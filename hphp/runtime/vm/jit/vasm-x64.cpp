@@ -16,17 +16,14 @@
 
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tracing.h"
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/align-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr-x64.h"
-#include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-block-counters.h"
@@ -37,12 +34,14 @@
 #include "hphp/runtime/vm/jit/vasm-prof.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
-#include "hphp/runtime/vm/jit/vasm-visit.h"
 
-#include <algorithm>
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/roar.h"
+
 #include <tuple>
 
-TRACE_SET_MOD(vasm);
+TRACE_SET_MOD(vasm)
 
 namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,6 +70,7 @@ struct Vgen {
   {}
 
   static void emitVeneers(Venv& env) {}
+  static void processVveneers(Venv& env) {}
   static void handleLiterals(Venv& env) {}
   static void retargetBinds(Venv& env);
   static void patch(Venv& env);
@@ -100,8 +100,14 @@ struct Vgen {
 
   // native function abi
   void emit(const call& i);
-  void emit(const callm& i) { a.prefix(i.target.mr()).call(i.target); }
-  void emit(const callr& i) { a.call(i.target); }
+  void emit(const callm& i) {
+    trap_unaligned_stack();
+    a.prefix(i.target.mr()).call(i.target);
+  }
+  void emit(const callr& i) {
+    if (!i.stackUnaligned) trap_unaligned_stack();
+    a.call(i.target);
+  }
   void emit(const calls& i);
   void emit(const ret& /*i*/) { a.ret(); }
 
@@ -121,6 +127,14 @@ struct Vgen {
     emit(callr{i.target, i.args});
     setCallFuncId(env, a.frontier());
   }
+  void emit(const inlinesideexit& i) {
+    emit(call{tc::ustubs().inlineSideExit, i.args});
+  }
+  void emit(const restoreripm& i);
+  // saverips and restorerips don't need to save the rip, which is already on
+  // the stack. However, they still need to align the stack.
+  void emit(const restorerips& /*i*/) { a.addq(8, reg::rsp); }
+  void emit(const saverips& /*i*/)    { a.subq(8, reg::rsp); }
   void emit(const phpret& i);
   void emit(const contenter& i);
 
@@ -199,6 +213,7 @@ struct Vgen {
   void emit(const incqm& i) { a.prefix(i.m.mr()).incq(i.m); }
   void emit(const incwm& i) { a.prefix(i.m.mr()).incw(i.m); }
   void emit(const jcc& i);
+  void emit(const interceptjcc& i);
   void emit(const jcci& i);
   void emit(const jmp& i);
   void emit(const jmpr& i) { a.jmp(i.target); }
@@ -207,7 +222,6 @@ struct Vgen {
   void emit(const ldbindretaddr& i);
   void emit(const lea& i);
   void emit(const leap& i) { a.lea(i.s, i.d); }
-  void emit(const leav& i);
   void emit(const lead& i) { a.lea(rip[(intptr_t)i.s.get()], i.d); }
   void emit(const loadups& i) { a.prefix(i.s.mr()).movups(i.s, i.d); }
   void emit(const loadtqb& i) { a.prefix(i.s.mr()).loadb(i.s, i.d); }
@@ -235,7 +249,7 @@ struct Vgen {
   void emit(mulsd i) { commute(i); a.mulsd(i.s0, i.d); }
   void emit(neg i) { unary(i); a.neg(i.d); }
   void emit(const nop& /*i*/) { a.nop(); }
-  void emit(not i) { unary(i); a.not(i.d); }
+  void emit(not_ i) { unary(i); a.not_(i.d); }
   void emit(notb i) { unary(i); a.notb(i.d); }
   void emit(orbi i) { binary(i); a.orb(i.s0, i.d); }
   void emit(const orbim& i) { a.prefix(i.m.mr()).orb(i.s0, i.m); }
@@ -305,7 +319,6 @@ struct Vgen {
   void emit(xorq i);
   void emit(xorqi i) { binary(i); a.xorq(i.s0, i.d); }
   void emit(const conjure& /*i*/) { always_assert(false); }
-  void emit(const conjureuse& /*i*/) { always_assert(false); }
   void emit(const crc32q& i);
 
   void emit_nop() {
@@ -330,6 +343,8 @@ private:
   template<class Inst> void noncommute(Inst&);
 
   CodeBlock& frozen() { return env.text.frozen().code; }
+
+  void trap_unaligned_stack();
 
 private:
   Venv& env;
@@ -474,7 +489,7 @@ namespace {
 
 template<class X64Asm>
 void Vgen<X64Asm>::retargetBinds(Venv& env) {
-  if (RuntimeOption::EvalJitRetargetJumps < 1) return;
+  if (Cfg::Jit::RetargetJumps < 1) return;
 
   // The target is unique per the SrcKey and the fallback flag.
   jit::hash_map<
@@ -497,7 +512,7 @@ void Vgen<X64Asm>::retargetBinds(Venv& env) {
   // smashableBinds.
   GrowableVector<IncomingBranch> newTailJumps;
   for (auto& jmp : env.meta.inProgressTailJumps) {
-    if (retargeted.count(jmp.toSmash()) == 0) {
+    if (!retargeted.contains(jmp.toSmash())) {
       newTailJumps.push_back(jmp);
     }
   }
@@ -505,7 +520,7 @@ void Vgen<X64Asm>::retargetBinds(Venv& env) {
 
   decltype(env.meta.smashableBinds) newBinds;
   for (auto& bind : env.meta.smashableBinds) {
-    if (retargeted.count(bind.smashable.toSmash()) == 0) {
+    if (!retargeted.contains(bind.smashable.toSmash())) {
       newBinds.push_back(bind);
     } else {
       FTRACE(3, "retargetBinds: removed {} from smashableBinds\n",
@@ -523,7 +538,7 @@ void Vgen<X64Asm>::patch(Venv& env) {
       env.text.toDestAddress(p.instr), p.instr, env.addrs[p.target]);
   }
 
-  auto const optLevel = RuntimeOption::EvalJitRetargetJumps;
+  auto const optLevel = Cfg::Jit::RetargetJumps;
   jit::hash_map<TCA, jit::vector<TCA>> jccs;
   for (auto const& p : env.jccs) {
     assertx(env.addrs[p.target]);
@@ -691,7 +706,20 @@ void Vgen<X64Asm>::emit(const mcprep& i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class X64Asm>
+void Vgen<X64Asm>::trap_unaligned_stack() {
+  if (!Cfg::Jit::TrapUnalignedStackCalls) return;
+
+  a.testb(0xf, rbyte(reg::rsp)); // should be 0 => 16-byte aligned
+  Label Call;
+  a.jcc(ConditionCode::CC_Z, Call);
+  env.meta.trapReasons.emplace_back(a.frontier(), "unaligned native call");
+  a.ud2();
+  asm_label(a, Call);
+}
+
+template<class X64Asm>
 void Vgen<X64Asm>::emit(const call& i) {
+  if (!i.stackUnaligned) trap_unaligned_stack();
   if (a.jmpDeltaFits(i.target)) {
     a.call(i.target);
   } else {
@@ -711,7 +739,18 @@ void Vgen<X64Asm>::emit(const call& i) {
 
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const calls& i) {
-  emitSmashableCall(a.code(), env.meta, i.target);
+  trap_unaligned_stack();
+  auto addr = emitSmashableCall(a.code(), env.meta, i.target);
+  (void)addr;
+  // When using ROAR, track the native call so we can register them with ROAR
+  // after the code is relocated into its final place in the code cache.
+  if (use_roar) {
+    env.meta.nativeCalls[addr] = i.target;
+  }
+  if (i.watch) {
+    *i.watch = a.frontier();
+    env.meta.watchpoints.push_back(i.watch);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -749,6 +788,11 @@ void Vgen<X64Asm>::emit(const tailcallstubr& i) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const restoreripm& i) {
+  emit(pushm{i.s});
+}
 
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const phpret& i) {
@@ -905,6 +949,19 @@ void Vgen<X64Asm>::emit(const jcc& i) {
 }
 
 template<class X64Asm>
+void Vgen<X64Asm>::emit(const interceptjcc& i) {
+  assertx(env.unit.context);
+  assertx(i.cc == CC_AE);
+  auto const funcId = env.unit.context->initSrcKey.funcID();
+  align(a.code(), &env.meta, Alignment::SmashIntercept, AlignContext::Live);
+  env.meta.setInterceptJccTCA(a.frontier(), funcId);
+  auto taken = i.targets[1];
+  jccs.push_back({a.frontier(), taken});
+  a.jcc(i.cc, a.frontier());
+  emit(jmp{i.targets[0]});
+}
+
+template<class X64Asm>
 void Vgen<X64Asm>::emit(const jcci& i) {
   a.jcc(i.cc, i.taken);
 }
@@ -943,13 +1000,6 @@ void Vgen<X64Asm>::emit(const lea& i) {
   } else {
     a.lea(i.s, i.d);
   }
-}
-
-template<class X64Asm>
-void Vgen<X64Asm>::emit(const leav& i) {
-  auto const addr = a.frontier();
-  emit(leap{reg::rip[(intptr_t)addr], i.d});
-  env.leas.push_back({addr, i.s});
 }
 
 template<class X64Asm>
@@ -1037,6 +1087,10 @@ void Vgen<X64Asm>::emit(const testqim& i) {
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const trap& i) {
   env.meta.trapReasons.emplace_back(a.frontier(), i.reason);
+  if (i.fix.isValid()) {
+    env.meta.trapFixups.emplace_back(a.frontier(), i.fix);
+    env.record_inline_stack(a.frontier());
+  }
   a.ud2();
 }
 
@@ -1138,7 +1192,7 @@ void lower(Vunit& unit, phplogue& inst, Vlabel b, size_t i) {
 
 void lower(Vunit& unit, resumetc& inst, Vlabel b, size_t i) {
   lower_impl(unit, b, i, [&] (Vout& v) {
-    v << callr{inst.target, inst.args};
+    v << callr{inst.target, inst.args, true /* stackUnaligned */};
     v << jmpi{inst.exittc};
   });
 }
@@ -1241,12 +1295,12 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
   doPass("VOPT_DCE",    removeDeadCode);
   doPass("VOPT_PHI",    optimizePhis);
   doPass("VOPT_BRANCH", fuseBranches);
-  doPass("VOPT_JMP",    [] (Vunit& u) { optimizeJmps(u, false); });
+  doPass("VOPT_JMP",    [] (Vunit& u) { optimizeJmps(u, false, true); });
 
   assertx(checkWidths(unit));
 
   if (unit.context && unit.context->kind == TransKind::Optimize &&
-      RuntimeOption::EvalProfBranchSampleFreq > 0) {
+      Cfg::Eval::ProfBranchSampleFreq > 0) {
     // Even when branch profiling is on, we still only want to profile
     // non-profiling translations of PHP functions.  We also require that we
     // can spill, so that we can generate arbitrary profiling code, and also to
@@ -1267,7 +1321,7 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
   doPass("VOPT_BRANCH", fuseBranches);
 
   if (unit.needsRegAlloc()) {
-    doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u, false); });
+    doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u, false, false); });
     doPass("VOPT_DCE", removeDeadCode);
 
     if (regalloc) {
@@ -1277,7 +1331,7 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
 
       doPass("VOPT_BLOCK_WEIGHTS", VasmBlockCounters::profileGuidedUpdate);
 
-      if (RuntimeOption::EvalUseGraphColor &&
+      if (Cfg::Eval::UseGraphColor &&
           unit.context &&
           (unit.context->kind == TransKind::Optimize ||
            unit.context->kind == TransKind::OptPrologue)) {
@@ -1294,18 +1348,13 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
 
   // We can add side-exiting instructions now
   doPass("VOPT_EXIT", optimizeExits);
-  doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u, true); });
+  doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u, true, false); });
 }
 
 void emitX64(Vunit& unit, Vtext& text, CGMeta& fixups,
              AsmInfo* asmInfo) {
   tracing::Block _{"emit-X64", [&] { return traceProps(unit); }};
 
-#ifdef HAVE_LIBXED
-  if (RuntimeOption::EvalUseXedAssembler) {
-    return vasm_emit<Vgen<XedAssembler>>(unit, text, fixups, asmInfo);
-  }
-#endif
   vasm_emit<Vgen<X64Assembler>>(unit, text, fixups, asmInfo);
 }
 

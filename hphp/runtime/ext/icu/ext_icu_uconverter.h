@@ -1,3 +1,8 @@
+
+
+
+
+
 #pragma once
 
 #include "hphp/runtime/ext/extension.h"
@@ -8,9 +13,7 @@
 namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 
-extern const StaticString s_UConverter;
-
-struct IntlUConverter : IntlError {
+struct IntlUConverter : IntlError, SystemLib::ClassLoader<"UConverter"> {
   IntlUConverter() {}
   IntlUConverter(const IntlUConverter& src) = delete;
   IntlUConverter& operator=(const IntlUConverter& src) {
@@ -31,7 +34,7 @@ struct IntlUConverter : IntlError {
   bool isValid() const { return true; }
 
   static IntlUConverter* Get(ObjectData* obj) {
-    return GetData<IntlUConverter>(obj, s_UConverter);
+    return GetData<IntlUConverter>(obj, className());
   }
 
   UConverter* src() const { return m_src; }

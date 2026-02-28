@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function get(): string {
   return 'hello';

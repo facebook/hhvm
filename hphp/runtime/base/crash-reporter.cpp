@@ -24,23 +24,28 @@
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 #include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/ringbuffer-print.h"
 
 #include "hphp/util/build-info.h"
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/configs/debug.h"
+#include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/stack-trace.h"
 
+#include <fcntl.h>
 #include <signal.h>
-#if defined(__x86_64__) && defined(__linux__)
 #include <ucontext.h>
-#endif
 
 #include <folly/portability/Fcntl.h>
 #include <folly/portability/Stdio.h>
@@ -58,14 +63,17 @@ enum class CrashReportStage {
   SpinOnCrash,
   CheckFD,
   CreateCppStack,
+  CreateCppStackFallback,
   ReportHeader,
   ReportAssertDetail,
   ReportTrap,
   DumpTreadmill,
   ReportCppStack,
   ReportPhpStack,
+  ReportTrapPhpStack,
   ReportApproximatePhpStack,
   DumpTransDB,
+  DumpProfileData,
   SendEmail,
   Log,
   Done,
@@ -73,10 +81,24 @@ enum class CrashReportStage {
 
 static CrashReportStage s_crash_report_stage;
 
-static const char* s_newBlacklist[] = {
+// These ranges contain debug information in the core that can be extracted
+// using the helper tool `hphp/tools/extract_from_core.sh`.  They start at
+// kDebugAddr and each start is page size aligned.  These static variables
+// should be kept in sync with that utility.
+static uintptr_t s_jitprof_start = 0;
+static uintptr_t s_jitprof_end = 0;
+static uintptr_t s_stacktrace_start = 0;
+static uintptr_t s_stacktrace_end = 0;
+static uintptr_t s_perfmap_start = 0;
+static uintptr_t s_perfmap_end = 0;
+
+static bool s_saw_trap = false;
+
+static const char* s_newIgnorelist[] = {
   "_ZN4HPHP16StackTraceNoHeap",
   "_ZN5folly10symbolizer17getStackTraceSafe",
-  "_ZN4HPHPL10bt_handlerEi",
+  "_ZN4HPHP10bt_handlerEi",
+  "_ZN5folly6fibers12_GLOBAL__N_120sigsegvSignalHandlerEiP9siginfo_tPv",
   "killpg"
 };
 
@@ -85,22 +107,22 @@ static void bt_timeout_handler(int sig) {
   abort();
 }
 
-static void bt_handler(int sigin, siginfo_t* info, void* args) {
+void bt_handler(int sigin, siginfo_t* info, void* args) {
   auto tid = Process::GetThreadPid();
   pid_t expected{};
   if (CrashingThread.compare_exchange_strong(expected, tid,
-                                             std::memory_order_relaxed)) {
+                                             std::memory_order_acq_rel)) {
     // We're the first crashing thread, go ahead and report everything.
-    if (RuntimeOption::StackTraceTimeout > 0) {
+    if (Cfg::Debug::StackTraceTimeout > 0) {
       signal(SIGALRM, bt_timeout_handler);
-      alarm(RuntimeOption::StackTraceTimeout);
+      alarm(Cfg::Debug::StackTraceTimeout);
     }
   } else {
     if (expected != tid) {
       // Another thread is already dealing with its own crash. Spin
       // until its done.
       while (true) {
-        sleep(RuntimeOption::StackTraceTimeout + 1);
+        sleep(Cfg::Debug::StackTraceTimeout + 1);
       }
     }
   }
@@ -111,27 +133,37 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
   // If we get here, we're running single threaded, but we might still
   // re-enter if we crash while generating the report - so make fd
   // static so its available to all re-entered calls.
-  static auto const fd = ::open(RuntimeOption::StackTraceFilename.c_str(),
+  static auto const fd = ::open(Cfg::Debug::StackTraceFilename.c_str(),
                                 O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
 
   static int sig = sigin;
   static Optional<StackTraceNoHeap> st;
   static void* sig_addr = info ? info->si_addr : nullptr;
-#if defined(__x86_64__) && defined(__linux__)
+
+  static FILE* stacktraceFile = nullptr;
+
+#ifdef __x86_64__
+  static uintptr_t sig_rbp = ((ucontext_t*) args)->uc_mcontext.gregs[REG_RBP];
   static uintptr_t sig_rip = ((ucontext_t*) args)->uc_mcontext.gregs[REG_RIP];
+#elif defined(__aarch64__)
+  static uintptr_t sig_rbp = ((ucontext_t*) args)->uc_mcontext.regs[29];
+  static uintptr_t sig_rip = ((ucontext_t*) args)->uc_mcontext.pc;
+#else
+  static uintptr_t sig_rbp = 0;
+  static uintptr_t sig_rip = 0;
 #endif
 
   switch (s_crash_report_stage) {
     case CrashReportStage::DumpRingBuffer:
       s_crash_report_stage = CrashReportStage::SpinOnCrash;
 
-      if (RuntimeOption::EvalDumpRingBufferOnCrash) {
-        Trace::dumpRingBuffer(RuntimeOption::EvalDumpRingBufferOnCrash, 0);
+      if (Cfg::Eval::DumpRingBufferOnCrash) {
+        Trace::dumpRingBuffer(Cfg::Eval::DumpRingBufferOnCrash, 0);
       }
-      // fall through
+      [[fallthrough]];
     case CrashReportStage::SpinOnCrash:
       s_crash_report_stage = CrashReportStage::CheckFD;
-      if (RuntimeOption::EvalSpinOnCrash) {
+      if (Cfg::Eval::SpinOnCrash) {
         char buf[128];
         snprintf(buf, 127,
                  "Crashed. Waiting for debugger to attach pid %d\n", getpid());
@@ -139,7 +171,7 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
         write(STDERR_FILENO, buf, strlen(buf));
         for (;;) sleep(1);
       }
-      // fall through
+      [[fallthrough]];
     case CrashReportStage::CheckFD:
       s_crash_report_stage = CrashReportStage::CreateCppStack;
       if (fd < 0) {
@@ -148,21 +180,27 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
         raise(sig);
         return;
       }
-      // fall through
+      [[fallthrough]];
     case CrashReportStage::CreateCppStack:
-      s_crash_report_stage = CrashReportStage::ReportHeader;
+      s_crash_report_stage = CrashReportStage::CreateCppStackFallback;
 
       // Turn on stack traces for coredumps
       StackTrace::Enabled = true;
-      StackTrace::FunctionBlacklist = s_newBlacklist;
-      StackTrace::FunctionBlacklistCount = 3;
+      StackTrace::FunctionIgnorelist = s_newIgnorelist;
+      StackTrace::FunctionIgnorelistCount = 5;
       st.emplace();
-      // fall through
+      [[fallthrough]];
+    case CrashReportStage::CreateCppStackFallback:
+      s_crash_report_stage = CrashReportStage::ReportHeader;
+      // If the attempt to create the cpp stack failed above, try it
+      // again, using a simpler fallback.
+      if (!st.has_value()) st.emplace(true, true);
+      [[fallthrough]];
     case CrashReportStage::ReportHeader:
       s_crash_report_stage = CrashReportStage::ReportAssertDetail;
       {
         auto const debuggerCount = [&] {
-          if (RuntimeOption::EnableHphpdDebugger) {
+          if (Cfg::Debugger::EnableHphpd) {
             return Eval::Debugger::CountConnectedProxy();
           }
 
@@ -174,9 +212,9 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
 
           return 0;
         }();
-        st->log(strsignal(sig), fd, compilerId().begin(), debuggerCount);
+        StackTraceNoHeap::log(strsignal(sig), fd, compilerId().begin(), debuggerCount);
       }
-      // fall through
+      [[fallthrough]];
     case CrashReportStage::ReportAssertDetail:
     {
       // Don't point s_crash_report_stage to the next one. We want to
@@ -186,7 +224,7 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
         write(fd, msg.c_str(), msg.size());
         ::fsync(fd);
       }
-      // fall through
+      [[fallthrough]];
     }
     case CrashReportStage::ReportTrap:
       s_crash_report_stage = CrashReportStage::DumpTreadmill;
@@ -194,11 +232,12 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
       if (sig == SIGILL && sig_addr) {
         auto reason = jit::getTrapReason((jit::CTCA)sig_addr);
         if (reason) {
+          s_saw_trap = true;
           dprintf(fd, "Detected jit::trap at %p: from %s:%d\n\n",
                   sig_addr, reason->file, reason->line);
         }
       }
-      // fall through
+      [[fallthrough]];
     case CrashReportStage::DumpTreadmill:
       s_crash_report_stage = CrashReportStage::ReportCppStack;
       ::fsync(fd);
@@ -206,51 +245,86 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
         fd,
         "\n-------------------------------"
         "Treadmill Information"
-        "----------------------------\n%s\n",
+        "----------------------------\n%s\n"
+        "---------------------------------"
+        "---------------------------------"
+        "------------\n",
         Treadmill::dumpTreadmillInfo(true).data()
       );
-      // fall through
+      [[fallthrough]];
     case CrashReportStage::ReportCppStack:
       s_crash_report_stage = CrashReportStage::ReportPhpStack;
 
       // flush so if C++ stack walking crashes, we still have this output so far
       ::fsync(fd);
-      st->printStackTrace(fd);
-      // fall through
-    case CrashReportStage::ReportPhpStack:
+      dprintf(fd, "\nCPP Stacktrace:\n\n");
+      if (st.has_value()) {
+        st->printStackTrace(fd);
+      } else {
+        folly::StringPiece msg{"(Unable to obtain cpp stack trace)"};
+        write(fd, msg.begin(), msg.size());
+      }
+      [[fallthrough]];
+    case CrashReportStage::ReportPhpStack: {
       // flush so if php stack-walking crashes, we still have this output so far
       ::fsync(fd);
 
-      s_crash_report_stage = CrashReportStage::ReportApproximatePhpStack;
+      s_crash_report_stage = CrashReportStage::ReportTrapPhpStack;
       // Don't attempt to determine function arguments in the PHP backtrace, as
       // that might involve re-entering the VM.
+      auto done = true;
       if (!g_context.isNull() && !tl_sweeping) {
-        dprintf(fd, "\nPHP Stacktrace:\n\n%s",
-                debug_string_backtrace(
-                    /*skip*/false,
-                    /*ignore_args*/true
-                ).data());
+        VMRegAnchor _(VMRegAnchor::Soft);
+        if (regState() == VMRegState::CLEAN) {
+          dprintf(fd, "\nPHP Stacktrace:\n\n%s",
+                  debug_string_backtrace(
+                      /*skip*/false,
+                      /*ignore_args*/true
+                  ).data());
+        } else {
+          done = false;
+        }
       }
-      ::close(fd);
 
-      s_crash_report_stage = CrashReportStage::DumpTransDB;
+      if (done) {
+        ::close(fd);
+        s_crash_report_stage = CrashReportStage::DumpTransDB;
+      }
+    }
+      [[fallthrough]];
+    case CrashReportStage::ReportTrapPhpStack:
+      if (s_crash_report_stage == CrashReportStage::ReportTrapPhpStack) {
+        s_crash_report_stage = CrashReportStage::ReportApproximatePhpStack;
 
-      // fall through
+        if (s_saw_trap) {
+          // We would need to walk the stack to find the previous cfa, but trap
+          // fixups should always be direct so we shouldn't need one.
+          jit::VMFrame frame {(ActRec*)sig_rbp, (jit::TCA)sig_addr, 0};
+
+          if (jit::FixupMap::processFixupForVMFrame(frame)) {
+            regState() = VMRegState::CLEAN;
+            dprintf(fd, "\nPHP Stacktrace:\n\n%s",
+                    debug_string_backtrace(
+                        /*skip*/false,
+                        /*ignore_args*/true
+                    ).data());
+            ::close(fd);
+            s_crash_report_stage = CrashReportStage::DumpTransDB;
+          }
+        }
+      }
+      [[fallthrough]];
     case CrashReportStage::ReportApproximatePhpStack:
       if (s_crash_report_stage == CrashReportStage::ReportApproximatePhpStack) {
         // We were unable to find a fixup for the backtrace; scan the stack to
         // find a VM frame, fake the vmpc, and attempt again.
         s_crash_report_stage = CrashReportStage::DumpTransDB;
 
-        if (auto const ar = jit::findVMFrameForDebug()) {
+        if (auto const ar = jit::findVMFrameForDebug(sig_rbp)) {
           auto const frame = BTFrame::regular(ar, kInvalidOffset);
           auto const addr = [&] () -> jit::CTCA {
             if (sig != SIGILL && sig != SIGSEGV) return (jit::CTCA) sig_addr;
-#if defined(__x86_64__) && defined(__linux__)
             return (jit::CTCA) sig_rip;
-#else
-            return (jit::CTCA) 0;
-#endif
           }();
           auto const trace = createCrashBacktrace(frame, (jit::CTCA) addr);
 
@@ -260,31 +334,69 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
         }
       }
 
-      // fall through
+      [[fallthrough]];
     case CrashReportStage::DumpTransDB:
-      s_crash_report_stage = CrashReportStage::SendEmail;
+      s_crash_report_stage = CrashReportStage::DumpProfileData;
 
-      if (jit::transdb::enabled() && RuntimeOption::EvalJit) {
+      if (jit::transdb::enabled() && Cfg::Jit::Enabled) {
         jit::tc::dump(true);
       }
-      // fall through
+      [[fallthrough]];
+    case CrashReportStage::DumpProfileData: {
+      s_crash_report_stage = CrashReportStage::SendEmail;
+      auto frontier = kDebugAddr;
+      auto const mapFileIn = [&frontier](const std::string& filename,
+                                         uintptr_t& start,
+                                         uintptr_t& end) {
+
+        auto file = fopen(filename.c_str(), "r");
+        size_t size = 0;
+        start = end = frontier;
+        if (file) {
+          fseek(file, 0, SEEK_END);
+          size = ftell(file);
+          end = start + size;
+          fseek(file, 0, SEEK_SET);
+          if (size > 0) {
+            mmap(reinterpret_cast<void*>(start),
+                 size, PROT_READ | PROT_WRITE,
+                 MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+            fread(reinterpret_cast<void*>(start), 1, size, file);
+          }
+          fclose(file);
+        }
+        frontier = (end + s_pageSize - 1) & -s_pageSize;
+      };
+      if (auto const serdesFile = jit::getFilenameDeserialized()) {
+        // Copy JitSerdesFile to fixed address (the debug range), so that they
+        // get included in the coredump.
+        mapFileIn(*serdesFile, s_jitprof_start, s_jitprof_end);
+      }
+      auto const& stacktraceFile = Cfg::Debug::StackTraceFilename;
+      mapFileIn(stacktraceFile, s_stacktrace_start, s_stacktrace_end);
+      if (Cfg::Eval::PerfPidMap) {
+        if (auto const debugInfo = Debug::DebugInfo::Get()) {
+          mapFileIn(debugInfo->perfMapName(), s_perfmap_start, s_perfmap_end);
+        }
+      }
+    }
+      [[fallthrough]];
     case CrashReportStage::SendEmail:
       s_crash_report_stage = CrashReportStage::Log;
 
-      if (!RuntimeOption::CoreDumpEmail.empty()) {
+      if (!Cfg::Debug::CoreDumpEmail.empty()) {
         char format [] = "cat %s | mail -s \"Stack Trace from %s\" '%s'";
-        char* cmdline = (char*)alloca(
-            sizeof(char) *
-            (strlen(format)
-             +RuntimeOption::StackTraceFilename.length()
+        size_t cmdline_size = sizeof(char) *(strlen(format)
+             +Cfg::Debug::StackTraceFilename.length()
              +strlen(Process::GetAppName().c_str())
-             +strlen(RuntimeOption::CoreDumpEmail.c_str())+1));
-        sprintf(cmdline, format, RuntimeOption::StackTraceFilename.c_str(),
+             +strlen(Cfg::Debug::CoreDumpEmail.c_str())+1);
+        char* cmdline = (char*)alloca(cmdline_size);
+        snprintf(cmdline, cmdline_size, format, Cfg::Debug::StackTraceFilename.c_str(),
                 Process::GetAppName().c_str(),
-                RuntimeOption::CoreDumpEmail.c_str());
+                Cfg::Debug::CoreDumpEmail.c_str());
         FileUtil::ssystem(cmdline);
       }
-      // fall through
+      [[fallthrough]];
     case CrashReportStage::Log:
       s_crash_report_stage = CrashReportStage::Done;
 
@@ -293,7 +405,20 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
       // Do it last just in case
 
       Logger::FError("Core dumped: {}", strsignal(sig));
-      Logger::FError("Stack trace in {}", RuntimeOption::StackTraceFilename);
+      Logger::FError("Stack trace in {}", Cfg::Debug::StackTraceFilename);
+
+      if (Cfg::Eval::DumpStacktraceToErrorLogOnCrash) {
+        stacktraceFile = fopen(Cfg::Debug::StackTraceFilename.c_str(), "r");
+        if (stacktraceFile) {
+          char line[256];
+          while (fgets(line, sizeof(line), stacktraceFile)) {
+            // Strip the newline, or just truncate the line if it's larger than
+            // 256 characters.
+            line[MIN(strcspn(line, "\n"), 255)] = 0;
+            Logger::FError("{}", line);
+          }
+        }
+      }
 
       // Flush whatever access logs are still pending
       Logger::FlushAll();
@@ -309,7 +434,7 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
         // to allocate memory for the ELF file.
         g_context->syncGdbState();
       }
-      // fall through
+      [[fallthrough]];
     case CrashReportStage::Done:
       // re-raise the signal and pass it to the default handler
       // to terminate the process.
@@ -324,12 +449,6 @@ void install_crash_reporter() {
   // bt_handler.  Don't install our handler when running with tsan.
   if (use_tsan) return;
 
-#ifdef _MSC_VER
-  signal(SIGILL,  bt_handler);
-  signal(SIGFPE,  bt_handler);
-  signal(SIGSEGV, bt_handler);
-  signal(SIGABRT, bt_handler);
-#else
   struct sigaction sa{};
   struct sigaction osa;
   sigemptyset(&sa.sa_mask);
@@ -345,9 +464,11 @@ void install_crash_reporter() {
   CHECK_ERR(sigaction(SIGBUS,  &sa, &osa));
   CHECK_ERR(sigaction(SIGILL,  &sa, &osa));
   CHECK_ERR(sigaction(SIGFPE,  &sa, &osa));
-  CHECK_ERR(sigaction(SIGSEGV, &sa, &osa));
+  if (!Cfg::GC::SanitizeReqHeap) {
+    // SIGSEGV is handled by the request heap sanitizer when it is enabled.
+    CHECK_ERR(sigaction(SIGSEGV, &sa, &osa));
+  }
   CHECK_ERR(sigaction(SIGABRT, &sa, &osa));
-#endif
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -1,0 +1,48 @@
+ERROR: File "case_type.php--Arraykey.php", line 3, characters 11-18:
+Cannot use `Arraykey` as a type name as it is reserved (Parsing[1002])
+ERROR: File "case_type.php--Bool.php", line 3, characters 11-11:
+A name is expected here. (Parsing[1002])
+ERROR: File "case_type.php--Callable.php", line 3, characters 11-18:
+Cannot use `Callable` as a type name as it is reserved (Parsing[1002])
+ERROR: File "case_type.php--Darray.php", line 3, characters 11-16:
+Cannot use `Darray` as a type name as it is reserved (Parsing[1002])
+ERROR: File "case_type.php--Dynamic.php", line 3, characters 11-17:
+Cannot use `Dynamic` as a type name as it is reserved (Parsing[1002])
+ERROR: File "case_type.php--False.php", line 3, characters 11-11:
+A name is expected here. (Parsing[1002])
+ERROR: File "case_type.php--Float.php", line 3, characters 11-15:
+Cannot use `Float` as a type name as it is reserved (Parsing[1002])
+ERROR: File "case_type.php--Int.php", line 3, characters 11-11:
+A name is expected here. (Parsing[1002])
+ERROR: File "case_type.php--Mixed.php", line 3, characters 11-15:
+Cannot use `Mixed` as a type name as it is reserved (Parsing[1002])
+ERROR: File "case_type.php--Nonnull.php", line 3, characters 11-17:
+Cannot use `Nonnull` as a type name as it is reserved (Parsing[1002])
+ERROR: File "case_type.php--Noreturn.php", line 3, characters 11-18:
+Cannot use `Noreturn` as a type name as it is reserved (Parsing[1002])
+ERROR: File "case_type.php--Nothing.php", line 3, characters 11-17:
+Cannot use `Nothing` as a type name as it is reserved (Parsing[1002])
+ERROR: File "case_type.php--Null.php", line 3, characters 11-11:
+A name is expected here. (Parsing[1002])
+ERROR: File "case_type.php--Num.php", line 3, characters 11-13:
+Cannot use `Num` as a type name as it is reserved (Parsing[1002])
+ERROR: File "case_type.php--Parent.php", line 3, characters 11-11:
+A name is expected here. (Parsing[1002])
+ERROR: File "case_type.php--Resource.php", line 3, characters 11-18:
+Cannot use `Resource` as a type name as it is reserved (Parsing[1002])
+ERROR: File "case_type.php--Self.php", line 3, characters 11-11:
+A name is expected here. (Parsing[1002])
+ERROR: File "case_type.php--Static.php", line 3, characters 11-11:
+A name is expected here. (Parsing[1002])
+ERROR: File "case_type.php--String.php", line 3, characters 11-11:
+A name is expected here. (Parsing[1002])
+ERROR: File "case_type.php--This.php", line 3, characters 11-14:
+Cannot use `This` as a type name as it is reserved (Parsing[1002])
+ERROR: File "case_type.php--True.php", line 3, characters 11-11:
+A name is expected here. (Parsing[1002])
+ERROR: File "case_type.php--Varray.php", line 3, characters 11-16:
+Cannot use `Varray` as a type name as it is reserved (Parsing[1002])
+ERROR: File "case_type.php--Void.php", line 3, characters 11-11:
+A name is expected here. (Parsing[1002])
+ERROR: File "case_type.php--_.php", line 3, characters 11-11:
+Cannot use `_` as a type name as it is reserved (Parsing[1002])

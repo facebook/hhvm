@@ -38,6 +38,7 @@ namespace HPHP {
 struct ImagickExtension final : Extension {
   ImagickExtension();
   void moduleInit() override;
+  void moduleRegisterNative() override;
   void moduleShutdown() override;
   void threadInit() override;
 
@@ -45,10 +46,10 @@ struct ImagickExtension final : Extension {
   static bool hasProgressMonitor();
 
  private:
-  void loadImagickClass();
-  void loadImagickDrawClass();
-  void loadImagickPixelClass();
-  void loadImagickPixelIteratorClass();
+  void registerNativeImagickClass();
+  void registerNativeImagickDrawClass();
+  void registerNativeImagickPixelClass();
+  void registerNativeImagickPixelIteratorClass();
 
   struct ImagickIniSetting {
     bool m_locale_fix;
@@ -60,46 +61,35 @@ struct ImagickExtension final : Extension {
 
 //////////////////////////////////////////////////////////////////////////////
 // PHP Exceptions and Classes
+#define IMAGE_MAGIC_CLASSES(X) \
+  X(ImagickException) \
+  X(ImagickDrawException) \
+  X(ImagickPixelException) \
+  X(ImagickPixelIteratorException) \
+  X(Imagick) \
+  X(ImagickDraw) \
+  X(ImagickPixel) \
+  X(ImagickPixelIterator)
+
 #define IMAGICK_DEFINE_CLASS(CLS) \
-  class CLS { \
+  struct CLS : SystemLib::ClassLoader<#CLS> { \
    public: \
     static Object allocObject() { \
-      if (cls == nullptr) { \
-        initClass(); \
-      } \
-      return Object{cls};                       \
+      return Object{ classof() }; \
     } \
     \
     static Object allocObject(const Variant& arg) { \
       Object ret = allocObject(); \
       tvDecRefGen(\
-        g_context->invokeFunc(cls->getCtor(), make_vec_array(arg), \
-                              ret.get()) \
+        g_context->invokeFunc(classof()->getCtor(), make_vec_array(arg), \
+                              nullptr, ret.get()) \
       );\
       return ret; \
     } \
     \
-   private: \
-    static void initClass() {                                   \
-      cls = Class::lookup(                                  \
-        req::ptr<StringData>::attach(                           \
-          StringData::Make(#CLS)                                \
-        ).get()                                                 \
-      );                                                        \
-    }                                                           \
-                                                                \
-    static HPHP::Class* cls; \
   };
 
-IMAGICK_DEFINE_CLASS(ImagickException)
-IMAGICK_DEFINE_CLASS(ImagickDrawException)
-IMAGICK_DEFINE_CLASS(ImagickPixelException)
-IMAGICK_DEFINE_CLASS(ImagickPixelIteratorException)
-
-IMAGICK_DEFINE_CLASS(Imagick)
-IMAGICK_DEFINE_CLASS(ImagickDraw)
-IMAGICK_DEFINE_CLASS(ImagickPixel)
-IMAGICK_DEFINE_CLASS(ImagickPixelIterator)
+IMAGE_MAGIC_CLASSES(IMAGICK_DEFINE_CLASS)
 
 #undef IMAGICK_DEFINE_CLASS
 
@@ -125,7 +115,7 @@ template<typename Wand>
 struct WandResource : SweepableResourceData {
 
 private:
-  DECLARE_RESOURCE_ALLOCATION(WandResource<Wand>);
+  DECLARE_RESOURCE_ALLOCATION(WandResource<Wand>)
 
 public:
   explicit WandResource(Wand* wand, bool owner = true) :
@@ -136,7 +126,7 @@ public:
     clear();
   }
 
-  CLASSNAME_IS("WandResource");
+  CLASSNAME_IS("WandResource")
   const String& o_getClassNameHook() const override {
     return classnameof();
   }
@@ -277,11 +267,11 @@ void imagickWriteOp(MagickWand* wand,
                     const ImagickFileOp& op);
 
 void imagickReadOp(MagickWand* wand,
-                   const Resource& res,
+                   const OptResource& res,
                    const ImagickHandleOp& op);
 
 void imagickWriteOp(MagickWand* wand,
-                    const Resource& res,
+                    const OptResource& res,
                     const String& format,
                     const ImagickHandleOp& op);
 
@@ -386,4 +376,3 @@ void loadImagickPixelIteratorClass();
 
 //////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
-

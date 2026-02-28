@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 abstract class X {
   abstract const type T as arraykey = arraykey;

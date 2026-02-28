@@ -1,10 +1,25 @@
-<?hh // partial
+<?hh
+
+const bool GD_BUNDLED = true;
 
 /* Gets information about the version and capabilities of the installed GD
  * library.
  */
 <<__Native>>
-function gd_info(): darray;
+function gd_info(): shape(
+  'GD Version' => string,
+  'FreeType Support' => bool,
+  'FreeType Linkage' => string,
+  'T1Lib Support' => bool,
+  'GIF Read Support' => bool,
+  'GIF Create Support' => bool,
+  'JPG Support' => bool,
+  'PNG Support' => bool,
+  'WBMP Support' => bool,
+  'XPM Support' => bool,
+  'XBM Support' => bool,
+  'JIS-mapped Japanese Font Support' => bool,
+);
 
 /* The getimagesize() function will determine the size of any given image file
  * and return the dimensions along with the file type and a height/width text
@@ -19,16 +34,16 @@ function gd_info(): darray;
  */
 <<__Native>>
 function getimagesize(string $filename,
-                      <<__OutOnly("darray")>>
-                      inout mixed $imageinfo): mixed;
+                      <<__OutOnly>>
+                      inout shape(...) $imageinfo): mixed;
 
 /* Identical to getimagesize() except that getimagesizefromstring() accepts
  * a string instead of a file name as the first parameter.
  */
 <<__Native>>
 function getimagesizefromstring(string $filename,
-                      <<__OutOnly("darray")>>
-                      inout mixed $imageinfo): mixed;
+                      <<__OutOnly>>
+                      inout shape(...) $imageinfo): mixed;
 
 /* Returns the extension for the given IMAGETYPE_XXX constant.
  */
@@ -53,20 +68,27 @@ function image2wbmp(resource $image,
  * an optional clipping area.
  */
 <<__Native>>
-function imageaffine(resource $image,
-                     varray $affine = varray[],
-                     darray $clip = darray[]): mixed;
+function imageaffine(
+  resource $image,
+  varray<mixed> $affine = vec[],
+  shape(
+    ?'x' => int,
+    ?'y' => int,
+    ?'width' => int,
+    ?'height' => int,
+  ) $clip = shape()
+): mixed;
 
 /* Concat two matrices.
  */
 <<__Native>>
-function imageaffinematrixconcat(varray $m1, varray $m2): mixed;
+function imageaffinematrixconcat(varray<mixed> $m1, varray<mixed> $m2): mixed;
 
 /* Return an image containing the affine tramsformed src image, using
  * an optional clipping area.
  */
 <<__Native>>
-function imageaffinematrixget(int $type, mixed $options = darray[]): mixed;
+function imageaffinematrixget(int $type, mixed $options = dict[]): mixed;
 
 /* imagealphablending() allows for two different modes of drawing on truecolor
  * images. In blending mode, the alpha channel component of the color supplied
@@ -287,10 +309,12 @@ function imagecolortransparent(resource $image,
  * offset.
  */
 <<__Native>>
-function imageconvolution(resource $image,
-                          varray $matrix,
-                          float $div,
-                          float $offset): bool;
+function imageconvolution(
+  resource $image,
+  varray<varray<float>> $matrix,
+  float $div,
+  float $offset,
+): bool;
 
 /* Copy a part of src_im onto dst_im starting at the x,y coordinates src_x,
  * src_y with a width of src_w and a height of src_h. The portion defined will
@@ -462,9 +486,6 @@ function imagecreatefromjpeg(string $filename): mixed;
 <<__Native>>
 function imagecreatefrompng(string $filename): mixed;
 
-<<__Native>>
-function imagecreatefromwebp(string $filename): mixed;
-
 /* imagecreatefromstring() returns an image identifier representing the image
  * obtained from the given data. These types will be automatically detected if
  * your build of PHP supports them: JPEG, PNG, GIF, WBMP, and GD2.
@@ -494,17 +515,6 @@ function imagecreatefromwbmp(string $filename): mixed;
 <<__Native>>
 function imagecreatefromxbm(string $filename): mixed;
 
-/* imagecreatefromxpm() returns an image identifier representing the image
- * obtained from the given filename. TipA URL can be used as a filename with
- * this function if the fopen wrappers have been enabled. See fopen() for more
- * details on how to specify the filename. See the List of Supported
- * Protocols/Wrappers for links to information about what abilities the
- * various wrappers have, notes on their usage, and information on any
- * predefined variables they may provide.
- */
-<<__Native>>
-function imagecreatefromxpm(string $filename): mixed;
-
 /* imagecreatetruecolor() returns an image identifier representing a black
  * image of the specified size.  Depending on your PHP and GD versions this
  * function is defined or not. With PHP 4.0.6 through 4.1.x this function
@@ -520,7 +530,15 @@ function imagecreatetruecolor(int $width,
 /* Crop an image using the given coordinates and size, x, y, width and height.
  */
 <<__Native>>
-function imagecrop(resource $image, darray $rect): mixed;
+function imagecrop(
+  resource $image,
+  shape(
+    'x' => int,
+    'y' => int,
+    'width' => int,
+    'height' => int,
+  ) $rect,
+): mixed;
 
 /* Crop an image automatically using one of the available modes.
  */
@@ -596,7 +614,7 @@ function imagefilledellipse(resource $image,
  */
 <<__Native>>
 function imagefilledpolygon(resource $image,
-                            varray $points,
+                            varray<int> $points,
                             int $num_points,
                             int $color): bool;
 
@@ -650,7 +668,7 @@ function imageftbbox(float $size,
                      float $angle,
                      string $font_file,
                      string $text,
-                     darray $extrainfo = darray[]): mixed;
+                     shape(?'linespacing' => float) $extrainfo = shape()): mixed;
 
 <<__Native>>
 function imagefttext(resource $image,
@@ -661,7 +679,7 @@ function imagefttext(resource $image,
                      int $col,
                      string $font_file,
                      string $text,
-                     darray $extrainfo = darray[]): mixed;
+                     shape(?'linespacing' => float) $extrainfo = shape()): mixed;
 
 /* Applies gamma correction to the given gd image given an input and an output
  * gamma.
@@ -744,18 +762,11 @@ function imagepng(resource $image,
                   int $quality = -1,
                   int $filters = -1): bool;
 
-/* Outputs or saves a webp image from the given image.
- */
-<<__Native>>
-function imagewebp(resource $image,
-                  string $filename = "",
-                  int $quality = 80): bool;
-
 /* imagepolygon() creates a polygon in the given image.
  */
 <<__Native>>
 function imagepolygon(resource $image,
-                      varray $points,
+                      varray<int> $points,
                       int $num_points,
                       int $color): bool;
 
@@ -820,7 +831,7 @@ function imagesetpixel(resource $image,
  */
 <<__Native>>
 function imagesetstyle(resource $image,
-                       varray $style): bool;
+                       varray<int> $style): bool;
 
 /* imagesetthickness() sets the thickness of the lines drawn when drawing
  * rectangles, polygons, ellipses etc. etc. to thickness pixels.
@@ -919,13 +930,6 @@ function imagetypes(): int;
 function imagewbmp(resource $image,
                    string $filename = "",
                    int $foreground = -1): bool;
-
-/* Outputs or save an XBM version of the given image.
- */
-<<__Native>>
-function imagexbm(resource $image,
-                  string $filename = "",
-                  int $foreground = -1): bool;
 
 /* Embeds binary IPTC data into a JPEG image.
  */

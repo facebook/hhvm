@@ -80,7 +80,7 @@ namespace detail {
 
 template<class GenFunc>
 TCA vwrap_impl(CodeBlock& main, CodeBlock& cold, DataBlock& data,
-               CGMeta* meta, GenFunc gen, CodeKind kind,
+               CGMeta* meta, GenFunc gen, const char* name, CodeKind kind,
                bool relocate, bool nullOnFull) {
   CGMeta dummy_meta;
 
@@ -89,7 +89,7 @@ TCA vwrap_impl(CodeBlock& main, CodeBlock& cold, DataBlock& data,
   auto wasFull = false;
   { // Finish emitting in this scope so that we can assert about `dummy_meta'.
     Vauto vauto {
-      main, cold, data, meta ? *meta : dummy_meta, kind, relocate,
+      main, cold, data, meta ? *meta : dummy_meta, kind, name, relocate,
       nullOnFull ? &wasFull : nullptr
     };
     gen(vauto.main(), vauto.cold());

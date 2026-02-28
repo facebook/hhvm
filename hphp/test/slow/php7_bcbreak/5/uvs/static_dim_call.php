@@ -1,10 +1,10 @@
 <?hh
 
 class Foo {
-  static $bar = darray['baz' => myfunc<>];
+  public static $bar = dict['baz' => myfunc<>];
 }
 
-function myfunc() {
+function myfunc() :mixed{
   return 'quux';
 }
 <<__EntryPoint>>

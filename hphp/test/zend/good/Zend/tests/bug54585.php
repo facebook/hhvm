@@ -1,9 +1,9 @@
 <?hh
-function testing($source) {
+function testing($source) :mixed{
   unset($source['']);
 }
 <<__EntryPoint>>
 function main(): void {
-  testing($_GET);
+  testing(\HH\global_get('_GET'));
   echo "ok\n";
 }

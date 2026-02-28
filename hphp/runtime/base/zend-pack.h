@@ -32,14 +32,12 @@ struct Array;
  * x, X, Z and @.
  */
 struct ZendPack {
-  ZendPack();
-
   /**
    * Takes one or more arguments and packs them into a binary string according
    * to the format argument. pack() idea stolen from Perl (implemented formats
    * behave the same as there).
    */
-  Variant pack(const String& fmt, const Array& argv);
+  static Variant pack(const String& fmt, const Array& argv);
 
   /**
    * Unpack binary string into named array elements according to format
@@ -56,37 +54,8 @@ struct ZendPack {
    * Numeric pack types will return numbers, a and A will return strings,
    * f and d will return doubles.
    */
-  Variant unpack(const String& fmt, const String& data);
-
-private:
-  // Whether machine is little endian
-  char machine_little_endian;
-
-  // Mapping of byte from char (8bit) to int32 for machine endian
-  int64_t byte_map[1];
-
-  // Mappings of bytes from int (machine dependent) to int for machine endian
-  int64_t int_map[sizeof(int)];
-
-  // Mappings of bytes from shorts (16bit) for all endian environments
-  int64_t machine_endian_short_map[2];
-  int64_t big_endian_short_map[2];
-  int64_t little_endian_short_map[2];
-
-  // Mappings of bytes from int32s (32bit) for all endian environments
-  int64_t machine_endian_int32_map[4];
-  int64_t big_endian_int32_map[4];
-  int64_t little_endian_int32_map[4];
-
-  /* Mappings of bytes from int64s (64bit) for all endian environments */
-  int64_t machine_endian_int64_map[8];
-  int64_t big_endian_int64_map[8];
-  int64_t little_endian_int64_map[8];
-
-  void pack(const Variant& val, int64_t size, int64_t *map, char *output);
-  int64_t unpack(const char *data, int64_t size, int issigned, int64_t *map);
+  static Variant unpack(const String& fmt, const String& data);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

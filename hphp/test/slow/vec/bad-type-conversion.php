@@ -4,13 +4,13 @@ abstract final class FooStatics {
   public static $x = false;
 }
 
-async function foo() {
+async function foo() :Awaitable<mixed>{
   FooStatics::$x = !FooStatics::$x;
   return FooStatics::$x;
 }
 
 class X {
-  public async function f() {
+  public async function f() :Awaitable<mixed>{
     $buckets = vec[];
 
     $foo = await foo();
@@ -21,10 +21,10 @@ class X {
     return $this->g($buckets);
   }
 
-  public function g(vec $v) { return $v; }
+  public function g(vec $v) :mixed{ return $v; }
 }
 
-function test() {
+function test() :mixed{
   $x = new X;
   var_dump(HH\Asio\join($x->f()));
   var_dump(HH\Asio\join($x->f()));
@@ -32,6 +32,6 @@ function test() {
 
 
 <<__EntryPoint>>
-function main_bad_type_conversion() {
+function main_bad_type_conversion() :mixed{
 test();
 }

@@ -58,11 +58,11 @@ let get_recursive_files root =
         Array.fold_left
           begin
             fun (d_acc, f_acc) f ->
-            let f = Filename.concat d f in
-            if Sys.is_directory f then
-              (f :: d_acc, f_acc)
-            else
-              (d_acc, f :: f_acc)
+              let f = Filename.concat d f in
+              if Sys.is_directory f then
+                (f :: d_acc, f_acc)
+              else
+                (d_acc, f :: f_acc)
           end
           (ds, files)
           curr_files

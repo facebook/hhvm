@@ -1,8 +1,8 @@
 <?hh
 // Copyright 2004-2015 Facebook. All Rights Reserved.
 
-function array_cse() {
-  $a = varray[0,1,2,3,4];
+function array_cse() :mixed{
+  $a = vec[0,1,2,3,4];
   $x = $a[2] + $a[2];
   return $x;
 }

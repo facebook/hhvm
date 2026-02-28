@@ -1,0 +1,16 @@
+*** Test strncmp() function: with different lengths ***
+int(-%d)
+int(-%d)
+int(-%d)
+int(-%d)
+int(-%d)
+int(-%d)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+int(0)
+*** Done ***

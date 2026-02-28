@@ -7,7 +7,7 @@
 */
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
    error_reporting(-1);
 
    include_once 'MyRangeException.inc';

@@ -1,6 +1,6 @@
 <?hh
 
-function test(Disable $c) {
+function test(Disable $c) :mixed{
   var_dump($c);
 }
 <<__EntryPoint>>

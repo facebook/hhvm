@@ -3,7 +3,7 @@
 class C {}
 
 <<__EntryPoint>>
-function main_idx() {
+function main_idx() :mixed{
   // Make sure we can't constant-fold this expression to get a static string.
   $refcounted_string = __hhvm_intrinsics\launder_value('xyz')[0];
 

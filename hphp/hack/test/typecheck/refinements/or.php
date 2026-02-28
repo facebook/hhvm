@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f(mixed $x): void {
   if ($x is string || $x is int) {

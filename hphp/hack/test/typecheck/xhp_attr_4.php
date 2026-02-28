@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 class :baz {
   attribute int x @required;
 }
@@ -6,7 +6,7 @@ class :bar {
   // Import all attributes from :baz
   attribute :baz;
 }
-class :foo {
+class :foo extends XHPTest {
   // Import all attributes from :bar
   attribute :bar;
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_include_path() {
+function main_include_path() :mixed{
 
 // originally came from ext/standard/tests/general_functions/include_path.phpt
 

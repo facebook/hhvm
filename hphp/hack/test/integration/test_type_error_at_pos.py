@@ -1,16 +1,17 @@
+# pyre-unsafe
 from __future__ import absolute_import, unicode_literals
 
 import json
 import os
 
-from common_tests import CommonTestDriver
-from test_case import TestCase
+from hphp.hack.test.integration.common_tests import CommonTestDriver
+from hphp.hack.test.integration.test_case import TestCase
 
 
 class TypeErrorAtPosDriver(CommonTestDriver):
-
     error_file_ext = ".err"
     auto_namespace_map = '{"PHP": "HH\\\\Lib\\\\PHP"}'
+    enable_experimental_stx_features = '{"like_type_hints": "Unstable"}'
     repo_dir = "hphp/hack/test/integration/data/holes"
 
     def write_load_config(
@@ -23,9 +24,9 @@ auto_namespace_map = {}
 allowed_fixme_codes_strict = 4101,4323
 allowed_decl_fixme_codes = 4101,4323
 disable_xhp_element_mangling = false
-""".format(
-                    self.auto_namespace_map
-                )
+everything_sdt = true
+enable_experimental_stx_features = {}
+""".format(self.auto_namespace_map, self.enable_experimental_stx_features)
             )
 
     def expected_file_name(self, file_name: str, row_num: int, col_num: int) -> str:
@@ -90,10 +91,11 @@ class TestTypeErrorAtPos(TestCase[TypeErrorAtPosDriver]):
             ("call_unpack.php", [(7, 8)]),
             ("return_expr_only.php", [(5, 10), (5, 21)]),
             ("return_and_fn_arg.php", [(5, 10), (5, 21)]),
+            ("call_open_tuple.php", [(7, 16), (11, 16)]),
         ]
 
-        for (file_name, positions) in cases:
-            for (row_num, col_num) in positions:
+        for file_name, positions in cases:
+            for row_num, col_num in positions:
                 with self.subTest(msg=f"{file_name}:{row_num}:{col_num}"):
                     self.test_driver.assert_expected_error_matches_extracted_error(
                         file_name, row_num, col_num

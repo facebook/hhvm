@@ -1,0 +1,2 @@
+WARN: File "like_truthy.php", line 13, characters 7-10:
+Invalid condition: a value of type `A<int>` will always be truthy (Warn[12006])

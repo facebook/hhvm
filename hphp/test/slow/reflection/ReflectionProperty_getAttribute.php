@@ -1,7 +1,7 @@
 <?hh
 
 class C {
-  <<A, B(1, "two", varray[3])>>
+  <<A, B(1, "two", vec[3])>>
   public $p;
   <<C, D('a', dict['b' => 'c'])>>
   public static $sp;
@@ -12,7 +12,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function main_reflection_property_get_attribute() {
+function main_reflection_property_get_attribute() :mixed{
 $rp = new ReflectionProperty(C::class, 'p');
 var_dump($rp->getAttribute('B'));
 var_dump($rp->hasAttribute('B'));

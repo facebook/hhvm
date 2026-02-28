@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function empty_vec_literal(): vec<string> {
   return vec[];

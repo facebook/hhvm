@@ -12,13 +12,20 @@ class XSLTProcessor {
   public function getParameter(?string $namespaceURI, string $localName): mixed;
   public function getSecurityPrefs(): int;
   public function hasExsltSupport(): bool;
-  public function importStylesheet(mixed $stylesheet): void;
+  public function importStylesheet(DOMDocument $stylesheet): void;
   public function registerPHPFunctions(mixed $funcs = null): void;
-  public function removeParameter(?string $namespaceURI, string $localName): bool;
-  public function setParameter(?string $namespaceURI, mixed $localName, mixed $value = null): bool;
+  public function removeParameter(
+    ?string $namespaceURI,
+    string $localName,
+  ): bool;
+  public function setParameter(
+    ?string $namespaceURI,
+    mixed $localName,
+    mixed $value = null,
+  ): bool;
   public function setProfiling(string $filename): bool;
   public function setSecurityPrefs(int $securityPrefs): int;
-  public function transformToDoc(mixed $doc): mixed;
-  public function transformToURI(mixed $doc, string $uri): mixed;
-  public function transformToXML(mixed $doc): mixed;
+  public function transformToDoc(DOMNode $doc): mixed;
+  public function transformToURI(DOMDocument $doc, string $uri): mixed;
+  public function transformToXML(DOMDocument $doc): mixed;
 }

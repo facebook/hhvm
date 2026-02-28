@@ -1,10 +1,10 @@
 <?hh
 
-function x() {}
+function x() :mixed{}
 
 
 <<__EntryPoint>>
-function main_repeat() {
+function main_repeat() :mixed{
 for ($i = 0; $i < 128; $i++) {
   $t = new IntervalTimer(0.1, 0.1, () ==> {});
   $t->start();

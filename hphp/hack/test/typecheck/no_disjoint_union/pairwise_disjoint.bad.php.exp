@@ -1,0 +1,10 @@
+WARN: File "pairwise_disjoint.bad.php", line 8, characters 3-27:
+Invalid type argument due to disjoint types in a union (Warn[12017])
+  File "pairwise_disjoint.bad.php", line 8, characters 7-10:
+  `bool` is one of the disjoint types
+  File "pairwise_disjoint.bad.php", line 8, characters 17-18:
+  `int` is one of the disjoint types
+  File "pairwise_disjoint.bad.php", line 8, characters 21-25:
+  `string` is one of the disjoint types
+  File "pairwise_disjoint.bad.php", line 5, characters 36-36:
+  This type parameter is marked with `__NoDisjointUnion` to indicate that disjoint unions are errors

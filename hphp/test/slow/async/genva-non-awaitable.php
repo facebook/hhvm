@@ -2,7 +2,7 @@
 
 class Foo {}
 
-async function test_short($input) {
+async function test_short($input) :Awaitable<mixed>{
   var_dump($input);
   try {
     concurrent {
@@ -16,7 +16,7 @@ async function test_short($input) {
   }
 }
 
-async function test_long($input) {
+async function test_long($input) :Awaitable<mixed>{
   var_dump($input);
   try {
     concurrent {
@@ -36,7 +36,7 @@ async function test_long($input) {
   }
 }
 
-async function test() {
+async function test() :Awaitable<mixed>{
   await test_short(null);
   await test_short(async {});
   await test_short(RescheduleWaitHandle::create(0, 0));
@@ -57,6 +57,6 @@ async function test() {
 
 
 <<__EntryPoint>>
-function main_genva_non_awaitable() {
+function main_genva_non_awaitable() :mixed{
 HH\Asio\join(test());
 }

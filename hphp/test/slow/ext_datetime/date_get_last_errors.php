@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_date_get_last_errors() {
+function main_date_get_last_errors() :mixed{
 $dt = date_create("asdfasdf");
 $errs = date_get_last_errors();
 var_dump(is_darray($errs));

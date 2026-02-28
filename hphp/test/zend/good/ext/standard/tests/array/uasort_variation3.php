@@ -17,7 +17,7 @@
  * Description : compares value1 and value2
  */
 function cmp_function($value1, $value2)
-{
+:mixed{
   if($value1 == $value2) {
     return 0;
   }
@@ -47,7 +47,7 @@ multiline heredoc with 123
 and speci@! ch@r..\ncheck\talso
 EOT3;
 
-$array_arg = darray[
+$array_arg = dict[
   // default key
   0 => 1,  //expecting: default key 0, value will be replaced by 'FALSE'
 

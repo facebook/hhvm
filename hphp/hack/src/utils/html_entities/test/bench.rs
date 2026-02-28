@@ -9,14 +9,13 @@ extern crate test;
 
 fn main() {
     let command =
-        "buck run @mode/opt //hphp/hack/src/utils/html_entities/tests:bench-unittest -- --bench";
+        "buck run @//mode/opt //hphp/hack/src/utils/html_entities/tests:bench-unittest -- --bench";
     println!("Run this bench suite with: {}", command);
 }
 
 #[cfg(test)]
 mod tests {
     use html_entities::*;
-
     use test::Bencher;
 
     #[bench]

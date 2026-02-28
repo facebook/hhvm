@@ -28,7 +28,7 @@ namespace HPHP::HHBBC {
 namespace php { struct WideFunc; }
 
 struct FuncAnalysis;
-struct Index;
+struct IIndex;
 struct State;
 struct VisitContext;
 
@@ -45,14 +45,12 @@ void local_dce(VisitContext& visit, BlockId bid, const State&);
  *
  * Returns true if we should re-run the optimizer.
  */
-bool global_dce(const Index&, const FuncAnalysis&, php::WideFunc&);
+bool global_dce(const IIndex&, const FuncAnalysis&, php::WideFunc&);
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_unreachable("static analysis error: supposedly "
-                                 "unreachable code was reached");
+extern const StaticString s_unreachable;
 
 //////////////////////////////////////////////////////////////////////
 
 }
-

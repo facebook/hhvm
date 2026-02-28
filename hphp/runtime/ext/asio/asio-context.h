@@ -18,12 +18,10 @@
 #ifndef incl_HPHP_EXT_ASIO_CONTEXT_H_
 #define incl_HPHP_EXT_ASIO_CONTEXT_H_
 
-#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/req-deque.h"
 #include "hphp/runtime/base/req-map.h"
 #include "hphp/runtime/base/req-vector.h"
-
-#include <functional>
+#include "hphp/runtime/ext/asio/asio-context-index.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,57 +34,22 @@ struct c_SleepWaitHandle;
 struct c_ExternalThreadEventWaitHandle;
 struct c_AsyncFunctionWaitHandle;
 
-typedef uint8_t context_idx_t;
+using reschedule_priority_queue_t = req::map<
+  int64_t, req::deque<c_RescheduleWaitHandle*>
+>;
 
-struct AsioContext final {
-  explicit AsioContext(ActRec* savedFP) : m_savedFP(savedFP) {}
-  void exit(context_idx_t ctx_idx);
-
-  ActRec* getSavedFP() const { return m_savedFP; }
-
-  void schedule(c_ResumableWaitHandle* wait_handle) {
-    m_runnableQueue.push_back(wait_handle);
-  }
-  void scheduleFast(c_AsyncFunctionWaitHandle* wait_handle) {
-    m_fastRunnableQueue.push_back(wait_handle);
-  }
-  void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue,
-                int64_t priority);
-
-  c_AsyncFunctionWaitHandle* maybePopFast();
-
-  template <class TWaitHandle>
-  uint32_t registerTo(req::vector<TWaitHandle*>& vec, TWaitHandle* wh);
-
-  template <class TWaitHandle>
-  void unregisterFrom(req::vector<TWaitHandle*>& vec, uint32_t idx);
-
-  req::vector<c_SleepWaitHandle*>& getSleepEvents() {
-    return m_sleepEvents;
-  };
-  req::vector<c_ExternalThreadEventWaitHandle*>& getExternalThreadEvents() {
-    return m_externalThreadEvents;
-  };
-
-  void runUntil(c_WaitableWaitHandle* wait_handle);
-
-  // used for back-traces, when surprise flag is handled
-  // from inside Asio scheduler
-  c_WaitableWaitHandle* getBlamedWaitHandle();
-
-  static constexpr uint32_t QUEUE_DEFAULT       = 0;
-  static constexpr uint32_t QUEUE_NO_PENDING_IO = 1;
-
+// Context state holding WH queues
+struct AsioContextState {
 private:
-  using reschedule_priority_queue_t = req::map<
-    int64_t, req::deque<c_RescheduleWaitHandle*>
-  >;
+  explicit AsioContextState() {}
 
-  bool runSingle(reschedule_priority_queue_t& queue);
-
-private:
-  // Frame pointer to the ActRec of the \HH\Asio\join() call.
-  ActRec* m_savedFP;
+  bool hasWork() {
+    // Notably, do not check m_priorityQueueNoPendingIO here. This is handled in
+    // the context by runSingle() to ensure proper batching of I/O.
+    return !m_runnableQueue.empty() ||
+      !m_fastRunnableQueue.empty() ||
+      !m_priorityQueueDefault.empty();
+  }
 
   // stack of ResumableWaitHandles ready for immediate execution
   req::vector<c_ResumableWaitHandle*> m_runnableQueue;
@@ -101,9 +64,60 @@ private:
   // pending I/O
   reschedule_priority_queue_t m_priorityQueueNoPendingIO;
 
+  friend struct AsioContext;
+};
+
+struct AsioContext final {
+  explicit AsioContext(ActRec* savedFP)
+    : m_savedFP(savedFP), m_regularState(), m_lowState() {}
+  void exit(ContextIndex ContextIndex);
+
+  ActRec* getSavedFP() const { return m_savedFP; }
+
+  void schedule(c_ResumableWaitHandle* wait_handle);
+  void scheduleFast(c_AsyncFunctionWaitHandle* wait_handle);
+  void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue,
+                int64_t priority);
+
+  c_AsyncFunctionWaitHandle* maybePopFast();
+
+  template <class TWaitHandle>
+  uint32_t registerTo(req::vector<TWaitHandle*>& vec, TWaitHandle* wh);
+
+  template <class TWaitHandle>
+  void unregisterFrom(req::vector<TWaitHandle*>& vec, uint32_t idx);
+
+  req::vector<c_SleepWaitHandle*>& getSleepEvents() {
+    return m_sleepEvents;
+  }
+  req::vector<c_ExternalThreadEventWaitHandle*>& getExternalThreadEvents() {
+    return m_externalThreadEvents;
+  }
+
+  void runUntil(c_WaitableWaitHandle* wait_handle);
+
+  // used for back-traces, when surprise flag is handled
+  // from inside Asio scheduler
+  c_WaitableWaitHandle* getBlamedWaitHandle();
+
+  static constexpr uint32_t QUEUE_DEFAULT       = 0;
+  static constexpr uint32_t QUEUE_NO_PENDING_IO = 1;
+
+private:
+  // Frame pointer to the ActRec of the \HH\Asio\join() call.
+  ActRec* m_savedFP;
+
+  // Context states for managing priority contexts
+  AsioContextState m_regularState;
+  AsioContextState m_lowState;
+
   // pending wait handles
   req::vector<c_SleepWaitHandle*> m_sleepEvents;
   req::vector<c_ExternalThreadEventWaitHandle*> m_externalThreadEvents;
+
+  bool runSingle(reschedule_priority_queue_t& queue);
+
+  AsioContextState* getContextState(ContextStateIndex ctxStateIdx);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

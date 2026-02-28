@@ -22,7 +22,6 @@
 #include "hphp/runtime/vm/jit/tc-record.h"
 
 #include "hphp/runtime/base/perf-warning.h"
-#include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
@@ -40,20 +39,18 @@
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/translate-region.h"
-#include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
-#include "hphp/runtime/vm/jit/vm-protect.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
-#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/boot-stats.h"
-#include "hphp/util/service-data.h"
+#include "hphp/util/configs/codecache.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/hardware-counter.h"
 #include "hphp/util/struct-log.h"
-#include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
-TRACE_SET_MOD(mcg);
+TRACE_SET_MOD(mcg)
 
 namespace HPHP::jit::tc {
 
@@ -65,8 +62,8 @@ using SrcKeyTransMap = jit::hash_map<SrcKey,jit::vector<TCA>,
 
 bool checkLimit(TransKind kind, const size_t numTrans) {
   auto const limit = kind == TransKind::Profile
-    ? RuntimeOption::EvalJitMaxProfileTranslations
-    : RuntimeOption::EvalJitMaxTranslations;
+    ? Cfg::Jit::MaxProfileTranslations
+    : Cfg::Jit::MaxTranslations;
 
   // Once numTrans has reached limit + 1 we know that an interp translation
   // has already been emitted. Prior to that if numTrans == limit only allow
@@ -78,7 +75,7 @@ bool checkLimit(TransKind kind, const size_t numTrans) {
 }
 
 void invalidateSrcKey(SrcKey sk, SBInvOffset spOff) {
-  assertx(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
+  assertx(!Cfg::Repo::Authoritative || Cfg::Jit::PGO);
   /*
    * Reroute existing translations for SrcKey to an as-yet indeterminate
    * new one.
@@ -122,14 +119,6 @@ size_t infoSize(const FuncMetaInfo& info) {
     sz += range.main.size() + range.cold.size() + range.frozen.size();
   }
   return sz;
-}
-
-bool checkTCLimits() {
-  auto const main_under = code().main().used() < CodeCache::AMaxUsage;
-  auto const cold_under = code().cold().used() < CodeCache::AColdMaxUsage;
-  auto const froz_under = code().frozen().used() < CodeCache::AFrozenMaxUsage;
-
-  return main_under && cold_under && froz_under;
 }
 
 void relocateOptFunc(FuncMetaInfo& info,
@@ -192,7 +181,6 @@ void publishOptFuncMeta(FuncMetaInfo& info) {
 
 void publishOptFuncCode(FuncMetaInfo& info,
                         jit::hash_set<TCA>* publishedSet = nullptr) {
-  auto const func = info.func;
 
   // Publish all prologues and translations for func in order.
   for (auto const& translator : info.translators) {
@@ -200,10 +188,6 @@ void publishOptFuncCode(FuncMetaInfo& info,
       translator->publishCodeInternal();
       auto const tca = translator->entry();
       if (publishedSet) publishedSet->insert(tca);
-      if (translator->sk == SrcKey{func, 0, SrcKey::FuncEntryTag{}} &&
-          func->numRequiredParams() == func->numNonVariadicParams()) {
-        func->setFuncEntry(tca);
-      }
     } else {
       // If we failed to emit the prologue (e.g. the TC filled up), redirect
       // all the callers to the fcallHelperThunk so that they stop calling
@@ -216,9 +200,11 @@ void publishOptFuncCode(FuncMetaInfo& info,
 void relocateSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
                             PrologueTCAMap& prologueTCAs,
                             SrcKeyTransMap& srcKeyTrans) {
+  BootStats::Block timer("RTA_relocate_sorted_opt_funcs", Cfg::Server::Mode,
+                         true);
   size_t failedBytes = 0;
 
-  bool shouldLog = RuntimeOption::ServerExecutionMode();
+  bool shouldLog = Cfg::Server::Mode;
   for (auto& finfo : infos) {
     // We clear the translations that are not relocated to ensure
     // no one tries publishing such translations.
@@ -230,7 +216,7 @@ void relocateSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
     // make sure we don't get ahead of the translation threads
     mcgen::waitForTranslate(finfo);
 
-    if (!checkTCLimits()) {
+    if (tcIsFull()) {
       FTRACE(1, "relocateSortedOptFuncs: ran out of space in the TC. "
              "Skipping function {} {}\n", finfo.func->getFuncId(),
              finfo.func->fullName());
@@ -370,7 +356,7 @@ void smashOptBinds(CGMeta& meta,
   // inProgressTailJumps as it has already been smashed.
   GrowableVector<IncomingBranch> newTailJumps;
   for (auto& jump : meta.inProgressTailJumps) {
-    if (smashed.count(jump.toSmash()) == 0) {
+    if (!smashed.contains(jump.toSmash())) {
       newTailJumps.push_back(jump);
     } else {
       FTRACE(3, "smashOptBinds: removing {} from inProgressTailJumps\n",
@@ -388,7 +374,7 @@ void smashOptSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
                             const PrologueTCAMap& prologueTCAs,
                             const SrcKeyTransMap& srcKeyTrans) {
   BootStats::Block timer("RTA_smash_opt_funcs",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
   for (auto& finfo : infos) {
     if (!Func::isFuncIdValid(finfo.fid)) continue;
 
@@ -409,7 +395,7 @@ void smashOptSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
 
 void invalidateFuncsProfSrcKeys() {
   BootStats::Block timer("RTA_invalidate_prof_srckeys",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
   auto const pd = profData();
   assertx(pd);
   pd->forEachProfilingFunc([&](auto const& func) {
@@ -428,7 +414,7 @@ void invalidateFuncsProfSrcKeys() {
 
 void publishSortedOptFuncsMeta(std::vector<FuncMetaInfo>& infos) {
   BootStats::Block timer("RTA_publish_meta",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
   for (auto& finfo : infos) {
     if (Func::isFuncIdValid(finfo.fid)) {
       publishOptFuncMeta(finfo);
@@ -439,7 +425,7 @@ void publishSortedOptFuncsMeta(std::vector<FuncMetaInfo>& infos) {
 void publishSortedOptFuncsCode(std::vector<FuncMetaInfo>& infos,
                                jit::hash_set<TCA>* publishedSet) {
   BootStats::Block timer("RTA_publish_code",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
   for (auto& finfo : infos) {
     if (Func::isFuncIdValid(finfo.fid)) {
       publishOptFuncCode(finfo, publishedSet);
@@ -462,7 +448,7 @@ std::string show(const SrcKeyTransMap& map) {
 void checkPublishedAddr(TCA tca, const jit::hash_set<TCA>& publishedSet) {
   always_assert_flog(code().inMainOrColdOrFrozen(tca),
                      "srcKeyTrans has address not in hot/main: {}", tca);
-  always_assert_flog(publishedSet.count(tca),
+  always_assert_flog(publishedSet.contains(tca),
                      "srcKeyTrans has unpublished translation @ {}", tca);
 }
 
@@ -508,7 +494,7 @@ SrcRec* createSrcRec(SrcKey sk, SBInvOffset spOff) {
   SKTRACE(1, sk, "inserting SrcRec\n");
 
   auto const sr = srcDB().insert(sk);
-  if (RuntimeOption::EvalEnableReusableTC) {
+  if (Cfg::Eval::EnableReusableTC) {
     recordFuncSrcRec(sk.func(), sr);
   }
 
@@ -536,7 +522,7 @@ void relocatePublishSortedOptFuncs(std::vector<FuncMetaInfo> infos) {
   // Grab the session now (which includes a Treadmill::Session) so
   // that no Func's get destroyed during this step
   ProfData::Session pds(Treadmill::SessionKind::RetranslateAll);
-  const bool serverMode = RuntimeOption::ServerExecutionMode();
+  const bool serverMode = Cfg::Server::Mode;
 
   PrologueTCAMap prologueTCAs;
   SrcKeyTransMap srcKeyTrans;
@@ -616,13 +602,13 @@ Optional<TranslationResult> RegionTranslator::getCached() {
   if (!m_lease || !(*m_lease)) return std::nullopt;
   // Check for potential interp anchor translation
   if (kind == TransKind::Profile) {
-    if (numTrans > RuntimeOption::EvalJitMaxProfileTranslations) {
+    if (numTrans > Cfg::Jit::MaxProfileTranslations) {
       always_assert(numTrans ==
-                    RuntimeOption::EvalJitMaxProfileTranslations + 1);
+                    Cfg::Jit::MaxProfileTranslations + 1);
       return TranslationResult{srcRec->getTopTranslation()};
     }
-  } else if (numTrans > RuntimeOption::EvalJitMaxTranslations) {
-    always_assert(numTrans == RuntimeOption::EvalJitMaxTranslations + 1);
+  } else if (numTrans > Cfg::Jit::MaxTranslations) {
+    always_assert(numTrans == Cfg::Jit::MaxTranslations + 1);
     return TranslationResult{srcRec->getTopTranslation()};
   }
   return std::nullopt;
@@ -633,6 +619,9 @@ void RegionTranslator::resetCached() {
 }
 
 void RegionTranslator::gen() {
+  // Per-request hardware counters (such as instructions, load/store) should not
+  // include the JIT.
+  UNUSED HardwareCounter::ExcludeScope stopCount;
   auto const srcRec = srcDB().find(sk);
   auto const emitInterpStub = [&] {
     FTRACE(1, "emitting dispatchBB interp request for failed "
@@ -670,7 +659,7 @@ void RegionTranslator::gen() {
   if (!region) return fail();
 
   INC_TPC(translate);
-  Timer timer(Timer::mcg_translate);
+  Timer timer(Timer::mcg_translate, nullptr);
 
   tracing::Block _{"translate", [&] {
 		return traceProps(sk.func())
@@ -697,6 +686,7 @@ void RegionTranslator::gen() {
     kind,
     sk,
     region.get(),
+    sk.packageInfo(),
     PrologueID(),
   };
   unit = irGenRegion(*region, ctx, pconds);
@@ -725,7 +715,7 @@ void RegionTranslator::publishMetaImpl() {
   auto const srcRec = srcDB().find(sk);
   always_assert(srcRec);
 
-  if (RuntimeOption::EvalProfileBC) {
+  if (Cfg::Eval::ProfileBC) {
     TransBCMapping prev{};
     for (auto& cur : fixups.bcMap) {
       if (!cur.aStart) continue;
@@ -742,16 +732,22 @@ void RegionTranslator::publishMetaImpl() {
   recordGdbTranslation(sk, view.cold(), loc.coldCodeStart(), loc.coldEnd());
 
   TransRec tr{sk, transId, kind, loc.mainStart(), loc.mainSize(),
-      loc.coldStart(), loc.coldSize(), loc.frozenStart(), loc.frozenSize(),
-      std::move(annotations), region, fixups.bcMap, hasLoop};
+              loc.coldCodeStart(), loc.coldCodeSize(),
+              loc.frozenCodeStart(), loc.frozenCodeSize(),
+              std::move(annotations), region, fixups.bcMap, hasLoop};
   transdb::addTranslation(tr);
   FuncOrder::recordTranslation(tr);
-  if (RuntimeOption::EvalJitUseVtuneAPI) {
+  if (Cfg::Jit::UseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);
   }
   recordTranslationSizes(tr);
 
   fixups.process(&tailBranches);
+
+  if (kind == TransKind::Live) {
+    incrementLiveFuncTransBytes(sk.func()->getFuncId(), 
+                                loc.mainSize() + loc.coldCodeSize() + loc.frozenCodeSize());
+  }
 }
 
 /*
@@ -763,7 +759,7 @@ void RegionTranslator::publishCodeImpl() {
   const auto& loc = transMeta->range.loc();
   const auto srcRec = srcDB().find(sk);
   always_assert(srcRec);
-  assertx(checkLimit(kind, srcRec->numTrans()));
+  assert_flog(checkLimit(kind, srcRec->numTrans()), "sk: {}", show(sk));
 
   if (kind == TransKind::Profile) {
     always_assert(region);
@@ -775,6 +771,11 @@ void RegionTranslator::publishCodeImpl() {
         entry(), showShort(sk).c_str());
 
   srcRec->newTranslation(loc, tailBranches);
+  auto const func = sk.func();
+  auto const numParams = func->numNonVariadicParams();
+  if (sk == SrcKey{func, numParams, SrcKey::FuncEntryTag{}}) {
+    const_cast<Func*>(func)->setFuncEntry(entry());
+  }
 
   TRACE(1, "mcg: %u-byte translation (%u main, %u cold, %u frozen)\n",
         loc.mainSize() + loc.coldCodeSize() + loc.frozenCodeSize(),
@@ -789,6 +790,12 @@ void RegionTranslator::setCachedForProcessFail() {
   auto const srcRec = srcDB().find(sk);
   always_assert(srcRec);
 
+  auto const func = sk.func();
+  auto const numParams = func->numNonVariadicParams();
+  if (sk == SrcKey{func, numParams, SrcKey::FuncEntryTag{}}) {
+    const_cast<Func*>(func)->setFuncEntry(
+      tc::ustubs().interpHelperNoTranslateFuncEntryFromTC);
+  }
   auto const stub = svcreq::emit_interp_no_translate_stub(spOff, sk);
   TRACE(1, "setCachedForProcessFail: stub: %p  sk: %s\n",
         stub, showShort(sk).c_str());
@@ -797,4 +804,11 @@ void RegionTranslator::setCachedForProcessFail() {
   srcRec->smashFallbacksToStub(stub);
 }
 
+bool RegionTranslator::exceededMaxLiveTranslations(int numTrans) {
+  always_assert(isLive(kind));
+  // After hitting limit, jit will generate one
+  // more translation that will call the interpreter.
+  always_assert(numTrans <= Cfg::Jit::MaxTranslations + 1);
+  return numTrans >= Cfg::Jit::MaxTranslations;
+}
 }

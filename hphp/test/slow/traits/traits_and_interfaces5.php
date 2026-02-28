@@ -1,15 +1,15 @@
 <?hh
 
 interface I {
-  public function foo();
+  public function foo():mixed;
 }
 
 interface J extends I {
-  public function bar();
+  public function bar():mixed;
 }
 
 trait T1 implements J {
-  public function foo() {
+  public function foo() :mixed{
     echo "foo()\n";
   }
 }
@@ -21,7 +21,7 @@ trait T2 {
 trait T3 {
   use T2;
 
-  public function bar() {
+  public function bar() :mixed{
     echo "bar()\n";
   }
 }
@@ -30,17 +30,17 @@ class C {
   use T3;
 }
 
-function foo(J $x) {
+function foo(J $x) :mixed{
   $x->foo();
   $x->bar();
 }
 
-function main() {
+function main() :mixed{
   foo(new C());
 }
 
 
 <<__EntryPoint>>
-function main_traits_and_interfaces5() {
+function main_traits_and_interfaces5() :mixed{
 main();
 }

@@ -1,32 +1,35 @@
-<?hh // strict
+<?hh
 
 namespace HH {
 
-// class-like
-interface ClassLikeAttribute {}
-interface ClassAttribute extends ClassLikeAttribute {}
-interface ClassConstantAttribute {}
-interface EnumAttribute extends ClassLikeAttribute {}
-interface EnumClassAttribute extends ClassLikeAttribute {}
+  // class-like
+  interface ClassLikeAttribute {}
+  interface ClassAttribute extends ClassLikeAttribute {}
+  interface ClassConstantAttribute {}
+  interface EnumAttribute extends ClassLikeAttribute {}
+  interface EnumClassAttribute extends ClassLikeAttribute {}
 
-interface TypeAliasAttribute {}
+  interface TypeAliasAttribute {}
 
-// function-like
-interface FunctionAttribute {}
-interface MethodAttribute {}
+  // function-like
+  interface FunctionAttribute {}
+  interface MethodAttribute {}
 
-interface LambdaAttribute {}
+  interface LambdaAttribute {}
 
-// properties
-interface PropertyAttribute {}
-interface InstancePropertyAttribute extends PropertyAttribute {}
-interface StaticPropertyAttribute extends PropertyAttribute {}
+  // modules
+  interface ModuleAttribute {}
 
-interface ParameterAttribute {}
-interface FileAttribute {}
+  // properties
+  interface PropertyAttribute {}
+  interface InstancePropertyAttribute extends PropertyAttribute {}
+  interface StaticPropertyAttribute extends PropertyAttribute {}
 
-interface TypeParameterAttribute {}
+  interface ParameterAttribute {}
+  interface FileAttribute {}
 
-interface TypeConstantAttribute {}
+  interface TypeParameterAttribute {}
+
+  interface TypeConstantAttribute {}
 
 }

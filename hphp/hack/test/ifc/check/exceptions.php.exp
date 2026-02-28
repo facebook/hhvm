@@ -1,7 +1,0 @@
-=== IFC analysis results for exceptions.php
-File "exceptions.php", line 19, characters 3-18:
-Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
-  File "exceptions.php", line 6, characters 68-74:
-  This may be the data source with policy `PRIVATE`
-  File "exceptions.php", line 11, characters 67-73:
-  This may be the data sink with policy `PUBLIC`

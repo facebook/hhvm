@@ -1,0 +1,19 @@
+{
+  "foo": {
+    "type": "PoolRoute",
+    "pool": "foo",
+    "shadows": [
+      {
+        "target": {
+          "type": "PoolRoute",
+          "pool": {
+            "name": "foo-shadow",
+            "servers": [ "127.0.0.1:%PORT_SHADOW%" ]
+          }
+        },
+        "index_range": [0, 2],
+        "key_fraction_range": [0.0, 0.1]
+      }
+    ]
+  }
+}

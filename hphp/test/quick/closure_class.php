@@ -1,9 +1,9 @@
 <?hh
 
 trait A {
-  public function b() {
+  public function b() :mixed{
     return function() {
-      return varray[
+      return vec[
         __CLASS__,
         get_class($this)
       ];
@@ -13,9 +13,9 @@ trait A {
 
 class C {
   use A;
-  public function d() {
+  public function d() :mixed{
     return function() {
-      return varray[
+      return vec[
         __CLASS__,
         get_class($this)
       ];

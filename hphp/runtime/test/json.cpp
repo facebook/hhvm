@@ -33,7 +33,7 @@ void test_json(const char* json) {
   auto caught = false;
   req::vector<Variant> buf;
   ASSERT_LE(tl_heap->getStatsCopy().usage(), tl_heap->getMemoryLimit());
-  ASSERT_FALSE(getSurpriseFlag(MemExceededFlag));
+  ASSERT_FALSE(stackLimitAndSurprise().getFlag(MemExceededFlag));
   auto len = strlen(json);
   try {
     for (int i = 0; i < 100000; i++) {
@@ -42,10 +42,10 @@ void test_json(const char* json) {
       auto ok = JSON_parser(z, json, len, true, 0xffff,
                             k_JSON_FB_LOOSE);
       ASSERT_TRUE(ok);
-      ASSERT_FALSE(getSurpriseFlag(MemExceededFlag));
+      ASSERT_FALSE(stackLimitAndSurprise().getFlag(MemExceededFlag));
       buf.push_back(z);
     }
-  } catch (RequestMemoryExceededException& e) {
+  } catch (RequestMemoryExceededException&) {
     caught = true;
   }
   EXPECT_TRUE(caught);

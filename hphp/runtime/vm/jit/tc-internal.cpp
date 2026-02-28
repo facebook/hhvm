@@ -17,9 +17,7 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc.h"
 
-#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/perf-warning.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/vm/debug/debug.h"
@@ -28,6 +26,7 @@
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/guard-type-profile.h"
+#include "hphp/runtime/vm/jit/mcgen-async.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
@@ -35,7 +34,7 @@
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
-#include "hphp/runtime/vm/jit/tc-prologue.h"
+#include "hphp/runtime/vm/jit/tc-intercept.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
@@ -44,13 +43,15 @@
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/util/configs/codecache.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/disasm.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/rds-local.h"
+#include "hphp/util/service-data.h"
 #include "hphp/util/trace.h"
-
-#include <tbb/concurrent_hash_map.h>
 
 #include <atomic>
 
@@ -58,7 +59,7 @@ extern "C" _Unwind_Reason_Code
 __gxx_personality_v0(int, _Unwind_Action, uint64_t, _Unwind_Exception*,
                      _Unwind_Context*);
 
-TRACE_SET_MOD(mcg);
+TRACE_SET_MOD(mcg)
 
 namespace HPHP::jit::tc {
 
@@ -67,6 +68,10 @@ __thread bool tl_is_jitting = false;
 CodeCache* g_code{nullptr};
 SrcDB g_srcDB;
 UniqueStubs g_ustubs;
+ServiceData::ExportedCounter* g_JitMaturityCounter{nullptr};
+int g_maxJitMaturity = 100; // may be reduced to 99 when workload changes
+folly::ConcurrentHashMap<FuncId, uint32_t> g_funcLiveTransBytes;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -92,12 +97,12 @@ struct CodeReuseBlock {
   // reusable TC is enabled).
   CodeCache::View getMaybeReusedView(CodeCache::View& src,
                                      const TransRange& range) {
-    if (!RuntimeOption::EvalEnableReusableTC) return src;
+    if (!Cfg::Eval::EnableReusableTC) return src;
     auto main = &src.main();
     auto cold = &src.cold();
     auto frozen = &src.frozen();
 
-    auto const pad = RuntimeOption::EvalReusableTCPadding;
+    auto const pad = Cfg::Eval::ReusableTCPadding;
     size_t mainSize   = range.main.size() + pad;
     size_t coldSize   = range.cold.size() + pad;
     size_t frozenSize = range.frozen.size() + pad;
@@ -126,9 +131,11 @@ struct CodeReuseBlock {
 TransLoc TransRange::loc() const {
   TransLoc loc;
   loc.setMainStart(main.begin());
-  loc.setColdStart(cold.begin() - sizeof(uint32_t));
-  loc.setFrozenStart(frozen.begin() - sizeof(uint32_t));
+  loc.setColdStart(cold.begin());
+  loc.setFrozenStart(frozen.begin());
   loc.setMainSize(main.size());
+  loc.setColdSize(cold.size());
+  loc.setFrozenSize(frozen.size());
 
   assertx(loc.coldCodeSize() == cold.size());
   assertx(loc.frozenCodeSize() == frozen.size());
@@ -136,29 +143,23 @@ TransLoc TransRange::loc() const {
 }
 
 bool canTranslate() {
-  return s_numTrans.load(std::memory_order_relaxed) <
-    RuntimeOption::EvalJitGlobalTranslationLimit;
+  return s_numTrans.load(std::memory_order_acquire) <
+    Cfg::Jit::GlobalTranslationLimit;
 }
-
-using FuncCounterMap = tbb::concurrent_hash_map<FuncId, uint32_t,
-                                                FuncIdHashCompare>;
-static FuncCounterMap s_func_counters;
-
-using SrcKeyCounters = tbb::concurrent_hash_map<SrcKey, uint32_t,
-                                                SrcKey::TbbHashCompare>;
-
-static SrcKeyCounters s_sk_counters;
 
 static RDS_LOCAL_NO_CHECK(bool, s_jittingTimeLimitExceeded);
 
-TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
+TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind,
+                                                    bool noTheshold) {
   // If we've hit Eval.JitGlobalTranslationLimit, then we stop translating.
   if (!canTranslate()) return TranslationResult::Scope::Process;
 
   if (*s_jittingTimeLimitExceeded) return TranslationResult::Scope::Request;
 
-  auto const maxTransTime = RuntimeOption::EvalJitMaxRequestTranslationTime;
-  if (maxTransTime >= 0 && RuntimeOption::ServerExecutionMode()) {
+  auto const maxTransTime = Cfg::Jit::MaxRequestTranslationTime;
+  if (maxTransTime >= 0 &&
+      Cfg::Server::Mode &&
+      !mcgen::isAsyncJitEnabled(kind)) {
     auto const transCounter = Timer::CounterValue(Timer::mcg_translate);
     if (transCounter.wall_time_elapsed >= maxTransTime) {
       if (Trace::moduleEnabledRelease(Trace::mcg, 1)) {
@@ -176,7 +177,7 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
   }
 
   auto const func = sk.func();
-  if (!RO::EvalHHIRAlwaysInterpIgnoreHint &&
+  if (!Cfg::HHIR::AlwaysInterpIgnoreHint &&
       func->userAttributes().count(s_AlwaysInterp.get())) {
     SKTRACE(2, sk,
             "punting because function is annotated with __ALWAYS_INTERP\n");
@@ -189,8 +190,22 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
     return TranslationResult::Scope::Transient;
   }
 
+  // Never translate functions in user-supplied blocklist.
+  if (!Cfg::Jit::FuncBlockList.empty()) {
+    // Calling func->fullName() could create a static string. So do our own
+    // concatenation here to avoid wasting low memory.
+    std::string fullName;
+    if (auto cls = func->cls()) {
+      fullName = cls->name()->toCppString() + "::";
+    }
+    fullName.append(func->name()->data());
+    if (Cfg::Jit::FuncBlockList.contains(fullName)) {
+      return TranslationResult::Scope::Process;
+    }
+  }
+
   // Refuse to JIT Live translations if Eval.JitPGOOnly is enabled.
-  if (RuntimeOption::EvalJitPGOOnly &&
+  if (Cfg::Jit::PGOOnly &&
       (kind == TransKind::Live || kind == TransKind::LivePrologue)) {
     return TranslationResult::Scope::Transient;
   }
@@ -201,24 +216,17 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
                       kind == TransKind::LivePrologue;
   auto const isProf = kind == TransKind::Profile ||
                       kind == TransKind::ProfPrologue;
-  if (isLive || isProf) {
-    uint32_t skCount = 1;
-    if (RuntimeOption::EvalJitSrcKeyThreshold > 1) {
-      SrcKeyCounters::accessor acc;
-      if (!s_sk_counters.insert(acc, SrcKeyCounters::value_type(sk, 1))) {
-        skCount = ++acc->second;
-      }
-    }
-    {
-      FuncCounterMap::accessor acc;
-      if (!s_func_counters.insert(acc, {func->getFuncId(), 1})) ++acc->second;
-      auto const funcThreshold = isLive ? RuntimeOption::EvalJitLiveThreshold
-                                        : RuntimeOption::EvalJitProfileThreshold;
-      if (acc->second < funcThreshold) {
-        return TranslationResult::Scope::Transient;
-      }
-    }
-    if (skCount < RuntimeOption::EvalJitSrcKeyThreshold) {
+  
+  auto const hasLiveTransBytesLimit = Cfg::Jit::FuncLiveTranslationByteLimit != std::numeric_limits<uint32_t>::max();
+  if (isLive && hasLiveTransBytesLimit && 
+      g_funcLiveTransBytes[func->getFuncId()] > Cfg::Jit::FuncLiveTranslationByteLimit) {
+    return TranslationResult::Scope::Process;
+  }
+
+  if (!noTheshold && (isLive || isProf)) {
+    auto const funcThreshold = isLive ? Cfg::Jit::LiveThreshold
+                                      : Cfg::Jit::ProfileThreshold;
+    if (func->incJitReqCount() < funcThreshold) {
       return TranslationResult::Scope::Transient;
     }
   }
@@ -227,10 +235,15 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
 }
 
 static std::atomic_flag s_did_log = ATOMIC_FLAG_INIT;
+// After DataBlockFull exception is raised consecutively this number of times,
+// we consider TC as being full.
+static constexpr size_t kConsecutiveTransBlocksFull = 3;
+static std::atomic<int> s_transBlocksFull{0};
 static std::atomic<bool> s_TCisFull{false};
 
-TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind) {
-  if (s_TCisFull.load(std::memory_order_relaxed)) {
+TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind,
+                                         bool noThreshold) {
+  if (tcIsFull()) {
     return TranslationResult::Scope::Process;
   }
 
@@ -239,23 +252,18 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind) {
   }
 
   const bool reachedMaxLiveMainLimit =
-    getLiveMainUsage() >= RuntimeOption::EvalJitMaxLiveMainUsage;
+    getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage;
 
-  auto const main_under = code().main().used() < CodeCache::AMaxUsage;
-  auto const cold_under = code().cold().used() < CodeCache::AColdMaxUsage;
-  auto const froz_under = code().frozen().used() < CodeCache::AFrozenMaxUsage;
-
-  if (!reachedMaxLiveMainLimit && main_under && cold_under && froz_under) {
-    return shouldTranslateNoSizeLimit(sk, kind);
+  if (!reachedMaxLiveMainLimit) {
+    return shouldTranslateNoSizeLimit(sk, kind, noThreshold);
   }
 
-  // Set a flag so we quickly bail from trying to generate new
-  // translations next time.
-  s_TCisFull.store(true, std::memory_order_relaxed);
-  Treadmill::enqueue([] { s_sk_counters.clear(); });
+  auto const main_under = code().mainUsed() < Cfg::CodeCache::AMaxUsage;
+  auto const cold_under = code().coldUsed() < Cfg::CodeCache::AColdMaxUsage;
+  auto const froz_under = code().frozenUsed() < Cfg::CodeCache::AFrozenMaxUsage;
 
-  if (main_under && !s_did_log.test_and_set() &&
-      RuntimeOption::EvalProfBranchSampleFreq == 0) {
+  if (!Cfg::Jit::DynamicTCSections && main_under && !s_did_log.test_and_set() &&
+      Cfg::Eval::ProfBranchSampleFreq == 0) {
     // If we ran out of TC space in cold or frozen but not in main,
     // something unexpected is happening and we should take note of
     // it. We skip this logging if TC branch profiling is on, since
@@ -272,8 +280,8 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind) {
 }
 
 bool newTranslation() {
-  if (s_numTrans.fetch_add(1, std::memory_order_relaxed) >=
-      RuntimeOption::EvalJitGlobalTranslationLimit) {
+  if (s_numTrans.fetch_add(1, std::memory_order_acq_rel) >=
+      Cfg::Jit::GlobalTranslationLimit) {
     return false;
   }
   return true;
@@ -325,7 +333,7 @@ void requestInit() {
 void requestExit() {
   Stats::dump();
   Stats::clear();
-  if (RuntimeOption::EvalJitProfileGuardTypes) {
+  if (Cfg::Jit::ProfileGuardTypes) {
     logGuardProfileData();
   }
   Timer::RequestExit();
@@ -356,6 +364,7 @@ void processInit() {
 
   g_code = new(low_malloc(sizeof(CodeCache))) CodeCache();
   g_ustubs.emitAll(*g_code, *Debug::DebugInfo::Get());
+  g_JitMaturityCounter = ServiceData::createCounter("jit.maturity");
 
   // Write an .eh_frame section that covers the JIT portion of the TC.
   initUnwinder(g_code->base(), g_code->tcSize(),
@@ -375,6 +384,17 @@ void processExit() {
   recycleStop();
 }
 
+void recordWorkloadChange() {
+  if (Cfg::Eval::WorkloadAwareMaturity && getJitMaturity() < g_maxJitMaturity) {
+    g_maxJitMaturity = 99;
+  }
+}
+
+int getJitMaturity() {
+  if (!g_JitMaturityCounter) return 0;
+  return g_JitMaturityCounter->getValue();
+}
+
 bool isValidCodeAddress(TCA addr) {
   return g_code->isValidCodeAddress(addr);
 }
@@ -391,9 +411,9 @@ void checkFreeProfData() {
   // via a different mechanism, after all the optimized translations are
   // generated.
   if (profData() &&
-      !RuntimeOption::EvalEnableReusableTC &&
-      (code().main().used() >= CodeCache::AMaxUsage ||
-       getLiveMainUsage() >= RuntimeOption::EvalJitMaxLiveMainUsage) &&
+      !Cfg::Eval::EnableReusableTC &&
+      (tcIsFull() ||
+       getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage) &&
       !transdb::enabled() &&
       !mcgen::retranslateAllEnabled()) {
     discardProfData();
@@ -403,13 +423,12 @@ void checkFreeProfData() {
 bool shouldProfileNewFuncs() {
   if (profData() == nullptr) return false;
 
-  // We have two knobs to control the number of functions we're allowed to
-  // profile: Eval.JitProfileRequests and Eval.JitProfileBCSize. We profile new
-  // functions until either of these limits is exceeded. In practice, we expect
-  // to hit the bytecode size limit first, but we keep the request limit around
-  // as a safety net.
-  return profData()->profilingBCSize() < RuntimeOption::EvalJitProfileBCSize &&
-    requestCount() < RuntimeOption::EvalJitProfileRequests;
+  // We have one knob to control the number of functions we're allowed to
+  // profile:Eval.JitProfileBCSize. We profile new functions this limit is exceeded.
+  int64_t limit = Cfg::Jit::EnableProfileBCSizeMultiplier
+                  ? Cfg::Jit::ProfileBCSizeMultiplier * Cfg::Jit::ProfileBCSize
+                  : Cfg::Jit::ProfileBCSize;
+  return profData()->profilingBCSize() < limit;
 }
 
 bool profileFunc(const Func* func) {
@@ -419,9 +438,9 @@ bool profileFunc(const Func* func) {
   // being added to ProfData.
   if (mcgen::retranslateAllScheduled()) return false;
 
-  if (code().main().used() >= CodeCache::AMaxUsage) return false;
+  if (tcIsFull()) return false;
 
-  if (getLiveMainUsage() >= RuntimeOption::EvalJitMaxLiveMainUsage) {
+  if (getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage) {
     return false;
   }
 
@@ -442,18 +461,18 @@ LocalTCBuffer::LocalTCBuffer(Address start, size_t initialSize) {
   TCA fakeStart = code().threadLocalStart();
   auto const sz = initialSize / 4;
   auto initBlock = [&] (DataBlock& block, size_t mxSz, const char* nm) {
-    always_assert(sz <= mxSz);
+    always_assert_flog(sz <= mxSz, "sz: {} mxSz: {}\n", sz, mxSz);
     block.init(fakeStart, start, sz, mxSz, nm);
     fakeStart += mxSz;
     start += sz;
   };
-  initBlock(m_main, RuntimeOption::EvalThreadTCMainBufferSize,
+  initBlock(m_main, Cfg::Eval::ThreadTCMainBufferSize,
             "thread local main");
-  initBlock(m_cold, RuntimeOption::EvalThreadTCColdBufferSize,
+  initBlock(m_cold, Cfg::Eval::ThreadTCColdBufferSize,
             "thread local cold");
-  initBlock(m_frozen, RuntimeOption::EvalThreadTCFrozenBufferSize,
+  initBlock(m_frozen, Cfg::Eval::ThreadTCFrozenBufferSize,
             "thread local frozen");
-  initBlock(m_data, RuntimeOption::EvalThreadTCDataBufferSize,
+  initBlock(m_data, Cfg::Eval::ThreadTCDataBufferSize,
             "thread local data");
 }
 
@@ -470,30 +489,30 @@ Translator::Translator(SrcKey sk, TransKind kind)
 
 Translator::~Translator() = default;
 
-Optional<TranslationResult>
-Translator::acquireLeaseAndRequisitePaperwork() {
+bool Translator::shouldEmitLiveTranslation() {
   computeKind();
-
   // Avoid a race where we would create a Live translation while
   // retranslateAll is in flight and we haven't generated an
   // Optimized translation yet.
-  auto const shouldEmitLiveTranslation = [&] {
-    if (mcgen::retranslateAllPending() && !isProfiling(kind) && profData()) {
-      // When bespokes are enabled, we can't emit live translations until the
-      // bespoke hierarchy is finalized.
-      if (allowBespokeArrayLikes() && !bespoke::Layout::HierarchyFinalized()) {
-        return false;
-      }
-      // Functions that are marked as being profiled or marked as having been
-      // optimized are about to have their translations invalidated during the
-      // publish phase of retranslate all.  Don't allow live translations to be
-      // emitted in this scenario.
-      auto const fid = sk.func()->getFuncId();
-      return !profData()->profiling(fid) &&
-             !profData()->optimized(fid);
+  if (mcgen::retranslateAllPending() && !isProfiling(kind) && profData()) {
+    // When bespokes are enabled, we can't emit live translations until the
+    // bespoke hierarchy is finalized.
+    if (allowBespokeArrayLikes() && !bespoke::Layout::HierarchyFinalized()) {
+      return false;
     }
-    return true;
-  };
+    // Functions that are marked as being profiled or marked as having been
+    // optimized are about to have their translations invalidated during the
+    // publish phase of retranslate all.  Don't allow live translations to be
+    // emitted in this scenario.
+    auto const fid = sk.func()->getFuncId();
+    return !profData()->profiling(fid) &&
+           !profData()->optimized(fid);
+  }
+  return true;
+}
+
+Optional<TranslationResult>
+Translator::acquireLeaseAndRequisitePaperwork() {
   if (!shouldEmitLiveTranslation()) {
     return TranslationResult::failTransiently();
   }
@@ -514,7 +533,8 @@ Translator::acquireLeaseAndRequisitePaperwork() {
     return TranslationResult::failTransiently();
   }
 
-  if (auto const s = shouldTranslate();
+  if (auto const s = shouldTranslate(false /*noTheshold*/,
+                                     false /*noSizeLimit*/);
       s != TranslationResult::Scope::Success) {
     if (s == TranslationResult::Scope::Process) setCachedForProcessFail();
     return TranslationResult{s};
@@ -529,12 +549,13 @@ Translator::acquireLeaseAndRequisitePaperwork() {
   return getCached();
 }
 
-TranslationResult::Scope Translator::shouldTranslate(bool noSizeLimit) {
+TranslationResult::Scope Translator::shouldTranslate(bool noThreshold,
+                                                     bool noSizeLimit) {
   if (kind == TransKind::Invalid) computeKind();
   if (noSizeLimit) {
-    return shouldTranslateNoSizeLimit(sk, kind);
+    return shouldTranslateNoSizeLimit(sk, kind, noThreshold);
   }
-  return ::HPHP::jit::tc::shouldTranslate(sk, kind);
+  return ::HPHP::jit::tc::shouldTranslate(sk, kind, noThreshold);
 }
 
 Optional<TranslationResult>
@@ -567,7 +588,7 @@ Translator::translate(Optional<CodeCache::View> view) {
   // TODO: categorize failure
   if (!vunit) return TranslationResult::failTransiently();
 
-  Timer timer(Timer::mcg_finishTranslation);
+  Timer timer(Timer::mcg_finishTranslation, nullptr);
 
   tracing::Block _b{
     "emit-translation",
@@ -578,7 +599,7 @@ Translator::translate(Optional<CodeCache::View> view) {
 
   auto codeLock = lockCode(false);
   if (!view.has_value()) {
-    if (RuntimeOption::EvalEnableReusableTC) {
+    if (Cfg::Eval::EnableReusableTC) {
       auto const initialSize = 256;
       m_localBuffer = std::make_unique<uint8_t[]>(initialSize);
       m_localTCBuffer =
@@ -594,7 +615,13 @@ Translator::translate(Optional<CodeCache::View> view) {
   // Generate vasm into the code view, retrying if we fill hot.
   while (true) {
     if (!view.has_value() || !view->isLocal()) {
-      view.emplace(code().view(kind));
+      try {
+        view.emplace(code().view(kind));
+      } catch (const DataBlockFull&) {
+        setTcIsFull();
+        reset();
+        return TranslationResult::failForProcess();
+      }
     }
     CGMeta fixups;
     TransLocMaker maker{*view};
@@ -618,7 +645,7 @@ Translator::translate(Optional<CodeCache::View> view) {
         e.setStr("data_block", dbFull.name);
         e.setInt("bytes_dropped", bytes);
       });
-      if (RuntimeOption::ServerExecutionMode()) {
+      if (Cfg::Server::Mode) {
         Logger::Warning("TC area %s filled up!", dbFull.name.c_str());
       }
       reset();
@@ -634,13 +661,13 @@ Translator::translate(Optional<CodeCache::View> view) {
     profData()->setProfiling(sk.func());
   }
 
-  Timer metaTimer(Timer::mcg_finishTranslation_metadata);
+  Timer metaTimer(Timer::mcg_finishTranslation_metadata, nullptr);
   if (unit && unit->logEntry()) {
     auto metaLock = lockMetadata();
     logTranslation(this, transMeta->range);
   }
 
-  if (!RuntimeOption::EvalJitLogAllInlineRegions.empty()) {
+  if (!Cfg::Jit::LogAllInlineRegions.empty()) {
     logFrames(*vunit);
   }
 
@@ -656,7 +683,7 @@ Optional<TranslationResult> Translator::relocate(bool alignMain) {
   // Code emitted directly is relocated during emission (or emitted
   // directly in place).
   if (!transMeta->view.isLocal()) {
-    assertx(!RuntimeOption::EvalEnableReusableTC);
+    assertx(!Cfg::Eval::EnableReusableTC);
     return std::nullopt;
   }
 
@@ -669,22 +696,24 @@ Optional<TranslationResult> Translator::relocate(bool alignMain) {
   RelocationInfo rel;
   {
     auto codeLock = lockCode();
+    std::optional<TransLocMaker> maker;
+    std::optional<CodeCache::View> finalView;
     while (true) {
-      auto finalView = code().view(kind);
-      CodeReuseBlock crb;
-      auto dstView = crb.getMaybeReusedView(finalView, range);
-      auto& srcView = transMeta->view;
-      TransLocMaker maker{dstView};
-
       try {
+        finalView = code().view(kind, &range);
+        CodeReuseBlock crb;
+        auto dstView = crb.getMaybeReusedView(*finalView, range);
+        auto& srcView = transMeta->view;
+
+        maker.emplace(dstView);
         dstView.alignForTranslation(alignMain);
-        maker.markStart();
+        maker->markStart();
         auto origin = range.data;
         if (!origin.empty()) {
           dstView.data().bytes(origin.size(),
                                srcView.data().toDestAddress(origin.begin()));
 
-          auto dest = maker.dataRange();
+          auto dest = maker->dataRange();
           auto oAddr = origin.begin();
           auto dAddr = dest.begin();
           while (oAddr != origin.end()) {
@@ -704,8 +733,13 @@ Optional<TranslationResult> Translator::relocate(bool alignMain) {
         }
 
       } catch (const DataBlockFull& dbFull) {
+        // Set a flag so we quickly bail from trying to generate new
+        // translations next time.
+        setTcIsFull();
         // Rollback so the area can be used by something else.
-        maker.rollback();
+        if (maker) {
+          maker->rollback();
+        }
         auto const bytes = range.main.size() + range.cold.size() +
                            range.frozen.size();
         // There should be few of these.  They mean there is wasted work
@@ -719,14 +753,15 @@ Optional<TranslationResult> Translator::relocate(bool alignMain) {
         reset();
         return TranslationResult::failForProcess();
       }
-      transMeta->range = maker.markEnd();
-      transMeta->view = finalView;
+      transMeta->range = maker->markEnd();
+      transMeta->view = *finalView;
       break;
     }
   }
   adjustForRelocation(rel);
   adjustMetaDataForRelocation(rel, nullptr, fixups);
   adjustCodeForRelocation(rel, fixups);
+  s_transBlocksFull.store(0, std::memory_order_release);
   return std::nullopt;
 }
 
@@ -789,13 +824,47 @@ TranslationResult Translator::publish() {
 
 void Translator::publishMetaInternal() {
   assertx(transMeta.has_value());
-  this->publishMetaImpl();
+  if (!transMeta->fixups.interceptTCAs.empty()) {
+    auto interceptLock = lockGlobalIntercept();
+    for (auto& it : transMeta->fixups.interceptTCAs) {
+      tc::recordInterceptTCA(it.first, it.second);
+    }
+    this->publishMetaImpl();
+  } else {
+    this->publishMetaImpl();
+  }
 }
 
 void Translator::publishCodeInternal() {
   assertx(transMeta.has_value());
   this->publishCodeImpl();
   updateCodeSizeCounters();
+}
+
+void incrementLiveFuncTransBytes(FuncId funcId, uint32_t bytes) {
+  auto const hasLiveTransBytesLimit = Cfg::Jit::FuncLiveTranslationByteLimit != std::numeric_limits<uint32_t>::max();
+  if (!hasLiveTransBytesLimit) return;
+
+  auto prev = g_funcLiveTransBytes[funcId];
+  while (!g_funcLiveTransBytes.assign_if_equal(funcId, prev, prev + bytes)) {
+    prev = g_funcLiveTransBytes[funcId];
+  }
+}
+
+bool tcIsFull() {
+  if (Cfg::Jit::DynamicTCSections) {
+    return s_TCisFull.load(std::memory_order_acquire);
+  }
+
+  return code().main().used() >= Cfg::CodeCache::AMaxUsage ||
+         code().cold().used() >= Cfg::CodeCache::AColdMaxUsage ||
+         code().frozen().used() >= Cfg::CodeCache::AFrozenMaxUsage;
+}
+
+void setTcIsFull() {
+  if (s_transBlocksFull.fetch_add(1, std::memory_order_release) >= kConsecutiveTransBlocksFull - 1) {
+    s_TCisFull.store(true, std::memory_order_release);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

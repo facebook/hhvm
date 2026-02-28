@@ -18,8 +18,9 @@
 
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
-#include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/thread-hint.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/util/configs/debug.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/service-data.h"
 
@@ -77,7 +78,14 @@ struct ServerWorker
 
 protected:
 
-  void doJobImpl(JobPtr job, bool abort) {
+  virtual void doJobImpl(JobPtr job, bool abort) {
+    ThreadHint::getInstance().updateThreadHint(
+      ThreadHint::Priority::FirstFlush);
+    SCOPE_EXIT {
+      ThreadHint::getInstance().updateThreadHint(
+          ThreadHint::Priority::Idling);
+    };
+
     TransportTraits traits(job, this->m_context, this->m_id);
     Server *server = traits.getServer();
     Transport *transport = traits.getTransport();
@@ -126,10 +134,10 @@ protected:
     }
 
     if (error) {
-      if (RuntimeOption::ServerErrorMessage) {
+      if (Cfg::Debug::ServerErrorMessage) {
         transport->sendString(errorMsg, 500);
       } else {
-        transport->sendString(RuntimeOption::FatalErrorMessage, 500);
+        transport->sendString(Cfg::Server::FatalErrorMessage, 500);
       }
       transport->onSendEnd();
     }
@@ -140,4 +148,3 @@ protected:
 };
 
 }
-

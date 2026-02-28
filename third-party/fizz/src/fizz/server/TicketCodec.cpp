@@ -1,0 +1,92 @@
+/*
+ *  Copyright (c) 2018-present, Facebook, Inc.
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
+
+#include <fizz/server/TicketCodec.h>
+#include <folly/io/async/ssl/OpenSSLTransportCertificate.h>
+#include <folly/ssl/OpenSSLCertUtils.h>
+
+namespace fizz {
+std::string toString(fizz::server::CertificateStorage storage) {
+  using fizz::server::CertificateStorage;
+  switch (storage) {
+    case CertificateStorage::None:
+      return "None";
+    case CertificateStorage::X509:
+      return "X509";
+    case CertificateStorage::IdentityOnly:
+      return "IdentityOnly";
+    default:
+      return "Unknown storage";
+  }
+}
+namespace server {
+void appendClientCertificate(
+    CertificateStorage storage,
+    const std::shared_ptr<const Cert>& cert,
+    folly::io::Appender& appender) {
+  Buf clientCertBuf = folly::IOBuf::create(0);
+  CertificateStorage selectedStorage;
+
+  auto serializeIdentity = [&]() {
+    selectedStorage = CertificateStorage::IdentityOnly;
+    clientCertBuf = folly::IOBuf::copyBuffer(cert->getIdentity());
+  };
+
+  auto trySerializeX509 = [&]() {
+    auto opensslCert =
+        dynamic_cast<const folly::OpenSSLTransportCertificate*>(cert.get());
+    if (opensslCert && opensslCert->getX509()) {
+      selectedStorage = CertificateStorage::X509;
+      clientCertBuf =
+          folly::ssl::OpenSSLCertUtils::derEncode(*opensslCert->getX509());
+    } else {
+      serializeIdentity();
+    }
+  };
+
+  if (!cert || storage == CertificateStorage::None) {
+    selectedStorage = CertificateStorage::None;
+  } else if (storage == CertificateStorage::X509) {
+    trySerializeX509();
+  } else {
+    serializeIdentity();
+  }
+  Error err;
+  FIZZ_THROW_ON_ERROR(fizz::detail::write(err, selectedStorage, appender), err);
+  if (selectedStorage != CertificateStorage::None) {
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::writeBuf<uint16_t>(err, clientCertBuf, appender), err);
+  }
+}
+
+std::shared_ptr<const Cert> readClientCertificate(
+    folly::io::Cursor& cursor,
+    const Factory& factory) {
+  CertificateStorage storage;
+  size_t len;
+  Error err;
+  FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, storage, cursor), err);
+  switch (storage) {
+    case CertificateStorage::None:
+      return nullptr;
+    case CertificateStorage::X509: {
+      CertificateEntry certEntry;
+      fizz::detail::readBuf<uint16_t>(certEntry.cert_data, cursor);
+      return factory.makePeerCertFromTicket(std::move(certEntry));
+    }
+    case CertificateStorage::IdentityOnly: {
+      Buf ident;
+      fizz::detail::readBuf<uint16_t>(ident, cursor);
+      return factory.makeIdentityOnlyCert(ident->to<std::string>());
+    }
+  }
+
+  return nullptr;
+}
+} // namespace server
+} // namespace fizz

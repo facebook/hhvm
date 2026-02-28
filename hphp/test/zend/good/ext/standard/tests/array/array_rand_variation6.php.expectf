@@ -1,0 +1,25 @@
+*** Testing array_rand() : with keys of input array as heredoc strings ***
+
+-- with default parameters --
+string(%d) "%A"
+
+-- with num_req = 1 --
+string(%d) "%A"
+
+-- with num_req = 3 --
+vec(3) {
+  string(%d) "%A"
+  string(%d) "%A"
+  string(%d) "%A"
+}
+
+-- with num_req = 6 --
+vec(6) {
+  string(%d) "%A"
+  string(%d) "%A"
+  string(%d) "%A"
+  string(%d) "%A"
+  string(%d) "%A"
+  string(%d) "%A"
+}
+Done

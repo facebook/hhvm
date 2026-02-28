@@ -48,9 +48,21 @@ class ServerClientTestCase
 
     private function spawnWorkerProcess($code)
     {
-        $cmd = sprintf('%s "%s" %s', PHP_BINARY, __FILE__, WORKER_ARGV_VALUE);
+        $cmd = sprintf('%s "%s" %s',
+          HH\__internal\hhvm_binary(),
+          __FILE__,
+          WORKER_ARGV_VALUE
+        );
 
-        $this->workerHandle = proc_open($cmd, varray[varray['pipe', 'r'], varray['pipe', 'w'], STDERR], $pipes);
+        $this->workerHandle = proc_open(
+          $cmd,
+          vec[
+            vec['pipe', 'r'],
+            vec['pipe', 'w'],
+            HH\stderr(),
+          ],
+          $pipes
+        );
         $this->workerStdIn = $pipes[0];
         $this->workerStdOut = $pipes[1];
 
@@ -74,7 +86,7 @@ class ServerClientTestCase
         $code = '';
 
         while (1) {
-            $line = fgets(STDIN);
+            $line = fgets(HH\stdin());
 
             if (trim($line) === "---") {
                 break;
@@ -95,12 +107,12 @@ class ServerClientTestCase
 
     public function wait()
     {
-        fgets($this->isWorker ? STDIN : $this->workerStdOut);
+        fgets($this->isWorker ? HH\stdin() : $this->workerStdOut);
     }
 
     public function notify()
     {
-        fwrite($this->isWorker ? STDOUT : $this->workerStdIn, "\n");
+        fwrite($this->isWorker ? HH\stdout() : $this->workerStdIn, "\n");
     }
 }
 

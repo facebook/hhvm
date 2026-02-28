@@ -14,13 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#pragma once
+#ifndef incl_HPHP_MEMORY_MANAGER_INL_H_
+#error "memory-manager-inl.h should only be included by memory-manager.h"
+#endif
 
 #include <limits>
 #include <utility>
 
+#include "hphp/util/assertions.h"
 #include "hphp/util/bitops.h"
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP {
 
@@ -264,7 +268,8 @@ inline void MemoryManager::freeSmallIndex(void* ptr, size_t index) {
   size_t bytes = sizeIndex2Size(index);
   FTRACE(3, "freeSmallIndex({}, {}), freelist {}\n", ptr, bytes, index);
 
-  assertx(memset(ptr, kSmallFreeFill, bytes));
+  if (debug) debugFreeFill(ptr, bytes);
+
   auto clamped = std::min(index, kNumSmallSizes);
   if (LIKELY(m_freelists[clamped].head != nullptr)) {
     m_freelists[clamped].push(ptr);
@@ -381,11 +386,6 @@ inline bool MemoryManager::empty() const {
 
 inline bool MemoryManager::contains(const void* p) const {
   return m_heap.contains(p);
-}
-
-inline HeapObject* MemoryManager::find(const void* p) {
-  initFree();
-  return m_heap.find(p);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

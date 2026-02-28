@@ -6,6 +6,6 @@ class EC { const X = new stdClass; }
 class C { const X = EC::X; }
 
 <<__EntryPoint>>
-function enum_class03() {
+function enum_class03() :mixed{
   var_dump(C::X); // Exception here.
 }

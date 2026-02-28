@@ -2,7 +2,7 @@
 
 class X {
   private $foo;
-  function foo(inout $b) {
+  function foo(inout $b) :mixed{
     $this->foo = $b;
   }
 }

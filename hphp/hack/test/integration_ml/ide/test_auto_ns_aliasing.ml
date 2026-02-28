@@ -91,22 +91,28 @@ function testTypecheck(): void {
 "
 
 let test () =
-  let global_opts =
-    GlobalOptions.make
-      ~po_auto_namespace_map:[("ShortName", "HH\\LongName\\ShortName")]
-      ~po_deregister_php_stdlib:true
-      ()
+  let po =
+    ParserOptions.
+      {
+        default with
+        auto_namespace_map = [("ShortName", "HH\\LongName\\ShortName")];
+        deregister_php_stdlib = true;
+      }
+  in
+  let global_opts : GlobalOptions.t =
+    GlobalOptions.set
+      ~po
+      ~tco_saved_state:GlobalOptions.default_saved_state
+      GlobalOptions.default
   in
   let custom_config = ServerConfig.default_config in
   let custom_config = ServerConfig.set_tc_options custom_config global_opts in
-  let custom_config =
-    ServerConfig.set_parser_options custom_config global_opts
-  in
-  let env = Test.setup_server ~custom_config () in
-  let env = Test.setup_disk env [("foo.php", foo_contents)] in
+  let custom_config = ServerConfig.set_parser_options custom_config po in
+  Test.Client.with_env ~custom_config:(Some custom_config) @@ fun env ->
+  let env = Test.Client.setup_disk env [("foo.php", foo_contents)] in
   let env =
     let get_name i = "test" ^ string_of_int i ^ ".php" in
-    Test.setup_disk env
+    Test.Client.setup_disk env
     @@ List.mapi
          (fun i contents ->
            let clean_contents =
@@ -124,34 +130,33 @@ let test () =
            autocomplete_contents7;
          ]
   in
-  let env = Test.connect_persistent_client env in
-  let test_legacy env contents expected =
-    let (_, loop_output) = Test.autocomplete env contents in
-    Test.assert_autocomplete loop_output expected
-  in
   let test_ide env contents i expected =
     let path = "test" ^ string_of_int i ^ ".php" in
     let offset =
       String_utils.substring_index AutocompleteTypes.autocomplete_token contents
     in
+    let clean_contents =
+      Str.global_replace (Str.regexp_string "AUTO332") "" contents
+    in
     let position = File_content.offset_to_position contents offset in
-    let line = position.File_content.line in
-    let column = position.File_content.column in
-    let (_, loop_output) = Test.ide_autocomplete env (path, line, column) in
-    Test.assert_ide_autocomplete loop_output expected
+    let (line, column) = File_content.Position.line_column_one_based position in
+    let (env, _diagnostics) = Test.Client.open_file env path in
+    let (env, response) =
+      ClientIdeDaemon.Test.handle
+        env
+        ClientIdeMessage.(
+          Completion
+            ( Test.doc path clean_contents,
+              File_content.Position.from_one_based line column,
+              { is_manually_invoked = true } ))
+    in
+    Test.assert_ide_completions response expected;
+    ignore env;
+    ()
   in
   (* Note that autocomplete now hides namespaces when you've already typed them!
    * This means that all tests will simply return "foo" as long as you're in
    * the correct namespace when autocomplete is triggered. *)
-  test_legacy env autocomplete_contents0 ["foo"];
-  test_legacy env autocomplete_contents1 [""];
-  test_legacy env autocomplete_contents2 ["foo"];
-  test_legacy env autocomplete_contents3 ["foo"];
-  test_legacy env autocomplete_contents4 [""];
-  test_legacy env autocomplete_contents5 ["foo"];
-  test_legacy env autocomplete_contents6 ["foo"];
-  test_legacy env autocomplete_contents7 [""];
-
   test_ide env autocomplete_contents0 0 ["foo"];
   test_ide env autocomplete_contents1 1 [];
   test_ide env autocomplete_contents2 2 ["foo"];

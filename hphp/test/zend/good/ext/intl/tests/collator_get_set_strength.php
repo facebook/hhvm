@@ -9,14 +9,14 @@
  * and check if it's the same.
  */
 function check_set_strength( $coll, $val )
-{
+:mixed{
     ut_coll_set_strength( $coll, $val );
     $new_val = ut_coll_get_strength( $coll );
     return ( $new_val == $val ? "ok" : "failed" ) . "\n";
 }
 
 function ut_main()
-{
+:mixed{
     $res = '';
     $coll = ut_coll_create( 'en_US' );
 

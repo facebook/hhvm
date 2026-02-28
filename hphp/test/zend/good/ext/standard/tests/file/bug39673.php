@@ -2,10 +2,10 @@
 <<__EntryPoint>> function main(): void {
 $str = str_repeat("test", 3456);
 
-$filename = __SystemLib\hphp_test_tmppath('bug39673.txt');
+$filename = sys_get_temp_dir().'/'.'bug39673.txt';
 file_put_contents($filename, $str);
 
-$offsets = varray[
+$offsets = vec[
 	-1,
 	0,
 	3456*4,
@@ -22,6 +22,6 @@ foreach ($offsets as $offset) {
 	var_dump(strlen($r));
 }
 
-@unlink($filename);
+unlink($filename);
 echo "Done\n";
 }

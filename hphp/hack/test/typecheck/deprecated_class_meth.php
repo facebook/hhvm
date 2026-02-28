@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class X {
   <<__Deprecated('use bar() instead')>>
@@ -6,5 +6,5 @@ class X {
 }
 
 function f(): (function(): void) {
-  return class_meth(X::class, 'foo');
+  return X::foo<>;
 }

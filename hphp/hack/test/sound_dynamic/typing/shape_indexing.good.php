@@ -2,7 +2,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 <<__SupportDynamicType>>
-function myfilter<Tv as dynamic >(
+function myfilter<Tv as supportdyn<mixed> >(
   ~Traversable<Tv> $traversable,
   ~?supportdyn<(function (Tv): ~bool)> $value_predicate = null,
 ): ~vec<Tv> {

@@ -6,25 +6,25 @@
  */
 
 class B {
-    public function inherit_pub() {}
-    protected function inherit_prot() {}
-    private function inherit_priv() {}
-    static public function inherit_static_pub() {}
-    static protected function inherit_static_prot() {}
-    static private function inherit_static_priv() {}
+    public function inherit_pub() :mixed{}
+    protected function inherit_prot() :mixed{}
+    private function inherit_priv() :mixed{}
+    static public function inherit_static_pub() :mixed{}
+    static protected function inherit_static_prot() :mixed{}
+    static private function inherit_static_priv() :mixed{}
 }
 
 class C extends B {
-    public function pub() {}
-    protected function prot() {}
-    private function priv() {}
-    static public function static_pub() {}
-    static protected function static_prot() {}
-    static private function static_priv() {}
+    public function pub() :mixed{}
+    protected function prot() :mixed{}
+    private function priv() :mixed{}
+    static public function static_pub() :mixed{}
+    static protected function static_prot() :mixed{}
+    static private function static_priv() :mixed{}
 }
 
-<<__EntryPoint>> function main(): void {
-$methods = varray[
+<<__EntryPoint>> function method_exists_basic_001(): void {
+$methods = vec[
     'inherit_pub', 'inherit_prot', 'inherit_priv',
     'inherit_static_pub', 'inherit_static_prot', 'inherit_static_priv',
     'pub', 'prot', 'priv',

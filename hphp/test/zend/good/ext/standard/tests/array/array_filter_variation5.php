@@ -11,13 +11,13 @@
 
 // callback function always_true
 function always_true($input)
-{
+:mixed{
   return true;
 }
 
 // callback function always_false
 function always_false($input)
-{
+:mixed{
   return false;
 }
 <<__EntryPoint>> function main(): void {
@@ -30,7 +30,7 @@ $empty_heredoc =<<<EOT
 EOT;
 
 // input array with different false elements
-$input = varray[
+$input = vec[
   false,
   False,
   '',
@@ -41,7 +41,7 @@ $input = varray[
   NULL,
   "0",
   '0',
-  varray[],
+  vec[],
   !1,
   1==2,
   $empty_heredoc,

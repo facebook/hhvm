@@ -2,13 +2,13 @@
 
 -- Testing checkdate() function with more than expected no. of arguments --
 
-Warning: checkdate() expects exactly 3 parameters, 4 given in %s/checkdate_error.php on line 19
+Warning: checkdate() expects exactly 3 positional parameters, 4 given in %s/checkdate_error.php on line 19
 
 -- Testing checkdate() function with less than expected no. of arguments --
 
-Warning: checkdate() expects exactly 3 parameters, 0 given in %s/checkdate_error.php on line 22
+Warning: checkdate() expects exactly 3 positional parameters, 0 given in %s/checkdate_error.php on line 22
 
-Warning: checkdate() expects exactly 3 parameters, 1 given in %s/checkdate_error.php on line 23
+Warning: checkdate() expects exactly 3 positional parameters, 1 given in %s/checkdate_error.php on line 23
 
-Warning: checkdate() expects exactly 3 parameters, 2 given in %s/checkdate_error.php on line 24
+Warning: checkdate() expects exactly 3 positional parameters, 2 given in %s/checkdate_error.php on line 24
 ===DONE===

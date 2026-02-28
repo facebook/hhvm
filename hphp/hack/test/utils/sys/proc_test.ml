@@ -1,3 +1,12 @@
+(*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
+ *)
+
+open Hh_prelude
 open Asserter
 
 (*
@@ -119,7 +128,7 @@ let test_get_proc_stat_self () : bool =
   true
 
 let test_get_proc_stack_systemd () : bool =
-  let proc_stack = ok_or_assert (Proc.get_proc_stack 1) in
+  let proc_stack = Proc.get_proc_stack 1 in
   String_asserter.assert_list_equals
     ["/usr/lib/systemd/systemd --switched-root --system --deserialize 30"]
     proc_stack
@@ -127,9 +136,7 @@ let test_get_proc_stack_systemd () : bool =
   true
 
 let test_get_proc_stack_self_max_depth () =
-  let proc_stack =
-    ok_or_assert (Proc.get_proc_stack ~max_depth:2 proc_test_pid.contents)
-  in
+  let proc_stack = Proc.get_proc_stack ~max_depth:2 proc_test_pid.contents in
   String_asserter.assert_list_equals
     [
       "[xarexec] /usr/local/bin/threshold-monitor -tt /mnt/xarfuse/uid-0/456/__run_xar_main__.py";
@@ -140,9 +147,7 @@ let test_get_proc_stack_self_max_depth () =
   true
 
 let test_get_proc_stack_self_max_length () =
-  let proc_stack =
-    ok_or_assert (Proc.get_proc_stack ~max_length:50 proc_test_pid.contents)
-  in
+  let proc_stack = Proc.get_proc_stack ~max_length:50 proc_test_pid.contents in
   String_asserter.assert_list_equals
     [
       "/usr/lib/systemd/systemd --switched-root --system...";
@@ -156,7 +161,7 @@ let test_get_proc_stack_self_max_length () =
   true
 
 let test_get_proc_stack_self () =
-  let proc_stack = ok_or_assert (Proc.get_proc_stack proc_test_pid.contents) in
+  let proc_stack = Proc.get_proc_stack proc_test_pid.contents in
   String_asserter.assert_list_equals
     [
       "/usr/lib/systemd/systemd --switched-root --system --deserialize 30";
@@ -172,8 +177,18 @@ let test_get_proc_stack_self () =
 
 let test_get_proc_stack_non_existent_PID () : bool =
   match Proc.get_proc_stack 9999999 with
-  | Ok _ -> false
-  | Error _ -> true
+  | [msg] when String.is_prefix msg ~prefix:"ERROR" -> true
+  | _ -> false
+
+let test_is_alive () : bool =
+  let pid = Unix.getpid () in
+  (* we need to use a real pid, because "Unix.kill pid" isn't mocked *)
+  create_cmdline pid "cmdline1";
+  assert (Proc.is_alive ~pid ~expected:"cmdline1");
+  assert (Proc.is_alive ~pid ~expected:"");
+  assert (not (Proc.is_alive ~pid ~expected:"cmdline2"));
+  assert (not (Proc.is_alive ~pid:(pid + 1) ~expected:""));
+  true
 
 let tests =
   [
@@ -188,6 +203,7 @@ let tests =
       test_get_proc_stack_self_max_length );
     ( "Test get_proc_stack for a non-existent PID",
       test_get_proc_stack_non_existent_PID );
+    ("test_is_alive", test_is_alive);
   ]
 
 let () =

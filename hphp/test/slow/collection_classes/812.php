@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_812() {
-$m = Map::fromArray(darray['a' => 'foo']);
+function main_812() :mixed{
+$m = Map::fromArray(dict['a' => 'foo']);
 var_dump($m['a']);
 var_dump($m->at('a'));
 var_dump($m->get('a'));

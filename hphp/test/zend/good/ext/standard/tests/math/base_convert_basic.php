@@ -1,8 +1,8 @@
 <?hh <<__EntryPoint>> function main(): void {
-$frombase = varray[2,8,10,16,36];
-$tobase = varray[2,8,10,16,36];
+$frombase = vec[2,8,10,16,36];
+$tobase = vec[2,8,10,16,36];
 
-$values = varray[10,
+$values = vec[10,
                 27,
                 39,
                 03,

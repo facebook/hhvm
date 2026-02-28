@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "hphp/runtime/base/array-key-types.h"
+#include "hphp/runtime/vm/jit/array-iter-profile.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 
@@ -27,37 +29,36 @@ namespace HPHP::jit::irgen {
 // declare functions that take an IRGS& env as input.
 struct IRGS;
 
-// To reduce code size for specialized iters, we share blocks of generated code
-// such as the "dec-ref old outputs; load, inc-ref, and store new ones" block
-// that's part of both IterInit and IterNext.
-//
-// To make it possible to reuse this code, we consider IterInits / IterNexts
-// equivalent if they share the same loop entry block, and we store a map from
-// loop entry block -> SpecializedIterator struct in IRGS. See cpp for details.
-struct SpecializedIterator {
+/*
+ * Represents an information from profiling at IterInit, intersected with known
+ * layout at that time. Used by IterNext to bootstrap its knowledge about the
+ * iterated array, as known information about array specialization in frame
+ * state is lost during irgen due to unprocessed preds while emitting the loop.
+ */
+struct IterProfileInfo {
   ArrayLayout layout;
-  IterSpecialization iter_type;
-  std::vector<IRInstruction*> placeholders;
-  Block* header;
-  Block* footer;
 };
 
-// If this method gens specialized code for an IterInit, it will hide it behind
-// a placeholder, which we'll replace with a Jmp if we see a matching IterNext.
-// Thus, we always need to emit generic code for IterInit as well.
+// Generate specialized code for an IterInit. Returns true iff succeeded, which
+// means we no longer need to emit the generic code.
 //
 // `doneOffset` is the relative offset to jump to if the base has no elements.
-// `baseLocalId` is the base ID for local iters, or kInvalidId for non-local.
-void specializeIterInit(IRGS& env, Offset doneOffset,
-                        const IterArgs& data, uint32_t baseLocalId);
+// `base` is the array base value
+// `baseLocalId` is the local ID the `base` came from
+bool specializeIterInit(IRGS& env, Offset doneOffset,
+                        const IterArgs& data, SSATmp* base,
+                        uint32_t baseLocalId,
+                        ArrayIterProfile::Result profiledResult);
 
 // Returns true on specialization. If it returns true, then we no longer need
 // to emit generic code for this IterNext.
 //
 // `loopOffset` is the relative offset to jump to if the base has more elements.
-// `baseLocalId` is the base ID for local iters, or kInvalidId for non-local.
+// `base` is the array base value
+// `baseLocalId` is the local ID the `base` came from
 bool specializeIterNext(IRGS& env, Offset loopOffset,
-                        const IterArgs& data, uint32_t baseLocalId);
+                        const IterArgs& data, SSATmp* base,
+                        uint32_t baseLocalId);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -18,6 +18,10 @@ external resume_workers : unit -> unit = "hh_resume_workers"
 
 external set_can_worker_stop : bool -> unit = "hh_set_can_worker_stop"
 
+external is_stop_requested : unit -> bool = "hh_should_exit" [@@noalloc]
+
+external raise_if_stop_requested : unit -> unit = "hh_raise_if_should_exit"
+
 let with_no_cancellations_nested = ref false
 
 let with_no_cancellations f =
@@ -28,8 +32,8 @@ let with_no_cancellations f =
     ~f:
       begin
         fun () ->
-        set_can_worker_stop false;
-        f ()
+          set_can_worker_stop false;
+          f ()
       end
     ~finally:(fun () ->
       set_can_worker_stop true;

@@ -1,0 +1,55 @@
+error: Typing[4472] Cannot access class C defined in package pkg2 which may not be available [1]
+-> C is defined in cross_package_function_pointers.php--bar.php [2]
+-> C belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_function_pointers.php--foo.php:4:3
+    2 | // package pkg1 (does not include pkg2)
+    3 | function main(): void {
+[1] 4 |   C::foo<>;
+    5 |   bar<>;
+    6 | }
+
+cross_package_function_pointers.php--bar.php:4:7
+    1 | <?hh
+    2 | // package pkg2
+[3] 3 | <<file: __PackageOverride('pkg2')>>
+[2] 4 | class C {
+    5 |   public static function foo(): void {}
+    6 | }
+
+PACKAGES.toml:3:11
+    1 | [packages]
+    2 |
+[4] 3 | [packages.pkg1]
+    4 | include_paths=["//"]
+    5 |
+
+error: Typing[4472] Cannot access function bar defined in package pkg2 which may not be available [1]
+-> bar is defined in cross_package_function_pointers.php--bar.php [2]
+-> bar belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_function_pointers.php--foo.php:5:3
+    3 | function main(): void {
+    4 |   C::foo<>;
+[1] 5 |   bar<>;
+    6 | }
+
+cross_package_function_pointers.php--bar.php:7:10
+    1 | <?hh
+    2 | // package pkg2
+[3] 3 | <<file: __PackageOverride('pkg2')>>
+    4 | class C {
+    5 |   public static function foo(): void {}
+    6 | }
+[2] 7 | function bar(): void {}
+
+PACKAGES.toml:3:11
+    1 | [packages]
+    2 |
+[4] 3 | [packages.pkg1]
+    4 | include_paths=["//"]
+    5 |
+
+2 errors found

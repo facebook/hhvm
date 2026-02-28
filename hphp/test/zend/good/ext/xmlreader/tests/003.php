@@ -1,7 +1,7 @@
 <?hh
 /* $Id$ */
 <<__EntryPoint>> function main(): void {
-$filename = __SystemLib\hphp_test_tmppath('_003.xml');
+$filename = sys_get_temp_dir().'/'.'_003.xml';
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 <books><book num="1" idx="2">book1</book></books>';
 file_put_contents($filename, $xmlstring);
@@ -13,8 +13,8 @@ if (!$reader->open($filename)) {
 
 // Only go through
 while ($reader->read()) {
-    if ($reader->nodeType != XMLREADER::END_ELEMENT) {
-        if ($reader->nodeType == XMLREADER::ELEMENT && $reader->hasAttributes) {
+    if ($reader->nodeType != XMLReader::END_ELEMENT) {
+        if ($reader->nodeType == XMLReader::ELEMENT && $reader->hasAttributes) {
             $attr = $reader->moveToFirstAttribute();
             echo $reader->name . ": ";
             echo $reader->value . "\n";

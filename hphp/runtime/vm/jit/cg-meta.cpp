@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
 
-#include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -25,27 +23,31 @@
 #include "hphp/runtime/vm/tread-hash-map.h"
 
 #include "hphp/util/atomic-vector.h"
+#include "hphp/util/roar.h"
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(mcg);
+TRACE_SET_MOD(mcg)
+
+extern "C" __attribute__((weak))
+int __roar_api_flag_safe_function_call_site(void*, void*);
 
 namespace {
 
 std::atomic<IFrameID> s_nextFrameKey;
 
 // Map from integral literals to their location in the TC data section.
-using LiteralMap = TreadHashMap<uint64_t,const uint64_t*,std::hash<uint64_t>>;
+using LiteralMap = TreadHashMap<uint64_t, const uint64_t*, uint64_hash>;
 LiteralMap s_literals{128};
 
 // Landingpads for TC catch traces; used by the unwinder.
-using CatchTraceMap = TreadHashMap<uint32_t, uint32_t, std::hash<uint32_t>>;
+using CatchTraceMap = TreadHashMap<uint32_t, uint32_t, uint32_hash>;
 CatchTraceMap s_catchTraceMap{128};
 
-using AbortReasonMap = TreadHashMap<uint32_t, Reason, std::hash<uint32_t>>;
+using AbortReasonMap = TreadHashMap<uint32_t, Reason, uint32_hash>;
 AbortReasonMap s_trapReasonMap{128};
 
-using InlineStackMap = TreadHashMap<uint32_t, IStack, std::hash<uint32_t>>;
+using InlineStackMap = TreadHashMap<uint32_t, IStack, uint32_hash>;
 InlineStackMap s_inlineStacks{1024};
 
 using InlineFrameVec = AtomicVector<IFrame>;
@@ -85,11 +87,9 @@ void insertStacks(
   IFrameID start, const std::vector<std::pair<TCA,IStack>>& stacks
 ) {
   for (auto& stk : stacks) {
-    assertx(stk.second.frame != stk.second.pubFrame);
     auto off = stackAddrToOffset(stk.first);
     auto val = stk.second;
     val.frame += start;
-    if (val.pubFrame != kRootIFrameID) val.pubFrame += start;
 
     if (auto pos = s_inlineStacks.find(off)) {
       *pos = val;
@@ -103,6 +103,8 @@ void processInlineFrames(const CGMeta& cm) {
   auto const start = insertFrames(cm.inlineFrames);
   insertStacks(start, cm.inlineStacks);
 }
+
+static auto s_trace_counter = ServiceData::createCounter("admin.catch-traces");
 
 }
 
@@ -148,6 +150,7 @@ size_t numCatchTraces() {
 void eraseCatchTrace(CTCA addr) {
   if (auto ct = s_catchTraceMap.find(tc::addrToOffset(addr))) {
     *ct = kInvalidCatchTrace;
+    s_trace_counter->decrement();
   }
 }
 
@@ -196,6 +199,10 @@ void CGMeta::setCallFuncId(TCA callRetAddr, FuncId funcId, TransKind kind) {
   callFuncIds.emplace_back(callRetAddr, funcId);
 }
 
+void CGMeta::setInterceptJccTCA(TCA jccAddr, FuncId funcId) {
+  interceptTCAs.emplace_back(funcId, jccAddr);
+}
+
 void CGMeta::process(
   GrowableVector<IncomingBranch>* inProgressTailBranches
 ) {
@@ -220,6 +227,12 @@ void CGMeta::process_only(
 ) {
   tc::assertOwnsMetadataLock();
 
+  for (auto const& pair : trapFixups) {
+    assertx(tc::isValidCodeAddress(pair.first));
+    FixupMap::recordFixup(pair.first, pair.second);
+  }
+  trapFixups.clear();
+
   for (auto const& pair : fixups) {
     assertx(tc::isValidCodeAddress(pair.first));
     FixupMap::recordFixup(pair.first, pair.second);
@@ -237,6 +250,7 @@ void CGMeta::process_only(
       *pos = val;
     } else {
       s_catchTraceMap.insert(key, val);
+      s_trace_counter->increment();
     }
   }
   catches.clear();
@@ -262,6 +276,18 @@ void CGMeta::process_only(
   }
   trapReasons.clear();
 
+  if (use_roar && __roar_api_flag_safe_function_call_site) {
+    for (auto const& nc : nativeCalls) {
+      const int retval = __roar_api_flag_safe_function_call_site(nc.first, nc.second);
+
+      if (Trace::moduleEnabledRelease(Trace::mcg, 5)) {
+        Trace::ftraceRelease("ROAR: registering native call @ {} to {}, "
+                             "__roar_api_flag_safe_function_call_site returned = {}\n",
+                             nc.first, nc.second, retval);
+      }
+    }
+  }
+
   process_literals();
 
   if (inProgressTailBranches) {
@@ -278,6 +304,7 @@ void CGMeta::clear() {
   inlineStacks.clear();
   jmpTransIDs.clear();
   callFuncIds.clear();
+  interceptTCAs.clear();
   literalsToPool.clear();
   literalAddrs.clear();
   veneers.clear();
@@ -289,6 +316,7 @@ void CGMeta::clear() {
   bcMap.clear();
   smashableBinds.clear();
   smashableCallData.clear();
+  nativeCalls.clear();
 }
 
 bool CGMeta::empty() const {
@@ -300,6 +328,7 @@ bool CGMeta::empty() const {
     inlineStacks.empty() &&
     jmpTransIDs.empty() &&
     callFuncIds.empty() &&
+    interceptTCAs.empty() &&
     literalsToPool.empty() &&
     literalAddrs.empty() &&
     veneers.empty() &&
@@ -310,7 +339,8 @@ bool CGMeta::empty() const {
     inProgressTailJumps.empty() &&
     bcMap.empty() &&
     smashableBinds.empty() &&
-    smashableCallData.empty();
+    smashableCallData.empty() &&
+    nativeCalls.empty();
 }
 
 }

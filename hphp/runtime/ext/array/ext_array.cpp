@@ -17,32 +17,26 @@
 
 #include "hphp/runtime/ext/array/ext_array.h"
 
-#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/sort-flags.h"
-#include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
-#include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
-#include "hphp/runtime/ext/generator/ext_generator.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/coeffects.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/util/configs/php7.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/rds-local.h"
 
@@ -200,7 +194,7 @@ TypedValue HHVM_FUNCTION(array_column,
   int64_t nextKI = 0; // for appends
   for (ArrayIter it(arr_input); it; ++it) {
     Array sub;
-    if (UNLIKELY(RuntimeOption::PHP7_Builtins && it.second().isObject())) {
+    if (UNLIKELY(Cfg::PHP7::Builtins && it.second().isObject())) {
       sub = it.second().toObject().get()->toArray<IntishCast::Cast>();
     } else if (it.second().isArray()) {
       sub = it.second().toArray();
@@ -307,11 +301,7 @@ Array HHVM_FUNCTION(array_fill_keys,
       if (isIntType(v.m_type) || isStringType(v.m_type)) {
         ai->setUnknownKey<IntishCast::Cast>(v, value);
       } else {
-        raise_hack_strict(RuntimeOption::StrictArrayFillKeys,
-                          "strict_array_fill_keys",
-                          "keys must be ints or strings");
-        ai->setUnknownKey<IntishCast::Cast>(
-          tvCastToString(v).asTypedValue(), value);
+        raise_error("keys must be ints or strings");
       }
     },
     [&](ObjectData* coll) {
@@ -406,6 +396,7 @@ bool HHVM_FUNCTION(array_key_exists,
 
   auto const cell = key.asTypedValue();
 
+  auto const op = "array_key_exists";
   switch (cell->m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -425,12 +416,14 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfResource:
     case KindOfRFunc:
     case KindOfFunc:
+    case KindOfEnumClassLabel:
       throwInvalidArrayKeyException(cell, ad);
 
     case KindOfClass:
-      return ad->exists(StrNR(classToStringHelper(cell->m_data.pclass)));
+      return ad->exists(StrNR(classToStringHelper(cell->m_data.pclass, op)));
     case KindOfLazyClass:
-      return ad->exists(StrNR(lazyClassToStringHelper(cell->m_data.plazyclass)));
+      return ad->exists(StrNR(lazyClassToStringHelper(cell->m_data.plazyclass,
+                                                      op)));
 
     case KindOfPersistentString:
     case KindOfString: {
@@ -464,12 +457,6 @@ TypedValue HHVM_FUNCTION(array_keys,
 }
 
 namespace {
-
-void php_array_merge(Array& arr1, const Array& arr2) {
-  assertx(arr1->isVanillaDict());
-  arr1.reset(!arr2.empty() ? VanillaDict::Merge(arr1.get(), arr2.get())
-                           : VanillaDict::Renumber(arr1.get()));
-}
 
 void php_array_merge_recursive(Array& arr1, const Array& arr2) {
   for (ArrayIter iter(arr2); iter; ++iter) {
@@ -530,7 +517,7 @@ TypedValue HHVM_FUNCTION(array_map,
     for (ArrayIter iter(arr1); iter; ++iter) {
       auto const arg = iter.secondValPlus();
       auto result =
-        g_context->invokeFuncFew(ctx, 1, &arg, RuntimeCoeffects::fixme());
+        g_context->invokeFuncFew(ctx, 1, nullptr, &arg, RuntimeCoeffects::fixme());
       // if keyConverted is false, it's possible that ret will have fewer
       // elements than cell_arr1; keys int(1) and string('1') may both be
       // present
@@ -572,7 +559,7 @@ TypedValue HHVM_FUNCTION(array_map,
     Array params = params_ai.toArray();
     if (ctx.func) {
       auto result = Variant::attach(
-        g_context->invokeFunc(ctx, params, RuntimeCoeffects::fixme())
+        g_context->invokeFunc(ctx, params, nullptr, RuntimeCoeffects::fixme())
       );
       ret_ai.append(result);
     } else {
@@ -580,34 +567,6 @@ TypedValue HHVM_FUNCTION(array_map,
     }
   }
   return tvReturn(ret_ai.toVariant());
-}
-
-TypedValue HHVM_FUNCTION(array_merge,
-                         const Variant& array1,
-                         const Array& arrays /* = null array */) {
-  getCheckedContainer(array1);
-  Array ret = Array::CreateDict();
-  php_array_merge(ret, arr_array1);
-
-  bool success = true;
-  IterateV(
-    arrays.get(),
-    [&](TypedValue v) -> bool {
-      if (!tvIsArrayLike(v)) {
-        raise_expected_array_warning("array_merge");
-        success = false;
-        return true;
-      }
-
-      php_array_merge(ret, asCArrRef(&v));
-      return false;
-    }
-  );
-
-  if (UNLIKELY(!success)) {
-    return make_tv<KindOfNull>();
-  }
-  return tvReturn(std::move(ret));
 }
 
 TypedValue HHVM_FUNCTION(array_merge_recursive,
@@ -802,6 +761,7 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfLazyClass:
       case KindOfClsMeth:
       case KindOfRClsMeth:
+      case KindOfEnumClassLabel:
         continue;
     }
     not_reached();
@@ -817,6 +777,7 @@ DOUBLE:
       DT_UNCOUNTED_CASE:
       case KindOfString:
         d *= tvCastToDouble(tv);
+        continue;
 
       case KindOfVec:
       case KindOfDict:
@@ -1079,6 +1040,7 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfLazyClass:
       case KindOfClsMeth:
       case KindOfRClsMeth:
+      case KindOfEnumClassLabel:
         continue;
     }
     not_reached();
@@ -1094,6 +1056,7 @@ DOUBLE:
       DT_UNCOUNTED_CASE:
       case KindOfString:
         d += tvCastToDouble(tv);
+        continue;
 
       case KindOfVec:
       case KindOfDict:
@@ -1267,6 +1230,7 @@ int64_t HHVM_FUNCTION(count,
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return 1;
 
     case KindOfPersistentVec:
@@ -1289,7 +1253,7 @@ int64_t HHVM_FUNCTION(count,
         if (obj->isCollection()) {
           return collections::getSize(obj.get());
         }
-        if (obj.instanceof(SystemLib::s_CountableClass)) {
+        if (obj.instanceof(SystemLib::getCountableClass())) {
           return obj->o_invoke_few_args(s_count, RuntimeCoeffects::fixme(), 0).toInt64();
         }
       }
@@ -1435,7 +1399,7 @@ TypedValue HHVM_FUNCTION(range,
 
 static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
   auto callback = static_cast<const Variant*>(data);
-  return vm_call_user_func(*callback, make_vec_array(v1, v2)).toInt32();
+  return (int)vm_call_user_func(*callback, make_vec_array(v1, v2)).toInt64();
 }
 
 #define COMMA ,
@@ -1510,16 +1474,6 @@ static void containerValuesToSetHelper(const req::ptr<c_Set>& st,
   for (ArrayIter iter(container); iter; ++iter) {
     auto const c = iter.secondValPlus();
     addToSetHelper(st, c, strTv, true);
-  }
-}
-
-static void containerKeysToSetHelper(const req::ptr<c_Set>& st,
-                                     const Variant& container) {
-  Variant strHolder(empty_string_variant());
-  TypedValue* strTv = strHolder.asTypedValue();
-  bool convertIntLikeStrs = !isArrayLikeType(container.asTypedValue()->m_type);
-  for (ArrayIter iter(container); iter; ++iter) {
-    addToSetHelper(st, *iter.first().asTypedValue(), strTv, convertIntLikeStrs);
   }
 }
 
@@ -2078,44 +2032,6 @@ static void containerValuesIntersectHelper(const req::ptr<c_Set>& st,
   }
 }
 
-static void containerKeysIntersectHelper(const req::ptr<c_Set>& st,
-                                         TypedValue* containers,
-                                         int count) {
-  assertx(count >= 2);
-  auto mp = req::make<c_Map>();
-  Variant strHolder(empty_string_variant());
-  TypedValue* strTv = strHolder.asTypedValue();
-  TypedValue intOneTv = make_tv<KindOfInt64>(1);
-  bool convertIntLikeStrs = !isArrayLikeType(containers[0].m_type);
-  for (ArrayIter iter(tvAsCVarRef(&containers[0])); iter; ++iter) {
-    auto key = iter.first();
-    const auto& c = *key.asTypedValue();
-    // For each key k in containers[0], we add the key/value pair (k, 1)
-    // to the map. If a key (after various conversions) occurs more than
-    // once in the container, we'll simply overwrite the old entry and
-    // that's fine.
-    addToIntersectMapHelper(mp, c, &intOneTv, strTv, convertIntLikeStrs);
-  }
-  for (int pos = 1; pos < count; ++pos) {
-    convertIntLikeStrs = !isArrayLikeType(containers[pos].m_type);
-    for (ArrayIter iter(tvAsCVarRef(&containers[pos])); iter; ++iter) {
-      auto key = iter.first();
-      const auto& c = *key.asTypedValue();
-      updateIntersectMapHelper(mp, c, pos, strTv, convertIntLikeStrs);
-    }
-  }
-  for (ArrayIter iter(mp.get()); iter; ++iter) {
-    // For each key in the map, we copy the key to the set if the
-    // corresponding value is equal to pos exactly (which means it
-    // was present in all of the containers).
-    auto const tv = iter.secondValPlus();
-    assertx(type(tv) == KindOfInt64);
-    if (val(tv).num == count) {
-      st->add(*iter.first().asTypedValue());
-    }
-  }
-}
-
 TypedValue HHVM_FUNCTION(array_intersect,
                          const Variant& container1,
                          const Variant& container2,
@@ -2503,6 +2419,17 @@ struct ArraySortTmp {
     if (!old->isVanilla()) {
       m_ad = BespokeArray::PostSort(old, m_ad);
     }
+
+    // Do not update the inout value if we are throwing an exception. Builtins
+    // receive inout values by a TV pointer. The JIT expects that the inout
+    // value will not be updated if the builtin throws. For example, it assumes
+    // that the type remains the same and if an exception is thrown, it uses the
+    // corresponding destructor.
+    if (folly::uncaught_exceptions() > m_excCount) {
+      if (m_ad != old) decRefArr(m_ad);
+      return;
+    }
+
     if (m_ad != old) {
       tvMove(make_array_like_tv(m_ad), m_tv);
     }
@@ -2518,6 +2445,7 @@ struct ArraySortTmp {
  private:
   TypedValue* m_tv;
   ArrayData* m_ad;
+  int m_excCount{folly::uncaught_exceptions()};
 };
 }
 
@@ -2787,7 +2715,9 @@ TypedValue HHVM_FUNCTION(hphp_array_idx,
       auto const index = key.toKey(arr).tv();
       if (!isNullType(index.m_type)) {
         auto const ret = arr->get(index, false);
-        return tvReturn(ret.is_init() ? tvAsCVarRef(ret) : def);
+        if (ret.is_init()) {
+          return tvReturn(tvAsCVarRef(ret));
+        }
       }
     } else {
       raise_error("hphp_array_idx: search must be an array");
@@ -3005,6 +2935,7 @@ Array HHVM_FUNCTION(HH_darray, const Variant& input) {
 }
 
 TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
+  auto const op = "array_key_cast";
   switch (input.getType()) {
     case KindOfPersistentString:
     case KindOfString: {
@@ -3022,9 +2953,10 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
       );
 
     case KindOfClass:
-      return tvReturn(StrNR(classToStringHelper(input.toClassVal())));
+      return tvReturn(StrNR(classToStringHelper(input.toClassVal(), op)));
     case KindOfLazyClass:
-      return tvReturn(StrNR(lazyClassToStringHelper(input.toLazyClassVal())));
+      return tvReturn(StrNR(lazyClassToStringHelper(input.toLazyClassVal(),
+                                                    op)));
 
     case KindOfInt64:
     case KindOfBoolean:
@@ -3067,6 +2999,10 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
       SystemLib::throwInvalidArgumentExceptionObject(
         "Reified functions cannot be cast to an array key"
       );
+    case KindOfEnumClassLabel:
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Enum Class Labels cannot be cast to an array key"
+      );
   }
   not_reached();
 }
@@ -3099,8 +3035,8 @@ Array HHVM_FUNCTION(merge_xhp_attr_declarations,
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ArrayExtension final : Extension {
-  ArrayExtension() : Extension("array") {}
-  void moduleInit() override {
+  ArrayExtension() : Extension("array", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  void moduleRegisterNative() override {
     HHVM_RC_INT_SAME(UCOL_DEFAULT);
 
     HHVM_RC_INT_SAME(UCOL_PRIMARY);
@@ -3127,9 +3063,6 @@ struct ArrayExtension final : Extension {
     HHVM_RC_INT_SAME(UCOL_STRENGTH);
     HHVM_RC_INT_SAME(UCOL_HIRAGANA_QUATERNARY_MODE);
     HHVM_RC_INT_SAME(UCOL_NUMERIC_COLLATION);
-
-    HHVM_RC_INT(ARRAY_FILTER_USE_BOTH, 1);
-    HHVM_RC_INT(ARRAY_FILTER_USE_KEY, 2);
 
     HHVM_RC_INT(CASE_LOWER, static_cast<int64_t>(CaseMode::LOWER));
     HHVM_RC_INT(CASE_UPPER, static_cast<int64_t>(CaseMode::UPPER));
@@ -3162,7 +3095,6 @@ struct ArrayExtension final : Extension {
     HHVM_FE(array_keys);
     HHVM_FALIAS(__SystemLib\\array_map, array_map);
     HHVM_FE(array_merge_recursive);
-    HHVM_FE(array_merge);
     HHVM_FE(array_replace_recursive);
     HHVM_FE(array_replace);
     HHVM_FE(array_pad);
@@ -3234,8 +3166,6 @@ struct ArrayExtension final : Extension {
     HHVM_FALIAS(HH\\array_key_cast, HH_array_key_cast);
     HHVM_FALIAS(__SystemLib\\merge_xhp_attr_declarations,
                 merge_xhp_attr_declarations);
-
-    loadSystemlib();
   }
 } s_array_extension;
 

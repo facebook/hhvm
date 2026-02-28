@@ -1,0 +1,24 @@
+string(1) "E"
+=> parameter
+
+Notice: String passed to class type-hint in %s/class-ptr/enum-hint-basic.php on line 15
+lazyclass(E)
+=> parameter
+
+Notice: Class passed to classname type-hint in %s/class-ptr/enum-hint-basic.php on line 16
+class(E)
+=> parameter
+
+Notice: Class passed to classname type-hint in %s/class-ptr/enum-hint-basic.php on line 16
+Laundering string(1) "E"
+=> parameter
+
+Notice: String passed to class type-hint in %s/class-ptr/enum-hint-basic.php on line 15
+Laundering lazyclass(E)
+=> parameter
+
+Notice: Class passed to classname type-hint in %s/class-ptr/enum-hint-basic.php on line 16
+Laundering class(E)
+=> parameter
+
+Notice: Class passed to classname type-hint in %s/class-ptr/enum-hint-basic.php on line 16

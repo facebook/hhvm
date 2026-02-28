@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_apis_taking_null() {
+function main_apis_taking_null() :mixed{
 $x = new Vector(null);
 var_dump($x);
 $x->addAll(null);

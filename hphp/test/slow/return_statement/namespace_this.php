@@ -10,7 +10,7 @@ class Foo {
 
 
 <<__EntryPoint>>
-function main_namespace_this() {
+function main_namespace_this() :mixed{
 $foo = new Foo();
 \var_dump($foo->foo());
 }

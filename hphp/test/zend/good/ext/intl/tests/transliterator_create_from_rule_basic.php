@@ -4,8 +4,8 @@ function entrypoint_transliterator_create_from_rule_basic(): void {
   ini_set("intl.error_level", E_WARNING);
 
   $rules = <<<RULES
-α <> y;
-\`\` } a > “;
+\xce\xb1 <> y;
+\`\` } a > \xe2\x80\x9c;
 RULES;
 
   $t = Transliterator::createFromRules($rules);

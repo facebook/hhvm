@@ -21,9 +21,6 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/rds-header.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/tv-mutate.h"
-#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/vm/class.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
@@ -31,33 +28,31 @@
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/asm-x64.h"
-#include "hphp/util/abi-cxx.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/immed.h"
-#include "hphp/util/low-ptr.h"
 #include "hphp/util/ringbuffer.h"
-#include "hphp/util/thread-local.h"
+#include "hphp/util/roar.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void assertSFNonNegative(Vout& v, Vreg sf, Reason reason) {
-  if (!RuntimeOption::EvalHHIRGenerateAsserts) return;
-  ifThen(v, CC_NGE, sf, [&] (Vout& v) { v << trap{reason}; });
+  if (!Cfg::HHIR::GenerateAsserts) return;
+  ifThen(v, CC_NGE, sf, [&] (Vout& v) { v << trap{reason, Fixup::none()}; });
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -92,20 +87,29 @@ void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref) {
   }
 }
 
-void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size) {
-  if (size == 8) {
+void ldLowPtrImpl(Vout& v, Vptr mem, Vreg reg, size_t size) {
+  if (size == 64) {
     v << load{mem, reg};
-  } else if (size == 4) {
+  } else if (size == 35) {
+    auto packed = v.makeReg();
+    v << loadzlq{mem, packed};
+    v << lea{baseless(packed * 8 + 0), reg};
+  } else if (size == 32) {
     v << loadzlq{mem, reg};
   } else {
     not_implemented();
   }
 }
 
-void emitStLowPtr(Vout& v, Vreg reg, Vptr mem, size_t size) {
-  if (size == 8) {
+void stLowPtrImpl(Vout& v, Vreg reg, Vptr mem, size_t size) {
+  if (size == 64) {
     v << store{reg, mem};
-  } else if (size == 4) {
+  } else if (size == 35) {
+    auto shifted = v.makeReg();
+    v << shrqi{3, reg, shifted, v.makeReg()};
+    auto const temp = emitMovtql(v, shifted);
+    v << storel{temp, mem};
+  } else if (size == 32) {
     auto const temp = emitMovtql(v, reg);
     v << storel{temp, mem};
   } else {
@@ -162,7 +166,7 @@ void storeTVVal(Vout& v, Type type, Vloc srcLoc, Vptr valPtr) {
 }
 
 void storeTVType(Vout& v, Type type, Vloc srcLoc, Vptr typePtr, bool aux) {
-  if (type.needsReg() || aux) {
+  if (type.needsReg()) {
     assertx(srcLoc.hasReg(1));
     if (aux) {
       v << store{srcLoc.reg(1), typePtr};
@@ -170,7 +174,11 @@ void storeTVType(Vout& v, Type type, Vloc srcLoc, Vptr typePtr, bool aux) {
       v << storeb{srcLoc.reg(1), typePtr};
     }
   } else {
-    v << storeb{v.cns(type.toDataType()), typePtr};
+    if (aux) {
+      v << store{v.cns(type.toDataType()), typePtr};
+    } else {
+      v << storeb{v.cns(type.toDataType()), typePtr};
+    }
   }
 }
 
@@ -184,7 +192,7 @@ void storeTV(Vout& v, Type type, Vloc srcLoc,
              Vptr typePtr, Vptr valPtr, bool aux) {
   if (srcLoc.isFullSIMD()) {
     // The whole TV is stored in a single SIMD reg.
-    assertx(RuntimeOption::EvalHHIRAllocSIMDRegs);
+    assertx(Cfg::HHIR::AllocSIMDRegs);
     always_assert(typePtr == valPtr + (TVOFF(m_type) - TVOFF(m_data)));
     v << storeups{srcLoc.reg(), valPtr};
     return;
@@ -236,7 +244,7 @@ void loadTV(Vout& v, Type type, Vloc dstLoc, Vptr typePtr, Vptr valPtr,
             bool aux) {
   if (dstLoc.isFullSIMD()) {
     // The whole TV is loaded into a single SIMD reg.
-    assertx(RuntimeOption::EvalHHIRAllocSIMDRegs);
+    assertx(Cfg::HHIR::AllocSIMDRegs);
     always_assert(typePtr == valPtr + (TVOFF(m_type) - TVOFF(m_data)));
     v << loadups{valPtr, dstLoc.reg()};
     return;
@@ -336,12 +344,12 @@ void emitAssertRefCount(Vout& v, Vreg data, Reason reason) {
 
   ifThen(v, CC_NLE, sf, [&] (Vout& v) {
     auto const sf = emitCmpRefCount(v, RefCountMaxRealistic, data);
-    ifThen(v, CC_NBE, sf, [&] (Vout& v) { v << trap{reason}; });
+    ifThen(v, CC_NBE, sf, [&] (Vout& v) { v << trap{reason, Fixup::none()}; });
   });
 }
 
 void emitIncRef(Vout& v, Vreg base, Reason reason) {
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (Cfg::HHIR::GenerateAsserts) {
     emitAssertRefCount(v, base, reason);
   }
 
@@ -418,7 +426,14 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
 
   switch (target.kind()) {
     case K::Direct:
-      v << call{static_cast<TCA>(target.address()), args};
+      // When using ROAR, we emit all native calls as smashable ones via the
+      // fallthru below, so that ROAR can patch them when it re-JITs native
+      // functions.
+      if (use_roar) {
+        v << calls{static_cast<TCA>(target.address()), args};
+      } else {
+        v << call{static_cast<TCA>(target.address()), args};
+      }
       return;
 
     case K::Smashable:
@@ -432,11 +447,11 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
 
     case K::ObjDestructor: {
       auto const func = v.makeReg();
-      emitLdLowPtr(
+      ldLowPtrImpl(
         v,
         target.reg()[Class::releaseFuncOff()],
         func,
-        sizeof(ObjReleaseFunc)
+        ObjReleaseFunc::bits
       );
       v << callr{func, args};
     } return;
@@ -471,15 +486,17 @@ Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsQuad) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Vreg emitLdObjClass(Vout& v, Vreg obj, Vreg d) {
-  emitLdLowPtr(v, obj[ObjectData::getVMClassOffset()], d,
-               sizeof(LowPtr<Class>));
+  emitLdPackedPtr<Class>(v, obj[ObjectData::getVMClassOffset()], d);
   return d;
 }
 
 void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vptr mem, size_t size) {
-  if (size == 8) {
+  if (size == 64) {
     v << cmpqm{v.cns(ptr), mem, sf};
-  } else if (size == 4) {
+  } else if (size == 35) {
+    auto const ptrImm = safe_cast<uint32_t>(reinterpret_cast<intptr_t>(ptr) >> 3);
+    v << cmplm{v.cns(ptrImm), mem, sf};
+  } else if (size == 32) {
     auto const ptrImm = safe_cast<uint32_t>(reinterpret_cast<intptr_t>(ptr));
     v << cmplm{v.cns(ptrImm), mem, sf};
   } else {
@@ -487,10 +504,26 @@ void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vptr mem, size_t size) {
   }
 }
 
+void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vreg reg, size_t size) {
+  if (size == 64 || size == 35) {
+    v << cmpq{v.cns(ptr), reg, sf};
+  } else if (size == 32) {
+    auto const ptrImm = safe_cast<uint32_t>(reinterpret_cast<intptr_t>(ptr));
+    v << cmpl{v.cns(ptrImm), reg, sf};
+  } else {
+    not_implemented();
+  }
+}
+
 void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg, Vptr mem, size_t size) {
-  if (size == 8) {
+  if (size == 64) {
     v << cmpqm{reg, mem, sf};
-  } else if (size == 4) {
+  } else if (size == 35) {
+    auto shifted = v.makeReg();
+    v << shrqi{3, reg, shifted, v.makeReg()};
+    auto low = emitMovtql(v, shifted);
+    v << cmplm{low, mem, sf};
+  } else if (size == 32) {
     auto low = emitMovtql(v, reg);
     v << cmplm{low, mem, sf};
   } else {
@@ -499,23 +532,12 @@ void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg, Vptr mem, size_t size) {
 }
 
 void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg1, Vreg reg2, size_t size) {
-  if (size == 8) {
+  if (size == 64 || size == 35) {
     v << cmpq{reg1, reg2, sf};
-  } else if (size == 4) {
+  } else if (size == 32) {
     auto const l1 = emitMovtql(v, reg1);
     auto const l2 = emitMovtql(v, reg2);
     v << cmpl{l1, l2, sf};
-  } else {
-    not_implemented();
-  }
-}
-
-void emitCmpVecLen(Vout& v, Vreg sf, Immed val, Vptr mem) {
-  auto const size = sizeof(Class::veclen_t);
-  if (size == 2) {
-    v << cmpwim{val, mem, sf};
-  } else if (size == 4) {
-    v << cmplim{val, mem, sf};
   } else {
     not_implemented();
   }

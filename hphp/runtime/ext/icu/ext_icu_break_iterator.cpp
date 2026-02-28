@@ -6,11 +6,7 @@ using icu::RuleBasedBreakIterator;
 namespace HPHP::Intl {
 
 const StaticString
-  s_IntlBreakIterator("IntlBreakIterator"),
-  s_IntlCodePointBreakIterator("IntlCodePointBreakIterator");
-
-Class* IntlBreakIterator::c_IntlBreakIterator = nullptr;
-Class* IntlBreakIterator::c_IntlCodePointBreakIterator = nullptr;
+  s_IntlBreakIterator("IntlBreakIterator");
 
 //////////////////////////////////////////////////////////////////////////////
 // class IntlBreakIterator
@@ -35,6 +31,17 @@ inline Object ibi_create(const char *funcname,
   return IntlBreakIterator::newInstance(bi);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// class IntlCodePointBreakIterator
+
+Object IntlCodePointBreakIterator::newInstance(CodePointBreakIterator* bi) {
+  Object obj{ classof() };
+  if (bi) {
+    Native::data<IntlBreakIterator>(obj)->setBreakIterator(bi);
+  }
+  return obj;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 static Object HHVM_STATIC_METHOD(IntlBreakIterator, createCharacterInstance,
@@ -45,7 +52,7 @@ static Object HHVM_STATIC_METHOD(IntlBreakIterator, createCharacterInstance,
 }
 
 static Object HHVM_STATIC_METHOD(IntlBreakIterator, createCodePointInstance) {
-  return IntlBreakIterator::newCodePointInstance(new CodePointBreakIterator());
+  return IntlCodePointBreakIterator::newInstance(new CodePointBreakIterator());
 }
 
 static Object HHVM_STATIC_METHOD(IntlBreakIterator, createLineInstance,
@@ -365,7 +372,7 @@ static Object HHVM_METHOD(IntlPartsIterator, getBreakIterator) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initBreakIterator() {
+void IntlExtension::registerNativeBreakIterator() {
   HHVM_STATIC_ME(IntlBreakIterator, createCharacterInstance);
   HHVM_STATIC_ME(IntlBreakIterator, createCodePointInstance);
   HHVM_STATIC_ME(IntlBreakIterator, createLineInstance);
@@ -424,9 +431,7 @@ void IntlExtension::initBreakIterator() {
   HHVM_RCC_INT(IntlBreakIterator, SENTENCE_SEP, UBRK_SENTENCE_SEP);
   HHVM_RCC_INT(IntlBreakIterator, SENTENCE_SEP_LIMIT, UBRK_SENTENCE_SEP_LIMIT);
 
-  Native::registerNativeDataInfo<IntlBreakIterator>(s_IntlBreakIterator.get());
-
-  loadSystemlib("icu_break_iterator");
+  Native::registerNativeDataInfo<IntlBreakIterator>();
 }
 
 //////////////////////////////////////////////////////////////////////////////

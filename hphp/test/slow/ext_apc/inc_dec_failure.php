@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_inc_dec_failure() {
+function main_inc_dec_failure() :mixed{
 $res = null;
 apc_delete('test');
 var_dump(apc_inc('test', 1, inout $res));

@@ -42,7 +42,8 @@ module Common_argspecs = struct
     ( "--from",
       Arg.Set_string value_ref,
       " so we know who's calling hh_client - e.g. nuclide, vim, emacs, vscode"
-    )
+      (* This setting also controls whether spinner is displayed, and whether
+         clientCheckStatus.ml uses error-formatting. *) )
 
   let no_prechecked value_ref =
     ( "--no-prechecked",
@@ -70,6 +71,27 @@ module Common_argspecs = struct
       Arg.Set value_ref,
       " Override build mode check triggered by warn_on_non_opt_build .hhconfig option"
     )
+
+  let ignore_hh_version value_ref =
+    ( "--ignore-hh-version",
+      Arg.Set value_ref,
+      " ignore hh_version check when loading saved states (default: false)" )
+
+  let saved_state_ignore_hhconfig value_ref =
+    ( "--saved-state-ignore-hhconfig",
+      Arg.Set value_ref,
+      " ignore hhconfig hash when loading saved states (default: false)" )
+
+  let naming_table value_ref =
+    ( "--naming-table",
+      Arg.String (fun s -> value_ref := Some s),
+      " use the provided naming table instead of fetching it from a saved state"
+    )
+
+  let preexisting_warnings preexisting_warnings =
+    ( "--preexisting-warnings",
+      Arg.Set preexisting_warnings,
+      " show all preexisting warnings in typechecked files (default: false)" )
 end
 
 let parse_command () =
@@ -82,8 +104,10 @@ let parse_command () =
     | "stop" -> CKStop
     | "restart" -> CKRestart
     | "lsp" -> CKLsp
+    | "saved-state-project-metadata" -> CKSavedStateProjectMetadata
     | "download-saved-state" -> CKDownloadSavedState
     | "rage" -> CKRage
+    | "decompress-zhhdg" -> CKDecompressZhhdg
     | _ -> CKNone
 
 let parse_without_command options usage command =
@@ -93,30 +117,37 @@ let parse_without_command options usage command =
   | x :: rest when String.(lowercase x = lowercase command) -> rest
   | args -> args
 
+let is_interactive = List.mem [""; "[sh]"] ~equal:String.equal
+
+let validate_check_args ~invalid_warning_codes =
+  if not (List.is_empty invalid_warning_codes) then (
+    Printf.printf
+      "Unknown warning codes: %s"
+      (String.concat ~sep:", "
+      @@ List.map invalid_warning_codes ~f:Int.to_string);
+    exit 2
+  )
+
 (* *** *** NB *** *** ***
  * Commonly-used options are documented in hphp/hack/man/hh_client.1 --
  * if you are making significant changes you need to update the manpage as
  * well. Experimental or otherwise volatile options need not be documented
  * there, but keep what's there up to date please. *)
-let parse_check_args cmd =
+let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
   (* arg parse output refs *)
-  let ai_mode = ref None in
   let autostart = ref true in
   let config = ref [] in
   let custom_telemetry_data = ref [] in
   let custom_hhi_path = ref None in
-  let error_format = ref Errors.Highlighted in
+  let error_format = ref None in
   let force_dormant_start = ref false in
-  let format_from = ref 0 in
-  let from = ref "" in
+  let from = ref from_default in
   let show_spinner = ref None in
-  let hot_classes_threshold = ref 0 in
-  let gen_saved_ignore_type_errors = ref false in
+  let show_tast = ref false in
   let ignore_hh_version = ref false in
   let save_64bit = ref None in
   let save_human_readable_64bit_dep_map = ref None in
   let saved_state_ignore_hhconfig = ref false in
-  let log_inference_constraints = ref false in
   let max_errors = ref None in
   let mode = ref None in
   let logname = ref false in
@@ -127,21 +158,28 @@ let parse_check_args cmd =
   let lock_file = ref false in
   let no_load = ref false in
   let output_json = ref false in
+  let output_jsonl = ref false in
   let prechecked = ref None in
   let mini_state : string option ref = ref None in
-  let refactor_before = ref "" in
-  let refactor_mode = ref "" in
-  let remote = ref false in
+  let rename_before = ref "" in
   let sort_results = ref false in
   let stdin_name = ref None in
   let timeout = ref None in
   let version = ref false in
   let watchman_debug_logging = ref false in
   let allow_non_opt_build = ref false in
-  let desc = ref "check" in
+  let preexisting_warnings = ref false in
+  let warning_switches = ref [] in
+  let invalid_warning_codes = ref [] in
+  let desc = ref (ClientCommand.command_name cmd) in
   (* custom behaviors *)
   let current_option = ref None in
+  let dump_config = ref false in
+
   let set_from x () = from := x in
+  let single_files = ref [] in
+  let only_log_errors = ref false in
+  let log_to_file = ref None in
   let set_mode ?(validate = true) x =
     if validate && Option.is_some !mode then
       raise (Arg.Bad "only a single mode should be specified")
@@ -151,12 +189,38 @@ let parse_check_args cmd =
       ()
     end
   in
-  let add_single x =
-    match !mode with
-    | Some (MODE_STATUS_SINGLE xs) ->
-      mode := Some (MODE_STATUS_SINGLE (x :: xs))
-    | _ -> set_mode (MODE_STATUS_SINGLE [x])
+  let add_single x = single_files := x :: !single_files in
+  let set_log_to_file x = log_to_file := Some x in
+  let add_multi f =
+    let files =
+      Sys_utils.read_file f
+      |> Bytes.to_string
+      |> String.strip
+      |> String.split ~on:'\n'
+    in
+    single_files := files @ !single_files
   in
+  let add_warning_switch switch =
+    warning_switches := switch :: !warning_switches
+  in
+  let add_invalid_warning_code i =
+    invalid_warning_codes := i :: !invalid_warning_codes
+  in
+  let set_mode_from_single_files (show_tast : bool) preexisting_warnings =
+    match !single_files with
+    | [] -> ()
+    | single_files ->
+      (match !mode with
+      | _ ->
+        set_mode
+          (MODE_STATUS_SINGLE
+             { filenames = single_files; show_tast; preexisting_warnings }))
+  in
+  let set_mode_only_log_errors config =
+    if !only_log_errors then set_mode (MODE_LOG_ERRORS config)
+  in
+  let find_my_tests_max_distance = ref 1 in
+  let find_my_tests_max_test_files = ref None in
   (* parse args *)
   let usage =
     match cmd with
@@ -177,46 +241,27 @@ let parse_check_args cmd =
         ^^ "\tCOMMAND\t\tcheck\n"
         ^^ "\tWWW-ROOT\tCurrent directory\n\nCheck command options:\n")
         Sys.argv.(0)
-    | _ -> failwith "No other keywords should make it here"
+    | CKSavedStateProjectMetadata ->
+      Printf.sprintf
+        "Usage: %s saved-state-project-metadata [OPTION]... [WWW-ROOT]\nOutput the project metadata for the current saved state\n\nWWW-ROOT is assumed to be current directory if unspecified\n"
+        Sys.argv.(0)
+    | CKDownloadSavedState
+    | CKLsp
+    | CKRage
+    | CKRestart
+    | CKStart
+    | CKDecompressZhhdg
+    | CKStop ->
+      failwith "No other keywords should make it here"
   in
   let options =
     [
       (* Please keep these sorted in the alphabetical order *)
-      ( "--ai",
-        Arg.String
-          (fun s ->
-            ai_mode :=
-              Some
-                (ignore (Ai_options.prepare ~server:true s);
-                 s)),
-        " run AI module with provided options" );
-      ( "--ai-query",
-        Arg.String (fun x -> set_mode (MODE_AI_QUERY x)),
-        (* Send an AI query *) "" );
       Common_argspecs.allow_non_opt_build allow_non_opt_build;
-      ( "--auto-complete",
-        Arg.Unit (fun () -> set_mode MODE_AUTO_COMPLETE),
-        " (mode) auto-completes the text on stdin" );
       ( "--autostart-server",
-        Arg.Bool (fun x -> autostart := x),
+        Arg.Bool (( := ) autostart),
         " automatically start hh_server if it's not running (default: true)" );
-      ( "--bigcode",
-        Arg.String (fun filename -> set_mode (MODE_BIGCODE filename)),
-        " (mode) source code indexing functionalities for Big Code analysis" );
-      ( "--color",
-        Arg.String (fun x -> set_mode (MODE_COLORING x)),
-        " (mode) pretty prints the file content showing what is checked (give '-' for stdin)"
-      );
-      ("--colour", Arg.String (fun x -> set_mode (MODE_COLORING x)), " ");
       Common_argspecs.config config;
-      ( "--coverage",
-        Arg.String (fun x -> set_mode (MODE_COVERAGE x)),
-        " (mode) calculates the extent of typing of a given file or directory"
-      );
-      ( "--create-checkpoint",
-        Arg.String (fun x -> set_mode (MODE_CREATE_CHECKPOINT x)),
-        (* Create a checkpoint which can be used to retrieve changed files later *)
-        "" );
       ( "--cst-search",
         Arg.Unit (fun () -> set_mode (MODE_CST_SEARCH None)),
         " (mode) Search the concrete syntax trees of files in the codebase"
@@ -225,25 +270,49 @@ let parse_check_args cmd =
         Arg.Rest
           begin
             fun fn ->
-            set_mode
-              ~validate:false
-              (match !mode with
-              | None
-              | Some (MODE_CST_SEARCH None) ->
-                MODE_CST_SEARCH (Some [fn])
-              | Some (MODE_CST_SEARCH (Some fnl)) ->
-                MODE_CST_SEARCH (Some (fn :: fnl))
-              | _ -> raise (Arg.Bad "only a single mode should be specified"))
+              set_mode
+                ~validate:false
+                (match !mode with
+                | None
+                | Some (MODE_CST_SEARCH None) ->
+                  MODE_CST_SEARCH (Some [fn])
+                | Some (MODE_CST_SEARCH (Some fnl)) ->
+                  MODE_CST_SEARCH (Some (fn :: fnl))
+                | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " Run CST search on this set of files,"
         ^ " rather than all the files in the codebase." );
       Common_argspecs.custom_hhi_path custom_hhi_path;
       Common_argspecs.custom_telemetry_data custom_telemetry_data;
-      (* Delete an existing checkpoint.
-       * Exitcode will be non-zero if no checkpoint is found *)
-      ( "--delete-checkpoint",
-        Arg.String (fun x -> set_mode (MODE_DELETE_CHECKPOINT x)),
-        "" );
+      ( "--deps-out-at-pos-batch",
+        Arg.Rest
+          begin
+            fun position ->
+              set_mode
+                ~validate:false
+                (match !mode with
+                | None -> MODE_DEPS_OUT_AT_POS_BATCH [position]
+                | Some (MODE_DEPS_OUT_AT_POS_BATCH positions) ->
+                  MODE_FUN_DEPS_AT_POS_BATCH (position :: positions)
+                | _ -> raise (Arg.Bad "only a single mode should be specified"))
+          end,
+        " (mode) for each entry in input list get list of what it depends on [file:line:character list]"
+      );
+      ( "--deps-in-at-pos-batch",
+        Arg.Rest
+          begin
+            fun position ->
+              set_mode
+                ~validate:false
+                (match !mode with
+                | None -> MODE_DEPS_IN_AT_POS_BATCH [position]
+                | Some (MODE_DEPS_IN_AT_POS_BATCH positions) ->
+                  MODE_DEPS_IN_AT_POS_BATCH (position :: positions)
+                | _ -> raise (Arg.Bad "only a single mode should be specified"))
+          end,
+        " (mode) for each entry in input list get list of what depends on it [file:line:character list]"
+      );
+      ("--dump-config", Arg.Set dump_config, " Output configuration");
       ( "--dump-full-fidelity-parse",
         Arg.String (fun x -> set_mode (MODE_FULL_FIDELITY_PARSE x)),
         "" );
@@ -263,24 +332,19 @@ let parse_check_args cmd =
         Arg.String
           (fun s ->
             match s with
-            | "raw" -> error_format := Errors.Raw
-            | "context" -> error_format := Errors.Context
-            | "highlighted" -> error_format := Errors.Highlighted
+            | "raw" -> error_format := Some Diagnostics.Raw
+            | "plain" -> error_format := Some Diagnostics.Plain
+            | "context" -> error_format := Some Diagnostics.Context
+            | "highlighted" -> error_format := Some Diagnostics.Highlighted
+            | "extended" -> error_format := Some Diagnostics.Extended
             | _ -> print_string "Warning: unrecognized error format.\n"),
-        "<raw|context|highlighted> Error formatting style" );
-      ( "--extract-standalone",
-        Arg.String (fun name -> set_mode (MODE_EXTRACT_STANDALONE name)),
-        " extract a given function / method together with its dependencies as a standalone file. Usage: --extract-standalone Classname::methodName or function_name"
-      );
-      ( "--concatenate-all",
-        Arg.Unit (fun () -> set_mode MODE_CONCATENATE_ALL),
-        "(mode) create a single file containing all Hack code in the specified prefix"
+        "<extended|raw|context|highlighted|plain> Error formatting style; (default: highlighted)"
       );
       ( "--file-dependents",
         Arg.Unit
           (fun () ->
             let () = prechecked := Some false in
-            set_mode MODE_FILE_DEPENDENTS),
+            set_mode MODE_FILE_LEVEL_DEPENDENCIES),
         " (mode) Given a list of filepaths, shows list of (possibly) dependent files"
       );
       ( "--find-class-refs",
@@ -288,15 +352,35 @@ let parse_check_args cmd =
         " (mode) finds references of the provided class name" );
       ( "--find-refs",
         Arg.String (fun x -> set_mode (MODE_FIND_REFS x)),
-        " (mode) finds references of the provided method name" );
+        " (mode) finds references of the provided symbol; optionally specify the symbol kind like \"Kind|Symbol\" (looks for functions or methods if unspecified)"
+        ^ "; valid kinds are Method, Property, Class_const, Typeconst, Function, Class, ExplicitClass, and GConst"
+        ^ "; use ExplicitClass instead of Class to exclude references via self/static/parent"
+      );
+      ( "--find-my-tests",
+        Arg.Rest
+          begin
+            fun symbol ->
+              set_mode
+                ~validate:false
+                (match !mode with
+                | None -> MODE_FIND_MY_TESTS [symbol]
+                | Some (MODE_FIND_MY_TESTS symbols) ->
+                  MODE_FIND_MY_TESTS (symbol :: symbols)
+                | _ -> raise (Arg.Bad "only a single mode should be specified"))
+          end,
+        " (mode) return test files that reference the given methods [C::m list]"
+      );
+      ( "--find-my-tests-max-distance",
+        Arg.Int (fun max_distance -> find_my_tests_max_distance := max_distance),
+        "maximum distance between given symbol(s) and any test that --find-my-tests will return (default: 1)"
+      );
+      ( "--find-my-tests-max-test-files",
+        Arg.Int
+          (fun max_test_files ->
+            find_my_tests_max_test_files := Some max_test_files),
+        "maximum number of test files to return from --find-my-tests (default: unlimited)"
+      );
       Common_argspecs.force_dormant_start force_dormant_start;
-      ( "--format",
-        Arg.Tuple
-          [
-            Arg.Int (fun x -> format_from := x);
-            Arg.Int (fun x -> set_mode (MODE_FORMAT (!format_from, x)));
-          ],
-        "" );
       Common_argspecs.from from;
       ( "--from-arc-diff",
         Arg.Unit (set_from "arc_diff"),
@@ -320,34 +404,15 @@ let parse_check_args cmd =
         Arg.Rest
           begin
             fun position ->
-            set_mode
-              ~validate:false
-              (match !mode with
-              | None -> MODE_FUN_DEPS_AT_POS_BATCH [position]
-              | Some (MODE_FUN_DEPS_AT_POS_BATCH positions) ->
-                MODE_FUN_DEPS_AT_POS_BATCH (position :: positions)
-              | _ -> raise (Arg.Bad "only a single mode should be specified"))
+              set_mode
+                ~validate:false
+                (match !mode with
+                | None -> MODE_FUN_DEPS_AT_POS_BATCH [position]
+                | Some (MODE_FUN_DEPS_AT_POS_BATCH positions) ->
+                  MODE_FUN_DEPS_AT_POS_BATCH (position :: positions)
+                | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) for each entry in input list get list of function dependencies [file:line:character list]"
-      );
-      ( "--gen-hot-classes-file",
-        Arg.Tuple
-          [
-            Arg.Int (fun x -> hot_classes_threshold := x);
-            Arg.String
-              (fun x ->
-                set_mode (MODE_GEN_HOT_CLASSES (!hot_classes_threshold, x)));
-          ],
-        " generate a JSON file listing all classes with more dependents than the"
-        ^ " given threshold. Usage: --gen-hot-classes-file 500 ~/hh_hot_classes.json"
-      );
-      ( "--gen-prefetch-dir",
-        Arg.String (fun x -> set_mode (MODE_GEN_PREFETCH_DIR x)),
-        " generate a directory of decls and typecheck dependencies to use for prefetching"
-        ^ " Usage: --gen-prefetch-dir ~/prefetched-dir" );
-      ( "--gen-saved-ignore-type-errors",
-        Arg.Set gen_saved_ignore_type_errors,
-        " generate a saved state even if there are type errors (default: false)."
       );
       ( "--get-method-name",
         Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL3 x)),
@@ -356,62 +421,52 @@ let parse_check_args cmd =
         Arg.String (fun x -> set_mode (MODE_GO_TO_IMPL_CLASS x)),
         " (mode) goes to implementation of the provided class/trait/interface/etc. with the given name"
       );
-      ( "--go-to-impl-class-remote",
-        Arg.String (fun x -> set_mode (MODE_GO_TO_IMPL_CLASS_REMOTE x)),
-        " (mode) similar to go-to-class-impl, but uses a glean database for faster but potentially out-of-date results"
-      );
       ( "--go-to-impl-method",
         Arg.String (fun x -> set_mode (MODE_GO_TO_IMPL_METHOD x)),
         " (mode) goes to implementation of the provided method name" );
-      ( "--ide-find-refs",
-        Arg.String (fun x -> set_mode (MODE_IDE_FIND_REFS x)),
-        "" );
+      ( "--hack-to-notebook",
+        Arg.Unit (fun () -> set_mode MODE_HACK_TO_NOTEBOOK),
+        "Convert a Hack file generated by `hh --notebook-to-hack` into a notebook. Pass hack file contents via stdin"
+      );
+      ( "--ide-find-refs-by-symbol",
+        Arg.String
+          (fun x ->
+            set_mode
+              (MODE_IDE_FIND_REFS_BY_SYMBOL
+                 (FindRefsWireFormat.CliArgs.from_string_exn x))),
+        "(mode) similar to IDE_FIND_REFS, but takes a symbol name rather than position"
+      );
+      ( "--ide-find-refs-by-symbol3",
+        (let action = ref "" in
+         let stream_file = ref "-" in
+         Arg.Tuple
+           [
+             Arg.String (fun s -> action := s);
+             Arg.String (fun s -> stream_file := s);
+             Arg.String
+               (fun hints ->
+                 set_mode
+                   (MODE_IDE_FIND_REFS_BY_SYMBOL
+                      (FindRefsWireFormat.CliArgs.from_string_triple_exn
+                         (!action, !stream_file, hints))));
+           ]),
+        "(mode) similar to FIND_REFS, but takes [action stream_file hints]" );
+      ( "--ide-go-to-impl-by-symbol",
+        Arg.String
+          (fun x ->
+            set_mode
+              (MODE_IDE_GO_TO_IMPL_BY_SYMBOL
+                 (FindRefsWireFormat.CliArgs.from_string_exn x))),
+        "(mode) similar to IDE_GO_TO_IMPL, but takes a symbol name rather than position"
+      );
       ( "--ide-get-definition",
         Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL2 x)),
         (* alias for --identify-function *) "" );
-      ( "--ide-highlight-refs",
-        Arg.String (fun x -> set_mode (MODE_IDE_HIGHLIGHT_REFS x)),
-        (* Similar to --ide-find-refs, but returns references in current file only,
-         * and is optimized to be faster in that case *)
-        "" );
-      ( "--global-inference",
-        Arg.Rest
-          begin
-            fun fn ->
-            set_mode
-              ~validate:false
-              (match !mode with
-              | None ->
-                let submode =
-                  (*
-                - "merge" will gather all artifacts generated by typechecking with
-                  global inference on and generate the global constraint graph
-                - "solve" will solve the global constraint graph and bind all
-                  global type variable to a concrete type
-                - "export-json" will export the global constraint graph in a
-                  json file *)
-                  match fn with
-                  | "merge" -> ServerGlobalInferenceTypes.MMerge
-                  | "solve" -> ServerGlobalInferenceTypes.MSolve
-                  | "export-json" -> ServerGlobalInferenceTypes.MExport
-                  | "rewrite" -> ServerGlobalInferenceTypes.MRewrite
-                  | _ ->
-                    raise
-                      (Arg.Bad
-                         ("No " ^ fn ^ " submode supported for global inference"))
-                in
-                MODE_GLOBAL_INFERENCE (submode, [])
-              | Some (MODE_GLOBAL_INFERENCE (submode, fnl)) ->
-                MODE_GLOBAL_INFERENCE (submode, fn :: fnl)
-              | _ -> raise (Arg.Bad "only a single mode should be specified"))
-          end,
-        " (mode) global inference operations, Usage: --global-inference "
-        ^ "[\"merge\", \"solve\", \"export-json\", \"rewrite\"] files..." );
       ("--ide-outline", Arg.Unit (fun () -> set_mode MODE_OUTLINE2), "");
-      ( "--ide-refactor",
-        Arg.String (fun x -> set_mode (MODE_IDE_REFACTOR x)),
-        " (mode) rename a symbol, Usage: --ide-refactor "
-        ^ " <filename>:<line number>:<col number>:<new name>" );
+      ( "--ide-rename-by-symbol",
+        Arg.String (fun x -> set_mode (MODE_IDE_RENAME_BY_SYMBOL x)),
+        " (mode) renames, but takes a Find_refs.action. Usage: "
+        ^ " <new name>|<comma_separated_action>" );
       ( "--identify-function",
         Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL1 x)),
         " (mode) print the full function name at the position "
@@ -419,9 +474,7 @@ let parse_check_args cmd =
       ( "--identify",
         Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL x)),
         " (mode) identify the named symbol" );
-      ( "--ignore-hh-version",
-        Arg.Set ignore_hh_version,
-        " ignore hh_version check when loading saved states (default: false)" );
+      Common_argspecs.ignore_hh_version ignore_hh_version;
       ( "--in-memory-dep-table-size",
         Arg.Unit (fun () -> set_mode MODE_IN_MEMORY_DEP_TABLE_SIZE),
         " number of entries in the in-memory dependency table" );
@@ -432,13 +485,13 @@ let parse_check_args cmd =
         Arg.Rest
           begin
             fun class_ ->
-            set_mode
-              ~validate:false
-              (match !mode with
-              | None -> MODE_METHOD_JUMP_ANCESTORS_BATCH ([class_], "Class")
-              | Some (MODE_METHOD_JUMP_ANCESTORS_BATCH (classes, "Class")) ->
-                MODE_METHOD_JUMP_ANCESTORS_BATCH (class_ :: classes, "Class")
-              | _ -> raise (Arg.Bad "only a single mode should be specified"))
+              set_mode
+                ~validate:false
+                (match !mode with
+                | None -> MODE_METHOD_JUMP_ANCESTORS_BATCH ([class_], "Class")
+                | Some (MODE_METHOD_JUMP_ANCESTORS_BATCH (classes, "Class")) ->
+                  MODE_METHOD_JUMP_ANCESTORS_BATCH (class_ :: classes, "Class")
+                | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) prints a list of classes that these classes extend" );
       ( "--inheritance-ancestor-interfaces",
@@ -449,14 +502,16 @@ let parse_check_args cmd =
         Arg.Rest
           begin
             fun class_ ->
-            set_mode
-              ~validate:false
-              (match !mode with
-              | None -> MODE_METHOD_JUMP_ANCESTORS_BATCH ([class_], "Interface")
-              | Some (MODE_METHOD_JUMP_ANCESTORS_BATCH (classes, "Interface"))
-                ->
-                MODE_METHOD_JUMP_ANCESTORS_BATCH (class_ :: classes, "Interface")
-              | _ -> raise (Arg.Bad "only a single mode should be specified"))
+              set_mode
+                ~validate:false
+                (match !mode with
+                | None ->
+                  MODE_METHOD_JUMP_ANCESTORS_BATCH ([class_], "Interface")
+                | Some (MODE_METHOD_JUMP_ANCESTORS_BATCH (classes, "Interface"))
+                  ->
+                  MODE_METHOD_JUMP_ANCESTORS_BATCH
+                    (class_ :: classes, "Interface")
+                | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) prints a list of interfaces that these classes implement" );
       ( "--inheritance-ancestor-traits",
@@ -466,13 +521,13 @@ let parse_check_args cmd =
         Arg.Rest
           begin
             fun class_ ->
-            set_mode
-              ~validate:false
-              (match !mode with
-              | None -> MODE_METHOD_JUMP_ANCESTORS_BATCH ([class_], "Trait")
-              | Some (MODE_METHOD_JUMP_ANCESTORS_BATCH (classes, "Trait")) ->
-                MODE_METHOD_JUMP_ANCESTORS_BATCH (class_ :: classes, "Trait")
-              | _ -> raise (Arg.Bad "only a single mode should be specified"))
+              set_mode
+                ~validate:false
+                (match !mode with
+                | None -> MODE_METHOD_JUMP_ANCESTORS_BATCH ([class_], "Trait")
+                | Some (MODE_METHOD_JUMP_ANCESTORS_BATCH (classes, "Trait")) ->
+                  MODE_METHOD_JUMP_ANCESTORS_BATCH (class_ :: classes, "Trait")
+                | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) prints a list of traits that these classes use" );
       ( "--inheritance-ancestors",
@@ -486,7 +541,11 @@ let parse_check_args cmd =
         ^ " to the given class" );
       ( "--json",
         Arg.Set output_json,
-        " output json for machine consumption. (default: false)" );
+        " output json for machine consumption (default: false)" );
+      ( "--jsonl",
+        Arg.Set output_jsonl,
+        " output streaming jsonl (JSON Lines) for machine consumption (default: false)"
+      );
       ( "--lint",
         Arg.Unit (fun () -> set_mode MODE_LINT),
         " (mode) lint the given list of files" );
@@ -501,13 +560,10 @@ let parse_check_args cmd =
         Arg.Unit (fun () -> set_mode MODE_LIST_FILES),
         " (mode) list files with errors" );
       ("--lock-file", Arg.Set lock_file, " (mode) show lock file name and exit");
-      ( "--log-inference-constraints",
-        Arg.Set log_inference_constraints,
-        "  (for hh debugging purpose only) log type"
-        ^ " inference constraints into external logger (e.g. Scuba)" );
       ( "--max-errors",
         Arg.Int (fun num_errors -> max_errors := Some num_errors),
         " Maximum number of errors to display" );
+      Common_argspecs.preexisting_warnings preexisting_warnings;
       ("--logname", Arg.Set logname, " (mode) show log filename and exit");
       ( "--monitor-logname",
         Arg.Set monitor_logname,
@@ -522,51 +578,57 @@ let parse_check_args cmd =
         Arg.Set lsp_logname,
         " (mode) show client lsp log filename and exit" );
       ("--no-load", Arg.Set no_load, " start from a fresh state");
+      ( "--notebook-to-hack",
+        (let notebook_number = ref "" in
+         Arg.Tuple
+           [
+             Arg.String (( := ) notebook_number);
+             Arg.String
+               (fun notebook_header ->
+                 set_mode
+                   (MODE_NOTEBOOK_TO_HACK
+                      { notebook_number = !notebook_number; notebook_header }));
+           ]),
+        "Convert notebook to a Hack file. Arg: notebook_number (example: \"N12345\"). "
+        ^ "Pass notebook in .ipynb format to stdin and a header (such as a copyright notice comment)"
+      );
       ( "--outline",
         Arg.Unit (fun () -> set_mode MODE_OUTLINE),
         " (mode) prints an outline of the text on stdin" );
+      ( "--package-lint",
+        Arg.String (fun x -> set_mode (MODE_PACKAGE_LINT x)),
+        "Support for linting of __PackageOverride annotations" );
       Common_argspecs.prechecked prechecked;
       Common_argspecs.no_prechecked prechecked;
       Common_argspecs.with_mini_state mini_state;
-      ( "--pause",
-        Arg.Unit (fun () -> set_mode (MODE_PAUSE true)),
-        " (mode) pause recheck-on-file-change [EXPERIMENTAL]" );
       ( "--profile-log",
         Arg.Unit (fun () -> config := ("profile_log", "true") :: !config),
         " enable profile logging" );
       ( "--refactor",
-        Arg.Tuple
-          [
-            Arg.Symbol
-              (["Class"; "Function"; "Method"], (fun x -> refactor_mode := x));
-            Arg.String (fun x -> refactor_before := x);
-            Arg.String
-              (fun x ->
-                set_mode (MODE_REFACTOR (!refactor_mode, !refactor_before, x)));
-          ],
+        (let rename_mode = ref Unspecified in
+         Arg.Tuple
+           [
+             Arg.Symbol
+               ( ["Class"; "Function"; "Method"],
+                 (fun x -> rename_mode := string_to_rename_mode x) );
+             Arg.String (fun x -> rename_before := x);
+             Arg.String
+               (fun x ->
+                 set_mode (MODE_RENAME (!rename_mode, !rename_before, x)));
+           ]),
         " (mode) rename a symbol, Usage: --refactor "
         ^ "[\"Class\", \"Function\", \"Method\"] <Current Name> <New Name>" );
-      ("--remote", Arg.Set remote, " force remote type checking");
-      ( "--remote-execution",
-        Arg.String
-          (fun s ->
-            if String.equal s "cold" || String.equal s "warm" then
-              set_mode (MODE_STATUS_REMOTE_EXECUTION s)
-            else
-              print_string
-                "Warning: unrecognized remote-execution hulk mode. Please pass in \"cold\" or \"warm\".\n"),
-        "<cold|warm> force type checking with remote execution" );
       ( "--remove-dead-fixme",
         Arg.Int
           begin
             fun code ->
-            set_mode
-              ~validate:false
-              (match !mode with
-              | None -> MODE_REMOVE_DEAD_FIXMES [code]
-              | Some (MODE_REMOVE_DEAD_FIXMES codel) ->
-                MODE_REMOVE_DEAD_FIXMES (code :: codel)
-              | _ -> raise (Arg.Bad "only a single mode should be specified"))
+              set_mode
+                ~validate:false
+                (match !mode with
+                | None -> MODE_REMOVE_DEAD_FIXMES [code]
+                | Some (MODE_REMOVE_DEAD_FIXMES codel) ->
+                  MODE_REMOVE_DEAD_FIXMES (code :: codel)
+                | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) remove dead HH_FIXME for specified error code "
         ^ "(first do hh_client restart --no-load)" );
@@ -574,80 +636,49 @@ let parse_check_args cmd =
         Arg.Unit (fun () -> set_mode (MODE_REMOVE_DEAD_FIXMES [])),
         " (mode) remove dead HH_FIXME for any error code < 5000 "
         ^ "(first do hh_client restart --no-load)" );
-      ( "--resume",
-        Arg.Unit (fun () -> set_mode (MODE_PAUSE false)),
-        " (mode) resume recheck-on-file-change [EXPERIMENTAL]" );
+      ( "--remove-dead-unsafe-casts",
+        Arg.Unit (fun () -> set_mode MODE_REMOVE_DEAD_UNSAFE_CASTS),
+        " (mode) remove dead UNSAFE_CASTS (first do hh_client restart --no-load)"
+      );
       ( "--retries",
         Arg.Int (fun n -> timeout := Some (float_of_int (max 5 n))),
         " (deprecated) same as --timeout" );
-      (* Retrieve changed files since input checkpoint.
-       * Output is separated by newline.
-       * Exit code will be non-zero if no checkpoint is found *)
-      ( "--retrieve-checkpoint",
-        Arg.String (fun x -> set_mode (MODE_RETRIEVE_CHECKPOINT x)),
-        "" );
       ("--retry-if-init", Arg.Bool (fun _ -> ()), " (deprecated and ignored)");
+      ( "--rewrite-declarations",
+        Arg.Unit (fun () -> set_mode MODE_REWRITE_DECLARATIONS),
+        {|Rewrite Hack source code allowed in notebooks to valid Hack.
+For example in `function foo(): void {} function foo(): void{}` we
+rewrite to the function names to something like `foo_1` and `foo_2`.
+|}
+      );
       ( "--rewrite-lambda-parameters",
         Arg.Rest
           begin
             fun fn ->
-            set_mode
-              ~validate:false
-              (match !mode with
-              | None -> MODE_REWRITE_LAMBDA_PARAMETERS [fn]
-              | Some (MODE_REWRITE_LAMBDA_PARAMETERS fnl) ->
-                MODE_REWRITE_LAMBDA_PARAMETERS (fn :: fnl)
-              | _ -> raise (Arg.Bad "only a single mode should be specified"))
+              set_mode
+                ~validate:false
+                (match !mode with
+                | None -> MODE_REWRITE_LAMBDA_PARAMETERS [fn]
+                | Some (MODE_REWRITE_LAMBDA_PARAMETERS fnl) ->
+                  MODE_REWRITE_LAMBDA_PARAMETERS (fn :: fnl)
+                | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) rewrite lambdas in the files from the given list"
         ^ " with suggested parameter types" );
-      ( "--rewrite-partial-parameters-type-hints",
-        Arg.Rest
-          begin
-            fun fn ->
-            set_mode
-              ~validate:false
-              (match !mode with
-              | None -> MODE_REWRITE_TYPE_PARAMS_TYPE [fn]
-              | Some (MODE_REWRITE_TYPE_PARAMS_TYPE fnl) ->
-                MODE_REWRITE_TYPE_PARAMS_TYPE (fn :: fnl)
-              | _ -> raise (Arg.Bad "only a single mode should be specified"))
-          end,
-        " (mode) add missing type parameters in the type hints for function"
-        ^ " parameters (e.g.: C $x -> C<int> $x) in the files from the given list"
-      );
       ( "--save-naming",
         Arg.String (fun x -> set_mode (MODE_SAVE_NAMING x)),
         " (mode) Save the naming table to the given file."
         ^ " Returns the number of files and symbols written to disk." );
-      ( "--save-state",
-        Arg.String (fun x -> set_mode (MODE_SAVE_STATE x)),
-        " (mode) Save a saved state to the given file."
-        ^ " Returns number of edges dumped from memory to the database." );
       ( "--save-64bit",
         Arg.String (fun x -> save_64bit := Some x),
         " save discovered 64-bit to the given directory" );
       ( "--save-human-readable-64bit-dep-map",
         Arg.String (fun x -> save_human_readable_64bit_dep_map := Some x),
         " save map of 64bit hashes to names to files in the given directory" );
-      ( "--saved-state-ignore-hhconfig",
-        Arg.Set saved_state_ignore_hhconfig,
-        " ignore hhconfig hash when loading saved states (default: false)" );
+      Common_argspecs.saved_state_ignore_hhconfig saved_state_ignore_hhconfig;
       ( "--search",
-        Arg.String (fun x -> set_mode (MODE_SEARCH (x, ""))),
-        " (mode) fuzzy search symbol definitions" );
-      ( "--search-class",
-        Arg.String (fun x -> set_mode (MODE_SEARCH (x, "class"))),
-        " (mode) fuzzy search class definitions" );
-      ( "--search-constant",
-        Arg.String (fun x -> set_mode (MODE_SEARCH (x, "constant"))),
-        " (mode) fuzzy search constant definitions" );
-      ( "--search-function",
-        Arg.String (fun x -> set_mode (MODE_SEARCH (x, "function"))),
-        " (mode) fuzzy search function definitions" );
-      ( "--search-typedef",
-        Arg.String (fun x -> set_mode (MODE_SEARCH (x, "typedef"))),
-        " (mode) fuzzy search typedef definitions" );
+        Arg.String (fun x -> set_mode (MODE_SEARCH x)),
+        " (mode) --search this_is_just_to_check_liveness_of_hh_server" );
       ( "--server-rage",
         Arg.Unit (fun () -> set_mode MODE_SERVER_RAGE),
         " (mode) dumps internal state of hh_server" );
@@ -658,12 +689,22 @@ let parse_check_args cmd =
         Arg.String add_single,
         "<path> Return errors in file with provided name (give '-' for stdin)"
       );
-      ( "--single-remote-execution",
-        Arg.String (fun x -> set_mode (MODE_STATUS_SINGLE_REMOTE_EXECUTION x)),
-        "<path> Return (errors, dep_edges) in file with provided name" );
-      ( "--multi-remote-execution",
-        Arg.Unit (fun () -> set_mode MODE_STATUS_MULTI_REMOTE_EXECUTION),
-        "<paths> Return (errors, dep_edges) in files with provided names" );
+      ( "--multi",
+        Arg.String add_multi,
+        "<path> Return errors for files read from the given file (one per line)"
+      );
+      ( "--log-errors",
+        Arg.Unit (fun () -> only_log_errors := true),
+        " (mode) type check the given list of files and log their errors (use --log-to-file to specify output file)"
+      );
+      ( "--log-to-file",
+        Arg.String set_log_to_file,
+        "<path> Write logged errors to specified file (use with --log-errors)"
+      );
+      ( "--show-tast",
+        Arg.Unit (fun () -> show_tast := true),
+        " in combination with `--single`, output the TASTs of the file along with TAST hashes."
+      );
       ("--sort-results", Arg.Set sort_results, " sort output for CST search.");
       ( "--stats",
         Arg.Unit (fun () -> set_mode MODE_STATS),
@@ -684,22 +725,29 @@ let parse_check_args cmd =
         Arg.Rest
           begin
             fun position ->
-            set_mode
-              ~validate:false
-              (match !mode with
-              | None -> MODE_TYPE_AT_POS_BATCH [position]
-              | Some (MODE_TYPE_AT_POS_BATCH positions) ->
-                MODE_TYPE_AT_POS_BATCH (position :: positions)
-              | _ -> raise (Arg.Bad "only a single mode should be specified"))
+              set_mode
+                ~validate:false
+                (match !mode with
+                | None -> MODE_TYPE_AT_POS_BATCH [position]
+                | Some (MODE_TYPE_AT_POS_BATCH positions) ->
+                  MODE_TYPE_AT_POS_BATCH (position :: positions)
+                | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) show types at multiple positions [file:line:character list]" );
       ( "--type-error-at-pos",
         Arg.String (fun x -> set_mode (MODE_TYPE_ERROR_AT_POS x)),
         " (mode) show type error at a given position in file [line:character]"
       );
+      ( "--is-subtype",
+        Arg.Unit (fun () -> set_mode MODE_IS_SUBTYPE),
+        " (mode) take a JSON list of subtype queries via stdin" );
       ( "--tast-holes",
         Arg.String (fun x -> set_mode (MODE_TAST_HOLES x)),
         " (mode) return all TAST Holes in a given file" );
+      ( "--tast-holes-batch",
+        Arg.String (fun x -> set_mode (MODE_TAST_HOLES_BATCH x)),
+        " (mode) return all TAST Holes for a set of files. Argument is a file containing a newline-separated list of files"
+      );
       ( "--verbose-on",
         Arg.Unit (fun () -> set_mode (MODE_VERBOSE true)),
         " (mode) turn on verbose server log" );
@@ -707,6 +755,37 @@ let parse_check_args cmd =
         Arg.Unit (fun () -> set_mode (MODE_VERBOSE false)),
         " (mode) turn off verbose server log" );
       ("--version", Arg.Set version, " (mode) show version and exit");
+      ( "-Wall",
+        Arg.Unit (fun () -> add_warning_switch Filter_diagnostics.WAll),
+        " show all warnings" );
+      ( "-Wnone",
+        Arg.Unit (fun () -> add_warning_switch Filter_diagnostics.WNone),
+        " hide all warnings" );
+      ( "-W",
+        Arg.Int
+          (fun code ->
+            match Filter_diagnostics.Code.of_enum code with
+            | None -> add_invalid_warning_code code
+            | Some code -> add_warning_switch @@ Filter_diagnostics.Code_on code),
+        " show all warnings with a given code, e.g. -W 12001" );
+      ( "-Wno",
+        Arg.Int
+          (fun code ->
+            match Filter_diagnostics.Code.of_enum code with
+            | None -> add_invalid_warning_code code
+            | Some code ->
+              add_warning_switch @@ Filter_diagnostics.Code_off code),
+        " hide all warnings with a given code, e.g. -Wno 12001" );
+      ( "-Wignore-files",
+        Arg.String
+          (fun regexp ->
+            add_warning_switch
+              (Filter_diagnostics.Ignored_files (Str.regexp regexp))),
+        " hide warnings in files matching a regexp" );
+      ( "-Wgenerated",
+        Arg.Unit
+          (fun () -> add_warning_switch Filter_diagnostics.Generated_files_on),
+        " show warnings in generated files" );
       Common_argspecs.watchman_debug_logging watchman_debug_logging;
       (* Please keep these sorted in the alphabetical order *)
     ]
@@ -742,7 +821,17 @@ let parse_check_args cmd =
     List.map options ~f:(fun (option, spec, text) ->
         (option, modify_spec ~option spec, text))
   in
-  let args = parse_without_command options usage "check" in
+  let args =
+    parse_without_command options usage (ClientCommand.command_name cmd)
+  in
+
+  validate_check_args ~invalid_warning_codes:!invalid_warning_codes;
+
+  if !output_json && !output_jsonl then begin
+    Printf.eprintf "--json and --jsonl are mutually exclusive\n%!";
+    exit 2
+  end;
+
   if !version then (
     if !output_json then
       ServerArgs.print_json_version ()
@@ -751,22 +840,18 @@ let parse_check_args cmd =
     exit 0
   );
 
+  set_mode_from_single_files !show_tast !preexisting_warnings;
+  set_mode_only_log_errors
+    { log_file = !log_to_file; preexisting_warnings = !preexisting_warnings };
   let mode = Option.value !mode ~default:MODE_STATUS in
   (* fixups *)
   let (root, paths) =
     match (mode, args) with
     | (MODE_LINT, _)
-    | (MODE_CONCATENATE_ALL, _)
-    | (MODE_STATUS_MULTI_REMOTE_EXECUTION, _)
-    | (MODE_FILE_DEPENDENTS, _) ->
-      (Wwwroot.get None, args)
-    | (_, []) -> (Wwwroot.get None, [])
-    | (_, [x]) -> (Wwwroot.get (Some x), [])
-    | (_, _) ->
-      Printf.fprintf
-        stderr
-        "Error: please provide at most one www directory\n%!";
-      exit 1
+    | (MODE_FILE_LEVEL_DEPENDENCIES, _)
+    | (MODE_LOG_ERRORS _, _) ->
+      (Wwwroot.interpret_command_line_root_parameter [], args)
+    | (_, _) -> (Wwwroot.interpret_command_line_root_parameter args, [])
   in
 
   if !lock_file then (
@@ -805,50 +890,52 @@ let parse_check_args cmd =
     exit 0
   );
 
-  let () =
-    if String.equal !from "emacs" then
-      Printf.fprintf stdout "-*- mode: compilation -*-\n%!"
-  in
-  CCheck
-    {
-      ai_mode = !ai_mode;
-      autostart = !autostart;
-      config = !config;
-      custom_hhi_path = !custom_hhi_path;
-      custom_telemetry_data = !custom_telemetry_data;
-      error_format = !error_format;
-      force_dormant_start = !force_dormant_start;
-      from = !from;
-      show_spinner = Option.value ~default:(String.equal !from "") !show_spinner;
-      gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
-      ignore_hh_version = !ignore_hh_version;
-      saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
-      paths;
-      log_inference_constraints = !log_inference_constraints;
-      max_errors = !max_errors;
-      mode;
-      no_load =
-        (!no_load
-        ||
-        match mode with
-        | MODE_REMOVE_DEAD_FIXMES _ -> true
-        | _ -> false);
-      save_64bit = !save_64bit;
-      save_human_readable_64bit_dep_map = !save_human_readable_64bit_dep_map;
-      output_json = !output_json;
-      prechecked = !prechecked;
-      mini_state = !mini_state;
-      remote = !remote;
-      root;
-      sort_results = !sort_results;
-      stdin_name = !stdin_name;
-      deadline = Option.map ~f:(fun t -> Unix.time () +. t) !timeout;
-      watchman_debug_logging = !watchman_debug_logging;
-      allow_non_opt_build = !allow_non_opt_build;
-      desc = !desc;
-    }
+  if String.equal !from "emacs" then
+    Printf.fprintf stdout "-*- mode: compilation -*-\n%!";
 
-let parse_start_env command =
+  let is_interactive = is_interactive !from in
+  {
+    ClientEnv.autostart = !autostart;
+    config = !config;
+    custom_hhi_path = !custom_hhi_path;
+    custom_telemetry_data = !custom_telemetry_data;
+    error_format = !error_format;
+    force_dormant_start = !force_dormant_start;
+    from = !from;
+    show_spinner = Option.value ~default:is_interactive !show_spinner;
+    ignore_hh_version = !ignore_hh_version;
+    saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
+    paths;
+    max_errors = !max_errors;
+    preexisting_warnings = !preexisting_warnings;
+    mode;
+    no_load =
+      (!no_load
+      ||
+      match mode with
+      | MODE_REMOVE_DEAD_FIXMES _ -> true
+      | _ -> false);
+    save_64bit = !save_64bit;
+    save_human_readable_64bit_dep_map = !save_human_readable_64bit_dep_map;
+    output_json = !output_json;
+    output_jsonl = !output_jsonl;
+    prechecked = !prechecked;
+    mini_state = !mini_state;
+    root;
+    sort_results = !sort_results;
+    stdin_name = !stdin_name;
+    deadline = Option.map ~f:(fun t -> Unix.time () +. t) !timeout;
+    watchman_debug_logging = !watchman_debug_logging;
+    allow_non_opt_build = !allow_non_opt_build;
+    desc = !desc;
+    is_interactive;
+    warning_switches = List.rev !warning_switches;
+    dump_config = !dump_config;
+    find_my_tests_max_distance = !find_my_tests_max_distance;
+    find_my_tests_max_test_files = !find_my_tests_max_test_files;
+  }
+
+let parse_start_env command ~from_default =
   let usage =
     Printf.sprintf
       "Usage: %s %s [OPTION]... [WWW-ROOT]\n%s a Hack server\n\nWWW-ROOT is assumed to be current directory if unspecified\n"
@@ -856,19 +943,18 @@ let parse_start_env command =
       command
       (String.capitalize command)
   in
-  let log_inference_constraints = ref false in
   let no_load = ref false in
   let watchman_debug_logging = ref false in
-  let ai_mode = ref None in
   let ignore_hh_version = ref false in
   let saved_state_ignore_hhconfig = ref false in
   let prechecked = ref None in
   let mini_state = ref None in
-  let from = ref "" in
+  let from = ref from_default in
   let config = ref [] in
   let custom_hhi_path = ref None in
   let custom_telemetry_data = ref [] in
   let allow_non_opt_build = ref false in
+  let preexisting_warnings = ref false in
   let wait_deprecation_msg () =
     Printf.eprintf
       "WARNING: --wait is deprecated, does nothing, and will be going away soon!\n%!"
@@ -876,19 +962,12 @@ let parse_start_env command =
   let options =
     [
       (* Please keep these sorted in the alphabetical order *)
-      ("--ai", Arg.String (fun x -> ai_mode := Some x), " run ai with options ");
       Common_argspecs.allow_non_opt_build allow_non_opt_build;
       Common_argspecs.config config;
       Common_argspecs.custom_hhi_path custom_hhi_path;
       Common_argspecs.custom_telemetry_data custom_telemetry_data;
       Common_argspecs.from from;
-      ( "--ignore-hh-version",
-        Arg.Set ignore_hh_version,
-        " ignore hh_version check when loading saved states (default: false)" );
-      ( "--log-inference-constraints",
-        Arg.Set log_inference_constraints,
-        " (for hh debugging purpose only) log type"
-        ^ " inference constraints into external logger (e.g. Scuba)" );
+      Common_argspecs.ignore_hh_version ignore_hh_version;
       ("--no-load", Arg.Set no_load, " start from a fresh state");
       Common_argspecs.no_prechecked prechecked;
       Common_argspecs.prechecked prechecked;
@@ -896,30 +975,19 @@ let parse_start_env command =
       ( "--profile-log",
         Arg.Unit (fun () -> config := ("profile_log", "true") :: !config),
         " enable profile logging" );
-      ( "--saved-state-ignore-hhconfig",
-        Arg.Set saved_state_ignore_hhconfig,
-        " ignore hhconfig hash when loading saved states (default: false)" );
+      Common_argspecs.saved_state_ignore_hhconfig saved_state_ignore_hhconfig;
       ( "--wait",
         Arg.Unit wait_deprecation_msg,
         " this flag is deprecated and does nothing!" );
       Common_argspecs.watchman_debug_logging watchman_debug_logging;
+      Common_argspecs.preexisting_warnings preexisting_warnings;
       (* Please keep these sorted in the alphabetical order *)
     ]
   in
   let args = parse_without_command options usage command in
-  let root =
-    match args with
-    | [] -> Wwwroot.get None
-    | [x] -> Wwwroot.get (Some x)
-    | _ ->
-      Printf.fprintf
-        stderr
-        "Error: please provide at most one www directory\n%!";
-      exit 1
-  in
+  let root = Wwwroot.interpret_command_line_root_parameter args in
   {
-    ClientStart.ai_mode = !ai_mode;
-    config = !config;
+    ClientStart.config = !config;
     custom_hhi_path = !custom_hhi_path;
     custom_telemetry_data = !custom_telemetry_data;
     exit_on_failure = true;
@@ -928,7 +996,6 @@ let parse_start_env command =
     saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
     save_64bit = None;
     save_human_readable_64bit_dep_map = None;
-    log_inference_constraints = !log_inference_constraints;
     no_load = !no_load;
     prechecked = !prechecked;
     mini_state = !mini_state;
@@ -936,31 +1003,29 @@ let parse_start_env command =
     silent = false;
     watchman_debug_logging = !watchman_debug_logging;
     allow_non_opt_build = !allow_non_opt_build;
+    preexisting_warnings = !preexisting_warnings;
   }
 
-let parse_start_args () = CStart (parse_start_env "start")
+let parse_saved_state_project_metadata_args ~from_default =
+  CSavedStateProjectMetadata
+    (parse_check_args CKSavedStateProjectMetadata ~from_default)
 
-let parse_restart_args () = CRestart (parse_start_env "restart")
+let parse_start_args ~from_default =
+  CStart (parse_start_env "start" ~from_default)
 
-let parse_stop_args () =
+let parse_restart_args ~from_default =
+  CRestart (parse_start_env "restart" ~from_default)
+
+let parse_stop_args ~from_default =
   let usage =
     Printf.sprintf
       "Usage: %s stop [OPTION]... [WWW-ROOT]\nStop a hack server\n\nWWW-ROOT is assumed to be current directory if unspecified\n"
       Sys.argv.(0)
   in
-  let from = ref "" in
+  let from = ref from_default in
   let options = [Common_argspecs.from from] in
   let args = parse_without_command options usage "stop" in
-  let root =
-    match args with
-    | [] -> Wwwroot.get None
-    | [x] -> Wwwroot.get (Some x)
-    | _ ->
-      Printf.fprintf
-        stderr
-        "Error: please provide at most one www directory\n%!";
-      exit 1
-  in
+  let root = Wwwroot.interpret_command_line_root_parameter args in
   CStop { ClientStop.root; from = !from }
 
 let parse_lsp_args () =
@@ -971,14 +1036,32 @@ let parse_lsp_args () =
   in
   let from = ref "" in
   let config = ref [] in
+  let disable_format_on_save = ref false in
+  let notebook_mode = ref false in
   let verbose = ref false in
+  let ignore_hh_version = ref false in
+  let naming_table = ref None in
+  let warnings_saved_state_path = ref None in
   let options =
     [
       Common_argspecs.from from;
       Common_argspecs.config config;
+      ( "--disable-format-on-save",
+        Arg.Set disable_format_on_save,
+        " disable `textDocument/willSaveWaitUntil` handling of format-on-save"
+      );
       (* Please keep these sorted in the alphabetical order *)
       ("--enhanced-hover", Arg.Unit (fun () -> ()), " [legacy] no-op");
       ("--ffp-autocomplete", Arg.Unit (fun () -> ()), " [legacy] no-op");
+      Common_argspecs.ignore_hh_version ignore_hh_version;
+      Common_argspecs.naming_table naming_table;
+      ( "--warnings-saved-state",
+        Arg.String (fun s -> warnings_saved_state_path := Some (Path.make s)),
+        " path to the warnings saved state" );
+      ( "--notebook-mode",
+        Arg.Set notebook_mode,
+        " enable notebook mode, which is designed for use in notebooks. For example, this mode enables top-level statements."
+      );
       ("--ranked-autocomplete", Arg.Unit (fun () -> ()), " [legacy] no-op");
       ("--serverless-ide", Arg.Unit (fun () -> ()), " [legacy] no-op");
       ( "--verbose",
@@ -988,11 +1071,19 @@ let parse_lsp_args () =
     ]
   in
   let args = parse_without_command options usage "lsp" in
-  match args with
-  | [] -> CLsp { ClientLsp.from = !from; config = !config; verbose = !verbose }
-  | _ ->
-    Printf.printf "%s\n" usage;
-    exit 2
+  let root = Wwwroot.interpret_command_line_root_parameter args in
+  CLsp
+    {
+      ClientLsp.from = !from;
+      config = !config;
+      disable_format_on_save = !disable_format_on_save;
+      ignore_hh_version = !ignore_hh_version;
+      naming_table = !naming_table;
+      warnings_saved_state_path = !warnings_saved_state_path;
+      notebook_mode = !notebook_mode;
+      verbose = !verbose;
+      root_from_cli = root;
+    }
 
 let parse_rage_args () =
   let usage =
@@ -1015,14 +1106,7 @@ let parse_rage_args () =
     ]
   in
   let args = parse_without_command options usage "rage" in
-  let root =
-    match args with
-    | [] -> Wwwroot.get None
-    | [x] -> Wwwroot.get (Some x)
-    | _ ->
-      Printf.printf "%s\n" usage;
-      exit 2
-  in
+  let root = Wwwroot.interpret_command_line_root_parameter args in
   (* hh_client normally handles Ctrl+C by printing an exception-stack.
      But for us, in an interactive prompt, Ctrl+C is an unexceptional way to quit. *)
   Sys_utils.set_signal Sys.sigint Sys.Signal_default;
@@ -1116,6 +1200,37 @@ let parse_rage_args () =
       lsp_log = !lsp_log;
     }
 
+let parse_decompress_zhhdg_args () =
+  let usage =
+    Printf.sprintf
+      {|Usage: %s decompress-zhhdg --path [PATH]
+
+Decompress a .zhhdg file by running the depgraph decompressor, and write a .hhdg file in the same directory.
+|}
+      Sys.argv.(0)
+  in
+  let from = ref "" in
+  let path = ref "" in
+  let options =
+    Arg.align
+      [
+        Common_argspecs.from from;
+        ( "--path",
+          Arg.String (fun arg -> path := arg),
+          " The path on disk to the .zhhdg file" );
+      ]
+  in
+  let _args = parse_without_command options usage "decompress-zhhdg" in
+  let path =
+    match !path with
+    | "" ->
+      print_endline "The '--path' option is required.";
+      exit 2
+    | p -> p
+  in
+  let from = !from in
+  CDecompressZhhdg { ClientDecompressZhhdg.path; from }
+
 let parse_download_saved_state_args () =
   let usage =
     Printf.sprintf
@@ -1125,26 +1240,23 @@ Download a saved-state to disk for the given repository, to make future
 invocations of `hh` faster.|}
       Sys.argv.(0)
   in
-  let valid_types_message =
-    "Valid values are: naming-and-dep-table, naming-table"
-  in
 
   let from = ref "" in
-  let saved_state_type = ref None in
   let should_save_replay = ref false in
   let replay_token = ref None in
+  let saved_state_manifold_api_key = ref None in
   let options =
     Arg.align
       [
         Common_argspecs.from from;
-        ( "--type",
-          Arg.String (fun arg -> saved_state_type := Some arg),
-          Printf.sprintf
-            " The type of saved-state to download. %s"
-            valid_types_message );
+        ("--type", Arg.String (fun _ -> ()), " (unused)");
         ( "--save-replay",
           Arg.Set should_save_replay,
           " Produce a token that can be later consumed by --replay-token to replay the same saved-state download."
+        );
+        ( "--saved-state-manifold-api-key",
+          Arg.String (fun arg -> saved_state_manifold_api_key := Some arg),
+          " An API key for Manifold to use when downloading the specified saved state."
         );
         ( "--replay-token",
           Arg.String (fun arg -> replay_token := Some arg),
@@ -1155,10 +1267,10 @@ invocations of `hh` faster.|}
   let args = parse_without_command options usage "download-saved-state" in
   let root =
     match args with
-    | [x] -> Wwwroot.get (Some x)
-    | _ ->
+    | [] ->
       print_endline usage;
       exit 2
+    | _ -> Wwwroot.interpret_command_line_root_parameter args
   in
   let from =
     match !from with
@@ -1167,39 +1279,29 @@ invocations of `hh` faster.|}
       exit 2
     | from -> from
   in
-  let saved_state_type =
-    match !saved_state_type with
-    | None ->
-      Printf.printf "The '--type' option is required. %s\n" valid_types_message;
-      exit 2
-    | Some "naming-and-dep-table" ->
-      ClientDownloadSavedState.Naming_and_dep_table { naming_sqlite = false }
-    | Some "naming-table" -> ClientDownloadSavedState.Naming_table
-    | Some saved_state_type ->
-      Printf.printf
-        "Unrecognized value '%s' for '--type'. %s\n"
-        saved_state_type
-        valid_types_message;
-      exit 2
-  in
   CDownloadSavedState
     {
       ClientDownloadSavedState.root;
       from;
-      saved_state_type;
+      saved_state_manifold_api_key = !saved_state_manifold_api_key;
       should_save_replay = !should_save_replay;
       replay_token = !replay_token;
     }
 
-let parse_args () : command =
+let parse_args ~(from_default : string) : command =
   match parse_command () with
-  | (CKNone | CKCheck) as cmd -> parse_check_args cmd
-  | CKStart -> parse_start_args ()
-  | CKStop -> parse_stop_args ()
-  | CKRestart -> parse_restart_args ()
-  | CKLsp -> parse_lsp_args ()
-  | CKRage -> parse_rage_args ()
-  | CKDownloadSavedState -> parse_download_saved_state_args ()
+  | CKNone
+  | CKCheck ->
+    With_config (CCheck (parse_check_args CKCheck ~from_default))
+  | CKStart -> With_config (parse_start_args ~from_default)
+  | CKStop -> With_config (parse_stop_args ~from_default)
+  | CKRestart -> With_config (parse_restart_args ~from_default)
+  | CKLsp -> With_config (parse_lsp_args ())
+  | CKRage -> With_config (parse_rage_args ())
+  | CKSavedStateProjectMetadata ->
+    With_config (parse_saved_state_project_metadata_args ~from_default)
+  | CKDownloadSavedState -> With_config (parse_download_saved_state_args ())
+  | CKDecompressZhhdg -> Without_config (parse_decompress_zhhdg_args ())
 
 let root = function
   | CCheck { ClientEnv.root; _ }
@@ -1207,17 +1309,36 @@ let root = function
   | CRestart { ClientStart.root; _ }
   | CStop { ClientStop.root; _ }
   | CRage { ClientRage.root; _ }
+  | CSavedStateProjectMetadata { ClientEnv.root; _ }
   | CDownloadSavedState { ClientDownloadSavedState.root; _ } ->
-    Some root
-  | CLsp _ -> None
+    root
+  | CLsp { ClientLsp.root_from_cli; _ } -> root_from_cli
 
 let config = function
   | CCheck { ClientEnv.config; _ }
   | CStart { ClientStart.config; _ }
   | CRestart { ClientStart.config; _ }
-  | CLsp { ClientLsp.config; _ } ->
+  | CLsp { ClientLsp.config; _ }
+  | CSavedStateProjectMetadata { ClientEnv.config; _ } ->
     Some config
   | CStop _
   | CDownloadSavedState _
   | CRage _ ->
     None
+
+let from = function
+  | CCheck { ClientEnv.from; _ }
+  | CStart { ClientStart.from; _ }
+  | CRestart { ClientStart.from; _ }
+  | CLsp { ClientLsp.from; _ }
+  | CSavedStateProjectMetadata { ClientEnv.from; _ }
+  | CStop { ClientStop.from; _ }
+  | CDownloadSavedState { ClientDownloadSavedState.from; _ }
+  | CRage { ClientRage.from; _ } ->
+    from
+
+let dump_config = function
+  | CCheck { ClientEnv.dump_config; _ } -> dump_config
+  | _ -> false
+
+let is_interactive cmd = from cmd |> is_interactive

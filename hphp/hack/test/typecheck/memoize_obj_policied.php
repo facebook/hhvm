@@ -45,5 +45,5 @@ function ok2(vec<Foo> $x)[globals] : void {}
 <<__Memoize>>
 function not_ok_policied(vec<Foo> $x)[zoned] : void {}
 
-<<__PolicyShardedMemoize>>
+<<__Memoize(#KeyedByIC)>>
 function ok_policied(vec<Foo> $x)[zoned] : void {}

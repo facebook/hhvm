@@ -1,10 +1,10 @@
 <?hh <<__EntryPoint>> function main(): void {
-$descriptors = darray[
-    0 => varray['pipe', 'r'],
-    1 => varray['pipe', 'w'],
-    2 => varray['pipe', 'w']];
+$descriptors = dict[
+    0 => vec['pipe', 'r'],
+    1 => vec['pipe', 'w'],
+    2 => vec['pipe', 'w']];
 
-$pipes = varray[];
+$pipes = vec[];
 
 $process = proc_open('/bin/sleep 120', $descriptors, inout $pipes);
 

@@ -1,5 +1,4 @@
-#ifndef GD_IO_H
-#define GD_IO_H 1
+#pragma once
 
 #include <stdio.h>
 
@@ -7,7 +6,7 @@
 #define Putchar gdPutchar
 #endif
 
-typedef struct gdIOCtx {
+struct gdIOCtx {
   int (*getC)(struct gdIOCtx*);
   int (*getBuf)(struct gdIOCtx*, void*, int);
 
@@ -20,9 +19,9 @@ typedef struct gdIOCtx {
   void  (*gd_free)(struct gdIOCtx*);
 
   void  *data;
-} gdIOCtx;
+};
 
-typedef struct gdIOCtx  *gdIOCtxPtr;
+using gdIOCtxPtr = struct gdIOCtx  *;
 
 void Putword(int w, gdIOCtx *ctx);
 void Putchar(int c, gdIOCtx *ctx);
@@ -40,5 +39,3 @@ int gdGetInt(int *result, gdIOCtx *ctx);
 
 int gdSeek(gdIOCtx *ctx, const int);
 long gdTell(gdIOCtx *ctx);
-
-#endif

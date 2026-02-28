@@ -1,6 +1,10 @@
 int(100)
+
+Warning: Method C::foo1 not marked dynamic in %s/prop_order_parens.php on line 31
 int(150)
 int(200)
+
+Warning: Method C::foo2 not marked dynamic in %s/prop_order_parens.php on line 35
 int(250)
 int(300)
 int(350)

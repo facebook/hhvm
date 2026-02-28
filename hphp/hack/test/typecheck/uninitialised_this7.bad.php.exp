@@ -1,0 +1,2 @@
+ERROR: File "uninitialised_this7.bad.php", line 9, characters 12-12:
+Read access to `$this->i` before initialization (Typing[4083])

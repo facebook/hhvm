@@ -1,0 +1,171 @@
+Program %s/flow_gen.php loaded. Type '[r]un' to go.
+run
+flow_gen.php loaded
+Program %s/flow_gen.php exited normally.
+break genFoo()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+break flow_gen.php:13
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+@test(1)
+Finished in genFoo
+int(10)
+int(2)
+
+cont
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'cont'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+step
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+step
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+run
+flow_gen.php loaded
+Program %s/flow_gen.php exited normally.
+quit

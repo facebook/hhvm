@@ -2,12 +2,12 @@
 
 
 <<__EntryPoint>>
-function main_290() {
-  $a = darray[0 => 10];
+function main_290() :mixed{
+  $a = dict[0 => 10];
   $a['test'] = 1;
   var_dump($a);
 
-  $a = darray(varray[10]);
+  $a = darray(vec[10]);
   $a['test'] = 1;
   var_dump($a);
 }

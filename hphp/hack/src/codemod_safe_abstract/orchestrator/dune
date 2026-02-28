@@ -1,0 +1,18 @@
+
+(executable
+ (name run_codemod_safe_abstract)
+ (modes exe)
+ (preprocess (pps ppx_yojson_conv))
+ (libraries
+    utils_core
+    default_injector_config
+    sys_utils
+    collections))
+
+(alias
+ (name codemod_safe_abstract_orchestrator)
+ (deps run_codemod_safe_abstract.exe ../codemod/codemod_safe_abstract.exe))
+
+(alias
+ (name run_codemod_safe_abstract)
+ (deps run_codemod_safe_abstract.exe ../codemod/codemod_safe_abstract.exe))

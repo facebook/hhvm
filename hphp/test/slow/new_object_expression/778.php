@@ -1,13 +1,13 @@
 <?hh
 
-function g() {
+function g() :mixed{
 }
-function h() {
+function h() :mixed{
 }
 class C {
 }
 
 <<__EntryPoint>>
-function main_778() {
+function main_778() :mixed{
 new C(g(), h());
 }

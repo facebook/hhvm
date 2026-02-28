@@ -61,8 +61,8 @@ let rec mkdir_p = function
       ~f:
         begin
           fun () ->
-          try Unix.mkdir d 0o777 with
-          | Unix.Unix_error (Unix.EEXIST, _, _) -> ()
+            try Unix.mkdir d 0o777 with
+            | Unix.Unix_error (Unix.EEXIST, _, _) -> ()
         end
       ~finally:(fun () -> ignore (Unix.umask old_mask))
   | d when Sys.is_directory d -> ()
@@ -110,12 +110,12 @@ let rec chmod ~(recursive : bool) (path : string) (mode : int) : unit =
     Unix.chmod path mode;
     if recursive then
       let contents = Sys.readdir path in
-      Core_kernel.List.iter
+      Core.List.iter
         ~f:
           begin
             fun name ->
-            let name = Filename.concat path name in
-            chmod ~recursive name mode
+              let name = Filename.concat path name in
+              chmod ~recursive name mode
           end
         (Array.to_list contents)
   | _ -> Unix.chmod path mode
@@ -128,13 +128,13 @@ let rec readpath (path : string) : string list =
   match stats.st_kind with
   | S_DIR ->
     let contents = Sys.readdir path in
-    Core_kernel.List.fold
+    Core.List.fold
       ~init:[]
       ~f:
         begin
           fun acc name ->
-          let name = Filename.concat path name in
-          List.rev_append acc (readpath name)
+            let name = Filename.concat path name in
+            List.rev_append acc (readpath name)
         end
       (Array.to_list contents)
   | S_REG -> [path]
@@ -160,16 +160,18 @@ let rec treesize path : int =
   | S_DIR ->
     let contents = Sys.readdir path in
     size
-    + Core_kernel.List.fold
+    + Core.List.fold
         ~init:0
         ~f:
           begin
             fun acc name ->
-            let name = Filename.concat path name in
-            acc + treesize name
+              let name = Filename.concat path name in
+              acc + treesize name
           end
         (Array.to_list contents)
   | S_REG -> size
   | _ -> 0
 
 let filemtime file = (Unix.stat file).Unix.st_mtime
+
+let is_real_disk = true

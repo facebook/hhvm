@@ -13,7 +13,7 @@
 echo "*** Testing array_diff() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$array = varray[1, 2];
+$array = vec[1, 2];
 
 //get heredoc
 $heredoc = <<<END
@@ -21,12 +21,12 @@ This is a heredoc
 END;
 
 //array of values to iterate over
-$values = darray[
+$values = dict[
 
-/*1*/"empty array" => varray[],
+/*1*/"empty array" => vec[],
 
 /*2*/
-"int" => varray[
+"int" => vec[
       // int data
       0,
       1,
@@ -34,7 +34,7 @@ $values = darray[
       -2345],
 
 /*3*/
-"float" => varray[
+"float" => vec[
       // float data
        10.5,
        -10.5,
@@ -43,13 +43,13 @@ $values = darray[
        .5],
 
 /*4*/
-"null" => varray[
+"null" => vec[
       // null data
       NULL,
       null],
 
 /*5*/
-"boolean" => varray[
+"boolean" => vec[
       // boolean data
       true,
       false,
@@ -57,20 +57,20 @@ $values = darray[
       FALSE],
 
 /*6*/
-"empty" => varray[
+"empty" => vec[
       // empty data
       "",
       ''],
 
 /*7*/
-"string" => varray[
+"string" => vec[
       // string data
       "string",
       'string',
       $heredoc],
 
 /*8*/
-"binary" => varray[
+"binary" => vec[
        // binary data
        b"binary",
        (string)"binary"]

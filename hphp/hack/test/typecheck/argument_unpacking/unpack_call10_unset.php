@@ -1,7 +1,7 @@
 <?hh
 
 function test(): void {
-  $args = varray["hello"];
+  $args = vec["hello"];
   // HHVM doesn't support unpacking into unset
   unset(...$args);
 }

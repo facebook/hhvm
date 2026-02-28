@@ -1,4 +1,4 @@
-/*
+ /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "memo-cache.h"
+#include "hphp/runtime/vm/memo-cache.h"
 
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -111,6 +111,10 @@ template <int N> struct EmptyHeader {
   // Always non-empty
   size_t startHash() const { always_assert(false); }
   void moved() {}
+  bool needsMixing() const { return false; }
+  FuncId getFuncId() const {
+    return FuncId::Invalid;
+  }
 };
 // Shared, fixed size case. The head just stores a FuncId (to distinguish
 // different functions), but the number of keys is a constant.
@@ -126,6 +130,10 @@ template <int N> struct FuncIdHeader {
   // Always non-empty
   size_t startHash() const { always_assert(false); }
   void moved() {}
+  bool needsMixing() const { return true; }
+  FuncId getFuncId() const {
+    return funcId;
+  }
   FuncId funcId;
 };
 // Generic case. Both the function and key count are stored (and are
@@ -141,6 +149,10 @@ struct GenericHeader {
   }
   size_t startHash() const { return id.asParam(); }
   void moved() { id.setKeyCount(0); }
+  bool needsMixing() const { return true; }
+  FuncId getFuncId() const {
+    return id.getFuncId();
+  }
   GenericMemoId id;
 };
 
@@ -204,6 +216,10 @@ template <int N, typename H> struct FixedStorage : private H {
     stringTags = castStringTags(o);
   }
 
+  FuncId getFuncId() const {
+    return header().getFuncId();
+  }
+
   // The key elements are a fixed size, and we use a bitset to know which ones
   // are strings.
   std::array<KeyElem, N> elems;
@@ -258,6 +274,10 @@ struct UnboundStorage {
   Header& header() { return header_; }
   const Header& header() const { return header_; }
 
+  FuncId getFuncId() const {
+    return header().getFuncId();
+
+  }
   // We don't store the int/string markers for keys in a compacted bitset, so we
   // can't take advantage of some optimizations.
   static constexpr bool HasStringTags = false;
@@ -339,15 +359,28 @@ template <typename S> struct Key {
     auto hash = storage.header().startHash(
       storage.elem(0).hash(storage.isString(0))
     );
-    // And then combine it with the rest of the hashes for the other key
-    // elements.
-    for (size_t i = 1; i < storage.size(); ++i) {
-      hash = combineHashes(
-        hash,
-        storage.elem(i).hash(storage.isString(i))
-      );
+    if (storage.size() > 1) {
+      // And then combine it with the rest of the hashes for the other key
+      // elements.
+      for (size_t i = 1; i < storage.size(); ++i) {
+        hash = combineHashes(
+          hash,
+          storage.elem(i).hash(storage.isString(i))
+        );
+      }
+      // Need to do the bit mix explicitly.
+      hash = hash_int64(hash);
+    } else if (storage.header().needsMixing() || !storage.isString(0)) {
+      // Single element, and the element itself is combined with another key,
+      // or the element is an int, so needs a final mix.
+      hash = hash_int64(hash);
     }
-    return hash;
+    return std::uint32_t(hash) | (std::size_t(hash) << 32);
+  }
+
+  FuncId getFuncId() const {
+    // storage contains header, which contains funcId in all shared caches
+    return storage.getFuncId();
   }
 
   TYPE_SCAN_CUSTOM() {
@@ -370,7 +403,7 @@ using UnboundKey = Key<UnboundStorage>;
  * KeyProxy is a wrapper around the pointer to the TypedValue array passed into the
  * get/set function. It allows us to do lookups in the memo cache without having
  * to move or transform those Cells. It comes in two flavors: KeyProxy, where
- * the key types are not known and must be checked at runtme, and
+ * the key types are not known and must be checked at runtime, and
  * KeyProxyWithTypes, where the key types are known statically.
  */
 struct KeyProxy {
@@ -389,10 +422,18 @@ struct KeyProxy {
     // Otherwise, combine the hash from the header and the first element, and
     // then combine that with the rest of the element hashes.
     auto hash = header.startHash(getHash(keys[0]));
-    for (size_t i = 1; i < header.size(); ++i) {
-      hash = combineHashes(hash, getHash(keys[i]));
+    if (header.size() > 1) {
+      for (size_t i = 1; i < header.size(); ++i) {
+        hash = combineHashes(hash, getHash(keys[i]));
+      }
+      // Need to explicitly mix.
+      hash = hash_int64(hash);
+    } else if (header.needsMixing() || isIntType(keys[0].m_type)) {
+      // Single element, and the element itself is combined with another key,
+      // or the element is an int, so needs a final mix.
+      hash = hash_int64(hash);
     }
-    return hash;
+    return std::uint32_t(hash) | (std::size_t(hash) << 32);
   }
 
   template <typename S>
@@ -438,7 +479,11 @@ struct KeyProxyWithTypes {
   template <typename H>
   size_t hash(H header) const {
     assertx(header.size() == Size);
-    return Next{keys}.template hashRec<1>(header.startHash(hashAt<0>()));
+    auto hash = Next{keys}.template hashRec<1>(header.startHash(hashAt<0>()));
+    // Need to explicitly mix since there's at least 2 elements, so hashCombine
+    // hash been called.
+    hash = hash_int64(hash);
+    return std::uint32_t(hash) | (std::size_t(hash) << 32);
   }
 
   template <typename S>
@@ -501,7 +546,7 @@ struct KeyProxyWithTypes {
     assertx(!IsStr || isStringType(keys[N].m_type));
     assertx(IsStr || isIntType(keys[N].m_type));
     return IsStr ? keys[N].m_data.pstr->hash() : keys[N].m_data.num;
-  };
+  }
 
   static constexpr std::bitset<Size> makeBitset() {
     std::bitset<Size> b;
@@ -523,7 +568,11 @@ template <bool IsStr> struct KeyProxyWithTypes<IsStr> {
   template <typename H>
   size_t hash(H header) const {
     assertx(header.size() == 1);
-    return header.startHash(hashAt<0>());
+    auto hash = header.startHash(hashAt<0>());
+    if (header.needsMixing() || !IsStr) {
+      hash = hash_int64(hash);
+    }
+    return std::uint32_t(hash) | (std::size_t(hash) << 32);
   }
 
   template <typename S>
@@ -583,7 +632,7 @@ template <bool IsStr> struct KeyProxyWithTypes<IsStr> {
     assertx(!IsStr || isStringType(keys[N].m_type));
     assertx(IsStr || isIntType(keys[N].m_type));
     return IsStr ? keys[N].m_data.pstr->hash() : keys[N].m_data.num;
-  };
+  }
 
   static constexpr std::bitset<1> makeBitset() {
     std::bitset<1> b;
@@ -615,6 +664,8 @@ template <typename K> struct KeyEquals {
 
 template <typename K> struct KeyHasher {
   using is_transparent = void;
+  using folly_is_avalanching = std::true_type;
+  using folly_assume_32bit_hash = std::true_type;
 
   template <typename P>
   size_t operator()(std::tuple<typename K::Header, P> k) const {
@@ -625,6 +676,9 @@ template <typename K> struct KeyHasher {
 
 // The SharedOnlyKey has already been hashed, so its an identity here.
 struct SharedOnlyKeyHasher {
+  using folly_is_avalanching = std::true_type;
+  using folly_assume_32bit_hash = std::true_type;
+
   size_t operator()(SharedOnlyKey k) const { return k; }
 };
 
@@ -649,26 +703,6 @@ struct TVWrapper {
 
 ////////////////////////////////////////////////////////////
 
-}
-
-}
-
-namespace folly {
-
-// Mark the SharedOnlyKeyHasher as avalanching so that F14 doesn't use the bit
-// mixer on it.
-template <typename K>
-struct IsAvalanchingHasher<HPHP::memoCacheDetail::SharedOnlyKeyHasher, K>
-  : std::true_type {};
-
-}
-
-namespace HPHP {
-
-namespace memoCacheDetail {
-
-////////////////////////////////////////////////////////////
-
 // For the specialized and generic caches
 template <typename K> struct MemoCache : MemoCacheBase {
   using Cache = folly::F14ValueMap<
@@ -686,6 +720,11 @@ template <typename K> struct MemoCache : MemoCacheBase {
   MemoCache& operator=(const MemoCache&) = delete;
   MemoCache& operator=(MemoCache&&) = delete;
 
+  void heapSizesPerCacheEntry(std::vector<PerCacheInfo>& entries) const override {
+    for (auto const& p : cache) {
+      entries.push_back({p.first.getFuncId(), sizeof(p), p.second.value});
+    }
+  }
   TYPE_SCAN_CUSTOM() {
     using value_type = typename Cache::value_type; // pair
     cache.visitContiguousRanges(
@@ -712,6 +751,11 @@ struct SharedOnlyMemoCache : MemoCacheBase {
   SharedOnlyMemoCache& operator=(const SharedOnlyMemoCache&) = delete;
   SharedOnlyMemoCache& operator=(SharedOnlyMemoCache&&) = delete;
 
+  void heapSizesPerCacheEntry(std::vector<PerCacheInfo>& entries) const override {
+    for (auto const& p : cache) {
+      entries.push_back({unmakeSharedOnlyKey(p.first), sizeof(p), p.second.value});
+    }
+  }
   TYPE_SCAN_CUSTOM() {
     using value_type = typename Cache::value_type; // pair
     cache.visitContiguousRanges(
@@ -958,7 +1002,7 @@ struct Name##Builder<M,                                                 \
       } else {                                                          \
         return FromTypes<N-1, IsStr..., false>::get(types, count);      \
       }                                                                 \
-    };                                                                  \
+    }                                                                   \
   };                                                                    \
                                                                         \
   template <bool... IsStr>                                              \
@@ -996,10 +1040,10 @@ template <> struct Name##Builder<0> {                                   \
 };
 
 // Actually create the builders
-O(MemoCacheGetter, MemoCacheGet, memoCacheGet);
-O(MemoCacheSetter, MemoCacheSet, memoCacheSet);
-O(SharedMemoCacheGetter, MemoCacheGetShared, memoCacheGetShared);
-O(SharedMemoCacheSetter, MemoCacheSetShared, memoCacheSetShared);
+O(MemoCacheGetter, MemoCacheGet, memoCacheGet)
+O(MemoCacheSetter, MemoCacheSet, memoCacheSet)
+O(SharedMemoCacheGetter, MemoCacheGetShared, memoCacheGetShared)
+O(SharedMemoCacheSetter, MemoCacheSetShared, memoCacheSetShared)
 
 #undef O
 

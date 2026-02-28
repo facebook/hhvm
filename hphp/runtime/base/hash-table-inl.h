@@ -14,6 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef incl_HPHP_HASH_TABLE_INL_H_
+#error "hash-table-inl.h should only be included by hash-table.h"
+#endif
+
+#include "hphp/util/assertions.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/portability.h"
 
 namespace HPHP {
@@ -265,7 +271,7 @@ typename HashTable<ArrayType, ElmType>::Inserter
 HashTable<ArrayType, ElmType>::findForNewInsertWarn(int32_t* table,
                                                     size_t mask,
                                                     hash_t h0) const {
-  uint64_t balanceLimit = RuntimeOption::MaxArrayChain;
+  uint64_t balanceLimit = Cfg::Server::MaxArrayChain;
   for (uint64_t i = 1, probe = (uint32_t)h0 & mask;; ++i) {
     auto ei = &table[probe];
     if (!validPos(*ei)) {

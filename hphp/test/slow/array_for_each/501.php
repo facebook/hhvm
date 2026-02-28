@@ -1,14 +1,14 @@
 <?hh
 
-function main() {
+function main() :mixed{
   echo "Entering main\n";
-  foreach (darray[1 => 1] as $k => $v) {
+  foreach (dict[1 => 1] as $k => $v) {
     break;
   }
   echo "Leaving main\n";
 }
 
 <<__EntryPoint>>
-function main_501() {
+function main_501() :mixed{
 main();
 }

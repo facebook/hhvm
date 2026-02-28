@@ -19,23 +19,18 @@
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/debugger/break_point.h"
 #include "hphp/runtime/debugger/debugger.h"
-#include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/async-flow-stepper.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
-#include "hphp/runtime/vm/jit/mcgen.h"
-#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/pc-filter.h"
-#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/util/logger.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debuggerflow);
+TRACE_SET_MOD(debuggerflow)
 
 using StepOutState = RequestInjectionData::StepOutState;
 
@@ -56,11 +51,7 @@ void DebuggerHook::detach(RequestInfo* ti /* = nullptr */) {
 
   if (ti == &RI()) {
     // Clear the pc filters.  We can only do this for the current thread.
-    ti->m_reqInjectionData.m_breakPointFilter.clear();
-    ti->m_reqInjectionData.m_flowFilter.clear();
-    ti->m_reqInjectionData.m_lineBreakPointFilter.clear();
-    ti->m_reqInjectionData.m_callBreakPointFilter.clear();
-    ti->m_reqInjectionData.m_retBreakPointFilter.clear();
+    ti->m_reqInjectionData.clearPCFilters();
   }
 
   // Disble function entry/exit events
@@ -76,6 +67,14 @@ void DebuggerHook::detach(RequestInfo* ti /* = nullptr */) {
 Mutex DebuggerHook::s_lock;
 int DebuggerHook::s_numAttached {0};
 DebuggerHook* DebuggerHook::s_activeHook {nullptr};
+rds::Link<bool, rds::Mode::Normal> DebuggerHook::s_exceptionBreakpointIntr;
+
+//////////////////////////////////////////////////////////////////////////
+
+void markFunctionWithDebuggerIntr(const Func* f) {
+  f->ensureDebuggerIntrSetLinkBound();
+  f->debuggerIntrSetLink().markInit();
+}
 
 //////////////////////////////////////////////////////////////////////////
 // Hooks
@@ -86,7 +85,8 @@ DebuggerHook* DebuggerHook::s_activeHook {nullptr};
 // lets the opcode execute.
 void phpDebuggerOpcodeHook(const unsigned char* pc) {
   VMRegAnchor anchor;
-  TRACE(5, "in phpDebuggerOpcodeHook() with pc %p\n", pc);
+  TRACE(5, "in phpDebuggerOpcodeHook() with pc %p, function %s\n",
+        pc, vmfp()->func()->fullName()->data());
   // Short-circuit when we're doing things like evaling PHP for print command,
   // or conditional breakpoints.
   if (UNLIKELY(g_context->m_dbgNoBreak)) {
@@ -194,11 +194,9 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
     }
   }
 
-  // If the current state is OUT and we are still at a stack level less than the
-  // original, then we skip over the PopC opcode if it exists and then break
-  // (matching hphpd).
+  // If the current state is OUT, then we skip over the PopC opcode
+  // if it exists and then break (matching hphpd).
   if (UNLIKELY(req_data.getDebuggerStepOut() == StepOutState::Out &&
-      curStackDisp == StackDepthDisposition::Shallower &&
       peek_op(pc) != OpPopC)) {
     req_data.setDebuggerStepOut(StepOutState::None);
     if (!req_data.getDebuggerNext()) {
@@ -234,18 +232,28 @@ void phpDebuggerRequestInitHook() {
 
 // Hook called on function entry. Since function entry breakpoints are handled
 // by onOpcode, this just handles pushing the active line breakpoint
-void phpDebuggerFuncEntryHook(const ActRec* /*ar*/) {
-  VMRegAnchor anchor;
-  RID().pushActiveLineBreak();
+void phpDebuggerFuncEntryHook(const ActRec* ar, bool isResume) {
+  auto &req_data = RID();
+  req_data.pushActiveLineBreak();
+  TRACE(4, "in phpDebuggerFuncEntryHook()\n");
+  TRACE(4, "Func: %s, isResume: %d, flow depth: %d, stack depth: %lu\n",
+            ar->func()->fullName()->data(), isResume,
+            req_data.getDebuggerFlowDepth(), req_data.getDebuggerStackDepth());
+  if (!isResume && req_data.getDebuggerStepOut() == StepOutState::Out) {
+    req_data.setDebuggerStepOut(StepOutState::Stepping);
+  }
 }
 
 // Hook called on function exit. onOpcode handles function exit breakpoints,
 // this just handles stack-related manipulations. This handles returns,
 // suspends, and exceptions.
-void phpDebuggerFuncExitHook(const ActRec* /*ar*/) {
-  VMRegAnchor anchor;
+void phpDebuggerFuncExitHook(const ActRec* ar, bool isSuspend) {
   auto& req_data = RID();
   req_data.popActiveLineBreak();
+  TRACE(4, "in phpDebuggerFuncExitHook()\n");
+  TRACE(4, "Func: %s, isSuspend: %d, flow depth: %d, stack depth: %lu\n",
+            ar->func()->fullName()->data(), isSuspend,
+            req_data.getDebuggerFlowDepth(), req_data.getDebuggerStackDepth());
 
   // If the step out command is active and if our stack depth has decreased,
   // we are out of the function being stepped out of
@@ -274,7 +282,8 @@ void phpDebuggerExceptionThrownHook(ObjectData* exception) {
 void phpDebuggerExceptionHandlerHook() noexcept {
   try {
     VMRegAnchor anchor;
-    TRACE(5, "in phpDebuggerExceptionHandlerHook()\n");
+    TRACE(5, "in phpDebuggerExceptionHandlerHook() with function %s\n",
+          vmfp() ? vmfp()->func()->fullName()->data() : "");
     if (UNLIKELY(g_context->m_dbgNoBreak)) {
       TRACE(5, "NoBreak flag is on\n");
       return;
@@ -373,6 +382,10 @@ void phpDebuggerStepIn() {
   auto flow_filter = getFlowFilter();
   flow_filter->clear();
 
+  // Initialize flow depth to current stack depth to ensure correct
+  // stack disposition calculations in phpDebuggerOpcodeHook
+  req_data.setDebuggerFlowDepth(req_data.getDebuggerStackDepth());
+
   // Check if the site is valid.
   ActRec* fp = vmfp();
   PC pc = vmpc();
@@ -462,6 +475,17 @@ void phpDebuggerNext() {
 void phpAddBreakPoint(const Func* f, Offset offset) {
   PC pc = f->at(offset);
   getBreakPointFilter()->addPC(pc);
+  markFunctionWithDebuggerIntr(f);
+}
+
+void phpSetExceptionBreakpoint(VSDEBUG::ExceptionBreakMode mode) {
+  auto& link = DebuggerHook::s_exceptionBreakpointIntr;
+  assertx(link.bound());
+  if (mode == VSDEBUG::ExceptionBreakMode::BreakNone) {
+    link.markUninit();
+  } else {
+    link.markInit();
+  }
 }
 
 void phpAddBreakPointFuncEntry(const Func* f) {
@@ -476,6 +500,7 @@ void phpAddBreakPointFuncEntry(const Func* f) {
 
   // Add to the breakpoint filter and the func entry filter
   getBreakPointFilter()->addPC(pc);
+  markFunctionWithDebuggerIntr(f);
   RID().m_callBreakPointFilter.addPC(pc);
 }
 
@@ -492,6 +517,7 @@ void phpAddBreakPointFuncExit(const Func* f) {
     getBreakPointFilter()->addPC(pc);
     RID().m_retBreakPointFilter.addPC(pc);
   }
+  markFunctionWithDebuggerIntr(f);
 }
 
 bool phpAddBreakPointLine(const Unit* unit, int line) {
@@ -501,30 +527,30 @@ bool phpAddBreakPointLine(const Unit* unit, int line) {
     return false;
   }
 
-  // One source line may refer to multiple bytecodes. We want to set the
-  // breakpoint only on the first bytecode. There are two exeptions:
-  // 1. If the first bytecode is EntryNop, set the breakpoint at the next
-  // bytecode because EntryOp is outside the loop the source line refers to.
-  // 2. If the bytecodes refer to different functions, set breakpoints on
-  // one bytecode of each function. This can happen for lambdas.
+  // One source line may refer to multiple blocks of bytecodes, possibly in
+  // different functions (in case of lambdas).
+  // We want to set the breakpoint only on the first bytecode of each block,
+  // unless they are overlapping or contiguous.
   // Add to the breakpoint filter and the line filter.
   assertx(funcOffsets.size() > 0);
-  DEBUG_ONLY std::unordered_set<const Func*> seenFuncs;
   for (auto const& offsets : funcOffsets) {
     auto f = offsets.first;
-    assertx(seenFuncs.find(f) == seenFuncs.end());
-    for (auto const offset : offsets.second) {
+    auto currPast = -1;
+    // offsets are sorted.
+    for (auto const& offset : offsets.second) {
       auto bpOffset = offset.base;
-      auto op = f->getOp(bpOffset);
-      if (op != Op::EntryNop) {
-        TRACE(3, "Adding breakpoint at %s::%d, Op %s.\n",
-              f->name()->data(), bpOffset, opcodeToName(op));
-        phpAddBreakPoint(f, bpOffset);
-        auto pc = f->at(bpOffset);
-        RID().m_lineBreakPointFilter.addPC(pc);
-        if (debug) seenFuncs.insert(f);
-        break;
+      if (bpOffset <= currPast) {
+        // Overlapping or contiguous bytecode blocks for the same source line.
+        // Do not add a breakpoint, only update the currPast.
+        currPast = offset.past > currPast ? offset.past : currPast;
+        continue;
       }
+      currPast = offset.past;
+      TRACE(3, "Adding breakpoint at %s::%d, Op %s.\n",
+            f->name()->data(), bpOffset, opcodeToName(f->getOp(bpOffset)));
+      phpAddBreakPoint(f, bpOffset);
+      auto pc = f->at(bpOffset);
+      RID().m_lineBreakPointFilter.addPC(pc);
     }
   }
   return true;

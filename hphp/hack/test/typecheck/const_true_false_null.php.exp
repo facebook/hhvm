@@ -1,0 +1,36 @@
+ERROR: File "const_true_false_null.php", line 3, characters 11-14:
+Name already bound: `TRUE` (Naming[2012])
+  File "stdlib/builtins_constant.hhi", line 10, characters 1-16:
+  Previous definition is here
+  File "const_true_false_null.php", line 3, characters 11-14:
+  This appears to be defined in an hhi file included in your project root. The hhi files for the standard library are now a part of the typechecker and must be removed from your project. Typically, you can do this by deleting the "hhi" directory you copied into your project when first starting with Hack.
+ERROR: File "const_true_false_null.php", line 4, characters 11-14:
+Name already bound: `true` (Naming[2012])
+  File "stdlib/builtins_constant.hhi", line 11, characters 1-16:
+  Previous definition is here
+  File "const_true_false_null.php", line 4, characters 11-14:
+  This appears to be defined in an hhi file included in your project root. The hhi files for the standard library are now a part of the typechecker and must be removed from your project. Typically, you can do this by deleting the "hhi" directory you copied into your project when first starting with Hack.
+ERROR: File "const_true_false_null.php", line 5, characters 11-15:
+Name already bound: `FALSE` (Naming[2012])
+  File "stdlib/builtins_constant.hhi", line 12, characters 1-17:
+  Previous definition is here
+  File "const_true_false_null.php", line 5, characters 11-15:
+  This appears to be defined in an hhi file included in your project root. The hhi files for the standard library are now a part of the typechecker and must be removed from your project. Typically, you can do this by deleting the "hhi" directory you copied into your project when first starting with Hack.
+ERROR: File "const_true_false_null.php", line 6, characters 11-15:
+Name already bound: `false` (Naming[2012])
+  File "stdlib/builtins_constant.hhi", line 13, characters 1-17:
+  Previous definition is here
+  File "const_true_false_null.php", line 6, characters 11-15:
+  This appears to be defined in an hhi file included in your project root. The hhi files for the standard library are now a part of the typechecker and must be removed from your project. Typically, you can do this by deleting the "hhi" directory you copied into your project when first starting with Hack.
+ERROR: File "const_true_false_null.php", line 7, characters 11-14:
+Name already bound: `NULL` (Naming[2012])
+  File "stdlib/builtins_constant.hhi", line 14, characters 1-16:
+  Previous definition is here
+  File "const_true_false_null.php", line 7, characters 11-14:
+  This appears to be defined in an hhi file included in your project root. The hhi files for the standard library are now a part of the typechecker and must be removed from your project. Typically, you can do this by deleting the "hhi" directory you copied into your project when first starting with Hack.
+ERROR: File "const_true_false_null.php", line 8, characters 11-14:
+Name already bound: `null` (Naming[2012])
+  File "stdlib/builtins_constant.hhi", line 15, characters 1-16:
+  Previous definition is here
+  File "const_true_false_null.php", line 8, characters 11-14:
+  This appears to be defined in an hhi file included in your project root. The hhi files for the standard library are now a part of the typechecker and must be removed from your project. Typically, you can do this by deleting the "hhi" directory you copied into your project when first starting with Hack.

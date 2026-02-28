@@ -12,13 +12,16 @@ abstract class FilterIterator<Tv> extends IteratorIterator<Tv> {
 
   // Methods
   public function __construct(Iterator<Tv> $it);
-  public function rewind();
+  public function rewind(): void;
   public abstract function accept(): bool;
-  public function next();
-  public function valid();
-  public function key();
-  public function current();
-  protected function __clone();
-  public function call__($func, $params);
+  public function next(): void;
+  public function valid(): bool;
+  public function key(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function current(): ~Tv;
+  protected function __clone(): void;
+  public function call__(
+    HH\FIXME\MISSING_PARAM_TYPE $func,
+    HH\FIXME\MISSING_PARAM_TYPE $params,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getInnerIterator(): Iterator<Tv>;
 }

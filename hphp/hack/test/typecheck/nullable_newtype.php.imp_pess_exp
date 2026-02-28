@@ -1,0 +1,26 @@
+ERROR: File "nullable_newtype.php--file2.php", line 10, characters 16-17:
+Invalid argument (Typing[4110])
+  File "nullable_newtype.php--file2.php", line 3, characters 24-25:
+  Expected `dynamic`
+  File "nullable_newtype.php--file2.php", line 9, characters 16-21:
+  But got `mixed`
+  File "nullable_newtype.php--file1.php", line 3, characters 9-9:
+    by the definition of `N`
+ERROR: File "nullable_newtype.php--file2.php", line 10, characters 16-17:
+Invalid argument (Typing[4110])
+  File "nullable_newtype.php--file2.php", line 3, characters 24-25:
+  Expected `null` or something of type `~N<int>`
+  File "nullable_newtype.php--file2.php", line 9, characters 16-21:
+  But got `N<num>`
+ERROR: File "nullable_newtype.php--file2.php", line 10, characters 16-17:
+Invalid argument (Typing[4110])
+  File "nullable_newtype.php--file2.php", line 3, characters 24-25:
+  Expected `~?_`
+  File "nullable_newtype.php--file2.php", line 9, characters 16-21:
+  But got `N<num>`
+ERROR: File "nullable_newtype.php--file2.php", line 10, characters 16-17:
+Invalid argument (Typing[4110])
+  File "nullable_newtype.php--file2.php", line 7, characters 14-16:
+  Expected `int`
+  File "nullable_newtype.php--file2.php", line 9, characters 18-20:
+  But got `float`

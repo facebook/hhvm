@@ -1,0 +1,24 @@
+ERROR: File "gadt_tuple_test.php", line 19, characters 7-18:
+Invalid return type (Typing[4110])
+  File "gadt_tuple_test.php", line 12, characters 59-59:
+  Expected `T`
+  File "gadt_tuple_test.php", line 19, characters 11-16:
+  But got `MyBool`
+ERROR: File "gadt_tuple_test.php", line 35, characters 7-17:
+Invalid return type (Typing[4110])
+  File "gadt_tuple_test.php", line 32, characters 59-59:
+  Expected `T`
+  File "gadt_tuple_test.php", line 35, characters 11-15:
+  But got `MyInt`
+ERROR: File "gadt_tuple_test.php", line 39, characters 12-23:
+Invalid return type (Typing[4110])
+  File "gadt_tuple_test.php", line 32, characters 59-59:
+  Expected `T`
+  File "gadt_tuple_test.php", line 39, characters 16-21:
+  But got `MyBool`
+ERROR: File "gadt_tuple_test.php", line 52, characters 7-18:
+Invalid return type (Typing[4110])
+  File "gadt_tuple_test.php", line 43, characters 59-59:
+  Expected `T`
+  File "gadt_tuple_test.php", line 52, characters 11-16:
+  But got `MyBool`

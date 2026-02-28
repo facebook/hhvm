@@ -1,6 +1,6 @@
 <?hh
 
-function child_main(...$args): void {
+<<__DynamicallyCallable>> function child_main(...$args): void {
   var_dump($args);
   throw new Exception("thrown from child");
 }
@@ -11,7 +11,7 @@ function main(): void { if (HH\execution_context() === "xbox") return;
     await fb_gen_user_func_array(
       __FILE__,
       'child_main',
-      varray['args', 'go', 'here']
+      vec['args', 'go', 'here']
     );
   });
 }

@@ -95,7 +95,7 @@ struct SweepableMember : Sweepable {
       uintptr_t(this) - offsetof(T, m_sweepable)
     );
     obj->sweep();
-  };
+  }
   void* owner() override {
     return reinterpret_cast<T*>(
       uintptr_t(this) - offsetof(T, m_sweepable)

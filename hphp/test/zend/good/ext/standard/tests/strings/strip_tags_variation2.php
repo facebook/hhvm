@@ -10,7 +10,7 @@
 
 //get a class
 class classA{
-   public function __toString(){
+   public function __toString():mixed{
      return "Class A Object";
    }
 }
@@ -25,7 +25,7 @@ $string = "<html><a>hello</a></html><p>world</p><!-- COMMENT --><?hh echo hello 
 $fp = fopen(__FILE__, "r");
 
 //array of values to iterate over
-$values = varray[
+$values = vec[
 
       // int data
       0,

@@ -43,6 +43,12 @@ function jsonify_filters(HH\Facts\DeriveFilters $filters): string {
     \sort(inout $attributes);
     $filters_for_json['attributes'] = $attributes;
   }
+  $flags = Shapes::idx($filters, 'flags');
+  if ($flags is Container<_>) {
+    $flags = vec($flags);
+    \sort(inout $flags);
+    $filters_for_json['flags'] = $flags;
+  }
 
   return json_encode($filters_for_json);
 }
@@ -73,17 +79,14 @@ function print_subtypes(
 function print_transitive_subtypes(
   classname<mixed> $type,
   ?HH\Facts\DeriveFilters $filters = null,
+  bool $include_interface_require_extends = false,
 ): void {
   if ($filters is nonnull) {
-    $subtypes_json = jsonify_arr(HH\Facts\transitive_subtypes(
-      $type,
-      $filters,
-    ));
+    $subtypes_json = jsonify_arr(HH\Facts\transitive_subtypes($type, $filters, $include_interface_require_extends));
     $filters_json = jsonify_filters($filters);
-    print "Transitive subtypes of $type with filters $filters_json: ".
-      "$subtypes_json\n";
+    print "Transitive subtypes of $type with filters $filters_json: $subtypes_json\n";
   } else {
-    $subtypes_json = jsonify_arr(HH\Facts\transitive_subtypes($type));
+    $subtypes_json = jsonify_arr(HH\Facts\transitive_subtypes($type, $filters, $include_interface_require_extends));
     print "Transitive subtypes of $type: $subtypes_json\n";
   }
 }
@@ -175,7 +178,14 @@ function print_attr_type_aliases(
 function print_attr_methods(
   classname<\HH\MethodAttribute> $attr,
 ): void {
-  $method_tuples = HH\Facts\methods_with_attribute($attr);
+  try {
+    $method_tuples = HH\Facts\methods_with_attribute($attr);
+  } catch (Exception $e) {
+    print HH\Lib\Str\format(
+      'Threw %s:"%s" trying to get methods with %s%s',
+      get_class($e), $e->getMessage(), $attr, "\n");
+    return;
+  }
   $methods = vec[];
   foreach ($method_tuples as list($type, $method)) {
     $methods[] = "$type::$method";
@@ -183,6 +193,22 @@ function print_attr_methods(
   \sort(inout $methods);
   $methods_json = \json_encode($methods);
   print "Methods decorated with $attr: $methods_json\n";
+}
+
+function print_type_methods_with_attr(
+  string $type,
+): void {
+  try {
+    $method_attrs = HH\Facts\type_method_attributes($type);
+  } catch (Exception $e) {
+    print HH\Lib\Str\format(
+      'Threw %s:"%s" trying to get methods with attributes for %s%s',
+      get_class($e), $e->getMessage(), $type, "\n");
+    return;
+  }
+  \ksort(inout $method_attrs);
+  $method_attrs_json = \json_encode($method_attrs);
+  print "Methods with attributes for $type: $method_attrs_json\n";
 }
 
 function print_attr_files(
@@ -194,9 +220,65 @@ function print_attr_files(
   print "Files decorated with $attr: $files_json\n";
 }
 
+function print_attr_files_and_args(
+  classname<\HH\FileAttribute> $attr,
+): void {
+  $result = HH\Facts\files_and_attr_args_with_attribute($attr);
+  \sort(inout $result);
+  $result_json = \json_encode($result);
+  print "Files and attr args with $attr: $result_json\n";
+}
+
+function print_attr_value_files(
+  classname<\HH\FileAttribute> $attr,
+  string $value,
+): void {
+  $files = HH\Facts\files_with_attribute_and_any_value($attr, $value);
+  \sort(inout $files);
+  $files_json = \json_encode($files);
+  print "Files decorated with $attr and value $value: $files_json\n";
+}
+function print_path_modules(
+  string $path,
+): void {
+  $modules = HH\Facts\path_to_modules($path);
+  foreach ($modules as $mod) {
+    print "$path has $mod module definition\n";
+  }
+
+  $module_membership = HH\Facts\path_to_module_membership($path);
+  if ($module_membership is null) {
+    print "$path has no module membership\n";
+  } else {
+    print "$path has $module_membership module membership\n";
+  }
+}
+
+function print_path_package(
+  string $path,
+): void {
+  $package = HH\Facts\path_to_package($path);
+  if ($package is null) {
+    print "$path has no package\n";
+  } else {
+    print "$path has $package package override\n";
+  }
+}
+
 function print_num_symbols(
   string $path,
 ): void {
+  $modules = HH\Facts\path_to_modules($path);
+  $num_modules = \count($modules);
+  print "$path has $num_modules modules\n";
+
+  $module_membership = HH\Facts\path_to_module_membership($path);
+  if ($module_membership is null) {
+    print "$path has no module membership\n";
+  } else {
+    print "$path has $module_membership module membership\n";
+  }
+
   $types = HH\Facts\path_to_types($path);
   $num_types = \count($types);
   print "$path has $num_types types\n";
@@ -214,85 +296,70 @@ function print_num_symbols(
   print "$path has $num_type_aliases type aliases\n";
 }
 
-function print_extracted_facts(vec<string> $files): void {
-  $files_with_null_hashes = vec[];
-  foreach ($files as $file) {
-    $files_with_null_hashes[] = tuple($file, null);
+function print_type_file_path(
+  string $className,
+): void {
+  $path = HH\Facts\type_to_path($className);
+  print "$className has path: $path\n";
+}
+
+function print_function_file_path(
+  string $function_name,
+): void {
+  $path = HH\Facts\function_to_path($function_name);
+  print "$function_name has path: $path\n";
+}
+
+function print_type_alias_file_path(
+  string $alias,
+): void {
+  $path = HH\Facts\type_or_type_alias_to_path($alias);
+  print "alias $alias from type_or_type_alias_to_path has path: $path\n";
+
+  $path = HH\Facts\type_alias_to_path($alias);
+  print "alias $alias from type_alias_to_path has path: $path\n";
+}
+
+function print_constant_file_path(
+  string $constant,
+): void {
+  $path = HH\Facts\constant_to_path($constant);
+  print "$constant has path: $path\n";
+}
+
+function print_module_file_path(
+  string $module,
+): void {
+  $path = HH\Facts\module_to_path($module);
+  print "$module has path: $path\n";
+}
+
+function print_validation(): void {
+  //These shouldnt throw
+  HH\Facts\validate(vec["someClass1", "classWithDuplicateName", "classWithDuplicateName"]);
+  HH\Facts\validate(vec["classWithDuplicateName"]);
+
+  //This should throw
+  try {
+    HH\Facts\validate();
   }
-  foreach (
-    HH\Facts\extract($files_with_null_hashes) as $file => $facts
-  ) {
-    print "Facts in $file:\n";
+  catch(UnexpectedValueException $e){
+    print "\n$e \n";
+    print "UnexpectedValueException thrown as expected\n";
+  }
 
-    print "  types:\n";
-    foreach ($facts['types'] as $type) {
-      $name = $type['name'];
-      print "    name: $name\n";
-
-      $kind = $type['kind'];
-      print "      kind: $kind\n";
-
-      $flags = $type['flags'];
-      print "      flags: $flags\n";
-
-      $base_types = $type['baseTypes'];
-      \sort(inout $base_types);
-      $base_types_json = \json_encode($base_types);
-      print "      baseTypes: $base_types_json\n";
-
-      $require_extends = $type['requireExtends'];
-      \sort(inout $require_extends);
-      $require_extends_json = \json_encode($require_extends);
-      print "      requireExtends: $require_extends_json\n";
-
-      $require_implements = $type['requireImplements'];
-      \sort(inout $require_implements);
-      $require_implements_json = \json_encode($require_implements);
-      print "      requireImplements: $require_implements_json\n";
-
-      $attributes = $type['attributes'];
-      \usort(
-        inout $attributes,
-        ($attr1, $attr2) ==> $attr1['name'] <=> $attr2['name'],
-      );
-      $attributes_json = \json_encode($attributes);
-      print "      attributes: $attributes_json\n";
-
-      $methods = $type['methods'];
-      \usort(
-        inout $methods,
-        ($m1, $m2) ==> $m1['name'] <=> $m2['name'],
-      );
-      $methods_json = \json_encode($methods);
-      print "      methods: $methods_json\n";
-    }
-
-    $functions = $facts['functions'];
-    \sort(inout $functions);
-    $functions_json = \json_encode($functions);
-    print "  functions: $functions_json\n";
-
-    $constants = $facts['constants'];
-    \sort(inout $constants);
-    $constants_json = \json_encode($constants);
-    print "  constants: $constants_json\n";
-
-    $attributes = $facts['attributes'];
-    \usort(
-      inout $attributes,
-      ($attr1, $attr2) ==> $attr1['name'] <=> $attr2['name'],
-    );
-    $attributes_json = \json_encode($attributes);
-    print "  attributes: $attributes_json\n";
-
-    $sha1 = $facts['sha1sum'];
-    print "  sha1sum: $sha1\n";
+  //This should throw
+  try {
+    HH\Facts\validate(vec["someClass1", "someClass1"]);
+  }
+  catch(UnexpectedValueException $e){
+    print "UnexpectedValueException thrown as expected\n";
   }
 }
 
 <<__EntryPoint>>
 function facts(): void {
-  var_dump(HH\Facts\enabled());
+    var_dump(HH\Facts\enabled());
 
   var_dump(HH\Facts\TypeKind::K_CLASS);
   var_dump(HH\Facts\TypeKind::K_ENUM);
@@ -315,35 +382,45 @@ function facts(): void {
     IBase::class,
     shape('kind' => keyset[HH\Facts\TypeKind::K_CLASS]),
   );
-  print_transitive_subtypes(
+  print_subtypes(
     IBase::class,
+    shape('kind' => keyset[HH\Facts\TypeKind::K_TRAIT]),
+  );
+  print_subtypes(
+    IBase::class,
+    shape(
+      'kind' => keyset[
+        HH\Facts\TypeKind::K_CLASS,
+        HH\Facts\TypeKind::K_TRAIT,
+      ],
+    ),
+  );
+
+  print_transitive_subtypes(
+    BaseClass::class,
     shape('kind' => keyset[HH\Facts\TypeKind::K_CLASS]),
   );
-  print_subtypes(
-    IBase::class,
-    shape('kind' => keyset[HH\Facts\TypeKind::K_TRAIT]),
-  );
   print_transitive_subtypes(
-    IBase::class,
-    shape('kind' => keyset[HH\Facts\TypeKind::K_TRAIT]),
-  );
-  print_subtypes(
-    IBase::class,
+    SuperClassOfFinalClassB::class,
     shape(
       'kind' => keyset[
         HH\Facts\TypeKind::K_CLASS,
         HH\Facts\TypeKind::K_TRAIT,
+        HH\Facts\TypeKind::K_INTERFACE,
       ],
     ),
+    true
   );
   print_transitive_subtypes(
-    IBase::class,
+    SuperClassOfFinalClassB::class,
     shape(
       'kind' => keyset[
         HH\Facts\TypeKind::K_CLASS,
         HH\Facts\TypeKind::K_TRAIT,
+        HH\Facts\TypeKind::K_INTERFACE,
       ],
     ),
+    false
   );
 
   print_supertypes(DerivedClass::class);
@@ -384,17 +461,51 @@ function facts(): void {
     IBase::class,
     shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
   );
-  print_transitive_subtypes(
-    IBase::class,
-    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
-  );
   print_subtypes(
     BaseClass::class,
     shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
   );
-  print_transitive_subtypes(
+  print_subtypes(
     BaseClass::class,
-    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
+    shape(
+      'derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS],
+      'flags' => keyset[HH\Facts\TypeFlag::K_FINAL],
+    ),
+  );
+  print_subtypes(
+    BaseClass::class,
+    shape(
+      'derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS],
+      'flags' => keyset[
+          HH\Facts\TypeFlag::K_ABSTRACT,
+          HH\Facts\TypeFlag::K_FINAL
+      ],
+    ),
+  );
+  print_subtypes(
+    BaseClass::class,
+    shape(
+      'derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS],
+      'flags' => keyset[HH\Facts\TypeFlag::K_EMPTY],
+    ),
+  );
+  print_subtypes(
+    BaseClass::class,
+    shape(
+      'derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS],
+      'flags' => keyset[
+        HH\Facts\TypeFlag::K_ABSTRACT,
+        HH\Facts\TypeFlag::K_EMPTY,
+        HH\Facts\TypeFlag::K_FINAL
+      ],
+    ),
+  );
+  print_subtypes(
+    BaseClass::class,
+    shape(
+      'derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS],
+      'flags' => keyset[],
+    ),
   );
   print_supertypes(
     TRequireExtendsBaseClassAndRequireImplementsIBase::class,
@@ -411,12 +522,30 @@ function facts(): void {
       'derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS],
     ),
   );
-  print_transitive_subtypes(
-    IBase::class,
-    shape(
-      'kind' => keyset[HH\Facts\TypeKind::K_INTERFACE],
-      'derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS],
-    ),
+  // `require class` trait constraints
+  print_supertypes(
+    TRequireClassFinalClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
+  );
+  print_subtypes(
+    TRequireClassFinalClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
+  );
+  print_supertypes(
+    FinalClassUsesTRequireClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
+  );
+  print_subtypes(
+    FinalClassUsesTRequireClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
+  );
+  print_supertypes(
+    TRequireClassFinalClassB::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
+  );
+  print_subtypes(
+    FinalClassUsesTRequireClassB::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
   );
 
   print "\nExcluding `extends` relations\n";
@@ -429,16 +558,8 @@ function facts(): void {
     BaseClass::class,
     shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
   );
-  print_transitive_subtypes(
-    IBase::class,
-    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
-  );
   print_supertypes(
     TRequireExtendsBaseClassAndRequireImplementsIBase::class,
-    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
-  );
-  print_transitive_subtypes(
-    BaseClass::class,
     shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
   );
   print_supertypes(
@@ -456,13 +577,6 @@ function facts(): void {
       'derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS],
     ),
   );
-  print_transitive_subtypes(
-    IBase::class,
-    shape(
-      'kind' => keyset[HH\Facts\TypeKind::K_INTERFACE],
-      'derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS],
-    ),
-  );
   print_subtypes(
     IBase::class,
     shape(
@@ -470,59 +584,38 @@ function facts(): void {
       'derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS],
     ),
   );
-  print_transitive_subtypes(
-    IBase::class,
-    shape(
-      'kind' => keyset[HH\Facts\TypeKind::K_TRAIT],
-      'derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS],
-    ),
-  );
-
-  print "\nFiltering by attribute\n";
-
-  print_subtypes(
-    BaseClassForAttributeFiltering::class,
-    shape('attributes' => vec[shape(
-      'name' => TwoArgAttr::class,
-      'parameters' => dict[0 => "banana"],
-    )]),
-  );
-  print_transitive_subtypes(
-    IBaseForAttributeFiltering::class,
-    shape('attributes' => vec[shape(
-      'name' => TwoArgAttr::class,
-      'parameters' => dict[0 => "banana"],
-    )]),
+  // `require class` trait constraints
+  print_supertypes(
+    TRequireClassFinalClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
   );
   print_subtypes(
-    BaseClassForAttributeFiltering::class,
-    shape('attributes' => vec[shape(
-      'name' => TwoArgAttr::class,
-      'parameters' => dict[0 => 'apple'],
-    )]),
+    TRequireClassFinalClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
   );
-  print_transitive_subtypes(
-    IBaseForAttributeFiltering::class,
-    shape('attributes' => vec[shape(
-      'name' => TwoArgAttr::class,
-      'parameters' => dict[0 => 'apple'],
-    )]),
+  print_supertypes(
+    FinalClassUsesTRequireClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
   );
   print_subtypes(
-    BaseClassForAttributeFiltering::class,
-    shape('attributes' => vec[shape(
-      'name' => TwoArgAttr::class,
-      'parameters' => dict[1 => 'carrot'],
-    )]),
+    FinalClassUsesTRequireClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
   );
-  print_transitive_subtypes(
-    IBaseForAttributeFiltering::class,
-    shape('attributes' => vec[shape(
-      'name' => TwoArgAttr::class,
-      'parameters' => dict[1 => 'carrot'],
-    )]),
+  print_supertypes(
+    TRequireClassFinalClassB::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
+  );
+  print_subtypes(
+    FinalClassUsesTRequireClassB::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
   );
 
+  print "\nGetting paths\n";
+  print_type_file_path(AppleThenBanana::class);
+  print_function_file_path("outOfClassFunction");
+  print_type_alias_file_path("AnAlias");
+  print_constant_file_path("SOME_CONSTANT");
+  print_module_file_path("someModule");
   print "\nGetting attributes\n";
 
   print_type_attrs(AppleThenBanana::class);
@@ -544,80 +637,39 @@ function facts(): void {
   print_attr_types(TwoArgAttr::class);
   print_attr_methods(NoArgMethodAttr::class);
   print_attr_methods(TwoArgMethodAttr::class);
+  print_attr_methods(DontIndexThisMethodAttr::class);
+
+  print "\nGetting type methods with attribute\n";
+  print_type_methods_with_attr(ClassWithMethodAttrs::class);
+  print_type_methods_with_attr('AnnoyingNS\\TerribleClass');
 
   print "\nGetting type aliases with attribute\n";
   print_attr_type_aliases(TypeAliasAttr::class);
 
+  // The reason these are in a weird order is because there was a bug
+  // which made print_files_and_args and print_attr_value_files not work
+  // unless they were called *after* print_attr_files.  So scramble the
+  // order aound to fix this.  The fix for that bug is in symbol-map.cpp
+  // in the same commit as this comment.
   print "\nGetting file attributes\n";
+  print_attr_value_files  (TwoArgFileAttr::class, 'Hello');
+  print_attr_files_and_args(OneArgFileAttr::class);
   print_attr_files(NoArgFileAttr::class);
+  print_attr_files(OneArgFileAttr::class);
   print_attr_files(TwoArgFileAttr::class);
+  print_attr_files_and_args(NoArgFileAttr::class);
+  print_attr_files_and_args(TwoArgFileAttr::class);
   print_file_attrs('attribute-classes.inc');
-
+  print "\nGetting modules from paths\n";
+  print_path_modules('types-with-kinds.inc');
+  print_path_modules('module-membership.inc');
+  print "\nGetting package overrides from paths\n";
+  print_path_package('package-membership.inc');
+  print_path_package('types-with-kinds.inc');
+  print_path_package('does-not-exist.inc');
   print "\nChecking nonexistent paths\n";
   print_num_symbols('this/path/does/not/exist.php');
   print_num_symbols('/this/path/does/not/exist.php');
-
-  print "\nGetting all types\n";
-  $all_types = HH\Facts\all_types();
-  \ksort(inout $all_types);
-  foreach ($all_types as $type => $path) {
-    $is_abstract = HH\Facts\is_abstract($type) ? 'true' : 'false';
-    $is_final = HH\Facts\is_final($type) ? 'true' : 'false';
-    print "$type => $path\n";
-    print "  Abstract? $is_abstract\n";
-    print "  Final? $is_final\n";
-    $facts_path = relative_path(HH\Facts\type_to_path($type) as nonnull);
-    if ($facts_path !== $path) {
-      print "FAILURE: $facts_path !== $path\n";
-    }
-  }
-  print "\nGetting all functions\n";
-  $all_functions = HH\Facts\all_functions();
-  \ksort(inout $all_functions);
-  foreach ($all_functions as $function => $path) {
-    print "$function => $path\n";
-    $facts_path = relative_path(
-      HH\Facts\function_to_path($function) as nonnull,
-    );
-    if ($facts_path !== $path) {
-      print "FAILURE: $facts_path !== $path\n";
-    }
-  }
-  print "\nGetting all constants\n";
-  $all_constants = HH\Facts\all_constants();
-  \ksort(inout $all_constants);
-  foreach ($all_constants as $constant => $path) {
-    print "$constant => $path\n";
-    $facts_path = relative_path(
-      HH\Facts\constant_to_path($constant) as nonnull,
-    );
-    if ($facts_path !== $path) {
-      print "FAILURE: $facts_path !== $path\n";
-    }
-  }
-  print "\nGetting all type aliases\n";
-  $all_type_aliases = HH\Facts\all_type_aliases();
-  \ksort(inout $all_type_aliases);
-  foreach ($all_type_aliases as $type_alias => $path) {
-    print "$type_alias => $path\n";
-    $facts_path = relative_path(
-      HH\Facts\type_alias_to_path($type_alias) as nonnull,
-    );
-    if ($facts_path !== $path) {
-      print "FAILURE: $facts_path !== $path\n";
-    }
-  }
-
-  print_extracted_facts(
-    vec[
-      'attribute-classes.inc',
-      'attribute-namespace.inc',
-      'base-class.inc',
-      'constants.inc',
-      'derived-class.inc',
-      'type_aliases.inc',
-      'types-with-kinds.inc',
-    ],
-  );
+  print_validation();
   print "Finished.\n";
 }

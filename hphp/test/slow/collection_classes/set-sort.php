@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   for ($i = 0; $i < 8; ++$i) {
     if ($i < 4) {
       $s = Set {3, 4, 1, 2};
@@ -26,6 +26,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_set_sort() {
+function main_set_sort() :mixed{
 main();
 }

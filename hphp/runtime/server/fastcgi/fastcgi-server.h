@@ -39,9 +39,9 @@ struct FastCGIServer;
  * each one in a FastCGISession.
  */
 struct FastCGIAcceptor : public wangle::Acceptor {
-  FastCGIAcceptor(const wangle::ServerSocketConfig& config,
+  FastCGIAcceptor(std::shared_ptr<const wangle::ServerSocketConfig> config,
                   FastCGIServer *server)
-    : wangle::Acceptor(config)
+    : wangle::Acceptor(std::move(config))
     , m_server(server)
   {}
 
@@ -94,10 +94,6 @@ struct FastCGIServer : public Server,
     m_socket.reset();
   }
 
-  // These are currently unimplemented (TODO(#4129))
-  void addTakeoverListener(TakeoverListener* /*lisener*/) override {}
-  void removeTakeoverListener(TakeoverListener* /*lisener*/) override {}
-
   // Increases the size of the thread-pool for dispatching requests
   void saturateWorkers() override {
     m_dispatcher.saturateWorkers();
@@ -116,6 +112,9 @@ struct FastCGIServer : public Server,
   JobQueueDispatcher<FastCGIWorker>& getDispatcher() { return m_dispatcher; }
   size_t getMaxThreadCount() override {
     return m_dispatcher.getMaxThreadCount();
+  }
+  void setMaxThreadCount(size_t count) override {
+    return m_dispatcher.setMaxThreadCount(count);
   }
   int getActiveWorker() override { return m_dispatcher.getActiveWorker(); }
   int getQueuedJobs()   override { return m_dispatcher.getQueuedJobs();   }
@@ -137,6 +136,10 @@ struct FastCGIServer : public Server,
 
   // Callback for FastCGIAcceptor that terminates the server
   void onConnectionsDrained();
+
+  DispatcherStats getDispatcherStats() override {
+    return m_dispatcher.getDispatcherStats();
+  }
 
 private:
   // Priority of requests to dispatcher thread; currently we only use normal
@@ -168,7 +171,7 @@ private:
   JobQueueDispatcher<FastCGIWorker> m_dispatcher;
 
   // Configuration for accepting webserver connections
-  wangle::ServerSocketConfig m_socketConfig;
+  std::shared_ptr<const wangle::ServerSocketConfig> m_socketConfig;
   std::unique_ptr<FastCGIAcceptor> m_acceptor;
 };
 

@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_1686() {
+function main_1686() :mixed{
 $name = tempnam(sys_get_temp_dir(), '1682');
 $input = fopen($name, 'w+');
 fwrite($input, 'hello world');

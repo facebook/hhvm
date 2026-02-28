@@ -1,12 +1,12 @@
 <?hh
 
-function retimer() {
+function retimer() :mixed{
   $t3 = new IntervalTimer(1.0, 1.0, () ==> {echo "t3\n";});
   return $t3;
 }
 
 <<__EntryPoint>>
-function main_return() {
+function main_return() :mixed{
 $t1 = new IntervalTimer(1.0, 1.0, () ==> {echo "t1\n";});
 $t1->start();
 

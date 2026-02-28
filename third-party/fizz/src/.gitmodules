@@ -1,0 +1,3 @@
+[submodule "folly"]
+	path = folly
+	url = https://github.com/facebook/folly

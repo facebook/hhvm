@@ -13,7 +13,7 @@ text to be read
 and displayed.
 EOT;
 
-$file = __SystemLib\hphp_test_tmppath("gzopen_variation8.tmp");
+$file = sys_get_temp_dir().'/'."gzopen_variation8.tmp";
 $h = fopen($file, 'w');
 fwrite($h, $data);
 fclose($h);

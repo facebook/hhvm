@@ -4,11 +4,11 @@
   require_once('test_base.inc');
   init();
   requestAll(
-    varray[
-      varray[
+    vec[
+      vec[
         'test_get_headers_secure.php',
         null,
-        darray[
+        dict[
           'xyzzy' => 42,
           'XyZZy' => 43,
           'XYZZY' => 44,

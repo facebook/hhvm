@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_closed_resource_type() {
+function main_closed_resource_type() :mixed{
 $fp = fopen('php://memory', 'r');
 fclose($fp);
 

@@ -1,9 +1,9 @@
 <?hh
 
-class Object
+class MyObject
 {
     function getNone()
-    {
+:mixed    {
         throw new Exception('NONE');
     }
 }
@@ -11,14 +11,14 @@ class Object
 class Proxy
 {
     function three($a, $b, $c)
-    {
+:mixed    {
     }
 
     function callOne()
-    {
+:mixed    {
         try
         {
-            $res = new Object();
+            $res = new MyObject();
             $this->three($res->getNone());
         }
         catch(Exception $e)
@@ -28,10 +28,10 @@ class Proxy
     }
 
     function callTwo()
-    {
+:mixed    {
         try
         {
-            $res = new Object();
+            $res = new MyObject();
             $this->three(1, $res->getNone());
         }
         catch(Exception $e)
@@ -41,10 +41,10 @@ class Proxy
     }
 
     function callThree()
-    {
+:mixed    {
         try
         {
-            $res = new Object();
+            $res = new MyObject();
             $this->three(1, 2, $res->getNone());
         }
         catch(Exception $e)

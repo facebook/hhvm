@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_188() {
-$a = darray['a' => 1, 'a' => 2];
+function main_188() :mixed{
+$a = dict['a' => 1, 'a' => 2];
  var_dump($a);
 }

@@ -1,2 +1,0 @@
-File "parent_01.bad.php", line 12, characters 5-10:
-You can only use `parent::` in traits that specify `require extends SomeClass` (Typing[4074])

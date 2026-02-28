@@ -1,0 +1,2 @@
+WARN: File "sealed_class.php", line 5, characters 3-10:
+Class `B` in sealed allowlist for `S`, but does not extend `S` (Warn[12035])

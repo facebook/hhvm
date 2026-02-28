@@ -1,19 +1,19 @@
 <?hh
 
 class X {
-  static function bar(X $x) {
+  static function bar(X $x) :mixed{
     $x->foo();
     $x->foo();
   }
-  function foo() {
+  function foo() :mixed{
  var_dump(__METHOD__);
  }
 }
-function test() {
+function test() :mixed{
   X::bar(null);
 }
 
 <<__EntryPoint>>
-function main_1321() {
+function main_1321() :mixed{
 test();
 }

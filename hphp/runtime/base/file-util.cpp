@@ -17,11 +17,7 @@
 
 #include <algorithm>
 #include <vector>
-#include <fstream>
-
-#include <boost/filesystem.hpp>
-
-#include <sys/types.h>
+#include <filesystem>
 
 #include <folly/String.h>
 #include <folly/portability/Dirent.h>
@@ -31,9 +27,7 @@
 
 #include "hphp/runtime/base/file-util-defs.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/network.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/process.h"
 
@@ -41,7 +35,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 using std::string;
-namespace fs = boost::filesystem;
 
 bool FileUtil::mkdir(const std::string &path, int mode /* = 0777 */) {
   if (path.empty()) {
@@ -176,7 +169,7 @@ void FileUtil::syncdir(const std::string &dest_, const std::string &src_,
     for (std::set<string>::const_iterator iter = todelete.begin();
          iter != todelete.end(); ++iter) {
       Logger::Info("sync: deleting %s", iter->c_str());
-      fs::remove_all(*iter);
+      std::filesystem::remove_all(*iter);
     }
   }
 
@@ -232,11 +225,7 @@ int FileUtil::copy(const char *srcfile, const char *dstfile) {
 }
 
 static int force_sync(int fd) {
-#if defined(__FreeBSD__) || defined(__APPLE__) || defined(_MSC_VER)
-  return fsync(fd);
-#else
   return fdatasync(fd);
-#endif
 }
 
 int FileUtil::directCopy(const char *srcfile, const char *dstfile) {
@@ -258,11 +247,6 @@ int FileUtil::directCopy(const char *srcfile, const char *dstfile) {
   int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (dstFd == -1) return -1;
   SCOPE_EXIT { close(dstFd); };
-
-#if defined(__APPLE__)
-  fcntl(srcFd, F_NOCACHE, 1);
-  fcntl(dstFd, F_NOCACHE, 1);
-#endif
 
   while (1) {
     char buf[1 << 20];
@@ -505,7 +489,6 @@ String FileUtil::canonicalize(const char *addpath, size_t addlen,
   String ret(maxlen-1, ReserveString);
   char *path = ret.mutableData();
 
-#ifndef _MSC_VER
   if (addpath[0] == '/' && collapse_slashes) {
     /* Ignore the given root path, strip off leading
      * '/'s to a single leading '/' from the addpath,
@@ -516,7 +499,6 @@ String FileUtil::canonicalize(const char *addpath, size_t addlen,
     path[0] = '/';
     pathlen = 1;
   }
-#endif
 
   while (*addpath) {
     /* Parse each segment, find the closing '/'
@@ -580,15 +562,6 @@ String FileUtil::canonicalize(const char *addpath, size_t addlen,
   // If there are null bytes in the path, treat it as the empty string
   if (addpath != pathend) pathlen = 0;
 
-#ifdef _MSC_VER
-  // Need to normalize to Windows directory separators, as the underlying
-  // system calls don't like unix path separators.
-  for (int i = 0; i < pathlen; i++) {
-    if (path[i] == '/') {
-      path[i] = '\\';
-    }
-  }
-#endif
   ret.setSize(pathlen);
   return ret;
 }
@@ -628,10 +601,11 @@ std::string FileUtil::normalizeDir(const std::string &dirname) {
 
 void FileUtil::find(std::vector<std::string> &out,
                     const std::string &root, const std::string& path, bool php,
+                    bool failHard,
                     const hphp_fast_string_set *excludeDirs /* = NULL */,
                     const hphp_fast_string_set *excludeFiles /* = NULL */) {
 
-  find(root, path, php,
+  find(root, path, php, failHard,
        [&] (const std::string& rpath, bool isDir, size_t) {
          if (isDir) {
            return !excludeDirs || !excludeDirs->count(rpath);
@@ -674,7 +648,7 @@ void FileUtil::checkPathAndError(const String& path,
 }
 
 bool FileUtil::isSystemName(folly::StringPiece path) {
-  static const char prefix[] = "/:systemlib";
+  static const char prefix[] = "/:";
   return !strncmp(path.begin(), prefix, sizeof prefix - 1);
 }
 

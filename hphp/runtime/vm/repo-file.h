@@ -16,8 +16,10 @@
 
 #pragma once
 
+#include "hphp/runtime/base/isame-log.h"
 #include "hphp/runtime/vm/source-location.h"
 
+#include "hphp/util/blob.h"
 #include "hphp/util/compact-tagged-ptrs.h"
 
 #include <cstdint>
@@ -30,10 +32,18 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ArrayData;
+struct BlobDecoder;
+struct BlobEncoder;
+struct Extension;
+struct PackageInfo;
 struct RepoAutoloadMapBuilder;
+struct RepoFileIndex;
 struct RepoGlobalData;
 struct SHA1;
 struct StringData;
+struct string_data_tsame;
+struct string_data_fsame;
+struct string_data_same;
 struct UnitEmitter;
 
 namespace Native {
@@ -42,9 +52,32 @@ struct FuncTable;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct RepoUnitInfo {
+  int64_t unitSn;
+  const StringData* path = nullptr;
+  Blob::Bounds emitterLocation;
+  Blob::Bounds symbolsLocation;
+
+  void serde(BlobEncoder& sd) const;
+  void serde(BlobDecoder& sd);
+};
+
+enum class RepoSymbolType {
+  TYPE,
+  FUNC,
+  CONSTANT,
+  TYPE_ALIAS,
+  MODULE
+};
+
+using RepoUnitSymbols =
+  std::vector<std::pair<const StringData*, RepoSymbolType>>;
+
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * RepoFileBuilder is used to create a RepoFile (you can either use a
- * RepoFile, or create one, there's no simulataneous creation/use).
+ * RepoFile, or create one, there's no simultaneous creation/use).
  *
  * Usage is simple. Instantiate one, call add() with as many
  * UnitEmitters as needed, then call finish().
@@ -66,7 +99,7 @@ struct RepoFileBuilder {
   explicit RepoFileBuilder(const std::string& path);
   ~RepoFileBuilder();
 
-  // Encoding an UnitEmitter is expensive, so one can do it ahead of
+  // Encoding a UnitEmitter is expensive, so one can do it ahead of
   // time (in different threads), then add it directly.
   struct EncodedUE {
     explicit EncodedUE(const UnitEmitter& ue);
@@ -88,7 +121,9 @@ struct RepoFileBuilder {
   // information into the file. Once successful, the temporary file is
   // renamed to its final name. Once finish() is called, nothing can
   // be done with the RepoFileBuilder except destroy it.
-  void finish(const RepoGlobalData&, const RepoAutoloadMapBuilder&);
+  void finish(const RepoGlobalData&,
+              const RepoAutoloadMapBuilder&,
+              const PackageInfo&);
 
   RepoFileBuilder(const RepoFileBuilder&) = delete;
   RepoFileBuilder(RepoFileBuilder&&) = delete;
@@ -113,6 +148,7 @@ private:
  * don't have a good way to recover from such errors.
  */
 struct RepoFile {
+
   // To support lazy-loading, RepoFile needs to know where to load
   // certain pieces of data. It is the responsibility of the caller to
   // provide such offsets. The offset is abstracted away as a "token"
@@ -130,10 +166,6 @@ struct RepoFile {
   // cannot be called concurrently.
   static void destroy();
 
-  // Called after a fork. Tears down RepoFile state and re-initializes
-  // it.
-  static void postfork();
-
   // Retrieve the RepoGlobalData which was stored in this repo
   // file. The data is actually loaded during init(), so this does no
   // file I/O. Unlike other querying functions, this does not require
@@ -149,7 +181,12 @@ struct RepoFile {
    * querying functions are called. It can only be called once, and
    * cannot be called concurrently.
    */
-  static void loadGlobalTables();
+  static void loadGlobalTables(bool loadAutoloadMap = true);
+
+  /*
+   * Retrieves the package info stored in the repo file.
+   */
+  static const PackageInfo& packageInfo();
 
   /*
    * Query functions:
@@ -162,15 +199,17 @@ struct RepoFile {
   // file.
   static std::vector<const StringData*> enumerateUnits();
 
+  // Return the number of units in the repo file.
+  static std::size_t numUnits();
+
   // Load the UnitEmitter with the given path `searchPath`, returning
   // nullptr if none exists. The UnitEmitter will be assigned the path
   // `path' (it might be different from `searchPath` due to SourceRoot
   // issues). If `lazy` is true, the bytecode and line tables are not
   // loaded with the UnitEmitter and will instead be loaded on demand.
   static std::unique_ptr<UnitEmitter>
-  loadUnitEmitter(const StringData* searchPath,
-                  const StringData* path,
-                  const Native::FuncTable& nativeFuncs,
+  loadUnitEmitter(const StringData* path,
+                  const RepoUnitInfo* info,
                   bool lazy);
 
   // Given an unit's SN, and a token for that unit, return the amount
@@ -188,9 +227,6 @@ struct RepoFile {
                               unsigned char* data,
                               size_t len);
 
-  // Map an UnitEmitter's path to its associated SN (returning -1 if
-  // no such UnitEmitter exists).
-  static int64_t findUnitSN(const StringData* path);
   // Map an UnitEmitter's SN to its associated path (returning nullptr
   // if no such UnitEmitter exists).
   static const StringData* findUnitPath(int64_t unitSn);
@@ -199,6 +235,15 @@ struct RepoFile {
   // thing" for RepoFile. We assume the SHA1 matches the SN. This is
   // only provided for compatibility for tc-print.
   static const StringData* findUnitPath(const SHA1&);
+
+  // Get the RepoUnitInfo for a specific key in a specific map.
+  // The map must point to RepoBounds containing the bounds for RepoUnitInfo
+  template <typename KeyCompare>
+  static const RepoUnitInfo* findUnitInfo(
+    const Blob::HashMapIndex<KeyCompare>& map, const StringData* key);
+
+  // Get all the symbols for a specific path
+  static const RepoUnitSymbols* findUnitSymbols(const StringData* path);
 
   RepoFile() = delete;
   RepoFile(const RepoFile&) = delete;
@@ -258,9 +303,38 @@ private:
   }
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
 using StringOrToken = TokenOrPtr<const StringData>;
 using ArrayOrToken = TokenOrPtr<const ArrayData>;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+// We can't use the hardware accelerated hash functions because different
+// hardware has different hash functions. We need a hash function that is stable
+// between different hardware implementations.
+
+struct CaseSensitiveCompare {
+  bool equal(const std::string& s1, const std::string& s2) const {
+    return s1 == s2;
+  }
+  size_t hash(const std::string& s) const {
+    return hash_string_cs_software(s.c_str(), s.size());
+  }
+};
+
+struct TypeNameCompare {
+  bool equal(const std::string& s1, const std::string& s2) const {
+    return tstrcmp_slice(s1, s2) == 0;
+  }
+  size_t hash(const std::string& s) const {
+    return hash_string_i_software(s.c_str(), s.size());
+  }
+};
+
+using FuncNameCompare = CaseSensitiveCompare;
+using CaseSensitiveHashMapIndex = Blob::HashMapIndex<CaseSensitiveCompare>;
+using HashMapTypeIndex = Blob::HashMapIndex<TypeNameCompare>;
+using HashMapFuncIndex = Blob::HashMapIndex<FuncNameCompare>;
 
 }

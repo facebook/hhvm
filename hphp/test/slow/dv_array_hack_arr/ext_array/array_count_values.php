@@ -3,9 +3,9 @@
 function array_count_values_test_cases(
 ): vec<mixed> {
   return vec[
-    tuple(varray[], dict[]),
+    tuple(vec[], dict[]),
     tuple(
-      varray[
+      vec[
         'foo',
         'foo',
         'bar',
@@ -21,7 +21,7 @@ function array_count_values_test_cases(
       ],
     ),
     tuple(
-      darray[
+      dict[
         'foo' => 1,
         'bar' => 42,
         'baz' => 1,

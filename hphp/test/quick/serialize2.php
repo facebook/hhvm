@@ -10,7 +10,7 @@ class UnexpectedSerializedClass extends Exception {}
 
 <<__EntryPoint>> function main(): void {
   error_reporting(E_ALL);
-  $v = serialize(varray[new A, new B, new C, new D, new E]);
+  $v = serialize(vec[new A, new B, new C, new D, new E]);
   $run = $opts ==> {
     try {
       printf("%s (%s)\n",
@@ -25,14 +25,14 @@ class UnexpectedSerializedClass extends Exception {}
   foreach (vec[false, true] as $subclasses) {
     $check = $xs ==> $run(shape('include_subclasses' => $subclasses,
                                 'allowed_classes' => $xs));
-    $check(varray[]);
-    $check(varray['A']);
-    $check(varray['B']);
-    $check(varray['C']);
-    $check(varray['D']);
-    $check(varray['E']);
-    $check(varray['I']);
-    $check(varray['A', 'I']);
+    $check(vec[]);
+    $check(vec['A']);
+    $check(vec['B']);
+    $check(vec['C']);
+    $check(vec['D']);
+    $check(vec['E']);
+    $check(vec['I']);
+    $check(vec['A', 'I']);
     $check(vec['A', 'I']);
     $run(shape('include_subclasses' => $subclasses,
                'allowed_classes' => vec['A','B','C','D','E','I'],

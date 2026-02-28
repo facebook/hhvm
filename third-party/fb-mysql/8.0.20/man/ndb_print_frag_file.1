@@ -1,0 +1,139 @@
+'\" t
+.\"     Title: \fBndb_print_frag_file\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_PRINT_FRAG_FILE\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_print_frag_file \- print NDB Fragment List File contents
+.SH "SYNOPSIS"
+.HP \w'\fBndb_print_frag_file\ \fR\fB\fIfile_name\fR\fR\ 'u
+\fBndb_print_frag_file \fR\fB\fIfile_name\fR\fR
+.SH "DESCRIPTION"
+.PP
+\fBndb_print_frag_file\fR
+obtains information from a cluster fragment list file\&. It is intended for use in helping to diagnose issues with data node restarts\&.
+Usage
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_print_frag_file \fIfile_name\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fIfile_name\fR
+is the name of a cluster fragment list file, which matches the pattern
+S\fIX\fR\&.FragList, where
+\fIX\fR
+is a digit in the range 2\-9 inclusive, and are found in the data node file system of the data node having the node ID
+\fInodeid\fR, in directories named
+ndb_\fInodeid\fR_fs/D\fIN\fR/DBDIH/, where
+\fIN\fR
+is
+1
+or
+2\&. Each fragment file contains records of the fragments belonging to each
+NDB
+table\&. For more information about cluster fragment files, see
+\m[blue]\fBNDB Cluster Data Node File System Directory Files\fR\m[]\&\s-2\u[1]\d\s+2\&.
+.PP
+Like
+\fBndb_print_backup_file\fR,
+\fBndb_print_sys_file\fR, and
+\fBndb_print_schema_file\fR
+(and unlike most of the other
+NDB
+utilities that are intended to be run on a management server host or to connect to a management server),
+\fBndb_print_frag_file\fR
+must be run on a cluster data node, since it accesses the data node file system directly\&. Because it does not make use of the management server, this utility can be used when the management server is not running, and even when the cluster has been completely shut down\&.
+Additional Options
+.PP
+None\&.
+Sample Output
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_print_frag_file /usr/local/mysqld/data/ndb_3_fs/D1/DBDIH/S2\&.FragList\fR
+Filename: /usr/local/mysqld/data/ndb_3_fs/D1/DBDIH/S2\&.FragList with size 8192
+noOfPages = 1 noOfWords = 182
+Table Data
+\-\-\-\-\-\-\-\-\-\-
+Num Frags: 2 NoOfReplicas: 2 hashpointer: 4294967040
+kvalue: 6 mask: 0x00000000 method: HashMap
+Storage is on Logged and checkpointed, survives SR
+\-\-\-\-\-\- Fragment with FragId: 0 \-\-\-\-\-\-\-\-
+Preferred Primary: 2 numStoredReplicas: 2 numOldStoredReplicas: 0 distKey: 0 LogPartId: 0
+\-\-\-\-\-\-\-Stored Replica\-\-\-\-\-\-\-\-\-\-
+Replica node is: 2 initialGci: 2 numCrashedReplicas = 0 nextLcpNo = 1
+LcpNo[0]: maxGciCompleted: 1 maxGciStarted: 2 lcpId: 1 lcpStatus: valid
+LcpNo[1]: maxGciCompleted: 0 maxGciStarted: 0 lcpId: 0 lcpStatus: invalid
+\-\-\-\-\-\-\-Stored Replica\-\-\-\-\-\-\-\-\-\-
+Replica node is: 3 initialGci: 2 numCrashedReplicas = 0 nextLcpNo = 1
+LcpNo[0]: maxGciCompleted: 1 maxGciStarted: 2 lcpId: 1 lcpStatus: valid
+LcpNo[1]: maxGciCompleted: 0 maxGciStarted: 0 lcpId: 0 lcpStatus: invalid
+\-\-\-\-\-\- Fragment with FragId: 1 \-\-\-\-\-\-\-\-
+Preferred Primary: 3 numStoredReplicas: 2 numOldStoredReplicas: 0 distKey: 0 LogPartId: 1
+\-\-\-\-\-\-\-Stored Replica\-\-\-\-\-\-\-\-\-\-
+Replica node is: 3 initialGci: 2 numCrashedReplicas = 0 nextLcpNo = 1
+LcpNo[0]: maxGciCompleted: 1 maxGciStarted: 2 lcpId: 1 lcpStatus: valid
+LcpNo[1]: maxGciCompleted: 0 maxGciStarted: 0 lcpId: 0 lcpStatus: invalid
+\-\-\-\-\-\-\-Stored Replica\-\-\-\-\-\-\-\-\-\-
+Replica node is: 2 initialGci: 2 numCrashedReplicas = 0 nextLcpNo = 1
+LcpNo[0]: maxGciCompleted: 1 maxGciStarted: 2 lcpId: 1 lcpStatus: valid
+LcpNo[1]: maxGciCompleted: 0 maxGciStarted: 0 lcpId: 0 lcpStatus: invalid
+.fi
+.if n \{\
+.RE
+.\}
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "NOTES"
+.IP " 1." 4
+NDB Cluster Data Node File System Directory Files
+.RS 4
+\%https://dev.mysql.com/doc/ndb-internals/en/ndb-internals-ndbd-filesystemdir-files.html
+.RE
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

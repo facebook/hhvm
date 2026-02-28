@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class finfo {
 
@@ -26,7 +26,7 @@ class finfo {
   }
 
   public function __sleep() {
-    return varray['options', 'magic_file'];
+    return vec['options', 'magic_file'];
   }
 
   public function __wakeup() {

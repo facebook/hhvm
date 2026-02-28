@@ -14,8 +14,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef VARIANTCONTROLLER_H
-#define VARIANTCONTROLLER_H
+
+#pragma once
+
+#ifndef HPHP_OSS
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -24,7 +26,10 @@
 #include "hphp/runtime/base/datatype.h"
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/fb/FBSerialize/FBSerialize.h"
+
+#include "hphp/util/configs/eval.h"
+
+#include "common/serialize/FBSerialize.h"
 
 #include <algorithm>
 #include <utility>
@@ -71,6 +76,7 @@ enum class VariantControllerHackArraysMode {
 template <VariantControllerHackArraysMode HackArraysMode>
 struct VariantControllerImpl {
   using VariantType = Variant;
+  using VariantTypeReference = const Variant&;
   using MapType = Array;
   using VectorType = Array;
   using SetType = Array;
@@ -89,15 +95,16 @@ struct VariantControllerImpl {
         if (obj.toFuncVal()->isMethCaller()) {
           throw HPHP::serialize::MethCallerSerializeError();
         }
+        [[fallthrough]];
       case KindOfClass:
       case KindOfLazyClass:
       case KindOfPersistentString:
       case KindOfString:     return HPHP::serialize::Type::STRING;
       case KindOfObject:
-        if (RO::EvalForbidMethCallerHelperSerialize &&
+        if (Cfg::Eval::ForbidMethCallerHelperSerialize &&
             obj.asCObjRef().get()->getVMClass() ==
-              SystemLib::s_MethCallerHelperClass) {
-          if (RO::EvalForbidMethCallerHelperSerialize == 1) {
+              SystemLib::getMethCallerHelperClass()) {
+          if (Cfg::Eval::ForbidMethCallerHelperSerialize == 1) {
             raise_warning("Serializing MethCallerHelper");
           } else {
             throw HPHP::serialize::MethCallerSerializeError();
@@ -151,6 +158,7 @@ struct VariantControllerImpl {
         );
 
       case KindOfResource:
+      case KindOfEnumClassLabel:
         throw HPHP::serialize::SerializeError(
           "don't know how to serialize HPHP Variant");
       case KindOfRFunc:
@@ -202,11 +210,29 @@ struct VariantControllerImpl {
   static HPHP::serialize::Type mapKeyType(const Variant& k) {
     return type(k);
   }
+  static int64_t mapKeyFromInt64(int64_t key) {
+    return key;
+  }
   static int64_t mapKeyAsInt64(const Variant& k) { return k.toInt64(); }
+  static bool mapExistsInt64Key(const MapType& map, int64_t key) {
+    return map.exists(key);
+  }
+  static VariantType mapAtInt64Key(
+      const MapType& map,
+      int64_t key) {
+    return map[key];
+  }
   static String mapKeyAsString(const Variant& k) {
     return k.toString();
   }
-
+  static bool mapExistsStringKey(const MapType& map, const StringType& key) {
+    return map.exists(key);
+  }
+  static VariantType mapAtStringKey(
+      const MapType& map,
+      const StringType& key) {
+    return map[key];
+  }
   static void mapSet(MapType& map, StringType&& k, VariantType&& v) {
     auto constexpr IC = [&]{
       switch (HackArraysMode) {
@@ -238,7 +264,15 @@ struct VariantControllerImpl {
                      VariantType&& v) {
     map.setIntishCast(idx, k, std::move(v));
   }
+
+  // this function is only added to keep the FBObject decoder buildable it cannot be
+  // called.
+  static void mapSet(StructDictInit& /* map */, int64_t /* k */,
+                     VariantType&& /* v */) {
+    throw std::runtime_error("mapSet for StructDictInit with int key is not supported");
+  }
   static int64_t mapSize(const MapType& map) { return map.size(); }
+  static int64_t mapSize(const_variant_ref map) { return map.toArray().size(); }
   static ArrayIter mapIterator(const MapType& map) {
     return ArrayIter(map);
   }
@@ -261,8 +295,22 @@ struct VariantControllerImpl {
         return empty_dict_array();
     }
   }
+  static VectorType createVector(size_t size) {
+    switch (HackArraysMode) {
+      case VariantControllerHackArraysMode::ON:
+      case VariantControllerHackArraysMode::ON_AND_KEYSET:
+      case VariantControllerHackArraysMode::MIGRATORY:
+      case VariantControllerHackArraysMode::POST_MIGRATION:
+          return Array::attach(VanillaVec::MakeReserveVec(size));
+      case VariantControllerHackArraysMode::OFF:
+          return Array::attach(VanillaDict::MakeReserveDict(size));
+    }
+  }
   static int64_t vectorSize(const VectorType& vec) {
     return vec.size();
+  }
+   static int64_t vectorSize(const_variant_ref vec) {
+    return vec.toArray().size();
   }
   static void vectorAppend(VectorType& vec, const VariantType& v) {
     if constexpr (HackArraysMode == VariantControllerHackArraysMode::OFF) {
@@ -284,6 +332,9 @@ struct VariantControllerImpl {
   static SetType createSet() {
     return empty_keyset();
   }
+  static SetType createSet(size_t size) {
+    return Array::attach(VanillaKeyset::MakeReserveSet(size));
+  }
   static int64_t setSize(const SetType& set) {
     return set.size();
   }
@@ -302,7 +353,7 @@ struct VariantControllerImpl {
     return !it.end();
   }
   static void setNext(ArrayIter& it) { ++it; }
-  static Variant setValue(ArrayIter& it) { return it.second(); }
+  static Variant setValue(ArrayIter& it) { return it.first(); }
 
   // string methods
   static StringType createMutableString(size_t n) {
@@ -313,6 +364,9 @@ struct VariantControllerImpl {
   static StringType createStaticString(const char* str, size_t len) {
     String ret = String(makeStaticString(str, len));
     return ret;
+  }
+  static StringType createStaticStringSafe(const char* str, size_t len) {
+    return createStaticString(str, len);
   }
   static StringType getStaticEmptyString() {
     return empty_string();
@@ -341,6 +395,16 @@ struct VariantControllerImpl {
       RuntimeStruct::registerRuntimeStruct(stableIdentifier, fields);
     return runtimeStruct;
   }
+
+  template<typename StableIdentifierCB>
+  static StructHandle registerStruct(
+      StableIdentifierCB&& stableIdentifierCb,
+      const std::vector<std::pair<size_t, StringType>>& fields) {
+    auto const stableIdentifier = stableIdentifierCb();
+    auto const runtimeStruct =
+      RuntimeStruct::registerRuntimeStruct(stableIdentifier, fields);
+    return runtimeStruct;
+  }
 };
 
 using VariantController =
@@ -357,4 +421,4 @@ using VariantControllerPostHackArrayMigration =
 }
 
 
-#endif
+#endif // HPHP_OSS

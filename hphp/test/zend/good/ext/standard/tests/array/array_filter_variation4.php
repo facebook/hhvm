@@ -14,23 +14,23 @@
 
 // callback function without parameters and with return value
 function callback1()
-{
+:mixed{
   return 1;
 }
 
 // callback function with parameter and without return value
 function callback2($input)
-{
+:mixed{
 }
 
 // callback function without parameter and without return value
 function callback3()
-{
+:mixed{
 }
 
 // callback function with parameter and with return value
 function callback4($input)
-{
+:mixed{
   if(HH\Lib\Legacy_FIXME\gt($input, 0) ) {
     return true;
   }
@@ -42,7 +42,7 @@ function callback4($input)
 echo "*** Testing array_filter() : usage variation - different 'callback' functions***\n";
 
 // Initialize variables
-$input = darray[0 => 0, 1 => -1, 2 => 2, 3 => 3.4E-3, 4 => 'hello', 5 => "value", "key" => 4, 'null' => NULL];
+$input = dict[0 => 0, 1 => -1, 2 => 2, 3 => 3.4E-3, 4 => 'hello', 5 => "value", "key" => 4, 'null' => NULL];
 
 echo "-- Callback function without parameter and with return --\n";
 var_dump( array_filter($input, callback1<>) );

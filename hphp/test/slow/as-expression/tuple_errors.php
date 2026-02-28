@@ -1,6 +1,6 @@
 <?hh
 
-function f(mixed $x) {
+function f(mixed $x) :mixed{
   try {
     $x as (int, bool, string);
     echo "OK\n";
@@ -9,7 +9,7 @@ function f(mixed $x) {
   }
 }
 
-function g(mixed $x) {
+function g(mixed $x) :mixed{
   try {
     $x as (int, (int, (int, bool)));
     echo "OK\n";
@@ -20,7 +20,7 @@ function g(mixed $x) {
 
 
 <<__EntryPoint>>
-function main_tuple_errors() {
+function main_tuple_errors() :mixed{
 $arr = vec[
   tuple(1, true, "hi"),
   tuple(1, 1, "hi"),

@@ -2,12 +2,12 @@
 
 trait PrivateState {
   private $foo = 2;
-  public function getFoo() {
+  public function getFoo() :mixed{
     return $this->foo;
   }
 }
 class Base {
-  public static function create() {
+  public static function create() :mixed{
     return new static();
   }
 }
@@ -18,7 +18,7 @@ class DerivedUsePrivateState extends UsePrivateState {
 }
 
 <<__EntryPoint>>
-function main_2106() {
+function main_2106() :mixed{
 $state = new DerivedUsePrivateState();
 $method = new ReflectionMethod('DerivedUsePrivateState', 'getFoo');
 echo $method->invoke($state)."\n";

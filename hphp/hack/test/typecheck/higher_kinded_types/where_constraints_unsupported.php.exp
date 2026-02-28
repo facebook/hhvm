@@ -1,6 +1,0 @@
-File "where_constraints_unsupported.php", line 5, characters 42-47:
-`T2` is a higher-kinded type parameter, standing for a type that has type parameters itself. We don't support where constraints mentioning parameters like `T2`. (Naming[2047])
-File "where_constraints_unsupported.php", line 5, characters 42-47:
-Wrong number of type arguments (expected 0, got 1) (Typing[4101])
-  File "where_constraints_unsupported.php", line 5, characters 19-20:
-  Definition is here

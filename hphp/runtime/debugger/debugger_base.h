@@ -31,6 +31,7 @@ namespace HPHP::Eval {
 
 struct DebuggerClientOptions {
   std::string host;
+  bool isNotebook;
   int port{-1};
   std::string extension;
   std::vector<std::string> cmds;
@@ -63,7 +64,7 @@ struct DebuggerServerLostException : DebuggerClientException {};
 
 // Both client- and server-side exceptions
 struct DebuggerException : Exception {
-  EXCEPTION_COMMON_IMPL(DebuggerException);
+  EXCEPTION_COMMON_IMPL(DebuggerException)
 };
 
 // Exception thrown in two cases:
@@ -80,7 +81,7 @@ struct DebuggerClientExitException : DebuggerException {
   const char* what() const noexcept override {
     return "Debugger client has just quit, request (if any) terminated.";
   }
-  EXCEPTION_COMMON_IMPL(DebuggerClientExitException);
+  EXCEPTION_COMMON_IMPL(DebuggerClientExitException)
 };
 
 // Exception thrown when a DebuggerClientExitException occurs specifically
@@ -99,7 +100,7 @@ struct DebuggerRestartException : DebuggerException {
   const char* what() const noexcept override {
     return "Debugger restarting program or aborting web request.";
   }
-  EXCEPTION_COMMON_IMPL(DebuggerRestartException);
+  EXCEPTION_COMMON_IMPL(DebuggerRestartException)
 
   std::shared_ptr<std::vector<std::string>> m_args;
 };
@@ -145,7 +146,8 @@ using DSandboxInfoPtr = std::shared_ptr<DSandboxInfo>;
 struct DMachineInfo {
   std::string m_name;
   int m_port{0};
-  DebuggerThriftBuffer m_thrift;
+  DebuggerThriftBuffer m_read_thrift;
+  DebuggerThriftBuffer m_write_thrift;
 
   DSandboxInfoPtr m_sandbox;
   bool m_interrupting{false}; // If the machine is paused at an interrupt
@@ -233,10 +235,10 @@ struct DebuggerUsageLogger {
   virtual void setClientInfo(const std::string& /*username*/, uid_t /*uid*/,
                              pid_t /*clientPid*/) {}
   virtual void
-  log(const std::string& /*mode*/, const std::string& /*sandboxId*/,
-      const std::string& /*cmd*/, const std::string& /*data*/) {}
+  log(const std::string& /*clientId*/, const std::string& /*mode*/,
+      const std::string& /*sandboxId*/, const std::string& /*cmd*/,
+      const std::string& /*data*/) {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

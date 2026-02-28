@@ -1,0 +1,43 @@
+
+Boolean
+WARNING: Argument 2 passed to sha1() must be an instance of bool, int given
+WARNING: Argument 2 passed to sha1() must be an instance of bool, float given
+WARNING: Argument 2 passed to sha1() must be an instance of bool, string given
+WARNING: Argument 2 passed to sha1() must be an instance of bool, HH\vec given
+WARNING: Argument 2 passed to sha1() must be an instance of bool, null given
+
+Int64
+WARNING: Argument 2 passed to str_pad() must be an instance of int, bool given
+WARNING: Argument 2 passed to str_pad() must be an instance of int, float given
+WARNING: Argument 2 passed to str_pad() must be an instance of int, string given
+WARNING: Argument 2 passed to str_pad() must be an instance of int, HH\vec given
+WARNING: Argument 2 passed to str_pad() must be an instance of int, null given
+
+Double
+WARNING: Argument 1 passed to number_format() must be an instance of float, bool given
+WARNING: Argument 1 passed to number_format() must be an instance of float, int given
+WARNING: Argument 1 passed to number_format() must be an instance of float, string given
+WARNING: Argument 1 passed to number_format() must be an instance of float, HH\vec given
+WARNING: Argument 1 passed to number_format() must be an instance of float, null given
+
+String
+WARNING: Argument 1 passed to rtrim() must be an instance of string, bool given
+WARNING: Argument 1 passed to rtrim() must be an instance of string, int given
+WARNING: Argument 1 passed to rtrim() must be an instance of string, float given
+WARNING: Argument 1 passed to rtrim() must be an instance of string, HH\vec given
+WARNING: Argument 1 passed to rtrim() must be an instance of string, null given
+
+varray
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, bool given
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, int given
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, float given
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, string given
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, null given
+
+Object
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, bool given
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, int given
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, float given
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, string given
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, HH\vec given
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, null given

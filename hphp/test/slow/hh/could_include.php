@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_could_include() {
+function main_could_include() :mixed{
 var_dump(HH\could_include(__FILE__));
 $n = tempnam(sys_get_temp_dir(), 'could_include');
 var_dump(HH\could_include($n));

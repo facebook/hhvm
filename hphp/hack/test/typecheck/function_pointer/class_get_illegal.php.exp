@@ -1,2 +1,0 @@
-File "class_get_illegal.php", line 8, characters 8-26:
-Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. (Parsing[1002])

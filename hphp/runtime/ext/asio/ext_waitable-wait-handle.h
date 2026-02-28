@@ -34,29 +34,32 @@ namespace HPHP {
 struct AsioBlockable;
 struct AsioContext;
 
-struct c_WaitableWaitHandle : c_Awaitable {
-  WAITHANDLE_CLASSOF(WaitableWaitHandle);
-  WAITHANDLE_DTOR(WaitableWaitHandle);
+struct c_WaitableWaitHandle :
+    c_Awaitable,
+    SystemLib::ClassLoader<"HH\\WaitableWaitHandle"> {
+  using SystemLib::ClassLoader<"HH\\WaitableWaitHandle">::classof;
+  using SystemLib::ClassLoader<"HH\\WaitableWaitHandle">::className;
+  WAITHANDLE_DTOR(WaitableWaitHandle)
 
   explicit c_WaitableWaitHandle(Class*, HeaderKind, type_scan::Index) noexcept;
   ~c_WaitableWaitHandle();
 
  public:
-  static constexpr ptrdiff_t contextIdxOff() {
-    return offsetof(c_WaitableWaitHandle, m_contextIdx);
+  static constexpr ptrdiff_t ctxStateIdxOff() {
+    return offsetof(c_WaitableWaitHandle, m_ctxStateIdx);
   }
   static constexpr ptrdiff_t parentChainOff() {
     return offsetof(c_WaitableWaitHandle, m_parentChain);
   }
 
-  context_idx_t getContextIdx() const;
-  void setContextIdx(context_idx_t ctx_idx);
+  ContextIndex getContextIndex() const;
+  ContextStateIndex getContextStateIndex() const;
+  void setContextStateIndex(ContextStateIndex ctxStateIdx);
   bool isInContext() const;
   AsioContext* getContext() const;
   AsioBlockableChain& getParentChain();
   void join();
   String getName();
-  Array getDependencyStack();
 
  protected:
   c_WaitableWaitHandle* getChild();

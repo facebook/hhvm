@@ -1,0 +1,20 @@
+ERROR: File "case_type_cyclic_case_type_mutually.php", line 4, characters 11-11:
+Invalid case type declaration. More than one variant of `A` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_cyclic_case_type_mutually.php", line 4, characters 15-15:
+  This is the type `B`, which includes **ints** because it is a cyclic type
+  File "case_type_cyclic_case_type_mutually.php", line 6, characters 15-15:
+    via this variant of the case type `B`
+  File "case_type_cyclic_case_type_mutually.php", line 4, characters 15-15:
+    via this variant of the case type `A`
+  File "case_type_cyclic_case_type_mutually.php", line 4, characters 19-21:
+  It overlaps with `int`, which also includes **ints**
+ERROR: File "case_type_cyclic_case_type_mutually.php", line 6, characters 11-11:
+Invalid case type declaration. More than one variant of `B` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_cyclic_case_type_mutually.php", line 6, characters 15-15:
+  This is the type `A`, which includes **strings** because it is a cyclic type
+  File "case_type_cyclic_case_type_mutually.php", line 4, characters 15-15:
+    via this variant of the case type `A`
+  File "case_type_cyclic_case_type_mutually.php", line 6, characters 15-15:
+    via this variant of the case type `B`
+  File "case_type_cyclic_case_type_mutually.php", line 6, characters 19-24:
+  It overlaps with `string`, which also includes **strings**

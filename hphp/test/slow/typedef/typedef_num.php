@@ -6,13 +6,13 @@ newtype A = num;
 type B = ?num;
 newtype C = X;
 type D = Y;
-function a(<<__Soft>> A $x) {}
-function b(<<__Soft>> B $x) {}
-function c(<<__Soft>> C $x) {}
-function d(<<__Soft>> D $x) {}
+function a(<<__Soft>> A $x) :mixed{}
+function b(<<__Soft>> B $x) :mixed{}
+function c(<<__Soft>> C $x) :mixed{}
+function d(<<__Soft>> D $x) :mixed{}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   a(null);
   a(1);
   a(1.0);

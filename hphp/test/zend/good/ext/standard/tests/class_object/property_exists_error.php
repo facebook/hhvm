@@ -4,7 +4,7 @@
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function property_exists_error(): void {
 echo "*** Testing property_exists() : error conditions ***\n";
 
 $object_or_class = "obj";

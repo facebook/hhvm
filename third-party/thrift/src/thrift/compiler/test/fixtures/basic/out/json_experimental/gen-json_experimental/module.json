@@ -1,0 +1,760 @@
+{
+  "__fbthrift": "@generated",
+  "thrift_module" : "module",
+  "includes": {
+    "hack": "thrift/annotation/hack.thrift",
+    "thrift": "thrift/annotation/thrift.thrift"
+  },
+  "namespaces": {
+    "android": "test.fixtures.basic",
+    "hack.module": "hack.module.test",
+    "java": "test.fixtures.basic",
+    "java.swift": "test.fixtures.basic"
+  },
+  "package": {
+    "domain_prefix": "test",
+    "domain_suffix": "dev",
+    "path": "fixtures/basic",
+    "filename": "module"
+  },
+
+  "typedefs": {
+      "MyEnumAlias": {
+        "name": "MyEnumAlias",
+        "type": {
+  "type" : "enum",
+  "name" : "MyEnum"
+},
+        "is_exception": false,
+        "lineno": 45
+      },
+      "MyDataItemAlias": {
+        "name": "MyDataItemAlias",
+        "type": {
+  "type" : "struct",
+  "name" : "MyDataItem"
+},
+        "is_exception": false,
+        "lineno": 70
+      }
+  },
+  "constants": {
+      "FLAG": {
+        "name": "FLAG",
+        "type": "bool",
+        "value": true,
+        "lineno": 27
+      },
+      "OFFSET": {
+        "name": "OFFSET",
+        "type": "byte",
+        "value": -10,
+        "lineno": 28
+      },
+      "COUNT": {
+        "name": "COUNT",
+        "type": "i16",
+        "value": 200,
+        "lineno": 29
+      },
+      "MASK": {
+        "name": "MASK",
+        "type": "i32",
+        "value": 16388846,
+        "lineno": 30
+      },
+      "E": {
+        "name": "E",
+        "type": "double",
+        "value": 2.718281828459,
+        "lineno": 31
+      },
+      "DATE": {
+        "name": "DATE",
+        "type": "string",
+        "value": "June 28, 2017",
+        "lineno": 32
+      },
+      "AList": {
+        "name": "AList",
+        "type": "list<i32>",
+        "value": [2, 3, 5, 7],
+        "lineno": 34
+      },
+      "ASet": {
+        "name": "ASet",
+        "type": "set<string>",
+        "value": ["foo", "bar", "baz"],
+        "lineno": 36
+      },
+      "AMap": {
+        "name": "AMap",
+        "type": "map<string, list<i32>>",
+        "value": {"foo": [1, 2, 3, 4], "bar": [10, 32, 54]},
+        "lineno": 38
+      }
+  },
+  "enumerations" :
+  {
+      "MyEnum" : {
+        "name" : "MyEnum",
+        "constants" : {
+          "MyValue1" : {
+            "name" : "MyValue1",
+            "lineno" : 41,
+            "value" : 0
+          },
+          "MyValue2" : {
+            "name" : "MyValue2",
+            "lineno" : 42,
+            "value" : 1
+          }
+        },
+        "lineno" : 40
+      },
+      "HackEnum" : {
+        "name" : "HackEnum",
+        "constants" : {
+          "Value1" : {
+            "name" : "Value1",
+            "lineno" : 104,
+            "value" : 0
+          },
+          "Value2" : {
+            "name" : "Value2",
+            "lineno" : 105,
+            "value" : 1
+          }
+        },
+        "lineno" : 102
+      }
+  },
+  "structs" :
+  {
+      "MyStruct" : {
+        "name" : "MyStruct",
+        "fields" : {
+          "MyIntField" : {
+            "name" : "MyIntField",
+            "key" : 1,
+            "lineno" : 49,
+            "required" : "opt-in-req-out",
+            "type" : "i64"
+                  },
+          "MyStringField" : {
+            "name" : "MyStringField",
+            "key" : 2,
+            "lineno" : 50,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  },
+          "MyDataField" : {
+            "name" : "MyDataField",
+            "key" : 3,
+            "lineno" : 52,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "struct",
+      "name" : "MyDataItemAlias"
+    }
+                  },
+          "myEnum" : {
+            "name" : "myEnum",
+            "key" : 4,
+            "lineno" : 53,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "enum",
+      "name" : "MyEnum"
+    }
+                  },
+          "oneway" : {
+            "name" : "oneway",
+            "key" : 5,
+            "lineno" : 54,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+                  },
+          "readonly" : {
+            "name" : "readonly",
+            "key" : 6,
+            "lineno" : 55,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+                  },
+          "idempotent" : {
+            "name" : "idempotent",
+            "key" : 7,
+            "lineno" : 56,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+                  },
+          "floatSet" : {
+            "name" : "floatSet",
+            "key" : 8,
+            "lineno" : 57,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "set",
+      "inner_type" : "float"
+    }
+            ,
+            "structured_annotations": {
+              "hack.SkipCodegen" : {
+                "type" : {
+                "type" : "struct",
+                "name" : "SkipCodegen",
+                "path" : "thrift/annotation/hack.thrift"
+              },
+                "value" : {"reason": "Invalid key type"}
+              }
+            }
+          },
+          "no_hack_codegen_field" : {
+            "name" : "no_hack_codegen_field",
+            "key" : 9,
+            "lineno" : 59,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+            ,
+            "structured_annotations": {
+              "hack.SkipCodegen" : {
+                "type" : {
+                "type" : "struct",
+                "name" : "SkipCodegen",
+                "path" : "thrift/annotation/hack.thrift"
+              },
+                "value" : {"reason": "skip field codegen for deprecation"}
+              }
+            }
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 48
+      },
+      "Containers" : {
+        "name" : "Containers",
+        "fields" : {
+          "I32List" : {
+            "name" : "I32List",
+            "key" : 1,
+            "lineno" : 64,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "list",
+      "inner_type" : "i32"
+    }
+                  },
+          "StringSet" : {
+            "name" : "StringSet",
+            "key" : 2,
+            "lineno" : 65,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "set",
+      "inner_type" : "string"
+    }
+                  },
+          "StringToI64Map" : {
+            "name" : "StringToI64Map",
+            "key" : 3,
+            "lineno" : 66,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "map",
+      "key_type" : "string",
+      "value_type" : "i64"
+    }
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 63
+      },
+      "MyDataItem" : {
+        "name" : "MyDataItem",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 69
+      },
+      "MyUnion" : {
+        "name" : "MyUnion",
+        "fields" : {
+          "myEnum" : {
+            "name" : "myEnum",
+            "key" : 1,
+            "lineno" : 74,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "enum",
+      "name" : "MyEnumAlias"
+    }
+                  },
+          "myStruct" : {
+            "name" : "myStruct",
+            "key" : 2,
+            "lineno" : 75,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "struct",
+      "name" : "MyStruct"
+    }
+                  },
+          "myDataItem" : {
+            "name" : "myDataItem",
+            "key" : 3,
+            "lineno" : 76,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "struct",
+      "name" : "MyDataItem"
+    }
+                  },
+          "floatSet" : {
+            "name" : "floatSet",
+            "key" : 4,
+            "lineno" : 77,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "set",
+      "inner_type" : "float"
+    }
+            ,
+            "structured_annotations": {
+              "hack.SkipCodegen" : {
+                "type" : {
+                "type" : "struct",
+                "name" : "SkipCodegen",
+                "path" : "thrift/annotation/hack.thrift"
+              },
+                "value" : {"reason": "Invalid key type"}
+              }
+            }
+          }
+        },
+        "is_exception" : false,
+        "is_union" : true,
+        "lineno" : 73
+      },
+      "MyException" : {
+        "name" : "MyException",
+        "fields" : {
+          "MyIntField" : {
+            "name" : "MyIntField",
+            "key" : 1,
+            "lineno" : 82,
+            "required" : "opt-in-req-out",
+            "type" : "i64"
+                  },
+          "MyStringField" : {
+            "name" : "MyStringField",
+            "key" : 2,
+            "lineno" : 83,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  },
+          "myStruct" : {
+            "name" : "myStruct",
+            "key" : 3,
+            "lineno" : 84,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "struct",
+      "name" : "MyStruct"
+    }
+                  },
+          "myUnion" : {
+            "name" : "myUnion",
+            "key" : 4,
+            "lineno" : 85,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "struct",
+      "name" : "MyUnion"
+    }
+                  }
+        },
+        "is_exception" : true,
+        "is_union" : false,
+        "lineno" : 81
+      },
+      "MyExceptionWithMessage" : {
+        "name" : "MyExceptionWithMessage",
+        "fields" : {
+          "MyIntField" : {
+            "name" : "MyIntField",
+            "key" : 1,
+            "lineno" : 89,
+            "required" : "opt-in-req-out",
+            "type" : "i64"
+                  },
+          "MyStringField" : {
+            "name" : "MyStringField",
+            "key" : 2,
+            "lineno" : 90,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+            ,
+            "structured_annotations": {
+              "thrift.ExceptionMessage" : {
+                "type" : {
+                "type" : "struct",
+                "name" : "ExceptionMessage",
+                "path" : "thrift/annotation/thrift.thrift"
+              },
+                "value" : {}
+              }
+            }
+          },
+          "myStruct" : {
+            "name" : "myStruct",
+            "key" : 3,
+            "lineno" : 92,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "struct",
+      "name" : "MyStruct"
+    }
+                  },
+          "myUnion" : {
+            "name" : "myUnion",
+            "key" : 4,
+            "lineno" : 93,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "struct",
+      "name" : "MyUnion"
+    }
+                  }
+        },
+        "is_exception" : true,
+        "is_union" : false,
+        "lineno" : 88
+      },
+      "ReservedKeyword" : {
+        "name" : "ReservedKeyword",
+        "structured_annotations": {
+          "hack.Name" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Name",
+            "path" : "thrift/annotation/hack.thrift"
+          },
+            "value" : {"name": "MyRenamedStruct"}
+          }
+        },
+        "fields" : {
+          "reserved_field" : {
+            "name" : "reserved_field",
+            "key" : 1,
+            "lineno" : 98,
+            "required" : "opt-in-req-out",
+            "type" : "i32"
+            ,
+            "structured_annotations": {
+              "hack.Name" : {
+                "type" : {
+                "type" : "struct",
+                "name" : "Name",
+                "path" : "thrift/annotation/hack.thrift"
+              },
+                "value" : {"name": "renamed_field"}
+              }
+            }
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 96
+      },
+      "UnionToBeRenamed" : {
+        "name" : "UnionToBeRenamed",
+        "structured_annotations": {
+          "hack.Name" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Name",
+            "path" : "thrift/annotation/hack.thrift"
+          },
+            "value" : {"name": "MyRenamedUnion"}
+          }
+        },
+        "fields" : {
+          "reserved_field" : {
+            "name" : "reserved_field",
+            "key" : 1,
+            "lineno" : 111,
+            "required" : "opt-in-req-out",
+            "type" : "i32"
+            ,
+            "structured_annotations": {
+              "hack.Name" : {
+                "type" : {
+                "type" : "struct",
+                "name" : "Name",
+                "path" : "thrift/annotation/hack.thrift"
+              },
+                "value" : {"name": "renamed_field"}
+              }
+            }
+          }
+        },
+        "is_exception" : false,
+        "is_union" : true,
+        "lineno" : 109
+      }
+  },
+  "services" :
+  {
+      "FooService" : { 
+        "name" : "FooService",
+        "lineno" : 115,
+        "functions" : {
+          "simple_rpc" : {
+            "name" : "simple_rpc",
+            "returnType" : "void",
+            "lineno" : 117
+          }
+        }
+        ,
+        "structured_annotations": {
+          "hack.Name" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Name",
+            "path" : "thrift/annotation/hack.thrift"
+          },
+            "value" : {"name": "RenamedService"}
+          }
+        }
+      },
+      "FB303Service" : { 
+        "name" : "FB303Service",
+        "lineno" : 120,
+        "functions" : {
+          "simple_rpc" : {
+            "name" : "simple_rpc",
+            "args" : {
+              "int_parameter": {
+                "name" : "int_parameter",
+                "type" : "i32",
+                "key" : 1,
+                "lineno" : 123,
+                "required" : "opt-in-req-out"
+                ,
+                "structured_annotations": {
+                  "hack.Name" : {
+                    "type" : {
+                    "type" : "struct",
+                    "name" : "Name",
+                    "path" : "thrift/annotation/hack.thrift"
+                  },
+                    "value" : {"name": "renamed_parameter"}
+                  }
+                }
+              }
+            },
+            "returnType" : {
+      "type" : "struct",
+      "name" : "ReservedKeyword"
+    },
+            "lineno" : 121,
+            "structured_annotations": {
+              "hack.Name" : {
+                "type" : {
+                "type" : "struct",
+                "name" : "Name",
+                "path" : "thrift/annotation/hack.thrift"
+              },
+                "value" : {"name": "renamed_rpc"}
+              }
+            }
+          }
+        }
+          },
+      "MyService" : { 
+        "name" : "MyService",
+        "lineno" : 128,
+        "functions" : {
+          "ping" : {
+            "name" : "ping",
+            "returnType" : "void",
+            "lineno" : 129
+          },
+          "getRandomData" : {
+            "name" : "getRandomData",
+            "returnType" : "string",
+            "lineno" : 130
+          },
+          "sink" : {
+            "name" : "sink",
+            "args" : {
+              "sink": {
+                "name" : "sink",
+                "type" : "i64",
+                "key" : 1,
+                "lineno" : 131,
+                "required" : "opt-in-req-out"
+                          }
+            },
+            "returnType" : "void",
+            "lineno" : 131
+          },
+          "putDataById" : {
+            "name" : "putDataById",
+            "args" : {
+              "id": {
+                "name" : "id",
+                "type" : "i64",
+                "key" : 1,
+                "lineno" : 133,
+                "required" : "opt-in-req-out"
+                          },
+              "data": {
+                "name" : "data",
+                "type" : "string",
+                "key" : 2,
+                "lineno" : 133,
+                "required" : "opt-in-req-out"
+                          }
+            },
+            "returnType" : "void",
+            "lineno" : 133
+          },
+          "hasDataById" : {
+            "name" : "hasDataById",
+            "args" : {
+              "id": {
+                "name" : "id",
+                "type" : "i64",
+                "key" : 1,
+                "lineno" : 134,
+                "required" : "opt-in-req-out"
+                          }
+            },
+            "returnType" : "bool",
+            "lineno" : 134
+          },
+          "getDataById" : {
+            "name" : "getDataById",
+            "args" : {
+              "id": {
+                "name" : "id",
+                "type" : "i64",
+                "key" : 1,
+                "lineno" : 135,
+                "required" : "opt-in-req-out"
+                          }
+            },
+            "returnType" : "string",
+            "lineno" : 135
+          },
+          "deleteDataById" : {
+            "name" : "deleteDataById",
+            "args" : {
+              "id": {
+                "name" : "id",
+                "type" : "i64",
+                "key" : 1,
+                "lineno" : 136,
+                "required" : "opt-in-req-out"
+                          }
+            },
+            "returnType" : "void",
+            "lineno" : 136
+          },
+          "lobDataById" : {
+            "name" : "lobDataById",
+            "args" : {
+              "id": {
+                "name" : "id",
+                "type" : "i64",
+                "key" : 1,
+                "lineno" : 137,
+                "required" : "opt-in-req-out"
+                          },
+              "data": {
+                "name" : "data",
+                "type" : "string",
+                "key" : 2,
+                "lineno" : 137,
+                "required" : "opt-in-req-out"
+                          }
+            },
+            "returnType" : "void",
+            "lineno" : 137
+          },
+          "invalid_return_for_hack" : {
+            "name" : "invalid_return_for_hack",
+            "returnType" : {
+      "type" : "set",
+      "inner_type" : "float"
+    },
+            "lineno" : 139,
+            "structured_annotations": {
+              "hack.SkipCodegen" : {
+                "type" : {
+                "type" : "struct",
+                "name" : "SkipCodegen",
+                "path" : "thrift/annotation/hack.thrift"
+              },
+                "value" : {"reason": "Invalid key type"}
+              }
+            }
+          },
+          "rpc_skipped_codegen" : {
+            "name" : "rpc_skipped_codegen",
+            "returnType" : "void",
+            "lineno" : 142,
+            "structured_annotations": {
+              "hack.SkipCodegen" : {
+                "type" : {
+                "type" : "struct",
+                "name" : "SkipCodegen",
+                "path" : "thrift/annotation/hack.thrift"
+              },
+                "value" : {"reason": "Skip function deprecation"}
+              }
+            }
+          }
+        }
+          },
+      "DbMixedStackArguments" : { 
+        "name" : "DbMixedStackArguments",
+        "lineno" : 146,
+        "functions" : {
+          "getDataByKey0" : {
+            "name" : "getDataByKey0",
+            "args" : {
+              "key": {
+                "name" : "key",
+                "type" : "string",
+                "key" : 1,
+                "lineno" : 147,
+                "required" : "opt-in-req-out"
+                          }
+            },
+            "returnType" : "binary",
+            "lineno" : 147
+          },
+          "getDataByKey1" : {
+            "name" : "getDataByKey1",
+            "args" : {
+              "key": {
+                "name" : "key",
+                "type" : "string",
+                "key" : 1,
+                "lineno" : 148,
+                "required" : "opt-in-req-out"
+                          }
+            },
+            "returnType" : "binary",
+            "lineno" : 148
+          }
+        }
+          }
+  },
+  "source_path" : "thrift/compiler/test/fixtures/basic/src/module",
+  "py_namespace" : ""
+}

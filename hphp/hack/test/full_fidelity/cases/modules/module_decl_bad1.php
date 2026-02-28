@@ -1,3 +1,3 @@
 <?hh
 
-module {}
+new module {}

@@ -1,0 +1,2 @@
+WARN: File "nameof_as.php", line 5, characters 5-22:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `classname<C>` which is a subtype of `string`. (Warn[12011])

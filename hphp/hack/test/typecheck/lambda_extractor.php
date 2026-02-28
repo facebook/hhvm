@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 final class LamdbaExtractor {
   private static function run(string $program, int $line): void {

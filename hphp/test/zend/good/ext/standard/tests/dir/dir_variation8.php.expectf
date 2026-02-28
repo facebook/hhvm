@@ -1,5 +1,7 @@
 *** Testing dir() : checking with wildcard characters ***
 string(29) "Undefined variable: dir_path1"
+
+Warning: mkdir(): No such file or directory in %s/dir_variation8.php on line 21
 -- wildcard = '*' --
 
 Warning: No such file or directory in %s/dir_variation8.php on line 26

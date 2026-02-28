@@ -1,8 +1,8 @@
 <?hh
 
 abstract final class TestAsyncMysqlConn {
-  static $conn = null;
-  public static function testMultiQuery($input) {
+  public static $conn = null;
+  public static function testMultiQuery($input) :mixed{
     if (self::$conn === null) {
       $conn = (new ReflectionClass(AsyncMysqlConnection::class))
         ->newInstanceWithoutConstructor();
@@ -12,19 +12,10 @@ abstract final class TestAsyncMysqlConn {
     } catch (Exception $_) {}
   }
 }
-<<__EntryPoint>> function main(): void {
-$pool = new AsyncMysqlConnectionPool(darray['foo' => null]);
-var_dump($pool->getPoolStats());
+<<__EntryPoint>>
+function main(): void {
+  $pool = new AsyncMysqlConnectionPool(dict['foo' => null]);
+  var_dump($pool->getPoolStats());
 
-$inputs = vec[
-  varray[],
-  darray[],
-  Vector {},
-  dict[],
-  vec[],
-];
-
-foreach ($inputs as $i) {
-  TestAsyncMysqlConn::testMultiQuery($i);
-}
+  TestAsyncMysqlConn::testMultiQuery(vec[]);
 }

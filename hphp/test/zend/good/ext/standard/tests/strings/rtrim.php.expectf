@@ -1,9 +1,9 @@
 
  *** Output for Error Conditions ***
 
-Warning: rtrim() expects at least 1 parameter, 0 given in %s/rtrim.php on line 8
+Warning: rtrim() expects at least 1 positional parameter, 0 given in %s/rtrim.php on line 8
 
-Warning: rtrim() expects at most 2 parameters, 3 given in %s/rtrim.php on line 9
+Warning: rtrim() expects at most 2 positional parameters, 3 given in %s/rtrim.php on line 9
 
  *** Output for Normal Behaviour ***
 string(10) "rtrim test"
@@ -15,7 +15,7 @@ string(10) "rtrim test"
 string(10) "rtrim test"
 
 *** String with embedded NULL ***
-string(22) "234%r\x00%r05678%r\x00%r00efgh\xijkl"
+string(22) "234%h{00}05678%h{00}00efgh\xijkl"
 
  *** Using heredoc string ***
 string(18) "us

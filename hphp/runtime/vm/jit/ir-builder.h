@@ -202,12 +202,6 @@ struct IRBuilder {
   void setBlock(SrcKey sk, Block* block);
 
   /*
-   * Clear the instructions in `block' and reset its start to the out state of
-   * `pred', which must have been saved.
-   */
-  void resetBlock(Block* block, Block* pred);
-
-  /*
    * Append `block' to the unit.
    *
    * This method is used to implement IR-level control-flow helpers. When doing
@@ -218,6 +212,12 @@ struct IRBuilder {
    * all incoming edges should be created before calling this method.
    */
   void appendBlock(Block* block);
+
+  /*
+   * If the final instruction in the current block is a block end and no next
+   * block has been assigned yet, create one.
+   */
+  void ensureBlockAppendable();
 
   /*
    * Clear the SrcKey-to-block map.
@@ -232,14 +232,20 @@ struct IRBuilder {
   void restoreOffsetMapping(SkToBlockMap&& offsetMapping);
 
   /*
-   * Get, set, or null out the block to branch to in case of a guard failure.
-   *
-   * A nullptr guard fail block indicates that guard failures should end the
-   * region and perform a service request.
+   * Get or set an exception handling block for a given EH at SrcKey assuming
+   * an empty stack, or a parent block, plus a value on top of the stack.
    */
-  Block* guardFailBlock() const;
-  void setGuardFailBlock(Block* block);
-  void resetGuardFailBlock();
+  Block* getEHBlock(SrcKey) const;
+  Block* getEHDecRefBlock(Block*, SSATmp*) const;
+  void setEHBlock(SrcKey, Block*);
+  void setEHDecRefBlock(Block*, SSATmp*, Block*);
+
+  /*
+   * Save and restore the m_skToEHBlockMap.
+   */
+  SkToBlockMap saveAndClearEHBlockMapping();
+  void restoreEHBlockMapping(SkToBlockMap&& skToEHBlockMap);
+
 
   /*
    * To emit code to a block other than the current block, call pushBlock(),
@@ -384,10 +390,12 @@ private:
   // Keep track of blocks created to support bytecode control flow.
   SkToBlockMap m_skToBlockMap;
 
-  // Keeps the block to branch to (if any) in case a guard fails.
-  // This holds nullptr if the guard failures should perform a service
-  // request (StubType::Retranslate or REQ_BIND_JMP).
-  Block* m_guardFailBlock{nullptr};
+  // A map from exception handler SKs to blocks implementing their handlers.
+  SkToBlockMap m_skToEHBlockMap;
+
+  // A map from a pair of EH block id and top of the stack value id to another
+  // EH block that is responsible for popping and decreffing that value.
+  jit::fast_map<std::pair<uint32_t, uint32_t>, Block*> m_skToEHDecRefBlockMap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

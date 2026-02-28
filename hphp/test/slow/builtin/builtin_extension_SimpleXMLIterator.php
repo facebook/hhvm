@@ -1,6 +1,6 @@
 <?hh
 
-function basicXML() {
+function basicXML() :mixed{
   return
 '<root>
   <a><a1>a1</a1></a>
@@ -10,12 +10,12 @@ function basicXML() {
 </root>';
 }
 
-function testInitialize() {
+function testInitialize() :mixed{
   $s = new SimpleXMLIterator(basicXML());
   echo "SimpleXMLIterator can be initialized :)\n";
 }
 
-function testMeta() {
+function testMeta() :mixed{
   $s = new SimpleXMLIterator(basicXML());
   echo "SimpleXMLIterator is a SimpleXMLElement: ";
   var_export($s is SimpleXMLElement);echo "\n";
@@ -24,12 +24,12 @@ function testMeta() {
   var_export($s is RecursiveIterator);echo "\n";
 }
 
-function testGetBasicProperty() {
+function testGetBasicProperty() :mixed{
   $s = new SimpleXMLIterator(basicXML());
   echo "Node root/b has contents: {$s->b}\n";
 }
 
-function testFlatIteration() {
+function testFlatIteration() :mixed{
   $s = new SimpleXMLIterator(basicXML());
   echo "Iteration of elements: ";
   foreach ($s as $e) {
@@ -38,7 +38,7 @@ function testFlatIteration() {
   echo "\n";
 }
 
-function testChildCountDuringIteration() {
+function testChildCountDuringIteration() :mixed{
   $s = new SimpleXMLIterator(basicXML());
   echo "Counts of first level nodes: ";
   foreach ($s as $i => $e) {
@@ -47,7 +47,7 @@ function testChildCountDuringIteration() {
   echo "\n";
 }
 
-function testHasChildrenDuringIteration() {
+function testHasChildrenDuringIteration() :mixed{
   $s = new SimpleXMLIterator(basicXML());
   echo "first level nodes have children: ";
   foreach ($s as $i => $e) {
@@ -56,7 +56,7 @@ function testHasChildrenDuringIteration() {
   echo "\n";
 }
 
-function testRecursiveIteration() {
+function testRecursiveIteration() :mixed{
   $s = new RecursiveIteratorIterator(new SimpleXMLIterator(basicXML()));
   echo "Leaves:\n";
   foreach ($s as $i => $e) {

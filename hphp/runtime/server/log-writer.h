@@ -77,7 +77,7 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
   switch (field) {
   case 'b':
     if (responseSize == 0) return false;
-    // Fall through
+    [[fallthrough]];
   case 'B':
     out = folly::to<T>(responseSize);
     break;
@@ -150,6 +150,10 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
         out = folly::to<T>(jitMaturityCounter->getValue());
       }
     }
+    break;
+  case 'M':
+    // current Unix timestamp in microseconds
+    out = folly::to<T>(Timer::GetCurrentTimeMicros());
     break;
   case 'n':
     if (arg.empty()) return false;
@@ -225,7 +229,7 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
     {
       std::string host = transport->getHeader("Host");
       const std::string &sname = VirtualHost::GetCurrent()->serverName(host);
-      if (sname.empty() || RuntimeOption::ForceServerNameToHeader) {
+      if (sname.empty() || Cfg::Server::ForceServerNameToHeader) {
         out = folly::to<T>(host);
       } else {
         out = folly::to<T>(sname);

@@ -7,19 +7,21 @@
  *)
 
 let telemetry_to_multiline (telemetry : Telemetry.t) : string =
-  telemetry |> Telemetry.to_json |> Hh_json.json_to_multiline
+  Telemetry.to_string ~pretty:true telemetry
 
 (** e.g. drilling for "foo.bar" will return that field.
 Raises exception if foo is absent or not an object, and if bar is absent *)
-let value_exn (telemetry : Telemetry.t) (path : string) : Hh_json.json =
-  let json = telemetry |> Telemetry.to_json in
+let value_exn (telemetry : Telemetry.t) (path : string) : Yojson.Safe.t =
+  let json = telemetry |> Telemetry.to_yojson in
   let accessors = Str.split (Str.regexp "\\.") path in
-  let rec drill (json : Hh_json.json) (accessors : string list) : Hh_json.json =
+  let rec drill (json : Yojson.Safe.t) (accessors : string list) : Yojson.Safe.t
+      =
     match accessors with
     | [] -> failwith "empty path provided"
-    | [key] ->
-      begin
-        match Hh_json_helpers.Jget.val_opt (Some json) key with
+    | [key] -> begin
+      match json with
+      | `Assoc kvs -> begin
+        match List.assoc_opt key kvs with
         | None ->
           failwith
             (Printf.sprintf
@@ -29,34 +31,69 @@ let value_exn (telemetry : Telemetry.t) (path : string) : Hh_json.json =
                (telemetry_to_multiline telemetry))
         | Some v -> v
       end
-    | key :: rest ->
-      let obj = Hh_json_helpers.Jget.obj_opt (Some json) key in
-      (match obj with
-      | None ->
+      | _ ->
         failwith
           (Printf.sprintf
-             "%s not correct: %s in %s"
+             "%s not an object: %s in %s"
              key
              path
              (telemetry_to_multiline telemetry))
-      | Some obj -> drill obj rest)
+    end
+    | key :: rest -> begin
+      match json with
+      | `Assoc kvs -> begin
+        match List.assoc_opt key kvs with
+        | None ->
+          failwith
+            (Printf.sprintf
+               "%s not correct: %s in %s"
+               key
+               path
+               (telemetry_to_multiline telemetry))
+        | Some obj -> drill obj rest
+      end
+      | _ ->
+        failwith
+          (Printf.sprintf
+             "%s not an object: %s in %s"
+             key
+             path
+             (telemetry_to_multiline telemetry))
+    end
   in
   drill json accessors
 
 (** e.g. inspecting "foo.bar"` will return the int foo.bar, and fail if
 it's not an int or if either foo/bar don't exist. *)
 let int_exn (telemetry : Telemetry.t) (path : string) : int =
-  value_exn telemetry path |> Hh_json.get_number_int_exn
+  match value_exn telemetry path with
+  | `Int i -> i
+  | `Intlit s -> int_of_string s
+  | v ->
+    failwith
+      (Printf.sprintf
+         "expected int at %s, got %s"
+         path
+         (Yojson.Safe.to_string v))
 
 (** e.g. inspecting "foo.bar"` will return the float foo.bar, and fail if
 it's not a float or if either foo/bar don't exist. *)
 let float_exn (telemetry : Telemetry.t) (path : string) : float =
-  value_exn telemetry path |> Hh_json.get_number_exn |> float_of_string
+  match value_exn telemetry path with
+  | `Float f -> f
+  | `Int i -> float_of_int i
+  | `Intlit s -> float_of_string s
+  | v ->
+    failwith
+      (Printf.sprintf
+         "expected float at %s, got %s"
+         path
+         (Yojson.Safe.to_string v))
 
 (** e.g. to tell whether "foo.bar" exists *)
 let is_absent (telemetry : Telemetry.t) (path : string) : bool =
   try
-    let (_ : Hh_json.json) = value_exn telemetry path in
+    let (_ : Yojson.Safe.t) = value_exn telemetry path in
     false
   with
   | _ -> true

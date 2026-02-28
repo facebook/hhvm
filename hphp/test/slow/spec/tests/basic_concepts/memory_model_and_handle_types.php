@@ -6,7 +6,7 @@ class Point
     private $y;
 
     public static function getPointCount()
-    {
+:mixed    {
         return self::$pointCount;
     }
 
@@ -17,25 +17,25 @@ class Point
     }
 
     public function move($x, $y)
-    {
+:mixed    {
         $this->x = $x;
         $this->y = $y;
     }
 
     public function translate($x, $y)
-    {
+:mixed    {
         $this->x += $x;
         $this->y += $y;
     }
 
     public function __toString()
-    {
+:mixed    {
         return '(' . $this->x . ',' . $this->y . ')';
     }
 }
 
 function f1($b) // pass-by-value creates second alias to first point
-{
+:mixed{
     echo "\tInside function " . __FUNCTION__ . ", \$b is $b\n";
 
     $b->move(4, 6);         // moving $b also moves $a
@@ -48,7 +48,7 @@ function f1($b) // pass-by-value creates second alias to first point
 } // $b goes away, remove the only alias from second point, so destructor runs
 
 function f2()
-{
+:mixed{
     $b = new Point(5, 7);   // create first new point, and make $b an alias to it
 
     echo "After 'new Point(5, 7)', \$b is $b\n";

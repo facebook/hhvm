@@ -1,10 +1,10 @@
 <?hh
 
-function set(inout $b) {
+function set(inout $b) :mixed{
   $b = 3;
 }
 
-function run(inout $a) {
+function run(inout $a) :mixed{
   set(inout $a);
   return $a;
 }

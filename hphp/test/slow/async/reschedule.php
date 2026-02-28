@@ -1,6 +1,6 @@
 <?hh
 
-async function re($e) {
+async function re($e) :Awaitable<mixed>{
   echo "begin 2**$e(-1, 0, 1)\n";
   $priority = (int)pow(2, $e);
   $r = async $diff ==> {
@@ -18,7 +18,7 @@ async function re($e) {
 }
 
 <<__EntryPoint>>
-function main_reschedule() {
+function main_reschedule() :mixed{
   \HH\Asio\join(AwaitAllWaitHandle::fromDict(dict(array_map(
     async $e ==> await re($e),
     vec[ 1, 10, 20 ],

@@ -3,7 +3,7 @@
 class Test implements Countable
 {
     function count()
-    {
+:mixed    {
         return 4;
     }
 }

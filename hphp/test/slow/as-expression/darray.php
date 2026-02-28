@@ -10,7 +10,7 @@ function f(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_darray() {
+function main_darray() :mixed{
 f(vec[]);
 f(dict[]);
 f(keyset[]);

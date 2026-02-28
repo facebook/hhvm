@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * xml_parser_create() creates a new XML parser and returns a resource handle
@@ -67,10 +67,10 @@ function xml_parse(resource $parser, string $data, bool $is_final = true): int;
 <<__Native>>
 function xml_parse_into_struct(resource $parser,
                                string $data,
-                               <<__OutOnly("varray")>>
-                               inout mixed $values,
-                               <<__OutOnly("darray")>>
-                               inout mixed $index): int;
+                               <<__OutOnly>>
+                               inout vec<mixed> $values,
+                               <<__OutOnly>>
+                               inout dict<arraykey, mixed> $index): int;
 
 /**
  * xml_parser_create_ns() creates a new XML parser with XML namespace support

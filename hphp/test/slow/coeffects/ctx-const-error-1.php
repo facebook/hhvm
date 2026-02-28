@@ -2,9 +2,9 @@
 
 class A {}
 
-function f(A $x)[$x::C] { echo "in f\n"; }
+function f(A $x)[$x::C] :mixed{ echo "in f\n"; }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   f(new A);
 }

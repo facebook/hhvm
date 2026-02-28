@@ -162,8 +162,11 @@ let checker (visitor : 'env nast_visitor_with_state) =
       super#on_method_ env m
 
     method! on_expr env e =
-      let env = visitor#at_expr env e in
-      super#on_expr env e
+      match e with
+      | (_, _, Aast.Invalid _) -> ()
+      | _ ->
+        let env = visitor#at_expr env e in
+        super#on_expr env e
 
     method! on_stmt env s =
       let env = visitor#at_stmt env s in

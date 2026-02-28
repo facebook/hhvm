@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing file_put_contents() : variation ***\n";
 
-$filename = __SystemLib\hphp_test_tmppath('FilePutContentsVar1.tmp');
+$filename = sys_get_temp_dir().'/'.'FilePutContentsVar1.tmp';
 
 $data = "The first string to write";
 $extra = ", followed by this";

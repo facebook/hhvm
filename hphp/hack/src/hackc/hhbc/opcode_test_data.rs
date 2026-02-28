@@ -3,7 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_gen::{ImmType, Inputs, InstrFlags, OpcodeData, Outputs};
+use hhbc_gen::ImmType;
+use hhbc_gen::Inputs;
+use hhbc_gen::InstrFlags;
+use hhbc_gen::OpcodeData;
+use hhbc_gen::Outputs;
 
 pub fn test_opcodes() -> Vec<OpcodeData> {
     vec![
@@ -38,14 +42,6 @@ pub fn test_opcodes() -> Vec<OpcodeData> {
             inputs: Inputs::NOV,
             outputs: Outputs::NOV,
             flags: InstrFlags::NF,
-        },
-        // --------------------------------------------------
-        OpcodeData {
-            name: "TestAsStruct",
-            immediates: vec![("str1", ImmType::SA), ("str2", ImmType::SA)],
-            inputs: Inputs::NOV,
-            outputs: Outputs::NOV,
-            flags: InstrFlags::AS_STRUCT,
         },
         // --------------------------------------------------
         OpcodeData {
@@ -163,13 +159,6 @@ pub fn test_opcodes() -> Vec<OpcodeData> {
         OpcodeData {
             name: "TestOA",
             immediates: vec![("subop1", ImmType::OA("OaSubType"))],
-            inputs: Inputs::NOV,
-            outputs: Outputs::NOV,
-            flags: InstrFlags::NF,
-        },
-        OpcodeData {
-            name: "TestOAL",
-            immediates: vec![("subop1", ImmType::OAL("OaSubType"))],
             inputs: Inputs::NOV,
             outputs: Outputs::NOV,
             flags: InstrFlags::NF,

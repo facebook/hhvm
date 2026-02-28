@@ -16,7 +16,7 @@ function is_shape(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_ta_shape2() {
+function main_is_expression_ta_shape2() :mixed{
 is_shape(null);
 is_shape(new stdClass());
 is_shape(tuple(1, true));

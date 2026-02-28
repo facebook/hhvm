@@ -1,0 +1,6 @@
+int(4)
+int(4)
+NULL
+int(42)
+
+Fatal error: fb_intercept2 was used on a non-interceptable function (HH\Shapes::idx). Builtins are by default non-interceptable. If you need to intercept a builtin, add it to the InterceptableBuiltins allowlist in %s/intercept/restrict_intercept_systemlib1.php on line %d

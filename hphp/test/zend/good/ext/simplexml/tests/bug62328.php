@@ -1,6 +1,6 @@
 <?hh
 class UberSimpleXML extends SimpleXMLElement {
-    public function __toString() {
+    public function __toString() :mixed{
         return 'stringification';
     }
 }

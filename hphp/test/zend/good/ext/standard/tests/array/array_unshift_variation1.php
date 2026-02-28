@@ -12,7 +12,7 @@
 // get a class
 class classA
 {
-  public function __toString() {
+  public function __toString() :mixed{
     return "Class A object";
   }
 }
@@ -32,7 +32,7 @@ $fp = fopen(__FILE__, "r");
 
 
 // array of unexpected values to be passed to $array argument
-$arrays = varray[
+$arrays = vec[
 
        // int data
 /*1*/  0,

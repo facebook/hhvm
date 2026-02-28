@@ -9,7 +9,7 @@
 echo "*** Testing readlink() and realpath() : usage variations ***\n";
 
 echo "\n*** Testing readlink() and realpath() with linkname as empty string, NULL and single space ***\n";
-$link_string = varray [
+$link_string = vec[
   /* linkname as spaces */
   " ",
   ' ',

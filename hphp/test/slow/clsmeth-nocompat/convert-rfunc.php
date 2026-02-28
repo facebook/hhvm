@@ -1,6 +1,6 @@
 <?hh
 
-function handle_error($_no, $msg, ...) {
+function handle_error($_no, $msg, ...$_rest) :mixed{
   $matches = null;
   $pat1 = '/Argument ([0-9]+) passed to ([^(]+)\(\) must be an instance of ([^,]+), clsmeth given/';
   if (preg_match_with_matches($pat1, $msg, inout $matches)) {
@@ -21,9 +21,9 @@ function handle_error($_no, $msg, ...) {
   return false;
 }
 
-class Foo { static function bar() {} }
+class Foo { static function bar() :mixed{} }
 
-function LV($x) { return __hhvm_intrinsics\launder_value($x); }
+function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 
 function args<reify Tarr, reify Tvar, reify Ttrav, reify Tcont>(
   Tarr $arr,
@@ -43,18 +43,18 @@ function args<reify Tarr, reify Tvar, reify Ttrav, reify Tcont>(
   if ($cont[0] !== Foo::class || $cont[1] !== 'bar') echo "Fail!\n";
 }
 
-function ret_varr<reify T>(): T { return class_meth(Foo::class, 'bar'); }
-function ret_arr<reify T>():  T { return class_meth(Foo::class, 'bar'); }
+function ret_varr<reify T>(): T { return Foo::bar<>; }
+function ret_arr<reify T>():  T { return Foo::bar<>; }
 
-function ret_varr_dyn<reify T>(): T {return LV(class_meth(Foo::class, 'bar')); }
-function ret_arr_dyn<reify T>():  T {return LV(class_meth(Foo::class, 'bar')); }
+function ret_varr_dyn<reify T>(): T {return LV(Foo::bar<>); }
+function ret_arr_dyn<reify T>():  T {return LV(Foo::bar<>); }
 
 function inout_args<reify Tarr, reify Tvar, reify Ttrav, reify Tcont>(
   inout Tarr $arr,
   inout Tvar $varr,
   inout Ttrav $trav,
   inout Tcont $cont,
-) {
+) :mixed{
   var_dump(
     $arr,
     $varr,
@@ -67,23 +67,23 @@ function inout_args<reify Tarr, reify Tvar, reify Ttrav, reify Tcont>(
   if ($cont[0] !== Foo::class || $cont[1] !== 'bar') echo "Fail!\n";
 }
 
-function test_static() {
+function test_static() :mixed{
   try {
     args<AnyArray, varray, Traversable, Container>(
-      class_meth(Foo::class, 'bar'),
-      class_meth(Foo::class, 'bar'),
-      class_meth(Foo::class, 'bar'),
-      class_meth(Foo::class, 'bar'),
+      Foo::bar<>,
+      Foo::bar<>,
+      Foo::bar<>,
+      Foo::bar<>,
     );
   } catch (Exception $_) {}
 
   try { var_dump(ret_varr<varray>()); } catch (Exception $_) {}
   try { var_dump(ret_arr<AnyArray>()); } catch (Exception $_) {}
 
-  $io1 = class_meth(Foo::class, 'bar');
-  $io2 = class_meth(Foo::class, 'bar');
-  $io3 = class_meth(Foo::class, 'bar');
-  $io4 = class_meth(Foo::class, 'bar');
+  $io1 = Foo::bar<>;
+  $io2 = Foo::bar<>;
+  $io3 = Foo::bar<>;
+  $io4 = Foo::bar<>;
 
   try {
     inout_args<AnyArray, varray, Traversable, Container>(
@@ -95,7 +95,7 @@ function test_static() {
   } catch (Exception $_) {}
   var_dump($io1, $io2, $io3, $io4);
 
-  $foo = class_meth(Foo::class, 'bar');
+  $foo = Foo::bar<>;
   try { var_dump(varray($foo)); } catch (Exception $_) {}
 
   try {
@@ -103,23 +103,23 @@ function test_static() {
   } catch (Exception $_) {}
 }
 
-function test_dynamic() {
+function test_dynamic() :mixed{
   try {
     args<AnyArray, varray, Traversable, Container>(
-      LV(class_meth(Foo::class, 'bar')),
-      LV(class_meth(Foo::class, 'bar')),
-      LV(class_meth(Foo::class, 'bar')),
-      LV(class_meth(Foo::class, 'bar')),
+      LV(Foo::bar<>),
+      LV(Foo::bar<>),
+      LV(Foo::bar<>),
+      LV(Foo::bar<>),
     );
   } catch (Exception $_) {}
 
   try { var_dump(ret_varr_dyn<varray>()); } catch (Exception $_) {}
   try { var_dump(ret_arr_dyn<AnyArray>()); } catch (Exception $_) {}
 
-  $io1 = LV(class_meth(Foo::class, 'bar'));
-  $io2 = LV(class_meth(Foo::class, 'bar'));
-  $io3 = LV(class_meth(Foo::class, 'bar'));
-  $io4 = LV(class_meth(Foo::class, 'bar'));
+  $io1 = LV(Foo::bar<>);
+  $io2 = LV(Foo::bar<>);
+  $io3 = LV(Foo::bar<>);
+  $io4 = LV(Foo::bar<>);
 
   try {
     inout_args<AnyArray, varray, Traversable, Container>(
@@ -131,7 +131,7 @@ function test_dynamic() {
   } catch (Exception $_) {}
   var_dump($io1, $io2, $io3, $io4);
 
-  $foo = LV(class_meth(Foo::class, 'bar'));
+  $foo = LV(Foo::bar<>);
   try { var_dump(varray($foo)); } catch (Exception $_) {}
 
   try {
@@ -140,7 +140,7 @@ function test_dynamic() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(handle_error<>);
 
   test_static();  test_static();  test_static();

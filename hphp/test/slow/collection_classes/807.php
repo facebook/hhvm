@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_807() {
+function main_807() :mixed{
 $m = new Map;
 $m[3] = 'foo';
 var_dump(serialize($m));

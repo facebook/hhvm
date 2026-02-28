@@ -1,17 +1,17 @@
 <?hh
 
-function alpha() {
+function alpha() :mixed{
   throw new Error('Foo');
 }
 
-function beta() {
+function beta() :mixed{
   alpha();
 }
 
-function gamma() {
+function gamma() :mixed{
   beta();
 }
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   gamma();
 }

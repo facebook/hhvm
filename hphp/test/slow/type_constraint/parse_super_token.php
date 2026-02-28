@@ -1,8 +1,8 @@
 <?hh
 
-function super() { echo "hello world\n"; }
+function super() :mixed{ echo "hello world\n"; }
 
 <<__EntryPoint>>
-function main_parse_super_token() {
+function main_parse_super_token() :mixed{
 super();
 }

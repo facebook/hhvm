@@ -1,5 +1,5 @@
 <?hh
-function error_handler($num, $msg, $file, $line, $vars) { echo $line,"\n"; }
+function error_handler($num, $msg, $file, $line, $vars) :mixed{ echo $line,"\n"; }
 
 <<__EntryPoint>> function main(): void {
 set_error_handler(error_handler<>);

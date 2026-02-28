@@ -1,0 +1,10 @@
+<?hh
+
+module M1;
+
+class B extends A {
+  public function foobar(): void {
+    (new A())->foo().'bar'; // pass
+    A::static_foo().'bar'; // pass
+  }
+}

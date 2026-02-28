@@ -37,7 +37,7 @@ function g(Tshape $s): float {
 <<__EntryPoint>>
 function main_entry(): void {
 
-  f(darray[0 => 0, 1 => 'one']);
+  f(dict[0 => 0, 1 => 'one']);
 
-  g(darray['zero' => 0, 'one' => 'one', 2 => 2.]);
+  g(dict['zero' => 0, 'one' => 'one', 2 => 2.]);
 }

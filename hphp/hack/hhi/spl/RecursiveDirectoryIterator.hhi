@@ -8,18 +8,22 @@
  *
  */
 
-class RecursiveDirectoryIterator extends FilesystemIterator
-  implements
-    RecursiveIterator<SplFileInfo> {
+class RecursiveDirectoryIterator
+  extends FilesystemIterator
+  implements RecursiveIterator<~SplFileInfo> {
 
   // Constants
-  const int FOLLOW_SYMLINKS = 512;
+  const int FOLLOW_SYMLINKS;
 
   // Methods
-  public function __construct($path, $flags = null);
-  public function hasChildren();
-  public function getChildren();
-  public function getSubPath();
-  public function getSubPathname();
+  public function __construct(
+    HH\FIXME\MISSING_PARAM_TYPE $path,
+    HH\FIXME\MISSING_PARAM_TYPE $flags = null,
+  );
+  public function hasChildren(): bool;
+  // implementation can also return string or false
+  public function getChildren(): ~this;
+  public function getSubPath(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getSubPathname(): HH\FIXME\MISSING_RETURN_TYPE;
 
 }

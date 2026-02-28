@@ -2,7 +2,7 @@
 class C {
   public $t = Pair {'foo', 42};
 }
-function f() {
+function f() :mixed{
   $c = new C;
   $t = $c->t;
   $u = Pair {new stdClass, 73};
@@ -56,6 +56,6 @@ function f() {
 }
 
 <<__EntryPoint>>
-function main_823() {
+function main_823() :mixed{
 f();
 }

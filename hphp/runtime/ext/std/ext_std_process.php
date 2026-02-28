@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * This function is identical to the backtick operator.
@@ -31,10 +31,10 @@ function shell_exec(string $cmd): mixed;
  */
 <<__Native>>
 function exec(string $command,
-              <<__OutOnly("varray")>>
-              inout mixed $output,
-              <<__OutOnly("KindOfInt64")>>
-              inout mixed $return_var): string;
+              <<__OutOnly>>
+              inout vec<string> $output,
+              <<__OutOnly>>
+              inout int $return_var): string;
 
 /**
  * The passthru() function is similar to the exec() function in that it
@@ -54,8 +54,8 @@ function exec(string $command,
  */
 <<__Native>>
 function passthru(string $command,
-                  <<__OutOnly("KindOfInt64")>>
-                  inout mixed $return_var): void;
+                  <<__OutOnly>>
+                  inout int $return_var): void;
 
 /**
  * system() is just like the C version of the function in that it executes the
@@ -75,8 +75,8 @@ function passthru(string $command,
  */
 <<__Native>>
 function system(string $command,
-                <<__OutOnly("KindOfInt64")>>
-                inout mixed $return_var): string;
+                <<__OutOnly>>
+                inout int $return_var): string;
 
 /**
  * proc_open() is similar to popen() but provides a much greater degree of
@@ -123,8 +123,8 @@ function system(string $command,
 <<__Native>>
 function proc_open(string $cmd,
                    darray<int, mixed> $descriptorspec,
-                   <<__OutOnly("darray")>>
-                   inout mixed $pipes,
+                   <<__OutOnly>>
+                   inout dict<int, resource> $pipes,
                    ?string $cwd = null,
                    mixed $env = null,
                    mixed $other_options = null): mixed;

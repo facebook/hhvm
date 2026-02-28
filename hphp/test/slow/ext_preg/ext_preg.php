@@ -1,27 +1,27 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; var_dump(debug_backtrace()); }
 }
-function VERIFY($x) { VS($x, true); }
+function VERIFY($x) :mixed{ VS($x, true); }
 
 //////////////////////////////////////////////////////////////////////
 
-function test_preg_rep($a,$b,$c) {
+function test_preg_rep($a,$b,$c) :mixed{
   return strtoupper($c).$a;
 }
 
-function test_preg_grep() {
-  $array = varray["foo 123.1", "fg 24bar", "123.1", "24"];
+function test_preg_grep() :mixed{
+  $array = vec["foo 123.1", "fg 24bar", "123.1", "24"];
   $fl_array = preg_grep("/^(\\d+)?\\.\\d+$/", $array);
   VS(count($fl_array), 1);
   VS($fl_array[2], "123.1");
 
-  VS(preg_grep("/a/", varray["c", "b"]), darray[]);
+  VS(preg_grep("/a/", vec["c", "b"]), dict[]);
 }
 
-function test_preg_match() {
+function test_preg_match() :mixed{
   // The "i" after the pattern delimiter indicates a case-insensitive search
   VS(preg_match("/php/i", "PHP is a scripting language."), 1);
 
@@ -57,7 +57,7 @@ function test_preg_match() {
 }
 
 
-function test_preg_match_all() {
+function test_preg_match_all() :mixed{
   $matches = null;
   preg_match_all_with_matches(
     "/\\(?  (\\d{3})?  \\)?  (?(1)  [\\-\\s] ) \\d{3}-\\d{4}/x",
@@ -162,15 +162,15 @@ function test_preg_match_all() {
      ")\n");
 }
 
-function test_preg_replace() {
+function test_preg_replace() :mixed{
   $str = "April 15, 2003";
   $pattern = "/(\\w+) (\\d+), (\\d+)/i";
   $replacement = "\${1}1,\$3";
   VS(preg_replace($pattern, $replacement, $str), "April1,2003");
 
   $str = "The quick brown fox jumped over the lazy dog.";
-  $patterns = darray[];
-  $replacements = darray[];
+  $patterns = dict[];
+  $replacements = dict[];
   $patterns[0] = "/quick/";
   $patterns[1] = "/brown/";
   $patterns[2] = "/fox/";
@@ -185,20 +185,20 @@ function test_preg_replace() {
   VS(preg_replace($patterns, $replacements, $str),
      "The slow black bear jumped over the lazy dog.");
 
-  $foos = darray[];
+  $foos = dict[];
   $foos[0] = "foo";
   $foos[1] = "Foo";
   $foos[2] = "FOO";
-  $expFoo = darray[];
+  $expFoo = dict[];
   $expFoo[0] = "FOO";
   $expFoo[1] = "FOO";
   $expFoo[2] = "FOO";
-  VS(preg_replace("/some pattern/", "", varray[]), darray[]);
+  VS(preg_replace("/some pattern/", "", vec[]), dict[]);
   VS(preg_replace("/foo/i", "FOO", $foos), $expFoo);
 
-  $patterns = varray["/(19|20)(\\d{2})-(\\d{1,2})-(\\d{1,2})/",
+  $patterns = vec["/(19|20)(\\d{2})-(\\d{1,2})-(\\d{1,2})/",
                                   "/^\\s*{(\\w+)}\\s*=/"];
-  $replace = varray["\\3/\\4/\\1\\2", "$\\1 ="];
+  $replace = vec["\\3/\\4/\\1\\2", "$\\1 ="];
   VS(preg_replace($patterns, $replace, "{startDate} = 1999-5-27"),
      "\$startDate = 5/27/1999");
 
@@ -207,29 +207,29 @@ function test_preg_replace() {
   VS($str, "foo o");
 
   $count = 0;
-  preg_replace_with_count(varray["/\\d/", "/\\s/"], "*", "xp 4 to", -1, inout $count);
+  preg_replace_with_count(vec["/\\d/", "/\\s/"], "*", "xp 4 to", -1, inout $count);
   VS($count, 3);
 
   VS(preg_replace("/xxx", "w", "xxxx"), NULL);
   VS(preg_replace("/xxx/", "w", "xxxx"), "wx");
   VS(preg_replace("/xxy/", "w", "xxxx"), "xxxx");
 
-  VS(preg_replace("/xxx", "w", varray["xxxx"]), darray[]);
-  VS(preg_replace("/xxx/", "w", varray["xxxx"]), darray[0 => "wx"]);
-  VS(preg_replace("/xxx/", "w", varray["xxxx", "yyyy"]), darray[0 => "wx", 1 => "yyyy"]);
-  VS(preg_replace(varray["/xxx/", "/xxx"], "w", varray["xxxx"]), darray[]);
-  VS(preg_replace(varray["/xxx/", "/xxx/"], "w", varray["xxxx"]), darray[0 => "wx"]);
+  VS(preg_replace("/xxx", "w", vec["xxxx"]), dict[]);
+  VS(preg_replace("/xxx/", "w", vec["xxxx"]), dict[0 => "wx"]);
+  VS(preg_replace("/xxx/", "w", vec["xxxx", "yyyy"]), dict[0 => "wx", 1 => "yyyy"]);
+  VS(preg_replace(vec["/xxx/", "/xxx"], "w", vec["xxxx"]), dict[]);
+  VS(preg_replace(vec["/xxx/", "/xxx/"], "w", vec["xxxx"]), dict[0 => "wx"]);
 
-  VS(preg_replace("/xxx", varray["w"], varray["xxxx"]), false);
-  VS(preg_replace(varray["/xxx"], varray["w"], varray["xxxx"]), darray[]);
-  VS(preg_replace(varray["/xxx/"], varray["w"], varray["xxxx"]), darray[0 => "wx"]);
+  VS(preg_replace("/xxx", vec["w"], vec["xxxx"]), false);
+  VS(preg_replace(vec["/xxx"], vec["w"], vec["xxxx"]), dict[]);
+  VS(preg_replace(vec["/xxx/"], vec["w"], vec["xxxx"]), dict[0 => "wx"]);
 }
 
-function next_year($m) {
+function next_year($m) :mixed{
   return $m[1].((int)$m[2] + 1);
 }
 
-function test_preg_replace_callback() {
+function test_preg_replace_callback() :mixed{
   $text = "April fools day is 04/01/2002\n".
     "Last christmas was 12/24/2001\n";
   $count = -1;
@@ -238,7 +238,7 @@ function test_preg_replace_callback() {
   VS($text, "April fools day is 04/01/2003\nLast christmas was 12/24/2002\n");
 }
 
-function test_preg_split() {
+function test_preg_split() :mixed{
   $keywords = preg_split("/[\\s,]+/",
                          "hypertext language, programming");
   VS(count($keywords), 3);
@@ -298,7 +298,7 @@ function test_preg_split() {
      ")\n");
 }
 
-function test_preg_quote() {
+function test_preg_quote() :mixed{
   $keywords = "$40 for a g3/400";
   $keywords = preg_quote($keywords, "/");
   VS($keywords, "\\$40 for a g3\\/400");
@@ -314,7 +314,7 @@ function test_preg_quote() {
   VS($textbody, "This book is <i>*very*</i> difficult to find.");
 }
 
-function test_ereg_replace() {
+function test_ereg_replace() :mixed{
   $str = "This is a test";
   VS(str_replace(" is", " was", $str), "This was a test");
   VS(ereg_replace("( )is", "\\1was", $str), "This was a test");
@@ -331,7 +331,7 @@ function test_ereg_replace() {
   VS($test, "<a href=\"http://test.com/test\">http://test.com/test</a>");
 }
 
-function test_eregi_replace() {
+function test_eregi_replace() :mixed{
   $pattern = "(>[^<]*)(suffix)";
   $replacement = "\\1<span class=\"search\">\\2</span>";
   $body = ">whateversuffix";
@@ -339,7 +339,7 @@ function test_eregi_replace() {
   VS($body, ">whatever<span class=\"search\">suffix</span>");
 }
 
-function test_split() {
+function test_split() :mixed{
   $mb = "\xe4\xbf\xa1\xe6\x81\xaf\x01  2366797";
   $ret = split("\x01", $mb);
   VS($ret[0], "\xe4\xbf\xa1\xe6\x81\xaf");
@@ -352,7 +352,7 @@ function test_split() {
   VS($ret[2], "1973");
 }
 
-function test_spliti() {
+function test_spliti() :mixed{
   $str = "aBBBaCCCADDDaEEEaGGGA";
   $chunks = spliti("a", $str, 5);
   VS($chunks[0], "");
@@ -362,13 +362,13 @@ function test_spliti() {
   VS($chunks[4], "EEEaGGGA");
 }
 
-function test_sql_regcase() {
+function test_sql_regcase() :mixed{
   VS(sql_regcase("Foo - bar."), "[Ff][Oo][Oo] - [Bb][Aa][Rr].");
 }
 
 
 <<__EntryPoint>>
-function main_ext_preg() {
+function main_ext_preg() :mixed{
 test_preg_grep();
 test_preg_match();
 test_preg_match_all();

@@ -1,10 +1,10 @@
 <?hh <<__EntryPoint>> function main(): void {
-$tests = varray[
-    varray["hello world", "3e4a5a57"],
-    varray["", 0],
-    varray["", "000000"],
-    varray["a", "ca2e9442"],
-    varray["aa", "7081738e"],
+$tests = vec[
+    vec["hello world", "3e4a5a57"],
+    vec["", 0],
+    vec["", "000000"],
+    vec["a", "ca2e9442"],
+    vec["aa", "7081738e"],
 ];
 
 $i = 0;

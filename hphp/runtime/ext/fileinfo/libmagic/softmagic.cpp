@@ -29,13 +29,13 @@
  * softmagic - interpret variable magic from MAGIC
  */
 
-#include "file.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/file.h"
 
 #ifndef  lint
 FILE_RCSID("@(#)$File: softmagic.c,v 1.165 2013/03/07 02:22:24 christos Exp $")
 #endif  /* lint */
 
-#include "magic.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/magic.h"
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>

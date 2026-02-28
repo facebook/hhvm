@@ -4,7 +4,7 @@ const COUNT = 120;
 function main_entry(): void {
   $ok = 0;
   $d0 = new DateTime('2009-11-20');
-  $dates = darray[];
+  $dates = dict[];
   for ( $i = 0; $i < COUNT * 12; $i++ )
   {
   	$d = clone $d0;

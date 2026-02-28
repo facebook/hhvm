@@ -1,0 +1,6 @@
+ERROR: File "requirethis_interface.bad.php", line 6, characters 9-9:
+Interfaces cannot use traits (NastCheck[3073])
+ERROR: File "requirethis_interface.bad.php", line 12, characters 21-21:
+`I` is not a class. It is an interface. (NastCheck[3017])
+  File "requirethis_interface.bad.php", line 12, characters 21-21:
+  Try using `require implements` instead of `require this as`.

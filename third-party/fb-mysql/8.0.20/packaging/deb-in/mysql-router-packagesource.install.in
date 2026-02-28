@@ -1,0 +1,56 @@
+# Copyright (c) 2017, 2020, Oracle and/or its affiliates. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2.0,
+# as published by the Free Software Foundation.
+#
+# This program is also distributed with certain software (including
+# but not limited to OpenSSL) that is licensed under separate terms,
+# as designated in a particular file or component or in included license
+# documentation.  The authors of MySQL hereby grant you an additional
+# permission to link the program and your derivative works with the
+# separately licensed software that they have included with MySQL.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License, version 2.0, for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+
+usr/bin/mysqlrouter
+usr/bin/mysqlrouter_keyring
+usr/bin/mysqlrouter_plugin_info
+usr/bin/mysqlrouter_passwd
+usr/lib/mysqlrouter/plugin/http_auth_backend.so
+usr/lib/mysqlrouter/plugin/http_auth_realm.so
+usr/lib/mysqlrouter/plugin/http_server.so
+usr/lib/mysqlrouter/plugin/keepalive.so
+usr/lib/mysqlrouter/plugin/mysql_protocol.so
+usr/lib/mysqlrouter/plugin/routing.so
+usr/lib/mysqlrouter/plugin/metadata_cache.so
+usr/lib/mysqlrouter/plugin/rest_api.so
+usr/lib/mysqlrouter/plugin/rest_router.so
+usr/lib/mysqlrouter/plugin/rest_routing.so
+usr/lib/mysqlrouter/plugin/rest_metadata_cache.so
+# private shared libraries
+usr/lib/mysqlrouter/private/libprotobuf-lite.so.3.6.1
+usr/lib/mysqlrouter/private/libmysqlharness.so.1
+usr/lib/mysqlrouter/private/libmysqlrouter.so.1
+usr/lib/mysqlrouter/private/libmysqlrouter_http.so.1
+usr/lib/mysqlrouter/private/libmysqlrouter_http_auth_backend.so.1
+usr/lib/mysqlrouter/private/libmysqlrouter_http_auth_realm.so.1
+
+usr/share/mysql-@MYSQL_BASE_VERSION@/docs/sample_mysqlrouter.conf
+usr/share/man/man1/mysqlrouter.1
+usr/share/man/man1/mysqlrouter_passwd.1
+usr/share/man/man1/mysqlrouter_plugin_info.1
+debian/extra/mysqlrouter.conf /etc/mysqlrouter/
+# app armor profile
+@DEB_INSTALL_ROUTER_APPARMOR@
+
+# legal
+usr/LICENSE.router usr/share/doc/mysql-router-@DEB_PRODUCTNAME@/
+usr/README.router usr/share/doc/mysql-router-@DEB_PRODUCTNAME@/

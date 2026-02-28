@@ -1,0 +1,8 @@
+ERROR: File "using_good.php", line 59, characters 3-17:
+Typing error (Typing[4189])
+  File "using_good.php", line 7, characters 62-63:
+  This parameter is marked `<<__AcceptDisposable>>`
+  File "using_good.php", line 59, characters 15-16:
+  This parameter is not marked `<<__AcceptDisposable>>`
+ERROR: File "using_good.php", line 59, characters 15-16:
+Variable from `using` clause may only be used as receiver in method invocation or passed to function with `<<__AcceptDisposable>>` parameter attribute (Typing[4180])

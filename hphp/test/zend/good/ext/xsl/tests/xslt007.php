@@ -8,7 +8,7 @@ function main_entry(): void {
   $proc = XSLTPrepare::getProc();
   $proc->importStylesheet(XSLTPrepare::getXSL());
   print "\n";
-  $tmpfile = __SystemLib\hphp_test_tmppath('out.xml');
+  $tmpfile = sys_get_temp_dir().'/'.'out.xml';
   $doc = $proc->transformToURI(XSLTPrepare::getDOM(), "file://$tmpfile");
   print file_get_contents($tmpfile);
   unlink($tmpfile);

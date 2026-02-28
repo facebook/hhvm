@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /**
  * It's possible to iterate over tuple-like array and it behaves as vec-like
@@ -6,7 +6,7 @@
  */
 
 function test(): void {
-  $a = varray[4, 3.14];
+  $a = vec[4, 3.14];
 
   foreach ($a as $v) {
     take_int($v);

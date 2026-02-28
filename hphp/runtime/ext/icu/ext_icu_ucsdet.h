@@ -10,9 +10,8 @@
 
 namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
-extern const StaticString s_EncodingDetector;
 
-struct EncodingDetector : IntlError {
+struct EncodingDetector : IntlError, SystemLib::ClassLoader<"EncodingDetector"> {
   EncodingDetector() = default;
   EncodingDetector(const EncodingDetector&) = delete;
   EncodingDetector& operator=(const EncodingDetector& /*src*/) = delete;
@@ -21,8 +20,11 @@ struct EncodingDetector : IntlError {
   bool isValid() const { return true; }
 
   static EncodingDetector* Get(ObjectData* obj) {
-    return GetData<EncodingDetector>(obj, s_EncodingDetector);
+    return GetData<EncodingDetector>(obj, className());
   }
+
+  const String& text() const { return m_text; }
+  const String& declaredEncoding() const { return m_declaredEncoding; }
 
   std::shared_ptr<UCharsetDetector> detector();
 
@@ -41,9 +43,7 @@ struct EncodingDetector : IntlError {
 
 /////////////////////////////////////////////////////////////////////////////
 
-extern const StaticString s_EncodingMatch;
-
-struct EncodingMatch : IntlError {
+struct EncodingMatch : IntlError, SystemLib::ClassLoader<"EncodingMatch"> {
   EncodingMatch() {}
   EncodingMatch(const EncodingMatch&) = delete;
   EncodingMatch& operator=(const EncodingMatch& src) {
@@ -54,20 +54,20 @@ struct EncodingMatch : IntlError {
   ~EncodingMatch() = default;
 
   static Object newInstance(const UCharsetMatch* match,
-                            const std::shared_ptr<UCharsetDetector>& det) {
-    if (UNLIKELY(!c_EncodingMatch)) {
-      c_EncodingMatch = Class::lookup(s_EncodingMatch.get());
-      assertx(c_EncodingMatch);
-    }
-    Object ret{c_EncodingMatch};
+                            const std::shared_ptr<UCharsetDetector>& det,
+                            const String& text,
+                            const String& declaredEncoding) {
+    Object ret{classof()};
     auto const data = Native::data<EncodingMatch>(ret);
     data->m_match = const_cast<UCharsetMatch*>(match);
     data->m_encodingDetector = det;
+    data->m_text = text;
+    data->m_declaredEncoding = declaredEncoding;
     return ret;
   }
 
   static EncodingMatch* Get(ObjectData* obj) {
-    return GetData<EncodingMatch>(obj, s_EncodingMatch);
+    return GetData<EncodingMatch>(obj, className());
   }
 
   bool isValid() const {
@@ -77,9 +77,12 @@ struct EncodingMatch : IntlError {
   UCharsetMatch* match() const { return m_match; }
 
  private:
+  // m_match is owned by m_encodingDetector
   std::shared_ptr<UCharsetDetector> m_encodingDetector;
   UCharsetMatch* m_match{nullptr};
-  static Class* c_EncodingMatch;
+  // m_text and m_declaredEncoding are used by m_encodingDetector
+  String m_text;
+  String m_declaredEncoding;
 };
 
 /////////////////////////////////////////////////////////////////////////////

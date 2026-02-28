@@ -29,6 +29,7 @@ pub enum SyntaxVariant<'a, T, V> {
     EndOfFile(&'a EndOfFileChildren<'a, T, V>),
     Script(&'a ScriptChildren<'a, T, V>),
     QualifiedName(&'a QualifiedNameChildren<'a, T, V>),
+    ModuleName(&'a ModuleNameChildren<'a, T, V>),
     SimpleTypeSpecifier(&'a SimpleTypeSpecifierChildren<'a, T, V>),
     LiteralExpression(&'a LiteralExpressionChildren<'a, T, V>),
     PrefixedStringExpression(&'a PrefixedStringExpressionChildren<'a, T, V>),
@@ -43,6 +44,8 @@ pub enum SyntaxVariant<'a, T, V> {
     EnumClassEnumerator(&'a EnumClassEnumeratorChildren<'a, T, V>),
     AliasDeclaration(&'a AliasDeclarationChildren<'a, T, V>),
     ContextAliasDeclaration(&'a ContextAliasDeclarationChildren<'a, T, V>),
+    CaseTypeDeclaration(&'a CaseTypeDeclarationChildren<'a, T, V>),
+    CaseTypeVariant(&'a CaseTypeVariantChildren<'a, T, V>),
     PropertyDeclaration(&'a PropertyDeclarationChildren<'a, T, V>),
     PropertyDeclarator(&'a PropertyDeclaratorChildren<'a, T, V>),
     NamespaceDeclaration(&'a NamespaceDeclarationChildren<'a, T, V>),
@@ -61,21 +64,17 @@ pub enum SyntaxVariant<'a, T, V> {
     MethodishTraitResolution(&'a MethodishTraitResolutionChildren<'a, T, V>),
     ClassishDeclaration(&'a ClassishDeclarationChildren<'a, T, V>),
     ClassishBody(&'a ClassishBodyChildren<'a, T, V>),
-    TraitUsePrecedenceItem(&'a TraitUsePrecedenceItemChildren<'a, T, V>),
-    TraitUseAliasItem(&'a TraitUseAliasItemChildren<'a, T, V>),
-    TraitUseConflictResolution(&'a TraitUseConflictResolutionChildren<'a, T, V>),
     TraitUse(&'a TraitUseChildren<'a, T, V>),
     RequireClause(&'a RequireClauseChildren<'a, T, V>),
+    RequireClauseConstraint(&'a RequireClauseConstraintChildren<'a, T, V>),
     ConstDeclaration(&'a ConstDeclarationChildren<'a, T, V>),
     ConstantDeclarator(&'a ConstantDeclaratorChildren<'a, T, V>),
     TypeConstDeclaration(&'a TypeConstDeclarationChildren<'a, T, V>),
     ContextConstDeclaration(&'a ContextConstDeclarationChildren<'a, T, V>),
     DecoratedExpression(&'a DecoratedExpressionChildren<'a, T, V>),
+    NamedArgument(&'a NamedArgumentChildren<'a, T, V>),
     ParameterDeclaration(&'a ParameterDeclarationChildren<'a, T, V>),
-    VariadicParameter(&'a VariadicParameterChildren<'a, T, V>),
     OldAttributeSpecification(&'a OldAttributeSpecificationChildren<'a, T, V>),
-    AttributeSpecification(&'a AttributeSpecificationChildren<'a, T, V>),
-    Attribute(&'a AttributeChildren<'a, T, V>),
     InclusionExpression(&'a InclusionExpressionChildren<'a, T, V>),
     InclusionDirective(&'a InclusionDirectiveChildren<'a, T, V>),
     CompoundStatement(&'a CompoundStatementChildren<'a, T, V>),
@@ -83,11 +82,11 @@ pub enum SyntaxVariant<'a, T, V> {
     MarkupSection(&'a MarkupSectionChildren<'a, T, V>),
     MarkupSuffix(&'a MarkupSuffixChildren<'a, T, V>),
     UnsetStatement(&'a UnsetStatementChildren<'a, T, V>),
+    DeclareLocalStatement(&'a DeclareLocalStatementChildren<'a, T, V>),
     UsingStatementBlockScoped(&'a UsingStatementBlockScopedChildren<'a, T, V>),
     UsingStatementFunctionScoped(&'a UsingStatementFunctionScopedChildren<'a, T, V>),
     WhileStatement(&'a WhileStatementChildren<'a, T, V>),
     IfStatement(&'a IfStatementChildren<'a, T, V>),
-    ElseifClause(&'a ElseifClauseChildren<'a, T, V>),
     ElseClause(&'a ElseClauseChildren<'a, T, V>),
     TryStatement(&'a TryStatementChildren<'a, T, V>),
     CatchClause(&'a CatchClauseChildren<'a, T, V>),
@@ -100,6 +99,8 @@ pub enum SyntaxVariant<'a, T, V> {
     SwitchFallthrough(&'a SwitchFallthroughChildren<'a, T, V>),
     CaseLabel(&'a CaseLabelChildren<'a, T, V>),
     DefaultLabel(&'a DefaultLabelChildren<'a, T, V>),
+    MatchStatement(&'a MatchStatementChildren<'a, T, V>),
+    MatchStatementArm(&'a MatchStatementArmChildren<'a, T, V>),
     ReturnStatement(&'a ReturnStatementChildren<'a, T, V>),
     YieldBreakStatement(&'a YieldBreakStatementChildren<'a, T, V>),
     ThrowStatement(&'a ThrowStatementChildren<'a, T, V>),
@@ -111,6 +112,9 @@ pub enum SyntaxVariant<'a, T, V> {
     AnonymousClass(&'a AnonymousClassChildren<'a, T, V>),
     AnonymousFunction(&'a AnonymousFunctionChildren<'a, T, V>),
     AnonymousFunctionUseClause(&'a AnonymousFunctionUseClauseChildren<'a, T, V>),
+    VariablePattern(&'a VariablePatternChildren<'a, T, V>),
+    ConstructorPattern(&'a ConstructorPatternChildren<'a, T, V>),
+    RefinementPattern(&'a RefinementPatternChildren<'a, T, V>),
     LambdaExpression(&'a LambdaExpressionChildren<'a, T, V>),
     LambdaSignature(&'a LambdaSignatureChildren<'a, T, V>),
     CastExpression(&'a CastExpressionChildren<'a, T, V>),
@@ -129,6 +133,7 @@ pub enum SyntaxVariant<'a, T, V> {
     ConditionalExpression(&'a ConditionalExpressionChildren<'a, T, V>),
     EvalExpression(&'a EvalExpressionChildren<'a, T, V>),
     IssetExpression(&'a IssetExpressionChildren<'a, T, V>),
+    NameofExpression(&'a NameofExpressionChildren<'a, T, V>),
     FunctionCallExpression(&'a FunctionCallExpressionChildren<'a, T, V>),
     FunctionPointerExpression(&'a FunctionPointerExpressionChildren<'a, T, V>),
     ParenthesizedExpression(&'a ParenthesizedExpressionChildren<'a, T, V>),
@@ -175,7 +180,12 @@ pub enum SyntaxVariant<'a, T, V> {
     DictionaryTypeSpecifier(&'a DictionaryTypeSpecifierChildren<'a, T, V>),
     ClosureTypeSpecifier(&'a ClosureTypeSpecifierChildren<'a, T, V>),
     ClosureParameterTypeSpecifier(&'a ClosureParameterTypeSpecifierChildren<'a, T, V>),
+    TupleOrUnionOrIntersectionElementTypeSpecifier(&'a TupleOrUnionOrIntersectionElementTypeSpecifierChildren<'a, T, V>),
+    TypeRefinement(&'a TypeRefinementChildren<'a, T, V>),
+    TypeInRefinement(&'a TypeInRefinementChildren<'a, T, V>),
+    CtxInRefinement(&'a CtxInRefinementChildren<'a, T, V>),
     ClassnameTypeSpecifier(&'a ClassnameTypeSpecifierChildren<'a, T, V>),
+    ClassPtrTypeSpecifier(&'a ClassPtrTypeSpecifierChildren<'a, T, V>),
     FieldSpecifier(&'a FieldSpecifierChildren<'a, T, V>),
     FieldInitializer(&'a FieldInitializerChildren<'a, T, V>),
     ShapeTypeSpecifier(&'a ShapeTypeSpecifierChildren<'a, T, V>),
@@ -196,6 +206,8 @@ pub enum SyntaxVariant<'a, T, V> {
     ListItem(&'a ListItemChildren<'a, T, V>),
     EnumClassLabelExpression(&'a EnumClassLabelExpressionChildren<'a, T, V>),
     ModuleDeclaration(&'a ModuleDeclarationChildren<'a, T, V>),
+    ModuleMembershipDeclaration(&'a ModuleMembershipDeclarationChildren<'a, T, V>),
+    PackageExpression(&'a PackageExpressionChildren<'a, T, V>),
 }
 
 #[derive(Debug, Clone)]
@@ -210,6 +222,11 @@ pub struct ScriptChildren<'a, T, V> {
 
 #[derive(Debug, Clone)]
 pub struct QualifiedNameChildren<'a, T, V> {
+    pub parts: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ModuleNameChildren<'a, T, V> {
     pub parts: Syntax<'a, T, V>,
 }
 
@@ -233,7 +250,7 @@ pub struct PrefixedStringExpressionChildren<'a, T, V> {
 pub struct PrefixedCodeExpressionChildren<'a, T, V> {
     pub prefix: Syntax<'a, T, V>,
     pub left_backtick: Syntax<'a, T, V>,
-    pub expression: Syntax<'a, T, V>,
+    pub body: Syntax<'a, T, V>,
     pub right_backtick: Syntax<'a, T, V>,
 }
 
@@ -259,6 +276,7 @@ pub struct FileAttributeSpecificationChildren<'a, T, V> {
 #[derive(Debug, Clone)]
 pub struct EnumDeclarationChildren<'a, T, V> {
     pub attribute_spec: Syntax<'a, T, V>,
+    pub modifiers: Syntax<'a, T, V>,
     pub keyword: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
     pub colon: Syntax<'a, T, V>,
@@ -313,6 +331,8 @@ pub struct EnumClassEnumeratorChildren<'a, T, V> {
 #[derive(Debug, Clone)]
 pub struct AliasDeclarationChildren<'a, T, V> {
     pub attribute_spec: Syntax<'a, T, V>,
+    pub modifiers: Syntax<'a, T, V>,
+    pub module_kw_opt: Syntax<'a, T, V>,
     pub keyword: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
     pub generic_parameter: Syntax<'a, T, V>,
@@ -332,6 +352,28 @@ pub struct ContextAliasDeclarationChildren<'a, T, V> {
     pub equal: Syntax<'a, T, V>,
     pub context: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct CaseTypeDeclarationChildren<'a, T, V> {
+    pub attribute_spec: Syntax<'a, T, V>,
+    pub modifiers: Syntax<'a, T, V>,
+    pub case_keyword: Syntax<'a, T, V>,
+    pub type_keyword: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub generic_parameter: Syntax<'a, T, V>,
+    pub as_: Syntax<'a, T, V>,
+    pub bounds: Syntax<'a, T, V>,
+    pub equal: Syntax<'a, T, V>,
+    pub variants: Syntax<'a, T, V>,
+    pub semicolon: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct CaseTypeVariantChildren<'a, T, V> {
+    pub bar: Syntax<'a, T, V>,
+    pub type_: Syntax<'a, T, V>,
+    pub where_clause: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -472,7 +514,6 @@ pub struct ClassishDeclarationChildren<'a, T, V> {
     pub extends_list: Syntax<'a, T, V>,
     pub implements_keyword: Syntax<'a, T, V>,
     pub implements_list: Syntax<'a, T, V>,
-    pub where_clause: Syntax<'a, T, V>,
     pub body: Syntax<'a, T, V>,
 }
 
@@ -480,30 +521,6 @@ pub struct ClassishDeclarationChildren<'a, T, V> {
 pub struct ClassishBodyChildren<'a, T, V> {
     pub left_brace: Syntax<'a, T, V>,
     pub elements: Syntax<'a, T, V>,
-    pub right_brace: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct TraitUsePrecedenceItemChildren<'a, T, V> {
-    pub name: Syntax<'a, T, V>,
-    pub keyword: Syntax<'a, T, V>,
-    pub removed_names: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct TraitUseAliasItemChildren<'a, T, V> {
-    pub aliasing_name: Syntax<'a, T, V>,
-    pub keyword: Syntax<'a, T, V>,
-    pub modifiers: Syntax<'a, T, V>,
-    pub aliased_name: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct TraitUseConflictResolutionChildren<'a, T, V> {
-    pub keyword: Syntax<'a, T, V>,
-    pub names: Syntax<'a, T, V>,
-    pub left_brace: Syntax<'a, T, V>,
-    pub clauses: Syntax<'a, T, V>,
     pub right_brace: Syntax<'a, T, V>,
 }
 
@@ -518,6 +535,15 @@ pub struct TraitUseChildren<'a, T, V> {
 pub struct RequireClauseChildren<'a, T, V> {
     pub keyword: Syntax<'a, T, V>,
     pub kind: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub semicolon: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct RequireClauseConstraintChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub this: Syntax<'a, T, V>,
+    pub operator: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,
 }
@@ -572,21 +598,26 @@ pub struct DecoratedExpressionChildren<'a, T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct ParameterDeclarationChildren<'a, T, V> {
-    pub attribute: Syntax<'a, T, V>,
-    pub visibility: Syntax<'a, T, V>,
-    pub call_convention: Syntax<'a, T, V>,
-    pub readonly: Syntax<'a, T, V>,
-    pub type_: Syntax<'a, T, V>,
+pub struct NamedArgumentChildren<'a, T, V> {
     pub name: Syntax<'a, T, V>,
-    pub default_value: Syntax<'a, T, V>,
+    pub equal: Syntax<'a, T, V>,
+    pub expression: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]
-pub struct VariadicParameterChildren<'a, T, V> {
+pub struct ParameterDeclarationChildren<'a, T, V> {
+    pub attribute: Syntax<'a, T, V>,
+    pub visibility: Syntax<'a, T, V>,
+    pub optional: Syntax<'a, T, V>,
     pub call_convention: Syntax<'a, T, V>,
+    pub named: Syntax<'a, T, V>,
+    pub readonly: Syntax<'a, T, V>,
+    pub pre_ellipsis: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
     pub ellipsis: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub default_value: Syntax<'a, T, V>,
+    pub parameter_end: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -594,17 +625,6 @@ pub struct OldAttributeSpecificationChildren<'a, T, V> {
     pub left_double_angle: Syntax<'a, T, V>,
     pub attributes: Syntax<'a, T, V>,
     pub right_double_angle: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct AttributeSpecificationChildren<'a, T, V> {
-    pub attributes: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct AttributeChildren<'a, T, V> {
-    pub at: Syntax<'a, T, V>,
-    pub attribute_name: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -654,6 +674,16 @@ pub struct UnsetStatementChildren<'a, T, V> {
 }
 
 #[derive(Debug, Clone)]
+pub struct DeclareLocalStatementChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub variable: Syntax<'a, T, V>,
+    pub colon: Syntax<'a, T, V>,
+    pub type_: Syntax<'a, T, V>,
+    pub initializer: Syntax<'a, T, V>,
+    pub semicolon: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
 pub struct UsingStatementBlockScopedChildren<'a, T, V> {
     pub await_keyword: Syntax<'a, T, V>,
     pub using_keyword: Syntax<'a, T, V>,
@@ -687,17 +717,7 @@ pub struct IfStatementChildren<'a, T, V> {
     pub condition: Syntax<'a, T, V>,
     pub right_paren: Syntax<'a, T, V>,
     pub statement: Syntax<'a, T, V>,
-    pub elseif_clauses: Syntax<'a, T, V>,
     pub else_clause: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct ElseifClauseChildren<'a, T, V> {
-    pub keyword: Syntax<'a, T, V>,
-    pub left_paren: Syntax<'a, T, V>,
-    pub condition: Syntax<'a, T, V>,
-    pub right_paren: Syntax<'a, T, V>,
-    pub statement: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -806,6 +826,24 @@ pub struct DefaultLabelChildren<'a, T, V> {
 }
 
 #[derive(Debug, Clone)]
+pub struct MatchStatementChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub left_paren: Syntax<'a, T, V>,
+    pub expression: Syntax<'a, T, V>,
+    pub right_paren: Syntax<'a, T, V>,
+    pub left_brace: Syntax<'a, T, V>,
+    pub arms: Syntax<'a, T, V>,
+    pub right_brace: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct MatchStatementArmChildren<'a, T, V> {
+    pub pattern: Syntax<'a, T, V>,
+    pub arrow: Syntax<'a, T, V>,
+    pub body: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
 pub struct ReturnStatementChildren<'a, T, V> {
     pub keyword: Syntax<'a, T, V>,
     pub expression: Syntax<'a, T, V>,
@@ -875,6 +913,7 @@ pub struct AnonymousFunctionChildren<'a, T, V> {
     pub attribute_spec: Syntax<'a, T, V>,
     pub async_keyword: Syntax<'a, T, V>,
     pub function_keyword: Syntax<'a, T, V>,
+    pub type_parameters: Syntax<'a, T, V>,
     pub left_paren: Syntax<'a, T, V>,
     pub parameters: Syntax<'a, T, V>,
     pub right_paren: Syntax<'a, T, V>,
@@ -895,6 +934,26 @@ pub struct AnonymousFunctionUseClauseChildren<'a, T, V> {
 }
 
 #[derive(Debug, Clone)]
+pub struct VariablePatternChildren<'a, T, V> {
+    pub variable: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ConstructorPatternChildren<'a, T, V> {
+    pub constructor: Syntax<'a, T, V>,
+    pub left_paren: Syntax<'a, T, V>,
+    pub members: Syntax<'a, T, V>,
+    pub right_paren: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct RefinementPatternChildren<'a, T, V> {
+    pub variable: Syntax<'a, T, V>,
+    pub colon: Syntax<'a, T, V>,
+    pub specifier: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
 pub struct LambdaExpressionChildren<'a, T, V> {
     pub attribute_spec: Syntax<'a, T, V>,
     pub async_: Syntax<'a, T, V>,
@@ -905,6 +964,8 @@ pub struct LambdaExpressionChildren<'a, T, V> {
 
 #[derive(Debug, Clone)]
 pub struct LambdaSignatureChildren<'a, T, V> {
+    pub function_keyword: Syntax<'a, T, V>,
+    pub type_parameters: Syntax<'a, T, V>,
     pub left_paren: Syntax<'a, T, V>,
     pub parameters: Syntax<'a, T, V>,
     pub right_paren: Syntax<'a, T, V>,
@@ -1026,6 +1087,12 @@ pub struct IssetExpressionChildren<'a, T, V> {
     pub left_paren: Syntax<'a, T, V>,
     pub argument_list: Syntax<'a, T, V>,
     pub right_paren: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct NameofExpressionChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub target: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -1330,7 +1397,6 @@ pub struct TypeParameterChildren<'a, T, V> {
     pub reified: Syntax<'a, T, V>,
     pub variance: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
-    pub param_params: Syntax<'a, T, V>,
     pub constraints: Syntax<'a, T, V>,
 }
 
@@ -1370,6 +1436,7 @@ pub struct ClosureTypeSpecifierChildren<'a, T, V> {
     pub outer_left_paren: Syntax<'a, T, V>,
     pub readonly_keyword: Syntax<'a, T, V>,
     pub function_keyword: Syntax<'a, T, V>,
+    pub type_parameters: Syntax<'a, T, V>,
     pub inner_left_paren: Syntax<'a, T, V>,
     pub parameter_list: Syntax<'a, T, V>,
     pub inner_right_paren: Syntax<'a, T, V>,
@@ -1382,13 +1449,64 @@ pub struct ClosureTypeSpecifierChildren<'a, T, V> {
 
 #[derive(Debug, Clone)]
 pub struct ClosureParameterTypeSpecifierChildren<'a, T, V> {
+    pub optional: Syntax<'a, T, V>,
     pub call_convention: Syntax<'a, T, V>,
+    pub named: Syntax<'a, T, V>,
     pub readonly: Syntax<'a, T, V>,
+    pub pre_ellipsis: Syntax<'a, T, V>,
+    pub type_: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub ellipsis: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct TupleOrUnionOrIntersectionElementTypeSpecifierChildren<'a, T, V> {
+    pub optional: Syntax<'a, T, V>,
+    pub pre_ellipsis: Syntax<'a, T, V>,
+    pub type_: Syntax<'a, T, V>,
+    pub ellipsis: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct TypeRefinementChildren<'a, T, V> {
+    pub type_: Syntax<'a, T, V>,
+    pub keyword: Syntax<'a, T, V>,
+    pub left_brace: Syntax<'a, T, V>,
+    pub members: Syntax<'a, T, V>,
+    pub right_brace: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct TypeInRefinementChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub type_parameters: Syntax<'a, T, V>,
+    pub constraints: Syntax<'a, T, V>,
+    pub equal: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]
+pub struct CtxInRefinementChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub type_parameters: Syntax<'a, T, V>,
+    pub constraints: Syntax<'a, T, V>,
+    pub equal: Syntax<'a, T, V>,
+    pub ctx_list: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
 pub struct ClassnameTypeSpecifierChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub left_angle: Syntax<'a, T, V>,
+    pub type_: Syntax<'a, T, V>,
+    pub trailing_comma: Syntax<'a, T, V>,
+    pub right_angle: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ClassPtrTypeSpecifierChildren<'a, T, V> {
     pub keyword: Syntax<'a, T, V>,
     pub left_angle: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
@@ -1528,10 +1646,24 @@ pub struct EnumClassLabelExpressionChildren<'a, T, V> {
 #[derive(Debug, Clone)]
 pub struct ModuleDeclarationChildren<'a, T, V> {
     pub attribute_spec: Syntax<'a, T, V>,
-    pub keyword: Syntax<'a, T, V>,
+    pub new_keyword: Syntax<'a, T, V>,
+    pub module_keyword: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
     pub left_brace: Syntax<'a, T, V>,
     pub right_brace: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ModuleMembershipDeclarationChildren<'a, T, V> {
+    pub module_keyword: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub semicolon: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct PackageExpressionChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
 }
 
 
@@ -1539,7 +1671,7 @@ pub struct ModuleDeclarationChildren<'a, T, V> {
 impl<'a, T, V> SyntaxVariant<'a, T, V> {
     pub fn iter_children(&'a self) -> SyntaxChildrenIterator<'a, T, V> {
         SyntaxChildrenIterator {
-            syntax: &self,
+            syntax: self,
             index: 0,
             index_back: 0,
         }

@@ -1,2 +1,2 @@
 extension pcntl
-function posix_kill
+extension posix

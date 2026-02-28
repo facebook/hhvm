@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_331() {
-$a = darray['a' => 10];
- $a[1] = varray[0];
+function main_331() :mixed{
+$a = dict['a' => 10];
+ $a[1] = vec[0];
       var_dump($a);
 }

@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : integer formats with boolean values ***\n";
 
 // array of boolean type values
-$boolean_values = varray [
+$boolean_values = vec[
   true,
   false,
   TRUE,
@@ -15,7 +15,7 @@ $boolean_values = varray [
 ];
 
 // various integer formats
-$int_formats = varray[
+$int_formats = vec[
   "%d", "%hd", "%ld",
   "%Ld", " %d", "%d ",
   "\t%d", "\n%d", "%4d", 

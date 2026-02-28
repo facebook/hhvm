@@ -63,7 +63,7 @@ inline static void appendstring(StringBuffer *buffer, const char *add,
                                 int min_width, int max_width, char padding,
                                 int alignment, int len, int neg, int expprec,
                                 int always_sign) {
-  register int npad;
+  int npad;
   int req_size;
   int copy_len;
 
@@ -100,8 +100,8 @@ inline static void appendint(StringBuffer *buffer, long number,
                              int width, char padding, int alignment,
                              int always_sign) {
   char numbuf[NUM_BUF_SIZE];
-  register unsigned long magn, nmagn;
-  register unsigned int i = NUM_BUF_SIZE - 1, neg = 0;
+  unsigned long magn, nmagn;
+  unsigned int i = NUM_BUF_SIZE - 1, neg = 0;
 
   if (number < 0) {
     neg = 1;
@@ -136,8 +136,8 @@ inline static void appenduint(StringBuffer *buffer,
                               unsigned long number,
                               int width, char padding, int alignment) {
   char numbuf[NUM_BUF_SIZE];
-  register unsigned long magn, nmagn;
-  register unsigned int i = NUM_BUF_SIZE - 1;
+  unsigned long magn, nmagn;
+  unsigned int i = NUM_BUF_SIZE - 1;
 
   magn = (unsigned long) number;
 
@@ -249,9 +249,9 @@ inline static void append2n(StringBuffer *buffer, long number,
                             int width, char padding, int alignment, int n,
                             char *chartable, int expprec) {
   char numbuf[NUM_BUF_SIZE];
-  register unsigned long num;
-  register unsigned int  i = NUM_BUF_SIZE - 1;
-  register int andbits = (1 << n) - 1;
+  unsigned long num;
+  unsigned int  i = NUM_BUF_SIZE - 1;
+  int andbits = (1 << n) - 1;
 
   num = (unsigned long) number;
   numbuf[i] = '\0';
@@ -269,8 +269,8 @@ inline static void append2n(StringBuffer *buffer, long number,
 
 inline static int getnumber(const char *buffer, int *pos) {
   char *endptr;
-  register long num = strtol(buffer + *pos, &endptr, 10);
-  register int i = 0;
+  long num = strtol(buffer + *pos, &endptr, 10);
+  int i = 0;
 
   if (endptr != nullptr) {
     i = (endptr - buffer - *pos);
@@ -305,6 +305,12 @@ inline static int getnumber(const char *buffer, int *pos) {
  *  "s"   argument is a string
  *  "x"   integer argument is printed as lowercase hexadecimal
  *  "X"   integer argument is printed as uppercase hexadecimal
+ *
+ * Warning: The logic for handling the tokens %%, %s in the format string
+ * in this function should mimic the implementation in the tokenize function in
+ * irgen-builtin.cpp which is invoked in the fast path of certain builtins like
+ * Str\format. If you make any changes here, please ensure that the two
+ * implementations will be in sync.
  */
 String string_printf(const char *format, int len, const Array& args) {
   Array vargs = args;
@@ -457,7 +463,7 @@ String string_printf(const char *format, int len, const Array& args) {
       break;
 
     case 'c':
-      result.append(tmp.toByte());
+      result.append((char)tmp.toInt64());
       break;
 
     case 'o':

@@ -2,22 +2,22 @@
 
 class C {
   public function publicFoo()
-  {
+:mixed  {
     return true;
   }
 
   protected function protectedFoo()
-  {
+:mixed  {
     return true;
   }
 
   private function privateFoo()
-  {
+:mixed  {
     return true;
   }
 
   static function staticFoo()
-  {
+:mixed  {
     return true;
   }
 }

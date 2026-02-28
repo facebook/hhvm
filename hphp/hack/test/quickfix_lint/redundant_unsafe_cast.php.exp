@@ -1,0 +1,13 @@
+//// redundant_unsafe_cast.php
+<?hh
+
+function takes_arraykey(arraykey $_) : void {}
+
+function redundant_cast(arraykey $a, int $i): void {
+  takes_arraykey($a);
+  takes_arraykey($i);
+}
+
+
+There were input 2 patches for 1 files.
+Dropped patch count: 0 (0 overlapping, 0 original not found)

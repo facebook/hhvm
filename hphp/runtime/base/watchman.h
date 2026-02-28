@@ -16,17 +16,27 @@
 
 #pragma once
 
+#include <chrono>
+#include <filesystem>
 #include <memory>
 #include <string>
 
 #include "hphp/util/optional.h"
 
-#include <folly/dynamic.h>
-#include <folly/experimental/io/FsUtil.h>
+#include <folly/json/dynamic.h>
 #include <folly/futures/Future.h>
 #include <watchman/cppclient/WatchmanClient.h>
 
 namespace HPHP {
+
+using ClockTime = std::chrono::time_point<std::chrono::steady_clock>;
+using WatchmanProfiler = void (*)(
+  const watchman::QueryResult& result,
+  const folly::dynamic& query,
+  ClockTime preLockTime,
+  ClockTime preExecTime,
+  ClockTime execTime
+);
 
 /**
  * Singleton to interact with Watchman for a given root.
@@ -39,7 +49,13 @@ public:
    * Return the Watchman singleton for the chosen root.
    */
   static std::shared_ptr<Watchman>
-  get(const folly::fs::path& path, const Optional<std::string>& sockPath);
+  get(const std::filesystem::path& path, const Optional<std::string>& sockPath);
+
+  /**
+   * Set a profiling function to invoke with timing information from watchman
+   * queries.
+   */
+  static void setProfiler(WatchmanProfiler&&);
 
   /**
    * Return information about the altered and deleted paths matching

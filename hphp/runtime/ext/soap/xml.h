@@ -27,8 +27,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef std::map<std::string, xmlDocPtr> xmlDocMap;
-typedef std::map<std::string, xmlNodePtr> xmlNodeMap;
+using xmlDocMap = std::map<std::string, xmlDocPtr>;
+using xmlNodeMap = std::map<std::string, xmlNodePtr>;
 
 #define NS_STRING(ns) (ns.empty() ? nullptr : BAD_CAST(ns.c_str()))
 
@@ -37,46 +37,46 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t size, bool skip_clean = tr
 
 xmlNsPtr attr_find_ns(xmlAttrPtr node);
 xmlNsPtr node_find_ns(xmlNodePtr node);
-bool attr_is_equal_ex(xmlAttrPtr node, char *name, char *ns);
-bool node_is_equal_ex(xmlNodePtr node, char *name, char *ns);
-xmlAttrPtr get_attribute_ex(xmlAttrPtr node,char *name, char *ns);
-xmlNodePtr get_node_ex(xmlNodePtr node,char *name, char *ns);
-xmlNodePtr get_node_recursive_ex(xmlNodePtr node,char *name, char *ns);
+bool attr_is_equal_ex(xmlAttrPtr node, const char *name, const char *ns);
+bool node_is_equal_ex(xmlNodePtr node, const char *name, const char *ns);
+xmlAttrPtr get_attribute_ex(xmlAttrPtr node, const char *name, const char *ns);
+xmlNodePtr get_node_ex(xmlNodePtr node, const char *name, const char *ns);
+xmlNodePtr get_node_recursive_ex(xmlNodePtr node, const char *name, const char *ns);
 xmlNodePtr get_node_with_attribute_ex
-(xmlNodePtr node, char *name, char *name_ns, char *attribute, char *value,
- char *attr_ns);
+(xmlNodePtr node, const char *name, const char *name_ns, const char *attribute, const char *value,
+ const char *attr_ns);
 xmlNodePtr get_node_with_attribute_recursive_ex
-(xmlNodePtr node, char *name, char *name_ns, char *attribute, char *value,
- char *attr_ns);
+(xmlNodePtr node, const char *name, const char *name_ns, const char *attribute, const char *value,
+ const char *attr_ns);
 void parse_namespace(const xmlChar *inval, std::string &value,
                      std::string &ns);
 
-inline xmlAttrPtr get_attribute(xmlAttrPtr node, char* name) {
+inline xmlAttrPtr get_attribute(xmlAttrPtr node, const char* name) {
   return get_attribute_ex(node, name, nullptr);
 }
-inline xmlNodePtr get_node(xmlNodePtr node, char* name) {
+inline xmlNodePtr get_node(xmlNodePtr node, const char* name) {
   return get_node_ex(node, name, nullptr);
 }
-inline xmlNodePtr get_node_recursive(xmlNodePtr node, char* name) {
+inline xmlNodePtr get_node_recursive(xmlNodePtr node, const char* name) {
   return get_node_recursive_ex(node, name, nullptr);
 }
 inline xmlNodePtr get_node_with_attribute(xmlNodePtr node,
-                                          char* name,
-                                          char* attr,
-                                          char* val) {
+                                          const char* name,
+                                          const char* attr,
+                                          const char* val) {
   return get_node_with_attribute_ex(node, name, nullptr, attr, val, nullptr);
 }
 inline xmlNodePtr get_node_with_attribute_recursive(xmlNodePtr node,
-                                                    char* name,
-                                                    char* attr,
-                                                    char* val) {
+                                                    const char* name,
+                                                    const char* attr,
+                                                    const char* val) {
   return get_node_with_attribute_recursive_ex(node, name, nullptr,
                                               attr, val, nullptr);
 }
-inline bool node_is_equal(xmlNodePtr node, char* name) {
+inline bool node_is_equal(xmlNodePtr node, const char* name) {
   return node_is_equal_ex(node, name, nullptr);
 }
-inline bool attr_is_equal(xmlAttrPtr node, char* name) {
+inline bool attr_is_equal(xmlAttrPtr node, const char* name) {
   return attr_is_equal_ex(node, name, nullptr);
 }
 

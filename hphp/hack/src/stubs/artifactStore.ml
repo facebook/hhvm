@@ -36,8 +36,7 @@ let string_of_file_system_mode file_system_mode =
   | Local -> "Local"
   | Distributed -> "Distributed"
 
-let default_config ~recli_version ~temp_dir =
-  ignore recli_version;
+let default_config ~temp_dir =
   {
     mode = Distributed;
     temp_dir;

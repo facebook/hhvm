@@ -12,7 +12,7 @@ function f<T>(HH\MemberOf<E, Box<T>> $elt) : T {
 }
 
 <<__EntryPoint>>
- function main() {
+ function main() :mixed{
     $x = "A";
     echo("Hello " . (string)(f($x)) . "!\n");
 }

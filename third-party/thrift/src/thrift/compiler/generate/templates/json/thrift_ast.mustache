@@ -1,0 +1,108 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "enums" as m_enums}}
+{{#import "partials" as m_partials}}
+{{#import "services" as m_services}}
+{{#import "structs" as m_structs}}
+{
+  "__fbthrift": "@{{!}}generated",
+  "thrift_module" : "{{program.name}}",
+  {{#each (array.enumerate program.includes with_first=true with_last=true) as |index include first? last?|}}
+    {{#if first?}}
+    {{! Before the first entry, open the object}}
+  "includes": {
+    {{/if first?}}
+    "{{include.program.name}}": {{!
+}}"{{include.program.include_prefix}}{{include.program.name}}.thrift"{{#if (not last?)}},{{#else}}
+    {{! After the last entry, close the object on a new line}}
+  },{{/if (not last?)}}
+  {{/each}}
+  {{#each (array.enumerate (map.items program.namespaces) with_first=true with_last=true)
+      as |index namespace first? last?|}}
+    {{#if first?}}
+  "namespaces": {
+    {{/if first?}}
+    "{{namespace.key}}": "{{namespace.value}}"{{#if (not last?)}},{{#else}}
+  },{{/if (not last?)}}
+  {{/each}}
+  {{#let package = program.package}}
+  {{#if (not package.empty?)}}
+  "package": {
+    {{#if package.domain?}}
+    "domain_prefix": "{{package.domain_prefix}}",
+    "domain_suffix": "{{package.domain_suffix}}",
+    {{/if package.domain?}}
+    {{#if (object.notnull? package.path)}}
+    "path": "{{package.path}}",
+    {{/if (object.notnull? package.path)}}
+    "filename": "{{program.name}}"
+  },{{/if (not package.empty?)}}
+  {{#if program.docs?}}
+  "global_docstring": {{program.docstring}},{{/if program.docs?}}{{!
+  }}{{#if program.typedefs?}}
+  "typedefs": {
+    {{#each (array.enumerate program.typedefs with_last=true) as |i typedef last?|}}
+      "{{typedef.name}}": {
+        "name": "{{typedef.name}}",
+        "type": {{#partial m_partials.type t=typedef.resolved}},
+        "is_exception": {{#if typedef.exception?}}true{{#else}}false{{/if}},
+        "lineno": {{typedef.lineno}}
+      }{{#if (not last?)}},{{/if}}
+    {{/each}}
+  },{{/if program.typedefs?}}{{!
+  }}{{#if program.constants?}}
+  "constants": {
+      {{#each (array.enumerate program.consts with_last=true) as |i constant last?|}}
+      "{{constant.name}}": {
+        "name": "{{constant.name}}",
+        "type": "{{constant.value.type.true_type.full_name}}",
+        "value": {{constant.value.string_value_any}},{{!
+        }}{{#if constant.docs?}}
+        "docstring": {{constant.docstring}},{{/if constant.docs?}}
+        "lineno": {{constant.lineno}}
+      }{{#if (not last?)}},{{/if}}
+      {{/each}}
+  },{{/if program.constants?}}{{!
+  }}{{#if program.enums?}}
+  "enumerations" :
+  {
+    {{#each (array.enumerate program.enums with_last=true) as |i enum last?|}}
+    {{#partial m_enums.render_enum enum=enum trailing_comma?=(not last?)}}
+    {{/each}}
+  },
+  {{/if program.enums?}}
+  {{#if program.structs?}}
+  "structs" :
+  {
+    {{#each (array.enumerate program.structured_definitions with_last=true) as |i struct last?|}}
+    {{#partial m_structs.render_struct struct=struct trailing_comma?=(not last?)}}
+    {{/each}}
+  },
+  {{/if program.structs?}}
+  {{#if program.services?}}
+  "services" :
+  {
+    {{#each (array.enumerate program.services with_last=true) as |i service last?|}}
+    {{#partial m_services.render_service service=service trailing_comma?=(not last?)}}
+    {{/each}}
+  },
+  {{/if program.services?}}
+  {{! rearrange to avoid trailing comma issue}}
+  "source_path" : "{{program.normalized_include_prefix}}{{program.name}}",
+  "py_namespace" : "{{(program.namespace_of language="py")}}"
+}

@@ -1,4 +1,4 @@
-File "undefined_method.php", line 21, characters 9-12:
+ERROR: File "undefined_method.php", line 21, characters 9-12:
 No instance method `blah` in `I1` (Typing[4053])
   File "undefined_method.php", line 15, characters 32-33:
   This is why I think it is an object of type I1

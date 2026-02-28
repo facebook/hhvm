@@ -28,9 +28,6 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-#include "hphp/runtime/vm/jit/type.h"
-#include "hphp/runtime/vm/jit/types.h"
-
 namespace HPHP {
 
 struct Class;
@@ -48,8 +45,7 @@ namespace irgen {
 struct ClsPropLookup {
   SSATmp* propPtr;
   Type knownType;
-  const TypeConstraint* tc;
-  const VMCompactVector<TypeConstraint>* ubs;
+  const TypeIntersectionConstraint* typeConstraints;
   Slot slot;
 };
 

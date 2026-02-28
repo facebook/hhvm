@@ -1,6 +1,19 @@
-<?hh // partial
+<?hh
 
 namespace HH\Facts {
+
+/**
+ * Used to communicate whether a symbol string is the name of a type, function,
+ * constant, or type alias.
+ *
+ * Replicated as `AutoloadMap::KindOf` in `autoload-map.h`
+ */
+enum SymbolKind : int {
+  K_TYPE = 1;
+  K_FUNCTION = 2;
+  K_CONSTANT = 3;
+  K_MODULE = 4;
+}
 
 /**
  * These are the different kinds of types that Facts concerns itself with.
@@ -12,6 +25,16 @@ enum TypeKind : string {
   K_INTERFACE = 'interface';
   K_TRAIT = 'trait';
   K_TYPE_ALIAS = 'typeAlias';
+}
+
+/**
+ * Type flags include abstract and final. Empty means no flags i.e.
+ * `class MyClass {}`
+ */
+enum TypeFlag : string {
+  K_EMPTY = 'empty';
+  K_ABSTRACT = 'abstract';
+  K_FINAL = 'final';
 }
 
 /**
@@ -29,10 +52,16 @@ type TypeAttributeFilter = shape(
   'parameters' => dict<int, dynamic>,
 );
 
+/**
+ * Different filters for for type queries, not just for derived types but
+ * also for base types. These filters default to 'include everything' if they
+ * are omitted, not 'include nothing'. See the enums for what type of thing
+ * goes in each field.
+ */
 type DeriveFilters = shape(
   ?'kind' => keyset<TypeKind>,
   ?'derive_kind' => keyset<DeriveKind>,
-  ?'attributes' => vec<TypeAttributeFilter>,
+  ?'flags' => vec<TypeFlag>,
 );
 
 /**
@@ -63,6 +92,18 @@ function enabled()[]: bool;
 function db_path(string $root)[]: ?string;
 
 /**
+ * Return the schema version in use by this hhvm binary.
+ */
+<<__Native>>
+function schema_version()[]: int;
+
+/**
+ * Blocks until Facts is synchronized as of when the call was intiated.
+ */
+<<__Native>>
+function sync(): void;
+
+/**
  * Return the only path defining a given symbol.
  *
  * Return `null` if the symbol is not defined, or is defined in more than one
@@ -71,6 +112,8 @@ function db_path(string $root)[]: ?string;
  * Throw InvalidOperationException if Facts is not enabled.
  */
 <<__Native>>
+function module_to_path(string $module_name)[]: ?string;
+<<__Native>>
 function type_to_path(string $type_name)[]: ?string;
 <<__Native>>
 function function_to_path(string $function_name)[]: ?string;
@@ -78,12 +121,16 @@ function function_to_path(string $function_name)[]: ?string;
 function constant_to_path(string $constant_name)[]: ?string;
 <<__Native>>
 function type_alias_to_path(string $type_alias_name)[]: ?string;
+<<__Native>>
+function type_or_type_alias_to_path(string $type_name)[]: ?string;
 
 /**
  * Return all the symbols defined in the given path.
  *
  * Throw InvalidOperationException if Facts is not enabled.
  */
+<<__Native>>
+function path_to_modules(string $path)[]: vec<string>;
 <<__Native>>
 function path_to_types(string $path)[]: vec<string>;
 <<__Native>>
@@ -92,6 +139,32 @@ function path_to_functions(string $path)[]: vec<string>;
 function path_to_constants(string $path)[]: vec<string>;
 <<__Native>>
 function path_to_type_aliases(string $path)[]: vec<string>;
+
+/**
+ * Return the module the file is a member of, if any.
+ */
+<<__Native>>
+function path_to_module_membership(string $path)[]: ?string;
+
+/**
+ * Return all modules defined in the repo.
+ *
+ * Throw InvalidOperationException if Facts is not enabled.
+ */
+<<__Native>>
+function all_modules()[]: vec<string>;
+
+/**
+ * Return the package the file is a member of, if any.
+ */
+<<__Native>>
+function path_to_package(string $path)[]: ?string;
+
+/**
+ * Return the sha1 of the path, if any.
+ */
+<<__Native>>
+function sha1(string $path)[]: ?string;
 
 /**
  * Resolve a string into a classname that's properly capitalized and
@@ -126,6 +199,12 @@ function is_abstract(
 )[]: bool;
 
 /**
+ * validate facts sql database
+ */
+<<__Native>>
+function validate(vec<string> $types_to_ignore = vec[]): void;
+
+/**
  * True iff the given type cannot be inherited.
  */
 <<__Native>>
@@ -140,31 +219,21 @@ function is_final(
  */
 <<__Native>>
 function subtypes(
-  /* classname<T> */ string $base_type,
+  class_or_classname<mixed> $base_type,
   /* DeriveFilters */ ?darray<string, dynamic> $filters = null,
-)[]: vec<string>;
+)[]: vec<class<mixed>>;
 
 /**
- * Return all types which transitively extend, implement, or use the given
- * base type.
- *
- * The 'kind' and 'derive_kind' filters passed in determine which relationships
- * and types we look at while traversing the inheritance graph. So if you
- * filter traits out, we'll exclude classes which are only related because
- * they `use` a trait which `implements` the interface you passed in.
- *
- * The 'attributes' filters passed in will be applied to the final list of
- * transitive subtypes. So if you look for types with the `<<Oncalls('team')>>`
- * attribute, we'll only filter the final list of subtypes, instead of ignoring
- * all types that don't have the given attribute.
+ * Get the transitive types which extend, implement, or use the given base type.
  *
  * Throws InvalidOperationException if Facts is not enabled.
  */
 <<__Native>>
 function transitive_subtypes(
-  /* classname<T> */ string $base_type,
-  /* ?DeriveFilters */ ?darray<string, dynamic> $filters = null,
-)[]: vec<(string, string, TypeKind)> /* vec<(classname<T>, string, TypeKind)> */;
+  class_or_classname<mixed> $base_type,
+  /* DeriveFilters */ ?darray<string, dynamic> $filters = null,
+  bool $include_interface_require_extends = false,
+ )[]: vec<class<mixed>>;
 
 /**
  * Get all types which the given type extends, implements, or uses.
@@ -173,9 +242,9 @@ function transitive_subtypes(
  */
 <<__Native>>
 function supertypes(
-  /* classname<nonnull> */ string $derived_type,
+  class_or_classname<mixed> $derived_type,
   /* DeriveFilters */ ?darray<string, dynamic> $filters = null,
-)[]: vec<string>;
+)[]: vec<class<mixed>>;
 
 /**
  * Get all types matching the given filters.
@@ -184,8 +253,8 @@ function supertypes(
  */
 <<__Native>>
 function types_with_attribute(
-  /* classname<\HH\ClassLikeAttribute> */ string $attribute,
-)[]: vec<string>; /* vec<classname<nonnull>> */
+  class_or_classname<\HH\ClassLikeAttribute> $attribute,
+)[]: vec<classname<nonnull>>;
 
 /**
  * Get all type aliases matching the given filters.
@@ -201,11 +270,25 @@ function type_aliases_with_attribute(
  * Get all methods matching the given filters.
  *
  * Throws InvalidOperationException if Facts is not enabled.
+ * Throws a RuntimeException if querying for an attribute that's not listed
+ *   in the `Autoload.IndexedMethodAttributes` setting in this repo's
+ *   `.hhvmconfig.hdf` file.
  */
 <<__Native>>
 function methods_with_attribute(
   /* classname<\HH\MethodAttribute> */ string $attribute,
-)[]: vec<string>; /* vec<(classname<nonnull>, string)> */
+)[]: vec<(classname<nonnull>, string)>;
+
+/**
+ * Get all methods of a given type that have any indexed attribute,
+ * returning a dict mapping method name to its attribute names.
+ *
+ * Throws InvalidOperationException if Facts is not enabled.
+ */
+<<__Native>>
+function type_method_attributes(
+  /* classname<nonnull> */ string $type,
+)[]: dict<string, vec<string>>;
 
 /**
  * Get all files matching the given filters.
@@ -216,6 +299,32 @@ function methods_with_attribute(
 function files_with_attribute(
   /* classname<\HH\FileAttribute> */ string $attribute,
 )[]: vec<string>;
+
+/**
+ * Get all files matching the given filters.
+ * Only bool, int, string, dict, vec, and keyset are supported
+ * as value types to query for. Unsupported types will be
+ * coerced to null.
+ *
+ * Throws InvalidOperationException if Facts is not enabled.
+ */
+<<__Native>>
+function files_with_attribute_and_any_value(
+  /* classname<\HH\FileAttribute> */ string $attribute,
+  dynamic $value,
+)[]: vec<string>;
+
+/**
+ * Get all files with the following attribute, including the argument list for
+ * that attribute if it exists.  Because each item in the returned list is a
+ * tuple including path and attr arg, if a file has more than one attr arg
+ * for the given attr, that file will appear in the return list more than once.
+ * If there is no argument for this attr, the second arg will be null.
+ */
+<<__Native>>
+function files_and_attr_args_with_attribute(
+  /* classname<\HH\FileAttribute> */ string $attribute,
+)[]: vec<(string, ?string)>;
 
 /**
  * Get all attributes on the given type.
@@ -316,63 +425,5 @@ function file_attribute_parameters(
   string $file,
   /* classname<\HH\FileAttribute> */ string $attribute,
 )[]: vec<dynamic>;
-
-/**
- * Return all symbols defined in the repo, as a dict mapping each symbol
- * name to the path where the symbol lives in the repo.
- *
- * If a symbol is defined in more than one path, one of the paths defining the
- * symbol will be chosen in an unspecified manner.
- */
-<<__Native>>
-function all_types()[]: dict<classname<nonnull>, string>;
-<<__Native>>
-function all_functions()[]: dict<string, string>;
-<<__Native>>
-function all_constants()[]: dict<string, string>;
-<<__Native>>
-function all_type_aliases()[]: dict<string, string>;
-
-type AttributeData = shape(
-  'name' => string,
-  'args' => vec<?arraykey>,
-);
-
-type MethodData = shape(
-  'name' => string,
-  'attributes' => vec<AttributeData>,
-);
-
-type TypeData = shape(
-  'name' => string,
-  'kind' => TypeKind,
-  'flags' => int,
-  'baseTypes' => vec<string>,
-  'requireExtends' => vec<string>,
-  'requireImplements' => vec<string>,
-  'attributes' => vec<AttributeData>,
-  'methods' => vec<MethodData>,
-);
-
-type FileData = shape(
-  'types' => vec<TypeData>,
-  'functions' => vec<string>,
-  'constants' => vec<string>,
-  'attributes' => vec<AttributeData>,
-  'sha1sum' => string,
-);
-
-/**
- * For each path/hash pair in `$pathsAndHashes`, parse the file on the
- * filesystem, or lookup the file with the given SHA1 hash, and return a dict
- * mapping each path to its contents.
- *
- * Each given path should be relative to the given `$root`.
- */
-<<__Native>>
-function extract(
-  vec<(string, ?string)> $pathsAndHashes,
-  ?string $root = null,
-): dict<string, ?FileData>;
 
 } // namespace HH\Facts

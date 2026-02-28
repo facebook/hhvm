@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class B {
   public function foo(): void {}

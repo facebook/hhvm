@@ -1,6 +1,6 @@
 <?hh
 
-function get_hexcolor($im, $c) {
+function get_hexcolor($im, $c) :mixed{
     if (imageistruecolor($im)) {
         return $c;
     }
@@ -8,7 +8,7 @@ function get_hexcolor($im, $c) {
     return ($colors['red'] << 16)  + ($colors['green'] << 8) + ($colors['blue']);
 }
 
-function check_doublesize($dst) {
+function check_doublesize($dst) :mixed{
     $im = imagecreatetruecolor(38,38);
     imagefill($im,0,0, 0xffffff);
     imagefilledrectangle($im, 0,0,9,9, 0xff0000);

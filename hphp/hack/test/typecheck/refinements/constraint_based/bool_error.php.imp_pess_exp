@@ -1,0 +1,28 @@
+ERROR: File "bool_error.php", line 11, characters 12-13:
+Invalid return type (Typing[4110])
+  File "bool_error.php", line 6, characters 28-30:
+  Expected `int`
+  File "bool_error.php", line 4, characters 23-27:
+  But got `float`
+ERROR: File "bool_error.php", line 11, characters 12-13:
+Invalid return type (Typing[4110])
+  File "bool_error.php", line 6, characters 28-30:
+  Expected `int`
+  File "bool_error.php", line 6, characters 21-21:
+  But got `T as CT`
+ERROR: File "bool_error.php", line 11, characters 12-13:
+Invalid return type (Typing[4110])
+  File "bool_error.php", line 6, characters 28-30:
+  Expected `int`
+  File "bool_error.php", line 6, characters 21-21:
+  But got `mixed`
+  File "bool_error.php", line 6, characters 17-18:
+    by the definition of `T`
+  File "bool_error.php", line 4, characters 11-12:
+    by the definition of `CT`
+ERROR: File "bool_error.php", line 11, characters 12-13:
+Invalid return type (Typing[4110])
+  File "bool_error.php", line 6, characters 28-30:
+  Expected `int`
+  File "bool_error.php", line 7, characters 13-16:
+  But got `(float & T) where T as CT` from this `is` expression test

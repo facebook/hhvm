@@ -1,10 +1,10 @@
 <?hh
 
-function eq($x, $y) {
+function eq($x, $y) :mixed{
   var_dump(HH\Lib\Legacy_FIXME\eq($x, $y));
 }
 
-function lt($x, $y) {
+function lt($x, $y) :mixed{
   try {
     var_dump(HH\Lib\Legacy_FIXME\lt($x, $y));
   } catch (Exception $e) {
@@ -12,7 +12,7 @@ function lt($x, $y) {
   }
 }
 
-function gt($x, $y) {
+function gt($x, $y) :mixed{
   try {
     var_dump(HH\Lib\Legacy_FIXME\gt($x, $y));
   } catch (Exception $e) {
@@ -23,20 +23,20 @@ function gt($x, $y) {
 <<__EntryPoint>> function main(): void {
 echo "======\n";
 
-eq('Array', varray[1,2]);
-eq('Array', varray[]);
-eq(varray[], 'Array');
-eq(varray['a', 'b'], 'Array');
+eq('Array', vec[1,2]);
+eq('Array', vec[]);
+eq(vec[], 'Array');
+eq(vec['a', 'b'], 'Array');
 echo "\n";
-lt('Array', varray[1,2]);
-lt('Array', varray[]);
-lt(varray[], 'Array');
-lt(varray['a', 'b'], 'Array');
+lt('Array', vec[1,2]);
+lt('Array', vec[]);
+lt(vec[], 'Array');
+lt(vec['a', 'b'], 'Array');
 echo "\n";
-gt('Array', varray[1,2]);
-gt('Array', varray[]);
-gt(varray[], 'Array');
-gt(varray['a', 'b'], 'Array');
+gt('Array', vec[1,2]);
+gt('Array', vec[]);
+gt(vec[], 'Array');
+gt(vec['a', 'b'], 'Array');
 
 echo "======\n";
 

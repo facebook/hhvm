@@ -1,0 +1,42 @@
+ERROR: File "invalid_operator.php", line 13, characters 19-27:
+`new` is not supported in expression trees. (Parsing[1002])
+ERROR: File "invalid_operator.php", line 16, characters 19-26:
+Global constants are not supported in expression trees. (Parsing[1002])
+ERROR: File "invalid_operator.php", line 19, characters 19-42:
+Expression trees do not support PHP lambdas. Consider using Hack lambdas `() ==> {}` instead. (Parsing[1002])
+ERROR: File "invalid_operator.php", line 22, characters 28-45:
+Expression trees do not support `do while` loops. Consider using a `while` loop instead. (Parsing[1002])
+ERROR: File "invalid_operator.php", line 23, characters 43-67:
+Expression trees do not support `foreach` loops. Consider using a `for` loop or a `while` loop instead. (Parsing[1002])
+ERROR: File "invalid_operator.php", line 29, characters 38-42:
+Indexing with `[]` is not supported in expression trees. (Parsing[1002])
+ERROR: File "invalid_operator.php", line 32, characters 34-40:
+Expression trees do not support compound assignments. Try the long form style `$foo = $foo + $bar` instead. (Parsing[1002])
+ERROR: File "invalid_operator.php", line 29, characters 38-39:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+  File "invalid_operator.php", line 13, characters 3-28:
+  Did you mean `$z` instead?
+ERROR: File "invalid_operator.php", line 13, characters 19-27:
+Invalid return type (Typing[4110])
+  File "expr_tree.php", line 87, characters 21-26:
+  Expected `string`
+  File "expr_tree.php", line 100, characters 29-44:
+    resulting from expanding the type constant `ExampleDsl::TAst`
+  File "invalid_operator.php", line 13, characters 23-25:
+  But got `Foo`
+ERROR: File "invalid_operator.php", line 16, characters 19-26:
+Invalid argument (Typing[4110])
+  File "expr_tree.php", line 87, characters 21-26:
+  Expected `string`
+  File "expr_tree.php", line 206, characters 5-20:
+    resulting from expanding the type constant `ExampleDsl::TAst`
+  File "invalid_operator.php", line 9, characters 7-9:
+  But got `int`
+ERROR: File "invalid_operator.php", line 19, characters 19-42:
+Invalid return type (Typing[4110])
+  File "expr_tree.php", line 87, characters 21-26:
+  Expected `string`
+  File "expr_tree.php", line 100, characters 29-44:
+    resulting from expanding the type constant `ExampleDsl::TAst`
+  File "invalid_operator.php", line 19, characters 19-42:
+  But got `(function(): int)`

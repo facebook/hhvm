@@ -3,7 +3,6 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
-#include <curl/easy.h>
 #include <curl/multi.h>
 
 namespace {
@@ -113,11 +112,11 @@ CURLMcode CurlMultiResource::remove(CurlResource* curle, bool leak) {
   return CURLM_OK;
 }
 
-Resource CurlMultiResource::find(CURL *cp) {
+OptResource CurlMultiResource::find(CURL *cp) {
   for (auto const& curl : m_easyh) {
-    if (curl->get() == cp) return Resource(curl.get());
+    if (curl->get() == cp) return OptResource(curl.get());
   }
-  return Resource();
+  return OptResource();
 }
 
 void CurlMultiResource::setInExec(bool b) {

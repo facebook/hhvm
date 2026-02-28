@@ -18,7 +18,7 @@ class C2 extends P2 {
 
 
 <<__EntryPoint>>
-function main_trait_private() {
+function main_trait_private() :mixed{
 $p = new ReflectionClass(new P2);
 var_dump($p->hasProperty('p2'));
 var_dump($p->hasProperty('p1'));

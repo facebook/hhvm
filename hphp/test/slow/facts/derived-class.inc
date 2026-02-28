@@ -6,6 +6,10 @@ final class DerivedClass extends BaseClass implements IBase {
   use TImplementsIBase;
 }
 
+abstract class AbstractDerived extends BaseClass {}
+
+class NoFlagsDerived extends BaseClass {}
+
 interface IRequireExtendsBaseClass {
   require extends BaseClass;
 }
@@ -35,3 +39,46 @@ class UsesTRequireImplementsIBase implements IBase {
 }
 
 abstract final class AbstractFinalClass {}
+
+trait TRequireClassFinalClass {
+  require class FinalClassUsesTRequireClass;
+}
+
+final class FinalClassUsesTRequireClass {
+  use TRequireClassFinalCLass;
+}
+
+// `require class` trait constraints
+
+trait TRequireClassFinalClass {
+  require class FinalClassUsesTRequireClass;
+}
+
+final class FinalClassUsesTRequireClass {
+  use TRequireClassFinalCLass;
+}
+
+class SuperClassOfFinalClassB {};
+
+trait TRequireClassFinalClassB {
+  require class FinalClassUsesTRequireClassB;
+  require extends SuperClassOfFinalClassB;
+}
+
+interface IRequireClassFinalClassB {
+  require extends SuperClassOfFinalClassB;
+}
+
+final class FinalClassUsesTRequireClassB extends SuperClassOfFinalClassB {
+  use TRequireClassFinalCLass;
+}
+
+// testing for transitive subclasses
+
+class DerivedOnceClass extends BaseClass {}
+
+class DerivedTwiceClass extends DerivedOnceClass {}
+
+class DerivedAgainClass extends DerivedOnceClass {}
+
+class DerivedFromDerivedTwiceClass extends DerivedTwiceClass {}

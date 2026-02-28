@@ -29,7 +29,6 @@ const do = 1;
 const double = 1;
 const echo = 1;
 const else = 1;
-const elseif = 1;
 const empty = 1;
 const enddeclare = 1;
 const endfor = 1;

@@ -9,6 +9,6 @@ function is_this(mixed $x): void {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   is_this(new stdClass());
 }

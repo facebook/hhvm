@@ -1,12 +1,12 @@
 <?hh
 class MyConverter extends UConverter {
-  public function toUCallback($reason, $source, $codeUnits, inout $error) {
+  public function toUCallback($reason, $source, $codeUnits, inout $error) :mixed{
     $error = U_ZERO_ERROR;
     switch ($codeUnits) {
       case "\x80": return NULL;
       case "\x81": return 'a';
       case "\x82": return ord('b');
-      case "\x83": return varray['c'];
+      case "\x83": return vec['c'];
       default: break;
     }
   }
@@ -14,12 +14,12 @@ class MyConverter extends UConverter {
   /**
    * Called during conversion from internal UChar to destination encoding
    */
-  public function fromUCallback($reason, $source, $codePoint, inout $error) {
+  public function fromUCallback($reason, $source, $codePoint, inout $error) :mixed{
     $error = U_ZERO_ERROR;
     switch ($codePoint) {
       case 0x00F1: return "A";
       case 0x00F2: return ord("B");
-      case 0x00F3: return varray["C"];
+      case 0x00F3: return vec["C"];
       case 0x00F4: return NULL;
       default: break;
     }

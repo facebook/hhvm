@@ -9,13 +9,13 @@ class XML_Parser
 {
 
     function PIHandler($parser, $target, $data)
-    {
+:mixed    {
         echo "Target: " . $target. "\n";
         echo "Data: " . $data . "\n";
     }
 
     function parse($data)
-    {
+:mixed    {
         $parser = xml_parser_create();
         xml_set_object($parser, $this);
         xml_set_processing_instruction_handler($parser, "PIHandler");
@@ -32,7 +32,7 @@ $xml = <<<HERE
 HERE;
 
 echo "Simple test of xml_set_processing_instruction_handler() function\n";
-$p1 = new Xml_Parser();
+$p1 = new XML_Parser();
 $p1->parse($xml);
 echo "Done\n";
 }

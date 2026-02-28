@@ -33,7 +33,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef void PFN_THREAD_FUNC(void *);
+using PFN_THREAD_FUNC = void(void *);
 
 PFN_THREAD_FUNC* AsyncFuncImpl::s_initFunc = nullptr;
 void* AsyncFuncImpl::s_initFuncArg = nullptr;
@@ -45,12 +45,14 @@ std::atomic<uint32_t> AsyncFuncImpl::s_count { 0 };
 
 AsyncFuncImpl::AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func,
                              int numaNode, unsigned hugeStackKb,
-                             unsigned tlExtraKb)
+                             unsigned tlExtraKb,
+                             const std::string& threadGroupSuffix)
   : m_obj(obj)
   , m_func(func)
   , m_node(numaNode)
   , m_hugeStackKb(hugeStackKb / 4 * 4)  // align to 4K page boundary
-  , m_tlExtraKb((tlExtraKb + 3) / 4 * 4) {
+  , m_tlExtraKb((tlExtraKb + 3) / 4 * 4)
+  , m_threadGroupSuffix(threadGroupSuffix) {
   if (m_tlExtraKb > (128 * 1024)) {
     // Don't include a big additional per-thread storage to avoid running out of
     // virtual memory.
@@ -265,15 +267,24 @@ bool AsyncFuncImpl::waitForEnd(int seconds /* = 0 */) {
 
 void AsyncFuncImpl::setThreadName() {
 #ifdef HAVE_NUMA
-  if (use_numa) {
-    static constexpr size_t kMaxCommNameLen = 16; // TASK_COMM_LEN in kernel
-    char name[kMaxCommNameLen];
-    snprintf(name, sizeof(name), "hhvmworker.ND%d", m_node);
-    prctl(PR_SET_NAME, name);
+  static constexpr size_t kMaxCommNameLen = 16;
+  char name[kMaxCommNameLen];
+
+  if (!m_threadGroupSuffix.empty()) {
+    if (use_numa) {
+      snprintf(name, sizeof(name), "hhvmworker%s.ND%d",
+               m_threadGroupSuffix.c_str(), m_node);
+    } else {
+      snprintf(name, sizeof(name), "hhvmworker%s", m_threadGroupSuffix.c_str());
+    }
   } else {
-    // On single-socket servers
-    prctl(PR_SET_NAME, "hhvmworker");
+    if (use_numa) {
+      snprintf(name, sizeof(name), "hhvmworker.ND%d", m_node);
+    } else {
+      snprintf(name, sizeof(name), "hhvmworker");
+    }
   }
+  prctl(PR_SET_NAME, name);
 #endif
 }
 

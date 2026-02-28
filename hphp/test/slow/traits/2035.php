@@ -1,7 +1,7 @@
 <?hh
 
 trait TestTrait {
-    public static function test() {
+    public static function test() :mixed{
         return __TRAIT__;
     }
 }

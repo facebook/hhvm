@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -12,5 +12,5 @@
 function id<T>(T $x): T { return $x; }
 
 function test(): (function(int): int) {
-  return fun('id');
+  return id<>;
 }

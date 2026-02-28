@@ -1,7 +1,7 @@
 <?hh
 
-function foo($a) {
-  $result = darray[];
+function foo($a) :mixed{
+  $result = dict[];
 
 
   try {
@@ -16,7 +16,7 @@ function foo($a) {
   }
 
   if ($a & 4) {
-    return darray['success' => true];//$result;
+    return dict['success' => true];//$result;
   }
 
   $result['success'] = false;
@@ -24,12 +24,12 @@ function foo($a) {
   return $result;
 }
 
-function throwError(Exception $ex) {
+function throwError(Exception $ex) :mixed{
   throw $ex;
 }
 
 
 <<__EntryPoint>>
-function main_subtypeof() {
+function main_subtypeof() :mixed{
 var_dump(foo(42));
 }

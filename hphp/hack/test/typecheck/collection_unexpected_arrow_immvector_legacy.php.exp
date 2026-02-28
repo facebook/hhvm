@@ -1,0 +1,4 @@
+ERROR: File "collection_unexpected_arrow_immvector_legacy.php", line 5, characters 8-35:
+Cannot use key value initializer for `ImmVector`. It does not allow keys. (Parsing[1002])
+ERROR: File "collection_unexpected_arrow_immvector_legacy.php", line 5, characters 19-23:
+Keys may not be specified for \HH\ImmVector initialization (Naming[2051])

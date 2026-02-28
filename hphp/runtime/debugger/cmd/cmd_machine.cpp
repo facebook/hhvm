@@ -16,17 +16,12 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_machine.h"
 
-#include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/intercept.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/debugger/cmd/cmd_signal.h"
 #include "hphp/runtime/debugger/debugger_client.h"
-#include "hphp/util/process.h"
 
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 void CmdMachine::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
@@ -135,13 +130,8 @@ bool CmdMachine::AttachSandbox(DebuggerClient &client,
                                const char *user /* = NULL */,
                                const char *name /* = NULL */,
                                bool force /* = false */) {
-  std::string login;
-  if (user == nullptr) {
-    user = client.getCurrentUser().c_str();
-  }
-
   DSandboxInfoPtr sandbox(new DSandboxInfo());
-  sandbox->m_user = user ? user : "";
+  sandbox->m_user = user ? user : client.getCurrentUser();
   sandbox->m_name = (name && *name) ? name : "default";
   return AttachSandbox(client, sandbox, force);
 }
@@ -204,7 +194,7 @@ void CmdMachine::onClient(DebuggerClient &client) {
     }
     std::string host = client.argValue(2);
     int port = 0;
-    size_t pos = host.find(":");
+    size_t pos = host.find(':');
     if (pos != std::string::npos) {
       if (!DebuggerClient::IsValidNumber(host.substr(pos + 1))) {
         client.error("Port needs to be a number");

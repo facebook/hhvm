@@ -21,9 +21,8 @@
 #include <vector>
 
 #include <folly/Try.h>
-#include <folly/dynamic.h>
-#include <folly/experimental/io/FsUtil.h>
-#include <folly/json.h>
+#include <folly/json/dynamic.h>
+#include <folly/json/json.h>
 #include <folly/logging/xlog.h>
 #include <folly/memory/not_null.h>
 
@@ -75,27 +74,27 @@ Optional<std::string> getSha1Hash(const folly::dynamic& pathData) {
  * Process the given Watchman results into a type-safe struct. Throw `UpdateExc`
  * if the results don't conform to the structure we expected.
  */
-Watcher::Results
-parseWatchmanResults(Optional<Clock> lastClock, folly::dynamic&& result) {
-
+Watcher::Delta parseWatchmanResults(
+    Optional<Clock> lastClock,
+    folly::dynamic&& result) {
   if (result.count("error")) {
     throw UpdateExc{
         folly::sformat("Got a watchman error: {}\n", folly::toJson(result))};
   }
 
-  std::vector<Watcher::ResultFile> alteredPaths;
+  std::vector<Watcher::FileDelta> alteredPaths;
   auto* resultFiles = result.get_ptr("files");
   if (resultFiles && resultFiles->isArray()) {
     alteredPaths.reserve(resultFiles->size());
     for (auto const& pathData : std::move(*resultFiles)) {
-      folly::fs::path path{pathData.at("name").asString()};
+      std::filesystem::path path{pathData.at("name").asString()};
       std::string hash;
       assertx(path.is_relative());
       if (LIKELY(pathData.at("exists").asBool())) {
         alteredPaths.push_back(
             {.m_path = std::move(path),
              .m_exists = true,
-             .m_hash = getSha1Hash(pathData)});
+             .m_watcher_hash = getSha1Hash(pathData)});
       } else {
         alteredPaths.push_back({.m_path = std::move(path), .m_exists = false});
       }
@@ -106,8 +105,16 @@ parseWatchmanResults(Optional<Clock> lastClock, folly::dynamic&& result) {
       lastClock.has_value() && !lastClock.value().m_mergebase.empty();
 
   XLOG(DBG0) << "parseWatchmanResults: mergebase_set = " << mergebaseSet;
-  XLOG(DBG0) << "parseWatchmanResults: is_fresh_instance = "
-             << result.at("is_fresh_instance").asBool();
+
+  bool isFresh = [&] {
+    auto const* freshPtr = result.get_ptr("is_fresh_instance");
+    if (freshPtr != nullptr && freshPtr->isBool()) {
+      XLOG(DBG0) << "parseWatchmanResults: is_fresh_instance = "
+                 << freshPtr->asBool();
+      return freshPtr->asBool();
+    }
+    return false;
+  }();
 
   std::string clock = [&] {
     auto* clockPtr = result.get_ptr("clock");
@@ -133,7 +140,7 @@ parseWatchmanResults(Optional<Clock> lastClock, folly::dynamic&& result) {
   return {
       .m_lastClock = std::move(lastClock),
       .m_newClock = Clock{.m_clock = std::move(clock)},
-      .m_fresh = !mergebaseSet && result.at("is_fresh_instance").asBool(),
+      .m_fresh = !mergebaseSet && isFresh,
       .m_files = std::move(alteredPaths)};
 }
 
@@ -171,15 +178,13 @@ folly::dynamic addWatchmanSince(folly::dynamic query, const Clock& clock) {
 struct WatchmanWatcher final
     : public Watcher,
       public std::enable_shared_from_this<WatchmanWatcher> {
-
   WatchmanWatcher(
       folly::dynamic queryExpr,
       std::shared_ptr<Watchman> watchmanClient,
       WatchmanWatcherOpts opts)
-      : m_opts{std::move(opts)}
-      , m_queryExpr{addFieldsToQuery(std::move(queryExpr))}
-      , m_watchmanClient{watchmanClient} {
-  }
+      : m_opts{std::move(opts)},
+        m_queryExpr{addFieldsToQuery(std::move(queryExpr))},
+        m_watchmanClient{watchmanClient} {}
 
   ~WatchmanWatcher() override = default;
   WatchmanWatcher(const WatchmanWatcher&) = delete;
@@ -187,16 +192,18 @@ struct WatchmanWatcher final
   WatchmanWatcher(WatchmanWatcher&&) = delete;
   WatchmanWatcher& operator=(WatchmanWatcher&&) = delete;
 
-  folly::SemiFuture<Results> getChanges(Clock lastClock) override {
+  folly::SemiFuture<Delta> getChanges(Clock lastClock) override {
     auto queryExpr = addWatchmanSince(m_queryExpr, lastClock);
     XLOGF(INFO, "Querying watchman ({})\n", folly::toJson(queryExpr));
     return getChanges(
         std::move(lastClock), std::move(queryExpr), m_opts.m_retries);
   }
 
-  void subscribe(std::function<void(Results&& callback)> callback) override {
+  void subscribe(
+      const Clock& lastClock,
+      std::function<void(Delta&& callback)> callback) override {
     m_watchmanClient->subscribe(
-        m_queryExpr,
+        addWatchmanSince(m_queryExpr, lastClock),
         [cb = std::move(callback)](folly::Try<folly::dynamic>&& results) {
           if (results.hasValue()) {
             cb(parseWatchmanResults({}, std::move(results.value())));
@@ -207,8 +214,8 @@ struct WatchmanWatcher final
         });
   }
 
-private:
-  folly::SemiFuture<Results>
+ private:
+  folly::SemiFuture<Delta>
   getChanges(Clock lastClock, folly::dynamic queryExpr, int32_t retries) {
     return queryWatchman(queryExpr, retries)
         .deferValue([lastClock = std::move(lastClock)](
@@ -218,8 +225,9 @@ private:
         });
   }
 
-  folly::SemiFuture<folly::dynamic>
-  queryWatchman(folly::dynamic queryExpr, int32_t retries) {
+  folly::SemiFuture<folly::dynamic> queryWatchman(
+      folly::dynamic queryExpr,
+      int32_t retries) {
     auto fut = m_watchmanClient->query(queryExpr);
     if (retries == 0) {
       return fut;

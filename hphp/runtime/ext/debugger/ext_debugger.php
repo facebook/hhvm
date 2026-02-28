@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 namespace __SystemLib {
 
@@ -8,7 +8,10 @@ namespace __SystemLib {
    * and port will be null if the connection is local.
    */
   <<__Native>>
-  function debugger_get_info() : darray;
+  function debugger_get_info() : shape(
+    ?'clientIP' => string,
+    ?'clientPort' => ?int,
+  );
 
 }
 
@@ -74,4 +77,10 @@ namespace {
    */
   <<__Native("NoFCallBuiltin")>>
   function hphp_debugger_get_option(string $option): bool;
+
+  /**
+   * Returns true if the request was interrupted by the debugger
+   */
+  <<__Native("NoFCallBuiltin")>>
+  function hphp_was_interrupted_by_debugger(): bool;
 }

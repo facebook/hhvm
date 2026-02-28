@@ -15,7 +15,7 @@ function is_xhp(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_ta_xhp() {
+function main_is_expression_ta_xhp() :mixed{
 is_xhp(1);
 is_xhp(1.5);
 is_xhp('foo');

@@ -3,21 +3,35 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{Error, Result};
-use oxidized::{ast, ast_defs::ParamKind};
+use oxidized::ast;
 
-pub fn expect_normal_paramkind(arg: &(ParamKind, ast::Expr)) -> Result<&ast::Expr> {
+use crate::Error;
+use crate::Result;
+
+pub fn expect_normal_paramkind(arg: &ast::Argument) -> Result<&ast::Expr> {
     match arg {
-        (ParamKind::Pnormal, e) => Ok(e),
-        (ParamKind::Pinout(pk_pos), _) => {
+        ast::Argument::Anormal(e) => Ok(e),
+        ast::Argument::Ainout(pk_pos, _) => {
             Err(Error::fatal_parse(pk_pos, "Unexpected `inout` annotation"))
+        }
+        ast::Argument::Anamed(name, _) => {
+            Err(Error::fatal_parse(name.pos(), "Unexpected named argument"))
         }
     }
 }
 
-pub fn ensure_normal_paramkind(pk: &ParamKind) -> Result<()> {
-    match pk {
-        ParamKind::Pnormal => Ok(()),
-        ParamKind::Pinout(p) => Err(Error::fatal_parse(p, "Unexpected `inout` annotation")),
+pub fn expect_normal_paramkind_mut(arg: &mut ast::Argument) -> Result<&mut ast::Expr> {
+    match arg {
+        ast::Argument::Anormal(e) => Ok(e),
+        ast::Argument::Ainout(pk_pos, _) => {
+            Err(Error::fatal_parse(pk_pos, "Unexpected `inout` annotation"))
+        }
+        ast::Argument::Anamed(name, _) => {
+            Err(Error::fatal_parse(name.pos(), "Unexpected named argument"))
+        }
     }
+}
+
+pub fn ensure_normal_paramkind(arg: &ast::Argument) -> Result<()> {
+    expect_normal_paramkind(arg).map(|_| ())
 }

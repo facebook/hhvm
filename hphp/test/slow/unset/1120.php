@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  public function foo() {
+  public function foo() :mixed{
     unset($this);
     var_dump($this);
   }

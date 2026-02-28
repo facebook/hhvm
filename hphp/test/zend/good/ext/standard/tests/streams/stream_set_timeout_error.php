@@ -15,7 +15,7 @@ for ($i=0; $i<100; $i++) {
   /* Setup socket server */
   $errno = null;
   $errstr = null;
-  $server = @stream_socket_server(
+  $server = stream_socket_server(
     "tcp://127.0.0.1:$port",
     inout $errno,
     inout $errstr
@@ -42,9 +42,6 @@ try { var_dump( stream_set_timeout($client) ); } catch (Exception $e) { echo "\n
 echo "\n-- Testing stream_set_timeout() function with a closed socket --\n";
 fclose($client);
 var_dump( stream_set_timeout($client, $seconds) );
-
-echo "\n-- Testing stream_set_timeout() function with an invalid stream --\n";
-try { var_dump( stream_set_timeout($seconds, $seconds) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing stream_set_timeout() function with a stream that does not support timeouts --\n";
 $filestream = fopen(__FILE__, "r");

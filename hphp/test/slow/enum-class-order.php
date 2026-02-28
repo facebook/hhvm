@@ -13,6 +13,6 @@ enum class GrandParentEnum: stdClass {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(ChildEnum::Foo, ChildEnum::Bar, ChildEnum::Baz);
 }

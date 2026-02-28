@@ -16,10 +16,10 @@ hello world
 EOT;
 
 // unexpected values to be passed to $stack argument
-$inputs = darray[
+$inputs = dict[
 
        // int data
-/*1*/  'int' => darray[
+/*1*/  'int' => dict[
        0 => 'zero',
        1 => 'one',
        12345 => 'positive',
@@ -27,16 +27,16 @@ $inputs = darray[
        ],
 
        // empty data
-/*2*/  'empty double quotes' => darray[
+/*2*/  'empty double quotes' => dict[
        "" => 'emptyd',
        ],
 
-/*3*/  'empty single quotes' => darray[
+/*3*/  'empty single quotes' => dict[
        '' => 'emptys',
        ],
 
        // string data
-/*4*/ 'string' => darray[
+/*4*/ 'string' => dict[
        "stringd" => 'stringd',
        'strings' => 'strings',
        $heredoc => 'stringh',

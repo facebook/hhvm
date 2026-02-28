@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
     Hdf empty;
     RuntimeOption::Load(ini, empty);
     // This one's default value changed recently
-    RuntimeOption::AlwaysPopulateRawPostData = true;
+    Cfg::Server::AlwaysPopulateRawPostData = true;
   }
 
   hphp_process_init();

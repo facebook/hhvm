@@ -146,8 +146,8 @@ public:
     size_t m_offset;
   };
 
-  typedef thm_iterator<value_type> iterator;
-  typedef thm_iterator<const value_type> const_iterator;
+  using iterator = thm_iterator<value_type>;
+  using const_iterator = thm_iterator<const value_type>;
 
   size_t size() const {
     return m_table.load(std::memory_order_acquire)->size;

@@ -18,11 +18,9 @@
 
 #include "hphp/runtime/base/string-data.h"
 
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
-#include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -34,7 +32,7 @@
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -123,11 +121,11 @@ void cgStringIsset(IRLS& env, const IRInstruction* inst) {
   v << setcc{CC_NBE, sf, dst};
 }
 
-IMPL_OPCODE_CALL(ConcatStrStr);
-IMPL_OPCODE_CALL(ConcatStrInt);
-IMPL_OPCODE_CALL(ConcatIntStr);
-IMPL_OPCODE_CALL(ConcatStr3);
-IMPL_OPCODE_CALL(ConcatStr4);
+IMPL_OPCODE_CALL(ConcatStrStr)
+IMPL_OPCODE_CALL(ConcatStrInt)
+IMPL_OPCODE_CALL(ConcatIntStr)
+IMPL_OPCODE_CALL(ConcatStr3)
+IMPL_OPCODE_CALL(ConcatStr4)
 
 IMPL_OPCODE_CALL(StringGet)
 

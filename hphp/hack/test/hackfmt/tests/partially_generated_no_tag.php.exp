@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // This entire file is formatted because it does not contain the
 // "partially-generated" tag.

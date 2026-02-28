@@ -1,0 +1,88 @@
+dict(3) {
+  ["kind"]=>
+  int(1)
+  ["typevars"]=>
+  string(3) "Tno"
+  ["alias"]=>
+  string(2) "No"
+}
+dict(4) {
+  ["kind"]=>
+  int(13)
+  ["name"]=>
+  string(4) "Tyes"
+  ["typevars"]=>
+  string(4) "Tyes"
+  ["alias"]=>
+  string(3) "Yes"
+}
+dict(4) {
+  ["kind"]=>
+  int(1)
+  ["alias"]=>
+  string(4) "NoNo"
+  ["typevar_types"]=>
+  dict(1) {
+    ["Tno"]=>
+    dict(1) {
+      ["kind"]=>
+      int(3)
+    }
+  }
+  ["typevars"]=>
+  string(5) "Tnono"
+}
+dict(4) {
+  ["kind"]=>
+  int(2)
+  ["alias"]=>
+  string(5) "NoYes"
+  ["typevar_types"]=>
+  dict(1) {
+    ["Tyes"]=>
+    dict(1) {
+      ["kind"]=>
+      int(2)
+    }
+  }
+  ["typevars"]=>
+  string(6) "Tnoyes"
+}
+dict(4) {
+  ["kind"]=>
+  int(1)
+  ["alias"]=>
+  string(5) "YesNo"
+  ["typevar_types"]=>
+  dict(1) {
+    ["Tno"]=>
+    dict(2) {
+      ["kind"]=>
+      int(13)
+      ["name"]=>
+      string(6) "Tyesno"
+    }
+  }
+  ["typevars"]=>
+  string(6) "Tyesno"
+}
+dict(5) {
+  ["kind"]=>
+  int(13)
+  ["name"]=>
+  string(7) "Tyesyes"
+  ["alias"]=>
+  string(6) "YesYes"
+  ["typevar_types"]=>
+  dict(1) {
+    ["Tyes"]=>
+    dict(2) {
+      ["kind"]=>
+      int(13)
+      ["name"]=>
+      string(7) "Tyesyes"
+    }
+  }
+  ["typevars"]=>
+  string(7) "Tyesyes"
+}

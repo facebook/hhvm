@@ -16,15 +16,15 @@
 
 #pragma once
 
+#include <filesystem>
 #include <functional>
 #include <string>
 #include <vector>
 
 #include <folly/Executor.h>
 #include <folly/Unit.h>
-#include <folly/dynamic.h>
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/futures/Future.h>
+#include <folly/json/dynamic.h>
 
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/util/optional.h"
@@ -37,17 +37,18 @@ namespace Facts {
  * Keeps track of which files have changed on the filesystem.
  */
 struct Watcher {
-  struct ResultFile {
-    folly::fs::path m_path;
+  struct FileDelta {
+    std::filesystem::path m_path;
     bool m_exists{false};
-    Optional<std::string> m_hash;
+    Optional<std::string> m_watcher_hash;
 
-    bool operator==(const ResultFile& o) const {
-      return m_path == o.m_path && m_exists == o.m_exists && m_hash == o.m_hash;
+    bool operator==(const FileDelta& o) const {
+      return m_path == o.m_path && m_exists == o.m_exists &&
+          m_watcher_hash == o.m_watcher_hash;
     }
   };
 
-  struct Results {
+  struct Delta {
     // These represent points in time.
     Optional<Clock> m_lastClock;
     Clock m_newClock;
@@ -59,7 +60,7 @@ struct Watcher {
     bool m_fresh{false};
 
     // All the files that changed between m_lastClock and m_newClock.
-    std::vector<ResultFile> m_files;
+    std::vector<FileDelta> m_files;
   };
 
   Watcher() = default;
@@ -72,13 +73,15 @@ struct Watcher {
   /**
    * Return the changed files since `lastVersion`.
    */
-  virtual folly::SemiFuture<Results> getChanges(Clock lastClock) = 0;
+  virtual folly::SemiFuture<Delta> getChanges(Clock lastClock) = 0;
 
   /**
    * Subscribe to the filesystem. Whenever the filesystem changes, this Watcher
-   * will send a Results object describing the change to the given callback.
+   * will send a Delta object describing the change to the given callback.
    */
-  virtual void subscribe(std::function<void(Results&&)> callback) = 0;
+  virtual void subscribe(
+      const Clock& lastClock,
+      std::function<void(Delta&&)> callback) = 0;
 };
 
 } // namespace Facts

@@ -28,7 +28,7 @@ class Meh {
   }
 
   public function foo(): void {
-    $b = darray["blah" => new Other()];
+    $b = dict["blah" => new Other()];
     print "$b[blah]$this";
   }
 }

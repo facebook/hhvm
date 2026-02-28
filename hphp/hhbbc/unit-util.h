@@ -27,8 +27,18 @@ namespace php { struct Unit; }
  * the native units.
  */
 bool is_systemlib_part(const php::Unit&);
+bool is_systemlib_part(SString);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * A native unit is a synthetic unit created to house native constants
+ * which don't otherwise have an associated unit.
+ */
+bool is_native_unit(const php::Unit&);
+bool is_native_unit(SString);
+std::unique_ptr<php::Unit> make_native_unit();
 
 //////////////////////////////////////////////////////////////////////
 
 }
-

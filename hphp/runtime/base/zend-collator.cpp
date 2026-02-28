@@ -16,7 +16,6 @@
 */
 #include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/base/intl-convert.h"
-#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -241,7 +240,7 @@ static DataType collator_is_numeric(UChar *str, int length, int64_t *lval,
   }
 
   if (conv_base == 16) { /* hex string, under UNIX strtod() messes it up */
-    /* UTODO: keep compatibility with is_numeric_string() here? */
+    /* TODO: keep compatibility with is_numeric_string() here? */
     return KindOfNull;
   }
 
@@ -341,7 +340,7 @@ static Variant collator_convert_object_to_string(const Variant& obj) {
   String str;
   try {
     str = obj.toString();
-  } catch (Exception& e) {
+  } catch (Exception& ) {
     return obj;
   }
   UErrorCode status;

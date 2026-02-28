@@ -1,0 +1,24 @@
+File "arithmetic_lower.php", line 88, characters 3-12:
+Invalid assignment (Typing[4110])
+  File "arithmetic_lower.php", line 87, characters 13-17:
+  Expected `int` because this is used in an arithmetic operation
+  File "arithmetic_lower.php", line 88, characters 10-12:
+  But got `float`
+File "arithmetic_lower.php", line 92, characters 15-23:
+Invalid argument (Typing[4110])
+  File "arithmetic_lower.php", line 4, characters 22-26:
+  Expected `float`
+  File "arithmetic_lower.php", line 92, characters 15-23:
+  But got `int` because this is the result of an integer arithmetic operation
+File "arithmetic_lower.php", line 93, characters 3-12:
+Invalid assignment (Typing[4110])
+  File "arithmetic_lower.php", line 92, characters 15-19:
+  Expected `int` because this is used in an arithmetic operation
+  File "arithmetic_lower.php", line 93, characters 10-12:
+  But got `float`
+File "arithmetic_lower.php", line 99, characters 3-12:
+Invalid assignment (Typing[4110])
+  File "arithmetic_lower.php", line 97, characters 13-17:
+  Expected `int` because this is used in an arithmetic operation
+  File "arithmetic_lower.php", line 99, characters 10-12:
+  But got `float`

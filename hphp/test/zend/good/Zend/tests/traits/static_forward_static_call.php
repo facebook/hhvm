@@ -1,13 +1,13 @@
 <?hh
 
 trait TestTrait {
-    public static function test() {
+    public static function test() :mixed{
         return 'Forwarded '.A::test();
     }
 }
 
 class A {
-    public static function test() {
+    public static function test() :mixed{
         return "Test A";
     }
 }

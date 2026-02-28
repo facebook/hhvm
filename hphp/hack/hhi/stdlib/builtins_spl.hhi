@@ -9,27 +9,45 @@
  */
 
 <<__PHPStdLib>>
-function spl_classes();
+function spl_classes(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function spl_object_hash($obj)[];
+function spl_object_hash(
+  HH\FIXME\MISSING_PARAM_TYPE $obj,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function hphp_object_pointer($obj);
+function hphp_object_pointer(
+  HH\FIXME\MISSING_PARAM_TYPE $obj,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function hphp_get_this();
+function hphp_get_this(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function class_implements($obj, bool $autoload = true)[];
+function class_implements(
+  HH\FIXME\MISSING_PARAM_TYPE $obj,
+  bool $autoload = true,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function class_parents($obj, bool $autoload = true)[];
+function class_parents(
+  HH\FIXME\MISSING_PARAM_TYPE $obj,
+  bool $autoload = true,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function class_uses($obj, bool $autoload = true)[];
+function class_uses(
+  HH\FIXME\MISSING_PARAM_TYPE $obj,
+  bool $autoload = true,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function iterator_apply($obj, $func, $params = null);
+function iterator_apply(
+  HH\FIXME\MISSING_PARAM_TYPE $obj,
+  HH\FIXME\MISSING_PARAM_TYPE $func,
+  HH\FIXME\MISSING_PARAM_TYPE $params = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function iterator_count($obj);
-<<__PHPStdLib>>
-function iterator_to_array($obj, bool $use_keys = true);
+function iterator_count(
+  HH\FIXME\MISSING_PARAM_TYPE $obj,
+): HH\FIXME\MISSING_RETURN_TYPE;
 
-class SplDoublyLinkedList<T> implements Iterator<T>, ArrayAccess<int, T>, Countable {
+class SplDoublyLinkedList<T>
+  implements Iterator<T>, ArrayAccess<int, T>, Countable {
   public function bottom(): T;
   public function isEmpty(): bool;
   public function key(): int;
@@ -47,10 +65,13 @@ class SplDoublyLinkedList<T> implements Iterator<T>, ArrayAccess<int, T>, Counta
   public function rewind(): void;
   public function valid(): bool;
 
-  public function offsetExists(/*int*/ $key): bool;
-  public function offsetGet(/*int*/ $key): T;
-  public function offsetSet(/*int*/ $key, T $val): void;
-  public function offsetUnset(/*int*/ $key): void;
+  public function offsetExists(/*int*/ HH\FIXME\MISSING_PARAM_TYPE $key): bool;
+  public function offsetGet(/*int*/ HH\FIXME\MISSING_PARAM_TYPE $key): T;
+  public function offsetSet(/*int*/
+    HH\FIXME\MISSING_PARAM_TYPE $key,
+    T $val,
+  ): void;
+  public function offsetUnset(/*int*/ HH\FIXME\MISSING_PARAM_TYPE $key): void;
 
   public function count(): int;
 }
@@ -98,16 +119,17 @@ class SplFileInfo {
   public function setInfoClass(string $class_name = "SplFileInfo"): void;
 }
 
-class SplFileObject extends SplFileInfo
+class SplFileObject
+  extends SplFileInfo
   implements
-    SeekableIterator<string>,
-    RecursiveIterator<SplFileObject> {
+    SeekableIterator<~string>,
+    RecursiveIterator<~string> {
 
   // Constants
-  const int DROP_NEW_LINE = 1;
-  const int READ_AHEAD = 2;
-  const int SKIP_EMPTY = 4;
-  const int READ_CSV = 8;
+  const int DROP_NEW_LINE;
+  const int READ_AHEAD;
+  const int SKIP_EMPTY;
+  const int READ_CSV;
 
   // Methods
   public function __construct(
@@ -117,7 +139,7 @@ class SplFileObject extends SplFileInfo
     ?resource $context = null,
   );
   /** @return string|array violates Iterator interface */
-  public function current();
+  public function current(): ~string;
   public function eof(): bool;
   public function fflush(): bool;
   public function fgetc(): string;
@@ -125,28 +147,24 @@ class SplFileObject extends SplFileInfo
     string $delimiter = ",",
     string $enclosure = "\"",
     string $escape = "\\",
-    /* HH_IGNORE_ERROR[2071] */
-  ): varray;
-  public function fgets();
+  ): varray<mixed>;
+  public function fgets(): HH\FIXME\MISSING_RETURN_TYPE;
   public function fgetss(?string $allowable_tags = null): string;
   public function flock(int $operation, inout mixed $wouldblock): bool;
   public function fpassthru(): int;
   public function fputcsv(
-    /* HH_IGNORE_ERROR[2071] */
-    varray $fields,
+    varray<mixed> $fields,
     string $delimiter = ",",
     string $enclosure = '"',
   ): int;
   public function fread(int $length): string;
-  public function fscanf(string $format): varray;
+  public function fscanf(string $format): varray<mixed>;
   public function fseek(int $offset, int $whence = SEEK_SET): int;
-  /* HH_IGNORE_ERROR[2071] */
-  public function fstat(): darray;
+  public function fstat(): darray<arraykey, mixed>;
   public function ftell(): int;
   public function ftruncate(int $size): bool;
   public function fwrite(string $str, int $length): int;
-  /* HH_IGNORE_ERROR[2071] */
-  public function getCsvControl(): varray;
+  public function getCsvControl(): varray<mixed>;
   public function getFlags(): int;
   public function getMaxLineLen(): int;
   public function setCsvControl(
@@ -154,8 +172,8 @@ class SplFileObject extends SplFileInfo
     string $enclosure = "\"",
     string $escape = "\\",
   ): void;
-  /* (always) returns null -- violates RecursiveIterator interface */
-  public function getChildren();
+  /* (always) returns null */
+  public function getChildren(): null;
   public function hasChildren(): bool;
   public function key(): int;
   public function next(): void;
@@ -166,26 +184,25 @@ class SplFileObject extends SplFileInfo
   public function valid(): bool;
 }
 
-class SplTempFileObject extends SplFileObject
-  implements
-    SeekableIterator<string>,
-    RecursiveIterator<SplTempFileObject> {
+class SplTempFileObject extends SplFileObject {
 
   // Methods
   public function __construct(?int $max_memory = null);
 }
 
-class DirectoryIterator extends SplFileInfo
-  implements SeekableIterator<DirectoryIterator> {
+class DirectoryIterator
+  extends SplFileInfo
+  implements SeekableIterator<~SplFileInfo> {
 
   // Methods
   public function __construct(string $path);
-  public function current(): DirectoryIterator;
+  public function current(): ~SplFileInfo;
   public function isDot(): bool;
   public function next(): void;
   public function rewind(): void;
   public function seek(int $position): void;
   public function valid(): bool;
+  public function key(): mixed;
 }
 
 class NoRewindIterator<T> extends IteratorIterator<T> {
@@ -195,58 +212,44 @@ class InfiniteIterator<T> extends IteratorIterator<T> {
 }
 
 class GlobIterator extends FilesystemIterator implements Countable {
-  public function count() {}
+  public function count(): int {}
 }
 
 class SplStack<T> extends SplDoublyLinkedList<T> {
 }
 
-class SplPriorityQueue<T> implements Iterator<T>, Countable {
-  const int EXTR_BOTH = 3;
-  const int EXTR_PRIORITY = 2;
-  const int EXTR_DATA = 1;
-  public function compare($a, $b) {}
-  public function count() {}
-  public function current() {}
-  public function extract() {}
-  public function insert($value, $priority) {}
-  public function isEmpty() {}
-  public function key() {}
-  public function next() {}
-  public function recoverFromCorruption() {}
-  public function rewind() {}
-  public function setExtractFlags($flags) {}
-  public function top() {}
-  public function valid() {}
+class SplPriorityQueue<Tv, Tp>
+  implements Iterator<~Tv>, Countable {
+  const int EXTR_BOTH;
+  const int EXTR_PRIORITY;
+  const int EXTR_DATA;
+  public function compare(Tp $a, Tp $b): int {}
+  public function count(): int {}
+  public function current(): ~Tv {}
+  public function extract(): ~Tv {}
+  public function insert(Tv $value, Tp $priority): bool {}
+  public function isEmpty(): bool {}
+  public function key(): int {}
+  public function next(): void {}
+  public function recoverFromCorruption(): bool {}
+  public function rewind(): void {}
+  public function setExtractFlags(int $flags): int {}
+  public function top(): ~Tv {}
+  public function valid(): bool {}
 }
 
 interface SplObserver {
-  public function update(SplSubject $SplSubject) {}
+  public function update(
+    SplSubject $SplSubject,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
 }
 
 interface SplSubject {
-  public function attach(SplObserver $SplObserver) {}
-  public function detach(SplObserver $SplObserver) {}
-  public function notify() {}
-}
-
-class SplType {
-  public function __construct($initial_value, $strict) {}
-}
-
-class SplInt extends SplType {
-}
-
-class SplFloat extends SplType {
-}
-
-class SplString extends SplType {
-}
-
-class SplEnum extends SplType {
-  public function __construct($initial_value, $strict) {}
-  public function getConstList($include_default = false) {}
-}
-
-class SplBool extends SplEnum {
+  public function attach(
+    SplObserver $SplObserver,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function detach(
+    SplObserver $SplObserver,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function notify(): HH\FIXME\MISSING_RETURN_TYPE {}
 }

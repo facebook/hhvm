@@ -1,5 +1,5 @@
 <?hh
 
 class C {
-  function __isset() {}
+  function __isset() :mixed{}
 }

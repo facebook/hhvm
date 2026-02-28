@@ -1,21 +1,21 @@
 <?hh
 
-function handler($errno, $errstr, $errfile, $errline) {
+function handler($errno, $errstr, $errfile, $errline) :mixed{
   throw new Exception($errstr);
 }
 
-function f<reify T>(T $x) {
+function f<reify T>(T $x) :mixed{
   var_dump($x is T);
 }
 
 class C<reify T> {}
 
-function g<reify T>(C<T> $x) {
+function g<reify T>(C<T> $x) :mixed{
   var_dump($x is C<T>);
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(handler<>);
   // pass type hint but fail is
   f<shape('a' => int)>(shape());

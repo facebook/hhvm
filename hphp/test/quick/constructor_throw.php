@@ -6,7 +6,7 @@ class X {
   }
 }
 
-function handler($kind, $name) {
+function handler($kind, $name) :mixed{
   if ($kind == 'exit' && $name == 'X::__construct') throw new Exception;
 }
 

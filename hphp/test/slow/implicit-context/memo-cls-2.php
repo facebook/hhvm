@@ -1,39 +1,38 @@
 <?hh
 
 class Foo {
-  static Foo $x;
-  <<__PolicyShardedMemoize>>
-  function memo<reify T>($a, $b)[zoned] {
-    $hash = quoted_printable_encode(
-      HH\ImplicitContext\_Private\get_implicit_context_memo_key()
-    );
+  public static Foo $x;
+  <<__Memoize(#KeyedByIC)>>
+  readonly function memo<reify T>($a, $b)[zoned] :mixed{
+    $hash = HH\ImplicitContext\_Private\get_implicit_context_debug_info();
     $kind = HH\ReifiedGenerics\get_type_structure<T>()['kind'];
-    echo "args: $a, $b hash: $hash, kind: $kind\n";
+    $str_hash = HH\Lib\Str\join($hash, ', '); // can't do var_dump due to keyedByIC
+    echo "args: $a, $b hash: $str_hash, kind: $kind\n";
   }
 }
 
-function g()[zoned] {
-  Foo::$x->memo<int>(1, 2);
-  Foo::$x->memo<int>(1, 3);
-  Foo::$x->memo<string>(1, 2);
-  Foo::$x->memo<string>(1, 3);
+function g()[zoned] :mixed{
+  (readonly Foo::$x)->memo<int>(1, 2);
+  (readonly Foo::$x)->memo<int>(1, 3);
+  (readonly Foo::$x)->memo<string>(1, 2);
+  (readonly Foo::$x)->memo<string>(1, 3);
 }
 
-function f()[zoned] {
-  Foo::$x->memo<int>(1, 2);
-  Foo::$x->memo<int>(1, 3);
-  Foo::$x->memo<string>(1, 2);
-  Foo::$x->memo<string>(1, 3);
-  ClassContext2::start(new B, g<>);
-  Foo::$x->memo<int>(1, 2);
-  Foo::$x->memo<int>(1, 3);
-  Foo::$x->memo<string>(1, 2);
-  Foo::$x->memo<string>(1, 3);
+function f()[zoned] :mixed{
+  (readonly Foo::$x)->memo<int>(1, 2);
+  (readonly Foo::$x)->memo<int>(1, 3);
+  (readonly Foo::$x)->memo<string>(1, 2);
+  (readonly Foo::$x)->memo<string>(1, 3);
+  ClassContext2::start(new B(0), g<>);
+  (readonly Foo::$x)->memo<int>(1, 2);
+  (readonly Foo::$x)->memo<int>(1, 3);
+  (readonly Foo::$x)->memo<string>(1, 2);
+  (readonly Foo::$x)->memo<string>(1, 3);
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include 'implicit.inc';
   Foo::$x = new Foo();
-  ClassContext::start(new A, f<>);
+  ClassContext::start(new A(0), f<>);
 }

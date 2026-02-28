@@ -1,7 +1,7 @@
 <?hh
 
 namespace {
-    function test() {
+    function test() :mixed{
         echo "NO!";
     }
 }

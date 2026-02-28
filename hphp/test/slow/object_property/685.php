@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   if (__hhvm_intrinsics\launder_value(true)) {
     include '685-1.inc';
   } else {

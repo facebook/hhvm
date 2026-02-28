@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 function might_throw(): void {}
 

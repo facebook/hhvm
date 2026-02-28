@@ -36,12 +36,12 @@
     },
     {
       "pos":{"filename":"async_lambda.php","line":9,"char_start":3,"char_end":5},
-      "type":"(function(string $x): Awaitable<void>)",
+      "type":"(function(~string $x): Awaitable<void>)",
       "ident":0
     },
     {
       "pos":{"filename":"async_lambda.php","line":9,"char_start":15,"char_end":16},
-      "type":"string",
+      "type":"~string",
       "ident":0
     },
     {
@@ -51,7 +51,7 @@
     },
     {
       "pos":{"filename":"async_lambda.php","line":10,"char_start":28,"char_end":29},
-      "type":"string",
+      "type":"~string",
       "ident":0
     }
   ]

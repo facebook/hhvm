@@ -1,0 +1,32 @@
+{
+  "macros": {
+    "route": {
+      "type": "macroDef",
+      "params": [ "a", "b" ],
+      "result": {
+        "aliases": [ "/%a%/%b%/" ],
+        "route": "PoolRoute|%a%%b%"
+      }
+    }
+  },
+  "pools": {
+    "aa": {
+      "servers": [ "127.0.0.1:12345" ]
+    },
+    "ab": {
+      "servers": [ "127.0.0.1:12346" ]
+    },
+    "ba": {
+      "servers": [ "127.0.0.1:12347" ]
+    },
+    "bb": {
+      "servers": [ "127.0.0.1:12348" ]
+    }
+  },
+  "routes": [
+    "@route(a, a)",
+    "@route(a, b)",
+    "@route(b, a)",
+    "@route(b, b)"
+  ]
+}

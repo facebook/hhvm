@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f(inout string $s): void {
   g(inout $s);

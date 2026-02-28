@@ -3,7 +3,7 @@
 class Ref {
   function __construct(public $value)[] {}
 }
-function foo($a, $b, $y) {
+function foo($a, $b, $y) :AsyncGenerator<mixed,mixed,void>{
   $x = $a;
   unset($a);
   unset($b);
@@ -19,7 +19,7 @@ function foo($a, $b, $y) {
 }
 
 <<__EntryPoint>>
-function main_g12() {
+function main_g12() :mixed{
 $a1 = 1;
 $a2 = new Ref(-999999999);
 $x = foo($a1, $a2, $a2);

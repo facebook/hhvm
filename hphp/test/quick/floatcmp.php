@@ -2,8 +2,8 @@
 
 <<__EntryPoint>> function main(): void {
   $nan = acos(1.01);
-  $values = varray[-0.0, 0.0, 0, 0.0001, $nan, 1.0];
-  $cmps = varray[
+  $values = vec[-0.0, 0.0, 0, 0.0001, $nan, 1.0];
+  $cmps = vec[
      function($x, $y) { return $x < $y; },
      function($x, $y) { return $x <= $y; },
      function($x, $y) { return $x > $y; },
@@ -12,7 +12,7 @@
      function($x, $y) { return HH\Lib\Legacy_FIXME\neq($x, $y); },
      function($x, $y) { return $x === $y; },
      function($x, $y) { return $x !== $y; }];
-  $cmpJmps = varray[
+  $cmpJmps = vec[
      function($x, $y) { return $x < $y ? true : false; },
      function($x, $y) { return $x <= $y ? true : false; },
      function($x, $y) { return $x > $y ? true : false; },
@@ -21,7 +21,7 @@
      function($x, $y) { return HH\Lib\Legacy_FIXME\neq($x, $y) ? true : false; },
      function($x, $y) { return $x === $y ? true : false; },
      function($x, $y) { return $x !== $y ? true : false; }];
-  $cmpNames = varray["<", "<=", ">", ">=", "==", "!=", "===", "!=="];
+  $cmpNames = vec["<", "<=", ">", ">=", "==", "!=", "===", "!=="];
 
   foreach ($values as $x) {
     foreach ($values as $y) {

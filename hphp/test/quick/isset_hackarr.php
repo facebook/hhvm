@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $b = dict[123 => 456];
   var_dump(isset($b[123]));
   $b = keyset[123];

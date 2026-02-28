@@ -1,0 +1,9 @@
+{
+  "pools": {
+    "A": {
+      "servers": [ "127.0.0.1:12345" ],
+      "server_timeout": 12346
+    }
+  },
+  "route": "PoolRoute|A"
+}

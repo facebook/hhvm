@@ -3,15 +3,22 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use emit_expression::{emit_reified_arg, is_reified_tparam};
-use env::{emitter::Emitter, Env};
+use decl_provider::TypeDecl;
+use env::ClassExpr;
+use env::Env;
+use env::emitter::Emitter;
 use error::Result;
-use instruction_sequence::{instr, InstrSeq};
-use naming_special_names_rust as sn;
-use oxidized::{aast, ast_defs::Id, file_info, pos::Pos};
-
 use hash::HashSet;
-use oxidized_by_ref::shallow_decl_defs;
+use instruction_sequence::InstrSeq;
+use instruction_sequence::instr;
+use naming_special_names_rust as sn;
+use oxidized::aast;
+use oxidized::aast_defs::HintFun;
+use oxidized::aast_defs::TupleInfo;
+use oxidized::ast_defs::Id;
+use oxidized::pos::Pos;
+
+use crate::emit_expression::emit_reified_arg;
 
 #[derive(Debug, Clone)]
 pub enum ReificationLevel {
@@ -32,9 +39,7 @@ impl ReificationLevel {
     }
 }
 
-pub(crate) fn get_erased_tparams<'a, 'arena>(
-    env: &'a Env<'a, 'arena>,
-) -> impl Iterator<Item = String> + 'a {
+pub(crate) fn get_erased_tparams<'a>(env: &'a Env<'a>) -> impl Iterator<Item = String> + 'a {
     env.scope.get_tparams().into_iter().filter_map(|tp| {
         if tp.reified != aast::ReifyKind::Reified {
             Some(tp.name.1.clone()) // TODO(hrust) figure out how to return &str
@@ -44,30 +49,24 @@ pub(crate) fn get_erased_tparams<'a, 'arena>(
     })
 }
 
-pub(crate) fn has_reified_type_constraint<'a, 'arena>(
-    env: &Env<'a, 'arena>,
-    h: &aast::Hint,
-) -> ReificationLevel {
+pub(crate) fn has_reified_type_constraint<'a>(env: &Env<'a>, h: &aast::Hint) -> ReificationLevel {
     use aast::Hint_;
     fn is_all_erased<'a>(
-        env: &'a Env<'_, '_>,
+        env: &'a Env<'_>,
         mut h_iter: impl Iterator<Item = &'a aast::Hint>,
     ) -> bool {
         let erased_tparams: HashSet<String> = get_erased_tparams(env).collect();
-        h_iter.all(|h| {
-            if let Hint_::Happly(Id(_, ref id), ref apply_hints) = *h.1 {
-                if apply_hints.is_empty() {
-                    return id == "_" || erased_tparams.contains(id);
-                }
+        h_iter.all(|h| match &*h.1 {
+            Hint_::Hwildcard => true,
+            Hint_::Happly(Id(_, id), apply_hints) => {
+                apply_hints.is_empty() && erased_tparams.contains(id)
             }
-            false
+            _ => false,
         })
     }
     match &*h.1 {
         Hint_::Happly(Id(_, id), hs) => {
-            if is_reified_tparam(env, true, id).is_some()
-                || is_reified_tparam(env, false, id).is_some()
-            {
+            if ClassExpr::is_reified_tparam(&env.scope, id) {
                 ReificationLevel::Definitely
             } else if hs.is_empty() || is_all_erased(env, hs.iter()) {
                 ReificationLevel::Not
@@ -80,8 +79,10 @@ pub(crate) fn has_reified_type_constraint<'a, 'arena>(
         Hint_::Hsoft(h) | Hint_::Hlike(h) | Hint_::Hoption(h) => {
             has_reified_type_constraint(env, h)
         }
-        Hint_::Hprim(_)
+        Hint_::HclassPtr(_, _) // TODO(T199611023) track reified when enforcing inner
+        | Hint_::Hprim(_)
         | Hint_::Hmixed
+        | Hint_::Hwildcard
         | Hint_::Hnonnull
         | Hint_::HvecOrDict(_, _)
         | Hint_::Hthis
@@ -93,16 +94,17 @@ pub(crate) fn has_reified_type_constraint<'a, 'arena>(
         | Hint_::Hshape(_)
         | Hint_::Hfun(_)
         | Hint_::Haccess(_, _)
+        | Hint_::Hrefinement(_, _)
         | Hint_::HfunContext(_)
         | Hint_::Hvar(_) => ReificationLevel::Not,
         // Not found in the original AST
-        Hint_::Herr | Hint_::Hany => panic!("Should be a naming error"),
-        Hint_::Habstr(_, _) => panic!("TODO Unimplemented: Not in the original AST"),
+        Hint_::Habstr(_) => panic!("TODO Unimplemented: Not in the original AST"),
     }
 }
 
 fn remove_awaitable(aast::Hint(pos, hint): aast::Hint) -> aast::Hint {
-    use aast::{Hint, Hint_};
+    use aast::Hint;
+    use aast::Hint_;
     match *hint {
         Hint_::Happly(sid, mut hs)
             if hs.len() == 1 && sid.1.eq_ignore_ascii_case(sn::classes::AWAITABLE) =>
@@ -121,14 +123,15 @@ fn remove_awaitable(aast::Hint(pos, hint): aast::Hint) -> aast::Hint {
         | Hint_::Hshape(_)
         | Hint_::Hfun(_)
         | Hint_::Haccess(_, _)
+        | Hint_::Hrefinement(_, _)
+        | Hint_::HclassPtr(_, _)
         | Hint_::Happly(_, _)
         | Hint_::HfunContext(_)
-        | Hint_::Hvar(_) => Hint(pos, hint),
-        Hint_::Herr
-        | Hint_::Hany
-        | Hint_::Hmixed
+        | Hint_::Hvar(_)
+        | Hint_::Hwildcard => Hint(pos, hint),
+        Hint_::Hmixed
         | Hint_::Hnonnull
-        | Hint_::Habstr(_, _)
+        | Hint_::Habstr(_)
         | Hint_::HvecOrDict(_, _)
         | Hint_::Hprim(_)
         | Hint_::Hthis
@@ -137,7 +140,7 @@ fn remove_awaitable(aast::Hint(pos, hint): aast::Hint) -> aast::Hint {
     }
 }
 
-pub(crate) fn convert_awaitable<'a, 'arena>(env: &Env<'a, 'arena>, h: aast::Hint) -> aast::Hint {
+pub(crate) fn convert_awaitable<'a>(env: &Env<'a>, h: aast::Hint) -> aast::Hint {
     if env.scope.is_in_async() {
         remove_awaitable(h)
     } else {
@@ -145,14 +148,14 @@ pub(crate) fn convert_awaitable<'a, 'arena>(env: &Env<'a, 'arena>, h: aast::Hint
     }
 }
 
-pub(crate) fn simplify_verify_type<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+pub(crate) fn simplify_verify_type<'a>(
+    e: &mut Emitter,
+    env: &mut Env<'a>,
     pos: &Pos,
-    check: InstrSeq<'arena>,
+    check: InstrSeq,
     hint: &aast::Hint,
-    verify_instr: InstrSeq<'arena>,
-) -> Result<InstrSeq<'arena>> {
+    verify_instr: InstrSeq,
+) -> Result<InstrSeq> {
     let get_ts = |e, hint| Ok(emit_reified_arg(e, env, pos, false, hint)?.0);
     let aast::Hint(_, hint_) = hint;
     if let aast::Hint_::Hoption(ref hint) = **hint_ {
@@ -160,7 +163,7 @@ pub(crate) fn simplify_verify_type<'a, 'arena, 'decl>(
         let done_label = label_gen.next_regular();
         Ok(InstrSeq::gather(vec![
             check,
-            instr::jmpnz(done_label),
+            instr::jmp_nz(done_label),
             get_ts(e, hint)?,
             verify_instr,
             instr::label(done_label),
@@ -170,28 +173,41 @@ pub(crate) fn simplify_verify_type<'a, 'arena, 'decl>(
     }
 }
 
-pub(crate) fn remove_erased_generics<'a, 'arena>(
-    env: &Env<'a, 'arena>,
-    h: aast::Hint,
-) -> aast::Hint {
-    use aast::{Hint, Hint_, NastShapeInfo, ShapeFieldInfo};
-    fn rec<'a, 'arena>(env: &Env<'a, 'arena>, Hint(pos, h_): Hint) -> Hint {
-        fn modify<'a, 'arena>(env: &Env<'a, 'arena>, id: String) -> String {
-            if get_erased_tparams(env).any(|p| p == id) {
-                "_".into()
-            } else {
-                id
-            }
-        }
+pub(crate) fn remove_erased_generics<'a>(env: &Env<'a>, h: aast::Hint) -> aast::Hint {
+    use aast::Hint;
+    use aast::Hint_;
+    use aast::NastShapeInfo;
+    use aast::ShapeFieldInfo;
+    use aast::TupleExtra;
+    use aast::TupleExtraInfo;
+    fn rec<'a>(env: &Env<'a>, Hint(pos, h_): Hint) -> Hint {
         let h_ = match *h_ {
-            Hint_::Happly(Id(pos, id), hs) => Hint_::Happly(
-                Id(pos, modify(env, id)),
-                hs.into_iter().map(|h| rec(env, h)).collect(),
-            ),
+            Hint_::Happly(Id(pos, id), hs) => {
+                if get_erased_tparams(env).any(|p| p == id) {
+                    Hint_::Hwildcard
+                } else {
+                    Hint_::Happly(Id(pos, id), hs.into_iter().map(|h| rec(env, h)).collect())
+                }
+            }
             Hint_::Hsoft(h) => Hint_::Hsoft(rec(env, h)),
             Hint_::Hlike(h) => Hint_::Hlike(rec(env, h)),
+            Hint_::HclassPtr(k, h) => Hint_::HclassPtr(k, rec(env, h)),
             Hint_::Hoption(h) => Hint_::Hoption(rec(env, h)),
-            Hint_::Htuple(hs) => Hint_::Htuple(hs.into_iter().map(|h| rec(env, h)).collect()),
+            Hint_::Htuple(TupleInfo { required, extra }) => {
+                let extra = match extra {
+                    TupleExtra::Hextra(TupleExtraInfo { optional, variadic }) => {
+                        TupleExtra::Hextra(TupleExtraInfo {
+                            optional: optional.into_iter().map(|h| rec(env, h)).collect(),
+                            variadic: variadic.map(|h| rec(env, h)),
+                        })
+                    }
+                    TupleExtra::Hsplat(h) => TupleExtra::Hsplat(rec(env, h)),
+                };
+                Hint_::Htuple(TupleInfo {
+                    required: required.into_iter().map(|h| rec(env, h)).collect(),
+                    extra,
+                })
+            }
             Hint_::Hunion(hs) => Hint_::Hunion(hs.into_iter().map(|h| rec(env, h)).collect()),
             Hint_::Hintersection(hs) => {
                 Hint_::Hintersection(hs.into_iter().map(|h| rec(env, h)).collect())
@@ -212,12 +228,29 @@ pub(crate) fn remove_erased_generics<'a, 'arena>(
                     field_map,
                 })
             }
-            h_ @ Hint_::Hfun(_) | h_ @ Hint_::Haccess(_, _) => h_,
-            Hint_::Herr
-            | Hint_::Hany
-            | Hint_::Hmixed
+            Hint_::Hfun(HintFun {
+                is_readonly,
+                tparams,
+                param_tys,
+                param_info,
+                variadic_ty,
+                ctxs,
+                return_ty,
+                is_readonly_return,
+            }) => Hint_::Hfun(HintFun {
+                is_readonly,
+                tparams,
+                param_tys: param_tys.into_iter().map(|h| rec(env, h)).collect(),
+                param_info,
+                variadic_ty: variadic_ty.map(|h| rec(env, h)),
+                ctxs,
+                return_ty: rec(env, return_ty),
+                is_readonly_return,
+            }),
+            h_ @ Hint_::Haccess(_, _) | h_ @ Hint_::Hrefinement(_, _) | h_ @ Hint_::Hwildcard => h_,
+            Hint_::Hmixed
             | Hint_::Hnonnull
-            | Hint_::Habstr(_, _)
+            | Hint_::Habstr(_)
             | Hint_::HvecOrDict(_, _)
             | Hint_::Hprim(_)
             | Hint_::Hthis
@@ -232,45 +265,60 @@ pub(crate) fn remove_erased_generics<'a, 'arena>(
     rec(env, h)
 }
 
-/// Warning: Experimental usage of decls in compilation.
+/// Warning: Experimental usage of decl-directed bytecode compilation.
 /// Given a hint, if the hint is an Happly(id, _), checks if the id is a class
 /// that has reified generics.
-pub(crate) fn happly_decl_has_reified_generics<'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+pub(crate) fn happly_decl_has_reified_generics<'a>(
+    env: &Env<'a>,
+    emitter: &mut Emitter,
     aast::Hint(_, hint): &aast::Hint,
 ) -> bool {
-    use aast::{Hint_, ReifyKind};
-    use file_info::NameType;
-    use shallow_decl_defs::Decl;
+    use aast::Hint_;
+    use aast::ReifyKind;
     match hint.as_ref() {
-        Hint_::Happly(Id(_, id), _) => match emitter.get_decl(NameType::Class, id) {
-            Ok(Decl::Class(class_decl)) => {
-                // Found a class with a matching name. Does it's shallow decl have
-                // any reified tparams?
-                class_decl
-                    .tparams
-                    .iter()
-                    .any(|tparam| tparam.reified != ReifyKind::Erased)
+        Hint_::Happly(Id(_, id), _) => {
+            // If the parameter itself is a reified type parameter, then we want to do the
+            // tparam check
+            if ClassExpr::is_reified_tparam(&env.scope, id) {
+                return true;
             }
-            Ok(x @ Decl::Fun(_) | x @ Decl::Const(_) | x @ Decl::Module(_)) => {
-                // We asked for a NameType::Class and got something weird back.
-                // This must be a bug because types/funcs/constants have different
-                // name kinds.
-                unreachable!(
-                    "Unexpected Decl kind from get_decl(NameType::Class): {:?}",
-                    x
-                )
+            // If the parameter is an erased type parameter, then no check is necessary
+            if get_erased_tparams(env).any(|tparam| &tparam == id) {
+                return false;
             }
-            Ok(Decl::Typedef(_)) => {
-                // TODO: `id` could be an alias for something without reified generics,
-                // but assume it has at least one, for now.
-                true
+            // Otherwise, we have a class or typedef name that we want to look up
+            let provider = match emitter.decl_provider.as_ref() {
+                Some(p) if emitter.options().hhbc.optimize_reified_param_checks => p,
+                Some(_) | None => {
+                    // If we don't have a `DeclProvider` available, or this specific optimization
+                    // has been turned off, assume that this may be a refied generic class.
+                    return true;
+                }
+            };
+            match provider.type_decl(id, 0) {
+                Ok(TypeDecl::Class(class_decl)) => {
+                    // Found a class with a matching name. Does it's shallow decl have
+                    // any reified tparams?
+                    class_decl
+                        .tparams
+                        .iter()
+                        .any(|tparam| tparam.reified != ReifyKind::Erased)
+                }
+                Ok(TypeDecl::Typedef(_)) => {
+                    // TODO: `id` could be an alias for something without reified generics,
+                    // but conservatively assume it has at least one, for now.
+                    true
+                }
+                Err(decl_provider::Error::NotFound) => {
+                    // The DeclProvider has no idea what `id` is.
+                    true
+                }
+                Err(decl_provider::Error::Bincode(_)) => {
+                    // Infra error while handling serialized decls
+                    true
+                }
             }
-            Err(decl_provider::Error::NotFound) => {
-                // The DeclProvider has no idea what `id` is.
-                true
-            }
-        },
+        }
         Hint_::Hoption(_)
         | Hint_::Hlike(_)
         | Hint_::Hfun(_)

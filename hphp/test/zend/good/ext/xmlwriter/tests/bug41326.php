@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$xml = new XmlWriter();
+$xml = new XMLWriter();
 $xml->openMemory();
 $xml->setIndent(true);
 $xml->startDocument();

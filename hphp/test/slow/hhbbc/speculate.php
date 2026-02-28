@@ -1,6 +1,6 @@
 <?hh
 
-function test(?string $a, ?string $b) {
+function test(?string $a, ?string $b) :mixed{
   echo "Foo\n";
   if (
     ($a === null && $b === null) ||

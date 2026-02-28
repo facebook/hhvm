@@ -1,0 +1,14 @@
+[packages]
+
+[packages.foo]
+
+[packages.bar]
+includes = ["foo"]
+
+[packages.baz]
+includes = ["foo", "bar"]
+
+[deployments]
+
+[deployments.my-prod]
+packages = ["foo", "bar"]

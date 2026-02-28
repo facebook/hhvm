@@ -3,19 +3,19 @@
 
 class A {
   private $a = 1;
-  public function __sleep() {
+  public function __sleep() :mixed{
     return SerializationPrivateProperties::$g;
   }
-  public function seta($a) {
+  public function seta($a) :mixed{
     $this->a = $a;
   }
 }
 class B extends A {
-  public function __sleep() {
+  public function __sleep() :mixed{
     return SerializationPrivateProperties::$g;
   }
 
-  static function test($a, $elems, $p = null) {
+  static function test($a, $elems, $p = null) :mixed{
 
     $a->seta(42);
     SerializationPrivateProperties::$g = $elems;
@@ -40,15 +40,15 @@ abstract final class SerializationPrivateProperties {
 <<__EntryPoint>>
 function entrypoint_private_properties(): void {
   error_reporting(-1);
-  B::test(new A, varray["a"]);
-  B::test(new A, varray["\0A\0a"]);
-  B::test(new A, varray["\0*\0a"]);
-  B::test(new A, varray["\0*\0b"], "b");
-  B::test(new A, varray["\0B\0b"], "b");
+  B::test(new A, vec["a"]);
+  B::test(new A, vec["\0A\0a"]);
+  B::test(new A, vec["\0*\0a"]);
+  B::test(new A, vec["\0*\0b"], "b");
+  B::test(new A, vec["\0B\0b"], "b");
   B::test(new A, "foo");
-  B::test(new B, varray["a"]);
-  B::test(new B, varray["\0A\0a"]);
-  B::test(new B, varray["\0*\0a"]);
-  B::test(new B, varray["\0*\0b"], "b");
-  B::test(new B, varray["\0B\0b"], "b");
+  B::test(new B, vec["a"]);
+  B::test(new B, vec["\0A\0a"]);
+  B::test(new B, vec["\0*\0a"]);
+  B::test(new B, vec["\0*\0b"], "b");
+  B::test(new B, vec["\0B\0b"], "b");
 }

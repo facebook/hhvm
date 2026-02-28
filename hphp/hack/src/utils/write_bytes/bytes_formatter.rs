@@ -3,11 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::io::{Result, Write};
+use std::io::Result;
+use std::io::Write;
 
 // Once we support fmtspec this is where the parameters (like width) will live.
 pub struct FmtSpec {}
 
+#[allow(dead_code)] // field `1` is never read
 pub struct BytesFormatter<'a>(pub(crate) &'a mut dyn Write, pub(crate) &'a FmtSpec);
 
 impl Write for BytesFormatter<'_> {

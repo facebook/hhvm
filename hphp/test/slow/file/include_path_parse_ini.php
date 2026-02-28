@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_include_path_parse_ini() {
+function main_include_path_parse_ini() :mixed{
 $direct_ini_file = "include_path_parse_direct_dir.ini";
 $nested_ini_file = "include_path_parse_nested_dir.ini";
 $nested_dir = "ini_files";

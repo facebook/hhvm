@@ -1,0 +1,31 @@
+/*
+ *  Copyright (c) 2023-present, Facebook, Inc.
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
+
+/**
+ * <fizz/fizz-config.h> holds compile time configuration options for Fizz.
+ */
+#pragma once
+
+#cmakedefine01 FIZZ_HAVE_LIBAEGIS
+#cmakedefine01 FIZZ_HAVE_SODIUM
+#cmakedefine01 FIZZ_CERTIFICATE_USE_OPENSSL_CERT
+#cmakedefine01 FIZZ_HAVE_OQS
+
+#if !defined(FIZZ_ENABLE_CONTEXT_COMPATIBILITY_CHECKS)
+#if defined(NDEBUG)
+#define FIZZ_ENABLE_CONTEXT_COMPATIBILITY_CHECKS 0
+#else
+#define FIZZ_ENABLE_CONTEXT_COMPATIBILITY_CHECKS 1
+#endif
+#endif
+
+#define FIZZ_CONTEXT_VALIDATION_SHOULD_CHECK_CIPHER(x) (true)
+
+#define FIZZ_DEFAULT_FACTORY_HEADER <fizz/protocol/MultiBackendFactory.h>
+#define FIZZ_DEFAULT_FACTORY ::fizz::MultiBackendFactory
+

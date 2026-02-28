@@ -8,15 +8,8 @@
 echo "*** Testing is_executable(): usage variations ***\n";
 
 echo "\n*** Testing is_executable() on invalid files ***\n";
-$invalid_files = varray[
-  0,
-  1234,
-  -2.34555,
-  TRUE,
-  FALSE,
-  NULL,
+$invalid_files = vec[
   " ",
-  varray[],
 ];
 /* loop through to test each element in the above array
    is an executable file */

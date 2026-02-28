@@ -1,0 +1,3 @@
+-vEval.AllowHhas=true
+-vEval.Verify=true
+-vEval.FatalOnVerifyError=true

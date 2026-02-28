@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_1717() {
-$vals = varray[null, 0, false, varray[], 'test'];
+function main_1717() :mixed{
+$vals = vec[null, 0, false, vec[], 'test'];
 foreach ($vals as $val) {
   try {
     $val->foo();

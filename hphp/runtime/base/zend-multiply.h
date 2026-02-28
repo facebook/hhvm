@@ -28,6 +28,19 @@
     else (lval) = __tmpvar;                                             \
   } while (0)
 
+#elif defined(__aarch64__) && defined(__GNUC__)
+
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {       \
+    long __tmpvar;                                                      \
+    __asm__("mul %0, %2, %3\n"                                          \
+      "smulh %1, %2, %3\n"                                              \
+      "sub %1, %1, %0, asr #63\n"                                       \
+        : "=&r"(__tmpvar), "=&r"(usedval)                               \
+        : "r"(a), "r"(b));                                              \
+    if (usedval) (dval) = (double) (a) * (double) (b);                  \
+    else (lval) = __tmpvar;                                             \
+  } while (0)
+
 #else
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {       \
@@ -42,4 +55,3 @@
   } while (0)
 
 #endif
-

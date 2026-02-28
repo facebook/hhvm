@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_array_rand() {
-$input = varray["Neo", "Morpheus", "Trinity", "Cypher", "Tank"];
+function main_array_rand() :mixed{
+$input = vec["Neo", "Morpheus", "Trinity", "Cypher", "Tank"];
 $rand_keys = array_rand($input, 2);
 var_dump(count($rand_keys));
 

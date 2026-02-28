@@ -1,0 +1,2 @@
+Warning: mysql_connect(): Can't connect to local MySQL server through socket '/var/lib/mysql/mysql.sock' (2) in %s/slow/ext_mysql/connection_failure.php on line 8
+Done

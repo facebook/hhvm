@@ -7,7 +7,7 @@
 */
 
 namespace NS1;          // define a level-1 namespace
-function foo() {
+function foo() :mixed{
   echo "Inside namespace " . __NAMESPACE__ . "\n";
 }
 
@@ -16,13 +16,13 @@ function foo() {
 
 
 namespace NS1\Sub1;     // define a level-2 namespace that happens to have a level-1 prefix
-function foo() {
+function foo() :mixed{
   echo "Inside namespace " . __NAMESPACE__ . "\n";
 }
 
 
 namespace NS2;          // define a level-1 namespace
-function foo() {
+function foo() :mixed{
   echo "Inside namespace " . __NAMESPACE__ . "\n";
 }
 
@@ -30,7 +30,7 @@ use NS2;
 
 
 namespace NS3\Sub1;     // define a level-2 namespace who's prefix is not an existing level-1 ns
-function foo() {
+function foo() :mixed{
   echo "Inside namespace " . __NAMESPACE__ . "\n";
 }
 
@@ -42,7 +42,7 @@ class C1
 
 //  public function NS3\Sub1\f()    // prefix not allowed in definition
     public function f()
-    {
+:mixed    {
         echo "Inside function " . __FUNCTION__ . "\n";
         echo "Inside method " . __METHOD__ . "\n";
     }

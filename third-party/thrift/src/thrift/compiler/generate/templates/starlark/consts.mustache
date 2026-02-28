@@ -1,0 +1,56 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{#let partial primitive_value |value|}}
+  {{#pragma ignore-newlines}}
+  {{#let val_type = value.type}}
+  {{#if val_type.string?}}
+"{{value.string_value}}"
+  {{#else if (or val_type.byte? val_type.any_int?)}}
+{{value.integer_value}}
+  {{#else if val_type.bool?}}
+{{#if value.nonzero?}}True{{#else}}False{{/if}}
+  {{#else if val_type.floating_point?}}
+{{#if value.double?}}{{(float_to_string value.double_value)}}{{#else}}{{value.integer_value}}.0{{/if}}
+  {{/if val_type.string?}}
+{{/let partial}}
+
+{{!
+  We can't use ignore-newlines in the const_value partial because lists/maps
+  need to emit newlines. So we must comment all the line breaks we don't want to emit.
+}}
+{{#let export partial const_value |value| captures |primitive_value|}}
+  {{#let val_type = value.type}}
+{{#if val_type.primitive?}}{{#partial primitive_value value=value}}{{!
+}}{{#else if (and val_type.enum? value.enum_value?)}}{{val_type.true_type.name}}.{{value.enum_value.name}}{{!
+}}{{#else if val_type.list?}}{{!
+  List
+}}[
+    {{#each value.list_elements as |elem|}}
+  {{#partial const_value value=elem }},
+    {{/each}}
+]{{!
+}}{{#else if val_type.map?}}{{!
+  Map
+}}{
+    {{#each value.map_elements as |elem|}}
+  {{#partial const_value value=elem.key}}: {{#partial const_value value=elem.value}},
+    {{/each}}
+}{{!
+}}{{/if val_type.primitive?}}{{!
+}}{{/let partial}}

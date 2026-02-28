@@ -3,13 +3,24 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::{Pair, Slice, Str};
+use std::hash::Hash;
+use std::hash::Hasher;
+use std::ops::Deref;
 
-/// Raw IEEE floating point bits. We use this rather than f64 so that the default
-/// hash/equality have the right interning behavior: -0.0 != 0.0, NaN == NaN.
+use ffi::Vector;
+use intern::string::BytesId;
+use serde::Serialize;
+use serde::Serializer;
+use triomphe::Arc;
+use triomphe::OffsetArc;
+
+use crate::ClassName;
+
+/// Raw IEEE floating point bits. We use this rather than f64 so that
+/// hash/equality have bitwise interning behavior: -0.0 != 0.0, NaN == NaN.
 /// If we ever implement Ord/PartialOrd, we'd need to base it on the raw bits
 /// (u64), not floating point partial order.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Serialize)]
 #[repr(transparent)]
 pub struct FloatBits(pub f64);
 
@@ -43,58 +54,150 @@ impl From<f64> for FloatBits {
 }
 
 /// We introduce a type for Hack/PHP values, mimicking what happens at
-/// runtime. Currently this is used for constant folding. By defining
-/// a special type, we ensure independence from usage: for example, it
-/// can be used for optimization on ASTs, or on bytecode, or (in
-/// future) on a compiler intermediate language. HHVM takes a similar
-/// approach: see runtime/base/typed-value.h
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+/// runtime. Currently this is used for constant folding.
+/// These convert to HHVM TypedValue - see runtime/base/typed-value.h
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize)]
 #[repr(C)]
-pub enum TypedValue<'arena> {
+pub enum TypedValue {
     /// Used for fields that are initialized in the 86pinit method
     Uninit,
-    /// Hack/PHP integers are 64-bit
+
+    /// Hack/PHP integers are signed 64-bit
     Int(i64),
+
+    /// Hack bool
     Bool(bool),
+
     /// Hack, C++, PHP, and Caml floats are IEEE754 64-bit
-    Double(FloatBits),
-    String(Str<'arena>),
-    LazyClass(Str<'arena>),
+    Float(FloatBits),
+
+    /// Hack strings are plain bytes with no utf-8 guarantee
+    String(BytesId),
+
+    /// Hack source code including identifiers must be valid utf-8
+    LazyClass(ClassName),
+
+    /// Hack null
     Null,
-    /// An array literal represented as __hhas_adata("serialized-data").
-    HhasAdata(Str<'arena>),
-    // Hack arrays: vectors, keysets, and dictionaries
-    Vec(Slice<'arena, TypedValue<'arena>>),
-    Keyset(Slice<'arena, TypedValue<'arena>>),
-    Dict(Slice<'arena, Pair<TypedValue<'arena>, TypedValue<'arena>>>),
+
+    /// Hack vec<T>
+    Vec(ArcVec<TypedValue>),
+
+    /// Hack keyset<T>
+    Keyset(ArcVec<TypedValue>),
+
+    /// Hack dict<T>
+    Dict(ArcVec<Entry<TypedValue, TypedValue>>),
+
+    /// Hack EnumClassLabel (#FieldName, EnumName#FieldName)
+    EnumClassLabel(BytesId),
 }
 
-impl<'arena> TypedValue<'arena> {
-    pub fn string(x: impl Into<Str<'arena>>) -> Self {
-        Self::String(x.into())
+/// A reference counted Vector<T>
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[repr(C)]
+pub struct ArcVec<T>(OffsetArc<Vector<T>>);
+
+impl<T: Hash> Hash for ArcVec<T> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.hash(state)
+    }
+}
+
+impl<T: Serialize> Serialize for ArcVec<T> {
+    fn serialize<S: Serializer>(&self, ser: S) -> Result<S::Ok, S::Error> {
+        self.0.serialize(ser)
+    }
+}
+
+impl<T> Deref for ArcVec<T> {
+    type Target = Vector<T>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<T: Clone> ArcVec<T> {
+    pub fn into_vec(self) -> Vec<T> {
+        Arc::unwrap_or_clone(Arc::from_raw_offset(self.0)).into()
+    }
+}
+
+// This is declared as a generic type to work around cbindgen's topo-sort,
+// which outputs Entry before TypedValue. This violates C++ ordering rules:
+// A struct field type must be declared before the field.
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize)]
+#[repr(C)]
+pub struct Entry<K, V> {
+    pub key: K,
+    pub value: V,
+}
+
+pub type DictEntry = Entry<TypedValue, TypedValue>;
+
+impl TypedValue {
+    pub fn intern_string(x: impl AsRef<[u8]>) -> Self {
+        Self::String(intern::string::intern_bytes(x.as_ref()))
     }
 
-    pub fn hhas_adata(x: impl Into<Str<'arena>>) -> Self {
-        Self::HhasAdata(x.into())
+    pub fn intern_enum_class_label(x: impl AsRef<[u8]>) -> Self {
+        Self::EnumClassLabel(intern::string::intern_bytes(x.as_ref()))
     }
 
-    pub fn vec(x: impl Into<Slice<'arena, TypedValue<'arena>>>) -> Self {
-        Self::Vec(x.into())
+    pub fn intern_lazy_class(x: impl AsRef<str>) -> Self {
+        Self::LazyClass(ClassName::intern(x.as_ref()))
     }
 
-    pub fn keyset(x: impl Into<Slice<'arena, TypedValue<'arena>>>) -> Self {
-        Self::Keyset(x.into())
+    pub fn vec(x: Vec<TypedValue>) -> Self {
+        Self::Vec(ArcVec(Arc::into_raw_offset(Arc::new(Vector::from(x)))))
     }
 
-    pub fn dict(x: impl Into<Slice<'arena, Pair<TypedValue<'arena>, TypedValue<'arena>>>>) -> Self {
-        Self::Dict(x.into())
+    pub fn keyset(x: Vec<TypedValue>) -> Self {
+        Self::Keyset(ArcVec(Arc::into_raw_offset(Arc::new(Vector::from(x)))))
     }
 
-    pub fn alloc_string(s: impl AsRef<str>, alloc: &'arena bumpalo::Bump) -> Self {
-        Self::String((alloc.alloc_str(s.as_ref()) as &str).into())
+    pub fn dict(x: Vec<DictEntry>) -> Self {
+        Self::Dict(ArcVec(Arc::into_raw_offset(Arc::new(Vector::from(x)))))
     }
 
-    pub fn double(f: f64) -> Self {
-        Self::Double(f.into())
+    pub fn float(f: f64) -> Self {
+        Self::Float(f.into())
     }
+
+    pub fn get_string(&self) -> Option<BytesId> {
+        match self {
+            TypedValue::String(str) => Some(*str),
+            _ => None,
+        }
+    }
+
+    pub fn get_int(&self) -> Option<i64> {
+        match self {
+            TypedValue::Int(num) => Some(*num),
+            _ => None,
+        }
+    }
+
+    pub fn get_bool(&self) -> Option<bool> {
+        match self {
+            TypedValue::Bool(b) => Some(*b),
+            _ => None,
+        }
+    }
+
+    pub fn get_dict(&self) -> Option<&[DictEntry]> {
+        match self {
+            TypedValue::Dict(dv) => Some(&dv.0),
+            _ => None,
+        }
+    }
+}
+
+pub fn dict_get<'d>(d: &'d [DictEntry], q: &TypedValue) -> Option<&'d TypedValue> {
+    for e in d {
+        if &e.key == q {
+            return Some(&e.value);
+        }
+    }
+    None
 }

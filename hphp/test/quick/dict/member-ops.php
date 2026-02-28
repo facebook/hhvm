@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function base_elem_warn($d, $k) {
+function base_elem_warn($d, $k) :mixed{
   try {
     var_dump($d[$k]['a']);
   } catch (Exception $e) {
@@ -9,7 +9,7 @@ function base_elem_warn($d, $k) {
   }
 }
 
-function base_elem($d, $k) {
+function base_elem($d, $k) :mixed{
   try {
     var_dump($d[$k]['a'] ?? "MISSING");
   } catch (Exception $e) {
@@ -17,7 +17,7 @@ function base_elem($d, $k) {
   }
 }
 
-function base_define($d, $k) {
+function base_define($d, $k) :mixed{
   try {
     $d[$k]['a'] = 200;
   } catch (Exception $e) {
@@ -26,7 +26,7 @@ function base_define($d, $k) {
   var_dump($d);
 }
 
-function base_unset($d, $k) {
+function base_unset($d, $k) :mixed{
   try {
     unset($d[$k]['a']);
   } catch (Exception $e) {
@@ -35,7 +35,7 @@ function base_unset($d, $k) {
   var_dump($d);
 }
 
-function base($d) {
+function base($d) :mixed{
   echo "======= base_elem_warn =============================\n";
   base_elem_warn($d, 1);
   base_elem_warn($d, 3);
@@ -83,14 +83,14 @@ function base($d) {
   echo "======= base_prop_set ==============================\n";
   try {
     $copy = $d;
-    $copy->foobaz = varray[123];
+    $copy->foobaz = vec[123];
     var_dump($copy);
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
   }
 }
 
-function dim_elem_warn($a, $k) {
+function dim_elem_warn($a, $k) :mixed{
   try {
     var_dump($a[1][$k]['a']);
   } catch (Exception $e) {
@@ -98,7 +98,7 @@ function dim_elem_warn($a, $k) {
   }
 }
 
-function dim_elem($a, $k) {
+function dim_elem($a, $k) :mixed{
   try {
     var_dump($a[1][$k]['a'] ?? "MISSING");
   } catch (Exception $e) {
@@ -106,7 +106,7 @@ function dim_elem($a, $k) {
   }
 }
 
-function dim_define($a, $k) {
+function dim_define($a, $k) :mixed{
   try {
     $a[1][$k]['a'] = 200;
   } catch (Exception $e) {
@@ -115,7 +115,7 @@ function dim_define($a, $k) {
   var_dump($a);
 }
 
-function dim_unset($a, $k) {
+function dim_unset($a, $k) :mixed{
   try {
     unset($a[1][$k]['a']);
   } catch (Exception $e) {
@@ -124,7 +124,7 @@ function dim_unset($a, $k) {
   var_dump($a);
 }
 
-function dim($a) {
+function dim($a) :mixed{
   echo "======= dim_elem_warn ==============================\n";
   dim_elem_warn($a, 1);
   dim_elem_warn($a, 3);
@@ -172,14 +172,14 @@ function dim($a) {
   echo "======= dim_prop_set ===============================\n";
   try {
     $copy = $a;
-    $copy[1]->foobaz = varray[123];
+    $copy[1]->foobaz = vec[123];
     var_dump($copy);
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
   }
 }
 
-function fini_cget_warn($a, $k) {
+function fini_cget_warn($a, $k) :mixed{
   try {
     var_dump($a[1][$k]);
   } catch (Exception $e) {
@@ -187,7 +187,7 @@ function fini_cget_warn($a, $k) {
   }
 }
 
-function fini_cget($a, $k) {
+function fini_cget($a, $k) :mixed{
   try {
     var_dump($a[1][$k] ?? "MISSING");
   } catch (Exception $e) {
@@ -195,7 +195,7 @@ function fini_cget($a, $k) {
   }
 }
 
-function fini_empty($a, $k) {
+function fini_empty($a, $k) :mixed{
   try {
     var_dump(!($a[1][$k] ?? false));
   } catch (Exception $e) {
@@ -203,7 +203,7 @@ function fini_empty($a, $k) {
   }
 }
 
-function fini_isset($a, $k) {
+function fini_isset($a, $k) :mixed{
   try {
     var_dump(isset($a[1][$k]));
   } catch (Exception $e) {
@@ -212,7 +212,7 @@ function fini_isset($a, $k) {
 }
 
 
-function fini_set($a, $k) {
+function fini_set($a, $k) :mixed{
   try {
     $a[1][$k] = 123;
   } catch (Exception $e) {
@@ -221,7 +221,7 @@ function fini_set($a, $k) {
   var_dump($a);
 }
 
-function fini_incdec($a, $k) {
+function fini_incdec($a, $k) :mixed{
   try {
     $a[1][$k]++;
   } catch (Exception $e) {
@@ -230,7 +230,7 @@ function fini_incdec($a, $k) {
   var_dump($a);
 }
 
-function fini_setop($a, $k) {
+function fini_setop($a, $k) :mixed{
   try {
     $a[1][$k] .= "some-str";
   } catch (Exception $e) {
@@ -239,7 +239,7 @@ function fini_setop($a, $k) {
   var_dump($a);
 }
 
-function fini_unset($a, $k) {
+function fini_unset($a, $k) :mixed{
   try {
     unset($a[1][$k]);
   } catch (Exception $e) {
@@ -248,7 +248,7 @@ function fini_unset($a, $k) {
   var_dump($a);
 }
 
-function fini($a) {
+function fini($a) :mixed{
   echo "======= fini_cget_warn =============================\n";
   fini_cget_warn($a, 1);
   fini_cget_warn($a, 3);
@@ -349,7 +349,7 @@ function fini($a) {
   }
 }
 <<__EntryPoint>> function main(): void {
-base(dict[1 => darray['a' => 100], 2 => "", "1" => darray['a' => 500]]);
-dim(varray[null, dict[1 => darray['a' => 100], 2 => "", "1" => darray['a' => 500]]]);
-fini(varray[null, dict[1 => "abc", 2 => "", "1" => "def"]]);
+base(dict[1 => dict['a' => 100], 2 => "", "1" => dict['a' => 500]]);
+dim(vec[null, dict[1 => dict['a' => 100], 2 => "", "1" => dict['a' => 500]]]);
+fini(vec[null, dict[1 => "abc", 2 => "", "1" => "def"]]);
 }

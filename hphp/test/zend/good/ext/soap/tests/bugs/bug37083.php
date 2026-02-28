@@ -1,6 +1,6 @@
 <?hh
 class TestSoapClient extends SoapClient {
-	function __dorequest($request, $location, $action, $version, $one_way = 0) {
+	function __dorequest($request, $location, $action, $version, $one_way = 0) :mixed{
 		return <<<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -37,16 +37,17 @@ EOF;
 function main_entry(): void {
   for ($i = 0; $i < 10; $i++) {
   	$ws=new TestSoapClient(dirname(__FILE__).'/bug37083.wsdl',
-                     darray['encoding'=>'ISO-8859-1',
+                     dict['encoding'=>'ISO-8859-1',
                            'cache_wsdl'=>WSDL_CACHE_BOTH]);
   	$search=new stdClass();
   	$search->queryString='argo';
-  	$search->ranges = varray[];
-  	$search->ranges[]=$r=new stdClass();
+  	$search->ranges = vec[];
+  	$r = new stdClass();
+  	$search->ranges[] = $r;
   	$r->field='maxDateTime';
   	$r->min='2003-04-01';
   	$search->index='all';
-  	$res=$ws->__soapcall('search', varray[$search,0,10]);
+  	$res=$ws->__soapcall('search', vec[$search,0,10]);
   }
   echo "ok\n";
 }

@@ -9,6 +9,7 @@
 (** This module checks wellformedness of type hints in the decls and bodies.
     Wellformedness checks include:
     - constraints on type parameters (e.g. C<string> where C requires T as arraykey)
+    - constraints on type splats (e.g. ...T requires T as (mixed...) )
     - hint well-kinded-ness
     - trivial syntactic errors:
         - writing ?nonnull instead of mixed
@@ -19,7 +20,7 @@
     "Featherweight Java: A Minimal Core Calculus for Java and GJ", 2002,
     Igarashi, Pierce, Wadler. *)
 
-val fun_ : Typing_env_types.env -> Nast.fun_ -> Typing_error.t list
+val fun_def : Typing_env_types.env -> Nast.fun_def -> Typing_error.t list
 
 val class_ : Typing_env_types.env -> Nast.class_ -> Typing_error.t list
 

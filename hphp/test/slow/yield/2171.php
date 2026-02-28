@@ -1,14 +1,14 @@
 <?hh
 <<__DynamicallyCallable>>
-function f($a1, $a2, $a3) {
+function f($a1, $a2, $a3) :mixed{
   var_dump($a1, $a2, $a3);
 }
 <<__DynamicallyCallable>>
-function g($a1, $a2, $a3) {
+function g($a1, $a2, $a3) :mixed{
   var_dump($a1, $a2, $a3);
 }
-function h($fcn) {
-  $fcn(\HH\global_get('_POST'), Yield2171::$x, Yield2171::$x++);
+function h($fcn) :AsyncGenerator<mixed,mixed,void>{
+  HH\dynamic_fun($fcn)(\HH\global_get('_POST'), Yield2171::$x, Yield2171::$x++);
   yield 64;
 }
 

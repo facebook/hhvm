@@ -103,7 +103,7 @@ const StaticString
   s_ImagickPixel("ImagickPixel"),
   s_ImagickPixelIterator("ImagickPixelIterator");
 
-void loadImagickConstants() {
+void registerNativeImagickConstants() {
   // COLOR_* constants
   // Colortype constants. These constants are mainly used with ImagickPixel.
   HHVM_RCC_INT(Imagick, COLOR_BLACK, IMAGICK_COLOR_BLACK);

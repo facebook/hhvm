@@ -1,21 +1,20 @@
-//// decls.php
+//// module_A.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+new module A {}
 
-module A {}
-module D {}
+//// module_D.php
+<?hh
+new module D {}
 
 //// A.php
 <?hh
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+
+module A;
 
 abstract class A {
-    <<__Internal>>
-    public function foobar(): void {}
-    <<__Internal>>
-    abstract public function abstractFoobar(): void;
-    <<__Internal>>
-    public int $foobar = 42;
+ internal function foobar(): void {}
+ abstract internal function abstractFoobar(): void;
+ internal int $foobar = 42;
 }
 
 //// B.php
@@ -31,19 +30,34 @@ class B extends A {
 }
 
 class C extends A {
-    // Not OK
+    // Not OK since since we are narrowing visibility and not in the same module
+    private function foobar(): void {}
+    // Not OK since since we are narrowing visibility and not in the same module
     protected function abstractFoobar(): void {}
 }
 
 //// D.php
 <?hh
-<<file:__EnableUnstableFeatures('modules'), __Module('D')>>
+
+module D;
 
 class D extends A {
-    // Not OK
-    <<__Internal>> public function foobar(): void {}
-    // Not OK
-    <<__Internal>> public function abstractFoobar(): void {}
-    // Not OK
-    <<__Internal>> public int $foobar = 13;
+    // Not OK since we are in a different module
+    internal function foobar(): void {}
+    // Not OK since we are in a different module
+    internal function abstractFoobar(): void {}
+    //Not OK since we are in a different module
+    internal int $foobar = 13;
+}
+
+//// E.php
+<?hh
+
+module A;
+
+class E extends A {
+    // Not OK since we are narrowing visibility even though we are in the same module
+    protected function foobar(): void {}
+    // OK since we are in the same module
+    internal function abstractFoobar(): void {}
 }

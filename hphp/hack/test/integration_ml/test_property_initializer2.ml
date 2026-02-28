@@ -30,7 +30,7 @@ class C extends A {}
 
 let errors =
   {|
-File "/C.php", line 3, characters 7-7:
+ERROR: File "/C.php", line 3, characters 7-7:
 Class `C` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
   File "/A.php", line 4, characters 12-13:
   `$this->x` is not initialized.
@@ -47,8 +47,8 @@ let test () =
         (c_file_name, c_contents);
       ]
   in
-  Test.assert_env_errors env errors;
+  Test.assert_env_diagnostics env errors;
 
   let (env, _) = Test.change_files env [(b_file_name, b_contents_after)] in
-  Test.assert_no_errors env;
+  Test.assert_no_diagnostics env;
   ()

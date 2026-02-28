@@ -9,13 +9,8 @@
  *
  */
 
-#include "cs_config.h"
-
 #include <stdlib.h>
-#include <string.h>
-#include <errno.h>
 
-#include "neo_misc.h"
 #include "neo_err.h"
 #include "ulist.h"
 
@@ -37,7 +32,7 @@ static NEOERR *check_resize (ULIST *ul, int size)
     new_items = (void **) realloc ((void *)(ul->items), new_size * sizeof(void *));
     if (new_items == NULL)
     {
-      return nerr_raise(NERR_NOMEM, 
+      return nerr_raise(NERR_NOMEM,
 	  "Unable to resize ULIST to %d: Out of memory", new_size);
     }
     ul->items = new_items;
@@ -98,7 +93,7 @@ NEOERR *uListGet (ULIST *ul, int x, void **data)
     x = ul->num + x;
 
   if (x >= ul->num)
-    return nerr_raise(NERR_OUTOFRANGE, "uListGet: past end (%d > %d)", 
+    return nerr_raise(NERR_OUTOFRANGE, "uListGet: past end (%d > %d)",
 	x, ul->num);
 
   if (x < 0)

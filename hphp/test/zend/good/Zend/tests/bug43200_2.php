@@ -1,15 +1,15 @@
 <?hh
 
 interface A {
-    function foo();
+    function foo():mixed;
 }
 
 abstract class B implements A {
-    abstract public function foo();
+    abstract public function foo():mixed;
 }
 
 class C extends B {
-    public function foo() {
+    public function foo() :mixed{
         echo 'works';
     }
 }

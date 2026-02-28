@@ -19,42 +19,41 @@
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/server/ext_server.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/server/replay-transport.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/server/warmup-request-handler.h"
-#include "hphp/runtime/server/xbox-server.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
-#include "hphp/util/alloc.h"
 #include "hphp/util/boot-stats.h"
-#include "hphp/util/light-process.h"
+#include "hphp/util/bump-mapper.h"
+#include "hphp/util/configs/adminserver.h"
+#include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
-#include "hphp/util/ssl-init.h"
-#include "hphp/util/stack-trace.h"
+#include "hphp/util/roar.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/sync-signal.h"
+#include "hphp/util/user-info.h"
 
 #include <folly/Conv.h>
+#include <folly/FileUtil.h>
 #include <folly/Format.h>
 #include <folly/portability/Unistd.h>
 
 #include <signal.h>
 #include <fstream>
 
-#ifdef __linux__
 void DisableFork() __attribute__((__weak__));
 void EnableForkLogging() __attribute__((__weak__));
 // GCC GCOV API
@@ -62,7 +61,6 @@ extern "C" void __gcov_flush() __attribute__((__weak__));
 // LLVM/clang API. See llvm-project/compiler-rt/lib/profile/InstrProfiling.h
 extern "C" void __llvm_profile_write_file() __attribute__((__weak__));
 extern "C" void __llvm_profile_set_filename(const char* filename) __attribute__((__weak__));
-#endif
 
 namespace HPHP {
 
@@ -82,7 +80,36 @@ folly::MicroSpinLock HttpServer::StatsLock;
 // signals upon which the server shuts down gracefully
 static const int kTermSignals[] = { SIGHUP, SIGINT, SIGTERM, SIGUSR1 };
 
-static void on_kill_server(int sig) {   // runs in signal handler thread.
+void log_signal(int sig, siginfo_t* info) {
+  if (!Cfg::Eval::LogHttpServerSignalSource) return;
+
+  auto const sname = strsignal(sig);
+  std::string pname = "<unknown>";
+  std::string uname = "<unknown>";
+
+  folly::readFile(
+    folly::to<std::string>("/proc/", info->si_pid, "/cmdline").data(),
+    pname
+  );
+
+  try {
+    UserInfo user{info->si_uid};
+    uname = user.pw->pw_name;
+  } catch (const Exception&) {
+  }
+
+  Logger::Error(
+    "Received signal `%s' from %s via `%s' (UID: %i, PID: %i)",
+    sname,
+    uname.data(),
+    pname.data(),
+    info->si_uid,
+    info->si_pid
+  );
+}
+
+// runs in signal handler thread.
+static void on_kill_server(int sig, siginfo_t* info) {
   static std::atomic_flag flag = ATOMIC_FLAG_INIT;
   if (flag.test_and_set()) return;      // it was already called once.
 
@@ -91,6 +118,10 @@ static void on_kill_server(int sig) {   // runs in signal handler thread.
     // server is already shutting down, and we don't want to use the default
     // handlers which may immediately terminate the process.
     ignore_sync_signals();
+
+    // Write information to the error log to make determining the sender of the
+    // signal easier.
+    log_signal(sig, info);
 
     int zero = 0;
     HttpServer::SignalReceived.compare_exchange_strong(zero, sig);
@@ -114,98 +145,110 @@ static void exit_on_timeout(int sig) {
 ///////////////////////////////////////////////////////////////////////////////
 
 HttpServer::HttpServer() {
-  LoadFactor = RuntimeOption::EvalInitialLoadFactor;
+  LoadFactor = Cfg::Eval::InitialLoadFactor;
 
   // enabling mutex profiling, but it's not turned on
   LockProfiler::s_pfunc_profile = server_stats_log_mutex;
 
-  int startingThreadCount = RuntimeOption::ServerThreadCount;
-  if (RuntimeOption::ServerWarmupThrottleRequestCount > 0) {
+  int startingThreadCount = Cfg::Server::ThreadCount;
+  if (Cfg::Server::WarmupThrottleRequestCount > 0) {
     startingThreadCount =
       std::min(startingThreadCount,
-               RuntimeOption::ServerWarmupThrottleThreadCount);
+               Cfg::Server::WarmupThrottleThreadCount);
   }
   auto serverFactory = ServerFactoryRegistry::getInstance()->getFactory
-      (RuntimeOption::ServerType);
-  const std::string address = RuntimeOption::ServerFileSocket.empty()
-    ? RuntimeOption::ServerIP : RuntimeOption::ServerFileSocket;
-  ServerOptions options(address, RuntimeOption::ServerPort,
-    RuntimeOption::ServerThreadCount, startingThreadCount,
-    RuntimeOption::ServerQueueCount, RuntimeOption::ServerLegacyBehavior);
-  options.m_useFileSocket = !RuntimeOption::ServerFileSocket.empty();
-  options.m_serverFD = RuntimeOption::ServerPortFd;
-  options.m_sslFD = RuntimeOption::SSLPortFd;
-  options.m_takeoverFilename = RuntimeOption::TakeoverFilename;
-  options.m_hugeThreads = RuntimeOption::ServerHugeThreadCount;
-  options.m_hugeStackKb = RuntimeOption::ServerHugeStackKb;
-  options.m_loop_sample_rate = RuntimeOption::ServerLoopSampleRate;
+      (Cfg::Server::Type);
+  const std::string address = Cfg::Server::FileSocket.empty()
+    ? Cfg::Server::IP : Cfg::Server::FileSocket;
+  ServerOptions options(address, Cfg::Server::Port,
+    Cfg::Server::ThreadCount, startingThreadCount,
+    Cfg::Server::QueueCount);
+  options.m_useFileSocket = !Cfg::Server::FileSocket.empty();
+  options.m_serverFD = Cfg::Server::PortFd;
+  options.m_sslFD = Cfg::Server::SSLPortFd;
+  options.m_hugeThreads = Cfg::Server::HugeThreadCount;
+  options.m_hugeStackKb = Cfg::Server::HugeStackSizeKb;
+  options.m_loop_sample_rate = Cfg::Server::LoopSampleRate;
   m_pageServer = serverFactory->createServer(options);
-  m_pageServer->addTakeoverListener(this);
   m_pageServer->addServerEventListener(this);
 
-  if (startingThreadCount != RuntimeOption::ServerThreadCount) {
+  if (startingThreadCount != Cfg::Server::ThreadCount) {
     auto handlerFactory = std::make_shared<WarmupRequestHandlerFactory>(
       m_pageServer.get(),
-      RuntimeOption::ServerWarmupThrottleRequestCount,
-      RuntimeOption::RequestTimeoutSeconds);
+      Cfg::Server::WarmupThrottleRequestCount,
+      Cfg::Server::RequestTimeoutSeconds);
     m_pageServer->setRequestHandlerFactory([handlerFactory] {
       return handlerFactory->createHandler();
     });
   } else {
     m_pageServer->setRequestHandlerFactory<HttpRequestHandler>(
-      RuntimeOption::RequestTimeoutSeconds);
+      Cfg::Server::RequestTimeoutSeconds);
   }
 
-  if (RuntimeOption::EnableSSL) {
-    assertx(SSLInit::IsInited());
-    m_pageServer->enableSSL(RuntimeOption::SSLPort);
+  if (Cfg::Server::EnableSSL) {
+    m_pageServer->enableSSL(Cfg::Server::SSLPort);
   }
 
-  if (RuntimeOption::EnableSSLWithPlainText) {
-    assertx(SSLInit::IsInited());
-    m_pageServer->enableSSLWithPlainText();
-  }
+  if (!Cfg::Server::SecondaryType.empty()) {
+    if (Cfg::Eval::AuthoritativeMode) {
+      startupFailure("Secondary server is not supported in RepoAuthoritative (production) mode");
+    } else {
+      auto secondaryServerFactory = ServerFactoryRegistry::getInstance()->getFactory
+        (Cfg::Server::SecondaryType);
+      ServerOptions secondaryServerOptions(Cfg::Server::IP, Cfg::Server::SecondaryPort,
+        Cfg::Server::ThreadCount, startingThreadCount,
+        Cfg::Server::QueueCount);
+      secondaryServerOptions.m_useFileSocket = false;
+      secondaryServerOptions.m_serverFD = Cfg::Server::PortFd;
+      secondaryServerOptions.m_sslFD = Cfg::Server::SSLPortFd;
+      secondaryServerOptions.m_hugeThreads = Cfg::Server::HugeThreadCount;
+      secondaryServerOptions.m_hugeStackKb = Cfg::Server::HugeStackSizeKb;
+      secondaryServerOptions.m_loop_sample_rate = Cfg::Server::LoopSampleRate;
+      m_secondaryPageServer = secondaryServerFactory->createServer(secondaryServerOptions);
+      m_secondaryPageServer->addServerEventListener(this);
 
-  ServerOptions admin_options(RuntimeOption::AdminServerIP,
-                              RuntimeOption::AdminServerPort,
-                              RuntimeOption::AdminThreadCount);
-  m_adminServer = serverFactory->createServer(admin_options);
-  m_adminServer->setRequestHandlerFactory<AdminRequestHandler>(
-    RuntimeOption::RequestTimeoutSeconds);
-  if (RuntimeOption::AdminServerEnableSSLWithPlainText) {
-    assertx(SSLInit::IsInited());
-    m_adminServer->enableSSLWithPlainText();
-  }
-
-  for (auto const& info : RuntimeOption::SatelliteServerInfos) {
-    auto satellite(SatelliteServer::Create(info));
-    if (satellite) {
-      m_satellites.push_back(std::move(satellite));
+      if (startingThreadCount != Cfg::Server::ThreadCount) {
+        auto secondaryHandlerFactory = std::make_shared<WarmupRequestHandlerFactory>(
+          m_secondaryPageServer.get(),
+          Cfg::Server::WarmupThrottleRequestCount,
+          Cfg::Server::RequestTimeoutSeconds);
+        m_secondaryPageServer->setRequestHandlerFactory([secondaryHandlerFactory] {
+          return secondaryHandlerFactory->createHandler();
+        });
+      } else {
+        m_secondaryPageServer->setRequestHandlerFactory<HttpRequestHandler>(
+          Cfg::Server::RequestTimeoutSeconds);
+      }
     }
   }
 
-  StaticContentCache::TheCache.load();
+  ServerOptions admin_options(Cfg::AdminServer::IP,
+                              Cfg::AdminServer::Port,
+                              Cfg::AdminServer::ThreadCount);
+  m_adminServer = serverFactory->createServer(admin_options);
+  m_adminServer->setRequestHandlerFactory<AdminRequestHandler>(
+    Cfg::Server::RequestTimeoutSeconds);
 
   m_counterCallback.init(
     [this](std::map<std::string, int64_t>& counters) {
       counters["ev_connections"] = m_pageServer->getLibEventConnectionCount();
-      counters["inflight_requests"] = m_pageServer->getActiveWorker();
-      auto queued_requests = m_pageServer->getQueuedJobs();
+      auto const uptime = HHVM_FN(server_uptime)();
+      counters["uptime"] = uptime;
+      counters["stopping_soon"] = HHVM_FN(server_is_prepared_to_stop)();
+
+      auto const dispatcherStats = m_pageServer->getDispatcherStats();
+      counters["inflight_requests"] = dispatcherStats.activeThreads;
+      counters["max_threads"] = dispatcherStats.maxThreads;
+      auto queued_requests = dispatcherStats.queuedJobCount;
       counters["queued_requests"] = queued_requests;
       counters["queued_requests_high"] =
-        queued_requests > RuntimeOption::ServerHighQueueingThreshold;
-
-
-      auto const sat_requests = getSatelliteRequestCount();
-      counters["satellite_inflight_requests"] = sat_requests.first;
-      counters["satellite_queued_requests"] = sat_requests.second;
-      auto const uptime = f_server_uptime();
-      counters["uptime"] = uptime;
+        queued_requests > Cfg::Server::HighQueueingThreshold;
 
       // Temporary counter that is available only during a short uptime window.
-      if (uptime > RO::EvalMemTrackStart && uptime < RO::EvalMemTrackEnd) {
+      if (uptime > Cfg::GC::MemTrackStart && uptime < Cfg::GC::MemTrackEnd) {
         counters["windowed_rss"] = ProcStatus::adjustedRssKb();
         counters["windowed_low_mem"] = alloc::getLowMapped();
+        counters["windowed_mid_mem"] = alloc::getMidMapped();
         counters["windowed_units"] = MemoryStats::Count(AllocKind::Unit);
         counters["windowed_classes"] = MemoryStats::Count(AllocKind::Class);
         counters["windowed_funcs"] = MemoryStats::Count(AllocKind::Func);
@@ -224,11 +267,10 @@ HttpServer::HttpServer() {
   );
 
   for (auto const sig : kTermSignals) {
-    sync_signal(sig, on_kill_server);
+    sync_signal_info(sig, on_kill_server);
   }
 }
 
-// Synchronously stop satellites
 void HttpServer::onServerShutdown() {
   // Avoid running this multiple times
   static std::atomic_flag flag = ATOMIC_FLAG_INIT;
@@ -237,44 +279,43 @@ void HttpServer::onServerShutdown() {
   SparseHeap::PrepareToStop();
 #ifdef USE_JEMALLOC
   shutdown_slab_managers();
+#if USE_JEMALLOC
+  if (HPHP::alloc::BumpEmergencyMapper::
+      s_emergencyFlag.load(std::memory_order_acquire)) {
+    // Server is shutting down when it almost exhausted low memory.
+    Logger::Error("emergency restart: terminating due to lowptr exhaustion!");
+    if (StructuredLog::enabled()) {
+      auto record = StructuredLogEntry{};
+      record.setInt("uptime", HHVM_FN(server_uptime)());
+      record.setInt("low_mapped", alloc::getLowMapped());
+      record.setInt("mid_mapped", alloc::getMidMapped());
+      StructuredLog::log("hhvm_emergency_restart", record);
+    }
+  }
+#endif
 #endif
   InitFiniNode::ServerFini();
 
   Eval::Debugger::Stop();
-  if (RuntimeOption::EnableDebuggerServer) {
+  if (Cfg::Debugger::EnableServer) {
     Logger::Info("debugger server stopped");
   }
 
-  // When a new instance of HPHP has taken over our page server socket,
-  // stop our admin server and satellites so it can acquire those
-  // ports.
-  if (RuntimeOption::AdminServerPort) {
+  // When a new instance of HPHP has taken over our page server socket, stop our
+  // admin server so it can acquire those ports.
+  if (Cfg::AdminServer::Port) {
     m_adminServer->stop();
-  }
-  for (unsigned int i = 0; i < m_satellites.size(); i++) {
-    std::string name = m_satellites[i]->getName();
-    m_satellites[i]->stop();
-    Logger::Info("satellite server %s stopped", name.c_str());
-  }
-  if (RuntimeOption::AdminServerPort) {
     m_adminServer->waitForEnd();
     Logger::Info("admin server stopped");
   }
 }
 
-void HttpServer::takeoverShutdown() {
-  // We want to synchronously shut down our satellite servers to free up ports,
-  // then asynchronously shut down everything else.
-  onServerShutdown();
-  stop();
-}
-
 void HttpServer::serverStopped(HPHP::Server* server) {
   Logger::Info("Page server stopped");
-  assertx(server == m_pageServer.get());
+  assertx(server == m_pageServer.get() || (m_secondaryPageServer && server == m_secondaryPageServer.get()));
   removePid();
 
-  auto sockFile = RuntimeOption::ServerFileSocket;
+  auto sockFile = Cfg::Server::FileSocket;
   if (!sockFile.empty()) {
     unlink(sockFile.c_str());
   }
@@ -308,54 +349,27 @@ HttpServer::~HttpServer() {
   stop();
 }
 
-static StaticString s_file{"file"}, s_line{"line"};
+void HttpServer::startupFailure(const std::string& msg) {
+  Logger::Error(msg);
+  Logger::Error("Shutting down due to failure(s) to bind in "
+                "HttpServer::runAndExitProcess");
+  // Logger flushes itself---we don't need to run any atexit handlers
+  // (historically we've mostly just SEGV'd while trying) ...
+  _Exit(HPHP_EXIT_FAILURE);
+}
+
+
+void HttpServer::runAdminServerOrExitProcess() {
+  if (Cfg::AdminServer::Port) {
+    if (!startServer(false)) {
+      startupFailure("Unable to start admin server");
+      not_reached();
+    }
+    Logger::Info("admin server started");
+  }
+}
 
 void HttpServer::runOrExitProcess() {
-  if (StaticContentCache::TheFileCache &&
-      StructuredLog::enabled() &&
-      StructuredLog::coinflip(RuntimeOption::EvalStaticContentsLogRate)) {
-    CacheManager::setLogger([](bool existsCheck, const std::string& name) {
-        auto record = StructuredLogEntry{};
-        record.setInt("existsCheck", existsCheck);
-        record.setStr("file", name);
-        bool needsCppStack = true;
-        if (!g_context.isNull()) {
-          VMRegAnchor _;
-          if (vmfp()) {
-            auto const bt =
-              createBacktrace(BacktraceArgs().withArgValues(false));
-            std::vector<std::string> frameStrings;
-            std::vector<folly::StringPiece> frames;
-            for (int i = 0; i < bt.size(); i++) {
-              auto f = tvCastToArrayLike(bt.lookup(i));
-              if (f.exists(s_file)) {
-                auto s = tvCastToString(f.lookup(s_file)).toCppString();
-                if (f.exists(s_line)) {
-                  s += folly::sformat(":{}", tvCastToInt64(f.lookup(s_line)));
-                }
-                frameStrings.emplace_back(std::move(s));
-                frames.push_back(frameStrings.back());
-              }
-            }
-            record.setVec("stack", frames);
-            needsCppStack = false;
-          }
-        }
-        if (needsCppStack) {
-          record.setStackTrace("stack", StackTrace{StackTrace::Force{}});
-        }
-        StructuredLog::log("hhvm_file_cache", record);
-      });
-  }
-  auto startupFailure = [] (const std::string& msg) {
-    Logger::Error(msg);
-    Logger::Error("Shutting down due to failure(s) to bind in "
-                  "HttpServer::runAndExitProcess");
-    // Logger flushes itself---we don't need to run any atexit handlers
-    // (historically we've mostly just SEGV'd while trying) ...
-    _Exit(1);
-  };
-
   if (!RuntimeOption::InstanceId.empty()) {
     std::string msg = "Starting instance " + RuntimeOption::InstanceId;
     if (!RuntimeOption::DeploymentId.empty()) {
@@ -368,7 +382,7 @@ void HttpServer::runOrExitProcess() {
 
   ServerStats::Clear();                 // Clear stats from warmup requests
 
-  if (RuntimeOption::ServerPort) {
+  if (Cfg::Server::Port) {
     if (!startServer(true)) {
       startupFailure("Unable to start page server");
       not_reached();
@@ -378,32 +392,17 @@ void HttpServer::runOrExitProcess() {
 
   StartTime = time(nullptr);
 
-  if (RuntimeOption::AdminServerPort) {
-    if (!startServer(false)) {
-      startupFailure("Unable to start admin server");
-      not_reached();
-    }
-    Logger::Info("admin server started");
-  }
-
-  for (unsigned int i = 0; i < m_satellites.size(); i++) {
-    std::string name = m_satellites[i]->getName();
-    try {
-      m_satellites[i]->start();
-      Logger::Info("satellite server %s started", name.c_str());
-    } catch (Exception& e) {
-      startupFailure(
-        folly::format("Unable to start satellite server {}: {}",
-                      name, e.getMessage()).str()
-      );
-      not_reached();
-    }
+  // If we haven't already, start the admin server.
+  // We can't start the admin server early when hotswap is enabled because
+  // it might result in killing ourself instead of the old server.
+  if (Cfg::Server::StopOld) {
+    runAdminServerOrExitProcess();
   }
 
   if (!Eval::Debugger::StartServer()) {
     startupFailure("Unable to start debugger server");
     not_reached();
-  } else if (RuntimeOption::EnableDebuggerServer) {
+  } else if (Cfg::Debugger::EnableServer) {
     Logger::Info("debugger server started");
   }
 
@@ -418,8 +417,7 @@ void HttpServer::runOrExitProcess() {
   {
     BootStats::mark("servers started");
     Logger::Info("all servers started");
-    if (!RuntimeOption::ServerForkEnabled) {
-#ifdef __linux__
+    if (!Cfg::Server::ForkingEnabled) {
       if (DisableFork) {
         // We should not fork from the server process.  Use light process
         // instead.  This will intercept subsequent fork() calls and make them
@@ -430,10 +428,6 @@ void HttpServer::runOrExitProcess() {
         // some tests, don't intercept fork().
         Logger::Warning("ignored runtime option Server.Forking.Enabled=false");
       }
-#else
-      Logger::Warning("ignored Server.Forking.Enabled=false "
-                      "as it only works on Linux");
-#endif
     } else {
 #if FOLLY_HAVE_PTHREAD_ATFORK
       pthread_atfork(nullptr, nullptr,
@@ -442,8 +436,7 @@ void HttpServer::runOrExitProcess() {
                      });
 #endif
     }
-    if (RuntimeOption::ServerForkLogging) {
-#ifdef __linux__
+    if (Cfg::Server::ForkingLogForkAttempts) {
       if (EnableForkLogging) {
         EnableForkLogging();
       } else {
@@ -451,33 +444,26 @@ void HttpServer::runOrExitProcess() {
         // some tests, don't intercept fork().
         Logger::Warning("ignored runtime option Server.Forking.Log=true");
       }
-#else
-      Logger::Warning("ignored Server.Forking.Log=true "
-                      "as it only works on Linux");
-#endif
     }
-    if (RuntimeOption::EvalServerOOMAdj < 0) {
+    if (Cfg::Eval::ServerOOMAdj < 0) {
       // Avoid HHVM getting killed when a forked process uses too much memory.
       // A positive adjustment makes it more likely for the server to be killed,
       // and that's not what we want.
-      Process::OOMScoreAdj(RuntimeOption::EvalServerOOMAdj);
+      Process::OOMScoreAdj(Cfg::Eval::ServerOOMAdj);
     }
     createPid();
     Lock lock(this);
-    BootStats::done();
-    // Play extended warmup requests after server starts running.
-    if (isJitSerializing() &&
-        RuntimeOption::ServerExtendedWarmupThreadCount > 0 &&
-        !RuntimeOption::ServerExtendedWarmupRequests.empty()) {
-      auto const threadCount = RuntimeOption::ServerExtendedWarmupThreadCount;
-      auto const delay = RuntimeOption::ServerExtendedWarmupDelaySeconds;
-      auto const nTimes = RuntimeOption::ServerExtendedWarmupRepeat;
-      InternalWarmupRequestPlayer{threadCount}.
-        runAfterDelay(RuntimeOption::ServerExtendedWarmupRequests,
-                      nTimes, delay);
+    BootStats::markFromStart("start_server");
+    if (!jit::mcgen::retranslateAllPending()) {
+      BootStats::done(Cfg::Server::LogBootStats);
+    } // else we log after retranslateAll finishes
+
+    // Play extended warmup requests after server starts running. This works on
+    // jumpstart seeders, and on sandboxes.
+    if (isJitSerializing() || !Cfg::Repo::Authoritative) {
+      replayExtendedWarmupRequests();
     }
-    // continously running until /stop is received on admin server, or
-    // takeover is requested.
+    // continously running until /stop is received on admin server
     while (!m_stopped) {
       wait();
     }
@@ -490,9 +476,13 @@ void HttpServer::runOrExitProcess() {
     }
   }
 
-  if (RuntimeOption::ServerPort) {
+  if (Cfg::Server::Port) {
     Logger::Info("stopping page server");
     m_pageServer->stop();
+  }
+  if (m_secondaryPageServer) {
+    Logger::Info("stopping secondary page server");
+    m_secondaryPageServer->stop();
   }
   onServerShutdown();
 
@@ -501,31 +491,37 @@ void HttpServer::runOrExitProcess() {
   waitForServers();
   // Log APC samples after all requests finish.
   apc_sample_by_size();
-  playShutdownRequest(RuntimeOption::ServerCleanupRequest);
+  // Log static string samples after all requests finish.
+  log_static_strings();
+  playShutdownRequest(Cfg::Server::CleanupRequest);
 }
 
 void HttpServer::waitForServers() {
-  if (RuntimeOption::ServerPort) {
+  if (Cfg::Server::Port) {
     m_pageServer->waitForEnd();
   }
-  if (RuntimeOption::AdminServerPort) {
+  if (Cfg::AdminServer::Port) {
     m_adminServer->waitForEnd();
+  }
+  if (m_secondaryPageServer) {
+    m_secondaryPageServer->waitForEnd();
   }
   // all other servers invoke waitForEnd on stop
 }
 
 void HttpServer::ProfileFlush() {
-  #ifdef __linux__
   if (__gcov_flush) {
     Logger::Info("Flushing profile");
     __gcov_flush();
   }
-  if (__llvm_profile_write_file) {
+  // If running with ROAR, this calls into the profiling runtime included with
+  // ROAR. ROAR expects to be in full control of the runtime, so this has to be
+  // disabled.
+  if (!use_roar && __llvm_profile_write_file) {
     Logger::Info("Flushing profile");
     __llvm_profile_write_file();
     __llvm_profile_set_filename("/dev/null");
   }
-  #endif
 }
 
 void HttpServer::stop(const char* stopReason) {
@@ -546,26 +542,23 @@ void HttpServer::stop(const char* stopReason) {
   Process::OOMScoreAdj(1000);
   MarkShutdownStat(ShutdownEvent::SHUTDOWN_INITIATED);
 
-  if (RuntimeOption::ServerKillOnTimeout) {
+  if (Cfg::Server::KillOnTimeout) {
     int totalWait =
-      RuntimeOption::ServerPreShutdownWait +
-      RuntimeOption::ServerShutdownListenWait +
-      RuntimeOption::ServerGracefulShutdownWait;
+      Cfg::Server::PreShutdownWait +
+      Cfg::Server::ShutdownListenWait +
+      Cfg::Server::GracefulShutdownWait;
 
     if (totalWait > 0) {
       // Use a killer thread to _Exit() after totalWait seconds.  If
       // the main thread returns before that, the killer thread will
       // exit.  So don't do join() on this thread.
       auto killer = std::thread([totalWait] {
-#ifdef __linux__
           sched_param param{};
           param.sched_priority = 5;
           pthread_setschedparam(pthread_self(), SCHED_RR, &param);
-          // It is OK if we fail to increase thread priority.
-#endif
           /* sleep override */
           std::this_thread::sleep_for(std::chrono::seconds{totalWait});
-          _Exit(1);
+          _Exit(HPHP_SHUTDOWN_TIMEOUT);
         });
       killer.detach();
     }
@@ -581,11 +574,11 @@ void HttpServer::stop(const char* stopReason) {
 void HttpServer::stopOnSignal(int sig) {
   int zero = 0;
   if (SignalReceived.compare_exchange_strong(zero, sig) &&
-      RuntimeOption::ServerKillOnTimeout) {
+      Cfg::Server::KillOnTimeout) {
     auto const totalWait =
-      RuntimeOption::ServerPreShutdownWait +
-      RuntimeOption::ServerShutdownListenWait +
-      RuntimeOption::ServerGracefulShutdownWait;
+      Cfg::Server::PreShutdownWait +
+      Cfg::Server::ShutdownListenWait +
+      Cfg::Server::GracefulShutdownWait;
     // In case HttpServer::stop() isn't invoked in the synchronous signal
     // handler.
     if (totalWait > 0) {
@@ -608,8 +601,8 @@ void HttpServer::EvictFileCache() {
   // explicitly advise files out.  But we can do it anyway when we
   // need more free memory, e.g., when a new instance of the server is
   // about to start.
-  advise_out(RuntimeOption::RepoPath);
-  advise_out(RuntimeOption::FileCache);
+  advise_out(Cfg::Repo::Path);
+  advise_out(Cfg::Server::FileCache);
 }
 
 void HttpServer::PrepareToStop() {
@@ -659,30 +652,31 @@ void HttpServer::killPid() {
 }
 
 static bool sendAdminCommand(const char* cmd) {
-  if (RuntimeOption::AdminServerPort <= 0) return false;
-  std::string host = RuntimeOption::AdminServerIP;
+  if (Cfg::AdminServer::Port <= 0) return false;
+  std::string host = Cfg::AdminServer::IP;
   if (host.empty()) host = "localhost";
-  auto passwords = RuntimeOption::AdminPasswords;
-  if (passwords.empty() && !RuntimeOption::AdminPassword.empty()) {
-    passwords.insert(RuntimeOption::AdminPassword);
+  auto passwords = Cfg::AdminServer::Passwords;
+  if (passwords.empty() && !Cfg::AdminServer::Password.empty()) {
+    passwords.insert(Cfg::AdminServer::Password);
   }
   auto passwordIter = passwords.begin();
   do {
     std::string url;
     if (passwordIter != passwords.end()) {
       url = folly::sformat("http://{}:{}/{}?auth={}", host,
-                           RuntimeOption::AdminServerPort,
+                           Cfg::AdminServer::Port,
                            cmd, *passwordIter);
       ++passwordIter;
     } else {
       url = folly::sformat("http://{}:{}/{}", host,
-                           RuntimeOption::AdminServerPort, cmd);
+                           Cfg::AdminServer::Port, cmd);
     }
     if (CURL* curl = curl_easy_init()) {
       curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
       curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
       curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
       curl_easy_setopt(curl, CURLOPT_TIMEOUT, 3);
+      curl_easy_setopt(curl, CURLOPT_USERAGENT, "hhvm-internal/1.0");
       auto code = curl_easy_perform(curl);
       curl_easy_cleanup(curl);
       if (code == CURLE_OK) {
@@ -695,7 +689,7 @@ static bool sendAdminCommand(const char* cmd) {
 }
 
 bool HttpServer::ReduceOldServerLoad() {
-  if (!RuntimeOption::StopOldServer) return false;
+  if (!Cfg::Server::StopOld) return false;
   if (OldServerStopTime > 0) return true;
   Logger::Info("trying to reduce load of the old HPHP server");
   return sendAdminCommand("prepare-to-stop");
@@ -724,7 +718,7 @@ static inline int64_t availableMemory(const MemInfo& mem, int64_t rss,
 bool HttpServer::CanContinue(const MemInfo& mem, int64_t rssMb,
                              int64_t rssNeeded, int cacheFreeFactor) {
   if (!mem.valid()) return false;
-  if (mem.freeMb < RuntimeOption::ServerCriticalFreeMb) return false;
+  if (mem.freeMb < Cfg::Server::CriticalFreeMb) return false;
   auto const availableMb = availableMemory(mem, rssMb, cacheFreeFactor);
   auto const result = (rssMb + availableMb >= rssNeeded);
   if (result) assertx(CanStep(mem, rssMb, rssNeeded, cacheFreeFactor));
@@ -734,7 +728,7 @@ bool HttpServer::CanContinue(const MemInfo& mem, int64_t rssMb,
 bool HttpServer::CanStep(const MemInfo& mem, int64_t rssMb,
                          int64_t rssNeeded, int cacheFreeFactor) {
   if (!mem.valid()) return false;
-  if (mem.freeMb < RuntimeOption::ServerCriticalFreeMb) return false;
+  if (mem.freeMb < Cfg::Server::CriticalFreeMb) return false;
   auto const availableMb = availableMemory(mem, rssMb, cacheFreeFactor);
   // Estimation of the memory needed till the next check point.  Since
   // the current check point is not the last one, we try to be more
@@ -746,15 +740,15 @@ bool HttpServer::CanStep(const MemInfo& mem, int64_t rssMb,
 }
 
 void HttpServer::CheckMemAndWait(bool final) {
-  if (!RuntimeOption::StopOldServer) return;
-  if (RuntimeOption::OldServerWait <= 0) return;
+  if (!Cfg::Server::StopOld) return;
+  if (Cfg::Server::StopOldWait <= 0) return;
 
-  auto const rssNeeded = RuntimeOption::ServerRSSNeededMb;
-  auto const factor = RuntimeOption::CacheFreeFactor;
+  auto const rssNeeded = Cfg::Server::RSSNeededMb;
+  auto const factor = Cfg::Server::CacheFreeFactor;
   do {
     // Don't wait too long
     if (OldServerStopTime > 0 &&
-        time(nullptr) - OldServerStopTime >= RuntimeOption::OldServerWait) {
+        time(nullptr) - OldServerStopTime >= Cfg::Server::StopOldWait) {
       return;
     }
 
@@ -784,7 +778,7 @@ void HttpServer::CheckMemAndWait(bool final) {
 }
 
 void HttpServer::MarkShutdownStat(ShutdownEvent event) {
-  if (!RuntimeOption::EvalLogServerRestartStats) return;
+  if (!Cfg::Eval::LogServerRestartStats) return;
   std::lock_guard<folly::MicroSpinLock> lock(StatsLock);
   MemInfo mem;
   Process::GetMemoryInfo(mem);
@@ -803,7 +797,7 @@ void HttpServer::MarkShutdownStat(ShutdownEvent event) {
 }
 
 void HttpServer::LogShutdownStats() {
-  if (!RuntimeOption::EvalLogServerRestartStats) return;
+  if (!Cfg::Eval::LogServerRestartStats) return;
   StructuredLogEntry entry;
   std::lock_guard<folly::MicroSpinLock> lock(StatsLock);
   if (ShutdownStats.empty()) return;
@@ -833,46 +827,27 @@ void HttpServer::LogShutdownStats() {
   ShutdownStats.clear();
 }
 
-void HttpServer::getSatelliteStats(
-    std::vector<std::pair<std::string, int>> *stats) {
-  for (const auto& i : m_satellites) {
-    std::pair<std::string, int> active("satellite." + i->getName() + ".load",
-                                       i->getActiveWorker());
-    std::pair<std::string, int> queued("satellite." + i->getName() + ".queued",
-                                       i->getQueuedJobs());
-    stats->push_back(active);
-    stats->push_back(queued);
-  }
-}
-
-std::pair<int, int> HttpServer::getSatelliteRequestCount() const {
-  int inflight = 0;
-  int queued = 0;
-  for (const auto& i : m_satellites) {
-    inflight += i->getActiveWorker();
-    queued += i->getQueuedJobs();
-  }
-  return std::make_pair(inflight, queued);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // page server
 
 bool HttpServer::startServer(bool pageServer) {
   int port = pageServer ?
-    RuntimeOption::ServerPort : RuntimeOption::AdminServerPort;
+    Cfg::Server::Port : Cfg::AdminServer::Port;
 
   // 1. try something nice
   for (unsigned int i = 0; i < 60; i++) {
     try {
       if (pageServer) {
         m_pageServer->start();
+        if (m_secondaryPageServer) {
+          m_secondaryPageServer->start();
+        }
       } else {
         m_adminServer->start();
       }
       return true;
     } catch (FailedToListenException& e) {
-      if (RuntimeOption::ServerExitOnBindFail) return false;
+      if (Cfg::Server::ExitOnBindFail) return false;
 
       StopOldServer();
 
@@ -881,19 +856,19 @@ bool HttpServer::startServer(bool pageServer) {
         return false;
       }
 
-      if (pageServer && !RuntimeOption::ServerFileSocket.empty()) {
+      if (pageServer && !Cfg::Server::FileSocket.empty()) {
         if (i == 0) {
           Logger::Info("Unlinking unused socket at %s",
-                       RuntimeOption::ServerFileSocket.c_str());
+                       Cfg::Server::FileSocket.c_str());
         }
         struct stat stat_buf;
-        if (stat(RuntimeOption::ServerFileSocket.c_str(), &stat_buf) == 0
+        if (stat(Cfg::Server::FileSocket.c_str(), &stat_buf) == 0
             && S_ISSOCK(stat_buf.st_mode)) {
           std::string cmd = "bash -c '! fuser ";
-          cmd += RuntimeOption::ServerFileSocket;
+          cmd += Cfg::Server::FileSocket;
           cmd += "'";
           if (FileUtil::ssystem(cmd.c_str()) == 0) {
-            unlink(RuntimeOption::ServerFileSocket.c_str());
+            unlink(Cfg::Server::FileSocket.c_str());
           }
         }
       }
@@ -902,16 +877,19 @@ bool HttpServer::startServer(bool pageServer) {
   }
 
   // 2. try something harsh
-  if (RuntimeOption::ServerHarshShutdown) {
+  if (Cfg::Server::HarshShutdown) {
     for (unsigned int i = 0; i < 5; i++) {
       try {
         if (pageServer) {
           m_pageServer->start();
+          if (m_secondaryPageServer) {
+            m_secondaryPageServer->start();
+          }
         } else {
           m_adminServer->start();
         }
         return true;
-      } catch (FailedToListenException& e) {
+      } catch (FailedToListenException& ) {
         if (i == 0) {
           Logger::Info("shutting down old HPHP server by pid file");
         }
@@ -922,26 +900,29 @@ bool HttpServer::startServer(bool pageServer) {
   }
 
   // 3. try something evil
-  if (RuntimeOption::ServerEvilShutdown) {
+  if (Cfg::Server::EvilShutdown) {
     for (unsigned int i = 0; i < 60; i++) {
       try {
         if (pageServer) {
           m_pageServer->start();
+          if (m_secondaryPageServer) {
+            m_secondaryPageServer->start();
+          }
         } else {
           m_adminServer->start();
         }
         return true;
-      } catch (FailedToListenException& e) {
-        if (pageServer && !RuntimeOption::ServerFileSocket.empty()) {
+      } catch (FailedToListenException& ) {
+        if (pageServer && !Cfg::Server::FileSocket.empty()) {
           if (i == 0) {
             Logger::Info("unlinking socket at %s",
-                         RuntimeOption::ServerFileSocket.c_str());
+                         Cfg::Server::FileSocket.c_str());
           }
 
           struct stat stat_buf;
-          if (stat(RuntimeOption::ServerFileSocket.c_str(), &stat_buf) == 0
+          if (stat(Cfg::Server::FileSocket.c_str(), &stat_buf) == 0
               && S_ISSOCK(stat_buf.st_mode)) {
-            unlink(RuntimeOption::ServerFileSocket.c_str());
+            unlink(Cfg::Server::FileSocket.c_str());
           }
         } else {
           if (i == 0) {

@@ -1,0 +1,35 @@
+Code actions available:
+------------------------------------------
+Replace with `->contains` (CodeActionKind: "quickfix") SELECTED
+Devmate Quick Fix - Array access on type `ConstSet<string>` returns the key (if present) or throws an exception. Consider using the `contains` method to check for membership instead. (CodeActionKind: "quickfix")
+Devmate Agent Fix - Array access on type `ConstSet<string>` returns the key (if present) or throws an exception. Consider using the `contains` method to check for membership instead. (CodeActionKind: "quickfix")
+Devmate Quick Fix - Typing error (CodeActionKind: "quickfix")
+Devmate Agent Fix - Typing error (CodeActionKind: "quickfix")
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"$set->contains($key)",
+          "range":{"end":{"character":17,"line":3},"start":{"character":7,"line":3}}
+        }
+      ]
+    }
+  },
+  "kind":"quickfix",
+  "title":"Replace with `->contains`"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+function test_set(ConstSet<string> $set, string $key): void {
+  $_ = $set->contains($key);
+  //       ^ at-caret
+}
+

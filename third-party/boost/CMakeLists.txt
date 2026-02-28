@@ -2,7 +2,9 @@
 option(FORCE_BUNDLED_BOOST "Always build boost, instead of using system version" OFF)
 set(
   BOOST_COMPONENTS
+  chrono
   context
+  date_time
   fiber
   filesystem
   iostreams
@@ -11,7 +13,7 @@ set(
   system
   thread
 )
-if(FORCE_BUNDLED_BOOST)
+if(FORCE_BUNDLED_BOOST OR CLANG_FORCE_LIBCPP)
   set(Boost_FOUND false)
 else()
   find_package(Boost 1.69.0 COMPONENTS ${BOOST_COMPONENTS})

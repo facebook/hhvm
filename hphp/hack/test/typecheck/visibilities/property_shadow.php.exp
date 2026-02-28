@@ -1,4 +1,4 @@
-File "property_shadow.php", line 6, characters 12-13:
+ERROR: File "property_shadow.php", line 6, characters 12-13:
 Typing error (Typing[4256])
   File "property_shadow.php", line 6, characters 16-16:
   This object access to `x` is ambiguous

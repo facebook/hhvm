@@ -1,37 +1,42 @@
 HHVM_DEFINE_EXTENSION(
   "facts"
   SOURCES
+    config.cpp
     exception.cpp
     ext_facts.cpp
     fact-extractor.cpp
+    facts-store.cpp
+    log-perf.cpp
     logging.cpp
     sqlite-autoload-db.cpp
     sqlite-key.cpp
+    static-watcher.cpp
     string-data-ptr.cpp
     symbol-map.cpp
     thread-factory.cpp
-    facts-store.cpp
     watchman-watcher.cpp
   HEADERS
     attribute-argument-map.h
     attribute-map.h
     autoload-db.h
+    config.h
     exception.h
-    ext_facts.h
     fact-extractor.h
+    facts-store.h
     file-facts.h
     inheritance-info.h
     lazy-two-way-map.h
+    log-perf.h
     logging.h
     path-and-hash.h
     path-symbols-map.h
     sqlite-autoload-db.h
     sqlite-key.h
+    static-watcher.h
     string-ptr.h
     symbol-map.h
     symbol-types.h
     thread-factory.h
-    facts-store.h
     watcher.h
     watchman-watcher.h
   SYSTEMLIB

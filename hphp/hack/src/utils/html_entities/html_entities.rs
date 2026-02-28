@@ -9,7 +9,8 @@ extern crate lazy_static;
 pub mod decoder;
 
 use ocaml_helper::int_of_string_opt;
-use regex::bytes::{Captures, Regex};
+use regex::bytes::Captures;
+use regex::bytes::Regex;
 
 fn utf32_to_utf8(k: i64, r: &mut [u8; 6]) -> &[u8] {
     if k < 0x80 {
@@ -91,8 +92,9 @@ pub fn decode<'a>(s: &'a [u8]) -> Vec<u8> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     fn test() {

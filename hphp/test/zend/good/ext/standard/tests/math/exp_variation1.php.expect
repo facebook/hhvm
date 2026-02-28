@@ -1,0 +1,17 @@
+*** Testing exp() : usage variations ***
+
+-- Iteration 1 --
+float(36315.502674247)
+
+-- Iteration 2 --
+float(2.7536449349747E-5)
+
+-- Iteration 3 --
+float(INF)
+
+-- Iteration 4 --
+float(1.0000000012346)
+
+-- Iteration 5 --
+float(1.6487212707001)
+===Done===

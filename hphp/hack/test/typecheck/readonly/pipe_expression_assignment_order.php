@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 class Demo {
   public string $s = '';
   public readonly string $t = '';

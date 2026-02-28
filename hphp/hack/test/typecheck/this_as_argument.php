@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // Using 'this' as an argument is kind of strange. In order for it to be safe
 // you need to invoke a static method on the instance.

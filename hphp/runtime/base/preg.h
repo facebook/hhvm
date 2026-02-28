@@ -45,7 +45,8 @@ enum {
   PHP_PCRE_RECURSION_LIMIT_ERROR,
   PHP_PCRE_BAD_UTF8_ERROR,
   PHP_PCRE_BAD_UTF8_OFFSET_ERROR,
-  PHP_PCRE_BAD_REGEX_ERROR
+  PHP_PCRE_BAD_REGEX_ERROR,
+  PHP_PCRE_JIT_STACKLIMIT_ERROR,
 };
 
 namespace HPHP {
@@ -95,7 +96,7 @@ struct PCREglobals {
   ~PCREglobals();
 
   // pcre ini_settings
-  int64_t preg_backtrace_limit;
+  int64_t preg_backtrack_limit;
   int64_t preg_recursion_limit;
   pcre_jit_stack* jit_stack;
 };
@@ -138,6 +139,8 @@ Variant preg_match_all(const String& pattern, const String& subject,
 Variant preg_match_all(StringData* pattern, const StringData* subject,
                        Variant* matches = nullptr,
                        int flags = 0, int offset = 0);
+
+Variant preg_get_error_message_if_invalid(const String& pattern);
 
 Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
                           const Variant& subject, int limit, int64_t* count,

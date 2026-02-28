@@ -1,7 +1,7 @@
 <?hh
 
 function ut_main()
-{
+:mixed{
     $res_str = '';
     $keywords_arr = ut_loc_get_keywords( 'de_DE@currency=EUR;collation=PHONEBOOK;sort=PHONEBOOK' );
     if ($keywords_arr) {

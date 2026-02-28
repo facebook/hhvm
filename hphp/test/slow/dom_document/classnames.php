@@ -1,13 +1,13 @@
 <?hh
 
-function filter_dom_element($dom_element) {
+function filter_dom_element($dom_element) :mixed{
   foreach ($dom_element->childNodes as $node) {
     var_dump(get_class($node));
   }
 }
 
 <<__EntryPoint>>
-function main_classnames() {
+function main_classnames() :mixed{
 $html = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>

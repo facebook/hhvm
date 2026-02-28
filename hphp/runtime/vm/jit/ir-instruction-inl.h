@@ -14,7 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef incl_HPHP_VM_JIT_INSTRUCTION_INL_H_
+#error "ir-instruction-inl.h should only be included by ir-instruction.h"
+#endif
+
 #include "hphp/runtime/vm/jit/edge.h"
+#include "hphp/util/assertions.h"
 
 #include <utility>
 
@@ -54,7 +59,10 @@ inline bool IRInstruction::naryDst() const {
 }
 
 inline bool IRInstruction::consumesReferences() const {
-  return opcodeHasFlags(op(), ConsumesRC);
+  for (auto flag : g_opInfo[(uint16_t)op()].srcFlags) 
+    if ((flag & IRSrcFlag::Consume) == IRSrcFlag::Consume) 
+      return true;
+  return false;
 }
 
 inline bool IRInstruction::mayRaiseError() const {
@@ -63,7 +71,6 @@ inline bool IRInstruction::mayRaiseError() const {
 
 inline bool IRInstruction::mayRaiseErrorWithSources() const {
   if (!mayRaiseError()) return false;
-  if (is(IterInit, IterInitK) && !src(0)->type().maybe(TObj)) return false;
   if (is(SameArrLike, NSameArrLike, EqArrLike, NeqArrLike)) {
     // Keyset comparisons never re-enter or throw
     return !(src(0)->type() <= TKeyset && src(1)->type() <= TKeyset);
@@ -95,9 +102,13 @@ inline bool IRInstruction::producesReference() const {
   return opcodeHasFlags(op(), ProducesRC);
 }
 
+inline bool IRInstruction::producesNewReference() const {
+  return opcodeHasFlags(op(), ProducesNewRC);
+}
+
 inline SSATmp* IRInstruction::getPassthroughValue() const {
   assertx(isPassthrough());
-  assertx(is(CheckType, AssertType, AssertNonNull,
+  assertx(is(CheckType, AssertType, CheckNonNull, AssertNonNull,
              Mov, ConvPtrToLval, StructDictTypeBoundCheck));
   return src(0);
 }
@@ -288,6 +299,12 @@ T* IRInstruction::extra() {
 
 inline const IRExtraData* IRInstruction::rawExtra() const {
   return m_extra;
+}
+
+inline void IRInstruction:: updateStackOffsetsExtra(int32_t delta) {
+  if (m_extra) {
+    jit::updateStackOffsetsExtra(m_op, m_extra, delta);
+  }
 }
 
 inline void IRInstruction::setExtra(IRExtraData* data) {

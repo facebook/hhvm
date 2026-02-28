@@ -20,7 +20,7 @@ namespace HPHP::Eval {
 
 //////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debuggerflow);
+TRACE_SET_MOD(debuggerflow)
 
 // See if the given name matches the function's name.
 static bool matchFunctionName(std::string name, const Func* f) {
@@ -123,6 +123,10 @@ void proxySetBreakPoints(DebuggerProxy* proxy) {
 DebuggerHook* HphpdHook::GetInstance() {
   static DebuggerHook* instance = new HphpdHook();
   return instance;
+}
+
+void HphpdHook::onRequestInit() {
+  RID().setVSDebugDisablesJit(Debugger::getDisableJit());
 }
 
 void HphpdHook::onFileLoad(Unit* unit) {

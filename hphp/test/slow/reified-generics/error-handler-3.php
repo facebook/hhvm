@@ -2,7 +2,7 @@
 
 class C<reify T>{}
 
-function f(C<int> $c) {}
+function f(C<int> $c) :mixed{}
 <<__EntryPoint>> function main(): void {
 set_error_handler(
   (int $errno,

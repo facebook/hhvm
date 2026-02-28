@@ -12,19 +12,19 @@ class Point
     }
 
     public function move($x, $y)
-    {
+:mixed    {
         $this->x = $x;
         $this->y = $y;
     }
 
     public function translate($x, $y)
-    {
+:mixed    {
         $this->x += $x;
         $this->y += $y;
     }
 
     public function __toString()
-    {
+:mixed    {
         return '(' . $this->x . ',' . $this->y . ')';
     }
 }

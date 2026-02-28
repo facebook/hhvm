@@ -1,0 +1,2 @@
+
+Fatal error: Pipe variables must occur only in the RHS of pipe expressions in %s/expr-tree-pipe-capture-error.php on line 5

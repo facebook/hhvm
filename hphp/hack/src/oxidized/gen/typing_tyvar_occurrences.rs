@@ -3,14 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5b8320b40faa4fb6d90f8cdb0f1ce0be>>
+// @generated SignedSource<<63fb2a8b37b5ca5f1954bf4aab496ca0>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized_regen.sh
+//   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
 
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -50,10 +50,10 @@ pub struct TypingTyvarOccurrences {
     /// There are only entries for variables that are unsolved or contain
     /// other unsolved type variables. Variables that are solved and contain
     /// no other unsolved type variables get removed from this map.
-    pub tyvar_occurrences: i_map::IMap<i_set::ISet>,
+    pub tyvar_occurrences: tvid::map::Map<tvid::set::Set>,
     /// Mapping of type variables to the type variables contained in their
     /// types which are either unsolved or themselves contain unsolved type
     /// variables.
     /// This is the dual of tyvar_occurrences.
-    pub tyvars_in_tyvar: i_map::IMap<i_set::ISet>,
+    pub tyvars_in_tyvar: tvid::map::Map<tvid::set::Set>,
 }

@@ -1,7 +1,7 @@
 <?hh
 
 class logger {
-  static $x = 0;
+  public static $x = 0;
   private $idx;
   function __construct() {
     $this->idx = self::$x++;
@@ -9,7 +9,7 @@ class logger {
   }
 }
 
-function create() {
+function create() :AsyncGenerator<mixed,mixed,void>{
   $x = 5;
   yield $x;
   $s = 'foo';
@@ -20,34 +20,34 @@ function create() {
   yield $foo;
 }
 
-function unusedarg($x, $y) {
+function unusedarg($x, $y) :AsyncGenerator<mixed,mixed,void>{
   $z = 5;
-  yield darray['x' => $x, 'z' => $z];
+  yield dict['x' => $x, 'z' => $z];
   $s = 'foo';
   yield 'almost there';
   $foo = 'inside foo';
-  yield darray['foo' => $foo, 's' => $s];
-  yield darray['x' => $x, 'y' => $y, 'foo' => $foo, 'z' => $z];
+  yield dict['foo' => $foo, 's' => $s];
+  yield dict['x' => $x, 'y' => $y, 'foo' => $foo, 'z' => $z];
 }
 
-function dumpgen($g) {
+function dumpgen($g) :mixed{
   foreach ($g as $v) {
     var_dump($v);
   }
 }
 
-function getargs(...$args) {
+function getargs(...$args) :AsyncGenerator<mixed,mixed,void>{
   yield 0xdeadbeef;
   yield $args;
   yield $args[3];
 }
 
-function genthrow() {
+function genthrow() :AsyncGenerator<mixed,mixed,void>{
   throw new Exception();
   yield 5;
 }
 
-function manylocals() {
+function manylocals() :AsyncGenerator<mixed,mixed,void>{
   $a = 1;
   $b = 2;
   $c = 3;
@@ -60,11 +60,12 @@ function manylocals() {
   $j = 10;
   $k = 11;
   $l = 12;
-  $a = yield darray['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
+  $a = yield dict['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
   $b = 0xdeadbeef;
-  $c = yield darray['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
-  $d = $e = 0xba53b411;
-  yield darray['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
+  $c = yield dict['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
+  $e = 0xba53b411;
+  $d = $e;
+  yield dict['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
 }
 
 <<__EntryPoint>> function main(): void {

@@ -1,0 +1,58 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#let export partial enum |e|}}
+type {{e.go_name}} int32
+
+const (
+{{#each e.values as |ev|}}
+    {{e.go_name}}_{{ev.name}} {{e.go_name}} = {{ev.value}}
+{{/each}}
+)
+
+// Enum value maps for {{e.go_name}}
+var (
+    {{e.go_name}}ToName = map[{{e.go_name}}]string {
+    {{#each e.values as |ev|}}
+        {{e.go_name}}_{{ev.name}}: "{{ev.name}}",
+    {{/each}}
+    }
+
+    {{e.go_name}}ToValue = map[string]{{e.go_name}} {
+    {{#each e.values as |ev|}}
+        "{{ev.name}}": {{e.go_name}}_{{ev.name}},
+    {{/each}}
+    }
+)
+
+func (x {{e.go_name}}) String() string {
+    if v, ok := {{e.go_name}}ToName[x]; ok {
+        return v
+    }
+    return "<UNSET>"
+}
+{{#if e.program.compat?}}
+
+// Deprecated: Use {{e.go_name}}ToValue instead (e.g. `x, ok := {{e.go_name}}ToValue["name"]`).
+func {{e.go_name}}FromString(s string) ({{e.go_name}}, error) {
+    if v, ok := {{e.go_name}}ToValue[s]; ok {
+        return v, nil
+    }
+    return {{e.go_name}}(0), fmt.Errorf("not a valid {{e.go_name}} string")
+}
+{{/if e.program.compat?}}
+{{/let partial}}

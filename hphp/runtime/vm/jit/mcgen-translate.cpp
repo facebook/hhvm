@@ -21,23 +21,18 @@
 
 #include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
-#include "hphp/runtime/vm/jit/irlower.h"
-#include "hphp/runtime/vm/jit/outlined-sequence-selector.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/tc-region.h"
-#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
-#include "hphp/runtime/vm/jit/translate-region.h"
 #include "hphp/runtime/vm/jit/vasm-block-counters.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
-#include "hphp/runtime/vm/jit/vtune-jit.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
-#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/property-profile.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-profile.h"
 
@@ -46,18 +41,22 @@
 #include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/base/vm-worker.h"
 #include "hphp/runtime/ext/server/ext_server.h"
-#include "hphp/runtime/server/http-server.h"
 
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
+#if USE_JEMALLOC
 #include "hphp/util/managed-arena.h"
-#include "hphp/util/numa.h"
+#endif
+#include "hphp/util/roar.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/zend/zend-strtod.h"
 
-TRACE_SET_MOD(mcg);
+#include <folly/system/ThreadName.h>
+
+TRACE_SET_MOD(mcg)
 
 namespace HPHP::jit::mcgen {
 
@@ -87,9 +86,9 @@ CompactVector<Trace::BumpRelease> bumpTraceFunctions(const Func* func) {
 
   auto opt = [&] {
     CompactVector<Trace::BumpRelease> result;
-    if (RuntimeOption::EvalJitPrintOptimizedIR) {
+    if (Cfg::Jit::PrintOptimizedIR) {
       result.emplace_back(Trace::printir,
-                          -RuntimeOption::EvalJitPrintOptimizedIR);
+                          -Cfg::Jit::PrintOptimizedIR);
     }
 
     return result;
@@ -102,7 +101,7 @@ CompactVector<Trace::BumpRelease> bumpTraceFunctions(const Func* func) {
     if (it == RuntimeOption::TraceFunctions.end()) return opt();
     folly::StringPiece name = *it;
     if (name.size() >= funcName.size() &&
-        bstrcaseeq(name.data(), funcName.data(), funcName.size())) {
+        fstrcmp_slice(funcName, name.subpiece(0, funcName.size())) == 0) {
       if (name.size() == funcName.size()) return def();
       if (name[funcName.size()] != ';') return opt();
       name.advance(funcName.size() + 1);
@@ -125,23 +124,21 @@ void optimize(tc::FuncMetaInfo& info) {
 
   tracing::Block _{"optimize", [&] { return traceProps(func); }};
 
-  // Regenerate the prologues and DV funclets before the actual function body.
-  auto const includedBody = regeneratePrologues(func, info);
+  // Regenerate the prologues before the actual function body.
+  regeneratePrologues(func, info);
 
   // Regionize func and translate all its regions.
   std::string transCFGAnnot;
-  auto const regions = includedBody ? std::vector<RegionDescPtr>{}
-                                    : regionizeFunc(func, transCFGAnnot);
+  auto const regions = regionizeFunc(func, transCFGAnnot);
   tracing::annotateBlock(
     [&] {
       return tracing::Props{}
-        .add("num_regions", regions.size())
-        .add("included_body", includedBody);
+        .add("num_regions", regions.size());
     }
   );
 
-  FTRACE(4, "Translating {} regions for {} (includedBody={})\n",
-         regions.size(), func->fullName(), includedBody);
+  FTRACE(4, "Translating {} regions for {}\n",
+         regions.size(), func->fullName());
 
   Optional<uint64_t> maxWeight;
   for (auto region : regions) {
@@ -173,7 +170,10 @@ void optimize(tc::FuncMetaInfo& info) {
     translator->optIndex = optIndex++;
     auto const spOff = region->entry()->initialSpOffset();
     translator->spOff = spOff;
-    tc::createSrcRec(regionSk, spOff);
+    if (tc::createSrcRec(regionSk, spOff) == nullptr) {
+      // ran out of TC space, stop trying to translate regions
+      break;
+    }
     translator->translate(info.tcBuf.view());
     if (translator->translateSuccess()) {
       info.add(std::move(translator));
@@ -213,13 +213,14 @@ struct TranslateWorker : JobQueueWorker<tc::FuncMetaInfo*, void*, true, true> {
     }
   }
 
-#if USE_JEMALLOC_EXTENT_HOOKS
   void onThreadEnter() override {
+    folly::setThreadName("jitworker");
+#if USE_JEMALLOC
     if (auto arena = next_extra_arena(s_numaNode)) {
       arena->bindCurrentThread();
     }
-  }
 #endif
+  }
 };
 
 using WorkerDispatcher = JobQueueDispatcher<TranslateWorker>;
@@ -230,8 +231,8 @@ WorkerDispatcher& dispatcher() {
   if (auto ptr = s_dispatcher.load(std::memory_order_acquire)) return *ptr;
 
   auto dispatcher = new WorkerDispatcher(
-    RuntimeOption::EvalJitWorkerThreads,
-    RuntimeOption::EvalJitWorkerThreads, 0, false, nullptr
+    Cfg::Jit::WorkerThreads,
+    Cfg::Jit::WorkerThreads, 0, false, nullptr
   );
   dispatcher->start();
   s_dispatcher.store(dispatcher, std::memory_order_release);
@@ -244,18 +245,18 @@ void enqueueRetranslateOptRequest(tc::FuncMetaInfo* info) {
 
 void createSrcRecs(const Func* func) {
   auto const profData = globalProfData();
+  auto const numParams = func->numNonVariadicParams();
 
-  auto create_one = [&] (Offset off) {
-    auto const sk = SrcKey { func, off, SrcKey::FuncEntryTag {} };
-    if (off == 0 ||
+  auto create_one = [&] (uint32_t numArgs) {
+    auto const sk = SrcKey { func, numArgs, SrcKey::FuncEntryTag {} };
+    if (numArgs == numParams ||
         profData->dvFuncletTransId(sk) != kInvalidTransID) {
       tc::createSrcRec(sk, SBInvOffset{0});
     }
   };
 
-  create_one(0);
-  for (auto const& pi : func->params()) {
-    if (pi.hasDefaultValue()) create_one(pi.funcletOff);
+  for (auto i = func->numRequiredParams(); i <= numParams; ++i) {
+    create_one(i);
   }
 }
 
@@ -273,14 +274,14 @@ void killProcess() {
  * mode. This function returns true if retranslate-all should be skipped.
  */
 bool serializeProfDataAndLog() {
-  auto const serverMode = RuntimeOption::ServerExecutionMode();
+  auto const serverMode = Cfg::Server::Mode;
   auto const mode = RuntimeOption::EvalJitSerdesMode;
   if (serverMode) {
     Logger::Info("retranslateAll: serializing profile data");
   }
   std::string errMsg;
   VMWorker([&errMsg] () {
-    errMsg = serializeProfData(RuntimeOption::EvalJitSerdesFile);
+    errMsg = serializeProfData(Cfg::Jit::SerdesFile);
   }).run();
 
   if (serverMode) {
@@ -291,7 +292,7 @@ bool serializeProfDataAndLog() {
     }
 
     if (mode == JitSerdesMode::Serialize) {
-      if (serializeOptProfEnabled() && RO::EvalJitSerializeOptProfRestart) {
+      if (serializeOptProfEnabled() && Cfg::Jit::SerializeOptProfRestart) {
         Logger::Info("retranslateAll: deferring retranslate-all until restart");
         return true;
       }
@@ -299,7 +300,7 @@ bool serializeProfDataAndLog() {
     }
 
     assertx(mode == JitSerdesMode::SerializeAndExit);
-    if (!serializeOptProfEnabled() || RO::EvalJitSerializeOptProfRestart) {
+    if (!serializeOptProfEnabled() || Cfg::Jit::SerializeOptProfRestart) {
       Logger::Info("retranslateAll: deferring retranslate-all until restart");
       killProcess();
       return true;
@@ -307,7 +308,30 @@ bool serializeProfDataAndLog() {
     return false;
   }
 
-  return serializeOptProfEnabled() && RO::EvalJitSerializeOptProfRestart;
+  return serializeOptProfEnabled() && Cfg::Jit::SerializeOptProfRestart;
+}
+
+void debugDumpProfDataAndLog() {
+  auto const serverMode = Cfg::Server::Mode;
+
+  if (Cfg::Jit::SerializeDebugLocation.empty()) return;
+
+  if (serverMode) {
+    Logger::Info("retranslateAll: serializing profile data for debugging");
+  }
+
+  std::string errMsg;
+  VMWorker([&errMsg] () {
+    errMsg = serializeProfData(Cfg::Jit::SerializeDebugLocation);
+  }).run();
+
+  if (serverMode) {
+    if (errMsg.empty()) {
+      Logger::Info("retranslateAll: serializing done");
+    } else {
+      Logger::FError("serializeProfData failed with: {}", errMsg);
+    }
+  }
 }
 
 /*
@@ -321,9 +345,9 @@ void scheduleSerializeOptProf() {
     return;
   }
 
-  auto const serverMode    = RuntimeOption::ServerExecutionMode();
-  auto const delayRequests = RuntimeOption::EvalJitSerializeOptProfRequests;
-  auto const delaySeconds  = RuntimeOption::EvalJitSerializeOptProfSeconds;
+  auto const serverMode    = Cfg::Server::Mode;
+  auto const delayRequests = Cfg::Jit::SerializeOptProfRequests;
+  auto const delaySeconds  = Cfg::Jit::SerializeOptProfSeconds;
 
   if (delayRequests > 0) {
     s_serializeOptProfRequest = requestCount() + delayRequests;
@@ -334,10 +358,10 @@ void scheduleSerializeOptProf() {
     }
   }
 
-  // f_server_uptime will return -1 if the http server is not yet
+  // server_uptime will return -1 if the http server is not yet
   // active. In that case, set the uptime to 0, so that we'll trigger
   // exactly delaySeconds after the server becomes active.
-  auto const uptime = std::max(0, static_cast<int>(f_server_uptime()));
+  auto const uptime = std::max(0, static_cast<int>(HHVM_FN(server_uptime)()));
   if (delaySeconds > 0) {
     s_serializeOptProfSeconds = uptime + delaySeconds;
     if (serverMode) {
@@ -348,12 +372,19 @@ void scheduleSerializeOptProf() {
   }
 }
 
-#ifdef __linux__
-  // GCC GCOV API
-  extern "C" void __gcov_reset() __attribute__((__weak__));
-  // LLVM/clang API. See llvm-project/compiler-rt/lib/profile/InstrProfiling.h
-  extern "C" void __llvm_profile_reset_counters() __attribute__((__weak__));
-#endif
+// GCC GCOV API
+extern "C" void __gcov_reset() __attribute__((__weak__));
+// LLVM/clang API. See llvm-project/compiler-rt/lib/profile/InstrProfiling.h
+extern "C" void __llvm_profile_reset_counters() __attribute__((__weak__));
+// ROAR API
+extern "C" int  __roar_api_pending_warmups()         __attribute__((__weak__));
+extern "C" void __roar_api_trigger_warmup()          __attribute__((__weak__));
+extern "C" bool __roar_api_pgo_enabled()             __attribute__((__weak__));
+extern "C" bool __roar_api_cspgo_enabled()           __attribute__((__weak__));
+extern "C" void __roar_api_wait_for_pgo_profile()    __attribute__((__weak__));
+extern "C" void __roar_api_wait_for_cspgo_profile()  __attribute__((__weak__));
+extern "C" int  __roar_api_finalize_jumpstart_serialization()
+                                             __attribute__((__weak__));
 
 /*
  * This is the main driver for the profile-guided retranslation of all the
@@ -364,42 +395,60 @@ void scheduleSerializeOptProf() {
  *   1) Get ordering of functions in the TC using hfsort on the call graph (or
  *   from a precomputed order when deserializing).
  *   2) Compute a bespoke coloring and finalize the layout hierarchy.
- *   3) Optionally serialize profile data when configured.
- *   4) Generate machine code for each of the profiled functions.
- *   5) Relocate the functions in the TC according to the selected order.
+ *   3) Finalize the list of "lazy APC classes".
+ *   4) Optionally serialize profile data when configured.
+ *   5) Generate machine code for each of the profiled functions.
+ *   6) Relocate the functions in the TC according to the selected order.
  */
 void retranslateAll(bool skipSerialize) {
-  const bool serverMode = RuntimeOption::ServerExecutionMode();
-  const bool serialize = RuntimeOption::RepoAuthoritative &&
-                         !RuntimeOption::EvalJitSerdesFile.empty() &&
+  const bool serverMode = Cfg::Server::Mode;
+  const bool serialize = Cfg::Repo::Authoritative &&
+                         !Cfg::Jit::SerdesFile.empty() &&
                          isJitSerializing();
   const bool serializeOpt = serialize && serializeOptProfEnabled();
 
   // 1) Obtain function ordering in code.hot.
 
   if (FuncOrder::get().empty()) {
+    BootStats::Block timer("RTA_compute_func_order", Cfg::Server::Mode, true);
     auto const avgProfCount = FuncOrder::compute();
     ProfData::Session pds;
     profData()->setBaseProfCount(avgProfCount);
   } else {
     assertx(isJitDeserializing());
   }
-  setBaseInliningProfCount(globalProfData()->baseProfCount());
+  setInliningMetadata(globalProfData()->baseProfCount(), FuncOrder::getTargetCounts());
   auto const& sortedFuncs = FuncOrder::get();
   auto const nFuncs = sortedFuncs.size();
 
   // 2) Perform bespoke coloring and finalize the layout hierarchy.
   //    Jumpstart consumers use the coloring computed by the seeder.
 
-  if (allowBespokeArrayLikes()) bespoke::selectBespokeLayouts();
+  if (allowBespokeArrayLikes()) {
+    BootStats::Block timer("RTA_select_bespoke_layouts", Cfg::Server::Mode, true);
+    bespoke::selectBespokeLayouts();
+  }
+  // 3) Stop adding new classes to the "lazy APC classes" list. After we
+  //    finalize this list, we can skip lazy deserialization checks for any
+  //    classes that are NOT on the list when JIT-ing access to them.
 
-  // 3) Check if we should dump profile data. We may exit here in
+  {
+    BootStats::Block timer("RTA_finalize_lazy_apc_classes", Cfg::Server::Mode,
+                           true);
+    Class::finalizeLazyAPCClasses();
+  }
+
+  // 4) Check if we should dump profile data. We may exit here in
   //    SerializeAndExit mode, without really doing the JIT, unless
   //    serialization of optimized code's profile is also enabled.
 
   if (serialize && !skipSerialize && serializeProfDataAndLog()) return;
+  if (!skipSerialize && !isJitSerializing() && !isJitDeserializing() &&
+      Cfg::Repo::Authoritative) {
+    debugDumpProfDataAndLog();
+  }
 
-  // 4) Generate machine code for all the profiled functions.
+  // 5) Generate machine code for all the profiled functions.
 
   auto const initialSize = 512;
   std::vector<tc::FuncMetaInfo> jobs;
@@ -409,7 +458,7 @@ void retranslateAll(bool skipSerialize) {
   {
     std::lock_guard<std::mutex> lock{s_dispatcherMutex};
     BootStats::Block timer("RTA_translate_and_relocate",
-                           RuntimeOption::ServerExecutionMode());
+                           Cfg::Server::Mode, true);
     auto const runParallelRetranslate = [&] {
       {
         Treadmill::Session session(Treadmill::SessionKind::Retranslate);
@@ -417,9 +466,9 @@ void retranslateAll(bool skipSerialize) {
         for (auto i = 0u; i < nFuncs; ++i, bufp += initialSize) {
           auto const fid = sortedFuncs[i];
           auto const func = const_cast<Func*>(Func::fromFuncId(fid));
-          if (!RuntimeOption::EvalJitSerdesDebugFunctions.empty()) {
+          if (!Cfg::Jit::SerdesDebugFunctions.empty()) {
             // Only run specified functions
-            if (!RuntimeOption::EvalJitSerdesDebugFunctions.
+            if (!Cfg::Jit::SerdesDebugFunctions.
                 count(func->fullName()->toCppString())) {
               continue;
             }
@@ -433,17 +482,10 @@ void retranslateAll(bool skipSerialize) {
           enqueueRetranslateOptRequest(&jobs.back());
         }
       }
-      if (RuntimeOption::EvalJitBuildOutliningHashes) {
-        auto const dispatcher = s_dispatcher.load(std::memory_order_acquire);
-        if (dispatcher) {
-          dispatcher->waitEmpty(false);
-        }
-        buildOptimizedHashes();
-      }
     };
     runParallelRetranslate();
 
-    if (RuntimeOption::EvalJitRerunRetranslateAll) {
+    if (Cfg::Jit::RerunRetranslateAll) {
       if (auto const dispatcher = s_dispatcher.load(std::memory_order_acquire)) {
         dispatcher->waitEmpty(false);
       }
@@ -456,12 +498,12 @@ void retranslateAll(bool skipSerialize) {
           profData()->unsetOptimized(fid);
         }
         profData()->clearAllOptimizedSKs();
-        clearCachedInliningCost();
+        clearCachedInliningMetadata();
       }
       runParallelRetranslate();
     }
 
-    // 5) Relocate the machine code into code.hot in the desired order
+    // 6) Relocate the machine code into code.hot in the desired order
     tc::relocatePublishSortedOptFuncs(std::move(jobs));
 
     if (auto const dispatcher = s_dispatcher.load(std::memory_order_acquire)) {
@@ -472,8 +514,15 @@ void retranslateAll(bool skipSerialize) {
   }
 
   if (serverMode) {
-    Logger::Info("retranslateAll: finished retranslating all optimized "
-                 "translations!");
+    auto const uptime = HHVM_FN(server_uptime)();
+    if (uptime > 0) {
+      BootStats::set("jit_profile_and_optimize", uptime);
+      BootStats::done(Cfg::Server::LogBootStats);
+      Logger::FInfo("retranslateAll finished {} seconds after server started",
+                    uptime);
+    } else {
+      Logger::Info("retranslateAll finished");
+    }
   }
 
   // This will enable live translations to happen again.
@@ -484,8 +533,9 @@ void retranslateAll(bool skipSerialize) {
     ProfData::Session pds;
     // The ReusableTC mode assumes that ProfData is never freed, so don't
     // discard ProfData in this mode.
-    if (!RuntimeOption::EvalEnableReusableTC) {
+    if (!Cfg::Eval::EnableReusableTC) {
       discardProfData();
+      PropertyProfile::clear();
     }
   }
 
@@ -493,22 +543,43 @@ void retranslateAll(bool skipSerialize) {
     scheduleSerializeOptProf();
   }
 
-#ifdef __linux__
   if (__gcov_reset) {
     if (serverMode) {
       Logger::Info("Calling __gcov_reset (retranslateAll finished)");
     }
     __gcov_reset();
   }
-  if (__llvm_profile_reset_counters) {
-    if (serverMode) {
-      Logger::Info("Calling __llvm_profile_reset_counters (retranslateAll "
-                   "finished)");
+  // If running with ROAR, we call __roar_api_trigger_warmup(), which will reset
+  // ROAR's profile counters and start collecting profile data for the specified
+  // collection period before optimizing the code.
+  // Note that, when ROAR does its own jumpstart, it'll have already produced
+  // optimized code at this point and, in this case, we don't want to trigger
+  // another warmup cycle.  This situation is detected by checking that
+  // __roar_api_pending_warmups() returns 0.
+  if (use_roar) {
+    always_assert(__roar_api_pending_warmups);
+    if (__roar_api_pending_warmups() != 0) {
+      if (serverMode) {
+        Logger::Info("Calling __roar_api_trigger_warmup (retranslateAll "
+                     "finished)");
+      }
+      always_assert(__roar_api_trigger_warmup);
+      __roar_api_trigger_warmup();
+    } else {
+      if (serverMode) {
+        Logger::Info("Skipping call to __roar_api_trigger_warmup due to no "
+                     "pending warmups");
+      }
     }
-    __llvm_profile_reset_counters();
+  } else {
+    if (__llvm_profile_reset_counters) {
+      if (serverMode) {
+        Logger::Info("Calling __llvm_profile_reset_counters (retranslateAll "
+                     "finished)");
+      }
+      __llvm_profile_reset_counters();
+    }
   }
-#endif
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -573,10 +644,101 @@ TranslationResult retranslate(TransArgs args, const RegionContext& ctx) {
   return translator.publish();
 }
 
+Optional<SBInvOffset> offsetAtLocation(SrcKey sk) {
+  auto const f = sk.func();
+  auto const end = sk.pc();
+  auto const start = f->entry();
+
+  std::vector<std::pair<PC, SBInvOffset>> toProcess;
+  hphp_fast_set<PC> seen;
+
+  for (auto& pi : f->params()) {
+    if (pi.funcletOff != kInvalidOffset) {
+      toProcess.emplace_back(start + pi.funcletOff, SBInvOffset{0});
+    }
+  }
+
+  for (auto& eh : f->ehtab()) {
+    toProcess.emplace_back(start + eh.m_handler, SBInvOffset{0});
+  }
+
+  // Process start first
+  toProcess.emplace_back(start, SBInvOffset{0});
+
+  while (!toProcess.empty()) {
+    auto [pc, off] = toProcess.back();
+    toProcess.pop_back();
+    if (!seen.emplace(pc).second) continue;
+
+    while (true) {
+      if (pc == end) return off;
+
+      off += instrNumPushes(pc);
+      off -= instrNumPops(pc);
+
+      auto const targets = instrJumpTargets(start, pc - start);
+      for (auto t : targets) toProcess.emplace_back(start + t, off);
+      if (!instrAllowsFallThru(peek_op(pc))) break;
+      pc += instrLen(pc);
+    }
+  }
+
+  return {};
+}
+
+std::string debug_translate_live(SrcKey sk,
+                                 const std::vector<std::string>& types) {
+  auto off = offsetAtLocation(sk);
+  if (!off) return "Unable to compute stack offset for start location";
+  if (!tc::createSrcRec(sk, *off)) return "Unable to create SrcRec";
+  RegionContext ctx{sk, *off};
+
+  for (auto& tloc : types) {
+    std::string locStr, typeStr;
+    if (!folly::split('|', tloc, locStr, typeStr)) {
+      return folly::to<std::string>("Cannot parse guard: ", tloc);
+    }
+
+    int32_t id;
+    Optional<Location> loc;
+    if (sscanf(locStr.data(), "loc(%i)", &id) == 1) {
+      loc = Location::Local{static_cast<uint32_t>(id)};
+    } else if (sscanf(locStr.data(), "stk(%i)", &id) == 1) {
+      loc = Location::Stack{BCSPRelOffset{id}.to<SBInvOffset>(*off)};
+    } else {
+      return folly::to<std::string>("Cannot parse guard location: ", locStr);
+    }
+
+    DataType dt;
+#define DT(t, ...) else if (typeStr == tname(DataType::t)) dt = DataType::t;
+    if (false) {}
+    DATATYPES
+    else {
+      return folly::to<std::string>("Cannot parse guard type: ", typeStr);
+    }
+#undef DT
+
+    ctx.liveTypes.emplace_back(*loc, Type{dt});
+  }
+
+  auto const res = mcgen::retranslate(TransArgs{sk}, ctx);
+  switch (res.scope()) {
+  case TranslationResult::Scope::Success: return "";
+  case TranslationResult::Scope::Transient:
+    return "Encountered transient retranslate failure";
+  case TranslationResult::Scope::Request:
+    return "Encountered request persistent retranslate failure";
+  case TranslationResult::Scope::Process:
+    return "Encountered process persistent retranslate failure";
+  }
+}
+
 bool retranslateOpt(FuncId funcId) {
   VMProtect _;
 
-  if (isDebuggerAttachedProcess()) return false;
+  if (Cfg::Jit::DisabledByVSDebug && isDebuggerAttachedProcess()) {
+    return false;
+  }
 
   auto const func = const_cast<Func*>(Func::fromFuncId(funcId));
   if (profData() == nullptr) return false;
@@ -599,29 +761,36 @@ bool retranslateOpt(FuncId funcId) {
   return true;
 }
 
+void optimizeFunc(Func* func) {
+  tc::FuncMetaInfo info(func, tc::LocalTCBuffer());
+  optimize(info);
+  tc::publishOptFunc(std::move(info));
+  tc::checkFreeProfData();
+}
+
 bool retranslateAllEnabled() {
   return
-    RuntimeOption::EvalJitPGO &&
-    RuntimeOption::EvalJitRetranslateAllRequest != 0 &&
-    RuntimeOption::EvalJitRetranslateAllSeconds != 0;
+    Cfg::Jit::PGO &&
+    Cfg::Jit::RetranslateAllRequest != 0 &&
+    Cfg::Jit::RetranslateAllSeconds != 0;
 }
 
 void checkRetranslateAll(bool force, bool skipSerialize) {
   assertx(IMPLIES(skipSerialize, force));
 
-  if (s_retranslateAllScheduled.load(std::memory_order_relaxed) ||
+  if (s_retranslateAllScheduled.load(std::memory_order_acquire) ||
       !retranslateAllEnabled()) {
     assertx(!force);
     return;
   }
 
-  auto const serverMode = RuntimeOption::ServerExecutionMode();
+  auto const serverMode = Cfg::Server::Mode;
   if (!force) {
-    auto const uptime = static_cast<int>(f_server_uptime()); // may be -1
-    if (uptime >= (int)RuntimeOption::EvalJitRetranslateAllSeconds) {
+    auto const uptime = static_cast<int>(HHVM_FN(server_uptime)()); // may be -1
+    if (uptime >= (int)Cfg::Jit::RetranslateAllSeconds) {
       assertx(serverMode);
       Logger::FInfo("retranslateAll: scheduled after {} seconds", uptime);
-    } else if (requestCount() >= RuntimeOption::EvalJitRetranslateAllRequest) {
+    } else if (requestCount() >= Cfg::Jit::RetranslateAllRequest) {
       if (serverMode) {
         Logger::FInfo("retranslateAll: scheduled after {} requests",
                       requestCount());
@@ -647,6 +816,7 @@ void checkRetranslateAll(bool force, bool skipSerialize) {
     Treadmill::enqueue([] {
       std::unique_lock<std::mutex> lock{s_rtaThreadMutex};
       s_retranslateAllThread = std::thread([] {
+        folly::setThreadName("jit.rta");
         rds::local::init();
         zend_get_bigint_data();
         SCOPE_EXIT { rds::local::fini(); };
@@ -656,8 +826,9 @@ void checkRetranslateAll(bool force, bool skipSerialize) {
   } else {
     std::unique_lock<std::mutex> lock{s_rtaThreadMutex};
     s_retranslateAllThread = std::thread([skipSerialize] {
+      folly::setThreadName("jit.rta");
       BootStats::Block timer("retranslateall",
-                             RuntimeOption::ServerExecutionMode());
+                             Cfg::Server::Mode, true);
       rds::local::init();
       zend_get_bigint_data();
       SCOPE_EXIT { rds::local::fini(); };
@@ -687,10 +858,10 @@ bool retranslateAllComplete() {
 }
 
 int getActiveWorker() {
-  if (s_retranslateAllComplete.load(std::memory_order_relaxed)) {
+  if (s_retranslateAllComplete.load(std::memory_order_acquire)) {
     return 0;
   }
-  if (auto disp = s_dispatcher.load(std::memory_order_relaxed)) {
+  if (auto disp = s_dispatcher.load(std::memory_order_acquire)) {
     return disp->getActiveWorker();
   }
   return 0;
@@ -707,20 +878,20 @@ CompactVector<Trace::BumpRelease> unbumpFunctions() {
 }
 
 void checkSerializeOptProf() {
-  if (!s_serializeOptProfScheduled.load(std::memory_order_relaxed) ||
-      s_serializeOptProfTriggered.load(std::memory_order_relaxed)) {
+  if (!s_serializeOptProfScheduled.load(std::memory_order_acquire) ||
+      s_serializeOptProfTriggered.load(std::memory_order_acquire)) {
     return;
   }
 
-  assertx(RuntimeOption::RepoAuthoritative &&
-          !RuntimeOption::EvalJitSerdesFile.empty() &&
+  assertx(Cfg::Repo::Authoritative &&
+          !Cfg::Jit::SerdesFile.empty() &&
           isJitSerializing());
 
-  auto const uptime = f_server_uptime(); // may be -1
+  auto const uptime = HHVM_FN(server_uptime)(); // may be -1
   auto const triggerSeconds =
-    s_serializeOptProfSeconds.load(std::memory_order_relaxed);
+    s_serializeOptProfSeconds.load(std::memory_order_acquire);
   auto const triggerRequest =
-    s_serializeOptProfRequest.load(std::memory_order_relaxed);
+    s_serializeOptProfRequest.load(std::memory_order_acquire);
   const bool trigger =
     ((triggerSeconds > 0 && uptime >= 0 && uptime >= triggerSeconds) ||
      (triggerRequest > 0 && requestCount() >= triggerRequest));
@@ -736,13 +907,13 @@ void checkSerializeOptProf() {
   s_serializeOptProfThread = std::thread([] {
     rds::local::init();
     SCOPE_EXIT { rds::local::fini(); };
-    auto const serverMode = RuntimeOption::ServerExecutionMode();
+    auto const serverMode = Cfg::Server::Mode;
     if (serverMode) {
       Logger::FInfo("retranslateAll: serialization of optimized code's "
                     "profile triggered");
     }
 
-    auto const errMsg = serializeOptProfData(RuntimeOption::EvalJitSerdesFile);
+    auto const errMsg = serializeOptProfData(Cfg::Jit::SerdesFile);
 
     if (serverMode) {
       if (errMsg.empty()) {
@@ -751,6 +922,19 @@ void checkSerializeOptProf() {
         Logger::FInfo("retranslateAll: serializeOptProfData failed: {}",
                       errMsg);
       }
+    }
+
+    // When running under ROAR, we trigger ROAR's PGO/CSPGO after
+    // retranslate-all, and we want to wait for ROAR to finish generating its
+    // PGO/CSPGO profile so that it can serialize that code to the jumpstart
+    // file on disk.
+    if (use_roar) {
+      if (__roar_api_cspgo_enabled()) {
+        __roar_api_wait_for_cspgo_profile();
+      } else if (__roar_api_pgo_enabled()) {
+        __roar_api_wait_for_pgo_profile();
+      }
+      __roar_api_finalize_jumpstart_serialization();
     }
 
     if (!transdb::enabled()) {

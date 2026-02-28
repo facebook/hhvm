@@ -1,7 +1,7 @@
 <?hh
 class ext_heap extends SplMaxHeap {
   public $fail = false;
-  public function compare($val1,$val2) {
+  public function compare($val1,$val2) :mixed{
     if ($this->fail)
       throw new Exception('Corrupting heap',99);
     return 0;
@@ -9,9 +9,9 @@ class ext_heap extends SplMaxHeap {
 }
 <<__EntryPoint>> function main(): void {
 $h = new ext_heap();
-$h->insert(varray['foobar']);
-$h->insert(varray['foobar1']);
-$h->insert(varray['foobar2']);
+$h->insert(vec['foobar']);
+$h->insert(vec['foobar1']);
+$h->insert(vec['foobar2']);
 
 try {
   $h->fail=true;

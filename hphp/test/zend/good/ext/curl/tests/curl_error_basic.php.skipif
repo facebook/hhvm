@@ -1,8 +1,8 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-if (!extension_loaded("curl")) die("skip\n");
+if (!extension_loaded("curl")) exit("skip\n");
 
 $url = "fakeURL";
 $ip = gethostbyname($url);
-if ($ip != $url) die("skip 'fakeURL' resolves to $ip\n");
+if ($ip != $url) exit("skip 'fakeURL' resolves to $ip\n");
 }

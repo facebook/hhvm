@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/vm/func-id.h"
 #include "hphp/util/type-scan.h"
 #include <vector>
 #include <cstdint>
@@ -25,6 +26,7 @@ namespace HPHP {
 
 struct Class;
 struct HeapObject;
+struct StringData;
 
 // Graph representation of the heap. The heap consists of some objects
 // (Nodes), and directed pointers (Ptrs) from Node to Node. For each
@@ -49,13 +51,51 @@ struct HeapGraph {
     Weak, // a weak pointer to a possibly dead object
   };
   static constexpr auto NumPtrKinds = 3;
+
+  // Distinguishes between heap object nodes and different types of root nodes
+  enum class RootKind : uint8_t {
+    NotRoot,    // This is a heap object node, use 'h' pointer
+    MemoCache,  // Root from memo cache, use 'funcId'
+    SPropCache, // Root from static property cache, use 'sPropName'
+    Other,      // Other root types with no special metadata
+  };
+
   struct Node {
-    const HeapObject* h; // nullptr for roots
+    union {
+      const HeapObject* h;        // non-null for non-roots (RootKind::NotRoot)
+      FuncId funcId;              // for memo cache roots (RootKind::MemoCache)
+      const StringData* sPropName; // for sprop cache roots (RootKind::SPropCache)
+    };
     size_t size;
-    bool is_root;
+    RootKind rootKind;
     type_scan::Index tyindex;
     int first_out;
     int first_in; // first out-ptr and in-ptr, respectively
+
+    // Constructor for heap object nodes (non-roots)
+    Node(const HeapObject* heap_obj, size_t sz, type_scan::Index ty)
+        : h(heap_obj), size(sz), rootKind(RootKind::NotRoot), tyindex(ty),
+          first_out(-1), first_in(-1) {}
+
+    // Constructor for memo cache root nodes
+    struct MemoTag {};
+    Node(MemoTag, FuncId func_id, size_t sz, type_scan::Index ty)
+        : funcId(func_id), size(sz), rootKind(RootKind::MemoCache), tyindex(ty),
+          first_out(-1), first_in(-1) {}
+
+    // Constructor for static property cache root nodes
+    struct SPropTag {};
+    Node(SPropTag, const StringData* name, size_t sz, type_scan::Index ty)
+        : sPropName(name), size(sz), rootKind(RootKind::SPropCache),
+          tyindex(ty), first_out(-1), first_in(-1) {}
+
+    // Constructor for other root nodes (no special metadata)
+    struct OtherRootTag {};
+    Node(OtherRootTag, size_t sz, type_scan::Index ty)
+        : h(nullptr), size(sz), rootKind(RootKind::Other), tyindex(ty),
+          first_out(-1), first_in(-1) {}
+
+    bool is_root() const { return rootKind != RootKind::NotRoot; }
   };
   struct Ptr {
     int from, to; // node ids. if root, from == -1
@@ -122,4 +162,3 @@ std::vector<int> makeParentTree(const HeapGraph&);
 bool checkPointers(const HeapGraph& g, const char* phase);
 
 }
-

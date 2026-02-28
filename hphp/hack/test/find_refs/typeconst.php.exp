@@ -1,4 +1,4 @@
 C::BAR
-File "typeconst.php", line 15, characters 18-20:
-File "typeconst.php", line 15, characters 35-37:
+File "typeconst.php", line 15, characters 18-20: D::BAR
+File "typeconst.php", line 15, characters 35-37: D::BAR
 2 total results

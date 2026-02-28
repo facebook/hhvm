@@ -1,9 +1,9 @@
 <?hh
 
-function foo(int $bar, AnyArray $baz) {
+function foo(int $bar, AnyArray $baz) :mixed{
 }
 <<__EntryPoint>>
-function main_php_forcehh() {
+function main_php_forcehh() :mixed{
 ;
 
 $rp = new ReflectionParameter('foo', 'bar');

@@ -1,2 +1,2 @@
-File "ctx_const_constraints.php", line 6, characters 3-26:
+ERROR: File "ctx_const_constraints.php", line 6, characters 3-26:
 Constraints on a context constant requires it to be abstract (Parsing[1002])

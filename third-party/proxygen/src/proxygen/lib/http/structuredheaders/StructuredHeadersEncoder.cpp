@@ -1,0 +1,241 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+#include <folly/base64.h>
+#include <glog/logging.h>
+#include <proxygen/lib/http/structuredheaders/StructuredHeadersEncoder.h>
+#include <proxygen/lib/http/structuredheaders/StructuredHeadersUtilities.h>
+
+namespace proxygen {
+
+using namespace StructuredHeaders;
+
+EncodeError StructuredHeadersEncoder::encodeList(
+    const std::vector<StructuredHeaderItem>& input) {
+
+  if (input.empty()) {
+    return handleEncodeError(EncodeError::EMPTY_DATA_STRUCTURE);
+  }
+
+  for (auto it = input.begin(); it != input.end(); it++) {
+    auto err = encodeItem(*it);
+    if (err != EncodeError::OK) {
+      return err;
+    }
+
+    if (std::next(it, 1) != input.end()) {
+      outputStream_ << ", ";
+    }
+  }
+
+  return EncodeError::OK;
+}
+
+EncodeError StructuredHeadersEncoder::encodeDictionary(
+    const Dictionary& input) {
+
+  if (input.empty()) {
+    return handleEncodeError(EncodeError::EMPTY_DATA_STRUCTURE);
+  }
+
+  for (auto it = input.begin(); it != input.end(); it++) {
+    auto err = encodeIdentifier(it->first);
+    if (err != EncodeError::OK) {
+      return err;
+    }
+
+    if (!itemTypeMatchesContent(it->second)) {
+      return handleEncodeError(EncodeError::ITEM_TYPE_MISMATCH);
+    }
+    if (!skipBoolean(it->second)) {
+      outputStream_ << "=";
+      err = encodeItem(it->second);
+      if (err != EncodeError::OK) {
+        return err;
+      }
+    }
+
+    if (std::next(it, 1) != input.end()) {
+      outputStream_ << ", ";
+    }
+  }
+
+  return EncodeError::OK;
+}
+
+EncodeError StructuredHeadersEncoder::encodeParameterisedList(
+    const ParameterisedList& input) {
+
+  if (input.empty()) {
+    return handleEncodeError(EncodeError::EMPTY_DATA_STRUCTURE);
+  }
+
+  for (auto it1 = input.begin(); it1 != input.end(); it1++) {
+    auto err = encodeIdentifier(it1->identifier);
+    if (err != EncodeError::OK) {
+      return err;
+    }
+
+    for (auto it2 = it1->parameterMap.begin(); it2 != it1->parameterMap.end();
+         it2++) {
+
+      outputStream_ << "; ";
+
+      err = encodeIdentifier(it2->first);
+      if (err != EncodeError::OK) {
+        return err;
+      }
+
+      if (it2->second.tag != StructuredHeaderItem::Type::NONE) {
+        if (!itemTypeMatchesContent(it2->second)) {
+          return handleEncodeError(EncodeError::ITEM_TYPE_MISMATCH);
+        }
+        if (!skipBoolean(it2->second)) {
+          outputStream_ << "=";
+          err = encodeItem(it2->second);
+        }
+
+        if (err != EncodeError::OK) {
+          return err;
+        }
+      }
+    }
+
+    if (std::next(it1, 1) != input.end()) {
+      outputStream_ << ", ";
+    }
+  }
+
+  return EncodeError::OK;
+}
+
+StructuredHeadersEncoder::StructuredHeadersEncoder() {
+  outputStream_.precision(kMaxValidFloatLength - 1);
+}
+
+EncodeError StructuredHeadersEncoder::encodeItem(
+    const StructuredHeaderItem& input) {
+
+  if (!itemTypeMatchesContent(input)) {
+    return handleEncodeError(EncodeError::ITEM_TYPE_MISMATCH);
+  }
+
+  switch (input.tag) {
+    case StructuredHeaderItem::Type::STRING:
+      return encodeString(std::get<std::string>(input.value));
+    case StructuredHeaderItem::Type::INT64:
+      return encodeInteger(std::get<int64_t>(input.value));
+    case StructuredHeaderItem::Type::BOOLEAN:
+      return encodeBoolean(std::get<bool>(input.value));
+    case StructuredHeaderItem::Type::DOUBLE:
+      return encodeFloat(std::get<double>(input.value));
+    case StructuredHeaderItem::Type::BINARYCONTENT:
+      return encodeBinaryContent(std::get<std::string>(input.value));
+    default:
+      return handleEncodeError(EncodeError::ENCODING_NULL_ITEM);
+  }
+}
+
+EncodeError StructuredHeadersEncoder::encodeBinaryContent(
+    const std::string& input) {
+
+  outputStream_ << "*";
+  outputStream_ << folly::base64Encode(input);
+  outputStream_ << "*";
+
+  return EncodeError::OK;
+}
+
+EncodeError StructuredHeadersEncoder::encodeString(const std::string& input) {
+
+  if (!isValidString(input)) {
+    return handleEncodeError(EncodeError::BAD_STRING, input);
+  }
+
+  outputStream_ << "\"";
+
+  size_t l = 0;
+  size_t r = 0;
+  for (char c : input) {
+    if (c == '"' || c == '\\') {
+      if (r > l) {
+        outputStream_ << input.substr(l, r - l) << "\\" << c;
+      } else {
+        outputStream_ << "\\" << c;
+      }
+      ++r;
+      l = r;
+    } else {
+      ++r;
+    }
+  }
+  if (l < r) {
+    outputStream_ << input.substr(l, r - l + 1);
+  }
+
+  outputStream_ << "\"";
+
+  return EncodeError::OK;
+}
+
+EncodeError StructuredHeadersEncoder::encodeInteger(int64_t input) {
+
+  outputStream_ << input;
+
+  return EncodeError::OK;
+}
+
+bool StructuredHeadersEncoder::skipBoolean(const StructuredHeaderItem& input) {
+  return input.tag == StructuredHeaderItem::Type::BOOLEAN &&
+         std::get<bool>(input.value);
+}
+
+EncodeError StructuredHeadersEncoder::encodeBoolean(bool input) {
+
+  outputStream_ << '?' << (input ? '1' : '0');
+
+  return EncodeError::OK;
+}
+
+EncodeError StructuredHeadersEncoder::encodeFloat(double input) {
+
+  outputStream_ << input;
+
+  return EncodeError::OK;
+}
+
+EncodeError StructuredHeadersEncoder::encodeIdentifier(
+    const std::string& input) {
+
+  if (!isValidIdentifier(input)) {
+    return handleEncodeError(EncodeError::BAD_IDENTIFIER, input);
+  }
+  outputStream_ << input;
+  return EncodeError::OK;
+}
+
+// Used to print an error when a string type (eg: a string or binary content)
+// was involved in the error
+EncodeError StructuredHeadersEncoder::handleEncodeError(
+    EncodeError err, const std::string& culprit) {
+  LOG_EVERY_N(ERROR, 1000) << "Error message: " << encodeErrToString(err)
+                           << ", culprit: " << culprit;
+  return err;
+}
+
+// Used to print more general error messages (eg: empty data structure)
+EncodeError StructuredHeadersEncoder::handleEncodeError(EncodeError err) {
+  LOG_EVERY_N(ERROR, 1000) << "Error message: " << encodeErrToString(err);
+  return err;
+}
+
+std::string StructuredHeadersEncoder::get() {
+  return outputStream_.str();
+}
+
+} // namespace proxygen

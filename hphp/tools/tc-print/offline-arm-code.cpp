@@ -14,17 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include <vector>
+#if defined(__aarch64__)
+
 #include <iomanip>
 
+#include "hphp/tools/tc-print/offline-code.h"
+#include "hphp/tools/tc-print/tc-print.h"
 
+#include "hphp/vixl/a64/disasm-a64.h"
+#include "hphp/vixl/a64/instructions-a64.h"
 
 #define MAX_INSTR_ASM_LEN 128
 
-
 namespace HPHP { namespace jit {
-
-#if defined(__aarch64__)
 
 using namespace vixl;
 
@@ -119,6 +121,29 @@ TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
   for (frontier = code, ip = codeStartAddr; frontier < code + codeLen; ) {
     dec.Decode(frontier);
 
+    std::string literalStr;
+    if (frontier->IsLoadLiteral()) {
+      auto const literalWidth = frontier->Mask(LoadLiteralMask);
+      size_t literalSize = sizeof(uint32_t);
+      if (literalWidth == LDR_x_lit || literalWidth == LDR_d_lit) {
+        literalSize = sizeof(uint64_t);
+      }
+
+      auto const literalAddr = frontier->LiteralAddress();
+      auto const codeBegin = reinterpret_cast<uint8_t*>(code);
+      auto const codeEnd = codeBegin + codeLen;
+      if (literalAddr >= codeBegin && literalAddr + literalSize < codeEnd) {
+        uint64_t literal = 0;
+        memcpy(&literal, literalAddr, literalSize);
+        if (literalSize == sizeof(uint64_t)) {
+          literalStr = folly::sformat(" [value 0x{:016x}]", literal);
+        } else {
+          literalStr = folly::sformat(" [value 0x{:08x}]",
+                                      static_cast<uint32_t>(literal));
+        }
+      }
+    }
+
     // Shadow potential call destinations based on fixed sequence.
     // This needs to match code generation in JIT.
     //
@@ -138,10 +163,13 @@ TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
       callAddr |= (frontier-8)->InstructionBits();
       callAddr = callAddr + (int64_t)ip;
       callAddr = callAddr + (int64_t)kInstructionSize;
+
+    } else if (frontier->Mask(UnconditionalBranchMask) == BL) {
+      callAddr = int64_t(frontier->ImmPCOffsetTarget((Instruction*)ip));
     }
 
-    string callDest="";
-    if ((insn & BLR_x18) == BLR_x18) {
+    std::string callDest="";
+    if ((insn & BLR_x18) == BLR_x18 || frontier->Mask(UnconditionalBranchMask) == BL) {
       callDest = getSymbolName((TCA)callAddr);
       callAddr = 0;
     }
@@ -150,14 +178,14 @@ TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
       std::ostringstream binary_os;
       binary_os << folly::format("{:08" PRIx32 "}",
                                  *reinterpret_cast<int32_t*>(frontier));
-      binary_os << string(10, ' ');
+      binary_os << std::string(10, ' ');
       return binary_os.str();
     }();
 
     while (currBC < ranges.size() - 1 && ip >= ranges[currBC].end) currBC++;
 
     auto const disasmInfo = getDisasmInfo(ip, kInstructionSize, perfEvents,
-                                          binaryStr, callDest, codeStr);
+                                          binaryStr, callDest, codeStr + literalStr);
     ranges[currBC].disasm.push_back(disasmInfo);
 
     frontier += kInstructionSize;
@@ -166,6 +194,6 @@ TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
   return regionInfo;
 }
 
-#endif
-
 } } // HPHP::jit
+
+#endif

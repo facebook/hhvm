@@ -1,6 +1,9 @@
 <?hh
 
-class Base implements HH\IMemoizeParam {
+class Base implements HH\IPureMemoizeParam {
+  public int $x;
+  public function __construct(int $x)[] { $this->x = $x; }
+  public function getPayload()[zoned]: int { return $this->x; }
   public function getInstanceKey()[]: string {
     return 'KEY' . $this->name();
   }
@@ -12,30 +15,24 @@ class B extends Base {}
 class C extends Base {}
 class D extends Base {}
 
-abstract final class IntContext extends HH\ImplicitContext {
-  const type T = int;
-  public static function start(int $context, (function (): int) $f)[zoned] {
-    return parent::set($context, $f);
+trait ClassContextDefs {
+  const type TData = Base;
+  const ctx CRun = [zoned];
+  public static function start(this::TData $context, (function (): int) $f)[zoned, ctx $f] {
+    return parent::runWith($context, $f);
   }
-  public static function getContext()[zoned]: ?int {
+  public static function getContext()[zoned]: this::TData {
     return parent::get();
   }
-}
-
-trait ClassContextDefs {
-  const type T = Base;
-  public static function start(Base $context, (function (): int) $f)[zoned] {
-    return parent::set($context, $f);
-  }
-  public static function getContext()[zoned]: Base {
-    return parent::get() as nonnull;
+  public static function exists()[zoned]: bool {
+    return parent::get() is nonnull;
   }
 }
 
-abstract final class ClassContext extends HH\ImplicitContext {
+abstract final class ClassContext extends HH\HHVMTestMemoSensitiveImplicitContext {
   use ClassContextDefs;
 }
 
-abstract final class ClassContext2 extends HH\ImplicitContext {
+abstract final class ClassContext2 extends HH\HHVMTestMemoSensitiveImplicitContext {
   use ClassContextDefs;
 }

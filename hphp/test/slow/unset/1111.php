@@ -4,9 +4,9 @@ class A {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $obj = new A;
-  $obj->arr = varray['test'];
+  $obj->arr = vec['test'];
   var_dump($obj->arr);
   unset($obj->arr);
   try {

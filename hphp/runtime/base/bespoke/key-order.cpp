@@ -18,12 +18,15 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/bespoke/key-order.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/bespoke/struct-dict.h"
+
+#include "hphp/util/configs/eval.h"
 
 #include <sstream>
 
 namespace HPHP::bespoke {
 
-TRACE_SET_MOD(bespoke);
+TRACE_SET_MOD(bespoke)
 
 namespace {
 
@@ -51,7 +54,7 @@ KeyOrder KeyOrder::insert(const StringData* k) const {
   if (!k->isStatic() || !m_keys) return KeyOrder::MakeInvalid();
   if (isTooLong() || contains(k)) return *this;
   KeyOrderData newOrder{*m_keys};
-  auto const full = m_keys->size() == RO::EvalBespokeMaxTrackedKeys;
+  auto const full = m_keys->size() == Cfg::Eval::BespokeMaxTrackedKeys;
   newOrder.push_back(full ? s_extraKey.get() : k);
   return Make(newOrder);
 }
@@ -60,7 +63,7 @@ KeyOrder KeyOrder::remove(const StringData* k) const {
   if (!valid()) return *this;
   KeyOrderData newOrder{*m_keys};
   newOrder.erase(std::remove_if(newOrder.begin(), newOrder.end(),
-                                [&](LowStringPtr key) { return k->same(key); }),
+                                [&](PackedStringPtr key) { return k->same(key); }),
                  newOrder.end());
   return Make(newOrder);
 }
@@ -75,12 +78,12 @@ KeyOrder KeyOrder::pop() const {
 KeyOrder KeyOrder::Make(const KeyOrderData& ko) {
   auto trimmedKeyOrder = trimKeyOrder(ko);
   {
-    folly::SharedMutex::ReadHolder rlock{s_keyOrderLock};
+    std::shared_lock rlock{s_keyOrderLock};
     auto it = s_profilingKeyOrders.find(trimmedKeyOrder);
     if (it != s_profilingKeyOrders.end()) return KeyOrder{&*it};
   }
 
-  folly::SharedMutex::WriteHolder wlock{s_keyOrderLock};
+  std::unique_lock wlock{s_keyOrderLock};
   auto const ret = s_profilingKeyOrders.insert(std::move(trimmedKeyOrder));
   return KeyOrder{&*ret.first};
 }
@@ -91,8 +94,8 @@ KeyOrder::KeyOrder(const KeyOrderData* keys)
 
 KeyOrderData KeyOrder::trimKeyOrder(const KeyOrderData& ko) {
   KeyOrderData res{ko};
-  if (res.size() > RO::EvalBespokeMaxTrackedKeys) {
-    res.resize(RO::EvalBespokeMaxTrackedKeys);
+  if (res.size() > Cfg::Eval::BespokeMaxTrackedKeys) {
+    res.resize(Cfg::Eval::BespokeMaxTrackedKeys);
     res.push_back(s_extraKey.get());
   }
   return res;
@@ -135,7 +138,7 @@ KeyOrder KeyOrder::MakeInvalid() {
 
 bool KeyOrder::isTooLong() const {
   assertx(m_keys);
-  return m_keys->size() > RO::EvalBespokeMaxTrackedKeys;
+  return m_keys->size() > Cfg::Eval::BespokeMaxTrackedKeys;
 }
 
 size_t KeyOrder::size() const {
@@ -171,7 +174,7 @@ void KeyOrder::ReleaseProfilingKeyOrders() {
 }
 
 KeyOrder collectKeyOrder(const KeyOrderMap& keyOrderMap) {
-  std::unordered_set<const StringData*> keys;
+  hphp_fast_set<const StringData*> keys;
   uint64_t weightedSizeSum = 0;
   uint64_t weight = 0;
   for (auto const& pair : keyOrderMap) {
@@ -181,21 +184,22 @@ KeyOrder collectKeyOrder(const KeyOrderMap& keyOrderMap) {
     keys.insert(pair.first.begin(), pair.first.end());
   }
 
-  if (weight == 0 || keys.size() > RO::EvalBespokeStructDictMaxNumKeys) {
+  if (weight == 0 || keys.size() > bespoke::StructLayout::maxNumKeys()) {
     return KeyOrder::MakeInvalid();
   }
 
   auto const weightedAvg = (double)weightedSizeSum / weight;
   auto const scale =
-    (keys.size() + RO::EvalBespokeStructDictMinKeys) /
-    (weightedAvg + RO::EvalBespokeStructDictMinKeys);
+    (keys.size() + Cfg::Eval::BespokeStructDictMinKeys) /
+    (weightedAvg + Cfg::Eval::BespokeStructDictMinKeys);
   // If the final merged key size is significantly larger than the average
   // key order size, creating a StructDict will waste memory.
-  if (scale > RO::EvalBespokeStructDictMaxSizeRatio) {
+  if (scale > Cfg::Eval::BespokeStructDictMaxSizeRatio) {
     return KeyOrder::MakeInvalid();
   }
 
   KeyOrderData sorted;
+  sorted.reserve(keys.size());
   for (auto const key : keys) {
     sorted.push_back(key);
   }

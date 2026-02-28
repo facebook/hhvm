@@ -3,7 +3,7 @@
 const CON = TRUE;
 
 function f1($b)
-{
+:mixed{
     $b__str = (string)($b);
     echo "\tInside function " . __FUNCTION__ . ", \$b is $b__str\n";
 
@@ -13,7 +13,7 @@ function f1($b)
 }
 
 function f2()
-{
+:mixed{
     $b = "abc";
 
     echo "After '\$b = \"abc\"', \$b is $b\n";
@@ -22,7 +22,7 @@ function f2()
 }
 
 function h1()
-{
+:mixed{
     $b = 10;
     return $b + 5;
 //  return 12;
@@ -32,7 +32,7 @@ function h1()
 
 ///*
 function h2()
-{
+:mixed{
     $b = 10;
 //  return $b + 5;  // Only variable references should be returned by reference
 //  return 12;

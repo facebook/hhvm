@@ -18,17 +18,22 @@
 #include <chrono>
 #include <cassert>
 
-#include <boost/variant.hpp>
+#include <variant>
 #include <memory>
 
+#include "hphp/hhbbc/options.h"
+
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/vm/repo-global-data.h"
+
 #include "hphp/util/compact-vector.h"
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/extern-worker.h"
+#include "hphp/util/ptr.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/tribool.h"
 
 namespace HPHP {
-struct StringData;
 struct ArrayData;
 }
 
@@ -45,7 +50,7 @@ namespace HHBBC {
  * static array.
  */
 using SString  = const StringData*;
-using LSString = LowPtr<const StringData>;
+using LSString = PackedPtr<const StringData>;
 using SArray   = const ArrayData*;
 
 struct Bytecode;
@@ -62,7 +67,19 @@ enum class Flavor { C, U, CU };
 struct PrepKind {
   TriBool inOut;
   TriBool readonly;
+  bool operator==(const PrepKind& o) const {
+    return std::tie(inOut, readonly) == std::tie(o.inOut, o.readonly);
+  }
+  size_t hash() const {
+    return folly::hash::hash_combine(inOut, readonly);
+  }
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(inOut)
+      (readonly)
+      ;
+  }
 };
+using PrepKindVec = CompactVector<PrepKind>;
 
 using LocalId = uint32_t;
 constexpr const LocalId NoLocalId = -1;
@@ -76,10 +93,21 @@ constexpr const LocalId MaxLocalId = StackThisId - 1;
 
 using ClosureId = uint32_t;
 using IterId = uint32_t;
+constexpr const IterId NoIterId = -1;
 using BlockId = uint32_t;
 constexpr const BlockId NoBlockId = -1;
 using ExnNodeId = uint32_t;
 constexpr const ExnNodeId NoExnNodeId = -1;
+
+//////////////////////////////////////////////////////////////////////
+
+inline bool double_equals(double a, double b) {
+  // +ve and -ve zero must not compare equal, but (for purposes of
+  // Type equivalence), NaNs are equal.
+  return a == b
+    ? std::signbit(a) == std::signbit(b)
+    : (std::isnan(a) && std::isnan(b));
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -105,78 +133,215 @@ constexpr int kStatsBump = 50;
 
 //////////////////////////////////////////////////////////////////////
 
+// "Bucketize" a vector of strings into N buckets, using consistent
+// hashing.
+std::vector<std::vector<SString>>
+consistently_bucketize(const std::vector<SString>&, size_t bucketSize);
+
+std::vector<std::vector<SString>>
+consistently_bucketize_by_num_buckets(const std::vector<SString>&,
+                                      size_t numBuckets);
+
+//////////////////////////////////////////////////////////////////////
+
+// Helper functions to produce a std::vector<T> from a single T
+// without boilerplate.
+template <typename T> std::vector<T> singleton_vec(T t) {
+  std::vector<T> out;
+  out.emplace_back(std::move(t));
+  return out;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+extern_worker::Client::ExecMetadata
+make_exec_metadata(const std::string& job,
+                   const std::string& key = "");
+extern_worker::Client::ExecMetadata
+make_exec_metadata(const std::string& job,
+                   int round,
+                   const std::string& key = "");
+
+//////////////////////////////////////////////////////////////////////
+
 void profile_memory(const char* what, const char* when, const std::string&);
-void summarize_memory(StructuredLogEntry&);
+void summarize_memory(StructuredLogEntry*);
 
 struct trace_time {
-  using clock      = std::chrono::system_clock;
-  using time_point = clock::time_point;
-
   explicit trace_time(const char* what,
-                      const std::string& extra = std::string{})
-    : what(what)
-    , start(clock::now())
-    , extra(extra)
-  {
-    profile_memory(what, "start", extra);
-    if (Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) {
-      Trace::traceRelease(
-        "%s",
-        folly::sformat(
-          "{}: {}: start{}\n",
-          ts(start),
-          what,
-          !extra.empty() ? folly::format(" ({})", extra).str() : extra
-        ).c_str()
-      );
-    }
-  }
-
-  ~trace_time() {
-    namespace C = std::chrono;
-    auto const end = clock::now();
-    auto const elapsed = C::duration_cast<C::milliseconds>(
-      end - start
-    );
-    profile_memory(what, "end", extra);
-    if (Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) {
-      Trace::traceRelease(
-        "%s",
-        folly::sformat(
-          "{}: {}: {}ms elapsed\n",
-          ts(end), what, elapsed.count())
-          .c_str()
-      );
-    }
-  }
+                      std::string extra,
+                      StructuredLogEntry* logEntry);
+  explicit trace_time(const char* what)
+    : trace_time{what, std::string{}, nullptr} {}
+  explicit trace_time(const char* what, StructuredLogEntry* logEntry)
+    : trace_time{what, std::string{}, logEntry} {}
+  explicit trace_time(const char* what, std::string extra)
+    : trace_time{what, std::move(extra), nullptr} {}
+  ~trace_time();
 
   trace_time(const trace_time&) = delete;
   trace_time& operator=(const trace_time&) = delete;
 
-  const char* label() const {
-    return what;
-  }
+  void ignore_client_stats();
 
-  int64_t elapsed_ms() const {
-    namespace C = std::chrono;
-    return C::duration_cast<C::milliseconds>(clock::now() - start).count();
-  }
+  // Register a Client::Stats to automatically report on
+  static void register_client_stats(extern_worker::Client::Stats::Ptr);
 
 private:
-  std::string ts(time_point t) {
-    char snow[64];
-    auto tm = std::chrono::system_clock::to_time_t(t);
-    ctime_r(&tm, snow);
-    // Eliminate trailing newline from ctime_r.
-    snow[24] = '\0';
-    return snow;
-  }
+  using clock      = std::chrono::system_clock;
+  using time_point = clock::time_point;
+
   const char* what;
   time_point start;
   std::string extra;
+  extern_worker::Client::Stats::Ptr clientBefore;
+  StructuredLogEntry* logEntry;
+  int64_t beforeRss;
 };
 
 //////////////////////////////////////////////////////////////////////
 
+std::string format_bytes(size_t);
+std::string format_duration(std::chrono::microseconds);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * One-to-one case insensitive maps for types, where the keys
+ * are static strings and the values are some T.
+ *
+ * Elements are not stable under insert/erase.
+ */
+template<class T> using TSStringToOneT =
+  hphp_fast_map<
+    SString,
+    T,
+    string_data_hash,
+    string_data_tsame
+  >;
+
+/*
+ * One-to-one case sensitive map, where the keys are static strings
+ * and the values are some T.
+ *
+ * Elements are not stable under insert/erase.
+ *
+ * Static strings are always uniquely defined by their pointer, so
+ * pointer hashing/comparison is sufficient.
+ */
+template<class T> using SStringToOneT = hphp_fast_map<SString, T>;
+template<class T> using FSStringToOneT = SStringToOneT<T>;
+
+/*
+ * One-to-one case insensitive map, where the keys are static strings
+ * and the values are some T.
+ *
+ * Elements are stable under insert/erase.
+ */
+template<typename T> using TSStringToOneNodeT =
+  hphp_hash_map<SString, T, string_data_hash, string_data_tsame>;
+
+/*
+ * One-to-one case sensitive map, where the keys are static strings
+ * and the values are some T.
+ *
+ * Elements are stable under insert/erase.
+ *
+ * Static strings are always uniquely defined by their pointer, so
+ * pointer hashing/comparison is sufficient.
+ */
+template<typename T> using SStringToOneNodeT = hphp_hash_map<SString, T>;
+template<typename T> using FSStringToOneNodeT = SStringToOneNodeT<T>;
+
+/*
+ * One-to-one case sensitive concurrent map, where the keys are static
+ * strings and the values are some T.
+ *
+ * Concurrent insertions and lookups are supported.
+ *
+ * Static strings are always uniquely defined by their pointer, so
+ * pointer hashing/comparison is sufficient.
+ */
+template<class T> using SStringToOneConcurrentT =
+  folly_concurrent_hash_map_simd<SString, T>;
+template<class T> using FSStringToOneConcurrentT = SStringToOneConcurrentT<T>;
+
+/*
+ * One-to-one case insensitive concurrent map, where the keys are
+ * static strings and the values are some T.
+ *
+ * Concurrent insertions and lookups are supported.
+ */
+template<class T> using TSStringToOneConcurrentT =
+  folly_concurrent_hash_map_simd<SString, T,
+                                 string_data_hash, string_data_tsame>;
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Case sensitive static string set.
+ */
+using SStringSet = hphp_fast_set<SString>;
+using FSStringSet = SStringSet;
+
+/*
+ * Case insensitive static string set.
+ */
+using TSStringSet = hphp_fast_set<SString, string_data_hash, string_data_tsame>;
+
+//////////////////////////////////////////////////////////////////////
+
+template<typename T>
+using TSStringToRef = TSStringToOneT<extern_worker::Ref<T>>;
+template<typename T>
+using FSStringToRef = FSStringToOneT<extern_worker::Ref<T>>;
+
+template<typename T>
+using SStringToRef = SStringToOneT<extern_worker::Ref<T>>;
+
+template<typename T>
+using RefVec = std::vector<extern_worker::Ref<T>>;
+
+//////////////////////////////////////////////////////////////////////
+
+template<typename T>
+using UniquePtrRef = extern_worker::Ref<std::unique_ptr<T>>;
+
+template<typename T>
+using TSStringToUniquePtrRef = TSStringToOneT<UniquePtrRef<T>>;
+template<typename T>
+using FSStringToUniquePtrRef = FSStringToOneT<UniquePtrRef<T>>;
+
+template<typename T>
+using SStringToUniquePtrRef = SStringToOneT<UniquePtrRef<T>>;
+
+template<typename T>
+using UniquePtrRefVec = std::vector<UniquePtrRef<T>>;
+
+//////////////////////////////////////////////////////////////////////
+
+// Set up the process state (either for the main process or for
+// extern-worker Jobs). If "full" is true, systemlib and JIT data
+// structures will be parsed and initialized.
+void process_init(const Options&, const RepoGlobalData&, bool full);
+// Undo process_init().
+void process_exit(bool full);
+
 }}
 
+//////////////////////////////////////////////////////////////////////
+
+namespace std {
+
+//////////////////////////////////////////////////////////////////////
+
+template<>
+struct hash<HPHP::HHBBC::PrepKind> {
+  size_t operator()(HPHP::HHBBC::PrepKind k) const {
+    return k.hash();
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
+
+}

@@ -1,7 +1,7 @@
 <?hh
 class foo extends ArrayIterator {
     public function __construct( ) {
-        parent::__construct(darray[
+        parent::__construct(dict[
             'test3'=>'test999']);
     }
 }

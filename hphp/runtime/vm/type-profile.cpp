@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/code-coverage-util.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -67,7 +68,7 @@ void profileWarmupEnd() {
 }
 
 uint64_t requestCount() {
-  return numRequests.load(std::memory_order_relaxed);
+  return numRequests.load(std::memory_order_acquire);
 }
 
 static inline RequestKind getRequestKind() {
@@ -80,14 +81,19 @@ void profileRequestStart() {
   rl_typeProfileLocals->requestKind = getRequestKind();
 
   auto const codeCoverageForceInterp = []{
-    if (RuntimeOption::EvalEnableCodeCoverage > 1) return true;
-    if (RuntimeOption::EvalEnableCodeCoverage == 1) {
-      if (RuntimeOption::RepoAuthoritative) return false;
-      auto const tport = g_context->getTransport();
-      return tport &&
-             tport->getParam("enable_code_coverage").compare("true") == 0;
+    if (Cfg::Eval::EnableCodeCoverage > 1) return true;
+    if (Cfg::Eval::EnableCodeCoverage == 1) {
+      if (Cfg::Repo::Authoritative) return false;
+      return isEnableCodeCoverageReqParamTrue();
     }
     return false;
+  }();
+
+  auto const shouldUsePerFileCoverage = []{
+    if (Cfg::Repo::Authoritative) return false;
+    if (Cfg::Eval::EnablePerFileCoverage > 1) return true;
+    return Cfg::Eval::EnablePerFileCoverage == 1 &&
+      isEnablePerFileCoverageReqParamTrue();
   }();
 
   // Force the request to use interpreter (not even running jitted code) during
@@ -102,7 +108,11 @@ void profileRequestStart() {
     } else if (!okToJit) {
       RID().setJittingDisabled(true);
     }
+    if (shouldUsePerFileCoverage) {
+      RI().m_coverage.m_should_use_per_file_coverage = true;
+    }
   }
+
   jit::setMayAcquireLease(okToJit);
 
   // Force interpretation if needed.
@@ -116,7 +126,7 @@ void profileRequestStart() {
 
 void profileRequestEnd() {
   if (!isStandardRequest()) return;
-  numRequests.fetch_add(1, std::memory_order_relaxed);
+  numRequests.fetch_add(1, std::memory_order_acq_rel);
   static auto const requestSeries = ServiceData::createTimeSeries(
     "vm.requests",
     {ServiceData::StatsType::RATE, ServiceData::StatsType::SUM},

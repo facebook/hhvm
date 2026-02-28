@@ -1,0 +1,2 @@
+ERROR: File "override-with-concrete-member+class-generic.php", line 7, characters 59-62:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])

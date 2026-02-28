@@ -19,9 +19,6 @@
 #include <folly/portability/Asm.h>
 
 #include "hphp/util/assertions.h"
-#ifdef _MSC_VER
-#include <intrin.h>
-#endif
 
 namespace HPHP {
 
@@ -35,13 +32,6 @@ inline uint64_t cpuCycles() {
   uint64_t lo, hi;
   asm volatile("rdtsc" : "=a"((lo)),"=d"(hi));
   return lo | (hi << 32);
-#elif __powerpc64__
-  // This returns a time-base
-  uint64_t tb;
-  asm volatile("mfspr %0, 268" : "=r" (tb));
-  return tb;
-#elif _MSC_VER
-  return (uint64_t)__rdtsc();
 #elif __aarch64__
   // FIXME: This returns the virtual timer which is not exactly
   // the core cycles but has a different frequency.
@@ -65,4 +55,3 @@ inline void cycleDelay(uint32_t numCycles) {
 }
 
 }
-

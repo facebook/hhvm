@@ -51,14 +51,37 @@ val next :
   'a list ->
   'a list Hh_bucket.next
 
-(* Can raise MultiThreadedCall.Coalesced_failures unless in single-threaded mode. *)
+(** Can raise MultiThreadedCall.Coalesced_failures unless in single-threaded mode. *)
 val call :
   worker list option ->
-  job:('c -> 'a -> 'b) ->
-  merge:('b -> 'c -> 'c) ->
-  neutral:'c ->
-  next:'a Hh_bucket.next ->
-  'c
+  job:('acc -> 'input -> 'output) ->
+  merge:('output -> 'acc -> 'acc) ->
+  neutral:'acc ->
+  next:'input Hh_bucket.next ->
+  'acc
+
+module type WorkItems_sig = sig
+  type t
+
+  type workitem
+
+  val of_workitem : workitem -> t
+
+  val pop : t -> workitem option * t
+
+  val push : workitem -> t -> t
+end
+
+(** [job] can return more items to process, e.g. the
+  part of the input that it could not process. *)
+val call_stateless :
+  (module WorkItems_sig with type workitem = 'input and type t = 'inputs) ->
+  worker list ->
+  job:('acc -> 'input -> 'input * 'output) ->
+  merge:('output -> 'acc -> 'acc) ->
+  neutral:'acc ->
+  inputs:'inputs ->
+  'acc
 
 type call_wrapper = {
   f:
@@ -97,7 +120,7 @@ val call_with_interrupt :
   neutral:'c ->
   next:'a Hh_bucket.next ->
   interrupt:'d interrupt_config ->
-  'c * 'd * 'a list
+  'c * 'd * ('a list * MultiThreadedCall.cancel_reason) option
 
 (* Creates a pool of workers. *)
 val make :

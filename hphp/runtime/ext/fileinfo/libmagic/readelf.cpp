@@ -24,7 +24,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include "file.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/file.h"
 
 #ifndef lint
 FILE_RCSID("@(#)$File: readelf.c,v 1.97 2013/03/06 03:35:30 christos Exp $")
@@ -35,8 +35,8 @@ FILE_RCSID("@(#)$File: readelf.c,v 1.97 2013/03/06 03:35:30 christos Exp $")
 #include <ctype.h>
 #include <stdlib.h>
 
-#include "readelf.h"
-#include "magic.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/readelf.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/magic.h"
 
 #include <folly/portability/Unistd.h>
 
@@ -807,10 +807,10 @@ core:
 }
 
 /* SunOS 5.x hardware capability descriptions */
-typedef struct cap_desc {
+struct cap_desc_t {
   uint64_t cd_mask;
   const char *cd_name;
-} cap_desc_t;
+};
 
 static const cap_desc_t cap_desc_sparc[] = {
   { AV_SPARC_MUL32,    "MUL32" },
@@ -1189,13 +1189,13 @@ file_tryelf(struct magic_set *ms, int fd, const unsigned char *buf,
 #define elf_getu(a, b)  elf_getu32(a, b)
 #undef elfhdr
 #define elfhdr elf32hdr
-#include "elfclass.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/elfclass.inc"
   case ELFCLASS64:
 #undef elf_getu
 #define elf_getu(a, b)  elf_getu64(a, b)
 #undef elfhdr
 #define elfhdr elf64hdr
-#include "elfclass.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/elfclass.inc"
   default:
       if (file_printf(ms, ", unknown class %d", clazz) == -1)
         return -1;

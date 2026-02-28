@@ -1,27 +1,27 @@
 <?hh
 
 class APure {
-  function __wakeup()[] {
+  function __wakeup()[] :mixed{
     echo __CLASS__." wakes up safely.\n";
   }
-  function __sleep()[] {
+  function __sleep()[] :mixed{
     echo __CLASS__." sleeps safely.\n";
-    return varray[];
+    return vec[];
   }
 }
 
 class ANonPure {
-  function __wakeup() {
+  function __wakeup() :mixed{
     echo __CLASS__." wakes up safely.\n";
   }
-  function __sleep() {
+  function __sleep() :mixed{
     echo __CLASS__." sleeps safely.\n";
-    return varray[];
+    return vec[];
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $pure = new APure();
   $non_pure = new ANonPure();
   serialize($pure) |> unserialize($$);

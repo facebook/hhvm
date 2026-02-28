@@ -1,7 +1,7 @@
 <?hh
 function f(){
-  varray[];
-  varray[$a];
-  varray[$a,];
-  varray[$a, $b, $c];
+  vec[];
+  vec[$a];
+  vec[$a,];
+  vec[$a, $b, $c];
 }

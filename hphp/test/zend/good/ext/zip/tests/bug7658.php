@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>>
 function main_entry(): void {
-  $expect = varray[
+  $expect = vec[
   	"mimetype",
   	"Configurations2/statusbar/",
   	"Configurations2/accelerator/current.xml",
@@ -20,7 +20,7 @@ function main_entry(): void {
   ];
   $dirname = dirname(__FILE__) . '/';
   include $dirname . 'utils.inc';
-  $file = __SystemLib\hphp_test_tmppath('__tmp_bug7658.odt');
+  $file = sys_get_temp_dir().'/'.'__tmp_bug7658.odt';
   $zip = new ZipArchive();
   copy($dirname . 'bug7658.odt', $file);
   if(!$zip->open($file)) {
@@ -33,7 +33,7 @@ function main_entry(): void {
   $zip->close();
   echo "\n";
   $zip->open($file);
-  $found = varray[];
+  $found = vec[];
   for($i=0; $i < $zip->numFiles; $i++) {
   	$sb = $zip->statIndex($i);
   	$found[] = $sb['name'];

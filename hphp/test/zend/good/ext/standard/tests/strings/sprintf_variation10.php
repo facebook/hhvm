@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : float formats with integer values ***\n";
 
 // array of int type values
-$integer_values = varray [
+$integer_values = vec[
   0,
   1,
   -1,
@@ -29,7 +29,7 @@ $integer_values = varray [
 ];
 
 // various float formats
-$float_formats = varray[
+$float_formats = vec[
   "%f", "%hf", "%lf",
   "%Lf", " %f", "%f ",
   "\t%f", "\n%f", "%4f",

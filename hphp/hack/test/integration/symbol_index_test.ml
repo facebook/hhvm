@@ -1,6 +1,6 @@
 open Hh_prelude
-open IndexBuilderTypes
 open SearchUtils
+open SearchTypes
 open Test_harness
 module Args = Test_harness_common_args
 module SA = Asserter.String_asserter
@@ -27,8 +27,8 @@ let rec assert_docblock_markdown
       in
       assert_docblock_markdown exp_list act_list)
 
-let assert_ns_matches (expected_ns : string) (actual : SearchUtils.si_results) :
-    unit =
+let assert_ns_matches (expected_ns : string) (actual : SearchTypes.si_item list)
+    : unit =
   let found =
     List.fold actual ~init:false ~f:(fun acc item ->
         String.equal item.si_name expected_ns || acc)
@@ -44,16 +44,26 @@ let assert_ns_matches (expected_ns : string) (actual : SearchUtils.si_results) :
   ()
 
 let assert_autocomplete
-    ~(query_text : string) ~(kind : si_kind) ~(expected : int) ~(sienv : si_env)
-    : unit =
+    ~(query_text : string)
+    ~(kind : FileInfo.si_kind)
+    ~(expected : int)
+    ~(sienv_ref : si_env ref) : unit =
+  let context =
+    match kind with
+    | FileInfo.SI_Interface
+    | FileInfo.SI_Enum ->
+      Actype
+      (* the `Acid` context rules out interfaces+enums, so we pick one that allows them *)
+    | _ -> Acid
+  in
   (* Search for the symbol *)
-  let results =
+  let (results, _is_complete) =
     SymbolIndex.find_matching_symbols
-      ~sienv
+      ~sienv_ref
       ~query_text
       ~max_results:100
       ~kind_filter:(Some kind)
-      ~context:None
+      ~context
   in
   (* Verify correct number of results *)
   IA.assert_equals
@@ -80,188 +90,91 @@ let run_index_builder (harness : Test_harness.t) : si_env =
   Relative_path.set_path_prefix Relative_path.Root harness.repo_dir;
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
   Relative_path.set_path_prefix Relative_path.Hhi hhi_folder;
-  let repo_path = Path.to_string harness.repo_dir in
-  (* Set up initial variables *)
-  let fn = Caml.Filename.temp_file "autocomplete." ".db" in
-  let file_opt = Some fn in
-  let ctxt =
-    {
-      repo_folder = repo_path;
-      sqlite_filename = file_opt;
-      text_filename = None;
-      json_filename = None;
-      json_repo_name = None;
-      json_chunk_size = 0;
-      custom_service = None;
-      custom_repo_name = None;
-      set_paths_for_worker = false;
-      hhi_root_folder = Some hhi_folder;
-      namespace_map = [];
-      silent = true;
-    }
+  let (hhconfig, _) =
+    ServerConfig.load ~silent:true ~from:"" ~cli_config_overrides:[]
   in
-  (* Scan the repo folder and produce answers in sqlite *)
-  IndexBuilder.go ctxt None;
+  let popt = ServerConfig.parser_options hhconfig in
+  let tcopt = ServerConfig.typechecker_options hhconfig in
+  let ctx =
+    Provider_context.empty_for_test
+      ~popt
+      ~tcopt
+      ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+  in
+  let (_handle : SharedMem.handle) =
+    SharedMem.init ~num_workers:0 SharedMem.default_config
+  in
+
+  (* Scan the repo folder *)
   let sienv =
     SymbolIndex.initialize
-      ~globalrev:None
-      ~gleanopt:GleanOptions.default
+      ~gleanopt:Glean_options.default
       ~namespace_map:[]
-      ~provider_name:"SqliteIndex"
+      ~provider_name:"LocalIndex"
       ~quiet:true
-      ~savedstate_file_opt:file_opt
-      ~workers:None
   in
-  Hh_logger.log "Built Sqlite database [%s]" fn;
+  let paths_with_addenda =
+    Find.find ~file_only:true ~filter:FindUtils.file_filter [harness.repo_dir]
+    |> List.filter_map ~f:(fun path ->
+           let path = Relative_path.create_detect_prefix path in
+           let decls = Direct_decl_utils.direct_decl_parse ctx path in
+           match decls with
+           | None -> None
+           | Some decls ->
+             let addenda = Direct_decl_parser.decls_to_addenda decls in
+             Some (path, addenda, SearchUtils.TypeChecker))
+  in
+  let sienv = SymbolIndexCore.update_from_addenda ~sienv ~paths_with_addenda in
+
   sienv
-
-let test_sqlite_plus_local (harness : Test_harness.t) : bool =
-  let sienv = run_index_builder harness in
-
-  (* Find one of each major type *)
-  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
-  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:1 ~sienv;
-  assert_autocomplete
-    ~query_text:"some_long_function_name"
-    ~kind:SI_Function
-    ~expected:1
-    ~sienv;
-  assert_autocomplete
-    ~query_text:"ClassToBeIdentified"
-    ~kind:SI_Class
-    ~expected:1
-    ~sienv;
-  Hh_logger.log "First pass complete";
-
-  (* Now, let's remove a few files and try again - assertions should change *)
-  let bar1path = Relative_path.from_root ~suffix:"/bar_1.php" in
-  let foo3path = Relative_path.from_root ~suffix:"/foo_3.php" in
-  let s = Relative_path.Set.empty in
-  let s = Relative_path.Set.add s bar1path in
-  let s = Relative_path.Set.add s foo3path in
-  let sienv = SymbolIndexCore.remove_files ~sienv ~paths:s in
-  Hh_logger.log "Removed files";
-
-  (* Two of these have been removed! *)
-  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
-  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:0 ~sienv;
-  assert_autocomplete
-    ~query_text:"some_long_function_name"
-    ~kind:SI_Function
-    ~expected:0
-    ~sienv;
-  assert_autocomplete
-    ~query_text:"ClassToBeIdentified"
-    ~kind:SI_Class
-    ~expected:1
-    ~sienv;
-  Hh_logger.log "Second pass complete";
-
-  (* Add the files back! *)
-  let nobigtrait_id =
-    (FileInfo.File (FileInfo.Class, bar1path), "\\NoBigTrait", None)
-  in
-  let some_long_function_name_id =
-    (FileInfo.File (FileInfo.Fun, foo3path), "\\some_long_function_name", None)
-  in
-  let bar1fileinfo =
-    {
-      FileInfo.hash = None;
-      file_mode = None;
-      funs = [];
-      classes = [nobigtrait_id];
-      typedefs = [];
-      consts = [];
-      comments = Some [];
-      modules = [];
-    }
-  in
-  let foo3fileinfo =
-    {
-      FileInfo.hash = None;
-      file_mode = None;
-      funs = [some_long_function_name_id];
-      classes = [];
-      typedefs = [];
-      consts = [];
-      comments = Some [];
-      modules = [];
-    }
-  in
-  let changelist =
-    [
-      (bar1path, bar1fileinfo, TypeChecker);
-      (foo3path, foo3fileinfo, TypeChecker);
-    ]
-  in
-  let init_id = Random_id.short_string () in
-  let env =
-    ServerEnvBuild.make_env
-      ~init_id
-      ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-      ServerConfig.default_config
-  in
-  let ctx = Provider_utils.ctx_from_server_env env in
-  let sienv = SymbolIndexCore.update_files ~ctx ~sienv ~paths:changelist in
-  let n = LocalSearchService.count_local_fileinfos ~sienv in
-  Hh_logger.log "Added back; local search service now contains %d files" n;
-
-  (* Find one of each major type *)
-  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
-  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:1 ~sienv;
-  assert_autocomplete
-    ~query_text:"some_long_function_name"
-    ~kind:SI_Function
-    ~expected:1
-    ~sienv;
-  assert_autocomplete
-    ~query_text:"ClassToBeIdentified"
-    ~kind:SI_Class
-    ~expected:1
-    ~sienv;
-  Hh_logger.log "Third pass complete";
-
-  (* If we got here, all is well *)
-  true
 
 (* Test the ability of the index builder to capture a variety of
  * names and kinds correctly *)
 let test_builder_names (harness : Test_harness.t) : bool =
   let sienv = run_index_builder harness in
+  let sienv_ref = ref sienv in
 
   (* Assert that we can capture all kinds of symbols *)
-  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
-  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:1 ~sienv;
+  assert_autocomplete
+    ~query_text:"UsesA"
+    ~kind:FileInfo.SI_Class
+    ~expected:1
+    ~sienv_ref;
+  assert_autocomplete
+    ~query_text:"NoBigTrait"
+    ~kind:FileInfo.SI_Trait
+    ~expected:1
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"some_long_function_name"
-    ~kind:SI_Function
+    ~kind:FileInfo.SI_Function
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"ClassToBeIdentified"
-    ~kind:SI_Class
+    ~kind:FileInfo.SI_Class
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"CONST_SOME_COOL_VALUE"
-    ~kind:SI_GlobalConstant
+    ~kind:FileInfo.SI_GlobalConstant
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"IMyFooInterface"
-    ~kind:SI_Interface
+    ~kind:FileInfo.SI_Interface
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"SomeTypeAlias"
-    ~kind:SI_Typedef
+    ~kind:FileInfo.SI_Typedef
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
   assert_autocomplete
     ~query_text:"FbidMapField"
-    ~kind:SI_Enum
+    ~kind:FileInfo.SI_Enum
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
 
   (* XHP is considered a class at the moment - this may change.
    * Note that XHP classes are saved WITH a leading colon.
@@ -269,98 +182,12 @@ let test_builder_names (harness : Test_harness.t) : bool =
    * text for XHP class autocomplete. *)
   assert_autocomplete
     ~query_text:":xhp:helloworld"
-    ~kind:SI_Class
+    ~kind:FileInfo.SI_Class
     ~expected:1
-    ~sienv;
+    ~sienv_ref;
 
   (* All good *)
   true
-
-(* Ensure that the namespace map handles common use cases *)
-let test_namespace_map (harness : Test_harness.t) : bool =
-  NamespaceSearchService.(
-    let _ = harness in
-    let sienv = SearchUtils.quiet_si_env in
-    (* Register a namespace and fetch it back exactly *)
-    register_namespace ~sienv ~namespace:"HH\\Lib\\Str\\fb";
-    let ns = find_exact_match ~sienv ~namespace:"HH" in
-    SA.assert_equals "\\HH" ns.nss_full_namespace "Basic match";
-    let ns = find_exact_match ~sienv ~namespace:"HH\\Lib" in
-    SA.assert_equals "\\HH\\Lib" ns.nss_full_namespace "Basic match";
-    let ns = find_exact_match ~sienv ~namespace:"HH\\Lib\\Str" in
-    SA.assert_equals "\\HH\\Lib\\Str" ns.nss_full_namespace "Basic match";
-    let ns = find_exact_match ~sienv ~namespace:"HH\\Lib\\Str\\fb" in
-    SA.assert_equals "\\HH\\Lib\\Str\\fb" ns.nss_full_namespace "Basic match";
-
-    (* Fetch back case insensitive *)
-    let ns = find_exact_match ~sienv ~namespace:"hh" in
-    SA.assert_equals "\\HH" ns.nss_full_namespace "Case insensitive";
-    let ns = find_exact_match ~sienv ~namespace:"hh\\lib" in
-    SA.assert_equals "\\HH\\Lib" ns.nss_full_namespace "Case insensitive";
-    let ns = find_exact_match ~sienv ~namespace:"hh\\lib\\str" in
-    SA.assert_equals "\\HH\\Lib\\Str" ns.nss_full_namespace "Case insensitive";
-    let ns = find_exact_match ~sienv ~namespace:"hh\\lib\\str\\FB" in
-    SA.assert_equals
-      "\\HH\\Lib\\Str\\fb"
-      ns.nss_full_namespace
-      "Case insensitive";
-
-    (* Register an alias and verify that it works as expected *)
-    register_alias ~sienv ~alias:"Str" ~target:"HH\\Lib\\Str";
-    let ns = find_exact_match ~sienv ~namespace:"Str" in
-    SA.assert_equals "\\HH\\Lib\\Str" ns.nss_full_namespace "Alias search";
-    let ns = find_exact_match ~sienv ~namespace:"Str\\fb" in
-    SA.assert_equals "\\HH\\Lib\\Str\\fb" ns.nss_full_namespace "Alias search";
-
-    (* Register an alias with a leading backslash *)
-    register_alias ~sienv ~alias:"StrFb" ~target:"\\HH\\Lib\\Str\\fb";
-    let ns = find_exact_match ~sienv ~namespace:"StrFb" in
-    SA.assert_equals "\\HH\\Lib\\Str\\fb" ns.nss_full_namespace "Alias search";
-
-    (* Add a new namespace under an alias, and make sure it's visible *)
-    register_namespace ~sienv ~namespace:"StrFb\\SecureRandom";
-    let ns =
-      find_exact_match ~sienv ~namespace:"\\hh\\lib\\str\\fb\\securerandom"
-    in
-    SA.assert_equals
-      "\\HH\\Lib\\Str\\fb\\SecureRandom"
-      ns.nss_full_namespace
-      "Late bound namespace";
-
-    (* Should always be able to find root *)
-    let ns = find_exact_match ~sienv ~namespace:"\\" in
-    SA.assert_equals "\\" ns.nss_full_namespace "Find root";
-    let ns = find_exact_match ~sienv ~namespace:"" in
-    SA.assert_equals "\\" ns.nss_full_namespace "Find root";
-    let ns = find_exact_match ~sienv ~namespace:"\\\\" in
-    SA.assert_equals "\\" ns.nss_full_namespace "Find root";
-
-    (* Test partial matches *)
-    let matches = find_matching_namespaces ~sienv ~query_text:"st" in
-    assert_ns_matches "Str" matches;
-
-    (* Assuming we're in a leaf node, find matches under that leaf node *)
-    let matches = find_matching_namespaces ~sienv ~query_text:"StrFb\\Secu" in
-    assert_ns_matches "SecureRandom" matches;
-
-    (* Special case: empty string always provides zero matches *)
-    let matches = find_matching_namespaces ~sienv ~query_text:"" in
-    IA.assert_equals 0 (List.length matches) "Empty string / zero matches";
-
-    (* Special case: single backslash should show at least these root namespaces *)
-    let matches = find_matching_namespaces ~sienv ~query_text:"\\" in
-    assert_ns_matches "Str" matches;
-    assert_ns_matches "StrFb" matches;
-    assert_ns_matches "HH" matches;
-
-    (* Normal use case *)
-    Hh_logger.log "Reached the hh section";
-    let matches = find_matching_namespaces ~sienv ~query_text:"hh" in
-    assert_ns_matches "Lib" matches;
-    let matches = find_matching_namespaces ~sienv ~query_text:"\\HH\\" in
-    assert_ns_matches "Lib" matches;
-
-    true)
 
 (* Rapid unit tests to verify docblocks are found and correct *)
 let test_docblock_finder (harness : Test_harness.t) : bool =
@@ -387,9 +214,8 @@ let test_docblock_finder (harness : Test_harness.t) : bool =
     ServerDocblockAt.go_docblock_ctx
       ~ctx
       ~entry
-      ~line:6
-      ~column:7
-      ~kind:SI_Trait
+      (File_content.Position.from_one_based 6 7)
+      ~kind:FileInfo.SI_Trait
   in
   assert_docblock_markdown
     [DocblockService.Markdown "This is a docblock for NoBigTrait"]
@@ -406,24 +232,12 @@ let tests args =
     }
   in
   [
-    ( "test_sqlite_plus_local",
-      fun () ->
-        Test_harness.run_test
-          ~stop_server_in_teardown:false
-          harness_config
-          test_sqlite_plus_local );
     ( "test_builder_names",
       fun () ->
         Test_harness.run_test
           ~stop_server_in_teardown:false
           harness_config
           test_builder_names );
-    ( "test_namespace_map",
-      fun () ->
-        Test_harness.run_test
-          ~stop_server_in_teardown:false
-          harness_config
-          test_namespace_map );
     ( "test_docblock_finder",
       fun () ->
         Test_harness.run_test

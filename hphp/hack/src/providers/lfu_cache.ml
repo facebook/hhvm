@@ -11,9 +11,21 @@ open Option.Monad_infix
 
 type size = int
 
-module type Entry = Cache_sig.Entry
+module type Entry = sig
+  type _ t
 
-module RevIMap = Caml.Map.Make (struct
+  type 'a key = 'a t
+
+  type 'a value = 'a
+
+  val compare : 'a t -> 'b t -> int
+
+  val hash : 'a t -> int
+
+  val key_to_log_string : 'a key -> string
+end
+
+module RevIMap = Stdlib.Map.Make (struct
   type t = int
 
   let compare a b = Int.compare b a
@@ -26,6 +38,16 @@ module Cache (Entry : Entry) = struct
 
   type value_wrapper = Value_wrapper : 'a Entry.value -> value_wrapper
 
+  module KeyWrapper = struct
+    type t = key_wrapper
+
+    let compare (Key key1) (Key key2) = Entry.compare key1 key2
+
+    let sexp_of_t (Key key) = Sexp.Atom (Entry.key_to_log_string key)
+
+    let hash (Key key) = Entry.hash key
+  end
+
   type entry = {
     frequency: int ref;
     value: value_wrapper;
@@ -34,12 +56,25 @@ module Cache (Entry : Entry) = struct
   type t = {
     capacity: size;
     entries: (key_wrapper, entry) Hashtbl.t;
+    can_collect: bool ref;
+    num_added: int ref;
+    num_collected: int ref;
+    num_collections: int ref;
   }
+
+  type element = Element : ('a Entry.key * 'a Entry.value) -> element
 
   let make_entry value = { frequency = ref 0; value }
 
   let make ~(max_size : size) : t =
-    { capacity = max_size; entries = Hashtbl.Poly.create () }
+    {
+      capacity = max_size;
+      entries = Hashtbl.create (module KeyWrapper);
+      can_collect = ref true;
+      num_added = ref 0;
+      num_collected = ref 0;
+      num_collections = ref 0;
+    }
 
   let clear (t : t) : unit = Hashtbl.clear t.entries
 
@@ -51,10 +86,20 @@ module Cache (Entry : Entry) = struct
       So before collection: size = 2 * capacity
       After collection: size = capacity (with the most frequently
       used objects) *)
-  let collect { entries; capacity } =
-    if Hashtbl.length entries < 2 * capacity then
+  let collect
+      {
+        can_collect;
+        entries;
+        capacity;
+        num_collected;
+        num_collections;
+        num_added = _;
+      } =
+    if (not !can_collect) || Hashtbl.length entries < 2 * capacity then
       ()
-    else
+    else begin
+      incr num_collections;
+      let prev_length = Hashtbl.length entries in
       let sorted_by_freq =
         (* bucket sort *)
         Hashtbl.fold
@@ -62,25 +107,34 @@ module Cache (Entry : Entry) = struct
             RevIMap.add
               !frequency
               ((key, value)
-               :: (RevIMap.find_opt !frequency m |> Option.value ~default:[]))
+              :: (RevIMap.find_opt !frequency m |> Option.value ~default:[]))
               m)
           entries
           ~init:RevIMap.empty
       in
       Hashtbl.clear entries;
-      try
-        ignore
-        @@ RevIMap.fold
-             (fun _freq values count ->
-               List.fold values ~init:count ~f:(fun count (key, value) ->
-                   Hashtbl.set entries ~key ~data:(make_entry value);
-                   let count = count + 1 in
-                   if count >= capacity then raise Done;
-                   count))
-             sorted_by_freq
-             0
-      with
-      | Done -> ()
+      begin
+        try
+          ignore
+          @@ RevIMap.fold
+               (fun _freq values count ->
+                 List.fold values ~init:count ~f:(fun count (key, value) ->
+                     Hashtbl.set entries ~key ~data:(make_entry value);
+                     let count = count + 1 in
+                     if count >= capacity then raise Done;
+                     count))
+               sorted_by_freq
+               0
+        with
+        | Done -> ()
+      end;
+      num_collected := !num_collected + prev_length - Hashtbl.length entries
+    end
+
+  let without_collections (t : t) ~(f : unit -> 'a) : 'a =
+    let prev = !(t.can_collect) in
+    t.can_collect := false;
+    Utils.try_finally ~f ~finally:(fun () -> t.can_collect := prev)
 
   let add (type a) (t : t) ~(key : a Entry.key) ~(value : a Entry.value) : unit
       =
@@ -91,13 +145,26 @@ module Cache (Entry : Entry) = struct
       incr frequency;
       if phys_equal (Obj.magic value' : a Entry.value) value then
         ()
-      else
+      else begin
         Hashtbl.set
           t.entries
           ~key
           ~data:{ frequency; value = Value_wrapper value }
+      end
     | None ->
+      incr t.num_added;
       Hashtbl.set t.entries ~key ~data:(make_entry (Value_wrapper value))
+
+  let find (type a) (t : t) ~(key : a Entry.key) : a Entry.value option =
+    match Hashtbl.find t.entries (Key key) with
+    | None -> None
+    | Some { value = Value_wrapper value; frequency = _ } ->
+      let value = (Obj.magic value : a Entry.value) in
+      Some value
+
+  let keys_as_log_strings (t : t) : string list =
+    Hashtbl.keys t.entries
+    |> List.map ~f:(fun (Key key) -> Entry.key_to_log_string key)
 
   let find_or_add
       (type a)
@@ -136,9 +203,27 @@ module Cache (Entry : Entry) = struct
   let remove (t : t) ~(key : 'a Entry.key) : unit =
     Hashtbl.remove t.entries (Key key)
 
-  let get_telemetry (_ : t) ~(key : string) (telemetry : Telemetry.t) :
-      Telemetry.t =
-    telemetry |> Telemetry.string_ ~key ~value:"LFU telemetry not implemented"
+  let fold (t : t) ~(init : 'acc) ~(f : element -> 'acc -> 'acc) : 'acc =
+    Hashtbl.fold t.entries ~init ~f:(fun ~key ~data acc ->
+        let (Key key, Value_wrapper value) = (key, data.value) in
+        f (Element (key, Obj.magic value)) acc)
 
-  let reset_telemetry (_ : t) : unit = ()
+  let get_telemetry (t : t) ~(key : string) (telemetry : Telemetry.t) :
+      Telemetry.t =
+    Telemetry.object_
+      telemetry
+      ~key
+      ~value:
+        (Telemetry.create ()
+        |> Telemetry.int_ ~key:"num_added" ~value:!(t.num_added)
+        |> Telemetry.int_ ~key:"num_collected" ~value:!(t.num_collected)
+        |> Telemetry.int_ ~key:"num_collections" ~value:!(t.num_collections)
+        |> Telemetry.int_ ~key:"capacity" ~value:t.capacity
+        |> Telemetry.int_ ~key:"length" ~value:(length t))
+
+  let reset_telemetry (t : t) : unit =
+    t.num_added := 0;
+    t.num_collected := 0;
+    t.num_collections := 0;
+    ()
 end

@@ -1,0 +1,2 @@
+WARN: File "aliased_private_properties_01.good.php", line 19, characters 13-13:
+Duplicated property `i` in `C` (defined in `C` and `T`): all instances will be aliased at runtime (Warn[12008])

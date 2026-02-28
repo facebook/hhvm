@@ -2,13 +2,13 @@
 
 -- Testing array_combine() function with Zero arguments --
 
-Warning: array_combine() expects exactly 2 parameters, 0 given in %s/array_combine_error1.php on line 12
+Warning: array_combine() expects exactly 2 positional parameters, 0 given in %s/array_combine_error1.php on line 12
 
 -- Testing array_combine() function with more than expected no. of arguments --
 
-Warning: array_combine() expects exactly 2 parameters, 3 given in %s/array_combine_error1.php on line 19
+Warning: array_combine() expects exactly 2 positional parameters, 3 given in %s/array_combine_error1.php on line 19
 
 -- Testing array_combine() function with less than expected no. of arguments --
 
-Warning: array_combine() expects exactly 2 parameters, 1 given in %s/array_combine_error1.php on line 24
+Warning: array_combine() expects exactly 2 positional parameters, 1 given in %s/array_combine_error1.php on line 24
 Done

@@ -1,0 +1,13 @@
+*** Testing exif_tagname() : different types for index argument ***
+
+--- Testing exif_tagname() by supplying different values for 'index' argument ---
+-- Iteration 1 --
+bool(false)
+-- Iteration 2 --
+bool(false)
+-- Iteration 3 --
+bool(false)
+-- Iteration 4 --
+bool(false)
+Done
+===Done===

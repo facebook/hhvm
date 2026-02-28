@@ -51,6 +51,15 @@ void HHVM_FUNCTION(
     bool strict_write,
     bool oneway = false);
 
+void HHVM_FUNCTION(
+    thrift_protocol_write_binary_struct,
+    const Object& transportobj,
+    const Object& request_struct);
+
+String HHVM_FUNCTION(
+    thrift_protocol_write_binary_struct_to_string,
+    const Object& request_struct);
+
 Object HHVM_FUNCTION(
     thrift_protocol_read_binary,
     const Object& transportobj,
@@ -64,16 +73,35 @@ Variant HHVM_FUNCTION(
     const String& obj_typename,
     int64_t options);
 
+
+Object HHVM_FUNCTION(
+    thrift_protocol_read_binary_struct_from_string,
+    const String& serialized,
+    const String& obj_typename,
+    int64_t options);
+
 int64_t HHVM_FUNCTION(thrift_protocol_set_compact_version, int64_t version);
 
 void HHVM_FUNCTION(
-    thrift_protocol_write_compact,
+    thrift_protocol_write_compact2,
     const Object& transportobj,
     const String& method_name,
     int64_t msgtype,
     const Object& request_struct,
     int64_t seqid,
-    bool oneway = false);
+    bool oneway = false,
+    int64_t version = 2);
+
+void HHVM_FUNCTION(
+    thrift_protocol_write_compact_struct,
+    const Object& transportobj,
+    const Object& request_struct,
+    int64_t version = 2);
+
+String HHVM_FUNCTION(
+    thrift_protocol_write_compact_struct_to_string,
+    const Object& request_struct,
+    int64_t version);
 
 Variant HHVM_FUNCTION(
     thrift_protocol_read_compact,
@@ -85,16 +113,34 @@ Object HHVM_FUNCTION(
     thrift_protocol_read_compact_struct,
     const Object& transportobj,
     const String& obj_typename,
-    int64_t options);
+    int64_t options,
+    int64_t version = 2);
+
+Object HHVM_FUNCTION(
+    thrift_protocol_read_compact_struct_from_string,
+    const String& serialized,
+    const String& obj_typename,
+    int64_t options,
+    int64_t version = 2);
+
+///////////////////////////////////////////////////////////////////////////////
+// Helper functions for compact serialization and deserialization
+
+Object compact_deserialize_from_string(
+    const String& serialized,
+    const String& thrift_typename,
+    int64_t options = 0, int64_t version = 2);
+
+String compact_serialize_to_string(
+                   const Object& thrift_struct,
+                   int64_t version = 2);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct InteractionId {
+struct InteractionId : SystemLib::ClassLoader<"InteractionId"> {
   static Object newInstance() {
-    return Object{PhpClass()};
+    return Object{classof()};
   }
-
-  static Class* PhpClass();
 
   ~InteractionId() {
     sweep();
@@ -125,9 +171,7 @@ struct InteractionId {
 
 /////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_RpcOptions("RpcOptions");
-
-struct RpcOptions {
+struct RpcOptions : SystemLib::ClassLoader<"RpcOptions"> {
   RpcOptions() {}
   RpcOptions& operator=(const RpcOptions& that_) {
     return *this;
@@ -139,16 +183,8 @@ struct RpcOptions {
 
   void close(bool /*sweeping*/ = false) {}
 
-  static Class* PhpClass() {
-    if (!c_RpcOptions) {
-      c_RpcOptions = Class::lookup(s_RpcOptions.get());
-      assert(c_RpcOptions);
-    }
-    return c_RpcOptions;
-  }
-
   static Object newInstance() {
-    return Object{PhpClass()};
+    return Object{classof()};
   }
 
   static RpcOptions* GetDataOrThrowException(ObjectData* object_) {
@@ -156,7 +192,7 @@ struct RpcOptions {
       throw_null_pointer_exception();
       not_reached();
     }
-    if (!object_->getVMClass()->classofNonIFace(PhpClass())) {
+    if (!object_->getVMClass()->classofNonIFace(classof())) {
       raise_error("RpcOptions expected");
       not_reached();
     }
@@ -166,7 +202,6 @@ struct RpcOptions {
   apache::thrift::RpcOptions rpcOptions;
 
  private:
-  static Class* c_RpcOptions;
   TYPE_SCAN_IGNORE_ALL;
 };
 
@@ -190,22 +225,22 @@ struct TClientStreamError {
         },
         [&](apache::thrift::detail::EncodedStreamError& err) {
           auto& payload = err.encoded;
-          DCHECK(payload.metadata.payloadMetadata_ref().has_value());
+          DCHECK(payload.metadata.payloadMetadata().has_value());
           DCHECK_EQ(
-              payload.metadata.payloadMetadata_ref()->getType(),
-              apache::thrift::PayloadMetadata::exceptionMetadata);
+              payload.metadata.payloadMetadata()->getType(),
+              apache::thrift::PayloadMetadata::Type::exceptionMetadata);
           auto& exceptionMetadataBase =
-              payload.metadata.payloadMetadata_ref()->get_exceptionMetadata();
+              payload.metadata.payloadMetadata()->get_exceptionMetadata();
           if (auto exceptionMetadataRef =
-                  exceptionMetadataBase.metadata_ref()) {
+                  exceptionMetadataBase.metadata()) {
             if (exceptionMetadataRef->getType() ==
-                apache::thrift::PayloadExceptionMetadata::declaredException) {
+                apache::thrift::PayloadExceptionMetadata::Type::declaredException) {
               msgBuffer = std::move(payload.payload);
               if (!msgBuffer) {
                 msgStr = "Failed to parse declared exception";
               }
             } else {
-              msgStr = exceptionMetadataBase.what_utf8_ref().value_or("");
+              msgStr = exceptionMetadataBase.what_utf8().value_or("");
             }
           } else {
             msgStr = "Missing payload exception metadata";
@@ -216,7 +251,7 @@ struct TClientStreamError {
           apache::thrift::CompactProtocolReader reader;
           reader.setInput(err.encoded.get());
           streamRpcError.read(&reader);
-          msgStr = streamRpcError.what_utf8_ref().value_or("");
+          msgStr = streamRpcError.what_utf8().value_or("");
         },
         [](...) {});
 
@@ -230,9 +265,7 @@ struct TClientStreamError {
   bool isEncoded_;
 };
 
-const StaticString s_TClientBufferedStream("TClientBufferedStream");
-
-struct TClientBufferedStream {
+struct TClientBufferedStream : SystemLib::ClassLoader<"TClientBufferedStream"> {
   TClientBufferedStream() = default;
   TClientBufferedStream(const TClientBufferedStream&) = delete;
   TClientBufferedStream& operator=(const TClientBufferedStream&) = delete;
@@ -265,32 +298,38 @@ struct TClientBufferedStream {
   }
 
   bool shouldRequestMore() {
-    return (outstanding_ <= bufferOptions_.chunkSize / 2) ||
-        (payloadDataSize_ >= kRequestCreditPayloadSize);
+    if (outstanding_ <= bufferOptions_.chunkSize / 2) {
+      return true;
+    }
+    return use16KBBufferingPolicy_ && (payloadDataSize_ >= kRequestCreditPayloadSize);
   }
 
   BufferAndErrorPair clientQueueToVec() {
     std::vector<std::unique_ptr<folly::IOBuf>> bufferVec;
     TClientStreamError error;
     while (!queue_.empty()) {
-      auto& payload = queue_.front();
-      if (!payload.hasValue() && !payload.hasException()) {
-        queue_.pop();
-        endStream();
-        break;
-      }
-      if (payload.hasException()) {
-        error = TClientStreamError::create(payload.exception());
-        queue_.pop();
-        endStream();
-        break;
-      }
-      if (payload->payload) {
-        payloadDataSize_ += payload->payload->computeChainDataLength();
-        bufferVec.push_back(std::move(payload->payload));
-        --outstanding_;
-      }
+      auto& message = queue_.front();
+      bool streamEnded = folly::variant_match(
+          message,
+          [&](apache::thrift::StreamMessage::PayloadOrError& payloadOrError) {
+            auto& payload = payloadOrError.streamPayloadTry;
+            if (payload.hasException()) {
+              error = TClientStreamError::create(payload.exception());
+              return true;
+            }
+            if (payload->payload) {
+              payloadDataSize_ += payload->payload->computeChainDataLength();
+              bufferVec.push_back(std::move(payload->payload));
+              --outstanding_;
+            }
+            return false;
+          },
+          [&](apache::thrift::StreamMessage::Complete) { return true; });
       queue_.pop();
+      if (streamEnded) {
+        endStream();
+        break;
+      }
       if (shouldRequestMore()) {
         break;
       }
@@ -298,16 +337,8 @@ struct TClientBufferedStream {
     return std::make_pair(std::move(bufferVec), std::move(error));
   }
 
-  static Class* PhpClass() {
-    if (!c_TClientBufferedStream) {
-      c_TClientBufferedStream = Class::lookup(s_TClientBufferedStream.get());
-      assert(c_TClientBufferedStream);
-    }
-    return c_TClientBufferedStream;
-  }
-
   static Object newInstance() {
-    return Object{PhpClass()};
+    return Object{classof()};
   }
 
   static TClientBufferedStream* GetDataOrThrowException(ObjectData* object_) {
@@ -315,7 +346,7 @@ struct TClientBufferedStream {
       throw_null_pointer_exception();
       not_reached();
     }
-    if (!object_->getVMClass()->classofNonIFace(PhpClass())) {
+    if (!object_->getVMClass()->classofNonIFace(classof())) {
       raise_error("TClientBufferedStream expected");
       not_reached();
     }
@@ -324,6 +355,7 @@ struct TClientBufferedStream {
 
  private:
   Object genNext();
+  void disable16KBBufferingPolicy();
 
  public:
   apache::thrift::detail::ClientStreamBridge::ClientPtr streamBridge_;
@@ -331,9 +363,8 @@ struct TClientBufferedStream {
   apache::thrift::detail::ClientStreamBridge::ClientQueue queue_;
   int32_t outstanding_ = 0;
   size_t payloadDataSize_ = 0;
+  bool use16KBBufferingPolicy_ = true;
   static constexpr size_t kRequestCreditPayloadSize = 16384;
-
-  static Class* c_TClientBufferedStream;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -341,9 +372,7 @@ struct TClientBufferedStream {
 using TClientSinkCreditsOrFinalResponse =
     std::variant<uint64_t, std::unique_ptr<folly::IOBuf>, TClientStreamError>;
 
-const StaticString s_TClientSink("TClientSink");
-
-struct TClientSink {
+struct TClientSink : SystemLib::ClassLoader<"TClientSink"> {
   TClientSink() = default;
   TClientSink(const TClientSink&) = delete;
   TClientSink& operator=(const TClientSink&) = delete;
@@ -372,16 +401,8 @@ struct TClientSink {
     }
   }
 
-  static Class* PhpClass() {
-    if (!c_TClientSink) {
-      c_TClientSink = Class::lookup(s_TClientSink.get());
-      assert(c_TClientSink);
-    }
-    return c_TClientSink;
-  }
-
   static Object newInstance() {
-    return Object{PhpClass()};
+    return Object{classof()};
   }
 
   static TClientSink* GetDataOrThrowException(ObjectData* object_) {
@@ -389,7 +410,7 @@ struct TClientSink {
       throw_null_pointer_exception();
       not_reached();
     }
-    if (!object_->getVMClass()->classofNonIFace(PhpClass())) {
+    if (!object_->getVMClass()->classofNonIFace(classof())) {
       raise_error("TClientSink expected");
       not_reached();
     }
@@ -406,11 +427,13 @@ struct TClientSink {
       auto& message = creditsQueue_.front();
       folly::variant_match(
           message,
-          [&](folly::Try<apache::thrift::StreamPayload>& payload) {
-            response = std::move(payload);
+          [&](apache::thrift::StreamMessage::PayloadOrError& payloadOrError) {
+            response = std::move(payloadOrError.streamPayloadTry);
             responseAvailable = true;
           },
-          [&](uint64_t n) { credits += n; });
+          [&](apache::thrift::StreamMessage::RequestN& requestN) {
+            credits += requestN.n;
+          });
       creditsQueue_.pop();
     }
     if (responseAvailable) {
@@ -429,7 +452,6 @@ struct TClientSink {
 
  public:
   apache::thrift::detail::ClientSinkBridge::Ptr sinkBridge_;
-  static Class* c_TClientSink;
 };
 } // namespace thrift
 

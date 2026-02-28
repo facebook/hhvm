@@ -1,2 +1,2 @@
-File "test_class.php", line 4, characters 12-19:
+ERROR: File "test_class.php", line 4, characters 12-19:
 Unbound name: `MCRouter` (an object type) (Naming[2049])

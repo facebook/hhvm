@@ -2,7 +2,7 @@
 $key = openssl_pkey_get_private('file://' . dirname(__FILE__) . '/private_ec.key');
 var_dump($key);
 
-$config_arg = darray["config" => __DIR__ . DIRECTORY_SEPARATOR . "openssl.cnf"];
+$config_arg = dict["config" => __DIR__ . DIRECTORY_SEPARATOR . "openssl.cnf"];
 
 $output = null;
 var_dump(openssl_pkey_export($key, inout $output, '', $config_arg));
@@ -34,5 +34,5 @@ $details = openssl_pkey_get_details(openssl_pkey_get_private('file://' . $tempna
 var_dump(OPENSSL_KEYTYPE_EC === $details['type']);
 
 // Clean the temporary file
-@unlink($tempname);
+unlink($tempname);
 }

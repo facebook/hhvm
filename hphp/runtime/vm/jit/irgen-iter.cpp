@@ -14,15 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
-
 #include "hphp/runtime/vm/jit/array-iter-profile.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
-
-#include "hphp/util/struct-log.h"
 
 namespace HPHP::jit::irgen {
 
@@ -32,60 +29,75 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-// `doneOffset` is the relative offset to jump to if the base has no elements.
-// `result` is a TBool that is true if the iterator has more items.
-void implIterInitJmp(IRGS& env, Offset doneOffset, SSATmp* result) {
-  auto const targetOffset = bcOff(env) + doneOffset;
-  auto const target = getBlock(env, targetOffset);
-  assertx(target != nullptr);
-  gen(env, JmpZero, target, result);
+const StaticString s_ArrayIterProfile{"ArrayIterProfile"};
+
+ArrayIterProfile::Result profileIterInit(IRGS& env, SSATmp* base) {
+  auto const generic = ArrayIterProfile::Result{};
+  if (base->isA(TObj)) return generic;
+  assertx(base->type().subtypeOfAny(TVec, TDict, TKeyset));
+
+  auto const profile = TargetProfile<ArrayIterProfile>(
+    env.context,
+    env.irb->curMarker(),
+    s_ArrayIterProfile.get()
+  );
+
+  if (profile.profiling()) {
+    gen(env, ProfileIterInit, RDSHandleData { profile.handle() }, base);
+  }
+
+  if (!profile.optimizing()) return generic;
+  auto const result = profile.data().result();
+  return result.value_type == TBottom ? generic : result;
 }
 
-// `loopOffset` is the relative offset to jump to if the base has more elements.
+// `doneOffset` is the absolute offset to jump to if the base has no elements.
 // `result` is a TBool that is true if the iterator has more items.
-void implIterNextJmp(IRGS& env, Offset loopOffset, SSATmp* result) {
-  auto const targetOffset = bcOff(env) + loopOffset;
-  auto const target = getBlock(env, targetOffset);
-  assertx(target != nullptr);
+void implIterInitJmp(IRGS& env, Offset doneOffset, SSATmp* result,
+                     uint32_t iterId) {
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      gen(env, JmpZero, taken, result);
+    },
+    [&] {
+      // Empty iteration- the iterator is dead
+      gen(env, KillIter, IterId{iterId}, fp(env));
+      gen(env, Jmp, getBlock(env, doneOffset));
+    }
+  );
+}
 
-  if (loopOffset <= 0) {
+// `bodyOffset` is the absolute offset to jump to if the base has more elements.
+// `result` is a TBool that is true if the iterator has more items.
+void implIterNextJmp(IRGS& env, Offset bodyOffset, SSATmp* result,
+                     uint32_t iterId) {
+  if (bodyOffset <= bcOff(env)) {
     ifThen(env,
       [&](Block* taken) {
         gen(env, JmpNZero, taken, result);
       },
       [&]{
-        surpriseCheckWithTarget(env, targetOffset);
-        gen(env, Jmp, target);
+        surpriseCheckWithTarget(env, bodyOffset);
+        gen(env, Jmp, getBlock(env, bodyOffset));
       }
     );
   } else {
-    gen(env, JmpNZero, target, result);
+    gen(env, JmpNZero, getBlock(env, bodyOffset), result);
   }
+
+  // Fallthrough to next block the iterator is dead
+  gen(env, KillIter, IterId{iterId}, fp(env));
 }
 
 // If the iterator base is an empty array-like, this method will generate
 // trivial IR for the loop (just jump directly to done) and return true.
-bool iterInitEmptyBase(IRGS& env, Offset doneOffset, SSATmp* base, bool local) {
+bool iterInitEmptyBase(IRGS& env, Offset doneOffset, SSATmp* base) {
   auto const empty = base->hasConstVal(TArrLike) && base->arrLikeVal()->empty();
   if (!empty) return false;
 
-  // NOTE: `base` is static, so we can skip the dec-ref for non-local iters.
-  if (!local) discard(env, 1);
-  auto const targetOffset = bcOff(env) + doneOffset;
-  auto const target = getBlock(env, targetOffset);
-  assertx(target != nullptr);
-  gen(env, Jmp, target);
+  gen(env, Jmp, getBlock(env, doneOffset));
   return true;
-}
-
-// For profiling tracelets, we deliberately widen the types of locals used
-// as a local iterator base to make it easier to merge tracelets later.
-//
-// This pessimization only affects region formation. We still track types
-// precisely when we optimize the IRUnit.
-void widenLocalIterBase(IRGS& env, int baseLocalId) {
-  if (env.context.kind != TransKind::Profile) return;
-  env.irb->fs().clearForUnprocessedPred();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -94,75 +106,216 @@ void widenLocalIterBase(IRGS& env, int baseLocalId) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitIterInit(IRGS& env, IterArgs ita, Offset doneOffset) {
-  auto const base = topC(env, BCSPRelOffset{0}, DataTypeIterBase);
-  if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInit);
-  if (iterInitEmptyBase(env, doneOffset, base, false)) return;
-  specializeIterInit(env, doneOffset, ita, kInvalidId);
+void emitIterBase(IRGS& env) {
+  auto const base = topC(env);
+  if (base->type().subtypeOfAny(TArrLike)) return;
+  if (!base->type().subtypeOfAny(TObj)) return interpOne(env);
 
-  discard(env, 1);
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  if (auto cls = base->type().clsSpec().cls()) {
+    if (!env.irb->constrainValue(base, GuardConstraint(cls).setWeak())) {
+      using CT = CollectionType;
 
-  auto const op = ita.hasKey() ? IterInitK : IterInit;
-  auto const data = IterData(ita);
-  auto const result = gen(env, op, data, base, fp(env));
-  implIterInitJmp(env, doneOffset, result);
-}
-
-void emitIterNext(IRGS& env, IterArgs ita, Offset loopOffset) {
-  if (specializeIterNext(env, loopOffset, ita, kInvalidId)) return;
-
-  auto const op = ita.hasKey() ? IterNextK : IterNext;
-  auto const result = gen(env, op, IterData(ita), fp(env));
-  implIterNextJmp(env, loopOffset, result);
-}
-
-void emitLIterInit(IRGS& env, IterArgs ita,
-                   int32_t baseLocalId, Offset doneOffset) {
-  auto const base = ldLoc(env, baseLocalId, DataTypeIterBase);
-  if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInit);
-  if (iterInitEmptyBase(env, doneOffset, base, true)) return;
-  specializeIterInit(env, doneOffset, ita, baseLocalId);
-
-  if (base->isA(TObj)) gen(env, IncRef, base);
-  auto const op = base->isA(TArrLike)
-    ? (ita.hasKey() ? LIterInitK : LIterInit)
-    : (ita.hasKey() ? IterInitK : IterInit);
-  auto const data = IterData(ita);
-  auto const result = gen(env, op, data, base, fp(env));
-  widenLocalIterBase(env, baseLocalId);
-  implIterInitJmp(env, doneOffset, result);
-}
-
-void emitLIterNext(IRGS& env, IterArgs ita,
-                   int32_t baseLocalId, Offset loopOffset) {
-  if (specializeIterNext(env, loopOffset, ita, baseLocalId)) return;
-
-  auto const base = ldLoc(env, baseLocalId, DataTypeIterBase);
-  if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterNext);
-
-  auto const result = [&]{
-    if (base->isA(TArrLike)) {
-      auto const op = ita.hasKey() ? LIterNextK : LIterNext;
-      return gen(env, op, IterData(ita), base, fp(env));
+      if (cls->classof(SystemLib::getHH_IteratorClass())) {
+        // nothing to do
+        return;
+      } else if (collections::isType(cls,
+                                     CT::Map, CT::ImmMap,
+                                     CT::Set, CT::ImmSet)) {
+        popC(env);
+        pushIncRef(env, gen(env, LdColDict, base));
+        decRef(env, base);
+        return;
+      } else if (collections::isType(cls, CT::Vector, CT::ImmVector)) {
+        // Can't use ConstVector, as that includes Pair.
+        popC(env);
+        pushIncRef(env, gen(env, LdColVec, base));
+        decRef(env, base);
+        return;
+      }
     }
-    auto const op = ita.hasKey() ? IterNextK : IterNext;
-    return gen(env, op, IterData(ita), fp(env));
-  }();
-  widenLocalIterBase(env, baseLocalId);
-  implIterNextJmp(env, loopOffset, result);
+  }
+
+  auto const ctx = curClass(env) ? cns(env, curClass(env)) : cns(env, nullptr);
+  auto const extracted = gen(env, IterExtractBase, base, ctx);
+  popC(env);
+  push(env, extracted);
+  decRef(env, base);
+}
+
+namespace {
+
+const StaticString s_current("current");
+const StaticString s_key("key");
+
+void emitIterObjGet(IRGS& env, SSATmp* base, const StringData* methodName) {
+  assertx(base->isA(TObj));
+
+  pushIncRef(env, base);
+  push(env, cns(env, TUninit));
+  updateStackOffset(env);
+
+  auto const fca = FCallArgs(
+    FCallArgsFlags::SkipRepack | FCallArgsFlags::EnforceMutableReturn,
+    0, 1, nullptr, nullptr, kInvalidId, kInvalidOffset, nullptr
+  );
+  auto const subop = ObjMethodOp::NullThrows;
+  emitFCallObjMethodD(env, fca, staticEmptyString(), subop, methodName);
+}
+
+}
+
+void emitIterGetKey(IRGS& env, IterArgs ita, int32_t baseLocalId) {
+  auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
+  assertx(base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj));
+  if (base->isA(TObj)) return emitIterObjGet(env, base, s_key.get());
+
+  auto const pos = gen(env, LdIterPos, IterId(ita.iterId), fp(env));
+  auto const baseConst = has_flag(ita.flags, IterArgs::Flags::BaseConst);
+
+  if (!allowBespokeArrayLikes() || base->type().arrSpec().vanilla()) {
+    if (base->isA(TVec)) {
+      push(env, pos);
+    } else if (base->isA(TDict)) {
+      auto const elm = baseConst
+        ? gen(env, IntAsPtrToElem, pos)
+        : gen(env, GetDictPtrIter, base, pos);
+      pushIncRef(env, gen(env, LdPtrIterKey, TInt | TStr, base, elm));
+    } else {
+      assertx(base->isA(TKeyset));
+      auto const elm = baseConst
+        ? gen(env, IntAsPtrToElem, pos)
+        : gen(env, GetKeysetPtrIter, base, pos);
+      pushIncRef(env, gen(env, LdPtrIterVal, TInt | TStr, base, elm));
+    }
+    return;
+  }
+
+  if (base->type().arrSpec().bespoke()) {
+    pushIncRef(env, gen(env, BespokeIterGetKey, base, pos));
+    return;
+  }
+
+  pushIncRef(env, gen(env, IterGetKeyArr, IterData(ita), base, pos));
+}
+
+void emitIterGetValue(IRGS& env, IterArgs ita, int32_t baseLocalId) {
+  auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
+  assertx(base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj));
+  if (base->isA(TObj)) return emitIterObjGet(env, base, s_current.get());
+
+  auto const pos = gen(env, LdIterPos, IterId(ita.iterId), fp(env));
+  auto const baseConst = has_flag(ita.flags, IterArgs::Flags::BaseConst);
+  auto const withKeys = has_flag(ita.flags, IterArgs::Flags::WithKeys);
+
+  if (!allowBespokeArrayLikes() || base->type().arrSpec().vanilla()) {
+    if (base->isA(TVec)) {
+      if (baseConst && !withKeys && VanillaVec::stores_unaligned_typed_values) {
+        auto const elm = gen(env, IntAsPtrToElem, pos);
+        pushIncRef(env, gen(env, LdPtrIterVal, TInitCell, base, elm));
+      } else {
+        pushIncRef(env, gen(env, LdVecElem, base, pos));
+      }
+    } else if (base->isA(TDict)) {
+      auto const elm = baseConst
+        ? gen(env, IntAsPtrToElem, pos)
+        : gen(env, GetDictPtrIter, base, pos);
+      pushIncRef(env, gen(env, LdPtrIterVal, TInitCell, base, elm));
+    } else {
+      assertx(base->isA(TKeyset));
+      auto const elm = baseConst
+        ? gen(env, IntAsPtrToElem, pos)
+        : gen(env, GetKeysetPtrIter, base, pos);
+      pushIncRef(env, gen(env, LdPtrIterVal, TInt | TStr, base, elm));
+    }
+    return;
+  }
+
+  if (base->type().arrSpec().bespoke()) {
+    pushIncRef(env, gen(env, BespokeIterGetVal, base, pos));
+    return;
+  }
+
+  pushIncRef(env, gen(env, IterGetValArr, IterData(ita), base, pos));
+}
+
+void emitIterSetValue(IRGS& env, IterArgs ita, int32_t baseLocalId) {
+  auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
+  auto const val = popC(env, DataTypeGeneric);
+  assertx(base->type().subtypeOfAny(TVec, TDict));
+  assertx(!has_flag(ita.flags, IterArgs::Flags::BaseConst));
+
+  auto const pos = gen(env, LdIterPos, IterId(ita.iterId), fp(env));
+
+  if (!allowBespokeArrayLikes() || base->type().arrSpec().vanilla()) {
+    auto const cow = [&] {
+      return cond(
+        env,
+        [&] (Block* taken) { return gen(env, CheckArrayCOW, taken, base); },
+        [&] (SSATmp* single) {
+          gen(env, StLocMeta, LocalId(baseLocalId), fp(env), single);
+          return single;
+        },
+        [&] {
+          decRefNZ(env, base);
+          auto const copy = gen(env, CopyArray, base);
+          stLocRaw(env, baseLocalId, fp(env), copy);
+          return copy;
+        }
+      );
+    };
+
+    if (base->isA(TVec)) {
+      auto const oldVal = gen(env, LdVecElem, base, pos);
+      auto const cowBase = cow();
+      decRef(env, oldVal);
+      auto const cowElm = gen(env, LdVecElemAddr, cowBase, pos, base);
+      gen(env, StMem, cowElm, val);
+    } else {
+      assertx(base->isA(TDict));
+      auto const oldElm = gen(env, GetDictPtrIter, base, pos);
+      auto const oldVal = gen(env, LdPtrIterVal, TInitCell, base, oldElm);
+      auto const cowBase = cow();
+      decRef(env, oldVal);
+      auto const cowElm = gen(env, GetDictPtrIter, cowBase, pos);
+      auto const updatedBase = gen(env, StPtrIterVal, cowBase, cowElm, val);
+      gen(env, StLoc, LocalId(baseLocalId), fp(env), updatedBase);
+    }
+    return;
+  }
+
+  stLocRaw(env, baseLocalId, fp(env), gen(env, BespokeSetPos, base, pos, val));
+}
+
+void emitIterInit(IRGS& env, IterArgs ita,
+                   int32_t baseLocalId, Offset doneRelOffset) {
+  auto const doneOffset = bcOff(env) + doneRelOffset;
+  auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
+  if (!base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj)) PUNT(IterInit);
+  if (iterInitEmptyBase(env, doneOffset, base)) return;
+  auto const profiledResult = profileIterInit(env, base);
+  auto const done =
+    specializeIterInit(env, doneOffset, ita, base, baseLocalId, profiledResult);
+  if (done) return;
+
+  auto const op = base->isA(TArrLike) ? IterInitArr : IterInitObj;
+  auto const result = gen(env, op, IterData(ita), base, fp(env));
+  implIterInitJmp(env, doneOffset, result, ita.iterId);
+}
+
+void emitIterNext(IRGS& env, IterArgs ita,
+                   int32_t baseLocalId, Offset bodyRelOffset) {
+  auto const bodyOffset = bcOff(env) + bodyRelOffset;
+  auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
+  if (!base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj)) PUNT(IterNext);
+
+  if (specializeIterNext(env, bodyOffset, ita, base, baseLocalId)) return;
+
+  auto const op = base->isA(TArrLike) ? IterNextArr : IterNextObj;
+  auto const result = gen(env, op, IterData(ita), base, fp(env));
+  implIterNextJmp(env, bodyOffset, result, ita.iterId);
 }
 
 void emitIterFree(IRGS& env, int32_t iterId) {
-  gen(env, IterFree, IterId(iterId), fp(env));
-  gen(env, KillIter, IterId(iterId), fp(env));
-}
-
-void emitLIterFree(IRGS& env, int32_t iterId, int32_t baseLocalId) {
-  auto const baseType = env.irb->local(baseLocalId, DataTypeIterBase).type;
-  if (!baseType.subtypeOfAny(TArrLike, TObj)) PUNT(LIterFree);
-  if (!(baseType <= TArrLike)) gen(env, IterFree, IterId(iterId), fp(env));
   gen(env, KillIter, IterId(iterId), fp(env));
 }
 

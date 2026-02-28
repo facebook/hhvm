@@ -1,11 +1,11 @@
-<?hh //strict
+<?hh
 
 /**
  * Shape-like arrays preserve element types - usage that should report errors.
  */
 
 function test(): void {
-  $a = darray[];
+  $a = dict[];
   $a['k1'] = 4;
   $a['k2'] = 'aaa';
   take_string($a['k1']);

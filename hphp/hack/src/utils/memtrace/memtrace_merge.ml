@@ -93,7 +93,7 @@ let () =
   else
     let srcs = List.drop (Array.to_list Sys.argv) 1 in
     (* The ctf-writer requires a seekable output. We'll write to a tempfile, then cat it, then delete it. *)
-    let dst = Caml.Filename.temp_file "memtrace.merged." ".ctf" in
+    let dst = Stdlib.Filename.temp_file "memtrace.merged." ".ctf" in
     Utils.try_finally
       ~f:(fun () ->
         merge_memtraces srcs dst;

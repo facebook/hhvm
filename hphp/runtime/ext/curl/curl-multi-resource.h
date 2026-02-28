@@ -30,7 +30,7 @@ struct CurlMultiResource : SweepableResourceData {
 
   CURLMcode add(CurlResource* curle);
   CURLMcode remove(CurlResource* curle, bool leak = false);
-  Resource find(CURL *cp);
+  OptResource find(CURL *cp);
 
   CURLM* get();
   void check_exceptions();

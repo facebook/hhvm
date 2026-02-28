@@ -1,33 +1,33 @@
 <?hh
 
-function none() {}
+function none() :mixed{}
 
 
 class Foo {
 }
 
-function asdf($pattern) {
+function asdf($pattern) :mixed{
   $len = strlen($pattern);
   $len--;
   echo $len;
   echo "\n";
 }
 
-function main() {
+function main() :mixed{
   $foo = new Foo();
   for ($i=0; $i<100; $i++) {
     try {
       asdf(new Foo());
     } catch (Exception $e) {}
     try {
-      asdf(varray[]);
+      asdf(vec[]);
     } catch (Exception $e) {}
   }
 }
 
 
 
-function main2() {
+function main2() :mixed{
   try {
     echo "foo: " .strlen($x)."\n";
   } catch (Exception $e) {
@@ -49,12 +49,16 @@ function main2() {
     var_dump($e->getMessage());
   }
 }
-<<__EntryPoint>> function main_entry(): void {
-set_error_handler(none<>);
 
-main();
-main();
-main2();
+<<__EntryPoint>>
+function main_entry(): void {
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
+    throw new Exception($errstr);
+  });
 
-echo "done\n";
+  main();
+  main();
+  main2();
+
+  echo "done\n";
 }

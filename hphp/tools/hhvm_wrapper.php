@@ -7,7 +7,8 @@ function my_option_map(): OptionInfoMap {
   return Map {
 'help'            => Pair { 'h', 'Print help message' },
 'bin:'            => Pair { 'b', 'Use a specific HHVM binary' },
-'gdb'             => Pair { 'g', 'Run the whole command in agdb' },
+'gdb'             => Pair { 'g', 'Run the whole command in gdb' },
+'lldb'            => Pair { 'l', 'Run the whole command in lldb' },
 'server'          => Pair { '',  'Run a server, port 80, pwd as the root' },
 'interp'          => Pair { 'i', 'Disable the JIT compiler' },
 'opt-ir'          => Pair { 'o', 'Disable debug assertions in IR output' },
@@ -30,7 +31,6 @@ function my_option_map(): OptionInfoMap {
                             'Which region selector to use (e.g \'method\')' },
 'no-pgo'          => Pair { '',  'Disable PGO' },
 'bespoke:'        => Pair { '',  'Bespoke array mode' },
-'lazyclass'       => Pair { '',  'Enable lazy classes' },
 'hadva'           => Pair { '',  'Enable HAM and automarking' },
 'pgo-threshold:'  => Pair { '',  'PGO threshold to use' },
 'no-obj-destruct' => Pair { '',
@@ -40,9 +40,8 @@ function my_option_map(): OptionInfoMap {
 'hdf[]'           => Pair { '',  'An .hdf configuration file or CLI option' },
 'no-defaults'     => Pair { '',
                             'Do not use the default wrapper runtime options'},
-'build-root:'     => Pair { '',
-                            'Override the default directory for hhvm and hphp'},
 'perf:'           => Pair { '', 'Run perf record'},
+'allow-unstable-features'   => Pair { 'u',  'Allow running unstable features' },
   };
 }
 
@@ -51,30 +50,24 @@ function get_hhvm_path(OptionMap $opts): string {
     return $opts['bin'];
   }
 
-  $root = __DIR__.'/..';
-  $buck = __DIR__.'/../../buck-out/gen/hphp';
-  if (is_dir($buck)) {
-    $root = $buck;
-  }
+  $buck = __DIR__.'/../../buck-out/gen/hphp/hhvm/hhvm/hhvm';
+  $buck2 = __DIR__.'/../../../buck-out/v2/gen/fbcode/hphp/hhvm/out/hhvm';
 
-  $fbbuild = __DIR__.'/../../_bin/hphp';
-  if (is_dir($fbbuild)) {
+  $bins = vec[$buck, $buck2] |> HH\Lib\Vec\filter($$, $bin ==> file_exists($bin));
 
-    if ($root === $buck) {
-      echo "Multiple build directories found.\n";
-      echo " - " . $fbbuild . "\n";
-      echo " - " . $buck . "\n";
-      error("Delete one of them, or use the --build-root flag.");
+  if (HH\Lib\C\is_empty($bins)) {
+    echo "Couldn't find an HHVM binary in the following locations:\n";
+    echo " - " . $buck . "\n";
+    echo " - " . $buck2 . "\n";
+    error("Build HHVM first.");
+  } else if (HH\Lib\C\count($bins) > 1) {
+    echo "Multiple HHVM binaries found:\n";
+    foreach ($bins as $bin) {
+      echo " - " . $bin . "\n";
     }
-
-    $root = $fbbuild;
+    error("Delete one of them or use the --bin flag.");
   }
-
-  if ($opts->containsKey('build-root')) {
-    $root = realpath($opts['build-root']);
-  }
-
-  return $root === $buck ? $root.'/hhvm/hhvm/hhvm' : $root.'/hhvm/hhvm';
+  return $bins[0];
 }
 
 function determine_flags(OptionMap $opts): string {
@@ -155,13 +148,7 @@ function determine_flags(OptionMap $opts): string {
         '-v Eval.BespokeArrayLikeMode='.$mode.' '.
         '-v Eval.ExportLoggingArrayDataPath="/tmp/logging-array-export" '.
         '-v Eval.EmitLoggingArraySampleRate=17 '.
-        '';
-  }
-
-  if ($opts->containsKey('lazyclass')) {
-    $flags .=
-        '-v Eval.EmitClassPointers=2 '.
-        '-v Eval.ClassPassesClassname=true '.
+        '-v Eval.BespokeEscalationSampleRate=1000 '.
         '';
   }
 
@@ -196,6 +183,7 @@ function determine_flags(OptionMap $opts): string {
     'no-pgo'          => '-v Eval.JitPGO=false ',
     'hphpd'           => '-m debug ',
     'server'          => '-m server ',
+    'allow-unstable-features' => '-v Hack.Lang.AllowUnstableFeatures=1 ',
   };
 
   if ($opts->containsKey('pgo-threshold')) {
@@ -279,17 +267,18 @@ function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
     '--hphp '.
     ($unoptimized ? '-v UseHHBBC=0 ' : '').
     ($opts->containsKey('php7') ? '-d hhvm.php7.all=1 ' : '').
-    '-t hhbc -k1 -l3 '.
+    '-l3 '.
     $hphpc_flags.
     argv_for_shell().
     " >$hphp_out 2>&1";
   if ($echo_command) {
     echo "\n", $cmd, "\n";
   }
-  $return_var = -1;
-  system($cmd, inout $return_var);
+  $compile_rv = -1;
+  system($cmd, inout $compile_rv);
 
   $repo=$output_dir.'/hhvm.hhbc';
+  $return_var = -1;
   system("rm -f $hphp_out", inout $return_var);
   if ($echo_command !== true) {
     register_shutdown_function(
@@ -298,6 +287,9 @@ function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
         system("rm -fr $output_dir", inout $return_var);
       },
     );
+    if ($compile_rv !== 0) {
+      exit($compile_rv);
+    }
   }
 
   return $repo;
@@ -349,6 +341,9 @@ function run_hhvm(OptionMap $opts): void {
     create_repo($opts);
     exit(0);
   }
+  if ($opts->containsKey('gdb') && $opts->containsKey('lldb')) {
+      error('Can only specify a single debugger');
+  }
   if ($opts->containsKey('repo')) {
     $flags = repo_auth_flags($flags, (string) $opts['repo']);
   } else if ($opts->containsKey('compile')) {
@@ -360,7 +355,11 @@ function run_hhvm(OptionMap $opts): void {
   }
 
   $pfx = determine_trace_env($opts);
-  $pfx .= $opts->containsKey('gdb') ? 'gdb --args ' : '';
+  if ($opts->containsKey('gdb')) {
+    $pfx .= 'gdb --args ';
+  } else if ($opts->containsKey('lldb')) {
+    $pfx .= 'lldb -- ';
+  }
   if ($opts->containsKey('perf')) {
     $pfx .= 'perf record -g -o ' . $opts['perf'] . ' ';
   }
@@ -370,6 +369,11 @@ function run_hhvm(OptionMap $opts): void {
     $cmd = "$pfx $hhvm $flags";
   } else {
     $cmd = "$pfx $hhvm $flags --file $filename";
+  }
+  if ($opts->containsKey('gdb') || $opts->containsKey('lldb')) {
+    // Trick gdb into thinking gdb_stderr->isatty(), so tui mode can be used.
+    // Also enables lldb to progress after trying to set the target.run-args.
+    $cmd = "script -q --return -c \" $cmd \" /dev/null";
   }
   if ($opts->containsKey('print-command')) {
     echo "\n$cmd\n\n";

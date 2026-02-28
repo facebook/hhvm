@@ -5,9 +5,9 @@ namespace Foo\Bar {
     class ClassB{}
     class ClassC{}
 
-    function fn_a(){ return __FUNCTION__; }
-    function fn_b(){ return __FUNCTION__; }
-    function fn_c(){ return __FUNCTION__; }
+    function fn_a():mixed{ return __FUNCTION__; }
+    function fn_b():mixed{ return __FUNCTION__; }
+    function fn_c():mixed{ return __FUNCTION__; }
 
     const CONST_A = 1;
     const CONST_B = 2;

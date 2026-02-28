@@ -260,39 +260,41 @@ struct ProfData {
   };
 
   static bool triedDeserialization() {
-    return s_triedDeserialization.load(std::memory_order_relaxed);
+    return s_triedDeserialization.load(std::memory_order_acquire);
   }
   static void setTriedDeserialization() {
-    s_triedDeserialization.store(true, std::memory_order_relaxed);
+    s_triedDeserialization.store(true, std::memory_order_release);
+    s_tried_deserialze->setValue(1);
   }
 
   static bool wasDeserialized() {
-    return s_wasDeserialized.load(std::memory_order_relaxed);
+    return s_wasDeserialized.load(std::memory_order_acquire);
   }
   static int64_t buildTime() {
-    return s_buildTime.load(std::memory_order_relaxed);
+    return s_buildTime.load(std::memory_order_acquire);
   }
   static const StringData* buildHost() {
-    return s_buildHost.load(std::memory_order_relaxed);
+    return s_buildHost.load(std::memory_order_acquire);
   }
   static const StringData* tag() {
-    return s_tag.load(std::memory_order_relaxed);
+    return s_tag.load(std::memory_order_acquire);
   }
   static void setDeserialized(const std::string& buildHost,
                               const std::string& tag,
                               int64_t buildTime) {
-    s_buildHost.store(makeStaticString(buildHost), std::memory_order_relaxed);
-    s_tag.store(makeStaticString(tag), std::memory_order_relaxed);
-    s_buildTime.store(buildTime, std::memory_order_relaxed);
-    s_wasDeserialized.store(true, std::memory_order_relaxed);
+    s_buildHost.store(makeStaticString(buildHost), std::memory_order_release);
+    s_tag.store(makeStaticString(tag), std::memory_order_release);
+    s_buildTime.store(buildTime, std::memory_order_release);
+    s_wasDeserialized.store(true, std::memory_order_release);
+    s_deserialize_succ->setValue(1);
   }
 
   static size_t prevProfSize() {
-    return s_prevProfSize.load(std::memory_order_relaxed);
+    return s_prevProfSize.load(std::memory_order_acquire);
   }
   static void setPrevProfSize(size_t s) {
     assertx(isJitSerializing());
-    s_prevProfSize.store(s, std::memory_order_relaxed);
+    s_prevProfSize.store(s, std::memory_order_release);
   }
 
   /*
@@ -303,12 +305,12 @@ struct ProfData {
   TransID allocTransID();
 
   size_t numTransRecs() {
-    folly::SharedMutex::ReadHolder lock{m_transLock};
+    std::shared_lock lock{m_transLock};
     return m_transRecs.size();
   }
 
   ProfTransRec* transRec(TransID id) {
-    folly::SharedMutex::ReadHolder lock{m_transLock};
+    std::shared_lock lock{m_transLock};
     return m_transRecs.at(id).get();
   }
   const ProfTransRec* transRec(TransID id) const {
@@ -317,14 +319,14 @@ struct ProfData {
 
   template<class L>
   void forEachTransRec(L&& body) {
-    folly::SharedMutex::ReadHolder lock{m_transLock};
+    std::shared_lock lock{m_transLock};
     for (auto& rec : m_transRecs) {
       if (rec) body(rec.get());
     }
   }
 
   TransIDVec funcProfTransIDs(FuncId funcId) const {
-    folly::SharedMutex::ReadHolder lock{m_funcProfTransLock};
+    std::shared_lock lock{m_funcProfTransLock};
     auto it = m_funcProfTrans.find(funcId);
     if (it == m_funcProfTrans.end()) return TransIDVec{};
 
@@ -335,7 +337,7 @@ struct ProfData {
    * The absolute number of times that a translation executed.
    */
   int64_t transCounter(TransID id) const {
-    folly::SharedMutex::ReadHolder lock{m_transLock};
+    std::shared_lock lock{m_transLock};
     assertx(id < m_transRecs.size());
     auto const counter = m_counters.get(id);
     auto const initVal = m_counters.getDefault();
@@ -360,7 +362,7 @@ struct ProfData {
    */
   int64_t* transCounterAddr(TransID id) {
     // getAddr() can grow the slab list, so grab a write lock.
-    folly::SharedMutex::WriteHolder lock{m_transLock};
+    std::unique_lock lock{m_transLock};
     return m_counters.getAddr(id);
   }
 
@@ -426,14 +428,18 @@ struct ProfData {
     DEBUG_ONLY auto const previousValue =
       func->atomicFlags().set(Func::Flags::Optimized);
     assertx(!previousValue);
-    m_optimizedFuncCount.fetch_add(1, std::memory_order_relaxed);
+    m_optimizedFuncCount.fetch_add(1, std::memory_order_acq_rel);
+    s_optimized_funcs_counter->increment();
+    // reset the counter for live translations.
+    func->resetJitReqCount();
   }
   void unsetOptimized(FuncId funcId) {
     auto func = Func::fromFuncId(funcId);
     DEBUG_ONLY auto const previousValue =
       func->atomicFlags().unset(Func::Flags::Optimized);
     assertx(previousValue);
-    m_optimizedFuncCount.fetch_sub(1, std::memory_order_relaxed);
+    m_optimizedFuncCount.fetch_sub(1, std::memory_order_acq_rel);
+    s_optimized_funcs_counter->decrement();
   }
   void setOptimized(SrcKey sk) {
     m_optimizedSKs.emplace(sk.toAtomicInt(), true).first->second = true;
@@ -476,11 +482,14 @@ struct ProfData {
     }
 
     auto const bcSize = func->bclen();
-    m_profilingBCSize.fetch_add(bcSize, std::memory_order_relaxed);
+    m_profilingBCSize.fetch_add(bcSize, std::memory_order_acq_rel);
 
     static auto const bcSizeCounter =
       ServiceData::createCounter("jit.profile-bc-size");
+    static auto const profilingFuncsCounter =
+      ServiceData::createCounter("jit.profiling_funcs");
     bcSizeCounter->setValue(profilingBCSize());
+    profilingFuncsCounter->increment();
   }
 
   template<class Fn>
@@ -500,7 +509,7 @@ struct ProfData {
     return m_profilingFuncs.size();
   }
   int64_t optimizedFuncs() const {
-    return m_optimizedFuncCount.load(std::memory_order_relaxed);
+    return m_optimizedFuncCount.load(std::memory_order_acquire);
   }
 
   /*
@@ -508,7 +517,7 @@ struct ProfData {
    * profiling.
    */
   int64_t profilingBCSize() const {
-    return m_profilingBCSize.load(std::memory_order_relaxed);
+    return m_profilingBCSize.load(std::memory_order_acquire);
   }
 
   /*
@@ -522,7 +531,7 @@ struct ProfData {
   /*
    * Check if the profile counters should be reset and, if so, do it.  This is
    * used in server mode, and it triggers once the server executes
-   * RuntimeOption::EvalJitResetProfCountersRequest requests.  In the requests
+   * Cfg::Jit::ResetProfCountersRequest requests.  In the requests
    * executed before reaching this limit, the profile counters are set very high
    * so that no retranslation in optimized mode is triggered.  This allows more
    * profile translations to be produced before the counters effectively start,
@@ -585,7 +594,7 @@ struct ProfData {
 
     /* implicit */ operator uint64_t() const {
       assertx(nArgs >= 0);
-      return (uint64_t(func.toInt()) << 32) | nArgs;
+      return (uint64_t(func.toStableInt()) << 32) | nArgs;
     }
   };
 
@@ -662,6 +671,17 @@ struct ProfData {
   static std::atomic<StringData*> s_tag;
   static std::atomic<int64_t> s_buildTime;
   static std::atomic<size_t> s_prevProfSize;
+
+  /*
+   * profiling counter for number of optimized funcs
+   */
+  static ServiceData::ExportedCounter* s_optimized_funcs_counter;
+
+  /*
+   * Counters to indicate jumpstart attempt/success.
+   */
+  static ServiceData::ExportedCounter* s_tried_deserialze;
+  static ServiceData::ExportedCounter* s_deserialize_succ;
 };
 
 //////////////////////////////////////////////////////////////////////

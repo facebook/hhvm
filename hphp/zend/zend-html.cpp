@@ -750,8 +750,7 @@ char *string_html_encode(const char *input, int &len,
         p++;
         break;
       }
-
-      // fallthrough
+      [[fallthrough]];
     default: {
       if (LIKELY(c < 0x80)) {
         *q++ = c;
@@ -767,8 +766,8 @@ char *string_html_encode(const char *input, int &len,
           */
         *q++ = '&';
         const char *s = ent_iso_8859_1[c - 160];
-        int len = strlen(s);
-        for (int n = 0; n < len; n++) {
+        int len_2 = strlen(s);
+        for (int n = 0; n < len_2; n++) {
           *q++ = *s++;
         }
         *q++ = ';';
@@ -874,12 +873,12 @@ char *string_html_encode(const char *input, int &len,
 
         char buf[16] = {0};
         buf[0] = c;
-        int len = 1;
+        int len_2 = 1;
 
-        if (encode_entity(buf, &len, const_cast<char*>(entity), utf8)) {
+        if (encode_entity(buf, &len_2, const_cast<char*>(entity), utf8)) {
           *q++ = '&';
           const char *s = buf;
-          for (int n = 0; n < len; n++) {
+          for (int n = 0; n < len_2; n++) {
             *q++ = *s++;
           }
           *q++ = ';';

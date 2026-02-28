@@ -1,47 +1,47 @@
 <?hh
 
-class Foo { static function bar() {} }
+class Foo { static function bar() :mixed{} }
 class StrObj {
   public function __construct(private string $s)[] {}
   public function __toString(): string { return $this->s; }
 }
 class Wrapper { public function __construct(private mixed $w)[] {} }
 
-function bar() {}
+function bar() :mixed{}
 
-function LV($x)  { return __hhvm_intrinsics\launder_value($x); }
-function CLS($c) { return __hhvm_intrinsics\create_class_pointer($c); }
+function LV($x)  :mixed{ return __hhvm_intrinsics\launder_value($x); }
+function CLS($c) :mixed{ return HH\classname_to_class($c); }
 
-function WRAPA($x) { return LV(varray[$x]); }
-function WRAPO($x) { return LV(new Wrapper($x)); }
-function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
+function WRAPA($x) :mixed{ return LV(vec[$x]); }
+function WRAPO($x) :mixed{ return LV(new Wrapper($x)); }
+function WRAPD($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
 
-<<__NEVER_INLINE>> function print_header($title) {
+<<__NEVER_INLINE>> function print_header($title) :mixed{
   echo "$title\n";
   echo "+------------+------+------+------+------+------+------+------+\n";
   echo "| VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |\n";
   echo "+============+======+======+======+======+======+======+======+";
 }
-<<__NEVER_INLINE>> function begin_row($var, $wrap = null) {
+<<__NEVER_INLINE>> function begin_row($var, $wrap = null) :mixed{
   printf("\n| %-10s |", $wrap !== null ? $wrap."(\$$var)" : "\$$var");
 }
-<<__NEVER_INLINE>> function C(bool $v) {
+<<__NEVER_INLINE>> function C(bool $v) :mixed{
   printf(" %s    |", $v ? 'T' : 'F');
 }
-<<__NEVER_INLINE>> function Cx($f) {
+<<__NEVER_INLINE>> function Cx($f) :mixed{
   try {
     C($f());
   } catch (InvalidOperationException $e) {
     print(" EXN  |");
   }
 }
-<<__NEVER_INLINE>> function print_footer() {
+<<__NEVER_INLINE>> function print_footer() :mixed{
   echo "\n+------------+------+------+------+------+------+------+------+\n\n";
 }
-<<__NEVER_INLINE>> function I(int $v) {
+<<__NEVER_INLINE>> function I(int $v) :mixed{
   printf(" %-4d |", $v);
 }
-<<__NEVER_INLINE>> function Ix($f) {
+<<__NEVER_INLINE>> function Ix($f) :mixed{
   try {
     I($f());
   } catch (InvalidOperationException $e) {
@@ -49,16 +49,16 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
   }
 }
 
-<<__NEVER_INLINE>> function static_compare() {
-  $cm = class_meth(Foo::class, 'bar');
-  $va = varray[Foo::class, 'bar'];
-  $oa = varray[new StrObj(Foo::class), new StrObj('bar')];
-  $fa = varray[Foo::class, fun('bar')];
-  $ca = varray[CLS('Foo'), 'bar'];
-  $pa = varray[CLS('Foo'), fun('bar')];
+<<__NEVER_INLINE>> function static_compare() :mixed{
+  $cm = Foo::bar<>;
+  $va = vec[Foo::class, 'bar'];
+  $oa = vec[new StrObj(Foo::class), new StrObj('bar')];
+  $fa = vec[Foo::class, bar<>];
+  $ca = vec[CLS('Foo'), 'bar'];
+  $pa = vec[CLS('Foo'), bar<>];
 
-  $xx = varray[$cm]; $vx = varray[$va]; $ox = varray[$oa]; $fx = varray[$fa];
-  $cx = varray[$ca]; $px = varray[$pa];
+  $xx = vec[$cm]; $vx = vec[$va]; $ox = vec[$oa]; $fx = vec[$fa];
+  $cx = vec[$ca]; $px = vec[$pa];
 
   $xy = new Wrapper($cm); $vy = new Wrapper($va); $oy = new Wrapper($oa);
   $fy = new Wrapper($fa); $cy = new Wrapper($ca); $py = new Wrapper($pa);
@@ -200,13 +200,13 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function dynamic_compare() {
-  $cm = LV(class_meth(Foo::class, 'bar'));
-  $va = LV(varray[Foo::class, 'bar']);
-  $oa = LV(varray[new StrObj(Foo::class), new StrObj('bar')]);
-  $fa = LV(varray[Foo::class, fun('bar')]);
-  $ca = LV(varray[CLS('Foo'), 'bar']);
-  $pa = LV(varray[CLS('Foo'), fun('bar')]);
+<<__NEVER_INLINE>> function dynamic_compare() :mixed{
+  $cm = LV(Foo::bar<>);
+  $va = LV(vec[Foo::class, 'bar']);
+  $oa = LV(vec[new StrObj(Foo::class), new StrObj('bar')]);
+  $fa = LV(vec[Foo::class, bar<>]);
+  $ca = LV(vec[CLS('Foo'), 'bar']);
+  $pa = LV(vec[CLS('Foo'), bar<>]);
 
   $xx = WRAPA($cm); $vx = WRAPA($va); $ox = WRAPA($oa); $fx = WRAPA($fa);
   $cx = WRAPA($ca); $px = WRAPA($pa);
@@ -351,7 +351,7 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   static_compare();
   dynamic_compare();
 }

@@ -1,0 +1,2 @@
+ERROR: File "nameof_upcast.php", line 5, characters 5-26:
+Cannot use unstable feature: `upcast_expression` (Parsing[1002])

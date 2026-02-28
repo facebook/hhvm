@@ -17,12 +17,10 @@
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ldap/ext_ldap.h"
 #include "hphp/util/process.h"
 
 #include <atomic>
-#include <chrono>
 #include <thread>
 
 namespace HPHP {
@@ -70,7 +68,7 @@ void runInManyThreads(unsigned nThreads, Func f) {
 
 TEST(MultiThread, LDAP) {
   runInManyThreads(Process::GetCPUCount(), [] {
-    f_ldap_connect("localhost");
+    HHVM_FN(ldap_connect)("localhost");
   });
 }
 

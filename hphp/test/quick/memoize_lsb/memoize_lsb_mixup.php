@@ -5,41 +5,53 @@ class A {
 
   <<__Memoize>>
   public static function memo1(): int {
-    return self::$counter++;
+    $__lval_tmp_0 = self::$counter;
+    self::$counter++;
+    return $__lval_tmp_0;
   }
 
   <<__MemoizeLSB>>
   public static function lsb1(): int {
-    return self::$counter++;
+    $__lval_tmp_1 = self::$counter;
+    self::$counter++;
+    return $__lval_tmp_1;
   }
 }
 
 class B extends A {
   <<__Memoize>>
   public static function memo2(): int {
-    return self::$counter++;
+    $__lval_tmp_2 = self::$counter;
+    self::$counter++;
+    return $__lval_tmp_2;
   }
 
   <<__MemoizeLSB>>
   public static function lsb2(): int {
-    return self::$counter++;
+    $__lval_tmp_3 = self::$counter;
+    self::$counter++;
+    return $__lval_tmp_3;
   }
 }
 
 class C extends B {
   <<__Memoize>>
   public static function memo3(): int {
-    return self::$counter++;
+    $__lval_tmp_4 = self::$counter;
+    self::$counter++;
+    return $__lval_tmp_4;
   }
 
   <<__MemoizeLSB>>
   public static function lsb3(): int {
-    return self::$counter++;
+    $__lval_tmp_5 = self::$counter;
+    self::$counter++;
+    return $__lval_tmp_5;
   }
 }
 
 
-function main() {
+function main() :mixed{
   // These are all possibilities, sorted randomly,
   // with the expected value determined by hand.
   $results = vec[

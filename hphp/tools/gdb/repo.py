@@ -6,12 +6,13 @@ Wow okay, let's frob repos from inside gdb.
 
 from compatibility import *
 
-import gdb
 import sqlite3
+
+import gdb
 from gdbutils import *
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 _paths = [None, None]
 _conns = [None, None]
@@ -40,39 +41,40 @@ def set(repo_id, path):
 
 
 def table(prefix):
-    return '%s_%s' % (prefix, K('HPHP::(anonymous namespace)::repoSchema').string())
+    return "%s_%s" % (prefix, K("HPHP::(anonymous namespace)::repoSchema").string())
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Decoder.
 
-class Decoder(object):
+
+class Decoder:
     def __init__(self, buf):
         self.buf = buf
         self.off = 0
-        self.struct = struct.Struct('b')
+        self.struct = struct.Struct("b")
 
     def next_byte(self):
-        return self.struct.unpack_from(self.buf[self.off:])[0]
+        return self.struct.unpack_from(self.buf[self.off :])[0]
 
     def decode(self):
         remaining = len(self.buf) - self.off
-        max_len = 10    # int(V('folly::kMaxVarintLength64'))
+        max_len = 10  # int(V('folly::kMaxVarintLength64'))
 
         limit = min(remaining, max_len)
         i, val, shift = 0, 0, 0
         b = self.next_byte()
 
         while i < limit and b < 0:
-            val |= (b & 0x7f) << shift
+            val |= (b & 0x7F) << shift
             self.off += 1
             shift += 7
             b = self.next_byte()
 
         if i == limit:
-            raise BufferError('Invalid varint value.')
+            raise BufferError("Invalid varint value.")
 
-        val |= (b & 0x7f) << shift
+        val |= (b & 0x7F) << shift
         self.off += 1
 
         return val
@@ -81,64 +83,66 @@ class Decoder(object):
         return self.off == len(self.buf)
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # `repo' commands.
+
 
 class RepoCommand(gdb.Command):
     """Point GDB to HHVM's repos to fetch auxiliary data."""
 
     def __init__(self):
-        super(RepoCommand, self).__init__('repo', gdb.COMMAND_FILES,
-                                          gdb.COMPLETE_NONE, True)
+        super(RepoCommand, self).__init__(
+            "repo", gdb.COMMAND_FILES, gdb.COMPLETE_NONE, True
+        )
 
 
 class RepoShowCommand(gdb.Command):
     """List the user-specified repos."""
 
     def __init__(self):
-        super(RepoShowCommand, self).__init__('repo show', gdb.COMMAND_FILES)
+        super(RepoShowCommand, self).__init__("repo show", gdb.COMMAND_FILES)
 
     @errorwrap
     def invoke(self, args, from_tty):
         global _paths
-        print('Central repo: %s' % '<none>' if _paths[0] is None else _paths[0])
-        print('Local repo: %s' % '<none>' if _paths[1] is None else _paths[1])
+        print("Central repo: %s" % "<none>" if _paths[0] is None else _paths[0])
+        print("Local repo: %s" % "<none>" if _paths[1] is None else _paths[1])
 
 
 class RepoSetCentralCommand(gdb.Command):
     """Set the central repo."""
 
     def __init__(self):
-        super(RepoSetCentralCommand, self).__init__('repo set-central',
-                                                    gdb.COMMAND_FILES)
+        super(RepoSetCentralCommand, self).__init__(
+            "repo set-central", gdb.COMMAND_FILES
+        )
 
     @errorwrap
     def invoke(self, args, from_tty):
         argv = gdb.string_to_argv(args)
         if len(argv) != 1:
-            print('Usage: repo set-central path/to/repo')
+            print("Usage: repo set-central path/to/repo")
             return
 
-        set(V('HPHP::RepoIdCentral'), argv[0])
-        print('Set central repo to %s' % argv[0])
+        set(V("HPHP::RepoIdCentral"), argv[0])
+        print("Set central repo to %s" % argv[0])
 
 
 class RepoSetLocalCommand(gdb.Command):
     """Set the local repo."""
 
     def __init__(self):
-        super(RepoSetLocalCommand, self).__init__('repo set-local',
-                                                  gdb.COMMAND_FILES)
+        super(RepoSetLocalCommand, self).__init__("repo set-local", gdb.COMMAND_FILES)
 
     @errorwrap
     def invoke(self, args, from_tty):
         argv = gdb.string_to_argv(args)
         if len(argv) != 1:
-            print('Usage: repo set-local path/to/repo')
+            print("Usage: repo set-local path/to/repo")
             return
 
-        set(V('HPHP::RepoIdLocal'), argv[0])
-        print('Set local repo to %s' % argv[0])
+        set(V("HPHP::RepoIdLocal"), argv[0])
+        print("Set local repo to %s" % argv[0])
 
 
 RepoCommand()

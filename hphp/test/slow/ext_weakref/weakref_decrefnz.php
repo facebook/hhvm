@@ -1,8 +1,8 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Test {
-  static ?stdClass $stash = null;
+  public static ?stdClass $stash = null;
 
   static function get(int $count): WeakRef<stdClass> {
     $obj = new stdClass();
@@ -19,7 +19,7 @@ class Test {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   for ($i = 99; $i >= 0; $i--) {
     $weakref = Test::get($i);
     var_dump($weakref->valid());

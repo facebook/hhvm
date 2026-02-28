@@ -7,7 +7,7 @@
 /* Test strncmp() function with double quoted strings for 'str1', 'str2' */
 <<__EntryPoint>> function main(): void {
 echo "*** Test strncmp() function: with double quoted strings ***\n";
-$strings = varray[
+$strings = vec[
   "Hello, World",
   "hello, world",
   "HELLO, WORLD",

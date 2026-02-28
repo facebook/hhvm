@@ -1,8 +1,8 @@
 <?hh
 
-function handler() {}
+function handler() :mixed{}
 
-function foo() {
+function foo() :mixed{
   $go = function($start) {
     $x = $start;
     for ($i = 0; $i < 10000; ++$i) {

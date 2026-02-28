@@ -10,10 +10,13 @@ class IntBox extends MyBox {
   public function set(int $_): void {}
 }
 
-function set_a_box<TBox as MyBox, TVal>(TBox $b, TVal $v): void where TVal = TBox::TInner {
+function set_a_box<TBox as MyBox with { type TInner = TVal }, TVal>(
+  TBox $b,
+  TVal $v,
+): void {
   $b->set($v);
 }
 
-function test(): (function(IntBox, string): void) {
+function test(): HH\FunctionRef<(readonly function(IntBox, string): void)> {
   return set_a_box<>;
 }

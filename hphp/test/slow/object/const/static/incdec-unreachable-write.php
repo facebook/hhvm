@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class A {
@@ -8,7 +8,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   A::$a++;
   var_dump(A::$a);
   if (A::$a > 60) {

@@ -29,6 +29,8 @@ struct CmdException : CmdBreak {
   void list(DebuggerClient&) override;
   void help(DebuggerClient&) override;
   void onClient(DebuggerClient&) override;
+
+  std::string name() const override { return "exception"; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_round() {
+function main_round() :mixed{
 var_dump(ceil(4.3));
 var_dump(ceil(9.999));
 var_dump(ceil(-3.14));

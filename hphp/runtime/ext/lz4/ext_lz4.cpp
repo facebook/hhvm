@@ -101,11 +101,10 @@ Variant HHVM_FUNCTION(lz4_uncompress, const String& compressed) {
 }
 
 static struct LZ4Extension final : Extension {
-  LZ4Extension() : Extension("lz4", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
+  LZ4Extension() : Extension("lz4", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  void moduleRegisterNative() override {
     HHVM_FE(lz4_compress);
     HHVM_FE(lz4_uncompress);
-    loadSystemlib();
   }
 } s_lz4_extension;
 

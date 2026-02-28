@@ -1,0 +1,38 @@
+[manifest]
+name = proxygen
+fbsource_path = fbcode/proxygen
+shipit_project = proxygen
+shipit_fbcode_builder = true
+
+[git]
+repo_url = https://github.com/facebook/proxygen.git
+
+[build.os=windows]
+builder = nop
+
+[build]
+builder = cmake
+subdir = .
+job_weight_mib = 3072
+
+[cmake.defines.test=on]
+BUILD_TESTS = ON
+
+[cmake.defines.test=off]
+BUILD_TESTS = OFF
+
+[dependencies]
+zlib
+gperf
+folly
+fizz
+wangle
+mvfst
+c-ares
+
+[dependencies.test=on]
+googletest
+
+[shipit.pathmap]
+fbcode/proxygen/public_tld = .
+fbcode/proxygen = proxygen

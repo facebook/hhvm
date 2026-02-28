@@ -19,10 +19,11 @@
 
 #include "hphp/runtime/base/locale.h"
 #include "hphp/runtime/base/type-array.h"
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 
-struct HSLLocale {
+struct HSLLocale : SystemLib::ClassLoader<"HH\\Lib\\_Private\\_Locale\\Locale"> {
   struct Ops;
 
   HSLLocale() = default;

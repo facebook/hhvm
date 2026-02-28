@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 try {
-  $imagick = new Imagick(varray [
+  $imagick = new Imagick(vec [
               'magick:rose',
               'magick:rose',
               'fail_this_does_not_exist.jpg',
@@ -13,19 +13,19 @@ try {
 }
 
 try {
-  $imagick = new Imagick(varray [
+  $imagick = new Imagick(vec [
               'magick:rose',
               'magick:rose',
               'magick:rose',
   ]);
   echo 'OK' . PHP_EOL;
-  $imagick->readImages (varray [
+  $imagick->readImages (vec [
               'magick:rose',
               'magick:rose',
               'magick:rose',
   ]);
   echo 'OK' . PHP_EOL;
-  $imagick->readImages (varray [
+  $imagick->readImages (vec [
               'magick:rose',
               'fail_this_does_not_exist.jpg',
   ]);

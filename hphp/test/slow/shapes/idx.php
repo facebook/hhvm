@@ -6,7 +6,7 @@ class C {
 
 
 <<__EntryPoint>>
-function main_idx() {
+function main_idx() :mixed{
   $s = shape('x' => 4);
 
   var_dump(Shapes::idx($s, 'x'));

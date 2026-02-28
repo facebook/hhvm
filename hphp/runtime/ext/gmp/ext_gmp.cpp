@@ -15,14 +15,20 @@
    +----------------------------------------------------------------------+
  */
 
-#include "ext_gmp.h"
+#include "hphp/runtime/ext/gmp/ext_gmp.h"
 
 #include <cstdlib>
 #include <float.h>
 
 namespace HPHP {
 
-HPHP::Class* GMP::cls = nullptr;
+// GMP class strings
+const StaticString s_GMP_num("num");
+
+// Array indexes for division functions
+const StaticString s_GMP_s("s");
+const StaticString s_GMP_t("t");
+const StaticString s_GMP_g("g");
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -40,7 +46,7 @@ static String mpzToString(mpz_t gmpData, const int64_t base) {
 
 
 static Object mpzToGMPObject(mpz_t gmpData) {
-  Object ret(GMP::allocObject());
+  Object ret(GMPData::allocObject());
 
   auto data = Native::data<GMPData>(ret);
   data->setGMPMpz(gmpData);
@@ -113,7 +119,7 @@ static bool variantToGMPData(const char* const fnCaller,
 
   case KindOfObject: {
     Object gmpObject = data.toObject();
-    if (!gmpObject.instanceof(s_GMP_GMP)) {
+    if (!gmpObject.instanceof(GMPData::classof())) {
       raise_warning(cs_GMP_INVALID_OBJECT, fnCaller);
       return false;
     }
@@ -164,6 +170,7 @@ static bool variantToGMPData(const char* const fnCaller,
   case KindOfLazyClass:
   case KindOfClsMeth:
   case KindOfRClsMeth:
+  case KindOfEnumClassLabel:
     raise_warning(cs_GMP_INVALID_TYPE, fnCaller);
     return false;
   }
@@ -255,7 +262,7 @@ static void HHVM_FUNCTION(gmp_clrbit,
   }
 
   Object gmpObject = data.toObject();
-  if (!gmpObject.instanceof(s_GMP_GMP)) {
+  if (!gmpObject.instanceof(GMPData::classof())) {
     raise_warning(cs_GMP_INVALID_OBJECT, "gmp_clrbit");
     return;
   }
@@ -665,7 +672,7 @@ static int64_t HHVM_FUNCTION(gmp_intval,
   if (data.isArray()
       || data.isResource()
       || (data.isString() && data.toString().empty())
-      || (data.isObject() && !data.toObject().instanceof(s_GMP_GMP))
+      || (data.isObject() && !data.toObject().instanceof(GMPData::classof()))
       || !variantToGMPData("gmp_intval", gmpData, data)) {
     return data.toInt64();
   }
@@ -921,6 +928,12 @@ static Variant HHVM_FUNCTION(gmp_pow,
     return false;
   }
 
+  // Check if the exponent is too large
+  if (exp > UINT32_MAX) {
+    raise_warning(cs_GMP_INVALID_EXPONENT_TOO_LARGE, "gmp_pow");
+    return false;
+  }
+
   if (!variantToGMPData("gmp_pow", gmpData, data)) {
     return false;
   }
@@ -1125,7 +1138,7 @@ static void HHVM_FUNCTION(gmp_setbit,
   }
 
   Object gmpObject = data.toObject();
-  if (!gmpObject.instanceof(s_GMP_GMP)) {
+  if (!gmpObject.instanceof(GMPData::classof())) {
     raise_warning(cs_GMP_INVALID_OBJECT, "gmp_setbit");
     return;
   }
@@ -1401,8 +1414,8 @@ void GMPData::setGMPMpz(const mpz_t data) {
 ///////////////////////////////////////////////////////////////////////////////
 // extension
 struct GMPExtension final : Extension {
-  GMPExtension() : Extension("gmp", "2.0.0-hhvm") { };
-  void moduleInit() override {
+  GMPExtension() : Extension("gmp", "2.0.0-hhvm", NO_ONCALL_YET) { }
+  void moduleRegisterNative() override {
     HHVM_RC_INT_SAME(GMP_MAX_BASE);
     HHVM_RC_INT_SAME(GMP_ROUND_ZERO);
     HHVM_RC_INT_SAME(GMP_ROUND_PLUSINF);
@@ -1453,12 +1466,10 @@ struct GMPExtension final : Extension {
     HHVM_FE(gmp_testbit);
     HHVM_FE(gmp_xor);
 
-    Native::registerNativeDataInfo<GMPData>(s_GMPData.get());
+    Native::registerNativeDataInfo<GMPData>();
     HHVM_ME(GMP, serialize);
     HHVM_ME(GMP, unserialize);
     HHVM_ME(GMP, __debugInfo);
-
-    loadSystemlib();
   }
 } s_gmp_extension;
 

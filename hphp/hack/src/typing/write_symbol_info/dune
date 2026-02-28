@@ -1,25 +1,38 @@
 (library
  (name write_symbol_info)
- (wrapped false)
+ (wrapped true)
  (modules
-  symbol_file_info
-  symbol_add_fact
-  symbol_build_json
-  symbol_fact_id
-  symbol_json_util
-  symbol_json_builder
-  symbol_entrypoint
-  symbol_predicate)
+  sym_def
+  gencode_utils
+  package_utils
+  indexable
+  file_info
+  add_fact
+  build_fact
+  xrefs
+  util
+  pretty
+  sym_hash
+  index_batch
+  index_decls
+  index_xrefs
+  indexer_options
+  entrypoint
+  predicate
+  thrift)
  (libraries
+  glean_schema
   ast_provider
+  naming_table
   tast_provider
   typing
   typing_ast
   parser
   procs_procs
   server_services
+  core_unix.filename_unix
   utils_core
-  version
+  base64
   uutf)
  (preprocess
   (pps ppx_deriving.std)))

@@ -28,11 +28,7 @@
 
 #include <cstddef>
 
-#ifndef _MSC_VER
 #include <unwind.h>
-#else
-#include "hphp/util/unwind-itanium-msvc.h"
-#endif
 
 namespace HPHP {
 
@@ -63,15 +59,6 @@ struct UnwindRDS {
    * to somewhere else in the TC, rather than resuming the unwind process. */
   bool doSideExit;
 
-  /* Indicates that we entered tc_unwind_resume directly rather than through
-   * itanium ABI
-   */
-  bool sideEnter;
-
-  /* Indicates whether this is the first frame the unwinder will unwind
-   */
-  bool isFirstFrame;
-
   /* The instruction pointer that async functions will use to return to
    */
   TCA savedRip;
@@ -86,7 +73,6 @@ IMPLEMENT_OFF(Exn, exn)
 IMPLEMENT_OFF(FSWH, fswh)
 IMPLEMENT_OFF(TV, tv)
 IMPLEMENT_OFF(SideExit, doSideExit)
-IMPLEMENT_OFF(SideEnter, sideEnter)
 IMPLEMENT_OFF(SavedRip, savedRip)
 #undef IMPLEMENT_OFF
 
@@ -115,8 +101,8 @@ using PersonalityFunc = _Unwind_Reason_Code(*)(int, _Unwind_Action, uint64_t,
  * unwinder should be invoked via _Unwind_Resume().
  */
 struct TCUnwindInfo {
-  TCA catchTrace;
   ActRec* fp;
+  TCA catchTrace;
 };
 TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown);
 TCUnwindInfo tc_unwind_resume_stublogue(ActRec* fp, TCA savedRip);
@@ -130,4 +116,3 @@ void initUnwinder(TCA base, size_t size, PersonalityFunc fn);
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-

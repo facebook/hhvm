@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function expects_int(int $_): void {}
 

@@ -1,6 +1,6 @@
 <?hh
 
-function test($thing) {
+function test($thing) :mixed{
   echo "==== " . get_class($thing) . " may notice ====\n";
 
   echo "== read ==\n";
@@ -18,7 +18,7 @@ function test($thing) {
   $thing->dynprop++;
 
   echo "== dim for read ==\n";
-  $thing->dynprop = darray['a' => 'b'];
+  $thing->dynprop = dict['a' => 'b'];
   $discard = $thing->dynprop['a'];
 
   echo "== dim for read (quiet) ==\n";
@@ -69,7 +69,7 @@ function test($thing) {
   echo "==== " . get_class($thing) . " never notice ====\n";
 
   echo "== dim for write ==\n";
-  $thing->dynprop = darray['a' => 'b'];
+  $thing->dynprop = dict['a' => 'b'];
   $thing->dynprop['c'] = 'd';
   $thing->dynprop = 3; // set prop back to an int
 
@@ -83,13 +83,13 @@ function test($thing) {
   unset($thing->dynprop);
 }
 
-function by_ref(inout $ref) {}
+function by_ref(inout $ref) :mixed{}
 
 class C {}
 class D { public $x = 1; }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   test(new C());
   test(new D());
   test(gmp_init(0));

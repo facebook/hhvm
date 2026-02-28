@@ -2,7 +2,7 @@
 $domain = AF_INET6;
 $level = IPPROTO_IPV6;
 $s = socket_create($domain, SOCK_DGRAM, SOL_UDP);
-$s || die("Could not create socket!\n");
+$s || exit("Could not create socket!\n");
 
 echo "Setting IPV6_MULTICAST_TTL\n";
 $r = socket_set_option($s, $level, IPV6_MULTICAST_HOPS, 9);

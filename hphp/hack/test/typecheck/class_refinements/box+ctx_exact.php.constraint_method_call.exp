@@ -1,0 +1,20 @@
+ERROR: File "box+ctx_exact.php", line 13, characters 16-45:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+ERROR: File "box+ctx_exact.php", line 24, characters 3-11:
+Typing error (Typing[4403])
+  File "box+ctx_exact.php", line 23, characters 37-38:
+  Expected a function that requires the capability set {}
+  File "box+ctx_exact.php", line 10, characters 31-31:
+  But got a function that requires the capability <expr#2>::C
+ERROR: File "box+ctx_exact.php", line 55, characters 3-19:
+Typing error (Typing[4403])
+  File "box+ctx_exact.php", line 51, characters 2-3:
+  Expected a function that requires the capability set {}
+  File "box+ctx_exact.php", line 10, characters 31-31:
+  But got a function that requires the capability <expr#5>::C
+ERROR: File "box+ctx_exact.php", line 56, characters 3-24:
+Typing error (Typing[4403])
+  File "box+ctx_exact.php", line 51, characters 2-3:
+  Expected a function that requires the capability set {}
+  File "box+ctx_exact.php", line 10, characters 31-31:
+  But got a function that requires the capability <expr#2>::C

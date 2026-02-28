@@ -8,7 +8,7 @@
 <<__EntryPoint>> function main(): void {
 echo "Starting image_type_to_mime_type() test\n\n";
 
-$image_types = varray [
+$image_types = vec[
     IMAGETYPE_GIF,
     IMAGETYPE_JPEG,
     IMAGETYPE_PNG,
@@ -25,6 +25,8 @@ $image_types = varray [
     IMAGETYPE_WBMP,
     IMAGETYPE_WEBP,
     IMAGETYPE_JPEG2000,
+    IMAGETYPE_AVIF,
+    IMAGETYPE_HEIC,
     IMAGETYPE_XBM
 ];
 

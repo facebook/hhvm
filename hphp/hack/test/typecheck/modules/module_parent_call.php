@@ -1,16 +1,17 @@
 //// modules.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
 
-module A {}
+
+new module A {}
 //// A.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+
+module A;
 
 class A {
-  <<__Internal>>
-  public function foobar(): void {}
+  internal function foobar(): void {}
+  protected internal function baz(): void {}
 }
 
 //// f.php
@@ -20,5 +21,10 @@ class B extends A {
   <<__Override>>
   public function foobar(): void {
     parent::foobar();
+  }
+
+  <<__Override>>
+  public function baz(): void {
+    parent::baz();
   }
 }

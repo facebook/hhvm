@@ -4,9 +4,9 @@
 
 <<__EntryPoint>>
 function test(): void {
-  require 'expression_tree.inc';
+  require __DIR__.'/../../../hack/test/expr_tree.php';
 
-  $et = Code`(ExampleBool $y) ==> {
+  $et = ExampleDsl`(ExampleBool $y) ==> {
     $x = $y;
 
     if ($x) {

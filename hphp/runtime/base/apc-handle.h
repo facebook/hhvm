@@ -56,7 +56,6 @@ enum class APCKind: uint8_t {
   SerializedKeyset,
   SerializedObject,
   FuncEntity,
-  ClassEntity,
   ClsMeth,
   RFunc,
   RClsMeth
@@ -152,10 +151,10 @@ struct APCHandle {
    * the various flags. This is the only entry point to create APC entities.
    */
   static Pair Create(const_variant_ref source, APCHandleLevel level,
-                     bool unserializeObj);
+                     bool unserializeObj, bool pure);
   static Pair Create(const Variant& var, APCHandleLevel level,
-                     bool unserializeObj) {
-    return Create(const_variant_ref{var}, level, unserializeObj);
+                     bool unserializeObj, bool pure) {
+    return Create(const_variant_ref{var}, level, unserializeObj, pure);
   }
 
   /*
@@ -196,8 +195,10 @@ struct APCHandle {
    * instance returned will be local to the request/thread that performed
    * the call.
    */
-  Variant toLocalHelper() const;
-  Variant toLocal() const;
+  TypedValue toLazyProp() const;
+  Variant toLocalHelper(bool pure) const;
+  Variant toLocal(bool pure) const;
+  bool toLocalMayRaise() const;
 
   /*
    * Return the APCKind represented by this APCHandle.
@@ -223,13 +224,13 @@ struct APCHandle {
     assertx(m_kind == APCKind::SerializedObject ||
            m_kind == APCKind::SharedObject ||
            m_kind == APCKind::SharedCollection);
-    return m_obj_attempted.load(std::memory_order_relaxed);
+    return m_obj_attempted.load(std::memory_order_acquire);
   }
   void setObjAttempted() {
     assertx(m_kind == APCKind::SerializedObject ||
            m_kind == APCKind::SharedObject ||
            m_kind == APCKind::SharedCollection);
-    m_obj_attempted.store(true, std::memory_order_relaxed);
+    m_obj_attempted.store(true, std::memory_order_release);
   }
 
   /*
@@ -276,4 +277,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 }
-

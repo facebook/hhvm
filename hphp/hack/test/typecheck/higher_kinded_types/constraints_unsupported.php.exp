@@ -1,4 +1,0 @@
-File "constraints_unsupported.php", line 3, characters 11-12:
-`TC` is a higher-kinded type parameter, standing for a type that has type parameters itself. We don't support constraints on parameters like `TC`. (Naming[2047])
-File "constraints_unsupported.php", line 7, characters 14-15:
-`TX` is a generic parameter of another (higher-kinded) generic parameter. We don't support constraints on parameters like `TX`. (Naming[2047])

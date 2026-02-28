@@ -78,12 +78,12 @@ void hh_start_gc_profiling() {
  * definitely don't allocate anything during GC
  */
 value hh_get_gc_time() {
+  CAMLparam0();
+  CAMLlocal1(ret);
   caml_minor_gc_begin_hook = NULL;
   caml_minor_gc_end_hook = NULL;
   caml_major_slice_begin_hook = NULL;
   caml_major_slice_end_hook = NULL;
-  CAMLparam0();
-  CAMLlocal1(ret);
 
   ret = caml_alloc_tuple(2);
   Store_field(ret, 0, caml_copy_double(major_time));

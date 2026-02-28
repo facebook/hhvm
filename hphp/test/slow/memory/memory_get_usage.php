@@ -1,19 +1,19 @@
 <?hh
 
-function decieve_static_analysis() {
+function deceive_static_analysis() :mixed{
   return mt_rand() ? 'a' : 'b';
 }
 
-function main() {
+function main() :mixed{
   $start_usage = memory_get_usage();
-  $a = varray[];
+  $a = vec[];
   for ($i = 0; $i < $start_usage / 1000; $i++) {
-    $a[] = str_repeat(decieve_static_analysis(), 1000);
+    $a[] = str_repeat(deceive_static_analysis(), 1000);
   }
   var_dump(memory_get_usage() > $start_usage);
 }
 
 <<__EntryPoint>>
-function main_memory_get_usage() {
+function main_memory_get_usage() :mixed{
 main();
 }

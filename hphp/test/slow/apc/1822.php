@@ -12,15 +12,15 @@ class E {
   public function __construct($f) {
     $this->map = $f;
   }
-  public function getMap() {
+  public function getMap() :mixed{
     return $this->map;
   }
 }
 
 <<__EntryPoint>>
-function main_1822() {
+function main_1822() :mixed{
 $f = new stdClass();
-$arr = varray[new E($f), new D($f)];
+$arr = vec[new E($f), new D($f)];
 apc_store('ggg', $arr);
 $arr2 = __hhvm_intrinsics\apc_fetch_no_check('ggg');
 var_dump($arr[0]->getMap());

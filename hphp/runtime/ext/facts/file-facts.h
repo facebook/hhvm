@@ -16,54 +16,30 @@
 
 #pragma once
 
+#include <functional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <fmt/format.h>
 #include <folly/Format.h>
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
+#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
 
 namespace HPHP {
 namespace Facts {
 
 using TypeKindMask = int;
-enum class TypeKind {
-  Unknown = 0,
-  Class = 1 << 0,
-  Interface = 1 << 1,
-  Enum = 1 << 2,
-  Trait = 1 << 3,
-  TypeAlias = 1 << 4,
-};
-inline constexpr TypeKindMask kTypeKindAll =
-    static_cast<int>(TypeKind::Class) | static_cast<int>(TypeKind::Interface) |
-    static_cast<int>(TypeKind::Enum) | static_cast<int>(TypeKind::Trait) |
-    static_cast<int>(TypeKind::TypeAlias);
+using hackc::TypeKind;
+inline constexpr TypeKindMask kTypeKindAll = static_cast<int>(TypeKind::Class) |
+    static_cast<int>(TypeKind::Interface) | static_cast<int>(TypeKind::Enum) |
+    static_cast<int>(TypeKind::Trait) | static_cast<int>(TypeKind::TypeAlias);
 
-inline constexpr std::string_view kTypeKindClass = "class";
-inline constexpr std::string_view kTypeKindInterface = "interface";
-inline constexpr std::string_view kTypeKindEnum = "enum";
-inline constexpr std::string_view kTypeKindTrait = "trait";
-inline constexpr std::string_view kTypeKindTypeAlias = "typeAlias";
-inline constexpr std::string_view kTypeKindMixed = "mixed";
-inline constexpr std::string_view kTypeKindUnknown = "unknown";
-
-constexpr std::string_view toString(TypeKind kind) {
-  switch (kind) {
-    case TypeKind::Class:
-      return kTypeKindClass;
-    case TypeKind::Enum:
-      return kTypeKindEnum;
-    case TypeKind::Interface:
-      return kTypeKindInterface;
-    case TypeKind::Trait:
-      return kTypeKindTrait;
-    case TypeKind::TypeAlias:
-      return kTypeKindTypeAlias;
-    default:
-      return "";
-  }
-}
+constexpr std::string_view kTypeKindClass = "class";
+constexpr std::string_view kTypeKindInterface = "interface";
+constexpr std::string_view kTypeKindEnum = "enum";
+constexpr std::string_view kTypeKindTrait = "trait";
+constexpr std::string_view kTypeKindTypeAlias = "typeAlias";
 
 using TypeFlagMask = int;
 enum class TypeFlag {
@@ -71,82 +47,58 @@ enum class TypeFlag {
   Abstract = 1 << 0,
   Final = 1 << 1,
 };
+constexpr TypeFlagMask kTypeFlagAll = static_cast<int>(TypeFlag::Empty) |
+    static_cast<int>(TypeFlag::Abstract) | static_cast<int>(TypeFlag::Final);
 
 // Two different forms of inheritance.
 //
 // `trait T { require extends B; }` means that, while T does not extend B
 // itself, any class using T must also extend B in order to be sound.
+// `trait T { require class B; }` means that trait T can only be used
+// by class T
 using DeriveKindMask = int;
 enum class DeriveKind {
   Extends = 1 << 0,
   RequireExtends = 1 << 1,
   // This should be merged into RequireExtends.
   RequireImplements = 1 << 2,
+  RequireClass = 1 << 3,
+  RequireThisAs = 1 << 4,
 };
 constexpr DeriveKindMask kDeriveKindAll =
     static_cast<int>(DeriveKind::Extends) |
     static_cast<int>(DeriveKind::RequireExtends) |
-    static_cast<int>(DeriveKind::RequireImplements);
+    static_cast<int>(DeriveKind::RequireImplements) |
+    static_cast<int>(DeriveKind::RequireClass) |
+    static_cast<int>(DeriveKind::RequireThisAs);
 
-// Represents `<<IAmAnAttribute(0, 'Hello', null)>>` as
-// `{"IAmAnAttribute", vec[0, "Hello", null]}`
-struct Attribute {
-  std::string m_name;
-  std::vector<folly::dynamic> m_args;
-};
+using hackc::AttrFacts;
+using hackc::FileFacts;
+using hackc::MethodFacts;
+using hackc::ModuleFacts;
+using hackc::TypeFacts;
 
-struct MethodDetails {
-  std::string m_name;
-  std::vector<Attribute> m_attributes;
-};
+inline bool isAbstract(const hackc::TypeFacts& t) noexcept {
+  return (t.flags & static_cast<int>(TypeFlag::Abstract)) != 0;
+}
 
-struct TypeDetails {
+inline bool isFinal(const hackc::TypeFacts& t) noexcept {
+  return (t.flags & static_cast<int>(TypeFlag::Final)) != 0;
+}
 
-  std::string m_name;
-  TypeKind m_kind;
-  int m_flags{0};
+inline bool isEmpty(const FileFacts& f) noexcept {
+  return f.types.empty() && f.functions.empty() && f.constants.empty() &&
+      f.modules.empty() && f.file_attributes.empty();
+}
 
-  // List of types which this `extends`, `implements`, or `use`s
-  std::vector<std::string> m_baseTypes;
-
-  // List of attributes and their arguments
-  std::vector<Attribute> m_attributes;
-
-  // List of classes or interfaces which this `require extends`
-  std::vector<std::string> m_requireExtends;
-
-  // List of interfaces which this `require implements`
-  std::vector<std::string> m_requireImplements;
-
-  std::vector<MethodDetails> m_methods;
-
-  bool isAbstract() const noexcept {
-    return m_flags & static_cast<int>(TypeFlag::Abstract);
-  }
-
-  bool isFinal() const noexcept {
-    return m_flags & static_cast<int>(TypeFlag::Final);
-  }
-};
-
-struct FileFacts {
-
-  bool isEmpty() const noexcept {
-    return m_types.empty() && m_functions.empty() && m_constants.empty();
-  }
-
-  std::vector<TypeDetails> m_types;
-  std::vector<std::string> m_functions;
-  std::vector<std::string> m_constants;
-  std::vector<Attribute> m_attributes;
-  std::string m_sha1hex;
-};
+inline std::string_view as_slice(const rust::String& s) noexcept {
+  return {s.data(), s.size()};
+}
 
 /**
  * A string from Watchman representing a point in time.
  */
 struct Clock {
-
   /**
    * True iff this represents an initial load, where all files have changed
    * since this point in time
@@ -178,31 +130,32 @@ struct Clock {
 } // namespace HPHP
 
 namespace folly {
-template <> class FormatValue<HPHP::Facts::Clock> {
-public:
-  explicit FormatValue(HPHP::Facts::Clock v) : m_val(v) {
-  }
+template <>
+class FormatValue<HPHP::Facts::Clock> {
+ public:
+  explicit FormatValue(HPHP::Facts::Clock v) : m_val(std::move(v)) {}
 
-  template <typename Callback> void format(FormatArg& arg, Callback& cb) const {
+  template <typename Callback>
+  void format(FormatArg& arg, Callback& cb) const {
     format_value::formatString(
         folly::sformat("\"{}|{}\"", m_val.m_clock, m_val.m_mergebase), arg, cb);
   }
 
-private:
+ private:
   const HPHP::Facts::Clock m_val;
 };
 } // namespace folly
 
-template <> struct fmt::formatter<HPHP::Facts::Clock> {
-
+template <>
+struct fmt::formatter<HPHP::Facts::Clock> {
   // We don't support any settings within the braces, so nothing to do here.
   constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.end();
   }
 
   template <typename FormatContext>
-  auto format(const HPHP::Facts::Clock& c, FormatContext& ctx)
+  auto format(const HPHP::Facts::Clock& c, FormatContext& ctx) const
       -> decltype(ctx.out()) {
-    return format_to(ctx.out(), "Clock({}, {})", c.m_clock, c.m_mergebase);
+    return fmt::format_to(ctx.out(), "Clock({}, {})", c.m_clock, c.m_mergebase);
   }
 };

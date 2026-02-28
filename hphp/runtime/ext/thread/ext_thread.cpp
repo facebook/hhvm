@@ -15,24 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/thread/ext_thread.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/util/process.h"
 
 namespace HPHP {
-
-static struct ThreadExtension final : Extension {
-  ThreadExtension() : Extension("thread", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
-    HHVM_FE(hphp_get_thread_id);
-    HHVM_FE(hphp_gettid);
-
-    loadSystemlib();
-  }
-} s_thread_extension;
-
-///////////////////////////////////////////////////////////////////////////////
 
 int64_t HHVM_FUNCTION(hphp_get_thread_id) {
   return  (unsigned long)Process::GetThreadId();
@@ -41,6 +29,16 @@ int64_t HHVM_FUNCTION(hphp_get_thread_id) {
 int64_t HHVM_FUNCTION(hphp_gettid) {
   return (unsigned int)Process::GetThreadPid();
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+static struct ThreadExtension final : Extension {
+  ThreadExtension() : Extension("thread", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  void moduleRegisterNative() override {
+    HHVM_FE(hphp_get_thread_id);
+    HHVM_FE(hphp_gettid);
+  }
+} s_thread_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

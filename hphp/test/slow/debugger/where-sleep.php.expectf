@@ -1,0 +1,14 @@
+Program %s/where-sleep.php loaded. Type '[r]un' to go.
+break bar()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+run
+object(Sleeper) (1) {
+  ["foo"]=>
+  int(1)
+}
+Program %s/where-sleep.php exited normally.
+where
+#0   ()
+    at :1
+#1  include ("")
+quit

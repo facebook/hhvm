@@ -1,34 +1,46 @@
-File "arities02.php", line 23, characters 11-15:
-Typing error (Typing[4110])
+ERROR: File "arities02.php", line 23, characters 11-15:
+Typing error (Typing[4429])
   File "arities02.php", line 23, characters 11-23:
   Expected `num` because this is used in an arithmetic operation
   File "arities02.php", line 3, characters 35-40:
   But got `string`
-File "arities02.php", line 23, characters 19-23:
-Typing error (Typing[4110])
+ERROR: File "arities02.php", line 23, characters 19-23:
+Typing error (Typing[4429])
   File "arities02.php", line 23, characters 11-23:
   Expected `num` because this is used in an arithmetic operation
   File "arities02.php", line 3, characters 35-40:
   But got `string`
-File "arities02.php", line 34, characters 17-19:
-You are trying to access the method `bar` but this is a string (Typing[4062])
+ERROR: File "arities02.php", line 34, characters 17-19:
+No instance method `bar` in `string` (Typing[4053])
   File "arities02.php", line 3, characters 35-40:
-  Definition is here
-File "arities02.php", line 34, characters 17-19:
+  This is why I think it is an object of type HH\string
+  File "string.hhi", line 6, characters 15-20:
+  Declaration of `string` is here
+ERROR: File "arities02.php", line 34, characters 17-19:
 You are trying to access the method `bar` but this is an int (Typing[4062])
   File "arities02.php", line 3, characters 51-53:
   Definition is here
-File "arities02.php", line 40, characters 17-19:
-You are trying to access the method `bar` but this is a string (Typing[4062])
+ERROR: File "arities02.php", line 40, characters 17-19:
+No instance method `bar` in `string` (Typing[4053])
+  File "arities02.php", line 40, characters 10-14:
+  This is why I think it is an object of type HH\string
   File "arities02.php", line 39, characters 29-30:
-  Definition is here
-File "arities02.php", line 45, characters 13-48:
+    from this definition (variadic argument)
+  File "string.hhi", line 6, characters 15-20:
+  Declaration of `string` is here
+ERROR: File "arities02.php", line 45, characters 13-48:
 Invalid argument (Typing[4042])
   File "arities02.php", line 45, characters 13-48:
   Should have a variadic argument
   File "arities02.php", line 3, characters 20-63:
   Because of this definition
-File "arities02.php", line 50, characters 13-52:
+ERROR: File "arities02.php", line 50, characters 13-52:
+Invalid argument (Typing[4042])
+  File "arities02.php", line 50, characters 13-52:
+  Should have a variadic argument
+  File "arities02.php", line 3, characters 20-63:
+  Because of this definition
+ERROR: File "arities02.php", line 50, characters 13-52:
 Invalid argument (Typing[4041])
   File "arities02.php", line 50, characters 13-52:
   Too many mandatory arguments (expected 3 but got 4)

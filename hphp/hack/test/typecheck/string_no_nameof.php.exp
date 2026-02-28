@@ -1,0 +1,2 @@
+ERROR: File "string_no_nameof.php", line 4, characters 10-15:
+`nameof` cannot be used with string (Parsing[1002])

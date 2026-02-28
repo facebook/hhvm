@@ -12,15 +12,15 @@
 echo "*** Testing array_merge_recursive() : two dimensional array for \$arr1 argument ***\n";
 
 // initialize the 2-d array
-$arr1 = darray[
-  0 => varray[1, 2, 3, 1],
-  "array" => darray[0 => "hello", 1 => "world", "str1" => "hello", "str2" => 'world'],
-  1 => darray[1 => "one", 2 => "two", 3 => "one", 4 => 'two'],
-  2 => varray[1, 2, 3, 1]
+$arr1 = dict[
+  0 => vec[1, 2, 3, 1],
+  "array" => dict[0 => "hello", 1 => "world", "str1" => "hello", "str2" => 'world'],
+  1 => dict[1 => "one", 2 => "two", 3 => "one", 4 => 'two'],
+  2 => vec[1, 2, 3, 1]
 ];
 
 // initialize the second argument
-$arr2 = darray[0 => 1, 1 => "hello", "array" => varray["hello", 'world']];
+$arr2 = dict[0 => 1, 1 => "hello", "array" => vec["hello", 'world']];
 
 echo "-- Passing the entire 2-d array --\n";
 echo "-- With default argument --\n";

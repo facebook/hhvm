@@ -1,0 +1,85 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Definitions for constant values. These are included from the struct.pyx file
+and define Python objects that can be imported from the end-user's Python
+file.
+
+}}{{#pragma ignore-newlines}}
+  {{#if (or value:bool? (and value:integer? value:type.bool?))}}
+{{(py_bool value:nonzero?)}}
+  {{#else if value:integer?}}
+{{value:integer_value}}{{#if value:type.floating_point?}}.0{{/if}}
+  {{#else if value:double?}}
+float({{(float_to_string value:double_value)}})
+  {{#else if value:string?}}
+    {{#if value:type.binary?}}
+b"{{value:string_value}}"
+    {{#else}}
+"{{value:unicode_value}}"
+    {{/if value:type.binary?}}
+  {{#else if value:structured?}}
+    {{#value:type.true_type}}
+{{#if type:need_module_path?}}{{type:module_name}}.{{/if}}{{> structs/unadapted_name}}
+    {{/value:type.true_type}}
+(
+    {{#each (array.enumerate value:structured_elements with_last=true) as |i elem last?|}}
+{{elem.field.py_name}}={{#elem.value}}{{> types/constant_value }}{{/elem.value}}{{^last?}}, {{/last?}}
+    {{/each}}
+)
+  {{#else if value:map?}}
+_fbthrift_python_types.Map(
+    {{#value:type.true_type}}
+{{#partial m_types.typeinfo type=map:key_type}}, {{!}}
+{{#partial m_types.typeinfo type=map:val_type}}, { {{! purposeful open brace}}
+    {{/value:type.true_type}}
+    {{#each (array.enumerate value:map_elements with_last=true) as |i map_elem last?|}}
+{{#map_elem.key}}{{> types/constant_value }}{{/map_elem.key}}: {{!}}
+{{#map_elem.value}}{{> types/constant_value}}{{/map_elem.value}}{{^last?}}, {{/last?}}
+    {{/each}}{{! purposeful close brace [next line] }}
+})
+  {{#else if value:list?}}
+    {{#if value:type.set?}}
+_fbthrift_python_types.Set(
+    {{#else}}
+_fbthrift_python_types.List(
+    {{/if value:type.set?}}
+{{#partial m_types.typeinfo type=value:type.true_type.elem_type}}, (
+    {{#value:list_elements}}
+{{> types/constant_value }}, {{!}}
+    {{/value:list_elements}}
+))
+
+  {{#else if value:enum?}}
+    {{#let bad_enum = (not value:enum_value?)}}
+    {{#if bad_enum}}
+_fbthrift_python_types.BadEnum(
+    {{/if bad_enum}}
+
+    {{#value:type.true_type}}
+{{#if type:need_module_path?}}{{type:module_name}}.{{/if}}
+    {{/value:type.true_type}}
+{{value:enum_name}}
+
+    {{#if bad_enum}}
+      {{! Close BadEnum }}
+, {{value:integer_value}})
+    {{#else}}
+.{{value:py3_enum_value_name}}
+    {{/if bad_enum}}
+  {{/if (or value:bool? (and value:integer? value:type.bool?))}}

@@ -1,7 +1,7 @@
 <?hh
 
-function main() {
-  $inputs = varray[
+function main() :mixed{
+  $inputs = vec[
     'php://temp',
     'php://memory',
   ];
@@ -27,6 +27,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_feof_after_fwrite_after_eof() {
+function main_feof_after_fwrite_after_eof() :mixed{
 main();
 }

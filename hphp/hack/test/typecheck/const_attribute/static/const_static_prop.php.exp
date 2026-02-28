@@ -1,14 +1,14 @@
-File "const_static_prop.php", line 10, characters 5-16:
+ERROR: File "const_static_prop.php", line 10, characters 5-16:
 You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
-File "const_static_prop.php", line 16, characters 5-12:
+ERROR: File "const_static_prop.php", line 16, characters 5-12:
 You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
-File "const_static_prop.php", line 9, characters 12-29:
+ERROR: File "const_static_prop.php", line 9, characters 12-29:
 Cannot mutate a `__Const` property (Typing[4196])
-File "const_static_prop.php", line 15, characters 8-25:
+ERROR: File "const_static_prop.php", line 15, characters 8-25:
 Cannot mutate a `__Const` property (Typing[4196])
-File "const_static_prop.php", line 17, characters 12-21:
+ERROR: File "const_static_prop.php", line 17, characters 12-21:
 Cannot mutate a `__Const` property (Typing[4196])
-File "const_static_prop.php", line 21, characters 13-30:
+ERROR: File "const_static_prop.php", line 21, characters 13-30:
 Cannot mutate a `__Const` property (Typing[4196])
-File "const_static_prop.php", line 26, characters 6-23:
+ERROR: File "const_static_prop.php", line 26, characters 6-23:
 Cannot mutate a `__Const` property (Typing[4196])

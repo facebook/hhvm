@@ -1,5 +1,5 @@
 <?hh
-function fact($x) {
+function fact($x) :mixed{
   if($x <= 1) {
     return 1;
   }
@@ -9,6 +9,6 @@ function fact($x) {
 
 
 <<__EntryPoint>>
-function main_002() {
+function main_002() :mixed{
 print gmp_strval(fact(218)) . "\n";
 }

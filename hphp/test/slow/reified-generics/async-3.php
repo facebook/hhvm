@@ -5,7 +5,7 @@ async function foo<reify T>($x): Awaitable<T> {
 }
 
 <<__EntryPoint>>
-async function main() {
+async function main() :Awaitable<mixed>{
   await foo<int>(1);
   echo "yep\n";
   await foo<string>(1);

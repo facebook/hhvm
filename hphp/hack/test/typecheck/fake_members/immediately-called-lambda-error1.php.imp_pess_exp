@@ -1,0 +1,36 @@
+ERROR: File "immediately-called-lambda-error1.php", line 18, characters 19-23:
+Typing error (Typing[4429])
+  File "immediately-called-lambda-error1.php", line 18, characters 19-27:
+  Expected `num` because this is used in an arithmetic operation
+  File "immediately-called-lambda-error1.php", line 4, characters 38-41:
+  But got `?int`
+  File "immediately-called-lambda-error1.php", line 18, characters 12-27:
+  All the local information about `$c->x` has been invalidated by this lambda function.
+This is a limitation of the type-checker; use a local if that's the problem.
+ERROR: File "immediately-called-lambda-error1.php", line 18, characters 19-23:
+Typing error (Typing[4429])
+  File "immediately-called-lambda-error1.php", line 18, characters 19-27:
+  Expected `num` because this is used in an arithmetic operation
+  File "immediately-called-lambda-error1.php", line 18, characters 23-23:
+  But got `dynamic`, the result of accessing a property of a `dynamic` type
+  File "immediately-called-lambda-error1.php", line 18, characters 12-27:
+  All the local information about `$c->x` has been invalidated by this lambda function.
+This is a limitation of the type-checker; use a local if that's the problem.
+ERROR: File "immediately-called-lambda-error1.php", line 22, characters 25-29:
+Typing error (Typing[4429])
+  File "immediately-called-lambda-error1.php", line 22, characters 25-33:
+  Expected `num` because this is used in an arithmetic operation
+  File "immediately-called-lambda-error1.php", line 4, characters 38-41:
+  But got `?int`
+  File "immediately-called-lambda-error1.php", line 22, characters 12-33:
+  All the local information about `$c->x` has been invalidated by this lambda function.
+This is a limitation of the type-checker; use a local if that's the problem.
+ERROR: File "immediately-called-lambda-error1.php", line 22, characters 25-29:
+Typing error (Typing[4429])
+  File "immediately-called-lambda-error1.php", line 22, characters 25-33:
+  Expected `num` because this is used in an arithmetic operation
+  File "immediately-called-lambda-error1.php", line 22, characters 29-29:
+  But got `dynamic`, the result of accessing a property of a `dynamic` type
+  File "immediately-called-lambda-error1.php", line 22, characters 12-33:
+  All the local information about `$c->x` has been invalidated by this lambda function.
+This is a limitation of the type-checker; use a local if that's the problem.

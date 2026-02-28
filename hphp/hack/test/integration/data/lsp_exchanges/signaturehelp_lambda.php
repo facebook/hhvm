@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test_lambda_sighelp(string $str, (function(string): int) $f): int {
   return $f($str);

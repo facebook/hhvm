@@ -3,19 +3,25 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{Env, EnvFlags, ParseError, Profile};
-// use crate::compile_rust as compile;
-use ocamlrep::rc::RcOc;
-use options::{LangFlags, Options};
-use oxidized::namespace_env::Env as NamespaceEnv;
-use oxidized::pos::Pos;
-use oxidized::{
-    aast,
-    aast_visitor::{AstParams, Node, Visitor},
-    ast,
-};
-use parser_core_types::source_text::SourceText;
 use std::fs;
+// use crate::compile_rust as compile;
+use std::sync::Arc;
+
+use options::Options;
+use oxidized::aast;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::Node;
+use oxidized::aast_visitor::Visitor;
+use oxidized::ast;
+use oxidized::namespace_env::Env as NamespaceEnv;
+use oxidized::namespace_env::Mode;
+use oxidized::pos::Pos;
+use parser_core_types::source_text::SourceText;
+use relative_path::RelativePath;
+
+use crate::EnvFlags;
+use crate::ParseError;
+use crate::Profile;
 
 struct ExprTreeLiteralExtractor {
     literals: Vec<(Pos, ast::ExpressionTree)>,
@@ -32,7 +38,7 @@ impl<'ast> Visitor<'ast> for ExprTreeLiteralExtractor {
         use aast::Expr_;
         match &e.2 {
             Expr_::ExpressionTree(et) => {
-                self.literals.push((e.1.clone(), (&**et).clone()));
+                self.literals.push((e.1.clone(), (**et).clone()));
             }
             _ => e.recurse(env, self)?,
         }
@@ -63,17 +69,13 @@ fn find_et_literals(program: ast::Program) -> Vec<(Pos, ast::ExpressionTree)> {
     visitor.literals
 }
 
-fn sort_by_start_pos<T>(items: &mut Vec<(Pos, T)>) {
+fn sort_by_start_pos<T>(items: &mut [(Pos, T)]) {
     items.sort_by(|(p1, _), (p2, _)| p1.start_offset().cmp(&p2.start_offset()));
 }
 
 /// The source code of `program` with expression tree literals
 /// replaced with their desugared form.
-fn desugar_and_replace_et_literals<S: AsRef<str>>(
-    env: &Env<S>,
-    program: ast::Program,
-    src: &str,
-) -> String {
+fn desugar_and_replace_et_literals(flags: &EnvFlags, program: ast::Program, src: &str) -> String {
     let mut literals = find_et_literals(program);
     sort_by_start_pos(&mut literals);
 
@@ -83,7 +85,7 @@ fn desugar_and_replace_et_literals<S: AsRef<str>>(
 
     let mut src = src.to_string();
     for (pos, literal) in literals {
-        let desugared_literal_src = crate::expr_to_string_lossy(env, &literal.runtime_expr);
+        let desugared_literal_src = crate::expr_to_string_lossy(flags, &literal.runtime_expr);
         let (pos_start, pos_end) = pos.info_raw();
         src.replace_range(pos_start..pos_end, &desugared_literal_src);
     }
@@ -94,37 +96,32 @@ fn desugar_and_replace_et_literals<S: AsRef<str>>(
 /// Parse the file in `env`, desugar expression tree literals, and
 /// print the source code as if the user manually wrote the desugared
 /// syntax.
-pub fn desugar_and_print<S: AsRef<str>>(env: &Env<S>) {
-    let is_systemlib = env.flags.contains(EnvFlags::IS_SYSTEMLIB);
-    let opts = Options::from_configs(&env.config_jsons, &env.config_list).expect("Invalid options");
-    stack_limit::with_elastic_stack(|limit| {
-        let filepath = env.filepath.clone();
-        let content = fs::read(filepath.to_absolute()).unwrap();
-        let source_text = SourceText::make(RcOc::new(filepath), &content);
-        let ns = RcOc::new(NamespaceEnv::empty(
-            opts.hhvm.aliased_namespaces_cloned().collect(),
-            true,
-            opts.hhvm
-                .hack_lang
-                .flags
-                .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
-        ));
-        match crate::parse_file(
-            &opts,
-            limit,
-            source_text,
-            false,
-            ns,
-            is_systemlib,
-            &mut Profile::default(),
-        ) {
-            Err(ParseError(_, msg, _)) => panic!("Parsing failed: {}", msg),
-            Ok(ast) => {
-                let old_src = String::from_utf8_lossy(&content);
-                let new_src = desugar_and_replace_et_literals(env, ast, &old_src);
-                print!("{}", new_src);
-            }
+pub fn desugar_and_print(filepath: RelativePath, flags: &EnvFlags) {
+    let type_directed = false;
+    let mut opts = Options::default();
+    opts.hhvm.parser_options.allow_unstable_features = true;
+    let content = fs::read(filepath.path()).unwrap(); // consider: also show prefix?
+    let source_text = SourceText::make(Arc::new(filepath), &content);
+    let ns = Arc::new(NamespaceEnv::empty(
+        opts.hhvm.aliased_namespaces_cloned().collect(),
+        Mode::ForCodegen,
+        opts.hhvm.parser_options.disable_xhp_element_mangling,
+    ));
+    match crate::parse_file(
+        &opts,
+        source_text,
+        false,
+        ns,
+        flags.is_systemlib,
+        false, // for_debugger_eval
+        type_directed,
+        &mut Profile::default(),
+    ) {
+        Err(ParseError(_, msg, _)) => panic!("Parsing failed: {}", msg),
+        Ok((ast, _active_experimental_features)) => {
+            let old_src = String::from_utf8_lossy(&content);
+            let new_src = desugar_and_replace_et_literals(flags, ast, &old_src);
+            print!("{}", new_src);
         }
-    })
-    .unwrap()
+    }
 }

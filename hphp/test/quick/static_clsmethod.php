@@ -1,34 +1,34 @@
 <?hh
 class C {
-  public static function className() {
+  public static function className() :mixed{
     return 'C';
   }
   public function __construct() {
     var_dump(isset($this));
     var_dump(static::className());
   }
-  public function foo() {
+  public function foo() :mixed{
     var_dump(isset($this));
     var_dump(static::className());
   }
-  public static function bar() {
+  public static function bar() :mixed{
     var_dump(static::className());
   }
-  public function yar() {
+  public function yar() :mixed{
     var_dump(isset($this));
     var_dump(static::className());
   }
 }
 
 class D extends C {
-  public static function className() {
+  public static function className() :mixed{
     return 'D';
   }
   public function __construct() {
     var_dump(isset($this));
     var_dump(static::className());
   }
-  public function yar() {
+  public function yar() :mixed{
     var_dump(isset($this));
     var_dump(static::className());
     C::yar();

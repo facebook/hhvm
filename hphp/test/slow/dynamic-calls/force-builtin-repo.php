@@ -1,20 +1,20 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function foo() {}
+function foo() :mixed{}
 
 <<__DynamicallyCallable>>
-function bar() {}
+function bar() :mixed{}
 
 class Cls {
-  public static function foo() {}
+  public static function foo() :mixed{}
 
   <<__DynamicallyCallable>>
-  public static function bar() {}
+  public static function bar() :mixed{}
 }
 
 <<__EntryPoint>>
-function main_exit() {
+function main_exit() :mixed{
   $foo = 'foo';
   $bar = 'bar';
   $cls = 'Cls';

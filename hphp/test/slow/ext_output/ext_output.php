@@ -1,12 +1,12 @@
 <?hh
 
-function mytolower($a) {
+function mytolower($a) :mixed{
   return strtolower($a);
 }
 
 // don't print things here, since this tests what accumulates in the
 // output buffer.
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   if ($x !== $y) {
     var_dump($x);
     var_dump($y);
@@ -18,7 +18,7 @@ function VS($x, $y) {
 //////////////////////////////////////////////////////////////////////
 
 <<__EntryPoint>>
-function main_ext_output() {
+function main_ext_output() :mixed{
 ob_start();
 ob_start(mytolower<>);
 echo "TEst";
@@ -89,7 +89,7 @@ ob_start(mytolower<>);
 $handlers = ob_list_handlers();
 ob_end_clean();
 ob_end_clean();
-VS($handlers, varray["default output handler", mytolower<>]);
+VS($handlers, vec["default output handler", mytolower<>]);
 VS(is_varray($handlers), true);
 
 echo "\nok\n";

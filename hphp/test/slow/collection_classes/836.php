@@ -1,9 +1,9 @@
-<?hh // decl
+<?hh
 
 
 
 <<__EntryPoint>>
-function main_836() {
+function main_836() :mixed{
 $x = Set {
 1, 2, 3}
 ;

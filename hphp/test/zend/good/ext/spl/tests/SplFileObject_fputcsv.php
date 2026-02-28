@@ -1,9 +1,9 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$file = __SystemLib\hphp_test_tmppath('SplFileObject_fputcsv.csv');
+$file = sys_get_temp_dir().'/'.'SplFileObject_fputcsv.csv';
 $fo = new SplFileObject($file, 'w');
 
-$list = darray [
+$list = dict[
   0 => 'aaa,bbb',
   1 => 'aaa,"bbb"',
   2 => '"aaa","bbb"',
@@ -39,7 +39,7 @@ foreach($res as $key => $val)
 echo '$list = ';var_export($res);echo ";\n";
 
 $fp = fopen($file, "r");
-$res = varray[];
+$res = vec[];
 while($l=fgetcsv($fp))
 {
     $res[] = join(',',$l);

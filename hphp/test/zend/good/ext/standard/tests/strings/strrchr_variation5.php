@@ -14,7 +14,7 @@ $escape_char_str = <<<EOD
 \escape \\seque\nce
 EOD;
 
-$needles = varray[
+$needles = vec[
   "\t",
   '\n',
   "\r",

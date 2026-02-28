@@ -1,9 +1,0 @@
-File "indexing.php", line 5, characters 3-13:
-  vec<int>
-File "indexing.php", line 10, characters 3-13:
-  dict<(int | (dynamic & arraykey)), int>
-File "indexing.php", line 17, characters 3-16:
-  dict<(int | (dynamic & arraykey)), int>
-File "indexing.php", line 21, characters 3-16:
-  dict<(int | (dynamic & arraykey)), int>
-No errors

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class C {
   const string A = "key_c";

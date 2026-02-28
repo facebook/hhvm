@@ -8,7 +8,7 @@
 
 // defining a class
 class sample  {
-  public function __toString() {
+  public function __toString() :mixed{
     return "object";
   }
 }
@@ -20,47 +20,10 @@ echo "*** Testing stripos() function with unexpected values for haystack and nee
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values
-$values =  varray [
-
-  // integer values
-  0,
-  1,
-  12345,
-  -2345,
-
-  // float values
-  10.5,
-  -10.5,
-  10.5e10,
-  10.6E-10,
-  .5,
-
-  // array values
-  varray[],
-  varray[0],
-  varray[1],
-  varray[1, 2],
-  darray['color' => 'red', 'item' => 'pen'],
-
-  // boolean values
-  true,
-  false,
-  TRUE,
-  FALSE,
-
-  // objects
-  new sample(),
-
+$values =  vec[
   // empty string
   "",
   '',
-
-  // null vlaues
-  NULL,
-  null,
-
-  // resource
-  $file_handle,
 ];
 
 

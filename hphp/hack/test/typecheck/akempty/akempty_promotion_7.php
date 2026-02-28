@@ -1,11 +1,11 @@
-<?hh //strict
+<?hh
 
 /**
  * Test AKempty promotion if assignment happens inside an expression, not on
  * statement level.
  */
 function test(): void {
-  $a = varray[];
+  $a = vec[];
   if ($a[] = 'aaa') {
 
   }

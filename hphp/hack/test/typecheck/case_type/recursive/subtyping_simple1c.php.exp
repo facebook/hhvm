@@ -1,0 +1,2 @@
+ERROR: File "subtyping_simple1c.php", line 4, characters 11-11:
+This recursive case type is not supported. `A` should not be at the top-level. (Typing[4485])

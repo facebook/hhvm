@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_draw_accessor() {
+function main_draw_accessor() :mixed{
 $draw = new ImagickDraw;
 
 // clip
@@ -33,7 +33,7 @@ var_dump($draw->getStrokeAntialias());
 $draw->setStrokeColor(new ImagickPixel('#F02B88'));
 var_dump($draw->getStrokeColor()->getColor());
 
-$draw->setStrokeDashArray(varray[1, 2, 3]);
+$draw->setStrokeDashArray(vec[1, 2, 3]);
 var_dump($draw->getStrokeDashArray());
 
 $draw->setStrokeDashOffset(-1.0);

@@ -1,5 +1,5 @@
 <?hh
 
 function test(): void {
-  darray["tingley" => 0];
+  dict["tingley" => 0];
 }

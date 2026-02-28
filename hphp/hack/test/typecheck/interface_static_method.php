@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface A {
   public static function foo(): void;

@@ -1,11 +1,11 @@
 <?hh
 
-function test($str) {
+function test($str) :mixed{
   return strlen($str);
 }
 
 <<__EntryPoint>>
-function main_28() {
+function main_28() :mixed{
 try { var_dump(strlen()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { test(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 

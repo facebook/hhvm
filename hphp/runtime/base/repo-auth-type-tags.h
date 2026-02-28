@@ -34,6 +34,7 @@
   X(Func, Y)                                 \
   X(ClsMeth, Y)                              \
   X(LazyCls, Y)                              \
+  X(EnumClassLabel, Y)                       \
   X(Num, Y)                                  \
   X(UncArrKey, Y)                            \
   X(ArrKey, Y)                               \

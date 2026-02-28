@@ -1,0 +1,6 @@
+File "explicit_type_collection_generic_mismatch1.php", line 4, characters 14-14:
+Wrong type hint (Typing[4110])
+  File "explicit_type_collection_generic_mismatch1.php", line 4, characters 14-14:
+  Expected `T`
+  File "explicit_type_collection_generic_mismatch1.php", line 4, characters 33-36:
+  But got `null`

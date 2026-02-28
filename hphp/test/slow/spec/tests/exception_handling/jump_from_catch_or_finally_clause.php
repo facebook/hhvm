@@ -1,13 +1,13 @@
 <?hh
 
 function msg()
-{
+:mixed{
     echo "In msg\n";
     return 999;
 }
 
 function f()
-{
+:mixed{
     for ($i = 1; $i < 3; ++$i)
     {
         try

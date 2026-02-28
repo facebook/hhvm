@@ -5,8 +5,8 @@ $context = stream_context_create();
 var_dump(stream_context_set_option($context, 'http', 'method', 'POST'));
 
 // Array of options
-$options = darray[
-    'http' => darray[
+$options = dict[
+    'http' => dict[
         'protocol_version' => 1.1,
         'user_agent'       => 'PHPT Agent',
     ],

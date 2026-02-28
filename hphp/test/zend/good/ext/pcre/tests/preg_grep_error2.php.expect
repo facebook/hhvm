@@ -1,0 +1,10 @@
+*** Testing preg_grep() : error conditions ***
+
+Arg value is: Array
+dict(2) {
+  [0]=>
+  string(7) "this is"
+  [1]=>
+  string(10) "a subarray"
+}
+Done

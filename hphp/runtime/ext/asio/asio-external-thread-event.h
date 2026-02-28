@@ -84,7 +84,7 @@ struct c_ExternalThreadEventWaitHandle;
  *
  * Example:
  *
- * Object f_gen_foo(int max_value) {
+ * Object HHVM_FUNCTION(gen_foo, int max_value) {
  *   // validate user input early
  *   if (max_value < 0) {
  *     SystemLib::throwInvalidArgumentExceptionObject(
@@ -198,7 +198,7 @@ struct AsioExternalThreadEvent {
      * Get the time markAsFinished was called to retroactively reference
      * when the underlying IO operation was over
      */
-    AsioSession::TimePoint getFinishTime() const { return m_finishTime; };
+    AsioSession::TimePoint getFinishTime() const { return m_finishTime; }
 
   protected:
     /**
@@ -224,7 +224,7 @@ struct AsioExternalThreadEvent {
         m_state.load() == Canceled ||
         m_state.load() == Abandoned
       );
-    };
+    }
 
     /**
      * Mark the event as finished.

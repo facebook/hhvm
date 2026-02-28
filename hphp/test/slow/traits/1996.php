@@ -8,7 +8,7 @@ interface MY_INTERFACE {
 }
 
 <<__EntryPoint>>
-function main_1996() {
+function main_1996() :mixed{
 var_dump(trait_exists('MY_CLASS'));
 var_dump(trait_exists('MY_INTERFACE'));
 var_dump(trait_exists('MY_TRAIT'));

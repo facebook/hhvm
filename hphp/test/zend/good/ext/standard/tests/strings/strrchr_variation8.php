@@ -12,7 +12,7 @@ echo "*** Testing strrchr() function: with heredoc strings ***\n";
 $empty_str = <<<EOD
 EOD;
 
-$needles = varray[
+$needles = vec[
   "",
   '',
   FALSE,

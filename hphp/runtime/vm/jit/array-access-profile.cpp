@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/array-access-profile.h"
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/base/vanilla-dict.h"
@@ -25,6 +24,7 @@
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/jit/decref-profile.h"
 
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/safe-cast.h"
 
 #include <algorithm>
@@ -134,19 +134,19 @@ ArrayAccessProfile::Result ArrayAccessProfile::choose() const {
   auto const pickAction = [&](
     uint32_t val,
     double cold,
-    double exit = RO::EvalHHIRExitArrayProfileThreshold
+    double exit = Cfg::HHIR::ExitArrayProfileThreshold
   ) {
     if (val >= total * exit) return Action::Exit;
     if (val >= total * cold) return Action::Cold;
     return Action::None;
   };
 
-  auto const offset_threshold  = RO::EvalHHIROffsetArrayProfileThreshold;
-  auto const size_threshold = RO::EvalHHIRSmallArrayProfileThreshold;
-  auto const missing_threshold = RO::EvalHHIRMissingArrayProfileThreshold;
+  auto const offset_threshold  = Cfg::HHIR::OffsetArrayProfileThreshold;
+  auto const size_threshold = Cfg::HHIR::SmallArrayProfileThreshold;
+  auto const missing_threshold = Cfg::HHIR::MissingArrayProfileThreshold;
   auto const index_action =
     pickAction(hottest.count, offset_threshold,
-               RO::EvalHHIROffsetExitArrayProfileThreshold);
+               Cfg::HHIR::OffsetExitArrayProfileThreshold);
   auto const offset =
     std::make_pair(index_action, index_action == Action::None
                                  ? 0 : safe_cast<uint32_t>(hottest.pos));
@@ -154,7 +154,7 @@ ArrayAccessProfile::Result ArrayAccessProfile::choose() const {
                          ? SizeHintData::SmallStatic : SizeHintData::Default;
   auto const empty = pickAction(m_empty, missing_threshold);
   auto const missing = pickAction(m_missing, missing_threshold);
-  auto const nocow = pickAction(m_nocow, RO::EvalHHIRCOWArrayProfileThreshold);
+  auto const nocow = pickAction(m_nocow, Cfg::HHIR::COWArrayProfileThreshold);
   return Result{offset, SizeHintData(size_hint), empty, missing, nocow};
 }
 
@@ -180,8 +180,9 @@ bool ArrayAccessProfile::update(int32_t pos, uint32_t count) {
   return false;
 }
 
-void ArrayAccessProfile::update(const ArrayData* ad, int64_t i,
-                                DecRefProfileEntry* decRefProfile) {
+void ArrayAccessProfile::update(const ArrayData* ad,
+                                int64_t i,
+                                DecRefProfile* decRefProfile) {
   auto const h = hash_int64(i);
   auto const pos =
     ad->isVanillaDict() ? VanillaDict::as(ad)->find(i, h) :
@@ -192,13 +193,13 @@ void ArrayAccessProfile::update(const ArrayData* ad, int64_t i,
   if (ad->size() == 0) m_empty++;
   if (!ad->cowCheck()) m_nocow++;
   if (decRefProfile && validPos(pos)) {
-    auto const tv = ad->nvGetVal(pos);
-    decRefProfile->update([&](auto& profile) { profile.update(tv); });
+    decRefProfile->update(ad->nvGetVal(pos));
   }
 }
 
-void ArrayAccessProfile::update(const ArrayData* ad, const StringData* sd,
-                                DecRefProfileEntry* decRefProfile) {
+void ArrayAccessProfile::update(const ArrayData* ad,
+                                const StringData* sd,
+                                DecRefProfile* decRefProfile) {
   // Only count cases where the string keys compare equal as pointers
   // (checked within findStringKey).
   auto const pos =
@@ -213,8 +214,7 @@ void ArrayAccessProfile::update(const ArrayData* ad, const StringData* sd,
   }
   if (!ad->cowCheck()) m_nocow++;
   if (decRefProfile && validPos(pos)) {
-    auto const tv = ad->nvGetVal(pos);
-    decRefProfile->update([&](auto& profile) { profile.update(tv); });
+    decRefProfile->update(ad->nvGetVal(pos));
   }
 }
 

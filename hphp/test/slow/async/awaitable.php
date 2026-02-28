@@ -1,16 +1,16 @@
 <?hh
 
-function block() {
+function block() :mixed{
   return RescheduleWaitHandle::create(
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
   );
 }
-async function f() {
+async function f() :Awaitable<mixed>{
   return 1;
 }
 
-async function foo() {
+async function foo() :Awaitable<mixed>{
   $f = f();
   $a = await $f;
   var_dump($a);
@@ -21,7 +21,7 @@ async function foo() {
 }
 
 <<__EntryPoint>>
-function main_awaitable() {
+function main_awaitable() :mixed{
 ;
 
 HH\Asio\join(foo());

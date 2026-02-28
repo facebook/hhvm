@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('like_type_hints')>>
 
 class C {
   const type A = ~int;
@@ -22,7 +23,7 @@ function f(string $const_name): void {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   f('A');
   f('B');
   f('C');

@@ -1,6 +1,6 @@
 <?hh
 
-function foo($x) {
+function foo($x) :AsyncGenerator<mixed,mixed,void>{
   foreach ($x as $k) yield $k;
 }
 

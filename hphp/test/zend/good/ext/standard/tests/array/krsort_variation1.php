@@ -19,7 +19,7 @@ echo "*** Testing krsort() : usage variations ***\n";
 // resource variable
 $fp = fopen(__FILE__, "r");
 
-$unexpected_values = varray [
+$unexpected_values = vec[
 
         // int data
 /*1*/   0,

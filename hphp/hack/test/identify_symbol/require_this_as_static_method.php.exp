@@ -1,0 +1,11 @@
+name: \T::static_meth, kind: method, span: line 14, characters 11-21, is_declaration: false
+definition:
+ static_meth
+   kind: method
+   id: method::C::static_meth
+   position: line 7, characters 26-36
+   span: line 7, character 3 - line 7, character 47
+   modifiers: public static 
+   params:
+
+

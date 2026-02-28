@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$tmp_sqllite = tempnam('/tmp', 'vmpdotest');
+$tmp_sqllite = tempnam(sys_get_temp_dir(), 'vmpdotest');
 $source = "sqlite:$tmp_sqllite";
 $dbh = new PDO($source);
 $stmt = $dbh->query("SELECT 1+1");

@@ -1,13 +1,13 @@
 <?hh
 
 class A {
-  public function b() {
+  public function b() :AsyncGenerator<mixed,mixed,void>{
     $cl = function() {
       return $this->c();
     };
     yield $cl();
   }
-  private function c() {
+  private function c() :mixed{
     return 'A';
   }
 }

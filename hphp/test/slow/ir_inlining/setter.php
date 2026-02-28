@@ -11,24 +11,24 @@ class Foo {
     $this->x = $x;
   }
 
-  public function setX($x) {
+  public function setX($x) :mixed{
     $this->x = $x;
   }
 
-  public function getX() {
+  public function getX() :mixed{
     return $this->x;
   }
 
-  public function setXVerified(string $str) {
+  public function setXVerified(string $str) :mixed{
     $this->x = $str;
   }
 
-  public function setY(Bar $k) {
+  public function setY(Bar $k) :mixed{
     $this->y = $k;
   }
 }
 
-function main() {
+function main() :mixed{
   $k = new Foo("something");
   echo $k->getX();
   echo "\n";
@@ -44,6 +44,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_setter() {
+function main_setter() :mixed{
 main();
 }

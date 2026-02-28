@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   $x = Vector {};
   $x->resize(50000, null);
   for ($i = 50000; $i < 100000; ++$i) {
@@ -17,6 +17,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_large_vector() {
+function main_large_vector() :mixed{
 main();
 }

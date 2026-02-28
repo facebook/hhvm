@@ -20,9 +20,9 @@
 
 #include <folly/ScopeGuard.h>
 
+#include <hphp/system/systemlib.h>
 #include "hphp/util/trace.h"
 
-#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
@@ -42,7 +42,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(unwind);
+TRACE_SET_MOD(unwind)
 using boost::implicit_cast;
 
 namespace {
@@ -239,14 +239,14 @@ const StaticString s_previous("previous");
 const Slot s_previousIdx{6};
 
 DEBUG_ONLY bool is_throwable(ObjectData* throwable) {
-  auto const erCls = SystemLib::s_ErrorClass;
-  auto const exCls = SystemLib::s_ExceptionClass;
+  auto const erCls = SystemLib::getErrorClass();
+  auto const exCls = SystemLib::getExceptionClass();
   return throwable->instanceof(erCls) || throwable->instanceof(exCls);
 }
 
 DEBUG_ONLY bool throwable_has_expected_props() {
-  auto const erCls = SystemLib::s_ErrorClass;
-  auto const exCls = SystemLib::s_ExceptionClass;
+  auto const erCls = SystemLib::getErrorClass();
+  auto const exCls = SystemLib::getExceptionClass();
   if (erCls->lookupDeclProp(s_previous.get()) != s_previousIdx ||
       exCls->lookupDeclProp(s_previous.get()) != s_previousIdx) {
     return false;
@@ -255,14 +255,20 @@ DEBUG_ONLY bool throwable_has_expected_props() {
   // Check that we have the expected type-hints on these props so we don't need
   // to verify anything when setting. If someone changes the type-hint we want
   // to know.
-  auto const isException = [&](const TypeConstraint& tc) {
-    if (!tc.isUnresolved() && !tc.isObject()) return false;
-    auto const cls = Class::lookup(tc.anyNamedEntity());
-    return cls && cls == SystemLib::s_ExceptionClass;
+  auto const isException = [&](const TypeIntersectionConstraint& tic) {
+    auto const check =  [&](const TypeConstraint& tc) {
+      if (!tc.isUnresolved() && !tc.isSubObject()) return false;
+      auto const cls = tc.anyNamedType()->getCachedClass();
+      return cls && cls == SystemLib::getThrowableClass();
+    };
+    return std::all_of(
+      tic.range().begin(),
+      tic.range().end(),
+      [&](const TypeConstraint& tc) {return check(tc);}
+    );
   };
 
-  return
-    isException(erCls->declPropTypeConstraint(s_previousIdx)) &&
+  return isException(erCls->declPropTypeConstraint(s_previousIdx)) &&
     isException(exCls->declPropTypeConstraint(s_previousIdx));
 }
 
@@ -272,7 +278,7 @@ const StaticString s_hphpd_break("hphpd_break");
 
 }
 
-Offset findCatchHandler(const Func* func, Offset raiseOffset) {
+Offset findExceptionHandler(const Func* func, Offset raiseOffset) {
   auto const eh = func->findEH(raiseOffset);
   if (eh == nullptr) return kInvalidOffset;
   return eh->m_handler;
@@ -298,7 +304,7 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
       assertx(foundLval.type() != KindOfUninit);
       head = foundLval.val().pobj;
     } while (foundLval.type() == KindOfObject &&
-             foundLval.val().pobj->instanceof(SystemLib::s_ThrowableClass));
+             foundLval.val().pobj->instanceof(SystemLib::getThrowableClass()));
     return foundLval;
   };
 
@@ -405,35 +411,60 @@ UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
         vmStack().pushObjectNoRc(phpException);
         pc = func->at(eh->m_handler);
         DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
-        return UnwindNone;
+        return UnwinderResult::None;
       }
     }
 
     // We found no more handlers in this frame.
     auto const jit = fpToUnwind != nullptr && fpToUnwind == fp->m_sfp;
+    auto const retToInterp = isReturnHelper(fp->m_savedRip);
     phpException = tearDownFrame(fp, stack, pc, phpException, jit, teardown);
 
-    // If we entered from the JIT and this is the last iteration, we can't
-    // trust the PC since catch traces for inlined frames may add more
-    // frames on vmfp()'s rbp chain which might have resulted in us incorrectly
-    // calculating the PC.
+    if (retToInterp) {
+      // If this is a call from an interpreted FCallCtor, we might need to lock
+      // the object. Interpreted calls are by definition not inlined, so the PC
+      // must be correct.
+      // Jitted FCallCtor calls lock objects in their catch traces.
+      assertx(fp && pc);
+      lockObjectWhileUnwinding(pc, stack);
+    }
 
-    if (exception.left() != phpException) {
+    if (exception.left() != nullptr && RI().m_pendingException != nullptr) {
+      // EventHook::FunctionUnwind might have generated a pending C++ exception.
+      // If we are unwinding a Hack exception, replace it with the C++ one.
+      ITRACE(1,
+             "unwind: replacing Hack exception {} with a pending C++ "
+             "exception {}\n",
+             describeEx(exception),
+             describeEx(RI().m_pendingException));
+      if (fpToUnwind) {
+        assertx(!fp || fp == fpToUnwind);
+        return UnwinderResult::ReplaceWithPendingException;
+      }
+
+      if (phpException) decRefObj(phpException);
+      phpException = nullptr;
+      exception = RI().m_pendingException;
+      RI().m_pendingException = nullptr;
+    } else if (exception.left() != phpException) {
+      // If we entered from the JIT and this is the last iteration, we can't
+      // trust the PC since catch traces for inlined frames may add more
+      // frames on vmfp()'s rbp chain which might have resulted in us incorrectly
+      // calculating the PC.
       assertx(phpException == nullptr);
       if (fp && !jit) pc = skipCall(pc);
       ITRACE(1, "Returning with exception == null\n");
-      return UnwindFSWH;
+      return UnwinderResult::FSWH;
     }
 
     if (!fp || (fpToUnwind && fp == fpToUnwind)) break;
-    lockObjectWhileUnwinding(pc, stack);
   }
 
   if (fp || fpToUnwind) {
     assertx(fpToUnwind && (phpException || exception.right()));
     ITRACE(1, "Reached {}\n", fpToUnwind);
     if (phpException) phpException->decRefCount();
-    return UnwindReachedGoal;
+    return UnwinderResult::ReachedGoal;
   }
 
   ITRACE(1, "unwind: reached the end of this nesting's ActRec chain\n");

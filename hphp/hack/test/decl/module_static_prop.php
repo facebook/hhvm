@@ -1,19 +1,19 @@
-//// modules.php
+//// module_A.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
-
-module A {}
-module B {}
+new module A {}
+//// module_B.php
+<?hh
+new module B {}
 
 //// A.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+
+module A;
 
 class A {
-  <<__Internal>>
-  public static int $x = 0;
+  internal static int $x = 0;
 }
 
 
@@ -26,9 +26,10 @@ function a(): void {
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules'), __Module('B')>>
 
-<<__Module("B")>>
+module B;
+
+
 function b(): void {
   A::$x = 1;
 }

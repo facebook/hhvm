@@ -1,0 +1,80 @@
+ERROR: File "generic_self_type_access_failure.php", line 13, characters 9-10:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "generic_self_type_access_failure.php", line 19, characters 9-10:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "generic_self_type_access_failure.php", line 18, characters 36-53:
+Some type arguments violate their constraints (Typing[4323])
+  File "generic_self_type_access_failure.php", line 11, characters 32-33:
+  `TX` is a constrained type parameter
+  File "generic_self_type_access_failure.php", line 11, characters 38-40:
+  This type constraint is violated
+  File "generic_self_type_access_failure.php", line 11, characters 38-40:
+  Expected `Box`
+  File "generic_self_type_access_failure.php", line 18, characters 52-52:
+  But got `Box::T where \Box::T super TX::T, \Box::T as Intf`
+  File "generic_self_type_access_failure.php", line 19, characters 9-13:
+    by the definition of `T`
+ERROR: File "generic_self_type_access_failure.php", line 18, characters 36-53:
+Some type arguments violate their constraints (Typing[4323])
+  File "generic_self_type_access_failure.php", line 11, characters 32-33:
+  `TX` is a constrained type parameter
+  File "generic_self_type_access_failure.php", line 11, characters 38-40:
+  This type constraint is violated
+  File "generic_self_type_access_failure.php", line 11, characters 38-40:
+  Expected `Box`
+  File "generic_self_type_access_failure.php", line 18, characters 52-52:
+  But got `Intf`
+  File "generic_self_type_access_failure.php", line 18, characters 30-33:
+    by the definition of `T`
+ERROR: File "generic_self_type_access_failure.php", line 18, characters 36-53:
+Some type arguments violate their constraints (Typing[4323])
+  File "generic_self_type_access_failure.php", line 11, characters 32-33:
+  `TX` is a constrained type parameter
+  File "generic_self_type_access_failure.php", line 11, characters 38-40:
+  This type constraint is violated
+  File "generic_self_type_access_failure.php", line 11, characters 38-40:
+  Expected `Box`
+  File "generic_self_type_access_failure.php", line 18, characters 52-52:
+  But got `Intf`
+  File "generic_self_type_access_failure.php", line 19, characters 9-13:
+    by the definition of `T`
+ERROR: File "generic_self_type_access_failure.php", line 18, characters 36-53:
+Some type arguments violate their constraints (Typing[4323])
+  File "generic_self_type_access_failure.php", line 11, characters 32-33:
+  `TX` is a constrained type parameter
+  File "generic_self_type_access_failure.php", line 11, characters 38-40:
+  This type constraint is violated
+  File "generic_self_type_access_failure.php", line 11, characters 38-40:
+  Expected `Box`
+  File "generic_self_type_access_failure.php", line 18, characters 52-52:
+  But got `T = TX::T`
+ERROR: File "generic_self_type_access_failure.php", line 18, characters 36-53:
+Some type arguments violate their constraints (Typing[4323])
+  File "generic_self_type_access_failure.php", line 11, characters 32-33:
+  `TX` is a constrained type parameter
+  File "generic_self_type_access_failure.php", line 11, characters 38-40:
+  This type constraint is violated
+  File "generic_self_type_access_failure.php", line 11, characters 38-40:
+  Expected `Box`
+  File "generic_self_type_access_failure.php", line 18, characters 52-52:
+  But got `T = TX::T`
+  File "generic_self_type_access_failure.php", line 19, characters 9-13:
+    by the definition of `T`
+ERROR: File "generic_self_type_access_failure.php", line 18, characters 36-53:
+Some type arguments violate their constraints (Typing[4323])
+  File "generic_self_type_access_failure.php", line 11, characters 32-33:
+  `TX` is a constrained type parameter
+  File "generic_self_type_access_failure.php", line 11, characters 38-40:
+  This type constraint is violated
+  File "generic_self_type_access_failure.php", line 11, characters 38-40:
+  Expected `Box`
+  File "generic_self_type_access_failure.php", line 18, characters 52-52:
+  But got `TX::T = T`
+  File "generic_self_type_access_failure.php", line 19, characters 9-13:
+    by the definition of `T`
+ERROR: File "generic_self_type_access_failure.php", line 20, characters 5-15:
+Typing error (Typing[4110])
+  File "generic_self_type_access_failure.php", line 20, characters 5-15:
+  Expected `(function(<expr#4> as T): _)`
+  File "generic_self_type_access_failure.php", line 12, characters 28-28:
+  But got `dynamic`

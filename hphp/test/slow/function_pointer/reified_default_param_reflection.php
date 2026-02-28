@@ -10,15 +10,15 @@ function rbaz<reify T>(): int {
   return 1;
 }
 
-function func1($p0 = Foo::rbar<int>) {}
-function func2($p0 = rbaz<int>) {}
+function func1($p0 = Foo::rbar<int>) :mixed{}
+function func2($p0 = rbaz<int>) :mixed{}
 
 // Actual specified function calls
-function func3($p0 = Foo::rbar<int>()) {}
-function func4($p0 = rbaz<int>()) {}
+function func3($p0 = Foo::rbar<int>()) :mixed{}
+function func4($p0 = rbaz<int>()) :mixed{}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $funcs = vec[
     'func1',
     'func2',

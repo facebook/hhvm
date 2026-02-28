@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 class C {
   public ?D $prop;
   public function foo(): D {

@@ -1,1 +1,4 @@
-A HH\MemberOf<E, int>
+A
+  INSERT A
+  ~int
+SORT TEXT: none

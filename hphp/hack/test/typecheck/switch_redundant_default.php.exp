@@ -1,0 +1,2 @@
+WARN: File "switch_redundant_default.php", line 16, characters 5-12:
+All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])

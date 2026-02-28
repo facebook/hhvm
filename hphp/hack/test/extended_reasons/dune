@@ -1,0 +1,32 @@
+(rule
+ (alias extended_reasons)
+ (deps
+  %{exe:../../src/hh_single_type_check.exe}
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/extended_reasons/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/extended_reasons/*.php)
+  (glob_files %{project_root}/hack/test/extended_reasons/*.exp))
+ (action
+  (run
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/extended_reasons
+   --program
+   %{exe:../../src/hh_single_type_check.exe}
+   --batch
+   --in-extension
+   .php
+   --out-extension
+   .out
+   --expect-extension
+   .exp
+   --flags
+   --config extended_reasons=1
+   )))
+
+
+(alias
+ (name runtest)
+ (deps
+  (alias extended_reasons)
+  ))

@@ -3,7 +3,7 @@
 class Dtor {
 }
 
-function do_unset($v, $k) {
+function do_unset($v, $k) :mixed{
   try {
     unset($v[$k]);
   } catch (Exception $e) {

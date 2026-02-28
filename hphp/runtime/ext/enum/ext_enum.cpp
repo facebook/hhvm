@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/enum-util.h"
+#include "hphp/runtime/base/opaque-resource.h"
 #include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
@@ -129,14 +130,14 @@ static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
   auto values = EnumCache::getValuesBuiltin(self_);
   if (!values->names.exists(res)) {
     res = init_null();
-  } else if (auto base = self_->enumBaseTy()) {
+  } else if (auto base = self_->enumBaseTy().underlyingDataType()) {
     if (isStringType(*base) && res.isInteger()) {
       res = Variant(res.toString());
     }
   } else {
     // If the value is present, but the enum has no base type, return the value
     // as specified, undoing any int-like string conversion we did on it.
-    return value;
+    if (res.isInteger()) return value;
   }
 
   return res;
@@ -145,16 +146,13 @@ static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
 //////////////////////////////////////////////////////////////////////////////
 
 struct enumExtension final : Extension {
-  enumExtension() : Extension("enum", "1.0.0-dev") {}
-  void moduleInit() override {
+  enumExtension() : Extension("enum", "1.0.0-dev", NO_ONCALL_YET) {}
+  void moduleRegisterNative() override {
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, getValues, BuiltinEnum, getValues);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, getNames, BuiltinEnum, getNames);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, isValid, BuiltinEnum, isValid);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, coerce, BuiltinEnum, coerce);
-    HHVM_RC_STR(HH\\BUILTIN_ENUM, "HH\\BuiltinEnum");
     HHVM_STATIC_MALIAS(HH\\BuiltinEnumClass, getValues, BuiltinEnum, getValues);
-    HHVM_RC_STR(HH\\BUILTIN_ENUM_CLASS, "HH\\BuiltinEnumClass");
-    loadSystemlib();
   }
 } s_enum_extension;
 

@@ -1,0 +1,8 @@
+ERROR: File "non_fixed_point_recursion_mutual.php", line 3, characters 11-24:
+Recursion is not supported via case type where clauses. (Typing[4485])
+  File "non_fixed_point_recursion_mutual.php", line 7, characters 22-44:
+  `NonFixedPointA` appears here
+ERROR: File "non_fixed_point_recursion_mutual.php", line 6, characters 11-24:
+Recursion is not supported via case type where clauses. (Typing[4485])
+  File "non_fixed_point_recursion_mutual.php", line 4, characters 22-44:
+  `NonFixedPointB` appears here

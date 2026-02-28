@@ -5,13 +5,13 @@ final class Foo {
 }
 
 function test(): void {
-  class_meth('Foo', 'bar');
+  Foo::bar<>;
 
-  class_meth(Foo::class, 'bar');
-
-  // Should error
-  class_meth('NotFound', 'bar');
+  Foo::bar<>;
 
   // Should error
-  class_meth(NotFound::class, 'bar');
+  NotFound::bar<>;
+
+  // Should error
+  NotFound::bar<>;
 }

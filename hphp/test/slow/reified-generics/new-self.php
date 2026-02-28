@@ -1,20 +1,20 @@
 <?hh
 
 class C<reify T> {
-  function f() {
+  function f() :mixed{
     var_dump(HH\ReifiedGenerics\get_type_structure<T>());
   }
-  function a() {
+  function a() :mixed{
     $c = new self();
     $c->f();
   }
 }
 
 class D<reify T> extends C<bool> {
-  function f() {
+  function f() :mixed{
     var_dump(HH\ReifiedGenerics\get_type_structure<T>());
   }
-  function h() {
+  function h() :mixed{
     $this->a();
   }
 }

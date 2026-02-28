@@ -15,17 +15,18 @@
 */
 #include "hphp/runtime/base/intercept.h"
 
-#include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/vm/jit/tc-intercept.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/event-hook.h"
-#include "hphp/util/lock.h"
+
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
 
@@ -34,7 +35,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(intercept);
+TRACE_SET_MOD(intercept)
 
 struct InterceptRequestData final : RequestEventHandler {
   InterceptRequestData() {}
@@ -64,6 +65,73 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(InterceptRequestData, s_intercept_data);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool register_intercept_surprise_flags(const Variant& callback,
+                                       Func *const interceptedFunc) {
+  assertx(!Cfg::Eval::FastMethodIntercept);
+
+  if (!callback.toBoolean()) {
+    if (!s_intercept_data->empty()) {
+      auto& handlers = s_intercept_data->intercept_handlers();
+      auto it = handlers.find(interceptedFunc);
+      if (it != handlers.end()) {
+        // erase the map entry before destroying the value
+        auto tmp = it->second;
+        handlers.erase(it);
+      }
+    }
+    // We've cleared out all the intercepts, so we don't need to pay the
+    // surprise flag cost anymore
+    if (s_intercept_data->empty()) {
+      EventHook::DisableIntercept();
+    }
+    return true;
+  }
+
+  EventHook::EnableIntercept();
+
+  auto& handlers = s_intercept_data->intercept_handlers();
+  handlers[interceptedFunc] = callback;
+  interceptedFunc->setMaybeIntercepted();
+  return true;
+}
+
+bool register_intercept_fast_method_intercept(const Variant& callback,
+                                              Func *const interceptedFunc) {
+  assertx(Cfg::Eval::FastMethodIntercept);
+  auto interceptedFuncId = interceptedFunc->getFuncId();
+
+  if (!callback.toBoolean()) {
+    if (!s_intercept_data->empty()) {
+      auto& handlers = s_intercept_data->intercept_handlers();
+      auto it = handlers.find(interceptedFunc);
+      if (it != handlers.end()) {
+        // erase the map entry before destroying the value
+        auto tmp = it->second;
+        handlers.erase(it);
+        // Record that the current request does not intercept anymore interceptedFunc.
+        // If no other request intercepts interceptedFunc, then replace the forced `jmp`
+        // to the surprise stub with a conditional `jcc` in the TC translations of
+        // interceptedFunc.
+        jit::tc::stopInterceptFunc(interceptedFuncId);
+      }
+    }
+    return true;
+  }
+
+  auto& handlers = s_intercept_data->intercept_handlers();
+  auto [it, did_insert] = handlers.emplace(interceptedFunc, callback);
+  if (!did_insert) {
+    it->second = callback;
+  } else {
+    // The request didn't previously intercept this function: record this and
+    // replace the conditional `jcc` implementing the surprise flag check with a
+    // forced jmp to the surprise stub in all the TC translations of the function.
+    jit::tc::startInterceptFunc(interceptedFuncId);
+  };
+  interceptedFunc->setMaybeIntercepted();
+  return true;
+}
+
 bool register_intercept(const String& name, const Variant& callback) {
   SCOPE_EXIT {
     DEBUGGER_ATTACHED_ONLY(phpDebuggerInterceptRegisterHook(name));
@@ -78,7 +146,9 @@ bool register_intercept(const String& name, const Variant& callback) {
       if (!meth || meth->cls() != cls) return nullptr;
       return meth;
     } else {
-      return Func::load(name.get());
+      auto const f = Func::load(name.get());
+      if (!f) return nullptr;
+      return f->unwrap();
     }
   }();
 
@@ -88,32 +158,52 @@ bool register_intercept(const String& name, const Variant& callback) {
     return true;
   }
 
-  if (!callback.toBoolean()) {
-    if (!s_intercept_data->empty()) {
-      auto& handlers = s_intercept_data->intercept_handlers();
-      auto it = handlers.find(interceptedFunc);
-      if (it != handlers.end()) {
-        // erase the map entry before destroying the value
-        auto tmp = it->second;
-        handlers.erase(it);
+  /*
+   * In production mode, only functions that we have assumed can be
+   * intercepted during static analysis should actually be
+   * intercepted. Otherwise, we refer to the NonInterceptableFunctions
+   * blocklist in the config.
+   */
+  if (!(interceptedFunc->isInterceptable())) {
+    if (Cfg::Repo::Authoritative) {
+      raise_error("fb_intercept2 was used on a non-interceptable function (%s) "
+                  "in RepoAuthoritative mode", interceptedFunc->fullName()->data());
+    } else {
+      if (interceptedFunc->isBuiltin()) {
+        raise_error("fb_intercept2 was used on a non-interceptable function (%s). "
+                    "Builtins are by default non-interceptable. If you need to "
+                    "intercept a builtin, add it to the InterceptableBuiltins "
+                    "allowlist",
+                    interceptedFunc->fullName()->data());
+      } else {
+        raise_error("fb_intercept2 was used on a non-interceptable function (%s). "
+                    "It appears in the NonInterceptableFunctions blocklist.",
+                    interceptedFunc->fullName()->data());
       }
     }
-
-    // We've cleared out all the intercepts, so we don't need to pay the
-    // surprise flag cost anymore
-    if (s_intercept_data->empty()) {
-      EventHook::DisableIntercept();
-    }
-
-    return true;
   }
 
-  EventHook::EnableIntercept();
+  if (Cfg::Eval::DumpJitEnableRenameFunctionStats &&
+      StructuredLog::coinflip(Cfg::Jit::InterceptFunctionLogRate)) {
+    StructuredLogEntry entry;
+    entry.setStr("intercepted_func", interceptedFunc->fullName()->data());
+    entry.setInt("builtin", interceptedFunc->isBuiltin());
+    addBacktraceToStructLog(
+      createBacktrace(BacktraceArgs()), entry
+    );
+    StructuredLog::log("hhvm_intercept_function", entry);
+  }
 
-  auto& handlers = s_intercept_data->intercept_handlers();
-  handlers[interceptedFunc] = callback;
-  interceptedFunc->setMaybeIntercepted();
-  return true;
+  if (Cfg::Eval::FastMethodIntercept) {
+    return register_intercept_fast_method_intercept(callback, interceptedFunc);
+  } else {
+    return register_intercept_surprise_flags(callback, interceptedFunc);
+  }
+}
+
+bool is_intercepted(const Func* func) {
+  auto const h = get_intercept_handler(func);
+  return (h != nullptr);
 }
 
 Variant* get_intercept_handler(const Func* func) {
@@ -130,50 +220,63 @@ Variant* get_intercept_handler(const Func* func) {
   return nullptr;
 }
 
+void reset_all_intercepted_functions() {
+  if (Cfg::Eval::FastMethodIntercept && !s_intercept_data->empty()) {
+    auto& handlers = s_intercept_data->intercept_handlers();
+    for (auto& h: handlers) {
+      jit::tc::stopInterceptFunc(h.first->getFuncId());
+    }
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // fb_rename_function()
 
 void rename_function(const String& old_name, const String& new_name) {
   auto const old = old_name.get();
   auto const n3w = new_name.get();
-  auto const oldNe = const_cast<NamedEntity*>(NamedEntity::get(old));
-  auto const newNe = const_cast<NamedEntity*>(NamedEntity::get(n3w));
+  auto const oldNe = const_cast<NamedFunc*>(NamedFunc::getNoCreate(old));
 
-  Func* func = Func::lookup(oldNe);
+  Func* func = oldNe ? oldNe->getCachedFunc() : nullptr;
   if (!func) {
-    // It's the caller's responsibility to ensure that the old function
-    // exists.
+    // It's the caller's responsibility to ensure that the old function exists.
     not_reached();
   }
 
-  // Interceptable functions can be renamed even when
-  // JitEnableRenameFunction is false.
-  if (!(func->attrs() & AttrInterceptable)) {
-    if (!RuntimeOption::EvalJitEnableRenameFunction) {
-      // When EvalJitEnableRenameFunction is false, the translator may
-      // wire non-AttrInterceptable Func*'s into the TC. Don't rename
-      // functions.
+  if (!RuntimeOption::funcIsRenamable(old)) {
+    if (Cfg::Jit::EnableRenameFunction == 2) {
+      raise_error("fb_rename_function must be explicitly enabled for %s "
+                  "(when Eval.JitEnableRenameFunction=2 by adding it to "
+                  "option Eval.RenamableFunctions)", old->data());
+    } else {
       raise_error("fb_rename_function must be explicitly enabled"
-                  "(-v Eval.JitEnableRenameFunction=true)");
+                  "(-v Eval.JitEnableRenameFunction=1)");
     }
   }
 
-  auto const fnew = Func::lookup(newNe);
+  auto const newNe = const_cast<NamedFunc*>(NamedFunc::getOrCreate(n3w));
+  auto const fnew = newNe->getCachedFunc();
   if (fnew && fnew != func) {
     raise_error("Function already defined: %s", n3w->data());
+  }
+
+  if (StructuredLog::enabled() &&
+    Cfg::Eval::DumpJitEnableRenameFunctionStats) {
+    StructuredLogEntry entry;
+    entry.setStr("old_function_name", old->data());
+    entry.setStr("new_function_name", n3w->data());
+    StructuredLog::log("hhvm_rename_function", entry);
   }
 
   always_assert(
     !rds::isPersistentHandle(oldNe->getFuncHandle(func->fullName()))
   );
   oldNe->setCachedFunc(nullptr);
-  newNe->m_cachedFunc.bind(
-    rds::Mode::Normal,
-    rds::LinkName{"NEFunc", fnew ? fnew->fullName() : makeStaticString(n3w)}
-  );
+  auto const newName = fnew ? fnew->fullName() : makeStaticString(n3w);
+  newNe->m_cachedFunc.bind(rds::Mode::Normal, rds::LinkName{"NEFunc", newName});
   newNe->setCachedFunc(func);
 
-  if (RuntimeOption::EvalJit) {
+  if (Cfg::Jit::Enabled) {
     jit::invalidateForRenameFunction(old);
   }
 }

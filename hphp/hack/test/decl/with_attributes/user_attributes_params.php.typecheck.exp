@@ -1,0 +1,96 @@
+ERROR: File "user_attributes_params.php", line 8, characters 28-28:
+A method must have a body or be marked `abstract`. (Parsing[1002])
+ERROR: File "user_attributes_params.php", line 10, characters 9-24:
+Attribute arguments must be literals (Parsing[1002])
+ERROR: File "user_attributes_params.php", line 10, characters 27-33:
+Attribute arguments must be literals (Parsing[1002])
+ERROR: File "user_attributes_params.php", line 16, characters 9-14:
+Attribute arguments must be literals (Parsing[1002])
+ERROR: File "user_attributes_params.php", line 4, characters 5-7:
+Unbound name: `Foo` (an object type) (Naming[2049])
+ERROR: File "user_attributes_params.php", line 4, characters 5-7:
+Unrecognized user attribute: `Foo` does not have a class. Please declare a class for the attribute. (Naming[2049])
+ERROR: File "user_attributes_params.php", line 7, characters 5-7:
+Unbound name: `Foo` (an object type) (Naming[2049])
+ERROR: File "user_attributes_params.php", line 7, characters 5-7:
+Unrecognized user attribute: `Foo` does not have a class. Please declare a class for the attribute. (Naming[2049])
+ERROR: File "user_attributes_params.php", line 10, characters 5-7:
+Unbound name: `Foo` (an object type) (Naming[2049])
+ERROR: File "user_attributes_params.php", line 10, characters 5-7:
+Unrecognized user attribute: `Foo` does not have a class. Please declare a class for the attribute. (Naming[2049])
+ERROR: File "user_attributes_params.php", line 10, characters 9-17:
+Unbound name: `SomeClass` (an object type) (Naming[2049])
+ERROR: File "user_attributes_params.php", line 13, characters 5-7:
+Unbound name: `Foo` (an object type) (Naming[2049])
+ERROR: File "user_attributes_params.php", line 13, characters 5-7:
+Unrecognized user attribute: `Foo` does not have a class. Please declare a class for the attribute. (Naming[2049])
+ERROR: File "user_attributes_params.php", line 13, characters 9-17:
+Unbound name: `SomeClass` (an object type) (Naming[2049])
+ERROR: File "user_attributes_params.php", line 16, characters 5-7:
+Unbound name: `Foo` (an object type) (Naming[2049])
+ERROR: File "user_attributes_params.php", line 16, characters 5-7:
+Unrecognized user attribute: `Foo` does not have a class. Please declare a class for the attribute. (Naming[2049])
+ERROR: File "user_attributes_params.php", line 19, characters 5-7:
+Unbound name: `Foo` (an object type) (Naming[2049])
+ERROR: File "user_attributes_params.php", line 19, characters 5-7:
+Unrecognized user attribute: `Foo` does not have a class. Please declare a class for the attribute. (Naming[2049])
+ERROR: File "user_attributes_params.php", line 19, characters 15-17:
+Unbound name: `Baz` (an object type) (Naming[2049])
+ERROR: File "user_attributes_params.php", line 22, characters 5-7:
+Unbound name: `Foo` (an object type) (Naming[2049])
+ERROR: File "user_attributes_params.php", line 22, characters 5-7:
+Unrecognized user attribute: `Foo` does not have a class. Please declare a class for the attribute. (Naming[2049])
+ERROR: File "user_attributes_params.php", line 25, characters 5-7:
+Unbound name: `Foo` (an object type) (Naming[2049])
+ERROR: File "user_attributes_params.php", line 25, characters 5-7:
+Unrecognized user attribute: `Foo` does not have a class. Please declare a class for the attribute. (Naming[2049])
+ERROR: File "user_attributes_params.php", line 28, characters 5-7:
+Unbound name: `Foo` (an object type) (Naming[2049])
+ERROR: File "user_attributes_params.php", line 28, characters 5-7:
+Unrecognized user attribute: `Foo` does not have a class. Please declare a class for the attribute. (Naming[2049])
+ERROR: File "user_attributes_params.php", line 31, characters 5-7:
+Unbound name: `Foo` (an object type) (Naming[2049])
+ERROR: File "user_attributes_params.php", line 31, characters 5-7:
+Unrecognized user attribute: `Foo` does not have a class. Please declare a class for the attribute. (Naming[2049])
+ERROR: File "user_attributes_params.php", line 34, characters 5-7:
+Unbound name: `Foo` (an object type) (Naming[2049])
+ERROR: File "user_attributes_params.php", line 34, characters 5-7:
+Unrecognized user attribute: `Foo` does not have a class. Please declare a class for the attribute. (Naming[2049])
+ERROR: File "user_attributes_params.php", line 34, characters 16-24:
+Unbound name: `SomeClass` (an object type) (Naming[2049])
+ERROR: File "user_attributes_params.php", line 37, characters 5-7:
+Unbound name: `Foo` (an object type) (Naming[2049])
+ERROR: File "user_attributes_params.php", line 37, characters 5-7:
+Unrecognized user attribute: `Foo` does not have a class. Please declare a class for the attribute. (Naming[2049])
+ERROR: File "user_attributes_params.php", line 37, characters 22-24:
+Unbound name: `Baz` (an object type) (Naming[2049])
+ERROR: File "user_attributes_params.php", line 5, characters 19-25:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "user_attributes_params.php", line 8, characters 19-25:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "user_attributes_params.php", line 10, characters 9-24:
+This label is not a valid reference to a member of the given enum class (Typing[4110])
+  File "user_attributes_params.php", line 10, characters 18-24:
+  Expected a class with a constant `Label1`
+  File "user_attributes_params.php", line 10, characters 9-17:
+  But got `SomeClass`
+ERROR: File "user_attributes_params.php", line 11, characters 19-29:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "user_attributes_params.php", line 14, characters 19-29:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "user_attributes_params.php", line 17, characters 19-29:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "user_attributes_params.php", line 20, characters 19-28:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "user_attributes_params.php", line 23, characters 19-25:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "user_attributes_params.php", line 26, characters 19-26:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "user_attributes_params.php", line 29, characters 19-28:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "user_attributes_params.php", line 32, characters 19-27:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "user_attributes_params.php", line 35, characters 19-31:
+Was expecting a return type hint (Typing[4030])
+ERROR: File "user_attributes_params.php", line 38, characters 19-34:
+Was expecting a return type hint (Typing[4030])

@@ -2,10 +2,12 @@
 
 <<file: __EnableUnstableFeatures('expression_trees')>>
 
-async function potential_void_return<T>(
-  ExampleContext $_,
-): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function((function(): T)): T)>> {
-  return ExampleDsl`((function(): T) $x): T ==> {
+async function potential_void_return<T>(ExampleContext $_): Awaitable<
+  ExampleExpression<
+    ExampleFunction<(function(ExampleFunction<(function(): T)>): T)>,
+  >,
+> {
+  return ExampleDsl`(ExampleFunction<(function(): T)> $x): T ==> {
     return $x();
   }`;
 }

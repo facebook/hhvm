@@ -116,10 +116,31 @@ struct IRGS {
   TranslateRetryContext* retryContext;
 
   /*
-   * Used to reuse blocks of code between specialized IterInits and IterNexts.
+   * Used to communicate iterator profile info from IterInit to IterNext.
    * See irgen-iter-spec for details.
    */
-  jit::fast_map<Block*, std::unique_ptr<SpecializedIterator>> iters;
+  jit::fast_map<
+    std::pair<Block*, DataType>,
+    IterProfileInfo
+  > iterProfiles;
+
+  /*
+   * Func entry inputs:
+   *  - previous (caller's) FP
+   *  - ActRec flags (callee's ActRec::m_callOffAndFlags)
+   *  - the id of the func being called
+   *  - the $this/static::class context (TCtx)
+   */
+  SSATmp* funcEntryPrevFP{nullptr};
+  SSATmp* funcEntryArFlags{nullptr};
+  SSATmp* funcEntryCalleeId{nullptr};
+  SSATmp* funcEntryCtx{nullptr};
+
+  /*
+   * We put DefCalleeFP instructions at the head of the translation to avoid
+   * interfering with control flow.
+   */
+  IRInstruction* lastDefFramePtr{nullptr};
 };
 
 //////////////////////////////////////////////////////////////////////

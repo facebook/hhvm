@@ -1,4 +1,9 @@
-<?hh // partial
+<?hh
+
+namespace {
+
+const int FILE_TEXT = 0;
+const int FILE_BINARY = 0;
 
 /**
  * fopen() binds a named resource, specified by filename, to a stream.
@@ -277,7 +282,9 @@ function fputs(resource $handle, string $data, int $length = 0): mixed;
  *
  */
 <<__Native>>
-function fprintf(mixed $handle, string $format, ...$argv): mixed;
+function fprintf(mixed $handle, string $format, mixed... $argv): mixed;
+// TODO(T121572869): This function probably ought to take a format string
+// rather than a normal string.
 
 /**
  * Write a string produced according to format to the stream resource
@@ -350,8 +357,8 @@ function ftruncate(resource $handle, int $size): bool;
 <<__Native>>
 function flock(resource $handle,
                int $operation,
-               <<__OutOnly("KindOfBoolean")>>
-               inout mixed $wouldblock): bool;
+               <<__OutOnly>>
+               inout bool $wouldblock): bool;
 
 /**
  * fputcsv() formats a line (passed as a fields array) as CSV and write it
@@ -373,7 +380,7 @@ function flock(resource $handle,
  */
 <<__Native>>
 function fputcsv(resource $handle,
-                 varray $fields,
+                 varray<string> $fields,
                  string $delimiter = ",",
                  string $enclosure = "\"",
                  string $escape_char = "\\"): mixed;
@@ -815,7 +822,8 @@ function basename(string $path, string $suffix = "")[]: string;
 
 /**
  * fnmatch() checks if the passed string would match the given shell wildcard
- *   pattern.
+ *   pattern. If you're looking to test a GLOB pattern against a filepath, this
+ *   is what you want.
  *
  * @param string $pattern - The shell wildcard pattern.
  * @param string $filename - The tested string. This function is especially
@@ -1469,3 +1477,72 @@ function scandir(string $directory,
  */
 <<__Native>>
 function closedir(?resource $dir_handle = null): void;
+
+}
+
+namespace HH {
+
+/**
+ * Return a stream resource attached to stdin in script environments,
+ * or null in web requests
+ */
+<<__Native>>
+function try_stdin()[]: ?resource;
+
+/**
+ * Return a stream resource attached to stdout in script environments,
+ * or null in web requests
+ */
+<<__Native>>
+function try_stdout()[]: ?resource;
+
+/**
+ * Return a stream resource attached to stderr in script environments,
+ * or null in web requests
+ */
+<<__Native>>
+function try_stderr()[]: ?resource;
+
+/**
+ * Return a stream resource attached to stdin in script environments,
+ * or throw a RuntimeException in web requests.
+ */
+function stdin()[]: resource {
+  $s = try_stdin();
+  if ($s is null) {
+    throw new \RuntimeException(
+      "Request STDIO file descriptors are only available in CLI mode"
+    );
+  }
+  return $s;
+}
+
+/**
+ * Return a stream resource attached to stdout in script environments,
+ * or throw a RuntimeException in web requests.
+ */
+function stdout()[]: resource {
+  $s = try_stdout();
+  if ($s is null) {
+    throw new \RuntimeException(
+      "Request STDIO file descriptors are only available in CLI mode"
+    );
+  }
+  return $s;
+}
+
+/**
+ * Return a stream resource attached to stderr in script environments,
+ * or throw a RuntimeException in web requests.
+ */
+function stderr()[]: resource {
+  $s = try_stderr();
+  if ($s is null) {
+    throw new \RuntimeException(
+      "Request STDIO file descriptors are only available in CLI mode"
+    );
+  }
+  return $s;
+}
+
+}

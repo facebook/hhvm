@@ -1,11 +1,11 @@
 <?hh
-function run($str, $fmt) {
+function run($str, $fmt) :mixed{
   $r = sscanf($str, $fmt);
   return tuple($r[0] ?? null, $r[1] ?? null, $r[2] ?? null);
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   list($a, $b, $c) = run(":59:58","%s:%d:%f");
   $a__str = (string)($a);
   $b__str = (string)($b);

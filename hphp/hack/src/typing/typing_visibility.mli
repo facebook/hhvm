@@ -10,6 +10,12 @@
 open Typing_defs
 open Typing_env_types
 
+type package_access_result =
+  | Package_access_ok
+  | Package_access_error of Typing_error.t
+  | Package_access_linter_error of
+      (Pos.t * Typing_packages.package_warning_info)
+
 val check_class_access :
   is_method:bool ->
   use_pos:Pos.t ->
@@ -20,19 +26,44 @@ val check_class_access :
   Decl_provider.class_decl ->
   Typing_error.t option
 
+val check_internal_access :
+  in_signature:bool ->
+  Typing_env_types.env ->
+  string option ->
+  Pos.t ->
+  Pos_or_decl.t ->
+  Typing_error.t option
+
 val check_obj_access :
   is_method:bool ->
+  is_receiver_interface:bool ->
   use_pos:Pos.t ->
   def_pos:Pos_or_decl.t ->
   env ->
   ce_visibility ->
   Typing_error.t option
 
-val check_inst_meth_access :
+(** Checks whether access to a symbol is permitted according to package visibility rules. *)
+val check_package_access :
+  should_check_package_boundary:Typing_packages.check_reason ->
   use_pos:Pos.t ->
   def_pos:Pos_or_decl.t ->
-  ce_visibility ->
-  Typing_error.t option
+  env ->
+  Aast_defs.package_membership option ->
+  string ->
+  package_access_result
+
+val check_top_level_access :
+  should_check_package_boundary:Typing_packages.check_reason ->
+  in_signature:bool ->
+  use_pos:Pos.t ->
+  def_pos:Pos_or_decl.t ->
+  env ->
+  bool ->
+  string option ->
+  Aast_defs.package_membership option ->
+  string ->
+  Typing_error.t list * (Pos.t * Typing_packages.package_warning_info) list
 
 val check_meth_caller_access :
   use_pos:Pos.t ->
@@ -63,26 +94,17 @@ val is_visible :
   Decl_provider.class_decl ->
   bool
 
-(* Can the class in a type hint be accessed from code or signature checked under [env]?
- *   If class is public, then yes
- *   If class is internal, then only if modules match, and in the case that
- *     we are in a signature, the signature had better be internal too.
- *)
-val check_classname_access :
-  use_pos:Pos.t ->
-  in_signature:bool ->
-  env ->
-  Decl_provider.class_decl ->
-  Typing_error.t option
+(** Checks whether a function call satisfies the callee's package requirement annotation
+  * (RequirePackage or SoftRequirePackage).
 
-(* Can the typdef in a type hint be accessed from code or signature checked under [env]?
- *   If type is public, then yes
- *   If type is internal, then only if modules match, and in the case that
- *     we are in a signature, the signature had better be internal too.
- *)
-val check_typedef_access :
+  * This function validates that the caller's per-continuation package environment
+  * includes the required package. For soft requirements, it also considers whether
+  * the caller has a matching [__SoftRequirePackage] annotation to allow soft-to-soft
+  * calls during migration.
+  *)
+val check_cross_package :
   use_pos:Pos.t ->
-  in_signature:bool ->
+  def_pos:Pos_or_decl.t ->
   env ->
-  Decl_provider.typedef_decl ->
+  package_requirement option ->
   Typing_error.t option

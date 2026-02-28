@@ -1,0 +1,6 @@
+WARN: File "just_null.php", line 27, characters 5-12:
+All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])
+ERROR: File "just_null.php", line 16, characters 3-46:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `null` (Typing[4019])
+  File "just_null.php", line 16, characters 11-12:
+  The scrutinee has type `null`.

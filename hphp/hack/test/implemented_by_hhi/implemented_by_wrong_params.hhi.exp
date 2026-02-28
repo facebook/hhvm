@@ -1,0 +1,6 @@
+ERROR: File "implemented_by_wrong_params.hhi", line 5, characters 21-40:
+The method must be implemented by a function with a compatible type. (Typing[4110])
+  File "implemented_by_wrong_params.hhi", line 2, characters 35-40:
+  Expected `string`
+  File "implemented_by_wrong_params.hhi", line 6, characters 28-30:
+  But got `int`

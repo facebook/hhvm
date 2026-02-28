@@ -6,12 +6,12 @@ class Foo {
     $this->str = $str . " World";
   }
 
-  function test() {
+  function test() :mixed{
     return $this->str;
   }
 }
 <<__EntryPoint>> function main(): void {
-$server = new soapserver(null,darray['uri'=>"http://testuri.org"]);
+$server = new SoapServer(null,dict['uri'=>"http://testuri.org"]);
 $server->setClass("Foo","Hello");
 
 $HTTP_RAW_POST_DATA = <<<EOF

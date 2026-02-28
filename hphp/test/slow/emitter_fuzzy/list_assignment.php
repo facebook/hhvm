@@ -1,6 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function foo() {
-  list($a, $i, $version) = $testProcess= 0;
+function foo() :mixed{
+  $testProcess = 0;
+  list($a, $i, $version) = $testProcess;
 }

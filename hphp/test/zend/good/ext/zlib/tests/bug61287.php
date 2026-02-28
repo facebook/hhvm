@@ -1,8 +1,8 @@
 <?hh <<__EntryPoint>> function main(): void {
-$array = darray[
+$array = dict[
     'region_id' => 1,
     'discipline' => 23,
-    'degrees' => varray[],
+    'degrees' => vec[],
     'country_id' => 27
 ];
 

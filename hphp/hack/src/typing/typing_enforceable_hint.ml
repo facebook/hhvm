@@ -11,7 +11,7 @@ open Hh_prelude
 open Typing_defs
 module Env = Typing_env
 module Reason = Typing_reason
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module SN = Naming_special_names
 
 let validator =
@@ -20,9 +20,6 @@ let validator =
 
     (* Only comes about because naming has reported an error and left Hany *)
     method! on_tany acc _ = acc
-
-    (* Already reported an error *)
-    method! on_terr acc _ = acc
 
     method! on_tprim acc r prim =
       match prim with
@@ -51,93 +48,96 @@ let validator =
         super#on_typeconst acc class_ typeconst
       | TCAbstract _ ->
         let (pos, tconst) = typeconst.ttc_name in
-        let r = Reason.Rwitness_from_decl pos in
+        let r = Reason.witness_from_decl pos in
         this#invalid acc r
         @@ "the abstract type constant "
         ^ tconst
         ^ " because it is not marked `<<__Enforceable>>`"
 
-    method! on_tgeneric acc r name _tyargs =
-      (* If we allow higher-kinded generics to be enforceable at some point,
-         handle type arguments here *)
-      if acc.Type_validator.like_context then
-        acc
-      else
-        this#check_generic acc r name
+    method! on_tgeneric acc r name = this#check_generic acc r name
 
-    method! on_newtype acc r sid _ ty _ =
+    method! on_newtype acc r sid _ as_cstr _super_cstr _ =
       if String.equal (snd sid) SN.Classes.cSupportDyn then
-        this#on_type acc ty
-      else if acc.Type_validator.like_context then
-        acc
+        this#on_type acc (with_reason as_cstr r)
       else
         this#invalid acc r "a `newtype`"
 
-    method! on_tlike acc r ty =
-      if TypecheckerOptions.like_casts (Env.get_tcopt acc.Type_validator.env)
-      then
-        super#on_tlike { acc with Type_validator.like_context = true } r ty
-      else
-        this#invalid acc r "a like type"
+    method! on_tlike acc _r ty = this#on_type acc ty
 
     method! on_class acc r cls tyl =
       match Env.get_class acc.Type_validator.env (snd cls) with
-      | Some tc ->
-        let tparams = Cls.tparams tc in
-        begin
-          match tyl with
-          | [] -> acc
-          (* this case should really be handled by the fold2,
-             but we still allow class hints without args in certain places *)
-          | targs ->
-            List.Or_unequal_lengths.(
-              begin
-                match
-                  List.fold2 ~init:acc targs tparams ~f:(fun acc targ tparam ->
-                      let covariant =
-                        Ast_defs.(equal_variance tparam.tp_variance Covariant)
-                      in
-                      if this#is_wildcard targ then
-                        acc
-                      else if
-                        Aast.(equal_reify_kind tparam.tp_reified Reified)
-                        || (acc.Type_validator.like_context && covariant)
-                      then
-                        this#on_type acc targ
-                      else
-                        let error_message =
-                          "a type with an erased generic type argument"
+      | Decl_entry.Found tc ->
+        (match Cls.kind tc with
+        | Ast_defs.Ctrait -> this#invalid acc r "a trait name"
+        | _ ->
+          let tparams = Cls.tparams tc in
+          begin
+            match tyl with
+            | [] -> acc
+            (* this case should really be handled by the fold2,
+               but we still allow class hints without args in certain places *)
+            | targs ->
+              List.Or_unequal_lengths.(
+                begin
+                  match
+                    List.fold2
+                      ~init:acc
+                      targs
+                      tparams
+                      ~f:(fun acc targ tparam ->
+                        let inside_reified_class_generic_position =
+                          acc
+                            .Type_validator
+                             .inside_reified_class_generic_position
                         in
-                        let error_message =
-                          if
-                            TypecheckerOptions.like_casts
-                              (Env.get_tcopt acc.Type_validator.env)
-                          then
-                            error_message
-                            ^ ", except in a like cast when the corresponding type parameter is covariant"
+                        if this#is_wildcard targ then begin
+                          if inside_reified_class_generic_position then
+                            this#invalid
+                              acc
+                              r
+                              "a reified type containing a wildcard (`_`)"
                           else
-                            error_message
-                        in
-                        this#invalid acc r error_message)
-                with
-                | Ok new_acc -> new_acc
-                | Unequal_lengths -> acc (* arity error elsewhere *)
-              end)
-        end
-      | None -> acc
+                            acc
+                        end else if
+                              Aast.(equal_reify_kind tparam.tp_reified Reified)
+                            then
+                          let old_inside_reified_class_generic_position =
+                            inside_reified_class_generic_position
+                          in
+                          let acc =
+                            this#on_type
+                              {
+                                acc with
+                                Type_validator
+                                .inside_reified_class_generic_position = true;
+                              }
+                              targ
+                          in
+                          {
+                            acc with
+                            Type_validator.inside_reified_class_generic_position =
+                              old_inside_reified_class_generic_position;
+                          }
+                        else if inside_reified_class_generic_position then
+                          this#on_type acc targ
+                        else
+                          let error_message =
+                            "a type with an erased generic type argument"
+                          in
+                          this#invalid acc r error_message)
+                  with
+                  | Ok new_acc -> new_acc
+                  | Unequal_lengths -> acc (* arity error elsewhere *)
+                end)
+          end)
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        acc
 
-    method! on_alias acc r id tyl ty =
-      if List.is_empty tyl then
-        this#on_type acc ty
-      else if
-        String.equal (snd id) Naming_special_names.FB.cIncorrectType
-        && Int.equal (List.length tyl) 1
-      then
-        let ty = List.hd_exn tyl in
-        this#on_type { acc with Type_validator.like_context = true } ty
-      else if acc.Type_validator.like_context then
-        super#on_alias acc r id tyl ty
-      else
+    method! on_alias acc r _id tyl ty =
+      match List.filter ~f:(fun ty -> not @@ this#is_wildcard ty) tyl with
+      | [] -> this#on_type acc ty
+      | _ ->
         this#invalid
           acc
           r
@@ -156,7 +156,7 @@ let validator =
 
     method is_wildcard ty =
       match get_node ty with
-      | Tapply ((_, name), _) -> String.equal name SN.Typehints.wildcard
+      | Twildcard -> true
       | _ -> false
 
     method check_for_wildcards acc tyl s =
@@ -169,14 +169,28 @@ let validator =
                ( Typing_defs_core.get_reason ty,
                  "_ in a " ^ s ^ " (use `mixed` instead)" )))
 
-    method! on_ttuple acc _ tyl =
-      let acc = List.fold_left tyl ~f:this#on_type ~init:acc in
-      this#check_for_wildcards acc tyl "tuple"
+    method! on_ttuple acc r { t_required; t_optional; t_extra } =
+      let acc = List.fold_left t_required ~f:this#on_type ~init:acc in
+      match t_extra with
+      | Tvariadic t_variadic ->
+        (* HHVM doesn't currently support is/as on open tuples, so let's reject it in Hack *)
+        if (not (is_nothing t_variadic)) || not (List.is_empty t_optional) then
+          this#invalid acc r
+          @@ "a tuple type with optional or variadic elements"
+        else
+          this#check_for_wildcards acc t_required "tuple"
+      | Tsplat _ ->
+        (* HHVM doesn't currently support is/as on type splats, so let's reject it in Hack *)
+        this#invalid acc r @@ "a tuple type with a splat element"
 
-    method! on_tshape acc _ _ fdm =
+    method! on_tshape acc _ { s_fields = fdm; _ } =
       let tyl = TShapeMap.values fdm |> List.map ~f:(fun s -> s.sft_ty) in
       let acc = List.fold_left tyl ~init:acc ~f:this#on_type in
       this#check_for_wildcards acc tyl "shape"
+
+    method! on_tclass_ptr acc r _ty =
+      (* TODO(T199611023) allow when we enforce inner type *)
+      this#invalid acc r "a class pointer type"
 
     method check_generic acc r name =
       (* No need to look at type arguments of generic var, as higher-kinded type params
@@ -191,10 +205,15 @@ let validator =
       | (Aast.SoftReified, _) ->
         this#invalid acc r "a soft reified generic type parameter"
       | (Aast.Reified, false) ->
-        this#invalid
+        (* If a reified generic is an argument to a reified class it does not
+         * need to be enforceable *)
+        if acc.Type_validator.inside_reified_class_generic_position then
           acc
-          r
-          "a reified type parameter that is not marked `<<__Enforceable>>`"
+        else
+          this#invalid
+            acc
+            r
+            "a reified type parameter that is not marked `<<__Enforceable>>`"
       | (Aast.Reified, true) -> acc
   end
 

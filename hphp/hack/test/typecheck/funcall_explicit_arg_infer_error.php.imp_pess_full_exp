@@ -1,0 +1,8 @@
+File "funcall_explicit_arg_infer_error.php", line 7, characters 16-17:
+Invalid argument (Typing[4110])
+  File "funcall_explicit_arg_infer_error.php", line 7, characters 13-13:
+  Expected `~_` because a type could not be determined here
+  File "funcall_explicit_arg_infer_error.php", line 4, characters 16-16:
+    via this generic `T`
+  File "funcall_explicit_arg_infer_error.php", line 6, characters 26-28:
+  But got `int`

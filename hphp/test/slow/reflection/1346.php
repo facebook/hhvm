@@ -6,7 +6,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function main_1346() {
+function main_1346() :mixed{
 $a = new A;
  $b = new B;
 var_dump(is_a($a, 'A'));

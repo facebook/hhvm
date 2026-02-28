@@ -1,0 +1,10 @@
+*** Testing money_format() function: with unexpected inputs for 'format' argument ***
+-- Iteration 1 --
+string
+-- Iteration 2 --
+string
+-- Iteration 3 --
+string
+-- Iteration 4 --
+string
+===Done===

@@ -1,1 +1,1 @@
-Fatal error: You cannot decorate this argument as `inout` in %s on line 8
+Fatal error: You cannot use this syntax with `inout`. in %s/bad-arg-this.php on line 8

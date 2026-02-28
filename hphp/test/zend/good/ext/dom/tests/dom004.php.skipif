@@ -1,8 +1,8 @@
 <?hh 
 <<__EntryPoint>>
 function main() {
-  if (!extension_loaded('dom')) die('skip dom extension not available');
+  if (!extension_loaded('dom')) exit('skip dom extension not available');
   if (!in_array('compress.zlib', stream_get_wrappers())) {
-    die('skip compress.zlib wrapper is not available');
+    exit('skip compress.zlib wrapper is not available');
   }
 }

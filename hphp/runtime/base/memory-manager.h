@@ -25,6 +25,7 @@
 
 #include "hphp/util/alloc.h" // must be included before USE_JEMALLOC is used
 #include "hphp/util/bloom-filter.h"
+#include "hphp/util/configs/gc.h"
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/radix-map.h"
 #include "hphp/util/rds-local.h"
@@ -36,8 +37,8 @@
 
 #include "hphp/runtime/base/memory-usage-stats.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/sweepable.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/req-malloc.h"
 #include "hphp/runtime/base/req-ptr.h"
@@ -360,7 +361,10 @@ constexpr size_t kSizeClassesPerDoubling = (1u << kLgSizeClassesPerDoubling);
  *
  * We want kMaxSmallSize to be the largest size-class less than kSlabSize.
  */
-constexpr size_t kNumSmallSizes = 63;
+constexpr size_t kNumSmallSizes =
+  kSizeClassesPerDoubling * (kLgSlabSize - 6 /* log of size 64 bytes */)
+  + 4 /* number of size classes up to 64 bytes */
+  - 1 /* exclude kSlabSize */;
 static_assert(kNumSizeClasses < 256,
               "size class index must fit in 8 bits in HeapObject header");
 static_assert(kNumSmallSizes < kNumSizeClasses,
@@ -540,7 +544,7 @@ struct SparseHeap {
    * instead of handling them to slab manager.
    */
   static void PrepareToStop(bool val = true) {
-    s_shutdown.exchange(val, std::memory_order_release);
+    s_shutdown.store(val, std::memory_order_release);
   }
 
  protected:
@@ -764,6 +768,8 @@ struct MemoryManager {
   /*
    * Find the HeapObject* in the heap which contains `p', else nullptr if `p'
    * is not contained in any heap allocation.
+   *
+   * This will initialize free node headers if not already initialized.
    */
   HeapObject* find(const void* p);
 
@@ -778,7 +784,7 @@ struct MemoryManager {
    * to track it are performed with relaxed ordering constraints.
    */
   static ssize_t getAllMMUsage() {
-    return s_req_heap_usage.load(std::memory_order_relaxed);
+    return s_req_heap_usage.load(std::memory_order_acquire);
   }
 
   /*
@@ -842,7 +848,7 @@ struct MemoryManager {
   int64_t currentUsage() const;
 
   /*
-   * Reset all stats that are synchronzied externally from the memory manager.
+   * Reset all stats that are synchronized externally from the memory manager.
    *
    * Used between sessions and to signal that external sync is now safe to
    * begin (after shared structure initialization that should not be counted is
@@ -961,7 +967,7 @@ struct MemoryManager {
 
   /*
    * Compute the usage threshold to trigger the next gc, as a function
-   * of RuntimeOption::EvalGCMinTrigger and EvalGCTriggerPct.
+   * of Cfg::GC::MinTrigger and Cfg::GC::TriggerPct.
    */
   void updateNextGc();
 
@@ -1041,10 +1047,11 @@ private:
   // Allocation sampling
   void checkSampling(size_t bytes);
 
+  void debugFreeFill(void* ptr, size_t bytes);
   /////////////////////////////////////////////////////////////////////////////
 
 private:
-  TRACE_SET_MOD(mm);
+  TRACE_SET_MOD(mm)
 
   static auto constexpr kNoNextGC = std::numeric_limits<int64_t>::max();
   static auto constexpr kNoNextSample = std::numeric_limits<int64_t>::max();
@@ -1068,7 +1075,7 @@ private:
   bool m_statsIntervalActive;
   bool m_couldOOM{true};
   bool m_bypassSlabAlloc;
-  bool m_gc_enabled{RuntimeOption::EvalEnableGC};
+  bool m_gc_enabled{Cfg::GC::Enabled};
   bool m_enableStatsSync{false};
   GCBits m_mark_version{GCBits(0)};
 
@@ -1094,6 +1101,11 @@ private:
 
   int64_t m_req_start_micros;
 
+  // Used to check free node headers and holes are initialized when we want to
+  // count on them.
+  int64_t m_lastInitFreeAllocated{-1};
+  int64_t m_lastInitFreeFreed{-1};
+
   TYPE_SCAN_IGNORE_ALL; // heap-scan handles MemoryManager fields itself.
 };
 
@@ -1115,7 +1127,7 @@ struct RequestLocalGCData {
 };
 
 extern RDS_LOCAL_NO_CHECK(RequestLocalGCData, rl_gcdata);
-extern DECLARE_RDS_LOCAL_HOTVALUE(bool, t_eager_gc);
+extern DECLARE_RDS_LOCAL_HOTVALUE(bool, t_eager_gc)
 
 void gather_alloc_stack(bool skipTop = false);
 void reset_alloc_sampling();
@@ -1124,4 +1136,6 @@ void reset_alloc_sampling();
 
 }
 
+#define incl_HPHP_MEMORY_MANAGER_INL_H_
 #include "hphp/runtime/base/memory-manager-inl.h"
+#undef incl_HPHP_MEMORY_MANAGER_INL_H_

@@ -1,0 +1,40 @@
+// Copyright (c) Facebook, Inc. and its affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+//
+// @generated <<SignedSource::*O*zOeWoEQle#+L!plEphiEmie@IsG>>
+use eq_modulo_pos::EqModuloPos;
+use no_pos_hash::NoPosHash;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
+
+#[allow(unused_imports)]
+use crate::*;
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep,
+)]
+#[rust_to_ocaml(attr = r#"deriving (eq, show, (visitors { variety = "iter" }))"#)]
+#[repr(C)]
+pub struct A {
+    #[rust_to_ocaml(attr = "opaque")]
+    #[rust_to_ocaml(attr = "visitors.opaque")]
+    pub x: X,
+    #[rust_to_ocaml(attr = "visitors.opaque")]
+    pub y: Y,
+}

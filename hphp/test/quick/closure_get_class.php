@@ -1,13 +1,9 @@
 <?hh
 
 trait Too {
-  function bar() {
+  function bar() :mixed{
     $a = function () {
       var_dump(__CLASS__);
-    };
-    $a();
-    $a = function () {
-      var_dump(get_class());
     };
     $a();
     if (isset($this)) {

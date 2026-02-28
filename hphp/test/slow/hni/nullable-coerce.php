@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_nullable_coerce() {
+function main_nullable_coerce() :mixed{
 error_reporting(0);
 var_dump(error_reporting(null));
 var_dump(error_reporting());

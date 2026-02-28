@@ -34,7 +34,6 @@ bool(true)
 bool(true)
 bool(true)
 int(2)
-string(7) "invoked"
 bool(true)
 string(4) "cls1"
 bool(false)

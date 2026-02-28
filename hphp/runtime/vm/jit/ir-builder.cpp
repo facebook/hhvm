@@ -16,15 +16,14 @@
 
 #include "hphp/runtime/vm/jit/ir-builder.h"
 
-#include <algorithm>
 #include <utility>
 
 #include <folly/ScopeGuard.h>
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/trace.h"
 
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -34,13 +33,12 @@
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/simple-propagation.h"
 #include "hphp/runtime/vm/jit/simplify.h"
-#include "hphp/runtime/vm/jit/translator.h"
 
 namespace HPHP::jit::irgen {
 
 namespace {
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 using Trace::Indent;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -75,8 +73,8 @@ IRBuilder::IRBuilder(IRUnit& unit, const Func* func)
   , m_state(func)
   , m_curBlock(m_unit.entry())
 {
-  if (RuntimeOption::EvalHHIRGenOpts) {
-    m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
+  if (Cfg::HHIR::GenOpts) {
+    m_enableSimplification = Cfg::HHIR::Simplification;
   }
   m_state.startBlock(m_curBlock, false);
 }
@@ -92,6 +90,21 @@ bool IRBuilder::shouldConstrainGuards() const {
 bool IRBuilder::isMBaseLoad(const IRInstruction* inst) const {
   if (!inst->is(LdMem)) return false;
   return m_state.isMBase(inst->src(0)) == TriBool::Yes;
+}
+
+void IRBuilder::ensureBlockAppendable() {
+  if (m_curBlock->empty()) return;
+
+  auto& prev = m_curBlock->back();
+  if (!prev.isBlockEnd()) return;
+  assertx(!prev.isTerminal());
+
+  m_curBlock = m_unit.defBlock(prev.block()->profCount());
+  m_curBlock->setHint(prev.block()->hint());
+  prev.setNext(m_curBlock);
+  m_state.finishBlock(prev.block());
+  FTRACE(2, "lazily appending B{}\n", m_curBlock->id());
+  m_state.startBlock(m_curBlock, false);
 }
 
 void IRBuilder::appendInstruction(IRInstruction* inst) {
@@ -140,18 +153,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
   }
 
   // If the block isn't empty, check if we need to create a new block.
-  if (!m_curBlock->empty()) {
-    auto& prev = m_curBlock->back();
-    if (prev.isBlockEnd()) {
-      assertx(!prev.isTerminal());
-      m_curBlock = m_unit.defBlock(prev.block()->profCount());
-      m_curBlock->setHint(prev.block()->hint());
-      prev.setNext(m_curBlock);
-      m_state.finishBlock(prev.block());
-      FTRACE(2, "lazily appending B{}\n", m_curBlock->id());
-      m_state.startBlock(m_curBlock, false);
-    }
-  }
+  ensureBlockAppendable();
 
   assertx((m_curBlock->empty() || !m_curBlock->back().isBlockEnd()) &&
           "Can't append an instruction after a BlockEnd instruction");
@@ -195,7 +197,7 @@ SSATmp* IRBuilder::preOptimizeCheckLocation(IRInstruction* inst, Location l) {
     return fwdGuardSource(inst);
   }
 
-  auto const newType = oldType & inst->typeParam();
+  auto const newType = oldType.refine(inst->typeParam());
   if (oldType <= newType) {
     // The type of the src is the same or more refined than type, so the guard
     // is unnecessary.
@@ -226,7 +228,7 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
          oldVal ? oldVal->toString() : "nullptr",
          srcInst ? srcInst->toString() : "nullptr");
 
-  auto const newType = oldType & inst->typeParam();
+  auto const newType = oldType.refine(inst->typeParam());
 
   // Eliminate this AssertTypeOp if:
   // 1) oldType is at least as good as newType and:
@@ -267,7 +269,7 @@ SSATmp* IRBuilder::preOptimizeAssertLocation(IRInstruction* inst,
   auto const prevType = typeOf(l, DataTypeGeneric);
   if (auto const prevValue = valueOf(l, DataTypeGeneric)) {
     auto toAssert = inst->typeParam();
-    if (!shouldConstrainGuards()) toAssert &= prevType;
+    if (!shouldConstrainGuards()) toAssert = prevType.refine(toAssert);
     gen(AssertType, toAssert, prevValue);
     inst->convertToNop();
     return nullptr;
@@ -498,7 +500,7 @@ SSATmp* IRBuilder::preOptimizeCheckTypeMem(IRInstruction* inst) {
     return nullptr;
   }
 
-  auto const newType = oldType & inst->typeParam();
+  auto const newType = oldType.refine(inst->typeParam());
   if (oldType <= newType) {
     inst->convertToNop();
     return nullptr;
@@ -874,7 +876,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, GuardConstraint gc) {
     // value that was killed by a Call. The value won't be live but it's ok to
     // use it to track down the guard.
 
-    always_assert_flog(m_constraints.typeSrcs.count(inst),
+    always_assert_flog(m_constraints.typeSrcs.contains(inst),
                        "no typeSrcs found for {}", *inst);
 
     bool changed = false;
@@ -986,7 +988,7 @@ bool IRBuilder::constrainTypeSrc(TypeSource typeSrc, GuardConstraint gc) {
   // If the dest of the Assert/Check doesn't fit `gc', there's no point in
   // continuing.
   auto prevType = get_required(m_constraints.prevTypes, guard);
-  if (!typeFitsConstraint(prevType & guard->typeParam(), gc)) {
+  if (!typeFitsConstraint(prevType.refine(guard->typeParam()), gc)) {
     return false;
   }
 
@@ -1158,7 +1160,7 @@ Block* IRBuilder::makeBlock(SrcKey sk, uint64_t profCount) {
 }
 
 bool IRBuilder::hasBlock(SrcKey sk) const {
-  return m_skToBlockMap.count(sk);
+  return m_skToBlockMap.contains(sk);
 }
 
 void IRBuilder::setBlock(SrcKey sk, Block* block) {
@@ -1178,11 +1180,6 @@ void IRBuilder::appendBlock(Block* block) {
   }
 }
 
-void IRBuilder::resetBlock(Block* block, Block* pred) {
-  block->instrs().clear();
-  m_state.resetBlock(block, pred);
-}
-
 void IRBuilder::resetOffsetMapping() {
   m_skToBlockMap.clear();
 }
@@ -1195,16 +1192,40 @@ void IRBuilder::restoreOffsetMapping(SkToBlockMap&& offsetMapping) {
   m_skToBlockMap = std::move(offsetMapping);
 }
 
-Block* IRBuilder::guardFailBlock() const {
-  return m_guardFailBlock;
+Block* IRBuilder::getEHBlock(SrcKey sk) const {
+  auto const it = m_skToEHBlockMap.find(sk);
+  return it != m_skToEHBlockMap.end() ? it->second : nullptr;
 }
 
-void IRBuilder::setGuardFailBlock(Block* block) {
-  m_guardFailBlock = block;
+Block* IRBuilder::getEHDecRefBlock(Block* prev, SSATmp* value) const {
+  auto const valueId = value != nullptr
+    ? value->id()
+    : std::numeric_limits<uint32_t>::max();
+  auto const key = std::make_pair(prev->id(), valueId);
+  auto const it = m_skToEHDecRefBlockMap.find(key);
+  return it != m_skToEHDecRefBlockMap.end() ? it->second : nullptr;
 }
 
-void IRBuilder::resetGuardFailBlock() {
-  m_guardFailBlock = nullptr;
+void IRBuilder::setEHBlock(SrcKey sk, Block* block) {
+  assertx(getEHBlock(sk) == nullptr);
+  m_skToEHBlockMap[sk] = block;
+}
+
+void IRBuilder::setEHDecRefBlock(Block* prev, SSATmp* value, Block* block) {
+  assertx(getEHDecRefBlock(prev, value) == nullptr);
+  auto const valueId = value != nullptr
+    ? value->id()
+    : std::numeric_limits<uint32_t>::max();
+  auto const key = std::make_pair(prev->id(), valueId);
+  m_skToEHDecRefBlockMap[key] = block;
+}
+
+IRBuilder::SkToBlockMap IRBuilder::saveAndClearEHBlockMapping() {
+  return std::move(m_skToEHBlockMap);
+}
+
+void IRBuilder::restoreEHBlockMapping(SkToBlockMap&& ehBlockMapping) {
+  m_skToEHBlockMap = std::move(ehBlockMapping);
 }
 
 void IRBuilder::pushBlock(const BCMarker& marker, Block* b) {

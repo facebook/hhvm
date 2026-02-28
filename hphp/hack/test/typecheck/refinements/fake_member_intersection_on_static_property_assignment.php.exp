@@ -1,4 +1,4 @@
-File "fake_member_intersection_on_static_property_assignment.php", line 10, characters 3-14:
+ERROR: File "fake_member_intersection_on_static_property_assignment.php", line 10, characters 3-14:
 Invalid assignment (Typing[4110])
   File "fake_member_intersection_on_static_property_assignment.php", line 4, characters 17-19:
   Expected `int`

@@ -1,0 +1,10 @@
+ERROR: File "call_missing_label_like_class.php", line 11, characters 15-21:
+Invalid argument (Typing[4110])
+  File "call_missing_label_like_class.php", line 11, characters 15-21:
+  Expected a class with a constant `classy`
+  File "call_missing_label_like_class.php", line 7, characters 41-41:
+  But got `E`
+  File "call_missing_label_like_class.php", line 3, characters 12-12:
+  `E` is defined here
+  File "call_missing_label_like_class.php", line 4, characters 10-20:
+  Did you mean `very_classy`?

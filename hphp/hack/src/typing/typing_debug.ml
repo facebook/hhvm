@@ -17,7 +17,8 @@ let local_env_size env =
   | None -> 0
   | Some Typing_per_cont_env.{ local_types; _ } ->
     Local_id.Map.fold
-      (fun _ (ty, _, _) size -> size + ty_size env.inference_env ty)
+      (fun _ local size ->
+        size + ty_size env.inference_env local.Typing_local_types.ty)
       local_types
       0
 
@@ -25,7 +26,7 @@ let env_size env = local_env_size env + inference_env_size env.inference_env
 
 let log_env_if_too_big pos env =
   if
-    (Env.get_tcopt env).GlobalOptions.tco_timeout > 0
+    Env.get_tcopt env |> TypecheckerOptions.timeout > 0
     && List.length !(env.big_envs) < 1
     && env_size env >= 1000
   then

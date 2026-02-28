@@ -2,8 +2,8 @@
 
 class C { public function __construct(public $x)[] {} }
 
-function test($a, C $b) {
-  $xs = varray[];
+function test($a, C $b) :mixed{
+  $xs = vec[];
   if ($a) {
     $xs = vec[$a];
   }

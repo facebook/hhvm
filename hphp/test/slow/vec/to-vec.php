@@ -1,6 +1,6 @@
 <?hh
 
-function gen() {
+function gen() :AsyncGenerator<mixed,mixed,void>{
   yield 'a' => 'b';
   yield '1' => 'one';
   yield 1 => 'ONE';
@@ -8,7 +8,7 @@ function gen() {
 
 
 <<__EntryPoint>>
-function main_to_vec() {
+function main_to_vec() :mixed{
 $arr = dict['q' => 'r', 1 => 'un', '1' => 'uno'];
 
 var_dump(vec(new ArrayIterator($arr)));

@@ -21,12 +21,12 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
+#include "hphp/util/configs/errorhandling.h"
 #include "hphp/util/rds-local.h"
 
 namespace HPHP {
@@ -70,7 +70,7 @@ struct VariableSerializer {
   static RDS_LOCAL(SerializationLimitWrapper, serializationSizeLimit);
 
   /**
-   * Top level entry function called by f_ functions.
+   * Top level entry function called by native builtins.
    */
   String serialize(const_variant_ref v, bool ret, bool keepCount = false);
   String serialize(const Variant& var, bool ret, bool keepCount = false) {
@@ -110,9 +110,15 @@ struct VariableSerializer {
   void setEmptyDArrayWarn()    { m_edWarn = true; }
   void setVecLikeDArrayWarn()  { m_vdWarn = true; }
   void setDictLikeDArrayWarn() { m_ddWarn = true; }
+  void setSortArrayKeys() { m_sortArrayKeys = true; }
+  void setFullFloatPrecision() { m_fullFloatPrecision = true; }
 
   // ignore uninitialized late init props and do not attempt to serialize them
   void setIgnoreLateInit() { m_ignoreLateInit = true; }
+
+  // Skip JsonSerializable interface handling during JSON serialization.
+  // This avoids re-entrancy concerns when serializing from Xenon code.
+  void setSkipJsonSerializable() { m_skipJsonSerializable = true; }
 
   // Serialize legacy bit and provenance tag, using same format as
   // Type::Internal serializer. This is only supported Type::Serialize.
@@ -123,6 +129,12 @@ struct VariableSerializer {
 
   void setDisallowObjects() { m_disallowObjects = true; }
 
+  void setDisallowCollections() { m_disallowCollections = true; }
+
+  void setKeepClasses() { m_keepClasses = true; }
+
+  void setIgnoreStringSizeLimit() { m_ignoreStringSizeLimit = true; }
+
   // Should we be calling the pure callbacks
   void setPure() { m_pure = true; }
 
@@ -130,7 +142,7 @@ struct VariableSerializer {
   // can distinguish between all 3 possible array states (unmarked varray,
   // unmarked vec, marked varray/vec). Now corresponds to marked vec/dict.
   enum class ArrayKind { PHP, Dict, Vec, Keyset, VArray, DArray,
-                         MarkedVArray, MarkedDArray };
+                         MarkedVArray, MarkedDArray, BespokeTypeStructure };
 
   void setUnitFilename(const StringData* name) {
     assertx(name->isStatic());
@@ -172,6 +184,7 @@ private:
     ArrayKind kind
   );
   void writeArrayFooter(ArrayKind kind);
+  void writeCollectionKVSorted(ObjectData* obj);
   void writeSerializableObject(const String& clsname, const String& serialized);
 
   /**
@@ -215,6 +228,7 @@ private:
   void serializeFunc(const Func* func);
   void serializeClass(const Class* cls);
   void serializeLazyClass(LazyClassData);
+  void serializeEnumClassLabel(const StringData*);
   void serializeClsMeth(ClsMethDataRef clsMeth, bool skipNestCheck = false);
   void serializeRClsMeth(RClsMethData* rclsMeth);
 
@@ -245,8 +259,12 @@ private:
 
   private:
     struct TvHash {
+      using folly_is_avalanching = std::true_type;
+      using folly_assume_32bit_hash = std::true_type;
+
       std::size_t operator()(const TypedValue& tv) const {
-        return pointer_hash<void>()(tv.m_data.parr);
+        auto hash = pointer_hash<void>()(tv.m_data.parr);
+        return std::uint32_t(hash) | (std::size_t(hash) << 32);
       }
     };
 
@@ -279,7 +297,11 @@ private:
   bool m_vdWarn{false};          // warn when attempting on vec-like darrays
   bool m_ddWarn{false};          // warn when attempting on non-vec-like darrays
   bool m_ignoreLateInit{false};  // ignore uninitalized late init props
+  bool m_skipJsonSerializable{false};  // skip JsonSerializable handling for JSON
   bool m_disallowObjects{false};  // throw if serializing non-collection object
+  bool m_disallowCollections{false}; // throw if serializing collection object
+  bool m_keepClasses{false};     // emit lazy class if serializing class or lazy class
+  bool m_ignoreStringSizeLimit{false}; // ignore limit on string buffer output
   bool m_hasHackWarned{false};   // have we already warned on Hack arrays?
   bool m_hasDictWarned{false};   // have we already warned on dicts?
   bool m_hasKeysetWarned{false};   // have we already warned on dicts?
@@ -287,6 +309,8 @@ private:
   bool m_hasVDWarned{false};     // have we already warned on vec-like darrays?
   bool m_hasDDWarned{false};  // have we already warned on non-vec-like darrays?
   bool m_pure{false};            // should we call the pure callbacks?
+  bool m_sortArrayKeys{false};   // Sort keys of associative arrays
+  bool m_fullFloatPrecision{false}; // Output full precision for floats (17 decimal places)
   RefCount m_refCount{OneReference}; // current variable's reference count
   String m_objClass;             // for object serialization
   char m_objCode{0};             // for object serialization
@@ -295,7 +319,7 @@ private:
   int m_maxCount;                // for max recursive levels
   int m_levelDebugger{0};        // keep track of levels for DebuggerSerialize
   int m_maxLevelDebugger{0};     // for max level of DebuggerSerialize
-  size_t m_currentDepth{0};      // current depth (nasted objects/arrays)
+  size_t m_currentDepth{0};      // current depth (nested objects/arrays)
   size_t m_maxDepth{0};          // max depth limit before an error (0 -> none)
   bool m_keyPrinted{false};
 
@@ -327,6 +351,19 @@ inline String internal_serialize(const Variant& v) {
   return vs.serializeValue(v, false);
 }
 
+// For internal HHVM use: JSON encode without invoking JsonSerializable.
+// This is intended to allow extensions to encode as json without
+// re-entering the VM.
+inline String json_encode_skip_jsonserializable(
+    const Variant& v,
+    int64_t options = 0,
+    bool limit = true
+) {
+  VariableSerializer vs{VariableSerializer::Type::JSON, static_cast<int>(options)};
+  vs.setSkipJsonSerializable();
+  return vs.serializeValue(v, limit);
+}
+
 // TODO: Move to util/folly?
 template<typename T> struct TmpAssign {
   TmpAssign(T& v, const T tmp) : cur(v), save(cur) { cur = tmp; }
@@ -340,7 +377,7 @@ struct UnlimitSerializationScope {
   TmpAssign<int64_t> v{VariableSerializer::serializationSizeLimit->value,
                        kTmpLimit};
   TmpAssign<int64_t> rs{RuntimeOption::SerializationSizeLimit, kTmpLimit};
-  TmpAssign<int32_t> rm{RuntimeOption::MaxSerializedStringSize, kTmpLimit};
+  TmpAssign<int32_t> rm{Cfg::ErrorHandling::MaxSerializedStringSize, kTmpLimit};
 };
 
 extern const StaticString s_serializedNativeDataKey;

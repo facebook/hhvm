@@ -1,1 +1,1 @@
-Fatal error: C cannot inherit the type constant T from I, because it was previously inherited from %rA|B%r in %s/hphp/test/slow/constants/concretization_conflict_granchild.php on line 16
+Fatal error: C cannot inherit the type constant T from I, because it was previously inherited from %|{A|B} in %s/hphp/test/slow/constants/concretization_conflict_granchild.php on line 16

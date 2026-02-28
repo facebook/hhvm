@@ -15,9 +15,7 @@
 */
 #include "hphp/util/afdt-util.h"
 #include <afdt.h>
-#include <fcntl.h>
 #include <errno.h>
-#include <limits.h>
 #include <system_error>
 
 #include "hphp/util/assertions.h"
@@ -114,6 +112,10 @@ void recv(int afdt_fd, std::vector<iovec>& iov) {
     if (skip_processed(msg, nread, npending_iovs)) return;
 
     nread = recvmsg(afdt_fd, &msg, MSG_WAITALL);
+    if (nread == 0 && !skip_processed(msg, nread, npending_iovs)) {
+      throw std::runtime_error("peer reset connection");
+    }
+
     if (nread < 0) {
       if (errno == EINTR) {
         nread = 0;
@@ -139,13 +141,6 @@ bool send_fd(int afdt_fd, int fd) {
 }
 
 int recv_fd(int afdt_fd) {
-#ifdef __APPLE__
-  {
-    errno = 0;
-    int flags = fcntl(0, F_GETFD);
-    always_assert(flags != -1 || errno != EBADF);
-  }
-#endif
   int fd;
   afdt_error_t err = AFDT_ERROR_T_INIT;
   uint32_t afdt_len = 0;

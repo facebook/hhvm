@@ -1,0 +1,13 @@
+%AIn cli
+int(2)
+Handling request %d, associated root request %d
+receiving xbox_process_call_message
+In xbox
+xbox done.
+int(1)
+Handling request %d, associated root request %d
+receiving xbox_process_call_message
+In xbox
+xbox done.
+int(0)
+cli done.

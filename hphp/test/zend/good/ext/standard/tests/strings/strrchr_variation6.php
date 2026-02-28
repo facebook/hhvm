@@ -14,7 +14,7 @@ $quote_char_str = <<<EOD
 'things' 'in' 'single' 'quote'
 EOD;
 
-$needles = varray[
+$needles = vec[
   "things",
   "\"things\"",
   "\'things\'",

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function to_string(mixed $value): string {
@@ -13,6 +13,6 @@ function to_string(mixed $value): string {
 
 
 <<__EntryPoint>>
-function main_same_float() {
+function main_same_float() :mixed{
 var_dump(to_string(42.0));
 }

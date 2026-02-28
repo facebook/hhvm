@@ -1,0 +1,10 @@
+C::foo
+B::foo
+
+Warning: Method C::foo not marked dynamic in %s/selfparent.php on line 17
+C::foo
+
+Warning: Method B::foo not marked dynamic in %s/selfparent.php on line 18
+B::foo
+C::MYCONST
+B::MYCONST

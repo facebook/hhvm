@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_duplicate_require2() {
+function main_duplicate_require2() :mixed{
   $n = __hhvm_intrinsics\apc_fetch_no_check('foo');
   if (!$n) $n = 0;
   apc_store('foo', ++$n);

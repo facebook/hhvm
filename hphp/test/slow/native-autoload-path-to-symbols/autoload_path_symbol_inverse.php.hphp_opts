@@ -1,1 +1,1 @@
--i "hphp/test/slow/native-autoload-path-to-symbols/autoload.inc"
+-i "__DIR__/autoload.inc"

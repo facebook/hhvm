@@ -1,31 +1,32 @@
-//// modules.php
+//// module_foo.php
 <?hh
-
-<<file:__EnableUnstableFeatures('modules')>>
-
 namespace A {
-  module foo {}
+  new module foo {}
 }
 
+//// module_bar.php
+<?hh
 namespace {
-  module bar {}
+  new module bar {}
 }
 
 //// foo.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('foo')>>
+
+module foo;
 
 namespace Bing {
-  // TODO(T108206307) You _need_ a top level symbol to attach a module to in order
-  // to get an unbound module name error.
+  // You _need_ a top level symbol to attach a new module to in order
+  // to get an unbound new module name error.
   function f(): void {}
 }
 
 //// bar.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('bar')>>
+
+module bar;
 
 function g(): void {
   Bing\f(); // Not an error, demonstrates that modules have no effect on naming
@@ -34,6 +35,6 @@ function g(): void {
 //// a-foo.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('A\\foo')>>
 
+module A\foo;
 function h(): void {}

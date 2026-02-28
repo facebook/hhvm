@@ -14,7 +14,7 @@
   pos
   relative_path
   typechecker_options
-  typing_algebra
+  typing
   typing_ast
   typing_defs
   utils_core))
@@ -35,7 +35,8 @@
   pos
   relative_path
   utils_core
-  write_symbol_info))
+  write_symbol_info
+  glean_schema))
 
 (test
  (name posSpanTinyTest)

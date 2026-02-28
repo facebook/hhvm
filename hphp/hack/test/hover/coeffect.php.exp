@@ -1,4 +1,5 @@
 Contexts\write_props
+---
 The `write_props` context allows your function to write to instance
 variables.
 

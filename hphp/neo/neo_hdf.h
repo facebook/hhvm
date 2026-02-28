@@ -22,21 +22,14 @@ __BEGIN_DECLS
 
 typedef struct _hdf HDF;
 
-typedef struct _attr
-{
-  char *key;
-  char *value;
-  struct _attr *next;
-} HDF_ATTR;
-
 struct _hdf
 {
-  int link;
   int alloc_value;
   char *name;
   int name_len;
+  char *file_name;
+  int file_name_len;
   char *value;
-  struct _attr *attr;
   struct _hdf *top;
   struct _hdf *next;
   struct _hdf *child;
@@ -52,6 +45,7 @@ struct _hdf
   struct _hdf *last_child;
 
   int visited;
+  int is_wildcard;
 };
 
 /*
@@ -126,6 +120,11 @@ void hdf_set_visited (HDF *hdf, int visited);
 int hdf_is_visited (HDF *hdf);
 
 /*
+ * Function: hdf_is_wildcard - Returns if a node's name is from a wildcard
+ */
+int hdf_is_wildcard (HDF *hdf);
+
+/*
  * Function: hdf_obj_child - Return the first child of a dataset node
  * Description: hdf_obj_child and the other hdf_obj_ functions are
  *              accessors to the HDF dataset.  Although we do not
@@ -149,7 +148,7 @@ HDF* hdf_obj_next (HDF *hdf);
 
 /*
  * Function: hdf_obj_name - Return the name of a node
- * Description: hdf_obj_name is an accessor function for a datset node
+ * Description: hdf_obj_name is an accessor function for a dataset node
  *              which returns the name of the node.  This is just the
  *              local name, and not the full path.
  * Input: hdf -> the hdf dataset node
@@ -158,6 +157,17 @@ HDF* hdf_obj_next (HDF *hdf);
  * NULL.
  */
 char* hdf_obj_name (HDF *hdf);
+
+/*
+ * Function: hdf_obj_file_name - Return the name of the file that a node came from
+ * Description: hdf_obj_file_name is an accessor function for a dataset node
+ *              which returns the file name of the node.  This will be the first file
+ *              that set the node, if set in multiple files to the same value.
+ * Input: hdf -> the hdf dataset node
+ * Output: None
+ * Returns: The file name of the node. Only set for leaf nodes.
+ */
+char* hdf_obj_file_name (HDF *hdf);
 
 /*
  * Function: hdf_obj_value - Return the value of a node

@@ -14,7 +14,7 @@
 // implementation will transform the three bytes to the two code point
 // sequence \xef\xbf\xbd\x28.
 <<__EntryPoint>>
-function main_utf8ize() {
+function main_utf8ize() :mixed{
 $INVALID_UTF_8_STRING = "\xe2\x82\x28";
 
 $s = "hon\xE7k";

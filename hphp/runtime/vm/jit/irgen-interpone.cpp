@@ -27,6 +27,8 @@
 
 namespace HPHP::jit::irgen {
 
+TRACE_SET_MOD(hhir)
+
 namespace {
 
 //////////////////////////////////////////////////////////////////////
@@ -38,11 +40,6 @@ Type arithOpResult(Type t1, Type t2) {
   auto both = t1 | t2;
   if (both.maybe(TDbl)) return TDbl;
   return TInt;
-}
-
-Type arithOpOverResult(Type t1, Type t2) {
-  if (t1 <= TInt && t2 <= TInt) return TInt | TDbl;
-  return arithOpResult(t1, t2);
 }
 
 Type bitOpResult(Type t1, Type t2) {
@@ -60,9 +57,6 @@ Type setOpResult(Type locType, Type valType, SetOpOp op) {
   case SetOpOp::PlusEqual:
   case SetOpOp::MinusEqual:
   case SetOpOp::MulEqual:    return arithOpResult(locType, valType);
-  case SetOpOp::PlusEqualO:
-  case SetOpOp::MinusEqualO:
-  case SetOpOp::MulEqualO:   return arithOpOverResult(locType, valType);
   case SetOpOp::ConcatEqual: return TStr;
   case SetOpOp::PowEqual:
   case SetOpOp::DivEqual:
@@ -76,27 +70,12 @@ Type setOpResult(Type locType, Type valType, SetOpOp op) {
   not_reached();
 }
 
-uint32_t localInputId(SrcKey sk) {
-  auto const idx = localImmIdx(sk.op());
-  auto const argu = getImm(sk.pc(), idx);
-  switch (immType(sk.op(), idx)) {
-    case ArgType::LA:
-      return argu.u_LA;
-    case ArgType::NLA:
-      return argu.u_NLA.id;
-    case ArgType::ILA:
-      return argu.u_ILA;
-    default:
-      always_assert(false);
-  }
-}
-
 Optional<Type> interpOutputType(IRGS& env,
                                        Optional<Type>& checkTypeType) {
   using namespace jit::InstrFlags;
   auto const sk = curSrcKey(env);
   auto localType = [&]{
-    auto locId = localInputId(sk);
+    auto locId = getLocalOperand(sk);
     static_assert(std::is_unsigned<decltype(locId)>::value,
                   "locId should be unsigned");
     assertx(locId < curFunc(env)->numLocals());
@@ -135,9 +114,7 @@ Optional<Type> interpOutputType(IRGS& env,
     case OutArith:
       return arithOpResult(topType(env, BCSPRelOffset{0}),
                            topType(env, BCSPRelOffset{1}));
-    case OutArithO:
-      return arithOpOverResult(topType(env, BCSPRelOffset{0}),
-                               topType(env, BCSPRelOffset{1}));
+
     case OutUnknown:     return TCell;
 
     case OutBitOp:
@@ -171,6 +148,7 @@ Optional<Type> interpOutputType(IRGS& env,
     case OutClsMeth: return TClsMeth;
     case OutClsMethLike: return TClsMethLike;
     case OutLazyClass: return TLazyCls;
+    case OutEnumClassLabel: return TEnumClassLabel;
   }
   not_reached();
 }
@@ -196,7 +174,7 @@ interpOutputLocals(IRGS& env,
   auto setImmLocType = [&](uint32_t id, Type t) {
     assertx(id < kMaxHhbcImms);
     assertx(id == localImmIdx(sk.op()));
-    setLocType(localInputId(sk), t);
+    setLocType(getLocalOperand(sk), t);
   };
 
   auto const mDefine = static_cast<unsigned char>(MOpMode::Define);
@@ -240,34 +218,11 @@ interpOutputLocals(IRGS& env,
     case OpUnsetM:
       smashesAllLocals = true;
       break;
-
-    case OpIterInit:
-    case OpLIterInit:
-    case OpIterNext:
-    case OpLIterNext: {
-      auto const ita = getImm(sk.pc(),  0).u_ITA;
-      setLocType(ita.valId, TCell);
-      if (ita.hasKey()) setLocType(ita.keyId, TCell);
-      break;
-    }
-
-    case OpVerifyParamTypeTS:
-    case OpVerifyParamType: {
-      setImmLocType(0, TCell);
-      break;
-    }
-
-    case OpSilence:
-      if (static_cast<SilenceOp>(getImm(sk.pc(), 1).u_OA) == SilenceOp::Start) {
-        setImmLocType(0, TInt);
-      }
-      break;
-
     default:
       always_assert_flog(
         false, "Unknown local-modifying op {}", opcodeToName(sk.op())
       );
-  }
+  }  
 
   return locals;
 }
@@ -293,6 +248,7 @@ void interpOne(IRGS& env) {
   idata.changedLocals = locals.data();
 
   interpOne(env, stackType, popped, pushed, idata);
+  if (env.irb->inUnreachableState()) return;
   if (checkTypeType) {
     auto const out = getInstrInfo(sk.op()).out;
     auto const checkIdx = BCSPRelOffset{
@@ -300,7 +256,7 @@ void interpOne(IRGS& env) {
     }.to<SBInvOffset>(env.irb->fs().bcSPOff());
 
     auto const loc = Location::Stack { checkIdx };
-    checkType(env, loc, *checkTypeType, nextSrcKey(env));
+    checkType(env, loc, *checkTypeType, makeExit(env, nextSrcKey(env)));
   }
 }
 
@@ -319,6 +275,12 @@ void interpOne(IRGS& env,
                int popped,
                int pushed,
                InterpOneData& idata) {
+  if (isInlining(env)) {
+    // Interp not supported in inlined context, so side exit.
+    gen(env, Jmp, makeExit(env));
+    return;
+  }
+
   auto const func = curFunc(env);
   auto const op = func->getOp(bcOff(env));
 
@@ -326,8 +288,6 @@ void interpOne(IRGS& env,
   idata.cellsPopped = popped;
   idata.cellsPushed = pushed;
   idata.opcode = op;
-
-  spillInlinedFrames(env);
 
   auto const cf = opcodeChangesPC(idata.opcode);
   gen(
@@ -338,16 +298,6 @@ void interpOne(IRGS& env,
     sp(env),
     fp(env)
   );
-
-  if (!cf && isInlining(env)) {
-    // Can't continue due to spilled frames.
-    auto const rbjData = ReqBindJmpData {
-      nextSrcKey(env),
-      spOffBCFromStackBase(env),
-      spOffBCFromIRSP(env)
-    };
-    gen(env, ReqBindJmp, rbjData, sp(env), fp(env));
-  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -359,8 +309,6 @@ void interpOne(IRGS& env,
 
 void emitExit(IRGS& env)                      { interpOne(env); }
 void emitFatal(IRGS& env, FatalOp)            { interpOne(env); }
-void emitSetOpG(IRGS& env, SetOpOp)           { interpOne(env); }
-void emitIncDecG(IRGS& env, IncDecOp)         { interpOne(env); }
 void emitUnsetG(IRGS& env)                    { interpOne(env); }
 void emitIncl(IRGS& env)                      { interpOne(env); }
 void emitInclOnce(IRGS& env)                  { interpOne(env); }
@@ -370,8 +318,6 @@ void emitReqOnce(IRGS& env)                   { interpOne(env); }
 void emitEval(IRGS& env)                      { interpOne(env); }
 void emitChainFaults(IRGS& env)               { interpOne(env); }
 void emitContGetReturn(IRGS& env)             { interpOne(env); }
-void emitResolveClass(IRGS& env, const StringData*)
-                                              { interpOne(env); }
 //////////////////////////////////////////////////////////////////////
 
 }

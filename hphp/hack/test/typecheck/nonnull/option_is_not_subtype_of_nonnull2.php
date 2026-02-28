@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface I {
   public static function f<T>(): ?T;

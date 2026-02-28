@@ -10,7 +10,7 @@ echo "*** Testing isset() : basic functionality ***\n";
 $i = 10;
 $f = 10.5;
 $s = "Hello";
-$a = varray[1,2,3,4,5];
+$a = vec[1,2,3,4,5];
 $b = true;
 $n = NULL;
 $obj = new foo;

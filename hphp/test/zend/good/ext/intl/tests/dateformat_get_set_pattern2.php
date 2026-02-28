@@ -6,8 +6,8 @@
 
 
 function ut_main()
-{
-        $pattern_arr = varray [
+:mixed{
+        $pattern_arr = vec[
                 'DD-MM-YYYY hh:mm:ss',
         'yyyy-DDD.hh:mm:ss z',
                 "yyyy/MM/dd",

@@ -1,0 +1,1092 @@
+'\" t
+.\"     Title: \fBndb_index_stat\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_INDEX_STAT\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_index_stat \- NDB index statistics utility
+.SH "SYNOPSIS"
+.HP \w'\fBndb_index_stat\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBndb_index_stat \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+\fBndb_index_stat\fR
+provides per\-fragment statistical information about indexes on
+NDB
+tables\&. This includes cache version and age, number of index entries per partition, and memory consumption by indexes\&.
+Usage
+.PP
+To obtain basic index statistics about a given
+NDB
+table, invoke
+\fBndb_index_stat\fR
+as shown here, with the name of the table as the first argument and the name of the database containing this table specified immediately following it, using the
+\fB\-\-database\fR
+(\fB\-d\fR) option:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_index_stat \fItable\fR \-d \fIdatabase\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+In this example, we use
+\fBndb_index_stat\fR
+to obtain such information about an
+NDB
+table named
+mytable
+in the
+test
+database:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_index_stat \-d test mytable\fR
+table:City index:PRIMARY fragCount:2
+sampleVersion:3 loadTime:1399585986 sampleCount:1994 keyBytes:7976
+query cache: valid:1 sampleCount:1994 totalBytes:27916
+times in ms: save: 7\&.133 sort: 1\&.974 sort per sample: 0\&.000
+NDBT_ProgramExit: 0 \- OK
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+sampleVersion
+is the version number of the cache from which the statistics data is taken\&. Running
+\fBndb_index_stat\fR
+with the
+\fB\-\-update\fR
+option causes sampleVersion to be incremented\&.
+.PP
+loadTime
+shows when the cache was last updated\&. This is expressed as seconds since the Unix Epoch\&.
+.PP
+sampleCount
+is the number of index entries found per partition\&. You can estimate the total number of entries by multiplying this by the number of fragments (shown as
+fragCount)\&.
+.PP
+sampleCount
+can be compared with the cardinality of
+SHOW INDEX
+or
+INFORMATION_SCHEMA\&.STATISTICS, although the latter two provide a view of the table as a whole, while
+\fBndb_index_stat\fR
+provides a per\-fragment average\&.
+.PP
+keyBytes
+is the number of bytes used by the index\&. In this example, the primary key is an integer, which requires four bytes for each index, so
+keyBytes
+can be calculated in this case as shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+    keyBytes = sampleCount * (4 bytes per index) = 1994 * 4 = 7976
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This information can also be obtained using the corresponding column definitions from
+INFORMATION_SCHEMA\&.COLUMNS
+(this requires a MySQL Server and a MySQL client application)\&.
+.PP
+totalBytes
+is the total memory consumed by all indexes on the table, in bytes\&.
+.PP
+Timings shown in the preceding examples are specific to each invocation of
+\fBndb_index_stat\fR\&.
+.PP
+The
+\fB\-\-verbose\fR
+option provides some additional output, as shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_index_stat \-d test mytable \-\-verbose\fR
+random seed 1337010518
+connected
+loop 1 of 1
+table:mytable index:PRIMARY fragCount:4
+sampleVersion:2 loadTime:1336751773 sampleCount:0 keyBytes:0
+read stats
+query cache created
+query cache: valid:1 sampleCount:0 totalBytes:0
+times in ms: save: 20\&.766 sort: 0\&.001
+disconnected
+NDBT_ProgramExit: 0 \- OK
+shell>
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+If the only output from the program is
+NDBT_ProgramExit: 0 \- OK, this may indicate that no statistics yet exist\&. To force them to be created (or updated if they already exist), invoke
+\fBndb_index_stat\fR
+with the
+\fB\-\-update\fR
+option, or execute
+ANALYZE TABLE
+on the table in the
+\fBmysql\fR
+client\&.
+Options
+.PP
+The following table includes options that are specific to the NDB Cluster
+\fBndb_index_stat\fR
+utility\&. Additional descriptions are listed following the table\&. For options common to most NDB Cluster programs (including
+\fBndb_index_stat\fR), see
+Options Common to NDB Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.262.\ \&Command\-line options for the ndb_index_stat program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+\fB--database=name\fR,
+.PP
+\fB \fR\fB-d\fR\fB \fR
+T}:T{
+Name of the database containing the table
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--delete\fR\fB \fR
+T}:T{
+Delete index statistics for the given table, stopping any auto-update
+              previously configured
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--update\fR\fB \fR
+T}:T{
+Update index statistics for the given table, restarting any auto-update
+              previously configured
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--dump\fR\fB \fR
+T}:T{
+Print the query cache
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--query=#\fR\fB \fR
+T}:T{
+Perform a number of random range queries on first key attr (must be int
+              unsigned)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--sys-drop\fR\fB \fR
+T}:T{
+Drop any statistics tables and events in NDB kernel (all statistics are
+              lost)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--sys-create\fR\fB \fR
+T}:T{
+Create all statistics tables and events in NDB kernel, if none of them
+              already exist
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--sys-create-if-not-exist\fR\fB \fR
+T}:T{
+Create any statistics tables and events in NDB kernel that do not
+              already exist
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--sys-create-if-not-valid\fR\fB \fR
+T}:T{
+Create any statistics tables or events that do not already exist in the
+              NDB kernel. after dropping any that are invalid
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--sys-check\fR\fB \fR
+T}:T{
+Verify that NDB system index statistics and event tables exist
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--sys-skip-tables\fR\fB \fR
+T}:T{
+Do not apply sys-* options to tables
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--sys-skip-events\fR\fB \fR
+T}:T{
+Do not apply sys-* options to events
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--verbose\fR,
+.PP
+\fB \fR\fB-v\fR\fB \fR
+T}:T{
+Turn on verbose output
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--loops=#\fR\fB \fR
+T}:T{
+Set the number of times to perform a given command. Default is 0
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+.PP
+\fBndb_index_stat statistics options\fR. The following options are used to generate index statistics\&. They work with a given table and database\&. They cannot be mixed with system options (see
+ndb_index_stat system options)\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-database=\fR\fB\fIname\fR\fR,
+\fB\-d \fR\fB\fIname\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--database=name
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+[none]
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+The name of the database that contains the table being queried\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-delete\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--delete
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+false
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Delete the index statistics for the given table, stopping any auto\-update that was previously configured\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-update\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--update
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+false
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Update the index statistics for the given table, and restart any auto\-update that was previously configured\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-dump\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--dump
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+false
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Dump the contents of the query cache\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-query=\fR\fB\fI#\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--query=#
+T}
+T{
+\fBType\fR
+T}:T{
+Numeric
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+0
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+MAX_INT
+T}
+.TE
+.sp 1
+Perform random range queries on first key attribute (must be int unsigned)\&.
+.RE
+.PP
+\fBndb_index_stat system options\fR. The following options are used to generate and update the statistics tables in the NDB kernel\&. None of these options can be mixed with statistics options (see
+ndb_index_stat statistics options)\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-sys\-drop\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--sys-drop
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+false
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Drop all statistics tables and events in the NDB kernel\&.
+\fIThis causes all statistics to be lost\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-sys\-create\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--sys-create
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+false
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Create all statistics tables and events in the NDB kernel\&. This works only if none of them exist previously\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fBsys\-create\-if\-not\-exist\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--sys-create-if-not-exist
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+false
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Create any NDB system statistics tables or events (or both) that do not already exist when the program is invoked\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-sys\-create\-if\-not\-valid\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--sys-create-if-not-valid
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+false
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Create any NDB system statistics tables or events that do not already exist, after dropping any that are invalid\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-sys\-check\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--sys-check
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+false
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Verify that all required system statistics tables and events exist in the NDB kernel\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-sys\-skip\-tables\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--sys-skip-tables
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+false
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Do not apply any
+\fB\-\-sys\-*\fR
+options to any statistics tables\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-sys\-skip\-events\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--sys-skip-events
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+false
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Do not apply any
+\fB\-\-sys\-*\fR
+options to any events\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-verbose\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--verbose
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+false
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Turn on verbose output\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-loops=\fR\fB\fI#\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--loops=#
+T}
+T{
+\fBType\fR
+T}:T{
+Numeric
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+0
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+MAX_INT
+T}
+.TE
+.sp 1
+Repeat commands this number of times (for use in testing)\&.
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

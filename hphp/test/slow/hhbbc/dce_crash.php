@@ -1,8 +1,8 @@
 <?hh
 
-function f($x) { return $x; }
+function f($x) :mixed{ return $x; }
 
-function g($t) {
+function g($t) :mixed{
   $a = 1;
   $b = 1;
   return f($t ? $a : $b);
@@ -10,6 +10,6 @@ function g($t) {
 
 
 <<__EntryPoint>>
-function main_dce_crash() {
+function main_dce_crash() :mixed{
 var_dump(g(true));
 }

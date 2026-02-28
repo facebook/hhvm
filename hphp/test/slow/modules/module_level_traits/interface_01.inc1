@@ -1,0 +1,7 @@
+<?hh
+
+class C implements I {
+  use T;
+}
+  
+

@@ -6,7 +6,7 @@ class C1 extends Base {}
 class C2 extends Base {}
 
 class Foo {
-  public static darray<int, classname<Base>> $p = darray[
+  public static darray<int, classname<Base>> $p = dict[
     1 => C1::class,
     3 => C2::class,
   ];
@@ -22,7 +22,7 @@ class Foo {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(__hhvm_intrinsics\launder_value(Foo::baz(C2::class)));
   var_dump(Foo::baz(C2::class));
 }

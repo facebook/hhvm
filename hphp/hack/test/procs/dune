@@ -1,0 +1,6 @@
+(executable
+ (name is_worker_process)
+ (modules
+  is_worker_process)
+ (libraries
+  worker_utils))

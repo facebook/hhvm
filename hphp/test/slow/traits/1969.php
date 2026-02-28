@@ -5,7 +5,7 @@ trait MY_TRAIT {
 }
 class MY_CLASS{
   use MY_TRAIT;
-  public function printX() {
+  public function printX() :mixed{
     var_dump(self::$x);
   }
 }

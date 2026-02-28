@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 
-function runtest() {
+function runtest() :mixed{
 
     $tmpfile =  basename(__FILE__, ".php") . ".tmp";
     $h = fopen($tmpfile, "w", true);
@@ -13,7 +13,7 @@ function runtest() {
     fclose($h);
 
 
-    $h = @fopen($tmpfile, "r");
+    $h = fopen($tmpfile, "r");
     if ($h === false) {
        echo "Not created in working dir\n";
     }
@@ -23,7 +23,7 @@ function runtest() {
        unlink($tmpfile);
     }
 
-    $h = @fopen(ZendGoodExtStandardTestsFileFopenIncludePathInc::dir1().'/'.$tmpfile, "r");
+    $h = fopen(ZendGoodExtStandardTestsFileFopenIncludePathInc::dir1().'/'.$tmpfile, "r");
     if ($h === false) {
        echo "Not created in dir1\n";
     }
@@ -36,7 +36,7 @@ function runtest() {
 <<__EntryPoint>> function main(): void {
 require_once('fopen_include_path.inc');
 
-$thisTestDir =  __SystemLib\hphp_test_tmppath('fopen_variation7.dir');
+$thisTestDir =  sys_get_temp_dir().'/'.'fopen_variation7.dir';
 mkdir($thisTestDir);
 chdir($thisTestDir);
 

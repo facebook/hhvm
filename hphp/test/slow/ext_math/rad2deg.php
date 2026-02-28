@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_rad2deg() {
+function main_rad2deg() :mixed{
 $rad = 1.0;
 $deg = rad2deg($rad);
 printf("rad: %.f = deg: %.20f \n", $rad, $deg);

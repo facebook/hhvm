@@ -1,10 +1,10 @@
 <?hh
 
-function my_handler($errno, $errstr, $file, $line) {
+function my_handler($errno, $errstr, $file, $line) :mixed{
   throw new Exception($errstr);
 }
 
-function try_takes_num($a) {
+function try_takes_num($a) :mixed{
   try {
     takes_num($a);
   } catch (Exception $e) {
@@ -12,17 +12,17 @@ function try_takes_num($a) {
   }
 }
 
-function takes_num(num $a) {
+function takes_num(num $a) :mixed{
   var_dump($a);
 }
 
 class NumericallyStringable {
-  function __toString() {
+  function __toString() :mixed{
     return "100";
   }
 }
 
-function main() {
+function main() :mixed{
   try_takes_num(10);
   try_takes_num(10.0);
   try_takes_num(10.5);

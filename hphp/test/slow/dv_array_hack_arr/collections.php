@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function test($c) {
+function test($c) :mixed{
   echo "====================================================\n";
   $x1 = $c->toVArray();
   $x2 = $c->toDArray();
@@ -15,7 +15,7 @@ function test($c) {
 
 
 <<__EntryPoint>>
-function main_collections() {
+function main_collections() :mixed{
 test(Vector{});
 test(Map{});
 test(Set{});

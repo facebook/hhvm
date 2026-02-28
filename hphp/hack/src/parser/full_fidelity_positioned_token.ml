@@ -25,7 +25,7 @@ module TokenKind = Full_fidelity_token_kind
 module TriviaKind = Full_fidelity_trivia_kind
 
 module LazyTrivia : sig
-  type t [@@deriving show]
+  type t [@@deriving show, sexp_of]
 
   val equal : t -> t -> bool
 
@@ -82,6 +82,8 @@ end = struct
     Special case: [trivia] is [(Trivia.t list * Trivia.t list)], corresponding
       to the leading and trailing trivia. *)
   type t = Obj.t
+
+  let sexp_of_t _ = Sexp.Atom "Obj.t"
 
   let equal : t -> t -> bool = (fun x y -> Poly.equal x y)
 
@@ -216,7 +218,7 @@ type t = {
   trailing_width: int;
   trivia: LazyTrivia.t;
 }
-[@@deriving show, eq]
+[@@deriving show, eq, sexp_of]
 
 let fold_width sum trivia = sum + Trivia.width trivia
 

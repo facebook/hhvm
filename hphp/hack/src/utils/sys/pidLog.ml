@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Core
 module Unix = Caml_unix
 
 let log_oc = ref None
@@ -26,7 +26,6 @@ let init pids_file =
 
 let log ?reason ?(no_fail = false) pid =
   if !enabled then
-    let pid = Sys_utils.pid_of_handle pid in
     let reason =
       match reason with
       | None -> "unknown"

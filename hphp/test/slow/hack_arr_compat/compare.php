@@ -1,7 +1,7 @@
 <?hh
 
-class Info { static bool $sawHackArrNotice = false; }
-function handler($_errno, $errstr, ...) {
+class Info { public static bool $sawHackArrNotice = false; }
+function handler($_errno, $errstr, ...$_rest):mixed{
   if (
     !Info::$sawHackArrNotice &&
     $errstr === 'Hack Array Compat: Comparing PHP array with Hack array'
@@ -12,7 +12,7 @@ function handler($_errno, $errstr, ...) {
   return false;
 }
 
-function do_compare_hack_array($cmp) {
+function do_compare_hack_array($cmp) :mixed{
   Info::$sawHackArrNotice = false;
   try {
     $cmp();
@@ -21,7 +21,7 @@ function do_compare_hack_array($cmp) {
   }
   return Info::$sawHackArrNotice ? 'T' : 'F';
 }
-function do_compare_non_any_array($cmp) {
+function do_compare_non_any_array($cmp) :mixed{
   try {
     $cmp();
   } catch (InvalidOperationException $e) {
@@ -29,7 +29,7 @@ function do_compare_non_any_array($cmp) {
   }
   return 'F';
 }
-function do_compares($a, $b, $cmp) {
+function do_compares($a, $b, $cmp) :mixed{
   echo "=========================== Notice Compare =======================\n";
   var_dump($a);
   var_dump($b);
@@ -46,13 +46,13 @@ function do_compares($a, $b, $cmp) {
 }
 
 <<__EntryPoint>>
-function main_compare() {
+function main_compare() :mixed{
   set_error_handler(handler<>);
 
   $x1 = vec[
-    varray[],
-    varray[1, 2, varray[3, 4]],
-    darray['a' => 'b', 'c' => 'd'],
+    vec[],
+    vec[1, 2, vec[3, 4]],
+    dict['a' => 'b', 'c' => 'd'],
   ];
   $x2_non_hack_arrays = vec[
     true,
@@ -63,8 +63,8 @@ function main_compare() {
     'abc',
     new stdClass,
     imagecreate(1, 1),
-    varray[1, varray[2, 5], varray[3, 4]],
-    darray['a' => varray[], 'c' => varray[1, 2]],
+    vec[1, vec[2, 5], vec[3, 4]],
+    dict['a' => vec[], 'c' => vec[1, 2]],
   ];
   $x2_hack_arrays = vec[
     vec[],
@@ -73,7 +73,7 @@ function main_compare() {
     dict['a' => 'b', 'c' => 'd'],
     keyset[],
     keyset['a', 'b', 'c'],
-    varray[1, 2, vec[3, 4]],
+    vec[1, 2, vec[3, 4]],
   ];
 
   foreach ($x1 as $a) {

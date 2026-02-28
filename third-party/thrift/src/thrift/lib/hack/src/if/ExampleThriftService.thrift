@@ -1,0 +1,67 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+package "meta.com/thrift/example"
+
+struct RequestStruct {
+  1: string text;
+}
+
+struct ResponseStruct {
+  1: string text;
+}
+
+exception WhisperException {
+  1: string message;
+}
+
+// Root service (grandparent) - has getMethodMetadata for sendRequest
+service ExampleService {
+  ResponseStruct sendRequest(1: RequestStruct request) throws (
+    1: WhisperException ex,
+  );
+}
+
+// Middle service (parent) - extends ExampleService
+// getMethodMetadata for sendMiddleRequest, delegates to parent for sendRequest
+service ExampleMiddleService extends ExampleService {
+  ResponseStruct sendMiddleRequest(1: RequestStruct request) throws (
+    1: WhisperException ex,
+  );
+}
+
+// Child service (grandchild) - extends ExampleMiddleService
+// Tests full inheritance chain: child -> parent -> grandparent
+// getMethodMetadata for sendChildRequest, delegates to parent for inherited methods
+service ExampleChildService extends ExampleMiddleService {
+  ResponseStruct sendChildRequest(1: RequestStruct request) throws (
+    1: WhisperException ex,
+  );
+}
+
+exception StreamException {
+  1: string message;
+}
+
+service ExampleStreamingService {
+  ResponseStruct, stream<string throws (1: StreamException ex)> testStream(
+    1: RequestStruct request,
+  );
+  ResponseStruct, sink<string, ResponseStruct> testSink(
+    1: RequestStruct request,
+  );
+}

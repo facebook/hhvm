@@ -18,10 +18,10 @@ module ExprDepTy = struct
   type dep =
     | Dep_This
     | Dep_Cls of string
-    | Dep_Expr of Ident.t
+    | Dep_Expr of Expression_id.t
 
-  let new_ () =
-    let eid = Ident.tmp () in
+  let new_ env =
+    let eid = Env.make_expression_id env in
     (Reason.ERexpr eid, Dep_Expr eid)
 
   (* Convert a class_id into a "dependent kind" (dep). This later informs the make_with_dep_kind function
@@ -35,13 +35,13 @@ module ExprDepTy = struct
         (match Env.get_parent_id env with
         | Some cls -> (pos, Reason.ERparent cls, Dep_Cls cls)
         | None ->
-          let (ereason, dep) = new_ () in
+          let (ereason, dep) = new_ env in
           (pos, ereason, dep))
       | N.CIself ->
         (match Env.get_self_id env with
         | Some cls -> (pos, Reason.ERself cls, Dep_Cls cls)
         | None ->
-          let (ereason, dep) = new_ () in
+          let (ereason, dep) = new_ env in
           (pos, ereason, dep))
       | N.CI (p, cls) ->
         (Pos_or_decl.of_raw_pos p, Reason.ERclass cls, Dep_Cls cls)
@@ -57,17 +57,17 @@ module ExprDepTy = struct
         let (ereason, dep) =
           match Env.get_local_expr_id env x with
           | Some eid -> (Reason.ERexpr eid, Dep_Expr eid)
-          | None -> new_ ()
+          | None -> new_ env
         in
         (Pos_or_decl.of_raw_pos p, ereason, dep)
       (* If all else fails we generate a new identifier for our expression
        * dependent type.
        *)
       | N.CIexpr (_, p, _) ->
-        let (ereason, dep) = new_ () in
+        let (ereason, dep) = new_ env in
         (Pos_or_decl.of_raw_pos p, ereason, dep)
     in
-    (Reason.Rexpr_dep_type (reason, pos, expr_dep_reason), dep)
+    (Reason.expr_dep_type (reason, pos, expr_dep_reason), dep)
 
   (****************************************************************************)
   (* A type access "this::T" is translated to "<this>::T" during the
@@ -92,23 +92,34 @@ module ExprDepTy = struct
     let (r_dep_ty, dep_ty) = dep_kind in
     let apply env ty =
       match dep_ty with
-      | Dep_Cls _ -> (env, mk (r_dep_ty, Tdependent (DTexpr (Ident.tmp ()), ty)))
+      | Dep_Cls _ ->
+        ( env,
+          mk (r_dep_ty, Tdependent (DTexpr (Env.make_expression_id env), ty)) )
       | Dep_This -> (env, ty)
       | Dep_Expr id -> (env, mk (r_dep_ty, Tdependent (DTexpr id, ty)))
     in
-    let rec make env ty =
+    let rec make ~seen env ty =
       let (env, ty) = Env.expand_type env ty in
       match deref ty with
       | (_, Tclass (_, Exact, _)) -> (env, ty)
-      | (_, Tclass (((_, x) as c), Nonexact, tyl)) ->
+      (* Special case for known final generic types that don't use this in their API *)
+      | (_, Tclass ((_, x), _, _))
+        when String.equal x Naming_special_names.Collections.cVec
+             || String.equal x Naming_special_names.Collections.cDict
+             || String.equal x Naming_special_names.Collections.cKeyset
+             || String.equal x Naming_special_names.Classes.cString ->
+        (env, ty)
+      | (_, Tclass (((_, x) as c), Nonexact _, tyl)) ->
         let class_ = Env.get_class env x in
         (* If a class is both final and variant, we must treat it as non-final
            * since we can't statically guarantee what the runtime type
            * will be.
         *)
         if
-          Option.value_map class_ ~default:false ~f:(fun class_ty ->
-              TUtils.class_is_final_and_not_contravariant class_ty)
+          Option.value_map
+            (Decl_entry.to_option class_)
+            ~default:false
+            ~f:(fun class_ty -> TUtils.class_is_final_and_invariant class_ty)
         then
           (env, ty)
         else (
@@ -117,44 +128,46 @@ module ExprDepTy = struct
             (env, mk (r_dep_ty, Tclass (c, Exact, tyl)))
           | _ -> apply env ty
         )
-      | (_, Tgeneric (s, _tyargs)) when DependentKind.is_generic_dep_ty s ->
-        (* TODO(T69551141) handle type arguments *)
-        (env, ty)
-      | (_, Tgeneric _) ->
-        (* TODO(T69551141) handle type arguments here? *)
-        let (env, tyl) =
-          Typing_utils.get_concrete_supertypes ~abstract_enum:true env ty
-        in
-        let (env, tyl') = List.fold_map tyl ~init:env ~f:make in
-        if tyl_equal tyl tyl' then
+      | (_, Tgeneric s) when DependentKind.is_generic_dep_ty s -> (env, ty)
+      | (_, Tgeneric name) ->
+        if SSet.mem name seen then
           (env, ty)
         else
-          apply env ty
+          let (env, tyl) =
+            TUtils.get_concrete_supertypes ~abstract_enum:true env ty
+          in
+          let (env, tyl') =
+            List.fold_map tyl ~init:env ~f:(make ~seen:(SSet.add name seen))
+          in
+          if tyl_equal tyl tyl' then
+            (env, ty)
+          else
+            apply env ty
       | (r, Toption ty) ->
-        let (env, ty) = make env ty in
+        let (env, ty) = make ~seen env ty in
         (env, mk (r, Toption ty))
-      | (_, Tunapplied_alias _) ->
-        Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | (r, Tnewtype (n, p, ty)) ->
-        let (env, ty) = make env ty in
+        let (env, ty) = make ~seen env ty in
         (env, mk (r, Tnewtype (n, p, ty)))
       | (_, Tdependent (_, _)) -> (env, ty)
       | (r, Tunion tyl) ->
-        let (env, tyl) = List.fold_map tyl ~init:env ~f:make in
+        let (env, tyl) = List.fold_map tyl ~init:env ~f:(make ~seen) in
         (env, mk (r, Tunion tyl))
       | (r, Tintersection tyl) ->
-        let (env, tyl) = List.fold_map tyl ~init:env ~f:make in
+        let (env, tyl) = List.fold_map tyl ~init:env ~f:(make ~seen) in
         (env, mk (r, Tintersection tyl))
       | (r, Taccess (ty, ids)) ->
-        let (env, ty) = make env ty in
+        let (env, ty) = make ~seen env ty in
         (env, mk (r, Taccess (ty, ids)))
-      (* TODO(T36532263) check if this is legal *)
+      | (r, Tclass_ptr ty) ->
+        let (env, ty) = make ~seen env ty in
+        (env, mk (r, Tclass_ptr ty))
       | ( _,
           ( Tnonnull | Tprim _ | Tshape _ | Ttuple _ | Tdynamic | Tvec_or_dict _
-          | Tfun _ | Tany _ | Tvar _ | Terr | Tneg _ ) ) ->
+          | Tfun _ | Tany _ | Tvar _ | Tneg _ | Tlabel _ ) ) ->
         (env, ty)
     in
-    make env ty
+    make ~seen:SSet.empty env ty
 
   let make env ~cid ty =
     make_with_dep_kind env (from_cid env (get_reason ty) cid) ty

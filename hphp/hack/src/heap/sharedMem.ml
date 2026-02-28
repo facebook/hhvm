@@ -64,17 +64,38 @@ let empty_config =
     compression = 0;
   }
 
-(* Allocated in C only. *)
-type handle = private {
+(* Allocated in C only.
+   NOTE: If you change the order, update hh_shared.c! *)
+type internal_handle = private {
   h_fd: Unix.file_descr;
   h_global_size: int;
   h_heap_size: int;
-  h_hash_table_pow_val: int;
-  h_num_workers_val: int;
+  _h_hash_table_pow_val: int;
+  _h_num_workers_val: int;
   h_shm_use_sharded_hashtbl: bool;
-  h_shm_cache_size: int;
+  _h_shm_cache_size: int;
   h_sharded_hashtbl_fd: Unix.file_descr;
 }
+
+type handle = internal_handle * internal_handle option
+
+let get_heap_size ({ h_heap_size; _ }, _) = h_heap_size
+
+let get_global_size ({ h_global_size; _ }, _) = h_global_size
+
+let apply_on_pair
+    ~f ({ h_fd; h_shm_use_sharded_hashtbl; h_sharded_hashtbl_fd; _ }, h2) =
+  f h_fd;
+  if h_shm_use_sharded_hashtbl then f h_sharded_hashtbl_fd;
+  match h2 with
+  (* We don't support 2 shared hashtables, so ignore it in the second part *)
+  | Some { h_fd; _ } -> f h_fd
+  | None -> ()
+
+let set_close_on_exec handle = apply_on_pair ~f:Unix.set_close_on_exec handle
+
+let clear_close_on_exec handle =
+  apply_on_pair ~f:Unix.clear_close_on_exec handle
 
 exception Out_of_shared_memory
 
@@ -114,8 +135,14 @@ let () =
     (C_assertion_failure "dummy string")
 
 external hh_shared_init :
-  config:config -> shm_dir:string option -> num_workers:int -> handle
+  config:config -> shm_dir:string option -> num_workers:int -> internal_handle
   = "hh_shared_init"
+
+let ref_shared_mem_callbacks = ref None
+
+let register_callbacks init_flash connect_flash get_handle_flash =
+  ref_shared_mem_callbacks := Some (init_flash, connect_flash, get_handle_flash);
+  ()
 
 let anonymous_init config ~num_workers =
   hh_shared_init ~config ~shm_dir:None ~num_workers
@@ -172,36 +199,49 @@ let rec shm_dir_init config ~num_workers = function
 
 let init config ~num_workers =
   ref_has_done_init := true;
-  try anonymous_init config ~num_workers with
-  | Failed_anonymous_memfd_init ->
-    EventLogger.(
-      log_if_initialized (fun () -> sharedmem_failed_anonymous_memfd_init ()));
-    Hh_logger.log "Failed to use anonymous memfd init";
-    shm_dir_init config ~num_workers config.shm_dirs
+  let fst =
+    try anonymous_init config ~num_workers with
+    | Failed_anonymous_memfd_init ->
+      EventLogger.(
+        log_if_initialized (fun () -> sharedmem_failed_anonymous_memfd_init ()));
+      Hh_logger.log "Failed to use anonymous memfd init";
+      shm_dir_init config ~num_workers config.shm_dirs
+  in
+  let snd =
+    match !ref_shared_mem_callbacks with
+    | Some (init, _connect, _get) -> init config ~num_workers
+    | None -> None
+  in
+  (fst, snd)
 
-external connect : handle -> worker_id:int -> unit = "hh_connect"
+external connect_internal_handle : internal_handle -> worker_id:int -> unit
+  = "hh_connect"
 
-external get_handle : unit -> handle = "hh_get_handle"
+let connect (handle, maybe_handle) ~worker_id =
+  let () = connect_internal_handle handle ~worker_id in
+  let () =
+    match !ref_shared_mem_callbacks with
+    | Some (_init, connect, _get) -> connect maybe_handle ~worker_id
+    | _ -> ()
+  in
+  ()
+
+external get_handle_internal_handle : unit -> internal_handle = "hh_get_handle"
+
+let get_handle () =
+  let snd =
+    match !ref_shared_mem_callbacks with
+    | Some (_init, _connect, get) -> get ()
+    | None -> None
+  in
+  (get_handle_internal_handle (), snd)
+
+external get_worker_id : unit -> int = "hh_get_worker_id"
 
 external set_allow_removes : bool -> unit = "hh_set_allow_removes"
 
 external set_allow_hashtable_writes_by_current_process : bool -> unit
   = "hh_set_allow_hashtable_writes_by_current_process"
-
-module RawAccess = struct
-  (* Allocated in C only. *)
-  type serialized = private bytes
-
-  external mem_raw : string -> bool = "hh_mem"
-
-  external get_raw : string -> serialized option = "hh_get_raw"
-
-  external add_raw : string -> serialized -> unit = "hh_add_raw"
-
-  external deserialize_raw : serialized -> 'a = "hh_deserialize_raw"
-
-  external serialize_raw : 'a -> serialized = "hh_serialize_raw"
-end
 
 module SMTelemetry = struct
   (*****************************************************************************)
@@ -495,7 +535,7 @@ functor
         else
           0.);
       Measure.sample
-        "(ALL shmem cache hit rate)"
+        "ALL shmem cache hit rate"
         (if hit then
           1.
         else
@@ -804,6 +844,7 @@ module type Heap = sig
 
   val mem_old : key -> bool
 
+  (** Equivalent to moving a set of entries (= key + value) to some heap of old entries. *)
   val oldify_batch : KeySet.t -> unit
 
   val revive_batch : KeySet.t -> unit
@@ -869,8 +910,7 @@ module Heap (Backend : Backend) (Key : Key) (Value : Value) :
   let get_batch xs =
     KeySet.fold
       begin
-        fun key acc ->
-        KeyMap.add key (get key) acc
+        (fun key acc -> KeyMap.add key (get key) acc)
       end
       xs
       KeyMap.empty
@@ -878,8 +918,7 @@ module Heap (Backend : Backend) (Key : Key) (Value : Value) :
   let get_old_batch xs =
     KeySet.fold
       begin
-        fun key acc ->
-        KeyMap.add key (get_old key) acc
+        (fun key acc -> KeyMap.add key (get_old key) acc)
       end
       xs
       KeyMap.empty
@@ -906,6 +945,7 @@ module Heap (Backend : Backend) (Key : Key) (Value : Value) :
 
   let mem_old x = WithLocalChanges.mem (old_hash_of_key x)
 
+  (** Equivalent to moving an entry (= key + value) to some heap of old entries. *)
   let oldify x =
     if mem x then
       WithLocalChanges.move (hash_of_key x) (old_hash_of_key x)
@@ -918,16 +958,17 @@ module Heap (Backend : Backend) (Key : Key) (Value : Value) :
       WithLocalChanges.move (old_hash_of_key x) (hash_of_key x)
     )
 
+  (** Equivalent to moving a set of entries (= key + value) to some heap of old entries. *)
   let oldify_batch xs =
     KeySet.iter
       begin
         fun key ->
-        if mem key then
-          oldify key
-        else
-          (* this is weird, semantics of `oldify x` and `oldify_batch {x}` are
-             different for some mysterious reason *)
-          remove_old key
+          if mem key then
+            oldify key
+          else
+            (* this is weird, semantics of `oldify x` and `oldify_batch {x}` are
+               different for some mysterious reason *)
+            remove_old key
       end
       xs
 
@@ -935,12 +976,12 @@ module Heap (Backend : Backend) (Key : Key) (Value : Value) :
     KeySet.iter
       begin
         fun key ->
-        if mem_old key then
-          revive key
-        else
-          (* this is weird, semantics of `revive x` and `revive {x}` are
-               different for some mysterious reason *)
-          remove key
+          if mem_old key then
+            revive key
+          else
+            (* this is weird, semantics of `revive x` and `revive {x}` are
+                 different for some mysterious reason *)
+            remove key
       end
       xs
 
@@ -984,8 +1025,7 @@ module FreqCache (Key : Key) (Value : Value) (Capacity : Capacity) :
       let l = ref [] in
       Hashtbl.iter
         begin
-          fun key (freq, v) ->
-          l := (key, !freq, v) :: !l
+          (fun key (freq, v) -> l := (key, !freq, v) :: !l)
         end
         cache;
       Hashtbl.clear cache;
@@ -1214,12 +1254,12 @@ end = struct
   let get_batch keys =
     KeySet.fold
       begin
-        fun key acc ->
-        KeyMap.add key (get key) acc
+        (fun key acc -> KeyMap.add key (get key) acc)
       end
       keys
       KeyMap.empty
 
+  (** see .mli **)
   let oldify_batch keys =
     Direct.oldify_batch keys;
     KeySet.iter Cache.remove keys
@@ -1243,8 +1283,7 @@ end = struct
   let () =
     invalidate_local_caches_callback_list :=
       begin
-        fun () ->
-        Cache.clear ()
+        (fun () -> Cache.clear ())
       end
       :: !invalidate_local_caches_callback_list
 

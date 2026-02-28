@@ -17,13 +17,13 @@ class B implements I2, I {
   const FOO = 47;
 }
 
-function test(I $i) {
+function test(I $i) :mixed{
   var_dump($i::FOO);
 }
 
 
 <<__EntryPoint>>
-function main_interface_diff_slots() {
+function main_interface_diff_slots() :mixed{
 test(new A());
 test(new B());
 }

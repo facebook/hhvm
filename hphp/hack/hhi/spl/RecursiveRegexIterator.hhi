@@ -8,8 +8,9 @@
  *
  */
 
-class RecursiveRegexIterator<Tv> extends RegexIterator<Tv>
-  implements RecursiveIterator<Tv> {
+class RecursiveRegexIterator<Tv>
+  extends RegexIterator<Tv>
+  implements RecursiveIterator<~Tv> {
 
   // Methods
   public function __construct(

@@ -1,2 +1,0 @@
-File "partial_application_unsupported.php", line 8, characters 19-30:
-A higher-kinded type is expected here. We do not not support partial applications to yield higher-kinded types, but you are providing 1 type argument(s). (Naming[2047])

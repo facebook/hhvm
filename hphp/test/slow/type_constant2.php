@@ -13,6 +13,6 @@ class C implements I {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(type_structure(C::class, 'T'));
 }

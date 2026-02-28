@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   require "inner.inc";
   require "nested3/inner.inc";
 

@@ -2,7 +2,7 @@
 
 /** test */
 namespace foo {
-    function test() { }
+    function test() :mixed{ }
 
     /** test1 */
     class bar { }

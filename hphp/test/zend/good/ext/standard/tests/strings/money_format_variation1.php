@@ -13,7 +13,7 @@ class class_no_tostring  {
 }
 
 class class_with_tostring  {
-  public function __toString() {
+  public function __toString() :mixed{
     return "  sample object  ";
   }
 }
@@ -26,48 +26,12 @@ echo "*** Testing money_format() function: with unexpected inputs for 'format' a
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $input
-$formats =  varray [
-
-          // integer values
-/*1*/      0,
-          1,
-          255,
-          256,
-          2147483647,
-          -2147483648,
-
-          // float values
-/*7*/      10.5,
-          -20.5,
-          10.1234567e10,
-
-          // array values
-/*10*/      varray[],
-          varray[0],
-          varray[1, 2],
-
-          // boolean values
-/*13*/      true,
-          false,
-          TRUE,
-          FALSE,
-
-          // null values
-/*17*/      NULL,
-          null,
-
+$formats =  vec[
           // string values
-/*19*/      "abcd",
+          "abcd",
           'abcd',
           "0x12f",
           "%=*!14#8.2nabcd",
-
-          // objects
-/*23*/      new class_no_tostring(),
-          new class_with_tostring(),
-
-          // resource
-/*25*/      $file_handle,
 ];
 
 // loop through with each element of the $formats array to test money_format() function

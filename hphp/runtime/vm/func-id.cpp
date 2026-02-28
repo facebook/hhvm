@@ -16,6 +16,7 @@
 #include <limits>
 
 #include "hphp/runtime/vm/func-id.h"
+#include "hphp/runtime/vm/func.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -23,7 +24,9 @@ namespace HPHP {
 FuncId FuncId::Invalid = FuncId::fromInt(std::numeric_limits<FuncId::Int>::max());
 FuncId FuncId::Dummy   = FuncId::fromInt(std::numeric_limits<FuncId::Int>::max() - 1);
 
+#ifdef USE_LOWPTR
+FuncId::Int FuncId::toStableInt() const { return getFunc()->getStableId(); }
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
-};
-
-
+}

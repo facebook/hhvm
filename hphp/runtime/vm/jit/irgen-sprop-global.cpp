@@ -16,6 +16,8 @@
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
+#include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-create.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-incdec.h"
@@ -23,23 +25,25 @@
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
+#include "hphp/util/configs/eval.h"
+
 namespace HPHP::jit::irgen {
 
 namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-void bindMem(IRGS& env, SSATmp* ptr, SSATmp* src, Type prevTy) {
+void bindMem(IRGS& env, SSATmp* ptr, SSATmp* src, Type prevTy, bool copySrc = true) {
   auto const prevValue = gen(env, LdMem, prevTy, ptr);
-  pushIncRef(env, src);
+  if (copySrc) pushIncRef(env, src);
   gen(env, StMem, ptr, src);
-  decRef(env, prevValue, DecRefProfileId::Default);
+  decRef(env, prevValue);
 }
 
 void destroyName(IRGS& env, SSATmp* name) {
   if (env.irb->inUnreachableState()) return;
   assertx(name == topC(env));
-  popDecRef(env, DecRefProfileId::Default);
+  popDecRef(env);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -63,10 +67,8 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
   auto const& prop = cls->staticProperties()[slot];
 
   auto knownType = TCell;
-  if (RuntimeOption::EvalCheckPropTypeHints >= 3 &&
-      (!prop.typeConstraint.isUpperBound() ||
-       RuntimeOption::EvalEnforceGenericsUB >= 2)) {
-    knownType = typeFromPropTC(prop.typeConstraint, cls, ctx, true);
+  if (Cfg::Eval::CheckPropTypeHints >= 3) {
+    knownType = typeFromPropTC(prop.typeConstraints, cls, ctx, true);
     if (!(prop.attrs & AttrNoImplicitNullable)) knownType |= TInitNull;
   }
   knownType &= typeFromRAT(prop.repoAuthType, ctx);
@@ -80,6 +82,10 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
     } else {
       knownType -= TUninit;
     }
+  }
+
+  if (prop.attrs & AttrInternal) {
+    emitModuleBoundaryCheckKnown(env, &prop);
   }
 
   profileRDSAccess(env, handle);
@@ -163,8 +169,7 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
   return {
     checkedAddr,
     knownType,
-    &prop.typeConstraint,
-    &prop.ubs,
+    &prop.typeConstraints,
     slot,
   };
 
@@ -189,7 +194,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName,
     if (!ssaCls->hasConstVal()) return false;
     auto const cls = ssaCls->clsVal();
 
-    auto const lookup = cls->findSProp(curClass(env), propName);
+    auto const lookup = cls->findSProp(MemberLookupContext(curClass(env), curUnit(env)->moduleName()), propName);
 
     if (lookup.slot == kInvalidSlot) return false;
     if (!lookup.accessible) return false;
@@ -209,8 +214,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName,
     if (lookup.propPtr) return lookup;
   }
 
-  auto const ctxClass = curClass(env);
-  auto const ctxTmp = ctxClass ? cns(env, ctxClass) : cns(env, nullptr);
+  auto const ctxFunc = cns(env, curFunc(env));
   auto const data = ReadonlyData{ opts.readOnlyCheck };
   auto const knownType = opts.ignoreLateInit ? TCell : TInitCell;
   auto const propAddr = gen(
@@ -220,14 +224,13 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName,
     knownType,
     ssaCls,
     ssaName,
-    ctxTmp,
+    ctxFunc,
     cns(env, opts.ignoreLateInit),
     cns(env, opts.writeMode)
   );
   return {
     propAddr,
     knownType,
-    nullptr,
     nullptr,
     kInvalidSlot
   };
@@ -262,19 +265,17 @@ void emitSetS(IRGS& env, ReadonlyOp op) {
   const LdClsPropOptions opts { op, true, true, true };
   auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, opts);
 
-  if (lookup.tc) {
-    verifyPropType(
+  if (lookup.typeConstraints) {
+    value = verifyPropType(
       env,
       ssaCls,
-      lookup.tc,
-      lookup.ubs,
+      lookup.typeConstraints,
       lookup.slot,
       value,
       ssaPropName,
-      true,
-      &value
+      true
     );
-  } else if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+  } else if (Cfg::Eval::CheckPropTypeHints > 0) {
     auto const slot = gen(env, LookupSPropSlot, ssaCls, ssaPropName);
     value = gen(env, VerifyPropCoerceAll, ssaCls, slot, value, cns(env, true));
   }
@@ -305,19 +306,17 @@ void emitSetOpS(IRGS& env, SetOpOp op) {
   auto const lhs = gen(env, LdMem, lookup.knownType, lookup.propPtr);
 
   auto const finish = [&] (SSATmp* value) {
-    if (lookup.tc) {
-      verifyPropType(
+    if (lookup.typeConstraints) {
+      value = verifyPropType(
         env,
         ssaCls,
-        lookup.tc,
-        lookup.ubs,
+        lookup.typeConstraints,
         lookup.slot,
         value,
         ssaPropName,
-        true,
-        &value
+        true
       );
-    } else if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+    } else if (Cfg::Eval::CheckPropTypeHints > 0) {
       auto const slot = gen(env, LookupSPropSlot, ssaCls, ssaPropName);
       value = gen(env, VerifyPropCoerceAll, ssaCls, slot, value,
                   cns(env, true));
@@ -389,18 +388,17 @@ void emitIncDecS(IRGS& env, IncDecOp subop) {
   assertx(result->isA(TUncounted));
   assertx(!result->type().maybe(TClsMeth));
 
-  if (lookup.tc) {
+  if (lookup.typeConstraints) {
     verifyPropType(
       env,
       ssaCls,
-      lookup.tc,
-      lookup.ubs,
+      lookup.typeConstraints,
       lookup.slot,
       result,
       ssaPropName,
       true
     );
-  } else if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+  } else if (Cfg::Eval::CheckPropTypeHints > 0) {
     auto const slot = gen(env, LookupSPropSlot, ssaCls, ssaPropName);
     gen(env, VerifyPropAll, ssaCls, slot, result, cns(env, true));
   }
@@ -421,7 +419,7 @@ void emitIncDecS(IRGS& env, IncDecOp subop) {
 
   gen(env, StMem, lookup.propPtr, result);
   gen(env, IncRef, result);
-  decRef(env, oldVal, DecRefProfileId::Default);
+  decRef(env, oldVal);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -450,9 +448,9 @@ void emitCGetG(IRGS& env) {
   push(env, ret);
 }
 
-void emitSetG(IRGS& env) {
+void emitPopG(IRGS& env) {
   auto const name = topC(env, BCSPRelOffset{1});
-  if (!name->isA(TStr)) PUNT(SetG-NameNotStr);
+  if (!name->isA(TStr)) PUNT(PopG-NameNotStr);
   auto const value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
 
   auto const ptr = profiledGlobalAccess(
@@ -466,7 +464,7 @@ void emitSetG(IRGS& env) {
 
   discard(env);
   destroyName(env, name);
-  bindMem(env, ptr, value, TCell);
+  bindMem(env, ptr, value, TCell, false);
 }
 
 void emitIssetG(IRGS& env) {
@@ -522,16 +520,14 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
       auto const& prop = ctx->staticProperties()[slot];
       assertx(!(prop.attrs & AttrSystemInitialValue));
       if (!(prop.attrs & AttrInitialSatisfiesTC)) {
-        verifyPropType(
+        val = verifyPropType(
           env,
           cns(env, ctx),
-          &prop.typeConstraint,
-          &prop.ubs,
+          &prop.typeConstraints,
           slot,
           val,
           cns(env, propName),
-          true,
-          &val
+          true
         );
       }
 
@@ -556,16 +552,14 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
       auto const& prop = ctx->declProperties()[slot];
       assertx(!(prop.attrs & AttrSystemInitialValue));
       if (!(prop.attrs & AttrInitialSatisfiesTC)) {
-        verifyPropType(
+        val = verifyPropType(
           env,
           cls,
-          &prop.typeConstraint,
-          &prop.ubs,
+          &prop.typeConstraints,
           slot,
           val,
           cns(env, propName),
-          false,
-          &val
+          false
         );
       }
 

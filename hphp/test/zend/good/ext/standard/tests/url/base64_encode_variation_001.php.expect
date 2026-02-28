@@ -1,0 +1,8 @@
+*** Testing base64_encode() : usage variations ***
+
+Arg value 
+string(0) ""
+
+Arg value 
+string(0) ""
+Done

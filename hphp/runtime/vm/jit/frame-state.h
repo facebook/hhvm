@@ -186,10 +186,13 @@ struct FrameState {
   bool stublogue{false};
 
   /*
-   * ctx tracks the current ActRec's this/ctx field
+   * ctx tracks the current ActRec's this/ctx field, origCtxType is the type of
+   * the original non-refined ctx.
    */
   SSATmp* ctx{nullptr};
   Type ctxType{TObj|TCls};
+  Type origCtxType{TObj|TCls};
+
 
   /*
    * stackModified is reset to false by exceptionStackBoundary() and set to
@@ -271,11 +274,6 @@ struct FrameStateMgr final {
   FrameStateMgr& operator=(FrameStateMgr&&) = default;
 
   /*
-   * Called when we are manually creating diamonds in the CFG.
-   */
-  void clearForUnprocessedPred();
-
-  /*
    * Update state by computing the effects of an instruction.
    */
   void update(const IRInstruction*);
@@ -298,17 +296,11 @@ struct FrameStateMgr final {
 
   /*
    * Finish tracking state for `b' and save the current state to b->next()
-   * (b->taken() is handled in update()).  Also save the out-state if
-   * setSaveOutState() was called on `b'.
+   * (b->taken() is handled in update()).
    *
    * Returns true iff the in-state for the next block has changed.
    */
   bool finishBlock(Block* b);
-
-  /*
-   * Mark that `b' should save its out-state when finishBlock() is called.
-   */
-  void setSaveOutState(Block* b);
 
   /*
    * Save current state of a block so we can resume processing it after working
@@ -324,12 +316,6 @@ struct FrameStateMgr final {
    * Resume processing a block that was stopped by pauseBlock.
    */
   void unpauseBlock(Block*);
-
-  /*
-   * Reset the saved state associated with the given block `b' to match the out
-   * state of the given predecessor `pred', which must have been saved a priori.
-   */
-  void resetBlock(Block* b, Block* pred);
 
   /*
    * Return the post-conditions associated with `exitBlock'.
@@ -361,6 +347,14 @@ struct FrameStateMgr final {
   unsigned inlineDepth() const { return m_stack.size() - 1; }
 
   /*
+   * Perform the frame state effects of LeaveInlineFrame, without actually using
+   * the instruction. InlineSideExit contains the other effects of LeaveInlineFrame,
+   * but it can't include the frame state ones, as they are needed for its own
+   * catch block.
+   */
+  void endInliningForSideExit() { trackLeaveInlineFrame(); }
+
+  /*
    * Get the irSPOff for the parent frame of the most-inlined frame.
    *
    * @requires: inlineDepth() > 0
@@ -376,9 +370,18 @@ struct FrameStateMgr final {
    * frame.
    */
   void resetStackModified()             { cur().stackModified = false; }
-  void setBCSPOff(SBInvOffset o)        { cur().bcSPOff = o; }
-  void incBCSPDepth(int32_t n = 1)      { cur().bcSPOff += n; }
-  void decBCSPDepth(int32_t n = 1)      { cur().bcSPOff -= n; }
+  void setBCSPOff(SBInvOffset o) {
+    assertx(o.offset >= 0);
+    cur().bcSPOff = o;
+  }
+  void incBCSPDepth(int32_t n = 1) {
+    assertx(n >= 0);
+    cur().bcSPOff += n;
+  }
+  void decBCSPDepth(int32_t n = 1) {
+    assertx(bcSPOff().offset >= n);
+    cur().bcSPOff -= n;
+  }
 
   /*
    * Return the LocationState for local `id' or stack element at `off' in the
@@ -405,6 +408,15 @@ struct FrameStateMgr final {
    * unit's entry.
    */
   bool localsCleared() const { return cur().localsCleared; }
+
+  /*
+   * Recover the state of a local `id' from input state of `from' blocks,
+   * that are successors of immediate dominator of the current block.
+   *
+   * The caller must ensure the local `id' is not modified on any path
+   * between the dominator of the current block and the current block.
+   */
+  void recoverLocal(const std::vector<Block*>& from, uint32_t id);
 
   /*
    * Generic accessors for LocationState members.
@@ -435,6 +447,11 @@ struct FrameStateMgr final {
    */
   SSATmp* valueOfPointee(SSATmp*) const;
   Type typeOfPointee(SSATmp*, Type limit = TCell) const;
+
+  /*
+   * Clear frame state to make an exception handler shareable.
+   */
+  void clearForEH();
 
   /*
    * Debug stringification.
@@ -496,9 +513,10 @@ private:
   void handleMInstr(const IRInstruction*);
   void initStack(SSATmp* sp, SBInvOffset irSPOff, SBInvOffset bcSPOff);
   void uninitStack();
-  void trackBeginInlining(const IRInstruction* inst);
-  void trackEndInlining();
+  void trackEnterInlineFrame(const IRInstruction* inst);
+  void trackLeaveInlineFrame();
   void trackInlineCall(const IRInstruction* inst);
+  void trackInlineSideExit(const IRInstruction* inst);
 
   void pointerLoad(SSATmp*, SSATmp*);
   void pointerStore(SSATmp*, SSATmp*);
@@ -507,13 +525,13 @@ private:
   /*
    * Per-block state helpers.
    */
-  bool save(Block* b, Block* pred = nullptr);
+  bool save(Block* b);
   PostConditions collectPostConds();
 
   /*
    * LocationState update helpers.
    */
-  void setValue(Location l, SSATmp* value);
+  void setValue(Location l, SSATmp* value, bool forLoad = false);
   void setType(Location l, Type type);
   void widenType(Location l, Type type);
   void refineType(Location l, Type type, Optional<TypeSource> typeSrc);
@@ -531,7 +549,13 @@ private:
   /*
    * Local state update helpers.
    */
+  void clearCtx();
   void clearLocals();
+
+  /*
+   * Called when starting a block with unprocessed predecessors.
+   */
+  void clearForUnprocessedPred();
 
   /*
    * MTempBase update helpers.
@@ -558,9 +582,6 @@ private:
   struct BlockState {
     // Mandatory in-state computed from predecessors.
     jit::vector<FrameState> in;
-    // Optionally-saved out-state.  Non-none but empty indicates that out-state
-    // should be saved.
-    Optional<jit::vector<FrameState>> out;
     // Paused state, used by IRBuilder::{push,pop}Block().
     Optional<jit::vector<FrameState>> paused;
   };

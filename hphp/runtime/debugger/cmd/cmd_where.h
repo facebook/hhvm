@@ -32,9 +32,11 @@ struct CmdWhere : DebuggerCommand {
 
   Array fetchStackTrace(DebuggerClient &client); // client side
 
+  std::string name() const override { return "where"; }
+
 protected:
- void sendImpl(DebuggerThriftBuffer& thrift) override;
- void recvImpl(DebuggerThriftBuffer& thrift) override;
+  void sendImpl(DebuggerThriftBuffer& thrift) override;
+  void recvImpl(DebuggerThriftBuffer& thrift) override;
 
 private:
   req::root<Array> m_stacktrace;

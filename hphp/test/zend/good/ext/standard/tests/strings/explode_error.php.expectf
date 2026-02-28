@@ -2,9 +2,9 @@
 
 -- Testing explode() function with no arguments --
 
-Warning: explode() expects at least 2 parameters, 0 given in %s/explode_error.php on line 11
+Warning: explode() expects at least 2 positional parameters, 0 given in %s/explode_error.php on line 11
 
 -- Testing explode() function with more than expected no. of arguments --
 
-Warning: explode() expects at most 3 parameters, 4 given in %s/explode_error.php on line 18
+Warning: explode() expects at most 3 positional parameters, 4 given in %s/explode_error.php on line 18
 ===Done===

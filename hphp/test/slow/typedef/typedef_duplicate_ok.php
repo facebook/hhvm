@@ -20,6 +20,6 @@ type SomethingElse = Something2;
 
 
 <<__EntryPoint>>
-function main_typedef_duplicate_ok() {
+function main_typedef_duplicate_ok() :mixed{
 echo "Yeah\n";
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_enc() {
+function main_enc() :mixed{
 echo scrypt_enc("pleaseletmein", "SodiumChloride", 14, 8, 1) . "\n";
 echo scrypt_enc("password", "toomuchsalt", 14, 8 ,1) . "\n";
 echo scrypt_enc("supersecure", "notthepassword", 14, 8, 1) . "\n";

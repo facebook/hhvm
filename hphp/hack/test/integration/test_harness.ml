@@ -13,7 +13,7 @@ module Tempfile = struct
   let mkdtemp () =
     let tmp_dir = Sys_utils.temp_dir_name in
     let tmp_dir = Path.make tmp_dir in
-    let name = Random_id.(short_string_with_alphabet alphanumeric_alphabet) in
+    let name = Random_id.short_string () in
     let tmp_dir = Path.concat tmp_dir name in
     let () = Unix.mkdir (Path.to_string tmp_dir) 0o740 in
     tmp_dir
@@ -77,7 +77,7 @@ let get_recording_path harness =
         ( Path.make (Str.matched_group 1 logs),
           Path.make (Str.matched_group 2 logs) )
     with
-    | Caml.Not_found ->
+    | Stdlib.Not_found ->
       Printf.eprintf "recorder path or lock file not found\n%!";
       Printf.eprintf "See also server logs: %s\n%!" logs;
       None)

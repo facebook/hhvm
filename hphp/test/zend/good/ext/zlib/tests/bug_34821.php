@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 // test 50 bytes to 50k
-$b = varray[
+$b = vec[
     50,
     500,
     5000,

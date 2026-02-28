@@ -66,10 +66,11 @@ enum class Alignment : uint32_t {
   SmashCall,
   SmashJmp,
   SmashJcc,
+  SmashIntercept,
 };
 
 constexpr auto kNumAlignments =
-  static_cast<size_t>(Alignment::SmashJcc) + 1;
+  static_cast<size_t>(Alignment::SmashIntercept) + 1;
 
 /*
  * Under most architectures, the Alignments can be expressed by stipulating

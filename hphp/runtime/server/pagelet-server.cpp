@@ -25,10 +25,10 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/configs/pageletserver.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -36,7 +36,6 @@
 #include "hphp/util/timer.h"
 
 using std::set;
-using std::deque;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,10 +62,39 @@ PageletTransport::PageletTransport(
     if (key.isString() && !key.toString().empty()) {
       m_requestHeaders[key.toString().data()].push_back(header.data());
     } else {
+      if (Cfg::PageletServer::HeaderCheck == 1) {
+        raise_warning(
+          "Specifying Pagelet headers using \"key: value\" syntax "
+          "is deprecated: %s",
+          header.data()
+        );
+      } else if (Cfg::PageletServer::HeaderCheck == 2) {
+        SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+          "Specifying Pagelet headers using \"key: value\" syntax "
+          "is disabled: {}",
+          header.data()
+        ));
+      }
       int pos = header.find(": ");
       if (pos >= 0) {
         std::string name = header.substr(0, pos).data();
         std::string value = header.substr(pos + 2).data();
+
+        if (Cfg::PageletServer::HeaderCollide > 0 &&
+            headers->exists(String(name))) {
+          auto const msg = folly::sformat(
+            "Detected Pagelet header specified using both \"key: value\" "
+            "and key => \"value\" syntax: {}",
+            name
+          );
+          if (Cfg::PageletServer::HeaderCollide == 3) {
+            SystemLib::throwInvalidArgumentExceptionObject(msg);
+          }
+
+          raise_warning("%s", msg.data());
+          if (Cfg::PageletServer::HeaderCollide == 2) continue;
+        }
+
         m_requestHeaders[name].push_back(value);
       } else {
         Logger::Error("throwing away bad header: %s", header.data());
@@ -83,7 +111,7 @@ PageletTransport::PageletTransport(
 
   disableCompression(); // so we don't have to decompress during sendImpl()
   m_rfc1867UploadedFiles = rfc1867UploadedFiles;
-  m_files = (std::string) f_serialize(files);
+  m_files = (std::string) HHVM_FN(serialize)(files);
 }
 
 const char *PageletTransport::getUrl() {
@@ -357,7 +385,7 @@ struct PageletTask : SweepableResourceData {
 
   PageletTransport *getJob() { return m_job;}
 
-  CLASSNAME_IS("PageletTask");
+  CLASSNAME_IS("PageletTask")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
@@ -371,12 +399,7 @@ IMPLEMENT_RESOURCE_ALLOCATION(PageletTask)
 
 static JobQueueDispatcher<PageletWorker> *s_dispatcher;
 static Mutex s_dispatchMutex;
-static ServiceData::CounterCallback s_counters(
-  [](std::map<std::string, int64_t>& counters) {
-    counters["pagelet_inflight_requests"] = PageletServer::GetActiveWorker();
-    counters["pagelet_queued_requests"] = PageletServer::GetQueuedJobs();
-  }
-);
+static ServiceData::CounterCallback* s_counters;
 
 bool PageletServer::Enabled() {
   return s_dispatcher;
@@ -384,23 +407,31 @@ bool PageletServer::Enabled() {
 
 void PageletServer::Restart() {
   Stop();
-  if (RuntimeOption::PageletServerThreadCount > 0) {
+  if (Cfg::PageletServer::ThreadCount > 0) {
     {
       Lock l(s_dispatchMutex);
       s_dispatcher = new JobQueueDispatcher<PageletWorker>
-        (RuntimeOption::PageletServerThreadCount,
-         RuntimeOption::PageletServerThreadCount,
-         RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds,
-         RuntimeOption::PageletServerThreadDropStack,
+        (Cfg::PageletServer::ThreadCount,
+         Cfg::PageletServer::ThreadCount,
+         Cfg::PageletServer::ThreadDropCacheTimeoutSeconds,
+         Cfg::PageletServer::ThreadDropStack,
          nullptr);
       s_dispatcher->setHugePageConfig(
-        RuntimeOption::PageletServerHugeThreadCount,
-        RuntimeOption::ServerHugeStackKb);
+        Cfg::PageletServer::HugeThreadCount,
+        Cfg::Server::HugeStackSizeKb);
       auto monitor = getSingleton<HostHealthMonitor>();
       monitor->subscribe(s_dispatcher);
     }
     s_dispatcher->start();
     BootStats::mark("pagelet server started");
+    s_counters = new ServiceData::CounterCallback(
+        [](std::map<std::string, int64_t>& counters) {
+          counters["pagelet_inflight_requests"] =
+            PageletServer::GetActiveWorker();
+          counters["pagelet_queued_requests"] =
+            PageletServer::GetQueuedJobs();
+        }
+    );
   }
 }
 
@@ -409,13 +440,15 @@ void PageletServer::Stop() {
     auto monitor = getSingleton<HostHealthMonitor>();
     monitor->unsubscribe(s_dispatcher);
     s_dispatcher->stop();
+    delete s_counters;
+    s_counters = nullptr;
     Lock l(s_dispatchMutex);
     delete s_dispatcher;
     s_dispatcher = nullptr;
   }
 }
 
-Resource PageletServer::TaskStart(
+OptResource PageletServer::TaskStart(
   const String& url, const Array& headers,
   const String& remote_host,
   const String& post_data /* = null_string */,
@@ -432,13 +465,13 @@ Resource PageletServer::TaskStart(
   {
     Lock l(s_dispatchMutex);
     if (!s_dispatcher) {
-      return Resource();
+      return OptResource();
     }
-    if (RuntimeOption::PageletServerQueueLimit > 0) {
+    if (Cfg::PageletServer::QueueLimit > 0) {
       auto num_queued_jobs = s_dispatcher->getQueuedJobs();
-      if (num_queued_jobs > RuntimeOption::PageletServerQueueLimit) {
+      if (num_queued_jobs > Cfg::PageletServer::QueueLimit) {
         pageletOverflowCounter->addValue(1);
-        return Resource();
+        return OptResource();
       }
       if (num_queued_jobs > 0) {
         pageletQueuedCounter->addValue(1);
@@ -460,12 +493,12 @@ Resource PageletServer::TaskStart(
 
     s_dispatcher->enqueue(job);
     g_context->incrPageletTasksStarted();
-    return Resource(std::move(task));
+    return OptResource(std::move(task));
   }
-  return Resource();
+  return OptResource();
 }
 
-int64_t PageletServer::TaskStatus(const Resource& task) {
+int64_t PageletServer::TaskStatus(const OptResource& task) {
   PageletTransport *job = cast<PageletTask>(task)->getJob();
   if (!job->isPipelineEmpty()) {
     return PAGELET_READY;
@@ -476,13 +509,13 @@ int64_t PageletServer::TaskStatus(const Resource& task) {
   return PAGELET_NOT_READY;
 }
 
-String PageletServer::TaskResult(const Resource& task, Array &headers, int &code,
+String PageletServer::TaskResult(const OptResource& task, Array &headers, int &code,
                                  int64_t timeout_ms) {
   auto ptask = cast<PageletTask>(task);
   return ptask->getJob()->getResults(headers, code, timeout_ms);
 }
 
-Array PageletServer::AsyncTaskResult(const Resource& task) {
+Array PageletServer::AsyncTaskResult(const OptResource& task) {
   auto ptask = cast<PageletTask>(task);
   return ptask->getJob()->getAsyncResults(true);
 }

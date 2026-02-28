@@ -10,7 +10,7 @@
   client
   hh_server_monitor
   server
-  server_client_provider
+  client_provider
   server_command_types
   server_env
   test_injector_config)
@@ -28,7 +28,6 @@
   errors
   server_env
   unit_test
-  test_coverage_levels
   test_all_ide))
 
 (executable
@@ -42,7 +41,6 @@
   test_added_parent
   test_capitalization
   test_coeffects
-  test_coverage_counts
   test_decl_decl
   test_delete_file
   test_duplicate_parent
@@ -62,11 +60,36 @@
   test_new_file
   test_property_initializer
   test_property_initializer2
-  test_server_hover
+  test_remove_enum_variant
+  test_remove_method
+  test_ide_hover
   test_serverConfig_overrides
   test_unbound_name
-  test_unbound_name_2)
+  test_unbound_name_2
+  test_unbound_name_3)
  (libraries runner_base))
+
+(executable
+ (name server_progress_tests)
+ (link_flags
+  (:standard
+   (:include ../../src/dune_config/ld-opts.sexp)))
+ (modes
+  exe
+  byte_complete)
+ (modules
+  server_progress_tests)
+ (libraries
+  lwt_utils
+  server_progress_lwt
+  server_progress_test_helpers
+  temp_file
+  test_injector_config
+  unit_test
+  utils_core)
+ (preprocess
+  (pps
+   lwt_ppx)))
 
 (rule
  (targets test_all.exe)
@@ -89,12 +112,6 @@
  (deps test_all.exe)
  (action
   (run ./test_all.exe ignore_fixme_hhi)))
-
-(rule
- (alias coverage_counts)
- (deps test_all.exe)
- (action
-  (run ./test_all.exe coverage_counts)))
 
 (rule
  (alias new_file)
@@ -161,7 +178,7 @@
 ;         "//hphp/hack/src/deps:deps",
 ;         "//hphp/hack/src/errors:errors",
 ;         "//hphp/hack/src/naming:naming",
-;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_env", "//hphp/hack/src/server:server_config",
 ;         "//hphp/hack/src/utils/core:core",
 ;         "//hphp/hack/src/utils:relative_path",
 ;         "//hphp/hack/src/utils/collections:collections",
@@ -181,7 +198,7 @@
 ;         "//hphp/hack/src/options:tc_options",
 ;         "//hphp/hack/src/server:server",
 ;         "//hphp/hack/src/server:server_command_types",
-;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_env", "//hphp/hack/src/server:server_config",
 ;         "//hphp/hack/src/server:server_services",
 ;         "//hphp/hack/src/typing:typing",
 ;         "//hphp/hack/src/typing:typing_ast",
@@ -207,10 +224,10 @@
   (run ./test_all.exe identify)))
 
 (rule
- (alias server_hover)
+ (alias ide_hover)
  (deps test_all.exe)
  (action
-  (run ./test_all.exe server_hover)))
+  (run ./test_all.exe ide_hover)))
 
 (rule
  (alias failed_naming)
@@ -220,7 +237,7 @@
 
 ;         ":integration_test_base",
 ;         "//hphp/hack/src/errors:errors",
-;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_env", "//hphp/hack/src/server:server_config",
 
 (rule
  (alias gconst_file)
@@ -234,7 +251,7 @@
 ;         "//hphp/hack/src/errors:errors",
 ;         "//hphp/hack/src/heap:heap",
 ;         "//hphp/hack/src/options:tc_options",
-;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_env", "//hphp/hack/src/server:server_config",
 ;         "//hphp/hack/src/server:server_services",
 ;         "//hphp/hack/src/typing:typing",
 ;         "//hphp/hack/src/typing:typing_ast",
@@ -249,7 +266,7 @@
 
 ;         ":integration_test_base",
 ;         "//hphp/hack/src/errors:errors",
-;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_env", "//hphp/hack/src/server:server_config",
 
 (rule
  (alias decl_decl)
@@ -260,7 +277,7 @@
 ;         ":integration_test_base",
 ;         "//hphp/hack/src/decl:decl",
 ;         "//hphp/hack/src/errors:errors",
-;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_env", "//hphp/hack/src/server:server_config",
 ;         "//hphp/hack/src/utils/core:core",
 ;         "//hphp/hack/src/utils/collections:collections",
 
@@ -278,7 +295,7 @@
 ;         "//hphp/hack/src/options:global_options",
 ;         "//hphp/hack/src/options:parser_options",
 ;         "//hphp/hack/src/options:tc_options",
-;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_env", "//hphp/hack/src/server:server_config",
 ;         "//hphp/hack/src/server:server_services",
 ;         "//hphp/hack/src/typing:typing_check_service",
 ;         "//hphp/hack/src/utils/core:core",
@@ -302,7 +319,7 @@
 ;         "//hphp/hack/src/options:tc_options",
 ;         "//hphp/hack/src/procs:procs",
 ;         "//hphp/hack/src/server:server",
-;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_env", "//hphp/hack/src/server:server_config",
 ;         "//hphp/hack/src/server:server_services",
 ;         "//hphp/hack/src/typing:typing_check_service",
 ;         "//hphp/hack/src/utils/core:core",
@@ -335,7 +352,6 @@
 (alias
  (name runtest)
  (deps
-  (alias coverage_counts)
   (alias new_file)
   (alias capitalization)
   (alias coeffects)
@@ -348,7 +364,7 @@
   (alias infer_type)
   (alias getfundeps)
   (alias identify)
-  (alias server_hover)
+  (alias ide_hover)
   (alias failed_naming)
   (alias gconst_file)
   (alias unbound_name)

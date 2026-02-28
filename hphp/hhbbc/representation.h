@@ -23,7 +23,7 @@
 #include <utility>
 #include <vector>
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/compact-vector.h"
@@ -40,9 +40,18 @@
 
 #include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/misc.h"
+#include "hphp/hhbbc/options-util.h"
 #include "hphp/hhbbc/src-loc.h"
 
-namespace HPHP::HHBBC::php {
+namespace HPHP {
+namespace HHBBC {
+
+//////////////////////////////////////////////////////////////////////
+
+struct IIndex;
+struct ClassInfo2;
+
+namespace php {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -56,6 +65,8 @@ struct WideFunc;
 struct SrcInfo {
   LineRange loc;
   LSString docComment;
+
+  template <typename SerDe> void serde(SerDe&);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -82,8 +93,7 @@ struct Block {
    * Edges coming out of blocks are repesented in three ways:
    *
    *  - fallthrough edges (the end of the block unconditionally jumps
-   *    to the named block).  If fallthroughNS is true, this edge
-   *    represents a no-surprise jump.
+   *    to the named block).
    *
    *  - throwExit (the edges traversed for exceptions from this block)
    *
@@ -100,12 +110,13 @@ struct Block {
     uint8_t initializer{0};
     struct {
       bool catchEntry: 1;
-      bool fallthroughNS: 1;
       bool multiPred: 1;
       bool multiSucc: 1;
       bool dead: 1;
     };
   };
+
+  template <typename SerDe> void serde(SerDe&);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -129,8 +140,11 @@ struct Block {
  * exists to get the EHEnts right.
  */
 
-struct CatchRegion { BlockId catchEntry;
-                     Id iterId; };
+struct CatchRegion {
+  BlockId catchEntry;
+  Id iterId;
+  template <typename SerDe> void serde(SerDe&);
+};
 
 struct ExnNode {
   ExnNodeId idx;
@@ -138,6 +152,7 @@ struct ExnNode {
   CompactVector<ExnNodeId> children;
   ExnNodeId parent;
   CatchRegion region;
+  template <typename SerDe> void serde(SerDe&);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -160,20 +175,18 @@ struct Param {
   BlockId dvEntryPoint;
 
   /*
-   * Information about the parameter's typehint, if any.
-   *
-   * NOTE: this is represented in the repo as a string type name and
-   * some TypeConstraint::Flags.
-   */
-  TypeConstraint typeConstraint;
-
-  /*
    * User-visible version of the type constraint as a string.
    * Propagated for reflection.
    */
   LSString userTypeConstraint;
 
-  CompactVector<TypeConstraint> upperBounds;
+  /*
+   * Information about the parameter's typehint and upperbounds, if any.
+   *
+   * NOTE: this is represented in the repo as a string type name and
+   * some TypeConstraint::Flags.
+   */
+  TypeIntersectionConstraint typeConstraints;
 
   /*
    * Each parameter of a func can have arbitrary user attributes.
@@ -188,16 +201,14 @@ struct Param {
   LSString phpCode;
 
   /*
-   * The type of the arguments for builtin functions, or for HNI
-   * functions with a native implementation.  std::nullopt for
-   * non-builtins.
-   */
-  Optional<DataType> builtinType;
-
-  /*
    * Whether this parameter is passed as inout.
    */
   bool inout: 1;
+
+  /*
+   * Whether this inout parameter is out-only.
+   */
+  bool outOnly: 1;
 
   /*
    * Whether this parameter is passed as readonly.
@@ -208,6 +219,18 @@ struct Param {
    * Whether this parameter is a variadic capture.
    */
   bool isVariadic: 1;
+
+  /*
+   * Whether this parameter is optional in an abstract method
+   */
+  bool isOptional: 1;
+
+  /*
+   * Whether this parameter is named.
+   */
+  bool isNamed: 1;
+
+  template <typename SerDe> void serde(SerDe&);
 };
 
 /*
@@ -220,20 +243,14 @@ struct Local {
   uint32_t killed     : 1;
   uint32_t nameId     : 31;
   uint32_t unusedName : 1;
-};
 
-/*
- * Extra information for function with a HNI native implementation.
- */
-struct NativeInfo {
-  /*
-   * Return type from the C++ implementation function, as an optional DataType;
-   * std::nullopt stands for a Variant return.
-   */
-  Optional<DataType> returnType;
+  template <typename SerDe> void serde(SerDe&);
 };
 
 using BlockVec = CompactVector<copy_ptr<Block>>;
+
+using CompressedBytecode = CompactVector<char>;
+using CompressedBytecodePtr = copy_ptr<CompactVector<char>>;
 
 /*
  * Separate out the fields that need special attention when copying,
@@ -256,13 +273,10 @@ struct FuncBase {
   CompactVector<ExnNode> exnNodes;
 
   /*
-   * For HNI-based extensions, additional information for functions
-   * with a native-implementation is here.  If this isn't a function
-   * with an HNI-based native implementation, this will be nullptr.
+   * Does this function have a native (C++) implementation?
    */
-  std::unique_ptr<NativeInfo> nativeInfo;
+  bool isNative;
 
-private:
   /*
    * All owning pointers to blocks are in this vector, which has the
    * blocks in an unspecified order.  Blocks use BlockIds to represent
@@ -270,25 +284,40 @@ private:
    *
    * Use WideFunc to access this data.
    */
-  copy_ptr<CompactVector<char>> rawBlocks;
-
-  friend struct WideFunc;
+  CompressedBytecodePtr rawBlocks;
 };
 
 /*
- * Representation of a function, class method, or pseudomain function.
+ * Representation of a function or class method.
  */
 struct Func : FuncBase {
   /*
-   * An index, so we can lookup auxiliary structures efficiently
+  * An index, so we can lookup auxiliary structures efficiently. This
+  * field is not serialized and its meaning is context dependent.
+  */
+  uint32_t idx{std::numeric_limits<uint32_t>::max()};
+
+  /*
+   * If this function is a method, it's index in the owning Class'
+   * methods table (2^32-1 otherwise so that misuse will tend to cause
+   * crashes).
    */
-  uint32_t idx;
+  uint32_t clsIdx{std::numeric_limits<uint32_t>::max()};
 
   /*
    * Basic information about the function.
    */
   LSString name;
   SrcInfo srcInfo;
+
+  /*
+   * If hhbbc flattens a trait, we keep the original filename of the file
+   * that defined the trait in originalUnit to get to the srcLocs. This
+   * ensures that backtraces and whatnot work correctly. Otherwise this is
+   * nullptr. This field lives above `attrs` for alignment reasons.
+   */
+  LSString originalUnit{};
+
   Attr attrs;
 
   /*
@@ -300,12 +329,11 @@ struct Func : FuncBase {
   CompactVector<Param> params;
   CompactVector<Local> locals;
 
-
   /*
    * Which unit defined this function.  If it is a method, the cls
    * field will be set to the class that contains it.
    */
-  Unit* unit;
+  LSString unit;
   Class* cls;
 
   /*
@@ -335,23 +363,21 @@ struct Func : FuncBase {
   LSString returnUserType;
 
   /*
-   * If traits are being flattened by hphpc, we keep the original
-   * filename of a function (the file that defined the trait) so
-   * backtraces and things work correctly.  Otherwise this is nullptr.
-   * Similarly, if hhbbc did the flattening itself, we need the original
-   * unit, to get to the srcLocs. Once we stop flattening in hphpc, we can
-   * drop the originalFilename.
+   * The reference of the trait where the method was originally
+   * defined.  This is used to detected if a method is imported
+   * multiple times via different use-chains as the pair (name,
+   * originalClass) uniquely identifies a method. If nullptr, the
+   * "original" class is just the function's class.
    */
-  LSString originalFilename;
-  Unit* originalUnit{};
+  LSString originalClass{};
 
   /*
-   * The refernece of the trait where the method was originally defined.
-   * This is used to detected if a method is imported multiple
-   * times via different use-chains as the pair (name, originalClass)
-   * uniquely identifies a method.
+   * The module where the method was initially defined, irrespective
+   * of trait inlining.  If the requiresFromOriginalModule flag is set
+   * then this field is exported to HHVM to implement the
+   * Module Level Trait semantics.
    */
-  Class* originalClass;
+  LSString originalModuleName{};
 
   /*
    * This is the generated function for a closure body.  I.e. this
@@ -398,18 +424,26 @@ struct Func : FuncBase {
   bool isReadonlyThis : 1;
 
   /*
-   * Type parameter upper bounds. May be enforced and used for optimizations.
+   * Method was originally declared in a trait with Module Level Trait semantics
+   * (e.g. the <<__ModuleLevelTrait>> attribute was specified on the original trait).
    */
-  bool hasParamsWithMultiUBs : 1;
-  bool hasReturnWithMultiUBs : 1;
-  CompactVector<TypeConstraint> returnUBs;
+  bool fromModuleLevelTrait : 1;
+  bool requiresFromOriginalModule : 1;
+
+  bool hasNamedParams : 1;
 
   /*
    * Return type specified in the source code (ex. "function foo(): Bar").
    * HHVM checks if the a function's return value matches it's return type
-   * constraint via the VerifyRetType* instructions.
+   * constraint via the VerifyRetType* instructions. This field also includes
+   * any upperbounds computed for the return type.
    */
-  TypeConstraint retTypeConstraint;
+  TypeIntersectionConstraint retTypeConstraints;
+
+  /*
+   * Contains the names of type params defined for this method or function
+   */
+  CompactVector<PackedStringPtr> typeParamNames;
 
   /*
    * Static coeffects in bit encoding
@@ -420,7 +454,7 @@ struct Func : FuncBase {
   /*
    * Lists of all static coeffect names and coeffect rules
    */
-  CompactVector<LowStringPtr> staticCoeffects;
+  CompactVector<PackedStringPtr> staticCoeffects;
   CompactVector<CoeffectRule> coeffectRules;
 
   /*
@@ -428,6 +462,36 @@ struct Func : FuncBase {
    */
   UserAttributeMap userAttributes;
 
+  template <typename SerDe> void serde(SerDe&, Class* c = nullptr);
+};
+
+/*
+ * Bytecode for a function (global function or class method). While
+ * using extern-worker, this is stored separately and not within
+ * php::Func.
+ */
+struct FuncBytecode {
+  FuncBytecode() = default;
+  FuncBytecode(SString name, CompressedBytecodePtr bc)
+    : name{name}, bc{std::move(bc)} {}
+
+  LSString name;
+  CompressedBytecodePtr bc;
+
+  /*
+   * Bytecode is stored using copy_ptr, which allows multiple
+   * functions to share the same bytecode if they're the same. This
+   * gets lost if we serde the function, which can lead to increased
+   * memory pressure.
+   *
+   * If s_reuser is non-nullptr during deserializing, it will be used
+   * to try to find similar bytecode and reuse it, restoring the
+   * sharing of copy_ptr (and maybe more).
+   */
+  using Reuser = folly_concurrent_hash_map_simd<SHA1, CompressedBytecodePtr>;
+  static Reuser* s_reuser;
+
+  template <typename SerDe> void serde(SerDe&);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -444,8 +508,7 @@ struct Prop {
   LSString docComment;
 
   LSString userType;
-  TypeConstraint typeConstraint;
-  CompactVector<TypeConstraint> ubs;
+  TypeIntersectionConstraint typeConstraints;
 
   /*
    * The default value of the property, for properties with scalar
@@ -453,6 +516,8 @@ struct Prop {
    * property should not have an initial value (i.e. not even null).
    */
   TypedValue val;
+
+  template <typename SerDe> void serde(SerDe&);
 };
 
 /*
@@ -462,7 +527,7 @@ struct Const {
   LSString name;
 
   // The class that defined this constant.
-  php::Class* cls;
+  LSString cls;
 
   /*
    * The value will be KindOfUninit if the class constant is defined
@@ -471,16 +536,29 @@ struct Const {
    */
   Optional<TypedValue> val;
 
-  std::vector<LowStringPtr> coeffects;
+  std::vector<PackedStringPtr> coeffects;
 
   SArray resolvedTypeStructure;
 
-  ConstModifiers::Kind kind;
+  ConstModifierFlags::Kind kind;
 
   using Invariance = PreClass::Const::Invariance;
   Invariance invariance : 2;
   bool isAbstract   : 1;
   bool isFromTrait  : 1;
+  /*
+   * Whether resolvedTypeStructure incorporates context sensitive
+   * types. If true, the resolvedTypeStructure cannot be safely used
+   * by classes other than the one which defined it.
+   */
+  bool contextInsensitive : 1;
+  /*
+   * Whether resolvedTypeStructure was determined in the current
+   * worker.
+   */
+  bool resolvedLocally : 1 = false;
+
+  template <typename SerDe> void serde(SerDe&);
 };
 
 /*
@@ -497,6 +575,11 @@ struct ClassBase {
    * Methods on the class. If there's an 86cinit, it must be last.
    */
   CompactVector<std::unique_ptr<php::Func>> methods;
+
+  /*
+   * Closures declared by this class.
+   */
+  CompactVector<std::unique_ptr<php::Class>> closures;
 };
 
 /*
@@ -511,14 +594,20 @@ struct Class : ClassBase {
   Attr attrs;
 
   /*
-   * The id used to reference the class within its unit
+   * Pointer to the Class' associated ClassInfo2 (if any). Must be set
+   * manually.
    */
-  int32_t id;
+  ClassInfo2* cinfo{nullptr};
 
   /*
    * Which unit defined this class.
    */
-  Unit* unit;
+  LSString unit;
+
+  /*
+   * Which module this class was defined in.
+   */
+  LSString moduleName;
 
   /*
    * Name of the parent class.
@@ -526,25 +615,33 @@ struct Class : ClassBase {
   LSString parentName;
 
   /*
-   * If this class represents a closure, this points to the class that
-   * lexically contains the closure, if there was one.  If this class
-   * doesn't represent a closure, this will be nullptr.
+   * If this class represents a closure, this points to the name of
+   * the class that lexically contains the closure, if there was one.
+   * If this class doesn't represent a closure, this will be nullptr.
    *
    * The significance of this is that closures created lexically
    * inside of a class run as if they were part of that class context
    * (with regard to access checks, etc).
    */
-  php::Class* closureContextCls;
+  LSString closureContextCls;
+
+  /*
+   * If this class represents a closure defined in a top level
+   * function (not a method), this points to the name of that
+   * function. Nullptr otherwise. (For closures defined within
+   * classes, use closureContextCls).
+   */
+  LSString closureDeclFunc;
 
   /*
    * Names of inherited interfaces.
    */
-  CompactVector<LowStringPtr> interfaceNames;
+  CompactVector<PackedStringPtr> interfaceNames;
 
   /*
    * Names of included enums.
    */
-  CompactVector<LowStringPtr> includedEnumNames;
+  CompactVector<PackedStringPtr> includedEnumNames;
 
   /*
    * Names of used traits, number of declared (i.e., non-trait, non-inherited)
@@ -554,10 +651,8 @@ struct Class : ClassBase {
    * WholeProgram mode, we won't see these because traits will already be
    * flattened.
    */
-  CompactVector<LowStringPtr> usedTraitNames;
+  CompactVector<PackedStringPtr> usedTraitNames;
   CompactVector<PreClass::ClassRequirement> requirements;
-  CompactVector<PreClass::TraitPrecRule> traitPrecRules;
-  CompactVector<PreClass::TraitAliasRule> traitAliasRules;
 
   /*
    * Properties defined on this class.
@@ -567,7 +662,7 @@ struct Class : ClassBase {
   /*
    * Constants defined on this class.
    */
-  CompactVector<Const> constants;
+  std::deque<Const> constants;
 
   /*
    * User attributes for this class declaration.
@@ -580,46 +675,74 @@ struct Class : ClassBase {
   TypeConstraint enumBaseTy;
 
   /*
+   * Contains the names of type params defined for this class
+   */
+  CompactVector<PackedStringPtr> typeParamNames;
+
+  /*
    * This is a reified class.
    */
   bool hasReifiedGenerics : 1;
+
   /*
    * This class has at least one const instance property.
    */
   bool hasConstProp : 1;
+
   /*
    * Dynamic construction of this class can yield at most a warning and is
    * sampled at a user defined rate.
    */
   bool sampleDynamicConstruct : 1;
+
+  template <typename SerDe> void serde(SerDe&);
+};
+
+struct ClassBytecode {
+  ClassBytecode() = default;
+  explicit ClassBytecode(SString cls) : cls{cls} {}
+  SString cls;
+  // This stores both the class' bytecode and the bytecode for any
+  // closures declared in the class. The bytecode for the methods is
+  // provided first, and the remaining bytecode is for each closure's
+  // __invoke method (in closure vec order).
+  CompactVector<FuncBytecode> methodBCs;
+  template <typename SerDe> void serde(SerDe&);
 };
 
 struct Constant {
-  Unit* unit;
   LSString name;
   TypedValue val;
   Attr attrs;
+
+  template <typename SerDe> void serde(SerDe&);
 };
 
 struct Module {
-  Unit* unit;
   LSString name;
   SrcInfo srcInfo;
   Attr attrs;
   UserAttributeMap userAttributes;
+
+  template <typename SerDe> void serde(SerDe&);
 };
 
 struct TypeAlias {
-  Unit* unit;
   SrcInfo srcInfo;
   LSString name;
-  LSString value;
   Attr attrs;
-  AnnotType type;
-  bool nullable;  // null is allowed; for ?Foo aliases
+  TypeConstraint value;
+  AliasKind kind;
   UserAttributeMap userAttrs;
-  Array typeStructure{ArrayData::CreateDict()};
-  Array resolvedTypeStructure;
+  SArray typeStructure{nullptr};
+  SArray resolvedTypeStructure{nullptr};
+  /*
+   * Whether resolvedTypeStructure was determined in the current
+   * worker.
+   */
+  bool resolvedLocally{false};
+
+  template <typename SerDe> void serde(SerDe&);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -628,38 +751,43 @@ struct TypeAlias {
  * Information regarding a runtime/parse error in a unit
  */
 struct FatalInfo {
-  Location::Range fatalLoc;
+  // If fatalLoc is missing, this represents a verifier failure
+  Optional<Location::Range> fatalLoc;
   FatalOp fatalOp;
   std::string fatalMsg;
+
+  template <typename SerDe> void serde(SerDe& sd);
 };
 
 /*
  * Representation of a php file (normal compilation unit).
  */
 struct Unit {
-  int64_t sn{-1};
-  SHA1 sha1;
-  LSString filename;
+  LSString filename{nullptr};
   std::unique_ptr<FatalInfo> fatalInfo{nullptr};
-  CompactVector<std::unique_ptr<Func>> funcs;
-  CompactVector<std::unique_ptr<Class>> classes;
+  CompactVector<SString> funcs;
+  CompactVector<SString> classes;
   CompactVector<std::unique_ptr<TypeAlias>> typeAliases;
   CompactVector<std::unique_ptr<Constant>> constants;
   CompactVector<std::unique_ptr<Module>> modules;
   CompactVector<SrcLoc> srcLocs;
   UserAttributeMap metaData;
   UserAttributeMap fileAttributes;
-  LSString moduleName;
+  LSString moduleName{nullptr};
+  LSString extName{nullptr};
+  PackageInfo packageInfo;
+  bool softDeployed{false};
+
+  template <typename SerDe> void serde(SerDe& sd);
 };
 
 /*
  * A php Program is a set of compilation units.
  */
 struct Program {
-  std::mutex lock;
-  std::atomic<uint32_t> nextFuncId{};
+  std::vector<std::unique_ptr<Func>> funcs;
+  std::vector<std::unique_ptr<Class>> classes;
   std::vector<std::unique_ptr<Unit>> units;
-  std::vector<php::Func*> constInits;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -668,20 +796,138 @@ std::string show(const Func&);
 std::string show(const Func&, const Block&);
 std::string show(const Func&, const Bytecode& bc);
 std::string show(const Class&);
-std::string show(const Unit&);
-std::string show(const Program&);
+std::string show(const Unit&,
+                 const std::vector<const Class*>&,
+                 const std::vector<const Func*>&);
+std::string show(const Unit&, const IIndex&);
+std::string show(const Unit&, const Program&);
+std::string show(const Program&, const IIndex&);
 std::string local_string(const Func&, LocalId);
-
-inline std::string show(const Func* f, const Bytecode& bc) {
-  return show(*f, bc);
-}
 
 //////////////////////////////////////////////////////////////////////
 
 bool check(const Func&);
-bool check(const Class&);
-bool check(const Unit&);
+bool check(const Class&, bool checkMeths = true);
+bool check(const Unit&, const IIndex&);
 bool check(const Program&);
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+struct FuncClsUnit {
+  FuncClsUnit() : tagged{Tag::Func, nullptr} {}
+  /* implicit */ FuncClsUnit(const php::Func* f) : tagged{Tag::Func, f} {}
+  /* implicit */ FuncClsUnit(const php::Class* c) : tagged{Tag::Class, c} {}
+  /* implicit */ FuncClsUnit(const php::Unit* u) : tagged{Tag::Unit, u} {}
+  /* implicit */ FuncClsUnit(std::nullptr_t) : tagged{Tag::Func, nullptr} {}
+
+  operator bool() const { return (bool)tagged.ptr(); }
+
+  const php::Func* func() const {
+    return tagged.tag() == Tag::Func
+      ? (const php::Func*)tagged.ptr()
+      : nullptr;
+  }
+  const php::Class* cls() const {
+    return tagged.tag() == Tag::Class
+      ? (const php::Class*)tagged.ptr()
+      : nullptr;
+  }
+  const php::Unit* unit() const {
+    return tagged.tag() == Tag::Unit
+      ? (const php::Unit*)tagged.ptr()
+      : nullptr;
+  }
+
+  php::Func* func() {
+    return tagged.tag() == Tag::Func
+      ? (php::Func*)tagged.ptr()
+      : nullptr;
+  }
+  php::Class* cls() {
+    return tagged.tag() == Tag::Class
+      ? (php::Class*)tagged.ptr()
+      : nullptr;
+  }
+  php::Unit* unit() {
+    return tagged.tag() == Tag::Unit
+      ? (php::Unit*)tagged.ptr()
+      : nullptr;
+  }
+
+  size_t hash() const { return pointer_hash<const void>{}(tagged.ptr()); }
+
+  bool operator==(FuncClsUnit o) const {
+    // The same pointer will never have different tags, so this is
+    // sufficient.
+    return tagged.ptr() == o.tagged.ptr();
+  }
+  bool operator!=(FuncClsUnit o) const { return !(*this == o); }
+
+  // Less than operator, but guaranteed to be stable across different
+  // machines.
+  bool stableLT(FuncClsUnit o) const {
+    if (*this == o) return false;
+    auto const t1 = tagged.tag();
+    auto const t2 = o.tagged.tag();
+    if (t1 != t2) return t1 < t2;
+    switch (t1) {
+      case Tag::Func: {
+        auto const f1 = (const php::Func*)tagged.ptr();
+        auto const f2 = (const php::Func*)o.tagged.ptr();
+        if (!f1) return false;
+        if (!f2) return true;
+        return string_data_lt_func{}(f1->name, f2->name);
+      }
+      case Tag::Class: {
+        auto const c1 = (const php::Class*)tagged.ptr();
+        auto const c2 = (const php::Class*)o.tagged.ptr();
+        if (!c1) return false;
+        if (!c2) return true;
+        return string_data_lt_type{}(c1->name, c2->name);
+      }
+      case Tag::Unit: {
+        auto const u1 = (const php::Unit*)tagged.ptr();
+        auto const u2 = (const php::Unit*)o.tagged.ptr();
+        if (!u1) return false;
+        if (!u2) return true;
+        return string_data_lt{}(u1->filename, u2->filename);
+      }
+    }
+  }
+
+  int traceBump() const {
+    if constexpr (!Trace::enabled) return 0;
+    if (auto const c = cls()) {
+      return trace_bump_for(c, nullptr);
+    } else if (auto const f = func()) {
+      return trace_bump_for(nullptr, f);
+    } else if (auto const u = unit()) {
+      return trace_bump_for(nullptr, nullptr, u);
+    } else {
+      return 0;
+    }
+  }
+
+private:
+  enum class Tag : uint8_t {
+    Func,
+    Class,
+    Unit
+  };
+  CompactTaggedPtr<const void, Tag> tagged;
+};
+
+struct FuncClsUnitHasher {
+  size_t operator()(FuncClsUnit f) const { return f.hash(); }
+};
+
+std::string show(FuncClsUnit);
+
+}
 
 //////////////////////////////////////////////////////////////////////
 

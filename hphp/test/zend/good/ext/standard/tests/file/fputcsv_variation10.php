@@ -14,14 +14,14 @@ echo "*** Testing fputcsv() : with no CSV format in the field ***\n";
    and 3rd element is csv fields
 */
 
-$fields = varray[ varray['water_fruit\n'],
-                varray["water_fruit\n"],
-                varray[""]
+$fields = vec[ vec['water_fruit\n'],
+                vec["water_fruit\n"],
+                vec[""]
          ];
 
-$filename = __SystemLib\hphp_test_tmppath('fputcsv_variation10.tmp');
+$filename = sys_get_temp_dir().'/'.'fputcsv_variation10.tmp';
 
-$file_modes = varray ["r+", "r+b", "r+t",
+$file_modes = vec["r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
                      "x+", "x+b", "x+t"]; 

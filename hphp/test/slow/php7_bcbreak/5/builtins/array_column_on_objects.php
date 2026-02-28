@@ -11,8 +11,8 @@ class User
 
 
 <<__EntryPoint>>
-function main_array_column_on_objects() {
-$users = varray[
+function main_array_column_on_objects() :mixed{
+$users = vec[
     new User('user 1'),
     new User('user 2'),
     new User('user 3'),

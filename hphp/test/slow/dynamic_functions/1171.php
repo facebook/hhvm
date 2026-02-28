@@ -1,11 +1,11 @@
 <?hh
 <<__DynamicallyCallable>>
-function test() {
- print 'ok';
+function test() :mixed{
+  print 'ok';
 }
 
  <<__EntryPoint>>
-function main_1171() {
-$a = 'Test';
- $a();
+function main_1171() :mixed{
+  $a = 'test';
+  HH\dynamic_fun($a)();
 }

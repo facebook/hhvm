@@ -1,26 +1,26 @@
 <?hh
-function brackets($x, $k) {
+function brackets($x, $k) :mixed{
   try {
     var_dump($x[$k]);
   } catch (Exception $e) {
     echo $e->getMessage(), "\n";
   }
 }
-function do_isset($x, $k) {
+function do_isset($x, $k) :mixed{
   try {
     var_dump(isset($x[$k]));
   } catch (Exception $e) {
     echo $e->getMessage(), "\n";
   }
 }
-function do_empty($x, $k) {
+function do_empty($x, $k) :mixed{
   try {
     var_dump(!($x[$k] ?? false));
   } catch (Exception $e) {
     echo $e->getMessage(), "\n";
   }
 }
-function main() {
+function main() :mixed{
   $x = Set {5, 'a', 0, ''};
   $y = ImmSet {5, 'a', 0, ''};
   var_dump($x[5], $x['a'], $x[0], $x['']);
@@ -61,6 +61,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_set_brackets_at_get() {
+function main_set_brackets_at_get() :mixed{
 main();
 }

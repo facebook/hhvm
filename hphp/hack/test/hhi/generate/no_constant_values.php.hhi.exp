@@ -1,0 +1,18 @@
+<?hh
+// @generated from implementation
+
+<<file:__EnableUnstableFeatures('class_const_default')>>
+
+namespace GeneratedHHITest;
+
+/** Top level constant doc block */
+const int FOO , BAR ;
+
+abstract class Baz {
+  /** Class constant doc block */
+  const string QUX ;
+
+  /** Abstract class constant doc block */
+  abstract const bool YES ;
+}
+

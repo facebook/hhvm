@@ -47,7 +47,10 @@ enum class AnnotMetaType : uint8_t {
   NoReturn = 9,
   Nothing = 10,
   Classname = 11,
-  Unresolved = 12,
+  SubObject = 12,
+  Unresolved = 13,
+  Class = 14,
+  ClassOrClassname = 15,
 };
 
 enum class AnnotType : uint16_t {
@@ -73,8 +76,105 @@ enum class AnnotType : uint16_t {
   NoReturn   = (uint16_t)AnnotMetaType::NoReturn << 8   | (uint8_t)KindOfUninit,
   Nothing    = (uint16_t)AnnotMetaType::Nothing << 8    | (uint8_t)KindOfUninit,
   Classname  = (uint16_t)AnnotMetaType::Classname << 8  | (uint8_t)KindOfUninit,
+  SubObject  = (uint16_t)AnnotMetaType::SubObject << 8  | (uint8_t)KindOfUninit,
   Unresolved = (uint16_t)AnnotMetaType::Unresolved << 8 | (uint8_t)KindOfUninit,
+  Class      = (uint16_t)AnnotMetaType::Class << 8      | (uint8_t)KindOfUninit,
+  ClassOrClassname = (uint16_t)AnnotMetaType::ClassOrClassname << 8
+                                                        | (uint8_t)KindOfUninit,
 };
+
+constexpr const char* kAnnotTypeVarrayStr = "HH\\varray";
+constexpr const char* kAnnotTypeDarrayStr = "HH\\darray";
+constexpr const char* kAnnotTypeVarrayOrDarrayStr = "HH\\varray_or_darray";
+
+constexpr const char* annotNullableTypeName(AnnotType ty) {
+  switch (ty) {
+    case AnnotType::ArrayKey: return "?HH\\arraykey";
+    case AnnotType::ArrayLike: return "?HH\\AnyArray";
+    case AnnotType::Bool: return "?HH\\bool";
+    case AnnotType::Callable: return "?callable";
+    case AnnotType::Class: return "?HH\\class";
+    case AnnotType::Classname: return "?HH\\classname";
+    case AnnotType::ClassOrClassname: return "?HH\\class_or_classname";
+    case AnnotType::Dict: return "?HH\\dict";
+    case AnnotType::Float: return "?HH\\float";
+    case AnnotType::Int: return "?HH\\int";
+    case AnnotType::Keyset: return "?HH\\keyset";
+    case AnnotType::Mixed: return "?HH\\mixed";
+    case AnnotType::NoReturn: return "?HH\\noreturn";
+    case AnnotType::Nonnull: return "?HH\\nonnull";
+    case AnnotType::Nothing: return "?HH\\nothing";
+    case AnnotType::Null: return "?HH\\null";
+    case AnnotType::Number: return "?HH\\num";
+    case AnnotType::Object: return "?HH\\object";
+    case AnnotType::Resource: return "?HH\\resource";
+    case AnnotType::String: return "?HH\\string";
+    case AnnotType::SubObject: not_implemented();
+    case AnnotType::This: return "?HH\\this";
+    case AnnotType::Unresolved: not_implemented();
+    case AnnotType::Vec: return "?HH\\vec";
+    case AnnotType::VecOrDict: return "?HH\\vec_or_dict";
+  }
+}
+
+// Encodes possible default values for a given AnnotType.
+enum class AnnotTypeDefault : uint8_t {
+  None                 = 0b00000000,
+  Null                 = 0b00000001,
+  ZeroInt              = 0b00000010,
+  False                = 0b00000100,
+  ZeroDouble           = 0b00001000,
+  EmptyString          = 0b00010000,
+  EmptyVec             = 0b00100000,
+  EmptyDict            = 0b01000000,
+  EmptyKeyset          = 0b10000000,
+  // The following are simply unions of the above, defined for convenience
+  AnyNonNull           = 0b11111110,
+  Any                  = 0b11111111,
+  ZeroNumber           = 0b00001010,
+  ZeroIntOrEmptyString = 0b00010010,
+  EmptyArray           = 0b11100000,
+  EmptyVecOrDict       = 0b01100000
+};
+
+constexpr AnnotTypeDefault operator&(AnnotTypeDefault a, AnnotTypeDefault b) {
+  return AnnotTypeDefault(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
+}
+
+constexpr AnnotTypeDefault operator|(AnnotTypeDefault a, AnnotTypeDefault b) {
+  return AnnotTypeDefault(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
+}
+
+constexpr AnnotTypeDefault operator~(AnnotTypeDefault a) {
+  return AnnotTypeDefault(~static_cast<uint8_t>(a));
+}
+
+constexpr bool has_flag(AnnotTypeDefault flags, AnnotTypeDefault flag) {
+  return (flags & flag) != AnnotTypeDefault::None;
+}
+
+static_assert(AnnotTypeDefault::ZeroNumber
+  == (AnnotTypeDefault::ZeroInt | AnnotTypeDefault::ZeroDouble));
+static_assert(uint8_t(AnnotTypeDefault::Any) == 0xFF);
+static_assert(uint8_t(AnnotTypeDefault::AnyNonNull)
+    == uint8_t(AnnotTypeDefault::Any & ~AnnotTypeDefault::Null));
+static_assert(AnnotTypeDefault::EmptyArray
+  == (AnnotTypeDefault::EmptyVec
+     | AnnotTypeDefault::EmptyDict
+     | AnnotTypeDefault::EmptyKeyset)
+);
+static_assert(AnnotTypeDefault::ZeroIntOrEmptyString
+  == (AnnotTypeDefault::EmptyString | AnnotTypeDefault::ZeroInt)
+);
+static_assert(AnnotTypeDefault::EmptyVecOrDict
+  == (AnnotTypeDefault::EmptyVec | AnnotTypeDefault::EmptyDict)
+);
+
+constexpr const char* annotTypeName(AnnotType ty) {
+  const char* name = annotNullableTypeName(ty);
+  assertx(*name == '?');
+  return name + 1;
+}
 
 inline AnnotMetaType getAnnotMetaType(AnnotType at) {
   return (AnnotMetaType)((uint16_t)at >> 8);
@@ -90,10 +190,11 @@ inline AnnotType enumDataTypeToAnnotType(DataType dt) {
   return (AnnotType)((uint8_t)dt | (uint16_t)AnnotMetaType::Precise << 8);
 }
 
+// This is the "user name" of the AnnotType. It has no direct relation to
+// nameToAnnotType().
+const char* annotName(AnnotType);
+
 const AnnotType* nameToAnnotType(const StringData* typeName);
-const AnnotType* nameToAnnotType(const std::string& typeName);
-MaybeDataType nameToMaybeDataType(const StringData* typeName);
-MaybeDataType nameToMaybeDataType(const std::string& typeName);
 
 bool interface_supports_non_objects(const StringData* s);
 bool interface_supports_int(const StringData* s);
@@ -109,6 +210,21 @@ bool interface_supports_arrlike(folly::StringPiece s);
 
 TypedValue annotDefaultValue(AnnotType at);
 
+inline bool enumSupportsAnnot(AnnotType at) {
+  return
+    at == AnnotType::String ||
+    at == AnnotType::Int ||
+    at == AnnotType::ArrayKey ||
+    at == AnnotType::Classname;
+}
+
+inline bool propSupportsAnnot(AnnotType at) {
+  return
+    at != AnnotType::Callable &&
+    at != AnnotType::Nothing &&
+    at != AnnotType::NoReturn;
+}
+
 enum class AnnotAction {
   Pass,
   Fail,
@@ -116,16 +232,17 @@ enum class AnnotAction {
   FallbackCoerce,
   ObjectCheck,
   CallableCheck,
-  WarnClass,
-  ConvertClass,
-  WarnLazyClass,
-  ConvertLazyClass,
+  WarnClassToString,
+  ConvertClassToString,
+  WarnLazyClassToString,
+  ConvertLazyClassToString,
   WarnClassname,
+  WarnClass,
 };
 
 /*
  * annotCompat() takes a DataType (`dt') and tries to determine if a value
- * with DataType `dt' could be compatiable with a given AnnotType (`at')
+ * with DataType `dt' could be compatible with a given AnnotType (`at')
  * and class name (`annotClsName').  Note that this function does not have
  * access to the actual value, nor does it do any run time resolution on
  * the annotation's class name.  Here are the possible values that can be
@@ -157,10 +274,18 @@ enum class AnnotAction {
  * The caller needs to perform more checks to determine whether or not a
  * value with the KindOfObject DataType is compatible with the annotation.
  *
- * WarnClassname: 'at' is classname and 'dt' is either a Class or LazyClass
- * and RuntimeOption::ClassnameNotices is on. The 'dt' is compatible with 'at'
- * but raises a notice at runtime.
+ * (Warn|Convert)(Lazy|)ClassToString: 'at' is string, arraykey, Stringish,
+ * or XHPChild and 'dt' is a Class or LazyClass.
+ * When Cfg::Eval::ClassStringHintNoticesSampleRate > 0, a notice is raised
+ * before converison.
  *
+ * WarnClassname: 'at' is classname and 'dt' is either a Class or LazyClass
+ * and Cfg::Eval::ClassnameNoticesSampleRate is on. The 'dt' is compatible
+ * with 'at' but raises a notice at runtime.
+ *
+ * WarnClass: 'at' is class and 'dt' is a String and
+ * Cfg::Eval::ClassNoticesSampleRate is on. The 'dt' is compatible with 'at'
+ * but raises a notice at runtime.
  */
 AnnotAction
 annotCompat(DataType dt, AnnotType at, const StringData* annotClsName);

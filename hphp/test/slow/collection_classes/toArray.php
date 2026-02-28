@@ -1,5 +1,5 @@
 <?hh
-function foo() {
+function foo() :mixed{
   $x = Vector {1, 2};
   $y = $x->immutable();
   $a = $x->toVArray();
@@ -12,6 +12,6 @@ function foo() {
 }
 
 <<__EntryPoint>>
-function main_to_array() {
+function main_to_array() :mixed{
 foo();
 }

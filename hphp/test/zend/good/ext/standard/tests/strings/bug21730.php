@@ -9,6 +9,6 @@ list($res_a0, $res_a1, $res_a2) = sscanf($foo, $fmt);
 
 $res_b = sscanf($foo, $fmt);
 
-var_dump(varray[$res_a0, $res_a1, $res_a2]);
+var_dump(vec[$res_a0, $res_a1, $res_a2]);
 var_dump($res_b);
 }

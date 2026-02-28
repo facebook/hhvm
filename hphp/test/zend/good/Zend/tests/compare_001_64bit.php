@@ -3,15 +3,15 @@
 class test {
 }
 
-function my_dump($var) {
+function my_dump($var) :mixed{
     ob_start();
     var_dump($var);
     $buf = ob_get_clean();
     echo str_replace("\n", "", $buf);
 }
 <<__EntryPoint>> function main(): void {
-$a = varray[
-    varray[1,2,3],
+$a = vec[
+    vec[1,2,3],
     "",
     1,
     2.5,
@@ -25,7 +25,7 @@ $a = varray[
     new stdClass,
     new stdClass,
     new test,
-    varray[],
+    vec[],
     -PHP_INT_MAX-1,
     (string)(-PHP_INT_MAX-1),
 ];

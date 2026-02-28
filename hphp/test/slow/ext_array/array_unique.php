@@ -1,7 +1,7 @@
 <?hh
 
-function a() {
-  $input = darray[
+function a() :mixed{
+  $input = dict[
     "a" => "green",
     0 => "red",
     "b" => "green",
@@ -12,8 +12,8 @@ function a() {
   var_dump($result);
 }
 
-function b() {
-  $input = varray[
+function b() :mixed{
+  $input = vec[
     4,
     "4",
     "3",
@@ -24,8 +24,8 @@ function b() {
   var_dump($result);
 }
 
-function c() {
-  $input = darray[
+function c() :mixed{
+  $input = dict[
     "a" => "A",
     "b" => "C",
     0 => "1",
@@ -37,8 +37,8 @@ function c() {
   var_dump(array_unique($input, SORT_REGULAR));
 }
 
-function d() {
-  $input = darray[
+function d() :mixed{
+  $input = dict[
     'a' => 'A',
     'b' => 'C',
     0 => '1',
@@ -50,7 +50,7 @@ function d() {
 
 
 <<__EntryPoint>>
-function main_array_unique() {
+function main_array_unique() :mixed{
 a();
 b();
 c();

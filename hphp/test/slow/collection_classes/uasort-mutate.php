@@ -7,7 +7,7 @@ function nonstatic_string(string $a): string {
 class Ref { public function __construct(public $v)[] {} }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $m = Map{};
   $m[1] = nonstatic_string('c');
   $m[2] = nonstatic_string('b');

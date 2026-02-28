@@ -1,11 +1,11 @@
 <?hh
 
-function t($c) {
+function t($c) :mixed{
   var_dump($c);
   var_dump(get_class($c));
 }
 
-function main() {
+function main() :mixed{
   $ext_var = 1;
   $another_ext = new stdClass();
 
@@ -26,6 +26,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_classname() {
+function main_classname() :mixed{
 main();
 }

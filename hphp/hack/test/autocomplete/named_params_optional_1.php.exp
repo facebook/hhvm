@@ -1,0 +1,4 @@
+example
+  INSERT example(${1:\$x}, y=${2:\$y})
+  function(int $x, named int $y, optional int $optional1, optional int $optional2): void
+SORT TEXT: none

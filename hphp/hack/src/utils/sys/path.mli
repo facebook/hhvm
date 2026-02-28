@@ -37,6 +37,9 @@ val equal : t -> t -> bool
 
 val compare : t -> t -> int
 
+(** [concat p1 p2] returns a path equivalent to [p1 ^ "/" ^ p2].
+  In the resulting path [p1] (resp. [p2]) has all its trailing (resp. leading) "." and "/" removed.
+  eg: concat "a/." ".//b" => "a/b" concat "." "b" => "./b" concat "a" "." => "a/." concat "a" "/b" => "a/b" *)
 val concat : t -> string -> t
 
 val chdir : t -> unit

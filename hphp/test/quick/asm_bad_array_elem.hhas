@@ -1,9 +1,0 @@
-.function ["__EntryPoint"("""y:0:{}""")] main() {
-  String "asd"
-  String "asd"
-  AddNewElemC
-  Print
-  PopC
-  Int 1
-  RetC
-}

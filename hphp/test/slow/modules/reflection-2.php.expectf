@@ -11,6 +11,6 @@ string(1) "B"
 dict(0) {
 }
 
-Fatal error: Uncaught exception 'ReflectionException' with message 'Module 'C' does not exist' in %s:19
+Fatal error: Uncaught exception 'ReflectionException' with message 'Module 'C' does not exist' in %s:23
 Stack trace:
 %A

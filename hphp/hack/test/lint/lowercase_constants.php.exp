@@ -1,4 +1,4 @@
 File "lowercase_constants.php", line 3, characters 10-10:
-lowercase_constants.php only declares `f`, it should be named f.php instead. (Lint[5564])
+f is the only function declared in lowercase_constants.php, so that file should be named f.php instead. (Lint[5564])
 File "lowercase_constants.php", line 4, characters 10-13:
 Please use `null` instead of `NULL` (Lint[5001])

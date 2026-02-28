@@ -1,1 +1,3 @@
-Fatal error: Cannot convert reified class meth pointer to string in %s on line %d
+exception 'InvalidOperationException' with message 'Cannot convert reified class method to string' in %s
+Stack trace:
+#0 {main}

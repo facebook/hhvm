@@ -24,16 +24,15 @@ namespace HPHP::HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 namespace php { struct Unit; }
-struct Index;
+struct IIndex;
 
 /*
  * This method is not const in the Unit because it will remap local IDs
  * and free the the Unit's Funcs' bytecode. We choose to do so in order
  * to release memory as soon as possible.
  */
-std::unique_ptr<UnitEmitter> emit_unit(const Index&, php::Unit&);
+std::unique_ptr<UnitEmitter> emit_unit(IIndex&, php::Unit&);
 
 //////////////////////////////////////////////////////////////////////
 
 }
-

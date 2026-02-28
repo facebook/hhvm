@@ -21,18 +21,18 @@ function serialize_provenance(mixed $thing, bool $keepDVArrays): string {
 function main(): void {
   $inputs = vec[
     // empty cases
-    varray[],
-    HH\array_mark_legacy(varray[]),
     vec[],
-    darray[],
-    HH\array_mark_legacy(darray[]),
+    HH\array_mark_legacy(vec[]),
+    vec[],
+    dict[],
+    HH\array_mark_legacy(dict[]),
     dict[],
     // non-empty cases
-    varray[1, 2, 3],
-    HH\array_mark_legacy(varray[1, 2, 3]),
     vec[1, 2, 3],
-    darray[0 => 0],
-    HH\array_mark_legacy(darray[0 => 0]),
+    HH\array_mark_legacy(vec[1, 2, 3]),
+    vec[1, 2, 3],
+    dict[0 => 0],
+    HH\array_mark_legacy(dict[0 => 0]),
     dict[0 => 0],
   ];
   foreach ($inputs as $input) {

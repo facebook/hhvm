@@ -2,19 +2,19 @@
 
 class IterableClass implements \HH\Iterable {
   use StrictIterable;
-  public function getIterator() {
-    return new ArrayIterator(varray[11, 22, 33]);
+  public function getIterator() :mixed{
+    return new ArrayIterator(vec[11, 22, 33]);
   }
 }
 
 class KeyedIterableClass implements \HH\KeyedIterable {
   use StrictKeyedIterable;
-  public function getIterator() {
-    return new ArrayIterator(varray[44, 55, 66]);
+  public function getIterator() :mixed{
+    return new ArrayIterator(vec[44, 55, 66]);
   }
 }
 
-function test($name, $a, $b) {
+function test($name, $a, $b) :mixed{
   echo "---- $name\n";
   $got = $a->zip($b);
   echo get_class($got) . "\n";
@@ -29,8 +29,8 @@ function test($name, $a, $b) {
   }
 }
 
-function main() {
-  $zippable = darray[
+function main() :mixed{
+  $zippable = dict[
     'empty Vector'    => Vector    {},
     'short Vector'    => Vector    {1, 2},
     'long  Vector'    => Vector    {3, 4, 5, 6},
@@ -45,7 +45,7 @@ function main() {
     'short ImmMap' => ImmMap {'u' => 'U', 'v' => 'V'},
     'long  ImmMap' => ImmMap {'w' => 'W', 'x' => 'X', 'y' => 'Y', 'z' => 'Z'},
   ];
-  $additional_iterable = darray[
+  $additional_iterable = dict[
     'IterableClass'      => new IterableClass,
     'KeyedIterableClass' => new KeyedIterableClass,
   ];
@@ -61,6 +61,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_zip() {
+function main_zip() :mixed{
 main();
 }

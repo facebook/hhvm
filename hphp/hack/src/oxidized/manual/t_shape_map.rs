@@ -4,31 +4,40 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::cmp::Ordering;
-use std::hash::{Hash, Hasher};
-
-use serde::{Deserialize, Serialize};
+use std::hash::Hash;
+use std::hash::Hasher;
 
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 
+use crate::typing_defs_core::PosByteString;
+use crate::typing_defs_core::PosString;
 use crate::typing_defs_core::TshapeFieldName;
 
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    FromOcamlRep,
-    EqModuloPos,
-    NoPosHash,
-    Serialize,
-    ToOcamlRep
-)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(FromOcamlRep, EqModuloPos, NoPosHash, ToOcamlRep)]
 pub struct TShapeField(pub TshapeFieldName);
 
+/// Ord implementation that ignores pos
 impl Ord for TShapeField {
-    fn cmp(&self, _other: &Self) -> Ordering {
-        unimplemented!()
+    fn cmp(&self, other: &Self) -> Ordering {
+        use TshapeFieldName::*;
+        match (&self.0, &other.0) {
+            (TSFregexGroup(PosString(_, s1)), TSFregexGroup(PosString(_, s2))) => s1.cmp(s2),
+            (TSFlitStr(PosByteString(_, s1)), TSFlitStr(PosByteString(_, s2))) => s1.cmp(s2),
+            (
+                TSFclassConst((_, c1), PosString(_, m1)),
+                TSFclassConst((_, c2), PosString(_, m2)),
+            ) => (c1, m1).cmp(&(c2, m2)),
+            (TSFregexGroup(_), _) => Ordering::Less,
+            (TSFlitStr(_), TSFregexGroup(_)) => Ordering::Greater,
+            (TSFlitStr(_), _) => Ordering::Less,
+            (TSFclassConst(_, _), _) => Ordering::Greater,
+        }
     }
 }
 

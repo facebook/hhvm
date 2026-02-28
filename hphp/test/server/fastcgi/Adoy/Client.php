@@ -91,7 +91,7 @@ class Client
      *
      * @var array
      */
-    private $_requests = darray[];
+    private $_requests = dict[];
 
     /**
      * Use persistent sockets to connect to backend
@@ -130,7 +130,7 @@ class Client
      * @param Boolean $b true if the connection should stay alive, false otherwise
      */
     public function setKeepAlive($b)
-    {
+:mixed    {
         $this->_keepAlive = (bool)$b;
         if (!$this->_keepAlive && $this->_sock) {
             \fclose($this->_sock);
@@ -143,7 +143,7 @@ class Client
      * @return Boolean true if the connection should stay alive, false otherwise
      */
     public function getKeepAlive()
-    {
+:mixed    {
         return $this->_keepAlive;
     }
 
@@ -154,7 +154,7 @@ class Client
      * @param Boolean $b true if persistent socket should be used, false otherwise
      */
     public function setPersistentSocket($b)
-    {
+:mixed    {
         $was_persistent = ($this->_sock && $this->_persistentSocket);
         $this->_persistentSocket = (bool)$b;
         if (!$this->_persistentSocket && $was_persistent) {
@@ -168,7 +168,7 @@ class Client
      * @return Boolean true if the socket should be persistent, false otherwise
      */
     public function getPersistentSocket()
-    {
+:mixed    {
         return $this->_persistentSocket;
     }
 
@@ -179,7 +179,7 @@ class Client
      * @param Integer  number of milliseconds before connect will timeout
      */
     public function setConnectTimeout($timeoutMs)
-    {
+:mixed    {
         $this->_connectTimeout = $timeoutMs;
     }
 
@@ -189,7 +189,7 @@ class Client
      * @return Integer  number of milliseconds before connect will timeout
      */
     public function getConnectTimeout()
-    {
+:mixed    {
         return $this->_connectTimeout;
     }
 
@@ -199,7 +199,7 @@ class Client
      * @param Integer  number of milliseconds before read or write call will timeout
      */
     public function setReadWriteTimeout($timeoutMs)
-    {
+:mixed    {
         $this->_readWriteTimeout = $timeoutMs;
         $this->set_ms_timeout($this->_readWriteTimeout);
     }
@@ -210,7 +210,7 @@ class Client
      * @return Integer  number of milliseconds before read will timeout
      */
     public function getReadWriteTimeout()
-    {
+:mixed    {
         return $this->_readWriteTimeout;
     }
 
@@ -220,7 +220,7 @@ class Client
      * @param Integer millisecond timeout
      * @return Boolean
      */
-    private function set_ms_timeout($timeoutMs) {
+    private function set_ms_timeout($timeoutMs) :mixed{
         if (!$this->_sock) {
             return false;
         }
@@ -232,7 +232,7 @@ class Client
      * Create a connection to the FastCGI application
      */
     private function connect()
-    {
+:mixed    {
         if (!$this->_sock) {
             $errno = 0;
             $errstr = "";
@@ -260,7 +260,7 @@ class Client
      * @param Integer $requestId RequestId
      */
     private function buildPacket($type, $content, $requestId = 1)
-    {
+:mixed    {
         $clen = \strlen($content);
         return \chr(self::VERSION_1)         /* version */
             . \chr($type)                    /* type */
@@ -281,7 +281,7 @@ class Client
      * @return String FastCGI Name value pair
      */
     private function buildNvpair($name, $value)
-    {
+:mixed    {
         $nlen = \strlen($name);
         $vlen = \strlen((string)$value);
         if ($nlen < 128) {
@@ -309,8 +309,8 @@ class Client
      * @return array of NVPair
      */
     private function readNvpair($data, $length = null)
-    {
-        $array = darray[];
+:mixed    {
+        $array = dict[];
 
         if ($length === null) {
             $length = \strlen($data);
@@ -320,19 +320,19 @@ class Client
 
         while ($p != $length) {
 
-            $nlen = \ord($data{$p++});
+            $nlen = \ord($data['$p++']);
             if ($nlen >= 128) {
                 $nlen = ($nlen & 0x7F << 24);
-                $nlen |= (\ord($data{$p++}) << 16);
-                $nlen |= (\ord($data{$p++}) << 8);
-                $nlen |= (\ord($data{$p++}));
+                $nlen |= (\ord($data['$p++']) << 16);
+                $nlen |= (\ord($data['$p++']) << 8);
+                $nlen |= (\ord($data['$p++']));
             }
-            $vlen = \ord($data{$p++});
+            $vlen = \ord($data['$p++']);
             if ($vlen >= 128) {
                 $vlen = ($nlen & 0x7F << 24);
-                $vlen |= (\ord($data{$p++}) << 16);
-                $vlen |= (\ord($data{$p++}) << 8);
-                $vlen |= (\ord($data{$p++}));
+                $vlen |= (\ord($data['$p++']) << 16);
+                $vlen |= (\ord($data['$p++']) << 8);
+                $vlen |= (\ord($data['$p++']));
             }
             $array[\substr($data, $p, $nlen)] = \substr($data, $p+$nlen, $vlen);
             $p += ($nlen + $vlen);
@@ -348,14 +348,14 @@ class Client
      * @return array
      */
     private function decodePacketHeader($data)
-    {
-        $ret = darray[];
-        $ret['version']       = \ord($data{0});
-        $ret['type']          = \ord($data{1});
-        $ret['requestId']     = (\ord($data{2}) << 8) + \ord($data{3});
-        $ret['contentLength'] = (\ord($data{4}) << 8) + \ord($data{5});
-        $ret['paddingLength'] = \ord($data{6});
-        $ret['reserved']      = \ord($data{7});
+:mixed    {
+        $ret = dict[];
+        $ret['version']       = \ord($data[0]);
+        $ret['type']          = \ord($data[1]);
+        $ret['requestId']     = (\ord($data[2]) << 8) + \ord($data[3]);
+        $ret['contentLength'] = (\ord($data[4]) << 8) + \ord($data[5]);
+        $ret['paddingLength'] = \ord($data[6]);
+        $ret['reserved']      = \ord($data[7]);
         return $ret;
     }
 
@@ -365,7 +365,7 @@ class Client
      * @return array
      */
     private function readPacket()
-    {
+:mixed    {
         if ($packet = \fread($this->_sock, self::HEADER_LEN)) {
             $resp = $this->decodePacketHeader($packet);
             $resp['content'] = '';
@@ -392,7 +392,7 @@ class Client
      * @return array
      */
     public function getValues(darray $requestedInfo)
-    {
+:mixed    {
         $this->connect();
 
         $request = '';
@@ -417,7 +417,7 @@ class Client
      * @return String
      */
     public function request(darray $params, $stdin)
-    {
+:mixed    {
         $id = $this->async_request($params, $stdin);
         return $this->wait_for_response($id);
     }
@@ -438,7 +438,7 @@ class Client
      * @return Integer
      */
     public function async_request(darray $params, $stdin)
-    {
+:mixed    {
         $this->connect();
 
         // Pick random number between 1 and max 16 bit unsigned int 65535
@@ -479,7 +479,7 @@ class Client
             throw new \Exception('Failed to write request to socket');
         }
 
-        $this->_requests[$id] = darray[
+        $this->_requests[$id] = dict[
             'state' => self::REQ_STATE_WRITTEN,
             'response' => null
         ];
@@ -494,7 +494,7 @@ class Client
      * @param Integer $timeoutMs [optional] the number of milliseconds to wait. Defaults to the ReadWriteTimeout value set.
      * @return string  response body
      */
-    public function wait_for_response($requestId, $timeoutMs = 0) {
+    public function wait_for_response($requestId, $timeoutMs = 0) :mixed{
 
         if (!isset($this->_requests[$requestId])) {
             throw new \Exception('Invalid request id given');
@@ -562,7 +562,7 @@ class Client
         // Reset timeout
         $this->set_ms_timeout($this->_readWriteTimeout);
 
-        switch (\ord($resp['content']{4})) {
+        switch (\ord($resp['content'][4])) {
             case self::CANT_MPX_CONN:
                 throw new \Exception('This app can\'t multiplex [CANT_MPX_CONN]');
                 break;

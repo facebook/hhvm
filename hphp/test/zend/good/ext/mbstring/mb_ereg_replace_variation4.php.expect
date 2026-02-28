@@ -1,0 +1,23 @@
+*** Testing mb_ereg_replace() : usage variations ***
+
+-- Iteration 1 --
+string(10) "str1n1_v1l"
+
+-- Iteration 2 --
+string(10) "str1n1_v1l"
+
+-- Iteration 3 --
+string(10) "str1n1_v1l"
+
+-- Iteration 4 --
+string(10) "str1n1_v1l"
+
+-- Iteration 5 --
+string(10) "str1n1_v1l"
+
+-- Iteration 6 --
+string(10) "str1n1_v1l"
+
+-- Iteration 7 --
+string(10) "str1n1_v1l"
+Done

@@ -19,20 +19,25 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-enum TypeConstraintFlags : uint16_t {
+enum class TypeConstraintFlags : uint16_t {
   NoFlags = 0x0,
+
+  /*
+   * Reserved. This bit is used by TypeIntersectionConstraint to discriminate
+   * its union member.
+   */
+  SingleTypeConstraint = 0x1,
 
   /*
    * Nullable type hints check they are either the specified type,
    * or null.
    */
-  Nullable = 0x1,
+  Nullable = 0x2,
 
   /*
-   * Extended hints are hints that do not apply to normal, vanilla
-   * php.  For example "?Foo".
+   * Indicates a union
    */
-  ExtendedHint = 0x4,
+  Union = 0x4,
 
   /*
    * Indicates that a type constraint is a type variable. For example,
@@ -69,12 +74,6 @@ enum TypeConstraintFlags : uint16_t {
   Resolved = 0x40,
 
   /*
-   * Indicates that no mock object can satisfy this constraint.  This is
-   * resolved by HHBBC.
-   */
-  NoMockObjects = 0x80,
-
-  /*
    * Indicates that a type-constraint should be displayed as nullable (even if
    * isNullable()) is false. This is used to maintain proper display of
    * type-constraints even when resolved.
@@ -85,15 +84,44 @@ enum TypeConstraintFlags : uint16_t {
    * Indicates that a type-constraint came from an upper-bound constraint.
    */
   UpperBound = 0x200,
+  /*
+   * Temporary flag intended to identify type constraints that have been
+   * inherited from overidden methods.
+   */
+  Inherited = 0x400,
 };
+
+static_assert(uint8_t(TypeConstraintFlags::SingleTypeConstraint) == 0x1);
 
 constexpr TypeConstraintFlags
 operator|(TypeConstraintFlags a, TypeConstraintFlags b) {
   return TypeConstraintFlags(static_cast<int>(a) | static_cast<int>(b));
 }
 
-inline TypeConstraintFlags& operator|=(TypeConstraintFlags& a, const TypeConstraintFlags& b) {
-return (a = TypeConstraintFlags((int)a | (int)b));
+constexpr TypeConstraintFlags
+operator&(TypeConstraintFlags a, TypeConstraintFlags b) {
+  return TypeConstraintFlags(static_cast<int>(a) & static_cast<int>(b));
+}
+
+constexpr TypeConstraintFlags
+operator~(TypeConstraintFlags a) {
+  return TypeConstraintFlags(~static_cast<int>(a));
+}
+
+constexpr void operator|=(TypeConstraintFlags& a, TypeConstraintFlags b) {
+  a = a | b;
+}
+
+constexpr void operator&=(TypeConstraintFlags& a, TypeConstraintFlags b) {
+  a = a & b;
+}
+
+constexpr bool operator!(TypeConstraintFlags a) {
+  return a == TypeConstraintFlags::NoFlags;
+}
+
+constexpr bool contains(TypeConstraintFlags a, TypeConstraintFlags b) {
+  return (a & b) != TypeConstraintFlags::NoFlags;
 }
 
 }

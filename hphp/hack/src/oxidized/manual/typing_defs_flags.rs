@@ -6,26 +6,19 @@
 use bitflags::bitflags;
 use eq_modulo_pos::EqModuloPos;
 
-use crate::xhp_attribute::{self, XhpAttribute};
+use crate::xhp_attribute;
+use crate::xhp_attribute::XhpAttribute;
 
 // NB: Keep the values of these flags in sync with typing_defs_flags.ml.
 
+#[derive(EqModuloPos, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Clone, Copy)]
+pub struct FunTypeFlags(u16);
 bitflags! {
-    #[derive(EqModuloPos)]
-    pub struct FunTypeFlags: u16 {
+    impl FunTypeFlags: u16 {
         const RETURN_DISPOSABLE      = 1 << 0;
-        const RETURNS_MUTABLE        = 1 << 1;
-        const RETURNS_VOID_TO_RX     = 1 << 2;
         const IS_COROUTINE           = 1 << 3;
         const ASYNC                  = 1 << 4;
         const GENERATOR              = 1 << 5;
-
-        // These flags apply to the self type on methods.
-        const MUTABLE_FLAGS_OWNED    = 1 << 6;
-        const MUTABLE_FLAGS_BORROWED = 1 << 7;
-        const MUTABLE_FLAGS_MAYBE    = Self::MUTABLE_FLAGS_OWNED.bits | Self::MUTABLE_FLAGS_BORROWED.bits;
-        const MUTABLE_FLAGS_MASK     = Self::MUTABLE_FLAGS_OWNED.bits | Self::MUTABLE_FLAGS_BORROWED.bits;
-
         const INSTANTIATED_TARGS     = 1 << 8;
         const IS_FUNCTION_POINTER    = 1 << 9;
         const RETURNS_READONLY       = 1 << 10;
@@ -36,29 +29,24 @@ bitflags! {
     }
 }
 
+#[derive(EqModuloPos, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Clone, Copy)]
+pub struct FunParamFlags(u16);
 bitflags! {
-    #[derive(EqModuloPos)]
-    pub struct FunParamFlags: u16 {
+    impl FunParamFlags: u16 {
         const ACCEPT_DISPOSABLE      = 1 << 0;
         const INOUT                  = 1 << 1;
-        const HAS_DEFAULT            = 1 << 2;
-        const IFC_EXTERNAL           = 1 << 3;
-        const IFC_CAN_CALL           = 1 << 4;
-        // const VIA_LABEL_DEPRECATED              = 1 << 5;
-
-        // These flags apply to the parameter type.
-        const MUTABLE_FLAGS_OWNED    = 1 << 6;
-        const MUTABLE_FLAGS_BORROWED = 1 << 7;
-        const MUTABLE_FLAGS_MAYBE    = Self::MUTABLE_FLAGS_OWNED.bits | Self::MUTABLE_FLAGS_BORROWED.bits;
-        const MUTABLE_FLAGS_MASK     = Self::MUTABLE_FLAGS_OWNED.bits | Self::MUTABLE_FLAGS_BORROWED.bits;
-
-        const READONLY       = 1 << 8;
+        const IS_OPTIONAL            = 1 << 2;
+        const READONLY               = 1 << 8;
+        const IGNORE_READONLY_ERROR  = 1 << 3;
+        const SPLAT                  = 1 << 9;
+        const NAMED                  = 1 << 4;
     }
 }
 
+#[derive(EqModuloPos, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Clone, Copy)]
+pub struct ClassEltFlags(u16);
 bitflags! {
-    #[derive(EqModuloPos)]
-    pub struct ClassEltFlags: u16 {
+    impl ClassEltFlags: u16 {
         const ABSTRACT                 = 1 << 0;
         const FINAL                    = 1 << 1;
         const SUPERFLUOUS_OVERRIDE     = 1 << 2;
@@ -75,10 +63,16 @@ bitflags! {
         const XA_HAS_DEFAULT           = 1 << 9;
         const XA_TAG_REQUIRED          = 1 << 10;
         const XA_TAG_LATEINIT          = 1 << 11;
-        const READONLY_PROP            = 1 << 12;
+        /*
+        * for properties: indicates readonly-ness
+        * for methods: indicates presence of <<__NeedsConcrete>> attribute
+        */
+        const READONLY_PROP_OR_NEEDS_CONCRETE            = 1 << 12;
         const NEEDS_INIT               = 1 << 13;
+        const SAFE_GLOBAL_VARIABLE     = 1 << 14;
+        const NO_AUTO_LIKES            = 1 << 15;
 
-        const XA_FLAGS_MASK = Self::XA_HAS_DEFAULT.bits | Self::XA_TAG_REQUIRED.bits | Self::XA_TAG_LATEINIT.bits;
+        const XA_FLAGS_MASK = Self::XA_HAS_DEFAULT.bits() | Self::XA_TAG_REQUIRED.bits() | Self::XA_TAG_LATEINIT.bits();
     }
 }
 
@@ -93,9 +87,15 @@ pub struct ClassEltFlagsArgs {
     pub is_const: bool,
     pub is_lateinit: bool,
     pub is_dynamicallycallable: bool,
-    pub is_readonly_prop: bool,
+    /**
+     * for properties: indicates readonly-ness
+     * for methods: indicates presence of <<__NeedsConcrete>> attribute:
+     */
+    pub is_readonly_prop_or_needs_concrete: bool,
     pub supports_dynamic_type: bool,
     pub needs_init: bool,
+    pub safe_global_variable: bool,
+    pub no_auto_likes: bool,
 }
 
 impl From<xhp_attribute::Tag> for ClassEltFlags {
@@ -137,9 +137,11 @@ impl ClassEltFlags {
             is_const,
             is_lateinit,
             is_dynamicallycallable,
-            is_readonly_prop,
+            is_readonly_prop_or_needs_concrete,
             supports_dynamic_type,
             needs_init,
+            safe_global_variable,
+            no_auto_likes,
         } = args;
         let mut flags = Self::empty();
         flags.set(Self::ABSTRACT, is_abstract);
@@ -151,9 +153,14 @@ impl ClassEltFlags {
         flags.set(Self::LATEINIT, is_lateinit);
         flags.set(Self::DYNAMICALLYCALLABLE, is_dynamicallycallable);
         flags.set_xhp_attr(xhp_attr);
-        flags.set(Self::READONLY_PROP, is_readonly_prop);
+        flags.set(
+            Self::READONLY_PROP_OR_NEEDS_CONCRETE,
+            is_readonly_prop_or_needs_concrete,
+        );
         flags.set(Self::SUPPORT_DYNAMIC_TYPE, supports_dynamic_type);
         flags.set(Self::NEEDS_INIT, needs_init);
+        flags.set(Self::SAFE_GLOBAL_VARIABLE, safe_global_variable);
+        flags.set(Self::NO_AUTO_LIKES, no_auto_likes);
         flags
     }
 
@@ -190,12 +197,19 @@ pub mod class_elt {
     pub type ClassElt = ClassEltFlags;
 }
 
+pub mod fun {
+    use super::FunTypeFlags;
+    pub type Fun = FunTypeFlags;
+}
+
+pub mod fun_param {
+    use super::FunParamFlags;
+    pub type FunParam = FunParamFlags;
+}
+
 impl ocamlrep::ToOcamlRep for ClassEltFlags {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        _alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
-        ocamlrep::OpaqueValue::int(self.bits() as isize)
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, _alloc: &'a A) -> ocamlrep::Value<'a> {
+        ocamlrep::Value::int(self.bits() as isize)
     }
 }
 
@@ -251,12 +265,45 @@ impl<'de> serde::Deserialize<'de> for ClassEltFlags {
     }
 }
 
+impl FunTypeFlags {
+    pub fn return_disposable(&self) -> bool {
+        self.contains(Self::RETURN_DISPOSABLE)
+    }
+    pub fn is_coroutine(&self) -> bool {
+        self.contains(Self::IS_COROUTINE)
+    }
+    pub fn is_async(&self) -> bool {
+        self.contains(Self::ASYNC)
+    }
+    pub fn is_generator(&self) -> bool {
+        self.contains(Self::GENERATOR)
+    }
+    pub fn instantiated_targs(&self) -> bool {
+        self.contains(Self::INSTANTIATED_TARGS)
+    }
+    pub fn is_function_pointer(&self) -> bool {
+        self.contains(Self::IS_FUNCTION_POINTER)
+    }
+    pub fn returns_readonly(&self) -> bool {
+        self.contains(Self::RETURNS_READONLY)
+    }
+    pub fn readonly_this(&self) -> bool {
+        self.contains(Self::READONLY_THIS)
+    }
+    pub fn support_dynamic_type(&self) -> bool {
+        self.contains(Self::SUPPORT_DYNAMIC_TYPE)
+    }
+    pub fn is_memoized(&self) -> bool {
+        self.contains(Self::IS_MEMOIZED)
+    }
+    pub fn variadic(&self) -> bool {
+        self.contains(Self::VARIADIC)
+    }
+}
+
 impl ocamlrep::ToOcamlRep for FunTypeFlags {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        _alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
-        ocamlrep::OpaqueValue::int(self.bits() as isize)
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, _alloc: &'a A) -> ocamlrep::Value<'a> {
+        ocamlrep::Value::int(self.bits() as isize)
     }
 }
 
@@ -312,12 +359,30 @@ impl<'de> serde::Deserialize<'de> for FunTypeFlags {
     }
 }
 
+impl FunParamFlags {
+    pub fn accepts_disposable(&self) -> bool {
+        self.contains(Self::ACCEPT_DISPOSABLE)
+    }
+    pub fn is_inout(&self) -> bool {
+        self.contains(Self::INOUT)
+    }
+    pub fn is_optional(&self) -> bool {
+        self.contains(Self::IS_OPTIONAL)
+    }
+    pub fn is_readonly(&self) -> bool {
+        self.contains(Self::READONLY)
+    }
+    pub fn is_splat(&self) -> bool {
+        self.contains(Self::SPLAT)
+    }
+    pub fn is_named(&self) -> bool {
+        self.contains(Self::NAMED)
+    }
+}
+
 impl ocamlrep::ToOcamlRep for FunParamFlags {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        _alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
-        ocamlrep::OpaqueValue::int(self.bits() as isize)
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, _alloc: &'a A) -> ocamlrep::Value<'a> {
+        ocamlrep::Value::int(self.bits() as isize)
     }
 }
 

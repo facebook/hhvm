@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   $a = IntlTimeZone::createDefault();
   $a->hasSameRules(new stdClass);
 }

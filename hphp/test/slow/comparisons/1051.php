@@ -1,6 +1,6 @@
 <?hh
 
-function foo($p) {
+function foo($p) :mixed{
   if ($p) {
     $a = 'foo';
   }
@@ -25,6 +25,6 @@ function foo($p) {
 }
 
 <<__EntryPoint>>
-function main_1051() {
+function main_1051() :mixed{
   foo(false);
 }

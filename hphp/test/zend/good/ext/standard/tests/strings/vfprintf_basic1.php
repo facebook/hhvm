@@ -11,13 +11,13 @@ $format = "format";
 $format1 = "%s\n";
 $format2 = "%s %s\n";
 $format3 = "%s %s %s\n";
-$arg1 = varray["one"];
-$arg2 = varray["one","two"];
-$arg3 = varray["one","two","three"];
+$arg1 = vec["one"];
+$arg2 = vec["one","two"];
+$arg3 = vec["one","two","three"];
 
 
 /* creating dumping file */
-$data_file = __SystemLib\hphp_test_tmppath('vfprintf_basic1.txt');
+$data_file = sys_get_temp_dir().'/'.'vfprintf_basic1.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

@@ -12,10 +12,9 @@ open Hh_prelude
 module Status = struct
   type t =
     | Initializing
-    | Processing_files of ClientIdeMessage.Processing_files.t
     | Rpc of Telemetry.t list
     | Ready
-    | Stopped of ClientIdeMessage.stopped_reason
+    | Stopped of ClientIdeMessage.rich_error
 
   let is_ready (t : t) : bool =
     match t with
@@ -25,10 +24,6 @@ module Status = struct
   let to_log_string (t : t) : string =
     match t with
     | Initializing -> "Initializing"
-    | Processing_files p ->
-      Printf.sprintf
-        "Processing_files(%s)"
-        (ClientIdeMessage.Processing_files.to_string p)
     | Rpc requests ->
       Printf.sprintf
         "Rpc [%s]"
@@ -57,16 +52,16 @@ end
 
 type state =
   | Uninitialized
-      (** The ide_service is created. We may or may not have yet sent an initialize
-      message to the daemon, but we certainly haven't heard back yet. *)
-  | Failed_to_initialize of ClientIdeMessage.stopped_reason
+      (** The ide_service is created. We may or may not have yet sent an
+      initialize message to the daemon. *)
+  | Failed_to_initialize of ClientIdeMessage.rich_error
       (** The response to our initialize message was a failure. This is
       a terminal state. *)
   | Initialized of { status: Status.t }
       (** We have received an initialize response from the daemon and all
       is well. The only thing that can take us out of this state is if
       someone invokes [stop], or if the daemon connection gets EOF. *)
-  | Stopped of ClientIdeMessage.stopped_reason * Lsp.Error.t
+  | Stopped of ClientIdeMessage.rich_error
       (** Someone called [stop] or the daemon connection got EOF.
       This is a terminal state. This is the only state that arose
       from actions on our side; all the other states arose from
@@ -74,13 +69,13 @@ type state =
 
 let state_to_log_string (state : state) : string =
   match state with
-  | Uninitialized -> "Uninitialized"
-  | Failed_to_initialize { ClientIdeMessage.short_user_message; _ } ->
-    Printf.sprintf "Failed_to_initialize(%s)" short_user_message
+  | Uninitialized -> Printf.sprintf "Uninitialized"
+  | Failed_to_initialize { ClientIdeMessage.category; _ } ->
+    Printf.sprintf "Failed_to_initialize(%s)" category
   | Initialized env ->
     Printf.sprintf "Initialized(%s)" (Status.to_log_string env.status)
-  | Stopped (reason, _) ->
-    Printf.sprintf "Stopped(%s)" reason.ClientIdeMessage.medium_user_message
+  | Stopped { ClientIdeMessage.category; _ } ->
+    Printf.sprintf "Stopped(%s)" category
 
 type message_wrapper =
   | Message_wrapper : 'a ClientIdeMessage.tracked_t -> message_wrapper
@@ -162,10 +157,11 @@ let set_state (t : t) (new_state : state) : unit =
   Lwt_condition.broadcast t.state_changed_cv ()
 
 let make (args : ClientIdeMessage.daemon_args) : t =
+  let log_fd = Daemon.fd_of_path args.ClientIdeMessage.client_lsp_log_fn in
   let daemon_handle =
     Daemon.spawn
       ~channel_mode:`pipe
-      (Unix.stdin, Unix.stdout, Unix.stderr)
+      (Daemon.null_fd (), log_fd, log_fd)
       ClientIdeDaemon.daemon_entry_point
       args
   in
@@ -184,29 +180,6 @@ let make (args : ClientIdeMessage.daemon_args) : t =
     notification_emitter = Lwt_message_queue.create ();
   }
 
-(** This function does an rpc to the daemon: it pushes a message
-onto the daemon's stdin queue, then awaits until [serve] has stuck
-the stdout response from the daemon response onto our [response_emitter].
-The daemon updates [ref_unblocked_time], the time at which the
-daemon starting handling the rpc.
-
-The progress callback will be invoked during this call to rpc, at times
-when the result of [get_status t] might have changed. It's designed
-so the caller of rpc can, in their callback, invoke get_status and display
-some kind of progress message.
-
-Note: it is safe to call this method even while an existing rpc
-is outstanding - we guarantee that results will be delivered in order.
-
-Note: it is not safe to cancel this method, since we might end up
-with no one reading the response to the message we just pushed, leading
-to desync.
-
-Note: If we're in Stopped state (due to someone calling [stop]) then
-we'll refrain from sending the rpc. Stopped is the only state we enter
-due to our own volition; all other states are just a reflection
-of what state the daemon is in, and so it's fine for the daemon
-to respond as it see fits while in the other states. *)
 let rpc
     (t : t)
     ~(tracking_id : string)
@@ -216,7 +189,7 @@ let rpc
   let tracked_message = { ClientIdeMessage.tracking_id; message } in
   try%lwt
     match t.state with
-    | Stopped (_, e) -> Lwt.return_error e
+    | Stopped reason -> Lwt.return_error (ClientIdeUtils.to_lsp_error reason)
     | Uninitialized
     | Initialized _
     | Failed_to_initialize _ ->
@@ -238,29 +211,36 @@ let rpc
              ~key:"message"
              ~value:(ClientIdeMessage.t_to_string message)
       in
+      if not (Active_rpc_requests.is_empty t.active_rpc_requests) then
+        HackEventLogger.invariant_violation_bug
+          "Multiple concurrent ide_rpc requests"
+          ~telemetry:
+            (Telemetry.create ()
+            |> Telemetry.object_list
+                 ~key:"prev"
+                 ~value:(Active_rpc_requests.values t.active_rpc_requests)
+            |> Telemetry.object_ ~key:"new" ~value:telemetry);
       let (active, id) =
         Active_rpc_requests.add telemetry t.active_rpc_requests
       in
       t.active_rpc_requests <- active;
-      let (pingPromise : unit Lwt.t) =
-        let%lwt () = Lwt_unix.sleep 0.2 in
-        progress ();
-        Lwt.return_unit
-      in
+      let pingPromise = Lwt_unix.sleep 0.2 |> Lwt.map progress in
       let%lwt (response : response_wrapper option) =
         Lwt_message_queue.pop t.response_emitter
       in
       t.active_rpc_requests <-
         Active_rpc_requests.remove id t.active_rpc_requests;
       Lwt.cancel pingPromise;
-      if Active_rpc_requests.is_empty t.active_rpc_requests then progress ();
+      progress ();
 
-      (* when might t.active_rpc_count <> 0? well, if the caller did
-         Lwt.pick [rpc t message1, rpc t message2], then active_rpc_count will
+      (* Above there's an assertion (invariant_violation_bug) that the caller
+         hasn't made multiple concurrent rpc calls. That's only there as a help
+         to our caller. We actually support that scenario fine, e.g.
+         `let%lwt x = rpc(X) and y = rpc(Y)` -- active_rpc_count will
          reach a peak of 2, then when the first rpc has finished it will go dowwn
-         to 1, then when the second rpc has finished it will go down to 0. *)
+         to 1, then when the second rpc has finished it will go down to 0.
 
-      (* Discussion about why the following is safe, even if multiple people call rpc:
+         Discussion about why the following is safe, even if multiple people call rpc:
          Imagine `let%lwt x = rpc(X) and y = rpc(Y)`.
          We will therefore push X onto the [messages_to_send] queue, then
          await [Lwt_message_queue.pop] on [response_emitter] for a response to X,
@@ -297,8 +277,9 @@ let rpc
         failwith "Could not read response: queue was closed")
   with
   | exn ->
-    let exn = Exception.wrap exn in
-    Lwt.return_error (ClientIdeUtils.make_bug_error "rpc" ~exn)
+    let e = Exception.wrap exn in
+    Lwt.return_error
+      (ClientIdeUtils.make_rich_error "rpc" ~e |> ClientIdeUtils.to_lsp_error)
 
 let initialize_from_saved_state
     (t : t)
@@ -306,23 +287,15 @@ let initialize_from_saved_state
     ~(naming_table_load_info :
        ClientIdeMessage.Initialize_from_saved_state.naming_table_load_info
        option)
-    ~(use_ranked_autocomplete : bool)
+    ~warnings_saved_state_path
     ~(config : (string * string) list)
+    ~(ignore_hh_version : bool)
     ~(open_files : Path.t list) :
-    (unit, ClientIdeMessage.stopped_reason) Lwt_result.t =
+    (unit, ClientIdeMessage.rich_error) Lwt_result.t =
   let open ClientIdeMessage in
   set_state t Uninitialized;
 
   try%lwt
-    (* We must be the first function called after [make].
-       This satisfies the invariant that Initialize_from_saved_state
-       is the first message sent to the daemon. *)
-    begin
-      match t.state with
-      | Uninitialized -> ()
-      | _ -> failwith "not in uninitialized state"
-    end;
-
     let message =
       {
         tracking_id = "init";
@@ -331,8 +304,9 @@ let initialize_from_saved_state
             {
               Initialize_from_saved_state.root;
               naming_table_load_info;
-              use_ranked_autocomplete;
+              warnings_saved_state_path;
               config;
+              ignore_hh_version;
               open_files;
             };
       }
@@ -355,7 +329,7 @@ let initialize_from_saved_state
     | Response { response = Error e; tracking_id = "init"; _ } ->
       (* that error has structure, which we wish to preserve in our error_data. *)
       Lwt.return_error
-        (ClientIdeUtils.make_bug_reason
+        (ClientIdeUtils.make_rich_error
            e.Lsp.Error.message
            ~data:e.Lsp.Error.data)
     | _ ->
@@ -364,30 +338,23 @@ let initialize_from_saved_state
       failwith ("desync: " ^ message_from_daemon_to_string response)
   with
   | exn ->
-    let exn = Exception.wrap exn in
-    let reason = ClientIdeUtils.make_bug_reason "init_failed" ~exn in
+    let e = Exception.wrap exn in
+    let reason = ClientIdeUtils.make_rich_error "init_failed" ~e in
     set_state t (Failed_to_initialize reason);
     Lwt.return_error reason
 
 let process_status_notification
     (t : t) (notification : ClientIdeMessage.notification) : unit =
   let open ClientIdeMessage in
-  let open ClientIdeMessage.Processing_files in
   match (t.state, notification) with
   | (Failed_to_initialize _, _)
   | (Stopped _, _) ->
     (* terminal states, which don't change with notifications *)
     ()
-  | (Uninitialized, Done_init (Ok { total = 0; _ })) ->
+  | (Uninitialized, Done_init (Ok ())) ->
     set_state t (Initialized { status = Status.Ready })
-  | (Uninitialized, Done_init (Ok p)) ->
-    set_state t (Initialized { status = Status.Processing_files p })
   | (Uninitialized, Done_init (Error edata)) ->
     set_state t (Failed_to_initialize edata)
-  | (Initialized _, Processing_files p) ->
-    set_state t (Initialized { status = Status.Processing_files p })
-  | (Initialized _, Done_processing) ->
-    set_state t (Initialized { status = Status.Ready })
   | (_, _) ->
     let message =
       Printf.sprintf
@@ -425,8 +392,10 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
             ]
         with
         | exn ->
-          let exn = Exception.wrap exn in
-          Lwt.return_error (ClientIdeUtils.make_bug_error "destroy" ~exn)
+          let e = Exception.wrap exn in
+          Lwt.return_error
+            (ClientIdeUtils.make_rich_error "destroy" ~e
+            |> ClientIdeUtils.to_lsp_error)
       in
       let () =
         match result with
@@ -447,15 +416,14 @@ let stop
     (t : t)
     ~(tracking_id : string)
     ~(stop_reason : Stop_reason.t)
-    ~(exn : Exception.t option) : unit Lwt.t =
+    ~(e : Exception.t option) : unit Lwt.t =
   (* we store both a user-facing reason here, and a programmatic error
      for use in subsequent telemetry *)
-  let reason = ClientIdeUtils.make_bug_reason "stop" in
-  let e = ClientIdeUtils.make_bug_error "stop" ?exn in
+  let reason = ClientIdeUtils.make_rich_error "stop" ?e in
   (* We'll stick the stop_reason into that programmatic error, so that subsequent
      telemetry can pick it up. (It never affects the user-facing message.) *)
   let items =
-    match e.Lsp.Error.data with
+    match reason.ClientIdeMessage.data with
     | None -> []
     | Some (Hh_json.JSON_Object items) -> items
     | Some json -> [("data", json)]
@@ -464,7 +432,9 @@ let stop
     ("stop_reason", stop_reason |> Stop_reason.to_log_string |> Hh_json.string_)
     :: items
   in
-  let e = { e with Lsp.Error.data = Some (Hh_json.JSON_Object items) } in
+  let reason =
+    { reason with ClientIdeMessage.data = Some (Hh_json.JSON_Object items) }
+  in
 
   let%lwt () = destroy t ~tracking_id in
   (* Correctness here is very subtle... During the course of that call to
@@ -484,21 +454,21 @@ let stop
      weirdly because of the lack of hhi.
      Luckily we're saved from that because clientLsp never makes rpc requests
      to us after it has called 'stop'. *)
-  set_state t (Stopped (reason, e));
+  set_state t (Stopped reason);
   Lwt.return_unit
 
-let cleanup_upon_shutdown_or_exn (t : t) ~(exn : Exception.t option) :
-    unit Lwt.t =
+let cleanup_upon_shutdown_or_exn (t : t) ~(e : Exception.t option) : unit Lwt.t
+    =
   (* We are invoked with e=None when one of the message-queues has said that
      it's closed. This indicates an orderly shutdown has been performed by 'stop'.
      We are invoked with e=Some when we had an exception in our main serve loop. *)
   let stop_reason =
-    match exn with
+    match e with
     | None ->
       log "Normal shutdown due to message-queue closure";
       Stop_reason.Closed
-    | Some exn ->
-      ClientIdeUtils.log_bug "shutdown" ~exn ~telemetry:true;
+    | Some e ->
+      ClientIdeUtils.log_bug "shutdown" ~e ~telemetry:true;
       Stop_reason.Crashed
   in
   (* We might as well call 'stop' in both cases; there'll be no harm. *)
@@ -506,7 +476,7 @@ let cleanup_upon_shutdown_or_exn (t : t) ~(exn : Exception.t option) :
   | Stopped _ -> Lwt.return_unit
   | _ ->
     log "Shutting down...";
-    let%lwt () = stop t ~tracking_id:"cleanup_or_shutdown" ~stop_reason ~exn in
+    let%lwt () = stop t ~tracking_id:"cleanup_or_shutdown" ~stop_reason ~e in
     Lwt.return_unit
 
 let rec serve (t : t) : unit Lwt.t =
@@ -533,7 +503,7 @@ let rec serve (t : t) : unit Lwt.t =
     in
     match next_action with
     | `Close ->
-      let%lwt () = cleanup_upon_shutdown_or_exn t ~exn:None in
+      let%lwt () = cleanup_upon_shutdown_or_exn t ~e:None in
       Lwt.return_unit
     | `Outgoing (Message_wrapper next_message) ->
       log_debug "-> %s" (ClientIdeMessage.tracked_t_to_string next_message);
@@ -557,13 +527,13 @@ let rec serve (t : t) : unit Lwt.t =
       if queue_is_open then
         serve t
       else
-        let%lwt () = cleanup_upon_shutdown_or_exn t ~exn:None in
+        let%lwt () = cleanup_upon_shutdown_or_exn t ~e:None in
         Lwt.return_unit
   with
   | exn ->
-    let exn = Exception.wrap exn in
+    let e = Exception.wrap exn in
     (* cleanup function below will log the exception *)
-    let%lwt () = cleanup_upon_shutdown_or_exn t ~exn:(Some exn) in
+    let%lwt () = cleanup_upon_shutdown_or_exn t ~e:(Some e) in
     Lwt.return_unit
 
 let get_notifications (t : t) : notification_emitter = t.notification_emitter
@@ -572,7 +542,7 @@ let get_status (t : t) : Status.t =
   match t.state with
   | Uninitialized -> Status.Initializing
   | Failed_to_initialize error_data -> Status.Stopped error_data
-  | Stopped (reason, _) -> Status.Stopped reason
+  | Stopped reason -> Status.Stopped reason
   | Initialized { status } ->
     if
       Status.is_ready status

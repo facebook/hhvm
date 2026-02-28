@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1676() {
+function main_1676() :mixed{
 $xml = <<< EOXML
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE courses [
@@ -68,7 +68,7 @@ $ents = $dtd->entities;
 $length = $ents->length;
 echo "Length: ".$length."\n";
 
-$a = darray[];
+$a = dict[];
 foreach ($ents as $key=>$node) {
   $a[$key] = $node;
 }

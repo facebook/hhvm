@@ -6,29 +6,30 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
-open Hh_prelude
 open Typing_defs
 
-let show_locl_ty _ = "<locl_ty>"
-
-let pp_locl_ty _ _ = Printf.printf "%s\n" "<locl_ty>"
-
-(* Along with a type, each local variable has a expression id associated with
-* it. This is used when generating expression dependent types for the 'this'
-* type. The idea is that if two local variables have the same expression_id
-* then they refer to the same late bound type, and thus have compatible
-* 'this' types.
-* It also has an optional position that indicates where the local got this type.
-*
-*)
-type expression_id = Ident.t [@@deriving eq, show]
-
-type local = locl_ty * Pos.t * expression_id [@@deriving show]
-
-let show_t _ = "<local_types.t>"
-
-let pp_t _ _ = Printf.printf "%s\n" "<local_types.t>"
+type local = {
+  ty: locl_ty;  (** The type of the local *)
+  defined: bool;
+      (** True if the variable is definitely defined. False if it might not be.
+        This will happen when there is a typed local declared along some control
+        paths but not others. In this case, using the variable is still an
+        error, but any assigning to it should still follow the bound. *)
+  bound_ty: locl_ty option;
+      (** The bound on the variable if it is a typed local. *)
+  pos: Pos.t;  (** The position at which the variable got its type. *)
+  eid: Expression_id.t;
+      (** Along with a type, each local variable has a expression id associated with
+          it. This is used when generating expression dependent types for the 'this'
+          type. The idea is that if two local variables have the same expression_id
+          then they refer to the same late bound type, and thus have compatible
+          'this' types. *)
+  macro_splice_vars: (Pos.t * locl_ty) Local_id.Map.t option;
+      (** If the variable is bound to a expression tree splice that has nested expression
+          trees with free variables, this records the types of those variables along with
+          the position they occurred in. *)
+}
+[@@deriving show]
 
 type t = local Local_id.Map.t
 

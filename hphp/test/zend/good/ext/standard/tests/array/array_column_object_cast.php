@@ -1,14 +1,14 @@
 <?hh
 class ColumnKeyClass {
-    function __toString() { return 'first_name'; }
+    function __toString() :mixed{ return 'first_name'; }
 }
 
 class IndexKeyClass {
-    function __toString() { return 'id'; }
+    function __toString() :mixed{ return 'id'; }
 }
 
 class ValueClass {
-    function __toString() { return '2135'; }
+    function __toString() :mixed{ return '2135'; }
 }
 
 <<__EntryPoint>> function main(): void {
@@ -18,13 +18,13 @@ $value = new ValueClass();
 
 
 // Array representing a possible record set returned from a database
-$records = varray[
-    darray[
+$records = vec[
+    dict[
         'id' => $value,
         'first_name' => 'John',
         'last_name' => 'XXX'
     ],
-    darray[
+    dict[
         'id' => 3245,
         'first_name' => 'Sally',
         'last_name' => 'Smith'

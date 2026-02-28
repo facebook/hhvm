@@ -3,7 +3,7 @@ class A
 {
     private $p = "A::p";
     function showA()
-    {
+:mixed    {
         echo $this->p . "\n";
     }
 }
@@ -12,7 +12,7 @@ class B extends A
 {
     private static $p = "B::p (static)";
     static function showB()
-    {
+:mixed    {
         echo self::$p . "\n";
     }
 }

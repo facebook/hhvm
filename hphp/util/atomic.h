@@ -39,7 +39,7 @@ assert_address_is_atomically_accessible(ATTRIBUTE_UNUSED T* address) {
   assert(((uintptr_t(address) + sizeof(T) - 1) & ~63ul) ==
          ( uintptr_t(address)                  & ~63ul) &&
         "Atomically accessed addresses may not span cache lines");
-#elif __aarch64__ || __powerpc64__
+#elif __aarch64__
   // N-byte accesses must be N-byte aligned
   assert((uintptr_t(address) & (sizeof(T) - 1)) == 0);
 #else
@@ -47,6 +47,25 @@ assert_address_is_atomically_accessible(ATTRIBUTE_UNUSED T* address) {
 #endif
 }
 
+/*
+ * In some data structures (like Func) we need to copy objects that contain atomics.
+ */
+template<typename T> class CopyableAtomic : public std::atomic<T> {
+  static_assert(std::is_arithmetic<T>::value || std::is_pointer<T>::value);
+  static_assert(sizeof(T) == 1 || sizeof(T) == 2 ||
+                sizeof(T) == 4 || sizeof(T) == 8);
+ public:
+  CopyableAtomic() = default;
+  explicit CopyableAtomic(T&& v) : std::atomic<T>(std::move(v)) { }
+  explicit CopyableAtomic(const CopyableAtomic<T>& other)
+    : std::atomic<T>(other.load(std::memory_order_acquire)) {
+  }
+  CopyableAtomic& operator=(const CopyableAtomic<T>& other) {
+    this->store(other.load(std::memory_order_acquire),
+                std::memory_order_release);
+    return *this;
+  }
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 }
-

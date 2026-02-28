@@ -8,7 +8,7 @@ class B extends A {
  }
 
 <<__EntryPoint>>
-function main_1815() {
+function main_1815() :mixed{
 apc_store('key', new B());
 var_dump(__hhvm_intrinsics\apc_fetch_no_check('key'));
 }

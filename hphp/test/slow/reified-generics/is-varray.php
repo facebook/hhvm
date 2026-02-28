@@ -3,7 +3,7 @@
 class C<reify T> {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $c = new C<varray<int>>;
   var_dump($c is C<vec<_>>);
   var_dump($c is C<vec<int>>);

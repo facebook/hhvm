@@ -23,9 +23,7 @@
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-#ifndef VIXL_A64_MACRO_ASSEMBLER_A64_H_
-#define VIXL_A64_MACRO_ASSEMBLER_A64_H_
+#pragma once
 
 #include "hphp/vixl/globals.h"
 #include "hphp/vixl/a64/assembler-a64.h"
@@ -119,6 +117,42 @@ class MacroAssembler : public Assembler {
                             FlagsUpdate S,
                             AddSubWithCarryOp op);
 
+  // CRC32 macros
+  void Crc32b(const Register& rd, const Register& rn, const Register& rm) {
+    assert(allow_macro_instructions_);
+    crc32b(rd, rn, rm);
+  }
+  void Crc32h(const Register& rd, const Register& rn, const Register& rm) {
+    assert(allow_macro_instructions_);
+    crc32h(rd, rn, rm);
+  }
+  void Crc32w(const Register& rd, const Register& rn, const Register& rm) {
+    assert(allow_macro_instructions_);
+    crc32w(rd, rn, rm);
+  }
+  void Crc32x(const Register& rd, const Register& rn, const Register& rm) {
+    assert(allow_macro_instructions_);
+    crc32x(rd, rn, rm);
+  }
+
+  // CRC32C macros
+  void Crc32cb(const Register& rd, const Register& rn, const Register& rm) {
+    assert(allow_macro_instructions_);
+    crc32cb(rd, rn, rm);
+  }
+  void Crc32ch(const Register& rd, const Register& rn, const Register& rm) {
+    assert(allow_macro_instructions_);
+    crc32ch(rd, rn, rm);
+  }
+  void Crc32cw(const Register& rd, const Register& rn, const Register& rm) {
+    assert(allow_macro_instructions_);
+    crc32cw(rd, rn, rm);
+  }
+  void Crc32cx(const Register& rd, const Register& rn, const Register& rm) {
+    assert(allow_macro_instructions_);
+    crc32cx(rd, rn, rm);
+  }
+
   // Move macros.
   void Mov(const Register& rd, uint64_t imm);
   void Mov(const Register& rd, const Operand& operand);
@@ -129,7 +163,7 @@ class MacroAssembler : public Assembler {
   }
   void Mvn(const Register& rd, uint64_t imm) {
     Mov(rd, ~imm);
-  };
+  }
   void Mvn(const Register& rd, const Operand& operand);
   bool IsImmMovn(uint64_t imm, unsigned reg_size);
   bool IsImmMovz(uint64_t imm, unsigned reg_size);
@@ -158,6 +192,8 @@ class MacroAssembler : public Assembler {
   void LoadStoreMacro(const CPURegister& rt,
                       const MemOperand& addr,
                       LoadStoreOp op);
+
+  void Prfm(PrefetchOperation op, const MemOperand& addr);
 
   // Push or pop up to 4 registers of the same width to or from the stack,
   // using the current stack pointer as set by SetStackPointer.
@@ -1188,5 +1224,3 @@ class InstructionAccurateScope {
 
 
 }  // namespace vixl
-
-#endif  // VIXL_A64_MACRO_ASSEMBLER_A64_H_

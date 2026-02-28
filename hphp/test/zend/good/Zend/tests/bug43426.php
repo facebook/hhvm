@@ -1,6 +1,6 @@
 <?hh
 
-function foo2($d) {}
+function foo2($d) :mixed{}
 
 <<__EntryPoint>> function main(): void {
 $c = 1; // doesn't matter

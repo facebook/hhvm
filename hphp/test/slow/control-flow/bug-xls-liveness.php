@@ -1,6 +1,6 @@
 <?hh
 
-function strip_hh_prefix($str, $nonobject_types_only = false) {
+function strip_hh_prefix($str, $nonobject_types_only = false) :mixed{
   if (!is_string($str)) {
     return $str;
   }
@@ -65,7 +65,7 @@ function strip_hh_prefix($str, $nonobject_types_only = false) {
   return $out;
 }
 
-function main() {
+function main() :mixed{
   var_dump(strip_hh_prefix("HH\\bool", true));
   var_dump(strip_hh_prefix("HH\\boolean", true));
   var_dump(strip_hh_prefix("HH\\int", true));
@@ -84,6 +84,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_bug_xls_liveness() {
+function main_bug_xls_liveness() :mixed{
 main();
 }

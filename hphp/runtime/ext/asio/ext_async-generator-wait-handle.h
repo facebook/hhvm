@@ -47,9 +47,12 @@ namespace HPHP {
  */
 struct AsyncGenerator;
 
-struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
-  WAITHANDLE_CLASSOF(AsyncGeneratorWaitHandle);
-  WAITHANDLE_DTOR(AsyncGeneratorWaitHandle);
+struct c_AsyncGeneratorWaitHandle final :
+    c_ResumableWaitHandle,
+    SystemLib::ClassLoader<"HH\\AsyncGeneratorWaitHandle"> {
+  using SystemLib::ClassLoader<"HH\\AsyncGeneratorWaitHandle">::classof;
+  using SystemLib::ClassLoader<"HH\\AsyncGeneratorWaitHandle">::className;
+  WAITHANDLE_DTOR(AsyncGeneratorWaitHandle)
 
   c_AsyncGeneratorWaitHandle(AsyncGenerator* gen, c_WaitableWaitHandle* child);
   ~c_AsyncGeneratorWaitHandle();
@@ -77,7 +80,7 @@ struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
   void failCpp();
   String getName();
   c_WaitableWaitHandle* getChild();
-  void exitContext(context_idx_t ctx_idx);
+  void exitContext(ContextIndex contextIdx);
   bool isRunning() { return getState() == STATE_RUNNING; }
 
   Resumable* resumable() const;

@@ -1,13 +1,13 @@
 <?hh
 
-function fruit() {
+function fruit() :AsyncGenerator<mixed,mixed,void>{
  yield 'apple';
  yield 'banana';
 }
 
 
  <<__EntryPoint>>
-function main_2141() {
+function main_2141() :mixed{
 foreach (fruit() as $fruit) {
  var_dump($fruit);
 }

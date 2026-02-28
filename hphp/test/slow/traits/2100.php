@@ -12,6 +12,6 @@ class c {
 const INIT1 = 123;
 
 <<__EntryPoint>>
-function main_2100() {
+function main_2100() :mixed{
 var_dump(c::$x);
 }

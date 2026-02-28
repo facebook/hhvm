@@ -20,7 +20,7 @@ function main(): void {
   $bar = "pred"; //pred
   var_dump((Foo::$bar)(10)); // int(11)
   if (Foo::$bar) {
-    var_dump(Foo::$bar(10)); // int(9)
+    var_dump(HH\dynamic_class_meth(Foo::class, $bar)(10)); // int(9)
   }
   var_dump(Foo::bar(10)); // int(20)
 }

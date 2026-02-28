@@ -51,19 +51,27 @@ val default_config : config
 val empty_config : config
 
 (** A handle to initialized shared memory. Used to connect other workers to
-    shared memory.
+    shared memory. *)
+type handle
 
-    NOTE: If you change the order, update hh_shared.c! *)
-type handle = private {
-  h_fd: Unix.file_descr;
-  h_global_size: int;
-  h_heap_size: int;
-  h_hash_table_pow_val: int;
-  h_num_workers_val: int;
-  h_shm_use_sharded_hashtbl: bool;
-  h_shm_cache_size: int;
-  h_sharded_hashtbl_fd: Unix.file_descr;
-}
+(** Internal type for a handle, to enable additional low-level heaps attachments **)
+type internal_handle
+
+(** Exposed for testing **)
+val get_heap_size : handle -> int
+
+(** Exposed for testing **)
+val get_global_size : handle -> int
+
+val clear_close_on_exec : handle -> unit
+
+val set_close_on_exec : handle -> unit
+
+val register_callbacks :
+  (config -> num_workers:int -> internal_handle option) ->
+  (internal_handle option -> worker_id:int -> unit) ->
+  (unit -> internal_handle option) ->
+  unit
 
 (** Initialize shared memory.
 
@@ -77,28 +85,14 @@ val connect : handle -> worker_id:int -> unit
     process hasn't yet connected to shared memory *)
 val get_handle : unit -> handle
 
+(** Get the worker id (starting from 1). 0 is the master process *)
+val get_worker_id : unit -> int
+
 (** Allow or disallow remove operations. *)
 val set_allow_removes : bool -> unit
 
 (** Allow or disallow shared memory writes for the current process. *)
 val set_allow_hashtable_writes_by_current_process : bool -> unit
-
-(** Directly access the shared memory table.
-
-    This can be used to provide proxying across the network *)
-module RawAccess : sig
-  type serialized = private bytes
-
-  val mem_raw : string -> bool
-
-  val get_raw : string -> serialized option
-
-  val add_raw : string -> serialized -> unit
-
-  val deserialize_raw : serialized -> 'a
-
-  val serialize_raw : 'a -> serialized
-end
 
 (** Some telemetry utilities *)
 module SMTelemetry : sig
@@ -208,7 +202,9 @@ module type Value = sig
 end
 
 (** Whether or not a backend is evictable. *)
-module type Evictability
+module type Evictability = sig
+  val evictable : bool
+end
 
 (** Used to indicate that values can be evicted at all times. *)
 module Evictable : Evictability
@@ -286,6 +282,7 @@ module type Heap = sig
 
   val mem_old : key -> bool
 
+  (** Equivalent to moving a set of entries (= key + value) to some heap of old entries. *)
   val oldify_batch : KeySet.t -> unit
 
   val revive_batch : KeySet.t -> unit

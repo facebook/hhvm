@@ -1,0 +1,6 @@
+ERROR: File "more_where_clauses.php", line 20, characters 12-17:
+Some elements in this collection are incompatible (Typing[4110])
+  File "more_where_clauses.php", line 16, characters 54-54:
+  Expected `T`
+  File "more_where_clauses.php", line 20, characters 16-16:
+  But got `int`

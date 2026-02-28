@@ -22,6 +22,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/htonll.h"
 
+#include <folly/lang/Bits.h>
 #include <sys/types.h>
 #include <stdexcept>
 
@@ -53,6 +54,7 @@ enum TType {
 };
 
 extern const StaticString
+  s_getBuffer,
   s_getTransport,
   s_flush,
   s_onewayFlush,
@@ -63,6 +65,7 @@ extern const StaticString
   s_collection,
   s_harray,
   s_TProtocolException,
+  s_TTransportException,
   s_TApplicationException;
 
 const size_t SIZE = 8192;
@@ -72,21 +75,6 @@ public:
   explicit PHPOutputTransport(const Object& protocol)
     : m_transport(protocol->o_invoke_few_args(s_getTransport, RuntimeCoeffects::fixme(), 0).toObject())
   {}
-
-  ~PHPOutputTransport() {
-    // Because this is a destructor, we might already be
-    // in the process of unwinding when this function is called, so we
-    // need to ensure that no exceptions can escape so that the unwinder
-    // does not terminate the process.
-    try {
-      if (buffer_used != 0) {
-        raise_warning("runtime/ext_thrift: "
-                      "Output buffer has %lu unflushed bytes", buffer_used);
-      }
-    } catch (...) {
-      handle_destructor_exception();
-    }
-  }
 
   void write(const char* data, size_t len) {
     if ((len + buffer_used) > SIZE) {
@@ -99,6 +87,10 @@ public:
       buffer_used += len;
       buffer_ptr += len;
     }
+  }
+
+  void push(const uint8_t* data, size_t len) {
+    write((const char*)data, len);
   }
 
   void writeI64(int64_t i) {
@@ -146,6 +138,13 @@ public:
   void onewayFlush() {
     writeBufferToTransport();
     directOnewayFlush();
+  }
+
+  String getPHPBuffer() {
+    if (buffer_used != 0) {
+      raise_warning("runtime/ext_thrift: Output buffer has %lu unflushed bytes", buffer_used);
+    }
+    return m_transport->o_invoke_few_args(s_getBuffer, RuntimeCoeffects::fixme(), 0).toString();
   }
 
 private:
@@ -213,46 +212,61 @@ struct PHPInputTransport {
     }
   }
 
-  void readBytes(void* buf, size_t len) {
-    while (len) {
-      size_t chunk_size = len < buffer_used ? len : buffer_used;
-      if (chunk_size) {
-        memcpy(buf, buffer_ptr, chunk_size);
-        buffer_ptr += chunk_size;
-        buffer_used -= chunk_size;
-        buf = reinterpret_cast<char*>(buf) + chunk_size;
-        len -= chunk_size;
+  void skipNoAdvance(size_t len) {
+    DCHECK_LE(len, length());
+    buffer_ptr += len;
+    buffer_used -= len;
+  }
+
+  size_t length() noexcept {
+    return buffer_used;
+  }
+
+  const uint8_t* data() noexcept {
+    return reinterpret_cast<const uint8_t*>(buffer_ptr);
+  }
+
+  void pull(void* buf, size_t len) {
+    if (LIKELY(len < buffer_used)) {
+      // Fast path if we have enough data
+      memcpy(buf, buffer_ptr, len);
+      buffer_ptr += len;
+      buffer_used -= len;
+    } else {
+      // Slow path at the end of the buffer
+      while (len) {
+        size_t chunk_size = len < buffer_used ? len : buffer_used;
+        if (chunk_size) {
+          memcpy(buf, buffer_ptr, chunk_size);
+          buffer_ptr += chunk_size;
+          buffer_used -= chunk_size;
+          buf = reinterpret_cast<char*>(buf) + chunk_size;
+          len -= chunk_size;
+        }
+        if (! len) break;
+        refill(len);
       }
-      if (! len) break;
-      refill(len);
     }
   }
 
-  int8_t readI8() {
-    int8_t c;
-    readBytes(&c, 1);
-    return c;
+  template<typename T>
+  T readBE() {
+    return folly::Endian::big(read<T>());
   }
 
-  int16_t readI16() {
-    int16_t c;
-    readBytes(&c, 2);
-    return (int16_t)ntohs(c);
-  }
-
-  uint32_t readU32() {
-    uint32_t c;
-    readBytes(&c, 4);
-    return (uint32_t)ntohl(c);
-  }
-
-  int32_t readI32() {
-    int32_t c;
-    readBytes(&c, 4);
-    return (int32_t)ntohl(c);
+  template<typename T>
+  T readLE() {
+    return folly::Endian::little(read<T>());
   }
 
 private:
+  template<typename T>
+  T read() {
+    T ret;
+    pull(&ret, sizeof(T));
+    return ret;
+  }
+
   void refill(size_t len) {
     assertx(buffer_used == 0);
     len = std::max<size_t>(len, SIZE);

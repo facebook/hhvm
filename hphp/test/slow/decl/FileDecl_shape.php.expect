@@ -1,0 +1,41 @@
+vec(3) {
+  string(4) "key1"
+  string(4) "key2"
+  string(22) "FAKE_CLASS::FAKE_CONST"
+}
+dict(2) {
+  ["name"]=>
+  string(7) "fooType"
+  ["kind"]=>
+  string(48) "shape('k1' => int, BAD_CLS::BAD_CONST => string)"
+}
+vec(1) {
+  string(26) "GaryTestClass::TEST_STRING"
+}
+dict(2) {
+  ["name"]=>
+  string(7) "clsTest"
+  ["kind"]=>
+  string(40) "shape(GaryTestClass::TEST_STRING => int)"
+}
+dict(3) {
+  ["type"]=>
+  string(40) "shape(GaryTestClass::TEST_STRING => int)"
+  ["kind"]=>
+  string(5) "shape"
+  ["subtypes"]=>
+  vec(1) {
+    dict(2) {
+      ["name"]=>
+      string(26) "GaryTestClass::TEST_STRING"
+      ["type"]=>
+      dict(2) {
+        ["type"]=>
+        string(3) "int"
+        ["kind"]=>
+        string(9) "primitive"
+      }
+    }
+  }
+}
+

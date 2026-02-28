@@ -1,0 +1,9 @@
+NOTICE: Implicit Class to string conversion for argument 1 passed to test1()
+NOTICE: Implicit Class to string conversion for argument 1 passed to test1c()
+---
+NOTICE: Implicit Class to string conversion for argument 1 passed to test2()
+NOTICE: Implicit Class to string conversion for argument 1 passed to test2c()
+---
+NOTICE: Class passed to classname type-hint
+NOTICE: Class passed to classname type-hint
+Done

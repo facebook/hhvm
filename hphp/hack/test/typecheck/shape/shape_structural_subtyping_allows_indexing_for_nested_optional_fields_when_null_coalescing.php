@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type InnerShape = shape(?'inner_optional_field' => int);
 type OuterShape = shape(?'outer_optional_field' => InnerShape);

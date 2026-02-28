@@ -27,7 +27,7 @@ class Foo4 <T as Ta as Fooable> {
   public ?T $x = null;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   set_error_handler(
     (int $errno, string $errstr) ==> {
       if ($errno === E_RECOVERABLE_ERROR) {

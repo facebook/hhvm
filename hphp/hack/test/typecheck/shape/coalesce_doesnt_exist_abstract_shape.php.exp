@@ -1,0 +1,4 @@
+ERROR: File "coalesce_doesnt_exist_abstract_shape.php", line 7, characters 5-19:
+You are accessing a field known to not exist (Typing[4321])
+  File "coalesce_doesnt_exist_abstract_shape.php", line 4, characters 29-60:
+  The field `c` is not defined in this shape

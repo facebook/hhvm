@@ -1,0 +1,19 @@
+[packages]
+
+[packages.prod]
+soft_includes=["soft"]
+
+[packages.soft]
+includes=["prod"]
+
+[packages.tmp]
+includes=["intern"]
+
+[packages.intern]
+includes=["prod", "soft"]
+
+[deployments]
+
+[deployments.prod]
+packages=["prod"]
+soft_packages = ["soft", "tmp"]

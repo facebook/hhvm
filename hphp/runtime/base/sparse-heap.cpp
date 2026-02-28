@@ -14,16 +14,15 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/alloc.h"
-#include "hphp/util/safe-cast.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/trace.h"
 #include <folly/portability/SysMman.h>
 
 namespace HPHP {
 
-TRACE_SET_MOD(mm);
+TRACE_SET_MOD(mm)
 
 std::atomic_bool SparseHeap::s_shutdown = false;
 
@@ -38,7 +37,7 @@ void SparseHeap::reset() {
         tl_heap_id, m_pooled_slabs.size(), m_bigs.countBlocks());
 #if !FOLLY_SANITIZE
   // trash fill is redundant with ASAN
-  if (RuntimeOption::EvalTrashFillOnRequestExit) {
+  if (Cfg::Eval::TrashFillOnRequestExit) {
     m_bigs.iterate([&](HeapObject* h, size_t size) {
       memset(h, kSmallFreeFill, size);
     });
@@ -46,15 +45,11 @@ void SparseHeap::reset() {
 #endif
   auto const do_free =
     [this] (void* ptr, size_t size) {
-      if (RuntimeOption::EvalBigAllocUseLocalArena) {
+      if (Cfg::Eval::BigAllocUseLocalArena) {
         if (size) local_sized_free(ptr, size);
       } else {
 #ifdef USE_JEMALLOC
-#if JEMALLOC_VERSION_MAJOR >= 4
         sdallocx(ptr, size, 0);
-#else
-        dallocx(ptr, 0);
-#endif
 #else
         free(ptr);
         MemoryManager::g_threadDeallocated += size;
@@ -63,17 +58,15 @@ void SparseHeap::reset() {
   };
   TaggedSlabList pooledSlabs;
   void* pooledSlabTail = nullptr;
-  auto const UNUSED isShuttingDown = s_shutdown.load(std::memory_order_acquire);
+  auto const isShuttingDown = s_shutdown.load(std::memory_order_acquire);
   for (auto& slab : m_pooled_slabs) {
     m_bigs.erase(slab.ptr);
-#ifdef __linux__
     if (isShuttingDown) {
       // Free the slab by remapping to overwrite it. This may still fail (e.g.,
       // when the slab comes from weird things such as a 1G page and the kernel
       // doesn't handle it properly); so check the result.
       if (SlabManager::UnmapSlab(slab.ptr)) continue;
     }
-#endif
     if (!pooledSlabTail) pooledSlabTail = slab.ptr;
     pooledSlabs.push_front<true>(slab.ptr, slab.version);
   }
@@ -110,7 +103,7 @@ HeapObject* SparseHeap::allocSlab(MemoryUsageStats& stats) {
     return static_cast<HeapObject*>(p);
   };
 
-  if (m_slabManager && m_hugeBytes < RuntimeOption::RequestHugeMaxBytes) {
+  if (m_slabManager && m_hugeBytes < Cfg::Server::RequestHugeMaxBytes) {
     if (auto slab = m_slabManager->tryAlloc()) {
       stats.mmap_volume += kSlabSize;
       stats.mmap_cap += kSlabSize;
@@ -123,7 +116,7 @@ HeapObject* SparseHeap::allocSlab(MemoryUsageStats& stats) {
   }
 #ifdef USE_JEMALLOC
   auto const flags = MALLOCX_ALIGN(kSlabAlign) |
-    (RuntimeOption::EvalBigAllocUseLocalArena ? local_arena_flags : 0);
+    (Cfg::Eval::BigAllocUseLocalArena ? local_arena_flags : 0);
   auto slab = mallocx(kSlabSize, flags);
   // this is the expected behavior of jemalloc 5 and above;
   // if the allocation size differs, HHVM
@@ -143,7 +136,7 @@ HeapObject* SparseHeap::allocSlab(MemoryUsageStats& stats) {
 void* SparseHeap::allocBig(size_t bytes, bool zero, MemoryUsageStats& stats) {
 #ifdef USE_JEMALLOC
   int flags = (zero ? MALLOCX_ZERO : 0) |
-    (RuntimeOption::EvalBigAllocUseLocalArena ? local_arena_flags : 0);
+    (Cfg::Eval::BigAllocUseLocalArena ? local_arena_flags : 0);
   auto n = static_cast<HeapObject*>(mallocx(bytes, flags));
   auto cap = sallocx(n, flags);
 #else
@@ -176,16 +169,12 @@ void SparseHeap::freeBig(void* ptr, MemoryUsageStats& stats) {
   stats.mm_freed += cap;
   stats.malloc_cap -= cap;
 #ifdef USE_JEMALLOC
-  if (RuntimeOption::EvalBigAllocUseLocalArena) {
+  if (Cfg::Eval::BigAllocUseLocalArena) {
     assertx(nallocx(cap, local_arena_flags) == sallocx(ptr, local_arena_flags));
     local_sized_free(ptr, cap);
   } else {
     assertx(nallocx(cap, 0) == sallocx(ptr, 0));
-#if JEMALLOC_VERSION_MAJOR >= 4
     sdallocx(ptr, cap, 0);
-#else
-    dallocx(ptr, 0);
-#endif
   }
 #else
   MemoryManager::g_threadDeallocated += cap;
@@ -199,7 +188,7 @@ void* SparseHeap::resizeBig(void* ptr, size_t new_size,
   auto old_cap = m_bigs.get(old);
 #ifdef USE_JEMALLOC
   auto const flags =
-    (RuntimeOption::EvalBigAllocUseLocalArena ? local_arena_flags : 0);
+    (Cfg::Eval::BigAllocUseLocalArena ? local_arena_flags : 0);
   auto const newNode = static_cast<HeapObject*>(
     rallocx(ptr, new_size, flags)
   );

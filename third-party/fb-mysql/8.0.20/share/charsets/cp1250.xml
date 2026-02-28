@@ -1,0 +1,190 @@
+<?xml version='1.0' encoding="utf-8"?>
+
+<charsets>
+
+<copyright>
+ Copyright (c) 2003, 2005 MySQL AB
+   Use is subject to license terms
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License, version 2.0,
+  as published by the Free Software Foundation.
+
+  This program is also distributed with certain software (including
+  but not limited to OpenSSL) that is licensed under separate terms,
+  as designated in a particular file or component or in included license
+  documentation.  The authors of MySQL hereby grant you an additional
+  permission to link the program and your derivative works with the
+  separately licensed software that they have included with MySQL.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License, version 2.0, for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+</copyright>
+
+<charset name="cp1250">
+
+<ctype>
+<map>
+  00
+  20  20  20  20  20  20  20  20  20  28  28  28  28  28  20  20
+  20  20  20  20  20  20  20  20  20  20  20  20  20  20  20  20
+  48  10  10  10  10  10  10  10  10  10  10  10  10  10  10  10
+  84  84  84  84  84  84  84  84  84  84  10  10  10  10  10  10
+  10  81  81  81  81  81  81  01  01  01  01  01  01  01  01  01
+  01  01  01  01  01  01  01  01  01  01  01  10  10  10  10  10
+  10  82  82  82  82  82  82  02  02  02  02  02  02  02  02  02
+  02  02  02  02  02  02  02  02  02  02  02  10  10  10  10  20
+  20  20  10  20  10  10  10  10  20  10  01  10  01  01  01  01
+  20  10  10  10  10  10  10  10  20  10  02  10  02  02  02  02
+  48  10  10  01  10  01  10  01  10  10  01  10  10  10  10  01
+  10  10  10  02  10  10  10  10  10  02  02  10  01  10  02  02
+  01  01  01  01  01  01  01  01  01  01  01  01  01  01  01  01
+  01  01  01  01  01  01  01  10  01  01  01  01  01  01  01  02
+  02  02  02  02  02  02  02  02  02  02  02  02  02  02  02  02
+  02  02  02  02  02  02  02  10  02  02  02  02  02  02  02  10
+</map>
+</ctype>
+
+
+<lower>
+<map>
+  00  01  02  03  04  05  06  07  08  09  0A  0B  0C  0D  0E  0F
+  10  11  12  13  14  15  16  17  18  19  1A  1B  1C  1D  1E  1F
+  20  21  22  23  24  25  26  27  28  29  2A  2B  2C  2D  2E  2F
+  30  31  32  33  34  35  36  37  38  39  3A  3B  3C  3D  3E  3F
+  40  61  62  63  64  65  66  67  68  69  6A  6B  6C  6D  6E  6F
+  70  71  72  73  74  75  76  77  78  79  7A  5B  5C  5D  5E  5F
+  60  61  62  63  64  65  66  67  68  69  6A  6B  6C  6D  6E  6F
+  70  71  72  73  74  75  76  77  78  79  7A  7B  7C  7D  7E  7F
+  80  81  82  83  84  85  86  87  88  89  9A  8B  9C  9D  9E  9F
+  90  91  92  93  94  95  96  97  98  99  9A  9B  9C  9D  9E  9F
+  A0  A1  A2  B3  A4  B9  A6  A7  A8  A9  BA  AB  AC  AD  AE  BF
+  B0  B1  B2  B3  B4  B5  B6  B7  B8  B9  BA  BB  BE  BD  BE  BF
+  E0  E1  E2  E3  E4  E5  E6  E7  E8  E9  EA  EB  EC  ED  EE  EF
+  F0  F1  F2  F3  F4  F5  F6  D7  F8  F9  FA  FB  FC  FD  FE  DF
+  E0  E1  E2  E3  E4  E5  E6  E7  E8  E9  EA  EB  EC  ED  EE  EF
+  F0  F1  F2  F3  F4  F5  F6  F7  F8  F9  FA  FB  FC  FD  FE  FF
+</map>
+</lower>
+
+
+<upper>
+<map>
+  00  01  02  03  04  05  06  07  08  09  0A  0B  0C  0D  0E  0F
+  10  11  12  13  14  15  16  17  18  19  1A  1B  1C  1D  1E  1F
+  20  21  22  23  24  25  26  27  28  29  2A  2B  2C  2D  2E  2F
+  30  31  32  33  34  35  36  37  38  39  3A  3B  3C  3D  3E  3F
+  40  41  42  43  44  45  46  47  48  49  4A  4B  4C  4D  4E  4F
+  50  51  52  53  54  55  56  57  58  59  5A  5B  5C  5D  5E  5F
+  60  41  42  43  44  45  46  47  48  49  4A  4B  4C  4D  4E  4F
+  50  51  52  53  54  55  56  57  58  59  5A  7B  7C  7D  7E  7F
+  80  81  82  83  84  85  86  87  88  89  8A  8B  8C  8D  8E  8F
+  90  91  92  93  94  95  96  97  98  99  8A  9B  8C  8D  8E  8F
+  A0  A1  A2  A3  A4  A5  A6  A7  A8  A9  AA  AB  AC  AD  AE  AF
+  B0  B1  B2  A3  B4  B5  B6  B7  B8  A5  AA  BB  BC  BD  BC  AF
+  C0  C1  C2  C3  C4  C5  C6  C7  C8  C9  CA  CB  CC  CD  CE  CF
+  D0  D1  D2  D3  D4  D5  D6  D7  D8  D9  DA  DB  DC  DD  DE  DF
+  C0  C1  C2  C3  C4  C5  C6  C7  C8  C9  CA  CB  CC  CD  CE  CF
+  D0  D1  D2  D3  D4  D5  D6  F7  D8  D9  DA  DB  DC  DD  DE  FF
+</map>
+</upper>
+
+
+<unicode>
+<map>
+0000 0001 0002 0003 0004 0005 0006 0007 0008 0009 000A 000B 000C 000D 000E 000F
+0010 0011 0012 0013 0014 0015 0016 0017 0018 0019 001A 001B 001C 001D 001E 001F
+0020 0021 0022 0023 0024 0025 0026 0027 0028 0029 002A 002B 002C 002D 002E 002F
+0030 0031 0032 0033 0034 0035 0036 0037 0038 0039 003A 003B 003C 003D 003E 003F
+0040 0041 0042 0043 0044 0045 0046 0047 0048 0049 004A 004B 004C 004D 004E 004F
+0050 0051 0052 0053 0054 0055 0056 0057 0058 0059 005A 005B 005C 005D 005E 005F
+0060 0061 0062 0063 0064 0065 0066 0067 0068 0069 006A 006B 006C 006D 006E 006F
+0070 0071 0072 0073 0074 0075 0076 0077 0078 0079 007A 007B 007C 007D 007E 007F
+20AC 0000 201A 0000 201E 2026 2020 2021 0000 2030 0160 2039 015A 0164 017D 0179
+0000 2018 2019 201C 201D 2022 2013 2014 0000 2122 0161 203A 015B 0165 017E 017A
+00A0 02C7 02D8 0141 00A4 0104 00A6 00A7 00A8 00A9 015E 00AB 00AC 00AD 00AE 017B
+00B0 00B1 02DB 0142 00B4 00B5 00B6 00B7 00B8 0105 015F 00BB 013D 02DD 013E 017C
+0154 00C1 00C2 0102 00C4 0139 0106 00C7 010C 00C9 0118 00CB 011A 00CD 00CE 010E
+0110 0143 0147 00D3 00D4 0150 00D6 00D7 0158 016E 00DA 0170 00DC 00DD 0162 00DF
+0155 00E1 00E2 0103 00E4 013A 0107 00E7 010D 00E9 0119 00EB 011B 00ED 00EE 010F
+0111 0144 0148 00F3 00F4 0151 00F6 00F7 0159 016F 00FA 0171 00FC 00FD 0163 02D9
+</map>
+</unicode>
+
+
+<collation name="cp1250_general_ci">
+<map>
+  00  01  02  03  04  05  06  07  08  09  0A  0B  0C  0D  0E  0F
+  10  11  12  13  14  15  16  17  18  19  1A  1B  1C  1D  1E  1F
+  20  21  22  23  24  25  26  27  28  29  2A  2B  2C  2D  2E  2F
+  30  31  32  33  34  35  36  37  38  39  3A  3B  3C  3D  3E  3F
+  40  41  42  43  46  49  4A  4B  4C  4D  4E  4F  50  52  53  55
+  56  57  58  59  5B  5C  5D  5E  5F  60  61  63  64  65  66  67
+  68  41  42  43  46  49  4A  4B  4C  4D  4E  4F  50  52  53  55
+  56  57  58  59  5B  5C  5D  5E  5F  60  61  7B  7C  7D  7E  7F
+  80  81  82  83  84  85  86  87  88  89  5A  8B  5A  5B  62  62
+  90  91  92  93  94  95  96  97  98  99  5A  9B  5A  5B  62  62
+  20  A1  A2  50  A4  41  A6  59  A8  A9  59  AB  AC  AD  AE  62
+  B0  B1  B2  50  B4  B5  B6  B7  B8  41  59  BB  50  BD  50  62
+  58  41  41  41  41  50  45  43  44  49  49  49  49  4D  4D  46
+  47  53  53  55  55  55  55  D7  58  5C  5C  5C  5C  60  5B  59
+  58  41  41  41  41  50  45  43  44  49  49  49  49  4D  4D  46
+  47  53  53  55  55  55  55  F7  58  5C  5C  5C  5C  60  5B  FF
+</map>
+</collation>
+
+<collation name="cp1250_croatian_ci">
+<map>
+00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F
+10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F
+20 21 22 23 24 25 26 27 28 29 2A 2B 2C 2D 2E 2F
+30 31 32 33 34 35 36 37 38 39 3A 3B 3C 3D 3E 3F
+40 41 43 44 48 4B 4D 4E 4F 50 52 53 54 56 57 59
+5B 5C 5D 5F 62 64 66 67 68 69 6B 90 91 92 93 94
+95 41 43 44 48 4B 4D 4E 4F 50 52 53 54 56 57 59
+5B 5C 5D 5F 62 64 66 67 68 69 6B 96 97 98 99 9A
+9B 9C 9E 9F A0 A1 A2 A3 A4 A5 60 A6 5F 62 6C 6B
+A7 A8 A9 AA AB AC AD AE AF B0 60 B1 5F 62 6C 6B
+B2 B3 B4 54 B5 41 B6 B7 B8 B9 5F BA BB BC BD 6B
+BE BF C0 54 C1 C2 C3 C4 C5 41 5F C6 54 C7 54 6B
+5D 41 41 41 41 54 47 44 46 4B 4B 4B 4B 50 50 48
+4A 57 57 59 59 59 59 C8 5D 64 64 64 64 69 62 5F
+5D 41 41 41 41 54 47 44 46 4B 4B 4B 4B 50 50 48
+4A 57 57 59 59 59 59 C9 5D 64 64 64 64 69 62 FF
+</map>
+</collation>
+
+<collation name="cp1250_polish_ci">
+<map>
+00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F
+10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F
+20 21 22 23 24 25 26 27 28 29 2A 2B 2C 2D 2E 2F
+30 31 32 33 34 35 36 37 38 39 3A 3B 3C 3D 3E 3F
+40 41 43 44 48 4B 4D 4E 4F 50 52 53 54 56 57 59
+5B 5C 5D 5F 62 64 66 67 68 69 6B 90 91 92 93 94
+95 41 43 44 48 4B 4D 4E 4F 50 52 53 54 56 57 59
+5B 5C 5D 5F 62 64 66 67 68 69 6B 96 97 98 99 9A
+9B 9C 9E 9F A0 A1 A2 A3 A4 A5 5F A6 60 62 6B 6C
+A7 A8 A9 AA AB AC AD AE AF B0 5F B1 60 62 6B 6C
+B2 B3 B4 55 B5 42 B6 B7 B8 B9 5F BA BB BC BD 6D
+BE BF C0 55 C1 C2 C3 C4 C5 42 5F C6 54 C7 54 6D
+5D 41 41 41 41 54 47 44 44 4B 4C 4B 4B 50 50 48
+48 58 57 5A 59 59 59 C8 5D 64 64 64 64 69 62 5F
+5D 41 41 41 41 54 47 44 44 4B 4C 4B 4B 50 50 48
+48 58 57 5A 59 59 59 C9 5D 64 64 64 64 69 62 FF
+</map>
+</collation>
+
+<collation name="cp1250_czech_ci"/>
+
+<collation name="cp1250_bin"	flag="binary"/>
+
+</charset>
+
+</charsets>

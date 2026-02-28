@@ -1,0 +1,4 @@
+ERROR: File "private_static_final_bad.php", line 8, characters 9-11:
+Private members cannot be accessed dynamically. Did you mean to use 'self::'? (Typing[4112])
+  File "private_static_final_bad.php", line 12, characters 27-29:
+  This member is private

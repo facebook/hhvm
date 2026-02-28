@@ -1,0 +1,28 @@
+{
+  "pools": {
+    "A.wildcard": {
+      "server_timeout": 1000,
+      "servers": [
+        "localhost:12345",
+        "localhost:12345"
+      ]
+    },
+    "B.wildcard": {
+      "server_timeout": 2000,
+      "servers": [
+        "localhost:12345",
+        "localhost:12345"
+      ]
+    }
+  },
+  "routes": [
+    {
+      "aliases": [ "/a/a/" ],
+      "route": "PoolRoute|A.wildcard"
+    },
+    {
+      "aliases": [ "/b/b/" ],
+      "route": "PoolRoute|B.wildcard"
+    }
+  ]
+}

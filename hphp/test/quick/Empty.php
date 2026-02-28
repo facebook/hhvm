@@ -5,7 +5,7 @@ abstract final class quickEmpty {
 }
 
 <<__EntryPoint>>
-function f() {
+function f() :mixed{
 
   $x = 0;
   \HH\global_set('y', 0);

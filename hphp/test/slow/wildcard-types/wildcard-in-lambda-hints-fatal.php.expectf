@@ -1,0 +1,2 @@
+
+Catchable fatal error: Value returned from closure must be of type HH\vec, int given in %s/test/slow/wildcard-types/wildcard-in-lambda-hints-fatal.php on line 5

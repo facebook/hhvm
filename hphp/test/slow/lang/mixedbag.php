@@ -4,23 +4,23 @@
  * mixedbag is intended to run quickly and test a bunch of functionality.
  */
 
-function ack($m, $n){
+function ack($m, $n):mixed{
   if($m == 0) return $n+1;
   if($n == 0) return ack($m-1, 1);
   return ack($m - 1, ack($m, ($n - 1)));
 }
 
-function ackermann($n = 7) {
+function ackermann($n = 7) :mixed{
   $r = ack(3,$n);
   print "ack(3,$n): $r\n";
 }
 
-function ary($n = 50000) {
-  $X = darray[];
+function ary($n = 50000) :mixed{
+  $X = dict[];
   for ($i=0; $i<$n; $i++) {
     $X[$i] = $i;
   }
-  $Y = darray[];
+  $Y = dict[];
   for ($i=$n-1; $i>=0; $i--) {
     $Y[$i] = $X[$i];
   }
@@ -28,8 +28,8 @@ function ary($n = 50000) {
   print "$Y[$last]\n";
 }
 
-function ary2($n = 50000) {
-  $X = darray[];
+function ary2($n = 50000) :mixed{
+  $X = dict[];
   for ($i=0; $i<$n;) {
     $X[$i] = $i; ++$i;
     $X[$i] = $i; ++$i;
@@ -43,7 +43,7 @@ function ary2($n = 50000) {
     $X[$i] = $i; ++$i;
     $X[$i] = $i; ++$i;
   }
-  $Y = darray[];
+  $Y = dict[];
   for ($i=$n-1; $i>=0;) {
     $Y[$i] = $X[$i]; --$i;
     $Y[$i] = $X[$i]; --$i;
@@ -61,9 +61,9 @@ function ary2($n = 50000) {
   print "$Y[$last]\n";
 }
 
-function ary3($n = 2000) {
-  $X = darray[];
-  $Y = darray[];
+function ary3($n = 2000) :mixed{
+  $X = dict[];
+  $Y = dict[];
   for ($i=0; $i<$n; $i++) {
     $X[$i] = $i + 1;
     $Y[$i] = 0;
@@ -79,17 +79,17 @@ function ary3($n = 2000) {
   print " $Y[$last]\n";
 }
 
-function fibo_r($n){
+function fibo_r($n):mixed{
     return(($n < 2) ? 1 : fibo_r($n - 2) + fibo_r($n - 1));
 }
 
-function fibo($n = 30) {
+function fibo($n = 30) :mixed{
   $r = fibo_r($n);
   print "$r\n";
 }
 
-function hash1($n = 50000) {
-  $X = darray[];
+function hash1($n = 50000) :mixed{
+  $X = dict[];
   for ($i = 1; $i <= $n; $i++) {
     $X[dechex($i)] = $i;
   }
@@ -100,9 +100,9 @@ function hash1($n = 50000) {
   print "$c\n";
 }
 
-function hash2($n = 500) {
-  $hash1 = darray[];
-  $hash2 = darray[];
+function hash2($n = 500) :mixed{
+  $hash1 = dict[];
+  $hash2 = dict[];
   for ($i = 0; $i < $n; $i++) {
     $hash1["foo_$i"] = $i;
     $hash2["foo_$i"] = 0;
@@ -117,7 +117,7 @@ function hash2($n = 500) {
   print "$hash1[$first] $hash1[$last] $hash2[$first] $hash2[$last]\n";
 }
 
-function heapsort_r($n, inout $ra) {
+function heapsort_r($n, inout $ra) :mixed{
   $l = ($n >> 1) + 1;
   $ir = $n;
 
@@ -149,8 +149,8 @@ function heapsort_r($n, inout $ra) {
   }
 }
 
-function heapsort($N = 20000) {
-  $ary = darray[];
+function heapsort($N = 20000) :mixed{
+  $ary = dict[];
   for ($i=1; $i<=$N; $i++) {
     $ary[$i] = ($N - $i);
   }
@@ -158,34 +158,34 @@ function heapsort($N = 20000) {
   var_dump($ary[$N]);
 }
 
-function mkmatrix ($rows, $cols) {
+function mkmatrix ($rows, $cols) :mixed{
   $count = 1;
-  $mx = darray[];
+  $mx = dict[];
   for ($i=0; $i<$rows; $i++) {
     for ($j=0; $j<$cols; $j++) {
-      if (!array_key_exists($i, $mx)) $mx[$i] = darray[];
+      if (!array_key_exists($i, $mx)) $mx[$i] = dict[];
       $mx[$i][$j] = $count++;
     }
   }
   return($mx);
 }
 
-function mmult ($rows, $cols, $m1, $m2) {
-  $m3 = darray[];
+function mmult ($rows, $cols, $m1, $m2) :mixed{
+  $m3 = dict[];
   for ($i=0; $i<$rows; $i++) {
     for ($j=0; $j<$cols; $j++) {
       $x = 0;
       for ($k=0; $k<$cols; $k++) {
         $x += $m1[$i][$k] * $m2[$k][$j];
       }
-      if (!array_key_exists($i, $m3)) $m3[$i] = darray[];
+      if (!array_key_exists($i, $m3)) $m3[$i] = dict[];
       $m3[$i][$j] = $x;
     }
   }
   return($m3);
 }
 
-function matrix($n = 20) {
+function matrix($n = 20) :mixed{
   $SIZE = 5;
   $m1 = mkmatrix($SIZE, $SIZE);
   $m2 = mkmatrix($SIZE, $SIZE);
@@ -195,7 +195,7 @@ function matrix($n = 20) {
   print "{$mm[0][0]} {$mm[2][3]} {$mm[3][2]} {$mm[4][4]}\n";
 }
 
-function nestedloop($n = 12) {
+function nestedloop($n = 12) :mixed{
   $x = 0;
   for ($a=0; $a<$n; $a++)
     for ($b=0; $b<$n; $b++)
@@ -207,7 +207,7 @@ function nestedloop($n = 12) {
   print "$x\n";
 }
 
-function sieve($n = 30) {
+function sieve($n = 30) :mixed{
   $count = 0;
   while ($n-- > 0) {
     $count = 0;
@@ -224,7 +224,7 @@ function sieve($n = 30) {
   print "Count: $count\n";
 }
 
-function strcat($n = 200000) {
+function strcat($n = 200000) :mixed{
   $str = "";
   while ($n-- > 0) {
     $str .= "hello\n";
@@ -234,22 +234,22 @@ function strcat($n = 200000) {
 }
 
 function bottomUpTree($item, $depth)
-{
+:mixed{
    if($depth)
    {
       --$depth;
       $newItem = $item<<1;
-      return varray[
+      return vec[
          bottomUpTree($newItem - 1, $depth),
          bottomUpTree($newItem, $depth),
          $item
       ];
    }
-   return varray[NULL, NULL, $item];
+   return vec[NULL, NULL, $item];
 }
 
 function itemCheck($treeNode)
-{
+:mixed{
    $check = 0;
    do
    {
@@ -264,7 +264,7 @@ function itemCheck($treeNode)
    while(TRUE);
 }
 
-function binary_trees($n = 12) {
+function binary_trees($n = 12) :mixed{
   $minDepth = 4;
   $maxDepth = max($minDepth + 2, $n);
   $stretchDepth = $maxDepth + 1;
@@ -302,12 +302,12 @@ function binary_trees($n = 12) {
   $maxDepth, itemCheck($longLivedTree));
 }
 
-function Fannkuch_run($n){
+function Fannkuch_run($n):mixed{
    $check = 0;
-   $perm = darray[];
-   $perm1 = darray[];
-   $count = darray[];
-   $maxPerm = darray[];
+   $perm = dict[];
+   $perm1 = dict[];
+   $count = dict[];
+   $maxPerm = dict[];
    $maxFlipsCount = 0;
    $m = $n - 1;
 
@@ -359,12 +359,12 @@ function Fannkuch_run($n){
    }
 }
 
-function fannkuch($n = 9) {
+function fannkuch($n = 9) :mixed{
   printf("Pfannkuchen(%d) = %d\n", $n, Fannkuch_run($n));
 }
 
 <<__EntryPoint>>
-function main_function() {
+function main_function() :mixed{
   ackermann(2);
   ary(500);
   ary2(500);

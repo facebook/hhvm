@@ -4,14 +4,14 @@ class foo implements Throwable {
   function __construct($msg) {
     $this->msg = $msg;
   }
-  function getMessage() { return $msg; }
-  function getCode() {}
-  function getFile() {}
-  function getLine() {}
-  function getTrace() {}
-  function getTraceAsString() {}
-  function getPrevious() {}
-  function __toString()[] {}
+  function getMessage() :mixed{ return $msg; }
+  function getCode() :mixed{}
+  function getFile() :mixed{}
+  function getLine() :mixed{}
+  function getTrace() :mixed{}
+  function getTraceAsString() :mixed{}
+  function getPrevious() :mixed{}
+  function __toString()[] :mixed{}
 }
 <<__EntryPoint>> function main(): void {
 try {

@@ -1,6 +1,6 @@
 <?hh
 
-function g() {
+function g() :mixed{
   exit;
   $x = exit;
   exit(0);

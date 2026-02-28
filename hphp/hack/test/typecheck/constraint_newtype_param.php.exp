@@ -1,4 +1,4 @@
-File "constraint_newtype_param.php--file1.php", line 3, characters 23-26:
+ERROR: File "constraint_newtype_param.php--file1.php", line 3, characters 23-26:
 Some type arguments violate their constraints (Typing[4323])
   File "constraint_newtype_param.php--file1.php", line 2, characters 9-9:
   `T` is a constrained type parameter
@@ -8,7 +8,19 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `bool`
   File "constraint_newtype_param.php--file1.php", line 3, characters 25-25:
   But got `T as int`
-File "constraint_newtype_param.php--file2.php", line 2, characters 14-22:
+ERROR: File "constraint_newtype_param.php--file1.php", line 3, characters 23-26:
+Some type arguments violate their constraints (Typing[4323])
+  File "constraint_newtype_param.php--file1.php", line 2, characters 9-9:
+  `T` is a constrained type parameter
+  File "constraint_newtype_param.php--file1.php", line 2, characters 14-17:
+  This type constraint is violated
+  File "constraint_newtype_param.php--file1.php", line 2, characters 14-17:
+  Expected `bool`
+  File "constraint_newtype_param.php--file1.php", line 3, characters 25-25:
+  But got `int`
+  File "constraint_newtype_param.php--file1.php", line 3, characters 16-18:
+    by the definition of `T`
+ERROR: File "constraint_newtype_param.php--file2.php", line 2, characters 14-22:
 Some type arguments violate their constraints (Typing[4323])
   File "constraint_newtype_param.php--file1.php", line 3, characters 11-11:
   `T` is a constrained type parameter

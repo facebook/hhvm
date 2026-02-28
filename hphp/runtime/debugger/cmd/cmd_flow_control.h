@@ -79,6 +79,8 @@ struct CmdFlowControl : DebuggerCommand {
     return m_needsVMInterrupt;
   }
 
+  std::string name() const override { return "flow_control"; }
+
 protected:
   void sendImpl(DebuggerThriftBuffer&) override;
   void recvImpl(DebuggerThriftBuffer&) override;

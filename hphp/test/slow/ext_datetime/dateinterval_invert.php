@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_dateinterval_invert() {
+function main_dateinterval_invert() :mixed{
 date_default_timezone_set("UTC");
 
 $a = new DateTime("@0");

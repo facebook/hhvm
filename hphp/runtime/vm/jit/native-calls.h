@@ -92,8 +92,8 @@ struct CallInfo {
   std::vector<Arg> args;
 };
 
-typedef std::initializer_list<CallInfo> CallInfoList;
-typedef hphp_hash_map<Opcode, CallInfo, std::hash<Opcode>> CallInfoMap;
+using CallInfoList = std::initializer_list<CallInfo>;
+using CallInfoMap = hphp_hash_map<Opcode, CallInfo, std::hash<Opcode>>;
 
 struct CallMap {
   explicit CallMap(CallInfoList infos);

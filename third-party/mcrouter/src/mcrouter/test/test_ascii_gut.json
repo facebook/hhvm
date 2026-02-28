@@ -1,0 +1,9 @@
+{
+  "pools": {
+    "A": {
+      "servers": [ "127.0.0.1:11540" ],
+      "protocol": "ascii"
+    }
+  },
+  "route": "PoolRoute|A"
+}

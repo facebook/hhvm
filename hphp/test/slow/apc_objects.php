@@ -9,7 +9,7 @@ class B {
   public $f;
 }
 
-function apcOps($key, $val) {
+function apcOps($key, $val) :mixed{
   apc_store($key, $val);
   // need to fetch the value twice because under common
   // config settings object are serialized on first store
@@ -21,7 +21,7 @@ function apcOps($key, $val) {
 
 
 <<__EntryPoint>>
-function main_apc_objects() {
+function main_apc_objects() :mixed{
 $s = strtolower('heLLo');
 
 echo "**** Object instance with simple properties\n";

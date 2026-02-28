@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /*
  *  Copyright (c) 2004-present, Facebook, Inc.
  *  All rights reserved.
@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class DictDivideTest extends HackTest {
 
   public static function providePartition(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Dict\associate(Vec\range(1, 10), Vec\range(11, 20)),
         $val ==> $val % 2 === 0,
@@ -60,7 +60,7 @@ final class DictDivideTest extends HackTest {
   }
 
   public static function providePartitionWithKey(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Dict\associate(Vec\range(1, 10), Vec\range(11, 20)),
         ($key, $val) ==> $val >= 19 || $key <= 3,

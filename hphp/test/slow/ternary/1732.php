@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1732() {
+function main_1732() :mixed{
 $t = true;
  $a = $t ? "" : "a" . $t . "b";
 }

@@ -1,0 +1,58 @@
+ERROR: File "shape_idx_wrong.php", line 9, characters 10-101:
+Invalid return type (Typing[4110])
+  File "shape_idx_wrong.php", line 8, characters 33-42:
+  Expected `int`
+  File "shape_idx_wrong.php", line 11, characters 12-40:
+  But got `?(_ | _)`
+  File "expr_tree.php", line 101, characters 26-31:
+    via this generic `TInfer`
+ERROR: File "shape_idx_wrong.php", line 11, characters 37-39:
+You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
+  File "shape_idx_wrong.php", line 10, characters 10-29:
+  The field `z` is not defined in this shape
+ERROR: File "shape_idx_wrong.php", line 19, characters 37-39:
+You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
+  File "shape_idx_wrong.php", line 18, characters 10-29:
+  The field `z` is not defined in this shape
+ERROR: File "shape_idx_wrong.php", line 26, characters 10-99:
+Invalid return type (Typing[4110])
+  File "shape_idx_wrong.php", line 25, characters 33-42:
+  Expected `int`
+  File "shape_idx_wrong.php", line 28, characters 12-40:
+  But got `?(_ | _ | string)`
+  File "expr_tree.php", line 101, characters 26-31:
+    via this generic `TInfer`
+ERROR: File "shape_idx_wrong.php", line 34, characters 10-94:
+Invalid return type (Typing[4110])
+  File "shape_idx_wrong.php", line 33, characters 34-43:
+  Expected `int`
+  File "expr_tree.php", line 147, characters 40-45:
+  But got `string`
+ERROR: File "shape_idx_wrong.php", line 36, characters 37-39:
+You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
+  File "shape_idx_wrong.php", line 35, characters 10-16:
+  The field `y` is not defined in this shape
+ERROR: File "shape_idx_wrong.php", line 43, characters 5-45:
+Too many positional arguments (expected 3 but got 4) (Typing[4105])
+  File "Shapes.hhi", line 41, characters 28-30:
+  Definition is here
+ERROR: File "shape_idx_wrong.php", line 46, characters 34-39:
+Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
+ERROR: File "shape_idx_wrong.php", line 49, characters 5-32:
+Too few positional arguments (required 2 but got 1) (Typing[4104])
+  File "Shapes.hhi", line 41, characters 28-30:
+  Definition is here
+ERROR: File "shape_idx_wrong.php", line 52, characters 34-36:
+You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
+  File "shape_idx_wrong.php", line 5, characters 36-62:
+  The field `x` is not defined in this shape
+ERROR: File "shape_idx_wrong.php", line 55, characters 5-34:
+`HH\string` does not support this operator (it has no instance method named `__unwrap`) (Typing[4053])
+ERROR: File "shape_idx_wrong.php", line 62, characters 10-140:
+Invalid return type (Typing[4110])
+  File "shape_idx_wrong.php", line 59, characters 33-45:
+  Expected `string`
+  File "shape_idx_wrong.php", line 63, characters 24-33:
+  But got `mixed` because the field `y` may be set to any type in this shape
+  File "expr_tree.php", line 101, characters 26-31:
+    via this generic `TInfer`

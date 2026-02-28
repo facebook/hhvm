@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 /*
  * It is permissible to include additional fields when passing a shape into a
@@ -21,7 +21,7 @@ function bar(): void {
       'b' => "b string",
       'c' => true,
       'd' => 9000.1,
-      'e' => varray[],
+      'e' => vec[],
     ),
   );
 }

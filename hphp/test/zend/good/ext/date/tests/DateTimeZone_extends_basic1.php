@@ -3,7 +3,7 @@
 class DateTimeZoneExt extends DateTimeZone
 {
 	public function __toString()
-	{
+:mixed	{
 		return parent::getName();
 	}
 }

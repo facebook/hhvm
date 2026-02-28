@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   var_dump((Vector {1, 2})->immutable());
   var_dump((ImmVector {1, 2})->immutable());
   var_dump((Map {'a' => 1, 'a' => 2})->immutable());
@@ -11,6 +11,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_immutable() {
+function main_immutable() :mixed{
 main();
 }

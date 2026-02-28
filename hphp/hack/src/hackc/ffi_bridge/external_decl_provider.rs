@@ -1,0 +1,163 @@
+// Copyright (c) Facebook, Inc. and its affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
+use std::cell::RefCell;
+use std::ffi::c_void;
+
+use cxx::CxxString;
+use decl_provider::ConstDecl;
+use decl_provider::Error;
+use decl_provider::FunDecl;
+use decl_provider::ModuleDecl;
+use decl_provider::Result;
+use decl_provider::TypeDecl;
+use direct_decl_parser::Decls;
+use hash::HashMap;
+use libc::c_char;
+
+use crate::DeclProvider;
+use crate::DeclsHolder;
+
+/// Keep this in sync with struct ExternalDeclProviderResult in decl_provider.h
+#[repr(C)]
+pub enum ExternalDeclProviderResult {
+    Missing,
+    Decls(*const DeclsHolder),
+    RustVec(*const Vec<u8>),
+    CppString(*const CxxString),
+}
+
+// Bridge to C++ DeclProviders.
+unsafe extern "C" {
+    // Safety: direct_decl_parser::Decls is a list of tuples, which cannot be repr(C)
+    // even if the contents are. But we never dereference Decls in C++.
+    #[allow(improper_ctypes)]
+    fn provide_type(
+        provider: *const c_void,
+        symbol: *const c_char,
+        symbol_len: usize,
+        depth: u64,
+    ) -> ExternalDeclProviderResult;
+
+    #[allow(improper_ctypes)]
+    fn provide_func(
+        provider: *const c_void,
+        symbol: *const c_char,
+        symbol_len: usize,
+    ) -> ExternalDeclProviderResult;
+
+    #[allow(improper_ctypes)]
+    fn provide_const(
+        provider: *const c_void,
+        symbol: *const c_char,
+        symbol_len: usize,
+    ) -> ExternalDeclProviderResult;
+
+    #[allow(improper_ctypes)]
+    fn provide_module(
+        provider: *const c_void,
+        symbol: *const c_char,
+        symbol_len: usize,
+    ) -> ExternalDeclProviderResult;
+}
+
+/// An ExternalDeclProvider implements the Rust DeclProvider trait, which
+/// provides access to individual shallow_decl_defs::Decls, and the C++
+/// DeclProvider interface, which provides the serialized decls for whole
+/// source files, which are opaque to C++.
+///
+/// This class avoids repeatedly deserializing the same data by memoizing
+/// deserialized decls, indexed by content hash of the serialized data.
+pub struct ExternalDeclProvider {
+    pub provider: *const c_void,
+    decls: RefCell<HashMap<Box<[u8]>, Decls>>,
+}
+
+impl ExternalDeclProvider {
+    pub fn new(provider: *const c_void) -> Self {
+        Self {
+            provider,
+            decls: Default::default(),
+        }
+    }
+}
+
+impl std::fmt::Debug for ExternalDeclProvider {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("ExternalDeclProvider")
+    }
+}
+
+impl DeclProvider for ExternalDeclProvider {
+    fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl> {
+        let result = unsafe {
+            // Invoke extern C/C++ provider implementation.
+            provide_type(self.provider, symbol.as_ptr() as _, symbol.len(), depth)
+        };
+        self.find_decl(result, |decls| decl_provider::find_type_decl(decls, symbol))
+    }
+
+    fn func_decl(&self, symbol: &str) -> Result<FunDecl> {
+        let result = unsafe { provide_func(self.provider, symbol.as_ptr() as _, symbol.len()) };
+        self.find_decl(result, |decls| decl_provider::find_func_decl(decls, symbol))
+    }
+
+    fn const_decl(&self, symbol: &str) -> Result<ConstDecl> {
+        let result = unsafe { provide_const(self.provider, symbol.as_ptr() as _, symbol.len()) };
+        self.find_decl(result, |decls| {
+            decl_provider::find_const_decl(decls, symbol)
+        })
+    }
+
+    fn module_decl(&self, symbol: &str) -> Result<ModuleDecl> {
+        let result = unsafe { provide_module(self.provider, symbol.as_ptr() as _, symbol.len()) };
+        self.find_decl(result, |decls| {
+            decl_provider::find_module_decl(decls, symbol)
+        })
+    }
+}
+
+impl ExternalDeclProvider {
+    /// Search for the decl we asked for in the list of decls returned.
+    /// This is O(N) for now.
+    fn find_decl<T>(
+        &self,
+        result: ExternalDeclProviderResult,
+        mut find: impl FnMut(&Decls) -> Result<T>,
+    ) -> Result<T> {
+        match result {
+            ExternalDeclProviderResult::Missing => Err(Error::NotFound),
+            ExternalDeclProviderResult::Decls(ptr) => {
+                let holder = unsafe { ptr.as_ref() }.unwrap();
+                find(&holder.parsed_file.decls)
+            }
+            ExternalDeclProviderResult::RustVec(p) => {
+                // turn raw pointer back into &Vec<u8>
+                let data = unsafe { p.as_ref().unwrap() };
+                find(&self.deser(data)?)
+            }
+            ExternalDeclProviderResult::CppString(p) => {
+                // turn raw pointer back into &CxxString
+                let data = unsafe { p.as_ref().unwrap() };
+                find(&self.deser(data.as_bytes())?)
+            }
+        }
+    }
+
+    /// Either deserialize the given data, or access a memoized copy of previously
+    /// deserialized decls from identical data. The memo key is a content hash
+    /// appended to data at serialization time.
+    fn deser(&self, data: &[u8]) -> Result<Decls> {
+        use std::collections::hash_map::Entry::*;
+        let content_hash = decl_provider::decls_content_hash(data);
+        match self.decls.borrow_mut().entry(content_hash.into()) {
+            Occupied(e) => Ok(e.get().clone()),
+            Vacant(e) => {
+                let decls = decl_provider::deserialize_decls(data)?;
+                Ok(e.insert(decls).clone())
+            }
+        }
+    }
+}

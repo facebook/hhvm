@@ -2,24 +2,24 @@
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:11-34], "\\keyvalue_collection_lit");
       fd_fun =
       { f_span = [3:2-6:3]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((dict<int, int>), (Some ([3:37-50], (Happly (([3:37-41], "\\HH\\dict"), [([3:42-45], (Hprim Tint)); ([3:46-49], (Hprim Tint))])))));
-        f_name = ([3:11-34], "\\keyvalue_collection_lit"); f_tparams = []; 
-        f_where_constraints = []; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_readonly_ret = None; f_tparams = []; f_ret = ((~dict<int, int>), (Some ([3:37-50], (Happly (([3:37-41], "\\HH\\dict"), [([3:42-45], (Hprim Tint)); ([3:46-49], (Hprim Tint))])))));
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([5:4-38],
             (Return
                (Some ((dict<int, int>), [5:11-37],
-                      (KeyValCollection (Dict, None,
+                      (KeyValCollection (([5:11-15], Dict), None,
                          [(((string), [5:18-23], (Hole (((string), [5:18-23], (String "bad")), (string), (int), Typing))), ((int), [5:27-28], (Int "1")));
                            (((int), [5:30-31], (Int "1")), ((int), [5:35-36], (Int "2")))]
                          ))))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
-      fd_internal = false })
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:11-34], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None })

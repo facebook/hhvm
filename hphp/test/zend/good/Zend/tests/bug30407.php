@@ -1,6 +1,6 @@
 <?hh
 
-function haricow($a = 'one') {
+function haricow($a = 'one') :mixed{
     var_dump($a);
     $a = 'two';
 }

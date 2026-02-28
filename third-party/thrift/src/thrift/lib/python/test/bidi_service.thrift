@@ -1,0 +1,85 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+namespace cpp2 apache.thrift.test
+namespace py3 thrift.python
+
+include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
+struct SinkChunk {
+  1: string value;
+}
+
+struct StreamChunk {
+  1: string value;
+}
+
+struct FirstRequest {
+  1: string value;
+}
+
+struct FirstResponse {
+  1: string value;
+}
+
+exception SinkException {
+  @thrift.ExceptionMessage
+  1: string message;
+}
+
+exception StreamException {
+  @thrift.ExceptionMessage
+  1: string message;
+}
+
+exception MethodException {
+  @thrift.ExceptionMessage
+  1: string message;
+}
+
+enum ThrowWhere {
+  FIRST_RESPONSE = 0,
+  FROM_SINK = 1,
+  STREAM_BEFORE_FIRST_CHUNK = 2,
+  STREAM_AFTER_FIRST_CHUNK = 3,
+}
+
+service TestBidiService {
+  sink<string>, stream<string> echo(1: double serverDelay);
+
+  string, sink<string>, stream<string> echoWithResponse(1: string initial);
+
+  sink<string>, stream<i32> intStream(1: double serverDelay);
+
+  FirstResponse, sink<SinkChunk>, stream<StreamChunk> structBidi(
+    1: FirstRequest request,
+  );
+
+  // Method that throws an exception:
+  // if where is 0, throws on the method
+  // if where is 1, throws on the stream before first chunk
+  // if where is 2, throws on the stream after first chunk
+  // otherwise, doesn't throw
+  sink<i64 throws (1: SinkException sinkEx)>, stream<
+    i64 throws (1: StreamException streamEx)
+  > canThrow(1: ThrowWhere where, 2: bool expected_throw) throws (
+    1: MethodException methodEx,
+  );
+}

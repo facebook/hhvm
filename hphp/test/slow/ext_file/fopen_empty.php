@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_fopen_empty() {
+function main_fopen_empty() :mixed{
 var_dump(fopen('', 'r'));
 }

@@ -4,13 +4,14 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
-
-use crate::common::{gen_helpers, to_snake};
+use quote::format_ident;
+use quote::quote;
 
 use super::Context;
+use crate::common::gen_helpers;
+use crate::common::to_snake;
 
-pub fn gen(ctx: &Context) -> TokenStream {
+pub fn r#gen(ctx: &Context) -> TokenStream {
     let uses = gen_helpers::gen_module_uses(ctx.modules());
     let visit_functions = ctx.types().map(gen_visit_function).collect::<Vec<_>>();
 

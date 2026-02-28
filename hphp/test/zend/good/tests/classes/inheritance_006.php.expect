@@ -1,0 +1,6 @@
+object(C) (2) {
+  ["c":"B":private]=>
+  NULL
+  ["c":"A":private]=>
+  NULL
+}

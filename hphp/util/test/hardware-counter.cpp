@@ -16,7 +16,6 @@
 
 #include "hphp/util/hardware-counter.h"
 
-#include <algorithm>
 #include <cstring>
 
 #include "hphp/util/hash.h"

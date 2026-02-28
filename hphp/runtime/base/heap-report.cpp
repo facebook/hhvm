@@ -21,10 +21,9 @@
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/assertions.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/container-functions.h"
 
-TRACE_SET_MOD(heapreport);
+TRACE_SET_MOD(heapreport)
 
 namespace HPHP {
 namespace {
@@ -78,6 +77,7 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::WaitHandle:
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::AwaitAllWH:
+    case HeaderKind::ConcurrentWH:
       out << ":" << static_cast<const ObjectData*>(h)->classname_cstr();
       break;
     case HeaderKind::Vector:
@@ -124,7 +124,7 @@ std::string describePtr(const HeapGraph& g, const HeapGraph::Ptr& ptr) {
   std::ostringstream out;
   out << " " << ptrSym[(unsigned)ptr.ptr_kind];
   auto& from = g.nodes[ptr.from];
-  if (!from.is_root) out << describe(g, ptr.from);
+  if (!from.is_root()) out << describe(g, ptr.from);
   else out << type_scan::getName(from.tyindex);
   return out.str();
 }

@@ -37,6 +37,13 @@ bool simplify(Env&, const Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+template <typename Inst>
+bool psimplify(Env&, const Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/) {
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 bool operand_one(Env& env, Vreg op) {
   auto const op_it = env.unit.regToConst.find(op);
   if (op_it == env.unit.regToConst.end()) return false;
@@ -84,26 +91,85 @@ bool simplify(Env& env, const cmovq& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool simplify(Env& env, const loadb& inst, Vlabel b, size_t i) {
-  if (if_inst<Vinstr::movzbl>(env, b, i + 1, [&] (const movzbl& mov) {
-      // loadb{s, tmp}; movzbl{tmp, d}; -> loadzbl{s, d};
-      if (!(env.use_counts[inst.d] == 1 && inst.d == mov.s)) return false;
+template <typename reg_type>
+static bool get_const_int(Env& env, reg_type op, uint64_t &Val) {
+  auto const op_it = env.unit.regToConst.find(op);
+  if (op_it == env.unit.regToConst.end()) return false;
+  auto const op_const = op_it->second;
+  assert(op_const.kind != Vconst::Double);
+  if (op_const.isUndef) return false;
+  Val = op_const.val;
+  return true;
+}
 
-      return simplify_impl(env, b, i, [&] (Vout& v) {
-        v << loadzbl{inst.s, mov.d};
-        return 2;
-      }); })) {
-      return true;
+bool simplify(Env& env, const shrqi& inst, Vlabel b, size_t i) {
+  if (env.use_counts[inst.d] != 1 || env.use_counts[inst.sf] ||
+      inst.s0.l() > 32) return false;
+
+  return if_inst<Vinstr::testl>(env, b, i + 1, [&] (const testl& tstl) {
+    if (tstl.s1 != inst.d || env.use_counts[tstl.sf] != 1) return false;
+
+    uint64_t Val;
+    if (!get_const_int(env, tstl.s0, Val) || folly::popcount(Val) != 1) {
+      return false;
     }
 
-  return if_inst<Vinstr::movsbl>(env, b, i + 1, [&] (const movsbl& mov) {
-      // loadb{s, tmp}; movsbl{tmp, d}; -> loadsbl{s, d};
-      if (!(env.use_counts[inst.d] == 1 && inst.d == mov.s)) return false;
+    auto shift_amt = inst.s0.l();
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      uint64_t NewVal = Val << shift_amt;
+      v << testq{env.unit.makeConst(NewVal), inst.s1, tstl.sf, tstl.fl};
+      return 2;
+    });
+  });
+}
+
+bool simplify(Env& env, const testq& inst, Vlabel b, size_t i) {
+  if (env.use_counts[inst.sf] != 1) return false;
+
+  uint64_t Val;
+  if (!get_const_int(env, inst.s0, Val) || Val != 0x8000000000000000ull) {
+    return false;
+  }
+
+  return if_inst<Vinstr::jcc>(env, b, i + 1, [&] (const jcc& jcci) {
+    if (jcci.sf != inst.sf || jcci.cc != CC_E) return false;
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      auto const sf = v.makeReg();
+      v << cmpqi{0, inst.s1, sf, inst.fl};
+      v << jcc{CC_GE, sf, {jcci.targets[0], jcci.targets[1]}, jcci.tag};
+      return 2;
+    });
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+template <Vinstr::Opcode ExtOp, typename ExtMov, typename ExtLoad, typename Load>
+bool simplify_load_ext(Env& env, const Load& inst, Vlabel b, size_t i) {
+  return if_inst<ExtOp>(env, b, i + 1, [&] (const ExtMov& mov) {
+      if (env.use_counts[inst.d] != 1 || inst.d != mov.s) return false;
 
       return simplify_impl(env, b, i, [&] (Vout& v) {
-        v << loadsbl{inst.s, mov.d};
+        v << ExtLoad{inst.s, mov.d};
         return 2;
-      }); });
+      });
+  });
+}
+
+bool simplify(Env& env, const loadb& inst, Vlabel b, size_t i) {
+  if (simplify_load_ext<Vinstr::movzbl, movzbl, loadzbl>(env, inst, b, i)) {
+    return true;
+  }
+  if (simplify_load_ext<Vinstr::movzbq, movzbq, loadzbq>(env, inst, b, i)) {
+    return true;
+  }
+  if (simplify_load_ext<Vinstr::movsbl, movsbl, loadsbl>(env, inst, b, i)) {
+    return true;
+  }
+  if (simplify_load_ext<Vinstr::movsbq, movsbq, loadsbq>(env, inst, b, i)) {
+    return true;
+  }
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -127,6 +193,49 @@ bool simplify(Env& env, const ldimmq& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool simplify(Env& env, const movtqb& inst, Vlabel b, size_t i) {
+  if (env.use_counts[inst.d] != 1) return false;
+
+  // movtqb{s, tmp}; movzbq{tmp, d} --> movzbq{s, d}
+  bool simplified = if_inst<Vinstr::movzbq>(env, b, i + 1, [&](const movzbq& ext) {
+      if (ext.s != inst.d) return false;
+
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+        v << movzbq{Vreg8((Vreg)inst.s), ext.d};
+        return 2;
+      });
+    });
+
+  if (simplified) return true;
+
+  // movtqb{s, tmp}; andbi{imm, tmp, d} --> copy{s, tmp}; andbi{imm, tmp, d}
+  // the copy vasm could be a nop if tmp == d
+  return if_inst<Vinstr::andbi>(env, b, i + 1, [&](const andbi& vandbi) {
+      if (vandbi.s1 != inst.d) return false;
+
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+        v << copy{Vreg8((Vreg)inst.s), vandbi.s1};
+        return 1;
+      });
+    });
+}
+
+bool simplify(Env& env, const movzbq& inst, Vlabel b, size_t i) {
+  auto const def_op = env.def_insts[inst.s];
+
+  // Check if `inst.s' was defined by an andbi instruction, which
+  // automatically clears the high bits.
+  if (def_op != Vinstr::andbi) {
+    return false;
+  }
+
+  // If so, the movzbq{} is redundant
+  return simplify_impl(env, b, i, [&] (Vout& v) {
+    v << copy{inst.s, inst.d};
+    return 1;
+  });
+}
+
 bool simplify(Env& env, const movzbl& inst, Vlabel b, size_t i) {
   // movzbl{s, d}; shrli{2, s, d} --> ubfmli{2, 7, s, d}
   return if_inst<Vinstr::shrli>(env, b, i + 1, [&](const shrli& sh) {
@@ -145,6 +254,180 @@ bool simplify(Env& env, const movzbl& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool simplify(Env& env, const movsbq& inst, Vlabel b, size_t i) {
+  // movsbq{s, tmp}; shlqi{imm, tmp, d} -> sbfizq{imm, 8, s, d}
+  return if_inst<Vinstr::shlqi>(env, b, i + 1, [&] (const shlqi& sh) {
+    if (inst.d != sh.s1) return false;
+    if (env.use_counts[inst.d] != 1) return false;
+    if (sh.fl) return false;
+    if (sh.sf.isValid() && env.use_counts[sh.sf]) return false;
+
+    auto const shift = sh.s0.l();
+    if (shift < 0 || shift > 56) return false;
+
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      auto const src = Vreg64(Vreg(inst.s));
+      v << sbfizq{sh.s0, Immed{8}, src, sh.d};
+      return 2;
+    });
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+int is_adjacent_vptr64(const Vptr64& a, const Vptr64& b, int32_t step, int32_t min_disp, int32_t max_disp) {
+  const int32_t min_disp_val = a.disp < b.disp ? a.disp : b.disp;
+  if (a.base.isValid() && b.base.isValid() &&
+      !a.index.isValid() && !b.index.isValid() &&
+      a.base == b.base &&
+      a.scale == 1 && b.scale == 1 &&
+      a.width == b.width &&
+      (a.disp - b.disp == step || b.disp - a.disp == step) &&
+      (min_disp_val >= min_disp && min_disp_val <= max_disp && (min_disp_val % step) == 0)) {
+    return a.disp < b.disp ? -1 : 1;
+  }
+  return 0;
+}
+
+bool simplify(Env& env, const store& inst, Vlabel b, size_t i) {
+  // store{s, d}; store{s, d} --> storepair{s0, s1, d}
+  return if_inst<Vinstr::store>(env, b, i + 1, [&](const store& st) {
+    if (!inst.s.isGP()) return false;
+    if (!st.s.isGP()) return false;
+    const auto rv = is_adjacent_vptr64(inst.d, st.d, 8, -512, 504);
+    if (rv != 0) {
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+        if (rv < 0) {
+          v << storepair{inst.s, st.s, inst.d};
+        } else {
+          v << storepair{st.s, inst.s, st.d};
+        }
+        return 2;
+      });
+    }
+    return false;
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool simplify(Env& env, const storel& inst, Vlabel b, size_t i) {
+  // storel{s, d}; storel{s, d} --> storepairl{s0, s1, d}
+  return if_inst<Vinstr::storel>(env, b, i + 1, [&](const storel& st) {
+    if (!inst.s.isGP()) return false;
+    if (!st.s.isGP()) return false;
+    const auto rv = is_adjacent_vptr64(inst.m, st.m, 4, -256, 252);
+    if (rv != 0) {
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+        if (rv < 0) {
+          v << storepairl{inst.s, st.s, inst.m};
+        } else {
+          v << storepairl{st.s, inst.s, st.m};
+        }
+        return 2;
+      });
+    }
+    return false;
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool simplify(Env& env, const load& inst, Vlabel b, size_t i) {
+  // load{d, m}; load{d, m} --> loadpair{s, d0, d1}
+  return if_inst<Vinstr::load>(env, b, i + 1, [&](const load& ld) {
+    if (inst.d == ld.d) return false;
+    if (!inst.d.isGP()) return false;
+    if (!ld.d.isGP()) return false;
+    const auto rv = is_adjacent_vptr64(inst.s, ld.s, 8, -512, 504);
+    if (rv != 0) {
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+        if (rv < 0) {
+          v << loadpair{inst.s, inst.d, ld.d};
+        } else {
+          v << loadpair{ld.s, ld.d, inst.d};
+        }
+        return 2;
+      });
+    }
+    return false;
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool simplify(Env& env, const loadl& inst, Vlabel b, size_t i) {
+  // loadl{d, m}; loadl{d, m} --> loadpairl{s, d0, d1}
+  bool simplified = if_inst<Vinstr::loadl>(env, b, i + 1, [&](const loadl& ld) {
+    if (inst.d == ld.d) return false;
+    if (!inst.d.isGP()) return false;
+    if (!ld.d.isGP()) return false;
+    const auto rv = is_adjacent_vptr64(inst.s, ld.s, 4, -256, 252);
+    if (rv != 0) {
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+        if (rv < 0) {
+          v << loadpairl{inst.s, inst.d, ld.d};
+        } else {
+          v << loadpairl{ld.s, ld.d, inst.d};
+        }
+        return 2;
+      });
+    }
+    return false;
+  });
+  if (simplified) return true;
+
+  // Eliminate IncRef/DecRef redundant load:
+  // B1:
+  //    ...
+  //    loadl      [xI] => xJ
+  //    cmpli      0, xJ => SF
+  //    jcc        GE, SF, B2, else B3
+  // B2:   preds: B1
+  //    loadl      [xI] => xK
+  //    incl/decl  xK => xK, SF
+  //    storel     xK, [xI]
+  if (i == 0 && env.preds[b].size() == 1) {
+    auto const p = env.preds[b][0];
+    if (env.unit.blocks[p].code.size() >= 3) {
+      auto& predCode = env.unit.blocks[p].code;
+      auto const lastIdx = predCode.size() - 1;
+      auto const& pred1 = predCode[lastIdx];
+      auto const& pred2 = predCode[lastIdx - 1];
+      auto const& pred3 = predCode[lastIdx - 2];
+      if (pred1.op == Vinstr::jcc && pred2.op == Vinstr::cmpli &&
+          pred3.op == Vinstr::loadl && pred3.loadl_.s == inst.s) {
+        return simplify_impl(env, b, i, [&] (Vout& v) {
+          v << movl{pred3.loadl_.d, inst.d};
+          return 1;
+        });
+      }
+    }
+  }
+
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool psimplify(Env& env, const store& inst, Vlabel b, size_t i) {
+  return simplify(env, inst, b, i);
+}
+
+bool psimplify(Env& env, const storel& inst, Vlabel b, size_t i) {
+  return simplify(env, inst, b, i);
+}
+
+bool psimplify(Env& env, const load& inst, Vlabel b, size_t i) {
+  return simplify(env, inst, b, i);
+}
+
+bool psimplify(Env& env, const loadl& inst, Vlabel b, size_t i) {
+  return simplify(env, inst, b, i);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 bool simplify(Env& env, Vlabel b, size_t i) {
@@ -155,6 +438,23 @@ bool simplify(Env& env, Vlabel b, size_t i) {
 #define O(name, ...)    \
     case Vinstr::name:  \
       return simplify(env, inst.name##_, b, i); \
+
+    VASM_OPCODES
+#undef O
+  }
+  not_reached();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool psimplify(Env& env, Vlabel b, size_t i) {
+  assertx(i <= env.unit.blocks[b].code.size());
+  auto const& inst = env.unit.blocks[b].code[i];
+
+  switch (inst.op) {
+#define O(name, ...)    \
+    case Vinstr::name:  \
+      return psimplify(env, inst.name##_, b, i); \
 
     VASM_OPCODES
 #undef O

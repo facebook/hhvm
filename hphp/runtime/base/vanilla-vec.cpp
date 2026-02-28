@@ -15,22 +15,17 @@
 */
 #include "hphp/runtime/base/vanilla-vec.h"
 
-#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 
-#include <folly/Format.h>
 #include <folly/Likely.h>
 
 #include "hphp/runtime/base/apc-array.h"
-#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/tv-variant.h"
@@ -38,7 +33,6 @@
 
 #include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/base/packed-block.h"
-#include "hphp/runtime/base/vanilla-vec-defs.h"
 
 namespace HPHP {
 
@@ -79,9 +73,7 @@ namespace {
 
 inline ArrayData* alloc_packed_static(const ArrayData* ad) {
   auto const size = VanillaVec::capacityToSizeBytes(ad->size());
-  auto const ret = RuntimeOption::EvalLowStaticArrays
-    ? low_malloc(size)
-    : uncounted_malloc(size);
+  auto const ret = ArrayData::AllocStatic(size);
   return reinterpret_cast<ArrayData*>(reinterpret_cast<char*>(ret));
 }
 
@@ -120,7 +112,7 @@ VanillaDict* VanillaVec::ToMixedHeader(const ArrayData* old,
   auto const kind    = HeaderKind::Dict;
   auto const aux     = packSizeIndexAndAuxBits(index, 0);
   ad->initHeader_16(kind, OneReference, aux);
-  *ad->mutableKeyTypes() = VanillaDictKeys::Ints();
+  *ad->mutableKeyTypes() = ArrayKeyTypes::Ints();
   ad->m_size          = oldSize;
   ad->m_layout_index  = old->m_layout_index;
   ad->m_scale_used    = scale | uint64_t{oldSize} << 32; // used=oldSize
@@ -403,12 +395,12 @@ ArrayData* VanillaVec::MakeUninitializedVec(uint32_t size) {
   return ad;
 }
 
-ArrayData* VanillaVec::MakeVecFromAPC(const APCArray* apc, bool isLegacy) {
+ArrayData* VanillaVec::MakeVecFromAPC(const APCArray* apc, bool pure, bool isLegacy) {
   assertx(apc->isPacked());
   auto const apcSize = apc->size();
   VecInit init{apcSize};
   for (uint32_t i = 0; i < apcSize; ++i) {
-    init.append(apc->getPackedVal(i)->toLocal());
+    init.append(apc->getPackedVal(i)->toLocal(pure));
   }
   auto const ad = init.create();
   ad->setLegacyArrayInPlace(isLegacy);
@@ -546,6 +538,16 @@ tv_lval VanillaVec::LvalNewInPlace(ArrayData* ad) {
   auto const lval = LvalUncheckedInt(ad, ad->m_size++);
   type(lval) = KindOfNull;
   return lval;
+}
+
+ArrayData* VanillaVec::SetPosMove(ArrayData* adIn, ssize_t pos, TypedValue v) {
+  assertx(PosIsValid(adIn, pos));
+  assertx(v.m_type != KindOfUninit);
+  assertx(adIn->cowCheck() || adIn->notCyclic(v));
+  auto const ad = adIn->cowCheck() ? VanillaVec::Copy(adIn) : adIn;
+  tvMove(v, LvalUncheckedInt(ad, pos));
+  if (adIn != ad && adIn->decReleaseCheck()) VanillaVec::Release(adIn);
+  return ad;
 }
 
 ArrayData* VanillaVec::SetIntMove(ArrayData* adIn, int64_t k, TypedValue v) {

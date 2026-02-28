@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-key-types.h"
 #include "hphp/runtime/vm/iter.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -28,21 +29,15 @@ namespace HPHP::jit {
 /*
  * Target profile for the distribution of array types seen by a given iterator.
  *
- * We aim to identify the best IterSpecialization for that iterator, along with
- * some stats about how long the arrays we iterate over are on average and how
- * many arrays we'd fail to specialize given that specialization.
+ * We aim to identify the best key and value types for that iterator.
  */
 struct ArrayIterProfile {
   /*
    * The specialization information we've collected.
    */
   struct Result {
-    size_t num_arrays = 0;
-    size_t num_iterations = 0;
-    size_t top_count = 0;
-    IterSpecialization top_specialization =
-      IterSpecialization::generic();
-    Type value_type = TBottom;
+    ArrayKeyTypes key_types = ArrayKeyTypes::Any();
+    Type value_type = TInitCell;
   };
 
   /*
@@ -52,10 +47,8 @@ struct ArrayIterProfile {
 
   /*
    * Update the profile when we iterate over a given array.
-   *
-   * `is_kviter` will be true for iterators over both keys and values.
    */
-  void update(const ArrayData* arr, bool is_kviter);
+  void update(const ArrayData* arr);
 
   /*
    * Combine `l' and `r', summing across the kind counts.
@@ -86,25 +79,7 @@ private:
   // usually monotyped, so we don't get much benefit from examining more.
   static constexpr size_t kNumProfiledValues = 16;
 
-  size_t m_num_iterations;
-  uint32_t m_base_type_counts[IterSpecialization::kNumBaseTypes];
-  uint32_t m_key_types_counts[IterSpecialization::kNumKeyTypes];
-
-  // For bases that aren't a specialized base type, we increment m_generic
-  // instead of any of the m_base_types elements.
-  uint32_t m_generic_base_count;
-
-  // We have a generic ArrayKey option in m_key_types, but we don't want to
-  // increment it for empty bases, because empty bases fit all key types.
-  uint32_t m_empty_count;
-
-  // the first bucket keeps track of the number of zeros. yes, that makes the
-  // keyTypes count of empty redundant. the question here is... since we're
-  // making a distribution, does it make sense to use that for empty
-  // checks as well?
-  static constexpr size_t kNumApproximateCountBuckets = 32 + 1;
-
-  uint32_t m_approximate_iteration_buckets[kNumApproximateCountBuckets];
+  ArrayKeyTypes m_key_types = ArrayKeyTypes::Empty();
 
   // Track a TypeProfile for values. Zero-initialized types are TBottom.
   static_assert(Type::kBottom.empty(), "Assuming TBottom is 0");

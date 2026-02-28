@@ -9,12 +9,12 @@ class FooException extends Exception {
   }
 }
 
-function f() {
+function f() :mixed{
   throw new FooException();
 }
 
 <<__NEVER_INLINE>>
-function run() {
+function run() :mixed{
   $delta = 0;
   for ($i = 0; $i < 10; $i++) {
     $start = memory_get_usage(true);
@@ -26,7 +26,7 @@ function run() {
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   run(); run(); run(); // ignore
   $delta1 = abs(run());
   $delta2 = abs(run());

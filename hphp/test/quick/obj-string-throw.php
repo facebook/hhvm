@@ -1,13 +1,13 @@
 <?hh
 
 class foo {
-  public function __toString() { throw new Exception("asd"); }
+  public function __toString() :mixed{ throw new Exception("asd"); }
 }
 
-function main() {
+function main() :mixed{
   echo (string)(new foo());
 }
-<<__EntryPoint>> function main_entry() {
+<<__EntryPoint>> function main_entry() :mixed{
 try { main(); } catch (Exception $x) {}
 echo "done.\n";
 }

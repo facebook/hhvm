@@ -1,6 +1,6 @@
 <?hh
 
-function t() {
+function t() :mixed{
   if (mt_rand()) {
     include 'refcount-1.inc';
   } else {
@@ -10,7 +10,7 @@ function t() {
 
 
 <<__EntryPoint>>
-function main_refcount() {
+function main_refcount() :mixed{
 t();
 var_dump(Foo::VALUE);
 }

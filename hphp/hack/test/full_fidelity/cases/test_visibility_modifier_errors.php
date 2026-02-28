@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface I1 {
   function i1(): void; // legal

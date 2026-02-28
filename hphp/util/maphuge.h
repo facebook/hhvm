@@ -21,9 +21,6 @@ namespace HPHP {
 
 inline constexpr bool hugePagesSupported() {
 #ifdef MADV_HUGEPAGE
-  // Kernels earlier than 3.2.28 may have bugs dealing with MADV_HUGEPAGE.  The
-  // bug should've been fixed in production kernels now, so we no longer do
-  // run-time kernel version checks.
   return true;
 #else
   return false;
@@ -38,5 +35,15 @@ inline void hintHuge(void* mem, size_t length) {
 #endif
 }
 
+// Read the page size of transparent huge pages. On x86_64, this is 2MB.
+// On aarch64, the value can be different (e.g., 512MB)
+size_t readTHPSize();
+
+inline size_t THPPageSize() {
+#ifdef __x86_64__
+  return 2 * 1024 * 1024;
+#endif
+  return readTHPSize();
 }
 
+}

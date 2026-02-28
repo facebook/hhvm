@@ -1,0 +1,16 @@
+ERROR: File "new_map_lambda.php", line 24, characters 25-66:
+Invalid argument (Typing[4110])
+  File "new_map_lambda.php", line 18, characters 36-41:
+  Expected `MyEnum`
+  File "new_map_lambda.php", line 22, characters 30-35:
+  But got `string`
+  File "new_map_lambda.php", line 11, characters 15-16:
+    via this generic `Tk`
+ERROR: File "new_map_lambda.php", line 25, characters 25-73:
+Invalid argument (Typing[4110])
+  File "new_map_lambda.php", line 25, characters 26-31:
+  Expected `MyEnum`
+  File "new_map_lambda.php", line 22, characters 30-35:
+  But got `string`
+  File "new_map_lambda.php", line 11, characters 15-16:
+    via this generic `Tk`

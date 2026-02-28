@@ -1,14 +1,26 @@
 <?hh
-function foo(stdClass $a, AnyArray $b, callable $c, stdClass $d = null,
+function foo(stdClass $a, AnyArray $b, callable $c, ?stdClass $d = null,
              $e = null, string $f, bool $g, int $h, float $i,
-             NotExisting $j) { }
+             NotExisting $j) :mixed{ }
 function bar(): stdClass { return new stdClass; }
 
+class Base {
+  function foo<T as arraykey>() : T {
+    return 1;
+  }
+}
+
+class Derived extends Base {
+  function foo<T as ?int>() : T {
+    return 1;
+  }
+}
+
 <<__EntryPoint>>
-function main_reflection_type_detailed() {
+function main_reflection_type_detailed() :mixed{
 $closure = function (Test $a): Test { return $a; };
 echo "*** functions\n";
-foreach (varray[
+foreach (vec[
   new ReflectionFunction('foo'),
   new ReflectionFunction($closure),
 ] as $idx => $rf) {
@@ -24,7 +36,7 @@ foreach (varray[
   }
 }
 echo "\n*** methods\n";
-foreach (varray[
+foreach (vec[
   new ReflectionMethod('SplObserver', 'update'),
   new ReflectionMethod($closure, '__invoke'),
 ] as $idx => $rm) {
@@ -40,11 +52,12 @@ foreach (varray[
   }
 }
 echo "\n*** return types\n";
-foreach (varray[
+foreach (vec[
   new ReflectionMethod('SplObserver', 'update'),
   new ReflectionFunction('bar'),
   new ReflectionFunction($closure),
   new ReflectionMethod($closure, '__invoke'),
+  new ReflectionMethod('Derived', 'foo'),
 ] as $idx => $rf) {
   echo "** Function/method return type $idx\n";
   var_dump($rf->hasReturnType());

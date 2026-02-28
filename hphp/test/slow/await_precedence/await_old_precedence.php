@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 async function f(): Awaitable<bool> {
@@ -12,6 +12,6 @@ async function test(): Awaitable<void> {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   \HH\Asio\join(test());
 }

@@ -1,0 +1,6 @@
+ERROR: File "unsupported_module.php--file2.php", line 4, characters 10-10:
+Unbound name: `a` (an object type) (Naming[2049])
+ERROR: File "unsupported_module.php--file2.php", line 4, characters 12-12:
+Unbound name: `b` (a global constant) (Naming[2049])
+ERROR: File "unsupported_module.php--file2.php", line 4, characters 12-12:
+Unbound global constant (Typing) (Typing[4106])

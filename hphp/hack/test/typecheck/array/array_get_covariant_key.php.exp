@@ -1,10 +1,12 @@
-File "array_get_covariant_key.php", line 4, characters 3-11:
+WARN: File "array_get_covariant_key.php", line 8, characters 3-11:
+Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (Warn[12034])
+ERROR: File "array_get_covariant_key.php", line 4, characters 7-10:
 Invalid index type for this dict (Typing[4449])
   File "array_get_covariant_key.php", line 3, characters 44-49:
   This is a string
   File "array_get_covariant_key.php", line 3, characters 61-63:
   It is incompatible with an int
-File "array_get_covariant_key.php", line 8, characters 3-11:
+ERROR: File "array_get_covariant_key.php", line 8, characters 7-10:
 Invalid index type for this keyset (Typing[4449])
   File "array_get_covariant_key.php", line 7, characters 48-53:
   This is a string

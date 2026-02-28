@@ -1,10 +1,7 @@
-<?hh // strict
+<?hh
 
-class C {
-  public static function foo(): void {}
-}
+class C {}
 
 function test(): void {
-  $cls = C::class;
-  $cls::foo();
+  hh_expect<string>(nameof C);
 }

@@ -13,13 +13,18 @@ open Typing_defs
 module Env = Tast_env
 
 let check_xhp_children env pos ty =
-  if not @@ Env.is_xhp_child env pos ty then
+  let (is_xhp_child, subty_err_opt) = Env.is_xhp_child env pos ty in
+  let Equal = Tast_env.eq_typing_env in
+  Option.iter subty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
+  if not is_xhp_child then
     let ty_str = lazy (Env.print_error_ty ~ignore_dynamic:true env ty) in
     let ty_reason_msg =
       Lazy.map ty_str ~f:(fun ty_str ->
           Reason.to_string ("This is " ^ ty_str) (get_reason ty))
     in
-    Errors.add_typing_error
+    let Equal = Tast_env.eq_typing_env in
+    Typing_error_utils.add_typing_error
+      ~env
       Typing_error.(xhp @@ Primary.Xhp.Illegal_xhp_child { pos; ty_reason_msg })
 
 let handler =
@@ -36,14 +41,21 @@ let handler =
       match child with
       | ChildName (p, name)
         when (not @@ Naming_special_names.XHP.is_reserved name)
-             && (not @@ Naming_special_names.XHP.is_xhp_category name) ->
-        begin
-          match Env.get_class env name with
-          | Some _ -> ()
-          | None ->
-            Errors.add_naming_error
-            @@ Naming_error.Unbound_name
-                 { pos = p; name; kind = Name_context.ClassContext }
-        end
+             && (not @@ Naming_special_names.XHP.is_xhp_category name) -> begin
+        match Env.get_class env name with
+        | Decl_entry.Found _
+        | Decl_entry.NotYetAvailable ->
+          ()
+        | Decl_entry.DoesNotExist ->
+          let custom_err_config =
+            let tcopt = Tast_env.get_tcopt env in
+            TypecheckerOptions.custom_error_config tcopt
+          in
+          Diagnostics.add_diagnostic
+            (Naming_error_utils.to_user_diagnostic
+               (Naming_error.Unbound_name
+                  { pos = p; name; kind = Name_context.ClassContext })
+               custom_err_config)
+      end
       | _ -> ()
   end

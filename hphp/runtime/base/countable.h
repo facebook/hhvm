@@ -139,19 +139,19 @@ struct Countable : MaybeCountable {
 ALWAYS_INLINE void MaybeCountable::uncountedIncRef() const {
   assertx(isUncounted());
   auto& count = m_atomic_count;
-  auto const DEBUG_ONLY val = count.fetch_sub(1, std::memory_order_relaxed);
+  auto const DEBUG_ONLY val = count.fetch_sub(1, std::memory_order_acq_rel);
   assertx(val <= UncountedValue);
 }
 
 ALWAYS_INLINE bool MaybeCountable::uncountedDecRef() const {
   assertx(isUncounted());
-  auto const val = m_atomic_count.fetch_add(1, std::memory_order_relaxed);
+  auto const val = m_atomic_count.fetch_add(1, std::memory_order_acq_rel);
   return val == UncountedValue;
 }
 
 ALWAYS_INLINE bool MaybeCountable::uncountedCowCheck() const {
   assertx(!isRefCounted());
-  auto const val = m_atomic_count.load(std::memory_order_relaxed);
+  auto const val = m_atomic_count.load(std::memory_order_acquire);
   return val != UncountedValue;
 }
 

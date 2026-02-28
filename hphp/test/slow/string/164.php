@@ -3,8 +3,8 @@ class c {}
 
 
 <<__EntryPoint>>
-function main_164() {
-$a = darray['x'=>'foo'];
+function main_164() :mixed{
+$a = dict['x'=>'foo'];
 $b = 'qqq';
 $c = new c;
 $c->p = 'zzz';

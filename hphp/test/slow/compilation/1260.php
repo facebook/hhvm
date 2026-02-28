@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   $a = 0;
   try {
     $a += $b;
@@ -10,7 +10,7 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_1260() {
+function main_1260() :mixed{
   test();
   echo "done\n";
 }

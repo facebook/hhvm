@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 <<__Native>>
 function gmp_abs(mixed $a): mixed;
 
@@ -207,7 +207,7 @@ function gmp_xor(mixed $a,
                  mixed $b): mixed;
 
 
-<<__NativeData("GMPData")>>
+<<__NativeData>>
 class GMP implements Serializable {
   <<__Native>>
   public function serialize() : string;

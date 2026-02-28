@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/base/data-walker.h"
+#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -29,7 +30,11 @@ namespace HPHP {
  * If `seen` is provided, we'll use it to de-dupe new uncounted arrays.
  */
 struct MakeUncountedEnv {
-  DataWalker::PointerMap* seen;
+  using ArrayMap = req::fast_map<ArrayData*, ArrayData*, pointer_hash<ArrayData>>;
+  using StringSet = req::fast_set<StringData*, string_data_hash, string_data_same>;
+
+  ArrayMap* seenArrays;
+  StringSet* seenStrings;
 };
 
 /*

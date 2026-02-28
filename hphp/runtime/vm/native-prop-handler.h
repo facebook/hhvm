@@ -48,7 +48,7 @@ NativePropHandler* getNativePropHandler(const StringData* className);
 /**
  * Handler for a class with custom handling functions.
  */
-void registerNativePropHandler(const String& className,
+void registerNativePropHandler(const StringData* className,
                                NativePropHandler::GetFunc get,
                                NativePropHandler::SetFunc set,
                                NativePropHandler::IssetFunc isset,
@@ -117,7 +117,7 @@ Variant nativePropHandlerUnset(const Object& obj, const String& name) {
  * Example: Native::registerNativePropHandler<HandlerClassName>(className);
  */
 template<class T>
-void registerNativePropHandler(const String& className) {
+void registerNativePropHandler(const StringData* className) {
   registerNativePropHandler(
     className,
     &nativePropHandlerGet<T>,
@@ -125,6 +125,11 @@ void registerNativePropHandler(const String& className) {
     &nativePropHandlerIsset<T>,
     &nativePropHandlerUnset<T>
   );
+}
+
+template<class T>
+void registerNativePropHandler(const String& className) {
+  registerNativePropHandler<T>(className.get());
 }
 
 /**
@@ -159,7 +164,7 @@ struct BasePropHandler {
 
 /**
  * Base prop handler class, that uses `Native::PropAccessorMap`.
- * Derived classes provide the handling map with accessort per each property.
+ * Derived classes provide the handling map with accessors per each property.
  */
 template <class Derived>
 struct MapPropHandler : BasePropHandler {
@@ -219,11 +224,9 @@ struct hashNPA {
     return hash_string_i(pa->name, strlen(pa->name));
   }
 };
+
 struct cmpNPA {
-  bool operator()(const PropAccessor* pa1,
-                  const PropAccessor* pa2) const {
-    return strcasecmp(pa1->name, pa2->name) == 0;
-  }
+  bool operator()(const PropAccessor* pa1, const PropAccessor* pa2) const;
 };
 
 /**

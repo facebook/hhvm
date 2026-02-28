@@ -1,0 +1,291 @@
+Program %s/flow.php loaded. Type '[r]un' to go.
+break cls::pub()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+run
+flow_t.php loaded
+Program %s/flow.php exited normally.
+@test(1)
+test 1
+in pub:1
+in pri:1
+foo:1
+out pri:1
+out pub:1
+test done 1
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+variable
+$__debugger$this = 1
+$__debugger_exn$output = 1
+$__debugger$return_val = 1
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+run
+flow_t.php loaded
+Program %s/flow.php exited normally.
+break flow.php:18
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+@test(2)
+test 2
+in pub:2
+in pri:2
+foo:5
+out pri:2
+out pub:2
+test done 2
+step
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+variable
+$__debugger$this = 1
+$__debugger_exn$output = 1
+$__debugger$return_val = 1
+step
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+variable
+$__debugger$this = 1
+$__debugger_exn$output = 1
+$__debugger$return_val = 1
+step
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+variable
+$__debugger$this = 1
+$__debugger_exn$output = 1
+$__debugger$return_val = 1
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+step
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'step'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+run
+flow_t.php loaded
+Program %s/flow.php exited normally.
+break flow.php:6
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+@test(3)
+test 3
+in pub:3
+in pri:3
+foo:9
+out pri:3
+out pub:3
+test done 3
+run
+flow_t.php loaded
+Program %s/flow.php exited normally.
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+run
+flow_t.php loaded
+Program %s/flow.php exited normally.
+break flow.php:7
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+@test(4)
+test 4
+in pub:4
+in pri:4
+foo:13
+out pri:4
+out pub:4
+test done 4
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+out
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+out
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+out
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+run
+flow_t.php loaded
+Program %s/flow.php exited normally.
+break flow.php:46
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+test(5)
+test 5
+in pub:5
+in pri:5
+foo:17
+out pri:5
+out pub:5
+test done 5
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+out
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+run
+flow_t.php loaded
+Program %s/flow.php exited normally.
+break flow.php:46
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+test(6)
+test 6
+in pub:6
+in pri:6
+foo:21
+out pri:6
+out pub:6
+test done 6
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+out
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+out
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'out'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+run
+flow_t.php loaded
+Program %s/flow.php exited normally.
+break flow.php:7
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+@test(7)
+test 7
+in pub:7
+in pri:7
+foo:25
+out pri:7
+out pub:7
+test done 7
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+break flow.php:62
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+run
+flow_t.php loaded
+Program %s/flow.php exited normally.
+quit

@@ -72,7 +72,7 @@ function report_failure(
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $pass = true;
   foreach (vec[true, false] as $use_simple_parser) {
     foreach (test_cases() as $test_case_name => $test_case) {

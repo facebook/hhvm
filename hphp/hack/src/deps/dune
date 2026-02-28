@@ -4,7 +4,10 @@
  (modules fileInfo)
  (libraries opaque_digest pos symbol_name utils_core)
  (preprocess
-  (pps ppx_deriving.std)))
+  (pps
+   ppx_hash
+   ppx_sexp_conv
+   ppx_deriving.std)))
 
 (library
  (name symbol_name)
@@ -17,35 +20,53 @@
 (library
  (name typing_deps)
  (wrapped false)
- (modules typing_deps typing_deps_mode)
+ (modules
+  typing_deps
+  typing_deps_mode)
  (libraries
   collections
   decl_reference
-  depgraph
+  depgraph_reader
   file_info
   heap_shared_mem
   heap_shared_mem_hash
   hh_json
   logging
-  ocamlpool
   relative_path
+  sqlite3
+  sqlite_utils
   typing_deps_rust
-  worker_cancel)
+  worker_cancel
+  worker_utils)
  (preprocess
   (pps ppx_deriving.std)))
-
-(data_only_dirs cargo deps_rust)
 
 (library
  (name typing_deps_rust)
  (modules)
  (wrapped false)
- (foreign_archives deps_rust))
+ (foreign_archives deps_rust_ffi))
+
+(library
+ (name typing_pessimisation_deps)
+ (wrapped false)
+ (modules typing_pessimisation_deps)
+ (libraries
+  typing_deps
+  provider_context
+  relative_path
+  sqlite3
+  sqlite_utils)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(data_only_dirs cargo deps_rust)
+
 
 (rule
- (targets libdeps_rust.a)
+ (targets libdeps_rust_ffi.a)
  (deps
-  (source_tree %{workspace_root}/src))
+  (source_tree %{workspace_root}/hack/src))
  (locks /cargo)
  (action
-  (run %{workspace_root}/scripts/build_rust_to_ocaml.sh deps_rust deps_rust)))
+  (run %{workspace_root}/hack/scripts/invoke_cargo.sh deps_rust_ffi deps_rust_ffi)))

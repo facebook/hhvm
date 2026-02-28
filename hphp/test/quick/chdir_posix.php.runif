@@ -1,1 +1,1 @@
-function posix_access
+extension posix

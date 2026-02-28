@@ -5,8 +5,8 @@ class A {
 }
 
 <<__EntryPoint>>
-function main() {
-  $a = varray[new A];
+function main() :mixed{
+  $a = vec[new A];
   apc_store('key1', $a);
   $b = __hhvm_intrinsics\apc_fetch_no_check('key1');
   $c = $b[0];

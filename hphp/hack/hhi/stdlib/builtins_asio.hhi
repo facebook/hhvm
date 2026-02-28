@@ -8,9 +8,8 @@
  *
  */
 namespace HH {
-  function asio_get_current_context_idx();
-  function asio_get_running_in_context($ctx_idx);
-  function asio_get_running();
+  function asio_get_current_context_depth(): int;
+  function asio_get_running(): \HH\FIXME\MISSING_RETURN_TYPE;
 }
 namespace HH\Asio {
   function join<T>(Awaitable<T> $awaitable)[]: T;
@@ -18,7 +17,10 @@ namespace HH\Asio {
   function name(Awaitable<mixed> $awaitable)[]: string;
   function has_finished(Awaitable<mixed> $awaitable)[]: bool;
   function cancel(Awaitable<mixed> $awaitable, \Exception $exception): bool;
-  function backtrace(Awaitable<mixed> $awaitable,
-                        int $options = \DEBUG_BACKTRACE_PROVIDE_OBJECT,
-                        int $limit = 0): varray<darray>;
+  function cancel_sleep_nothrow(SleepWaitHandle $wh): bool;
+  function backtrace(
+    Awaitable<mixed> $awaitable,
+    int $options = \DEBUG_BACKTRACE_PROVIDE_OBJECT,
+    int $limit = 0,
+  ): ?varray<darray<arraykey, mixed>>;
 }

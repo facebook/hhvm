@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$arr = varray[];
+$arr = vec[];
 $arr[] = 0x1234;
 $arr[] = 0x5678;
 

@@ -1,6 +1,6 @@
 <?hh
 
-function test($v1, $v2) {
+function test($v1, $v2) :mixed{
     $compare = version_compare($v1, $v2);
     switch ($compare) {
     case -1:
@@ -17,8 +17,8 @@ function test($v1, $v2) {
 }
 <<__EntryPoint>> function main(): void {
 print "TESTING COMPARE\n";
-$special_forms = varray["-dev", "a1", "b1", "RC1", "rc1", "", "pl1"];
-$operators = varray[
+$special_forms = vec["-dev", "a1", "b1", "RC1", "rc1", "", "pl1"];
+$operators = vec[
     "lt", "<",
     "le", "<=",
     "gt", ">",

@@ -5,16 +5,16 @@
  * Alias to functions:
  */
 
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) :mixed{
     echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_parent_class_variation_002(): void {
 set_error_handler(test_error_handler<>);
 echo "*** Testing get_parent_class() : usage variations ***\n";
 
 
 //array of values to iterate over
-$values = varray[
+$values = vec[
 
       // int data
       0,
@@ -64,7 +64,11 @@ $values = varray[
 
 foreach($values as $value) {
       echo "\nArg value ".(string)$value." \n";
-      var_dump( get_parent_class($value) );
+      try { 
+        var_dump( get_parent_class($value) );
+      } catch (Exception $ex) {
+        var_dump($ex->getMessage());
+      }
 };
 
 echo "Done";

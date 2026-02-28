@@ -17,10 +17,11 @@
 #include "hphp/runtime/base/annot-type.h"
 
 #include <folly/MapUtil.h>
+#include "hphp/runtime/base/isame-log.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/static-string-table.h"
-#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/hash-map.h"
 
 namespace HPHP {
@@ -28,30 +29,18 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 using HhvmStrToTypeMap = hphp_hash_map<
-  const StringData*, AnnotType, string_data_hash, string_data_isame
+  const StringData*, AnnotType, string_data_hash, string_data_tsame
 >;
 
-using StdStrToTypeMap = hphp_string_imap<AnnotType>;
+using StdStrToTypeMap = hphp_string_tmap<AnnotType>;
 
 const StaticString
   s_HH_Traversable("HH\\Traversable"),
-  s_HH_RX_Traversable("HH\\Rx\\Traversable"),
   s_HH_KeyedTraversable("HH\\KeyedTraversable"),
-  s_HH_RX_KeyedTraversable("HH\\Rx\\KeyedTraversable"),
   s_HH_Container("HH\\Container"),
   s_HH_KeyedContainer("HH\\KeyedContainer"),
   s_XHPChild("XHPChild"),
   s_Stringish("Stringish");
-
-MaybeDataType nameToMaybeDataType(const StringData* typeName) {
-  auto const* type = nameToAnnotType(typeName);
-  return type ? MaybeDataType(getAnnotDataType(*type)) : std::nullopt;
-}
-
-MaybeDataType nameToMaybeDataType(const std::string& typeName) {
-  auto const* type = nameToAnnotType(typeName);
-  return type ? MaybeDataType(getAnnotDataType(*type)) : std::nullopt;
-}
 
 /**
  * This is the authoritative map that determines which typehints require
@@ -66,33 +55,36 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       AnnotType type;
     };
     std::vector<Pair> pairs = {
-      { "HH\\nothing",  AnnotType::Nothing },
-      { "HH\\noreturn", AnnotType::NoReturn },
-      { "HH\\null",     AnnotType::Null },
-      { "HH\\void",     AnnotType::Null },
-      { "HH\\bool",     AnnotType::Bool },
-      { "HH\\int",      AnnotType::Int },
-      { "HH\\float",    AnnotType::Float },
-      { "HH\\string",   AnnotType::String },
-      { "HH\\resource", AnnotType::Resource },
-      { "HH\\mixed",    AnnotType::Mixed },
-      { "HH\\nonnull",  AnnotType::Nonnull },
-      { "HH\\num",      AnnotType::Number },
-      { "HH\\arraykey", AnnotType::ArrayKey },
-      { "HH\\this",     AnnotType::This },
-      { "callable",     AnnotType::Callable },
-      { "HH\\vec",      AnnotType::Vec },
-      { "HH\\dict",     AnnotType::Dict },
-      { "HH\\keyset",   AnnotType::Keyset },
-      { "HH\\varray",   AnnotType::Vec },
-      { "HH\\darray",   AnnotType::Dict },
-      { "HH\\varray_or_darray", AnnotType::VecOrDict },
-      { "HH\\vec_or_dict", AnnotType::VecOrDict },
-      { "HH\\AnyArray", AnnotType::ArrayLike },
+      { annotTypeName(AnnotType::Nothing),   AnnotType::Nothing },
+      { annotTypeName(AnnotType::NoReturn),  AnnotType::NoReturn },
+      { annotTypeName(AnnotType::Null),      AnnotType::Null },
+      { "HH\\void",                          AnnotType::Null },
+      { annotTypeName(AnnotType::Bool),      AnnotType::Bool },
+      { annotTypeName(AnnotType::Int),       AnnotType::Int },
+      { annotTypeName(AnnotType::Float),     AnnotType::Float },
+      { annotTypeName(AnnotType::String),    AnnotType::String },
+      { annotTypeName(AnnotType::Object),    AnnotType::Object },
+      { annotTypeName(AnnotType::Resource),  AnnotType::Resource },
+      { annotTypeName(AnnotType::Mixed),     AnnotType::Mixed },
+      { annotTypeName(AnnotType::Nonnull),   AnnotType::Nonnull },
+      { annotTypeName(AnnotType::Number),    AnnotType::Number },
+      { annotTypeName(AnnotType::ArrayKey),  AnnotType::ArrayKey },
+      { annotTypeName(AnnotType::This),      AnnotType::This },
+      { annotTypeName(AnnotType::Callable),  AnnotType::Callable },
+      { annotTypeName(AnnotType::Vec),       AnnotType::Vec },
+      { annotTypeName(AnnotType::Dict),      AnnotType::Dict },
+      { annotTypeName(AnnotType::Keyset),    AnnotType::Keyset },
+      { kAnnotTypeVarrayStr,                 AnnotType::Vec },
+      { kAnnotTypeDarrayStr,                 AnnotType::Dict },
+      { kAnnotTypeVarrayOrDarrayStr,         AnnotType::VecOrDict },
+      { annotTypeName(AnnotType::VecOrDict), AnnotType::VecOrDict },
+      { annotTypeName(AnnotType::ArrayLike), AnnotType::ArrayLike },
+      { annotTypeName(AnnotType::Classname), AnnotType::Classname },
+      // TODO(T199611023) revisit when we enforce the inner type
+      { annotTypeName(AnnotType::Class),     AnnotType::Class },
+      { annotTypeName(AnnotType::ClassOrClassname),
+                                             AnnotType::ClassOrClassname },
     };
-    if (RO::EvalClassPassesClassname) {
-      pairs.push_back({ "HH\\classname", AnnotType::Classname });
-    }
     for (unsigned i = 0; i < pairs.size(); ++i) {
       mappedPairs.first[makeStaticString(pairs[i].name)] = pairs[i].type;
       mappedPairs.second[pairs[i].name] = pairs[i].type;
@@ -108,17 +100,10 @@ const AnnotType* nameToAnnotType(const StringData* typeName) {
   return folly::get_ptr(mapPair.first, typeName);
 }
 
-const AnnotType* nameToAnnotType(const std::string& typeName) {
-  auto const& mapPair = getAnnotTypeMaps();
-  auto const* at = folly::get_ptr(mapPair.second, typeName);
-  assertx(!at || (*at != AnnotType::Object && *at != AnnotType::Unresolved));
-  return at;
-}
-
 namespace {
 
-bool isame(folly::StringPiece a, folly::StringPiece b) {
-  return a.size() == b.size() && !strcasecmp(a.data(), b.data());
+bool tsame(folly::StringPiece a, folly::StringPiece b) {
+  return a.size() == b.size() && !tstrcmp(a.data(), b.data());
 }
 
 }
@@ -129,7 +114,7 @@ bool interface_supports_non_objects(const StringData* s) {
 
 bool interface_supports_non_objects(folly::StringPiece s) {
   return interface_supports_arrlike(s) ||
-         isame(s, s_Stringish.slice());
+         tsame(s, s_Stringish.slice());
 }
 
 bool interface_supports_arrlike(const StringData* s) {
@@ -137,13 +122,11 @@ bool interface_supports_arrlike(const StringData* s) {
 }
 
 bool interface_supports_arrlike(folly::StringPiece s) {
-  return isame(s, s_HH_Traversable.slice()) ||
-         isame(s, s_HH_KeyedTraversable.slice()) ||
-         isame(s, s_HH_RX_Traversable.slice()) ||
-         isame(s, s_HH_RX_KeyedTraversable.slice()) ||
-         isame(s, s_HH_Container.slice()) ||
-         isame(s, s_HH_KeyedContainer.slice()) ||
-         isame(s, s_XHPChild.slice());
+  return tsame(s, s_HH_Traversable.slice()) ||
+         tsame(s, s_HH_KeyedTraversable.slice()) ||
+         tsame(s, s_HH_Container.slice()) ||
+         tsame(s, s_HH_KeyedContainer.slice()) ||
+         tsame(s, s_XHPChild.slice());
 }
 
 bool interface_supports_string(const StringData* s) {
@@ -151,8 +134,8 @@ bool interface_supports_string(const StringData* s) {
 }
 
 bool interface_supports_string(folly::StringPiece s) {
-  return isame(s, s_XHPChild.slice()) ||
-         isame(s, s_Stringish.slice());
+  return tsame(s, s_XHPChild.slice()) ||
+         tsame(s, s_Stringish.slice());
 }
 
 bool interface_supports_int(const StringData* s) {
@@ -160,7 +143,7 @@ bool interface_supports_int(const StringData* s) {
 }
 
 bool interface_supports_int(folly::StringPiece s) {
-  return isame(s, s_XHPChild.slice());
+  return tsame(s, s_XHPChild.slice());
 }
 
 bool interface_supports_double(const StringData* s) {
@@ -168,7 +151,7 @@ bool interface_supports_double(const StringData* s) {
 }
 
 bool interface_supports_double(folly::StringPiece s) {
-  return isame(s, s_XHPChild.slice());
+  return tsame(s, s_XHPChild.slice());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -180,10 +163,13 @@ TypedValue annotDefaultValue(AnnotType at) {
     case AnnotType::Callable:
     case AnnotType::Resource:
     case AnnotType::Object:
+    case AnnotType::SubObject:
     case AnnotType::Unresolved:
     case AnnotType::Nothing:
     case AnnotType::NoReturn:
     case AnnotType::Classname:
+    case AnnotType::Class:
+    case AnnotType::ClassOrClassname:
     case AnnotType::Null:     return make_tv<KindOfNull>();
     case AnnotType::Nonnull:
     case AnnotType::Number:
@@ -207,7 +193,7 @@ TypedValue annotDefaultValue(AnnotType at) {
 
 AnnotAction
 annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
-  assertx(IMPLIES(at == AnnotType::Object, annotClsName != nullptr));
+  assertx(IMPLIES(at == AnnotType::SubObject, annotClsName != nullptr));
   assertx(IMPLIES(at == AnnotType::Unresolved, annotClsName != nullptr));
 
   auto const metatype = getAnnotMetaType(at);
@@ -221,12 +207,13 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::ArrayKey:
       if (isClassType(dt)) {
-        return RuntimeOption::EvalClassStringHintNotices
-          ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
+        return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
+          ? AnnotAction::WarnClassToString : AnnotAction::ConvertClassToString;
       }
       if (isLazyClassType(dt)) {
-        return RuntimeOption::EvalClassStringHintNotices
-          ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
+        return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
+          ? AnnotAction::WarnLazyClassToString
+          : AnnotAction::ConvertLazyClassToString;
       }
       return (isIntType(dt) || isStringType(dt))
         ? AnnotAction::Pass : AnnotAction::Fail;
@@ -252,33 +239,54 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::Classname:
       if (isStringType(dt)) return AnnotAction::Pass;
       if (isClassType(dt) || isLazyClassType(dt)) {
-        return RO::EvalClassnameNotices ?
+        if (!Cfg::Eval::ClassPassesClassname) {
+          return AnnotAction::Fail;
+        }
+        return Cfg::Eval::ClassnameNoticesSampleRate > 0 ?
           AnnotAction::WarnClassname : AnnotAction::Pass;
       }
+      return AnnotAction::Fail;
+    case AnnotMetaType::Class:
+      // TODO(T199611023) add more levels
+      if (isClassType(dt) || isLazyClassType(dt)) return AnnotAction::Pass;
+      if (isStringType(dt)) {
+        if (Cfg::Eval::ClassTypeLevel > 0) {
+          return AnnotAction::Fail;
+        }
+        return Cfg::Eval::ClassNoticesSampleRate > 0 ?
+          AnnotAction::WarnClass : AnnotAction::Pass;
+      }
+      return AnnotAction::Fail;
+    case AnnotMetaType::ClassOrClassname:
+      if (isStringType(dt)|| isLazyClassType(dt) || isClassType(dt))
+        return AnnotAction::Pass;
       return AnnotAction::Fail;
     case AnnotMetaType::Nothing:
     case AnnotMetaType::NoReturn:
       return AnnotAction::Fail;
     case AnnotMetaType::Precise:
+    case AnnotMetaType::SubObject:
     case AnnotMetaType::Unresolved:
       break;
   }
 
   assertx(metatype == AnnotMetaType::Precise ||
+          metatype == AnnotMetaType::SubObject ||
           metatype == AnnotMetaType::Unresolved);
   if (at == AnnotType::String && dt == KindOfClass) {
-    return RuntimeOption::EvalClassStringHintNotices
-      ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
+    return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
+      ? AnnotAction::WarnClassToString : AnnotAction::ConvertClassToString;
   }
   if (at == AnnotType::String && dt == KindOfLazyClass) {
-    return RuntimeOption::EvalClassStringHintNotices
-      ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
+    return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
+      ? AnnotAction::WarnLazyClassToString
+      : AnnotAction::ConvertLazyClassToString;
   }
 
-  if (at != AnnotType::Object && at != AnnotType::Unresolved) {
-    // If `at' is "bool", "int", "float", "string", "array", or "resource",
-    // then equivDataTypes() can definitively tell us whether or not `dt'
-    // is compatible.
+  if (metatype == AnnotMetaType::Precise) {
+    // If `at' is "bool", "int", "float", "string", "vec", "dict", "keyset",
+    // "object", or "resource", then equivDataTypes() can definitively tell us
+    // whether or not `dt' is compatible.
     return equivDataTypes(getAnnotDataType(at), dt)
       ? AnnotAction::Pass : AnnotAction::Fail;
   }
@@ -310,14 +318,15 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
           ? AnnotAction::Pass : AnnotAction::Fail;
       case KindOfClass:
         if (interface_supports_string(annotClsName)) {
-          return RuntimeOption::EvalClassStringHintNotices
-            ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
+          return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
+            ? AnnotAction::WarnClassToString : AnnotAction::ConvertClassToString;
         }
         return AnnotAction::Fail;
       case KindOfLazyClass:
         if (interface_supports_string(annotClsName)) {
-          return RuntimeOption::EvalClassStringHintNotices
-            ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
+          return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
+            ? AnnotAction::WarnLazyClassToString
+            : AnnotAction::ConvertLazyClassToString;
         }
         return AnnotAction::Fail;
       case KindOfClsMeth:
@@ -329,6 +338,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfNull:
       case KindOfBoolean:
       case KindOfResource:
+      case KindOfEnumClassLabel:
         return AnnotAction::Fail;
       case KindOfObject:
         not_reached();
@@ -336,11 +346,44 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     }
   }
 
-  if (at == AnnotType::Object) return AnnotAction::Fail;
+  if (at == AnnotType::SubObject) return AnnotAction::Fail;
 
   assertx(at == AnnotType::Unresolved);
   return isClassType(dt) || isLazyClassType(dt)
     ? AnnotAction::FallbackCoerce : AnnotAction::Fallback;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+const char* annotName(AnnotType at) {
+  switch (at) {
+    case AnnotType::Mixed:      return "mixed";
+    case AnnotType::This:       return "this";
+    case AnnotType::Callable:   return "callable";
+    case AnnotType::Resource:   return "resource";
+    case AnnotType::Object:     return "object";
+    case AnnotType::SubObject:  return "subobject";
+    case AnnotType::Unresolved: return "unresolved";
+    case AnnotType::Nothing:    return "nothing";
+    case AnnotType::NoReturn:   return "noreturn";
+    case AnnotType::Classname:  return "classname";
+    case AnnotType::Class:      return "class";
+    case AnnotType::ClassOrClassname: return "class_or_classname";
+    case AnnotType::Null:       return "null";
+    case AnnotType::Nonnull:    return "nonnull";
+    case AnnotType::Number:     return "number";
+    case AnnotType::ArrayKey:   return "arraykey";
+    case AnnotType::Int:        return "int";
+    case AnnotType::Bool:       return "bool";
+    case AnnotType::Float:      return "float";
+    case AnnotType::ArrayLike:  return "arraylike";
+    case AnnotType::VecOrDict:  return "vec-or-dict";
+    case AnnotType::Vec:        return "vec";
+    case AnnotType::String:     return "string";
+    case AnnotType::Dict:       return "dict";
+    case AnnotType::Keyset:     return "keyset";
+  }
+  always_assert(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

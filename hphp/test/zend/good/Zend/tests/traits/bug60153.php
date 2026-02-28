@@ -1,11 +1,11 @@
 <?hh
 
 interface IFoo {
-    public function oneArgument($a);
+    public function oneArgument($a):mixed;
 }
 
 trait TFoo {
-  public function oneArgument() {}
+  public function oneArgument() :mixed{}
 }
 
 class C implements IFoo {

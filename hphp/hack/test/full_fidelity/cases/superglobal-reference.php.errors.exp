@@ -1,1 +1,2 @@
-(4,5)-(4,19) You cannot decorate this argument as `inout`
+(4,11)-(4,19) `$_SERVER` is no longer accessible as a magic global variable. Use the HH\global_* functions instead.
+(4,11)-(4,19) You cannot decorate this argument as `inout`

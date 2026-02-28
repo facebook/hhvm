@@ -1,6 +1,6 @@
 <?hh
 
-function derp() {
+function derp() :mixed{
   include 'continuation_inherit.inc';
 }
 <<__EntryPoint>> function main(): void {

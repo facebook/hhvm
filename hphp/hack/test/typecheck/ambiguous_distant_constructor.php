@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 trait TX {
   public function __construct() {}
 }

@@ -1,18 +1,18 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
                    var_dump(debug_backtrace()); }
 }
 
-function VUNPACK($fmt, $inp, $exp) {
+function VUNPACK($fmt, $inp, $exp) :mixed{
   $a = unpack($fmt, $inp);
   VS(isset($a[1]), true);
   VS($a[1], (int)$exp);
 }
 
-function test_unpack() {
+function test_unpack() :mixed{
   $iFF = str_repeat("\xFF", 4);
   $le64_FF = "\xFF\x00\x00\x00\x00\x00\x00\x00";
   $be64_FF = "\x00\x00\x00\x00\x00\x00\x00\xFF";
@@ -57,13 +57,13 @@ function test_unpack() {
   VUNPACK("S", $le16_FF, 0xFF);
 }
 
-function test_unpack_empty() {
+function test_unpack_empty() :mixed{
   var_dump(unpack("n*", ''));
 }
 
 
 <<__EntryPoint>>
-function main_unpack() {
+function main_unpack() :mixed{
 test_unpack();
 test_unpack_empty();
 }

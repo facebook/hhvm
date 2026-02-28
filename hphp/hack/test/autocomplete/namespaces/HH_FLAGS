@@ -1,0 +1,4 @@
+--auto-complete
+--no-builtins
+--auto-namespace-map
+'{"Vec": "FlibSL\\Vec", "C": "FlibSL\\C", "SecureRandom": "FlibSL\\SecureRandom"}'

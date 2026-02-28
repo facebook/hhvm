@@ -4,8 +4,8 @@
 <<__EntryPoint>>
 function main(): void {
   // default
-  fb_serialize(varray[]);
-  fb_serialize(darray[]);
+  fb_serialize(vec[]);
+  fb_serialize(dict[]);
   try {
     fb_serialize(vec[]);
     echo "Serialized: vec\n";
@@ -20,8 +20,8 @@ function main(): void {
   } catch (Exception $e) {}
 
   // default
-  fb_serialize(varray[], FB_SERIALIZE_VARRAY_DARRAY);
-  fb_serialize(darray[], FB_SERIALIZE_VARRAY_DARRAY);
+  fb_serialize(vec[], FB_SERIALIZE_VARRAY_DARRAY);
+  fb_serialize(dict[], FB_SERIALIZE_VARRAY_DARRAY);
   try {
     fb_serialize(vec[], FB_SERIALIZE_VARRAY_DARRAY);
     echo "Serialized: vec (dvarrays)\n";
@@ -35,8 +35,8 @@ function main(): void {
     echo "Serialized: keyset (dvarrays)\n";
   } catch (Exception $e) {}
 
-  fb_serialize(varray[], FB_SERIALIZE_HACK_ARRAYS);
-  fb_serialize(darray[], FB_SERIALIZE_HACK_ARRAYS);
+  fb_serialize(vec[], FB_SERIALIZE_HACK_ARRAYS);
+  fb_serialize(dict[], FB_SERIALIZE_HACK_ARRAYS);
   fb_serialize(vec[], FB_SERIALIZE_HACK_ARRAYS);
   fb_serialize(dict[], FB_SERIALIZE_HACK_ARRAYS);
   try {
@@ -44,8 +44,8 @@ function main(): void {
     echo "Serialized: keyset (Hack arrays)\n";
   } catch (Exception $e) {}
 
-  fb_serialize(varray[], FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS);
-  fb_serialize(darray[], FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS);
+  fb_serialize(vec[], FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS);
+  fb_serialize(dict[], FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS);
   fb_serialize(vec[], FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS);
   fb_serialize(dict[], FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS);
   fb_serialize(keyset[], FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS);

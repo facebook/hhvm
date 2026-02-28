@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $fp = finfo_open(FILEINFO_MIME_TYPE);
-$results = darray[];
+$results = dict[];
 
 foreach (glob(__DIR__ . "/resources/*") as $filename) {
 	if (is_file($filename)) {

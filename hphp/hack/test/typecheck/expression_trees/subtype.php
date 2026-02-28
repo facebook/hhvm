@@ -11,15 +11,15 @@ interface Foo {}
 class FooSubtypeA implements Foo {}
 class FooSubtypeB implements Foo {}
 
-function lift_int(int $i): ExprTree<ExampleDsl, ExampleDsl::TAst, FooSubtypeA> {
+function lift_int(int $i): ExampleExpression<FooSubtypeA> {
   throw new Exception();
 }
 
-function lift_string(string $s): ExprTree<ExampleDsl, ExampleDsl::TAst, FooSubtypeB> {
+function lift_string(string $s): ExampleExpression<FooSubtypeB> {
   throw new Exception();
 }
 
-function uniontest(bool $b): ExprTree<ExampleDsl, ExampleDsl::TAst, Foo> {
+function uniontest(bool $b): ExampleExpression<Foo> {
   if ($b) {
     $arg = lift_string("foo");
   } else {

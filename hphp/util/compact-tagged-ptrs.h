@@ -35,8 +35,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-#if !(defined(__x86_64__) || defined(_M_X64) || defined(__powerpc64__) || \
-      defined(__aarch64__))
+#if !(defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__))
 #error CompactTaggedPtr is not supported on your architecture.
 #endif
 
@@ -81,6 +80,13 @@ struct CompactTaggedPtr {
     std::swap(m_data, o.m_data);
   }
 
+  bool operator==(const CompactTaggedPtr& o) const {
+    return m_data == o.m_data;
+  }
+  bool operator!=(const CompactTaggedPtr& o) const {
+    return m_data != o.m_data;
+  }
+
 private:
   uintptr_t m_data;
 
@@ -101,7 +107,12 @@ private:
  */
 template<class T>
 struct CompactSizedPtr {
-  void set(uint32_t size, T* ptr) { m_data.set(size, ptr); }
+  static constexpr size_t kMaxSize = std::numeric_limits<uint16_t>::max();
+
+  void set(uint32_t size, T* ptr) {
+    assertx(size <= kMaxSize);
+    m_data.set(size, ptr);
+  }
 
   uint32_t size() const { return m_data.tag(); }
   const T* ptr()  const { return m_data.ptr(); }
@@ -112,7 +123,7 @@ struct CompactSizedPtr {
   }
 
 private:
-  CompactTaggedPtr<T> m_data;
+  CompactTaggedPtr<T, uint16_t> m_data;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -131,4 +142,3 @@ void swap(CompactSizedPtr<T>& p1, CompactSizedPtr<T>& p2) noexcept {
 //////////////////////////////////////////////////////////////////////
 
 }
-

@@ -1,7 +1,7 @@
 <?hh
 
 class F {
- function fruit() {
+ function fruit() :AsyncGenerator<mixed,mixed,void>{
  yield 'apple';
  yield 'banana';
 }
@@ -9,7 +9,7 @@ class F {
 
 
 <<__EntryPoint>>
-function main_2143() {
+function main_2143() :mixed{
 $f = new F;
  foreach ($f->fruit() as $fruit) {
  var_dump($fruit);

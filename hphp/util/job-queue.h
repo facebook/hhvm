@@ -96,6 +96,15 @@ namespace detail {
 struct NoDropCachePolicy { static void dropCache() {} };
 }
 
+struct DispatcherStats {
+  // Maximum number of threads that can be used by the dispatcher
+  size_t maxThreads = 0;
+  // Number of workers that are actively processing jobs
+  size_t activeThreads = 0;
+  // Number of jobs that are currently in the queue
+  size_t queuedJobCount = 0;
+};
+
 /**
  * A job queue that's suitable for multiple threads to work on.
  */
@@ -112,15 +121,13 @@ public:
    */
   JobQueue(int maxQueueCount, int dropCacheTimeout,
            bool dropStack, int lifoSwitchThreshold = INT_MAX,
-           int maxJobQueuingMs = -1, int numPriorities = 1,
-           bool legacyBehavior = true)
+           int maxJobQueuingMs = -1, int numPriorities = 1)
       : SynchronizableMulti(maxQueueCount + 1) // reaper added
       , m_dropCacheTimeout(dropCacheTimeout)
       , m_dropStack(dropStack)
       , m_lifoSwitchThreshold(lifoSwitchThreshold)
       , m_maxJobQueuingMs(maxJobQueuingMs)
-      , m_jobReaperId(maxQueueCount)
-      , m_legacyBehavior(legacyBehavior) {
+      , m_jobReaperId(maxQueueCount) {
     assertx(maxQueueCount > 0);
     m_jobQueues.resize(numPriorities);
   }
@@ -129,22 +136,14 @@ public:
    * Put a job into the queue and notify a worker to pick it up if requested.
    */
   void enqueue(TJob job, int priority = 0, bool eagerNotify = true) {
-    uint32_t kNumPriority = m_jobQueues.size();
     assertx(priority >= 0);
-    assertx(priority < kNumPriority);
     timespec enqueueTime;
     Timer::GetMonotonicTime(enqueueTime);
     Lock lock(this);
     m_jobQueues[priority].emplace_back(job, enqueueTime);
     ++m_jobCount;
-    if (m_legacyBehavior) {
-      if (eagerNotify) notify();
-    } else {
-      if (priority == kNumPriority - 1 ||
-          getActiveWorker() <
-          m_maxActiveWorkers.load(std::memory_order_acquire)) {
-        notify();
-      }
+    if (eagerNotify) {
+      notify();
     }
   }
 
@@ -198,19 +197,10 @@ public:
   }
 
   void updateMaxActiveWorkers(int num) {
-    int old = m_maxActiveWorkers.exchange(num, std::memory_order_acq_rel);
-    if (!m_legacyBehavior && num > old) {
-      Lock lock(this);
-      int workerCountChange = num - getActiveWorker();
-      int toRelease = std::min(m_jobCount, workerCountChange);
-      for (; toRelease > 0; --toRelease) {
-        notify();
-      }
-    }
+    m_maxActiveWorkers.exchange(num, std::memory_order_acq_rel);
   }
 
   int releaseQueuedJobs(int target = 0) {
-    assertx(m_legacyBehavior);
     if (m_jobCount) {
       Lock lock(this);
       const int active = getActiveWorker();
@@ -371,22 +361,19 @@ public:
   const int m_lifoSwitchThreshold;
   const int m_maxJobQueuingMs;
   const int m_jobReaperId;              // equals max worker thread count
-  const bool m_legacyBehavior;
 };
 
 template<class TJob, class Policy>
 struct JobQueue<TJob,true,Policy> : JobQueue<TJob,false,Policy> {
   JobQueue(int threadCount, int dropCacheTimeout,
            bool dropStack, int lifoSwitchThreshold=INT_MAX,
-           int maxJobQueuingMs = -1, int numPriorities = 1,
-           bool legacyBehavior = true) :
+           int maxJobQueuingMs = -1, int numPriorities = 1) :
     JobQueue<TJob,false,Policy>(threadCount,
                                 dropCacheTimeout,
                                 dropStack,
                                 lifoSwitchThreshold,
                                 maxJobQueuingMs,
-                                numPriorities,
-                                legacyBehavior) {
+                                numPriorities) {
     pthread_cond_init(&m_cond, nullptr);
   }
   ~JobQueue() override {
@@ -529,7 +516,7 @@ struct JobQueueDispatcher : IHostHealthObserver {
                      int initThreadCount = -1,
                      unsigned hugeStackKb = 0,
                      unsigned extraKb = 0,
-                     bool legacyBehavior = true)
+                     const std::string& threadGroupSuffix = "")
       : m_startReaperThread(maxJobQueuingMs > 0)
       , m_context(context)
       , m_maxThreadCount(maxThreadCount)
@@ -538,10 +525,9 @@ struct JobQueueDispatcher : IHostHealthObserver {
       , m_hugeThreadCount(hugeCount)
       , m_hugeStackKb(hugeStackKb)
       , m_tlExtraKb(extraKb)
-      , m_legacyBehavior(legacyBehavior)
+      , m_threadGroupSuffix(threadGroupSuffix)
       , m_queue(m_maxQueueCount, dropCacheTimeout, dropStack,
-                lifoSwitchThreshold, maxJobQueuingMs, numPriorities,
-                legacyBehavior) {
+                lifoSwitchThreshold, maxJobQueuingMs, numPriorities) {
     assertx(maxThreadCount >= 1);
     assertx(m_maxQueueCount >= maxThreadCount);
     if (maxQueueCountConfig < maxThreadCount) {
@@ -618,15 +604,11 @@ struct JobQueueDispatcher : IHostHealthObserver {
    */
   void enqueue(typename TWorker::JobType job, int priority = 0) {
     auto const level = getHealthLevel();
-    if (m_legacyBehavior) {
-      auto const eagerNotify =
-        (level < HealthLevel::Cautious) ||
-        ((level == HealthLevel::Cautious) &&
-         (m_queue.getActiveWorker() * 2 <= m_currThreadCountLimit));
-      m_queue.enqueue(job, priority, eagerNotify);
-    } else {
-      m_queue.enqueue(job, priority);
-    }
+    auto const eagerNotify =
+      (level < HealthLevel::Cautious) ||
+      ((level == HealthLevel::Cautious) &&
+        (m_queue.getActiveWorker() * 2 <= m_currThreadCountLimit));
+    m_queue.enqueue(job, priority, eagerNotify);
 
     // Spin up another worker thread if appropriate.
     auto const target = getTargetNumWorkers();
@@ -734,20 +716,16 @@ struct JobQueueDispatcher : IHostHealthObserver {
   }
 
   void notifyNewStatus(HealthLevel newStatus) override {
-    if (m_legacyBehavior) {
-      if (m_healthStatus >= HealthLevel::NoMore &&
-          newStatus < HealthLevel::NoMore) {
-        m_healthStatus = newStatus;
-        // release blocked requests in queue if any
-        m_queue.updateMaxActiveWorkers(INT_MAX);
-        m_queue.releaseQueuedJobs(m_currThreadCountLimit / 4);
-      } else if (newStatus >= HealthLevel::NoMore &&
-                 m_healthStatus < HealthLevel::NoMore) {
-        m_healthStatus = newStatus;
-        m_queue.updateMaxActiveWorkers(0);
-      } else {
-        m_healthStatus = newStatus;
-      }
+    if (m_healthStatus >= HealthLevel::NoMore &&
+        newStatus < HealthLevel::NoMore) {
+      m_healthStatus = newStatus;
+      // release blocked requests in queue if any
+      m_queue.updateMaxActiveWorkers(INT_MAX);
+      m_queue.releaseQueuedJobs(m_currThreadCountLimit / 4);
+    } else if (newStatus >= HealthLevel::NoMore &&
+                m_healthStatus < HealthLevel::NoMore) {
+      m_healthStatus = newStatus;
+      m_queue.updateMaxActiveWorkers(0);
     } else {
       m_healthStatus = newStatus;
     }
@@ -808,6 +786,16 @@ struct JobQueueDispatcher : IHostHealthObserver {
     m_workers.resize(mtc);
   }
 
+  DispatcherStats getDispatcherStats() {
+    DispatcherStats stats;
+
+    stats.maxThreads = getMaxThreadCount();
+    stats.activeThreads = getActiveWorker();
+    stats.queuedJobCount = getQueuedJobs();
+
+    return stats;
+  }
+
   /////////////////////////////////////////////////////////////////////////////
 
 private:
@@ -822,7 +810,7 @@ private:
   int m_hugeThreadCount{0};
   unsigned m_hugeStackKb;
   unsigned m_tlExtraKb;
-  const bool m_legacyBehavior;
+  std::string m_threadGroupSuffix;
   JobQueue<typename TWorker::JobType,
            TWorker::Waitable,
            typename TWorker::DropCachePolicy> m_queue;
@@ -839,7 +827,7 @@ private:
    */
   static AsyncFunc<TWorker>* funcFrom(TWorker* worker) {
     return reinterpret_cast<AsyncFunc<TWorker>*>(worker->func());
-  };
+  }
 
   /*
    * Total number of workers that might be active.
@@ -894,7 +882,8 @@ private:
                                        &TWorker::start,
                                        next_numa_node(m_prevNode),
                                        hugeStackKb,
-                                       m_tlExtraKb);
+                                       m_tlExtraKb,
+                                       m_threadGroupSuffix);
     int id = m_workers.size();
     m_workers.push_back(worker);
     m_funcs.insert(func);
@@ -909,4 +898,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -1,12 +1,12 @@
 <?hh
 
-function pure()[] { echo "in pure\n"; }
-function rx()[rx] { echo "in rx\n"; }
-function defaults() { echo "in defaults\n"; }
+function pure()[] :mixed{ echo "in pure\n"; }
+function rx()[rx] :mixed{ echo "in rx\n"; }
+function defaults() :mixed{ echo "in defaults\n"; }
 
 abstract class A {
   abstract const ctx C;
-  public function f()[this::C] {
+  public function f()[this::C] :mixed{
     pure();
     rx();
     defaults();
@@ -18,7 +18,7 @@ class B2 extends A { const ctx C = [rx]; }
 class B3 extends A { const ctx C = [defaults]; }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   (new B1)->f();
   (new B2)->f();
   (new B3)->f();

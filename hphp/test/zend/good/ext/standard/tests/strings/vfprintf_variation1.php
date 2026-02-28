@@ -17,14 +17,14 @@
 class FooClass
 {
     public function __toString()
-    {
+:mixed    {
         return "Object";
     }
 }
 
 // Output facilitating function
 function writeAndDump($fp, $format, $args)
-{
+:mixed{
     try { ftruncate( $fp, 0 ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
     $length = vfprintf( $fp, $format, $args );
     try { rewind( $fp ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
@@ -40,18 +40,17 @@ function writeAndDump($fp, $format, $args)
 echo "*** Testing vfprintf() : variation functionality ***\n";
 
 // Open handle
-$file = __SystemLib\hphp_test_tmppath('vfprintf_variation1.phpt.txt');
+$file = sys_get_temp_dir().'/'.'vfprintf_variation1.phpt.txt';
 $fp = fopen( $file, 'a+' );
 
 // Test vfprintf()
 writeAndDump( $fp, "format", null );
-writeAndDump( $fp, "Foo is %d and %s", varray[ 30, 'bar' ] );
-writeAndDump( $fp, "Foobar testing", varray[] );
-writeAndDump( $fp, "%s %s %s", varray[ 'bar', 'bar', 'bar' ] );
-writeAndDump( $fp, "%02d", varray[ 50 ] );
-writeAndDump( $fp, "", varray[] );
-writeAndDump( $fp, "Testing %b %d %f %o %s %x %X", varray[ 9, 6, 2.5502, 24, "foobar", 15, 65 ] );
-@writeAndDump( new FooClass(), "Foo with %s", varray[ 'string' ] );
+writeAndDump( $fp, "Foo is %d and %s", vec[ 30, 'bar' ] );
+writeAndDump( $fp, "Foobar testing", vec[] );
+writeAndDump( $fp, "%s %s %s", vec[ 'bar', 'bar', 'bar' ] );
+writeAndDump( $fp, "%02d", vec[ 50 ] );
+writeAndDump( $fp, "", vec[] );
+writeAndDump( $fp, "Testing %b %d %f %o %s %x %X", vec[ 9, 6, 2.5502, 24, "foobar", 15, 65 ] );
 
 // Close handle
 fclose( $fp );

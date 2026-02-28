@@ -1,5 +1,5 @@
 <?hh
-function test ($a,$b) {
+function test ($a,$b) :mixed{
     echo $a+$b;
 }
 <<__EntryPoint>> function main(): void {

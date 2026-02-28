@@ -5,37 +5,33 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use aast::Expr_ as E_;
+use hash::HashMap;
+use hash::HashSet;
 use hh_autoimport_rust::is_hh_autoimport_fun;
 use naming_special_names_rust::special_idents;
 use naming_special_names_rust::typehints;
 use naming_special_names_rust::user_attributes;
-use oxidized::{
-    aast,
-    aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
-    ast::*,
-    ast_defs, local_id,
-    pos::Pos,
-};
-use parser_core_types::{
-    syntax_error,
-    syntax_error::{Error as ErrorMsg, SyntaxError},
-};
-use std::collections::{HashMap, HashSet};
+use oxidized::aast;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::NodeMut;
+use oxidized::aast_visitor::VisitorMut;
+use oxidized::aast_visitor::visit_mut;
+use oxidized::ast::*;
+use oxidized::ast_defs;
+use oxidized::local_id;
+use oxidized::pos::Pos;
+use parser_core_types::syntax_error;
+use parser_core_types::syntax_error::Error as ErrorMsg;
+use parser_core_types::syntax_error::SyntaxError;
 
 // Local environment which keeps track of how many readonly values it has
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Default)]
 struct Lenv {
     pub lenv: HashMap<String, Rty>,
     pub num_readonly: u32,
 }
 
 impl Lenv {
-    pub fn new() -> Lenv {
-        Lenv {
-            lenv: HashMap::new(),
-            num_readonly: 0,
-        }
-    }
     pub fn insert(&mut self, var_name: String, rty: Rty) {
         let result = self.lenv.insert(var_name, rty);
         match (rty, result) {
@@ -75,10 +71,10 @@ struct Context {
 impl Context {
     fn new(readonly_ret: Rty, this_ty: Rty, is_typechecker: bool) -> Self {
         Self {
-            locals: Lenv::new(),
+            locals: Lenv::default(),
             readonly_return: readonly_ret,
             this_ty,
-            inout_params: HashSet::new(),
+            inout_params: HashSet::default(),
             is_typechecker,
         }
     }
@@ -129,7 +125,7 @@ fn ro_kind_to_rty(ro: Option<oxidized::ast_defs::ReadonlyKind>) -> Rty {
 }
 
 fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
-    let aast::Expr(_, _, exp) = &*expr;
+    let aast::Expr(_, _, exp) = expr;
     use aast::Expr_::*;
     match exp {
         ReadonlyExpr(_) => Rty::Readonly,
@@ -145,14 +141,6 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
             } else {
                 context.get_rty(var_name)
             }
-        }
-        Darray(d) => {
-            let (_, exprs) = &**d;
-            ro_expr_list2(context, exprs)
-        }
-        Varray(v) => {
-            let (_, exprs) = &**v;
-            ro_expr_list(context, exprs)
         }
         Shape(fields) => ro_expr_list2(context, fields),
         ValCollection(v) => {
@@ -190,13 +178,18 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         //
         As(a) => {
             // Readonlyness of inner expression
-            let (exp, hint, _) = &**a;
+            let As_ {
+                expr: exp, hint, ..
+            } = &**a;
             let hint_ = &*hint.1;
             match hint_ {
                 // Primitives are always mutable
                 // Unfortunately, we don't make Hprim as a hint type until naming
                 // so we have to look at Happly
-                aast::Hint_::Happly(cn, _) if typehints::is_primitive_type_hint(cn.name()) => {
+                aast::Hint_::Happly(cn, _)
+                    if typehints::PRIMITIVE_TYPEHINTS.contains(cn.name())
+                        || cn.name() == typehints::STRING =>
+                {
                     Rty::Mutable
                 }
                 _ => rty_expr(context, exp),
@@ -209,14 +202,20 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         }
         Eif(e) => {
             // $x ? a : b is readonly if either a or b are readonly
-            let (_, exp1_opt, exp2) = &**e;
+            let (cond, exp1_opt, exp2) = &**e;
             if let Some(exp1) = exp1_opt {
                 match (rty_expr(context, exp1), rty_expr(context, exp2)) {
                     (_, Rty::Readonly) | (Rty::Readonly, _) => Rty::Readonly,
                     (Rty::Mutable, Rty::Mutable) => Rty::Mutable,
                 }
             } else {
-                rty_expr(context, exp2)
+                // Elvis operator: cond ?: exp2
+                // Result is cond if truthy, exp2 if falsy
+                // So readonly if either cond or exp2 is readonly
+                match (rty_expr(context, cond), rty_expr(context, exp2)) {
+                    (_, Rty::Readonly) | (Rty::Readonly, _) => Rty::Readonly,
+                    (Rty::Mutable, Rty::Mutable) => Rty::Mutable,
+                }
             }
         }
         Pair(p) => {
@@ -230,6 +229,7 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
             let (expr, _, _, _) = &**h;
             rty_expr(context, expr)
         }
+        Invalid(_e) => Rty::Mutable,
         Cast(_) => Rty::Mutable, // Casts are only valid on primitive types, so its always mutable
         New(_) => Rty::Mutable,
         // FWIW, this does not appear on the aast at this stage(it only appears after naming in typechecker),
@@ -245,11 +245,11 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         }
         // Primitive types are mutable
         Null | True | False | Omitted => Rty::Mutable,
-        Int(_) | Float(_) | String(_) | String2(_) | PrefixedString(_) => Rty::Mutable,
+        Int(_) | Float(_) | String(_) | String2(_) | PrefixedString(_) | Nameof(_) => Rty::Mutable,
         Id(_) => Rty::Mutable,
         Dollardollar(lid) => {
             let (id, dollardollar) = &lid.1;
-            let var_name = format!("{}{}", dollardollar.clone(), id);
+            let var_name = format!("{}{}", dollardollar, id);
             context.get_rty(&var_name)
         }
         // First put it in typechecker, then HHVM
@@ -259,10 +259,15 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
             rty_expr(context, expr)
         }
         Call(c) => {
-            if let (aast::Expr(_, _, Id(i)), _, args, _) = &**c {
+            if let aast::CallExpr {
+                func: aast::Expr(_, _, Id(i)),
+                args,
+                ..
+            } = &**c
+            {
                 if is_special_builtin(&i.1) && !args.is_empty() {
                     // Take first argument
-                    let (_, expr) = &args[0];
+                    let expr = &args[0].to_expr_ref();
                     rty_expr(context, expr)
                 } else {
                     Rty::Mutable
@@ -277,7 +282,11 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         // This is really just a statement, does not have a value
         Yield(_) => Rty::Mutable,
         Binop(b) => {
-            let (bop, e1, e2) = &**b;
+            let aast::Binop {
+                bop,
+                lhs: e1,
+                rhs: e2,
+            } = &**b;
             match bop {
                 ast_defs::Bop::QuestionQuestion => {
                     match (rty_expr(context, e1), rty_expr(context, e2)) {
@@ -289,20 +298,22 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
                 _ => Rty::Mutable,
             }
         }
+        Assign(_) => Rty::Mutable,
         // Unary operators are all primitive in result
         Unop(_) => Rty::Mutable,
         Pipe(p) => {
-            let (lid, left, _) = &**p;
+            let (lid, left, right, _) = &**p;
             // The only time the id number matters is for Dollardollar
             let (_, dollardollar) = &lid.1;
             let left_rty = rty_expr(context, left);
             context.add_local(dollardollar, left_rty);
-            rty_expr(context, &p.2)
+            rty_expr(context, right)
         }
         ExpressionTree(_) | EnumClassLabel(_) | ETSplice(_) => Rty::Mutable,
         Import(_) | Lplaceholder(_) => Rty::Mutable,
         // More function values which are always mutable
-        MethodId(_) | MethodCaller(_) | SmethodId(_) | FunId(_) => Rty::Mutable,
+        MethodCaller(_) => Rty::Mutable,
+        Package(_) => Rty::Mutable,
     }
 }
 
@@ -328,12 +339,12 @@ fn is_special_builtin(f_name: &str) -> bool {
         | "HH\\darray"
         | "HH\\vec"
         | "hphp_array_idx"
+        | "HH\\FIXME\\UNSAFE_NONNULL_CAST"
         | "HH\\FIXME\\UNSAFE_CAST" => true,
         /* all other special builtins listed in emit_expresion.rs return mutable:
         specifically, these:
         "array_key_exists" => Some((2, IMisc(AKExists))),
         "intval" => Some((1, IOp(CastInt))),
-        "boolval" => Some((1, IOp(CastBool))),
         "strval" => Some((1, IOp(CastString))),
         "floatval" | "doubleval" => Some((1, IOp(CastDouble))),
         "HH\\global_get" => Some((1, IGet(CGetG))),
@@ -347,7 +358,8 @@ fn explicit_readonly(expr: &mut Expr) {
     match &expr.2 {
         aast::Expr_::ReadonlyExpr(_) => {}
         _ => {
-            expr.2 = aast::Expr_::ReadonlyExpr(Box::new(expr.clone()));
+            let tmp = std::mem::replace(expr, Expr(expr.0, expr.1.clone(), Expr_::Null));
+            expr.2 = aast::Expr_::ReadonlyExpr(Box::new(tmp));
         }
     }
 }
@@ -462,9 +474,16 @@ fn check_assignment_validity(
             context.add_local(&var_name, rhs_rty);
         }
         // list assignment
-        aast::Expr_::List(l) => {
+        aast::Expr_::List(l) | aast::Expr_::Tuple(l) => {
             let exprs = &mut **l;
             for e in exprs.iter_mut() {
+                check_assignment_validity(context, checker, &e.1.clone(), e, rhs);
+            }
+        }
+        // shape assignment
+        aast::Expr_::Shape(l) => {
+            let exprs = &mut **l;
+            for (_field_name, e) in exprs.iter_mut() {
                 check_assignment_validity(context, checker, &e.1.clone(), e, rhs);
             }
         }
@@ -583,6 +602,19 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 ast_defs::ParamKind::Pinout(_) => true,
                 _ => false,
             };
+            match &p.info {
+                FunParamInfo::ParamOptional(Some(rhs)) => {
+                    let ro_rhs = rty_expr(&mut context, rhs);
+                    self.subtype(
+                        &rhs.1,
+                        &ro_rhs,
+                        &ro_kind_to_rty(p.readonly),
+                        "this parameter is not marked readonly",
+                    );
+                }
+                _ => {}
+            }
+
             if p.readonly.is_some() {
                 if is_inout {
                     self.add_error(&p.pos, syntax_error::inout_readonly_parameter);
@@ -619,6 +651,18 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 ast_defs::ParamKind::Pinout(_) => true,
                 _ => false,
             };
+            match &p.info {
+                FunParamInfo::ParamOptional(Some(rhs)) => {
+                    let ro_rhs = rty_expr(&mut new_context, rhs);
+                    self.subtype(
+                        &rhs.1,
+                        &ro_rhs,
+                        &ro_kind_to_rty(p.readonly),
+                        "this parameter is not marked readonly",
+                    );
+                }
+                _ => {}
+            }
             if p.readonly.is_some() {
                 if is_inout {
                     self.add_error(&p.pos, syntax_error::inout_readonly_parameter)
@@ -643,59 +687,105 @@ impl<'ast> VisitorMut<'ast> for Checker {
 
     fn visit_expr(&mut self, context: &mut Context, p: &mut aast::Expr<(), ()>) -> Result<(), ()> {
         // Pipe expressions have their own recursion method due to their weird evaluation rules
-        if !self.is_typechecker || !p.2.is_pipe() {
+        if !p.2.is_pipe() {
             // recurse on inner members first, then assign to value
             p.recurse(context, self.object())?;
         }
         match &mut p.2 {
-            aast::Expr_::Binop(x) => {
-                let (bop, e_lhs, e_rhs) = x.as_mut();
-                if let Bop::Eq(_) = bop {
-                    check_assignment_validity(context, self, &p.1, e_lhs, e_rhs);
+            aast::Expr_::Assign(x) => {
+                let (e_lhs, _, e_rhs) = x.as_mut();
+                check_assignment_validity(context, self, &p.1, e_lhs, e_rhs);
+            }
+            aast::Expr_::Unop(x) => {
+                let (operator, operand) = x.as_mut();
+                if let Uop::Upincr | Uop::Updecr | Uop::Uincr | Uop::Udecr = operator {
+                    check_assignment_validity(
+                        context,
+                        self,
+                        &p.1,
+                        operand,
+                        // Expr_::Int("1".to_string()) might be more accurate
+                        // but for this analysis we really just want any
+                        // non-ReadonlyExpr as an implicit RHS
+                        // when treating a these unops as binops
+                        &mut Expr((), Pos::NONE, Expr_::Omitted),
+                    );
                 }
             }
             aast::Expr_::Call(x) => {
-                let (caller, _targs, params, _variadic) = &mut **x;
+                let aast::CallExpr { func, args, .. } = &mut **x;
 
-                match rty_expr(context, caller) {
-                    Rty::Readonly => explicit_readonly(caller),
+                match rty_expr(context, func) {
+                    Rty::Readonly => explicit_readonly(func),
                     Rty::Mutable => {}
                 };
-                for (callconv, param) in params.iter_mut() {
-                    match (callconv, rty_expr(context, param)) {
-                        (ast_defs::ParamKind::Pinout(_), Rty::Readonly) => {
-                            self.add_error(param.pos(), syntax_error::inout_readonly_argument)
-                        }
-                        (ast_defs::ParamKind::Pnormal, Rty::Readonly) => explicit_readonly(param),
-                        (_, Rty::Mutable) => {}
+                for arg in args.iter_mut() {
+                    match arg {
+                        Argument::Ainout(_, param) => match rty_expr(context, param) {
+                            Rty::Readonly => {
+                                self.add_error(param.pos(), syntax_error::inout_readonly_argument)
+                            }
+                            Rty::Mutable => {}
+                        },
+                        Argument::Anormal(param) => match rty_expr(context, param) {
+                            Rty::Readonly => explicit_readonly(param),
+                            Rty::Mutable => {}
+                        },
+                        Argument::Anamed(_, param) => match rty_expr(context, param) {
+                            Rty::Readonly => {
+                                self.add_error(param.pos(), syntax_error::readonly_named_argument)
+                            }
+                            Rty::Mutable => {}
+                        },
                     }
                 }
             }
             aast::Expr_::New(n) => {
                 let (_, _targs, args, _variadic, _) = &mut **n;
-                for param in args.iter_mut() {
-                    match rty_expr(context, param) {
-                        Rty::Readonly => explicit_readonly(param),
+                for arg in args.iter_mut() {
+                    let e = match arg {
+                        Argument::Ainout(_, e) => e,
+                        Argument::Anormal(e) => e,
+                        Argument::Anamed(_, e) => e,
+                    };
+                    match rty_expr(context, e) {
+                        Rty::Readonly => explicit_readonly(e),
                         Rty::Mutable => {}
                     }
                 }
             }
             aast::Expr_::Pipe(p) => {
-                let (lid, left, right) = &mut **p;
+                let (lid, left, right, _) = &mut **p;
                 // The only time the id number matters is for Dollardollar
                 let (_, dollardollar) = &lid.1;
-                if self.is_typechecker {
-                    self.visit_expr(context, left)?;
-                }
+                // Go left first, get the readonlyness, then go right
+                self.visit_expr(context, left)?;
                 let left_rty = rty_expr(context, left);
                 context.add_local(dollardollar, left_rty);
-                // Since pipe expressions are in reverse for evaluation,
-                // we need to recurse on the inner values again to check
-                // for readonlyness calls
+                self.visit_expr(context, right)?;
+            }
+            aast::Expr_::Yield(y) => {
+                // TODO: T128042708 Remove once typechecker change is landed
                 if self.is_typechecker {
-                    self.visit_expr(context, right)?;
+                    let mut expect_mutable = |expr| match rty_expr(context, expr) {
+                        Rty::Readonly => {
+                            self.add_error(expr.pos(), syntax_error::yield_readonly);
+                        }
+                        Rty::Mutable => (),
+                    };
+
+                    match &**y {
+                        aast::Afield::AFkvalue(k, v) => {
+                            expect_mutable(k);
+                            expect_mutable(v);
+                        }
+                        aast::Afield::AFvalue(v) => {
+                            expect_mutable(v);
+                        }
+                    };
                 }
             }
+
             _ => {}
         }
         Ok(())
@@ -833,11 +923,11 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 let new_lenv = self.handle_single_block(context, context.locals.clone(), b);
                 let block_lenv = self.handle_loop(context, new_lenv, b, None);
                 context.locals = block_lenv;
-                self.visit_expr(context, cond)
+                self.visit_expr(context, &mut cond.2)
             }
             aast::Stmt_::While(w) => {
                 let (cond, b) = &mut **w;
-                self.visit_expr(context, cond)?;
+                self.visit_expr(context, &mut cond.2)?;
                 let old_lenv = context.locals.clone();
                 let new_lenv = self.handle_loop(context, old_lenv, b, None);
                 context.locals = new_lenv;
@@ -850,11 +940,11 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 }
                 match term {
                     Some(t) => {
-                        self.visit_expr(context, t)?;
+                        self.visit_expr(context, &mut t.2)?;
                     }
                     None => {}
                 }
-                for inc in increment {
+                for inc in &mut increment.2 {
                     self.visit_expr(context, inc)?;
                 }
                 let old_lenv = context.locals.clone();
@@ -868,11 +958,11 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 let (assignments, block) = &mut **a;
                 for i in assignments {
                     // if there's a temp local
-                    if let Some(lid) = &i.0 {
-                        let var_name = local_id::get_name(&lid.1).to_string();
-                        let rhs_rty = rty_expr(context, &i.1);
-                        context.add_local(&var_name, rhs_rty);
-                    }
+                    let lid = &i.0;
+                    let var_name = local_id::get_name(&lid.1).to_string();
+                    let rhs_rty = rty_expr(context, &i.1);
+                    context.add_local(&var_name, rhs_rty);
+                    i.recurse(context, self.object())?;
                 }
                 block.recurse(context, self.object())
             }

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /* Wraps a string to a given number of characters.
  * @param string $str - The input string.
@@ -85,7 +85,7 @@ function wordwrap(string $str, int $width = 75, string $break = "\n",
  * Variables will be co-erced to a suitable type for the specifier:
  */
 <<__Native, __IsFoldable>>
-function sprintf(mixed $format, ...$args)[]: mixed;
+function sprintf(mixed $format, mixed... $args)[]: mixed;
 
 /* Return a formatted string
  *
@@ -102,8 +102,8 @@ function vsprintf(mixed $format, mixed $args)[]: mixed;
  *
  * @param string $format - See sprintf() for a description of format.
  */
-<<__Native>>
-function printf(mixed $format, ...$args): mixed;
+<<__Native("NoRecording")>>
+function printf(mixed $format, mixed... $args): mixed;
 
 /* Output a formatted string
  *
@@ -113,5 +113,5 @@ function printf(mixed $format, ...$args): mixed;
  * Operates as printf() but accepts an array of arguments,
  * rather than a variable number of arguments.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function vprintf(mixed $format, mixed $args): mixed;

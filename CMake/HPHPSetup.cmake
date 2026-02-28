@@ -1,4 +1,5 @@
 include(Options)
+include(GNUInstallDirs)
 
 set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS Debug DebugOpt RelWithDebInfo)
 
@@ -44,8 +45,7 @@ set(HHVM_LINK_LIBRARIES
   vixl neo)
 
 if(ENABLE_FASTCGI)
-  LIST(APPEND HHVM_LINK_LIBRARIES thrift)
-  LIST(APPEND HHVM_LINK_LIBRARIES proxygen)
+  LIST(APPEND HHVM_LINK_LIBRARIES thrift proxygen mvfst)
   include(CheckCXXSourceCompiles)
   CHECK_CXX_SOURCE_COMPILES("#include <pthread.h>
   int main() {
@@ -60,7 +60,7 @@ if(HHVM_DYNAMIC_EXTENSION_DIR)
   add_definitions(-DHHVM_DYNAMIC_EXTENSION_DIR="${HHVM_DYNAMIC_EXTENSION_DIR}")
 else()
   if(UNIX)
-    add_definitions(-DHHVM_DYNAMIC_EXTENSION_DIR="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/hhvm/extensions")
+    add_definitions(-DHHVM_DYNAMIC_EXTENSION_DIR="${CMAKE_INSTALL_FULL_LIBDIR}/hhvm/extensions")
   endif()
 endif()
 
@@ -101,20 +101,8 @@ if (LINUX)
   add_definitions(-D_GNU_SOURCE)
 endif()
 
-if(MSVC)
-  add_definitions(-DGLOG_NO_ABBREVIATED_SEVERITIES)
-  add_definitions(-DWIN32_LEAN_AND_MEAN)
-endif()
-
 if(CMAKE_CONFIGURATION_TYPES)
-  if(NOT MSVC)
-    message(FATAL_ERROR "Adding the appropriate defines for multi-config targets using anything other than MSVC is not yet supported!")
-  endif()
-  foreach(flag_var
-      CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
-      CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-    set(${flag_var} "${${flag_var}} /D NDEBUG")
-  endforeach()
+  message(FATAL_ERROR "Adding the appropriate defines for multi-config targets is not yet supported!")
 elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR
        ${CMAKE_BUILD_TYPE} MATCHES "DebugOpt")
   message("Generating DEBUG build")
@@ -127,7 +115,7 @@ if(ALWAYS_ASSERT)
   add_definitions(-DALWAYS_ASSERT=1)
 endif()
 
-if(APPLE OR FREEBSD OR MSVC)
+if(APPLE OR FREEBSD)
   add_definitions(-DSKIP_USER_CHANGE=1)
 endif()
 
@@ -170,7 +158,7 @@ add_definitions(-DHAVE_INTTYPES_H)
 # blacklist the platform rather than whitelisting others.
 option(USE_BUNDLED_TZDATA "Use bundled system tzdata instead of /usr/share/zoneinfo" OFF)
 if (NOT ${USE_BUNDLED_TZDATA})
-  if (NOT EXISTS /usr/share/zoneinfo)
+  if (NOT DEFINED HAVE_SYSTEM_TZDATA AND NOT EXISTS /usr/share/zoneinfo)
     message(FATAL_ERROR "/usr/share/zoneinfo does not exist, and USE_BUNDLED_TZDATA not set")
   endif()
   add_definitions(-DHAVE_SYSTEM_TZDATA)
@@ -182,4 +170,8 @@ if (THIRD_PARTY_INCLUDE_PATHS)
   add_definitions(${THIRD_PARTY_DEFINITIONS})
   include_directories(${HPHP_HOME}/hphp)
   include_directories(${HPHP_HOME})
+endif()
+
+if (ENABLE_SYSTEM_LOCALE_ARCHIVE)
+  add_definitions(-DENABLE_SYSTEM_LOCALE_ARCHIVE)
 endif()

@@ -24,6 +24,7 @@ type t =
   | EndOfFile
   | Script
   | QualifiedName
+  | ModuleName
   | SimpleTypeSpecifier
   | LiteralExpression
   | PrefixedStringExpression
@@ -38,6 +39,8 @@ type t =
   | EnumClassEnumerator
   | AliasDeclaration
   | ContextAliasDeclaration
+  | CaseTypeDeclaration
+  | CaseTypeVariant
   | PropertyDeclaration
   | PropertyDeclarator
   | NamespaceDeclaration
@@ -56,21 +59,17 @@ type t =
   | MethodishTraitResolution
   | ClassishDeclaration
   | ClassishBody
-  | TraitUsePrecedenceItem
-  | TraitUseAliasItem
-  | TraitUseConflictResolution
   | TraitUse
   | RequireClause
+  | RequireClauseConstraint
   | ConstDeclaration
   | ConstantDeclarator
   | TypeConstDeclaration
   | ContextConstDeclaration
   | DecoratedExpression
+  | NamedArgument
   | ParameterDeclaration
-  | VariadicParameter
   | OldAttributeSpecification
-  | AttributeSpecification
-  | Attribute
   | InclusionExpression
   | InclusionDirective
   | CompoundStatement
@@ -78,11 +77,11 @@ type t =
   | MarkupSection
   | MarkupSuffix
   | UnsetStatement
+  | DeclareLocalStatement
   | UsingStatementBlockScoped
   | UsingStatementFunctionScoped
   | WhileStatement
   | IfStatement
-  | ElseifClause
   | ElseClause
   | TryStatement
   | CatchClause
@@ -95,6 +94,8 @@ type t =
   | SwitchFallthrough
   | CaseLabel
   | DefaultLabel
+  | MatchStatement
+  | MatchStatementArm
   | ReturnStatement
   | YieldBreakStatement
   | ThrowStatement
@@ -106,6 +107,9 @@ type t =
   | AnonymousClass
   | AnonymousFunction
   | AnonymousFunctionUseClause
+  | VariablePattern
+  | ConstructorPattern
+  | RefinementPattern
   | LambdaExpression
   | LambdaSignature
   | CastExpression
@@ -124,6 +128,7 @@ type t =
   | ConditionalExpression
   | EvalExpression
   | IssetExpression
+  | NameofExpression
   | FunctionCallExpression
   | FunctionPointerExpression
   | ParenthesizedExpression
@@ -170,7 +175,12 @@ type t =
   | DictionaryTypeSpecifier
   | ClosureTypeSpecifier
   | ClosureParameterTypeSpecifier
+  | TupleOrUnionOrIntersectionElementTypeSpecifier
+  | TypeRefinement
+  | TypeInRefinement
+  | CtxInRefinement
   | ClassnameTypeSpecifier
+  | ClassPtrTypeSpecifier
   | FieldSpecifier
   | FieldInitializer
   | ShapeTypeSpecifier
@@ -191,6 +201,8 @@ type t =
   | ListItem
   | EnumClassLabelExpression
   | ModuleDeclaration
+  | ModuleMembershipDeclaration
+  | PackageExpression
 [@@deriving show, eq]
 
 let to_string kind =
@@ -201,6 +213,7 @@ let to_string kind =
   | EndOfFile -> "end_of_file"
   | Script -> "script"
   | QualifiedName -> "qualified_name"
+  | ModuleName -> "module_name"
   | SimpleTypeSpecifier -> "simple_type_specifier"
   | LiteralExpression -> "literal"
   | PrefixedStringExpression -> "prefixed_string"
@@ -215,6 +228,8 @@ let to_string kind =
   | EnumClassEnumerator -> "enum_class_enumerator"
   | AliasDeclaration -> "alias_declaration"
   | ContextAliasDeclaration -> "context_alias_declaration"
+  | CaseTypeDeclaration -> "case_type_declaration"
+  | CaseTypeVariant -> "case_type_variant"
   | PropertyDeclaration -> "property_declaration"
   | PropertyDeclarator -> "property_declarator"
   | NamespaceDeclaration -> "namespace_declaration"
@@ -233,21 +248,17 @@ let to_string kind =
   | MethodishTraitResolution -> "methodish_trait_resolution"
   | ClassishDeclaration -> "classish_declaration"
   | ClassishBody -> "classish_body"
-  | TraitUsePrecedenceItem -> "trait_use_precedence_item"
-  | TraitUseAliasItem -> "trait_use_alias_item"
-  | TraitUseConflictResolution -> "trait_use_conflict_resolution"
   | TraitUse -> "trait_use"
   | RequireClause -> "require_clause"
+  | RequireClauseConstraint -> "require_clause_constraint"
   | ConstDeclaration -> "const_declaration"
   | ConstantDeclarator -> "constant_declarator"
   | TypeConstDeclaration -> "type_const_declaration"
   | ContextConstDeclaration -> "context_const_declaration"
   | DecoratedExpression -> "decorated_expression"
+  | NamedArgument -> "named_argument"
   | ParameterDeclaration -> "parameter_declaration"
-  | VariadicParameter -> "variadic_parameter"
   | OldAttributeSpecification -> "old_attribute_specification"
-  | AttributeSpecification -> "attribute_specification"
-  | Attribute -> "attribute"
   | InclusionExpression -> "inclusion_expression"
   | InclusionDirective -> "inclusion_directive"
   | CompoundStatement -> "compound_statement"
@@ -255,11 +266,11 @@ let to_string kind =
   | MarkupSection -> "markup_section"
   | MarkupSuffix -> "markup_suffix"
   | UnsetStatement -> "unset_statement"
+  | DeclareLocalStatement -> "declare_local_statement"
   | UsingStatementBlockScoped -> "using_statement_block_scoped"
   | UsingStatementFunctionScoped -> "using_statement_function_scoped"
   | WhileStatement -> "while_statement"
   | IfStatement -> "if_statement"
-  | ElseifClause -> "elseif_clause"
   | ElseClause -> "else_clause"
   | TryStatement -> "try_statement"
   | CatchClause -> "catch_clause"
@@ -272,6 +283,8 @@ let to_string kind =
   | SwitchFallthrough -> "switch_fallthrough"
   | CaseLabel -> "case_label"
   | DefaultLabel -> "default_label"
+  | MatchStatement -> "match_statement"
+  | MatchStatementArm -> "match_statement_arm"
   | ReturnStatement -> "return_statement"
   | YieldBreakStatement -> "yield_break_statement"
   | ThrowStatement -> "throw_statement"
@@ -283,6 +296,9 @@ let to_string kind =
   | AnonymousClass -> "anonymous_class"
   | AnonymousFunction -> "anonymous_function"
   | AnonymousFunctionUseClause -> "anonymous_function_use_clause"
+  | VariablePattern -> "variable_pattern"
+  | ConstructorPattern -> "constructor_pattern"
+  | RefinementPattern -> "refinement_pattern"
   | LambdaExpression -> "lambda_expression"
   | LambdaSignature -> "lambda_signature"
   | CastExpression -> "cast_expression"
@@ -301,6 +317,7 @@ let to_string kind =
   | ConditionalExpression -> "conditional_expression"
   | EvalExpression -> "eval_expression"
   | IssetExpression -> "isset_expression"
+  | NameofExpression -> "nameof_expression"
   | FunctionCallExpression -> "function_call_expression"
   | FunctionPointerExpression -> "function_pointer_expression"
   | ParenthesizedExpression -> "parenthesized_expression"
@@ -347,7 +364,13 @@ let to_string kind =
   | DictionaryTypeSpecifier -> "dictionary_type_specifier"
   | ClosureTypeSpecifier -> "closure_type_specifier"
   | ClosureParameterTypeSpecifier -> "closure_parameter_type_specifier"
+  | TupleOrUnionOrIntersectionElementTypeSpecifier ->
+    "tuple_or_union_or_intersection_element_type_specifier"
+  | TypeRefinement -> "type_refinement"
+  | TypeInRefinement -> "type_in_refinement"
+  | CtxInRefinement -> "ctx_in_refinement"
   | ClassnameTypeSpecifier -> "classname_type_specifier"
+  | ClassPtrTypeSpecifier -> "class_ptr_type_specifier"
   | FieldSpecifier -> "field_specifier"
   | FieldInitializer -> "field_initializer"
   | ShapeTypeSpecifier -> "shape_type_specifier"
@@ -368,3 +391,5 @@ let to_string kind =
   | ListItem -> "list_item"
   | EnumClassLabelExpression -> "enum_class_label"
   | ModuleDeclaration -> "module_declaration"
+  | ModuleMembershipDeclaration -> "module_membership_declaration"
+  | PackageExpression -> "package_expression"

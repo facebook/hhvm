@@ -1,0 +1,2 @@
+ERROR: File "needs_concrete_on_nonstatic_method_1.php", line 5, characters 19-20:
+The `__NeedsConcrete` attribute is not allowed on `A::m1` (a nonstatic method). The `__NeedsConcrete` attribute is only meaningful on static methods. (Typing[4506])

@@ -17,23 +17,21 @@
 
 #include "hphp/runtime/ext/asio/asio-session.h"
 
-#include <limits>
 #include <algorithm>
-
-#include <folly/String.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_priority-bridge-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_wait-handle.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
-#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/configs/eval.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,9 +39,6 @@ namespace HPHP {
 RDS_LOCAL_NO_CHECK(AsioSession*, AsioSession::s_current)(nullptr);
 
 namespace {
-  const context_idx_t MAX_CONTEXT_DEPTH =
-    std::numeric_limits<context_idx_t>::max();
-
   Object checkCallback(const Variant& callback, char* name) {
     if (!callback.isNull() &&
         (!callback.isObject() ||
@@ -77,27 +72,30 @@ void AsioSession::Init() {
 }
 
 AsioSession::AsioSession()
-    : m_contexts(), m_externalThreadEventQueue() {
+  : m_contexts(), m_externalThreadEventQueue(), m_currCtxStateIdx(0) {
 }
 
 void AsioSession::enterContext(ActRec* savedFP) {
-  if (UNLIKELY(getCurrentContextIdx() >= MAX_CONTEXT_DEPTH)) {
+  assertx(getCurrentContextStateIndex().contextIndex().value == m_contexts.size());
+  if (UNLIKELY(m_contexts.size() >= ContextIndex::max().value)) {
     SystemLib::throwInvalidOperationExceptionObject(
       "Unable to enter asio context: too many contexts open");
   }
 
   m_contexts.push_back(req::make_raw<AsioContext>(savedFP));
-
-  assertx(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
+  setCurrentContextStateIndex(
+    ContextIndex{uint8_t(m_contexts.size())}.toRegular());
   assertx(isInContext());
 }
 
 void AsioSession::exitContext() {
   assertx(isInContext());
+  m_contexts.back()->exit(getCurrentContextStateIndex().contextIndex());
 
-  m_contexts.back()->exit(m_contexts.size());
   req::destroy_raw(m_contexts.back());
   m_contexts.pop_back();
+  setCurrentContextStateIndex(
+    ContextIndex{uint8_t(m_contexts.size())}.toRegular());
 }
 
 void AsioSession::initAbruptInterruptException() {
@@ -124,11 +122,15 @@ void AsioSession::onIOWaitEnter() {
   runCallback(m_onIOWaitEnter, empty_vec_array(), "Awaitable::onIOWaitEnter");
 }
 
-void AsioSession::onIOWaitExit() {
-  runCallback(m_onIOWaitExit, empty_vec_array(), "Awaitable::onIOWaitExit");
+void AsioSession::onIOWaitExit(c_WaitableWaitHandle* waitHandle) {
+  runCallback(
+    m_onIOWaitExit,
+    make_vec_array(waitHandle),
+    "Awaitable::onIOWaitExit"
+  );
 }
 
-void AsioSession::onJoin(c_Awaitable* waitHandle) {
+void AsioSession::onJoin(c_WaitableWaitHandle* waitHandle) {
   runCallback(m_onJoin, make_vec_array(waitHandle), "Awaitable::onJoin");
 }
 
@@ -214,12 +216,30 @@ void AsioSession::setOnAwaitAllCreate(const Variant& callback) {
 
 void AsioSession::onAwaitAllCreate(
   c_AwaitAllWaitHandle* waitHandle,
-  const Variant &dependencies
+  Array&& dependencies
 ) {
   runCallback(
     m_onAwaitAllCreate,
-    make_vec_array(waitHandle, dependencies),
+    make_vec_array(waitHandle, std::move(dependencies)),
     "AwaitAllWaitHandle::onCreate"
+  );
+}
+
+void AsioSession::setOnConcurrentCreate(const Variant& callback) {
+  m_onConcurrentCreate = checkCallback(
+    callback,
+    "ConcurrentWaitHandle::onCreate"
+  );
+}
+
+void AsioSession::onConcurrentCreate(
+  c_ConcurrentWaitHandle* waitHandle,
+  Array&& dependencies
+) {
+  runCallback(
+    m_onConcurrentCreate,
+    make_vec_array(waitHandle, std::move(dependencies)),
+    "ConcurrentWaitHandle::onCreate"
   );
 }
 
@@ -296,6 +316,24 @@ void AsioSession::onExternalThreadEventFail(
     m_onExtThreadEventFail,
     make_vec_array(waitHandle, exception, finish_time),
     "ExternalThreadEventWaitHandle::onFail"
+  );
+}
+
+void AsioSession::setOnPriorityBridgeCreate(const Variant& callback) {
+  m_onPriorityBridgeCreate = checkCallback(
+    callback,
+    "PriorityBridgeWaitHandle::onCreate"
+  );
+}
+
+void AsioSession::onPriorityBridgeCreate(
+  c_PriorityBridgeWaitHandle* waitHandle,
+  c_WaitableWaitHandle* child
+) {
+  runCallback(
+    m_onPriorityBridgeCreate,
+    make_vec_array(waitHandle, child),
+    "PriorityBridgeWaitHandle::onCreate"
   );
 }
 

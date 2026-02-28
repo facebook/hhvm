@@ -36,9 +36,16 @@ type per_cont_entry = {
    * inference, not conclusions.
    *)
   tpenv: Type_parameter_env.t;
+  (* Information about packages that have been tested at runtime for inclusion
+   * in the current deployment.  These include the packages asserted with
+   * RequirePackage and if (package).
+   * Remark: the package the file belongs to is _not included although it can
+   * be safely assumed to be part of the current deployment.
+   *)
+  loaded_packages: Typing_local_packages.t;
 }
 
-type t = per_cont_entry Typing_continuations.Map.t
+type t = per_cont_entry C.Map.t
 
 (*****************************************************************************)
 (* Functions dealing with continuation based flow typing of local variables *)
@@ -49,13 +56,18 @@ let empty_entry =
     local_types = Typing_local_types.empty;
     fake_members = Typing_fake_members.empty;
     tpenv = Type_parameter_env.empty;
+    loaded_packages = Typing_local_packages.empty;
   }
 
-let initial_locals entry = CMap.add Typing_continuations.Next entry CMap.empty
+let initial_locals entry = CMap.add C.Next entry CMap.empty
 
 let get_cont_option = CMap.find_opt
 
-let all_continuations = Typing_continuations.Map.keys
+let all_continuations : t -> C.t list = C.Map.keys
+
+(** Continuations used to typecheck the `finally` block. *)
+let continuations_for_finally =
+  [C.Break; C.Continue; C.Catch; C.Exit; C.Finally]
 
 (* Update an entry if it exists *)
 let update_cont_entry name m f =
@@ -90,3 +102,18 @@ let replace_cont key valueopt map =
   match valueopt with
   | None -> drop_cont key map
   | Some value -> CMap.add key value map
+
+let assert_package_loaded_in_cont ~package_info name pos pkg status m =
+  match CMap.find_opt name m with
+  | None -> m
+  | Some cont ->
+    let loaded_packages =
+      Typing_local_packages.add
+        ~package_info
+        pos
+        pkg
+        status
+        cont.loaded_packages
+    in
+    let cont = { cont with loaded_packages } in
+    CMap.add name cont m

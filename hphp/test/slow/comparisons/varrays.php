@@ -1,14 +1,14 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $varrays = vec[
-    varray[],
-    varray[1],
-    varray[-1],
-    varray['1'],
-    varray[1, 1],
-    varray[2],
+    vec[],
+    vec[1],
+    vec[-1],
+    vec['1'],
+    vec[1, 1],
+    vec[2],
   ];
   foreach ($varrays as $v1) {
     foreach ($varrays as $v2) {

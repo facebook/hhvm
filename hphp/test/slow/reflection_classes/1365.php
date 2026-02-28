@@ -1,16 +1,16 @@
 <?hh
 
-function not_a_closure() {
+function not_a_closure() :mixed{
    return 1;
  }
-  function is_a_generator() {
+  function is_a_generator() :AsyncGenerator<mixed,mixed,void>{
    yield 1;
    yield 2;
  }
 
 
 <<__EntryPoint>>
-function main_1365() {
+function main_1365() :mixed{
 ;
  $rf = new ReflectionFunction('not_a_closure');
  var_dump($rf->isClosure());

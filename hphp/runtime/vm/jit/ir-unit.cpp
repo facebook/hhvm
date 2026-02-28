@@ -19,12 +19,13 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/timer.h"
 
 namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -41,9 +42,14 @@ IRUnit::IRUnit(TransContext context,
   m_startNanos = HPHP::Timer::GetThreadCPUTimeNanos();
 }
 
+const PackageInfo& IRUnit::packageInfo() {
+  assertx(m_context.packageInfo);
+  return *m_context.packageInfo;
+}
+
 void IRUnit::initLogEntry(const Func* func) {
   if (func ? func->shouldSampleJit() :
-      StructuredLog::coinflip(RuntimeOption::EvalJitSampleRate)) {
+      StructuredLog::coinflip(Cfg::Jit::SampleRate)) {
     m_logEntry.emplace();
   }
 }
@@ -91,11 +97,12 @@ void IRUnit::expandJmp(IRInstruction* jmp, SSATmp* value) {
 Block* IRUnit::defBlock(uint64_t profCount /* =1 */,
                         Block::Hint hint   /* =Neither */ ) {
   FTRACE(2, "IRUnit defining B{}\n", m_nextBlockId);
-  auto const block = new (m_arena) Block(m_nextBlockId++, profCount);
   if (hint == Block::Hint::Neither) {
     hint = m_defHint;
   }
-  block->setHint(hint);
+  auto const block = new (m_arena) Block(m_nextBlockId++, profCount, hint);
+  assertx(!block->isEntry() || block->hint() >= Block::Hint::Neither);
+
   return block;
 }
 
@@ -127,8 +134,7 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     // These instructions end a unit after executing the bytecode
     // instruction they correspond to.
     case InterpOneCF:
-    case JmpSSwitchDest:
-    case JmpSwitchDest:
+    case JmpExit:
     case Unreachable:
     case EndBlock:
       return instSk == sk;
@@ -145,15 +151,13 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     case AsyncFuncRetSlow:
     case AsyncGenRetR:
     case AsyncGenYieldR:
-    case EnterTCUnwind:
       return true;
 
     // A ReqBindJmp ends a unit and it jumps to the next instruction to
     // execute.
     case ReqBindJmp: {
       auto destSk = inst.extra<ReqBindJmp>()->target;
-      if (destSk.funcEntry()) return false;
-      return sk.succOffsets().count(destSk.offset());
+      return sk.succSrcKeys().contains(destSk);
     }
 
     default:

@@ -19,17 +19,25 @@
 #error "This should only be included by ext_async-function-wait-handle.h"
 #endif
 
+#include "hphp/util/assertions.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+template <bool lowPri>
 inline void
 c_AsyncFunctionWaitHandle::Node::setChild(c_WaitableWaitHandle* child) {
-  assertx(child);
-  assertx(!child->isFinished());
+  if constexpr(lowPri) {
+    assertx(!child);
+    m_child = nullptr;
+  } else {
+    assertx(child);
+    assertx(!child->isFinished());
 
-  m_child = child;
-  m_child->getParentChain()
-    .addParent(m_blockable, AsioBlockable::Kind::AsyncFunctionWaitHandleNode);
+    m_child = child;
+    m_child->getParentChain()
+      .addParent(m_blockable, AsioBlockable::Kind::AsyncFunctionWaitHandleNode);
+  }
 }
 
 inline c_WaitableWaitHandle*

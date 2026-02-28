@@ -28,10 +28,10 @@ let from_class { dc_name; dc_props; dc_sprops; dc_methods; dc_smethods; _ } =
     SMap.fold
       begin
         fun name { elt_origin = cls; _ } set ->
-        if String.equal cls dc_name then
-          EltHeap.KeySet.add (cls, name) set
-        else
-          set
+          if String.equal cls dc_name then
+            EltHeap.KeySet.add (cls, name) set
+          else
+            set
       end
       elts
       EltHeap.KeySet.empty
@@ -54,9 +54,9 @@ let get_for_classes ~old classes =
     ~f:
       begin
         fun acc cls ->
-        match get cls with
-        | None -> acc
-        | Some c -> SMap.add cls (from_class c) acc
+          match get cls with
+          | None -> acc
+          | Some c -> SMap.add cls (from_class c) acc
       end
     classes
     ~init:SMap.empty
@@ -83,8 +83,8 @@ let oldify_all class_to_elems =
   SMap.iter
     begin
       fun cls elems ->
-      Constructors.oldify_batch (SSet.singleton cls);
-      oldify_batch elems
+        Constructors.oldify_batch (SSet.singleton cls);
+        oldify_batch elems
     end
     class_to_elems
 
@@ -92,8 +92,8 @@ let remove_old_all class_to_elems =
   SMap.iter
     begin
       fun cls elems ->
-      Constructors.remove_old_batch (SSet.singleton cls);
-      remove_old_batch elems
+        Constructors.remove_old_batch (SSet.singleton cls);
+        remove_old_batch elems
     end
     class_to_elems
 
@@ -101,7 +101,7 @@ let remove_all class_to_elems =
   SMap.iter
     begin
       fun cls elems ->
-      Constructors.remove_batch (SSet.singleton cls);
-      remove_batch elems
+        Constructors.remove_batch (SSet.singleton cls);
+        remove_batch elems
     end
     class_to_elems

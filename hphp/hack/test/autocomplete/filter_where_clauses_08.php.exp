@@ -1,0 +1,8 @@
+notToThrow
+  INSERT notToThrow()
+  function<TRet>(): void
+SORT TEXT: none
+check
+  INSERT check()
+  function(): void
+SORT TEXT: none

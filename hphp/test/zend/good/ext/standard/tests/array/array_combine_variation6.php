@@ -13,8 +13,8 @@
 echo "*** Testing array_combine() : binary safe checking ***\n";
 
 // array with binary values
-$arr_binary = varray[b"hello", b"world"];
-$arr_normal = varray["hello", "world"];
+$arr_binary = vec[b"hello", b"world"];
+$arr_normal = vec["hello", "world"];
 
 // array with binary value for $keys and $values argument
 var_dump( array_combine($arr_binary, $arr_binary) );

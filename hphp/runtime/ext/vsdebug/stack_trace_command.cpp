@@ -15,11 +15,11 @@
 */
 
 #include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/debugger-request-info.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/base/tv-variant.h"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -112,7 +112,7 @@ bool StackTraceCommand::executeImpl(
     if (!fileName.empty()) {
       stackFrame["source"] = folly::dynamic::object;
       folly::dynamic& source = stackFrame["source"];
-      source["name"] = boost::filesystem::basename(fileName);
+      source["name"] = std::filesystem::path{fileName}.stem().native();
       source["path"] = fileName;
     }
 

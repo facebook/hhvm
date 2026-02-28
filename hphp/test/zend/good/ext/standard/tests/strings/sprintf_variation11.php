@@ -11,13 +11,13 @@ $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
 // array of resource types
-$resource_values = varray [
+$resource_values = vec[
   $fp,
   $dfp
 ];
 
 // various float formats
-$float_formats = varray[
+$float_formats = vec[
   "%f", "%hf", "%lf", 
   "%Lf", " %f", "%f ", 
   "\t%f", "\n%f", "%4f",

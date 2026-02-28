@@ -1,26 +1,13 @@
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
-#include "hphp/runtime/ext/collections/ext_collections-map.h"
-#include "hphp/runtime/ext/collections/ext_collections-pair.h"
-#include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/vanilla-vec.h"
-#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/zend/zend-math.h"
 
 namespace HPHP { namespace collections {
-/////////////////////////////////////////////////////////////////////////////
-
-const StaticString
-  s_HH_Vector("HH\\Vector"),
-  s_HH_ImmVector("HH\\ImmVector"),
-  s_VectorIterator("VectorIterator");
 
 /////////////////////////////////////////////////////////////////////////////
 // VectorIterator
@@ -29,7 +16,7 @@ static Variant HHVM_METHOD(VectorIterator, current) {
   return Native::data<VectorIterator>(this_)->current();
 }
 
-static Variant HHVM_METHOD(VectorIterator, key) {
+static int64_t HHVM_METHOD(VectorIterator, key) {
   return Native::data<VectorIterator>(this_)->key();
 }
 
@@ -280,8 +267,6 @@ Object BaseVector::getIterator() {
 //////////////////////////////////////////////////////////////////////////////
 // c_Vector
 
-Class* c_Vector::s_cls;
-
 void c_Vector::clear() {
   dropImmCopy();
   decRefArr(arrayData());
@@ -456,25 +441,20 @@ void c_Vector::OffsetUnset(ObjectData* /*obj*/, const TypedValue* /*key*/) {
 /////////////////////////////////////////////////////////////////////////////
 // c_ImmVector
 
-Class* c_ImmVector::s_cls;
-
 c_ImmVector* c_ImmVector::Clone(ObjectData* obj) {
   return BaseVector::Clone<c_ImmVector>(obj);
 }
 
 namespace collections {
 
-void CollectionsExtension::initVector() {
+void CollectionsExtension::registerNativeVector() {
   HHVM_ME(VectorIterator, current);
   HHVM_ME(VectorIterator, key);
   HHVM_ME(VectorIterator, valid);
   HHVM_ME(VectorIterator, next);
   HHVM_ME(VectorIterator, rewind);
 
-  Native::registerNativeDataInfo<VectorIterator>(
-    s_VectorIterator.get(),
-    Native::NDIFlags::NO_SWEEP
-  );
+  Native::registerNativeDataInfo<VectorIterator>(Native::NDIFlags::NO_SWEEP);
 
   // Common Vector/ImmVector
 
@@ -486,27 +466,24 @@ void CollectionsExtension::initVector() {
 #undef BASE_ME
 
   // Vector specific
-  HHVM_NAMED_ME(HH\\Vector, clear,        &c_Vector::php_clear);
-  HHVM_NAMED_ME(HH\\Vector, pop,          &c_Vector::pop);
-  HHVM_NAMED_ME(HH\\Vector, reverse,      &c_Vector::reverse);
-  HHVM_NAMED_ME(HH\\Vector, shuffle,      &c_Vector::shuffle);
-  HHVM_NAMED_ME(HH\\Vector, removeKey,    &c_Vector::php_removeKey);
-  HHVM_NAMED_ME(HH\\Vector, reserve,      &c_Vector::php_reserve);
-  HHVM_NAMED_ME(HH\\Vector, resize,       &c_Vector::php_resize);
-  HHVM_NAMED_ME(HH\\Vector, splice,       &c_Vector::php_splice);
+  HHVM_NAMED_ME(HH\\Vector, pop,      &c_Vector::pop);
+  HHVM_NAMED_ME(HH\\Vector, reverse,  &c_Vector::reverse);
+  HHVM_NAMED_ME(HH\\Vector, shuffle,  &c_Vector::shuffle);
+  HHVM_NAMED_ME(HH\\Vector, reserve,  &c_Vector::php_reserve);
+  HHVM_NAMED_ME(HH\\Vector, resize,   &c_Vector::php_resize);
+  HHVM_NAMED_ME(HH\\Vector, splice,   &c_Vector::php_splice);
 
-  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_Vector);
-  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_ImmVector);
+  // Vector specific functions that return `$this` in userland. These mutate
+  // the underlying vector *then* return, with the mutation contained within
+  // a `void` C++ function.
+  HHVM_NAMED_ME(HH\\Vector, removeKeyNative,  &c_Vector::php_removeKey);
+  HHVM_NAMED_ME(HH\\Vector, clearNative,      &c_Vector::clear);
 
-  loadSystemlib("collections-vector");
+  Native::registerNativePropHandler<CollectionPropHandler>(c_Vector::className());
+  Native::registerNativePropHandler<CollectionPropHandler>(c_ImmVector::className());
 
-  c_Vector::s_cls = Class::lookup(s_HH_Vector.get());
-  assertx(c_Vector::s_cls);
-  finishClass<c_Vector>();
-
-  c_ImmVector::s_cls = Class::lookup(s_HH_ImmVector.get());
-  assertx(c_ImmVector::s_cls);
-  finishClass<c_ImmVector>();
+  Native::registerClassExtraDataHandler(c_Vector::className(), finish_class<c_Vector>);
+  Native::registerClassExtraDataHandler(c_ImmVector::className(), finish_class<c_ImmVector>);
 }
 
 /////////////////////////////////////////////////////////////////////////////

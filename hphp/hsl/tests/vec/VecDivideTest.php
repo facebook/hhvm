@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /*
  *  Copyright (c) 2004-present, Facebook, Inc.
  *  All rights reserved.
@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class VecDivideTest extends HackTest {
 
   public static function providePartition(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Vec\range(1, 10),
         $n ==> $n % 2 === 0,

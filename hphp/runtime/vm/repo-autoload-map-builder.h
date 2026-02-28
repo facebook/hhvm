@@ -30,6 +30,7 @@ struct PreClassEmitter;
 struct FuncEmitter;
 struct TypeAlias;
 struct Constant;
+struct Module;
 
 struct RepoAutoloadMapBuilder {
 
@@ -41,43 +42,26 @@ struct RepoAutoloadMapBuilder {
     Compare
   >;
 
-  using CaseInsensitiveMap = Map<string_data_isame>;
+  using TypeNameMap = Map<string_data_tsame>;
+  using FuncNameMap = Map<string_data_fsame>;
   using CaseSensitiveMap = Map<string_data_same>;
 
   friend struct FuncEmitter;
 
-  static std::unique_ptr<RepoAutoloadMap> serde(BlobDecoder& sd);
-  void serde(BlobEncoder& sd) const;
-
   void addUnit(const UnitEmitter& ue);
 
+  const TypeNameMap& getTypes() const;
+  const FuncNameMap& getFuncs() const;
+  const CaseSensitiveMap& getConstants() const;
+  const TypeNameMap& getTypeAliases() const;
+  const CaseSensitiveMap& getModules() const;
+
 private:
-  template<typename Compare>
-  static void serdeMap(BlobEncoder& sd, const Map<Compare>& map) {
-    sd(map.size());
-    for (auto const& kv : map) sd(kv.first)(kv.second);
-  }
-
-  template<typename Map>
-  static Map serdeMap(BlobDecoder& sd) {
-    size_t size;
-    sd(size);
-    Map map(size);
-    for (size_t i = 0; i < size; i++) {
-      const StringData* str;
-      int64_t unitSn;
-      sd(str)
-        (unitSn)
-        ;
-      map[str] = unitSn;
-    }
-    return map;
-  }
-
-  CaseInsensitiveMap m_types;
-  CaseInsensitiveMap m_funcs;
-  CaseInsensitiveMap m_typeAliases;
+  TypeNameMap m_types;
+  FuncNameMap m_funcs;
+  TypeNameMap m_typeAliases;
   CaseSensitiveMap m_constants;
+  CaseSensitiveMap m_modules;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 
-function myErrorHandler($errno, $errstr, $errfile, $errline) {
+function myErrorHandler($errno, $errstr, $errfile, $errline) :mixed{
     return true;
 }
 <<__EntryPoint>> function main(): void {

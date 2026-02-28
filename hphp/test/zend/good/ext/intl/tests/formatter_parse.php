@@ -6,7 +6,7 @@
 
 
 function ut_main()
-{
+:mixed{
     $res_str = '';
 
     $pos = null;

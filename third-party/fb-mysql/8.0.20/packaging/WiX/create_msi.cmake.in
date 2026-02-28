@@ -1,0 +1,118 @@
+# Copyright (c) 2010, 2018, Oracle and/or its affiliates. All rights reserved.
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2.0,
+# as published by the Free Software Foundation.
+#
+# This program is also distributed with certain software (including
+# but not limited to OpenSSL) that is licensed under separate terms,
+# as designated in a particular file or component or in included license
+# documentation.  The authors of MySQL hereby grant you an additional
+# permission to link the program and your derivative works with the
+# separately licensed software that they have included with MySQL.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License, version 2.0, for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+
+SET(LINK_STATIC_RUNTIME_LIBRARIES "@LINK_STATIC_RUNTIME_LIBRARIES@")
+SET(BUNDLE_RUNTIME_LIBRARIES "@BUNDLE_RUNTIME_LIBRARIES@")
+SET(CMAKE_BINARY_DIR "@CMAKE_BINARY_DIR@")
+SET(CMAKE_CURRENT_SOURCE_DIR "@CMAKE_CURRENT_SOURCE_DIR@")
+SET(CANDLE_EXECUTABLE "@CANDLE_EXECUTABLE@")
+SET(LIGHT_EXECUTABLE "@LIGHT_EXECUTABLE@")
+SET(CMAKE_COMMAND "@CMAKE_COMMAND@")
+SET(CMAKE_CFG_INTDIR "@CMAKE_CFG_INTDIR@")
+SET(VERSION "@VERSION@")
+SET(MAJOR_VERSION "@MAJOR_VERSION@")
+SET(MINOR_VERSION "@MINOR_VERSION@")
+SET(PATCH_VERSION "@PATCH_VERSION@")
+SET(CMAKE_SIZEOF_VOID_P @CMAKE_SIZEOF_VOID_P@)
+SET(MANUFACTURER "@MANUFACTURER@")
+SET(LICENSE_RTF "@LICENSE_RTF@")
+SET(CPACK_WIX_CONFIG "@CPACK_WIX_CONFIG@")
+SET(CPACK_WIX_INCLUDE "@CPACK_WIX_INCLUDE@")
+SET(CPACK_MSI_SETUP "@CPACK_MSI_SETUP@")
+SET(PRODUCT_NAME "MySQL Server")
+SET(PRODUCT_DESCRIPTION "MySQL Database Server")
+SET(UPGRADE_ID "D1DA7A5D-E358-40A5-8DB0-94B563487A74")
+SET(UPGRADE_CODE "D1DA7A5D-E358-40A5-8DB0-94B563487A74")
+
+SET(WITH_NDBCLUSTER "@WITH_NDBCLUSTER@")
+IF(WITH_NDBCLUSTER)
+  MESSAGE(STATUS "This is Cluster build")
+
+  MESSAGE(STATUS "Overriding PRODUCT_NAME ${PRODUCT_NAME}")
+  SET(PRODUCT_NAME "MySQL Cluster")
+  MESSAGE(STATUS "PRODUCT_NAME: ${PRODUCT_NAME}")
+
+  MESSAGE(STATUS "Overriding PRODUCT_DESCRIPTION ${PRODUCT_DESCRIPTION}")
+  SET(PRODUCT_DESCRIPTION "MySQL Cluster")
+  MESSAGE(STATUS "PRODUCT_DESCRIPTION: ${PRODUCT_DESCRIPTION}")
+
+  # use codes different from Server codes
+  MESSAGE(STATUS "Overriding UPGRADE_ID ${UPGRADE_ID}")
+  SET(UPGRADE_ID "847b8aea-26b3-4440-8fc8-fa9b482a2603")
+  MESSAGE(STATUS "UPGRADE_ID: ${UPGRADE_ID}")
+
+  MESSAGE(STATUS "Overriding UPGRADE_CODE ${UPGRADE_CODE}")
+  SET(UPGRADE_CODE "847b8aea-26b3-4440-8fc8-fa9b482a2603")
+  MESSAGE(STATUS "UPGRADE_CODE: ${UPGRADE_CODE}")
+ENDIF()
+
+LIST(APPEND EXCLUDE_DIRS
+     bin/debug
+     data/test
+     lib/plugin/debug
+     mysql-test
+     scripts
+)
+
+LIST(APPEND EXCLUDE_FILES
+     bin/echo.exe
+     bin/mysqld-debug.exe
+     lib/debug/mysqlserver.lib
+     lib/mysqlserver.lib
+     lib/mysqlservices.lib
+)
+
+INCLUDE(${CPACK_MSI_SETUP})
+
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/mysql_server.wxs.in 
+ ${CMAKE_CURRENT_BINARY_DIR}/mysql_server.wxs)
+
+SET(EXTRA_CANDLE_ARGS)
+IF("$ENV{EXTRA_CANDLE_ARGS}")
+	SET(EXTRA_CANDLE_ARGS "$ENV{EXTRA_CANDLE_ARGS}")
+ENDIF()
+
+SET(EXTRA_LIGHT_ARGS)
+IF("$ENV{EXTRA_LIGHT_ARGS}")
+	SET(EXTRA_LIGHT_ARGS "$ENV{EXTRA_LIGHT_ARGS}")
+ENDIF()
+
+FILE(REMOVE mysql_server.wixobj)
+EXECUTE_PROCESS(
+ COMMAND ${CANDLE_EXECUTABLE} -ext WixUtilExtension  mysql_server.wxs ${EXTRA_CANDLE_ARGS}
+ RESULT_VARIABLE CANDLE_RESULT
+)
+
+IF(CANDLE_RESULT)
+  MESSAGE(FATAL_ERROR "ERROR: can't run candle")
+ENDIF()
+
+EXECUTE_PROCESS(
+ COMMAND ${LIGHT_EXECUTABLE} -ext WixUIExtension -ext WixUtilExtension
+  mysql_server.wixobj  -out  ${CMAKE_BINARY_DIR}/${CPACK_PACKAGE_FILE_NAME}.msi
+  ${EXTRA_LIGHT_ARGS}
+ RESULT_VARIABLE LIGHT_RESULT
+)
+
+IF(LIGHT_RESULT)
+  MESSAGE(FATAL_ERROR "ERROR: can't run light")
+ENDIF()

@@ -1,6 +1,6 @@
 [("\\no_hint_async",
   (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None; fe_module = None;
+     { Typing_defs.fe_deprecated = None; fe_module = None; fe_package = None;
        fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([4:16-29]),
@@ -8,71 +8,72 @@
            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [4:16-29]) };
              ft_ret =
-             { et_enforced = Typing_defs_core.Unenforced;
-               et_type =
-               (Rret_fun_kind_from_decl ([4:16-29]),
-                (Tapply (([4:16-29], "\\HH\\Awaitable"),
-                   [(Rwitness_from_decl ([4:16-29]), Tany)])))
-               };
+             (Rret_fun_kind_from_decl ([4:16-29], FAsync),
+              (Tapply (([4:16-29], "\\HH\\Awaitable"),
+                 [(Rwitness_from_decl ([4:16-29]), Tany)])));
              ft_flags =
-             (make_ft_flags FAsync ~return_disposable:false
-               ~returns_readonly:false ~support_dynamic_type:false
-               ~readonly_this:false ~is_memoized:false ~variadic:false);
-             ft_ifc_decl = FDPolicied {PUBLIC} }));
+             { Typing_defs_flags.Fun.return_disposable = false; async = true;
+               generator = false; fun_kind = FAsync;
+               is_function_pointer = false; returns_readonly = false;
+               readonly_this = false; support_dynamic_type = false;
+               is_memoized = false; variadic = false };
+             ft_instantiated = true }));
        fe_pos = [4:16-29]; fe_php_std_lib = false;
-       fe_support_dynamic_type = false }));
+       fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+       fe_no_auto_likes = false;
+       fe_package_requirement = Typing_defs.RPNormal }));
   ("\\no_hint_generator",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_internal = false;
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([7:10-27]),
          (Tfun
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [7:10-27]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rret_fun_kind_from_decl ([7:10-27]),
-                 (Tapply (([7:10-27], "\\Generator"),
-                    [(Rwitness_from_decl ([7:10-27]), Tany);
-                      (Rwitness_from_decl ([7:10-27]), Tany);
-                      (Rwitness_from_decl ([7:10-27]), Tany)]
-                    )))
-                };
+              (Rret_fun_kind_from_decl ([7:10-27], FGenerator),
+               (Tapply (([7:10-27], "\\Generator"),
+                  [(Rwitness_from_decl ([7:10-27]), Tany);
+                    (Rwitness_from_decl ([7:10-27]), Tany);
+                    (Rwitness_from_decl ([7:10-27]), Tany)]
+                  )));
               ft_flags =
-              (make_ft_flags FGenerator ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC} }));
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = true; fun_kind = FGenerator;
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
+              ft_instantiated = true }));
         fe_pos = [7:10-27]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }));
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false;
+        fe_package_requirement = Typing_defs.RPNormal }));
   ("\\no_hint_async_generator",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_internal = false;
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([12:16-39]),
          (Tfun
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [12:16-39]) };
               ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type =
-                (Rret_fun_kind_from_decl ([12:16-39]),
-                 (Tapply (([12:16-39], "\\HH\\AsyncGenerator"),
-                    [(Rwitness_from_decl ([12:16-39]), Tany);
-                      (Rwitness_from_decl ([12:16-39]), Tany);
-                      (Rwitness_from_decl ([12:16-39]), Tany)]
-                    )))
-                };
+              (Rret_fun_kind_from_decl ([12:16-39], FAsyncGenerator),
+               (Tapply (([12:16-39], "\\HH\\AsyncGenerator"),
+                  [(Rwitness_from_decl ([12:16-39]), Tany);
+                    (Rwitness_from_decl ([12:16-39]), Tany);
+                    (Rwitness_from_decl ([12:16-39]), Tany)]
+                  )));
               ft_flags =
-              (make_ft_flags FAsyncGenerator ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC} }));
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = true; generator = true; fun_kind = FAsyncGenerator;
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
+              ft_instantiated = true }));
         fe_pos = [12:16-39]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }))
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false;
+        fe_package_requirement = Typing_defs.RPNormal }))
   ]
-
-They matched!

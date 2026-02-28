@@ -18,8 +18,10 @@
 
 #include <sstream>
 
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 #include <folly/Random.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/stack-trace.h"
@@ -62,13 +64,20 @@ void StructuredLogEntry::setVec(folly::StringPiece key,
 void StructuredLogEntry::setStackTrace(folly::StringPiece key,
                                        const StackTrace& st) {
   std::vector<folly::StringPiece> stackFrames;
-  folly::split("\n", st.toString(), stackFrames);
+  folly::split('\n', st.toString(), stackFrames);
   for (auto& frame : stackFrames) {
     const char* p = frame.begin();
     while (*p == '#' || *p == ' ' || (*p >= '0' && *p <= '9')) ++p;
     frame = folly::StringPiece(p, frame.end());
   }
   setVec(key, stackFrames);
+}
+
+void StructuredLogEntry::setProcessUuid(folly::StringPiece key) {
+  static std::string uuid{boost::uuids::to_string(
+    boost::uuids::random_generator()()
+  )};
+  setStr(key, uuid);
 }
 
 void StructuredLogEntry::clear() {

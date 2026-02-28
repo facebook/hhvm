@@ -150,8 +150,8 @@ private:
   >;
 
 public:
-  typedef typename Map::const_iterator const_iterator;
-  typedef typename Map::iterator iterator;
+  using const_iterator = typename Map::const_iterator;
+  using iterator = typename Map::iterator;
 
   iterator find(const StringData* key) { return m_map.find(key); }
   iterator begin()                     { return m_map.begin(); }

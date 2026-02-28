@@ -1,6 +1,6 @@
 <?hh
 
-function gen($foo, $bar) {
+function gen($foo, $bar) :AsyncGenerator<mixed,mixed,void>{
     yield $foo;
     yield $bar;
 }

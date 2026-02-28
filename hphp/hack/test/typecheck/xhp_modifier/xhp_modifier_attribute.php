@@ -1,6 +1,6 @@
-<?hh // strict
+<?hh
 
-xhp class foo {
+xhp class foo extends XHPTest {
     // Verify that attributes are allowed.
     attribute int userid @required;
     // Verify that attributes are usable

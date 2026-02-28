@@ -4,7 +4,7 @@ trait T1 {
 
   <<__LSB>>
   private static $incX =0;
-  public function inc($who) {
+  public function inc($who) :mixed{
     static::$incX++;
     echo $who . " (" . __CLASS__ . "): " . static::$incX . "\n";
   }
@@ -19,7 +19,7 @@ class D extends C {
 }
 
 <<__EntryPoint>>
-function main_2055() {
+function main_2055() :mixed{
 $c1 = new C;
 $c2 = new C;
 $d1 = new D;

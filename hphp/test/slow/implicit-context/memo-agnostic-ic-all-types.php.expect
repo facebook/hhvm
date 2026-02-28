@@ -1,0 +1,58 @@
+
+1. Set null
+NULL
+
+2. Set 5
+int(5)
+
+3. Set String
+string(34) "I don't have friends, I got family"
+
+4. Set Dict
+dict(3) {
+  ["a"]=>
+  int(0)
+  ["b"]=>
+  int(1)
+  ["c"]=>
+  int(2)
+}
+
+5. Set nested baggage
+inside f2, calling f1 with a new baggage 7
+int(7)
+returned, now the baggage should be 6
+int(6)
+
+6. Set lambda 10
+result: object(Closure$main) (0) {
+}
+result, resolved: int(10)
+
+7. Set async func result 15
+result: function(f3)
+result, awaited: int(15)
+
+8. Set func result 20
+result: function(f4)
+result, resolved: int(20)
+
+9. Set async func result Dict
+result: function(f5)
+result, awaited: dict(3) {
+  ["x"]=>
+  int(0)
+  ["y"]=>
+  int(1)
+  ["z"]=>
+  int(2)
+}
+
+10. Set 17. call via an indirection
+int(17)
+
+11. Set 18. call a memoized indirection via indirection
+calling memo_indirection...
+int(10)
+returned. fetching context again
+int(10)

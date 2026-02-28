@@ -3,7 +3,7 @@
 class foo {}
 class bar {}
 
-function baz($a, $b, $c, $d, $e) {
+function baz($a, $b, $c, $d, $e) :mixed{
   var_dump($a === $b); var_dump($a == $b);
   var_dump($a < $b);   var_dump($a <= $b);
   var_dump($a > $b);   var_dump($a >= $b);
@@ -29,6 +29,6 @@ function baz($a, $b, $c, $d, $e) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   baz(foo::class, foo::class, bar::class, 'foo', 'bar');
 }

@@ -1,8 +1,0 @@
-File "partial_classes_bad_02.php", line 12, characters 7-7:
-A `where` type constraint is violated here (Typing[4323])
-  File "partial_classes_bad_02.php", line 13, characters 7-14:
-  This is the class with `where` type constraints
-  File "partial_classes_bad_02.php", line 21, characters 35-38:
-  Expected `this`
-  File "partial_classes_bad_02.php", line 21, characters 42-42:
-  But got `C`

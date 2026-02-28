@@ -17,42 +17,24 @@
 #include "hphp/runtime/vm/repo-global-data.h"
 
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/configs/configs.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/util/logger.h"
+#include "hphp/util/configs/eval.h"
 
-#include <folly/Format.h>
+#include <fmt/core.h>
+#include <fmt/ranges.h>
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
 void RepoGlobalData::load(bool loadConstantFuncs) const {
-  RO::EnableIntrinsicsExtension                    = EnableIntrinsicsExtension;
-  RO::PHP7_Builtins                                = PHP7_Builtins;
-  RO::PHP7_NoHexNumerics                           = PHP7_NoHexNumerics;
-  RO::PHP7_Substr                                  = PHP7_Substr;
-  RO::EvalCheckPropTypeHints                       = CheckPropTypeHints;
-  RO::EnableArgsInBacktraces                       = EnableArgsInBacktraces;
-  RO::EvalAbortBuildOnVerifyError                  = AbortBuildOnVerifyError;
-  RO::StrictArrayFillKeys                          = StrictArrayFillKeys;
-  RO::EvalEmitClassPointers                        = EmitClassPointers;
-  RO::EvalEmitClsMethPointers                      = EmitClsMethPointers;
-  RO::EvalForbidDynamicCallsWithAttr               = ForbidDynamicCallsWithAttr;
-  RO::EvalRaiseClassConversionWarning              = RaiseClassConversionWarning;
-  RO::EvalClassPassesClassname                     = ClassPassesClassname;
-  RO::EvalClassnameNotices                         = ClassnameNotices;
-  RO::EvalClassIsStringNotices                     = ClassIsStringNotices;
-  RO::EvalTraitConstantInterfaceBehavior           = TraitConstantInterfaceBehavior;
-  RO::EvalBuildMayNoticeOnMethCallerHelperIsObject =
-    BuildMayNoticeOnMethCallerHelperIsObject;
-  RO::EvalDiamondTraitMethods                      = DiamondTraitMethods;
+  Cfg::LoadFromGlobalData(*this);
+
   RO::EvalCoeffectEnforcementLevels                = EvalCoeffectEnforcementLevels;
-  RO::EvalEnableImplicitContext                    = EnableImplicitContext;
 
-  if (HardGenericsUB) RO::EvalEnforceGenericsUB = 2;
-
-  if (!RO::EvalBuildMayNoticeOnMethCallerHelperIsObject) {
-    RO::EvalNoticeOnMethCallerHelperIsObject = false;
+  if (!Cfg::Eval::BuildMayNoticeOnMethCallerHelperIsObject) {
+    Cfg::Eval::NoticeOnMethCallerHelperIsObject = false;
   }
 
   if (loadConstantFuncs) {
@@ -73,40 +55,20 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
 
 std::string show(const RepoGlobalData& gd) {
   std::string out;
-#define SHOW(x) folly::format(&out, "  {}: {}\n", #x, gd.x)
-  SHOW(InitialNamedEntityTableSize);
-  SHOW(InitialStaticStringTableSize);
-  SHOW(CheckPropTypeHints);
-  SHOW(HardGenericsUB);
-  SHOW(HardPrivatePropInference);
-  SHOW(PHP7_NoHexNumerics);
-  SHOW(PHP7_Builtins);
-  SHOW(PHP7_Substr);
-  SHOW(HackArrCompatSerializeNotices);
-  SHOW(EnableIntrinsicsExtension);
-  SHOW(ForbidDynamicCallsToFunc);
-  SHOW(ForbidDynamicCallsToClsMeth);
-  SHOW(ForbidDynamicCallsToInstMeth);
-  SHOW(ForbidDynamicConstructs);
-  SHOW(ForbidDynamicCallsWithAttr);
-  SHOW(LogKnownMethodsAsDynamicCalls);
-  SHOW(NoticeOnBuiltinDynamicCalls);
-  SHOW(AbortBuildOnVerifyError);
-  SHOW(EnableArgsInBacktraces);
-  SHOW(Signature);
-  SHOW(EmitClassPointers);
-  SHOW(EmitClsMethPointers);
-  SHOW(IsVecNotices);
-  SHOW(RaiseClassConversionWarning);
-  SHOW(ClassPassesClassname);
-  SHOW(ClassnameNotices);
-  SHOW(ClassIsStringNotices);
-  SHOW(StrictArrayFillKeys);
-  SHOW(TraitConstantInterfaceBehavior);
-  SHOW(BuildMayNoticeOnMethCallerHelperIsObject);
-  SHOW(DiamondTraitMethods);
-  SHOW(EnableImplicitContext);
+#define SHOW(x) fmt::format_to(std::back_inserter(out), "  {}: {}\n", #x, gd.x);
+  SHOW(EnableArgsInBacktraces)
+  SHOW(Signature)
 #undef SHOW
+
+#define C(_, Name, ...) fmt::format_to(std::back_inserter(out), "  {}: {}\n", #Name, gd.Name);
+  CONFIGS_FOR_REPOGLOBALDATA()
+#undef C
+
+  fmt::format_to(
+    std::back_inserter(out),
+    "  SourceRootForFileBC: {}\n",
+    gd.SourceRootForFileBC.value_or("*")
+  );
   return out;
 }
 

@@ -25,16 +25,13 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 
-#include "hphp/runtime/base/vanilla-vec.h"
-
 #include "hphp/util/arch.h"
-
-#include <boost/dynamic_bitset.hpp>
+#include "hphp/util/configs/hhir.h"
 
 namespace HPHP::jit {
 
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -132,7 +129,7 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
 void assignRegs(const IRUnit& unit, Vunit& vunit, irlower::IRLS& state,
                 const BlockList& blocks) {
   // visit instructions to find tmps eligible to use SIMD registers
-  auto const try_wide = RuntimeOption::EvalHHIRAllocSIMDRegs;
+  auto const try_wide = Cfg::HHIR::AllocSIMDRegs;
   boost::dynamic_bitset<> not_wide(unit.numTmps());
   StateVector<SSATmp,SSATmp*> tmps(unit, nullptr);
   for (auto block : blocks) {
@@ -211,6 +208,7 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::callphpr:
     case Vinstr::callphps:
     case Vinstr::contenter:
+    case Vinstr::inlinesideexit:
       defs = abi.all() - (rvmfp() | rvmtl() | rsp());
       break;
 

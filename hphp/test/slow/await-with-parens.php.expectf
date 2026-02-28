@@ -1,0 +1,1 @@
+Fatal error: Function 'foo' contains 'await' but is not declared as async. in %s on line 9

@@ -4,9 +4,9 @@ require __DIR__."/random_port.inc";
 
 function http_server_skipif($socket_string) {
 
-	if (!function_exists('pcntl_fork')) die('skip pcntl_fork() not available');
-	if (!function_exists('posix_kill')) die('skip posix_kill() not available');
-	if (!stream_socket_server($socket_string)) die('skip stream_socket_server() failed');
+	if (!function_exists('pcntl_fork')) exit('skip pcntl_fork() not available');
+	if (!function_exists('posix_kill')) exit('skip posix_kill() not available');
+	if (!stream_socket_server($socket_string)) exit('skip stream_socket_server() failed');
 }
 
 /* Minimal HTTP server with predefined responses.
@@ -33,7 +33,7 @@ function http_server($socket_string, AnyArray $files, inout $output)
 
 	$pid = pcntl_fork();
 	if ($pid == -1) {
-		die('could not fork');
+		exit('could not fork');
 	} else if ($pid) {
 		return $pid;
 	}

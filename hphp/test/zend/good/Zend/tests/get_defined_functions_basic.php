@@ -1,13 +1,13 @@
 <?hh
 
-function foo() {}
+function foo() :mixed{}
 
 // mixed case function
-function HelloWorld() {}
+function HelloWorld() :mixed{}
 
 class C {
-	function f1() {}
-	static function f2() {}
+	function f1() :mixed{}
+	static function f2() :mixed{}
 }
 <<__EntryPoint>>
 function entrypoint_get_defined_functions_basic(): void {
@@ -43,7 +43,7 @@ function entrypoint_get_defined_functions_basic(): void {
   }
 
   $user = $func["user"];
-  if (count($user) == 3 && in_array("entrypoint_get_defined_functions_basic", $user) && in_array("foo", $user) && in_array("helloworld", $user)) {
+  if (count($user) == 3 && in_array("entrypoint_get_defined_functions_basic", $user) && in_array("foo", $user) && in_array("HelloWorld", $user)) {
   	echo "TEST PASSED\n";
   } else {
   	echo "TEST FAILED: missing elements from 'user' array\n";

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class A {
   public function foo(): void {
@@ -6,5 +6,5 @@ class A {
 }
 
 function main(?A $a): void {
-  $a ?? new A() ?->foo();
+  $a ?? new A() ->foo();
 }

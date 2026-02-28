@@ -10,7 +10,7 @@ $n = gmp_nextprime(1000);
 var_dump(gmp_strval($n));
 $n = gmp_nextprime(100000);
 var_dump(gmp_strval($n));
-$n = gmp_nextprime(varray[]);
+$n = gmp_nextprime(vec[]);
 var_dump(gmp_strval($n));
 $n = gmp_nextprime("");
 var_dump(gmp_strval($n));

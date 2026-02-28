@@ -8,10 +8,10 @@ class B {
 class A {
   const type T1 = B;
   const ctx C2 = [];
-  function f()[this::T1::T2::C1, this::C2] {}
+  function f()[this::T1::T2::C1, this::C2] :mixed{}
 }
 
 <<__EntryPoint>>
-function main()[] {
+function main()[] :mixed{
   (new A)->f();
 }

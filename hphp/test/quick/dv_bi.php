@@ -1,6 +1,6 @@
 <?hh
 class A {
-  public function a(bool $a0 = 0) {}
+  public function a(bool $a0 = 0) :mixed{}
 }
 
 <<__EntryPoint>>

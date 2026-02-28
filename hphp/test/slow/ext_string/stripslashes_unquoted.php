@@ -11,7 +11,7 @@
 echo "*** Testing stripslashes() : basic functionality ***\n";
 
 // Initialize all required variables
-$str_array = varray[ "\\",
+$str_array = vec[ "\\",
                     "ends with slash\\",
                   ];
 

@@ -1,0 +1,122 @@
+Program %s/print1.php loaded. Type '[r]un' to go.
+b print1.php:23
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+r
+Program %s/print1.php exited normally.
+= $a
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: a' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+n
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'n'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+= $a
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: a' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+y
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'y'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+set cc 100
+ShortPrintCharCount(cc) is set to 100
+= $a
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: a' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+y
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'y'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+set cc -1
+ShortPrintCharCount(cc) is set to -1
+= $a
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: a' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+p $a
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: a' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+null
+p $s
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: s' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+null
+p r $s
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: s' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+
+p v $s
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: s' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+NULL
+
+p $ch
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: ch' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+null
+p r $ch
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: ch' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+
+p v $ch
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: ch' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+NULL
+
+p $c
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: c' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+null
+= $d
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: d' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+quit

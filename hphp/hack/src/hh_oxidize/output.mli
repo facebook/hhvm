@@ -7,7 +7,10 @@
  *)
 
 val with_output_context :
-  module_name:string -> (unit -> unit) -> Oxidized_module.t
+  module_name:string ->
+  mli_signature:Parsetree.signature option ->
+  (unit -> unit) ->
+  Oxidized_module.t
 
 val add_extern_use : string -> unit
 

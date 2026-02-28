@@ -1,6 +1,5 @@
-#include "gd.h"
-#include "gdhelpers.h"
-#include "gd_intern.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
+#include "hphp/runtime/ext/gd/libgd/gdhelpers.h"
 
 /* bring the palette colors in im2 to be closer to im1
  *
@@ -56,5 +55,3 @@ int gdImageColorMatch (gdImagePtr im1, gdImagePtr im2)
   gdFree(buf);
   return 0;
 }
-
-

@@ -1,0 +1,4 @@
+ERROR: File "simple_instantiability_check.php", line 4, characters 33-39:
+`MyTrait` is uninstantiable (Typing[4002])
+  File "simple_instantiability_check.php", line 3, characters 7-13:
+  Declaration is here

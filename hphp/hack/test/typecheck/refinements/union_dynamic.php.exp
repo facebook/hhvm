@@ -1,10 +1,16 @@
 File "union_dynamic.php", line 15, characters 3-13:
-  ((dynamic & S<T#1>) | S<int>)
+  ~S<int>
 File "union_dynamic.php", line 17, characters 3-13:
-  (int | (dynamic & T#1))
-File "union_dynamic.php", line 18, characters 10-23:
+  ~int
+ERROR: File "union_dynamic.php", line 18, characters 10-23:
 Some elements in this collection are incompatible (Typing[4110])
   File "union_dynamic.php", line 8, characters 50-52:
   Expected `int`
-  File "union_dynamic.php", line 18, characters 14-22:
-  But got `dynamic`, the result of calling a `dynamic` type as a function
+  File "union_dynamic.php", line 14, characters 3-4:
+  But got `dynamic` from this "as" assertion
+ERROR: File "union_dynamic.php", line 25, characters 17-34:
+Invalid argument (Typing[4110])
+  File "union_dynamic.php", line 8, characters 21-27:
+  Expected `dynamic`
+  File "union_dynamic.php", line 25, characters 21-21:
+  Type `S<string>` is not a subtype of `dynamic` under dynamic-aware subtyping

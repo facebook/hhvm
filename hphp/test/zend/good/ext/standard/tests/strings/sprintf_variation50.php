@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : scientific formats with string values ***\n";
 
 // array of string values 
-$string_values = varray[
+$string_values = vec[
   "",
   '',
   "0",
@@ -30,7 +30,7 @@ $string_values = varray[
 ];
 
 // array of scientific formats
-$scientific_formats = varray[
+$scientific_formats = vec[
   "%e", "%he", "%le",
   "%Le", " %e", "%e ",
   "\t%e", "\n%e", "%4e",

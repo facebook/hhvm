@@ -6,8 +6,8 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing gzopen() : variation ***\n";
-$absfile = __SystemLib\hphp_test_tmppath('absfile.tmp');
-chdir(__SystemLib\hphp_test_tmproot());
+$absfile = sys_get_temp_dir().'/'.'absfile.tmp';
+chdir(sys_get_temp_dir());
 $relfile = "gzopen_variation6.tmp";
 
 $h = gzopen($absfile, "w");

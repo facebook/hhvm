@@ -1,6 +1,6 @@
 <?hh
 
-function my_apc_add($key) {
+function my_apc_add($key) :mixed{
   var_dump(
     apc_add(
       $key,
@@ -11,7 +11,7 @@ function my_apc_add($key) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   my_apc_add("abc", "def");
   my_apc_add("", "def");
   my_apc_add(dict["abc" => "def"]);

@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function test($a, $b) {
+function test($a, $b) :mixed{
   echo "====================================================\n";
   var_dump($a);
   var_dump($b);
@@ -12,17 +12,17 @@ function test($a, $b) {
   var_dump(is_darray($x));
 }
 
-function test_all() {
+function test_all() :mixed{
   $vals = vec[
-    darray[],
-    varray['a', 'b', 'c'],
-    darray[10 => 'a', 20 => 'b', 30 => 'c'],
-    darray['a' => 123, 'b' => 456, 'c' => 789],
-    varray[],
-    varray['a', 'b', 'c'],
-    darray[],
-    darray[10 => 'a', 20 => 'b', 30 => 'c'],
-    darray['a' => 123, 'b' => 456, 'c' => 789],
+    dict[],
+    vec['a', 'b', 'c'],
+    dict[10 => 'a', 20 => 'b', 30 => 'c'],
+    dict['a' => 123, 'b' => 456, 'c' => 789],
+    vec[],
+    vec['a', 'b', 'c'],
+    dict[],
+    dict[10 => 'a', 20 => 'b', 30 => 'c'],
+    dict['a' => 123, 'b' => 456, 'c' => 789],
     vec[],
     vec['a', 'b', 'c'],
     dict[],
@@ -38,6 +38,6 @@ function test_all() {
 }
 
 <<__EntryPoint>>
-function main_array_merge() {
+function main_array_merge() :mixed{
 test_all();
 }

@@ -1,8 +1,8 @@
 <?hh
 
 <<__EntryPoint>>
-function main_http_build_query_numeric_prefix() {
-$query = darray[
+function main_http_build_query_numeric_prefix() :mixed{
+$query = dict[
     0                    => "4.6.1",
     'php'                => "7.0.99-hhvm",
     'locale'             => "de_DE",

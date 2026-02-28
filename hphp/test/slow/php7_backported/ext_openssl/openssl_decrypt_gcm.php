@@ -1,7 +1,7 @@
 <?hh
 
 
-function test_decryption($method) {
+function test_decryption($method) :mixed{
   $tests = openssl_get_cipher_tests($method);
 
   foreach ($tests as $idx => $test) {

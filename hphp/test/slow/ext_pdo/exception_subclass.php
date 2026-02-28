@@ -2,7 +2,7 @@
 
 class Foo extends PDOException {}
 
-function main() {
+function main() :mixed{
   // just checking it can be default-constructed...
   var_dump((new Foo())->getMessage());
 
@@ -15,6 +15,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_exception_subclass() {
+function main_exception_subclass() :mixed{
 main();
 }

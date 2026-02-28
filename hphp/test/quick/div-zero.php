@@ -1,7 +1,7 @@
 <?hh
 
 
-function main($num, $zero) {
+function main($num, $zero) :mixed{
   try {
     $z = $num / 0;
   } catch (DivisionByZeroException $e) {

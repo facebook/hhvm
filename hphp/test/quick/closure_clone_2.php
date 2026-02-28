@@ -1,7 +1,7 @@
 <?hh
 
 trait T {
-  function f() {
+  function f() :mixed{
     return function ($a) {
       if ($a) {
         return $this->foo;

@@ -1,0 +1,17 @@
+f [fromPackages] basic-1.php
+f [fromPackages] basic-2.php
+f [fromPackages] basic-3.php
+f [fromPackages] basic-4.php
+f [fromPackages] if-package-2.php
+f [fromPackages] if-package-3.php
+f [fromPackages] if-package-4.php
+f [fromPackages] if-package-5.php
+f [fromPackages] if-package.php
+f [fromPackages] prod/foo.inc.php
+f [fromPackages] prod/intern/bar.inc.php
+f [fromPackages] prod/internal_prod/zap.inc.php
+f [fromPackagesSoft] prod/qux.inc.php
+f [fromPackages] prod/zot.inc.php
+f [fromPackagesSoft] softprod/quz.inc.php
+I am foo in prod/
+I am bar in prod/intern/

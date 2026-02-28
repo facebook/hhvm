@@ -1,0 +1,2 @@
+ERROR: File "undefined_class.php", line 4, characters 10-10:
+Unbound name: `C` (an object type) (Naming[2049])

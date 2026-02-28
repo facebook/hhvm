@@ -9,8 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "gd.h"
-#include "gdhelpers.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
+#include "hphp/runtime/ext/gd/libgd/gdhelpers.h"
 
 #include <folly/portability/Unistd.h>
 
@@ -29,36 +29,9 @@ gdImageStringTTF (gdImage * im, int *brect, int fg, char *fontlist,
   return gdImageStringFT (im, brect, fg, fontlist, ptsize, angle, x, y, string);
 }
 
-#ifndef HAVE_LIBFREETYPE
-char *
-gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
-     double ptsize, double angle, int x, int y, char *string,
-     gdFTStringExtraPtr strex)
-{
-  return "libgd was not built with FreeType font support\n";
-}
+#include "hphp/runtime/ext/gd/libgd/gdcache.h"
 
-char *
-gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
-     double ptsize, double angle, int x, int y, char *string)
-{
-  return "libgd was not built with FreeType font support\n";
-}
-#else
-
-#include "gdcache.h"
-
-#ifdef HHVM
-# ifdef HAVE_FT2BUILD
-#  include <ft2build.h>
-# else
-#  ifdef FREETYPE_PATH_FREETYPE2
-#   include <freetype2/config/ftheader.h>
-#  else
-#   include <freetype/config/ftheader.h>
-#  endif
-# endif
-#endif // HHVM
+#include <freetype/config/ftheader.h>
 
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
@@ -89,11 +62,7 @@ gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
  * if building this version of gd separate from graphviz.
  */
 #ifndef DEFAULT_FONTPATH
-#if defined(__APPLE__) || (defined(__MWERKS__) && defined(macintosh))
-#define DEFAULT_FONTPATH "/usr/share/fonts/truetype:/System/Library/Fonts:/Library/Fonts"
-#else
 #define DEFAULT_FONTPATH "/usr/share/fonts/truetype"
-#endif
 #endif
 #ifndef PATHSEPARATOR
 #define PATHSEPARATOR ":"
@@ -112,38 +81,34 @@ gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
 
-typedef struct
-{
+struct font_t {
   char *fontlist;   /* key */
   FT_Library *library;
   FT_Face face;
   FT_Bool have_char_map_unicode, have_char_map_big5, have_char_map_sjis, have_char_map_apple_roman;
   gdCache_head_t *glyphCache;
-} font_t;
+};
 
-typedef struct
-{
+struct fontkey_t {
   char *fontlist;   /* key */
   int preferred_map;
   FT_Library *library;
-} fontkey_t;
+};
 
-typedef struct
-{
+struct tweencolor_t {
   int pixel;    /* key */
   int bgcolor;    /* key */
   int fgcolor;    /* key *//* -ve means no antialias */
   gdImagePtr im;    /* key */
   int tweencolor;
-} tweencolor_t;
+};
 
-typedef struct
-{
+struct tweencolorkey_t {
   int pixel;    /* key */
   int bgcolor;    /* key */
   int fgcolor;    /* key *//* -ve means no antialias */
   gdImagePtr im;    /* key */
-} tweencolorkey_t;
+};
 
 /********************************************************************
  * gdTcl_UtfToUniChar is borrowed from Tcl ...
@@ -1168,5 +1133,3 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
   gdMutexUnlock(gdFontCacheMutex);
   return (char *) NULL;
 }
-
-#endif /* HAVE_LIBFREETYPE */

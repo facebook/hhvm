@@ -1,14 +1,14 @@
 <?hh
 <<__DynamicallyConstructible>>
 class Test {
-    function say_hello() {
+    function say_hello() :mixed{
         echo "Hello world";
     }
 }
 
 class Factory {
     public $name = "Test";
-    function create() {
+    function create() :mixed{
         $obj = new $this->name; /* Parse error */
         return $obj;
     }

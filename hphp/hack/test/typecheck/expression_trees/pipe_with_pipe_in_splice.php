@@ -2,7 +2,7 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function foo(int $_): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
+function foo(int $_): ExampleExpression<ExampleInt> {
   throw new Exception();
 }
 

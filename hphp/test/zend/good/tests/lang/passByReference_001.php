@@ -1,6 +1,6 @@
 <?hh
 function f($arg1, inout $arg2)
-{
+:mixed{
     var_dump($arg1++);
     var_dump($arg2++);
 }

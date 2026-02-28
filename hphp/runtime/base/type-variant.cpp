@@ -19,35 +19,26 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/req-root.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/tv-arith.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
-#include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/base/zend-string.h"
 
-#include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/native-data.h"
-#include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/systemlib.h"
 
 #include "hphp/util/abi-cxx.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/roar.h"
 
-#include <limits>
 #include <utility>
-#include <vector>
+
+extern "C" __attribute__((weak))
+int __roar_api_flag_safe_function_pointer_site(void*, void*);
 
 namespace HPHP {
 
@@ -81,13 +72,10 @@ void implCopyConstruct(TypedValue tv, Variant& v) {
 }
 }
 
-// the version of the high frequency function that is not inlined
-NEVER_INLINE
 Variant::Variant(const Variant& v) noexcept {
   implCopyConstruct(*v.asTypedValue(), *this);
 }
 
-NEVER_INLINE
 Variant::Variant(const_variant_ref v) noexcept {
   implCopyConstruct(*v.rval(), *this);
 }
@@ -125,19 +113,52 @@ Variant Variant::fromDynamic(const folly::dynamic& dy) {
 
 namespace {
 
+template<bool OnlyVanilla>
 void vecReleaseWrapper(ArrayData* ad) noexcept {
-  ad->isVanilla() ? VanillaVec::Release(ad) : BespokeArray::Release(ad);
-}
+  // If we are approaching a stack overflow.  Leak the heap object.  The GC can
+  // clean it up if it is a problem.
+  if (!stack_in_bounds()) return;
 
+  if (OnlyVanilla) {
+    VanillaVec::Release(ad);
+  } else {
+    ad->isVanilla() ? VanillaVec::Release(ad) : BespokeArray::Release(ad);
+  }
+}
+template void vecReleaseWrapper<false>(ArrayData* ad) noexcept;
+template void vecReleaseWrapper<true>(ArrayData* ad) noexcept;
+
+template<bool OnlyVanilla>
 void dictReleaseWrapper(ArrayData* ad) noexcept {
-  ad->isVanilla() ? VanillaDict::Release(ad) : BespokeArray::Release(ad);
-}
+  // If we are approaching a stack overflow.  Leak the heap object.  The GC can
+  // clean it up if it is a problem.
+  if (!stack_in_bounds()) return;
 
-void keysetReleaseWrapper(ArrayData* ad) noexcept {
-  ad->isVanilla() ? VanillaKeyset::Release(ad) : BespokeArray::Release(ad);
+  if (OnlyVanilla) {
+    VanillaDict::Release(ad);
+  } else {
+    ad->isVanilla() ? VanillaDict::Release(ad) : BespokeArray::Release(ad);
+  }
 }
+template void dictReleaseWrapper<false>(ArrayData* ad) noexcept;
+template void dictReleaseWrapper<true>(ArrayData* ad) noexcept;
+
+template<bool OnlyVanilla>
+void keysetReleaseWrapper(ArrayData* ad) noexcept {
+  if (OnlyVanilla) {
+    VanillaKeyset::Release(ad);
+  } else {
+    ad->isVanilla() ? VanillaKeyset::Release(ad) : BespokeArray::Release(ad);
+  }
+}
+template void keysetReleaseWrapper<false>(ArrayData* ad) noexcept;
+template void keysetReleaseWrapper<true>(ArrayData* ad) noexcept;
 
 void objReleaseWrapper(ObjectData* obj) noexcept {
+  // If we are approaching a stack overflow.  Leak the heap object.  The GC can
+  // clean it up if it is a problem.
+  if (!stack_in_bounds()) return;
+
   auto const cls = obj->getVMClass();
   cls->releaseFunc()(obj, cls);
 }
@@ -151,10 +172,14 @@ RawDestructors computeDestructors() {
   }
   auto const set = [&](auto const type, auto const destructor) {
     result[typeToDestrIdx(type)] = (RawDestructor)destructor;
+    if (use_roar && __roar_api_flag_safe_function_pointer_site) {
+      __roar_api_flag_safe_function_pointer_site(
+          &result[typeToDestrIdx(type)], reinterpret_cast<void*>(destructor));
+    }
   };
-  set(KindOfVec,      &vecReleaseWrapper);
-  set(KindOfDict,     &dictReleaseWrapper);
-  set(KindOfKeyset,   &keysetReleaseWrapper);
+  set(KindOfVec,      &vecReleaseWrapper<false>);
+  set(KindOfDict,     &dictReleaseWrapper<false>);
+  set(KindOfKeyset,   &keysetReleaseWrapper<false>);
   set(KindOfString,   getMethodPtr(&StringData::release));
   set(KindOfObject,   &objReleaseWrapper);
   set(KindOfResource, getMethodPtr(&ResourceHdr::release));
@@ -173,10 +198,15 @@ void specializeVanillaDestructors() {
   auto const specialize = [](auto const type, auto const destructor) {
     if (allowBespokeArrayLikes() && arrayTypeCouldBeBespoke(type)) return;
     g_destructors[typeToDestrIdx(type)] = (RawDestructor)destructor;
+    if (use_roar && __roar_api_flag_safe_function_pointer_site) {
+      __roar_api_flag_safe_function_pointer_site(
+          &g_destructors[typeToDestrIdx(type)],
+          reinterpret_cast<void*>(destructor));
+    }
   };
-  specialize(KindOfVec,    &VanillaVec::Release);
-  specialize(KindOfDict,   &VanillaDict::Release);
-  specialize(KindOfKeyset, &VanillaKeyset::Release);
+  specialize(KindOfVec,    &vecReleaseWrapper<true>);
+  specialize(KindOfDict,   &dictReleaseWrapper<true>);
+  specialize(KindOfKeyset, &keysetReleaseWrapper<true>);
 }
 
 #define IMPLEMENT_SET(argType, setOp)                     \
@@ -238,10 +268,10 @@ IMPLEMENT_SET(const StaticString&,
   }
 
 IMPLEMENT_PTR_SET(StringData, pstr,
-                  v->isRefCounted() ? KindOfString : KindOfPersistentString);
+                  v->isRefCounted() ? KindOfString : KindOfPersistentString)
 IMPLEMENT_PTR_SET(ArrayData, parr,
                   v->isRefCounted() ?
-                  v->toDataType() : v->toPersistentDataType());
+                  v->toDataType() : v->toPersistentDataType())
 IMPLEMENT_PTR_SET(ObjectData, pobj, KindOfObject)
 IMPLEMENT_PTR_SET(ResourceHdr, pres, KindOfResource)
 
@@ -273,7 +303,7 @@ IMPLEMENT_STEAL(StringData, pstr,
                 v->isRefCounted() ? KindOfString : KindOfPersistentString)
 IMPLEMENT_STEAL(ArrayData, parr,
                 v->isRefCounted() ?
-                v->toDataType() : v->toPersistentDataType());
+                v->toDataType() : v->toPersistentDataType())
 IMPLEMENT_STEAL(ObjectData, pobj, KindOfObject)
 IMPLEMENT_STEAL(ResourceHdr, pres, KindOfResource)
 
@@ -309,6 +339,7 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       return m_type;
 
     case KindOfInt64:
@@ -351,6 +382,7 @@ bool Variant::isScalar() const noexcept {
     case KindOfFunc:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return true;
   }
   not_reached();
@@ -368,7 +400,6 @@ static Variant::AllowedAsConstantValue isAllowedAsConstantValueImpl(TypedValue t
     case KindOfPersistentDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfResource:
     case KindOfFunc:
     case KindOfClsMeth:
     case KindOfLazyClass:
@@ -404,6 +435,8 @@ static Variant::AllowedAsConstantValue isAllowedAsConstantValueImpl(TypedValue t
     case KindOfClass:
     case KindOfRFunc:
     case KindOfRClsMeth:
+    case KindOfResource:
+    case KindOfEnumClassLabel:
       return Variant::AllowedAsConstantValue::NotAllowed;
   }
   not_reached();
@@ -411,14 +444,6 @@ static Variant::AllowedAsConstantValue isAllowedAsConstantValueImpl(TypedValue t
 
 Variant::AllowedAsConstantValue Variant::isAllowedAsConstantValue() const {
   return isAllowedAsConstantValueImpl(*this);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-inline DataType Variant::convertToNumeric(int64_t *lval, double *dval) const {
-  StringData *s = getStringData();
-  assertx(s);
-  return s->isNumericWithVal(*lval, *dval, 1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -442,8 +467,7 @@ bool Variant::toBooleanHelper() const {
     case KindOfObject:        return m_data.pobj->toBoolean();
     case KindOfResource:      return m_data.pres->data()->o_toBoolean();
     case KindOfRFunc:
-      SystemLib::throwInvalidOperationExceptionObject("RFunc to bool conversion");
-      return true;
+    case KindOfEnumClassLabel:
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
@@ -454,6 +478,7 @@ bool Variant::toBooleanHelper() const {
 }
 
 int64_t Variant::toInt64Helper(int base /* = 10 */) const {
+  auto const op = "int conversion";
   switch (m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -471,25 +496,26 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfObject:        return m_data.pobj->toInt64();
     case KindOfResource:      return m_data.pres->data()->o_toInt64();
     case KindOfRFunc:
-      SystemLib::throwInvalidOperationExceptionObject("RFunc to Int64 conversion");
+      throw_convert_rfunc_to_type("int");
       return 1;
     case KindOfFunc:
       invalidFuncConversion("int");
     case KindOfClass:
-      return classToStringHelper(m_data.pclass)->toInt64();
+      return classToStringHelper(m_data.pclass, op)->toInt64();
     case KindOfLazyClass:
-      return lazyClassToStringHelper(m_data.plazyclass)->toInt64();
+      return lazyClassToStringHelper(m_data.plazyclass, op)->toInt64();
     case KindOfClsMeth:
       throwInvalidClsMethToType("int");
     case KindOfRClsMeth:
-      SystemLib::throwInvalidOperationExceptionObject(
-        "RClsMeth to Int64 conversion");
-      return 1;
+      throw_convert_rcls_meth_to_type("int");
+    case KindOfEnumClassLabel:
+      throw_convert_ecl_to_type("int");
   }
   not_reached();
 }
 
 Array Variant::toPHPArrayHelper() const {
+  auto const op = "PHPArray conversion";
   switch (m_type) {
     case KindOfUninit:
     case KindOfNull:          return empty_dict_array();
@@ -516,11 +542,11 @@ Array Variant::toPHPArrayHelper() const {
     case KindOfFunc:
       invalidFuncConversion("array");
     case KindOfClass: {
-      auto const str = classToStringHelper(m_data.pclass);
+      auto const str = classToStringHelper(m_data.pclass, op);
       return make_dict_array(0, Variant{str, PersistentStrInit{}});
     }
     case KindOfLazyClass: {
-      auto const str = lazyClassToStringHelper(m_data.plazyclass);
+      auto const str = lazyClassToStringHelper(m_data.plazyclass, op);
       return make_dict_array(0, Variant{str, PersistentStrInit{}});
     }
     case KindOfClsMeth:
@@ -530,11 +556,14 @@ Array Variant::toPHPArrayHelper() const {
       SystemLib::throwInvalidOperationExceptionObject(
         "RClsMeth to PHPArray conversion");
       return empty_dict_array();
+    case KindOfEnumClassLabel:
+      throw_convert_ecl_to_type("PHPArray");
+      return empty_dict_array();
   }
   not_reached();
 }
 
-Resource Variant::toResourceHelper() const {
+OptResource Variant::toResourceHelper() const {
   switch (m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -556,10 +585,11 @@ Resource Variant::toResourceHelper() const {
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-      return Resource(req::make<DummyResource>());
+    case KindOfEnumClassLabel:
+      return OptResource(req::make<DummyResource>());
 
     case KindOfResource:
-      return Resource{m_data.pres};
+      return OptResource{m_data.pres};
   }
   not_reached();
 }
@@ -601,10 +631,12 @@ void Variant::setEvalScalar() {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return;
 
     case KindOfString:
       m_type = KindOfPersistentString;
+      [[fallthrough]];
     case KindOfPersistentString: {
       auto pstr = m_data.pstr;
       if (!pstr->isStatic()) {
@@ -618,18 +650,21 @@ void Variant::setEvalScalar() {
 
     case KindOfVec:
       m_type = KindOfPersistentVec;
+      [[fallthrough]];
     case KindOfPersistentVec:
       do_array();
       return;
 
     case KindOfDict:
       m_type = KindOfPersistentDict;
+      [[fallthrough]];
     case KindOfPersistentDict:
       do_array();
       return;
 
     case KindOfKeyset:
       m_type = KindOfPersistentKeyset;
+      [[fallthrough]];
     case KindOfPersistentKeyset:
       do_array();
       return;

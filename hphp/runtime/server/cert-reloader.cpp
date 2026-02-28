@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/server/cert-reloader.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/file-util.h"
 #include <sys/types.h>
@@ -64,16 +63,18 @@ void CertReloader::find_paths(
   std::vector<std::string> crt_dir_files;
   std::unordered_set<std::string> crt_files;
   std::unordered_set<std::string> key_files;
-  FileUtil::find(crt_dir_files, "/", path, /* php */ false);
+  // FIXME: should this fail hard too?
+  FileUtil::find(crt_dir_files, "/", path, /* php */ false,
+                 /* failHard */ false);
 
   for (auto it = crt_dir_files.begin(); it != crt_dir_files.end(); ++it) {
     size_t filename_len = it->size() - path.size();
     if (ends_with(*it, crt_ext) &&
-        *it != RuntimeOption::SSLCertificateFile) {
+        *it != Cfg::Server::SSLCertificateFile) {
       std::string name = it->substr(path.size(), filename_len - crt_ext.size());
       crt_files.insert(name);
     } else if (ends_with(*it, key_ext) &&
-        *it != RuntimeOption::SSLCertificateKeyFile) {
+        *it != Cfg::Server::SSLCertificateKeyFile) {
       std::string name = it->substr(path.size(), filename_len - key_ext.size());
       key_files.insert(name);
     }

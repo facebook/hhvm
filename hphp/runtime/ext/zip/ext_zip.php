@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * A file archive, compressed with Zip.
@@ -62,7 +62,7 @@ class ZipArchive {
   <<__Native>>
   public function addGlob(string $pattern,
                    int $flags = 0,
-                   darray $options = darray[]): bool;
+                   darray $options = dict[]): bool;
 
   /**
    * Add files from a directory by PCRE pattern
@@ -76,7 +76,7 @@ class ZipArchive {
   <<__Native>>
   public function addPattern(string $pattern,
                       string $path = '.',
-                      darray $options = darray[]): bool;
+                      darray $options = dict[]): bool;
 
   /**
    * Close the active archive (opened or newly created)
@@ -117,7 +117,7 @@ class ZipArchive {
    */
   <<__Native>>
   public function extractTo(string $destination,
-                     mixed $entries = varray[]): bool;
+                     mixed $entries = vec[]): bool;
 
   /**
    * Returns the Zip archive comment
@@ -166,12 +166,12 @@ class ZipArchive {
    *   following values may be ORed to it.    ZipArchive::FL_UNCHANGED
    *   ZipArchive::FL_COMPRESSED
    *
-   * @return string - Returns the contents of the entry on success.
+   * @return string - Returns the contents of the entry on success. null on error.
    */
   <<__Native>>
   public function getFromIndex(int $index,
                         int $length = 0,
-                        int $flags = 0): mixed;
+                        int $flags = 0): ?string;
 
   /**
    * Returns the entry contents using its name
@@ -532,15 +532,12 @@ function zip_entry_open(resource $zip,
  * Read from an open directory entry
  *
  * @param resource $zip_entry - A directory entry returned by zip_read().
- * @param int $length - The number of bytes to return.    This should be
- *   the uncompressed length you wish to read.
  *
  * @return string - Returns the data read, empty string on end of a file,
  *   or FALSE on error.
  */
 <<__Native>>
-function zip_entry_read(resource $zip_entry,
-                        int $length = 1024): mixed;
+function zip_entry_read(resource $zip_entry): mixed;
 
 /**
  * Open a ZIP file archive

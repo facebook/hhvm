@@ -1,8 +1,8 @@
 <?hh <<__EntryPoint>> function main(): void {
-$arr = varray[
+$arr = vec[
   "This is string one.",
   "This is string two.",
-  varray[
+  vec[
       "This is another string.",
       "This is a last string."],
   "This is a last string."];

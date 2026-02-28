@@ -1,3 +1,5 @@
+Warning: Function f is reified and cannot be used with dynamic_fun in %s on line 19
+
 Warning: Generic at index 0 to Function f must be reified, erased given in %s on line 20
 ok
 

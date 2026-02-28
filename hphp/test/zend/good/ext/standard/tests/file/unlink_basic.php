@@ -5,7 +5,7 @@
 <<__EntryPoint>> function main(): void {
 
 echo "*** Testing unlink() on a file ***\n";
-$filename = __SystemLib\hphp_test_tmppath('unlink_basic.tmp');  // temp file name used here
+$filename = sys_get_temp_dir().'/'.'unlink_basic.tmp';  // temp file name used here
 $fp = fopen($filename, "w");  // create file
 fwrite($fp, "Hello World");
 fclose($fp);
@@ -18,7 +18,7 @@ echo "\n*** Testing unlink() : checking second argument ***\n";
 // creating a context
 $context = stream_context_create();
 // temp file name used here
-$filename = __SystemLib\hphp_test_tmppath('unlink_basic.tmp');
+$filename = sys_get_temp_dir().'/'.'unlink_basic.tmp';
 $fp = fopen($filename, "w");  // create file
 fclose($fp);
 

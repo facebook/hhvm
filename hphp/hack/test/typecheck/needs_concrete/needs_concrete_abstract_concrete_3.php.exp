@@ -1,0 +1,4 @@
+WARN: File "needs_concrete_abstract_concrete_3.php", line 28, characters 7-7:
+Dangerous call to `C2::m` (a `<<__NeedsConcrete>>` method). It is expecting a concrete receiver but `C2` is not concrete. (Warn[12024])
+  File "needs_concrete_abstract_concrete_3.php", line 20, characters 26-26:
+  Declaration is here

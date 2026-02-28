@@ -26,6 +26,12 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/user-attributes.h"
 
+#include "hphp/runtime/vm/type-constraint.h"
+
+#include "hphp/util/tiny-vector.h"
+
+#include <folly/Range.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -36,25 +42,27 @@ struct Unit;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+enum class AliasKind {
+  TypeAlias,
+  CaseType
+};
+
 /*
- * This is the runtime representation of a type alias.  Type aliases are only
- * allowed when HipHop extensions are enabled.
+ * This is the runtime representation of a type alias.
  *
- * The `type' field is Object whenever the type alias is basically just a
- * name. At runtime we still might resolve this name to another type alias,
+ * At runtime we still might resolve this name to another type alias,
  * becoming a type alias for some other type or something in that request.
  *
  * For the per-request struct, see TypeAlias below.
  */
 struct PreTypeAlias {
   Unit* unit;
-  LowStringPtr name;
-  LowStringPtr value;
+  PackedStringPtr name;
   Attr attrs;
-  AnnotType type;
+  TypeConstraint value;
   int line0;
   int line1;
-  bool nullable;  // null is allowed; for ?Foo aliases
+  AliasKind kind;
   UserAttributeMap userAttrs;
   Array typeStructure;
   // If !isNull(), contains m_typeStructure in post-resolved form from
@@ -79,15 +87,6 @@ struct PreTypeAlias {
  * hints for a type alias at runtime.
  */
 struct TypeAlias {
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Static constructors.
-
-  static TypeAlias Invalid(const PreTypeAlias* alias);
-  static TypeAlias From(const PreTypeAlias* alias);
-  static TypeAlias From(TypeAlias req, const PreTypeAlias* alias);
-
-
   /////////////////////////////////////////////////////////////////////////////
   // Comparison.
 
@@ -97,15 +96,9 @@ struct TypeAlias {
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
-
-  // The aliased type.
-  AnnotType type{AnnotType::NoReturn};
+  TypeConstraint value;
   // Overrides `type' if the alias is invalid (e.g., for a nonexistent class).
   bool invalid{false};
-  // For option types, like ?Foo.
-  bool nullable{false};
-  // Aliased Class; nullptr if type != Object.
-  LowPtr<Class> klass{nullptr};
 
   explicit TypeAlias(const PreTypeAlias* preTypeAlias)
     : m_preTypeAlias(preTypeAlias)
@@ -116,13 +109,23 @@ struct TypeAlias {
   const Unit* unit() const { return m_preTypeAlias->unit; }
   UserAttributeMap userAttrs() const { return m_preTypeAlias->userAttrs; }
   const Array& typeStructure() const { return m_preTypeAlias->typeStructure; }
-  const Array& resolvedTypeStructure() const {
+  const Array& resolvedTypeStructureRaw() const {
     return m_preTypeAlias->resolvedTypeStructure;
   }
 
+  // Return the type-structure, possibly as a logging array
+  const Array resolvedTypeStructure() const;
+
+  // Should only be used to change the existing type-structure to
+  // a bespoke array layout.
+  void setResolvedTypeStructure(ArrayData* ad);
+
+  // A hash for this class that will remain constant across process restarts.
+  size_t stableHash() const;
+
   /*
    * Define the type alias given by `id', binding it to the appropriate
-   * NamedEntity for this request.
+   * NamedType for this request.
    *
    * Raises a fatal error if type alias already defined or cannot be defined
    * unless failIsFatal is unset

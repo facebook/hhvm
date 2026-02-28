@@ -1,0 +1,24 @@
+ERROR: File "case_type_function_bad.php", line 4, characters 11-24:
+Invalid case type declaration. More than one variant of `NoTwoFunctions` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_function_bad.php", line 4, characters 28-47:
+  This is the type `(function(): ~string)`, which includes **built-in values**
+  File "case_type_function_bad.php", line 4, characters 51-67:
+  It may overlap with `(function(): ~int)`, which includes **built-in values**
+  File "case_type_function_bad.php", line 4, characters 11-24:
+  Because it is possible for values to be both **built-in values** and **built-in values**, `(function(): ~string)` and `(function(): ~int)` cannot be in the same case type
+ERROR: File "case_type_function_bad.php", line 6, characters 11-23:
+Invalid case type declaration. More than one variant of `NoFunctionRef` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_function_bad.php", line 7, characters 5-40:
+  This is the type `HH\FunctionRef<(function(): ~string)>`, which includes **built-in values**
+  File "case_type_function_bad.php", line 7, characters 5-40:
+    via the constraint on the newtype `HH\FunctionRef`
+  File "case_type_function_bad.php", line 8, characters 5-21:
+  It may overlap with `(function(): ~int)`, which includes **built-in values**
+  File "case_type_function_bad.php", line 6, characters 11-23:
+  Because it is possible for values to be both **built-in values** and **built-in values**, `HH\FunctionRef<(function(): ~string)>` and `(function(): ~int)` cannot be in the same case type
+ERROR: File "case_type_function_bad.php", line 10, characters 11-19:
+Invalid case type declaration. More than one variant of `NoClosure` could contain values with the same runtime tag (Typing[4475])
+  File "case_type_function_bad.php", line 10, characters 23-29:
+  This is the type `Closure`, which includes **instances of the class Closure**
+  File "case_type_function_bad.php", line 10, characters 33-49:
+  It overlaps with `(function(): ~int)`, which also includes **instances of the class Closure**

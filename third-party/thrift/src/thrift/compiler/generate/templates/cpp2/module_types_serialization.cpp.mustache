@@ -1,0 +1,89 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+  Optional JSON serialization and other serialization-related code provided
+  by the types library. The compact and binary serialization are in separate
+  translation units to improve build times.
+}}
+{{> Autogen}}
+#include "{{program:include_prefix}}{{program:name}}_types_custom_protocol.h"
+#include "{{program:include_prefix}}{{program:name}}_data.h"
+
+#include <thrift/lib/cpp2/gen/module_types_cpp.h>
+
+{{! Any registration is here and not in module_types.cpp because it depends on
+    serialization. }}
+{{#if (has_compiler_option? "any")}}
+#include <thrift/conformance/cpp2/AnyRegistry.h>
+
+namespace {{program:cpp_qualified_namespace}} {
+// Static-init time registration for dynamically-linked libraries.
+//
+// To include in statically-linked libraries, link whole (e.g. --whole-archive)
+// `{{program:name}}_sinit.cpp`.
+{{#program:split_structs}}
+{{#struct:any?}}
+class __fbthrift_static_init_{{struct:cpp_underlying_name}}_Tag {};
+void __fbthrift_static_init_{{struct:cpp_underlying_name}}() {
+  {{!
+  module_sinit.cpp might be compiled into multiple dynamically-linked libraries.
+  When dynamically loading those libraries, this function might be invoked
+  multiple times. We need to ensure this function is only performed once.
+  }}
+
+  using Tag = __fbthrift_static_init_{{struct:cpp_underlying_name}}_Tag;
+  if (folly::detail::createGlobal<std::atomic<bool>, Tag>().exchange(true)) {
+    {{! Not the first time when this function is invoked, skip. }}
+    return;
+  }
+
+  apache::thrift::conformance::detail::registerGeneratedStruct<
+      {{struct:cpp_underlying_name}},
+{{#if (has_compiler_option? "json")}}
+      apache::thrift::conformance::StandardProtocol::SimpleJson,
+{{/if (has_compiler_option? "json")}}
+      apache::thrift::conformance::StandardProtocol::Compact,
+      apache::thrift::conformance::StandardProtocol::Binary>();
+}
+{{/struct:any?}}
+{{/program:split_structs}}
+} // namespace {{program:cpp_qualified_namespace}}
+{{/if (has_compiler_option? "any")}}
+{{#program:split_structs}}{{#if (not (has_compiler_option? "tablebased"))}}
+{{> module_types_cpp/struct_traits}}
+{{/if (not (has_compiler_option? "tablebased"))}}{{/program:split_structs}}
+
+namespace {{program:cpp_qualified_namespace}} {
+{{#program:split_structs}}
+
+{{#struct:extra_namespace}}
+namespace {{struct:extra_namespace}} {
+{{/struct:extra_namespace}}
+
+{{#if (has_compiler_option? "json")}}
+template void {{struct:cpp_underlying_name}}::readNoXfer<>(apache::thrift::SimpleJSONProtocolReader*);
+template uint32_t {{struct:cpp_underlying_name}}::write<>(apache::thrift::SimpleJSONProtocolWriter*) const;
+template uint32_t {{struct:cpp_underlying_name}}::serializedSize<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+template uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC<>(apache::thrift::SimpleJSONProtocolWriter const*) const;
+{{/if (has_compiler_option? "json")}}
+
+{{> module_types_cpp/lazy_deserialization}}
+{{#struct:extra_namespace}}
+} // namespace {{struct:extra_namespace}}
+{{/struct:extra_namespace}}
+{{/program:split_structs}}
+
+} // namespace {{program:cpp_qualified_namespace}}

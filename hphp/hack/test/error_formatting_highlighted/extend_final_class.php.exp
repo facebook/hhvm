@@ -1,4 +1,4 @@
-Typing[4035] You cannot extend final class _Foo_ [1]
+error: Typing[4035] You cannot extend final class _Foo_ [1]
 -> Declaration is here [2]
 
 extend_final_class.php:5:7
@@ -8,4 +8,4 @@ extend_final_class.php:5:7
     4 | 
 [1] 5 | class B extends _Foo_ {}
 
-1 error found.
+1 error found

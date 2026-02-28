@@ -32,6 +32,8 @@ interface SprintfFormat {
   public function format_upcase_x(int $s): string;
   // %% takes no arguments
   public function format_0x25(): string;
+  // %'(char)
+  public function format_0x27(): SprintfFormatQuote;
   // Modifiers that don't change the type
   public function format_l(): SprintfFormat;
   public function format_0x20(): SprintfFormat; // ' '
@@ -48,18 +50,16 @@ interface SprintfFormat {
   public function format_0x37(): SprintfFormat;
   public function format_0x38(): SprintfFormat;
   public function format_0x39(): SprintfFormat; // '9'
-  public function format_0x27(): SprintfFormatQuote;
 }
 
 /**
  * Accessory interface for `SprintfFormat`
- * Note: This should really be a wildcard. It's only used once (with '=').
  *
  * @guide /hack/built-in-types/string
  * @guide /hack/functions/format-strings
  */
 interface SprintfFormatQuote {
-  public function format_0x3d(): SprintfFormat;
+  public function format_wild(): SprintfFormat;
 }
 
 type SprintfFormatString = \HH\FormatString<SprintfFormat>;
@@ -71,9 +71,14 @@ type SprintfFormatString = \HH\FormatString<SprintfFormat>;
  * @guide /hack/built-in-types/string
  * @guide /hack/functions/format-strings
  */
-function format(
-  SprintfFormatString $format_string,
-  mixed ...$format_args
+<<__NoAutoLikes>>
+function format<Targs as (mixed...)>(
+  \HH\TypedFormatString<SprintfFormat, Targs> $format_string,
+  ... Targs $format_args,
 )[]: string {
-  return _Str\vsprintf_l(null, $format_string as string, $format_args);
+  return _Str\vsprintf_l(
+    null,
+    $format_string,
+    HH\FIXME\UNSAFE_CAST<(mixed...), vec<mixed>>($format_args),
+  );
 }

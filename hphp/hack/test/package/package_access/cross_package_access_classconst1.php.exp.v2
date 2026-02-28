@@ -1,0 +1,25 @@
+error: Typing[4472] Cannot access class B1 defined in package pkg2 which may not be available [1]
+-> B1 is defined in cross_package_access_classconst1.php--b.php [2]
+-> B1 belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_access_classconst1.php--a.php:4:9
+    2 | // package pkg1
+    3 | function test(): void {
+[1] 4 |    $b = B1::class; // error when package_allow_classconst_violations is off
+    5 | }
+
+cross_package_access_classconst1.php--b.php:4:7
+    1 | <?hh
+    2 | // package pkg2
+[3] 3 | <<file: __PackageOverride('pkg2')>>
+[2] 4 | class B1 {}
+
+PACKAGES.toml:3:11
+    1 | [packages]
+    2 | 
+[4] 3 | [packages.pkg1]
+    4 | include_paths=["//"]
+    5 | 
+
+1 error found

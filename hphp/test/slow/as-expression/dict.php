@@ -10,7 +10,7 @@ function f(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_dict() {
+function main_dict() :mixed{
 f(1);
 f(false);
 f(1.5);

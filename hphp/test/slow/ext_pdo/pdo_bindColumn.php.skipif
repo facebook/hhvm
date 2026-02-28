@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 $drivers = PDO::getAvailableDrivers();
 if (!in_array('mysql', $drivers))
-  die("skip Driver not found");
+  exit("skip Driver not found");
 
 $host   = getenv("MYSQL_TEST_HOST")   ? getenv("MYSQL_TEST_HOST") : "localhost";
 $port   = getenv("MYSQL_TEST_PORT")   ? getenv("MYSQL_TEST_PORT") : 3306;
@@ -13,6 +13,6 @@ $db     = getenv("MYSQL_TEST_DB")     ? getenv("MYSQL_TEST_DB") : "test";
 try {
   $pdo = new PDO("mysql:dbname=$db;host=$host", $user, $passwd);
 } catch (PDOException $e) {
-  die("skip: ".$e->getMessage());
+  exit("skip: ".$e->getMessage());
 }
 }

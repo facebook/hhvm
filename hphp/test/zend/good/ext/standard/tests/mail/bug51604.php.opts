@@ -1,0 +1,1 @@
+-vMail.SendmailPath='cat > "$TMPDIR/mail_bug51604.out"'

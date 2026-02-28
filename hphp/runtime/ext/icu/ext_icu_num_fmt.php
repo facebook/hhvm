@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Programs store and operate on numbers using a locale-independent binary
@@ -23,7 +23,7 @@
  * 75%.   For more complex formatting, like spelled-out numbers, the
  * rule-based number formatters are used.
  */
-<<__NativeData("NumberFormatter")>>
+<<__NativeData>>
 class NumberFormatter {
   /**
    * Create a number formatter
@@ -168,8 +168,8 @@ class NumberFormatter {
    */
   <<__Native>>
   public function parseCurrency(string $value,
-                                <<__OutOnly("KindOfString")>>
-                                inout mixed $currency,
+                                <<__OutOnly>>
+                                inout string $currency,
                                 inout mixed $position): mixed;
 
   /**

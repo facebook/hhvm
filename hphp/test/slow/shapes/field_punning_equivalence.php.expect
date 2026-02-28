@@ -1,0 +1,7 @@
+Punned and explicit are equal: bool(true)
+Mixed form 1 equals explicit: bool(true)
+Mixed form 2 equals explicit: bool(true)
+Keys match:
+  foo: bool(true)
+  bar: bool(true)
+  baz: bool(true)

@@ -1,2 +1,0 @@
-File "class_with_constraints_unsupported.php", line 9, characters 17-17:
-The class C imposes constraints on some of its type parameters. Classes that do this cannot be used as higher-kinded types at this time. (Naming[2047])

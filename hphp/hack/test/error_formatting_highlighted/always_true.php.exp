@@ -1,1 +1,11 @@
-No errors
+warning: Warn[12007] Invalid comparison: This expression will always return true.
+A value of type null can never be equal to a value of type vec<int> [1]
+
+always_true.php:4:7
+    2 | 
+    3 | function foo(varray<int> $arg): void {
+[1] 4 |   if (null !== $arg) {
+    5 |   }
+    6 | }
+
+1 error found

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 bake_bread(
   // rye
@@ -50,7 +50,6 @@ punch_dough(
    * This duration is important.
    */
 );
-
 
 brush_with(
   $cooking_oil,

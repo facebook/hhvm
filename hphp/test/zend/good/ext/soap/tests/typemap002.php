@@ -1,11 +1,11 @@
 <?hh
 
-function book_to_xml($book) {
+function book_to_xml($book) :mixed{
 	return '<book xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><a xsi:type="xsd:string">'.$book->a.'!</a><b xsi:type="xsd:string">'.$book->b.'!</b></book>';
 }
 
 class test{
-	function dotest2($str){
+	function dotest2($str):mixed{
 		$book = new book;
 		$book->a = "foo";
 		$book->b = "bar";
@@ -35,9 +35,9 @@ function entrypoint_typemap002(): void {
   <env:Header/>
   </env:Envelope>");
 
-  $options=darray[
+  $options=dict[
   		'actor'   =>'http://schemas.nothing.com',
-  		'typemap' => varray[darray["type_ns"   => "http://schemas.nothing.com",
+  		'typemap' => vec[dict["type_ns"   => "http://schemas.nothing.com",
   		                         "type_name" => "book",
   		                         "to_xml"    => book_to_xml<>]]
   		];

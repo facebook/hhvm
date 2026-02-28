@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_preg_cache_overflow() {
+function main_preg_cache_overflow() :mixed{
 $matches = 1;
 for ($i=1 ; $i < 1050 ; $i++) {
   $db_name = 'dbs.'.rand();

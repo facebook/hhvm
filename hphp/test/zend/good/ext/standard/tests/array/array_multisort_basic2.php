@@ -8,8 +8,8 @@
 echo "*** Testing array_multisort() : basic functionality - renumbering of numeric keys ***\n";
 
 // Initialise all required variables
-$ar1 = darray[ "strkey" => 2,  0 => 1,  9 => 1];
-$ar2 = varray[ 2, "aa" , "1"];
+$ar1 = dict[ "strkey" => 2,  0 => 1,  9 => 1];
+$ar2 = vec[ 2, "aa" , "1"];
 
 echo "\n-- Testing array_multisort() function with all normal arguments --\n";
 $asc = SORT_ASC;

@@ -1,6 +1,6 @@
 <?hh
 
-function functionProvider((function ((function (int...):void)...): void) $fn) {
+function functionProvider((function ((function (int...):void)...): void) $fn) :mixed{
   $fn(
     ((...$x) ==> var_dump($x)),
     ((int ...$x) ==> var_dump($x)),
@@ -15,7 +15,7 @@ function functionProvider((function ((function (int...):void)...): void) $fn) {
 
 
 <<__EntryPoint>>
-function main_lambdas_variadic_functions() {
+function main_lambdas_variadic_functions() :mixed{
 print "Function provider ...\$fns\n";
 functionProvider((...$fns) ==> {
   foreach ($fns as $fn) {

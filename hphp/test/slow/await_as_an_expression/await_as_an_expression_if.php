@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 async function test(): Awaitable<void> {
   if (await async { return true; }) {
@@ -11,6 +11,6 @@ async function test(): Awaitable<void> {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   \HH\Asio\join(test());
 }

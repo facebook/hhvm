@@ -1,11 +1,11 @@
 <?hh
 
-function Test() {
+function Test() :mixed{
   var_dump(__FUNCTION__);
 }
 
 <<__EntryPoint>>
 function main(): void {
-  test();
+  Test();
   var_dump(__FUNCTION__);
 }

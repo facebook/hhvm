@@ -12,14 +12,14 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing fileperms() & chmod() : usage variations ***\n";
 
-$file_name = __SystemLib\hphp_test_tmppath('006_variation2.tmp');
+$file_name = sys_get_temp_dir().'/'.'006_variation2.tmp';
 $file_handle = fopen($file_name, "w");
 try { fclose($file_handle); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-$dir_name = __SystemLib\hphp_test_tmppath('006_variation2');
+$dir_name = sys_get_temp_dir().'/'.'006_variation2';
 mkdir($dir_name);
 
 echo "\n*** Testing fileperms(), chmod() with miscellaneous permissions ***\n";
-$perms_array = varray[
+$perms_array = vec[
   /* testing sticky bit */
   07777,
   00000,
@@ -37,12 +37,6 @@ $perms_array = varray[
   /* hex value as permission */
   0x777, // permissions will be given as ocatal equivalent value of 0x777
   0x7777,
-
-  /* strings notation of permission,  wont work properly */
-  "r+w",
-  "r+w+x",
-  "u+rwx",
-  "u+rwx, g+rw, o+wx"
 ];
 
 $count = 1;

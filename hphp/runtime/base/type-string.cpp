@@ -19,12 +19,11 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/util/conv-10.h"
 
-#include <folly/tracing/StaticTracepoint.h>
+#include <usdt/usdt.h>
 
 #include <algorithm>
 
@@ -110,14 +109,6 @@ StringData* buildStringData(double n) {
   char *buf = nullptr;
   formatPhpDblStr(&buf, n);
   return StringData::Make(buf, AttachString);
-}
-
-std::string convDblToStrWithPhpFormat(double n) {
-  char *buf = nullptr;
-  formatPhpDblStr(&buf, n);
-  std::string retVal(buf);
-  free(buf);
-  return retVal;
 }
 
 String::String(double n) : m_str(buildStringData(n), NoIncRef{}) { }
@@ -239,7 +230,7 @@ String& String::operator+=(folly::StringPiece slice) {
   }
   if (!m_str->cowCheck()) {
     UNUSED auto const lsize = m_str->size();
-    FOLLY_SDT(hhvm, hhvm_mut_concat, lsize, slice.size());
+    USDT(hhvm, hhvm_mut_concat, lsize, slice.size());
     auto const tmp = m_str->append(slice);
     if (UNLIKELY(tmp != m_str)) {
       // had to realloc even though count==1
@@ -247,7 +238,7 @@ String& String::operator+=(folly::StringPiece slice) {
     }
     return *this;
   }
-  FOLLY_SDT(hhvm, hhvm_cow_concat, m_str->size(), slice.size());
+  USDT(hhvm, hhvm_cow_concat, m_str->size(), slice.size());
   m_str = req::ptr<StringData>::attach(
     StringData::Make(m_str.get(), slice)
   );
@@ -417,7 +408,8 @@ const StaticString
   s_func("function"),
   s_class("class"),
   s_clsmeth("clsmeth"),
-  s_rclsmeth("rclsmeth");
+  s_rclsmeth("rclsmeth"),
+  s_enumclasslabel("enumclasslabel");
 
 StaticString getDataTypeString(DataType t, bool isLegacy) {
   switch (t) {
@@ -442,6 +434,7 @@ StaticString getDataTypeString(DataType t, bool isLegacy) {
     case KindOfClsMeth:    return s_clsmeth;
     case KindOfRClsMeth:   return s_rclsmeth;
     case KindOfLazyClass:  return s_class;
+    case KindOfEnumClassLabel: return s_enumclasslabel;
   }
   not_reached();
 }

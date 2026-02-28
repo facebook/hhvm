@@ -1,10 +1,10 @@
 <?hh
 
-function throwException() {
+function throwException() :mixed{
     throw new Exception('test');
 }
 
-function gen() {
+function gen() :AsyncGenerator<mixed,mixed,void>{
     yield 'foo';
     strlen("foo", "bar", throwException());
     yield 'bar';

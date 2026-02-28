@@ -5,14 +5,14 @@
  * Alias to functions:
  */
 
-function runtest() {
+function runtest() :mixed{
     $tmpfile =  basename(__FILE__, ".php") . ".tmp";
     $h = fopen($tmpfile, "w", true);
     fwrite($h, (string)"This is the test file");
     fclose($h);
 
 
-    $h = @fopen($tmpfile, "r");
+    $h = fopen($tmpfile, "r");
     if ($h === false) {
        echo "Not created in working dir\n";
     }
@@ -22,7 +22,7 @@ function runtest() {
        unlink($tmpfile);
     }
 
-    $h = @fopen('dir1/'.$tmpfile, "r");
+    $h = fopen('dir1/'.$tmpfile, "r");
     if ($h === false) {
        echo "Not created in dir1\n";
     }
@@ -35,7 +35,7 @@ function runtest() {
 <<__EntryPoint>> function main(): void {
 require_once('fopen_include_path.inc');
 
-$thisTestDir =  __SystemLib\hphp_test_tmppath('fopen_variation9.dir');
+$thisTestDir =  sys_get_temp_dir().'/'.'fopen_variation9.dir';
 mkdir($thisTestDir);
 chdir($thisTestDir);
 

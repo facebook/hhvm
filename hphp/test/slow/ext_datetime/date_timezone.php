@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_date_timezone() {
+function main_date_timezone() :mixed{
 date_default_timezone_set("America/Los_Angeles");
 var_dump(date_default_timezone_get());
 

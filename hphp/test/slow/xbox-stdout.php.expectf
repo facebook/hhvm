@@ -1,0 +1,34 @@
+In cli%S
+do_prints(cli%S, false) > echo
+string(%d) "do_prints(cli%S, false) > var_dump"
+do_prints(cli%S, false) > error_log
+do_prints(cli%S, false) > fprintf stdout
+do_prints(cli%S, false) > fprintf stderr
+do_prints(cli%S, false) > fprintf $out
+do_prints(cli%S, false) > file_put_contents stdout
+
+Notice: do_prints(cli%S, false) > trigger_error notice in %s/xbox-stdout.php on line 17
+In xbox
+do_prints(xbox, false) > echo
+string(33) "do_prints(xbox, false) > var_dump"
+do_prints(xbox, false) > error_log
+do_prints(xbox, false) > fprintf stdout
+do_prints(xbox, false) > fprintf stderr
+do_prints(xbox, false) > fprintf $out
+do_prints(xbox, false) > file_put_contents stdout
+
+Notice: do_prints(xbox, false) > trigger_error notice in %s/xbox-stdout.php on line 17
+xbox done.
+do_prints(xbox-func, true) > echo
+string(37) "do_prints(xbox-func, true) > var_dump"
+do_prints(xbox-func, true) > error_log
+do_prints(xbox-func, true) > fprintf stdout
+do_prints(xbox-func, true) > fprintf stderr
+do_prints(xbox-func, true) > fprintf $out
+do_prints(xbox-func, true) > file_put_contents stdout
+
+Notice: do_prints(xbox-func, true) > trigger_error notice in %s/xbox-stdout.php on line 17
+
+Fatal error: Call to undefined function i_dont_exist() in %s/xbox-stdout.php on line 19
+xbox thread threw: Call to undefined function i_dont_exist()
+cli%S done.

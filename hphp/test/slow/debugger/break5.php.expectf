@@ -1,0 +1,30 @@
+Program %s/break5.php loaded. Type '[r]un' to go.
+b 12 if bad()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+run
+1
+1
+Program %s/break5.php exited normally.
+p DebuggerBreak5::$x
+1
+s
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 's'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+p DebuggerBreak5::$x
+1
+s
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 's'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+p DebuggerBreak5::$x
+1
+quit

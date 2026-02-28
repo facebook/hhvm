@@ -1,2 +1,2 @@
 
-Warning: DOMCharacterData::replaceData() expects exactly 3 parameters, 0 given in %s/DOMCharacterData_replaceData_error_001.php on line 8
+Warning: DOMCharacterData::replaceData() expects exactly 3 positional parameters, 0 given in %s/DOMCharacterData_replaceData_error_001.php on line 8

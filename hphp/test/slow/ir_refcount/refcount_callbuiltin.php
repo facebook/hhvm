@@ -1,6 +1,6 @@
 <?hh
 
-function x($x) {
+function x($x) :mixed{
   $z = new stdClass;
   $k = new stdClass;
   $p = new stdClass;
@@ -11,7 +11,7 @@ function x($x) {
 
 
 <<__EntryPoint>>
-function main_refcount_callbuiltin() {
+function main_refcount_callbuiltin() :mixed{
 x("asd".mt_rand());
 x("asd".mt_rand());
 x("asd".mt_rand());

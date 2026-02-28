@@ -1,0 +1,69 @@
+<?hh
+
+<<file: __EnableUnstableFeatures('expression_trees')>>
+
+final class MyClass {
+  public static function bar(
+  ): ExampleExpression<ExampleFunction<(function(ExampleString): ExampleInt)>> {
+    throw new Exception();
+  }
+
+  public function test(): void {
+    $fun_call = (
+      () ==> {
+        $sm0 = static::bar<>;
+        return ExampleDsl::makeTree(
+          darray[
+            "path" => __FILE__,
+            "start_line" => 12,
+            "end_line" => 12,
+            "start_column" => 27,
+            "end_column" => 45,
+          ],
+          darray[
+            "splices" => dict[],
+            "functions" => vec[],
+            "static_methods" => vec[$sm0],
+            "variables" => vec[],
+            "lexically_enclosing_tree" => NULL,
+          ],
+          (
+            (ExampleDsl $v) ==> {
+              return $v->visitCall(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 12,
+                  "end_line" => 12,
+                  "start_column" => 27,
+                  "end_column" => 45,
+                ],
+                $v->visitStaticMethod(
+                  darray[
+                    "path" => __FILE__,
+                    "start_line" => 12,
+                    "end_line" => 12,
+                    "start_column" => 27,
+                    "end_column" => 45,
+                  ],
+                  $sm0,
+                ),
+                vec[
+                  $v->visitString(
+                    darray[
+                      "path" => __FILE__,
+                      "start_line" => 12,
+                      "end_line" => 12,
+                      "start_column" => 39,
+                      "end_column" => 44,
+                    ],
+                    "baz",
+                  ),
+                ],
+              );
+            }
+          ),
+        );
+      }
+    )();
+  }
+}

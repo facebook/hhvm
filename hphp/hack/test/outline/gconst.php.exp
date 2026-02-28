@@ -1,0 +1,8 @@
+TShape
+  kind: typedef
+  id: type_id::TShape
+  position: line 1, characters 6-11
+  span: line 1, character 6 - line 1, character 35
+  modifiers: 
+  detail: TShape = shape("field" => int)
+

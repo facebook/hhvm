@@ -3,4 +3,4 @@
  (wrapped false)
  (libraries decl_reference pos)
  (preprocess
-  (pps ppx_deriving.std)))
+  (pps ppx_deriving.std ppx_hash)))

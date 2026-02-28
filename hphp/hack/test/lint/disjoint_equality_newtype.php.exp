@@ -1,0 +1,3 @@
+File "disjoint_equality_newtype.php--main.php", line 8, characters 7-15:
+Invalid comparison: This expression will always return `false`.
+A value of type `NTIntA` can never be equal to a value of type `NTStringB` (Lint[5607])

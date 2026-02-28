@@ -11,6 +11,15 @@ use synstructure::decl_derive;
 
 decl_derive!([NoPosHash] => derive_no_pos_hash);
 
+fn workaround_non_local_def(impl_block: TokenStream) -> TokenStream {
+    // We need to upgrade synstructure to remove this warning, but doing so will also require upgrading
+    // to syn2 and rewriting to handle the API changes.
+    quote! {
+        #[allow(non_local_definitions)]
+        #impl_block
+    }
+}
+
 fn derive_no_pos_hash(mut s: synstructure::Structure<'_>) -> TokenStream {
     // By default, if you are deriving an impl of trait Foo for generic type
     // X<T>, synstructure will add Foo as a bound not only for the type
@@ -21,13 +30,13 @@ fn derive_no_pos_hash(mut s: synstructure::Structure<'_>) -> TokenStream {
 
     let body = no_pos_hash_body(&s);
 
-    s.gen_impl(quote! {
+    workaround_non_local_def(s.gen_impl(quote! {
         gen impl ::no_pos_hash::NoPosHash for @Self {
             fn hash<__H: ::core::hash::Hasher>(&self, state: &mut __H) {
                 match self { #body }
             }
         }
-    })
+    }))
 }
 
 fn no_pos_hash_body(s: &synstructure::Structure<'_>) -> TokenStream {

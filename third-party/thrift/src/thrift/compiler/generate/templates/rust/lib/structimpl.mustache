@@ -1,0 +1,284 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{#if (not struct:union?)}}
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::{{struct:rust_name}} {
+    fn default() -> Self {
+        Self {{> lib/block}}{{!
+        }}{{#struct:fields}}
+            {{field:rust_name}}: {{!
+                }}{{#field:default}}{{!
+                    }}{{#if field:optional?}}{{!
+                        }}{{#if (has_compiler_option? "deprecated_optional_with_default_is_some")}}{{!
+                            }}{{#if field:has_adapter?}}{{field:adapter_struct_qualified}}::from_thrift_default::<{{struct:rust_name}}>({{/if field:has_adapter?}}{{!
+                            }}{{> lib/fieldvalue}}{{!
+                            }}{{#if field:has_adapter?}}, {{field:id}}){{/if field:has_adapter?}}{{!
+                        }}{{#else}}{{!
+                            }}::std::option::Option::None{{!
+                        }}{{/if (has_compiler_option? "deprecated_optional_with_default_is_some")}}{{!
+                    }}{{#else}}{{!
+                        }}{{#if field:has_adapter?}}{{field:adapter_struct_qualified}}::from_thrift_default::<{{struct:rust_name}}>({{/if field:has_adapter?}}{{!
+                        }}{{> lib/fieldvalue}}{{!
+                        }}{{#if field:has_adapter?}}, {{field:id}}){{/if field:has_adapter?}}{{!
+                    }}{{/if field:optional?}}{{!
+                }}{{/field:default}}{{!
+                }}{{^field:default}}{{!
+                    }}{{#if field:optional?}}{{!
+                        }}::std::option::Option::None{{!
+                    }}{{#else}}{{!
+                        }}{{#if field:has_adapter?}}{{field:adapter_struct_qualified}}::from_thrift_default::<{{struct:rust_name}}>({{/if field:has_adapter?}}{{!
+                        }}::std::default::Default::default(){{!
+                        }}{{#if field:has_adapter?}}, {{field:id}}){{/if field:has_adapter?}}{{!
+                    }}{{/if field:optional?}}{{!
+                }}{{/field:default}}{{!
+            }},{{!
+        }}{{/struct:fields}}
+            {{> lib/structvalue_epilogue}}
+
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::{{struct:rust_name}} {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("{{struct:rust_name}}"){{!
+            }}{{#struct:fields}}
+            .field("{{field:rust_name}}", &self.{{field:rust_name}}){{!
+            }}{{/struct:fields}}
+            .finish()
+    }
+}
+
+{{! Avoid needing to raise the recursion_limit for the trait solver to
+    figure out autotrait impls for deeply nested data structures.
+    These unsafe impls are fine because all possible field types we allow
+    (primitives, string, vec, maps, sets) are Send and Sync and Unpin. }}
+unsafe impl ::std::marker::Send for self::{{struct:rust_name}} {}
+unsafe impl ::std::marker::Sync for self::{{struct:rust_name}} {}
+impl ::std::marker::Unpin for self::{{struct:rust_name}} {}
+impl ::std::panic::RefUnwindSafe for self::{{struct:rust_name}} {}
+impl ::std::panic::UnwindSafe for self::{{struct:rust_name}} {}
+
+impl ::fbthrift::GetTType for self::{{struct:rust_name}} {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+{{#if (not (string.empty? struct:uri))}}
+
+impl ::fbthrift::GetUri for self::{{struct:rust_name}} {
+    fn uri() -> &'static ::std::primitive::str {
+        "{{struct:uri}}"
+    }
+}
+{{/if (not (string.empty? struct:uri))}}
+
+impl ::fbthrift::GetTypeNameType for self::{{struct:rust_name}} {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::StructType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::{{struct:rust_name}}
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("{{struct:name}}");{{!
+        }}{{#struct:fields}}{{!
+        }}{{#if field:optional?}}
+        if let ::std::option::Option::Some(some) = &self.{{field:rust_name}} {
+            p.write_field_begin({{!
+                }}"{{field:name}}", {{!
+                }}{{#field:type}}{{> lib/ttype}}{{/field:type}}, {{!
+                }}{{field:id}}{{!
+            }});
+            {{#field:type}}{{#if field:type_annotation?}}{{> lib/annfieldwrite}}{{#else}}{{> lib/write}}{{/if field:type_annotation?}}{{/field:type}}({{!
+            }}{{#if field:has_adapter?}}&{{field:adapter_struct_qualified}}::to_thrift_field::<{{struct:rust_name}}>({{/if field:has_adapter?}}{{!
+            }}some{{!
+            }}{{#if field:has_adapter?}}, {{field:id}}){{/if field:has_adapter?}}{{!
+            }}, p);
+            p.write_field_end();
+        }{{!
+        }}{{#else}}
+        p.write_field_begin({{!
+            }}"{{field:name}}", {{!
+            }}{{#field:type}}{{> lib/ttype}}{{/field:type}}, {{!
+            }}{{field:id}}{{!
+        }});
+        {{#field:type}}{{#if field:type_annotation?}}{{> lib/annfieldwrite}}{{#else}}{{> lib/write}}{{/if field:type_annotation?}}{{/field:type}}({{!
+          }}{{#if field:has_adapter?}}&{{field:adapter_struct_qualified}}::to_thrift_field::<{{struct:rust_name}}>({{/if field:has_adapter?}}{{!
+          }}&self.{{field:rust_name}}{{!
+          }}{{#if field:has_adapter?}}, {{field:id}}){{/if field:has_adapter?}}{{!
+        }}, p);
+        p.write_field_end();{{!
+        }}{{/if field:optional?}}{{!
+        }}{{/struct:fields}}
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::{{struct:rust_name}}
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            {{#each struct:fields_by_name as |field|}}
+            ::fbthrift::Field::new("{{field.name}}", {{#field.type}}{{> lib/ttype}}{{/field.type}}, {{field.id}}),
+            {{/each}}
+        ];
+
+        {{#if (not (has_compiler_option? "deprecated_optional_with_default_is_some"))}}
+        #[allow(unused_mut)]
+        let mut output = {{struct:rust_name}}::default();
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a {{struct:name}}")?;
+        let (_, mut fty, mut fid) = p.read_field_begin(|_| (), FIELDS)?;
+        #[allow(unused_labels)]
+        let fallback  = 'fastpath: {
+            {{#struct:fields}}
+            if (fty, fid) == ({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:id}}) {
+                output.{{field:rust_name}} = {{!
+                }}{{#if field:optional?}}{{!
+                }}::std::option::Option::Some({{!
+                }}{{/if field:optional?}}{{!
+                }}{{#if field:has_adapter?}}{{field:adapter_struct_qualified}}::from_thrift_field::<{{struct:rust_name}}>({{/if field:has_adapter?}}{{!
+                }}{{#field:type}}::anyhow::Context::context({{#if field:type_annotation?}}{{> lib/annfieldread}}{{#else}}{{> lib/read}}{{/if field:type_annotation?}}{{/field:type}}(p), ::fbthrift::errors::DeserializingFieldError { field: "{{field:name}}", strct: "{{struct:name}}"})?{{!
+                }}{{#if field:has_adapter?}}, {{field:id}})?{{/if field:has_adapter?}}{{!
+                }}{{#if field:optional?}}{{!
+                }}){{!
+                }}{{/if field:optional?}}{{!
+                }};
+                p.read_field_end()?;
+            } else {
+                break 'fastpath true;
+            }
+            (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            {{/struct:fields}}
+
+            fty != ::fbthrift::TType::Stop
+        };
+
+        if fallback {
+            loop {
+                match (fty, fid) {
+                    (::fbthrift::TType::Stop, _) => break,{{!
+                    }}{{#struct:fields}}
+                    ({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:id}}) => {{!
+                        }}output.{{field:rust_name}} = {{!
+                        }}{{#if field:optional?}}{{!
+                        }}::std::option::Option::Some({{!
+                        }}{{/if field:optional?}}{{!
+                        }}{{#if field:has_adapter?}}{{field:adapter_struct_qualified}}::from_thrift_field::<{{struct:rust_name}}>({{/if field:has_adapter?}}{{!
+                        }}{{#field:type}}::anyhow::Context::context({{#if field:type_annotation?}}{{> lib/annfieldread}}{{#else}}{{> lib/read}}{{/if field:type_annotation?}}{{/field:type}}(p), ::fbthrift::errors::DeserializingFieldError { field: "{{field:name}}", strct: "{{struct:name}}"})?{{!
+                        }}{{#if field:has_adapter?}}, {{field:id}})?{{/if field:has_adapter?}}{{!
+                        }}{{#if field:optional?}}{{!
+                        }}){{!
+                        }}{{/if field:optional?}}{{!
+                        }},{{!
+                    }}{{/struct:fields}}
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+                (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            }
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(output)
+
+        {{!TODO: Remove this when we remove the legacy option}}
+        {{#else}}
+
+        {{#if struct:all_optional?}}
+        #[allow(unused_mut)]
+        let mut output = Self {{> lib/block}}{{!
+            }}{{#struct:fields}}
+            {{field:rust_name}}: ::std::option::Option::None,{{!
+            }}{{/struct:fields}}
+            {{> lib/structvalue_epilogue}}
+
+        };
+        {{/if struct:all_optional?}}
+        {{#if (not struct:all_optional?)}}
+        {{#struct:fields}}
+        let mut field_{{field:name}} = ::std::option::Option::None;
+        {{/struct:fields}}
+        {{/if (not struct:all_optional?)}}
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a {{struct:name}}")?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,{{!
+                }}{{#struct:fields}}
+                ({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:id}}) => {{!
+                    }}{{#if struct:all_optional?}}output.{{field:rust_name}}{{/if struct:all_optional?}}{{!
+                    }}{{#if (not struct:all_optional?)}}field_{{field:name}}{{/if (not struct:all_optional?)}}{{!
+                    }} = ::std::option::Option::Some({{!
+                    }}{{#if field:has_adapter?}}{{field:adapter_struct_qualified}}::from_thrift_field::<{{struct:rust_name}}>({{/if field:has_adapter?}}{{!
+                    }}{{#field:type}}::anyhow::Context::context({{#if field:type_annotation?}}{{> lib/annfieldread}}{{#else}}{{> lib/read}}{{/if field:type_annotation?}}{{/field:type}}(p), ::fbthrift::errors::DeserializingFieldError { field: "{{field:name}}", strct: "{{struct:name}}"})?{{!
+                    }}{{#if field:has_adapter?}}, {{field:id}})?{{/if field:has_adapter?}}{{!
+                    }}),{{!
+                }}{{/struct:fields}}
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        {{#if struct:all_optional?}}
+        ::std::result::Result::Ok(output)
+        {{/if struct:all_optional?}}
+        {{#if (not struct:all_optional?)}}
+        ::std::result::Result::Ok(Self {{> lib/block}}{{!
+            }}{{#struct:fields}}
+            {{field:rust_name}}: field_{{field:name}}{{!
+                }}{{#if (not field:optional?)}}{{!
+                    }}{{#if field:has_adapter?}}{{!
+                        }}.unwrap_or_else(|| {{field:adapter_struct_qualified}}::from_thrift_default::<{{struct:rust_name}}>({{!
+                        }}{{#field:default}}{{> lib/value}}{{/field:default}}{{!
+                        }}{{^field:default}}::std::default::Default::default(){{/field:default}}{{!
+                        }}, {{field:id}})){{!
+                    }}{{/if field:has_adapter?}}{{!
+                    }}{{#if (not field:has_adapter?)}}{{!
+                        }}{{#field:default}}{{!
+                            }}{{#if value:simpleLiteral?}}{{!
+                                }}.unwrap_or({{> lib/value}}){{!
+                            }}{{#else}}{{!
+                                }}.unwrap_or_else(|| {{> lib/value}}){{!
+                            }}{{/if value:simpleLiteral?}}{{!
+                        }}{{/field:default}}{{!
+                        }}{{^field:default}}{{!
+                            }}.unwrap_or_default(){{!
+                        }}{{/field:default}}{{!
+                    }}{{/if (not field:has_adapter?)}}{{!
+                }}{{/if (not field:optional?)}}{{!
+            }},{{!
+            }}{{/struct:fields}}
+            {{> lib/structvalue_epilogue}}
+        })
+        {{/if (not struct:all_optional?)}}
+        {{/if (not (has_compiler_option? "deprecated_optional_with_default_is_some"))}}
+    }
+}
+
+{{#if program:rust_gen_native_metadata?}}
+{{> lib/metadata/struct}}
+{{/if program:rust_gen_native_metadata?}}
+{{/if (not struct:union?)}}

@@ -1,8 +1,8 @@
 <?hh
 
-function f($x) { echo $x, "\n"; }
+function f($x) :mixed{ echo $x, "\n"; }
 
-function vecTest() {
+function vecTest() :mixed{
   $x = vec[0, vec[1]];
   f($x[1][0]);
   try {
@@ -17,7 +17,7 @@ function vecTest() {
   }
 }
 
-function dictTest() {
+function dictTest() :mixed{
   $x = dict['a' => 'foo', 'b' => dict['a' => 1]];
   f($x['b']['a']);
   try {
@@ -32,7 +32,7 @@ function dictTest() {
   }
 }
 
-function keysetTest() {
+function keysetTest() :mixed{
   $x = keyset['a', 'b'];
   f($x['b']);
   try {
@@ -49,7 +49,7 @@ function keysetTest() {
 
 
 <<__EntryPoint>>
-function main_unreachable_minstr() {
+function main_unreachable_minstr() :mixed{
 vecTest();
 dictTest();
 keysetTest();

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class UsesA {
   public function test() : int {

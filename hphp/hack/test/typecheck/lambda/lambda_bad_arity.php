@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class C {
@@ -18,5 +18,9 @@ class C {
       10,
       vec[1, 2, 3],
     );
+  }
+
+  public static function viaReturn(): (function(int, string, bool): void) {
+    return (int $_i, string $_s = '') ==> {};
   }
 }

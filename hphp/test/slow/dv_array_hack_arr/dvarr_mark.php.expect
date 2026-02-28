@@ -29,12 +29,6 @@ darray(1) {
   [1]=>
   int(1)
 }
-bool(true)
-varray(2) {
-  object(Baz) (0) {
-  }
-  string(1) "m"
-}
 bool(false)
 dict(1) {
   ["a"]=>

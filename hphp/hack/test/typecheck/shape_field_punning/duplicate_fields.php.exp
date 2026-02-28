@@ -1,0 +1,10 @@
+ERROR: File "duplicate_fields.php", line 7, characters 26-29:
+Field name already bound (Naming[2015])
+ERROR: File "duplicate_fields.php", line 13, characters 20-23:
+Field name already bound (Naming[2015])
+ERROR: File "duplicate_fields.php", line 19, characters 20-24:
+Field name already bound (Naming[2015])
+ERROR: File "duplicate_fields.php", line 25, characters 18-20:
+Field name already bound (Naming[2015])
+ERROR: File "duplicate_fields.php", line 25, characters 28-29:
+Field name already bound (Naming[2015])

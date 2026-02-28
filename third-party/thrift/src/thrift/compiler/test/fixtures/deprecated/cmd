@@ -1,0 +1,6 @@
+hack: hack:json,server=1 src/module.thrift
+cpp2: mstch_cpp2 src/module.thrift
+go: mstch_go src/module.thrift
+rust: mstch_rust src/module.thrift
+java: mstch_java src/module.thrift
+python: mstch_python src/module.thrift

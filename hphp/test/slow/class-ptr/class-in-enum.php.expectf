@@ -1,0 +1,6 @@
+
+Notice: Implicit Class to string conversion for return of foo() in %s/class-in-enum.php on line 14
+string(1) "A"
+
+Notice: Implicit Class to string conversion for argument 1 passed to bar() in %s/class-in-enum.php on line 24
+string(1) "B"

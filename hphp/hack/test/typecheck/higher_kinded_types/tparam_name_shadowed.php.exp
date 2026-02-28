@@ -1,8 +1,0 @@
-File "tparam_name_shadowed.php", line 3, characters 16-17:
-You cannot re-bind the type parameter `T2` (Naming[2041])
-File "tparam_name_shadowed.php", line 3, characters 21-22:
-`T2` is already bound here
-File "tparam_name_shadowed.php", line 6, characters 16-17:
-You cannot re-bind the type parameter `T1` (Naming[2041])
-File "tparam_name_shadowed.php", line 6, characters 13-14:
-`T1` is already bound here

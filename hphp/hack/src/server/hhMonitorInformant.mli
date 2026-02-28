@@ -1,1 +1,0 @@
-include HhMonitorInformant_sig.S

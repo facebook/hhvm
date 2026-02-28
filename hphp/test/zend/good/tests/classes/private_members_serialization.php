@@ -9,8 +9,8 @@ class foo
 class bar extends foo
 {
     public function __sleep()
-    {
-        return varray["\0foo\0private", 'protected', 'public'];
+:mixed    {
+        return vec["\0foo\0private", 'protected', 'public'];
     }
 }
 <<__EntryPoint>> function main(): void {

@@ -1,2 +1,4 @@
-File "array_typehints.php", line 38, characters 17-32:
+ERROR: File "array_typehints.php", line 23, characters 17-32:
+Unbound name: `varray_or_darray` (Naming[2049])
+ERROR: File "array_typehints.php", line 23, characters 17-51:
 Too many type arguments for this type (Naming[2065])

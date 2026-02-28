@@ -1,0 +1,612 @@
+'\" t
+.\"     Title: \fBndb_move_data\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_MOVE_DATA\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_move_data \- NDB data copy utility
+.SH "SYNOPSIS"
+.HP \w'\fBndb_move_data\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBndb_move_data \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+\fBndb_move_data\fR
+copies data from one NDB table to another\&.
+Usage
+.PP
+The program is invoked with the names of the source and target tables; either or both of these may be qualified optionally with the database name\&. Both tables must use the NDB storage engine\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_move_data \fIoptions\fR \fIsource\fR \fItarget\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The following table includes options that are specific to
+\fBndb_move_data\fR\&. Additional descriptions follow the table\&. For options common to most NDB Cluster programs (including
+\fBndb_move_data\fR), see
+Options Common to NDB Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.263.\ \&Command\-line options for the ndb_move_data program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+\fB \fR\fB--abort-on-error\fR\fB \fR
+T}:T{
+Dump core on permanent error (debug option)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--character-sets-dir=name\fR\fB \fR
+T}:T{
+Directory where character sets are
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--database=dbname\fR,
+.PP
+\fB \fR\fB-d\fR\fB \fR
+T}:T{
+Name of the database in which the table is found
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--drop-source\fR\fB \fR
+T}:T{
+Drop source table after all rows have been moved
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--error-insert\fR\fB \fR
+T}:T{
+Insert random temporary errors (testing option)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--exclude-missing-columns\fR\fB \fR
+T}:T{
+Ignore extra columns in source or target table
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--lossy-conversions\fR,
+.PP
+\fB \fR\fB-l\fR\fB \fR
+T}:T{
+Allow attribute data to be truncated when converted to a smaller type
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--promote-attributes\fR,
+.PP
+\fB \fR\fB-A\fR\fB \fR
+T}:T{
+Allow attribute data to be converted to a larger type
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--staging-tries=x[,y[,z]]\fR\fB \fR
+T}:T{
+Specify tries on temporary errors. Format is x[,y[,z]] where x=max tries
+              (0=no limit), y=min delay (ms), z=max delay (ms)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--verbose\fR\fB \fR
+T}:T{
+Enable verbose messages
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-abort\-on\-error\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--abort-on-error
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Dump core on permanent error (debug option)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-character\-sets\-dir\fR=\fIname\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--character-sets-dir=name
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+[none]
+T}
+.TE
+.sp 1
+Directory where character sets are\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-database\fR=\fIdbname\fR,
+\fB\-d\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--database=dbname
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+TEST_DB
+T}
+.TE
+.sp 1
+Name of the database in which the table is found\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-drop\-source\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--drop-source
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Drop source table after all rows have been moved\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-error\-insert\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--error-insert
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Insert random temporary errors (testing option)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-exclude\-missing\-columns\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--exclude-missing-columns
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Ignore extra columns in source or target table\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-lossy\-conversions\fR,
+\fB\-l\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--lossy-conversions
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Allow attribute data to be truncated when converted to a smaller type\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-promote\-attributes\fR,
+\fB\-A\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--promote-attributes
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Allow attribute data to be converted to a larger type\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-staging\-tries\fR=\fIx[,y[,z]]\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--staging-tries=x[,y[,z]]
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+0,1000,60000
+T}
+.TE
+.sp 1
+Specify tries on temporary errors\&. Format is x[,y[,z]] where x=max tries (0=no limit), y=min delay (ms), z=max delay (ms)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-verbose\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--verbose
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Enable verbose messages\&.
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

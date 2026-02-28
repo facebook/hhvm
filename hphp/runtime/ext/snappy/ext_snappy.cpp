@@ -42,13 +42,12 @@ Variant HHVM_FUNCTION(snappy_uncompress, const String& data) {
 }
 
 static struct SnappyExtension final : Extension {
-  SnappyExtension() : Extension("snappy", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
+  SnappyExtension() : Extension("snappy", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  void moduleRegisterNative() override {
     HHVM_FE(snappy_compress);
     HHVM_FE(snappy_uncompress);
     HHVM_FALIAS(sncompress, snappy_compress);
     HHVM_FALIAS(snuncompress, snappy_uncompress);
-    loadSystemlib();
   }
 } s_snappy_extension;
 

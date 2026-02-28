@@ -17,8 +17,6 @@
 
 #pragma once
 
-#include <folly/Range.h>
-
 #include <cstdint>
 
 #include "hphp/runtime/base/datatype.h"
@@ -34,18 +32,6 @@ namespace HPHP {
 DataType is_numeric_string(const char* str, int length, int64_t* lval,
                            double* dval, int allow_errors = 0,
                            int* overflow_info = nullptr);
-
-/**
- * Whether or not a string is a valid variable name.
- */
-bool is_valid_var_name(const char *var_name, int len);
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Adapted from ap_php_conv_10 for fast signed integer to string conversion.
- */
-folly::StringPiece conv_10(int64_t num, char* buf_end);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

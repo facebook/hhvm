@@ -1,0 +1,209 @@
+{
+  "nestedLimit": {
+    "macros": {
+      "a": {
+        "type": "macroDef",
+        "result": "@a"
+      }
+    },
+    "ret": "@a"
+  },
+  "invalidMacroDef": {
+    "macros": {
+      "a": "str"
+    }
+  },
+  "invalidMacroDefType": {
+    "macros": {
+      "a": {
+        "result": "a"
+      }
+    }
+  },
+  "invalidMerge": {
+    "ret": {
+      "type": "merge",
+      "params": [ [], {} ]
+    }
+  },
+  "invalidSelect": {
+    "ret": {
+      "type": "select",
+      "key": "b",
+      "dictionary": { "a": 1 }
+    }
+  },
+  "invalidSelectDictList": {
+    "ret": {
+      "type": "select",
+      "key": [ "a", "a" ],
+      "dictionary": { "a": 1 }
+    }
+  },
+  "selectFailDefault": {
+    "ret": {
+      "type": "select",
+      "dictionary": [ "a" ],
+      "key": 2,
+      "default": "@fail(No key)"
+    }
+  },
+  "invalidSelectArrayList": {
+    "ret": {
+      "type": "select",
+      "key": [ 0, 1, 0 ],
+      "dictionary": [ "a", "b" ]
+    }
+  },
+  "invalidTransform": {
+    "ret": {
+      "type": "transform",
+      "dictionary": [ 1 ]
+    }
+  },
+  "invalidTransformNames": {
+    "ret": {
+      "type": "transform",
+      "itemName": "not_item",
+      "itemTransform": "%item%",
+      "dictionary": { "a": 1 }
+    }
+  },
+  "invalidDefaults": {
+    "macros": {
+      "a": {
+        "type": "macroDef",
+        "params": [
+          {
+            "name": "a",
+            "default": 1
+          },
+          "b"
+        ],
+        "result": "a"
+      }
+    }
+  },
+  "invalidDoubleCast": {
+    "ret": "@double(1.a)"
+  },
+  "tooFewParams": {
+    "macros": {
+      "a": {
+        "type": "macroDef",
+        "params": [ "a", { "name": "b", "default": "1" } ],
+        "result": "%a%"
+      }
+    },
+    "ret": "@a"
+  },
+  "tooManyParams": {
+    "macros": {
+      "a": {
+        "type": "macroDef",
+        "params": [ "a", { "name": "b", "default": "1" } ],
+        "result": "%a%"
+      }
+    },
+    "ret": "@a(1,2,3)"
+  },
+  "stringAfterMacro": {
+    "macros": {
+      "a": {
+        "type": "macroDef",
+        "params": [ "a" ],
+        "result": "%a%"
+      }
+    },
+    "ret": "@a()a"
+  },
+  "divBy0": {
+    "ret": "@div(@int(5),@int(0))"
+  },
+  "modBy0": {
+    "ret": "@mod(@int(5),@int(0))"
+  },
+  "lessObjs": {
+    "ret": {
+      "type": "less",
+      "A": {},
+      "B": {}
+    }
+  },
+  "fail": {
+    "ret": "@fail(Custom failure here)"
+  },
+  "set_out_of_range": {
+    "ret": {
+      "type": "set",
+      "dictionary": [ 1, 2 ],
+      "key": 2,
+      "value": 3
+    }
+  },
+
+  "out_of_scope": {
+    "macros": {
+      "a": {
+        "type": "macroDef",
+        "result": "%item%"
+      }
+    },
+    "ret": {
+      "type": "transform",
+      "dictionary": [ 1, 2, 3 ],
+      "itemTransform": "@a"
+    }
+  },
+  "duplicate_params": {
+    "macros": {
+      "a": {
+        "type": "macroDef",
+        "params": [ "p", "p" ],
+        "result": "%p%"
+      }
+    },
+    "ret": "@a(1,2)"
+  },
+  "empty_weighted_hash": {
+    "ret": {
+      "type": "weightedHash",
+      "dictionary": {},
+      "key": 15
+    }
+  },
+  "conflicting_optional_param_settings": {
+    "macros": {
+      "a": {
+        "type": "macroDef",
+        "params": [
+          {
+            "name": "p",
+            "optional": false,
+            "default": 0
+          }
+        ],
+        "result": "%p%"
+      }
+    },
+    "ret": "@a"
+  },
+  "non_optional_after_optional": {
+    "macros": {
+      "a": {
+        "type": "macroDef",
+        "params": [
+          {
+            "name": "p",
+            "default": 0
+          },
+          {
+            "name": "q"
+          },
+        ],
+        "result": "%p%"
+      }
+    },
+    "ret": "@a(0,1)"
+  }
+}

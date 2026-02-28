@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1060() {
+function main_1060() :mixed{
 $a = 1;
  $b = $a;
   $a = 2;

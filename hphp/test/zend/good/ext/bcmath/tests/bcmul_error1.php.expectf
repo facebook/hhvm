@@ -1,2 +1,2 @@
 
-Warning: bcmul() expects at least 2 parameters, 0 given in %s/bcmul_error1.php on line 2
+Warning: bcmul() expects at least 2 positional parameters, 0 given in %s/bcmul_error1.php on line 2

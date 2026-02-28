@@ -1,6 +1,6 @@
 <?hh
-function main() {
-  $arr = varray[null, false, true, 0, 1, 0.0, 1.0, '', '0', '1',
+function main() :mixed{
+  $arr = vec[null, false, true, 0, 1, 0.0, 1.0, '', '0', '1',
                '0.0', '1.0', '0 ', 'foo'];
   $vec = Vector::fromArray($arr);
   foreach ($vec as $k => $v) {
@@ -21,7 +21,7 @@ function main() {
 
     echo "\n";
   }
-  $new_arr = darray[];
+  $new_arr = dict[];
   foreach ($mp as $k => $v) {
     $new_arr[$k] = $v;
   }
@@ -31,6 +31,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_802() {
+function main_802() :mixed{
 main();
 }

@@ -1,0 +1,10 @@
+<?hh
+
+module MLT_B;
+
+class C {
+  use T;
+  internal function bar(): void {
+    echo "I am bar\n";
+  }
+}

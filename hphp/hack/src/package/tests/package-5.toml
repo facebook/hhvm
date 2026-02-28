@@ -1,0 +1,27 @@
+[packages]
+
+[packages.a]
+includes = ["b"]
+
+[packages.b]
+includes = ["c"]
+
+[packages.c]
+includes = []
+soft_includes=["b"]
+
+[deployments]
+
+[deployments.d] # no error
+packages=["c"]
+soft_packages=["b"]
+
+[deployments.e] # no error
+packages=["c", "b"]
+
+[deployments.f] # error, b needs to be soft included since c requires it
+packages=["c"]
+
+[deployments.g] # error, c needs to be hard included
+packages=["b"]
+soft_packages=["c"]

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class :xhp extends XHPTest implements XHPChild {}
 class :foo extends :xhp {}
@@ -27,6 +27,6 @@ function test(): void {
     {new A()}
   </foo>;
   <bar>
-    <foo>{varray[vec[<bar />]]}</foo>
+    <foo>{vec[vec[<bar />]]}</foo>
   </bar>;
 }

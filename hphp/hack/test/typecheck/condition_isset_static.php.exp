@@ -1,4 +1,4 @@
-File "condition_isset_static.php", line 17, characters 14-21:
+ERROR: File "condition_isset_static.php", line 17, characters 14-21:
 Invalid return type (Typing[4110])
   File "condition_isset_static.php", line 15, characters 33-35:
   Expected `int`

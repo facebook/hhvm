@@ -10,9 +10,9 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_assoc() : basic functionality ***\n";
-$array_default_key = varray['one',       2,            'three', '4'];
-$array_numeric_key = darray[1 => 'one',  2=> 'two',    3 => 4];
-$array_string_key  = darray['one' => 1, 'two' => '2', '3' => 'three'];
+$array_default_key = vec['one',       2,            'three', '4'];
+$array_numeric_key = dict[1 => 'one',  2=> 'two',    3 => 4];
+$array_string_key  = dict['one' => 1, 'two' => '2', '3' => 'three'];
 
 
 

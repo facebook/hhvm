@@ -16,19 +16,16 @@
 #include "hphp/runtime/vm/debug/elfwriter.h"
 #include "hphp/runtime/vm/debug/gdb-jit.h"
 #include <elf.h>
-#include <gelf.h>
 #include <string>
 #include <vector>
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/asm-x64.h"
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
-#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
 
 using namespace HPHP::jit;
@@ -36,7 +33,7 @@ using namespace HPHP::jit;
 namespace HPHP {
 namespace Debug {
 
-TRACE_SET_MOD(debuginfo);
+TRACE_SET_MOD(debuginfo)
 static const uint8_t CFA_OFFSET = 16;
 
 void ElfWriter::logError(const std::string& msg) {
@@ -631,7 +628,7 @@ ElfWriter::~ElfWriter() {
     elf_end(m_elf);
   if (m_fd != -1)
     close(m_fd);
-  if (!RuntimeOption::EvalJitKeepDbgFiles) {
+  if (!Cfg::Jit::KeepDbgFiles) {
     unlink(m_filename.c_str());
   }
   if (m_dwarfProducer != nullptr)

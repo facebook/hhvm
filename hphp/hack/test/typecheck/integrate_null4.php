@@ -10,8 +10,8 @@
  */
 
 function f(): void {
-  $x = darray[];
-  foreach (varray[1, 2, 3] as $y) {
+  $x = dict[];
+  foreach (vec[1, 2, 3] as $y) {
     $z = $x['test'];
     if (true) {
       $x = null;

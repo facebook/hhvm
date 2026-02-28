@@ -11,13 +11,13 @@
 // get a class
 class classA
 {
-  public function __toString() {
+  public function __toString() :mixed{
     return "Class A object";
   }
 }
 
 function callback($a)
-{
+:mixed{
   return $a;
 }
 <<__EntryPoint>> function main(): void {
@@ -35,7 +35,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // different scalar/non-scalar values for array input
-$unexpected_inputs = varray[
+$unexpected_inputs = vec[
 
        // int data
 /*1*/  0,

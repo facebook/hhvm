@@ -2,7 +2,7 @@
 class TestSoapClient extends SoapClient{}
 
 <<__EntryPoint>> function main(): void {
-  $options=darray[
+  $options=dict[
     'actor' =>'http://schemas.nothing.com',
     'proxy_host' => 'myproxy',
     'proxy_port' => 80,

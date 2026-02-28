@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/request-info.h"
 
 #include "hphp/util/async-func.h"
@@ -180,12 +179,12 @@ TEST(MemoryManager, ContainsAnySize) {
 }
 
 static void testLeak(size_t alloc_size) {
-  RuntimeOption::EvalGCTriggerPct = 0.50;
-  RuntimeOption::EvalGCMinTrigger = 4 << 20;
+  Cfg::GC::TriggerPct = 0.50;
+  Cfg::GC::MinTrigger = 4 << 20;
 
   tl_heap->collect("testLeak");
   tl_heap->setGCEnabled(true);
-  clearSurpriseFlag(MemExceededFlag);
+  stackLimitAndSurprise().clearFlag(MemExceededFlag);
   tl_heap->setMemoryLimit(100 << 20);
 
   auto const target_alloc = int64_t{5} << 30;
@@ -207,7 +206,7 @@ static void testLeak(size_t alloc_size) {
     if (tl_heap->getStatsRaw().mmAllocated() - start_alloc > target_alloc) {
       break;
     }
-    if (UNLIKELY(checkSurpriseFlags())) handle_request_surprise();
+    if (UNLIKELY(stackLimitAndSurprise().hasSurprise())) handle_request_surprise();
   }
 }
 

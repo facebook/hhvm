@@ -14,9 +14,9 @@ extern const char* const build_id;
 
 value hh_get_compiler_id(void) {
   CAMLparam0();
+  CAMLlocal1(result);
   const char* const buf = build_id;
   const ssize_t len = strlen(buf);
-  value result;
 
   result = caml_alloc_initialized_string(len, buf);
   CAMLreturn(result);

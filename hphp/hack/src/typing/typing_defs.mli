@@ -29,7 +29,7 @@ end
 
 module CCRSet : sig
   include module type of struct
-    include Caml.Set.Make (CCR)
+    include Stdlib.Set.Make (CCR)
   end
 
   type t_as_list = CCR.t list [@@deriving show]
@@ -43,29 +43,45 @@ end
 type const_decl = {
   cd_pos: Pos_or_decl.t;
   cd_type: decl_ty;
+  cd_value: string option;
+  cd_package: Aast_defs.package_membership option;
 }
-[@@deriving show]
+[@@deriving eq, show]
+
+type package_requirement =
+  | RPRequire of pos_string
+  | RPSoft of pos_string
+  | RPNormal
+[@@deriving eq, show]
 
 type class_elt = {
   ce_visibility: ce_visibility;
   ce_type: decl_ty Hh_prelude.Lazy.t;
-  ce_origin: string;
+  ce_origin: string;  (** identifies the class from which this elt originates *)
   ce_deprecated: string option;
-  ce_pos: Pos_or_decl.t Hh_prelude.Lazy.t;
+  ce_pos: Pos_or_decl.t Hh_prelude.Lazy.t;  (** pos of the type of the elt *)
   ce_flags: Typing_defs_flags.ClassElt.t;
+  ce_sealed_allowlist: SSet.t option;
+  ce_sort_text: string option;
+  ce_overlapping_tparams: SSet.t option;
+  ce_package_requirement: package_requirement option;
 }
 [@@deriving show]
 
 type fun_elt = {
   fe_deprecated: string option;
   fe_module: Ast_defs.id option;
-  fe_internal: bool;
+  fe_package: Aast_defs.package_membership option;
+  fe_internal: bool;  (** Top-level functions have limited visibilities *)
   fe_type: decl_ty;
   fe_pos: Pos_or_decl.t;
   fe_php_std_lib: bool;
   fe_support_dynamic_type: bool;
+  fe_no_auto_dynamic: bool;
+  fe_no_auto_likes: bool;
+  fe_package_requirement: package_requirement;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type class_const_kind =
   | CCAbstract of bool (* has default *)
@@ -78,32 +94,44 @@ type class_const = {
   cc_pos: Pos_or_decl.t;
   cc_type: decl_ty;
   cc_origin: string;
+      (** identifies the class from which this const originates *)
   cc_refs: class_const_ref list;
+      (** references to the constants used in the initializer *)
 }
 [@@deriving show]
 
 type module_def_type = { mdt_pos: Pos_or_decl.t } [@@deriving show]
 
-type requirement = Pos_or_decl.t * decl_ty
+type requirement = Pos_or_decl.t * decl_ty [@@deriving show]
 
-and abstract_typeconst = {
+type constraint_requirement =
+  | CR_Equal of requirement
+  | CR_Subtype of requirement
+[@@deriving eq, show]
+
+val to_requirement : constraint_requirement -> requirement
+
+type abstract_typeconst = {
   atc_as_constraint: decl_ty option;
   atc_super_constraint: decl_ty option;
   atc_default: decl_ty option;
 }
+[@@deriving show]
 
-and concrete_typeconst = { tc_type: decl_ty }
+type concrete_typeconst = { tc_type: decl_ty } [@@deriving show]
 
-and partially_abstract_typeconst = {
+type partially_abstract_typeconst = {
   patc_constraint: decl_ty;
   patc_type: decl_ty;
 }
+[@@deriving show]
 
-and typeconst =
+type typeconst =
   | TCAbstract of abstract_typeconst
   | TCConcrete of concrete_typeconst
+[@@deriving eq, show]
 
-and typeconst_type = {
+type typeconst_type = {
   ttc_synthesized: bool;
   ttc_name: pos_id;
   ttc_kind: typeconst;
@@ -113,25 +141,37 @@ and typeconst_type = {
   ttc_concretized: bool;
   ttc_is_ctx: bool;
 }
+[@@deriving show]
 
-and enum_type = {
+type enum_type = {
   te_base: decl_ty;
   te_constraint: decl_ty option;
   te_includes: decl_ty list;
 }
-[@@deriving show]
+[@@deriving eq, show]
+
+type typedef_case_type_variant = decl_ty * decl_where_constraint list
+[@@deriving eq, show]
+
+type typedef_type_assignment =
+  | SimpleTypeDef of Ast_defs.typedef_visibility * decl_ty
+  | CaseType of typedef_case_type_variant * typedef_case_type_variant list
+[@@deriving eq, show]
 
 type typedef_type = {
   td_module: Ast_defs.id option;
   td_pos: Pos_or_decl.t;
-  td_vis: Aast.typedef_visibility;
   td_tparams: decl_tparam list;
-  td_constraint: decl_ty option;
-  td_type: decl_ty;
+  td_as_constraint: decl_ty option;
+  td_super_constraint: decl_ty option;
+  td_type_assignment: typedef_type_assignment;
   td_is_ctx: bool;
   td_attributes: user_attribute list;
+  td_internal: bool;
+  td_docs_url: string option;
+  td_package: Aast_defs.package_membership option;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 type phase_ty =
   | DeclTy of decl_ty
@@ -140,34 +180,71 @@ type phase_ty =
 type deserialization_error =
   | Wrong_phase of string
   | Not_supported of string
+      (** The specific type or some component thereof is not one that we support
+          deserializing, usually because not enough information was serialized to be
+          able to deserialize it again. *)
   | Deserialization_error of string
+      (** The input JSON was invalid for some reason. *)
+[@@deriving show]
 
-module Type_expansions : sig
-  (** A list of the type defs and type access we have expanded thus far. Used
-      to prevent entering into a cycle when expanding these types. *)
-  type t
+(** How should we treat the wildcard character _ when localizing?
+ *  1. Generate a fresh type variable, e.g. in type argument to constructor or function,
+ *     or in a lambda parameter or return type.
+ *       Example: foo<shape('a' => _)>($myshape);
+ *       Example: ($v : vec<_>) ==> $v[0]
+ *  2. As a placeholder in a formal higher-kinded type parameter
+ *       Example: function test<T1, T2<_>>() // T2 is HK and takes a type to a type
+ *  3. Generate a fresh generic (aka Skolem variable), e.g. in `is` or `as` test
+ *       Example: if ($x is Vector<_>) { // $x has type Vector<T#1> }
+ *  4. Reject, when in a type argument to a generic parameter marked <<__Explicit>>
+ *       Example: makeVec<_>(3)  where function makeVec<<<__Explicit>> T>(T $_): void
+ *  5. Reject, because the type must be explicit.
+ *  6. (Specially for case type checking). Replace any type argument by a fresh generic.
+ *)
+type wildcard_action =
+  | Wildcard_fresh_tyvar
+  | Wildcard_fresh_generic
+  | Wildcard_higher_kinded_placeholder
+  | Wildcard_require_explicit of decl_tparam
+  | Wildcard_illegal
 
-  val empty : t
+type visibility_behavior =
+  | Always_expand_newtype
+  | Expand_visible_newtype_only
+  | Never_expand_newtype
+  (* Approximate HHVM's resolution of type structures, where types and newtypes are
+   * fully expanded, but recursive references to the current type become opaque leaf
+   * nodes i.e. TypeStructureKind::T_recursiveUnion. Where this differs is, for regular
+   * type alias roots, we do not expand case types. *)
+  | Resolve_type_structure of string option
+[@@deriving show]
 
-  (** If we are expanding the RHS of a type definition, [report_cycle] contains
-      the position and id of the LHS. This way, if the RHS expands at some point
-      to the LHS id, we are able to report a cycle. *)
-  val empty_w_cycle_report : report_cycle:(Pos.t * string) option -> t
+val is_default_visibility_behaviour : visibility_behavior -> bool
 
-  val ids : t -> string list
-
-  val positions : t -> Pos_or_decl.t list
-end
+val default_visibility_behaviour : visibility_behavior
 
 (** Tracks information about how a type was expanded *)
 type expand_env = {
   type_expansions: Type_expansions.t;
-  expand_visible_newtype: bool;
-      (** Allow to expand visible `newtype`, i.e. opaque types defined in the current file.
-          True by default. *)
+  make_internal_opaque: bool;
+      (** Localize internal classes outside their module as if newtypes i.e. opaque *)
+  visibility_behavior: visibility_behavior;
   substs: locl_ty SMap.t;
+  no_substs: SSet.t;
   this_ty: locl_ty;
   on_error: Typing_error.Reasons_callback.t option;
+  wildcard_action: wildcard_action;
+  ish_weakening: bool;
+      (** If true, for refinement hints (is/as), approximate E by ~E & arraykey to account
+       * for intish and stringish casts
+       *)
+  under_type_constructor: bool;
+      (** True when localizing a type that appears under a type constructor
+          (e.g. the T in vec<T>, (T, int), shape('a' => T)). Recursive case
+          type references in these positions are "guarded" by the constructor,
+          so on cycle we preserve the Tnewtype identity instead of collapsing
+          to mixed — this prevents unsound subtyping through the constructor's
+          type parameters. *)
 }
 
 val empty_expand_env : expand_env
@@ -175,30 +252,31 @@ val empty_expand_env : expand_env
 val empty_expand_env_with_on_error :
   Typing_error.Reasons_callback.t -> expand_env
 
-(** Returns:
-    - [None] if there was no cycle
-    - [Some None] if there was a cycle which did not involve the first
-      type expansion, i.e. error reporting should be done elsewhere
-    - [Some (Some pos)] if there was a cycle involving the first type
-      expansion in which case an error should be reported at [pos]. *)
+(** [add_type_expansion_check_cycles ety_env expansion] adds
+  and [expansion] to [ety_env.expansions] and
+  checks that that [expansion] hasn't already been done,
+  i.e. wasn't already in ety_env.expansions. *)
 val add_type_expansion_check_cycles :
-  expand_env -> Pos_or_decl.t * string -> expand_env * Pos.t option option
+  expand_env ->
+  Type_expansions.expansion ->
+  (expand_env, Type_expansions.cycle_reporter) result
 
-val get_var : 'a ty -> Ident.t option
+(** Returns whether there was an attempt at expanding a cyclic type. *)
+val cyclic_expansion : expand_env -> bool
 
 val get_class_type : locl_phase ty -> (pos_id * exact * locl_ty list) option
 
-val get_var_i : internal_type -> Ident.t option
-
-val is_tyvar : 'a ty -> bool
-
-val is_var_v : 'a ty -> Ident.t -> bool
+val is_tyvar : locl_phase ty -> bool
 
 val is_generic : 'a ty -> bool
 
 val is_dynamic : 'a ty -> bool
 
 val is_nonnull : 'a ty -> bool
+
+val is_nothing : 'a ty -> bool
+
+val is_wildcard : decl_phase ty -> bool
 
 val is_fun : 'a ty -> bool
 
@@ -212,41 +290,30 @@ val is_union : 'a ty -> bool
 
 val is_neg : locl_ty -> bool
 
-val is_constraint_type_union : constraint_type -> bool
-
-val is_has_member : constraint_type -> bool
-
 (** Can the type be written down in a Hack program?
   - [false] result is sound but potentially incomplete;
   - [true] result is complete but potentially unsound.  *)
 val is_denotable : locl_ty -> bool
 
-val show_phase_ty : 'a -> string
-
-val pp_phase_ty : 'a -> 'b -> Base.unit
-
-val is_locl_type : internal_type -> bool
-
-val reason : internal_type -> locl_phase Reason.t_
-
-val is_constraint_type : internal_type -> bool
-
 (** Whether the given type is a union, intersection or option. *)
 val is_union_or_inter_type : locl_ty -> bool
 
-module InternalType : sig
-  val get_var : internal_type -> Ident.t option
+module Named_params : sig
+  (** (Some name) iff fp is a named parameter *)
+  val name_of_named_param : 'a fun_param -> string option
 
-  val is_var_v : internal_type -> v:Ident.t -> bool
-
-  val is_not_var_v : internal_type -> v:Ident.t -> bool
+  (** (Some name) iff arg is named *)
+  val name_of_arg : ('a, 'b) Aast_defs.argument -> string option
 end
 
 val this : Local_id.t
 
 val make_tany : unit -> 'a ty_
 
-val arity_min : 'a fun_type -> int
+(* Number of required parameters. Does not include optional, variadic, or
+ * type-splat parameters
+ *)
+val arity_and_names_required : 'a fun_type -> int * SSet.t
 
 val get_param_mode : Ast_defs.param_kind -> param_mode
 
@@ -254,6 +321,8 @@ module DependentKind : sig
   val to_string : dependent_type -> string
 
   val is_generic_dep_ty : string -> bool
+
+  val strip_generic_dep_ty : string -> string option
 end
 
 module ShapeFieldMap : sig
@@ -305,106 +374,7 @@ end
 
 val is_suggest_mode : bool Hh_prelude.ref
 
-val possibly_enforced_ty_compare :
-  ?normalize_lists:bool ->
-  'a ty possibly_enforced_ty ->
-  'a ty possibly_enforced_ty ->
-  Ppx_deriving_runtime.int
-
-val ft_param_compare :
-  ?normalize_lists:bool -> 'a ty fun_param -> 'a ty fun_param -> int
-
-val ft_params_compare :
-  ?normalize_lists:bool ->
-  'a ty fun_param list ->
-  'a ty fun_param list ->
-  Ppx_deriving_runtime.int
-
-val compare_locl_ty : ?normalize_lists:bool -> locl_ty -> locl_ty -> int
-
-val compare_decl_ty : ?normalize_lists:bool -> decl_ty -> decl_ty -> int
-
-val tyl_equal : 'a ty list -> 'a ty list -> bool
-
-val class_id_con_ordinal : ('a, 'b) Aast.class_id_ -> int
-
-val class_id_compare : ('a, 'b) Aast.class_id_ -> ('c, 'd) Aast.class_id_ -> int
-
-val class_id_equal : ('a, 'b) Aast.class_id_ -> ('c, 'd) Aast.class_id_ -> bool
-
-val has_member_compare :
-  normalize_lists:bool -> has_member -> has_member -> Ppx_deriving_runtime.int
-
-val destructure_compare :
-  normalize_lists:bool -> destructure -> destructure -> Ppx_deriving_runtime.int
-
-val constraint_ty_con_ordinal : constraint_type_ -> int
-
-val constraint_ty_compare :
-  ?normalize_lists:bool ->
-  constraint_type ->
-  constraint_type ->
-  Ppx_deriving_runtime.int
-
-val constraint_ty_equal :
-  ?normalize_lists:bool -> constraint_type -> constraint_type -> bool
-
-val ty_equal : ?normalize_lists:bool -> 'a ty -> 'a ty -> bool
-
-val equal_internal_type : internal_type -> internal_type -> bool
-
-val equal_locl_ty : locl_ty -> locl_ty -> bool
-
-val equal_locl_ty_ : locl_ty_ -> locl_ty_ -> bool
-
 val is_type_no_return : locl_ty_ -> bool
-
-val equal_decl_ty_ :
-  decl_phase ty_ -> decl_phase ty_ -> Ppx_deriving_runtime.bool
-
-val equal_decl_ty : decl_phase ty -> decl_phase ty -> Ppx_deriving_runtime.bool
-
-val equal_shape_field_type :
-  decl_phase shape_field_type -> decl_phase shape_field_type -> bool
-
-val equal_decl_fun_type :
-  decl_phase ty fun_type -> decl_phase ty fun_type -> bool
-
-val non_public_ifc : ifc_fun_decl -> bool
-
-val equal_decl_tyl :
-  decl_phase ty Hh_prelude.List.t -> decl_phase ty Hh_prelude.List.t -> bool
-
-val equal_decl_possibly_enforced_ty :
-  decl_phase ty possibly_enforced_ty ->
-  decl_phase ty possibly_enforced_ty ->
-  bool
-
-val equal_decl_fun_param :
-  decl_phase ty fun_param -> decl_phase ty fun_param -> bool
-
-val equal_decl_ft_params :
-  decl_phase ty fun_params -> decl_phase ty fun_params -> bool
-
-val equal_decl_ft_implicit_params :
-  decl_ty fun_implicit_params -> decl_ty fun_implicit_params -> bool
-
-val equal_typeconst : typeconst -> typeconst -> bool
-
-val equal_enum_type : enum_type -> enum_type -> bool
-
-val equal_decl_where_constraint :
-  decl_phase ty * Ast_defs.constraint_kind * decl_phase ty ->
-  decl_phase ty * Ast_defs.constraint_kind * decl_phase ty ->
-  bool
-
-val equal_decl_tparam : decl_phase ty tparam -> decl_phase ty tparam -> bool
-
-val equal_typedef_type : typedef_type -> typedef_type -> bool
-
-val equal_fun_elt : fun_elt -> fun_elt -> bool
-
-val equal_const_decl : const_decl -> const_decl -> bool
 
 val get_ce_abstract : class_elt -> bool
 
@@ -421,13 +391,17 @@ val get_ce_const : class_elt -> bool
 
 val get_ce_lateinit : class_elt -> bool
 
-val get_ce_readonly_prop : class_elt -> bool
+val get_ce_readonly_prop_or_needs_concrete : class_elt -> bool
 
 val get_ce_dynamicallycallable : class_elt -> bool
 
 val get_ce_support_dynamic_type : class_elt -> bool
 
 val get_ce_xhp_attr : class_elt -> xhp_attr option
+
+val get_ce_safe_global_variable : class_elt -> bool
+
+val get_ce_no_auto_likes : class_elt -> bool
 
 val make_ce_flags :
   xhp_attr:xhp_attr option ->
@@ -439,16 +413,22 @@ val make_ce_flags :
   const:bool ->
   lateinit:bool ->
   dynamicallycallable:bool ->
-  readonly_prop:bool ->
+  readonly_prop_or_needs_concrete:bool ->
   support_dynamic_type:bool ->
   needs_init:bool ->
+  safe_global_variable:bool ->
+  no_auto_likes:bool ->
   Typing_defs_flags.ClassElt.t
 
 val class_elt_is_private_not_lsb : class_elt -> bool
 
 val class_elt_is_private_or_protected_not_lsb : class_elt -> bool
 
-val error_Tunapplied_alias_in_illegal_context : unit -> 'a
+val is_typeconst_type_abstract : typeconst_type -> bool
+
+val is_arraykey : locl_ty -> bool
+
+val is_string : locl_ty -> bool
 
 module Attributes : sig
   val mem : string -> user_attribute Hh_prelude.List.t -> bool

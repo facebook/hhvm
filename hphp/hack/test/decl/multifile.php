@@ -1,9 +1,9 @@
 //// A.php
-<?hh // strict
+<?hh
 
 class A {}
 
 //// B.php
-<?hh // strict
+<?hh
 
 class B extends A {}

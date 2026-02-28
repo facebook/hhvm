@@ -189,6 +189,9 @@ struct HashTable : HashTableCommon {
   static constexpr ptrdiff_t usedOff() {
     return offsetof(ArrayType, m_used);
   }
+  static constexpr ptrdiff_t usedSize() {
+    return sizeof(m_used);
+  }
   static constexpr ptrdiff_t scaleOff() {
     return offsetof(ArrayType, m_scale);
   }
@@ -210,8 +213,8 @@ struct HashTable : HashTableCommon {
   ArrayType* staticAlloc(uint32_t scale, size_t extra = 0) {
     extra = (extra + 15) & ~15ull;
     auto const size = computeAllocBytes(scale) + extra;
-    auto const mem = RuntimeOption::EvalLowStaticArrays
-      ? lower_malloc(size)
+    auto const mem = Cfg::Eval::LowStaticArrays
+      ? low_malloc(size)
       : uncounted_malloc(size);
     return reinterpret_cast<ArrayType*>(reinterpret_cast<char*>(mem) + extra);
   }
@@ -314,6 +317,7 @@ struct HashTable : HashTableCommon {
   // Iteration
   /////////////////////////////////////////////////////////////////////////////
   ssize_t getIterBeginNotEmpty() const;
+  uint32_t iterLimit() const { return m_used; }
 
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterLast(const ArrayData*);
@@ -518,4 +522,6 @@ private:
 }  // namespace array
 }  // namespace HPHP
 
+#define incl_HPHP_HASH_TABLE_INL_H_
 #include "hphp/runtime/base/hash-table-inl.h"
+#undef incl_HPHP_HASH_TABLE_INL_H_

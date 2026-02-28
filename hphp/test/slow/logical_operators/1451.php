@@ -1,5 +1,5 @@
 <?hh
-function foo() {
+function foo() :mixed{
   echo "foo";
 }
 <<__EntryPoint>> function main(): void {

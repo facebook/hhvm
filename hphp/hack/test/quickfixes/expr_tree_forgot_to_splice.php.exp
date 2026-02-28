@@ -1,0 +1,13 @@
+Splice in $num
+Change to $NUM
+
+<?hh
+
+function f(int $num): void {
+    DSL`${$num} + 1`;
+
+    DSL`{
+      $NUM = 1;
+      return $NUM + 1;
+    }`;
+}

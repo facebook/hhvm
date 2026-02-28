@@ -7,16 +7,17 @@ GDB commands related to the HHVM stack.
 from compatibility import *
 
 import gdb
-from gdb.unwinder import Unwinder, register_unwinder
+from gdb.unwinder import register_unwinder, Unwinder
 from gdbutils import *
 import frame
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # HHVM unwinder.
 
-class FrameId(object):
-    __slots__ = ['sp', 'pc', 'special']
+
+class FrameId:
+    __slots__ = ["sp", "pc", "special"]
 
     def __init__(self, sp, ip, special):
         self.sp = sp
@@ -27,18 +28,18 @@ class FrameId(object):
 class HHVMUnwinder(Unwinder):
     """Custom unwinder for jitted frames.
 
-Chases the frame pointer chain in frames which appear to be in the TC, and
-falls back to the default GDB unwinder(s) otherwise.
-"""
+    Chases the frame pointer chain in frames which appear to be in the TC, and
+    falls back to the default GDB unwinder(s) otherwise.
+    """
 
     def __init__(self):
         self.regs = arch_regs()
-        super(HHVMUnwinder, self).__init__('hhvm_unwinder')
+        super(HHVMUnwinder, self).__init__("hhvm_unwinder")
 
     def __call__(self, pending_frame):
-        fp = pending_frame.read_register(self.regs['fp'])
-        sp = pending_frame.read_register(self.regs['sp'])
-        ip = pending_frame.read_register(self.regs['ip'])
+        fp = pending_frame.read_register(self.regs["fp"])
+        sp = pending_frame.read_register(self.regs["sp"])
+        ip = pending_frame.read_register(self.regs["ip"])
 
         if not frame.is_jitted(fp, ip):
             return None
@@ -63,28 +64,28 @@ falls back to the default GDB unwinder(s) otherwise.
         unwind_info = pending_frame.create_unwind_info(FrameId(sp, ip, fp))
 
         # Restore the saved frame pointer and instruction pointer.
-        fp = fp.cast(T('uintptr_t').pointer())
-        unwind_info.add_saved_register(self.regs['fp'], fp[0])
-        unwind_info.add_saved_register(self.regs['ip'], fp[1])
+        fp = fp.cast(T("uintptr_t").pointer())
+        unwind_info.add_saved_register(self.regs["fp"], fp[0])
+        unwind_info.add_saved_register(self.regs["ip"], fp[1])
 
         if frame.is_jitted(fp[0], fp[1]):
             # Our parent frame is jitted.  Again, we are unable to track %rsp
             # properly in the TC, so just preserve its value (just as we do in
             # the TC's custom .eh_frame section).
-            unwind_info.add_saved_register(self.regs['sp'], sp)
+            unwind_info.add_saved_register(self.regs["sp"], sp)
         else:
             # Our parent frame is not jitted, so we're in g_ustubs.enterTCHelper,
             # which has a special restore sequence
             i = 0
-            for r in self.regs['cross_jit_save']:
+            for r in self.regs["cross_jit_save"]:
                 i -= 1
                 unwind_info.add_saved_register(r, fp[i])
-            unwind_info.add_saved_register(self.regs['sp'], fp + 2)
+            unwind_info.add_saved_register(self.regs["sp"], fp + 2)
 
         return unwind_info
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Unwinder initialization.
 
 _did_init = False
@@ -117,8 +118,9 @@ class UnwinderCommand(gdb.Command):
     """Manage the custom unwinder."""
 
     def __init__(self):
-        super(UnwinderCommand, self).__init__('unwinder', gdb.COMMAND_STACK,
-                                              gdb.COMPLETE_NONE, True)
+        super(UnwinderCommand, self).__init__(
+            "unwinder", gdb.COMMAND_STACK, gdb.COMPLETE_NONE, True
+        )
 
 
 UnwinderCommand()
@@ -128,16 +130,15 @@ class UnwinderInitCommand(gdb.Command):
     """Initialize the custom unwinder."""
 
     def __init__(self):
-        super(UnwinderInitCommand, self).__init__('unwinder init',
-                                                  gdb.COMMAND_STACK)
+        super(UnwinderInitCommand, self).__init__("unwinder init", gdb.COMMAND_STACK)
 
     @errorwrap
     def invoke(self, args, from_tty):
         if try_unwinder_init():
-            print('HHVM unwinder has been initialized.')
+            print("HHVM unwinder has been initialized.")
         else:
-            print('HHVM unwinder could not be initialized.')
-            print('Has gdb startup run to completion?')
+            print("HHVM unwinder could not be initialized.")
+            print("Has gdb startup run to completion?")
 
 
 UnwinderInitCommand()

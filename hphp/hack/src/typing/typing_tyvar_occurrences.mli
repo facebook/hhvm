@@ -14,22 +14,22 @@ end
 
 val init : t
 
-val get_tyvar_occurrences : t -> Ident.t -> ISet.t
+val get_tyvar_occurrences : t -> Tvid.t -> Tvid.Set.t
 
-val get_tyvars_in_tyvar : t -> Ident.t -> ISet.t
+val get_tyvars_in_tyvar : t -> Tvid.t -> Tvid.Set.t
 
-val contains_unsolved_tyvars : t -> Ident.t -> bool
+val contains_unsolved_tyvars : t -> Tvid.t -> bool
 
-val make_tyvars_occur_in_tyvar : t -> ISet.t -> occur_in:Ident.t -> t
+val make_tyvars_occur_in_tyvar : t -> Tvid.Set.t -> occur_in:Tvid.t -> t
 
-val make_tyvar_no_more_occur_in_tyvar : t -> Ident.t -> no_more_in:int -> t
+val make_tyvar_no_more_occur_in_tyvar : t -> Tvid.t -> no_more_in:Tvid.t -> t
 
 (** Update the tyvar occurrences after unbinding a type variable. *)
-val unbind_tyvar : t -> Ident.t -> t
+val unbind_tyvar : t -> Tvid.t -> t
 
-val occurs_in : t -> Ident.t -> in_:Ident.t -> bool
+val occurs_in : t -> Tvid.t -> in_:Tvid.t -> bool
 
 (** remove variable from the occurrence structure.
     Does not try and be clever, especially does not perform any
     type simplification. *)
-val remove_var : t -> Ident.t -> t
+val remove_var : t -> Tvid.t -> t

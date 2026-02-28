@@ -24,8 +24,9 @@
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-#include "hphp/util/text-color.h"
+#include "hphp/util/configs/debugger.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/text-color.h"
 
 #include <memory>
 #include <set>
@@ -35,9 +36,10 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 bool Debugger::s_clientStarted = false;
+bool Debugger::s_disableJit = true;
 
 
 Debugger& Debugger::get() {
@@ -226,7 +228,7 @@ void Debugger::InterruptRequestEnded(const char *url) {
 }
 
 void Debugger::InterruptPSPEnded(const char *url) {
-  if (!RuntimeOption::EnableHphpdDebugger) return;
+  if (!Cfg::Debugger::EnableHphpd) return;
   try {
     TRACE(2, "Debugger::InterruptPSPEnded\n");
     if (isDebuggerAttached()) {
@@ -244,7 +246,7 @@ void Debugger::InterruptPSPEnded(const char *url) {
 void Debugger::Interrupt(int type, const char *program,
                          InterruptSite *site /* = NULL */,
                          const char *error /* = NULL */) {
-  assertx(RuntimeOption::EnableHphpdDebugger);
+  assertx(Cfg::Debugger::EnableHphpd);
   TRACE_RB(2, "Debugger::Interrupt type %d\n", type);
 
   DebuggerProxyPtr proxy = GetProxy();
@@ -525,6 +527,14 @@ void Debugger::cleanupRetiredProxies() {
   }
 }
 
+bool Debugger::getDisableJit() {
+  return s_disableJit;
+}
+
+void Debugger::setDisableJit(bool disableJit) {
+  s_disableJit = disableJit;
+}
+
 // NB: when this returns, the Debugger class no longer has any references to the
 // given proxy. It will likely be destroyed when the caller's reference goes out
 // of scope.
@@ -660,7 +670,7 @@ void Debugger::InitUsageLogging() {
 
 void Debugger::UsageLog(const std::string &mode, const std::string &sandboxId,
                         const std::string &cmd, const std::string &data) {
-  if (get().m_usageLogger) get().m_usageLogger->log(mode, sandboxId,
+  if (get().m_usageLogger) get().m_usageLogger->log("hphpd", mode, sandboxId,
                                                     cmd, data);
 }
 

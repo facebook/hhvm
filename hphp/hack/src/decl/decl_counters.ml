@@ -29,7 +29,6 @@ type origin =
 
 type subdecl_kind =
   (* Shallow *)
-  | Shallow_decl
   | Abstract
   | Final
   | Const
@@ -38,16 +37,17 @@ type subdecl_kind =
   | Name
   | Module
   | Internal
+  | IsModuleLevelTrait
   | Pos
   | Tparams
-  | Where_constraints
   | Enum_type
   | Xhp_enum_values
+  | Xhp_marked_empty
   | Sealed_whitelist
+  | Docs_url
   | Decl_errors
   | Support_dynamic_type
   (* Lazy *)
-  | Linearization
   | Construct
   | Need_init
   | Get_ancestor of string [@printer (fun fmt _s -> fprintf fmt "Get_ancestor")]
@@ -85,8 +85,7 @@ type subdecl_kind =
   | SProps
   | Methods
   | SMethods
-  | All_inherited_methods
-  | All_inherited_smethods
+  | Overridden_method
   (* Misc *)
   | Deferred_init_members
 [@@deriving show { with_path = false }]
@@ -119,7 +118,6 @@ let subdecl_member_name (subdecl_kind : subdecl_kind) : string option =
 
 let subdecl_eagerness (subdecl_kind : subdecl_kind) : string =
   match subdecl_kind with
-  | Shallow_decl
   | Abstract
   | Final
   | Const
@@ -128,16 +126,17 @@ let subdecl_eagerness (subdecl_kind : subdecl_kind) : string =
   | Name
   | Module
   | Internal
+  | IsModuleLevelTrait
   | Pos
   | Tparams
-  | Where_constraints
   | Enum_type
   | Xhp_enum_values
+  | Xhp_marked_empty
   | Sealed_whitelist
+  | Docs_url
   | Decl_errors
   | Support_dynamic_type ->
     "shallow"
-  | Linearization
   | Construct
   | Need_init
   | Get_ancestor _
@@ -172,8 +171,7 @@ let subdecl_eagerness (subdecl_kind : subdecl_kind) : string =
   | SProps
   | Methods
   | SMethods
-  | All_inherited_methods
-  | All_inherited_smethods ->
+  | Overridden_method ->
     "eager"
   | Deferred_init_members -> "misc"
 
@@ -218,7 +216,7 @@ let count_decl
     (* CARE! This path must be highly performant. *)
     f None
   | HackEventLogger.PerFileProfilingConfig.DeclingTopCounts ->
-    Counters.count Counters.Category.Decling (fun () -> f None)
+    Counters.count Counters.Category.Decl_provider_get (fun () -> f None)
   | HackEventLogger.PerFileProfilingConfig.DeclingAllTelemetry { callstacks } ->
     let start_time = Unix.gettimeofday () in
     let start_cpu_time = Sys.time () in

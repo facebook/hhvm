@@ -1,7 +1,7 @@
 <?hh
 
-<<__Const>>
 class C {
+  <<__Const>>
   public int $ci = 0;
 }
 
@@ -18,7 +18,7 @@ class D extends C {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   $d = new D();
   echo "-- after constructor completes --\n";
   var_dump($d);

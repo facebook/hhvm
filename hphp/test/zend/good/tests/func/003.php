@@ -1,18 +1,18 @@
 <?hh
 
 function a()
-{
+:mixed{
   echo "hey\n";
 }
 
 function b($i)
-{
+:mixed{
   echo "$i\n";
 }
 
 
 function c($i,$j)
-{
+:mixed{
   echo "Counting from $i to $j\n";
   for ($k=$i; $k<=$j; $k++) {
     echo "$k\n";
@@ -21,7 +21,7 @@ function c($i,$j)
 
 
 function factorial($n)
-{
+:mixed{
   if ($n==0 || $n==1) {
     return 1;
   } else {
@@ -31,7 +31,7 @@ function factorial($n)
 
 
 function factorial2($start, $n)
-{
+:mixed{
   if ($n<=$start) {
     return $start;
   } else {
@@ -41,7 +41,7 @@ function factorial2($start, $n)
 
 
 function call_fact()
-{
+:mixed{
   echo "(it should break at 5...)\n";
   for ($i=0; $i<=10; $i++) {
     if ($i == 5) break;
@@ -50,11 +50,11 @@ function call_fact()
   }
 }
 
-function return4() { return 4; }
-function return7() { return 7; }
+function return4() :mixed{ return 4; }
+function return7() :mixed{ return 7; }
 
 function andi($i, $j)
-{
+:mixed{
     for ($k=$i ; $k<=$j ; $k++) {
         if ($k >5) continue;
         echo "$k\n";

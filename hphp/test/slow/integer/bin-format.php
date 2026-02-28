@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_bin_format() {
+function main_bin_format() :mixed{
 echo "simple\n";
 var_dump(0b0);
 var_dump(0b1);
@@ -58,7 +58,7 @@ var_dump($ufBin === $ufInt);
 var_dump($ufBin === $ufHex);
 
 echo "array-index\n";
-$array = varray[0, 1, 2, 3];
+$array = vec[0, 1, 2, 3];
 var_dump($array[0b11]);
 
 // PHP5 does not have "real" runtime support as of 5.5.7

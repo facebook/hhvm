@@ -1,0 +1,6 @@
+
+Notice: Class passed to classname type-hint in %s/class-ptr/lazyclass-same-str.php on line 26
+int(3)
+
+Notice: Class passed to classname type-hint in %s/class-ptr/lazyclass-same-str.php on line 27
+int(3)

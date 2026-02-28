@@ -8,6 +8,6 @@ class X {
   use T1;
 }
 <<__EntryPoint>>
-function main_require_constraint_nonexistent_class() {
+function main_require_constraint_nonexistent_class() :mixed{
   $x = new X();
 }

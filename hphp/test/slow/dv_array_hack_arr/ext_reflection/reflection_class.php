@@ -1,7 +1,7 @@
 <?hh
 
 interface Foo {
-  public function bar();
+  public function bar():mixed;
 }
 
 <<__Attr1(3, 4)>>
@@ -11,26 +11,26 @@ abstract class A implements Foo {
   const type TFoo = mixed;
   protected $prop;
   private static $static_prop;
-  public function baz() {}
+  public function baz() :mixed{}
 }
 
 trait TBing {
   require extends A;
-  public function bong() {}
+  public function bong() :mixed{}
 }
 
 
 final class B extends A {
   use TBing;
   const TWO = null;
-  public function bar() {}
+  public function bar() :mixed{}
   public function __construct($prop) {
     $this->prop = $prop;
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $a_cls = new ReflectionClass('A');
   var_dump($a_cls->getConstants());
   var_dump($a_cls->getAbstractConstantNames());
@@ -47,8 +47,7 @@ function main() {
   var_dump($a_cls->getProperties());
   var_dump($a_cls->getStaticProperties());
   $b_cls = new ReflectionClass('B');
-  var_dump($b_cls->newInstanceArgs(varray[null]));
-  var_dump($b_cls->getTraitAliases());
+  var_dump($b_cls->newInstanceArgs(vec[null]));
   var_dump($b_cls->getTraitNames());
   var_dump($b_cls->getTraits());
   $bing_cls = new ReflectionClass('TBing');

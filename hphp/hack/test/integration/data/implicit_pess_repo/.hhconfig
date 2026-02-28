@@ -1,0 +1,3 @@
+# some comment
+everything_sdt = true
+fetch_remote_old_decls = false

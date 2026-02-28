@@ -1,0 +1,41 @@
+DEFAULT
+exit fb_setprofile return
+enter some_function args
+enter SomeClass::__construct args
+exit SomeClass::__construct return
+exit some_function return
+
+EXITS
+enter fb_setprofile args
+exit fb_setprofile return
+exit SomeClass::__construct return
+exit some_function return
+
+ENTERS
+enter some_function args
+enter SomeClass::__construct args
+
+FRAME PTRS
+enter fb_setprofile args
+exit fb_setprofile return,frame_ptr,parent_frame_ptr
+enter some_function args,this_ptr,frame_ptr,parent_frame_ptr
+enter SomeClass::__construct args,this_ptr,frame_ptr,parent_frame_ptr
+exit SomeClass::__construct return,frame_ptr,parent_frame_ptr
+exit some_function return,frame_ptr,parent_frame_ptr
+
+THIS OBJECT
+enter fb_setprofile args,this_ptr,frame_ptr,parent_frame_ptr
+exit fb_setprofile return,frame_ptr,parent_frame_ptr
+enter SomeClass::__construct args,this_ptr,this_obj,frame_ptr,parent_frame_ptr
+exit SomeClass::__construct return,frame_ptr,parent_frame_ptr
+enter SomeClass::some_method args,this_ptr,this_obj,frame_ptr,parent_frame_ptr
+exit SomeClass::some_method return,frame_ptr,parent_frame_ptr
+
+IMPLICIT CTORS
+enter fb_setprofile args,this_ptr,frame_ptr,parent_frame_ptr
+exit fb_setprofile return
+enter some_function args
+enter SomeClass::__construct args
+exit SomeClass::__construct return
+exit some_function return
+exit entrypoint_setprofileflags return

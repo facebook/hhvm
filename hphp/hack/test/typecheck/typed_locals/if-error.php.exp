@@ -1,0 +1,26 @@
+ERROR: File "if-error.php", line 13, characters 5-20:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "if-error.php", line 11, characters 3-23:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+ERROR: File "if-error.php", line 14, characters 5-19:
+Illegal definition of typed local variable $y. (Naming[2126])
+  File "if-error.php", line 16, characters 5-19:
+  It is assigned in another branch. Consider moving the definition to an enclosing block.
+ERROR: File "if-error.php", line 24, characters 7-22:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "if-error.php", line 28, characters 7-8:
+  It is assigned in another branch. Consider moving the definition to an enclosing block.
+ERROR: File "if-error.php", line 43, characters 7-22:
+Illegal definition of typed local variable $y. (Naming[2126])
+  File "if-error.php", line 36, characters 7-8:
+  It is assigned in another branch. Consider moving the definition to an enclosing block.
+ERROR: File "if-error.php", line 51, characters 5-16:
+Illegal definition of typed local variable $x. (Naming[2126])
+  File "if-error.php", line 49, characters 3-4:
+  It is already defined. Typed locals must have their type declared before they can be assigned.
+ERROR: File "if-error.php", line 59, characters 3-9:
+Typing error (Typing[4110])
+  File "if-error.php", line 57, characters 13-15:
+  Expected `int`
+  File "if-error.php", line 59, characters 8-9:
+  But got `string`

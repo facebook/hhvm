@@ -3,7 +3,7 @@
 class test {
     function __construct() {
     }
-    function test() {
+    function test() :mixed{
     }
 }
 <<__EntryPoint>> function main(): void {

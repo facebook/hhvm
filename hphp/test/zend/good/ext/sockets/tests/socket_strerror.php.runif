@@ -1,3 +1,2 @@
 extension sockets
-function socket_strerror
 os Linux

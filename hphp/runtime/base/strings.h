@@ -25,8 +25,8 @@ constexpr char FUNCTION_ALREADY_DEFINED[] = "Function already defined: %s";
 constexpr char CONSTANT_ALREADY_DEFINED[] = "Constant %s already defined";
 constexpr char DIVISION_BY_ZERO[] =
   "Division by zero";
-constexpr char INTEGER_OVERFLOW[] = "Integer overflow";
 constexpr char UNKNOWN_CLASS[] = "Class undefined: %s";
+constexpr char FAILED_RESOLVE_CLASS[] = "Failure to resolve undefined class %s";
 constexpr char CANT_ACCESS_SELF[] =
   "Cannot access self:: when no class scope is active";
 constexpr char CANT_ACCESS_PARENT_WHEN_NO_CLASS[] =
@@ -62,7 +62,10 @@ constexpr char TRAITS_UNKNOWN_TRAIT_METHOD[] =
 constexpr char METHOD_IN_MULTIPLE_TRAITS[] =
   "Method '%s' declared in multiple traits (%s)";
 constexpr char TRAIT_REQ_EXTENDS[] =
-  "Class '%s' required to extend class '%s'"
+  "Class '%s' required to be a strict subclass of class '%s'"
+  " by trait '%s'";
+constexpr char TRAIT_REQ_THIS_AS[] =
+  "Class '%s' required to be a subclass of class '%s'"
   " by trait '%s'";
 constexpr char TRAIT_REQ_IMPLEMENTS[] =
   "Class '%s' required to implement interface '%s'"
@@ -85,7 +88,7 @@ constexpr char HACKARR_COMPAT_ARR_HACK_ARR_CMP[] =
 constexpr char HACKARR_COMPAT_VARR_IS_VEC[] = "is_vec() called on varray";
 constexpr char HACKARR_COMPAT_DARR_IS_DICT[] = "is_dict() called on darray";
 constexpr char DATATYPE_SPECIALIZED_DVARR[] =
-  "Dataype-specialized array currently unsupported";
+  "Datatype-specialized array currently unsupported";
 constexpr char FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE[] =
   "'%s' called dynamically but is not __DynamicallyCallable";
 constexpr char FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE[] =
@@ -116,10 +119,10 @@ constexpr char FUNC_TO_STRING_IMPLICIT[] =
   "Implicit Func to string conversion for type-hint";
 constexpr char FUNC_TO_STRING[] = "Func to string conversion";
 constexpr char CLASS_TO_STRING_IMPLICIT[] =
-  "Implicit Class to string conversion for type-hint";
-constexpr char CLASS_TO_STRING[] = "Class to string conversion";
+  "Implicit Class to string conversion for %s";
 constexpr char CLASS_TO_MEMOKEY[] = "Class to memo key conversion";
 constexpr char CLASS_TO_CLASSNAME[] = "Class passed to classname type-hint";
+constexpr char STRING_TO_CLASS[] = "String passed to class type-hint";
 constexpr char ARRAY_MARK_LEGACY_VEC[] = "array_mark_legacy() called on vec";
 constexpr char ARRAY_MARK_LEGACY_DICT[] = "array_mark_legacy() called on dict";
 constexpr char NONEXHAUSTIVE_SWITCH[] =
@@ -137,7 +140,17 @@ constexpr char MUST_BE_VALUE_TYPE[] = "Property %s of class %s is readonly, and 
   "therefore must be a value type to be modified.";
 constexpr char MUST_BE_ENCLOSED_IN_READONLY[] =
   "Property %s of class %s is readonly, but isn't enclosed in a readonly expression.";
-
+constexpr char MISSING_DYNAMICALLY_REFERENCED[] =
+  "Class %s was loaded from a string, but it is missing the "
+  "__DynamicallyReferenced attribute";
+constexpr char SOFT_MISSING_DYNAMICALLY_REFERENCED[] =
+  "Class %s was loaded from a string, but it is marked soft "
+  "__DynamicallyReferenced (sampled at rate 1 in %ld)";
+constexpr char CLASSNAME_TO_CLASS_NOEXIST_EXCEPTION[] =
+  "Failed to load class from %s %s for classname_to_class.";
+constexpr char REFLECTION_MISS_CONSTANTS_FROM_INCLUDED_ENUMS[] =
+  "ReflectionClass::getConstants() misses constants from the enums/enum classes included by %s";
+constexpr char NON_ASYNC_OVERRIDES_ASYNC[] = "Cannot override async method %s with non-async method in class %s";
 
 } // namespace Strings
 } // namespace HPHP

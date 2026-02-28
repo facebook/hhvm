@@ -1,0 +1,129 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/common" as m_common}}
+{{#import "common/types" as m_types}}
+
+{{! PEP484 type for collections }}
+{{#let export partial typedef_container |type| captures |m_types|}}
+  {{#pragma ignore-newlines}}
+  {{#if python.generate_immutable_types?}}
+{{#if type.list?}}_typing.List
+{{#else if type.set?}}_typing.Set
+{{#else if type.map?}}_typing.Dict{{/if type.list?}}
+  {{#else}}
+{{#if type.list?}}{{#partial m_types.sequence}}
+{{#else if type.set?}}{{#partial m_types.set}}
+{{#else if type.map?}}{{#partial m_types.mapping}}{{/if type.list?}}
+  {{/if python.generate_immutable_types?}}
+{{/let partial}}
+
+{{! PEP484 typing for builtin types }}
+{{#let export partial unadapted_builtin |type|}}
+{{#pragma ignore-newlines}}
+{{#if type.bool?}}builtins.bool
+{{#else if type.byte?}}builtins.int
+{{#else if type.i16?}}builtins.int
+{{#else if type.i32?}}builtins.int
+{{#else if type.i64?}}builtins.int
+{{#else if type.double?}}builtins.float
+{{#else if type.float?}}builtins.float
+{{#else if type.string?}}builtins.str
+{{#else if (and type.binary? type.iobuf?)}}_fbthrift_iobuf.IOBuf
+{{#else if type.binary?}}builtins.bytes
+{{/if type.bool?}}
+{{/let partial}}
+
+{{!
+This is useful for typing call patterns since it allows python container types OR
+thrift-python specific container types.
+
+Accepts a boolean parameter 'unadapted', which controls whether the adapter type
+(if present) is emitted. I.e. with `unadapted=false`, the adapter will be ignored.
+
+This `impl` template avoids a circular dependency between pep484 type (adapter
+wrapping unadapted type) and unadapted type, which renders the potentially
+adapted element types of containers.
+}}
+{{#let partial pep484_type_impl |type unadapted| captures |m_common m_types unadapted_builtin|}}
+{{#pragma ignore-newlines}}
+  {{#if (and (not unadapted) type.has_adapter?)}}
+    {{! PEP484 type with adapter }}
+    {{#let adapter = type.adapter}}
+{{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial pep484_type_impl type=type unadapted=true}}]{{/if}}
+
+  {{! Unadapted type }}
+  {{#else if type.void?}}
+None
+  {{#else if type.primitive?}}
+{{#partial unadapted_builtin type=type}}
+
+  {{#else if type.structured?}}
+{{#if type.need_module_path?}}{{type.module_mangle}}.{{/if}}
+{{#if (not (or type.need_module_path? type.true_type.has_adapter?))}}{{#partial m_common.private_alias_prefix}}{{/if}}
+{{#partial m_types.unadapted_name type=type.true_type}}
+
+  {{#else if type.list?}}
+{{#partial m_types.sequence}}[{{#partial pep484_type_impl type=type.true_type.elem_type unadapted=false}}]
+
+  {{#else if type.set?}}
+{{#partial m_types.set}}[{{#partial pep484_type_impl type=type.true_type.elem_type unadapted=false}}]
+
+  {{#else if type.map?}}
+{{#partial m_types.mapping}}[
+{{#partial pep484_type_impl type=type.true_type.key_type unadapted=false}}, {{!}}
+{{#partial pep484_type_impl type=type.true_type.val_type unadapted=false}}
+]
+
+  {{#else if type.enum?}}
+    {{#if type.need_module_path?}}
+{{type.module_mangle}}.
+    {{#else}}
+{{#partial m_common.private_alias_prefix}}
+    {{/if type.need_module_path?}}
+{{type.true_type.py_name}}
+
+  {{/if (and (not unadapted) type.has_adapter?)}}
+{{/let partial}}
+
+{{#let export partial unadapted_type |type| captures |pep484_type_impl|}}
+{{#pragma ignore-newlines}}
+{{#partial pep484_type_impl type=type unadapted=true}}
+{{/let partial}}
+
+{{#let export partial pep484_type |type| captures |pep484_type_impl|}}
+{{#pragma ignore-newlines}}
+{{#partial pep484_type_impl type=type unadapted=false}}
+{{/let partial}}
+
+
+{{! Const PEP484 type }}
+{{#let export partial const_type |type| captures |pep484_type|}}
+{{#pragma ignore-newlines}}
+  {{#if type.list?}}
+_typing.Sequence[{{#partial pep484_type type=type.true_type.elem_type}}]
+  {{#else if type.set?}}
+_typing.AbstractSet[{{#partial pep484_type type=type.true_type.elem_type}}]
+  {{#else if type.map?}}
+_typing.Mapping[
+{{#partial pep484_type type=type.true_type.key_type}}, {{!}}
+{{#partial pep484_type type=type.true_type.val_type}}
+]
+  {{#else}}
+{{#partial pep484_type type=type}}
+  {{/if type.list?}}
+{{/let partial}}

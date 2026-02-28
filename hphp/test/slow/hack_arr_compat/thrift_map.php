@@ -25,7 +25,7 @@ class DummyProtocol {
   function __construct() {
     $this->t = new DummyTransport();
   }
-  function getTransport() {
+  function getTransport() :mixed{
     return $this->t;
   }
 }
@@ -33,13 +33,13 @@ class DummyProtocol {
 class DummyTransport {
   public $buff = '';
   public $pos = 0;
-  function flush() {
+  function flush() :mixed{
  }
-  function onewayFlush() {}
-  function write($buff) {
+  function onewayFlush() :mixed{}
+  function write($buff) :mixed{
     $this->buff .= $buff;
   }
-  function read($n) {
+  function read($n) :mixed{
     $r = substr($this->buff, $this->pos, $n);
     $this->pos += $n;
     return $r;
@@ -47,16 +47,16 @@ class DummyTransport {
 }
 
 class Mappish {
-  const darray<int, darray<string, mixed>> SPEC = darray[
-    1 => darray[
+  const darray<int, darray<string, mixed>> SPEC = dict[
+    1 => dict[
       'var' => 'extraData',
       'type' => TType::MAP,
       'ktype' => TType::STRING,
       'vtype' => TType::STRING,
-      'key' => darray[
+      'key' => dict[
         'type' => TType::STRING,
       ],
-      'val' => darray[
+      'val' => dict[
         'type' => TType::STRING,
         ],
         'format' => 'collection',
@@ -66,11 +66,13 @@ class Mappish {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class TestStruct {
-  const SPEC = darray[
-    0 => darray[
+  const SPEC = dict[
+    0 => dict[
       'var' => 'success',
       'type' => TType::STRUCT,
       'class' => 'Config'
@@ -82,9 +84,11 @@ class TestStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+
+  public function clearTerseFields()[write_props]: void {}
 }
 
-function test() {
+function test() :mixed{
   //var_dump(TestStruct::SPEC);
   $p = new DummyProtocol();
   $v1 = new Mappish();
@@ -96,6 +100,6 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_1556() {
+function main_1556() :mixed{
 test();
 }

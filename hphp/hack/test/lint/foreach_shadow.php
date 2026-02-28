@@ -1,6 +1,6 @@
 <?hh
 
-function f1(array<int> $xs): int {
+function f1(vec<int> $xs): int {
   $x = 0;
   foreach ($xs as $x) {
     $x++;
@@ -8,7 +8,7 @@ function f1(array<int> $xs): int {
   return $x;
 }
 
-function f2(array<int> $xs): int {
+function f2(vec<int> $xs): int {
   $x = 1;
   $x = $x - 1;
   foreach ($xs as $x) {
@@ -17,7 +17,7 @@ function f2(array<int> $xs): int {
   return $x;
 }
 
-function f3(array<int, int> $xs): int {
+function f3(dict<int, int> $xs): int {
   $x = 0;
   foreach ($xs as $x => $_) {
     $x++;
@@ -25,7 +25,7 @@ function f3(array<int, int> $xs): int {
   return $x;
 }
 
-function f4(array<int, int> $xs): int {
+function f4(dict<int, int> $xs): int {
   $x = 0;
   foreach ($xs as $_ => $x) {
     $x++;
@@ -33,7 +33,7 @@ function f4(array<int, int> $xs): int {
   return $x;
 }
 
-function f5(array<int, (int, int)> $xs): int {
+function f5(dict<int, (int, int)> $xs): int {
   $x = 0;
   foreach ($xs as $_ => list($x, $_)) {
     $x++;
@@ -41,7 +41,7 @@ function f5(array<int, (int, int)> $xs): int {
   return $x;
 }
 
-function f6(array<int> $xs): int {
+function f6(vec<int> $xs): int {
   $x = 0;
   if (true) {
     foreach ($xs as $x) {
@@ -51,7 +51,7 @@ function f6(array<int> $xs): int {
   return $x;
 }
 
-function f7(array<array<int>> $xss): int {
+function f7(vec<vec<int>> $xss): int {
   $s = 0;
   foreach ($xss as $xs) {
     $x = 0;
@@ -63,8 +63,8 @@ function f7(array<array<int>> $xss): int {
   return $x;
 }
 
-function f8(array<int> $xs): array<(int, int)> {
-  $result = varray[];
+function f8(vec<int> $xs): vec<(int, int)> {
+  $result = vec[];
   foreach ($xs as $x) {
     $x1 = $x;
     foreach ($xs as $x) {
@@ -75,15 +75,15 @@ function f8(array<int> $xs): array<(int, int)> {
   return $result;
 }
 
-function f9(array<int> $xs): int {
-  list($x, $_) = varray[0, 0];
+function f9(vec<int> $xs): int {
+  list($x, $_) = vec[0, 0];
   foreach ($xs as $x) {
     $x++;
   }
   return $x;
 }
 
-function f10(array<int> $xs): int {
+function f10(vec<int> $xs): int {
   $s = 0;
   try {
     throw new Exception();
@@ -96,7 +96,7 @@ function f10(array<int> $xs): int {
   return $s;
 }
 
-function f11(array<int> $xs): int {
+function f11(vec<int> $xs): int {
   $s = 0;
   // The loop variable $x doesn't shadow $x defined after the loop.
   foreach ($xs as $x) {
@@ -107,8 +107,8 @@ function f11(array<int> $xs): int {
   return $s;
 }
 
-function f12(array<int> $xs): int {
-  if (false) {
+function f12(vec<int> $xs): int {
+  if (1 === 2) {
     $x = 0;
     $s = $x;
   } else {
@@ -122,7 +122,7 @@ function f12(array<int> $xs): int {
   return $s;
 }
 
-function f13(array<int, array<int>> $xss): int {
+function f13(dict<int, vec<int>> $xss): int {
   $s = 0;
   foreach ($xss as $_ => $xs) {
     // Variables named $_ are ignored

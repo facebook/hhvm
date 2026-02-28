@@ -14,7 +14,7 @@ try { var_dump( join() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->get
 // More than expected number of arguments
 echo "\n-- Testing join() function with more than expected no. of arguments --\n";
 $glue = 'string_val';
-$pieces = varray[1, 2];
+$pieces = vec[1, 2];
 $extra_arg = 10;
 
 try { var_dump( join($glue, $pieces, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

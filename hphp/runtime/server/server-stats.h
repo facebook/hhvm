@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/execution-profiler.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/server/writer.h"
+#include "hphp/util/configs/stats.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/thread-local.h"
@@ -30,6 +31,58 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Intermediate types for reporting
+ */
+struct ServerStatusProcessReport {
+  int64_t id;
+  std::string build;
+  std::string compiler;
+  bool debug;
+  int64_t now;
+  int64_t start;
+  int64_t up;
+};
+
+struct ServerStatusRequestMemoryReport {
+  int64_t currentUsage;
+  int64_t currentAlloc;
+  int64_t peakUsage;
+  int64_t peakAlloc;
+  int64_t limit;
+  int64_t currentMmUsage;
+};
+
+struct ServerStatusRequestIOReport {
+  std::string status;
+  int64_t duration;
+};
+
+struct ServerStatusRequestReport {
+  std::string vhost;
+  std::string url;
+  std::string endpoint;
+  std::string client;
+  int64_t start;
+  int64_t duration_ms;
+  ServerStatusRequestMemoryReport memory;
+  HPHP::Optional<ServerStatusRequestIOReport> io;
+};
+
+struct ServerStatusThreadReport {
+  int64_t id;
+  int64_t tid;
+  int64_t req;
+  int64_t bytes;
+  std::string mode;
+  HPHP::Optional<ServerStatusRequestReport> request;
+};
+
+struct ServerStatusReport {
+  ServerStatusProcessReport process;
+  std::vector<ServerStatusThreadReport> threads;
+};
 
 struct ServerStats {
 
@@ -47,26 +100,26 @@ public:
   static void Reset();
   static void Clear();
   static std::string GetKeys();
-  static std::string Report(const std::string& keys,
-                            const std::string& prefix);
+  static std::string ReportString(const std::string& keys,
+                                  const std::string& prefix);
+  static hphp_fast_string_map<int64_t> Report(
+    const std::vector<std::string>& keys, const std::string& prefix);
 
   // thread status functions
   static void LogBytes(int64_t bytes);
   static void StartRequest(const char* url, const char* clientIP,
                            const char* vhost);
+  static void SetEndpoint(const char* endpoint);
   static void SetThreadMode(ThreadMode mode);
   static ThreadMode GetThreadMode();
   static const char* ThreadModeString(ThreadMode mode);
+  static ServerStatusReport ReportStatus();
   static std::string ReportStatus(Writer::Format format);
 
   // io status functions
   static void SetThreadIOStatus(const char* name, const char* addr,
                                 int64_t usWallTime = -1);
   static Array GetThreadIOStatuses();
-  static void StartNetworkProfile();
-  static Array EndNetworkProfile();
-
-  static bool s_profile_network;
 
 public:
   ServerStats();
@@ -104,15 +157,15 @@ private:
 
   static uint32_t curr() {
     auto const now = static_cast<uint64_t>(time(nullptr));
-    return now / RuntimeOption::StatsSlotDuration;
+    return now / Cfg::Stats::SlotDuration;
   }
 
   static void Merge(CounterMap& dest, const CounterMap& src,
                     const KeyMap& wanted);
   static void Merge(TimeSlot& dest, const TimeSlot& src,
                     const KeyMap& wanted);
-  static KeyMap CompileKeys(const std::string& keys);
-  static std::string Report(const TimeSlot& s, const std::string& prefix);
+  static KeyMap CompileKeys(const std::vector<std::string>& rules);
+  static CounterMap ReportImpl(const KeyMap& keys);
 
   template<typename F> static void VisitAllSlots(F fun) {
     Lock lock(s_lock, false);
@@ -138,6 +191,7 @@ private:
    */
   void logBytes(int64_t bytes);
   void startRequest(const char* url, const char* clientIP, const char* vhost);
+  void setEndpoint(const char* endpoint);
   void setThreadMode(ThreadMode mode) { m_threadStatus.m_mode = mode; }
 
   void setThreadIOStatus(const char* name, const char* addr,
@@ -178,6 +232,7 @@ private:
     char m_clientIP[64];
     char m_vhost[64];
     char m_url[512];
+    char m_endpoint[512];
 
     IOStatusMap m_ioStatuses;
   };
@@ -235,4 +290,3 @@ void server_stats_log_mutex(const std::string& stack, int64_t elapsed_us);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -1,0 +1,62 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+include "thrift/annotation/thrift.thrift"
+
+@thrift.AllowLegacyMissingUris
+package;
+
+namespace cpp2 carbon
+namespace py3 carbon
+namespace hack carbon
+
+enum Result {
+  UNKNOWN = 0,
+  DELETED = 1,
+  TOUCHED = 2,
+  FOUND = 3,
+  FOUNDSTALE = 4,
+  NOTFOUND = 5,
+  NOTFOUNDHOT = 6,
+  NOTSTORED = 7,
+  STALESTORED = 8,
+  OK = 9,
+  STORED = 10,
+  EXISTS = 11,
+  OOO = 12,
+  TIMEOUT = 13,
+  CONNECT_TIMEOUT = 14,
+  CONNECT_ERROR = 15,
+  BUSY = 16,
+  RES_TRY_AGAIN = 17,
+  SHUTDOWN = 18,
+  TKO = 19,
+  BAD_COMMAND = 20,
+  BAD_KEY = 21,
+  BAD_FLAGS = 22,
+  BAD_EXPTIME = 23,
+  BAD_LEASE_ID = 24,
+  BAD_CAS_ID = 25,
+  BAD_VALUE = 26,
+  ABORTED = 27,
+  CLIENT_ERROR = 28,
+  LOCAL_ERROR = 29,
+  REMOTE_ERROR = 30,
+  WAITING = 31,
+  DEADLINE_EXCEEDED = 32,
+  PERMISSION_DENIED = 33,
+  HOT_KEY = 34,
+  // Indicates that the system is out of a resource that is
+  // being overused, resulting in the request being shed. Currently used for
+  // per-tenant network egress overload protection. This result does not fail over
+  // and is treated as a non-recoverable error. The specific reason
+  // for overload is communicated via the message field in the response.
+  OVERLOADED = 35,
+  // Result::NUM_RESULTS indicates the size of the results array and should
+  // always be updated to the end of the list
+  NUM_RESULTS = 36,
+}

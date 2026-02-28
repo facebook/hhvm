@@ -18,8 +18,6 @@
 
 #include "hphp/runtime/vm/debug/dwarf.h"
 
-using namespace HPHP::Debug;
-
 typedef enum {
   JIT_NOACTION = 0,
   JIT_REGISTER_FN,
@@ -41,8 +39,8 @@ struct jit_descriptor {
 };
 
 extern int register_gdb_hook(char *symfile_addr,
-                               uint64_t symfile_size, DwarfChunk* d);
-extern void unregister_gdb_chunk(DwarfChunk* d);
+                               uint64_t symfile_size, HPHP::Debug::DwarfChunk* d);
+extern void unregister_gdb_chunk(HPHP::Debug::DwarfChunk* d);
 
 extern "C" void __jit_debug_register_code();
 

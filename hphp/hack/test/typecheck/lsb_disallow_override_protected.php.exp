@@ -1,4 +1,8 @@
-File "lsb_disallow_override_protected.php", line 8, characters 20-22:
+WARN: File "lsb_disallow_override_protected.php", line 7, characters 17-17:
+Static property is overridden: `$x` (Warn[12021])
+  File "lsb_disallow_override_protected.php", line 8, characters 20-22:
+  Overriding static property is here
+ERROR: File "lsb_disallow_override_protected.php", line 8, characters 20-22:
 Member `$x` may not override `__LSB` member of parent (Typing[4284])
   File "lsb_disallow_override_protected.php", line 4, characters 30-32:
   This is being overridden

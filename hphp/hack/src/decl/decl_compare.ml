@@ -22,86 +22,181 @@ open Hh_prelude
 open Decl_defs
 open Typing_deps
 
+module VersionedNames = struct
+  type t = {
+    old_names: FileInfo.names;
+    new_names: FileInfo.names;
+  }
+  [@@deriving show]
+
+  let empty : t =
+    { old_names = FileInfo.empty_names; new_names = FileInfo.empty_names }
+
+  let make_unchanged (names : FileInfo.names) : t =
+    { old_names = names; new_names = names }
+
+  let merge left right : t =
+    let { old_names = left_old_names; new_names = left_new_names } = left in
+    let { old_names = right_old_names; new_names = right_new_names } = right in
+    {
+      old_names = FileInfo.merge_names left_old_names right_old_names;
+      new_names = FileInfo.merge_names left_new_names right_new_names;
+    }
+end
+
+module VersionedSSet = struct
+  type t = {
+    old: SSet.t;
+    new_: SSet.t;
+  }
+
+  type diff = {
+    removed: SSet.t;
+    kept: SSet.t;
+    added: SSet.t;
+  }
+
+  let empty = { old = SSet.empty; new_ = SSet.empty }
+
+  let project (project : FileInfo.names -> SSet.t) (names : VersionedNames.t) :
+      t =
+    let { VersionedNames.old_names; new_names } = names in
+    { old = project old_names; new_ = project new_names }
+
+  let get_classes = project (fun names -> names.FileInfo.n_classes)
+
+  let merge (left : t) (right : t) : t =
+    let { old = old_left; new_ = new_left } = left in
+    let { old = old_right; new_ = new_right } = right in
+    {
+      old = SSet.union old_left old_right;
+      new_ = SSet.union new_left new_right;
+    }
+
+  let empty_diff =
+    { removed = SSet.empty; kept = SSet.empty; added = SSet.empty }
+
+  let diff { old; new_ } : diff =
+    let diff =
+      SSet.fold
+        (fun old_name diff ->
+          match SSet.find_opt old_name new_ with
+          | None -> { diff with removed = SSet.add old_name diff.removed }
+          | Some n -> { diff with kept = SSet.add n diff.kept })
+        old
+        empty_diff
+    in
+    { diff with added = SSet.diff new_ old }
+
+  let diff_cardinal { removed; kept; added } =
+    SSet.cardinal removed + SSet.cardinal kept + SSet.cardinal added
+end
+
+module VersionedFileInfo = struct
+  type t = {
+    funs: VersionedSSet.t;
+    types: VersionedSSet.t;
+    gconsts: VersionedSSet.t;
+    modules: VersionedSSet.t;
+  }
+
+  let transpose (names : VersionedNames.t) : t =
+    let { VersionedNames.old_names; new_names } = names in
+    let {
+      FileInfo.n_funs = old_funs;
+      n_classes = _;
+      n_types = old_types;
+      n_consts = old_gconsts;
+      n_modules = old_modules;
+    } =
+      old_names
+    in
+    let {
+      FileInfo.n_funs = new_funs;
+      n_classes = _;
+      n_types = new_types;
+      n_consts = new_gconsts;
+      n_modules = new_modules;
+    } =
+      new_names
+    in
+    {
+      funs = { VersionedSSet.old = old_funs; new_ = new_funs };
+      types = { VersionedSSet.old = old_types; new_ = new_types };
+      gconsts = { VersionedSSet.old = old_gconsts; new_ = new_gconsts };
+      modules = { VersionedSSet.old = old_modules; new_ = new_modules };
+    }
+
+  module Diff = struct
+    type t = {
+      funs: VersionedSSet.diff;
+      types: VersionedSSet.diff;
+      gconsts: VersionedSSet.diff;
+      modules: VersionedSSet.diff;
+    }
+  end
+
+  let diff (t : t) : Diff.t =
+    let { funs; types; gconsts; modules } = t in
+    {
+      Diff.funs = VersionedSSet.diff funs;
+      types = VersionedSSet.diff types;
+      gconsts = VersionedSSet.diff gconsts;
+      modules = VersionedSSet.diff modules;
+    }
+
+  let diff_names (names : VersionedNames.t) : Diff.t =
+    names |> transpose |> diff
+end
+
 (*****************************************************************************)
 (* Given two classes give back the set of functions or classes that need
  * to be rechecked
  *)
 (*****************************************************************************)
-module ClassDiff = struct
+module Class_diff = struct
   let smap_left s1 s2 =
     SMap.fold
       begin
         fun x ty1 diff ->
-        let ty2 = SMap.find_opt x s2 in
-        match ty2 with
-        | Some ty2 ->
-          if Poly.( = ) ty1 ty2 then
-            diff
-          else
-            SSet.add x diff
-        | None -> SSet.add x diff
+          let ty2 = SMap.find_opt x s2 in
+          match ty2 with
+          | Some ty2 ->
+            if Poly.( = ) ty1 ty2 then
+              diff
+            else
+              SSet.add x diff
+          | None -> SSet.add x diff
       end
       s1
       SSet.empty
 
   let smap s1 s2 = SSet.union (smap_left s1 s2) (smap_left s2 s1)
 
-  let add_inverted_dep mode build_obj x acc =
-    DepSet.union (Typing_deps.get_ideps mode (build_obj x)) acc
-
-  let add_inverted_deps mode acc build_obj xset =
-    SSet.fold (add_inverted_dep mode build_obj) xset acc
-
-  let compare mode cid class1 class2 =
-    let acc = DepSet.make () in
+  let compare class1 class2 =
     let is_unchanged = true in
     (* compare class constants *)
     let consts_diff = smap class1.dc_consts class2.dc_consts in
     let is_unchanged = is_unchanged && SSet.is_empty consts_diff in
-    let acc =
-      add_inverted_deps mode acc (fun x -> Dep.Const (cid, x)) consts_diff
-    in
     (* compare class members *)
     let props_diff = smap class1.dc_props class2.dc_props in
     let is_unchanged = is_unchanged && SSet.is_empty props_diff in
-    let acc =
-      add_inverted_deps mode acc (fun x -> Dep.Prop (cid, x)) props_diff
-    in
     (* compare class static members *)
     let sprops_diff = smap class1.dc_sprops class2.dc_sprops in
     let is_unchanged = is_unchanged && SSet.is_empty sprops_diff in
-    let acc =
-      add_inverted_deps mode acc (fun x -> Dep.SProp (cid, x)) sprops_diff
-    in
     (* compare class methods *)
     let methods_diff = smap class1.dc_methods class2.dc_methods in
     let is_unchanged = is_unchanged && SSet.is_empty methods_diff in
-    let acc =
-      add_inverted_deps mode acc (fun x -> Dep.Method (cid, x)) methods_diff
-    in
     (* compare class static methods *)
     let smethods_diff = smap class1.dc_smethods class2.dc_smethods in
     let is_unchanged = is_unchanged && SSet.is_empty smethods_diff in
-    let acc =
-      add_inverted_deps mode acc (fun x -> Dep.SMethod (cid, x)) smethods_diff
-    in
     (* compare class constructors *)
     let ctor_diff = Poly.( <> ) class1.dc_construct class2.dc_construct in
     let is_unchanged = is_unchanged && not ctor_diff in
-    let ctor_ideps = Typing_deps.get_ideps mode (Dep.Constructor cid) in
-    let acc =
-      if ctor_diff then
-        DepSet.union acc ctor_ideps
-      else
-        acc
-    in
     (* compare class type constants *)
     let typeconsts_diff = smap class1.dc_typeconsts class2.dc_typeconsts in
     let is_unchanged = is_unchanged && SSet.is_empty typeconsts_diff in
-    let acc =
-      add_inverted_deps mode acc (fun x -> Dep.Const (cid, x)) typeconsts_diff
-    in
-    (acc, is_unchanged)
+    is_unchanged
 end
 
 (*****************************************************************************)
@@ -109,20 +204,16 @@ end
  * to be rechecked because the type of their member changed
  *)
 (*****************************************************************************)
-module ClassEltDiff = struct
+module Class_elt_diff = struct
   open Decl_heap
 
-  let add_inverted_dep mode build_obj x _ acc =
-    DepSet.union (Typing_deps.get_ideps mode (build_obj x)) acc
-
-  let add_inverted_deps mode (acc, is_unchanged) build_obj xmap =
+  let acc_diff is_unchanged xmap =
     let is_unchanged =
       match is_unchanged with
       | `Unchanged when not @@ SMap.is_empty xmap -> `Changed
       | x -> x
     in
-    let acc = SMap.fold (add_inverted_dep mode build_obj) xmap acc in
-    (acc, is_unchanged)
+    is_unchanged
 
   let diff_elts
       (type t)
@@ -136,36 +227,36 @@ module ClassEltDiff = struct
     SMap.merge
       begin
         fun name elt1 elt2 ->
-        let key = (cid, name) in
-        let match1 =
-          match elt1 with
-          | Some elt -> String.equal elt.elt_origin cid
-          | _ -> false
-        in
-        let match2 =
-          match elt2 with
-          | Some elt -> String.equal elt.elt_origin cid
-          | _ -> false
-        in
-        if match1 || match2 then
-          match (EltHeap.get_old key, EltHeap.get key) with
-          | (None, _)
-          | (_, None) ->
-            Some ()
-          | (Some x1, Some x2) ->
-            let ty1 = normalize x1 in
-            let ty2 = normalize x2 in
-            if Poly.( = ) ty1 ty2 then
-              None
-            else
+          let key = (cid, name) in
+          let match1 =
+            match elt1 with
+            | Some elt -> String.equal elt.elt_origin cid
+            | _ -> false
+          in
+          let match2 =
+            match elt2 with
+            | Some elt -> String.equal elt.elt_origin cid
+            | _ -> false
+          in
+          if match1 || match2 then
+            match (EltHeap.get_old key, EltHeap.get key) with
+            | (None, _)
+            | (_, None) ->
               Some ()
-        else
-          None
+            | (Some x1, Some x2) ->
+              let ty1 = normalize x1 in
+              let ty2 = normalize x2 in
+              if Poly.( = ) ty1 ty2 then
+                None
+              else
+                Some ()
+          else
+            None
       end
       elts1
       elts2
 
-  let compare_props mode class1 class2 acc =
+  let compare_props class1 class2 acc =
     let cid = class1.dc_name in
     let (elts1, elts2) = (class1.dc_props, class2.dc_props) in
     let diff =
@@ -176,9 +267,9 @@ module ClassEltDiff = struct
         ~elts2
         ~normalize:Decl_pos_utils.NormalizeSig.ty
     in
-    add_inverted_deps mode acc (fun x -> Dep.Prop (cid, x)) diff
+    acc_diff acc diff
 
-  let compare_sprops mode class1 class2 acc =
+  let compare_sprops class1 class2 acc =
     let cid = class1.dc_name in
     let (elts1, elts2) = (class1.dc_sprops, class2.dc_sprops) in
     let diff =
@@ -189,9 +280,9 @@ module ClassEltDiff = struct
         ~elts2
         ~normalize:Decl_pos_utils.NormalizeSig.ty
     in
-    add_inverted_deps mode acc (fun x -> Dep.SProp (cid, x)) diff
+    acc_diff acc diff
 
-  let compare_meths mode class1 class2 acc =
+  let compare_meths class1 class2 acc =
     let cid = class1.dc_name in
     let (elts1, elts2) = (class1.dc_methods, class2.dc_methods) in
     let diff =
@@ -202,9 +293,9 @@ module ClassEltDiff = struct
         ~elts2
         ~normalize:Decl_pos_utils.NormalizeSig.fun_elt
     in
-    add_inverted_deps mode acc (fun x -> Dep.Method (cid, x)) diff
+    acc_diff acc diff
 
-  let compare_smeths mode class1 class2 acc =
+  let compare_smeths class1 class2 acc =
     let cid = class1.dc_name in
     let (elts1, elts2) = (class1.dc_smethods, class2.dc_smethods) in
     let diff =
@@ -215,9 +306,9 @@ module ClassEltDiff = struct
         ~elts2
         ~normalize:Decl_pos_utils.NormalizeSig.fun_elt
     in
-    add_inverted_deps mode acc (fun x -> Dep.SMethod (cid, x)) diff
+    acc_diff acc diff
 
-  let compare_cstrs mode class1 class2 =
+  let compare_cstrs class1 class2 =
     let cid = class1.dc_name in
     let match1 =
       match class1.dc_construct with
@@ -233,105 +324,63 @@ module ClassEltDiff = struct
       match (Constructors.get_old cid, Constructors.get cid) with
       | (None, _)
       | (_, None) ->
-        (Typing_deps.get_ideps mode (Dep.Constructor cid), `Changed)
+        `Changed
       | (Some fe1, Some fe2) ->
         let fe1 = Decl_pos_utils.NormalizeSig.fun_elt fe1 in
         let fe2 = Decl_pos_utils.NormalizeSig.fun_elt fe2 in
         if Poly.( = ) fe1 fe2 then
-          (DepSet.make (), `Unchanged)
+          `Unchanged
         else
-          (Typing_deps.get_ideps mode (Dep.Constructor cid), `Changed)
+          `Changed
     else
-      (DepSet.make (), `Unchanged)
+      `Unchanged
 
-  let compare mode class1 class2 =
-    compare_cstrs mode class1 class2
-    |> compare_props mode class1 class2
-    |> compare_sprops mode class1 class2
-    |> compare_meths mode class1 class2
-    |> compare_smeths mode class1 class2
+  let compare class1 class2 =
+    compare_cstrs class1 class2
+    |> compare_props class1 class2
+    |> compare_sprops class1 class2
+    |> compare_meths class1 class2
+    |> compare_smeths class1 class2
 end
 
-let add_changed acc dep = DepSet.add acc (Dep.make dep)
-
-(*****************************************************************************)
-(* Determines if there is a "big" difference between two classes
- * What it really means: most of the time, a change in a class doesn't affect
- * the users of the class, recomputing the sub-classes is enough.
- * However, there are some cases, where we really need to re-check all the
- * use cases of a class. For example: if a class doesn't implement an
- * interface anymore, all the subtyping is changed, so we have to recheck
- * all the places where the class was used.
- *)
-(*****************************************************************************)
-let class_big_diff class1 class2 =
-  let class1 = Decl_pos_utils.NormalizeSig.class_type class1 in
-  let class2 = Decl_pos_utils.NormalizeSig.class_type class2 in
-  let ( <> ) = Poly.( <> ) in
-  class1.dc_need_init <> class2.dc_need_init
-  || SSet.compare
-       class1.dc_deferred_init_members
-       class2.dc_deferred_init_members
-     <> 0
-  || class1.dc_kind <> class2.dc_kind
-  || class1.dc_is_xhp <> class2.dc_is_xhp
-  || class1.dc_has_xhp_keyword <> class2.dc_has_xhp_keyword
-  || class1.dc_const <> class2.dc_const
-  || class1.dc_tparams <> class2.dc_tparams
-  || SMap.compare compare_subst_context class1.dc_substs class2.dc_substs <> 0
-  || SMap.compare
-       Typing_defs.compare_decl_ty
-       class1.dc_ancestors
-       class2.dc_ancestors
-     <> 0
-  || List.compare Poly.compare class1.dc_req_ancestors class2.dc_req_ancestors
-     <> 0
-  || SSet.compare
-       class1.dc_req_ancestors_extends
-       class2.dc_req_ancestors_extends
-     <> 0
-  || SSet.compare class1.dc_extends class2.dc_extends <> 0
-  || SSet.compare class1.dc_xhp_attr_deps class2.dc_xhp_attr_deps <> 0
-  || class1.dc_enum_type <> class2.dc_enum_type
-  || class1.dc_internal <> class2.dc_internal
-  || Option.map ~f:snd class1.dc_module <> Option.map ~f:snd class2.dc_module
-
-and get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck) =
-  let dep = Dep.Type cid in
-  let cid_hash = Typing_deps.(Dep.make dep) in
-  (* Why can't we just use `Typing_deps.get_ideps dep` here? See test case
-     hphp/hack/test/integration_ml/saved_state/test_changed_type_in_base_class.ml
-     for an example. *)
-  let where_class_and_subclasses_were_used =
-    Typing_deps.add_all_deps mode (DepSet.singleton cid_hash)
-  in
-  let to_recheck =
-    DepSet.union where_class_and_subclasses_were_used to_recheck
-  in
-  let to_redecl =
-    Typing_deps.get_extend_deps
-      ~mode
-      ~visited:trace
-      ~source_class:cid_hash
-      ~acc:to_redecl
-  in
-  (add_changed changed dep, to_redecl, to_recheck)
-
-let get_extend_deps mode cid_hash to_redecl =
+let get_extend_deps mode cid_hash acc =
   Typing_deps.get_extend_deps
     ~mode
     ~visited:(VisitedSet.make ())
     ~source_class:cid_hash
-    ~acc:to_redecl
+    ~acc
+
+let add_fanout make_dep mode id fanout_acc =
+  Fanout.add_fanout_of mode (make_dep id) fanout_acc
+
+let add_fun_fanout = add_fanout (fun id -> Dep.Fun id)
+
+let add_type_fanout = add_fanout (fun id -> Dep.Type id)
+
+let add_gconst_fanout mode id fanout =
+  fanout
+  |> add_fanout (fun id -> Dep.GConst id) mode id
+  |> add_fanout (fun id -> Dep.GConstName id) mode id
+
+let add_module_fanout = add_fanout (fun id -> Dep.Module id)
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
  * the old and the new type signature of "fid" (function identifier).
  *)
 (*****************************************************************************)
-let get_fun_deps
-    ~mode old_funs fid ((changed, to_redecl, to_recheck), old_funs_missing) =
-  match (SMap.find fid old_funs, Decl_heap.Funs.get fid) with
+
+let get_fun_deps ~ctx ~mode old_funs fid (fanout_acc, old_funs_missing) =
+  match
+    ( SMap.find fid old_funs,
+      match Provider_backend.get () with
+      | Provider_backend.Rust_provider_backend backend ->
+        Rust_provider_backend.Decl.get_fun
+          backend
+          (Naming_provider.rust_backend_ctx_proxy ctx)
+          fid
+      | _ -> Decl_heap.Funs.get fid )
+  with
   (* Note that we must include all dependencies even if we get the None, None
    * case. Due to the fact we can declare types lazily, there may be no
    * existing declaration in the old Decl_heap that corresponds to a function
@@ -340,62 +389,66 @@ let get_fun_deps
    * sites of `foo` to make sure there are no dangling references. *)
   | (None, _)
   | (_, None) ->
-    let dep = Dep.Fun fid in
-    let where_fun_is_used = Typing_deps.get_ideps mode dep in
-    let to_recheck = DepSet.union where_fun_is_used to_recheck in
-    ((add_changed changed dep, to_redecl, to_recheck), old_funs_missing + 1)
+    let fanout_acc = add_fun_fanout mode fid fanout_acc in
+    (fanout_acc, old_funs_missing + 1)
   | (Some fe1, Some fe2) ->
     let fe1 = Decl_pos_utils.NormalizeSig.fun_elt fe1 in
     let fe2 = Decl_pos_utils.NormalizeSig.fun_elt fe2 in
     if Poly.( = ) fe1 fe2 then
-      ((changed, to_redecl, to_recheck), old_funs_missing)
+      (fanout_acc, old_funs_missing)
     else
-      let dep = Dep.Fun fid in
-      let where_fun_is_used = Typing_deps.get_ideps mode dep in
-      ( ( add_changed changed dep,
-          to_redecl,
-          DepSet.union where_fun_is_used to_recheck ),
-        old_funs_missing )
+      let fanout_acc = add_fun_fanout mode fid fanout_acc in
+      (fanout_acc, old_funs_missing)
 
-let get_funs_deps ~ctx old_funs funs =
+let get_funs_deps ~ctx old_funs (funs : VersionedSSet.diff) =
   let mode = Provider_context.get_deps_mode ctx in
-  SSet.fold
-    (get_fun_deps ~mode old_funs)
-    funs
-    ((DepSet.make (), DepSet.make (), DepSet.make ()), 0)
+  let { VersionedSSet.removed; kept; added } = funs in
+  let fanout =
+    Fanout.empty
+    |> SSet.fold (add_fun_fanout mode) removed
+    |> SSet.fold (add_fun_fanout mode) added
+  in
+  SSet.fold (get_fun_deps ~ctx ~mode old_funs) kept (fanout, 0)
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
  * the old and the new typedef
  *)
 (*****************************************************************************)
-let get_type_deps ~mode old_types tid ((changed, to_recheck), old_types_missing)
-    =
-  match (SMap.find tid old_types, Decl_heap.Typedefs.get tid) with
+let get_type_deps ~ctx ~mode old_types tid (fanout_acc, old_types_missing) =
+  match
+    ( SMap.find tid old_types,
+      match Provider_backend.get () with
+      | Provider_backend.Rust_provider_backend backend ->
+        Rust_provider_backend.Decl.get_typedef
+          backend
+          (Naming_provider.rust_backend_ctx_proxy ctx)
+          tid
+      | _ -> Decl_heap.Typedefs.get tid )
+  with
   | (None, _)
   | (_, None) ->
-    let dep = Dep.Type tid in
-    let where_typedef_was_used = Typing_deps.get_ideps mode dep in
-    ( (add_changed changed dep, DepSet.union where_typedef_was_used to_recheck),
-      old_types_missing + 1 )
+    let fanout_acc = add_type_fanout mode tid fanout_acc in
+    (fanout_acc, old_types_missing + 1)
   | (Some tdef1, Some tdef2) ->
     let tdef1 = Decl_pos_utils.NormalizeSig.typedef tdef1 in
     let tdef2 = Decl_pos_utils.NormalizeSig.typedef tdef2 in
     let is_same_signature = Poly.( = ) tdef1 tdef2 in
     if is_same_signature then
-      ((changed, to_recheck), old_types_missing)
+      (fanout_acc, old_types_missing)
     else
-      let dep = Dep.Type tid in
-      let where_type_is_used = Typing_deps.get_ideps mode dep in
-      let to_recheck = DepSet.union where_type_is_used to_recheck in
-      ((add_changed changed dep, to_recheck), old_types_missing)
+      let fanout_acc = add_type_fanout mode tid fanout_acc in
+      (fanout_acc, old_types_missing)
 
-let get_types_deps ~ctx old_types types =
+let get_types_deps ~ctx old_types (types : VersionedSSet.diff) =
   let mode = Provider_context.get_deps_mode ctx in
-  SSet.fold
-    (get_type_deps ~mode old_types)
-    types
-    ((DepSet.make (), DepSet.make ()), 0)
+  let { VersionedSSet.removed; kept; added } = types in
+  let fanout =
+    Fanout.empty
+    |> SSet.fold (add_type_fanout mode) removed
+    |> SSet.fold (add_type_fanout mode) added
+  in
+  SSet.fold (get_type_deps ~ctx ~mode old_types) kept (fanout, 0)
 
 (*****************************************************************************)
 (* Determine which top level definitions have to be rechecked if the constant
@@ -403,161 +456,65 @@ let get_types_deps ~ctx old_types types =
  *)
 (*****************************************************************************)
 let get_gconst_deps
-    ~mode
-    old_gconsts
-    cst_id
-    ((changed, to_redecl, to_recheck), old_gconsts_missing) =
+    ~ctx ~mode old_gconsts cst_id (fanout_acc, old_gconsts_missing) =
   let cst1 = SMap.find cst_id old_gconsts in
-  let cst2 = Decl_heap.GConsts.get cst_id in
+  let cst2 =
+    match Provider_backend.get () with
+    | Provider_backend.Rust_provider_backend backend ->
+      Rust_provider_backend.Decl.get_gconst
+        backend
+        (Naming_provider.rust_backend_ctx_proxy ctx)
+        cst_id
+    | _ -> Decl_heap.GConsts.get cst_id
+  in
   match (cst1, cst2) with
   | (None, _)
   | (_, None) ->
-    let dep = Dep.GConst cst_id in
-    let where_const_is_used = Typing_deps.get_ideps mode dep in
-    let to_recheck = DepSet.union where_const_is_used to_recheck in
-    let const_name = Typing_deps.get_ideps mode (Dep.GConstName cst_id) in
-    ( (add_changed changed dep, to_redecl, DepSet.union const_name to_recheck),
-      old_gconsts_missing + 1 )
+    let fanout_acc = add_gconst_fanout mode cst_id fanout_acc in
+    (fanout_acc, old_gconsts_missing + 1)
   | (Some cst1, Some cst2) ->
     let is_same_signature = Poly.( = ) cst1 cst2 in
     if is_same_signature then
-      ((changed, to_redecl, to_recheck), old_gconsts_missing)
+      (fanout_acc, old_gconsts_missing)
     else
       let dep = Dep.GConst cst_id in
-      let where_type_is_used = Typing_deps.get_ideps mode dep in
-      let to_recheck = DepSet.union where_type_is_used to_recheck in
-      ((add_changed changed dep, to_redecl, to_recheck), old_gconsts_missing)
+      let fanout_acc = Fanout.add_fanout_of mode dep fanout_acc in
+      (fanout_acc, old_gconsts_missing)
 
 let get_gconsts_deps ~ctx old_gconsts gconsts =
   let mode = Provider_context.get_deps_mode ctx in
-  SSet.fold
-    (get_gconst_deps ~mode old_gconsts)
-    gconsts
-    ((DepSet.make (), DepSet.make (), DepSet.make ()), 0)
+  let { VersionedSSet.removed; kept; added } = gconsts in
+  let fanout =
+    Fanout.empty
+    |> SSet.fold (add_gconst_fanout mode) removed
+    |> SSet.fold (add_gconst_fanout mode) added
+  in
+  SSet.fold (get_gconst_deps ~ctx ~mode old_gconsts) kept (fanout, 0)
 
-(*****************************************************************************)
-(* Determine which functions/classes have to be rechecked after comparing
- * the old and the new type signature of "cid" (class identifier).
- *)
-(*****************************************************************************)
-let get_class_deps
-    ctx
-    old_classes
-    new_classes
-    trace
-    cid
-    ((changed, to_redecl, to_recheck), old_classes_missing) =
-  let mode = Provider_context.get_deps_mode ctx in
-  match (SMap.find cid old_classes, SMap.find cid new_classes) with
+let get_module_deps ~ctx ~mode old_modules mid (fanout_acc, old_modules_missing)
+    : Fanout.t * int =
+  match
+    ( SMap.find mid old_modules,
+      match Provider_backend.get () with
+      | Provider_backend.Rust_provider_backend backend ->
+        Rust_provider_backend.Decl.get_module
+          backend
+          (Naming_provider.rust_backend_ctx_proxy ctx)
+          mid
+      | _ -> Decl_heap.Modules.get mid )
+  with
   | (None, _)
   | (_, None) ->
-    ( get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck),
-      old_classes_missing + 1 )
-  | (Some class1, Some class2) when class_big_diff class1 class2 ->
-    ( get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck),
-      old_classes_missing + 1 )
-  | (Some class1, Some class2) ->
-    let nclass1 = Decl_pos_utils.NormalizeSig.class_type class1 in
-    let nclass2 = Decl_pos_utils.NormalizeSig.class_type class2 in
-    let (deps, is_unchanged) = ClassDiff.compare mode cid nclass1 nclass2 in
-    let dep = Dep.Type cid in
-    let cid_hash = Typing_deps.(Dep.make dep) in
-    let (changed, to_redecl, to_recheck) =
-      if is_unchanged then
-        let (_, is_unchanged) = ClassDiff.compare mode cid class1 class2 in
-        if is_unchanged then
-          (changed, to_redecl, to_recheck)
-        else
-          (* If we reach this case it means that class1 and class2
-           * have the same signatures, but that some of their
-           * positions differ. We therefore must redeclare the sub-classes
-           * but not recheck them.
-           *)
-          let to_redecl =
-            Typing_deps.get_extend_deps
-              ~mode
-              ~visited:trace
-              ~source_class:cid_hash
-              ~acc:to_redecl
-          in
-          (changed, to_redecl, to_recheck)
-      else
-        let to_redecl =
-          Typing_deps.get_extend_deps
-            ~mode
-            ~visited:trace
-            ~source_class:cid_hash
-            ~acc:to_redecl
-        in
-        let to_recheck = DepSet.union to_redecl to_recheck in
-        let to_recheck =
-          DepSet.union
-            (Typing_deps.get_ideps mode (Dep.AllMembers cid))
-            to_recheck
-        in
-        ( add_changed changed dep,
-          DepSet.union deps to_redecl,
-          DepSet.union deps to_recheck )
-    in
-    (* This adds additional files to recheck if the type signature of a class
-     * element has changed. We do not require adding any additional redecls
-     * because the type is not folded in any way so it won't affect any other
-     * classes.
-     *)
-    let (deps, is_changed) = ClassEltDiff.compare mode class1 class2 in
-    let is_changed = phys_equal is_changed `Changed in
-    let changed =
-      if is_changed then
-        add_changed changed dep
-      else
-        changed
-    in
-    (* If just the type of an element has changed, we don't need to
-       _redeclare_ descendants (the type is not copied, so descendant
-       declarations do not need recomputing), but we do need to recheck them
-       to verify that their declarations are still valid. Running type
-       inference on them and rechecking method bodies may not be necessary,
-       but decl-validation and typechecking happen in the same step. *)
-    let to_recheck =
-      if is_changed then
-        Typing_deps.get_extend_deps
-          ~mode
-          ~visited:trace
-          ~source_class:cid_hash
-          ~acc:to_recheck
-      else
-        to_recheck
-    in
-    ((changed, to_redecl, DepSet.union deps to_recheck), old_classes_missing)
+    let fanout_acc = add_module_fanout mode mid fanout_acc in
+    (fanout_acc, old_modules_missing + 1)
+  | (Some _, Some _) -> (fanout_acc, old_modules_missing)
 
-let get_classes_deps ~ctx old_classes new_classes classes =
-  SSet.fold
-    (get_class_deps ctx old_classes new_classes (VisitedSet.make ()))
-    classes
-    ((DepSet.make (), DepSet.make (), DepSet.make ()), 0)
-
-let get_all_module_dependencies ~mode _ mid (changed, to_redecl, to_recheck) =
-  let dep = Dep.Module mid in
-  let where_module_referenced = Typing_deps.get_ideps mode dep in
-  let to_recheck = DepSet.union where_module_referenced to_recheck in
-  (add_changed changed dep, to_redecl, to_recheck)
-
-let get_module_deps ~ctx ~old_modules ~new_modules ~modules =
+let get_modules_deps ~ctx ~old_modules ~modules =
   let mode = Provider_context.get_deps_mode ctx in
-  let get_module_deps_
-      _old_modules
-      _new_modules
-      trace
-      mid
-      ((changed, to_redecl, to_recheck), old_modules_missing) =
-    ( get_all_module_dependencies
-        ~mode
-        trace
-        mid
-        (changed, to_redecl, to_recheck),
-      old_modules_missing + 1 )
+  let { VersionedSSet.removed; kept; added } = modules in
+  let fanout =
+    Fanout.empty
+    |> SSet.fold (add_module_fanout mode) removed
+    |> SSet.fold (add_module_fanout mode) added
   in
-  SSet.fold
-    (get_module_deps_ old_modules new_modules (VisitedSet.make ()))
-    modules
-    ((DepSet.make (), DepSet.make (), DepSet.make ()), 0)
+  SSet.fold (get_module_deps ~ctx ~mode old_modules) kept (fanout, 0)

@@ -11,7 +11,7 @@
 echo "*** Testing ucwords() : usage variations ***\n";
 
 // different strings containing regular chars and special chars
-$str_array = varray[
+$str_array = vec[
   // multiple spaces
   "testing    ucwords",
   "t e s t i n g   u c w o r d s ",

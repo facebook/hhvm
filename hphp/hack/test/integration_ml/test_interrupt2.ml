@@ -22,14 +22,14 @@ function bar%d() : int {
 
 let expected_errors =
   {|
-File "/bar1.php", line 4, characters 10-14:
+ERROR: File "/bar1.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
   File "/bar1.php", line 3, characters 19-21:
   Expected `int`
   File "/foo.php", line 3, characters 18-23:
   But got `string`
 
-File "/bar2.php", line 4, characters 10-14:
+ERROR: File "/bar2.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
   File "/bar2.php", line 3, characters 19-21:
   Expected `int`
@@ -50,14 +50,15 @@ allowed_decl_fixme_codes = 4336
 let test () =
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   TestDisk.set hhconfig_filename hhconfig_contents;
-  let hhconfig_path =
-    Relative_path.create Relative_path.Root hhconfig_filename
-  in
-  let options = ServerArgs.default_options ~root in
   let (custom_config, _) =
-    ServerConfig.load ~silent:false hhconfig_path options
+    ServerConfig.load ~silent:false ~from:"" ~cli_config_overrides:[]
   in
-  let env = Test.setup_server ~custom_config () in
+  let env =
+    Test.setup_server
+      ~custom_config
+      ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
+      ()
+  in
   ServerMain.force_break_recheck_loop_for_test false;
 
   (* There are initially no errors *)
@@ -70,7 +71,7 @@ let test () =
         (bar_name 2, bar_contents 2);
       ]
   in
-  Test.assert_no_errors env;
+  Test.assert_no_diagnostics env;
 
   (* This change will recheck all files and reveal errors in bar1 and bar2 *)
   let loop_input =
@@ -90,4 +91,4 @@ let test () =
   let (env, _) = Test.run_loop_once env loop_input in
   (* We'll get all the errors anyway due to server looping until check is
    * fully finished *)
-  Test.assert_env_errors env expected_errors
+  Test.assert_env_diagnostics env expected_errors

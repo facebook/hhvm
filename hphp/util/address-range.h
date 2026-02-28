@@ -19,11 +19,43 @@
 #include "hphp/util/alloc-defs.h"
 
 #include "hphp/util/lock-free-ptr-wrapper.h"
+#include "hphp/util/ptr.h"
 
 namespace HPHP {
 
 // Address ranges for managed arenas.
-
+//
+// Depending if we are running in LowPtr, PackedPtr or FullPtr mode we allocate
+// memory differently. We have 3 main arenas Lower, Low and Small. The number in
+// the table is which chunk we allocate memory from first.
+//
+// LowPtr mode
+// --------------------------------------------------------------------------
+// Start Addr                           Low         Small
+// --------------------------------------------------------------------------
+// 1 GB                                 1           1
+// 4 GB - Emergency                     2           2
+// 4 GB
+// --------------------------------------------------------------------------
+//
+// PackedPtr mode                       Lower       Small
+// --------------------------------------------------------------------------
+// 1 GB                                 1           1
+// 4 GB - Emergency - Small             3           2
+// 4 GB - Emergency                     4           3
+// 4 GB                                 2
+// 32 GB
+// --------------------------------------------------------------------------
+//
+// FullPtr mode
+// --------------------------------------------------------------------------
+// Start Addr                           Lower       Small
+// --------------------------------------------------------------------------
+// 1 GB                                 1           1
+// 64 GB - Emergency                    2           2
+// 64 GB
+// --------------------------------------------------------------------------
+//
 // Low arenas are in [lowArenaMinAddr(), 4G), and high arena are in
 // [4G, kUncountedMaxAddr).
 // LOW_PTR builds won't work if low arena overflows. High arena overflow would
@@ -33,29 +65,57 @@ namespace HPHP {
 // avoid having ifdefs everywhere.
 extern uintptr_t lowArenaMinAddr();
 
-constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
 constexpr size_t kLowEmergencySize = 128 << 20;
+
+#ifdef USE_LOWPTR
+#ifdef USE_PACKEDPTR
+constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
+constexpr uintptr_t kMidArenaMaxAddr = 32ull << 30;
+constexpr size_t kLowSmallArenaSize = 128 << 20;
+#else
+constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
+constexpr uintptr_t kMidArenaMaxAddr = kLowArenaMaxAddr;
+constexpr size_t kLowSmallArenaSize = 0;
+#endif
+#else
+constexpr uintptr_t kLowArenaMaxAddr = 64ull << 30;
+constexpr uintptr_t kMidArenaMaxAddr = kLowArenaMaxAddr;
+constexpr size_t kLowSmallArenaSize = 0;
+#endif
+
 constexpr unsigned kUncountedMaxShift = 38;
 constexpr uintptr_t kUncountedMaxAddr = 1ull << kUncountedMaxShift;
 constexpr size_t kHighColdCap = 4ull << 30;
 constexpr uintptr_t kHighArenaMaxAddr = kUncountedMaxAddr - kHighColdCap;
-constexpr size_t kHighArenaMaxCap = kHighArenaMaxAddr - kLowArenaMaxAddr;
+constexpr uintptr_t kHighArenaMinAddr = kMidArenaMaxAddr;
 
-// Areans for request heap starts at kLocalArenaMinAddr.
+constexpr size_t kHighArenaMaxCap = kHighArenaMaxAddr - kHighArenaMinAddr;
+
+// Arenas for request heap starts at kLocalArenaMinAddr.
 constexpr uintptr_t kLocalArenaMinAddr = 1ull << 40;
 constexpr size_t kLocalArenaSizeLimit = 64ull << 30;
 // Extra pages for Arena 0
 constexpr uintptr_t kArena0Base = 2ull << 40;
+constexpr uintptr_t kDebugAddr = 3ull << 39;
+
+inline bool is_low_mem(void* m) {
+  assertx(use_lowptr);
+  auto const i = reinterpret_cast<uintptr_t>(m);
+  return i < kHighArenaMinAddr;
+}
 
 namespace alloc {
 
 // List of address ranges ManagedArena can manage.
 enum AddrRangeClass : uint32_t {
-  VeryLow = 0,                     // below 2G, 31-bit address
-  Low,                             // [2G, 4G - kLowEmergencySize)
-  LowEmergency,                    // [4G - kLowEmergencySize, 4G)
-  Uncounted,                       // [4G, kHighArenaMaxAddr)
+  Low = 0,                         // [.., kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize)
+  LowSmall,                        // [kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize, kLowArenaMaxAddr - kLowEmergencySize) 
+  LowEmergency,                    // [kLowArenaMaxAddr - kLowEmergencySize, kLowArenaMaxAddr)
+  Mid,                             // [kLowArenaMaxAddr, kMidArenaMaxAddr) (Only exists in USE_PACKEDPTR builds)
+  Uncounted,                       // [kMidArenaMaxAddr, kHighArenaMaxAddr)
   UncountedCold,                   // [kHighArenaMaxAddr, kUncountedMaxAddr)
+  Global,                          // [kArena0Base, ...)
+  NumRangeClasses,
 };
 
 // Direction of the bump allocator.
@@ -140,12 +200,8 @@ struct RangeState {
     return high() - low();
   }
 
-  void lock() {
-    low_internal.lock_for_update();
-  }
-
-  void unlock() {
-    low_internal.unlock();
+  LockFreePtrWrapper<char*>::ScopedLock lock() {
+    return low_internal.lock_for_update();
   }
 
   // Whether it is possible (but not guaranteed when multiple threads are
@@ -216,8 +272,7 @@ struct RangeState {
       // Need to add more mapping.
       if (newUse > mapFrontier) return nullptr;
       if (low_use.compare_exchange_weak(oldUse, newUse,
-                                        std::memory_order_release,
-                                        std::memory_order_acquire)) {
+                                        std::memory_order_acq_rel)) {
         return reinterpret_cast<void*>(aligned);
       }
     } while (true);
@@ -233,8 +288,7 @@ struct RangeState {
       // Need to add more mapping.
       if (newUse < mapFrontier) return nullptr;
       if (high_use.compare_exchange_weak(oldUse, newUse,
-                                         std::memory_order_release,
-                                         std::memory_order_acquire)) {
+                                         std::memory_order_acq_rel)) {
         return reinterpret_cast<void*>(newUse);
       }
     } while (true);
@@ -244,11 +298,11 @@ struct RangeState {
   // the operation was successful.
   bool tryFreeLow(void* ptr, size_t size) {
     auto const p = reinterpret_cast<uintptr_t>(ptr);
-    assertx(p < low_use.load(std::memory_order_relaxed));
+    assertx(p < low_use.load(std::memory_order_acquire));
     assertx(p >= low());
     uintptr_t expected = p + size;
     return low_use.compare_exchange_strong(expected, p,
-                                           std::memory_order_relaxed);
+                                           std::memory_order_acq_rel);
   }
 
   std::atomic<uintptr_t> low_use{0};
@@ -269,6 +323,7 @@ static_assert(sizeof(RangeState) <= 64, "");
 RangeState& getRange(AddrRangeClass rc);
 
 size_t getLowMapped();
+size_t getMidMapped();
 
 }
 

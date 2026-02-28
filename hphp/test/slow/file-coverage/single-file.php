@@ -1,12 +1,12 @@
 <?hh
 
-function cover_me1() {
+function cover_me1() :mixed{
   $x = __hhvm_intrinsics\launder_value("hello, world!");
   $y = $x."~~";
   var_dump($y);
 }
 
-function cover_me2(bool $has_cover) {
+function cover_me2(bool $has_cover) :mixed{
   $x = __hhvm_intrinsics\launder_value("coverme!");
   if (!$has_cover) {
     $y = __hhvm_intrinsics\launder_value("dontcoverme");
@@ -19,19 +19,19 @@ function cover_me2(bool $has_cover) {
   }
 }
 
-function cover_me3() {
+function cover_me3() :mixed{
   $x = __hhvm_intrinsics\launder_value("hello, world!");
   $y = $x."!!";
   var_dump($y);
 }
 
-function cover_me4() {
+function cover_me4() :mixed{
   $x = __hhvm_intrinsics\launder_value("hello, world!");
   $y = $x."??";
   var_dump($y);
 }
 
-function print_cover_map(vec<int> $map, $max) {
+function print_cover_map(vec<int> $map, $max) :mixed{
   $first = -1;
   $last = -1;
   foreach ($map as $line) {
@@ -48,7 +48,7 @@ function print_cover_map(vec<int> $map, $max) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   cover_me1();      cover_me1();       // opt
   cover_me2(false); cover_me2(false);  // partial opt
   cover_me3();                         // profile

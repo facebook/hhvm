@@ -18,15 +18,12 @@
 #include <memory>
 #include <utility>
 
-#include <folly/experimental/io/FsUtil.h>
-
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/req-deque.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/type-array.h"
-#include "hphp/runtime/base/user-autoload-map.h"
 #include "hphp/util/rds-local.h"
 
 namespace HPHP {
@@ -39,6 +36,24 @@ struct RepoAutoloadMap;
 
 struct AutoloadHandler final : RequestEventHandler {
 
+  /*
+   * RAII helper to prevent autoloading within a particular scope.
+   */
+  struct Inhibit {
+    Inhibit(bool suppress = true)
+      : prev(s_suppressAutoloading ? *s_suppressAutoloading : false)
+    {
+      *s_suppressAutoloading = suppress;
+    }
+    ~Inhibit() { *s_suppressAutoloading = prev; }
+
+    Inhibit(Inhibit&&) = delete;
+    Inhibit& operator=(Inhibit&&) = delete;
+
+  private:
+    bool prev;
+  };
+
   AutoloadHandler() = default;
   AutoloadHandler(const AutoloadHandler&) = delete;
   AutoloadHandler(AutoloadHandler&&) = delete;
@@ -49,49 +64,18 @@ struct AutoloadHandler final : RequestEventHandler {
   void requestInit() override;
   void requestShutdown() override;
 
-  bool autoloadClass(const String& className);
-
   /**
-   * autoloadNamedType() tries to autoload either a class or a type
-   * alias with the specified name. This method avoids calling the
-   * failure callback until one of the following happens: (1) we tried
-   * to autoload the specified name from the 'class' and 'type' maps
-   * but for each map either nothing was found or the file we included
-   * did not define a class or type alias with the specified name, or
-   * (2) there was an uncaught exception or fatal error during an
-   * include operation.
+   * autoloadTypeOrTypeAlias() tries to autoload either a type or a type
+   * alias with the specified name.
    */
-  bool autoloadNamedType(const String& className);
+  bool autoloadTypeOrTypeAlias(const String& className);
 
+  bool autoloadType(const String& className);
   bool autoloadFunc(StringData* name);
   bool autoloadConstant(StringData* name);
-  bool autoloadType(const String& name);
+  bool autoloadTypeAlias(const String& name);
+  bool autoloadModule(StringData* name);
   static RDS_LOCAL(AutoloadHandler, s_instance);
-
-  /**
-   * Initialize the AutoloadHandler with a given root directory and map of
-   * symbols to files.
-   *
-   * The map has the form:
-   *
-   * ```
-   *  shape('class'    => dict['cls' => 'cls_file.php', ...],
-   *        'function' => dict['fun' => 'fun_file.php', ...],
-   *        'constant' => dict['con' => 'con_file.php', ...],
-   *        'type'     => dict['type' => 'type_file.php', ...],
-   *        'failure'  => (string $type, string $name, mixed $err): ?bool ==> {
-   *          return null;  // KEEP_GOING We don't know where this symbol is,
-   *                                      but it isn't important. Ignore the
-   *                                      failure.
-   *          return true;  // RETRY We require_once'd the correct file and the
-   *                                 symbol should now be loaded. Try again.
-   *          return false; // STOP We don't know where this symbol is and we
-   *                                need to know where it is to correctly
-   *                                continue the request. Abort the request.
-   *        });
-   * ```
-   */
-  bool setMap(const Array& map, String root);
 
   const AutoloadMap* getAutoloadMap() const {
     return m_map;
@@ -105,64 +89,39 @@ struct AutoloadHandler final : RequestEventHandler {
     return m_facts;
   }
 
-  Optional<String> getFile(const String& name,
-                                  AutoloadMap::KindOf kind);
-
-  Array getSymbols(const String& path, AutoloadMap::KindOf kind);
+  Optional<AutoloadMap::FileResult> getFile(const String& name,
+                                            AutoloadMap::KindOf kind);
 
   static void setRepoAutoloadMap(std::unique_ptr<RepoAutoloadMap>);
 
 private:
   /**
-   * This method may return Success or Failure.
+   * This method may return true on success or false on failure.
    */
   template <class T>
-  AutoloadMap::Result loadFromMapImpl(const String& name,
-                                      AutoloadMap::KindOf kind,
-                                      const T &checkExists,
-                                      Variant& err);
+  bool loadFromMapImpl(const String& name, AutoloadMap::KindOf kind,
+                       const T &checkExists, Variant& err);
 
   /**
-   * loadFromMap() will call the failure callback if the specified name is not
-   * present in the specified map, or if there is an entry in the map but there
-   * was an error during the include operation. loadFromMap() will also retry
-   * loading the specified name from the map if the failure callback returned
-   * boolean true. Note that calling this method may throw if the failure
-   * callback throws an exception or raises a fatal error.
-   *
-   * This method may return Success, Failure, or StopAutoloading. If the
-   * failure callback was called, this method will not return Failure.
+   * This method attempts to load the unit containing the given symbol,
+   * and will return true on success.
    */
   template <class T>
-  AutoloadMap::Result loadFromMap(const String& name, AutoloadMap::KindOf kind,
-                                  const T &checkExists);
-
-  /**
-   * loadFromMapPartial() will call the failure callback if there is an error
-   * during the include operation, but otherwise it will not call the failure
-   * callback.
-   *
-   * This method may return Success, Failure, StopAutoloading, or
-   * RetryAutoloading. If the failure callback was called, this method will not
-   * return Failure.
-   */
-  template <class T>
-  AutoloadMap::Result loadFromMapPartial(const String& className,
-                                         AutoloadMap::KindOf kind,
-                                         const T &checkExists, Variant& err);
-
-  static String getSignature(const Variant& handler);
+  bool loadFromMap(const String& name, AutoloadMap::KindOf kind,
+                   const T &checkExists);
 
 private:
 
   // The value of m_map determines which data structure, if any, we'll be
   // using for autoloading within this request. m_map may have the same value
-  // as m_req_map (a request-scoped AutoloadMap set from userland) or m_facts
-  // (a statically-scoped native AutoloadMap that can answer additional
-  // queries about the codebase).
+  // as m_facts, a statically-scoped native AutoloadMap that can answer
+  // queries (aka Facts) about the codebase.
   FactsStore* m_facts = nullptr;
-  req::unique_ptr<UserAutoloadMap> m_req_map;
   AutoloadMap* m_map = nullptr;
+
+  // When true disables the various autoload functions. The map itself remains
+  // accessible.
+  static RDS_LOCAL(bool, s_suppressAutoloading);
 
   static std::unique_ptr<RepoAutoloadMap> s_repoAutoloadMap;
 };
@@ -190,6 +149,7 @@ struct FactsFactory {
    * yet, create it.
    */
   virtual FactsStore* getForOptions(const RepoOptions& options) = 0;
+  virtual bool canFork() const { return true; }
 };
 
 }

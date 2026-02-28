@@ -10,10 +10,17 @@ open Hh_prelude
 open Aast
 open Typing_defs
 open Utils
+open Typing_error.Primary.Modules
+open Typing_error.Primary.Package
 module Env = Typing_env
 module TUtils = Typing_utils
-module Cls = Decl_provider.Class
-module Module = Typing_modules
+module Cls = Folded_class
+
+type package_access_result =
+  | Package_access_ok
+  | Package_access_error of Typing_error.t
+  | Package_access_linter_error of
+      (Pos.t * Typing_packages.package_warning_info)
 
 (* Is a private member defined on class/trait [origin_id] visible
  * from code in class/trait [self_id]?
@@ -26,6 +33,9 @@ module Module = Typing_modules
  * trait TR where this = C {
  *   ...C::foo...
  * }
+ *
+ * Using `require_class` also allows a trait to access the private
+ * method from the class it requires
  *)
 let is_private_visible env origin_id self_id =
   if String.equal origin_id self_id then
@@ -38,11 +48,16 @@ let is_private_visible env origin_id self_id =
           | _ -> false)
     in
     match Env.get_class env self_id with
-    | Some cls
-      when Ast_defs.is_c_trait (Cls.kind cls)
-           && in_bounds (Cls.upper_bounds_on_this_from_constraints cls)
-           && in_bounds (Cls.lower_bounds_on_this_from_constraints cls) ->
-      None
+    | Decl_entry.Found cls when Ast_defs.is_c_trait (Cls.kind cls) ->
+      (* If the right class is required via `require class`, give access;
+       * `require this as` constraints are not sufficient to give access *)
+      let bounds_from_require_class_constraints =
+        List.map (Cls.all_ancestor_req_class_requirements cls) ~f:snd
+      in
+      if in_bounds bounds_from_require_class_constraints then
+        None
+      else
+        Some "You cannot access this member"
     | _ -> Some "You cannot access this member"
 
 let is_protected_visible env origin_id self_id =
@@ -50,8 +65,10 @@ let is_protected_visible env origin_id self_id =
     None
   else
     match Env.get_class env origin_id with
-    | None -> None
-    | Some origin_class ->
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      None
+    | Decl_entry.Found origin_class ->
       (* Parents can call direct children's protected methods
        * (like a constructor)
        *)
@@ -67,7 +84,7 @@ let is_private_visible_for_class env x self_id cid class_ =
   | CIstatic ->
     let my_class = Env.get_class env self_id in
     (match my_class with
-    | Some cls when Cls.final cls -> None
+    | Decl_entry.Found cls when Cls.final cls -> None
     | _ ->
       Some
         "Private members cannot be accessed with static:: since a child class may also have an identically named private member")
@@ -76,16 +93,15 @@ let is_private_visible_for_class env x self_id cid class_ =
   | CI (_, called_ci) ->
     (match is_private_visible env x self_id with
     | None -> None
-    | Some _ ->
-      begin
-        match Env.get_class env called_ci with
-        | Some cls when Ast_defs.is_c_trait (Cls.kind cls) ->
-          Some
-            "You cannot access private members using the trait's name (did you mean to use self::?)"
-        | _ -> Some "You cannot access this member"
-      end)
+    | Some _ -> begin
+      match Env.get_class env called_ci with
+      | Decl_entry.Found cls when Ast_defs.is_c_trait (Cls.kind cls) ->
+        Some
+          "You cannot access private members using the trait's name (did you mean to use self::?)"
+      | _ -> Some "You cannot access this member"
+    end)
   | CIexpr _ ->
-    if Cls.final class_ then
+    if Cls.final class_ && String.equal self_id (Cls.name class_) then
       None
     else
       Some
@@ -93,7 +109,10 @@ let is_private_visible_for_class env x self_id cid class_ =
 
 let is_internal_visible env target =
   match
-    Module.can_access ~env ~current:(Env.get_module env) ~target:(Some target)
+    Typing_modules.can_access_internal
+      ~env
+      ~current:(Env.get_current_module env)
+      ~target:(Some target)
   with
   | `Yes -> None
   | `Disjoint (current, target) ->
@@ -106,70 +125,125 @@ let is_internal_visible env target =
   | `OutsideViaTrait _ ->
     Some "You cannot access internal members inside a public trait"
 
-let check_internal_access ~use_pos ~in_signature ~def_pos env internal module_ =
+let check_internal_access ~in_signature env target pos decl_pos =
   let module_err_opt =
-    if internal then
-      let open Typing_error.Primary.Modules in
-      match
-        Module.can_access ~env ~current:(Env.get_module env) ~target:module_
-      with
-      | `Yes when in_signature && not (Env.get_internal env) ->
-        Some (Module_hint { pos = use_pos; decl_pos = def_pos })
-      | `Yes -> None
-      | `Disjoint (current, target) ->
-        Some
-          (Module_mismatch
-             {
-               pos = use_pos;
-               decl_pos = def_pos;
-               current_module_opt = Some current;
-               target_module = target;
-             })
-      | `Outside target ->
-        Some
-          (Module_mismatch
-             {
-               pos = use_pos;
-               decl_pos = def_pos;
-               current_module_opt = None;
-               target_module = target;
-             })
-      | `OutsideViaTrait trait_pos ->
-        Some (Module_unsafe_trait_access { access_pos = use_pos; trait_pos })
-    else
-      None
+    match
+      Typing_modules.can_access_internal
+        ~env
+        ~current:(Env.get_current_module env)
+        ~target
+    with
+    | `Yes when in_signature && not (Env.get_internal env) ->
+      Some (Module_hint { pos; decl_pos })
+    | `Yes -> None
+    | `Disjoint (current, target) ->
+      Some
+        (Module_mismatch
+           {
+             pos;
+             decl_pos;
+             current_module_opt = Some current;
+             target_module = target;
+           })
+    | `Outside target ->
+      Some
+        (Module_mismatch
+           { pos; decl_pos; current_module_opt = None; target_module = target })
+    | `OutsideViaTrait trait_pos ->
+      Some (Module_unsafe_trait_access { access_pos = pos; trait_pos })
   in
   Option.map ~f:Typing_error.modules module_err_opt
 
-let check_classname_access ~use_pos ~in_signature env cls =
-  check_internal_access
+let check_package_access
+    ~should_check_package_boundary
     ~use_pos
-    ~in_signature
-    ~def_pos:(Cls.pos cls)
+    ~def_pos
     env
-    (Cls.internal cls)
-    (Cls.get_module cls)
+    target_package
+    target_id =
+  match should_check_package_boundary with
+  | `No -> Package_access_ok
+  | `Yes target_symbol_spec ->
+    let loaded_packages = Env.get_loaded_packages_list env in
+    let included_packages = Env.get_included_packages env in
+    begin
+      match
+        Typing_packages.can_access_by_package_rules
+          ~env
+          ~target_package_membership:target_package
+          ~target_pos:def_pos
+          ~target_id
+      with
+      | `Yes -> Package_access_ok
+      | `YesWarning w -> Package_access_linter_error (use_pos, w)
+      | `PackageNotSatisfied
+          Typing_packages.
+            {
+              current_package;
+              current_package_assignment_kind;
+              target_package;
+              target_package_assignment_kind;
+              target_id;
+            } ->
+        Package_access_error
+          (Typing_error.package
+             (Cross_pkg_access
+                {
+                  pos = use_pos;
+                  decl_pos = def_pos;
+                  current_filename = Pos.filename use_pos;
+                  target_filename = Pos_or_decl.filename def_pos;
+                  current_package;
+                  current_package_assignment_kind;
+                  target_package;
+                  target_package_assignment_kind;
+                  target_id;
+                  target_symbol_spec;
+                  loaded_packages;
+                  included_packages;
+                }))
+      | `PackageSoftIncludes
+          Typing_packages.
+            {
+              current_package;
+              current_package_assignment_kind;
+              target_package;
+              target_package_assignment_kind;
+              target_id;
+            } ->
+        Package_access_error
+          (Typing_error.package
+             (Soft_included_access
+                {
+                  pos = use_pos;
+                  decl_pos = def_pos;
+                  current_filename = Pos.filename use_pos;
+                  target_filename = Pos_or_decl.filename def_pos;
+                  current_package;
+                  current_package_assignment_kind;
+                  target_package;
+                  target_package_assignment_kind;
+                  target_id;
+                  target_symbol_spec;
+                  loaded_packages;
+                  included_packages;
+                }))
+    end
 
-let check_typedef_access ~use_pos ~in_signature env td =
-  let internal =
-    match td.td_vis with
-    | Tinternal -> true
-    | _ -> false
-  in
-  check_internal_access
-    ~use_pos
-    ~in_signature
-    ~def_pos:td.td_pos
-    env
-    internal
-    (Option.map td.td_module ~f:snd)
-
-let is_visible_for_obj ~is_method env vis =
+let is_visible_for_obj ~is_method ~is_receiver_interface env vis =
   let member_ty =
     if is_method then
       "method"
     else
       "property"
+  in
+  let check_protected x =
+    if is_receiver_interface then
+      Some "You cannot invoke a protected method on an interface"
+    else
+      match Env.get_self_id env with
+      | None -> Some ("You cannot access this " ^ member_ty)
+      | Some self_id -> is_protected_visible env x self_id
   in
   match vis with
   | Vpublic -> None
@@ -177,11 +251,13 @@ let is_visible_for_obj ~is_method env vis =
     (match Env.get_self_id env with
     | None -> Some ("You cannot access this " ^ member_ty)
     | Some self_id -> is_private_visible env x self_id)
-  | Vprotected x ->
-    (match Env.get_self_id env with
-    | None -> Some ("You cannot access this " ^ member_ty)
-    | Some self_id -> is_protected_visible env x self_id)
+  | Vprotected x -> check_protected x
   | Vinternal m -> is_internal_visible env m
+  | Vprotected_internal { class_id; module_ } ->
+    Option.merge
+      (check_protected class_id)
+      (is_internal_visible env module_)
+      ~f:(fun s1 s2 -> s1 ^ "\n" ^ s2)
 
 (* The only permitted way to access an LSB property is via
    static::, ClassName::, or $class_name:: *)
@@ -193,17 +269,24 @@ let is_lsb_permitted cid =
 
 (* LSB property accessibility is relative to the defining class *)
 let is_lsb_accessible env vis =
+  let check_protected x =
+    match Env.get_self_id env with
+    | None -> Some "You cannot access this property"
+    | Some self_id -> is_protected_visible env x self_id
+  in
   match vis with
   | Vpublic -> None
   | Vprivate x ->
     (match Env.get_self_id env with
     | None -> Some "You cannot access this property"
     | Some self_id -> is_private_visible env x self_id)
-  | Vprotected x ->
-    (match Env.get_self_id env with
-    | None -> Some "You cannot access this property"
-    | Some self_id -> is_protected_visible env x self_id)
+  | Vprotected x -> check_protected x
   | Vinternal m -> is_internal_visible env m
+  | Vprotected_internal { class_id; module_ } ->
+    Option.merge
+      (check_protected class_id)
+      (is_internal_visible env module_)
+      ~f:(fun s1 s2 -> s1 ^ "\n" ^ s2)
 
 let is_lsb_visible_for_class env vis cid =
   match is_lsb_permitted cid with
@@ -220,29 +303,37 @@ let is_visible_for_class ~is_method env (vis, lsb) cid cty =
       else
         "property"
     in
+    let check_protected x =
+      match Env.get_self_id env with
+      | None -> Some ("You cannot access this " ^ member_ty)
+      | Some self_id ->
+        let their_class = Env.get_class env x in
+        (match (cid, their_class) with
+        | (CI _, Decl_entry.Found cls) when Ast_defs.is_c_trait (Cls.kind cls)
+          ->
+          Some
+            "You cannot access protected members using the trait's name (did you mean to use static:: or self::?)"
+        | _ -> is_protected_visible env x self_id)
+    in
     match vis with
     | Vpublic -> None
     | Vprivate x ->
       (match Env.get_self_id env with
       | None -> Some ("You cannot access this " ^ member_ty)
       | Some self_id -> is_private_visible_for_class env x self_id cid cty)
-    | Vprotected x ->
-      (match Env.get_self_id env with
-      | None -> Some ("You cannot access this " ^ member_ty)
-      | Some self_id ->
-        let their_class = Env.get_class env x in
-        (match (cid, their_class) with
-        | (CI _, Some cls) when Ast_defs.is_c_trait (Cls.kind cls) ->
-          Some
-            "You cannot access protected members using the trait's name (did you mean to use static:: or self::?)"
-        | _ -> is_protected_visible env x self_id))
+    | Vprotected x -> check_protected x
     | Vinternal m -> is_internal_visible env m
+    | Vprotected_internal { class_id; module_ } ->
+      Option.merge
+        (check_protected class_id)
+        (is_internal_visible env module_)
+        ~f:(fun s1 s2 -> s1 ^ "\n" ^ s2)
 
 let is_visible ~is_method env (vis, lsb) cid class_ =
   let msg_opt =
     match cid with
     | Some cid -> is_visible_for_class ~is_method env (vis, lsb) cid class_
-    | None -> is_visible_for_obj ~is_method env vis
+    | None -> is_visible_for_obj ~is_method ~is_receiver_interface:false env vis
   in
   Option.is_none msg_opt
 
@@ -254,13 +345,48 @@ let visibility_error p msg (p_vis, vis) =
     @@ Primary.Visibility
          { pos = p; msg; decl_pos = p_vis; reason_msg = msg_vis })
 
-let check_obj_access ~is_method ~use_pos ~def_pos env vis =
-  Option.map (is_visible_for_obj ~is_method env vis) ~f:(fun msg ->
-      visibility_error use_pos msg (def_pos, vis))
+let check_obj_access ~is_method ~is_receiver_interface ~use_pos ~def_pos env vis
+    =
+  Option.map
+    (is_visible_for_obj ~is_method ~is_receiver_interface env vis)
+    ~f:(fun msg -> visibility_error use_pos msg (def_pos, vis))
+
+let check_top_level_access
+    ~should_check_package_boundary
+    ~in_signature
+    ~use_pos
+    ~def_pos
+    env
+    is_internal
+    target_module
+    target_package
+    target_id =
+  let module_error =
+    if is_internal then
+      check_internal_access ~in_signature env target_module use_pos def_pos
+    else
+      None
+  in
+  let package_error =
+    check_package_access
+      ~should_check_package_boundary
+      ~use_pos
+      ~def_pos
+      env
+      target_package
+      target_id
+  in
+  match (module_error, package_error) with
+  | (Some e1, Package_access_error e2) -> ([e1; e2], [])
+  | (Some e, Package_access_linter_error w) -> ([e], [w])
+  | (Some e, Package_access_ok) -> ([e], [])
+  | (None, Package_access_error e) -> ([e], [])
+  | (None, Package_access_linter_error w) -> ([], [w])
+  | (None, Package_access_ok) -> ([], [])
 
 let check_expression_tree_vis ~use_pos ~def_pos env vis =
   let open Typing_error in
-  if Typing_env.is_in_expr_tree env then
+  if Env.is_in_expr_tree env then
     match vis with
     | Vpublic -> None
     | _ ->
@@ -270,19 +396,6 @@ let check_expression_tree_vis ~use_pos ~def_pos env vis =
              { pos = use_pos; decl_pos = def_pos })
   else
     None
-
-let check_inst_meth_access ~use_pos ~def_pos vis =
-  let open Typing_error in
-  match vis with
-  | Vprivate _ ->
-    Some
-      (primary
-      @@ Primary.Private_inst_meth { decl_pos = def_pos; pos = use_pos })
-  | Vprotected _ ->
-    Some
-      (primary
-      @@ Primary.Protected_inst_meth { decl_pos = def_pos; pos = use_pos })
-  | _ -> None
 
 let check_meth_caller_access ~use_pos ~def_pos vis =
   let open Typing_error in
@@ -295,6 +408,15 @@ let check_meth_caller_access ~use_pos ~def_pos vis =
     Some
       (primary
       @@ Primary.Protected_meth_caller { decl_pos = def_pos; pos = use_pos })
+  | Vinternal _ ->
+    Some
+      (primary
+      @@ Primary.Internal_meth_caller { decl_pos = def_pos; pos = use_pos })
+  | Vprotected_internal _ ->
+    Some
+      (primary
+      @@ Primary.Protected_internal_meth_caller
+           { decl_pos = def_pos; pos = use_pos })
   | _ -> None
 
 let check_class_access ~is_method ~use_pos ~def_pos env (vis, lsb) cid class_ =
@@ -302,8 +424,98 @@ let check_class_access ~is_method ~use_pos ~def_pos env (vis, lsb) cid class_ =
     (is_visible_for_class ~is_method env (vis, lsb) cid class_)
     ~f:(fun msg -> visibility_error use_pos msg (def_pos, vis))
 
+let check_cross_package ~use_pos ~def_pos:_ env package_requirement =
+  let current_pkg = Env.get_current_package env in
+  let current_file = Env.get_file env in
+
+  let can_call_in_continuation target =
+    let target_pkg = Env.get_package_by_name env target in
+    Typing_packages.get_package_violation env current_pkg target_pkg
+  in
+
+  let in_exclude_patterns target_pos =
+    let target_file = Pos_or_decl.filename target_pos in
+    let accessing_hhi = Pos_or_decl.is_hhi target_pos in
+    accessing_hhi
+    || Typing_packages.is_excluded env current_file
+    || Typing_packages.is_excluded env target_file
+  in
+
+  match package_requirement with
+  | Some (RPRequire (target_pos, target)) ->
+    if in_exclude_patterns target_pos then
+      None
+    else (
+      match can_call_in_continuation target with
+      | Some _ ->
+        (* Convert from Package.t option to (string * Pos.t) option *)
+        let current_package =
+          Option.map current_pkg ~f:(fun pkg -> pkg.Package.name)
+        in
+        Some
+          (Typing_error.package
+             (Cross_pkg_access_with_requirepackage
+                {
+                  pos = use_pos;
+                  decl_pos = target_pos;
+                  target_package = target;
+                  current_package;
+                  loaded_packages = Env.get_loaded_packages_list env;
+                  included_packages = Env.get_included_packages env;
+                }))
+      | _ -> None
+    )
+  | Some (RPSoft (soft_pos, soft)) ->
+    if in_exclude_patterns soft_pos then
+      None
+    else (
+      (* If the per-continuation environment does not provide the softly-required
+       * package, we have one more option -- a __SoftRequirePackage function may
+       * call another __SoftRequirePackage function to aid monolithic migration
+       * to __RequirePackage. In the soft-soft case, the choice of error is
+       * arbitrary; we'll focus on the soft annotation rather than the per-cont
+       * environment packages. *)
+      match can_call_in_continuation soft with
+      | Some _ ->
+        (match Env.get_soft_package_requirement env with
+        | Some (env_soft_pos, env_soft) ->
+          let env_soft_pkg = Env.get_package_by_name env env_soft in
+          let soft_pkg = Env.get_package_by_name env soft in
+          (match
+             Typing_packages.get_package_violation env env_soft_pkg soft_pkg
+           with
+          | Some _ ->
+            Some
+              (Typing_error.package
+                 (Cross_pkg_access_with_softrequirepackage
+                    {
+                      pos = use_pos;
+                      decl_pos = soft_pos;
+                      current_soft_package_opt = Some (env_soft_pos, env_soft);
+                      target_package = soft;
+                      loaded_packages = Env.get_loaded_packages_list env;
+                      included_packages = Env.get_included_packages env;
+                    }))
+          | None -> None)
+        | None ->
+          Some
+            (Typing_error.package
+               (Cross_pkg_access_with_softrequirepackage
+                  {
+                    pos = use_pos;
+                    decl_pos = soft_pos;
+                    current_soft_package_opt = None;
+                    target_package = soft;
+                    loaded_packages = Env.get_loaded_packages_list env;
+                    included_packages = Env.get_included_packages env;
+                  })))
+      | _ -> None
+    )
+  | Some RPNormal -> None
+  | None -> None
+
 let check_deprecated ~use_pos ~def_pos env deprecated =
-  if Typing_env_types.(env.in_support_dynamic_type_method_check) then
+  if Tast.is_under_dynamic_assumptions env.Typing_env_types.checked then
     None
   else
     Option.map deprecated ~f:(fun s ->

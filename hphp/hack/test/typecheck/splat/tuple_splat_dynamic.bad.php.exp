@@ -1,0 +1,6 @@
+ERROR: File "tuple_splat_dynamic.bad.php", line 11, characters 14-17:
+Invalid argument (Typing[4110])
+  File "tuple_splat_dynamic.bad.php", line 5, characters 21-27:
+  Expected `dynamic`
+  File "tuple_splat_dynamic.bad.php", line 10, characters 46-56:
+  Type `(int, ...T)` is not a subtype of `dynamic` under dynamic-aware subtyping

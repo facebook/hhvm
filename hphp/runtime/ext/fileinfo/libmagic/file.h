@@ -33,7 +33,7 @@
 #ifndef __file_h__
 #define __file_h__
 
-#include "compat.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/compat.h"
 
 #include "hphp/util/hphp-config.h"
 
@@ -390,7 +390,7 @@ struct magic_set {
 };
 
 /* Type for Unicode characters */
-typedef unsigned long unichar;
+using unichar = unsigned long;
 
 struct stat;
 #define FILE_T_LOCAL  1

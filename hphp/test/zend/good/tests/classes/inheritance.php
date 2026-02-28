@@ -5,19 +5,19 @@
 class foo {
   public $a;
   public $b;
-  function display() {
+  function display() :mixed{
   	echo "This is class foo\n";
     echo "a = ".$this->a."\n";
     echo "b = ".$this->b."\n";
   }
-  function mul() {
+  function mul() :mixed{
     return $this->a*$this->b;
   }
 }
 
 class bar extends foo {
   public $c;
-  function display() {  /* alternative display function for class bar */
+  function display() :mixed{  /* alternative display function for class bar */
     echo "This is class bar\n";
     echo "a = ".$this->a."\n";
     echo "b = ".$this->b."\n";

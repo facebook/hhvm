@@ -22,14 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(filter_list);
-Variant HHVM_FUNCTION(filter_id,
-                      const String& filtername);
-Variant HHVM_FUNCTION(filter_var,
-                      const Variant& variable,
-                      int64_t filter,
-                      const Variant& options);
-
 extern const int64_t k_FILTER_FLAG_NONE;
 extern const int64_t k_FILTER_REQUIRE_SCALAR;
 extern const int64_t k_FILTER_REQUIRE_ARRAY;

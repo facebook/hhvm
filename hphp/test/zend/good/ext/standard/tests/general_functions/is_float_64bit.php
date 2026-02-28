@@ -3,14 +3,14 @@
  * Description: Finds whether the given variable is a float
  */
 class foo {
-  public $array = varray[10.5];
+  public $array = vec[10.5];
 }
 
 <<__EntryPoint>>
 function main(): void {
   echo "*** Testing is_float(), is_double() and is_real() with float values***\n";
   // different valid  float vlaues
-  $floats = varray[
+  $floats = vec[
     -2147483649, // float value
     2147483648,  // float value
     -0x80000001, // float value, beyond max negative int
@@ -62,18 +62,18 @@ function main(): void {
   // non_scalar values, objects, arrays, resources and boolean
   $object = new foo();
 
-  $not_floats = varray[
+  $not_floats = vec[
     new foo, //object
     $object,
 
     $fp,  // resource
     $dfp,
 
-    varray[],  // arrays
-    varray[NULL],
-    varray[0.5e10],
-    varray[1,2,3,4],
-    varray["string"],
+    vec[],  // arrays
+    vec[NULL],
+    vec[0.5e10],
+    vec[1,2,3,4],
+    vec["string"],
 
     NULL,  // nulls
     null,

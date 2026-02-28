@@ -13,7 +13,7 @@ enum Enum2 : string {
   VAL3 = 'VAL3';
 }
 
-enum Enum3 : mixed {
+enum Enum3 : arraykey {
   VAL1 = 1;
   VAL2 = 'VAL2';
   VAL3 = 3;
@@ -314,7 +314,7 @@ class B extends A {
   public static ?CondAlias $sopt31;
 }
 
-function test($x) {
+function test($x) :mixed{
   var_dump($x->p1);
   var_dump($x->p2);
   var_dump($x->p3);

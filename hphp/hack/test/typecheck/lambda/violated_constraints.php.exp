@@ -1,4 +1,4 @@
-File "violated_constraints.php", line 7, characters 9-17:
+ERROR: File "violated_constraints.php", line 7, characters 9-17:
 Some type arguments violate their constraints (Typing[4323])
   File "violated_constraints.php", line 3, characters 9-9:
   `T` is a constrained type parameter
@@ -8,7 +8,7 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `num`
   File "violated_constraints.php", line 7, characters 11-16:
   But got `string`
-File "violated_constraints.php", line 7, characters 25-33:
+ERROR: File "violated_constraints.php", line 7, characters 25-33:
 Some type arguments violate their constraints (Typing[4323])
   File "violated_constraints.php", line 3, characters 9-9:
   `T` is a constrained type parameter

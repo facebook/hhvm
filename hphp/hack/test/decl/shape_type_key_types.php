@@ -3,6 +3,6 @@
 type Shape = shape(
   0 => int,
   's' => string,
-  C::class => classname<C>,
+  nameof C => classname<C>,
   C::KEY => string,
 );

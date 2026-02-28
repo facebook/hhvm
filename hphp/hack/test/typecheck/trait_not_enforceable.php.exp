@@ -1,0 +1,6 @@
+ERROR: File "trait_not_enforceable.php", line 12, characters 7-14:
+Invalid type (Typing[4302])
+  File "trait_not_enforceable.php", line 7, characters 38-38:
+  Type parameter `T` was declared `__Enforceable` here
+  File "trait_not_enforceable.php", line 12, characters 7-14:
+  This type is not enforceable because it has a trait name

@@ -6,14 +6,14 @@ class C {
   }
 }
 
-function foo($x) {
+function foo($x) :mixed{
   new C(...$x);
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   try {
-    foo(varray[1,2]);
+    foo(vec[1,2]);
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }

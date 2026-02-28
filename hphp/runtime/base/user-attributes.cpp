@@ -15,18 +15,19 @@
 */
 
 #include "hphp/runtime/base/user-attributes.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/tv-comparisons.h"
+#include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/vm/disas.h"
 
-#include <folly/Hash.h>
-
+#include <folly/concurrency/ConcurrentHashMap.h>
 #include <tbb/concurrent_unordered_set.h>
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(stats);
+TRACE_SET_MOD(stats)
 
 // Somehow the visibility attribute is important for shared-library builds.
 UserAttributeMap::Map UserAttributeMap::s_empty_map EXTERNALLY_VISIBLE;
@@ -69,7 +70,7 @@ void UserAttributeMap::lookup(Map&& m) {
   static tbb::concurrent_unordered_set<copy_ptr<Map>,
                                        UserAttributeMap::MapCompare,
                                        UserAttributeMap::MapCompare> s_maps;
-  s_count.fetch_add(1, std::memory_order_relaxed);
+  s_count.fetch_add(1, std::memory_order_acq_rel);
   m_map.emplace(std::move(m));
 
   auto ret = s_maps.insert(m_map);
@@ -77,10 +78,27 @@ void UserAttributeMap::lookup(Map&& m) {
     FTRACE(3, "Adding User Attributes {}; {} out of {}\n",
            user_attrs(this),
            s_maps.size(),
-           s_count.load(std::memory_order_relaxed));
+           s_count.load(std::memory_order_acquire));
   } else {
     m_map = *ret.first;
   }
+}
+
+Array UserAttributeMap::getArray() const {
+  static folly::ConcurrentHashMap<copy_ptr<Map>, ArrayData*,
+                                  UserAttributeMap::MapCompare,
+                                  UserAttributeMap::MapCompare> s_cache;
+
+  if (empty()) return empty_dict_array();
+  if (auto const ad = folly::get_default(s_cache, m_map)) return ArrNR{ad};
+
+  DictInit ai(size());
+  for (auto [k, v] : map()) ai.set(StrNR{k}, v);
+  auto arr = ai.toArray();
+  arr.setEvalScalar();
+
+  s_cache.insert(m_map, arr.get());
+  return arr;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -6,7 +6,8 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
+module Sys = Stdlib.Sys
 open Printf
 open Reordered_argument_collections
 open Utils
@@ -27,22 +28,34 @@ let regen_instructions = "
 // To regenerate this file, run:
 //   "
 
-let parse filename =
+let with_lexbuf (filename : string) ~(f : Lexing.lexbuf -> 'a) : 'a =
   let ic = In_channel.create filename in
   let lexbuf = Lexing.from_channel ic in
-  let phrases = Parse.use_file lexbuf in
+  let result = f lexbuf in
   In_channel.close ic;
-  phrases
+  result
+
+let parse (filename : string) : Parsetree.toplevel_phrase list =
+  with_lexbuf filename ~f:Parse.use_file
+
+let parse_mli (filename : string) : Parsetree.signature option =
+  let mli_filename = String.chop_suffix_exn filename ~suffix:".ml" ^ ".mli" in
+  if Sys.file_exists mli_filename then
+    Some (with_lexbuf mli_filename ~f:Parse.interface)
+  else
+    None
 
 let oxidize filename =
   let phrases = parse filename in
+  let mli_signature = parse_mli filename in
   let in_basename = Filename.basename filename in
   let module_name = String.chop_suffix_exn in_basename ~suffix:".ml" in
   let module_name = convert_module_name module_name in
   log "Converting %s" module_name;
+  Convert_type_decl.reset_excluded_types ();
   let oxidized_module =
     Utils.with_log_indent (fun () ->
-        Output.with_output_context ~module_name (fun () ->
+        Output.with_output_context ~module_name ~mli_signature (fun () ->
             let _env =
               Convert_toplevel_phrase.(
                 List.fold phrases ~f:toplevel_phrase ~init:Env.empty)
@@ -63,7 +76,6 @@ let write filename contents =
   Out_channel.close oc
 
 let write_format_and_sign env filename contents =
-  log "Writing %s" filename;
   write filename contents;
   if Sys.command (sprintf "%S %S" env.rustfmt filename) <> 0 then
     failwith ("Could not format Rust output in " ^ filename);
@@ -74,13 +86,14 @@ let write_format_and_sign env filename contents =
   in
   write filename contents
 
+let make_header regen_command =
+  match regen_command with
+  | None -> header
+  | Some cmd -> header ^ regen_instructions ^ cmd
+
 let convert_files env out_dir files regen_command =
   ignore (Sys.command (sprintf "rm -f %S/*.rs" out_dir));
-  let header =
-    match regen_command with
-    | None -> header
-    | Some cmd -> header ^ regen_instructions ^ cmd
-  in
+  let header = make_header regen_command in
   let modules = files |> List.map ~f:oxidize |> SMap.of_list in
   let () =
     modules
@@ -98,43 +111,46 @@ let convert_files env out_dir files regen_command =
   let manifest = header ^ "\n\n" ^ manifest_mods in
   write_format_and_sign env manifest_filename manifest
 
-let convert_single_file env filename =
+let convert_single_file env filename regen_command =
   with_tempfile @@ fun out_filename ->
   let (_, oxidized_module) = oxidize filename in
   let src = Stringify.stringify oxidized_module in
   write_format_and_sign env out_filename src;
+  let header = make_header regen_command in
   printf "%s\n%s" header (read out_filename)
 
-let parse_types_file filename =
+let parse_types_line line filename =
+  if String.is_substring line ~substring:"::" then
+    line
+  else
+    failwith
+      (Printf.sprintf "Failed to parse line in types file %S: %S" filename line)
+
+let parse_file filename parse_line =
   let lines = ref [] in
-  let ic = Caml.open_in filename in
+  let ic = Stdlib.open_in filename in
   (try
      while true do
-       lines := Caml.input_line ic :: !lines
+       lines := Stdlib.input_line ic :: !lines
      done;
-     Caml.close_in ic
+     Stdlib.close_in ic
    with
-  | End_of_file -> Caml.close_in ic);
-  List.filter_map !lines ~f:(fun name ->
+  | End_of_file -> Stdlib.close_in ic);
+  List.filter_map !lines ~f:(fun line ->
       (* Ignore comments beginning with '#' *)
-      let name =
-        match String.index name '#' with
-        | Some idx -> String.sub name ~pos:0 ~len:idx
-        | None -> name
+      let line =
+        match String.index line '#' with
+        | Some idx -> String.sub line ~pos:0 ~len:idx
+        | None -> line
       in
       (* Strip whitespace *)
-      let name = String.strip name in
-      if String.is_substring name ~substring:"::" then
-        Some name
-      else (
-        if String.(name <> "") then
-          failwith
-            (Printf.sprintf
-               "Failed to parse line in types file %S: %S"
-               filename
-               name);
+      let line = String.strip line in
+      if String.equal line "" then
         None
-      ))
+      else
+        Some (parse_line line filename))
+
+let parse_types_file filename = parse_file filename parse_types_line
 
 let parse_extern_types_file filename =
   parse_types_file filename
@@ -159,16 +175,19 @@ let parse_extern_types_file filename =
                   name);
            map)
 
-let parse_owned_types_file filename = SSet.of_list (parse_types_file filename)
-
 let parse_copy_types_file filename = SSet.of_list (parse_types_file filename)
+
+let parse_safe_ints_file filename = SSet.of_list (parse_types_file filename)
 
 let usage =
   "Usage: buck run hphp/hack/src/hh_oxidize -- [out_directory] [target_files]
        buck run hphp/hack/src/hh_oxidize -- [target_file]"
 
 type mode =
-  | File of string
+  | File of {
+      file: string;
+      regen_command: string option;
+    }
   | Files of {
       out_dir: string;
       files: string list;
@@ -185,10 +204,9 @@ let parse_args () =
   let regen_command = ref None in
   let rustfmt_path = ref None in
   let files = ref [] in
-  let mode = ref Configuration.ByBox in
   let extern_types_file = ref None in
-  let owned_types_file = ref None in
   let copy_types_file = ref None in
+  let safe_ints_types_file = ref None in
   let options =
     [
       ( "--out-dir",
@@ -200,21 +218,17 @@ let parse_args () =
       ( "--rustfmt-path",
         Arg.String (fun s -> rustfmt_path := Some s),
         " Path to rustfmt binary used to format output" );
-      ( "--by-ref",
-        Arg.Unit (fun () -> mode := Configuration.ByRef),
-        " Use references instead of Box, slices instead of Vec and String" );
       ( "--extern-types-file",
         Arg.String (fun s -> extern_types_file := Some s),
         " Use the types listed in this file rather than assuming all types"
         ^ " are defined within the set of files being oxidized" );
-      ( "--owned-types-file",
-        Arg.String (fun s -> owned_types_file := Some s),
-        " Do not add a lifetime parameter to the types listend in this file"
-        ^ " (when --by-ref is enabled)" );
       ( "--copy-types-file",
         Arg.String (fun s -> copy_types_file := Some s),
-        " Do not use references for the types listed in this file"
-        ^ " (when --by-ref is enabled)" );
+        " Derive Copy for the types listed in this file" );
+      ( "--safe-ints-types-file",
+        Arg.String (fun s -> safe_ints_types_file := Some s),
+        " Convert integers to ocamlrep::OCamlInt (instead of isize) for these type declarations"
+      );
     ]
   in
   Arg.parse options (fun file -> files := file :: !files) usage;
@@ -223,15 +237,16 @@ let parse_args () =
     | None -> Configuration.(default.extern_types)
     | Some filename -> parse_extern_types_file filename
   in
-  let owned_types =
-    match !owned_types_file with
-    | None -> Configuration.(default.owned_types)
-    | Some filename -> parse_owned_types_file filename
-  in
   let copy_types = Option.map !copy_types_file ~f:parse_copy_types_file in
-  Configuration.set
-    { Configuration.mode = !mode; extern_types; owned_types; copy_types };
+  let safe_ints_types =
+    Option.value_map
+      !safe_ints_types_file
+      ~f:parse_safe_ints_file
+      ~default:SSet.empty
+  in
+  Configuration.set { extern_types; copy_types; safe_ints_types };
   let rustfmt_path = Option.value !rustfmt_path ~default:"rustfmt" in
+  let regen_command = !regen_command in
   match !files with
   | [] ->
     eprintf "%s\n" usage;
@@ -239,9 +254,7 @@ let parse_args () =
   | [file] ->
     if Option.is_some !out_dir then
       failwith "Cannot set output directory in single-file mode";
-    if Option.is_some !regen_command then
-      failwith "Cannot set regen command in single-file mode";
-    { mode = File file; rustfmt_path }
+    { mode = File { file; regen_command }; rustfmt_path }
   | files ->
     let out_dir =
       match !out_dir with
@@ -249,13 +262,12 @@ let parse_args () =
       | None ->
         failwith "Cannot convert multiple files without output directory"
     in
-    let regen_command = !regen_command in
     { mode = Files { out_dir; files; regen_command }; rustfmt_path }
 
 let () =
   let { mode; rustfmt_path } = parse_args () in
   let env = { rustfmt = rustfmt_path } in
   match mode with
-  | File file -> convert_single_file env file
+  | File { file; regen_command } -> convert_single_file env file regen_command
   | Files { out_dir; files; regen_command } ->
     convert_files env out_dir files regen_command

@@ -1,14 +1,14 @@
 <?hh
 
 abstract class Base {
-  abstract function sayWorld();
+  abstract function sayWorld():mixed;
 }
 
 trait Hello {
-   public function sayHello() {
+   public function sayHello() :mixed{
      echo 'Hello';
    }
-   public function sayWorld() {
+   public function sayWorld() :mixed{
      echo ' World!';
    }
 }

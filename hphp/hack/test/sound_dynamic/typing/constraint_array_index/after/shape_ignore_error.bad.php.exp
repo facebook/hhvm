@@ -1,0 +1,4 @@
+ERROR: File "shape_ignore_error.bad.php", line 3, characters 8-27:
+You are accessing a field known to not exist (Typing[4321])
+  File "shape_ignore_error.bad.php", line 2, characters 27-33:
+  The field `a` is not defined in this shape

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 final class Bar1 implements IDisposable {
   public function __dispose(): void {}

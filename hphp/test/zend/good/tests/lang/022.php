@@ -1,7 +1,7 @@
 <?hh
 
 function switchtest ($i, $j)
-{
+:mixed{
     switch ($i) {
         case 0:
                 switch($j) {

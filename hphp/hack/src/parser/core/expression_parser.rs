@@ -7,18 +7,26 @@
 use std::borrow::Cow;
 use std::marker::PhantomData;
 
-use crate::declaration_parser::DeclarationParser;
-use crate::lexer::{Lexer, StringLiteralKind};
-use crate::operator::{Assoc, Operator};
-use crate::parser_env::ParserEnv;
-use crate::parser_trait::{Context, ParserTrait};
-use crate::smart_constructors::{NodeType, SmartConstructors, Token};
-use crate::statement_parser::StatementParser;
-use crate::type_parser::TypeParser;
 use parser_core_types::lexable_token::LexableToken;
-use parser_core_types::syntax_error::{self as Errors, SyntaxError};
+use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_error::SyntaxQuickfix;
+use parser_core_types::syntax_error::{self as Errors};
 use parser_core_types::token_factory::TokenFactory;
 use parser_core_types::token_kind::TokenKind;
+
+use crate::declaration_parser::DeclarationParser;
+use crate::lexer::Lexer;
+use crate::lexer::StringLiteralKind;
+use crate::operator::Assoc;
+use crate::operator::Operator;
+use crate::parser_env::ParserEnv;
+use crate::parser_trait::Context;
+use crate::parser_trait::ParserTrait;
+use crate::smart_constructors::NodeType;
+use crate::smart_constructors::SmartConstructors;
+use crate::smart_constructors::Token;
+use crate::statement_parser::StatementParser;
+use crate::type_parser::TypeParser;
 
 #[derive(PartialEq)]
 pub enum BinaryExpressionPrefixKind<P> {
@@ -53,11 +61,11 @@ enum ParseContinuation<NT, P> {
 pub struct ExpressionParser<'a, S>
 where
     S: SmartConstructors,
-    S::R: NodeType,
+    S::Output: NodeType,
 {
-    lexer: Lexer<'a, S::TF>,
+    lexer: Lexer<'a, S::Factory>,
     env: ParserEnv,
-    context: Context<'a, Token<S>>,
+    context: Context<Token<S>>,
     errors: Vec<SyntaxError>,
     sc: S,
     precedence: usize,
@@ -69,12 +77,12 @@ where
 impl<'a, S> ParserTrait<'a, S> for ExpressionParser<'a, S>
 where
     S: SmartConstructors,
-    S::R: NodeType,
+    S::Output: NodeType,
 {
     fn make(
-        lexer: Lexer<'a, S::TF>,
+        lexer: Lexer<'a, S::Factory>,
         env: ParserEnv,
-        context: Context<'a, Token<S>>,
+        context: Context<Token<S>>,
         errors: Vec<SyntaxError>,
         sc: S,
     ) -> Self {
@@ -91,15 +99,22 @@ where
         }
     }
 
-    fn into_parts(self) -> (Lexer<'a, S::TF>, Context<'a, Token<S>>, Vec<SyntaxError>, S) {
+    fn into_parts(
+        self,
+    ) -> (
+        Lexer<'a, S::Factory>,
+        Context<Token<S>>,
+        Vec<SyntaxError>,
+        S,
+    ) {
         (self.lexer, self.context, self.errors, self.sc)
     }
 
-    fn lexer(&self) -> &Lexer<'a, S::TF> {
+    fn lexer(&self) -> &Lexer<'a, S::Factory> {
         &self.lexer
     }
 
-    fn lexer_mut(&mut self) -> &mut Lexer<'a, S::TF> {
+    fn lexer_mut(&mut self) -> &mut Lexer<'a, S::Factory> {
         &mut self.lexer
     }
 
@@ -131,11 +146,11 @@ where
         &self.context.skipped_tokens
     }
 
-    fn context_mut(&mut self) -> &mut Context<'a, Token<S>> {
+    fn context_mut(&mut self) -> &mut Context<Token<S>> {
         &mut self.context
     }
 
-    fn context(&self) -> &Context<'a, Token<S>> {
+    fn context(&self) -> &Context<Token<S>> {
         &self.context
     }
 }
@@ -143,7 +158,7 @@ where
 impl<'a, S> ExpressionParser<'a, S>
 where
     S: SmartConstructors,
-    S::R: NodeType,
+    S::Output: NodeType,
 {
     fn allow_as_expressions(&self) -> bool {
         self.allow_as_expressions
@@ -180,7 +195,7 @@ where
         res
     }
 
-    fn parse_remaining_type_specifier(&mut self, name: S::R) -> S::R {
+    fn parse_remaining_type_specifier(&mut self, name: S::Output) -> S::Output {
         let mut type_parser: TypeParser<'_, S> = TypeParser::make(
             self.lexer.clone(),
             self.env.clone(),
@@ -193,7 +208,7 @@ where
         res
     }
 
-    fn parse_generic_type_arguments(&mut self) -> (S::R, bool) {
+    fn parse_generic_type_arguments(&mut self) -> (S::Output, bool) {
         self.with_type_parser(|x| x.parse_generic_type_argument_list())
     }
 
@@ -229,28 +244,30 @@ where
         res
     }
 
-    fn parse_compound_statement(&mut self) -> S::R {
+    fn parse_compound_statement(&mut self) -> S::Output {
         self.with_statement_parser(|x| x.parse_compound_statement())
     }
 
-    fn parse_parameter_list_opt(&mut self) -> (S::R, S::R, S::R) {
+    fn parse_parameter_list_opt(&mut self) -> (S::Output, S::Output, S::Output) {
         self.with_decl_parser(|x| x.parse_parameter_list_opt())
     }
 
-    pub fn parse_expression(&mut self) -> S::R {
-        let term = self.parse_term();
-        self.parse_remaining_expression(term)
+    pub fn parse_expression(&mut self) -> S::Output {
+        stack_limit::maybe_grow(|| {
+            let term = self.parse_term();
+            self.parse_remaining_expression(term)
+        })
     }
 
     fn with_reset_precedence<U, F: FnOnce(&mut Self) -> U>(&mut self, parse_function: F) -> U {
         self.with_numeric_precedence(0, parse_function)
     }
 
-    fn parse_expression_with_reset_precedence(&mut self) -> S::R {
+    fn parse_expression_with_reset_precedence(&mut self) -> S::Output {
         self.with_reset_precedence(|x| x.parse_expression())
     }
 
-    fn parse_expression_with_operator_precedence(&mut self, operator: Operator) -> S::R {
+    fn parse_expression_with_operator_precedence(&mut self, operator: Operator) -> S::Output {
         self.with_operator_precedence(operator, |x| x.parse_expression())
     }
 
@@ -270,22 +287,22 @@ where
         result
     }
 
-    fn with_operator_precedence<F: FnOnce(&mut Self) -> S::R>(
+    fn with_operator_precedence<F: FnOnce(&mut Self) -> S::Output>(
         &mut self,
         operator: Operator,
         parse_function: F,
-    ) -> S::R {
+    ) -> S::Output {
         let new_precedence = operator.precedence(&self.env);
         self.with_numeric_precedence(new_precedence, parse_function)
     }
 
-    fn parse_as_name_or_error(&mut self) -> S::R {
+    fn parse_as_name_or_error(&mut self) -> S::Output {
         let mut parser1 = self.clone();
         let token = parser1.next_token_non_reserved_as_name();
         match token.kind() {
             TokenKind::Namespace | TokenKind::Name => {
                 self.continue_from(parser1);
-                let token = S!(make_token, self, token);
+                let token = self.sc_mut().make_token(token);
                 let name = self.scan_remaining_qualified_name(token);
                 self.parse_name_or_collection_literal_expression(name)
             }
@@ -293,26 +310,72 @@ where
                 // ERROR RECOVERY: If we're encountering a token that matches a kind in
                 // the previous scope of the expected stack, don't eat it--just mark the
                 // name missing and continue parsing, starting from the offending token.
-                self.with_error(Errors::error1015);
-                S!(make_missing, self, self.pos())
+                self.with_error(Errors::error1015, Vec::new());
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
             }
-            _ => {
+            kind => {
                 self.continue_from(parser1);
                 // ERROR RECOVERY: If we're encountering anything other than a TokenKind::Name
                 // or the next expected kind, eat the offending token.
                 // TODO: Increase the coverage of PrecedenceParser.expects_next, so that
                 // we wind up eating fewer of the tokens that'll be needed by the outer
                 // statement / declaration parsers.
-                self.with_error(Errors::error1015);
-                S!(make_token, self, token)
+                match (kind, token.leading_start_offset()) {
+                    (TokenKind::Equal, Some(lhs_leading_start_offset)) => {
+                        let lhs_start_offset = lhs_leading_start_offset + token.leading_width();
+                        let (lhs_end_offset, _) = self.error_offsets(false);
+                        let rhs_offset = {
+                            let mut parser = self.clone();
+                            parser.parse_expression_with_reset_precedence();
+                            parser.lexer().start()
+                        };
+                        self.with_error(
+                            Errors::error2078,
+                            vec![SyntaxQuickfix {
+                                title: "convert to 'debugger_dump'".into(),
+                                edits: vec![
+                                    (lhs_start_offset, lhs_end_offset, "debugger_dump(".into()),
+                                    (rhs_offset, rhs_offset, ")".into()),
+                                ],
+                            }],
+                        );
+                    }
+                    _ => {
+                        self.with_error(Errors::error1015, Vec::new());
+                    }
+                };
+                self.sc_mut().make_token(token)
             }
         }
     }
 
-    fn parse_term(&mut self) -> S::R {
+    // Used in conjunction with the following function. If you call next_token
+    // when the parser is at the <<<, it will scan the entire file looking for an
+    // ending to the heredoc, which could quickly get bad if there are many such
+    // declarations in a file.
+    fn peek_next_partial_token_is_triple_left_angle(&self) -> bool {
+        let mut lexer = self.lexer().clone();
+        lexer.scan_leading_php_trivia();
+        let tparam_open = lexer.peek_char(0);
+        let attr1 = lexer.peek_char(1);
+        let attr2 = lexer.peek_char(2);
+        tparam_open == '<' && attr1 == '<' && attr2 == '<'
+    }
+
+    // Type parameter/argument lists begin with < and can have attributes immediately
+    // afterwards, so this peeks a token kind at the beginning of such a list. *)
+    fn peek_token_kind_with_possible_attributized_type_list(&self) -> TokenKind {
+        if self.peek_next_partial_token_is_triple_left_angle() {
+            TokenKind::LessThan
+        } else {
+            self.peek_token_kind()
+        }
+    }
+
+    fn parse_term(&mut self) -> S::Output {
         let mut parser1 = self.clone();
         let token = parser1.next_xhp_class_name_or_other_token();
-        let allow_new_attr = self.env.allow_new_attribute_syntax;
         match token.kind() {
             TokenKind::DecimalLiteral
             | TokenKind::OctalLiteral
@@ -364,8 +427,7 @@ where
             | TokenKind::Readonly
             | TokenKind::Clone
             | TokenKind::Print => self.parse_prefix_unary_expression(),
-            // Allow error suppression prefix when not using new attributes
-            TokenKind::At if !allow_new_attr => self.parse_prefix_unary_expression(),
+            TokenKind::At => self.parse_prefix_unary_expression(),
             TokenKind::LeftParen => self.parse_cast_or_parenthesized_or_lambda_expression(),
             TokenKind::LessThan => {
                 self.continue_from(parser1);
@@ -390,7 +452,6 @@ where
             TokenKind::LessThanLessThan | TokenKind::Async => {
                 self.parse_anon_or_lambda_or_awaitable()
             }
-            TokenKind::At if allow_new_attr => self.parse_anon_or_lambda_or_awaitable(),
             TokenKind::Include
             | TokenKind::Include_once
             | TokenKind::Require
@@ -398,10 +459,18 @@ where
             TokenKind::Isset => self.parse_isset_expression(),
             TokenKind::Eval => self.parse_eval_expression(),
             TokenKind::Hash => {
-                let qualifier = S!(make_missing, self, self.pos());
+                let pos = self.pos();
+                let qualifier = self.sc_mut().make_missing(pos);
                 self.parse_enum_class_label_expression(qualifier)
             }
+            TokenKind::Package => self.parse_package_expression(),
             TokenKind::Empty => self.parse_empty(),
+            TokenKind::Nameof => self.parse_nameof(),
+            TokenKind::Backtick => {
+                let pos = self.pos();
+                let prefix = self.sc_mut().make_missing(pos);
+                self.parse_expression_tree(prefix)
+            }
             kind if self.expects(kind) => {
                 // ERROR RECOVERY: if we've prematurely found a token we're expecting
                 // later, mark the expression missing, throw an error, and do not advance
@@ -412,47 +481,50 @@ where
         }
     }
 
-    fn parse_null(&mut self, token: Token<S>) -> S::R {
-        let token = S!(make_token, self, token);
-        S!(make_literal_expression, self, token)
+    fn parse_null(&mut self, token: Token<S>) -> S::Output {
+        let token = self.sc_mut().make_token(token);
+        self.sc_mut().make_literal_expression(token)
     }
 
-    fn parse_xhp_class_name(&mut self, token: Token<S>) -> S::R {
-        let token = S!(make_token, self, token);
+    fn parse_xhp_class_name(&mut self, token: Token<S>) -> S::Output {
+        let token = self.sc_mut().make_token(token);
         self.parse_name_or_collection_literal_expression(token)
     }
 
-    fn parse_backslash(&mut self, token: Token<S>) -> S::R {
-        let missing = S!(make_missing, self, self.pos());
-        let backslash = S!(make_token, self, token);
+    fn parse_backslash(&mut self, token: Token<S>) -> S::Output {
+        let pos = self.pos();
+        let missing = self.sc_mut().make_missing(pos);
+        let backslash = self.sc_mut().make_token(token);
 
         let qualified_name = self.scan_qualified_name(missing, backslash);
         self.parse_name_or_collection_literal_expression(qualified_name)
     }
 
-    fn parse_function(&mut self) -> S::R {
-        let attribute_spec = S!(make_missing, self, self.pos());
-        self.parse_anon(attribute_spec)
+    fn parse_function(&mut self) -> S::Output {
+        let pos = self.pos();
+        let attribute_spec = self.sc_mut().make_missing(pos);
+        self.parse_anon_or_polymorphic_lambda(attribute_spec)
     }
 
-    fn parse_dollar_dollar(&mut self, token: Token<S>) -> S::R {
-        let token = S!(make_token, self, token);
-        S!(make_pipe_variable_expression, self, token)
+    fn parse_dollar_dollar(&mut self, token: Token<S>) -> S::Output {
+        let token = self.sc_mut().make_token(token);
+        self.sc_mut().make_pipe_variable_expression(token)
     }
 
-    fn parse_empty(&mut self) -> S::R {
-        self.with_error(Errors::empty_expression_illegal);
+    fn parse_empty(&mut self) -> S::Output {
+        self.with_error(Errors::empty_expression_illegal, Vec::new());
         let token = self.next_token_non_reserved_as_name();
-        S!(make_token, self, token)
+        self.sc_mut().make_token(token)
     }
 
-    fn parse_error1015(&mut self) -> S::R {
-        self.with_error(Errors::error1015);
-        S!(make_missing, self, self.pos())
+    fn parse_error1015(&mut self) -> S::Output {
+        self.with_error(Errors::error1015, Vec::new());
+        let pos = self.pos();
+        self.sc_mut().make_missing(pos)
     }
 
-    fn parse_name(&mut self, token: Token<S>) -> S::R {
-        let token = S!(make_token, self, token);
+    fn parse_name(&mut self, token: Token<S>) -> S::Output {
+        let token = self.sc_mut().make_token(token);
         let qualified_name = self.scan_remaining_qualified_name(token);
         let mut parser1 = self.clone();
         let str_maybe = parser1.next_token_no_trailing();
@@ -468,23 +540,24 @@ where
                         self.parse_remaining_expression(result)
                     }
                     _ => {
-                        self.with_error(Errors::prefixed_invalid_string_kind);
+                        self.with_error(Errors::prefixed_invalid_string_kind, Vec::new());
                         self.parse_name_or_collection_literal_expression(qualified_name)
                     }
                 }
             }
             TokenKind::HeredocStringLiteralHead => {
                 // Treat as an attempt to prefix a non-double-quoted string
-                self.with_error(Errors::prefixed_invalid_string_kind);
+                self.with_error(Errors::prefixed_invalid_string_kind, Vec::new());
                 self.parse_name_or_collection_literal_expression(qualified_name)
             }
             TokenKind::SingleQuotedStringLiteral | TokenKind::DoubleQuotedStringLiteral => {
                 // This name prefixes a double-quoted string or a single
                 // quoted string
                 self.continue_from(parser1);
-                let str_ = S!(make_token, self, str_maybe);
-                let str_ = S!(make_literal_expression, self, str_);
-                S!(make_prefixed_string_expression, self, qualified_name, str_)
+                let str_ = self.sc_mut().make_token(str_maybe);
+                let str_ = self.sc_mut().make_literal_expression(str_);
+                self.sc_mut()
+                    .make_prefixed_string_expression(qualified_name, str_)
             }
             TokenKind::DoubleQuotedStringLiteralHead => {
                 self.continue_from(parser1);
@@ -493,7 +566,8 @@ where
                     str_maybe,
                     StringLiteralKind::LiteralDoubleQuoted,
                 );
-                S!(make_prefixed_string_expression, self, qualified_name, str_)
+                self.sc_mut()
+                    .make_prefixed_string_expression(qualified_name, str_)
             }
             _ => {
                 // Not a prefixed string or an attempt at one
@@ -502,7 +576,7 @@ where
         }
     }
 
-    fn parse_eval_expression(&mut self) -> S::R {
+    fn parse_eval_expression(&mut self) -> S::Output {
         // TODO: This is a PHP-ism. Open questions:
         // * Should we allow a trailing comma? it is not a function call and
         //   never has more than one argument. See D4273242 for discussion.
@@ -520,13 +594,14 @@ where
             let left = self.assert_token(TokenKind::LeftParen);
             let arg = self.parse_expression_with_reset_precedence();
             let right = self.require_right_paren();
-            S!(make_eval_expression, self, keyword, left, arg, right)
+            self.sc_mut()
+                .make_eval_expression(keyword, left, arg, right)
         } else {
             self.parse_as_name_or_error()
         }
     }
 
-    fn parse_isset_expression(&mut self) -> S::R {
+    fn parse_isset_expression(&mut self) -> S::Output {
         // TODO: This is a PHP-ism. Open questions:
         // * Should we allow a trailing comma? See D4273242 for discussion.
         // * Is there any restriction on the kind of expression the arguments can be?
@@ -543,7 +618,8 @@ where
         if parser1.peek_token_kind() == TokenKind::LeftParen {
             self.continue_from(parser1);
             let (left, args, right) = self.parse_expression_list_opt();
-            S!(make_isset_expression, self, keyword, left, args, right)
+            self.sc_mut()
+                .make_isset_expression(keyword, left, args, right)
         } else {
             self.parse_as_name_or_error()
         }
@@ -553,11 +629,11 @@ where
         &mut self,
         head: Token<S>,
         literal_kind: StringLiteralKind,
-    ) -> S::R {
+    ) -> S::Output {
         self.parse_string_literal(head, literal_kind)
     }
 
-    fn parse_heredoc_string(&mut self, head: Token<S>, name: &[u8]) -> S::R {
+    fn parse_heredoc_string(&mut self, head: Token<S>, name: &[u8]) -> S::Output {
         self.parse_string_literal(
             head,
             StringLiteralKind::LiteralHeredoc {
@@ -570,7 +646,7 @@ where
         &mut self,
         left_brace: Token<S>,
         dollar_inside_braces: bool,
-    ) -> S::R {
+    ) -> S::Output {
         // We are parsing something like "abc{$x}def" or "abc${x}def", and we
         // are at the left brace.
         //
@@ -599,15 +675,15 @@ where
         };
 
         let left_brace_trailing_is_empty = left_brace.trailing_is_empty();
-        let left_brace = S!(make_token, self, left_brace);
+        let left_brace = self.sc_mut().make_token(left_brace);
         let mut parser1 = self.clone();
         let name_or_keyword_as_name = parser1.next_token_as_name();
         let after_name = parser1.next_token_no_trailing();
         let (expr, right_brace) = match (name_or_keyword_as_name.kind(), after_name.kind()) {
             (TokenKind::Name, TokenKind::RightBrace) => {
                 self.continue_from(parser1);
-                let expr = S!(make_token, self, name_or_keyword_as_name);
-                let right_brace = S!(make_token, self, after_name);
+                let expr = self.sc_mut().make_token(name_or_keyword_as_name);
+                let right_brace = self.sc_mut().make_token(after_name);
                 (expr, right_brace)
             }
             (TokenKind::Name, TokenKind::LeftBracket)
@@ -649,27 +725,26 @@ where
                 // The first case can already be parsed successfully because `x` is a valid
                 // expression, so we special-case only the second case here.
                 self.continue_from(parser1);
-                let receiver = S!(make_token, self, name_or_keyword_as_name);
-                let left_bracket = S!(make_token, self, after_name);
+                let receiver = self.sc_mut().make_token(name_or_keyword_as_name);
+                let left_bracket = self.sc_mut().make_token(after_name);
                 let index = self.parse_expression_with_reset_precedence();
                 let right_bracket = self.require_right_bracket();
-                let expr = S!(
-                    make_subscript_expression,
-                    self,
+                let expr = self.sc_mut().make_subscript_expression(
                     receiver,
                     left_bracket,
                     index,
-                    right_bracket
+                    right_bracket,
                 );
 
                 let mut parser1 = self.clone();
                 let right_brace = parser1.next_token_no_trailing();
                 let right_brace = if right_brace.kind() == TokenKind::RightBrace {
                     self.continue_from(parser1);
-                    S!(make_token, self, right_brace)
+                    self.sc_mut().make_token(right_brace)
                 } else {
-                    self.with_error(Errors::error1006);
-                    S!(make_missing, self, self.pos())
+                    self.with_error(Errors::error1006, Vec::new());
+                    let pos = self.pos();
+                    self.sc_mut().make_missing(pos)
                 };
                 (expr, right_brace)
             }
@@ -679,15 +754,16 @@ where
                 // were a constant, and you can't use an assignment operator with a
                 // constant. Flag the issue by reporting that a right brace is expected.
                 self.continue_from(parser1);
-                let expr = S!(make_token, self, name_or_keyword_as_name);
+                let expr = self.sc_mut().make_token(name_or_keyword_as_name);
                 let mut parser1 = self.clone();
                 let right_brace = parser1.next_token_no_trailing();
                 let right_brace = if right_brace.kind() == TokenKind::RightBrace {
                     self.continue_from(parser1);
-                    S!(make_token, self, right_brace)
+                    self.sc_mut().make_token(right_brace)
                 } else {
-                    self.with_error(Errors::error1006);
-                    S!(make_missing, self, self.pos())
+                    self.with_error(Errors::error1006, Vec::new());
+                    let pos = self.pos();
+                    self.sc_mut().make_missing(pos)
                 };
                 (expr, right_brace)
             }
@@ -725,24 +801,24 @@ where
                 let token = parser1.next_token_no_trailing();
                 let right_brace = if token.kind() == TokenKind::RightBrace {
                     self.continue_from(parser1);
-                    S!(make_token, self, token)
+                    self.sc_mut().make_token(token)
                 } else {
-                    self.with_error(Errors::error1006);
-                    S!(make_missing, self, self.pos())
+                    self.with_error(Errors::error1006, Vec::new());
+                    let pos = self.pos();
+                    self.sc_mut().make_missing(pos)
                 };
                 (expr, right_brace)
             }
         };
-        S!(
-            make_embedded_braced_expression,
-            self,
-            left_brace,
-            expr,
-            right_brace
-        )
+        self.sc_mut()
+            .make_embedded_braced_expression(left_brace, expr, right_brace)
     }
 
-    fn parse_string_literal(&mut self, head: Token<S>, literal_kind: StringLiteralKind) -> S::R {
+    fn parse_string_literal(
+        &mut self,
+        head: Token<S>,
+        literal_kind: StringLiteralKind,
+    ) -> S::Output {
         // SPEC
         //
         // Double-quoted string literals and heredoc string literals use basically
@@ -863,16 +939,16 @@ where
             }
         };
 
-        let put_opt = |parser: &mut Self, head: Option<Token<S>>, acc: &mut Vec<S::R>| {
+        let put_opt = |parser: &mut Self, head: Option<Token<S>>, acc: &mut Vec<S::Output>| {
             if let Some(h) = head {
-                let token = S!(make_token, parser, h);
+                let token = parser.sc_mut().make_token(h);
                 acc.push(token)
             }
         };
 
         let parse_embedded_expression = |parser: &mut Self, token: Token<S>| {
-            let token = S!(make_token, parser, token);
-            let var_expr = S!(make_variable_expression, parser, token);
+            let token = parser.sc_mut().make_token(token);
+            let var_expr = parser.sc_mut().make_variable_expression(token);
             let mut parser1 = parser.clone();
             let token1 = parser1.next_token_in_string(&literal_kind);
             let mut parser2 = parser1.clone();
@@ -882,44 +958,30 @@ where
             match (token1.kind(), token2.kind(), token3.kind()) {
                 (TokenKind::MinusGreaterThan, TokenKind::Name, _) => {
                     parser.continue_from(parser2);
-                    let token1 = S!(make_token, parser, token1);
-                    let token2 = S!(make_token, parser, token2);
-                    S!(
-                        make_embedded_member_selection_expression,
-                        parser,
-                        var_expr,
-                        token1,
-                        token2
-                    )
+                    let token1 = parser.sc_mut().make_token(token1);
+                    let token2 = parser.sc_mut().make_token(token2);
+                    parser
+                        .sc_mut()
+                        .make_embedded_member_selection_expression(var_expr, token1, token2)
                 }
                 (TokenKind::LeftBracket, TokenKind::Name, TokenKind::RightBracket) => {
                     parser.continue_from(parser3);
-                    let token1 = S!(make_token, parser, token1);
-                    let token2 = S!(make_token, parser, token2);
-                    let token3 = S!(make_token, parser, token3);
-                    S!(
-                        make_embedded_subscript_expression,
-                        parser,
-                        var_expr,
-                        token1,
-                        token2,
-                        token3
-                    )
+                    let token1 = parser.sc_mut().make_token(token1);
+                    let token2 = parser.sc_mut().make_token(token2);
+                    let token3 = parser.sc_mut().make_token(token3);
+                    parser
+                        .sc_mut()
+                        .make_embedded_subscript_expression(var_expr, token1, token2, token3)
                 }
                 (TokenKind::LeftBracket, TokenKind::Variable, TokenKind::RightBracket) => {
                     parser.continue_from(parser3);
-                    let token1 = S!(make_token, parser, token1);
-                    let token2 = S!(make_token, parser, token2);
-                    let expr = S!(make_variable_expression, parser, token2);
-                    let token3 = S!(make_token, parser, token3);
-                    S!(
-                        make_embedded_subscript_expression,
-                        parser,
-                        var_expr,
-                        token1,
-                        expr,
-                        token3
-                    )
+                    let token1 = parser.sc_mut().make_token(token1);
+                    let token2 = parser.sc_mut().make_token(token2);
+                    let expr = parser.sc_mut().make_variable_expression(token2);
+                    let token3 = parser.sc_mut().make_token(token3);
+                    parser
+                        .sc_mut()
+                        .make_embedded_subscript_expression(var_expr, token1, expr, token3)
                 }
                 (TokenKind::LeftBracket, TokenKind::DecimalLiteral, TokenKind::RightBracket)
                 | (TokenKind::LeftBracket, TokenKind::OctalLiteral, TokenKind::RightBracket)
@@ -930,36 +992,28 @@ where
                 )
                 | (TokenKind::LeftBracket, TokenKind::BinaryLiteral, TokenKind::RightBracket) => {
                     parser.continue_from(parser3);
-                    let token1 = S!(make_token, parser, token1);
-                    let token2 = S!(make_token, parser, token2);
-                    let expr = S!(make_literal_expression, parser, token2);
-                    let token3 = S!(make_token, parser, token3);
-                    S!(
-                        make_embedded_subscript_expression,
-                        parser,
-                        var_expr,
-                        token1,
-                        expr,
-                        token3
-                    )
+                    let token1 = parser.sc_mut().make_token(token1);
+                    let token2 = parser.sc_mut().make_token(token2);
+                    let expr = parser.sc_mut().make_literal_expression(token2);
+                    let token3 = parser.sc_mut().make_token(token3);
+                    parser
+                        .sc_mut()
+                        .make_embedded_subscript_expression(var_expr, token1, expr, token3)
                 }
                 (TokenKind::LeftBracket, _, _) => {
                     // PHP compatibility: throw an error if we encounter an
                     // insufficiently-simple expression for a string like "$b[<expr>]", or if
                     // the expression or closing bracket are missing.
                     parser.continue_from(parser1);
-                    let token1 = S!(make_token, parser, token1);
-                    let token2 = S!(make_missing, parser, parser.pos());
-                    let token3 = S!(make_missing, parser, parser.pos());
-                    parser.with_error(Errors::expected_simple_offset_expression);
-                    S!(
-                        make_embedded_subscript_expression,
-                        parser,
-                        var_expr,
-                        token1,
-                        token2,
-                        token3
-                    )
+                    let token1 = parser.sc_mut().make_token(token1);
+                    let pos = parser.pos();
+                    let token2 = parser.sc_mut().make_missing(pos);
+                    let pos = parser.pos();
+                    let token3 = parser.sc_mut().make_missing(pos);
+                    parser.with_error(Errors::expected_simple_offset_expression, Vec::new());
+                    parser
+                        .sc_mut()
+                        .make_embedded_subscript_expression(var_expr, token1, token2, token3)
                 }
                 _ => var_expr,
             }
@@ -968,7 +1022,7 @@ where
         let handle_left_brace = |parser: &mut Self,
                                  left_brace: Token<S>,
                                  head: Option<Token<S>>,
-                                 acc: &mut Vec<S::R>| {
+                                 acc: &mut Vec<S::Output>| {
             // Note that here we use next_token_in_string because we need to know
             // whether there is trivia between the left brace and the $x which follows.
             let mut parser1 = parser.clone();
@@ -997,7 +1051,7 @@ where
         };
 
         let handle_dollar =
-            |parser: &mut Self, dollar, head: Option<Token<S>>, acc: &mut Vec<S::R>| {
+            |parser: &mut Self, dollar, head: Option<Token<S>>, acc: &mut Vec<S::Output>| {
                 // We need to parse ${x} as though it was {$x}
                 // TODO: This should be an error in strict mode.
                 // We must not have trivia between the $ and the {, but we can have
@@ -1019,7 +1073,7 @@ where
                         // a variable expression, not a qualified name expression.
                         parser.continue_from(parser1);
                         put_opt(parser, head, acc);
-                        let dollar = S!(make_token, parser, dollar);
+                        let dollar = parser.sc_mut().make_token(dollar);
                         let expr = parser.parse_braced_expression_in_string(
                             token, /*dollar_inside_braces:*/ false,
                         );
@@ -1063,12 +1117,13 @@ where
         let results = if acc.len() == 1 {
             acc.pop().unwrap()
         } else {
-            S!(make_list, self, acc, self.pos())
+            let pos = self.pos();
+            self.sc_mut().make_list(acc, pos)
         };
-        S!(make_literal_expression, self, results)
+        self.sc_mut().make_literal_expression(results)
     }
 
-    fn parse_inclusion_expression(&mut self) -> S::R {
+    fn parse_inclusion_expression(&mut self) -> S::Output {
         // SPEC:
         // inclusion-directive:
         //   require-multiple-directive
@@ -1101,9 +1156,41 @@ where
         // in strict mode.
         let require = self.next_token();
         let operator = Operator::prefix_unary_from_token(require.kind());
-        let require = S!(make_token, self, require);
+        let require = self.sc_mut().make_token(require);
         let filename = self.parse_expression_with_operator_precedence(operator);
-        S!(make_inclusion_expression, self, require, filename)
+        self.sc_mut().make_inclusion_expression(require, filename)
+    }
+
+    fn parse_package_expression(&mut self) -> S::Output {
+        // SPEC:
+        // package package-name
+        let package_kw = self.next_token();
+        if self.peek_token_kind() == TokenKind::Default {
+            let default = self.assert_token(TokenKind::Default);
+            let package_kw = self.sc_mut().make_token(package_kw);
+            self.sc_mut().make_package_expression(package_kw, default)
+        } else {
+            let package_name = self.parse_expression_with_operator_precedence(
+                Operator::prefix_unary_from_token(package_kw.kind()),
+            );
+            if !package_name.is_name() {
+                self.with_error(Errors::error1004, Vec::new());
+            }
+            let package_kw = self.sc_mut().make_token(package_kw);
+            self.sc_mut()
+                .make_package_expression(package_kw, package_name)
+        }
+    }
+
+    fn parse_nameof(&mut self) -> S::Output {
+        // SPEC:
+        // nameof expr
+        let kw_token = self.next_token();
+        let expr = self.parse_expression_with_operator_precedence(
+            Operator::prefix_unary_from_token(kw_token.kind()),
+        );
+        let kw = self.sc_mut().make_token(kw_token);
+        self.sc_mut().make_nameof_expression(kw, expr)
     }
 
     fn peek_next_kind_if_operator(&self) -> Option<TokenKind> {
@@ -1127,7 +1214,7 @@ where
         }
     }
 
-    fn try_parse_specified_function_call(&mut self, term: &S::R) -> Option<(S::R, Self)> {
+    fn try_parse_specified_function_call(&mut self, term: &S::Output) -> Option<(S::Output, Self)> {
         if !Self::can_term_take_type_args(term) {
             return None;
         }
@@ -1143,39 +1230,43 @@ where
             let mut parser2 = self.clone();
             let open_angle = parser2.fetch_token();
             if parser2.peek_token_kind() == TokenKind::GreaterThan {
-                let missing = S!(make_missing, parser2, parser2.pos());
+                let pos = parser2.pos();
+                let missing = parser2.sc_mut().make_missing(pos);
                 let close_angle = parser2.assert_token(TokenKind::GreaterThan);
-                let empty_targs = S!(make_type_arguments, self, open_angle, missing, close_angle);
+                let empty_targs =
+                    self.sc_mut()
+                        .make_type_arguments(open_angle, missing, close_angle);
                 return Some((empty_targs, parser2));
             }
             None
         }
     }
 
-    fn do_parse_specified_function_call(&mut self, term: S::R, type_arguments: S::R) -> S::R {
+    fn do_parse_specified_function_call(
+        &mut self,
+        term: S::Output,
+        type_arguments: S::Output,
+    ) -> S::Output {
         match self.peek_token_kind() {
             TokenKind::ColonColon => {
                 // handle a<type-args>::... case
-                let type_specifier = S!(make_generic_type_specifier, self, term, type_arguments);
+                let type_specifier = self
+                    .sc_mut()
+                    .make_generic_type_specifier(term, type_arguments);
                 self.parse_scope_resolution_expression(type_specifier)
             }
             TokenKind::LeftParen => {
                 let (left, args, right) = self.parse_expression_list_opt();
-                S!(
-                    make_function_call_expression,
-                    self,
-                    term,
-                    type_arguments,
-                    left,
-                    args,
-                    right
-                )
+                self.sc_mut()
+                    .make_function_call_expression(term, type_arguments, left, args, right)
             }
-            _ => S!(make_function_pointer_expression, self, term, type_arguments),
+            _ => self
+                .sc_mut()
+                .make_function_pointer_expression(term, type_arguments),
         }
     }
 
-    fn can_be_used_as_lvalue(t: &S::R) -> bool {
+    fn can_be_used_as_lvalue(t: &S::Output) -> bool {
         t.is_variable_expression()
             || t.is_subscript_expression()
             || t.is_member_selection_expression()
@@ -1193,10 +1284,10 @@ where
     // - Prefix:LessThan - is the start of a specified function call f<T>(...)
     fn check_if_should_override_normal_precedence(
         &mut self,
-        left_term: &S::R,
+        left_term: &S::Output,
         operator: TokenKind,
         left_precedence: usize,
-    ) -> BinaryExpressionPrefixKind<(S::R, Self)> {
+    ) -> BinaryExpressionPrefixKind<(S::Output, Self)> {
         // We need to override the precedence of the < operator in the case where it
         // is the start of a specified function call.
         let maybe_prefix =
@@ -1244,7 +1335,7 @@ where
         }
     }
 
-    fn can_term_take_type_args(term: &S::R) -> bool {
+    fn can_term_take_type_args(term: &S::Output) -> bool {
         term.is_name()
             || term.is_qualified_name()
             || term.is_member_selection_expression()
@@ -1252,7 +1343,7 @@ where
             || term.is_scope_resolution_expression()
     }
 
-    fn parse_remaining_expression(&mut self, mut term: S::R) -> S::R {
+    fn parse_remaining_expression(&mut self, mut term: S::Output) -> S::Output {
         // This method is intentionally kept small and simple so that any recursion it does
         // only uses a small amount of stack space for this frame.
         loop {
@@ -1270,7 +1361,10 @@ where
 
     // Avoid inlining to keep down the stack frame size of recursing functions.
     #[inline(never)]
-    fn parse_remaining_expression_helper(&mut self, term: S::R) -> ParseContinuation<S::R, Self> {
+    fn parse_remaining_expression_helper(
+        &mut self,
+        term: S::Output,
+    ) -> ParseContinuation<S::Output, Self> {
         match self.peek_next_kind_if_operator() {
             None => ParseContinuation::Done(term),
             Some(token) => {
@@ -1334,13 +1428,14 @@ where
                         | TokenKind::GreaterThanGreaterThan
                         | TokenKind::Carat
                         | TokenKind::BarGreaterThan
+                        | TokenKind::BarQuestionGreaterThan
                         | TokenKind::QuestionColon
                         | TokenKind::QuestionQuestion
                         | TokenKind::QuestionQuestionEqual => {
                             ParseContinuation::Binary(term, assignment_prefix_kind)
                         }
                         TokenKind::Instanceof => {
-                            self.with_error(Errors::instanceof_disabled);
+                            self.with_error(Errors::instanceof_disabled, Vec::new());
                             let _ = self.assert_token(TokenKind::Instanceof);
                             ParseContinuation::Done(term)
                         }
@@ -1380,7 +1475,7 @@ where
                             let result = self.parse_function_call(term);
                             ParseContinuation::Reparse(result)
                         }
-                        TokenKind::LeftBracket | TokenKind::LeftBrace => {
+                        TokenKind::LeftBracket => {
                             let result = self.parse_subscript(term);
                             ParseContinuation::Reparse(result)
                         }
@@ -1396,7 +1491,7 @@ where
         }
     }
 
-    fn parse_member_selection_expression(&mut self, term: S::R) -> S::R {
+    fn parse_member_selection_expression(&mut self, term: S::Output) -> S::Output {
         // SPEC:
         // member-selection-expression:
         //   postfix-expression  =>  name
@@ -1414,7 +1509,7 @@ where
         // TODO: Produce an error if the braced syntax is used in Hack.
         let token = self.next_token();
         let token_kind = token.kind();
-        let op = S!(make_token, self, token);
+        let op = self.sc_mut().make_token(token);
         // TODO: We are putting the name / variable into the tree as a token
         // leaf, rather than as a name or variable expression. Is that right?
         let name = match self.peek_token_kind() {
@@ -1426,13 +1521,15 @@ where
             _ => self.require_xhp_class_name_or_name_or_variable(),
         };
         if token_kind == TokenKind::MinusGreaterThan {
-            S!(make_member_selection_expression, self, term, op, name)
+            self.sc_mut()
+                .make_member_selection_expression(term, op, name)
         } else {
-            S!(make_safe_member_selection_expression, self, term, op, name)
+            self.sc_mut()
+                .make_safe_member_selection_expression(term, op, name)
         }
     }
 
-    fn parse_variable_in_php5_compat_mode(&mut self) -> S::R {
+    fn parse_variable_in_php5_compat_mode(&mut self) -> S::Output {
         // PHP7 had a breaking change in parsing variables:
         // (https://wiki.php.net/rfc/uniform_variable_syntax).
         // Hack parser by default uses PHP7 compatible more which interprets
@@ -1458,45 +1555,34 @@ where
         e
     }
 
-    fn parse_subscript(&mut self, term: S::R) -> S::R {
+    fn parse_subscript(&mut self, term: S::Output) -> S::Output {
         // SPEC
         // subscript-expression:
         //   postfix-expression  [  expression-opt  ]
-        //   postfix-expression  {  expression-opt  }   [Deprecated form]
-        //
-        // TODO: Produce an error for brace case in a later pass
         let left = self.next_token();
         match (left.kind(), self.peek_token_kind()) {
-            (TokenKind::LeftBracket, TokenKind::RightBracket)
-            | (TokenKind::LeftBrace, TokenKind::RightBrace) => {
+            (TokenKind::LeftBracket, TokenKind::RightBracket) => {
                 let right = self.next_token();
-                let left = S!(make_token, self, left);
-                let missing = S!(make_missing, self, self.pos());
-                let right = S!(make_token, self, right);
-                S!(make_subscript_expression, self, term, left, missing, right)
+                let left = self.sc_mut().make_token(left);
+                let pos = self.pos();
+                let missing = self.sc_mut().make_missing(pos);
+                let right = self.sc_mut().make_token(right);
+                self.sc_mut()
+                    .make_subscript_expression(term, left, missing, right)
             }
-            (left_kind, _) => {
-                let left_token = S!(make_token, self, left);
+            _ => {
+                let left_token = self.sc_mut().make_token(left);
                 let index = self.with_as_expressions(/* enabled :*/ true, |x| {
                     x.with_reset_precedence(|x| x.parse_expression())
                 });
-                let right = match left_kind {
-                    TokenKind::LeftBracket => self.require_right_bracket(),
-                    _ => self.require_right_brace(),
-                };
-                S!(
-                    make_subscript_expression,
-                    self,
-                    term,
-                    left_token,
-                    index,
-                    right
-                )
+                let right = self.require_right_bracket();
+                self.sc_mut()
+                    .make_subscript_expression(term, left_token, index, right)
             }
         }
     }
 
-    fn parse_expression_list_opt(&mut self) -> (S::R, S::R, S::R) {
+    fn parse_expression_list_opt(&mut self) -> (S::Output, S::Output, S::Output) {
         // SPEC
         //
         // TODO: This business of allowing ... does not appear in the spec. Add it.
@@ -1526,28 +1612,48 @@ where
         //
         // This function parses the parens as well.
         self.parse_parenthesized_comma_list_opt_allow_trailing(|x| {
-            x.with_reset_precedence(|x| x.parse_decorated_expression_opt())
+            x.with_reset_precedence(|x| x.parse_argument_expression())
         })
     }
 
-    fn parse_decorated_expression_opt(&mut self) -> S::R {
+    fn parse_argument_expression(&mut self) -> S::Output {
         match self.peek_token_kind() {
             TokenKind::DotDotDot | TokenKind::Inout => {
                 let decorator = self.fetch_token();
                 let expr = self.parse_expression();
-                S!(make_decorated_expression, self, decorator, expr)
+                self.sc_mut().make_decorated_expression(decorator, expr)
+            }
+            TokenKind::Name => {
+                // Might be a named argument (name=expression)
+                let mut parser1 = self.clone();
+                let name_token = parser1.next_token();
+                if parser1.peek_token_kind() == TokenKind::Equal {
+                    self.continue_from(parser1);
+                    let name_token = self.sc_mut().make_token(name_token);
+                    let equal_token_raw = self.next_token();
+                    let equal_token = self.sc_mut().make_token(equal_token_raw);
+                    let expr = self.parse_expression();
+
+                    // Create a named argument node
+                    self.sc_mut()
+                        .make_named_argument(name_token, equal_token, expr)
+                } else {
+                    // Not a named parameter, parse normally
+                    self.parse_expression()
+                }
             }
             _ => self.parse_expression(),
         }
     }
 
-    fn parse_start_of_type_specifier(&mut self, start_token: Token<S>) -> Option<S::R> {
+    fn parse_start_of_type_specifier(&mut self, start_token: Token<S>) -> Option<S::Output> {
         let name = if start_token.kind() == TokenKind::Backslash {
-            let missing = S!(make_missing, self, self.pos());
-            let backslash = S!(make_token, self, start_token);
+            let pos = self.pos();
+            let missing = self.sc_mut().make_missing(pos);
+            let backslash = self.sc_mut().make_token(start_token);
             self.scan_qualified_name(missing, backslash)
         } else {
-            let start_token = S!(make_token, self, start_token);
+            let start_token = self.sc_mut().make_token(start_token);
             self.scan_remaining_qualified_name(start_token)
         };
         match self.peek_token_kind_with_possible_attributized_type_list() {
@@ -1556,7 +1662,7 @@ where
         }
     }
 
-    fn parse_designator(&mut self) -> S::R {
+    fn parse_designator(&mut self) -> S::Output {
         // SPEC:
         // class-type-designator:
         //   parent
@@ -1581,16 +1687,17 @@ where
                 match parser1.peek_token_kind_with_possible_attributized_type_list() {
                     TokenKind::LeftParen => {
                         self.continue_from(parser1);
-                        S!(make_token, self, token)
+                        self.sc_mut().make_token(token)
                     }
                     TokenKind::LessThan => {
                         let (type_arguments, no_arg_is_missing) =
                             parser1.parse_generic_type_arguments();
                         if no_arg_is_missing && self.errors.len() == parser1.errors.len() {
                             self.continue_from(parser1);
-                            let token = S!(make_token, self, token);
-                            let type_specifier =
-                                S!(make_generic_type_specifier, self, token, type_arguments);
+                            let token = self.sc_mut().make_token(token);
+                            let type_specifier = self
+                                .sc_mut()
+                                .make_generic_type_specifier(token, type_arguments);
                             type_specifier
                         } else {
                             default(self)
@@ -1601,7 +1708,7 @@ where
             }
             TokenKind::Static if parser1.peek_token_kind() == TokenKind::LeftParen => {
                 self.continue_from(parser1);
-                S!(make_token, self, token)
+                self.sc_mut().make_token(token)
             }
             TokenKind::Name | TokenKind::Backslash => {
                 match parser1.parse_start_of_type_specifier(token) {
@@ -1623,16 +1730,17 @@ where
         }
     }
 
-    fn parse_object_creation_expression(&mut self) -> S::R {
+    fn parse_object_creation_expression(&mut self) -> S::Output {
         // SPEC
         // object-creation-expression:
         //   new object-creation-what
         let new_token = self.assert_token(TokenKind::New);
         let new_what = self.parse_constructor_call();
-        S!(make_object_creation_expression, self, new_token, new_what)
+        self.sc_mut()
+            .make_object_creation_expression(new_token, new_what)
     }
 
-    pub fn parse_constructor_call(&mut self) -> S::R {
+    pub fn parse_constructor_call(&mut self) -> S::Output {
         // SPEC
         // constructor-call:
         //   class-type-designator  (  argument-expression-list-opt  )
@@ -1646,65 +1754,70 @@ where
         let (left, args, right) = if self.peek_token_kind() == TokenKind::LeftParen {
             self.parse_expression_list_opt()
         } else {
-            let missing1 = S!(make_missing, self, self.pos());
-            let missing2 = S!(make_missing, self, self.pos());
-            let missing3 = S!(make_missing, self, self.pos());
+            let pos = self.pos();
+            let missing1 = self.sc_mut().make_missing(pos);
+            let pos = self.pos();
+            let missing2 = self.sc_mut().make_missing(pos);
+            let pos = self.pos();
+            let missing3 = self.sc_mut().make_missing(pos);
             (missing1, missing2, missing3)
         };
-        S!(make_constructor_call, self, designator, left, args, right)
+        self.sc_mut()
+            .make_constructor_call(designator, left, args, right)
     }
 
-    fn parse_function_call(&mut self, receiver: S::R) -> S::R {
+    fn parse_function_call(&mut self, receiver: S::Output) -> S::Output {
         // SPEC
         // function-call-expression:
         //   postfix-expression  (  argument-expression-list-opt  )
-        let type_arguments = S!(make_missing, self, self.pos());
+        let pos = self.pos();
+        let type_arguments = self.sc_mut().make_missing(pos);
         let old_enabled = self.allow_as_expressions();
         self.allow_as_expressions = true;
         let (left, args, right) = self.parse_expression_list_opt();
-        let result = S!(
-            make_function_call_expression,
-            self,
+        let result = self.sc_mut().make_function_call_expression(
             receiver,
             type_arguments,
             left,
             args,
-            right
+            right,
         );
         self.allow_as_expressions = old_enabled;
         result
     }
 
-    fn parse_variable_or_lambda(&mut self) -> S::R {
+    fn parse_variable_or_lambda(&mut self) -> S::Output {
         let mut parser1 = self.clone();
         let variable = parser1.assert_token(TokenKind::Variable);
         if parser1.peek_token_kind() == TokenKind::EqualEqualGreaterThan {
-            let attribute_spec = S!(make_missing, self, self.pos());
+            let pos = self.pos();
+            let attribute_spec = self.sc_mut().make_missing(pos);
             self.parse_lambda_expression(attribute_spec)
         } else {
             self.continue_from(parser1);
-            S!(make_variable_expression, self, variable)
+            self.sc_mut().make_variable_expression(variable)
         }
     }
 
-    fn parse_yield_expression(&mut self) -> S::R {
+    fn parse_yield_expression(&mut self) -> S::Output {
         // SPEC:
         // yield  array-element-initializer
         //
         let yield_kw = self.assert_token(TokenKind::Yield);
         match self.peek_token_kind() {
             TokenKind::Semicolon => {
-                let missing = S!(make_missing, self, self.pos());
-                S!(make_yield_expression, self, yield_kw, missing)
+                let pos = self.pos();
+                let missing = self.sc_mut().make_missing(pos);
+                self.sc_mut().make_yield_expression(yield_kw, missing)
             }
             _ => {
                 let operand = self.parse_array_element_init();
-                S!(make_yield_expression, self, yield_kw, operand)
+                self.sc_mut().make_yield_expression(yield_kw, operand)
             }
         }
     }
 
-    pub fn parse_cast_or_parenthesized_or_lambda_expression(&mut self) -> S::R {
+    pub fn parse_cast_or_parenthesized_or_lambda_expression(&mut self) -> S::Output {
         // We need to disambiguate between casts, lambdas and ordinary
         // parenthesized expressions.
         let mut parser1 = self.clone();
@@ -1713,7 +1826,8 @@ where
                 self.continue_from(parser1);
                 let operand =
                     self.parse_expression_with_operator_precedence(Operator::CastOperator);
-                S!(make_cast_expression, self, left, cast_type, right, operand)
+                self.sc_mut()
+                    .make_cast_expression(left, cast_type, right, operand)
             }
             _ => {
                 let mut parser1 = self.clone();
@@ -1732,7 +1846,7 @@ where
         }
     }
 
-    fn possible_cast_expression(&mut self) -> Option<(S::R, S::R, S::R)> {
+    fn possible_cast_expression(&mut self) -> Option<(S::Output, S::Output, S::Output)> {
         // SPEC:
         // cast-expression:
         //   (  cast-type  ) unary-expression
@@ -1765,21 +1879,20 @@ where
                 | TokenKind::Real
                 | TokenKind::Int
                 | TokenKind::Integer
-                | TokenKind::Object
                 | TokenKind::String
                 | TokenKind::Binary => true,
                 _ => false,
             };
         if is_cast {
-            let type_token = S!(make_token, self, type_token);
-            let right_paren = S!(make_token, self, right_paren);
+            let type_token = self.sc_mut().make_token(type_token);
+            let right_paren = self.sc_mut().make_token(right_paren);
             Some((left_paren, type_token, right_paren))
         } else {
             None
         }
     }
 
-    fn possible_lambda_expression(&mut self) -> Option<(S::R, S::R, S::R)> {
+    fn possible_lambda_expression(&mut self) -> Option<(S::Output, S::Output, S::Output)> {
         // We have a left paren in hand and we already know we're not in a cast.
         // We need to know whether this is a parenthesized expression or the
         // signature of a lambda.
@@ -1805,7 +1918,8 @@ where
 
         let old_errors = self.errors.len();
 
-        let attribute_spec = S!(make_missing, self, self.pos());
+        let pos = self.pos();
+        let attribute_spec = self.sc_mut().make_missing(pos);
         let (async_, signature) = self.parse_lambda_header();
         if old_errors == self.errors.len()
             && self.peek_token_kind() == TokenKind::EqualEqualGreaterThan
@@ -1816,52 +1930,56 @@ where
         }
     }
 
-    fn parse_lambda_expression(&mut self, attribute_spec: S::R) -> S::R {
+    fn parse_lambda_expression(&mut self, attribute_spec: S::Output) -> S::Output {
         // SPEC
         // lambda-expression:
         //   async-opt  lambda-function-signature  ==>  lambda-body
         let (async_, signature) = self.parse_lambda_header();
         let arrow = self.require_lambda_arrow();
         let body = self.parse_lambda_body();
-        S!(
-            make_lambda_expression,
-            self,
-            attribute_spec,
-            async_,
-            signature,
-            arrow,
-            body
-        )
+        self.sc_mut()
+            .make_lambda_expression(attribute_spec, async_, signature, arrow, body)
     }
 
     fn parse_lambda_expression_after_signature(
         &mut self,
-        attribute_spec: S::R,
-        async_: S::R,
-        signature: S::R,
-    ) -> S::R {
+        attribute_spec: S::Output,
+        async_: S::Output,
+        signature: S::Output,
+    ) -> S::Output {
         // We had a signature with no async, and we disambiguated it
         // from a cast.
         let arrow = self.require_lambda_arrow();
         let body = self.parse_lambda_body();
-        S!(
-            make_lambda_expression,
-            self,
-            attribute_spec,
-            async_,
-            signature,
-            arrow,
-            body
-        )
+        self.sc_mut()
+            .make_lambda_expression(attribute_spec, async_, signature, arrow, body)
     }
 
-    fn parse_lambda_header(&mut self) -> (S::R, S::R) {
+    fn parse_lambda_header(&mut self) -> (S::Output, S::Output) {
         let async_ = self.optional_token(TokenKind::Async);
         let signature = self.parse_lambda_signature();
         (async_, signature)
     }
 
-    fn parse_lambda_signature(&mut self) -> S::R {
+    fn parse_lambda_signature_type_parameter_list_opt(&mut self) -> (S::Output, S::Output) {
+        let quant_token = self.optional_token(TokenKind::Function);
+
+        if quant_token.is_missing() {
+            let pos = self.pos();
+            let missing = self.sc_mut().make_missing(pos);
+
+            (quant_token, missing)
+        } else {
+            (
+                quant_token,
+                self.with_type_parser(|p: &mut TypeParser<'a, S>| {
+                    p.parse_generic_type_parameter_list()
+                }),
+            )
+        }
+    }
+
+    fn parse_lambda_signature(&mut self) -> S::Output {
         // SPEC:
         // lambda-function-signature:
         //   variable-name
@@ -1869,26 +1987,28 @@ where
         //      anonymous-function-return-opt
         if self.peek_token_kind() == TokenKind::Variable {
             let token = self.next_token();
-            S!(make_token, self, token)
+            self.sc_mut().make_token(token)
         } else {
+            let (function_keyword, typarams) =
+                self.parse_lambda_signature_type_parameter_list_opt();
             let (left, params, right) = self.parse_parameter_list_opt();
             let contexts = self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_contexts());
             let (colon, readonly_opt, return_type) = self.parse_optional_return();
-            S!(
-                make_lambda_signature,
-                self,
+            self.sc_mut().make_lambda_signature(
+                function_keyword,
+                typarams,
                 left,
                 params,
                 right,
                 contexts,
                 colon,
                 readonly_opt,
-                return_type
+                return_type,
             )
         }
     }
 
-    fn parse_lambda_body(&mut self) -> S::R {
+    fn parse_lambda_body(&mut self) -> S::Output {
         // SPEC:
         // lambda-body:
         //   expression
@@ -1896,11 +2016,11 @@ where
         if self.peek_token_kind() == TokenKind::LeftBrace {
             self.parse_compound_statement()
         } else {
-            self.with_reset_precedence(|x| x.parse_expression())
+            self.parse_expression_with_reset_precedence()
         }
     }
 
-    fn parse_parenthesized_expression(&mut self) -> S::R {
+    fn parse_parenthesized_expression(&mut self) -> S::Output {
         let left_paren = self.assert_token(TokenKind::LeftParen);
         let expression =
             self.with_as_expressions(
@@ -1908,47 +2028,46 @@ where
                 |p| p.with_reset_precedence(|p| p.parse_expression()),
             );
         let right_paren = self.require_right_paren();
-        S!(
-            make_parenthesized_expression,
-            self,
-            left_paren,
-            expression,
-            right_paren
-        )
+        self.sc_mut()
+            .make_parenthesized_expression(left_paren, expression, right_paren)
     }
 
-    fn parse_postfix_unary(&mut self, term: S::R) -> S::R {
+    fn parse_postfix_unary(&mut self, term: S::Output) -> S::Output {
         let token = self.fetch_token();
-        let term = S!(make_postfix_unary_expression, self, term, token);
+        let term = self.sc_mut().make_postfix_unary_expression(term, token);
         self.parse_remaining_expression(term)
     }
 
-    fn parse_prefix_unary_expression(&mut self) -> S::R {
+    fn parse_prefix_unary_expression(&mut self) -> S::Output {
         // TODO: Operand to ++ and -- must be an lvalue.
         let token = self.next_token();
         let kind = token.kind();
         let operator = Operator::prefix_unary_from_token(kind);
-        let token = S!(make_token, self, token);
+        let token = self.sc_mut().make_token(token);
         let operand = self.parse_expression_with_operator_precedence(operator);
-        S!(make_prefix_unary_expression, self, token, operand)
+        self.sc_mut().make_prefix_unary_expression(token, operand)
     }
 
-    pub fn parse_simple_variable(&mut self) -> S::R {
+    pub fn parse_simple_variable(&mut self) -> S::Output {
         match self.peek_token_kind() {
             TokenKind::Variable => {
                 let variable = self.next_token();
-                S!(make_token, self, variable)
+                self.sc_mut().make_token(variable)
             }
             TokenKind::Dollar => self.parse_dollar_expression(false),
             _ => self.require_variable(),
         }
     }
 
-    fn parse_dollar_expression(&mut self, is_term: bool) -> S::R {
+    fn parse_dollar_expression(&mut self, is_term: bool) -> S::Output {
         let dollar = self.assert_token(TokenKind::Dollar);
         let operand = match self.peek_token_kind() {
             TokenKind::LeftBrace if is_term => {
-                return self.parse_et_splice_expression(dollar);
+                let old_in_expr_tree = self.in_expression_tree;
+                self.in_expression_tree = false;
+                let res = self.parse_et_splice_expression(dollar);
+                self.in_expression_tree = old_in_expr_tree;
+                return res;
             }
             TokenKind::LeftBrace => self.parse_braced_expression(),
             TokenKind::Variable if self.env.php5_compat_mode => {
@@ -1958,12 +2077,12 @@ where
                 TokenKind::Dollar,
             )),
         };
-        S!(make_prefix_unary_expression, self, dollar, operand)
+        self.sc_mut().make_prefix_unary_expression(dollar, operand)
     }
 
-    fn parse_is_as_helper<F>(&mut self, left: S::R, kw: TokenKind, f: F) -> S::R
+    fn parse_is_as_helper<F>(&mut self, left: S::Output, kw: TokenKind, f: F) -> S::Output
     where
-        F: Fn(&mut Self, S::R, S::R, S::R) -> S::R,
+        F: Fn(&mut Self, S::Output, S::Output, S::Output) -> S::Output,
     {
         let op = self.assert_token(kw);
         let right =
@@ -1971,7 +2090,7 @@ where
         f(self, left, op, right)
     }
 
-    fn parse_is_expression(&mut self, left: S::R) -> S::R {
+    fn parse_is_expression(&mut self, left: S::Output) -> S::Output {
         // SPEC:
         // is-expression:
         //   is-subject  is  type-specifier
@@ -1979,11 +2098,11 @@ where
         // is-subject:
         //   expression
         self.parse_is_as_helper(left, TokenKind::Is, |p, x, y, z| {
-            S!(make_is_expression, p, x, y, z)
+            p.sc_mut().make_is_expression(x, y, z)
         })
     }
 
-    fn parse_as_expression(&mut self, left: S::R) -> S::R {
+    fn parse_as_expression(&mut self, left: S::Output) -> S::Output {
         // SPEC:
         // as-expression:
         //   as-subject  as  type-specifier
@@ -1991,20 +2110,20 @@ where
         // as-subject:
         //   expression
         self.parse_is_as_helper(left, TokenKind::As, |p, x, y, z| {
-            S!(make_as_expression, p, x, y, z)
+            p.sc_mut().make_as_expression(x, y, z)
         })
     }
 
-    fn parse_nullable_as_expression(&mut self, left: S::R) -> S::R {
+    fn parse_nullable_as_expression(&mut self, left: S::Output) -> S::Output {
         // SPEC:
         // nullable-as-expression:
         //   as-subject  ?as  type-specifier
         self.parse_is_as_helper(left, TokenKind::QuestionAs, |p, x, y, z| {
-            S!(make_nullable_as_expression, p, x, y, z)
+            p.sc_mut().make_nullable_as_expression(x, y, z)
         })
     }
 
-    fn parse_upcast_expression(&mut self, left: S::R) -> S::R {
+    fn parse_upcast_expression(&mut self, left: S::Output) -> S::Output {
         // SPEC:
         // upcast-expression:
         //   upcast-subject upcast type-specifier
@@ -2012,7 +2131,7 @@ where
         // upcast-subject:
         //   expression
         self.parse_is_as_helper(left, TokenKind::Upcast, |p, x, y, z| {
-            S!(make_upcast_expression, p, x, y, z)
+            p.sc_mut().make_upcast_expression(x, y, z)
         })
     }
 
@@ -2020,9 +2139,9 @@ where
     #[inline(never)]
     fn parse_remaining_binary_expression(
         &mut self,
-        left_term: S::R,
-        assignment_prefix_kind: BinaryExpressionPrefixKind<(S::R, Self)>,
-    ) -> S::R {
+        left_term: S::Output,
+        assignment_prefix_kind: BinaryExpressionPrefixKind<(S::Output, Self)>,
+    ) -> S::Output {
         // We have a left term. If we get here then we know that
         // we have a binary operator to its right, and that furthermore,
         // the binary operator is of equal or higher precedence than the
@@ -2066,7 +2185,7 @@ where
         let token = self.next_token();
         let operator = Operator::trailing_from_token(token.kind());
         let precedence = operator.precedence(&self.env);
-        let token = S!(make_token, self, token);
+        let token = self.sc_mut().make_token(token);
         let right_term = if is_rhs_of_assignment {
             // reset the current precedence to make sure that expression on
             // the right hand side of the assignment is fully consumed
@@ -2075,14 +2194,15 @@ where
             self.parse_term()
         };
         let right_term = self.parse_remaining_binary_expression_helper(right_term, precedence);
-        S!(make_binary_expression, self, left_term, token, right_term)
+        self.sc_mut()
+            .make_binary_expression(left_term, token, right_term)
     }
 
     fn parse_remaining_binary_expression_helper(
         &mut self,
-        right_term: S::R,
+        right_term: S::Output,
         left_precedence: usize,
-    ) -> S::R {
+    ) -> S::Output {
         // This gathers up terms to the right of an operator that are
         // operands of operators of higher precedence than the
         // operator to the left. For instance, if we have
@@ -2114,14 +2234,10 @@ where
                 kind,
                 left_precedence,
             ) {
-                BinaryExpressionPrefixKind::PrefixLessThan(_) => {
-                    let old_precedence = self.precedence;
-                    let right_term = {
-                        self.with_precedence(left_precedence);
-                        self.parse_remaining_expression(right_term)
-                    };
-                    self.with_precedence(old_precedence);
-                    self.parse_remaining_binary_expression_helper(right_term, left_precedence)
+                BinaryExpressionPrefixKind::PrefixLessThan((type_args, parser1)) => {
+                    self.continue_from(parser1);
+                    let result = self.do_parse_specified_function_call(right_term, type_args);
+                    self.parse_remaining_binary_expression_helper(result, left_precedence)
                 }
                 BinaryExpressionPrefixKind::PrefixAssignment => {
                     let old_precedence = self.precedence;
@@ -2150,7 +2266,7 @@ where
         }
     }
 
-    fn parse_conditional_expression(&mut self, test: S::R, question: S::R) -> S::R {
+    fn parse_conditional_expression(&mut self, test: S::Output, question: S::Output) -> S::Output {
         // POSSIBLE SPEC PROBLEM
         // We allow any expression, including assignment expressions, to be in
         // the consequence and alternative of a conditional expression, even
@@ -2181,7 +2297,8 @@ where
         // TODO: Add this to the XHP draft specification.
         let missing_consequence = kind == TokenKind::Colon && !(self.is_next_xhp_class_name());
         let consequence = if missing_consequence {
-            S!(make_missing, self, self.pos())
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
         } else {
             self.with_reset_precedence(|p| p.parse_expression())
         };
@@ -2189,23 +2306,16 @@ where
         let term = self.parse_term();
         let precedence = Operator::ConditionalQuestionOperator.precedence(&self.env);
         let alternative = self.parse_remaining_binary_expression_helper(term, precedence);
-        S!(
-            make_conditional_expression,
-            self,
-            test,
-            question,
-            consequence,
-            colon,
-            alternative
-        )
+        self.sc_mut()
+            .make_conditional_expression(test, question, consequence, colon, alternative)
     }
 
     /// Parse a name, a collection literal like vec[1, 2] or an
     /// expression tree literal Code`1`;
-    fn parse_name_or_collection_literal_expression(&mut self, name: S::R) -> S::R {
+    fn parse_name_or_collection_literal_expression(&mut self, name: S::Output) -> S::Output {
         match self.peek_token_kind_with_possible_attributized_type_list() {
             TokenKind::LeftBrace => {
-                let name = S!(make_simple_type_specifier, self, name);
+                let name = self.sc_mut().make_simple_type_specifier(name);
                 self.parse_collection_literal_expression(name)
             }
             TokenKind::LessThan => {
@@ -2216,7 +2326,9 @@ where
                     && parser1.peek_token_kind() == TokenKind::LeftBrace
                 {
                     self.continue_from(parser1);
-                    let name = S!(make_generic_type_specifier, self, name, type_arguments);
+                    let name = self
+                        .sc_mut()
+                        .make_generic_type_specifier(name, type_arguments);
                     self.parse_collection_literal_expression(name)
                 } else {
                     name
@@ -2231,27 +2343,25 @@ where
                     name
                 } else {
                     // Opening backtick of an expression tree literal.
-                    let prefix = S!(make_simple_type_specifier, self, name);
-                    let left_backtick = self.require_token(TokenKind::Backtick, Errors::error1065);
-                    self.in_expression_tree = true;
-                    let expr = self.parse_expression_with_reset_precedence();
-                    self.in_expression_tree = false;
-                    let right_backtick = self.require_token(TokenKind::Backtick, Errors::error1065);
-                    S!(
-                        make_prefixed_code_expression,
-                        self,
-                        prefix,
-                        left_backtick,
-                        expr,
-                        right_backtick
-                    )
+                    let prefix = self.sc_mut().make_simple_type_specifier(name);
+                    self.parse_expression_tree(prefix)
                 }
             }
             _ => name,
         }
     }
 
-    fn parse_collection_literal_expression(&mut self, name: S::R) -> S::R {
+    fn parse_expression_tree(&mut self, prefix: S::Output) -> S::Output {
+        let left_backtick = self.require_token(TokenKind::Backtick, Errors::error1065);
+        self.in_expression_tree = true;
+        let body = self.parse_lambda_body();
+        self.in_expression_tree = false;
+        let right_backtick = self.require_token(TokenKind::Backtick, Errors::error1065);
+        self.sc_mut()
+            .make_prefixed_code_expression(prefix, left_backtick, body, right_backtick)
+    }
+
+    fn parse_collection_literal_expression(&mut self, name: S::Output) -> S::Output {
         // SPEC
         // collection-literal:
         //   key-collection-class-type  {  cl-initializer-list-with-keys-opt  }
@@ -2281,17 +2391,15 @@ where
         let (left_brace, initialization_list, right_brace) =
             self.parse_braced_comma_list_opt_allow_trailing(|p| p.parse_init_expression());
         // Validating the name is a collection type happens in a later phase
-        S!(
-            make_collection_literal_expression,
-            self,
+        self.sc_mut().make_collection_literal_expression(
             name,
             left_brace,
             initialization_list,
-            right_brace
+            right_brace,
         )
     }
 
-    fn parse_init_expression(&mut self) -> S::R {
+    fn parse_init_expression(&mut self) -> S::Output {
         // ERROR RECOVERY
         // We expect either a list of expr, expr, expr, ... or
         // expr => expr, expr => expr, expr => expr, ...
@@ -2300,22 +2408,22 @@ where
         let expr1 = self.parse_expression_with_reset_precedence();
         if self.peek_token_kind() == TokenKind::EqualGreaterThan {
             let token = self.next_token();
-            let arrow = S!(make_token, self, token);
+            let arrow = self.sc_mut().make_token(token);
             let expr2 = self.parse_expression_with_reset_precedence();
-            S!(make_element_initializer, self, expr1, arrow, expr2)
+            self.sc_mut().make_element_initializer(expr1, arrow, expr2)
         } else {
             expr1
         }
     }
 
-    fn parse_keyed_element_initializer(&mut self) -> S::R {
+    fn parse_keyed_element_initializer(&mut self) -> S::Output {
         let expr1 = self.parse_expression_with_reset_precedence();
         let arrow = self.require_arrow();
         let expr2 = self.parse_expression_with_reset_precedence();
-        S!(make_element_initializer, self, expr1, arrow, expr2)
+        self.sc_mut().make_element_initializer(expr1, arrow, expr2)
     }
 
-    fn parse_list_expression(&mut self) -> S::R {
+    fn parse_list_expression(&mut self) -> S::Output {
         // SPEC:
         // list-intrinsic:
         //   list  (  expression-list-opt  )
@@ -2337,7 +2445,8 @@ where
         let (left, items, right) = self.parse_parenthesized_comma_list_opt_items_opt(|p| {
             p.parse_expression_with_reset_precedence()
         });
-        S!(make_list_expression, self, keyword, left, items, right)
+        self.sc_mut()
+            .make_list_expression(keyword, left, items, right)
     }
 
     fn parse_bracketed_collection_intrinsic_expression<F, G>(
@@ -2345,10 +2454,10 @@ where
         keyword_token: TokenKind,
         parse_element_function: F,
         make_intrinsic_function: G,
-    ) -> S::R
+    ) -> S::Output
     where
-        F: Fn(&mut Self) -> S::R,
-        G: Fn(&mut Self, S::R, S::R, S::R, S::R, S::R) -> S::R,
+        F: Fn(&mut Self) -> S::Output,
+        G: Fn(&mut Self, S::Output, S::Output, S::Output, S::Output, S::Output) -> S::Output,
     {
         let mut parser1 = self.clone();
         let keyword = parser1.assert_token(keyword_token);
@@ -2358,7 +2467,10 @@ where
                 // skip no_arg_is_missing check since there must only be 1 or 2 type arguments
                 type_arguments
             }
-            _ => S!(make_missing, parser1, parser1.pos()),
+            _ => {
+                let pos = parser1.pos();
+                parser1.sc_mut().make_missing(pos)
+            }
         };
         let left_bracket = parser1.optional_token(TokenKind::LeftBracket);
         if left_bracket.is_missing() {
@@ -2384,69 +2496,72 @@ where
         }
     }
 
-    fn parse_darray_intrinsic_expression(&mut self) -> S::R {
+    fn parse_darray_intrinsic_expression(&mut self) -> S::Output {
         // TODO: Create the grammar and add it to the spec.
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Darray,
             |p| p.parse_keyed_element_initializer(),
-            |p, a, b, c, d, e| S!(make_darray_intrinsic_expression, p, a, b, c, d, e),
+            |p, a, b, c, d, e| p.sc_mut().make_darray_intrinsic_expression(a, b, c, d, e),
         )
     }
 
-    fn parse_dictionary_intrinsic_expression(&mut self) -> S::R {
+    fn parse_dictionary_intrinsic_expression(&mut self) -> S::Output {
         // TODO: Create the grammar and add it to the spec.
         // TODO: Can the list have a trailing comma?
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Dict,
             |p| p.parse_keyed_element_initializer(),
-            |p, a, b, c, d, e| S!(make_dictionary_intrinsic_expression, p, a, b, c, d, e),
+            |p, a, b, c, d, e| {
+                p.sc_mut()
+                    .make_dictionary_intrinsic_expression(a, b, c, d, e)
+            },
         )
     }
 
-    fn parse_keyset_intrinsic_expression(&mut self) -> S::R {
+    fn parse_keyset_intrinsic_expression(&mut self) -> S::Output {
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Keyset,
             |p| p.parse_expression_with_reset_precedence(),
-            |p, a, b, c, d, e| S!(make_keyset_intrinsic_expression, p, a, b, c, d, e),
+            |p, a, b, c, d, e| p.sc_mut().make_keyset_intrinsic_expression(a, b, c, d, e),
         )
     }
 
-    fn parse_varray_intrinsic_expression(&mut self) -> S::R {
+    fn parse_varray_intrinsic_expression(&mut self) -> S::Output {
         // TODO: Create the grammar and add it to the spec.
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Varray,
             |p| p.parse_expression_with_reset_precedence(),
-            |p, a, b, c, d, e| S!(make_varray_intrinsic_expression, p, a, b, c, d, e),
+            |p, a, b, c, d, e| p.sc_mut().make_varray_intrinsic_expression(a, b, c, d, e),
         )
     }
 
-    fn parse_vector_intrinsic_expression(&mut self) -> S::R {
+    fn parse_vector_intrinsic_expression(&mut self) -> S::Output {
         // TODO: Create the grammar and add it to the spec.
         // TODO: Can the list have a trailing comma?
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Vec,
             |p| p.parse_expression_with_reset_precedence(),
-            |p, a, b, c, d, e| S!(make_vector_intrinsic_expression, p, a, b, c, d, e),
+            |p, a, b, c, d, e| p.sc_mut().make_vector_intrinsic_expression(a, b, c, d, e),
         )
     }
 
     // array-element-initializer :=
     //   expression
     //   expression => expression
-    fn parse_array_element_init(&mut self) -> S::R {
+    fn parse_array_element_init(&mut self) -> S::Output {
         let expr1 = self.with_reset_precedence(|p| p.parse_expression());
         match self.peek_token_kind() {
             TokenKind::EqualGreaterThan => {
                 let token = self.next_token();
-                let arrow = S!(make_token, self, token);
+                let arrow = self.sc_mut().make_token(token);
                 let expr2 = self.with_reset_precedence(|p| p.parse_expression());
-                S!(make_element_initializer, self, expr1, arrow, expr2)
+                self.sc_mut().make_element_initializer(expr1, arrow, expr2)
             }
             _ => expr1,
         }
     }
 
-    fn parse_field_initializer(&mut self) -> S::R {
+    fn parse_field_initializer(&mut self) -> S::Output {
         // SPEC
         // field-initializer:
         //   single-quoted-string-literal  =>  expression
@@ -2465,10 +2580,32 @@ where
         let name = self.with_reset_precedence(|p| p.parse_expression());
         let arrow = self.require_arrow();
         let value = self.with_reset_precedence(|p| p.parse_expression());
-        S!(make_field_initializer, self, name, arrow, value)
+        self.sc_mut().make_field_initializer(name, arrow, value)
     }
 
-    fn parse_shape_expression(&mut self) -> S::R {
+    fn parse_shape_field(&mut self) -> S::Output {
+        // SPEC extension for shape field punning:
+        // shape-field:
+        //   field-initializer
+        //   variable  (shorthand for 'var_name' => $var_name)
+        //
+        // If we see a variable followed by , or ) we treat it as shorthand syntax.
+        // Otherwise, we fall back to the regular field initializer syntax.
+
+        if self.peek_token_kind() == TokenKind::Variable {
+            let next_kind = self.peek_token_kind_with_lookahead(1);
+            if next_kind == TokenKind::Comma || next_kind == TokenKind::RightParen {
+                // Shorthand syntax: $foo becomes 'foo' => $foo
+                let token = self.next_token();
+                let variable = self.sc_mut().make_token(token);
+                return self.sc_mut().make_variable_expression(variable);
+            }
+        }
+        // Fall back to regular field initializer
+        self.parse_field_initializer()
+    }
+
+    fn parse_shape_expression(&mut self) -> S::Output {
         // SPEC
         // shape-literal:
         //   shape  (  field-initializer-list-opt  )
@@ -2479,20 +2616,19 @@ where
         // field-initializers:
         //   field-initializer
         //   field-initializers  ,  field-initializer
+        //
+        // Extended for shape field punning:
+        //   shape-field:
+        //     field-initializer
+        //     variable  (shorthand for 'var_name' => $var_name)
         let shape = self.assert_token(TokenKind::Shape);
         let (left_paren, fields, right_paren) =
-            self.parse_parenthesized_comma_list_opt_allow_trailing(|p| p.parse_field_initializer());
-        S!(
-            make_shape_expression,
-            self,
-            shape,
-            left_paren,
-            fields,
-            right_paren
-        )
+            self.parse_parenthesized_comma_list_opt_allow_trailing(|p| p.parse_shape_field());
+        self.sc_mut()
+            .make_shape_expression(shape, left_paren, fields, right_paren)
     }
 
-    fn parse_tuple_expression(&mut self) -> S::R {
+    fn parse_tuple_expression(&mut self) -> S::Output {
         // SPEC
         // tuple-literal:
         //   tuple  (  expression-list-one-or-more  )
@@ -2508,21 +2644,15 @@ where
             .parse_parenthesized_comma_list_opt_allow_trailing(|p| {
                 p.parse_expression_with_reset_precedence()
             });
-        S!(
-            make_tuple_expression,
-            self,
-            keyword,
-            left_paren,
-            items,
-            right_paren
-        )
+        self.sc_mut()
+            .make_tuple_expression(keyword, left_paren, items, right_paren)
     }
 
-    fn parse_use_variable(&mut self) -> S::R {
+    fn parse_use_variable(&mut self) -> S::Output {
         self.require_variable()
     }
 
-    fn parse_anon_or_lambda_or_awaitable(&mut self) -> S::R {
+    fn parse_anon_or_lambda_or_awaitable(&mut self) -> S::Output {
         // TODO: The original Hack parser accepts "async" as an identifier, and
         // so we do too. We might consider making it reserved.
         // Skip any async declarations that may be present. When we
@@ -2533,7 +2663,7 @@ where
         let mut parser2 = self.clone();
         let _ = parser2.optional_token(TokenKind::Async);
         match parser2.peek_token_kind() {
-            TokenKind::Function => self.parse_anon(attribute_spec),
+            TokenKind::Function => self.parse_anon_or_polymorphic_lambda(attribute_spec),
             TokenKind::LeftBrace => self.parse_async_block(attribute_spec),
             TokenKind::Variable | TokenKind::LeftParen => {
                 self.parse_lambda_expression(attribute_spec)
@@ -2541,12 +2671,12 @@ where
             _ => {
                 self.continue_from(parser1);
                 let async_as_name = self.next_token_as_name();
-                S!(make_token, self, async_as_name)
+                self.sc_mut().make_token(async_as_name)
             }
         }
     }
 
-    fn parse_async_block(&mut self, attribute_spec: S::R) -> S::R {
+    fn parse_async_block(&mut self, attribute_spec: S::Output) -> S::Output {
         // grammar:
         //   awaitable-creation-expression :
         //     async-opt compound-statement
@@ -2554,16 +2684,11 @@ where
         //      anonymous-function-body in a lambda-expression
         let async_ = self.optional_token(TokenKind::Async);
         let stmt = self.parse_compound_statement();
-        S!(
-            make_awaitable_creation_expression,
-            self,
-            attribute_spec,
-            async_,
-            stmt
-        )
+        self.sc_mut()
+            .make_awaitable_creation_expression(attribute_spec, async_, stmt)
     }
 
-    fn parse_anon_use_opt(&mut self) -> S::R {
+    fn parse_anon_use_opt(&mut self) -> S::Output {
         // SPEC:
         // anonymous-function-use-clause:
         //   use  (  use-variable-name-list  ,-opt  )
@@ -2577,27 +2702,23 @@ where
         } else {
             let (left, vars, right) =
                 self.parse_parenthesized_comma_list_opt_allow_trailing(|p| p.parse_use_variable());
-            S!(
-                make_anonymous_function_use_clause,
-                self,
-                use_token,
-                left,
-                vars,
-                right
-            )
+            self.sc_mut()
+                .make_anonymous_function_use_clause(use_token, left, vars, right)
         }
     }
 
-    fn parse_optional_readonly(&mut self) -> S::R {
+    fn parse_optional_readonly(&mut self) -> S::Output {
         self.optional_token(TokenKind::Readonly)
     }
 
-    fn parse_optional_return(&mut self) -> (S::R, S::R, S::R) {
+    fn parse_optional_return(&mut self) -> (S::Output, S::Output, S::Output) {
         // Parse an optional "colon-folowed-by-return-type"
         let colon = self.optional_token(TokenKind::Colon);
         let (readonly_opt, return_type) = if colon.is_missing() {
-            let missing1 = S!(make_missing, self, self.pos());
-            let missing2 = S!(make_missing, self, self.pos());
+            let pos = self.pos();
+            let missing1 = self.sc_mut().make_missing(pos);
+            let pos = self.pos();
+            let missing2 = self.sc_mut().make_missing(pos);
             (missing1, missing2)
         } else {
             let readonly = self.parse_optional_readonly();
@@ -2612,7 +2733,7 @@ where
         (colon, readonly_opt, return_type)
     }
 
-    fn parse_anon(&mut self, attribute_spec: S::R) -> S::R {
+    fn parse_anon_or_polymorphic_lambda(&mut self, attribute_spec: S::Output) -> S::Output {
         // SPEC
         // anonymous-function-creation-expression:
         //   async-opt function
@@ -2627,98 +2748,111 @@ where
         // parse an optional parameter list; it already takes care of making the
         // type annotations optional.
         let async_ = self.optional_token(TokenKind::Async);
-        let fn_ = self.assert_token(TokenKind::Function);
+        // We can only reach this point if we have determined there was a function
+        // keyword
+        let function_keyword = self.assert_token(TokenKind::Function);
+
+        // Lambda signature
+        let typarams = self.with_type_parser(|p: &mut TypeParser<'a, S>| {
+            p.parse_generic_type_parameter_list_opt()
+        });
         let (left_paren, params, right_paren) = self.parse_parameter_list_opt();
         let ctx_list = self.with_type_parser(|p| p.parse_contexts());
         let (colon, readonly_opt, return_type) = self.parse_optional_return();
-        let use_clause = self.parse_anon_use_opt();
-        // Detect if the user has the type in the wrong place
-        // function() use(): T // wrong
-        // function(): T use() // correct
-        if !use_clause.is_missing() {
-            let misplaced_colon = self.clone().optional_token(TokenKind::Colon);
-            if !misplaced_colon.is_missing() {
-                self.with_error(Cow::Borrowed(
-                    "Bad signature: use(...) should occur after the type",
-                ));
+
+        // Is there is fat-arrow? If yes, this is a polymorphic lambda otherwise it is an anonymous function
+
+        if self.peek_token_kind() == TokenKind::EqualEqualGreaterThan {
+            let signature = self.sc_mut().make_lambda_signature(
+                function_keyword,
+                typarams,
+                left_paren,
+                params,
+                right_paren,
+                ctx_list,
+                colon,
+                readonly_opt,
+                return_type,
+            );
+            let arrow = self.require_lambda_arrow();
+            let body = self.parse_lambda_body();
+            self.sc_mut()
+                .make_lambda_expression(attribute_spec, async_, signature, arrow, body)
+        } else {
+            let use_clause = self.parse_anon_use_opt();
+            // Detect if the user has the type in the wrong place
+            // function() use(): T // wrong
+            // function(): T use() // correct
+            if !use_clause.is_missing() {
+                let misplaced_colon = self.clone().optional_token(TokenKind::Colon);
+                if !misplaced_colon.is_missing() {
+                    self.with_error(
+                        Cow::Borrowed("Bad signature: use(...) should occur after the type"),
+                        Vec::new(),
+                    );
+                }
             }
+            let body = self.parse_compound_statement();
+            self.sc_mut().make_anonymous_function(
+                attribute_spec,
+                async_,
+                function_keyword,
+                typarams,
+                left_paren,
+                params,
+                right_paren,
+                ctx_list,
+                colon,
+                readonly_opt,
+                return_type,
+                use_clause,
+                body,
+            )
         }
-        let body = self.parse_compound_statement();
-        S!(
-            make_anonymous_function,
-            self,
-            attribute_spec,
-            async_,
-            fn_,
-            left_paren,
-            params,
-            right_paren,
-            ctx_list,
-            colon,
-            readonly_opt,
-            return_type,
-            use_clause,
-            body,
-        )
     }
 
-    fn parse_et_splice_expression(&mut self, dollar: S::R) -> S::R {
+    fn parse_et_splice_expression(&mut self, dollar: S::Output) -> S::Output {
         let left_brace = self.assert_token(TokenKind::LeftBrace);
         let expression = self.parse_expression_with_reset_precedence();
         let right_brace = self.require_right_brace();
-        S!(
-            make_et_splice_expression,
-            self,
-            dollar,
-            left_brace,
-            expression,
-            right_brace
-        )
+        self.sc_mut()
+            .make_et_splice_expression(dollar, left_brace, expression, right_brace)
     }
 
-    fn parse_braced_expression(&mut self) -> S::R {
+    fn parse_braced_expression(&mut self) -> S::Output {
         let left_brace = self.assert_token(TokenKind::LeftBrace);
         let expression = self.parse_expression_with_reset_precedence();
         let right_brace = self.require_right_brace();
-        S!(
-            make_braced_expression,
-            self,
-            left_brace,
-            expression,
-            right_brace
-        )
+        self.sc_mut()
+            .make_braced_expression(left_brace, expression, right_brace)
     }
 
-    fn require_right_brace_xhp(&mut self) -> S::R {
+    fn require_right_brace_xhp(&mut self) -> S::Output {
         // do not consume trailing trivia for the right brace
         // it should be accounted as XHP text
         let mut parser1 = self.clone();
         let token = parser1.next_token_no_trailing();
         if token.kind() == TokenKind::RightBrace {
             self.continue_from(parser1);
-            S!(make_token, self, token)
+            self.sc_mut().make_token(token)
         } else {
             // ERROR RECOVERY: Create a missing token for the expected token,
             // and continue on from the current token. Don't skip it.
-            self.with_error(Errors::error1006);
-            S!(make_missing, self, self.pos())
+            self.with_error(Errors::error1006, Vec::new());
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
         }
     }
 
-    fn parse_xhp_body_braced_expression(&mut self) -> S::R {
+    fn parse_xhp_body_braced_expression(&mut self) -> S::Output {
         // The difference between a regular braced expression and an
         // XHP body braced expression is:
         // <foo bar={$x}/*this_is_a_comment*/>{$y}/*this_is_body_text!*/</foo>
         let left_brace = self.assert_token(TokenKind::LeftBrace);
         let expression = self.parse_expression_with_reset_precedence();
         let right_brace = self.require_right_brace_xhp();
-        S!(
-            make_braced_expression,
-            self,
-            left_brace,
-            expression,
-            right_brace
-        )
+        self.sc_mut()
+            .make_braced_expression(left_brace, expression, right_brace)
     }
 
     fn next_xhp_element_token(&mut self, no_trailing: bool) -> (Token<S>, &[u8]) {
@@ -2729,90 +2863,92 @@ where
         self.lexer_mut().next_xhp_body_token()
     }
 
-    fn parse_xhp_attribute(&mut self) -> Option<S::R> {
+    fn parse_xhp_attribute(&mut self) -> Option<S::Output> {
         let mut parser1 = self.clone();
         let (token, _) = parser1.next_xhp_element_token(false);
         match token.kind() {
             TokenKind::LeftBrace => self.parse_xhp_spread_attribute(),
             TokenKind::XHPElementName => {
                 self.continue_from(parser1);
-                let token = S!(make_token, self, token);
+                let token = self.sc_mut().make_token(token);
                 self.parse_xhp_simple_attribute(token)
             }
             _ => None,
         }
     }
 
-    fn parse_xhp_spread_attribute(&mut self) -> Option<S::R> {
+    fn parse_xhp_spread_attribute(&mut self) -> Option<S::Output> {
         let (left_brace, _) = self.next_xhp_element_token(false);
-        let left_brace = S!(make_token, self, left_brace);
+        let left_brace = self.sc_mut().make_token(left_brace);
         let ellipsis = self.require_token(TokenKind::DotDotDot, Errors::expected_dotdotdot);
         let expression = self.parse_expression_with_reset_precedence();
         let right_brace = self.require_right_brace();
-        let node = S!(
-            make_xhp_spread_attribute,
-            self,
-            left_brace,
-            ellipsis,
-            expression,
-            right_brace
-        );
+        let node =
+            self.sc_mut()
+                .make_xhp_spread_attribute(left_brace, ellipsis, expression, right_brace);
         Some(node)
     }
 
-    fn parse_xhp_simple_attribute(&mut self, name: S::R) -> Option<S::R> {
+    fn parse_xhp_simple_attribute(&mut self, name: S::Output) -> Option<S::Output> {
         // Parse the attribute name and then defensively check for well-formed
         // attribute assignment
         let mut parser1 = self.clone();
         let (token, _) = parser1.next_xhp_element_token(false);
         if token.kind() != TokenKind::Equal {
-            self.with_error(Errors::error1016);
+            self.with_error(Errors::error1016, Vec::new());
             self.continue_from(parser1);
-            let missing1 = S!(make_missing, self, self.pos());
-            let missing2 = S!(make_missing, self, self.pos());
-            let node = S!(make_xhp_simple_attribute, self, name, missing1, missing2);
+            let pos = self.pos();
+            let missing1 = self.sc_mut().make_missing(pos);
+            let pos = self.pos();
+            let missing2 = self.sc_mut().make_missing(pos);
+            let node = self
+                .sc_mut()
+                .make_xhp_simple_attribute(name, missing1, missing2);
             // ERROR RECOVERY: The = is missing; assume that the name belongs
             // to the attribute, but that the remainder is missing, and start
             // looking for the next attribute.
             Some(node)
         } else {
-            let equal = S!(make_token, parser1, token);
+            let equal = parser1.sc_mut().make_token(token);
             let mut parser2 = parser1.clone();
             let (token, _text) = parser2.next_xhp_element_token(false);
             match token.kind() {
                 TokenKind::XHPStringLiteral => {
                     self.continue_from(parser2);
-                    let token = S!(make_token, self, token);
-                    let node = S!(make_xhp_simple_attribute, self, name, equal, token);
+                    let token = self.sc_mut().make_token(token);
+                    let node = self.sc_mut().make_xhp_simple_attribute(name, equal, token);
                     Some(node)
                 }
                 TokenKind::LeftBrace => {
                     self.continue_from(parser1);
                     let expr = self.parse_braced_expression();
-                    let node = S!(make_xhp_simple_attribute, self, name, equal, expr);
+                    let node = self.sc_mut().make_xhp_simple_attribute(name, equal, expr);
                     Some(node)
                 }
                 _ => {
                     // ERROR RECOVERY: The expression is missing; assume that the "name ="
                     // belongs to the attribute and start looking for the next attribute.
                     self.continue_from(parser1);
-                    self.with_error(Errors::error1017);
+                    self.with_error(Errors::error1017, Vec::new());
                     self.continue_from(parser2);
-                    let missing = S!(make_missing, self, self.pos());
-                    let node = S!(make_xhp_simple_attribute, self, name, equal, missing);
+                    let pos = self.pos();
+                    let missing = self.sc_mut().make_missing(pos);
+                    let node = self
+                        .sc_mut()
+                        .make_xhp_simple_attribute(name, equal, missing);
                     Some(node)
                 }
             }
         }
     }
 
-    fn parse_xhp_body_element(&mut self) -> Option<S::R> {
+    fn parse_xhp_body_element(&mut self) -> Option<S::Output> {
         let mut parser1 = self.clone();
         let token = parser1.next_xhp_body_token();
         match token.kind() {
             TokenKind::XHPComment | TokenKind::XHPBody => {
                 self.continue_from(parser1);
-                let token = S!(make_token, self, token);
+                let token = self.sc_mut().make_token(token);
                 Some(token)
             }
             TokenKind::LeftBrace => {
@@ -2825,7 +2961,7 @@ where
                 // to be a mis-edit, so we'll keep it as a right-brace token so that
                 // tooling can flag it as suspicious.
                 self.continue_from(parser1);
-                let token = S!(make_token, self, token);
+                let token = self.sc_mut().make_token(token);
                 Some(token)
             }
             TokenKind::LessThan => {
@@ -2837,77 +2973,65 @@ where
         }
     }
 
-    fn parse_xhp_close(&mut self, consume_trailing_trivia: bool) -> S::R {
+    fn parse_xhp_close(&mut self, consume_trailing_trivia: bool) -> S::Output {
         let (less_than_slash, _) = self.next_xhp_element_token(false);
         let less_than_slash_token_kind = less_than_slash.kind();
-        let less_than_slash_token = S!(make_token, self, less_than_slash);
+        let less_than_slash_token = self.sc_mut().make_token(less_than_slash);
         if less_than_slash_token_kind == TokenKind::LessThanSlash {
             let mut parser1 = self.clone();
             let (name, _name_text) = parser1.next_xhp_element_token(false);
             if name.kind() == TokenKind::XHPElementName {
-                let name_token = S!(make_token, parser1, name);
+                let name_token = parser1.sc_mut().make_token(name);
                 // TODO: Check that the given and name_text are the same.
                 let mut parser2 = parser1.clone();
                 let (greater_than, _) = parser2.next_xhp_element_token(!consume_trailing_trivia);
                 if greater_than.kind() == TokenKind::GreaterThan {
                     self.continue_from(parser2);
-                    let greater_than_token = S!(make_token, self, greater_than);
-                    S!(
-                        make_xhp_close,
-                        self,
+                    let greater_than_token = self.sc_mut().make_token(greater_than);
+                    self.sc_mut().make_xhp_close(
                         less_than_slash_token,
                         name_token,
-                        greater_than_token
+                        greater_than_token,
                     )
                 } else {
                     // ERROR RECOVERY:
                     self.continue_from(parser1);
-                    self.with_error(Errors::error1039);
-                    let missing = S!(make_missing, self, self.pos());
-                    S!(
-                        make_xhp_close,
-                        self,
-                        less_than_slash_token,
-                        name_token,
-                        missing
-                    )
+                    self.with_error(Errors::error1039, Vec::new());
+                    let pos = self.pos();
+                    let missing = self.sc_mut().make_missing(pos);
+                    self.sc_mut()
+                        .make_xhp_close(less_than_slash_token, name_token, missing)
                 }
             } else {
                 // ERROR RECOVERY:
-                self.with_error(Errors::error1039);
-                let missing1 = S!(make_missing, self, self.pos());
-                let missing2 = S!(make_missing, self, self.pos());
-                S!(
-                    make_xhp_close,
-                    self,
-                    less_than_slash_token,
-                    missing1,
-                    missing2
-                )
+                self.with_error(Errors::error1039, Vec::new());
+                let pos = self.pos();
+                let missing1 = self.sc_mut().make_missing(pos);
+                let pos = self.pos();
+                let missing2 = self.sc_mut().make_missing(pos);
+                self.sc_mut()
+                    .make_xhp_close(less_than_slash_token, missing1, missing2)
             }
         } else {
             // ERROR RECOVERY: We probably got a < without a following / or name.
             // TODO: For now we'll just bail out. We could use a more
             // sophisticated strategy here.
-            self.with_error(Errors::error1039);
-            let missing1 = S!(make_missing, self, self.pos());
-            let missing2 = S!(make_missing, self, self.pos());
-            S!(
-                make_xhp_close,
-                self,
-                less_than_slash_token,
-                missing1,
-                missing2
-            )
+            self.with_error(Errors::error1039, Vec::new());
+            let pos = self.pos();
+            let missing1 = self.sc_mut().make_missing(pos);
+            let pos = self.pos();
+            let missing2 = self.sc_mut().make_missing(pos);
+            self.sc_mut()
+                .make_xhp_close(less_than_slash_token, missing1, missing2)
         }
     }
 
     fn parse_xhp_expression(
         &mut self,
         consume_trailing_trivia: bool,
-        left_angle: S::R,
-        name: S::R,
-    ) -> S::R {
+        left_angle: S::Output,
+        name: S::Output,
+    ) -> S::Output {
         let attrs = self.parse_list_until_none(|p| p.parse_xhp_attribute());
         let mut parser1 = self.clone();
         let (token, _) = parser1.next_xhp_element_token(/*no_trailing:*/ true);
@@ -2918,11 +3042,12 @@ where
                 // `consume_trailing_trivia` needs to be propagated down.
                 let (token, _) =
                     self.next_xhp_element_token(/* ~no_trailing:*/ !consume_trailing_trivia);
-                let token = S!(make_token, self, token);
-                let xhp_open = S!(make_xhp_open, self, left_angle, name, attrs, token);
-                let missing1 = S!(make_missing, self, pos);
-                let missing2 = S!(make_missing, self, pos);
-                S!(make_xhp_expression, self, xhp_open, missing1, missing2)
+                let token = self.sc_mut().make_token(token);
+                let xhp_open = self.sc_mut().make_xhp_open(left_angle, name, attrs, token);
+                let missing1 = self.sc_mut().make_missing(pos);
+                let missing2 = self.sc_mut().make_missing(pos);
+                self.sc_mut()
+                    .make_xhp_expression(xhp_open, missing1, missing2)
             }
             TokenKind::GreaterThan => {
                 // This is not a self-closing tag, so we are now in an XHP body context.
@@ -2930,30 +3055,41 @@ where
                 // ~no_trailing:true), since we don't want to lex trailing trivia inside
                 // XHP bodies.
                 self.continue_from(parser1);
-                let token = S!(make_token, self, token);
-                let xhp_open = S!(make_xhp_open, self, left_angle, name, attrs, token);
+                let token = self.sc_mut().make_token(token);
+                let xhp_open = self.sc_mut().make_xhp_open(left_angle, name, attrs, token);
                 let xhp_body = self.parse_list_until_none(|p| p.parse_xhp_body_element());
                 let xhp_close = self.parse_xhp_close(consume_trailing_trivia);
-                S!(make_xhp_expression, self, xhp_open, xhp_body, xhp_close)
+                self.sc_mut()
+                    .make_xhp_expression(xhp_open, xhp_body, xhp_close)
             }
             _ => {
                 // ERROR RECOVERY: Assume the unexpected token belongs to whatever
                 // comes next.
-                let missing = S!(make_missing, self, self.pos());
-                let xhp_open = S!(make_xhp_open, self, left_angle, name, attrs, missing);
-                let missing1 = S!(make_missing, parser1, self.pos());
-                let missing2 = S!(make_missing, parser1, self.pos());
+                let pos = self.pos();
+                let missing = self.sc_mut().make_missing(pos);
+                let xhp_open = self
+                    .sc_mut()
+                    .make_xhp_open(left_angle, name, attrs, missing);
+                let pos = self.pos();
+                let missing1 = parser1.sc_mut().make_missing(pos);
+                let pos = self.pos();
+                let missing2 = parser1.sc_mut().make_missing(pos);
                 self.continue_from(parser1);
-                self.with_error(Errors::error1013);
-                S!(make_xhp_expression, self, xhp_open, missing1, missing2)
+                self.with_error(Errors::error1013, Vec::new());
+                self.sc_mut()
+                    .make_xhp_expression(xhp_open, missing1, missing2)
             }
         }
     }
 
-    fn parse_possible_xhp_expression(&mut self, in_xhp_body: bool, less_than: Token<S>) -> S::R {
+    fn parse_possible_xhp_expression(
+        &mut self,
+        in_xhp_body: bool,
+        less_than: Token<S>,
+    ) -> S::Output {
         // We got a < token where an expression was expected.
         //println!("assert_xhp_body_token start {}|", self.lexer().offset_as_string());
-        let less_than = S!(make_token, self, less_than);
+        let less_than = self.sc_mut().make_token(less_than);
 
         //println!("assert_xhp_body_token end {}|", self.lexer().offset_as_string());
         let mut parser1 = self.clone();
@@ -2961,7 +3097,7 @@ where
         let (name, _text) = parser1.next_xhp_element_token(false);
         if name.kind() == TokenKind::XHPElementName {
             self.continue_from(parser1);
-            let token = S!(make_token, self, name);
+            let token = self.sc_mut().make_token(name);
             self.parse_xhp_expression(!in_xhp_body, less_than, token)
         } else {
             // ERROR RECOVERY
@@ -2978,12 +3114,12 @@ where
             } else {
                 Errors::error1015
             };
-            self.with_error(error);
+            self.with_error(error, Vec::new());
             less_than
         }
     }
 
-    fn parse_anon_or_awaitable_or_scope_resolution_or_name(&mut self) -> S::R {
+    fn parse_anon_or_awaitable_or_scope_resolution_or_name(&mut self) -> S::Output {
         // static is a legal identifier, if next token is scope resolution operatpr
         // - parse expresson as scope resolution operator, otherwise try to interpret
         // it as anonymous function (will fallback to name in case of failure)
@@ -2995,7 +3131,7 @@ where
         }
     }
 
-    fn parse_scope_resolution_or_name(&mut self) -> S::R {
+    fn parse_scope_resolution_or_name(&mut self) -> S::Output {
         // parent, self and static are legal identifiers. If the next
         // thing that follows is a scope resolution operator, parse them as
         // ordinary tokens, and then we'll pick them up as the operand to the
@@ -3005,14 +3141,14 @@ where
         let qualifier = parser1.next_token();
         if parser1.peek_token_kind() == TokenKind::ColonColon {
             self.continue_from(parser1);
-            S!(make_token, self, qualifier)
+            self.sc_mut().make_token(qualifier)
         } else {
             let parent_or_self_or_static_as_name = self.next_token_as_name();
-            S!(make_token, self, parent_or_self_or_static_as_name)
+            self.sc_mut().make_token(parent_or_self_or_static_as_name)
         }
     }
 
-    fn parse_scope_resolution_expression(&mut self, qualifier: S::R) -> S::R {
+    fn parse_scope_resolution_expression(&mut self, qualifier: S::Output) -> S::Output {
         // SPEC
         // scope-resolution-expression:
         //   scope-resolution-qualifier  ::  name
@@ -3039,7 +3175,7 @@ where
             match token.kind() {
                 TokenKind::Class => {
                     self.continue_from(parser1);
-                    S!(make_token, self, token)
+                    self.sc_mut().make_token(token)
                 }
                 TokenKind::Dollar => self.parse_dollar_expression(false),
                 TokenKind::LeftBrace => self.parse_braced_expression(),
@@ -3064,10 +3200,11 @@ where
                 _ => self.require_name_or_variable_or_error(Errors::error1048),
             }
         };
-        S!(make_scope_resolution_expression, self, qualifier, op, name)
+        self.sc_mut()
+            .make_scope_resolution_expression(qualifier, op, name)
     }
 
-    fn parse_enum_class_label_expression(&mut self, qualifier: S::R) -> S::R {
+    fn parse_enum_class_label_expression(&mut self, qualifier: S::Output) -> S::Output {
         // SPEC
         // enum-class-label-expression:
         //   enum-class-label-qualifier # name
@@ -3076,12 +3213,7 @@ where
         //   qualified-name
         let hash = self.assert_token(TokenKind::Hash);
         let label_name = self.require_name_allow_all_keywords();
-        S!(
-            make_enum_class_label_expression,
-            self,
-            qualifier,
-            hash,
-            label_name
-        )
+        self.sc_mut()
+            .make_enum_class_label_expression(qualifier, hash, label_name)
     }
 }

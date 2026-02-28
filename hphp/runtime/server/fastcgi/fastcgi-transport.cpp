@@ -20,13 +20,14 @@
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/transport.h"
 
+#include "hphp/util/configs/server.h"
+
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 
 namespace HPHP {
 
-using folly::IOBuf;
 using folly::IOBufQueue;
 using folly::io::Cursor;
 
@@ -55,7 +56,7 @@ const void *FastCGITransport::getPostData(size_t& size) {
 const void *FastCGITransport::getMorePostData(size_t& size) {
   // session will terminate the request if we don't receive data in
   // this much time
-  long maxWait = RuntimeOption::ConnectionTimeoutSeconds;
+  long maxWait = Cfg::Server::ConnectionTimeoutSeconds;
   if (maxWait <= 0) {
     maxWait = 50; // this was the default read timeout in LibEventServer
   }
@@ -96,7 +97,7 @@ std::string FastCGITransport::getHeader(const char* name) {
     key += (*p == '-') ? '_' : toupper(*p);
   }
 
-  if (m_requestParams.count(key)) {
+  if (m_requestParams.contains(key)) {
     return m_requestParams[key];
   }
 
@@ -244,7 +245,7 @@ void FastCGITransport::onHeadersComplete() {
     m_docRoot += '/';
   }
 
-  if (m_scriptName.empty() || RuntimeOption::ServerFixPathInfo) {
+  if (m_scriptName.empty() || Cfg::Server::FixPathInfo) {
     // According to php-fpm, some servers don't set SCRIPT_FILENAME. In
     // this case, it uses PATH_TRANSLATED.
     // Added runtime option to change m_scriptFilename to s_pathTran

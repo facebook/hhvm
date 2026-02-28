@@ -1,10 +1,10 @@
 <?hh
 
-function foo(inout mixed $thing) {
+function foo(inout mixed $thing) :mixed{
   $thing = 5;
 }
 
-function main() {
+function main() :mixed{
   $a = 2;
   foo(inout $a);
   var_dump($a);
@@ -12,6 +12,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_inout_param_mixed_hint() {
+function main_inout_param_mixed_hint() :mixed{
 main();
 }

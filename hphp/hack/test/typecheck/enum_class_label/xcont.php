@@ -8,73 +8,80 @@ abstract class XParam<T> implements IXParam {
 
   public function __construct()[] {}
 
-  public function optional()[] : this {
+  public function optional()[]: this {
     return $this;
   }
 
-  public function defaultValue(T $data)[write_props] : this {
+  public function defaultValue(T $data)[write_props]: this {
     $this->value = $data;
     return $this;
   }
 
-  abstract public function coerceTo(mixed $data) : T;
+  abstract public function coerceTo(mixed $data): T;
 
 }
 
 class XString extends XParam<string> {
   <<__Override>>
-    public function coerceTo(mixed $data) : string {
-      return $data as string;
-    }
+  public function coerceTo(mixed $data): string {
+    return $data as string;
+  }
 }
 
 class XInt extends XParam<int> {
   <<__Override>>
-    public function coerceTo(mixed $data) : int {
-      return $data as int;
-    }
+  public function coerceTo(mixed $data): int {
+    return $data as int;
+  }
 }
 
 abstract final class X {
-  public static function Int()[] : XInt {
+  public static function Int()[]: XInt {
     return new XInt();
   }
 
-  public static function String()[] : XString {
+  public static function String()[]: XString {
     return new XString();
   }
 }
 
-enum class XE : IXParam {}
+enum class XE: IXParam {}
 
 abstract class Controller {
   abstract const type TE as XE;
 
   private dict<string, mixed> $data = dict[];
 
-  protected static function key<T, TParam as XParam<T>>(HH\EnumClass\Label<this::TE, TParam> $label) : string {
+  protected static function key<T>(
+    HH\EnumClass\Label<this::TE, XParam<T>> $label,
+  ): string {
     $ts = type_structure(static::class, 'TE');
     $cls = $ts['classname'] as nonnull;
     return $cls::nameOf($label);
   }
 
-  protected static function value<T, TParam as XParam<T>>(HH\EnumClass\Label<this::TE, TParam> $label) : HH\MemberOf<this::TE, TParam> {
+  protected static function value<T>(
+    HH\EnumClass\Label<this::TE, XParam<T>> $label,
+  ): HH\MemberOf<this::TE, XParam<T>> {
     $ts = type_structure(static::class, 'TE');
     $cls = $ts['classname'] as nonnull;
     return $cls::valueOf($label);
   }
 
-  public function set<T, TParam as XParam<T>>(HH\EnumClass\Label<this::TE, TParam> $label, T $actual_data) : void {
+  public function set<T>(
+    HH\EnumClass\Label<this::TE, XParam<T>> $label,
+    T $actual_data,
+  ): void {
     $key = static::key($label);
     $this->data[$key] = $actual_data;
   }
 
-  public function get<T, TParam as XParam<T>>(HH\EnumClass\Label<this::TE, TParam> $label) : ?T {
+  public function get<T>(HH\EnumClass\Label<this::TE, XParam<T>> $label): ?T {
     $key = static::key($label);
     $definition = static::value($label);
 
-  // TODO: add the logic for defaultValue, but not important for this
-  // demonstration
+    // TODO: add the logic for defaultValue, but not important for this
+    // demonstration
     $raw_data = $this->data[$key] ?? null;
     if ($raw_data is nonnull) {
       return $definition->coerceTo($raw_data);
@@ -83,7 +90,7 @@ abstract class Controller {
   }
 }
 
-enum class SomeE : IXParam extends XE {
+enum class SomeE: IXParam extends XE {
   XString Name = X::String()->defaultValue("zuck");
   XInt Age = X::Int()->defaultValue(42);
   XInt Foo = X::Int()->optional();

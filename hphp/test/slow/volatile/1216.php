@@ -1,6 +1,6 @@
 <?hh
 
-function bar() {
+function bar() :mixed{
   for ($i = 0;
  $i < 4;
  $i++) {
@@ -16,14 +16,14 @@ function bar() {
     }
   }
 }
-function later3() {
+function later3() :mixed{
   echo "later3 called\n";
 }
 class later4 {
 }
 
 <<__EntryPoint>>
-function main_1216() {
+function main_1216() :mixed{
 if (function_exists('bar')) bar();
 $a = 'bar';
 if (function_exists($a)) bar();
@@ -58,7 +58,7 @@ if (class_exists($a)) {
 if (function_exists('function_exists')) {
   echo "yes\n";
 }
-if (class_exists('exception')) {
+if (class_exists('Exception')) {
   echo "yes\n";
 }
 }

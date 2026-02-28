@@ -1,4 +1,4 @@
-File "interface2.php", line 10, characters 25-26:
+ERROR: File "interface2.php", line 10, characters 25-26:
 Some members in class `I` are incompatible with those declared in type `I2` (Typing[4340])
   File "interface2.php", line 10, characters 25-26:
   Some members in class `I` are incompatible with those declared in type `I2`

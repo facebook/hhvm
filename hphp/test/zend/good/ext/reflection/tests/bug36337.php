@@ -11,7 +11,7 @@ abstract class enum {
 }
 
 final class myEnum extends enum {
-    public $_values = darray[
+    public $_values = dict[
         0 => 'No value',
     ];
 }

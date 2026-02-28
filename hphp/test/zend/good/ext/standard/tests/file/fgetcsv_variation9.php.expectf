@@ -1,5 +1,7 @@
 *** Testing fgetcsv() : with different delimiter but same enclosure ***
 
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation9.php on line 30
+
 -- Testing fgetcsv() with file opened using r mode --
 vec(1) {
   string(11) "water,fruit"

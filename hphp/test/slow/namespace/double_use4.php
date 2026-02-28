@@ -12,6 +12,6 @@ use test\Traversable;
 
 
 <<__EntryPoint>>
-function main_double_use4() {
+function main_double_use4() :mixed{
 echo 'successful';
 }

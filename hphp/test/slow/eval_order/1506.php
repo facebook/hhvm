@@ -1,8 +1,8 @@
 <?hh
 <<__DynamicallyCallable>>
-function x($a, $b, $c, $d) {
+function x($a, $b, $c, $d) :mixed{
 }
-function p($x) {
+function p($x) :mixed{
   echo $x.
     "
 ";
@@ -11,24 +11,24 @@ function p($x) {
 class c {
   function __construct($a, $b, $c, $d) {
   }
-  function f($a, $b, $c, $d) {
+  function f($a, $b, $c, $d) :mixed{
   }
   <<__DynamicallyCallable>>
-  static function g($a, $b, $c, $d) {
+  static function g($a, $b, $c, $d) :mixed{
   }
 }
-function rt(inout $a, $v) {
+function rt(inout $a, $v) :mixed{
   $a = $v;
 }
-function id($x) {
+function id($x) :mixed{
   return $x;
 }
-function dump($a, $b) {
+function dump($a, $b) :mixed{
   var_dump($a, $b);
 }
 
 <<__EntryPoint>>
-function main_1506() {
+function main_1506() :mixed{
   echo "sfc
 ";
   x(p(1), p(2), p(3), 4);
@@ -42,7 +42,7 @@ function main_1506() {
   $y = 'g';
   echo "dsmc
 ";
-  c::$y(p(1), p(2), p(3), 4);
+  HH\dynamic_class_meth(c::class, $y)(p(1), p(2), p(3), 4);
   echo "occ
 ";
   $q = new c(p(1), p(2), p(3), 4);
@@ -66,7 +66,7 @@ function main_1506() {
   x(p(1), x(p(2), p(3), p(4), p(5)), p(6), x(p(7), p(8), p(9), p(10)));
   echo "arr
 ";
-  $z = varray[p(1), p(2), x(p(3), p(4), p(5), p(6)), p(7)];
+  $z = vec[p(1), p(2), x(p(3), p(4), p(5), p(6)), p(7)];
   $q = 1;
-  $z = varray[1, 2, $q];
+  $z = vec[1, 2, $q];
 }

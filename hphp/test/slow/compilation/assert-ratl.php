@@ -1,15 +1,15 @@
 <?hh
 
 final class X {
-  private function foo() {
-    $r = darray[1 => varray[]];
+  private function foo() :mixed{
+    $r = dict[1 => vec[]];
     $r[1][] = 55;
     $r[1][] = "foo";
 
     return $r;
   }
 
-  public function bar() {
+  public function bar() :mixed{
     $s = $this->foo();
 
     foreach ($s as $v) {
@@ -24,6 +24,6 @@ final class X {
 
 
 <<__EntryPoint>>
-function main_assert_ratl() {
+function main_assert_ratl() :mixed{
 (new X)->bar();
 }

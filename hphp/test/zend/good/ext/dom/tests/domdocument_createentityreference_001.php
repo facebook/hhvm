@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-  $objDoc = new DomDocument();
+  $objDoc = new DOMDocument();
 
   $objRef = $objDoc->createEntityReference('Test');
   echo $objRef->nodeName . "\n";

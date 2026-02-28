@@ -24,8 +24,6 @@ namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 const StaticString s_IntlTimeZone("IntlTimeZone");
 
-Class* IntlTimeZone::c_IntlTimeZone = nullptr;
-
 static bool ustring_from_char(icu::UnicodeString& ret,
                               const String& str,
                               UErrorCode &error) {
@@ -44,16 +42,16 @@ icu::TimeZone* IntlTimeZone::ParseArg(const Variant& arg,
   String tzstr;
 
   if (arg.isNull()) {
-    tzstr = f_date_default_timezone_get();
+    tzstr = HHVM_FN(date_default_timezone_get)();
   } else if (arg.isObject()) {
     auto objarg = arg.toObject();
     auto cls = objarg->getVMClass();
-    auto IntlTimeZone_Class = Class::lookup(s_IntlTimeZone.get());
+    auto IntlTimeZone_Class = IntlTimeZone::classof();
     if (IntlTimeZone_Class &&
         ((cls == IntlTimeZone_Class) || cls->classof(IntlTimeZone_Class))) {
       return IntlTimeZone::Get(objarg.get())->timezone()->clone();
     }
-    if (objarg.instanceof(DateTimeZoneData::getClass())) {
+    if (objarg.instanceof(DateTimeZoneData::classof())) {
       auto* dtz = Native::data<DateTimeZoneData>(objarg);
       tzstr = dtz->getName();
     } else {
@@ -378,7 +376,7 @@ static Object HHVM_STATIC_METHOD(IntlTimeZone, getUnknown) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initTimeZone() {
+void IntlExtension::registerNativeTimeZone() {
   HHVM_RCC_INT(IntlTimeZone, DISPLAY_SHORT, icu::TimeZone::SHORT);
   HHVM_RCC_INT(IntlTimeZone, DISPLAY_LONG, icu::TimeZone::LONG);
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
@@ -424,9 +422,7 @@ void IntlExtension::initTimeZone() {
  HHVM_STATIC_ME(IntlTimeZone, getUnknown);
 #endif // ICU 4.9
 
-  Native::registerNativeDataInfo<IntlTimeZone>(s_IntlTimeZone.get());
-
-  loadSystemlib("icu_timezone");
+  Native::registerNativeDataInfo<IntlTimeZone>();
 }
 
 //////////////////////////////////////////////////////////////////////////////

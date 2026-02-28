@@ -1,0 +1,6 @@
+File "bad_contra_constraint_2.php", line 25, characters 21-34:
+Invalid argument (Typing[4110])
+  File "bad_contra_constraint_2.php", line 17, characters 52-57:
+  Expected `string`
+  File "bad_contra_constraint_2.php", line 19, characters 20-24:
+  But got `mixed`

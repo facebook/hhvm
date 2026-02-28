@@ -15,7 +15,7 @@ class CPure {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $pure = new CPure();
   $non_pure = new CNonPure();
   print_r($pure);

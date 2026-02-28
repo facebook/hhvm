@@ -1,3 +1,3 @@
 <?hh
-function id(,$x) { }
+function id(,$x) :mixed{ }
 

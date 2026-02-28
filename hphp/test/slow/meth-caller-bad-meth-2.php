@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $foo = 'foo';
   meth_caller('Foo', $foo);
 }

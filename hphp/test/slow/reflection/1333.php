@@ -1,15 +1,15 @@
 <?hh
 
 class A {
- function foo() {
+ function foo() :mixed{
 }
  }
 class B extends A {
- function bar() {
+ function bar() :mixed{
 }
 }
 
 <<__EntryPoint>>
-function main_1333() {
+function main_1333() :mixed{
 var_dump(get_class_methods(new B()));
 }

@@ -29,9 +29,9 @@ namespace HPHP {
 
 /*
  * Checks whether the given cell is an instance of the class referred by
- * given named entity.
+ * given named type.
  */
-bool tvInstanceOf(const TypedValue* tv, const NamedEntity* ne);
+bool tvInstanceOf(const TypedValue* tv, const NamedType* ne);
 
 /*
  * Checks whether the given cell is an instance of the given class.
@@ -68,7 +68,7 @@ bool verifyReifiedLocalType(
  * type.
  * If suppress is not set, will raise an error if the type structure cannot be
  * resolved.
- * Otherwise, if suppress and RuntimeOption::EvalIsExprEnableUnresolvedWarning
+ * Otherwise, if suppress and Cfg::Eval::IsExprEnableUnresolvedWarning
  * are set, will raise a warning instead.
  *
  * Because the type structure might contain unresolved nested structures, we
@@ -106,6 +106,13 @@ bool typeStructureCouldBeNonStatic(const ArrayData* ts);
  */
 bool checkTypeStructureMatchesTV(const Array& ts, TypedValue c1);
 
+bool checkForVerifyTypeStructureMatchesTV(
+  const Array& ts,
+  TypedValue c1,
+  std::string& givenType,
+  std::string& expectedType,
+  std::string& errorKey);
+
 /*
  * In addition to regular checkTypeStructureMatchesTV, also populates the
  * error paths
@@ -132,7 +139,8 @@ bool checkTypeStructureMatchesTV(const Array& ts, TypedValue c1, bool& warn);
 [[noreturn]] void throwTypeStructureDoesNotMatchTVException(
   std::string& givenType,
   std::string& expectedType,
-  std::string& errorKey
+  std::string& errorKey,
+  bool throwFatal
 );
 
 /*
@@ -141,4 +149,3 @@ bool checkTypeStructureMatchesTV(const Array& ts, TypedValue c1, bool& warn);
 bool doesTypeStructureContainTUnresolved(const ArrayData* ts);
 
 }
-

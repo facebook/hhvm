@@ -1,7 +1,7 @@
 <?hh
 
-function f() {
-  $mp1 = Map { 'a' => 1, 2 => 'b', 'c' => varray[]};
+function f() :mixed{
+  $mp1 = Map { 'a' => 1, 2 => 'b', 'c' => vec[]};
   $mp2 = Map {};
   $mp3 = Map {} ;
   foreach ($mp1->items() as $t) {
@@ -15,6 +15,6 @@ function f() {
 }
 
 <<__EntryPoint>>
-function main_827() {
+function main_827() :mixed{
 f();
 }

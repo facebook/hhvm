@@ -16,13 +16,16 @@
 
 #include "hphp/runtime/vm/jit/irlower-bespoke.h"
 
+#include <hphp/util/assertions.h>
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
+#include "hphp/runtime/base/bespoke/struct-data-layout.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
@@ -188,7 +191,6 @@ void cgBespokeGet(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const args = argGroup(env, inst).ssa(0).ssa(1);
   cgCallHelper(v, env, target, callDestTV(env, inst), syncMode, args);
-
 }
 
 void cgBespokeGetThrow(IRLS& env, const IRInstruction* inst) {
@@ -229,6 +231,21 @@ void cgBespokeSet(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const args = argGroup(env, inst).ssa(0).ssa(1).typedValue(2);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+}
+
+void cgBespokeSetPos(IRLS& env, const IRInstruction* inst) {
+  auto const setPosMove = CallSpec::method(&ArrayData::setPosMove);
+
+  auto const arr = inst->src(0)->type();
+  auto const target = CALL_TARGET(arr, SetPosMove, setPosMove);
+
+  auto const syncMode = maybeLogging(arr)
+    ? SyncOptions::Sync
+    : SyncOptions::None;
+
+  auto& v = vmain(env);
+  auto const args = argGroup(env, inst).ssa(0).ssa(1).typedValue(2);
+  cgCallHelper(v, env, target, callDest(env, inst), syncMode, args);
 }
 
 void cgBespokeUnset(IRLS &env, const IRInstruction *inst) {
@@ -335,8 +352,6 @@ void cgBespokeEscalateToVanilla(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst).ssa(0).imm(reason);
   cgCallHelper(v, env, target, callDest(env, inst), syncMode, args);
 }
-
-#undef CALL_TARGET
 
 void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
@@ -478,6 +493,98 @@ void cgLdMonotypeVecElem(IRLS& env, const IRInstruction* inst) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// TypeStructure
+
+void callBespokeGetStr(IRLS& env, const IRInstruction* inst, CallDest dest) {
+  using GetStr = TypedValue (ArrayData::*)(const StringData*) const;
+  auto const getStr =
+    CallSpec::method(static_cast<GetStr>(&ArrayData::get));
+
+  auto const arr = inst->src(0)->type();
+  auto const target = CALL_TARGET(arr, NvGetStr, getStr);
+
+  auto const syncMode = maybeLogging(arr)
+    ? SyncOptions::Sync
+    : SyncOptions::None;
+
+  auto& v = vmain(env);
+  auto const args = argGroup(env, inst).ssa(0).ssa(1);
+  cgCallHelper(v, env, target, dest, syncMode, args);
+}
+
+void cgLdTypeStructureVal(IRLS &env, const IRInstruction *inst) {
+  auto& v = vmain(env);
+
+  auto const sf = v.makeReg();
+  auto const data = v.makeReg();
+  auto const dt = v.makeReg();
+  auto next = v.makeBlock();
+  auto const dst = dstLoc(env, inst, 0);
+
+  callBespokeGetStr(env, inst, callDest(data, dt));
+  emitCmpTVType(v, sf, KindOfUninit, dt);
+  v << jcc{CC_E, sf, {next, label(env, inst->taken())}};
+  v = next;
+  v << copy{data, dst.reg(0)};
+  // if return type is known (ie. key is constant), dst uses only one register
+  if (dst.hasReg(1)) v << copy{dt, dst.reg(1)};
+}
+
+void cgLdTypeStructureValCns(IRLS &env, const IRInstruction *inst) {
+  auto const rarr = srcLoc(env, inst, 0).reg();
+  auto const key = inst->extra<KeyedData>()->key;
+  assertx(!key->empty());
+
+  auto& v = vmain(env);
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const fieldSF = v.makeReg();
+
+  auto const offset = bespoke::TypeStructure::getFieldOffset(key);
+  auto const fieldPair = bespoke::TypeStructure::getFieldPair(key);
+  auto const dt = fieldPair.first;
+  assertx(!isNullType(dt));
+
+  auto const fieldsByteOffset = bespoke::TypeStructure::fieldsByteOffset();
+  auto const fieldBitOffset = fieldPair.second;
+  assertx(0 <= fieldBitOffset && fieldBitOffset < 8);
+  auto const fieldBitMask = static_cast<uint8_t>(1 << fieldBitOffset);
+  v << testbim{fieldBitMask, rarr[fieldsByteOffset], fieldSF};
+
+  // load value at offset if the field exists on this kind of type structure
+  // otherwise load falsy values
+  cond(
+    v, CC_NE, fieldSF, dst,
+    [&] (Vout& v) {
+      auto value = v.makeReg();
+      if (dt == KindOfBoolean) {
+        auto const sf = v.makeReg();
+        auto const bitOffset = bespoke::TypeStructure::getBooleanBitOffset(key);
+        v << testbim{static_cast<uint8_t>(1 << bitOffset), rarr[offset], sf};
+        v << setcc{CC_NE, sf, value};
+      } else if (dt == KindOfInt64) {
+        v << loadzbq{rarr[offset], value};
+      } else if (isArrayLikeType(dt) || isStringType(dt)) {
+        v << load{rarr[offset], value};
+      } else {
+        always_assert(false);
+      }
+      return value;
+    },
+    [&] (Vout& v) {
+      if (dt == KindOfBoolean) {
+        return v.cns(false);
+      } else if (dt == KindOfInt64) {
+        return v.cns(0);
+      }
+      assertx(isArrayLikeType(dt) || isStringType(dt));
+      return v.cns(nullptr);
+    }
+  );
+}
+
+#undef CALL_TARGET
+
+//////////////////////////////////////////////////////////////////////////////
 // StructDict
 
 namespace {
@@ -507,7 +614,8 @@ void cgAllocBespokeStructDict(IRLS& env, const IRInstruction* inst) {
   auto const target = CallSpec::direct(StructDict::AllocStructDict);
   auto const args = argGroup(env, inst)
     .imm(layout->sizeIndex())
-    .imm(layout->extraInitializer());
+    .imm(layout->extraInitializer())
+    .imm(layout->mayContainCounted());
 
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
@@ -523,24 +631,43 @@ void cgInitStructPositions(IRLS& env, const IRInstruction* inst) {
   auto const layout = arr->type().arrSpec().layout();
   auto const slayout = StructLayout::As(layout.bespokeLayout());
 
-  auto constexpr kSlotsPerStore = 8;
-  auto const size = extra->numSlots;
+  auto const posSize = slayout->isBigStruct() ? 2 : 1;
+  auto constexpr kStoreSize = 8;
+  auto const slotsPerStore = kStoreSize / posSize;
   auto const padBytes = slayout->positionOffset() & 0x7;
-  for (auto i = 0; i < size + padBytes; i += kSlotsPerStore) {
+  assertx((padBytes % posSize) == 0);
+  auto const padSlots = padBytes / posSize;
+  auto const numSlots = extra->numSlots + padSlots;
+
+  for (auto i = 0; i < numSlots; i += slotsPerStore) {
     uint64_t slots = 0;
-    for (auto j = 0; j < kSlotsPerStore; j++) {
-      // The type array comes before the positions array, and the types should
-      // stay initialized with KindOfUninit. Later positions can be zeroed.
-      auto const index = static_cast<int32_t>(i + j - padBytes);
+    for (auto j = 0; j < slotsPerStore; j++) {
+      // We store 8 bytes at a time, starting from an 8 byte aligned address,
+      // which can be before the poition offset. The gap between the start
+      // address and the position offset may contain UnalignedTypedValue or
+      // DataType and therefore should be initialized with KindOfUninit.
+      // Later positions can be zeroed.
+      auto const index = static_cast<int32_t>(i + j - padSlots);
       auto const slot = [&]{
-        if (index < 0) return static_cast<uint8_t>(KindOfUninit);
-        if (index < size) return safe_cast<uint8_t>(extra->slots[index]);
-        return static_cast<uint8_t>(0);
+        if (index < 0) {
+          if (slayout->isBigStruct()) {
+            auto const u = static_cast<uint8_t>(KindOfUninit);
+            return static_cast<uint16_t>(u << 8 | u);
+          } else {
+            return static_cast<uint16_t>(KindOfUninit);
+          }
+        }
+        if (index < extra->numSlots) {
+          return safe_cast<uint16_t>(extra->slots[index]);
+        }
+        return uint16_t{0};
       }();
-      slots = slots | (safe_cast<uint64_t>(slot) << (j * 8));
+      auto const shiftedSlot =
+        static_cast<uint64_t>(Slot(slot)) << (j * posSize * 8);
+      slots = slots | shiftedSlot;
     }
-    auto const offset = slayout->positionOffset() + i - padBytes;
-    assertx((offset % kSlotsPerStore) == 0);
+    auto const offset = slayout->positionOffset() + i * posSize - padBytes;
+    assertx((offset % slotsPerStore) == 0);
     v << store{v.cns(slots), rarr[offset]};
   }
 }
@@ -559,30 +686,51 @@ void cgInitStructElem(IRLS& env, const IRInstruction* inst) {
   storeTV(vmain(env), val->type(), srcLoc(env, inst, 1), type, data);
 }
 
-void cgNewBespokeStructDict(IRLS& env, const IRInstruction* inst) {
+namespace {
+template<typename PosType>
+void newBespokeStructDictImpl(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
-  auto const extra = inst->extra<NewBespokeStructDict>();
+
   auto& v = vmain(env);
 
+  auto const extra = inst->extra<NewBespokeStructDict>();
+  auto const layout = StructLayout::As(extra->layout.bespokeLayout());
   auto const n = static_cast<size_t>((extra->numSlots + 7) & ~7);
-  auto const slots = reinterpret_cast<uint8_t*>(v.allocData<uint64_t>(n / 8));
+  auto constexpr slotsPerAlloc = sizeof(uint64_t) / sizeof(PosType);
+  auto const slots = reinterpret_cast<PosType*>(
+    v.allocData<uint64_t>(n / slotsPerAlloc)
+  );
   for (auto i = 0; i < extra->numSlots; i++) {
-    slots[i] = safe_cast<uint8_t>(extra->slots[i]);
+    slots[i] = safe_cast<PosType>(extra->slots[i]);
   }
+  constexpr uint16_t initVal =
+    (uint8_t)KindOfUninit << 8 | (uint8_t)KindOfUninit;
   for (auto i = extra->numSlots; i < n; i++) {
-    slots[i] = static_cast<uint8_t>(KindOfUninit);
+    slots[i] = static_cast<PosType>(initVal);
   }
 
-  auto const layout = StructLayout::As(extra->layout.bespokeLayout());
-  auto const target = CallSpec::direct(StructDict::MakeStructDict);
+  auto const target = std::is_same_v<PosType, uint8_t> ?
+    CallSpec::direct(StructDict::MakeStructDictSmall) :
+    CallSpec::direct(StructDict::MakeStructDictBig);
+
   auto const args = argGroup(env, inst)
     .imm(layout->sizeIndex())
     .imm(layout->extraInitializer())
     .imm(extra->numSlots)
+    .imm(layout->mayContainCounted())
     .dataPtr(slots)
     .addr(sp, cellsToBytes(extra->offset.offset));
 
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
+}
+}
+
+void cgNewBespokeStructDict(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<NewBespokeStructDict>();
+  auto const layout = StructLayout::As(extra->layout.bespokeLayout());
+  layout->isBigStruct() ?
+    newBespokeStructDictImpl<uint16_t>(env, inst) :
+    newBespokeStructDictImpl<uint8_t>(env, inst);
 }
 
 void cgStructDictSlot(IRLS& env, const IRInstruction* inst) {
@@ -647,34 +795,30 @@ void cgStructDictSlot(IRLS& env, const IRInstruction* inst) {
     return;
   }
 
+  // This register will be assigned iff the string is not constant.
+  auto const colorMasked = v.makeReg();
+  auto constexpr layoutMask = StructLayout::kMaxColor;
+  static_assert(folly::isPowTwo(layoutMask + 1));
+  static_assert(layoutMask <= std::numeric_limits<uint16_t>::max());
+
   // Calculate pointers to the hash table string and slot value, based
   // on what we know about the layout and key.
-  auto const pair = [&] {
+  auto const tuple = [&] {
     using PerfectHashEntry = StructLayout::PerfectHashEntry;
-    auto constexpr layoutMask = StructLayout::kMaxColor;
     auto constexpr hashEntrySize = sizeof(PerfectHashEntry);
 
     auto constexpr strHashOffset  = offsetof(PerfectHashEntry, str);
     auto constexpr slotHashOffset = offsetof(PerfectHashEntry, slot);
+    auto constexpr dupFlagOffset = offsetof(PerfectHashEntry, maybeDup);
 
     // Read the string's color. This may be junk if the string is
     // non-static.
     auto const color = [&] {
-      auto const colorMasked = [&] {
-        static_assert(folly::isPowTwo(layoutMask + 1));
-        static_assert(layoutMask <= std::numeric_limits<uint8_t>::max());
-        auto const colorPremask = v.makeReg();
-        v << loadzbq{rkey[StringData::colorOffset()], colorPremask};
-        if (layoutMask == std::numeric_limits<uint8_t>::max()) {
-          return colorPremask;
-        } else {
-          auto const colorMasked = v.makeReg();
-          v << andqi{
-            uint8_t(layoutMask), colorPremask, colorMasked, v.makeReg()
-          };
-          return colorMasked;
-        }
-      }();
+      auto const colorPremask = v.makeReg();
+      v << loadzwq{rkey[StringData::colorOffset()], colorPremask};
+      v << andqi{
+        uint16_t(layoutMask), colorPremask, colorMasked, v.makeReg()
+      };
 
       static_assert(hashEntrySize == 8 || hashEntrySize == 16);
       if constexpr (hashEntrySize == 16) {
@@ -691,9 +835,10 @@ void cgStructDictSlot(IRLS& env, const IRInstruction* inst) {
       auto const hashTable = StructLayout::hashTable(layout.bespokeLayout());
       auto const base = v.cns(uintptr_t(hashTable));
       auto const c = color();
-      return std::make_pair(
+      return std::make_tuple(
         base[c * 8 + slotHashOffset],
-        base[c * 8 + strHashOffset]
+        base[c * 8 + strHashOffset],
+        base[c * 8 + dupFlagOffset]
       );
     }
 
@@ -712,53 +857,81 @@ void cgStructDictSlot(IRLS& env, const IRInstruction* inst) {
     if (key->hasConstVal(TStr)) {
       auto const offWithColor =
         (key->strVal()->color() & layoutMask) * hashEntrySize;
-      return std::make_pair(
+      return std::make_tuple(
         hashTableOffset[v.cns(hashTableSet) + (offWithColor + slotHashOffset)],
-        hashTableOffset[v.cns(hashTableSet) + (offWithColor + strHashOffset)]
+        hashTableOffset[v.cns(hashTableSet) + (offWithColor + strHashOffset)],
+        hashTableOffset[v.cns(hashTableSet) + (offWithColor + dupFlagOffset)]
       );
     }
 
     auto const base = v.makeReg();
     v << lea{hashTableOffset[v.cns(hashTableSet)], base};
     auto const c = color();
-    return std::make_pair(
+    return std::make_tuple(
       base[c * 8 + slotHashOffset],
-      base[c * 8 + strHashOffset]
+      base[c * 8 + strHashOffset],
+      base[c * 8 + dupFlagOffset]
     );
   }();
-  auto const slotPtr = pair.first;
-  auto const strPtr = pair.second;
+  auto const slotPtr = std::get<0>(tuple);
+  auto const strPtr = std::get<1>(tuple);
+  auto const dupFlagPtr = std::get<2>(tuple);
 
   auto const hashStr = v.makeReg();
   auto const hashSF = v.makeReg();
+
   // Load the string in the hash table and check if it matches the
   // key.
-  emitLdLowPtr(v, strPtr, hashStr, sizeof(LowStringPtr));
+  emitLdPackedPtr<const StringData>(v, strPtr, hashStr);
   v << cmpq{rkey, hashStr, hashSF};
 
-  // If the key is definitely static, we're done. The key is present
-  // if and only if they match.
+  // If the key is definitely static and the strings don't match and the color
+  // may not be duplicate, we're done. Otherwise, lookup using a C++ helper.
   if (key->isA(TStaticStr)) {
-    fwdJcc(v, env, CC_NE, hashSF, inst->taken());
-    v << loadzbq{slotPtr, dst};
+    cond(
+      v, vcold(env), CC_E, hashSF, dst,
+      [&] (Vout& v) {
+        auto const slot = v.makeReg();
+        v << loadzwq{slotPtr, slot};
+        return slot;
+      },
+      [&] (Vout& v) {
+        auto const dupSF = v.makeReg();
+        v << cmpbim{static_cast<uint8_t>(true), dupFlagPtr, dupSF};
+        fwdJcc(v, env, CC_NE, dupSF, inst->taken());
+        return nonStaticCase(v);
+      },
+      StringTag {}
+    );
     return;
   }
 
   // Otherwise the the key could be non-static. If they match, we're
-  // good. Otherwise, check if the string is static. If it is, then we
-  // definitely don't have a match. If it's non-static, evoke a C++
-  // helper to do the lookup.
+  // good. Otherwise, check if the string is static
+  // and the color may not be duplicate. If it is, then we definitely
+  // don't have a match. Otherwise, evoke a C++ helper to do the lookup.
   cond(
     v, vcold(env), CC_E, hashSF, dst,
     [&] (Vout& v) {
       auto const slot = v.makeReg();
-      v << loadzbq{slotPtr, slot};
+      v << loadzwq{slotPtr, slot};
       return slot;
     },
     [&] (Vout& v) {
       auto const refSF = emitCmpRefCount(v, StaticValue, rkey);
-      fwdJcc(v, env, CC_E, refSF, inst->taken());
-      return nonStaticCase(v);
+      auto const slot = v.makeReg();
+      return cond(v, vcold(env), CC_NE, refSF, slot,
+        [&] (Vout& v) {
+          return nonStaticCase(v);
+        },
+        [&] (Vout& v) {
+          auto const dupSF = v.makeReg();
+          v << cmpbim{static_cast<uint8_t>(true), dupFlagPtr, dupSF};
+          fwdJcc(v, env, CC_NE, dupSF, inst->taken());
+          return nonStaticCase(v);
+        },
+        StringTag{}
+      );
     },
     StringTag{}
   );
@@ -775,43 +948,60 @@ void cgStructDictElemAddr(IRLS& env, const IRInstruction* inst) {
   auto const& layout = arr->type().arrSpec().layout();
   assertx(layout.is_struct());
 
-  if (layout.bespokeLayout()->isConcrete()) {
+  if (layout.bespokeLayout()->isConcrete() && slot->hasConstVal(TInt)) {
     auto const slayout = StructLayout::As(layout.bespokeLayout());
-
-    if (slot->hasConstVal(TInt)) {
-      v << lea{
-        rarr[slayout->valueOffsetForSlot(slot->intVal())],
-        dst.reg(tv_lval::val_idx)
-      };
-      v << lea{
-        rarr[slayout->typeOffsetForSlot(slot->intVal())],
-        dst.reg(tv_lval::type_idx)
-      };
-      return;
-    }
-
-    auto const valBegin = slayout->valueOffset();
     v << lea{
-      rarr[rslot * safe_cast<int>(sizeof(Value)) + valBegin],
+      rarr[slayout->valueOffsetForSlot(slot->intVal())],
       dst.reg(tv_lval::val_idx)
     };
-  } else {
-    static_assert(StructDict::valueOffsetSize() == 1);
-    auto const valBegin = v.makeReg();
-    auto const valIdx = v.makeReg();
-    v << loadzbq{rarr[StructDict::valueOffsetOffset()], valBegin};
-    v << addq{valBegin, rslot, valIdx, v.makeReg()};
     v << lea{
-      rarr[valIdx * safe_cast<int>(sizeof(Value))],
-      dst.reg(tv_lval::val_idx)
+      rarr[slayout->typeOffsetForSlot(slot->intVal())],
+      dst.reg(tv_lval::type_idx)
     };
+    return;
   }
 
-  v << lea{
-    rarr[rslot * safe_cast<int>(sizeof(DataType))
-         + StructLayout::staticTypeOffset()],
-    dst.reg(tv_lval::type_idx)
-  };
+  if constexpr (bespoke::detail_struct_data_layout::stores_utv) {
+    static_assert(sizeof(UnalignedTypedValue) == 9);
+    auto const rslot_times_9 = v.makeReg();
+    v << lea{rslot[rslot * 8], rslot_times_9};
+    auto constexpr val_offset =
+      sizeof(StructDict) + offsetof(UnalignedTypedValue, m_data);
+    auto constexpr type_offset =
+      sizeof(StructDict) + offsetof(UnalignedTypedValue, m_type);
+    static_assert(type_offset == val_offset + 8);
+    v << lea{
+      rarr[rslot_times_9 + val_offset], dst.reg(tv_lval::val_idx)
+    };
+    v << addqi{
+      8, dst.reg(tv_lval::val_idx), dst.reg(tv_lval::type_idx), v.makeReg()
+    };
+  } else {
+    using DataLayout = bespoke::detail_struct_data_layout::TypePosValLayout;
+    if (layout.bespokeLayout()->isConcrete()) {
+      auto const slayout = StructLayout::As(layout.bespokeLayout());
+      auto const valBegin = DataLayout::valueOffsetForSlot(slayout, 0);
+      v << lea{
+        rarr[rslot * safe_cast<int>(sizeof(Value)) + valBegin],
+        dst.reg(tv_lval::val_idx)
+      };
+    } else {
+      static_assert(DataLayout::valueOffsetSize() == 1);
+      auto const valBegin = v.makeReg();
+      auto const valIdx = v.makeReg();
+      v << loadzbq{rarr[DataLayout::valueOffsetOffset()], valBegin};
+      v << addq{valBegin, rslot, valIdx, v.makeReg()};
+      v << lea{
+        rarr[valIdx * safe_cast<int>(sizeof(Value))],
+        dst.reg(tv_lval::val_idx)
+      };
+    }
+    v << lea{
+      rarr[rslot * safe_cast<int>(sizeof(DataType))
+        + DataLayout::staticTypeOffset()],
+      dst.reg(tv_lval::type_idx)
+    };
+  }
 }
 
 void cgStructDictTypeBoundCheck(IRLS& env, const IRInstruction* inst) {
@@ -888,7 +1078,6 @@ void cgStructDictAddNextSlot(IRLS& env, const IRInstruction* inst) {
   assertx(layout.is_struct());
 
   static_assert(ArrayData::sizeofSize() == 4);
-  static_assert(StructDict::numFieldsSize() == 1);
 
   auto const size = v.makeReg();
   v << loadzlq{rarr[ArrayData::offsetofSize()], size};
@@ -896,16 +1085,59 @@ void cgStructDictAddNextSlot(IRLS& env, const IRInstruction* inst) {
   if (layout.bespokeLayout()->isConcrete()) {
     auto const slayout = StructLayout::As(layout.bespokeLayout());
     auto const smallSlot = v.makeReg();
-    v << movtqb{rslot, smallSlot};
-    v << storeb{smallSlot, rarr[size + slayout->positionOffset()]};
+    if (slayout->isBigStruct()) {
+      v << movtqw{rslot, smallSlot};
+      v << storew{smallSlot, rarr[size * 2 + slayout->positionOffset()]};
+    } else {
+      v << movtqb{rslot, smallSlot};
+      v << storeb{smallSlot, rarr[size + slayout->positionOffset()]};
+    }
   } else {
-    auto const numFields = v.makeReg();
-    auto const positionsOffset = v.makeReg();
-    v << loadzbq{rarr[StructDict::numFieldsOffset()], numFields};
-    v << addq{size, numFields, positionsOffset, v.makeReg()};
-    auto const smallSlot = v.makeReg();
-    v << movtqb{rslot, smallSlot};
-    v << storeb{smallSlot, rarr[positionsOffset + sizeof(StructDict)]};
+    if constexpr (bespoke::detail_struct_data_layout::stores_utv) {
+      assertx(StructDict::numFieldsSize() == 2);
+      auto const numFields = v.makeReg();
+      v << loadzwq{rarr[StructDict::numFieldsOffset()], numFields};
+      static_assert(sizeof(UnalignedTypedValue) == 9);
+      auto const sf = v.makeReg();
+      v << testqi{0xff00, numFields, sf};
+      ifThenElse(v, CC_NZ, sf,
+        [&](Vout& v) {
+          auto const num_fields_times_9 = v.makeReg();
+          v << lea{numFields[numFields * 8], num_fields_times_9};
+          auto const num_fields_times_9_plus_1 = v.makeReg();
+          v << incq {num_fields_times_9, num_fields_times_9_plus_1, v.makeReg()};
+          auto const aligned_num_fields = v.makeReg();
+          v << andqi {
+            ~0x01, num_fields_times_9_plus_1, aligned_num_fields, v.makeReg()
+          };
+          auto const scaledSize = v.makeReg();
+          v << shlqi {1, size, scaledSize, v.makeReg()};
+          auto const positionsOffset = v.makeReg();
+          v << addq{scaledSize, aligned_num_fields, positionsOffset, v.makeReg()};
+          auto const smallSlot = v.makeReg();
+          v << movtqw{rslot, smallSlot};
+          v << storew{smallSlot, rarr[positionsOffset + sizeof(StructDict)]};
+        },
+        [&](Vout& v) {
+          auto const smallSlot = v.makeReg();
+          v << movtqb{rslot, smallSlot};
+          auto const posBegin = v.makeReg();
+          v << lea{numFields[numFields * 8 + sizeof(StructDict)], posBegin};
+          auto const posOffset = v.makeReg();
+          v << lea{posBegin[size], posOffset};
+          v << storeb{smallSlot, rarr[posOffset]};
+        }
+      );
+    } else {
+      assertx(StructDict::numFieldsSize() == 1);
+      auto const numFields = v.makeReg();
+      v << loadzbq{rarr[StructDict::numFieldsOffset()], numFields};
+      auto const positionsOffset = v.makeReg();
+      v << addq{size, numFields, positionsOffset, v.makeReg()};
+      auto const smallSlot = v.makeReg();
+      v << movtqb{rslot, smallSlot};
+      v << storeb{smallSlot, rarr[positionsOffset + sizeof(StructDict)]};
+    }
   }
 
   auto const newSize = v.makeReg();
@@ -936,6 +1168,144 @@ void cgStructDictUnset(IRLS& env, const IRInstruction* inst) {
   auto const target = CallSpec::direct(StructDict::RemoveStrInSlot);
   auto const args = argGroup(env, inst).ssa(0).imm(*slot);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
+}
+
+void cgStructDictSlotInPos(IRLS& env, const IRInstruction* inst) {
+  auto const rarr = srcLoc(env, inst, 0).reg();
+  auto const rpos = srcLoc(env, inst, 1).reg();
+  auto const rdst = dstLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  auto const arr = inst->src(0);
+  auto const& layout = arr->type().arrSpec().layout();
+  assertx(layout.is_struct());
+  if (layout.bespokeLayout()->isConcrete()) {
+    auto const slayout = StructLayout::As(layout.bespokeLayout());
+    if (slayout->isBigStruct()) {
+      v << loadzwq{rarr[rpos * 2 + slayout->positionOffset()], rdst};
+    } else {
+      v << loadzbq{rarr[rpos + slayout->positionOffset()], rdst};
+    }
+  } else {
+    if constexpr (bespoke::detail_struct_data_layout::stores_utv) {
+      assertx(StructDict::numFieldsSize() == 2);
+      auto const numFields = v.makeReg();
+      v << loadzwq{rarr[StructDict::numFieldsOffset()], numFields};
+      static_assert(sizeof(UnalignedTypedValue) == 9);
+      auto const sf = v.makeReg();
+      v << testqi{0xff00, numFields, sf};
+      cond(v, CC_NZ, sf, rdst,
+        [&](Vout& v) {
+          // iterator positions are aligned to 2 bytes, starting after typed values.
+          // offset_past_tvs_plus_1 = numFields * 9 + sizeof(StructDict) + 1
+          // aligned_pos_begin = offset_past_tvs_plus_1 & ~0x01;
+          auto const offset_past_tvs_plus_1 = v.makeReg();
+          v << lea{
+            numFields[numFields * 8 + sizeof(StructDict) + 1],
+            offset_past_tvs_plus_1
+          };
+          auto const aligned_pos_begin = v.makeReg();
+          v << andqi {
+            ~0x01, offset_past_tvs_plus_1, aligned_pos_begin, v.makeReg()
+          };
+          auto const pos_offset = v.makeReg();
+          v << lea{aligned_pos_begin[rpos * 2], pos_offset};
+          auto const slot = v.makeReg();
+          v << loadzwq{rarr[pos_offset], slot};
+          return slot;
+        },
+        [&](Vout& v) {
+          auto const pos_begin = v.makeReg();
+          v << lea{numFields[numFields * 8 + sizeof(StructDict)], pos_begin};
+          auto const pos_offset = v.makeReg();
+          v << lea{pos_begin[rpos], pos_offset};
+          auto const slot = v.makeReg();
+          v << loadzbq{rarr[pos_offset], slot};
+          return slot;
+        }
+      );
+    } else {
+      assertx(StructDict::numFieldsSize() == 1);
+      auto const numFields = v.makeReg();
+      v << loadzbq{rarr[StructDict::numFieldsOffset()], numFields};
+      auto const pos_offset = v.makeReg();
+      v << lea{rpos[numFields + sizeof(StructDict)], pos_offset};
+      v << loadzbq{rarr[pos_offset], rdst};
+    }
+  }
+}
+
+void cgLdStructDictKey(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const rarr = srcLoc(env, inst, 0).reg();
+  auto const rslot = srcLoc(env, inst, 1).reg();
+  auto const rdst = dstLoc(env, inst, 0).reg();
+
+  // Get a pointer to the bespoke layout for this array into a register.
+  auto const layout = [&]{
+    auto const layout = inst->src(0)->type().arrSpec().layout().bespokeLayout();
+    if (layout->isConcrete()) return v.cns(uintptr_t(layout));
+
+    auto const value = v.makeReg();
+    auto const index = v.makeReg();
+    auto const array = v.cns(bespoke::layoutsForJIT());
+    v << loadzwq{rarr[ArrayData::offsetOfBespokeIndex()], index};
+    v << load{array[index * safe_cast<int>(sizeof(bespoke::Layout*))], value};
+    return value;
+  }();
+
+  auto constexpr offset = StructLayout::fieldsOffset() +
+                          offsetof(StructLayout::Field, key);
+  auto constexpr size = sizeof(StructLayout::Field);
+  static_assert(!use_lowptr || size == 8);
+  static_assert(use_lowptr || size == 16);
+  if constexpr (use_lowptr) {
+    emitLdPackedPtr<const StringData>(v, layout[rslot * 8 + offset], rdst);
+  } else {
+    auto const rslot_scaled = v.makeReg();
+    v << shlqi {4, rslot, rslot_scaled, v.makeReg()};
+    v << load{layout[rslot_scaled + offset], rdst};
+  }
+}
+
+void cgLdStructDictVal(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const rarr = srcLoc(env, inst, 0).reg();
+  auto const rslot = srcLoc(env, inst, 1).reg();
+  auto const dst = dstLoc(env, inst, 0);
+
+	if constexpr (bespoke::detail_struct_data_layout::stores_utv) {
+    static_assert(sizeof(UnalignedTypedValue) == 9);
+    auto const rslot_times_9 = v.makeReg();
+    v << lea{rslot[rslot * 8], rslot_times_9};
+    auto constexpr val_offset =
+      sizeof(StructDict) + offsetof(UnalignedTypedValue, m_data);
+    auto constexpr type_offset =
+      sizeof(StructDict) + offsetof(UnalignedTypedValue, m_type);
+    static_assert(type_offset == val_offset + 8);
+    auto const val = rarr[rslot_times_9 + val_offset];
+    auto const type = rarr[rslot_times_9 + type_offset];
+    loadTV(v, inst->dst()->type(), dst, type, val);
+  } else {
+    auto const layout = inst->src(0)->type().arrSpec().layout().bespokeLayout();
+    using DataLayout = bespoke::detail_struct_data_layout::TypePosValLayout;
+    auto const val = [&]() -> Vptr {
+      if (layout->isConcrete()) {
+        auto const slayout = StructLayout::As(layout);
+        auto const val_begin = slayout->valueOffsetForSlot(0);
+        return rarr[rslot * safe_cast<int>(sizeof(Value)) + val_begin];
+      } else {
+        static_assert(DataLayout::valueOffsetSize() == 1);
+        auto const val_begin = v.makeReg();
+        v << loadzbq{rarr[DataLayout::valueOffsetOffset()], val_begin};
+        auto const val_offset = v.makeReg();
+        v << addq{val_begin, rslot, val_offset, v.makeReg()};
+        return rarr[val_offset * safe_cast<int>(sizeof(Value))];
+      }
+    }();
+    auto const type = rarr[rslot + DataLayout::staticTypeOffset()];
+    loadTV(v, inst->dst()->type(), dst, type, val);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////

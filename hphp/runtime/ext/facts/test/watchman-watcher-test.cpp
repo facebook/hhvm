@@ -29,6 +29,7 @@
 using ::testing::ByMove;
 using ::testing::ElementsAre;
 using ::testing::Return;
+using ::testing::WithArg;
 
 namespace HPHP {
 namespace Facts {
@@ -36,7 +37,10 @@ namespace {
 
 struct MockWatchman final : public Watchman {
   MOCK_METHOD(
-      folly::SemiFuture<folly::dynamic>, query, (folly::dynamic), (override));
+      folly::SemiFuture<folly::dynamic>,
+      query,
+      (folly::dynamic),
+      (override));
 
   MOCK_METHOD(folly::SemiFuture<watchman::Clock>, getClock, (), (override));
 
@@ -54,8 +58,8 @@ TEST(WatchmanWatcherTest, sinceAndClockArePassedThrough) {
       make_watchman_watcher(folly::dynamic::object(), mockWatchman, {});
 
   EXPECT_CALL(*mockWatchman, query)
-      .WillOnce(Return(
-          ByMove(folly::makeSemiFuture<folly::dynamic>(folly::dynamic::object(
+      .WillOnce(Return(ByMove(
+          folly::makeSemiFuture<folly::dynamic>(folly::dynamic::object(
               "clock", "this is the new clock")("is_fresh_instance", false)))));
 
   auto since = Clock{.m_clock = "this is the old clock"};
@@ -70,22 +74,25 @@ TEST(WatchmanWatcherTest, filesAndExistenceArePassedThrough) {
       make_watchman_watcher(folly::dynamic::object(), mockWatchman, {});
 
   EXPECT_CALL(*mockWatchman, query)
-      .WillOnce(Return(ByMove(folly::makeSemiFuture<folly::dynamic>(
-          folly::dynamic::object("clock", "2")("is_fresh_instance", false)(
-              "files",
-              folly::dynamic::array(
-                  folly::dynamic::object("name", "a.hck")("exists", true)(
-                      "content.sha1hex", "faceb00c"),
-                  folly::dynamic::object("name", "b.hck")(
-                      "exists", false)))))));
+      .WillOnce(Return(ByMove(
+          folly::makeSemiFuture<folly::dynamic>(
+              folly::dynamic::object("clock", "2")("is_fresh_instance", false)(
+                  "files",
+                  folly::dynamic::array(
+                      folly::dynamic::object("name", "a.hck")("exists", true)(
+                          "content.sha1hex", "faceb00c"),
+                      folly::dynamic::object("name", "b.hck")(
+                          "exists", false)))))));
 
   auto results = watcher->getChanges(Clock{}).get();
   EXPECT_THAT(
       results.m_files,
       ElementsAre(
-          Watcher::ResultFile{
-              .m_path = "a.hck", .m_exists = true, .m_hash = "faceb00c"},
-          Watcher::ResultFile{.m_path = "b.hck", .m_exists = false}));
+          Watcher::FileDelta{
+              .m_path = "a.hck",
+              .m_exists = true,
+              .m_watcher_hash = "faceb00c"},
+          Watcher::FileDelta{.m_path = "b.hck", .m_exists = false}));
 }
 
 TEST(WatchmanWatcherTest, malformedWatchmanOutput) {
@@ -101,8 +108,9 @@ TEST(WatchmanWatcherTest, malformedWatchmanOutput) {
 
   // "clock" field is an empty object instead of a string
   EXPECT_CALL(*mockWatchman, query)
-      .WillOnce(Return(ByMove(folly::makeSemiFuture<folly::dynamic>(
-          folly::dynamic::object("clock", folly::dynamic::object)))));
+      .WillOnce(Return(ByMove(
+          folly::makeSemiFuture<folly::dynamic>(
+              folly::dynamic::object("clock", folly::dynamic::object)))));
   EXPECT_THROW(watcher->getChanges({}).get(), UpdateExc);
 }
 
@@ -115,10 +123,12 @@ TEST(WatchmanWatcherTest, querySinceMergebaseIsNotFresh) {
   // `is_fresh_instance: true` even if you gave it a mergebase. Results from
   // these queries are not actually fresh as far as we're concerned.
   EXPECT_CALL(*mockWatchman, query)
-      .WillOnce(Return(ByMove(folly::makeSemiFuture<folly::dynamic>(
-          folly::dynamic::object("clock", "1")("is_fresh_instance", true)))))
-      .WillOnce(Return(ByMove(folly::makeSemiFuture<folly::dynamic>(
-          folly::dynamic::object("clock", "2")("is_fresh_instance", true)))));
+      .WillOnce(Return(ByMove(
+          folly::makeSemiFuture<folly::dynamic>(folly::dynamic::object(
+              "clock", "1")("is_fresh_instance", true)))))
+      .WillOnce(Return(ByMove(
+          folly::makeSemiFuture<folly::dynamic>(folly::dynamic::object(
+              "clock", "2")("is_fresh_instance", true)))));
 
   // This query is asking for all files in the repo, not since a given point in
   // time or since a given commit. This is actually fresh from our perspective.
@@ -136,8 +146,7 @@ TEST(WatchmanWatcherTest, querySinceMergebaseIsNotFresh) {
 
 struct WatchmanFailure : public std::runtime_error {
   explicit WatchmanFailure(std::string msg)
-      : std::runtime_error{std::move(msg)} {
-  }
+      : std::runtime_error{std::move(msg)} {}
 };
 
 TEST(WatchmanWatcherTest, RetryOnFailure) {
@@ -147,10 +156,12 @@ TEST(WatchmanWatcherTest, RetryOnFailure) {
 
   // Exercise retries by failing the first query.
   EXPECT_CALL(*mockWatchman, query)
-      .WillOnce(Return(ByMove(folly::makeSemiFuture<folly::dynamic>(
-          WatchmanFailure{"Watchman error"}))))
-      .WillOnce(Return(ByMove(folly::makeSemiFuture<folly::dynamic>(
-          folly::dynamic::object("clock", "1")("is_fresh_instance", true)))));
+      .WillOnce(Return(ByMove(
+          folly::makeSemiFuture<folly::dynamic>(
+              WatchmanFailure{"Watchman error"}))))
+      .WillOnce(Return(ByMove(
+          folly::makeSemiFuture<folly::dynamic>(folly::dynamic::object(
+              "clock", "1")("is_fresh_instance", true)))));
 
   Clock since;
   auto results = watcher->getChanges(Clock{}).get();
@@ -165,13 +176,50 @@ TEST(WatchmanWatcherTest, ThrowAfterRetrying) {
 
   // Fail twice.
   EXPECT_CALL(*mockWatchman, query)
-      .WillOnce(Return(ByMove(folly::makeSemiFuture<folly::dynamic>(
-          std::runtime_error{"Ignored error"}))))
-      .WillOnce(Return(ByMove(folly::makeSemiFuture<folly::dynamic>(
-          WatchmanFailure{"Watchman error"}))));
+      .WillOnce(Return(ByMove(
+          folly::makeSemiFuture<folly::dynamic>(
+              std::runtime_error{"Ignored error"}))))
+      .WillOnce(Return(ByMove(
+          folly::makeSemiFuture<folly::dynamic>(
+              WatchmanFailure{"Watchman error"}))));
 
   Clock since;
   EXPECT_THROW(watcher->getChanges(Clock{}).get(), WatchmanFailure);
+}
+
+TEST(WatchmanWatcherTest, HgTransactionUpdate) {
+  auto mockWatchman = std::make_shared<MockWatchman>();
+  auto watcher = make_watchman_watcher(
+      folly::dynamic::object(), mockWatchman, {.m_retries = 0});
+
+  // Invoke the subscribe callback with a {"state-enter": "hg.transaction"}
+  // message
+  EXPECT_CALL(*mockWatchman, subscribe)
+      .WillOnce(WithArg<1>([&](watchman::SubscriptionCallback&& cb) {
+        // clang-format off
+        folly::dynamic msg = folly::dynamic::object
+	  ("clock", "2")
+	  ("version", "2022-05-06T03:03:19Z")
+	  ("metadata", folly::dynamic::object
+	     ("rev", "91f14be170109d514e9115b909d62114cabe5412")
+	     ("distance", 0)
+	     ("partial", false)
+	     ("status", "ok"))
+	  ("root", "/var/www")
+	  ("state-enter", "hg.transaction")
+	  ("unilateral", true)
+	  ("subscription", "sub1");
+        // clang-format on
+        cb(folly::Try{std::move(msg)});
+      }));
+
+  Clock oldClock{.m_clock = "1"};
+  watcher->subscribe(oldClock, [&](Watcher::Delta&& delta) {
+    EXPECT_FALSE(delta.m_lastClock);
+    EXPECT_EQ(delta.m_newClock, Clock{.m_clock = "2"});
+    EXPECT_FALSE(delta.m_fresh);
+    EXPECT_TRUE(delta.m_files.empty());
+  });
 }
 
 } // namespace

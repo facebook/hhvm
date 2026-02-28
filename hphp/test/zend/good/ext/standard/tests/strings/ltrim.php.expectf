@@ -3,11 +3,11 @@
 
  *** Output for zero argument ***
 
-Warning: ltrim() expects at least 1 parameter, 0 given in %s/ltrim.php on line 10
+Warning: ltrim() expects at least 1 positional parameter, 0 given in %s/ltrim.php on line 10
 
  *** Output for more than valid number of arguments (Valid are 1 or 2 arguments) ***
 
-Warning: ltrim() expects at most 2 parameters, 3 given in %s/ltrim.php on line 13
+Warning: ltrim() expects at most 2 positional parameters, 3 given in %s/ltrim.php on line 13
 
  *** Using heredoc string ***
 string(17) "ng heredoc string"

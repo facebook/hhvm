@@ -8,5 +8,5 @@ function main_entry(): void {
 
   	// This is actually HH\Traversable due to autoimport
   	var_dump($r is Traversable);
-  	var_dump(iterator_to_array($r->get('testarray')));
+  	var_dump(dict($r->get('testarray')));
 }

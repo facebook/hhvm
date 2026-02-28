@@ -46,14 +46,14 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <folly/ScopeGuard.h>
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
 #include <folly/Demangle.h>
 #include <folly/experimental/symbolizer/Symbolizer.h>
 #endif
 
 namespace HPHP {
 
-TRACE_SET_MOD(perf_mem_event);
+TRACE_SET_MOD(perf_mem_event)
 
 using namespace jit;
 
@@ -122,7 +122,7 @@ void fill_record(const Func* func, const void* addr,
                         + Func::prologueTableOff();
   if (func_end <= addr && addr < func->mallocEnd()) {
     auto const idx = (reinterpret_cast<const char*>(addr) - func_end)
-                     / sizeof(AtomicLowPtr<uint8_t>);
+                     / sizeof(AtomicLowTCA);
     record.setStr("member", "m_prologueTable");
     record.setInt("index", idx);
   }
@@ -218,7 +218,7 @@ bool record_vm_metadata_mem_event(data_map::result res, const void* addr,
   auto const pos = reinterpret_cast<const char*>(addr);
 
   assertx(!res.empty());
-  match<void>(
+  match(
     res,
     [&](const ArrayData* arr) {
       record.setInt("offset", pos - reinterpret_cast<const char*>(arr));
@@ -235,9 +235,14 @@ bool record_vm_metadata_mem_event(data_map::result res, const void* addr,
       record.setStr("kind", "Func");
       fill_record(func, addr, record);
     },
-    [&](const NamedEntity* ne) {
+    [&](const NamedType* ne) {
       record.setInt("offset", pos - reinterpret_cast<const char*>(ne));
-      record.setStr("kind", "NamedEntity");
+      record.setStr("kind", "NamedType");
+      try_member(ne, addr, record);
+    },
+    [&](const NamedFunc* ne) {
+      record.setInt("offset", pos - reinterpret_cast<const char*>(ne));
+      record.setStr("kind", "NamedFunc");
       try_member(ne, addr, record);
     },
     [&](const StringData* sd) {
@@ -267,7 +272,7 @@ bool record_low_mem_event(const void* addr, StructuredLogEntry& record) {
   }
 
   // Try to symbolize `addr' if possible.
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
   using namespace folly::symbolizer;
   Symbolizer symbolizer;
   SymbolizedFrame frame;
@@ -323,6 +328,7 @@ bool record_request_heap_mem_event(const void* addr,
     case HeaderKind::WaitHandle:
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::AwaitAllWH:
+    case HeaderKind::ConcurrentWH:
     case HeaderKind::Resource:
     case HeaderKind::ClsMeth:
     case HeaderKind::RClsMeth:
@@ -413,7 +419,7 @@ void record_perf_mem_event(PerfEvent kind, const perf_event_sample* sample) {
     if (jit::mcgen::initialized() && jit::tc::code().isValidCodeAddress(tca)) {
       return record_tc_mem_event(tca, record);
     }
-    if (uintptr_t(addr) <= 0xffffffff) {
+    if (uintptr_t(addr) <= kLowArenaMaxAddr) {
       return record_low_mem_event(addr, record);
     }
     if (uintptr_t(addr) - s_stackLimit < s_stackSize) {
@@ -423,13 +429,8 @@ void record_perf_mem_event(PerfEvent kind, const perf_event_sample* sample) {
       return record_vm_stack_mem_event(addr, record);
     }
 
-    if (auto const thing = tl_heap->find(addr)) {
-      if (UNLIKELY(thing->kind() != HeaderKind::Slab)) {
-        return record_request_heap_mem_event(addr, thing, record);
-      }
-      auto const slab = static_cast<const Slab*>(thing);
-      auto const obj = slab->find(addr);
-      return record_request_heap_mem_event(addr, obj ? obj : slab, record);
+    if (auto const obj = tl_heap->find(addr)) {
+      return record_request_heap_mem_event(addr, obj, record);
     }
     if (tl_heap->contains(const_cast<void*>(addr))) {
       record.setStr("location", "request_heap");
@@ -447,7 +448,7 @@ void record_perf_mem_event(PerfEvent kind, const perf_event_sample* sample) {
       sample->nr
     );
     auto frames = std::vector<folly::StringPiece>{};
-    folly::split("\n", st.toString(), frames);
+    folly::split('\n', st.toString(), frames);
     record.setVec("stacktrace", frames);
 
     FTRACE(1, "perf_mem_event: {}\n", show(record).c_str());

@@ -1,7 +1,7 @@
 <?hh
-function main() {
+function main() :mixed{
   $containers = Vector {
-    varray[11, 22, 33],
+    vec[11, 22, 33],
     Vector {11, 22, 33},
     Map {'a' => 11, 'b' => 22, 'c' => 33},
     Set {11, 22, 33},
@@ -9,7 +9,7 @@ function main() {
     ImmMap {'a' => 11, 'b' => 22, 'c' => 33},
     ImmSet {11, 22, 33},
     Pair {11, 22},
-    varray[],
+    vec[],
     Vector {},
     Map {},
     Set {},
@@ -24,6 +24,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_array_pop() {
+function main_array_pop() :mixed{
 main();
 }

@@ -3,7 +3,7 @@
 
 // Create a 100*30 image
 <<__EntryPoint>>
-function main_1790() {
+function main_1790() :mixed{
 $im = imagecreate(100, 30);
 // White background and blue text
 $bg = imagecolorallocate($im, 255, 255, 255);

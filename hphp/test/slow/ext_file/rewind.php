@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_rewind() {
-$tempfile = tempnam('/tmp', 'vmextfiletest');
+function main_rewind() :mixed{
+$tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
 fputs($f, 'testing rewind');

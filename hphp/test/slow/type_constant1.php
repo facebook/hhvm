@@ -13,6 +13,6 @@ class C extends B {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(type_structure(C::class, 'T'));
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   $x = 5;
   $y = 3;
   return $x - $y;

@@ -17,11 +17,3 @@ let go res output_json =
     print_json res
   else
     FileOutline.print res
-
-let print_json_definition res =
-  Nuclide_rpc_message_printer.(symbol_by_id_response_to_json res |> print_json)
-
-let print_readable_definition res =
-  match res with
-  | Some res -> FileOutline.print_def "" res
-  | None -> print_endline "None"

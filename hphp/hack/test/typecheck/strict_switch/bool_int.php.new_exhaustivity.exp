@@ -1,0 +1,4 @@
+ERROR: File "bool_int.php", line 23, characters 3-78:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "bool_int.php", line 23, characters 11-12:
+  The scrutinee has type `(int | bool)` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.

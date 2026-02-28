@@ -18,6 +18,8 @@ type t =
   | Finally
 [@@deriving eq, ord, show]
 
+let all = [Next; Continue; Break; Catch; Do; Exit; Fallthrough; Finally]
+
 let to_string = function
   | Next -> "Next"
   | Continue -> "Continue"

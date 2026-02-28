@@ -1,0 +1,23 @@
+*** Testing iconv_strlen() : usage variations ***
+
+-- Iteration 1 --
+int(12)
+
+-- Iteration 2 --
+int(12)
+
+-- Iteration 3 --
+int(12)
+
+-- Iteration 4 --
+int(12)
+
+-- Iteration 5 --
+int(12)
+
+-- Iteration 6 --
+int(12)
+
+-- Iteration 7 --
+int(12)
+Done

@@ -13,14 +13,14 @@ try { var_dump( array_combine() ); } catch (Exception $e) { echo "\n".'Warning: 
 
 //Test array_combine with one more than the expected number of arguments
 echo "\n-- Testing array_combine() function with more than expected no. of arguments --\n";
-$keys = varray[1, 2];
-$values = varray[1, 2];
+$keys = vec[1, 2];
+$values = vec[1, 2];
 $extra_arg = 10;
 try { var_dump( array_combine($keys,$values, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing array_combine with one less than the expected number of arguments
 echo "\n-- Testing array_combine() function with less than expected no. of arguments --\n";
-$keys = varray[1, 2];
+$keys = vec[1, 2];
 try { var_dump( array_combine($keys) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";

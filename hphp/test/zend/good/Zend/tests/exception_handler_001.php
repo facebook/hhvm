@@ -1,6 +1,6 @@
 <?hh
 
-function foo($e) {
+function foo($e) :mixed{
     var_dump(get_class($e)." thrown!");
 }
 

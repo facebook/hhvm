@@ -1,12 +1,12 @@
 <?hh
 
 class MyClass {
-    static function test() {
+    static function test() :mixed{
       return __TRAIT__;
     }
 }
 
-function someFun() {
+function someFun() :mixed{
   return __TRAIT__;
 }
 

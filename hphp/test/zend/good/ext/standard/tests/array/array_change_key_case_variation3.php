@@ -18,10 +18,10 @@ hello world
 EOT;
 
 // arrays of different data types to be passed to $input argument
-$inputs = darray[
+$inputs = dict[
 
        // int data
-/*1*/  'int' => darray[
+/*1*/  'int' => dict[
        0 => 'zero',
        1 => 'one',
        12345 => 'positive',
@@ -29,15 +29,15 @@ $inputs = darray[
        ],
 
        // empty data
-/*5*/ 'empty double quotes' => darray[
+/*5*/ 'empty double quotes' => dict[
        "" => 'emptyd',
        ],
-       'empty single quotes' => darray[
+       'empty single quotes' => dict[
        '' => 'emptys',
        ],
 
        // string data
-/*6*/ 'string' => darray[
+/*6*/ 'string' => dict[
        "stringd" => 'stringd',
        'strings' => 'strings',
        $heredoc => 'stringh',

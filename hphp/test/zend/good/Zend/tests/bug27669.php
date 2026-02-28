@@ -8,7 +8,7 @@ class A {
 
 <<__EntryPoint>> function main(): void {
   error_reporting(E_ALL & ~E_STRICT);
-  $y = varray['hello'];
-  A::$y[0]();
+  $y = vec['hello'];
+  HH\dynamic_class_meth(A::class, $y[0])();
   echo "===DONE===\n";
 }

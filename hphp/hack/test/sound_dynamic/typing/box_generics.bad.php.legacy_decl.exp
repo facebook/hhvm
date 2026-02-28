@@ -1,6 +1,0 @@
-File "box_generics.bad.php", line 7, characters 19-21:
-Method  `set` in class `Box` is not dynamically callable. (Typing[4402])
-  File "box_generics.bad.php", line 7, characters 44-44:
-  Cannot write to property `x` through dynamic type because private property in `Box` does not have an enforceable type
-  File "box_generics.bad.php", line 6, characters 39-39:
-  Property `x` has type `T`

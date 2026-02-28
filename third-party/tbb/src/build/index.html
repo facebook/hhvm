@@ -1,0 +1,242 @@
+<HTML>
+<BODY>
+
+<H2>Overview</H2>
+This directory contains the internal Makefile infrastructure for Intel&reg; Threading Building Blocks (Intel&reg; TBB).
+
+<P>
+See below for how to <A HREF="#build">build</A> Intel TBB and how to <A HREF="#port">port</A> Intel TBB
+to a new platform, operating system or architecture.
+</P>
+
+<H2>Files</H2>
+The files here are not intended to be used directly.  See below for usage.
+<DL>
+<DT><A HREF="Makefile.tbb">Makefile.tbb</A>
+<DD>Main Makefile to build the Intel TBB library.
+    Invoked via 'make tbb' from <A HREF="../Makefile">top-level Makefile</A>.
+<DT><A HREF="Makefile.tbbmalloc">Makefile.tbbmalloc</A>
+<DD>Main Makefile to build the Intel TBB scalable memory allocator library as well as its tests.
+    Invoked via 'make tbbmalloc' from <A HREF="../Makefile">top-level Makefile</A>.
+<DT><A HREF="Makefile.test">Makefile.test</A>
+<DD>Main Makefile to build and run the tests for the Intel TBB library.
+    Invoked via 'make test' from <A HREF="../Makefile">top-level Makefile</A>.
+<DT><A HREF="common.inc">common.inc</A>
+<DD>Main common included Makefile that includes OS-specific and compiler-specific Makefiles.
+<DT>&lt;os&gt;.inc
+<DD>OS-specific Makefile for a particular &lt;os&gt;.
+<DT>&lt;os&gt;.&lt;compiler&gt;.inc
+<DD>Compiler-specific Makefile for a particular &lt;os&gt; / &lt;compiler&gt; combination.
+<DT>*.sh
+<DD>Infrastructure utilities for Linux* OS, macOS*, and UNIX*-related operating systems.
+<DT>*.js, *.bat
+<DD>Infrastructure utilities for Windows* OS.
+</DL>
+
+<A NAME="build"><H2>To Build</H2></A>
+<P>
+To port Intel TBB to a new platform, operating system or architecture, see the <A HREF="#port">porting directions</A> below.
+</P>
+
+<H3>Software prerequisites:</H3>
+<OL>
+<LI>C++ compiler for the platform, operating system and architecture of interest.
+    Either the native compiler for your system, or, optionally, the appropriate Intel&reg; C++ Compiler, may be used.
+<LI>GNU make utility. On Windows OS, if a UNIX* emulator is used to run GNU make,
+    it should be able to run Windows OS utilities and commands. On Linux OS, macOS, etc.,
+    shell commands issued by GNU make should execute in a Bourne or BASH compatible shell.
+    In the following examples, replace <TT>make</TT> with the correct GNU make command for
+    your system (for example, <TT>gmake</TT>). GNU make version 3.80 and more recent are supported.
+</OL>
+
+<P>
+Intel TBB libraries can be built by performing the following steps.
+On systems that support only one ABI (e.g., 32-bit), these steps build the libraries for that ABI.
+On systems that support both 64-bit and 32-bit libraries, these steps build the 64-bit libraries
+(Linux OS, macOS, and related systems) or whichever ABI is selected in the development environment (Windows OS).
+</P>
+<OL>
+<LI>Change to the <A HREF="../index.html">top-level directory</A> of the installed software.
+<LI>If using the Intel&reg; C++ Compiler, make sure the appropriate compiler is available in your PATH
+    (e.g., by sourcing the appropriate iccvars script for the compiler to be used).
+<LI>Invoke GNU make using no arguments, for example, <TT>make</TT>.
+</OL>
+
+<P>
+To build Intel TBB libraries for other than the default ABI (e.g., to build 32-bit libraries on Linux OS, macOS,
+or related systems that support both 64-bit and 32-bit libraries), perform the following steps:
+</P>
+<OL>
+<LI>Change to the <A HREF="../index.html">top-level directory</A> of the installed software.
+<LI>If using the Intel&reg; C++ Compiler, make sure the appropriate compiler is available in your PATH
+    (e.g., by sourcing the appropriate iccvars script for the compiler to be used).
+<LI>Explicitly specify the architecture when invoking GNU make, e.g. <TT>make arch=ia32</TT>.
+</OL>
+
+<P>The default make target will build the release and debug versions of the Intel TBB library.</P>
+<P>Other targets are available in the top-level Makefile. You might find the following targets useful:
+<UL>
+<LI><TT>make test</TT> will build and run Intel TBB <A HREF="../src/test">unit-tests</A>;
+<LI><TT>make examples</TT> will build and run Intel TBB <A HREF="../examples/index.html">examples</A>. Available in the open-source version only.
+For the commercial version, you can download Intel TBB Samples at the <a href="https://software.intel.com/en-us/product-code-samples?topic=20828">Intel&reg; Software Product Samples and Tutorials</a> website;
+<LI><TT>make all</TT> will do all of the above. Available in the open-source version only.
+</UL>
+See also the list of other targets below.
+</P>
+
+<P>
+By default, the libraries will be built in sub-directories within the build/ directory.
+The sub-directories are named according to the operating system, architecture, compiler and software environment used
+(the sub-directory names also distinguish release vs. debug libraries).  On Linux OS, the software environment comprises
+the GCC, libc and kernel version used.  On macOS, the software environment comprises the GCC and OS version used.
+On Windows OS, the software environment comprises the Microsoft* Visual Studio* version used.
+See below for how to change the default build directory.
+</P>
+
+<P>
+To perform different build and/or test operations, use the following steps.
+</P>
+<OL>
+<LI>Change to the <A HREF="../index.html">top-level directory</A> of the installed software.
+<LI>If using the Intel&reg; C++ Compiler, make sure the appropriate compiler is available in your PATH
+    (e.g., by sourcing the appropriate iccvars script for the compiler to be used).
+<LI>Invoke GNU make by using one or more of the following commands.
+    <DL>
+    <DT><TT>make</TT>
+    <DD>Default build.  Equivalent to <TT>make tbb tbbmalloc</TT>.
+    <DT><TT>make all</TT>
+    <DD>Equivalent to <TT>make tbb tbbmalloc test examples</TT>. Available in the open-source version only.
+    <DT><TT>cd src;make release</TT>
+    <DD>Build and test release libraries only.
+    <DT><TT>cd src;make debug</TT>
+    <DD>Build and test debug libraries only. 
+    <DT><TT>make tbb</TT>
+    <DD>Make Intel TBB release and debug libraries.
+    <DT><TT>make tbbmalloc</TT>
+    <DD>Make Intel TBB scalable memory allocator libraries.
+    <DT><TT>make test</TT>
+    <DD>Compile and run unit-tests
+    <DT><TT>make examples</TT>
+    <DD>Build libraries and run all examples, like doing <TT>make debug clean release</TT> from <A HREF="../examples/Makefile">the general example Makefile</A>.
+        Available in the open-source version only.
+    <DT><TT>make python</TT>
+    <DD>Build, install, and test Python* API for Intel TBB. See <A HREF="../python/index.html">details here</A>.
+    <DT><TT>make compiler=<B>{</B>icl, icc, gcc, clang<B>}</B> <B>[</B>(above options or targets)<B>]</B></TT>
+    <DD>Build and run as above, but use specified compilers instead of default, native compilers
+    <ol>
+        <li><tt><b> {</b>icl, icc<b>}</b> </tt> - to use Intel&reg; compilers (<tt>icl</tt> on Windows OS,  <tt>icc</tt>  on Linux OS or macOS). </li>
+        <li><tt>gcc</tt>  - to use g++ (e.g. MinGW on Windows OS)</li>
+        <li><tt>clang</tt> - to use Clang compiler</li>
+    </ol>
+    <DT><TT>make compiler=clang stdlib=libc++ <B>[</B>(above options or targets)<B>]</B></TT>
+    <DD>Build and run as above, but use <TT>libc++</TT> as a standard c++ library for clang.
+    <DT><TT>make stdver=<B>{</B>c++11, c++14, ...<B>}</B> <B>[</B>(above options or targets)<B>]</B></TT>
+    <DD>Build and run as above, but additionally specify the version of the C++ standard or dialect to be used by
+      the compiler. The specified value of <TT>stdver</TT> will be used as a parameter to the appropriate
+      compiler option (such as <TT>-std</TT>); the behavior in case of unsupported value is compiler-specific.
+    <DT><TT>make target_app=<B>{</B>win8ui, uwp, uwd<B>}</B> [target_mode=store] <B>[</B>(above options or targets)<B>]</B></TT>
+    <DD>Build and run as above, but use API that is compliant with Universal Windows* applications. Use <TT>win8ui</TT> option, if you want to use Intel TBB in Windows* 8 Universal application, <TT>uwp</TT> in case of Windows* 10 Universal Windows application and <TT>uwd</TT> for the usage inside Universal Windows* driver.
+    <TT>target_mode=store</TT> is used to produce binaries that are compliant with Windows Store* application container. In later case they won't work with Intel TBB unit tests but work only with Windows Store* applications.
+    <DT><TT>ndk-build target=android <B>[</B>(above options or targets)<B>]</B></TT>
+    <DD>Build and run as above, but build libraries for Android* OS by Android NDK that should be installed. Makefiles were tested with revision 8.
+    <DT><TT>make arch=<B>{</B>ia32, intel64, ia64<B>}</B> <B>[</B>(above options or targets)<B>]</B></TT>
+    <DD>Build and run as above, but build libraries for the selected ABI.
+        Might be useful for cross-compilation; ensure proper environment is set before running this command.
+    <DT><TT>make tbb_root=<B>{</B>(Intel TBB directory)<B>}</B> <B>[</B>(above options or targets)<B>]</B></TT>
+    <DD>Build and run as above; for use when invoking <TT>make</TT> from a directory other than the <A HREF="../index.html">top-level directory</A>.
+    <DT><TT>make tbb_build_dir=<B>{</B>(build directory)<B>}</B> <B>[</B>(above options or targets)<B>]</B></TT>
+    <DD>Build and run as above, but place the built libraries in the specified directory, rather than in the default sub-directory within the build/ directory. This command might have troubles with the build in case the sources installed to the directory with spaces in the path.
+    <DT><TT>make tbb_build_prefix=<B>{</B>(build sub-directory)<B>}</B> <B>[</B>(above options or targets)<B>]</B></TT>
+    <DD>Build and run as above, but place the built libraries in the specified sub-directory within the build/ directory, rather than using the default sub-directory name.
+    <DT><TT>make tbb_cpf=1 <B>[</B>(above options or targets)<B>]</B></TT>
+    <DD>Build and run as above, but build and use libraries with the Community Preview Features enabled, rather than the default libraries.
+    <DT><TT>make <B>[</B>(above options)<B>]</B> clean</TT>
+    <DD>Remove any executables or intermediate files produced by the above commands.
+        Includes build directories, object files, libraries and test executables.
+    </DL>
+</OL>
+
+<A NAME="port"><H2>To Port</H2></A>
+<P>
+This section provides information on how to port Intel TBB to a new platform, operating system or architecture.
+A subset or a superset of these steps may be required for porting to a given platform.
+</P>
+
+<H4>To port the Intel TBB source code:</H4>
+<OL>
+<LI>If porting to a new architecture, create a file that describes the architecture-specific details for that architecture.
+    <UL>
+    <LI>Create a &lt;os&gt;_&lt;architecture&gt;.h file in the <A HREF="../include/tbb/machine">include/tbb/machine</A> directory
+	that describes these details.
+	<UL>
+	<LI>The &lt;os&gt;_&lt;architecture&gt;.h is named after the operating system and architecture as recognized by
+	    <A HREF="../include/tbb/tbb_machine.h">include/tbb/tbb_machine.h</A> and the Makefile infrastructure.
+	<LI>This file defines the implementations of synchronization operations, and also the
+	    scheduler yield function, for the operating system and architecture.
+	<LI>Several examples of &lt;os&gt;_&lt;architecture&gt;.h files can be found in the
+	    <A HREF="../include/tbb/machine">include/tbb/machine</A> directory.
+	    <UL>
+	    <LI>A minimal implementation defines the 4-byte and 8-byte compare-and-swap operations,
+		and the scheduler yield function.  See <A HREF="../include/tbb/machine/mac_ppc.h">include/tbb/machine/mac_ppc.h</A>
+		for an example of a minimal implementation.
+	    <LI>More complex implementation examples can also be found in the
+		<A HREF="../include/tbb/machine">include/tbb/machine</A> directory
+		that implement all the individual variants of synchronization operations that Intel TBB uses.
+		Such implementations are more verbose but may achieve better performance on a given architecture.
+	    <LI>In a given implementation, any synchronization operation that is not defined is implemented, by default,
+		in terms of 4-byte or 8-byte compare-and-swap.  More operations can thus be added incrementally to increase
+		the performance of an implementation.
+	    <LI>In most cases, synchronization operations are implemented as inline assembly code; examples also exist,
+		(e.g., for Intel&reg; Itanium&reg; processors) that use out-of-line assembly code in *.s or *.asm files
+		(see the assembly code sub-directories in the <A HREF="../src/tbb">src/tbb</A> directory).
+	    </UL>
+	</UL>
+    <LI>Modify <A HREF="../include/tbb/tbb_machine.h">include/tbb/tbb_machine.h</A>, if needed, to invoke the appropriate
+	&lt;os&gt;_&lt;architecture&gt;.h file in the <A HREF="../include/tbb/machine">include/tbb/machine</A> directory.
+    </UL>
+<LI>Add an implementation of DetectNumberOfWorkers() in <A HREF="../src/tbb/tbb_misc.h">src/tbb/tbb_misc.h</A>,
+    that returns the number of cores found on the system in case it is not supported by the current implementation.  
+    This is used to determine the default number of threads for the Intel TBB task scheduler.
+<LI>Either properly define FillDynamicLinks for use in
+    <A HREF="../src/tbb/cache_aligned_allocator.cpp">src/tbb/cache_aligned_allocator.cpp</A>,
+    or hardcode the allocator to be used.
+<LI>Additional types might be required in the union defined in
+    <A HREF="../include/tbb/aligned_space.h">include/tbb/aligned_space.h</A>
+    to ensure proper alignment on your platform.
+<LI>Changes may be required in <A HREF="../include/tbb/tick_count.h">include/tbb/tick_count.h</A>
+    for systems that do not provide gettimeofday.
+</OL>
+
+<H4>To port the Makefile infrastructure:</H4>
+Modify the appropriate files in the Makefile infrastructure to add a new platform, operating system or architecture as needed.
+See the Makefile infrastructure files for examples.
+<OL>
+<LI>The <A HREF="../Makefile">top-level Makefile</A> includes <A HREF="common.inc">common.inc</A> to determine the operating system.
+    <UL>
+    <LI>To add a new operating system, add the appropriate test to <A HREF="common.inc">common.inc</A>, and create the needed &lt;os&gt;.inc and &lt;os&gt;.&lt;compiler&gt;.inc files (see below).
+    </UL>
+<LI>The &lt;os&gt;.inc file makes OS-specific settings for a particular operating systems.
+    <UL>
+    <LI>For example, <A HREF="linux.inc">linux.inc</A> makes settings specific to Linux operating systems.
+    <LI>This file performs OS-dependent tests to determine the specific platform and/or architecture, and sets other platform-dependent values.
+    <LI>Add a new &lt;os&gt;.inc file for each new operating system added.
+    </UL>
+<LI>The &lt;os&gt;.&lt;compiler&gt;.inc file makes compiler-specific settings for a particular
+    &lt;os&gt; / &lt;compiler&gt; combination.
+    <UL>
+    <LI>For example, <A HREF="linux.gcc.inc">linux.gcc.inc</A> makes specific settings for using GCC on Linux OS, and <A HREF="linux.icc.inc">linux.icc.inc</A> makes specific settings for using the Intel&reg; C++ compiler on Linux OS.
+    <LI>This file sets particular compiler, assembler and linker options required when using a particular &lt;os&gt; / &lt;compiler&gt; combination.
+    <LI>Add a new &lt;os&gt;.&lt;compiler&gt;.inc file for each new &lt;os&gt; / &lt;compiler&gt; combination added.
+    </UL>
+</OL>
+
+<HR>
+<A HREF="../index.html">Up to parent directory</A>
+<P></P>
+Copyright &copy; 2005-2018 Intel Corporation.  All Rights Reserved.
+<P></P>
+Intel, the Intel logo and Itanium are trademarks of Intel Corporation or its subsidiaries in the U.S. and/or other countries.
+<p></p>
+* Other names and brands may be claimed as the property of others.
+</BODY>
+</HTML>

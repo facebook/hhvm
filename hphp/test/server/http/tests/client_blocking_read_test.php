@@ -1,6 +1,6 @@
 <?hh
 
-function createSocketStream($serverPort) {
+function createSocketStream($serverPort) :mixed{
   $errorCode = null;
   $errorMessage = null;
   $stream = stream_socket_client(
@@ -10,12 +10,12 @@ function createSocketStream($serverPort) {
     3.0
   );
   if (!$stream) {
-      die($errorMessage);
+      exit($errorMessage);
   }
   return $stream;
 }
 
-function createReq(){
+function createReq():mixed{
   $host_name = "hphpd.debugger.".php_uname('n');
   $message = "GET /large_response.php HTTP/1.1\r\n".
              "Host: $host_name\r\nContent-Length:0\r\n\r\n";

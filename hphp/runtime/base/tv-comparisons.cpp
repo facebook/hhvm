@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/base/tv-comparisons.h"
 
+#include <folly/Random.h>
 #include <type_traits>
 
 #include "hphp/runtime/base/comparisons.h"
@@ -28,6 +29,8 @@
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/rclass-meth-data.h"
+
+#include "hphp/util/random.h"
 
 namespace HPHP {
 
@@ -58,14 +61,15 @@ bool isStringOrClassish(DataType t) {
 
 const StringData* convStringishToStringData(TypedValue cell, bool warn = true) {
   assertx(isStringOrClassish(cell.type()));
+  auto const op = "comparison";
   if (tvIsClass(cell)) {
     return warn
-      ? classToStringHelper(cell.m_data.pclass)
+      ? classToStringHelper(cell.m_data.pclass, op)
       : cell.m_data.pclass->name();
   }
   if (tvIsLazyClass(cell)) {
     return warn
-      ? lazyClassToStringHelper(cell.m_data.plazyclass)
+      ? lazyClassToStringHelper(cell.m_data.plazyclass, op)
       : cell.m_data.plazyclass.name();
   }
   return cell.m_data.pstr;
@@ -115,6 +119,8 @@ typename Op::RetType tvRelOp(Op op, TypedValue c1, TypedValue c2) {
     case KindOfKeyset:       return op(c1.m_data.parr, c2.m_data.parr);
     case KindOfObject:       return op(c1.m_data.pobj, c2.m_data.pobj);
     case KindOfResource:     return op(c1.m_data.pres, c2.m_data.pres);
+    case KindOfEnumClassLabel: return op(ECLString{c1.m_data.pstr},
+                                         ECLString{c2.m_data.pstr});
     case KindOfRFunc:        return op(c1.m_data.prfunc, c2.m_data.prfunc);
     case KindOfFunc:         return op(c1.m_data.pfunc, c2.m_data.pfunc);
     case KindOfClsMeth:      return op(c1.m_data.pclsmeth, c2.m_data.pclsmeth);
@@ -170,8 +176,8 @@ struct Eq {
   bool eqStringishTypes(TypedValue lhs, const StringData* rhs) const {
     assertx(tvIsLazyClass(lhs) || tvIsString(lhs));
     if (tvIsLazyClass(lhs)) return lhs.m_data.plazyclass.name() == rhs;
-    if (RuntimeOption::EvalRaiseClassConversionWarning) {
-      raise_class_to_string_conversion_warning();
+    if (folly::Random::oneIn(Cfg::Eval::RaiseClassConversionNoticeSampleRate, threadLocalRng64())) {
+      raise_class_to_string_conversion_notice("comparison");
     }
     return lhs.m_data.pstr->equal(rhs);
   }
@@ -236,15 +242,21 @@ struct CompareBase {
     throw_clsmeth_compare_exception();
   }
 
+  RetType operator()(ECLString c1, ECLString c2) const {
+    throw_ecl_compare_exception();
+  }
+
   bool operator()(TypedValue t, LazyClassData u) const {
     assertx(isStringOrClassish(t.type()));
     // this seems like an oversight?
     if (tvIsLazyClass(t)) return operator()(t.m_data.plazyclass.name(), u.name());
-    return operator()(convStringishToStringData(t), lazyClassToStringHelper(u));
+    return operator()(convStringishToStringData(t),
+                      lazyClassToStringHelper(u, "comparison"));
   }
   bool operator()(TypedValue t, Class* u) const {
     assertx(isStringOrClassish(t.type()));
-    return operator()(convStringishToStringData(t), classToStringHelper(u));
+    return operator()(convStringishToStringData(t),
+                      classToStringHelper(u, "comparison"));
   }
 };
 
@@ -291,12 +303,12 @@ bool tvSame(TypedValue c1, TypedValue c2) {
       return c1.m_data.pfunc == c2.m_data.pfunc;
     case KindOfClass:
       if (tvIsClass(c2)) return c1.m_data.pclass == c2.m_data.pclass;
-      // FALLTHROUGH
+      [[fallthrough]];
     case KindOfLazyClass: {
       const auto warn_on_conv = tvIsString(c2);
       return convStringishToStringData(c1, warn_on_conv)
               ->same(convStringishToStringData(c2, warn_on_conv));
-    }
+    } break;
     case KindOfPersistentVec:
     case KindOfVec:
       return vecSameHelper(c1.m_data.parr, c2.m_data.parr);
@@ -320,6 +332,8 @@ bool tvSame(TypedValue c1, TypedValue c2) {
       return c1.m_data.pobj == c2.m_data.pobj;
     case KindOfResource:
      return c1.m_data.pres == c2.m_data.pres;
+    case KindOfEnumClassLabel:
+      return c1.m_data.pstr == c2.m_data.pstr;
     case KindOfClsMeth:
       return c1.m_data.pclsmeth == c2.m_data.pclsmeth;
     case KindOfRClsMeth:

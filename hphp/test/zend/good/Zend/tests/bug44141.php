@@ -11,7 +11,7 @@ class X
 class Y extends X
 {
         static public function cheat($x)
-        {
+:mixed        {
                 return new Y($x);
         }
 }

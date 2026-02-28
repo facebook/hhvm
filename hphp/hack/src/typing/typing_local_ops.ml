@@ -16,26 +16,29 @@ module SN = Naming_special_names
 let check_local_capability (mk_required : env -> env * locl_ty) mk_err_opt env =
   (* gate the check behavior on coeffects TC option *)
   let tcopt = Env.get_tcopt env in
-  if
-    TypecheckerOptions.local_coeffects tcopt
-    && not
-         (TypecheckerOptions.enable_sound_dynamic tcopt
-         && env.in_support_dynamic_type_method_check)
-  then (
+  let should_skip_check =
+    (not @@ TypecheckerOptions.local_coeffects tcopt)
+    || Tast.is_under_dynamic_assumptions env.checked
+  in
+  if not should_skip_check then (
     let available = Env.get_local env Typing_coeffects.local_capability_id in
     let (env, required) = mk_required env in
     let err_opt = mk_err_opt available required in
     let (env, ty_err_opt) =
-      Typing_subtype.sub_type_or_fail env available required err_opt
+      Typing_subtype.sub_type_or_fail
+        env
+        available.Typing_local_types.ty
+        required
+        err_opt
     in
-    Option.iter ~f:Errors.add_typing_error ty_err_opt;
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     env
   ) else
     env
 
 let enforce_local_capability
     ?((* Run-time enforced ops must have the default as it's unfixmeable *)
-    err_code = Error_codes.Typing.OpCoeffects)
+      err_code = Error_codes.Typing.OpCoeffects)
     ?suggestion
     (mk_required : env -> env * locl_ty)
     (op : string)
@@ -51,8 +54,10 @@ let enforce_local_capability
                {
                  pos = op_pos;
                  op_name = op;
-                 locally_available = Typing_coeffects.pretty env available;
-                 available_pos = Typing_defs.get_pos available;
+                 locally_available =
+                   Typing_coeffects.pretty env available.Typing_local_types.ty;
+                 available_pos =
+                   Typing_defs.get_pos available.Typing_local_types.ty;
                  required = Typing_coeffects.pretty env required;
                  err_code;
                  suggestion;
@@ -64,40 +69,50 @@ module Capabilities = struct
   include SN.Capabilities
 
   let mk special_name env =
-    let r = Reason.Rnone in
+    let r = Reason.none in
     let ((env, ty_err_opt), res) =
       Typing_make_type.apply r (Reason.to_pos r, special_name) []
       |> Typing_phase.localize_no_subst ~ignore_errors:true env
     in
-    Option.iter ~f:Errors.add_typing_error ty_err_opt;
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
     (env, res)
 end
 
-let enforce_static_property_access =
-  enforce_local_capability
-    Capabilities.(mk readGlobals)
-    "Reading static properties"
+let enforce_memoize_object pos env =
+  (* Allow zoned_shallow/local policies to memoize objects,
+     since those will convert to PolicyShardedMemoize after conversion to zoned *)
+  (* We use ImplicitPolicy instead of ImplicitPolicyShallow just to not error
+     for zoned, since memoizing a zoned function already has a different error
+     associated with it. *)
+  let (env, zoned) = Capabilities.(mk implicitPolicy) env in
+  let (env, access_globals) = Capabilities.(mk accessGlobals) env in
 
-let enforce_mutable_static_variable ?msg (op_pos : Pos.t) env =
-  let suggestion =
-    match msg with
-    | Some msg -> lazy [(Pos_or_decl.of_raw_pos op_pos, msg)]
-    | None -> lazy []
+  let mk_zoned_or_access_globals env =
+    let r = Reason.none in
+    (env, Typing_make_type.union r [zoned; access_globals])
   in
-  enforce_local_capability
-    Capabilities.(mk accessGlobals)
-    ~suggestion
-    "Creating mutable references to static properties"
-    op_pos
+  check_local_capability
+    mk_zoned_or_access_globals
+    (fun available _required ->
+      Some
+        Typing_error.(
+          coeffect
+          @@ Primary.Coeffect.Op_coeffect_error
+               {
+                 pos;
+                 op_name = "Memoizing object parameters";
+                 locally_available =
+                   Typing_coeffects.pretty env available.Typing_local_types.ty;
+                 available_pos =
+                   Typing_defs.get_pos available.Typing_local_types.ty;
+                 (* Use access globals in error message *)
+                 required = Typing_coeffects.pretty env access_globals;
+                 (* Temporarily FIXMEable error for memoizing objects. Once ~65 current cases are removed
+                    we can change this *)
+                 err_code = Error_codes.Typing.MemoizeObjectWithoutGlobals;
+                 suggestion = None;
+               }))
     env
-
-(* Temporarily FIXMEable error for memoizing objects. Once ~65 current cases are removed
-we can change this *)
-let enforce_memoize_object =
-  enforce_local_capability
-    ~err_code:Error_codes.Typing.MemoizeObjectWithoutGlobals
-    Capabilities.(mk accessGlobals)
-    "Memoizing object parameters"
 
 let enforce_io =
   enforce_local_capability Capabilities.(mk io) "`echo` or `print` builtin"
@@ -110,7 +125,6 @@ let enforce_enum_class_variant =
 (* basic local mutability checks *)
 let rec is_byval_collection_or_string_or_any_type env ty =
   let check ty =
-    let open Aast in
     let (env, ty) = Env.expand_type env ty in
     match get_node ty with
     | Toption inner -> is_byval_collection_or_string_or_any_type env inner
@@ -118,10 +132,10 @@ let rec is_byval_collection_or_string_or_any_type env ty =
       String.equal x SN.Collections.cVec
       || String.equal x SN.Collections.cDict
       || String.equal x SN.Collections.cKeyset
+      || String.equal x SN.Classes.cString
     | Tvec_or_dict _
     | Ttuple _
     | Tshape _
-    | Tprim Tstring
     | Tdynamic
     | Tany _ ->
       true
@@ -134,16 +148,15 @@ let rec is_byval_collection_or_string_or_any_type env ty =
     | Tdependent _ ->
       (* FIXME we should probably look at the upper bounds here. *)
       false
-    | Terr
     | Tnonnull
     | Tprim _
     | Tfun _
     | Tvar _
     | Taccess _
-    | Tneg _ ->
+    | Tlabel _
+    | Tneg _
+    | Tclass_ptr _ ->
       false
-    | Tunapplied_alias _ ->
-      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
   in
   let (_, tl) =
     Typing_utils.get_concrete_supertypes ~abstract_enum:true env ty
@@ -152,7 +165,7 @@ let rec is_byval_collection_or_string_or_any_type env ty =
 
 let mutating_this_in_ctor env (_, _, e) : bool =
   match e with
-  | Aast.This when Typing_env.fun_is_constructor env -> true
+  | Aast.This when Env.fun_is_constructor env -> true
   | _ -> false
 
 let rec is_valid_mutable_subscript_expression_target env v =
@@ -203,8 +216,11 @@ let rec check_assignment_or_unset_target
                op_name;
                suggestion;
                locally_available =
-                 Typing_coeffects.pretty env capability_available;
-               available_pos = Typing_defs.get_pos capability_available;
+                 Typing_coeffects.pretty
+                   env
+                   capability_available.Typing_local_types.ty;
+               available_pos =
+                 Typing_defs.get_pos capability_available.Typing_local_types.ty;
                required = Typing_coeffects.pretty env capability_required;
                err_code = Error_codes.Typing.OpCoeffects;
              })
@@ -254,18 +270,7 @@ let rec check_assignment env (x, append_pos_opt, te_) =
   match te_ with
   | Aast.Hole ((_, _, e), _, _, _) -> check_assignment env (x, append_pos_opt, e)
   | Aast.Unop ((Uincr | Udecr | Upincr | Updecr), te1)
-  | Aast.Binop (Eq _, te1, _) ->
-    let env =
-      match te1 with
-      | (_, _, Aast.Class_get _) ->
-        (* Assigning static properties requires specific caps *)
-        enforce_local_capability
-          Capabilities.(mk accessGlobals)
-          "Modifying static properties"
-          append_pos_opt
-          env
-      | _ -> env
-    in
+  | Aast.Assign (te1, _, _) ->
     check_local_capability
       Capabilities.(mk writeProperty)
       (check_assignment_or_unset_target
@@ -276,15 +281,15 @@ let rec check_assignment env (x, append_pos_opt, te_) =
       env
   | _ -> env
 
-let check_unset_target env (tel : (Ast_defs.param_kind * Tast.expr) list) =
-  List.fold ~init:env tel ~f:(fun env (_, te) ->
+let check_unset_target env (tel : Tast.argument list) =
+  List.fold ~init:env tel ~f:(fun env arg ->
       check_local_capability
         Capabilities.(mk writeProperty)
         (fun available required ->
           check_assignment_or_unset_target
             ~is_assignment:false
             env
-            te
+            (Aast_utils.arg_to_expr arg)
             available
             required)
         env)

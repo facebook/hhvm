@@ -10,7 +10,7 @@ echo "*** Testing error conditions of array_search() ***\n";
 try { var_dump( array_search() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* unexpected no.of arguments in array_search() */
-$var = varray["mon", "tues", "wed", "thurs"];
+$var = vec["mon", "tues", "wed", "thurs"];
 try { var_dump( array_search(1, $var, 0, "test") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( array_search("test") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 

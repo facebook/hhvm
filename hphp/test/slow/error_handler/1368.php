@@ -1,9 +1,9 @@
 <?hh
-function handler($e) {
+function handler($e) :mixed{
   var_dump(strpos((string)$e, 'bomb') !== false);
   return true;
 }
-function a() {
+function a() :mixed{
 }
 <<__EntryPoint>> function main(): void {
   set_exception_handler(handler<>);

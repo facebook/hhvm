@@ -26,7 +26,7 @@ class Foo {
 
 
 function test($prefix) {
-  $hints = varray[
+  $hints = vec[
     // Primitives without HH namespace
     "bool",
     "int",
@@ -56,7 +56,7 @@ function test($prefix) {
     "Stringish"
   ];
 
-  $default_values = darray[
+  $default_values = dict[
     "b" => "false",
     "i" => "1337",
     "f" => "3.1415926",
@@ -78,9 +78,9 @@ function test($prefix) {
   );
 
   $i = 0;
-  $tldr_table = darray[];
+  $tldr_table = dict[];
   foreach ($hints as $h) {
-    $tldr_row = varray[];
+    $tldr_row = vec[];
     echo "##### Parameter type: $h #####\n";
     foreach ($default_values as $dv) {
       echo "== Default value: $dv ==\n";

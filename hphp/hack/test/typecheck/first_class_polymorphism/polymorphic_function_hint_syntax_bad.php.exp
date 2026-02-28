@@ -1,0 +1,26 @@
+ERROR: File "polymorphic_function_hint_syntax_bad.php", line 6, characters 25-26:
+Variance annotation are not allowed on generics in polymorphic function hints or polymorphic lambda signatures. (Parsing[1002])
+ERROR: File "polymorphic_function_hint_syntax_bad.php", line 9, characters 25-31:
+Reified generics are not allowed in polymorphic function hints or polymorphic lambda signatures. (Parsing[1002])
+ERROR: File "polymorphic_function_hint_syntax_bad.php", line 17, characters 25-46:
+Attributes with parameters are not allowed for type parameters in polymorphic function hints or polymorphic lambda signatures. (Parsing[1002])
+ERROR: File "polymorphic_function_hint_syntax_bad.php", line 20, characters 28-28:
+You cannot re-bind the type parameter `T` (Naming[2041])
+  File "polymorphic_function_hint_syntax_bad.php", line 20, characters 15-15:
+  `T` is already bound here
+ERROR: File "polymorphic_function_hint_syntax_bad.php", line 23, characters 38-39:
+You cannot re-bind the type parameter `Tm` (Naming[2041])
+  File "polymorphic_function_hint_syntax_bad.php", line 23, characters 24-25:
+  `Tm` is already bound here
+ERROR: File "polymorphic_function_hint_syntax_bad.php", line 23, characters 41-42:
+You cannot re-bind the type parameter `Tc` (Naming[2041])
+  File "polymorphic_function_hint_syntax_bad.php", line 22, characters 9-10:
+  `Tc` is already bound here
+ERROR: File "polymorphic_function_hint_syntax_bad.php", line 27, characters 16-16:
+Wildcard typehints are not allowed in this position (Naming[2084])
+ERROR: File "polymorphic_function_hint_syntax_bad.php", line 28, characters 19-19:
+Wildcard typehints are not allowed in this position (Naming[2084])
+ERROR: File "polymorphic_function_hint_syntax_bad.php", line 29, characters 16-16:
+Wildcard typehints are not allowed in this position (Naming[2084])
+ERROR: File "polymorphic_function_hint_syntax_bad.php", line 29, characters 19-19:
+Wildcard typehints are not allowed in this position (Naming[2084])

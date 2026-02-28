@@ -16,23 +16,17 @@
 
 #include "hphp/runtime/vm/jit/mcgen.h"
 
-#include "hphp/runtime/vm/jit/mcgen-prologue.h"
-#include "hphp/runtime/vm/jit/mcgen-translate.h"
-
-#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/tc.h"
-#include "hphp/runtime/vm/jit/trans-db.h"
-#include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
-#include "hphp/runtime/vm/jit/vtune-jit.h"
-#include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/runtime/vm/debug/debug.h"
 
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
-TRACE_SET_MOD(mcg);
+TRACE_SET_MOD(mcg)
 
 namespace HPHP::jit {
 
@@ -55,7 +49,7 @@ void processInit() {
   tc::processInit();
 
   if (Trace::moduleEnabledRelease(Trace::printir) &&
-      !RuntimeOption::EvalJit) {
+      !Cfg::Jit::Enabled) {
     Trace::traceRelease("TRACE=printir is set but the jit isn't on. "
                         "Did you mean to run with -vEval.Jit=1?\n");
   }
@@ -71,9 +65,11 @@ bool initialized() { return s_inited; }
 int64_t jitInitTime() { return s_startTime; }
 
 bool dumpTCAnnotation(TransKind transKind) {
-  return RuntimeOption::EvalDumpTCAnnotationsForAllTrans ||
-         transKind == TransKind::Optimize ||
-         transKind == TransKind::OptPrologue;
+  if (Cfg::Eval::DumpTCAnnotationsForAllTrans) return true;
+  if (transKind != TransKind::Optimize && transKind != TransKind::OptPrologue) {
+    return false;
+  }
+  return !isJitSerializing();
 }
 
 }}

@@ -1,7 +1,7 @@
 <?hh
 
 namespace {
-    function foo() {
+    function foo() :mixed{
         return 'foo';
     }
 }

@@ -28,21 +28,21 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/rds-local.h"
 
 #include <libxml/parserInternals.h>
 #include <libxml/tree.h>
-#include <libxml/uri.h>
 #include <libxml/xmlerror.h>
 #include <libxml/xmlsave.h>
+#include <libxml/xmlversion.h>
 #ifdef LIBXML_SCHEMAS_ENABLED
-#include <libxml/relaxng.h>
 #include <libxml/xmlschemas.h>
 #endif
 
 #include <folly/FBVector.h>
 
-TRACE_SET_MOD(libxml);
+TRACE_SET_MOD(libxml)
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -126,16 +126,15 @@ inline bool forgetStream(void* userData) {
 
 }
 
-static Class* s_LibXMLError_class;
-
 const StaticString
-  s_LibXMLError("LibXMLError"),
   s_level("level"),
   s_code("code"),
   s_column("column"),
   s_message("message"),
   s_file("file"),
   s_line("line");
+
+struct LibXMLError : SystemLib::ClassLoader<"LibXMLError"> {};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -262,11 +261,11 @@ static xmlExternalEntityLoader s_default_entity_loader = nullptr;
 static std::unordered_set<
   const StringData*,
   string_data_hash,
-  string_data_isame
+  string_data_same_nocase
 > s_ext_entity_whitelist;
 
 static bool allow_ext_entity_protocol(const String& protocol) {
-  return s_ext_entity_whitelist.count(protocol.get());
+  return s_ext_entity_whitelist.contains(protocol.get());
 }
 
 static xmlParserInputPtr libxml_ext_entity_loader(const char *url,
@@ -407,6 +406,7 @@ void php_libxml_node_free(xmlNodePtr node, bool force) {
         node->ns = NULL;
       }
       node->type = XML_ELEMENT_NODE;
+      [[fallthrough]];
     default:
       xmlFreeNode(node);
     }
@@ -623,7 +623,11 @@ String libxml_get_valid_file_path(const String& source) {
   return file_dest;
 }
 
+#if LIBXML_VERSION >= 21200
+static void libxml_error_handler(void* /*userData*/, const xmlError* error) {
+#else
 static void libxml_error_handler(void* /*userData*/, xmlErrorPtr error) {
+#endif
   if (rl_libxml_request_data->m_suppress_error) {
     return;
   }
@@ -641,24 +645,25 @@ static void libxml_error_handler(void* /*userData*/, xmlErrorPtr error) {
   }
 }
 
-static Object create_libxmlerror(xmlError &error) {
-  Object ret{s_LibXMLError_class};
-  ret->setProp(nullptr, s_level.get(), make_tv<KindOfInt64>(error.level));
-  ret->setProp(nullptr, s_code.get(), make_tv<KindOfInt64>(error.code));
-  ret->setProp(nullptr, s_column.get(), make_tv<KindOfInt64>(error.int2));
+static Object create_libxmlerror(const xmlError &error) {
+  Object ret{ LibXMLError::classof() };
+  // Setting only public properties
+  ret->setProp(nullctx, s_level.get(), make_tv<KindOfInt64>(error.level));
+  ret->setProp(nullctx, s_code.get(), make_tv<KindOfInt64>(error.code));
+  ret->setProp(nullctx, s_column.get(), make_tv<KindOfInt64>(error.int2));
   if (error.message) {
     String message(error.message);
-    ret->setProp(nullptr, s_message.get(), message.asTypedValue());
+    ret->setProp(nullctx, s_message.get(), message.asTypedValue());
   } else {
-    ret->setProp(nullptr, s_message.get(), make_tv<KindOfNull>());
+    ret->setProp(nullctx, s_message.get(), make_tv<KindOfNull>());
   }
   if (error.file) {
     String file(error.file);
-    ret->setProp(nullptr, s_file.get(), file.asTypedValue());
+    ret->setProp(nullctx, s_file.get(), file.asTypedValue());
   } else {
-    ret->setProp(nullptr, s_file.get(), make_tv<KindOfNull>());
+    ret->setProp(nullctx, s_file.get(), make_tv<KindOfNull>());
   }
-  ret->setProp(nullptr, s_line.get(), make_tv<KindOfInt64>(error.line));
+  ret->setProp(nullctx, s_line.get(), make_tv<KindOfInt64>(error.line));
   return ret;
 }
 
@@ -676,7 +681,7 @@ Array HHVM_FUNCTION(libxml_get_errors) {
 }
 
 Variant HHVM_FUNCTION(libxml_get_last_error) {
-  xmlErrorPtr error = xmlGetLastError();
+  auto error = xmlGetLastError();
   if (error) {
     return create_libxmlerror(*error);
   }
@@ -715,7 +720,7 @@ bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable /* = true */) {
   return old;
 }
 
-void HHVM_FUNCTION(libxml_set_streams_context, const Resource & context) {
+void HHVM_FUNCTION(libxml_set_streams_context, const OptResource & context) {
   rl_libxml_request_data->m_streams_context =
     dyn_cast_or_null<StreamContext>(context);
 }
@@ -724,7 +729,7 @@ void HHVM_FUNCTION(libxml_set_streams_context, const Resource & context) {
 // Extension
 
 struct LibXMLExtension final : Extension {
-    LibXMLExtension() : Extension("libxml") {}
+    LibXMLExtension() : Extension("libxml", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
     void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
 
@@ -743,7 +748,7 @@ struct LibXMLExtension final : Extension {
       }
     }
 
-    void moduleInit() override {
+    void moduleRegisterNative() override {
       HHVM_RC_INT_SAME(LIBXML_VERSION);
       HHVM_RC_STR_SAME(LIBXML_DOTTED_VERSION);
       HHVM_RC_STR(LIBXML_LOADED_VERSION, xmlParserVersion);
@@ -793,11 +798,9 @@ struct LibXMLExtension final : Extension {
       HHVM_FE(libxml_suppress_errors);
       HHVM_FE(libxml_disable_entity_loader);
       HHVM_FE(libxml_set_streams_context);
+    }
 
-      loadSystemlib();
-
-      s_LibXMLError_class = Class::lookup(s_LibXMLError.get());
-
+    void moduleInit() override {
       // Set up callbacks to support stream wrappers for reading and writing
       // xml files and loading external entities.
       xmlParserInputBufferCreateFilenameDefault(libxml_create_input_buffer);
@@ -833,7 +836,7 @@ constexpr ssize_t kOOMCheckThreshold = 65536;
 
 // Return whether it OOMed, also safe to call in non-VM threads.
 inline bool checkOOM(size_t size) {
-  if (!RuntimeOption::EvalMoreAccurateMemStats) return false;
+  if (!Cfg::Eval::MoreAccurateMemStats) return false;
   if (tl_heap) return tl_heap->preAllocOOM(size);
   return false;
 }
@@ -854,6 +857,11 @@ void checked_local_free(void* ptr) {
 }
 
 void* checked_local_realloc(void* ptr, size_t size) {
+  if (ptr == NULL) {
+    // system realloc with a nullptr behaves like malloc
+    return checked_local_malloc(size);
+  }
+
   if (!size) {
     checked_local_free(ptr);
     return nullptr;
@@ -878,7 +886,7 @@ char* local_strdup(const char* str) {
 
 void processInitLibXML() {
   // Use request-local allocator functions.
-  if (RuntimeOption::EvalXmlParserUseLocalArena) {
+  if (Cfg::Eval::XmlParserUseLocalArena) {
     xmlMemSetup(checked_local_free,
                 checked_local_malloc,
                 checked_local_realloc,

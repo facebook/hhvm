@@ -7,8 +7,6 @@ namespace HPHP::Intl {
 
 const StaticString s_IntlDatePatternGenerator("IntlDatePatternGenerator");
 
-Class* IntlDatePatternGenerator::c_IntlDatePatternGenerator = nullptr;
-
 #define GENERATOR_GET(dest, src) \
   auto dest = IntlDatePatternGenerator::Get(src); \
   if (!dest) { \
@@ -327,7 +325,7 @@ HHVM_RCC_INT(IntlDatePatternGenerator, nm##_PATTERN_FIELD, UDATPG_##nm##_FIELD);
 #define UDATPG_CONST(nm) \
   HHVM_RCC_INT(IntlDatePatternGenerator, PATTERN_##nm, UDATPG_##nm);
 
-void IntlExtension::initDatePatternGenerator() {
+void IntlExtension::registerNativeDatePatternGenerator() {
   // UDateTimePatternField
   UDATPG_CONST_FIELD(ERA);
   UDATPG_CONST_FIELD(YEAR);
@@ -374,10 +372,7 @@ void IntlExtension::initDatePatternGenerator() {
   HHVM_ME(IntlDatePatternGenerator, getErrorCode);
   HHVM_ME(IntlDatePatternGenerator, getErrorMessage);
 
-  auto gen = s_IntlDatePatternGenerator.get();
-  Native::registerNativeDataInfo<IntlDatePatternGenerator>(gen);
-
-  loadSystemlib("icu_date_pattern_gen");
+  Native::registerNativeDataInfo<IntlDatePatternGenerator>();
 }
 
 //////////////////////////////////////////////////////////////////////////////

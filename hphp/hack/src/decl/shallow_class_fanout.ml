@@ -8,9 +8,29 @@
  *)
 
 open Hh_prelude
-open ClassDiff
+open Class_diff
 open Reordered_argument_collections
 open Typing_deps
+
+type changed_class = {
+  name: string;
+  diff: Class_diff.t;
+  dep: Dep.t;
+  descendant_deps: Typing_deps.DepSet.t;
+}
+
+let get_all_deps (ctx : Provider_context.t) (changed_class : changed_class) :
+    DepSet.t =
+  let mode = Provider_context.get_deps_mode ctx in
+  Typing_deps.add_typing_deps mode changed_class.descendant_deps
+
+let get_maximum_fanout
+    (ctx : Provider_context.t) (changed_class : changed_class) : Fanout.t =
+  {
+    Fanout.changed = DepSet.singleton changed_class.dep;
+    to_recheck = get_all_deps ctx changed_class;
+    to_recheck_if_errors = DepSet.make ();
+  }
 
 let class_names_from_deps ~ctx ~get_classes_in_file deps =
   let filenames = Naming_provider.get_files ctx deps in
@@ -21,37 +41,19 @@ let class_names_from_deps ~ctx ~get_classes_in_file deps =
           else
             acc))
 
-let add_minor_change_fanout
+let include_fanout_of_dep (mode : Mode.t) (dep : Dep.t) (deps : DepSet.t) :
+    DepSet.t =
+  let fanout = Typing_deps.get_ideps_from_hash mode dep in
+  DepSet.union fanout deps
+
+let get_minor_change_fanout
     ~(ctx : Provider_context.t)
-    (acc : AffectedDeps.t)
-    (class_name : string)
-    (minor_change : ClassDiff.minor_change) : AffectedDeps.t =
+    (changed_class : changed_class)
+    (member_diff : Class_diff.member_diff) : Fanout.t =
   let mode = Provider_context.get_deps_mode ctx in
-  let changed = DepSet.singleton (Dep.make (Dep.Type class_name)) in
-  let acc = AffectedDeps.mark_changed acc changed in
-  let acc = AffectedDeps.mark_as_needing_recheck acc changed in
-  let {
-    mro_positions_changed;
-    member_diff =
-      { consts; typeconsts; props; sprops; methods; smethods; constructor };
-  } =
-    minor_change
-  in
-  let changed_and_descendants =
-    lazy (Typing_deps.add_extend_deps mode changed)
-  in
-  let acc =
-    (* If positions affecting the linearization have changed, we need to update
-       positions in the linearization of this class and all its descendants.
-       We mark those linearizations as invalidated here. We don't need to
-       recheck the fanout of the invalidated classes--since only positions
-       changed, there will be no change in the fanout except in the positions
-       in error messages, and we recheck all files with errors anyway. *)
-    if mro_positions_changed then
-      let changed_and_descendants = Lazy.force changed_and_descendants in
-      AffectedDeps.mark_mro_invalidated acc changed_and_descendants
-    else
-      acc
+  let acc = DepSet.singleton changed_class.dep in
+  let { consts; typeconsts; props; sprops; methods; smethods; constructor } =
+    member_diff
   in
   (* Recheck any file with a dependency on the provided member
      in the changed class and in each of its descendants,
@@ -59,18 +61,19 @@ let add_minor_change_fanout
      where adding, removing, or changing the abstract-ness of a member causes
      some subclass which inherits a member of that name from multiple parents
      to resolve the conflict in a different way than it did previously. *)
-  let recheck_descendants_and_their_member_dependents acc member =
-    let changed_and_descendants = Lazy.force changed_and_descendants in
-    DepSet.fold changed_and_descendants ~init:acc ~f:(fun dep acc ->
-        let acc =
-          AffectedDeps.mark_as_needing_recheck acc (DepSet.singleton dep)
-        in
-        AffectedDeps.mark_all_dependents_as_needing_recheck_from_hash
-          mode
-          acc
-          (Typing_deps.Dep.make_member_dep_from_type_dep dep member))
+  let recheck_descendants_and_their_member_dependents (acc : DepSet.t) member :
+      DepSet.t =
+    DepSet.fold changed_class.descendant_deps ~init:acc ~f:(fun dep acc ->
+        DepSet.add acc dep
+        |> include_fanout_of_dep
+             mode
+             (Typing_deps.Dep.make_member_dep_from_type_dep dep member))
   in
-  let add_member_fanout ~is_const member change acc =
+  let add_member_fanout
+      ~is_const
+      (member : Dep.Member.t)
+      (change : member_change)
+      (acc : DepSet.t) =
     (* Consts and typeconsts have their types copied into descendant classes in
        folded decl (rather than being stored in a separate heap as methods and
        properties are). As a result, when using a const, we register a
@@ -82,16 +85,15 @@ let add_minor_change_fanout
        origin in this way, we must always take the more expensive path for
        consts. *)
     if
-      is_const || ClassDiff.method_or_property_change_affects_descendants change
+      is_const
+      || Class_diff.method_or_property_change_affects_descendants change
     then
       recheck_descendants_and_their_member_dependents acc member
     else
-      AffectedDeps.mark_all_dependents_as_needing_recheck_from_hash
+      include_fanout_of_dep
         mode
+        (Dep.make_member_dep_from_type_dep changed_class.dep member)
         acc
-        (Typing_deps.Dep.make_member_dep_from_type_dep
-           (Typing_deps.Dep.make (Typing_deps.Dep.Type class_name))
-           member)
   in
   let add_member_fanouts ~is_const changes make_member acc =
     SMap.fold changes ~init:acc ~f:(fun name ->
@@ -108,10 +110,7 @@ let add_minor_change_fanout
           match change with
           | Added
           | Removed ->
-            AffectedDeps.mark_all_dependents_as_needing_recheck
-              mode
-              acc
-              (Dep.AllMembers class_name)
+            recheck_descendants_and_their_member_dependents acc Dep.Member.all
           | _ -> acc
         in
         add_member_fanout ~is_const:true (Dep.Member.const name) change acc)
@@ -128,23 +127,105 @@ let add_minor_change_fanout
     Option.value_map constructor ~default:acc ~f:(fun change ->
         add_member_fanout ~is_const:false Dep.Member.constructor change acc)
   in
-  acc
+  {
+    Fanout.changed = DepSet.singleton changed_class.dep;
+    to_recheck = acc;
+    to_recheck_if_errors = DepSet.make ();
+  }
 
-let add_maximum_fanout
-    (ctx : Provider_context.t) (acc : AffectedDeps.t) (class_name : string) =
-  let mode = Provider_context.get_deps_mode ctx in
-  AffectedDeps.add_maximum_fanout mode acc (Dep.make (Dep.Type class_name))
+let get_fanout ~(ctx : Provider_context.t) (changed_class : changed_class) :
+    Fanout.t =
+  match changed_class.diff with
+  | Major_change _change -> get_maximum_fanout ctx changed_class
+  | Minor_change minor_change ->
+    get_minor_change_fanout ~ctx changed_class minor_change
+
+let direct_references_cardinal mode dep : int =
+  Typing_deps.get_ideps_from_hash mode dep |> DepSet.cardinal
+
+let descendants_cardinal descendant_deps : int =
+  DepSet.cardinal descendant_deps - 1
+
+let children_cardinal mode class_name : int =
+  Typing_deps.get_ideps mode (Dep.Extends class_name) |> DepSet.cardinal
+
+module Log : sig
+  val log_class_fanout :
+    Provider_context.t -> class_cnt:int -> changed_class -> Fanout.t -> unit
+
+  val log_fanout :
+    Provider_context.t ->
+    'a list ->
+    Fanout.t ->
+    max_class_fanout_cardinal:int ->
+    unit
+end = struct
+  let do_log ctx ~fanout_cardinal =
+    TypecheckerOptions.log_fanout ~fanout_cardinal
+    @@ Provider_context.get_tcopt ctx
+
+  let max_class_cnt = 10
+
+  let log_class_fanout
+      ctx ~class_cnt (changed_class : changed_class) (fanout : Fanout.t) : unit
+      =
+    let { name; diff; dep; descendant_deps } = changed_class in
+    let fanout_cardinal = Fanout.cardinal fanout in
+    if class_cnt < max_class_cnt then
+      Hh_logger.log
+        "Fanout of %s (hash: %s) is %d deps: %s%s"
+        name
+        (Dep.to_hex_string dep)
+        fanout_cardinal
+        ( fanout.Fanout.to_recheck |> DepSet.elements |> fun l ->
+          List.take l 5
+          |> List.map ~f:Dep.to_hex_string
+          |> String.concat ~sep:", " )
+        (if fanout_cardinal > 5 then
+          " (truncated)"
+        else
+          "")
+    else if class_cnt = max_class_cnt then
+      Hh_logger.log "(truncated)";
+    if do_log ~fanout_cardinal ctx then
+      let mode = Provider_context.get_deps_mode ctx in
+      HackEventLogger.Fanouts.log_class
+        ~class_name:name
+        ~class_diff:(Class_diff.show diff)
+        ~fanout_cardinal
+        ~class_diff_category:(Class_diff.to_category_json diff)
+        ~direct_references_cardinal:(direct_references_cardinal mode dep)
+        ~descendants_cardinal:(descendants_cardinal descendant_deps)
+        ~children_cardinal:(children_cardinal mode name)
+
+  let log_fanout
+      ctx (changes : _ list) (fanout : Fanout.t) ~max_class_fanout_cardinal :
+      unit =
+    let fanout_cardinal = Fanout.cardinal fanout in
+    if do_log ~fanout_cardinal ctx then
+      HackEventLogger.Fanouts.log
+        ~changes_cardinal:(List.length changes)
+        ~max_class_fanout_cardinal
+        ~fanout_cardinal
+end
 
 let add_fanout
-    ~(ctx : Provider_context.t) (acc : AffectedDeps.t) (class_name, diff) :
-    AffectedDeps.t =
-  match diff with
-  | Unchanged -> acc
-  | Major_change -> add_maximum_fanout ctx acc class_name
-  | Minor_change minor_change ->
-    add_minor_change_fanout ~ctx acc class_name minor_change
+    class_cnt
+    ~ctx
+    ((fanout_acc, max_class_fanout_cardinal) : Fanout.t * int)
+    (changed_class : changed_class) : Fanout.t * int =
+  let fanout = get_fanout ~ctx changed_class in
+  Log.log_class_fanout ctx ~class_cnt changed_class fanout;
+  let fanout_acc = Fanout.union fanout_acc fanout in
+  let max_class_fanout_cardinal =
+    Int.max max_class_fanout_cardinal (Fanout.cardinal fanout)
+  in
+  (fanout_acc, max_class_fanout_cardinal)
 
-let fanout_of_changes
-    ~(ctx : Provider_context.t) (changes : (string * ClassDiff.t) list) :
-    AffectedDeps.t =
-  List.fold changes ~init:(AffectedDeps.empty ()) ~f:(add_fanout ~ctx)
+let fanout_of_changes ~(ctx : Provider_context.t) (changes : changed_class list)
+    : Fanout.t =
+  let (fanout, max_class_fanout_cardinal) =
+    List.foldi changes ~init:(Fanout.empty, 0) ~f:(add_fanout ~ctx)
+  in
+  Log.log_fanout ctx changes fanout ~max_class_fanout_cardinal;
+  fanout

@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$list = darray[
+$list = dict[
   'boolean_true' => true,
   'boolean_false' => false,
   'string' => "just a string",
@@ -13,8 +13,8 @@ $list = darray[
   'float_negative' => -42.123312,
   'float_zero' => 0.0,
   'null' => null,
-  'array_empty' => varray[],
-  'array' => varray[1, 2, 3, "foo"],
+  'array_empty' => vec[],
+  'array' => vec[1, 2, 3, "foo"],
 ];
 
 $memc = new Memcached();

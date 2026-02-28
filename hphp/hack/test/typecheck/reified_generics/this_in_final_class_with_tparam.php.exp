@@ -1,0 +1,6 @@
+ERROR: File "this_in_final_class_with_tparam.php", line 17, characters 16-20:
+Invalid reified hint (Typing[4305])
+  File "this_in_final_class_with_tparam.php", line 11, characters 29-32:
+  This is the late static bound `this` type of a class with type parameters, it cannot be used as a reified type argument
+  File "this_in_final_class_with_tparam.php", line 14, characters 29-29:
+  `T` is reified

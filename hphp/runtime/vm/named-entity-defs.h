@@ -19,13 +19,13 @@
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/preclass.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 
 namespace HPHP {
 
 template<class Fn>
-void NamedEntity::foreach_name(Fn fn) {
-  if (auto table = NamedEntity::table()) {
+void NamedType::foreach_name(Fn fn) {
+  if (auto table = NamedType::types()) {
     for (auto n = table->begin(); n != table->end(); ++n) {
       fn(n->second);
     }
@@ -33,8 +33,8 @@ void NamedEntity::foreach_name(Fn fn) {
 }
 
 template<class Fn>
-void NamedEntity::foreach_class(Fn fn) {
-  foreach_name([&](NamedEntity& name) {
+void NamedType::foreach_class(Fn fn) {
+  foreach_name([&](NamedType& name) {
     for (auto cls = name.clsList(); cls; cls = cls->m_next) {
       for (auto const& clone : cls->scopedClones()) {
         fn(clone.second.get());
@@ -45,8 +45,8 @@ void NamedEntity::foreach_class(Fn fn) {
 }
 
 template<class Fn>
-void NamedEntity::foreach_cached_class(Fn fn) {
-  foreach_name([&](NamedEntity& name) {
+void NamedType::foreach_cached_class(Fn fn) {
+  foreach_name([&](NamedType& name) {
     if (auto cls = name.clsList()) {
       if (auto cached = cls->getCached()) {
         if (cls->parent() != c_Closure::classof()) {
@@ -58,8 +58,17 @@ void NamedEntity::foreach_cached_class(Fn fn) {
 }
 
 template<class Fn>
-void NamedEntity::foreach_cached_func(Fn fn) {
-  foreach_name([&](NamedEntity& name) {
+void NamedFunc::foreach_name(Fn fn) {
+  if (auto table = NamedFunc::funcs()) {
+    for (auto n = table->begin(); n != table->end(); ++n) {
+      fn(n->second);
+    }
+  }
+}
+
+template<class Fn>
+void NamedFunc::foreach_cached_func(Fn fn) {
+  foreach_name([&](NamedFunc& name) {
     if (auto func = name.getCachedFunc()) {
       fn(func);
     }
@@ -67,7 +76,7 @@ void NamedEntity::foreach_cached_func(Fn fn) {
 }
 
 template<class T>
-const char* NamedEntity::checkSameName() {
+const char* NamedType::checkSameName() {
   if (!std::is_same<T, PreTypeAlias>::value && getCachedTypeAlias()) {
     return "type";
   } else if (!std::is_same<T, PreClass>::value && getCachedClass()) {

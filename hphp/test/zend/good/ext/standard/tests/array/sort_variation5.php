@@ -14,15 +14,15 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing sort() : usage variations ***\n";
 
-$various_arrays = varray [
+$various_arrays = vec[
   // group of escape sequences
-  varray["\a", "\cx", "\e", "\f", "\n", "\r", "\t", "\xhh", "\ddd", "\v"],
+  vec["\a", "\cx", "\e", "\f", "\n", "\r", "\t", "\xhh", "\ddd", "\v"],
 
   // array contains combination of capital/small letters
-  varray["lemoN", "Orange", "banana", "apple", "Test", "TTTT", "ttt", "ww", "x", "X", "oraNGe", "BANANA"]
+  vec["lemoN", "Orange", "banana", "apple", "Test", "TTTT", "ttt", "ww", "x", "X", "oraNGe", "BANANA"]
 ];
 
-$flags = darray["SORT_REGULAR" => SORT_REGULAR, "SORT_STRING" => SORT_STRING];
+$flags = dict["SORT_REGULAR" => SORT_REGULAR, "SORT_STRING" => SORT_STRING];
 
 $count = 1;
 echo "\n-- Testing sort() by supplying various string arrays --\n";

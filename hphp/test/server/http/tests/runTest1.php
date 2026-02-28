@@ -3,7 +3,7 @@
 <<__EntryPoint>> function main(): void {
   require_once('test_base.inc');
   init();
-requestAll(varray[
+requestAll(vec[
   "test_status.php",
   "test_get.php?name=Foo",
   "test_get.php?name=Bar",
@@ -32,13 +32,14 @@ requestAll(varray[
   "test_header.php?test_string=foo",
   // This is expected to fatal due to embedded newline in the header.
   "test_header.php?test_string=f%0d%0aoo",
-  varray[
-    "test_duplicate_headers.php", null, darray[
+  vec[
+    "test_duplicate_headers.php", null, dict[
       'xyzzy' => 42, 'XyZZy' => 43, 'XYZZY' => 44, 'xxxxx' => 45
     ]
   ],
   "test_curl_multi_except.php",
   "test_pagelet.php",
   "test_cookie2.php",
+  "test_curl_empty_post.php",
 ]);
 }

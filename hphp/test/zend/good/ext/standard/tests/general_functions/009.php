@@ -1,5 +1,5 @@
 <?hh
-function test($str) {
+function test($str) :mixed{
     $res = sha1($str)."\n";
     return $res;
 }

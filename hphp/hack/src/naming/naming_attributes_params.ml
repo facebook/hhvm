@@ -15,33 +15,14 @@ let deprecated ~kind (_, name) attrs =
   let attr = Naming_attributes.find SN.UserAttributes.uaDeprecated attrs in
   let open Aast in
   match attr with
-  | Some { ua_name = _; ua_params = msg :: _ } ->
-    begin
-      match Nast_eval.static_string msg with
-      | Ok msg ->
-        let name = Utils.strip_ns name in
-        let deprecated_prefix =
-          Printf.sprintf "The %s %s is deprecated: " kind name
-        in
-        Some (deprecated_prefix ^ msg)
-      | Error _ -> None
-    end
+  | Some { ua_name = _; ua_params = msg :: _ } -> begin
+    match Nast_eval.static_string msg with
+    | Ok msg ->
+      let name = Utils.strip_ns name in
+      let deprecated_prefix =
+        Printf.sprintf "The %s %s is deprecated: " kind name
+      in
+      Some (deprecated_prefix ^ msg)
+    | Error _ -> None
+  end
   | _ -> None
-
-let get_module_attribute attrs =
-  let attr =
-    List.bind attrs ~f:(fun attr -> attr.Aast.fa_user_attributes)
-    |> Naming_attributes.find SN.UserAttributes.uaModule
-  in
-  let open Aast in
-  match attr with
-  | Some { ua_name = _; ua_params = ((_, p, _) as name) :: _ } ->
-    begin
-      match Nast_eval.static_string name with
-      | Ok name -> Some (p, name)
-      | Error _ -> None
-    end
-  | _ -> None
-
-let has_internal_attribute attrs =
-  Naming_attributes.mem SN.UserAttributes.uaInternal attrs

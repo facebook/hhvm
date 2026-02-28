@@ -1,0 +1,17 @@
+*** Testing mb_ereg_replace() : usage variations ***
+
+-- Iteration 1 --
+string(1) "_"
+
+-- Iteration 2 --
+string(1) "_"
+
+-- Iteration 3 --
+string(46) "UTF-8UTF-8UTF-8UTF-8UTF-8UTF-8_UTF-8UTF-8UTF-8"
+
+-- Iteration 4 --
+string(46) "UTF-8UTF-8UTF-8UTF-8UTF-8UTF-8_UTF-8UTF-8UTF-8"
+
+-- Iteration 5 --
+string(46) "UTF-8UTF-8UTF-8UTF-8UTF-8UTF-8_UTF-8UTF-8UTF-8"
+Done

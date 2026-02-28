@@ -21,6 +21,10 @@
 #include <folly/portability/SysTime.h>
 
 #include "hphp/util/arch.h"
+#include "hphp/util/configs/debug.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/log.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/text-util.h"
@@ -31,7 +35,6 @@
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -94,13 +97,11 @@ const VirtualHost *HttpProtocol::GetVirtualHost(Transport *transport) {
 }
 
 const StaticString
-  s_REQUEST_START_TIME("REQUEST_START_TIME"),
   s_HPHP("HPHP"),
   s_HHVM("HHVM"),
   s_HHVM_JIT("HHVM_JIT"),
   s_HHVM_ARCH("HHVM_ARCH"),
   s_HPHP_SERVER("HPHP_SERVER"),
-  s_HPHP_HOTPROFILER("HPHP_HOTPROFILER"),
   s_HTTP_HOST("HTTP_HOST"),
   s_CONTENT_TYPE("CONTENT_TYPE"),
   s_CONTENT_LENGTH("CONTENT_LENGTH"),
@@ -140,8 +141,6 @@ const StaticString
   s_POST("POST"),
   s_HTTPS("HTTPS"),
   s_on("on"),
-  s_REQUEST_TIME("REQUEST_TIME"),
-  s_REQUEST_TIME_FLOAT("REQUEST_TIME_FLOAT"),
   s_QUERY_STRING("QUERY_STRING"),
   s_REMOTE_ADDR("REMOTE_ADDR"),
   s_REMOTE_HOST("REMOTE_HOST"),
@@ -158,7 +157,7 @@ static void PrepareEnv(Array& env, Transport *transport) {
   process_env_variables(env);
   env.set(s_HPHP, 1);
   env.set(s_HHVM, 1);
-  if (RuntimeOption::EvalJit) {
+  if (Cfg::Jit::Enabled) {
     env.set(s_HHVM_JIT, 1);
   }
   switch (arch()) {
@@ -170,11 +169,8 @@ static void PrepareEnv(Array& env, Transport *transport) {
     break;
   }
 
-  bool isServer =
-    RuntimeOption::ServerExecutionMode() && !is_cli_server_mode();
-  if (isServer) {
+  if (!is_any_cli_mode()) {
     env.set(s_HPHP_SERVER, 1);
-    env.set(s_HPHP_HOTPROFILER, 1);
   }
 
   // Do this last so it can overwrite all the previous settings
@@ -189,44 +185,31 @@ static void PrepareEnv(Array& env, Transport *transport) {
   }
 }
 
-static void StartRequest(Array& server) {
-  server.set(s_REQUEST_START_TIME, time(nullptr));
-  time_t now;
-  struct timeval tp = {0};
-  double now_double;
-  if (!gettimeofday(&tp, nullptr)) {
-    now_double = (double)(tp.tv_sec + tp.tv_usec / 1000000.00);
-    now = tp.tv_sec;
-  } else {
-    now = time(nullptr);
-    now_double = (double)now;
-  }
-  server.set(s_REQUEST_TIME, now);
-  server.set(s_REQUEST_TIME_FLOAT, now_double);
-}
-
 /**
  * PHP has "EGPCS" processing order of these global variables, and this
  * order is important in preparing $_REQUEST that needs to know which to
  * overwrite what when name happens to be the same.
  */
 void HttpProtocol::PrepareSystemVariables(Transport *transport,
-                                          const RequestURI &r,
-                                          const SourceRootInfo &sri) {
+                                          const RequestURI &r) {
   auto const vhost = VirtualHost::GetCurrent();
   auto const emptyArr = empty_dict_array();
   php_global_set(s__SERVER, emptyArr);
   php_global_set(s__GET, emptyArr);
   php_global_set(s__POST, emptyArr);
   php_global_set(s__FILES, emptyArr);
-  php_global_set(s__REQUEST, emptyArr);
+  if (!Cfg::Eval::DisableRequestSuperglobal) {
+    php_global_set(s__REQUEST, emptyArr);
+  }
   php_global_set(s__ENV, emptyArr);
-  php_global_set(s__COOKIE, emptyArr);
+  if (!Cfg::Eval::DisableParsedCookies) {
+    php_global_set(s__COOKIE, emptyArr);
+  }
 
   // according to doc if content type is multipart/form-data
   // $HTTP_RAW_POST_DATA should always not available
   bool shouldSetHttpRawPostData = false;
-  if (RuntimeOption::AlwaysPopulateRawPostData) {
+  if (Cfg::Server::AlwaysPopulateRawPostData) {
     std::string dummy;
     if (!IsRfc1867(transport->getHeader("Content-Type"), dummy)) {
       shouldSetHttpRawPostData = true;
@@ -244,10 +227,8 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   X(ENV)
   X(GET)
   X(POST)
-  X(COOKIE)
   X(FILES)
   X(SERVER)
-  X(REQUEST)
 
 #undef X
 
@@ -258,89 +239,56 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     }
   };
 
-  auto variablesOrder = RequestInfo::s_requestInfo.getNoCheck()
-    ->m_reqInjectionData.getVariablesOrder();
-
-  auto requestOrder = RequestInfo::s_requestInfo.getNoCheck()
-    ->m_reqInjectionData.getRequestOrder();
-
-  if (requestOrder.empty()) {
-    requestOrder = variablesOrder;
-  }
-
-  bool postPopulated = false;
-
-  for (char& c : variablesOrder) {
-    switch(c) {
-      case 'e':
-      case 'E':
-        PrepareEnv(ENVarr, transport);
-        break;
-      case 'g':
-      case 'G':
-        if (!r.queryString().empty()) {
-          PrepareGetVariable(GETarr, r);
-        }
-        break;
-      case 'p':
-      case 'P':
-        postPopulated = true;
-        PreparePostVariables(POSTarr, HTTP_RAW_POST_DATA,
-                             FILESarr, transport, r);
-        break;
-      case 'c':
-      case 'C':
-        PrepareCookieVariable(COOKIEarr, transport);
-        break;
-      case 's':
-      case 'S':
-        StartRequest(SERVERarr);
-        PrepareServerVariable(SERVERarr,
-            transport,
-            r,
-            sri,
-            vhost);
-        break;
+  auto REQUESTarr = empty_dict_array();
+  auto COOKIEarr = empty_dict_array();
+  SCOPE_EXIT {
+    if (!Cfg::Eval::DisableRequestSuperglobal) {
+      php_global_set(s__REQUEST, REQUESTarr);
     }
+    if (!Cfg::Eval::DisableParsedCookies) {
+      php_global_set(s__COOKIE, COOKIEarr);
+    }
+  };
+
+  // Env
+  PrepareEnv(ENVarr, transport);
+
+  // Get
+  if (!r.queryString().empty()) {
+    PrepareGetVariable(GETarr, r);
   }
 
-  if (!postPopulated && shouldSetHttpRawPostData) {
-    // Always try to populate $HTTP_RAW_POST_DATA if not populated
-    auto dummyPost = empty_dict_array();
-    auto dummyFiles = empty_dict_array();
-    PreparePostVariables(dummyPost, HTTP_RAW_POST_DATA,
-                         dummyFiles, transport, r);
+  // Post
+  PreparePostVariables(POSTarr, HTTP_RAW_POST_DATA,
+                        FILESarr, transport, r);
+
+  // Cookie
+  if (!Cfg::Eval::DisableParsedCookies) {
+    PrepareCookieVariable(COOKIEarr, transport);
   }
 
-  PrepareRequestVariables(REQUESTarr,
-                          GETarr,
-                          POSTarr,
-                          COOKIEarr,
-                          requestOrder);
+  // Server
+  init_server_request_time(SERVERarr);
+  PrepareServerVariable(SERVERarr, transport, r, vhost);
+
+  if (!Cfg::Eval::DisableRequestSuperglobal) {
+    // Request
+    PrepareRequestVariables(REQUESTarr,
+                            GETarr,
+                            POSTarr,
+                            COOKIEarr);
+  }
 }
 
 void HttpProtocol::PrepareRequestVariables(Array& request,
                                            const Array& get,
                                            const Array& post,
-                                           const Array& cookie,
-                                           const std::string& requestOrder) {
-  for (const char& c : requestOrder) {
-    switch(c) {
-      case 'g':
-      case 'G':
-        CopyParams(request, get);
-        break;
-      case 'p':
-      case 'P':
-        CopyParams(request, post);
-        break;
-      case 'c':
-      case 'C':
-        CopyParams(request, cookie);
-        break;
-    }
-  }
+                                           const Array& cookie) {
 
+  CopyParams(request, get);
+  CopyParams(request, post);
+  // if Cfg::Eval::DisableParsedCookies is set this is just a no-op
+  CopyParams(request, cookie);
 }
 
 void HttpProtocol::PrepareGetVariable(Array& get,
@@ -355,7 +303,7 @@ void HttpProtocol::PreparePostVariables(Array& post,
                                         Array& files,
                                         Transport *transport,
                                         const RequestURI& r) {
-  if (transport->getMethod() != Transport::Method::POST) {
+  if (!transport->shouldReadPostData()) {
     return;
   }
 
@@ -391,7 +339,7 @@ void HttpProtocol::PreparePostVariables(Array& post,
           // iff we're trying to coalesce the entire POST body.  Otherwise,
           // data may be invalid when DecodeRfc1867 returns.  See
           // upload.cpp:read_post.
-          if (RuntimeOption::AlwaysPopulateRawPostData) {
+          if (Cfg::Server::AlwaysPopulateRawPostData) {
             needDelete = true;
             data = buffer_duplicate(data, size);
           } else {
@@ -451,8 +399,8 @@ void HttpProtocol::PreparePostVariables(Array& post,
         String((char*)data, size, AttachString) :
         String((char*)data, size, CopyString);
       g_context->setRawPostData(string_data);
-      if (RuntimeOption::AlwaysPopulateRawPostData || ! needDelete) {
-        // For literal we disregard RuntimeOption::AlwaysPopulateRawPostData
+      if (Cfg::Server::AlwaysPopulateRawPostData || ! needDelete) {
+        // For literal we disregard Cfg::Server::AlwaysPopulateRawPostData
         raw_post = string_data;
       }
     }
@@ -491,7 +439,7 @@ static void CopyHeaderVariables(Array& server,
     // header past a proxy that would either overwrite or filter it
     // otherwise.  Client code should use apache_request_headers() to
     // retrieve the original headers if they are security-critical.
-    if (RuntimeOption::LogHeaderMangle != 0 && server.exists(normalizedKey)) {
+    if (Cfg::Log::HeaderMangle != 0 && server.exists(normalizedKey)) {
       badHeaders.push_back(key);
     }
 
@@ -503,7 +451,7 @@ static void CopyHeaderVariables(Array& server,
 
   if (!badHeaders.empty()) {
     auto reqId = badRequests.fetch_add(1, std::memory_order_acq_rel) + 1;
-    if (!(reqId % RuntimeOption::LogHeaderMangle)) {
+    if (!(reqId % Cfg::Log::HeaderMangle)) {
       std::string badNames = folly::join(", ", badHeaders);
       std::string allHeaders;
 
@@ -521,8 +469,8 @@ static void CopyHeaderVariables(Array& server,
         "The header(s) [%s] overwrote other headers which mapped to the same "
         "key. This happens because PHP normalises - to _, ie AN_EXAMPLE "
         "and AN-EXAMPLE are equivalent. You should treat this as "
-        "malicious. All headers from this request:\n%s",
-        badNames.c_str(), allHeaders.c_str());
+        "malicious.",
+        badNames.c_str());
     }
   }
 }
@@ -558,7 +506,7 @@ static void CopyServerInfo(Array& server,
   // Use the header from the transport if it is available
   if (!serverNameHeader.empty()) {
     hostName = serverNameHeader;
-  } else if (hostName.empty() || RuntimeOption::ForceServerNameToHeader) {
+  } else if (hostName.empty() || Cfg::Server::ForceServerNameToHeader) {
     hostName = hostHeader;
   }
 
@@ -629,7 +577,7 @@ static void CopyPathInfo(Array& server,
     Variant port = server[s_SERVER_PORT];
     always_assert(port.isInteger() || port.isString());
     if (port.isInteger()) {
-      serverPort = folly::to<std::string>(port.toInt32());
+      serverPort = folly::to<std::string>((int)port.toInt64());
     } else {
       serverPort = port.toString().data();
     }
@@ -663,13 +611,13 @@ static void CopyPathInfo(Array& server,
       }
     }
     if (r.globalDoc()) {
-      name = String(RuntimeOption::GlobalDocument);
+      name = String(Cfg::Server::GlobalDocument);
     }
     if (r.defaultDoc()) {
       if (!name.empty() && name[name.length() - 1] != '/') {
         name += "/";
       }
-      name += String(RuntimeOption::DefaultDocument);
+      name += String(Cfg::Server::DefaultDocument);
     }
     server.set(s_SCRIPT_NAME, name);
   } else {
@@ -684,7 +632,7 @@ static void CopyPathInfo(Array& server,
 
   String documentRoot = transport->getDocumentRoot();
   if (documentRoot.empty()) {
-    // Right now this is just RuntimeOption::SourceRoot but mwilliams wants to
+    // Right now this is just Cfg::Server::SourceRoot but mwilliams wants to
     // fix it so it is settable, so I'll leave this for now
     documentRoot = vhost->getDocumentRoot();
   }
@@ -747,19 +695,20 @@ static void CopyPathInfo(Array& server,
 void HttpProtocol::PrepareServerVariable(Array& server,
                                          Transport *transport,
                                          const RequestURI &r,
-                                         const SourceRootInfo &sri,
                                          const VirtualHost *vhost) {
   // $_SERVER
 
   std::string contentType = transport->getHeader("Content-Type");
   std::string contentLength = transport->getHeader("Content-Length");
 
-  // HTTP_ headers -- we don't exclude headers we handle elsewhere (e.g.,
-  // Content-Type, Authorization), since the CGI "spec" merely says the server
-  // "may" exclude them; this is not what APE does, but it's harmless.
-  auto const& headers = transport->getHeaders();
-  // Do this first so other methods can overwrite them
-  CopyHeaderVariables(server, headers);
+  if (Cfg::Eval::SetHeadersInServerSuperGlobal) {
+    // HTTP_ headers -- we don't exclude headers we handle elsewhere (e.g.,
+    // Content-Type, Authorization), since the CGI "spec" merely says the server
+    // "may" exclude them; this is not what APE does, but it's harmless.
+    auto const& headers = transport->getHeaders();
+    // Do this first so other methods can overwrite them
+    CopyHeaderVariables(server, headers);
+  }
   CopyServerInfo(server, transport, vhost);
   // Do this last so it can overwrite all the previous settings
   CopyTransportParams(server, transport);
@@ -789,7 +738,7 @@ void HttpProtocol::PrepareServerVariable(Array& server,
     String str(kv.second);
     server.set(arrkey, make_tv<KindOfString>(str.get()), true);
   }
-  server = sri.setServerVariables(std::move(server));
+  server = SourceRootInfo::SetServerVariables(std::move(server));
 
   const char *threadType = transport->getThreadTypeName();
   server.set(s_THREAD_TYPE, threadType);
@@ -798,7 +747,7 @@ void HttpProtocol::PrepareServerVariable(Array& server,
 
 std::string HttpProtocol::RecordRequest(Transport *transport) {
   char tmpfile[PATH_MAX + 1];
-  if (RuntimeOption::RecordInput) {
+  if (Cfg::Debug::RecordInput) {
     strcpy(tmpfile, "/tmp/hphp_request_XXXXXX");
     close(mkstemp(tmpfile));
 
@@ -811,7 +760,7 @@ std::string HttpProtocol::RecordRequest(Transport *transport) {
 }
 
 void HttpProtocol::ClearRecord(bool success, const std::string &tmpfile) {
-  if (success && RuntimeOption::ClearInputOnSuccess && !tmpfile.empty()) {
+  if (success && Cfg::Debug::ClearInputOnSuccess && !tmpfile.empty()) {
     unlink(tmpfile.c_str());
     Logger::Info("request %s deleted", tmpfile.c_str());
   }

@@ -1,4 +1,4 @@
-File "array.php", line 18, characters 3-6:
+ERROR: File "array.php", line 18, characters 3-6:
 A `where` type constraint is violated here (Typing[4323])
   File "array.php", line 3, characters 10-13:
   This is the method with `where` type constraints
@@ -8,7 +8,31 @@ A `where` type constraint is violated here (Typing[4323])
     via this generic `T3`
   File "array.php", line 3, characters 51-59:
   But got `(vec<mixed> & (int, arraykey))`
-File "array.php", line 22, characters 3-6:
+ERROR: File "array.php", line 18, characters 3-6:
+A `where` type constraint is violated here (Typing[4323])
+  File "array.php", line 3, characters 10-13:
+  This is the method with `where` type constraints
+  File "array.php", line 18, characters 37-43:
+  Expected `nothing`
+  File "array.php", line 3, characters 42-43:
+    via this generic `T3`
+  File "array.php", line 18, characters 8-22:
+  But got `(int, arraykey)`
+  File "array.php", line 3, characters 57-58:
+    via this generic `T1`
+ERROR: File "array.php", line 18, characters 3-6:
+A `where` type constraint is violated here (Typing[4323])
+  File "array.php", line 3, characters 10-13:
+  This is the method with `where` type constraints
+  File "array.php", line 18, characters 37-43:
+  Expected `nothing`
+  File "array.php", line 3, characters 42-43:
+    via this generic `T3`
+  File "array.php", line 18, characters 25-34:
+  But got `vec<mixed>`
+  File "array.php", line 3, characters 52-53:
+    via this generic `T2`
+ERROR: File "array.php", line 22, characters 3-6:
 A `where` type constraint is violated here (Typing[4323])
   File "array.php", line 3, characters 10-13:
   This is the method with `where` type constraints
@@ -18,7 +42,31 @@ A `where` type constraint is violated here (Typing[4323])
     via this generic `T3`
   File "array.php", line 3, characters 51-59:
   But got `(dict<arraykey, mixed> & shape('a' => int))`
-File "array.php", line 27, characters 3-6:
+ERROR: File "array.php", line 22, characters 3-6:
+A `where` type constraint is violated here (Typing[4323])
+  File "array.php", line 3, characters 10-13:
+  This is the method with `where` type constraints
+  File "array.php", line 22, characters 35-41:
+  Expected `nothing`
+  File "array.php", line 3, characters 42-43:
+    via this generic `T3`
+  File "array.php", line 22, characters 8-9:
+  But got `shape('a' => int)`
+  File "array.php", line 3, characters 57-58:
+    via this generic `T1`
+ERROR: File "array.php", line 22, characters 3-6:
+A `where` type constraint is violated here (Typing[4323])
+  File "array.php", line 3, characters 10-13:
+  This is the method with `where` type constraints
+  File "array.php", line 22, characters 35-41:
+  Expected `nothing`
+  File "array.php", line 3, characters 42-43:
+    via this generic `T3`
+  File "array.php", line 22, characters 12-32:
+  But got `dict<arraykey, mixed>`
+  File "array.php", line 3, characters 52-53:
+    via this generic `T2`
+ERROR: File "array.php", line 27, characters 3-6:
 A `where` type constraint is violated here (Typing[4323])
   File "array.php", line 3, characters 10-13:
   This is the method with `where` type constraints
@@ -28,7 +76,7 @@ A `where` type constraint is violated here (Typing[4323])
     via this generic `T3`
   File "array.php", line 3, characters 51-59:
   But got `shape('a' => int, 'b' => int, ...)`
-File "array.php", line 28, characters 3-6:
+ERROR: File "array.php", line 28, characters 3-6:
 A `where` type constraint is violated here (Typing[4323])
   File "array.php", line 3, characters 10-13:
   This is the method with `where` type constraints

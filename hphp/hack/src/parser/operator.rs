@@ -6,12 +6,14 @@
 
 mod operator_generated;
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
-use parser_core_types::{parser_env::ParserEnv, token_kind::TokenKind};
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
+use parser_core_types::parser_env::ParserEnv;
+use parser_core_types::token_kind::TokenKind;
 
 pub use crate::operator_generated::*;
 
-#[derive(PartialEq, FromOcamlRep, ToOcamlRep)]
+#[derive(PartialEq, FromOcamlRep, ToOcamlRep, Debug)]
 pub enum Assoc {
     LeftAssociative,
     RightAssociative,
@@ -80,7 +82,7 @@ impl Operator {
             | PostfixDecrementOperator
             | AwaitOperator
             | ReadonlyOperator => 23,
-            CloneOperator => 24,
+            CloneOperator | NameofOperator => 24,
             // value 25 is reserved for assignment that appear in expressions
             EnumClassLabelOperator | FunctionCallOperator => 26,
             NewOperator => 27,
@@ -88,6 +90,7 @@ impl Operator {
             IndexingOperator => 29,
             ScopeResolutionOperator => 30,
             DollarOperator => 31,
+            PackageOperator => 32,
         }
     }
 
@@ -132,13 +135,14 @@ impl Operator {
             | RemainderAssignmentOperator | AndAssignmentOperator
             | OrAssignmentOperator | ExclusiveOrAssignmentOperator
             | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
-            | PrintOperator | AwaitOperator | ReadonlyOperator => Assoc::RightAssociative,
+            | PrintOperator | AwaitOperator | NameofOperator | ReadonlyOperator | PackageOperator => Assoc::RightAssociative,
         }
     }
 
     pub fn prefix_unary_from_token(token: TokenKind) -> Operator {
         match token {
             TokenKind::Await => AwaitOperator,
+            TokenKind::Nameof => NameofOperator,
             TokenKind::Exclamation => LogicalNotOperator,
             TokenKind::Tilde => NotOperator,
             TokenKind::PlusPlus => PrefixIncrementOperator,
@@ -155,6 +159,7 @@ impl Operator {
             TokenKind::Require_once => RequireOnceOperator,
             TokenKind::Print => PrintOperator,
             TokenKind::Readonly => ReadonlyOperator,
+            TokenKind::Package => PackageOperator,
             _ => panic!("not a unary operator"),
         }
     }
@@ -166,11 +171,11 @@ impl Operator {
             | TokenKind::MinusMinus
             | TokenKind::LeftParen
             | TokenKind::LeftBracket
-            | TokenKind::LeftBrace
             | TokenKind::Plus
             | TokenKind::Minus
             | TokenKind::Ampersand
             | TokenKind::BarGreaterThan
+            | TokenKind::BarQuestionGreaterThan
             | TokenKind::Question
             | TokenKind::QuestionQuestion
             | TokenKind::QuestionQuestionEqual
@@ -223,7 +228,7 @@ impl Operator {
 
     pub fn trailing_from_token(token: TokenKind) -> Operator {
         match token {
-            TokenKind::BarGreaterThan => PipeOperator,
+            TokenKind::BarGreaterThan | TokenKind::BarQuestionGreaterThan => PipeOperator,
             TokenKind::Question => ConditionalQuestionOperator,
             TokenKind::Colon => ConditionalColonOperator,
             TokenKind::QuestionQuestion => CoalesceOperator,
@@ -289,6 +294,7 @@ impl Operator {
             | TokenKind::Minus
             | TokenKind::Ampersand
             | TokenKind::BarGreaterThan
+            | TokenKind::BarQuestionGreaterThan
             | TokenKind::QuestionQuestion
             | TokenKind::QuestionQuestionEqual
             | TokenKind::QuestionColon

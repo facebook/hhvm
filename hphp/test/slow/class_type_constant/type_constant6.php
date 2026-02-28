@@ -7,7 +7,7 @@ async function test(
 
 
 <<__EntryPoint>>
-function main_type_constant6() {
+function main_type_constant6() :mixed{
 $reflect = new ReflectionFunction('test');
 
 var_dump($reflect->getReturnTypeText());

@@ -17,13 +17,11 @@
 #include "hphp/runtime/base/ini-setting.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include <vector>
 #include <string>
 #include <iostream>
-#include <sstream>
 
 #include <folly/portability/Fcntl.h>
 #include <folly/portability/Stdlib.h>
@@ -35,13 +33,7 @@ int execute_program(int argc, char **argv);
 
 static int get_tempfile_if_not_exists(int ini_fd, char ini_path[]) {
   if (ini_fd == -1) {
-#ifdef _MSC_VER
-    // MSVC doesn't require the characters to be the last
-    // 6 in the string.
-    ini_fd = open(mktemp(ini_path), O_RDWR | O_EXCL);
-#else
     ini_fd = mkstemps(ini_path, 4); // keep the .ini suffix
-#endif
     if (ini_fd == -1) {
       fprintf(stderr, "Error: unable to open temporary file");
       exit(EXIT_FAILURE);
@@ -60,7 +52,7 @@ int emulate_zend(int argc, char** argv) {
   bool need_file = true;
   int ini_fd = -1;
   char ini_path[] = "/tmp/php-ini-XXXXXX.ini";
-  std::string ini_section = "";
+  std::string ini_section;
 
   const char* posArg = nullptr;
 
@@ -72,13 +64,6 @@ int emulate_zend(int argc, char** argv) {
       need_file = false;
       newargv.push_back("-a");
       cnt++;
-      continue;
-    }
-    if (strcmp(argv[cnt], "-z") == 0) {
-      std::string arg = "-vDynamicExtensions.0=";
-      arg.append(argv[cnt+1]);
-      newargv.push_back(arg.c_str());
-      cnt += 2;
       continue;
     }
     if (strcmp(argv[cnt], "-l") == 0 || strcmp(argv[cnt], "--lint") == 0) {

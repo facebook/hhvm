@@ -1,2 +1,2 @@
-<?hh // strict
+<?hh
 function unsaved_bar(): int { return 1; }

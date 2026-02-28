@@ -1,0 +1,17 @@
+*** Testing mb_substr() : usage variations ***
+
+-- Iteration 1 --
+string(0) ""
+
+-- Iteration 2 --
+string(0) ""
+
+-- Iteration 3 --
+string(5) "strin"
+
+-- Iteration 4 --
+string(5) "strin"
+
+-- Iteration 5 --
+string(5) "hello"
+Done

@@ -21,7 +21,6 @@
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
 

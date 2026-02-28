@@ -1,10 +1,10 @@
 <?hh
 
-function bungle($s) {
+function bungle($s) :mixed{
   return 314159;
 }
 
-function prefix() {
+function prefix() :mixed{
   return "__rename_func_";
 }
 <<__EntryPoint>> function main(): void {

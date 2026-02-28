@@ -114,7 +114,7 @@ static Variant HHVM_STATIC_METHOD(Normalizer, normalize,
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initNormalizer() {
+void IntlExtension::registerNativeNormalizer() {
   HHVM_STATIC_ME(Normalizer, isNormalized);
   HHVM_STATIC_ME(Normalizer, normalize);
 
@@ -127,8 +127,6 @@ void IntlExtension::initNormalizer() {
   HHVM_RCC_INT(Normalizer, NFC, UNORM_NFC);
   HHVM_RCC_INT(Normalizer, FORM_KC, UNORM_NFKC);
   HHVM_RCC_INT(Normalizer, NFKC, UNORM_NFKC);
-
-  loadSystemlib("icu_normalizer");
 }
 
 //////////////////////////////////////////////////////////////////////////////

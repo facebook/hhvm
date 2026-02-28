@@ -1,4 +1,4 @@
-File "this_anon_bad.php", line 34, characters 11-19:
+ERROR: File "this_anon_bad.php", line 34, characters 11-19:
 Invalid argument (Typing[4110])
   File "this_anon_bad.php", line 21, characters 13-17:
   Expected `this`

@@ -1,8 +1,8 @@
-File "parent_test.php", line 26, characters 25-26:
-Invalid argument (Typing[4110])
-  File "parent_test.php", line 14, characters 18-20:
-  Expected `int`
-  File "parent_test.php", line 8, characters 39-45:
-    resulting from expanding the type constant `this::T`
-  File "parent_test.php", line 26, characters 25-26:
-  But got `string`
+ERROR: File "parent_test.php", line 22, characters 13-23:
+No static method `__construct` in `X` (Typing[4090])
+  File "parent_test.php", line 3, characters 16-16:
+  Declaration of `X` is here
+ERROR: File "parent_test.php", line 26, characters 13-23:
+No static method `__construct` in `X` (Typing[4090])
+  File "parent_test.php", line 3, characters 16-16:
+  Declaration of `X` is here

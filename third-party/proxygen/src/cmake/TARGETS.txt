@@ -1,0 +1,70 @@
+Proxygen CMake Target Compatibility Aliases
+============================================
+
+This file explains the rationale behind the compatibility aliases defined in
+ProxygenCompatAliases.cmake.
+
+Background
+----------
+Proxygen's CMake build now uses granular library targets generated from BUCK
+files (via generate_cmake.py). Each BUCK target maps to a CMake target with
+a name like proxygen_<path>_<name>.
+
+However, downstream projects (like moxygen) depend on higher-level groupings
+rather than individual fine-grained targets. The compat aliases provide stable,
+semantic names that bundle related granular targets together.
+
+Alias Categories
+----------------
+
+http_core
+  Core HTTP types: error codes, status types, utilities, and common types.
+  Groups: proxygen_error, proxygen_http_status_type, proxygen_http_http_utils,
+          proxygen_http_types
+
+codec
+  HTTP/1.1 and HTTP/2 codec infrastructure.
+  Groups: proxygen_http_codec, proxygen_http_codec_direction,
+          proxygen_http_codec_error_code, proxygen_http_codec_util
+
+hq_core
+  HTTP/3 (HQ) codec and error types.
+  Groups: proxygen_http_codec_hq_codec, proxygen_http_h3_errors
+
+hpack / qpack
+  Header compression libraries for HTTP/2 and HTTP/3 respectively.
+
+session / hq_session
+  HTTP session management for HTTP/1-2 and HTTP/3.
+
+webtransport / quicwebtransport
+  WebTransport protocol support over HTTP/2 and QUIC.
+
+coro / coro_client / coro_server / coro_filters
+  C++20 coroutine-based HTTP client and server APIs.
+
+connpool
+  Connection pooling infrastructure.
+
+dns
+  DNS resolution using c-ares.
+
+services
+  Acceptor and service configuration.
+
+utils
+  Common utilities (time, URL parsing, etc.).
+
+httpserver
+  HTTP server framework including ScopedHTTPServer for testing.
+
+hq_server
+  HQ (HTTP/3) server implementation.
+
+Adding New Aliases
+------------------
+When adding new aliases:
+1. Choose a semantic name that describes the functionality, not the path
+2. Group related granular targets that are typically used together
+3. Document the grouping in this file
+4. Avoid breaking existing downstream consumers

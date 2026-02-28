@@ -1,4 +1,4 @@
-File "static_and_arrow3.php", line 18, characters 12-13:
+ERROR: File "static_and_arrow3.php", line 18, characters 12-13:
 No instance method `f2` in `Foo` (Typing[4053])
   File "static_and_arrow3.php", line 13, characters 26-27:
   Did you mean static method `f2` instead?

@@ -1,0 +1,2 @@
+ERROR: File "occurs_check.php", line 16, characters 3-4:
+Type circularity: in order to type-check this expression it is necessary for a type [rec] to be equal to type `Box<?C with { type T = [rec] }>` (Typing[4155])

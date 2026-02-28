@@ -1,0 +1,55 @@
+# Math replacements
+- define: DUK_FPCLASSIFY
+- define: DUK_SIGNBIT
+- define: DUK_ISFINITE
+- define: DUK_ISNAN
+- define: DUK_ISINF
+- define: DUK_FABS
+- define: DUK_FLOOR
+- define: DUK_CEIL
+- define: DUK_FMOD
+- define: DUK_POW
+- define: DUK_ACOS
+- define: DUK_ASIN
+- define: DUK_ATAN
+- define: DUK_ATAN2
+- define: DUK_SIN
+- define: DUK_COS
+- define: DUK_TAN
+- define: DUK_EXP
+- define: DUK_LOG
+- define: DUK_SQRT
+- define: DUK_CBRT
+- define: DUK_LOG2
+- define: DUK_LOG10
+- define: DUK_TRUNC
+
+# Memory allocation
+- define: DUK_ANSI_MALLOC
+- define: DUK_ANSI_REALLOC
+- define: DUK_ANSI_CALLOC
+- define: DUK_ANSI_FREE
+
+# Memory manipulation
+- define: DUK_MEMCPY
+- define: DUK_MEMMOVE
+- define: DUK_MEMCMP
+- define: DUK_MEMSET
+- define: DUK_MEMZERO
+
+# String manipulation
+- define: DUK_STRLEN
+- define: DUK_STRCMP
+- define: DUK_STRNCMP
+
+# String printing and parsing
+- define: DUK_SPRINTF
+- define: DUK_SNPRINTF
+- define: DUK_VSNPRINTF
+- define: DUK_SSCANF
+- define: DUK_VSSCANF
+
+# These don't need to save/restore signal mask.
+- define: DUK_SETJMP
+- define: DUK_LONGJMP
+- define: DUK_JMPBUF_TYPE  # e.g. jmp_buf

@@ -2,6 +2,7 @@
 # pyre-strict
 
 import os
+import shutil
 import subprocess
 import sys
 from typing import List
@@ -14,7 +15,7 @@ def arg_extract(args: List[str], arg: str) -> str:
     return value
 
 
-if __name__ == "__main__":
+def main() -> None:
     # Parsing the arguments is not straightforward as pessimise_and_single_type_check
     # must be aware of all the arguments supported by hh_single_type_check, but we do
     # not want to duplicate the list here (which is long and moving fast).
@@ -46,6 +47,7 @@ if __name__ == "__main__":
             hh_pessimisation_path,
             "--file=" + file,
             "--update",
+            "--enable-multifile-support",
         ]
         subprocess.run(cmd)
 
@@ -59,44 +61,59 @@ if __name__ == "__main__":
 
     # pessimise the extra builtins and build the cli options
     # - if extra_builtin refer to <path>/<file>, the pessimised extra builtin is
-    #   generated inside <path>/pessimised_hhi/<file>
-    # - to avoid a race condition, the hhi is first pessimised into <file>.pess.<PID>,
-    #   and then moved to <path>/pessimised_hhi/<file>
+    #   generated inside <path>/pessimised_hhi_<PID>/<file>
+    # - the <PID> is required to avoid a race condition when multiple instances of
+    #   this script are invoked concurrently by buck
+    # - the <path>/pessimised_hhi_<PID>/ directories are deleted at the end of the script
     extra_builtins_opts: List[str] = []
+    pessimised_extra_builtins_dirs: List[str] = []
+
     for file in extra_builtins:
         (file_dir, file_name) = os.path.split(file)
-        unique_output_file = file + ".pess." + str(os.getpid())
-        pessimised_file_dir = os.path.join(file_dir, "pessimised_hhi")
-        pessimised_file = os.path.join(pessimised_file_dir, file_name)
-
+        output_file = file + ".pess"
+        unique_pessimised_file_dir = os.path.join(
+            file_dir, "pessimised_hhi_" + str(os.getpid())
+        )
+        os.makedirs(unique_pessimised_file_dir, exist_ok=True)
+        pessimised_file = os.path.join(unique_pessimised_file_dir, file_name)
         if not (os.path.exists(pessimised_file)):
             cmd: List[str] = [
                 hh_pessimisation_path,
                 "--file",
                 file,
                 "--output-file",
-                unique_output_file,
+                pessimised_file,
             ]
             subprocess.run(cmd)
-            os.makedirs(pessimised_file_dir, exist_ok=True)
-            # this is expected to be atomic
-            os.rename(unique_output_file, pessimised_file)
-
         extra_builtins_opts.append("--extra-builtin")
         extra_builtins_opts.append(pessimised_file)
+        pessimised_extra_builtins_dirs.append(unique_pessimised_file_dir)
 
     # pessimised tests have extension file+".pess"
     # invoke hh_single_type_check on the pessimised tests
-    pessimised_files: List[str] = list(map(lambda file: file + ".pess", files))
+    pessimised_files: List[str] = [file + ".pess" for file in files]
+
     cmd: List[str] = (
         [hh_stc_path]
         + hh_stc_arguments
         + extra_builtins_opts
-        + ["--enable-sound-dynamic-type", "--like-type-hints", "--pessimise-builtins"]
+        + [
+            "--config",
+            "pessimise_builtins=true",
+            "--force-allow-builtins-in-custom-hhi-path-FLAKEY",
+        ]
         + ["--custom-hhi-path", pessimised_hhi_path]
         + pessimised_files
     )
     subprocess.run(cmd)
 
+    # delete the temporary directories where extra builtins files have been pessimised
+    for dir in pessimised_extra_builtins_dirs:
+        shutil.rmtree(dir)
+
     # Remark: in batch-mode the out files will have extension ".pess.out"
     # instead of ".out"
+
+
+if __name__ == "__main__":
+    main()

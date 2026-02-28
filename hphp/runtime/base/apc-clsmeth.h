@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 
 namespace HPHP {
 
@@ -55,11 +55,9 @@ struct APCClsMeth {
   }
 
 private:
-  LowPtr<const StringData> m_clsName;
-  LowPtr<const StringData> m_methName;
+  PackedPtr<const StringData> m_clsName;
+  PackedPtr<const StringData> m_methName;
   APCHandle m_handle;
 };
 
 }
-
-

@@ -102,16 +102,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
-# if defined(__LITTLE_ENDIAN__)
-#  undef WORDS_BIGENDIAN
-# else
-#  if defined(__BIG_ENDIAN__)
-#   define WORDS_BIGENDIAN
-#  endif
-# endif
-#endif
-
 #ifdef WORDS_BIGENDIAN
 #define IEEE_BIG_ENDIAN
 #else
@@ -232,10 +222,10 @@ namespace HPHP {
        should be defined.
 #endif
 
-  typedef union {
+  union _double {
         double d;
           ULong ul[2];
-  } _double;
+  };
 #define value(x) ((x).d)
 #ifdef IEEE_LITTLE_ENDIAN
 #define word0(x) ((x).ul[1])
@@ -384,8 +374,6 @@ struct Bigint {
   int k, maxwds, sign, wds;
   ULong x[1];
 };
-
-typedef struct Bigint Bigint;
 
 } // namespace
 
@@ -914,7 +902,7 @@ static Bigint * diff(Bigint *a, Bigint *b)
 static double ulp (double _x)
 {
   _double x;
-  register Long L;
+  Long L;
   _double a;
 
   value(x) = _x;
@@ -1526,7 +1514,7 @@ char * zend_dtoa(double _d, int mode, int ndigits, int *decpt, int *sign, char *
       break;
     case 2:
       leftright = 0;
-      /* no break */
+      [[fallthrough]];
     case 4:
       if (ndigits <= 0)
         ndigits = 1;
@@ -1534,7 +1522,7 @@ char * zend_dtoa(double _d, int mode, int ndigits, int *decpt, int *sign, char *
       break;
     case 3:
       leftright = 0;
-      /* no break */
+      [[fallthrough]];
     case 5:
       i = ndigits + k + 1;
       ilim = i;
@@ -2036,6 +2024,7 @@ dig_done:
     switch(c = *++s) {
       case '-':
         esign = 1;
+        [[fallthrough]];
       case '+':
         c = *++s;
     }

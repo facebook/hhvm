@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,6 +10,6 @@
  */
 
 function f(): void {
-  foreach (varray[1] as 42) {
+  foreach (vec[1] as 42) {
   }
 }

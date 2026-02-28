@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_print_r() {
+function main_print_r() :mixed{
 $xml = <<<XML
 <root>
   <A>Hello</A>

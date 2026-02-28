@@ -1,12 +1,12 @@
 <?hh
 interface I {
-  public function foo($x);
+  public function foo($x):mixed;
 }
 abstract class B implements I {
-  abstract public function foo($x);
+  abstract public function foo($x):mixed;
 }
 class C extends B {
-  public function foo($x){ echo "$x\n";}
+  public function foo($x):mixed{ echo "$x\n";}
 }
 <<__EntryPoint>> function main(): void {
 $obj = new C;

@@ -30,8 +30,8 @@ namespace HPHP {
 void RepoAutoloadMapBuilder::addUnit(const UnitEmitter& ue) {
   auto unitSn = ue.m_sn;
   assertx(unitSn != -1 && "unitSn is invalid");
-  for (size_t n = 0; n < ue.numPreClasses(); ++n) {
-    auto pce = ue.pce(n);
+
+  for (auto const pce : ue.preclasses()) {
     if (!boost::starts_with(pce->name()->slice(), "Closure$")) {
       m_types.emplace(pce->name(), unitSn);
     }
@@ -49,21 +49,35 @@ void RepoAutoloadMapBuilder::addUnit(const UnitEmitter& ue) {
   for (auto& c : ue.constants()) {
     m_constants.emplace(c.name, unitSn);
   }
+
+  for (auto& m : ue.modules()) {
+    m_modules.emplace(m.name, unitSn);
+  }
 }
 
-void RepoAutoloadMapBuilder::serde(BlobEncoder& sd) const {
-  serdeMap(sd, m_types);
-  serdeMap(sd, m_funcs);
-  serdeMap(sd, m_typeAliases);
-  serdeMap(sd, m_constants);
+const RepoAutoloadMapBuilder::TypeNameMap&
+RepoAutoloadMapBuilder::getTypes() const {
+  return m_types;
 }
 
-std::unique_ptr<RepoAutoloadMap> RepoAutoloadMapBuilder::serde(BlobDecoder& sd) {
-  RepoAutoloadMap::CaseInsensitiveMap types = serdeMap<RepoAutoloadMap::CaseInsensitiveMap>(sd);
-  RepoAutoloadMap::CaseInsensitiveMap funcs = serdeMap<RepoAutoloadMap::CaseInsensitiveMap>(sd);
-  RepoAutoloadMap::CaseInsensitiveMap typeAliases = serdeMap<RepoAutoloadMap::CaseInsensitiveMap>(sd);
-  RepoAutoloadMap::CaseSensitiveMap constants = serdeMap<RepoAutoloadMap::CaseSensitiveMap>(sd);
-  return std::make_unique<RepoAutoloadMap>(types, funcs, constants, typeAliases);
+const RepoAutoloadMapBuilder::FuncNameMap&
+RepoAutoloadMapBuilder::getFuncs() const {
+  return m_funcs;
+}
+
+const RepoAutoloadMapBuilder::CaseSensitiveMap&
+RepoAutoloadMapBuilder::getConstants() const {
+  return m_constants;
+}
+
+const RepoAutoloadMapBuilder::TypeNameMap&
+RepoAutoloadMapBuilder::getTypeAliases() const {
+  return m_typeAliases;
+}
+
+const RepoAutoloadMapBuilder::CaseSensitiveMap&
+RepoAutoloadMapBuilder::getModules() const {
+  return m_modules;
 }
 
 //////////////////////////////////////////////////////////////////////

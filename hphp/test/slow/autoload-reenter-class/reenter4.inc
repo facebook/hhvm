@@ -1,0 +1,3 @@
+<?hh
+
+newtype MyIntType = int;

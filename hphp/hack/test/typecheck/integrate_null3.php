@@ -10,7 +10,7 @@
  */
 
 function get_arr(): varray<?int> {
-  return varray[1, null, 2];
+  return vec[1, null, 2];
 }
 
 function f(int $x): void {}

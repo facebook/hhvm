@@ -1,0 +1,69 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "types/schema_association" as schema_association}}
+{{#import "method_decorators/decorator_h" as method_decorator_h}}
+namespace {{service:cpp_qualified_namespace}} {
+class {{service:cpp_name}};
+class {{service:cpp_name}}AsyncProcessor;
+
+{{> service_h/service_info_holder}}
+
+} // namespace {{service:cpp_qualified_namespace}}
+
+namespace apache::thrift {
+template <>
+class ServiceHandler<{{service:qualified_name}}> : {{#service:extends}}virtual public ::{{service:cpp_qualified_namespace}}::{{service:cpp_name}}SvIf{{/service:extends}}{{^service:extends}}public apache::thrift::ServerInterface{{/service:extends}} {
+  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, {{service:qualified_name}}>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
+
+ public:
+  std::string_view getGeneratedName() const override { return "{{service:name}}"; }
+{{#service:uri}}
+
+  static constexpr folly::cstring_view __fbthrift_thrift_uri = "{{service:uri}}";
+{{/service:uri}}
+
+  typedef {{service:qualified_name}}AsyncProcessor ProcessorType;
+  std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
+  CreateMethodMetadataResult createMethodMetadata() override;
+  {{#service:has_service_schema}}
+  std::optional<schema::DefinitionsSchema> getServiceSchema() override;
+  std::vector<folly::not_null<const syntax_graph::ServiceNode*>> getServiceSchemaNodes() override;
+  {{/service:has_service_schema}}
+  {{^service:extends}}
+  bool isThriftGenerated() const override final { return true; }
+  {{/service:extends}}
+ private:
+  std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
+ public:
+{{#service:interactions}}
+{{> service_h/interaction_service_interface}}
+{{/service:interactions}}
+
+{{> service_h/service_interface_functions}}
+{{#partial method_decorator_h.handler_declarations service=service:self}}
+};
+{{#partial method_decorator_h.additional_declarations service=service:self}}
+
+namespace detail {
+{{#partial schema_association.declaration node=service:self}}
+}
+} // namespace apache::thrift
+
+namespace {{service:cpp_qualified_namespace}} {
+using {{service:cpp_name}}SvIf [[deprecated("Use apache::thrift::ServiceHandler<{{service:cpp_name}}> instead")]] = ::apache::thrift::ServiceHandler<{{service:cpp_name}}>;
+} // namespace {{service:cpp_qualified_namespace}}

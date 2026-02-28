@@ -1,0 +1,22 @@
+(rule
+ (alias ide_code_actions_extract_method_no_experimental_capabilities)
+ (deps
+  %{exe:../../../src/hh_single_type_check.exe}
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/ide_code_actions/extract_method_no_experimental_capabilities/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/ide_code_actions/extract_method_no_experimental_capabilities/*.php)
+  (glob_files %{project_root}/hack/test/ide_code_actions/extract_method_no_experimental_capabilities/*.exp))
+ (action
+  (run
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/ide_code_actions/extract_method_no_experimental_capabilities
+   --program
+   %{exe:../../../src/hh_single_type_check.exe}
+   --flags
+   --ide-code-actions-no-experimental-capabilities "Extract into method")))
+
+(alias
+ (name runtest)
+ (deps
+  (alias ide_code_actions_extract_method_no_experimental_capabilities)))

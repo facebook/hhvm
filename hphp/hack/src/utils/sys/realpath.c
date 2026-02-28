@@ -29,21 +29,13 @@ Val_some( value v )
 CAMLprim value
 hh_realpath(value v) {
   const char *input;
-#ifndef _WIN32
   char output[PATH_MAX];
-#else
-  char output[_MAX_PATH];
-#endif
   char *result;
 
   CAMLparam1(v);
 
   input = String_val(v);
-#ifndef _WIN32
   result = realpath(input, output);
-#else
-  result = _fullpath(output, input, _MAX_PATH);
-#endif
   if (result == NULL) {
     CAMLreturn(Val_none);
   } else {

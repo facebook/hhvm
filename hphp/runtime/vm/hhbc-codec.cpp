@@ -19,6 +19,8 @@
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 
+#include "folly/Utility.h"
+
 namespace HPHP {
 
 namespace {
@@ -28,7 +30,7 @@ const StringData* decode_string(PC& pc, StringDecoder u) {
   if (u.isNull()) return nullptr;
   return u.match(
     [id](const Unit* u) { return u->lookupLitstrId(id); },
-    [id](const UnitEmitter* ue) { return ue->lookupLitstr(id); }
+    [id](const UnitEmitter* ue) { return ue->lookupLitstrId(id); }
   );
 }
 
@@ -69,7 +71,7 @@ MemberKey decode_member_key(PC& pc, Either<const Unit*, const UnitEmitter*> u) {
   not_reached();
 }
 
-void encode_member_key(MemberKey mk, FuncEmitter& fe) {
+void encode_member_key(MemberKey mk, FuncEmitter& fe, UnitEmitter& ue) {
   fe.emitByte(mk.mcode);
 
   switch (mk.mcode) {
@@ -89,7 +91,7 @@ void encode_member_key(MemberKey mk, FuncEmitter& fe) {
       break;
 
     case MET: case MPT: case MQT:
-      fe.emitInt32(fe.ue().mergeLitstr(mk.litstr));
+      fe.emitInt32(ue.mergeLitstr(mk.litstr));
       fe.emitByte(static_cast<uint8_t>(mk.rop));
       break;
 
@@ -115,25 +117,22 @@ LocalRange decodeLocalRange(const unsigned char*& pc) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void encodeIterArgs(FuncEmitter& fe, const IterArgs& args) {
-  fe.emitByte(args.flags);
+  fe.emitByte(folly::to_underlying(args.flags));
   fe.emitIVA(args.iterId);
-  fe.emitIVA(args.keyId - IterArgs::kNoKey);
-  fe.emitIVA(args.valId);
 }
 
 IterArgs decodeIterArgs(PC& pc) {
   auto const flags = static_cast<IterArgs::Flags>(decode_byte(pc));
   auto const iterId = int32_t(decode_iva(pc));
-  auto const keyId = int32_t(decode_iva(pc)) + IterArgs::kNoKey;
-  auto const valId = int32_t(decode_iva(pc));
-  return IterArgs(flags, iterId, keyId, valId);
+  return IterArgs(flags, iterId);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void encodeFCallArgsBase(FuncEmitter& fe, const FCallArgsBase& fca,
                          bool hasInoutArgs, bool hasReadonlyArgs,
-                         bool hasAsyncEagerOffset, bool hasContext) {
+                         bool hasNamedArgs, bool hasAsyncEagerOffset,
+                         bool hasContext) {
   auto constexpr kFirstNumArgsBit = FCallArgsBase::kFirstNumArgsBit;
   auto constexpr kLimit =
     std::numeric_limits<std::underlying_type_t<FCallArgsFlags>>::max();
@@ -146,6 +145,7 @@ void encodeFCallArgsBase(FuncEmitter& fe, const FCallArgsBase& fca,
   if (hasReadonlyArgs) flags |= FCallArgsFlags::EnforceReadonly;
   if (hasAsyncEagerOffset) flags |= FCallArgsFlags::HasAsyncEagerOffset;
   if (hasContext) flags |= FCallArgsFlags::ExplicitContext;
+  if (hasNamedArgs) flags |= FCallArgsFlags::HasNamedArgs;
 
   static_assert(sizeof(std::underlying_type_t<FCallArgsFlags>) * 8 == 16);
   fe.emitInt16(flags);
@@ -175,12 +175,15 @@ FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc, StringDecoder u) {
   if (inoutArgs != nullptr) pc += (numArgs + 7) / 8;
   auto const readonlyArgs = (flags & FCallArgsFlags::EnforceReadonly) ? pc : nullptr;
   if (readonlyArgs != nullptr) pc += (numArgs + 7) / 8;
+  auto const hasNamedArgs = flags & FCallArgsFlags::HasNamedArgs;
+  Id namedArgNames = hasNamedArgs ? decode_raw<Id>(pc) : kInvalidId;
   auto const asyncEagerOffset = (flags & FCallArgsFlags::HasAsyncEagerOffset)
     ? decode_ba(pc) : kInvalidOffset;
   auto const context = !skipContext ? decode_string(pc, u) : nullptr;
   return FCallArgs(
     static_cast<FCallArgsFlags>(flags & FCallArgs::kInternalFlags),
-    numArgs, numRets, inoutArgs, readonlyArgs, asyncEagerOffset, context
+    numArgs, numRets, inoutArgs, readonlyArgs,
+    namedArgNames, asyncEagerOffset, context
   );
 }
 

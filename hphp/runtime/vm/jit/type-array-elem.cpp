@@ -367,6 +367,7 @@ Type keysetPosType(Type arr, Type pos, const Class* ctx) {
       arr.arrLikeVal(),
       [&] (TypedValue k, TypedValue) { type |= Type::cns(k); }
     );
+    return type;
   }
 
   auto type = TStr | TInt;

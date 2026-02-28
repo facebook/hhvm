@@ -11,7 +11,7 @@ namespace NS1
     const CON1 = 100;
 
     function f()
-    {
+:mixed    {
         echo "In " . __FUNCTION__ . "\n";
     }
 
@@ -19,7 +19,7 @@ namespace NS1
     {
         const C_CON = 200;
         public function f()
-        {
+:mixed        {
             echo "In " . __NAMESPACE__ . "..." . __METHOD__ . "\n";
         }
     }
@@ -32,7 +32,7 @@ namespace NS1
     trait T
     {
         public function f()
-        {
+:mixed        {
             echo "In " . __TRAIT__ . "..." . __NAMESPACE__ . "..." . __METHOD__ . "\n";
         }
     }
@@ -65,7 +65,7 @@ echo "=============================================\n";
     use \NS1\C as C2;
 
     <<__EntryPoint>>
-    function main() {
+    function main() :mixed{
         $d = new D;
         \var_dump($d);
 

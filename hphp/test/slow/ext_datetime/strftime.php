@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_strftime() {
+function main_strftime() :mixed{
 date_default_timezone_set("America/Los_Angeles");
 
 $ts = mktime(0, 0, 0, 8, 5, 1998);

@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_1415() {
-$arr = varray['one', 'two', 'three', 'four', 'stop', 'five'];
+function main_1415() :mixed{
+$arr = vec['one', 'two', 'three', 'four', 'stop', 'five'];
 foreach ($arr as $val) {
   if ($val == 'stop') {
     break;

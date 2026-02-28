@@ -2,32 +2,58 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
-use ast_scope::Scope;
-use emit_type_hint::{hint_to_type_info, Kind};
-use env::{emitter::Emitter, Env};
-use error::{Error, Result};
-use ffi::{Maybe, Nothing, Slice, Str};
-use hhbc::{hhas_param::HhasParam, hhas_type::HhasTypeInfo, Label, Local};
-use hhbc_string_utils::locals::strip_dollar;
-use instruction_sequence::{instr, InstrSeq};
-use oxidized::{
-    aast_defs::{Hint, Hint_},
-    aast_visitor::{self, AstParams, Node},
-    ast as a,
-    ast_defs::{Id, ReadonlyKind},
-    pos::Pos,
-};
-use std::collections::{BTreeMap, BTreeSet};
 use std::marker::PhantomData;
 
-pub fn from_asts<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+use ast_scope::Scope;
+use emit_type_hint::Kind;
+use emit_type_hint::hint_to_type_info;
+use env::Env;
+use env::emitter::Emitter;
+use error::Error;
+use error::Result;
+use ffi::Maybe;
+use hhbc::Label;
+use hhbc::Local;
+use hhbc::Param;
+use hhbc::ParamEntry;
+use hhbc::StringIdMap;
+use hhbc::StringIdSet;
+use hhbc::TypeInfo;
+use hhbc_string_utils::locals::strip_dollar;
+use instruction_sequence::InstrSeq;
+use instruction_sequence::instr;
+use oxidized::aast_defs::Hint;
+use oxidized::aast_defs::Hint_;
+use oxidized::aast_visitor;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::Node;
+use oxidized::ast as a;
+use oxidized::ast::ParamNamed;
+use oxidized::ast_defs::Id;
+use oxidized::ast_defs::ReadonlyKind;
+use oxidized::pos::Pos;
+
+use crate::emit_attribute;
+use crate::emit_expression;
+
+pub fn has_variadic(params: &[ParamEntry]) -> bool {
+    params
+        .iter()
+        .rev()
+        .any(|p| p.param.is_variadic || p.param.is_splat)
+}
+
+pub fn has_splat(params: &[ParamEntry]) -> bool {
+    params.iter().rev().any(|p| p.param.is_splat)
+}
+
+pub fn from_asts<'a>(
+    emitter: &mut Emitter,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
-    scope: &Scope<'a, 'arena>,
+    scope: &Scope<'a>,
     ast_params: &[a::FunParam],
-) -> Result<Vec<(HhasParam<'arena>, Option<(Label, a::Expr)>)>> {
+) -> Result<Vec<(Param, Option<(Label, a::Expr)>)>> {
     ast_params
         .iter()
         .map(|param| from_ast(emitter, tparams, generate_defaults, scope, param))
@@ -38,86 +64,83 @@ pub fn from_asts<'a, 'arena, 'decl>(
                 .filter_map(|p| p.to_owned())
                 .collect::<Vec<_>>()
         })
-        .map(|params| rename_params(emitter.alloc, params))
+        .map(rename_params)
 }
 
-fn rename_params<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    mut params: Vec<(HhasParam<'arena>, Option<(Label, a::Expr)>)>,
-) -> Vec<(HhasParam<'arena>, Option<(Label, a::Expr)>)> {
-    fn rename<'arena>(
-        alloc: &'arena bumpalo::Bump,
-        names: &BTreeSet<Str<'arena>>,
-        param_counts: &mut BTreeMap<Str<'arena>, usize>,
-        param: &mut HhasParam<'arena>,
-    ) {
-        match param_counts.get_mut(&param.name) {
-            None => {
-                param_counts.insert(param.name, 0);
-            }
-            Some(count) => {
-                let newname =
-                    Str::new_str(alloc, &format!("{}{}", param.name.unsafe_as_str(), count));
-                *count += 1;
-                if names.contains(&newname) {
-                    rename(alloc, names, param_counts, param);
-                } else {
-                    param.name = newname;
+fn rename_params(
+    mut params: Vec<(Param, Option<(Label, a::Expr)>)>,
+) -> Vec<(Param, Option<(Label, a::Expr)>)> {
+    let mut param_counts = StringIdMap::default();
+    let names: StringIdSet = params.iter().map(|(p, _)| p.name).collect();
+    for (param, _) in params.iter_mut() {
+        use std::collections::hash_map::Entry;
+        'inner: loop {
+            match param_counts.entry(param.name) {
+                Entry::Vacant(e) => {
+                    e.insert(0);
+                }
+                Entry::Occupied(mut e) => {
+                    let newname = format!("{}{}", param.name, e.get());
+                    let newname = hhbc::intern(newname);
+                    *e.get_mut() += 1;
+                    if names.contains(&newname) {
+                        // collision - try again
+                        continue 'inner;
+                    } else {
+                        param.name = newname;
+                    }
                 }
             }
+            break 'inner;
         }
     }
-    let mut param_counts = BTreeMap::new();
-    let names = params
-        .iter()
-        .map(|(p, _)| p.name.clone())
-        .collect::<BTreeSet<_>>();
-    params
-        .iter_mut()
-        .rev()
-        .for_each(|(p, _)| rename(alloc, &names, &mut param_counts, p));
     params.into_iter().collect()
 }
 
-fn from_ast<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+fn from_ast<'a>(
+    emitter: &mut Emitter,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
-    scope: &Scope<'a, 'arena>,
+    scope: &Scope<'a>,
     param: &a::FunParam,
-) -> Result<Option<(HhasParam<'arena>, Option<(Label, a::Expr)>)>> {
-    if param.is_variadic && param.name == "..." {
+) -> Result<Option<(Param, Option<(Label, a::Expr)>)>> {
+    let is_variadic = match param.info {
+        a::FunParamInfo::ParamVariadic => true,
+        a::FunParamInfo::ParamRequired => false,
+        a::FunParamInfo::ParamOptional(_) => false,
+    };
+    let is_splat = param.splat.is_some();
+    if is_variadic && param.name == "..." {
         return Ok(None);
-    };
-    if param.is_variadic {
+    }
+    // Variadic and splat parameters are treated the same by HackC and HHVM
+    // The former is a vec (represented by an array) all of whose elements are the same type
+    // The latter is a tuple (represented by an array) whose elements many vary in type
+    if is_variadic || is_splat {
         tparams.push("array");
-    };
-    let nullable = param
-        .expr
-        .as_ref()
-        .map_or(false, |a::Expr(_, _, e)| e.is_null());
+    }
     let type_info = {
-        let param_type_hint = if param.is_variadic {
-            Some(Hint(
-                Pos::make_none(),
+        let param_type_hint = match param.info {
+            a::FunParamInfo::ParamVariadic => Some(Hint(
+                Pos::NONE,
                 Box::new(Hint_::mk_happly(
-                    Id(Pos::make_none(), "array".to_string()),
+                    Id(Pos::NONE, "array".to_string()),
                     param
                         .type_hint
                         .get_hint()
                         .as_ref()
                         .map_or(vec![], |h| vec![h.clone()]),
                 )),
-            ))
-        } else {
-            param.type_hint.get_hint().clone()
+            )),
+            a::FunParamInfo::ParamRequired | a::FunParamInfo::ParamOptional(_) => {
+                param.type_hint.get_hint().clone()
+            }
         };
         if let Some(h) = param_type_hint {
             Some(hint_to_type_info(
-                emitter.alloc,
                 &Kind::Param,
                 false,
-                nullable,
+                false, /* meaning only set nullable based on given hint */
                 &tparams[..],
                 &h,
             )?)
@@ -125,29 +148,27 @@ fn from_ast<'a, 'arena, 'decl>(
             None
         }
     };
+    let expr = match &param.info {
+        a::FunParamInfo::ParamOptional(Some(expr)) => Some(expr),
+        a::FunParamInfo::ParamOptional(None)
+        | a::FunParamInfo::ParamRequired
+        | a::FunParamInfo::ParamVariadic => None,
+    };
     // Do the type check for default value type and hint type
-    if !nullable {
-        if let Some(err_msg) =
-            default_type_check(&param.name, type_info.as_ref(), param.expr.as_ref())
-        {
-            return Err(Error::fatal_parse(&param.pos, err_msg));
-        }
+    if let Some(err_msg) = default_type_check(&param.name, type_info.as_ref(), expr) {
+        return Err(Error::fatal_parse(&param.pos, err_msg));
     }
     aast_visitor::visit(
         &mut ResolverVisitor {
             phantom_a: PhantomData,
-            phantom_b: PhantomData,
-            phantom_c: PhantomData,
+            phantom_d: PhantomData,
         },
         &mut Ctx { emitter, scope },
-        &param.expr,
+        &expr,
     )
     .unwrap();
     let default_value = if generate_defaults {
-        param
-            .expr
-            .as_ref()
-            .map(|expr| (emitter.label_gen_mut().next_regular(), expr.clone()))
+        expr.map(|expr| (emitter.label_gen_mut().next_regular(), expr.clone()))
     } else {
         None
     };
@@ -155,41 +176,53 @@ fn from_ast<'a, 'arena, 'decl>(
         Some(ReadonlyKind::Readonly) => true,
         _ => false,
     };
+    let is_named = match param.named {
+        Some(ParamNamed::ParamNamed) => true,
+        _ => false,
+    };
+    let is_optional = match &param.info {
+        a::FunParamInfo::ParamOptional(None) => true,
+        a::FunParamInfo::ParamOptional(Some(_))
+        | a::FunParamInfo::ParamRequired
+        | a::FunParamInfo::ParamVariadic => false,
+    };
     let attrs = emit_attribute::from_asts(emitter, &param.user_attributes)?;
     Ok(Some((
-        HhasParam {
-            name: Str::new_str(emitter.alloc, &param.name),
-            is_variadic: param.is_variadic,
+        Param {
+            name: hhbc::intern(&param.name),
+            is_variadic,
+            is_splat,
             is_inout: param.callconv.is_pinout(),
             is_readonly,
-            user_attributes: Slice::new(emitter.alloc.alloc_slice_fill_iter(attrs.into_iter())),
+            is_optional,
+            is_named,
+            user_attributes: attrs.into(),
             type_info: Maybe::from(type_info),
-            // - Write hhas_param.default_value as `Nothing` while keeping `default_value` around
-            //   for emitting decl vars and default value setters
-            // - emit_body::make_body will rewrite hhas_param.default_value using `default_value`
-            default_value: Nothing,
         },
         default_value,
     )))
 }
 
-pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    env: &Env<'a, 'arena>,
-    pos: &Pos,
-    params: &[(HhasParam<'arena>, Option<(Label, a::Expr)>)],
-) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
+pub fn emit_param_default_value_setter<'a>(
+    emitter: &mut Emitter,
+    env: &Env<'a>,
+    params: &[(Param, Option<(Label, a::Expr)>)],
+    ast_params: &[a::FunParam],
+) -> Result<(InstrSeq, InstrSeq)> {
     let setters = params
         .iter()
+        .zip(ast_params.into_iter())
         .enumerate()
-        .filter_map(|(i, (_, dv))| {
+        .filter_map(|(i, ((_, dv), ast_param))| {
             // LocalIds for params are numbered from 0.
             dv.as_ref().map(|(lbl, expr)| {
+                let param_local = Local::new(i);
                 let instrs = InstrSeq::gather(vec![
                     emit_expression::emit_expr(emitter, env, expr)?,
-                    emit_pos::emit_pos(pos),
-                    instr::setl(Local::new(i)),
-                    instr::popc(),
+                    emit_pos::emit_pos(&ast_param.pos),
+                    instr::verify_param_type(param_local),
+                    instr::set_l(param_local),
+                    instr::pop_c(),
                 ]);
                 Ok(InstrSeq::gather(vec![instr::label(lbl.to_owned()), instrs]))
             })
@@ -201,46 +234,45 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
         let l = emitter.label_gen_mut().next_regular();
         Ok((
             instr::label(l),
-            InstrSeq::gather(vec![InstrSeq::gather(setters), instr::jmpns(l)]),
+            InstrSeq::gather(vec![InstrSeq::gather(setters), instr::enter(l)]),
         ))
     }
 }
 
-struct ResolverVisitor<'a, 'arena: 'a, 'decl: 'a> {
+struct ResolverVisitor<'a, 'd: 'a> {
     phantom_a: PhantomData<&'a ()>,
-    phantom_b: PhantomData<&'arena ()>,
-    phantom_c: PhantomData<&'decl ()>,
+    phantom_d: PhantomData<&'d ()>,
 }
 
 #[allow(dead_code)]
-struct Ctx<'a, 'arena, 'decl> {
-    emitter: &'a mut Emitter<'arena, 'decl>,
-    scope: &'a Scope<'a, 'arena>,
+struct Ctx<'a> {
+    emitter: &'a mut Emitter,
+    scope: &'a Scope<'a>,
 }
 
-impl<'ast, 'a, 'arena, 'decl> aast_visitor::Visitor<'ast> for ResolverVisitor<'a, 'arena, 'decl> {
-    type Params = AstParams<Ctx<'a, 'arena, 'decl>, ()>;
+impl<'ast, 'a, 'd> aast_visitor::Visitor<'ast> for ResolverVisitor<'a, 'd> {
+    type Params = AstParams<Ctx<'a>, ()>;
 
     fn object(&mut self) -> &mut dyn aast_visitor::Visitor<'ast, Params = Self::Params> {
         self
     }
 
-    fn visit_expr(&mut self, c: &mut Ctx<'a, 'arena, 'decl>, p: &a::Expr) -> Result<(), ()> {
+    fn visit_expr(&mut self, c: &mut Ctx<'a>, p: &a::Expr) -> Result<(), ()> {
         p.recurse(c, self.object())
         // TODO(hrust) implement on_CIexpr & remove dead_code on struct Ctx
     }
 }
 
 // Return None if it passes type check, otherwise return error msg
-fn default_type_check<'arena>(
+fn default_type_check(
     param_name: &str,
-    param_type_info: Option<&HhasTypeInfo<'arena>>,
+    param_type_info: Option<&TypeInfo>,
     param_expr: Option<&a::Expr>,
 ) -> Option<String> {
     let hint_type = get_hint_display_name(
         param_type_info
             .as_ref()
-            .and_then(|ti| ti.user_type.as_ref().into()),
+            .and_then(|ti| ti.user_type.as_ref().map(|s| s.as_str()).into()),
     );
     // If matches, return None, otherwise return default_type
     let default_type = hint_type.and_then(|ht| match_default_and_hint(ht, param_expr));
@@ -257,8 +289,8 @@ fn default_type_check<'arena>(
     }))
 }
 
-fn get_hint_display_name<'arena>(hint: Option<&Str<'arena>>) -> Option<&'static str> {
-    hint.map(|h| match h.unsafe_as_str() {
+fn get_hint_display_name(hint: Option<&str>) -> Option<&'static str> {
+    hint.map(|h| match h {
         "HH\\bool" => "bool",
         "HH\\varray" => "HH\\varray",
         "HH\\darray" => "HH\\darray",

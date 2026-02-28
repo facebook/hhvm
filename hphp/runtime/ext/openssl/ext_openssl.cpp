@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -56,10 +57,8 @@ struct OpenSSLInitializer {
 
 // CCM ciphers are not added by default, so let's add them!
 #if !defined(OPENSSL_NO_AES) && defined(EVP_CIPH_CCM_MODE) && \
-    OPENSSL_VERSION_NUMBER < 0x100020000
-    EVP_add_cipher(EVP_aes_128_ccm());
-    EVP_add_cipher(EVP_aes_192_ccm());
-    EVP_add_cipher(EVP_aes_256_ccm());
+    OPENSSL_VERSION_NUMBER < 0x10002000
+#error "This old OpenSSL version is not supported"
 #endif
 
     ERR_load_ERR_strings();
@@ -99,7 +98,7 @@ struct Key : SweepableResourceData {
     if (m_key) EVP_PKEY_free(m_key);
   }
 
-  CLASSNAME_IS("OpenSSL key");
+  CLASSNAME_IS("OpenSSL key")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
@@ -289,7 +288,7 @@ public:
     X509_REQ_free(m_csr);
   }
 
-  CLASSNAME_IS("OpenSSL X.509 CSR");
+  CLASSNAME_IS("OpenSSL X.509 CSR")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
@@ -465,6 +464,20 @@ struct php_x509_request {
 
 ///////////////////////////////////////////////////////////////////////////////
 // utilities
+struct OpenSSLException : SystemLib::ClassLoader<"OpenSSLException"> {};
+[[noreturn]] void throw_openssl_exception(
+    const std::string& msg, int64_t code = 0) {
+  throw_object(OpenSSLException::classof(), make_vec_array(msg, code));
+}
+[[noreturn]] void throw_openssl_exception_with_error(const std::string& msg) {
+  char buf[512];
+  unsigned long err = ERR_get_error();
+  if (err) {
+    throw_openssl_exception(
+        msg + ": " + ERR_error_string(err, buf), static_cast<int64_t>(err));
+  }
+  throw_openssl_exception(msg);
+}
 
 static void add_assoc_name_entry(Array &ret, const char *key,
                                  X509_NAME *name, bool shortname) {
@@ -834,6 +847,44 @@ static X509_STORE *setup_verify(const Array& calist) {
   return store;
 }
 
+
+static STACK_OF(GENERAL_NAME) *csr_get_subject_alt_names(X509_REQ *csr) {
+  if (!csr) return nullptr;
+  STACK_OF(X509_EXTENSION) *csr_exts = X509_REQ_get_extensions(csr);
+  if (!csr_exts) return nullptr;
+  return (STACK_OF(GENERAL_NAME) *)X509V3_get_d2i(csr_exts, NID_subject_alt_name, 
+    nullptr, nullptr);
+}
+
+static STACK_OF(GENERAL_NAME) *x509_get_subject_alt_names(X509 *certificate) {
+  if (!certificate) return nullptr;
+  const STACK_OF(X509_EXTENSION) *cert_exts = X509_get0_extensions(certificate);
+  if (!cert_exts) return nullptr;
+  return (STACK_OF(GENERAL_NAME) *)X509V3_get_d2i(cert_exts, NID_subject_alt_name, 
+    nullptr, nullptr);
+}
+
+static Optional<String> sk_SAN_get_upn(STACK_OF(GENERAL_NAME) *subject_alt_names) {
+  if (!subject_alt_names) return std::nullopt;
+  for (int i = 0; i < sk_GENERAL_NAME_num(subject_alt_names); i++){
+    const GENERAL_NAME *general_name = sk_GENERAL_NAME_value(subject_alt_names, i);
+    if (!general_name) continue;
+    ASN1_OBJECT *oid = NULL;
+    ASN1_TYPE *value = NULL;
+    // seek an otherName
+    if(!GENERAL_NAME_get0_otherName(general_name, &oid, &value)) continue;
+    // compare its OID to MS UPN
+    if (OBJ_obj2nid(oid) != NID_ms_upn) continue;
+    // get the utf8string from the UPN
+    if(ASN1_TYPE_get(value) == V_ASN1_UTF8STRING) {
+      ASN1_UTF8STRING *upn = value->value.utf8string;
+      if (!upn || !upn->data) continue;
+      return String((char *)upn->data, upn->length, CopyString);
+    }  
+  }
+  return std::nullopt;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static bool add_entries(X509_NAME *subj, const Array& items) {
@@ -1200,6 +1251,35 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
  cleanup:
   php_openssl_dispose_config(&req);
   return ret;
+}
+
+Array HHVM_FUNCTION(openssl_csr_get_dns_names, const Variant& csr) {
+  auto pcsr = CSRequest::Get(csr);
+  if (!pcsr) throw_openssl_exception("Could not parse CSR");
+  auto ret = Array::CreateVec();
+  auto *subject_alt_names = csr_get_subject_alt_names(pcsr->csr());
+  if (!subject_alt_names) return ret;
+  // get DNS names from SANs
+  for (int i = 0; i < sk_GENERAL_NAME_num(subject_alt_names); i++){
+    const GENERAL_NAME *general_name = sk_GENERAL_NAME_value(subject_alt_names, i);
+    if (!general_name) continue;
+    if (general_name->type == GEN_DNS) {
+      const ASN1_IA5STRING *dns_name = general_name->d.dNSName;
+      if (!dns_name) continue;
+      ret.append(String((char *)dns_name->data,dns_name->length, CopyString));
+    }
+  }
+  return ret;
+}
+
+String HHVM_FUNCTION(openssl_csr_get_upn, const Variant& csr) {
+  auto pcsr = CSRequest::Get(csr);
+  if (!pcsr) throw_openssl_exception("Could not parse CSR");
+  auto *subject_alt_names = csr_get_subject_alt_names(pcsr->csr());
+  if (!subject_alt_names) throw_openssl_exception("CSR contains no SANs");
+  auto upn =  sk_SAN_get_upn(subject_alt_names);
+  if (!upn.has_value()) throw_openssl_exception("No valid UPNs in CSR");
+  return upn.value();
 }
 
 Variant HHVM_FUNCTION(openssl_error_string) {
@@ -1780,6 +1860,55 @@ Variant HHVM_FUNCTION(openssl_pkcs7_verify, const String& filename, int64_t flag
                                    vextracerts, vcontent, false);
 }
 
+Array HHVM_FUNCTION(openssl_pkcs7_read, const String& data) {
+  BIO *bio_in = BIO_new_mem_buf(data.data(), data.size());
+  if (bio_in == nullptr) {
+    throw_openssl_exception_with_error("Failed to create BIO for PKCS7 data");
+  }
+  SCOPE_EXIT { BIO_free(bio_in); };
+
+  PKCS7 *p7 = PEM_read_bio_PKCS7(bio_in, nullptr, nullptr, nullptr);
+  if (p7 == nullptr) {
+    throw_openssl_exception_with_error("Failed to parse PKCS7 data");
+  }
+  SCOPE_EXIT { PKCS7_free(p7); };
+
+  STACK_OF(X509) *cert_stack = nullptr;
+  switch (OBJ_obj2nid(p7->type)) {
+    case NID_pkcs7_signed:
+      if (p7->d.sign != nullptr) {
+        cert_stack = p7->d.sign->cert;
+      }
+      break;
+    case NID_pkcs7_signedAndEnveloped:
+      if (p7->d.signed_and_enveloped != nullptr) {
+        cert_stack = p7->d.signed_and_enveloped->cert;
+      }
+      break;
+    default:
+      break;
+  }
+
+  Array arr = Array::CreateVec();
+  if (cert_stack != nullptr) {
+    for (int i = 0; i < sk_X509_num(cert_stack); i++) {
+      X509 *cert = sk_X509_value(cert_stack, i);
+      BIO *bio_out = BIO_new(BIO_s_mem());
+      if (bio_out == nullptr) {
+        throw_openssl_exception("Failed to allocate BIO for certificate export");
+      }
+      SCOPE_EXIT { BIO_free(bio_out); };
+      if (!PEM_write_bio_X509(bio_out, cert)) {
+        throw_openssl_exception_with_error("Failed to export certificate as PEM");
+      }
+      BUF_MEM *bio_buf;
+      BIO_get_mem_ptr(bio_out, &bio_buf);
+      arr.append(String((char*)bio_buf->data, bio_buf->length, CopyString));
+    }
+  }
+  return arr;
+}
+
 static bool
 openssl_pkey_export_impl(const Variant& key, BIO *bio_out,
                          const String& passphrase /* = null_string */,
@@ -1888,7 +2017,7 @@ static void add_bignum_as_string(Array &arr,
   arr.set(key, std::move(str));
 }
 
-Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
+Array HHVM_FUNCTION(openssl_pkey_get_details, const OptResource& key) {
   EVP_PKEY *pkey = cast<Key>(key)->m_key;
   BIO *out = BIO_new(BIO_s_mem());
   PEM_write_bio_PUBKEY(out, pkey);
@@ -2036,10 +2165,20 @@ Variant HHVM_FUNCTION(openssl_pkey_new,
   std::vector<String> strings;
   if (php_openssl_parse_config(&req, configargs.toArray(), strings) &&
       req.generatePrivateKey()) {
-    return Resource(req::make<Key>(req.priv_key));
+    return OptResource(req::make<Key>(req.priv_key));
   } else {
     return false;
   }
+}
+
+String HHVM_FUNCTION(openssl_x509_get_upn, const Variant& certificate) {
+  auto pcert = Certificate::Get(certificate);
+  if (!pcert) throw_openssl_exception("Could not parse certificate");
+  auto *subject_alt_names = x509_get_subject_alt_names(pcert->get());
+  if (!subject_alt_names) throw_openssl_exception("Certificate contains no SANs");
+  auto upn = sk_SAN_get_upn(subject_alt_names);
+  if (!upn.has_value()) throw_openssl_exception("No valid UPNs in certificate");
+  return upn.value();
 }
 
 bool HHVM_FUNCTION(openssl_private_decrypt, const String& data,
@@ -2322,7 +2461,7 @@ static const EVP_MD *php_openssl_get_evp_md_from_algo(long algo) {
   case OPENSSL_ALGO_MD2:  return EVP_md2();
 #endif
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-  case OPENSSL_ALGO_DSS1: return EVP_dss1();
+  #error "OpenSSL < 1.1.0 is not supported"
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x0090708fL
   case OPENSSL_ALGO_SHA224: return EVP_sha224();
@@ -2692,7 +2831,11 @@ Variant HHVM_FUNCTION(openssl_x509_parse, const Variant& x509cert,
   auto ret = Array::CreateDict();
   const auto sn = X509_get_subject_name(cert);
   if (sn) {
-    ret.set(s_name, String(X509_NAME_oneline(sn, nullptr, 0), CopyString));
+    char* subjectName = X509_NAME_oneline(sn, nullptr, 0);
+    SCOPE_EXIT {
+      OPENSSL_free(subjectName);
+    };
+    ret.set(s_name, String(subjectName, CopyString));
   }
   add_assoc_name_entry(ret, "subject", sn, shortnames);
   /* hash as used in CA directories to lookup cert by subject name */
@@ -3359,8 +3502,8 @@ Array HHVM_FUNCTION(openssl_get_md_methods, bool aliases /* = false */) {
 const StaticString s_OPENSSL_VERSION_TEXT("OPENSSL_VERSION_TEXT");
 
 struct opensslExtension final : Extension {
-  opensslExtension() : Extension("openssl") {}
-  void moduleInit() override {
+  opensslExtension() : Extension("openssl", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  void moduleRegisterNative() override {
     HHVM_RC_INT(OPENSSL_RAW_DATA, k_OPENSSL_RAW_DATA);
     HHVM_RC_INT(OPENSSL_ZERO_PADDING, k_OPENSSL_ZERO_PADDING);
     HHVM_RC_INT(OPENSSL_NO_PADDING, k_OPENSSL_NO_PADDING);
@@ -3422,6 +3565,8 @@ struct opensslExtension final : Extension {
     HHVM_FE(openssl_csr_export);
     HHVM_FE(openssl_csr_get_public_key);
     HHVM_FE(openssl_csr_get_subject);
+    HHVM_FE(openssl_csr_get_dns_names);
+    HHVM_FE(openssl_csr_get_upn);
     HHVM_FE(openssl_csr_new);
     HHVM_FE(openssl_csr_sign);
     HHVM_FE(openssl_error_string);
@@ -3431,6 +3576,7 @@ struct opensslExtension final : Extension {
     HHVM_FE(openssl_pkcs12_read);
     HHVM_FE(openssl_pkcs7_decrypt);
     HHVM_FE(openssl_pkcs7_encrypt);
+    HHVM_FE(openssl_pkcs7_read);
     HHVM_FE(openssl_pkcs7_sign);
     HHVM_FE(openssl_pkcs7_verify);
     HHVM_FE(openssl_pkey_export_to_file);
@@ -3448,6 +3594,7 @@ struct opensslExtension final : Extension {
     HHVM_FE(openssl_verify);
     HHVM_FE(openssl_x509_check_private_key);
     HHVM_FE(openssl_x509_checkpurpose);
+    HHVM_FE(openssl_x509_get_upn);
     HHVM_FE(openssl_x509_export_to_file);
     HHVM_FE(openssl_x509_export);
     HHVM_FE(openssl_x509_parse);
@@ -3461,8 +3608,6 @@ struct opensslExtension final : Extension {
     HHVM_FE(openssl_get_cipher_methods);
     HHVM_FE(openssl_get_curve_names);
     HHVM_FE(openssl_get_md_methods);
-
-    loadSystemlib();
   }
 } s_openssl_extension;
 

@@ -4,13 +4,13 @@ use A as B;
 class Foo {
     const C = "ok\n";
 }
-function f1($x=Foo::C) {
+function f1($x=Foo::C) :mixed{
     echo $x;
 }
-function f2($x=B\Foo::C) {
+function f2($x=B\Foo::C) :mixed{
     echo $x;
 }
-function f3($x=\A\Foo::C) {
+function f3($x=\A\Foo::C) :mixed{
     echo $x;
 }
 <<__EntryPoint>> function main(): void {

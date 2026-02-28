@@ -12,6 +12,6 @@ class C {
 }
 
 <<__EntryPoint>>
-function enum_class04() {
+function enum_class04() :mixed{
   var_dump(C::X);
 }

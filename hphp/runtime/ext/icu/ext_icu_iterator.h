@@ -23,9 +23,8 @@
 
 namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
-extern const StaticString s_IntlIterator;
 
-struct IntlIterator : IntlError {
+struct IntlIterator : IntlError, SystemLib::ClassLoader<"IntlIterator"> {
   IntlIterator() {}
   IntlIterator(const IntlIterator&) = delete;
   IntlIterator& operator=(const IntlIterator& src) {
@@ -48,11 +47,7 @@ struct IntlIterator : IntlError {
   }
 
   static Object newInstance(icu::StringEnumeration *se = nullptr) {
-    if (!c_IntlIterator) {
-      c_IntlIterator = Class::lookup(s_IntlIterator.get());
-      assertx(c_IntlIterator);
-    }
-    Object obj{c_IntlIterator};
+    Object obj{ classof() };
     if (se) {
       Native::data<IntlIterator>(obj)->setEnumeration(se);
     }
@@ -60,7 +55,7 @@ struct IntlIterator : IntlError {
   }
 
   static IntlIterator* Get(ObjectData* obj) {
-    return GetData<IntlIterator>(obj, s_IntlIterator);
+    return GetData<IntlIterator>(obj, className());
   }
 
   int64_t key() const { return m_key; }
@@ -100,8 +95,6 @@ private:
   icu::StringEnumeration *m_enum = nullptr;
   int64_t m_key = -1;
   Variant m_current{Variant::NullInit()};
-
-  static Class* c_IntlIterator;
 };
 
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 42

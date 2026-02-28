@@ -25,6 +25,6 @@ abstract final class C {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(type_structure(C::class, 'TVal'));
 }

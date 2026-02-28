@@ -10,9 +10,9 @@
  */
 
 function g(): varray<int> {
-  return varray[1];
+  return vec[1];
 }
 
 function h(): darray<string, int> {
-  return darray["one" => 1];
+  return dict["one" => 1];
 }

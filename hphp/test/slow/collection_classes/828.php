@@ -1,6 +1,6 @@
 <?hh
 
-function f() {
+function f() :mixed{
   $obj = new stdClass();
   $a = Vector {
 $obj, $obj}
@@ -25,6 +25,6 @@ $obj, $obj}
 }
 
 <<__EntryPoint>>
-function main_828() {
+function main_828() :mixed{
 f();
 }

@@ -1,6 +1,6 @@
 *** Testing pathinfo() for error conditions ***
 
-Warning: pathinfo() expects at least 1 parameter, 0 given in %s/pathinfo_error.php on line 8
+Warning: pathinfo() expects at least 1 positional parameter, 0 given in %s/pathinfo_error.php on line 8
 
-Warning: pathinfo() expects at most 2 parameters, 3 given in %s/pathinfo_error.php on line 9
+Warning: pathinfo() expects at most 2 positional parameters, 3 given in %s/pathinfo_error.php on line 9
 Done

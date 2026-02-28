@@ -7,7 +7,7 @@ $str = str_repeat('x', PREG_CACHE_SIZE);
 for ($i=0; $i < PREG_CACHE_SIZE; ++$i) {
     $re .= '.';
     if (!preg_match("/$re/", $str)) {
-        die('non match. error');
+        exit('non match. error');
     }
 }
 

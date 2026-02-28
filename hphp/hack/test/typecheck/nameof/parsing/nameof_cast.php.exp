@@ -1,0 +1,4 @@
+ERROR: File "nameof_cast.php", line 6, characters 12-14:
+`nameof` can only be used with a class (Parsing[1002])
+ERROR: File "nameof_cast.php", line 6, characters 15-18:
+Encountered unexpected token `$foo`. (Parsing[1002])

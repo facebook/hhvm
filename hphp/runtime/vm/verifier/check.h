@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "hphp/runtime/vm/verifier/util.h"
+
 namespace HPHP {
 
 struct UnitEmitter;
@@ -88,7 +90,10 @@ bool checkUnit(const UnitEmitter*, ErrorMode mode = kStderr);
  *    certian attributes are mutually exclusive, others aren't, some
  *    imply bytecode restrictions.  (access This from static? etc).
  */
-bool checkFunc(const FuncEmitter*, ErrorMode mode = kStderr);
+bool checkFunc(const FuncEmitter*,
+               const UnitEmitter*,
+               StringToStringTMap& createCls,
+               ErrorMode mode = kStderr);
 
 /**
  * Checker for HNI native function signatures. Verifies that argument types
@@ -108,7 +113,6 @@ bool checkFunc(const FuncEmitter*, ErrorMode mode = kStderr);
  * -- Methods take an ObjectData* as their first argument
  * -- Static methods take a const Class* as their first argument
  */
-bool checkNativeFunc(const FuncEmitter*, ErrorMode mode = kStderr);
+bool checkNativeFunc(const FuncEmitter*, const UnitEmitter*, ErrorMode mode = kStderr);
 
 }} // HPHP::Verifier
-

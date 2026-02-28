@@ -1,11 +1,11 @@
 *** Testing strtr() : error conditions ***
 
 -- Testing strtr() function with Zero arguments --
-Warning: strtr() expects at least 2 parameters, 0 given in %s/strtr_error.php on line 14
+Warning: strtr() expects at least 2 positional parameters, 0 given in %s/strtr_error.php on line 14
 
 -- Testing strtr() function with less than expected no. of arguments --
-Warning: strtr() expects at least 2 parameters, 1 given in %s/strtr_error.php on line 17
+Warning: strtr() expects at least 2 positional parameters, 1 given in %s/strtr_error.php on line 17
 
 -- Testing strtr() function with more than expected no. of arguments --
-Warning: strtr() expects at most 3 parameters, 4 given in %s/strtr_error.php on line 20
+Warning: strtr() expects at most 3 positional parameters, 4 given in %s/strtr_error.php on line 20
 Done

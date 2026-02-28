@@ -1,0 +1,62 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{#import "common/types" as m_types}}
+
+{{! Name of the struct that wraps function args }}
+{{#let export partial args_type |service function| captures |m_types|}}
+{{#pragma ignore-newlines}}
+{{#if (not python.is_types_file?)}}{{root_program.module_mangle}}__{{#partial m_types.import_path}}.{{/if}}_fbthrift_{{service.name}}_{{function.name}}_args
+{{/let partial}}
+
+{{! Name of the the struct that wraps function return }}
+{{#let export partial return_type |service function| captures |m_types|}}
+{{#pragma ignore-newlines}}
+  {{#if function.oneway?}}
+None
+  {{#else}}
+{{root_program.module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service.name}}_{{function.name}}_result
+  {{/if function.oneway?}}
+{{/let partial}}
+
+{{! Name of the struct that wraps function secondary return type (ie. stream, sink) }}
+{{#let export partial second_return_type |service function| captures |m_types|}}
+  {{#pragma ignore-newlines}}
+  {{#if function.bidirectional_stream?}}
+{{root_program.module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service.name}}_{{function.name}}_result_sink_elem, {{!}}
+{{root_program.module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service.name}}_{{function.name}}_result_stream_elem
+  {{#else if function.sink?}}
+{{root_program.module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service.name}}_{{function.name}}_result_sink_elem
+  {{#else if function.stream?}}
+{{root_program.module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service.name}}_{{function.name}}_result_stream_elem
+  {{/if function.bidirectional_stream?}}
+{{/let partial}}
+
+{{! Client return type tuple }}
+{{#let export partial client_return_type |service function| captures |m_types return_type second_return_type|}}
+{{#pragma ignore-newlines}}
+{{#if function.sink_or_stream?}}({{/if}}
+{{#partial return_type service=service function=function}}
+  {{#if function.sink_or_stream?}}
+, {{#partial second_return_type service=service function=function}}
+  {{/if function.sink_or_stream?}}
+  {{#if (and (not function.bidirectional_stream?) function.sink?)}}
+, {{root_program.module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service.name}}_{{function.name}}_result_sink_final
+  {{/if (and (not function.bidirectional_stream?) function.sink?)}}
+{{#if function.sink_or_stream?}}){{/if}}
+{{/let partial}}

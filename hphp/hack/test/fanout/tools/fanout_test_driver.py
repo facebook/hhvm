@@ -9,13 +9,14 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Any, Dict, List, Optional, Tuple
 
 import attr
 
 from .fanout_information import FanoutInformation
 from .fanout_test_parser import FanoutTest
 
+# pyre-fixme[24]: Generic type `re.Pattern` expects 1 type parameter.
 WHITESPACE_SPLITTER: re.Pattern = re.compile(r"\s+")
 
 DEFAULT_HH_SERVER_FLAGS: List[str] = [
@@ -30,22 +31,27 @@ DEFAULT_HH_SERVER_FLAGS: List[str] = [
     "--config",
     "symbolindex_search_provider=NoIndex",
     "--config",
-    "use_direct_decl_parser=true",
-    "--config",
     "num_local_workers=1",
     "--config",
     "max_workers=1",
     "--config",
     "allow_unstable_features=true",
+    "--config",
+    "allow_all_files_for_module_declarations=true",
+    "--config",
+    "disable_xhp_element_mangling=false",
+    "--config",
+    "fetch_remote_old_decls=false",
+    "--config",
+    "current_saved_state_rollout_flag_index=7",
 ]
 
 
 @attr.s(auto_attribs=True)
-class Binaries(object):
+class Binaries:
     hh_client: str
     hh_server: str
     hh_single_type_check: str
-    legacy_hh_fanout: str
 
     def validate(self) -> None:
         if os.path.join(os.path.dirname(self.hh_client), "hh_server") != self.hh_server:
@@ -60,7 +66,7 @@ class Binaries(object):
         allow_type_errors: bool = True,
         env: Optional[Dict[str, str]] = None,
         check: bool = True,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> subprocess.CompletedProcess[str]:
         if env is None:
             env = {}
@@ -83,14 +89,9 @@ class Binaries(object):
     ) -> subprocess.CompletedProcess[str]:
         return _exec([self.hh_single_type_check] + args, **kwargs)
 
-    def exec_legacy_hh_fanout(
-        self, args: List[str], **kwargs: Any
-    ) -> subprocess.CompletedProcess[str]:
-        return _exec([self.legacy_hh_fanout] + args, **kwargs)
-
 
 @attr.s(auto_attribs=True)
-class RepoRoot(object):
+class RepoRoot:
     path: str
 
     def cleanup(self) -> None:
@@ -101,7 +102,7 @@ class RepoRoot(object):
 
 
 @attr.s(auto_attribs=True)
-class SavedStateDir(object):
+class SavedStateDir:
     path: str
 
     def cleanup(self) -> None:
@@ -113,9 +114,6 @@ class SavedStateDir(object):
     def naming_table_blob_file(self) -> str:
         return os.path.join(self.path, "hh_mini")
 
-    def depgraph_file(self) -> str:
-        return os.path.join(self.path, "hh_mini.hhdg")
-
     def naming_table_sqlite_file(self) -> str:
         return os.path.join(self.path, "hh_naming.sql")
 
@@ -123,7 +121,6 @@ class SavedStateDir(object):
         return json.dumps(
             {
                 "data_dump": {
-                    "deptable": self.depgraph_file(),
                     "state": self.naming_table_blob_file(),
                     "changes": changed_files,
                     "prechecked_changes": [],
@@ -134,7 +131,7 @@ class SavedStateDir(object):
 
 
 @attr.s(auto_attribs=True)
-class ExecResult(object):
+class ExecResult:
     exit_code: int
     stdout: str
     stderr: str
@@ -146,7 +143,7 @@ def _exec(
     timeout: int = 300,
     text: bool = True,
     check: bool = True,
-    **kwargs: Any
+    **kwargs: Any,
 ) -> subprocess.CompletedProcess[str]:
     logging.debug("_exec: run: %s (%s)", args, kwargs)
     try:
@@ -156,7 +153,7 @@ def _exec(
             timeout=timeout,
             text=text,
             check=check,
-            **kwargs
+            **kwargs,
         )
     except subprocess.CalledProcessError as e:
         logging.debug(
@@ -233,18 +230,6 @@ def _create_saved_state(
         ]
     )
     bins.exec_hh_stop(repo_root.path)
-    logging.debug(
-        "Step 3/3: Building dependency graph to %s", saved_state_dir.depgraph_file()
-    )
-    bins.exec_legacy_hh_fanout(
-        [
-            "build",
-            "--edges-dir",
-            saved_state_dir.edges_dir(),
-            "--output",
-            saved_state_dir.depgraph_file(),
-        ]
-    )
     _exec(["rm", "-rf", saved_state_dir.edges_dir()])
     return (hh_result, saved_state_dir)
 
@@ -265,7 +250,6 @@ def _launch_hh_from_saved_state(
     bins: Binaries,
     repo_root: RepoRoot,
     saved_state_dir: SavedStateDir,
-    load_decls_from_saved_state: bool,
     changed_files: List[str],
 ) -> subprocess.CompletedProcess[str]:
     logging.debug("Launching hh from saved-state for %s", repo_root.path)
@@ -279,10 +263,6 @@ def _launch_hh_from_saved_state(
             "lazy_init2=true",
             "--config",
             "lazy_parse=true",
-            "--config",
-            "load_decls_from_saved_state={}".format(
-                "true" if load_decls_from_saved_state else "false"
-            ),
             "--with-mini-state",
             saved_state_dir.saved_state_spec(changed_files),
             "--config",
@@ -292,7 +272,7 @@ def _launch_hh_from_saved_state(
             "--config",
             "enable_naming_table_fallback=true",
             "--config",
-            "log_categories=fanout_information",
+            "log_categories=fanout_tests",
             "--error-format",
             "raw",
         ]
@@ -320,21 +300,9 @@ def _strip_repo_root_from_output(repo_root: str, output: str) -> str:
 
 
 def _format_result(
-    repo_root: RepoRoot,
-    hh_result_base: subprocess.CompletedProcess[str],
-    hh_result_changed: subprocess.CompletedProcess[str],
     fanout_information: List[FanoutInformation],
     fanout_hash_map: Dict[str, str],
 ) -> None:
-    print("=== base errors ===")
-    sys.stdout.write(
-        _strip_repo_root_from_output(repo_root.path, hh_result_base.stdout)
-    )
-    print("=== changed errors ===")
-    sys.stdout.write(
-        _strip_repo_root_from_output(repo_root.path, hh_result_changed.stdout)
-    )
-    print("=== fanout ===")
     symbols = []
     for fi in fanout_information:
         symbols += [fanout_hash_map.get(h, h) for h in fi.hashes]
@@ -360,11 +328,10 @@ def run_scenario_saved_state_init(bins: Binaries, test: FanoutTest) -> None:
 
     (hh_result_base, saved_state_dir) = _create_saved_state(bins, repo_root, test)
     changed_files = _make_repo_change(repo_root, test)
-    hh_result_changed = _launch_hh_from_saved_state(
+    _launch_hh_from_saved_state(
         bins,
         repo_root,
         saved_state_dir,
-        load_decls_from_saved_state=True,
         changed_files=changed_files,
     )
     bins.exec_hh_stop(repo_root.path)
@@ -374,9 +341,6 @@ def run_scenario_saved_state_init(bins: Binaries, test: FanoutTest) -> None:
     )
 
     _format_result(
-        repo_root=repo_root,
-        hh_result_base=hh_result_base,
-        hh_result_changed=hh_result_changed,
         fanout_information=fanout_information,
         fanout_hash_map=fanout_hash_map,
     )
@@ -407,11 +371,10 @@ def run_scenario_incremental_no_old_decls(bins: Binaries, test: FanoutTest) -> N
         bins,
         repo_root,
         saved_state_dir,
-        load_decls_from_saved_state=False,
         changed_files=[],
     )
     _make_repo_change(repo_root, test)
-    hh_result_changed = bins.exec_hh(["--error-format", "raw", repo_root.path])
+    bins.exec_hh(["--error-format", "raw", repo_root.path])
     bins.exec_hh_stop(repo_root.path)
 
     fanout_information = _extract_fanout_information(
@@ -419,9 +382,6 @@ def run_scenario_incremental_no_old_decls(bins: Binaries, test: FanoutTest) -> N
     )
 
     _format_result(
-        repo_root=repo_root,
-        hh_result_base=hh_result_base,
-        hh_result_changed=hh_result_changed,
         fanout_information=fanout_information,
         fanout_hash_map=fanout_hash_map,
     )
@@ -453,11 +413,10 @@ def run_scenario_incremental_with_old_decls(bins: Binaries, test: FanoutTest) ->
         bins,
         repo_root,
         saved_state_dir,
-        load_decls_from_saved_state=True,
         changed_files=test.all_base_php_files(),
     )
     _make_repo_change(repo_root, test)
-    hh_result_changed = bins.exec_hh(["--error-format", "raw", repo_root.path])
+    bins.exec_hh(["--error-format", "raw", repo_root.path])
     bins.exec_hh_stop(repo_root.path)
 
     fanout_information = _extract_fanout_information(
@@ -465,9 +424,6 @@ def run_scenario_incremental_with_old_decls(bins: Binaries, test: FanoutTest) ->
     )
 
     _format_result(
-        repo_root=repo_root,
-        hh_result_base=hh_result_base,
-        hh_result_changed=hh_result_changed,
         fanout_information=fanout_information,
         fanout_hash_map=fanout_hash_map,
     )

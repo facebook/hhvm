@@ -1,0 +1,4 @@
+WARN: File "split_tuple_types.php", line 5, characters 9-29:
+This `is` check is always `false`. The expression on the left has type `(int, int)` which shares no values with `(int, int, int)`. (Warn[12010])
+WARN: File "split_tuple_types.php", line 13, characters 9-32:
+This `is` check is always `false`. The expression on the left has type `(int, int, int)` which shares no values with `(int, int, string)`. (Warn[12010])

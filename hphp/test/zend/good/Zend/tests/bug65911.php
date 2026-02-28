@@ -4,7 +4,7 @@ class A {}
 class B
 {
     public function go()
-    {
+:mixed    {
         $this->foo = 'bar';
         echo A::$this->foo; // should not output 'bar'
     }

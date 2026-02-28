@@ -1,0 +1,6 @@
+*** Testing strrchr() function: with unexpected inputs for haystack and needle ***
+-- Iteration 1 --
+bool(false)
+-- Iteration 2 --
+bool(false)
+*** Done ***

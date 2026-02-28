@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 /**
  * Test case with various trivia such as end of line, fixme, whitespace

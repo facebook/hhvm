@@ -5,7 +5,7 @@ class Class1 {
 
 class Class2 {
   <<Attribute(Class1::class)>>  // Should allow builtin class class constant
-    public function index() {}
+    public function index() :mixed{}
 }
 
 function get_attributes(): void {

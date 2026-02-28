@@ -1,0 +1,1043 @@
+'\" t
+.\"     Title: \fBndb_top\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_TOP\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_top \- View CPU usage information for NDB threads
+.SH "SYNOPSIS"
+.HP \w'\fBndb_top\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBndb_top \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+\fBndb_top\fR
+displays running information in the terminal about CPU usage by NDB threads on an NDB Cluster data node\&. Each thread is represented by two rows in the output, the first showing system statistics, the second showing the measured statistics for the thread\&.
+.PP
+\fBndb_top\fR
+is available beginning with MySQL NDB Cluster 7\&.6\&.3\&.
+Usage
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_top [\-h \fIhostname\fR] [\-t \fIport\fR] [\-u \fIuser\fR] [\-p \fIpass\fR] [\-n \fInode_id\fR]
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fBndb_top\fR
+connects to a MySQL Server running as an SQL node of the cluster\&. By default, it attempts to connect to a
+\fBmysqld\fR
+running on
+localhost
+and port 3306, as the MySQL
+root
+user with no password specified\&. You can override the default host and port using, respectively,
+\fB\-\-host\fR
+(\fB\-h\fR) and
+\fB\-\-port\fR
+(\fB\-t\fR)\&. To specify a MySQL user and password, use the
+\fB\-\-user\fR
+(\fB\-u\fR) and
+\fB\-\-passwd\fR
+(\fB\-p\fR) options\&. This user must be able to read tables in the
+ndbinfo
+database (\fBndb_top\fR
+uses information from
+ndbinfo\&.cpustat
+and related tables)\&.
+.PP
+For more information about MySQL user accounts and passwords, see
+Section\ \&6.2, \(lqAccess Control and Account Management\(rq\&.
+.PP
+Output is available as plain text or an ASCII graph; you can specify this using the
+\fB\-\-text\fR
+(\fB\-x\fR) and
+\fB\-\-graph\fR
+(\fB\-g\fR) options, respectively\&. These two display modes provide the same information; they can be used concurrently\&. At least one display mode must be in use\&.
+.PP
+Color display of the graph is supported and enabled by default (\fB\-\-color\fR
+or
+\fB\-c\fR
+option)\&. With color support enabled, the graph display shows OS user time in blue, OS system time in green, and idle time as blank\&. For measured load, blue is used for execution time, yellow for send time, red for time spent in send buffer full waits, and blank spaces for idle time\&. The percentage shown in the graph display is the sum of percentages for all threads which are not idle\&. Colors are not currently configurable; you can use grayscale instead by using
+\fB\-\-skip\-color\fR\&.
+.PP
+The sorted view (\fB\-\-sort\fR,
+\fB\-r\fR) is based on the maximum of the measured load and the load reported by the OS\&. Display of these can be enabled and disabled using the
+\fB\-\-measured\-load\fR
+(\fB\-m\fR) and
+\fB\-\-os\-load\fR
+(\fB\-o\fR) options\&. Display of at least one of these loads must be enabled\&.
+.PP
+The program tries to obtain statistics from a data node having the node ID given by the
+\fB\-\-node\-id\fR
+(\fB\-n\fR) option; if unspecified, this is 1\&.
+\fBndb_top\fR
+cannot provide information about other types of nodes\&.
+.PP
+The view adjusts itself to the height and width of the terminal window; the minimum supported width is 76 characters\&.
+.PP
+Once started,
+\fBndb_top\fR
+runs continuously until forced to exit; you can quit the program using
+Ctrl\-C\&. The display updates once per second; to set a different delay interval, use
+\fB\-\-sleep\-time\fR
+(\fB\-s\fR)\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+\fBndb_top\fR
+is available on macOS, Linux, and Solaris\&. It is not currently supported on Windows platforms\&.
+.sp .5v
+.RE
+.PP
+The following table includes all options that are specific to the NDB Cluster program
+\fBndb_top\fR\&. Additional descriptions follow the table\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.274.\ \&Command\-line options for the ndb_top program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+\fB--color\fR,
+.PP
+\fB \fR\fB-c\fR\fB \fR
+T}:T{
+Show ASCII graphs in color; use --skip-colors to disable
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--graph\fR,
+.PP
+\fB \fR\fB-g\fR\fB \fR
+T}:T{
+Display data using graphs; use --skip-graphs to disable
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--help\fR,
+.PP
+\fB \fR\fB-?\fR\fB \fR
+T}:T{
+Show program usage information
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--host[=name]\fR,
+.PP
+\fB \fR\fB-h\fR\fB \fR
+T}:T{
+Host name or IP address of MySQL Server to connect to
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--measured-load\fR,
+.PP
+\fB \fR\fB-m\fR\fB \fR
+T}:T{
+Show measured load by thread
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--node-id[=#]\fR,
+.PP
+\fB \fR\fB-n\fR\fB \fR
+T}:T{
+Watch node having this node ID
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--os-load\fR,
+.PP
+\fB \fR\fB-o\fR\fB \fR
+T}:T{
+Show load measured by operating system
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--password[=password]\fR,
+.PP
+\fB \fR\fB-p\fR\fB \fR
+T}:T{
+Connect using this password
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--port[=#]\fR,
+.PP
+\fB-P\fR
+(>=7.6.6)
+T}:T{
+Port number to use when connecting to MySQL Server
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--sleep-time[=seconds]\fR,
+.PP
+\fB \fR\fB-s\fR\fB \fR
+T}:T{
+Time to wait between display refreshes, in seconds
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--socket\fR,
+.PP
+\fB \fR\fB-S\fR\fB \fR
+T}:T{
+Socket file to use for connection
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--sort\fR,
+.PP
+\fB \fR\fB-r\fR\fB \fR
+T}:T{
+Sort threads by usage; use --skip-sort to disable
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--text\fR,
+.PP
+\fB-t\fR
+(>=7.6.6)
+T}:T{
+Display data using text
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--user[=name]\fR,
+.PP
+\fB \fR\fB-u\fR\fB \fR
+T}:T{
+Connect as this MySQL user
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+.PP
+In NDB 7\&.6\&.6 and later,
+\fBndb_top\fR
+also supports the common
+NDB
+program options
+\fB\-\-defaults\-file\fR,
+\fB\-\-defaults\-extra\-file\fR,
+\fB\-\-print\-defaults\fR,
+\fB\-\-no\-defaults\fR, and
+\fB\-\-defaults\-group\-suffix\fR\&. (Bug #86614, Bug #26236298)
+Additional Options
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-color\fR,
+\fB\-c\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--color
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+TRUE
+T}
+.TE
+.sp 1
+Show ASCII graphs in color; use
+\fB\-\-skip\-colors\fR
+to disable\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-graph\fR,
+\fB\-g\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--graph
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+TRUE
+T}
+.TE
+.sp 1
+Display data using graphs; use
+\fB\-\-skip\-graphs\fR
+to disable\&. This option or
+\fB\-\-text\fR
+must be true; both options may be true\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-help\fR,
+\fB\-?\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--help
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+TRUE
+T}
+.TE
+.sp 1
+Show program usage information\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-host[\fR=\fIname]\fR,
+\fB\-h\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--host[=name]
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+localhost
+T}
+.TE
+.sp 1
+Host name or IP address of MySQL Server to connect to\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-measured\-load\fR,
+\fB\-m\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--measured-load
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Show measured load by thread\&. This option or
+\fB\-\-os\-load\fR
+must be true; both options may be true\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-node\-id[\fR=\fI#]\fR,
+\fB\-n\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--node-id[=#]
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+1
+T}
+.TE
+.sp 1
+Watch the data node having this node ID\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-os\-load\fR,
+\fB\-o\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--os-load
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+TRUE
+T}
+.TE
+.sp 1
+Show load measured by operating system\&. This option or
+\fB\-\-measured\-load\fR
+must be true; both options may be true\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-passwd[\fR=\fIpassword]\fR,
+\fB\-p\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--passwd[=password]
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+NULL
+T}
+.TE
+.sp 1
+Connect using this password\&.
+.sp
+This option is deprecated in NDB 7\&.6\&.4\&. It is removed in NDB 7\&.6\&.6, where it is replaced by the
+\fB\-\-password\fR
+option\&. (Bug #26907833)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-password[\fR=\fIpassword]\fR,
+\fB\-p\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--password[=password]
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+NULL
+T}
+.TE
+.sp 1
+Connect using this password\&.
+.sp
+This option was added in NDB 7\&.6\&.6 as a replacement for the
+\fB\-\-passwd\fR
+option used previously\&. (Bug #26907833)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-port[\fR=\fI#]\fR,
+\fB\-t\fR
+(NDB 7\&.6\&.6 and later:
+\fB\-P\fR)
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--port[=#]
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+3306
+T}
+.TE
+.sp 1
+Port number to use when connecting to MySQL Server\&.
+.sp
+Beginning with NDB 7\&.6\&.6, the short form for this option is
+\fB\-P\fR, and
+\fB\-t\fR
+is repurposed as the short form for the
+\fB\-\-text\fR
+option\&. (Bug #26907833)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-sleep\-time[\fR=\fIseconds]\fR,
+\fB\-s\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--sleep-time[=seconds]
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+1
+T}
+.TE
+.sp 1
+Time to wait between display refreshes, in seconds\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-socket=\fR\fB\fIpath/to/file\fR\fR,
+\fI\-S\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--socket
+T}
+T{
+\fBType\fR
+T}:T{
+Path name
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+[none]
+T}
+.TE
+.sp 1
+Use the specified socket file for the connection\&.
+.sp
+Added in NDB 7\&.6\&.6\&. (Bug #86614, Bug #26236298)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-sort\fR,
+\fB\-r\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--sort
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+TRUE
+T}
+.TE
+.sp 1
+Sort threads by usage; use
+\fB\-\-skip\-sort\fR
+to disable\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-text\fR,
+\fB\-x\fR
+(NDB 7\&.6\&.6 and later:
+\fB\-t\fR)
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--text
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Display data using text\&. This option or
+\fB\-\-graph\fR
+must be true; both options may be true\&.
+.sp
+Beginning with NDB 7\&.6\&.6, the short form for this option is
+\fB\-t\fR
+and support for
+\fB\-x\fR
+is removed\&. (Bug #26907833)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-user[\fR=\fIname]\fR,
+\fB\-u\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--user[=name]
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+root
+T}
+.TE
+.sp 1
+Connect as this MySQL user\&.
+.RE
+.PP
+\fBSample Output\fR. The next figure shows
+\fBndb_top\fR
+running in a terminal window on a Linux system with an
+\fBndbmtd\fR
+data node under a moderate load\&. Here, the program has been invoked using
+\fBndb_top\fR
+\fB\-n8\fR
+\fB\-x\fR
+to provide both text and graph output:
+.PP
+\fBFigure\ \&22.26.\ \&ndb_top Running in Terminal\fR
+.sp
+.RS 4
+[IMAGE]\&\s-2\u[1]\d\s+2
+[IMAGE]\&\s-2\u[1]\d\s+2
+Display from ndb_top, running in a
+            terminal window\&. Shows information for each node, including
+            the utilized resources\&.
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "NOTES"
+.IP " 1." 4
+[set $man.base.url.for.relative.links]/../refman-common/images/published/ndb-top-1.png
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

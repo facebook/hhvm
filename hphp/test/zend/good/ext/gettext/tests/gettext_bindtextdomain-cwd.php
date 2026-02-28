@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main_entry() {
+<?hh <<__EntryPoint>> function main_entry() :mixed{
 $base_dir = dirname(__FILE__);
 chdir($base_dir);
 setlocale(LC_ALL, 'en_US.UTF-8');

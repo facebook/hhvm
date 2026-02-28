@@ -1,0 +1,3 @@
+-vHack.Lang.AllowUnstableFeatures=true
+-vEval.ModuleLevelTraits=true
+-vEval.EnforceModules=1

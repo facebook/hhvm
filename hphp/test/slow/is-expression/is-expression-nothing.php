@@ -10,7 +10,7 @@ function is_nothing($x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_nothing() {
+function main_is_expression_nothing() :mixed{
 is_nothing(null);
 is_nothing(-1);
 is_nothing(false);

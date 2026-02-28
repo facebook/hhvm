@@ -21,18 +21,18 @@ Class method pointer call
 Class method pointer call (laundered)
 Class/method string call (laundered)
 
-Notice: 'Klass::funktion' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 57
+Warning: Method Klass::funktion not marked dynamic in %s/dyncall-sample.php on line 57
 
 Notice: 'Klass::funktion' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 58
 
-Notice: 'Klass::funktion' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 59
+Warning: Method Klass::funktion not marked dynamic in %s/dyncall-sample.php on line 59
 Class/method string call
 
-Notice: 'Klass::funktion' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 65
+Warning: Method Klass::funktion not marked dynamic in %s/dyncall-sample.php on line 65
 
 Notice: 'Klass::funktion' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 66
 
-Notice: 'Klass::funktion' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 67
+Warning: Method Klass::funktion not marked dynamic in %s/dyncall-sample.php on line 67
 Class/method array call
 
 Notice: 'Klass::funktion' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 72

@@ -6,7 +6,7 @@ fclose($fp);
 $b = "file://" . dirname(__FILE__) . "/cert.crt";
 $c = "invalid cert";
 $d = openssl_x509_read($a);
-$e = varray[];
+$e = vec[];
 
 $output = null;
 $output2 = null;
@@ -19,9 +19,9 @@ var_dump(openssl_x509_export($c, inout $output3));    // read an invalid cert, f
 var_dump(openssl_x509_export($d, inout $output4));    // read cert from a resource
 var_dump(openssl_x509_export($e, inout $output5));    // read an array, fails
 
-$outfilename = tempnam("/tmp", "ssl");
+$outfilename = tempnam(sys_get_temp_dir(), "ssl");
 if ($outfilename === false)
-        die("failed to get a temporary filename!");
+        exit("failed to get a temporary filename!");
 
 echo "---\n";
 
@@ -34,7 +34,7 @@ echo "---\n";
 
 var_dump($exists = file_exists($outfilename));
 if ($exists) {
-        @unlink($outfilename);
+        unlink($outfilename);
 }
 echo "---\n";
 

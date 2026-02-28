@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Any failed MCRouter action will throw an
@@ -31,7 +31,7 @@ class MCRouterOptionException extends Exception {
   }
 }
 
-<<__NativeData("MCRouter")>>
+<<__NativeData>>
 class MCRouter {
 
   /**
@@ -59,10 +59,10 @@ class MCRouter {
    * @return - Instance of MCRouter
    */
   public static function createSimple(ConstVector<string> $servers): MCRouter {
-    $options = darray[
-      'config_str' => json_encode(darray[
-        'pools' => darray[
-          'P' => darray[
+    $options = dict[
+      'config_str' => json_encode(dict[
+        'pools' => dict[
+          'P' => dict[
             'servers' => $servers,
           ],
         ],

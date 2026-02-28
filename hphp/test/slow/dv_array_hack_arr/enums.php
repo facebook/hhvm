@@ -21,7 +21,7 @@ enum Enum2 : int {
   THREE = 3;
 }
 
-enum Enum3 : mixed {
+enum Enum3 : arraykey {
   ONE = '1';
   TWO = '2';
   THREE = '3';

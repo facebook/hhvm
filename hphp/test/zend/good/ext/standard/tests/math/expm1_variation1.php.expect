@@ -1,0 +1,17 @@
+*** Testing expm1() : usage variations ***
+
+-- Iteration 1 --
+float(36314.502674247)
+
+-- Iteration 2 --
+float(-0.99997246355065)
+
+-- Iteration 3 --
+float(INF)
+
+-- Iteration 4 --
+float(0.0012353302826471)
+
+-- Iteration 5 --
+float(0.64872127070013)
+===Done===

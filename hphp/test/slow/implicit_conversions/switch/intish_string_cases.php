@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   a1('4.0');
   a2('4');
   a2(4);
@@ -9,7 +9,7 @@ function main() {
   a4('baz');
 }
 
-function a1($x) {
+function a1($x) :mixed{
   switch ($x) {
     case '5':
       print '5';
@@ -42,7 +42,7 @@ function a1($x) {
 }
 
 
-function a2($x) {
+function a2($x) :mixed{
   switch ($x) {
     case '5':
       print '5';
@@ -74,7 +74,7 @@ function a2($x) {
   }
 }
 
-function a3($x) {
+function a3($x) :mixed{
   switch ($x) {
     case '5':
       print '5';
@@ -106,7 +106,7 @@ function a3($x) {
   }
 }
 
-function a4($x) {
+function a4($x) :mixed{
   switch ($x) {
     case 'foo':
       print 'foo';

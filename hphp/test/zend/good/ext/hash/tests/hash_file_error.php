@@ -8,7 +8,7 @@
 echo "*** Testing hash_file() : error conditions ***\n";
 
 // Set up file
-$filename = __SystemLib\hphp_test_tmppath('hash_file_error_example.txt');
+$filename = sys_get_temp_dir().'/'.'hash_file_error_example.txt';
 file_put_contents( $filename, 'The quick brown fox jumped over the lazy dog.' );
 
 

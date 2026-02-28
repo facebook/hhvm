@@ -1,7 +1,0 @@
-=== Shape analysis results for dynamic_access.php
-Constraints for \f:
-Allocated at [5:3-9]
-DK ?1 : dyn
-SK #{0} [5:3-9] : shape()
-[5:3-9] ⊆ ?1
-

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 async function foo(): Awaitable<void> {
   concurrent {

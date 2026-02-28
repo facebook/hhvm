@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_domnode_append_same() {
+function main_domnode_append_same() :mixed{
 $doc = new DOMDocument;
 
 $node1 = $doc->createElement('div');

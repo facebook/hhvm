@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_580() {
+function main_580() :mixed{
 $a = 't';
  $a = 10;
  $a *= 2;

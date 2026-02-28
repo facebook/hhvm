@@ -21,7 +21,7 @@ function bar%d() : int {
 
 let expected_errors =
   {|
-File "/bar2.php", line 4, characters 10-14:
+ERROR: File "/bar2.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
   File "/bar2.php", line 3, characters 19-21:
   Expected `int`
@@ -42,14 +42,15 @@ allowed_decl_fixme_codes = 4336
 let test () =
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   TestDisk.set hhconfig_filename hhconfig_contents;
-  let hhconfig_path =
-    Relative_path.create Relative_path.Root hhconfig_filename
-  in
-  let options = ServerArgs.default_options ~root in
   let (custom_config, _) =
-    ServerConfig.load ~silent:false hhconfig_path options
+    ServerConfig.load ~silent:false ~from:"" ~cli_config_overrides:[]
   in
-  let env = Test.setup_server ~custom_config () in
+  let env =
+    Test.setup_server
+      ~custom_config
+      ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
+      ()
+  in
   (* There are errors in both bar files *)
   let env =
     Test.setup_disk
@@ -63,7 +64,9 @@ let test () =
   (* Prepare rechecking of all files *)
   let ctx = Provider_utils.ctx_from_server_env env in
   let workers = None in
-  let fast = Naming_table.to_fast env.ServerEnv.naming_table in
+  let defs_per_file =
+    Naming_table.to_defs_per_file env.ServerEnv.naming_table
+  in
   (* Pretend that this rechecking will be cancelled before we get to bar1 *)
   let bar1_path =
     Relative_path.(create Root (Test.prepend_root (bar_name 1)))
@@ -72,44 +75,36 @@ let test () =
 
   (* Run the recheck *)
   let interrupt = MultiThreadedCall.no_interrupt () in
-  let fnl = Relative_path.Map.keys fast in
+  let fnl = Relative_path.Map.keys defs_per_file in
   let check_info =
     {
       Typing_service_types.init_id = "";
       check_reason = "test_interrupt";
+      log_errors = false;
+      discard_warnings = false;
       recheck_id = Some "";
-      use_max_typechecker_worker_memory_for_decl_deferral = false;
       per_file_profiling = HackEventLogger.PerFileProfilingConfig.default;
       memtrace_dir = None;
     }
   in
-  let ( ( (),
-          {
-            Typing_check_service.errors;
-            diagnostic_pusher = (diag_pusher, _);
-            _;
-          } ),
-        cancelled ) =
+  let (((), { Typing_check_service.diagnostics; _ }), cancelled) =
     Typing_check_service.go_with_interrupt
       ctx
       workers
-      Typing_service_delegate.default
       (Telemetry.create ())
       fnl
+      ~root:None
       ~interrupt
-      ~memory_cap:None
       ~longlived_workers:false
-      ~hulk_lite:false
-      ~hulk_heavy:false
-      ~remote_execution:None
+      ~hh_distc_config:None
+      ~warnings_saved_state:None
       ~check_info
   in
-  assert (Option.is_none diag_pusher);
   (* Assert that we got the errors in bar2 only... *)
-  Test.assert_errors errors expected_errors;
+  Test.assert_diagnostics diagnostics expected_errors;
 
   (* ...while bar1 is among cancelled jobs*)
   (match cancelled with
-  | [x] when x = bar1_path -> ()
+  | Some ([x], _) when x = bar1_path -> ()
   | _ -> assert false);
   ()

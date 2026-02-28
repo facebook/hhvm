@@ -6,7 +6,7 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing parse_ini_file() : variation ***\n";
-$output_file = __SystemLib\hphp_test_tmppath('parse_ini_file_variation1.ini');
+$output_file = sys_get_temp_dir().'/'.'parse_ini_file_variation1.ini';
 $iniFile = <<<FILE
 [section1]
 value1=original

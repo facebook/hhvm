@@ -27,7 +27,7 @@ class F {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $o = new D();
   $o->dynamic = 1;
   echo "==== class D, extant ====\n";

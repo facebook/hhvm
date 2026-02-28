@@ -1,21 +1,23 @@
 <?hh
 
 class Foo {
-  function alpha(inout $a, inout $b) {
+  function alpha(inout $a, inout $b) :mixed{
     $a = 'bravo';
     $b = 'charlie';
     return 'delta';
   }
-  static function beta(inout $x) {
-    return $x++;
+  static function beta(inout $x) :mixed{
+    $__lval_tmp_0 = $x;
+    $x++;
+    return $__lval_tmp_0;
   }
-  function one(inout $t) {
+  function one(inout $t) :mixed{
     $t = debug_backtrace()[0]['function'];
   }
-  static function two(inout $t) {
+  static function two(inout $t) :mixed{
     $t = debug_backtrace()[0]['function'];
   }
-  function info(inout $x, inout $y) {
+  function info(inout $x, inout $y) :mixed{
     $x = self::class;
     $y = static::class;
     return $this->beep();
@@ -23,30 +25,30 @@ class Foo {
 }
 
 class Bar extends Foo {
-  function beep() { return 42; }
-  function info2(inout $x, inout $y, inout $z) {
+  function beep() :mixed{ return 42; }
+  function info2(inout $x, inout $y, inout $z) :mixed{
     $z = parent::class;
     return parent::info(inout $x, inout $y);
   }
 }
 
-function main($obj, $foo, $alpha, $beta, $one, $two, $bar, $arr1, $arr2) {
+function main($obj, $foo, $alpha, $beta, $one, $two, $bar, $arr1, $arr2) :mixed{
   $a = 'beta';
   $b = 'gamma';
   $x = 41;
   $r1 = $obj->$alpha(inout $a, inout $b);
-  $r2 = $foo::$beta(inout $x);
+  $r2 = HH\dynamic_class_meth($foo, $beta)(inout $x);
   var_dump($a, $b, $x, $r1, $r2);
 
   $t = null;
   $obj->$one(inout $t);
   var_dump($t);
 
-  $foo::$two(inout $t);
+  HH\dynamic_class_meth($foo, $two)(inout $t);
   var_dump($t);
 
   $q = null;
-  Foo::$two(inout $q);
+  HH\dynamic_class_meth(Foo::class, $two)(inout $q);
   var_dump($q);
 
   $r = null;
@@ -68,7 +70,7 @@ function main($obj, $foo, $alpha, $beta, $one, $two, $bar, $arr1, $arr2) {
 
 
 <<__EntryPoint>>
-function main_method_dynamic() {
+function main_method_dynamic() :mixed{
 main(new Foo, 'Foo', 'alpha', 'beta', 'one', 'two', new Bar,
-     varray[new Foo, 'one'], varray['Foo', 'two']);
+     vec[new Foo, 'one'], vec['Foo', 'two']);
 }

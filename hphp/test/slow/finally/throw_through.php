@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>>
-function foo() {
+function foo() :mixed{
   try {
     throw new Exception('foo');
   } finally {

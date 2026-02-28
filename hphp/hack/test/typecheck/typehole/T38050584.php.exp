@@ -1,1 +1,6 @@
-No errors
+ERROR: File "T38050584.php", line 8, characters 13-23:
+No instance method `__construct` in `MyParent` (Typing[4053])
+  File "T38050584.php", line 6, characters 21-28:
+  This is why I think it is an object of type MyParent
+  File "T38050584.php", line 4, characters 7-14:
+  Declaration of `MyParent` is here

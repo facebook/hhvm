@@ -1,0 +1,41 @@
+Code actions available:
+------------------------------------------
+Add stubs for missing interface methods (CodeActionKind: "quickfix") SELECTED
+Devmate Quick Fix - This interface is not properly implemented (CodeActionKind: "quickfix")
+Devmate Agent Fix - This interface is not properly implemented (CodeActionKind: "quickfix")
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"\n  public function someMethod(): void {}\n",
+          "range":{"end":{"character":0,"line":11},"start":{"character":0,"line":11}}
+        }
+      ]
+    }
+  },
+  "kind":"quickfix",
+  "title":"Add stubs for missing interface methods"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+interface TheInterface {
+  public function someMethod(): void;
+}
+
+class C implements TheInterface {
+                  // ^ at-caret
+  public function bar(): void {
+    3 + true;
+  }
+
+  public function someMethod(): void {}
+}
+

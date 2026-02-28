@@ -16,21 +16,21 @@ $num = 2;
 
 
 //array of different types of array values for 'val' argument
-$values = varray[
+$values = vec[
 
-  /* 1  */  varray[],
-            varray[1 , 2 , 3 , 4],
-            darray[1 => "Hi" , 2 => "Hello"],
-            varray["Saffron" , "White" , "Green"],
-  /* 5  */  darray['color' => 'red' , 'item' => 'pen'],
-            darray[ 'color' => 'red' , 2 => 'green ' ],
-            darray["colour" => "red" , "item" => "pen"],
-            darray[ 1 => "red" , 0 => "green" ],
-            darray[ 1 => "red" , 0 => "green" ],
-  /* 10 */  darray[ 1 => "Hi" , "color" => "red" , 'item' => 'pen'],
-            darray[ '' => "Hi", '1' => "Hello" , "1" => "Green"],
-            darray[ ""=>1, "color" => "green"],
-  /* 13 */  varray['Saffron' , 'White' , 'Green']
+  /* 1  */  vec[],
+            vec[1 , 2 , 3 , 4],
+            dict[1 => "Hi" , 2 => "Hello"],
+            vec["Saffron" , "White" , "Green"],
+  /* 5  */  dict['color' => 'red' , 'item' => 'pen'],
+            dict[ 'color' => 'red' , 2 => 'green ' ],
+            dict["colour" => "red" , "item" => "pen"],
+            dict[ 1 => "red" , 0 => "green" ],
+            dict[ 1 => "red" , 0 => "green" ],
+  /* 10 */  dict[ 1 => "Hi" , "color" => "red" , 'item' => 'pen'],
+            dict[ '' => "Hi", '1' => "Hello" , "1" => "Green"],
+            dict[ ""=>1, "color" => "green"],
+  /* 13 */  vec['Saffron' , 'White' , 'Green']
 ];
 
 // loop through each element of the values array for 'val' argument

@@ -13,6 +13,7 @@ type insertion_error = {
   hash: Int64.t;
   name_kind: Naming_types.name_kind;
   name: string;
+  sort_text: string option;
   origin_exception: Exception.t;
       [@printer (fun fmt e -> fprintf fmt "%s" (Exception.get_ctor_string e))]
 }
@@ -22,10 +23,9 @@ type save_result = {
   files_added: int;
   symbols_added: int;
   errors: insertion_error list;
+  checksum: Int64.t;
 }
 [@@deriving show]
-
-val empty_save_result : save_result
 
 type 'a forward_naming_table_delta =
   | Modified of 'a
@@ -71,6 +71,9 @@ val get_path_by_64bit_dep :
   (Relative_path.t * Naming_types.name_kind) option
 
 val get_decl_hash_by_64bit_dep : db_path -> Typing_deps.Dep.t -> string option
+
+val get_file_hash_by_64bit_dep :
+  db_path -> Typing_deps.Dep.t -> (Relative_path.t * string) option
 
 val get_type_path_by_name :
   db_path -> string -> (Relative_path.t * Naming_types.kind_of_type) option

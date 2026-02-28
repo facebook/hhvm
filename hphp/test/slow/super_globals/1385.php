@@ -1,11 +1,11 @@
 <?hh
 
-function test() {
-  $_POST = darray['HELLO' => 1];
+function test() :mixed{
+  \HH\global_set('_POST', dict['HELLO' => 1]);
 }
 
 <<__EntryPoint>>
-function main_1385() {
+function main_1385() :mixed{
 test();
-var_dump($_POST);
+var_dump(\HH\global_get('_POST'));
 }

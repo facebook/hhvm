@@ -1,10 +1,10 @@
 <?hh
 
-class A { public static function meth() {} }
+class A { public static function meth() :mixed{} }
 
-function LV($x) { return __hhvm_intrinsics\launder_value($x); }
+function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 
-function wrap($fun) {
+function wrap($fun) :mixed{
   try {
     $fun();
   } catch (Exception $e) {
@@ -12,8 +12,8 @@ function wrap($fun) {
   }
 }
 
-function getTestcase(int $num) {
-  $test_cases = varray[
+function getTestcase(int $num) :mixed{
+  $test_cases = vec[
     null,
     false, true,
     0, 1,
@@ -30,7 +30,7 @@ function getTestcase(int $num) {
 
 <<__EntryPoint>>
 function main(): void {
-  $x = LV(HH\class_meth(A::class, 'meth'));
+  $x = LV(A::meth<>);
 
   for ($i = 0; $i < 13; $i++) {
     $y = getTestcase($i);

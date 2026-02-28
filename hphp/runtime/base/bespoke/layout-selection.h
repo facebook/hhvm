@@ -31,7 +31,11 @@ using LayoutWeightVector =
 // Layout selection. We'll call selectBespokeLayouts in RTA, and then we'll
 // be able to use layoutForSource / layoutForSink for optimized code.
 jit::ArrayLayout layoutForSource(SrcKey sk);
-SinkLayout layoutForSink(const jit::TransIDSet& ids, SrcKey sk);
+SinkLayouts layoutsForSink(
+  const jit::TransIDSet& ids,
+  SrcKey sk,
+  jit::ArrayLayout knownLayout
+);
 void selectBespokeLayouts();
 
 }

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface IBase {
   abstract const type T as arraykey;

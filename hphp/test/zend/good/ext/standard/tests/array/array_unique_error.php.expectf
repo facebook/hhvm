@@ -2,9 +2,9 @@
 
 -- Testing array_unique() function with zero arguments --
 
-Warning: array_unique() expects at least 1 parameter, 0 given in %s/array_unique_error.php on line 11
+Warning: array_unique() expects at least 1 positional parameter, 0 given in %s/array_unique_error.php on line 11
 
 -- Testing array_unique() function with more than expected no. of arguments --
 
-Warning: array_unique() expects at most 2 parameters, 3 given in %s/array_unique_error.php on line 17
+Warning: array_unique() expects at most 2 positional parameters, 3 given in %s/array_unique_error.php on line 17
 Done

@@ -19,27 +19,23 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
-#include "hphp/runtime/vm/jit/tc-region.h"
 
-#include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 #include "hphp/runtime/vm/jit/irlower.h"
-#include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
-#include "hphp/runtime/vm/jit/vasm-emit.h"
-#include "hphp/runtime/vm/jit/vm-protect.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
-TRACE_SET_MOD(mcg);
+TRACE_SET_MOD(mcg)
 
 namespace HPHP::jit::tc {
 namespace {
@@ -71,17 +67,17 @@ void PrologueTranslator::computeKind() {
   }
 }
 
-int PrologueTranslator::paramIndex() const {
+uint32_t PrologueTranslator::paramIndex() const {
   return paramIndexHelper(func, nPassed);
 }
 
-int PrologueTranslator::paramIndexHelper(const Func* f, int passed) {
-  int const numParams = f->numNonVariadicParams();
+uint32_t PrologueTranslator::paramIndexHelper(const Func* f, uint32_t passed) {
+  auto const numParams = f->numNonVariadicParams();
   return passed <= numParams ? passed : numParams + 1;
 }
 
 Optional<TranslationResult> PrologueTranslator::getCached() {
-  if (UNLIKELY(RuntimeOption::EvalFailJitPrologs)) {
+  if (UNLIKELY(Cfg::Eval::FailJitPrologs)) {
     return TranslationResult::failTransiently();
   }
 
@@ -104,7 +100,7 @@ void PrologueTranslator::resetCached() {
 }
 
 void PrologueTranslator::setCachedForProcessFail() {
-  TRACE(2, "funcPrologue %s(%d) setting prologue %p\n",
+  TRACE(2, "funcPrologue %s(%u) setting prologue %p\n",
         func->fullName()->data(), nPassed,
         tc::ustubs().fcallHelperNoTranslateThunk);
   func->setPrologue(paramIndex(), tc::ustubs().fcallHelperNoTranslateThunk);
@@ -130,6 +126,7 @@ void PrologueTranslator::gen() {
     kind,
     sk,
     nullptr,
+    sk.packageInfo(),
     PrologueID(func, nPassed),
   };
   tracing::Block _b{
@@ -145,10 +142,12 @@ void PrologueTranslator::gen() {
   tracing::Pause _p;
 
   unit = std::make_unique<IRUnit>(context, std::make_unique<AnnotationData>());
+  unit->initLogEntry(sk.func());
   irgen::IRGS env{*unit, nullptr, 0, nullptr};
 
   irgen::emitFuncPrologue(env, func, nPassed, transId);
   irgen::sealUnit(env);
+  optimize(*unit, kind);
 
   printUnit(2, *unit, "After initial prologue generation");
 
@@ -170,11 +169,12 @@ void PrologueTranslator::publishMetaImpl() {
 
   auto const& loc = transMeta->range.loc();
   TransRec tr{sk, transId, kind, loc.mainStart(), loc.mainSize(),
-              loc.coldStart(), loc.coldSize(), loc.frozenStart(),
-              loc.frozenSize(), std::move(annotations)};
+              loc.coldCodeStart(), loc.coldCodeSize(),
+              loc.frozenCodeStart(), loc.frozenCodeSize(),
+              std::move(annotations)};
   transdb::addTranslation(tr);
   FuncOrder::recordTranslation(tr);
-  if (RuntimeOption::EvalJitUseVtuneAPI) {
+  if (Cfg::Jit::UseVtuneAPI) {
     reportTraceletToVtune(func->unit(), func, tr);
   }
   recordTranslationSizes(tr);
@@ -189,14 +189,14 @@ void PrologueTranslator::publishCodeImpl() {
   assertOwnsMetadataLock();
   assertOwnsCodeLock();
 
-  if (RuntimeOption::EvalEnableReusableTC) {
+  if (Cfg::Eval::EnableReusableTC) {
     auto const& loc = transMeta->range.loc();
     recordFuncPrologue(func, loc);
   }
 
   const auto start = entry();
   assertx(start);
-  TRACE(2, "funcPrologue %s(%d) setting prologue %p\n",
+  TRACE(2, "funcPrologue %s(%u) setting prologue %p\n",
         func->fullName()->data(), nPassed, start);
   func->setPrologue(paramIndex(), start);
 

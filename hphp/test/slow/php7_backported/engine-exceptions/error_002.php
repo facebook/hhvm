@@ -1,18 +1,18 @@
 <?hh
 
-function alpha() {
+function alpha() :mixed{
   throw new Error('Foo');
 }
 
-function beta() {
+function beta() :mixed{
   alpha();
 }
 
-function gamma() {
+function gamma() :mixed{
   beta();
 }
 
-function main() {
+function main() :mixed{
   try {
     gamma();
   } catch (Throwable $t) {
@@ -22,6 +22,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_error_002() {
+function main_error_002() :mixed{
 main();
 }

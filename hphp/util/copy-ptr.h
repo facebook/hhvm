@@ -56,6 +56,9 @@ struct copy_ptr {
   explicit operator bool() const { return !isNull(); }
   bool isNull() const { return m_p == nullptr; }
 
+  bool unique() const { return !m_p || get_ref(m_p) == 1; }
+  bool shared() const { return !unique(); }
+
   const T& operator*() const { return *m_p; }
   const T* operator->() const { return m_p; }
   const T* get() const { return m_p; }
@@ -71,10 +74,11 @@ struct copy_ptr {
     m_p = nullptr;
   }
 
-  template <typename... Args> void emplace(Args&&... args) {
+  template <typename... Args> T* emplace(Args&&... args) {
     auto const save = m_p;
     construct(save, std::forward<Args>(args)...);
     dec_ref(save);
+    return m_p;
   }
 
   friend bool
@@ -116,16 +120,16 @@ private:
 
   static refcount_type* get_ref_ptr(T* p) {
     return (refcount_type*)((char*)p - data_offset());
-  };
+  }
 
   static uint32_t get_ref(T* p) {
-    return get_ref_ptr(p)->load(std::memory_order_relaxed);
-  };
+    return get_ref_ptr(p)->load(std::memory_order_acquire);
+  }
 
   static void dec_ref(T* p) {
     if (!p) return;
     auto ref = get_ref_ptr(p);
-    if (ref->fetch_sub(1, std::memory_order_relaxed) == 1) {
+    if (ref->fetch_sub(1, std::memory_order_acq_rel) == 1) {
       p->~T();
       ref->~refcount_type();
       std::free(ref);
@@ -134,11 +138,10 @@ private:
 
   static void inc_ref(T* p) {
     if (!p) return;
-    get_ref_ptr(p)->fetch_add(1, std::memory_order_relaxed);
+    get_ref_ptr(p)->fetch_add(1, std::memory_order_acq_rel);
   }
 };
 
 //////////////////////////////////////////////////////////////////////
 
 }
-

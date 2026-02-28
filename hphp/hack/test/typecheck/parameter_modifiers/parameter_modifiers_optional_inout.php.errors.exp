@@ -1,0 +1,2 @@
+(5,32)-(5,40) A type specifier is expected here.
+(5,41)-(5,44) Encountered unexpected token `int`.

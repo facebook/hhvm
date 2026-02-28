@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_1933() {
-$my_array = varray[7, 1, 5, 6];
+function main_1933() :mixed{
+$my_array = vec[7, 1, 5, 6];
 $some_value = 6;
 usort(inout $my_array,   function($a, $b) use ($some_value) {
     if ($a === $some_value) {

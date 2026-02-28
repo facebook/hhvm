@@ -1,0 +1,146 @@
+8: schema8
+-1: schema-1
++1: schema1
+0.02: schema0
+-0.02: schema0
++0.02: schema0
+Persistent Str "8": schema8
+"8": schema8
+"-1": schema-1
+"008": schema8
+"+8": schema8
+"0.8": schema0
+"-0.8": schema0
+"badint": schema0
+null: schema0
+true: schema1
+false: schema0
+Persistent vec[1,2]: schema1
+vec[1,2]: schema1
+Persistent dict["1" => 2]: schema1
+dict["1" => 2]: schema1
+Persistent keyset["1"]: schema1
+keyset["1"]: schema1
+vec[]: schema0
+dict[]: schema0
+keyset[]: schema0
+enum: schema42
+exception 'InvalidOperationException' with message 'Cannot convert enum class label to int' in %s
+Stack trace:
+#0 (): HH\Lib\_Private\_Str\vsprintf_l()
+#1 %s HH\Lib\Str\format()
+#2 %s
+#3 (): main()
+#4 {main}
+exception 'TypecastException' with message 'Object of class A could not be converted to int' in %s
+Stack trace:
+#0 (): HH\Lib\_Private\_Str\vsprintf_l()
+#1 %s HH\Lib\Str\format()
+#2 %s testConvToInt()
+#3 (): main()
+#4 {main}
+exception 'InvalidOperationException' with message 'Cannot convert function to int' in %s
+Stack trace:
+#0 (): HH\Lib\_Private\_Str\vsprintf_l()
+#1 %s HH\Lib\Str\format()
+#2 %s testConvToInt()
+#3 (): main()
+#4 {main}
+class: schema0
+lazycls: schema1
+resource: schema4
+exception 'InvalidOperationException' with message 'Cannot convert class method to int' in %s
+Stack trace:
+#0 (): HH\Lib\_Private\_Str\vsprintf_l()
+#1 %s HH\Lib\Str\format()
+#2 %s testConvToInt()
+#3 (): main()
+#4 {main}
+exception 'InvalidOperationException' with message 'Cannot convert reified class method to int' in %s
+Stack trace:
+#0 (): HH\Lib\_Private\_Str\vsprintf_l()
+#1 %s HH\Lib\Str\format()
+#2 %s testConvToInt()
+#3 (): main()
+#4 {main}
+exception 'InvalidOperationException' with message 'Cannot convert reified function to int' in %s
+Stack trace:
+#0 (): HH\Lib\_Private\_Str\vsprintf_l()
+#1 %s HH\Lib\Str\format()
+#2 %s testConvToInt()
+#3 (): main()
+#4 {main}
+Done
+8: schema8.000000
+-1: schema-1.000000
++1: schema1.000000
+0.02: schema0.020000
+-0.02: schema-0.020000
++0.02: schema0.020000
+Persistent Str "8": schema8
+"8": schema8.000000
+"-1": schema-1.000000
+"008": schema8.000000
+"+8": schema8.000000
+"0.8": schema0.800000
+"-0.8": schema-0.800000
+"badint": schema0.000000
+null: schema0.000000
+true: schema1.000000
+false: schema0.000000
+Persistent vec[1,2]: schema1.000000
+vec[1,2]: schema1.000000
+Persistent dict["1" => 2]: schema1.000000
+dict["1" => 2]: schema1.000000
+Persistent keyset["1"]: schema1.000000
+keyset["1"]: schema1.000000
+vec[]: schema0.000000
+dict[]: schema0.000000
+keyset[]: schema0.000000
+enum: schema42.000000
+exception 'InvalidOperationException' with message 'Cannot convert enum class label to float' in %s
+Stack trace:
+#0 (): HH\Lib\_Private\_Str\vsprintf_l()
+#1 %s HH\Lib\Str\format()
+#2 %s testConvToDbl()
+#3 (): main()
+#4 {main}
+exception 'TypecastException' with message 'Object of class A could not be converted to float' in %s
+Stack trace:
+#0 (): HH\Lib\_Private\_Str\vsprintf_l()
+#1 %s HH\Lib\Str\format()
+#2 %s testConvToDbl()
+#3 (): main()
+#4 {main}
+exception 'InvalidOperationException' with message 'Cannot convert function to float' in %s
+Stack trace:
+#0 (): HH\Lib\_Private\_Str\vsprintf_l()
+#1 %s HH\Lib\Str\format()
+#2 %s testConvToDbl()
+#3 (): main()
+#4 {main}
+class: schema0.000000
+lazycls: schema1.000000
+resource: schema%d.000000
+exception 'InvalidOperationException' with message 'Cannot convert class method to float' in %s
+Stack trace:
+#0 (): HH\Lib\_Private\_Str\vsprintf_l()
+#1 %s HH\Lib\Str\format()
+#2 %s testConvToDbl()
+#3 (): main()
+#4 {main}
+exception 'InvalidOperationException' with message 'Cannot convert reified class method to float' in %s
+Stack trace:
+#0 (): HH\Lib\_Private\_Str\vsprintf_l()
+#1 %s HH\Lib\Str\format()
+#2 %s testConvToDbl()
+#3 (): main()
+#4 {main}
+exception 'InvalidOperationException' with message 'Cannot convert reified function to float' in %s
+Stack trace:
+#0 (): HH\Lib\_Private\_Str\vsprintf_l()
+#1 %s HH\Lib\Str\format()
+#2 %s testConvToDbl()
+#3 (): main()
+#4 {main}
+Done

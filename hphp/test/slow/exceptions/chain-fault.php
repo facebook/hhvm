@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class LogExn extends Exception {
   function __construct($msg) {
@@ -8,7 +8,7 @@ class LogExn extends Exception {
 
 }
 
-function thrower() {
+function thrower() :mixed{
   try {
     throw new LogExn('inner');
   } finally {
@@ -16,7 +16,7 @@ function thrower() {
   }
 }
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   try {
     echo "Calling thrower\n";
     thrower();

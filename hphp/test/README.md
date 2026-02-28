@@ -37,13 +37,7 @@ These are the allowed extensions:
 
 * `.php` - The source of the test.
 * `.php.expect` - The exact string expected output.
-* `.php.expectf` - The exact string expected output with formating characters.
-* `.php.hhvm.expect` - The exact string expected output. Same as `.php.expect`.
-* `.php.hhvm.expectf` - The exact string expected output with formating characters. Same as `.php.expectf`.
-* `.php.typechecker.expect` - The exact string expected output for typechecker tests.
-* `.php.typechecker.expectf` - The exact string expected output for typechecker tests with formatting characters.
-* `.php.expectregex` - A regex that matches the output.
-* `.php.in` - When you run the test, the input will be obtained from here.
+* `.php.expectf` - The exact string expected output with formatting characters.
 * `.php.out` - When you run the test, the output will be stored here.
 * `.php.opts` - Runtime options to pass to hhvm.
 * `.php.cli_args` - Command line arguments to the test file (e.g., `$argv` options).
@@ -51,8 +45,8 @@ These are the allowed extensions:
 * `.php.hphp_opts` - Options passed to hphp when generating a bytecode repo.
 * `.php.diff or hhas.diff` - The diff for .expect tests.
 * `.hhas` - HipHop Assembly.
-* `.php.norepo` - don't run the test in repo mode
-* `.php.noserver` - don't run the test in server mode
+* `.php.norepo` – If this file is present, then the test is not run in repo-authoritative mode. Repo-authoritative mode performs a whole-program build.
+* `.php.noserver` - Don't run the test in server mode.
 * `.php.hhconfig` - A blank or syntactically valid Hack typechecker configuration file if you want the test to be able to be run in typechecker mode.
 * `inc.php` - Use this extension for `require` or `include` files if you are going to have a typechecker test that uses them. For now, make sure they are in the same directory as the test. They will be copied along with the core test files when the test runner is executing.
 
@@ -66,7 +60,7 @@ and the rest are optional.
 
 NOTE: If you are using a `.php.type-errors` file, then all the files suffixes listed in the paragraph above will include `type-errors` (e.g., `.php.type-errors.hhvm.expectf`).
 
-NOTE: You can have both a `.php.[hhvm].expect[f]` and a 
+NOTE: You can have both a `.php.[hhvm].expect[f]` and a
 `.php.typechecker.expect[f]`.
 
 Any suite can have a `config.hdf` file in it that will be used. If one isn't
@@ -93,19 +87,24 @@ typechecker errors as well.
 
 ## Format Characters
 
-These can appear in `.expectf` or `typechecker.expectf` files.
+These can appear in `.expectf` files.
 
-| Char    | Description                                | Regex
-|---------|--------------------------------------------|-------
-| %e      | Path separator                             | \/
-| %s      | Any characters except newlines             | [^\r\n]+
-| %S      | Optionally any characters except newlines  | [^\r\n]*
-| %a      | Any characters                             | .+
-| %A      | Optionally any characters                  | .*
-| %w      | Optional whitespace                        | \s*
-| %i      | Integer with optional sign                 | [+-]?\d+
-| %d      | Digits                                     | \d+
-| %x      | Hex                                        | [0-9a-fA-F]+
-| %f      | Float                                      | [+-]?\.?\d+\.?\d|(?:[Ee][+-]?\d+)?
-| %c      | Character                                  | .
-| %r...%r | The ... is a regex                         | The part that is ...
+| Char        | Description
+|-------------|----------------------------------------------------------
+| %s          | Any characters except newlines                          |
+| %S          | Optionally any characters except newlines               |
+| %a          | Any characters                                          |
+| %A          | Optionally any characters                               |
+| %w          | Optional whitespace                                     |
+| %i          | Integer with optional sign                              |
+| %d          | Digits                                                  |
+| %x          | Hex                                                     |
+| %f          | Float                                                   |
+| %c          | Character                                               |
+| %C          | Optional character                                      |
+| %t          | Tab                                                     |
+| %%          | %                                                       |
+| %h{xx}      | Literal byte with the value given inside {} (in hex)    |
+| %?{...}     | Optionally the sub pattern inside {}                    |
+| %|{...|...} | One of the sub patterns inside {} (separated by |)      |
+| %*{...}     | Zero or more of the sub pattern inside {}               |

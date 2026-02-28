@@ -3,11 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    lexable_trivia::LexableTrivia, positioned_trivia::PositionedTrivium,
-    trivia_factory::TriviaFactory, trivia_kind::TriviaKind,
-};
-use bumpalo::{collections::Vec, Bump};
+use bumpalo::Bump;
+use bumpalo::collections::Vec;
+
+use crate::lexable_trivia::LexableTrivia;
+use crate::positioned_trivia::PositionedTrivium;
+use crate::trivia_factory::TriviaFactory;
+use crate::trivia_kind::TriviaKind;
 
 pub type PositionedTrivia<'a> = Vec<'a, PositionedTrivium>;
 

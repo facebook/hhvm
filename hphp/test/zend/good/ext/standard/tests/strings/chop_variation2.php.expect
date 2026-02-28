@@ -1,0 +1,8 @@
+*** Testing chop() : with different unexpected values for charlist argument ***
+
+--- Testing chop() by supplying different values for 'charlist' argument ---
+-- Iteration 1 --
+string(17) "hello world12345 "
+-- Iteration 2 --
+string(17) "hello world12345 "
+Done

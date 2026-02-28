@@ -1,1 +1,1 @@
-function snappy_compress
+extension snappy

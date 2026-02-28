@@ -4,19 +4,19 @@ class TestClass {
     protected static $staticVar = 'TestClassStatic';
     const CLASS_CONST = 'TestClassConst';
 
-    protected static function staticFunction() {
+    protected static function staticFunction() :mixed{
         return 'TestClassFunction';
     }
 
-    public function testStaticVar() {
+    public function testStaticVar() :mixed{
         return static::$staticVar;
     }
 
-    public function testClassConst() {
+    public function testClassConst() :mixed{
         return static::CLASS_CONST;
     }
 
-    public function testStaticFunction() {
+    public function testStaticFunction() :mixed{
         return static::staticFunction();
     }
 }
@@ -25,7 +25,7 @@ class ChildClass1 extends TestClass {
     protected static $staticVar = 'ChildClassStatic';
     const CLASS_CONST = 'ChildClassConst';
 
-    protected static function staticFunction() {
+    protected static function staticFunction() :mixed{
         return 'ChildClassFunction';
     }
 }

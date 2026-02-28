@@ -1,7 +1,7 @@
 <?hh
 
-function main() {
-  $x = varray[1, 2, 3];
+function main() :mixed{
+  $x = vec[1, 2, 3];
   array_unshift(inout $x, 24);
   array_unshift(inout $x, 42, 'apple', 200);
   array_unshift(inout $x, 8, 99, 'green');
@@ -16,6 +16,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_variadic_builtin() {
+function main_variadic_builtin() :mixed{
 main();
 }

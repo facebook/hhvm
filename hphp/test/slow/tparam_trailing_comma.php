@@ -12,7 +12,7 @@ class Foo<
 
 
 <<__EntryPoint>>
-function main_tparam_trailing_comma() {
+function main_tparam_trailing_comma() :mixed{
 $foo = new Foo();
 var_dump($foo->getRandomNumber());
 }

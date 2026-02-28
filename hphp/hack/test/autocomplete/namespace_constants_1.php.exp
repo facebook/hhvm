@@ -1,0 +1,8 @@
+foo_a
+  INSERT foo_a
+  constant
+SORT TEXT: none
+foo_b
+  INSERT foo_b
+  constant
+SORT TEXT: none

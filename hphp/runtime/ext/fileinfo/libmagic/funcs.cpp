@@ -24,13 +24,13 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include "file.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/file.h"
 
 #ifndef  lint
 FILE_RCSID("@(#)$File: funcs.c,v 1.61 2012/10/30 23:11:51 christos Exp $")
 #endif  /* lint */
 
-#include "magic.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/magic.h"
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>

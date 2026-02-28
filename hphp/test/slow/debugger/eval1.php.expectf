@@ -1,0 +1,93 @@
+Program %s/eval1.php loaded. Type '[r]un' to go.
+run
+eval1.php loaded
+Program %s/eval1.php exited normally.
+print function_exists('test1')
+false
+@ function test1($x){error_log((string)$x);return $x+1;}
+print function_exists('test1')
+true
+@ $eval1=test1(4)
+4
+print $eval1
+5
+print class_exists('test2')
+false
+<?hh
+Enter code, end with a single dot '.' or '?>'. Use ctrl+c then enter to abort.
+class test2 {
+  public $a = 0;
+  private $b = 0;
+  public function ab() {
+    return $this->a . ":" . $this->b;
+  }
+  public function callCls() {
+    $obj = new cls();
+    return $obj->meth($this);
+  }
+  private function seven() {
+    return 7;
+  }
+}
+?>
+print class_exists('test2')
+true
+set bac off
+BypassAccessCheck(bac) set to off
+@ $eval2 = new test2()
+@ $eval2->a = 3
+@ $eval2->b = 4
+Hit fatal : Cannot access protected property
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+print $eval2->ab()
+"3:0"
+set bac on
+BypassAccessCheck(bac) set to on.
+All code executed from debugger is bypassing access check!
+@ $eval2->b = 4
+print $eval2->ab()
+"3:4"
+break eval1.php:12
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+print $eval2->callCls()
+"11:12-11:12-11:12"
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+set bac off
+BypassAccessCheck(bac) set to off
+@ $this->pub = 21
+
+Warning: Cannot access property on non-object
+@ $this->pri = 22
+
+Warning: Cannot access property on non-object
+next
+Notice: Attempted to interpret unknown debugger command as PHP!
+
+Hit fatal : Undefined constant 'next'
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+@ $this->pub = $x->seven()
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: x' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+set bac on
+BypassAccessCheck(bac) set to on.
+All code executed from debugger is bypassing access check!
+@ $this->pub = $x->seven()
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: x' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+run
+eval1.php loaded
+Program %s/eval1.php exited normally.
+quit

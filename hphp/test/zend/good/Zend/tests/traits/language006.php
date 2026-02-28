@@ -1,19 +1,19 @@
 <?hh
 
 trait Hello {
-   public function sayHelloWorld() {
+   public function sayHelloWorld() :mixed{
      echo 'Hello'.$this->getWorld();
    }
-   abstract public function getWorld();
+   abstract public function getWorld():mixed;
 }
 
 class MyHelloWorld {
    private $world;
    use Hello;
-   public function getWorld() {
+   public function getWorld() :mixed{
      return $this->world;
    }
-   public function setWorld($val) {
+   public function setWorld($val) :mixed{
      $this->world = $val;
    }
 }

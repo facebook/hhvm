@@ -16,7 +16,9 @@
 #pragma once
 
 #include "hphp/util/address-range.h"
+#include "hphp/util/alloc-defs.h"
 #include "hphp/util/slab-manager.h"
+#include "hphp/util/service-data.h"
 
 #include <atomic>
 #include <mutex>
@@ -59,7 +61,7 @@ struct ReadOnlyChunk {
  * ReadOnlyArena is a bump allocator for process-lifetime constant data. It is
  * backed by a list of ReadOnlyChunk's. Deallocation is not supported, but an
  * instance is able to return partially allocated ReadOnlyChunks to a global
- * pool (a TaggestSlabList), if it is specified during construction.
+ * pool (a TaggedSlabList), if it is specified during construction.
  *
  * If `Local` is true, no concurrent allocation is supported for an instance
  * (but allocating new chunks, or returning chunks to the global pool can still
@@ -81,9 +83,13 @@ struct ReadOnlyArena : TaggedSlabList {
    * call to the allocator, and returns partially used chunks to `pool` when
    * destructed.
    */
-  explicit ReadOnlyArena(size_t minChunkSize, TaggedSlabList* pool = nullptr)
-    : m_pool(pool)
-    , m_minChunkSize((minChunkSize + kChunkSizeMask) & ~kChunkSizeMask) {}
+  explicit ReadOnlyArena(
+    size_t minChunkSize,
+    ServiceData::ExportedCounter* cap_counter,
+    TaggedSlabList* pool = nullptr)
+    : m_pool(pool),
+      m_cap_counter(cap_counter),
+      m_minChunkSize((minChunkSize + kChunkSizeMask) & ~kChunkSizeMask) {}
   ReadOnlyArena(const ReadOnlyArena&) = delete;
   ReadOnlyArena& operator=(const ReadOnlyArena&) = delete;
 
@@ -142,12 +148,6 @@ struct ReadOnlyArena : TaggedSlabList {
   }
 
  private:
-  template<size_t align, typename T>
-  static T ru(T n) {
-    static_assert((align & (align - 1)) == 0, "");
-    return (T)(((uintptr_t)n + align - 1) & ~(align - 1));
-  }
-
   // Need to hold the lock before calling this.
   void* addChunk(size_t size) {
     ReadOnlyChunk* chunk = nullptr;
@@ -177,6 +177,7 @@ struct ReadOnlyArena : TaggedSlabList {
     auto const high = reinterpret_cast<uintptr_t>(mem + allocSize);
     chunk = new (mem) ReadOnlyChunk((uintptr_t)low, (uintptr_t)high);
     m_cap += allocSize;
+    m_cap_counter->addValue(allocSize);
     auto ret = chunk->tryAlloc(size, Alignment);
     assertx(ret);
     if (Local) recordLast(ret, size);
@@ -192,6 +193,7 @@ struct ReadOnlyArena : TaggedSlabList {
 
 private:
   TaggedSlabList* m_pool{nullptr};
+  ServiceData::ExportedCounter* m_cap_counter{nullptr};
   // Result of last allocation, used to support immediate deallocation after
   // allocation.
   void* m_lastAlloc{nullptr};

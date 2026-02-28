@@ -6,18 +6,14 @@ int(100)
 int(10)
 int(24)
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 27
-string(3) "Foo"
+Warning: Argument 1 to foo() must be of type @HH\classname, lazy class given in %s/test/slow/class-ptr/classptr-eager.php on line 38
+class(Foo)
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 26
-string(3) "Bar"
+Warning: Value returned from function foo() must be of type @N, lazy class given in %s/test/slow/class-ptr/classptr-eager.php on line 26
+class(Bar)
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 19
+Warning: Static property 'Baz::f' declared as type @HH\classname, lazy class assigned in %s/test/slow/class-ptr/classptr-eager.php on line 39
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 39
-string(3) "Bar"
-
-Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager.php on line 41
-string(1) "T"
-
-Fatal error: Class undefined: T in %s/test/slow/class-ptr/classptr-eager.php on line 43
+Warning: Static property 'Baz::f' declared as type @HH\classname, lazy class assigned in %s/test/slow/class-ptr/classptr-eager.php on line 39
+class(Bar)
+class(T)

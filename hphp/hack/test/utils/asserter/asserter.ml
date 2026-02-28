@@ -159,6 +159,8 @@ module Make_asserter (Comp : Comparator) : sig
 
   val assert_option_equals : Comp.t option -> Comp.t option -> string -> unit
 end = struct
+  (** [assert_equals expexted actual failure_msg] asserts that
+    [expected] is equal to [actual]. Prints to stderr and assert false if not. *)
   let assert_equals exp actual failure_msg =
     if Comp.is_equal exp actual then
       ()
@@ -201,13 +203,13 @@ end = struct
     | (None, None) -> ()
     | (None, Some v) ->
       Printf.eprintf
-        "assert_option_equals failed. Expected None but got Some(%s)"
+        "assert_option_equals failed. Expected None but got Some(%s)\n"
         (Comp.to_string v);
       Printf.eprintf "Assertion msg: %s" failure_msg;
       assert false
     | (Some v, None) ->
       Printf.eprintf
-        "assert_option_equals failed. Expected Some(%s) but got None"
+        "assert_option_equals failed. Expected Some(%s) but got None\n"
         (Comp.to_string v);
       Printf.eprintf "Assertion msg: %s" failure_msg;
       assert false

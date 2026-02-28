@@ -1,0 +1,2 @@
+ERROR: File "erased_generic.php", line 5, characters 10-10:
+`nameof` cannot be used with a generic type (Parsing[1002])

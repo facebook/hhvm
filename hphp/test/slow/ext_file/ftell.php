@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_ftell() {
-$tempfile = tempnam('/tmp', 'vmextfiletest');
+function main_ftell() :mixed{
+$tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
 fputs($f, "testing fseek");

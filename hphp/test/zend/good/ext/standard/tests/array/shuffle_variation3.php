@@ -12,36 +12,36 @@
 echo "*** Testing shuffle() : arrays with diff types of values ***\n";
 
 // initialise different arrays
-$array_arg = varray[
+$array_arg = vec[
        // array with positive int values
-/*1*/  varray[0, 1, 2, 2147483647 ],
+/*1*/  vec[0, 1, 2, 2147483647 ],
 
        // array with negative int values
-       varray[-1, -2, -2147483647 ],
+       vec[-1, -2, -2147483647 ],
 
        // array with positive float values
-/*3*/  varray[0.23, 1.34, 0e2, 200e-2, 30e2, 10e0, 2147473648.90],
+/*3*/  vec[0.23, 1.34, 0e2, 200e-2, 30e2, 10e0, 2147473648.90],
 
        // array with negative float values
-       varray[-0.23, -1.34, -200e-2, -30e2, -10e0, -2147473649.80],
+       vec[-0.23, -1.34, -200e-2, -30e2, -10e0, -2147473649.80],
 
        // array with single quoted and double quoted strings
-/*5*/  varray['one', "123numbers", 'hello\tworld', "hello world\0", '12.34floatnum'],
+/*5*/  vec['one', "123numbers", 'hello\tworld', "hello world\0", '12.34floatnum'],
 
        // array with bool values
-       varray[true, TRUE, FALSE, false],
+       vec[true, TRUE, FALSE, false],
 
        // array with positive hexa values
-/*7*/  varray[0x123, 0xabc, 0xABC, 0xac, 0xAb1, 0x9fa],
+/*7*/  vec[0x123, 0xabc, 0xABC, 0xac, 0xAb1, 0x9fa],
 
        // array with negative hexa values
-       varray[-0x123, -0xabc, -0xABC, -0xAb1, -0x9fa],
+       vec[-0x123, -0xabc, -0xABC, -0xAb1, -0x9fa],
 
        // array with positive octal values
-/*9*/  varray[0123, 0234, 034, 00],
+/*9*/  vec[0123, 0234, 034, 00],
 
        // array with negative octal values
-/*10*/ varray[-0123, -0234, -034],
+/*10*/ vec[-0123, -0234, -034],
 
 ];
 

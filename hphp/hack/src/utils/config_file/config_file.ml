@@ -22,20 +22,34 @@ let apply_overrides = Config_file_common.apply_overrides
 
 let parse_contents = Config_file_common.parse_contents
 
-let parse_hhconfig (fn : string) : string * t =
-  try Config_file_common.parse fn with
+module Getters = Config_file_common.Getters
+
+let cat_packages_file (fn : string) =
+  if Disk.file_exists fn then (
+    try Sys_utils.cat fn with
+    | exn ->
+      let e = Exception.wrap exn in
+      Hh_logger.exception_ ~prefix:(Printf.sprintf "%s deleted: " fn) e;
+      ""
+  ) else
+    ""
+
+let cat_hhconfig_file (fn : string) =
+  try Sys_utils.cat fn with
   | exn ->
     let e = Exception.wrap exn in
     Hh_logger.exception_ ~prefix:".hhconfig deleted: " e;
     Exit.exit Exit_status.Hhconfig_deleted
+
+let parse_hhconfig (fn : string) : t =
+  let contents = cat_hhconfig_file fn in
+  Config_file_common.parse_contents contents
 
 let parse_local_config = Config_file_common.parse_local_config
 
 let of_list = Config_file_common.of_list
 
 let keys = Config_file_common.keys
-
-module Getters = Config_file_common.Getters
 
 module Utils = struct
   let parse_hhconfig_and_hh_conf_to_json

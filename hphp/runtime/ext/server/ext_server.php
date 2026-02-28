@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 namespace {
 
@@ -34,9 +34,9 @@ function pagelet_server_is_enabled(): bool;
  */
 <<__Native>>
 function pagelet_server_task_start(string $url,
-                                   darray $headers = darray[],
+                                   dict<arraykey, string> $headers = dict[],
                                    string $post_data = "",
-                                   darray $files = darray[],
+                                   dict<arraykey, string> $files = dict[],
                                    int $timeout_seconds = 0): resource;
 
 /**
@@ -70,10 +70,10 @@ function pagelet_server_task_status(resource $task): int;
 <<__Native("NoFCallBuiltin")>>
 function pagelet_server_task_result(
   resource $task,
-  <<__OutOnly('varray')>>
-  inout mixed $headers,
-  <<__OutOnly('KindOfInt64')>>
-  inout mixed $code,
+  <<__OutOnly>>
+  inout vec<mixed> $headers,
+  <<__OutOnly>>
+  inout int $code,
   int $timeout_ms = 0,
 ): string;
 
@@ -154,6 +154,14 @@ function xbox_task_result(
  */
 <<__Native>>
 function xbox_process_call_message(string $msg): mixed;
+
+/**
+ * Return the number of xbox tasks started during this request.
+ *
+ * @return int - Number of xbox tasks started.
+ */
+<<__Native>>
+function xbox_tasks_started(): int;
 
 } // root namespace
 

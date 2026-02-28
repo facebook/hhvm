@@ -1,0 +1,4 @@
+WARN: File "no_match_file.php", line 7, characters 13-15:
+Dangerous access of abstract member `NoMatchClass::abs`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Warn[12025])
+  File "no_match_file.php", line 9, characters 35-37:
+  Declaration is here

@@ -6,10 +6,11 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 type load_state_error =
   (* an error reported when downloading saved-state through [Saved_state_loader] *)
-  | Load_state_saved_state_loader_failure of Saved_state_loader.load_error
+  | Load_state_saved_state_loader_failure of Saved_state_loader.LoadError.t
   (* an error fetching list of dirty files from hg *)
   | Load_state_dirty_files_failure of Future.error
   (* any other unhandled exception from lazy_init *)
@@ -26,24 +27,19 @@ type load_state_approach =
   | Load_state_natively
 [@@deriving show]
 
-type remote_init = {
-  worker_key: string;
-  nonce: Int64.t;
-  check_id: string;
-}
-[@@deriving show]
-
 type init_approach =
   | Full_init
   | Parse_only_init
+      (** Only does parsing. Used in particular with --save-naming. *)
   | Saved_state_init of load_state_approach
-  | Remote_init of remote_init
-  | Write_symbol_info
+  | Write_symbol_info  (** Write symbol info. Used by Glean. *)
+  | Write_symbol_info_with_state of load_state_approach
+      (** Write symbol info. Initialize with a saved state. Used by Glean. *)
 [@@deriving show]
 
 (** Docs are in .mli *)
 type init_result =
-  | Load_state_succeeded of ServerEnv.saved_state_delta option
+  | Load_state_succeeded of ServerEnv.saved_state_revs_info
   | Load_state_failed of string * Telemetry.t
   | Load_state_declined of string
 
@@ -58,8 +54,8 @@ let load_state_error_to_verbose_string (err : load_state_error) :
           ("Could not load saved-state from DevX infrastructure. "
           ^^ "The underlying error message was: %s\n\n"
           ^^ "The accompanying debug details are: %s")
-          (Saved_state_loader.long_user_message_of_error err)
-          (Saved_state_loader.debug_details_of_error err);
+          (Saved_state_loader.LoadError.long_user_message_of_error err)
+          (Saved_state_loader.LoadError.debug_details_of_error err);
       auto_retry = false;
       telemetry =
         Telemetry.create ()
@@ -68,10 +64,16 @@ let load_state_error_to_verbose_string (err : load_state_error) :
              ~value:"Load_state_saved_state_loader_failure"
         |> Telemetry.string_
              ~key:"category"
-             ~value:(Saved_state_loader.category_of_error err)
+             ~value:(Saved_state_loader.LoadError.category_of_error err)
         |> Telemetry.string_
              ~key:"debug_details"
-             ~value:(Saved_state_loader.debug_details_of_error err);
+             ~value:(Saved_state_loader.LoadError.debug_details_of_error err)
+        |> Telemetry.string_opt
+             ~key:"saved_state_manifold_api_key"
+             ~value:
+               (Saved_state_loader.LoadError
+                .saved_state_manifold_api_key_of_error
+                  err);
     }
   | Load_state_dirty_files_failure error ->
     let Future.{ message; stack = Utils.Callstack stack; environment } =
@@ -106,28 +108,31 @@ type loaded_info = {
   naming_table_fn: string;
   deptable_fn: string;
   naming_table_fallback_fn: string option;
-  corresponding_rev: Hg.rev;
-  mergebase_rev: Hg.global_rev option;
-  mergebase: Hg.hg_rev option;
-  (* Files changed between the loaded naming table saved state and current revision. *)
-  dirty_naming_files: Relative_path.Set.t; [@printer Relative_path.Set.pp_large]
-  (* Files changed between saved state revision and current public merge base *)
-  dirty_master_files: Relative_path.Set.t; [@printer Relative_path.Set.pp_large]
-  (* Files changed between public merge base and current revision *)
-  dirty_local_files: Relative_path.Set.t; [@printer Relative_path.Set.pp_large]
-  old_naming_table: Naming_table.t; [@opaque]
-  old_errors: SaveStateServiceTypes.saved_state_errors; [@opaque]
-  saved_state_delta: ServerEnv.saved_state_delta option;
+  changed_files_since_saved_state_rev: (Relative_path.Set.t[@yojson.opaque]);
+      [@printer Relative_path.Set.pp_large]
+      (** All files changed since the saved state revision according to either watchman
+        if we load the saved state via watchman, or
+        if we initialized with a pre-loaded saved state, the list of files passed to hh_server.
+        This should be the disjoint union of `dirty_master_files` and `dirty_local_files`,
+        which are determined using hg and this set. *)
+  dirty_master_files: (Relative_path.Set.t[@yojson.opaque]);
+      [@printer Relative_path.Set.pp_large]
+      (** Files changed between saved state revision and current public merge base *)
+  dirty_local_files: (Relative_path.Set.t[@yojson.opaque]);
+      [@printer Relative_path.Set.pp_large]
+      (** Files changed since the public merge base *)
+  old_naming_table: (Naming_table.t[@yojson.opaque]); [@show.opaque]
+  old_errors: (SaveStateServiceTypes.saved_state_errors[@yojson.opaque]);
+      [@show.opaque]
+  old_warnings: (Warnings_saved_state.t[@yojson.opaque]); [@show.opaque]
+  saved_state_revs_info: ServerEnv.saved_state_revs_info;
   (* The manifold path for naming table saved state, to be used by remote type checker
      for downloading the naming table in the case of a saved-state init *)
   naming_table_manifold_path: string option;
 }
-[@@deriving show]
+[@@deriving show, yojson_of]
 
-(* Laziness *)
 type lazy_level =
-  | Off
-  | Decl
-  | Parse
-  | Init
+  | Eager
+  | Lazy
 [@@deriving show]

@@ -1,7 +1,17 @@
 (library
  (name ast)
  (wrapped false)
- (modules ast_defs ast_defs_visitors_ancestors)
- (libraries file_info namespace_env naming_special_names)
+ (modules ast_defs)
+ (libraries
+  file_info
+  namespace_env
+  naming_special_names
+  visitors_runtime)
  (preprocess
-  (pps visitors.ppx ppx_deriving.std)))
+  (pps
+   ppx_deriving.std
+   ppx_hash
+   ppx_sexp_conv
+   ppx_transform
+   ppx_yojson_conv
+   visitors.ppx)))

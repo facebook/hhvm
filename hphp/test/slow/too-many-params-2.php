@@ -1,6 +1,6 @@
-<?hh // strict
+<?hh
 
-function f() {
+function f() :mixed{
   echo "done\n";
 }
 

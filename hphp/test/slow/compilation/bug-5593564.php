@@ -1,6 +1,6 @@
 <?hh
 
-function main($arr) {
+function main($arr) :mixed{
   try {
     if ($arr[1 << 33]) {
       var_dump($arr[1 << 33]);
@@ -12,9 +12,9 @@ function main($arr) {
 
 
 <<__EntryPoint>>
-function main_bug_5593564() {
-$packed = varray[1,2,3];
-$mixed = darray[(1 << 33) => varray["value"]];
+function main_bug_5593564() :mixed{
+$packed = vec[1,2,3];
+$mixed = dict[(1 << 33) => vec["value"]];
 
 main($packed);
 main($mixed);

@@ -1,14 +1,14 @@
-File "array_get_tconst.php", line 4, characters 34-53:
+ERROR: File "array_get_tconst.php", line 4, characters 34-53:
 Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 29, characters 49-50:
+  File "hackarray.hhi", line 33, characters 24-25:
   `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 29, characters 55-62:
+  File "hackarray.hhi", line 33, characters 30-37:
   This type constraint is violated
-  File "hackarray.hhi", line 29, characters 55-62:
+  File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
   File "array_get_tconst.php", line 4, characters 41-45:
   But got `mixed`
-File "array_get_tconst.php", line 8, characters 12-13:
+ERROR: File "array_get_tconst.php", line 8, characters 12-13:
 Invalid return type (Typing[4110])
   File "array_get_tconst.php", line 6, characters 43-55:
   Expected `this::MyArray`

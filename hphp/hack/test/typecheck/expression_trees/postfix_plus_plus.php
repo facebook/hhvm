@@ -2,10 +2,8 @@
 
 <<file: __EnableUnstableFeatures('expression_trees')>>
 
-final class MyClassWithPostfixPlusPlus {
-  public function __postfixPlusPlus(): MyClassWithPostfixPlusPlus {
-    throw new Exception();
-  }
+interface MyClassWithPostfixPlusPlus extends ExampleMixedOpType {
+  public function __postfixPlusPlus(): MyClassWithPostfixPlusPlus;
 }
 
 // These should all work without problem

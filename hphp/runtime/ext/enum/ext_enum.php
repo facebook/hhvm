@@ -1,12 +1,15 @@
-<?hh // partial
+<?hh
 
 namespace HH {
+
+const string BUILTIN_ENUM = "HH\\BuiltinEnum";
+const string BUILTIN_ENUM_CLASS = "HH\\BuiltinEnumClass";
 
 /**
  * BuiltinEnum contains the utility methods provided by enums.
  * Under the hood, an enum Foo will extend BuiltinEnum<Foo>.
  */
-abstract class BuiltinEnum<+T> {
+abstract class BuiltinEnum<+T as arraykey> {
   // We set NoFCallBuiltin on our methods to work around an HHVM bug;
   // when using CallBuiltin, the class pointer isn't properly passed.
 
@@ -14,31 +17,31 @@ abstract class BuiltinEnum<+T> {
    * Get the values of the public consts defined on this class,
    * indexed by the string name of those consts.
    *
-   * @return darray['CONST_NAME' => $value, ....]
+   * @return dict['CONST_NAME' => $value, ....]
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function getValues()[]: darray<string, T>;
 
   /**
    * Get the names of all the const values, indexed by value. Calls
    * invariant_exception if multiple constants have the same value.
    *
-   * @return darray[$value => 'CONST_NAME', ....]
+   * @return dict[$value => 'CONST_NAME', ....]
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function getNames()[]: darray<T, string>;
 
   /**
    * Returns whether or not the value is defined as a constant.
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function isValid(mixed $value)[]: bool;
 
   /**
    * Coerce to a valid value or null.
    * This is useful for typing deserialized enum values.
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function coerce(mixed $value)[]: ?T;
 
   /**
@@ -63,7 +66,7 @@ abstract class BuiltinEnum<+T> {
   final public static function assertAll(
     Traversable<mixed> $values,
   )[]: Container<T> {
-    $new_values = varray[];
+    $new_values = vec[];
     foreach ($values as $value) {
       $new_values[] = static::assert($value);
     }
@@ -77,9 +80,29 @@ namespace EnumClass {
 /**
  * Type of enum class labels
  */
-newtype Label<-TEnumClass, TType> = mixed;
+newtype Label<-TEnumClass, +TType> = mixed;
 }
 
+/**
+ * GenericEnumClass is an interface that contains the utility methods provided
+ * by concrete implementations of enum classes. It is used to hide the
+ * implementation details of enum classes from the user, while allowing
+ * to write code that operates across unrelated enum classes generically.
+ *
+ * For instance this allows to restrict a type constant to be a concrete enum class
+ * whose members are known to be arraykeys by writing:
+ *
+ *   type const T as GenericEnumClass<mixed, arraykey>;
+ */
+<<__Sealed(BuiltinEnumClass::class)>>
+interface GenericEnumClass<+Tclass, +T> {
+  require extends BuiltinAbstractEnumClass;
+  public static function getValues()[write_props]: darray<string, T>;
+
+  public static function valueOf<TEnum super Tclass, TType>(
+    \HH\EnumClass\Label<TEnum, TType> $label,
+  )[write_props]: MemberOf<TEnum, TType>;
+}
 
 /**
  * BuiltinAbstractEnumClass contains the utility methods provided by
@@ -90,8 +113,8 @@ newtype Label<-TEnumClass, TType> = mixed;
  * provided for the typechecker and for developer reference.
  */
 abstract class BuiltinAbstractEnumClass {
-  final public static function nameOf<TType>(EnumClass\Label<this, TType> $atom): string {
-    return \__SystemLib\unwrap_opaque_value(\__SystemLib\OpaqueValueId::EnumClassLabel, $atom);
+  final public static function nameOf(EnumClass\Label<this, mixed> $atom)[]: string {
+      return \__SystemLib\unwrap_enum_class_label($atom);
   }
 }
 
@@ -104,18 +127,27 @@ abstract class BuiltinAbstractEnumClass {
  * definition below is not actually used at run time; it is simply
  * provided for the typechecker and for developer reference.
  */
-abstract class BuiltinEnumClass<+T> extends BuiltinAbstractEnumClass {
+abstract class BuiltinEnumClass<+T> extends BuiltinAbstractEnumClass
+  implements GenericEnumClass<this, T> {
   /**
    * Get the values of the public consts defined on this class,
    * indexed by the string name of those consts.
    *
+   * Because calling getValues might trigger the initialisation of
+   * the enum class constants, which are [write_props], we
+   * set the context to [write_props] to make sure the effects are
+   * correctly dealt with.
+   *
    * @return array ('CONST_NAME' => $value, ....)
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function getValues()[write_props]: darray<string, T>;
 
-  final public static function valueOf<TEnum super this, TType>(EnumClass\Label<TEnum, TType> $atom): MemberOf<TEnum, TType> {
-    $key = \__SystemLib\unwrap_opaque_value(\__SystemLib\OpaqueValueId::EnumClassLabel, $atom);
+  /* Has the same effects as getValues, thus [write_props] */
+  final public static function valueOf<TEnum super this, TType>(
+    EnumClass\Label<TEnum, TType> $atom,
+  )[write_props]: MemberOf<TEnum, TType> {
+    $key = \__SystemLib\unwrap_enum_class_label($atom);
     return \__SystemLib\get_enum_member_by_label($key);
   }
 }

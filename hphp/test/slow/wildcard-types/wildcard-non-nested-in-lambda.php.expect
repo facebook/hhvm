@@ -1,0 +1,8 @@
+vec(1) {
+  int(2)
+}
+NULL
+vec(1) {
+  int(3)
+}
+NULL

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_error_construct() {
+function main_error_construct() :mixed{
 error_reporting(0);
 var_dump(date_create("1942-07-13T25:05:02.00+00:00"));
 try {

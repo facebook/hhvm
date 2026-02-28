@@ -22,7 +22,7 @@ text & @()
 EOD;
 
 //array of string inputs for $str
-$str_arr = varray[
+$str_arr = vec[
   //double quoted strings
   "%",
   "#$*",
@@ -39,7 +39,7 @@ $str_arr = varray[
 
 $from = "%#$*&@()";
 $to = "specials";
-$replace_pairs = darray["$" => "%", "%" => "$", "#*&@()" => "()@&*#"];
+$replace_pairs = dict["$" => "%", "%" => "$", "#*&@()" => "()@&*#"];
 
 /* loop through to test strtr() with each element of $str_arr */
 for($index = 0; $index < count($str_arr); $index++) {

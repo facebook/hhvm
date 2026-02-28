@@ -35,17 +35,6 @@ const StaticString
   s_toUCallback("toUCallback"),
   s_fromUCallback("fromUCallback");
 
-static Class* UConverterClass = nullptr;
-
-static Class* getClass() {
-  if (!UConverterClass) {
-    UConverterClass = Class::lookup(s_UConverter.get());
-    assertx(UConverterClass);
-  }
-  return UConverterClass;
-}
-
-
 template<class T>
 bool checkLimits(IntlUConverter* data, T* args, int64_t needed) {
   if (needed > (args->targetLimit - args->target)) {
@@ -265,7 +254,7 @@ static void HHVM_METHOD(UConverter, __construct, const String& toEncoding,
   FETCH_CNV(data, this_,);
   data->setDest(doSetEncoding(data, toEncoding));
   data->setSrc(doSetEncoding(data, fromEncoding));
-  if (this_->getVMClass() != getClass()) {
+  if (this_->getVMClass() != IntlUConverter::classof()) {
     setCallback(Object{this_}, data->dest());
     setCallback(Object{this_}, data->src());
   }
@@ -494,7 +483,7 @@ static Variant HHVM_STATIC_METHOD(UConverter, getStandardName,
   return String(standard_name, CopyString);
 }
 
-void IntlExtension::initUConverter() {
+void IntlExtension::registerNativeUConverter() {
   HHVM_ME(UConverter, __construct);
   HHVM_ME(UConverter, __dispose);
   HHVM_ME(UConverter, convert);
@@ -559,9 +548,7 @@ void IntlExtension::initUConverter() {
   HHVM_RCC_INT(UConverter, CESU8, UCNV_CESU8);
   HHVM_RCC_INT(UConverter, IMAP_MAILBOX, UCNV_IMAP_MAILBOX);
 
-  Native::registerNativeDataInfo<IntlUConverter>(s_UConverter.get());
-
-  loadSystemlib("icu_uconverter");
+  Native::registerNativeDataInfo<IntlUConverter>();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -11,6 +11,7 @@ C
     position: line 4, characters 14-15
     span: line 4, character 3 - line 4, character 25
     modifiers: 
+    detail: const type Ta = string;
 
   Tb
     kind: typeconst
@@ -18,6 +19,7 @@ C
     position: line 5, characters 23-24
     span: line 5, character 3 - line 5, character 25
     modifiers: abstract 
+    detail: abstract const type Tb;
 
   Tc
     kind: typeconst
@@ -25,4 +27,5 @@ C
     position: line 6, characters 23-24
     span: line 6, character 3 - line 6, character 32
     modifiers: abstract 
+    detail: abstract const type Tc as int;
 

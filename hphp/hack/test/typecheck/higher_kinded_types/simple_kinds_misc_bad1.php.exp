@@ -1,8 +1,0 @@
-File "simple_kinds_misc_bad1.php", line 17, characters 22-30:
-This is a type constructor of kind Type -> ((Type -> Type) -> Type) -> Type, but a type constructor of kind Type -> (Type -> Type) -> Type was expected here. (Typing[4383])
-File "simple_kinds_misc_bad1.php", line 13, characters 12-13:
-We are expecting a type constructor of kind Type -> (Type -> Type) -> Type due to the definition of TC here.
-File "simple_kinds_misc_bad1.php", line 18, characters 22-30:
-This is a type constructor of kind Type -> ((Type -> Type) -> Type) -> Type, but a type constructor of kind Type -> (Type -> Type) -> Type was expected here. (Typing[4383])
-File "simple_kinds_misc_bad1.php", line 14, characters 15-16:
-We are expecting a type constructor of kind Type -> (Type -> Type) -> Type due to the definition of TC here.

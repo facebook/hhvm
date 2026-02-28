@@ -8,7 +8,7 @@ string(11) "02:08:08 PM"
 string(%d) "%d:%d"
 string(5) "14:08"
 
---Current time %H:%M:%S format--
+--Current time %%H:%%M:%S format--
 string(%d) "%d:%d:%d"
 string(8) "14:08:08"
 ===DONE===

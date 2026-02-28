@@ -1,4 +1,0 @@
-File "simple_kinds_in_constraints.php", line 10, characters 28-28:
-This is a type constructor of kind Type -> (Type -> Type) -> Type, but a type constructor expecting a single (fully-applied) type argument was expected here. (Typing[4383])
-File "simple_kinds_in_constraints.php", line 6, characters 12-13:
-We are expecting a type constructor expecting a single (fully-applied) type argument due to the definition of T2 here.

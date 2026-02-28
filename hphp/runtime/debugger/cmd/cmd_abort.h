@@ -26,6 +26,8 @@ struct CmdAbort : DebuggerCommand {
 
   void help(DebuggerClient&) override;
   void onClient(DebuggerClient&) override;
+
+  std::string name() const override { return "abort"; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

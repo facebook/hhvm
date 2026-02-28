@@ -1,6 +1,6 @@
 <?hh
 
-function gen(int $mode) {
+function gen(int $mode) :AsyncGenerator<mixed,mixed,void>{
   yield $mode;
   switch ($mode) {
     case 0: break;
@@ -12,7 +12,7 @@ function gen(int $mode) {
 
 
 <<__EntryPoint>>
-function main_2185() {
+function main_2185() :mixed{
 for ($mode = 0;
  $mode < 3;
  ++$mode) {

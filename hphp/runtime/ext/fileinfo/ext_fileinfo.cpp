@@ -14,7 +14,6 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include <sys/types.h>
 #include <sys/stat.h>
 
 #include "hphp/runtime/ext/extension.h"
@@ -71,12 +70,12 @@ static Variant HHVM_FUNCTION(finfo_open,
   return Variant(req::make<FileinfoResource>(magic));
 }
 
-static bool HHVM_FUNCTION(finfo_close, const Resource& finfo) {
+static bool HHVM_FUNCTION(finfo_close, const OptResource& finfo) {
   cast<FileinfoResource>(finfo)->close();
   return true;
 }
 
-static bool HHVM_FUNCTION(finfo_set_flags, const Resource& finfo, int64_t options) {
+static bool HHVM_FUNCTION(finfo_set_flags, const OptResource& finfo, int64_t options) {
   auto magic = cast<FileinfoResource>(finfo)->getMagic();
   if (magic_setflags(magic, options) == -1) {
     raise_warning(
@@ -95,7 +94,7 @@ static bool HHVM_FUNCTION(finfo_set_flags, const Resource& finfo, int64_t option
 #define FILEINFO_MODE_FILE 2
 
 static Variant
-php_finfo_get_type(const Resource& object, const Variant& what, int64_t options,
+php_finfo_get_type(const OptResource& object, const Variant& what, int64_t options,
                    const Variant& /*context*/, int mode, int mimetype_emu) {
   String ret_val;
   String buffer;
@@ -208,7 +207,7 @@ clean:
 }
 
 static String HHVM_FUNCTION(finfo_buffer,
-    const Resource& finfo, const Variant& string,
+    const OptResource& finfo, const Variant& string,
     int64_t options, const Variant& context) {
 
   String s;
@@ -221,7 +220,7 @@ static String HHVM_FUNCTION(finfo_buffer,
 }
 
 static String HHVM_FUNCTION(finfo_file,
-    const Resource& finfo, const Variant& file_name,
+    const OptResource& finfo, const Variant& file_name,
     int64_t options, const Variant& context) {
 
   String fn;
@@ -235,15 +234,15 @@ static String HHVM_FUNCTION(finfo_file,
 
 static String HHVM_FUNCTION(mime_content_type, const Variant& filename) {
   return php_finfo_get_type(
-    Resource{}, filename, 0, uninit_null(), -1, 1
+    OptResource{}, filename, 0, uninit_null(), -1, 1
   ).toString();
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 struct fileinfoExtension final : Extension {
-  fileinfoExtension() : Extension("fileinfo", "1.0.5-dev") {}
-  void moduleInit() override {
+  fileinfoExtension() : Extension("fileinfo", "1.0.5-dev", NO_ONCALL_YET) {}
+  void moduleRegisterNative() override {
     HHVM_RC_INT(FILEINFO_NONE, MAGIC_NONE);
     HHVM_RC_INT(FILEINFO_SYMLINK, MAGIC_SYMLINK);
     HHVM_RC_INT(FILEINFO_MIME, MAGIC_MIME);
@@ -259,12 +258,11 @@ struct fileinfoExtension final : Extension {
     HHVM_FE(finfo_set_flags);
     HHVM_FE(finfo_close);
     HHVM_FE(mime_content_type);
-    loadSystemlib();
   }
 } s_fileinfo_extension;
 
 // Uncomment for non-bundled module
-//HHVM_GET_MODULE(fileinfo);
+//HHVM_GET_MODULE(fileinfo)
 
 //////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP

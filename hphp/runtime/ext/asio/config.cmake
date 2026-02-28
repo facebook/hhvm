@@ -10,7 +10,9 @@ HHVM_DEFINE_EXTENSION("asio" REQUIRED
     ext_async-generator.cpp
     ext_async-generator-wait-handle.cpp
     ext_await-all-wait-handle.cpp
+    ext_concurrent-wait-handle.cpp
     ext_condition-wait-handle.cpp
+    ext_priority-bridge-wait-handle.cpp
     ext_asio.cpp
     ext_external-thread-event-wait-handle.cpp
     ext_reschedule-wait-handle.cpp
@@ -23,6 +25,7 @@ HHVM_DEFINE_EXTENSION("asio" REQUIRED
   HEADERS
     asio-blockable.h
     asio-context.h
+    asio-context-index.h
     asio-context-inl.h
     asio-context-enter.h
     asio-context-enter-inl.h
@@ -35,7 +38,10 @@ HHVM_DEFINE_EXTENSION("asio" REQUIRED
     ext_async-generator-wait-handle.h
     ext_await-all-wait-handle.h
     ext_await-all-wait-handle-inl.h
+    ext_concurrent-wait-handle.h
+    ext_concurrent-wait-handle-inl.h
     ext_condition-wait-handle.h
+    ext_priority-bridge-wait-handle.h
     ext_asio.h
     ext_external-thread-event-wait-handle.h
     ext_reschedule-wait-handle.h

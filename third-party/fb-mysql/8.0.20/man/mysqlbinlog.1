@@ -1,0 +1,3194 @@
+'\" t
+.\"     Title: \fBmysqlbinlog\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBMYSQLBINLOG\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+mysqlbinlog \- utility for processing binary log files
+.SH "SYNOPSIS"
+.HP \w'\fBmysqlbinlog\ [\fR\fBoptions\fR\fB]\ \fR\fB\fIlog_file\fR\fR\fB\ \&.\&.\&.\fR\ 'u
+\fBmysqlbinlog [\fR\fBoptions\fR\fB] \fR\fB\fIlog_file\fR\fR\fB \&.\&.\&.\fR
+.SH "DESCRIPTION"
+.PP
+The server\*(Aqs binary log consists of files containing
+\(lqevents\(rq
+that describe modifications to database contents\&. The server writes these files in binary format\&. To display their contents in text format, use the
+\fBmysqlbinlog\fR
+utility\&. You can also use
+\fBmysqlbinlog\fR
+to display the contents of relay log files written by a slave server in a replication setup because relay logs have the same format as binary logs\&. The binary log and relay log are discussed further in
+Section\ \&5.4.4, \(lqThe Binary Log\(rq, and
+Section\ \&17.2.4, \(lqReplication Relay and Status Logs\(rq\&.
+.PP
+Invoke
+\fBmysqlbinlog\fR
+like this:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlbinlog [\fR\fB\fIoptions\fR\fR\fB] \fR\fB\fIlog_file\fR\fR\fB \&.\&.\&.\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+For example, to display the contents of the binary log file named
+binlog\&.000003, use this command:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlbinlog binlog\&.0000003\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The output includes events contained in
+binlog\&.000003\&. For statement\-based logging, event information includes the SQL statement, the ID of the server on which it was executed, the timestamp when the statement was executed, how much time it took, and so forth\&. For row\-based logging, the event indicates a row change rather than an SQL statement\&. See
+Section\ \&17.2.1, \(lqReplication Formats\(rq, for information about logging modes\&.
+.PP
+Events are preceded by header comments that provide additional information\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+# at 141
+#100309  9:28:36 server id 123  end_log_pos 245
+  Query thread_id=3350  exec_time=11  error_code=0
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+In the first line, the number following
+at
+indicates the file offset, or starting position, of the event in the binary log file\&.
+.PP
+The second line starts with a date and time indicating when the statement started on the server where the event originated\&. For replication, this timestamp is propagated to slave servers\&.
+server id
+is the
+server_id
+value of the server where the event originated\&.
+end_log_pos
+indicates where the next event starts (that is, it is the end position of the current event + 1)\&.
+thread_id
+indicates which thread executed the event\&.
+exec_time
+is the time spent executing the event, on a master server\&. On a slave, it is the difference of the end execution time on the slave minus the beginning execution time on the master\&. The difference serves as an indicator of how much replication lags behind the master\&.
+error_code
+indicates the result from executing the event\&. Zero means that no error occurred\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+When using event groups, the file offsets of events may be grouped together and the comments of events may be grouped together\&. Do not mistake these grouped events for blank file offsets\&.
+.sp .5v
+.RE
+.PP
+The output from
+\fBmysqlbinlog\fR
+can be re\-executed (for example, by using it as input to
+\fBmysql\fR) to redo the statements in the log\&. This is useful for recovery operations after a server crash\&. For other usage examples, see the discussion later in this section and in
+Section\ \&7.5, \(lqPoint-in-Time (Incremental) Recovery Using the Binary Log\(rq\&. To execute the internal\-use
+BINLOG
+statements used by
+\fBmysqlbinlog\fR, the user requires the
+BINLOG_ADMIN
+or
+SUPER
+privilege, or the
+REPLICATION_APPLIER
+privilege plus the appropriate privileges to execute each log event\&.
+.PP
+You can use
+\fBmysqlbinlog\fR
+to read binary log files directly and apply them to the local MySQL server\&. You can also read binary logs from a remote server by using the
+\fB\-\-read\-from\-remote\-server\fR
+option\&. To read remote binary logs, the connection parameter options can be given to indicate how to connect to the server\&. These options are
+\fB\-\-host\fR,
+\fB\-\-password\fR,
+\fB\-\-port\fR,
+\fB\-\-protocol\fR,
+\fB\-\-socket\fR, and
+\fB\-\-user\fR\&.
+.PP
+When binary log files have been encrypted, which can be done from MySQL 8\&.0\&.14 onwards,
+\fBmysqlbinlog\fR
+cannot read them directly, but can read them from the server using the
+\fB\-\-read\-from\-remote\-server\fR
+option\&. Binary log files are encrypted when the server\*(Aqs
+binlog_encryption
+system variable is set to
+ON\&. The
+SHOW BINARY LOGS
+statement shows whether a particular binary log file is encrypted or unencrypted\&. Encrypted and unencrypted binary log files can also be distinguished using the magic number at the start of the file header for encrypted log files (0xFD62696E), which differs from that used for unencrypted log files (0xFE62696E)\&. Note that from MySQL 8\&.0\&.14,
+\fBmysqlbinlog\fR
+returns a suitable error if you attempt to read an encrypted binary log file directly, but older versions of
+\fBmysqlbinlog\fR
+do not recognise the file as a binary log file at all\&. For more information on binary log encryption, see
+Section\ \&17.3.2, \(lqEncrypting Binary Log Files and Relay Log Files\(rq\&.
+.PP
+When running
+\fBmysqlbinlog\fR
+against a large binary log, be careful that the filesystem has enough space for the resulting files\&. To configure the directory that
+\fBmysqlbinlog\fR
+uses for temporary files, use the
+TMPDIR
+environment variable\&.
+.PP
+\fBmysqlbinlog\fR
+sets the value of
+pseudo_slave_mode
+to true before executing any SQL statements\&. This system variable affects the handling of XA transactions, the
+original_commit_timestamp
+replication delay timestamp and the
+original_server_version
+system variable, and unsupported SQL modes\&.
+.PP
+\fBmysqlbinlog\fR
+supports the following options, which can be specified on the command line or in the
+[mysqlbinlog]
+and
+[client]
+groups of an option file\&. For information about option files used by MySQL programs, see
+Section\ \&4.2.2.2, \(lqUsing Option Files\(rq\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-help\fR,
+\fB\-?\fR
+.sp
+Display a help message and exit\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-base64\-output=\fR\fB\fIvalue\fR\fR
+.sp
+This option determines when events should be displayed encoded as base\-64 strings using
+BINLOG
+statements\&. The option has these permissible values (not case\-sensitive):
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+AUTO
+("automatic") or
+UNSPEC
+("unspecified") displays
+BINLOG
+statements automatically when necessary (that is, for format description events and row events)\&. If no
+\fB\-\-base64\-output\fR
+option is given, the effect is the same as
+\fB\-\-base64\-output=AUTO\fR\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+Automatic
+BINLOG
+display is the only safe behavior if you intend to use the output of
+\fBmysqlbinlog\fR
+to re\-execute binary log file contents\&. The other option values are intended only for debugging or testing purposes because they may produce output that does not include all events in executable form\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+NEVER
+causes
+BINLOG
+statements not to be displayed\&.
+\fBmysqlbinlog\fR
+exits with an error if a row event is found that must be displayed using
+BINLOG\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+DECODE\-ROWS
+specifies to
+\fBmysqlbinlog\fR
+that you intend for row events to be decoded and displayed as commented SQL statements by also specifying the
+\fB\-\-verbose\fR
+option\&. Like
+NEVER,
+DECODE\-ROWS
+suppresses display of
+BINLOG
+statements, but unlike
+NEVER, it does not exit with an error if a row event is found\&.
+.RE
+.sp
+For examples that show the effect of
+\fB\-\-base64\-output\fR
+and
+\fB\-\-verbose\fR
+on row event output, see
+the section called \(lqMYSQLBINLOG ROW EVENT DISPLAY\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-bind\-address=\fR\fB\fIip_address\fR\fR
+.sp
+On a computer having multiple network interfaces, use this option to select which interface to use for connecting to the MySQL server\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-binlog\-row\-event\-max\-size=\fR\fB\fIN\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--binlog-row-event-max-size=#
+T}
+T{
+\fBType\fR
+T}:T{
+Numeric
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+4294967040
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+256
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+18446744073709547520
+T}
+.TE
+.sp 1
+Specify the maximum size of a row\-based binary log event, in bytes\&. Rows are grouped into events smaller than this size if possible\&. The value should be a multiple of 256\&. The default is 4GB\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-character\-sets\-dir=\fR\fB\fIdir_name\fR\fR
+.sp
+The directory where character sets are installed\&. See
+Section\ \&10.15, \(lqCharacter Set Configuration\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-compress\fR
+.sp
+Compress all information sent between the client and the server if possible\&. See
+Section\ \&4.2.6, \(lqConnection Compression Control\(rq\&.
+.sp
+This option was added in MySQL 8\&.0\&.17\&. As of MySQL 8\&.0\&.18 it is deprecated\&. It will be removed in a future MySQL version\&. See
+the section called \(lqLegacy Connection Compression Configuration\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-compression\-algorithms=\fR\fB\fIvalue\fR\fR
+The permitted compression algorithms for connections to the server\&. The available algorithms are the same as for the
+protocol_compression_algorithms
+system variable\&. The default value is
+uncompressed\&.
+.sp
+For more information, see
+Section\ \&4.2.6, \(lqConnection Compression Control\(rq\&.
+.sp
+This option was added in MySQL 8\&.0\&.18\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-connection\-server\-id=\fR\fB\fIserver_id\fR\fR
+.sp
+\fB\-\-connection\-server\-id\fR
+specifies the server ID that
+\fBmysqlbinlog\fR
+reports when it connects to the server\&. It can be used to avoid a conflict with the ID of a slave server or another
+\fBmysqlbinlog\fR
+process\&.
+.sp
+If the
+\fB\-\-read\-from\-remote\-server\fR
+option is specified,
+\fBmysqlbinlog\fR
+reports a server ID of 0, which tells the server to disconnect after sending the last log file (nonblocking behavior)\&. If the
+\fB\-\-stop\-never\fR
+option is also specified to maintain the connection to the server,
+\fBmysqlbinlog\fR
+reports a server ID of 1 by default instead of 0, and
+\fB\-\-connection\-server\-id\fR
+can be used to replace that server ID if required\&. See
+the section called \(lqSPECIFYING THE MYSQLBINLOG SERVER ID\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-database=\fR\fB\fIdb_name\fR\fR,
+\fB\-d \fR\fB\fIdb_name\fR\fR
+.sp
+This option causes
+\fBmysqlbinlog\fR
+to output entries from the binary log (local log only) that occur while
+\fIdb_name\fR
+is been selected as the default database by
+USE\&.
+.sp
+The
+\fB\-\-database\fR
+option for
+\fBmysqlbinlog\fR
+is similar to the
+\fB\-\-binlog\-do\-db\fR
+option for
+\fBmysqld\fR, but can be used to specify only one database\&. If
+\fB\-\-database\fR
+is given multiple times, only the last instance is used\&.
+.sp
+The effects of this option depend on whether the statement\-based or row\-based logging format is in use, in the same way that the effects of
+\fB\-\-binlog\-do\-db\fR
+depend on whether statement\-based or row\-based logging is in use\&.
+.PP
+\fBStatement-based logging\fR. The
+\fB\-\-database\fR
+option works as follows:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+While
+\fIdb_name\fR
+is the default database, statements are output whether they modify tables in
+\fIdb_name\fR
+or a different database\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Unless
+\fIdb_name\fR
+is selected as the default database, statements are not output, even if they modify tables in
+\fIdb_name\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+There is an exception for
+CREATE DATABASE,
+ALTER DATABASE, and
+DROP DATABASE\&. The database being
+\fIcreated, altered, or dropped\fR
+is considered to be the default database when determining whether to output the statement\&.
+.RE
+.sp
+Suppose that the binary log was created by executing these statements using statement\-based\-logging:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+INSERT INTO test\&.t1 (i) VALUES(100);
+INSERT INTO db2\&.t2 (j)  VALUES(200);
+USE test;
+INSERT INTO test\&.t1 (i) VALUES(101);
+INSERT INTO t1 (i)      VALUES(102);
+INSERT INTO db2\&.t2 (j)  VALUES(201);
+USE db2;
+INSERT INTO test\&.t1 (i) VALUES(103);
+INSERT INTO db2\&.t2 (j)  VALUES(202);
+INSERT INTO t2 (j)      VALUES(203);
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+\fBmysqlbinlog \-\-database=test\fR
+does not output the first two
+INSERT
+statements because there is no default database\&. It outputs the three
+INSERT
+statements following
+USE test, but not the three
+INSERT
+statements following
+USE db2\&.
+.sp
+\fBmysqlbinlog \-\-database=db2\fR
+does not output the first two
+INSERT
+statements because there is no default database\&. It does not output the three
+INSERT
+statements following
+USE test, but does output the three
+INSERT
+statements following
+USE db2\&.
+.PP
+\fBRow-based logging\fR. \fBmysqlbinlog\fR
+outputs only entries that change tables belonging to
+\fIdb_name\fR\&. The default database has no effect on this\&. Suppose that the binary log just described was created using row\-based logging rather than statement\-based logging\&.
+\fBmysqlbinlog \-\-database=test\fR
+outputs only those entries that modify
+t1
+in the test database, regardless of whether
+USE
+was issued or what the default database is\&.
+If a server is running with
+binlog_format
+set to
+MIXED
+and you want it to be possible to use
+\fBmysqlbinlog\fR
+with the
+\fB\-\-database\fR
+option, you must ensure that tables that are modified are in the database selected by
+USE\&. (In particular, no cross\-database updates should be used\&.)
+.sp
+When used together with the
+\fB\-\-rewrite\-db\fR
+option, the
+\fB\-\-rewrite\-db\fR
+option is applied first; then the
+\fB\-\-database\fR
+option is applied, using the rewritten database name\&. The order in which the options are provided makes no difference in this regard\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-debug[=\fR\fB\fIdebug_options\fR\fR\fB]\fR,
+\fB\-# [\fR\fB\fIdebug_options\fR\fR\fB]\fR
+.sp
+Write a debugging log\&. A typical
+\fIdebug_options\fR
+string is
+d:t:o,\fIfile_name\fR\&. The default is
+d:t:o,/tmp/mysqlbinlog\&.trace\&.
+.sp
+This option is available only if MySQL was built using
+\fBWITH_DEBUG\fR\&. MySQL release binaries provided by Oracle are
+\fInot\fR
+built using this option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-debug\-check\fR
+.sp
+Print some debugging information when the program exits\&.
+.sp
+This option is available only if MySQL was built using
+\fBWITH_DEBUG\fR\&. MySQL release binaries provided by Oracle are
+\fInot\fR
+built using this option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-debug\-info\fR
+.sp
+Print debugging information and memory and CPU usage statistics when the program exits\&.
+.sp
+This option is available only if MySQL was built using
+\fBWITH_DEBUG\fR\&. MySQL release binaries provided by Oracle are
+\fInot\fR
+built using this option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-default\-auth=\fR\fB\fIplugin\fR\fR
+.sp
+A hint about which client\-side authentication plugin to use\&. See
+Section\ \&6.2.17, \(lqPluggable Authentication\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-defaults\-extra\-file=\fR\fB\fIfile_name\fR\fR
+.sp
+Read this option file after the global option file but (on Unix) before the user option file\&. If the file does not exist or is otherwise inaccessible, an error occurs\&.
+\fIfile_name\fR
+is interpreted relative to the current directory if given as a relative path name rather than a full path name\&.
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-defaults\-file=\fR\fB\fIfile_name\fR\fR
+.sp
+Use only the given option file\&. If the file does not exist or is otherwise inaccessible, an error occurs\&.
+\fIfile_name\fR
+is interpreted relative to the current directory if given as a relative path name rather than a full path name\&.
+.sp
+Exception: Even with
+\fB\-\-defaults\-file\fR, client programs read
+\&.mylogin\&.cnf\&.
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-defaults\-group\-suffix=\fR\fB\fIstr\fR\fR
+.sp
+Read not only the usual option groups, but also groups with the usual names and a suffix of
+\fIstr\fR\&. For example,
+\fBmysqlbinlog\fR
+normally reads the
+[client]
+and
+[mysqlbinlog]
+groups\&. If the
+\fB\-\-defaults\-group\-suffix=_other\fR
+option is given,
+\fBmysqlbinlog\fR
+also reads the
+[client_other]
+and
+[mysqlbinlog_other]
+groups\&.
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-disable\-log\-bin\fR,
+\fB\-D\fR
+.sp
+Disable binary logging\&. This is useful for avoiding an endless loop if you use the
+\fB\-\-to\-last\-log\fR
+option and are sending the output to the same MySQL server\&. This option also is useful when restoring after a crash to avoid duplication of the statements you have logged\&.
+.sp
+This option causes
+\fBmysqlbinlog\fR
+to include a
+SET sql_log_bin = 0
+statement in its output to disable binary logging of the remaining output\&. Manipulating the session value of the
+sql_log_bin
+system variable is a restricted operation, so this option requires that you have privileges sufficient to set restricted session variables\&. See
+Section\ \&5.1.9.1, \(lqSystem Variable Privileges\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-exclude\-gtids=\fR\fB\fIgtid_set\fR\fR
+.sp
+Do not display any of the groups listed in the
+\fIgtid_set\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-force\-if\-open\fR,
+\fB\-F\fR
+.sp
+Read binary log files even if they are open or were not closed properly\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-force\-read\fR,
+\fB\-f\fR
+.sp
+With this option, if
+\fBmysqlbinlog\fR
+reads a binary log event that it does not recognize, it prints a warning, ignores the event, and continues\&. Without this option,
+\fBmysqlbinlog\fR
+stops if it reads such an event\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-get\-server\-public\-key\fR
+.sp
+Request from the server the public key required for RSA key pair\-based password exchange\&. This option applies to clients that authenticate with the
+caching_sha2_password
+authentication plugin\&. For that plugin, the server does not send the public key unless requested\&. This option is ignored for accounts that do not authenticate with that plugin\&. It is also ignored if RSA\-based password exchange is not used, as is the case when the client connects to the server using a secure connection\&.
+.sp
+If
+\fB\-\-server\-public\-key\-path=\fR\fB\fIfile_name\fR\fR
+is given and specifies a valid public key file, it takes precedence over
+\fB\-\-get\-server\-public\-key\fR\&.
+.sp
+For information about the
+caching_sha2_password
+plugin, see
+Section\ \&6.4.1.2, \(lqCaching SHA-2 Pluggable Authentication\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-hexdump\fR,
+\fB\-H\fR
+.sp
+Display a hex dump of the log in comments, as described in
+the section called \(lqMYSQLBINLOG HEX DUMP FORMAT\(rq\&. The hex output can be helpful for replication debugging\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-host=\fR\fB\fIhost_name\fR\fR,
+\fB\-h \fR\fB\fIhost_name\fR\fR
+.sp
+Get the binary log from the MySQL server on the given host\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-idempotent\fR
+.sp
+Tell the MySQL Server to use idempotent mode while processing updates; this causes suppression of any duplicate\-key or key\-not\-found errors that the server encounters in the current session while processing updates\&. This option may prove useful whenever it is desirable or necessary to replay one or more binary logs to a MySQL Server which may not contain all of the data to which the logs refer\&.
+.sp
+The scope of effect for this option includes the current
+\fBmysqlbinlog\fR
+client and session only\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-include\-gtids=\fR\fB\fIgtid_set\fR\fR
+.sp
+Display only the groups listed in the
+\fIgtid_set\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-local\-load=\fR\fB\fIdir_name\fR\fR,
+\fB\-l \fR\fB\fIdir_name\fR\fR
+.sp
+Prepare local temporary files for
+LOAD DATA
+in the specified directory\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBImportant\fR
+.ps -1
+.br
+These temporary files are not automatically removed by
+\fBmysqlbinlog\fR
+or any other MySQL program\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-login\-path=\fR\fB\fIname\fR\fR
+.sp
+Read options from the named login path in the
+\&.mylogin\&.cnf
+login path file\&. A
+\(lqlogin path\(rq
+is an option group containing options that specify which MySQL server to connect to and which account to authenticate as\&. To create or modify a login path file, use the
+\fBmysql_config_editor\fR
+utility\&. See
+\fBmysql_config_editor\fR(1)\&.
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-no\-defaults\fR
+.sp
+Do not read any option files\&. If program startup fails due to reading unknown options from an option file,
+\fB\-\-no\-defaults\fR
+can be used to prevent them from being read\&.
+.sp
+The exception is that the
+\&.mylogin\&.cnf
+file, if it exists, is read in all cases\&. This permits passwords to be specified in a safer way than on the command line even when
+\fB\-\-no\-defaults\fR
+is used\&. (\&.mylogin\&.cnf
+is created by the
+\fBmysql_config_editor\fR
+utility\&. See
+\fBmysql_config_editor\fR(1)\&.)
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-offset=\fR\fB\fIN\fR\fR,
+\fB\-o \fR\fB\fIN\fR\fR
+.sp
+Skip the first
+\fIN\fR
+entries in the log\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-open\-files\-limit=\fR\fB\fIN\fR\fR
+Specify the number of open file descriptors to reserve\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-password[=\fR\fB\fIpassword\fR\fR\fB]\fR,
+\fB\-p[\fR\fB\fIpassword\fR\fR\fB]\fR
+.sp
+The password of the MySQL account used for connecting to the server\&. The password value is optional\&. If not given,
+\fBmysqlbinlog\fR
+prompts for one\&. If given, there must be
+\fIno space\fR
+between
+\fB\-\-password=\fR
+or
+\fB\-p\fR
+and the password following it\&. If no password option is specified, the default is to send no password\&.
+.sp
+Specifying a password on the command line should be considered insecure\&. To avoid giving the password on the command line, use an option file\&. See
+Section\ \&6.1.2.1, \(lqEnd-User Guidelines for Password Security\(rq\&.
+.sp
+To explicitly specify that there is no password and that
+\fBmysqlbinlog\fR
+should not prompt for one, use the
+\fB\-\-skip\-password\fR
+option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-plugin\-dir=\fR\fB\fIdir_name\fR\fR
+.sp
+The directory in which to look for plugins\&. Specify this option if the
+\fB\-\-default\-auth\fR
+option is used to specify an authentication plugin but
+\fBmysqlbinlog\fR
+does not find it\&. See
+Section\ \&6.2.17, \(lqPluggable Authentication\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-port=\fR\fB\fIport_num\fR\fR,
+\fB\-P \fR\fB\fIport_num\fR\fR
+.sp
+The TCP/IP port number to use for connecting to a remote server\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-print\-defaults\fR
+.sp
+Print the program name and all options that it gets from option files\&.
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-print\-table\-metadata\fR
+.sp
+Print table related metadata from the binary log\&. Configure the amount of table related metadata binary logged using
+binlog\-row\-metadata\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-protocol={TCP|SOCKET|PIPE|MEMORY}\fR
+.sp
+The connection protocol to use for connecting to the server\&. It is useful when the other connection parameters normally result in use of a protocol other than the one you want\&. For details on the permissible values, see
+Section\ \&4.2.4, \(lqConnecting to the MySQL Server Using Command Options\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-raw\fR
+.sp
+By default,
+\fBmysqlbinlog\fR
+reads binary log files and writes events in text format\&. The
+\fB\-\-raw\fR
+option tells
+\fBmysqlbinlog\fR
+to write them in their original binary format\&. Its use requires that
+\fB\-\-read\-from\-remote\-server\fR
+also be used because the files are requested from a server\&.
+\fBmysqlbinlog\fR
+writes one output file for each file read from the server\&. The
+\fB\-\-raw\fR
+option can be used to make a backup of a server\*(Aqs binary log\&. With the
+\fB\-\-stop\-never\fR
+option, the backup is
+\(lqlive\(rq
+because
+\fBmysqlbinlog\fR
+stays connected to the server\&. By default, output files are written in the current directory with the same names as the original log files\&. Output file names can be modified using the
+\fB\-\-result\-file\fR
+option\&. For more information, see
+the section called \(lqUSING MYSQLBINLOG TO BACK UP BINARY LOG FILES\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-read\-from\-remote\-master=\fR\fB\fItype\fR\fR
+.sp
+Read binary logs from a MySQL server with the
+COM_BINLOG_DUMP
+or
+COM_BINLOG_DUMP_GTID
+commands by setting the option value to either
+BINLOG\-DUMP\-NON\-GTIDS
+or
+BINLOG\-DUMP\-GTIDS, respectively\&. If
+\fB\-\-read\-from\-remote\-master=BINLOG\-DUMP\-GTIDS\fR
+is combined with
+\fB\-\-exclude\-gtids\fR, transactions can be filtered out on the master, avoiding unnecessary network traffic\&.
+.sp
+The connection parameter options are used with this option or the
+\fB\-\-read\-from\-remote\-server\fR
+option\&. These options are
+\fB\-\-host\fR,
+\fB\-\-password\fR,
+\fB\-\-port\fR,
+\fB\-\-protocol\fR,
+\fB\-\-socket\fR, and
+\fB\-\-user\fR\&. If neither of the remote options is specified, the connection parameter options are ignored\&.
+.sp
+The
+REPLICATION SLAVE
+privilege is required to use this option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-read\-from\-remote\-server\fR,
+\fB\-R\fR
+.sp
+Read the binary log from a MySQL server rather than reading a local log file\&. This option requires that the remote server be running\&. It works only for binary log files on the remote server, not relay log files\&.
+.sp
+The connection parameter options are used with this option or the
+\fB\-\-read\-from\-remote\-master\fR
+option\&. These options are
+\fB\-\-host\fR,
+\fB\-\-password\fR,
+\fB\-\-port\fR,
+\fB\-\-protocol\fR,
+\fB\-\-socket\fR, and
+\fB\-\-user\fR\&. If neither of the remote options is specified, the connection parameter options are ignored\&.
+.sp
+The
+REPLICATION SLAVE
+privilege is required to use this option\&.
+.sp
+This option is like
+\fB\-\-read\-from\-remote\-master=BINLOG\-DUMP\-NON\-GTIDS\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-result\-file=\fR\fB\fIname\fR\fR,
+\fB\-r \fR\fB\fIname\fR\fR
+.sp
+Without the
+\fB\-\-raw\fR
+option, this option indicates the file to which
+\fBmysqlbinlog\fR
+writes text output\&. With
+\fB\-\-raw\fR,
+\fBmysqlbinlog\fR
+writes one binary output file for each log file transferred from the server, writing them by default in the current directory using the same names as the original log file\&. In this case, the
+\fB\-\-result\-file\fR
+option value is treated as a prefix that modifies output file names\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-require\-row\-format\fR
+.sp
+Require row\-based binary logging format for events\&. This option enforces row\-based replication events for
+\fBmysqlbinlog\fR
+output\&. The stream of events produced with this option would be accepted by a replication channel that is secured using the
+REQUIRE_ROW_FORMAT
+option of the
+CHANGE MASTER TO
+statement\&.
+binlog_format=ROW
+must be set on the server where the binary log was written\&. When you specify this option,
+\fBmysqlbinlog\fR
+stops with an error message if it encounters any events that are disallowed under the
+REQUIRE_ROW_FORMAT
+restrictions, including
+LOAD DATA INFILE
+instructions, creating or dropping temporary tables,
+INTVAR,
+RAND, or
+USER_VAR
+events, and non\-row\-based events within a DML transaction\&.
+\fBmysqlbinlog\fR
+also prints a
+SET @@session\&.require_row_format
+statement at the start of its output to apply the restrictions when the output is executed, and does not print the
+SET @@session\&.pseudo_thread_id
+statement\&.
+.sp
+This option was added in MySQL 8\&.0\&.19\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-rewrite\-db=\*(Aq\fR\fB\fIfrom_name\fR\fR\fB\->\fR\fB\fIto_name\fR\fR\fB\*(Aq\fR
+.sp
+When reading from a row\-based or statement\-based log, rewrite all occurrences of
+\fIfrom_name\fR
+to
+\fIto_name\fR\&. Rewriting is done on the rows, for row\-based logs, as well as on the
+USE
+clauses, for statement\-based logs\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBWarning\fR
+.ps -1
+.br
+Statements in which table names are qualified with database names are not rewritten to use the new name when using this option\&.
+.sp .5v
+.RE
+The rewrite rule employed as a value for this option is a string having the form
+\*(Aq\fIfrom_name\fR\->\fIto_name\fR\*(Aq, as shown previously, and for this reason must be enclosed by quotation marks\&.
+.sp
+To employ multiple rewrite rules, specify the option multiple times, as shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlbinlog \-\-rewrite\-db=\*(Aqdbcurrent\->dbold\*(Aq \-\-rewrite\-db=\*(Aqdbtest\->dbcurrent\*(Aq \e
+                     binlog\&.00001 > /tmp/statements\&.sql\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+When used together with the
+\fB\-\-database\fR
+option, the
+\fB\-\-rewrite\-db\fR
+option is applied first; then
+\fB\-\-database\fR
+option is applied, using the rewritten database name\&. The order in which the options are provided makes no difference in this regard\&.
+.sp
+This means that, for example, if
+\fBmysqlbinlog\fR
+is started with
+\fB\-\-rewrite\-db=\*(Aqmydb\->yourdb\*(Aq \-\-database=yourdb\fR, then all updates to any tables in databases
+mydb
+and
+yourdb
+are included in the output\&. On the other hand, if it is started with
+\fB\-\-rewrite\-db=\*(Aqmydb\->yourdb\*(Aq \-\-database=mydb\fR, then
+\fBmysqlbinlog\fR
+outputs no statements at all: since all updates to
+mydb
+are first rewritten as updates to
+yourdb
+before applying the
+\fB\-\-database\fR
+option, there remain no updates that match
+\fB\-\-database=mydb\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-server\-id=\fR\fB\fIid\fR\fR
+.sp
+Display only those events created by the server having the given server ID\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-server\-id\-bits=\fR\fB\fIN\fR\fR
+.sp
+Use only the first
+\fIN\fR
+bits of the
+server_id
+to identify the server\&. If the binary log was written by a
+\fBmysqld\fR
+with server\-id\-bits set to less than 32 and user data stored in the most significant bit, running
+\fBmysqlbinlog\fR
+with
+\fB\-\-server\-id\-bits\fR
+set to 32 enables this data to be seen\&.
+.sp
+This option is supported only by the version of
+\fBmysqlbinlog\fR
+supplied with the NDB Cluster distribution, or built with NDB Cluster support\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-server\-public\-key\-path=\fR\fB\fIfile_name\fR\fR
+.sp
+The path name to a file containing a client\-side copy of the public key required by the server for RSA key pair\-based password exchange\&. The file must be in PEM format\&. This option applies to clients that authenticate with the
+sha256_password
+or
+caching_sha2_password
+authentication plugin\&. This option is ignored for accounts that do not authenticate with one of those plugins\&. It is also ignored if RSA\-based password exchange is not used, as is the case when the client connects to the server using a secure connection\&.
+.sp
+If
+\fB\-\-server\-public\-key\-path=\fR\fB\fIfile_name\fR\fR
+is given and specifies a valid public key file, it takes precedence over
+\fB\-\-get\-server\-public\-key\fR\&.
+.sp
+For
+sha256_password, this option applies only if MySQL was built using OpenSSL\&.
+.sp
+For information about the
+sha256_password
+and
+caching_sha2_password
+plugins, see
+Section\ \&6.4.1.3, \(lqSHA-256 Pluggable Authentication\(rq, and
+Section\ \&6.4.1.2, \(lqCaching SHA-2 Pluggable Authentication\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-set\-charset=\fR\fB\fIcharset_name\fR\fR
+.sp
+Add a
+SET NAMES \fIcharset_name\fR
+statement to the output to specify the character set to be used for processing log files\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-shared\-memory\-base\-name=\fR\fB\fIname\fR\fR
+.sp
+On Windows, the shared\-memory name to use for connections made using shared memory to a local server\&. The default value is
+MYSQL\&. The shared\-memory name is case\-sensitive\&.
+.sp
+This option applies only if the server was started with the
+shared_memory
+system variable enabled to support shared\-memory connections\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-short\-form\fR,
+\fB\-s\fR
+.sp
+Display only the statements contained in the log, without any extra information or row\-based events\&. This is for testing only, and should not be used in production systems\&. It is deprecated, and will be removed in a future release\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-skip\-gtids[=(true|false)]\fR
+.sp
+Do not display any GTIDs in the output\&. This is needed when writing to a dump file from one or more binary logs containing GTIDs, as shown in this example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlbinlog \-\-skip\-gtids binlog\&.000001 >  /tmp/dump\&.sql\fR
+shell> \fBmysqlbinlog \-\-skip\-gtids binlog\&.000002 >> /tmp/dump\&.sql\fR
+shell> \fBmysql \-u root \-p \-e "source /tmp/dump\&.sql"\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+The use of this option is otherwise not normally recommended in production\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-socket=\fR\fB\fIpath\fR\fR,
+\fB\-S \fR\fB\fIpath\fR\fR
+.sp
+For connections to
+localhost, the Unix socket file to use, or, on Windows, the name of the named pipe to use\&.
+.sp
+On Windows, this option applies only if the server was started with the
+named_pipe
+system variable enabled to support named\-pipe connections\&. In addition, the user making the connection must be a member of the Windows group specified by the
+named_pipe_full_access_group
+system variable\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ssl*\fR
+.sp
+Options that begin with
+\fB\-\-ssl\fR
+specify whether to connect to the server using SSL and indicate where to find SSL keys and certificates\&. See
+the section called \(lqCommand Options for Encrypted Connections\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ssl\-fips\-mode={OFF|ON|STRICT}\fR
+Controls whether to enable FIPS mode on the client side\&. The
+\fB\-\-ssl\-fips\-mode\fR
+option differs from other
+\fB\-\-ssl\-\fR\fB\fIxxx\fR\fR
+options in that it is not used to establish encrypted connections, but rather to affect which cryptographic operations are permitted\&. See
+Section\ \&6.5, \(lqFIPS Support\(rq\&.
+.sp
+These
+\fB\-\-ssl\-fips\-mode\fR
+values are permitted:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+OFF: Disable FIPS mode\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ON: Enable FIPS mode\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+STRICT: Enable
+\(lqstrict\(rq
+FIPS mode\&.
+.RE
+.sp
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+If the OpenSSL FIPS Object Module is not available, the only permitted value for
+\fB\-\-ssl\-fips\-mode\fR
+is
+OFF\&. In this case, setting
+\fB\-\-ssl\-fips\-mode\fR
+to
+ON
+or
+STRICT
+causes the client to produce a warning at startup and to operate in non\-FIPS mode\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-start\-datetime=\fR\fB\fIdatetime\fR\fR
+.sp
+Start reading the binary log at the first event having a timestamp equal to or later than the
+\fIdatetime\fR
+argument\&. The
+\fIdatetime\fR
+value is relative to the local time zone on the machine where you run
+\fBmysqlbinlog\fR\&. The value should be in a format accepted for the
+DATETIME
+or
+TIMESTAMP
+data types\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlbinlog \-\-start\-datetime="2005\-12\-25 11:25:56" binlog\&.000003\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+This option is useful for point\-in\-time recovery\&. See
+Section\ \&7.3, \(lqExample Backup and Recovery Strategy\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-start\-position=\fR\fB\fIN\fR\fR,
+\fB\-j \fR\fB\fIN\fR\fR
+.sp
+Start reading the binary log at the first event having a position equal to or greater than
+\fIN\fR\&. This option applies to the first log file named on the command line\&.
+.sp
+This option is useful for point\-in\-time recovery\&. See
+Section\ \&7.3, \(lqExample Backup and Recovery Strategy\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-stop\-datetime=\fR\fB\fIdatetime\fR\fR
+.sp
+Stop reading the binary log at the first event having a timestamp equal to or later than the
+\fIdatetime\fR
+argument\&. This option is useful for point\-in\-time recovery\&. See the description of the
+\fB\-\-start\-datetime\fR
+option for information about the
+\fIdatetime\fR
+value\&.
+.sp
+This option is useful for point\-in\-time recovery\&. See
+Section\ \&7.3, \(lqExample Backup and Recovery Strategy\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-stop\-never\fR
+.sp
+This option is used with
+\fB\-\-read\-from\-remote\-server\fR\&. It tells
+\fBmysqlbinlog\fR
+to remain connected to the server\&. Otherwise
+\fBmysqlbinlog\fR
+exits when the last log file has been transferred from the server\&.
+\fB\-\-stop\-never\fR
+implies
+\fB\-\-to\-last\-log\fR, so only the first log file to transfer need be named on the command line\&.
+.sp
+\fB\-\-stop\-never\fR
+is commonly used with
+\fB\-\-raw\fR
+to make a live binary log backup, but also can be used without
+\fB\-\-raw\fR
+to maintain a continuous text display of log events as the server generates them\&.
+.sp
+With
+\fB\-\-stop\-never\fR, by default,
+\fBmysqlbinlog\fR
+reports a server ID of 1 when it connects to the server\&. Use
+\fB\-\-connection\-server\-id\fR
+to explicitly specify an alternative ID to report\&. It can be used to avoid a conflict with the ID of a slave server or another
+\fBmysqlbinlog\fR
+process\&. See
+the section called \(lqSPECIFYING THE MYSQLBINLOG SERVER ID\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-stop\-never\-slave\-server\-id=\fR\fB\fIid\fR\fR
+.sp
+This option is deprecated and will be removed in a future release\&. Use the
+\fB\-\-connection\-server\-id\fR
+option instead to specify a server ID for mysqlbinlog to report\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-stop\-position=\fR\fB\fIN\fR\fR
+.sp
+Stop reading the binary log at the first event having a position equal to or greater than
+\fIN\fR\&. This option applies to the last log file named on the command line\&.
+.sp
+This option is useful for point\-in\-time recovery\&. See
+Section\ \&7.3, \(lqExample Backup and Recovery Strategy\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-tls\-ciphersuites=\fR\fB\fIciphersuite_list\fR\fR
+.sp
+The permissible ciphersuites for encrypted connections that use TLSv1\&.3\&. The value is a list of one or more colon\-separated ciphersuite names\&. The ciphersuites that can be named for this option depend on the SSL library used to compile MySQL\&. For details, see
+Section\ \&6.3.2, \(lqEncrypted Connection TLS Protocols and Ciphers\(rq\&.
+.sp
+This option was added in MySQL 8\&.0\&.16\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-tls\-version=\fR\fB\fIprotocol_list\fR\fR
+.sp
+The permissible TLS protocols for encrypted connections\&. The value is a list of one or more comma\-separated protocol names\&. The protocols that can be named for this option depend on the SSL library used to compile MySQL\&. For details, see
+Section\ \&6.3.2, \(lqEncrypted Connection TLS Protocols and Ciphers\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-to\-last\-log\fR,
+\fB\-t\fR
+.sp
+Do not stop at the end of the requested binary log from a MySQL server, but rather continue printing until the end of the last binary log\&. If you send the output to the same MySQL server, this may lead to an endless loop\&. This option requires
+\fB\-\-read\-from\-remote\-server\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-user=\fR\fB\fIuser_name\fR\fR,
+\fB\-u \fR\fB\fIuser_name\fR\fR
+.sp
+The user name of the MySQL account to use when connecting to a remote server\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-verbose\fR,
+\fB\-v\fR
+.sp
+Reconstruct row events and display them as commented SQL statements, with table partition information where applicable\&. If this option is given twice (by passing in either "\-vv" or "\-\-verbose \-\-verbose"), the output includes comments to indicate column data types and some metadata, and informational log events such as row query log events if the
+binlog_rows_query_log_events
+system variable is set to
+TRUE\&.
+.sp
+For examples that show the effect of
+\fB\-\-base64\-output\fR
+and
+\fB\-\-verbose\fR
+on row event output, see
+the section called \(lqMYSQLBINLOG ROW EVENT DISPLAY\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-verify\-binlog\-checksum\fR,
+\fB\-c\fR
+.sp
+Verify checksums in binary log files\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-version\fR,
+\fB\-V\fR
+.sp
+Display version information and exit\&.
+.sp
+The
+\fBmysqlbinlog\fR
+version number shown when using this option is 3\&.4\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-zstd\-compression\-level=\fR\fB\fIlevel\fR\fR
+The compression level to use for connections to the server that use the
+zstd
+compression algorithm\&. The permitted levels are from 1 to 22, with larger values indicating increasing levels of compression\&. The default
+zstd
+compression level is 3\&. The compression level setting has no effect on connections that do not use
+zstd
+compression\&.
+.sp
+For more information, see
+Section\ \&4.2.6, \(lqConnection Compression Control\(rq\&.
+.sp
+This option was added in MySQL 8\&.0\&.18\&.
+.RE
+.PP
+You can pipe the output of
+\fBmysqlbinlog\fR
+into the
+\fBmysql\fR
+client to execute the events contained in the binary log\&. This technique is used to recover from a crash when you have an old backup (see
+Section\ \&7.5, \(lqPoint-in-Time (Incremental) Recovery Using the Binary Log\(rq)\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlbinlog binlog\&.000001 | mysql \-u root \-p\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Or:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlbinlog binlog\&.[0\-9]* | mysql \-u root \-p\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+If the statements produced by
+\fBmysqlbinlog\fR
+may contain
+BLOB
+values, these may cause problems when
+\fBmysql\fR
+processes them\&. In this case, invoke
+\fBmysql\fR
+with the
+\fB\-\-binary\-mode\fR
+option\&.
+.PP
+You can also redirect the output of
+\fBmysqlbinlog\fR
+to a text file instead, if you need to modify the statement log first (for example, to remove statements that you do not want to execute for some reason)\&. After editing the file, execute the statements that it contains by using it as input to the
+\fBmysql\fR
+program:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlbinlog binlog\&.000001 > tmpfile\fR
+shell> \&.\&.\&. \fIedit tmpfile\fR \&.\&.\&.
+shell> \fBmysql \-u root \-p < tmpfile\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+When
+\fBmysqlbinlog\fR
+is invoked with the
+\fB\-\-start\-position\fR
+option, it displays only those events with an offset in the binary log greater than or equal to a given position (the given position must match the start of one event)\&. It also has options to stop and start when it sees an event with a given date and time\&. This enables you to perform point\-in\-time recovery using the
+\fB\-\-stop\-datetime\fR
+option (to be able to say, for example,
+\(lqroll forward my databases to how they were today at 10:30 a\&.m\&.\(rq)\&.
+.PP
+\fBProcessing multiple files\fR. If you have more than one binary log to execute on the MySQL server, the safe method is to process them all using a single connection to the server\&. Here is an example that demonstrates what may be
+\fIunsafe\fR:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlbinlog binlog\&.000001 | mysql \-u root \-p # DANGER!!\fR
+shell> \fBmysqlbinlog binlog\&.000002 | mysql \-u root \-p # DANGER!!\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Processing binary logs this way using multiple connections to the server causes problems if the first log file contains a
+CREATE TEMPORARY TABLE
+statement and the second log contains a statement that uses the temporary table\&. When the first
+\fBmysql\fR
+process terminates, the server drops the temporary table\&. When the second
+\fBmysql\fR
+process attempts to use the table, the server reports
+\(lqunknown table\&.\(rq
+.PP
+To avoid problems like this, use a
+\fIsingle\fR
+\fBmysql\fR
+process to execute the contents of all binary logs that you want to process\&. Here is one way to do so:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlbinlog binlog\&.000001 binlog\&.000002 | mysql \-u root \-p\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Another approach is to write all the logs to a single file and then process the file:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlbinlog binlog\&.000001 >  /tmp/statements\&.sql\fR
+shell> \fBmysqlbinlog binlog\&.000002 >> /tmp/statements\&.sql\fR
+shell> \fBmysql \-u root \-p \-e "source /tmp/statements\&.sql"\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+From MySQL 8\&.0\&.12, you can also supply multiple binary log files to
+\fBmysqlbinlog\fR
+as streamed input using a shell pipe\&. An archive of compressed binary log files can be decompressed and provided directly to
+\fBmysqlbinlog\fR\&. In this example,
+binlog\-files_1\&.gz
+contains multiple binary log files for processing\&. The pipeline extracts the contents of
+binlog\-files_1\&.gz, pipes the binary log files to
+\fBmysqlbinlog\fR
+as standard input, and pipes the output of
+\fBmysqlbinlog\fR
+into the
+\fBmysql\fR
+client for execution:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBgzip \-cd binlog\-files_1\&.gz | \&./mysqlbinlog \- | \&./mysql \-uroot\ \& \-p\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+You can specify more than one archive file, for example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBgzip \-cd binlog\-files_1\&.gz binlog\-files_2\&.gz | \&./mysqlbinlog \- | \&./mysql \-uroot\ \& \-p\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+For streamed input, do not use
+\-\-stop\-position, because
+\fBmysqlbinlog\fR
+cannot identify the last log file to apply this option\&.
+.PP
+\fBLOAD DATA operations\fR. \fBmysqlbinlog\fR
+can produce output that reproduces a
+LOAD DATA
+operation without the original data file\&.
+\fBmysqlbinlog\fR
+copies the data to a temporary file and writes a
+LOAD DATA LOCAL
+statement that refers to the file\&. The default location of the directory where these files are written is system\-specific\&. To specify a directory explicitly, use the
+\fB\-\-local\-load\fR
+option\&.
+.PP
+Because
+\fBmysqlbinlog\fR
+converts
+LOAD DATA
+statements to
+LOAD DATA LOCAL
+statements (that is, it adds
+LOCAL), both the client and the server that you use to process the statements must be configured with the
+LOCAL
+capability enabled\&. See
+Section\ \&6.1.6, \(lqSecurity Issues with LOAD DATA LOCAL\(rq\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBWarning\fR
+.ps -1
+.br
+.PP
+The temporary files created for
+LOAD DATA LOCAL
+statements are
+\fInot\fR
+automatically deleted because they are needed until you actually execute those statements\&. You should delete the temporary files yourself after you no longer need the statement log\&. The files can be found in the temporary file directory and have names like
+\fIoriginal_file_name\-#\-#\fR\&.
+.sp .5v
+.RE
+.SH "MYSQLBINLOG HEX DUMP FORMAT"
+.PP
+The
+\fB\-\-hexdump\fR
+option causes
+\fBmysqlbinlog\fR
+to produce a hex dump of the binary log contents:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlbinlog \-\-hexdump master\-bin\&.000001\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The hex output consists of comment lines beginning with
+#, so the output might look like this for the preceding command:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+/*!40019 SET @@SESSION\&.max_insert_delayed_threads=0*/;
+/*!50003 SET @OLD_COMPLETION_TYPE=@@COMPLETION_TYPE,COMPLETION_TYPE=0*/;
+# at 4
+#051024 17:24:13 server id 1  end_log_pos 98
+# Position  Timestamp   Type   Master ID        Size      Master Pos    Flags
+# 00000004 9d fc 5c 43   0f   01 00 00 00   5e 00 00 00   62 00 00 00   00 00
+# 00000017 04 00 35 2e 30 2e 31 35  2d 64 65 62 75 67 2d 6c |\&.\&.5\&.0\&.15\&.debug\&.l|
+# 00000027 6f 67 00 00 00 00 00 00  00 00 00 00 00 00 00 00 |og\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.|
+# 00000037 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 |\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.\&.|
+# 00000047 00 00 00 00 9d fc 5c 43  13 38 0d 00 08 00 12 00 |\&.\&.\&.\&.\&.\&.\&.C\&.8\&.\&.\&.\&.\&.\&.|
+# 00000057 04 04 04 04 12 00 00 4b  00 04 1a                |\&.\&.\&.\&.\&.\&.\&.K\&.\&.\&.|
+#       Start: binlog v 4, server v 5\&.0\&.15\-debug\-log created 051024 17:24:13
+#       at startup
+ROLLBACK;
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Hex dump output currently contains the elements in the following list\&. This format is subject to change\&. For more information about binary log format, see
+\m[blue]\fBMySQL Internals: The Binary Log\fR\m[]\&\s-2\u[1]\d\s+2\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Position: The byte position within the log file\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Timestamp: The event timestamp\&. In the example shown,
+\*(Aq9d fc 5c 43\*(Aq
+is the representation of
+\*(Aq051024 17:24:13\*(Aq
+in hexadecimal\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Type: The event type code\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Master ID: The server ID of the master that created the event\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Size: The size in bytes of the event\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Master Pos: The position of the next event in the original master log file\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Flags: Event flag values\&.
+.RE
+.SH "MYSQLBINLOG ROW EVENT DISPLAY"
+.PP
+The following examples illustrate how
+\fBmysqlbinlog\fR
+displays row events that specify data modifications\&. These correspond to events with the
+WRITE_ROWS_EVENT,
+UPDATE_ROWS_EVENT, and
+DELETE_ROWS_EVENT
+type codes\&. The
+\fB\-\-base64\-output=DECODE\-ROWS\fR
+and
+\fB\-\-verbose\fR
+options may be used to affect row event output\&.
+.PP
+Suppose that the server is using row\-based binary logging and that you execute the following sequence of statements:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+CREATE TABLE t
+(
+  id   INT NOT NULL,
+  name VARCHAR(20) NOT NULL,
+  date DATE NULL
+) ENGINE = InnoDB;
+START TRANSACTION;
+INSERT INTO t VALUES(1, \*(Aqapple\*(Aq, NULL);
+UPDATE t SET name = \*(Aqpear\*(Aq, date = \*(Aq2009\-01\-01\*(Aq WHERE id = 1;
+DELETE FROM t WHERE id = 1;
+COMMIT;
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+By default,
+\fBmysqlbinlog\fR
+displays row events encoded as base\-64 strings using
+BINLOG
+statements\&. Omitting extraneous lines, the output for the row events produced by the preceding statement sequence looks like this:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlbinlog \fR\fB\fIlog_file\fR\fR
+\&.\&.\&.
+# at 218
+#080828 15:03:08 server id 1  end_log_pos 258   Write_rows: table id 17 flags: STMT_END_F
+BINLOG \*(Aq
+fAS3SBMBAAAALAAAANoAAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
+fAS3SBcBAAAAKAAAAAIBAAAQABEAAAAAAAEAA//8AQAAAAVhcHBsZQ==
+\*(Aq/*!*/;
+\&.\&.\&.
+# at 302
+#080828 15:03:08 server id 1  end_log_pos 356   Update_rows: table id 17 flags: STMT_END_F
+BINLOG \*(Aq
+fAS3SBMBAAAALAAAAC4BAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
+fAS3SBgBAAAANgAAAGQBAAAQABEAAAAAAAEAA////AEAAAAFYXBwbGX4AQAAAARwZWFyIbIP
+\*(Aq/*!*/;
+\&.\&.\&.
+# at 400
+#080828 15:03:08 server id 1  end_log_pos 442   Delete_rows: table id 17 flags: STMT_END_F
+BINLOG \*(Aq
+fAS3SBMBAAAALAAAAJABAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
+fAS3SBkBAAAAKgAAALoBAAAQABEAAAAAAAEAA//4AQAAAARwZWFyIbIP
+\*(Aq/*!*/;
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+To see the row events as comments in the form of
+\(lqpseudo\-SQL\(rq
+statements, run
+\fBmysqlbinlog\fR
+with the
+\fB\-\-verbose\fR
+or
+\fB\-v\fR
+option\&. This output level also shows table partition information where applicable\&. The output will contain lines beginning with
+###:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlbinlog \-v \fR\fB\fIlog_file\fR\fR
+\&.\&.\&.
+# at 218
+#080828 15:03:08 server id 1  end_log_pos 258   Write_rows: table id 17 flags: STMT_END_F
+BINLOG \*(Aq
+fAS3SBMBAAAALAAAANoAAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
+fAS3SBcBAAAAKAAAAAIBAAAQABEAAAAAAAEAA//8AQAAAAVhcHBsZQ==
+\*(Aq/*!*/;
+### INSERT INTO test\&.t
+### SET
+###   @1=1
+###   @2=\*(Aqapple\*(Aq
+###   @3=NULL
+\&.\&.\&.
+# at 302
+#080828 15:03:08 server id 1  end_log_pos 356   Update_rows: table id 17 flags: STMT_END_F
+BINLOG \*(Aq
+fAS3SBMBAAAALAAAAC4BAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
+fAS3SBgBAAAANgAAAGQBAAAQABEAAAAAAAEAA////AEAAAAFYXBwbGX4AQAAAARwZWFyIbIP
+\*(Aq/*!*/;
+### UPDATE test\&.t
+### WHERE
+###   @1=1
+###   @2=\*(Aqapple\*(Aq
+###   @3=NULL
+### SET
+###   @1=1
+###   @2=\*(Aqpear\*(Aq
+###   @3=\*(Aq2009:01:01\*(Aq
+\&.\&.\&.
+# at 400
+#080828 15:03:08 server id 1  end_log_pos 442   Delete_rows: table id 17 flags: STMT_END_F
+BINLOG \*(Aq
+fAS3SBMBAAAALAAAAJABAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
+fAS3SBkBAAAAKgAAALoBAAAQABEAAAAAAAEAA//4AQAAAARwZWFyIbIP
+\*(Aq/*!*/;
+### DELETE FROM test\&.t
+### WHERE
+###   @1=1
+###   @2=\*(Aqpear\*(Aq
+###   @3=\*(Aq2009:01:01\*(Aq
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Specify
+\fB\-\-verbose\fR
+or
+\fB\-v\fR
+twice to also display data types and some metadata for each column, and informational log events such as row query log events if the
+binlog_rows_query_log_events
+system variable is set to
+TRUE\&. The output will contain an additional comment following each column change:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlbinlog \-vv \fR\fB\fIlog_file\fR\fR
+\&.\&.\&.
+# at 218
+#080828 15:03:08 server id 1  end_log_pos 258   Write_rows: table id 17 flags: STMT_END_F
+BINLOG \*(Aq
+fAS3SBMBAAAALAAAANoAAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
+fAS3SBcBAAAAKAAAAAIBAAAQABEAAAAAAAEAA//8AQAAAAVhcHBsZQ==
+\*(Aq/*!*/;
+### INSERT INTO test\&.t
+### SET
+###   @1=1 /* INT meta=0 nullable=0 is_null=0 */
+###   @2=\*(Aqapple\*(Aq /* VARSTRING(20) meta=20 nullable=0 is_null=0 */
+###   @3=NULL /* VARSTRING(20) meta=0 nullable=1 is_null=1 */
+\&.\&.\&.
+# at 302
+#080828 15:03:08 server id 1  end_log_pos 356   Update_rows: table id 17 flags: STMT_END_F
+BINLOG \*(Aq
+fAS3SBMBAAAALAAAAC4BAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
+fAS3SBgBAAAANgAAAGQBAAAQABEAAAAAAAEAA////AEAAAAFYXBwbGX4AQAAAARwZWFyIbIP
+\*(Aq/*!*/;
+### UPDATE test\&.t
+### WHERE
+###   @1=1 /* INT meta=0 nullable=0 is_null=0 */
+###   @2=\*(Aqapple\*(Aq /* VARSTRING(20) meta=20 nullable=0 is_null=0 */
+###   @3=NULL /* VARSTRING(20) meta=0 nullable=1 is_null=1 */
+### SET
+###   @1=1 /* INT meta=0 nullable=0 is_null=0 */
+###   @2=\*(Aqpear\*(Aq /* VARSTRING(20) meta=20 nullable=0 is_null=0 */
+###   @3=\*(Aq2009:01:01\*(Aq /* DATE meta=0 nullable=1 is_null=0 */
+\&.\&.\&.
+# at 400
+#080828 15:03:08 server id 1  end_log_pos 442   Delete_rows: table id 17 flags: STMT_END_F
+BINLOG \*(Aq
+fAS3SBMBAAAALAAAAJABAAAAABEAAAAAAAAABHRlc3QAAXQAAwMPCgIUAAQ=
+fAS3SBkBAAAAKgAAALoBAAAQABEAAAAAAAEAA//4AQAAAARwZWFyIbIP
+\*(Aq/*!*/;
+### DELETE FROM test\&.t
+### WHERE
+###   @1=1 /* INT meta=0 nullable=0 is_null=0 */
+###   @2=\*(Aqpear\*(Aq /* VARSTRING(20) meta=20 nullable=0 is_null=0 */
+###   @3=\*(Aq2009:01:01\*(Aq /* DATE meta=0 nullable=1 is_null=0 */
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+You can tell
+\fBmysqlbinlog\fR
+to suppress the
+BINLOG
+statements for row events by using the
+\fB\-\-base64\-output=DECODE\-ROWS\fR
+option\&. This is similar to
+\fB\-\-base64\-output=NEVER\fR
+but does not exit with an error if a row event is found\&. The combination of
+\fB\-\-base64\-output=DECODE\-ROWS\fR
+and
+\fB\-\-verbose\fR
+provides a convenient way to see row events only as SQL statements:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlbinlog \-v \-\-base64\-output=DECODE\-ROWS \fR\fB\fIlog_file\fR\fR
+\&.\&.\&.
+# at 218
+#080828 15:03:08 server id 1  end_log_pos 258   Write_rows: table id 17 flags: STMT_END_F
+### INSERT INTO test\&.t
+### SET
+###   @1=1
+###   @2=\*(Aqapple\*(Aq
+###   @3=NULL
+\&.\&.\&.
+# at 302
+#080828 15:03:08 server id 1  end_log_pos 356   Update_rows: table id 17 flags: STMT_END_F
+### UPDATE test\&.t
+### WHERE
+###   @1=1
+###   @2=\*(Aqapple\*(Aq
+###   @3=NULL
+### SET
+###   @1=1
+###   @2=\*(Aqpear\*(Aq
+###   @3=\*(Aq2009:01:01\*(Aq
+\&.\&.\&.
+# at 400
+#080828 15:03:08 server id 1  end_log_pos 442   Delete_rows: table id 17 flags: STMT_END_F
+### DELETE FROM test\&.t
+### WHERE
+###   @1=1
+###   @2=\*(Aqpear\*(Aq
+###   @3=\*(Aq2009:01:01\*(Aq
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+You should not suppress
+BINLOG
+statements if you intend to re\-execute
+\fBmysqlbinlog\fR
+output\&.
+.sp .5v
+.RE
+.PP
+The SQL statements produced by
+\fB\-\-verbose\fR
+for row events are much more readable than the corresponding
+BINLOG
+statements\&. However, they do not correspond exactly to the original SQL statements that generated the events\&. The following limitations apply:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The original column names are lost and replaced by
+@\fIN\fR, where
+\fIN\fR
+is a column number\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Character set information is not available in the binary log, which affects string column display:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+There is no distinction made between corresponding binary and nonbinary string types (BINARY
+and
+CHAR,
+VARBINARY
+and
+VARCHAR,
+BLOB
+and
+TEXT)\&. The output uses a data type of
+STRING
+for fixed\-length strings and
+VARSTRING
+for variable\-length strings\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+For multibyte character sets, the maximum number of bytes per character is not present in the binary log, so the length for string types is displayed in bytes rather than in characters\&. For example,
+STRING(4)
+will be used as the data type for values from either of these column types:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+CHAR(4) CHARACTER SET latin1
+CHAR(2) CHARACTER SET ucs2
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Due to the storage format for events of type
+UPDATE_ROWS_EVENT,
+UPDATE
+statements are displayed with the
+WHERE
+clause preceding the
+SET
+clause\&.
+.RE
+.RE
+.PP
+Proper interpretation of row events requires the information from the format description event at the beginning of the binary log\&. Because
+\fBmysqlbinlog\fR
+does not know in advance whether the rest of the log contains row events, by default it displays the format description event using a
+BINLOG
+statement in the initial part of the output\&.
+.PP
+If the binary log is known not to contain any events requiring a
+BINLOG
+statement (that is, no row events), the
+\fB\-\-base64\-output=NEVER\fR
+option can be used to prevent this header from being written\&.
+.SH "USING MYSQLBINLOG TO BACK UP BINARY LOG FILES"
+.PP
+By default,
+\fBmysqlbinlog\fR
+reads binary log files and displays their contents in text format\&. This enables you to examine events within the files more easily and to re\-execute them (for example, by using the output as input to
+\fBmysql\fR)\&.
+\fBmysqlbinlog\fR
+can read log files directly from the local file system, or, with the
+\fB\-\-read\-from\-remote\-server\fR
+option, it can connect to a server and request binary log contents from that server\&.
+\fBmysqlbinlog\fR
+writes text output to its standard output, or to the file named as the value of the
+\fB\-\-result\-file=\fR\fB\fIfile_name\fR\fR
+option if that option is given\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+mysqlbinlog Backup Capabilities
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+mysqlbinlog Backup Options
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Static and Live Backups
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Output File Naming
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Example: mysqldump + mysqlbinlog for Backup and Restore
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+mysqlbinlog Backup Restrictions
+.RE
+mysqlbinlog Backup Capabilities
+.PP
+\fBmysqlbinlog\fR
+can read binary log files and write new files containing the same content\(emthat is, in binary format rather than text format\&. This capability enables you to easily back up a binary log in its original format\&.
+\fBmysqlbinlog\fR
+can make a static backup, backing up a set of log files and stopping when the end of the last file is reached\&. It can also make a continuous (\(lqlive\(rq) backup, staying connected to the server when it reaches the end of the last log file and continuing to copy new events as they are generated\&. In continuous\-backup operation,
+\fBmysqlbinlog\fR
+runs until the connection ends (for example, when the server exits) or
+\fBmysqlbinlog\fR
+is forcibly terminated\&. When the connection ends,
+\fBmysqlbinlog\fR
+does not wait and retry the connection, unlike a slave replication server\&. To continue a live backup after the server has been restarted, you must also restart
+\fBmysqlbinlog\fR\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBImportant\fR
+.ps -1
+.br
+.PP
+\fBmysqlbinlog\fR
+can back up both encrypted and unencrypted binary log files \&. However, copies of encrypted binary log files that are generated using
+\fBmysqlbinlog\fR
+are stored in an unencrypted format\&.
+.sp .5v
+.RE
+mysqlbinlog Backup Options
+.PP
+Binary log backup requires that you invoke
+\fBmysqlbinlog\fR
+with two options at minimum:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The
+\fB\-\-read\-from\-remote\-server\fR
+(or
+\fB\-R\fR) option tells
+\fBmysqlbinlog\fR
+to connect to a server and request its binary log\&. (This is similar to a slave replication server connecting to its master server\&.)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The
+\fB\-\-raw\fR
+option tells
+\fBmysqlbinlog\fR
+to write raw (binary) output, not text output\&.
+.RE
+.PP
+Along with
+\fB\-\-read\-from\-remote\-server\fR, it is common to specify other options:
+\fB\-\-host\fR
+indicates where the server is running, and you may also need to specify connection options such as
+\fB\-\-user\fR
+and
+\fB\-\-password\fR\&.
+.PP
+Several other options are useful in conjunction with
+\fB\-\-raw\fR:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-stop\-never\fR: Stay connected to the server after reaching the end of the last log file and continue to read new events\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-connection\-server\-id=\fR\fB\fIid\fR\fR: The server ID that
+\fBmysqlbinlog\fR
+reports when it connects to a server\&. When
+\fB\-\-stop\-never\fR
+is used, the default reported server ID is 1\&. If this causes a conflict with the ID of a slave server or another
+\fBmysqlbinlog\fR
+process, use
+\fB\-\-connection\-server\-id\fR
+to specify an alternative server ID\&. See
+the section called \(lqSPECIFYING THE MYSQLBINLOG SERVER ID\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-result\-file\fR: A prefix for output file names, as described later\&.
+.RE
+Static and Live Backups
+.PP
+To back up a server\*(Aqs binary log files with
+\fBmysqlbinlog\fR, you must specify file names that actually exist on the server\&. If you do not know the names, connect to the server and use the
+SHOW BINARY LOGS
+statement to see the current names\&. Suppose that the statement produces this output:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysql> \fBSHOW BINARY LOGS;\fR
++\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-+
+| Log_name      | File_size | Encrypted |
++\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-+
+| binlog\&.000130 |     27459 | No        |
+| binlog\&.000131 |     13719 | No        |
+| binlog\&.000132 |     43268 | No        |
++\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-+
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+With that information, you can use
+\fBmysqlbinlog\fR
+to back up the binary log to the current directory as follows (enter each command on a single line):
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+To make a static backup of
+binlog\&.000130
+through
+binlog\&.000132, use either of these commands:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysqlbinlog \-\-read\-from\-remote\-server \-\-host=\fIhost_name\fR \-\-raw
+  binlog\&.000130 binlog\&.000131 binlog\&.000132
+mysqlbinlog \-\-read\-from\-remote\-server \-\-host=\fIhost_name\fR \-\-raw
+  \-\-to\-last\-log binlog\&.000130
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+The first command specifies every file name explicitly\&. The second names only the first file and uses
+\fB\-\-to\-last\-log\fR
+to read through the last\&. A difference between these commands is that if the server happens to open
+binlog\&.000133
+before
+\fBmysqlbinlog\fR
+reaches the end of
+binlog\&.000132, the first command will not read it, but the second command will\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+To make a live backup in which
+\fBmysqlbinlog\fR
+starts with
+binlog\&.000130
+to copy existing log files, then stays connected to copy new events as the server generates them:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysqlbinlog \-\-read\-from\-remote\-server \-\-host=\fIhost_name\fR \-\-raw
+  \-\-stop\-never binlog\&.000130
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+With
+\fB\-\-stop\-never\fR, it is not necessary to specify
+\fB\-\-to\-last\-log\fR
+to read to the last log file because that option is implied\&.
+.RE
+Output File Naming
+.PP
+Without
+\fB\-\-raw\fR,
+\fBmysqlbinlog\fR
+produces text output and the
+\fB\-\-result\-file\fR
+option, if given, specifies the name of the single file to which all output is written\&. With
+\fB\-\-raw\fR,
+\fBmysqlbinlog\fR
+writes one binary output file for each log file transferred from the server\&. By default,
+\fBmysqlbinlog\fR
+writes the files in the current directory with the same names as the original log files\&. To modify the output file names, use the
+\fB\-\-result\-file\fR
+option\&. In conjunction with
+\fB\-\-raw\fR, the
+\fB\-\-result\-file\fR
+option value is treated as a prefix that modifies the output file names\&.
+.PP
+Suppose that a server currently has binary log files named
+binlog\&.000999
+and up\&. If you use
+\fBmysqlbinlog \-\-raw\fR
+to back up the files, the
+\fB\-\-result\-file\fR
+option produces output file names as shown in the following table\&. You can write the files to a specific directory by beginning the
+\fB\-\-result\-file\fR
+value with the directory path\&. If the
+\fB\-\-result\-file\fR
+value consists only of a directory name, the value must end with the pathname separator character\&. Output files are overwritten if they exist\&.
+.TS
+allbox tab(:);
+lB lB.
+T{
+\fB--result-file\fR Option
+T}:T{
+Output File Names
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fB--result-file=x\fR
+T}:T{
+xbinlog.000999 and up
+T}
+T{
+\fB--result-file=/tmp/\fR
+T}:T{
+/tmp/binlog.000999 and up
+T}
+T{
+\fB--result-file=/tmp/x\fR
+T}:T{
+/tmp/xbinlog.000999 and up
+T}
+.TE
+.sp 1
+Example: mysqldump + mysqlbinlog for Backup and Restore
+.PP
+The following example describes a simple scenario that shows how to use
+\fBmysqldump\fR
+and
+\fBmysqlbinlog\fR
+together to back up a server\*(Aqs data and binary log, and how to use the backup to restore the server if data loss occurs\&. The example assumes that the server is running on host
+\fIhost_name\fR
+and its first binary log file is named
+binlog\&.000999\&. Enter each command on a single line\&.
+.PP
+Use
+\fBmysqlbinlog\fR
+to make a continuous backup of the binary log:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysqlbinlog \-\-read\-from\-remote\-server \-\-host=\fIhost_name\fR \-\-raw
+  \-\-stop\-never binlog\&.000999
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Use
+\fBmysqldump\fR
+to create a dump file as a snapshot of the server\*(Aqs data\&. Use
+\fB\-\-all\-databases\fR,
+\fB\-\-events\fR, and
+\fB\-\-routines\fR
+to back up all data, and
+\fB\-\-master\-data=2\fR
+to include the current binary log coordinates in the dump file\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysqldump \-\-host=\fIhost_name\fR \-\-all\-databases \-\-events \-\-routines \-\-master\-data=2> \fIdump_file\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Execute the
+\fBmysqldump\fR
+command periodically to create newer snapshots as desired\&.
+.PP
+If data loss occurs (for example, if the server crashes), use the most recent dump file to restore the data:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysql \-\-host=\fIhost_name\fR \-u root \-p < \fIdump_file\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Then use the binary log backup to re\-execute events that were written after the coordinates listed in the dump file\&. Suppose that the coordinates in the file look like this:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\-\- CHANGE MASTER TO MASTER_LOG_FILE=\*(Aqbinlog\&.001002\*(Aq, MASTER_LOG_POS=27284;
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+If the most recent backed\-up log file is named
+binlog\&.001004, re\-execute the log events like this:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysqlbinlog \-\-start\-position=27284 binlog\&.001002 binlog\&.001003 binlog\&.001004
+  | mysql \-\-host=\fIhost_name\fR \-u root \-p
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+You might find it easier to copy the backup files (dump file and binary log files) to the server host to make it easier to perform the restore operation, or if MySQL does not allow remote
+root
+access\&.
+mysqlbinlog Backup Restrictions
+.PP
+Binary log backups with
+\fBmysqlbinlog\fR
+are subject to these restrictions:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fBmysqlbinlog\fR
+does not automatically reconnect to the MySQL server if the connection is lost (for example, if a server restart occurs or there is a network outage)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The delay for a backup is similar to the delay for a replication slave\&.
+.RE
+.SH "SPECIFYING THE MYSQLBINLOG SERVER ID"
+.PP
+When invoked with the
+\fB\-\-read\-from\-remote\-server\fR
+option,
+\fBmysqlbinlog\fR
+connects to a MySQL server, specifies a server ID to identify itself, and requests binary log files from the server\&. You can use
+\fBmysqlbinlog\fR
+to request log files from a server in several ways:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Specify an explicitly named set of files: For each file,
+\fBmysqlbinlog\fR
+connects and issues a
+Binlog dump
+command\&. The server sends the file and disconnects\&. There is one connection per file\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Specify the beginning file and
+\fB\-\-to\-last\-log\fR:
+\fBmysqlbinlog\fR
+connects and issues a
+Binlog dump
+command for all files\&. The server sends all files and disconnects\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Specify the beginning file and
+\fB\-\-stop\-never\fR
+(which implies
+\fB\-\-to\-last\-log\fR):
+\fBmysqlbinlog\fR
+connects and issues a
+Binlog dump
+command for all files\&. The server sends all files, but does not disconnect after sending the last one\&.
+.RE
+.PP
+With
+\fB\-\-read\-from\-remote\-server\fR
+only,
+\fBmysqlbinlog\fR
+connects using a server ID of 0, which tells the server to disconnect after sending the last requested log file\&.
+.PP
+With
+\fB\-\-read\-from\-remote\-server\fR
+and
+\fB\-\-stop\-never\fR,
+\fBmysqlbinlog\fR
+connects using a nonzero server ID, so the server does not disconnect after sending the last log file\&. The server ID is 1 by default, but this can be changed with
+\fB\-\-connection\-server\-id\fR\&.
+.PP
+Thus, for the first two ways of requesting files, the server disconnects because
+\fBmysqlbinlog\fR
+specifies a server ID of 0\&. It does not disconnect if
+\fB\-\-stop\-never\fR
+is given because
+\fBmysqlbinlog\fR
+specifies a nonzero server ID\&.
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "NOTES"
+.IP " 1." 4
+MySQL Internals: The Binary Log
+.RS 4
+\%https://dev.mysql.com/doc/internals/en/binary-log.html
+.RE
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

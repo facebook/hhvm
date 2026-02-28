@@ -1,2 +1,3 @@
 final
+---
 A `final` method cannot be overridden in child classes.

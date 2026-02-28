@@ -1,0 +1,24 @@
+Not set
+NULL
+Set null
+NULL
+Set 5
+int(5)
+Set lambda 10
+int(10)
+Set to 15 (get via indirection)
+int(15)
+Nested sets 20-25
+int(25)
+int(20)
+Set null
+NULL
+Set 5
+int(5)
+Set lambda 10
+int(10)
+Set to 15 (get via indirection)
+int(15)
+Nested sets 20-25
+int(25)
+int(20)

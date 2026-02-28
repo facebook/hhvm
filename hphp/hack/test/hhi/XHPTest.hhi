@@ -2,9 +2,14 @@
 
 abstract class XHPTest {
   public function __construct(
-    public darray<string,mixed> $_, // Attributes
-    public varray<mixed> $_, // Children
-    public string $_, // Filename
-    public int $_, // Line number
+    public darray<string,mixed> $_attributes,
+    public varray<mixed> $_children,
+    public string $_filename,
+    public int $_line_number,
   );
+
+  public function getAttribute(
+    string $_attribute,
+    mixed $_default = null
+  ): mixed;
 }

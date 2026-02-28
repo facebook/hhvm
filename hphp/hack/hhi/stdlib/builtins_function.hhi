@@ -10,24 +10,35 @@
 
 namespace {
 
-<<__PHPStdLib>>
-function get_defined_functions(): darray<string, varray<string>>;
-<<__PHPStdLib>>
-function function_exists(string $function_name, bool $autoload = true)[]: bool;
-<<__PHPStdLib>>
-function is_callable($v, bool $syntax = false)[]: bool;
-<<__PHPStdLib>>
-function is_callable_with_name($v, bool $syntax, inout $name)[]: bool;
-<<__Deprecated('Use direct invocation instead.')>>
-function call_user_func_array($function, Container<mixed> $params);
-<<__Deprecated('Use direct invocation instead.')>>
-function call_user_func($function, ...$args);
-<<__PHPStdLib>>
-function register_postsend_function<T>((function(): T) $function): void;
-<<__PHPStdLib>>
-function register_shutdown_function<T>((function(): T) $function): void;
+  <<__PHPStdLib>>
+  function get_defined_functions(): darray<string, varray<string>>;
+  <<__PHPStdLib>>
+  function function_exists(
+    string $function_name,
+    bool $autoload = true,
+  )[]: bool;
+  <<__PHPStdLib>>
+  function is_callable(
+    HH\FIXME\MISSING_PARAM_TYPE $v,
+    bool $syntax = false,
+  )[]: bool;
+  <<__PHPStdLib>>
+  function is_callable_with_name(
+    HH\FIXME\MISSING_PARAM_TYPE $v,
+    bool $syntax,
+    inout HH\FIXME\MISSING_PARAM_TYPE $name,
+  )[]: bool;
+  <<__Deprecated('Use direct invocation instead.')>>
+  function call_user_func_array(
+    HH\FIXME\MISSING_PARAM_TYPE $function,
+    Container<mixed> $params,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
+  <<__PHPStdLib>>
+  function register_postsend_function<T>((function(): T) $function): void;
+  <<__PHPStdLib>>
+  function register_shutdown_function<T>((function(): T) $function): void;
 }
 
 namespace HH {
-function fun_get_function(mixed $fun)[]: string;
+  function fun_get_function(mixed $fun)[]: string;
 }

@@ -1,7 +1,0 @@
-=== Shape analysis results for entity_assignment2.php
-Summary for \f:
-#{0} [4:8-14] : shape()
-#{0} [8:11-13] :
-  shape(
-    a => nothing
-  )

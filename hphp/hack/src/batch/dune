@@ -23,9 +23,9 @@
   heap_shared_mem
   hhi
   naming
+  package_info
   procs_entry_point
   relative_path
   typechecker_options
-  typing_global_inference
   utils_core
   utils_exit))

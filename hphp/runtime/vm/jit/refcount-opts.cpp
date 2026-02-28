@@ -499,7 +499,6 @@ them when we shouldn't.
 #include <cstdio>
 #include <string>
 #include <limits>
-#include <sstream>
 #include <array>
 #include <tuple>
 
@@ -510,6 +509,8 @@ them when we shouldn't.
 
 #include "hphp/util/bitset-array.h"
 #include "hphp/util/bitset-utils.h"
+#include "hphp/util/configs/hhir.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/match.h"
 #include "hphp/util/safe-cast.h"
@@ -535,15 +536,16 @@ namespace HPHP { namespace jit {
 
 namespace {
 
-TRACE_SET_MOD(hhir_refcount);
+TRACE_SET_MOD(hhir_refcount)
 
 //////////////////////////////////////////////////////////////////////
+const int32_t kMaxReferences = std::numeric_limits<int32_t>::max();
 
 // Helper for removing instructions in the rest of this file---if a debugging
 // mode is enabled, it will replace it with a debugging instruction if
 // appropriate instead of removing it.
 void remove_helper(IRUnit& unit, IRInstruction* inst) {
-  if (!RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (!Cfg::HHIR::GenerateAsserts) {
     inst->convertToNop();
     return;
   }
@@ -551,7 +553,8 @@ void remove_helper(IRUnit& unit, IRInstruction* inst) {
   switch (inst->op()) {
   case IncRef:
   case DecRef:
-  case DecRefNZ: {
+  case DecRefNZ: 
+  case DecReleaseCheck: {
     inst->setOpcode(DbgAssertRefCount);
     inst->clearExtra();
     auto extra = ASSERT_REASON;
@@ -619,7 +622,6 @@ struct MemRefAnalysis {
     ALocBits avail_in;
     ALocBits avail_out;
     ALocBits kill;
-    ALocBits gen;
   };
 
   explicit MemRefAnalysis(IRUnit& unit) : info(unit, BlockInfo{}) {}
@@ -637,6 +639,12 @@ struct ASetInfo {
    * some subtleties here.
    */
   int32_t lower_bound{0};
+
+  /*
+   * An upper bound of the actual reference count of the object that this alias
+   * set refers to.
+   */
+  int32_t upper_bound{kMaxReferences};
 
   /*
    * Sometimes we know the refcount is higher than we've been able to
@@ -886,7 +894,7 @@ struct PreAdderInfo {
       }
       assertx(it != inst.block()->begin());
     }
-  };
+  }
   void setAvlAnt(Block::iterator iter, bool avl) {
     auto& inst = *iter;
     auto const id = penv.env.asetMap[inst.src(0)];
@@ -995,11 +1003,10 @@ struct PreAdder {
 
 //////////////////////////////////////////////////////////////////////
 
-template<class Kill, class Gen>
+template<class Kill>
 void mrinfo_step_impl(Env& env,
                       const IRInstruction& inst,
-                      Kill kill,
-                      Gen gen) {
+                      Kill kill) {
   auto do_store = [&] (AliasClass dst, SSATmp* value) {
     /*
      * Pure stores potentially (temporarily) break the heap's reference count
@@ -1012,12 +1019,17 @@ void mrinfo_step_impl(Env& env,
   };
 
   auto const effects = memory_effects(inst);
-  match<void>(
-    effects, [&](IrrelevantEffects) {}, [&](ExitEffects) {},
-    [&](ReturnEffects) {}, [&](GeneralEffects) {},
-    [&](UnknownEffects) { kill(ALocBits{}.set()); },
-    [&](PureStore x) { do_store(x.dst, x.value); },
-    [&](PureInlineCall) {},
+  match(
+    effects,
+    [&](const IrrelevantEffects&) {},
+    [&](const ExitEffects&) {},
+    [&](const ReturnEffects&) {},
+    [&](const GeneralEffects&) {},
+    [&](const PureInlineCall&) {},
+    [&](const CallEffects&) {},
+
+    [&](const UnknownEffects&) { kill(ALocBits{}.set()); },
+    [&](const PureStore& x) { do_store(x.dst, x.value); },
 
     /*
      * Note that loads do not kill a location.  In fact, it's possible that the
@@ -1033,21 +1045,7 @@ void mrinfo_step_impl(Env& env,
      * won't be able to remove support from the previous aset, and won't raise
      * the lower bound on the new loaded value.
      */
-    [&](PureLoad) {},
-
-    [&](CallEffects /*x*/) {
-      /*
-       * Because PHP callees can side-exit (or for that matter throw from their
-       * prologue), the program is ill-formed unless we have balanced reference
-       * counting for all memory locations.  Even if the call has the
-       * destroys_locals flag this is the case---after it destroys the locals
-       * the new value will have a fully synchronized reference count.
-       *
-       * This may need modifications after we allow php values to span calls in
-       * SSA registers.
-       */
-      gen(ALocBits{}.set());
-    });
+    [&](const PureLoad&) {});
 }
 
 // Helper for stepping after we've created a MemRefAnalysis.
@@ -1055,8 +1053,7 @@ void mrinfo_step(Env& env, const IRInstruction& inst, ALocBits& avail) {
   mrinfo_step_impl(
     env,
     inst,
-    [&] (ALocBits kill) { avail &= ~kill; },
-    [&] (ALocBits gen)  { avail |= gen; }
+    [&] (ALocBits kill) { avail &= ~kill; }
   );
 }
 
@@ -1089,11 +1086,6 @@ void populate_mrinfo(Env& env) {
         inst,
         [&] (ALocBits kill) {
           env.mrinfo.info[blk].kill |= kill;
-          env.mrinfo.info[blk].gen &= ~kill;
-        },
-        [&] (ALocBits gen) {
-          env.mrinfo.info[blk].gen |= gen;
-          env.mrinfo.info[blk].kill &= ~gen;
         }
       );
     }
@@ -1103,11 +1095,9 @@ void populate_mrinfo(Env& env) {
     [&] () -> std::string {
       auto ret = std::string{};
       for (auto& blk : env.rpoBlocks) {
-        folly::format(&ret, "  B{: <3}: {}\n"
-                            "      : {}\n",
+        folly::format(&ret, "  B{: <3}: {}\n",
           blk->id(),
-          show(env.mrinfo.info[blk].kill),
-          show(env.mrinfo.info[blk].gen)
+          show(env.mrinfo.info[blk].kill)
         );
       }
       return ret;
@@ -1117,7 +1107,7 @@ void populate_mrinfo(Env& env) {
   /*
    * 2. Find fixed point of avail_in:
    *
-   *   avail_out = avail_in - kill + gen
+   *   avail_out = avail_in - kill
    *   avail_in  = isect(pred) avail_out
    *
    * Locations that are marked "avail" mean they imply a non-zero lower bound
@@ -1143,7 +1133,7 @@ void populate_mrinfo(Env& env) {
     });
 
     auto const old = binfo.avail_out;
-    binfo.avail_out = (binfo.avail_in & ~binfo.kill) | binfo.gen;
+    binfo.avail_out = binfo.avail_in & ~binfo.kill;
     if (binfo.avail_out != old) {
       if (auto const t = blk->taken()) {
         incompleteQ.push(env.mrinfo.info[t].rpoId);
@@ -1200,7 +1190,7 @@ void weaken_decref_step(const Env& env, const IRInstruction& inst, Gen gen) {
     if (asetID == -1) continue;
     if (!checked) {
       auto const effects = memory_effects(inst);
-      if (boost::get<PureStore>(&effects)) return;
+      if (std::get_if<PureStore>(&effects)) return;
       checked = true;
     }
     gen(asetID);
@@ -1367,21 +1357,21 @@ bool irrelevant_inst(const IRInstruction& inst) {
     effects,
     // Pure loads, stores, and IrrelevantEffects do not read or write any
     // object reference counts.
-    [&] (PureLoad) { return true; },
-    [&] (PureStore) { return true; },
-    [&] (IrrelevantEffects) { return true; },
-    [&] (PureInlineCall) { return true; },
+    [&] (const PureLoad&) { return true; },
+    [&] (const PureStore&) { return true; },
+    [&] (const IrrelevantEffects&) { return true; },
+    [&] (const PureInlineCall&) { return true; },
 
     // Inlining related instructions can manipulate the frame but don't
     // observe reference counts.
-    [&] (GeneralEffects g) {
-      if (inst.is(BeginInlining, EndInlining, InlineCall)) {
+    [&] (const GeneralEffects& g) {
+      if (inst.is(LeaveInlineFrame, InlineCall, EnterInlineFrame)) {
         return true;
       }
       if (inst.consumesReferences()) return false;
 
       if (g.loads <= AEmpty &&
-          g.backtrace <= AEmpty &&
+          g.backtrace.empty() &&
           g.stores <= AEmpty &&
           g.inout <= AEmpty) {
         return true;
@@ -1390,10 +1380,10 @@ bool irrelevant_inst(const IRInstruction& inst) {
     },
 
     // Everything else may.
-    [&] (CallEffects)       { return false; },
-    [&] (ReturnEffects)     { return false; },
-    [&] (ExitEffects)       { return false; },
-    [&] (UnknownEffects)    { return false; }
+    [&] (const CallEffects&)       { return false; },
+    [&] (const ReturnEffects&)     { return false; },
+    [&] (const ExitEffects&)       { return false; },
+    [&] (const UnknownEffects&)    { return false; }
   );
 }
 
@@ -1413,12 +1403,15 @@ void find_alias_sets(Env& env) {
       id = env.asetMap[canon];
     } else {
       auto const cinst = canon->inst();
-      if (cinst->is(DefLabel) && cinst->numDsts() == 1) {
+      if (cinst->is(DefLabel)) {
+        auto const idx = cinst->findDst(canon);
+        assertx(idx < cinst->numDsts());
+
         int pid = -2;
-        cinst->block()->forEachSrc(0, [&](IRInstruction*, SSATmp* src) {
+        cinst->block()->forEachSrc(idx, [&](IRInstruction*, SSATmp* src) {
           if (pid == -1) return;
           src = canonical(src);
-          if (src == cinst->dst(0)) return;
+          if (src == canon) return;
           auto const srcId = env.asetMap[src];
           if (srcId == -1) {
             pid = -1;
@@ -1498,6 +1491,7 @@ DEBUG_ONLY bool check_state(const RCState& state) {
     // All reference count bounds are non-negative.
     always_assert(set.unsupported_refs >= 0);
     always_assert(set.lower_bound >= set.unsupported_refs);
+    always_assert(set.upper_bound >= set.lower_bound);
 
     // If this set has support bits, then the reverse map in the state is
     // consistent with it.
@@ -1511,6 +1505,17 @@ DEBUG_ONLY bool check_state(const RCState& state) {
   for (auto id = uint32_t{0}; id < state.support_map.size(); ++id) {
     auto const asetID = state.support_map[id];
     if (asetID != -1) {
+      always_assert_flog(
+        asetID >= 0,
+        "asetID {} must be non-negative",
+        asetID
+      );
+      always_assert_flog(
+        asetID < state.asets.size(),
+        "aset ID {} is out of bounds of state.asets size {}",
+        asetID,
+        state.asets.size()
+      );
       always_assert_flog(
         state.asets[asetID].memory_support[id],
         "expected aset {} to have support in location {}",
@@ -1534,10 +1539,11 @@ RCState entry_rc_state(Env& env) {
   return ret;
 }
 
-bool merge_into(ASetInfo& dst, const ASetInfo& src) {
+bool merge_into(ASetInfo& dst, const ASetInfo& src, bool is_back_edge) {
   auto changed = false;
 
   auto const lower_bound = std::min(dst.lower_bound, src.lower_bound);
+  auto const upper_bound = std::max(dst.upper_bound, src.upper_bound);
 
   /*
    * We're going to reduce the memory support to the intersection of
@@ -1551,23 +1557,45 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src) {
   auto const dst_count = dst.memory_support.count();
   auto const src_count = src.memory_support.count();
   auto const new_count = new_memory_support.count();
-  auto const dst_delta = dst_count - new_count;
-  auto const src_delta = src_count - new_count;
+  auto const dst_delta = safe_cast<int32_t>(dst_count - new_count);
+  auto const src_delta = safe_cast<int32_t>(src_count - new_count);
 
-  const int dst_unsupported_refs = dst.unsupported_refs + dst_delta;
-  const int src_unsupported_refs = src.unsupported_refs + src_delta;
+  auto const dst_unsupported_refs = std::min(
+    dst.unsupported_refs + dst_delta, dst.lower_bound);
+  auto const src_unsupported_refs = std::min(
+    src.unsupported_refs + src_delta, src.lower_bound);
+  auto const dst_supported_refs = dst.lower_bound - dst_unsupported_refs;
+  auto const src_supported_refs = src.lower_bound - src_unsupported_refs;
 
-  auto const unsupported_refs =
-    std::min(std::max(dst_unsupported_refs, src_unsupported_refs),
-             lower_bound);
-
-  if (dst.lower_bound != lower_bound) {
-    dst.lower_bound = lower_bound;
-    changed = true;
-  }
+  auto const supported_refs = std::min(dst_supported_refs, src_supported_refs);
+  auto const unsupported_refs = lower_bound - supported_refs;
 
   if (dst.unsupported_refs != unsupported_refs) {
     dst.unsupported_refs = unsupported_refs;
+    changed = true;
+  }
+
+  if (dst.lower_bound != lower_bound) {
+    /*
+     * If there's a cycle, we will still converge to 0, 
+     * albeit rather slowly - after going through lower_bound iterations.
+     * Accounting for the back edge lets us detect a cycle, and hence, converge immediately.
+     */
+     if (is_back_edge) {
+      dst.lower_bound = dst.unsupported_refs = 0;
+    } else {
+      dst.lower_bound = lower_bound;
+    }
+    changed = true;
+  }
+
+  if (dst.upper_bound != upper_bound) {
+    /*
+     * If there's a cycle, we will still converge to kMaxReferences, 
+     * albeit rather slowly - after going through kMaxReferences iterations.
+     * Accounting for the back edge lets us detect a cycle, and hence, converge immediately.
+     */
+    dst.upper_bound = is_back_edge ? kMaxReferences : upper_bound;
     changed = true;
   }
 
@@ -1580,7 +1608,7 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src) {
   return changed;
 }
 
-bool merge_into(Env& /*env*/, RCState& dst, const RCState& src) {
+bool merge_into(Env& /*env*/, RCState& dst, const RCState& src, bool is_back_edge) {
   if (!dst.initialized) {
     dst = src;
     return true;
@@ -1625,7 +1653,8 @@ bool merge_into(Env& /*env*/, RCState& dst, const RCState& src) {
   dst.has_unsupported_refs = false;
   for (auto asetID = uint32_t{0}; asetID < dst.asets.size(); ++asetID) {
     auto &daset = dst.asets[asetID];
-    if (merge_into(daset, src.asets[asetID])) {
+    if (merge_into(daset, src.asets[asetID], is_back_edge)) {
+      FTRACE(3, "  info changed for aset ID {}\n", asetID);
       changed = true;
     }
 
@@ -1653,6 +1682,7 @@ bool is_same(const RCState &dstState, const RCState& srcState) {
     auto& src = srcState.asets[asetID];
 
     if (dst.lower_bound != src.lower_bound ||
+        dst.upper_bound != src.upper_bound ||
         dst.unsupported_refs != src.unsupported_refs ||
         dst.memory_support != src.memory_support) {
       return false;
@@ -1719,6 +1749,7 @@ void observe_unbalanced_decrefs(Env& env, RCState& state, PreAdder add_node) {
 void pessimize_one(Env& /*env*/, RCState& state, ASetID asetID,
                    PreAdder add_node) {
   auto& aset = state.asets[asetID];
+  aset.upper_bound = kMaxReferences;
   if (!aset.lower_bound && aset.memory_support.none()) return;
   FTRACE(2, "      {} pessimized\n", asetID);
   aset.lower_bound = 0;
@@ -1728,7 +1759,7 @@ void pessimize_one(Env& /*env*/, RCState& state, ASetID asetID,
     [&](size_t id) { state.support_map[id] = -1; }
   );
   aset.memory_support.reset();
-  add_node(asetID, NReq{std::numeric_limits<int32_t>::max()});
+  add_node(asetID, NReq{kMaxReferences});
 }
 
 void pessimize_all(Env& env, RCState& state, PreAdder add_node) {
@@ -1736,6 +1767,19 @@ void pessimize_all(Env& env, RCState& state, PreAdder add_node) {
   observe_unbalanced_decrefs(env, state, add_node);
   for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
     pessimize_one(env, state, asetID, add_node);
+  }
+}
+
+void pessimize_upper_bound_one_aset(Env& /*env*/, RCState& state, ASetID asetID) {
+  auto& aset = state.asets[asetID];
+  FTRACE(2, "      {} upper bound pessimized\n", asetID);
+  aset.upper_bound = kMaxReferences;
+}
+
+void pessimize_upper_bound_all_asets(Env& env, RCState& state) {
+  FTRACE(3, "    pessimize_all_upper_bounds\n");
+  for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
+    pessimize_upper_bound_one_aset(env, state, asetID);
   }
 }
 
@@ -1777,8 +1821,35 @@ void observe_all(Env& env, RCState& state, PreAdder add_node) {
   FTRACE(3, "    observe_all\n");
   observe_unbalanced_decrefs(env, state, add_node);
   for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
-    add_node(asetID, NReq{std::numeric_limits<int32_t>::max()});
+    add_node(asetID, NReq{kMaxReferences});
   }
+}
+
+void decrease_upper_bound(Env& /*env*/, RCState& state, ASetID asetID) {
+  auto& aset = state.asets[asetID];
+  aset.upper_bound--;
+  assertx(aset.upper_bound >= aset.lower_bound);
+  FTRACE(5, "    decreased upper bound for aset {} by 1: ub({})\n",
+    asetID, aset.upper_bound);
+}
+
+void increase_upper_bound(Env& /*env*/, RCState& state, ASetID asetID) {
+  auto& aset = state.asets[asetID];
+  if (aset.upper_bound < kMaxReferences) aset.upper_bound++;
+  assertx(aset.upper_bound >= aset.lower_bound);
+  FTRACE(5, "    increased upper bound for aset {} by 1: new_ub({})\n",
+    asetID, aset.upper_bound);
+}
+
+void may_incref(Env& env, RCState& state, ASetID asetID) {
+  /*
+   * We must increase the upper bound of any alias set that could alias with asetID by 1.
+   */
+  assertx(asetID != -1);
+  increase_upper_bound(env, state, asetID);
+  for (auto may_id : env.asets[asetID].may_alias) {
+    increase_upper_bound(env, state, may_id);
+  }  
 }
 
 void may_decref(Env& env, RCState& state, ASetID asetID, PreAdder add_node) {
@@ -1789,8 +1860,13 @@ void may_decref(Env& env, RCState& state, ASetID asetID, PreAdder add_node) {
   add_node(asetID, NReq{1});
   FTRACE(3, "    {} lb: {}({})\n",
          asetID, aset.lower_bound, aset.unsupported_refs);
-
+  
   if (balanced) {
+    /*
+     * The intention here is to reduce just the assumed reference of may-alias sets by 1
+     * However, we don't distinguish which of the unsupported references are assumed
+     * Therefore, we conservatively decrease the unsupported reference by 1
+     */ 
     FTRACE(4, "    adding balanced decref: {}\n", asetID);
     if (!state.has_unsupported_refs) return;
     for (auto may_id : env.asets[asetID].may_alias) {
@@ -1843,28 +1919,20 @@ bool reduce_support_bit(Env& env,
     assertx(!may_decref || !aset.unsupported_refs);
     /*
      * We can't remove the support bit, and we have no way to account for the
-     * reduction in lower bound.  There are three cases to consider:
+     * reduction in lower bound.  There are two cases to consider:
      *
      *   o If may_decref is false (we're trying to move the support
      *     from this aset to another, but no refcounts are changing)
      *     we simply need to report that we failed.
      *
-     *   o If the event we're processing actually DecRef'd this
-     *     must-alias-set through this memory location (only possible
-     *     when may_decref is true implying a zero lower bound), the
-     *     lower bound will remain zero, and leaving the bit set
-     *     conservatively is not incorrect.
-     *
-     *   o If the event we're processing did not actually DecRef this
-     *     object through this memory location, because it stored
-     *     elsewhere, then we must not remove the bit, because
-     *     something in the future (after we've seen other IncRefs)
-     *     still may decref it through this location.
-     *
-     * So in this case we leave the lower bound alone, and also must
-     * not remove the bit.
+     *   o If may_decref is true we treat this as an unbalanced decref
+     *     and reduce support on all may-alias asets. As we have treated
+     *     this as an ordinary decref we can safely remove the memory
+     *     support from this aset.
      */
-    return false;
+    if (!may_decref) return false;
+    FTRACE(4, "    adding unbalanced decref: {}\n", current_set);
+    state.unbalanced_decrefs.push_back(current_set);
   }
   aset.memory_support.reset(locID);
   state.support_map[locID] = -1;
@@ -1989,15 +2057,11 @@ void create_store_support(Env& env, RCState& state, AliasClass dst, SSATmp* tmp,
 //////////////////////////////////////////////////////////////////////
 
 void handle_call(Env& env, RCState& state, const IRInstruction& /*inst*/,
-                 CallEffects e, PreAdder add_node) {
-  // We have to block all incref motion through a PHP call, by observing at the
-  // max.  This is fundamentally required because the callee can side-exit or
-  // throw an exception without a catch trace, so everything needs to be
-  // balanced.
-  observe_all(env, state, add_node);
-
+                 const CallEffects& e, PreAdder add_node) {
   // The call can affect any unsupported_refs
+  observe_unbalanced_decrefs(env, state, add_node);
   kill_unsupported_refs(state);
+  pessimize_upper_bound_all_asets(env, state);
 
   // Figure out locations the call may cause stores to, then remove any memory
   // support on those locations.
@@ -2006,6 +2070,7 @@ void handle_call(Env& env, RCState& state, const IRInstruction& /*inst*/,
   bset |= env.ainfo.may_alias(e.actrec);
   bset |= env.ainfo.may_alias(e.outputs);
   bset |= env.ainfo.may_alias(AHeapAny);
+  bset |= env.ainfo.may_alias(ARdsAny);
   reduce_support_bits(env, state, bset, true, add_node);
 }
 
@@ -2068,16 +2133,25 @@ void analyze_mem_effects(Env& env,
                          PreAdder add_node) {
   auto const effects = canonicalize(memory_effects(inst));
   FTRACE(4, "    mem: {}\n", show(effects));
-  match<void>(
+  match(
     effects,
-    [&] (IrrelevantEffects) {},
+    [&] (const IrrelevantEffects&) {},
 
-    [&] (PureInlineCall) {},
+    [&] (const PureInlineCall&) {},
 
-    [&] (GeneralEffects x)  {
+    [&] (const GeneralEffects& x) {
       if (inst.is(CallBuiltin)) {
         observe_unbalanced_decrefs(env, state, add_node);
         kill_unsupported_refs(state, add_node);
+        pessimize_upper_bound_all_asets(env, state);
+      }
+
+      /*
+       * We could have loaded from an untracked location
+       * that could be supporting any of the asets
+       */
+      if (x.loads != AEmpty || x.inout != AEmpty || !x.backtrace.empty()) {
+        pessimize_upper_bound_all_asets(env, state);
       }
 
       // Locations that are killed don't need to be tracked as memory support
@@ -2089,7 +2163,7 @@ void analyze_mem_effects(Env& env,
       // Various inline related instructions have non-empty stores to
       // prevent store sinking, but don't actually change any
       // refcounts, so we don't need to reduce lower bounds.
-      auto const may_decref = !inst.is(BeginInlining, EndInlining);
+      auto const may_decref = !inst.is(LeaveInlineFrame, EnterInlineFrame);
       if (may_decref && (x.stores != AEmpty || x.inout != AEmpty)) {
         observe_unbalanced_decrefs(env, state, add_node);
       }
@@ -2100,22 +2174,24 @@ void analyze_mem_effects(Env& env,
       reduce_support(env, state, x.moves, false, add_node);
     },
 
-    [&] (ReturnEffects)     {
+    [&] (const ReturnEffects&)     {
       observe_all(env, state, add_node);
     },
-    [&] (ExitEffects)       {
+    [&] (const ExitEffects&) {
       observe_all(env, state, add_node);
     },
-
-    [&] (UnknownEffects)    {
+    [&] (const UnknownEffects&) {
       pessimize_all(env, state, add_node);
     },
-
-    [&] (CallEffects e) {
+    [&] (const CallEffects& e) {
       handle_call(env, state, inst, e, add_node);
     },
-    [&] (PureStore x)   { pure_store(env, state, x.dst, x.value, add_node); },
-    [&] (PureLoad x)    { pure_load(env, state, x.src, inst.dst(), add_node); }
+    [&] (const PureStore& x) {
+      pure_store(env, state, x.dst, x.value, add_node);
+    },
+    [&] (const PureLoad& x) {
+      pure_load(env, state, x.src, inst.dst(), add_node);
+    }
   );
 }
 
@@ -2176,14 +2252,21 @@ void rc_analyze_inst(Env& env,
       auto const& defLabel = inst.taken()->front();
       assertx(defLabel.is(DefLabel));
       for (auto i = 0; i < inst.numSrcs(); i++) {
-        auto const srcID = lookup_aset(env, inst.src(i));
-        if (!srcID) continue;
-        auto& srcSet = state.asets[*srcID];
         auto const dstID = lookup_aset(env, defLabel.dst(i));
         if (!dstID) continue;
         auto& dstSet = state.asets[*dstID];
+        auto const srcID = lookup_aset(env, inst.src(i));
+        if (!srcID) {
+          dstSet.upper_bound = kMaxReferences;
+          FTRACE(3, "    DefLabel dstID {} set ub = {}\n", *dstID, dstSet.upper_bound);
+          continue;
+        }
+        auto& srcSet = state.asets[*srcID];
+        dstSet.upper_bound = srcSet.upper_bound;
+        FTRACE(3, "    DefLabel dstID {} set ub = {}\n", *dstID, dstSet.upper_bound);
         if (dstSet.lower_bound < srcSet.lower_bound) {
           auto const delta = srcSet.lower_bound - dstSet.lower_bound;
+          // Add assumed references to dstSet
           dstSet.unsupported_refs += delta;
           dstSet.lower_bound = srcSet.lower_bound;
           state.has_unsupported_refs = true;
@@ -2200,12 +2283,19 @@ void rc_analyze_inst(Env& env,
     if_aset(env, inst.src(0), [&] (ASetID asetID) {
       auto& aset = state.asets[asetID];
       if (!aset.lower_bound) {
+        /*
+         * We incref aset so there must be a ref to it, otherwise the input program is malformed.
+         * Therefore, we assume aset has atleast a single reference.
+         * This is a special unsupported ref because it may already be accounted for, 
+         * by the supported component of the aset's may-aliases.
+         */
         FTRACE(3, "    {} unsupported_refs += 1\n", asetID);
         assertx(!aset.unsupported_refs);
         aset.lower_bound = aset.unsupported_refs = 1;
         state.has_unsupported_refs = true;
       }
       add_node(asetID, NInc{&inst});
+      may_incref(env, state, asetID);
       ++aset.lower_bound;
       FTRACE(3, "    {} lb: {}({})\n",
              asetID, aset.lower_bound, aset.unsupported_refs);
@@ -2217,7 +2307,15 @@ void rc_analyze_inst(Env& env,
       auto old_lb = int32_t{0};
       if_aset(env, inst.src(0), [&] (ASetID asetID) {
         auto& aset = state.asets[asetID];
+        auto src_type = inst.src(0)->type();
         if (inst.op() == DecRefNZ && aset.lower_bound < 2) {
+          /*
+           * We DecRefNZ aset so there must be at least 2 refs to it, otherwise the input program is malformed.
+           * Therefore, we add 2 assumed references to aset.
+           * These are special unsupported refs because they may already be accounted for, 
+           * by the supported component of the aset's may-aliases.
+           */
+
           FTRACE(3, "    {} unsupported_refs += {}\n",
                  asetID, 2 - aset.lower_bound);
           assertx(aset.unsupported_refs <= aset.lower_bound);
@@ -2228,6 +2326,20 @@ void rc_analyze_inst(Env& env,
         add_node(asetID, NDec{&inst});
         old_lb = aset.lower_bound;
         may_decref(env, state, asetID, add_node);
+        /*
+         * We only modify upper bound for guaranteed counted asets.
+         * For asets that could be persistent, the upper bound must be kMaxReferences.
+         * However, this invariant may be temporarily broken at the moment. 
+         * One situation is if we are currently within a loop body
+         * and the Deflabel block corresponding to the loop beginning hasn't been merged
+         * with all of its ancestors because some of them are yet to be processed.
+         * It's possible that it has only been merged 
+         * with the ancestors that provide counted values (upper_bound <= kMaxReferences)
+         * but not with those that provide uncounted values (upper_bound == kMaxReferences).
+         */
+        if (src_type.subtypeOfAny(TCounted)) {
+          decrease_upper_bound(env, state, asetID);
+        }
       });
       if (old_lb <= 1) analyze_mem_effects(env, inst, state, add_node);
     }
@@ -2282,12 +2394,19 @@ void rc_analyze_inst(Env& env,
    * will be true.
    */
   for (auto srcID = uint32_t{0}; srcID < inst.numSrcs(); ++srcID) {
+
+    // The instruction might incref any of the args arbitrary number of times. 
+    if_aset(env, inst.src(srcID), [&] (ASetID asetID) {
+      pessimize_upper_bound_one_aset(env, state, asetID);
+    });
+
     if (consumes_reference_next_not_taken(inst, srcID)) {
       assertx(!consumes_reference_taken(inst, srcID));
       if_aset(env, inst.src(srcID), [&] (ASetID asetID) {
         if (inst.movesReference(srcID)) {
           auto& aset = state.asets[asetID];
           if (!aset.lower_bound) {
+            // Add an assumed reference
             aset.lower_bound = aset.unsupported_refs = 1;
             state.has_unsupported_refs = true;
           } else if (aset.lower_bound > aset.unsupported_refs) {
@@ -2308,8 +2427,16 @@ void rc_analyze_inst(Env& env,
   if (inst.producesReference()) {
     if_aset(env, inst.dst(), [&] (ASetID asetID) {
       auto& aset = state.asets[asetID];
-      ++aset.lower_bound;
-      FTRACE(3, "    {} produced: lb {}\n", asetID, aset.lower_bound);
+      assertx(aset.unsupported_refs == 0);
+      assertx(aset.lower_bound == 0);
+      assertx(aset.upper_bound == kMaxReferences);
+      aset.lower_bound = 1;
+      if (inst.producesNewReference() && inst.dst()->type().subtypeOfAny(TCounted)) {
+        aset.upper_bound = 1;
+      }
+      FTRACE(3, "    {} produced: lb {} ub {}\n", 
+        asetID, aset.lower_bound, aset.upper_bound
+      );
     });
   }
 }
@@ -2330,6 +2457,34 @@ void rc_analyze_step(Env& env,
   // now, and SSATmps can't span calls.
   mrinfo_step(env, inst, state.avail);
   assertx(check_state(state));
+
+  if (Cfg::HHIR::InliningAssertMemoryEffects && inst.is(LeaveInlineFrame)) {
+    assertx(inst.src(0)->inst()->is(DefCalleeFP));
+    auto const fp = inst.src(0);
+    auto const callee = fp->inst()->extra<DefCalleeFP>()->func;
+
+    auto const assertDead = [&] (AliasClass acls, const char* what) {
+      auto const canon = canonicalize(acls);
+      auto const mustBeDead = env.ainfo.expand(canon);
+      bitset_for_each_set(
+        mustBeDead,
+        [&] (size_t id) {
+          always_assert_flog(
+            state.support_map[id] == -1,
+            "Detected that {} location was still used as reference support "
+            "after accounting for all effects at an LeaveInlineFrame position\n"
+            "    Locations: {}\n",
+            what,
+            show(mustBeDead)
+          );
+        }
+      );
+    };
+
+    // Assert that all of the locals and iterators for this frame as well as
+    // the ActRec itself and the minstr state have been marked dead.
+    for_each_frame_location(fp, callee, assertDead);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2349,6 +2504,7 @@ void rc_analyze_worklist(Env& env,
     auto const blk = env.rpoBlocks[id];
     FTRACE(2, "B{}:\n", blk->id());
     auto state = rca.info[blk].state_in;
+    auto rpoID = rca.info[blk].rpoId;
 
     auto propagate = [&] (Block* target) {
       FTRACE(2, "   -> {}\n", target->id());
@@ -2382,7 +2538,7 @@ void rc_analyze_worklist(Env& env,
         );
         return;
       }
-      auto const changed = merge_into(env, tinfo.state_in, state);
+      auto const changed = merge_into(env, tinfo.state_in, state, tinfo.rpoId < rpoID);
       if (changed) incompleteQ.push(tinfo.rpoId);
     };
 
@@ -2467,8 +2623,17 @@ bool can_sink_inc_through(const IRInstruction& inst) {
     // these commonly occur along with type guards
     case LdLoc:
     case LdStk:
-    case BeginInlining:
-    case EndInlining:
+    case LdIterPos:
+    case LdPtrIterKey:
+    case LdPtrIterVal:
+    case GetDictPtrIter:
+    case GetKeysetPtrIter:
+    case BespokeIterGetKey:
+    case BespokeIterGetVal:
+    case IntAsPtrToElem:
+    case DefCalleeFP:
+    case EnterInlineFrame:
+    case LeaveInlineFrame:
     case InlineCall:
     case FinishMemberOp:
     case Nop:        return true;
@@ -2668,7 +2833,7 @@ void pre_local_transfer(PreEnv& penv, bool incDec, Block* blk) {
     PreAdder preAdder{&adder};
     for (auto iter = blk->begin(); iter != blk->end(); ++iter) {
       auto& inst = *iter;
-      if (inst.is(DecRef)) {
+      if (inst.is(DecRef) || inst.is(DecReleaseCheck)) {
         auto const id = penv.env.asetMap[inst.src(0)];
         if (id < 0) {
           assertx(inst.src(0)->type() <= TUncounted);
@@ -2687,8 +2852,31 @@ void pre_local_transfer(PreEnv& penv, bool incDec, Block* blk) {
           }
           if (lb >= 2) {
             FTRACE(2, "    ** decnz:  {}\n", inst);
+            if (inst.is(DecReleaseCheck)) {
+              Block* inst_block = inst.block();
+              inst_block->push_back(penv.env.unit.gen(Jmp, inst.bcctx(), inst.taken()));
+            }
             inst.setOpcode(DecRefNZ);
           }
+        }
+        if (state.asets[id].upper_bound == 1 && inst.is(DecReleaseCheck)) {
+          FTRACE(2, "    convert inst to Nop:  {}\n", inst);
+          assertx(inst.src(0)->type().subtypeOfAny(TCounted));
+          Block* inst_block = inst.block();
+          inst_block->push_back(penv.env.unit.gen(Jmp, inst.bcctx(), inst.next()));
+          remove_helper(penv.env.unit, &inst);
+        }
+      }
+      if (inst.is(CheckArrayCOW)) {
+        auto const id = penv.env.asetMap[inst.src(0)];
+        if (id > 0 && state.asets[id].upper_bound == 1) {
+          FTRACE(2, "    convert inst to AssertType:  {}\n", inst);
+          assertx(inst.src(0)->type().subtypeOfAny(TCounted));
+          auto inst_block = inst.block();
+          auto next = inst.next();
+          inst.setOpcode(AssertType);
+          inst.setTypeParam(inst.dst()->type());
+          inst_block->push_back(penv.env.unit.gen(Jmp, inst.bcctx(), next));
         }
       }
       rc_analyze_step(penv.env, inst, state, [&] (Block*) {}, preAdder);
@@ -2785,6 +2973,7 @@ void pre_compute_anticipated(PreEnv& penv) {
         if (!first) {
           s.antOut &= ss.antIn;
           s.pantOut |= ss.pantIn;
+          assertx(!ss.phiPropagate.any());
           return;
         }
         first = false;
@@ -2848,22 +3037,37 @@ bool pre_adjust_for_phis(PreEnv& penv) {
     auto newProp = s.phiPropagate;
     for (auto i = 0; i < front.numDsts(); i++) {
       if (i == s.phiPropagate.size()) break;
-      if (s.phiPropagate.test(i)) continue;
-      auto const did = lookup_aset(penv.env, front.dst(i));
-      if (!did || !s.antIn.test(*did) || s.pavlIn.test(*did)) continue;
+
+      auto const newVal = [&]{
+        auto const did = lookup_aset(penv.env, front.dst(i));
+        if (!did || !s.antIn.test(*did)) return false;
+        bool result = false;
+        blk->forEachPred(
+          [&] (Block* pred) {
+            auto const sid = lookup_aset(penv.env, pred->back().src(i));
+            if (!sid) return;
+            auto& ps = penv.state[pred];
+            if (ps.pavlOut.test(*sid)) result = true;
+          }
+        );
+        return result;
+      }();
+
+      if (s.phiPropagate.test(i) == newVal) continue;
+
+      FTRACE(3, "{}setting phiPropagate[{}] in blk({})\n",
+             newVal ? "" : "un", i, blk->id());
+
+      newProp.flip(i);
+
       blk->forEachPred(
         [&] (Block* pred) {
-          auto const sid = lookup_aset(penv.env, pred->back().src(i));
-          if (!sid) return;
           auto& ps = penv.state[pred];
-          if (ps.pavlOut.test(*sid)) {
-            penv.antQ.push(ps.rpoId);
-            newProp.set(i);
-            FTRACE(3, "setting phiPropagate[{}] in blk({})\n", i, blk->id());
-          }
+          penv.antQ.push(ps.rpoId);
         }
       );
     }
+
     if (s.phiPropagate != newProp) {
       s.phiPropagate = newProp;
       penv.avlQ.push(s.rpoId);
@@ -3398,6 +3602,12 @@ void optimizeRefcounts(IRUnit& unit) {
     // We sunk IncRefs past CheckTypes, which could allow us to
     // specialize them.
     insertNegativeAssertTypes(unit, env.rpoBlocks);
+
+    // Remove unreachable blocks before refineTmps
+    // asserts certain variants related to block reachability
+    bool needsReflow = removeUnreachable(unit);
+    if (needsReflow) reflowTypes(unit);
+
     refineTmps(unit);
   }
 }
@@ -3408,18 +3618,19 @@ bool shouldReleaseShallow(const DecRefProfile& data, SSATmp* tmp) {
   }
   return isArrayLikeType(tmp->type().toDataType())
     && data.percent(data.arrayOfUncountedReleasedCount())
-    > RuntimeOption::EvalHHIRSpecializedDestructorThreshold;
+    > Cfg::HHIR::SpecializedDestructorThreshold;
 }
 
 IRInstruction* makeReleaseShallow(
     IRUnit& unit, Block* remainder, IRInstruction* inst, SSATmp* tmp) {
+  assertx(inst->is(DecRef));
   auto const block = inst->block();
   auto const bcctx = inst->bcctx();
   auto const next = unit.defBlock(block->profCount());
   next->push_back(unit.gen(ReleaseShallow, bcctx, tmp));
   next->push_back(unit.gen(Jmp, bcctx, remainder));
 
-  auto const decReleaseCheck = unit.gen(DecReleaseCheck, bcctx, remainder, tmp);
+  auto const decReleaseCheck = unit.gen(DecReleaseCheck, bcctx, *(inst->extra<DecRefData>()), remainder, tmp);
   decReleaseCheck->setNext(next);
   return decReleaseCheck;
 }
@@ -3527,15 +3738,15 @@ void selectiveWeakenDecRefs(IRUnit& unit) {
           const auto decrefdPct = data.percent(data.destroyed()) +
                                   data.percent(data.survived());
           double decrefdPctLimit = inst.src(0)->type() <= cowFree
-            ? RuntimeOption::EvalJitPGODecRefNopDecPercent
-            : RuntimeOption::EvalJitPGODecRefNopDecPercentCOW;
+            ? Cfg::Jit::PGODecRefNopDecPercent
+            : Cfg::Jit::PGODecRefNopDecPercentCOW;
           if (decrefdPct < decrefdPctLimit && !(type <= TCounted)) {
             inst.convertToNop();
           } else if (inst.is(DecRef)) {
             const auto destroyPct = data.percent(data.destroyed());
             double destroyPctLimit = inst.src(0)->type() <= cowFree
-              ? RuntimeOption::EvalJitPGODecRefNZReleasePercent
-              : RuntimeOption::EvalJitPGODecRefNZReleasePercentCOW;
+              ? Cfg::Jit::PGODecRefNZReleasePercent
+              : Cfg::Jit::PGODecRefNZReleasePercentCOW;
             if (destroyPct < destroyPctLimit && !(type <= TAwaitable)) {
               inst.setOpcode(DecRefNZ);
             } else if (isRealType(data.datatype)) {

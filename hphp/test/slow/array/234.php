@@ -1,14 +1,14 @@
 <?hh
 
 class A {
- function f($a) {
+ function f($a) :mixed{
  var_dump($a === null);
  }
  }
 
 <<__EntryPoint>>
-function main_234() {
+function main_234() :mixed{
 $a = true;
  $a = new A();
-$a->f(varray[]);
+$a->f(vec[]);
 }

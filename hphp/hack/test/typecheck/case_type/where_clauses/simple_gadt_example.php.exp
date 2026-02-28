@@ -1,0 +1,12 @@
+ERROR: File "simple_gadt_example.php", line 31, characters 12-22:
+Invalid return type (Typing[4110])
+  File "simple_gadt_example.php", line 29, characters 65-65:
+  Expected `T`
+  File "simple_gadt_example.php", line 31, characters 16-20:
+  But got `MyInt`
+ERROR: File "simple_gadt_example.php", line 42, characters 12-22:
+Invalid return type (Typing[4110])
+  File "simple_gadt_example.php", line 38, characters 41-41:
+  Expected `T`
+  File "simple_gadt_example.php", line 42, characters 16-20:
+  But got `MyInt`

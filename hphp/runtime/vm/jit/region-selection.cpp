@@ -17,39 +17,28 @@
 
 #include <algorithm>
 #include <fstream>
-#include <functional>
 #include <exception>
-#include <sstream>
 #include <utility>
-#include <iostream>
 
 #include <folly/Memory.h>
 #include <folly/Conv.h>
 #include <folly/String.h>
 
 #include "hphp/util/assertions.h"
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/punt.h"
-#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator.h"
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(region);
+TRACE_SET_MOD(region)
 
 //////////////////////////////////////////////////////////////////////
 
 extern RegionDescPtr selectMethod(const RegionContext&);
-extern RegionDescPtr selectOneBC(const RegionContext&);
-extern RegionDescPtr selectHotBlock(TransID transId,
-                                    const ProfData* profData,
-                                    const TransCFG& cfg);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -65,7 +54,7 @@ enum class RegionMode {
 };
 
 RegionMode regionMode() {
-  auto& s = RuntimeOption::EvalJitRegionSelector;
+  auto& s = Cfg::Jit::RegionSelector;
   if (s == ""        ) return RegionMode::None;
   if (s == "method"  ) return RegionMode::Method;
   if (s == "tracelet") return RegionMode::Tracelet;
@@ -74,12 +63,20 @@ RegionMode regionMode() {
   return RegionMode::None;
 }
 
+std::string show(RegionMode mode) {
+  switch (mode) {
+    case RegionMode::None:     return "none";
+    case RegionMode::Method:   return "method";
+    case RegionMode::Tracelet: return "tracelet";
+  }
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////
 
 PGORegionMode pgoRegionMode(const Func& /*func*/) {
-  auto& s = RuntimeOption::EvalJitPGORegionSelector;
+  auto& s = Cfg::Jit::PGORegionSelector;
   if (s == "hottrace") return PGORegionMode::Hottrace;
   if (s == "hotblock") return PGORegionMode::Hotblock;
   if (s == "hotcfg")   return PGORegionMode::HotCFG;
@@ -200,21 +197,13 @@ void RegionDesc::deleteBlock(BlockId bid) {
 RegionDesc::BlockVec::iterator
 RegionDesc::deleteBlock(RegionDesc::BlockVec::iterator it) {
   const auto bid = (*it)->id();
-  for (auto pid : preds(bid)) removeArc(pid, bid);
-  for (auto sid : succs(bid)) removeArc(bid, sid);
+  for (auto pid : preds(bid)) data(pid).succs.erase(bid);
+  for (auto sid : succs(bid)) data(sid).preds.erase(bid);
 
-  if (auto nextR = nextRetrans(bid)) {
-    auto prevR = prevRetrans(bid);
-    clearPrevRetrans(nextR.value());
-    if (prevR) {
-      clearNextRetrans(prevR.value());
-      setNextRetrans(prevR.value(), nextR.value());
-    } else {
-      clearPrevRetrans(nextR.value());
-    }
-  } else if (auto prevR = prevRetrans(bid)) {
-    clearNextRetrans(prevR.value());
-  }
+  auto const prevRetr = data(bid).prevRetransId;
+  auto const nextRetr = data(bid).nextRetransId;
+  if (prevRetr != kInvalidTransID) data(prevRetr).nextRetransId = nextRetr;
+  if (nextRetr != kInvalidTransID) data(nextRetr).prevRetransId = prevRetr;
 
   m_data.erase(bid);
   return m_blocks.erase(it);
@@ -232,7 +221,7 @@ RegionDesc::BlockData& RegionDesc::data(BlockId id) {
 }
 
 bool RegionDesc::hasBlock(BlockId id) const {
-  return m_data.count(id);
+  return m_data.contains(id);
 }
 
 RegionDesc::BlockPtr RegionDesc::block(BlockId id) const {
@@ -268,6 +257,17 @@ void RegionDesc::incoming(RegionDesc::BlockIdSet&& ids) {
 
 const RegionDesc::BlockIdSet& RegionDesc::merged(BlockId id) const {
   return data(id).merged;
+}
+
+Optional<RegionDesc::BlockId> RegionDesc::idom(BlockId id) const {
+  auto const idom = data(id).idom;
+  if (idom == kInvalidTransID) return std::nullopt;
+  return idom;
+}
+
+uint32_t RegionDesc::rpoId(BlockId id) const {
+  assertx(data(id).rpoId != std::numeric_limits<uint32_t>::max());
+  return data(id).rpoId;
 }
 
 Optional<RegionDesc::BlockId> RegionDesc::prevRetrans(BlockId id) const {
@@ -344,7 +344,7 @@ void RegionDesc::renumberBlock(BlockId oldId, BlockId newId) {
   // Fix predecessor sets for the successors.
   for (auto succId : m_data[newId].succs) {
     BlockIdSet& succPreds = m_data[succId].preds;
-    assertx(succPreds.count(oldId));
+    assertx(succPreds.contains(oldId));
     succPreds.erase(oldId);
     succPreds.insert(newId);
   }
@@ -352,7 +352,7 @@ void RegionDesc::renumberBlock(BlockId oldId, BlockId newId) {
   // Fix successor sets for the predecessors.
   for (auto predId : m_data[newId].preds) {
     BlockIdSet& predSuccs = m_data[predId].succs;
-    assertx(predSuccs.count(oldId));
+    assertx(predSuccs.contains(oldId));
     predSuccs.erase(oldId);
     predSuccs.insert(newId);
   }
@@ -393,7 +393,7 @@ void RegionDesc::prepend(const RegionDesc& other) {
 void RegionDesc::postOrderSort(RegionDesc::BlockId     bid,
                                RegionDesc::BlockIdSet& visited,
                                RegionDesc::BlockIdVec& outVec) {
-  if (visited.count(bid)) return;
+  if (visited.contains(bid)) return;
   visited.insert(bid);
 
   if (auto nextRetr = nextRetrans(bid)) {
@@ -425,7 +425,7 @@ void RegionDesc::sortBlocks() {
   // Remove unreachable blocks from `m_data'.
   for (auto it = m_blocks.begin(); it != m_blocks.end();) {
     auto bid = (*it)->id();
-    if (visited.count(bid) == 0) {
+    if (!visited.contains(bid)) {
       it = deleteBlock(it);
     } else {
       it++;
@@ -435,16 +435,75 @@ void RegionDesc::sortBlocks() {
   // Update `m_blocks' vector, making sure that entryId remains the first one.
   m_blocks.clear();
   m_blocks.push_back(block(entryId));
+  data(entryId).rpoId = 0;
   auto size = reverse.size();
   for (size_t i = 0; i < size; i++) {
     auto const id = reverse[size - i - 1];
-    if (id != entryId) m_blocks.push_back(block(id));
+    if (id == entryId) continue;
+    data(id).rpoId = m_blocks.size();
+    m_blocks.push_back(block(id));
   }
   always_assert_flog(
     entryId == entry()->id(),
     "sortBlocks() changed region entry: entryId ({}) != entry()->id() ({})",
     entryId, entry()->id()
   );
+}
+
+void RegionDesc::initRpoIds() {
+  for (size_t i = 0; i < m_blocks.size(); ++i) {
+    data(m_blocks[i]->id()).rpoId = i;
+  }
+}
+
+void RegionDesc::findDominators() {
+  assertx(!m_blocks.empty());
+
+  auto constexpr kUnknown = -2;
+  auto constexpr kEntry = -1;
+
+  // Entry block has a special "outside of the region" kEntry dominator.
+  // All other blocks are unknown.
+  auto idoms = std::vector<int32_t>(m_blocks.size(), kUnknown);
+  idoms[0] = kEntry;
+
+  for (auto changed = true; changed; ) {
+    changed = false;
+
+    for (auto i = 1; i < idoms.size(); ++i) {
+      auto const bid = m_blocks[i]->id();
+      assertx(entry() != m_blocks[i]);
+
+      auto idom = kUnknown;
+      auto const update = [&](BlockId pred) {
+        auto rpoId = data(pred).rpoId;
+        if (idoms[rpoId] == kUnknown) return;
+        if (idom == kUnknown) {
+          idom = rpoId;
+          return;
+        }
+        while (rpoId != idom) {
+          while (rpoId < idom) idom = idoms[idom];
+          while (rpoId > idom) rpoId = idoms[rpoId];
+        }
+      };
+
+      if (auto const prevRetr = prevRetrans(bid)) update(*prevRetr);
+      for (auto pred : preds(bid)) update(pred);
+      assertx(idom != kUnknown);
+
+      if (idoms[i] != idom) {
+        idoms[i] = idom;
+        changed = true;
+      }
+    }
+  }
+
+  for (auto i = 0; i < idoms.size(); ++i) {
+    data(m_blocks[i]->id()).idom = idoms[i] == kEntry
+      ? kInvalidTransID
+      : m_blocks[idoms[i]]->id();
+  }
 }
 
 namespace {
@@ -467,7 +526,7 @@ void mergeChains(Chain& dst, Chain& src, BlockToChainMap& b2c) {
 
 RegionDesc::BlockId findFirstInSet(const Chain& c, RegionDesc::BlockIdSet s) {
   for (auto bid : c.blocks) {
-    if (s.count(bid)) return bid;
+    if (s.contains(bid)) return bid;
   }
   always_assert(0);
 }
@@ -612,7 +671,7 @@ void RegionDesc::chainRetransBlocks() {
   for (auto b : blocks()) {
     auto& succSet = data(b->id()).succs;
     for (auto s : succSet) {
-      if (erased_ids.count(s)) continue;
+      if (erased_ids.contains(s)) continue;
       auto& c = chains[block2chain[s]];
       auto selectedSucc = findFirstInSet(c, succSet);
       for (auto other : c.blocks) {
@@ -677,14 +736,14 @@ RegionDesc::Block::Block(BlockId     id,
   , m_profTransID(kInvalidTransID)
 {
   if (id == kInvalidTransID) {
-    m_id = s_nextId.fetch_sub(1, std::memory_order_relaxed);
+    m_id = s_nextId.fetch_sub(1, std::memory_order_acq_rel);
   } else {
     m_id = id;
     while (true) {
-      auto expected = s_nextId.load(std::memory_order_relaxed);
+      auto expected = s_nextId.load(std::memory_order_acquire);
       if (id > expected) break;
       if (s_nextId.compare_exchange_weak(expected, id - 1,
-                                         std::memory_order_relaxed)) {
+                                         std::memory_order_acq_rel)) {
         break;
       }
     }
@@ -713,6 +772,7 @@ void RegionDesc::Block::addInstruction() {
 }
 
 void RegionDesc::Block::truncateAfter(SrcKey final) {
+  if (final == m_last) return;
   auto skIter = start();
   int newLen = -1;
   for (int i = 0; i < m_length; ++i, skIter.advance(func())) {
@@ -722,6 +782,8 @@ void RegionDesc::Block::truncateAfter(SrcKey final) {
     }
   }
   assertx(newLen != -1);
+  FTRACE(1, "selectTracelet truncating block after offset {}:\n{}\n",
+          final.offset(), show(*this));
   m_length = newLen;
   m_last = final;
 
@@ -834,7 +896,7 @@ RegionDescPtr selectRegion(const RegionContext& context,
 
   FTRACE(1,
     "Select region: mode={} context:\n{}",
-    static_cast<int>(mode), show(context)
+    show(mode), show(context)
   );
 
   auto region = [&]{
@@ -846,16 +908,16 @@ RegionDescPtr selectRegion(const RegionContext& context,
           return selectMethod(context);
         case RegionMode::Tracelet: {
           auto const maxBCInstrs = kind == TransKind::Live
-            ? RuntimeOption::EvalJitMaxLiveRegionInstrs
-            : RuntimeOption::EvalJitMaxRegionInstrs;
+            ? Cfg::Jit::MaxLiveRegionInstrs
+            : Cfg::Jit::MaxRegionInstrs;
           return selectTracelet(context, kind, maxBCInstrs);
         }
       }
       not_reached();
-    } catch (const FailedIRGen& e) {
+    } catch ([[maybe_unused]] const FailedIRGen& e) {
       FTRACE(1, "region selector threw: {}\n", e.what());
       return RegionDescPtr{nullptr};
-    } catch (const ResourceExceededException& e) {
+    } catch ([[maybe_unused]] const ResourceExceededException& e) {
       FTRACE(1, "region selector fataled: {}\n", e.what());
       return RegionDescPtr{nullptr};
     } catch (const std::exception& e) {
@@ -868,62 +930,13 @@ RegionDescPtr selectRegion(const RegionContext& context,
   if (region) {
     FTRACE(3, "{}", show(*region));
     always_assert(
-      region->instrSize() <= std::max(RuntimeOption::EvalJitMaxRegionInstrs,
-                                      RuntimeOption::EvalJitMaxLiveRegionInstrs)
+      region->instrSize() <= std::max(Cfg::Jit::MaxRegionInstrs,
+                                      Cfg::Jit::MaxLiveRegionInstrs)
     );
   } else {
     FTRACE(1, "no region selectable; using tracelet compiler\n");
   }
 
-  return region;
-}
-
-RegionDescPtr selectHotRegion(TransID transId) {
-  auto const profData = jit::profData();
-  assertx(profData);
-  auto const& func = *profData->transRec(transId)->func();
-  FuncId funcId = func.getFuncId();
-  TransCFG cfg(funcId, profData);
-  assertx(regionMode() != RegionMode::Method);
-  RegionDescPtr region;
-  HotTransContext ctx;
-  ctx.cfg = &cfg;
-  ctx.profData = profData;
-  ctx.entries = {transId};
-  ctx.maxBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
-  switch (pgoRegionMode(func)) {
-    case PGORegionMode::Hottrace:
-      region = selectHotTrace(ctx);
-      break;
-
-    case PGORegionMode::Hotblock:
-      region = selectHotBlock(transId, profData, cfg);
-      break;
-
-    case PGORegionMode::WholeCFG:
-    case PGORegionMode::HotCFG:
-      region = selectHotCFG(ctx);
-      break;
-  }
-  assertx(region);
-
-  if (Trace::moduleEnabled(HPHP::Trace::pgo, 5)) {
-    std::string dotFileName = std::string("/tmp/trans-cfg-") +
-                              folly::to<std::string>(transId) + ".dot";
-
-    std::ofstream outFile(dotFileName);
-    if (outFile.is_open()) {
-      cfg.print(outFile, funcId, profData);
-      outFile.close();
-    }
-
-    FTRACE(5, "selectHotRegion: New Translation (file: {}) {}\n",
-           dotFileName, region ? show(*region) : std::string("empty region"));
-  }
-
-  always_assert(region->instrSize() <= RuntimeOption::EvalJitMaxRegionInstrs);
-
-  if (region->empty()) return nullptr;
   return region;
 }
 
@@ -951,12 +964,6 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
   return true;
 }
 
-const StaticString
-  s_HH_AsyncGenerator("HH\\AsyncGenerator"),
-  s_next("next"),
-  s_send("send"),
-  s_rewind("rewind");
-
 bool breaksRegion(SrcKey sk) {
   if (sk.funcEntry()) return false;
   switch (sk.op()) {
@@ -973,30 +980,16 @@ bool breaksRegion(SrcKey sk) {
     case Op::Eval:
     case Op::NativeImpl:
     case Op::ThrowNonExhaustiveSwitch:
+    case Op::StaticAnalysisError:
       return true;
 
     case Op::Await:
     case Op::AwaitAll:
+    case Op::AwaitLowPri:
       // We break regions at resumed Await instructions, to avoid
       // duplicating the translation of the resumed SrcKey after the
       // Await.
       return sk.resumeMode() == ResumeMode::Async;
-
-    case Op::FCallObjMethodD: {
-      // AsyncGenerators executing in Async mode will resume after a side exit.
-      // As a result, we should break the translation here to avoid needing a
-      // live translation for the resume point.
-      auto const cls  = sk.unit()->lookupLitstrId(getImm(sk.pc(), 1).u_SA);
-      auto const func = sk.unit()->lookupLitstrId(getImm(sk.pc(), 3).u_SA);
-      if (sk.resumeMode() == ResumeMode::Async &&
-          cls->isame(s_HH_AsyncGenerator.get()) &&
-          (func->isame(s_send.get()) || func->isame(s_next.get()) ||
-           func->isame(s_rewind.get()))) {
-        return true;
-      }
-
-      return false;
-    }
 
     default:
       return false;
@@ -1012,7 +1005,7 @@ struct DFSWalker {
     : m_region(region) { }
 
   void walk(RegionDesc::BlockId id) {
-    if (m_visited.count(id) > 0) return;
+    if (m_visited.contains(id)) return;
     m_visited.insert(id);
 
     if (auto nextRetrans = m_region.nextRetrans(id)) {
@@ -1073,7 +1066,7 @@ bool check(const RegionDesc& region, std::string& error) {
   for (auto b : region.blocks()) {
     auto bid = b->id();
     // 2) Each block in the region has a different id.
-    if (blockSet.count(bid)) {
+    if (blockSet.contains(bid)) {
       return bad(folly::sformat("many blocks with id {}", bid));
     }
     blockSet.insert(bid);
@@ -1082,21 +1075,20 @@ bool check(const RegionDesc& region, std::string& error) {
   for (auto b : region.blocks()) {
     auto bid = b->id();
     SrcKey    lastSk = region.block(bid)->last();
-    OffsetSet validSuccOffsets = lastSk.succOffsets();
-    OffsetSet succOffsets;
+    SrcKey::Set validSuccSrcKeys = lastSk.succSrcKeys();
+    SrcKey::Set succSrcKeys;
 
     for (auto succ : region.succs(bid)) {
       SrcKey succSk = region.block(succ)->start();
-      Offset succOffset = succSk.offset();
 
       // 3) All arcs involve blocks within the region.
-      if (blockSet.count(succ) == 0) {
+      if (!blockSet.contains(succ)) {
         return bad(folly::sformat("arc with dst not in the region: {} -> {}",
                                   bid, succ));
       }
 
       // 11) Successors and predecessors sets are consistent.
-      if (region.preds(succ).count(bid) == 0) {
+      if (!region.preds(succ).contains(bid)) {
         return bad(folly::sformat("arc missing in succ's pred set: {} -> {}",
                                   bid, succ));
       }
@@ -1108,26 +1100,26 @@ bool check(const RegionDesc& region, std::string& error) {
 
       // 4) For each arc, the bytecode offset of the dst block must
       //    possibly follow the execution of the src block.
-      if (validSuccOffsets.count(succOffset) == 0) {
+      if (!validSuccSrcKeys.contains(succSk)) {
         return bad(folly::sformat("arc with impossible control flow: {} -> {}",
                                   bid, succ));
       }
 
       // 5) Each block contains at most one successor corresponding to a
       //    given SrcKey.
-      if (succOffsets.count(succOffset) > 0) {
+      if (succSrcKeys.contains(succSk)) {
         return bad(folly::sformat("block {} has multiple successors with SK {}",
                                   bid, show(succSk)));
       }
-      succOffsets.insert(succOffset);
+      succSrcKeys.insert(succSk);
     }
     for (auto pred : region.preds(bid)) {
-      if (blockSet.count(pred) == 0) {
+      if (!blockSet.contains(pred)) {
         return bad(folly::sformat("arc with src not in the region: {} -> {}",
                                   pred, bid));
       }
       // 11) Successors and predecessors sets are consistent.
-      if (region.succs(pred).count(bid) == 0) {
+      if (!region.succs(pred).contains(bid)) {
         return bad(folly::sformat("arc missing in pred's succ set: {} -> {}",
                                   pred, bid));
       }
@@ -1146,10 +1138,8 @@ bool check(const RegionDesc& region, std::string& error) {
   auto& blocks = region.blocks();
   for (unsigned i = 0; i < blocks.size(); i++) {
     auto bid = blocks[i]->id();
-    unsigned nAllPreds = region.preds(bid).size();
     unsigned nVisited = 0;
     if (auto prevRetrans = region.prevRetrans(bid)) {
-      nAllPreds++;
       nVisited += visited.count(prevRetrans.value());
     }
     for (auto pred : region.preds(bid)) {
@@ -1194,7 +1184,7 @@ bool check(const RegionDesc& region, std::string& error) {
     chainSet.insert(bid);
     while (auto next = region.nextRetrans(bid)) {
       auto nextId = next.value();
-      if (chainSet.count(nextId)) {
+      if (chainSet.contains(nextId)) {
         return bad(folly::sformat("cyclic retranslation chain for block {}",
                                   bid));
       }
@@ -1242,14 +1232,6 @@ std::string show(const PostConditions& pconds) {
     folly::toAppend("  refined postcondition: ", show(postCond), "\n", &ret);
   }
   return ret;
-}
-
-std::string show(RegionContext::LiveType ta) {
-  return folly::format(
-    "{} :: {}",
-    show(ta.location),
-    ta.type.toString()
-  ).str();
 }
 
 std::string show(const RegionContext& ctx) {

@@ -1,0 +1,304 @@
+'\" t
+.\"     Title: \fBndbinfo_select_all\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDBINFO_SELECT_ALL\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndbinfo_select_all \- select from ndbinfo tables
+.SH "SYNOPSIS"
+.HP \w'\fBndbinfo_select_all\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBndbinfo_select_all \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+\fBndbinfo_select_all\fR
+is a client program that selects all rows and columns from one or more tables in the
+ndbinfo
+database
+.PP
+Not all
+ndbinfo
+tables available in the
+\fBmysql\fR
+client can be read by this program\&. In addition,
+\fBndbinfo_select_all\fR
+can show information about some tables internal to
+ndbinfo
+which cannot be accessed using SQL, including the
+tables
+and
+columns
+metadata tables\&.
+.PP
+To select from one or more
+ndbinfo
+tables using
+\fBndbinfo_select_all\fR, it is necessary to supply the names of the tables when invoking the program as shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndbinfo_select_all \fR\fB\fItable_name1\fR\fR\fB  [\fR\fB\fItable_name2\fR\fR\fB] [\&.\&.\&.]\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndbinfo_select_all logbuffers logspaces\fR
+== logbuffers ==
+node_id log_type        log_id  log_part        total   used    high
+5       0       0       0       33554432        262144  0
+6       0       0       0       33554432        262144  0
+7       0       0       0       33554432        262144  0
+8       0       0       0       33554432        262144  0
+== logspaces ==
+node_id log_type        log_id  log_part        total   used    high
+5       0       0       0       268435456       0       0
+5       0       0       1       268435456       0       0
+5       0       0       2       268435456       0       0
+5       0       0       3       268435456       0       0
+6       0       0       0       268435456       0       0
+6       0       0       1       268435456       0       0
+6       0       0       2       268435456       0       0
+6       0       0       3       268435456       0       0
+7       0       0       0       268435456       0       0
+7       0       0       1       268435456       0       0
+7       0       0       2       268435456       0       0
+7       0       0       3       268435456       0       0
+8       0       0       0       268435456       0       0
+8       0       0       1       268435456       0       0
+8       0       0       2       268435456       0       0
+8       0       0       3       268435456       0       0
+shell>
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The following table includes options that are specific to
+\fBndbinfo_select_all\fR\&. Additional descriptions follow the table\&. For options common to most NDB Cluster programs (including
+\fBndbinfo_select_all\fR), see
+Options Common to NDB Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.251.\ \&Command\-line options for the ndbinfo_select_all program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+\fB \fR\fB--delay=#\fR\fB \fR
+T}:T{
+Set the delay in seconds between loops. Default is 5
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--loops=#\fR,
+.PP
+\fB \fR\fB-l\fR\fB \fR
+T}:T{
+Set the number of times to perform the select. Default is 1
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--database=db_name\fR,
+.PP
+\fB \fR\fB-d\fR\fB \fR
+T}:T{
+Name of the database where the table located
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--parallelism=#\fR,
+.PP
+\fB \fR\fB-p\fR\fB \fR
+T}:T{
+Set the degree of parallelism
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-delay=\fR\fBseconds\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--delay=#
+T}
+T{
+\fBType\fR
+T}:T{
+Numeric
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+5
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+MAX_INT
+T}
+.TE
+.sp 1
+This option sets the number of seconds to wait between executing loops\&. Has no effect if
+\fB\-\-loops\fR
+is set to 0 or 1\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-loops=\fR\fBnumber\fR,
+\fB\-l \fR\fB\fInumber\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--loops=#
+T}
+T{
+\fBType\fR
+T}:T{
+Numeric
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+1
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+MAX_INT
+T}
+.TE
+.sp 1
+This option sets the number of times to execute the select\&. Use
+\fB\-\-delay\fR
+to set the time between loops\&.
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

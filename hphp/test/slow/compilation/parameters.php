@@ -1,13 +1,13 @@
 <?hh
 
 class X {
-  function foo(inout $a) {
+  function foo(inout $a) :mixed{
     return $this;
   }
 }
 
 class Y {
-  function foo($a) {
+  function foo($a) :mixed{
     if ($a) {
       $this->foo($a[0])->foo($a[0]);
     }

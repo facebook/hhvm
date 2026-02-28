@@ -1,6 +1,6 @@
 resource(%d) of type (Socket)
 bool(true)
 bool(true)
-string(%d) "/tmp/socktest%d"
-string(%d) "/tmp/socktest%d"
+string(%d) "%s/socktest%d"
+string(%d) "%s/socktest%d"
 bool(true)

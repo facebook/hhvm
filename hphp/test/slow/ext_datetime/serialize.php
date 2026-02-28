@@ -1,6 +1,6 @@
 <?hh
 
-function check($name) {
+function check($name) :mixed{
   $o = new $name('now', new DateTimeZone('UTC'));
   var_dump(is_varray($o->__sleep()));
   $s = serialize($o);
@@ -12,7 +12,7 @@ function check($name) {
 class A extends DateTime {}
 
 <<__EntryPoint>>
-function main_serialize() {
+function main_serialize() :mixed{
 check('DateTime');
 check('A');
 }

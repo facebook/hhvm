@@ -19,7 +19,6 @@ let show_tprim =
     | Tint -> int
     | Tbool -> bool
     | Tfloat -> float
-    | Tstring -> string
     | Tnum -> num
     | Tresource -> resource
     | Tarraykey -> arraykey
@@ -32,6 +31,8 @@ type def = (unit, unit) Aast.def
 type expr = (unit, unit) Aast.expr [@@deriving eq, show]
 
 type expr_ = (unit, unit) Aast.expr_
+
+type argument = (unit, unit) Aast.argument
 
 type stmt = (unit, unit) Aast.stmt
 
@@ -50,6 +51,10 @@ type method_ = (unit, unit) Aast.method_
 type file_attribute = (unit, unit) Aast.file_attribute
 
 type fun_ = (unit, unit) Aast.fun_
+
+type capture_lid = unit Aast.capture_lid
+
+type efun = (unit, unit) Aast.efun
 
 type fun_def = (unit, unit) Aast.fun_def
 
@@ -70,6 +75,10 @@ type class_id = (unit, unit) Aast.class_id
 type catch = (unit, unit) Aast.catch
 
 type case = (unit, unit) Aast.case
+
+type stmt_match = (unit, unit) Aast.stmt_match
+
+type stmt_match_arm = (unit, unit) Aast.stmt_match_arm
 
 type default_case = (unit, unit) Aast.default_case
 
@@ -101,6 +110,10 @@ type type_hint = unit Aast.type_hint
 
 type module_def = (unit, unit) Aast.module_def
 
+type loop_cond = (unit, unit) Aast.loop_cond
+
+type loop_iter = (unit, unit) Aast.loop_iter
+
 module ShapeMap = Ast_defs.ShapeMap
 
 let class_id_to_str = function
@@ -109,6 +122,8 @@ let class_id_to_str = function
   | CIstatic -> SN.Classes.cStatic
   | CIexpr (_, _, This) -> SN.SpecialIdents.this
   | CIexpr (_, _, Lvar (_, x)) -> "$" ^ Local_id.to_string x
+  | CIexpr (_, _, Lplaceholder _) -> SN.SpecialIdents.placeholder
+  | CIexpr (_, _, Dollardollar _) -> SN.SpecialIdents.dollardollar
   | CIexpr _ -> assert false
   | CI (_, x) -> x
 
@@ -123,7 +138,9 @@ let get_kvc_kind name =
   | x when String.equal x SN.Collections.cImmMap -> ImmMap
   | x when String.equal x SN.Collections.cDict -> Dict
   | _ ->
-    Errors.internal_error Pos.none ("Invalid KeyValueCollection name: " ^ name);
+    Diagnostics.internal_error
+      Pos.none
+      ("Invalid KeyValueCollection name: " ^ name);
     Map
 
 let kvc_kind_to_name kind =
@@ -149,7 +166,7 @@ let get_vc_kind name =
   | x when String.equal x SN.Collections.cImmSet -> ImmSet
   | x when String.equal x SN.Collections.cKeyset -> Keyset
   | _ ->
-    Errors.internal_error Pos.none ("Invalid ValueCollection name: " ^ name);
+    Diagnostics.internal_error Pos.none ("Invalid ValueCollection name: " ^ name);
     Set
 
 let vc_kind_to_name kind =
@@ -177,61 +194,76 @@ let get_simple_xhp_attrs =
       | Xhp_simple { xs_name = id; xs_expr = e; _ } -> Some (id, e)
       | Xhp_spread _ -> None)
 
-(* Given a Nast.program, give me the list of entities it defines *)
-let get_defs (ast : program) =
+type defs = {
+  funs: (FileInfo.id * fun_def) list;
+  classes: (FileInfo.id * class_) list;
+  typedefs: (FileInfo.id * typedef) list;
+  constants: (FileInfo.id * gconst) list;
+  modules: (FileInfo.id * module_def) list;
+  stmts: (FileInfo.id * stmt) list;
+}
+
+let get_defs (ast : program) : defs =
   (* fold_right traverses the file from top to bottom, and as such gives nicer
    * error messages than fold_left. E.g. in the case where a function is
    * declared twice in the same file, the error will say that the declaration
    * with the larger line number is a duplicate. *)
-  let to_id (a, b) = (a, b, None) in
+  let to_id (a, b) = (a, b, None, None) in
   (* TODO(hgoldstein): Just have this return four values, not five *)
-  let rec get_defs ast acc =
-    List.fold_right
-      ast
-      ~init:acc
-      ~f:(fun def ((funs, classes, typedefs, constants, modules) as acc) ->
+  let rec get_defs ast (acc : defs * int) =
+    List.fold_right ast ~init:acc ~f:(fun def (defs, stmt_count) ->
         Aast.(
           match def with
           | Fun f ->
-            ( FileInfo.pos_full (to_id f.fd_fun.f_name) :: funs,
-              classes,
-              typedefs,
-              constants,
-              modules )
+            let f = (FileInfo.pos_full (to_id f.fd_name), f) in
+            ({ defs with funs = f :: defs.funs }, stmt_count)
           | Class c ->
-            ( funs,
-              FileInfo.pos_full (to_id c.c_name) :: classes,
-              typedefs,
-              constants,
-              modules )
+            let c = (FileInfo.pos_full (to_id c.c_name), c) in
+            ({ defs with classes = c :: defs.classes }, stmt_count)
           | Typedef t ->
-            ( funs,
-              classes,
-              FileInfo.pos_full (to_id t.t_name) :: typedefs,
-              constants,
-              modules )
+            let t = (FileInfo.pos_full (to_id t.t_name), t) in
+            ({ defs with typedefs = t :: defs.typedefs }, stmt_count)
           | Constant cst ->
-            ( funs,
-              classes,
-              typedefs,
-              FileInfo.pos_full (to_id cst.cst_name) :: constants,
-              modules )
+            let cst = (FileInfo.pos_full (to_id cst.cst_name), cst) in
+            ({ defs with constants = cst :: defs.constants }, stmt_count)
           | Module md ->
-            ( funs,
-              classes,
-              typedefs,
-              constants,
-              FileInfo.pos_full (to_id md.md_name) :: modules )
-          | Namespace (_, defs) -> get_defs defs acc
+            let md = (FileInfo.pos_full (to_id md.md_name), md) in
+            ({ defs with modules = md :: defs.modules }, stmt_count)
+          | Stmt st ->
+            let pos = fst st in
+            let id = "#stmt_" ^ string_of_int stmt_count in
+            let st = (FileInfo.pos_full (pos, id, None, None), st) in
+            ({ defs with stmts = st :: defs.stmts }, stmt_count + 1)
+          | Namespace (_, ds) -> get_defs ds (defs, stmt_count)
           | NamespaceUse _
-          | SetNamespaceEnv _ ->
-            acc
-          (* toplevel statements are ignored *)
-          | FileAttributes _
-          | Stmt _ ->
-            acc))
+          | SetNamespaceEnv _
+          | SetModule _ ->
+            (defs, stmt_count)
+          | FileAttributes _ -> (defs, stmt_count)))
   in
-  get_defs ast ([], [], [], [], [])
+  let acc =
+    ( {
+        funs = [];
+        classes = [];
+        typedefs = [];
+        constants = [];
+        modules = [];
+        stmts = [];
+      },
+      0 )
+  in
+  fst @@ get_defs ast acc
+
+let get_def_names ast : FileInfo.ids =
+  let { funs; classes; typedefs; constants; modules; _ } = get_defs ast in
+  FileInfo.
+    {
+      funs = List.map funs ~f:fst;
+      classes = List.map classes ~f:fst;
+      typedefs = List.map typedefs ~f:fst;
+      consts = List.map constants ~f:fst;
+      modules = List.map modules ~f:fst;
+    }
 
 type ignore_attribute_env = { ignored_attributes: string list }
 
@@ -393,6 +425,8 @@ module Visitor_DEPRECATED = struct
     object
       method on_block : 'a -> block -> 'a
 
+      method on_declare_local : 'a -> lid -> hint -> expr option -> 'a
+
       method on_break : 'a -> 'a
 
       method on_case : 'a -> case -> 'a
@@ -403,17 +437,14 @@ module Visitor_DEPRECATED = struct
 
       method on_continue : 'a -> 'a
 
-      method on_darray : 'a -> (targ * targ) option -> field list -> 'a
-
-      method on_varray : 'a -> targ option -> expr list -> 'a
-
-      method on_do : 'a -> block -> expr -> 'a
+      method on_do : 'a -> block -> loop_cond -> 'a
 
       method on_expr : 'a -> expr -> 'a
 
       method on_expr_ : 'a -> expr_ -> 'a
 
-      method on_for : 'a -> expr list -> expr option -> expr list -> block -> 'a
+      method on_for :
+        'a -> expr list -> loop_cond option -> loop_iter -> block -> 'a
 
       method on_foreach : 'a -> expr -> (unit, unit) as_expr -> block -> 'a
 
@@ -425,7 +456,9 @@ module Visitor_DEPRECATED = struct
 
       method on_return : 'a -> expr option -> 'a
 
-      method on_awaitall : 'a -> (id option * expr) list -> block -> 'a
+      method on_awaitall : 'a -> (id * expr) list -> block -> 'a
+
+      method on_concurrent : 'a -> block -> 'a
 
       method on_stmt : 'a -> stmt -> 'a
 
@@ -433,11 +466,21 @@ module Visitor_DEPRECATED = struct
 
       method on_switch : 'a -> expr -> case list -> default_case option -> 'a
 
+      method on_stmt_match : 'a -> stmt_match -> 'a
+
+      method on_stmt_match_arm : 'a -> stmt_match_arm -> 'a
+
+      method on_pattern : 'a -> pattern -> 'a
+
+      method on_pat_var : 'a -> pat_var -> 'a
+
+      method on_pat_refinement : 'a -> pat_refinement -> 'a
+
       method on_throw : 'a -> expr -> 'a
 
       method on_try : 'a -> block -> catch list -> block -> 'a
 
-      method on_while : 'a -> expr -> block -> 'a
+      method on_while : 'a -> loop_cond -> block -> 'a
 
       method on_using : 'a -> (unit, unit) using_stmt -> 'a
 
@@ -445,10 +488,11 @@ module Visitor_DEPRECATED = struct
 
       method on_shape : 'a -> (Ast_defs.shape_field_name * expr) list -> 'a
 
-      method on_valCollection : 'a -> vc_kind -> targ option -> expr list -> 'a
+      method on_valCollection :
+        'a -> pos * vc_kind -> targ option -> expr list -> 'a
 
       method on_keyValCollection :
-        'a -> kvc_kind -> (targ * targ) option -> field list -> 'a
+        'a -> pos * kvc_kind -> (targ * targ) option -> field list -> 'a
 
       method on_collection :
         'a -> unit collection_targ option -> afield list -> 'a
@@ -461,24 +505,19 @@ module Visitor_DEPRECATED = struct
 
       method on_dollardollar : 'a -> id -> 'a
 
-      method on_fun_id : 'a -> sid -> 'a
-
-      method on_method_id : 'a -> expr -> pstring -> 'a
-
-      method on_smethod_id : 'a -> class_id -> pstring -> 'a
-
       method on_method_caller : 'a -> sid -> pstring -> 'a
 
       method on_obj_get : 'a -> expr -> expr -> 'a
 
       method on_array_get : 'a -> expr -> expr option -> 'a
 
-      method on_class_get : 'a -> class_id -> (unit, unit) class_get_expr -> 'a
+      method on_class_get : 'a -> class_id -> pstring -> 'a
 
       method on_class_const : 'a -> class_id -> pstring -> 'a
 
-      method on_call :
-        'a -> expr -> (Ast_defs.param_kind * expr) list -> expr option -> 'a
+      method on_call : 'a -> expr -> argument list -> expr option -> 'a
+
+      method on_argument : 'a -> argument -> 'a
 
       method on_function_pointer :
         'a -> (unit, unit) function_ptr_id -> targ list -> 'a
@@ -515,7 +554,9 @@ module Visitor_DEPRECATED = struct
 
       method on_binop : 'a -> Ast_defs.bop -> expr -> expr -> 'a
 
-      method on_pipe : 'a -> id -> expr -> expr -> 'a
+      method on_assign : 'a -> expr -> Ast_defs.bop option -> expr -> 'a
+
+      method on_pipe : 'a -> id -> expr -> expr -> operator_null_flavor -> 'a
 
       method on_eif : 'a -> expr -> expr option -> expr -> 'a
 
@@ -525,17 +566,19 @@ module Visitor_DEPRECATED = struct
 
       method on_upcast : 'a -> expr -> hint -> 'a
 
+      method on_omitted : 'a -> 'a
+
       method on_class_id : 'a -> class_id -> 'a
 
       method on_class_id_ : 'a -> class_id_ -> 'a
 
-      method on_new : 'a -> class_id -> expr list -> expr option -> 'a
+      method on_new : 'a -> class_id -> argument list -> expr option -> 'a
 
       method on_record : 'a -> sid -> (expr * expr) list -> 'a
 
-      method on_efun : 'a -> fun_ -> id list -> 'a
+      method on_efun : 'a -> efun -> 'a
 
-      method on_lfun : 'a -> fun_ -> id list -> 'a
+      method on_lfun : 'a -> fun_ -> capture_lid list -> 'a
 
       method on_xml : 'a -> sid -> xhp_attribute list -> expr list -> 'a
 
@@ -622,11 +665,7 @@ module Visitor_DEPRECATED = struct
         let acc =
           List.fold_left
             ~f:(fun acc (x, y) ->
-              let acc =
-                match x with
-                | Some x -> this#on_lvar acc x
-                | None -> acc
-              in
+              let acc = this#on_lvar acc x in
               let acc = this#on_expr acc y in
               acc)
             ~init:acc
@@ -635,18 +674,20 @@ module Visitor_DEPRECATED = struct
         let acc = this#on_block acc b in
         acc
 
+      method on_concurrent acc b = this#on_block acc b
+
       method on_if acc e b1 b2 =
         let acc = this#on_expr acc e in
         let acc = this#on_block acc b1 in
         let acc = this#on_block acc b2 in
         acc
 
-      method on_do acc b e =
+      method on_do acc b (_, _, e) =
         let acc = this#on_block acc b in
         let acc = this#on_expr acc e in
         acc
 
-      method on_while acc e b =
+      method on_while acc (_, _, e) b =
         let acc = this#on_expr acc e in
         let acc = this#on_block acc b in
         acc
@@ -656,7 +697,7 @@ module Visitor_DEPRECATED = struct
         let acc = this#on_block acc us.us_block in
         acc
 
-      method on_for acc e1 e2 e3 b =
+      method on_for acc e1 e2 (_, _, e3) b =
         let on_expr_list acc es = List.fold_left es ~f:this#on_expr ~init:acc in
 
         let acc = on_expr_list acc e1 in
@@ -664,7 +705,7 @@ module Visitor_DEPRECATED = struct
         let acc =
           match e2 with
           | None -> acc
-          | Some e -> this#on_expr acc e
+          | Some (_, _, e) -> this#on_expr acc e
         in
         let acc = this#on_block acc b in
         acc
@@ -679,6 +720,27 @@ module Visitor_DEPRECATED = struct
         in
         acc
 
+      method on_stmt_match acc { sm_expr; sm_arms } =
+        let acc = this#on_expr acc sm_expr in
+        let acc = List.fold_left sm_arms ~f:this#on_stmt_match_arm ~init:acc in
+        acc
+
+      method on_stmt_match_arm acc { sma_pat; sma_body } =
+        let acc = this#on_pattern acc sma_pat in
+        let acc = this#on_block acc sma_body in
+        acc
+
+      method on_pattern acc =
+        function
+        | PVar pv -> this#on_pat_var acc pv
+        | PRefinement pr -> this#on_pat_refinement acc pr
+
+      method on_pat_var acc { pv_pos = _; pv_id = _ } = acc
+
+      method on_pat_refinement acc { pr_pos = _; pr_id = _; pr_hint } =
+        let acc = this#on_hint acc pr_hint in
+        acc
+
       method on_foreach acc e ae b =
         let acc = this#on_expr acc e in
         let acc = this#on_as_expr acc ae in
@@ -690,6 +752,13 @@ module Visitor_DEPRECATED = struct
         let acc = List.fold_left cl ~f:this#on_catch ~init:acc in
         let acc = this#on_block acc fb in
         acc
+
+      method on_declare_local acc id t e =
+        let acc = this#on_lvar acc id in
+        let acc = this#on_hint acc t in
+        match e with
+        | None -> acc
+        | Some e -> this#on_expr acc e
 
       method on_block acc b = List.fold_left b ~f:this#on_stmt ~init:acc
 
@@ -730,21 +799,24 @@ module Visitor_DEPRECATED = struct
         | Using us -> this#on_using acc us
         | For (e1, e2, e3, b) -> this#on_for acc e1 e2 e3 b
         | Switch (e, cl, dfl) -> this#on_switch acc e cl dfl
+        | Match sm -> this#on_stmt_match acc sm
         | Foreach (e, ae, b) -> this#on_foreach acc e ae b
         | Try (b, cl, fb) -> this#on_try acc b cl fb
         | Noop -> this#on_noop acc
         | Fallthrough -> this#on_fallthrough acc
         | Awaitall (el, b) -> this#on_awaitall acc el b
-        | Block b -> this#on_block acc b
+        | Concurrent b -> this#on_concurrent acc b
+        | Declare_local (id, t, e) -> this#on_declare_local acc id t e
+        | Block (Some lids, b) ->
+          let acc = List.fold_left lids ~init:acc ~f:this#on_lvar in
+          this#on_block acc b
+        | Block (None, b) -> this#on_block acc b
         | Markup s -> this#on_markup acc s
-        | AssertEnv _ -> this#on_noop acc
 
       method on_expr acc (_, _, e) = this#on_expr_ acc e
 
       method on_expr_ acc e =
         match e with
-        | Darray (tap, fieldl) -> this#on_darray acc tap fieldl
-        | Varray (ta, el) -> this#on_varray acc ta el
         | Shape sh -> this#on_shape acc sh
         | True -> this#on_true acc
         | False -> this#on_false acc
@@ -757,10 +829,7 @@ module Visitor_DEPRECATED = struct
         | Lplaceholder _pos -> acc
         | Dollardollar id -> this#on_dollardollar acc id
         | Lvar id -> this#on_lvar acc id
-        | Fun_id sid -> this#on_fun_id acc sid
-        | Method_id (expr, pstr) -> this#on_method_id acc expr pstr
         | Method_caller (sid, pstr) -> this#on_method_caller acc sid pstr
-        | Smethod_id (cid, pstr) -> this#on_smethod_id acc cid pstr
         | Yield e -> this#on_yield acc e
         | Await e -> this#on_await acc e
         | Tuple el -> this#on_list acc el
@@ -770,9 +839,9 @@ module Visitor_DEPRECATED = struct
         | Array_get (e1, e2) -> this#on_array_get acc e1 e2
         | Class_get (cid, e, _) -> this#on_class_get acc cid e
         | Class_const (cid, id) -> this#on_class_const acc cid id
-        | Call (e, _, el, unpacked_element) ->
-          this#on_call acc e el unpacked_element
-        | FunctionPointer (fpid, targs) ->
+        | Call { func = e; args = el; unpacked_arg; _ } ->
+          this#on_call acc e el unpacked_arg
+        | FunctionPointer (fpid, targs, _) ->
           this#on_function_pointer acc fpid targs
         | String2 el -> this#on_string2 acc el
         | PrefixedString (_, e) -> this#on_expr acc e
@@ -780,27 +849,42 @@ module Visitor_DEPRECATED = struct
         | Cast (hint, e) -> this#on_cast acc hint e
         | ExpressionTree et -> this#on_expression_tree acc et
         | Unop (uop, e) -> this#on_unop acc uop e
-        | Binop (bop, e1, e2) -> this#on_binop acc bop e1 e2
-        | Pipe (id, e1, e2) -> this#on_pipe acc id e1 e2
+        | Binop { bop; lhs; rhs } -> this#on_binop acc bop lhs rhs
+        | Assign (lhs, bop, rhs) -> this#on_assign acc lhs bop rhs
+        | Pipe (id, e1, e2, null_flavor) ->
+          this#on_pipe acc id e1 e2 null_flavor
         | Eif (e1, e2, e3) -> this#on_eif acc e1 e2 e3
         | Is (e, h) -> this#on_is acc e h
-        | As (e, h, b) -> this#on_as acc e h b
+        | As { expr; hint; is_nullable; enforce_deep = _ } ->
+          this#on_as acc expr hint is_nullable
         | Upcast (e, h) -> this#on_upcast acc e h
         | New (cid, _, el, unpacked_element, _) ->
           this#on_new acc cid el unpacked_element
-        | Efun (f, idl) -> this#on_efun acc f idl
+        | Efun ef -> this#on_efun acc ef
         | Xml (sid, attrl, el) -> this#on_xml acc sid attrl el
         | ValCollection (s, ta, el) -> this#on_valCollection acc s ta el
         | KeyValCollection (s, tap, fl) -> this#on_keyValCollection acc s tap fl
-        | Omitted -> acc
+        | Omitted -> this#on_omitted acc
         | Lfun (f, idl) -> this#on_lfun acc f idl
         | Import (_, e) -> this#on_expr acc e
         | Collection (_, tal, fl) -> this#on_collection acc tal fl
-        | ET_Splice e -> this#on_et_splice acc e
+        | ET_Splice
+            {
+              spliced_expr;
+              extract_client_type = _;
+              contains_await = _;
+              macro_variables = _;
+              temp_lid = _;
+            } ->
+          this#on_et_splice acc spliced_expr
         | EnumClassLabel (opt_sid, name) ->
           this#on_enum_class_label acc opt_sid name
         | ReadonlyExpr e -> this#on_readonly_expr acc e
         | Hole (e, _, _, _) -> this#on_expr acc e
+        | Package id -> this#on_id acc id
+        | Nameof ci -> this#on_class_id acc ci
+        | Invalid (Some e) -> this#on_expr acc e
+        | Invalid _ -> acc
 
       method on_collection acc tal afl =
         let acc =
@@ -819,30 +903,11 @@ module Visitor_DEPRECATED = struct
           ~f:
             begin
               fun acc (_, e) ->
-              let acc = this#on_expr acc e in
-              acc
+                let acc = this#on_expr acc e in
+                acc
             end
           ~init:acc
           sm
-
-      method on_darray acc tap fieldl =
-        let acc =
-          match tap with
-          | Some (t1, t2) ->
-            let acc = this#on_targ acc t1 in
-            let acc = this#on_targ acc t2 in
-            acc
-          | None -> acc
-        in
-        List.fold_left fieldl ~f:this#on_field ~init:acc
-
-      method on_varray acc ta el =
-        let acc =
-          match ta with
-          | Some t -> this#on_targ acc t
-          | None -> acc
-        in
-        List.fold_left el ~f:this#on_expr ~init:acc
 
       method on_valCollection acc _ ta el =
         let acc =
@@ -871,12 +936,6 @@ module Visitor_DEPRECATED = struct
 
       method on_dollardollar acc id = this#on_lvar acc id
 
-      method on_fun_id acc _ = acc
-
-      method on_method_id acc _ _ = acc
-
-      method on_smethod_id acc _ _ = acc
-
       method on_method_caller acc _ _ = acc
 
       method on_obj_get acc e1 e2 =
@@ -893,25 +952,24 @@ module Visitor_DEPRECATED = struct
         in
         acc
 
-      method on_class_get acc cid e =
-        let acc = this#on_class_id acc cid in
-        match e with
-        | CGstring _ -> acc
-        | CGexpr e -> this#on_expr acc e
+      method on_class_get acc cid _ = this#on_class_id acc cid
 
       method on_class_const acc cid _ = this#on_class_id acc cid
 
       method on_call acc e el unpacked_element =
         let acc = this#on_expr acc e in
-        let f acc_ (pk, e_) =
-          let acc_ = this#on_param_kind acc_ pk in
-          this#on_expr acc_ e_
-        in
+        let f acc_ arg = this#on_argument acc_ arg in
         let acc = List.fold_left el ~f ~init:acc in
         let acc =
           Option.value_map unpacked_element ~f:(this#on_expr acc) ~default:acc
         in
         acc
+
+      method on_argument acc arg =
+        match arg with
+        | Aast_defs.Anormal e -> this#on_expr acc e
+        | Aast_defs.Ainout (_pos, e) -> this#on_expr acc e
+        | Aast_defs.Anamed (_name, e) -> this#on_expr acc e
 
       method on_function_pointer acc e targs =
         let acc = this#on_function_ptr_id acc e in
@@ -958,9 +1016,7 @@ module Visitor_DEPRECATED = struct
       method on_cast acc _ e = this#on_expr acc e
 
       method on_expression_tree acc (et : expression_tree) =
-        let acc = this#on_hint acc et.et_hint in
-        let acc = this#on_block acc et.et_splices in
-        let acc = this#on_expr acc et.et_virtualized_expr in
+        let acc = this#on_id acc et.et_class in
         let acc = this#on_expr acc et.et_runtime_expr in
         acc
 
@@ -971,7 +1027,12 @@ module Visitor_DEPRECATED = struct
         let acc = this#on_expr acc e2 in
         acc
 
-      method on_pipe acc _id e1 e2 =
+      method on_assign acc e1 _ e2 =
+        let acc = this#on_expr acc e1 in
+        let acc = this#on_expr acc e2 in
+        acc
+
+      method on_pipe acc _id e1 e2 _null_flavor =
         let acc = this#on_expr acc e1 in
         let acc = this#on_expr acc e2 in
         acc
@@ -992,6 +1053,8 @@ module Visitor_DEPRECATED = struct
 
       method on_upcast acc e _ = this#on_expr acc e
 
+      method on_omitted acc = acc
+
       method on_class_id acc (_, _, cid) = this#on_class_id_ acc cid
 
       method on_class_id_ acc =
@@ -1001,13 +1064,13 @@ module Visitor_DEPRECATED = struct
 
       method on_new acc cid el unpacked_element =
         let acc = this#on_class_id acc cid in
-        let acc = List.fold_left el ~f:this#on_expr ~init:acc in
+        let acc = List.fold_left el ~f:this#on_argument ~init:acc in
         let acc =
           Option.value_map unpacked_element ~default:acc ~f:(this#on_expr acc)
         in
         acc
 
-      method on_efun acc f _ = this#on_block acc f.f_body.fb_ast
+      method on_efun acc ef = this#on_block acc ef.ef_fun.f_body.fb_ast
 
       method on_lfun acc f _ = this#on_block acc f.f_body.fb_ast
 
@@ -1048,7 +1111,6 @@ module Visitor_DEPRECATED = struct
       method on_targ acc _ = acc
 
       method on_fun_ acc f =
-        let acc = this#on_id acc f.f_name in
         let acc = this#on_func_body acc f.f_body in
         let acc =
           match hint_of_type_hint f.f_ret with
@@ -1081,7 +1143,9 @@ module Visitor_DEPRECATED = struct
         let acc = List.fold_left c.c_methods ~f:this#on_method_ ~init:acc in
         acc
 
-      method on_fun_def acc f = this#on_fun_ acc f.fd_fun
+      method on_fun_def acc f =
+        let acc = this#on_id acc f.fd_name in
+        this#on_fun_ acc f.fd_fun
 
       method on_class_typeconst_def acc t =
         let acc = this#on_id acc t.c_tconst_name in
@@ -1167,9 +1231,22 @@ module Visitor_DEPRECATED = struct
 
       method on_typedef acc t =
         let acc = this#on_id acc t.t_name in
-        let acc = this#on_hint acc t.t_kind in
         let acc =
-          match t.t_constraint with
+          match t.t_assignment with
+          | SimpleTypeDef { tvh_vis = _; tvh_hint } -> this#on_hint acc tvh_hint
+          | CaseType (variant, variants) ->
+            List.fold_left
+              (variant :: variants)
+              ~init:acc
+              ~f:(fun acc variant -> this#on_hint acc variant.tctv_hint)
+        in
+        let acc =
+          match t.t_as_constraint with
+          | Some c -> this#on_hint acc c
+          | None -> acc
+        in
+        let acc =
+          match t.t_super_constraint with
           | Some c -> this#on_hint acc c
           | None -> acc
         in
@@ -1186,6 +1263,7 @@ module Visitor_DEPRECATED = struct
         | NamespaceUse _
         | SetNamespaceEnv _
         | FileAttributes _
+        | SetModule _
         | Module _ ->
           acc
 

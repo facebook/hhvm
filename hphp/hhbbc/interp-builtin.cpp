@@ -15,9 +15,11 @@
 */
 #include "hphp/hhbbc/interp.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
@@ -25,10 +27,8 @@
 #include "hphp/hhbbc/eval-cell.h"
 #include "hphp/hhbbc/interp-internal.h"
 #include "hphp/hhbbc/optimize.h"
-#include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/type-system.h"
-#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP::HHBBC {
 
@@ -49,7 +49,7 @@ const Type getArg(ISS& env, const php::Func* func, const FCallArgs& fca,
 
 struct Reduced {};
 struct NoReduced {};
-using TypeOrReduced = boost::variant<Type, Reduced, NoReduced>;
+using TypeOrReduced = std::variant<Type, Reduced, NoReduced>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -61,14 +61,49 @@ TypeOrReduced builtin_get_class(ISS& env, const php::Func* func,
   if (!ty.subtypeOf(BObj)) return NoReduced{};
 
   if (!is_specialized_obj(ty)) return TStr;
-  auto const d = dobj_of(ty);
-  switch (d.type) {
-  case DObj::Sub:   return TStr;
-  case DObj::Exact: break;
-  }
-
+  auto const& d = dobj_of(ty);
+  if (!d.isExact()) return TStr;
   constprop(env);
-  return sval(d.cls.name());
+  return sval(d.cls().name());
+}
+
+TypeOrReduced builtin_get_class_from_object(ISS& env, const php::Func* func,
+                                            const FCallArgs& fca) {
+  assertx(fca.numArgs() == 1);
+  auto const ty = getArg(env, func, fca, 0);
+
+  if (!ty.couldBe(BObj)) {
+    unreachable(env);
+    return TBottom;
+  }
+  if (ty.subtypeOf(BObj)) {
+    reduce(env, bc::ClassGetC { ClassGetCMode::Normal });
+    return Reduced{};
+  }
+  return TCls;
+}
+
+TypeOrReduced builtin_class_to_classname(ISS& env, const php::Func* func,
+                                         const FCallArgs& fca) {
+  assertx(fca.numArgs() == 1);
+  auto const ty = getArg(env, func, fca, 0);
+
+  if (!ty.couldBe(BCls | BLazyCls | BStr)) return NoReduced{};
+
+  if (ty.subtypeOf(BCls)) {
+    reduce(env, bc::ClassName {});
+    return Reduced{};
+  } else if (ty.subtypeOf(BLazyCls)) {
+    if (is_specialized_lazycls(ty)) {
+      reduce(env, bc::PopC {}, bc::String { lazyclsval_of(ty) });
+      return Reduced{};
+    }
+    return TSStr;
+  } else if (ty.subtypeOf(BStr)) {
+    reduce(env);
+    return Reduced{};
+  }
+  return TStr;
 }
 
 TypeOrReduced builtin_abs(ISS& env, const php::Func* func,
@@ -100,29 +135,6 @@ TypeOrReduced builtin_floor(ISS& env, const php::Func* func,
   return floatIfNumeric(env, func, fca);
 }
 
-/**
- * The compiler specializes the two-arg version of min() and max()
- * into an HNI provided helper. If both arguments are an integer
- * or both arguments are a double, we know the exact type of the
- * return value. If they're both numeric, the result is at least
- * numeric.
- */
-TypeOrReduced minmax2(ISS& env, const php::Func* func, const FCallArgs& fca) {
-  assertx(fca.numArgs() == 2);
-  auto const t0 = getArg(env, func, fca, 0);
-  auto const t1 = getArg(env, func, fca, 1);
-  if (!t0.subtypeOf(BNum) || !t1.subtypeOf(BNum)) return NoReduced{};
-  return t0 == t1 ? t0 : TNum;
-}
-TypeOrReduced builtin_max2(ISS& env, const php::Func* func,
-                           const FCallArgs& fca) {
-  return minmax2(env, func, fca);
-}
-TypeOrReduced builtin_min2(ISS& env, const php::Func* func,
-                           const FCallArgs& fca) {
-  return minmax2(env, func, fca);
-}
-
 TypeOrReduced builtin_strlen(ISS& env, const php::Func* func,
                              const FCallArgs& fca) {
   assertx(fca.numArgs() == 1);
@@ -133,14 +145,57 @@ TypeOrReduced builtin_strlen(ISS& env, const php::Func* func,
   return ty.subtypeOf(BPrim | BStr) ? TInt : TOptInt;
 }
 
+TypeOrReduced builtin_is_numeric(ISS& env, const php::Func* func,
+                                 const FCallArgs& fca) {
+  assertx(fca.numArgs() == 1);
+  auto const ty = getArg(env, func, fca, 0);
+  if (!ty.couldBe(BInt | BDbl | BStr)) return TFalse;
+  if (ty.subtypeOf(BInt | BDbl)) return TTrue;
+  if (ty.subtypeOf(BStr)) {
+     if (auto const val = tv(ty)) {
+       int64_t ival;
+       double dval;
+       auto const dt = val->m_data.pstr->toNumeric(ival, dval);
+       return dt == KindOfInt64 || dt == KindOfDouble ? TTrue : TFalse;
+     }
+  }
+  return TBool;
+}
+
+TypeOrReduced builtin_is_object(ISS& env, const php::Func* func,
+                                const FCallArgs& fca) {
+  assertx(fca.numArgs() == 1);
+  reduce(env, bc::IsTypeC { IsTypeOp::Obj });
+  return Reduced{};
+}
+
+TypeOrReduced builtin_is_scalar(ISS& env, const php::Func* func,
+                                const FCallArgs& fca) {
+  assertx(fca.numArgs() == 1);
+  reduce(env, bc::IsTypeC { IsTypeOp::Scalar });
+  return Reduced{};
+}
+
 TypeOrReduced builtin_function_exists(ISS& env, const php::Func* func,
                                       const FCallArgs& fca) {
   assertx(fca.numArgs() >= 1 && fca.numArgs() <= 2);
-  if (!handle_function_exists(env, getArg(env, func, fca, 0))) {
-    return NoReduced{};
+
+  auto const name = getArg(env, func, fca, 0);
+  if (!name.strictSubtypeOf(BStr)) return NoReduced{};
+  auto const v = tv(name);
+  if (!can_constprop(env) || !v) return NoReduced{};
+  auto const rfunc = env.index.resolve_func(v->m_data.pstr);
+  switch (rfunc.exists()) {
+    case TriBool::Yes:
+      constprop(env);
+      return TTrue;
+    case TriBool::No:
+      constprop(env);
+      return TFalse;
+    case TriBool::Maybe:
+      return NoReduced{};
   }
-  constprop(env);
-  return TTrue;
+  not_reached();
 }
 
 TypeOrReduced handle_oodecl_exists(ISS& env,
@@ -151,14 +206,16 @@ TypeOrReduced handle_oodecl_exists(ISS& env,
   auto const autoload = getArg(env, func, fca, 1);
   if (name.subtypeOf(BStr)) {
     if (fca.numArgs() == 1) {
-        reduce(env, bc::True {});
+      reduce(env, bc::True {});
     } else if (!autoload.subtypeOf(BBool)) {
-        reduce(env, bc::CastBool {});
+      reduce(env, bc::CastBool {});
     }
     reduce(env, bc::OODeclExists { subop });
     return Reduced{};
   }
-  if (!autoload.strictSubtypeOf(TBool)) return NoReduced{};
+  if (!can_constprop(env) || !autoload.strictSubtypeOf(TBool)) {
+    return NoReduced{};
+  }
   auto const v = tv(autoload);
   assertx(v);
   if (fca.numArgs() == 2) reduce(env, bc::PopC {});
@@ -184,6 +241,48 @@ TypeOrReduced builtin_trait_exists(ISS& env, const php::Func* func,
   return handle_oodecl_exists(env, func, fca, OODeclExistsOp::Trait);
 }
 
+TypeOrReduced builtin_package_exists(ISS& env, const php::Func* func,
+                                     const FCallArgs& fca) {
+  assertx(fca.numArgs() == 1);
+  auto name = getArg(env, func, fca, 0);
+  if (!name.strictSubtypeOf(BStr)) return NoReduced{};
+  auto const v = tv(name);
+  if (!v) return NoReduced{};
+  auto const packageName = v->m_data.pstr;
+  auto const unit = env.index.lookup_func_unit(*env.ctx.func);
+  if (!unit) return NoReduced{};
+  constprop(env);
+  return unit->packageInfo.implPackageExists(packageName)
+    ? TTrue : TFalse;
+}
+
+TypeOrReduced builtin_autoload_is_native(ISS& env, const php::Func*,
+                                         const FCallArgs& fca) {
+  assertx(fca.numArgs() == 0);
+  reduce(env, bc::True {});
+  return Reduced{};
+}
+
+const StaticString s_hhvm_repo_authoritative("hhvm.repo.authoritative");
+const StaticString s_one("1");
+
+TypeOrReduced builtin_ini_get(ISS& env, const php::Func* func,
+                              const FCallArgs& fca) {
+  assertx(fca.numArgs() == 1);
+  auto const arg = getArg(env, func, fca, 0);
+  if (!arg.strictSubtypeOf(BStr)) return NoReduced{};
+  auto const iniTV = tv(arg);
+  if (!iniTV) return NoReduced{};
+  auto const iniName = iniTV->m_data.pstr;
+
+  if (iniName->same(s_hhvm_repo_authoritative.get())) {
+    reduce(env, bc::PopC {}, bc::String { s_one.get() });
+    return Reduced{};
+  }
+
+  return NoReduced{};
+}
+
 TypeOrReduced builtin_array_key_cast(ISS& env, const php::Func* func,
                                      const FCallArgs& fca) {
   assertx(fca.numArgs() == 1);
@@ -203,9 +302,9 @@ TypeOrReduced builtin_array_key_cast(ISS& env, const php::Func* func,
   }
   if (ty.couldBe(BCls)) {
     if (is_specialized_cls(ty)) {
-      auto const dcls = dcls_of(ty);
-      if (dcls.type == DCls::Exact) {
-        auto cname = dcls_of(ty).cls.name();
+      auto const& dcls = dcls_of(ty);
+      if (dcls.isExact()) {
+        auto cname = dcls.cls().name();
         retTy |= sval(cname);
       } else {
         retTy |= TSStr;
@@ -244,7 +343,7 @@ TypeOrReduced builtin_array_key_cast(ISS& env, const php::Func* func,
     effect_free(env);
   }
 
-  if (retTy == TBottom) unreachable(env);
+  if (retTy.is(BBottom)) unreachable(env);
   return retTy;
 }
 
@@ -252,10 +351,10 @@ TypeOrReduced builtin_is_callable(ISS& env, const php::Func* func,
                                   const FCallArgs& fca) {
   assertx(fca.numArgs() >= 1 && fca.numArgs() <= 2);
   // Do not handle syntax-only checks or name output.
-  if (getArg(env, func, fca, 1) != TFalse) return NoReduced{};
+  if (!getArg(env, func, fca, 1).is(BFalse)) return NoReduced{};
 
   auto const ty = getArg(env, func, fca, 0);
-  if (ty == TInitCell) return NoReduced{};
+  if (ty.is(BInitCell)) return NoReduced{};
   auto const res = [&]() -> Optional<bool> {
     if (ty.subtypeOf(BClsMeth | BFunc)) return true;
     if (ty.subtypeOf(BArrLikeE | BKeyset) ||
@@ -317,31 +416,37 @@ impl_builtin_type_structure(ISS& env, const php::Func* func,
     auto const clsStr = [&] () -> SString {
       auto const t = getArg(env, func, fca, 0);
       if (t.subtypeOf(BCls) && is_specialized_cls(t)) {
-        auto const dcls = dcls_of(t);
-        if (dcls.type != DCls::Exact) return nullptr;
-        if (RO::EvalRaiseClassConversionWarning) throws = TriBool::Maybe;
-        return dcls.cls.name();
+        auto const& dcls = dcls_of(t);
+        if (!dcls.isExact()) return nullptr;
+        if (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0) {
+          throws = TriBool::Maybe;
+        }
+        return dcls.cls().name();
       }
       if (t.subtypeOf(BStr) && is_specialized_string(t)) {
         return sval_of(t);
       }
       if (t.subtypeOf(BLazyCls) && is_specialized_lazycls(t)) {
-        if (RO::EvalRaiseClassConversionWarning) throws = TriBool::Maybe;
+        if (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0) {
+          throws = TriBool::Maybe;
+        }
         return lazyclsval_of(t);
       }
       return nullptr;
     }();
     if (!clsStr) return std::nullopt;
 
-    auto const typeAlias = env.index.lookup_type_alias(clsStr);
-    if (!typeAlias) {
+    auto const [typeAlias, exists] = env.index.lookup_type_alias(clsStr);
+    if (!exists) {
       // No type-alias with that name
       unreachable(env);
       return std::make_pair(TBottom, TriBool::Yes);
     }
+    // It might exist, so be conservative.
+    if (!typeAlias) return std::nullopt;
 
     // Found a type-alias, resolve it's type-structure.
-    auto const r = resolve_type_structure(env.index, *typeAlias);
+    auto const r = resolve_type_structure(env.index, &env.collect, *typeAlias);
     if (r.type.is(BBottom)) {
       // Resolution will always fail
       unreachable(env);
@@ -365,27 +470,20 @@ impl_builtin_type_structure(ISS& env, const php::Func* func,
     auto const t = getArg(env, func, fca, 0);
     if (t.subtypeOf(BCls)) return t;
     if (t.subtypeOf(BObj)) return objcls(t);
-    if (t.subtypeOf(BStr) && is_specialized_string(t)) {
-      auto const str = sval_of(t);
-      auto const rcls = env.index.resolve_class(env.ctx, str);
-      if (!rcls || !rcls->resolved()) {
-        throws = TriBool::Maybe;
-        return TCls;
-      }
-      return clsExact(*rcls);
-    }
     if (t.subtypeOf(BLazyCls) && is_specialized_lazycls(t)) {
       auto const str = lazyclsval_of(t);
-      auto const rcls = env.index.resolve_class(env.ctx, str);
-      if (!rcls || !rcls->resolved()) {
-        throws = TriBool::Maybe;
-        return TCls;
-      }
-      return clsExact(*rcls);
+      auto const rcls = env.index.resolve_class(str);
+      if (!rcls) return TBottom;
+      return clsExact(*rcls, true);
     }
     throws = TriBool::Maybe;
     return TCls;
   }();
+
+  if (cls.is(BBottom)) {
+    unreachable(env);
+    return std::make_pair(TBottom, TriBool::Yes);
+  }
 
   auto lookup = env.index.lookup_class_type_constant(cls, name);
   assertx(lookup.resolution.type.subtypeOf(BSDictN));
@@ -477,8 +575,8 @@ TypeOrReduced builtin_type_structure_no_throw(ISS& env, const php::Func* func,
 
 const StaticString s_classname("classname");
 
-TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
-                                               const FCallArgs& fca) {
+TypeOrReduced impl_type_structure_classname(ISS& env, const php::Func* func,
+                                            const FCallArgs& fca, bool load) {
   auto const r = impl_builtin_type_structure(env, func, fca, false);
   if (!r) return NoReduced{};
   if (r->second == TriBool::Yes) {
@@ -495,11 +593,38 @@ TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
   }
   if (!classname.couldBe(BSStr)) return NoReduced{};
 
-  if (r->second == TriBool::No && present) {
-    effect_free(env);
-    constprop(env);
+  auto const classname_required = r->second == TriBool::No && present;
+  if (load) {
+    if (is_specialized_string(classname)) {
+      auto const n = sval_of(classname);
+      if (auto const rcls = env.index.resolve_class(n)) {
+        if (classname_required) {
+          effect_free(env);
+          constprop(env);
+        }
+        return clsExact(*rcls, true);
+      } else {
+        return TBottom;
+      }
+    }
+    return TCls;
+  } else {
+    if (classname_required) {
+      effect_free(env);
+      constprop(env);
+    }
+    return intersection_of(classname, TSStr);
   }
-  return intersection_of(classname, TSStr);
+}
+
+TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
+                                               const FCallArgs& fca) {
+  return impl_type_structure_classname(env, func, fca, false);
+}
+
+TypeOrReduced builtin_type_structure_class(ISS& env, const php::Func* func,
+                                           const FCallArgs& fca) {
+  return impl_type_structure_classname(env, func, fca, true);
 }
 
 #define SPECIAL_BUILTINS                                                \
@@ -507,19 +632,26 @@ TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
   X(ceil, ceil)                                                         \
   X(floor, floor)                                                       \
   X(get_class, get_class)                                               \
-  X(max2, max2)                                                         \
-  X(min2, min2)                                                         \
+  X(get_class_from_object, HH\\get_class_from_object)                   \
+  X(class_to_classname, HH\\class_to_classname)                         \
   X(strlen, strlen)                                                     \
+  X(is_numeric, is_numeric)                                             \
+  X(is_scalar, is_scalar)                                               \
+  X(is_object, is_object)                                               \
   X(function_exists, function_exists)                                   \
   X(class_exists, class_exists)                                         \
   X(interface_exists, interface_exists)                                 \
   X(trait_exists, trait_exists)                                         \
+  X(package_exists, HH\\package_exists)                                 \
+  X(autoload_is_native, HH\\autoload_is_native)                         \
+  X(ini_get, ini_get)                                                   \
   X(array_key_cast, HH\\array_key_cast)                                 \
   X(is_callable, is_callable)                                           \
   X(is_list_like, HH\\is_list_like)                                     \
   X(type_structure, HH\\type_structure)                                 \
   X(type_structure_no_throw, HH\\type_structure_no_throw)               \
   X(type_structure_classname, HH\\type_structure_classname)             \
+  X(type_structure_class, HH\\type_structure_class)                     \
 
 #define X(x, y)    const StaticString s_##x(#y);
   SPECIAL_BUILTINS
@@ -530,7 +662,7 @@ bool handle_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
     ? makeStaticString(folly::sformat("{}::{}", func->cls->name, func->name))
     : func->name;
   auto result = [&]() -> TypeOrReduced {
-#define X(x, y) if (name->isame(s_##x.get())) return builtin_##x(env, func, fca);
+#define X(x, y) if (name == s_##x.get()) return builtin_##x(env, func, fca);
     SPECIAL_BUILTINS
     return NoReduced{};
 #undef X
@@ -555,21 +687,25 @@ bool handle_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
 
 } // namespace
 
+const std::vector<SString>& special_builtins() {
+  static const std::vector<SString> builtins{{
+#define X(x, y) s_##x.get(),
+    SPECIAL_BUILTINS
+#undef X
+  }};
+  return builtins;
+}
+
 bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   if (any(env.collect.opts & CollectionOpts::Speculating) ||
       func->attrs & AttrNoFCallBuiltin ||
       (func->cls && !(func->attrs & AttrStatic))  ||
-      !func->nativeInfo ||
+      !func->isNative ||
       func->params.size() >= Native::maxFCallBuiltinArgs() ||
       fca.hasGenerics() ||
-      !RuntimeOption::EvalEnableCallBuiltin) {
+      !Cfg::Eval::EnableCallBuiltin) {
     return false;
   }
-
-  // We rely on strength reduction to convert builtins, but if we do
-  // the analysis on the assumption that builtins will be created, but
-  // don't actually create them, all sorts of things can go wrong.
-  if (!options.StrengthReduce) return false;
 
   // Do not allow for inout arguments, unpack and variadic arguments
   if (func->hasInOutArgs ||
@@ -592,19 +728,11 @@ bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
   return handle_builtin(env, func, fca);
 }
 
-bool handle_function_exists(ISS& env, const Type& name) {
-  if (!name.strictSubtypeOf(BStr)) return false;
-  auto const v = tv(name);
-  if (!v) return false;
-  auto const rfunc = env.index.resolve_func(env.ctx, v->m_data.pstr);
-  return rfunc.exactFunc();
-}
-
 Optional<Type> const_fold(ISS& env,
-                                 uint32_t nArgs,
-                                 uint32_t numExtraInputs,
-                                 const php::Func& phpFunc,
-                                 bool variadicsPacked) {
+                          uint32_t nArgs,
+                          uint32_t numExtraInputs,
+                          const php::Func& phpFunc,
+                          bool variadicsPacked) {
   assertx(phpFunc.attrs & AttrIsFoldable);
 
   std::vector<TypedValue> args(nArgs);
@@ -643,14 +771,15 @@ Optional<Type> const_fold(ISS& env,
     );
   }
 
-  FTRACE(1, "invoking: {}\n", func->fullName()->data());
+  ITRACE(2, "invoking: {}\n", func->fullName());
 
-  assertx(!RuntimeOption::EvalJit);
-  // NB: Coeffects are already checked prior to here by `shouldAttemptToFold`
+  assertx(!Cfg::Jit::Enabled);
+  // NB: Coeffects are already checked prior to here by `shouldAttemptToFold`.
+  // TODO(named_params) support constant folding calls with named args.
   return eval_cell(
     [&] {
       auto const retVal = g_context->invokeFuncFew(
-        func, cls, args.size(), args.data(), RuntimeCoeffects::none(),
+        func, cls, args.size(), nullptr, args.data(), RuntimeCoeffects::none(),
         false, false);
       assertx(tvIsPlausible(retVal));
       return retVal;

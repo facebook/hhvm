@@ -1,3 +1,3 @@
 begin sleep
 
-Fatal error: %r(Maximum execution time of 1 seconds exceeded|entire web request took longer than 1 seconds and timed out)%r in %s on line %d
+Fatal error: %|{Maximum execution time of 1 seconds exceeded|entire web request took longer than 1 seconds and timed out} in %s on line %d

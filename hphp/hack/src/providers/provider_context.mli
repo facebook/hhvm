@@ -47,11 +47,10 @@ two reasons:
 
 To create a new entry for a file, use [Provider_context.add_entry].
 
-There should generally be no more than one or two entries inside the
-[Provider_context.t] at a given time. Be careful not to try to store every
-single file's data in memory at once. Once you're done processing a file (e.g.
-you have the TAST and don't need to access further data), then you should
-discard the [entry] and the [Provider_context.t] that it came from.
+There should generally be no more than one entry inside the [Provider_context.t]
+at a given time. Once you're done processing a file (e.g. you have the TAST and
+don't need to access further data), then you should discard the [entry] and the
+[Provider_context.t] that it came from.
 
 All of these fields are monotonic, unless otherwise noted. They only
 transition forward through states, never backwards (e.g. from None -> Some),
@@ -66,12 +65,13 @@ type entry = {
       (** Derived from [contents]; contains additional preprocessing. *)
   mutable parser_return: Parser_return.t option;
       (** this parser_return, if present, came from source_text via Ast_provider.parse
-    under ~full:true ~keep_errors:true *)
-  mutable ast_errors: Errors.t option;  (** same invariant as parser_return *)
+      under ~full:true *)
+  mutable ast_diagnostics: Diagnostics.t option;
+      (** same invariant as parser_return *)
   mutable cst: PositionedSyntaxTree.t option;
-  mutable tast: Tast.program option;
-      (** NOT monotonic: depends on the decls of other files. *)
-  mutable naming_and_typing_errors: Errors.t option;
+  mutable tast: Tast.program Tast_with_dynamic.t option;
+      (** NOT monotonic: depends on the decls of other files. See invariants in Provider_utils.mli. *)
+  mutable all_diagnostics: Diagnostics.t option;
       (** NOT monotonic for the same reason as [tast]. *)
   mutable symbols: Relative_path.t SymbolOccurrence.t list option;
 }
@@ -168,6 +168,9 @@ val map_tcopt : t -> f:(TypecheckerOptions.t -> TypecheckerOptions.t) -> t
 (** Get the [Provider_backend.t] that backs this [t]. *)
 val get_backend : t -> Provider_backend.t
 
+(** Override the [Provider_backend.t] that backs this [t]. *)
+val set_backend : t -> Provider_backend.t -> t
+
 (** Get the [Typing_deps_mode.t] that backs this [t]. *)
 val get_deps_mode : t -> Typing_deps_mode.t
 
@@ -215,3 +218,20 @@ val get_telemetry : t -> Telemetry.t
 
 (** This function resets the 'counters' associated with telemetry. *)
 val reset_telemetry : t -> unit
+
+(** Given a context that uses [Provider_backend.Pessimised_shared_memory] as
+its backend, return a context with the backend updated to use the given
+[pessimisation_info] instead. Due to the stateful nature of setting backends in
+general (see the Provider_backend.set_* functions), we make no attempt to
+support situations where the original backend isn't
+[Provider_backend.Pessimised_shared_memory] already and fail instead. *)
+val ctx_with_pessimisation_info_exn :
+  t -> Provider_backend.pessimisation_info -> t
+
+val implicit_sdt_for_fun : t -> Shallow_decl_defs.fun_decl -> bool
+
+val no_auto_likes_for_fun : Shallow_decl_defs.fun_decl -> bool
+
+val get_package_info : t -> Package_info.t
+
+val with_tcopt_for_autocomplete : t -> t

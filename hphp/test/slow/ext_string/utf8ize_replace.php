@@ -1,20 +1,20 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
                    var_dump(debug_backtrace()); }
 }
-function VERIFY($x) { VS($x != false, true); }
+function VERIFY($x) :mixed{ VS($x != false, true); }
 
 // Php doesn't support \u escapes.
-function u($x) { return json_decode("\"" . $x . "\""); }
+function u($x) :mixed{ return json_decode("\"" . $x . "\""); }
 
 
 //////////////////////////////////////////////////////////////////////
 
 <<__EntryPoint>>
-function main_utf8ize_replace() {
+function main_utf8ize_replace() :mixed{
 $input =
   u('\u00a1')."\xc2\x41".
   u('\u0561')."\xd5\xe0".
@@ -30,7 +30,7 @@ $tmp = $input;
 fb_utf8ize(inout $tmp);
 $sanitized = $tmp;
 
-VS(fb_htmlspecialchars($input, ENT_QUOTES, "", varray[]), $sanitized);
+VS(fb_htmlspecialchars($input, ENT_QUOTES, "", vec[]), $sanitized);
 
 VS(fb_htmlspecialchars($input, ENT_FB_UTF8, "", null),
    "&#xa1;A".
@@ -39,7 +39,7 @@ VS(fb_htmlspecialchars($input, ENT_FB_UTF8, "", null),
    "&#x218a3;A".
    "helloworld");
 
-VS(fb_htmlspecialchars($sanitized, ENT_QUOTES, "", varray[]),
+VS(fb_htmlspecialchars($sanitized, ENT_QUOTES, "", vec[]),
    $sanitized);
 
 $zfoo = "\0foo";

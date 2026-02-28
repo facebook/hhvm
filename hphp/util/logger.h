@@ -19,12 +19,15 @@
 #include <atomic>
 #include <chrono>
 #include <cstdarg>
+#include <filesystem>
 #include <string>
 
 #include "hphp/util/cronolog.h"
 #include "hphp/util/log-file-flusher.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/thread-local.h"
+
+#define PATH_CONCAT(base, file) (std::filesystem::path(base) / file).string()
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,6 +37,8 @@ struct Exception;
 
 struct ErrorLogFileData {
   ErrorLogFileData() {}
+  ErrorLogFileData(const std::string& baseDir, const std::string& file, const std::string& symlink, int mpl)
+    : ErrorLogFileData(PATH_CONCAT(baseDir, file), PATH_CONCAT(baseDir, symlink), mpl) {}
   ErrorLogFileData(const std::string& file, const std::string& symlink, int mpl)
     : logFile(file)
     , symLink(symlink)
@@ -111,8 +116,7 @@ struct Logger {
 
   static void Log(LogLevelType level, const char* type, const Exception& e,
                   const char* file = nullptr, int line = 0);
-  static void OnNewRequest();
-  static void ResetRequestCount();
+  static void OnNewRequest(int64_t requestId);
 
   static bool SetThreadLog(const char *file, bool threadOnly);
   static void ClearThreadLog();
@@ -121,7 +125,7 @@ struct Logger {
   static void SetThreadHook(LoggerHook*);
 
   static constexpr const char *DEFAULT = "Default";
-  static void SetTheLogger(const std::string &name, Logger* newLogger);
+  static void SetTheLogger(const std::string &name, std::unique_ptr<Logger> newLogger);
   static bool IsDefaultLogger(const std::string& name);
 
   static char *EscapeString(const std::string &msg);
@@ -137,13 +141,20 @@ struct Logger {
   static void FlushAll();
   static void SetBatchSize(size_t bsize);
   static void SetFlushTimeout(std::chrono::milliseconds timeoutMs);
-  static int64_t GetRequestId();
 
   virtual FILE* fileForStackTrace() { return output(); }
 
+  struct GlobalLoggers {
+    std::unordered_map<std::string, std::unique_ptr<Logger>> m_loggers;
+    GlobalLoggers();
+    auto begin() { return m_loggers.begin(); }
+    auto end() { return m_loggers.end(); }
+    std::optional<Logger*> get(const std::string& name);
+  };
+
 protected:
   struct ThreadData {
-    int request{0};
+    int64_t requestId{0};
     int message{0};
     LogFileFlusher flusher;
     FILE *log{nullptr};
@@ -191,13 +202,34 @@ protected:
    */
   static std::string GetHeader();
   static pid_t s_pid;
+
 protected:
   bool m_isPipeOutput;
   FILE *m_output;
   FILE* m_standardOut;
   Cronolog m_cronOutput;
   LogFileFlusher m_flusher;
-  static std::map<std::string, Logger*> s_loggers;
+
+  static std::shared_ptr<GlobalLoggers> getLoggers();
+  template<typename F>
+  static void withLoggers(F f) {
+    auto loggers = getLoggers();
+    if (loggers) {
+      f(*loggers);
+    }
+  }
+  template<typename F>
+  static void forEachLogger(F f) {
+    withLoggers([&](auto& loggers) {
+      for (auto& it : loggers) {
+        if (it.second) {
+          f(*it.second);
+        }
+      }
+    });
+  }
+  static Logger* getLogger(const std::string& name);
+
   // serialized/compressed bytes and lines the DEFAULT logger has written
   static ServiceData::ExportedCounter* s_errorLines;
   static ServiceData::ExportedCounter* s_errorSerializedBytes;
@@ -208,4 +240,3 @@ protected:
 }
 
 #include "hphp/util/logger-inl.h"
-

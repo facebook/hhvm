@@ -1,0 +1,33 @@
+{
+  "errors": [
+    {
+      "descr": "This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH\\FIXME\\UNSAFE_CAST` call. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change.",
+      "severity": "disabled",
+      "path": "test_quickfix_unsafe_cast.php",
+      "line": 8,
+      "start": 8,
+      "end": 58,
+      "code": 5807,
+      "bypass_changed_lines": false,
+      "original": "",
+      "replacement": "",
+      "start_offset": null,
+      "width": null
+    },
+    {
+      "descr": "The input type to `HH\\FIXME\\UNSAFE_CAST` should be as specific as possible. Consider using `?string` instead.",
+      "severity": "advice",
+      "path": "test_quickfix_unsafe_cast.php",
+      "line": 8,
+      "start": 29,
+      "end": 33,
+      "code": 5636,
+      "bypass_changed_lines": false,
+      "original": "mixed",
+      "replacement": "?string",
+      "start_offset": 111,
+      "width": 5
+    }
+  ],
+  "version": ""
+}

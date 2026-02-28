@@ -5,13 +5,13 @@ class D {}
 class E {}
 
 class One<reify T1> {
-  public function f<reify T2>(bool $fun) {
+  public function f<reify T2>(bool $fun) :mixed{
     return $fun ? new T2 : new T1;
   }
 }
 
 class Two<reify T1> {
-  public function f<reify T2>(bool $fun) {
+  public function f<reify T2>(bool $fun) :mixed{
     $c = new One<T1>();
     return $c->f<T2>($fun);
   }

@@ -1,0 +1,8 @@
+*** Testing method_exists() : usage variations ***
+
+Arg value 
+bool(false)
+
+Arg value 
+bool(false)
+Done

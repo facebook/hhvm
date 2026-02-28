@@ -1,11 +1,11 @@
 <?hh
 
-class modalité {
- static function odalité() {
+class modalitâ‚¬ {
+ static function odalitâ‚¬() :mixed{
  var_dump(123);
 }
  }
  <<__EntryPoint>>
-function main_75() {
-modalité::odalité();
+function main_75() :mixed{
+modalitâ‚¬::odalitâ‚¬();
 }

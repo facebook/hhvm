@@ -4,7 +4,7 @@
  */
 
 function sort_using_locale( $locale, $test_array )
-{
+:mixed{
     $coll = ut_coll_create( $locale );
 
     // Sort array.
@@ -15,13 +15,13 @@ function sort_using_locale( $locale, $test_array )
 }
 
 function ut_main()
-{
+:mixed{
     $res_str = '';
 
     // Define a couple of arrays.
     // Each array contains equal strings that differ only in their length.
-    $a1 = varray[ 'aa', 'aaa', 'a' ];
-    $a2 = varray[ 'пп', 'ппп', 'п' ];
+    $a1 = vec[ 'aa', 'aaa', 'a' ];
+    $a2 = vec[ "\xd0\xbf\xd0\xbf", "\xd0\xbf\xd0\xbf\xd0\xbf", "\xd0\xbf" ];
 
     // Sort them.
     $res_str .= sort_using_locale( 'en_US', $a1 );

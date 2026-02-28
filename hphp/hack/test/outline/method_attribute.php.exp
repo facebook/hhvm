@@ -11,5 +11,7 @@ C
     position: line 5, characters 19-37
     span: line 4, character 3 - line 8, character 3
     modifiers: public 
+    detail: function() {
+    // multiline method
     params:
 

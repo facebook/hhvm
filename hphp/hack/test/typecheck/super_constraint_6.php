@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 class FooBase {}
 class Foo extends FooBase {}
 class FooDerived extends Foo {}

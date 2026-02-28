@@ -3,6 +3,6 @@
 // The default configuration should be that unstable features are disabled,
 // thus using the attribute with an unstable feature should result in a fatal error
 
-<<file:__EnableUnstableFeatures('class_level_where')>>
+<<file:__EnableUnstableFeatures('union_intersection_type_hints')>>
 
-interface I where this as I {}
+function f(): (int|bool) { return 0; }

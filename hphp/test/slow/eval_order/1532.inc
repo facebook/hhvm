@@ -1,5 +1,5 @@
 <?hh
 
-class A {
-  use T;
+class A1532 {
+  use T1532;
 }

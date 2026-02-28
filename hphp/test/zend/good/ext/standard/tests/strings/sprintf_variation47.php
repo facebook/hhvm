@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : scientific formats with float values ***\n";
 
 // array of float values 
-$float_values = varray[
+$float_values = vec[
   -2147483649,
   2147483648,
   -0x80000001, // float value, beyond max negative int
@@ -30,7 +30,7 @@ $float_values = varray[
 ];
 
 // array of scientific formats
-$scientific_formats = varray[
+$scientific_formats = vec[
   "%e", "%he", "%le",
   "%Le", " %e", "%e ",
   "\t%e", "\n%e", "%4e",

@@ -2,33 +2,25 @@
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-30], "\\array_get_index_pair");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:67-71], (Hprim Tvoid)))); 
-        f_name = ([3:10-30], "\\array_get_index_pair"); f_tparams = []; 
-        f_where_constraints = [];
+        f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([3:67-71], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (Pair<string, int>);
-           param_type_hint = ((Pair<string, int>), (Some ([3:31-48], (Happly (([3:31-35], "\\HH\\Pair"), [([3:36-42], (Hprim Tstring)); ([3:44-47], (Hprim Tint))]))))); 
-           param_is_variadic = false; param_pos = [3:49-52]; param_name = "$xs"; 
-           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None };
-          { param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:54-59], Hmixed))); 
-            param_is_variadic = false; param_pos = [3:60-64]; param_name = "$idx"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+           param_type_hint = ((Pair<string, int>), (Some ([3:31-48], (Happly (([3:31-35], "\\HH\\Pair"), [([3:36-42], (Happly (([3:36-42], "\\HH\\string"), []))); ([3:44-47], (Hprim Tint))])))));
+           param_pos = [3:49-52]; param_name = "$xs"; param_info = Param_required; 
+           param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+           param_named = None; param_user_attributes = []; param_visibility = None };
+          { param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:54-59], (Happly (([3:54-59], "\\HH\\supportdyn"), [([3:54-59], Hmixed)]))))); 
+            param_pos = [3:60-64]; param_name = "$idx"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
-        f_body =
-        { fb_ast =
-          [([5:3-13],
-            (Expr
-               ((_), [5:3-12],
-                (Array_get (((Pair<string, int>), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((mixed), [5:7-11], (Hole (((mixed), [5:7-11], (Lvar ([5:7-11], $idx))), (mixed), (int), Typing)))))))))
-            ]
-          };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
-      fd_internal = false })
+        f_body = { fb_ast = [([5:3-13], (Expr ((nothing), [5:3-12], (Array_get (((Pair<string, int>), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((mixed), [5:7-11], (Lvar ([5:7-11], $idx)))))))))] };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-30], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None })

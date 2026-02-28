@@ -23,13 +23,11 @@ use namespace HH\Lib\{_Private, C, Keyset, Vec, _Private\_Str};
  *
  * @guide /hack/built-in-types/string
  */
-function capitalize(
-  string $string,
-)[]: string {
+function capitalize(string $string)[]: string {
   if ($string === '') {
     return '';
   }
-  return _Str\uppercase_l(slice($string, 0, 1)) . slice($string, 1);
+  return _Str\uppercase_l(slice($string, 0, 1)).slice($string, 1);
 }
 
 /**
@@ -62,7 +60,7 @@ function capitalize_words(
     $substr_len = \strcspn($string, $delimiters, $offset);
     $words[] = tuple(
       \substr($string, $offset, $substr_len),
-      $offset + $substr_len < $length ? $string[$offset + $substr_len] : ''
+      $offset + $substr_len < $length ? $string[$offset + $substr_len] : '',
     );
     $offset += $substr_len + 1;
   }
@@ -90,7 +88,7 @@ function format_number(
   string $thousands_separator = ',',
 )[]: string {
   return \number_format(
-    (float) $number,
+    (float)$number,
     $decimals,
     $decimal_point,
     $thousands_separator,
@@ -102,9 +100,7 @@ function format_number(
  *
  * @guide /hack/built-in-types/string
  */
-function lowercase(
-  string $string,
-)[]: string {
+function lowercase(string $string)[]: string {
   return _Str\lowercase_l($string);
 }
 
@@ -157,10 +153,7 @@ function pad_right(
  *
  * @guide /hack/built-in-types/string
  */
-function repeat(
-  string $string,
-  int $multiplier,
-)[]: string {
+function repeat(string $string, int $multiplier)[]: string {
   if ($multiplier < 0) {
     throw new \InvalidArgumentException('Expected non-negative multiplier');
   }
@@ -195,12 +188,11 @@ function replace(
  *
  * @guide /hack/built-in-types/string
  */
-// not pure: str_ireplace uses global locale for capitalization
 function replace_ci(
   string $haystack,
   string $needle,
   string $replacement,
-): string {
+)[]: string {
   return _Str\replace_ci_l($haystack, $needle, $replacement);
 }
 
@@ -273,7 +265,7 @@ function replace_every_ci(
 function replace_every_nonrecursive(
   string $haystack,
   KeyedContainer<string, string> $replacements,
-): string {
+)[]: string {
   return _Str\replace_every_nonrecursive_l($haystack, dict($replacements));
 }
 
@@ -352,13 +344,14 @@ function splice(
 }
 
 /**
- * Returns the given string as an integer, or null if the string isn't numeric.
+ * Returns the given string as an integer, or null if the string would not match exactly with the result of casting the integer back to a string.
+ *
+ * Note this means "01" is considered null.
+ * Consider using `Math\from_base('011', 10)` instead or trimming leading 0's.
  *
  * @guide /hack/built-in-types/string
  */
-function to_int(
-  string $string,
-)[]: ?int {
+function to_int(string $string)[]: ?int {
   if ((string)(int)$string === $string) {
     return (int)$string;
   }
@@ -370,8 +363,6 @@ function to_int(
  *
  * @guide /hack/built-in-types/string
  */
-function uppercase(
-  string $string,
-)[]: string {
+function uppercase(string $string)[]: string {
   return _Str\uppercase_l($string);
 }

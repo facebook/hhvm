@@ -1,11 +1,11 @@
 
-Warning: array_column() expects at least 2 parameters, 0 given in %s/wrong_argument_types.php on line 6
+Warning: array_column() expects at least 2 positional parameters, 0 given in %s/wrong_argument_types.php on line 6
 
-Warning: array_column() expects at least 2 parameters, 1 given in %s/wrong_argument_types.php on line 7
+Warning: array_column() expects at least 2 positional parameters, 1 given in %s/wrong_argument_types.php on line 7
 
-Warning: array_column() expects at least 2 parameters, 1 given in %s/wrong_argument_types.php on line 8
+Warning: array_column() expects at least 2 positional parameters, 1 given in %s/wrong_argument_types.php on line 8
 
-Warning: array_column() expects at least 2 parameters, 1 given in %s/wrong_argument_types.php on line 9
+Warning: array_column() expects at least 2 positional parameters, 1 given in %s/wrong_argument_types.php on line 9
 
 Warning: array_column(): The column key should be either a string or an integer in %s/wrong_argument_types.php on line 10
 

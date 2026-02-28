@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1052() {
+function main_1052() :mixed{
 $part = ' 1';
 var_dump(trim($part) !== $part);
 }

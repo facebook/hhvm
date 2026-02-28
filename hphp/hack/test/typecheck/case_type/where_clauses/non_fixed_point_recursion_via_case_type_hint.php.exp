@@ -1,0 +1,4 @@
+ERROR: File "non_fixed_point_recursion_via_case_type_hint.php", line 3, characters 11-23:
+Recursion is not supported via case type where clauses. (Typing[4485])
+  File "non_fixed_point_recursion_via_case_type_hint.php", line 6, characters 37-53:
+  `NonFixedPoint` appears here

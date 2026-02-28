@@ -14,7 +14,6 @@ namespace HPHP {
 struct BaseMap;
 struct BaseSet;
 struct c_Pair;
-struct c_AwaitAllWaitHandle;
 
 namespace collections {
 void append(ObjectData*, TypedValue*);
@@ -26,23 +25,23 @@ struct VectorIterator;
 //// class BaseVector: encapsulates functionality that is common to both
 //// c_Vector and c_ImmVector. It doesn't map to any PHP-land class.
 
-struct BaseVector : ObjectData {
+struct BaseVector : c_Collection {
 protected:
   // Make sure this one is inlined all the way
   explicit BaseVector(Class* cls, HeaderKind kind)
-    : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
+    : c_Collection(cls, kind)
     , m_unusedAndSize(0)
   {
     setArrayData(ArrayData::CreateVec());
   }
   explicit BaseVector(Class* cls, HeaderKind kind, ArrayData* arr)
-    : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
+    : c_Collection(cls, kind)
     , m_unusedAndSize(arr->m_size)
   {
     setArrayData(arr);
   }
   explicit BaseVector(Class* cls, HeaderKind kind, uint32_t cap)
-    : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
+    : c_Collection(cls, kind)
     , m_unusedAndSize(0)
   {
     setArrayData(VanillaVec::MakeReserveVec(cap));
@@ -347,7 +346,6 @@ private:
   friend struct BaseMap;
   friend struct BaseSet;
   friend struct c_Pair;
-  friend struct c_AwaitAllWaitHandle;
 
   friend void collections::deepCopy(tv_lval);
 
@@ -358,8 +356,8 @@ private:
 /////////////////////////////////////////////////////////////////////////////
 // c_Vector
 
-struct c_Vector : BaseVector {
-  DECLARE_COLLECTIONS_CLASS(Vector);
+struct c_Vector : BaseVector, SystemLib::ClassLoader<"HH\\Vector"> {
+  DECLARE_COLLECTIONS_CLASS(Vector)
 
   explicit c_Vector()
     : BaseVector(c_Vector::classof(), HeaderKind::Vector) { }
@@ -429,17 +427,13 @@ struct c_Vector : BaseVector {
     return intSz;
   }
 
-  Object php_clear() {
-    clear();
-    return Object{this};
-  }
-  Object php_removeKey(const Variant& key) {
+  void php_removeKey(const Variant& key) {
     if (UNLIKELY(!key.isInteger())) {
       throwBadKeyType();
     }
     removeKey(key.toInt64());
-    return Object{this};
   }
+
   void php_reserve(const Variant& sz) {
     return reserve(checkRequestedSize(sz));
   }
@@ -462,7 +456,7 @@ private:
 /////////////////////////////////////////////////////////////////////////////
 // c_ImmVector
 
-struct c_ImmVector : BaseVector {
+struct c_ImmVector : BaseVector, SystemLib::ClassLoader<"HH\\ImmVector"> {
   DECLARE_COLLECTIONS_CLASS(ImmVector)
 
   explicit c_ImmVector()
@@ -479,10 +473,7 @@ namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 // VectorIterator
 
-extern const StaticString
-  s_VectorIterator;
-
-struct VectorIterator {
+struct VectorIterator : SystemLib::ClassLoader<"VectorIterator"> {
   VectorIterator() {}
   VectorIterator(const VectorIterator& src) = delete;
   VectorIterator& operator=(const VectorIterator& src) {
@@ -493,9 +484,7 @@ struct VectorIterator {
   ~VectorIterator() {}
 
   static Object newInstance() {
-    static Class* cls = Class::lookup(s_VectorIterator.get());
-    assertx(cls);
-    return Object{cls};
+    return Object{classof()};
   }
 
   void setVector(BaseVector* vec) {

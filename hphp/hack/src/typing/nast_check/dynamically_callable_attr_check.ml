@@ -31,40 +31,51 @@ let handler =
   object
     inherit Nast_visitor.handler_base
 
-    method! at_method_ _ m =
+    method! at_method_ env m =
       let (pos, _) = m.m_name in
       let vis = m.m_visibility in
       let attr = m.m_user_attributes in
-      match
-        Naming_attributes.mem_pos SN.UserAttributes.uaDynamicallyCallable attr
-      with
-      | Some p ->
-        (if not (Aast.equal_visibility vis Public) then
-          let vis =
-            match vis with
-            | Public -> `public
-            | Private -> `private_
-            | Protected -> `protected
-            | Internal -> `internal
-          in
-          Errors.add_naming_error
-          @@ Naming_error.Illegal_use_of_dynamically_callable
-               { attr_pos = p; meth_pos = pos; vis });
+      let check_reified_callable p =
         if has_reified_generics m.m_tparams then
-          Errors.add_nast_check_error
-          @@ Nast_check_error.Dynamically_callable_reified p;
-        ()
+          Diagnostics.add_diagnostic
+            Nast_check_error.(
+              to_user_diagnostic @@ Dynamically_callable_reified p)
+      in
+      match
+        ( Naming_attributes.mem_pos SN.UserAttributes.uaDynamicallyCallable attr,
+          vis )
+      with
+      | (Some p, Public)
+      | (Some p, Internal) ->
+        check_reified_callable p
+      | (Some p, _) ->
+        let vis =
+          match vis with
+          | Public -> Naming_error.Vpublic
+          | Private -> Naming_error.Vprivate
+          | Protected -> Naming_error.Vprotected
+          | Internal -> Naming_error.Vinternal
+          | ProtectedInternal -> Naming_error.Vprotected_internal
+        in
+        let custom_err_config = Nast_check_env.get_custom_error_config env in
+        Diagnostics.add_diagnostic
+          (Naming_error_utils.to_user_diagnostic
+             (Naming_error.Illegal_use_of_dynamically_callable
+                { attr_pos = p; meth_pos = pos; vis })
+             custom_err_config);
+        check_reified_callable p
       | _ -> ()
 
-    method! at_fun_ _ f =
-      let attrs = f.f_user_attributes in
+    method! at_fun_def _ fd =
+      let attrs = fd.fd_fun.f_user_attributes in
       match
         Naming_attributes.mem_pos SN.UserAttributes.uaDynamicallyCallable attrs
       with
       | Some p ->
-        if has_reified_generics f.f_tparams then
-          Errors.add_nast_check_error
-          @@ Nast_check_error.Dynamically_callable_reified p;
+        if has_reified_generics fd.fd_tparams then
+          Diagnostics.add_diagnostic
+            Nast_check_error.(
+              to_user_diagnostic @@ Dynamically_callable_reified p);
         ()
       | _ -> ()
   end

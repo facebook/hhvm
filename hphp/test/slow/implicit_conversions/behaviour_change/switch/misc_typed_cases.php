@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   f(true);
   f(false);
   f(null);
@@ -22,7 +22,7 @@ function main() {
   f(1);
   f(0);
   f("0");
-  f(STDIN);
+  f(HH\stdin());
   f(vec[1]);
   f(vec['1']);
   f(Vector{1});
@@ -35,7 +35,7 @@ class Herp {
   public function __construct(public $x)[] {}
 }
 
-function f($arg) {
+function f($arg) :mixed{
   var_dump($arg);
   print "goes to:\n";
   switch ($arg) {
@@ -63,10 +63,10 @@ function f($arg) {
     case 42.5:
       echo "42.5";
       break;
-    case STDIN:
+    case HH\stdin():
       echo "stdin";
       break;
-    case STDOUT:
+    case HH\stdout():
       echo "stdout";
       break;
     case new Derp():

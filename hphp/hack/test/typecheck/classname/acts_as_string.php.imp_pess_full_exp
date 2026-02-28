@@ -1,0 +1,8 @@
+File "acts_as_string.php", line 11, characters 3-13:
+  classname<exact Tr>
+File "acts_as_string.php", line 30, characters 8-9:
+Invalid `echo`/`print` argument (Typing[4438])
+  File "acts_as_string.php", line 30, characters 3-6:
+  Expected `arraykey`
+  File "acts_as_string.php", line 29, characters 26-34:
+  But got `Stringish`

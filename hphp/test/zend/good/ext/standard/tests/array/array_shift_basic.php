@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_shift() : basic functionality ***\n";
 
-$array = darray[0 => 'zero', 1 => 'one', '3' => 'three', 'four' => 4];
+$array = dict[0 => 'zero', 1 => 'one', '3' => 'three', 'four' => 4];
 echo "\n-- Before shift: --\n";
 var_dump($array);
 

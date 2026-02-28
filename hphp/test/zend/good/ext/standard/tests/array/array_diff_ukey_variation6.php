@@ -5,19 +5,19 @@
  */
 
 function key_compare_func($key1, $key2)
-{
+:mixed{
   return strcasecmp((string)$key1, (string)$key2);
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_ukey() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$input_array = darray[-07 => '-07', 0xA => '0xA'];
+$input_array = dict[-07 => '-07', 0xA => '0xA'];
 
-$input_arrays = darray[
-      'decimal indexed' => darray[10 => '10', '-17' => '-17'],
-      'octal indexed' => darray[-011 => '-011', 012 => '012'],
-      'hexa  indexed' => darray[0x12 => '0x12', -0x7 => '-0x7', ],
+$input_arrays = dict[
+      'decimal indexed' => dict[10 => '10', '-17' => '-17'],
+      'octal indexed' => dict[-011 => '-011', 012 => '012'],
+      'hexa  indexed' => dict[0x12 => '0x12', -0x7 => '-0x7', ],
 ];
 
 foreach($input_arrays as $key =>$value) {

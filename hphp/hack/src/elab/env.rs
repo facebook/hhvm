@@ -1,0 +1,169 @@
+// Copyright (c) Meta Platforms, Inc. and affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
+use std::cell::RefCell;
+
+use bitflags::bitflags;
+use hash::HashSet;
+use oxidized::experimental_features::FeatureName;
+use oxidized::naming_phase_error::NamingPhaseError;
+use oxidized::typechecker_options::TypecheckerOptions;
+
+#[derive(Debug, Clone, Default)]
+pub struct ProgramSpecificOptions {
+    pub is_hhi: bool,
+    pub allow_module_declarations: bool,
+    pub allow_ignore_readonly: bool,
+}
+
+bitflags! {
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
+    struct Flags: u16 {
+        const SOFT_AS_LIKE = 1 << 0;
+        // No longer in use: const HKT_ENABLED = 1 << 1;
+        const IS_HHI = 1 << 2;
+        const IS_SYSTEMLIB = 1 << 3;
+        const CONST_ATTRIBUTE = 1 << 5;
+        const CONST_STATIC_PROPS = 1 << 6;
+        const ALLOW_MODULE_DECLARATIONS = 1 << 7;
+        // No longer in use: const ERROR_PHP_LAMBDAS = 1 << 9;
+        const INFER_FLOWS = 1 << 10;
+        const EVERYTHING_SDT = 1 << 11;
+        const SUPPORTDYNAMIC_TYPE_HINT_ENABLED = 1 << 12;
+        const NO_AUTO_DYNAMIC_ENABLED = 1 << 13;
+        const ALLOW_IGNORE_READONLY = 1 << 14;
+    }
+}
+
+impl Flags {
+    pub fn new(tco: &TypecheckerOptions, pso: &ProgramSpecificOptions) -> Self {
+        let mut flags: Self = Flags::empty();
+
+        flags.set(
+            Self::SOFT_AS_LIKE,
+            tco.po.interpret_soft_types_as_like_types,
+        );
+
+        flags.set(Self::IS_SYSTEMLIB, tco.po.is_systemlib);
+        flags.set(
+            Self::NO_AUTO_DYNAMIC_ENABLED,
+            tco.tco_enable_no_auto_dynamic,
+        );
+        flags.set(
+            Self::SUPPORTDYNAMIC_TYPE_HINT_ENABLED,
+            tco.tco_experimental_features
+                .contains("supportdynamic_type_hint"),
+        );
+        flags.set(Self::EVERYTHING_SDT, tco.po.everything_sdt);
+        flags.set(Self::CONST_ATTRIBUTE, tco.tco_const_attribute);
+        flags.set(Self::CONST_STATIC_PROPS, tco.po.const_static_props);
+
+        flags.set(Self::IS_HHI, pso.is_hhi);
+        flags.set(
+            Self::ALLOW_MODULE_DECLARATIONS,
+            pso.allow_module_declarations,
+        );
+        flags.set(Self::ALLOW_IGNORE_READONLY, pso.allow_ignore_readonly);
+
+        flags.set(
+            Self::INFER_FLOWS,
+            tco.tco_experimental_features
+                .contains(EXPERIMENTAL_INFER_FLOWS),
+        );
+
+        flags
+    }
+}
+
+#[derive(Debug)]
+pub struct Env {
+    flags: Flags,
+    errors: RefCell<Vec<NamingPhaseError>>,
+    pub consistent_ctor_level: isize,
+    pub active_experimental_features: HashSet<FeatureName>,
+}
+
+impl Default for Env {
+    fn default() -> Self {
+        Self::new(
+            &TypecheckerOptions::default(),
+            &ProgramSpecificOptions::default(),
+            HashSet::<FeatureName>::default(),
+        )
+    }
+}
+
+impl Env {
+    pub fn new(
+        tco: &TypecheckerOptions,
+        pso: &ProgramSpecificOptions,
+        active_experimental_features: HashSet<FeatureName>,
+    ) -> Self {
+        Self {
+            flags: Flags::new(tco, pso),
+            errors: RefCell::new(vec![]),
+            consistent_ctor_level: tco.tco_explicit_consistent_constructors,
+            active_experimental_features,
+        }
+    }
+
+    pub fn emit_error(&self, err: impl Into<NamingPhaseError>) {
+        self.errors.borrow_mut().push(err.into())
+    }
+
+    pub fn assert_no_errors(&self) {
+        assert!(self.errors.borrow().is_empty());
+    }
+
+    pub fn into_errors(self) -> Vec<NamingPhaseError> {
+        self.errors.into_inner()
+    }
+
+    pub fn soft_as_like(&self) -> bool {
+        self.flags.contains(Flags::SOFT_AS_LIKE)
+    }
+
+    pub fn allow_module_declarations(&self) -> bool {
+        self.flags.contains(Flags::ALLOW_MODULE_DECLARATIONS)
+    }
+
+    pub fn allow_ignore_readonly(&self) -> bool {
+        self.flags.contains(Flags::ALLOW_IGNORE_READONLY)
+    }
+
+    pub fn is_systemlib(&self) -> bool {
+        self.flags.contains(Flags::IS_SYSTEMLIB)
+    }
+
+    pub fn supportdynamic_type_hint_enabled(&self) -> bool {
+        self.flags.contains(Flags::SUPPORTDYNAMIC_TYPE_HINT_ENABLED)
+    }
+
+    pub fn no_auto_dynamic_enabled(&self) -> bool {
+        self.flags.contains(Flags::NO_AUTO_DYNAMIC_ENABLED)
+    }
+
+    pub fn everything_sdt(&self) -> bool {
+        self.flags.contains(Flags::EVERYTHING_SDT)
+    }
+
+    pub fn is_hhi(&self) -> bool {
+        self.flags.contains(Flags::IS_HHI)
+    }
+
+    pub fn const_attribute(&self) -> bool {
+        self.flags.contains(Flags::CONST_ATTRIBUTE)
+    }
+
+    pub fn const_static_props(&self) -> bool {
+        self.flags.contains(Flags::CONST_STATIC_PROPS)
+    }
+
+    pub fn infer_flows(&self) -> bool {
+        self.flags.contains(Flags::INFER_FLOWS)
+    }
+}
+
+const EXPERIMENTAL_INFER_FLOWS: &str = "ifc_infer_flows";

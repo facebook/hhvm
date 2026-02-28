@@ -12,7 +12,7 @@ function main_entry(): void {
   var_dump($db->exec("INSERT INTO foobar (id, name, city) VALUES (2, 'doe', 'SF')"));
 
 
-  $queryArray = varray[
+  $queryArray = vec[
   	"SELECT * FROM foobar WHERE id = ? ORDER BY id ASC",
   	"SELECT * FROM foobar WHERE id = 2 ORDER BY id ASC",
   	"SELECT * FROM foobar WHERE id = :id AND name = :name ORDER BY id ASC",

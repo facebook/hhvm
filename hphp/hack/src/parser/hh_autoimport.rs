@@ -3,8 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use lazy_static::lazy_static;
 use std::collections::BTreeMap;
+
+use lazy_static::lazy_static;
 
 lazy_static! {
     pub static ref TYPES_MAP: BTreeMap<String, String> = make_map(TYPES);
@@ -23,7 +24,10 @@ pub static TYPES: &[&str] = &[
     "Awaitable",
     "AwaitAllWaitHandle",
     "classname",
+    "class_or_classname",
+    "concrete",
     "Collection",
+    "ConcurrentWaitHandle",
     "ConditionWaitHandle",
     "Container",
     "darray",
@@ -47,14 +51,15 @@ pub static TYPES: &[&str] = &[
     "ObjprofPathsStats",
     "ObjprofStringStats",
     "Pair",
+    "PriorityBridgeWaitHandle",
     "RescheduleWaitHandle",
     "ResumableWaitHandle",
     "Set",
     "Shapes",
     "SleepWaitHandle",
     "StaticWaitHandle",
+    "string",
     "supportdyn",
-    "supportdynamic",
     "Traversable",
     "typename",
     "TypeStructure",
@@ -69,8 +74,7 @@ pub static TYPES: &[&str] = &[
 ];
 
 static FUNCS: &[&str] = &[
-    "asio_get_current_context_idx",
-    "asio_get_running_in_context",
+    "asio_get_current_context_depth",
     "asio_get_running",
     "class_meth",
     "darray",
@@ -101,12 +105,17 @@ static FUNCS: &[&str] = &[
     "keyset",
     "meth_caller",
     "objprof_get_data",
+    "objprof_get_data_with_graph_stats",
     "objprof_get_paths",
-    "objprof_get_strings",
+    "objprof_get_paths_with_graph_stats",
+    "objprof_get_data_extended",
+    "objprof_get_data_extended_with_graph_stats",
+    "package_exists",
     "server_warmup_status",
     "thread_mark_stack",
     "thread_memory_stats",
     "type_structure",
+    "type_structure_for_alias",
     "varray",
     "vec",
     "xenon_get_data",

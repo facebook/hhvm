@@ -44,10 +44,6 @@ size_t smashableJccLen() {
   return ARCH_SWITCH_CALL(smashableJccLen);
 }
 
-size_t smashableAlignTo() {
-  return ARCH_SWITCH_CALL(smashableAlignTo);
-}
-
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d) {
   return ARCH_SWITCH_CALL(emitSmashableMovq, cb, fixups, imm, d);
@@ -89,7 +85,14 @@ void smashJcc(TCA inst, TCA target) {
   always_assert(target);
   return ARCH_SWITCH_CALL(smashJcc, inst, target);
 }
-
+void smashInterceptJcc(TCA inst) {
+  always_assert(inst);
+  return ARCH_SWITCH_CALL(smashInterceptJcc, inst);
+}
+void smashInterceptJmp(TCA inst) {
+  always_assert(inst);
+  return ARCH_SWITCH_CALL(smashInterceptJmp, inst);
+}
 uint64_t smashableMovqImm(TCA inst) {
   always_assert(inst);
   return ARCH_SWITCH_CALL(smashableMovqImm, inst);

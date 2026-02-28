@@ -1,0 +1,2 @@
+ERROR: File "implemented_by_basic.php", line 5, characters 5-19:
+This attribute can only be used in .hhi files (Naming[2131])

@@ -1,16 +1,16 @@
 <?hh
 
 class Foo {
-  public static function ok() {
+  public static function ok() :mixed{
     return static::bar();
   }
 
-  public static function bar() {
+  public static function bar() :mixed{
     return "heh";
   }
 }
 
-function main() {
+function main() :mixed{
   $y = Foo::ok();
   echo $y;
   echo "\n";
@@ -19,6 +19,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_lsb_001() {
+function main_lsb_001() :mixed{
 main();
 }

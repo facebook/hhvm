@@ -8,7 +8,7 @@ trait THello2 {
 class TraitsTest {
   use THello1;
   use THello2;
-  function test() {
+  function test() :mixed{
     echo $this->hello . ' ' . $this->world;
   }
 }

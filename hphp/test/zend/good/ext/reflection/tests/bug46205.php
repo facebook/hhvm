@@ -3,7 +3,7 @@ $x = new ReflectionMethod('ReflectionParameter', 'export');
 $y = function() { };
 
 try {
-    $x->invokeArgs(new ReflectionParameter('trim', 'str'), varray[$y, 1]);
+    $x->invokeArgs(new ReflectionParameter('trim', 'str'), vec[$y, 1]);
 } catch (Exception $e) { }
 echo "ok";
 }

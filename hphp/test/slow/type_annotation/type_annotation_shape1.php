@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class C {
   const type T = ?shape('field1'=>?bool, 'field2'=>int, 'field3'=>arraykey);
@@ -13,7 +13,7 @@ class C {
 
 
 <<__EntryPoint>>
-function main_type_annotation_shape1() {
+function main_type_annotation_shape1() :mixed{
 $x = new ReflectionTypeConstant('C', 'T');
 var_dump($x->getAssignedTypeText());
 var_dump($x->getTypeStructure());

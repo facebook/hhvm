@@ -2,8 +2,8 @@
 
 function good_cases(): vec<Container<mixed>> {
   $init = vec[
-    varray[],
-    darray[],
+    vec[],
+    dict[],
     vec[1, 2, 3],
     dict['foo' =>  null, 'bar' => null],
   ];
@@ -22,7 +22,7 @@ function good_cases(): vec<Container<mixed>> {
 }
 
 function bad_cases(): vec<mixed> {
-  return varray[
+  return vec[
     keyset[],
     42,
     null,

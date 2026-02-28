@@ -1,9 +1,9 @@
 <?hh
 
 class X {
-  function foo($p) { return $p; }
+  function foo($p) :mixed{ return $p; }
 }
-function test($a) {
+function test($a) :mixed{
   $x = new X;
 
   while (true) {
@@ -18,7 +18,7 @@ function test($a) {
 // depending on the exact timing of the timeout.
 
 <<__EntryPoint>>
-function main_timeout_init() {
+function main_timeout_init() :mixed{
 set_time_limit(1);
 ;
 

@@ -1,1 +1,1 @@
---disallow-silence
+--config disallow_silence=true

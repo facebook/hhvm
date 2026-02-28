@@ -10,18 +10,18 @@
  */
 
 interface I {
-    public function pubI();
+    public function pubI():mixed;
 
 }
 
 class C implements I {
-    public function pubI() {}
+    public function pubI() :mixed{}
 
-    private function privC() {}
-    protected function protC() {}
-    public function pubC() {}
+    private function privC() :mixed{}
+    protected function protC() :mixed{}
+    public function pubC() :mixed{}
 
-    public static function testFromC() {
+    public static function testFromC() :mixed{
         echo "Accessing I from C:\n";
         var_dump(get_class_methods("I"));
         echo "Accessing C from C:\n";
@@ -29,7 +29,7 @@ class C implements I {
     }
 }
 
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_class_methods_basic_003(): void {
 echo "Accessing I from global scope:\n";
 var_dump(get_class_methods("I"));
 echo "Accessing C from global scope:\n";

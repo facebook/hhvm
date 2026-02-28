@@ -14,28 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/service-request-handlers.h"
-
 #include "hphp/runtime/vm/jit/tc.h"
-#include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 
-#include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
-#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/unwind-itanium.h"
-
-#include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/treadmill.h"
-
-#include "hphp/util/arch.h"
-#include "hphp/util/ringbuffer.h"
 #include "hphp/util/trace.h"
 
-TRACE_SET_MOD(mcg);
+TRACE_SET_MOD(mcg)
 
 namespace HPHP::jit::tc {
 
@@ -94,7 +81,7 @@ void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs) {
   //
   // Additionally for profiled calls we need to remove them from the main
   // caller map.
-  if (RuntimeOption::EvalEnableReusableTC) {
+  if (Cfg::Eval::EnableReusableTC) {
     if (debug || rec) {
       recordFuncCaller(callee, toSmash, rec);
     }

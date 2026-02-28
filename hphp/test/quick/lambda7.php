@@ -2,36 +2,36 @@
 
 class box {
   public function __construct(private $x) {}
-  public function get() { return $this->x; }
+  public function get() :mixed{ return $this->x; }
 }
 
-function mappers() {
+function mappers() :mixed{
   $dump = ($ar, $fn) ==> {
     var_dump(array_map($fn, $ar));
   };
 
   // Doesn't capture $x; the parameter wins:
-  $x = varray["one", "two", "three"];
+  $x = vec["one", "two", "three"];
   $dump($x, $x ==> "(".$x.")");
 
-  $dump(varray[1,2,3,4], $x ==> $x*$x);
+  $dump(vec[1,2,3,4], $x ==> $x*$x);
   $dump(
-    varray[new box(123), new box(456)],
+    vec[new box(123), new box(456)],
     $x ==> $x->get()
   );
 }
 
-function filters() {
+function filters() :mixed{
   $dump = ($ar,$fn) ==> {
     var_dump(array_filter($ar, $fn));
   };
 
-  $dump(varray[1,2,3,4,5,6],         $x ==> $x % 2 == 0);
-  $dump(varray["a", "b", "ac", "k"], $x ==> $x[0] == "a");
-  $dump(varray["asd", new box(123)], $x ==> is_string($x));
+  $dump(vec[1,2,3,4,5,6],         $x ==> $x % 2 == 0);
+  $dump(vec["a", "b", "ac", "k"], $x ==> $x[0] == "a");
+  $dump(vec["asd", new box(123)], $x ==> is_string($x));
 }
 
-function collection() {
+function collection() :mixed{
   $blah = Vector {
     new box(1),
     new box(2),

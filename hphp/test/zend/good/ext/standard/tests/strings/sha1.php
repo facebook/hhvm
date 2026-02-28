@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$filename = __SystemLib\hphp_test_tmppath('sha1.dat');
-$a = varray[
+$filename = sys_get_temp_dir().'/'.'sha1.dat';
+$a = vec[
 	"abc",
 	"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
 	"a",
@@ -19,7 +19,7 @@ foreach ($a as $str) {
 var_dump(sha1($str, true));
 var_dump(sha1_file($filename, true));
 
-@unlink($filename);
+unlink($filename);
 
 sha1_file($filename);
 

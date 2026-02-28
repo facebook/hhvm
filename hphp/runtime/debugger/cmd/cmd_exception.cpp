@@ -21,7 +21,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 void CmdException::list(DebuggerClient &client) {
   if (client.argCount() == 0) {

@@ -1,4 +1,4 @@
 Foo
-File "abs_class.php", line 15, characters 7-9:
-File "abs_class.php", line 9, characters 7-9:
+File "abs_class.php", line 15, characters 7-9: \Baz
+File "abs_class.php", line 9, characters 7-9: \Bar
 2 total results

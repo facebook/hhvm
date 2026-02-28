@@ -1,0 +1,2 @@
+ERROR: File "memoize_lsb_typesplat.php", line 6, characters 35-39:
+Memoized functions cannot be variadic or use the type-splat operator. (NastCheck[3086])

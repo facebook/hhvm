@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   if (!interface_exists('MyInterface')) {
     include '1218.inc';
     echo 'no';
@@ -11,7 +11,7 @@ function foo() {
 }
 
 <<__EntryPoint>>
-function main_1218() {
+function main_1218() :mixed{
 foo();
 foo();
 }

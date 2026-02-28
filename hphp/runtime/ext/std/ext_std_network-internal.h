@@ -39,15 +39,17 @@
 #define DNS_T_SRV 33
 #define DNS_T_NAPTR 35
 #define DNS_T_A6 38
+#define DNS_T_CAA	257
 #define DNS_T_ANY 255
 
-#define PHP_DNS_NUM_TYPES   12  // Number of DNS Types Supported by PHP
+#define PHP_DNS_NUM_TYPES   13  // Number of DNS Types Supported by PHP
 #define PHP_DNS_A      0x00000001
 #define PHP_DNS_NS     0x00000002
 #define PHP_DNS_CNAME  0x00000010
 #define PHP_DNS_SOA    0x00000020
 #define PHP_DNS_PTR    0x00000800
 #define PHP_DNS_HINFO  0x00001000
+#define PHP_DNS_CAA    0x00002000
 #define PHP_DNS_MX     0x00004000
 #define PHP_DNS_TXT    0x00008000
 #define PHP_DNS_A6     0x01000000
@@ -56,6 +58,7 @@
 #define PHP_DNS_AAAA   0x08000000
 #define PHP_DNS_ANY    0x10000000
 #define PHP_DNS_ALL    (PHP_DNS_A|PHP_DNS_NS|PHP_DNS_CNAME|PHP_DNS_SOA| \
-                        PHP_DNS_PTR|PHP_DNS_HINFO|PHP_DNS_MX|PHP_DNS_TXT| \
-                        PHP_DNS_A6|PHP_DNS_SRV|PHP_DNS_NAPTR|PHP_DNS_AAAA)
+                        PHP_DNS_PTR|PHP_DNS_HINFO|PHP_DNS_CAA|PHP_DNS_MX| \
+                        PHP_DNS_TXT|PHP_DNS_A6|PHP_DNS_SRV|PHP_DNS_NAPTR| \
+                        PHP_DNS_AAAA)
 

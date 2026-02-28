@@ -16,12 +16,8 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
-#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/type-string.h"
-#include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
 
@@ -30,7 +26,6 @@
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
-#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -39,13 +34,14 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/trace.h"
 
 #include <limits>
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToBool
@@ -124,7 +120,7 @@ void cgConvObjToBool(IRLS& env, const IRInstruction* inst) {
 
   unlikelyCond(v, vcold(env), CC_NZ, sf, dst,
     [&] (Vout& v) {
-      if (RuntimeOption::EvalNoticeOnCollectionToBool) {
+      if (Cfg::Eval::NoticeOnCollectionToBool) {
         return callToBoolean(v);
       }
       auto const sf = emitIsCollection(v, src);
@@ -144,7 +140,7 @@ void cgConvObjToBool(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-IMPL_OPCODE_CALL(ConvTVToBool);
+IMPL_OPCODE_CALL(ConvTVToBool)
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToInt
@@ -225,10 +221,10 @@ void cgConvDblToInt(IRLS& env, const IRInstruction* inst) {
     [&](Vout& /*v*/) { return d; });
 }
 
-IMPL_OPCODE_CALL(ConvStrToInt);
-IMPL_OPCODE_CALL(ConvObjToInt);
-IMPL_OPCODE_CALL(ConvResToInt);
-IMPL_OPCODE_CALL(ConvTVToInt);
+IMPL_OPCODE_CALL(ConvStrToInt)
+IMPL_OPCODE_CALL(ConvObjToInt)
+IMPL_OPCODE_CALL(ConvResToInt)
+IMPL_OPCODE_CALL(ConvTVToInt)
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToDbl
@@ -260,34 +256,34 @@ void cgConvIntToDbl(IRLS& env, const IRInstruction* inst) {
   implConvBoolOrIntToDbl(env, inst);
 }
 
-IMPL_OPCODE_CALL(ConvStrToDbl);
-IMPL_OPCODE_CALL(ConvObjToDbl);
-IMPL_OPCODE_CALL(ConvResToDbl);
-IMPL_OPCODE_CALL(ConvTVToDbl);
+IMPL_OPCODE_CALL(ConvStrToDbl)
+IMPL_OPCODE_CALL(ConvObjToDbl)
+IMPL_OPCODE_CALL(ConvResToDbl)
+IMPL_OPCODE_CALL(ConvTVToDbl)
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToStr
 
-IMPL_OPCODE_CALL(ConvIntToStr);
-IMPL_OPCODE_CALL(ConvDblToStr);
-IMPL_OPCODE_CALL(ConvObjToStr);
-IMPL_OPCODE_CALL(ConvTVToStr);
+IMPL_OPCODE_CALL(ConvIntToStr)
+IMPL_OPCODE_CALL(ConvDblToStr)
+IMPL_OPCODE_CALL(ConvObjToStr)
+IMPL_OPCODE_CALL(ConvTVToStr)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPL_OPCODE_CALL(ConvArrLikeToVArr);
-IMPL_OPCODE_CALL(ConvArrLikeToDArr);
-IMPL_OPCODE_CALL(ConvClsMethToVArr);
-IMPL_OPCODE_CALL(ConvClsMethToDArr);
+IMPL_OPCODE_CALL(ConvArrLikeToVArr)
+IMPL_OPCODE_CALL(ConvArrLikeToDArr)
+IMPL_OPCODE_CALL(ConvClsMethToVArr)
+IMPL_OPCODE_CALL(ConvClsMethToDArr)
 
-IMPL_OPCODE_CALL(ConvArrLikeToVec);
-IMPL_OPCODE_CALL(ConvObjToVec);
+IMPL_OPCODE_CALL(ConvArrLikeToVec)
+IMPL_OPCODE_CALL(ConvObjToVec)
 
-IMPL_OPCODE_CALL(ConvArrLikeToDict);
-IMPL_OPCODE_CALL(ConvObjToDict);
+IMPL_OPCODE_CALL(ConvArrLikeToDict)
+IMPL_OPCODE_CALL(ConvObjToDict)
 
-IMPL_OPCODE_CALL(ConvArrLikeToKeyset);
-IMPL_OPCODE_CALL(ConvObjToKeyset);
+IMPL_OPCODE_CALL(ConvArrLikeToKeyset)
+IMPL_OPCODE_CALL(ConvObjToKeyset)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -325,6 +321,20 @@ void cgConvPtrToLval(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgDblAsBits(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << copy{src, dst};
+}
+
+void cgIntAsPtrToElem(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << copy{src, dst};
+}
+
+void cgPtrToElemAsInt(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const src = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);

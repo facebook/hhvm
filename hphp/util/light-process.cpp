@@ -41,6 +41,7 @@
 
 #include "hphp/util/afdt-util.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/hugetlb.h"
@@ -54,8 +55,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 // helper functions
-
-bool LightProcess::g_strictUser = false;
 
 namespace {
 
@@ -144,7 +143,7 @@ int popen_impl(const char* cmd, const char* mode, pid_t* out_pid) {
     sigprocmask(SIG_SETMASK, &eset, nullptr);
     execl("/bin/sh", "sh", "-c", cmd, nullptr);
     Logger::Warning("Failed to exec: `%s'", cmd);
-    _Exit(1);
+    _Exit(HPHP_EXIT_FAILURE);
   }
   // parent
 
@@ -457,7 +456,7 @@ void do_change_user(int afdt_fd) {
     err = errno;
     log = new StructuredLogEntry();
     log->setStr("function", "getpwnam_r");
-    if (LightProcess::g_strictUser) {
+    if (Cfg::Server::LightProcessStrictUser) {
       throw std::runtime_error{"getpwnam_r(): " + folly::errnoStr(err)};
     }
     return;
@@ -465,7 +464,7 @@ void do_change_user(int afdt_fd) {
   if (!pw) {
     log = new StructuredLogEntry();
     log->setStr("function", "getpwnam_r");
-    if (LightProcess::g_strictUser) {
+    if (Cfg::Server::LightProcessStrictUser) {
       throw std::runtime_error{"getpwnam_r(): not found"};
     }
     return;
@@ -481,7 +480,7 @@ void do_change_user(int afdt_fd) {
         err = errno;
         log = new StructuredLogEntry();
         log->setStr("function", "setgid");
-        if (LightProcess::g_strictUser) {
+        if (Cfg::Server::LightProcessStrictUser) {
           throw std::runtime_error{"setgid():" + folly::errnoStr(err)};
         }
       }
@@ -493,12 +492,24 @@ void do_change_user(int afdt_fd) {
         err = errno;
         log = new StructuredLogEntry();
         log->setStr("function", "setuid");
-        if (LightProcess::g_strictUser) {
+        if (Cfg::Server::LightProcessStrictUser) {
           throw std::runtime_error{"setuid():" + folly::errnoStr(err)};
         }
       }
     }
   }
+}
+
+
+void do_clone_delegate(int afdt_fd) {
+  auto const d = LightProcess::createDelegate();
+  if (d < 0) {
+    lwp_write(afdt_fd, "error");
+    return;
+  }
+  lwp_write(afdt_fd, "success");
+  send_fd(afdt_fd, d);
+  close(d);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -658,6 +669,8 @@ bool LightProcess::initShadow(int afdt_lid,
 void LightProcess::runShadow(int afdt_fd) {
   std::string buf;
 
+  auto error = false;
+
   pollfd pfd[1];
   pfd[0].fd = afdt_fd;
   pfd[0].events = POLLIN;
@@ -687,19 +700,23 @@ void LightProcess::runShadow(int afdt_fd) {
           do_waitpid(afdt_fd);
         } else if (buf == "change_user") {
           do_change_user(afdt_fd);
+        } else if (buf == "clone_delegate") {
+          do_clone_delegate(afdt_fd);
         } else if (buf[0]) {
           Logger::Info("LightProcess got invalid command: %.20s", buf.c_str());
         }
       }
     }
   } catch (const std::exception& e) {
+    error = true;
     Logger::Error("LightProcess exiting due to exception: %s", e.what());
   } catch (...) {
+    error = true;
     Logger::Error("LightProcess exiting due to unknown exception");
   }
 
   ::close(afdt_fd);
-  _Exit(0);
+  _Exit(error ? HPHP_EXIT_FAILURE : 0);
 }
 
 namespace {
@@ -1030,6 +1047,28 @@ std::unique_ptr<LightProcess> LightProcess::setThreadLocalAfdtOverride(int fd) {
   return ret;
 }
 
+int LightProcess::cloneDelegate() {
+  always_assert(tl_proc != nullptr);
+  return runLight("clone_delegate", [&] (LightProcess* proc) {
+    auto const afdt_fd = proc->m_afdt_fd;
+    lwp_write(afdt_fd, "clone_delegate");
+
+    std::string buf;
+    lwp_read(afdt_fd, buf);
+    if (buf == "error") return -1;
+    return recv_fd(afdt_fd);
+  }, -1);
+}
+
+void LightProcess::shutdownDelegate() {
+  always_assert(tl_proc != nullptr);
+  runLight("shutdown_delegate", [&] (LightProcess* proc) {
+    auto const afdt_fd = proc->m_afdt_fd;
+    lwp_write(afdt_fd, "exit");
+    return 0;
+  }, 0);
+}
+
 int LightProcess::createDelegate() {
   int pair[2];
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, pair)) {
@@ -1066,14 +1105,6 @@ int LightProcess::createDelegate() {
     }
 
     close(pair[0]);
-#ifdef __APPLE__
-    {
-      int newfd = dup2(pair[1], 0);
-      always_assert(newfd == 0);
-    }
-    close(pair[1]);
-    pair[1] = 0;
-#endif
     runShadow(pair[1]);
   }
 

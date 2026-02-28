@@ -1,7 +1,7 @@
 <?hh
 
 trait T {
-  static function f() {
+  static function f() :mixed{
     dict[ static::class => static::class ];
     echo "Ok\n";
   }

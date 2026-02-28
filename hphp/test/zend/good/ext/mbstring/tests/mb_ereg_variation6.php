@@ -4,7 +4,7 @@
  *
  * @param array $regs
  */
-function base64_encode_var_dump($regs) {
+function base64_encode_var_dump($regs) :mixed{
 	if ($regs) {
 		echo "array(" . count($regs) . ") {\n";
 		foreach ($regs as $key => $value) {
@@ -40,7 +40,7 @@ function main_entry(): void {
   	echo "Could not set regex encoding to utf-8\n";
   }
 
-  $regex_char = darray ['\w+' => b'\w+',
+  $regex_char = dict['\w+' => b'\w+',
                        '\W+' => b'\W+',
                        '\s+' => b'\s+',
                        '\S+' => b'\S+',
@@ -56,7 +56,7 @@ function main_entry(): void {
   $regs_mb = null;
   foreach ($regex_char as $displayChar => $char) {
   	echo "\n--** Pattern is: $displayChar **--\n";
-  	if (@$regs_ascii || @$regs_mb) {
+  	if ($regs_ascii || $regs_mb) {
   		$regs_ascii = null;
   		$regs_mb = null;
   	}

@@ -26,12 +26,12 @@
 #include <folly/Hash.h>
 #include <folly/Memory.h>
 #include <folly/Singleton.h>
-#include <folly/String.h>
 #include <folly/container/F14Map.h>
 #include <folly/container/F14Set.h>
 
 #include <boost/program_options.hpp>
-#include <boost/variant.hpp>
+#include <utility>
+#include <variant>
 
 #include <tbb/concurrent_unordered_map.h>
 #include <tbb/concurrent_vector.h>
@@ -237,7 +237,7 @@ struct Generator {
   // Indexer<> instantiation (preferred), or its raw memory address. We have to
   // use the raw memory address for Indexer<> instantiations which do not have
   // external linkage.
-  using Address = boost::variant<std::string, uintptr_t>;
+  using Address = std::variant<std::string, uintptr_t>;
 
  public:
   // Parse out all the debug information out of the specified file and do the
@@ -245,7 +245,7 @@ struct Generator {
   explicit Generator(const std::string&, bool skip);
 
   // Turn the layouts into C++ code, writing to the specified ostream.
-  void operator()(std::ostream&) const;
+  void operator()(std::ostream&, bool skip) const;
  private:
   static bool isTemplateName(const std::string& candidate,
                              const std::string& name);
@@ -374,7 +374,7 @@ struct Generator {
   > m_unique_objects;
 
   // Mapping of object types to their computed actions. We could compute the
-  // action everytime we needed it, but they're stored in this table for
+  // action every time we needed it, but they're stored in this table for
   // memoization. This table is mutable as well since its a cache.
   mutable node_map<const Object*, Action> m_actions; // XXX must be node
 
@@ -687,9 +687,8 @@ Generator::Generator(const std::string& filename, bool skip) {
   // Complain if it looks like we don't have any debug info enabled.
   // (falls back to conservative scanning for everything)
   if (collectable_markers.empty() && indexer_types.empty()) {
-    std::cerr << "gen-type-scanners: warning: "
-                 "No collectable or indexed types found. "
-                 "Is debug-info enabled?" << std::endl;
+    throw Exception("No collectable or indexed types found. "
+                    "Is debug-info enabled?");
   }
 
   // Extract all the types that Mark[Scannable]Collectable<> was instantiated on
@@ -1113,7 +1112,7 @@ void Generator::sanityCheckTemplateParams(const Object& object) {
   }
 }
 
-// Given a Mark[Scannable]CollectiblCollectable<> marker instantiation, extract
+// Given a Mark[Scannable]Collectable<> marker instantiation, extract
 // the object-type its marking. Actually very simple, but do a lot of sanity
 // checking on the result.
 const Object& Generator::getMarkedCollectable(const Object& mark) const {
@@ -2198,13 +2197,38 @@ const Object& Generator::getObject(const ObjectType& type) const {
     not_reached();
   };
 
+  // Check if the object is a valid indexer. LLVM for clang 15/16 will sometimes
+  // produce a DW_TAG_structure_type for the same Indexer<...> type in a
+  // compile_unit without a corresponding DW_TAG_variable. This check will skip
+  // such cases and end up pick a different type.
+  const auto isValid = [&](const Object& obj) -> bool {
+    if (isIndexerName(type.name.name)) {
+      const auto index_iter = std::find_if(
+        obj.members.begin(),
+        obj.members.end(),
+        [](const Object::Member& m) { return m.name == "s_index"; }
+      );
+
+      if (index_iter == obj.members.end()) {
+        return false;
+      }
+
+      const auto& index_member = *index_iter;
+      if (!index_member.address && index_member.linkage_name.empty()) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   // No direct matches in our internal maps, so we need to retrieve it from the
   // type parser. If the type is complete we can just retrieve it and use it
   // directly. If this type has no linkage or pseudo-linkage, it matches nothing
   // else, so just retrieve it. Store it in our maps for later lookup.
-  if (!type.incomplete ||
+  if (isValid(m_parser->getObject(type.key)) && (!type.incomplete ||
       type.name.linkage == ObjectTypeName::Linkage::none ||
-      type.name.linkage == ObjectTypeName::Linkage::pseudo) {
+      type.name.linkage == ObjectTypeName::Linkage::pseudo)) {
     return insert(m_parser->getObject(type.key));
   }
 
@@ -2221,6 +2245,7 @@ const Object& Generator::getObject(const ObjectType& type) const {
       if (key.object_id == type.key.object_id) continue;
       if (key.compile_unit_id != type.key.compile_unit_id) continue;
       auto other = m_parser->getObject(key);
+      if (!isValid(other)) continue;
       if (other.incomplete) continue;
       return insert(std::move(other));
     }
@@ -2238,6 +2263,7 @@ const Object& Generator::getObject(const ObjectType& type) const {
     for (auto const& key : keys) {
       if (key.object_id == type.key.object_id) continue;
       auto other = m_parser->getObject(key);
+      if (!isValid(other)) continue;
       if (other.incomplete) continue;
       return insert(std::move(other));
     }
@@ -2354,9 +2380,9 @@ bool Generator::checkMemberSpecialAction(const Object& base_object,
     return true;
   }
 
-  if (action.ignore_fields.count(member.name) > 0) return true;
+  if (action.ignore_fields.contains(member.name)) return true;
 
-  if (action.conservative_fields.count(member.name) > 0) {
+  if (action.conservative_fields.contains(member.name)) {
     layout.addConservative(offset, determineSize(member.type));
     return true;
   }
@@ -2390,7 +2416,7 @@ void Generator::genLayout(const Object& object,
                           bool conservative_everything) const {
   // Never generate layout for collectable types, unless it was marked as
   // scannable.
-  if (m_collectable.count(&object) > 0 &&
+  if (m_collectable.contains(&object) &&
       !m_scannable_collectable.count(&object)) {
     return;
   }
@@ -2433,7 +2459,7 @@ void Generator::genLayout(const Object& object,
   for (const auto& base : object.bases) {
     try {
       const auto& obj = getObject(base.type);
-      if (action.ignored_bases.count(&obj)) continue;
+      if (action.ignored_bases.contains(&obj)) continue;
 
       // Any base which has been included with the custom base scanner should be
       // ignored here, as we'll do one call to the custom scanner.
@@ -2457,7 +2483,7 @@ void Generator::genLayout(const Object& object,
         obj,
         layout,
         offset + *base.offset,
-        !action.silenced_bases.count(&obj),
+        !action.silenced_bases.contains(&obj),
         action.conservative_all_bases
       );
     } catch (LayoutError& exn) {
@@ -2661,7 +2687,7 @@ void Generator::makePtrFollowable(const Object& obj) {
 // Recursive function to check if a given object has a collectable base
 // somewhere in its type hierarchy.
 bool Generator::hasCollectableBase(const Object& object) const {
-  if (m_collectable.count(&object)) return true;
+  if (m_collectable.contains(&object)) return true;
   return std::any_of(
     object.bases.begin(),
     object.bases.end(),
@@ -2775,7 +2801,7 @@ void Generator::genAllLayouts() {
         if (indexed.errors) continue;
 
         // If this indexed type's action is conservative, examine guards (if
-        // any) to see if we want to ignore or conserative scan it.
+        // any) to see if we want to ignore or conservative scan it.
         if (indexed.conservative) {
           // If ignore isn't set, the issue has already been decided
           // (conservative scan).
@@ -2970,7 +2996,7 @@ void Generator::genForwardDecls(std::ostream& os) const {
   decls.clear();
   for (const auto& indexed : m_indexed_types) {
     for (const auto& addr : indexed.addresses) {
-      if (auto* decl = boost::get<std::string>(&addr)) {
+      if (auto* decl = std::get_if<std::string>(&addr)) {
         decls.emplace(*decl);
       }
     }
@@ -3013,9 +3039,9 @@ void Generator::genIndexInit(std::ostream& os) const {
                         [&](const std::string& s) {
                           os << "  " << s << " = " << index << ";\n";
                         },
-                        [&](uintptr_t /*p*/) {
+                        [&](uintptr_t p) {
                           os << "  *reinterpret_cast<Index*>(0x" << std::hex
-                             << address << std::dec << ") = " << index << ";\n";
+                             << p << std::dec << ") = " << index << ";\n";
                         });
     }
     ++index;
@@ -3093,7 +3119,7 @@ void Generator::genScannerFunc(std::ostream& os,
   const auto* offset_str = layout.suffix ? "" : "+offset";
 
   // First generate calls to the scanner to record all the pointers. We use the
-  // version of insert() which takes an initializator list because it is more
+  // version of insert() which takes an initializer list because it is more
   // efficient.
   if (layout.ptrs.size() == 1) {
     indent(2) << "scanner.m_addrs.emplace_back(\n";
@@ -3197,7 +3223,11 @@ void Generator::genMetrics(std::ostream& os) const {
 }
 
 // Generate the entire C++ file.
-void Generator::operator()(std::ostream& os) const {
+void Generator::operator()(std::ostream& os, bool skip) const {
+  if (!skip && m_layouts.empty()) {
+    throw Exception{"No layouts generated"};
+  }
+
   os << "#include <limits>\n\n";
 
   os << "#include \"hphp/util/assertions.h\"\n";
@@ -3363,6 +3393,9 @@ int main(int argc, char** argv) {
     ("source_file",
      po::value<std::string>()->required(),
      "filename to read debug-info from")
+    ("dep",
+      po::value<std::vector<std::string>>(),
+      "just here so we can add dependencies")
     ("output_file",
      po::value<std::string>()->required(),
      "filename of generated scanners")
@@ -3375,7 +3408,7 @@ int main(int argc, char** argv) {
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
 
-    if (vm.count("help")) {
+    if (vm.contains("help")) {
       std::cout << kProgramDescription << "\n\n"
                 << desc << std::endl;
       return 1;
@@ -3392,10 +3425,10 @@ int main(int argc, char** argv) {
 #endif
 
     po::notify(vm);
-    auto const print = vm.count("print") != 0;
+    auto const print = vm.contains("print");
 
     const auto output_filename =
-      vm.count("install_dir") ?
+      vm.contains("install_dir") ?
       folly::sformat(
         "{}{}{}",
         vm["install_dir"].as<std::string>(),
@@ -3404,7 +3437,7 @@ int main(int argc, char** argv) {
       ) :
       vm["output_file"].as<std::string>();
 
-    if (vm.count("num_threads")) {
+    if (vm.contains("num_threads")) {
       auto n = vm["num_threads"].as<int>();
       if (n > 0) {
         NumThreads = n;
@@ -3422,7 +3455,7 @@ int main(int argc, char** argv) {
       }
       Generator generator{source_executable, skip};
       std::ofstream output_file{output_filename};
-      generator(output_file);
+      generator(output_file, skip);
     } catch (const debug_parser::Exception& exn) {
       std::cerr << "\nError generating type scanners:\n"
                 << exn.what() << std::endl << std::endl;

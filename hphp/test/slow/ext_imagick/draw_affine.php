@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_draw_affine() {
-$affine_matrix = darray[
+function main_draw_affine() :mixed{
+$affine_matrix = dict[
   'sx' => 1,
   'rx' => 0,
   'ry' => 0,
@@ -25,7 +25,7 @@ try {
 }
 
 try {
-  $draw->affine(darray[]);
+  $draw->affine(dict[]);
 } catch (Exception $ex) {
   echo "PASS\n";
 }

@@ -1,5 +1,0 @@
-<?hh
-<<__EntryPoint>> function main(): void {
-if (!extension_loaded("readline")) die("skip");
-if (READLINE_LIB != "libedit") die("skip libedit only");
-}

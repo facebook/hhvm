@@ -11,10 +11,10 @@ echo "*** Testing array_udiff_assoc() : variation - testing with multiple array 
 $key_compare_function = compare_function<>;
 
 // Initialise all required variables
-$arr1 = darray["one" => "one", "02" => "two", '3' => "three", 0 => "four", "0.5" => 5, 6 => 6, "seven" => "0x7"];
-$arr2 = darray["one" => "one", "02" => "two", '3' => "three"];
-$arr3 = darray[0 => "four", "0.5" => "five", 6 => 6, "seven" => 7];
-$arr4 = darray[0 => "four", "0.5" => "five", 6 => 6, "seven" => 7];
+$arr1 = dict["one" => "one", "02" => "two", '3' => "three", 0 => "four", "0.5" => 5, 6 => 6, "seven" => "0x7"];
+$arr2 = dict["one" => "one", "02" => "two", '3' => "three"];
+$arr3 = dict[0 => "four", "0.5" => "five", 6 => 6, "seven" => 7];
+$arr4 = dict[0 => "four", "0.5" => "five", 6 => 6, "seven" => 7];
 
 
 var_dump( array_udiff_assoc($arr1, $arr2, $arr3, $arr4, $key_compare_function) );

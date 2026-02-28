@@ -1,4 +1,6 @@
-<?hh // partial
+<?hh
+
+namespace {
 
 /**
  * Check DNS records corresponding to a given Internet host name or IP address
@@ -13,7 +15,7 @@
  */
 <<__Native>>
 function checkdnsrr(string $host,
-                    string $type = "MX"): bool;
+                    string $type = "MX")[defaults]: bool;
 
 /**
  * Close connection to system logger
@@ -56,14 +58,14 @@ function define_syslog_variables(): void {
 /**
  * Alias of checkdnsrr()
  */
-function dns_check_record(mixed $host, mixed $type = 'MX'): bool {
+function dns_check_record(string $host, string $type = 'MX')[defaults]: bool {
   return checkdnsrr($host, $type);
 }
 
 /**
  * Alias of getmxrr
  */
-function dns_get_mx(mixed $host, inout mixed $mxhosts, inout mixed $weight) {
+function dns_get_mx(string $host, inout mixed $mxhosts, inout mixed $weight)[defaults]: bool {
   $ret = getmxrr($host, inout $mxhosts, inout $weight);
   return $ret;
 }
@@ -81,7 +83,7 @@ function dns_get_mx(mixed $host, inout mixed $mxhosts, inout mixed $weight) {
  * @param int $type - By default, dns_get_record() will search for any
  *   resource records associated with hostname. To limit the query, specify
  *   the optional type parameter. May be any one of the following: DNS_A,
- *   DNS_CNAME, DNS_HINFO, DNS_MX, DNS_NS, DNS_PTR, DNS_SOA, DNS_TXT,
+ *   DNS_CNAME, DNS_HINFO, DNS_CAA, DNS_MX, DNS_NS, DNS_PTR, DNS_SOA, DNS_TXT,
  *   DNS_AAAA, DNS_SRV, DNS_NAPTR, DNS_A6, DNS_ALL or DNS_ANY.    Because
  *   of eccentricities in the performance of libresolv between platforms,
  *   DNS_ANY will not always return every record, the slower DNS_ALL will
@@ -143,7 +145,7 @@ function dns_get_record(string $hostname,
                         <<__OutOnly>>
                         inout mixed $authns,
                         <<__OutOnly>>
-                        inout mixed $addtl): mixed;
+                        inout mixed $addtl)[defaults]: mixed;
 
 /**
  * Open Internet or Unix domain socket connection
@@ -184,7 +186,7 @@ function fsockopen(string $hostname,
  * @return int - Returns the size of the http request.
  */
 <<__Native>>
-function get_http_request_size(): int;
+function get_http_request_size()[read_globals]: int;
 
 /**
  * Get the Internet host name corresponding to a given IP address
@@ -249,7 +251,7 @@ function getmxrr(string $hostname,
                  <<__OutOnly>>
                  inout mixed $mxhosts,
                  <<__OutOnly>>
-                 inout mixed $weight): bool;
+                 inout mixed $weight)[defaults]: bool;
 
 /**
  * Get protocol number associated with protocol name
@@ -305,8 +307,8 @@ function getservbyport(int $port,
  *
  * @return bool -
  */
-<<__Native>>
-function header_register_callback(mixed $callback): mixed;
+<<__Native("NoRecording")>>
+function header_register_callback(mixed $callback)[globals]: mixed;
 
 /**
  * Remove previously set headers
@@ -317,7 +319,7 @@ function header_register_callback(mixed $callback): mixed;
  * @return void -
  */
 <<__Native>>
-function header_remove(?string $name = null): void;
+function header_remove(?string $name = null)[globals]: void;
 
 /**
  * Send a raw HTTP header
@@ -346,7 +348,7 @@ function header_remove(?string $name = null): void;
 <<__Native>>
 function header(string $string,
                 bool $replace = true,
-                int $http_response_code = 0): void;
+                int $http_response_code = 0)[globals]: void;
 
 /**
  * Returns a list of response headers sent (or ready to send)
@@ -368,14 +370,14 @@ function headers_list()[read_globals]: varray<string>;
  *   have already been sent or TRUE otherwise.
  */
 <<__Native>>
-function headers_sent(): bool;
+function headers_sent()[read_globals]: bool;
 
 <<__Native>>
 function headers_sent_with_file_line(
   <<__OutOnly>>
   inout mixed $file,
   <<__OutOnly>>
-  inout mixed $line): bool;
+  inout mixed $line)[read_globals]: bool;
 
 /**
  * Get or Set the HTTP response code
@@ -387,7 +389,7 @@ function headers_sent_with_file_line(
  *   is int(200).
  */
 <<__Native>>
-function http_response_code(int $response_code = 0): mixed;
+function http_response_code(int $response_code = 0)[globals]: mixed;
 
 /**
  * Converts a packed internet address to a human readable representation
@@ -557,15 +559,15 @@ function setrawcookie(string $name,
                       bool $secure = false,
                       bool $httponly = false): bool;
 
-function socket_get_status(mixed $stream): mixed {
+function socket_get_status(resource $stream): mixed {
   return stream_get_meta_data($stream);
 }
 
-function socket_set_blocking(mixed $stream, mixed $mode): bool {
+function socket_set_blocking(resource $stream, bool $mode): bool {
   return stream_set_blocking($stream, $mode);
 }
 
-function socket_set_timeout(mixed $stream, mixed $secs, mixed $msecs = 0): bool {
+function socket_set_timeout(resource $stream, int $secs, int $msecs = 0): bool {
   return stream_set_timeout($stream, $secs, $msecs);
 }
 
@@ -588,3 +590,22 @@ function socket_set_timeout(mixed $stream, mixed $secs, mixed $msecs = 0): bool 
 <<__Native>>
 function syslog(int $priority,
                 string $message): bool;
+
+}
+
+namespace HH {
+
+/**
+ * Given a cookie header value, parse it in the same style that the $_COOKIE
+ * global uses.
+ *
+ * @param string $header_value - Cookie header value.
+ *
+ * @return dict<arraykey, mixed> - dict of cookie names and values. Similarly to
+ *   $_COOKIE, cookie names like 'foo[0]=bar; foo[1]=baz' are returned as
+ *   `dict['foo' => vec['bar', 'baz']]`.
+ */
+<<__Native>>
+function parse_cookies(string $header_value)[]: dict<arraykey, mixed>;
+
+}

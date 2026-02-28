@@ -13,7 +13,7 @@
 class Test {
   public function bloo(): void {
     $b = 5;
-    $map = darray[];
+    $map = dict[];
     {
       // UNSAFE
       $map['a'] = $b;

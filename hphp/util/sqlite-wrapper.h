@@ -66,8 +66,11 @@ struct SQLite {
 
   enum class OpenMode {
     ReadOnly = 1,
-    ReadWrite = 2
+    ReadWrite = 2,
+    ReadWriteCreate = 3,
   };
+
+  static std::string_view openModeName(SQLite::OpenMode mode) noexcept;
 
   /**
    * Return a new SQLite connection, creating the DB file if necessary.
@@ -76,8 +79,9 @@ struct SQLite {
    * if you want to store data in memory instead.
    */
   static SQLite connect(const std::string& path,
-                        OpenMode mode = OpenMode::ReadWrite);
-  static SQLite connect(const char* path, OpenMode mode = OpenMode::ReadWrite);
+                        OpenMode mode = OpenMode::ReadWriteCreate);
+  static SQLite connect(const char* path,
+                        OpenMode mode = OpenMode::ReadWriteCreate);
 
   /**
    * Compile the given SQL query into a statement object which can run and rerun
@@ -187,6 +191,11 @@ struct SQLite {
    * Return the most recent error message from SQLite.
    */
   std::string errMsg() const noexcept;
+
+  /**
+   * Does a table with this name exist in the db.
+   */
+  bool hasTable(const char* tableName) const;
 
  private:
   friend struct SQLiteStmt;

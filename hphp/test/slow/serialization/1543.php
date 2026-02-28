@@ -9,7 +9,7 @@ class b2 extends b {
 }
 
 <<__EntryPoint>>
-function main_1543() {
+function main_1543() :mixed{
 $x = new b2;
 $x->foo = 100;
 var_dump(serialize($x));

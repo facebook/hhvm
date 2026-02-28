@@ -1,0 +1,124 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "partials" as m_partials}}
+
+{{! Render a function's return type, and possible sink/stream types }}
+{{#let partial return_type |function| captures |m_partials|}}
+  {{#if (not function.sink_or_stream?)}}
+{{#partial m_partials.type t=function.return_type}}{{!
+}}{{#else if function.sink?}}{
+    {{#let sink = function.sink}}
+  "type" : "sink",
+  "inner_type" : {{#partial m_partials.type t=sink.elem_type}},
+    {{#if function.sink_has_first_response?}}
+  "first_response_type" : {{#partial m_partials.type t=function.return_type}},
+    {{/if function.sink_has_first_response?}}
+  "final_response_type" : {{#partial m_partials.type t=sink.final_response_type}}
+}{{!
+}}{{#else if function.stream?}}{
+    {{#let stream = function.stream}}
+  "type" : "streamresponse",
+  "inner_type" : {{#partial m_partials.type t=stream.elem_type}}{{!
+  }}{{#if function.stream_has_first_response?}},
+  "first_response_type" : {{#partial m_partials.type t=function.return_type}}
+    {{/if function.stream_has_first_response?}}
+}{{/if (not function.sink_or_stream?)}}{{!
+}}{{/let partial}}
+
+{{#let export partial render_service |service trailing_comma?| captures |m_partials return_type|}}
+{{#let parent = service.extends}}
+  "{{service.name}}" : { {{#if (object.notnull? parent)}}
+    "extends" : {
+      "name" : "{{parent.name}}",
+      "path" : "{{parent.path}}"
+    },{{/if (object.notnull? parent)}}
+    "name" : "{{service.name}}",
+    "lineno" : {{service.lineno}},
+    {{#if service.docs?}}
+    "docstring" : {{service.docstring}},
+    {{/if service.docs?}}
+    "functions" : {
+      {{#each (array.enumerate service.functions with_last=true) as |i function last_fn?|}}
+      "{{function.name}}" : {
+        "name" : "{{function.name}}",
+        {{#if function.docs?}}
+        "docstring" : {{function.docstring}},
+        {{/if function.docs?}}
+        {{#if function.params.fields?}}
+        "args" : {
+          {{#each (array.enumerate function.params.fields with_last=true) as |i arg last_arg?| }}
+          "{{arg.name}}": {
+            "name" : "{{arg.name}}",
+            "type" : {{#partial m_partials.type t=arg.type}},
+            {{#if (object.notnull? arg.default_value)}}
+            "default_value" : {{#partial m_partials.const_value value=arg.default_value}},
+            {{/if (object.notnull? arg.default_value)}}
+            {{#if arg.docs?}}
+            "docstring" : {{arg.docstring}},
+            {{/if arg.docs?}}
+            "key" : {{arg.id}},
+            "lineno" : {{arg.lineno}},
+            {{#if arg.required?}}
+            "required" : "required",
+            {{/if arg.required?}}
+            {{#if arg.optional?}}
+            "required" : "optional",
+            {{/if arg.optional?}}
+            {{#if arg.unqualified?}}
+            "required" : "opt-in-req-out"
+            {{/if arg.unqualified?}}
+            {{#if (not (array.empty? arg.structured_annotations))}},
+            "structured_annotations": {
+              {{#partial m_partials.structured_annotations annotations=arg.structured_annotations}}
+            }
+            {{/if (not (array.empty? arg.structured_annotations))}}
+          }{{#if (not last_arg?)}},{{/if}}
+          {{/each}}
+        },
+        {{/if function.params.fields?}}
+        {{#if function.exceptions?}}
+        "exceptions" : {
+          {{#each (array.enumerate function.exceptions with_last=true) as |i except last_exc?| }}
+          "{{except.name}}" : {
+            "name": "{{except.name}}",
+            "type" : {{#partial m_partials.type t=except.type}},
+            "id" : {{except.id}}{{!
+            }}{{#if (not (array.empty? except.structured_annotations))}},
+            "structured_annotations": {
+              {{#partial m_partials.structured_annotations annotations=except.structured_annotations}}
+            }{{/if (not (array.empty? except.structured_annotations))}}
+          }{{#if (not last_exc?)}},{{/if}}
+          {{/each}}
+        },
+        {{/if function.exceptions?}}
+        "returnType" : {{#partial return_type function=function}},
+        "lineno" : {{function.lineno}}{{!
+        }}{{#if (not (array.empty? function.structured_annotations))}},
+        "structured_annotations": {
+          {{#partial m_partials.structured_annotations annotations=function.structured_annotations}}
+        }{{/if (not (array.empty? function.structured_annotations))}}
+      }{{#if (not last_fn?)}},{{/if}}
+      {{/each}}
+    }
+    {{#if (not (array.empty? service.structured_annotations))}},
+    "structured_annotations": {
+      {{#partial m_partials.structured_annotations annotations=service.structured_annotations}}
+    }
+    {{/if (not (array.empty? service.structured_annotations))}}
+  }{{#if trailing_comma?}},{{/if}}
+{{/let partial}}

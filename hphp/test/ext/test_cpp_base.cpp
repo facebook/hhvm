@@ -22,11 +22,12 @@
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/ip-block-map.h"
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/system/systemlib.h"
+
+using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -39,8 +40,6 @@ bool TestCppBase::RunTests(const std::string &which) {
   bool ret = true;
   RUN_TEST(TestIpBlockMap);
   RUN_TEST(TestIpBlockMapIni);
-  RUN_TEST(TestSatelliteServer);
-  RUN_TEST(TestSatelliteServerIni);
   RUN_TEST(TestVirtualHost);
   RUN_TEST(TestVirtualHostIni);
   RUN_TEST(TestCollectionHdf);
@@ -63,14 +62,14 @@ bool TestCppBase::TestIpBlockMap() {
   struct in6_addr addr;
   int bits;
 
-  VERIFY(IpBlockMap::ReadIPv6Address("204.15.21.0/22", &addr, bits));
+  VERIFY(HPHP::IpBlockMap::ReadIPv6Address("204.15.21.0/22", &addr, bits));
   VS(bits, 118);
   VS(in6addrWord(addr, 0), 0x00000000L);
   VS(in6addrWord(addr, 1), 0x00000000L);
   VS(in6addrWord(addr, 2), 0x0000FFFFL);
   VS(in6addrWord(addr, 3), 0xCC0F1500L);
 
-  VERIFY(IpBlockMap::ReadIPv6Address("127.0.0.1", &addr, bits));
+  VERIFY(HPHP::IpBlockMap::ReadIPv6Address("127.0.0.1", &addr, bits));
   VS(bits, 128);
   VS(in6addrWord(addr, 0), 0x00000000L);
   VS(in6addrWord(addr, 1), 0x00000000L);
@@ -260,110 +259,6 @@ bool TestCppBase::TestIpBlockMapIni() {
   return Count(true);
 }
 
-bool TestCppBase::TestSatelliteServer() {
-  IniSetting::Map ini = IniSetting::Map::object;
-  Hdf hdf;
-  hdf.fromString(
-    "Satellites {\n"
-    "  rpc {\n"
-    "    Type = RPCServer\n"
-    "    Port = 9999\n"
-    "    RequestInitDocument = my/rpc/rpc.php\n"
-    "    RequestInitFunction = init_me\n"
-    "    Password = abcd0987\n"
-    "    Passwords {\n"
-    "      * = abcd0987\n"
-    "    }\n"
-    "  }\n"
-    "  ips {\n"
-    "    Type = InternalPageServer\n"
-    "    BlockMainServer = false\n"
-    "  }\n"
-    "}\n"
-  );
-
-
-  std::vector<std::shared_ptr<SatelliteServerInfo>> infos;
-  RuntimeOption::ReadSatelliteInfo(ini, hdf, infos,
-                                   RuntimeOption::XboxPassword,
-                                   RuntimeOption::XboxPasswords);
-  for (auto& info_ptr : infos) {
-    auto info = info_ptr.get();
-    auto name = info->getName();
-    if (name == "rpc") {
-      VERIFY(info->getType() == SatelliteServer::Type::KindOfRPCServer);
-      VERIFY(info->getPort() == 9999);
-      VERIFY(info->getThreadCount() == 5);
-      VERIFY(info->getTimeoutSeconds() ==
-        std::chrono::seconds(RuntimeOption::RequestTimeoutSeconds));
-      VERIFY(info->getURLs().size() == 0);
-      VERIFY(info->getMaxRequest() == 500);
-      VERIFY(info->getMaxDuration() == 120);
-      VERIFY(info->getReqInitFunc() == "init_me");
-      VERIFY(info->getReqInitDoc() == "my/rpc/rpc.php");
-      VERIFY(info->getPassword() == "abcd0987");
-      VERIFY(info->getPasswords().size() == 1);
-      VERIFY(info->getPasswords().find("abcd0987") !=
-             info->getPasswords().end());
-      VERIFY(info->alwaysReset() == false);
-      VERIFY(RuntimeOption::XboxPassword == "abcd0987");
-    } else if (name == "ips") {
-      VERIFY(info->getType() ==
-             SatelliteServer::Type::KindOfInternalPageServer);
-      VERIFY(info->getURLs().size() == 0);
-    }
-  }
-  return Count(true);
-}
-
-bool TestCppBase::TestSatelliteServerIni() {
-  std::string iniStr =
-    "hhvm.satellites[rpc][type] = RPCServer\n"
-    "hhvm.satellites[rpc][port] = 9999\n"
-    "hhvm.satellites[rpc][request_init_document] = my/rpc/rpc.php\n"
-    "hhvm.satellites[rpc][request_init_function] = init_me\n"
-    "hhvm.satellites[rpc][password] = abcd0987\n"
-    "hhvm.satellites[rpc][passwords][] = abcd0987\n"
-    "hhvm.satellites[ips][type] = InternalPageServer\n"
-    "hhvm.satellites[ips][block_main_server] = false\n";
-
-  IniSettingMap ini = IniSetting::Map::object;
-  Hdf empty;
-  Config::ParseIniString(iniStr, ini);
-
-  std::vector<std::shared_ptr<SatelliteServerInfo>> infos;
-  RuntimeOption::ReadSatelliteInfo(ini, empty, infos,
-                                   RuntimeOption::XboxPassword,
-                                   RuntimeOption::XboxPasswords);
-  for (auto& info_ptr : infos) {
-    auto info = info_ptr.get();
-    auto name = info->getName();
-    if (name == "rpc") {
-      VERIFY(info->getType() == SatelliteServer::Type::KindOfRPCServer);
-      VERIFY(info->getPort() == 9999);
-      VERIFY(info->getThreadCount() == 5);
-      VERIFY(info->getTimeoutSeconds() ==
-        std::chrono::seconds(RuntimeOption::RequestTimeoutSeconds));
-      VERIFY(info->getURLs().size() == 0);
-      VERIFY(info->getMaxRequest() == 500);
-      VERIFY(info->getMaxDuration() == 120);
-      VERIFY(info->getReqInitFunc() == "init_me");
-      VERIFY(info->getReqInitDoc() == "my/rpc/rpc.php");
-      VERIFY(info->getPassword() == "abcd0987");
-      VERIFY(info->getPasswords().size() == 1);
-      VERIFY(info->getPasswords().find("abcd0987") !=
-             info->getPasswords().end());
-      VERIFY(info->alwaysReset() == false);
-      VERIFY(RuntimeOption::XboxPassword == "abcd0987");
-    } else if (name == "ips") {
-      VERIFY(info->getType() ==
-             SatelliteServer::Type::KindOfInternalPageServer);
-      VERIFY(info->getURLs().size() == 0);
-    }
-  }
-  return Count(true);
-}
-
 bool TestCppBase::TestVirtualHost() {
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf hdf;
@@ -422,25 +317,25 @@ bool TestCppBase::TestVirtualHost() {
     "  }\n"
   );
 
-  // reset RuntimeOption::AllowedDirectories to empty because if the INI
+  // reset Cfg::Server::AllowedDirectories to empty because if the INI
   // version of this test is run at the same time, we don't want to append
   // the same directories to it. We want to start fresh.
-  RuntimeOption::AllowedDirectories.clear();
+  Cfg::Server::AllowedDirectories.clear();
   std::vector<VirtualHost> hosts;
-  RuntimeOption::AllowedDirectories =
+  Cfg::Server::AllowedDirectories =
     Config::GetStrVector(ini, hdf, "Server.AllowedDirectories");
   auto cb = [&] (const IniSetting::Map &ini_cb, const Hdf &hdf_cb,
                  const std::string &host) {
     if (VirtualHost::IsDefault(ini_cb, hdf_cb, host)) {
       VirtualHost::GetDefault().init(ini_cb, hdf_cb, host);
       VirtualHost::GetDefault().
-        addAllowedDirectories(RuntimeOption::AllowedDirectories);
+        addAllowedDirectories(Cfg::Server::AllowedDirectories);
     } else {
       auto vh = VirtualHost(ini_cb, hdf_cb, host);
       // These will be added
       // "    AllowedDirectories.* = /var/www\n"
       // "    AllowedDirectories.* = /usr/bin\n"
-      vh.addAllowedDirectories(RuntimeOption::AllowedDirectories);
+      vh.addAllowedDirectories(Cfg::Server::AllowedDirectories);
       hosts.push_back(vh);
     }
   };
@@ -452,7 +347,7 @@ bool TestCppBase::TestVirtualHost() {
     if (name == "flibtest") {
       VERIFY(host.getPathTranslation() == "flib/_bin/"); // the / is added
       VERIFY(host.getDocumentRoot() ==
-             RuntimeOption::SourceRoot + "flib/_bin");
+             Cfg::Server::SourceRoot + "flib/_bin");
       VERIFY(host.getServerVars().size() == 0);
       VERIFY(VirtualHost::GetAllowedDirectories().size() == 2);
       VERIFY(host.valid() == true);
@@ -460,7 +355,7 @@ bool TestCppBase::TestVirtualHost() {
     } else if (name == "upload") {
       VERIFY(host.getPathTranslation() == "html/"); // the / is added
       VERIFY(host.getDocumentRoot() ==
-             RuntimeOption::SourceRoot + "html");
+             Cfg::Server::SourceRoot + "html");
       // SortALlowedDirectories might add something and remove
       // duplicates. In this case, /var/releases/continuous_www_scripts4
       // was added and the duplicate /var/www was removed.s
@@ -533,13 +428,13 @@ bool TestCppBase::TestVirtualHostIni() {
   Hdf empty;
   std::vector<VirtualHost> hosts;
 
-  // reset RuntimeOption::AllowedDirectories to empty because if the Hdf
+  // reset Cfg::Server::AllowedDirectories to empty because if the Hdf
   // version of this test is run at the same time, we don't want to append
   // the same directories to it. We want to start fresh.
-  RuntimeOption::AllowedDirectories.clear();
+  Cfg::Server::AllowedDirectories.clear();
 
   Config::ParseIniString(inistr, ini);
-  RuntimeOption::AllowedDirectories =
+  Cfg::Server::AllowedDirectories =
     Config::GetStrVector(ini, empty, "Server.AllowedDirectories");
   auto cb = [&] (const IniSetting::Map &ini_cb,
                  const Hdf &hdf_cb,
@@ -547,13 +442,13 @@ bool TestCppBase::TestVirtualHostIni() {
     if (VirtualHost::IsDefault(ini_cb, hdf_cb, host)) {
       VirtualHost::GetDefault().init(ini_cb, hdf_cb, host);
       VirtualHost::GetDefault().
-        addAllowedDirectories(RuntimeOption::AllowedDirectories);
+        addAllowedDirectories(Cfg::Server::AllowedDirectories);
     } else {
       auto vh = VirtualHost(ini_cb, hdf_cb, host);
       // These will be added
       // "hhvm.server.allowed_directories[] = /var/www\n"
       // "hhvm.server.allowed_directories[] = /usr/bin\n"
-      vh.addAllowedDirectories(RuntimeOption::AllowedDirectories);
+      vh.addAllowedDirectories(Cfg::Server::AllowedDirectories);
       hosts.push_back(vh);
     }
   };
@@ -565,7 +460,7 @@ bool TestCppBase::TestVirtualHostIni() {
     if (name == "flibtest") {
       VERIFY(host.getPathTranslation() == "flib/_bin/"); // the / is added
       VERIFY(host.getDocumentRoot() ==
-             RuntimeOption::SourceRoot + "flib/_bin");
+             Cfg::Server::SourceRoot + "flib/_bin");
       VERIFY(host.getServerVars().size() == 0);
       VERIFY(VirtualHost::GetAllowedDirectories().size() == 2);
       VERIFY(host.valid() == true);
@@ -582,7 +477,7 @@ bool TestCppBase::TestVirtualHostIni() {
     } else if (name == "upload") {
       VERIFY(host.getPathTranslation() == "html/"); // the / is added
       VERIFY(host.getDocumentRoot() ==
-             RuntimeOption::SourceRoot + "html");
+             Cfg::Server::SourceRoot + "html");
       // SortALlowedDirectories might add something and remove
       // duplicates. In this case, /var/releases/continuous_www_scripts4
       // was added and the duplicate /var/www was removed.s
@@ -618,19 +513,21 @@ bool TestCppBase::TestCollectionHdf() {
     "    HighPriorityEndPoints.* = /power\n"
     "  }\n"
   );
-  RuntimeOption::AllowedDirectories.clear();
+  Cfg::Server::AllowedDirectories.clear();
 
-  Config::Bind(RuntimeOption::AllowedDirectories, ini,
+  Config::Bind(Cfg::Server::AllowedDirectories, ini,
                hdf, "Server.AllowedDirectories");
-  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
+  VERIFY(Cfg::Server::AllowedDirectories.size() == 2);
   std::vector<std::string> ad =
     Config::GetStrVector(ini, hdf, "Server.AllowedDirectories",
-                      RuntimeOption::AllowedDirectories);
-  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
+                      Cfg::Server::AllowedDirectories);
+  VERIFY(Cfg::Server::AllowedDirectories.size() == 2);
   VERIFY(ad.size() == 2);
-  Config::Bind(RuntimeOption::ServerHighPriorityEndPoints, ini,
+
+  boost::container::flat_set<std::string> serverHighPriorityEndPoints;
+  Config::Bind(serverHighPriorityEndPoints, ini,
                hdf, "Server.HighPriorityEndPoints");
-  VERIFY(RuntimeOption::ServerHighPriorityEndPoints.size() == 3);
+  VERIFY(serverHighPriorityEndPoints.size() == 3);
   return Count(true);
 }
 
@@ -647,23 +544,24 @@ bool TestCppBase::TestCollectionIni() {
   Hdf empty;
 
   // Ensure we have no residuals left over from the HDF run.
-  RuntimeOption::AllowedDirectories.clear();
-  RuntimeOption::ServerHighPriorityEndPoints.clear();
+  Cfg::Server::AllowedDirectories.clear();
 
   Config::ParseIniString(inistr, ini);
-  Config::Bind(RuntimeOption::AllowedDirectories, ini, empty,
+  Config::Bind(Cfg::Server::AllowedDirectories, ini, empty,
                "Server.AllowedDirectories"); // Test converting name
-  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
+  VERIFY(Cfg::Server::AllowedDirectories.size() == 2);
   std::vector<std::string> ad =
     Config::GetStrVector(ini, empty, "Server.AllowedDirectories",
-                      RuntimeOption::AllowedDirectories, false);
+                      Cfg::Server::AllowedDirectories, false);
   // This should still be 2. In other words, Get shouldn't append
   // values.
-  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
+  VERIFY(Cfg::Server::AllowedDirectories.size() == 2);
   VERIFY(ad.size() == 2);
-  Config::Bind(RuntimeOption::ServerHighPriorityEndPoints, ini, empty,
+
+  boost::container::flat_set<std::string> serverHighPriorityEndPoints;
+  Config::Bind(serverHighPriorityEndPoints, ini, empty,
                "Server.HighPriorityEndPoints",
-                RuntimeOption::ServerHighPriorityEndPoints, false);
-  VERIFY(RuntimeOption::ServerHighPriorityEndPoints.size() == 4);
+               serverHighPriorityEndPoints, false);
+  VERIFY(serverHighPriorityEndPoints.size() == 4);
   return Count(true);
 }

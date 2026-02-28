@@ -18,13 +18,15 @@
 
 #include "hphp/runtime/vm/jit/fixup.h"
 
+#include "hphp/util/configs/hhir.h"
+#include "hphp/util/text-util.h"
+
 namespace HPHP::jit::irgen {
 
 //////////////////////////////////////////////////////////////////////
 
 const StaticString
-  s_FATAL_NULL_THIS(Strings::FATAL_NULL_THIS),
-  s_clsToStringWarning(Strings::CLASS_TO_STRING);
+  s_FATAL_NULL_THIS(Strings::FATAL_NULL_THIS);
 
 SSATmp* checkAndLoadThis(IRGS& env) {
   if (!hasThis(env)) {
@@ -46,24 +48,48 @@ SSATmp* convertClsMethToVec(IRGS& env, SSATmp* clsMeth) {
 }
 
 SSATmp* convertClassKey(IRGS& env, SSATmp* key) {
-  assertx (key->type().isKnownDataType());
-  if (key->isA(TCls)) {
-    if (RuntimeOption::EvalRaiseClassConversionWarning) {
-      gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
+  auto const handleCls = [&] (SSATmp* cls) {
+    if (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0) {
+      std::string msg;
+      string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
+                    "string key conversion");
+      gen(env,
+          RaiseNotice,
+          SampleRateData { Cfg::Eval::RaiseClassConversionNoticeSampleRate },
+          cns(env, makeStaticString(msg)));
     }
-    return gen(env, LdClsName, key);
-  }
-  if (key->isA(TLazyCls)) {
-    if (RuntimeOption::EvalRaiseClassConversionWarning) {
-      gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
+    return gen(env, LdClsName, cls);
+  };
+  auto const handleLazyCls = [&] (SSATmp* lazyCls) {
+    if (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0) {
+      std::string msg;
+      string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
+                    "string key conversion");
+      gen(env,
+          RaiseNotice,
+          SampleRateData { Cfg::Eval::RaiseClassConversionNoticeSampleRate },
+          cns(env, makeStaticString(msg)));
     }
-    return gen(env, LdLazyClsName, key);
-  }
-  assertx(!key->type().maybe(TCls | TLazyCls));
-  return key;
+    return gen(env, LdLazyClsName, lazyCls);
+  };
+
+  if (key->isA(TCls)) return handleCls(key);
+  if (key->isA(TLazyCls)) return handleLazyCls(key);
+  if (!key->type().maybe(TCls | TLazyCls)) return key;
+
+  return cond(
+    env,
+    [&] (Block* taken) { return gen(env, CheckType, TCls, taken, key); },
+    [&] (SSATmp* cls) { return handleCls(cls); },
+    [&] (Block* taken) { return gen(env, CheckType, TLazyCls, taken, key); },
+    [&] (SSATmp* lazyCls) { return handleLazyCls(lazyCls); },
+    [&] { return key; }
+  );
 }
 
 void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
+  auto const func = curFunc(env);
+
   // Define FP and SP.
   if (resumeMode(env) != ResumeMode::None) {
     // - resumable frames live on the heap, so they do not have a stack position
@@ -80,11 +106,26 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
     // - new native frame will be initialized at rvmsp() and linked to rvmfp()
     // - fp(env) and sp(env) will be backed by the same rvmfp() register
     // - stack base is numSlotsInFrame() away from sp(env)
-    gen(env, DefFuncEntryFP, FuncData { curFunc(env) });
+    gen(env, DefFuncEntryFP);
     updateMarker(env);
+    env.funcEntryPrevFP = gen(env, DefFuncEntryPrevFP);
+    env.funcEntryArFlags = gen(env, DefFuncEntryArFlags);
+    env.funcEntryCalleeId = gen(env, DefFuncEntryCalleeId);
+    env.funcEntryCtx = (func->isClosureBody() || func->cls())
+      ? gen(env, DefFuncEntryCtx, callCtxType(func))
+      : cns(env, nullptr);
+
+    if (!curSrcKey(env).trivialDVFuncEntry()) {
+      gen(env, EnterFrame, fp(env), env.funcEntryPrevFP, env.funcEntryArFlags,
+          env.funcEntryCalleeId);
+      updateMarker(env);
+      if (!env.funcEntryCtx->isA(TNullptr)) {
+        gen(env, StFrameCtx, fp(env), env.funcEntryCtx);
+      }
+    }
 
     assertx(bcSPOff == spOffEmpty(env));
-    auto const irSPOff = SBInvOffset { -curFunc(env)->numSlotsInFrame() };
+    auto const irSPOff = SBInvOffset { -func->numSlotsInFrame() };
     gen(env, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, fp(env));
   } else {
     // - frames of regular functions live on the stack
@@ -93,7 +134,7 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
     gen(env, DefFP, DefFPData { IRSPRelOffset { 0 } });
     updateMarker(env);
 
-    auto const irSPOff = SBInvOffset { -curFunc(env)->numSlotsInFrame() };
+    auto const irSPOff = SBInvOffset { -func->numSlotsInFrame() };
     gen(env, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, fp(env));
   }
 
@@ -103,9 +144,13 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
   env.irb->exceptionStackBoundary();
 
   gen(env, EnterTranslation);
+  env.lastDefFramePtr = &env.irb->curBlock()->back();
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    // Assert that we're in the correct function.
+  if (Cfg::HHIR::GenerateAsserts &&
+      !curSrcKey(env).trivialDVFuncEntry()) {
+    // Assert that we're in the correct function, but we can't do so
+    // for trivial DV FuncEntries because the frame isn't setup yet
+    // (we skip EnterFrame for them above).
     gen(env, DbgAssertFunc, fp(env));
   }
 }
@@ -124,7 +169,7 @@ void handleConvNoticeLevel(
     gen(env, ThrowInvalidOperation, cns(env, str));
   }
   if (notice_data.level == ConvNoticeLevel::Log) {
-    gen(env, RaiseNotice, cns(env, str));
+    gen(env, RaiseNotice, SampleRateData {}, cns(env, str));
   }
 }
 

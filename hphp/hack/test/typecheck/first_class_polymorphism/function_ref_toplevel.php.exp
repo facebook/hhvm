@@ -1,0 +1,9 @@
+File "function_ref_toplevel.php", line 14, characters 3-13:
+  HH\FunctionRef<(readonly function<T>(T $x): T)>
+File "function_ref_toplevel.php", line 16, characters 3-16:
+  Mock<(readonly function<T>(T $x): T)>
+File "function_ref_toplevel.php", line 18, characters 3-13:
+  HH\FunctionRef<(readonly function(int $x): int)>
+File "function_ref_toplevel.php", line 20, characters 3-17:
+  Mock<(readonly function(int $x): int)>
+No errors

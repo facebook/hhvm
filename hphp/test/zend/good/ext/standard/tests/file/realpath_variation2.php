@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing realpath() : variation ***\n";
 
-$paths = varray['c:\\', 
+$paths = vec['c:\\', 
                'c:', 
                'c' , 
                '\\' , 

@@ -6,12 +6,11 @@
 use proc_macro2::TokenStream;
 use quote::quote;
 
+use super::Context;
+use super::visitor_trait_generator;
 use crate::common::gen_helpers;
 
-use super::visitor_trait_generator;
-use super::Context;
-
-pub fn gen(ctx: &Context) -> TokenStream {
+pub fn r#gen(ctx: &Context) -> TokenStream {
     let uses = gen_helpers::gen_module_uses(ctx.modules());
     let impls = ctx.type_structures().map(gen_node_impl).collect::<Vec<_>>();
 
@@ -19,6 +18,7 @@ pub fn gen(ctx: &Context) -> TokenStream {
         #![allow(unused_braces)]
         #![allow(unused_imports)]
         #![allow(unused_variables)]
+        #![allow(clippy::all)]
 
         use super::node::Node;
         use super::visitor::Visitor;

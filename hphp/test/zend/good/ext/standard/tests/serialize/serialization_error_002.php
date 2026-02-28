@@ -11,8 +11,8 @@
  */
 
 // candidate safe idiom for determining whether data is serialized
-function isSerialized($str) {
-    return ($str == serialize(false) || @unserialize($str) !== false);
+function isSerialized($str) :mixed{
+    return ($str == serialize(false) || unserialize($str) !== false);
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing unserialize() error/boolean distinction ***\n";

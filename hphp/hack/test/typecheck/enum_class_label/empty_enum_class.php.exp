@@ -1,0 +1,16 @@
+ERROR: File "empty_enum_class.php", line 9, characters 7-8:
+Invalid argument (Typing[4110])
+  File "empty_enum_class.php", line 9, characters 7-8:
+  Expected a class with a constant `X`
+  File "empty_enum_class.php", line 6, characters 33-33:
+  But got `E`
+  File "empty_enum_class.php", line 3, characters 12-12:
+  `E` is defined here
+ERROR: File "empty_enum_class.php", line 10, characters 3-5:
+This label is not a valid reference to a member of the given enum class (Typing[4110])
+  File "empty_enum_class.php", line 10, characters 4-5:
+  Expected a class with a constant `X`
+  File "empty_enum_class.php", line 10, characters 3-3:
+  But got `E`
+  File "empty_enum_class.php", line 3, characters 12-12:
+  `E` is defined here

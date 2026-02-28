@@ -12,7 +12,7 @@ function succeed<Tv as arraykey>(bool $c, Tv $v1, Tv $v2)[]: keyset<Tv> {
 }
 
 function fail<Tv as arraykey>(bool $c, Tv $v)[]: mixed {
-  $result = varray[];
+  $result = vec[];
   if ($c) {
     $result[] = $v;
   } else {
@@ -25,7 +25,7 @@ function fail<Tv as arraykey>(bool $c, Tv $v)[]: mixed {
 function succeed_when_WriteProperty<Tv as arraykey>(bool $c, Tv $v)[
   \HH\Capabilities\WriteProperty
 ]: mixed {
-  $result = varray[];
+  $result = vec[];
   if ($c) {
     $result[] = $v;
   } else {

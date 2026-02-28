@@ -10,7 +10,7 @@ function is_nonnull($x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_nonnull() {
+function main_is_expression_nonnull() :mixed{
 is_nonnull(null);
 is_nonnull(-1);
 is_nonnull(false);

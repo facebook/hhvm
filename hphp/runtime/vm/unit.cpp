@@ -20,42 +20,35 @@
 #include <atomic>
 #include <cstdlib>
 #include <cstring>
-#include <iomanip>
+#include <filesystem>
 #include <map>
-#include <ostream>
 #include <sstream>
 #include <vector>
 
-#include <boost/container/flat_map.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <folly/Format.h>
 
-#include <tbb/concurrent_hash_map.h>
-
 #include "hphp/system/systemlib.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/assertions.h"
-#include "hphp/util/compilation-flags.h"
-#include "hphp/util/functional.h"
+#include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/repo.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/struct-log.h"
 
 #include "hphp/runtime/base/attr.h"
-#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/tv-mutate.h"
-#include "hphp/runtime/base/tv-variant.h"
-#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -67,41 +60,30 @@
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/frame-restore.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hh-utils.h"
-#include "hphp/runtime/vm/hhbc-codec.h"
-#include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
-#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-alias.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit-util.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/server/memory-stats.h"
-#include "hphp/runtime/server/source-root-info.h"
 
-#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/server/ext_server.h"
-#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 
-#include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/program-functions.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(hhbc);
+TRACE_SET_MOD(hhbc)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -121,8 +103,8 @@ Unit::Unit()
 }
 
 Unit::~Unit() {
-  if (RuntimeOption::EvalEnableReverseDataMap &&
-      m_mergeState.load(std::memory_order_relaxed) != MergeState::Unmerged) {
+  if (Cfg::Eval::EnableReverseDataMap &&
+      m_mergeState.load(std::memory_order_acquire) != MergeState::Unmerged) {
     // Units are registered to data_map in Unit::initialMerge().
     data_map::deregister(this);
   }
@@ -132,7 +114,7 @@ Unit::~Unit() {
   // ExecutionContext and the TC may retain references to Class'es, so
   // it is possible for Class'es to outlive their Unit.
   for (auto const& pcls : m_preClasses) {
-    Class* cls = pcls->namedEntity()->clsList();
+    Class* cls = pcls->namedType()->clsList();
     while (cls) {
       Class* cur = cls;
       cls = cls->m_next;
@@ -147,12 +129,38 @@ Unit::~Unit() {
 
 void* Unit::operator new(size_t sz) {
   MemoryStats::LogAlloc(AllocKind::Unit, sz);
-  return low_malloc(sz);
+  return vm_malloc(sz);
 }
 
 void Unit::operator delete(void* p, size_t /*sz*/) {
-  low_free(p);
+  vm_free(p);
 }
+
+void Unit::destroy() {
+  for (auto const func : funcs()) func->atomicFlags().set(Func::Flags::Zombie);
+  for (auto const& pcls : m_preClasses) {
+    Class* cls = pcls->namedType()->clsList();
+    while (cls) {
+      Class* cur = cls;
+      cls = cls->m_next;
+      if (cur->preClass() == pcls.get()) {
+      	for (size_t i = 0; i < cur->numMethods(); i++) {
+    			if (auto meth = cur->getMethod(i)) {
+      			if (meth->cls() == cur) {
+							meth->atomicFlags().set(Func::Flags::Zombie);
+            }
+    			}
+  			}
+      }
+    }
+  }
+  Treadmill::enqueue(
+    [this] {
+      delete this;
+    }
+  );
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Code locations.
@@ -178,7 +186,7 @@ bool Unit::isCoverageEnabled() const {
 }
 void Unit::enableCoverage() {
   if (!m_coverage.bound()) {
-    assertx(!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage);
+    assertx(!Cfg::Repo::Authoritative && Cfg::Eval::EnablePerFileCoverage);
     m_coverage.bind(
       rds::Mode::Normal,
       rds::LinkName{"UnitCoverage", origFilepath()}
@@ -242,22 +250,18 @@ StringData* Unit::lookupLitstrId(Id id) const {
   auto& elem = m_litstrs[id];
   auto wrapper = elem.copy();
   if (wrapper.isPtr()) {
-    assertx(wrapper.ptr());
-    assertx(wrapper.ptr()->isStatic());
+    assertx(!wrapper.ptr() || wrapper.ptr()->isStatic());
     return const_cast<StringData*>(wrapper.ptr());
   }
-  elem.lock_for_update();
+  auto lock = elem.lock_for_update();
   wrapper = elem.copy();
   if (wrapper.isPtr()) {
-    assertx(wrapper.ptr());
-    assertx(wrapper.ptr()->isStatic());
-    elem.unlock();
+    assertx(!wrapper.ptr() || wrapper.ptr()->isStatic());
     return const_cast<StringData*>(wrapper.ptr());
   }
   auto const str = UnitEmitter::loadLitstrFromRepo(m_sn, wrapper.token(), true);
-  assertx(str);
-  assertx(str->isStatic());
-  elem.update_and_unlock(StringOrToken::FromPtr(str));
+  assertx(!str || str->isStatic());
+  lock.update(StringOrToken::FromPtr(str));
   return const_cast<StringData*>(str);
 }
 
@@ -274,20 +278,31 @@ const ArrayData* Unit::lookupArrayId(Id id) const {
     assertx(wrapper.ptr()->isStatic());
     return wrapper.ptr();
   }
-  elem.lock_for_update();
+  auto lock = elem.lock_for_update();
   wrapper = elem.copy();
   if (wrapper.isPtr()) {
     assertx(wrapper.ptr());
     assertx(wrapper.ptr()->isStatic());
-    elem.unlock();
     return wrapper.ptr();
   }
-  auto const array = UnitEmitter::loadLitarrayFromRepo(
-    m_sn, wrapper.token(), m_origFilepath, true
-  );
+
+  auto const oldStrUnit = BlobEncoderHelper<const StringData*>::tl_unit;
+  auto const oldArrUnit = BlobEncoderHelper<const ArrayData*>::tl_unit;
+
+  BlobEncoderHelper<const StringData*>::tl_unit = const_cast<Unit*>(this);
+  BlobEncoderHelper<const ArrayData*>::tl_unit = const_cast<Unit*>(this);
+  SCOPE_EXIT {
+    assertx(BlobEncoderHelper<const StringData*>::tl_unit == this);
+    assertx(BlobEncoderHelper<const ArrayData*>::tl_unit == this);
+    BlobEncoderHelper<const StringData*>::tl_unit = oldStrUnit;
+    BlobEncoderHelper<const ArrayData*>::tl_unit = oldArrUnit;
+  };
+
+  auto const array =
+    UnitEmitter::loadLitarrayFromRepo(m_sn, wrapper.token(), true);
   assertx(array);
   assertx(array->isStatic());
-  elem.update_and_unlock(ArrayOrToken::FromPtr(array));
+  lock.update(ArrayOrToken::FromPtr(array));
   return array;
 }
 
@@ -296,23 +311,29 @@ const ArrayData* Unit::lookupArrayId(Id id) const {
 
 const RepoAuthType::Array* Unit::lookupRATArray(Id id) const {
   assertx(id >= 0 && id < m_rats.size());
-
   auto& elem = m_rats[id];
   auto wrapper = elem.copy();
   if (wrapper.isPtr()) {
     assertx(wrapper.ptr());
     return wrapper.ptr();
   }
-  elem.lock_for_update();
+  auto lock = elem.lock_for_update();
   wrapper = elem.copy();
   if (wrapper.isPtr()) {
     assertx(wrapper.ptr());
-    elem.unlock();
     return wrapper.ptr();
   }
+
+  assertx(!BlobEncoderHelper<const StringData*>::tl_unit);
+  BlobEncoderHelper<const StringData*>::tl_unit = const_cast<Unit*>(this);
+  SCOPE_EXIT {
+    assertx(BlobEncoderHelper<const StringData*>::tl_unit == this);
+    BlobEncoderHelper<const StringData*>::tl_unit = nullptr;
+  };
+
   auto const array = UnitEmitter::loadRATArrayFromRepo(m_sn, wrapper.token());
   assertx(array);
-  elem.update_and_unlock(RATArrayOrToken::FromPtr(array));
+  lock.update(RATArrayOrToken::FromPtr(array));
   return array;
 }
 
@@ -334,41 +355,275 @@ bool isEvalName(const StringData* name) {
 
 void Unit::initialMerge() {
   unitInitLock.assertOwnedBySelf();
-  if (m_mergeState.load(std::memory_order_relaxed) != MergeState::Unmerged) {
+  if (m_mergeState.load(std::memory_order_acquire) != MergeState::Unmerged) {
     return;
   }
 
-  auto const nrecord = RuntimeOption::EvalRecordFirstUnits;
-  if (s_loadedUnits.load(std::memory_order_relaxed) < nrecord) {
-    auto const index = s_loadedUnits.fetch_add(1, std::memory_order_relaxed);
+  auto const nrecord = Cfg::Eval::RecordFirstUnits;
+  if (s_loadedUnits.load(std::memory_order_acquire) < nrecord) {
+    auto const index = s_loadedUnits.fetch_add(1, std::memory_order_acq_rel);
     if (index < nrecord) {
       StructuredLogEntry ent;
       ent.setStr("path", m_origFilepath->data());
       ent.setInt("index", index);
-      if (RuntimeOption::ServerExecutionMode()) {
-        ent.setInt("uptime", f_server_uptime());
+      if (Cfg::Server::Mode) {
+        ent.setInt("uptime", HHVM_FN(server_uptime)());
       }
       StructuredLog::log("hhvm_first_units", ent);
     }
   }
 
-  if (RuntimeOption::EvalEnableReverseDataMap) {
+  if (Cfg::Eval::EnableReverseDataMap) {
     data_map::register_start(this);
   }
 
-  if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
+  if (!Cfg::Repo::Authoritative && Cfg::Eval::EnablePerFileCoverage) {
     m_coverage.bind(
       rds::Mode::Normal,
       rds::LinkName{"UnitCoverage", origFilepath()}
     );
   }
 
-  m_mergeState.store(MergeState::InitialMerged, std::memory_order_relaxed);
+  m_mergeState.store(MergeState::InitialMerged, std::memory_order_release);
+}
+
+namespace {
+
+using PType = std::variant<PreClass*, PreTypeAlias*>;
+using SymCache = hphp_fast_map<
+  const StringData*,
+  PType,
+  string_data_hash,
+  string_data_tsame
+>;
+
+struct LoadContext {
+  SymCache syms;
+  bool isSystem{false};
+  AutoloadMap* am{nullptr};
+  std::vector<Unit*> unmerged;
+  hphp_fast_set<PType> loaded;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+Optional<PType> addUnit(LoadContext& ctx, Unit* d, const StringData* name) {
+  Optional<PType> ret;
+  for (auto& pcls : d->preclasses()) {
+    if (!PreClassEmitter::IsAnonymousClassName(pcls->name()->slice())) {
+      ctx.syms.emplace(pcls->name(), pcls.get());
+      if (name && pcls->name()->tsame(name)) ret = pcls.get();
+    }
+  }
+
+  for (auto& pty : d->typeAliases()) {
+    ctx.syms.emplace(pty.name, &pty);
+    if (name && pty.name->tsame(name)) ret = &pty;
+  }
+
+  // We will need to finish fulling loading this unit now that we're merging a
+  // symbol from it.
+  ctx.unmerged.emplace_back(d);
+  return ret;
+}
+
+Optional<PType> findPreType(LoadContext& ctx, const StringData* name) {
+  auto const symIt = ctx.syms.find(name);
+  if (symIt != ctx.syms.end()) return symIt->second;
+
+  // SystemLib should have no external dependencies so ignore AutoloadMap init.
+  // Initializing the autoload map before we the first unit in the repo can
+  // cause us to cache a null map for the duration of the request.
+  if (ctx.isSystem) return {};
+
+  // Lazily compute the autoload map- if all symbols are local then avoid a
+  // potentially expensive facts initialization.
+  if (!ctx.am) {
+    ctx.am = AutoloadHandler::s_instance->getAutoloadMap();
+    if (!ctx.am) return {};
+  }
+
+  auto const p = ctx.am->getTypeOrTypeAliasFile(StrNR{name});
+  if (!p) return {};
+
+  bool initial = true;
+  auto const d = lookupUnit(p->m_path.get(), g_context->getCwd().data(),
+                            &initial, nullptr, true, false, true);
+
+  // If the unit was already loaded the symbol should have been defined already,
+  // this implies we don't know where to find the symbol.
+  if (!d || !initial) return {};
+  return addUnit(ctx, d, name);
+}
+
+void loadTypeSafe(LoadContext& ctx, const StringData* name, PType initial) {
+  std::vector<PType> stack;
+  hphp_fast_set<PType> visited;
+
+  auto const exists = [&] (const StringData* p) {
+    if (p->isSymbol() && p->getCachedClass()) return true;
+    auto ne = NamedType::getNoCreate(p);
+    return ne && (ne->getCachedClass() || ne->getCachedTypeAlias());
+  };
+
+  auto const def = [&] (PType p) {
+    if (!ctx.loaded.emplace(p).second) return;
+    match<void>(
+      p,
+      [&] (PreClass* pc)      { return Class::def(pc, true); },
+      [&] (PreTypeAlias* pta) { return TypeAlias::def(pta, true); }
+    );
+  };
+
+  auto const load = [&] (const StringData* p) {
+    if (!p || p->empty() || exists(p)) return;
+
+    // If the symbol isn't available or a cycle is detected continue on and
+    // allow the error to be encountered later when def() is called with
+    // failIsFatal.
+    auto ty = findPreType(ctx, p);
+    if (ty && !visited.count(*ty)) stack.emplace_back(*ty);
+  };
+
+  // If the symbol already exists trigger an error unless we were the ones who
+  // loaded it.
+  if (exists(name)) def(initial);
+  stack.emplace_back(initial);
+
+  while (!stack.empty()) {
+    auto p = stack.back();
+    if (visited.emplace(p).second) {
+      match<void>(
+        p,
+        [&] (PreClass* pc) {
+          if (auto const parent = pc->parent())    load(parent);
+          for (auto const i : pc->interfaces())    load(i);
+          for (auto const e : pc->includedEnums()) load(e);
+          for (auto const t : pc->usedTraits())    load(t);
+          if (pc->enumBaseTy().isUnresolved()) {
+            load(pc->enumBaseTy().typeName());
+          }
+        },
+        [&] (PreTypeAlias* pta) {
+          if (pta->value.isUnresolved()) {
+            for (auto& tc : eachTypeConstraintInUnion(pta->value)) {
+              if (tc.isUnresolved()) load(tc.typeName());
+            }
+          }
+        }
+      );
+    } else {
+      stack.pop_back();
+      def(p);
+    }
+  }
+}
+
+void mergeUnitSafe(LoadContext& ctx, Unit* u) {
+  if (!u->preMerge()) return;
+
+  for (auto const& pc : u->preclasses()) {
+    if (!PreClassEmitter::IsAnonymousClassName(pc->name()->slice())) {
+      loadTypeSafe(ctx, pc->name(), pc.get());
+    }
+  }
+  for (auto& pta : u->typeAliases()) loadTypeSafe(ctx, pta.name, &pta);
+
+  u->finalMerge();
+}
+
+void mergeUnitSafe(Unit* u) {
+  LoadContext ctx;
+  addUnit(ctx, u, nullptr);
+  ctx.isSystem = u->isSystemLib();
+
+  // Disallow further autoloading while performing a safe merge. The merge
+  // algorithm is responsible for querying the autoload map for symbols while
+  // in this state. Calling into the autoloader could trigger reentry into the
+  // mergeUnitSafe() stack.
+  AutoloadHandler::Inhibit _;
+
+  for (size_t i = 0; i < ctx.unmerged.size(); ++i) {
+    mergeUnitSafe(ctx, ctx.unmerged[i]);
+  }
+}
+
+}
+
+bool Unit::preMerge() {
+  auto mergeState = m_mergeState.load(std::memory_order_acquire);
+  if (mergeState == MergeState::Merged) return false;
+
+  if (m_fatalInfo) {
+    raise_parse_error(filepath(),
+                      m_fatalInfo->m_fatalMsg.c_str(),
+                      m_fatalInfo->m_fatalLoc);
+  }
+
+  if (m_softDeployedRepoOnly) {
+    raise_warning("File %s is soft-deployed, but its unit was merged", filepath()->data());
+  }
+
+  if (mergeState == MergeState::Unmerged) {
+    SimpleLock lock(unitInitLock);
+    initialMerge();
+    mergeState = m_mergeState.load(std::memory_order_acquire);
+    assertx(mergeState >= MergeState::InitialMerged);
+  }
+
+  if (mergeState == MergeState::InitialMerged) {
+    mergeImpl<false, true>();
+  }
+
+  if (mergeState == MergeState::NeedsNonPersistentMerged) {
+    if (isSystemLib()) {
+      mergeImpl<true /* mergeOnlyNonPersistentFuncs */>();
+      assertx(!Cfg::Repo::Authoritative && Cfg::Jit::EnableRenameFunction);
+    } else {
+      mergeImpl<false, true>();
+      assertx(!Cfg::Repo::Authoritative);
+    }
+  }
+
+  return mergeState != MergeState::Merged;
+}
+
+void Unit::finalMerge() {
+  assertx(m_mergeState.load(std::memory_order_acquire) != MergeState::Unmerged);
+
+  if (Cfg::Eval::LogDeclDeps) {
+    logDeclInfo();
+
+    auto const thisPath = filepath();
+    auto const& options = RepoOptions::forFile(thisPath->data());
+    auto const dir = options.dir();
+    auto const relPath = std::filesystem::relative(
+      std::filesystem::path(thisPath->data()),
+      dir
+    );
+
+    for (auto& [path, sha] : m_deps) {
+      auto hash = SHA1{mangleUnitSha1(sha.toString(), path, options.flags())};
+      auto fpath = makeStaticString(dir / path);
+      g_context->m_loadedRdepMap[fpath].emplace_back(relPath, hash);
+    }
+  }
+
+  if (Cfg::Repo::Authoritative ||
+      (isSystemLib() && !Cfg::Jit::EnableRenameFunction)) {
+    m_mergeState.store(MergeState::Merged, std::memory_order_release);
+  } else {
+    m_mergeState.store(MergeState::NeedsNonPersistentMerged, std::memory_order_release);
+  }
 }
 
 void Unit::merge() {
-  if (LIKELY(m_mergeState.load(std::memory_order_relaxed) == MergeState::Merged)) {
-    return;
+  auto mergeState = m_mergeState.load(std::memory_order_acquire);
+  if (mergeState == MergeState::Merged) return;
+
+  if (Cfg::Eval::UseTopologicalMerge &&
+      (!isSystemLib() || mergeState != MergeState::NeedsNonPersistentMerged)) {
+    return mergeUnitSafe(this);
   }
 
   if (m_fatalInfo) {
@@ -377,42 +632,81 @@ void Unit::merge() {
                       m_fatalInfo->m_fatalLoc);
   }
 
-  auto mergeTypes = MergeTypes::Everything;
-  if (UNLIKELY((m_mergeState.load(std::memory_order_relaxed) == MergeState::Unmerged))) {
-    SimpleLock lock(unitInitLock);
-    initialMerge();
-  } else if (!RuntimeOption::RepoAuthoritative && !SystemLib::s_inited && RuntimeOption::EvalJitEnableRenameFunction) {
-    mergeTypes = MergeTypes::Function;
+  if (m_softDeployedRepoOnly) {
+    raise_warning("File %s is soft-deployed, but its unit was merged", filepath()->data());
   }
 
-  mergeImpl(mergeTypes);
+  if (mergeState == MergeState::Unmerged) {
+    SimpleLock lock(unitInitLock);
+    initialMerge();
+    mergeState = m_mergeState.load(std::memory_order_acquire);
+    assertx(mergeState >= MergeState::InitialMerged);
+  }
 
-  if (RuntimeOption::RepoAuthoritative || (!SystemLib::s_inited && !RuntimeOption::EvalJitEnableRenameFunction)) {
-    m_mergeState.store(MergeState::Merged, std::memory_order_relaxed);
+  if (mergeState == MergeState::InitialMerged) {
+    mergeImpl<false>();
+  }
+
+  if (mergeState == MergeState::NeedsNonPersistentMerged) {
+    if (isSystemLib()) {
+      mergeImpl<true /* mergeOnlyNonPersistentFuncs */>();
+      assertx(!Cfg::Repo::Authoritative && Cfg::Jit::EnableRenameFunction);
+    } else {
+      mergeImpl<false>();
+      assertx(!Cfg::Repo::Authoritative);
+    }
+  }
+
+  if (Cfg::Eval::LogDeclDeps) {
+    logDeclInfo();
+
+    auto const thisPath = filepath();
+    auto const& options = RepoOptions::forFile(thisPath->data());
+    auto const dir = options.dir();
+    auto const relPath = std::filesystem::relative(
+      std::filesystem::path(thisPath->data()),
+      dir
+    );
+
+    for (auto& [path, sha] : m_deps) {
+      auto hash = SHA1{mangleUnitSha1(sha.toString(), path, options.flags())};
+      auto fpath = makeStaticString(dir / path);
+      g_context->m_loadedRdepMap[fpath].emplace_back(relPath, hash);
+    }
+  }
+
+  if (Cfg::Repo::Authoritative ||
+    (isSystemLib() && !Cfg::Jit::EnableRenameFunction)) {
+    m_mergeState.store(MergeState::Merged, std::memory_order_release);
+  } else {
+    m_mergeState.store(MergeState::NeedsNonPersistentMerged, std::memory_order_release);
   }
 }
 
 void Unit::logTearing(int64_t nsecs) {
-  assertx(!RO::RepoAuthoritative);
-  assertx(RO::EvalSampleRequestTearing);
+  assertx(!Cfg::Repo::Authoritative);
+  assertx(Cfg::Eval::SampleRequestTearing);
 
   auto const repoOptions = g_context->getRepoOptionsForRequest();
-  auto repoRoot = folly::fs::path(repoOptions->path()).parent_path();
+  auto repoRoot = repoOptions->dir();
 
   assertx(!isSystemLib());
   StructuredLogEntry ent;
 
   auto const tpath = [&] () -> std::string {
-    auto const orig = folly::fs::path(origFilepath()->data());
-    if (repoRoot.size() > orig.size() || repoRoot.empty()) return orig.native();
+    auto const orig = std::filesystem::path{origFilepath()->data()};
+    auto const origNative = orig.native();
+    if (repoRoot.native().size() > origNative.size() || repoRoot.empty()) {
+      return origNative;
+    }
     if (!std::equal(repoRoot.begin(), repoRoot.end(), orig.begin())) {
-      return orig.native();
+      return origNative;
     }
     return orig.lexically_relative(repoRoot).native();
   }();
 
   auto const debuggerCount = [&] {
-    if (RuntimeOption::EnableHphpdDebugger) {
+    if (Cfg::Debugger::EnableHphpd) {
       return Eval::Debugger::CountConnectedProxy();
     }
 
@@ -434,22 +728,91 @@ void Unit::logTearing(int64_t nsecs) {
   ent.setInt("debuggers", debuggerCount);
 
   // always generate logs
-  ent.force_init = RO::EvalSampleRequestTearingForce;
+  ent.force_init = Cfg::Eval::SampleRequestTearingForce;
 
   FTRACE(2, "Tearing in {} ({} ns)\n", tpath.data(), nsecs);
 
   StructuredLog::log("hhvm_sandbox_file_tearing", ent);
 }
 
-template <typename T, typename I>
-static bool defineSymbols(const T& symbols, boost::dynamic_bitset<>& define, bool failIsFatal, Stats::StatCounter counter, I lambda) {
-  auto i = define.find_first();
-  if (failIsFatal) {
-    if (i == define.npos) i = define.find_first();
+void Unit::logDeclInfo() const {
+  if (!Cfg::Eval::LogAllDeclTearing &&
+      !StructuredLog::coinflip(Cfg::Eval::LogDeclDeps)) return;
+
+  auto const thisPath = filepath();
+  auto const& options = RepoOptions::forFile(thisPath->data());
+  auto const dir = options.dir();
+  auto const& map = g_context->m_evaledFiles;
+  std::vector<std::string> rev_tears;
+  std::vector<std::string> not_loaded;
+  std::vector<std::string> loaded;
+
+  std::vector<std::tuple<std::string, std::string, SHA1>> deps;
+  for (auto const& [path, sha] : m_deps) {
+    auto hash = SHA1{mangleUnitSha1(sha.toString(), path, options.flags())};
+    deps.emplace_back(path, dir / path, std::move(hash));
   }
 
+  for (auto const& [path, fullpath, sha] : deps) {
+    auto const full = makeStaticString(fullpath);
+    if (auto const info = folly::get_ptr(map, full)) {
+      if (info->unit->sha1() != sha) rev_tears.emplace_back(path);
+      else loaded.emplace_back(path);
+    } else {
+      not_loaded.emplace_back(path);
+    }
+  }
+
+  StructuredLogEntry ent;
+
+  ent.setInt("num_loaded_deps", loaded.size() + rev_tears.size());
+  ent.setInt("num_torn_deps", rev_tears.size());
+  ent.setInt("num_not_loaded_deps", not_loaded.size());
+  ent.setInt("num_deps", deps.size());
+
+  auto const logVec = [&] (auto name, auto& vec) {
+    std::vector<folly::StringPiece> v;
+    v.reserve(vec.size());
+    for (auto& s : vec) v.emplace_back(s);
+    ent.setVec(name, v);
+  };
+
+  logVec("loaded_deps", loaded);
+  logVec("torn_deps", rev_tears);
+  logVec("not_loaded_deps", not_loaded);
+
+  std::vector<std::string> tears;
+  std::vector<std::string> non_tears;
+  for (auto const& [path, sha] : g_context->m_loadedRdepMap[thisPath]) {
+    if (sha != m_sha1) tears.emplace_back(path);
+    else non_tears.emplace_back(path);
+  }
+
+  ent.setInt("num_loaded_rdeps", tears.size() + non_tears.size());
+  ent.setInt("num_torn_rdeps", tears.size());
+
+  logVec("torn_rdeps", tears);
+  logVec("loaded_rdeps", non_tears);
+
+  if ((Cfg::Eval::LogAllDeclTearing && (!rev_tears.empty() || !tears.empty()))) {
+    ent.setInt("sample_rate", 1);
+    StructuredLog::log("hhvm_decl_logging", ent);
+  } else if(!Cfg::Eval::LogAllDeclTearing ||
+            StructuredLog::coinflip(Cfg::Eval::LogDeclDeps)) {
+    ent.setInt("sample_rate", Cfg::Eval::LogDeclDeps);
+    StructuredLog::log("hhvm_decl_logging", ent);
+  }
+}
+
+template <typename T, typename I>
+static bool defineSymbols(
+    const T& symbols,
+    boost::dynamic_bitset<>& define,
+    Stats::StatCounter counter,
+    I lambda
+) {
   bool madeProgress = false;
-  for (; i != define.npos; i = define.find_next(i)) {
+  for (auto i = define.find_first(); i != define.npos; i = define.find_next(i)) {
     auto& symbol = symbols[i];
     Stats::inc(Stats::UnitMerge_mergeable);
     Stats::inc(counter);
@@ -462,66 +825,79 @@ static bool defineSymbols(const T& symbols, boost::dynamic_bitset<>& define, boo
   return madeProgress;
 }
 
-void Unit::mergeImpl(MergeTypes mergeTypes) {
-  assertx(m_mergeState.load(std::memory_order_relaxed) >= MergeState::InitialMerged);
+template<bool mergeOnlyNonPersistentFuncs, bool skipClassesAndAliases>
+void Unit::mergeImpl() {
+  assertx(m_mergeState.load(std::memory_order_acquire) >=
+          MergeState::InitialMerged);
   autoTypecheck(this);
 
   FTRACE(1, "Merging unit {} ({} funcs, {} constants, {} typealiases, {} classes, {} modules)\n",
-         this->m_origFilepath->data(), m_funcs.size(), m_constants.size(), m_typeAliases.size(),
-         m_preClasses.size(), m_modules.size());
+         this->m_origFilepath->data(), m_funcs.size(), m_constants.size(),
+         m_typeAliases.size(), m_preClasses.size(), m_modules.size());
 
-  if (mergeTypes & MergeTypes::Function) {
-    for (auto func : funcs()) {
-      Func::def(func);
-    }
+  for (auto func : funcs()) {
+    Stats::inc(Stats::UnitMerge_mergeable_function);
+    if (mergeOnlyNonPersistentFuncs && func->isPersistent()) continue;
+    Stats::inc(Stats::UnitMerge_mergeable_function_define);
+    Func::def(func);
   }
 
-  if (mergeTypes & MergeTypes::NotFunction) {
-    for (auto& constant : m_constants) {
-      Stats::inc(Stats::UnitMerge_mergeable);
-      Stats::inc(Stats::UnitMerge_mergeable_define);
+  if (mergeOnlyNonPersistentFuncs) return;
 
-      assertx((!!(constant.attrs & AttrPersistent)) == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
-      Constant::def(&constant);
-    }
+  for (auto& constant : m_constants) {
+    Stats::inc(Stats::UnitMerge_mergeable);
+    Stats::inc(Stats::UnitMerge_mergeable_define);
 
-    for (auto& module : m_modules) {
-      Stats::inc(Stats::UnitMerge_mergeable);
-      Stats::inc(Stats::UnitMerge_mergeable_define);
-
-      assertx(IMPLIES(RO::RepoAuthoritative, module.attrs & AttrPersistent));
-      Module::def(&module);
-    }
-
-    boost::dynamic_bitset<> preClasses(m_preClasses.size());
-    preClasses.set();
-    boost::dynamic_bitset<> typeAliases(m_typeAliases.size());
-    typeAliases.set();
-
-    bool failIsFatal = false;
-    do {
-      bool madeProgress = false;
-      madeProgress = defineSymbols(m_preClasses, preClasses, failIsFatal,
-                                   Stats::UnitMerge_mergeable_class,
-                                   [&](const PreClassPtr& preClass) {
-                                     // Anonymous classes doesn't need to be defined because they will be defined when used
-                                     if (PreClassEmitter::IsAnonymousClassName(preClass->name()->toCppString())) {
-                                       return true;
-                                     }
-                                     assertx(preClass->isPersistent() == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
-                                     return Class::def(preClass.get(), failIsFatal) != nullptr;
-                                   }) || madeProgress;
-
-      // We do type alias last because they may depend on classes that needs to be define first
-      madeProgress = defineSymbols(m_typeAliases, typeAliases, failIsFatal,
-                                   Stats::UnitMerge_mergeable_typealias,
-                                   [&](const PreTypeAlias& typeAlias) {
-                                     assertx(typeAlias.isPersistent() == (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
-                                     return TypeAlias::def(&typeAlias, failIsFatal);
-                                   }) || madeProgress;
-      if (!madeProgress) failIsFatal = true;
-    } while (typeAliases.any() || preClasses.any());
+    assertx((!!(constant.attrs & AttrPersistent)) ==
+        (this->isSystemLib() || Cfg::Repo::Authoritative));
+    Constant::def(&constant);
   }
+
+  for (auto& module : m_modules) {
+    Stats::inc(Stats::UnitMerge_mergeable);
+    Stats::inc(Stats::UnitMerge_mergeable_define);
+
+    assertx(IMPLIES(Cfg::Repo::Authoritative, module.attrs & AttrPersistent));
+    Module::def(&module);
+  }
+
+  if (skipClassesAndAliases) return;
+
+  boost::dynamic_bitset<> preClasses(m_preClasses.size());
+  preClasses.set();
+  boost::dynamic_bitset<> typeAliases(m_typeAliases.size());
+  typeAliases.set();
+
+  bool failIsFatal = false;
+  do {
+    bool madeProgress = defineSymbols(
+      m_preClasses, preClasses, Stats::UnitMerge_mergeable_class,
+      [&](const PreClassPtr& preClass) {
+        // Anonymous classes doesn't need to be defined because they will be
+        // defined when used
+        auto pcName = preClass->name();
+        if (PreClassEmitter::IsAnonymousClassName(pcName->slice())) {
+          return true;
+        }
+        assertx(preClass->isPersistent() ==
+                (this->isSystemLib() || Cfg::Repo::Authoritative));
+        return Class::def(preClass.get(), failIsFatal) != nullptr;
+      });
+
+    // We do type alias last because they may depend on classes that needs to
+    // be defined first
+    madeProgress |= defineSymbols(m_typeAliases, typeAliases,
+      Stats::UnitMerge_mergeable_typealias,
+      [&](const PreTypeAlias& typeAlias) {
+        assertx(typeAlias.isPersistent() ==
+              (this->isSystemLib() || Cfg::Repo::Authoritative));
+        return TypeAlias::def(&typeAlias, failIsFatal);
+      });
+
+    // If we did not make progress then there is an undefined symbol or a
+    // class definition cycle that spans files.
+    if (!madeProgress) failIsFatal = true;
+  } while (typeAliases.any() || preClasses.any());
 }
 
 bool Unit::isSystemLib() const {
@@ -536,7 +912,7 @@ namespace {
 Array getClassesWithAttrInfo(Attr attrs, bool inverse = false) {
   auto builtins = Array::CreateVec();
   auto non_builtins = Array::CreateVec();
-  NamedEntity::foreach_cached_class([&](Class* c) {
+  NamedType::foreach_cached_class([&](Class* c) {
     if ((c->attrs() & attrs) ? !inverse : inverse) {
       if (c->isBuiltin()) {
         builtins.append(make_tv<KindOfPersistentString>(c->name()));
@@ -559,9 +935,9 @@ Array getFunctions() {
   // Return an array of all defined functions.  This method is used
   // to support get_defined_functions().
   Array a = Array::CreateVec();
-  NamedEntity::foreach_cached_func([&](Func* func) {
+  NamedFunc::foreach_cached_func([&](Func* func) {
     if ((system ^ func->isBuiltin()) || func->isGenerated()) return; //continue
-    a.append(HHVM_FN(strtolower)(func->nameStr()));
+    a.append(Variant(func->nameStr()));
   });
   return a;
 }

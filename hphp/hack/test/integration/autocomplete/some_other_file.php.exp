@@ -1,0 +1,24 @@
+class
+  INSERT class
+  class<this>
+SORT TEXT: none
+SECOND_NAME
+  INSERT SECOND_NAME
+  HH\MemberOf<SomeEnumClass, ~string>
+SORT TEXT: none
+FIRST_NAME
+  INSERT FIRST_NAME
+  HH\MemberOf<SomeEnumClass, ~int>
+SORT TEXT: none
+valueOf
+  INSERT valueOf(${1:#label})
+  function<TEnum super this, TType>(HH\EnumClass\Label<TEnum, TType> $label)[HH\Contexts\write_props]: ~HH\MemberOf<TEnum, TType>
+SORT TEXT: none
+nameOf
+  INSERT nameOf(${1:\$label})
+  function<TType>(~HH\EnumClass\Label<this, TType> $label)[]: string
+SORT TEXT: none
+getValues
+  INSERT getValues()
+  function()[HH\Contexts\write_props]: ~dict<string, HH\MemberOf<SomeEnumClass, mixed>>
+SORT TEXT: none

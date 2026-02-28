@@ -1,2 +1,2 @@
 os not WIN
-function posix_getuid
+extension posix

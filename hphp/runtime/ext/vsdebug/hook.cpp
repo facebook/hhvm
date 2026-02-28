@@ -18,6 +18,8 @@
 
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/debugger-request-info.h"
+#include "hphp/util/configs/jit.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -45,12 +47,16 @@ struct BreakContext {
 };
 
 void VSDebugHook::onRequestInit() {
-  RID().setDebuggerAttachedAtInit(true);
   BreakContext breakContext(false);
+  auto const disableJit = breakContext.m_debugger ?
+    breakContext.m_debugger->getDebuggerOptions().disableJit :
+    Cfg::Jit::DisabledByVSDebug;
+  RID().setVSDebugDisablesJit(disableJit);
 }
 
 void VSDebugHook::onOpcode(PC /*pc*/) {
   RID().setDebuggerIntr(false);
+  RID().clearFlag(DebuggerSignalFlag);
   BreakContext breakContext(true);
 }
 
@@ -211,15 +217,19 @@ void VSDebugHook::onFileLoad(Unit* efile) {
     return;
   }
 
+  std::filesystem::path p{efile->filepath()->toCppString()};
+  auto const& unitFilename = p.filename().string();
+  auto const& filenamesWithBp =
+    requestInfo->m_breakpointInfo->m_filenamesWithBp;
+  if (filenamesWithBp.find(unitFilename) == filenamesWithBp.end()) {
+    return;
+  }
+
   // Resolve any unresolved breakpoints that may be in this compilation unit.
   debugger->onCompilationUnitLoaded(
     requestInfo,
     efile
   );
-
-  if (requestInfo->m_flags.unresolvedBps) {
-    debugger->tryInstallBreakpoints(requestInfo);
-  }
 }
 
 void VSDebugHook::onDefClass(const Class* cls) {
@@ -233,6 +243,9 @@ void VSDebugHook::onDefClass(const Class* cls) {
     return;
   }
 
+  if (!requestInfo->m_breakpointInfo->m_hasFuncBp) {
+    return;
+  }
 
   // Resolve any breakpoints that are set on functions in this class.
   // Acquire semantics around reading requestInfo->m_flags lock-free.
@@ -249,7 +262,6 @@ void VSDebugHook::onDefClass(const Class* cls) {
         functionName
       );
     }
-    debugger->tryInstallBreakpoints(requestInfo);
   }
 }
 
@@ -280,6 +292,10 @@ void VSDebugHook::onDefFunc(const Func* func) {
     return;
   }
 
+  if (!requestInfo->m_breakpointInfo->m_hasFuncBp) {
+    return;
+  }
+
   // Resolve any breakpoints that are set on entry of this function.
 
   // Acquire semantics around reading requestInfo->m_flags lock-free.
@@ -293,7 +309,6 @@ void VSDebugHook::onDefFunc(const Func* func) {
       funcName
     );
   }
-  debugger->tryInstallBreakpoints(requestInfo);
 }
 
 void VSDebugHook::tryEnterDebugger(
@@ -348,16 +363,16 @@ void VSDebugHook::tryEnterDebugger(
     // the wrapper has the actual stdout and stderr pipes to use directly,
     // except for the case where we attached to an already-running script,
     // which behaves like server mode.
-    bool scriptAttachMode = RuntimeOption::VSDebuggerListenPort > 0 ||
-      (!RuntimeOption::ServerExecutionMode() &&
-       !RuntimeOption::VSDebuggerDomainSocketPath.empty());
+    bool scriptAttachMode =
+      Cfg::Debugger::VSDebuggerListenPort > 0 ||
+      (!Cfg::Server::Mode &&
+       !Cfg::Debugger::VSDebuggerDomainSocketPath.empty());
     if (!Debugger::hasSameTty()) {
       if (debugger->getDebuggerOptions().disableStdoutRedirection == false) {
-        if (!g_context.isNull()) {
-          g_context->addStdoutHook(debugger->getStdoutHook());
-        }
-
         if (scriptAttachMode || debugger->isDummyRequest()) {
+          if (!g_context.isNull()) {
+            g_context->addDebuggerStdoutHook(debugger->getStdoutHook());
+          }
           // Attach to stderr in server mode only for the dummy thread (to show
           // any error spew from evals, etc) or in script attach mode.
           // Attaching to all requests in server mode produces way too much error

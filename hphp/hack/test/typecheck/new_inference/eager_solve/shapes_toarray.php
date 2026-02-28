@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 type ShapeType = shape(
@@ -18,7 +18,7 @@ KeyedTraversable<Tk, Ta> $collection,
 (function(Tk, Ta): Tb) $mapping_function,
 ): darray<Tk, Tb>
 {
-  return darray[];
+  return dict[];
 }
 function testit(
     varray<ShapeType> $conversion_specs_shapes,

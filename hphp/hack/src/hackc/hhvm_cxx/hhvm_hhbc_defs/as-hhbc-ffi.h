@@ -18,6 +18,7 @@
 #include "hphp/runtime/vm/as-base.h"
 #include "hphp/runtime/vm/fcall-args-flags.h"
 #include "hphp/runtime/vm/hhbc-shared.h"
+#include "hphp/runtime/vm/iter-args-flags.h"
 
 #include "rust/cxx.h"
 
@@ -32,7 +33,12 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Convert an fcall flag `to a string of space-separated flag names.
+ * Convert an fcall flags to a string of space-separated flag names.
  */
 rust::String fcall_flags_to_string_ffi(FCallArgsFlags);
-}
+
+/*
+ * Convert an iter args flags to a string of space-separated flag names.
+ */
+rust::String iter_args_flags_to_string_ffi(IterArgsFlags);
+} // namespace HPHP

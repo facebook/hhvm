@@ -1,4 +1,4 @@
-File "trait_reuse_indirect2.php", line 13, characters 7-14:
+ERROR: File "trait_reuse_indirect2.php", line 13, characters 7-14:
 Traits with final methods cannot be reused, and `ReusedTrait` is already used by `MyBase`. (Typing[4186])
   File "trait_reuse_indirect2.php", line 6, characters 22-32:
   `TraitTwo` uses `ReusedTrait`

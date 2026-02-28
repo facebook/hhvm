@@ -1,4 +1,0 @@
-File "redundant_id.php", line 3, characters 10-10:
-redundant_id.php only declares `f`, it should be named f.php instead. (Lint[5564])
-File "redundant_id.php", line 4, characters 8-9:
-`id()` is no longer necessary here. Just use parentheses! (Lint[5501])

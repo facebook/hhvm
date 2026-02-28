@@ -29,14 +29,10 @@
 
 *************************************************************************/
 
-#include "config.h"
-#include <stdio.h>
-#include <assert.h>
+#include "hphp/runtime/ext/bcmath/config.h"
 #include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include "bcmath.h"
-#include "private.h"
+#include "hphp/runtime/ext/bcmath/bcmath.h"
+#include "hphp/runtime/ext/bcmath/private.h"
 
 
 /* Here is the full subtract routine that takes care of negative numbers.

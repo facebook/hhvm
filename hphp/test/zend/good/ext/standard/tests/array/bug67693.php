@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$array = darray[-1 => 0];
+$array = dict[-1 => 0];
 
 array_pop(inout $array);
 

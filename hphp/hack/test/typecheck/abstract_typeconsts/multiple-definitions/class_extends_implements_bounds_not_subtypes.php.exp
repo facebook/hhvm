@@ -1,0 +1,28 @@
+ERROR: File "class_extends_implements_bounds_not_subtypes.php", line 30, characters 27-28:
+Some members in class `C3` are incompatible with those declared in type `C1` (Typing[4340])
+  File "class_extends_implements_bounds_not_subtypes.php", line 18, characters 23-24:
+  The constraint on this type constant is inconsistent with its parent
+  File "class_extends_implements_bounds_not_subtypes.php", line 14, characters 29-39:
+  Expected `UpperBound1`
+  File "class_extends_implements_bounds_not_subtypes.php", line 18, characters 29-39:
+  But got `UpperBound2`
+ERROR: File "class_extends_implements_bounds_not_subtypes.php", line 31, characters 28-39:
+Invalid type hint (Typing[4090])
+  File "class_extends_implements_bounds_not_subtypes.php", line 31, characters 38-39:
+  No type constant `T2` in `UpperBound2`
+  File "class_extends_implements_bounds_not_subtypes.php", line 7, characters 11-21:
+  Declaration of `UpperBound2` is here
+ERROR: File "class_extends_implements_bounds_not_subtypes.php", line 36, characters 27-28:
+Some members in class `C4` are incompatible with those declared in type `C2` (Typing[4340])
+  File "class_extends_implements_bounds_not_subtypes.php", line 26, characters 23-24:
+  The constraint on this type constant is inconsistent with its parent
+  File "class_extends_implements_bounds_not_subtypes.php", line 22, characters 29-39:
+  Expected `UpperBound2`
+  File "class_extends_implements_bounds_not_subtypes.php", line 26, characters 29-39:
+  But got `UpperBound1`
+ERROR: File "class_extends_implements_bounds_not_subtypes.php", line 38, characters 28-39:
+Invalid type hint (Typing[4090])
+  File "class_extends_implements_bounds_not_subtypes.php", line 38, characters 38-39:
+  No type constant `T3` in `UpperBound1`
+  File "class_extends_implements_bounds_not_subtypes.php", line 3, characters 11-21:
+  Declaration of `UpperBound1` is here

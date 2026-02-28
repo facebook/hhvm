@@ -16,7 +16,7 @@ $data = bzcompress($string);
 $data2 = bzcompress($string, 1, 10);
 
 $data3 = $data2;
-$data3{3} = 0;
+$data3[3] = 0;
 
 try { var_dump(bzdecompress()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(bzdecompress(1,1,1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

@@ -6,22 +6,20 @@
  *
  *)
 
+type mode =
+  | ForTypecheck
+  | ForCodegen
+[@@deriving eq, hash, show, ord]
+
 type env = {
   ns_ns_uses: string SMap.t;
   ns_class_uses: string SMap.t;
   ns_fun_uses: string SMap.t;
   ns_const_uses: string SMap.t;
   ns_name: string option;
-  ns_auto_ns_map: (string * string) list;
-  ns_is_codegen: bool;
+  ns_mode: mode;
   ns_disable_xhp_element_mangling: bool;
 }
-[@@deriving eq, show]
+[@@deriving eq, hash, show, ord]
 
 val empty_with_default : env
-
-val empty_from_env : env -> env
-
-val empty_from_popt : ParserOptions.t -> env
-
-val is_global_namespace : env -> bool

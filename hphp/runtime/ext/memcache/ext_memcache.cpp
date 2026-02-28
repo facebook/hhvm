@@ -53,7 +53,7 @@ struct MEMCACHEGlobals final {
 static RDS_LOCAL_NO_CHECK(MEMCACHEGlobals*, s_memcache_globals){nullptr};
 #define MEMCACHEG(name) (*s_memcache_globals)->name
 
-const StaticString s_MemcacheData("MemcacheData");
+const StaticString s_Memcache("Memcache");
 
 struct MemcacheData {
   memcached_st m_memcache;
@@ -81,10 +81,10 @@ struct MemcacheData {
       memcached_behavior_set(&m_memcache, MEMCACHED_BEHAVIOR_HASH,
                              MEMCACHED_HASH_CRC);
     }
-  };
+  }
   ~MemcacheData() {
     memcached_free(&m_memcache);
-  };
+  }
 };
 
 static bool ini_on_update_hash_strategy(const std::string& value) {
@@ -171,6 +171,7 @@ static uint32_t memcache_get_flag_for_type(const Variant& var) {
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       return MMC_TYPE_STRING;
   }
   not_reached();
@@ -201,7 +202,7 @@ static std::vector<char> memcache_prepare_for_storage(const MemcacheData* data,
     v = var.toString();
   } else {
     flag |= MMC_SERIALIZED;
-    v = f_serialize(var);
+    v = HHVM_FN(serialize)(var);
   }
   std::vector<char> payload;
   size_t value_len = v.length();
@@ -758,33 +759,32 @@ HHVM_METHOD(Memcache, addserver, const String& host, int64_t port /* = 11211 */,
 ///////////////////////////////////////////////////////////////////////////////
 
 struct MemcacheExtension final : Extension {
-    MemcacheExtension() : Extension("memcache", "3.0.8") {};
+    MemcacheExtension() : Extension("memcache", "3.0.8", NO_ONCALL_YET) {}
     void threadInit() override {
       *s_memcache_globals = new MEMCACHEGlobals;
       assertx(*s_memcache_globals);
-      IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+      IniSetting::Bind(this, IniSetting::Mode::Request,
                        "memcache.hash_strategy", "standard",
                        IniSetting::SetAndGet<std::string>(
                          ini_on_update_hash_strategy,
-                         nullptr
-                       ),
-                       &MEMCACHEG(hash_strategy));
-      IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                         nullptr,
+                         &MEMCACHEG(hash_strategy)
+                       ));
+      IniSetting::Bind(this, IniSetting::Mode::Request,
                        "memcache.hash_function", "crc32",
                        IniSetting::SetAndGet<std::string>(
                          ini_on_update_hash_function,
-                         nullptr
-                       ),
-                       &MEMCACHEG(hash_function));
+                         nullptr,
+                         &MEMCACHEG(hash_function)
+                       ));
     }
     void threadShutdown() override {
       delete *s_memcache_globals;
       *s_memcache_globals = nullptr;
     }
 
-    void moduleInit() override {
+    void moduleRegisterNative() override {
       HHVM_RC_INT(MEMCACHE_COMPRESSED, k_MEMCACHE_COMPRESSED);
-      HHVM_RC_BOOL(MEMCACHE_HAVE_SESSION, false);
       HHVM_ME(Memcache, connect);
       HHVM_ME(Memcache, add);
       HHVM_ME(Memcache, set);
@@ -801,10 +801,8 @@ struct MemcacheExtension final : Extension {
       HHVM_ME(Memcache, getextendedstats);
       HHVM_ME(Memcache, addserver);
 
-      Native::registerNativeDataInfo<MemcacheData>(s_MemcacheData.get());
-
-      loadSystemlib();
+      Native::registerNativeDataInfo<MemcacheData>(s_Memcache.get());
     }
-} s_memcache_extension;;
+} s_memcache_extension;
 
 }

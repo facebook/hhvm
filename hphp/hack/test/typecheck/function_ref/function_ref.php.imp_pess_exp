@@ -1,0 +1,116 @@
+ERROR: File "function_ref.php", line 51, characters 17-18:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 39, characters 37-42:
+  Expected `string`
+  File "function_ref.php", line 43, characters 37-44:
+  But got `arraykey`
+ERROR: File "function_ref.php", line 51, characters 17-18:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 43, characters 48-55:
+  Expected `arraykey`
+  File "function_ref.php", line 39, characters 46-50:
+  But got `mixed`
+ERROR: File "function_ref.php", line 68, characters 17-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 19, characters 28-35:
+  Expected `arraykey`
+  File "function_ref.php", line 39, characters 46-50:
+  But got `mixed`
+ERROR: File "function_ref.php", line 68, characters 17-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 39, characters 37-42:
+  Expected `string`
+  File "function_ref.php", line 19, characters 23-24:
+  But got `~arraykey` because method must be callable in a dynamic context
+ERROR: File "function_ref.php", line 75, characters 17-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 5, characters 52-59:
+  Expected `arraykey`
+  File "function_ref.php", line 39, characters 46-50:
+  But got `mixed`
+ERROR: File "function_ref.php", line 75, characters 17-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 39, characters 37-42:
+  Expected `string`
+  File "function_ref.php", line 5, characters 38-45:
+  But got `arraykey`
+ERROR: File "function_ref.php", line 85, characters 16-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 31, characters 3-57:
+  Expected `HH\FunctionRef<(readonly function(arraykey): ~arraykey)>`
+  File "function_ref.php", line 82, characters 10-39:
+  But got `(function(arraykey $x): ~arraykey)`
+ERROR: File "function_ref.php", line 90, characters 16-18:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 22, characters 22-22:
+  Expected `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
+  File "function_ref.php", line 31, characters 48-55:
+  But got `arraykey`
+ERROR: File "function_ref.php", line 90, characters 16-18:
+Invalid argument (Typing[4323])
+  File "function_ref.php", line 22, characters 22-22:
+  `T` is a constrained type parameter
+  File "function_ref.php", line 22, characters 10-20:
+  This type constraint is violated
+  File "function_ref.php", line 31, characters 37-44:
+  Expected `arraykey`
+  File "function_ref.php", line 22, characters 22-22:
+  But got `mixed` where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function
+ERROR: File "function_ref.php", line 90, characters 16-18:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 31, characters 37-44:
+  Expected `arraykey`
+  File "function_ref.php", line 22, characters 22-22:
+  But got `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
+ERROR: File "function_ref.php", line 95, characters 16-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 11, characters 46-46:
+  Expected `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
+  File "function_ref.php", line 31, characters 48-55:
+  But got `arraykey`
+ERROR: File "function_ref.php", line 95, characters 16-19:
+Invalid argument (Typing[4323])
+  File "function_ref.php", line 11, characters 46-46:
+  `T` is a constrained type parameter
+  File "function_ref.php", line 11, characters 26-44:
+  This type constraint is violated
+  File "function_ref.php", line 31, characters 37-44:
+  Expected `arraykey`
+  File "function_ref.php", line 11, characters 46-46:
+  But got `mixed` where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function
+ERROR: File "function_ref.php", line 95, characters 16-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 31, characters 37-44:
+  Expected `arraykey`
+  File "function_ref.php", line 11, characters 46-46:
+  But got `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
+ERROR: File "function_ref.php", line 100, characters 17-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 14, characters 32-32:
+  Expected `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
+  File "function_ref.php", line 35, characters 51-58:
+  But got `arraykey`
+ERROR: File "function_ref.php", line 100, characters 17-19:
+Invalid argument (Typing[4323])
+  File "function_ref.php", line 14, characters 32-32:
+  `T` is a constrained type parameter
+  File "function_ref.php", line 14, characters 19-30:
+  This type constraint is violated
+  File "function_ref.php", line 35, characters 40-47:
+  Expected `arraykey`
+  File "function_ref.php", line 14, characters 32-32:
+  But got `mixed` where `T#1` corresponds to the rank-2 type parameter `T` in the polymorphic function
+ERROR: File "function_ref.php", line 100, characters 17-19:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 35, characters 40-47:
+  Expected `arraykey`
+  File "function_ref.php", line 14, characters 32-32:
+  But got `T#1` which corresponds to the rank-2 type parameter `T` in the polymorphic function
+ERROR: File "function_ref.php", line 104, characters 19-38:
+Invalid argument (Typing[4411])
+  File "function_ref.php", line 104, characters 19-38:
+  Function readonly mismatch
+  File "function_ref.php", line 104, characters 19-38:
+  This function is not marked readonly
+  File "function_ref.php", line 19, characters 10-12:
+  This function is marked readonly

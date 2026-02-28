@@ -52,7 +52,7 @@ class AChild extends ParentClass {
 let errors_to_string errors =
   List.fold_left
     (fun str error ->
-      str ^ (error |> User_error.to_absolute |> Errors.to_string))
+      str ^ (error |> User_diagnostic.to_absolute |> Diagnostics.to_string))
     ""
   @@ errors
 
@@ -64,7 +64,7 @@ let () =
         env
         { default_loop_input with disk_changes = init_disk_changes })
   in
-  let errors = Errors.get_sorted_error_list env.errorl in
+  let errors = Diagnostics.get_sorted_diagnostic_list env.diagnostics in
   if errors <> [] then
     Test.fail ("Expected no errors. Got:\n" ^ errors_to_string errors);
 
@@ -74,6 +74,6 @@ let () =
         env
         { default_loop_input with disk_changes = next_disk_changes })
   in
-  let errors = Errors.get_sorted_error_list env.errorl in
+  let errors = Diagnostics.get_sorted_diagnostic_list env.diagnostics in
   if errors <> [] then
     Test.fail ("Expected no errors. Got:\n" ^ errors_to_string errors)

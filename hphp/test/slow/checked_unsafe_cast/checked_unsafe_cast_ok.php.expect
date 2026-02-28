@@ -1,0 +1,14 @@
+float(2.3)
+vec(2) {
+  int(2)
+  int(3)
+}
+int(1)
+vec(2) {
+  int(2)
+  string(1) "A"
+}
+object(HH\Map) (1) {
+  [2]=>
+  string(1) "a"
+}

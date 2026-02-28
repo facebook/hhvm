@@ -1,0 +1,136 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#pragma once
+
+#include <memory>
+#include <string>
+
+#include <thrift/compiler/ast/t_const.h>
+#include <thrift/compiler/ast/t_type.h>
+
+namespace apache::thrift::compiler {
+
+/**
+ * Represents a typedef definition.
+ *
+ * A typedef introduces a named IDL alias of a type.
+ *
+ * Note that IDL typedefs are *not* a Thrift Object Model (TOM) concept, and in
+ * particular they do not represent TOM's "Opaque Alias Types".
+ * The IDL typedefs represented by this type are pure IDL-level aliases, and
+ * must (eventually) resolve to an underlying TOM type (eg. a struct, primitive,
+ * etc.). They are *transparent* aliases.
+ */
+class t_typedef : public t_type {
+ public:
+  enum class kind {
+    defined,
+    unnamed,
+    placeholder,
+  };
+
+  t_typedef(const t_program* program, std::string name, t_type_ref type)
+      : t_type(program, std::move(name)), aliased_type_ref_(type) {}
+
+  const t_type_ref& type() const { return aliased_type_ref_; }
+  void set_type(t_type_ref type) { aliased_type_ref_ = type; }
+
+  kind typedef_kind() const;
+
+  // Returns the first type, in the typedef type hierarchy, matching the
+  // given predicate or nullptr.
+  template <typename UnaryPredicate>
+  static const t_type* find_type_if(const t_type* type, UnaryPredicate&& pred) {
+    while (true) {
+      if (type == nullptr) {
+        return nullptr;
+      }
+      if (pred(type)) {
+        return type;
+      }
+      if (const t_typedef* as_typedef = type->try_as<t_typedef>()) {
+        type = as_typedef->type().get_type();
+      } else {
+        return nullptr;
+      }
+    }
+  }
+
+  // Finds the first matching annoation in the typedef's type hierarchy.
+  // Return null if not found.
+  static const std::string* get_first_unstructured_annotation_or_null(
+      const t_type* type, const std::vector<std::string_view>& names);
+
+  // Finds the first matching annoation in the typedef's type hierarchy.
+  // Return default_value or "" if not found.
+  template <typename D = const std::string*>
+  static auto get_first_unstructured_annotation(
+      const t_type* type,
+      const std::vector<std::string_view>& names,
+      D&& default_value = nullptr) {
+    return unstructured_annotation_or(
+        get_first_unstructured_annotation_or_null(type, names),
+        std::forward<D>(default_value));
+  }
+
+  // Finds the first matching structured annotation in the typedef's hierarchy.
+  // Return null if not found.
+  static const t_const* get_first_structured_annotation_or_null(
+      const t_type* type, const char* uri);
+
+  std::string get_full_name() const override { return get_scoped_name(); }
+
+  bool is_sealed() const override;
+
+  static std::unique_ptr<t_typedef> make_unnamed(
+      const t_program* program, std::string name, t_type_ref type);
+
+ protected:
+  /**
+   * Reference to the IDL type being transparently aliased by this typedef.
+   */
+  t_type_ref aliased_type_ref_;
+
+ private:
+  bool unnamed_{false};
+};
+
+// A placeholder for a type that can't be resolved at parse time.
+//
+// TODO(T244601847): Merge this class with t_type_ref and resolve all types
+// after parsing. This class assumes that, since the type was referenced by
+// name, it is safe to create a dummy typedef to use as a proxy for the original
+// type. However, this actually breaks dynamic_cast for t_node and t_type::is_*
+// calls, resulting in a lot of subtle bugs that may or may not show up,
+// depending on the order of IDL declarations.
+class t_placeholder_typedef final : public t_typedef {
+ public:
+  t_placeholder_typedef(const t_program* program, std::string name)
+      : t_typedef(program, std::move(name), {}) {}
+
+  /**
+   * Resolve and find the actual type that the symbolic name refers to.
+   * Return true iff the type exists in the scope.
+   */
+  bool resolve();
+
+  std::string get_full_name() const override {
+    return aliased_type_ref_ ? aliased_type_ref_->get_full_name() : name();
+  }
+};
+
+} // namespace apache::thrift::compiler

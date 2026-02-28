@@ -11,7 +11,7 @@
 // get a class
 class classA
 {
-    public function __toString()[] {
+    public function __toString()[] :mixed{
         return "Class A object";
     }
 }
@@ -31,7 +31,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $pattern argument
-$inputs = varray[
+$inputs = vec[
 
 // int data
 /*1*/  0,
@@ -66,7 +66,7 @@ $inputs = varray[
 $iterator = 1;
 $regs = null;
 foreach($inputs as $input) {
-    if (@is_array($regs)){
+    if (is_array($regs)){
         $regs = null;
     }
     echo "\n-- Iteration $iterator --\n";

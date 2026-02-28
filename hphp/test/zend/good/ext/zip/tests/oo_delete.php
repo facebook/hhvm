@@ -1,6 +1,6 @@
 <?hh <<__EntryPoint>> function main(): void {
 $dirname = dirname(__FILE__) . '/';
-$file = __SystemLib\hphp_test_tmppath('__tmp_oo_delete.zip');
+$file = sys_get_temp_dir().'/'.'__tmp_oo_delete.zip';
 if (file_exists($file)) {
     unlink($file);
 }

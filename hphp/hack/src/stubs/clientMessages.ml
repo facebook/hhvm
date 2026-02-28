@@ -7,8 +7,6 @@
  *
  *)
 
-let ignore_ide_from _ = false
-
 let waiting_for_server_to_be_started_doc = ""
 
 let angery_reaccs_only () = false

@@ -15,11 +15,10 @@
 */
 
 #include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/debugger-request-info.h"
 #include "hphp/runtime/ext/vsdebug/php_executor.h"
 
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/base/php-globals.h"
-#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {

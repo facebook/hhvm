@@ -1,2 +1,3 @@
 concurrent
+---
 `concurrent` allows you to `await` multiple values at once. This is similar to `Vec\map_async`, but `concurrent` allows awaiting unrelated values of different types.

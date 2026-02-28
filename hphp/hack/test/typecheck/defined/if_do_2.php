@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function foo(bool $b): int {
   if ($b) {

@@ -22,10 +22,10 @@ type entry = {
   mutable contents: entry_contents;
   mutable source_text: Full_fidelity_source_text.t option;
   mutable parser_return: Parser_return.t option;
-  mutable ast_errors: Errors.t option;
+  mutable ast_diagnostics: Diagnostics.t option;
   mutable cst: PositionedSyntaxTree.t option;
-  mutable tast: Tast.program option;
-  mutable naming_and_typing_errors: Errors.t option;
+  mutable tast: Tast.program Tast_with_dynamic.t option;
+  mutable all_diagnostics: Diagnostics.t option;
   mutable symbols: Relative_path.t SymbolOccurrence.t list option;
 }
 
@@ -75,10 +75,10 @@ let make_entry ~(path : Relative_path.t) ~(contents : entry_contents) : entry =
     contents;
     source_text = None;
     parser_return = None;
-    ast_errors = None;
+    ast_diagnostics = None;
     cst = None;
     tast = None;
-    naming_and_typing_errors = None;
+    all_diagnostics = None;
     symbols = None;
   }
 
@@ -104,10 +104,15 @@ let get_popt (t : t) : ParserOptions.t = t.popt
 
 let get_tcopt (t : t) : TypecheckerOptions.t = t.tcopt
 
+let get_package_info (t : t) : Package_info.t =
+  t.popt.ParserOptions.package_info
+
 let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =
   { t with tcopt = f t.tcopt }
 
 let get_backend (t : t) : Provider_backend.t = t.backend
+
+let set_backend (t : t) (b : Provider_backend.t) = { t with backend = b }
 
 let get_deps_mode (t : t) : Typing_deps_mode.t = t.deps_mode
 
@@ -220,27 +225,86 @@ let get_telemetry (t : t) : Telemetry.t =
        it not being the intended provider. *)
   in
   match t.backend with
-  | Provider_backend.Local_memory lmem ->
+  | Provider_backend.Local_memory
+      {
+        Provider_backend.shallow_decl_cache;
+        decl_cache;
+        folded_class_cache;
+        decls_reflect_this_file;
+        reverse_naming_table_delta;
+        fixmes;
+        naming_db_path_ref = _;
+        dep_table;
+      } ->
     let open Provider_backend in
     telemetry
-    |> Decl_cache.get_telemetry lmem.decl_cache ~key:"decl_cache"
+    |> Decl_cache.get_telemetry decl_cache ~key:"decl_cache"
+    |> (fun telemetry ->
+         match !decls_reflect_this_file with
+         | None -> telemetry
+         | Some (path, file_info, pfh_hash) ->
+           let value =
+             Printf.sprintf
+               "%s [%s] #%s"
+               (Relative_path.suffix path)
+               (FileInfo.to_string file_info)
+               (Int64.Hex.to_string pfh_hash)
+           in
+           Telemetry.string_ ~key:"decls_for_file" ~value telemetry)
     |> Shallow_decl_cache.get_telemetry
-         lmem.shallow_decl_cache
+         shallow_decl_cache
          ~key:"shallow_decl_cache"
-    |> Linearization_cache.get_telemetry
-         lmem.linearization_cache
-         ~key:"linearization_cache"
+    |> Folded_class_cache.get_telemetry
+         folded_class_cache
+         ~key:"folded_class_cache"
     |> Reverse_naming_table_delta.get_telemetry
-         lmem.reverse_naming_table_delta
+         reverse_naming_table_delta
          ~key:"reverse_naming_table_delta"
-    |> Fixmes.get_telemetry lmem.fixmes ~key:"fixmes"
+    |> Fixmes.get_telemetry fixmes ~key:"fixmes"
+    |> Telemetry.int_
+         ~key:"dep_table_entry_count"
+         ~value:(Stdlib.Hashtbl.length dep_table)
   | _ -> telemetry
 
 let reset_telemetry (t : t) : unit =
   match t.backend with
   | Provider_backend.Local_memory
-      { Provider_backend.decl_cache; shallow_decl_cache; _ } ->
+      {
+        Provider_backend.shallow_decl_cache;
+        decl_cache;
+        folded_class_cache;
+        decls_reflect_this_file = _;
+        reverse_naming_table_delta = _;
+        fixmes = _;
+        naming_db_path_ref = _;
+        dep_table = _;
+      } ->
     Provider_backend.Decl_cache.reset_telemetry decl_cache;
     Provider_backend.Shallow_decl_cache.reset_telemetry shallow_decl_cache;
+    Provider_backend.Folded_class_cache.reset_telemetry folded_class_cache;
     ()
   | _ -> ()
+
+let ctx_with_pessimisation_info_exn ctx info =
+  match ctx.backend with
+  | Provider_backend.Pessimised_shared_memory _ ->
+    { ctx with backend = Provider_backend.Pessimised_shared_memory info }
+  | _ ->
+    failwith
+      "This operation is only supported on contexts with a
+      Provider_backend.Pessimised_shared_memory backend."
+
+let implicit_sdt_for_fun ctx fe =
+  TypecheckerOptions.everything_sdt (get_tcopt ctx)
+  && not fe.Typing_defs.fe_no_auto_dynamic
+
+let no_auto_likes_for_fun fe = fe.Typing_defs.fe_no_auto_likes
+
+let with_tcopt_for_autocomplete t =
+  let tcopt =
+    t.tcopt
+    |> TypecheckerOptions.set_tco_autocomplete_mode
+    |> TypecheckerOptions.set_skip_check_under_dynamic
+    |> TypecheckerOptions.set_skip_hierarchy_checks
+  in
+  { t with tcopt }

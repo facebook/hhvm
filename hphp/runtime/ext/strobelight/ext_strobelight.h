@@ -105,7 +105,7 @@ struct Strobelight final {
   static bool active();
   static bool isXenonActive();
 
-  ~Strobelight() noexcept {};
+  ~Strobelight() noexcept {}
   Strobelight(const Strobelight&) = delete;
   Strobelight(Strobelight&&) = delete;
   void operator=(const Strobelight&) = delete;
@@ -119,7 +119,7 @@ struct Strobelight final {
   static void shutdown();
 
  private:
-  Strobelight() noexcept {};
+  Strobelight() noexcept {}
 };
 
 }

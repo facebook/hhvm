@@ -8,7 +8,10 @@ class D { }
 class C {
   // Legal, as we don't check signatures for private members
   private vec<int> $items;
-  private function setItems(vec<int> $vi):void { $this->items = $vi; }
+  private function setItems(vec<int> $vi):void {
+    // Unfortunately illegal, as setItems might be called through dynamic
+    $this->items = $vi;
+  }
 
   public function __construct() { $this->items = vec[]; }
   public function getItems(): vec<int> {

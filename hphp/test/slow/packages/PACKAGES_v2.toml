@@ -1,0 +1,16 @@
+[packages]
+
+[packages.prod]
+include_paths=["//fake_flib/", "//basic-3.php", "//doesnotexists/"]
+
+[packages.intern]
+include_paths=["//fake_flib/intern/"]
+includes=["prod"]
+
+[deployments]
+
+[deployments.my-prod]
+packages = ["prod"]
+
+[deployments.my-intern]
+packages = ["intern", "prod"]

@@ -21,15 +21,19 @@ from typing import (
 )
 
 import libcst
-from libcst.metadata import CodeRange, MetadataWrapper, PositionProvider
-from lspcommand import LspCommandProcessor, Transcript, TranscriptEntry
-from utils import (
-    Json,
-    VariableMap,
+from hphp.hack.test.integration.lspcommand import (
+    LspCommandProcessor,
+    Transcript,
+    TranscriptEntry,
+)
+from hphp.hack.test.integration.utils import (
     fixup_hhi_json,
     interpolate_variables,
+    Json,
     uninterpolate_variables,
+    VariableMap,
 )
+from libcst.metadata import CodeRange, MetadataWrapper, PositionProvider
 
 
 _MessageSpec = Union[
@@ -73,9 +77,9 @@ def line() -> int:
     accurately.
     """
     cf = inspect.currentframe()
-    assert (
-        cf is not None
-    ), "Must be able to get current call frame to produce error messages for test"
+    assert cf is not None, (
+        "Must be able to get current call frame to produce error messages for test"
+    )
     # pyre-fixme[16]: `Optional` has no attribute `f_lineno`.
     return cf.f_back.f_lineno
 
@@ -93,20 +97,25 @@ class LspTestSpec:
         self._messages: Sequence["_MessageSpec"] = []
         self._ignored_notification_methods: AbstractSet[str] = set()
         # pyre-fixme[11]: Annotation `Json` is not defined as a type.
-        self._ignored_requests: Sequence[Tuple[str, Json]] = []
-        self._ignore_status_diagnostics: bool = False
+        self._ignored_requests: Sequence[Tuple[str, Optional[Json]]] = []
 
     def ignore_notifications(self, *, method: str) -> "LspTestSpec":
+        """For example .ignore_notifications(method="textDocument/publishDiagnostics") --
+        normally an unexpected notification from the LSP server would result in test failure,
+        but this directive means that unexpected notifications with this exact method name do not.
+        """
         ignored_notification_methods = set(self._ignored_notification_methods)
         ignored_notification_methods.add(method)
         return self._update(ignored_notification_methods=ignored_notification_methods)
 
-    def ignore_status_diagnostics(self, value: bool) -> "LspTestSpec":
-        return self._update(ignore_status_diagnostics=value)
-
     def ignore_requests(
-        self, *, method: str, params: Json, comment: Optional[str] = None
+        self, *, method: str, params: Optional[Json], comment: Optional[str] = None
     ) -> "LspTestSpec":
+        """For example .ignore_requests(comment="for_tester", method="window/showStatus", params={"type":2}) --
+        normally an unexpected request from the LSP server would result in test failure,
+        but this directive means that unexpected requests with this exact method name and params do not.
+        If you pass params=None then unexpected requests with this exact method name and *any* params do not.
+        Typically used for window/showStatus messages!"""
         ignored_requests = list(self._ignored_requests)
         ignored_requests.append((method, params))
         return self._update(ignored_requests=ignored_requests)
@@ -232,7 +241,6 @@ class LspTestSpec:
         uri: str,
         contents: Optional[str],
         notify: bool,
-        wait: Optional[bool] = None,
     ) -> "LspTestSpec":
         """Write a file to disk in the middle of the LSP test.
 
@@ -240,8 +248,7 @@ class LspTestSpec:
 
         If `notify` is `True`, also send a `workspace/didChangeWatchedFiles`
         notification to the language server corresponding to the file you just
-        changed. The test will then wait for serverless IDE to process the file
-        change before proceeding, unless `wait` is set to `False`.
+        changed.
         """
         messages = list(self._messages)
         messages.append(
@@ -259,23 +266,6 @@ class LspTestSpec:
                     comment=comment,
                 )
             )
-            if wait is None:
-                wait = True
-            if wait:
-                messages.append(
-                    _WaitForNotificationSpec(
-                        comment=(
-                            f"Waiting for change to URI {uri} to be processed... "
-                            + "(set wait=False on the corresponding `write_to_disk` call "  # noqa: B950
-                            + "if this is undesirable)"
-                        ),
-                        method="telemetry/event",
-                        params={
-                            "type": 4,
-                            "message": "[client-ide] Done processing file changes",
-                        },
-                    )
-                )
         return self._update(messages=messages)
 
     def run(
@@ -313,7 +303,6 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         messages: Optional[Sequence["_MessageSpec"]] = None,
         ignored_notification_methods: Optional[AbstractSet[str]] = None,
         ignored_requests: Optional[Sequence[Tuple[str, Json]]] = None,
-        ignore_status_diagnostics: Optional[bool] = None,
     ) -> "LspTestSpec":
         spec = copy.copy(self)
         if messages is not None:
@@ -322,13 +311,11 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             spec._ignored_notification_methods = ignored_notification_methods
         if ignored_requests is not None:
             spec._ignored_requests = ignored_requests
-        if ignore_status_diagnostics:
-            spec._ignore_status_diagnostics = ignore_status_diagnostics
         return spec
 
     def _get_json_commands(
         self,
-        variables: VariableMap
+        variables: VariableMap,
         # pyre-fixme[11]: Annotation `_LspIdMap` is not defined as a type.
     ) -> Tuple[Sequence[Json], "_LspIdMap"]:
         """Transforms this test spec into something the LSP command processor
@@ -457,8 +444,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 transcript_id = LspCommandProcessor._client_request_id(lsp_id)
                 handled_entries.add(transcript_id)
                 assert transcript_id in transcript, (
-                    f"Expected message with ID {lsp_id!r} "
-                    + f"to have an entry in the transcript "
+                    f"Expected message with ID {lsp_id!r} to have an entry in the transcript "
                     + f"under key {transcript_id!r}, "
                     + f"but it was not found. Transcript: {transcript!r}"
                 )
@@ -472,8 +458,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 transcript_id = LspCommandProcessor._client_request_id(lsp_id)
                 handled_entries.add(transcript_id)
                 assert transcript_id in transcript, (
-                    f"Expected message with ID {lsp_id!r} "
-                    + f"to have an entry in the transcript "
+                    f"Expected message with ID {lsp_id!r} to have an entry in the transcript "
                     + f"under key {transcript_id!r}, "
                     + f"but it was not found. Transcript: {transcript!r}"
                 )
@@ -651,7 +636,7 @@ This was the associated request:
         )
         powered_by = actual_response.get("powered_by")
 
-        request_snippet = f"""\
+        request_snippet = """\
     .request(
         line=line(),"""
         if request.comment is not None:
@@ -667,7 +652,7 @@ This was the associated request:
         if powered_by is not None:
             request_snippet += f"""
         powered_by={powered_by!r},"""
-        request_snippet += f"""
+        request_snippet += """
     )"""
 
         remediation = f"""\
@@ -692,20 +677,14 @@ make it match:
 
             if (
                 entry.received is not None
-                and "id" not in entry.received
-                and self._ignore_status_diagnostics
-                and entry.received["method"] == "textDocument/publishDiagnostics"
-                and entry.received["params"].get("isStatusFB")
-            ):
-                yield transcript_id
-
-            if (
-                entry.received is not None
                 and "id" in entry.received
                 and "method" in entry.received
                 and "params" in entry.received
-                and (entry.received["method"], entry.received["params"])
-                in self._ignored_requests
+                and (
+                    (entry.received["method"], entry.received["params"])
+                    in self._ignored_requests
+                    or (entry.received["method"], None) in self._ignored_requests
+                )
             ):
                 yield transcript_id
 
@@ -840,9 +819,9 @@ received the notification:
             for request, lsp_id in lsp_id_map.items()
             if lsp_id == previous_request_lsp_id
         ]
-        assert isinstance(
-            corresponding_request, _RequestSpec
-        ), "We should have identified a client-to-server request at this point"
+        assert isinstance(corresponding_request, _RequestSpec), (
+            "We should have identified a client-to-server request at this point"
+        )
         return corresponding_request
 
     def _render_telemetry_rage(

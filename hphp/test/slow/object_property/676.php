@@ -7,7 +7,7 @@ class A {
 
 
 <<__EntryPoint>>
-function main_676() {
+function main_676() :mixed{
 $old = new A;
 unset($old->a);
 var_dump($old);

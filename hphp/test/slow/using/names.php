@@ -7,7 +7,7 @@ class C {
 
 
 <<__EntryPoint>>
-function main_names() {
+function main_names() :mixed{
 var_dump(C::using);
 
 $using = 'local variable';

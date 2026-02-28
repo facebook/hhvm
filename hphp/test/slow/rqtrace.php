@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   __hhvm_intrinsics\rqtrace_create_event("EVENT0", 100, 200, dict[]);
   __hhvm_intrinsics\rqtrace_create_event("EVENT1", 200, 300, dict['a'=>'b']);
   __hhvm_intrinsics\rqtrace_create_scope("SCOPE0", 300, 400, dict[]);
@@ -25,7 +25,7 @@ function main() {
   __hhvm_intrinsics\rqtrace_create_event("EVENT1", 850, 900, dict['e'=>'f']);
   __hhvm_intrinsics\rqtrace_create_scope("SCOPE1", 900, 950, dict['g'=>'h']);
 
-  $valid = varray[
+  $valid = vec[
     'EVENT0',
     'EVENT1',
     'SCOPE0',

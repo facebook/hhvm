@@ -1,116 +1,70 @@
 vec(6) {
-  dict(4) {
+  dict(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
     int(10)
     ["function"]=>
     string(3) "bar"
-    ["args"]=>
-    vec(1) {
-      int(0)
-    }
   }
-  dict(4) {
+  dict(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
     int(15)
     ["function"]=>
     string(3) "foo"
-    ["args"]=>
-    vec(1) {
-      int(0)
-    }
   }
-  dict(2) {
+  dict(1) {
     ["function"]=>
     string(4) "main"
-    ["args"]=>
-    vec(0) {
-    }
   }
-  dict(2) {
+  dict(1) {
     ["function"]=>
     string(43) "Closure$__SystemLib\enter_async_entry_point"
-    ["args"]=>
-    vec(0) {
-    }
   }
-  dict(2) {
+  dict(1) {
     ["function"]=>
     string(12) "HH\Asio\join"
-    ["args"]=>
-    vec(1) {
-      object(HH\AsyncFunctionWaitHandle) (0) {
-      }
-    }
   }
-  dict(2) {
+  dict(1) {
     ["function"]=>
     string(35) "__SystemLib\enter_async_entry_point"
-    ["args"]=>
-    vec(1) {
-      function(main)
-    }
   }
 }
 vec(6) {
-  dict(4) {
+  dict(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
     int(10)
     ["function"]=>
     string(3) "bar"
-    ["args"]=>
-    vec(1) {
-      int(65536)
-    }
   }
-  dict(5) {
+  dict(4) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
     int(16)
     ["function"]=>
     string(3) "foo"
-    ["args"]=>
-    vec(1) {
-      int(65536)
-    }
     ["metadata"]=>
     string(8) "I am foo"
   }
-  dict(2) {
+  dict(1) {
     ["function"]=>
     string(4) "main"
-    ["args"]=>
-    vec(0) {
-    }
   }
-  dict(2) {
+  dict(1) {
     ["function"]=>
     string(43) "Closure$__SystemLib\enter_async_entry_point"
-    ["args"]=>
-    vec(0) {
-    }
   }
-  dict(2) {
+  dict(1) {
     ["function"]=>
     string(12) "HH\Asio\join"
-    ["args"]=>
-    vec(1) {
-      object(HH\AsyncFunctionWaitHandle) (0) {
-      }
-    }
   }
-  dict(2) {
+  dict(1) {
     ["function"]=>
     string(35) "__SystemLib\enter_async_entry_point"
-    ["args"]=>
-    vec(1) {
-      function(main)
-    }
   }
 }

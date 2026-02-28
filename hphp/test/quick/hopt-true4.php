@@ -1,6 +1,6 @@
 <?hh
 
-function foo($x) {
+function foo($x) :mixed{
   if (!$x) { return true; }
   else { return false; }
 }

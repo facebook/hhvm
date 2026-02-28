@@ -1,3 +1,0 @@
-#!/bin/sh
-
-exec echo '{"passed":false,"errors":[{"message":[{"descr":"Invalid return type","path":"test.php","line":1,"start":1,"end":1,"code":4110},{"descr":"This is a string","path":"test.php","line":2,"start":2,"end":2,"code":4110},{"descr":"It is incompatible with an int","path":"test.php","line":1,"start":3,"end":3,"code":4110}]}],"version":"mock"}'

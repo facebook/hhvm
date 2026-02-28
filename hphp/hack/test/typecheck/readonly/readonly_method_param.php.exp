@@ -1,0 +1,6 @@
+ERROR: File "readonly_method_param.php", line 16, characters 16-17:
+Invalid argument (Typing[4411])
+  File "readonly_method_param.php", line 16, characters 16-17:
+  This expression is readonly
+  File "readonly_method_param.php", line 4, characters 38-39:
+  It is incompatible with this parameter, which is mutable

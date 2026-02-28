@@ -9,7 +9,7 @@ async function bar(): Awaitable<bool> {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(HH\Asio\join(bar()));
   var_dump(HH\Asio\join(bar()));
   var_dump(HH\Asio\join(bar()));

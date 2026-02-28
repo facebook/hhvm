@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 (**
  * Three values packed into one 64-bit integer:
  *
@@ -15,8 +17,8 @@
  * <----------------------------><----------------------><------->X
  *       beginning of line                 line            column
  *
- * - (bol)  beginning of line (byte offset from start of file) starts at 0,
-            maximum is 2^30-1 = 1,073,741,823
+ * - (bol)  beginning of line (byte offset from start of file).
+              Starts at 0, maximum is 2^30-1 = 1,073,741,823
  * - (line) line number starts at 1, maximum is 2^24-1 = 16,777,215
  * - (col)  column number starts at 0, maximum is 2^9-1 = 511
  *            This is saturating, i.e. every column past 511 has column
@@ -26,7 +28,7 @@
  *
  *)
 
-type t = int [@@deriving eq, ord]
+type t = int [@@deriving eq, hash, ord]
 
 let column_bits = 9
 
@@ -82,8 +84,6 @@ let pp fmt pos =
   Format.pp_print_int fmt (line pos);
   Format.pp_print_string fmt ":";
   Format.pp_print_int fmt (column pos + 1)
-
-let compare : t -> t -> int = compare
 
 let beg_of_file = bol_line_col_unchecked 0 1 0
 

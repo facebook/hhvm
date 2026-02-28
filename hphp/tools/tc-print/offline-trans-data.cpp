@@ -24,12 +24,12 @@
 
 using std::string;
 
-#define BUFLEN 1000
+#define BUFLEN 4096
 
 #define READ(FMT, ELEM)                                                 \
   do {                                                                  \
     if (!gzgets(file, buf, BUFLEN) || (sscanf(buf, FMT, ELEM) != 1)) {  \
-      error("Error reading " + string(FMT));                            \
+      error("Error reading {}", string(FMT));                           \
     }                                                                   \
   } while(0)
 
@@ -45,8 +45,10 @@ void OfflineTransData::loadTCHeader() {
 
   gzFile file = gzopen(fileName.c_str(), "r");
   if (!file) {
-    error("Error opening file " + fileName);
+    error("Error opening file {}", fileName);
   }
+
+  blockMap.resize(1025);
 
   // read header info
   READ("repo_schema = %40s", repoSchema);
@@ -58,6 +60,8 @@ void OfflineTransData::loadTCHeader() {
   READ("afrozen.frontier = %p", &frozenFrontier);
   READ_EMPTY();
   READ("total_translations = %u", &nTranslations);
+  READ_EMPTY();
+  READ("block_map = %1024s", blockMap.data());
   READ_EMPTY();
 
   headerSize = gztell(file);
@@ -71,7 +75,7 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
 
   gzFile file = gzopen(fileName.c_str(), "r");
   if (!file) {
-    error("Error opening file " + fileName);
+    error("Error opening file {}", fileName);
   }
 
   gzseek(file, headerSize, SEEK_SET);
@@ -80,6 +84,7 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
   for (uint32_t tid = 0; tid < nTranslations; tid++) {
     TransRec  tRec;
     SHA1Str   sha1Str;
+    int64_t   sn;
     uint32_t  kind;
     uint64_t  srcKeyInt;
     uint64_t  annotationsCount;
@@ -96,6 +101,8 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
     }
     READ(" src.sha1 = %40s", sha1Str);
     tRec.sha1 = SHA1(sha1Str);
+    READ(" src.sn = %" PRId64 "", &sn);
+    tRec.sn = sn;
     READ(" src.funcName = %s", funcName);
     tRec.funcName = funcName;
     READ(" src.key = %" PRIu64 "", &srcKeyInt);
@@ -104,20 +111,21 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
     READ(" src.blocks = %lu", &numBlocks);
     for (size_t i = 0; i < numBlocks; ++i) {
       SHA1Str sha1Tmp;
+      int64_t sn;
       Id funcSn = kInvalidId;
       uint64_t srcKeyIntTmp;
       Offset past = kInvalidOffset;
 
       if (gzgets(file, buf, BUFLEN) == Z_NULL ||
-          sscanf(buf, "%40s %d %" PRIu64 " %d", sha1Tmp, &funcSn, &srcKeyIntTmp, &past) != 4) {
+          sscanf(buf, "%40s %" PRId64 " %d %" PRIu64 " %d", sha1Tmp, &sn, &funcSn, &srcKeyIntTmp, &past) != 5) {
         snprintf(buf, BUFLEN,
                  "Error reading bytecode block #%lu at translation %u\n",
                  i, tRec.id);
-        error(buf);
+        error("{}", buf);
       }
 
       auto const sha1 = SHA1(sha1Tmp);
-      auto const func = repoWrapper->getFunc(sha1, funcSn);
+      auto const func = repoWrapper->getFunc(sn, funcSn);
       auto const funcId = func != nullptr ? func->getFuncId() : FuncId::Invalid;
       auto const sk = SrcKey::fromAtomicInt(srcKeyIntTmp).withFuncID(funcId);
       tRec.blocks.emplace_back(TransRec::Block { sha1, sk, past });
@@ -132,7 +140,7 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
         snprintf(buf, BUFLEN,
                  "Error reading guard #%lu at translation %u\n",
                  i, tRec.id);
-        error(buf);
+        error("{}", buf);
       }
 
       tRec.guards.emplace_back(folly::to<std::string>(
@@ -155,7 +163,7 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
         snprintf(buf, BUFLEN,
                  "Error reading annotation #%lu at translation %u\n",
                  i, tRec.id);
-        error(buf);
+        error("{}", buf);
       }
       char* title = strstr(buf, "[\"");
       char* annotation = nullptr;
@@ -185,30 +193,31 @@ void OfflineTransData::loadTCData(RepoWrapper* repoWrapper) {
       uint64_t srcKeyIntTmp;
 
       if (gzgets(file, buf, BUFLEN) == Z_NULL ||
-          sscanf(buf, "%40s %d %" PRIu64 " %p %p %p",
+          sscanf(buf, "%40s %ld %d %" PRIu64 " %p %p %p",
                  sha1Tmp,
+                 &bcMap.sn,
                  &funcSn,
                  &srcKeyIntTmp,
                  (void**)&bcMap.aStart,
                  (void**)&bcMap.acoldStart,
-                 (void**)&bcMap.afrozenStart) != 6) {
+                 (void**)&bcMap.afrozenStart) != 7) {
 
         snprintf(buf, BUFLEN,
                  "Error reading bytecode mapping #%lu at translation %u\n",
                  i, tRec.id);
 
-        error(buf);
+        error("{}", buf);
       }
 
       bcMap.sha1 = SHA1(sha1Tmp);
-      auto const func = repoWrapper->getFunc(bcMap.sha1, funcSn);
+      auto const func = repoWrapper->getFunc(bcMap.sn, funcSn);
       auto const funcId = func != nullptr ? func->getFuncId() : FuncId::Invalid;
       bcMap.sk = SrcKey::fromAtomicInt(srcKeyIntTmp).withFuncID(funcId);
       tRec.bcMapping.push_back(bcMap);
     }
 
     // push a sentinel bcMapping so that we can figure out stop offsets later on
-    const TransBCMapping sentinel { tRec.sha1, SrcKey {},
+    const TransBCMapping sentinel { tRec.sha1, tRec.sn, SrcKey {},
                                     tRec.aStart + tRec.aLen,
                                     tRec.acoldStart + tRec.acoldLen,
                                     tRec.afrozenStart + tRec.afrozenLen };
@@ -328,8 +337,7 @@ void OfflineTransData::printTransRec(TransID transId,
     "  src.resumeMode = {}\n"
     "  src.prologue = {}\n"
     "  src.funcEntry = {}\n"
-    "  src.bcStartOffset = {}\n"
-    "  src.guards = {}\n",
+    "  src.bcStartOffset = {}\n",
     tRec->id,
     tRec->sha1,
     tRec->src.funcID(),
@@ -337,8 +345,17 @@ void OfflineTransData::printTransRec(TransID transId,
     static_cast<int32_t>(tRec->src.resumeMode()),
     tRec->src.prologue(),
     tRec->src.funcEntry(),
-    tRec->src.printableOffset(),
-    tRec->guards.size());
+    // Unable to lookup entry offset, assume main entry.
+    tRec->src.prologue() || tRec->src.funcEntry()
+      ? 0 : tRec->src.offset());
+
+  if (tRec->src.prologue() || tRec->src.funcEntry()) {
+    std::cout << folly::format(
+      "  src.numEntryArgs = {}\n", tRec->src.numEntryArgs());
+  }
+
+  std::cout << folly::format(
+    "  src.guards = {}\n", tRec->guards.size());
 
   for (auto& guard : tRec->guards) {
     std::cout << "    " << guard << '\n';

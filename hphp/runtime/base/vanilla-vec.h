@@ -63,7 +63,8 @@ struct APCHandle;
 struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
   // If false, use the "8 type bytes / 8 value words" chunked layout.
   // If true, stored 9 byte unaligned typed values.
-  static constexpr bool stores_unaligned_typed_values = arch() == Arch::X64;
+  static constexpr bool stores_unaligned_typed_values =
+    (arch() == Arch::X64 || arch() == Arch::ARM);
 
   // The default capacity of PackedLayout and unaligned type values, used if capacity = 0.
   static constexpr uint32_t SmallSize = 5;
@@ -82,6 +83,7 @@ struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
   static TypedValue GetPosKey(const ArrayData*, ssize_t pos);
   static TypedValue GetPosVal(const ArrayData*, ssize_t pos);
   static bool PosIsValid(const ArrayData*, ssize_t pos);
+  static ArrayData* SetPosMove(ArrayData*, ssize_t pos, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
   static bool IsVectorData(const ArrayData*) { return true; }
@@ -135,6 +137,7 @@ struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
 
   // This method can only be called if `stores_unaligned_typed_values` is true.
   static UnalignedTypedValue* entries(ArrayData*);
+  static const UnalignedTypedValue* entries(const ArrayData*);
 
   // This method can be called for any layout, to get a layout start offset.
   static ptrdiff_t entriesOffset();
@@ -170,7 +173,7 @@ struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
   static ArrayData* MakeUncounted(
       ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv);
 
-  static ArrayData* MakeVecFromAPC(const APCArray* apc, bool isLegacy = false);
+  static ArrayData* MakeVecFromAPC(const APCArray* apc, bool pure, bool isLegacy = false);
 
   static bool VecEqual(const ArrayData* ad1, const ArrayData* ad2);
   static bool VecNotEqual(const ArrayData* ad1, const ArrayData* ad2);
@@ -195,6 +198,10 @@ struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
 
   static size_t capacityToSizeBytes(size_t);
   static size_t capacityToSizeIndex(size_t);
+  // Return false if the capacity exceeds the allowable limits. Note that this
+  // doesn't check available (or reservable) memory but checks that the size
+  // won't exceed internal limits.
+  static bool checkCapacity(size_t);
 
   static constexpr auto SizeIndexOffset = HeaderAuxOffset + 1;
 private:

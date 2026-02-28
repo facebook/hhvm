@@ -16,9 +16,7 @@
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 
-#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
-#include "hphp/runtime/vm/jit/translator.h"
 
 namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////

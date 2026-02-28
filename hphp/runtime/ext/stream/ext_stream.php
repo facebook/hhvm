@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Creates and returns a stream context with any options supplied in options
@@ -15,8 +15,14 @@
  *
  */
 <<__Native>>
-function stream_context_create(?darray $options = null,
-                               ?darray $params = null): mixed;
+function stream_context_create(
+  ?darray<string, darray<string, mixed>> $options = null,
+  ?shape(
+    ?'options' => darray<string, darray<string, mixed>>,
+    ?'notification' => mixed,
+    ...
+  ) $params = null,
+): mixed;
 
 /**
  * @param array $options - The options to set for the default context.
@@ -27,7 +33,9 @@ function stream_context_create(?darray $options = null,
  * @return mixed - Returns the default stream context.
  *
  */
-function stream_context_set_default(?darray $options = null): mixed {
+function stream_context_set_default(
+  ?darray<string, darray<string, mixed>> $options = null,
+): mixed {
   return stream_context_get_default($options);
 }
 
@@ -41,7 +49,9 @@ function stream_context_set_default(?darray $options = null): mixed {
  *
  */
 <<__Native>>
-function stream_context_get_default(?darray $options = null): mixed;
+function stream_context_get_default(
+  ?darray<string, darray<string, mixed>> $options = null,
+): mixed;
 
 /**
  * @param resource $stream_or_context - The stream or context to get options
@@ -76,8 +86,14 @@ function stream_context_set_option(mixed $stream_or_context = null,
 function stream_context_get_params(resource $stream_or_context): mixed;
 
 <<__Native>>
-function stream_context_set_params(resource $stream_or_context,
-                                   darray $params): bool;
+function stream_context_set_params(
+  resource $stream_or_context,
+  shape(
+    ?'options' => darray<string, darray<string, mixed>>,
+    ?'notification' => mixed,
+    ...
+  ) $params,
+): bool;
 
 /**
  * Makes a copy of up to maxlength bytes of data from the current position (or
@@ -278,7 +294,7 @@ function stream_select(inout mixed $read,
  * @return int - Result code
  *               STREAM_AWAIT_CLOSED: Stream is closed
  *               STREAM_AWAIT_READY: Activity on the provided stream
- *               STREAM_AWAIT_TIMEOUT: No activity (timeout occured)
+ *               STREAM_AWAIT_TIMEOUT: No activity (timeout occurred)
  *               STREAM_AWAIT_ERROR: Error
  */
 <<__Native>>

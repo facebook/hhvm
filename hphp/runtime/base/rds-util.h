@@ -21,7 +21,8 @@
 #include "hphp/runtime/vm/jit/target-cache.h"
 
 namespace HPHP {
-  struct NamedEntity;
+  struct NamedType;
+  struct NamedFunc;
   struct Class;
   struct Func;
   struct StringData;

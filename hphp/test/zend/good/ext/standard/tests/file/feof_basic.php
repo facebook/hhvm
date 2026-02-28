@@ -6,7 +6,7 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing feof() : basic functionality ***\n";
-$tmpFile1 = __SystemLib\hphp_test_tmppath('tmp1');
+$tmpFile1 = sys_get_temp_dir().'/'.'tmp1';
 $h = fopen($tmpFile1, 'wb');
 $count = 10;
 for ($i = 1; $i <= $count; $i++) {
@@ -29,7 +29,7 @@ echo $previousLine;
 var_dump($lastline); // this should be false 
 fclose($h);
 
-$tmpFile2 = __SystemLib\hphp_test_tmppath('tmp2');
+$tmpFile2 = sys_get_temp_dir().'/'.'tmp2';
 $h = fopen($tmpFile2, 'wb+');
 $count = 10;
 echo "*** writing $count lines, testing feof ***\n";

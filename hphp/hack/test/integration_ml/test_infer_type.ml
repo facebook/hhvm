@@ -1,3 +1,4 @@
+5
 (*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
@@ -151,7 +152,7 @@ function nullthrows<T>(?T $x): T {
 let nullthrows_cases =
   [
     (("nullthrows.php", 3, 13), "?T");
-    (("nullthrows.php", 5, 10), "(nonnull & T)");
+    (("nullthrows.php", 5, 10), "(T & nonnull)");
   ]
 
 let nullvec =
@@ -251,11 +252,11 @@ function class_id(): void {
 
 let class_id_cases =
   [
-    (("class_id.php", 3, 12), "A");
+    (("class_id.php", 3, 12), "(function(int $id): void)");
     (("class_id.php", 5, 3), "A");
     (("class_id.php", 7, 3), "A");
     (("class_id.php", 9, 3), "A");
-    (("class_id.php", 12, 4), "classname<A>");
+    (("class_id.php", 12, 4), "class<A>");
   ]
 
 let files =
@@ -298,7 +299,10 @@ let test () =
     let compare_type expected type_at =
       let ty_str =
         match type_at with
-        | Some (env, ty) -> Tast_env.print_ty env ty
+        | Some info ->
+          Tast_env.print_ty
+            (ServerInferType.get_env info)
+            (ServerInferType.get_type info)
         | None ->
           Test.fail
             (Printf.sprintf "No type inferred at %s:%d:%d" file line col)
@@ -315,7 +319,12 @@ let test () =
     let { Tast_provider.Compute_tast.tast; _ } =
       Tast_provider.compute_tast_unquarantined ~ctx ~entry
     in
-    let ty = ServerInferType.type_at_pos ctx tast line col in
+    let ty =
+      ServerInferType.type_at_pos
+        ctx
+        tast
+        (File_content.Position.from_one_based line col)
+    in
     compare_type expected_type ty
   in
   List.iter cases ~f:test_case

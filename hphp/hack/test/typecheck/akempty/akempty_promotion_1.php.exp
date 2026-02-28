@@ -1,4 +1,4 @@
-File "akempty_promotion_1.php", line 10, characters 5-6:
+ERROR: File "akempty_promotion_1.php", line 10, characters 5-6:
 Invalid argument (Typing[4110])
   File "akempty_promotion_1.php", line 13, characters 19-21:
   Expected `int`

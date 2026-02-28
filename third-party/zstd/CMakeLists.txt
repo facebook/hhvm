@@ -2,21 +2,24 @@ add_library(zstd INTERFACE)
 
 option(FORCE_BUNDLED_ZSTD "Always build zstd, instead of using the system version" OFF)
 if (NOT FORCE_BUNDLED_ZSTD)
-  set(CAN_USE_SYSTEM_ZSTD OFF)
   find_library(ZSTD_LIB NAMES zstd)
   find_path(ZSTD_INCLUDE_DIR NAMES zstd.h)
-  set(CMAKE_REQUIRED_INCLUDES "${ZSTD_INCLUDE_DIR}")
-  check_cxx_source_compiles("
-#include <zstd.h>
+
+  if(NOT DEFINED CAN_USE_SYSTEM_ZSTD)
+    set(CAN_USE_SYSTEM_ZSTD OFF)
+    set(CMAKE_REQUIRED_INCLUDES "${ZSTD_INCLUDE_DIR}")
+    check_cxx_source_compiles("
+  #include <zstd.h>
 
 
-  int main() {
-  static_assert(ZSTD_VERSION_MAJOR == 1);
-  static_assert(ZSTD_VERSION_MINOR >= 4);
-    return 0;
-  }
-  " CAN_USE_SYSTEM_ZSTD)
-  set(CMAKE_REQUIRED_INCLUDES)
+    int main() {
+    static_assert(ZSTD_VERSION_MAJOR == 1);
+    static_assert(ZSTD_VERSION_MINOR >= 4);
+      return 0;
+    }
+    " CAN_USE_SYSTEM_ZSTD)
+    set(CMAKE_REQUIRED_INCLUDES)
+  endif()
 
   if (CAN_USE_SYSTEM_ZSTD)
     message(STATUS "Using system zstd")

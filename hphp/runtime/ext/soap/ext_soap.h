@@ -22,15 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool HHVM_FUNCTION(use_soap_error_handler,
-                   bool handler = true);
-bool HHVM_FUNCTION(is_soap_fault,
-                   const Variant& fault);
-int64_t HHVM_FUNCTION(_soap_active_version);
-
-///////////////////////////////////////////////////////////////////////////////
-
-struct SoapServer {
+struct SoapServer : SystemLib::ClassLoader<"SoapServer"> {
   SoapServer();
 
   int                        m_type;
@@ -42,25 +34,23 @@ struct SoapServer {
   int                        m_version;
   sdl                       *m_sdl;
   xmlCharEncodingHandlerPtr  m_encoding;
-  Array                      m_classmap;
+  Array                      m_server_classmap;
   encodeMap                 *m_typemap;
   int                        m_features;
   Array                      m_soap_headers;
   int                        m_send_errors;
-
-  static const StaticString  s_className;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct SoapClient {
+struct SoapClient : SystemLib::ClassLoader<"SoapClient"> {
   SoapClient();
 
   int                         m_soap_version;
   sdl                        *m_sdl;
   xmlCharEncodingHandlerPtr   m_encoding;
   encodeMap                  *m_typemap;
-  Array                       m_classmap;
+  Array                       m_client_classmap;
   int                         m_features;
   String                      m_uri;
   String                      m_location;
@@ -94,8 +84,6 @@ struct SoapClient {
   Variant                     m_last_response_headers;
 
   Array                       m_stream_context_options;
-
-  static const StaticString   s_className;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -104,9 +92,7 @@ extern const StaticString
   s_enc_type, s_enc_value, s_enc_stype,
   s_enc_ns, s_enc_name, s_enc_namens;
 
-struct SoapVar {
-  static Class* getClass();
-
+struct SoapVar : SystemLib::ClassLoader<"SoapVar"> {
   static int64_t getEncType(ObjectData* obj) {
     auto enc_type = obj->o_get(s_enc_type, false);
     if (!enc_type.isInitialized()) {
@@ -118,7 +104,7 @@ struct SoapVar {
   }
 
   static void setEncType(ObjectData* obj, int64_t t) {
-    obj->setProp(nullptr, s_enc_type.get(), make_tv<KindOfInt64>(t));
+    obj->setProp(nullctx, s_enc_type.get(), make_tv<KindOfInt64>(t));
   }
 
   static Variant getEncValue(ObjectData* obj) {
@@ -126,15 +112,15 @@ struct SoapVar {
   }
 
   static void setEncValue(ObjectData* obj, const Variant& val) {
-    obj->setProp(nullptr, s_enc_value.get(), *val.asTypedValue());
+    obj->setProp(nullctx, s_enc_value.get(), *val.asTypedValue());
   }
 
 #define X(Name, str_name) \
   static void setEnc##Name(ObjectData* obj, const String& str) { \
     if (str.isNull()) { \
-      obj->setProp(nullptr, s_enc_##str_name.get(), make_tv<KindOfNull>()); \
+      obj->setProp(nullctx, s_enc_##str_name.get(), make_tv<KindOfNull>()); \
     } else { \
-      obj->setProp(nullptr, s_enc_##str_name.get(), str.asTypedValue()); \
+      obj->setProp(nullctx, s_enc_##str_name.get(), str.asTypedValue()); \
     } \
   } \
   static String getEnc##Name(ObjectData* obj) { \
@@ -157,38 +143,24 @@ struct SoapVar {
       return String();
     }
   }
-
-  static Class*               s_class;
-  static const StaticString   s_className;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct SoapParam {
-  static Class* getClass();
-
+struct SoapParam : SystemLib::ClassLoader<"SoapParam"> {
   String                      m_name;
   String                      m_data;
-
-  static Class*               s_class;
-  static const StaticString   s_className;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct SoapHeader {
-  static Class* getClass();
-
+struct SoapHeader : SystemLib::ClassLoader<"SoapHeader"> {
   String                      m_namespace;
   String                      m_name;
   Variant                     m_data;
   bool                        m_mustUnderstand;
   Variant                     m_actor;
-
-  static Class*               s_class;
-  static const StaticString   s_className;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

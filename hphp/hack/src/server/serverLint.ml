@@ -14,46 +14,51 @@ open Hh_prelude
 module RP = Relative_path
 
 (* For linting from stdin, we pass the file contents in directly because there's
-no other way to get ahold of the contents of stdin from a worker process. But
-when linting from disk, we want each individual worker to read the file off disk
-by itself, so that we don't need to read all the files at the beginning and hold
-them all in memory. *)
+   no other way to get ahold of the contents of stdin from a worker process. But
+   when linting from disk, we want each individual worker to read the file off disk
+   by itself, so that we don't need to read all the files at the beginning and hold
+   them all in memory. *)
 type lint_target = {
   filename: RP.t;
   contents: string option;
 }
 
-let lint tcopt _acc (files_with_contents : lint_target list) =
+let lint ctx _acc (files_with_contents : lint_target list) =
   List.fold_left
     files_with_contents
     ~f:
       begin
         fun acc { filename; contents } ->
-        let (errs, ()) =
-          Lints_core.do_ (fun () ->
-              Errors.ignore_ (fun () ->
-                  let contents =
-                    match contents with
-                    | Some contents -> contents
-                    | None -> Sys_utils.cat (Relative_path.to_absolute filename)
-                  in
-                  Linting_main.lint tcopt filename contents))
-        in
-        errs @ acc
+          let (errs, ()) =
+            Lints_core.do_ (fun () ->
+                Diagnostics.ignore_ (fun () ->
+                    let contents =
+                      match contents with
+                      | Some contents -> contents
+                      | None ->
+                        Sys_utils.cat (Relative_path.to_absolute filename)
+                    in
+                    Linting_main.lint ctx filename contents))
+          in
+          errs @ acc
       end
     ~init:[]
 
-let lint_and_filter tcopt code acc fnl =
-  let lint_errs = lint tcopt acc fnl in
+let lint_and_filter ctx code acc fnl =
+  let lint_errs = lint ctx acc fnl in
   List.filter lint_errs ~f:(fun err -> Lints_core.get_code err = code)
 
 let lint_all genv ctx code =
+  let tcopt = Provider_context.get_tcopt ctx in
+  let sample_rate = TypecheckerOptions.typecheck_sample_rate tcopt in
   let next =
     compose
       (fun lst ->
         lst
         |> List.map ~f:(fun fn ->
                { filename = RP.create RP.Root fn; contents = None })
+        |> List.filter ~f:(fun { filename; _ } ->
+               FindUtils.sample_filter ~sample_rate filename)
         |> Hack_bucket.of_list)
       (genv.indexer FindUtils.is_hack)
   in

@@ -1,9 +1,9 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class A {
-  abstract static int $p;
-  abstract int $l;
+  abstract public static int $p;
+  abstract public int $l;
 }
 
 <<__EntryPoint>>

@@ -11,7 +11,7 @@
 
 open Hh_prelude
 module Env = Typing_env
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 let is_disposable_class env cls =
   let name = Cls.name cls in
@@ -37,33 +37,32 @@ let is_disposable_visitor env =
     method! on_tclass acc _ (_, class_name) _ tyl =
       let default () = List.fold_left tyl ~f:this#on_type ~init:acc in
       match Env.get_class env class_name with
-      | None -> default ()
-      | Some c ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        default ()
+      | Decl_entry.Found c ->
         if is_disposable_class env c then
           Some (Utils.strip_ns class_name)
         else
           default ()
   end
 
-(* Does ty (or a type embedded in ty) implement IDisposable
- * or IAsyncDisposable, directly or indirectly?
- * Return Some class_name if it does, None if it doesn't.
- *)
 let is_disposable_type env ty =
   match Env.expand_type env ty with
   | (_env, ety) -> (is_disposable_visitor env)#on_type None ety
 
 let enforce_is_disposable env hint =
   match hint with
-  | (_, Aast.Happly ((p, c), _)) ->
-    begin
-      match Env.get_class_dep env c with
-      | None -> ()
-      | Some c ->
-        if
-          not (is_disposable_class env c || Ast_defs.is_c_interface (Cls.kind c))
-        then
-          Errors.add_typing_error
-            Typing_error.(primary @@ Primary.Must_extend_disposable p)
-    end
+  | (_, Aast.Happly ((p, c), _)) -> begin
+    match Env.get_class env c with
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      ()
+    | Decl_entry.Found c ->
+      if not (is_disposable_class env c || Ast_defs.is_c_interface (Cls.kind c))
+      then
+        Typing_error_utils.add_typing_error
+          ~env
+          Typing_error.(primary @@ Primary.Must_extend_disposable p)
+  end
   | _ -> ()

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1516() {
+function main_1516() :mixed{
   try {
     var_dump($v++, $v++);
   } catch (UndefinedVariableException $e) {

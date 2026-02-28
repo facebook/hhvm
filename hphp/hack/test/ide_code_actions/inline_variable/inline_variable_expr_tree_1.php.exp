@@ -1,0 +1,38 @@
+Code actions available:
+------------------------------------------
+Inline variable $x (CodeActionKind: "refactor") SELECTED
+Devmate Quick Fix - This type is not permitted as an expression tree visitor. It is not included in `allowed_expression_tree_visitors` in `.hhconfig`, and this file does not contain `<<file:__EnableUnstableFeatures('expression_trees')>>`. (CodeActionKind: "quickfix")
+Devmate Agent Fix - This type is not permitted as an expression tree visitor. It is not included in `allowed_expression_tree_visitors` in `.hhconfig`, and this file does not contain `<<file:__EnableUnstableFeatures('expression_trees')>>`. (CodeActionKind: "quickfix")
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"",
+          "range":{"end":{"character":0,"line":5},"start":{"character":0,"line":4}}
+        },
+        {
+          "newText":"5",
+          "range":{"end":{"character":20,"line":5},"start":{"character":18,"line":5}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Inline variable $x"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+function foo(): void {
+  ExampleDsl`() ==> {
+   /*range-start*/5/*range-end*/;
+  }`;
+}
+

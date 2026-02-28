@@ -8,10 +8,10 @@
  *)
 
 (* This `.mli` file was generated automatically. It may include extra
-definitions that should not actually be exposed to the caller. If you notice
-that this interface file is a poor interface, please take a few minutes to
-clean it up manually, and then delete this comment once the interface is in
-shape. *)
+   definitions that should not actually be exposed to the caller. If you notice
+   that this interface file is a poor interface, please take a few minutes to
+   clean it up manually, and then delete this comment once the interface is in
+   shape. *)
 
 type t = {
   mutable init_parsing_heap_size: int;
@@ -26,4 +26,4 @@ val get_stats : unit -> t
 
 val update_max_heap_size : int -> unit
 
-val to_json : t -> Hh_json.json
+val to_json : t -> Yojson.Safe.t

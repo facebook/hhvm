@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_set_indent_string_error() {
+function main_set_indent_string_error() :mixed{
 $writer = xmlwriter_open_memory();
 xmlwriter_set_indent_string($writer, '#');
 // The second arg is supposedly required. But just keep executing anyway and use

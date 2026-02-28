@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // Test of expression dependent type of local variable for foreach
 

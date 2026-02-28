@@ -1,12 +1,12 @@
 <?hh
 
 class Base {
-  public function sayHello() {
+  public function sayHello() :mixed{
     echo 'Hello ';
   }
 }
 trait SayWorld {
-  public function sayHello() {
+  public function sayHello() :mixed{
     parent::sayHello();
     echo 'World!';
   }

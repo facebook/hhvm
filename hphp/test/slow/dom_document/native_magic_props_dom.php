@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_native_magic_props_dom() {
+function main_native_magic_props_dom() :mixed{
 $doc = new DOMDocument();
 var_dump($doc->version); // native
 
@@ -34,7 +34,7 @@ var_dump($h1->item(0)->attributes->length);
 
 // XPath
 
-$xpath = new DOMXpath($doc);
+$xpath = new DOMXPath($doc);
 var_dump($xpath->document->doctype->name);
 $elements = $xpath->query("//*[@id]");
 var_dump($elements->length);

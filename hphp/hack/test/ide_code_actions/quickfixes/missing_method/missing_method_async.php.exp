@@ -1,0 +1,39 @@
+Code actions available:
+------------------------------------------
+Add stubs for missing interface methods (CodeActionKind: "quickfix") SELECTED
+Devmate Quick Fix - This interface is not properly implemented (CodeActionKind: "quickfix")
+Devmate Agent Fix - This interface is not properly implemented (CodeActionKind: "quickfix")
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"\n  public async function genBar(): Awaitable<int> {}\n",
+          "range":{"end":{"character":0,"line":9},"start":{"character":0,"line":9}}
+        }
+      ]
+    }
+  },
+  "kind":"quickfix",
+  "title":"Add stubs for missing interface methods"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+interface IFoo {
+  public function genBar(): Awaitable<int>;
+}
+
+class Foo implements IFoo {
+  //                  ^ at-caret
+  public function otherMethod(): void {}
+
+  public async function genBar(): Awaitable<int> {}
+}
+

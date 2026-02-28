@@ -1,0 +1,71 @@
+name: Ubuntu CI
+
+on:
+  push:
+    branches-ignore:
+      # Exclude the push event for exported diffs, because the CI for export
+      # should have been covered by GitHub Actions triggered by pull requests.
+      - 'export-D+'
+  pull_request:
+
+concurrency:
+  # If the workflow is triggered by a pull request, then cancel previous runs
+  # for the same pull request, which share the same `github.ref`, otherwise the
+  # run ID is used to identify the concurrency group, which is a no-op because
+  # the run ID is always unique for each trigged event.
+  group: ubuntu-ci-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+# OUT needs to be global. Ideally it would be local to the job so we could
+# store it in ${{ runner.temp }} instead of the checkout directory.
+# Unfortunately this is hitting some GitHub Action inconsistency with `env`:
+# https://github.com/actions/runner/issues/480
+env:
+  OUT: ${{ format('{0}/out', github.workspace) }}
+  DEBIAN_FRONTEND: "noninteractive"
+
+jobs:
+  build_ubuntu_focal_nightly:
+    runs-on: 16-core
+    container:
+      image: ubuntu:focal
+      env:
+        DISTRO: ubuntu-20.04-focal
+        IS_NIGHTLY: 1
+        CLANG_VERSION: 12
+    steps:
+    - name: Installing dependencies to bootstrap env
+      run: apt update -y && apt install -y git wget lsb-release software-properties-common gpg
+    - name: Installing llvm
+      run: |
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        # Note: Keep this version in sync with the one in the Debian control file.
+        ./llvm.sh ${CLANG_VERSION}
+    - name: Making LLVM the default compiler
+      run: |
+        if [ -f /etc/alternatives/cc ]
+        then
+          update-alternatives --remove-all cc
+        fi
+
+        if [ -f /etc/alternatives/c++ ]
+        then
+          update-alternatives --remove-all c++
+        fi
+        
+        update-alternatives --install /usr/bin/cc cc /usr/bin/clang++-${CLANG_VERSION} 500
+        update-alternatives --set cc /usr/bin/clang++-${CLANG_VERSION}
+        update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-${CLANG_VERSION} 500
+        update-alternatives --set c++ /usr/bin/clang++-${CLANG_VERSION}
+    - name: Fetching HHVM and its submodules
+      uses: actions/checkout@v6
+      with:
+        submodules: 'recursive'
+    - name: Installing HHVM deps and building HHVM
+      run: ci/bin/make-debianish-package
+    - name: Uploading artifacts
+      uses: actions/upload-artifact@v6
+      with:
+        name: out-directory
+        path: ${{ env.OUT }}

@@ -1,4 +1,4 @@
-Warning: Sort comparators should not return a boolean because it may result in a different sort order than expected. The comparator should return an integer (negative if left is less than right, positive if left is greater than right, zero if they are equal). in %s/test/slow/inout/builtin-interop.php on line 9
+Warning: Sort comparators should not return a boolean because it may result in a different sort order than expected. The comparator should return an integer (negative if left is less than right, positive if left is greater than right, zero if they are equal). in %s/test/slow/inout/builtin-interop.php on line 13
 vec(5) {
   int(8)
   int(17)
@@ -26,7 +26,7 @@ vec(5) {
   int(8)
 }
 
-Warning: Sort comparators should not return a boolean because it may result in a different sort order than expected. The comparator should return an integer (negative if left is less than right, positive if left is greater than right, zero if they are equal). in %s/test/slow/inout/builtin-interop.php on line 14
+Warning: Sort comparators should not return a boolean because it may result in a different sort order than expected. The comparator should return an integer (negative if left is less than right, positive if left is greater than right, zero if they are equal). in %s/test/slow/inout/builtin-interop.php on line 18
 dict(3) {
   ["apple"]=>
   int(0)

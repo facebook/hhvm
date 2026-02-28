@@ -6,8 +6,8 @@ $message = "echo \"hey\n\";";
 
 for ($i=0; $i<10; $i++) {
   $func = 'hey'.$i;
-  eval('function '.$func.'() { '.$message.' }');
-  $func();
+  eval('<<__DynamicallyCallable>> function '.$func.'() { '.$message.' }');
+  HH\dynamic_fun($func)();
   echo $i."\n";
 }
 }

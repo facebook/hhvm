@@ -141,7 +141,7 @@ class cls3 extends cls2 {
   public static $cls3PublicStatic;
 }
 
-function properties_dump($class_name) {
+function properties_dump($class_name) :mixed{
   $reflectionClass = new ReflectionClass($class_name);
   var_dump(array_map(function($prop) { return $prop->getName(); },
                      $reflectionClass->getProperties()));
@@ -149,7 +149,7 @@ function properties_dump($class_name) {
 
 
 <<__EntryPoint>>
-function main_reflection_class_get_properties() {
+function main_reflection_class_get_properties() :mixed{
 properties_dump('privateBeforeEverythingClass');
 properties_dump('privateAfterEverythingClass');
 properties_dump('protectedBeforeEverythingClass');

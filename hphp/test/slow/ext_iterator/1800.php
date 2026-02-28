@@ -2,11 +2,11 @@
 
 
 <<__EntryPoint>>
-function main_1800() {
+function main_1800() :mixed{
 $ite=new RecursiveDirectoryIterator(__DIR__.'/../../sample_dir/');
 $bytestotal=0;
 $nbfiles=0;
-$files = varray[];
+$files = vec[];
  // order changes per machine
 foreach ($ite as $filename=>$cur) {
   if (substr($filename,-1)=='.') continue;

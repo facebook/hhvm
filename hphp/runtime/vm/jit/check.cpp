@@ -19,27 +19,18 @@
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
-#include "hphp/runtime/vm/jit/id-set.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
-#include "hphp/runtime/vm/jit/state-vector.h"
-#include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/perf-warning.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
 
 #include <folly/Format.h>
 
-#include <bitset>
-#include <iostream>
 #include <string>
-
-#include <boost/dynamic_bitset.hpp>
 
 namespace HPHP::jit {
 
@@ -49,7 +40,7 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 /*
  * Return the number of parameters required for this block.
@@ -230,15 +221,20 @@ bool checkCfg(const IRUnit& unit) {
         );
 
         auto const dom = findDefiningBlock(src, idoms);
-        auto const locally_defined =
-          src->inst()->block() == inst.block() && defined_set.contains(src);
+        auto const locally_defined = defined_set.contains(src);
+        assertx(IMPLIES(locally_defined, src->inst()->block() == inst.block()));
         auto const strictly_dominates =
-          src->inst()->block() != inst.block() &&
-          dom && dominates(dom, inst.block(), idoms);
+          !locally_defined && dom && dominates(dom, inst.block(), idoms);
+        always_assert_flog(
+          locally_defined || dom,
+          "src '{}' in '{}' is not defined anywhere in this unit",
+          src->toString(), inst.toString()
+        );
         always_assert_flog(
           locally_defined || strictly_dominates,
           "src '{}' in '{}' came from '{}', which is not a "
-          "DefConst and is not defined at this use site",
+          "DefConst and is not defined at this use site since"
+          "defining block does not dominate",
           src->toString(), inst.toString(),
           src->inst()->toString()
         );
@@ -402,6 +398,14 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     ++curSrc;
   };
 
+  auto checkTypeStructure = [&]() {
+    auto const t = src()->type();
+    if (t != TBottom) {
+      check(t.arrSpec().is_type_structure(), Type(), "TArrLike=TypeStructure");
+    }
+    ++curSrc;
+  };
+
   auto checkStructDict = [&]() {
     auto const t = src()->type();
     if (t != TBottom) {
@@ -445,6 +449,10 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     }
     return types;
   };
+  auto const addNullptr = [&] (std::vector<Type> types) {
+    for (auto& type : types) type = type|TNullptr;
+    return types;
+  };
   auto const getTypeNames = [&] (const std::vector<Type>& types) {
     auto parts = std::vector<std::string>{};
     for (auto const& type : types) parts.push_back(type.toString());
@@ -460,27 +468,45 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 using namespace TypeNames;
 using TypeNames::TCA;
 
-#define NA            return checkNoArgs();
-#define S(T...)       {                                                     \
-                        static auto const types = checkLayoutFlags({T});    \
-                        static auto const names = getTypeNames(types);      \
-                        checkMultiple(src(), types, names);                 \
-                        ++curSrc;                                           \
-                      }
-#define AK(kind)      Type::Array(ArrayData::k##kind##Kind)
-#define C(T)          checkConstant(src(), T, "constant " #T); ++curSrc;
-#define CStr          C(StaticStr)
-#define SVar(T...)    {                                                     \
-                        static auto const types = checkLayoutFlags({T});    \
-                        static auto const names = getTypeNames(types);      \
-                        for (; curSrc < inst->numSrcs(); ++curSrc) {        \
-                          checkMultiple(src(), types, names);               \
-                        }                                                   \
-                      }
-#define SBespokeArr   checkBespokeArr();
-#define SMonotypeVec  checkMonotypeArr(TVec);
-#define SMonotypeDict checkMonotypeArr(TDict);
-#define SStructDict   checkStructDict();
+#define OR ,
+
+#define NA                    return checkNoArgs();
+#define S(T, ...)             {                                                     \
+                                static auto const types = checkLayoutFlags({T});    \
+                                static auto const names = getTypeNames(types);      \
+                                checkMultiple(src(), types, names);                 \
+                                ++curSrc;                                           \
+                              }
+#define SNullptr(T, ...)      {                                                     \
+                                static auto const types                             \
+                                  = addNullptr(checkLayoutFlags({T}));              \
+                                static auto const names = getTypeNames(types);      \
+                                checkMultiple(src(), types, names);                 \
+                                ++curSrc;                                           \
+                              }
+#define AK(kind)              Type::Array(ArrayData::k##kind##Kind)
+#define C(T, ...)             checkConstant(src(), T, "constant " #T); ++curSrc;
+#define CStr(...)             C(StaticStr)
+#define SVar(T, ...)          {                                                     \
+                                static auto const types = checkLayoutFlags({T});    \
+                                static auto const names = getTypeNames(types);      \
+                                for (; curSrc < inst->numSrcs(); ++curSrc) {        \
+                                  checkMultiple(src(), types, names);               \
+                                }                                                   \
+                              }
+#define SCrossTrace           {                                                     \
+                                auto const extra = inst->extra<ReqBindJmpData>();   \
+                                if (extra->target.funcEntry() && !extra->popFrame) {\
+                                  S(Int)  /* ActRec flags */                        \
+                                  S(Int)  /* func id of the callee */               \
+                                  S(Cls|Obj|Nullptr)  /* prologue context */        \
+                                }                                                   \
+                              }
+#define SBespokeArr(...)      checkBespokeArr();
+#define SMonotypeVec(...)     checkMonotypeArr(TVec);
+#define SMonotypeDict(...)    checkMonotypeArr(TDict);
+#define STypeStructure(...)   checkTypeStructure();
+#define SStructDict(...)      checkStructDict();
 #define ND
 #define DMulti
 #define DSetElem
@@ -509,10 +535,13 @@ using TypeNames::TCA;
 #define DBespokeElem
 #define DBespokePosKey
 #define DBespokePosVal
+#define DIterKey
+#define DIterVal
 #define DVecElem
 #define DDictElem
 #define DModified(n)
 #define DArrLikeSet
+#define DArrLikeSetPos
 #define DArrLikeUnset
 #define DArrLikeAppend
 #define DKeysetElem
@@ -527,12 +556,14 @@ using TypeNames::TCA;
 #define DMemoKey
 #define DLvalOfPtr
 #define DTypeCnsClsName
-#define DVerifyParamFail
+#define DTypeStructElem
+#define DVerifyCoerce
 #define DPropLval
 #define DElemLval
 #define DElemLvalPos
 #define DCOW
 #define DStructTypeBound
+#define DLdCls
 
 #define O(opcode, dstinfo, srcinfo, flags) \
   case opcode: dstinfo srcinfo countCheck(); return true;
@@ -544,14 +575,18 @@ using TypeNames::TCA;
 
 #undef O
 
+#undef OR
+
 #undef NA
 #undef S
+#undef SNullptr
 #undef AK
 #undef C
 #undef CStr
 #undef SBespokeArr
 #undef SMonotypeVec
 #undef SMonotypeDict
+#undef STypeStructure
 #undef SStructDict
 #undef SKnownArrLike
 
@@ -573,10 +608,13 @@ using TypeNames::TCA;
 #undef DBespokeElem
 #undef DBespokePosKey
 #undef DBespokePosVal
+#undef DIterKey
+#undef DIterVal
 #undef DVecElem
 #undef DDictElem
 #undef DModified
 #undef DArrLikeSet
+#undef DArrLikeSetPos
 #undef DArrLikeUnset
 #undef DArrLikeAppend
 #undef DKeysetElem
@@ -596,19 +634,21 @@ using TypeNames::TCA;
 #undef DMemoKey
 #undef DLvalOfPtr
 #undef DTypeCnsClsName
-#undef DVerifyParamFail
+#undef DTypeStructElem
+#undef DVerifyCoerce
 #undef DPropLval
 #undef DElemLval
 #undef DElemLvalPos
 #undef DCOW
 #undef DStructTypeBound
+#undef DLdCls
 
   if (inst->is(LdMBase)) {
     auto const& acls = inst->extra<LdMBase>()->acls;
     always_assert(acls <= AUnknownTV);
     always_assert(acls <= canonicalize(pointee(inst->typeParam())));
   }
-  if (inst->is(LdPropAddr, LdInitPropAddr,
+  if (inst->is(LdClosureArg, LdPropAddr, LdInitPropAddr,
                LdClsPropAddrOrNull, LdClsPropAddrOrRaise)) {
     always_assert(inst->typeParam() <= TCell);
   }

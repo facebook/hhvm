@@ -23,10 +23,11 @@ type t =
   | DelimitedComment
   | SingleLineComment
   | FixMe
+  | Ignore
   | IgnoreError
   | FallThrough
   | ExtraTokenError
-[@@deriving show, enum, eq]
+[@@deriving show, enum, eq, sexp_of]
 
 let to_string kind =
   match kind with
@@ -35,6 +36,7 @@ let to_string kind =
   | DelimitedComment -> "delimited_comment"
   | SingleLineComment -> "single_line_comment"
   | FixMe -> "fix_me"
+  | Ignore -> "ignore"
   | IgnoreError -> "ignore_error"
   | FallThrough -> "fall_through"
   | ExtraTokenError -> "extra_token_error"

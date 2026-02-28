@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_push() : basic functionality ***\n";
 
-$array = varray ['zero', 'one', 'two'];
+$array = vec['zero', 'one', 'two'];
 $var1 = 'three';
 $var2 = 'four';
 
@@ -18,7 +18,7 @@ echo "\n-- Push values onto an indexed array --\n";
 var_dump(array_push(inout $array, $var1, $var2));
 var_dump($array);
 
-$array_assoc = darray ['one' => 'un', 'two' => 'deux'];
+$array_assoc = dict['one' => 'un', 'two' => 'deux'];
 
 echo "\n-- Push values onto an associative array --\n";
 var_dump(array_push(inout $array_assoc, $var1, $var2));

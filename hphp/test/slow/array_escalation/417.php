@@ -1,7 +1,7 @@
 <?hh
 
-function test() {
-  $a = varray[];
+function test() :mixed{
+  $a = vec[];
   for ($i = 0;
  $i < 17;
  $i++) {
@@ -14,6 +14,6 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_417() {
+function main_417() :mixed{
 test();
 }

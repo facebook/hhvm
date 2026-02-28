@@ -1,0 +1,2 @@
+ERROR: File "method_no_sealed_constructors.php", line 6, characters 5-12:
+The `__Sealed` attribute cannot be used on a constructor. (Typing[4231])

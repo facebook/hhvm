@@ -1,0 +1,44 @@
+Code actions available:
+------------------------------------------
+Splice in $x (CodeActionKind: "quickfix")
+Inline variable $x (CodeActionKind: "refactor") SELECTED
+Devmate Quick Fix - This type is not permitted as an expression tree visitor. It is not included in `allowed_expression_tree_visitors` in `.hhconfig`, and this file does not contain `<<file:__EnableUnstableFeatures('expression_trees')>>`. (CodeActionKind: "quickfix")
+Devmate Agent Fix - This type is not permitted as an expression tree visitor. It is not included in `allowed_expression_tree_visitors` in `.hhconfig`, and this file does not contain `<<file:__EnableUnstableFeatures('expression_trees')>>`. (CodeActionKind: "quickfix")
+Devmate Quick Fix - Variable `$x` is undefined in this `ExampleDsl` expression tree. (CodeActionKind: "quickfix")
+Devmate Agent Fix - Variable `$x` is undefined in this `ExampleDsl` expression tree. (CodeActionKind: "quickfix")
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"",
+          "range":{"end":{"character":0,"line":7},"start":{"character":0,"line":6}}
+        },
+        {
+          "newText":"ExampleDsl`() ==> {}`",
+          "range":{"end":{"character":20,"line":8},"start":{"character":18,"line":8}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Inline variable $x"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+function foo(): void {
+  // Offering "inline variable" refactoring is incorrect here,
+  // since nested expression trees are not *yet* supported.
+  // But nesting may be supported soon, so leaving behavior as-is.
+  ExampleDsl`() ==> {
+   /*range-start*/ExampleDsl`() ==> {}`/*range-end*/;
+  }`;
+}
+

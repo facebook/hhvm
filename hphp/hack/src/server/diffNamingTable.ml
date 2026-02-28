@@ -15,33 +15,25 @@ let get_default_provider_context () =
   let () =
     Relative_path.set_path_prefix Relative_path.Hhi (Path.make_unsafe "hhi")
   in
-  let () =
-    Provider_backend.set_local_memory_backend_with_defaults_for_test ()
-  in
+  Provider_backend.set_local_memory_backend_with_defaults_for_test ();
   let hh_parser_options = GlobalOptions.default in
   let provider_backend = Provider_backend.get () in
   Provider_context.empty_for_tool
-    ~popt:hh_parser_options
+    ~popt:hh_parser_options.GlobalOptions.po
     ~tcopt:hh_parser_options
     ~backend:provider_backend
     ~deps_mode:(Typing_deps_mode.InMemoryMode None)
 
-let get_naming_table_and_errors provider_context path is_sqlite =
-  let (sqlite_path, marshaled_blob_path) =
-    if is_sqlite then
-      (Some path, "")
-    else
-      (None, path)
+let get_naming_table_and_errors provider_context path =
+  let sqlite_path = Some path in
+  let errors_path = Str.replace_first (Str.regexp "_naming.sql") ".err" path in
+  let warning_hashes_path =
+    Str.replace_first (Str.regexp "_naming.sql") ".warn" path
   in
-  let errors_path = path ^ ".err" in
-  SaveStateService.load_saved_state
-    ~load_decls:false
-    ~shallow_decls:false
+  SaveStateService.load_saved_state_exn
     ~naming_table_fallback_path:sqlite_path
-    ~naming_table_path:marshaled_blob_path
-    ~legacy_hot_decls_path:""
-    ~shallow_hot_decls_path:""
     ~errors_path
+    ~warning_hashes_path
     provider_context
 
 type diff = {
@@ -78,34 +70,18 @@ let calculate_diff naming_table1 naming_table2 errors1 errors2 =
       ~f:(fun path fileinfo1 acc ->
         match Naming_table.get_file_info naming_table2 path with
         | None -> { acc with removed_files = path :: acc.removed_files }
-        | Some fileinfo2 ->
-          begin
-            match FileInfo.diff fileinfo1 fileinfo2 with
-            | None -> acc
-            | Some file_diff ->
-              {
-                acc with
-                changed_files = (path, file_diff) :: acc.changed_files;
-              }
-          end)
+        | Some fileinfo2 -> begin
+          match FileInfo.diff fileinfo1 fileinfo2 with
+          | None -> acc
+          | Some file_diff ->
+            { acc with changed_files = (path, file_diff) :: acc.changed_files }
+        end)
   in
   let diff =
     Naming_table.fold naming_table2 ~init:diff ~f:(fun path _ acc ->
         match Naming_table.get_file_info naming_table1 path with
         | None -> { acc with added_files = path :: acc.added_files }
         | _ -> acc)
-  in
-  let errors1 =
-    List.fold
-      ~f:(fun acc (_phase, path_set) -> Relative_path.Set.union path_set acc)
-      ~init:Relative_path.Set.empty
-      errors1
-  in
-  let errors2 =
-    List.fold
-      ~f:(fun acc (_phase, path_set) -> Relative_path.Set.union path_set acc)
-      ~init:Relative_path.Set.empty
-      errors2
   in
   let removed_errors =
     Relative_path.Set.elements (Relative_path.Set.diff errors1 errors2)
@@ -185,13 +161,16 @@ let print_diff print_count diff =
   Prints the diff of test and control (naming table, error) pairs, and
   returns whether test and control differ.
 *)
-let diff (control_path, is_control_sqlite) (test_path, is_test_sqlite) =
+let diff control_path test_path =
   let provider_context = get_default_provider_context () in
-  let (control_naming_table, control_errors) =
-    get_naming_table_and_errors provider_context control_path is_control_sqlite
+  let ( control_naming_table,
+        { SaveStateServiceTypes.old_errors = control_errors; old_warnings = _ }
+      ) =
+    get_naming_table_and_errors provider_context control_path
   in
-  let (test_naming_table, test_errors) =
-    get_naming_table_and_errors provider_context test_path is_test_sqlite
+  let ( test_naming_table,
+        { SaveStateServiceTypes.old_errors = test_errors; old_warnings = _ } ) =
+    get_naming_table_and_errors provider_context test_path
   in
   let diff =
     calculate_diff

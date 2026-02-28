@@ -1,17 +1,17 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
                    var_dump(debug_backtrace()); }
 }
-function VERIFY($x) { VS($x != false, true); }
+function VERIFY($x) :mixed{ VS($x != false, true); }
 
 
 //////////////////////////////////////////////////////////////////////
 
 <<__EntryPoint>>
-function main_ext_mcrypt() {
+function main_ext_mcrypt() :mixed{
 $td = mcrypt_module_open("rijndael-256", "", "ofb", "");
 $iv = mcrypt_create_iv(mcrypt_enc_get_iv_size($td),
                                 MCRYPT_DEV_RANDOM);
@@ -33,9 +33,9 @@ VERIFY(in_array("cbc", mcrypt_list_modes()));
 VS(mcrypt_module_get_algo_block_size("blowfish"), 8);
 VS(mcrypt_module_get_algo_key_size("blowfish"), 56);
 
-VS(mcrypt_module_get_supported_key_sizes("blowfish"), varray[]);
+VS(mcrypt_module_get_supported_key_sizes("blowfish"), vec[]);
 VS(mcrypt_module_get_supported_key_sizes("twofish"),
-   varray[16, 24, 32]);
+   vec[16, 24, 32]);
 
 VS(mcrypt_module_is_block_algorithm_mode("cbc"), true);
 VS(mcrypt_module_is_block_algorithm("blowfish"), true);
@@ -132,7 +132,7 @@ VS(mcrypt_enc_get_modes_name($td), "CFB");
 
 $td = mcrypt_module_open("rijndael-256", "", "ecb", "");
 VS(mcrypt_enc_get_supported_key_sizes($td),
-   varray[16, 24, 32]);
+   vec[16, 24, 32]);
 
 $td = mcrypt_module_open("tripledes", "", "ecb", "");
 VS(mcrypt_enc_is_block_algorithm_mode($td), true);

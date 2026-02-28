@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test(dynamic $foo): void {
   $foo->getSomeValue<ExplicitTypeArgument1>();

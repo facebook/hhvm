@@ -10,7 +10,7 @@ int(13)
 Warning: gmp_scan0(): Unable to convert variable to GMP - wrong type in %s/gmp_scan0.php on line 12
 bool(false)
 
-Warning: gmp_scan0() expects exactly 2 parameters, 1 given in %s/gmp_scan0.php on line 13
+Warning: gmp_scan0() expects exactly 2 positional parameters, 1 given in %s/gmp_scan0.php on line 13
 
-Warning: gmp_scan0() expects exactly 2 parameters, 0 given in %s/gmp_scan0.php on line 14
+Warning: gmp_scan0() expects exactly 2 positional parameters, 0 given in %s/gmp_scan0.php on line 14
 Done

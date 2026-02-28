@@ -1,0 +1,1 @@
+Fatal error: fb_intercept2 was used on a non-interceptable function (HH\Lib\C\contains). Builtins are by default non-interceptable. If you need to intercept a builtin, add it to the InterceptableBuiltins allowlist in %s/restrict_intercept_systemlib.php on line %d

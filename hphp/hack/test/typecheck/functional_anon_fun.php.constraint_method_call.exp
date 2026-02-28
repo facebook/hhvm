@@ -1,0 +1,10 @@
+ERROR: File "functional_anon_fun.php", line 23, characters 13-25:
+You are using the return value of a `void` function (Typing[4119])
+  File "functional_anon_fun.php", line 14, characters 30-33:
+  A `void` function doesn't return a value.
+ERROR: File "functional_anon_fun.php", line 24, characters 10-16:
+Invalid return type (Typing[4110])
+  File "functional_anon_fun.php", line 19, characters 21-23:
+  Expected `int`
+  File "functional_anon_fun.php", line 14, characters 30-33:
+  But got `void`

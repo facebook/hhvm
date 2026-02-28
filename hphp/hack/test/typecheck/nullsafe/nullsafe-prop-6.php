@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class C {
   public X $x;
@@ -10,7 +10,7 @@ class C {
 class X {
   public int $prop = 1;
   public function method(?int $v): int {
-    return is_null($v) ? 1 : $v;
+    return $v is null ? 1 : $v;
   }
 }
 

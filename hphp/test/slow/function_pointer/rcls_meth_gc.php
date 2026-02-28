@@ -1,12 +1,12 @@
 <?hh
 
 class C {
-  public static function bar<reify T1, reify T2>() {
+  public static function bar<reify T1, reify T2>() :mixed{
     return 42;
   }
 }
 
-function foo<reify T>() {
+function foo<reify T>() :mixed{
   $meth = C::bar<T, int>;
   gc_collect_cycles();
   gc_collect_cycles();
@@ -14,6 +14,6 @@ function foo<reify T>() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(foo<string>());
 }

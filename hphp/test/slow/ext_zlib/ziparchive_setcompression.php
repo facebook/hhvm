@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_ziparchive_setcompression() {
+function main_ziparchive_setcompression() :mixed{
 $str = 'temp';
 $dir = tempnam(sys_get_temp_dir(), __FILE__);
 unlink($dir);

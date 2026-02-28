@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$list = darray [
+$list = dict[
   0 => 'aaa,bbb',
   1 => 'aaa,"bbb"',
   2 => '"aaa","bbb"',
@@ -23,7 +23,7 @@ $list = darray [
   19 => '"\\""",aaa',
 ];
 
-$file = __SystemLib\hphp_test_tmppath('fputcsv.csv');
+$file = sys_get_temp_dir().'/'.'fputcsv.csv';
 
 $fp = fopen($file, "w");
 foreach ($list as $v) {
@@ -39,7 +39,7 @@ foreach($res as $key => $val)
 echo '$list = ';var_export($res);echo ";\n";
 
 $fp = fopen($file, "r");
-$res = varray[];
+$res = vec[];
 while($l=fgetcsv($fp))
 {
 	$res[] = join(',',$l);
@@ -48,7 +48,7 @@ fclose($fp);
 
 echo '$list = ';var_export($res);echo ";\n";
 
-@unlink($file);
+unlink($file);
 
 echo "===DONE===\n";
 }

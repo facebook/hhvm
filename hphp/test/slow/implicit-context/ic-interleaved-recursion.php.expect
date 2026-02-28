@@ -1,0 +1,90 @@
+In memo agnostic...
+MAIC: int(0)
+MSIC: string(4) "NULL"
+In memo sensitive...
+MAIC: int(0)
+MSIC: int(1)
+In memo agnostic...
+MAIC: int(2)
+MSIC: int(1)
+In test_memo...
+MAIC: int(2)
+MSIC: string(4) "NULL"
+In memo sensitive...
+MAIC: int(2)
+MSIC: int(3)
+In memo agnostic...
+MAIC: int(4)
+MSIC: int(3)
+In memo sensitive...
+MAIC: int(4)
+MSIC: int(5)
+In memo agnostic...
+MAIC: int(6)
+MSIC: int(5)
+In memo sensitive...
+MAIC: int(6)
+MSIC: int(7)
+In memo agnostic...
+MAIC: int(8)
+MSIC: int(7)
+In memo sensitive...
+MAIC: int(8)
+MSIC: int(9)
+In memo agnostic...
+MAIC: int(10)
+MSIC: int(9)
+In memo sensitive...
+MAIC: int(10)
+MSIC: int(11)
+In memo agnostic...
+MAIC: int(12)
+MSIC: int(11)
+In memo sensitive...
+MAIC: int(12)
+MSIC: int(13)
+In memo agnostic...
+MAIC: int(14)
+MSIC: int(13)
+In memo sensitive...
+MAIC: int(14)
+MSIC: int(15)
+In memo agnostic...
+MAIC: int(16)
+MSIC: int(15)
+In memo sensitive...
+MAIC: int(16)
+MSIC: int(17)
+In memo agnostic...
+MAIC: int(18)
+MSIC: int(17)
+In memo sensitive...
+MAIC: int(18)
+MSIC: int(19)
+In memo agnostic...
+MAIC: int(20)
+MSIC: int(19)
+In memo sensitive...
+MAIC: int(20)
+MSIC: int(21)
+int(20)
+int(19)
+int(18)
+int(17)
+int(16)
+int(15)
+int(14)
+int(13)
+int(12)
+int(11)
+int(10)
+int(9)
+int(8)
+int(7)
+int(6)
+int(5)
+int(4)
+int(3)
+int(2)
+int(1)
+int(0)

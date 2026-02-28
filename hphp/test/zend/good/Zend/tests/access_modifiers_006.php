@@ -1,7 +1,7 @@
 <?hh
 
 class test {
-    static static function foo() {
+    static static function foo() :mixed{
     }
 }
 <<__EntryPoint>> function main(): void {

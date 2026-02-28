@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_ftell() {
+function main_ftell() :mixed{
 $errno = null;
 $errstr = null;
 $s = fsockopen("udp://127.0.0.1", 12345, inout $errno, inout $errstr);

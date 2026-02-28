@@ -1,5 +1,5 @@
 <?hh
-function test($str) {
+function test($str) :mixed{
     $res = md5(base64_decode(base64_encode($str)))."\n";
     return $res;
 }

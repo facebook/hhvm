@@ -1,15 +1,15 @@
 <?hh
 
-async function block() {
+async function block() :Awaitable<mixed>{
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
 }
 
-async function awaitva(...$args) {
+async function awaitva(...$args) :Awaitable<mixed>{
   await AwaitAllWaitHandle::fromVec(vec($args));
   return array_map($x ==> HH\Asio\join($x), $args);
 }
 
-async function foo() {
+async function foo() :Awaitable<mixed>{
   list(
     $res1,
     $res2,
@@ -31,6 +31,6 @@ async function foo() {
 
 
 <<__EntryPoint>>
-function main_immed_lambda2() {
+function main_immed_lambda2() :mixed{
 var_dump(HH\Asio\join(foo()));
 }

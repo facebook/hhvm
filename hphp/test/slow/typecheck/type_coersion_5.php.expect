@@ -1,0 +1,146 @@
+
+Boolean
+Builtin:
+User:
+Builtin:
+WARNING: Argument 2 passed to sha1() must be an instance of bool, int given
+User:
+WARNING: Argument 1 to __invoke() must be of type @bool, int given
+Builtin:
+WARNING: Argument 2 passed to sha1() must be an instance of bool, float given
+User:
+WARNING: Argument 1 to __invoke() must be of type @bool, float given
+Builtin:
+WARNING: Argument 2 passed to sha1() must be an instance of bool, string given
+User:
+WARNING: Argument 1 to __invoke() must be of type @bool, string given
+Builtin:
+WARNING: Argument 2 passed to sha1() must be an instance of bool, HH\vec given
+User:
+WARNING: Argument 1 to __invoke() must be of type @bool, HH\vec given
+Builtin:
+WARNING: Argument 2 passed to sha1() must be an instance of bool, null given
+User:
+WARNING: Argument 1 to __invoke() must be of type @bool, null given
+
+Int64
+Builtin:
+WARNING: Argument 2 passed to str_pad() must be an instance of int, bool given
+User:
+WARNING: Argument 1 to __invoke() must be of type @int, bool given
+Builtin:
+User:
+Builtin:
+WARNING: Argument 2 passed to str_pad() must be an instance of int, float given
+User:
+WARNING: Argument 1 to __invoke() must be of type @int, float given
+Builtin:
+WARNING: Argument 2 passed to str_pad() must be an instance of int, string given
+User:
+WARNING: Argument 1 to __invoke() must be of type @int, string given
+Builtin:
+WARNING: Argument 2 passed to str_pad() must be an instance of int, HH\vec given
+User:
+WARNING: Argument 1 to __invoke() must be of type @int, HH\vec given
+Builtin:
+WARNING: Argument 2 passed to str_pad() must be an instance of int, null given
+User:
+WARNING: Argument 1 to __invoke() must be of type @int, null given
+
+Double
+Builtin:
+WARNING: Argument 1 passed to number_format() must be an instance of float, bool given
+User:
+WARNING: Argument 1 to __invoke() must be of type @float, bool given
+Builtin:
+WARNING: Argument 1 passed to number_format() must be an instance of float, int given
+User:
+WARNING: Argument 1 to __invoke() must be of type @float, int given
+Builtin:
+User:
+Builtin:
+WARNING: Argument 1 passed to number_format() must be an instance of float, string given
+User:
+WARNING: Argument 1 to __invoke() must be of type @float, string given
+Builtin:
+WARNING: Argument 1 passed to number_format() must be an instance of float, HH\vec given
+User:
+WARNING: Argument 1 to __invoke() must be of type @float, HH\vec given
+Builtin:
+WARNING: Argument 1 passed to number_format() must be an instance of float, null given
+User:
+WARNING: Argument 1 to __invoke() must be of type @float, null given
+
+String
+Builtin:
+WARNING: Argument 1 passed to rtrim() must be an instance of string, bool given
+User:
+WARNING: Argument 1 to __invoke() must be of type @string, bool given
+Builtin:
+WARNING: Argument 1 passed to rtrim() must be an instance of string, int given
+User:
+WARNING: Argument 1 to __invoke() must be of type @string, int given
+Builtin:
+WARNING: Argument 1 passed to rtrim() must be an instance of string, float given
+User:
+WARNING: Argument 1 to __invoke() must be of type @string, float given
+Builtin:
+User:
+Builtin:
+WARNING: Argument 1 passed to rtrim() must be an instance of string, HH\vec given
+User:
+WARNING: Argument 1 to __invoke() must be of type @string, HH\vec given
+Builtin:
+WARNING: Argument 1 passed to rtrim() must be an instance of string, null given
+User:
+WARNING: Argument 1 to __invoke() must be of type @string, null given
+
+varray
+Builtin:
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, bool given
+User:
+WARNING: Argument 1 to __invoke() must be of type @HH\varray, bool given
+Builtin:
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, int given
+User:
+WARNING: Argument 1 to __invoke() must be of type @HH\varray, int given
+Builtin:
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, float given
+User:
+WARNING: Argument 1 to __invoke() must be of type @HH\varray, float given
+Builtin:
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, string given
+User:
+WARNING: Argument 1 to __invoke() must be of type @HH\varray, string given
+Builtin:
+User:
+Builtin:
+WARNING: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, null given
+User:
+WARNING: Argument 1 to __invoke() must be of type @HH\varray, null given
+
+Object
+Builtin:
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, bool given
+User:
+WARNING: Argument 1 to __invoke() must be of type @object, bool given
+Builtin:
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, int given
+User:
+WARNING: Argument 1 to __invoke() must be of type @object, int given
+Builtin:
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, float given
+User:
+WARNING: Argument 1 to __invoke() must be of type @object, float given
+Builtin:
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, string given
+User:
+WARNING: Argument 1 to __invoke() must be of type @object, string given
+Builtin:
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, HH\vec given
+User:
+WARNING: Argument 1 to __invoke() must be of type @object, HH\vec given
+Builtin:
+WARNING: Argument 1 passed to get_object_vars() must be an instance of HH\object, null given
+User:
+WARNING: Argument 1 to __invoke() must be of type @object, null given

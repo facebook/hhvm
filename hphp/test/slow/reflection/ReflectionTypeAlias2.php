@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_reflection_type_alias2() {
+function main_reflection_type_alias2() :mixed{
 try {
   $x = new ReflectionTypeAlias('NoSuchTypeAlias');
 } catch (ReflectionException $ex) {

@@ -1,7 +1,7 @@
 <?hh <<__EntryPoint>> function main(): void {
 echo "*** Testing hexdec() : basic functionality ***\n";
 
-$values = varray[0x123abc,
+$values = vec[0x123abc,
                 0x789DEF,
                 0x7FFFFFFF,
                 0x80000000,

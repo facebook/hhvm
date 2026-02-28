@@ -14,10 +14,10 @@ function f2(XHPChild $x): void {
   echo "\n";
 }
 
-function main() {
+function main() :mixed{
   // check array
-  f1(varray[1,2,3,4]);
-  f2(varray[1,2,3,4]);
+  f1(vec[1,2,3,4]);
+  f2(vec[1,2,3,4]);
 
   // check a static string
   f1("a boring string");
@@ -47,6 +47,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_xhpchild() {
+function main_xhpchild() :mixed{
 main();
 }

@@ -16,7 +16,7 @@ function x(X $x) : X {
   return new Z;
 }
 
-function g(X $x, int $i) {
+function g(X $x, int $i) :mixed{
   $x = x($x);
   if ($x is I) {
     return $x->foo($i);

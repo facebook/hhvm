@@ -16,5 +16,4 @@ val finally_merge :
   Typing_env_types.env * Typing_per_cont_env.per_cont_entry option) ->
   Typing_env_types.env ->
   Typing_per_cont_env.t CMap.t ->
-  CMap.key list ->
   Typing_env_types.env * Typing_per_cont_env.t

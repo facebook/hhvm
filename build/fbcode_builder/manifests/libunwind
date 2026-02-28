@@ -1,0 +1,20 @@
+[manifest]
+name = libunwind
+
+[rpms]
+libunwind-devel
+libunwind
+
+# on ubuntu this brings in liblzma-dev, which in turn breaks watchman tests
+[debs.not(distro=ubuntu)]
+libunwind-dev
+
+# The current libunwind v1.8.1 release has compiler issues with aarch64 (https://github.com/libunwind/libunwind/issues/702).
+# This more recent libunwind version (based on the latest commit, not a release version) got it fixed.
+[download]
+url = https://github.com/libunwind/libunwind/archive/f081cf42917bdd5c428b77850b473f31f81767cf.tar.gz
+sha256 = 4ff5c335c02d225491d6c885db827fb5fa505fee4e68b4d7e866efc0087e7264
+
+[build]
+builder = autoconf
+subdir = libunwind-f081cf42917bdd5c428b77850b473f31f81767cf

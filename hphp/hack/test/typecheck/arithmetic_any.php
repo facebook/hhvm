@@ -4,7 +4,7 @@
   function returnsAny() { return 5; }
 
 ////file2.php
-<?hh// strict
+<?hh
 
   // ADDITION
 function doAddIntAny(int $x): void {
@@ -77,7 +77,7 @@ function sorted<T>(
 }
 
 function TestSort():void {
-  $v = sorted(varray[],
+  $v = sorted(vec[],
               function ($x, $y) { hh_show($x); hh_show($y); return $x - $y; });
 }
 

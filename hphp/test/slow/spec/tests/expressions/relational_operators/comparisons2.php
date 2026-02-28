@@ -11,8 +11,8 @@ error_reporting(-1);
 ///*
 // Two non-numeric strings
 
-$oper1 = varray["", "a", "aa", "a0", "aA"];
-$oper2 = varray["", "ab", "abc", "A", "AB"];
+$oper1 = vec["", "a", "aa", "a0", "aA"];
+$oper2 = vec["", "ab", "abc", "A", "AB"];
 
 foreach ($oper1 as $e1)
 {

@@ -5,7 +5,7 @@ class Club {
 }
 
 class Glub extends Club {
-  public function go() {
+  public function go() :mixed{
     var_dump(property_exists($this, 'app_id'));
   }
 }

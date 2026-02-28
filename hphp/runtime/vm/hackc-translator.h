@@ -16,23 +16,27 @@
 
 #pragma once
 
-#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs"
-#include "hphp/hack/src/hackc/hhbc-ast.h"
+#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
+#include "hphp/hack/src/hackc/hhbc-unit.h"
 #include "hphp/runtime/vm/native-func-table.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
 namespace HPHP {
 
-inline const hackc::hhbc::HackCUnit* hackCUnitRaw(const ::rust::Box<HackCUnitWrapper>& unit) {
-  return (const hackc::hhbc::HackCUnit*)(&(*unit));
+enum class CodeSource;
+
+inline const hackc::hhbc::Unit* hackCUnitRaw(const rust::Box<hackc::UnitWrapper>& unit) {
+  return (const hackc::hhbc::Unit*)(&(*unit));
 }
 
 std::unique_ptr<UnitEmitter> unitEmitterFromHackCUnit(
-  const hackc::hhbc::HackCUnit& unit,
+  const hackc::hhbc::Unit& unit,
   const char* filename,
 	const SHA1& sha1,
-  const Native::FuncTable& nativeFuncs,
-  const std::string& hhasString
+  const SHA1& bcSha1,
+  const Extension* extension,
+  bool swallowErrors,
+  const PackageInfo&
 );
 
 }

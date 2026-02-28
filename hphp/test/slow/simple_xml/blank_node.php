@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_blank_node() {
+function main_blank_node() :mixed{
 $config = simplexml_load_string(<<<EOF
 <config>
   <global>

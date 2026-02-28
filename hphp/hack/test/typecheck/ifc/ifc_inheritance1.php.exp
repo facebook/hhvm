@@ -1,6 +1,0 @@
-File "ifc_inheritance1.php", line 11, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "ifc_inheritance1.php", line 11, characters 19-21:
-  IFC policies must be invariant with respect to inheritance. This method is policied with B
-  File "ifc_inheritance1.php", line 6, characters 19-21:
-  This is incompatible with its inherited policy, which is A

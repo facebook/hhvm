@@ -31,9 +31,9 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/random.h"
 
 namespace HPHP {
 
@@ -56,6 +56,9 @@ const StaticString
 const int64_t k_DEBUG_BACKTRACE_PROVIDE_OBJECT = (1 << 0);
 const int64_t k_DEBUG_BACKTRACE_IGNORE_ARGS = (1 << 1);
 const int64_t k_DEBUG_BACKTRACE_PROVIDE_METADATA = (1 << 16);
+const int64_t k_DEBUG_BACKTRACE_ONLY_METADATA_FRAMES = (1 << 17);
+const int64_t k_DEBUG_BACKTRACE_SKIP_INLINED = (1 << 18);
+const int64_t k_DEBUG_BACKTRACE_INCLUDE_ATTRIBUTES = (1 << 19);
 
 const int64_t k_DEBUG_BACKTRACE_HASH_CONSIDER_METADATA = (1 << 0);
 
@@ -64,12 +67,19 @@ Array HHVM_FUNCTION(debug_backtrace, int64_t options /* = 1 */,
                                      int64_t limit /* = 0 */) {
   bool provide_object = options & k_DEBUG_BACKTRACE_PROVIDE_OBJECT;
   bool provide_metadata = options & k_DEBUG_BACKTRACE_PROVIDE_METADATA;
+  bool only_metadata_frames = options & k_DEBUG_BACKTRACE_ONLY_METADATA_FRAMES;
   bool ignore_args = options & k_DEBUG_BACKTRACE_IGNORE_ARGS;
+  bool skip_inlined = options & k_DEBUG_BACKTRACE_SKIP_INLINED;
+  bool incl_attrs = options & k_DEBUG_BACKTRACE_INCLUDE_ATTRIBUTES;
   return createBacktrace(BacktraceArgs()
                          .withThis(provide_object)
                          .withMetadata(provide_metadata)
+                         .skipTop(skip_inlined)
+                         .skipInlined(skip_inlined)
+                         .onlyMetadataFrames(only_metadata_frames)
                          .ignoreArgs(ignore_args)
-                         .setLimit(limit));
+                         .setLimit(limit)
+                         .includeAttrs(incl_attrs));
 }
 
 ArrayData* debug_backtrace_jit(int64_t options) {
@@ -84,8 +94,8 @@ bool hphp_debug_caller_info_impl(
     return false;
   }
 
-  if (func->name()->isame(s_call_user_func.get())) return false;
-  if (func->name()->isame(s_call_user_func_array.get())) return false;
+  if (func->name() == s_call_user_func.get()) return false;
+  if (func->name() == s_call_user_func_array.get()) return false;
 
   auto const line = func->getLineNumber(offset);
   if (line == -1) return false;
@@ -104,8 +114,8 @@ bool hphp_debug_caller_info_impl(
     RuntimeStruct::registerRuntimeStruct(s_hphp_debug_caller_info, s_fields);
 
   auto const cls = func->cls();
-  auto const path = func->originalFilename() ?
-    func->originalFilename() : func->unit()->filepath();
+  auto const path = func->originalUnit() ?
+    func->originalUnit() : func->unit()->filepath();
 
   auto const has_cls = cls && !func->isClosureBody();
   StructDictInit init(s_struct, has_cls ? 4 : 3);
@@ -115,8 +125,7 @@ bool hphp_debug_caller_info_impl(
   }
   init.set(s_file_idx, s_file,
            Variant(VarNR(const_cast<StringData*>(path))));
-  init.set(s_function_idx, s_function,
-           Variant(VarNR(const_cast<StringData*>(func->name()))));
+  init.set(s_function_idx, s_function, func->nameWithClosureName());
   init.set(s_line_idx, s_line, line);
   result = init.toArray();
   return true;
@@ -133,12 +142,46 @@ bool hphp_debug_caller_info_impl(
  * optionally "class" which indicate the filename, function, line number and
  * class name (if in class context) where the "caller" called the "callee".
  */
-Array HHVM_FUNCTION(hphp_debug_caller_info) {
+ArrayRet HHVM_FUNCTION(hphp_debug_caller_info) {
   Array result = empty_dict_array();
   bool skipped = false;
   walkStack([&] (const BTFrame& frm) {
     return hphp_debug_caller_info_impl(
         result, skipped, frm.func(), frm.bcOff());
+  });
+  return result;
+}
+
+
+bool hphp_debug_caller_identifier_impl(
+    String& result, bool& skipped, const Func* func) {
+  if (!skipped && func->isSkipFrame()) return false;
+  if (!skipped) {
+    skipped = true;
+    return false;
+  }
+
+  if (func->name()->fsame(s_call_user_func.get())) return false;
+  if (func->name()->fsame(s_call_user_func_array.get())) return false;
+
+  result = func->fullNameWithClosureName();
+  return true;
+}
+
+/**
+ * hphp_debug_caller_identifier - returns the full function name of
+ * the "caller"
+ *
+ * For clarity, we refer to the function that called
+ * hphp_debug_caller_identifier() as the "callee", and we refer to the
+ * function that called the callee as the "caller".
+ */
+String HHVM_FUNCTION(hphp_debug_caller_identifier) {
+  String result = empty_string();
+  bool skipped = false;
+  walkStack([&] (const BTFrame& frm) {
+    return hphp_debug_caller_identifier_impl(
+        result, skipped, frm.func());
   });
   return result;
 }
@@ -261,7 +304,7 @@ int64_t HHVM_FUNCTION(error_reporting, const Variant& level /* = null */) {
   auto& id = RequestInfo::s_requestInfo.getNoCheck()->m_reqInjectionData;
   int oldErrorReportingLevel = id.getErrorReportingLevel();
   if (!level.isNull()) {
-    id.setErrorReportingLevel(level.toInt32());
+    id.setErrorReportingLevel((int)level.toInt64());
   }
   return oldErrorReportingLevel;
 }
@@ -375,7 +418,7 @@ bool HHVM_FUNCTION(trigger_error, const String& error_msg,
 bool HHVM_FUNCTION(trigger_sampled_error, const String& error_msg,
                    int64_t sample_rate,
                    int64_t error_type /* = (int)ErrorMode::USER_NOTICE */) {
-  if (!folly::Random::oneIn(sample_rate)) {
+  if (!folly::Random::oneIn(sample_rate, threadLocalRng64())) {
     return true;
   }
   return HHVM_FN(trigger_error)(error_msg, error_type);
@@ -392,23 +435,12 @@ Array HHVM_FUNCTION(HH_deferred_errors) {
   return g_context->releaseDeferredErrors();
 }
 
-Array HHVM_FUNCTION(SL_extract_trace, const Resource& handle) {
-  auto bt = dyn_cast<CompactTrace>(handle);
-  if (!bt) {
-    raise_invalid_argument_warning(
-        "__SystemLib\\extract_trace() expects parameter 1 "
-        "to be a CompactTrace resource.");
-    return Array::CreateVec();
-  }
-
-  return bt->extract();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
-void StandardExtension::initErrorFunc() {
+void StandardExtension::registerNativeErrorFunc() {
   HHVM_FE(debug_backtrace);
   HHVM_FE(hphp_debug_caller_info);
+  HHVM_FE(hphp_debug_caller_identifier);
   HHVM_FE(hphp_debug_backtrace_hash);
   HHVM_FE(debug_print_backtrace);
   HHVM_FE(error_get_last);
@@ -425,13 +457,18 @@ void StandardExtension::initErrorFunc() {
   HHVM_FE(trigger_sampled_error);
   HHVM_FE(user_error);
   HHVM_FALIAS(HH\\deferred_errors, HH_deferred_errors);
-  HHVM_FALIAS(__SystemLib\\extract_trace, SL_extract_trace);
   HHVM_RC_INT(DEBUG_BACKTRACE_PROVIDE_OBJECT, k_DEBUG_BACKTRACE_PROVIDE_OBJECT);
   HHVM_RC_INT(DEBUG_BACKTRACE_IGNORE_ARGS, k_DEBUG_BACKTRACE_IGNORE_ARGS);
   HHVM_RC_INT(DEBUG_BACKTRACE_PROVIDE_METADATA,
               k_DEBUG_BACKTRACE_PROVIDE_METADATA);
+  HHVM_RC_INT(DEBUG_BACKTRACE_ONLY_METADATA_FRAMES,
+              k_DEBUG_BACKTRACE_ONLY_METADATA_FRAMES);
   HHVM_RC_INT(DEBUG_BACKTRACE_HASH_CONSIDER_METADATA,
               k_DEBUG_BACKTRACE_HASH_CONSIDER_METADATA);
+  HHVM_RC_INT(DEBUG_BACKTRACE_SKIP_INLINED,
+              k_DEBUG_BACKTRACE_SKIP_INLINED);
+  HHVM_RC_INT(DEBUG_BACKTRACE_INCLUDE_ATTRIBUTES,
+              k_DEBUG_BACKTRACE_INCLUDE_ATTRIBUTES);
   HHVM_RC_INT(E_ERROR, (int)ErrorMode::ERROR);
   HHVM_RC_INT(E_WARNING, (int)ErrorMode::WARNING);
   HHVM_RC_INT(E_PARSE, (int)ErrorMode::PARSE);
@@ -450,8 +487,6 @@ void StandardExtension::initErrorFunc() {
   HHVM_RC_INT(E_ALL, (int)ErrorMode::PHP_ALL | (int)ErrorMode::STRICT);
 
   HHVM_RC_INT(E_HHVM_FATAL_ERROR, (int)ErrorMode::FATAL_ERROR);
-
-  loadSystemlib("std_errorfunc");
 }
 
 }

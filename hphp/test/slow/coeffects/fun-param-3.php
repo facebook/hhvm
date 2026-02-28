@@ -1,8 +1,8 @@
 <?hh
 
-function foo((function()[_]: void) $x)[ctx $x] {}
+function foo((function()[_]: void) $x)[ctx $x] :mixed{}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   foo(1);
 }

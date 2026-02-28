@@ -1,0 +1,12 @@
+ERROR: File "escape_return_type.php", line 11, characters 8-84:
+Rigid type variable escapes its lambda (Typing[4442])
+  File "escape_return_type.php", line 12, characters 21-26:
+  Could not remove rigid type variable `<expr#13>`
+  File "escape_return_type.php", line 11, characters 8-84:
+  in the return type of this lambda
+ERROR: File "escape_return_type.php", line 11, characters 8-84:
+Rigid type variable escapes its lambda (Typing[4442])
+  File "escape_return_type.php", line 12, characters 21-26:
+  Rigid type variable `T#3` is escaping
+  File "escape_return_type.php", line 11, characters 8-84:
+  in the return type of this lambda

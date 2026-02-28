@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 // CARE! the decl_from_stdin test looks at line 8 column 9 of this file

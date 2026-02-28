@@ -22,6 +22,8 @@
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
+#include "hphp/util/optional.h"
+
 #include <string>
 
 namespace HPHP {
@@ -144,6 +146,8 @@ struct ProfDataDeserializer {
   void record(ProfDataSerializer::Id, const RepoAuthType::Array*);
   void record(ProfDataSerializer::Id, FuncId);
 
+  void setExtraDataOffset(off_t off) { extraDataOffset = off; }
+
   bool done();
 
   ProfDataSerializer::Mappers getMappers() const;
@@ -152,6 +156,14 @@ struct ProfDataDeserializer {
   int fd;
   static constexpr uint32_t buffer_size = 8192;
   uint32_t offset{buffer_size};
+
+  // Logical offset past the end of the profile data in the serialized file,
+  // which may be the start of extra data that is not part of the proper JIT
+  // profile data.
+  off_t extraDataOffset{0};
+
+  uint32_t totalBytesRead{0};
+
   char buffer[buffer_size];
 
   template <typename T>
@@ -220,7 +232,7 @@ T read_raw(ProfDataDeserializer& ser) {
 void write_raw_string(ProfDataSerializer& ser, const StringData* str);
 StringData* read_raw_string(ProfDataDeserializer& ser, bool skip = false);
 void write_string(ProfDataSerializer& ser, const StringData* str);
-void write_string(ProfDataSerializer& ser, const std::string& str);
+void write_string(ProfDataSerializer& ser, const std::string_view& str);
 StringData* read_string(ProfDataDeserializer& ser);
 std::string read_cpp_string(ProfDataDeserializer& ser);
 void write_array(ProfDataSerializer& ser, const ArrayData* arr);
@@ -254,6 +266,10 @@ FuncId read_func_id(ProfDataDeserializer& des);
 // of failure otherwise.
 std::string serializeProfData(const std::string& filename);
 std::string serializeOptProfData(const std::string& filename);
+
+std::string serializeSBProfData(const std::string& root,
+                                const std::string& filename);
+
 // If loadRDS is true, only the RDS ordering information will be
 // loaded.
 std::string deserializeProfData(const std::string& filename,
@@ -264,9 +280,17 @@ bool tryDeserializePartialProfData(const std::string& filename,
                                    int numWorkers,
                                    bool loadRDS);
 
+std::string deserializeSBProfData(const std::string& root,
+                                  const std::string& filename);
+
 // Return whether or not serialization of profile data for optimized code is
 // enabled.
 bool serializeOptProfEnabled();
+
+// Get the name of the file deserialized if any.
+Optional<std::string> getFilenameDeserialized();
+
+bool didDeserializeSBProfData();
 
 //////////////////////////////////////////////////////////////////////
 } }

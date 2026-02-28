@@ -1,4 +1,4 @@
-File "variadic_args6.php", line 9, characters 16-20:
+ERROR: File "variadic_args6.php", line 9, characters 16-20:
 Invalid argument (Typing[4110])
   File "variadic_args6.php", line 3, characters 23-28:
   Expected `string`

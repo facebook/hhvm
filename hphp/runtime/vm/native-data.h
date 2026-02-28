@@ -117,7 +117,7 @@ nativeDataInfoCopy(ObjectData* /*dest*/, ObjectData* /*src*/) {}
 template<class T>
 void nativeDataInfoDestroy(ObjectData* obj) {
   data<T>(obj)->~T();
-};
+}
 
 template<class T>
 typename std::enable_if<!std::is_trivially_destructible<T>::value,
@@ -154,7 +154,7 @@ struct doSweep {
 template<class T>
 void callSweep(ObjectData* obj) {
   data<T>(obj)->sweep();
-};
+}
 
 template<class T>
 auto getNativeDataInfoSweep() -> void(*)(ObjectData*) {
@@ -234,6 +234,14 @@ typename std::enable_if<
     nativeTyindex<T>(),
     rt_attrs,
     (flags & NDIFlags::CTOR_THROWS));
+}
+
+template<class T>
+typename std::enable_if<
+  !std::is_base_of<Sweepable, T>::value,
+  void
+>::type registerNativeDataInfo(int64_t flags = 0, uint8_t rt_attrs = 0) {
+  registerNativeDataInfo<T>(T::className().get(), flags, rt_attrs);
 }
 
 // Return the ObjectData payload allocated after this NativeNode header

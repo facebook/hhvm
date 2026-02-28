@@ -1,0 +1,2 @@
+File "awaitable_awaitable_good.php", line 22, characters 5-62:
+Use `async ... ==> await ...` for lambdas that directly return `Awaitable`s, so stack traces include the lambda position. (Lint[5650])

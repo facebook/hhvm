@@ -1,0 +1,12 @@
+ERROR: File "validity_checks.php", line 18, characters 45-45:
+Invalid class refinement (Typing[4470])
+  File "validity_checks.php", line 18, characters 31-31:
+  Class `C` has no constant `T`
+ERROR: File "validity_checks.php", line 19, characters 44-44:
+Invalid class refinement (Typing[4470])
+  File "validity_checks.php", line 19, characters 31-31:
+  Constant `T` in `D` is not a ctx, did you mean type?
+ERROR: File "validity_checks.php", line 21, characters 30-37:
+Invalid class refinement (Typing[4470])
+  File "validity_checks.php", line 21, characters 16-16:
+  Class `D` has no constant `TInvalid`

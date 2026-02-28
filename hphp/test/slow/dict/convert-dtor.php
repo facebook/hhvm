@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Dtor {
@@ -8,7 +8,7 @@ class Dtor {
   }
 }
 
-function main() {
+function main() :mixed{
   $i = 1;
   var_dump(dict(dict[$i => new Dtor($i),
                      $i+1 => new Dtor($i+1),
@@ -70,7 +70,7 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_convert_dtor() {
+function main_convert_dtor() :mixed{
   main();
   var_dump(HH\objprof_get_data());
 }

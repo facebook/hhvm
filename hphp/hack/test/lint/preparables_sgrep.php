@@ -1,13 +1,13 @@
 <?hh
 
 function test($x, $y, $z) {
-  gena(varray[A]);
+  gena(vec[A]);
   genak(A, new ImmSet($x));
   genak(A, B->toArray());
-  list($a, $b) = await gena(varray[$x, $y]);
-  list($a, $b, $c) = await gena(varray[$x, $y, $z]);
-  list($a, $b) = Asio::awaitSynchronously(gena(varray[$x, $y]));
-  list($a, $b, $c) = Asio::awaitSynchronously(gena(varray[$x, $y, $z]));
+  list($a, $b) = await gena(vec[$x, $y]);
+  list($a, $b, $c) = await gena(vec[$x, $y, $z]);
+  list($a, $b) = Asio::awaitSynchronously(gena(vec[$x, $y]));
+  list($a, $b, $c) = Asio::awaitSynchronously(gena(vec[$x, $y, $z]));
 
   return Asio::awaitSynchronously(A);
 }

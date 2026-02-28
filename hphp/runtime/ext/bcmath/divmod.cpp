@@ -29,14 +29,8 @@
 
 *************************************************************************/
 
-#include "config.h"
-#include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include "bcmath.h"
-#include "private.h"
+#include "hphp/runtime/ext/bcmath/bcmath.h"
 
 #include <folly/ScopeGuard.h>
 

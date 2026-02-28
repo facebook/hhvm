@@ -1,13 +1,13 @@
 <?hh
 
-function dumpcourse($current) {
+function dumpcourse($current) :mixed{
 	$title = ($current->nodeType != XML_TEXT_NODE && $current->hasAttribute('title')) ? $current->getAttribute('title'):"no title";
 	echo "Course: $title:";echo(get_class($current)), "\n";
 	echo "~";var_dump($current->textContent);
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $xml = <<< EOXML
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <courses>

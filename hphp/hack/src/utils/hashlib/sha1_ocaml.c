@@ -15,6 +15,7 @@
 
 value sha1sum(value data) {
   CAMLparam1(data);
+  CAMLlocal1(result);
 
   const char *msg = String_val(data);
   size_t msglen = caml_string_length(data);
@@ -30,7 +31,6 @@ value sha1sum(value data) {
   char hex[41];
   sha1_to_hex(&digest, hex);
 
-  CAMLlocal1(result);
   result = caml_copy_string(hex);
   CAMLreturn(result);
 }

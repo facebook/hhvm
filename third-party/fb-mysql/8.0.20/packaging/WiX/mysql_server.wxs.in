@@ -1,0 +1,239 @@
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" 
+      xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+
+<!--
+   Copyright (c) 2010, 2019, Oracle and/or its affiliates. All rights reserved.
+   
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License, version 2.0,
+   as published by the Free Software Foundation.
+
+   This program is also distributed with certain software (including
+   but not limited to OpenSSL) that is licensed under separate terms,
+   as designated in a particular file or component or in included license
+   documentation.  The authors of MySQL hereby grant you an additional
+   permission to link the program and your derivative works with the
+   separately licensed software that they have included with MySQL.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License, version 2.0, for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+-->
+
+  <Product 
+    Id="*" 
+    UpgradeCode="@UPGRADE_CODE@"
+    Name="@PRODUCT_NAME@ @MAJOR_VERSION@.@MINOR_VERSION@" 
+    Version="@MAJOR_VERSION@.@MINOR_VERSION@.@PATCH_VERSION@" 
+    Language="1033" 
+    Manufacturer="@MANUFACTURER@">
+    
+    <Package Id='*'
+       Keywords='Installer'
+       Description="@PRODUCT_DESCRIPTION@"
+       Manufacturer='@MANUFACTURER@'
+       InstallerVersion='200'
+       Languages='1033'
+       Compressed='yes'
+       SummaryCodepage='1252'
+       Platform='x64'
+       InstallScope="perMachine"/>
+  
+    <Media Id='1' Cabinet='product.cab' EmbedCab='yes' />
+
+    <Property Id="MYSQL_INSTALLER" Secure="yes" /> 
+    <Property Id="MSIRESTARTMANAGERCONTROL" Value="Disable"/>
+
+    <!-- Upgrade -->
+    <Upgrade Id="@UPGRADE_ID@">
+      <?if '@PATCH_VERSION@' != '0'?>
+      <UpgradeVersion 
+        Minimum="@MAJOR_VERSION@.@MINOR_VERSION@.0"
+        IncludeMinimum="yes"
+        Maximum="@MAJOR_VERSION@.@MINOR_VERSION@.@PATCH_VERSION@"
+        IncludeMaximum="yes"
+        Property="OLDERVERSIONBEINGUPGRADED"
+        MigrateFeatures="yes"
+        />
+      <?endif?>
+      <UpgradeVersion 
+        Minimum="@MAJOR_VERSION@.@MINOR_VERSION@.@PATCH_VERSION@"
+        IncludeMinimum="no"
+        OnlyDetect="yes"
+        Property="NEWERVERSIONDETECTED" />
+    </Upgrade>
+    <Condition Message="A later version of [ProductName] is already installed. Setup will now exit.">
+      NOT NEWERVERSIONDETECTED OR Installed
+    </Condition>
+    <InstallExecuteSequence>
+      <RemoveExistingProducts After="InstallInitialize"/>
+    </InstallExecuteSequence>
+
+
+    <?if "@LINK_STATIC_RUNTIME_LIBRARIES@"="OFF" AND "@BUNDLE_RUNTIME_LIBRARIES@"="OFF" ?>
+      <Property Id="VS14REDISTX64_64_MAJOR">
+        <RegistrySearch Id="FindRedistVS14_64_MAJOR"
+            Root="HKLM"
+            Key="SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64"
+            Name="Major"
+            Win64="yes"
+            Type="raw" />
+      </Property>
+      <Property Id="VS14REDISTX64_64_MINOR">
+        <RegistrySearch Id="FindRedistVS14_64_MINOR"
+            Root="HKLM"
+            Key="SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64"
+            Name="Minor"
+            Win64="yes"
+            Type="raw" />
+      </Property>
+      <Property Id="VS14REDISTX64_32_MAJOR">
+        <RegistrySearch Id="FindRedistVS14_32_MAJOR"
+            Root="HKLM"
+            Key="SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64"
+            Name="Major"
+            Win64="no"
+            Type="raw" />
+      </Property>
+      <Property Id="VS14REDISTX64_32_MINOR">
+        <RegistrySearch Id="FindRedistVS14_32_MINOR"
+            Root="HKLM"
+            Key="SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64"
+            Name="Minor"
+            Win64="no"
+            Type="raw" />
+      </Property>
+
+      <!-- For numbers (DWORD type in Windows Registry) WiX RegistrySearch uses a special prefix: '#'.
+       We have to get rid of it before using properties in the condition check,
+       We want to compare numbers, rather than strings. -->
+      <CustomAction Id="DwordToNumber" Script="vbscript">
+        <![CDATA[
+          Session.Property("VS14REDISTX64_64_MAJOR") = Replace(Session.Property("VS14REDISTX64_64_MAJOR"),"#","")
+          Session.Property("VS14REDISTX64_64_MINOR") = Replace(Session.Property("VS14REDISTX64_64_MINOR"),"#","")
+          Session.Property("VS14REDISTX64_32_MAJOR") = Replace(Session.Property("VS14REDISTX64_32_MAJOR"),"#","")
+          Session.Property("VS14REDISTX64_32_MINOR") = Replace(Session.Property("VS14REDISTX64_32_MINOR"),"#","")
+        ]]>
+      </CustomAction>
+
+      <InstallExecuteSequence>
+        <Custom Action="DwordToNumber" Before="LaunchConditions"/>
+      </InstallExecuteSequence>
+      <InstallUISequence>
+        <Custom Action="DwordToNumber" Before="LaunchConditions"/>
+      </InstallUISequence>
+
+      <Condition Message="This application requires Visual Studio 2019 x64 Redistributable. Please install the Redistributable then run this installer again.">
+        Installed OR (VS14REDISTX64_64_MAJOR = 14 AND VS14REDISTX64_64_MINOR >= 20) OR (VS14REDISTX64_32_MAJOR = 14 AND VS14REDISTX64_32_MINOR >= 20)
+      </Condition>
+    <?endif?> 
+ 
+    <!-- Save/restore install location -->
+    <CustomAction Id="SaveTargetDir" Property="ARPINSTALLLOCATION" Value="[INSTALLDIR]" />
+    <InstallExecuteSequence>
+      <Custom Action="SaveTargetDir" After="InstallValidate">
+        NOT
+        Installed
+      </Custom>
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <!-- App search is what does FindInstallLocation, and it is dependent on FindRelatedProducts -->
+      <AppSearch After="FindRelatedProducts"/>
+    </InstallUISequence>
+ 
+    <!-- Find previous installation -->
+    <Property Id="GETINSTALLDIR">
+      <RegistrySearch Id="FindInstallLocation"
+          Root="HKLM"
+          Win64="yes"
+          Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\[OLDERVERSIONBEINGUPGRADED]"
+          Name="InstallLocation"
+          Type="raw" />
+    </Property>
+    <CustomAction Id="SetInstall"    Property="INSTALLDIR" Value="[GETINSTALLDIR]" />
+    <InstallUISequence>
+       <Custom Action="SetInstall"    After="AppSearch">Installed</Custom>
+    </InstallUISequence>
+    <Property Id="OLDERVERSION"> 
+      <RegistrySearch Id="FindOlderVersion"
+        Root="HKLM"
+        Win64="yes"
+        Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\[OLDERVERSIONBEINGUPGRADED]"
+        Name="DisplayVersion"
+        Type="raw" />
+    </Property>
+    <Property Id="INSTALLDIR2">
+       <RegistrySearch Id="FindInstallLocation2"
+          Root="HKLM"
+          Key="SOFTWARE\MySQL AB\[ProductName]"
+          Name="Location"
+          Type="raw" />
+    </Property>
+    <CustomAction Id="SetInstallDir2" Property="INSTALLDIR" Value="[INSTALLDIR2]" /> 
+    <InstallUISequence>
+    <Custom Action="SetInstallDir2" After="AppSearch">INSTALLDIR2</Custom> 
+    </InstallUISequence>
+   
+    <CustomAction Id="QtRemoveService" BinaryKey="WixCA" DllEntry="WixQuietExec"
+            Execute="deferred" Return="ignore" Impersonate="no"/>
+    <InstallExecuteSequence>
+      <Custom Action="QtRemoveService" After="InstallInitialize">(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL") AND (NOT MYSQL_INSTALLER="YES")</Custom>
+    </InstallExecuteSequence>
+    <SetProperty Before="QtRemoveService" Sequence="execute" Id="QtRemoveService" Value="&quot;cmd.exe&quot; /S /V:ON /C &quot;echo off&amp;set &quot;d=[INSTALLDIR]&quot;&amp;FOR /f &quot;skip=1&quot; %s in (&apos;wmic service where ^&apos;pathname like &quot;%!d:\=\\!%&quot;^&apos; get name ^| findstr /r &quot;^.$&quot;&apos;) do ((for /L %k IN (1,1,20) do wmic service where &apos;name=&quot;%s&quot; and started=&quot;true&quot;&apos; call stopservice | FIND /v &quot;No Instance&quot;>NUL&amp;&amp;timeout /t 5 /nobreak>NUL)&amp;sc delete %s>NUL)&quot;"/>
+
+    <!-- UI -->
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR"></Property>
+    <UIRef Id="@CPACK_WIX_UI@" />
+    <UIRef Id="WixUI_ErrorProgressText" />
+    <WixVariable
+      Id="WixUIBannerBmp"
+      Value="@CMAKE_CURRENT_SOURCE_DIR@/AdminHeader.jpg" />
+    <WixVariable
+      Id="WixUIDialogBmp"
+      Value="@CMAKE_CURRENT_SOURCE_DIR@/AdminBackground.jpg" />
+    <Icon
+      Id="icon.ico"
+      SourceFile="@CMAKE_CURRENT_SOURCE_DIR@/MySQLServer.ico"/>
+    <Icon 
+      Id="Icon.MysqlCmdShell" 
+      SourceFile='@CMAKE_CURRENT_SOURCE_DIR@/mysqlcommandlineshell.ico' />	  	  
+    <Property
+      Id="ARPPRODUCTICON"
+      Value="icon.ico" />
+    
+    <!-- License -->
+    <WixVariable
+      Id="WixUILicenseRtf"
+      Value="@LICENSE_RTF@"/>
+
+    <!-- Installation root-->
+    <Directory Id='TARGETDIR' Name='SourceDir'>
+      <Directory Id='ProgramFiles64Folder'>
+        <Directory Id='directory.MySQL' Name='MySQL'>
+          <Directory Id='INSTALLDIR' Name='@PRODUCT_NAME@ @MAJOR_VERSION@.@MINOR_VERSION@'>
+          </Directory>
+        </Directory>
+      </Directory>
+    </Directory>
+
+    <!-- CPACK_WIX_FEATURES -->
+    @CPACK_WIX_FEATURES@
+    
+    <!-- CPACK_WIX_DIRECTORIES -->
+    @CPACK_WIX_DIRECTORIES@
+    
+    <!--CPACK_WIX_COMPONENTS-->
+    @CPACK_WIX_COMPONENTS@
+    
+    <!--CPACK_WIX_COMPONENTS_GROUPS -->
+    @CPACK_WIX_COMPONENT_GROUPS@
+    
+    <!--CPACK_WIX_INCLUDES -->
+    @CPACK_WIX_INCLUDES@
+  </Product>
+</Wix>

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_813() {
+function main_813() :mixed{
 $v = new Vector;
 $v[] = 'c';
 $v[] = 'a';

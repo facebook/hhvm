@@ -40,7 +40,7 @@ struct MimePart : ResourceData {
   static bool ProcessLine(req::ptr<MimePart> workpart, const String& line);
 
 public:
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(MimePart);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(MimePart)
 
   MimePart();
 
@@ -52,9 +52,9 @@ public:
   bool parse(const char *buf, int bufsize);
   Variant extract(const Variant& filename, const Variant& callbackfunc, int decode,
                   bool isfile);
-  Variant getPartData();
+  Array getPartData();
   Array getStructure();
-  Resource findByName(const char *name);
+  OptResource findByName(const char *name);
 
   bool isVersion1();
   int filter(int c);
@@ -104,7 +104,7 @@ private:
   Array m_headers; /* a record of all the headers */
 
   /* these are used during part extraction */
-  typedef void (MimePart::*PFN_CALLBACK)(const String&);
+  using PFN_CALLBACK = void (MimePart::*)(const String&);
   PFN_CALLBACK m_extract_func;
   mbfl_convert_filter *m_extract_filter;
   Variant m_extract_context;
@@ -140,8 +140,7 @@ private:
     Enumerator *next;
     int id;
   };
-  typedef bool (MimePart::*PFUNC_ENUMERATOR)
-    (Enumerator *enumerator, void *ptr);
+  using PFUNC_ENUMERATOR = bool (MimePart::*)(Enumerator *enumerator, void *ptr);
   bool enumeratePartsImpl(Enumerator *top, Enumerator **child,
                           PFUNC_ENUMERATOR callback, void *ptr);
   void enumerateParts(PFUNC_ENUMERATOR callback, void *ptr);
@@ -153,4 +152,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

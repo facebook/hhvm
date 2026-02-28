@@ -10,27 +10,7 @@
 open Lints_core
 module Codes = Lint_codes
 
-let spf = Printf.sprintf
-
 let internal_error pos msg = add 0 Lint_error pos ("Internal error: " ^ msg)
-
-let mk_lowercase_constant pos cst =
-  let lower = String.lowercase_ascii cst in
-  Lints_core.
-    {
-      code = Codes.to_enum Codes.LowercaseConstant;
-      severity = Lint_warning;
-      pos;
-      message =
-        spf
-          "Please use %s instead of %s"
-          (Markdown_lite.md_codify lower)
-          (Markdown_lite.md_codify cst);
-      bypass_changed_lines = false;
-      autofix = ("", "");
-    }
-
-let lowercase_constant pos cst = add_lint (mk_lowercase_constant pos cst)
 
 let use_collection_literal pos coll =
   let coll = Utils.strip_ns coll in
@@ -66,23 +46,6 @@ let shape_idx_access_required_field field_pos name =
     ^ " is required to exist in the shape. Consider using a subscript-expression instead, such as "
     ^ Markdown_lite.md_codify ("$myshape['" ^ name ^ "']"))
 
-let opt_closed_shape_idx_missing_field method_name field_pos =
-  let msg =
-    match method_name with
-    | Some method_name ->
-      "You are calling "
-      ^ Markdown_lite.md_codify ("Shapes::" ^ method_name ^ "()")
-      ^ " on a field known to not exist, with a closed optional shape."
-    | None ->
-      "You are indexing a closed optional shape with"
-      ^ " a field known to not exist."
-  in
-  add
-    (Codes.to_enum Codes.OptClosedShapeIdxMissingField)
-    Lint_error
-    field_pos
-    msg
-
 let sealed_not_subtype verb parent_pos parent_name child_name child_kind =
   let parent_name = Utils.strip_ns parent_name in
   let child_name = Utils.strip_ns child_name in
@@ -93,9 +56,38 @@ let sealed_not_subtype verb parent_pos parent_name child_name child_kind =
     (child_kind
     ^ " "
     ^ Markdown_lite.md_codify child_name
-    ^ " in sealed whitelist for "
+    ^ " in sealed allowlist for "
     ^ Markdown_lite.md_codify parent_name
     ^ ", but does not "
     ^ verb
     ^ " "
     ^ Markdown_lite.md_codify parent_name)
+
+let option_mixed pos =
+  add
+    (Codes.to_enum Codes.OptionMixed)
+    Lint_warning
+    pos
+    "`?mixed` is a redundant typehint - just use `mixed`"
+
+let option_null pos =
+  add
+    (Codes.to_enum Codes.OptionNull)
+    Lint_warning
+    pos
+    "`?null` is a redundant typehint - just use `null`"
+
+let class_const_to_string pos cid_str =
+  let cid_str = Utils.strip_ns cid_str in
+  let nameof = "nameof " ^ cid_str in
+  let nameof_md = Markdown_lite.md_codify nameof in
+  let autofix = Some (nameof, pos) in
+  add
+    (Codes.to_enum Codes.ClassPointerToString)
+    Lint_warning
+    pos
+    ~autofix
+    ("Using `"
+    ^ cid_str
+    ^ "::class` in this position will trigger an implicit runtime conversion to string, please use "
+    ^ nameof_md)

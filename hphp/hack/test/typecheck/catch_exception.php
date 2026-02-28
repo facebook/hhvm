@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class MyException extends Exception {
   public function __construct() {

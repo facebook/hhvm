@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_pipevar_1() {
-varray[1, 2, 3] |> array_map($x ==> $x + 1, $$) |> var_dump($$);
+function main_pipevar_1() :mixed{
+vec[1, 2, 3] |> array_map($x ==> $x + 1, $$) |> var_dump($$);
 }

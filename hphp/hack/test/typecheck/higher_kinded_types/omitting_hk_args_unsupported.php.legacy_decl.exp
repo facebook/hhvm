@@ -1,8 +1,0 @@
-File "omitting_hk_args_unsupported.php", line 8, characters 3-5:
-You left out the type arguments here such that they may be inferred. However, a higher-kinded type is expected in place of the generic parameter T2, meaning that the type arguments cannot be inferred. Please provide the type arguments explicitly. (Typing[4456])
-  File "omitting_hk_args_unsupported.php", line 3, characters 18-19:
-  the generic parameter T2 was declared to be higher-kinded here.
-File "omitting_hk_args_unsupported.php", line 9, characters 7-9:
-You left out the type arguments here such that they may be inferred. However, a higher-kinded type is expected in place of the generic parameter T1, meaning that the type arguments cannot be inferred. Please provide the type arguments explicitly. (Typing[4456])
-  File "omitting_hk_args_unsupported.php", line 5, characters 11-12:
-  the generic parameter T1 was declared to be higher-kinded here.

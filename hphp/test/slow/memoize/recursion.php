@@ -7,7 +7,7 @@ class C {
   public $x;
 }
 
-<<__Memoize>> function func() {
+<<__Memoize>> function func() :mixed{
 
   if (MemoizeRecursion::$counter == 0) return new C(100);
   --MemoizeRecursion::$counter;

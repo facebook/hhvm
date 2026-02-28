@@ -1,2 +1,2 @@
 
-Warning: saveHTML() expects parameter 1 to be object, boolean given in %s on line 10
+Catchable fatal error: Argument 1 to DOMDocument::saveHTML() must be of type ?DOMNode, bool given in %s on line 10

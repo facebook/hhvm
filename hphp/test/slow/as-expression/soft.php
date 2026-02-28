@@ -10,6 +10,6 @@ function f(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_soft() {
+function main_soft() :mixed{
 f(1);
 }

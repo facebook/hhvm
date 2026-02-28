@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Sexplib.Std
 
 (**
  * An editable trivia contains the text of the trivia; these trivia are not
@@ -20,7 +21,7 @@ type t = {
   kind: TriviaKind.t;
   text: string;
 }
-[@@deriving show, eq]
+[@@deriving show, eq, sexp_of]
 
 let make_ignore_error source_text offset width =
   {
@@ -42,6 +43,9 @@ let make_fallthrough source_text offset width =
 
 let make_fix_me source_text offset width =
   { kind = TriviaKind.FixMe; text = SourceText.sub source_text offset width }
+
+let make_ignore source_text offset width =
+  { kind = TriviaKind.Ignore; text = SourceText.sub source_text offset width }
 
 let make_whitespace source_text offset width =
   {

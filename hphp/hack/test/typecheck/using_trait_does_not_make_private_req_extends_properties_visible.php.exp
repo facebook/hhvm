@@ -1,4 +1,4 @@
-File "using_trait_does_not_make_private_req_extends_properties_visible.php", line 13, characters 37-41:
+ERROR: File "using_trait_does_not_make_private_req_extends_properties_visible.php", line 13, characters 37-41:
 Typing error (Typing[4053])
   File "using_trait_does_not_make_private_req_extends_properties_visible.php", line 13, characters 44-44:
   No property `x` in `Child`

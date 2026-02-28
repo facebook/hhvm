@@ -1,0 +1,14 @@
+name: \C::instance_meth, kind: method, span: line 14, characters 12-24, is_declaration: false
+definition:
+ instance_meth
+   kind: method
+   id: method::C::instance_meth
+   position: line 7, characters 19-31
+   span: line 7, character 3 - line 7, character 42
+   modifiers: public 
+   params:
+
+
+name: \T::instance_meth, kind: method, span: line 14, characters 12-24, is_declaration: false
+definition: None
+

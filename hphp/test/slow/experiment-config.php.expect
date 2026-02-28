@@ -1,0 +1,28 @@
+vec(5) {
+  string(18) "Always Off Flipped"
+  string(9) "Always On"
+  string(13) "test_config_0"
+  string(13) "test_config_1"
+  string(13) "test_config_2"
+}
+vec(5) {
+  string(10) "Always Off"
+  string(17) "Always On Flipped"
+  string(13) "test_config_0"
+  string(13) "test_config_1"
+  string(13) "test_config_2"
+}
+dict(6) {
+  ["AlwaysOffFlip"]=>
+  string(2) "24"
+  ["AlwaysOn"]=>
+  string(2) "42"
+  ["cfg0"]=>
+  string(4) "PASS"
+  ["cfg1_flip"]=>
+  string(4) "PASS"
+  ["cfg2_flip"]=>
+  string(4) "PASS"
+  ["setting"]=>
+  string(5) "hello"
+}

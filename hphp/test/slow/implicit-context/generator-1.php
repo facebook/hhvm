@@ -1,29 +1,29 @@
 <?hh
 
-function genA() {
-  echo 'genA:' . (string)IntContext::getContext() . "\n";
+function genA() :AsyncGenerator<mixed,mixed,void>{
+  echo 'genA:' . (string)ClassContext::getContext()->getPayload() . "\n";
   yield 1;
-  echo 'genA:' . (string)IntContext::getContext() . "\n";
+  echo 'genA:' . (string)ClassContext::getContext()->getPayload() . "\n";
   yield 2;
-  echo 'genA:' . (string)IntContext::getContext() . "\n";
+  echo 'genA:' . (string)ClassContext::getContext()->getPayload() . "\n";
   yield 3;
 }
 
-function genB() {
-  echo 'genB:' . (string)IntContext::getContext() . "\n";
+function genB() :AsyncGenerator<mixed,mixed,void>{
+  echo 'genB:' . (string)ClassContext::getContext()->getPayload() . "\n";
   yield 1;
-  echo 'genB:' . (string)IntContext::getContext() . "\n";
+  echo 'genB:' . (string)ClassContext::getContext()->getPayload() . "\n";
   yield 2;
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include 'implicit.inc';
 
-  IntContext::start(1, () ==> {
+  ClassContext::start(new Base(1), () ==> {
     $a = genA();
     $a->next(); // 1
-    IntContext::start(2, () ==> {
+    ClassContext::start(new Base(2), () ==> {
       $b = genB();
       $b->next(); // 2
       $a->next(); // 2

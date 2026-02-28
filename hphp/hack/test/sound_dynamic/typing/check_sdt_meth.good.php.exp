@@ -1,0 +1,10 @@
+warning: Warn[12009] This is check is always true. The expression on the left has type vec<int> which is a subtype of vec<int>. [1]
+
+check_sdt_meth.good.php:10:9
+     8 | class C {
+     9 |   public function g(vec<int> $v) : vec<int> {
+[1] 10 |     if ($v is vec<_>) {
+    11 |       return vec[4];
+    12 |     }
+
+1 error found

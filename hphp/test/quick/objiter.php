@@ -5,7 +5,7 @@ class Base {
   protected $baseProt = 20;
   private $basePriv = 30;
 
-  public function baseIterate() {
+  public function baseIterate() :mixed{
     foreach ($this as $k => $v) {
       echo "$k => $v\n";
     }
@@ -20,7 +20,7 @@ class Child extends Base {
   // Same name as private in base class, different value
   private $basePriv = "child's basePriv";
 
-  public function childIterate() {
+  public function childIterate() :mixed{
     foreach ($this as $k => $v) {
       echo "$k => $v\n";
     }

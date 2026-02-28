@@ -1,1 +1,9 @@
-No errors
+warning: Warn[12009] This is check is always true. The expression on the left has type C which is a subtype of C. [1]
+
+like_meth_call_sd.good.php:13:21
+    11 | 
+    12 | function f(~V<C> $v) : void {
+[1] 13 |   $v->filter($x ==> $x is C || $x is D);
+    14 | }
+
+1 error found

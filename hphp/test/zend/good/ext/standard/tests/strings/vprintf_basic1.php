@@ -11,9 +11,9 @@ $format = "format";
 $format1 = "%s";
 $format2 = "%s %s";
 $format3 = "%s %s %s";
-$arg1 = varray["one"];
-$arg2 = varray["one","two"];
-$arg3 = varray["one","two","three"];
+$arg1 = vec["one"];
+$arg2 = vec["one","two"];
+$arg3 = vec["one","two","three"];
 
 
 $result = vprintf($format1,$arg1);

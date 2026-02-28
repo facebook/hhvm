@@ -1,0 +1,8 @@
+WARN: File "string_class_const.php", line 36, characters 10-13:
+This switch case, `E::B`, occurred before. It will never be matched. (Warn[12019])
+  File "string_class_const.php", line 34, characters 10-13:
+  This is the original occurrence of the case.
+WARN: File "string_class_const.php", line 50, characters 10-13:
+This switch case, `E::A`, occurred before. It will never be matched. (Warn[12019])
+  File "string_class_const.php", line 48, characters 10-13:
+  This is the original occurrence of the case.

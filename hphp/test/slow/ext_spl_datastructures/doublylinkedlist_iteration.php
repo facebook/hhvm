@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_doublylinkedlist_iteration() {
+function main_doublylinkedlist_iteration() :mixed{
 $stack = new SplStack();
 
 $stack->push("var1");

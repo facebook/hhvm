@@ -1,0 +1,247 @@
+*** Testing array_intersect() : Passing different types of arrays to $arr2 argument ***
+-- Iteration 1 --
+dict(3) {
+  [5]=>
+  int(2)
+  [7]=>
+  bool(true)
+  ["two"]=>
+  int(2)
+}
+dict(3) {
+  [5]=>
+  int(2)
+  [7]=>
+  bool(true)
+  ["two"]=>
+  int(2)
+}
+-- Iteration 2 --
+dict(1) {
+  [1]=>
+  float(1.1)
+}
+dict(1) {
+  [1]=>
+  float(1.1)
+}
+-- Iteration 3 --
+dict(3) {
+  [7]=>
+  bool(true)
+  [8]=>
+  bool(false)
+  [13]=>
+  string(0) ""
+}
+dict(3) {
+  [7]=>
+  bool(true)
+  [8]=>
+  bool(false)
+  [13]=>
+  string(0) ""
+}
+-- Iteration 4 --
+dict(0) {
+}
+dict(0) {
+}
+-- Iteration 5 --
+dict(2) {
+  [8]=>
+  bool(false)
+  [13]=>
+  string(0) ""
+}
+dict(2) {
+  [8]=>
+  bool(false)
+  [13]=>
+  string(0) ""
+}
+-- Iteration 6 --
+dict(1) {
+  [10]=>
+  string(5) "aaaa"
+}
+dict(1) {
+  [10]=>
+  string(5) "aaaa"
+}
+-- Iteration 7 --
+dict(1) {
+  [9]=>
+  string(6) "aaaa\r"
+}
+dict(1) {
+  [9]=>
+  string(6) "aaaa\r"
+}
+-- Iteration 8 --
+dict(2) {
+  [11]=>
+  string(90) "11 < 12. 123 >22
+'single quoted string'
+"double quoted string"
+2222 != 1111.	 0000 = 0000
+"
+  [12]=>
+  string(88) "hello world	
+1111		 != 2222
+heredoc
+double quoted string. withdifferentwhitespaces"
+}
+dict(2) {
+  [11]=>
+  string(90) "11 < 12. 123 >22
+'single quoted string'
+"double quoted string"
+2222 != 1111.	 0000 = 0000
+"
+  [12]=>
+  string(88) "hello world	
+1111		 != 2222
+heredoc
+double quoted string. withdifferentwhitespaces"
+}
+-- Iteration 9 --
+dict(2) {
+  [2]=>
+  string(3) "two"
+  [3]=>
+  string(3) "one"
+}
+dict(2) {
+  [2]=>
+  string(3) "two"
+  [3]=>
+  string(3) "one"
+}
+-- Iteration 10 --
+dict(3) {
+  [5]=>
+  int(2)
+  [7]=>
+  bool(true)
+  ["two"]=>
+  int(2)
+}
+dict(3) {
+  [5]=>
+  int(2)
+  [7]=>
+  bool(true)
+  ["two"]=>
+  int(2)
+}
+-- Iteration 11 --
+dict(0) {
+}
+dict(0) {
+}
+-- Iteration 12 --
+dict(1) {
+  ["one"]=>
+  string(3) "ten"
+}
+dict(1) {
+  ["one"]=>
+  string(3) "ten"
+}
+-- Iteration 13 --
+dict(3) {
+  [2]=>
+  string(3) "two"
+  [4]=>
+  string(4) "four"
+  [7]=>
+  bool(true)
+}
+dict(3) {
+  [2]=>
+  string(3) "two"
+  [4]=>
+  string(4) "four"
+  [7]=>
+  bool(true)
+}
+-- Iteration 14 --
+dict(2) {
+  [8]=>
+  bool(false)
+  [13]=>
+  string(0) ""
+}
+dict(2) {
+  [8]=>
+  bool(false)
+  [13]=>
+  string(0) ""
+}
+-- Iteration 15 --
+dict(3) {
+  [7]=>
+  bool(true)
+  [8]=>
+  bool(false)
+  [13]=>
+  string(0) ""
+}
+dict(3) {
+  [7]=>
+  bool(true)
+  [8]=>
+  bool(false)
+  [13]=>
+  string(0) ""
+}
+-- Iteration 16 --
+dict(3) {
+  [8]=>
+  bool(false)
+  [13]=>
+  string(0) ""
+  [""]=>
+  string(6) "emptys"
+}
+dict(3) {
+  [8]=>
+  bool(false)
+  [13]=>
+  string(0) ""
+  [""]=>
+  string(6) "emptys"
+}
+-- Iteration 17 --
+dict(3) {
+  [7]=>
+  bool(true)
+  [8]=>
+  bool(false)
+  [13]=>
+  string(0) ""
+}
+dict(3) {
+  [7]=>
+  bool(true)
+  [8]=>
+  bool(false)
+  [13]=>
+  string(0) ""
+}
+-- Iteration 18 --
+dict(1) {
+  [0]=>
+  int(5)
+}
+dict(1) {
+  [0]=>
+  int(5)
+}
+-- Iteration 19 --
+dict(0) {
+}
+dict(0) {
+}
+Done

@@ -16,10 +16,8 @@
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -353,7 +351,7 @@ void SetVariableCommand::setVariableValue(
     case KindOfInt64:
       try {
         val(typedVariable).num = std::stoi(value, nullptr, 0);
-      } catch (std::exception &e) {
+      } catch (std::exception &) {
         throw DebuggerCommandException("Invalid value specified.");
       }
       break;
@@ -361,7 +359,7 @@ void SetVariableCommand::setVariableValue(
     case KindOfDouble:
       try {
         val(typedVariable).dbl = std::stod(value);
-      } catch (std::exception &e) {
+      } catch (std::exception &) {
         throw DebuggerCommandException("Invalid value specified.");
       }
       break;

@@ -1,4 +1,5 @@
 shape
+---
 A shape is a key-value data structure where the keys are known. Shapes are value types, just like `dict` and `vec`.
 
  A closed shape, such as `shape('x' => int)`, has a fixed number of keys.  An open shape, such as `shape('x' => int, ...)`, may have additional keys.

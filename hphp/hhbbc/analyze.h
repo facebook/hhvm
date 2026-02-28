@@ -95,9 +95,18 @@ struct FuncAnalysisResult {
   bool effectFree{false};
 
   /*
+   * Flag to indicate whether the analysis should be repeated after the
+   * function's bytecode was updated. The analysis must have made progress
+   * irreversibly reducing the bytecode.
+   *
+   * Used to infer the effectFree flag after reduction of MemoGet to a constant.
+   */
+  bool reanalyzeOnUpdate{false};
+
+  /*
    * Flag to indicate that an iterator's base was unchanged on at least one path
    * to that iterator's release. If this is false, we can skip doing the more
-   * expensive LIter optimization pass (because it will never succeed).
+   * expensive Iter local optimization pass (because it will never succeed).
    */
   bool hasInvariantIterBase{false};
 
@@ -108,16 +117,18 @@ struct FuncAnalysisResult {
 
   /*
    * Bitset representing which parameters may affect the result of the
-   * function, assuming it produces one. Note that VerifyParamType
-   * does not count as a use in this context.
+   * function, assuming it produces one. Note that the parameter type
+   * verification does not count as a use in this context.
    */
   std::bitset<64> usedParams;
 
   /*
-   * For an 86cinit, any constants that we inferred a type for.
-   * The size_t is the index into ctx.cls->constants
+   * For an 86cinit, any constants that we inferred a type for. For
+   * 86pinit or 86sinit, any resolved initial values for
+   * properties. These two cases are disjoint, so we save memory by
+   * using a variant type.
    */
-  CompactVector<std::pair<size_t,Type>> resolvedConstants;
+  UniqueEither<ResolvedConstants*, ResolvedPropInits*> resolvedInitializers;
 
   /*
    * Public static property mutations in this function.
@@ -159,6 +170,7 @@ struct ClassAnalysisWorklist {
   void scheduleForProp(SString name);
   void scheduleForPropMutate(SString name);
   void scheduleForReturnType(const php::Func& callee);
+  void scheduleForUseVars(const php::Func& invoke);
 
   void addPropDep(SString name, const php::Func& f) {
     propDeps[name].emplace(&f);
@@ -168,6 +180,9 @@ struct ClassAnalysisWorklist {
   }
   void addReturnTypeDep(const php::Func& callee, const php::Func& f) {
     returnTypeDeps[&callee].emplace(&f);
+  }
+  void addUseVarsDep(const php::Func& invoke, const php::Func& caller) {
+    useVarDeps[&invoke].emplace(&caller);
   }
 
   bool empty() const { return worklist.empty(); }
@@ -183,6 +198,13 @@ struct ClassAnalysisWorklist {
     return &it->second;
   }
 
+  const hphp_fast_set<const php::Func*>*
+  depsForUseVars(const php::Func& f) const {
+    auto const it = useVarDeps.find(&f);
+    if (it == useVarDeps.end()) return nullptr;
+    return &it->second;
+  }
+
 private:
   hphp_fast_set<const php::Func*> inWorklist;
   std::deque<const php::Func*> worklist;
@@ -192,13 +214,19 @@ private:
   Deps<SString> propDeps;
   Deps<SString> propMutateDeps;
   Deps<const php::Func*> returnTypeDeps;
+  Deps<const php::Func*> useVarDeps;
 };
 
 struct ClassAnalysisWork {
   ClassAnalysisWorklist worklist;
-  hphp_fast_map<const php::Func*, Type> returnTypes;
+  hphp_fast_map<const php::Func*, Index::ReturnType> returnTypes;
   hphp_fast_map<const php::Func*, hphp_fast_set<SString>> propMutators;
-  bool propsRefined = false;
+  hphp_fast_map<const php::Func*, CompactVector<Type>> useVars;
+  // List of properties whose initial values have been determined to
+  // satisfy their type-constraint and which haven't been reflected in
+  // the index yet.
+  SStringSet privatePropsSatisfiesTC;
+  bool noPropRefine = false;
 };
 
 /*
@@ -223,10 +251,56 @@ struct ClassAnalysis {
   PropState privateProperties;
   PropState privateStatics;
 
-  ClassAnalysisWork* work{nullptr};
+  ResolvedPropInits resolvedProps;
+  ResolvedClsTypeConsts resolvedTypeConsts;
 
-  // Whether this class might have a bad initial value for a property.
-  bool badPropInitialValues{false};
+  ClassAnalysisWork* work{nullptr};
+};
+
+//////////////////////////////////////////////////////////////////////
+
+struct UnitAnalysis {
+  explicit UnitAnalysis(const Context& ctx) : ctx{ctx} {}
+
+  UnitAnalysis(UnitAnalysis&&) = default;
+  UnitAnalysis& operator=(UnitAnalysis&&) = default;
+
+  Context ctx;
+
+  ResolvedTypeAliases resolvedTypeAliases;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+// Local state for resolving class constants and reaching a fixed
+// point.
+struct ClsConstantWork {
+  ClsConstantWork(const IIndex&, const php::Class&);
+
+  ClsConstLookupResult lookup(SString);
+
+  void update(SString, Type);
+  void add(SString);
+  SString next();
+
+  void setCurrent(SString n) {
+    assertx(!current);
+    current = n;
+  }
+  void clearCurrent(SString n) {
+    assertx(current == n);
+    current = nullptr;
+  }
+
+  void schedule(SString);
+
+  const php::Class& cls;
+  hphp_fast_map<SString, ClsConstInfo> constants;
+
+  SString current{nullptr};
+  hphp_fast_map<SString, hphp_fast_set<SString>> deps;
+  hphp_fast_set<SString> inWorklist;
+  std::deque<SString> worklist;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -238,7 +312,7 @@ struct ClassAnalysis {
  *
  * This routine makes no changes to the php::Func.
  */
-FuncAnalysis analyze_func(const Index&, const AnalysisContext&,
+FuncAnalysis analyze_func(const IIndex&, const AnalysisContext&,
                           CollectionOpts opts);
 
 /*
@@ -251,10 +325,11 @@ FuncAnalysis analyze_func(const Index&, const AnalysisContext&,
  *
  * Currently this is not supported for closure bodies.
  */
-FuncAnalysis analyze_func_inline(const Index&,
+FuncAnalysis analyze_func_inline(const IIndex&,
                                  const AnalysisContext&,
                                  const Type& thisType,
                                  const CompactVector<Type>& args,
+                                 ClsConstantWork* clsCnsWork = nullptr,
                                  CollectionOpts opts = {});
 
 /*
@@ -263,7 +338,24 @@ FuncAnalysis analyze_func_inline(const Index&,
  * This involves doing a analyze_func call on each of its functions,
  * and inferring some whole-class information at the same time.
  */
-ClassAnalysis analyze_class(const Index&, const Context&);
+ClassAnalysis analyze_class(const IIndex&, const Context&);
+
+/*
+ * Perform an analysis of all the methods for a php::Class separately
+ * (without doing whole-class analysis).
+ */
+ClassAnalysis analyze_class_separate(const AnalysisIndex&, const Context&);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Perform an analysis for a php::Unit. This does not analyze any of
+ * the classes or funcs contained within the unit, that must be done
+ * explicitly. It analyzes type-aliases defined within the unit.
+ */
+UnitAnalysis analyze_unit(const AnalysisIndex& index, const Context& ctx);
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * Represents the various interp state at some particular instruction
@@ -297,6 +389,15 @@ struct PropagatedStates {
   // before next()).
   const Optional<Type>& lastPush() const { return m_lastPush; }
 
+  // The undoable array set performed by the current instruction (if
+  // any). Since next() will destroy information about the *pushed*
+  // array (IE, the post-set array), we can use this to recover the
+  // post-set array from the pre-set array. This juggling is done to
+  // avoid having a simultaneous reference to the pre-array and
+  // post-array to avoid triggering COW.
+  using LastSet = StateMutationUndo::UndoableArraySet;
+  const Optional<LastSet>& lastSet() const { return m_lastSet; }
+
   // Interp flags for the current instruction.
   bool wasPEI() const { return currentMark().wasPEI; }
   bool unreachable() const { return currentMark().unreachable; }
@@ -306,12 +407,13 @@ private:
   const StateMutationUndo::Mark& currentMark() const {
     assertx(!m_undos.events.empty());
     auto const mark =
-      boost::get<StateMutationUndo::Mark>(&m_undos.events.back());
+      std::get_if<StateMutationUndo::Mark>(&m_undos.events.back());
     assertx(mark);
     return *mark;
   }
 
   Optional<Type> m_lastPush;
+  Optional<LastSet> m_lastSet;
   CompactVector<Type> m_stack;
   CompactVector<Type> m_locals;
   CompactVector<std::pair<LocalId, Type>> m_afterLocals;
@@ -325,7 +427,7 @@ private:
  * Pre: stateIn.initialized == true
  */
 PropagatedStates
-locally_propagated_states(const Index&,
+locally_propagated_states(const IIndex&,
                           const AnalysisContext&,
                           CollectedInfo& collect,
                           BlockId bid,
@@ -336,12 +438,126 @@ locally_propagated_states(const Index&,
  * target of the block.  This is used to update the in state for a block added
  * to the CFG in between analysis rounds.
  */
-State locally_propagated_bid_state(const Index& index,
+State locally_propagated_bid_state(const IIndex& index,
                                    const AnalysisContext& ctx,
                                    CollectedInfo& collect,
                                    BlockId bid,
                                    State state,
                                    BlockId targetBid);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Resolve a type-constraint into its equivalent set of HHBBC types.
+ *
+ * In general, a type-constraint cannot be represented exactly by a
+ * single HHBBC type, so a lower and upper bound is provided
+ * instead.
+ *
+ * A "candidate" type can be provided which will be applied to the
+ * type-constraint and can further constrain the output types. This
+ * is useful for the magic interfaces, whose lower-bound cannot be
+ * precisely represented by a single type.
+ */
+struct ConstraintType {
+  // Lower bound of constraint. Any type which is a subtype of this
+  // is guaranteed to pass a type-check without any side-effects.
+  Type lower;
+  // Upper bound of constraint. Any type which does not intersect
+  // with this is guaranteed to always fail a type-check.
+  Type upper;
+  // If this type-constraint might promote a "classish" type to a
+  // static string as a side-effect.
+  TriBool coerceClassToString{TriBool::No};
+  // Whether this type-constraint might map to a mixed
+  // type-hint. The mixed type-hint has special semantics when it
+  // comes to properties.
+  bool maybeMixed{false};
+};
+ConstraintType lookup_constraint(const IIndex&,
+                                 const Context&,
+                                 const TypeConstraint&,
+                                 const Type& candidate = TCell);
+
+/*
+ * Returns a tuple containing a type after the parameter type
+ * verification, a flag indicating whether the verification is a no-op
+ * (because it always passes without any conversion), and a flag
+ * indicating whether the verification is effect free (the
+ * verification could convert a type without causing a side-effect).
+ */
+std::tuple<Type, bool, bool> verify_param_type(const IIndex&,
+                                               const Context&,
+                                               uint32_t paramId,
+                                               const Type&);
+
+/*
+ * Given a type, adjust the type for the given type-constraint. If there's no
+ * type-constraint, or if property type-hints aren't being enforced, then return
+ * the type as is. This might return TBottom if the type is not compatible with
+ * the type-hint.
+ */
+Type adjust_type_for_prop(const IIndex& index,
+                          const php::Class& propCls,
+                          const TypeConstraint& tc,
+                          const Type& ty);
+Type adjust_type_for_prop(const IIndex& index,
+                          const php::Class& propCls,
+                          const TypeIntersectionConstraint* tc,
+                          const Type& ty);
+
+/*
+ * Resolve a type-constraint to its equivalent
+ * ConstraintType. Candidate can be used to narrow the type in some
+ * situations. The std::functions are called when classes need to be
+ * resolved, or for "this" type-hints.
+ */
+ConstraintType
+type_from_constraint(const TypeConstraint& tc,
+                     const Type& candidate,
+                     const std::function<Optional<res::Class>(SString)>& resolve,
+                     const std::function<Optional<Type>()>& self);
+
+/*
+ * Given two ConstraintTypes, compute and return the union.
+ */
+ConstraintType union_constraint(const ConstraintType& a,
+                                const ConstraintType& b);
+std::string show(const ConstraintType&);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Try to resolve self/parent types in the given context.
+ */
+Optional<Type> selfCls(const IIndex&, const Context&);
+Optional<Type> selfClsExact(const IIndex&, const Context&);
+
+Optional<Type> parentCls(const IIndex&, const Context&);
+Optional<Type> parentClsExact(const IIndex&, const Context&);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Resolve a builtin class with the given name. This just calls
+ * index.resolve_class(), but has some additional sanity checks that
+ * the resultant class is a builtin.
+ */
+res::Class builtin_class(const IIndex&, SString);
+
+
+/*
+ * Compute an initial return type based on the function and the
+ * return type-constraints. The Resolve std::function is used to resolve
+ * the classname for objects and Self is used to lookup the class in case
+ * of the "this" type hint.
+ */
+Type return_type_from_constraints(
+  const php::Func& f,
+  const std::function<Optional<res::Class>(SString)>& resolve,
+  const std::function<Optional<Type>()>& self
+);
+
 //////////////////////////////////////////////////////////////////////
 
 }

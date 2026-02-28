@@ -1,4 +1,0 @@
-File "sealed_enum.php", line 5, characters 3-10:
-Enum `B` in sealed whitelist for `E`, but does not use `E` (Typing[4445])
-  File "sealed_enum.php", line 12, characters 6-6:
-  Definition is here

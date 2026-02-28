@@ -18,7 +18,6 @@
 
 #ifndef NDEBUG
 
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include <folly/portability/SysMman.h>
@@ -35,7 +34,7 @@ __thread const VMProtect* tl_active_prot{nullptr};
 void protect() {
   if (UNLIKELY(!s_fakeRdsBase.load(std::memory_order_acquire))) {
     std::lock_guard<std::mutex> guard(s_lock);
-    if (!s_fakeRdsBase.load(std::memory_order_relaxed)) {
+    if (!s_fakeRdsBase.load(std::memory_order_acquire)) {
       rds::tl_base = nullptr;
       rds::threadInit(false /* shouldRegister */);
       regState() = VMRegState::DIRTY;
@@ -61,7 +60,7 @@ void protect() {
 }
 
 void unprotect(void* base) {
-  assertx(rds::tl_base == s_fakeRdsBase.load(std::memory_order_relaxed));
+  assertx(rds::tl_base == s_fakeRdsBase.load(std::memory_order_acquire));
   rds::tl_base = base;
   VMProtect::is_protected = false;
 }

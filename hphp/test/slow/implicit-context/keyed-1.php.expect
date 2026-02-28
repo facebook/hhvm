@@ -1,0 +1,50 @@
+>>>>> from null
+  Before: null
+null
+Hash:
+vec(0) {
+}
+memoNoArg passed
+  After: null
+------------------------
+  Before: null
+null
+Hash:
+vec(0) {
+}
+memoWithArg passed
+  After: null
+------------------------
+>>>>> from value
+  Before: C
+C
+Hash:
+vec(2) {
+  string(12) "ClassContext"
+  string(4) "KEYC"
+}
+memoNoArg passed
+  After: C
+------------------------
+  Before: C
+C
+Hash:
+vec(2) {
+  string(12) "ClassContext"
+  string(4) "KEYC"
+}
+memoWithArg passed
+  After: C
+------------------------
+>>>>> from inaccessible
+  Before: null
+memoNoArg passed
+  After: null
+------------------------
+  Before: null
+memoWithArg passed
+  After: null
+------------------------
+>>>>> final report
+No arg ran: 2 times
+With arg ran: 2 times

@@ -5,6 +5,7 @@
 
 use config_file::ConfigFile;
 use ocamlrep_custom::Custom;
+use oxidized::global_options::AllOrSome;
 
 struct Config(ConfigFile);
 
@@ -18,7 +19,7 @@ fn wrap(config: ConfigFile) -> Custom<Config> {
 
 ocamlrep_ocamlpool::ocaml_ffi! {
     fn hh_config_file_empty() -> Custom<Config> {
-        wrap(ConfigFile::empty())
+        wrap(ConfigFile::default())
     }
 
     fn hh_config_file_parse_contents(contents: Vec<u8>) -> Custom<Config> {
@@ -83,6 +84,14 @@ ocamlrep_ocamlpool::ocaml_ffi! {
         key: String,
     ) -> Option<Result<bool, String>> {
         config.0.get_bool(&key)
+            .map(|r| r.map_err(|e| e.to_string()))
+    }
+
+    fn hh_config_file_get_all_or_some_ints_opt(
+        config: Custom<Config>,
+        key: String,
+    ) -> Option<Result<AllOrSome<isize>, String>> {
+        config.0.get_all_or_some_ints(&key)
             .map(|r| r.map_err(|e| e.to_string()))
     }
 

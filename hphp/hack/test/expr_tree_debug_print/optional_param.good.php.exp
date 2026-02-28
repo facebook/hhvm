@@ -1,0 +1,78 @@
+<?hh
+<<file: __EnableUnstableFeatures('expression_trees')>>
+
+function g(): ExprTree<(function(optional ExampleInt): ExampleInt)> {
+  return ExampleDsl::makeTree(
+    darray[
+      "path" => __FILE__,
+      "start_line" => 7,
+      "end_line" => 7,
+      "start_column" => 20,
+      "end_column" => 36,
+    ],
+    darray[
+      "splices" => dict[],
+      "functions" => vec[],
+      "static_methods" => vec[],
+      "variables" => vec[],
+      "lexically_enclosing_tree" => NULL,
+    ],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitLambda(
+          darray[
+            "path" => __FILE__,
+            "start_line" => 7,
+            "end_line" => 7,
+            "start_column" => 20,
+            "end_column" => 36,
+          ],
+          vec[],
+          vec[
+            $v->visitReturn(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 7,
+                "end_line" => 7,
+                "start_column" => 34,
+                "end_column" => 36,
+              ],
+              $v->visitLocal(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 7,
+                  "end_line" => 7,
+                  "start_column" => 34,
+                  "end_column" => 36,
+                ],
+                "$x",
+              ),
+            ),
+          ],
+          vec[
+            $v->visitOptionalParameter(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 7,
+                "end_line" => 7,
+                "start_column" => 20,
+                "end_column" => 36,
+              ],
+              "$x",
+              $v->visitInt(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 7,
+                  "end_line" => 7,
+                  "start_column" => 26,
+                  "end_column" => 28,
+                ],
+                10,
+              ),
+            ),
+          ],
+        );
+      }
+    ),
+  );
+}

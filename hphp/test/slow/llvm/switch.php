@@ -1,7 +1,7 @@
 <?hh
 
 
-function is($i) {
+function is($i) :mixed{
   switch ($i) {
     case 12345:
       return 'first';
@@ -16,7 +16,7 @@ function is($i) {
   }
 }
 
-function ss($s) {
+function ss($s) :mixed{
   switch ($s) {
     case 'nope1':
     case 'nope2':
@@ -34,7 +34,7 @@ function ss($s) {
 
 
 <<__EntryPoint>>
-function main_switch() {
+function main_switch() :mixed{
 var_dump(is(12346));
 var_dump(ss('hello there'));
 }

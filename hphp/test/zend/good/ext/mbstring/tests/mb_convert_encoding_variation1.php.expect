@@ -1,0 +1,17 @@
+*** Testing mb_convert_encoding() : usage variations ***
+
+-- Iteration 1 --
+string(24) "68656c6c6f2c20776f726c64"
+
+-- Iteration 2 --
+string(24) "68656c6c6f2c20776f726c64"
+
+-- Iteration 3 --
+string(24) "68656c6c6f2c20776f726c64"
+
+-- Iteration 4 --
+string(24) "68656c6c6f2c20776f726c64"
+
+-- Iteration 5 --
+string(24) "68656c6c6f2c20776f726c64"
+Done

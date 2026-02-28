@@ -1,5 +1,5 @@
 
-Warning: readgzfile() expects at most 2 parameters, 3 given in %s/readgzfile_error.php on line 8
+Warning: readgzfile() expects at most 2 positional parameters, 3 given in %s/readgzfile_error.php on line 8
 
-Warning: readgzfile() expects at least 1 parameter, 0 given in %s/readgzfile_error.php on line 10
+Warning: readgzfile() expects at least 1 positional parameter, 0 given in %s/readgzfile_error.php on line 10
 ===DONE===

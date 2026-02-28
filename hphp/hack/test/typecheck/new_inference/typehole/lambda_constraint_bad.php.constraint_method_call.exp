@@ -1,0 +1,10 @@
+ERROR: File "lambda_constraint_bad.php", line 18, characters 3-22:
+Typing error (Typing[4323])
+  File "lambda_constraint_bad.php", line 11, characters 12-12:
+  `T` is a constrained type parameter
+  File "lambda_constraint_bad.php", line 11, characters 17-17:
+  This type constraint is violated
+  File "lambda_constraint_bad.php", line 11, characters 17-17:
+  Expected `I`
+  File "lambda_constraint_bad.php", line 18, characters 19-19:
+  But got `C`

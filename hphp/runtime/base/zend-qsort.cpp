@@ -23,11 +23,11 @@ namespace HPHP {
 #define QSORT_STACK_SIZE (sizeof(size_t) * CHAR_BIT)
 
 void _zend_qsort_swap(void *a, void *b, size_t siz) {
-  register char  *tmp_a_char;
-  register char  *tmp_b_char;
-  register int   *tmp_a_int;
-  register int   *tmp_b_int;
-  register size_t i;
+  char  *tmp_a_char;
+  char  *tmp_b_char;
+  int   *tmp_a_int;
+  int   *tmp_b_int;
+  size_t i;
   int             t_i;
   char            t_c;
 
@@ -54,12 +54,12 @@ void zend_qsort(void *base, size_t nmemb, size_t siz,
                 compare_func_t compare, void *opaque) {
   void           *begin_stack[QSORT_STACK_SIZE];
   void           *end_stack[QSORT_STACK_SIZE];
-  register char  *begin;
-  register char  *end;
-  register char  *seg1;
-  register char  *seg2;
-  register char  *seg2p;
-  register int    loop;
+  char  *begin;
+  char  *end;
+  char  *seg1;
+  char  *seg2;
+  char  *seg2p;
+  int    loop;
   unsigned int    offset;
 
   begin_stack[0] = (char *) base;

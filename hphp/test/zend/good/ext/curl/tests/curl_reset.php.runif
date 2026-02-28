@@ -1,2 +1,1 @@
 extension curl
-function curl_reset

@@ -4,7 +4,7 @@
 class Character {
   private $actor;
 
-  function setActor(?string $actor) {
+  function setActor(?string $actor) :mixed{
     $this->actor = $actor;
   }
 }

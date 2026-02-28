@@ -1,0 +1,2 @@
+Argument 1 passed to dom_import_simplexml() must be an instance of SimpleXMLElement, DateTimeImmutable given
+Argument 1 passed to simplexml_import_dom() must be an instance of DOMNode, DateTimeImmutable given

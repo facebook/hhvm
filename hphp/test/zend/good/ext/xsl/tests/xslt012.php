@@ -15,7 +15,7 @@ if(!$xsl) {
   exit;
 }
 
-$proc = new xsltprocessor;
+$proc = new XSLTProcessor;
 if(!$proc) {
   echo "Error while making xsltprocessor object\n";
   exit;
@@ -24,7 +24,7 @@ if(!$proc) {
 
 $proc->importStylesheet($xsl);
 
-$parameters = darray[
+$parameters = dict[
                     'foo' => 'barbar',
                     'foo1' => 'test',
                     ];

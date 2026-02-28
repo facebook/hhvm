@@ -1,5 +1,5 @@
 <?hh
-function test($x) {
+function test($x) :mixed{
   try {
     var_dump($x[5] = 7);
   } catch (Exception $e) {
@@ -57,13 +57,13 @@ function test($x) {
   }
   var_dump($x);
 }
-function main() {
+function main() :mixed{
   test(Set {5, 'a', 0, ''});
   echo "----\n";
   test(ImmSet {5, 'a', 0, ''});
 }
 
 <<__EntryPoint>>
-function main_set_invalid_operations() {
+function main_set_invalid_operations() :mixed{
 main();
 }

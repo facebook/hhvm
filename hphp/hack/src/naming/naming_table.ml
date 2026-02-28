@@ -142,16 +142,16 @@ open Hh_prelude
 *)
 
 (* Changes since baseline can be None if there was no baseline to begin with.
-  The scenario where we apply changes since baseline instead of relying on
-  the packaged local changes in the LOCAL_CHANGES table is this:
-    1) Load the naming table baseline (may include local changes if it was
-      incrementally updated at some point - not currently done in practice,
-      but possible and likely to happen in the future)
-    2) Load the changes since baseline that include naming changes processed
-      at another time (perhaps, on another host)
-  In the scenario where the naming table is saved to SQLite from an Unbacked
-  naming table, there is no baseline to speak of
-  *)
+   The scenario where we apply changes since baseline instead of relying on
+   the packaged local changes in the LOCAL_CHANGES table is this:
+     1) Load the naming table baseline (may include local changes if it was
+       incrementally updated at some point - not currently done in practice,
+       but possible and likely to happen in the future)
+     2) Load the changes since baseline that include naming changes processed
+       at another time (perhaps, on another host)
+   In the scenario where the naming table is saved to SQLite from an Unbacked
+   naming table, there is no baseline to speak of
+*)
 type changes_since_baseline = Naming_sqlite.local_changes option
 
 type t =
@@ -159,7 +159,7 @@ type t =
   | Backed of Naming_sqlite.local_changes * Naming_sqlite.db_path
 [@@deriving show]
 
-type fast = FileInfo.names Relative_path.Map.t
+type defs_per_file = FileInfo.names Relative_path.Map.t [@@deriving show]
 
 type saved_state_info = FileInfo.saved Relative_path.Map.t
 
@@ -185,13 +185,13 @@ let filter a ~f =
               ~f:
                 begin
                   fun path fi acc ->
-                  if f path fi then
-                    acc
-                  else
-                    Relative_path.Map.add
+                    if f path fi then
                       acc
-                      ~key:path
-                      ~data:Naming_sqlite.Deleted
+                    else
+                      Relative_path.Map.add
+                        acc
+                        ~key:path
+                        ~data:Naming_sqlite.Deleted
                 end
               ~file_deltas;
         },
@@ -241,7 +241,7 @@ let get_file_info a key =
 
 exception File_info_not_found
 
-let get_file_info_unsafe a key =
+let get_file_info_exn a key =
   match get_file_info a key with
   | Some info -> info
   | None -> raise File_info_not_found
@@ -472,7 +472,7 @@ let to_saved a =
     fold a ~init:Relative_path.Map.empty ~f:(fun path fi acc ->
         Relative_path.Map.add acc ~key:path ~data:(FileInfo.to_saved fi))
 
-let to_fast ?(warn_on_naming_costly_iter = true) a =
+let to_defs_per_file ?(warn_on_naming_costly_iter = true) a =
   match a with
   | Unbacked a -> Relative_path.Map.map a ~f:FileInfo.simplify
   | Backed _ ->
@@ -483,7 +483,8 @@ let to_fast ?(warn_on_naming_costly_iter = true) a =
       ~f:(fun path fi acc ->
         Relative_path.Map.add acc ~key:path ~data:(FileInfo.simplify fi))
 
-let saved_to_fast saved = Relative_path.Map.map saved ~f:FileInfo.saved_to_names
+let saved_to_defs_per_file saved =
+  Relative_path.Map.map saved ~f:FileInfo.saved_to_names
 
 (*****************************************************************************)
 (* Forward naming table creation functions *)
@@ -494,7 +495,7 @@ let create a = Unbacked a
 (* Helper function to apply new files info to reverse naming table *)
 let update_reverse_entries_helper
     (ctx : Provider_context.t)
-    (changed_file_infos : (Relative_path.t * FileInfo.t option) list) : unit =
+    (changed_ids : (Relative_path.t * FileInfo.t option) list) : unit =
   let backend = Provider_context.get_backend ctx in
   let db_path_opt = Db_path_provider.get_naming_db_path backend in
   (* Remove all old file symbols first *)
@@ -506,47 +507,57 @@ let update_reverse_entries_helper
       in
       match fi_opt with
       | Some fi ->
+        let { FileInfo.classes; typedefs; funs; consts; modules } =
+          fi.FileInfo.ids
+        in
         Naming_provider.remove_type_batch
           backend
-          (fi.FileInfo.classes |> List.map ~f:(fun (_, x, _) -> x));
+          (classes |> List.map ~f:(fun id -> id.FileInfo.name));
         Naming_provider.remove_type_batch
           backend
-          (fi.FileInfo.typedefs |> List.map ~f:(fun (_, x, _) -> x));
+          (typedefs |> List.map ~f:(fun id -> id.FileInfo.name));
         Naming_provider.remove_fun_batch
           backend
-          (fi.FileInfo.funs |> List.map ~f:(fun (_, x, _) -> x));
+          (funs |> List.map ~f:(fun id -> id.FileInfo.name));
         Naming_provider.remove_const_batch
           backend
-          (fi.FileInfo.consts |> List.map ~f:(fun (_, x, _) -> x));
+          (consts |> List.map ~f:(fun id -> id.FileInfo.name));
         Naming_provider.remove_module_batch
           backend
-          (fi.FileInfo.modules |> List.map ~f:(fun (_, x, _) -> x))
+          (modules |> List.map ~f:(fun id -> id.FileInfo.name))
       | None -> ())
-    changed_file_infos;
+    changed_ids;
 
   (* Add new file symbols after removing old files symbols *)
   List.iter
     ~f:(fun (_path, new_file_info) ->
       match new_file_info with
       | Some fi ->
+        let { FileInfo.classes; typedefs; funs; consts; modules } =
+          fi.FileInfo.ids
+        in
         List.iter
-          ~f:(fun (pos, name, _) -> Naming_provider.add_class backend name pos)
-          fi.FileInfo.classes;
+          ~f:(fun id ->
+            Naming_provider.add_class backend id.FileInfo.name id.FileInfo.pos)
+          classes;
         List.iter
-          ~f:(fun (pos, name, _) ->
-            Naming_provider.add_typedef backend name pos)
-          fi.FileInfo.typedefs;
+          ~f:(fun id ->
+            Naming_provider.add_typedef backend id.FileInfo.name id.FileInfo.pos)
+          typedefs;
         List.iter
-          ~f:(fun (pos, name, _) -> Naming_provider.add_fun backend name pos)
-          fi.FileInfo.funs;
+          ~f:(fun id ->
+            Naming_provider.add_fun backend id.FileInfo.name id.FileInfo.pos)
+          funs;
         List.iter
-          ~f:(fun (pos, name, _) -> Naming_provider.add_const backend name pos)
-          fi.FileInfo.consts;
+          ~f:(fun id ->
+            Naming_provider.add_const backend id.FileInfo.name id.FileInfo.pos)
+          consts;
         List.iter
-          ~f:(fun (pos, name, _) -> Naming_provider.add_module backend name pos)
-          fi.FileInfo.modules
+          ~f:(fun id ->
+            Naming_provider.add_module backend id.FileInfo.name id.FileInfo.pos)
+          modules
       | None -> ())
-    changed_file_infos
+    changed_ids
 
 let update_reverse_entries ctx file_deltas =
   let file_delta_list = Relative_path.Map.bindings file_deltas in
@@ -604,6 +615,9 @@ let load_from_sqlite_for_type_checking
   Db_path_provider.set_naming_db_path
     (Provider_context.get_backend ctx)
     (Some db_path);
+  (* I believe that changes_since_baseline is never used. I want to check... *)
+  if Option.is_some changes_since_baseline then
+    HackEventLogger.naming_sqlite_has_changes_since_baseline ();
   let local_changes =
     choose_local_changes
       ~local_changes:(Naming_sqlite.get_local_changes db_path)
@@ -720,7 +734,7 @@ let save_async naming_table ~init_id ~root ~destination_path =
 (* Testing functions *)
 (*****************************************************************************)
 
-let assert_is_backed a backed =
-  match a with
-  | Unbacked _ -> assert (not backed)
-  | Backed _ -> assert backed
+let get_backed_delta_TEST_ONLY (t : t) : Naming_sqlite.local_changes option =
+  match t with
+  | Backed (local_changes, _) -> Some local_changes
+  | Unbacked _ -> None

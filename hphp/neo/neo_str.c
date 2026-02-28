@@ -9,8 +9,6 @@
  *
  */
 
-#include "cs_config.h"
-
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -19,15 +17,10 @@
 
 #ifdef _MSC_VER
 #include <io.h>
-#else
-#include <unistd.h>
 #endif
 
-#include "neo_bool.h"
-#include "neo_misc.h"
 #include "neo_err.h"
 #include "neo_str.h"
-#include "ulist.h"
 
 #ifndef va_copy
 #ifdef __va_copy

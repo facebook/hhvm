@@ -18,14 +18,9 @@
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/server/cli-server.h"
-#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 namespace {
-  bool is_any_cli_mode() {
-    return is_cli_server_mode() || !RuntimeOption::ServerExecutionMode();
-  }
-
   Array HHVM_FUNCTION(HH_io_pipe) {
     int fds[2];
     if (::pipe(fds) != 0) {
@@ -79,11 +74,12 @@ namespace {
 
   struct IOExtension final : Extension {
 
-    IOExtension() : Extension("hsl_io", "1.0") {}
+    IOExtension() : Extension("hsl_io", "1.0", NO_ONCALL_YET) {}
 
-    void moduleInit() override {
-      HHVM_FALIAS(
-        HH\\Lib\\_Private\\Native\\pipe,
+    void moduleRegisterNative() override {
+      // Clang 15 doesn't like the HHVM_FALIAS macro with \\N
+      HHVM_FALIAS_FE_STR(
+        "HH\\Lib\\_Private\\Native\\pipe",
         HH_io_pipe
       );
       HHVM_FALIAS(
@@ -98,7 +94,6 @@ namespace {
         HH\\Lib\\_Private\\_IO\\request_read,
         HH_io_request_read
       );
-      loadSystemlib();
     }
 
     void requestInit() {

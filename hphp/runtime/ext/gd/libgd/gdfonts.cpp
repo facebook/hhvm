@@ -10,7 +10,7 @@
  */
 
 
-#include "gdfonts.h"
+#include "hphp/runtime/ext/gd/libgd/gdfonts.h"
 
 static const char gdFontSmallData[] =
 {

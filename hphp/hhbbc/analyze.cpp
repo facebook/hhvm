@@ -22,9 +22,11 @@
 #include <string>
 #include <vector>
 
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 
-#include "hphp/util/trace.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/dataflow-worklist.h"
+#include "hphp/util/trace.h"
 
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/interp.h"
@@ -32,19 +34,15 @@
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/cfg.h"
-#include "hphp/hhbbc/unit-util.h"
-#include "hphp/hhbbc/cfg-opts.h"
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/options-util.h"
-
-#include "hphp/runtime/vm/reified-generics.h"
 
 namespace HPHP::HHBBC {
 
 namespace {
 
-TRACE_SET_MOD(hhbbc);
+TRACE_SET_MOD(hhbbc)
 
 struct KnownArgs {
   Type context;
@@ -54,6 +52,10 @@ struct KnownArgs {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_Closure("Closure");
+const StaticString s_AsyncGenerator("HH\\AsyncGenerator");
+const StaticString s_Generator("Generator");
+
+const StaticString s_invoke("__invoke");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -68,8 +70,8 @@ uint32_t rpoId(const FuncAnalysis& ai, BlockId blk) {
 const StaticString s_reified_generics_var("0ReifiedGenerics");
 const StaticString s_coeffects_var("0Coeffects");
 
-State entry_state(const Index& index, const Context& ctx,
-                  const KnownArgs* knownArgs) {
+Optional<State> entry_state(const IIndex& index, CollectedInfo& collect,
+                            const Context& ctx, const KnownArgs* knownArgs) {
   auto ret = State{};
   ret.initialized = true;
   ret.thisType = [&] {
@@ -78,15 +80,18 @@ State entry_state(const Index& index, const Context& ctx,
       if (knownArgs->context.subtypeOf(BOptObj)) {
         return setctx(knownArgs->context);
       }
-      if (is_specialized_cls(knownArgs->context)) {
-        auto const dcls = dcls_of(knownArgs->context);
-        return setctx(dcls.type == DCls::Exact ?
-                      objExact(dcls.cls) : subObj(dcls.cls));
+      if (knownArgs->context.subtypeOf(BCls) &&
+          is_specialized_cls(knownArgs->context)) {
+        return setctx(toobj(knownArgs->context));
       }
     }
-    auto const maybeThisType = thisType(index, ctx);
-    auto thisType = maybeThisType ? *maybeThisType : TObj;
-    if (index.lookup_this_available(ctx.func)) return thisType;
+    auto const maybeSelfType = selfCls(index, ctx);
+    auto thisType = maybeSelfType ? setctx(toobj(*maybeSelfType)) : TObj;
+    if (ctx.func->cls &&
+        !(ctx.func->cls->attrs & AttrTrait) &&
+        !(ctx.func->attrs & AttrStatic)) {
+      return thisType;
+    }
     return opt(std::move(thisType));
   }();
   ret.locals.resize(ctx.func->locals.size());
@@ -102,31 +107,50 @@ State entry_state(const Index& index, const Context& ctx,
           for (auto& p : pack) p = unctx(std::move(p));
           ret.locals[locId] = vec(std::move(pack));
         } else {
-          ret.locals[locId] = unctx(knownArgs->args[locId]);
+          auto [ty, _, effectFree] =
+            verify_param_type(index, ctx, locId, unctx(knownArgs->args[locId]));
+
+          if (ty.subtypeOf(BBottom)) {
+            ret.unreachable = true;
+            if (ctx.func->params[locId].dvEntryPoint == NoBlockId) {
+              return std::nullopt;
+            }
+          }
+
+          ret.locals[locId] = std::move(ty);
+          collect.effectFree &= effectFree;
         }
       } else {
         ret.locals[locId] = ctx.func->params[locId].isVariadic ? TVec : TUninit;
       }
       continue;
     }
-    auto const& param = ctx.func->params[locId];
-    if (ctx.func->isMemoizeImpl) {
-      auto const& constraint = param.typeConstraint;
-      if (constraint.hasConstraint() && !constraint.isTypeVar() &&
-          !constraint.isTypeConstant()) {
-        ret.locals[locId] = index.lookup_constraint(ctx, constraint);
-        continue;
-      }
+
+    if (ctx.func->params[locId].isVariadic) {
+      ret.locals[locId] = TVec;
+      continue;
     }
+
     // Because we throw a non-recoverable error for having fewer than the
     // required number of args, all function parameters must be initialized.
-    ret.locals[locId] = ctx.func->params[locId].isVariadic ? TVec : TInitCell;
+    auto [ty, _, effectFree] = verify_param_type(index, ctx, locId, TInitCell);
+
+    if (ty.subtypeOf(BBottom)) {
+      ret.unreachable = true;
+      if (ctx.func->params[locId].dvEntryPoint == NoBlockId) {
+        return std::nullopt;
+      }
+    }
+
+    ret.locals[locId] = std::move(ty);
+    collect.effectFree &= effectFree;
   }
 
   // Closures have use vars, we need to look up their types from the index.
-  auto const useVars = ctx.func->isClosureBody
-    ? index.lookup_closure_use_vars(ctx.func)
-    : CompactVector<Type>{};
+  auto const useVars = [&] {
+    if (!ctx.func->isClosureBody) return CompactVector<Type>{};
+    return collect.closureUseVars.initial(*ctx.func);
+  }();
 
   /*
    * Reified functions have a hidden local that's always the first
@@ -192,14 +216,16 @@ State entry_state(const Index& index, const Context& ctx,
  * this), but that case will be discovered when iterating.
  */
 dataflow_worklist<uint32_t>
-prepare_incompleteQ(const Index& index,
+prepare_incompleteQ(const IIndex& index,
                     FuncAnalysis& ai,
+                    CollectedInfo& collect,
                     const KnownArgs* knownArgs) {
   auto incompleteQ     = dataflow_worklist<uint32_t>(ai.rpoBlocks.size());
   auto const ctx       = ai.ctx;
   auto const numParams = ctx.func->params.size();
 
-  auto const entryState = entry_state(index, ctx, knownArgs);
+  auto const entryState = entry_state(index, collect, ctx, knownArgs);
+  if (!entryState) return incompleteQ;
 
   if (knownArgs) {
     // When we have known args, we only need to add one of the entry points to
@@ -209,7 +235,8 @@ prepare_incompleteQ(const Index& index,
       for (auto i = knownArgs->args.size(); i < numParams; ++i) {
         auto const dv = ctx.func->params[i].dvEntryPoint;
         if (dv != NoBlockId) {
-          ai.bdata[dv].stateIn.copy_from(entryState);
+          ai.bdata[dv].stateIn.copy_from(*entryState);
+          ai.bdata[dv].stateIn.unreachable = false;
           incompleteQ.push(rpoId(ai, dv));
           return true;
         }
@@ -217,8 +244,8 @@ prepare_incompleteQ(const Index& index,
       return false;
     }();
 
-    if (!useDvInit) {
-      ai.bdata[ctx.func->mainEntry].stateIn.copy_from(entryState);
+    if (!useDvInit && !entryState->unreachable) {
+      ai.bdata[ctx.func->mainEntry].stateIn.copy_from(*entryState);
       incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
     }
 
@@ -228,17 +255,23 @@ prepare_incompleteQ(const Index& index,
   for (auto paramId = uint32_t{0}; paramId < numParams; ++paramId) {
     auto const dv = ctx.func->params[paramId].dvEntryPoint;
     if (dv != NoBlockId) {
-      ai.bdata[dv].stateIn.copy_from(entryState);
+      ai.bdata[dv].stateIn.copy_from(*entryState);
+      ai.bdata[dv].stateIn.unreachable = false;
       incompleteQ.push(rpoId(ai, dv));
       for (auto locId = paramId; locId < numParams; ++locId) {
         ai.bdata[dv].stateIn.locals[locId] =
           ctx.func->params[locId].isVariadic ? TVec : TUninit;
       }
     }
+    // If a DV-init's param has an entry state of Bottom, then none of
+    // the following DV-inits are reachable.
+    if (entryState->locals[paramId].is(BBottom)) break;
   }
 
-  ai.bdata[ctx.func->mainEntry].stateIn.copy_from(entryState);
-  incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
+  if (!entryState->unreachable) {
+    ai.bdata[ctx.func->mainEntry].stateIn.copy_from(*entryState);
+    incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
+  }
 
   return incompleteQ;
 }
@@ -251,18 +284,35 @@ prepare_incompleteQ(const Index& index,
  * Note that in the interpreter code, ctx.func->cls is not
  * necessarily the same as ctx.cls because of closures.
  */
-AnalysisContext adjust_closure_context(AnalysisContext ctx) {
-  if (ctx.cls && ctx.cls->closureContextCls) {
-    ctx.cls = ctx.cls->closureContextCls;
-  }
+AnalysisContext adjust_closure_context(const IIndex& index,
+                                       AnalysisContext ctx) {
+  if (ctx.cls) ctx.cls = index.lookup_closure_context(*ctx.cls);
   return ctx;
 }
 
-FuncAnalysis do_analyze_collect(const Index& index,
+Type fixup_return_type(const IIndex& index, const php::Func& func, Type ty) {
+  if (func.isGenerator) {
+    if (func.isAsync) {
+      // Async generators always return AsyncGenerator object.
+      return objExact(builtin_class(index, s_AsyncGenerator.get()));
+    } else {
+      // Non-async generators always return Generator object.
+      return objExact(builtin_class(index, s_Generator.get()));
+    }
+  } else if (func.isAsync) {
+    // Async functions always return WaitH<T>, where T is the type returned
+    // internally.
+    return wait_handle(std::move(ty));
+  } else {
+    return ty;
+  }
+}
+
+FuncAnalysis do_analyze_collect(const IIndex& index,
                                 const AnalysisContext& ctx,
                                 CollectedInfo& collect,
                                 const KnownArgs* knownArgs) {
-  assertx(ctx.cls == adjust_closure_context(ctx).cls);
+  assertx(ctx.cls == adjust_closure_context(index, ctx).cls);
   auto ai = FuncAnalysis { ctx };
 
   SCOPE_ASSERT_DETAIL("do-analyze-collect-2") {
@@ -283,21 +333,40 @@ FuncAnalysis do_analyze_collect(const Index& index,
     return "Analyzing: " + show(ctx);
   };
 
-  auto const bump = trace_bump_for(ctx.cls, ctx.func);
-  Trace::Bump bumper1{Trace::hhbbc, bump};
-  Trace::Bump bumper2{Trace::hhbbc_cfg, bump};
-  Trace::Bump bumper3{Trace::hhbbc_index, bump};
+  Optional<std::array<Trace::Bump, 3>> bump;
 
   if (knownArgs) {
-    FTRACE(2, "{:.^70}\n", "Inline Interp");
+    using namespace folly::gen;
+    FTRACE(
+      2,
+      "{:.^70}\n",
+      folly::sformat(
+        "Inline Interp (context: {}, args: {})",
+        show(knownArgs->context),
+        from(knownArgs->args)
+          | map([] (const Type& t) { return show(t); })
+          | unsplit<std::string>(",")
+      )
+    );
+  } else {
+    // Only bump if we're not doing inline analysis. Otherwise we want
+    // to keep the bump from the caller.
+    bump.emplace(
+      trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index)
+    );
   }
+
   SCOPE_EXIT {
     if (knownArgs) {
       FTRACE(2, "{:.^70}\n", "End Inline Interp");
     }
   };
 
-  FTRACE(2, "{:-^70}\n-- {}\n", "Analyze", show(ctx));
+  FTRACE(
+    2, "{:-^70}\n-- {}\n",
+    index.frozen() ? "Analyze (frozen)" : "Analyze",
+    show(ctx)
+  );
 
   /*
    * Set of RPO ids that still need to be visited.
@@ -307,7 +376,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
    * back edges---when state merges cause a change to the block
    * stateIn, we will add it to this queue so it gets visited again.
    */
-  auto incompleteQ = prepare_incompleteQ(index, ai, knownArgs);
+  auto incompleteQ = prepare_incompleteQ(index, ai, collect, knownArgs);
 
   /*
    * There are potentially infinitely growing types when we're using union_of to
@@ -325,7 +394,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
   auto totalVisits = std::vector<uint32_t>(ctx.func.blocks().size());
 
   // For debugging, count how many times basic blocks get interpreted.
-  auto interp_counter = uint32_t{0};
+  DEBUG_ONLY auto interp_counter = uint32_t{0};
 
   hphp_fast_map<BlockId, BlockUpdateInfo> blockUpdates;
 
@@ -348,7 +417,11 @@ FuncAnalysis do_analyze_collect(const Index& index,
              property_state_string(collect.props));
       ++interp_counter;
 
-      auto propagate = [&] (BlockId target, const State* st) {
+      // Vector for consistent iteration order.
+      hphp_vector_map<BlockId, State> rollbackStates;
+      hphp_fast_set<BlockId> scheduled;
+
+      auto const propagate = [&] (BlockId target, const State* st) {
         if (!st) {
           FTRACE(2, "     Force reprocess: {}\n", target);
           incompleteQ.push(rpoId(ai, target));
@@ -359,28 +432,48 @@ FuncAnalysis do_analyze_collect(const Index& index,
           totalVisits[target] >= options.analyzeFuncWideningLimit;
 
         FTRACE(2, "     {}-> {}\n", needsWiden ? "widening " : "", target);
-        FTRACE(4, "target old {}",
+        FTRACE(4, "\ntarget old {}\n",
                state_string(*ctx.func, ai.bdata[target].stateIn, collect));
+
+        // Save the before start of the target (if we don't have one
+        // already). If we need to rollback this block, we'll restore
+        // all targets back to their original state.
+        rollbackStates.try_emplace(target, ai.bdata[target].stateIn);
 
         auto const changed =
           needsWiden ? widen_into(ai.bdata[target].stateIn, *st)
                      : merge_into(ai.bdata[target].stateIn, *st);
-        if (changed) {
-          incompleteQ.push(rpoId(ai, target));
-        }
+        if (changed) scheduled.emplace(target);
         FTRACE(4, "target new {}",
                state_string(*ctx.func, ai.bdata[target].stateIn, collect));
+        if (changed) FTRACE(2, "    changed: {}\n", target);
+      };
+
+      auto const rollback = [&] {
+        for (auto& [b, st] : rollbackStates) {
+          FTRACE(4, "\nrollback block #{}:\n", b);
+          FTRACE(4, "target old {}\n",
+                 state_string(*ctx.func, ai.bdata[b].stateIn, collect));
+          ai.bdata[b].stateIn.copy_from(std::move(st));
+          FTRACE(4, "target new {}\n",
+                 state_string(*ctx.func, ai.bdata[b].stateIn, collect));
+        }
+        rollbackStates.clear();
+        scheduled.clear();
       };
 
       auto const blk = ctx.func.blocks()[bid].get();
       auto stateOut = ai.bdata[bid].stateIn;
       auto interp   = Interp { index, ctx, collect, bid, blk, stateOut };
-      auto flags    = run(interp, ai.bdata[bid].stateIn, propagate);
+      auto flags    = run(interp, ai.bdata[bid].stateIn, propagate, rollback);
+
+      for (auto const target : scheduled) incompleteQ.push(rpoId(ai, target));
+
       if (any(collect.opts & CollectionOpts::EffectFreeOnly) &&
           !collect.effectFree) {
         break;
       }
-      if (flags.updateInfo.replacedBcs.size() ||
+      if (!flags.updateInfo.replacedBcs.empty() ||
           flags.updateInfo.unchangedBcs != blk->hhbcs.size() ||
           flags.updateInfo.fallthrough != blk->fallthrough) {
         blockUpdates[bid] = std::move(flags.updateInfo);
@@ -401,6 +494,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
         }
       }
 
+      ai.usedParams |= flags.usedParams;
       ai.bdata[bid].noThrow = flags.noThrow;
     }
 
@@ -410,16 +504,29 @@ FuncAnalysis do_analyze_collect(const Index& index,
     }
   } while (!incompleteQ.empty());
 
-  ai.closureUseTypes = std::move(collect.closureUseTypes);
+  ai.closureUseTypes = collect.closureUseVars.merged();
   ai.effectFree = collect.effectFree;
+  ai.reanalyzeOnUpdate = collect.reanalyzeOnUpdate;
   ai.hasInvariantIterBase = collect.hasInvariantIterBase;
   ai.unfoldableFuncs = collect.unfoldableFuncs;
-  ai.usedParams = collect.usedParams;
   ai.publicSPropMutations = std::move(collect.publicSPropMutations);
   for (auto& elm : blockUpdates) {
     ai.blockUpdates.emplace_back(elm.first, std::move(elm.second));
   }
-  index.fixup_return_type(ctx.func, ai.inferredReturn);
+  ai.inferredReturn =
+    fixup_return_type(index, *ctx.func, std::move(ai.inferredReturn));
+
+  if (collect.props.hasInitialValues()) {
+    for (size_t i = 0, size = ctx.cls->properties.size(); i < size; ++i) {
+      auto const& prop = ctx.cls->properties[i];
+      auto initial = collect.props.getInitialValue(prop);
+      if (!initial) continue;
+      if (ai.resolvedInitializers.isNull()) {
+        ai.resolvedInitializers = decltype(ai.resolvedInitializers)::makeR();
+      }
+      ai.resolvedInitializers.right()->emplace_back(i, std::move(*initial));
+    }
+  }
 
   /*
    * If inferredReturn is TBottom, the callee didn't execute a return
@@ -453,32 +560,104 @@ FuncAnalysis do_analyze_collect(const Index& index,
       );
     }
     ret += sep + bsep;
-    folly::format(&ret, "Inferred return type: {}\n", show(ai.inferredReturn));
+    folly::format(
+      &ret,
+      "{}{}: Inferred return type: {}{}\n",
+      show(ctx),
+      [&] () -> std::string {
+        using namespace folly::gen;
+        if (!knownArgs) return "";
+        return folly::sformat(
+          " (context: {}, args: {})",
+          show(knownArgs->context),
+          from(knownArgs->args)
+            | map([] (const Type& t) { return show(t); })
+            | unsplit<std::string>(",")
+        );
+      }(),
+      show(ai.inferredReturn),
+      ai.effectFree ? " (effect-free)" : ""
+    );
     ret += bsep;
     return ret;
   }());
   return ai;
 }
 
-FuncAnalysis do_analyze(const Index& index,
+FuncAnalysis do_analyze(const IIndex& index,
                         const AnalysisContext& inputCtx,
                         ClassAnalysis* clsAnalysis,
+                        ClsConstantWork* clsCnsWork = nullptr,
                         const KnownArgs* knownArgs = nullptr,
                         CollectionOpts opts = CollectionOpts{}) {
-  auto const ctx = adjust_closure_context(inputCtx);
-  auto collect = CollectedInfo { index, ctx, clsAnalysis, opts };
+  auto const ctx = adjust_closure_context(index, inputCtx);
+  ContextPusher _{index, ctx};
 
-  auto ret = do_analyze_collect(index, ctx, collect, knownArgs);
-  if (ctx.func->name == s_86cinit.get() && !knownArgs) {
-    // We need to try to resolve any dynamic constants
-    size_t idx = 0;
-    for (auto const& c : ctx.cls->constants) {
-      if (c.val && c.val->m_type == KindOfUninit) {
-        auto const fa = analyze_func_inline(index, ctx, TCls, { sval(c.name) });
-        ret.resolvedConstants.emplace_back(idx, unctx(fa.inferredReturn));
-      }
-      ++idx;
+  // If this isn't an 86cinit, or if we're inline interping, just do a
+  // normal analyze.
+  if (ctx.func->name != s_86cinit.get() || knownArgs) {
+    auto collect = CollectedInfo { index, ctx, clsAnalysis, opts, clsCnsWork };
+    return do_analyze_collect(index, ctx, collect, knownArgs);
+  }
+
+  // Otherwise this is an 86cinit. We want to inline interp it for
+  // each constant to resolve them. Since a constant can be defined in
+  // terms of another, we want to repeat this until we reach a fixed
+  // point.
+
+  // Use a scratch ClsConstantWork if one hasn't been provided (this
+  // is the case when we're the analyzing constants phase).
+  Optional<ClsConstantWork> temp;
+  if (!clsCnsWork) {
+    temp.emplace(index, *ctx.cls);
+    clsCnsWork = temp.get_pointer();
+  }
+  assertx(!clsCnsWork->next());
+
+  // Schedule initial work
+  for (auto const& cns : ctx.cls->constants) {
+    if (cns.kind != ConstModifierFlags::Kind::Value) continue;
+    if (!cns.val) continue;
+    if (cns.val->m_type != KindOfUninit) continue;
+    clsCnsWork->add(cns.name);
+  }
+
+  // Inline interp for this constant, and reschedule interp for any
+  // constants which rely on this constant. Continue until there's no
+  // more work.
+  while (auto const cns = clsCnsWork->next()) {
+    clsCnsWork->setCurrent(cns);
+    SCOPE_EXIT { clsCnsWork->clearCurrent(cns); };
+    auto const UNUSED bump =
+      trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+    auto fa = analyze_func_inline(
+      index,
+      ctx,
+      TCls,
+      { sval(cns) },
+      clsCnsWork
+    );
+    clsCnsWork->update(cns, unctx(std::move(fa.inferredReturn)));
+  }
+
+  // Analyze the 86cinit as a normal functions. We do this last so it
+  // can take advantage of any resolved constants in clsCnsWork.
+  auto collect = CollectedInfo { index, ctx, clsAnalysis, opts, clsCnsWork };
+  auto ret = do_analyze_collect(index, ctx, collect, nullptr);
+
+  // Propagate out the resolved constants so they can be reflected
+  // into the Index.
+  for (size_t i = 0, size = ctx.cls->constants.size(); i < size; ++i) {
+    auto const& cns = ctx.cls->constants[i];
+    if (cns.kind != ConstModifierFlags::Kind::Value) continue;
+    if (!cns.val) continue;
+    if (cns.val->m_type != KindOfUninit) continue;
+    auto& info = clsCnsWork->constants.at(cns.name);
+    if (ret.resolvedInitializers.isNull()) {
+      ret.resolvedInitializers = decltype(ret.resolvedInitializers)::makeL();
     }
+    assertx(ret.resolvedInitializers.left());
+    ret.resolvedInitializers.left()->emplace_back(i, std::move(info));
   }
   return ret;
 }
@@ -538,6 +717,133 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
 
 //////////////////////////////////////////////////////////////////////
 
+using Invariance = php::Const::Invariance;
+
+// Try to determine the appropriate invariance field for a (resolved)
+// type class constant. This requires looking at all of the subclasses
+// and comparing how they resolve the same type class constant.
+Invariance determine_invariance(const IIndex& index,
+                                const Context& ctx,
+                                SString name,
+                                SArray resolved) {
+  auto const rcls = index.resolve_class(*ctx.cls);
+  assertx(rcls);
+
+  auto const check = tvIsString(resolved->get(s_classname));
+  auto invariance = Invariance::Same;
+
+  auto const full = rcls->forEachSubclass(
+    [&] (SString subn, Attr) {
+      if (subn->tsame(ctx.cls->name)) return;
+
+      // Subclass isn't present, be conservative.
+      auto const srcls = index.resolve_class(subn);
+      if (!srcls) {
+        invariance = Invariance::None;
+        return;
+      }
+
+      auto const lookup =
+        index.lookup_class_type_constant(clsExact(*srcls, true), sval(name));
+      auto const sresolved = lookup.resolution.sarray();
+      if (!sresolved) {
+        // We can't resolve it, so we can't assume anything.
+        invariance = Invariance::None;
+        return;
+      }
+
+      if (sresolved == resolved) return;
+
+      // The resolved type structure in this subclass is not the
+      // same. We might still be able to assert that a classname is
+      // always present, or a resolved type structure at least exists.
+      if (invariance == Invariance::Same ||
+          invariance == Invariance::ClassnamePresent) {
+        invariance = (check && tvIsString(sresolved->get(s_classname)))
+          ? Invariance::ClassnamePresent
+          : Invariance::Present;
+      }
+    }
+  );
+  // If we don't have complete children here, the only reason is
+  // because this is a conservative class, so be conservative.
+  return full ? invariance : Invariance::None;
+}
+
+void resolve_type_constants(const IIndex& index,
+                            const Context& ctx,
+                            ClassAnalysis& analysis) {
+  auto const UNUSED bump =
+    trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+
+  InTypeCns _{index};
+
+  for (auto const& pair :
+         index.lookup_flattened_class_type_constants(*ctx.cls)) {
+    auto const name = pair.first;
+    auto const idx = pair.second;
+
+    SCOPE_ASSERT_DETAIL("resolve-type-constants") {
+      return folly::sformat(
+        "Resolving {}::{} -> {}",
+        idx.cls, name, show(ctx)
+      );
+    };
+
+    if (idx.cls->tsame(ctx.cls->name)) {
+      assertx(idx.idx < ctx.cls->constants.size());
+      auto const& cns = ctx.cls->constants[idx.idx];
+      if (cns.resolvedTypeStructure) {
+        if (cns.invariance != Invariance::None) continue;
+        auto const invariance = determine_invariance(
+          index,
+          ctx,
+          name,
+          cns.resolvedTypeStructure
+        );
+        if (invariance != Invariance::None) {
+          analysis.resolvedTypeConsts.emplace_back(
+            ResolvedClsTypeConst{
+              cns.resolvedTypeStructure,
+              cns.contextInsensitive,
+              idx,
+              invariance
+            }
+          );
+        }
+        continue;
+      }
+    }
+
+    FTRACE(2, "{:-^70}\n-- ({}) {}::{}\n", "Resolve", show(ctx), idx.cls, name);
+
+    auto const lookup = index.lookup_class_type_constant(*ctx.cls, name, idx);
+    auto const ts = lookup.resolution.sarray();
+    if (!ts) {
+      FTRACE(2, "  no resolution\n");
+      continue;
+    }
+
+    FTRACE(
+      2, "  resolved to {}{}\n",
+      staticArrayStreamer(ts),
+      lookup.resolution.contextSensitive ? " (context sensitive)" : ""
+    );
+
+    auto const invariance = determine_invariance(index, ctx, name, ts);
+    analysis.resolvedTypeConsts.emplace_back(
+      ResolvedClsTypeConst{
+        ts,
+        !lookup.resolution.contextSensitive,
+        idx,
+        invariance
+      }
+    );
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -575,6 +881,83 @@ void ClassAnalysisWorklist::scheduleForReturnType(const php::Func& callee) {
   for (auto const f : it->second) schedule(*f);
 }
 
+void ClassAnalysisWorklist::scheduleForUseVars(const php::Func& invoke) {
+  auto const it = useVarDeps.find(&invoke);
+  if (it == useVarDeps.end()) return;
+  for (auto const f : it->second) schedule(*f);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+ClsConstantWork::ClsConstantWork(const IIndex& index,
+                                 const php::Class& cls): cls{cls} {
+  auto initial = index.lookup_class_constants(cls);
+  for (auto& [name, info] : initial) constants.emplace(name, std::move(info));
+}
+
+ClsConstLookupResult ClsConstantWork::lookup(SString name) {
+  auto const it = constants.find(name);
+  if (it == end(constants)) {
+    return ClsConstLookupResult{ TBottom, TriBool::No, true };
+  }
+  if (current) deps[name].emplace(current);
+  return ClsConstLookupResult{
+    it->second.type,
+    TriBool::Yes,
+    !is_scalar(it->second.type) || bool(cls.attrs & AttrInternal)
+  };
+}
+
+void ClsConstantWork::update(SString name, Type t) {
+  auto& old = constants.at(name);
+  if (t.strictlyMoreRefined(old.type)) {
+    if (old.refinements < options.returnTypeRefineLimit) {
+      old.type = std::move(t);
+      ++old.refinements;
+      schedule(name);
+    } else {
+      FTRACE(
+        1, "maxed out refinements for class constant {}::{}\n",
+        cls.name, name
+      );
+    }
+  } else {
+    always_assert_flog(
+      t.moreRefined(old.type),
+      "Class constant type invariant violated for {}::{}.\n"
+      "   {} is not at least as refined as {}\n",
+      cls.name,
+      name,
+      show(t),
+      show(old.type)
+    );
+  }
+}
+
+void ClsConstantWork::add(SString name) {
+  auto const emplaced = inWorklist.emplace(name);
+  if (!emplaced.second) return;
+  worklist.emplace_back(name);
+}
+
+void ClsConstantWork::schedule(SString name) {
+  auto const it = deps.find(name);
+  if (it == end(deps)) return;
+  for (auto const d : it->second) {
+    FTRACE(2, "Scheduling {}::{} because of {}::{}\n",
+           cls.name, d, cls.name, name);
+    add(d);
+  }
+}
+
+SString ClsConstantWork::next() {
+  if (worklist.empty()) return nullptr;
+  auto n = worklist.front();
+  inWorklist.erase(n);
+  worklist.pop_front();
+  return n;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 FuncAnalysisResult::FuncAnalysisResult(AnalysisContext ctx)
@@ -593,35 +976,122 @@ FuncAnalysis::FuncAnalysis(AnalysisContext ctx)
   }
 }
 
-FuncAnalysis analyze_func(const Index& index, const AnalysisContext& ctx,
+FuncAnalysis analyze_func(const IIndex& index, const AnalysisContext& ctx,
                           CollectionOpts opts) {
-  return do_analyze(index, ctx, nullptr, nullptr, opts);
+  return do_analyze(index, ctx, nullptr, nullptr, nullptr, opts);
 }
 
-FuncAnalysis analyze_func_inline(const Index& index,
+FuncAnalysis analyze_func_inline(const IIndex& index,
                                  const AnalysisContext& ctx,
                                  const Type& thisType,
                                  const CompactVector<Type>& args,
+                                 ClsConstantWork* clsCnsWork,
                                  CollectionOpts opts) {
-  assertx(!ctx.func->isClosureBody);
-  auto const knownArgs = KnownArgs { thisType, args };
-  return do_analyze(index, ctx, nullptr, &knownArgs,
+  auto const knownArgs = KnownArgs {
+    ctx.func->isClosureBody ? TBottom : thisType,
+    args
+  };
+
+  return do_analyze(index, ctx, nullptr, clsCnsWork, &knownArgs,
                     opts | CollectionOpts::Inlining);
 }
 
-ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
-
-  assertx(ctx.cls && !ctx.func && !is_used_trait(*ctx.cls));
+ClassAnalysis analyze_class_separate(const AnalysisIndex& index,
+                                     const Context& ctx) {
+  assertx(ctx.cls);
+  assertx(!ctx.func);
+  assertx(!is_closure(*ctx.cls));
 
   {
-    Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
-      is_systemlib_part(*ctx.unit)};
-    FTRACE(2, "{:#^70}\n", "Class");
+    auto const UNUSED bump =
+      trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+    FTRACE(
+      2, "{:#^70}\n-- {}\n",
+      index.frozen() ? " Class (Frozen) " : " Class ",
+      ctx.cls->name
+    );
   }
 
+  AnalysisIndexAdaptor adaptor{index};
+  ContextPusher _{adaptor, ctx};
+  ClassAnalysis analysis{ctx};
+
+  if (!is_used_trait(*ctx.cls)) {
+    resolve_type_constants(adaptor, ctx, analysis);
+  }
+
+  if (index.mode() != AnalysisMode::Constants) {
+    auto const associatedClosures = [&] {
+      CompactVector<const php::Class*> out;
+      out.reserve(ctx.cls->closures.size());
+      for (auto& clo : ctx.cls->closures) out.emplace_back(clo.get());
+      return out;
+    }();
+
+    for (auto const c : associatedClosures) {
+      auto const f = c->methods[0].get();
+      auto const UNUSED bump =
+        trace_bump(*f, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+      auto const wf = php::WideFunc::cns(f);
+      analysis.closures.emplace_back(
+        analyze_func(
+          adaptor,
+          AnalysisContext { ctx.unit, wf, ctx.cls },
+          CollectionOpts{}
+        )
+      );
+    }
+  }
+
+  for (auto const& m : ctx.cls->methods) {
+    if (index.mode() == AnalysisMode::Constants &&
+        !is_86init_func(*m)) {
+      continue;
+    }
+    auto const UNUSED bump =
+      trace_bump(*m, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+    auto const wf = php::WideFunc::cns(m.get());
+    analysis.methods.emplace_back(
+      analyze_func(
+        adaptor,
+        AnalysisContext { ctx.unit, wf, ctx.cls },
+        CollectionOpts{}
+      )
+    );
+  }
+
+  return analysis;
+}
+
+ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
+  assertx(ctx.cls);
+  assertx(!ctx.func);
+  assertx(!is_used_trait(*ctx.cls));
+  // Uncomment when local execution is gone
+  //assertx(!is_closure(*ctx.cls));
+
+  {
+    auto const UNUSED bump =
+      trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+    FTRACE(
+      2, "{:#^70}\n-- {}\n",
+      index.frozen() ? " Class (Frozen) " : " Class ",
+      ctx.cls->name
+    );
+  }
+
+  ContextPusher _{index, ctx};
   ClassAnalysis clsAnalysis(ctx);
-  auto const associatedClosures = index.lookup_closures(ctx.cls);
-  auto const associatedMethods  = index.lookup_extra_methods(ctx.cls);
+
+  resolve_type_constants(index, ctx, clsAnalysis);
+
+  auto const associatedClosures = [&] {
+    CompactVector<const php::Class*> out;
+    out.reserve(ctx.cls->closures.size());
+    for (auto& clo : ctx.cls->closures) out.emplace_back(clo.get());
+    return out;
+  }();
+  auto const associatedMethods  = index.lookup_extra_methods(*ctx.cls);
   auto const isHNIBuiltin       = ctx.cls->attrs & AttrBuiltin;
 
   /*
@@ -635,33 +1105,52 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
    * Also, set Uninit properties to TBottom, so that analysis
    * of 86pinit methods sets them to the correct type.
    */
-  for (auto& prop : const_cast<php::Class*>(ctx.cls)->properties) {
+
+  auto const initialMightBeBad = [&] (const php::Prop& prop,
+                                      const Type& initial) {
+    if (is_closure(*ctx.cls)) return false;
+    if (prop.attrs & (AttrSystemInitialValue | AttrLateInit)) return false;
+    return std::any_of(
+      prop.typeConstraints.range().begin(), prop.typeConstraints.range().end(),
+      [&] (const TypeConstraint& tc) {
+        return !initial.moreRefined(
+          lookup_constraint(index, ctx, tc, initial).lower
+        );
+      }
+    );
+  };
+
+  for (size_t propIdx = 0, size = ctx.cls->properties.size();
+       propIdx < size; ++propIdx) {
+    auto const UNUSED bump =
+      trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+
+    auto const& prop = ctx.cls->properties[propIdx];
     auto const cellTy = from_cell(prop.val);
 
-    if (prop_might_have_bad_initial_value(index, *ctx.cls, prop)) {
-      prop.attrs = (Attr)(prop.attrs & ~AttrInitialSatisfiesTC);
-      // If Uninit, it will be determined in the 86[s,p]init function.
-      if (!cellTy.subtypeOf(BUninit)) clsAnalysis.badPropInitialValues = true;
-    } else {
-      prop.attrs |= AttrInitialSatisfiesTC;
+    if (!(prop.attrs & AttrInitialSatisfiesTC) &&
+        !cellTy.subtypeOf(BUninit)) {
+      if (!initialMightBeBad(prop, cellTy)) {
+        clsAnalysis.resolvedProps.emplace_back(
+          propIdx, PropInitInfo{prop.val, true, false}
+        );
+      }
     }
 
     if (!(prop.attrs & AttrPrivate)) continue;
 
     if (isHNIBuiltin) {
       auto const hniTy = from_hni_constraint(prop.userType);
-      if (!cellTy.subtypeOf(hniTy)) {
-        always_assert_flog(
-          false,
-          "hni {}::{} has impossible type. "
-          "The annotation says it is type ({}) "
-          "but the default value is type ({}).\n",
-          ctx.cls->name,
-          prop.name,
-          show(hniTy),
-          show(cellTy)
-        );
-      }
+      always_assert_flog(
+        cellTy.subtypeOf(hniTy),
+        "hni {}::{} has impossible type. "
+        "The annotation says it is type ({}) "
+        "but the default value is type ({}).\n",
+        ctx.cls->name,
+        prop.name,
+        show(hniTy),
+        show(cellTy)
+      );
     }
 
     if (!(prop.attrs & AttrStatic)) {
@@ -681,11 +1170,13 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
          */
         t = TBottom;
       } else if (!(prop.attrs & AttrSystemInitialValue)) {
-        t = adjust_type_for_prop(index, *ctx.cls, &prop.typeConstraint, t);
+        t = adjust_type_for_prop(
+          index, *ctx.cls, &prop.typeConstraints, t
+        );
       }
       auto& elem = clsAnalysis.privateProperties[prop.name];
       elem.ty = std::move(t);
-      elem.tc = &prop.typeConstraint;
+      elem.tc = &prop.typeConstraints;
       elem.attrs = prop.attrs;
       elem.everModified = false;
     } else {
@@ -696,10 +1187,12 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
         ? TBottom
         : (prop.attrs & AttrSystemInitialValue)
           ? cellTy
-          : adjust_type_for_prop(index, *ctx.cls, &prop.typeConstraint, cellTy);
+          : adjust_type_for_prop(
+            index, *ctx.cls, &prop.typeConstraints, cellTy
+          );
       auto& elem = clsAnalysis.privateStatics[prop.name];
       elem.ty = std::move(t);
-      elem.tc = &prop.typeConstraint;
+      elem.tc = &prop.typeConstraints;
       elem.attrs = prop.attrs;
       elem.everModified = false;
     }
@@ -712,6 +1205,8 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
    */
   if (isHNIBuiltin) expand_hni_prop_types(clsAnalysis);
 
+  ClsConstantWork clsCnsWork{index, *ctx.cls};
+
   /*
    * For classes with non-scalar initializers, the 86pinit, 86sinit,
    * 86linit, 86cinit, and 86reifiedinit methods are guaranteed to run
@@ -721,18 +1216,27 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
    * be run again as part of the fixedpoint computation.
    */
   CompactVector<FuncAnalysis> initResults;
-  auto analyze_86init = [&](const StaticString &name) {
-    if (auto func = find_method(ctx.cls, name.get())) {
-      auto const wf = php::WideFunc::cns(func);
-      auto const context = AnalysisContext { ctx.unit, wf, ctx.cls };
-      initResults.push_back(do_analyze(index, context, &clsAnalysis));
+  for (auto const& f : ctx.cls->methods) {
+    if (!is_86init_func(*f)) continue;
+    auto const wf = php::WideFunc::cns(f.get());
+    auto const context = AnalysisContext { ctx.unit, wf, ctx.cls };
+    initResults.emplace_back(
+      do_analyze(index, context, &clsAnalysis, &clsCnsWork)
+    );
+  }
+
+  ClassAnalysisWork work;
+  clsAnalysis.work = &work;
+
+  for (auto const& fa : initResults) {
+    auto const resolved = fa.resolvedInitializers.right();
+    if (!resolved) continue;
+    for (auto const& [idx, init] : *resolved) {
+      if (!init.satisfies) continue;
+      assertx(idx < ctx.cls->properties.size());
+      work.privatePropsSatisfiesTC.emplace(ctx.cls->properties[idx].name);
     }
-  };
-  analyze_86init(s_86pinit);
-  analyze_86init(s_86sinit);
-  analyze_86init(s_86linit);
-  analyze_86init(s_86cinit);
-  analyze_86init(s_86reifiedinit);
+  }
 
   // NB: Properties can still be TBottom at this point if their initial values
   // cannot possibly satisfy their type-constraints. The classes of such
@@ -749,22 +1253,17 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
    * counter.  This guarantees eventual termination.
    */
 
-  ClassAnalysisWork work;
-  clsAnalysis.work = &work;
-
   clsAnalysis.methods.reserve(initResults.size() + ctx.cls->methods.size());
   for (auto& m : initResults) {
     clsAnalysis.methods.emplace_back(std::move(m));
   }
-  if (associatedClosures) {
-    clsAnalysis.closures.reserve(associatedClosures->size());
-  }
+  clsAnalysis.closures.reserve(associatedClosures.size());
 
   auto const startPrivateProperties = clsAnalysis.privateProperties;
   auto const startPrivateStatics = clsAnalysis.privateStatics;
 
   struct FuncMeta {
-    const php::Unit* unit;
+    SString unit;
     const php::Class* cls;
     CompactVector<FuncAnalysisResult>* output;
     size_t startReturnRefinements;
@@ -776,19 +1275,15 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
 
   auto const getMeta = [&] (const php::Func& f) -> FuncMeta& {
     auto metaIt = funcMeta.find(&f);
-    assertx(metaIt != funcMeta.end());
+    always_assert(metaIt != funcMeta.end());
     return metaIt->second;
   };
 
   // Build up the initial worklist:
   for (auto const& f : ctx.cls->methods) {
-    if (f->name->isame(s_86pinit.get()) ||
-        f->name->isame(s_86sinit.get()) ||
-        f->name->isame(s_86linit.get()) ||
-        f->name->isame(s_86cinit.get()) ||
-        f->name->isame(s_86reifiedinit.get())) {
-      continue;
-    }
+    if (is_86init_func(*f)) continue;
+    auto const UNUSED bump =
+      trace_bump(*f, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
     auto const DEBUG_ONLY inserted = work.worklist.schedule(*f);
     assertx(inserted);
     auto [type, refinements] = index.lookup_return_type_raw(f.get());
@@ -799,29 +1294,54 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
     );
   }
 
-  if (associatedClosures) {
-    for (auto const c : *associatedClosures) {
-      auto const f = c->methods[0].get();
-      auto const DEBUG_ONLY inserted = work.worklist.schedule(*f);
-      assertx(inserted);
-      auto [type, refinements] = index.lookup_return_type_raw(f);
-      work.returnTypes.emplace(f, std::move(type));
-      funcMeta.emplace(
-        f, FuncMeta{ctx.unit, c, &clsAnalysis.closures, refinements}
-      );
-    }
+  for (auto const c : associatedClosures) {
+    auto const f = c->methods[0].get();
+    auto const UNUSED bump =
+      trace_bump(*f, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+    auto const DEBUG_ONLY inserted = work.worklist.schedule(*f);
+    assertx(inserted);
+    auto [type, refinements] = index.lookup_return_type_raw(f);
+    work.returnTypes.emplace(f, std::move(type));
+    work.useVars.emplace(f, index.lookup_closure_use_vars_raw(*f));
+    funcMeta.emplace(
+      f, FuncMeta{ctx.unit, c, &clsAnalysis.closures, refinements}
+    );
   }
-  if (associatedMethods) {
-    for (auto const m : *associatedMethods) {
-      auto const DEBUG_ONLY inserted = work.worklist.schedule(*m);
-      assertx(inserted);
-      funcMeta.emplace(m, FuncMeta{m->unit, ctx.cls, nullptr, 0, 0});
-    }
+  for (auto const m : associatedMethods) {
+    auto const DEBUG_ONLY inserted = work.worklist.schedule(*m);
+    assertx(inserted);
+    funcMeta.emplace(
+      m,
+      FuncMeta{m->unit, ctx.cls, nullptr, 0, 0}
+    );
   }
 
-  // Keep analyzing until we have more functions scheduled (the fixed
-  // point).
+  // Suppose we first analyze a function which has a CreateCl and
+  // record use-var types, then later analysis (within analyze_class)
+  // determines the CreateCl was dead. In that case, we'll overwrite
+  // the original FuncAnalysisResult (containing the use-var types)
+  // with the new one (containing no use-var types because we didn't
+  // see a CreateCl). The lack of info in the FuncAnalysisResult will
+  // prevent the index from being updated, even though our analysis
+  // might depend on some of those initial use-var types. This can
+  // cause monotonicity violations. To prevent this, when overwriting
+  // a FuncAnalysisResult entry, always make sure to copy over any
+  // use-var type into the new one. This ensures that if ever see a
+  // CreateCl, the FuncAnalysisResult will always have a record of
+  // that.
+  auto const persistUseTypes = [&] (const FuncAnalysisResult& from,
+                                    FuncAnalysisResult& to) {
+    for (auto const& [clo, types] : from.closureUseTypes) {
+      // Will only add closure entries which don't already exist.
+      to.closureUseTypes.emplace(clo, types);
+    }
+  };
+
+  // Keep analyzing until we have more no functions scheduled (the
+  // fixed point).
   while (!work.worklist.empty()) {
+    hphp_fast_set<const php::Func*> changed;
+
     // First analyze funcs until we hit a fixed point for the
     // properties. Until we reach that, the return types are *not*
     // guaranteed to be correct.
@@ -830,14 +1350,16 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
 
       auto const wf = php::WideFunc::cns(f);
       auto const context = AnalysisContext { meta.unit, wf, meta.cls };
-      auto results = do_analyze(index, context, &clsAnalysis);
+      auto results = do_analyze(index, context, &clsAnalysis, &clsCnsWork);
 
       if (meta.output) {
         if (meta.outputIdx < 0) {
           meta.outputIdx = meta.output->size();
           meta.output->emplace_back(std::move(results));
         } else {
-          (*meta.output)[meta.outputIdx] = std::move(results);
+          auto& output = (*meta.output)[meta.outputIdx];
+          persistUseTypes(output, results);
+          output = std::move(results);
         }
       }
 
@@ -863,8 +1385,6 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
     // information (such as return type information) is now correct
     // (but might not be optimal).
 
-    auto bail = false;
-
     // Reflect any improved return types into the results. This will
     // make them available for local analysis and they'll eventually
     // be written back into the Index.
@@ -875,11 +1395,12 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
       assertx(meta.outputIdx >= 0);
       auto& results = (*meta.output)[meta.outputIdx];
 
+      auto const UNUSED bump =
+        trace_bump(*f, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+
       auto const oldTypeIt = work.returnTypes.find(f);
       assertx(oldTypeIt != work.returnTypes.end());
-      auto& oldType = oldTypeIt->second;
-      results.inferredReturn =
-        loosen_interfaces(std::move(results.inferredReturn));
+      auto& [oldType, oldEffectFree] = oldTypeIt->second;
 
       // Heed the return type refinement limit
       if (results.inferredReturn.strictlyMoreRefined(oldType)) {
@@ -887,22 +1408,77 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
             < options.returnTypeRefineLimit) {
           oldType = results.inferredReturn;
           work.worklist.scheduleForReturnType(*f);
+          changed.emplace(f);
         } else if (meta.localReturnRefinements > 0) {
           results.inferredReturn = oldType;
+          results.effectFree = oldEffectFree;
         }
         ++meta.localReturnRefinements;
-      } else if (!more_refined_for_index(results.inferredReturn, oldType)) {
-        // If we have a monotonicity violation, bail out immediately
-        // and let the Index complain.
-        bail = true;
+      } else {
+        always_assert_flog(
+          results.inferredReturn.moreRefined(oldType),
+          "Index return type invariant violated in {} {}.\n"
+          "   {} is not at least as refined as {}\n",
+          f->unit,
+          func_fullname(*f),
+          show(results.inferredReturn),
+          show(oldType)
+        );
+      }
+
+      if (results.effectFree) {
+        if (!oldEffectFree) {
+          oldEffectFree = true;
+          work.worklist.scheduleForReturnType(*f);
+          changed.emplace(f);
+        }
+      } else {
+        always_assert_flog(
+          !oldEffectFree,
+          "Index effect-free invariant violated in {} {}.\n"
+          "    Went from true to false\n",
+          f->unit,
+          func_fullname(*f)
+        );
+      }
+
+      for (auto const& [clo, useVars] : results.closureUseTypes) {
+        assertx(is_closure(*clo));
+        auto invoke = find_method(clo, s_invoke.get());
+        always_assert(invoke);
+
+        auto const old = folly::get_ptr(work.useVars, invoke);
+        if (!old) continue;
+
+        auto anyChanged = false;
+        for (size_t i = 0, size = useVars.size(); i < size; ++i) {
+          auto u = useVars.get_default(i, TCell);
+          auto const o = old->get_default(i, TCell);
+
+          if (u.strictlyMoreRefined(o)) {
+            old->ensure(i, TCell) = std::move(u);
+            anyChanged = true;
+          } else {
+            always_assert_flog(
+              u.moreRefined(o),
+              "Index closure use-var invariant violated for {}.\n"
+              "   {} is not at least as refined as {}\n",
+              clo->name,
+              show(u),
+              show(o)
+            );
+          }
+        }
+
+        if (anyChanged) {
+          work.worklist.scheduleForUseVars(*invoke);
+          changed.emplace(invoke);
+        }
       }
 
       results.localReturnRefinements = meta.localReturnRefinements;
       if (results.localReturnRefinements > 0) --results.localReturnRefinements;
     }
-    if (bail) break;
-
-    hphp_fast_set<const php::Func*> changed;
 
     // We've made the return types available for local analysis. Now
     // iterate again and see if we can improve them.
@@ -912,18 +1488,19 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
       auto const wf = php::WideFunc::cns(f);
       auto const context = AnalysisContext { meta.unit, wf, meta.cls };
 
-      work.propsRefined = false;
-      auto results = do_analyze(index, context, &clsAnalysis);
-      assertx(!work.propsRefined);
+      work.noPropRefine = true;
+      auto results = do_analyze(index, context, &clsAnalysis, &clsCnsWork);
+      work.noPropRefine = false;
 
       if (!meta.output) continue;
+
+      auto const UNUSED bump =
+        trace_bump(context, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
 
       auto returnTypeIt = work.returnTypes.find(f);
       assertx(returnTypeIt != work.returnTypes.end());
 
-      auto& oldReturn = returnTypeIt->second;
-      results.inferredReturn =
-        loosen_interfaces(std::move(results.inferredReturn));
+      auto& [oldReturn, oldEffectFree] = returnTypeIt->second;
 
       // Heed the return type refinement limit
       if (results.inferredReturn.strictlyMoreRefined(oldReturn)) {
@@ -934,21 +1511,79 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
           changed.emplace(f);
         } else if (meta.localReturnRefinements > 0) {
           results.inferredReturn = oldReturn;
+          results.effectFree = oldEffectFree;
         }
         ++meta.localReturnRefinements;
-      } else if (!more_refined_for_index(results.inferredReturn, oldReturn)) {
-        // If we have a monotonicity violation, bail out immediately
-        // and let the Index complain.
-        bail = true;
+      } else {
+        always_assert_flog(
+          results.inferredReturn.moreRefined(oldReturn),
+          "Index return type invariant violated in {} {}.\n"
+          "   {} is not at least as refined as {}\n",
+          f->unit,
+          func_fullname(*f),
+          show(results.inferredReturn),
+          show(oldReturn)
+        );
+      }
+
+      if (results.effectFree) {
+        if (!oldEffectFree) {
+          oldEffectFree = true;
+          work.worklist.scheduleForReturnType(*f);
+          changed.emplace(f);
+        }
+      } else {
+        always_assert_flog(
+          !oldEffectFree,
+          "Index effect-free invariant violated in {} {}.\n"
+          "    Went from true to false\n",
+          f->unit,
+          func_fullname(*f)
+        );
+      }
+
+      for (auto const& [clo, useVars] : results.closureUseTypes) {
+        assertx(is_closure(*clo));
+        auto invoke = find_method(clo, s_invoke.get());
+        always_assert(invoke);
+
+        auto const old = folly::get_ptr(work.useVars, invoke);
+        if (!old) continue;
+
+        auto anyChanged = false;
+        for (size_t i = 0, size = useVars.size(); i < size; ++i) {
+          auto u = useVars.get_default(i, TCell);
+          auto const o = old->get_default(i, TCell);
+
+          if (u.strictlyMoreRefined(o)) {
+            old->ensure(i, TCell) = std::move(u);
+            anyChanged = true;
+          } else {
+            always_assert_flog(
+              u.moreRefined(o),
+              "Index closure use-var invariant violated for {}.\n"
+              "   {} is not at least as refined as {}\n",
+              clo->name,
+              show(u),
+              show(o)
+            );
+          }
+        }
+
+        if (anyChanged) {
+          work.worklist.scheduleForUseVars(*invoke);
+          changed.emplace(invoke);
+        }
       }
 
       results.localReturnRefinements = meta.localReturnRefinements;
       if (results.localReturnRefinements > 0) --results.localReturnRefinements;
 
       assertx(meta.outputIdx >= 0);
-      (*meta.output)[meta.outputIdx] = std::move(results);
+      auto& output = (*meta.output)[meta.outputIdx];
+      persistUseTypes(output, results);
+      output = std::move(results);
     }
-    if (bail) break;
 
     // Return types have reached a fixed point. However, this means
     // that we might be able to further improve property types. So, if
@@ -977,13 +1612,20 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
       };
 
       hphp_fast_set<SString> retryProps;
-      for (auto const f : changed) {
-        auto const deps = work.worklist.depsForReturnType(*f);
-        if (!deps) continue;
-        for (auto const dep : *deps) {
+      auto const addProps = [&] (const hphp_fast_set<const php::Func*>& deps) {
+        for (auto const dep : deps) {
           auto const propsIt = work.propMutators.find(dep);
           if (propsIt == work.propMutators.end()) continue;
           for (auto const prop : propsIt->second) retryProps.emplace(prop);
+        }
+      };
+
+      for (auto const f : changed) {
+        if (auto const deps = work.worklist.depsForReturnType(*f)) {
+          addProps(*deps);
+        }
+        if (auto const deps = work.worklist.depsForUseVars(*f)) {
+          addProps(*deps);
         }
       }
 
@@ -1005,8 +1647,8 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
     // improve properties nor return types.
   }
 
-  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
-    is_systemlib_part(*ctx.unit)};
+  auto const UNUSED bump =
+    trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
 
   // For debugging, print the final state of the class analysis.
   FTRACE(2, "{}", [&] {
@@ -1054,9 +1696,10 @@ void PropagatedStates::next() {
   // The undo log shouldn't be empty, and we should be at a mark
   // (which marks instruction boundary).
   assertx(!m_undos.events.empty());
-  assertx(boost::get<StateMutationUndo::Mark>(&m_undos.events.back()));
+  assertx(std::get_if<StateMutationUndo::Mark>(&m_undos.events.back()));
 
   m_lastPush.reset();
+  m_lastSet.reset();
   m_afterLocals.clear();
   m_undos.events.pop_back();
 
@@ -1087,6 +1730,21 @@ void PropagatedStates::next() {
         m_afterLocals.emplace_back(std::make_pair(l.id, std::move(old)));
         old = std::move(l.t);
         return false;
+      },
+      [this] (StateMutationUndo::UndoableArraySet& s) {
+        // Instead of holding onto a reference to the pre-set array
+        // (which can cause COW to trigger), store enough information
+        // to undo the set. This can only be done under certain
+        // circumstances. If not applicable, a normal stack-write undo
+        // is issued instead.
+        assertx(!m_stack.empty());
+        // Store information about the last undoable array set without
+        // referencing the array itself, to try to keep array
+        // ref-count at 1.
+        if (!m_lastSet) m_lastSet.emplace(s);
+        auto arr = std::move(m_stack.back());
+        m_stack.back() = undo_array_like_set(std::move(arr), s.key);
+        return false;
       }
     );
     if (stop) break;
@@ -1095,7 +1753,7 @@ void PropagatedStates::next() {
 }
 
 PropagatedStates
-locally_propagated_states(const Index& index,
+locally_propagated_states(const IIndex& index,
                           const AnalysisContext& ctx,
                           CollectedInfo& collect,
                           BlockId bid,
@@ -1119,7 +1777,7 @@ locally_propagated_states(const Index& index,
     auto const stepFlags = step(interp, op);
     // Store the step flags in the mark we recorded before the
     // interpret.
-    auto& mark = boost::get<StateMutationUndo::Mark>(undos.events[markIdx]);
+    auto& mark = std::get<StateMutationUndo::Mark>(undos.events[markIdx]);
     mark.wasPEI = stepFlags.wasPEI;
     mark.mayReadLocalSet = stepFlags.mayReadLocalSet;
     mark.unreachable = state.unreachable;
@@ -1131,7 +1789,7 @@ locally_propagated_states(const Index& index,
   return PropagatedStates{std::move(state), std::move(undos)};
 }
 
-State locally_propagated_bid_state(const Index& index,
+State locally_propagated_bid_state(const IIndex& index,
                                    const AnalysisContext& ctx,
                                    CollectedInfo& collect,
                                    BlockId bid,
@@ -1148,9 +1806,485 @@ State locally_propagated_bid_state(const Index& index,
   auto const propagate = [&] (BlockId target, const State* st) {
     if (target == targetBid) merge_into(ret, *st);
   };
-  run(interp, originalState, propagate);
+  run(interp, originalState, propagate, []{});
 
   ret.stack.compact();
+  return ret;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+UnitAnalysis analyze_unit(const AnalysisIndex& index, const Context& ctx) {
+  assertx(ctx.unit);
+  assertx(!ctx.cls);
+  assertx(!ctx.func);
+
+  auto const UNUSED bump =
+    trace_bump(ctx, Trace::hhbbc, Trace::hhbbc_cfg, Trace::hhbbc_index);
+
+  FTRACE(
+    2, "{:#^70}\n-- {}\n",
+    index.frozen() ? " Unit (Frozen) " : " Unit ",
+    ctx.unit
+  );
+
+  AnalysisIndexAdaptor adaptor{ index };
+  ContextPusher _{adaptor, ctx};
+
+  UnitAnalysis analysis{ctx};
+
+  InTypeCns _2{adaptor};
+
+  auto const& unit = index.lookup_unit(ctx.unit);
+  for (size_t i = 0, size = unit.typeAliases.size(); i < size; ++i) {
+    auto const& ta = *unit.typeAliases[i];
+    if (ta.resolvedTypeStructure) continue;
+
+    SCOPE_ASSERT_DETAIL("resolve-type-alias") {
+      return folly::sformat("Resolving {} {}", show(ctx), ta.name);
+    };
+    FTRACE(2, "{:-^70}\n-- ({}) {}\n", "Resolve", show(ctx), ta.name);
+
+    auto const resolution =
+      resolve_type_structure(AnalysisIndexAdaptor { index }, nullptr, ta);
+    auto const ts = resolution.sarray();
+    assertx(!resolution.contextSensitive);
+    if (!ts) {
+      FTRACE(2, "  no resolution\n");
+      continue;
+    }
+
+    FTRACE(2, "  resolved to {}\n", staticArrayStreamer(ts));
+    analysis.resolvedTypeAliases.emplace_back(ResolvedTypeAlias{i, ts});
+  }
+
+  return analysis;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+template <typename Resolve, typename Self>
+ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
+                                         const Type& candidate,
+                                         const Resolve& resolve,
+                                         const Self& self) {
+  using C = ConstraintType;
+
+  assertx(IMPLIES(!tc.isCheckable(), tc.isMixed()));
+
+  auto ty = [&] {
+    auto const exact = [&] (const Type& t) {
+      return C{ t, t };
+    };
+
+    if (tc.isUnion()) {
+      auto range = eachTypeConstraintInUnion(tc);
+      auto it = range.begin();
+      auto c = type_from_constraint_impl(*it, candidate, resolve, self);
+      ++it;
+
+      for(; it != range.end(); ++it) {
+        auto c2 = type_from_constraint_impl(*it, candidate, resolve, self);
+        c = union_constraint(c, c2);
+      }
+      return c;
+    }
+
+    switch (getAnnotMetaType(tc.type())) {
+      case AnnotMetaType::Precise: {
+        switch (getAnnotDataType(tc.type())) {
+          case KindOfNull:         return exact(TInitNull);
+          case KindOfBoolean:      return exact(TBool);
+          case KindOfInt64:        return exact(TInt);
+          case KindOfDouble:       return exact(TDbl);
+          case KindOfPersistentVec:
+          case KindOfVec:          return exact(TVec);
+          case KindOfPersistentDict:
+          case KindOfDict:         return exact(TDict);
+          case KindOfPersistentKeyset:
+          case KindOfKeyset:       return exact(TKeyset);
+          case KindOfResource:     return exact(TRes);
+          case KindOfClsMeth:      return exact(TClsMeth);
+          case KindOfEnumClassLabel: return exact(TEnumClassLabel);
+          case KindOfObject:       return exact(TObj);
+          case KindOfPersistentString:
+          case KindOfString:
+            return C{
+              TStr,
+              union_of(TStr, TCls, TLazyCls),
+              TriBool::Yes
+            };
+          case KindOfUninit:
+          case KindOfRFunc:
+          case KindOfFunc:
+          case KindOfRClsMeth:
+          case KindOfClass:
+          case KindOfLazyClass:    break;
+        }
+        always_assert(false);
+      }
+      case AnnotMetaType::Mixed:
+        return C{ TInitCell, TInitCell, TriBool::No, true };
+      case AnnotMetaType::Nothing:
+      case AnnotMetaType::NoReturn:   return exact(TBottom);
+      case AnnotMetaType::Nonnull:    return exact(TNonNull);
+      case AnnotMetaType::Number:     return exact(TNum);
+      case AnnotMetaType::VecOrDict:  return exact(TKVish);
+      case AnnotMetaType::ArrayLike:  return exact(TArrLike);
+      case AnnotMetaType::SubObject: {
+        auto const cls = resolve(tc.clsName());
+        auto lower = cls ? subObj(*cls) : TBottom;
+        auto upper = lower;
+
+        // The "magic" interfaces cannot be represented with a single
+        // type. Obj=Foo|Str, for example, is not a valid type. It is
+        // safe to only provide a subset as the lower bound. We can
+        // use any provided candidate type to refine the lower bound
+        // and supply the subset which would allow us to optimize away
+        // the check.
+        if (interface_supports_arrlike(tc.clsName())) {
+          if (candidate.subtypeOf(BArrLike)) lower = TArrLike;
+          upper |= TArrLike;
+        }
+        if (interface_supports_int(tc.clsName())) {
+          if (candidate.subtypeOf(BInt)) lower = TInt;
+          upper |= TInt;
+        }
+        if (interface_supports_double(tc.clsName())) {
+          if (candidate.subtypeOf(BDbl)) lower = TDbl;
+          upper |= TDbl;
+        }
+
+        if (interface_supports_string(tc.clsName())) {
+          if (candidate.subtypeOf(BStr)) lower = TStr;
+          upper |= union_of(TStr, TCls, TLazyCls);
+          return C{
+            std::move(lower),
+            std::move(upper),
+            TriBool::Yes
+          };
+        }
+
+        return C{ std::move(lower), std::move(upper) };
+      }
+      case AnnotMetaType::Unresolved:
+        return C{ TBottom, TBottom };
+      case AnnotMetaType::This:
+        if (auto const s = self()) {
+          auto const obj = toobj(*s);
+          if (!is_specialized_cls(*s) || dcls_of(*s).cls().couldBeMocked()) {
+            return C { setctx(obj), obj };
+          }
+          return exact(setctx(obj));
+        }
+        return C{ TBottom, TObj };
+      case AnnotMetaType::Callable:
+        return C{
+          TBottom,
+          union_of(TStr, TVec, TDict, TFunc, TRFunc, TObj, TClsMeth, TRClsMeth)
+        };
+      case AnnotMetaType::ArrayKey:
+        return C{
+          TArrKey,
+          union_of(TArrKey, TCls, TLazyCls),
+          TriBool::Yes
+        };
+      // NB: when we're logging, only string has no side effects going through
+      // classname<T>, and only class pointers have no side effects going
+      // through class<T>
+      case AnnotMetaType::Classname:
+        if (!Cfg::Eval::ClassPassesClassname) {
+          return exact(TStr);
+        }
+        return C{
+          TStr,
+          union_of(TStr, TCls, TLazyCls)
+        };
+      case AnnotMetaType::Class:
+        // TODO(T199611023) do similar checks to SubObject for inner class type
+        if (Cfg::Eval::ClassTypeLevel > 0) {
+          return exact(union_of(TCls, TLazyCls));
+        }
+        return C{
+          union_of(TCls, TLazyCls),
+          union_of(TStr, TCls, TLazyCls)
+        };
+      case AnnotMetaType::ClassOrClassname:
+        return C{
+          union_of(TStr, TCls, TLazyCls),
+          union_of(TStr, TCls, TLazyCls)
+        };
+    }
+
+    always_assert(false);
+  }();
+
+  // Nullable constraint always includes TInitNull.
+  if (tc.isNullable()) {
+    ty.lower = opt(std::move(ty.lower));
+    ty.upper = opt(std::move(ty.upper));
+  }
+  // Soft type-constraints can potentially allow anything, so its
+  // upper-bound is maximal. We might still be able to optimize away
+  // the check if the lower bound is satisfied.
+  if (tc.isSoft()) {
+    ty.upper = TInitCell;
+    ty.maybeMixed = true;
+  }
+  return ty;
+}
+
+}
+
+ConstraintType type_from_constraint(
+  const TypeConstraint& tc,
+  const Type& candidate,
+  const std::function<Optional<res::Class>(SString)>& resolve,
+  const std::function<Optional<Type>()>& self)
+{
+  return type_from_constraint_impl(tc, candidate, resolve, self);
+}
+
+ConstraintType
+lookup_constraint(const IIndex& index,
+                  const Context& ctx,
+                  const TypeConstraint& tc,
+                  const Type& candidate) {
+  return type_from_constraint_impl(
+    tc, candidate,
+    [&] (SString name) { return index.resolve_class(name); },
+    [&] { return selfCls(index, ctx); }
+  );
+}
+
+std::tuple<Type, bool, bool> verify_param_type(const IIndex& index,
+                                               const Context& ctx,
+                                               uint32_t paramId,
+                                               const Type& t) {
+  // Builtins verify parameter types differently.
+  if (ctx.func->isNative) return { t, true, true };
+
+  assertx(paramId < ctx.func->params.size());
+  auto const& pinfo = ctx.func->params[paramId];
+
+  // Inputs of out-only parameters are not enforced.
+  if (pinfo.outOnly) return { t, true, true };
+
+  auto refined = TInitCell;
+  auto noop = true;
+  auto effectFree = true;
+  for (auto const& tc : pinfo.typeConstraints.range()) {
+    auto const lookup = lookup_constraint(index, ctx, tc, t);
+    if (t.moreRefined(lookup.lower)) {
+      refined = intersection_of(std::move(refined), t);
+      continue;
+    }
+
+    if (!t.couldBe(lookup.upper)) return { TBottom, false, false };
+
+    noop = false;
+
+    auto result = intersection_of(t, lookup.upper);
+    if (lookup.coerceClassToString == TriBool::Yes) {
+      assertx(!lookup.lower.couldBe(BCls | BLazyCls));
+      assertx(lookup.upper.couldBe(BStr | BCls | BLazyCls));
+      if (result.couldBe(BCls | BLazyCls)) {
+        result = promote_classish(std::move(result));
+        if (effectFree && (Cfg::Eval::ClassStringHintNoticesSampleRate > 0 ||
+                           !promote_classish(t).moreRefined(lookup.lower))) {
+          effectFree = false;
+        }
+      } else {
+        effectFree = false;
+      }
+    } else if (lookup.coerceClassToString == TriBool::Maybe) {
+      if (result.couldBe(BCls | BLazyCls)) result |= TSStr;
+      effectFree = false;
+    } else {
+      effectFree = false;
+    }
+
+    refined = intersection_of(std::move(refined), std::move(result));
+    if (refined.is(BBottom)) return { TBottom, false, false };
+  }
+
+  return { std::move(refined), noop, effectFree };
+}
+
+Type adjust_type_for_prop(const IIndex& index,
+                          const php::Class& propCls,
+                          const TypeIntersectionConstraint* tcs,
+                          const Type& ty) {
+  if (!tcs) return ty;
+  auto result = ty;
+  for (auto const& tc : tcs->range()) {
+    result = adjust_type_for_prop(index, propCls, tc, result);
+    if (result.is(BBottom)) return result;
+  }
+  return result;
+}
+
+Type adjust_type_for_prop(const IIndex& index,
+                          const php::Class& propCls,
+                          const TypeConstraint& tc,
+                          const Type& ty) {
+  assertx(tc.validForProp());
+  if (Cfg::Eval::CheckPropTypeHints <= 2) return ty;
+  auto lookup = lookup_constraint(
+    index,
+    Context { nullptr, nullptr, &propCls },
+    tc,
+    ty
+  );
+  auto upper = unctx(lookup.upper);
+  // A property with a mixed type-hint can be unset and therefore by
+  // Uninit. Any other type-hint forbids unsetting.
+  if (lookup.maybeMixed) upper |= TUninit;
+  auto ret = intersection_of(std::move(upper), ty);
+  if (lookup.coerceClassToString == TriBool::Yes) {
+    assertx(!lookup.lower.couldBe(BCls | BLazyCls));
+    assertx(lookup.upper.couldBe(BStr | BCls | BLazyCls));
+    ret = promote_classish(std::move(ret));
+  } else if (lookup.coerceClassToString == TriBool::Maybe) {
+    if (ret.couldBe(BCls | BLazyCls)) ret |= TSStr;
+  }
+  return ret;
+}
+
+ConstraintType union_constraint(const ConstraintType& a,
+                                const ConstraintType& b) {
+  return ConstraintType {
+    intersection_of(a.lower, b.lower),
+    union_of(a.upper, b.upper),
+    a.coerceClassToString | b.coerceClassToString,
+    a.maybeMixed || b.maybeMixed,
+  };
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Optional<Type> selfCls(const IIndex& index, const Context& ctx) {
+  if (!ctx.cls || is_used_trait(*ctx.cls)) {
+    return std::nullopt;
+  }
+  if (auto const c = index.resolve_class(ctx.cls->name)) {
+    return subCls(*c, true);
+  }
+  return std::nullopt;
+}
+
+Optional<Type> selfClsExact(const IIndex& index, const Context& ctx) {
+  if (!ctx.cls || is_used_trait(*ctx.cls)) {
+    return std::nullopt;
+  }
+  if (auto const c = index.resolve_class(ctx.cls->name)) {
+    return clsExact(*c, true);
+  }
+  return std::nullopt;
+}
+
+Optional<Type> parentCls(const IIndex& index, const Context& ctx) {
+  if (!ctx.cls || is_used_trait(*ctx.cls) || !ctx.cls->parentName) {
+    return std::nullopt;
+  }
+  if (auto const c = index.resolve_class(ctx.cls->parentName)) {
+    return subCls(*c, true);
+  }
+  return std::nullopt;
+}
+
+Optional<Type> parentClsExact(const IIndex& index, const Context& ctx) {
+  if (!ctx.cls || is_used_trait(*ctx.cls) || !ctx.cls->parentName) {
+    return std::nullopt;
+  }
+  if (auto const c = index.resolve_class(ctx.cls->parentName)) {
+    return clsExact(*c, true);
+  }
+  return std::nullopt;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+res::Class builtin_class(const IIndex& index, SString name) {
+  // A builtin class may not necessarily be resolved, but it must
+  // exist, and if it is resolved, must be AttrBuiltin.
+  auto const rcls = index.resolve_class(name);
+  always_assert_flog(
+    rcls.has_value(),
+    "A builtin class ({}) does not exist",
+    name
+  );
+  always_assert_flog(
+    !rcls->cls() || rcls->cls()->attrs & AttrBuiltin,
+    "A builtin class ({}) resolved to non-builtin",
+    name
+  );
+  return *rcls;
+}
+
+Type return_type_from_constraints(
+  const php::Func& f,
+  const std::function<Optional<res::Class>(SString)>& resolve,
+  const std::function<Optional<Type>()>& self
+) {
+  if (f.isGenerator) {
+    if (f.isAsync) {
+      // Async generators always return AsyncGenerator object.
+      return objExact(res::Class::get(s_AsyncGenerator.get()));
+    }
+    // Non-async generators always return Generator object.
+    return objExact(res::Class::get(s_Generator.get()));
+  }
+
+  auto const make_type = [&] (const TypeConstraint& tc) {
+    auto lookup = type_from_constraint(tc, TInitCell, resolve, self);
+    if (lookup.coerceClassToString == TriBool::Yes) {
+      lookup.upper = promote_classish(std::move(lookup.upper));
+    } else if (lookup.coerceClassToString == TriBool::Maybe) {
+      lookup.upper |= TSStr;
+    }
+
+    if (f.isNative &&
+      lookup.upper.subtypeOf(BStr | BObj | BRes | BArrLike)
+    ) {
+      // TODO: T220184756 Remove implicit assumption that non-simple
+      // types (ones that are represented by pointers) can always
+      // possibly be null
+      lookup.upper = opt(std::move(lookup.upper));
+    }
+    return unctx(std::move(lookup.upper));
+  };
+
+  auto const process = [&] (const TypeIntersectionConstraint& tcs) {
+    auto ret = TInitCell;
+    for (auto const& tc : tcs.range()) {
+      ret = intersection_of(std::move(ret), make_type(tc));
+    }
+    return ret;
+  };
+
+  auto ret = process(f.retTypeConstraints);
+  if (f.hasInOutArgs && !ret.is(BBottom)) {
+    std::vector<Type> types;
+    types.reserve(f.params.size() + 1);
+    types.emplace_back(std::move(ret));
+    for (auto const& p : f.params) {
+      if (!p.inout) continue;
+      auto t = process(p.typeConstraints);
+      if (t.is(BBottom)) return TBottom;
+      types.emplace_back(std::move(t));
+    }
+    std::reverse(begin(types)+1, end(types));
+    ret = vec(std::move(types));
+  }
+
+  if (f.isAsync) {
+    // Async functions always return WaitH<T>, where T is the type
+    // returned internally.
+    return wait_handle(std::move(ret));
+  }
   return ret;
 }
 

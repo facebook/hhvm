@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Establishes a connection to a LDAP server on a specified hostname and port.
@@ -627,20 +627,20 @@ function ldap_next_reference(resource $link, resource $result_entry): mixed;
 <<__Native>>
 function ldap_parse_reference(resource $link,
                               resource $result_entry,
-                              <<__OutOnly("varray")>>
-                              inout mixed $referrals): bool;
+                              <<__OutOnly>>
+                              inout vec<mixed> $referrals): bool;
 
 <<__Native>>
 function ldap_parse_result(resource $link,
                            resource $result,
-                           <<__OutOnly("KindOfInt64")>>
-                           inout mixed $errcode,
-                           <<__OutOnly("KindOfString")>>
-                           inout mixed $matcheddn,
-                           <<__OutOnly("KindOfString")>>
-                           inout mixed $errmsg,
-                           <<__OutOnly("varray")>>
-                           inout mixed $referrals): bool;
+                           <<__OutOnly>>
+                           inout int $errcode,
+                           <<__OutOnly>>
+                           inout string $matcheddn,
+                           <<__OutOnly>>
+                           inout string $errmsg,
+                           <<__OutOnly>>
+                           inout vec<mixed> $referrals): bool;
 
 /**
  * Frees up the memory allocated internally to store the result. All result
@@ -743,10 +743,10 @@ function ldap_control_paged_result(resource $link,
 <<__Native>>
 function ldap_control_paged_result_response(resource $link,
                                             resource $result,
-                                            <<__OutOnly("KindOfString")>>
-                                            inout mixed $cookie,
-                                            <<__OutOnly("KindOfInt64")>>
-                                            inout mixed $estimated): bool;
+                                            <<__OutOnly>>
+                                            inout string $cookie,
+                                            <<__OutOnly>>
+                                            inout int $estimated): bool;
 
 /**
  * Escape a string for use in an LDAP filter or DN.

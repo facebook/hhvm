@@ -13,7 +13,7 @@ echo "*** Testing ctype_alpha() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
 
-$values = varray[
+$values = vec[
 /*1*/  "This string contains just letters and spaces", // Simple string
        "but this one contains some numbers too 123+456 = 678", // Mixed string
        "",

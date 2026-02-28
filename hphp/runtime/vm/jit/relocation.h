@@ -36,7 +36,6 @@ namespace HPHP::jit {
  *                             hold live instructions.
  *   adjustMetaDataForRelocation - Adjusts the affected metadata
  *                                 following a relocation.
- *   findFixups - Finds the affected fixups following a relocation.
  *   relocate - Relocates a range of instructions to a new
  *              destination. Critically, relocation is a chance
  *              to grow/shrink the region which is advantageous
@@ -99,7 +98,7 @@ struct RelocationInfo {
   bool isSmashableRelocation(TCA ip) {
     return m_smashableRelocations.count(ip);
   }
-  typedef std::vector<std::pair<TCA,TCA>> RangeVec;
+  using RangeVec = std::vector<std::pair<TCA,TCA>>;
   const RangeVec& srcRanges() { return m_srcRanges; }
   const RangeVec& dstRanges() { return m_dstRanges; }
  private:
@@ -123,7 +122,6 @@ void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& meta);
 void adjustMetaDataForRelocation(RelocationInfo& rel,
                                  AsmInfo* asmInfo,
                                  CGMeta& meta);
-void findFixups(TCA start, TCA end, CGMeta& meta);
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& destBlock,
                 TCA start, TCA end,
@@ -133,4 +131,3 @@ size_t relocate(RelocationInfo& rel,
                 AreaIndex codeArea);
 
 }
-

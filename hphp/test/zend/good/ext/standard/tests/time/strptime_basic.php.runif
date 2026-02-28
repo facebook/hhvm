@@ -1,2 +1,2 @@
-function strptime
+extension date
 os not Darwin

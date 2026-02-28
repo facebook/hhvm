@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  public function dyn_test(inout $a) {
+  public function dyn_test(inout $a) :mixed{
     $i = "gi";
     $a = $i;
     return $i;

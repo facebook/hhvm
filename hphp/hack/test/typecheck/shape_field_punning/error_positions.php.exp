@@ -1,0 +1,18 @@
+ERROR: File "error_positions.php", line 7, characters 20-23:
+Field name already bound (Naming[2015])
+ERROR: File "error_positions.php", line 13, characters 22-28:
+Field name already bound (Naming[2015])
+ERROR: File "error_positions.php", line 26, characters 33-37:
+Field name already bound (Naming[2015])
+ERROR: File "error_positions.php", line 20, characters 3-36:
+hh_expect type mismatch (Typing[4453])
+  File "error_positions.php", line 20, characters 28-30:
+  Expected `int`
+  File "error_positions.php", line 17, characters 10-17:
+  But got `string`
+ERROR: File "error_positions.php", line 20, characters 34-35:
+Invalid argument (Typing[4110])
+  File "error_positions.php", line 20, characters 28-30:
+  Expected `int`
+  File "error_positions.php", line 17, characters 10-17:
+  But got `string`

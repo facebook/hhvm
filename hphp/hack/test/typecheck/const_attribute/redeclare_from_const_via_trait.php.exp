@@ -1,4 +1,4 @@
-File "redeclare_from_const_via_trait.php--file3.php", line 3, characters 17-17:
+ERROR: File "redeclare_from_const_via_trait.php--file3.php", line 3, characters 17-17:
 Some members in class `D` are incompatible with those declared in type `C` (Typing[4204])
   File "redeclare_from_const_via_trait.php--file2.php", line 4, characters 10-12:
   This property is not `__Const`

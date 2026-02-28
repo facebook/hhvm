@@ -18,6 +18,12 @@
 #include <cstdint>
 
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/module.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/irgen-interpone.h"
+#include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/minstr-helpers.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 
 namespace HPHP {
@@ -36,11 +42,26 @@ struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 
-Type callReturnType(const Func* callee);
-Type awaitedCallReturnType(const Func* callee);
-Type callOutType(const Func* callee, uint32_t index);
+/*
+ * Lock the object on top of the stack if we just unwound a constructor
+ * frame called using FCallCtor with the LockWhileUnwinding flag.
+ */
+void emitLockObjOnFrameUnwind(IRGS& env, PC pc);
 
+Type callReturnType(const Func* callee, bool mayIntercept);
+Type awaitedCallReturnType(const Func* callee, bool mayIntercept);
+Type callOutType(const Func* callee, uint32_t inOutIdx, bool mayIntercept);
+
+/*
+ * Emits instructions to check and enforce module boundary violations
+ */
+void emitModuleBoundaryCheck(IRGS&, SSATmp* symbol, bool func = true);
+
+void emitModuleBoundaryCheckKnown(IRGS&, const Class* symbol);
+void emitModuleBoundaryCheckKnown(IRGS&, const Func* symbol);
+void emitModuleBoundaryCheckKnown(IRGS&, const Class::Prop* symbol);
+void emitModuleBoundaryCheckKnown(IRGS&, const Class::SProp* symbol);
 //////////////////////////////////////////////////////////////////////
 
-}}}
 
+}}}

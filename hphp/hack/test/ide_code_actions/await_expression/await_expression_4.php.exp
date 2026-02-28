@@ -1,0 +1,45 @@
+Code actions available:
+------------------------------------------
+await expression (CodeActionKind: "refactor") SELECTED
+Extract into variable (CodeActionKind: "refactor")
+Devmate Quick Fix - `await` can only operate on an `Awaitable` (CodeActionKind: "quickfix")
+Devmate Agent Fix - `await` can only operate on an `Awaitable` (CodeActionKind: "quickfix")
+Devmate Quick Fix - Typing error (CodeActionKind: "quickfix")
+Devmate Agent Fix - Typing error (CodeActionKind: "quickfix")
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"async ",
+          "range":{"end":{"character":15,"line":9},"start":{"character":15,"line":9}}
+        },
+        {
+          "newText":"await gen_int()/*range-end*/ + 3",
+          "range":{"end":{"character":63,"line":9},"start":{"character":37,"line":9}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"await expression"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+async function gen_int(): Awaitable<int> {
+  return 1;
+}
+
+
+async function repro(): Awaitable<mixed> {
+  // We should offer the refactoring.
+  return await async () ==> /*range-start*/await gen_int()/*range-end*/ + 3;
+}
+

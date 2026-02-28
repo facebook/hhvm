@@ -7,28 +7,31 @@
 mod decl_mode_smart_constructors_generated;
 
 use bumpalo::Bump;
-use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
-use parser_core_types::{
-    lexable_token::LexableToken,
-    source_text::SourceText,
-    syntax::{SyntaxTypeBase, SyntaxValueType},
-    syntax_by_ref::{has_arena::HasArena, syntax::Syntax, syntax_variant_generated::SyntaxVariant},
-    syntax_type::SyntaxType,
-    token_factory::TokenFactory,
-    token_kind::TokenKind,
-    trivia_factory::TriviaFactory,
-};
-use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
+use ocamlrep::Allocator;
+use ocamlrep::ToOcamlRep;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax::SyntaxTypeBase;
+use parser_core_types::syntax::SyntaxValueType;
+use parser_core_types::syntax_by_ref::has_arena::HasArena;
+use parser_core_types::syntax_by_ref::syntax::Syntax;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant;
+use parser_core_types::syntax_type::SyntaxType;
+use parser_core_types::token_factory::TokenFactory;
+use parser_core_types::token_kind::TokenKind;
+use parser_core_types::trivia_factory::TriviaFactory;
+use syntax_smart_constructors::StateType;
+use syntax_smart_constructors::SyntaxSmartConstructors;
 
-pub struct State<'src, 'arena, S> {
-    arena: &'arena Bump,
-    source: SourceText<'src>,
+pub struct State<'s, 'a, S> {
+    arena: &'a Bump,
+    source: SourceText<'s>,
     stack: Vec<bool>,
     phantom_s: std::marker::PhantomData<*const S>,
 }
 
-impl<'src, 'arena, S> State<'src, 'arena, S> {
-    fn new(source: &SourceText<'src>, arena: &'arena Bump) -> Self {
+impl<'s, 'a, S> State<'s, 'a, S> {
+    fn new(source: &SourceText<'s>, arena: &'a Bump) -> Self {
         Self {
             arena,
             source: source.clone(),
@@ -81,24 +84,20 @@ impl<S> StateType<S> for State<'_, '_, S> {
     }
 }
 
-impl<'arena, S> HasArena<'arena> for State<'_, 'arena, S> {
-    fn get_arena(&self) -> &'arena Bump {
+impl<'a, S> HasArena<'a> for State<'_, 'a, S> {
+    fn get_arena(&self) -> &'a Bump {
         self.arena
     }
 }
 
-pub use crate::decl_mode_smart_constructors_generated::*;
-
-pub struct DeclModeSmartConstructors<'src, 'arena, S, T, V, TF> {
-    pub state: State<'src, 'arena, S>,
+pub struct DeclModeSmartConstructors<'s, 'a, S, T, V, TF> {
+    pub state: State<'s, 'a, S>,
     pub token_factory: TF,
     phantom_value: std::marker::PhantomData<(V, T)>,
 }
 
-impl<'src, 'arena, T, V, TF>
-    DeclModeSmartConstructors<'src, 'arena, Syntax<'arena, T, V>, T, V, TF>
-{
-    pub fn new(src: &SourceText<'src>, token_factory: TF, arena: &'arena Bump) -> Self {
+impl<'s, 'a, T, V, TF> DeclModeSmartConstructors<'s, 'a, Syntax<'a, T, V>, T, V, TF> {
+    pub fn new(src: &SourceText<'s>, token_factory: TF, arena: &'a Bump) -> Self {
         Self {
             state: State::new(src, arena),
             token_factory,
@@ -107,7 +106,7 @@ impl<'src, 'arena, T, V, TF>
     }
 }
 
-impl<'src, S, T, V, TF: Clone> Clone for DeclModeSmartConstructors<'src, '_, S, T, V, TF> {
+impl<'s, S, T, V, TF: Clone> Clone for DeclModeSmartConstructors<'s, '_, S, T, V, TF> {
     fn clone(&self) -> Self {
         Self {
             state: self.state.clone(),
@@ -117,58 +116,58 @@ impl<'src, S, T, V, TF: Clone> Clone for DeclModeSmartConstructors<'src, '_, S, 
     }
 }
 
-type SyntaxToken<'src, 'arena, T, V> =
-    <Syntax<'arena, T, V> as SyntaxTypeBase<State<'src, 'arena, Syntax<'arena, T, V>>>>::Token;
+type SyntaxToken<'s, 'a, T, V> =
+    <Syntax<'a, T, V> as SyntaxTypeBase<State<'s, 'a, Syntax<'a, T, V>>>>::Token;
 
-impl<'src, 'arena, T, V, TF>
-    SyntaxSmartConstructors<Syntax<'arena, T, V>, TF, State<'src, 'arena, Syntax<'arena, T, V>>>
-    for DeclModeSmartConstructors<'src, 'arena, Syntax<'arena, T, V>, T, V, TF>
+impl<'s, 'a, T, V, TF>
+    SyntaxSmartConstructors<Syntax<'a, T, V>, TF, State<'s, 'a, Syntax<'a, T, V>>>
+    for DeclModeSmartConstructors<'s, 'a, Syntax<'a, T, V>, T, V, TF>
 where
-    TF: TokenFactory<Token = SyntaxToken<'src, 'arena, T, V>>,
-
+    TF: TokenFactory<Token = SyntaxToken<'s, 'a, T, V>>,
     T: LexableToken + Copy,
     V: SyntaxValueType<T> + Clone,
-    Syntax<'arena, T, V>: SyntaxType<State<'src, 'arena, Syntax<'arena, T, V>>>,
+    Syntax<'a, T, V>: SyntaxType<State<'s, 'a, Syntax<'a, T, V>>>,
 {
-    fn make_yield_expression(&mut self, _r1: Self::R, _r2: Self::R) -> Self::R {
+    fn make_yield_expression(&mut self, _r1: Self::Output, _r2: Self::Output) -> Self::Output {
         self.state.pop_n(2);
         self.state.push(true);
-        Self::R::make_missing(0)
+        Self::Output::make_missing(0)
     }
 
     fn make_lambda_expression(
         &mut self,
-        r1: Self::R,
-        r2: Self::R,
-        r3: Self::R,
-        r4: Self::R,
-        body: Self::R,
-    ) -> Self::R {
+        r1: Self::Output,
+        r2: Self::Output,
+        r3: Self::Output,
+        r4: Self::Output,
+        body: Self::Output,
+    ) -> Self::Output {
         let saw_yield = self.state.pop_n(5);
         let body = replace_body(&mut self.token_factory, &mut self.state, body, saw_yield);
         self.state.push(false);
-        Self::R::make_lambda_expression(&self.state, r1, r2, r3, r4, body)
+        Self::Output::make_lambda_expression(&self.state, r1, r2, r3, r4, body)
     }
 
     fn make_anonymous_function(
         &mut self,
-        r1: Self::R,
-        r2: Self::R,
-        r3: Self::R,
-        r4: Self::R,
-        r5: Self::R,
-        r6: Self::R,
-        r7: Self::R,
-        r8: Self::R,
-        r9: Self::R,
-        r10: Self::R,
-        r11: Self::R,
-        body: Self::R,
-    ) -> Self::R {
+        r1: Self::Output,
+        r2: Self::Output,
+        r3: Self::Output,
+        r4: Self::Output,
+        r5: Self::Output,
+        r6: Self::Output,
+        r7: Self::Output,
+        r8: Self::Output,
+        r9: Self::Output,
+        r10: Self::Output,
+        r11: Self::Output,
+        r12: Self::Output,
+        body: Self::Output,
+    ) -> Self::Output {
         let saw_yield = self.state.pop_n(11);
         let body = replace_body(&mut self.token_factory, &mut self.state, body, saw_yield);
         self.state.push(false);
-        Self::R::make_anonymous_function(
+        Self::Output::make_anonymous_function(
             &self.state,
             r1,
             r2,
@@ -181,54 +180,60 @@ where
             r9,
             r10,
             r11,
+            r12,
             body,
         )
     }
 
     fn make_awaitable_creation_expression(
         &mut self,
-        r1: Self::R,
-        r2: Self::R,
-        body: Self::R,
-    ) -> Self::R {
+        r1: Self::Output,
+        r2: Self::Output,
+        body: Self::Output,
+    ) -> Self::Output {
         let saw_yield = self.state.pop_n(3);
         let body = replace_body(&mut self.token_factory, &mut self.state, body, saw_yield);
         self.state.push(false);
-        Self::R::make_awaitable_creation_expression(&self.state, r1, r2, body)
+        Self::Output::make_awaitable_creation_expression(&self.state, r1, r2, body)
     }
 
     fn make_methodish_declaration(
         &mut self,
-        r1: Self::R,
-        r2: Self::R,
-        body: Self::R,
-        r3: Self::R,
-    ) -> Self::R {
+        r1: Self::Output,
+        r2: Self::Output,
+        body: Self::Output,
+        r3: Self::Output,
+    ) -> Self::Output {
         self.state.pop_n(1);
         let saw_yield = self.state.pop_n(3);
         let body = replace_body(&mut self.token_factory, &mut self.state, body, saw_yield);
         self.state.push(false);
-        Self::R::make_methodish_declaration(&self.state, r1, r2, body, r3)
+        Self::Output::make_methodish_declaration(&self.state, r1, r2, body, r3)
     }
 
-    fn make_function_declaration(&mut self, r1: Self::R, r2: Self::R, body: Self::R) -> Self::R {
+    fn make_function_declaration(
+        &mut self,
+        r1: Self::Output,
+        r2: Self::Output,
+        body: Self::Output,
+    ) -> Self::Output {
         let saw_yield = self.state.pop_n(3);
         let body = replace_body(&mut self.token_factory, &mut self.state, body, saw_yield);
         self.state.push(false);
-        Self::R::make_function_declaration(&self.state, r1, r2, body)
+        Self::Output::make_function_declaration(&self.state, r1, r2, body)
     }
 }
 
-fn replace_body<'src, 'arena, T, V, TF>(
+fn replace_body<'s, 'a, T, V, TF>(
     token_factory: &mut TF,
-    st: &mut State<'src, 'arena, Syntax<'arena, T, V>>,
-    body: Syntax<'arena, T, V>,
+    st: &mut State<'s, 'a, Syntax<'a, T, V>>,
+    body: Syntax<'a, T, V>,
     saw_yield: bool,
-) -> Syntax<'arena, T, V>
+) -> Syntax<'a, T, V>
 where
     T: LexableToken + Copy,
     V: SyntaxValueType<T> + Clone,
-    TF: TokenFactory<Token = SyntaxToken<'src, 'arena, T, V>>,
+    TF: TokenFactory<Token = SyntaxToken<'s, 'a, T, V>>,
 {
     match body.children {
         SyntaxVariant::CompoundStatement(children) => {
@@ -250,7 +255,7 @@ where
 }
 
 impl<S> ToOcamlRep for State<'_, '_, S> {
-    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         self.stack().to_ocamlrep(alloc)
     }
 }

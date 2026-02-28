@@ -1,10 +1,10 @@
-File "misspell_dict.php", line 4, characters 19-19:
+ERROR: File "misspell_dict.php", line 4, characters 19-19:
 A closing square bracket `]` is expected here. (Parsing[1002])
-File "misspell_dict.php", line 4, characters 8-11:
+ERROR: File "misspell_dict.php", line 4, characters 8-11:
 Unbound name: `Dict` (a global constant) (Naming[2049])
-File "misspell_dict.php", line 4, characters 19-20:
+ERROR: File "misspell_dict.php", line 4, characters 19-20:
 Unbound name: `=>` (a global constant) (Naming[2049])
-File "misspell_dict.php", line 4, characters 8-11:
+ERROR: File "misspell_dict.php", line 4, characters 8-11:
 Unbound global constant (Typing) (Typing[4106])
-File "misspell_dict.php", line 4, characters 19-20:
+ERROR: File "misspell_dict.php", line 4, characters 19-20:
 Unbound global constant (Typing) (Typing[4106])

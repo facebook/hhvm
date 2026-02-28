@@ -1,6 +1,6 @@
 <?hh
 class T {
-    function f(P $p = 42) {
+    function f(P $p = 42) :mixed{
     }
 }
 

@@ -1,0 +1,4 @@
+ERROR: File "internal_multiple_instantiations_good.php--A.php", line 5, characters 21-29:
+You cannot use this type in a public declaration. (Typing[4446])
+  File "internal_multiple_instantiations_good.php--A.php", line 4, characters 20-20:
+  It is declared as `internal` here

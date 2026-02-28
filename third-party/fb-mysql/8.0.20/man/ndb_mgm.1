@@ -1,0 +1,358 @@
+'\" t
+.\"     Title: \fBndb_mgm\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_MGM\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_mgm \- the NDB Cluster management client
+.SH "SYNOPSIS"
+.HP \w'\fBndb_mgm\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBndb_mgm \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+The
+\fBndb_mgm\fR
+management client process is actually not needed to run the cluster\&. Its value lies in providing a set of commands for checking the cluster\*(Aqs status, starting backups, and performing other administrative functions\&. The management client accesses the management server using a C API\&. Advanced users can also employ this API for programming dedicated management processes to perform tasks similar to those performed by
+\fBndb_mgm\fR\&.
+.PP
+To start the management client, it is necessary to supply the host name and port number of the management server:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_mgm [\fR\fB\fIhost_name\fR\fR\fB [\fR\fB\fIport_num\fR\fR\fB]]\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_mgm ndb_mgmd\&.mysql\&.com 1186\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The default host name and port number are
+localhost
+and 1186, respectively\&.
+.PP
+The following table includes options that are specific to the NDB Cluster management client program
+\fBndb_mgm\fR\&. Additional descriptions follow the table\&. For options common to most NDB Cluster programs (including
+\fBndb_mgm\fR), see
+Options Common to NDB Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.253.\ \&Command\-line options for the ndb_mgm program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l
+l l l
+l l l.
+T{
+.PP
+\fB \fR\fB--connect-retries=#\fR\fB \fR
+T}:T{
+Set the number of times to retry a connection before giving up; 0 means
+              1 attempt only (and no retries)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--try-reconnect=#\fR,
+.PP
+\fB \fR\fB-t\fR\fB \fR
+T}:T{
+Set the number of times to retry a connection before giving up; synonym
+              for --connect-retries
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--execute=name\fR,
+.PP
+\fB \fR\fB-e\fR\fB \fR
+T}:T{
+Execute command and exit
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-connect\-retries=\fR\fB\fI#\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--connect-retries=#
+T}
+T{
+\fBType\fR
+T}:T{
+Numeric
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+3
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+This option specifies the number of times following the first attempt to retry a connection before giving up (the client always tries the connection at least once)\&. The length of time to wait per attempt is set using
+\fB\-\-connect\-retry\-delay\fR\&.
+.sp
+This option is synonymous with the
+\fB\-\-try\-reconnect\fR
+option, which is now deprecated\&.
+.sp
+The default for this option this option differs from its default when used with other
+NDB
+programs\&. See
+Options Common to NDB Cluster Programs(1), for more information\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-execute=\fR\fBcommand\fR,
+\fB\-e \fR\fBcommand\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--execute=name
+T}
+.TE
+.sp 1
+This option can be used to send a command to the NDB Cluster management client from the system shell\&. For example, either of the following is equivalent to executing
+SHOW
+in the management client:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_mgm \-e "SHOW"\fR
+shell> \fBndb_mgm \-\-execute="SHOW"\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+This is analogous to how the
+\fB\-\-execute\fR
+or
+\fB\-e\fR
+option works with the
+\fBmysql\fR
+command\-line client\&. See
+Section\ \&4.2.2.1, \(lqUsing Options on the Command Line\(rq\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+If the management client command to be passed using this option contains any space characters, then the command
+\fImust\fR
+be enclosed in quotation marks\&. Either single or double quotation marks may be used\&. If the management client command contains no space characters, the quotation marks are optional\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-try\-reconnect=\fR\fB\fInumber\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--try-reconnect=#
+T}
+T{
+\fBDeprecated\fR
+T}:T{
+Yes
+T}
+T{
+\fBType\fR
+T}:T{
+Numeric
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+12
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+3
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+If the connection to the management server is broken, the node tries to reconnect to it every 5 seconds until it succeeds\&. By using this option, it is possible to limit the number of attempts to
+\fInumber\fR
+before giving up and reporting an error instead\&.
+.sp
+This option is deprecated and subject to removal in a future release\&. Use
+\fB\-\-connect\-retries\fR, instead\&.
+.RE
+.PP
+Additional information about using
+\fBndb_mgm\fR
+can be found in
+Section\ \&22.5.2, \(lqCommands in the NDB Cluster Management Client\(rq\&.
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

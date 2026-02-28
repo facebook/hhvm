@@ -1,6 +1,6 @@
 <?hh
 
-function book_from_xml($xml) {
+function book_from_xml($xml) :mixed{
 	$sxe = simplexml_load_string($xml);
 	$obj = new book;
 	$obj->a = (string)$sxe->a;
@@ -9,7 +9,7 @@ function book_from_xml($xml) {
 }
 
 class test{
-	function dotest($book){
+	function dotest($book):mixed{
 		$classname=get_class($book);
 		return "Object: ".$classname. "(".$book->a.",".$book->b.")";
 	}
@@ -39,9 +39,9 @@ function entrypoint_typemap001(): void {
    </env:Body>
   <env:Header/>
   </env:Envelope>");
-  $options=darray[
+  $options=dict[
   		'actor'   =>'http://schemas.nothing.com',
-  		'typemap' => varray[darray["type_ns"   => "http://schemas.nothing.com",
+  		'typemap' => vec[dict["type_ns"   => "http://schemas.nothing.com",
   		                         "type_name" => "book",
   		                         "from_xml"  => book_from_xml<>]]
   		];

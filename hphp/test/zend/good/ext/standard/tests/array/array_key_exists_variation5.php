@@ -11,9 +11,9 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_key_exists() : usage variations ***\n";
 
-$multi_array = darray ['zero' => 'val1', 
+$multi_array = dict['zero' => 'val1', 
                       'one' => 'val2', 
-                      'sub1' => varray [1, 2, 3]];
+                      'sub1' => vec[1, 2, 3]];
 
 echo "\n-- Attempt to match key in sub-array --\n";
 // this key is in the sub-array

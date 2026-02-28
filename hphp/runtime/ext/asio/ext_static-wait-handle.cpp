@@ -64,7 +64,7 @@ c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceeded(const TypedValue result)
  */
 c_StaticWaitHandle* c_StaticWaitHandle::CreateFailed(ObjectData* exception) {
   assertx(exception);
-  assertx(exception->instanceof(SystemLib::s_ThrowableClass));
+  assertx(exception->instanceof(SystemLib::getThrowableClass()));
 
   auto waitHandle = req::make<c_StaticWaitHandle>();
   waitHandle->setState(STATE_FAILED);
@@ -72,13 +72,16 @@ c_StaticWaitHandle* c_StaticWaitHandle::CreateFailed(ObjectData* exception) {
   return waitHandle.detach();
 }
 
-void AsioExtension::initStaticWaitHandle() {
+void AsioExtension::registerNativeStaticWaitHandle() {
   c_StaticWaitHandle::NullHandle.bind(
     rds::Mode::Normal, rds::LinkID{"StaticNullWH"});
   c_StaticWaitHandle::TrueHandle.bind(
     rds::Mode::Normal, rds::LinkID{"StaticTrueWH"});
   c_StaticWaitHandle::FalseHandle.bind(
     rds::Mode::Normal, rds::LinkID{"StaticFalseWH"});
+
+  Native::registerClassExtraDataHandler(
+    c_StaticWaitHandle::className(), finish_class<c_StaticWaitHandle>);
 }
 
 void AsioExtension::requestInitSingletons() {

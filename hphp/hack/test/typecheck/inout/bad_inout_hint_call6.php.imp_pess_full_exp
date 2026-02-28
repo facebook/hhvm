@@ -1,0 +1,6 @@
+File "bad_inout_hint_call6.php", line 7, characters 5-30:
+Invalid argument (Typing[4110])
+  File "bad_inout_hint_call6.php", line 3, characters 30-32:
+  Expected `int`
+  File "bad_inout_hint_call6.php", line 7, characters 12-14:
+  But got `float`

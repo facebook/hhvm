@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -13,13 +13,6 @@ namespace NS;
 
 function returns_int(mixed $in): ?int {
   if ($in is int) {
-    return $in;
-  }
-  return null;
-}
-
-function returns_array(mixed $in): ?varray_or_darray<mixed> {
-  if (\HH\is_php_array($in)) {
     return $in;
   }
   return null;

@@ -11,10 +11,11 @@ Checks: '
 -facebook-hte-InlinedStaticLocalVariableWarning,
 -facebook-hte-LocalUncheckedArrayBounds,
 -facebook-hte-MemberUncheckedArrayBounds,
--facebook-hte-MissingBraces,
 -facebook-hte-NullableDereference,
 -facebook-hte-NullableReturn,
 -facebook-hte-ParameterUncheckedArrayBounds,
--facebook-hte-BadImplicitCast
+-facebook-hte-BadImplicitCast,
+-facebook-reserve,
+-readability-braces-around-statements,
 '
 ...

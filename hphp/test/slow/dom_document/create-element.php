@@ -3,7 +3,7 @@
 class SampleElement extends DOMElement {}
 
 <<__EntryPoint>>
-function main_create_element() {
+function main_create_element() :mixed{
 $dom = new DOMDocument();
 $dom->registerNodeClass('DOMElement', 'SampleElement');
 

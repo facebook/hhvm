@@ -1,19 +1,19 @@
 <?hh
 
-function printImplicit() {
-  echo "Implicit: " . (string) IntContext::getContext() . "\n";
+function printImplicit() :mixed{
+  echo "Implicit: " . (string) ClassContext::getContext()->getPayload() . "\n";
 }
 
-function aux() {
-  $x = IntContext::getContext();
+function aux() :mixed{
+  $x = ClassContext::getContext()->getPayload();
   var_dump($x);
-  IntContext::start($x+1, printImplicit<>);
-  var_dump(IntContext::getContext());
+  ClassContext::start(new Base($x+1), printImplicit<>);
+  var_dump(ClassContext::getContext()->getPayload());
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include 'implicit.inc';
 
-  IntContext::start(0, aux<>);
+  ClassContext::start(new Base(0), aux<>);
 }

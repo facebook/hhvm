@@ -1,0 +1,2 @@
+ERROR: File "nullsafe_pipe_lambda.php", line 8, characters 33-34:
+Cannot use unstable feature: `capture_pipe_variables` (Parsing[1002])

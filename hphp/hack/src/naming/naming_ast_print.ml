@@ -9,7 +9,6 @@
 let pp_unit fmt () = Format.pp_print_string fmt "()"
 
 let print_nast_internal pp_ex nast =
-  let pp_unit fmt () = Format.pp_print_string fmt "()" in
   let formatter = Format.formatter_of_out_channel Stdlib.stdout in
   Format.pp_set_margin formatter 200;
   Aast.pp_program pp_ex pp_unit formatter nast;

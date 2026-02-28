@@ -6,7 +6,7 @@ function entrypoint_dimmable_object_access(): void {
   error_reporting(-1);
 
   $foo = new stdClass();
-  $foo->someprop = darray['baz' => 'quux'];
+  $foo->someprop = dict['baz' => 'quux'];
 
   $bar = 'someprop';
 

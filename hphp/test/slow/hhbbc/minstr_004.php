@@ -3,11 +3,11 @@
 class Foo {
   private $x;
   public function __construct() { $this->x = new stdClass(); }
-  public function get() { return $this->x; }
-  public function set($y) { $this->x->x = $y; }
+  public function get() :mixed{ return $this->x; }
+  public function set($y) :mixed{ $this->x->x = $y; }
 }
 
-function main() {
+function main() :mixed{
   $x = new Foo();
   var_dump($x);
   $x->set(12);
@@ -17,6 +17,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_minstr_004() {
+function main_minstr_004() :mixed{
 main();
 }

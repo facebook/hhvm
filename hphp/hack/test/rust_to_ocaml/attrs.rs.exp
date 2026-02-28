@@ -1,0 +1,15 @@
+(** type X *)
+type x = a [@@deriving show]
+
+(** type Y *)
+type y = {
+  y_foo: a; [@opaque] [@visitors.opaque]  (** foo *)
+  y_bar: b;  (** bar *)
+}
+[@@deriving visitors { variety = "iter"; ancestors = ["iter_ab"] }]
+
+(** type Visibility *)
+type visibility =
+  | VPrivate [@visitors.name "visibility_VPrivate"]  (** Private *)
+  | VPublic [@visitors.name "visibility_VPublic"]  (** Public *)
+[@@deriving eq, ord, show { with_path = false }]

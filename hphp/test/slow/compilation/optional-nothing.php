@@ -9,7 +9,7 @@ function foo2(): ?nothing {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   try {
     var_dump(foo1());
     var_dump(foo2());

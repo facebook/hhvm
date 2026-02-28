@@ -13,4 +13,4 @@ vec(2) {
   bool(false)
 }
 
-Catchable fatal error: Argument 1 to HH\Shapes::idx() must be of type ?HH\%rdarray|dict%r, HH\vec given in %s/idx_arr_compat.php on line 14
+Catchable fatal error: Argument 1 to HH\Shapes::idx() must be of type ?HH\darray, HH\vec given in %s/idx_arr_compat.php on line 14

@@ -1,1 +1,2 @@
-No errors
+WARN: File "multiple_concrete_defs_from_traits_no_default.php", line 12, characters 7-7:
+Duplicated property `tutorialID` in `C` (defined in `T1` and `T2`): all instances will be aliased at runtime (Warn[12008])

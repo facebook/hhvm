@@ -2,12 +2,11 @@
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-11], "\\f");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:15-19], (Hprim Tvoid)))); 
-        f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([3:15-19], (Hprim Tvoid)))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
@@ -16,35 +15,33 @@
                (((function(string $s): string)), [5:3-21],
                 (Lfun (
                    { f_span = [5:3-21]; f_readonly_this = None; f_annotation = (); 
-                     f_readonly_ret = None; f_ret = ((string), None); 
-                     f_name = ([5:3-21], ";anonymous"); f_tparams = []; 
-                     f_where_constraints = [];
+                     f_readonly_ret = None; f_tparams = []; f_ret = ((string), None);
                      f_params =
-                     [{ param_annotation = (string); param_type_hint = ((string), (Some ([5:4-10], (Hprim Tstring)))); 
-                        param_is_variadic = false; param_pos = [5:11-13]; 
-                        param_name = "$s"; param_expr = None; param_readonly = None; 
-                        param_callconv = Pnormal; param_user_attributes = []; 
+                     [{ param_annotation = (string); param_type_hint = ((string), (Some ([5:4-10], (Happly (([5:4-10], "\\HH\\string"), []))))); 
+                        param_pos = [5:11-13]; param_name = "$s"; param_info = Param_required; 
+                        param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+                        param_named = None; param_user_attributes = []; 
                         param_visibility = None }
                        ];
                      f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:19-21], (Return (Some ((string), [5:19-21], (Lvar ([5:19-21], $s))))))] }; 
                      f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-                     f_doc_comment = None },
+                     f_hidden = false; f_doc_comment = None },
                    [])))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
-      fd_internal = false });
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:16-17], "\\g");
        fd_fun =
        { f_span = [8:1-13:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((Awaitable<void>), (Some ([8:21-36], (Happly (([8:21-30], "\\HH\\Awaitable"), [([8:31-35], (Hprim Tvoid))]))))); 
-         f_name = ([8:16-17], "\\g"); f_tparams = []; f_where_constraints = []; 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((Awaitable<~void>), (Some ([8:21-36], (Happly (([8:21-30], "\\HH\\Awaitable"), [([8:31-35], (Hprim Tvoid))]))))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
@@ -53,21 +50,23 @@
                 ((int), [10:3-12:4],
                  (Await
                     ((Awaitable<int>), [10:9-12:4],
-                     (Call (
-                        (((function(): Awaitable<int>)), [10:9-12:4],
-                         (Lfun (
-                            { f_span = [10:9-12:4]; f_readonly_this = None; 
-                              f_annotation = (); f_readonly_ret = None; 
-                              f_ret = ((Awaitable<int>), None); f_name = ([10:9-12:4], ";anonymous"); 
-                              f_tparams = []; f_where_constraints = []; 
-                              f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
-                              f_body = { fb_ast = [([11:5-15], (Return (Some ((int), [11:12-14], (Int "42")))))] }; 
-                              f_fun_kind = FAsync; f_user_attributes = []; 
-                              f_external = false; f_doc_comment = None },
-                            []))),
-                        [], [], None)))))))
+                     (Call
+                        { func =
+                          (((function(): Awaitable<int>)), [10:9-12:4],
+                           (Lfun (
+                              { f_span = [10:9-12:4]; f_readonly_this = None; 
+                                f_annotation = (); f_readonly_ret = None; 
+                                f_tparams = []; f_ret = ((Awaitable<int>), None); 
+                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
+                                f_body = { fb_ast = [([11:5-15], (Return (Some ((int), [11:12-14], (Int "42")))))] }; 
+                                f_fun_kind = FAsync; f_user_attributes = []; 
+                                f_external = false; f_hidden = false; 
+                                f_doc_comment = None },
+                              [])));
+                          targs = []; args = []; unpacked_arg = None }))))))
              ]
            };
-         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
-       fd_internal = false })
+         f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([8:16-17], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None })

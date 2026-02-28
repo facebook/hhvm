@@ -6,28 +6,28 @@ class A {
     /**
      * My Doc Comment for A::f
      */
-    function f() {}
+    function f() :mixed{}
 
     /**
      * My Doc Comment for A::privf
      */
-    private function privf() {}
+    private function privf() :mixed{}
 
     /** My Doc Comment for A::protStatf */
-    protected static function protStatf() {}
+    protected static function protStatf() :mixed{}
 
     /**
 
      * My Doc Comment for A::finalStatPubf
      */
-	final static public function finalStatPubf() {}
+	final static public function finalStatPubf() :mixed{}
 	
 }
 
 
 class B extends A {
     /*** Not a doc comment */
-    function f() {}
+    function f() :mixed{}
 
     /** *
      * My Doc Comment for B::privf
@@ -36,7 +36,7 @@ class B extends A {
 
 
 
-    private function privf() {}
+    private function privf() :mixed{}
 
 
     /** My Doc Comment for B::protStatf 
@@ -45,13 +45,13 @@ class B extends A {
 
 
     */
-    protected static function protStatf() {}
+    protected static function protStatf() :mixed{}
 
 }
 <<__EntryPoint>>
 function main_entry(): void {
 
-  foreach (varray['A', 'B'] as $class) {
+  foreach (vec['A', 'B'] as $class) {
       $rc = new ReflectionClass($class);
       $rms = $rc->getMethods();
       foreach ($rms as $rm) {

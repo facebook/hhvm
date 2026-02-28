@@ -1,10 +1,10 @@
 <?hh
 
-async function block() {
+async function block() :Awaitable<mixed>{
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
 }
 
-async function foo() {
+async function foo() :Awaitable<mixed>{
   $awaitable = async {
     echo "waiting\n";
     await block();
@@ -18,6 +18,6 @@ async function foo() {
 
 
 <<__EntryPoint>>
-function main_immed_lambda1() {
+function main_immed_lambda1() :mixed{
 var_dump(HH\Asio\join(foo()));
 }

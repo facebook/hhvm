@@ -1,6 +1,6 @@
 <?hh
 class privateCtorOld {
-    private function privateCtorOld() {}
+    private function privateCtorOld() :mixed{}
 }
 <<__EntryPoint>> function main(): void {
 $reflectionClass = new ReflectionClass("privateCtorOld");

@@ -6,6 +6,6 @@
 // non-static method from a static context, the error message differs.
 
 <<__EntryPoint>>
-function main_dom_document_save_htm_l_error2() {
-try { (new DOMDocument())->saveHTML(true); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+function main_dom_document_save_htm_l_error2() :mixed{
+  (new DOMDocument())->saveHTML(true);
 }

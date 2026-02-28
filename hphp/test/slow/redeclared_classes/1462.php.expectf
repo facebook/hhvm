@@ -1,0 +1,20 @@
+first def made
+int(1)
+
+Warning: Method a::foo not marked dynamic in %s/redeclared_classes/1462.php on line 18
+int(1)
+int(1)
+int(1)
+int(1)
+string(6) "firstA"
+int(0)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+string(5) "base1"
+bool(true)
+bool(false)
+dict(0) {
+}

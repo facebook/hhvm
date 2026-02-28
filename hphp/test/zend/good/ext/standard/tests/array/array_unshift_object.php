@@ -13,7 +13,7 @@
 class SimpleClass
 {
   public $var1 = 1;
-  public function fun1() {
+  public function fun1() :mixed{
     return $var1;
   }
 }
@@ -27,14 +27,14 @@ class EmptyClass
 abstract class AbstractClass
 {
   protected $var2 = 5;
-  abstract function emptyFunction();
+  abstract function emptyFunction():mixed;
 }
 
 // class deriving the above abstract class
 class ChildClass extends AbstractClass
 {
   private $var3;
-  public function emptyFunction() {
+  public function emptyFunction() :mixed{
     echo "defined in child";
   }
 }
@@ -43,7 +43,7 @@ class ChildClass extends AbstractClass
 class FinalClass
 {
   private $var4;
-  final function finalMethod() {
+  final function finalMethod() :mixed{
     echo "This function can't be overloaded";
   }
 }
@@ -51,8 +51,8 @@ class FinalClass
 // class with static members
 class StaticClass
 {
-  static $var5 = 2;
-  public static function staticMethod() {
+  public static $var5 = 2;
+  public static function staticMethod() :mixed{
     echo "This is a static method";
   }
 }
@@ -60,10 +60,10 @@ class StaticClass
 echo "*** Testing array_unshift() : Passing object to \$var argument ***\n";
 
 // array to be passed to $array argument
-$array = darray['f' => "first", "s" => 'second', 0 => 1, 1 => 2.222];
+$array = dict['f' => "first", "s" => 'second', 0 => 1, 1 => 2.222];
 
 // array containing different types of objects as elements
-$vars = varray[
+$vars = vec[
   new SimpleClass(),
   new EmptyClass(),
   new ChildClass(),

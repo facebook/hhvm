@@ -1,1 +1,4 @@
-frob (function(): void)
+frob
+  INSERT frob()
+  function(): void
+SORT TEXT: none

@@ -3,7 +3,7 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 class Foo {
-  public static function bar(): ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): void)> {
+  public static function bar(): ExampleExpression<(function(): void)> {
     throw new Exception();
   }
 }

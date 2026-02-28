@@ -17,25 +17,14 @@
 #include "hphp/runtime/base/type-array.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/vanilla-dict-defs.h"
-#include "hphp/runtime/base/vanilla-dict.h"
-#include "hphp/runtime/base/vanilla-vec.h"
-#include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-qsort.h"
-#include "hphp/runtime/base/zend-string.h"
+#include "hphp/zend/zend-string.h"
 
-#include "hphp/runtime/ext/extension.h"
-
-#include <unicode/coll.h> // icu
 #include <vector>
 
 namespace HPHP {
@@ -781,25 +770,4 @@ int Array::SortNaturalCaseDescending(const Variant& v1, const Variant& v2,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Array::serde(BlobEncoder& encoder) const {
-  if (isNull()) {
-    encoder(make_tv<KindOfUninit>());
-    return;
-  }
-  encoder(make_array_like_tv(get()));
-}
-
-void Array::serde(BlobDecoder& decoder) {
-  TypedValue tv;
-  decoder(tv);
-  if (tv.m_type == KindOfUninit) {
-    m_arr.reset();
-    return;
-  }
-  assertx(tvIsArrayLike(tv));
-  assertx(tv.m_data.parr->isStatic());
-  m_arr = Ptr::attach(tv.m_data.parr);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 }

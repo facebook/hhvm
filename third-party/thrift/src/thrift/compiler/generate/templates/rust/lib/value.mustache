@@ -1,0 +1,184 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{#value:underlying_type}}{{!
+}}{{#if value:newtype?}}{{!
+    }}{{type:package}}::{{type:rust_name}}({{!
+        }}{{#value:underlying_type}}{{#type:typedef}}{{#if typedef:has_adapter?}}{{!
+        }}{{typedef:adapter_qualified}}::from_thrift({{!
+        }}{{/if typedef:has_adapter?}}{{/type:typedef}}{{/value:underlying_type}}{{!
+        }}{{#value:inner}}{{> lib/value}}{{/value:inner}}{{!
+        }}{{#value:underlying_type}}{{#type:typedef}}{{#if typedef:has_adapter?}}{{!
+        }}).expect("constant Thrift value should adapt without error"){{!
+        }}{{/if typedef:has_adapter?}}{{/type:typedef}}{{/value:underlying_type}}{{!
+    }}){{!
+}}{{/if value:newtype?}}{{!
+}}{{#if value:bool?}}{{value:bool_value}}{{/if value:bool?}}{{!
+}}{{#if value:integer?}}{{value:integer_value}}{{/if value:integer?}}{{!
+}}{{#if value:floatingPoint?}}{{value:floatingPointValue}}{{/if value:floatingPoint?}}{{!
+}}{{#if value:string?}}{{!
+    }}{{#if value:empty?}}::std::string::String::new(){{!
+    }}{{#else}}{{value:quoted}}.to_owned(){{/if value:empty?}}{{!
+}}{{/if value:string?}}{{!
+}}{{#if value:binary?}}{{!
+    }}{{#if value:empty?}}{{!
+        }}{{#if (not (string.empty? type:rust))}}<::{{type:rust}}>::new(){{!
+        }}{{#else}}::std::vec::Vec::new(){{/if (not (string.empty? type:rust))}}{{!
+    }}{{#else}}{{value:quoted}}.as_bytes().into(){{/if value:empty?}}{{!
+}}{{/if value:binary?}}{{!
+}}{{#if value:list?}}{{!
+    }}{{#if value:empty?}}::std::vec::Vec::new(){{/if value:empty?}}{{!
+    }}{{#if (not value:empty?)}}{{!
+        }}{
+            {{value:indent}}let mut list = ::std::vec::Vec::new();
+            {{#value:list_elements}}
+{{value:indent}}{
+    {{value:indent}}#[inline(never)]
+    {{value:indent}}fn __do_push(list: &mut {{!
+        }}{{#if type:has_adapter?}}{{type:adapter_qualified}}::StandardType{{/if type:has_adapter?}}{{!
+        }}{{#if (not type:has_adapter?)}}{{>lib/type}}{{/if (not type:has_adapter?)}}{{!
+    }}) {
+        {{value:indent}}list.push({{> lib/value}});
+    {{value:indent}}}
+    {{value:indent}}__do_push(&mut list);
+{{value:indent}}}
+            {{/value:list_elements}}
+            {{value:indent}}list
+        {{value:indent}}}{{!
+    }}{{/if (not value:empty?)}}{{!
+}}{{/if value:list?}}{{!
+}}{{#if value:set?}}{{!
+    }}{{#if value:empty?}}{{!
+        }}{{#if (not (string.empty? type:rust))}}::{{type:rust}}{{!
+        }}{{#else}}::std::collections::BTreeSet{{/if (not (string.empty? type:rust))}}{{!
+        }}::new(){{!
+    }}{{#else}}{{!
+        }}{
+            {{value:indent}}let mut set = {{!
+                }}{{#if (not (string.empty? type:rust))}}::{{type:rust}}{{!
+                }}{{#else}}::std::collections::BTreeSet{{/if (not (string.empty? type:rust))}}{{!
+            }}::new();
+            {{#value:setMembers}}
+{{value:indent}}{
+    {{value:indent}}#[inline(never)]
+    {{value:indent}}fn __do_insert(set: &mut {{!
+        }}{{#if type:has_adapter?}}{{type:adapter_qualified}}::StandardType{{/if type:has_adapter?}}{{!
+        }}{{#if (not type:has_adapter?)}}{{>lib/type}}{{/if (not type:has_adapter?)}}{{!
+    }}) {
+        {{value:indent}}set.insert({{!
+            }}{{#if value:floatingPoint?}}{{!
+                }}::fbthrift::export::OrderedFloat({{> lib/value}}){{!
+            }}{{#else}}{{> lib/value}}{{/if value:floatingPoint?}}{{!
+        }});
+    {{value:indent}}}
+    {{value:indent}}__do_insert(&mut set);
+{{value:indent}}}
+            {{/value:setMembers}}
+            {{value:indent}}set
+        {{value:indent}}}{{!
+    }}{{/if value:empty?}}{{!
+}}{{/if value:set?}}{{!
+}}{{#if value:map?}}{{!
+    }}{{#if value:empty?}}{{!
+        }}{{#if (not (string.empty? type:rust))}}::{{type:rust}}{{!
+        }}{{#else}}::std::collections::BTreeMap{{/if (not (string.empty? type:rust))}}{{!
+        }}::new(){{!
+    }}{{#else}}{{!
+        }}{
+            {{value:indent}}let mut map = {{!
+                }}{{#if (not (string.empty? type:rust))}}::{{type:rust}}{{!
+                }}{{#else}}::std::collections::BTreeMap{{/if (not (string.empty? type:rust))}}{{!
+            }}::new();{{!
+            }}{{#value:mapEntries}}
+            {{value:indent}}{
+                {{value:indent}}#[inline(never)]
+                {{value:indent}}fn __do_insert(map: &mut {{!
+                    }}{{#if type:has_adapter?}}{{type:adapter_qualified}}::StandardType{{/if type:has_adapter?}}{{!
+                    }}{{#if (not type:has_adapter?)}}{{>lib/type}}{{/if (not type:has_adapter?)}}{{!
+                }}) {
+                    {{value:indent}}map.insert({{!
+                        }}{{#entry:key}}{{!
+                            }}{{#if value:floatingPoint?}}{{!
+                                }}::fbthrift::export::OrderedFloat({{> lib/value}}){{!
+                            }}{{#else}}{{> lib/value}}{{/if value:floatingPoint?}}{{!
+                        }}{{/entry:key}}, {{!
+                        }}{{#entry:value}}{{> lib/value}}{{/entry:value}}{{!
+                    }});
+                {{value:indent}}}
+                {{value:indent}}__do_insert(&mut map);
+            {{value:indent}}}{{!
+            }}{{/value:mapEntries}}
+            {{value:indent}}map
+        {{value:indent}}}{{!
+    }}{{/if value:empty?}}{{!
+}}{{/if value:map?}}{{!
+}}{{#if value:struct?}}{{!
+    }}{{> lib/type}} {{> lib/block}}{{!
+        }}{{#value:structFields}}
+            {{value:indent}}{{field:rust_name}}: {{!
+            }}{{#if field:has_adapter?}}{{field:adapter_qualified}}::from_thrift_default::<{{!
+                }}{{#value:underlying_type}}{{#if type:structured?}}{{!
+                    }}{{#if type:true_type.has_adapter?}}{{!
+                        }}{{type:true_type.package}}::unadapted::{{type:true_type.rust_name}}{{!
+                    }}{{#else}}{{!
+                        }}{{type:true_type.package}}::{{type:true_type.rust_name}}{{!
+                    }}{{/if type:true_type.has_adapter?}}{{!
+                }}{{/if type:structured?}}{{/value:underlying_type}}{{!
+            }}>({{/if field:has_adapter?}}{{!
+            }}{{#field:explicit_value}}{{!
+                }}{{> lib/fieldvalue}}{{!
+            }}{{/field:explicit_value}}{{!
+            }}{{^field:explicit_value}}{{!
+                }}{{#field:default}}{{!
+                    }}{{#if field:optional?}}{{!
+                        }}{{#if (has_compiler_option? "deprecated_optional_with_default_is_some")}}{{!
+                            }}{{> lib/fieldvalue}}{{!
+                        }}{{#else}}{{!
+                            }}::std::option::Option::None{{!
+                        }}{{/if (has_compiler_option? "deprecated_optional_with_default_is_some")}}{{!
+                    }}{{#else}}{{!
+                        }}{{> lib/fieldvalue}}{{!
+                    }}{{/if field:optional?}}{{!
+                }}{{/field:default}}{{!
+                }}{{^field:default}}{{!
+                    }}::std::default::Default::default(){{!
+                }}{{/field:default}}{{!
+            }}{{/field:explicit_value}}{{!
+            }}{{#if field:has_adapter?}}, {{field:id}}){{/if field:has_adapter?}}{{!
+            }},{{!
+        }}{{/value:structFields}}{{!
+        }}{{#if (not value:exhaustive?)}}
+            {{value:indent}}..::std::default::Default::default(){{!
+        }}{{/if (not value:exhaustive?)}}
+        {{value:indent}}}{{!
+}}{{/if value:struct?}}{{!
+}}{{#if value:union?}}{{!
+    }}{{#value:unionVariant}}{{!
+        }}{{> lib/type}}::{{value:unionVariant}}({{!
+            }}{{#value:unionValue}}{{> lib/value}}{{/value:unionValue}}{{!
+        }}){{!
+    }}{{/value:unionVariant}}{{!
+    }}{{^value:unionVariant}}{{!
+        }}{{> lib/type}}::default(){{!
+    }}{{/value:unionVariant}}{{!
+}}{{/if value:union?}}{{!
+}}{{#if value:enum?}}{{!
+    }}{{#value:local_type}}{{type:package}}::{{type:rust_name}}{{/value:local_type}}{{!
+    }}{{#value:enumVariant}}::{{value:enumVariant}}{{/value:enumVariant}}{{!
+    }}{{^value:enumVariant}}({{value:integer_value}}){{/value:enumVariant}}{{!
+}}{{/if value:enum?}}{{!
+}}{{/value:underlying_type}}{{!
+}}

@@ -18,8 +18,8 @@ var_dump(gmp_strval(gmp_fact($n)));
 
 try { var_dump(gmp_fact()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(gmp_fact(1,1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-var_dump(gmp_fact(varray[]));
-var_dump(gmp_strval(gmp_fact(varray[])));
+var_dump(gmp_fact(vec[]));
+var_dump(gmp_strval(gmp_fact(vec[])));
 
 echo "Done\n";
 }

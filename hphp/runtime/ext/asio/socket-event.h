@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_ASIO_SOCKET_EVENT_H
-#define incl_HPHP_ASIO_SOCKET_EVENT_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include <folly/io/async/EventBase.h>
@@ -11,8 +10,8 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-typedef folly::EventHandler AsioEventHandler;
-typedef folly::AsyncTimeout AsioTimeoutHandler;
+using AsioEventHandler = folly::EventHandler;
+using AsioTimeoutHandler = folly::AsyncTimeout;
 
 struct AsioEventBase : folly::EventBase {
   AsioEventBase();
@@ -26,5 +25,3 @@ extern folly::Singleton<AsioEventBase> s_asio_event_base;
 
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
-
-#endif // incl_HPHP_ASIO_SOCKET_EVENT_H

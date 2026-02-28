@@ -1,39 +1,38 @@
-//// decls.php
+//// module_A.php
 <?hh
-
-<<file:__EnableUnstableFeatures('modules')>>
-
-module A {}
-module B {}
+new module A {}
+//// module_B.php
+<?hh
+new module B {}
 
 //// A.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Internal>>
-type Foo = int;
+module A;
 
-<<__Internal>>
-class Crosby {}
+internal type Foo = int;
+
+internal class Crosby {}
 
 //// also-A.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+
+module A;
 
 function foobar<T>(T $t): void where T = Foo {
   $t as Foo;
   foobar($t);
 }
 
-<<__Internal>>
-function quxx<T as Foo>(T $_): void {}
+internal function quxx<T as Foo>(T $_): void {}
 
 //// not-A.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module('B')>>
+
+module B;
 
 function baz<T>(T $t): void where T = Foo {
   $t as Foo;

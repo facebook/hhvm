@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1596() {
+function main_1596() :mixed{
 echo strlen("he\0llo");
 echo php_uname();
 echo md5('1f3870be274f6c49b3e31a0c6728957f');

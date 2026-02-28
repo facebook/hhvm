@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class A implements HH\TypeParameterAttribute {
   public function __construct() {}

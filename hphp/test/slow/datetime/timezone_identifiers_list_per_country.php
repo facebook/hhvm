@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_timezone_identifiers_list_per_country() {
-$country_codes = varray[
+function main_timezone_identifiers_list_per_country() :mixed{
+$country_codes = vec[
   'US',
   'PT',
   'GR',

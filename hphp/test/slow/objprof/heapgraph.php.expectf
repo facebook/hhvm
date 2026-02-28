@@ -1,4 +1,4 @@
-Warning: json_encode(): type is unsupported, encoded as false in %s/heapgraph.php on line 14
+Warning: json_encode(): type is unsupported, encoded as false in %s/heapgraph.php on line %d
 Capturing two snapshots...
 resource(%d) of type (HeapGraphContext)
 resource(%d) of type (HeapGraphContext)
@@ -29,6 +29,17 @@ ChildWithClosureMember
 ParentWithClosureTarget
 RootClass
 
+Traversing nodes for static memoizations:
+Static:  ParentWithMemoizeAndMemoizeLSB::doMemoizedLSBWork
+Static:  ParentWithMemoizeAndMemoizeLSB::doMemoizedLSBWorkWithParam
+Static:  ParentWithMemoizeAndMemoizeLSB::doStaticMemoizedWorkWithParam
+Static:  RootClass::getInstance
+
+Traversing nodes for instance memoizations:
+Instance: ParentWithMemoizeAndMemoizeLSB::doInstanceMemoizedWorkWithParam
+Instance: ParentWithMemoizeAndMemoizeLSB::doInstanceMemoizedWorkWithParam2
+Instance: SomeChildOfMemoize::doInstanceMemoizedWork
+
 Traversing edges for first capture:
 Property:child
 Property:children
@@ -37,16 +48,24 @@ Property:somestring
 
 Traversing roots for first capture:
 
+Traversing root properties:
+RootClass::myStaticInstance
+
 Getting in edges of root class:
 %A
 
 Getting out edges of root class:
+Property:childWithMemoize
+Property:childWithMemoize2
 Property:children
 
 Doing DFS from root class on nodes:
 ChildWithClosureMember
 Closure$ParentWithClosureTarget::createClosure
+InstanceCachedNode1
+InstanceCachedNode2
 ParentWithClosureTarget
 RootClass
+SomeChildOfMemoize
 
 Doing DFS from root class on nodes (skipping root):

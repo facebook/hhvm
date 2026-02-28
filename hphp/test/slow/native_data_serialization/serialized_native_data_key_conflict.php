@@ -10,7 +10,7 @@ class native {
 
 
 <<__EntryPoint>>
-function main_serialized_native_data_key_conflict() {
+function main_serialized_native_data_key_conflict() :mixed{
 $serialized = serialize(new native());
 var_dump(json_encode($serialized));
 var_dump(unserialize($serialized));

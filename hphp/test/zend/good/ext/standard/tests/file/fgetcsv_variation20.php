@@ -11,10 +11,10 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : with default enclosure, line without any csv fields ***\n";
 
-$filename = __SystemLib\hphp_test_tmppath('fgetcsv_variation20.tmp');
-@unlink($filename);
+$filename = sys_get_temp_dir().'/'.'fgetcsv_variation20.tmp';
+unlink($filename);
 
-$file_modes = varray ["r","rb", "rt", "r+", "r+b", "r+t",
+$file_modes = vec["r","rb", "rt", "r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
                      "x+", "x+b", "x+t"];

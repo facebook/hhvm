@@ -1,6 +1,6 @@
 <?hh
 
-function evil($x) {
+function evil($x) :mixed{
   ZendGoodExtPcreTests007::$txt[3] = "\xFF";
   var_dump($x);
   return $x[0];

@@ -8,23 +8,17 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/curl-tls-workarounds.h"
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/stack-logger.h"
-#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/util/configs/http.h"
+#include "hphp/util/configs/php7.h"
+
 #include <curl/curl.h>
 #include <curl/easy.h>
-#include <curl/multi.h>
 #include <folly/portability/OpenSSL.h>
-
-#if (LIBCURL_VERSION_NUM >= 0x074600) && (OPENSSL_VERSION_NUMBER >= 0x10101000L)
-#define CERT_CACHE_SUPPORTED 1
-#else
-#undef CERT_CACHE_SUPPORTED
-#endif
 
 #define PHP_CURL_STDOUT 0
 #define PHP_CURL_FILE   1
@@ -153,9 +147,9 @@ void CurlResource::setDefaultOptions() {
                    CurlResource::ssl_ctx_callback);
 
   curl_easy_setopt(m_cp, CURLOPT_TIMEOUT,
-                   minTimeout(RuntimeOption::HttpDefaultTimeout));
+                   minTimeout(Cfg::Http::DefaultTimeout));
   curl_easy_setopt(m_cp, CURLOPT_CONNECTTIMEOUT,
-                   minTimeout(RuntimeOption::HttpDefaultTimeout));
+                   minTimeout(Cfg::Http::DefaultTimeout));
   reseat();
 }
 
@@ -171,17 +165,18 @@ void CurlResource::prepare() {
     curl_easy_setopt(m_cp, CURLOPT_CAINFO, NULL);
     curl_easy_setopt(m_cp, CURLOPT_PROXY_CAINFO, NULL);
   }
+
+  if (m_emptyPost) {
+    // As per curl docs, an empty post must set POSTFIELDSIZE to be 0 or
+    // the reader function will be called
+    curl_easy_setopt(m_cp, CURLOPT_POSTFIELDSIZE, 0);
+  }
 }
 
 Variant CurlResource::execute() {
   assertx(!m_exception);
   if (m_cp == nullptr) {
     return false;
-  }
-  if (m_emptyPost) {
-    // As per curl docs, an empty post must set POSTFIELDSIZE to be 0 or
-    // the reader function will be called
-    curl_easy_setopt(m_cp, CURLOPT_POSTFIELDSIZE, 0);
   }
   m_write.buf.clear();
   m_write.content.clear();
@@ -533,6 +528,29 @@ bool CurlResource::isLongOption(long option) {
     case CURLOPT_UPKEEP_INTERVAL_MS:
     case CURLOPT_UPLOAD_BUFFERSIZE:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x074000 /* Available since 7.64.0 */
+    case CURLOPT_HTTP09_ALLOWED:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074001 /* Available since 7.64.1 */
+    case CURLOPT_ALTSVC_CTRL:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074100 /* Available since 7.65.0 */
+    case CURLOPT_MAXAGE_CONN:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074a00 /* Available since 7.74.0 */
+    case CURLOPT_HSTS_CTRL:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
+    case CURLOPT_DOH_SSL_VERIFYHOST:
+    case CURLOPT_DOH_SSL_VERIFYPEER:
+    case CURLOPT_DOH_SSL_VERIFYSTATUS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+    case CURLOPT_MAXLIFETIME_CONN:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x075100 /* Available since 7.81.0 */
+    case CURLOPT_MIME_OPTIONS:
+#endif
 #if CURLOPT_MUTE != 0
     case CURLOPT_MUTE:
 #endif
@@ -608,7 +626,6 @@ bool CurlResource::isStringOption(long option) {
     case CURLOPT_EGDSOCKET:
     case CURLOPT_INTERFACE:
     case CURLOPT_PROXY:
-    case CURLOPT_PROXYUSERPWD:
     case CURLOPT_REFERER:
     case CURLOPT_SSLCERTTYPE:
     case CURLOPT_SSLENGINE:
@@ -618,7 +635,6 @@ bool CurlResource::isStringOption(long option) {
     case CURLOPT_SSLKEYTYPE:
     case CURLOPT_SSL_CIPHER_LIST:
     case CURLOPT_USERAGENT:
-    case CURLOPT_USERPWD:
 #if LIBCURL_VERSION_NUM >= 0x070e01 /* Available since 7.14.1 */
     case CURLOPT_COOKIELIST:
 #endif
@@ -692,6 +708,24 @@ bool CurlResource::isStringOption(long option) {
 #if LIBCURL_VERSION_NUM >= 0x073e00 /* Available since 7.62.0 */
     case CURLOPT_DOH_URL:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x074001 /* Available since 7.64.1 */
+    case CURLOPT_ALTSVC:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0 */
+    case CURLOPT_SASL_AUTHZID:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074900 /* Available since 7.73.0 */
+    case CURLOPT_SSL_EC_CURVES:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074a00 /* Available since 7.74.0 */
+    case CURLOPT_HSTS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074b00 /* Available since 7.75.0 */
+    case CURLOPT_AWS_SIGV4:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+    case CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256:
+#endif
       return true;
     default:
       return isStringFilePathOption(option);
@@ -734,7 +768,9 @@ bool CurlResource::isNullableStringOption(long option) {
   switch (option) {
     case CURLOPT_CUSTOMREQUEST:
     case CURLOPT_FTPPORT:
+    case CURLOPT_PROXYUSERPWD:
     case CURLOPT_RANGE:
+    case CURLOPT_USERPWD:
 #if LIBCURL_VERSION_NUM >= 0x070d00 /* Available since 7.13.0 */
     case CURLOPT_FTP_ACCOUNT:
 #endif
@@ -789,18 +825,24 @@ bool CurlResource::setNullableStringOption(long option, const Variant& value) {
 }
 
 bool CurlResource::isBlobOption(long option) {
-#if LIBCURL_VERSION_NUM >= 0x074700 /* Available since 7.71.0 */
   switch (option) {
-  case CURLOPT_SSLCERT_BLOB:
-  case CURLOPT_SSLKEY_BLOB:
-  case CURLOPT_PROXY_SSLCERT_BLOB:
-  case CURLOPT_PROXY_SSLKEY_BLOB:
-  case CURLOPT_ISSUERCERT_BLOB:
-  case CURLOPT_PROXY_ISSUERCERT_BLOB:
-    return true;
-  }
+#if LIBCURL_VERSION_NUM >= 0x074700 /* Available since 7.71.0 */
+    case CURLOPT_SSLCERT_BLOB:
+    case CURLOPT_SSLKEY_BLOB:
+    case CURLOPT_PROXY_SSLCERT_BLOB:
+    case CURLOPT_PROXY_SSLKEY_BLOB:
+    case CURLOPT_ISSUERCERT_BLOB:
+    case CURLOPT_PROXY_ISSUERCERT_BLOB:
+      return true;
 #endif
-  return false;
+#if LIBCURL_VERSION_NUM >= 0x074d00 /* Available since 7.77.0 */
+    case CURLOPT_CAINFO_BLOB:
+    case CURLOPT_PROXY_CAINFO_BLOB:
+      return true;
+#endif
+    default:
+      return false;
+  }
 }
 
 bool CurlResource::setBlobOption(long option, const String& value) {
@@ -847,7 +889,7 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
     String key = iter.first().toString();
     Variant var_val = iter.second();
     if (UNLIKELY(var_val.isObject()
-        && var_val.toObject()->instanceof(SystemLib::s_CURLFileClass))) {
+        && var_val.toObject()->instanceof(SystemLib::getCURLFileClass()))) {
       Object val = var_val.toObject();
 
       String name = val->o_get(s_name).toString();
@@ -870,7 +912,7 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
       String val = var_val.toString();
       auto postval = val.data();
 
-      if (!RuntimeOption::PHP7_DisallowUnsafeCurlUploads &&
+      if (!Cfg::PHP7::DisallowUnsafeCurlUploads &&
           !m_safeUpload &&
           *postval == '@' &&
           strlen(postval) == val.size()) {
@@ -1101,7 +1143,7 @@ bool CurlResource::setNonCurlOption(long option, const Variant& value) {
       }
       return false;
     case CURLOPT_SAFE_UPLOAD:
-      if (RuntimeOption::PHP7_DisallowUnsafeCurlUploads &&
+      if (Cfg::PHP7::DisallowUnsafeCurlUploads &&
           value.toInt64() == 0) {
         raise_warning(
           "curl_setopt(): Disabling safe uploads is no longer supported"
@@ -1182,7 +1224,7 @@ size_t CurlResource::curl_read(char *data,
         };
         Variant ret = vm_call_user_func(
           t->callback,
-          make_vec_array(Resource(ch), Resource(t->fp), data_size));
+          make_vec_array(OptResource(ch), OptResource(t->fp), data_size));
         if (ret.isString()) {
           String sret = ret.toString();
           length = data_size < sret.size() ? data_size : sret.size();
@@ -1227,7 +1269,7 @@ size_t CurlResource::curl_write(char *data,
         };
         Variant ret = vm_call_user_func(
           t->callback,
-          make_vec_array(Resource(ch), String(data, length, CopyString)));
+          make_vec_array(OptResource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
         break;
       }
@@ -1268,7 +1310,7 @@ size_t CurlResource::curl_write_header(char *data,
         };
         Variant ret = vm_call_user_func(
           t->callback,
-          make_vec_array(Resource(ch), String(data, length, CopyString)));
+          make_vec_array(OptResource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
         break;
       }
@@ -1304,7 +1346,7 @@ int CurlResource::curl_progress(void* p,
   }
 
   VecInit pai(5);
-  pai.append(Resource(curl));
+  pai.append(OptResource(curl));
   pai.append(dltotal);
   pai.append(dlnow);
   pai.append(ultotal);
@@ -1325,12 +1367,11 @@ int CurlResource::curl_progress(void* p,
 }
 
 namespace {
-hphp_fast_map<String, X509_STORE*, hphp_string_hash, hphp_string_same> s_certCache;
+hphp_fast_string_map<X509_STORE*> s_certCache;
 folly::SharedMutex s_mutex;
 }
 
 bool CurlResource::useCertCache() const {
-#ifdef CERT_CACHE_SUPPORTED
   auto const isNonEmpty = [&](int64_t option) {
     if (!m_opts.exists(option)) return false;
     Variant untyped_value = m_opts[option];
@@ -1351,13 +1392,9 @@ bool CurlResource::useCertCache() const {
   }
 
   return true;
-#else
-  return false;
-#endif
 }
 
 String CurlResource::cainfo(bool proxy) const {
-#ifdef CERT_CACHE_SUPPORTED
   auto const option = proxy ? CURLOPT_PROXY_CAINFO : CURLOPT_CAINFO;
 
   static auto const defaultCainfoData = [&] () -> StringData* {
@@ -1376,9 +1413,6 @@ String CurlResource::cainfo(bool proxy) const {
   if (string_value.empty()) return defaultCainfo;
 
   return string_value;
-#else
-  return String{};
-#endif
 }
 
 CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
@@ -1398,72 +1432,73 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
     return CURLE_FAILED_INIT;
   }
 
-#ifdef CERT_CACHE_SUPPORTED
   // Load the CA from the cache.
   if (cp->useCertCache()) {
-    auto const cainfo = cp->cainfo(false);
-    auto const store = [&] () -> X509_STORE* {
-      {
-        folly::SharedMutex::ReadHolder lock(s_mutex);
+    auto const cainfo = cp->cainfo(false).toCppString();
+    if (!cainfo.empty()) {
+      auto const store = [&] () -> X509_STORE* {
+        {
+          std::shared_lock lock(s_mutex);
+          auto const iter = s_certCache.find(cainfo);
+          if (iter != s_certCache.end()) return iter->second;
+        }
+
+        STACK_OF(X509_INFO) *stack;
+        BIO *in;
+
+        in = BIO_new_file(cainfo.data(), "r");
+        if (!in) return nullptr;
+        stack = PEM_X509_INFO_read_bio(in, nullptr, nullptr, (void*)"");
+        BIO_free(in);
+        if (!stack) return nullptr;
+
+        auto const store = X509_STORE_new();
+        if (!store) return nullptr;
+        X509_STORE_set_flags(store, X509_V_FLAG_TRUSTED_FIRST);
+        X509_STORE_set_flags(store, X509_V_FLAG_PARTIAL_CHAIN);
+
+        unsigned count = 0;
+        for (int i = 0; i < sk_X509_INFO_num(stack); i++) {
+          X509_INFO* info;
+          info = sk_X509_INFO_value(stack, i);
+          if (info->x509) {
+            if (!X509_STORE_add_cert(store, info->x509)) {
+              X509_STORE_free(store);
+              sk_X509_INFO_pop_free(stack, X509_INFO_free);
+              return nullptr;
+            }
+            count++;
+          }
+          if (info->crl) {
+            if (!X509_STORE_add_crl(store, info->crl)) {
+              X509_STORE_free(store);
+              sk_X509_INFO_pop_free(stack, X509_INFO_free);
+              return nullptr;
+            }
+            count++;
+          }
+        }
+        sk_X509_INFO_pop_free(stack, X509_INFO_free);
+        if (count == 0) {
+          X509_STORE_free(store);
+          return nullptr;
+        }
+
+        std::unique_lock lock(s_mutex);
         auto const iter = s_certCache.find(cainfo);
-        if (iter != s_certCache.end()) return iter->second;
-      }
-
-      STACK_OF(X509_INFO) *stack;
-      BIO *in;
-
-      in = BIO_new_file(cainfo.data(), "r");
-      if (!in) return nullptr;
-      stack = PEM_X509_INFO_read_bio(in, nullptr, nullptr, (void*)"");
-      BIO_free(in);
-      if (!stack) return nullptr;
-
-      auto const store = X509_STORE_new();
-      if (!store) return nullptr;
-      X509_STORE_set_flags(store, X509_V_FLAG_TRUSTED_FIRST);
-      X509_STORE_set_flags(store, X509_V_FLAG_PARTIAL_CHAIN);
-
-      unsigned count = 0;
-      for (int i = 0; i < sk_X509_INFO_num(stack); i++) {
-        X509_INFO* info;
-        info = sk_X509_INFO_value(stack, i);
-        if (info->x509) {
-          if (!X509_STORE_add_cert(store, info->x509)) {
-            X509_STORE_free(store);
-            sk_X509_INFO_pop_free(stack, X509_INFO_free);
-            return nullptr;
-          }
-          count++;
+        if (iter != s_certCache.end()) {
+          // Lost the race to parse & insert the cached item.
+          X509_STORE_free(store);
+          return iter->second;
+        } else {
+          s_certCache.emplace(cainfo, store);
+          return store;
         }
-        if (info->crl) {
-          if (!X509_STORE_add_crl(store, info->crl)) {
-            X509_STORE_free(store);
-            sk_X509_INFO_pop_free(stack, X509_INFO_free);
-            return nullptr;
-          }
-          count++;
-        }
-      }
-      sk_X509_INFO_pop_free(stack, X509_INFO_free);
-      if (count == 0) {
-        X509_STORE_free(store);
-        return nullptr;
-      }
-
-      folly::SharedMutex::WriteHolder lock(s_mutex);
-      auto const iter = s_certCache.find(cainfo);
-      if (iter != s_certCache.end()) {
-        X509_STORE_free(store);
-        return iter->second;
-      } else {
-        s_certCache.emplace(cainfo, store);
-        return store;
-      }
-    }();
-    if (!store) return CURLE_FAILED_INIT;
-    SSL_CTX_set1_cert_store(ctx, store);
+      }();
+      if (!store) return CURLE_FAILED_INIT;
+      SSL_CTX_set1_cert_store(ctx, store);
+    }
   }
-#endif
 
   // Override cipher specs if necessary.
   if (cp->m_opts.exists(int64_t(CURLOPT_FB_TLS_CIPHER_SPEC))) {

@@ -2,8 +2,8 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Ref { public $v = 0; }
-function byref(inout $x) { $x->v = 42; }
-function build() {
+function byref(inout $x) :mixed{ $x->v = 42; }
+function build() :mixed{
   $d = dict[];
   $k = __hhvm_intrinsics\launder_value('key');
   while (__hhvm_intrinsics\launder_value(false)) {
@@ -15,6 +15,6 @@ function build() {
 
 
 <<__EntryPoint>>
-function main_insert_assertions_unreachable() {
+function main_insert_assertions_unreachable() :mixed{
 var_dump(build());
 }

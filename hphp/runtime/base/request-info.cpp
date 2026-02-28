@@ -30,10 +30,8 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/perf-mem-event.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/server/cli-server.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/ext/process/ext_process.h"
 
@@ -58,6 +56,8 @@ std::atomic<int> s_pendingOOMs{0};
 std::atomic_size_t
 RequestInfo::s_OOMKillThreshold{std::numeric_limits<int64_t>::max()};
 
+thread_local size_t RequestInfo::s_stackLimitWithSlack;
+
 RDS_LOCAL_NO_CHECK(RequestInfo, RequestInfo::s_requestInfo);
 
 RequestInfo::RequestInfo() {
@@ -68,10 +68,10 @@ RequestInfo::~RequestInfo() {
   s_request_infos.erase(this);
 }
 
-void RequestInfo::init() {
+void RequestInfo::threadInit() {
+  s_stackLimitWithSlack = s_stackLimit + StackSlack;
+  assertx(m_id.unallocated());
   m_reqInjectionData.threadInit();
-  onSessionInit();
-  // TODO(20427335): Get rid of the illogical onSessionInit() call above.
   Lock lock(s_request_info_mutex);
   s_request_infos.insert(this);
 }
@@ -115,24 +115,33 @@ int RequestInfo::SetPendingGCForAllOnRequest() {
 }
 
 void RequestInfo::InvokeOOMKiller(int maxToKill) {
-  auto pendingOOMs = s_pendingOOMs.load(std::memory_order_relaxed);
+  auto pendingOOMs = s_pendingOOMs.load(std::memory_order_acquire);
   while (!s_pendingOOMs.compare_exchange_weak(pendingOOMs,
                                               std::max(pendingOOMs, maxToKill),
-                                              std::memory_order_relaxed,
-                                              std::memory_order_relaxed));
+                                              std::memory_order_acq_rel,
+                                              std::memory_order_acquire));
   ExecutePerRequest(
     [] (RequestInfo* t) {
       t->m_reqInjectionData.setHostOOMFlag();
     }
   );
-  Logger::Error("Invoking request-level OOM killer");
+  Logger::FError("Invoking OOM killer on requests using more than {} bytes, "
+                 "current RSS = {}MB",
+                 OOMKillThreshold(), Process::GetMemUsageMb());
   static auto OOMKillerInvokeCounter = ServiceData::createTimeSeries(
     "hhvm_oom_killer_invoke", {ServiceData::StatsType::COUNT}
   );
   OOMKillerInvokeCounter->addValue(1);
 }
 
-void RequestInfo::onSessionInit() {
+void RequestInfo::onSessionInit(RequestId id, RequestId root_req_id) {
+  assertx(!id.unallocated());
+  assertx(m_id.unallocated());
+  m_id = id;
+  // If the root_req_id is not set, it means the current request is the
+  // first request in the session. In this case, we set the root_req_id to
+  // the current request id.
+  m_root_req_id = root_req_id.unallocated() ? id : root_req_id;
   m_reqInjectionData.onSessionInit();
   m_coverage.onSessionInit();
 }
@@ -150,6 +159,9 @@ void RequestInfo::setPendingException(Exception* e) {
 }
 
 void RequestInfo::onSessionExit() {
+  assertx(!m_id.unallocated());
+  m_id = RequestId();
+
   // Clear any timeout handlers to they don't fire when the request has already
   // been destroyed.
   m_reqInjectionData.setTimeout(0);
@@ -174,8 +186,6 @@ void RequestInfo::onSessionExit() {
 //////////////////////////////////////////////////////////////////////
 
 void raise_infinite_recursion_error() {
-  // Reset profiler otherwise it might recurse further causing segfault.
-  RI().m_profiler = nullptr;
   raise_error("infinite recursion detected");
 }
 
@@ -185,11 +195,14 @@ NEVER_INLINE void* stack_top_ptr_conservative() {
 }
 
 static Exception* generate_request_timeout_exception(c_WaitableWaitHandle* wh) {
-  auto exceptionMsg = folly::sformat(
-    !RuntimeOption::ServerExecutionMode() || is_cli_server_mode()
-      ? "Maximum execution time of {} seconds exceeded"
-      : "entire web request took longer than {} seconds and timed out",
-    RID().getTimeout());
+  auto timeout = RID().getTimeout();
+  auto exceptionMsg = is_any_cli_mode()
+    ? folly::sformat(
+        "Maximum execution time of {} seconds exceeded",
+        timeout)
+    : folly::sformat(
+        "entire web request took longer than {} seconds and timed out",
+        timeout);
   auto exceptionStack = createBacktrace(BacktraceArgs()
                                         .fromWaitHandle(wh)
                                         .withSelf()
@@ -215,13 +228,17 @@ static Exception* generate_request_cpu_timeout_exception(
 }
 
 static Exception* generate_memory_exceeded_exception(c_WaitableWaitHandle* wh) {
+  auto exceptionMsg = folly::sformat(
+    "request has exceeded memory limit {} of {} used",
+    tl_heap->getStatsCopy().usage(),
+    RID().getMemoryLimitNumeric());
+
   auto exceptionStack = createBacktrace(BacktraceArgs()
                                         .fromWaitHandle(wh)
                                         .withSelf()
                                         .withThis()
                                         .withMetadata());
-  return new RequestMemoryExceededException(
-    "request has exceeded memory limit", exceptionStack);
+  return new RequestMemoryExceededException(exceptionMsg, exceptionStack);
 }
 
 static Exception* generate_cli_client_terminated_exception(
@@ -255,17 +272,18 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
   auto& info = RI();
   auto& p = info.m_reqInjectionData;
 
-  auto flags = fetchAndClearSurpriseFlags() & mask;
+  auto flags = stackLimitAndSurprise().fetchFlags() & mask;
   auto const debugging = p.getDebuggerAttached();
 
   // Start with any pending exception that might be on the request.
+  stackLimitAndSurprise().clearFlag(PendingExceptionFlag);
   auto pendingException = info.m_pendingException;
   info.m_pendingException = nullptr;
 
   if (auto cbFlags =
-      flags & (XenonSignalFlag | MemThresholdFlag | IntervalTimerFlag)) {
+      flags & (MemThresholdFlag | IntervalTimerFlag)) {
     if (!callbacksOk()) {
-      setSurpriseFlag(static_cast<SurpriseFlag>(cbFlags));
+      stackLimitAndSurprise().setFlag(static_cast<SurpriseFlag>(cbFlags));
       flags -= cbFlags;
     }
   }
@@ -278,7 +296,7 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
       if (p.checkTimeoutKind(TimeoutTime)) {
         p.setCPUTimeout(0);  // Stop CPU timer so we won't time out twice.
         if (pendingException) {
-          setSurpriseFlag(TimedOutFlag);
+          stackLimitAndSurprise().setFlag(TimedOutFlag);
         } else {
           pendingException = generate_request_timeout_exception(wh);
         }
@@ -287,14 +305,14 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
         // timeout.
         p.setTimeout(0);  // Stop wall timer so we won't time out twice.
         if (pendingException) {
-          setSurpriseFlag(TimedOutFlag);
+          stackLimitAndSurprise().setFlag(TimedOutFlag);
         } else {
           pendingException = generate_request_cpu_timeout_exception(wh);
         }
       } else if (p.checkTimeoutKind(TimeoutSoft)) {
         p.setUserTimeout(0); // Stop wall timer so we won't time out twice.
         if (!callbacksOk()) {
-          setSurpriseFlag(TimedOutFlag);
+          stackLimitAndSurprise().setFlag(TimedOutFlag);
         } else {
           flags += TimedOutFlag;
         }
@@ -303,17 +321,15 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
   }
 
   if (flags & MemExceededFlag) {
-    assertx(MemExceededFlag & StickyFlags);
     if (p.hostOOMFlag() && !pendingException) {
       // When the host is running out of memory, don't abort all requests.
       // Instead, only kill a request if it uses a nontrivial amount of memory.
       auto const currUsage = tl_heap->currentUsage();
       // Once a request has the OOM abort flag set, it is never unset through
       // the lifetime of the request.
-      // TODO(#T25950158): add flags to indicate whether a request is safe to
-      // retry, etc. to help the OOM killer to make better decisions.
-      if (currUsage > RequestInfo::OOMKillThreshold() && !p.shouldOOMAbort() &&
-          s_pendingOOMs.fetch_sub(1, std::memory_order_relaxed) > 0) {
+      if (currUsage > (RequestInfo::OOMKillThreshold() * info.m_OOMMultiplier) &&
+          !p.shouldOOMAbort() &&
+          s_pendingOOMs.fetch_sub(1, std::memory_order_acq_rel) > 0) {
         p.setRequestOOMAbort();
       }
       if (p.shouldOOMAbort()) {
@@ -333,17 +349,28 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
       pendingException = generate_memory_exceeded_exception(wh);
     }
   }
+  if (debugging && p.getDebuggerStepIntr()) {
+    // we'll disable specific flags to make sure Xenon (or other)
+    // re-entrant code doesn't interfere with debugging.
+    if (flags & XenonSignalFlag) {
+      stackLimitAndSurprise().clearFlag(XenonSignalFlag);
+    }
+    if (flags & HeapSamplingFlag) {
+      stackLimitAndSurprise().clearFlag(HeapSamplingFlag);
+    }
+    if (flags & IntervalTimerFlag) {
+      stackLimitAndSurprise().clearFlag(IntervalTimerFlag);
+    }
+  }
   if (flags & CLIClientTerminated) {
     if (pendingException) {
-      setSurpriseFlag(CLIClientTerminated);
+      stackLimitAndSurprise().setFlag(CLIClientTerminated);
     } else {
       pendingException = generate_cli_client_terminated_exception(wh);
     }
   }
   if (flags & PendingGCFlag) {
-    if (StickyFlags & PendingGCFlag) {
-      clearSurpriseFlag(PendingGCFlag);
-    }
+    stackLimitAndSurprise().clearFlag(PendingGCFlag);
     if (tl_heap->isGCEnabled()) {
       tl_heap->collect("surprise");
     } else {
@@ -351,13 +378,12 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
     }
   }
   if (flags & SignaledFlag) {
+    stackLimitAndSurprise().clearFlag(SignaledFlag);
     HHVM_FN(pcntl_signal_dispatch)();
   }
 
   if (flags & PendingPerfEventFlag) {
-    if (StickyFlags & PendingPerfEventFlag) {
-      clearSurpriseFlag(PendingPerfEventFlag);
-    }
+    stackLimitAndSurprise().clearFlag(PendingPerfEventFlag);
     perf_event_consume(record_perf_mem_event);
   }
 

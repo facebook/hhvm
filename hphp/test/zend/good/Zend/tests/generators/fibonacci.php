@@ -1,10 +1,10 @@
 <?hh
 
-function fib() {
-    list($a, $b) = varray[1, 1];
+function fib() :AsyncGenerator<mixed,mixed,void>{
+    list($a, $b) = vec[1, 1];
     while (true) {
         yield $b;
-        list($a, $b) = varray[$b, $a + $b];
+        list($a, $b) = vec[$b, $a + $b];
     }
 }
 <<__EntryPoint>> function main(): void {

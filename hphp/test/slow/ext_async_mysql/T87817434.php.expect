@@ -1,4 +1,4 @@
-Invalid argument. Expected MySSLContextProvider, received stdClass
-Invalid argument. Expected AsyncMysqlConnectionOptions, received stdClass
-Invalid argument. Expected AsyncMysqlConnectionOptions, received stdClass
-Invalid argument. Expected AsyncMysqlConnectionOptions, received stdClass
+Argument 7 to AsyncMysqlClient::connect() must be of type ?MySSLContextProvider, stdClass given
+Argument 7 passed to AsyncMysqlClient::connectAndQuery() must be an instance of AsyncMysqlConnectionOptions, stdClass given
+Argument 6 passed to AsyncMysqlClient::connectWithOpts() must be an instance of AsyncMysqlConnectionOptions, stdClass given
+Argument 6 passed to AsyncMysqlConnectionPool::connectWithOpts() must be an instance of AsyncMysqlConnectionOptions, stdClass given

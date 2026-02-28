@@ -5,7 +5,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing imagecolorallocate() : usage variations ***\n";
 
-$values = darray[
+$values = dict[
       //Decimal integera data
       "Decimal 256" => 256,
 

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function array_create_set_from_values<T as arraykey>(
@@ -11,7 +11,7 @@ function maybe_varray_map<Tv1, Tv2>(
   (function(Tv1): Tv2) $value_func,
   Traversable<Tv1> $traversable,
 ): varray<Tv2> {
-  return varray[];
+  return vec[];
 }
 
 class C {
@@ -24,7 +24,7 @@ function darray_map<Tk as arraykey, Tv1, Tv2>(
   (function(Tv1): Tv2) $value_func,
   KeyedTraversable<Tk, Tv1> $traversable,
 ): darray<Tk, Tv2> {
-  return darray[];
+  return dict[];
 }
 async function genProfileInfos(): Awaitable<Vector<C>> {
     return Vector{};
@@ -42,10 +42,10 @@ async function testit(Map<arraykey, Vector<C>> $m, varray<int> $user_ids):Awaita
       ),
     );
 
-  $result = darray[];
+  $result = dict[];
    foreach ($m as $id => $profiles) {
       $result[$id] = array_create_set_from_values(
-        darray(maybe_varray_map($x1 ==> $x1->getID(), $profiles)),
+        dict(maybe_varray_map($x1 ==> $x1->getID(), $profiles)),
       );
    }
 }

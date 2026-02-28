@@ -3,7 +3,7 @@
 
 
 <<__EntryPoint>>
-function main_839() {
+function main_839() :mixed{
 $obj = new stdClass();
 $x0 = Vector {
 1, $obj, "foo", $obj}

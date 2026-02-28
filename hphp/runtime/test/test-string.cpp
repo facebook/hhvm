@@ -17,7 +17,6 @@
 #include <gtest/gtest.h>
 
 #include "hphp/runtime/base/type-string.h"
-#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
 namespace HPHP {
@@ -48,13 +47,9 @@ TEST(String, Informational) {
   EXPECT_TRUE(String("test").size() == 4);
   EXPECT_TRUE(String("test").length() == 4);
   EXPECT_TRUE(!String("2test").isNumeric());
-  EXPECT_TRUE(!String("2test").isInteger());
   EXPECT_TRUE(!String("test").isNumeric());
-  EXPECT_TRUE(!String("test").isInteger());
   EXPECT_TRUE(String("23").isNumeric());
-  EXPECT_TRUE(String("23").isInteger());
   EXPECT_TRUE(String("23.3").isNumeric());
-  EXPECT_TRUE(!String("23.3").isInteger());
 }
 
 TEST(String, Operators) {
@@ -75,9 +70,7 @@ TEST(String, Manipulations) {
 TEST(String, Conversions) {
   EXPECT_TRUE(!String().toBoolean());
   EXPECT_TRUE(String("123").toBoolean());
-  EXPECT_TRUE(String("123").toByte() == 123);
-  EXPECT_TRUE(String("32767").toInt16() == 32767);
-  EXPECT_TRUE(String("1234567890").toInt32() == 1234567890);
+  EXPECT_TRUE((int)String("1234567890").toInt64() == 1234567890);
   EXPECT_TRUE(String("123456789012345678").toInt64() == 123456789012345678LL);
   EXPECT_TRUE(String("123.45").toDouble() == 123.45);
 }

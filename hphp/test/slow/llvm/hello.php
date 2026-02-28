@@ -1,11 +1,11 @@
 <?hh
 
-function main() {
+function main() :mixed{
   echo "yo\n";
 }
 
 
 <<__EntryPoint>>
-function main_hello() {
+function main_hello() :mixed{
 main();
 }

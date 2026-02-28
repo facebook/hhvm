@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_decode_gif() {
-$streams = darray[
+function main_decode_gif() :mixed{
+$streams = dict[
   'stream_rfc2397_003.gif' =>
     'data://image/gif;base64,R0lGODdhMAAwAPAAAAAAAP///ywAAAAAMAAw
      AAAC8IyPqcvt3wCcDkiLc7C0qwyGHhSWpjQu5yqmCYsapyuvUUlvONmOZtfzgFz

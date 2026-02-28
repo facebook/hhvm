@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_unicode_literal_fallback() {
+function main_unicode_literal_fallback() :mixed{
 echo "Ma\u00F1ana\n";
 }

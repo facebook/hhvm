@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test_flow():string {
   $i = 0;

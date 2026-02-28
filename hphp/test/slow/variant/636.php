@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_636() {
+function main_636() :mixed{
 $a = 1;
  $a = 'test';
  $b = 'zzz';

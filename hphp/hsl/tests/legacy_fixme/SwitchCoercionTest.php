@@ -363,11 +363,11 @@ class SwitchCoercionsTestDateTime implements DateTimeInterface {
   }
   public function diff(mixed $dt, mixed $absolute = null): void {}
   public function format(mixed $format): void {}
-  public function getTimezone(): void {}
-  public function getOffset(): void {}
+  public function getTimezone(): int { return 0; }
+  public function getOffset(): int { return 0; }
 }
 
-xhp class xhpclass {
+class :xhpclass {
  public function __construct(
     public darray<string,mixed> $a, // Attributes
     public varray<mixed> $c, // Children

@@ -22,15 +22,12 @@ module Status : sig
     | Initializing
         (** The IDE services are still initializing (e.g. loading saved-state or
         building indexes.) *)
-    | Processing_files of ClientIdeMessage.Processing_files.t
-        (** The IDE services are available, but are also in the middle of
-        processing files. *)
     | Rpc of Telemetry.t list
         (** The IDE services will be available once they're done handling
         one or more existing requests. The telemetry items are information
         about each received request currently being performed. *)
     | Ready  (** The IDE services are available. *)
-    | Stopped of ClientIdeMessage.stopped_reason
+    | Stopped of ClientIdeMessage.rich_error
         (** The IDE services are not available. *)
 end
 
@@ -61,10 +58,11 @@ val initialize_from_saved_state :
   root:Path.t ->
   naming_table_load_info:
     ClientIdeMessage.Initialize_from_saved_state.naming_table_load_info option ->
-  use_ranked_autocomplete:bool ->
+  warnings_saved_state_path:Path.t option ->
   config:(string * string) list ->
+  ignore_hh_version:bool ->
   open_files:Path.t list ->
-  (unit, ClientIdeMessage.stopped_reason) Lwt_result.t
+  (unit, ClientIdeMessage.rich_error) Lwt_result.t
 
 (** Pump the message loop for the IDE service. Exits once the IDE service has
 been [destroy]ed. *)
@@ -77,10 +75,37 @@ val stop :
   t ->
   tracking_id:string ->
   stop_reason:Stop_reason.t ->
-  exn:Exception.t option ->
+  e:Exception.t option ->
   unit Lwt.t
 
-(** Make an RPC call to the IDE service. *)
+(** This function does an rpc to the daemon: it pushes a message
+onto the daemon's stdin queue, then awaits until [serve] has stuck
+the stdout response from the daemon response onto our [response_emitter].
+The daemon updates [ref_unblocked_time], the time at which the
+daemon starting handling the rpc.
+
+Our only caller of this function is [ClientLsp.ide_rpc], which aims
+to uphold the invariant that it never makes two concurrent calls
+to this function. We support that invariant here by logging an
+invariant_violation_bug should it occur, but that's only to help
+our caller; this function supports being called while an existing
+rpc is outstanding, and guarantees that its results will be
+delivered in order.
+
+The progress callback will be invoked during this call to rpc, at times
+when the result of [get_status t] might have changed. It's designed
+so the caller of rpc can, in their callback, invoke get_status and display
+some kind of progress message.
+
+Note: it is not safe to Lwt.cancel this method, since we might end up
+with no one reading the response to the message we just pushed, leading
+to desync.
+
+Note: If we're in Stopped state (due to someone calling [stop]) then
+we'll refrain from sending the rpc. Stopped is the only state we enter
+due to our own volition; all other states are just a reflection
+of what state the daemon is in, and so it's fine for the daemon
+to respond as it see fits while in the other states. *)
 val rpc :
   t ->
   tracking_id:string ->

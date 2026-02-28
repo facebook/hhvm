@@ -1,0 +1,173 @@
+/*
+ *  Copyright (c) 2018-present, Facebook, Inc.
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
+
+#include <fizz/record/Extensions.h>
+#include <fizz/server/AeadCookieCipher.h>
+
+namespace fizz {
+namespace server {
+namespace detail {
+
+enum class CookieHasGroup : uint8_t {
+  No = 0,
+  Yes = 1,
+};
+
+enum class CookieHasEch : uint8_t {
+  No = 0,
+  Yes = 1,
+};
+
+inline Buf encodeCookie(const CookieState& state) {
+  auto buf = folly::IOBuf::create(100);
+  folly::io::Appender appender(buf.get(), 100);
+
+  Error err;
+  FIZZ_THROW_ON_ERROR(fizz::detail::write(err, state.version, appender), err);
+  FIZZ_THROW_ON_ERROR(fizz::detail::write(err, state.cipher, appender), err);
+
+  if (state.group) {
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::write(err, CookieHasGroup::Yes, appender), err);
+    FIZZ_THROW_ON_ERROR(fizz::detail::write(err, *state.group, appender), err);
+  } else {
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::write(err, CookieHasGroup::No, appender), err);
+  }
+
+  FIZZ_THROW_ON_ERROR(
+      fizz::detail::writeBuf<uint16_t>(err, state.chloHash, appender), err);
+  FIZZ_THROW_ON_ERROR(
+      fizz::detail::writeBuf<uint16_t>(err, state.appToken, appender), err);
+
+  if (state.echCipherSuite) {
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::write(err, CookieHasEch::Yes, appender), err);
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::write(err, *state.echCipherSuite, appender), err);
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::write(err, *state.echConfigId, appender), err);
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::writeBuf<uint16_t>(err, state.echEnc, appender), err);
+  } else {
+    FIZZ_THROW_ON_ERROR(
+        fizz::detail::write(err, CookieHasEch::No, appender), err);
+  }
+  return buf;
+}
+
+inline CookieState decodeCookie(Buf cookie) {
+  folly::io::Cursor cursor(cookie.get());
+
+  CookieState state;
+  size_t len;
+  Error err;
+  FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, state.version, cursor), err);
+  FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, state.cipher, cursor), err);
+
+  CookieHasGroup hasGroup;
+  FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, hasGroup, cursor), err);
+  if (hasGroup == CookieHasGroup::Yes) {
+    NamedGroup group;
+    FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, group, cursor), err);
+    state.group = group;
+  }
+
+  fizz::detail::readBuf<uint16_t>(state.chloHash, cursor);
+  fizz::detail::readBuf<uint16_t>(state.appToken, cursor);
+
+  CookieHasEch hasEch;
+  FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, hasEch, cursor), err);
+  if (hasEch == CookieHasEch::Yes) {
+    ech::HpkeSymmetricCipherSuite cs;
+    FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, cs, cursor), err);
+    state.echCipherSuite = std::move(cs);
+    uint8_t configId;
+    FIZZ_THROW_ON_ERROR(fizz::detail::read(len, err, configId, cursor), err);
+    state.echConfigId = configId;
+    fizz::detail::readBuf<uint16_t>(state.echEnc, cursor);
+  }
+  return state;
+}
+} // namespace detail
+
+std::variant<AppToken, StatelessHelloRetryRequest>
+AeadCookieCipher::getTokenOrRetry(Buf clientHello, Buf appToken) const {
+  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+  queue.append(std::move(clientHello));
+  ReadRecordLayer::ReadResult<Param> msg;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      PlaintextReadRecordLayer().readEvent(
+          msg, err, queue, Aead::AeadOptions()),
+      err);
+  if (!msg) {
+    throw std::runtime_error("no TLS message in initial");
+  }
+
+  auto chloPtr = msg->asClientHello();
+  if (!chloPtr) {
+    throw std::runtime_error("Msg isn't client hello");
+  }
+  auto chlo = std::move(*chloPtr);
+
+  folly::Optional<Cookie> cookie;
+  FIZZ_THROW_ON_ERROR(getExtension<Cookie>(cookie, err, chlo.extensions), err);
+  if (cookie) {
+    auto state = decrypt(std::move(cookie->cookie));
+    if (!state) {
+      throw std::runtime_error("cookie could not be decrypted");
+    }
+    AppToken token;
+    token.token = std::move(state->appToken);
+    return std::move(token);
+  } else {
+    StatelessHelloRetryRequest hrr;
+    hrr.data = getStatelessResponse(chlo, std::move(appToken));
+    return std::move(hrr);
+  }
+}
+
+folly::Optional<CookieState> AeadCookieCipher::decrypt(Buf cookie) const {
+  auto plaintext = tokenCipher_->decrypt(std::move(cookie));
+  if (plaintext) {
+    return detail::decodeCookie(std::move(*plaintext));
+  } else {
+    return folly::none;
+  }
+}
+
+Buf AeadCookieCipher::getStatelessResponse(
+    const ClientHello& chlo,
+    Buf appToken) const {
+  auto state = getCookieState(
+      *context_->getFactory(),
+      context_->getSupportedVersions(),
+      context_->getSupportedCiphers(),
+      context_->getSupportedGroups(),
+      chlo,
+      std::move(appToken));
+
+  auto encoded = detail::encodeCookie(state);
+  auto cookie = tokenCipher_->encrypt(std::move(encoded));
+  if (!cookie) {
+    throw std::runtime_error("could not encrypt cookie");
+  }
+
+  auto statelessMessage = getStatelessHelloRetryRequest(
+      state.version, state.cipher, state.group, std::move(*cookie));
+  Error err;
+  TLSContent content;
+  FIZZ_THROW_ON_ERROR(
+      PlaintextWriteRecordLayer().writeHandshake(
+          content, err, std::move(statelessMessage)),
+      err);
+  return std::move(content.data);
+}
+} // namespace server
+} // namespace fizz

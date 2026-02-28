@@ -16,7 +16,7 @@
 
 #include "hphp/util/perf-event.h"
 
-#if defined(__linux__) && defined(__x86_64__) && defined(FACEBOOK)
+#if defined(__linux__) && defined(__x86_64__) && defined(HHVM_FACEBOOK)
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/logger.h"
@@ -349,7 +349,7 @@ Optional<perf_event_handle> enable_event(const char* event_name,
   auto const pe = perf_event_handle { fd, meta };
 
   // Reset the event.  This seems to be present in most examples, but it's
-  // unclear if it's necessary or just good hygeine.  (It's possible that it's
+  // unclear if it's necessary or just good hygiene.  (It's possible that it's
   // necessary on successive opens.)
   if (ioctl(fd, PERF_EVENT_IOC_RESET, 0) < 0) {
     Logger::Warning("perf_event: failed to reset perf_event: %s",

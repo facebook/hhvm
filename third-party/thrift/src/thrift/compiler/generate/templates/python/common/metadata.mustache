@@ -1,0 +1,97 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/types" as m_types}}
+
+{{! Turn a type into a thrift metadata ThriftType struct }}
+{{#let export partial thrift_type |type| captures |m_types|}}
+  {{#pragma ignore-newlines}}
+  {{#if type.primitive?}}
+_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.
+{{#if type.bool?}}THRIFT_BOOL_TYPE
+{{#else if type.byte?}}THRIFT_BYTE_TYPE
+{{#else if type.i16?}}THRIFT_I16_TYPE
+{{#else if type.i32?}}THRIFT_I32_TYPE
+{{#else if type.i64?}}THRIFT_I64_TYPE
+{{#else if type.float?}}THRIFT_FLOAT_TYPE
+{{#else if type.double?}}THRIFT_DOUBLE_TYPE
+{{#else if type.string?}}THRIFT_STRING_TYPE
+{{#else if type.binary?}}THRIFT_BINARY_TYPE
+{{#else if type.void?}}THRIFT_VOID_TYPE
+{{/if type.bool?}}
+)
+
+  {{#else if type.structured?}}
+    {{#let structured = type.true_type}}
+_fbthrift_metadata.ThriftType(
+  {{#if type.union?}}
+t_union=_fbthrift_metadata.ThriftUnionType
+  {{#else}}
+t_struct=_fbthrift_metadata.ThriftStructType
+  {{/if type.union?}}
+(name="{{structured.program.name}}.{{#partial m_types.unadapted_name type=structured}}"))
+
+  {{#else if type.list?}}
+_fbthrift_metadata.ThriftType(t_list=_fbthrift_metadata.ThriftListType(
+valueType={{#partial thrift_type type=type.true_type.elem_type}}))
+
+  {{#else if type.set?}}
+_fbthrift_metadata.ThriftType(t_set=_fbthrift_metadata.ThriftSetType(
+valueType={{#partial thrift_type type=type.true_type.elem_type}}))
+
+  {{#else if type.map?}}
+_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(
+keyType={{#partial thrift_type type=type.true_type.key_type}},
+valueType={{#partial thrift_type type=type.true_type.val_type}}))
+
+  {{#else if type.enum?}}
+    {{#let enum = type.true_type}}
+_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType(
+name="{{enum.program.name}}.{{enum.name}}"))
+
+  {{/if type.primitive?}}
+{{/let partial}}
+
+{{#let export partial return_type |function| captures |thrift_type|}}
+  {{#pragma ignore-newlines}}
+  {{#if function.bidirectional_stream?}}
+_fbthrift_metadata.ThriftType(t_bidi=_fbthrift_metadata.ThriftBidiType(
+sinkElemType={{#partial thrift_type type=function.sink.elem_type}},
+streamElemType={{#partial thrift_type type=function.sink.elem_type}}
+    {{#if function.stream_has_first_response?}}
+,initialResponseType={{#partial thrift_type type=function.return_type}}
+    {{/if function.stream_has_first_response?}}
+))
+  {{#else if function.sink?}}
+_fbthrift_metadata.ThriftType(t_sink=_fbthrift_metadata.ThriftSinkType(
+elemType={{#partial thrift_type type=function.sink.elem_type}},
+finalResponseType={{#partial thrift_type type=function.sink.final_response_type}}
+    {{#if function.sink_has_first_response?}}
+,initialResponseType={{#partial thrift_type type=function.return_type}}
+    {{/if function.sink_has_first_response?}}
+))
+  {{#else if function.stream?}}
+_fbthrift_metadata.ThriftType(t_stream=_fbthrift_metadata.ThriftStreamType(
+elemType={{#partial thrift_type type=function.stream.elem_type}}
+    {{#if function.stream_has_first_response?}}
+,initialResponseType={{#partial thrift_type type=function.return_type}}
+    {{/if function.stream_has_first_response?}}
+))
+  {{#else}}
+{{#partial thrift_type type=function.return_type}}
+  {{/if function.bidirectional_stream?}}
+{{/let partial}}

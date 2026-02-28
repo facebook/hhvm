@@ -1,38 +1,38 @@
 <?hh
-  $test = isset($_GET['test']) ? $_GET['test'] : null;
+  $test = isset(\HH\global_get('_GET')['test']) ? \HH\global_get('_GET')['test'] : null;
   switch($test) {
     case 'post':
-      var_dump($_POST);
+      var_dump(\HH\global_get('_POST'));
       break;
     case 'getpost':
-      var_dump($_GET);
-      var_dump($_POST);
+      var_dump(\HH\global_get('_GET'));
+      var_dump(\HH\global_get('_POST'));
       break;
     case 'referer':
-      echo $_SERVER['HTTP_REFERER'];
+      echo \HH\global_get('_SERVER')['HTTP_REFERER'];
       break;
     case 'useragent':
-      echo $_SERVER['HTTP_USER_AGENT'];
+      echo \HH\global_get('_SERVER')['HTTP_USER_AGENT'];
       break;
     case 'httpversion':
-      echo $_SERVER['SERVER_PROTOCOL'];
+      echo \HH\global_get('_SERVER')['SERVER_PROTOCOL'];
       break;
     case 'cookie':
-      echo $_COOKIE['foo'];
+      echo \HH\global_get('_SERVER')['foo'];
       break;
     case 'encoding':
-      echo $_SERVER['HTTP_ACCEPT_ENCODING'];  
+      echo \HH\global_get('_SERVER')['HTTP_ACCEPT_ENCODING'];
       break;
     case 'contenttype':
       header('Content-Type: text/plain;charset=utf-8');
       break;
     case 'file':
-      if (isset($_FILES['file'])) {
-          echo $_FILES['file']['name'] . '|' . $_FILES['file']['type'];
+      if (isset(_FILES['file'])) {
+          echo \HH\global_get('_FILES')['file']['name'] . '|' . _FILES['file']['type'];
       }
       break;
     case 'method':
-      echo $_SERVER['REQUEST_METHOD'];
+      echo \HH\global_get('_SERVER')['REQUEST_METHOD'];
       break;
     default:
       echo "Hello World!\n";

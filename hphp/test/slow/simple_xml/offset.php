@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $x = new SimpleXMLElement(
     '<a><b><c>d</c></b><b><c>d</c></b></a>'
   );
@@ -14,6 +14,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_offset() {
+function main_offset() :mixed{
 main();
 }

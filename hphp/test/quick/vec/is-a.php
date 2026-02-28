@@ -3,7 +3,7 @@
 
 class Foo {}
 
-function test_is_a($a, $interfaces) {
+function test_is_a($a, $interfaces) :mixed{
   echo "====================================================\n";
   echo "Testing: ";
   var_dump($a);
@@ -80,7 +80,7 @@ function test_is_a($a, $interfaces) {
   }
 }
 
-function test_is_vec($val) {
+function test_is_vec($val) :mixed{
   echo "====================================================\n";
   echo "Testing for is_vec: ";
   var_dump($val);
@@ -92,7 +92,7 @@ function test_is_vec($val) {
 }
 
 <<__EntryPoint>> function main(): void {
-  $interfaces = varray[
+  $interfaces = vec[
     "HH\\Traversable",
     "HH\\KeyedTraversable",
     "HH\\Container",
@@ -112,7 +112,7 @@ function test_is_vec($val) {
   test_is_vec(1.23);
   test_is_vec("abcd");
   test_is_vec(new stdClass);
-  test_is_vec(varray[1, 2, 3]);
+  test_is_vec(vec[1, 2, 3]);
   test_is_vec(Vector{'a', 'b', 'c'});
   test_is_vec(Map{100 => 'a', 'b' => 200});
   test_is_vec(Pair{123, 'abc'});

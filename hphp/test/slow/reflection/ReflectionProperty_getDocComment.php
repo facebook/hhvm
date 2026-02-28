@@ -25,7 +25,7 @@ class childClass extends testClass
 
 
 <<__EntryPoint>>
-function main_reflection_property_get_doc_comment() {
+function main_reflection_property_get_doc_comment() :mixed{
 $privateProperty = new ReflectionProperty('testClass', 'privateProperty');
 var_dump($privateProperty->getDeclaringClass()->getName());
 var_dump($privateProperty->getDocComment());

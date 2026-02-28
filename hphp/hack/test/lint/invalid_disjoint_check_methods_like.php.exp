@@ -1,0 +1,8 @@
+File "invalid_disjoint_check_methods_like.php", line 26, characters 14-52:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH\FIXME\UNSAFE_CAST` call. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5807])
+File "invalid_disjoint_check_methods_like.php", line 32, characters 8-38:
+Non-dynamic calls to 'isEqual' will always return the same value, because type int is disjoint from type string. (Lint[5638])
+File "invalid_disjoint_check_methods_like.php", line 34, characters 8-38:
+Non-dynamic calls to 'isEqual' will always return the same value, because type string is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check_methods_like.php", line 39, characters 8-24:
+Non-dynamic calls to 'contains' will always return the same value, because type int is disjoint from type string. (Lint[5638])

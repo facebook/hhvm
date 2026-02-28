@@ -1,5 +1,5 @@
-Typing[4110] await can only operate on an Awaitable [1]
--> Expected Awaitable<[unresolved]> [1]
+error: Typing[4110] await can only operate on an Awaitable [1]
+-> Expected Awaitable<nothing> [1]
 -> But got int [2]
 
 position_within_position.php:4:3
@@ -8,4 +8,4 @@ position_within_position.php:4:3
 [1,2] 4 |   await 42;
       5 | }
 
-1 error found.
+1 error found

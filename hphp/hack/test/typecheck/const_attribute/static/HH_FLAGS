@@ -1,2 +1,2 @@
---const-static-props
---const-attribute
+--config const_static_props=true
+--config const_attribute=true

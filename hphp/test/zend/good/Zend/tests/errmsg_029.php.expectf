@@ -1,2 +1,2 @@
 
-Fatal error: Cannot use `parent` as class name as it is reserved in %s/errmsg_029.php on line 3
+Fatal error: Cannot use `parent` as a type name as it is reserved in %s/errmsg_029.php on line 3

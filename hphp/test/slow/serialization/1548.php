@@ -9,13 +9,13 @@ class X {
     $this->prot = $b;
     $this->pub = $c;
   }
-  function foo() {
+  function foo() :mixed{
  var_dump($this->priv, $this->prot, $this->pub);
  }
 }
 
 <<__EntryPoint>>
-function main_1548() {
+function main_1548() :mixed{
 $x = new X(1,2,3);
 $s = serialize($x);
 $x = unserialize($s);

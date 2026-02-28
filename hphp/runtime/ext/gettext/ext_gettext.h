@@ -21,10 +21,9 @@
 namespace HPHP {
 
 struct GettextExtension final : Extension {
-  GettextExtension() : Extension("gettext") {}
-  void moduleInit() override;
+  GettextExtension() : Extension("gettext", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  void moduleRegisterNative() override;
   void moduleInfo(Array &info) override;
 };
 
 }
-

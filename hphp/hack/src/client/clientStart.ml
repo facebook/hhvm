@@ -9,30 +9,45 @@
 
 open Hh_prelude
 
-let get_hhserver () =
-  let exe_name =
-    if Sys.win32 then
-      "hh_server.exe"
-    else
-      "hh_server"
-  in
-  let server_next_to_client =
-    Path.(to_string @@ concat (dirname executable_name) exe_name)
-  in
-  if Sys.file_exists server_next_to_client then
-    server_next_to_client
-  else
-    exe_name
+(** What is the path to the hh_server binary?
+1. If HH_SERVER_PATH environment variable is defined, use this (even if it doesn't exist on disk!)
+2. Otherwise, if "dirname(realpath(executable_name))/hh_server" exists then use this
+3. Otherwise, use unqualified "hh_server" (hence search on PATH).
+The third case is currently what happens for "hh switch buck2" *)
+let get_hhserver_path () =
+  match Sys.getenv_opt "HH_SERVER_PATH" with
+  | Some p ->
+    Hh_logger.log "For hh_server path, using HH_SERVER_PATH=%s" p;
+    p
+  | None ->
+    let exe_name = "hh_server" in
+    (* Path.executable_name is an alias for Sys.executable_name. Its documentation is quite vague:
+       "This name may be absolute or relative to the current directory, depending on the platform
+       and whether the program was compiled to bytecode or a native executable." In my testing
+       on native ocaml binaries on CentOS, it produces the fully-qualified realpath of the executable,
+       i.e. it digs through symlinks. *)
+    let server_next_to_client =
+      Path.concat (Path.dirname Path.executable_name) exe_name |> Path.to_string
+    in
+    if Sys.file_exists server_next_to_client then begin
+      Hh_logger.log
+        "For hh_server path, found it adjacent to %s"
+        (Path.executable_name |> Path.to_string);
+      server_next_to_client
+    end else begin
+      Hh_logger.log
+        "For hh_server path, will do unqualified search for %s"
+        exe_name;
+      exe_name
+    end
 
 type env = {
   root: Path.t;
   from: string;
   no_load: bool;
   watchman_debug_logging: bool;
-  log_inference_constraints: bool;
   silent: bool;
   exit_on_failure: bool;
-  ai_mode: string option;
   ignore_hh_version: bool;
   save_64bit: string option;
   save_human_readable_64bit_dep_map: string option;
@@ -43,38 +58,36 @@ type env = {
   custom_hhi_path: string option;
   custom_telemetry_data: (string * string) list;
   allow_non_opt_build: bool;
+  preexisting_warnings: bool;
 }
 
 (* Sometimes systemd-run is available but we can't use it. For example, the
  * systemd might not have a proper working user session, so we might not be
  * able to run commands via systemd-run as a user process *)
 let can_run_systemd () =
-  if not Sys.unix then
+  (* Verify systemd-run is in the path *)
+  let systemd_binary =
+    try
+      Unix.open_process_in "which systemd-run 2> /dev/null"
+      |> In_channel.input_line
+    with
+    | _ -> None
+  in
+  if is_none systemd_binary then
     false
   else
-    (* if we're on Unix, verify systemd-run is in the path *)
-    let systemd_binary =
-      try
-        Unix.open_process_in "which systemd-run 2> /dev/null"
-        |> In_channel.input_line
-      with
-      | _ -> None
+    (* Use `timeout` in case it hangs mysteriously.
+     * `--quiet` only suppresses stdout. *)
+    let ic =
+      Unix.open_process_in
+        "timeout 1 systemd-run --scope --quiet --user -- true 2> /dev/null"
     in
-    if is_none systemd_binary then
-      false
-    else
-      (* Use `timeout` in case it hangs mysteriously.
-       * `--quiet` only suppresses stdout. *)
-      let ic =
-        Unix.open_process_in
-          "timeout 1 systemd-run --scope --quiet --user -- true 2> /dev/null"
-      in
-      (* If all goes right, `systemd-run` will return immediately with exit code 0
-       * and run `true` asynchronously as a service. If it goes wrong, it will exit
-       * with a non-zero exit code *)
-      match Unix.close_process_in ic with
-      | Unix.WEXITED 0 -> true
-      | _ -> false
+    (* If all goes right, `systemd-run` will return immediately with exit code 0
+     * and run `true` asynchronously as a service. If it goes wrong, it will exit
+     * with a non-zero exit code *)
+    match Unix.close_process_in ic with
+    | Unix.WEXITED 0 -> true
+    | _ -> false
 
 let start_server (env : env) =
   let {
@@ -82,10 +95,8 @@ let start_server (env : env) =
     from;
     no_load;
     watchman_debug_logging;
-    log_inference_constraints;
     silent;
     exit_on_failure;
-    ai_mode;
     ignore_hh_version;
     save_64bit;
     save_human_readable_64bit_dep_map;
@@ -96,6 +107,7 @@ let start_server (env : env) =
     custom_hhi_path;
     custom_telemetry_data;
     allow_non_opt_build;
+    preexisting_warnings;
   } =
     env
   in
@@ -111,12 +123,7 @@ let start_server (env : env) =
            [| option; Printf.sprintf "%s=%s" key value |])
     |> Array.concat
   in
-  let ai_options =
-    match ai_mode with
-    | Some ai -> [| "--ai"; ai |]
-    | None -> [||]
-  in
-  let hh_server = get_hhserver () in
+  let hh_server = get_hhserver_path () in
   let hh_server_args =
     Array.concat
       [
@@ -136,18 +143,15 @@ let start_server (env : env) =
           [| "--watchman-debug-logging" |]
         else
           [||]);
-        (if log_inference_constraints then
-          [| "--log-inference-constraints" |]
-        else
-          [||]);
-        ai_options;
         (* If the client starts up a server monitor process, the output of that
          * bootup is passed to this FD - so this FD needs to be threaded
          * through the server monitor process then to the typechecker process.
          *
          * Note: Yes, the FD is available in the monitor process as well, but
          * it doesn't, and shouldn't, use it. *)
-        [| "--waiting-client"; string_of_int (Handle.get_handle out_fd) |];
+        [|
+          "--waiting-client"; string_of_int (Sys_utils.fd_to_int_naughty out_fd);
+        |];
         (if ignore_hh_version then
           [| "--ignore-hh-version" |]
         else
@@ -178,6 +182,10 @@ let start_server (env : env) =
           custom_telemetry_data;
         (if allow_non_opt_build then
           [| "--allow-non-opt-build" |]
+        else
+          [||]);
+        (if preexisting_warnings then
+          [| "--preexisting-warnings" |]
         else
           [||]);
       ]
@@ -221,58 +229,60 @@ let start_server (env : env) =
 
     match Sys_utils.waitpid_non_intr [] server_pid with
     | (_, Unix.WEXITED 0) ->
-      assert (String.equal (Stdlib.input_line ic) ServerMonitorUtils.ready);
+      assert (String.equal (Stdlib.input_line ic) MonitorUtils.ready);
       Stdlib.close_in ic
     | (_, Unix.WEXITED i) ->
       if not silent then
         Printf.eprintf
           "Starting hh_server failed. Exited with status code: %d!\n"
           i;
-      if exit_on_failure then exit 77
+      if exit_on_failure then Exit.exit Exit_status.Server_already_exists
     | _ ->
       if not silent then Printf.eprintf "Could not start hh_server!\n";
-      if exit_on_failure then exit 77
+      if exit_on_failure then Exit.exit Exit_status.Server_already_exists
   with
   | _ ->
     if not silent then Printf.eprintf "Could not start hh_server!\n";
-    if exit_on_failure then exit 77
+    if exit_on_failure then Exit.exit Exit_status.Server_already_exists
 
 let should_start env =
   let root_s = Path.to_string env.root in
   let handoff_options =
-    MonitorRpc.
-      {
-        force_dormant_start = false;
-        pipe_name = HhServerMonitorConfig.(pipe_type_to_string Default);
-      }
+    MonitorRpc.{ force_dormant_start = false; pipe_type = MonitorRpc.Default }
   in
   let tracker = Connection_tracker.create () in
   Hh_logger.log
     "[%s] ClientStart.should_start"
     (Connection_tracker.log_id tracker);
   match
-    MonitorConnection.connect_once ~tracker ~timeout:3 env.root handoff_options
+    MonitorConnection.connect_once
+      ~tracker
+      ~timeout:3
+      ~terminate_monitor_on_version_mismatch:true
+      env.root
+      handoff_options
   with
   | Ok _conn -> false
-  | Error
-      ServerMonitorUtils.(
-        Connect_to_monitor_failure { server_exists = false; _ })
-  | Error (ServerMonitorUtils.Build_id_mismatched _)
-  | Error ServerMonitorUtils.Server_died ->
+  | Error MonitorUtils.(Connect_to_monitor_failure { server_exists = false; _ })
+  | Error (MonitorUtils.Build_id_mismatched_monitor_will_terminate _)
+  | Error MonitorUtils.Server_died ->
     true
-  | Error ServerMonitorUtils.Server_dormant
-  | Error ServerMonitorUtils.Server_dormant_out_of_retries ->
+  | Error (MonitorUtils.Build_id_mismatched_client_must_terminate _) ->
+    HackEventLogger.invariant_violation_bug
+      "we requested terminate_monitor_on_version_mismatch";
+    Printf.eprintf "Internal error. Please try `hh stop`\n";
+    false
+  | Error MonitorUtils.Server_dormant
+  | Error MonitorUtils.Server_dormant_out_of_retries ->
     Printf.eprintf "Server already exists but is dormant";
     false
-  | Error
-      ServerMonitorUtils.(
-        Connect_to_monitor_failure { server_exists = true; _ }) ->
+  | Error MonitorUtils.(Connect_to_monitor_failure { server_exists = true; _ })
+    ->
     Printf.eprintf "Replacing unresponsive server for %s\n%!" root_s;
     ClientStop.kill_server env.root env.from;
     true
 
 let main (env : env) : Exit_status.t Lwt.t =
-  HackEventLogger.set_from env.from;
   HackEventLogger.client_start ();
 
   (* TODO(ljw): There are some race conditions here. First scenario: two      *)

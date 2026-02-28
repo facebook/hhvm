@@ -25,11 +25,20 @@ namespace HPHP::thrift {
 enum TError {
   ERR_UNKNOWN = 0,
   ERR_INVALID_DATA = 1,
-  ERR_BAD_VERSION = 4
+  ERR_BAD_VERSION = 4,
+  ERR_UNEXPECTED_EXCEPTION = 5
+};
+
+enum class TTransportError {
+  END_OF_FILE = 4,
 };
 
 [[noreturn]] inline void thrift_error(const String& what, TError why) {
   throw_object(s_TProtocolException, make_vec_array(what, why));
+}
+
+[[noreturn]] inline void thrift_transport_error(const String& what, TTransportError why) {
+  throw_object(s_TTransportException, make_vec_array(what, static_cast<int>(why)));
 }
 
 inline void set_with_intish_key_cast(
@@ -51,4 +60,67 @@ inline void set_with_intish_key_cast(
         ERR_INVALID_DATA);
   }
 }
+
+
+inline bool is_value_type_default(int8_t thrift_typeID, const Variant& value) {
+  switch(thrift_typeID){
+    case T_BOOL:
+      return value.toBoolean() == false;
+    case T_BYTE:
+    case T_I16:
+    case T_I32:
+    case T_U64:
+    case T_I64:
+      return value.toInt64() == 0;
+    case T_DOUBLE:
+    case T_FLOAT:
+      return value.toDouble() == 0.0;
+    case T_UTF8:
+    case T_UTF16:
+    case T_STRING:
+      return value.toString().empty();
+    case T_MAP:
+    case T_LIST:
+    case T_SET:
+      return value.toArray<IntishCast::Cast>().empty();
+    default:
+      return false;
+    }
+}
+
+inline Array initialize_array(const uint32_t size) {
+  // Reserve up to 16k entries for perf - but after that use "normal"
+  // array expansion so that we ensure the data is actually there before
+  // allocating massive arrays.
+  return Array::attach(VanillaVec::MakeReserveVec(std::min(16384u, size)));
+}
+
+inline void check_container_size(const uint32_t size) {
+  if (UNLIKELY(size > std::numeric_limits<int32_t>::max())) {
+    raise_warning(
+        "%u exceeds array size limit %u",
+        size,
+        std::numeric_limits<int32_t>::max());
+  }
+}
+
+class StrictUnionChecker {
+public:
+  explicit StrictUnionChecker(bool enabled) : enabled_{enabled}, unionFieldFound_{false} {}
+
+  void markFieldFound() {
+    if (!enabled_) {
+      return;
+    }
+
+    if (unionFieldFound_) {
+      thrift_error("Union field already set", ERR_INVALID_DATA);
+    }
+    unionFieldFound_ = true;
+  }
+private:
+  bool enabled_{false};
+  bool unionFieldFound_{false};
+};
+
 }

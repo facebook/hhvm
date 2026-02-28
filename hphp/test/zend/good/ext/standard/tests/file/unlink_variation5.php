@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 
 // temp file used
-$filename = __SystemLib\hphp_test_tmppath('unlink_variation5.tmp');
+$filename = sys_get_temp_dir().'/'.'unlink_variation5.tmp';
 
 echo "*** Testing unlink() on a file ***\n";
 

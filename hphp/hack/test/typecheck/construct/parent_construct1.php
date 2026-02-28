@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -32,7 +32,7 @@ class C extends B {
         parent::__construct($this->x);
         break;
       case 2:
-        $args = varray[1];
+        $args = vec[1];
         parent::__construct(...$args);
         break;
     }

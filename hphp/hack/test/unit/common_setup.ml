@@ -8,6 +8,7 @@
 
 let foo_contents =
   {|<?hh //strict
+  new module foo {}
   class Foo {
     public function foo (Bar $b) : int {
       A::class;
@@ -23,6 +24,7 @@ let foo_contents =
 
 let bar_contents =
   {|<?hh //strict
+  module foo;
   class A {}
   class B<T> {}
   class D {}
@@ -73,12 +75,20 @@ let setup
   (* Parsing produces the file infos that the naming table module can use
      to construct the forward naming table (files-to-symbols) *)
   let popt =
+    ParserOptions.
+      {
+        default with
+        disable_xhp_element_mangling =
+          (match xhp_as with
+          | `Namespaces -> true
+          | `MangledSymbols -> false);
+      }
+  in
+  (* Since the common test has a module in it, always allow all files for module declarations *)
+  let tcopt =
     {
-      ParserOptions.default with
-      GlobalOptions.po_disable_xhp_element_mangling =
-        (match xhp_as with
-        | `Namespaces -> true
-        | `MangledSymbols -> false);
+      tcopt with
+      GlobalOptions.tco_allow_all_files_for_module_declarations = true;
     }
   in
   let deps_mode = Typing_deps_mode.InMemoryMode None in
@@ -91,31 +101,17 @@ let setup
   in
   let get_next = MultiWorker.next None [foo_path; bar_path] in
   let (file_infos, _errors, _failed_parsing) =
-    if
-      TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
-    then
-      ( Direct_decl_service.go
-          ctx
-          None
-          ~ide_files:Relative_path.Set.empty
-          ~get_next
-          ~trace:true
-          ~cache_decls:false,
-        Errors.empty,
-        Relative_path.Set.empty )
-    else
-      Parsing_service.go_DEPRECATED
-        ctx
-        None
-        Relative_path.Set.empty
-        ~get_next
-        popt
-        ~trace:true
+    ( Direct_decl_service.(go ctx None ~get_next ~trace:true ~decl_mode:Normal),
+      Diagnostics.empty,
+      Relative_path.Set.empty )
   in
   let naming_table = Naming_table.create file_infos in
   (* Construct the reverse naming table (symbols-to-files) *)
   Naming_table.fold naming_table ~init:() ~f:(fun fn fileinfo () ->
-      Naming_global.ndecl_file_skip_if_already_bound ctx fn fileinfo);
+      Naming_global.ndecl_file_skip_if_already_bound
+        ctx
+        fn
+        fileinfo.FileInfo.ids);
 
   let (ctx, naming_table) =
     if sqlite then (

@@ -26,6 +26,8 @@
 
 namespace HPHP {
 
+struct Array;
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -34,12 +36,12 @@ namespace HPHP {
  * case that it's empty (minimizing sizeof(UserAttributeMap)).
  */
 struct UserAttributeMap {
-  using value_type = std::pair<LowStringPtr, TypedValue>;
+  using value_type = std::pair<PackedStringPtr, TypedValue>;
 private:
   using Map = folly::sorted_vector_map<
-    LowStringPtr,
+    PackedStringPtr,
     TypedValue,
-    string_data_lti,
+    string_data_lt_type,
     VMAllocator<value_type>,
     void,
     folly::fbvector<value_type, VMAllocator<value_type>>
@@ -68,6 +70,10 @@ public:
 
   const_iterator find(const key_type& k) const {
     return map().find(k);
+  }
+
+  bool contains(const key_type& k) const {
+    return map().contains(k);
   }
 
   // Note: non-const iteration is not allowed, since we don't want to allocate
@@ -99,6 +105,11 @@ public:
     sd(map());
   }
 
+  /*
+   * A hack representation of these user attributes as a dict
+   */
+  Array getArray() const;
+
 private:
   struct MapCompare;
   void lookup(Map&& map);
@@ -120,4 +131,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 }
-

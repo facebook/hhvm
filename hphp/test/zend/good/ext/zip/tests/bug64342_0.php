@@ -24,5 +24,5 @@ if ($res === TRUE) {
 
 echo "DONE\n";
 error_reporting(0);
-@unlink(dirname(__FILE__) . '/bug64342.zip');
+unlink(dirname(__FILE__) . '/bug64342.zip');
 }

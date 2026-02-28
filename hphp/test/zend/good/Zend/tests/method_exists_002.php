@@ -1,36 +1,36 @@
 <?hh
 
 class bar {
-    static public function stat_a2() {
+    static public function stat_a2() :mixed{
     }
-    static private function stat_b2() {
+    static private function stat_b2() :mixed{
     }
-    static protected function stat_c2() {
+    static protected function stat_c2() :mixed{
     }
 
-    private function method_a() {
+    private function method_a() :mixed{
     }
-    protected function method_b() {
+    protected function method_b() :mixed{
     }
-    public function method_c() {
+    public function method_c() :mixed{
     }
 }
 
 
 
 class baz extends bar {
-    static public function stat_a() {
+    static public function stat_a() :mixed{
     }
-    static private function stat_b() {
+    static private function stat_b() :mixed{
     }
-    static protected function stat_c() {
+    static protected function stat_c() :mixed{
     }
 
-    private function method_a() {
+    private function method_a() :mixed{
     }
-    protected function method_b() {
+    protected function method_b() :mixed{
     }
-    public function method_c() {
+    public function method_c() :mixed{
     }
 }
 <<__EntryPoint>> function main(): void {

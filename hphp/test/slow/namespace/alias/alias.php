@@ -1,7 +1,7 @@
 <?hh
 
 namespace ABC\QRS\XYZ {
-  function foo() { echo "foo\n"; }
+  function foo() :mixed{ echo "foo\n"; }
 }
 
 namespace {

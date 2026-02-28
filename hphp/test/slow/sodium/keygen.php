@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_keygen() {
-$algos = varray[
+function main_keygen() :mixed{
+$algos = vec[
   'aead_chacha20poly1305',
   'aead_chacha20poly1305_ietf',
   'aead_xchacha20poly1305_ietf',
@@ -21,7 +21,7 @@ foreach ($algos as $algo) {
   $fun = $base.'_keygen';
   $const = strtoupper($base.'_KEYBYTES');
 
-  $key = $fun();
+  $key = HH\dynamic_fun($fun)();
   printf("%s %d %d\n", gettype($key), strlen($key), constant($const));
 }
 }

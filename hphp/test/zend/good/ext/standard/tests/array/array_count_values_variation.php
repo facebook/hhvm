@@ -10,20 +10,20 @@
  */
 
 class A {
-    static function hello() {
+    static function hello() :mixed{
       echo "Hello\n";
     }
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_count_values() : parameter variations ***\n";
-chdir(__SystemLib\hphp_test_tmproot());
+chdir(sys_get_temp_dir());
 $ob = new A();
 
 $fp = fopen("array_count_file", "w+");
 
-$arrays = darray["bobk" => "bobv", 0 => "val", 6 => "val6", 7 => $fp, 8 => $ob];
+$arrays = dict["bobk" => "bobv", 0 => "val", 6 => "val6", 7 => $fp, 8 => $ob];
 
-var_dump (@array_count_values ($arrays));
+var_dump (array_count_values ($arrays));
 echo "\n";
 
 

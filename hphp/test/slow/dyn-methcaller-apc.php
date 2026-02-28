@@ -1,9 +1,9 @@
 <?hh
 
-class C { <<__DynamicallyCallable>> function  m() {} }
+class C { <<__DynamicallyCallable>> function  m() :mixed{} }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $mc1 = HH\dynamic_meth_caller(C::class, 'm');
   $mc2 = __hhvm_intrinsics\launder_value($mc1);
 

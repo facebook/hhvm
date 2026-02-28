@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function expectVecString(vec<string> $vs):void {
@@ -6,12 +6,12 @@ function expectVecString(vec<string> $vs):void {
 class W {
   public function testit(vec<StringType> $x, StringType $st): void {
     $exactst = new StringType();
-    hh_show(class_meth(StringType::class, 'foo'));
-    hh_show(class_meth(StringType::class, 'bar'));
-    hh_show(inst_meth($exactst, 'inst_foo'));
-    hh_show(inst_meth($st, 'inst_foo'));
-    hh_show(inst_meth($exactst, 'inst_bar'));
-    hh_show(inst_meth($st, 'inst_bar'));
+    hh_show(StringType::foo<>);
+    hh_show(StringType::bar<>);
+    hh_show(($boxes) ==> $exactst->inst_foo($boxes));
+    hh_show(($boxes) ==> $st->inst_foo($boxes));
+    hh_show(($boxes) ==> $exactst->inst_bar($boxes));
+    hh_show(($boxes) ==> $st->inst_bar($boxes));
     expectVecString(StringType::foo($x));
     expectVecString(StringType::bar($x));
   }

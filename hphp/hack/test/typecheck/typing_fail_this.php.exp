@@ -1,4 +1,4 @@
-File "typing_fail_this.php", line 58, characters 5-9:
+ERROR: File "typing_fail_this.php", line 58, characters 5-9:
 Typing error (Typing[4053])
   File "typing_fail_this.php", line 58, characters 12-12:
   No property `l` in `MyDoubleList`

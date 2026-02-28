@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_date_timestamp() {
+function main_date_timestamp() :mixed{
 date_default_timezone_set("America/Los_Angeles");
 
 $tz = timezone_open("America/Los_Angeles");

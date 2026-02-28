@@ -13,6 +13,10 @@
  *)
 exception Worker_should_exit
 
+val is_stop_requested : unit -> bool
+
+val raise_if_stop_requested : unit -> unit
+
 val stop_workers : unit -> unit
 
 val resume_workers : unit -> unit

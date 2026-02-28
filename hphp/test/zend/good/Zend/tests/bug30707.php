@@ -1,20 +1,20 @@
 <?hh
 class C {
-    function byePHP($plop) {
+    function byePHP($plop) :mixed{
         echo "ok\n";
     }
 
-    function plip() {
+    function plip() :mixed{
         try {
             $this->plap($this->plop());
         }    catch(Exception $e) {
         }
     }
 
-    function plap($a) {
+    function plap($a) :mixed{
     }
 
-    function plop() {
+    function plop() :mixed{
         throw new Exception;
     }
 }

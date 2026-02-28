@@ -1,6 +1,6 @@
 <?hh
 
 class if_a {
-    abstract final function err();
+    abstract final function err():mixed;
 }
 

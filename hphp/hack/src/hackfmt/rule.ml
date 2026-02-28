@@ -13,7 +13,7 @@ type kind =
   | Simple of Cost.t
   | Always
   | Parental
-[@@deriving eq]
+[@@deriving eq, show { with_path = false }]
 
 let is_always = function
   | Always -> true
@@ -42,7 +42,7 @@ let cares_about_children kind =
   | Always -> false
   | Parental -> true
 
-let compare r1 r2 = Core_kernel.Int.compare r1.id r2.id
+let compare r1 r2 = Core.Int.compare r1.id r2.id
 
 let to_string rule =
   let kind =

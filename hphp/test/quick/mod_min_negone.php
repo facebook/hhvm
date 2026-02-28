@@ -1,10 +1,10 @@
 <?hh
 
-function int_min() {
+function int_min() :mixed{
   return ~PHP_INT_MAX;
 }
 
-function int_negone() {
+function int_negone() :mixed{
   return -1;
 }
 

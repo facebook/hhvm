@@ -15,7 +15,7 @@ spanning multiple lines
 using heredoc syntax.
 EOD;
 
-$needles = varray[
+$needles = vec[
   "ing", 
   "", 
   " ",

@@ -16,16 +16,17 @@
 
 #pragma once
 
+#include <filesystem>
 #include <iterator>
 #include <memory>
+#include <set>
 #include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
 
 #include <folly/Function.h>
-#include <folly/dynamic.h>
-#include <folly/experimental/io/FsUtil.h>
+#include <folly/json/dynamic.h>
 
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/util/optional.h"
@@ -39,8 +40,7 @@ namespace Facts {
  * Instantiated as a thread-local in `t_adb`.
  */
 struct AutoloadDB {
-
-protected:
+ protected:
   AutoloadDB() = default;
   AutoloadDB(const AutoloadDB&) = default;
   AutoloadDB(AutoloadDB&&) noexcept = default;
@@ -48,13 +48,14 @@ protected:
   AutoloadDB& operator=(AutoloadDB&&) noexcept = default;
   virtual ~AutoloadDB() = default;
 
-public:
-  template <typename T> class MultiResult;
+ public:
+  template <typename T>
+  class MultiResult;
 
   /**
    * Function which returns a reference to an AutoloadDB.
    */
-  using Handle = folly::Function<AutoloadDB&() const>;
+  using Opener = folly::Function<std::shared_ptr<AutoloadDB>() const>;
 
   struct KindAndFlags {
     TypeKind m_kind;
@@ -63,18 +64,23 @@ public:
 
   struct SymbolPath {
     std::string m_symbol;
-    folly::fs::path m_path;
+    std::filesystem::path m_path;
   };
 
   struct MethodPath {
     std::string m_type;
     std::string m_method;
-    folly::fs::path m_path;
+    std::filesystem::path m_path;
   };
 
   struct PathAndHash {
-    folly::fs::path m_path;
+    std::filesystem::path m_path;
     std::string m_hash;
+  };
+
+  struct PathAndAttrVal {
+    std::filesystem::path m_path;
+    HPHP::Optional<folly::dynamic> m_AttrVal;
   };
 
   /**
@@ -90,40 +96,43 @@ public:
    */
   virtual void commit() = 0;
 
-  virtual void insertPath(const folly::fs::path& path) = 0;
-  virtual void erasePath(const folly::fs::path& path) = 0;
+  virtual void insertPath(const std::filesystem::path& path) = 0;
+  virtual void erasePath(const std::filesystem::path& path) = 0;
 
   // Hashes
   virtual void insertSha1Hex(
-      const folly::fs::path& path, const Optional<std::string>& sha1hex) = 0;
-  virtual std::string getSha1Hex(const folly::fs::path& path) = 0;
+      const std::filesystem::path& path,
+      const Optional<std::string>& sha1hex) = 0;
+  virtual std::string getSha1Hex(const std::filesystem::path& path) = 0;
 
   // Types
   virtual void insertType(
       std::string_view type,
-      const folly::fs::path& path,
+      const std::filesystem::path& path,
       TypeKind kind,
       TypeFlagMask flags) = 0;
-  virtual std::vector<folly::fs::path> getTypePath(std::string_view type) = 0;
-  virtual std::vector<std::string>
-  getPathTypes(const folly::fs::path& path) = 0;
+  virtual std::vector<std::filesystem::path> getTypePath(
+      std::string_view type) = 0;
+  virtual std::vector<std::string> getPathTypes(
+      const std::filesystem::path& path) = 0;
 
   /**
    * Return the kind of the given type defined at the given path.
    *
    * If the type is not defined in the given path, return TypeKind::Unknown.
    */
-  virtual KindAndFlags
-  getKindAndFlags(std::string_view type, const folly::fs::path& path) = 0;
+  virtual KindAndFlags getKindAndFlags(
+      std::string_view type,
+      const std::filesystem::path& path) = 0;
 
   // Inheritance
   virtual void insertBaseType(
-      const folly::fs::path& path,
+      const std::filesystem::path& path,
       std::string_view derivedType,
       DeriveKind kind,
       std::string_view baseType) = 0;
   virtual std::vector<std::string> getBaseTypes(
-      const folly::fs::path& path,
+      const std::filesystem::path& path,
       std::string_view derivedType,
       DeriveKind kind) = 0;
 
@@ -133,20 +142,21 @@ public:
    *
    * Returns [(pathWhereDerivedTypeExtendsBaseType, derivedType)]
    */
-  virtual std::vector<SymbolPath>
-  getDerivedTypes(std::string_view baseType, DeriveKind kind) = 0;
+  virtual std::vector<SymbolPath> getDerivedTypes(
+      std::string_view baseType,
+      DeriveKind kind) = 0;
 
   // Attributes
 
   virtual void insertTypeAttribute(
-      const folly::fs::path& path,
+      const std::filesystem::path& path,
       std::string_view type,
       std::string_view attributeName,
       Optional<int> attributePosition,
       const folly::dynamic* attributeValue) = 0;
 
   virtual void insertMethodAttribute(
-      const folly::fs::path& path,
+      const std::filesystem::path& path,
       std::string_view type,
       std::string_view method,
       std::string_view attributeName,
@@ -154,21 +164,22 @@ public:
       const folly::dynamic* attributeValue) = 0;
 
   virtual void insertFileAttribute(
-      const folly::fs::path& path,
+      const std::filesystem::path& path,
       std::string_view attributeName,
       Optional<int> attributePosition,
       const folly::dynamic* attributeValue) = 0;
 
-  virtual std::vector<std::string>
-  getAttributesOfType(std::string_view type, const folly::fs::path& path) = 0;
+  virtual std::vector<std::string> getAttributesOfType(
+      std::string_view type,
+      const std::filesystem::path& path) = 0;
 
   virtual std::vector<std::string> getAttributesOfMethod(
       std::string_view type,
       std::string_view method,
-      const folly::fs::path& path) = 0;
+      const std::filesystem::path& path) = 0;
 
-  virtual std::vector<std::string>
-  getAttributesOfFile(const folly::fs::path& path) = 0;
+  virtual std::vector<std::string> getAttributesOfFile(
+      const std::filesystem::path& path) = 0;
 
   virtual std::vector<folly::dynamic> getTypeAttributeArgs(
       std::string_view type,
@@ -187,36 +198,84 @@ public:
       std::string_view attributeName) = 0;
 
   virtual std::vector<folly::dynamic> getFileAttributeArgs(
-      std::string_view path, std::string_view attributeName) = 0;
+      std::string_view path,
+      std::string_view attributeName) = 0;
 
-  virtual std::vector<SymbolPath>
-  getTypesWithAttribute(std::string_view attributeName) = 0;
-  virtual std::vector<SymbolPath>
-  getTypeAliasesWithAttribute(std::string_view attributeName) = 0;
+  virtual std::vector<SymbolPath> getTypesWithAttribute(
+      std::string_view attributeName) = 0;
+  virtual std::vector<SymbolPath> getTypeAliasesWithAttribute(
+      std::string_view attributeName) = 0;
 
   virtual std::vector<MethodPath> getPathMethods(std::string_view path) = 0;
 
-  virtual std::vector<MethodPath>
-  getMethodsWithAttribute(std::string_view attributeName) = 0;
+  virtual std::vector<MethodPath> getMethodsWithAttribute(
+      std::string_view attributeName) = 0;
 
-  virtual std::vector<folly::fs::path>
-  getFilesWithAttribute(std::string_view attributeName) = 0;
+  virtual std::vector<std::pair<std::string, std::string>>
+  getTypeMethodAttributes(
+      std::string_view type,
+      const std::filesystem::path& path) = 0;
+
+  virtual std::vector<std::filesystem::path> getFilesWithAttribute(
+      std::string_view attributeName) = 0;
+  virtual std::vector<std::filesystem::path> getFilesWithAttributeAndAnyValue(
+      std::string_view attributeName,
+      const folly::dynamic& attributeValue) = 0;
+  virtual std::vector<PathAndAttrVal> getFilesAndAttrValsWithAttribute(
+      const std::string_view attribute_name) = 0;
 
   // Functions
-  virtual void
-  insertFunction(std::string_view function, const folly::fs::path& path) = 0;
-  virtual std::vector<folly::fs::path>
+  virtual void insertFunction(
+      std::string_view function,
+      const std::filesystem::path& path) = 0;
+  virtual std::vector<std::pair<std::filesystem::path, std::string>>
   getFunctionPath(std::string_view function) = 0;
-  virtual std::vector<std::string>
-  getPathFunctions(const folly::fs::path& path) = 0;
+  virtual std::vector<std::string> getPathFunctions(
+      const std::filesystem::path& path) = 0;
 
   // Constants
-  virtual void
-  insertConstant(std::string_view constant, const folly::fs::path& path) = 0;
-  virtual std::vector<folly::fs::path>
-  getConstantPath(std::string_view constant) = 0;
-  virtual std::vector<std::string>
-  getPathConstants(const folly::fs::path& path) = 0;
+  virtual void insertConstant(
+      std::string_view constant,
+      const std::filesystem::path& path) = 0;
+  virtual std::vector<std::filesystem::path> getConstantPath(
+      std::string_view constant) = 0;
+  virtual std::vector<std::string> getPathConstants(
+      const std::filesystem::path& path) = 0;
+
+  // Module Definitions
+  virtual void insertModule(
+      std::string_view module,
+      const std::filesystem::path& path) = 0;
+  virtual std::vector<std::filesystem::path> getModulePath(
+      std::string_view module) = 0;
+  virtual std::vector<std::string> getPathModules(
+      const std::filesystem::path& path) = 0;
+  virtual std::vector<std::string> getAllModules() = 0;
+
+  // Module Membership
+  virtual void insertModuleMembership(
+      const std::filesystem::path& path,
+      std::string_view module) = 0;
+  virtual std::optional<std::string> getPathModuleMembership(
+      const std::filesystem::path& path) = 0;
+  virtual std::vector<std::filesystem::path> getModuleMembers(
+      std::string_view module) = 0;
+
+  // Package Membership
+  virtual void insertPackageMembership(
+      const std::filesystem::path& path,
+      std::string_view package) = 0;
+  virtual std::optional<std::string> getPathPackageMembership(
+      const std::filesystem::path& path) = 0;
+
+  /**
+   * Validates the current facts DB is not corrupted
+   *
+   * Throws a logic_error for corrupted DB
+   *
+   * Returns nothing (if valid)
+   */
+  virtual void validate(const std::set<std::string>& types_to_ignore) = 0;
 
   /**
    * Return a list of all paths defined in the given root, as absolute paths.
@@ -226,15 +285,6 @@ public:
    * Returns results in the form of a lazy generator.
    */
   virtual MultiResult<PathAndHash> getAllPathsAndHashes() = 0;
-
-  /**
-   * Return a list of all symbols and paths defined in the given root.
-   *
-   * Returns results in the form of a lazy generator.
-   */
-  virtual MultiResult<SymbolPath> getAllTypePaths() = 0;
-  virtual MultiResult<SymbolPath> getAllFunctionPaths() = 0;
-  virtual MultiResult<SymbolPath> getAllConstantPaths() = 0;
 
   virtual void insertClock(const Clock& clock) = 0;
   virtual Clock getClock() = 0;
@@ -254,7 +304,8 @@ public:
   /**
    * Lazy generator to return results from the DB.
    */
-  template <typename T> class MultiResult {
+  template <typename T>
+  class MultiResult {
     /**
      * Advance the internal iterator by one step, then check if we're at
      * the end. If we are at the end, return `std::nullopt`. If we
@@ -269,7 +320,7 @@ public:
       using pointer = value_type*;
       using reference = value_type&;
 
-    public:
+     public:
       Iterator(RowFn& rowFn, bool done) : m_rowFn{rowFn}, m_done{done} {
         if (!m_done) {
           m_current = m_rowFn();
@@ -309,15 +360,14 @@ public:
         return !(a == b);
       }
 
-    private:
+     private:
       RowFn& m_rowFn;
       Optional<T> m_current;
       bool m_done{false};
     };
 
-  public:
-    explicit MultiResult(RowFn rowFn) : m_rowFn{std::move(rowFn)} {
-    }
+   public:
+    explicit MultiResult(RowFn rowFn) : m_rowFn{std::move(rowFn)} {}
 
     Iterator begin() {
       return {m_rowFn, false};
@@ -326,7 +376,7 @@ public:
       return {m_rowFn, true};
     }
 
-  private:
+   private:
     RowFn m_rowFn;
   };
 };

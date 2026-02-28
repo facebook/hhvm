@@ -1,0 +1,23 @@
+[manifest]
+name = libelf
+
+[rpms]
+elfutils-libelf-devel-static
+
+[debs]
+libelf-dev
+
+[pps]
+libelf
+
+[download]
+url = https://sourceware.org/elfutils/ftp/0.193/elfutils-0.193.tar.bz2
+sha256 = 7857f44b624f4d8d421df851aaae7b1402cfe6bcdd2d8049f15fc07d3dde7635
+
+# libelf only makes sense on linux, so make it a NOP on other platforms
+[build.not(os=linux)]
+builder = nop
+
+[build.os=linux]
+builder = autoconf
+subdir = elfutils-0.193

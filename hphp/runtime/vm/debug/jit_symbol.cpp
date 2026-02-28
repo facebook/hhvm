@@ -23,7 +23,7 @@
  * the DWARF files emitted by HHVM */
 
 KEEP_SECTION NEVER_INLINE
-void __jit_debug_register_code() {};
+void __jit_debug_register_code() {}
 
 /*
  * With identical-code-folding enabled in the linker,
@@ -39,4 +39,4 @@ void __jit_debug_register_code() {};
 KEEP_SECTION NEVER_INLINE
 long jit_debug_register_code_uniquifier(int a, char* b, long* c) {
   return a + *b * *c;
-};
+}

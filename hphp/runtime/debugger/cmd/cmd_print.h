@@ -40,6 +40,8 @@ struct CmdPrint : DebuggerCommand {
     const std::string& php
   );
 
+  std::string name() const override { return "print"; }
+
 protected:
   void sendImpl(DebuggerThriftBuffer&) override;
   void recvImpl(DebuggerThriftBuffer&) override;

@@ -1,8 +1,36 @@
-File "assign_in_cond.php", line 4, characters 7-8:
+WARN: File "assign_in_cond.php", line 4, characters 7-14:
+This is a sketchy null check on an expression of type ?int.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
+WARN: File "assign_in_cond.php", line 10, characters 7-13:
+This is a sketchy null check on an expression of type ?int.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
+ERROR: File "assign_in_cond.php", line 4, characters 7-8:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-File "assign_in_cond.php", line 10, characters 7-8:
+ERROR: File "assign_in_cond.php", line 10, characters 7-8:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-File "assign_in_cond.php", line 17, characters 8-9:
+ERROR: File "assign_in_cond.php", line 17, characters 8-9:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-File "assign_in_cond.php", line 23, characters 8-9:
+ERROR: File "assign_in_cond.php", line 23, characters 8-9:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+ERROR: File "assign_in_cond.php", line 18, characters 16-17:
+Invalid argument (Typing[4110])
+  File "assign_in_cond.php", line 33, characters 21-23:
+  Expected `int`
+  File "assign_in_cond.php", line 29, characters 15-18:
+  But got `?int`
+ERROR: File "assign_in_cond.php", line 24, characters 16-17:
+Invalid argument (Typing[4110])
+  File "assign_in_cond.php", line 33, characters 21-23:
+  Expected `int`
+  File "assign_in_cond.php", line 22, characters 13-16:
+  But got `?int`
+ERROR: File "assign_in_cond.php", line 25, characters 16-17:
+Invalid argument (Typing[4110])
+  File "assign_in_cond.php", line 33, characters 21-23:
+  Expected `int`
+  File "assign_in_cond.php", line 22, characters 13-16:
+  But got `?int`

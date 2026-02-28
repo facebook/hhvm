@@ -2,13 +2,15 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::{
-    cell::Cell,
-    fmt::Debug,
-    io::{self, Result, Write},
-};
+use std::cell::Cell;
+use std::fmt::Debug;
+use std::io;
+use std::io::Result;
+use std::io::Write;
+
 use thiserror::Error;
-use write_bytes::{BytesFormatter, DisplayBytes};
+use write_bytes::BytesFormatter;
+use write_bytes::DisplayBytes;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -45,7 +47,7 @@ pub(crate) fn get_embedded_error(e: &io::Error) -> Option<&Error> {
 }
 
 pub(crate) fn into_error(e: io::Error) -> Error {
-    if e.kind() == io::ErrorKind::Other && e.get_ref().map_or(false, |e| e.is::<Error>()) {
+    if e.kind() == io::ErrorKind::Other && e.get_ref().is_some_and(|e| e.is::<Error>()) {
         let err: Error = *e.into_inner().unwrap().downcast::<Error>().unwrap();
         return err;
     }
@@ -54,7 +56,7 @@ pub(crate) fn into_error(e: io::Error) -> Error {
 
 impl From<Error> for std::io::Error {
     fn from(e: Error) -> Self {
-        io::Error::new(io::ErrorKind::Other, e)
+        io::Error::other(e)
     }
 }
 
@@ -98,7 +100,7 @@ wrap_by!(angle, "<", ">");
 wrap_by!(square, "[", "]");
 
 pub(crate) fn concat_str<I: AsRef<str>>(w: &mut dyn Write, ss: impl AsRef<[I]>) -> Result<()> {
-    concat(w, ss, |w, s| {
+    concat(w, ss, |w, _, s| {
         w.write_all(s.as_ref().as_bytes())?;
         Ok(())
     })
@@ -109,7 +111,7 @@ pub(crate) fn concat_str_by<I: AsRef<str>>(
     sep: impl AsRef<str>,
     ss: impl AsRef<[I]>,
 ) -> Result<()> {
-    concat_by(w, sep, ss, |w, s| {
+    concat_by(w, sep, ss, |w, _, s| {
         w.write_all(s.as_ref().as_bytes())?;
         Ok(())
     })
@@ -117,7 +119,7 @@ pub(crate) fn concat_str_by<I: AsRef<str>>(
 
 pub(crate) fn concat<T, F>(w: &mut dyn Write, items: impl AsRef<[T]>, f: F) -> Result<()>
 where
-    F: FnMut(&mut dyn Write, &T) -> Result<()>,
+    F: FnMut(&mut dyn Write, usize, &T) -> Result<()>,
 {
     concat_by(w, "", items, f)
 }
@@ -129,18 +131,19 @@ pub(crate) fn concat_by<T, F>(
     mut f: F,
 ) -> Result<()>
 where
-    F: FnMut(&mut dyn Write, &T) -> Result<()>,
+    F: FnMut(&mut dyn Write, usize, &T) -> Result<()>,
 {
     let mut first = true;
     let sep = sep.as_ref();
-    Ok(for i in items.as_ref() {
+    for (i, e) in items.as_ref().iter().enumerate() {
         if first {
             first = false;
         } else {
             w.write_all(sep.as_bytes())?;
         }
-        f(w, i)?;
-    })
+        f(w, i, e)?;
+    }
+    Ok(())
 }
 
 pub(crate) fn option<T, F>(w: &mut dyn Write, i: impl Into<Option<T>>, mut f: F) -> Result<()>
@@ -255,7 +258,8 @@ where
 #[test]
 fn test_fmt_separated() -> Result<()> {
     use bstr::BStr;
-    use write_bytes::{format_bytes, write_bytes};
+    use write_bytes::format_bytes;
+    use write_bytes::write_bytes;
 
     let v: Vec<&str> = vec!["a", "b"];
     assert_eq!(

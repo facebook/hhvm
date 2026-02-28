@@ -54,13 +54,14 @@ inline bool RequestInjectionData::getJitFolding() const {
 
 inline void RequestInjectionData::setJitFolding(bool flag) {
   m_jitFolding = flag;
+  updateJit();
 }
 
-inline bool RequestInjectionData::getSuppressClassConversionWarnings() const {
+inline bool RequestInjectionData::getSuppressClassConversionNotices() const {
   return m_suppressClassConversionWarnings;
 }
 
-inline void RequestInjectionData::setSuppressClassConversionWarnings(bool flag) {
+inline void RequestInjectionData::setSuppressClassConversionNotices(bool flag) {
   m_suppressClassConversionWarnings = flag;
 }
 
@@ -82,8 +83,8 @@ inline void RequestInjectionData::setDebuggerAttached(bool flag) {
   updateJit();
 }
 
-inline void RequestInjectionData::setDebuggerAttachedAtInit(bool flag) {
-  m_hasDebuggerAttachedAtInit = flag;
+inline void RequestInjectionData::setVSDebugDisablesJit(bool flag) {
+  m_vsdebugDisablesJit = flag;
   updateJit();
 }
 
@@ -100,6 +101,10 @@ inline bool RequestInjectionData::getDebuggerForceIntr() const {
     m_debuggerStepIn ||
     // Step out forces interrupts after we have exited the function.
     m_debuggerStepOut == StepOutState::Out;
+}
+
+inline bool RequestInjectionData::getDebuggerStepIntr() const {
+  return m_debuggerStepIn || m_debuggerStepOut == StepOutState::Out;
 }
 
 inline void RequestInjectionData::setDebuggerIntr(bool flag) {
@@ -137,6 +142,14 @@ inline int RequestInjectionData::getDebuggerFlowDepth() const {
 
 inline void RequestInjectionData::setDebuggerFlowDepth(int depth) {
   m_debuggerFlowDepth = depth;
+}
+
+inline void RequestInjectionData::clearPCFilters() {
+  m_breakPointFilter.clear();
+  m_flowFilter.clear();
+  m_lineBreakPointFilter.clear();
+  m_callBreakPointFilter.clear();
+  m_retBreakPointFilter.clear();
 }
 
 inline int RequestInjectionData::getActiveLineBreak() const {
@@ -182,22 +195,6 @@ inline void RequestInjectionData::setErrorReportingLevel(int64_t level) {
 
 inline int64_t RequestInjectionData::getMemoryLimitNumeric() const {
   return m_maxMemoryNumeric;
-}
-
-inline const std::string& RequestInjectionData::getVariablesOrder() const {
-  return m_variablesOrder;
-}
-
-inline void RequestInjectionData::setVariablesOrder(const std::string& order) {
-  m_variablesOrder = order;
-}
-
-inline const std::string& RequestInjectionData::getRequestOrder() const {
-  return m_requestOrder;
-}
-
-inline void RequestInjectionData::setRequestOrder(const std::string& order) {
-  m_requestOrder = order;
 }
 
 inline int64_t RequestInjectionData::getSocketDefaultTimeout() const {

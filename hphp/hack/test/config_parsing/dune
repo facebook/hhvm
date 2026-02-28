@@ -1,0 +1,38 @@
+(executable
+ (name test_hh_conf_equivalence)
+ (modules test_hh_conf_equivalence)
+ (link_flags
+  (:standard
+   (:include ../../src/dune_config/ld-opts.sexp)))
+ (modes exe byte_complete)
+ (libraries
+  default_injector_config
+  global_options
+  hh_config
+  parser_options
+  server_config
+  utils_config_file_common
+  utils_core
+  unit_test))
+
+(rule
+ (alias test_hh_conf_equivalence)
+ (deps
+  %{exe:test_hh_conf_equivalence.exe}
+  configs/bad_hh.conf
+  configs/complete_hh.conf
+  configs/empty_hh.conf
+  configs/real_hh.conf
+  configs/dump_tasts_list.txt)
+ (action
+  (chdir configs
+   (run %{exe:test_hh_conf_equivalence.exe}
+    bad_hh.conf
+    complete_hh.conf
+    empty_hh.conf
+    real_hh.conf))))
+
+(alias
+ (name runtest)
+ (deps
+  (alias test_hh_conf_equivalence)))

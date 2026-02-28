@@ -21,15 +21,15 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+struct PhpGostCtx {
   unsigned int state[16];
   unsigned int count[2];
   unsigned char length;
   unsigned char buffer[32];
-} PHP_GOST_CTX;
+} ;
 
 hash_gost::hash_gost()
-  : HashEngine(32, 32, sizeof(PHP_GOST_CTX)) {
+  : HashEngine(32, 32, sizeof(PhpGostCtx)) {
 }
 
 /*
@@ -231,7 +231,7 @@ static inline void Gost(unsigned int state[8], unsigned int data[8]) {
   SHIFT61(h, v);
 }
 
-static inline void GostTransform(PHP_GOST_CTX *context,
+static inline void GostTransform(PhpGostCtx *context,
                                  const unsigned char input[32]) {
   int i, j;
   unsigned int data[8], temp = 0;
@@ -250,7 +250,7 @@ static inline void GostTransform(PHP_GOST_CTX *context,
 }
 
 void hash_gost::hash_init(void *context_) {
-  PHP_GOST_CTX *context = (PHP_GOST_CTX*)context_;
+  PhpGostCtx *context = (PhpGostCtx*)context_;
   memset(context, 0, sizeof(*context));
 }
 
@@ -258,7 +258,7 @@ static const unsigned int MAX32 = 0xffffffffLU;
 
 void hash_gost::hash_update(void *context_, const unsigned char *input,
                             unsigned int len) {
-  PHP_GOST_CTX *context = (PHP_GOST_CTX*)context_;
+  PhpGostCtx *context = (PhpGostCtx*)context_;
   if ((MAX32 - context->count[0]) < (len * 8)) {
     context->count[1]++;
     context->count[0] = MAX32 - context->count[0];
@@ -290,7 +290,7 @@ void hash_gost::hash_update(void *context_, const unsigned char *input,
 }
 
 void hash_gost::hash_final(unsigned char *digest, void *context_) {
-  PHP_GOST_CTX *context = (PHP_GOST_CTX*)context_;
+  PhpGostCtx *context = (PhpGostCtx*)context_;
   unsigned int i, j, l[8] = {0};
 
   if (context->length) {

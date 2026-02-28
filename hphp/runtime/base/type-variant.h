@@ -30,10 +30,12 @@
 #include "hphp/runtime/vm/rclass-meth-data.h"
 #include "hphp/runtime/vm/rfunc-data.h"
 
+#include "hphp/util/configs/eval.h"
+
 #include <algorithm>
 #include <type_traits>
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -78,6 +80,7 @@ public:
   bool isClass()     const { return isClassType(getType()); }
   bool isLazyClass() const { return isLazyClassType(getType()); }
   bool isClsMeth()   const { return isClsMethType(getType()); }
+  bool isEnumClassLabel() const { return isEnumClassLabelType(getType()); }
 
   bool isPrimitive() const { return !isRefcountedType(type(m_val)); }
 
@@ -207,12 +210,12 @@ struct variant_ref : variant_ref_detail::base<false> {
   void set(const StaticString & v) noexcept;
   void set(const Array& v) noexcept { set(v.get()); }
   void set(const Object& v) noexcept { set(v.get()); }
-  void set(const Resource& v) noexcept { set(v.hdr()); }
+  void set(const OptResource& v) noexcept { set(v.hdr()); }
 
   void set(String&& v) noexcept { steal(v.detach()); }
   void set(Array&& v) noexcept { steal(v.detach()); }
   void set(Object&& v) noexcept { steal(v.detach()); }
-  void set(Resource&& v) noexcept { steal(v.detachHdr()); }
+  void set(OptResource&& v) noexcept { steal(v.detachHdr()); }
 
   template<typename T>
   void set(const req::ptr<T> &v) noexcept {
@@ -336,7 +339,7 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(const String& v) noexcept : Variant(v.get()) {}
   /* implicit */ Variant(const Array& v) noexcept : Variant(v.get()) { }
   /* implicit */ Variant(const Object& v) noexcept : Variant(v.get()) {}
-  /* implicit */ Variant(const Resource& v) noexcept
+  /* implicit */ Variant(const OptResource& v) noexcept
   : Variant(v.hdr()) {}
 
   /* implicit */ Variant(Class* v) {
@@ -442,6 +445,13 @@ struct Variant : private TypedValue {
     m_type = KindOfPersistentString;
   }
 
+  enum class EnumClassLabelInit {};
+  explicit Variant(const StringData *s, EnumClassLabelInit) noexcept {
+    assertx(!s->isRefCounted());
+    m_data.pstr = const_cast<StringData*>(s);
+    m_type = KindOfEnumClassLabel;
+  }
+
   // These are prohibited, but declared just to prevent accidentally
   // calling the bool constructor just because we had a pointer to
   // const.
@@ -533,7 +543,7 @@ struct Variant : private TypedValue {
   }
 
   // Move ctor for resources
-  /* implicit */ Variant(Resource&& v) noexcept {
+  /* implicit */ Variant(OptResource&& v) noexcept {
     auto hdr = v.hdr();
     if (hdr) {
       m_type = KindOfResource;
@@ -716,20 +726,20 @@ struct Variant : private TypedValue {
     return *reinterpret_cast<Object*>(&m_data.pobj);
   }
 
-  ALWAYS_INLINE const Resource& asCResRef() const {
+  ALWAYS_INLINE const OptResource& asCResRef() const {
     assertx(m_type == KindOfResource && m_data.pres);
-    return *reinterpret_cast<const Resource*>(&m_data.pres);
+    return *reinterpret_cast<const OptResource*>(&m_data.pres);
   }
 
-  ALWAYS_INLINE const Resource& toCResRef() const {
+  ALWAYS_INLINE const OptResource& toCResRef() const {
     assertx(is(KindOfResource));
     assertx(m_data.pres);
-    return *reinterpret_cast<const Resource*>(&m_data.pres);
+    return *reinterpret_cast<const OptResource*>(&m_data.pres);
   }
 
-  ALWAYS_INLINE Resource & asResRef() {
+  ALWAYS_INLINE OptResource & asResRef() {
     assertx(m_type == KindOfResource && m_data.pres);
-    return *reinterpret_cast<Resource*>(&m_data.pres);
+    return *reinterpret_cast<OptResource*>(&m_data.pres);
   }
 
   /**
@@ -789,6 +799,9 @@ struct Variant : private TypedValue {
   bool isClsMeth() const {
     return isClsMethType(getType());
   }
+  bool isEnumClassLabel() const {
+    return getType() == KindOfEnumClassLabel;
+  }
 
   bool isNumeric(bool checkString = false) const noexcept;
   DataType toNumeric(int64_t &ival, double &dval, bool checkString = false)
@@ -818,6 +831,7 @@ struct Variant : private TypedValue {
       case KindOfLazyClass:
       case KindOfClsMeth:
       case KindOfRClsMeth:
+      case KindOfEnumClassLabel:
         return false;
     }
     not_reached();
@@ -931,9 +945,6 @@ struct Variant : private TypedValue {
     if (hasNumData(m_type)) return m_data.num;
     return toBooleanHelper();
   }
-  char toByte() const { return (char)toInt64();}
-  short toInt16(int base = 10) const { return (short)toInt64(base);}
-  int toInt32(int base = 10) const { return (int)toInt64(base);}
   int64_t toInt64() const {
     if (isNullType(m_type)) return 0;
     if (hasNumData(m_type)) return m_data.num;
@@ -979,8 +990,8 @@ struct Variant : private TypedValue {
     if (isObjectType(m_type)) return Object{m_data.pobj};
     return Object::attach(tvCastToObjectData(*this));
   }
-  Resource toResource() const {
-    if (m_type == KindOfResource) return Resource{m_data.pres};
+  OptResource toResource() const {
+    if (m_type == KindOfResource) return OptResource{m_data.pres};
     return toResourceHelper();
   }
 
@@ -1007,9 +1018,6 @@ struct Variant : private TypedValue {
     assertx(copy.isKeyset());
     return Array::attach(copy.detach().m_data.parr);
   }
-
-  Array toVArray() const { return toVec(); }
-  Array toDArray() const { return toDict(); }
 
   template <typename T>
   typename std::enable_if<std::is_base_of<ResourceData,T>::value, bool>::type
@@ -1281,12 +1289,12 @@ struct Variant : private TypedValue {
   void set(const StaticString & v) noexcept;
   void set(const Array& v) noexcept { set(v.get()); }
   void set(const Object& v) noexcept { set(v.get()); }
-  void set(const Resource& v) noexcept { set(v.hdr()); }
+  void set(const OptResource& v) noexcept { set(v.hdr()); }
 
   void set(String&& v) noexcept { steal(v.detach()); }
   void set(Array&& v) noexcept { steal(v.detach()); }
   void set(Object&& v) noexcept { steal(v.detach()); }
-  void set(Resource&& v) noexcept { steal(v.detachHdr()); }
+  void set(OptResource&& v) noexcept { steal(v.detachHdr()); }
 
   template<typename T>
   void set(const req::ptr<T> &v) noexcept {
@@ -1308,9 +1316,7 @@ private:
   bool   toBooleanHelper() const;
   int64_t  toInt64Helper(int base = 10) const;
   Array  toPHPArrayHelper() const;
-  Resource toResourceHelper() const;
-
-  DataType convertToNumeric(int64_t *lval, double *dval) const;
+  OptResource toResourceHelper() const;
 };
 
 Variant operator+(const Variant & lhs, const Variant & rhs) = delete;
@@ -1444,6 +1450,7 @@ private:
         return;
       case KindOfRClsMeth:
         assertx(m_data.prclsmeth->checkCount());
+        return;
       case KindOfObject:
         assertx(m_data.pobj->checkCount());
         return;
@@ -1509,7 +1516,7 @@ inline void concat_assign(Variant &v1, const char* s2) = delete;
 inline void concat_assign(tv_lval lhs, const String& s2) {
   if (!tvIsString(lhs)) {
     const auto notice_level =
-      flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForStrConcat2);
+      flagToConvNoticeLevel(Cfg::Eval::NoticeOnCoerceForStrConcat2);
     tvCastToStringInPlace(lhs, notice_level, s_ConvNoticeReasonConcat.get());
   }
   asStrRef(lhs) += s2;

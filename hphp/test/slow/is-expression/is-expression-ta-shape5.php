@@ -24,5 +24,5 @@ function entrypoint_isexpressiontashape5(): void {
     throw new Exception($string);
   });
 
-  is_shape(darray[0 => 0, 1 => 'one']);
+  is_shape(dict[0 => 0, 1 => 'one']);
 }

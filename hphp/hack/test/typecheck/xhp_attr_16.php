@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Superclass {}
 class Subclass extends Superclass {}

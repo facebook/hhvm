@@ -1,6 +1,6 @@
 <?hh
 
-function dump($elems) {
+function dump($elems) :mixed{
  foreach ($elems as $elem) {
   var_dump($elem->nodeName);
   dump($elem->childNodes);
@@ -9,7 +9,7 @@ function dump($elems) {
 
 
 <<__EntryPoint>>
-function main_1673() {
+function main_1673() :mixed{
 $xml = <<<HERE
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <foo xmlns="http://www.example.com/ns/foo"

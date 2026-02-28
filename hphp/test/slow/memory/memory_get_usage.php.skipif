@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 if (ini_get('hhvm.disable_small_allocator') === '1') {
-  die("skip memory_get_usage behaves differently w/out the small-block allocator.");
+  exit("skip memory_get_usage behaves differently w/out the small-block allocator.");
 }
 }

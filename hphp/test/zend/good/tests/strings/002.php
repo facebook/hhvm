@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 error_reporting(0);
-($fp = fopen("php://stdout", "w")) || die("Arrggsgg!!");
+($fp = fopen("php://stdout", "w")) || exit("Arrggsgg!!");
 $x = fprintf($fp, "fprintf test 1:%.5s", "abcdefghij");
 echo "\n";
 var_dump($x);
@@ -16,9 +16,9 @@ printf("printf test 7:%010.2f\n", 2.5);
 printf("printf test 8:<%20s>\n", "foo");
 printf("printf test 9:<%-20s>\n", "bar");
 printf("printf test 10: 123456789012345\n");
-printf("printf test 10:<%15s>\n", "høyesterettsjustitiarius");
+printf("printf test 10:<%15s>\n", "h\xf8yesterettsjustitiarius");
 printf("printf test 11: 123456789012345678901234567890\n");
-printf("printf test 11:<%30s>\n", "høyesterettsjustitiarius");
+printf("printf test 11:<%30s>\n", "h\xf8yesterettsjustitiarius");
 printf("printf test 12:%5.2f\n", -12.34);
 printf("printf test 13:%5d\n", -12);
 printf("printf test 14:%c\n", 64);
@@ -38,5 +38,5 @@ printf("printf test 27:%3\$d %d %d\n", 1, 2, 3);
 printf("printf test 28:%2\$02d %1\$2d\n", 1, 2);
 printf("printf test 29:%2\$-2d %1\$2d\n", 1, 2);
 print("printf test 30:"); printf("%0\$s", 1); print("x\n");
-vprintf("vprintf test 1:%2\$-2d %1\$2d\n", varray[1, 2]);
+vprintf("vprintf test 1:%2\$-2d %1\$2d\n", vec[1, 2]);
 }

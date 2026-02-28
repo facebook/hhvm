@@ -6,12 +6,12 @@
  */
 
 function ut_main()
-{
+:mixed{
     $res_str='';
 
-    $disp_locales=varray['en','fr','de'];
+    $disp_locales=vec['en','fr','de'];
 
-    $locales = varray[
+    $locales = vec[
         'uk-ua_CALIFORNIA@currency=;currency=GRN',
         'root',
         'uk@currency=EURO',

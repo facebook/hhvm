@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$sample_urls = varray [
+$sample_urls = vec[
 '',
 '64.246.30.37',
 'http://64.246.30.37',
@@ -73,11 +73,11 @@ $sample_urls = varray [
 
     foreach ($sample_urls as $url) {
         echo "\n--> $url: ";
-        var_dump(@parse_url($url));
+        var_dump(parse_url($url));
     }
 
     $url = 'http://secret:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123';
-    foreach (varray[PHP_URL_SCHEME,PHP_URL_HOST,PHP_URL_PORT,PHP_URL_USER,PHP_URL_PASS,PHP_URL_PATH,PHP_URL_QUERY,PHP_URL_FRAGMENT] as $v) {
+    foreach (vec[PHP_URL_SCHEME,PHP_URL_HOST,PHP_URL_PORT,PHP_URL_USER,PHP_URL_PASS,PHP_URL_PATH,PHP_URL_QUERY,PHP_URL_FRAGMENT] as $v) {
     var_dump(parse_url($url, $v));
     }
 }

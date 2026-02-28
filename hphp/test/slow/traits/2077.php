@@ -1,14 +1,14 @@
 <?hh
 
 trait baz  {
-  public function bar() {
+  public function bar() :AsyncGenerator<mixed,mixed,void>{
     yield 1;
   }
 }
 
 class foo {
   use baz;
-  public function bar() {
+  public function bar() :mixed{
   }
 }
 

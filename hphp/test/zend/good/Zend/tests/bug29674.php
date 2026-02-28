@@ -3,7 +3,7 @@
 class BaseClass {
   private $private_base = "Base";
 
-  function printVars() {
+  function printVars() :mixed{
     var_dump($this->private_base);
     try {
       var_dump($this->private_child);

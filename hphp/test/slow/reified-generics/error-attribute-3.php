@@ -1,7 +1,7 @@
 <?hh
 
 class C {
-  <<__Reified(varray[1,2])>>
-  function f() {}
+  <<__Reified(vec[1,2])>>
+  function f() :mixed{}
 }
 

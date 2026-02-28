@@ -1,7 +1,7 @@
 async function bar(ExampleContext $_): Awaitable<
   ExprTree<
     ExampleDsl,
-    mixed,
+    ExampleDsl::TAst,
     (function(ExampleString): ExampleInt)
   >
 >

@@ -1,7 +1,7 @@
 <?hh
 
-function gen() {
-  $a = darray['a' => 'apple', 'b' => 'banana', 'c' => 'citrus'];
+function gen() :AsyncGenerator<mixed,mixed,void>{
+  $a = dict['a' => 'apple', 'b' => 'banana', 'c' => 'citrus'];
   foreach ($a as $k1 => $v1) {
     foreach ($a as $k2 => $v2) {
       if ($k2 == 'a') {
@@ -14,7 +14,7 @@ function gen() {
 }
 
 <<__EntryPoint>>
-function main_232() {
+function main_232() :mixed{
 foreach (gen() as $_) {
 }
 }

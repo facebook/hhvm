@@ -13,11 +13,6 @@ open WorkerController
 
 let entry_counter = ref 0
 
-let win32_worker ~restore p =
-  (* Explicitly ensure that Folly is initialized (installs signal handlers) *)
-  Folly.ensure_folly_init ();
-  win32_worker_main restore (p.entry_state, p.controller_fd)
-
 let unix_worker ~restore { longlived_workers; entry_state; controller_fd } =
   (* Explicitly ensure that Folly is initialized (installs signal handlers) *)
   Folly.ensure_folly_init ();
@@ -34,10 +29,5 @@ let register ~restore =
     Gc.set gc_control
   in
   let name = Printf.sprintf "subprocess_%d" !entry_counter in
-  let worker_main =
-    if Sys.win32 then
-      win32_worker ~restore
-    else
-      unix_worker ~restore
-  in
+  let worker_main = unix_worker ~restore in
   Daemon.register_entry_point name worker_main

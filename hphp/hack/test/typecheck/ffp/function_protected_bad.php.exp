@@ -1,8 +1,8 @@
-File "function_protected_bad.php", line 4, characters 7-15:
+ERROR: File "function_protected_bad.php", line 4, characters 7-15:
 Top-level functions cannot be declared `protected` (Parsing[1002])
-File "function_protected_bad.php", line 4, characters 33-36:
+ERROR: File "function_protected_bad.php", line 4, characters 33-36:
 `async` functions must have an `Awaitable` return type. (Parsing[1002])
-File "function_protected_bad.php", line 4, characters 26-28:
+ERROR: File "function_protected_bad.php", line 4, characters 26-28:
 Invalid return type (Typing[4336])
   File "function_protected_bad.php", line 4, characters 33-36:
   Expected `void`

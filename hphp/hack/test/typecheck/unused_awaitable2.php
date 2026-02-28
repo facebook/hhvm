@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -13,7 +13,7 @@ abstract class C {
   public async function gen(): Awaitable<void> {}
 
   public function f(): void {
-    foreach (varray[] as $_) {
+    foreach (vec[] as $_) {
     }
     $this->gen();
   }

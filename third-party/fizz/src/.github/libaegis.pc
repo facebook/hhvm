@@ -1,0 +1,9 @@
+prefix="$GITHUB_WORKSPACE"/tools/libaegis/zig-out
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+Name: libaegis
+Description: Aegis library
+Version: 1.0.0
+Libs: -L${libdir} -laegis
+Cflags: -I${includedir}

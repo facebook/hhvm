@@ -1,4 +1,0 @@
-File "sealed_class.php", line 5, characters 3-10:
-Class `B` in sealed whitelist for `S`, but does not extend `S` (Typing[4445])
-  File "sealed_class.php", line 10, characters 7-7:
-  Definition is here

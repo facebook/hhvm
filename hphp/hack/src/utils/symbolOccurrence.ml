@@ -12,19 +12,27 @@ type override_info = {
   method_name: string;
   is_static: bool;
 }
-[@@deriving ord, eq]
+[@@deriving ord, eq, show]
 
 type class_id_type =
   | ClassId
+  | ExpressionTreeVisitor
   | Other
-[@@deriving ord, eq]
+[@@deriving ord, eq, show]
 
 type receiver_class =
   | ClassName of string
   | UnknownClass (* invoked dynamically *)
-[@@deriving ord, eq]
+[@@deriving ord, eq, show]
 
 type keyword_with_hover_docs =
+  | Class
+  | Interface
+  | Trait
+  | Enum
+  | EnumClass
+  | Type
+  | Newtype
   | FinalOnClass
   | FinalOnMethod
   | AbstractOnClass
@@ -35,6 +43,16 @@ type keyword_with_hover_docs =
   | ReadonlyOnParameter
   | ReadonlyOnReturnType
   | ReadonlyOnExpression
+  | XhpAttribute
+  | XhpChildren
+  | ConstGlobal
+  | ConstOnClass
+  | ConstType
+  | StaticOnMethod
+  | StaticOnProperty
+  | Use
+  | FunctionGlobal
+  | FunctionOnMethod
   | Async
   | AsyncBlock
   | Await
@@ -42,10 +60,14 @@ type keyword_with_hover_docs =
   | Public
   | Protected
   | Private
-[@@deriving ord, eq]
+  | Internal
+  | ModuleInModuleDeclaration
+  | ModuleInModuleMembershipDeclaration
+[@@deriving ord, eq, show]
 
 type built_in_type_hint =
   | BIprimitive of Aast_defs.tprim
+  | BIstring
   | BImixed
   | BIdynamic
   | BInothing
@@ -54,7 +76,8 @@ type built_in_type_hint =
   (* TODO: support self and static too.*)
   | BIthis
   | BIoption
-[@@deriving ord, eq]
+  | BIclass_ptr
+[@@deriving ord, eq, show]
 
 type receiver =
   | FunctionReceiver of string
@@ -63,7 +86,7 @@ type receiver =
       meth_name: string;
       is_static: bool;
     }
-[@@deriving ord, eq]
+[@@deriving ord, eq, show]
 
 type kind =
   | Class of class_id_type
@@ -89,18 +112,26 @@ type kind =
      This is purely for IDE hover information, and is only used when
      we can easily find a concrete receiver (e.g. no complex generics). *)
   | BestEffortArgument of receiver * int
-[@@deriving ord, eq]
+  | HhFixme
+  | HhIgnore
+  | Module
+[@@deriving ord, eq, show]
 
 type 'a t = {
   name: string;
   type_: kind;
-  is_declaration: bool;
-  (* Span of the symbol itself *)
-  pos: 'a Pos.pos;
+  is_declaration: 'a Pos.pos option;
+      (** If this is a declaration, the span of the full declaration, or None otherwise *)
+  pos: 'a Pos.pos;  (** Span of the symbol name itself *)
 }
-[@@deriving ord]
+[@@deriving ord, show]
 
-let to_absolute x = { x with pos = Pos.to_absolute x.pos }
+let to_absolute x =
+  {
+    x with
+    is_declaration = Option.map Pos.to_absolute x.is_declaration;
+    pos = Pos.to_absolute x.pos;
+  }
 
 let kind_to_string = function
   | Class _ -> "class"
@@ -119,6 +150,36 @@ let kind_to_string = function
   | Keyword _ -> "keyword"
   | PureFunctionContext -> "context_braces"
   | BestEffortArgument _ -> "argument"
+  | HhFixme -> "hh_fixme"
+  | HhIgnore -> "hh_ignore"
+  | Module -> "module"
+
+let is_top_level_definition { name = _; type_; is_declaration; pos = _ } : bool
+    =
+  Option.is_some is_declaration
+  &&
+  match type_ with
+  | Class _
+  | Function
+  | GConst
+  | Module ->
+    true
+  | BuiltInType _
+  | Method _
+  | LocalVar
+  | Property _
+  | XhpLiteralAttr _
+  | ClassConst _
+  | Typeconst _
+  | TypeVar
+  | Attribute _
+  | EnumClassLabel _
+  | Keyword _
+  | PureFunctionContext
+  | BestEffortArgument _
+  | HhFixme
+  | HhIgnore ->
+    false
 
 let enclosing_class occurrence =
   match occurrence.type_ with
@@ -156,3 +217,43 @@ let is_xhp_literal_attr occurrence =
   match occurrence.type_ with
   | XhpLiteralAttr _ -> true
   | _ -> false
+
+let built_in_type_hover (bt : built_in_type_hint) : string =
+  match bt with
+  | BIprimitive prim ->
+    (match prim with
+    | Aast_defs.Tnull -> "The value `null`. The opposite of `nonnull`."
+    | Aast_defs.Tvoid ->
+      "A `void` return type indicates a function that never returns a value. `void` functions usually have side effects."
+    | Aast_defs.Tint -> "A 64-bit integer."
+    | Aast_defs.Tbool -> "A boolean value, `true` or `false`."
+    | Aast_defs.Tfloat -> "A 64-bit floating-point number."
+    | Aast_defs.Tresource ->
+      "An external resource, such as a file handle or database connection."
+    | Aast_defs.Tnum -> "An `int` or a `float`."
+    | Aast_defs.Tarraykey ->
+      "An `int` or a `string`. `arraykey` is a common key type for `dict`s."
+    | Aast_defs.Tnoreturn ->
+      "A `noreturn` function always errors or loops forever.")
+  | BIstring -> "A sequence of characters."
+  | BImixed ->
+    "Any value at all. It's usually better to use a more specific type, or a generic."
+  | BIdynamic ->
+    "Any value at all. Unlike `mixed`, the type checker allows any operation on a `dynamic` value, even if e.g. a method doesn't actually exist.\n\n"
+    ^ "All operations on a `dynamic` value return another `dynamic` value. Prefer more specific types so the type checker can help you.\n\n"
+    ^ "To convert a `generic` value to something specific, use `$foo as SomeSpecificType`. This will check the type at runtime and the "
+    ^ "type checker will verify types after this point."
+  | BInothing ->
+    "The `nothing` type has no values, it's the empty type.\n\nA function returning `nothing` either loops forever or throws an exception. A `vec<nothing>` is always empty."
+  | BInonnull -> "Any value except `null`."
+  | BIshape ->
+    "A shape is a key-value data structure where the keys are known."
+    ^ " Shapes are value types, just like `dict` and `vec`.\n\n"
+    ^ " A closed shape, such as `shape('x' => int)`, has a fixed number of keys. "
+    ^ " An open shape, such as `shape('x' => int, ...)`, may have additional keys."
+  | BIthis ->
+    "`this` represents the current class.\n\n"
+    ^ "`this` refers to the type of the current instance at runtime. In a child class, `this` refers to the child class, even if the method is defined in the parent."
+  | BIoption -> "The type `?Foo` allows either `Foo` or `null`."
+  | BIclass_ptr ->
+    "For any class C, C::class creates a class<C>. This value is used for\nexpressions like `new $c()` and `$c::foo()`."

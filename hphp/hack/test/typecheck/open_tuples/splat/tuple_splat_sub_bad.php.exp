@@ -1,0 +1,36 @@
+ERROR: File "tuple_splat_sub_bad.php", line 10, characters 20-26:
+Invalid argument (Typing[4110])
+  File "tuple_splat_sub_bad.php", line 5, characters 55-65:
+  Expected `(int, ..._)`
+  File "tuple_splat_sub_bad.php", line 10, characters 20-26:
+  But got `()`
+ERROR: File "tuple_splat_sub_bad.php", line 12, characters 20-27:
+Invalid argument (Typing[4323])
+  File "tuple_splat_sub_bad.php", line 5, characters 27-27:
+  `T` is a constrained type parameter
+  File "tuple_splat_sub_bad.php", line 5, characters 32-52:
+  This type constraint is violated
+  File "tuple_splat_sub_bad.php", line 5, characters 32-52:
+  Expected `(string, arraykey...)`
+  File "tuple_splat_sub_bad.php", line 12, characters 20-27:
+  But got `()`
+ERROR: File "tuple_splat_sub_bad.php", line 14, characters 20-32:
+Invalid argument (Typing[4323])
+  File "tuple_splat_sub_bad.php", line 5, characters 27-27:
+  `T` is a constrained type parameter
+  File "tuple_splat_sub_bad.php", line 5, characters 32-52:
+  This type constraint is violated
+  File "tuple_splat_sub_bad.php", line 5, characters 33-38:
+  Expected `string`
+  File "tuple_splat_sub_bad.php", line 14, characters 29-31:
+  But got `float`
+ERROR: File "tuple_splat_sub_bad.php", line 16, characters 20-39:
+Invalid argument (Typing[4323])
+  File "tuple_splat_sub_bad.php", line 5, characters 27-27:
+  `T` is a constrained type parameter
+  File "tuple_splat_sub_bad.php", line 5, characters 32-52:
+  This type constraint is violated
+  File "tuple_splat_sub_bad.php", line 5, characters 41-48:
+  Expected `arraykey`
+  File "tuple_splat_sub_bad.php", line 16, characters 34-38:
+  But got `bool`

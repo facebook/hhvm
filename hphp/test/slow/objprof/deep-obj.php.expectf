@@ -1,15 +1,70 @@
+=== Unlimited depth ===
+C bytes: %d
 
-Warning: objprof: data structure is too deep, pruning traversal in %s/test/slow/objprof/deep-obj.php on line 20
-dict(1) {
-  ["C"]=>
-  dict(4) {
-    ["instances"]=>
-    int(1)
-    ["bytes"]=>
-    int(%d)
-    ["bytes_normalized"]=>
-    float(%f)
-    ["paths"]=>
-    NULL
-  }
-}
+=== Max depth 100 ===
+C bytes: %d
+
+=== Max depth 10 ===
+C bytes: %d
+
+=== Max visits 100 ===
+C bytes: %d
+
+=== Max visits 10 ===
+C bytes: %d
+
+=== Verification ===
+bytes(depth=10) < bytes(depth=100): true
+bytes(depth=100) < bytes(unlimited): true
+bytes(visits=10) < bytes(visits=100): true
+bytes(visits=100) < bytes(unlimited): true
+
+=== objprof_get_data_with_graph_stats ===
+
+--- Unlimited depth and visits ---
+nodes_visited: 2001
+max_depth_seen: 4001
+
+--- Max depth 10 ---
+nodes_visited: 5
+max_depth_seen: 10
+max_depth_seen <= 10: true
+
+--- Max visits 100 ---
+nodes_visited: 100
+max_depth_seen: 199
+nodes_visited <= 100: true
+nodes_visited < unlimited: true
+
+=== objprof_get_data_extended_with_graph_stats ===
+
+--- Unlimited depth and visits ---
+nodes_visited: 2001
+max_depth_seen: 4001
+
+--- Max depth 50 ---
+nodes_visited: 25
+max_depth_seen: 50
+max_depth_seen <= 50: true
+
+--- Max visits 50 ---
+nodes_visited: 50
+max_depth_seen: 99
+nodes_visited <= 50: true
+
+=== objprof_get_paths_with_graph_stats ===
+
+--- Unlimited depth and visits ---
+nodes_visited: 2001
+max_depth_seen: 4001
+
+--- Max depth 20 ---
+nodes_visited: 10
+max_depth_seen: 20
+max_depth_seen <= 20: true
+
+--- Max visits 25 ---
+nodes_visited: 25
+max_depth_seen: 49
+nodes_visited <= 25: true
+

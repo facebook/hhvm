@@ -1,9 +1,9 @@
 <?hh
 
-function foo() {}
-function bar() {}
+function foo() :mixed{}
+function bar() :mixed{}
 
-function W($f) {
+function W($f) :mixed{
   try {
     var_dump($f());
   } catch (Exception $e) {
@@ -11,7 +11,7 @@ function W($f) {
   }
 }
 
-function baz($a, $b, $c, $d, $e) {
+function baz($a, $b, $c, $d, $e) :mixed{
   W(() ==> $a === $b); W(() ==> $a == $b);
   W(() ==> $a < $b);   W(() ==> $a <= $b);
   W(() ==> $a > $b);   W(() ==> $a >= $b);
@@ -37,6 +37,6 @@ function baz($a, $b, $c, $d, $e) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   baz(foo<>, foo<>, bar<>, 'foo', 'bar');
 }

@@ -4,7 +4,7 @@ class Foo {
     protected $unsetme = 1;
     protected $keepme = 2;
 
-    public function test() {
+    public function test() :mixed{
         $a = get_object_vars($this);
 
         foreach ($a as $k => $v) {

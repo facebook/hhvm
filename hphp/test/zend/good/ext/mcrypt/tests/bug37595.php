@@ -1,13 +1,13 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $cipher_alg = MCRYPT_BLOWFISH;
-$skey = varray[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+$skey = vec[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
 $key='';
 foreach($skey as $t) {
 	    $key .= chr($t);
 		}
 
-$sstr = varray[1,2,3,4,5,6,7,8];
+$sstr = vec[1,2,3,4,5,6,7,8];
 $iv='';
 foreach($sstr as $s) {
     $iv .= chr($s);
@@ -17,7 +17,7 @@ $str = "12345678";
 
 $td = mcrypt_module_open(MCRYPT_BLOWFISH,'',MCRYPT_MODE_CBC,'');
 
-$data = varray[
+$data = vec[
 	'12345678',
 	'123456789',
 	"\x001234567",
@@ -33,7 +33,7 @@ foreach ($data as $val) {
 	mcrypt_generic_deinit($td);
 
 	mcrypt_generic_init($td, $key, $iv);
-	var_dump($dec = @mdecrypt_generic($td, (string)$enc));
+	var_dump($dec = mdecrypt_generic($td, (string)$enc));
 }
 
 mcrypt_module_close($td);

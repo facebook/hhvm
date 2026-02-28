@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /**
  * Nested anonymous shape

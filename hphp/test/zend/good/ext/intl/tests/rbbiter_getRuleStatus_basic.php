@@ -18,7 +18,7 @@ function entrypoint_rbbiter_getRuleStatus_basic(): void {
 !!safe_reverse;
 RULES;
   $rbbi = new IntlRuleBasedBreakIterator($rules);
-  $rbbi->setText('sdfkjsdf88á.... ,;');
+  $rbbi->setText("sdfkjsdf88\xc3\xa1.... ,;");
 
   do {
   	echo "pos        : {$rbbi->current()}\n",

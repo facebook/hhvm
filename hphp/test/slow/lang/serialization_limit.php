@@ -1,14 +1,14 @@
 <?hh
 
-function foo($a) {
-  $v = varray[];
+function foo($a) :mixed{
+  $v = vec[];
   for ($i = 0; $i < 1024; $i++) {
     $v[] = $a;
   }
   return $v;
 }
 
-function test() {
+function test() :mixed{
   $a = foo(1);
   $a = foo($a);
   $a = foo($a);
@@ -17,6 +17,6 @@ function test() {
 
 
 <<__EntryPoint>>
-function main_serialization_limit() {
+function main_serialization_limit() :mixed{
 test();
 }

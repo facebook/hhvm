@@ -1,8 +1,0 @@
-File "generics.php", line 10, characters 13-14:
-Invalid argument (Typing[4110])
-  File "generics.php", line 8, characters 17-19:
-  Expected `int`
-  File "generics.php", line 5, characters 23-23:
-    via this generic `T`
-  File "generics.php", line 9, characters 8-18:
-  But got `dynamic`, the result of calling a `dynamic` type as a function

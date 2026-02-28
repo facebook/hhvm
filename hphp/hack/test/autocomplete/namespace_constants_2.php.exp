@@ -1,0 +1,8 @@
+bar_a
+  INSERT bar_a
+  constant
+SORT TEXT: none
+bar_b
+  INSERT bar_b
+  constant
+SORT TEXT: none

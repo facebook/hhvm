@@ -43,12 +43,7 @@ constexpr size_t smashableCmpqLen() { return 0; }
 constexpr size_t smashableCallLen() { return 4; } // not including veneer
 constexpr size_t smashableJmpLen()  { return 4; } // not including veneer
 constexpr size_t smashableJccLen()  { return 4; } // not including veneer
-
-/*
- * Don't align the smashables on arm.  The sensitive part of the instruction is
- * the literal which is stored out of line.
- */
-constexpr size_t smashableAlignTo() { return 0; }
+constexpr size_t smashableInterceptLen() { return 4; } // not including veneer
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& meta, uint64_t imm,
                       PhysReg d);
@@ -61,6 +56,8 @@ void smashCmpq(TCA inst, uint32_t imm);
 void smashCall(TCA inst, TCA target);
 void smashJmp(TCA inst, TCA target);
 void smashJcc(TCA inst, TCA target);
+void smashInterceptJcc(TCA inst);
+void smashInterceptJmp(TCA inst);
 
 bool possiblySmashableMovq(TCA inst);
 bool possiblySmashableJmp(TCA inst);
@@ -115,4 +112,3 @@ inline void smashInst(TCA addr, uint32_t newInst) {
 }
 
 }}
-

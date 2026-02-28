@@ -1,6 +1,0 @@
-=== Shape analysis results for parameter1.php
-Summary for \f:
-#{} [3:30-32] :
-  shape(
-    k => int
-  )

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type example_shape = shape(
   ?'example_1' => int,
@@ -19,7 +19,7 @@ type example_shape = shape(
 );
 function takes_example_shape(example_shape $in): string {
 
-  $bits = varray[];
+  $bits = vec[];
 
   if (Shapes::keyExists($in, 'example_1')) {
     $bits[] = 'example_1';

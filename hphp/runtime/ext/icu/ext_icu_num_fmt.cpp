@@ -15,7 +15,6 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/ext/icu/ext_icu_num_fmt.h"
-#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
 namespace HPHP::Intl {
@@ -23,8 +22,6 @@ namespace HPHP::Intl {
 // Internal resource data
 
 const StaticString s_NumberFormatter("NumberFormatter");
-
-Class* NumberFormatter::c_NumberFormatter = nullptr;
 
 /* workaround for ICU bug */
 #if U_ICU_VERSION_MAJOR_NUM == 3 && U_ICU_VERSION_MINOR_NUM < 8
@@ -471,7 +468,7 @@ static bool HHVM_METHOD(NumberFormatter, setTextAttribute,
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initNumberFormatter() {
+void IntlExtension::registerNativeNumberFormatter() {
   HHVM_ME(NumberFormatter, __construct);
   HHVM_ME(NumberFormatter, formatCurrency);
   HHVM_ME(NumberFormatter, format);
@@ -588,9 +585,7 @@ void IntlExtension::initNumberFormatter() {
   HHVM_RCC_INT(NumberFormatter, TYPE_DOUBLE, k_UNUM_TYPE_DOUBLE);
   HHVM_RCC_INT(NumberFormatter, TYPE_CURRENCY, k_UNUM_TYPE_CURRENCY);
 
-  Native::registerNativeDataInfo<NumberFormatter>(s_NumberFormatter.get());
-
-  loadSystemlib("icu_num_fmt");
+  Native::registerNativeDataInfo<NumberFormatter>();
 }
 
 //////////////////////////////////////////////////////////////////////////////

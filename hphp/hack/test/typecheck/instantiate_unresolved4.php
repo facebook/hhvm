@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,11 +10,11 @@
  */
 
 function foo<T>(mixed $x): varray<T> {
-  return varray[];
+  return vec[];
 }
 
 function a<T>(): varray<T> {
-  return varray[];
+  return vec[];
 }
 
 function f(): void {

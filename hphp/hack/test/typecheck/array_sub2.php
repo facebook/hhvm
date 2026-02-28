@@ -10,7 +10,7 @@
  */
 
 function get_keys<T2>(darray<bool, T2> $x): varray<bool> {
-  $result = varray[];
+  $result = vec[];
   foreach ($x as $k => $v) {
     $result[] = $k;
   }

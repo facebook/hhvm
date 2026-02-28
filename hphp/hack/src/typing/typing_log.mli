@@ -29,11 +29,33 @@ type log_structure =
   | Log_head of string * log_structure list
   | Log_type of string * Typing_defs.locl_ty
   | Log_decl_type of string * Typing_defs.decl_ty
-  | Log_type_i of string * Typing_defs.internal_type
+  | Log_type_i of string * Typing_defs_constraints.internal_type
 
+(** [log_with_level env level_category ~level log_f] executes
+  the the logging function [log_f] if the configured level for
+  the provided category is higher than [level]. *)
 val log_with_level :
   Typing_env_types.env -> string -> level:int -> (unit -> unit) -> unit
 
+(** [log_function pos ~function_name ~arguments ~result f]
+  write to output something like
+
+    File "file.php", line 16, characters 10-13:[4]
+      <function_name>
+        <arg1>: <value1>
+        <arg2>: <value2>
+          <any logging produced by f, indented>
+        <function_name result>: <result>
+  *)
+val log_function :
+  Pos_or_decl.t ->
+  function_name:string ->
+  arguments:(string * string) list ->
+  result:('a -> string option) ->
+  (unit -> 'a) ->
+  'a
+
+(** Logs a log_structure, which itself is a way to specify how to log types. *)
 val log_types :
   Pos_or_decl.t -> Typing_env_types.env -> log_structure list -> unit
 
@@ -44,9 +66,6 @@ val log_escape :
   string ->
   string list ->
   unit
-
-val log_global_inference_env :
-  Pos.t -> Typing_env_types.env -> Typing_inference_env.t_global -> unit
 
 val log_prop :
   int ->
@@ -69,7 +88,7 @@ val log_new_tvar_for_new_object :
 
 val log_new_tvar_for_tconst :
   Typing_env_types.env ->
-  Pos.t * Ident.t ->
+  Pos.t * Tvid.t ->
   Typing_defs.pos_id ->
   Typing_defs.locl_ty ->
   unit
@@ -82,15 +101,6 @@ val log_new_tvar_for_tconst_access :
   Typing_defs.pos_id ->
   unit
 
-val log_intersection :
-  level:int ->
-  Typing_env_types.env ->
-  Typing_reason.t ->
-  Typing_defs.locl_ty ->
-  Typing_defs.locl_ty ->
-  inter_ty:Typing_defs.locl_ty ->
-  unit
-
 val log_type_access :
   level:int ->
   Typing_defs.locl_ty ->
@@ -98,24 +108,24 @@ val log_type_access :
   Typing_env_types.env * Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty
 
-val log_localize :
-  level:int ->
-  Typing_defs.expand_env ->
-  Typing_defs.decl_ty ->
-  Typing_env_types.env * Typing_defs.locl_ty ->
-  Typing_env_types.env * Typing_defs.locl_ty
-
 val increment_feature_count : Typing_env_types.env -> string -> unit
 
-val log_pessimise_prop : Typing_env_types.env -> Pos_or_decl.t -> string -> unit
+val log_pessimise_prop : Typing_env_types.env -> Pos.t -> string -> unit
+
+val log_pessimise_return :
+  ?level:int -> Typing_env_types.env -> Pos.t -> string option -> unit
+
+val log_pessimise_poisoned_return :
+  ?level:int -> Typing_env_types.env -> Pos.t -> string -> unit
 
 val log_pessimise_param :
-  Typing_env_types.env -> Pos_or_decl.t -> string option -> unit
+  Typing_env_types.env ->
+  is_promoted_property:bool ->
+  Pos.t ->
+  Ast_defs.param_kind ->
+  string ->
+  unit
 
-module GlobalInference : sig
-  val log_merging_subgraph : Typing_env_types.env -> Pos.t -> unit
+val log_sd_pass : ?level:int -> Typing_env_types.env -> Pos.t -> unit
 
-  val log_merging_var : Typing_env_types.env -> Pos.t -> Ident.t -> unit
-end
-
-module GI = GlobalInference
+val should_log : Typing_env_types.env -> category:string -> level:int -> bool

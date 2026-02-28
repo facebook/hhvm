@@ -1,6 +1,6 @@
 <?hh
 
-function wrap($fun) {
+function wrap($fun) :mixed{
   try {
     $fun();
   } catch (Exception $e) {
@@ -8,7 +8,7 @@ function wrap($fun) {
   }
 }
 
-function comp($x, $y) {
+function comp($x, $y) :mixed{
   wrap(() ==> var_dump($x < $y));
   wrap(() ==> var_dump($x <= $y));
   wrap(() ==> var_dump($x > $y));
@@ -31,9 +31,9 @@ function main(): void {
 
   comp($f, 1);
 
-  comp($f, varray['Test','foo']);
+  comp($f, vec['Test','foo']);
 
-  comp($f, class_meth(Test::class, 'foo'));
+  comp($f, Test::foo<>);
 
   comp($f, "Test::foo");
 }

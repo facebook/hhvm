@@ -1,14 +1,14 @@
 <?hh
 <<__DynamicallyCallable>>
-function test($a) {
- return 'ok'.$a;
+function test($a): mixed {
+  return 'ok'.$a;
 }
 
 
 <<__EntryPoint>>
-function main_1330() {
-var_dump(function_exists('TEst'));
- var_dump(is_callable('teSt'));
-var_dump(call_user_func(teST<>, 'blah'));
- var_dump(call_user_func_array(teST<>, varray['blah']));
+function main_1330() :mixed{
+  var_dump(function_exists('test'));
+  var_dump(is_callable('test'));
+  var_dump(call_user_func(test<>, 'blah'));
+  var_dump(call_user_func_array(test<>, vec['blah']));
 }

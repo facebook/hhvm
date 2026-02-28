@@ -1,6 +1,6 @@
 <?hh
 
-function captureUninit() {
+function captureUninit() :mixed{
   echo "\n== captureUninit ==\n\n";
 
   $foo = () ==> { // no warning for $x
@@ -20,7 +20,7 @@ function captureUninit() {
   var_dump($x); // 1
 }
 
-function captureCatchUninit() {
+function captureCatchUninit() :mixed{
   echo "\n== captureCatchUninit ==\n\n";
 
   try {
@@ -41,7 +41,7 @@ function captureCatchUninit() {
   }
 }
 
-function captureUninitWarning() {
+function captureUninitWarning() :mixed{
   echo "\n== captureUninitWarning ==\n\n";
 
   $foo = () ==> { // no warning for $x
@@ -64,7 +64,7 @@ function captureUninitWarning() {
   $foo(); // still warning for $x
 }
 
-function captureExplicitUninit() {
+function captureExplicitUninit() :mixed{
   echo "\n== captureExplicitUninit ==\n\n";
 
   try {
@@ -81,7 +81,7 @@ function captureExplicitUninit() {
 
 
 <<__EntryPoint>>
-function main_lambda_uninit_capture() {
+function main_lambda_uninit_capture() :mixed{
   captureUninit();
   captureCatchUninit();
   captureUninitWarning();

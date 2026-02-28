@@ -1,0 +1,27 @@
+error: Typing[4472] Cannot access enum D defined in package pkg1 which may not be available [1]
+-> D is defined in cross_package_enum_inclusion_1.php--bar.php [2]
+-> D belongs to package pkg1 by this package definition [3]
+-> package pkg4 is available because the current file belongs to it by this package override [4]
+
+cross_package_enum_inclusion_1.php--foo.php:7:7
+    2 | 
+    3 | // package pkg4 (disjoint from pkg1)
+[4] 4 | <<file: __PackageOverride('pkg4')>>
+    5 | 
+    6 | enum C : string {
+[1] 7 |   use D;
+    8 | }
+
+cross_package_enum_inclusion_1.php--bar.php:4:6
+    2 | // package pkg1
+    3 | 
+[2] 4 | enum D : string {}
+
+PACKAGES.toml:3:11
+    1 | [packages]
+    2 | 
+[3] 3 | [packages.pkg1]
+    4 | include_paths=["//"]
+    5 | 
+
+1 error found

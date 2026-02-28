@@ -36,12 +36,12 @@ namespace HPHP::jit {
  * IRInstruction::m_block transparently.
  */
 struct Block {
-  typedef InstructionList::iterator iterator;
-  typedef InstructionList::const_iterator const_iterator;
-  typedef InstructionList::reverse_iterator reverse_iterator;
-  typedef InstructionList::const_reverse_iterator const_reverse_iterator;
-  typedef InstructionList::reference reference;
-  typedef InstructionList::const_reference const_reference;
+  using iterator = InstructionList::iterator;
+  using const_iterator = InstructionList::const_iterator;
+  using reverse_iterator = InstructionList::reverse_iterator;
+  using const_reverse_iterator = InstructionList::const_reverse_iterator;
+  using reference = InstructionList::reference;
+  using const_reference = InstructionList::const_reference;
 
   /*
    * Execution frequency hint; codegen will put Unlikely blocks in acold,
@@ -72,10 +72,10 @@ struct Block {
 
   enum class Hint { Unused, Unlikely, Neither, Likely };
 
-  explicit Block(unsigned id, uint64_t profCount)
+  explicit Block(unsigned id, uint64_t profCount, Hint hint)
     : m_profCount(checkedProfCount(profCount))
     , m_id(id)
-    , m_hint(Hint::Neither)
+    , m_hint(hint)
   {}
 
   Block(const Block&) = delete;
@@ -83,8 +83,16 @@ struct Block {
 
   unsigned    id() const           { return m_id; }
   Hint        hint() const         { return m_hint; }
-  void        setHint(Hint hint)   { m_hint = hint; }
   uint64_t    profCount() const    { return m_profCount; }
+
+  void setHint(Hint hint) {
+    // Do not downgrade likeliness of the entry block. Translations are entered
+    // at their first code emitted to the 'a' section, so downgrading the
+    // likeliness of the entry block may cause the translation to be entered
+    // at an incorrect block.
+    if (isEntry() && hint < m_hint) return;
+    m_hint = hint;
+  }
 
   void setProfCount(uint64_t count) { m_profCount = checkedProfCount(count); }
 

@@ -12,33 +12,33 @@
 // callback functions
 // int as return value
 function callback1($input)
-{
+:mixed{
   return 5;
 }
 // float as return value
 function callback2($input)
-{
+:mixed{
   return 3.4;
 }
 // string as return value
 function callback3($input)
-{
+:mixed{
   return 'value';
 }
 // null as return value
 function callback4($input)
-{
+:mixed{
   return null;
 }
 // array as return value
 function callback5($input)
-{
-  return varray[8];
+:mixed{
+  return vec[8];
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_filter() : usage variations - callback function with different return values***\n";
 
-$input = varray[0, 1, -1, 10, 100, 1000, 'Hello', null, true];
+$input = vec[0, 1, -1, 10, 100, 1000, 'Hello', null, true];
 
 echo "callback function with int return value\n";
 var_dump( array_filter($input, callback1<>) );

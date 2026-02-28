@@ -3,7 +3,12 @@
 * Run the test suites in various configurations.
 */
 
+use namespace HH\Lib\C;
+use namespace HH\Lib\Str;
+
 const int TIMEOUT_SECONDS = 300;
+
+const string MULTI_REQUEST_SEP = '//<>!<>&&|MULTI_REQUEST_SEP|&&<>!<>\\';
 
 function get_argv(): vec<string> {
   return \HH\FIXME\UNSAFE_CAST<vec<mixed>,vec<string>>(
@@ -58,9 +63,6 @@ function get_expect_file_and_type(
   $types = vec[
     'expect',
     'expectf',
-    'expectregex',
-    'hhvm.expect',
-    'hhvm.expectf',
   ];
   if ($options->repo) {
     if (file_exists($test . '.hphpc_assert')) {
@@ -99,17 +101,10 @@ function has_multi_request_mode(Options $options): bool {
   return count(multi_request_modes($options)) != 0;
 }
 
-function test_repo(Options $options, string $test): string {
-  if ($options->repo_out is nonnull) {
-    return $options->repo_out . '/' . str_replace('/', '.', $test) . '.repo';
-  }
-  return Status::getTestTmpPath($test, 'repo');
-}
-
 function jit_serialize_option(
   string $cmd, string $test, Options $options, bool $serialize,
 ): string {
-  $serialized = test_repo($options, $test) . "/jit.dump";
+  $serialized = Status::getTestWorkingDir($test) . "/jit.dump";
   $cmds = explode(' -- ', $cmd, 2);
   $jit_serialize = (int)($options->jit_serialize ?? 0);
   $cmds[0] .=
@@ -126,80 +121,6 @@ function jit_serialize_option(
 function usage(): string {
   $argv = get_argv();
   return "usage: {$argv[0]} [-m jit|interp] [-r] <test/directories>";
-}
-
-function help(): string {
-  $argv = get_argv();
-  $ztestexample = 'test/zend/good/*/*z*.php'; // sep. for syntax highlighting.
-  $help = <<<EOT
-
-
-This is the hhvm test-suite runner.  For more detailed documentation,
-see hphp/test/README.md.
-
-The test argument may be a path to a php test file, a directory name, or
-one of a few pre-defined suite names that this script knows about.
-
-If you work with hhvm a lot, you might consider a bash alias:
-
-   alias ht="path/to/hphp/test/run"
-
-Examples:
-
-  # Quick tests in JIT mode:
-  % {$argv[0]} test/quick
-
-  # Slow tests in interp mode:
-  % {$argv[0]} -m interp test/slow
-
-  # PHP specification tests in JIT mode:
-  % {$argv[0]} test/slow/spec
-
-  # Slow closure tests in JIT mode:
-  % {$argv[0]} test/slow/closure
-
-  # Slow closure tests in JIT mode with RepoAuthoritative:
-  % {$argv[0]} -r test/slow/closure
-
-  # Slow array tests, in RepoAuthoritative:
-  % {$argv[0]} -r test/slow/array
-
-  # Zend tests with a "z" in their name:
-  % {$argv[0]} $ztestexample
-
-  # Quick tests in JIT mode with some extra runtime options:
-  % {$argv[0]} test/quick -a '-vEval.JitMaxTranslations=120 -vEval.HHIRRefcountOpts=0'
-
-  # Quick tests in JIT mode with RepoAuthoritative and an extra compile-time option:
-  % {$argv[0]} test/quick -r --compiler-args '--parse-on-demand=false'
-
-  # All quick tests except debugger
-  % {$argv[0]} -e debugger test/quick
-
-  # All tests except those containing a string of 3 digits
-  % {$argv[0]} -E '/\d{3}/' all
-
-  # All tests whose name containing pdo_mysql
-  % {$argv[0]} -i pdo_mysql -m jit -r zend
-
-  # Print all the standard tests
-  % {$argv[0]} --list-tests
-
-  # Use a specific HHVM binary
-  % {$argv[0]} -b ~/code/hhvm/hphp/hhvm/hhvm
-  % {$argv[0]} --hhvm-binary-path ~/code/hhvm/hphp/hhvm/hhvm
-
-  # Use retranslate all.  Run the test n times, then run retranslate all, then
-  # run the test n more on the new code.
-  % {$argv[0]} --retranslate-all 2 quick
-
-  # Use jit-serialize.  Run the test n times, then run retranslate all, run the
-  # test once more, serialize all profile data, and then restart hhvm, load the
-  # serialized state and run retranslate-all before starting the test.
-  % {$argv[0]} --jit-serialize  2 -r quick
-EOT;
-
-  return usage().$help;
 }
 
 function error(string $message): noreturn {
@@ -235,13 +156,6 @@ function hhvm_binary_routes(): dict<string, string> {
   ];
 }
 
-function hh_codegen_binary_routes(): dict<string, string> {
-  return dict[
-    "buck"    => "/buck-out/bin/hphp/hack/src/hh_single_compile",
-    "cmake"   => "/hphp/hack/bin"
-  ];
-}
-
 // For Facebook: We have several build systems, and we can use any of them in
 // the same code repo.  If multiple binaries exist, we want the onus to be on
 // the user to specify a particular one because before we chose the buck one
@@ -261,9 +175,9 @@ function check_for_multiple_default_binaries(): void {
     }
   }
 
-  if (count($found) <= 1) {
-    return;
-  }
+  // emacs hack mode thinks <= is some kind of anchor and messes up
+  // parsing after it...
+  if (!(count($found) > 1)) return;
 
   $msg = "Multiple binaries exist in this repo. \n";
   foreach ($found as $bin) {
@@ -324,44 +238,7 @@ function bin_root(): string {
   return $home . $routes["cmake"];
 }
 
-function hh_codegen_path(): string {
-  $file = "";
-  $hh = getenv("HH_CODEGEN_BIN");
-  if ($hh is string) {
-    $file = realpath($hh);
-  } else {
-    $file = hh_codegen_bin_root().'/hh_single_compile.opt';
-  }
-  if (!is_file($file)) {
-    error("$file doesn't exist. Did you forget to build first?");
-  }
-  return rel_path($file);
-}
-
-function hh_codegen_bin_root(): string {
-  $home = hphp_home();
-  $env_tool = getenv("FBCODE_BUILD_TOOL");
-  $routes = hh_codegen_binary_routes();
-
-  if ($env_tool !== false) {
-    return $home . $routes[$env_tool];
-  }
-
-  foreach ($routes as $_ => $path) {
-    $dir = $home . $path;
-    if (is_dir($dir)) {
-      return $dir;
-    }
-  }
-
-  return $home . $routes["cmake"];
-}
-
-function unit_cache_file(): string {
-  return Status::getTmpPathFile('unit-cache.sql');
-}
-
-function read_opts_file(?string $file): string {
+function read_opts_file(?string $file, ?string $input_dir = null): string {
   if ($file is null || !file_exists($file)) {
     return "";
   }
@@ -379,12 +256,51 @@ function read_opts_file(?string $file): string {
     $line = preg_replace('/^ *#.*$/', ' ', $line);
 
     // Substitute in the directory name
-    $line = str_replace('__DIR__', dirname($file), $line);
-
+    // If input_dir is set, strip it from the expansion of DIR unless
+    // the option is -c, which is not affected by --input-dir
+    if ($input_dir != null && strpos($line, '-c ') == false) {
+      $line = str_replace('__DIR__', realpath(dirname($file)), $line);
+      if (strpos($line, $input_dir.'/') != false) {
+        $line = str_replace($input_dir.'/', '', $line);
+      } else {
+        // --foo=__DIR__ must be substituted with --foo=/, not --foo=
+        $line = str_replace($input_dir, '/', $line);
+      }
+    } else {
+      $line = str_replace('__DIR__', dirname($file), $line);
+    }
     $contents .= $line;
   }
   fclose($fp);
   return $contents;
+}
+
+function get_test_env(
+  Options $options,
+  string $test,
+  dict<string, mixed> $env,
+): dict<string, mixed> {
+  $extra_env = find_test_ext($test, 'env');
+  if ($options->cli_server) {
+    $extra_env = find_test_ext($test, 'clisrv_env') ?? $extra_env;
+  }
+
+  if ($extra_env is nonnull) {
+    $lines = file($extra_env, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+      $line = str_replace('__DIR__', realpath(dirname($extra_env)), $line);
+      $i = strpos($line, '=');
+      if ($i) {
+        $key = substr($line, 0, $i);
+        $val = substr($line, $i + 1);
+        $env[$key] = $val;
+      } else {
+        unset($env[$line]);
+      }
+    }
+  }
+
+  return $env;
 }
 
 // http://stackoverflow.com/questions/2637945/
@@ -434,8 +350,10 @@ final class Options {
     public bool $split_hphpc = false;
     public bool $repo_single = false;
     public bool $repo_separate = false;
+    public bool $only_remote_executable = false;
+    public bool $only_remote_executable_with_loopback = false;
+    public bool $only_non_remote_executable = false;
     public ?string $repo_threads;
-    public ?string $repo_out;
     public bool $hhbbc2 = false;
     public ?string $mode;
     public bool $server = false;
@@ -462,14 +380,14 @@ final class Options {
     public ?string $retranslate_all;
     public ?string $jit_serialize;
     public ?string $hhvm_binary_path;
+    public ?string $working_dir;
     public ?string $vendor;
     public ?string $record_failures;
     public ?string $ignore_oids;
     public ?string $jitsample;
     public ?string $hh_single_type_check;
-    public bool $write_to_checkout = false;
     public bool $bespoke = false;
-    public bool $lazyclass = false;
+    public bool $factsdir = false;
 
     // Additional state added for convenience since Options is plumbed
     // around almost everywhere.
@@ -489,7 +407,6 @@ function get_options(
     'include:' => 'i:',
     'include-pattern:' => 'I:',
     '*repo' => 'r',
-    '*split-hphpc' => '',
     '*repo-single' => '',
     '*repo-separate' => '',
     '*repo-threads:' => '',
@@ -502,6 +419,9 @@ function get_options(
     'help' => 'h',
     'verbose' => 'v',
     'testpilot' => '',
+    'only-remote-executable' => '',
+    'only-remote-executable-with-loopback' => '',
+    'only-non-remote-executable' => '',
     'threads:' => '',
     '*args:' => 'a:',
     '*compiler-args:' => '',
@@ -520,13 +440,14 @@ function get_options(
     '*retranslate-all:' => '',
     '*jit-serialize:' => '',
     '*hhvm-binary-path:' => 'b:',
-    '*vendor:' => '',
+    '*working-dir:' => 'w:',
     'record-failures:' => '',
     '*ignore-oids' => '',
     'jitsample:' => '',
     '*hh_single_type_check:' => '',
     'write-to-checkout' => '',
     'bespoke' => '',
+    '*factsdir' => '',
   ];
   $options = new Options() as dynamic;
   $files = vec[];
@@ -572,7 +493,7 @@ function get_options(
 
       if (!$found) {
         $msg = sprintf("Invalid argument: '%s'\nSee %s --help", $arg, $argv[0]);
-        error($msg as string);
+        error($msg);
       }
     } else {
       $files[] = $arg;
@@ -582,18 +503,12 @@ function get_options(
 
   \HH\global_set('recorded_options', $recorded);
 
-  $repo_out = $options->repo_out;
-  if ($repo_out is string && !is_dir($repo_out)) {
-    if (!mkdir($repo_out) && !is_dir($repo_out)) {
-      error("Unable to create repo-out dir " . $repo_out);
-    }
-  }
   if ($options->hhbbc2) {
     $options->repo_separate = true;
     if ($options->repo || $options->repo_single) {
       error("repo-single/repo and hhbbc2 are mutually exclusive options");
     }
-    if (isset($options['mode'])) {
+    if (isset(HH\FIXME\UNSAFE_CAST<mixed,dynamic>($options)['mode'])) {
       error("hhbbc2 doesn't support modes; it compares hhas, doesn't run code");
     }
   }
@@ -614,15 +529,6 @@ function get_options(
     }
   }
 
-  if ($options->split_hphpc) {
-    if (!$options->repo) {
-      error("split-hphpc only works in repo mode");
-    }
-    if (!$options->repo_separate) {
-      error("split-hphpc only works in repo-separate mode");
-    }
-  }
-
   if ($options->repo && $options->hhas_round_trip) {
     error("repo and hhas-round-trip are mutually exclusive options");
   }
@@ -631,10 +537,6 @@ function get_options(
   if (count($multi_request_modes) > 1) {
     error("The options\n -" . implode("\n -", $multi_request_modes) .
           "\nare mutually exclusive options");
-  }
-
-  if ($options->write_to_checkout) {
-    Status::$write_to_checkout = true;
   }
 
   return tuple($options, $files);
@@ -683,17 +585,22 @@ function find_test_files(string $file): vec<string>{
     'fastcgi'  => 'hphp/test/server/fastcgi/tests',
     'zend'     => 'hphp/test/zend/good',
     'facebook' => 'hphp/facebook/test',
-    'taint'    => 'hphp/test/taint',
 
     // subset of slow we run with CLI server too
     'slow_ext_hsl' => 'hphp/test/slow/ext_hsl',
 
     // Subsets of zend tests.
     'zend_ext'    => 'hphp/test/zend/good/ext',
-    'zend_ext_am' => 'hphp/test/zend/good/ext/[a-m]*',
-    'zend_ext_nz' => 'hphp/test/zend/good/ext/[n-z]*',
     'zend_Zend'   => 'hphp/test/zend/good/Zend',
     'zend_tests'  => 'hphp/test/zend/good/tests',
+    // Extension tests
+    'crypto_keyset' => 'hphp/facebook/extensions/crypto_keyset/test',
+    'cryptonative' => 'hphp/facebook/extensions/cryptonative/test',
+    'thrift' => 'hphp/facebook/extensions/thrift/test',
+    'flighttracker' => 'hphp/facebook/extensions/flighttracker/test',
+    'fci' => 'hphp/facebook/extensions/fci/test',
+    'scribe' => 'hphp/facebook/extensions/scribe/test',
+    'dataflowmonitor' => 'hphp/facebook/extensions/dataflowmonitor/test',
   ];
 
   $pattern = $mappage[$file] ?? null;
@@ -736,6 +643,7 @@ function exec_find(vec<string> $files, string $extra): vec<string> {
   $results = vec[];
   foreach (array_chunk($files, 500) as $chunk) {
     $efa = implode(' ', array_map(
+      /* HH_IGNORE[12012] $line is an int so the `as` always fails */
       $line ==> escapeshellarg($line as string),
       $chunk as dict<_, _>,
     ));
@@ -748,6 +656,32 @@ function exec_find(vec<string> $files, string $extra): vec<string> {
   return $results;
 }
 
+function is_facebook_build(Options $options): bool {
+  if (!is_dir(hphp_home() . '/hphp/facebook/test')) return false;
+
+  // We want to test for the presence of an extension in the build, so turn off
+  // a bunch of features in order to do this as simply and reliably as possible.
+  $simplified_options = clone $options;
+  $simplified_options->repo = false;
+  $simplified_options->server = false;
+  $simplified_options->cli_server = false;
+  // Use a bogus test name so we don't find any config overrides
+  $result = runif_extension_matches(
+    $simplified_options,
+    'not_a_real_test.php',
+    vec['facebook'],
+  );
+  if (!$result['valid']) {
+    invariant(Shapes::keyExists($result, 'error'), 'RunifResult contract');
+    invariant_violation(
+      "is_facebook_build is calling runif_extension_matches incorrectly: %s",
+      $result['error'],
+    );
+  }
+  invariant(Shapes::keyExists($result, 'match'), 'RunifResult contract');
+  return $result['match'];
+}
+
 function find_tests(
   vec<string> $files,
   Options $options,
@@ -757,7 +691,7 @@ function find_tests(
   }
   if ($files == vec['all']) {
     $files = vec['quick', 'slow', 'zend', 'fastcgi', 'http', 'debugger'];
-    if (is_dir(hphp_home() . '/hphp/facebook/test')) {
+    if (is_facebook_build($options)) {
       $files[] = 'facebook';
     }
   }
@@ -767,7 +701,7 @@ function find_tests(
   }
   $files = vec[];
   foreach ($ft as $file) {
-    if (!@stat($file)) {
+    if (!file_exists($file)) {
       error("Not valid file or directory: '$file'");
     }
     $file = preg_replace(',//+,', '/', realpath($file));
@@ -785,7 +719,8 @@ function find_tests(
     "-o -name '*.hack.type-errors' " .
     "-o -name '*.hackpartial.type-errors' " .
     "')' " .
-    "-not -regex '.*round_trip[.]hhas'"
+    "-not -regex '.*round_trip[.]hhas' " .
+    "-not -name '*.inc.php'"
   );
   if (!$tests) {
     error("Could not find any tests associated with your options.\n" .
@@ -814,6 +749,13 @@ function find_tests(
       return (false === in_array(canonical_path($test), $exclude));
     }));
   }
+
+  if ($options->list_tests) {
+    $tests = vec(array_filter($tests, function($test) use ($options) {
+      return should_skip_test_simple($options, $test) is null;
+    }));
+  }
+
   if ($options->include is nonnull) {
     $include = $options->include;
     $tests = vec(array_filter($tests, function($test) use ($include) {
@@ -864,18 +806,31 @@ function find_file_for_dir(string $dir, string $name): ?string {
   // are running the test runner on a file from the same directory as
   // the test e.g., './mytest.php'. dirname() will give you the '.' when
   // you actually have a lot of path to traverse upwards like
-  // /home/you/code/tests/mytest.php. Use realpath() to get that.
-  $dir = realpath($dir);
-  while ($dir !== '/' && is_dir($dir)) {
+  // /home/you/code/tests/mytest.php. Don't use realpath() to get that because
+  // it will mess up relative paths.
+  $depth = count(explode('/', realpath($dir))) - 1;
+  for (; $dir !== '/' && is_dir($dir) && $depth; $depth--) {
     $file = "$dir/$name";
     if (is_file($file)) {
       return $file;
     }
-    $dir = dirname($dir);
+    if ($dir === '.' || substr($dir, -2) === '..') {
+      $dir = $dir . '/..';
+    } else {
+      $dir = dirname($dir);
+    }
   }
   $file = test_dir().'/'.$name;
   if (file_exists($file)) {
     return $file;
+  }
+  return null;
+}
+
+function find_set_input_dir(string $test): ?string {
+  $set_input_dir = find_file_for_dir($test, ".set_input_dir");
+  if ($set_input_dir is nonnull) {
+    return dirname($set_input_dir);
   }
   return null;
 }
@@ -890,9 +845,6 @@ function find_debug_config(string $test, string $name): string {
 
 function mode_cmd(Options $options): vec<string> {
   $repo_args = '';
-  if (!$options->repo) {
-    $repo_args = "-vUnitFileCache.Path=".unit_cache_file();
-  }
   $interp_args = "$repo_args -vEval.Jit=0";
   $jit_args = "$repo_args -vEval.Jit=true";
   $mode = $options->mode ?? '';
@@ -909,23 +861,13 @@ function mode_cmd(Options $options): vec<string> {
   }
 }
 
-function extra_args(Options $options): string {
-  $args = $options->args ?? '';
-
-  if ($options->vendor is nonnull) {
-    $args .= ' -d auto_prepend_file=';
-    $args .= escapeshellarg($options->vendor.'/hh_autoload.php');
-  }
-
-  return $args;
-}
-
 function extra_compiler_args(Options $options): string {
   return $options->compiler_args ?? '';
 }
 
 function hhvm_cmd_impl(
   Options $options,
+  string $test,
   string $config,
   ?string $autoload_db_prefix,
   string ...$extra_args
@@ -944,26 +886,35 @@ function hhvm_cmd_impl(
       '-vEval.HHIRInliningIgnoreHints=false',
       '-vEval.HHIRAlwaysInterpIgnoreHint=false',
       '-vEval.FoldLazyClassKeys=false',
+      '-vEval.EnableLogBridge=false',
       $mode,
       $options->wholecfg ? '-vEval.JitPGORegionSelector=wholecfg' : '',
 
       // load/store counters don't work on Ivy Bridge so disable for tests
       '-vEval.ProfileHWEnable=false',
 
-      // use a fixed path for embedded data
-      '-vEval.EmbeddedDataExtractPath='
-        .escapeshellarg(bin_root().'/hhvm_%{type}_%{buildid}'),
+      // use the temp path for embedded data
+      '-vEval.EmbeddedDataExtractPath='.
+      Status::getTestWorkingDir($test).
+      escapeshellarg('/embedded_%{type}_%{buildid}'),
 
       // Stick to a single thread for retranslate-all
       '-vEval.JitWorkerThreads=1',
       '-vEval.JitWorkerThreadsForSerdes=1',
+      '-vEval.AsyncJitWorkerThreads=1',
+      '-vDebug.CoreDumpReportDirectory='.Status::getWorkingDir(),
 
-      extra_args($options),
+      $options->args ?? '',
     ];
 
     if ($autoload_db_prefix is nonnull) {
       $args[] =
         '-vAutoload.DB.Path='.escapeshellarg("$autoload_db_prefix.$mode_num");
+      if ($options->factsdir) {
+        // enable LMDB facts by telling HHVM where to create facts LMDB instances
+        $args[] =
+          '-vAutoload.DB.LmdbDir='.escapeshellarg("$autoload_db_prefix.$mode_num");
+      }
     }
 
     if ($options->retranslate_all is nonnull) {
@@ -973,6 +924,7 @@ function hhvm_cmd_impl(
       // Set to timeout.  We want requests to trigger retranslate all.
       $args[] = '-vEval.JitRetranslateAllSeconds=' . TIMEOUT_SECONDS;
     }
+    $args[] = '-vEval.EnableAsyncJITProfile=' . ($options->retranslate_all is nonnull ? '1' : '0');
 
     if ($options->recycle_tc is nonnull) {
       $args[] = '--count='.$options->recycle_tc;
@@ -997,7 +949,7 @@ function hhvm_cmd_impl(
     }
 
     if ($options->dump_tc) {
-      $args[] = '-vEval.DumpIR=1';
+      $args[] = '-vEval.DumpIR=2';
       $args[] = '-vEval.DumpTC=1';
     }
 
@@ -1034,19 +986,41 @@ function hhvm_cmd(
   $hdf = file_exists($test.$hdf_suffix)
        ? '-c ' . $test . $hdf_suffix
        : "";
-  $extra_opts = read_opts_file(find_test_ext($test, 'opts'));
-  $config = find_test_ext($test, 'ini');
-  invariant($config is nonnull, "%s", __METHOD__);
+
+  $config_opts = read_opts_file(
+    find_file_for_dir(dirname($test), 'config.opts')
+  );
+  $file_opts = read_opts_file("{$test}.opts");
+
+  $input_dir = find_set_input_dir(dirname($test));
+  if ($input_dir is nonnull) {
+    $input_dir = realpath($input_dir);
+  }
+
+  $config_ini = find_file_for_dir(dirname($test), 'config.ini');
+  invariant($config_ini is nonnull, "%s", __METHOD__);
   $cmds = hhvm_cmd_impl(
     $options,
-    $config,
-    Status::getTestTmpPath($test, 'autoloadDB'),
+    $test,
+    $config_ini,
+    Status::getTestWorkingDir($test) . '/autoloadDB',
     $hdf,
     find_debug_config($test, 'hphpd.ini'),
-    $extra_opts,
+    $options->repo && $input_dir is nonnull
+      ? '-vServer.SourceRoot='.$input_dir
+      : '',
+    $config_opts,
+    $file_opts,
     $is_temp_file ? " --temp-file" : "",
     '--file',
-    escapeshellarg($test_run),
+    escapeshellarg(
+      $options->repo && $input_dir is nonnull
+        ? str_replace($input_dir.'/', '', realpath($test_run))
+        : $test_run),
+
+    // Dump profile to working dir
+    '-vEval.JitSerializeDebugLocation='
+      . Status::getTestWorkingDir($test) . '/debugdump.jit',
   );
 
   $cmd = "";
@@ -1071,7 +1045,7 @@ function hhvm_cmd(
   if (file_exists($test.'.ini')) {
     $contents = file_get_contents($test.'.ini');
     if (strpos($contents, '{PWD}') !== false) {
-      $test_ini = tempnam('/tmp', $test).'.ini';
+      $test_ini = Status::getTestWorkingDir($test) . '/config.ini';
       file_put_contents($test_ini,
                         str_replace('{PWD}', dirname($test), $contents));
       $cmd .= " -c $test_ini";
@@ -1080,7 +1054,7 @@ function hhvm_cmd(
   if ($hdf !== "") {
     $contents = file_get_contents($test.$hdf_suffix);
     if (strpos($contents, '{PWD}') !== false) {
-      $test_hdf = tempnam('/tmp', $test).$hdf_suffix;
+      $test_hdf = Status::getTestWorkingDir($test) . '/config' . $hdf_suffix;
       file_put_contents($test_hdf,
                         str_replace('{PWD}', dirname($test), $contents));
       $cmd .= " -c $test_hdf";
@@ -1090,11 +1064,14 @@ function hhvm_cmd(
   if ($options->repo) {
     $repo_suffix = repo_separate($options, $test) ? 'hhbbc' : 'hhbc';
 
-    $program = "hhvm";
     $hhbbc_repo =
-      "\"" . test_repo($options, $test) . "/hhvm.$repo_suffix\"";
+      "\"" . Status::getTestWorkingDir($test) . "/hhvm.$repo_suffix\"";
     $cmd .= ' -vRepo.Authoritative=true';
     $cmd .= " -vRepo.Path=$hhbbc_repo";
+
+    $file_cache =
+      "\"" . Status::getTestWorkingDir($test) . "/file.cache\"";
+    $cmd .= " -vServer.FileCache=$file_cache";
   }
 
   if ($options->jitsample is nonnull) {
@@ -1125,6 +1102,8 @@ function hhvm_cmd(
     }
   }
 
+  $env = get_test_env($options, $test, $env);
+
   $in = find_test_ext($test, 'in');
   if ($in is nonnull) {
     $cmd .= ' < ' . escapeshellarg($in);
@@ -1135,6 +1114,19 @@ function hhvm_cmd(
     $env["TERM"] = "dumb";
   }
 
+  $env['TMPDIR'] = Status::getTestTempDir($test);
+  $env['HPHP_TEST_SOCKETDIR'] = Status::getSocketDir();
+  if ($options->log) {
+    $env['TRACE'] = 'printir:2';
+    $env['HPHP_TRACE_FILE'] = $test . '.log';
+  }
+
+  if ($options->retranslate_all is nonnull ||
+      $options->recycle_tc is nonnull ||
+      $options->cli_server) {
+    $env['HHVM_MULTI_COUNT_SEP'] = MULTI_REQUEST_SEP;
+  }
+
   foreach ($cmds as $idx => $_) {
     $cmds[$idx] .= $cmd;
   }
@@ -1142,14 +1134,10 @@ function hhvm_cmd(
   return tuple($cmds, $env);
 }
 
-function hphp_cmd(
-  Options $options,
-  string $test,
-  string $program,
-): string {
+function hphp_cmd(Options $options, string $test): string {
   // Transform extra_args like "-vName=Value" into "-vRuntime.Name=Value".
   $extra_args =
-    preg_replace("/(^-v|\s+-v)\s*/", "$1Runtime.", extra_args($options));
+    preg_replace("/(^-v|\s+-v)\s*/", "$1Runtime.", $options->args ?? '');
 
   $compiler_args = extra_compiler_args($options);
 
@@ -1161,11 +1149,20 @@ function hphp_cmd(
   if ($hdf !== "") {
     $contents = file_get_contents($test.$hdf_suffix);
     if (strpos($contents, '{PWD}') !== false) {
-      $test_hdf = tempnam('/tmp', $test).$hdf_suffix;
+      $test_hdf = Status::getTestWorkingDir($test) . '/config' . $hdf_suffix;
       file_put_contents($test_hdf,
                         str_replace('{PWD}', dirname($test), $contents));
       $hdf = " -c $test_hdf";
     }
+  }
+
+  $config_hphp_opts = read_opts_file(
+    find_file_for_dir(dirname($test), 'config.hphp_opts')
+  );
+
+  $input_dir = find_set_input_dir(dirname($test));
+  if ($input_dir is nonnull) {
+    $input_dir = realpath($input_dir);
   }
 
   return implode(" ", vec[
@@ -1175,140 +1172,233 @@ function hphp_cmd(
     '--config',
     find_test_ext($test, 'ini', 'hphp_config'),
     $hdf,
-    '-vRuntime.ResourceLimit.CoreFileSize=0',
+    $input_dir is nonnull ? '--input-dir='.$input_dir : '',
+    $input_dir is nonnull ? '-vRuntime.Server.SourceRoot='.$input_dir : '',
+    $options->cores ? '' : '-vRuntime.ResourceLimit.CoreFileSize=0',
+    '-vRuntime.Debug.CoreDumpReportDirectory='.Status::getWorkingDir(),
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
-    '-vRuntime.Eval.EnableArgsInBacktraces=true',
+    // EnableArgsInBacktraces disables most of HHBBC's DCE optimizations.
+    // In order to test those optimizations (which are part of a normal prod
+    // configuration) we turn this flag off by default.
+    '-vRuntime.Eval.EnableArgsInBacktraces=false',
     '-vRuntime.Eval.FoldLazyClassKeys=false',
+    '-vRuntime.Eval.EnableLogBridge=false',
+    '-vCachePHPFile=true',
     '-vParserThreadCount=' . ($options->repo_threads ?? 1),
-    '-thhbc -l1 -k1',
-    '-o "' . test_repo($options, $test) . '"',
-    "\"$test\"",
-    "-vExternWorker.WorkingDir=".Status::getTestTmpPath($test, 'work'),
+    '-l1',
+    '-o "' . Status::getTestWorkingDir($test) . '"',
+    '--file-cache="'.Status::getTestWorkingDir($test).'/file.cache"',
+    $input_dir is nonnull
+      ? str_replace($input_dir.'/', '', realpath($test))
+      : "\"$test\"",
+    "-vExternWorker.WorkingDir=".Status::getTestWorkingDir($test),
+    $config_hphp_opts,
     $extra_args,
     $compiler_args,
-    read_opts_file("$test.hphp_opts"),
+    read_opts_file(find_test_ext($test, 'hphp_opts'), $input_dir),
   ]);
 }
 
 function hphpc_path(Options $options): string {
-  if ($options->split_hphpc) {
-    $file = "";
-    $file = bin_root().'/hphpc';
-
-    if (!is_file($file)) {
-      error("$file doesn't exist. Did you forget to build first?");
-    }
-    return rel_path($file);
-  } else {
-    return hhvm_path();
-  }
+  return hhvm_path();
 }
 
-function hhbbc_cmd(
-  Options $options, string $test, string $program,
-): string {
-  $test_repo = test_repo($options, $test);
+function hhbbc_cmd(Options $options, string $test): string {
+  $working_dir = Status::getTestWorkingDir($test);
   return implode(" ", vec[
     hphpc_path($options),
     '--hhbbc',
     '--no-logging',
-    '--no-cores',
+    $options->cores ? '' : '--no-cores',
     '--parallel-num-threads=' . ($options->repo_threads ?? 1),
     '--parallel-final-threads=' . ($options->repo_threads ?? 1),
+    '--extern-worker-working-dir=' . $working_dir,
     read_opts_file("$test.hhbbc_opts"),
-    "-o \"$test_repo/hhvm.hhbbc\" \"$test_repo/hhvm.hhbc\"",
+    "-o \"$working_dir/hhvm.hhbbc\" \"$working_dir/hhvm.hhbc\"",
   ]);
 }
 
-// Execute $cmd and return its output on failure, including any stacktrace.log
-// file it generated. Return null on success.
-function exec_with_stack(string $cmd): ?string {
+// Split the output into everything before a stack trace dump and
+// everything after (including the dump).
+function split_stack_trace_from_output(string $str): (string, string) {
+  $before = vec[];
+  $after = vec[];
+  $found = false;
+  // Any of the below strings indicate the beginning of a crash
+  // report.
+  foreach (explode("\n", $str) as $line) {
+    if (!$found) {
+      if (stripos($line, "Core dumped") === 0 ||
+          stripos($line, "Stack trace in") === 0 ||
+          stripos($line, "Assertion Failure") !== false) {
+        $found = true;
+      }
+    }
+    if ($found) {
+      $after[] = $line;
+    } else {
+      $before[] = $line;
+    }
+  }
+  // Only provide the last 200 lines of before the dump.
+  return tuple(
+    implode("\n", array_slice($before, -200)),
+    implode("\n", $after)
+  );
+}
+
+// Run the specified command with a TIMEOUT_SECONDS timeout. If the
+// command is successful, return a tuple containing the command's
+// output and true. If unsuccessful, return a tuple containing an
+// error message containing useful information and false. A command is
+// judged to fail if it returns a non-successful error code, writes to
+// stderr (we redirect stderr to stdout), or times out.
+function exec_with_timeout(string $cmd,
+                           ?dict<string, mixed> $env = null,
+                           ?keyset<int> $success_codes = null): (string, bool) {
+  if ($success_codes is null) $success_codes = keyset[0];
+
   $pipes = null;
-  $proc = proc_open($cmd,
-                    dict[0 => vec['pipe', 'r'],
-                          1 => vec['pipe', 'w'],
-                          2 => vec['pipe', 'w']], inout $pipes);
+  // Use exec so that the shell execs the command directly instead of
+  // forking. Redirect stderr to stdout because the tests will write
+  // to both.
+  $proc = proc_open(
+    'exec ' . $cmd . ' 2>&1',
+    dict[0 => vec['pipe', 'r'],
+         1 => vec['pipe', 'w'],
+         2 => vec['pipe', 'w']],
+    inout $pipes,
+    null,
+    $env
+  );
+  $pipes as nonnull;
   fclose($pipes[0]);
-  $s = '';
-  $all_selects_failed=true;
+
+  stream_set_blocking($pipes[1], false);
+  stream_set_blocking($pipes[2], false);
+
+  $stdout = '';
+  $stderr = '';
+
+  // Loop, reading stdout and stderr until both stdout and stderr are
+  // closed, the process terminates, or we timeout.
   $end = mtime() + TIMEOUT_SECONDS;
-  $timedout = false;
+  $status = proc_get_status($proc);
   while (true) {
     $now = mtime();
     if ($now >= $end) break;
-    $read = vec[$pipes[1], $pipes[2]];
+
+    $read = vec[];
+    if (!feof($pipes[1])) $read[] = $pipes[1];
+    if (!feof($pipes[2])) $read[] = $pipes[2];
+    if (!count($read)) break;
+
     $write = null;
     $except = null;
-    $available = @stream_select(
+
+    // Don't wait longer than 5 seconds at a time so we can poll for
+    // the process exiting without closing stdout/stderr. This can
+    // happen if the process forks (the forked child can survive and
+    // keep the output open). If the process has already exited, don't
+    // sleep at all, because we're trying to drain all output.
+    $timeout = (int)min(
+      ($end - $now) * 1000000,
+      $status['running'] ? 5000000 : 0
+    );
+    $available = stream_select(
       inout $read,
       inout $write,
       inout $except,
-      (int)($end - $now),
+      0,
+      $timeout
     );
-    if ($available === false) {
-      usleep(1000);
-      $s .= "select failed:\n" . print_r(error_get_last(), true);
+    if ($available === false) continue;
+    if ($available === 0) {
+      if ($status['running']) $status = proc_get_status($proc);
+      if (!$status['running']) break;
       continue;
     }
-    $all_selects_failed=false;
-    if ($available === 0) continue;
+
+    $read as nonnull;
     foreach ($read as $pipe) {
-      $t = fread($pipe, 4096);
+      $t = fread($pipe, 8*1024);
       if ($t === false) continue;
-      $s .= $t;
+      if ($pipe === $pipes[1]) {
+        $stdout .= $t;
+      } else if ($pipe === $pipes[2]) {
+        $stderr .= $t;
+      }
     }
-    if (feof($pipes[1]) && feof($pipes[2])) break;
   }
   fclose($pipes[1]);
   fclose($pipes[2]);
-  while (true) {
+
+  $timedout = false;
+  while ($status['running']) {
     $status = proc_get_status($proc);
     if (!$status['running']) break;
     $now = mtime();
     if ($now >= $end) {
       $timedout = true;
-      $output = null;
-      $return_var = -1;
-      exec('pkill -P ' . $status['pid'] . ' 2> /dev/null', inout $output, inout $return_var);
-      posix_kill($status['pid'], SIGTERM);
+      $ignore1 = '';
+      $ignore2 = 0;
+      // We've timed out. Kill the command and any children it might
+      // have created.
+      exec(
+        'pkill --signal 9 -P ' . $status['pid'] . ' 2> /dev/null',
+        inout $ignore1,
+        inout $ignore2
+      );
+      posix_kill($status['pid'], SIGKILL);
     }
-    usleep(1000);
+    // Sleep then loop until the process actually terminates.
+    usleep(500000);
   }
+
+  $exit_code = $status['exitcode'];
   proc_close($proc);
+
+  if (!$timedout && C\contains($success_codes, $exit_code) && Str\is_empty($stderr)) {
+    return tuple($stdout, true);
+  }
+
+  // The command failed. Construct a useful error message.
+  $error = "Running '$cmd' failed ";
   if ($timedout) {
-    if ($all_selects_failed) {
-      return "All selects failed running `$cmd'\n\n$s";
-    }
-    return "Timed out running `$cmd'\n\n$s";
+    $error .= ' (timed out and was killed)';
+  } else {
+    $error .= " (exit-code $exit_code)";
   }
-  if (
-    !$status['exitcode'] &&
-    !preg_match('/\\b(error|exception|fatal)\\b/', $s)
-  ) {
-    return null;
-  }
+  if (!Str\is_empty($stderr)) $error .= ' (wrote to stderr)';
+
+  list($before_dump, $dump) = split_stack_trace_from_output($stdout);
+
   $pid = $status['pid'];
-  $stack =
-    @file_get_contents("/tmp/stacktrace.$pid.log") ?:
-    @file_get_contents("/var/tmp/cores/stacktrace.$pid.log");
-  if ($stack !== false) {
-    $s .= "\n" . $stack;
+  $stack_file = Status::getWorkingDir(). "/stacktrace.$pid.log";
+
+  $stack = null;
+  if (file_exists($stack_file)) $stack = file_get_contents($stack_file);
+
+  if ($stack) {
+    $error .= "\nstdout:\n$before_dump\nstderr:\n$stderr";
+    $error .= "\nContents of $stack_file:\n$stack";
+  } else if (!Str\is_empty($dump)) {
+    $error .= "\nstdout:\n$dump\nstderr:\n$stderr";
+  } else {
+    $error .= "\nstdout:\n$before_dump\nstderr:\n$stderr";
   }
-  return "Running `$cmd' failed (".$status['exitcode']."):\n\n$s";
+  return tuple($error, false);
 }
 
-function repo_mode_compile(
-  Options $options, string $test, string $program,
-): bool {
-  $hphp = hphp_cmd($options, $test, $program);
-  $result = exec_with_stack($hphp);
-  if ($result is null && repo_separate($options, $test)) {
-    $hhbbc = hhbbc_cmd($options, $test, $program);
-    $result = exec_with_stack($hhbbc);
+function repo_mode_compile(Options $options, string $test): (string, bool) {
+  $hphp = hphp_cmd($options, $test);
+  list($output, $success) = exec_with_timeout($hphp);
+  if ($success && repo_separate($options, $test)) {
+    $hhbbc = hhbbc_cmd($options, $test);
+    list($separate_output, $success) = exec_with_timeout($hhbbc);
+    $output = $output . $separate_output;
   }
-  if ($result is null) return true;
-  Status::writeDiff($test, $result);
-  return false;
+  return tuple($output, $success);
 }
 
 
@@ -1343,8 +1433,8 @@ class Queue {
   // is received, and the chunks can be reassembled.
   private Map<int, Vector<string>> $partials = Map {};
 
-  public function __construct(?string $dir = null): void {
-    $path = \tempnam($dir ?? \sys_get_temp_dir(), "queue.mkfifo.");
+  public function __construct(string $dir): void {
+    $path = \tempnam($dir, "queue.mkfifo.");
     \unlink($path);
     if (!\posix_mkfifo($path, 0700)) {
       // Only certain directories support "posix_mkfifo()".
@@ -1540,13 +1630,18 @@ final class Status {
   private static float $overall_start_time = 0.0;
   private static float $overall_end_time = 0.0;
 
-  private static string $tmpdir = "";
-  public static bool $write_to_checkout = false;
+  private static string $workdir = "";
+  private static string $sockdir = "";
+
+  public static vec<string> $tests = vec[];
 
   public static int $passed = 0;
   public static int $skipped = 0;
   public static dict<string, int> $skip_reasons = dict[];
   public static int $failed = 0;
+
+  public static keyset<int> $children = keyset[];
+  public static int $printer_pid = -1;
 
   const int MODE_NORMAL = 0;
   const int MODE_VERBOSE = 1;
@@ -1565,60 +1660,71 @@ final class Status {
   const int YELLOW = 33;
   const int BLUE = 34;
 
-  public static function createTmpDir(): void {
-    $parent = sys_get_temp_dir();
-    if (substr($parent, -1) !== "/") {
-      $parent .= "/";
-    }
-    self::$tmpdir = HH\Lib\_Private\_OS\mkdtemp($parent . 'hphp-test-XXXXXX');
+  public static function createWorkingDir(?string $working_dir): void {
+    $parent = $working_dir ?? sys_get_temp_dir();
+    if (substr($parent, -1) !== "/") $parent .= "/";
+    self::$workdir = HH\Lib\_Private\_OS\mkdtemp($parent . 'hphp-test-XXXXXX');
+    self::$sockdir = self::$workdir . '/sock';
+    mkdir(self::$sockdir, 0777, false);
+    file_put_contents(self::$workdir . '/work-queue', '0');
   }
 
-  public static function getRunTmpDir(): string {
-    return self::$tmpdir;
+  public static function getWorkingDir(): string {
+    return self::$workdir;
   }
 
-  // Return a path in the run tmpdir that's unique to this test and ext.
-  // Remember to teach clean_intermediate_files to clean up all the exts you use
-  public static function getTestTmpPath(string $test, string $ext): string {
-    return self::$tmpdir . '/' . $test . '.' . $ext;
+  // Paths for Unix sockets have size limitations, so provide a
+  // separate shorter path to put them in.
+  public static function getSocketDir(): string {
+    return self::$sockdir;
   }
 
-  public static function getTmpPathFile(string $filename): string {
-    return self::$tmpdir . '/' . $filename;
+  public static function createTestWorkingDir(string $test): void {
+    $path = self::getTestWorkingDir($test);
+    mkdir($path, 0777, true);
+    mkdir($path . '/temp', 0777, false);
   }
 
-  // Similar to getTestTmpPath, but if we're run with --write-to-checkout
-  // then we put the files next to the test instead of in the tmpdir.
-  public static function getTestOutputPath(string $test, string $ext): string {
-    if (self::$write_to_checkout) {
-      return "$test.$ext";
-    }
-    return static::getTestTmpPath($test, $ext);
+  public static function getTestWorkingDir(string $test): string {
+    return self::$workdir . '/' . $test;
   }
 
-  public static function createTestTmpDir(string $test): string {
-    $test_temp_dir = self::getTestTmpPath($test, 'tmpdir');
-    @mkdir($test_temp_dir, 0777, true);
-    return $test_temp_dir;
+  public static function getTestTempDir(string $test): string {
+    return self::getTestWorkingDir($test) . '/temp';
+  }
+
+  public static function createServerWorkingDir(): string {
+    return HH\Lib\_Private\_OS\mkdtemp(self::$workdir . '/server-XXXXXX');
   }
 
   public static function writeDiff(string $test, string $diff): void {
-    $path = Status::getTestOutputPath($test, 'diff');
-    @mkdir(dirname($path), 0777, true);
+    $path = self::getTestWorkingDir($test) . '/diff';
     file_put_contents($path, $diff);
   }
 
   public static function diffForTest(string $test): string {
-    $diff = @file_get_contents(Status::getTestOutputPath($test, 'diff'));
+    $path = self::getTestWorkingDir($test) . '/diff';
+    $diff = file_get_contents($path);
     return $diff === false ? '' : $diff;
   }
 
-  public static function removeDirectory(string $dir): void {
+  public static function cleanupTestWorkingDir(string $test): void {
+    self::removeDirectory(self::getTestWorkingDir($test));
+  }
+
+  private static function cleanupWorkingDir(): void {
+    self::removeDirectory(self::$workdir);
+  }
+
+  private static function cleanupEmptyWorkingDir(): void {
+    self::removeEmptyDirectories(self::$workdir);
+  }
+
+  private static function removeDirectory(string $dir): void {
     $files = scandir($dir);
+    if ($files === false) return;
     foreach ($files as $file) {
-      if ($file === '.' || $file === '..') {
-        continue;
-      }
+      if ($file === '.' || $file === '..') continue;
       $path = $dir . "/" . $file;
       if (is_dir($path)) {
         self::removeDirectory($path);
@@ -1629,29 +1735,23 @@ final class Status {
     rmdir($dir);
   }
 
-  // This is similar to removeDirectory but it only removes empty directores
-  // and won't enter directories whose names end with '.tmpdir'. This allows
-  // us to clean up paths like test/quick/vec in our run's temporary directory
-  // if all the tests in them passed, but it leaves test tmpdirs of failed
-  // tests (that we didn't remove with clean_intermediate_files because the
-  // test failed) and directores under them alone even if they're empty.
-  public static function removeEmptyTestParentDirs(string $dir): bool {
+  // This is similar to removeDirectory but it only removes empty
+  // directores. This allows us to clean up paths like test/quick/vec
+  // in our run's temporary directory if all the tests in them passed,
+  // but it leaves test workdirs of failed tests (that we didn't
+  // remove with clean_test_files because the test failed) and
+  // directores under them alone even if they're empty.
+  private static function removeEmptyDirectories(string $dir): bool {
     $is_now_empty = true;
     $files = scandir($dir);
     foreach ($files as $file) {
-      if ($file === '.' || $file === '..') {
-        continue;
-      }
-      if (strrpos($file, '.tmpdir') === (strlen($file) - strlen('.tmpdir'))) {
-        $is_now_empty = false;
-        continue;
-      }
+      if ($file === '.' || $file === '..') continue;
       $path = $dir . "/" . $file;
       if (!is_dir($path)) {
         $is_now_empty = false;
         continue;
       }
-      if (self::removeEmptyTestParentDirs($path)) {
+      if (self::removeEmptyDirectories($path)) {
         rmdir($path);
       } else {
         $is_now_empty = false;
@@ -1708,17 +1808,32 @@ final class Status {
         self::$queue->destroy();
         self::$queue = null;
       }
+      // Kill any pending children (including the printer if it's still
+      // running). The most common case of this is if `error()` is called from
+      // the main loop.
+      $children = self::$children;
+      if (self::$printer_pid > 0) {
+        $children[] = self::$printer_pid;
+      }
+      foreach (self::$children as $child) {
+        if ($child > 1) {
+          // No reason to think that SIGKILL is necessary.
+          posix_kill($child, SIGINT);
+        }
+      }
       switch (self::$temp_dir_remove) {
         case TempDirRemove::NEVER:
           break;
         case TempDirRemove::ON_RUN_SUCCESS:
           if (self::$return_value !== 0) {
-            self::removeEmptyTestParentDirs(self::$tmpdir);
+            self::cleanupEmptyWorkingDir();
             break;
           }
-          // FALLTHROUGH
+          self::cleanupWorkingDir();
+          break;
         case TempDirRemove::ALWAYS:
-          self::removeDirectory(self::$tmpdir);
+          self::cleanupWorkingDir();
+          break;
       }
     }
   }
@@ -1807,6 +1922,7 @@ final class Status {
         return false;
 
       case Status::MSG_SERVER_RESTARTED:
+        /* HH_FIXME[4489]: Revealed through strict switches */
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (!Status::hasCursorControl()) {
@@ -1832,6 +1948,7 @@ final class Status {
       case Status::MSG_TEST_PASS:
         self::$passed++;
         invariant($message is nonnull, "%s", __METHOD__);
+        /* HH_FIXME[4489]: Revealed through strict switches */
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (!Status::hasCursorControl()) {
@@ -1870,6 +1987,7 @@ final class Status {
         self::$skip_reasons[$reason] ??= 0;
         self::$skip_reasons[$reason]++;
 
+        /* HH_FIXME[4489]: Revealed through strict switches */
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (!Status::hasCursorControl()) {
@@ -1879,20 +1997,20 @@ final class Status {
 
           case Status::MODE_VERBOSE:
             Status::sayColor($message->test." ", Status::YELLOW, "skipped");
-
-            if ($reason is nonnull) {
-              Status::sayColor(" - reason: $reason");
-            }
+            Status::sayColor(" - reason: $reason");
             Status::sayColor(sprintf(" (%.2fs)\n", $message->time));
             break;
 
           case Status::MODE_TESTPILOT:
+            $skip_msg = $message->test." skipped (by run.php)";
+            $skip_msg .= " - reason: $reason";
             Status::sayTestpilot(
               $message->test,
               'not_relevant',
               $message->stime,
               $message->etime,
               $message->time,
+              $skip_msg,
             );
             break;
 
@@ -1904,6 +2022,7 @@ final class Status {
       case Status::MSG_TEST_FAIL:
         self::$failed++;
         invariant($message is nonnull, "%s", __METHOD__);
+        /* HH_FIXME[4489]: Revealed through strict switches */
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (Status::hasCursorControl()) {
@@ -1986,12 +2105,15 @@ final class Status {
 
   public static function sayTestpilot(
       string $test, string $status, int $stime, int $etime, float $time,
+      ?string $msg = null,
   ): void {
     $start = dict['op' => 'start', 'test' => $test];
     $end = dict['op' => 'test_done', 'test' => $test, 'status' => $status,
                  'start_time' => $stime, 'end_time' => $etime, 'time' => $time];
     if ($status === 'failed') {
       $end['details'] = self::utf8Sanitize(Status::diffForTest($test));
+    } else if ($msg is nonnull) {
+      $end['details'] = self::utf8Sanitize($msg);
     }
     self::say($start, $end);
   }
@@ -2006,9 +2128,10 @@ final class Status {
       $row ==> self::jsonEncode($row) . "\n",
       $args
     );
-    fwrite(STDERR, implode("", $data));
+    fwrite(HH\stderr(), implode("", $data));
   }
 
+  <<__Memoize>>
   public static function hasCursorControl(): bool {
     // for runs on hudson-ci.org (aka jenkins).
     if (getenv("HUDSON_URL")) {
@@ -2019,10 +2142,11 @@ final class Status {
       return false;
     }
     $stty = self::getSTTY();
-    if (!$stty) {
+    if (Str\is_empty($stty)) {
       return false;
     }
-    return strpos($stty, 'erase = <undef>') === false;
+    // emacs hack-mode really doesn't like <undef> inside a string...
+    return strpos($stty, 'erase = ' . '<' . 'undef' . '>') === false;
   }
 
   <<__Memoize>>
@@ -2033,6 +2157,7 @@ final class Status {
       'stty -a', $descriptorspec, inout $pipes, null, null,
       dict['suppress_errors' => true]
     );
+    $pipes as nonnull;
     $stty = stream_get_contents($pipes[1]);
     proc_close($process);
     return $stty;
@@ -2049,72 +2174,63 @@ final class Status {
   public static function getQueue(): Queue {
     if (!self::$queue) {
       if (self::$killed) error("Killed!");
-      self::$queue = new Queue(self::$tmpdir);
+      self::$queue = new Queue(self::$workdir);
     }
     return self::$queue;
   }
-}
 
-function clean_intermediate_files(string $test, Options $options): void {
-  if ($options->no_clean) {
-    return;
-  }
-  if ($options->write_to_checkout) {
-    // in --write-to-checkout mode, normal test output goes next to the test
-    $exts = vec[
-      'out',
-      'diff',
-    ];
-    foreach ($exts as $ext) {
-      $file = "$test.$ext";
-      if (file_exists($file)) {
-        unlink($file);
+  private static function nextTestIndex(): int {
+    $path = self::$workdir . '/work-queue';
+    $file = fopen($path, "r+");
+    try {
+      $would_block = false;
+      if (!flock($file, LOCK_EX, inout $would_block)) {
+        invariant_violation("unable to lock %s", $path);
+      }
+      $str = fread($file, 16);
+      if ($str === false) {
+        invariant_violation("unable to read from %s", $path);
+      }
+      $idx = Str\to_int($str);
+      if ($idx is null) {
+        invariant_violation("read non-integer \"%s\" from %s", $str, $path);
+      }
+      if (fseek($file, 0) < 0) {
+        invariant_violation("unable to seek to beginning of %s", $path);
+      }
+      fprintf($file, "%s", $idx + 1);
+      fflush($file);
+      return $idx;
+    } finally {
+      if ($file is resource) {
+        fclose($file);
       }
     }
   }
-  $tmp_exts = vec[
-    // normal test output goes here by default
-    'out',
-    'diff',
-    // scratch directory the test may write to
-    'tmpdir',
-    // tests in --hhas-round-trip mode
-    'round_trip.hhas',
-    // tests in --hhbbc2 mode
-    'before.round_trip.hhas',
-    'after.round_trip.hhas',
-    // temporary autoloader DB and associated cruft
-    // We have at most two modes for now - see hhvm_cmd_impl
-    'autoloadDB.0',
-    'autoloadDB.0-journal',
-    'autoloadDB.0-shm',
-    'autoloadDB.0-wal',
-    'autoloadDB.1',
-    'autoloadDB.1-journal',
-    'autoloadDB.1-shm',
-    'autoloadDB.1-wal',
-  ];
-  foreach ($tmp_exts as $ext) {
-    $file = Status::getTestTmpPath($test, $ext);
-    if (is_dir($file)) {
-      Status::removeDirectory($file);
-    } else if (file_exists($file)) {
-      unlink($file);
-    }
+
+  public static function nextTest(): ?string {
+    $idx = self::nextTestIndex();
+    if ($idx >= count(self::$tests)) return null;
+    return self::$tests[$idx];
   }
-  // repo mode uses a directory that may or may not be in the run's tmpdir
-  $repo = test_repo($options, $test);
-  if (is_dir($repo)) {
-    Status::removeDirectory($repo);
-  }
+}
+
+function clean_test_files(string $test, Options $options): void {
+  if ($options->no_clean) return;
+  Status::cleanupTestWorkingDir($test);
 }
 
 function child_main(
   Options $options,
-  vec<string> $tests,
+  vec<string> $serial_tests,
   string $json_results_file,
 ): int {
-  foreach ($tests as $test) {
+  foreach ($serial_tests as $test) {
+    run_and_log_test($options, $test);
+  }
+  while (true) {
+    $test = Status::nextTest();
+    if ($test is null) break;
     run_and_log_test($options, $test);
   }
   $results = Status::getResults();
@@ -2233,7 +2349,7 @@ function runif_test_for_feature(
   string $test,
   string $bool_expression,
 ): bool {
-  $tmp = tempnam(sys_get_temp_dir(), 'test-run-runif-');
+  $tmp = tempnam(Status::getWorkingDir(), 'test-run-runif-');
   file_put_contents(
     $tmp,
     "<?hh\n" .
@@ -2309,79 +2425,6 @@ function runif_extension_matches(
   );
 }
 
-function runif_function_matches(
-  Options $options,
-  string $test,
-  vec<string> $words,
-): RunifResult {
-  if (count($words) !== 1) {
-    return shape('valid' => false, 'error' => "malformed 'function' match");
-  }
-  if (runif_test_for_feature($options, $test, "function_exists('{$words[0]}')")) {
-    return shape('valid' => true, 'match' => true);
-  }
-  return shape(
-    'valid' => true,
-    'match' => false,
-    'skip_reason' => 'skip-runif-function-' . $words[0]
-  );
-}
-
-function runif_class_matches(
-  Options $options,
-  string $test,
-  vec<string> $words,
-): RunifResult {
-  if (count($words) !== 1) {
-    return shape('valid' => false, 'error' => "malformed 'class' match");
-  }
-  if (runif_test_for_feature($options, $test, "class_exists('{$words[0]}')")) {
-    return shape('valid' => true, 'match' => true);
-  }
-  return shape(
-    'valid' => true,
-    'match' => false,
-    'skip_reason' => 'skip-runif-class-' . $words[0]
-  );
-}
-
-function runif_method_matches(
-  Options $options,
-  string $test,
-  vec<string> $words,
-): RunifResult {
-  if (count($words) !== 2) {
-    return shape('valid' => false, 'error' => "malformed 'method' match");
-  }
-  if (runif_test_for_feature($options, $test,
-                             "method_exists('{$words[0]}', '{$words[1]}')")) {
-    return shape('valid' => true, 'match' => true);
-  }
-  return shape(
-    'valid' => true,
-    'match' => false,
-    'skip_reason' => 'skip-runif-method-' . $words[0] . '-' . $words[1],
-  );
-}
-
-function runif_const_matches(
-  Options $options,
-  string $test,
-  vec<string> $words,
-): RunifResult {
-  if (count($words) !== 1) {
-    return shape('valid' => false, 'error' => "malformed 'const' match");
-  }
-  if (runif_test_for_feature($options, $test, "defined('{$words[0]}')")) {
-    return shape('valid' => true, 'match' => true);
-  }
-  return shape(
-    'valid' => true,
-    'match' => false,
-    'skip_reason' => 'skip-runif-const-' . $words[0]
-  );
-}
-
 function runif_locale_matches(
   Options $options,
   string $test,
@@ -2415,7 +2458,7 @@ function runif_should_skip_test(
   string $test,
 ): RunifResult {
   $runif_path = find_test_ext($test, 'runif');
-  if (!$runif_path) return shape('valid' => true, 'match' => true);
+  if ($runif_path is null) return shape('valid' => true, 'match' => true);
 
   $file_empty = true;
   $contents = file($runif_path, FILE_IGNORE_NEW_LINES);
@@ -2453,18 +2496,6 @@ function runif_should_skip_test(
       case 'extension':
         $result = runif_extension_matches($options, $test, $words);
         break;
-      case 'function':
-        $result = runif_function_matches($options, $test, $words);
-        break;
-      case 'class':
-        $result = runif_class_matches($options, $test, $words);
-        break;
-      case 'method':
-        $result = runif_method_matches($options, $test, $words);
-        break;
-      case 'const':
-        $result = runif_const_matches($options, $test, $words);
-        break;
       case 'locale':
         $result = runif_locale_matches($options, $test, $words);
         break;
@@ -2479,6 +2510,10 @@ function runif_should_skip_test(
   return shape('valid' => true, 'match' => true);
 }
 
+// should_skip_test_simple handles generating skips in ways that are purely
+// based on options passed to run.php, and test names/exclusion files (eg.
+// norepo).  The benefit of should_skip_test_simple is that it can factor in to
+// test listing, while more complex skip behavior will appear in test results.
 function should_skip_test_simple(
   Options $options,
   string $test,
@@ -2503,8 +2538,7 @@ function should_skip_test_simple(
     }
   }
 
-  if (has_multi_request_mode($options) || $options->repo ||
-      $options->server) {
+  if (has_multi_request_mode($options) || $options->server) {
     if (file_exists($test . ".verify")) {
       return 'skip-verify';
     }
@@ -2513,7 +2547,7 @@ function should_skip_test_simple(
         file_exists(dirname($test).'/'.$no_multireq_tag)) {
       return 'skip-multi-req';
     }
-    if (find_debug_config($test, 'hphpd.ini')) {
+    if (!Str\is_empty(find_debug_config($test, 'hphpd.ini'))) {
       return 'skip-debugger';
     }
   }
@@ -2525,16 +2559,40 @@ function should_skip_test_simple(
       return 'skip-bespoke';
   }
 
-  $no_lazyclass_tag = "nolazyclass";
-  if ($options->lazyclass &&
-      file_exists("$test.$no_lazyclass_tag")) {
-    return 'skip-lazyclass';
-  }
-
   $no_jitserialize_tag = "nojitserialize";
   if ($options->jit_serialize is nonnull &&
       file_exists("$test.$no_jitserialize_tag")) {
     return 'skip-jit-serialize';
+  }
+
+  if ((!$options->repo || $options->jit_serialize is null
+       || (int)$options->jit_serialize < 1)
+      && file_exists($test.'.onlyjumpstart')) {
+    return 'skip-onlyjumpstart';
+  }
+
+  if (!$options->repo && file_exists($test.'.onlyrepo')) {
+    return 'skip-onlyrepo';
+  }
+
+  if ($options->repo) {
+    if (file_exists($test.'.norepo')) return 'skip-norepo';
+    if (file_exists($test.'.verify')) return 'skip-verify';
+    if (!Str\is_empty(find_debug_config($test, 'hphpd.ini'))) return 'skip-debugger';
+  }
+
+  if ($options->only_remote_executable &&
+      (file_exists("$test.no_remote") || file_exists("$test.uses_loopback"))) {
+    return 'skip-only_running_remote_executable_tests_not_requiring_loopback';
+  }
+
+  if ($options->only_remote_executable_with_loopback &&
+      (file_exists("$test.no_remote") || !file_exists("$test.uses_loopback"))) {
+    return 'skip-only_running_remote_executable_tests_requiring_loopback';
+  }
+
+  if ($options->only_non_remote_executable && !file_exists("$test.no_remote")) {
+    return 'skip-only_running_NON_remote_executable_tests';
   }
 
   return null;
@@ -2545,7 +2603,7 @@ function skipif_should_skip_test(
   string $test,
 ): RunifResult {
   $skipif_test = find_test_ext($test, 'skipif');
-  if (!$skipif_test) {
+  if ($skipif_test is null) {
     return shape('valid' => true, 'match' => true);
   }
 
@@ -2573,6 +2631,7 @@ function skipif_should_skip_test(
     );
   }
 
+  $pipes as nonnull;
   fclose($pipes[0]);
   $output = trim(stream_get_contents($pipes[1]));
   fclose($pipes[1]);
@@ -2593,22 +2652,430 @@ function skipif_should_skip_test(
   return shape('valid' => false, 'error' => "invalid skipif output '$output'");
 }
 
-function comp_line(string $l1, string $l2, bool $is_reg): bool {
-  if ($is_reg) {
-    return (bool)preg_match('/^'. $l1 . '$/s', $l2);
-  } else {
-    return !strcmp($l1, $l2);
+class BadExpectfPattern extends Exception {
+  public function __construct(string $str, string $pattern, int $offset) {
+    parent::__construct(
+      "$str (at offset $offset, context: \"" .
+      substr($pattern, max($offset - 25, 0), 50) .
+      "\")"
+    );
+  }
+}
+
+class ExpectfParser {
+  private string $str;
+
+  private string $pstr;
+  private vec<?(function(int): vec<(int, int)>)> $pattern = vec[];
+  private int $pindex = 0;
+
+  private bool $found_wildcard = false;
+  private bool $success = false;
+
+  public function __construct(string $str, string $pattern) {
+    $this->str = $str;
+    $this->pstr = $pattern;
+    $this->parse();
+    $this->success = $this->run();
+  }
+
+  public function succeeded(): bool { return $this->success; }
+  public function foundWildcard(): bool { return $this->found_wildcard; }
+
+  private function literal(string $s): void {
+    $next = count($this->pattern) + 1;
+    $this->pattern[] = (int $sindex) ==> {
+      if (!strlen($s)) return vec[tuple($sindex, $next)];
+      if ($sindex + strlen($s) > strlen($this->str)) return vec[];
+      if (substr_compare($this->str, $s, $sindex, strlen($s)) !== 0) {
+        return vec[];
+      }
+      return vec[tuple($sindex + strlen($s), $next)];
+    };
+  }
+
+  private function any(): void {
+    $next = count($this->pattern) + 1;
+    $this->pattern[] = (int $sindex)  ==> {
+      if ($sindex === strlen($this->str)) return vec[];
+      return vec[tuple($sindex + 1, $next)];
+    };
+  }
+
+  private function anyBut(string $s): void {
+    $next = count($this->pattern) + 1;
+    $this->pattern[] = (int $sindex) ==> {
+      if ($sindex === strlen($this->str)) return vec[];
+      if ($s === $this->str[$sindex]) return vec[];
+      return vec[tuple($sindex + 1, $next)];
+    };
+  }
+
+  private function func((function(string): bool) $f): void {
+    $next = count($this->pattern) + 1;
+    $this->pattern[] = (int $sindex) ==> {
+      if ($sindex === strlen($this->str)) return vec[];
+      if (!$f($this->str[$sindex])) return vec[];
+      return vec[tuple($sindex + 1, $next)];
+    };
+  }
+
+  private function or(vec<(function(): void)> $choices): void {
+    $start = count($this->pattern);
+    $this->pattern[] = null;
+
+    $choice_indices = vec[];
+    $jmp_indices = vec[];
+    foreach ($choices as $c) {
+      $choice_indices[] = count($this->pattern);
+      $c();
+      $jmp_indices[] = count($this->pattern);
+      $this->pattern[] = null;
+    }
+    $end = count($this->pattern);
+
+    $this->pattern[$start] = (int $sindex) ==> {
+      $v = vec[];
+      foreach ($choice_indices as $i) $v[] = tuple($sindex, $i);
+      return $v;
+    };
+
+    foreach ($jmp_indices as $i) {
+      $this->pattern[$i] = (int $sindex) ==> {
+        return vec[tuple($sindex, $end)];
+      };
+    }
+  }
+
+  private function orSub(): void {
+    $start = count($this->pattern);
+    $this->pattern[] = null;
+
+    $choice_indices = vec[];
+    $jmp_indices = vec[];
+    $finished = false;
+    do {
+      $choice_indices[] = count($this->pattern);
+      $finished = $this->parse('|');
+      $jmp_indices[] = count($this->pattern);
+      $this->pattern[] = null;
+    } while (!$finished);
+    $end = count($this->pattern);
+
+    $this->pattern[$start] = (int $sindex) ==> {
+      $v = vec[];
+      foreach ($choice_indices as $i) $v[] = tuple($sindex, $i);
+      return $v;
+    };
+
+    foreach ($jmp_indices as $i) {
+      $this->pattern[$i] = (int $sindex) ==> {
+        return vec[tuple($sindex, $end)];
+      };
+    }
+  }
+
+  private function zeroOrMore((function(): void) $c): void {
+    $index1 = count($this->pattern);
+    $this->pattern[] = null;
+    $c();
+    $this->pattern[] = (int $sindex) ==> {
+      return vec[tuple($sindex, $index1)];
+    };
+    $index2 = count($this->pattern);
+    $this->pattern[$index1] = (int $sindex) ==> {
+      return vec[tuple($sindex, $index1+1), tuple($sindex, $index2)];
+    };
+  }
+
+  private function oneOrMore((function(): void) $c): void {
+    $start = count($this->pattern);
+    $c();
+    $end = count($this->pattern);
+    $this->pattern[] = (int $sindex) ==> {
+      return vec[tuple($sindex, $start), tuple($sindex, $end + 1)];
+    };
+  }
+
+  private function opt((function(): void) $c): void {
+    $index1 = count($this->pattern);
+    $this->pattern[] = null;
+    $c();
+    $index2 = count($this->pattern);
+    $this->pattern[$index1] = (int $sindex) ==> {
+      return vec[tuple($sindex, $index1+1), tuple($sindex, $index2)];
+    };
+  }
+
+  private function plusMinus(): void {
+    $this->or(vec[() ==> $this->literal('-'), () ==> $this->literal('+')]);
+  }
+
+  private function whitespace(): void {
+    $this->func(ctype_space<>);
+  }
+  private function digit(): void {
+    $this->func(ctype_digit<>);
+  }
+  private function hexdigit(): void {
+    $this->func(ctype_xdigit<>);
+  }
+  private function notnewline(): void {
+    $this->anyBut("\n");
+  }
+
+  private function parse(?string $sub = null): bool {
+    $current_literal = '';
+
+    $size = strlen($this->pstr);
+    while ($this->pindex < $size) {
+      $token = $this->pstr[$this->pindex];
+      ++$this->pindex;
+      if ($token !== '%') {
+        if ($sub is nonnull) {
+          if ($token === '}') {
+            if (strlen($current_literal)) $this->literal($current_literal);
+            return true;
+          }
+          if ($token === '|' && $sub === '|') {
+            if (strlen($current_literal)) $this->literal($current_literal);
+            return false;
+          }
+        }
+        $current_literal .= $token;
+        continue;
+      }
+
+      if ($this->pindex == $size) {
+        throw new BadExpectfPattern(
+          "Unterminated wildcard at end of pattern", $this->pstr, $this->pindex
+        );
+      }
+      $token = $this->pstr[$this->pindex];
+      ++$this->pindex;
+
+      if ($token !== '%' && $token !== 't' && $token !== 'h') {
+        $this->found_wildcard = true;
+        if (strlen($current_literal)) {
+          $this->literal($current_literal);
+          $current_literal = '';
+        }
+      }
+
+      switch ($token) {
+        case '%':
+          $current_literal .= '%';
+          break;
+        case 't':
+          $current_literal .= "\t";
+          break;
+        case 'c':
+          $this->any();
+          break;
+        case 'd':
+          $this->oneOrMore(() ==> $this->digit());
+          break;
+        case 'x':
+          $this->oneOrMore(() ==> $this->hexdigit());
+          break;
+        case 's':
+          $this->oneOrMore(() ==> $this->notnewline());
+          break;
+        case 'a':
+          $this->oneOrMore(() ==> $this->any());
+          break;
+        case 'w':
+          $this->zeroOrMore(() ==> $this->whitespace());
+          break;
+        case 'C':
+          $this->opt(() ==> $this->any());
+          break;
+        case 'S':
+          $this->zeroOrMore(() ==> $this->notnewline());
+          break;
+        case 'A':
+          $this->zeroOrMore(() ==> $this->any());
+          break;
+        case 'i':
+          $this->opt(() ==> $this->plusMinus());
+          $this->oneOrMore(() ==> $this->digit());
+          break;
+        case 'f':
+          // This is more permissive than necessary, but good enough.
+          $this->opt(() ==> $this->plusMinus());
+          $this->opt(() ==> $this->literal('.'));
+          $this->oneOrMore(() ==> $this->digit());
+          $this->opt(() ==> $this->literal('.'));
+          $this->zeroOrMore(() ==> $this->digit());
+          $this->opt(() ==> {
+            $this->or(
+              vec[() ==> $this->literal('E'), () ==> $this->literal('e')]
+            );
+            $this->opt(() ==> $this->plusMinus());
+            $this->oneOrMore(() ==> $this->digit());
+          });
+          break;
+        case 'h':
+          if ($this->pindex == $size) {
+            throw new BadExpectfPattern(
+              "While parsing %h, expected '{', but reached end of pattern",
+              $this->pstr, $this->pindex
+            );
+          }
+          $brace = $this->pstr[$this->pindex];
+          if ($brace !== '{') {
+            throw new BadExpectfPattern(
+              "While parsing %h, expected '{', but got '$brace'",
+              $this->pstr, $this->pindex
+            );
+          }
+          ++$this->pindex;
+          if ($this->pindex == $size) {
+            throw new BadExpectfPattern(
+              "While parsing %h, expected hex digit, but reached end of pattern",
+              $this->pstr, $this->pindex
+            );
+          }
+          $h1 = $this->pstr[$this->pindex];
+          if (!ctype_xdigit($h1)) {
+            throw new BadExpectfPattern(
+              "While parsing %h, expected hex digit, but got '$h1'",
+              $this->pstr, $this->pindex
+            );
+          }
+          ++$this->pindex;
+          if ($this->pindex == $size) {
+            throw new BadExpectfPattern(
+              "While parsing %h, expected hex digit, but reached end of pattern",
+              $this->pstr, $this->pindex
+            );
+          }
+          $h2 = $this->pstr[$this->pindex];
+          if (!ctype_xdigit($h2)) {
+            throw new BadExpectfPattern(
+              "While parsing %h, expected hex digit, but got '$h2'",
+              $this->pstr, $this->pindex
+            );
+          }
+          ++$this->pindex;
+          if ($this->pindex == $size) {
+            throw new BadExpectfPattern(
+              "While parsing %h, expected '}', but reached end of pattern",
+              $this->pstr, $this->pindex
+            );
+          }
+          $brace = $this->pstr[$this->pindex];
+          if ($brace !== '}') {
+            throw new BadExpectfPattern(
+              "While parsing %h, expected '}', but got '$brace'",
+              $this->pstr, $this->pindex
+            );
+          }
+          ++$this->pindex;
+          $current_literal .= chr(hexdec($h1 . $h2));
+          break;
+        case '|':
+          if ($this->pindex == $size) {
+            throw new BadExpectfPattern(
+              "While parsing %|, expected '{', but reached end of pattern",
+              $this->pstr, $this->pindex
+            );
+          }
+          $brace = $this->pstr[$this->pindex];
+          if ($brace !== '{') {
+            throw new BadExpectfPattern(
+              "While parsing %|, expected '{', but got '$brace'",
+              $this->pstr, $this->pindex
+            );
+          }
+          ++$this->pindex;
+          $this->orSub();
+          break;
+        case '?':
+          if ($this->pindex == $size) {
+            throw new BadExpectfPattern(
+              "While parsing %?, expected '{', but reached end of pattern",
+              $this->pstr, $this->pindex
+            );
+          }
+          $brace = $this->pstr[$this->pindex];
+          if ($brace !== '{') {
+            throw new BadExpectfPattern(
+              "While parsing %?, expected '{', but got '$brace'",
+              $this->pstr, $this->pindex
+            );
+          }
+          ++$this->pindex;
+          $this->opt(() ==> { $this->parse('?'); return; });
+          break;
+        case '*':
+          if ($this->pindex == $size) {
+            throw new BadExpectfPattern(
+              "While parsing %*, expected '{', but reached end of pattern",
+              $this->pstr, $this->pindex
+            );
+          }
+          $brace = $this->pstr[$this->pindex];
+          if ($brace !== '{') {
+            throw new BadExpectfPattern(
+              "While parsing %*, expected '{', but got '$brace'",
+              $this->pstr, $this->pindex
+            );
+          }
+          ++$this->pindex;
+          $this->zeroOrMore(() ==> { $this->parse('*'); return; });
+          break;
+        default:
+          throw new BadExpectfPattern(
+            "Unknown wildcard %$token (escape with % if not a wildcard)",
+            $this->pstr, $this->pindex
+          );
+      }
+    }
+
+    if ($sub is nonnull) {
+      throw new BadExpectfPattern(
+        "While parsing %$sub, expected '}', but reached end of pattern",
+        $this->pstr, $this->pindex
+      );
+    }
+    if (strlen($current_literal)) $this->literal($current_literal);
+    return false;
+  }
+
+  private function run(): bool {
+    $states = dict[];
+    $states[0] = keyset[];
+    $states[0][] = 0;
+
+    do {
+      $newStates = dict[];
+      foreach ($states as $pindex => $sindices) {
+        foreach ($sindices as $sindex) {
+          if ($pindex === count($this->pattern)) {
+            if ($sindex === strlen($this->str)) return true;
+            continue;
+          }
+          foreach (($this->pattern[$pindex] as nonnull)($sindex) as list($s, $p)) {
+            $newStates[$p] ??= keyset[];
+            $newStates[$p][] = $s;
+          }
+        }
+      }
+      $states = $newStates;
+    } while ($states);
+    return false;
   }
 }
 
 function count_array_diff(
-  vec<string> $ar1, vec<string> $ar2, bool $is_reg,
+  vec<string> $ar1, vec<string> $ar2,
   int $idx1, int $idx2, int $cnt1, int $cnt2, num $steps,
+  (function(string, string): bool) $cmp
 ): int {
   $equal = 0;
 
-  while ($idx1 < $cnt1 && $idx2 < $cnt2 && comp_line($ar1[$idx1], $ar2[$idx2],
-                                                     $is_reg)) {
+  while ($idx1 < $cnt1 && $idx2 < $cnt2 && $cmp($ar1[$idx1], $ar2[$idx2])) {
     $idx1++;
     $idx2++;
     $equal++;
@@ -2621,8 +3088,8 @@ function count_array_diff(
 
     for ($ofs1 = $idx1 + 1; $ofs1 < $cnt1 && $st > 0; $ofs1++) {
       $st--;
-      $eq = @count_array_diff($ar1, $ar2, $is_reg, $ofs1, $idx2, $cnt1,
-                              $cnt2, $st);
+      $eq = count_array_diff($ar1, $ar2, $ofs1, $idx2, $cnt1,
+                             $cnt2, $st, $cmp);
 
       if ($eq > $eq1) {
         $eq1 = $eq;
@@ -2634,7 +3101,8 @@ function count_array_diff(
 
     for ($ofs2 = $idx2 + 1; $ofs2 < $cnt2 && $st > 0; $ofs2++) {
       $st--;
-      $eq = @count_array_diff($ar1, $ar2, $is_reg, $idx1, $ofs2, $cnt1, $cnt2, $st);
+      $eq = count_array_diff($ar1, $ar2, $idx1, $ofs2, $cnt1,
+                             $cnt2, $st, $cmp);
       if ($eq > $eq2) {
         $eq2 = $eq;
       }
@@ -2653,24 +3121,24 @@ function count_array_diff(
 function generate_array_diff(
   vec<string> $ar1,
   vec<string> $ar2,
-  bool $is_reg,
   vec<string> $w,
+  (function(string, string): bool) $cmp
 ): vec<string> {
-  $idx1 = 0; $cnt1 = @count($ar1);
-  $idx2 = 0; $cnt2 = @count($ar2);
+  $idx1 = 0; $cnt1 = count($ar1);
+  $idx2 = 0; $cnt2 = count($ar2);
   $old1 = dict[];
   $old2 = dict[];
 
   while ($idx1 < $cnt1 && $idx2 < $cnt2) {
-    if (comp_line($ar1[$idx1], $ar2[$idx2], $is_reg)) {
+    if ($cmp($ar1[$idx1], $ar2[$idx2])) {
       $idx1++;
       $idx2++;
       continue;
     } else {
-      $c1 = @count_array_diff($ar1, $ar2, $is_reg, $idx1+1, $idx2, $cnt1,
-                              $cnt2, 10);
-      $c2 = @count_array_diff($ar1, $ar2, $is_reg, $idx1, $idx2+1, $cnt1,
-                              $cnt2, 10);
+      $c1 = count_array_diff($ar1, $ar2, $idx1+1, $idx2, $cnt1,
+                             $cnt2, 10, $cmp);
+      $c2 = count_array_diff($ar1, $ar2, $idx1, $idx2+1, $cnt1,
+                             $cnt2, 10, $cmp);
 
       if ($c1 > $c2) {
         $old1[$idx1+1] = sprintf("%03d- ", $idx1+1) . $w[$idx1];
@@ -2733,37 +3201,40 @@ function generate_array_diff(
   return $diff;
 }
 
-function generate_diff(
-  string $wanted,
-  ?string $wanted_re,
-  string $output
-): string {
-  $m = null;
-  $w = explode("\n", $wanted);
-  $o = explode("\n", $output);
-  if (is_null($wanted_re)) {
-    $r = $w;
-  } else {
-    if (preg_match_with_matches('/^\((.*)\)\{(\d+)\}$/s', $wanted_re, inout $m)) {
-      $t = explode("\n", $m[1]);
-      $r = vec[];
-      $w2 = vec[];
-      for ($i = 0; $i < (int)$m[2]; $i++) {
-        foreach ($t as $v) {
-          $r[] = $v;
-        }
-        foreach ($w as $v) {
-          $w2[] = $v;
-        }
-      }
-      $w = $wanted === $wanted_re ? $r : $w2;
+function escape_unprintables(string $str): string {
+  $out = '';
+  for ($i = 0; $i < strlen($str); $i++) {
+    $s = $str[$i];
+    if (ctype_print($s)) {
+      $out .= $s;
+    } else if ($s === "\n") {
+      $out .= '\n';
+    } else if ($s === "\r") {
+      $out .= '\r';
+    } else if ($s === "\t") {
+      $out .= '\t';
     } else {
-      $r = explode("\n", $wanted_re);
+      $h = dechex(ord($s));
+      if (strlen($h) < 2) $h = "0" . $h;
+      $out .= '\x' . $h;
     }
   }
-  $diff = generate_array_diff($r, $o, !is_null($wanted_re), $w);
+  return $out;
+}
 
-  return implode("\r\n", $diff);
+function generate_diff(
+  string $wanted,
+  string $output,
+  (function(string, string): bool) $cmp
+): string {
+  $w = explode("\n", $wanted);
+  $o = explode("\n", $output);
+  $diff = generate_array_diff($w, $o, $w, $cmp);
+  if (count($diff) > 200) {
+    $diff = array_slice($diff, 0, 200);
+    $diff[] = "(truncated)";
+  }
+  return implode("\n", array_map(escape_unprintables<>, $diff));
 }
 
 function dump_hhas_cmd(
@@ -2780,8 +3251,11 @@ function dump_hhas_cmd(
   return $cmd;
 }
 
-function dump_hhas_to_temp(string $hhvm_cmd, string $test): ?string {
-  $temp_file = Status::getTestTmpPath($test, 'round_trip.hhas');
+function dump_hhas_to_temp(string $hhvm_cmd,
+                           string $test,
+                           string $prefix = ''): ?string {
+  $temp_file =
+    Status::getTestWorkingDir($test) .  '/' . $prefix . 'round_trip.hhas';
   $cmd = dump_hhas_cmd($hhvm_cmd, $test, $temp_file);
   $ret = -1;
   system("$cmd &> /dev/null", inout $ret);
@@ -2806,8 +3280,16 @@ function can_run_server_test(string $test, Options $options): bool {
     return false;
   }
 
+  if (is_file("$test.env") && $options->server) {
+    return false;
+  }
+
+  if (is_file("$test.clisrv_env") && $options->server) {
+    return false;
+  }
+
   // has its own config
-  if (find_test_ext($test, 'opts') || is_file("$test.ini") ||
+  if (is_file("$test.opts") || is_file("$test.ini") ||
       is_file("$test.use.for.ini.migration.testing.only.hdf")) {
     return false;
   }
@@ -2829,7 +3311,7 @@ function can_run_server_test(string $test, Options $options): bool {
   return true;
 }
 
-const int SERVER_TIMEOUT = 45;
+const int SERVER_TIMEOUT = 60;
 
 function run_config_server(Options $options, string $test): mixed {
   invariant(
@@ -2837,7 +3319,6 @@ function run_config_server(Options $options, string $test): mixed {
     'should_skip_test_simple should have skipped this',
   );
 
-  Status::createTestTmpDir($test); // force it to be created
   $config = find_file_for_dir(dirname($test), 'config.ini') ?? '';
   $servers = $options->servers as Servers;
   $port = $servers->configs[$config]->port;
@@ -2853,52 +3334,26 @@ function run_config_server(Options $options, string $test): mixed {
   }
   curl_close($ch);
 
-  return run_config_post(tuple($output, ''), $test, $options);
+  return run_config_post(null, $output, $test, $options, false);
 }
 
 function run_config_cli(
-  Options $options,
   string $test,
   string $cmd,
   dict<string, mixed> $cmd_env,
-): ?(string, string) {
-  $cmd = timeout_prefix() . $cmd;
-
-  if ($options->repo && $options->repo_out is null) {
-    // we already created it in run_test
-    $cmd_env['HPHP_TEST_TMPDIR'] = Status::getTestTmpPath($test, 'tmpdir');
-  } else {
-    $cmd_env['HPHP_TEST_TMPDIR'] = Status::createTestTmpDir($test);
+  bool $assert_verify = false
+): ?string {
+  $exit_codes = $assert_verify ? keyset[255, 127] : keyset[0, 1];
+  $file = $test.'.exit_code';
+  if (file_exists($file)) {
+    $exit_codes = keyset[(int)trim(file_get_contents($file))];
   }
-  $cmd_env['HPHP_TEST_SOURCE_FILE'] = $test;
-  if ($options->log) {
-    $cmd_env['TRACE'] = 'printir:1';
-    $cmd_env['HPHP_TRACE_FILE'] = $test . '.log';
-  }
-
-  $descriptorspec = dict[
-    0 => vec["pipe", "r"],
-    1 => vec["pipe", "w"],
-    2 => vec["pipe", "w"],
-  ];
-  $pipes = null;
-  $process = proc_open(
-    "$cmd 2>&1", $descriptorspec, inout $pipes, null, $cmd_env
-  );
-  if (!is_resource($process)) {
-    Status::writeDiff($test, "Couldn't invoke $cmd");
+  list($output, $success) = exec_with_timeout($cmd, $cmd_env, $exit_codes);
+  if (!$success) {
+    Status::writeDiff($test, $output);
     return null;
   }
-
-  fclose($pipes[0]);
-  $output = stream_get_contents($pipes[1]);
-  $output = trim($output);
-  $stderr = stream_get_contents($pipes[2]);
-  fclose($pipes[1]);
-  fclose($pipes[2]);
-  proc_close($process);
-
-  return tuple($output, $stderr);
+  return $output;
 }
 
 function replace_object_resource_ids(string $str, string $replacement): string {
@@ -2911,179 +3366,114 @@ function replace_object_resource_ids(string $str, string $replacement): string {
 }
 
 function run_config_post(
-  (string, string) $outputs,
+  ?string $pre_output,
+  string $output,
   string $test,
   Options $options,
-): mixed {
-  list($output, $stderr) = $outputs;
-  file_put_contents(Status::getTestOutputPath($test, 'out'), $output);
-
-  $check_hhbbc_error = $options->repo
-    && (file_exists($test . '.hhbbc_assert') ||
-        file_exists($test . '.hphpc_assert'));
-
-  // hhvm redirects errors to stdout, so anything on stderr is really bad.
-  if ($stderr && !$check_hhbbc_error) {
-    Status::writeDiff(
-      $test,
-      "Test failed because the process wrote on stderr:\n$stderr"
-    );
-    return false;
-  }
-
-  $repeats = 0;
-  if (!$check_hhbbc_error) {
-    if ($options->retranslate_all is nonnull) {
-      $repeats = (int)$options->retranslate_all * 2;
-    }
-
-    if ($options->recycle_tc is nonnull) {
-      $repeats = (int)$options->recycle_tc;
-    }
-
-    if ($options->cli_server) {
-      $repeats = 3;
-    }
-  }
-
+  bool $assert_verify
+): bool {
   list($file, $type) = get_expect_file_and_type($test, $options);
   if ($file is null || $type is null) {
     Status::writeDiff(
       $test,
-      "No $test.expect, $test.expectf, $test.hhvm.expect, " .
-      "$test.hhvm.expectf, or $test.expectregex. " .
+      "No $test.expect or $test.expectf. " .
       "If $test is meant to be included by other tests, " .
       "use a different file extension.\n"
     );
     return false;
   }
 
-  $wanted = null;
-  if ($type === 'expect' || $type === 'hhvm.expect') {
-    $wanted = trim(file_get_contents($file));
-    if ($options->ignore_oids || $options->repo) {
-      $output = replace_object_resource_ids($output, 'n');
+  $repeats = 0;
+  if (!$assert_verify) {
+    if ($options->retranslate_all is nonnull) {
+      $repeats = (int)$options->retranslate_all * 2;
+    }
+    if ($options->recycle_tc is nonnull) {
+      $repeats = (int)$options->recycle_tc;
+    }
+    if ($options->cli_server) {
+      $repeats = 3;
+    }
+  }
+
+  $prep = ($output) ==> {
+    $output = trim($output);
+    if ($pre_output is nonnull) {
+      $output = $pre_output . $output;
+    }
+    return $output;
+  };
+  if (!$repeats) {
+    $split = vec[$prep($output)];
+  } else {
+    $split = array_map($prep, explode(MULTI_REQUEST_SEP, $output));
+  }
+
+  $output = str_replace(MULTI_REQUEST_SEP, '', $output);
+  if ($pre_output is nonnull) {
+    $output = $pre_output . $output;
+  }
+  file_put_contents(Status::getTestWorkingDir($test) . '/out', $output);
+
+  if ($repeats > 0 && count($split) != $repeats) {
+    Status::writeDiff(
+      $test,
+      count($split) . ' sets of output returned, expected ' . $repeats
+    );
+    return false;
+  }
+
+  $wanted = trim(file_get_contents($file));
+
+  if ($type === 'expect') {
+    if ($options->ignore_oids is nonnull || $options->repo) {
+      $split = array_map($s ==> replace_object_resource_ids($s, 'n'), $split);
       $wanted = replace_object_resource_ids($wanted, 'n');
     }
 
-    if (!$repeats) {
-      $passed = !strcmp($output, $wanted);
-      if (!$passed) {
-        Status::writeDiff($test, generate_diff($wanted, null, $output));
+    foreach ($split as $s) {
+      if (strcmp($s, $wanted)) {
+        Status::writeDiff(
+          $test,
+          generate_diff($wanted, $s, ($l1, $l2) ==> !strcmp($l1, $l2))
+        );
+        return false;
       }
-      return $passed;
     }
-    $wanted_re = preg_quote($wanted, '/');
-  } else if ($type === 'expectf' || $type === 'hhvm.expectf') {
-    $wanted = trim(file_get_contents($file));
-    if ($options->ignore_oids || $options->repo) {
+    return true;
+  } else if ($type === 'expectf') {
+    if ($options->ignore_oids is nonnull || $options->repo) {
       $wanted = replace_object_resource_ids($wanted, '%d');
     }
-    $wanted_re = $wanted;
 
-    // do preg_quote, but miss out any %r delimited sections.
-    $temp = "";
-    $r = "%r";
-    $startOffset = 0;
-    $length = strlen($wanted_re);
-    while ($startOffset < $length) {
-      $start = strpos($wanted_re, $r, $startOffset);
-      if ($start !== false) {
-        // we have found a start tag.
-        $end = strpos($wanted_re, $r, $start+2);
-        if ($end === false) {
-          // unbalanced tag, ignore it.
-          $start = $length;
-          $end = $length;
+    try {
+      foreach ($split as $s) {
+        $parser = new ExpectfParser($s, $wanted);
+        if (!$parser->foundWildcard()) {
+          Status::writeDiff(
+            $test,
+            'Bad expectf file: File contains no actual wildcards. ' .
+            'Use expect instead'
+          );
+          return false;
         }
-      } else {
-        // no more %r sections.
-        $start = $length;
-        $end = $length;
+        if (!$parser->succeeded()) {
+          $diff = generate_diff(
+            $wanted,
+            $s,
+            ($l1, $l2) ==> (new ExpectfParser($l2, $l1))->succeeded()
+          );
+          Status::writeDiff($test, $diff);
+          return false;
+        }
       }
-      // quote a non re portion of the string.
-      $temp = $temp.preg_quote(substr($wanted_re, $startOffset,
-                                      ($start - $startOffset)),  '/');
-      // add the re unquoted.
-      if ($end > $start) {
-        $temp = $temp.'('.substr($wanted_re, $start+2, ($end - $start-2)).')';
-      }
-      $startOffset = $end + 2;
+      return true;
+    } catch (BadExpectfPattern $e) {
+      Status::writeDiff($test, 'Bad expectf file: ' . $e->getMessage());
+      return false;
     }
-    $wanted_re = $temp;
-
-    $wanted_re = str_replace(
-      vec['%binary_string_optional%'],
-      'string',
-      $wanted_re
-    );
-    $wanted_re = str_replace(
-      vec['%unicode_string_optional%'],
-      'string',
-      $wanted_re
-    );
-    $wanted_re = str_replace(
-      vec['%unicode\|string%', '%string\|unicode%'],
-      'string',
-      $wanted_re
-    );
-    $wanted_re = str_replace(
-      vec['%u\|b%', '%b\|u%'],
-      '',
-      $wanted_re
-    );
-    // Stick to basics.
-    $wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
-    $wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
-    $wanted_re = str_replace('%S', '[^\r\n]*', $wanted_re);
-    $wanted_re = str_replace('%a', '.+', $wanted_re);
-    $wanted_re = str_replace('%A', '.*', $wanted_re);
-    $wanted_re = str_replace('%w', '\s*', $wanted_re);
-    $wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
-    $wanted_re = str_replace('%d', '\d+', $wanted_re);
-    $wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
-    // %f allows two points "-.0.0" but that is the best *simple* expression.
-    $wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?',
-                             $wanted_re);
-    $wanted_re = str_replace('%c', '.', $wanted_re);
-    // must be last.
-    $wanted_re = str_replace('%%', '%%?', $wanted_re);
-
-    // Normalize newlines.
-    $wanted_re = preg_replace("/(\r\n?|\n)/", "\n", $wanted_re);
-    $output    = preg_replace("/(\r\n?|\n)/", "\n", $output);
-  } else if ($type === 'expectregex') {
-    $wanted_re = trim(file_get_contents($file));
   } else {
     throw new Exception("Unsupported expect file type: ".$type);
-  }
-
-  if ($repeats) {
-    $wanted_re = "($wanted_re\s*)".'{'.$repeats.'}';
-  }
-  if ($wanted is null) $wanted = $wanted_re;
-  $passed = @preg_match("/^$wanted_re\$/s", $output);
-  if ($passed) return true;
-  if ($passed === false && $repeats) {
-    // $repeats can cause the regex to become too big, and fail
-    // to compile.
-    return 'skip-repeats-fail';
-  }
-  $diff = generate_diff($wanted_re, $wanted_re, $output);
-  if ($passed === false && $diff === "") {
-    // the preg match failed, probably because the regex was too complex,
-    // but since the line by line diff came up empty, we're fine
-    return true;
-  }
-  Status::writeDiff($test, $diff);
-  return false;
-}
-
-function timeout_prefix(): string {
-  if (is_executable('/usr/bin/timeout')) {
-    return '/usr/bin/timeout ' . TIMEOUT_SECONDS . ' ';
-  } else {
-    return hphp_home() . '/hphp/tools/timeout.sh -t ' . TIMEOUT_SECONDS . ' ';
   }
 }
 
@@ -3092,13 +3482,15 @@ function run_foreach_config(
   string $test,
   vec<string> $cmds,
   dict<string, mixed> $cmd_env,
-): mixed {
+  bool $assert_verify = false,
+  ?string $pre_output = null
+): bool {
   invariant(count($cmds) > 0, "run_foreach_config: no modes");
   $result = false;
   foreach ($cmds as $cmd) {
-    $outputs = run_config_cli($options, $test, $cmd, $cmd_env);
-    if ($outputs is null) return false;
-    $result = run_config_post($outputs, $test, $options);
+    $output = run_config_cli($test, $cmd, $cmd_env, $assert_verify);
+    if ($output is null) return false;
+    $result = run_config_post($pre_output, $output, $test, $options, $assert_verify);
     if (!$result) return $result;
   }
   return $result;
@@ -3107,6 +3499,7 @@ function run_foreach_config(
 function run_and_log_test(Options $options, string $test): void {
   $stime = time();
   $time = mtime();
+  Status::createTestWorkingDir($test);
   $status = run_test($options, $test);
   $time = mtime() - $time;
   $etime = time();
@@ -3119,7 +3512,7 @@ function run_and_log_test(Options $options, string $test): void {
     Status::fail($test, $time, $stime, $etime, $diff);
   } else if ($status === true) {
     Status::pass($test, $time, $stime, $etime);
-    clean_intermediate_files($test, $options);
+    clean_test_files($test, $options);
   } else if ($status is string) {
     invariant(
       preg_match('/^skip-[\w-]+$/', $status),
@@ -3127,7 +3520,7 @@ function run_and_log_test(Options $options, string $test): void {
       $status
     );
     Status::skip($test, substr($status, 5), $time, $stime, $etime);
-    clean_intermediate_files($test, $options);
+    clean_test_files($test, $options);
   } else {
     invariant_violation("invalid status type %s", gettype($status));
   }
@@ -3177,97 +3570,7 @@ function run_test(Options $options, string $test): mixed {
   }
 
   if ($options->repo) {
-    if (file_exists($test.'.norepo')) {
-      return 'skip-norepo';
-    }
-    if (file_exists($test.'.onlyjumpstart') &&
-       ($options->jit_serialize is null || (int)$options->jit_serialize < 1)) {
-      return 'skip-onlyjumpstart';
-    }
-
-    $test_repo = test_repo($options, $test);
-    if ($options->repo_out is nonnull) {
-      // we may need to clean up after a previous run
-      $repo_files = vec['hhvm.hhbc', 'hhvm.hhbbc'];
-      foreach ($repo_files as $repo_file) {
-        @unlink("$test_repo/$repo_file");
-      }
-    } else {
-      // create tmpdir now so that we can write repos
-      Status::createTestTmpDir($test);
-    }
-
-    $program = "hhvm";
-
-    if (file_exists($test . '.hphpc_assert')) {
-      $hphp = hphp_cmd($options, $test, $program);
-      return run_foreach_config($options, $test, vec[$hphp], $hhvm_env);
-    } else if (file_exists($test . '.hhbbc_assert')) {
-      $hphp = hphp_cmd($options, $test, $program);
-      if (repo_separate($options, $test)) {
-        $result = exec_with_stack($hphp);
-        if ($result is string) return false;
-        $hhbbc = hhbbc_cmd($options, $test, $program);
-        return run_foreach_config($options, $test, vec[$hhbbc], $hhvm_env);
-      } else {
-        return run_foreach_config($options, $test, vec[$hphp], $hhvm_env);
-      }
-    }
-
-    if (!repo_mode_compile($options, $test, $program)) {
-      return false;
-    }
-
-    if ($options->hhbbc2) {
-      invariant(
-        count($hhvm) === 1,
-        "get_options forbids modes because we're not runnig code"
-      );
-      // create tmpdir now so that we can write hhas
-      Status::createTestTmpDir($test);
-      $hhas_temp1 = dump_hhas_to_temp($hhvm[0], "$test.before");
-      if ($hhas_temp1 is null) {
-        Status::writeDiff($test, "dumping hhas after first hhbbc pass failed");
-        return false;
-      }
-      shell_exec("mv $test_repo/hhvm.hhbbc $test_repo/hhvm.hhbc");
-      $hhbbc = hhbbc_cmd($options, $test, $program);
-      $result = exec_with_stack($hhbbc);
-      if ($result is string) {
-        Status::writeDiff($test, $result);
-        return false;
-      }
-      $hhas_temp2 = dump_hhas_to_temp($hhvm[0], "$test.after");
-      if ($hhas_temp2 is null) {
-        Status::writeDiff($test, "dumping hhas after second hhbbc pass failed");
-        return false;
-      }
-      $diff = shell_exec("diff $hhas_temp1 $hhas_temp2");
-      if (trim($diff) !== '') {
-        Status::writeDiff($test, $diff);
-        return false;
-      }
-    }
-
-    if ($options->jit_serialize is nonnull) {
-      invariant(count($hhvm) === 1, 'get_options enforces jit mode only');
-      $cmd = jit_serialize_option($hhvm[0], $test, $options, true);
-      $outputs = run_config_cli($options, $test, $cmd, $hhvm_env);
-      if ($outputs is null) return false;
-      $cmd = jit_serialize_option($hhvm[0], $test, $options, true);
-      $outputs = run_config_cli($options, $test, $cmd, $hhvm_env);
-      if ($outputs is null) return false;
-      $hhvm[0] = jit_serialize_option($hhvm[0], $test, $options, false);
-    }
-
-    return run_foreach_config($options, $test, $hhvm, $hhvm_env);
-  }
-
-  if (file_exists($test.'.onlyrepo')) {
-    return 'skip-onlyrepo';
-  }
-  if (file_exists($test.'.onlyjumpstart')) {
-    return 'skip-onlyjumpstart';
+    return run_repo_test($options, $test, $hhvm, $hhvm_env);
   }
 
   if ($options->hhas_round_trip) {
@@ -3275,15 +3578,15 @@ function run_test(Options $options, string $test): mixed {
       substr($test, -5) !== ".hhas",
       'should_skip_test_simple should have skipped this',
     );
-    // create tmpdir now so that we can write hhas
-    Status::createTestTmpDir($test);
     // dumping hhas, not running code so arbitrarily picking a mode
     $hhas_temp = dump_hhas_to_temp($hhvm[0], $test);
     if ($hhas_temp is null) {
       $err = "system failed: " .
-        dump_hhas_cmd($hhvm[0], $test,
-          Status::getTestTmpPath($test, 'round_trip.hhas')) .
-        "\n";
+        dump_hhas_cmd(
+          $hhvm[0],
+          $test,
+          Status::getTestWorkingDir($test) . '/round_trip.hhas'
+      ) . "\n";
       Status::writeDiff($test, $err);
       return false;
     }
@@ -3296,7 +3599,83 @@ function run_test(Options $options, string $test): mixed {
   return run_foreach_config($options, $test, $hhvm, $hhvm_env);
 }
 
+// Returns "(string | bool)".
+function run_repo_test(
+  Options $options,
+  string $test,
+  vec<string> $hhvm,
+  dict<string, mixed> $hhvm_env,
+): mixed {
+  if (file_exists($test . '.hphpc_assert')) {
+    $hphp = hphp_cmd($options, $test);
+    return run_foreach_config($options, $test, vec[$hphp], $hhvm_env, true);
+  } else if (file_exists($test . '.hhbbc_assert')) {
+    $hphp = hphp_cmd($options, $test);
+    if (repo_separate($options, $test)) {
+      list($output, $success) = exec_with_timeout($hphp);
+      if (!$success) {
+        Status::writeDiff($test, $output);
+        return false;
+      }
+      $hhbbc = hhbbc_cmd($options, $test);
+      return run_foreach_config($options, $test, vec[$hhbbc], $hhvm_env, true);
+    } else {
+      return run_foreach_config($options, $test, vec[$hphp], $hhvm_env, true);
+    }
+  }
+
+  list($repo_output, $repo_success) = repo_mode_compile($options, $test);
+  if (!$repo_success) {
+    Status::writeDiff($test, $repo_output);
+    return false;
+  }
+
+  if ($options->hhbbc2) {
+    invariant(
+      count($hhvm) === 1,
+      "get_options forbids modes because we're not running code"
+    );
+    $hhas_temp1 = dump_hhas_to_temp($hhvm[0], $test, 'before');
+    if ($hhas_temp1 is null) {
+      Status::writeDiff($test, "dumping hhas after first hhbbc pass failed");
+      return false;
+    }
+    $working_dir = Status::getTestWorkingDir($test);
+    shell_exec("mv $working_dir/hhvm.hhbbc $working_dir/hhvm.hhbc");
+    $hhbbc = hhbbc_cmd($options, $test);
+    list($output, $success) = exec_with_timeout($hhbbc);
+    if (!$success) {
+      Status::writeDiff($test, $output);
+      return false;
+    }
+    $hhas_temp2 = dump_hhas_to_temp($hhvm[0], $test, 'after');
+    if ($hhas_temp2 is null) {
+      Status::writeDiff($test, "dumping hhas after second hhbbc pass failed");
+      return false;
+    }
+    $diff = shell_exec("diff $hhas_temp1 $hhas_temp2");
+    if (trim($diff) !== '') {
+      Status::writeDiff($test, $diff);
+      return false;
+    }
+  }
+
+  if ($options->jit_serialize is nonnull) {
+    invariant(count($hhvm) === 1, 'get_options enforces jit mode only');
+    $cmd = jit_serialize_option($hhvm[0], $test, $options, true);
+    $output = run_config_cli($test, $cmd, $hhvm_env);
+    if ($output is null) return false;
+    $cmd = jit_serialize_option($hhvm[0], $test, $options, true);
+    $output = run_config_cli($test, $cmd, $hhvm_env);
+    if ($output is null) return false;
+    $hhvm[0] = jit_serialize_option($hhvm[0], $test, $options, false);
+  }
+
+  return run_foreach_config($options, $test, $hhvm, $hhvm_env, false, $repo_output);
+}
+
 function num_cpus(): int {
+  /* HH_FIXME[4489]: Revealed through strict switches */
   switch (PHP_OS) {
     case 'Linux':
       $data = file('/proc/stat');
@@ -3324,7 +3703,11 @@ function print_commands(
   vec<string> $tests,
   Options $options,
 ): void {
-  if ($options->verbose) {
+  if (C\count($tests) === 0) {
+    print make_header(
+      "Test run failed with no failed tests; did a worker process die?"
+    );
+  } else if ($options->verbose) {
     print make_header("Run these by hand:");
   } else {
     $test = $tests[0];
@@ -3333,47 +3716,60 @@ function print_commands(
   }
 
   foreach ($tests as $test) {
-    list($commands, $_) = hhvm_cmd($options, $test);
+    list($commands, $env) = hhvm_cmd($options, $test);
+
+    $envstr = '';
+    foreach (get_test_env($options, $test, dict[]) as $k => $v) {
+      if (strlen($envstr) > 0) $envstr .= ' ';
+      $envstr .= $k . "=" . (string)$v;
+    }
+    foreach ($env as $k => $v) {
+      if (strpos($k, "HPHP_TEST_") === 0 || $k === 'TMPDIR') {
+        if (strlen($envstr) > 0) $envstr .= ' ';
+        $envstr .= $k . "=" . (string)$v;
+      }
+    }
+    if (strlen($envstr) > 0) $envstr .= ' ';
+
     if (!$options->repo) {
       foreach ($commands as $c) {
-        print "$c\n";
+        print $envstr . $c . "\n";
       }
       continue;
     }
 
     // How to run it with hhbbc:
-    $program = "hhvm";
-    $hhbbc_cmds = hphp_cmd($options, $test, $program)."\n";
+    $hhbbc_cmds = hphp_cmd($options, $test)."\n";
     if (repo_separate($options, $test)) {
-      $hhbbc_cmd  = hhbbc_cmd($options, $test, $program)."\n";
+      $hhbbc_cmd  = hhbbc_cmd($options, $test)."\n";
       $hhbbc_cmds .= $hhbbc_cmd;
       if ($options->hhbbc2) {
+        $working_dir = Status::getTestWorkingDir($test);
         foreach ($commands as $c) {
           $hhbbc_cmds .=
-            $c." -vEval.DumpHhas=1 > $test.before.round_trip.hhas\n";
+            $c." -vEval.DumpHhas=1 > $working_dir.before.round_trip.hhas\n";
         }
-        $test_repo = test_repo($options, $test);
         $hhbbc_cmds .=
-          "mv $test_repo/hhvm.hhbbc $test_repo/hhvm.hhbc\n";
+          "mv $working_dir/hhvm.hhbbc $working_dir/hhvm.hhbc\n";
         $hhbbc_cmds .= $hhbbc_cmd;
         foreach ($commands as $c) {
           $hhbbc_cmds .=
-            $c." -vEval.DumpHhas=1 > $test.after.round_trip.hhas\n";
+            $c." -vEval.DumpHhas=1 > $working_dir.after.round_trip.hhas\n";
         }
         $hhbbc_cmds .=
-          "diff $test.before.round_trip.hhas $test.after.round_trip.hhas\n";
+          "diff $working_dir.before.round_trip.hhas $working_dir.after.round_trip.hhas\n";
       }
     }
     if ($options->jit_serialize is nonnull) {
       invariant(count($commands) === 1, 'get_options enforces jit mode only');
       $hhbbc_cmds .=
-        jit_serialize_option($commands[0], $test, $options, true) . "\n";
+        $envstr . jit_serialize_option($commands[0], $test, $options, true) . "\n";
       $hhbbc_cmds .=
-        jit_serialize_option($commands[0], $test, $options, true) . "\n";
+        $envstr . jit_serialize_option($commands[0], $test, $options, true) . "\n";
       $commands[0] = jit_serialize_option($commands[0], $test, $options, false);
     }
     foreach ($commands as $c) {
-      $hhbbc_cmds .= $c."\n";
+      $hhbbc_cmds .= $envstr . $c . "\n";
     }
     print "$hhbbc_cmds\n";
   }
@@ -3383,6 +3779,7 @@ function print_commands(
 function msg_loop(int $num_tests, Queue $queue): void {
   $cols = null;
   $do_progress =
+    $num_tests > 0 &&
     (
       Status::getMode() === Status::MODE_NORMAL ||
       Status::getMode() === Status::MODE_RECORD_FAILURES
@@ -3477,7 +3874,7 @@ function print_success(
     print_ship();
   }
   if ($options->failure_file is nonnull) {
-    @unlink($options->failure_file);
+    unlink($options->failure_file);
   }
   if ($options->verbose) {
     print_commands($tests, $options);
@@ -3501,10 +3898,10 @@ function print_failure(
   sort(inout $failed);
 
   $failing_tests_file = $options->failure_file ??
-    Status::getRunTmpDir() . '/test-failures';
+    Status::getWorkingDir() . '/test-failures';
   file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
   if ($passed) {
-    $passing_tests_file = Status::getRunTmpDir() . '/tests-passed';
+    $passing_tests_file = Status::getWorkingDir() . '/tests-passed';
     file_put_contents($passing_tests_file, implode("\n", $passed)."\n");
   } else {
     $passing_tests_file = "";
@@ -3523,8 +3920,8 @@ function print_failure(
   print make_header("See failed test output and expectations:");
   foreach ($failed as $n => $test) {
     if ($n !== 0) print "\n";
-    print 'cat ' . Status::getTestOutputPath($test, 'diff') . "\n";
-    print 'cat ' . Status::getTestOutputPath($test, 'out') . "\n";
+    print 'cat ' . Status::getTestWorkingDir($test) . "/diff\n";
+    print 'cat ' . Status::getTestWorkingDir($test) . "/out\n";
     $expect_file = get_expect_file_and_type($test, $options)[0];
     if ($expect_file is null) {
       print "# no expect file found for $test\n";
@@ -3562,7 +3959,12 @@ function print_failure(
 
 function port_is_listening(int $port): bool {
   $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-  return @socket_connect($socket, 'localhost', $port);
+  try {
+    return socket_connect($socket, 'localhost', $port);
+  }
+  catch (ErrorException $_) {
+    return false;
+  }
 }
 
 function find_open_port(): int {
@@ -3579,8 +3981,9 @@ function start_server_proc(
   string $config,
   int $port,
 ): Server {
+  $working_dir = Status::createServerWorkingDir();
   if ($options->cli_server) {
-    $cli_sock = tempnam(sys_get_temp_dir(), 'hhvm-cli-');
+    $cli_sock = "$working_dir/hhvm-cli";
   } else {
     // still want to test that an unwritable socket works...
     $cli_sock = '/var/run/hhvm-cli.sock';
@@ -3590,12 +3993,15 @@ function start_server_proc(
     ? '-vEval.UnixServerWorkers='.$threads
     : '-vServer.ThreadCount='.$threads;
   $prelude = $options->server
-    ? '-vEval.PreludePath=' . Status::getRunTmpDir() . '/server-prelude.php'
+    ? '-vEval.PreludePath=' . Status::getWorkingDir() . '/server-prelude.php'
     : "";
   $command = hhvm_cmd_impl(
     $options,
+    basename($working_dir),
     $config,
-    null, // we do not pass Autoload.DB.Path to the server process
+    // Provide a temporary file for `Autoload.DB.Path`: without this, we'll fail
+    // to run the server with native autoloading.
+    "$working_dir/autoloadDB",
     '-m', 'server',
     "-vServer.Port=$port",
     "-vServer.Type=proxygen",
@@ -3672,15 +4078,17 @@ function start_servers(
   keyset<string> $configs,
 ): Servers {
   if ($options->server) {
+    $socket_dir = Status::getSocketDir();
     $prelude = <<<'EOT'
 <?hh
 <<__EntryPoint>> function UNIQUE_NAME_I_DONT_EXIST_IN_ANY_TEST(): void {
-  putenv("HPHP_TEST_TMPDIR=BASEDIR{$_SERVER['SCRIPT_NAME']}.tmpdir");
+  putenv("TMPDIR=BASEDIR".\HH\global_get('_SERVER')['SCRIPT_NAME']."/temp");
+  putenv("HPHP_TEST_SOCKETDIR=$socket_dir");
 }
 EOT;
     file_put_contents(
-      Status::getRunTmpDir() . '/server-prelude.php',
-      str_replace('BASEDIR', Status::getRunTmpDir(), $prelude),
+      Status::getWorkingDir() . '/server-prelude.php',
+      str_replace('BASEDIR', Status::getWorkingDir(), $prelude),
     );
   }
 
@@ -3724,7 +4132,7 @@ EOT;
     }
 
     $starting = $still_starting;
-    $max_time = 10;
+    $max_time = 30;
     if (mtime() - $start_time > $max_time) {
       error("Servers took more than $max_time seconds to come up");
     }
@@ -3755,21 +4163,35 @@ function runner_precheck(): void {
   // Basic checking for runner.
   $server = HH\global_get('_SERVER');
   $env = HH\global_get('_ENV');
-  if (!((bool)$server ?? false) || !((bool)$env ?? false)) {
-    echo "Warning: \$_SERVER/\$_ENV variables not available, please check \n" .
-         "your ini setting: variables_order, it should have both 'E' and 'S'\n";
+  if (!((bool)$server) || !((bool)$env)) {
+    error("\\HH\global_get('_SERVER')/\\HH\global_get('_ENV') variables not available");
   }
+}
+
+function error_handler(int $type,
+                       string $message,
+                       string $file,
+                       int $line,
+                       mixed $_1,
+                       mixed $_2,
+                       mixed $_3): bool {
+  if (!($type & error_reporting())) return true;
+  throw new ErrorException($message, 0, $type, $file, $line);
 }
 
 function main(vec<string> $argv): int {
   runner_precheck();
 
+  set_error_handler(error_handler<>);
   ini_set('pcre.backtrack_limit', PHP_INT_MAX);
 
   list($options, $files) = get_options($argv);
   if ($options->help) {
     error(help());
   }
+
+  Status::createWorkingDir($options->working_dir);
+
   if ($options->list_tests) {
     list_tests($files, $options);
     print "\n";
@@ -3798,8 +4220,6 @@ function main(vec<string> $argv): int {
     print "You are using the binary located at: " . $binary_path . "\n";
   }
 
-  Status::createTmpDir();
-
   $servers = null;
   if ($options->server || $options->cli_server) {
     if ($options->server && $options->cli_server) {
@@ -3814,7 +4234,7 @@ function main(vec<string> $argv): int {
     $configs = keyset[];
     foreach ($tests as $test) {
       $config = find_file_for_dir(dirname($test), 'config.ini');
-      if (!$config) {
+      if ($config is null) {
         error("Couldn't find config file for $test");
       }
       if (array_key_exists($config, $configs)) continue;
@@ -3822,7 +4242,7 @@ function main(vec<string> $argv): int {
       $configs[] = $config;
     }
 
-    $max_configs = 30;
+    $max_configs = 10;
     if (count($configs) > $max_configs) {
       error("More than $max_configs unique config files will be needed to run ".
             "the tests you specified. They may not be a good fit for server ".
@@ -3843,38 +4263,16 @@ function main(vec<string> $argv): int {
   // the serial bucket. However if we only have one thread, we don't split
   // out serial tests.
   $parallel_threads = min(get_num_threads($options), \count($tests)) as int;
-  if ($parallel_threads === 1) {
-    $test_buckets = vec[$tests];
-  } else {
-    if (count($serial_tests) > 0) {
-      // reserve a thread for serial tests
-      $parallel_threads--;
-    }
-
-    $test_buckets = vec[];
-    for ($i = 0; $i < $parallel_threads; $i++) {
-      $test_buckets[] = vec[];
-    }
-
-    $i = 0;
-    foreach ($tests as $test) {
-      if (!in_array($test, $serial_tests)) {
-        $test_buckets[$i][] = $test;
-        $i = ($i + 1) % $parallel_threads;
-      }
-    }
-
-    if (count($serial_tests) > 0) {
-      // The last bucket is serial.
-      $test_buckets[] = $serial_tests;
-    }
+  foreach ($tests as $test) {
+    if (in_array($test, $serial_tests)) continue;
+    Status::$tests[] = $test;
   }
 
   // Remember that the serial tests are also in the tests array too,
   // so they are part of the total count.
   if (!$options->testpilot) {
     print "Running ".count($tests)." tests in ".
-      count($test_buckets)." threads (" . count($serial_tests) .
+      $parallel_threads ." threads (" . count($serial_tests) .
       " in serial)\n";
   }
 
@@ -3887,7 +4285,7 @@ function main(vec<string> $argv): int {
   if ($options->record_failures is nonnull) {
     Status::setMode(Status::MODE_RECORD_FAILURES);
   }
-  Status::setUseColor($options->color || posix_isatty(STDOUT));
+  Status::setUseColor($options->color || posix_isatty(HH\stdout()));
 
   Status::$nofork = count($tests) === 1 && !$servers;
 
@@ -3896,43 +4294,38 @@ function main(vec<string> $argv): int {
     $queue = Status::getQueue();
 
     // Fork a "printer" child to process status messages.
-    $printer_pid = pcntl_fork();
-    if ($printer_pid === -1) {
+    Status::$printer_pid = pcntl_fork();
+    if (Status::$printer_pid === -1) {
       error("failed to fork");
-    } else if ($printer_pid === 0) {
+    } else if (Status::$printer_pid === 0) {
       msg_loop(count($tests), $queue);
       return 0;
     }
-  } else {
-    // Satisfy the type-checker.
-    $printer_pid = -1;
   }
 
   // Unblock the Queue (if needed).
   Status::started();
 
   // Fork "worker" children (if needed).
-  $children = dict[];
   // We write results as json in each child and collate them at the end
   $json_results_files = vec[];
   if (Status::$nofork) {
     Status::registerCleanup($options->no_clean);
-    $json_results_file = tempnam('/tmp', 'test-run-');
+    $json_results_file = tempnam(Status::getWorkingDir(), 'test-run-');
     $json_results_files[] = $json_results_file;
-    invariant(count($test_buckets) === 1, "nofork was set erroneously");
-    $return_value = child_main($options, $test_buckets[0], $json_results_file);
+    $return_value = child_main($options, $serial_tests, $json_results_file);
   } else {
-    foreach ($test_buckets as $test_bucket) {
-      $json_results_file = tempnam('/tmp', 'test-run-');
+    for ($i = 0; $i < $parallel_threads; ++$i) {
+      $json_results_file = tempnam(Status::getWorkingDir(), 'test-run-');
       $json_results_files[] = $json_results_file;
       $pid = pcntl_fork();
       if ($pid === -1) {
         error('could not fork');
       } else if ($pid) {
-        $children[$pid] = $pid;
+        Status::$children[] = $pid;
       } else {
-        invariant($test_bucket is vec<_>, "%s", __METHOD__);
-        exit(child_main($options, $test_bucket, $json_results_file));
+        $serial = ($i === 0) ? $serial_tests : vec[];
+        exit(child_main($options, $serial, $json_results_file));
       }
     }
 
@@ -3942,18 +4335,29 @@ function main(vec<string> $argv): int {
 
     // Have the parent wait for all forked children to exit.
     $return_value = 0;
-    while (count($children) && $printer_pid !== 0) {
+    while (count(Status::$children) && Status::$printer_pid !== 0) {
       $status = null;
       $pid = pcntl_wait(inout $status);
-      if (!pcntl_wifexited($status) && !pcntl_wifsignaled($status)) {
+      if (pcntl_wifexited($status as nonnull)) {
+        $bad_end = pcntl_wexitstatus($status) !== 0;
+      } else if (pcntl_wifsignaled($status)) {
+        $bad_end = true;
+      } else {
         error("Unexpected exit status from child");
       }
 
-      if ($pid === $printer_pid) {
+      if ($pid === Status::$printer_pid) {
         // We should be finishing up soon.
-        $printer_pid = 0;
+        Status::$printer_pid = 0;
+        if ($bad_end) {
+          // Don't consider the run successful if the printer worker died
+          $return_value = 1;
+        }
       } else if ($servers && isset($servers->pids[$pid])) {
         // A server crashed. Restart it.
+        // We intentionally ignore $bad_end here because we expect this to
+        // show up as a test failure in whatever test was running on the server
+        // when it crashed. TODO(alexeyt): assert $bad_end === true?
         if (getenv('HHVM_TEST_SERVER_LOG')) {
           echo "\nServer $pid crashed. Restarting.\n";
         }
@@ -3965,21 +4369,43 @@ function main(vec<string> $argv): int {
         unset($servers->pids[$pid]);
         $pid = $server->pid;
         $servers->pids[$pid] = $server;
-      } elseif (isset($children[$pid])) {
-        unset($children[$pid]);
-        $return_value |= pcntl_wexitstatus($status);
-      } // Else, ignorable signal
+      } else if (isset(Status::$children[$pid])) {
+        unset(Status::$children[$pid]);
+        if ($bad_end) {
+          // If any worker process dies we should fail the test run
+          $return_value = 1;
+        }
+      } else {
+        // We definitely see messages about defunct processes that were started
+        // on our behalf - and it's too late to ask about their name. Don't
+        // error out because of that.
+        //
+        // A common example is: [scribe_cat] <defunct>.
+        fprintf(
+          HH\stderr(),
+          "WARNING: Got status for child that we didn't know we had with pid $pid\n"
+        );
+      }
     }
   }
 
   Status::finished($return_value);
 
-  // Wait for the printer child to die, if needed.
-  if (!Status::$nofork && $printer_pid !== 0) {
+  // Wait for the printer child to exit, if needed.
+  if (!Status::$nofork && Status::$printer_pid !== 0) {
     $status = 0;
-    $pid = pcntl_waitpid($printer_pid, inout $status);
+    $pid = pcntl_waitpid(Status::$printer_pid, inout $status);
     $status = $status as int;
-    if (!pcntl_wifexited($status) && !pcntl_wifsignaled($status)) {
+    Status::$printer_pid = 0;
+    if (pcntl_wifexited($status)) {
+      if (pcntl_wexitstatus($status) !== 0) {
+        // Don't consider the run successful if the printer worker died
+        $return_value = 1;
+      }
+    } else if (pcntl_wifsignaled($status)) {
+      // Don't consider the run successful if the printer worker died
+      $return_value = 1;
+    } else {
       error("Unexpected exit status from child");
     }
   }
@@ -4046,15 +4472,20 @@ function main(vec<string> $argv): int {
     print_failure($argv, $results, $options);
   }
 
+  $overall_time = Status::getOverallEndTime() - Status::getOverallStartTime();
+  $serial_time = Status::addTestTimesSerial($results);
+
+  $per_test = (count($tests) > 0) ? ($overall_time / count($tests)) : 0.0;
+  $serial_per_test = (count($tests) > 0) ? ($serial_time / count($tests)) : 0.0;
+
   Status::sayColor("\nTotal time for all executed tests as run: ",
                    Status::BLUE,
-                   sprintf("%.2fs\n",
-                   Status::getOverallEndTime() -
-                   Status::getOverallStartTime()));
+                   sprintf("%.2fs (%.2fs/test)\n",
+                           $overall_time, $per_test));
   Status::sayColor("Total time for all executed tests if run serially: ",
                    Status::BLUE,
-                   sprintf("%.2fs\n",
-                   Status::addTestTimesSerial($results)));
+                   sprintf("%.2fs (%.2fs/test)\n",
+                           $serial_time, $serial_per_test));
 
   return $return_value;
 }
@@ -4062,6 +4493,80 @@ function main(vec<string> $argv): int {
 <<__EntryPoint>>
 function run_main(): void {
   exit(main(get_argv()));
+}
+
+function help(): string {
+  $argv = get_argv();
+  $ztestexample = 'test/zend/good/*/*z*.php'; // sep. for syntax highlighting.
+  $help = <<<EOT
+
+
+This is the hhvm test-suite runner.  For more detailed documentation,
+see hphp/test/README.md.
+
+The test argument may be a path to a php test file, a directory name, or
+one of a few pre-defined suite names that this script knows about.
+
+If you work with hhvm a lot, you might consider a bash alias:
+
+   alias htest="path/to/hphp/test/run"
+
+Examples:
+
+  # Quick tests in JIT mode:
+  % {$argv[0]} test/quick
+
+  # Slow tests in interp mode:
+  % {$argv[0]} -m interp test/slow
+
+  # PHP specification tests in JIT mode:
+  % {$argv[0]} test/slow/spec
+
+  # Slow closure tests in JIT mode:
+  % {$argv[0]} test/slow/closure
+
+  # Slow closure tests in JIT mode with RepoAuthoritative:
+  % {$argv[0]} -r test/slow/closure
+
+  # Slow array tests, in RepoAuthoritative:
+  % {$argv[0]} -r test/slow/array
+
+  # Zend tests with a "z" in their name:
+  % {$argv[0]} $ztestexample
+
+  # Quick tests in JIT mode with some extra runtime options:
+  % {$argv[0]} test/quick -a '-vEval.JitMaxTranslations=120 -vEval.HHIRRefcountOpts=0'
+
+  # Quick tests in JIT mode with RepoAuthoritative and an extra compile-time option:
+  % {$argv[0]} test/quick -r --compiler-args '--log=4'
+
+  # All quick tests except debugger
+  % {$argv[0]} -e debugger test/quick
+
+  # All tests except those containing a string of 3 digits
+  % {$argv[0]} -E '/\d{3}/' all
+
+  # All tests whose name containing pdo_mysql
+  % {$argv[0]} -i pdo_mysql -m jit -r zend
+
+  # Print all the standard tests
+  % {$argv[0]} --list-tests
+
+  # Use a specific HHVM binary
+  % {$argv[0]} -b ~/code/hhvm/hphp/hhvm/hhvm
+  % {$argv[0]} --hhvm-binary-path ~/code/hhvm/hphp/hhvm/hhvm
+
+  # Use retranslate all.  Run the test n times, then run retranslate all, then
+  # run the test n more on the new code.
+  % {$argv[0]} --retranslate-all 2 quick
+
+  # Use jit-serialize.  Run the test n times, then run retranslate all, run the
+  # test once more, serialize all profile data, and then restart hhvm, load the
+  # serialized state and run retranslate-all before starting the test.
+  % {$argv[0]} --jit-serialize  2 -r quick
+EOT;
+
+  return usage().$help;
 }
 
 // Inline ASCII art moved to end-of-file to avoid confusing emacs.

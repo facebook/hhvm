@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $s = "a" . "b";
   print $s."\n";
 

@@ -3,7 +3,7 @@
 $memcache = new Memcache();
 $memcache->addServer('localhost', 11211);
 
-$keys = varray[
+$keys = vec[
   'abcdef1',
   'abcdef11',
   'abcdef12',

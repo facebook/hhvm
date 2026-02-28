@@ -1,8 +1,34 @@
-File "prop_access_lambda_nullsafe2.php", line 14, characters 6-7:
+WARN: File "prop_access_lambda_nullsafe2.php", line 13, characters 31-36:
+You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. (Warn[12030])
+ERROR: File "prop_access_lambda_nullsafe2.php", line 14, characters 6-7:
+Invalid argument (Typing[4110])
+  File "prop_access_lambda_nullsafe2.php", line 13, characters 23-28:
+  Expected `string`
+  File "prop_access_lambda_nullsafe2.php", line 9, characters 38-40:
+  But got `int`
+ERROR: File "prop_access_lambda_nullsafe2.php", line 14, characters 6-7:
+Invalid argument (Typing[4110])
+  File "prop_access_lambda_nullsafe2.php", line 13, characters 31-32:
+  Expected `?_`
+  File "prop_access_lambda_nullsafe2.php", line 12, characters 14-15:
+  But got `<expr#2> as A`
+  File "prop_access_lambda_nullsafe2.php", line 14, characters 6-7:
+    where `<expr#2>` is a reference to this expression
+ERROR: File "prop_access_lambda_nullsafe2.php", line 14, characters 6-7:
 Invalid argument (Typing[4110])
   File "prop_access_lambda_nullsafe2.php", line 13, characters 31-36:
-  Expected `null` or an object with property `x` (use of `?->` operator)
-  File "prop_access_lambda_nullsafe2.php", line 12, characters 14-15:
-  But got `<expr#1> as A`
-  File "prop_access_lambda_nullsafe2.php", line 14, characters 6-7:
-    where `<expr#1>` is a reference to this expression
+  Expected `?_`
+  File "prop_access_lambda_nullsafe2.php", line 5, characters 39-39:
+  But got `B`
+ERROR: File "prop_access_lambda_nullsafe2.php", line 14, characters 6-7:
+Invalid argument (Typing[4110])
+  File "prop_access_lambda_nullsafe2.php", line 13, characters 31-36:
+  Expected `null` (use of `?->` operator)
+  File "prop_access_lambda_nullsafe2.php", line 12, characters 15-15:
+  But got `A`
+ERROR: File "prop_access_lambda_nullsafe2.php", line 14, characters 6-7:
+Invalid argument (Typing[4110])
+  File "prop_access_lambda_nullsafe2.php", line 13, characters 31-40:
+  Expected `null` (use of `?->` operator)
+  File "prop_access_lambda_nullsafe2.php", line 5, characters 39-39:
+  But got `B`

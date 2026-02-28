@@ -15,7 +15,7 @@ function lookupPair($id): ?(int, int) {
 }
 
 <<__NEVER_INLINE>>
-function run($id) {
+function run($id) :mixed{
   $d = dict[0 => 0, 1 => 1, 2 => 2];
   list($curr, $_) = lookupPair($id);
 
@@ -23,7 +23,7 @@ function run($id) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   for ($i = 0; $i < 3; $i++) {
     try {
       run(__hhvm_intrinsics\launder_value($i));

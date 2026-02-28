@@ -2,7 +2,7 @@
 
 class TestingIterator implements HH\Iterator {
     private $position = 0;
-    private $array = varray[
+    private $array = vec[
         "second",
         "third",
         "forth"
@@ -12,40 +12,40 @@ class TestingIterator implements HH\Iterator {
         $this->position = 0;
     }
 
-    public function rewind() {
+    public function rewind() :mixed{
         $this->position = 0;
     }
 
-    public function current() {
+    public function current() :mixed{
         return $this->array[$this->position];
     }
 
-    public function key() {
+    public function key() :mixed{
         return $this->position;
     }
 
-    public function next() {
+    public function next() :mixed{
         ++$this->position;
     }
 
-    public function valid() {
+    public function valid() :mixed{
         return isset($this->array[$this->position]);
     }
 }
 
 class TestingIterable implements HH\Iterable {
-    public function getIterator() {
+    public function getIterator() :mixed{
         return new ArrayIterator(vec["first", "second", "third"]);
     }
 }
 
 class TestingIterableInvalid implements HH\Iterable {
-    public function getIterator() {
+    public function getIterator() :mixed{
         return "foo";
     }
 }
 
-function test(mixed $x) {
+function test(mixed $x) :mixed{
   print "first: ";
   try {
     var_dump(HH\Lib\_Private\Native\first($x));
@@ -80,7 +80,7 @@ function test(mixed $x) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   print "==========\n";
   print "vec\n";
   print "==========\n";
@@ -119,10 +119,10 @@ function main() {
   print "==========\n";
   print "array\n";
   print "==========\n";
-  test(varray[7, 8, 9]);
-  test(varray[7]);
-  test(varray[]);
-  $a = darray[];
+  test(vec[7, 8, 9]);
+  test(vec[7]);
+  test(vec[]);
+  $a = dict[];
   $a[100] = "321";
   $a["0"] = 2;
   $a[-1] = "10";

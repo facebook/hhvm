@@ -1,10 +1,10 @@
 <?hh
 
-class A { public static function meth() {} }
+class A { public static function meth() :mixed{} }
 
-function LV($x) { return __hhvm_intrinsics\launder_value($x); }
+function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 
-function wrap($fun) {
+function wrap($fun) :mixed{
   try {
     $fun();
   } catch (Exception $e) {
@@ -14,7 +14,7 @@ function wrap($fun) {
 
 <<__EntryPoint>>
 function main(): void {
-  $x = LV(HH\class_meth(A::class, 'meth'));
+  $x = LV(A::meth<>);
 
   wrap(() ==> var_dump((string)$x));
   wrap(() ==> var_dump((bool)$x));

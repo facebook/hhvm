@@ -1,10 +1,10 @@
 <?hh
 
-function one($a) { echo "one\n"; }
-function two($a, $b) { echo "two\n"; }
-function three($a, $b, $c) { echo "three\n"; }
+function one($a) :mixed{ echo "one\n"; }
+function two($a, $b) :mixed{ echo "two\n"; }
+function three($a, $b, $c) :mixed{ echo "three\n"; }
 
-function error_handler($errno, $errstr) {
+function error_handler($errno, $errstr) :mixed{
   throw new Exception("$errno, $errstr");
 }
 

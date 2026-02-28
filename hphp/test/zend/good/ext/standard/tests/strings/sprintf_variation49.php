@@ -7,26 +7,26 @@
 echo "*** Testing sprintf() : scientific formats with array values ***\n";
 
 // array of array values 
-$array_values = varray[
-  varray[],
-  varray[0],
-  varray[1],
-  varray[100000000000],
-  varray[.0000001],
-  varray[10e2],
-  varray[NULL],
-  varray[null],
-  varray["string"],
-  varray[true],
-  varray[TRUE],
-  varray[false],
-  varray[FALSE],
-  varray[1,2,3,4],
-  darray[1 => "One", "two" => 2]
+$array_values = vec[
+  vec[],
+  vec[0],
+  vec[1],
+  vec[100000000000],
+  vec[.0000001],
+  vec[10e2],
+  vec[NULL],
+  vec[null],
+  vec["string"],
+  vec[true],
+  vec[TRUE],
+  vec[false],
+  vec[FALSE],
+  vec[1,2,3,4],
+  dict[1 => "One", "two" => 2]
 ];
 
 // array of scientific formats
-$scientific_formats = varray[ 
+$scientific_formats = vec[ 
   "%e", "%he", "%le",
   "%Le", " %e", "%e ",
   "\t%e", "\n%e", "%4e", 

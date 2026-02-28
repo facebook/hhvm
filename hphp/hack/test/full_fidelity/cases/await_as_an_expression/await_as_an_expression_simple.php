@@ -11,16 +11,16 @@ async function foo(): Awaitable<void> {
   $x = (await genx()) is int;
   $x = (await genx()) as int;
   $x = (await genx()) ?as int;
-  $x = isset(varray[][await genx()]);
+  $x = isset(vec[][await genx()]);
   $x = Map { (await genx()) => (await geny()) };
   $x = Vector { (await genx()) };
   $x = Set { (await genx()) };
   $x = new (await genx())(await geny());
   $x = shape('key' => (await genx()));
   $x = tuple((await genx()), (await geny()));
-  $x = darray[0 => (await genx()), (await geny()) => (await genz())];
-  $x = darray[(await genx()) => (await geny())];
-  $x = varray[(await genx()), (await geny())];
+  $x = dict[0 => (await genx()), (await geny()) => (await genz())];
+  $x = dict[(await genx()) => (await geny())];
+  $x = vec[(await genx()), (await geny())];
   $x = dict[(await genx()) => (await geny())];
   $x = vec[(await genx()), (await geny())];
   $x = keyset[(await genx()), (await geny())];
@@ -77,7 +77,7 @@ async function foo(): Awaitable<void> {
 
   await genx();
   return await genx();
-  unset(varray[][await genx()]);
+  unset(vec[][await genx()]);
   if (await genx()) {}
   throw (await genx());
   switch (await genx()) { default: break; }

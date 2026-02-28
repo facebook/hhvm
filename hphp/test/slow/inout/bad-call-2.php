@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_bad_call_2() {
+function main_bad_call_2() :mixed{
 foo(inout SOME_CONST);
 }

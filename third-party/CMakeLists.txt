@@ -22,6 +22,7 @@ add_subdirectory(oniguruma)
 set(EXTRA_INCLUDE_PATHS)
 set(THIRD_PARTY_MODULES)
 set(THIRD_PARTY_HEADERS)
+include(GNUInstallDirs)
 
 function(TP_INSTALL_HEADERS TARGET SRCDIR DEST)
   file(GLOB_RECURSE files "${SRCDIR}/*.h")
@@ -29,7 +30,7 @@ function(TP_INSTALL_HEADERS TARGET SRCDIR DEST)
     CODE "INCLUDE(\"${HPHP_HOME}/CMake/HPHPFunctions.cmake\")
       HHVM_INSTALL_HEADERS(${TARGET}
         \"${CMAKE_CURRENT_BINARY_DIR}/${SRCDIR}\"
-      \"\${CMAKE_INSTALL_PREFIX}/include/hphp/third-party/${DEST}\"
+      \"\${CMAKE_INSTALL_FULL_INCLUDEDIR}/hphp/third-party/${DEST}\"
       ${files})"
     COMPONENT dev)
 endfunction()
@@ -53,6 +54,8 @@ add_subdirectory(fmt)
 add_subdirectory(jemalloc)
 add_subdirectory(libsodium)
 add_subdirectory(zstd)
+add_subdirectory(gflags)
+add_subdirectory(glog)
 
 add_subdirectory(folly)
 
@@ -62,6 +65,7 @@ list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/fatal")
 add_subdirectory(brotli) # Required by fizz
 add_subdirectory(fizz)
 add_subdirectory(wangle)
+add_subdirectory(mvfst)
 add_subdirectory(proxygen)
 add_subdirectory(thrift)
 
@@ -113,6 +117,9 @@ if(ENABLE_XED AND NOT LibXed_FOUND)
   list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/xed/xed/build/include/xed")
 endif()
 
+# Add bundled TBB
+list(APPEND THIRD_PARTY_MODULES tbb)
+list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/tbb/src/include")
 
 ##### rustc #####
 

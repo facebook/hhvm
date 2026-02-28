@@ -1,0 +1,24 @@
+Errors:
+  [9:6-7] `HH\BuiltinEnum` is an implementation internal class that cannot be used directly
+  [9:6-7] Interface `HH\BuiltinEnum` is used more than once in this declaration.
+  [9:6-7] Here is another occurrence
+{
+  "refinement_counter": {
+    "legacy_refinements": {
+      "intersection": {
+        "count": 1,
+        "positions": [
+          "File \"refinement_test1.php\", line 25, characters 20-20:"
+        ]
+      },
+      "union-dynamic": {
+        "count": 1,
+        "positions": [
+          "File \"refinement_test1.php\", line 5, characters 18-21:"
+        ]
+      }
+    },
+    "new_refinements": 6,
+    "total_refinements": 8
+  }
+}

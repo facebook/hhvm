@@ -2,35 +2,60 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
-use crate::emit_statement::Level;
-use crate::reified_generics_helpers as reified;
-use bitflags::bitflags;
-use emit_pos::emit_pos;
-use env::{emitter::Emitter, jump_targets as jt, Env, LocalGen};
-use error::Result;
-use hhbc::{Instruct, IsTypeOp, IterId, Label, Opcode, Pseudo};
-use indexmap::IndexSet;
-use instruction_sequence::{instr, InstrSeq};
-use oxidized::pos::Pos;
 use std::collections::BTreeMap;
 
-type LabelMap<'a, 'arena> = BTreeMap<jt::StateId, &'a Instruct<'arena>>;
+use bitflags::bitflags;
+use emit_pos::emit_pos;
+use env::Env;
+use env::LocalGen;
+use env::emitter::Emitter;
+use env::jump_targets as jt;
+use error::Result;
+use hhbc::Instruct;
+use hhbc::IsTypeOp;
+use hhbc::IterId;
+use hhbc::Label;
+use hhbc::Opcode;
+use hhbc::Pseudo;
+use hhbc::VerifyRetKind;
+use indexmap::IndexSet;
+use instruction_sequence::InstrSeq;
+use instruction_sequence::instr;
+use oxidized::pos::Pos;
 
-pub(super) struct JumpInstructions<'a, 'arena>(LabelMap<'a, 'arena>);
-impl<'a, 'arena> JumpInstructions<'a, 'arena> {
+use super::TypeRefinementInHint;
+use crate::emit_expression;
+use crate::emit_fatal;
+use crate::reified_generics_helpers as reified;
+
+type LabelMap<'i> = BTreeMap<jt::StateId, &'i Instruct>;
+
+pub(super) struct JumpInstructions<'i>(LabelMap<'i>);
+impl<'i> JumpInstructions<'i> {
     pub(super) fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 
-    /// Collects list of Ret* and non rewritten Break/Continue instructions inside try body.
-    pub(super) fn collect(
-        instr_seq: &'a InstrSeq<'arena>,
+    pub(super) fn collect_ret(
+        instr_seq: &'i InstrSeq,
         jt_gen: &mut jt::Gen,
-    ) -> JumpInstructions<'a, 'arena> {
-        fn get_label_id(jt_gen: &mut jt::Gen, is_break: bool, level: Level) -> jt::StateId {
+    ) -> JumpInstructions<'i> {
+        JumpInstructions(instr_seq.iter().fold(LabelMap::new(), |mut acc, instr| {
+            match *instr {
+                Instruct::Opcode(Opcode::RetC(_) | Opcode::RetM(_, _)) => {
+                    acc.insert(jt_gen.get_id_for_return(), instr);
+                }
+                _ => {}
+            };
+            acc
+        }))
+    }
+
+    /// Collects list of Ret* and non rewritten Break/Continue instructions inside try body.
+    pub(super) fn collect(instr_seq: &'i InstrSeq, jt_gen: &mut jt::Gen) -> JumpInstructions<'i> {
+        fn get_label_id(jt_gen: &mut jt::Gen, is_break: bool) -> jt::StateId {
             use jt::ResolvedJumpTarget;
-            match jt_gen.jump_targets().get_target_for_level(is_break, level) {
+            match jt_gen.jump_targets().get_target(is_break) {
                 ResolvedJumpTarget::ResolvedRegular(target_label, _)
                 | ResolvedJumpTarget::ResolvedTryFinally(jt::ResolvedTryFinally {
                     target_label,
@@ -41,13 +66,13 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
         }
         JumpInstructions(instr_seq.iter().fold(LabelMap::new(), |mut acc, instr| {
             match *instr {
-                Instruct::Pseudo(Pseudo::Break(level)) => {
-                    acc.insert(get_label_id(jt_gen, true, level as Level), instr);
+                Instruct::Pseudo(Pseudo::Break) => {
+                    acc.insert(get_label_id(jt_gen, true), instr);
                 }
-                Instruct::Pseudo(Pseudo::Continue(level)) => {
-                    acc.insert(get_label_id(jt_gen, false, level as Level), instr);
+                Instruct::Pseudo(Pseudo::Continue) => {
+                    acc.insert(get_label_id(jt_gen, false), instr);
                 }
-                Instruct::Opcode(Opcode::RetC | Opcode::RetCSuspended | Opcode::RetM(_)) => {
+                Instruct::Opcode(Opcode::RetC(_) | Opcode::RetCSuspended | Opcode::RetM(_, _)) => {
                     acc.insert(jt_gen.get_id_for_return(), instr);
                 }
                 _ => {}
@@ -57,19 +82,25 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
     }
 }
 
+/// Delete Ret* instructions from the foreach body
+pub(super) fn cleanup_iterate_body(mut is: InstrSeq) -> InstrSeq {
+    is.retain(|instr| !matches!(instr, Instruct::Opcode(Opcode::RetC(..) | Opcode::RetM(..))));
+    is
+}
+
 /// Delete Ret*, Break, and Continue instructions from the try body
-pub(super) fn cleanup_try_body<'arena>(mut is: InstrSeq<'arena>) -> InstrSeq<'arena> {
+pub(super) fn cleanup_try_body(mut is: InstrSeq) -> InstrSeq {
     is.retain(|instr| {
         !matches!(
             instr,
-            Instruct::Pseudo(Pseudo::Continue(_) | Pseudo::Break(_))
-                | Instruct::Opcode(Opcode::RetC | Opcode::RetCSuspended | Opcode::RetM(_))
+            Instruct::Pseudo(Pseudo::Continue | Pseudo::Break)
+                | Instruct::Opcode(Opcode::RetC(_) | Opcode::RetCSuspended | Opcode::RetM(_, _))
         )
     });
     is
 }
 
-pub(super) fn emit_jump_to_label<'arena>(l: Label, iters: Vec<IterId>) -> InstrSeq<'arena> {
+pub(super) fn emit_jump_to_label(l: Label, iters: Vec<IterId>) -> InstrSeq {
     if iters.is_empty() {
         instr::jmp(l)
     } else {
@@ -77,141 +108,145 @@ pub(super) fn emit_jump_to_label<'arena>(l: Label, iters: Vec<IterId>) -> InstrS
     }
 }
 
-pub(super) fn emit_save_label_id<'arena>(
-    local_gen: &mut LocalGen,
-    id: jt::StateId,
-) -> InstrSeq<'arena> {
+pub(super) fn emit_save_label_id(local_gen: &mut LocalGen, id: jt::StateId) -> InstrSeq {
     InstrSeq::gather(vec![
         instr::int(id.0.into()),
-        instr::setl(*local_gen.get_label()),
-        instr::popc(),
+        instr::set_l(*local_gen.get_label()),
+        instr::pop_c(),
     ])
 }
 
-pub(super) fn emit_return<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
+pub(super) fn emit_return<'a>(
+    e: &mut Emitter,
     in_finally_epilogue: bool,
-    env: &mut Env<'a, 'arena>,
-) -> Result<InstrSeq<'arena>> {
+    env: &mut Env<'a>,
+) -> Result<InstrSeq> {
     // check if there are try/finally region
     let jt_gen = &env.jump_targets_gen;
-    match jt_gen.jump_targets().get_closest_enclosing_finally_label() {
+    match jt_gen.jump_targets().get_enclosing_scope_for_return() {
         None => {
-            // no finally blocks, but there might be some iterators that should be
-            // released before exit - do it
-            let ctx = e.emit_statement_state();
+            let ctx = e.statement_state();
             let num_out = ctx.num_out;
             let verify_out = ctx.verify_out.clone();
             let verify_return = ctx.verify_return.clone();
-            let release_iterators_instr = InstrSeq::gather(
-                jt_gen
-                    .jump_targets()
-                    .iterators()
-                    .map(instr::iterfree)
-                    .collect(),
-            );
-            let mut instrs = Vec::with_capacity(5);
+
+            // no finally blocks. At this point there should be no
+            // iterators to be freed.
+            assert!(jt_gen.jump_targets().iterators().next().is_none());
+
+            let mut instrs = Vec::with_capacity(4);
             if in_finally_epilogue {
-                let load_retval_instr = instr::cgetl(e.local_gen_mut().get_retval().clone());
+                let load_retval_instr = instr::c_get_l(e.local_gen_mut().get_retval().clone());
                 instrs.push(load_retval_instr);
             }
-            let verify_return_instr = verify_return.map_or_else(
-                || Ok(instr::empty()),
+            let verify_return = verify_return.map_or_else(
+                || Ok((instr::empty(), VerifyRetKind::None)),
                 |h| {
                     use reified::ReificationLevel;
                     let h = reified::convert_awaitable(env, h);
                     let h = reified::remove_erased_generics(env, h);
                     match reified::has_reified_type_constraint(env, &h) {
-                        ReificationLevel::Unconstrained => Ok(instr::empty()),
-                        ReificationLevel::Not => Ok(instr::verify_ret_type_c()),
-                        ReificationLevel::Maybe => Ok(InstrSeq::gather(vec![
-                            emit_expression::get_type_structure_for_hint(
-                                e,
-                                &[],
-                                &IndexSet::new(),
-                                &h,
-                            )?,
-                            instr::verify_ret_type_ts(),
-                        ])),
+                        ReificationLevel::Unconstrained => {
+                            Ok((instr::empty(), VerifyRetKind::None))
+                        }
+                        ReificationLevel::Not => Ok((instr::empty(), VerifyRetKind::All)),
+                        ReificationLevel::Maybe => Ok((
+                            InstrSeq::gather(vec![
+                                emit_expression::get_type_structure_for_hint(
+                                    e,
+                                    &[],
+                                    &IndexSet::new(),
+                                    TypeRefinementInHint::Allowed,
+                                    &h,
+                                )?,
+                                instr::verify_ret_type_ts(),
+                            ]),
+                            VerifyRetKind::All,
+                        )),
                         ReificationLevel::Definitely => {
                             let check = InstrSeq::gather(vec![
                                 instr::dup(),
-                                instr::istypec(IsTypeOp::Null),
+                                instr::is_type_c(IsTypeOp::Null),
                             ]);
-                            reified::simplify_verify_type(
-                                e,
-                                env,
-                                &Pos::make_none(),
-                                check,
-                                &h,
-                                instr::verify_ret_type_ts(),
-                            )
+                            Ok((
+                                reified::simplify_verify_type(
+                                    e,
+                                    env,
+                                    &Pos::NONE,
+                                    check,
+                                    &h,
+                                    instr::verify_ret_type_ts(),
+                                )?,
+                                VerifyRetKind::All,
+                            ))
                         }
                     }
                 },
             )?;
+            let (verify_ret_instr, kind) = verify_return;
             instrs.extend(vec![
-                verify_return_instr,
+                verify_ret_instr,
                 verify_out,
-                release_iterators_instr,
                 if num_out != 0 {
-                    instr::retm(num_out as u32 + 1)
+                    instr::ret_m(num_out as u32 + 1, kind)
                 } else {
-                    instr::retc()
+                    instr::ret_c(kind)
                 },
             ]);
             Ok(InstrSeq::gather(instrs))
         }
-        // ret is in finally block and there might be iterators to release -
-        // jump to finally block via Jmp
-        Some((target_label, iterators_to_release)) => {
+        // ret is in a finally block or foreach body. Release the foreach
+        // iterator and jump to the finally block or loopbreak label.
+        Some((target_label, iterator)) => {
             let preamble = if in_finally_epilogue {
                 instr::empty()
             } else {
                 let jt_gen = &mut env.jump_targets_gen;
                 let save_state = emit_save_label_id(e.local_gen_mut(), jt_gen.get_id_for_return());
                 let save_retval = InstrSeq::gather(vec![
-                    instr::setl(e.local_gen_mut().get_retval().clone()),
-                    instr::popc(),
+                    instr::set_l(e.local_gen_mut().get_retval().clone()),
+                    instr::pop_c(),
                 ]);
                 InstrSeq::gather(vec![save_state, save_retval])
             };
             Ok(InstrSeq::gather(vec![
                 preamble,
-                emit_jump_to_label(target_label, iterators_to_release),
+                emit_jump_to_label(target_label, iterator.map_or(vec![], |x| vec![x])),
                 // emit ret instr as an indicator for try/finally rewriter to generate
                 // finally epilogue, try/finally rewriter will remove it.
-                instr::retc(),
+                //
+                // Note: The VerifyRetKind immediate specified here is not final.
+                // The correct flavor of verification will be read from ctx
+                // and emitted in the block above. Use VerifyRetKind::All to be
+                // conservative.
+                instr::ret_c(VerifyRetKind::All),
             ]))
         }
     }
 }
 
 bitflags! {
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     pub(super) struct EmitBreakOrContinueFlags: u8 {
         const IS_BREAK =            0b01;
         const IN_FINALLY_EPILOGUE = 0b10;
     }
 }
 
-pub(super) fn emit_break_or_continue<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
+pub(super) fn emit_break_or_continue<'a>(
+    e: &mut Emitter,
     flags: EmitBreakOrContinueFlags,
-    env: &mut Env<'a, 'arena>,
+    env: &mut Env<'a>,
     pos: &Pos,
-    level: Level,
-) -> InstrSeq<'arena> {
-    let alloc = env.arena;
+) -> InstrSeq {
     let jt_gen = &mut env.jump_targets_gen;
     let in_finally_epilogue = flags.contains(EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE);
     let is_break = flags.contains(EmitBreakOrContinueFlags::IS_BREAK);
-    match jt_gen.jump_targets().get_target_for_level(is_break, level) {
-        jt::ResolvedJumpTarget::NotFound => {
-            emit_fatal::emit_fatal_for_break_continue(alloc, pos, level)
-        }
+    match jt_gen.jump_targets().get_target(is_break) {
+        jt::ResolvedJumpTarget::NotFound => emit_fatal::emit_fatal_for_break_continue(pos),
         jt::ResolvedJumpTarget::ResolvedRegular(target_label, iterators_to_release) => {
-            let preamble = if in_finally_epilogue && level == 1 {
-                instr::unsetl(e.local_gen_mut().get_label().clone())
+            let preamble = if in_finally_epilogue {
+                instr::unset_l(e.local_gen_mut().get_label().clone())
             } else {
                 instr::empty()
             };
@@ -225,7 +260,6 @@ pub(super) fn emit_break_or_continue<'a, 'arena, 'decl>(
             target_label,
             finally_label,
             iterators_to_release,
-            adjusted_level,
         }) => {
             let preamble = if !in_finally_epilogue {
                 let label_id = jt_gen.get_id_for_label(target_label.clone());
@@ -233,7 +267,6 @@ pub(super) fn emit_break_or_continue<'a, 'arena, 'decl>(
             } else {
                 instr::empty()
             };
-            let adjusted_level = adjusted_level as isize;
             InstrSeq::gather(vec![
                 preamble,
                 emit_jump_to_label(finally_label, iterators_to_release),
@@ -241,61 +274,58 @@ pub(super) fn emit_break_or_continue<'a, 'arena, 'decl>(
                 // emit break/continue instr as an indicator for try/finally rewriter
                 // to generate finally epilogue - try/finally rewriter will remove it.
                 if is_break {
-                    instr::break_(adjusted_level)
+                    instr::break_()
                 } else {
-                    instr::continue_(adjusted_level)
+                    instr::continue_()
                 },
             ])
         }
     }
 }
 
-pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+pub(super) fn emit_finally_epilogue<'a>(
+    e: &mut Emitter,
+    env: &mut Env<'a>,
     pos: &Pos,
-    jump_instrs: JumpInstructions<'b, 'arena>,
+    jump_instrs: JumpInstructions<'_>,
     finally_end: Label,
-) -> Result<InstrSeq<'arena>> {
-    fn emit_instr<'a, 'arena, 'decl>(
-        e: &mut Emitter<'arena, 'decl>,
-        env: &mut Env<'a, 'arena>,
+) -> Result<InstrSeq> {
+    fn emit_instr<'a>(
+        e: &mut Emitter,
+        env: &mut Env<'a>,
         pos: &Pos,
-        i: &Instruct<'arena>,
-    ) -> Result<InstrSeq<'arena>> {
+        i: &Instruct,
+    ) -> Result<InstrSeq> {
         let fail = || {
             panic!("unexpected instruction: only Ret* or Break/Continue/Jmp(Named) are expected")
         };
         match *i {
-            Instruct::Opcode(Opcode::RetC | Opcode::RetCSuspended | Opcode::RetM(_)) => {
+            Instruct::Opcode(Opcode::RetC(_) | Opcode::RetCSuspended | Opcode::RetM(_, _)) => {
                 emit_return(e, true, env)
             }
-            Instruct::Pseudo(Pseudo::Break(level)) => Ok(emit_break_or_continue(
+            Instruct::Pseudo(Pseudo::Break) => Ok(emit_break_or_continue(
                 e,
                 EmitBreakOrContinueFlags::IS_BREAK | EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE,
                 env,
                 pos,
-                level as Level,
             )),
-            Instruct::Pseudo(Pseudo::Continue(level)) => Ok(emit_break_or_continue(
+            Instruct::Pseudo(Pseudo::Continue) => Ok(emit_break_or_continue(
                 e,
                 EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE,
                 env,
                 pos,
-                level as Level,
             )),
             _ => fail(),
         }
     }
-    let alloc = env.arena;
     Ok(if jump_instrs.0.is_empty() {
         instr::empty()
     } else if jump_instrs.0.len() == 1 {
         let (_, instr) = jump_instrs.0.iter().next().unwrap();
         InstrSeq::gather(vec![
             emit_pos(pos),
-            instr::issetl(e.local_gen_mut().get_label().clone()),
-            instr::jmpz(finally_end),
+            instr::isset_l(e.local_gen_mut().get_label().clone()),
+            instr::jmp_z(finally_end),
             emit_instr(e, env, pos, instr)?,
         ])
     } else {
@@ -345,13 +375,10 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
         }
         InstrSeq::gather(vec![
             emit_pos(pos),
-            instr::issetl(e.local_gen_mut().get_label().clone()),
-            instr::jmpz(finally_end),
-            instr::cgetl(e.local_gen_mut().get_label().clone()),
-            instr::switch(
-                alloc,
-                bumpalo::collections::Vec::from_iter_in(labels.into_iter().rev(), alloc),
-            ),
+            instr::isset_l(e.local_gen_mut().get_label().clone()),
+            instr::jmp_z(finally_end),
+            instr::c_get_l(e.local_gen_mut().get_label().clone()),
+            instr::switch(labels.into_iter().rev().collect()),
             InstrSeq::gather(bodies.into_iter().rev().collect()),
         ])
     })

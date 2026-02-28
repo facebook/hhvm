@@ -1,8 +1,21 @@
 A
-=E3=0CClassContext=E8=E3=07=E9=E3=04KEYA
+vec(2) {
+  string(12) "ClassContext"
+  string(4) "KEYA"
+}
+
 B
-=E3=0CClassContext=E8=E3=07=E9=E3=04KEYA=E3=0DClassContext2=E8=E3=07=
-=E9=E3=04KEYB
+vec(4) {
+  string(13) "ClassContext2"
+  string(4) "KEYB"
+  string(12) "ClassContext"
+  string(4) "KEYA"
+}
+
 C
-=E3=0CClassContext=E8=E3=07=E9=E3=04KEYA=E3=0DClassContext2=E8=E3=07=
-=E9=E3=04KEYC
+vec(4) {
+  string(13) "ClassContext2"
+  string(4) "KEYC"
+  string(12) "ClassContext"
+  string(4) "KEYA"
+}

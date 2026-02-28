@@ -33,21 +33,12 @@ const RegSet kGPRegs =
   reg::r8  | reg::r9  | reg::r10 | reg::r11 |
   reg::r12 | reg::r13 | reg::r14 | reg::r15;
 
-#ifdef _MSC_VER
-const RegSet kGPCallerSaved =
-  reg::rax | reg::rcx | reg::rdx |
-  reg::r8  | reg::r9  | reg::r10 | reg::r11;
-
-const RegSet kGPCalleeSaved =
-  reg::rbx | reg::rsi | reg::rdi | reg::r13 | reg::r14 | reg::r15;
-#else
 const RegSet kGPCallerSaved =
   reg::rax | reg::rcx | reg::rdx | reg::rsi | reg::rdi |
   reg::r8  | reg::r9  | reg::r10 | reg::r11;
 
 const RegSet kGPCalleeSaved =
   reg::rbx | reg::r12 | reg::r13 | reg::r14 | reg::r15;
-#endif
 
 const RegSet kGPReserved = x64::rsp() | x64::rvmfp() | x64::rvmtl();
 const RegSet kGPUnreserved = kGPRegs - kGPReserved;
@@ -129,21 +120,13 @@ const Abi helper_abi {
 
 // x64 INTEGER class argument registers.
 constexpr PhysReg gp_args[] = {
-#ifdef _MSC_VER
-  reg::rcx, reg::rdx, reg::r8, reg::r9
-#else
   reg::rdi, reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9
-#endif
 };
 
 // x64 SSE class argument registers.
 constexpr PhysReg simd_args[] = {
-#ifdef _MSC_VER
-  reg::xmm0, reg::xmm1, reg::xmm2, reg::xmm3,
-#else
   reg::xmm0, reg::xmm1, reg::xmm2, reg::xmm3,
   reg::xmm4, reg::xmm5, reg::xmm6, reg::xmm7,
-#endif
 };
 
 constexpr PhysReg svcreq_args[] = {

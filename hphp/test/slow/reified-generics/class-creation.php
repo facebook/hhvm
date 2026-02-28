@@ -5,12 +5,12 @@ class D {}
 class E {}
 
 class Test<reify T1> {
-  public function f<reify T2>(bool $fun) {
+  public function f<reify T2>(bool $fun) :mixed{
     return $fun ? new T2 : new T1;
   }
 }
 
-function f<reify T>() {
+function f<reify T>() :mixed{
   return new T();
 }
 <<__EntryPoint>> function main(): void {

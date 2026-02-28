@@ -15,43 +15,30 @@
 */
 
 #include "hphp/runtime/base/autoload-handler.h"
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/vm/builtin-symbol-map.h"
 #include "hphp/runtime/vm/decl-provider.h"
+
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/sha1.h"
+
+#include <boost/algorithm/string/predicate.hpp>
+
+#include <fstream>
 
 namespace HPHP {
 
-TRACE_SET_MOD(unit_parse);
-
-namespace {
-
-// Helper to return DeclProviderResult::Missing
-DeclProviderResult missing() {
-  return DeclProviderResult{DeclProviderResult::Tag::Missing, {}};
-}
-
-// Helper to return DeclProviderResult::Decls
-DeclProviderResult decls(const Decls* decls) {
-  DeclProviderResult r;
-  r.tag = DeclProviderResult::Tag::Decls;
-  r.decl_provider_decls_result._0 = decls;
-  return r;
-}
-
-} // namespace {}
+TRACE_SET_MOD(unit_parse)
 
 std::unique_ptr<HhvmDeclProvider>
-HhvmDeclProvider::create(const RepoOptionsFlags& options) {
-  if (!RuntimeOption::EvalEnableDecl) {
+HhvmDeclProvider::create(AutoloadMap* map,
+                         const RepoOptionsFlags& options,
+                         const std::filesystem::path& repoRoot) {
+  if (!Cfg::Eval::EnableDecl) {
     return {nullptr};
   }
-  if (!AutoloadHandler::s_instance) {
-    // It is not safe to autoinit AutoloadHandler outside a normal request.
-    return {nullptr};
-  }
-  auto map = AutoloadHandler::s_instance->getAutoloadMap();
-  if (!map || !map->isNative()) {
-    // Either compiling systemlib.php with no autoload map initialized yet,
-    // or AutoloadHandler was not configured with a native AutoloadMap.
+  if (!map) {
+    // Compiling systemlib.php with no autoload map initialized yet.
     return {nullptr};
   }
 
@@ -59,27 +46,50 @@ HhvmDeclProvider::create(const RepoOptionsFlags& options) {
   // This will only cache entries it sees during this invocation of
   // the compiler. Hackc should have a per-session cache indexed by symbol,
   // and this file-to-decls cache should span sessions.
-  auto decl_flags = options.getDeclFlags();
-  auto aliased_namespaces = options.getAliasedNamespacesConfig();
-  return std::make_unique<HhvmDeclProvider>(
-      decl_flags, aliased_namespaces, map
-  );
+  hackc::DeclParserConfig decl_config;
+  options.initDeclConfig(decl_config);
+  return std::make_unique<HhvmDeclProvider>(decl_config, map, repoRoot);
 }
 
 HhvmDeclProvider::HhvmDeclProvider(
-    int32_t flags,
-    std::string const& aliased_namespaces,
-    AutoloadMap* map
-)
-  : m_opts{hackc_create_direct_decl_parse_options(flags, aliased_namespaces)}
-  , m_map{map}
+    hackc::DeclParserConfig decl_config,
+    AutoloadMap* map,
+    const std::filesystem::path& repo
+) : m_config{decl_config}, m_map{map}, m_repo{repo}
 {}
 
-// Called by hackc, potentially on a different thread.
-DeclProviderResult HhvmDeclProvider::getDecl(
-  AutoloadMap::KindOf kind,
+// Called by hackc.
+
+hackc::ExternalDeclProviderResult HhvmDeclProvider::getType(
+  std::string_view symbol,
+  uint64_t depth
+) noexcept {
+  return getDecls(symbol, depth, AutoloadMap::KindOf::TypeOrTypeAlias);
+}
+
+hackc::ExternalDeclProviderResult HhvmDeclProvider::getFunc(
   std::string_view symbol
-) {
+) noexcept {
+  return getDecls(symbol, 0, AutoloadMap::KindOf::Function);
+}
+
+hackc::ExternalDeclProviderResult HhvmDeclProvider::getConst(
+  std::string_view symbol
+) noexcept {
+  return getDecls(symbol, 0, AutoloadMap::KindOf::Constant);
+}
+
+hackc::ExternalDeclProviderResult HhvmDeclProvider::getModule(
+  std::string_view symbol
+) noexcept {
+  return getDecls(symbol, 0, AutoloadMap::KindOf::Module);
+}
+
+hackc::ExternalDeclProviderResult HhvmDeclProvider::getDecls(
+  std::string_view symbol,
+  uint64_t depth,
+  AutoloadMap::KindOf kind
+) noexcept {
   // TODO(T110866581): symbol should be normalized by hackc
   std::string_view sym(normalizeNS(symbol));
   ITRACE(3, "DP lookup {}\n", sym);
@@ -92,7 +102,7 @@ DeclProviderResult HhvmDeclProvider::getDecl(
 
     if (result != m_cache.end()) {
       ITRACE(3, "DP found cached decls for {} in {}\n", sym, filename);
-      return decls(&(*result->second.decls));
+      return hackc::ExternalDeclProviderResult::from_decls(*result->second);
     }
 
     // Nothing cached: Load file, parse decls.
@@ -101,35 +111,85 @@ DeclProviderResult HhvmDeclProvider::getDecl(
       std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>()
     };
 
-    DeclResult decl_result = hackc_direct_decl_parse(*m_opts, filename, text);
-    ITRACE(3, "DP parsed {} in {}\n", sym, filename);
+    try {
+      auto holder = hackc::parse_decls(
+          m_config,
+          filename,
+          {(const uint8_t*)text.data(), text.size()}
+      );
+      ITRACE(3, "DP parsed {} in {}\n", sym, filename);
 
-    // Insert decl_result into the cache, return DeclResult::decls,
-    // a pointer to rust decls in m_cache.
-    auto [it, _] = m_cache.insert({filename, std::move(decl_result)});
-    return decls(&(*it->second.decls));
+      auto const norm_filename =
+        std::filesystem::relative(*filename_opt, m_repo);
+
+      auto const hash = SHA1{string_sha1(text)};
+      m_deps.emplace(DeclSym{kind, symbol}, DepInfo{norm_filename, depth, hash});
+
+      // Insert decl_result into the cache, return DeclsAndBlob::decls,
+      // a pointer to rust decls in m_cache.
+      auto [it, _] = m_cache.insert({filename, std::move(holder)});
+      return hackc::ExternalDeclProviderResult::from_decls(*it->second);
+    } catch ([[maybe_unused]] const std::exception& ex) {
+      // Decl parser error - don't cache anything, and don't fall through.
+      ITRACE(4, "DP {}: decl parse error: {}", ex.what());
+      return hackc::ExternalDeclProviderResult::missing();
+    }
   }
+
   ITRACE(4, "DP {}: getFile() returned None\n", sym);
-  return missing();
-}
 
-extern "C" {
-
-DeclProviderResult hhvm_decl_provider_get_decl(
-    void* provider, int symbol_kind, char const* symbol, size_t len
-) {
-  try {
-    // Unsafe: if `symbol_kind` is out of range the result of this cast is UB.
-    HPHP::AutoloadMap::KindOf kind {
-      static_cast<HPHP::AutoloadMap::KindOf>(symbol_kind)
-    };
-    return ((HhvmDeclProvider*)provider)->getDecl(
-        kind, std::string_view(symbol, len)
-    );
-  } catch(...) {
-    not_reached();
+  auto const res = Native::getBuiltinDecls(makeStaticString(sym), kind);
+  if (res) {
+    ITRACE(4, "DP {}: found in extensions or systemlib\n", sym);
+    return *res;
   }
+  ITRACE(4, "DP {}: symbol not found in native decl registry\n", sym);
+  m_sawMissing = true;
+  return hackc::ExternalDeclProviderResult::missing();
 }
 
-} //extern "C"
+std::vector<DeclDep> HhvmDeclProvider::getFlatDeps() const {
+  hphp_hash_map<std::string, SHA1> deps;
+  for (auto& [sym, info] : m_deps) deps.emplace(info.file, info.hash);
+
+  std::vector<DeclDep> flat;
+  for (auto [file, hash] : deps) flat.emplace_back(DeclDep{file, hash});
+  return flat;
+}
+
+std::vector<std::vector<DeclLoc>> HhvmDeclProvider::getLocsByDepth() const {
+  uint64_t max_depth = 0;
+
+  hphp_hash_map<std::string, std::pair<DeclSym, DepInfo>> deps;
+  for (auto& [sym, info] : m_deps) {
+    auto [it, inserted] = deps.emplace(info.file, std::make_pair(sym, info));
+    // smaller depth replaces entry with bigger depth, for equal depths,
+    // first one wins.
+    if (!inserted && info.depth < it->second.second.depth) {
+      it->second = std::make_pair(sym, info);
+    }
+    max_depth = std::max(info.depth, max_depth);
+  }
+
+  std::vector<std::vector<DeclLoc>> locs_by_depth(max_depth + 1);
+  for (auto& [file, sym_info] : deps) {
+    auto& [sym, info] = sym_info;
+    locs_by_depth[info.depth].emplace_back(
+      std::make_pair(sym, DeclDep{file, info.hash})
+    );
+  }
+
+  // Now that we've collapsed files in multiple dep lists to the list with the
+  // lowest level there may be empty lists. Our clients care about an ordering
+  // of dependencies by depth, not the specific levels themselves,
+  // so as a convenience guarantee that each dependency list is non-empty.
+  locs_by_depth.erase(
+    std::remove_if(locs_by_depth.begin(), locs_by_depth.end(), [] (auto& locs) {
+      return locs.empty();
+    }),
+    locs_by_depth.end()
+  );
+
+  return locs_by_depth;
+}
 }//namespace HPHP

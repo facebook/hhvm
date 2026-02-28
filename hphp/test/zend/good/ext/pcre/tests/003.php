@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-foreach (varray[PREG_PATTERN_ORDER, PREG_SET_ORDER] as $flag) {
+foreach (vec[PREG_PATTERN_ORDER, PREG_SET_ORDER] as $flag) {
     $m = null;
     var_dump(preg_match_all_with_matches(
       '~

@@ -3,14 +3,14 @@
 class XDate extends DateTime
 {
   public function myFormat()
-  {
+:mixed  {
 
     $return = parent::format("Y-m-d H:i:s");
     parent::setTimezone(GvnCrash13368505Php::$gmt);
   }
 }
 
-function main() {
+function main() :mixed{
 
 
   $date = new XDate('now', GvnCrash13368505Php::$gmt);

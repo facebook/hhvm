@@ -1,0 +1,168 @@
+error: Typing[4110] Invalid argument
+
+File fn_subtyping_contra_1.php, line 8, character 9 - line 8, character 10:
+
+ 4 | class Sub extends Super {}
+ 5 | 
+ 6 | function foo_1((function(Super): void) $_): void {}
+ 7 | function bar_1((function(Sub): void) $f): void {
+ 8 |   foo_1(»$f«);
+ 9 | }
+
+Expected Sub
+
+File fn_subtyping_contra_1.php, line 7, character 26 - line 7, character 28:
+
+ 4 | class Sub extends Super {}
+ 5 | 
+ 6 | function foo_1((function(Super): void) $_): void {}
+ 7 | function bar_1((function(»Sub«): void) $f): void {
+ 8 |   foo_1($f);
+ 9 | }
+
+But got Super
+
+File fn_subtyping_contra_1.php, line 6, character 26 - line 6, character 30:
+
+ 4 | class Sub extends Super {}
+ 5 | 
+ 6 | function foo_1((function(»Super«): void) $_): void {}
+ 7 | function bar_1((function(Sub): void) $f): void {
+ 8 |   foo_1($f);
+ 9 | }
+
+Here's why:
+
+
+  Step 1 of 3                                                                   
+
+I started by checking this subtype relationship.
+
+The subtype comes from this function or method declaration
+
+File fn_subtyping_contra_1.php, line 6, character 10 - line 6, character 14:
+
+ 4 | class Sub extends Super {}
+ 5 | 
+ 6 | function »foo_1«((function(Super): void) $_): void {}
+ 7 | function bar_1((function(Sub): void) $f): void {
+ 8 |   foo_1($f);
+ 9 | }
+
+The supertype comes from this expression
+
+File fn_subtyping_contra_1.php, line 8, character 3 - line 8, character 11:
+
+ 4 | class Sub extends Super {}
+ 5 | 
+ 6 | function foo_1((function(Super): void) $_): void {}
+ 7 | function bar_1((function(Sub): void) $f): void {
+ 8 |   »foo_1($f)«;
+ 9 | }
+
+
+  Step 2 of 3                                                                   
+
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
+
+The subtype comes from this hint
+
+File fn_subtyping_contra_1.php, line 7, character 16 - line 7, character 36:
+
+ 4 | class Sub extends Super {}
+ 5 | 
+ 6 | function foo_1((function(Super): void) $_): void {}
+ 7 | function bar_1(»(function(Sub): void)« $f): void {
+ 8 |   foo_1($f);
+ 9 | }
+
+and flows into this expression
+
+File fn_subtyping_contra_1.php, line 7, character 38 - line 7, character 39:
+
+ 4 | class Sub extends Super {}
+ 5 | 
+ 6 | function foo_1((function(Super): void) $_): void {}
+ 7 | function bar_1((function(Sub): void) »$f«): void {
+ 8 |   foo_1($f);
+ 9 | }
+
+as the parameter hint
+
+which itself flows into this expression
+
+File fn_subtyping_contra_1.php, line 8, character 9 - line 8, character 10:
+
+ 4 | class Sub extends Super {}
+ 5 | 
+ 6 | function foo_1((function(Super): void) $_): void {}
+ 7 | function bar_1((function(Sub): void) $f): void {
+ 8 |   foo_1(»$f«);
+ 9 | }
+
+as the type of the local variable
+
+The supertype comes from this hint
+
+File fn_subtyping_contra_1.php, line 6, character 16 - line 6, character 38:
+
+ 4 | class Sub extends Super {}
+ 5 | 
+ 6 | function foo_1(»(function(Super): void)« $_): void {}
+ 7 | function bar_1((function(Sub): void) $f): void {
+ 8 |   foo_1($f);
+ 9 | }
+
+
+  Step 3 of 3                                 (here is where the error occurred) 
+
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
+
+The subtype comes from this hint
+
+File fn_subtyping_contra_1.php, line 6, character 26 - line 6, character 30:
+
+ 4 | class Sub extends Super {}
+ 5 | 
+ 6 | function foo_1((function(»Super«): void) $_): void {}
+ 7 | function bar_1((function(Sub): void) $f): void {
+ 8 |   foo_1($f);
+ 9 | }
+
+which is defined here
+
+File fn_subtyping_contra_1.php, line 3, character 7 - line 3, character 11:
+
+ 1 | <?hh
+ 2 | 
+ 3 | class »Super« {}
+ 4 | class Sub extends Super {}
+ 5 | 
+ 6 | function foo_1((function(Super): void) $_): void {}
+ 7 | function bar_1((function(Sub): void) $f): void {
+
+The supertype comes from this hint
+
+File fn_subtyping_contra_1.php, line 7, character 26 - line 7, character 28:
+
+ 4 | class Sub extends Super {}
+ 5 | 
+ 6 | function foo_1((function(Super): void) $_): void {}
+ 7 | function bar_1((function(»Sub«): void) $f): void {
+ 8 |   foo_1($f);
+ 9 | }
+
+which is defined here
+
+File fn_subtyping_contra_1.php, line 4, character 7 - line 4, character 9:
+
+ 1 | <?hh
+ 2 | 
+ 3 | class Super {}
+ 4 | class »Sub« extends Super {}
+ 5 | 
+ 6 | function foo_1((function(Super): void) $_): void {}
+ 7 | function bar_1((function(Sub): void) $f): void {
+

@@ -1,4 +1,4 @@
-Program %s/print-datetime.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s/print-datetime.php loaded. Type '[r]un' to go.
 =new DateTime('9/18/2014 11:00:00 America/Los_Angeles');
 DateTime Object
 (
@@ -8,19 +8,15 @@ DateTime Object
 )
 
 =function () { return 4; };
-"Closure%s"
+"Closure\$include"
 p new DateTime('@'.time(), new DateTimeZone('UTC'))
 DateTime Object
 (
-    [date] => "%s"
+    [date] => "%d-%d-%d %d:%d:%d.%d"
     [timezone_type] => 1
     [timezone] => "+00:00"
 )
 
-c
-Break at entrypoint_printdatetime() on line 4 of %s/print-datetime.php
-   3 function entrypoint_printdatetime(): void {
-   4*  hphpd_break();
-   5 }
-
+r
+Program %s/print-datetime.php exited normally.
 quit

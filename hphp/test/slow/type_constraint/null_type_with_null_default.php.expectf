@@ -1,0 +1,4 @@
+hello
+hello
+
+Catchable fatal error: Argument 1 passed to foo() must be an instance of null, int given in %s on line 11

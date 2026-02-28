@@ -1,0 +1,38 @@
+Code actions available:
+------------------------------------------
+Add __NeedsConcrete attribute (CodeActionKind: "quickfix") SELECTED
+Devmate Quick Fix - Dangerous access of abstract member `A::m2`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (CodeActionKind: "quickfix")
+Devmate Agent Fix - Dangerous access of abstract member `A::m2`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (CodeActionKind: "quickfix")
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":", __NeedsConcrete",
+          "range":{"end":{"character":13,"line":3},"start":{"character":13,"line":3}}
+        }
+      ]
+    }
+  },
+  "kind":"quickfix",
+  "title":"Add __NeedsConcrete attribute"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+abstract class A {
+  <<__Memoize, __NeedsConcrete>>
+  public static function m1(): void {
+    static::m2();
+    //       ^ at-caret
+  }
+
+  public static abstract function m2(): void;
+}
+

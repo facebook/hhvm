@@ -84,7 +84,7 @@ ObjectData* alloc(CollectionType ctype, ArrayData* arr);
 ObjectData* allocPair(TypedValue c1, TypedValue c2);
 
 /////////////////////////////////////////////////////////////////////////////
-// Casting and Cloing
+// Casting and Cloning
 
 bool isType(const Class* cls, CollectionType type);
 template<typename ...Args>
@@ -182,7 +182,7 @@ COLLECTIONS_ALL_TYPES(X)
  * collection type.
  */
 inline Optional<CollectionType> stringToType(const StringData* name) {
-#define X(type) if (name->isame(s_##type.get())) return CollectionType::type;
+#define X(type) if (name->tsame(s_##type.get())) return CollectionType::type;
 COLLECTIONS_ALL_TYPES(X)
 #undef X
   return std::nullopt;

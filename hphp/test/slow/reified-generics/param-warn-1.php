@@ -3,9 +3,9 @@
 class B<reify T> {}
 class C<<<__Warn>> reify T> {}
 
-function f(C<int> $_) { echo "done\n"; }
+function f(C<int> $_) :mixed{ echo "done\n"; }
 
-function g(B<C<int>> $_) { echo "done\n"; }
+function g(B<C<int>> $_) :mixed{ echo "done\n"; }
 <<__EntryPoint>>
 function entrypoint_paramwarn1(): void {
 

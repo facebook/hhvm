@@ -8,10 +8,10 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_multisort() : usage variation  - test sort order of all types***\n";
 
-$inputs = darray[
+$inputs = dict[
       'int 0' => 0,
       'float -10.5' => -10.5,
-      0 => varray[],
+      0 => vec[],
       'uppercase NULL' => NULL,
       'lowercase true' => true,
       'empty string DQ' => "",

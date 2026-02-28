@@ -55,7 +55,7 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
   return match<bool>(
     dst,
     [&] (DeadIter) {
-      match<void>(
+      match(
         src,
         [] (DeadIter) {},
         [] (const LiveIter&) {
@@ -78,7 +78,7 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
           auto const throws1 =
             diter.types.mayThrowOnInit || siter.types.mayThrowOnInit;
           auto const throws2 =
-            diter.types.mayThrowOnNext || siter.types.mayThrowOnNext;
+            diter.types.mayThrowOnGetOrNext || siter.types.mayThrowOnGetOrNext;
           auto const baseUpdated = diter.baseUpdated || siter.baseUpdated;
           auto const baseLocal = (diter.baseLocal != siter.baseLocal)
             ? NoLocalId
@@ -89,19 +89,16 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
           auto const initBlock = (diter.initBlock != siter.initBlock)
             ? NoBlockId
             : diter.initBlock;
-          auto const baseCannotBeObject =
-            diter.baseCannotBeObject && siter.baseCannotBeObject;
           auto const changed =
-            !equivalently_refined(key, diter.types.key) ||
-            !equivalently_refined(value, diter.types.value) ||
+            !equal(key, diter.types.key) ||
+            !equal(value, diter.types.value) ||
             count != diter.types.count ||
             throws1 != diter.types.mayThrowOnInit ||
-            throws2 != diter.types.mayThrowOnNext ||
+            throws2 != diter.types.mayThrowOnGetOrNext ||
             keyLocal != diter.keyLocal ||
             baseLocal != diter.baseLocal ||
             baseUpdated != diter.baseUpdated ||
-            initBlock != diter.initBlock ||
-            baseCannotBeObject != diter.baseCannotBeObject;
+            initBlock != diter.initBlock;
           diter.types =
             IterTypes {
               std::move(key),
@@ -114,7 +111,6 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
           diter.baseLocal = baseLocal;
           diter.keyLocal = keyLocal;
           diter.initBlock = initBlock;
-          diter.baseCannotBeObject = baseCannotBeObject;
           return changed;
         }
       );
@@ -153,14 +149,18 @@ std::string show(const php::Func& f, const Iter& iter) {
 
 //////////////////////////////////////////////////////////////////////
 
-CollectedInfo::CollectedInfo(const Index& index,
+CollectedInfo::CollectedInfo(const IIndex& index,
                              Context ctx,
                              ClassAnalysis* cls,
                              CollectionOpts opts,
+                             ClsConstantWork* clsCns,
                              const FuncAnalysis* fa)
-    : props{index, ctx, cls}
+    : closureUseVars{&index, ctx, cls}
+    , props{index, ctx, cls}
     , methods{ctx, cls}
+    , clsCns{clsCns}
     , opts{fa ? opts | CollectionOpts::Optimizing : opts}
+    , publicSPropMutations{index.tracking_public_sprops() && !fa}
 {
   if (fa) {
     unfoldableFuncs = fa->unfoldableFuncs;
@@ -169,8 +169,8 @@ CollectedInfo::CollectedInfo(const Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
-State with_throwable_only(const Index& index, const State& src) {
-  auto throwable = subObj(index.builtin_class(s_Throwable.get()));
+State with_throwable_only(const IIndex& index, const State& src) {
+  auto throwable = subObj(builtin_class(index, s_Throwable.get()));
   auto ret          = State{};
   ret.initialized   = src.initialized;
   ret.thisType      = src.thisType;
@@ -201,13 +201,14 @@ State with_throwable_only(const Index& index, const State& src) {
 
 //////////////////////////////////////////////////////////////////////
 
-PropertiesInfo::PropertiesInfo(const Index& index,
+PropertiesInfo::PropertiesInfo(const IIndex& index,
                                Context ctx,
                                ClassAnalysis* cls)
   : m_cls(cls)
   , m_func(ctx.func)
 {
   if (m_cls == nullptr && ctx.cls != nullptr) {
+    auto const UNUSED bump = trace_bump(*ctx.cls, Trace::hhbbc_index);
     m_privateProperties = index.lookup_private_props(ctx.cls);
     m_privateStatics    = index.lookup_private_statics(ctx.cls);
   }
@@ -227,7 +228,7 @@ const PropState& PropertiesInfo::privateStaticsRaw() const {
   return m_privateStatics;
 }
 
-const PropStateElem<>*
+const PropStateElem*
 PropertiesInfo::readPrivateProp(SString name) const {
   if (m_cls != nullptr) {
     auto const it = m_cls->privateProperties.find(name);
@@ -239,7 +240,7 @@ PropertiesInfo::readPrivateProp(SString name) const {
   return it == m_privateProperties.end() ? nullptr : &it->second;
 }
 
-const PropStateElem<>*
+const PropStateElem*
 PropertiesInfo::readPrivateStatic(SString name) const {
   if (m_cls != nullptr) {
     auto const it = m_cls->privateStatics.find(name);
@@ -251,7 +252,7 @@ PropertiesInfo::readPrivateStatic(SString name) const {
   return it == m_privateStatics.end() ? nullptr : &it->second;
 }
 
-void PropertiesInfo::mergeInPrivateProp(const Index& index,
+void PropertiesInfo::mergeInPrivateProp(const IIndex& index,
                                         SString name,
                                         const Type& t) {
   if (!m_cls || t.is(BBottom)) return;
@@ -269,13 +270,13 @@ void PropertiesInfo::mergeInPrivateProp(const Index& index,
   if (it->second.ty.strictlyMoreRefined(newT)) {
     it->second.ty = std::move(newT);
     if (m_cls->work) {
-      m_cls->work->propsRefined = true;
+      always_assert(!m_cls->work->noPropRefine);
       m_cls->work->worklist.scheduleForProp(name);
     }
   }
 }
 
-void PropertiesInfo::mergeInPrivateStatic(const Index& index,
+void PropertiesInfo::mergeInPrivateStatic(const IIndex& index,
                                           SString name,
                                           const Type& t,
                                           bool ignoreConst,
@@ -297,7 +298,7 @@ void PropertiesInfo::mergeInPrivateStatic(const Index& index,
   if (it->second.ty.strictlyMoreRefined(newT)) {
     it->second.ty = std::move(newT);
     if (m_cls->work) {
-      m_cls->work->propsRefined = true;
+      always_assert(!m_cls->work->noPropRefine);
       m_cls->work->worklist.scheduleForProp(name);
     }
   }
@@ -317,13 +318,13 @@ void PropertiesInfo::mergeInPrivateStaticPreAdjusted(SString name,
   if (it->second.ty.strictlyMoreRefined(newT)) {
     it->second.ty = std::move(newT);
     if (m_cls->work) {
-      m_cls->work->propsRefined = true;
+      always_assert(!m_cls->work->noPropRefine);
       m_cls->work->worklist.scheduleForProp(name);
     }
   }
 }
 
-void PropertiesInfo::mergeInAllPrivateProps(const Index& index,
+void PropertiesInfo::mergeInAllPrivateProps(const IIndex& index,
                                             const Type& t) {
   if (!m_cls || t.is(BBottom)) return;
   for (auto& kv : m_cls->privateProperties) {
@@ -339,21 +340,21 @@ void PropertiesInfo::mergeInAllPrivateProps(const Index& index,
     if (kv.second.ty.strictlyMoreRefined(newT)) {
       kv.second.ty = std::move(newT);
       if (m_cls->work) {
-        m_cls->work->propsRefined = true;
+        always_assert(!m_cls->work->noPropRefine);
         m_cls->work->worklist.scheduleForProp(kv.first);
       }
     }
   }
 }
 
-void PropertiesInfo::mergeInAllPrivateStatics(const Index& index,
+void PropertiesInfo::mergeInAllPrivateStatics(const IIndex& index,
                                               const Type& t,
                                               bool ignoreConst,
                                               bool mustBeReadOnly) {
   if (!m_cls || t.is(BBottom)) return;
   for (auto& kv : m_cls->privateStatics) {
-    if (!ignoreConst && (kv.second.attrs & AttrIsConst)) return;
-    if (mustBeReadOnly && !(kv.second.attrs & AttrIsReadonly)) return;
+    if (!ignoreConst && (kv.second.attrs & AttrIsConst)) continue;
+    if (mustBeReadOnly && !(kv.second.attrs & AttrIsReadonly)) continue;
     if (m_cls->work) {
       m_cls->work->worklist.addPropMutateDep(kv.first, *m_func);
       m_cls->work->propMutators[m_func].emplace(kv.first);
@@ -366,15 +367,32 @@ void PropertiesInfo::mergeInAllPrivateStatics(const Index& index,
     if (kv.second.ty.strictlyMoreRefined(newT)) {
       kv.second.ty = std::move(newT);
       if (m_cls->work) {
-        m_cls->work->propsRefined = true;
+        always_assert(!m_cls->work->noPropRefine);
         m_cls->work->worklist.scheduleForProp(kv.first);
       }
     }
   }
 }
 
-void PropertiesInfo::setBadPropInitialValues() {
-  if (m_cls) m_cls->badPropInitialValues = true;
+void PropertiesInfo::setInitialValue(const php::Prop& prop,
+                                     TypedValue val,
+                                     bool satisfies,
+                                     bool deepInit) {
+  m_inits[&prop] = PropInitInfo{val, satisfies, deepInit};
+}
+
+const PropInitInfo*
+PropertiesInfo::getInitialValue(const php::Prop& prop) const {
+  return folly::get_ptr(m_inits, &prop);
+}
+
+bool PropertiesInfo::privatePropertySatisfiesTC(SString name) const {
+  if (m_cls && m_cls->work &&
+      m_cls->work->privatePropsSatisfiesTC.contains(name)) {
+    return true;
+  }
+  auto const p = folly::get_ptr(privatePropertiesRaw(), name);
+  return p && (p->attrs & AttrInitialSatisfiesTC);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -384,7 +402,7 @@ MethodsInfo::MethodsInfo(Context ctx, ClassAnalysis* cls)
   , m_func{ctx.func}
 {}
 
-Optional<Type> MethodsInfo::lookupReturnType(const php::Func& f) {
+Optional<Index::ReturnType> MethodsInfo::lookupReturnType(const php::Func& f) {
   if (!m_cls || !m_cls->work) return std::nullopt;
   auto const& types = m_cls->work->returnTypes;
   auto const it = types.find(&f);
@@ -395,20 +413,36 @@ Optional<Type> MethodsInfo::lookupReturnType(const php::Func& f) {
 
 //////////////////////////////////////////////////////////////////////
 
-void merge_closure_use_vars_into(ClosureUseVarMap& dst,
-                                 php::Class* clo,
-                                 CompactVector<Type> types) {
-  auto& current = dst[clo];
+ClosureUseVarInfo::ClosureUseVarInfo(const IIndex* i,
+                                     Context ctx,
+                                     ClassAnalysis* cls)
+  : m_index{i}
+  , m_cls{cls}
+  , m_func{ctx.func}
+{}
+
+CompactVector<Type> ClosureUseVarInfo::initial(const php::Func& f) {
+  if (!m_cls || !m_cls->work) return m_index->lookup_closure_use_vars(f);
+  auto vars = folly::get_ptr(m_cls->work->useVars, &f);
+  m_cls->work->worklist.addUseVarsDep(f, *m_func);
+  if (!vars) return m_index->lookup_closure_use_vars(f);
+  return *vars;
+}
+
+void ClosureUseVarInfo::merge(const php::Class& clo,
+                              CompactVector<Type> useVars) {
+  auto& current = m_merged[&clo];
   if (current.empty()) {
-    current = std::move(types);
+    current = std::move(useVars);
     return;
   }
-
-  assertx(types.size() == current.size());
+  assertx(useVars.size() == current.size());
   for (auto i = uint32_t{0}; i < current.size(); ++i) {
-    current[i] |= std::move(types[i]);
+    current[i] |= std::move(useVars[i]);
   }
 }
+
+//////////////////////////////////////////////////////////////////////
 
 template<class JoinOp>
 bool merge_impl(State& dst, const State& src, JoinOp join) {
@@ -438,7 +472,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
   auto changed = false;
 
   auto const thisType = join(dst.thisType, src.thisType);
-  if (thisType != dst.thisType) {
+  if (!equal(thisType, dst.thisType)) {
     changed = true;
     dst.thisType = thisType;
   }
@@ -452,7 +486,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
 
   for (auto i = size_t{0}; i < dst.stack.size(); ++i) {
     auto newT = join(dst.stack[i].type, src.stack[i].type);
-    if (!equivalently_refined(dst.stack[i].type, newT)) {
+    if (!equal(dst.stack[i].type, newT)) {
       changed = true;
       dst.stack[i].type = std::move(newT);
     }
@@ -464,7 +498,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
 
   for (auto i = size_t{0}; i < dst.locals.size(); ++i) {
     auto newT = join(dst.locals[i], src.locals[i]);
-    if (!equivalently_refined(dst.locals[i], newT)) {
+    if (!equal(dst.locals[i], newT)) {
       changed = true;
       dst.locals[i] = std::move(newT);
     }
@@ -693,8 +727,6 @@ std::string show(const php::Func& f, const Base& b) {
       return folly::to<std::string>(
         "stack{", show(b.type), ",", b.locSlot, "}"
       );
-    case BaseLoc::Global:
-      return folly::to<std::string>("global{", show(b.type), "}");
   }
   not_reached();
 }
@@ -759,10 +791,6 @@ std::string state_string(const php::Func& f, const State& st,
       ret += local_string(f, j);
     }
     ret += "\n";
-  }
-
-  if (collect.mInstrState.base.loc != BaseLoc::None) {
-    folly::format(&ret, "mInstrState   :: {}\n", show(f, collect.mInstrState));
   }
 
   return ret;

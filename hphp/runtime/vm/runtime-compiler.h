@@ -16,10 +16,15 @@
 #pragma once
 
 #include <cstddef>
+#include <folly/Range.h>
+#include <memory>
 
 namespace HPHP {
 
+struct AutoloadMap;
+struct Extension;
 struct Unit;
+struct UnitEmitter;
 struct SHA1;
 struct RepoOptions;
 struct LazyUnitContentsLoader;
@@ -28,11 +33,15 @@ namespace Native {
 struct FuncTable;
 }
 
+enum class CodeSource;
+
 // If set, releaseUnit will contain a pointer to any extraneous unit created due
 // to race-conditions while compiling
 Unit* compile_file(LazyUnitContentsLoader& loader,
+                   CodeSource codeSource,
                    const char* filename,
-                   const Native::FuncTable& nativeFuncs,
+                   const Extension* extension,
+                   AutoloadMap*,
                    Unit** releaseUnit = nullptr);
 
 // If forDebuggerEval is true, and the unit contains a single expression
@@ -41,14 +50,23 @@ Unit* compile_file(LazyUnitContentsLoader& loader,
 // forDebuggerEval is only meant to be used by debuggers, where humans may
 // enter a statement and we wish to eval it and display the resulting value,
 // if any.
-Unit* compile_string(const char* s, size_t sz, const char* fname,
-                     const Native::FuncTable& nativeFuncs, const RepoOptions&,
+Unit* compile_string(folly::StringPiece s,
+                     CodeSource codeSource,
+                     const char* fname,
+                     const Extension* extension,
+                     AutoloadMap*,
+                     const RepoOptions&,
                      bool isSystemLib = false,
                      bool forDebuggerEval = false);
 
-Unit* compile_debugger_string(const char* s, size_t sz, const RepoOptions&);
+Unit* compile_debugger_string(folly::StringPiece s, const RepoOptions&);
 
-Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
-                               const Native::FuncTable& nativeFuncs);
+Unit* get_systemlib(const std::string& section, const Extension* extension);
+
+std::unique_ptr<UnitEmitter> compile_systemlib_string_to_ue(
+   const char* s, size_t sz, const char* fname,
+   const Extension* extension);
+
+void dump_compiled_units(const std::string& path);
 
 }

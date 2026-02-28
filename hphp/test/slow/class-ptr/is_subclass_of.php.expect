@@ -1,0 +1,96 @@
+Subclass cases
+==============
+
+$allow_string = true (implicit)
+
+is_subclass_of(object(A)   , "A"         ) = bool(true)
+is_subclass_of("B"         , "A"         ) = bool(true)
+is_subclass_of(lazyclass(B), "A"         ) = bool(true)
+is_subclass_of(class(B)    , "A"         ) = bool(true)
+is_subclass_of(object(A)   , lazyclass(A)) = bool(true)
+is_subclass_of("B"         , lazyclass(A)) = bool(true)
+is_subclass_of(lazyclass(B), lazyclass(A)) = bool(true)
+is_subclass_of(class(B)    , lazyclass(A)) = bool(true)
+is_subclass_of(object(A)   , class(A)    ) = bool(true)
+is_subclass_of("B"         , class(A)    ) = bool(true)
+is_subclass_of(lazyclass(B), class(A)    ) = bool(true)
+is_subclass_of(class(B)    , class(A)    ) = bool(true)
+
+$allow_string = false
+
+is_subclass_of(object(A)   , "A"         , false) = bool(true)
+is_subclass_of("B"         , "A"         , false) = bool(false)
+is_subclass_of(lazyclass(B), "A"         , false) = bool(false)
+is_subclass_of(class(B)    , "A"         , false) = bool(false)
+is_subclass_of(object(A)   , lazyclass(A), false) = bool(true)
+is_subclass_of("B"         , lazyclass(A), false) = bool(false)
+is_subclass_of(lazyclass(B), lazyclass(A), false) = bool(false)
+is_subclass_of(class(B)    , lazyclass(A), false) = bool(false)
+is_subclass_of(object(A)   , class(A)    , false) = bool(true)
+is_subclass_of("B"         , class(A)    , false) = bool(false)
+is_subclass_of(lazyclass(B), class(A)    , false) = bool(false)
+is_subclass_of(class(B)    , class(A)    , false) = bool(false)
+
+$allow_string = true
+
+is_subclass_of(object(A)   , "A"         , true) = bool(true)
+is_subclass_of("B"         , "A"         , true) = bool(true)
+is_subclass_of(lazyclass(B), "A"         , true) = bool(true)
+is_subclass_of(class(B)    , "A"         , true) = bool(true)
+is_subclass_of(object(A)   , lazyclass(A), true) = bool(true)
+is_subclass_of("B"         , lazyclass(A), true) = bool(true)
+is_subclass_of(lazyclass(B), lazyclass(A), true) = bool(true)
+is_subclass_of(class(B)    , lazyclass(A), true) = bool(true)
+is_subclass_of(object(A)   , class(A)    , true) = bool(true)
+is_subclass_of("B"         , class(A)    , true) = bool(true)
+is_subclass_of(lazyclass(B), class(A)    , true) = bool(true)
+is_subclass_of(class(B)    , class(A)    , true) = bool(true)
+
+
+Equal class cases
+=================
+
+$allow_string = true (implicit)
+
+is_subclass_of(object(A)   , "A"         ) = bool(false)
+is_subclass_of("A"         , "A"         ) = bool(false)
+is_subclass_of(lazyclass(A), "A"         ) = bool(false)
+is_subclass_of(class(A)    , "A"         ) = bool(false)
+is_subclass_of(object(A)   , lazyclass(A)) = bool(false)
+is_subclass_of("A"         , lazyclass(A)) = bool(false)
+is_subclass_of(lazyclass(A), lazyclass(A)) = bool(false)
+is_subclass_of(class(A)    , lazyclass(A)) = bool(false)
+is_subclass_of(object(A)   , class(A)    ) = bool(false)
+is_subclass_of("A"         , class(A)    ) = bool(false)
+is_subclass_of(lazyclass(A), class(A)    ) = bool(false)
+is_subclass_of(class(A)    , class(A)    ) = bool(false)
+
+$allow_string = false
+
+is_subclass_of(object(A)   , "A"         , false) = bool(false)
+is_subclass_of("A"         , "A"         , false) = bool(false)
+is_subclass_of(lazyclass(A), "A"         , false) = bool(false)
+is_subclass_of(class(A)    , "A"         , false) = bool(false)
+is_subclass_of(object(A)   , lazyclass(A), false) = bool(false)
+is_subclass_of("A"         , lazyclass(A), false) = bool(false)
+is_subclass_of(lazyclass(A), lazyclass(A), false) = bool(false)
+is_subclass_of(class(A)    , lazyclass(A), false) = bool(false)
+is_subclass_of(object(A)   , class(A)    , false) = bool(false)
+is_subclass_of("A"         , class(A)    , false) = bool(false)
+is_subclass_of(lazyclass(A), class(A)    , false) = bool(false)
+is_subclass_of(class(A)    , class(A)    , false) = bool(false)
+
+$allow_string = true
+
+is_subclass_of(object(A)   , "A"         , true) = bool(false)
+is_subclass_of("A"         , "A"         , true) = bool(false)
+is_subclass_of(lazyclass(A), "A"         , true) = bool(false)
+is_subclass_of(class(A)    , "A"         , true) = bool(false)
+is_subclass_of(object(A)   , lazyclass(A), true) = bool(false)
+is_subclass_of("A"         , lazyclass(A), true) = bool(false)
+is_subclass_of(lazyclass(A), lazyclass(A), true) = bool(false)
+is_subclass_of(class(A)    , lazyclass(A), true) = bool(false)
+is_subclass_of(object(A)   , class(A)    , true) = bool(false)
+is_subclass_of("A"         , class(A)    , true) = bool(false)
+is_subclass_of(lazyclass(A), class(A)    , true) = bool(false)
+is_subclass_of(class(A)    , class(A)    , true) = bool(false)

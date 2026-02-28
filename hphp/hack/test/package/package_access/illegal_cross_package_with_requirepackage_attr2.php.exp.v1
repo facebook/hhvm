@@ -1,0 +1,24 @@
+error: Typing[4472] Cannot reference this __RequirePackage function [1]
+-> This function is marked with __RequirePackage("pkg2") [2]
+-> the current file belongs to package pkg1 [3]
+
+illegal_cross_package_with_requirepackage_attr2.php--a.php:11:7
+     3 | 
+     4 | class A {
+[2]  5 |   <<__RequirePackage("pkg2")>>
+     6 |   public function test() : void {
+     7 |   }
+     8 | }
+     9 | function test(): void {
+    10 |   $x = new A();
+[1] 11 |   $x->test(); // error
+    12 | }
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[3]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+1 error found

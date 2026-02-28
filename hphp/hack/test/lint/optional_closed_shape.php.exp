@@ -1,4 +1,18 @@
-File "optional_closed_shape.php", line 9, characters 24-34:
-You are calling `Shapes::idx()` on a field known to not exist, with a closed optional shape. (Lint[5006])
-File "optional_closed_shape.php", line 10, characters 8-31:
-You are indexing a closed optional shape with a field known to not exist. (Lint[5006])
+File "optional_closed_shape.php", line 9, characters 8-35:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])
+File "optional_closed_shape.php", line 11, characters 3-15:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using a type assertion through `as`. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5808])
+File "optional_closed_shape.php", line 12, characters 8-35:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])
+File "optional_closed_shape.php", line 14, characters 8-41:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])
+File "optional_closed_shape.php", line 25, characters 8-35:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])
+File "optional_closed_shape.php", line 27, characters 3-15:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using a type assertion through `as`. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5808])
+File "optional_closed_shape.php", line 28, characters 8-35:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])
+File "optional_closed_shape.php", line 29, characters 19-20:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])
+File "optional_closed_shape.php", line 30, characters 8-41:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])

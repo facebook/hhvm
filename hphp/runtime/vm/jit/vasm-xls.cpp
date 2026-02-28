@@ -16,10 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm.h"
 
-#include "hphp/runtime/base/stats.h"
-
 #include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -32,10 +29,10 @@
 
 #include "hphp/util/arch.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/trace.h"
 
-#include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <folly/Format.h>
 
@@ -47,7 +44,7 @@
 //  - #3098685 Optimize lifetime splitting
 //  - #3098739 new features now possible with XLS
 
-TRACE_SET_MOD(xls);
+TRACE_SET_MOD(xls)
 
 namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
@@ -590,7 +587,7 @@ Vlabel blockFor(const VxlsContext& ctx, unsigned pos) {
 void insertCodeAt(jit::vector<Vinstr>& dst, unsigned& j,
                   const jit::vector<Vinstr>& src, unsigned pos) {
   auto const irctx = dst[j].irctx();
-  dst.insert(dst.begin() + j, src.size(), trap{TRAP_REASON});
+  dst.insert(dst.begin() + j, src.size(), trap{TRAP_REASON, Fixup::none()});
   for (auto const& inst : src) {
     dst[j] = inst;
     dst[j].set_irctx(irctx);
@@ -1008,7 +1005,7 @@ jit::vector<Variable*> buildIntervals(const Vunit& unit,
       uv.across(implicit_across);
       if (inst.op == Vinstr::recordbasenativesp) {
         forEach(live, [&](Vreg r) {
-          if (!unit.regToConst.count(r)) {
+          if (!unit.regToConst.contains(r)) {
             // We mark the instruction as a use so no spills span the
             // instruction  unless they have to.
             uv.use(r);
@@ -1018,7 +1015,7 @@ jit::vector<Variable*> buildIntervals(const Vunit& unit,
         });
       } else if (inst.op == Vinstr::unrecordbasenativesp) {
         forEach(live, [&](Vreg r) {
-          if (!unit.regToConst.count(r)) {
+          if (!unit.regToConst.contains(r)) {
             // We mark the instruction as a use so no spills span the
             // instruction  unless they have to.
             uv.use(r);
@@ -1147,6 +1144,7 @@ void addPhiGroupMember(const jit::vector<Variable*>& variables,
 
   auto const var = variables[r];
   assertx(var != nullptr);
+  assertx(!var->fixed());
 
   auto const ivl = var->ivl();
   auto& u = pos == var->def_pos
@@ -1265,7 +1263,7 @@ analyzePhiHints(const Vunit& unit, const VxlsContext& ctx,
       // corresponding phi def variable (allocating a new group if the def
       // variable has not already been assigned one).
       for (size_t i = 0, n = uses.size(); i < n; ++i) {
-        if (is_fixed(defs[i])) continue;
+        if (is_fixed(defs[i]) || is_fixed(uses[i])) continue;
 
         auto const pgid = def_phi_group(defs[i], true);
         addPhiGroupMember(variables, phi_groups,
@@ -1363,8 +1361,8 @@ tryPhiHint(const jit::vector<Variable*>& variables,
 PhysReg chooseHint(const jit::vector<Variable*>& variables,
                    const Interval* ivl, const HintInfo& hint_info,
                    const PosVec& free_until, RegSet allow) {
-  if (!RuntimeOption::EvalHHIREnablePreColoring &&
-      !RuntimeOption::EvalHHIREnableCoalescing) return InvalidReg;
+  if (!Cfg::HHIR::EnablePreColoring &&
+      !Cfg::HHIR::EnableCoalescing) return InvalidReg;
 
   auto const choose = [&] (PhysReg h1, PhysReg h2) {
     return choose_closest_after(ivl->end(), free_until, h1, h2);
@@ -2501,7 +2499,7 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
         insertCopiesAt(ctx, code, j, c->second, pos);
         insertLoadsAt(code, j, c->second, slots, pos);
       }
-      assertx(resolution.spills.count(pos) == 0);
+      assertx(!resolution.spills.contains(pos));
       if (code[j].op == Vinstr::recordbasenativesp) {
         assert_flog(!offset, "Block B{} Instr {} initiailizes native SP, but "
                     "already initialized.", size_t(b), j);
@@ -2777,6 +2775,20 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
     auto state = states[label];
     auto& block = unit.blocks[label];
 
+    if (state.hasIndirectFixup && isPrologue(unit.context->kind)) {
+      auto curState = state.in;
+      for (auto it = block.code.begin(); it != block.code.end(); ++it) {
+        // Note that if the instruction at the start or end of the spill
+        // regions has fixup, this loop does not account for it.
+        // This is not ideal but currently there are no instructions that
+        // have fixups that can start/end spill regions, so it is fine.
+        curState = instrInState(unit, *it, curState, ctx.sp);
+        if (curState == NeedSpill && instrHasIndirectFixup(*it)) {
+          updateIndirectFixupBySpill(*it, spillSize);
+        }
+      }
+    }
+
     // Any block with a state change should be walked to check for allocation
     // or free of spill space.
     if (state.changes) {
@@ -2826,22 +2838,6 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
       FTRACE(3, "free spill before {}: {}\n", label, show(unit, (*it)));
       free.set_irctx(it->irctx());
       block.code.insert(it, free);
-    }
-
-    if (isPrologue(unit.context->kind)) {
-      if (state.hasIndirectFixup) {
-        auto blockState = state.in;
-        for (auto it = block.code.begin(); it != block.code.end(); ++it) {
-          // Note that if the instruction at the start or end of the spill
-          // regions has fixup, this loop does not account for it.
-          // This is not ideal but currently there are no instructions that
-          // have fixups that can start/end spill regions, so it is fine.
-          if (instrInState(unit, *it, blockState, ctx.sp) == NeedSpill &&
-              instrHasIndirectFixup(*it)) {
-            updateIndirectFixupBySpill(*it, spillSize);
-          }
-        }
-      }
     }
   }
 }
@@ -3061,7 +3057,7 @@ void dumpStats(const Vunit& unit, const ResolutionPlan& resolution) {
 
 void allocateRegistersWithXLS(Vunit& unit, const Abi& abi) {
   Timer timer(Timer::vasm_reg_alloc, unit.log_entry);
-  auto const counter = s_counter.fetch_add(1, std::memory_order_relaxed);
+  auto const counter = s_counter.fetch_add(1, std::memory_order_acq_rel);
 
   assertx(check(unit));
   assertx(checkNoCriticalEdges(unit));

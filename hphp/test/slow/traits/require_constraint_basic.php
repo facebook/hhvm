@@ -1,11 +1,11 @@
 <?hh
 
 interface I1 {
-  public function baz();
+  public function baz():mixed;
 }
 
 class Super {
-  protected function foo() {
+  protected function foo() :mixed{
     echo get_class($this), " ",__METHOD__, "\n";
   }
 }
@@ -15,7 +15,7 @@ trait T1 {
 
   require implements I1;
 
-  public function bar() {
+  public function bar() :mixed{
     return $this->foo();
   }
 }
@@ -23,12 +23,12 @@ trait T1 {
 class C1 extends Super implements I1 {
   use T1;
 
-  public function baz() {}
+  public function baz() :mixed{}
 }
 
 class Param<T> {
   public function __construct(private ?T $data = null)[] {}
-  protected function foo() {
+  protected function foo() :mixed{
     echo get_class($this), " ",__METHOD__, "\n";
   }
 }
@@ -36,7 +36,7 @@ class Param<T> {
 trait T2<T> {
   require extends Param<T>;
 
-  public function bar() {
+  public function bar() :mixed{
     return $this->foo();
   }
 }
@@ -45,7 +45,7 @@ class C2 extends Param<string> {
   use T2<string>;
 }
 
-function main() {
+function main() :mixed{
   $i = new C1();
   $i->bar();
 
@@ -53,7 +53,7 @@ function main() {
   $i->bar();
 }
 
-function reflect_requirements($name) {
+function reflect_requirements($name) :mixed{
   $rc = new ReflectionClass($name);
   if ($rc->isInterface()) {
     echo 'interface';
@@ -68,14 +68,14 @@ function reflect_requirements($name) {
   var_dump($rc->getRequirementNames());
 }
 
-function reflection() {
+function reflection() :mixed{
   echo '-------', __FUNCTION__, '-------', "\n";
   reflect_requirements(T1::class);
   reflect_requirements(T2::class);
 }
 
 <<__EntryPoint>>
-function main_require_constraint_basic() {
+function main_require_constraint_basic() :mixed{
 main();
 reflection();
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_810() {
+function main_810() :mixed{
 $m = new Map();
 $m['foo'] = new Map();
 $m['foo'][123] = new Vector();

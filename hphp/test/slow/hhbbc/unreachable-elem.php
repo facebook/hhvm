@@ -3,7 +3,7 @@
 class C {
   private static $x = dict[];
 
-  public static function test($c, string $n) {
+  public static function test($c, string $n) :mixed{
     if ($n) {
       self::$x[$c] .= 'a'.$n.'b';
     } else {
@@ -11,13 +11,13 @@ class C {
     }
   }
 
-  public static function get() {
+  public static function get() :mixed{
     return self::$x;
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   C::test('k0', '');
   C::test('k0', 'v0');
   C::test('k1', '');

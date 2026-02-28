@@ -16,6 +16,7 @@
 #pragma once
 
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/type-nonnull-ret.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
@@ -23,6 +24,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/configs/eval.h"
 
 #include <type_traits>
 
@@ -32,7 +34,7 @@ struct Class;
 struct FuncEmitter;
 struct Object;
 struct Extension;
-};
+}
 
 /* Macros related to declaring/registering internal implementations
  * of <<__Native>> global functions.
@@ -83,6 +85,11 @@ struct Extension;
  * function or for registering functions that live in a namespace.
  *
  */
+
+#define REGISTER_NATIVE_FUNC(functable, name, f) do { \
+  Native::registerNativeFunc(functable, name, f); \
+} while(0)
+
 #define HHVM_FN(fn) f_ ## fn
 #define HHVM_FUNCTION(fn, ...) \
         HHVM_FN(fn)(__VA_ARGS__)
@@ -90,7 +97,7 @@ struct Extension;
         do { \
           String name{makeStaticString(fn)}; \
           registerExtensionFunction(name); \
-          Native::registerNativeFunc(functable, name, fimpl); \
+          REGISTER_NATIVE_FUNC(functable, fn, fimpl); \
         } while(0)
 #define HHVM_NAMED_FE(fn, fimpl)\
   HHVM_NAMED_FE_STR(#fn, fimpl, nativeFuncs())
@@ -98,6 +105,8 @@ struct Extension;
   HHVM_NAMED_FE_STR(#fn, HHVM_FN(fn), nativeFuncs())
 #define HHVM_FALIAS(fn, falias)\
   HHVM_NAMED_FE_STR(#fn, HHVM_FN(falias), nativeFuncs())
+#define HHVM_FALIAS_FE_STR(fn, falias)\
+  HHVM_NAMED_FE_STR(fn, HHVM_FN(falias), nativeFuncs())
 
 /* Macros related to declaring/registering internal implementations
  * of <<__Native>> class instance methods.
@@ -112,19 +121,10 @@ struct Extension;
 #define HHVM_METHOD(cn, fn, ...) \
         HHVM_MN(cn,fn)(ObjectData* const this_, ##__VA_ARGS__)
 #define HHVM_NAMED_ME(cn,fn,mimpl) \
-        Native::registerNativeFunc(nativeFuncs(), #cn "->" #fn, mimpl)
+  REGISTER_NATIVE_FUNC(nativeFuncs(), #cn "->" #fn, mimpl)
 #define HHVM_ME(cn,fn) HHVM_NAMED_ME(cn,fn, HHVM_MN(cn,fn))
 #define HHVM_MALIAS(cn,fn,calias,falias) \
   HHVM_NAMED_ME(cn,fn,HHVM_MN(calias,falias))
-
-/* special case when we're registering info for a method defined in
- * s_systemNativeFuncs, instead of the current Extension
- */
-#define HHVM_SYS_FE(fn)\
-  HHVM_NAMED_FE_STR(#fn, HHVM_FN(fn), Native::s_systemNativeFuncs)
-#define HHVM_NAMED_SYS_ME(cn,fn,mimpl) Native::registerNativeFunc(\
-    Native::s_systemNativeFuncs, #cn "->" #fn, mimpl)
-#define HHVM_SYS_ME(cn,fn) HHVM_NAMED_SYS_ME(cn,fn, HHVM_MN(cn,fn))
 
 /* Macros related to declaring/registering internal implementations
  * of <<__Native>> class static methods.
@@ -139,7 +139,7 @@ struct Extension;
 #define HHVM_STATIC_METHOD(cn, fn, ...) \
         HHVM_STATIC_MN(cn,fn)(const Class *self_, ##__VA_ARGS__)
 #define HHVM_NAMED_STATIC_ME(cn,fn,mimpl) \
-        Native::registerNativeFunc(nativeFuncs(), #cn "::" #fn, mimpl)
+  REGISTER_NATIVE_FUNC(nativeFuncs(), #cn "::" #fn, mimpl)
 #define HHVM_STATIC_ME(cn,fn) HHVM_NAMED_STATIC_ME(cn,fn,HHVM_STATIC_MN(cn,fn))
 #define HHVM_STATIC_MALIAS(cn,fn,calias,falias) \
   HHVM_NAMED_STATIC_ME(cn,fn,HHVM_STATIC_MN(calias,falias))
@@ -153,9 +153,6 @@ struct Extension;
 #define HHVM_RC_INT(const_name, const_value)                         \
   Native::registerConstant<KindOfInt64>(                             \
     makeStaticString(#const_name), int64_t{const_value});
-#define HHVM_RC_DBL(const_name, const_value)                         \
-  Native::registerConstant<KindOfDouble>(                            \
-    makeStaticString(#const_name), double{const_value});
 #define HHVM_RC_BOOL(const_name, const_value)                        \
   Native::registerConstant<KindOfBoolean>(                           \
     makeStaticString(#const_name), bool{const_value});
@@ -166,9 +163,6 @@ struct Extension;
 #define HHVM_RC_INT_SAME(const_name)                                 \
   Native::registerConstant<KindOfInt64>(                             \
     makeStaticString(#const_name), int64_t{const_name});
-#define HHVM_RC_DBL_SAME(const_name)                                 \
-  Native::registerConstant<KindOfDouble>(                            \
-    makeStaticString(#const_name), double{const_name});
 #define HHVM_RC_BOOL_SAME(const_name)                                \
   Native::registerConstant<KindOfBoolean>(                           \
     makeStaticString(#const_name), bool{const_name});
@@ -185,11 +179,6 @@ struct Extension;
 #define HHVM_RCC_BOOL(class_name, const_name, const_value)           \
   Native::registerClassConstant<KindOfBoolean>(s_##class_name.get(), \
     makeStaticString(#const_name), bool{const_value});
-
-// Register a dynamic constant. This will not be optimized by hhbbc
-#define HHVM_RC_DYNAMIC(const_name, const_value_cell)           \
-  Native::registerConstant(makeStaticString(#const_name),       \
-                           const_value_cell, true);
 
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
@@ -231,14 +220,14 @@ void coerceFCallArgsFromLocals(const ActRec* fp,
   X(Object,     const Object&,        Object)         \
   X(String,     const String&,        String)         \
   X(Array,      const Array&,         Array)          \
-  X(Resource,   const Resource&,      Resource)       \
+  X(Resource,   const OptResource&,   OptResource)    \
   X(Func,       Func*,                Func*)          \
   X(Class,      const Class*,         const Class*)   \
   X(ClsMeth,    ClsMethDataRef,       ClsMethDataRef) \
   X(Mixed,      const Variant&,       Variant)        \
-  X(ObjectArg,  ObjectArg,            ObjectArg)      \
-  X(StringArg,  StringArg,            StringArg)      \
-  X(ArrayArg,   ArrayArg,             ArrayArg)       \
+  X(ObjectNN,   ObjectArg,            ObjectRet)      \
+  X(StringNN,   StringArg,            StringRet)      \
+  X(ArrayNN,    ArrayArg,             ArrayRet)       \
   X(ResourceArg,ResourceArg,          ResourceArg)    \
   X(MixedTV,    TypedValue,           TypedValue)     \
   X(This,       ObjectData*,          ObjectData*)    \
@@ -249,7 +238,7 @@ void coerceFCallArgsFromLocals(const ActRec* fp,
   X(ObjectIO,   Object&,              Object&)        \
   X(StringIO,   String&,              String&)        \
   X(ArrayIO,    Array&,               Array&)         \
-  X(ResourceIO, Resource&,            Resource&)      \
+  X(ResourceIO, OptResource&,         OptResource&)   \
   X(FuncIO,     Func*&,               Func*&)         \
   X(ClassIO,    Class*&,              Class*&)        \
   X(ClsMethIO,  ClsMethDataRef&,      ClsMethDataRef&)\
@@ -410,12 +399,18 @@ struct NativeFunctionInfo {
 };
 
 /*
- * Known output types for inout parameters on builtins and optional default
- * values to be passed to builtins which use inout paramaters purely as out
- * values, ignoring their inputs.
+ * Default values to be passed to builtins which use inout paramaters purely
+ * as out values, ignoring their inputs.
  */
-MaybeDataType builtinOutType(const TypeConstraint&, const UserAttributeMap&);
 Optional<TypedValue> builtinInValue(const Func* builtin, uint32_t i);
+
+/**
+* This function inspects the user attribute map to determine if a given
+* parameter is out-only. It returns a pair that contains a boolean
+* indicating that the attribute is present, and an optional return type,
+* if specified by the user.
+*/
+std::pair<bool, MaybeDataType> typeForOutParam(const UserAttributeMap& map);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -438,17 +433,13 @@ void getFunctionPointers(const NativeFunctionInfo& info,
                          ArFunction& bif,
                          NativeFunction& nif);
 
-/**
- * Fallback method bound to declared methods with no matching
- * internal implementation.
- */
-[[noreturn]] TypedValue* unimplementedWrapper(ActRec* ar);
-
 /////////////////////////////////////////////////////////////////////////////
 
 /**
  * registerNativeFunc() and getNativeFunction() use a provided
- * FuncTable that is a case insensitive map of "name" to function pointer.
+ * FuncTable that is a case sensitive map of "name" to function pointer.
+ * We require case-correct symbols for the purpose of binding native impls
+ * to their PHP decls, regardless of how the language treats the symbols.
  *
  * Extensions should generally add items to this map using the HHVM_FE/ME
  * macros above. The function name (key) must be a static string.
@@ -537,16 +528,7 @@ registerNativeFunc(FuncTable& nativeFuncs, const char* name,
 /////////////////////////////////////////////////////////////////////////////
 
 const char* checkTypeFunc(const NativeSig& sig,
-                          const TypeConstraint& retType,
                           const FuncEmitter* func);
-
-// NativeFunctionInfo for native funcs and methods defined under
-// system/php, separate from normal extensions.
-extern FuncTable s_systemNativeFuncs;
-
-// A permanently empty table, used in contexts were no native bindings
-// are possible (most ordinary code).
-extern const FuncTable s_noNativeFuncs;
 
 String fullName(const StringData* fname, const StringData* cname,
                 bool isStatic);
@@ -564,16 +546,14 @@ NativeFunctionInfo getNativeFunction(const FuncTable& nativeFuncs,
 //////////////////////////////////////////////////////////////////////////////
 // Global constants
 
-typedef std::map<const StringData*,TypedValueAux> ConstantMap;
+using ConstantMap = std::map<const StringData*,TypedValueAux>;
 extern ConstantMap s_constant_map;
 
 inline
-bool registerConstant(const StringData* cnsName, TypedValue cns,
-                      bool dynamic = false) {
+bool registerConstant(const StringData* cnsName, TypedValue cns) {
   assertx(tvIsPlausible(cns) && cns.m_type != KindOfUninit);
   auto& dst = s_constant_map[cnsName];
   *static_cast<TypedValue*>(&dst) = cns;
-  dst.dynamic() = dynamic;
   return bindPersistentCns(cnsName, cns);
 }
 
@@ -599,14 +579,11 @@ const ConstantMap& getConstants() {
   return s_constant_map;
 }
 
-using ConstantCallback = Variant (*)(const StringData*);
-bool registerConstant(const StringData*, ConstantCallback);
-
 //////////////////////////////////////////////////////////////////////////////
 // Class Constants
 
-typedef hphp_hash_map<const StringData*, ConstantMap,
-                      string_data_hash, string_data_isame> ClassConstantMapMap;
+using ClassConstantMapMap = hphp_hash_map<const StringData*, ConstantMap,
+                      string_data_hash, string_data_tsame>;
 extern ClassConstantMapMap s_class_constant_map;
 
 inline
@@ -647,6 +624,12 @@ const ConstantMap* getClassConstants(const StringData* clsName) {
   }
   return &clsit->second;
 }
+
+typedef void (*FinishFunc)(Class* cls);
+
+void registerClassExtraDataHandler(const String& clsName, FinishFunc fn);
+
+FinishFunc getClassExtraDataHandler(const StringData* clsName);
 
 //////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Native

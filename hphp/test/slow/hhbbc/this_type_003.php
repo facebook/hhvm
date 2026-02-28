@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  function getP() {
+  function getP() :mixed{
 
     return HhbbcThisType003::$g;
   }
@@ -15,7 +15,7 @@ class X {
 class Y extends X {}
 
 class Z extends X {
-  function f() {
+  function f() :mixed{
     return $this->getY();
   }
 }

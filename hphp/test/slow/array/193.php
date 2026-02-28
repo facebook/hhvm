@@ -2,9 +2,9 @@
 
 
 <<__EntryPoint>>
-function main_193() {
-$a = varray[1];
+function main_193() :mixed{
+$a = vec[1];
  $b = $a;
- $b = varray[2];
+ $b = vec[2];
  var_dump($a);
 }

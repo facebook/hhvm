@@ -23,13 +23,14 @@
 #include <vector>
 
 #include <folly/Bits.h>
-#include <folly/Hash.h>
 #include <folly/portability/SysMman.h>
 #include <folly/sorted_vector_types.h>
 #include <folly/String.h>
 
 #include <tbb/concurrent_hash_map.h>
 
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/maphuge.h"
 #include "hphp/util/numa.h"
@@ -44,8 +45,6 @@
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
-#include "hphp/runtime/vm/treadmill.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP::rds {
 
@@ -119,8 +118,14 @@ __thread bool s_settingPreAssignments{false};
 
 __thread std::atomic<bool> s_hasFullInit{false};
 
-struct IsProfile : boost::static_visitor<bool> {
+struct IsProfile {
   bool operator()(Profile) const { return true; }
+  template<typename T>
+  bool operator()(T) const { return false; }
+};
+
+struct IsSPropCache {
+  bool operator()(SPropCache) const { return true; }
   template<typename T>
   bool operator()(T) const { return false; }
 };
@@ -154,12 +159,16 @@ std::string profilingKeyForSymbol(const Symbol& s) {
 
 namespace detail {
 
+static auto byte_counter = ServiceData::createCounter("admin.vm-tcspace.RDS");
+static auto local_byte_counter = ServiceData::createCounter("admin.vm-tcspace.RDSLocal");
+static auto pers_byte_counter = ServiceData::createCounter("admin.vm-tcspace.PersistentRDS");
+
 // Current allocation frontier for the non-persistent region.
-size_t s_normal_frontier = sizeof(Header);
+std::atomic_size_t s_normal_frontier = sizeof(Header);
 
 // Frontier for the "local" part of the persistent region (data not
 // shared between threads, but not zero'd)---downward-growing.
-size_t s_local_frontier = 0;
+std::atomic_size_t s_local_frontier = 0;
 size_t s_local_base = 0;
 
 #if !RDS_FIXED_PERSISTENT_BASE
@@ -192,7 +201,15 @@ std::atomic<size_t> s_normal_alloc_descs_size;
 std::atomic<size_t> s_local_alloc_descs_size;
 
 /*
- * Round base up to align, which must be a power of two.
+ * Round `base' down to `align', which must be a power of 2.
+ */
+size_t roundDown(size_t base, size_t align) {
+  assertx(folly::isPowTwo(align));
+  return base & ~(align - 1);
+}
+
+/*
+ * Round `base' up to `align', which must be a power of 2.
  */
 size_t roundUp(size_t base, size_t align) {
   assertx(folly::isPowTwo(align));
@@ -244,7 +261,7 @@ Optional<Handle> findFreeBlock(FreeLists& lists, size_t size,
 // 's_persistent_free_lists' yet.
 NEVER_INLINE void addNewPersistentChunk(size_t size) {
   assertx(size > 0 && size < kMaxHandle && size % 4096 == 0);
-  auto const raw = static_cast<char*>(lower_malloc(size));
+  auto const raw = static_cast<char*>(small_malloc(size));
   auto const addr = reinterpret_cast<uintptr_t>(raw);
   memset(raw, 0, size);
 #if !RDS_FIXED_PERSISTENT_BASE
@@ -315,12 +332,13 @@ Handle alloc(Mode mode, size_t numBytes,
           return handle;
         }
 
-        auto const oldFrontier = s_normal_frontier;
-        s_normal_frontier = roundUp(s_normal_frontier, align);
+        auto const oldFrontier = s_normal_frontier.load(std::memory_order_acquire);
+        s_normal_frontier.store(roundUp(oldFrontier, align), std::memory_order_release);
 
         addFreeBlock(s_normal_free_lists, oldFrontier,
                      s_normal_frontier - oldFrontier);
         s_normal_frontier += adjBytes;
+        byte_counter->addValue(s_normal_frontier - oldFrontier);
         // tl_base might be nullptr here, if we're generating
         // pre-allocations
         if (debug && !jit::VMProtect::is_protected && tl_base) {
@@ -357,6 +375,7 @@ Handle alloc(Mode mode, size_t numBytes,
       align = folly::nextPowTwo(align);
       always_assert(align <= numBytes);
       s_persistent_usage += numBytes;
+      pers_byte_counter->addValue(numBytes);
 
       if (auto free = findFreeBlock(s_persistent_free_lists, numBytes, align)) {
         return *free;
@@ -390,6 +409,8 @@ Handle alloc(Mode mode, size_t numBytes,
         align = folly::nextPowTwo(align);
         always_assert(align <= numBytes);
 
+        const auto old_local_frontier =
+          s_local_frontier.load(std::memory_order_acquire);
         auto& frontier = s_local_frontier;
 
         frontier -= numBytes;
@@ -399,6 +420,7 @@ Handle alloc(Mode mode, size_t numBytes,
           frontier >= s_normal_frontier,
           "Ran out of RDS space (mode=Local)"
         );
+        local_byte_counter->addValue(old_local_frontier - frontier);
 
         handle = frontier;
       }
@@ -435,7 +457,7 @@ Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
   auto const handle = alloc(mode, sizeBytes, align, tyIndex, &key);
   recordRds(handle, sizeBytes, key);
 
-  if (shouldProfileAccesses() && !boost::apply_visitor(IsProfile(), key)) {
+  if (shouldProfileAccesses() && !std::visit(IsProfile(), key)) {
     // Allocate an integer in the local section to profile this
     // symbol.
     auto const profile = alloc(
@@ -458,7 +480,7 @@ Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
         LinkTable::value_type(key, {handle, safe_cast<uint32_t>(sizeBytes)}))) {
     always_assert(0);
   }
-  if (!boost::apply_visitor(IsProfile(), key)) {
+  if (!std::visit(IsProfile(), key)) {
     s_handleTable.emplace(handle, RevLinkEntry {
       safe_cast<uint32_t>(sizeBytes), key
     });
@@ -478,13 +500,12 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
                     type_scan::Index tsi, const void* init_val) {
   Handle c = kUninitHandle;
   if (handle.compare_exchange_strong(c, kBeingBound,
-                                     std::memory_order_relaxed,
-                                     std::memory_order_relaxed)) {
+                                     std::memory_order_acq_rel)) {
     // we flipped it from kUninitHandle, so we get to fill in the value.
     auto const h = allocUnlocked(mode, size, align, tsi, &sym);
     recordRds(h, size, sym);
 
-    if (shouldProfileAccesses() && !boost::apply_visitor(IsProfile(), sym)) {
+    if (shouldProfileAccesses() && !std::visit(IsProfile(), sym)) {
       // Allocate an integer in the local section to profile this
       // symbol.
       auto const profile = allocUnlocked(
@@ -497,10 +518,17 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
       s_profiling.insert(h, ProfilingMeta{profile, sym, mode, size, align});
     }
 
+    // Populate s_handleTable for SPropCache symbols to enable reverse lookups
+    // (e.g., heap graph). Other symbols bound via Link::bind() don't need this.
+    if (std::visit(IsSPropCache(), sym)) {
+      Guard g(s_allocMutex);
+      s_handleTable.emplace(h, RevLinkEntry{safe_cast<uint32_t>(size), sym});
+    }
+
     if (init_val != nullptr && isPersistentHandle(h)) {
       memcpy(handleToPtr<void, Mode::Persistent, false>(h), init_val, size);
     }
-    if (handle.exchange(h, std::memory_order_relaxed) ==
+    if (handle.exchange(h, std::memory_order_acq_rel) ==
         kBeingBoundWithWaiters) {
       futex_wake(&handle, INT_MAX);
     }
@@ -509,13 +537,12 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
   // Someone else beat us to it, so wait until they've filled it in.
   if (c == kBeingBound) {
     handle.compare_exchange_strong(c, kBeingBoundWithWaiters,
-                                   std::memory_order_relaxed,
-                                   std::memory_order_relaxed);
+                                   std::memory_order_acq_rel);
   }
-  while (handle.load(std::memory_order_relaxed) == kBeingBoundWithWaiters) {
+  while (handle.load(std::memory_order_acquire) == kBeingBoundWithWaiters) {
     futex_wait(&handle, kBeingBoundWithWaiters);
   }
-  assertx(isHandleBound(handle.load(std::memory_order_relaxed)));
+  assertx(isHandleBound(handle.load(std::memory_order_acquire)));
 }
 
 }
@@ -558,34 +585,34 @@ static size_t s_bits_to_go;
 
 void processInit() {
   assertx(!s_local_base);
-  if (RuntimeOption::EvalRDSSize > 1u << 30) {
+  if (Cfg::Eval::RDSSize > 1u << 30) {
     // The encoding of RDS handles require that the normal and local regions
     // together be smaller than 1G.
-    RuntimeOption::EvalRDSSize = 1u << 30;
+    Cfg::Eval::RDSSize = 1u << 30;
   }
-  s_local_base = RuntimeOption::EvalRDSSize * 3 / 4;
+  s_local_base = Cfg::Eval::RDSSize * 3 / 4;
   s_local_frontier = s_local_base;
 
 #if RDS_FIXED_PERSISTENT_BASE
   auto constexpr allocSize = kPersistentChunkSize;
 #else
-  auto const allocSize = RuntimeOption::EvalRDSSize / 4;
+  auto const allocSize = Cfg::Eval::RDSSize / 4;
 #endif
   addNewPersistentChunk(allocSize);
 
   // Attempt to load any RDS preassignments from the profiling file.
-  if (RO::RepoAuthoritative &&
-      RO::EvalReorderRDS &&
-      !RO::EvalJitSerdesFile.empty() &&
+  if (Cfg::Repo::Authoritative &&
+      Cfg::Eval::ReorderRDS &&
+      !Cfg::Jit::SerdesFile.empty() &&
       jit::mcgen::retranslateAllEnabled()) {
     s_settingPreAssignments = true;
     SCOPE_EXIT { s_settingPreAssignments = false; };
     if (isJitDeserializing()) {
-      jit::deserializeProfData(RO::EvalJitSerdesFile, 1, true);
+      jit::deserializeProfData(Cfg::Jit::SerdesFile, 1, true);
     } else if (isJitSerializing() &&
                jit::serializeOptProfEnabled() &&
-               RO::EvalJitSerializeOptProfRestart) {
-      jit::tryDeserializePartialProfData(RO::EvalJitSerdesFile, 1, true);
+               Cfg::Jit::SerializeOptProfRestart) {
+      jit::tryDeserializePartialProfData(Cfg::Jit::SerdesFile, 1, true);
     }
   }
 
@@ -593,6 +620,7 @@ void processInit() {
   s_persistentTrue.bind(Mode::Persistent, LinkID{"RDSTrue"}, &init);
 
   local::RDSInit();
+  byte_counter->setValue(s_normal_frontier);
 }
 
 void requestInit() {
@@ -629,27 +657,29 @@ void requestExit() {
 
 void flush() {
   if (madvise(tl_base, s_normal_frontier, MADV_DONTNEED) == -1) {
-    Logger::Warning("RDS madvise failure: %s\n",
-                    folly::errnoStr(errno).c_str());
+    Logger::Warning("RDS madvise failure: %s", folly::errnoStr(errno).c_str());
   }
+
   if (jit::mcgen::retranslateAllEnabled() &&
       !jit::mcgen::retranslateAllPending()) {
     // Madvise away everything except the rds-locals. These may lie in
     // the middle of the local section, we have to do it separately
     // for the data before and after (rounding up to page sizes).
-    auto const rdsLocalsBegin =
-      local::detail::RDSLocalNode::s_RDSLocalsBase & ~0xfff;
+    auto const pageSize = sysconf(_SC_PAGESIZE);
+    auto const rdsLocalsBegin = roundDown(
+      local::detail::RDSLocalNode::s_RDSLocalsBase,
+      pageSize
+    );
     auto const rdsLocalsEnd = roundUp(
       local::detail::RDSLocalNode::s_RDSLocalsBase + local::detail::s_usedbytes,
-      4096
+      pageSize
     );
-
     if (s_local_frontier < rdsLocalsBegin) {
-      auto const offset = s_local_frontier & ~0xfff;
+      auto const offset = roundDown(s_local_frontier, pageSize);
       if (madvise(static_cast<char*>(tl_base) + offset,
-                  rdsLocalsBegin - s_local_frontier,
+                  rdsLocalsBegin - offset,
                   MADV_DONTNEED)) {
-        Logger::Warning("RDS local madvise failure: %s\n",
+        Logger::Warning("RDS local madvise failure: %s",
                         folly::errnoStr(errno).c_str());
       }
     }
@@ -657,7 +687,7 @@ void flush() {
       if (madvise(static_cast<char*>(tl_base) + rdsLocalsEnd,
                   s_local_base - rdsLocalsEnd,
                   MADV_DONTNEED)) {
-        Logger::Warning("RDS local madvise failure: %s\n",
+        Logger::Warning("RDS local madvise failure: %s",
                         folly::errnoStr(errno).c_str());
       }
     }
@@ -765,7 +795,7 @@ bool isValidHandle(Handle handle) {
 
 Handle profileForHandle(Handle h) {
   assertx(shouldProfileAccesses());
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
   auto const it = s_profiling.find(h);
   if (it == s_profiling.end()) return kUninitHandle;
   assertx(isLocalHandle(it->second.countHandle));
@@ -783,7 +813,7 @@ void markAccess(Handle h) {
 // symbols.
 Ordering profiledOrdering() {
   assertx(shouldProfileAccesses());
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
 
   Guard g(s_allocMutex);
 
@@ -877,7 +907,7 @@ Ordering profiledOrdering() {
       assertx(mapIt != map.end());
       assertx(mapIt->second > 0);
       auto const percentage = (double)mapIt->second / total;
-      if (percentage < RO::EvalRDSReorderThreshold) break;
+      if (percentage < Cfg::Eval::RDSReorderThreshold) break;
       ++trimIt;
     }
     ordered.erase(trimIt, ordered.end());
@@ -893,8 +923,8 @@ Ordering profiledOrdering() {
 
 // Assign offsets to symbols that were ordered in the profiling file.
 void setPreAssignments(const Ordering& ordering) {
-  assertx(RO::RepoAuthoritative);
-  assertx(RO::EvalReorderRDS);
+  assertx(Cfg::Repo::Authoritative);
+  assertx(Cfg::Eval::ReorderRDS);
   assertx(s_settingPreAssignments);
 
   Guard g(s_allocMutex);
@@ -938,7 +968,7 @@ void threadInit(bool shouldRegister) {
   numa_bind_to(tl_base, s_local_base, s_numaNode);
 #ifdef NDEBUG
   // A huge-page RDS is incompatible with VMProtect in vm-regs.cpp
-  if (RuntimeOption::EvalMapTgtCacheHuge) {
+  if (Cfg::Eval::MapTgtCacheHuge) {
     hintHuge(tl_base, s_local_base);
   }
 #endif
@@ -950,7 +980,7 @@ void threadInit(bool shouldRegister) {
     s_tlBaseList.push_back(tl_base);
   }
 
-  if (RuntimeOption::EvalPerfDataMap) {
+  if (Cfg::Eval::PerfDataMap) {
     Debug::DebugInfo::recordDataMap(
       tl_base,
       (char*)tl_base + s_local_base,
@@ -976,7 +1006,7 @@ void threadExit(bool shouldUnregister) {
     }
   }
 
-  if (RuntimeOption::EvalPerfDataMap) {
+  if (Cfg::Eval::PerfDataMap) {
     Debug::DebugInfo::recordDataMap(
       tl_base,
       (char*)tl_base + s_local_base,
@@ -1004,7 +1034,7 @@ bool isFullyInitialized() {
 
 void recordRds(Handle h, size_t size,
                folly::StringPiece type, folly::StringPiece msg) {
-  if (RuntimeOption::EvalPerfDataMap) {
+  if (Cfg::Eval::PerfDataMap) {
     if (isNormalHandle(h)) {
       h = genNumberHandleFrom(h);
       size += sizeof(GenNumber);
@@ -1017,7 +1047,7 @@ void recordRds(Handle h, size_t size,
 }
 
 void recordRds(Handle h, size_t size, const Symbol& sym) {
-  if (RuntimeOption::EvalPerfDataMap) {
+  if (Cfg::Eval::PerfDataMap) {
     recordRds(h, size, symbol_kind(sym), symbol_rep(sym));
   }
 }
@@ -1032,6 +1062,13 @@ Optional<Symbol> reverseLink(Handle handle) {
   auto const it = s_handleTable.lower_bound(handle);
   if (it == s_handleTable.end()) return std::nullopt;
   if (it->first + it->second.size < handle) return std::nullopt;
+  return it->second.sym;
+}
+
+Optional<Symbol> reverseLinkExact(Handle handle) {
+  Guard g(s_allocMutex);
+  auto const it = s_handleTable.find(handle);
+  if (it == s_handleTable.end()) return std::nullopt;
   return it->second.sym;
 }
 

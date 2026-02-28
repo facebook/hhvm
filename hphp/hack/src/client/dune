@@ -4,68 +4,55 @@
  (modules
   (:standard
    \
-   clientColorFile
    clientLogCommand
    clientGetDefinition
    clientHighlightRefs
-   clientCoverageMetric
-   clientFindRefsPrint))
+   server_progress_lwt))
  (libraries
   connection_tracker
-  client_color_file
-  client_coverage_metric
-  client_find_refs_print
   client_get_definition
   client_highlight_refs
   client_ide_service
   clowder_paste
+  edenfs_watcher_stubs
   flytrap
   formatting_stubs
-  glean_dependency_graph_stubs
   hh_server_monitor
+  ide_format
   logging
   lwt
   lwt.unix
   lwt_utils
   messages
+  notebook_convert
   nuclide_rpc_message_printer
   pos
   rage
+  redeclarations
   server
   server_command_types
   server_monitor
+  server_notifier_types
+  server_progress
+  server_progress_lwt
   server_utils
+  state_loader
   sys_utils
   utils_config_file_lwt
+  watchman_lwt
+  yojson
   version)
  (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
- (name client_log_command)
- (modules clientLogCommand)
- (libraries sys_utils)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
+  (pps
+   lwt_ppx ppx_deriving.std
+   ppx_variants_conv
+   ppx_yojson_conv)))
 
 (library
  (name client_get_definition)
  (wrapped false)
  (modules clientGetDefinition)
  (libraries nuclide_rpc_message_printer server_file_outline sys_utils)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
- (name client_color_file)
- (wrapped false)
- (modules clientColorFile)
- (libraries
-  ide_rpc_api_types
-  nuclide_rpc_message_printer
-  server_color_file
-  server_command_types
-  utils_core)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -78,17 +65,10 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name client_coverage_metric)
+ (name server_progress_lwt)
  (wrapped false)
- (modules clientCoverageMetric)
- (libraries coverage_level server_command_types sys_utils)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
- (name client_find_refs_print)
- (wrapped false)
- (modules clientFindRefsPrint)
- (libraries nuclide_rpc_message_printer pos server_find_refs sys_utils)
+ (modules server_progress_lwt)
+ (libraries
+   server_progress)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))

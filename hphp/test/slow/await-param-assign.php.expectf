@@ -1,0 +1,2 @@
+
+Fatal error: `await` cannot be used in a parameter default value in %s/await-param-assign.php on line 9

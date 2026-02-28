@@ -18,6 +18,6 @@ function main(): void {
 
 
 <<__EntryPoint>>
-function main_typedef_shape() {
+function main_typedef_shape() :mixed{
 main();
 }

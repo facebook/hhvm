@@ -61,7 +61,7 @@ which is single slash
 EOT8;
 
 //different heredoc strings for 'str'
-$heredoc_array = varray[
+$heredoc_array = vec[
   $heredoc_null,
   $heredoc_blank,
   $heredoc_char,

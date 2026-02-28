@@ -1,0 +1,17 @@
+*** Testing is_finite() : usage variations ***
+
+-- Iteration 1 --
+bool(true)
+
+-- Iteration 2 --
+bool(true)
+
+-- Iteration 3 --
+bool(true)
+
+-- Iteration 4 --
+bool(true)
+
+-- Iteration 5 --
+bool(true)
+===Done===

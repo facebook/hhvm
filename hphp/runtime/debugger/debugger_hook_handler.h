@@ -30,6 +30,8 @@ void proxySetBreakPoints(DebuggerProxy* proxy);
 
 /* Debugger hook for hphpd. */
 struct HphpdHook final : DebuggerHook {
+  void onRequestInit() override;
+
   static DebuggerHook* GetInstance();
 
   void onOpcode(const unsigned char* /*pc*/) override {
@@ -58,4 +60,3 @@ private:
 };
 
 }
-

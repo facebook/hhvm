@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_some_null_byte_functions() {
+function main_some_null_byte_functions() :mixed{
 $file = '/etc/passwd'.chr(0).'asdf';
 
 var_dump(readlink($file));

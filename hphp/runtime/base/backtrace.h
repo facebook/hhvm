@@ -20,7 +20,8 @@
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/types.h"
 
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/ptr.h"
 
 #include <folly/small_vector.h>
 
@@ -38,7 +39,6 @@ struct Array;
 struct BTFrame;
 struct Class;
 struct Func;
-struct Resource;
 struct StructuredLogEntry;
 struct VMParserFrame;
 struct c_ResumableWaitHandle;
@@ -49,22 +49,15 @@ struct c_WaitableWaitHandle;
 struct CompactFrame final {
   CompactFrame(const Func* f = nullptr, int32_t ppc = 0, bool ht = false)
     : func(f)
-    , prevPc(ppc)
-    , hasThis(ht) {}
+    , prevPc(ppc) {}
 
   uint64_t hash() const {
     auto const f = reinterpret_cast<uintptr_t>(func.get());
-    return hash_int64_pair(prevPcAndHasThis, f >> 4);
+    return hash_int64_pair(prevPc, f >> 4);
   }
 
-  const LowPtr<const Func> func;
-  union {
-    struct {
-      int32_t prevPc : 31;
-      bool hasThis   : 1;
-    };
-    uint32_t prevPcAndHasThis;
-  };
+  const PackedPtr<const Func> func;
+  int32_t prevPc;
 };
 
 struct CompactTraceData {
@@ -137,6 +130,15 @@ struct BacktraceArgs {
   }
 
   /**
+   * For each frame in the backtrace include an "user_attributes" field with
+   * the user defined attributes dictionary for that function.
+   */
+  BacktraceArgs& includeAttrs(bool inclAttrs = true) {
+    m_inclAttrs = inclAttrs;
+    return *this;
+  }
+
+  /**
    * Include the current frame on top of the stack. If both skipTop and withSelf
    * are set then first frame is skipped and the second is added.
    */
@@ -158,6 +160,14 @@ struct BacktraceArgs {
    */
   BacktraceArgs& withMetadata(bool withMetadata = true) {
     m_withMetadata = withMetadata;
+    return *this;
+  }
+
+  /**
+   * Return only frames with metadata associated by having a 86metadata local.
+   */
+  BacktraceArgs& onlyMetadataFrames(bool onlyMetadataFrames = true) {
+    m_onlyMetadataFrames = onlyMetadataFrames;
     return *this;
   }
 
@@ -219,12 +229,14 @@ struct BacktraceArgs {
 
   bool isCompact() const {
     return
-      RuntimeOption::EvalEnableCompactBacktrace &&
+      Cfg::Eval::EnableCompactBacktrace &&
       !m_skipInlined &&
+      !m_inclAttrs &&
       !m_withSelf &&
-      !m_withThis &&
+      (!Cfg::Eval::EnableArgsInBacktraces || !m_withThis) &&
       !m_withMetadata &&
-      (!RuntimeOption::EnableArgsInBacktraces || !m_withArgValues) &&
+      !m_onlyMetadataFrames &&
+      (!Cfg::Eval::EnableArgsInBacktraces || !m_withArgValues) &&
       !m_withArgNames &&
       !m_limit &&
       !m_parserFrame &&
@@ -235,9 +247,11 @@ struct BacktraceArgs {
 private:
   bool m_skipTop{false};
   bool m_skipInlined{false};
+  bool m_inclAttrs{false};
   bool m_withSelf{false};
   bool m_withThis{false};
   bool m_withMetadata{false};
+  bool m_onlyMetadataFrames{false};
   bool m_withArgValues{true};
   bool m_withArgNames{false};
   int m_limit{0};
@@ -286,7 +300,6 @@ private:
  *             ____________________                            |  inl2->base())
  *            |                    |                           |
  *            |  frame: inl2       |                           |
- *            |  pubFrame: caller  |                           |
  *            |  callOff ----------+---------------------------+
  *            |____________________|
  *
@@ -302,7 +315,7 @@ private:
 
 using IFrameID = int32_t;
 
-// Represents the frame defined by DefFP or DefFuncEntryFP.
+// Represents the frame defined by DefFP or EnterFrame.
 constexpr IFrameID kRootIFrameID = std::numeric_limits<IFrameID>::max();
 
 struct IFrame {
@@ -314,7 +327,6 @@ struct IFrame {
 
 struct IStack {
   IFrameID frame;     // leaf frame in this stack
-  IFrameID pubFrame;  // the last published frame to which vmfp() points to
   Offset callOff;
 
   template<class SerDe> void serde(SerDe& sd) {
@@ -343,12 +355,10 @@ struct BTFrame {
 
   // Inlined frame that does not have a materialized ActRec. IFrame backed by
   // `frameID` contains the metadata necessary to reconstruct the frame.
-  // The nearest published frame `fp` is represented by `pubFrameId`.
-  static BTFrame iframe(ActRec* fp, Offset bcOff,
-                        IFrameID frameId, IFrameID pubFrameId) {
+  static BTFrame iframe(ActRec* fp, Offset bcOff, IFrameID frameId) {
     assertx(fp != nullptr);
-    assertx(frameId != kRootIFrameID && frameId != pubFrameId);
-    return BTFrame{fp, bcOff, frameId, pubFrameId};
+    assertx(frameId != kRootIFrameID);
+    return BTFrame{fp, bcOff, frameId};
   }
 
   static BTFrame afwhTailFrame(ActRec* fp, Offset bcOff,
@@ -359,7 +369,7 @@ struct BTFrame {
   }
 
   BTFrame withFP(ActRec* fp) const {
-    return BTFrame{fp, m_bcOff, m_frameId, m_pubFrameId};
+    return BTFrame{fp, m_bcOff, m_frameId};
   }
 
   operator bool() const { return m_fp != nullptr; }
@@ -375,10 +385,6 @@ struct BTFrame {
   // instead use the helpers above.
   ActRec* fpInternal() const { return m_fp; }
   IFrameID frameIdInternal() const { return m_frameId; }
-  IFrameID pubFrameIdInternal() const {
-    assertx(m_frameId != kRootIFrameID);
-    return m_pubFrameId;
-  }
   int8_t afwhTailFrameIdxInternal() const {
     assertx(m_frameId == kRootIFrameID);
     return m_afwhTailFrameIdx;
@@ -388,8 +394,8 @@ struct BTFrame {
 
  private:
   BTFrame() = default;
-  BTFrame(ActRec* fp, Offset bcOff, IFrameID frameId, IFrameID pubFrameId)
-    : m_fp(fp), m_bcOff(bcOff), m_frameId(frameId), m_pubFrameId(pubFrameId) {}
+  BTFrame(ActRec* fp, Offset bcOff, IFrameID frameId)
+    : m_fp(fp), m_bcOff(bcOff), m_frameId(frameId) {}
   BTFrame(ActRec* fp, Offset bcOff, int8_t afwhTailFrameIdx)
     : m_fp(fp), m_bcOff(bcOff), m_frameId(kRootIFrameID)
     , m_afwhTailFrameIdx(afwhTailFrameIdx) {}
@@ -397,12 +403,9 @@ struct BTFrame {
   ActRec* m_fp{nullptr};
   Offset m_bcOff{kInvalidOffset};
   IFrameID m_frameId{kRootIFrameID};
-  union {
-    // Used if m_frameId != kRootIFrameID
-    IFrameID m_pubFrameId;
-    // Used if m_frameId == kRootIFrameID, this is afwh tail frame if >= 0
-    int8_t m_afwhTailFrameIdx;
-  };
+
+  // Used if m_frameId == kRootIFrameID, this is afwh tail frame if >= 0
+  int8_t m_afwhTailFrameIdx;
 };
 
 Array createBacktrace(const BacktraceArgs& backtraceArgs);
@@ -418,7 +421,7 @@ std::pair<const Func*, Offset> getCurrentFuncAndOffset();
  */
 BTFrame getARFromWH(
   c_WaitableWaitHandle* currentWaitHandle,
-  folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
+  req::fast_set<c_WaitableWaitHandle*>& visitedWHs
 );
 
 /*
@@ -439,12 +442,12 @@ void walkStack(L func, bool skipTop = false);
 template<class L>
 void walkStackFrom(
     L func, BTFrame initFrm, jit::CTCA ip, bool skipTop,
-    folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs);
+    req::fast_set<c_WaitableWaitHandle*>& visitedWHs);
 
 namespace backtrace_detail {
 
 template<typename F>
-using from_ret_t = std::result_of_t<F(const BTFrame&)>;
+using from_ret_t = std::invoke_result_t<F, const BTFrame&>;
 
 }
 

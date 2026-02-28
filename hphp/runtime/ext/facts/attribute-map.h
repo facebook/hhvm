@@ -21,28 +21,26 @@
 #include <utility>
 #include <vector>
 
-#include <folly/dynamic.h>
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/hash/Hash.h>
+#include <folly/json/dynamic.h>
 
 #include "hphp/runtime/ext/facts/attribute-argument-map.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/runtime/ext/facts/lazy-two-way-map.h"
-#include "hphp/runtime/ext/facts/path-versions.h"
 #include "hphp/runtime/ext/facts/symbol-types.h"
 
 namespace HPHP {
 namespace Facts {
 
-template <typename Key> struct AttributeMap {
+template <typename Key>
+struct AttributeMap {
   using KeyToAttrMap = LazyTwoWayMap<Key, Symbol<SymKind::Type>>;
 
   using TypeDefs = typename KeyToAttrMap::Keys;
   using Attrs = typename KeyToAttrMap::Values;
 
-  explicit AttributeMap(std::shared_ptr<PathVersions> versions)
-      : m_attrMap{std::move(versions)} {
-  }
+  explicit AttributeMap(std::shared_ptr<LazyTwoWayMapVersionProvider> versions)
+      : m_attrMap{std::move(versions)} {}
 
   /**
    * Returns the attributes present in the map, or `nullptr` if the map needs
@@ -71,23 +69,34 @@ template <typename Key> struct AttributeMap {
    * Fill the map with `keysFromDB` and return a complete set of keys.
    */
   TypeDefs getKeysWithAttribute(
-      Symbol<SymKind::Type> attr, std::vector<Key> keysFromDB) {
+      Symbol<SymKind::Type> attr,
+      std::vector<Key> keysFromDB) {
     return m_attrMap.getKeysForValue(attr, std::move(keysFromDB));
   }
 
-  void setAttributes(Key key, std::vector<Attribute> attrVec) {
+  void setAttributes(Key key, const rust::Vec<AttrFacts>& attrVec) {
     Attrs attrs;
     attrs.reserve(attrVec.size());
+
+    // Erase any exising attribute arguments and then repopulate them.
+    m_attrArgs.erase(key);
     for (auto& attr : attrVec) {
-      auto attrSym = Symbol<SymKind::Type>{attr.m_name};
+      auto attrSym = Symbol<SymKind::Type>{as_slice(attr.name)};
       attrs.push_back(attrSym);
-      m_attrArgs.setAttributeArgs(key, attrSym, std::move(attr.m_args));
+      std::vector<folly::dynamic> args;
+      args.reserve(attr.args.size());
+      for (auto& arg : attr.args) {
+        args.emplace_back(as_slice(arg)); // string -> folly::dynamic
+      }
+      m_attrArgs.setAttributeArgs(key, attrSym, std::move(args));
     }
+
     m_attrMap.setValuesForKey(std::move(key), std::move(attrs));
   }
 
-  const std::vector<folly::dynamic>*
-  getAttributeArgs(Key key, Symbol<SymKind::Type> attr) const {
+  const std::vector<folly::dynamic>* getAttributeArgs(
+      Key key,
+      Symbol<SymKind::Type> attr) const {
     return m_attrArgs.getAttributeArgs(key, attr);
   }
 

@@ -2,7 +2,7 @@
 class C
 {
     const X = E::A;
-    public static $a = darray[K => D::V, E::A => K];
+    public static $a = dict[K => D::V, E::A => K];
 }
 
 const K = "nasty";

@@ -13,31 +13,20 @@ get_filename_component(BOOST_LIBRARY_DIR "${FIRST_LIB}" DIRECTORY)
 get_target_property(ZSTD_INCLUDE_DIR zstd INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(ZSTD_LIBRARY zstd INTERFACE_LINK_LIBRARIES)
 get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(GLOG_INCLUDE_DIR glog INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(GLOG_LIBRARY glog INTERFACE_LINK_LIBRARIES)
+
+get_filename_component(GLOG_LIBRARY_DIR "${GLOG_LIBRARY}" DIRECTORY)
 
 find_package(FLEX REQUIRED)
 # Thrift uses `%code`, which isn't in 2.x
 find_package(BISON 3.0 REQUIRED)
 
-SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
-  THRIFT_SOURCE_ARGS
-  SOURCE_URL
-  "https://github.com/facebook/fbthrift/archive/refs/tags/v2022.03.14.00.tar.gz"
-  SOURCE_HASH
-  "SHA256=20d1efabb57678f8fe4aa3ae49c620ede5c2f154ea068a54b3c048394f9a691e"
-  FILENAME_PREFIX
-  "fbthrift-"
-)
 
 ExternalProject_Add(
   bundled_thrift
-  ${THRIFT_SOURCE_ARGS}
-  PATCH_COMMAND
-    "${CMAKE_COMMAND}" -E copy
-    "${CMAKE_SOURCE_DIR}/CMake/FindGlog.cmake"
-    <SOURCE_DIR>/thrift/cmake/FindGlog.cmake
-    &&
-    "${CMAKE_CURRENT_SOURCE_DIR}/../apply-quilt-patches.sh"
-    "${CMAKE_CURRENT_SOURCE_DIR}/patches"
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
+  BUILD_ALWAYS ON
   CMAKE_ARGS
     "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
     -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/CMake
@@ -47,11 +36,10 @@ ExternalProject_Add(
     -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
     -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
     -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
 
     -DFLEX_EXECUTABLE=${FLEX_EXECUTABLE}
     -DBISON_EXECUTABLE=${BISON_EXECUTABLE}
-    
-    -DWITHOUT_GFLAGS=ON
 
     -DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}
     -DOPENSSL_CRYPTO_LIBRARY=${OPENSSL_CRYPTO_LIBRARY}
@@ -60,17 +48,18 @@ ExternalProject_Add(
     -DBoost_USE_STATIC_LIBS=${Boost_USE_STATIC_LIBS}
     -DBoost_INCLUDE_DIR=${BOOST_INCLUDE_DIR}
     "-DBOOST_LIBRARYDIR=${BOOST_LIBRARY_DIR}"
-    "-DLIBGLOG_INCLUDE_DIR=${LIBGLOG_INCLUDE_DIR}"
-    "-DLIBGLOG_LIBRARY=${LIBGLOG_LIBRARY}"
+    -DGLOG_INCLUDEDIR=${GLOG_INCLUDE_DIR}
+    -DGLOG_LIBRARYDIR=${GLOG_LIBRARY_DIR}
     "-DZSTD_INCLUDE_DIRS=${ZSTD_INCLUDE_DIR}"
     "-DZSTD_LIBRARIES=${ZSTD_LIBRARY}"
 
-    "-Dfizz_DIR=${FIZZ_INSTALL_DIR}/lib/cmake/fizz"
-    "-Dfmt_DIR=${FMT_INSTALL_DIR}/lib/cmake/fmt"
+    "-DFizz_DIR=${FIZZ_INSTALL_DIR}/lib/cmake/fizz"
+    "-Dfmt_DIR=${fmt_DIR}"
     "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
     "-Dwangle_DIR=${WANGLE_INSTALL_DIR}/lib/cmake/wangle"
 
-    "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR}"
+    "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}"
+    "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR} ${CMAKE_CXX_FLAGS}"
 )
 ExternalProject_Get_property(bundled_thrift INSTALL_DIR)
 
@@ -124,12 +113,16 @@ thrift_lib(concurrency)
 thrift_lib(rpcmetadata)
 thrift_lib(thrift-core)
 thrift_lib(thriftmetadata)
+thrift_lib(thriftannotation)
+thrift_lib(thrifttype)
+thrift_lib(thrifttyperep thriftannotation)
+thrift_lib(thriftanyrep thriftannotation thrifttype)
 
 thrift_lib(transport concurrency thrift-core rpcmetadata)
 thrift_lib(async concurrency transport)
 thrift_lib(thriftprotocol thrift-core)
 thrift_lib(thriftfrozen2 thriftmetadata thriftprotocol)
-thrift_lib(thriftcpp2 rpcmetadata thriftmetadata thriftfrozen2 thriftprotocol transport async)
+thrift_lib(thriftcpp2 rpcmetadata thriftmetadata thriftannotation thriftanyrep thrifttyperep thriftfrozen2 thriftprotocol transport async)
 
 # ----- Export the thrift compiler as a target -----
 

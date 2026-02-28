@@ -26,6 +26,7 @@
 #include "hphp/util/compact-tagged-ptrs.h"
 #include "hphp/util/optional.h"
 #include "hphp/util/hash-set.h"
+#include "hphp/util/ptr.h"
 
 namespace HPHP::jit {
 
@@ -34,15 +35,13 @@ namespace HPHP::jit {
 /*
  * Core types.
  */
-typedef unsigned char* TCA; // "Translation cache address."
-typedef const unsigned char* CTCA;
+using TCA = unsigned char*; // "Translation cache address."
+using CTCA = const unsigned char*;
 
 using TcaRange = folly::Range<TCA>;
 
-using LowTCA = LowPtr<uint8_t>;
-using AtomicLowTCA = AtomicLowPtr<uint8_t,
-                                  std::memory_order_acquire,
-                                  std::memory_order_release>;
+using LowTCA = SmallPtr<uint8_t>;
+using AtomicLowTCA = AtomicSmallPtr<uint8_t>;
 
 struct ctca_identity_hash {
   size_t operator()(CTCA val) const {
@@ -116,6 +115,24 @@ inline Optional<TransKind> nameToTransKind(const std::string& str) {
   return std::nullopt;
 }
 
+inline bool isLive(TransKind k) {
+  switch (k) {
+    case TransKind::Live:
+    case TransKind::LivePrologue:
+      return true;
+
+    case TransKind::Anchor:
+    case TransKind::Interp:
+    case TransKind::Profile:
+    case TransKind::ProfPrologue:
+    case TransKind::Optimize:
+    case TransKind::OptPrologue:
+    case TransKind::Invalid:
+      return false;
+  }
+  always_assert(false);
+}
+
 inline bool isProfiling(TransKind k) {
   switch (k) {
     case TransKind::Profile:
@@ -146,6 +163,24 @@ inline bool isPrologue(TransKind k) {
     case TransKind::Live:
     case TransKind::Profile:
     case TransKind::Optimize:
+    case TransKind::Invalid:
+      return false;
+  }
+  always_assert(false);
+}
+
+inline bool isOptimized(TransKind k) {
+  switch (k) {
+    case TransKind::Optimize:
+    case TransKind::OptPrologue:
+      return true;
+
+    case TransKind::Profile:
+    case TransKind::ProfPrologue:
+    case TransKind::Anchor:
+    case TransKind::Interp:
+    case TransKind::Live:
+    case TransKind::LivePrologue:
     case TransKind::Invalid:
       return false;
   }
@@ -311,4 +346,44 @@ inline std::string show(const Reason &r) {
   return folly::sformat("{}:{}", r.file, r.line);
 }
 
+#define LDCLS_FALLBACKS                    \
+  FALLBACK(Fatal)                          \
+  FALLBACK(FatalResolveClass)              \
+  FALLBACK(ThrowClassnameToClassString)    \
+  FALLBACK(ThrowClassnameToClassLazyClass) \
+  FALLBACK(Silent)
+
+enum class LdClsFallback: uint8_t {
+  #define FALLBACK(name) name,
+  LDCLS_FALLBACKS
+  #undef FALLBACK
+};
+
+inline std::string show(LdClsFallback f) {
+  switch (f) {
+    #define FALLBACK(name) case LdClsFallback::name: return #name;
+    LDCLS_FALLBACKS
+    #undef FALLBACK
+  }
+}
+
+#define STRTOCLASS_KINDS                   \
+  KIND(Expression)                         \
+  KIND(StaticMethod)                       \
+  KIND(TypeStructure)                      \
+  KIND(DynamicClassMeth)
+
+enum class StrToClassKind: uint8_t {
+  #define KIND(k) k,
+  STRTOCLASS_KINDS
+  #undef KIND
+};
+
+inline std::string show(StrToClassKind f) {
+  switch (f) {
+    #define KIND(k) case StrToClassKind::k: return #k;
+    STRTOCLASS_KINDS
+    #undef KIND
+  }
+}
 }

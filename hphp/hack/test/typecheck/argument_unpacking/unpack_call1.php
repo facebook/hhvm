@@ -26,7 +26,7 @@ function make_int_args(): Container<int> {
 }
 
 function make_mixed_args(): varray<mixed> {
-  return varray[];
+  return vec[];
 }
 
 function make_str_args(): Vector<string> {
@@ -34,7 +34,7 @@ function make_str_args(): Vector<string> {
 }
 
 function test_basic(): void {
-  $args = varray[1, 2, 3];
+  $args = vec[1, 2, 3];
   f(...$args);
   $inst = new C1(...$args);
   $inst->f(...$args);
@@ -49,11 +49,11 @@ function test_basic(): void {
   }
 
   f(...make_int_args());
-  $make = fun('make_int_args');
+  $make = make_int_args<>;
   f(...$make());
 
   f(1, ...make_mixed_args());
-  $make = fun('make_mixed_args');
+  $make = make_mixed_args<>;
   f(1, ...$make());
 
   g(
@@ -65,7 +65,7 @@ function test_basic(): void {
 
 function test_limitations(): void {
   // fails at runtime, but we don't track array arity!
-  $args = darray[];
+  $args = dict[];
   f(...$args);
 
   // fails at runtime, but we don't ensure that container doesn't have
@@ -77,13 +77,13 @@ function test_limitations(): void {
   $args = Map { 'a' => 1, 'b' => 2, };
   f(1, ...$args);
 
-  $args = darray[ 'a' => 1, 'b' => 2 ];
+  $args = dict[ 'a' => 1, 'b' => 2 ];
   f(1, ...$args);
 
   // fails at runtime, but we don't unpack the container's content type
   // because issuing errors for mixed pretty much destroys the feature
   f(...make_mixed());
-  $make = fun('make_mixed');
+  $make = make_mixed<>;
   f(...$make());
 }
 

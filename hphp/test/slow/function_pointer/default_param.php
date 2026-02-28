@@ -16,33 +16,33 @@ function baz<T>(): void {
   print "\n";
 }
 
-function func1($p0 = Foo::bar<>) {
+function func1($p0 = Foo::bar<>) :mixed{
   $p0();
 }
-function func2($p0 = baz<>) {
+function func2($p0 = baz<>) :mixed{
   $p0();
 }
-function func3($p0 = Foo::bar<_>) {
+function func3($p0 = Foo::bar<_>) :mixed{
   $p0();
 }
-function func4($p0 = baz<_>) {
+function func4($p0 = baz<_>) :mixed{
   $p0();
 }
-function func5($p0 = Foo::bar<int>) {
+function func5($p0 = Foo::bar<int>) :mixed{
   $p0();
 }
-function func6($p0 = baz<int>) {
+function func6($p0 = baz<int>) :mixed{
   $p0();
 }
-function func7($p0 = Foo::bar<D>) {
+function func7($p0 = Foo::bar<D>) :mixed{
   $p0();
 }
-function func8($p0 = baz<D>) {
+function func8($p0 = baz<D>) :mixed{
   $p0();
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   func1();
   func2();
   func3();

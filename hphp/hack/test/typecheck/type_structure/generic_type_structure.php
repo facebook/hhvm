@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function ts<T>(typename<T> $tn): TypeStructure<T> {
   throw new Exception();

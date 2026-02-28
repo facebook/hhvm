@@ -1,0 +1,2 @@
+WARN: File "10-object-collections-05.hack", line 31, characters 3-18:
+This `is` check is always `true`. The expression on the left has type `Set<string>` which is a subtype of `Set<string>`. (Warn[12009])

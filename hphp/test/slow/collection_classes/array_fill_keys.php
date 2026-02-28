@@ -1,12 +1,12 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $val = 'value';
 
   $v = Vector {'v1', 'v2'};
   $m = Map {'k1' => 'v1', 'k2' => 'v2'};
   $s = Set {'v1', 'v2'};
-  $a = varray['v1', 'v2'];
+  $a = vec['v1', 'v2'];
   var_dump(array_fill_keys($v, $val));
   var_dump(array_fill_keys($m, $val));
   var_dump(array_fill_keys($s, $val));
@@ -21,6 +21,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_array_fill_keys() {
+function main_array_fill_keys() :mixed{
 main();
 }

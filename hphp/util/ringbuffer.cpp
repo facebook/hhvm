@@ -105,7 +105,7 @@ RingBufferEntry* allocEntry(RingBufferType t) {
     newRingPos = (oldRingPos + 1) % kMaxRBEntries;
   } while (!g_ringIdx.compare_exchange_weak(oldRingPos, newRingPos,
                                             std::memory_order_acq_rel));
-  rb->seq = g_seqnum.fetch_add(1, std::memory_order_relaxed);
+  rb->seq = g_seqnum.fetch_add(1, std::memory_order_acq_rel);
   rb->type = t;
   rb->threadId = (uint32_t)((int64_t)pthread_self() & 0xFFFFFFFF);
   return rb;

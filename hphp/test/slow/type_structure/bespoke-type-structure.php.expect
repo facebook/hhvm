@@ -1,0 +1,147 @@
+int(14)
+dict(0) {
+}
+dict(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(2) {
+    ["a"]=>
+    dict(1) {
+      ["kind"]=>
+      int(2)
+    }
+    ["b"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+}
+int(14)
+dict(2) {
+  ["a"]=>
+  dict(1) {
+    ["kind"]=>
+    int(2)
+  }
+  ["b"]=>
+  dict(1) {
+    ["kind"]=>
+    int(1)
+  }
+}
+string(25) "field exists but is false"
+string(39) "correct field name but not on this kind"
+int(2)
+string(25) "field exists but is false"
+int(9)
+bool(true)
+string(6) "FooInt"
+int(1)
+bool(true)
+dict(3) {
+  ["kind"]=>
+  int(1)
+  ["alias"]=>
+  string(15) "FooTypevarTypes"
+  ["typevar_types"]=>
+  dict(1) {
+    ["F"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+}
+string(15) "FooTypevarTypes"
+dict(1) {
+  ["F"]=>
+  dict(1) {
+    ["kind"]=>
+    int(1)
+  }
+}
+int(1)
+dict(4) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(3) "Foo"
+  ["generic_types"]=>
+  vec(1) {
+    dict(1) {
+      ["kind"]=>
+      int(2)
+    }
+  }
+  ["alias"]=>
+  string(8) "FooClass"
+}
+int(15)
+string(3) "Foo"
+vec(1) {
+  dict(1) {
+    ["kind"]=>
+    int(2)
+  }
+}
+int(27)
+vec(2) {
+  dict(1) {
+    ["kind"]=>
+    int(4)
+  }
+  dict(1) {
+    ["kind"]=>
+    int(2)
+  }
+}
+string(8) "FooTuple"
+int(10)
+vec(2) {
+  dict(3) {
+    ["kind"]=>
+    int(4)
+    ["opaque"]=>
+    bool(true)
+    ["alias"]=>
+    string(9) "FooString"
+  }
+  dict(1) {
+    ["kind"]=>
+    int(9)
+  }
+}
+int(2)
+int(1)
+bool(true)
+int(15)
+int(14)
+dict(1) {
+  ["T"]=>
+  dict(1) {
+    ["kind"]=>
+    int(1)
+  }
+}
+dict(4) {
+  ["soft"]=>
+  bool(true)
+  ["kind"]=>
+  int(1)
+  ["opaque"]=>
+  bool(true)
+  ["alias"]=>
+  string(10) "FooSoftInt"
+}
+dict(4) {
+  ["soft"]=>
+  bool(true)
+  ["kind"]=>
+  int(1)
+  ["opaque"]=>
+  bool(true)
+  ["alias"]=>
+  string(10) "FooLikeInt"
+}

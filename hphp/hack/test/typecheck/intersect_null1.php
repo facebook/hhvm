@@ -9,7 +9,7 @@
  *
  */
 
-function get_arr(): varray<int> { return varray[1]; }
+function get_arr(): varray<int> { return vec[1]; }
 function foo(int $x): void {}
 
 function test(): void {

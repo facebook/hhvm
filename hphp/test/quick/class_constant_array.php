@@ -4,15 +4,15 @@
 const BOOLCNS = false;
 
 class Cls1 {
-  const ARRAY1 = varray[];
-  const ARRAY2 = varray[1, 2, 3, 4];
-  const ARRAY3 = varray['a', 'b', 'c', 'd'];
-  const ARRAY4 = varray[1, varray[false, null], varray[true, 'abc'], 1.23, varray[]];
-  const ARRAY5 = varray[vec[], dict[], keyset[]];
-  const ARRAY6 = varray[vec[1, 2], dict['abc' => true], keyset['a', 100, 'b']];
+  const ARRAY1 = vec[];
+  const ARRAY2 = vec[1, 2, 3, 4];
+  const ARRAY3 = vec['a', 'b', 'c', 'd'];
+  const ARRAY4 = vec[1, vec[false, null], vec[true, 'abc'], 1.23, vec[]];
+  const ARRAY5 = vec[vec[], dict[], keyset[]];
+  const ARRAY6 = vec[vec[1, 2], dict['abc' => true], keyset['a', 100, 'b']];
   const ARRAY7 = Cls1::ARRAY1;
-  const ARRAY8 = varray[Cls1::ARRAY2, Cls1::ARRAY2];
-  const ARRAY9 = varray[BOOLCNS ? Cls1::ARRAY2 : Cls1::ARRAY3];
+  const ARRAY8 = vec[Cls1::ARRAY2, Cls1::ARRAY2];
+  const ARRAY9 = vec[BOOLCNS ? Cls1::ARRAY2 : Cls1::ARRAY3];
 }
 
 class Cls2 {
@@ -20,8 +20,8 @@ class Cls2 {
   const VEC2 = vec[1, 2, 3, 4];
   const VEC3 = vec['a', 'b', 'c', 'd'];
   const VEC4 = vec[1, vec[false, null], vec[true, 'abc'], 1.23, vec[]];
-  const VEC5 = vec[varray[], dict[], keyset[]];
-  const VEC6 = vec[varray[1, 2], dict['abc' => true], keyset['a', 100, 'b']];
+  const VEC5 = vec[vec[], dict[], keyset[]];
+  const VEC6 = vec[vec[1, 2], dict['abc' => true], keyset['a', 100, 'b']];
   const VEC7 = Cls2::VEC1;
   const VEC8 = vec[Cls2::VEC2, Cls2::VEC2];
   const VEC9 = vec[BOOLCNS ? Cls2::VEC2 : Cls2::VEC3];
@@ -40,8 +40,8 @@ class Cls3 {
                      3 => 1.23,
                      4 => dict[]];
   const DICT8 = dict['100' => 5, 100 => 'abc', 1 => dict[123 => 'abc', '123' => 10]];
-  const DICT9 = dict[100 => varray[], 200 => vec[], 300 => keyset[]];
-  const DICT10 = dict[100 => varray[1, 2], 200 => vec['abc'], 300 => keyset['a', 100, 'b']];
+  const DICT9 = dict[100 => vec[], 200 => vec[], 300 => keyset[]];
+  const DICT10 = dict[100 => vec[1, 2], 200 => vec['abc'], 300 => keyset['a', 100, 'b']];
   const DICT11 = Cls3::DICT1;
   const DICT12 = dict[123 => Cls3::DICT2, 456 => Cls3::DICT2];
   const DICT13 = dict[100 => BOOLCNS ? Cls3::DICT2 : Cls3::DICT3];

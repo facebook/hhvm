@@ -710,7 +710,7 @@ static bool HHVM_STATIC_METHOD(Locale, setDefault, const String& locale) {
 
 const StaticString s_Locale("Locale");
 
-void IntlExtension::initLocale() {
+void IntlExtension::registerNativeLocale() {
   HHVM_STATIC_ME(Locale, acceptFromHttp);
   HHVM_STATIC_ME(Locale, canonicalize);
   HHVM_STATIC_ME(Locale, composeLocale);
@@ -745,8 +745,6 @@ void IntlExtension::initLocale() {
   HHVM_RCC_INT(Locale, VALID_LOCALE, ULOC_VALID_LOCALE);
 
   HHVM_RC_INT(INTL_MAX_LOCALE_LEN, MAX_LOCALE_LEN);
-
-  loadSystemlib("icu_locale");
 }
 
 //////////////////////////////////////////////////////////////////////////////

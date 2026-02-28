@@ -15,21 +15,21 @@ echo "*** Testing fgetcsv() : with delimiter & enclosure as NULL ***\n";
    1st element is delimiter, 2nd element is enclosure
    and 3rd element is csv fields
 */
-$csv_lists = varray [
-  varray[',', '"', '"water",fruit'],
-  varray[',', '"', '"water","fruit"'],
-  varray[' ', '^', '^water^ ^fruit^'],
-  varray[':', '&', '&water&:&fruit&'],
-  varray['=', '=', '=water===fruit='],
-  varray['-', '-', '-water--fruit-air'],
-  varray['-', '-', '-water---fruit---air-'],
-  varray[':', '&', '&""""&:&"&:,:":&,&:,,,,']
+$csv_lists = vec[
+  vec[',', '"', '"water",fruit'],
+  vec[',', '"', '"water","fruit"'],
+  vec[' ', '^', '^water^ ^fruit^'],
+  vec[':', '&', '&water&:&fruit&'],
+  vec['=', '=', '=water===fruit='],
+  vec['-', '-', '-water--fruit-air'],
+  vec['-', '-', '-water---fruit---air-'],
+  vec[':', '&', '&""""&:&"&:,:":&,&:,,,,']
 ];
 
-$filename = __SystemLib\hphp_test_tmppath('fgetcsv_variation5.tmp');
+$filename = sys_get_temp_dir().'/'.'fgetcsv_variation5.tmp';
 
 
-$file_modes = varray ["r","rb", "rt", "r+", "r+b", "r+t",
+$file_modes = vec["r","rb", "rt", "r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
                      "x+", "x+b", "x+t"];

@@ -8,6 +8,6 @@
 echo "*** Testing array_product() : variations ***\n";
 
 echo "\n-- Testing array_product() function with a keyed array array --\n";
-var_dump( array_product(darray["bob" => 2, "janet" => 5]) );
+var_dump( array_product(dict["bob" => 2, "janet" => 5]) );
 echo "===DONE===\n";
 }

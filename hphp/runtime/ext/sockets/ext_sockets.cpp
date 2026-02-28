@@ -17,7 +17,6 @@
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/base/zend-php-config.h"
 
-#include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -43,7 +42,6 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/util/logger.h"
 #include "hphp/util/rds-local.h"
 
 #define PHP_NORMAL_READ 0x0001
@@ -248,9 +246,6 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
   switch (sock->getType()) {
   case AF_UNIX:
     {
-#ifdef _MSC_VER
-      return false;
-#else
       struct sockaddr_un *sa = (struct sockaddr_un *)sock_type;
       sa->sun_family = AF_UNIX;
       if (addr.length() > sizeof(sa->sun_path)) {
@@ -264,7 +259,6 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
       memcpy(sa->sun_path, addr.data(), addr.length());
       sa_ptr = (struct sockaddr *)sa;
       sa_size = offsetof(struct sockaddr_un, sun_path) + addr.length();
-#ifdef __linux__
       if (addr.length() == 0) {
         // Linux supports 3 kinds of unix sockets; behavior of this struct
         // is in `man 7 unix`; relevant parts:
@@ -280,9 +274,6 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
         // distinguish between unnamed and abstract.
         sa_size = offsetof(struct sockaddr_un, sun_path);
       }
-#endif
-
-#endif // ifdef _MSC_VER
     }
     break;
   case AF_INET:
@@ -314,19 +305,6 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
                     "AF_UNIX, AF_INET, or AF_INET6", sock->getType());
     return false;
   }
-#ifdef __APPLE__
-  // This field is not in the relevant standards, not defined on Linux, but is
-  // technically required on MacOS (and other BSDs) according to the man pages:
-  // - `man 4 netintro` covers the base sa_len
-  // - `man 4 unix` and `man 4 inet6` cover AF_UNIX sun_len and AF_INET6
-  //    sin6_len
-  // - ... At least MacOS Catalina includes the wrong `man 4 inet`. Look at the
-  //   (Net|Free|Open)BSD `man 4 inet` instead.
-  //   The MacOS man page says it starts with `sin_family`, which would conflict
-  //   with the base sockaddr definition. `sin_len` is actually the first field
-  //   in the header file, matching `sa_len`.
-  sa_ptr->sa_len = sa_size;
-#endif
   return true;
 }
 
@@ -425,6 +403,24 @@ static int php_read(req::ptr<Socket> sock, void *buf, int64_t maxlen,
   }
 
   return n;
+}
+
+String HHVM_FUNCTION(socket_strerror,
+                     int64_t errnum) {
+  /*
+   * PHP5 encodes both the h_errno and errno values into a single int:
+   * < -10000: transformed h_errno value
+   * >= -10000: errno value
+   */
+  if (errnum < -10000) {
+    errnum = (-errnum) - 10000;
+#if HAVE_HSTRERROR
+    return String(hstrerror(errnum), CopyString);
+#endif
+    return folly::format("Host lookup error {}", errnum).str();
+  }
+
+  return String(folly::errnoStr(errnum));
 }
 
 static req::ptr<Socket> create_new_socket(
@@ -727,7 +723,7 @@ const StaticString
   s_usec("usec");
 
 Variant HHVM_FUNCTION(socket_get_option,
-                      const Resource& socket,
+                      const OptResource& socket,
                       int64_t level,
                       int64_t optname) {
   auto sock = cast<Socket>(socket);
@@ -782,7 +778,7 @@ Variant HHVM_FUNCTION(socket_get_option,
 }
 
 bool HHVM_FUNCTION(socket_getpeername,
-                   const Resource& socket,
+                   const OptResource& socket,
                    Variant& address,
                    Variant& port) {
   auto sock = cast<Socket>(socket);
@@ -802,7 +798,7 @@ bool HHVM_FUNCTION(socket_getpeername,
 }
 
 bool HHVM_FUNCTION(socket_getsockname,
-                   const Resource& socket,
+                   const OptResource& socket,
                    Variant& address,
                    Variant& port) {
   auto sock = cast<Socket>(socket);
@@ -822,17 +818,17 @@ bool HHVM_FUNCTION(socket_getsockname,
 }
 
 bool HHVM_FUNCTION(socket_set_block,
-                   const Resource& socket) {
+                   const OptResource& socket) {
   return cast<Socket>(socket)->setBlocking(true);
 }
 
 bool HHVM_FUNCTION(socket_set_nonblock,
-                   const Resource& socket) {
+                   const OptResource& socket) {
   return cast<Socket>(socket)->setBlocking(false);
 }
 
 bool HHVM_FUNCTION(socket_set_option,
-                   const Resource& socket,
+                   const OptResource& socket,
                    int64_t level,
                    int64_t optname,
                    const Variant& optval) {
@@ -857,8 +853,8 @@ bool HHVM_FUNCTION(socket_set_option,
         return false;
       }
 
-      lv.l_onoff = (unsigned short)value[s_l_onoff].toInt32();
-      lv.l_linger = (unsigned short)value[s_l_linger].toInt32();
+      lv.l_onoff = (unsigned short)value[s_l_onoff].toInt64();
+      lv.l_linger = (unsigned short)value[s_l_linger].toInt64();
       optlen = sizeof(lv);
       opt_ptr = &lv;
     }
@@ -877,8 +873,8 @@ bool HHVM_FUNCTION(socket_set_option,
         return false;
       }
 
-      tv.tv_sec = value[s_sec].toInt32();
-      tv.tv_usec = value[s_usec].toInt32();
+      tv.tv_sec = (int)value[s_sec].toInt64();
+      tv.tv_usec = (int)value[s_usec].toInt64();
       if (tv.tv_usec >= 1000000) {
         tv.tv_sec += tv.tv_usec / 1000000;
         tv.tv_usec %= 1000000;
@@ -894,7 +890,7 @@ bool HHVM_FUNCTION(socket_set_option,
     break;
 
   default:
-    ov = optval.toInt32();
+    ov = (int)optval.toInt64();
     optlen = sizeof(ov);
     opt_ptr = &ov;
     break;
@@ -908,7 +904,7 @@ bool HHVM_FUNCTION(socket_set_option,
 }
 
 bool HHVM_FUNCTION(socket_connect,
-                   const Resource& socket,
+                   const OptResource& socket,
                    const String& address,
                    int64_t port /* = 0 */) {
   auto sock = cast<Socket>(socket);
@@ -947,7 +943,7 @@ bool HHVM_FUNCTION(socket_connect,
 }
 
 bool HHVM_FUNCTION(socket_bind,
-                   const Resource& socket,
+                   const OptResource& socket,
                    const String& address,
                    int64_t port /* = 0 */) {
   auto sock = cast<Socket>(socket);
@@ -973,7 +969,7 @@ bool HHVM_FUNCTION(socket_bind,
 }
 
 bool HHVM_FUNCTION(socket_listen,
-                   const Resource& socket,
+                   const OptResource& socket,
                    int64_t backlog /* = 0 */) {
   auto sock = cast<Socket>(socket);
   if (listen(sock->fd(), backlog) != 0) {
@@ -1034,7 +1030,7 @@ Variant HHVM_FUNCTION(socket_select,
   IOStatusHelper io("socket_select");
   int timeout_ms = -1;
   if (!vtv_sec.isNull()) {
-    timeout_ms = vtv_sec.toInt32() * 1000 + tv_usec / 1000;
+    timeout_ms = ((int)vtv_sec.toInt64()) * 1000 + tv_usec / 1000;
   }
 
   /* slight hack to support buffered data; if there is data sitting in the
@@ -1132,7 +1128,7 @@ Variant socket_server_impl(
 }
 
 Variant HHVM_FUNCTION(socket_accept,
-                      const Resource& socket) {
+                      const OptResource& socket) {
   auto sock = cast<Socket>(socket);
   struct sockaddr sa;
   socklen_t salen = sizeof(sa);
@@ -1146,7 +1142,7 @@ Variant HHVM_FUNCTION(socket_accept,
 }
 
 Variant HHVM_FUNCTION(socket_read,
-                      const Resource& socket,
+                      const OptResource& socket,
                       int64_t length,
                       int64_t type /* = 0 */) {
   if (length <= 0) {
@@ -1180,7 +1176,7 @@ Variant HHVM_FUNCTION(socket_read,
 }
 
 Variant HHVM_FUNCTION(socket_write,
-                      const Resource& socket,
+                      const OptResource& socket,
                       const String& buffer,
                       int64_t length /* = 0 */) {
   auto sock = cast<Socket>(socket);
@@ -1197,7 +1193,7 @@ Variant HHVM_FUNCTION(socket_write,
 }
 
 Variant HHVM_FUNCTION(socket_send,
-                      const Resource& socket,
+                      const OptResource& socket,
                       const String& buf,
                       int64_t len,
                       int64_t flags) {
@@ -1215,7 +1211,7 @@ Variant HHVM_FUNCTION(socket_send,
 }
 
 Variant HHVM_FUNCTION(socket_sendto,
-                      const Resource& socket,
+                      const OptResource& socket,
                       const String& buf,
                       int64_t len,
                       int64_t flags,
@@ -1298,7 +1294,7 @@ Variant HHVM_FUNCTION(socket_sendto,
 }
 
 Variant HHVM_FUNCTION(socket_recv,
-                      const Resource& socket,
+                      const OptResource& socket,
                       Variant& buf,
                       int64_t len,
                       int64_t flags) {
@@ -1325,7 +1321,7 @@ Variant HHVM_FUNCTION(socket_recv,
 }
 
 Variant HHVM_FUNCTION(socket_recvfrom,
-                      const Resource& socket,
+                      const OptResource& socket,
                       Variant& buf,
                       int64_t len,
                       int64_t flags,
@@ -1437,7 +1433,7 @@ Variant HHVM_FUNCTION(socket_recvfrom,
 }
 
 bool HHVM_FUNCTION(socket_shutdown,
-                   const Resource& socket,
+                   const OptResource& socket,
                    int64_t how /* = 0 */) {
   /* For some operations that are conceptually a socket operation
    * (eg fopen('http://...)) we actually complete it and store the result in
@@ -1455,27 +1451,8 @@ bool HHVM_FUNCTION(socket_shutdown,
   return true;
 }
 
-void HHVM_FUNCTION(socket_close,
-                   const Resource& socket) {
+void HHVM_FUNCTION(socket_close, const OptResource& socket) {
   cast<Socket>(socket)->close();
-}
-
-String HHVM_FUNCTION(socket_strerror,
-                     int64_t errnum) {
-  /*
-   * PHP5 encodes both the h_errno and errno values into a single int:
-   * < -10000: transformed h_errno value
-   * >= -10000: errno value
-   */
-  if (errnum < -10000) {
-    errnum = (-errnum) - 10000;
-#if HAVE_HSTRERROR
-    return String(hstrerror(errnum), CopyString);
-#endif
-    return folly::format("Host lookup error {}", errnum).str();
-  }
-
-  return String(folly::errnoStr(errnum));
 }
 
 int64_t HHVM_FUNCTION(socket_last_error,
@@ -1693,9 +1670,9 @@ Variant HHVM_FUNCTION(getaddrinfo,
 }
 
 struct SocketsExtension final : Extension {
-  SocketsExtension() : Extension("sockets", NO_EXTENSION_VERSION_YET) {}
+  SocketsExtension() : Extension("sockets", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_RC_INT_SAME(AF_UNIX);
     HHVM_RC_INT_SAME(AF_INET);
     HHVM_RC_INT_SAME(AF_INET6);
@@ -1819,8 +1796,6 @@ struct SocketsExtension final : Extension {
     HHVM_FE(socket_last_error);
     HHVM_FE(socket_clear_error);
     HHVM_FE(getaddrinfo);
-
-    loadSystemlib();
   }
 } s_sockets_extension;
 

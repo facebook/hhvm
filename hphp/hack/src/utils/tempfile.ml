@@ -5,7 +5,7 @@ let rec mkdtemp ~(dir : Path.t) ~(skip_mocking : bool) ~(retries : int) : Path.t
   if retries < 0 then
     raise Out_of_retries
   else
-    let name = Random_id.(short_string_with_alphabet alphanumeric_alphabet) in
+    let name = Random_id.short_string () in
     let tmp_dir = Path.concat dir name in
     try
       let () = Sys_utils.mkdir_p (Path.to_string tmp_dir) ~skip_mocking in

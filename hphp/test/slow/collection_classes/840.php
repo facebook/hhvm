@@ -3,7 +3,7 @@
 
 
 <<__EntryPoint>>
-function main_840() {
+function main_840() :mixed{
 $m = Map {
 'd' => 4}
 ;

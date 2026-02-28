@@ -1,4 +1,4 @@
-<?hh  //strict
+<?hh
 
 function a_nomethod(): int {
   return b_nomethod();

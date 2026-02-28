@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /**
  * The description of mailparse_uudecode_all gives the impression that it can
@@ -59,7 +59,7 @@ function process(string $name, string $desc): void {
 
 
 <<__EntryPoint>>
-function main_ext_uudecode() {
+function main_ext_uudecode() :mixed{
 $scenarios = Map<string,string>{
   "simple" => "exactly one uuencoded file, no additional stuff",
   "mixed" => "literal data, and then one uuencoded file (common)",

@@ -1,12 +1,11 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-type UNSAFE_<T> = T;
-
-// This is a hack to mimic Tany on bounds of type constants
-/* HH_FIXME[4102] */
-/* HH_FIXME[4101] */
-type UNSAFE = UNSAFE_;
+namespace HH_FIXME {
+  type MISSING_TYPE_IN_HIERARCHY = mixed;
+}
+namespace Test {
+type UNSAFE = \HH_FIXME\MISSING_TYPE_IN_HIERARCHY;
 
 interface IE {
   abstract const type TID as UNSAFE;
@@ -25,4 +24,5 @@ final class Derived<T as IE, Tv> extends Base<T, Tv>
       $x = meth_caller(IE::class, 'getID');
       return new static($x);
     }
+}
 }

@@ -1,13 +1,13 @@
 <?hh
 
-function track(inout $overall, $name, $result) {
+function track(inout $overall, $name, $result) :mixed{
   if (!array_key_exists($name, $overall)) {
     $overall[$name] = '';
   }
   $overall[$name] .= $result ? '.' : 'X';
 }
 
-function trial(inout $overall, $x) {
+function trial(inout $overall, $x) :mixed{
   print("\n===========================================================\n");
   print("Input:\n");
   var_dump($x);
@@ -38,7 +38,7 @@ function trial(inout $overall, $x) {
   }
 }
 
-function test(inout $overall, $x) {
+function test(inout $overall, $x) :mixed{
   trial(inout $overall, $x);
   if (!($x is keyset<_>)) {
     trial(inout $overall, HH\array_mark_legacy_recursive($x));
@@ -46,7 +46,7 @@ function test(inout $overall, $x) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $overall = dict[];
   test(inout $overall, vec[]);
   test(inout $overall, dict[]);

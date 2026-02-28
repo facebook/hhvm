@@ -16,8 +16,8 @@ type validity =
   | Valid
   | Invalid : (Reason.decl_t * string) list -> validity
 
-(* In hint positions, reified types are not resolved *)
 type reification =
+  | TypeStructure
   | Resolved
   | Unresolved
 
@@ -25,9 +25,10 @@ type validation_state = {
   env: Typing_env_types.env;
   ety_env: expand_env;
   validity: validity;
-  like_context: bool;
+  inside_reified_class_generic_position: bool;
   reification: reification;
   expanded_typedefs: SSet.t;
+  class_from_taccess_lhs: Folded_class.t option;
 }
 
 type error_emitter = Pos.t -> (Pos_or_decl.t * string) list Lazy.t -> unit
@@ -40,8 +41,11 @@ class virtual type_validator =
 
     method on_class acc _ _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
 
-    method on_newtype acc _ _ tyl cstr ty =
-      List.fold_left (ty :: cstr :: tyl) ~f:this#on_type ~init:acc
+    method on_newtype acc _ _ tyl as_cstr super_cstr ty =
+      List.fold_left
+        (ty :: as_cstr :: super_cstr :: tyl)
+        ~f:this#on_type
+        ~init:acc
 
     method on_alias acc _ _ tyl ty =
       List.fold_left (ty :: tyl) ~f:this#on_type ~init:acc
@@ -59,34 +63,47 @@ class virtual type_validator =
       let ((env, ty_err_opt), root) =
         Typing_phase.localize acc.env ~ety_env:acc.ety_env root
       in
-      Option.iter ty_err_opt ~f:Errors.add_typing_error;
+      Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
       let (env, tyl) =
         Typing_utils.get_concrete_supertypes ~abstract_enum:true env root
       in
       List.fold tyl ~init:acc ~f:(fun acc ty ->
           let (env, ty) = Env.expand_type env ty in
           match get_node ty with
-          | Tclass ((_, class_name), _, _) ->
+          | Tclass ((_, receiver_name), _, _) ->
             let ( >>= ) = Option.( >>= ) in
             Option.value
               ~default:acc
-              ( Env.get_class env class_name >>= fun class_ ->
-                let (id_pos, id_name) = id in
-                Decl_provider.Class.get_typeconst class_ id_name
+              ( Env.get_class env receiver_name |> Decl_entry.to_option
+              >>= fun class_ ->
+                let (id_pos, type_const_name) = id in
+                Typing_env.get_typeconst env class_ type_const_name
                 >>= fun typeconst ->
-                let (ety_env, has_cycle) =
+                match
                   Typing_defs.add_type_expansion_check_cycles
                     { acc.ety_env with this_ty = ty }
-                    (id_pos, class_name ^ "::" ^ id_name)
-                in
-                match has_cycle with
-                | Some _ ->
+                    {
+                      Type_expansions.name =
+                        Type_expansions.Expandable.Type_constant
+                          { receiver_name; type_const_name };
+                      use_pos = id_pos;
+                      def_pos = None;
+                    }
+                with
+                | Error _ ->
                   (* This type is cyclic, give up checking it. We've
                      already reported an error. *)
                   None
-                | None ->
-                  Some (this#on_typeconst { acc with ety_env } class_ typeconst)
-              )
+                | Ok ety_env ->
+                  (* stash and restore `class_from_taccess_lhs` *)
+                  let { class_from_taccess_lhs; _ } = acc in
+                  let acc =
+                    this#on_typeconst
+                      { acc with ety_env; class_from_taccess_lhs = Some class_ }
+                      class_
+                      typeconst
+                  in
+                  Some { acc with class_from_taccess_lhs } )
           | _ -> acc)
 
     method! on_tapply acc r (pos, name) tyl =
@@ -94,18 +111,27 @@ class virtual type_validator =
         this#on_enum acc r (pos, name)
       else
         match Env.get_class_or_typedef acc.env name with
-        | Some (Env.TypedefResult td) ->
+        | Decl_entry.Found (Env.TypedefResult td) ->
           let {
             td_pos = _;
-            td_vis = _;
             td_module = _;
             td_tparams;
-            td_type;
-            td_constraint;
+            td_type_assignment;
+            td_as_constraint;
+            td_super_constraint;
             td_is_ctx = _;
             td_attributes = _;
+            td_internal = _;
+            td_docs_url = _;
+            td_package = _;
           } =
             td
+          in
+          let td_type =
+            match td_type_assignment with
+            | SimpleTypeDef (_, td_type) -> td_type
+            | CaseType (variant, variants) ->
+              Typing_utils.get_case_type_variants_as_type variant variants
           in
           if SSet.mem name acc.expanded_typedefs then
             acc
@@ -118,15 +144,27 @@ class virtual type_validator =
             in
             let subst = Decl_instantiate.make_subst td_tparams tyl in
             let td_type = Decl_instantiate.instantiate subst td_type in
-            if Env.is_typedef_visible acc.env td then
+            if Env.is_typedef_visible acc.env ~name td then
               this#on_alias acc r (pos, name) tyl td_type
             else
-              let td_constraint =
-                match td_constraint with
+              let td_as_constraint =
+                match td_as_constraint with
                 | None -> mk (r, Tmixed)
                 | Some ty -> Decl_instantiate.instantiate subst ty
               in
-              this#on_newtype acc r (pos, name) tyl td_constraint td_type
+              let td_super_constraint =
+                match td_super_constraint with
+                | None -> MakeType.nothing r
+                | Some ty -> Decl_instantiate.instantiate subst ty
+              in
+              this#on_newtype
+                acc
+                r
+                (pos, name)
+                tyl
+                td_as_constraint
+                td_super_constraint
+                td_type
         | _ -> this#on_class acc r (pos, name) tyl
 
     (* Use_pos is the primary error position *)
@@ -146,8 +184,9 @@ class virtual type_validator =
               };
             expanded_typedefs = SSet.empty;
             validity = Valid;
-            like_context = false;
+            inside_reified_class_generic_position = false;
             reification;
+            class_from_taccess_lhs = None;
           }
           root_ty
       in

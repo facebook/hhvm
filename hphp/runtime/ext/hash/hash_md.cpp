@@ -20,36 +20,36 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+struct PhpMd5Ctx {
   unsigned int state[4];      /* state (ABCD) */
   unsigned int count[2];      /* number of bits, modulo 2^64 (lsb first) */
   unsigned char buffer[64];   /* input buffer */
-} PHP_MD5_CTX;
+};
 
-hash_md5::hash_md5() : HashEngine(16, 64, sizeof(PHP_MD5_CTX)) {
+hash_md5::hash_md5() : HashEngine(16, 64, sizeof(PhpMd5Ctx)) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+struct PhpMd4Ctx {
   unsigned int state[4];
   unsigned int count[2];
   unsigned char buffer[64];
-} PHP_MD4_CTX;
+};
 
-hash_md4::hash_md4() : HashEngine(16, 64, sizeof(PHP_MD4_CTX)) {
+hash_md4::hash_md4() : HashEngine(16, 64, sizeof(PhpMd4Ctx)) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+struct PhpMd2Ctx {
   unsigned char state[48];
   unsigned char checksum[16];
   unsigned char buffer[16];
   char in_buffer;
-} PHP_MD2_CTX;
+};
 
-hash_md2::hash_md2() : HashEngine(16, 16, sizeof(PHP_MD2_CTX)) {
+hash_md2::hash_md2() : HashEngine(16, 16, sizeof(PhpMd2Ctx)) {
 }
 
 static const unsigned char PADDING[64] = {
@@ -180,7 +180,7 @@ static void MD5Transform(unsigned int[4], const unsigned char[64]);
  * MD5 initialization. Begins an MD5 operation, writing a new context.
  */
 void hash_md5::hash_init(void *context_) {
-  PHP_MD5_CTX *context = (PHP_MD5_CTX*)context_;
+  PhpMd5Ctx *context = (PhpMd5Ctx*)context_;
   context->count[0] = context->count[1] = 0;
   /* Load magic initialization constants.
    */
@@ -197,7 +197,7 @@ void hash_md5::hash_init(void *context_) {
  */
 void hash_md5::hash_update(void *context_, const unsigned char *input,
                            unsigned int inputLen) {
-  PHP_MD5_CTX *context = (PHP_MD5_CTX*)context_;
+  PhpMd5Ctx *context = (PhpMd5Ctx*)context_;
   unsigned int i, index, partLen;
 
   /* Compute number of bytes mod 64 */
@@ -236,7 +236,7 @@ void hash_md5::hash_update(void *context_, const unsigned char *input,
   the message digest and zeroizing the context.
  */
 void hash_md5::hash_final(unsigned char *digest, void *context_) {
-  PHP_MD5_CTX *context = (PHP_MD5_CTX*)context_;
+  PhpMd5Ctx *context = (PhpMd5Ctx*)context_;
   unsigned char bits[8];
   unsigned int index, padLen;
 
@@ -435,7 +435,7 @@ static void MD4Transform(unsigned int state[4],
  */
 
 void hash_md4::hash_init(void *context_) {
-  PHP_MD4_CTX *context = (PHP_MD4_CTX*)context_;
+  PhpMd4Ctx *context = (PhpMd4Ctx*)context_;
   context->count[0] = context->count[1] = 0;
   /* Load magic initialization constants.
    */
@@ -447,7 +447,7 @@ void hash_md4::hash_init(void *context_) {
 
 void hash_md4::hash_update(void *context_, const unsigned char *input,
                            unsigned int inputLen) {
-  PHP_MD4_CTX *context = (PHP_MD4_CTX*)context_;
+  PhpMd4Ctx *context = (PhpMd4Ctx*)context_;
   unsigned int i, index, partLen;
 
   /* Compute number of bytes mod 64 */
@@ -487,7 +487,7 @@ void hash_md4::hash_update(void *context_, const unsigned char *input,
    the message digest and zeroizing the context.
  */
 void hash_md4::hash_final(unsigned char *digest, void *context_) {
-  PHP_MD4_CTX *context = (PHP_MD4_CTX*)context_;
+  PhpMd4Ctx *context = (PhpMd4Ctx*)context_;
   unsigned char bits[8];
   unsigned int index, padLen;
 
@@ -533,11 +533,11 @@ static const unsigned char MD2_S[256] = {
 };
 
 void hash_md2::hash_init(void *context_) {
-  PHP_MD2_CTX *context = (PHP_MD2_CTX*)context_;
-  memset(context, 0, sizeof(PHP_MD2_CTX));
+  PhpMd2Ctx *context = (PhpMd2Ctx*)context_;
+  memset(context, 0, sizeof(PhpMd2Ctx));
 }
 
-static void MD2_Transform(PHP_MD2_CTX *context, const unsigned char *block) {
+static void MD2_Transform(PhpMd2Ctx *context, const unsigned char *block) {
   unsigned char i,j,t = 0;
 
   for(i = 0; i < 16; i++) {
@@ -562,7 +562,7 @@ static void MD2_Transform(PHP_MD2_CTX *context, const unsigned char *block) {
 
 void hash_md2::hash_update(void *context_, const unsigned char *buf,
                            unsigned int len) {
-  PHP_MD2_CTX *context = (PHP_MD2_CTX*)context_;
+  PhpMd2Ctx *context = (PhpMd2Ctx*)context_;
   const unsigned char *p = buf, *e = buf + len;
 
   if (context->in_buffer) {
@@ -593,7 +593,7 @@ void hash_md2::hash_update(void *context_, const unsigned char *buf,
 }
 
 void hash_md2::hash_final(unsigned char *digest, void *context_) {
-  PHP_MD2_CTX *context = (PHP_MD2_CTX*)context_;
+  PhpMd2Ctx *context = (PhpMd2Ctx*)context_;
   memset(context->buffer + context->in_buffer, 16 - context->in_buffer,
          16 - context->in_buffer);
   MD2_Transform(context, context->buffer);

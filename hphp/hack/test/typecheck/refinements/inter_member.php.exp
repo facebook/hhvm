@@ -1,1 +1,2 @@
-No errors
+WARN: File "inter_member.php", line 20, characters 7-13:
+This `is` check is always `false`. The expression on the left has type `A` which shares no values with `B`. (Warn[12010])

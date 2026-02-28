@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type my_shapeA = shape(?'x' => arraykey);
 type my_shapeB = shape(?'x' => int);

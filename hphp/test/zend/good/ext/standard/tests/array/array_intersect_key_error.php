@@ -7,7 +7,7 @@
 echo "*** Testing array_intersect_key() : error conditions ***\n";
 
 //Initialise function arguments
-$array1 = darray['blue' => 1, 'red' => 2, 'green' => 3, 'purple' => 4];
+$array1 = dict['blue' => 1, 'red' => 2, 'green' => 3, 'purple' => 4];
 
 // Testing array_intersect_key with one less than the expected number of arguments
 echo "\n-- Testing array_intersect_key() function with less than expected no. of arguments --\n";

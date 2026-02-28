@@ -3,11 +3,11 @@ class BasicSingleton
 {
     private static $instance;
 
-    public function __wakeup() {
+    public function __wakeup() :mixed{
         self::$instance = $this;
     }
 
-    public static function singleton() {
+    public static function singleton() :mixed{
         if (!(self::$instance is BasicSingleton)) {
             $c = __CLASS__;
             self::$instance = new $c;

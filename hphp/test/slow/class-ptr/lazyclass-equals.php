@@ -3,7 +3,7 @@
 final class Foo {
   public static function doTestClassName(
     classname $foo
-  ) {
+  ) :mixed{
     var_dump($foo);
     var_dump($foo == Foo::class);
     var_dump($foo == "Foo");
@@ -11,7 +11,7 @@ final class Foo {
 
   public static function doTestString(
     string $foo
-  ) {
+  ) :mixed{
     var_dump($foo);
     var_dump($foo == Foo::class);
     var_dump($foo == "Foo");
@@ -19,7 +19,7 @@ final class Foo {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $foo = Foo::class;
   var_dump($foo);
   var_dump($foo == Foo::class);

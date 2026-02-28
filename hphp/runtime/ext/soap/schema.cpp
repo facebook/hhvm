@@ -1905,7 +1905,7 @@ static void schema_content_model_fixup(sdlCtx *ctx, sdlContentModelPtr model) {
       model->min_occurs = 1;
       model->max_occurs = 1;
     }
-    // fall through
+    [[fallthrough]];
   case XSD_CONTENT_SEQUENCE:
   case XSD_CONTENT_ALL:
     for (unsigned int i = 0; i < model->u_content.size(); i++) {

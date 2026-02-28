@@ -6,190 +6,91 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+type t = {
+  (* These options are set in both hhvm and hh config *)
+  disable_lval_as_an_expression: bool;
+  const_static_props: bool;
+  const_default_func_args: bool;
+  abstract_static_props: bool;
+  disallow_func_ptrs_in_constants: bool;
+  enable_xhp_class_modifier: bool;
+  disable_xhp_element_mangling: bool;
+  allow_unstable_features: bool;
+  (* These options are set in hack config, but use the defaults in (from parser_options_impl.rs) hhvm*)
+  hhvm_compat_mode: bool;
+  hhi_mode: bool;
+  codegen: bool;
+  disable_legacy_soft_typehints: bool;
+  disable_xhp_children_declarations: bool;
+  const_default_lambda_args: bool;
+  interpret_soft_types_as_like_types: bool;
+  is_systemlib: bool;
+  disallow_static_constants_in_default_func_args: bool;
+  auto_namespace_map: (string * string) list;
+  everything_sdt: bool;
+  keep_user_attributes: bool;
+  stack_size: int;
+  deregister_php_stdlib: bool;
+  union_intersection_type_hints: bool;
+  unwrap_concurrent: bool;
+  disallow_silence: bool;
+  no_parser_readonly_check: bool;
+  disable_hh_ignore_error: int;
+  allowed_decl_fixme_codes: ISet.t;
+  use_legacy_experimental_feature_config: bool;
+  experimental_features: Experimental_features.feature_status SMap.t;
+  consider_unspecified_experimental_features_released: bool;
+  package_info: Package_info.t;
+  package_support_multifile_tests: bool;
+  enable_class_pointer_hint: bool;
+  disallow_non_annotated_memoize: bool;
+  treat_non_annotated_memoize_as_kbic: bool;
+  ignore_string_methods: bool;
+  enable_intrinsics_extension: bool;
+}
+[@@deriving show, eq]
 
-type t = GlobalOptions.t [@@deriving show]
-
-let auto_namespace_map = GlobalOptions.po_auto_namespace_map
-
-let with_auto_namespace_map po m =
-  { po with GlobalOptions.po_auto_namespace_map = m }
-
-let codegen = GlobalOptions.po_codegen
-
-let deregister_php_stdlib = GlobalOptions.po_deregister_php_stdlib
-
-let disallow_toplevel_requires = GlobalOptions.po_disallow_toplevel_requires
-
-let default = GlobalOptions.default
-
-let const_default_func_args = GlobalOptions.po_const_default_func_args
-
-let with_const_default_func_args po b =
-  { po with GlobalOptions.po_const_default_func_args = b }
-
-let const_default_lambda_args = GlobalOptions.po_const_default_lambda_args
-
-let with_const_default_lambda_args po b =
-  { po with GlobalOptions.po_const_default_lambda_args = b }
-
-let with_codegen po b = { po with GlobalOptions.po_codegen = b }
-
-let with_disable_lval_as_an_expression po b =
-  { po with GlobalOptions.po_disable_lval_as_an_expression = b }
-
-let disable_lval_as_an_expression =
-  GlobalOptions.po_disable_lval_as_an_expression
-
-let enable_class_level_where_clauses =
-  GlobalOptions.po_enable_class_level_where_clauses
-
-let disable_legacy_soft_typehints =
-  GlobalOptions.po_disable_legacy_soft_typehints
-
-let with_disable_legacy_soft_typehints po b =
-  { po with GlobalOptions.po_disable_legacy_soft_typehints = b }
-
-let allowed_decl_fixme_codes = GlobalOptions.po_allowed_decl_fixme_codes
-
-let allow_new_attribute_syntax = GlobalOptions.po_allow_new_attribute_syntax
-
-let with_allow_new_attribute_syntax po b =
-  { po with GlobalOptions.po_allow_new_attribute_syntax = b }
-
-let disable_legacy_attribute_syntax =
-  GlobalOptions.po_disable_legacy_attribute_syntax
-
-let with_disable_legacy_attribute_syntax po b =
-  { po with GlobalOptions.po_disable_legacy_attribute_syntax = b }
-
-let disallow_silence = GlobalOptions.po_disallow_silence
-
-let const_static_props = GlobalOptions.tco_const_static_props
-
-let enable_systemlib_annotations =
-  GlobalOptions.tco_enable_systemlib_annotations
-
-let with_const_static_props po b =
-  { po with GlobalOptions.tco_const_static_props = b }
-
-let abstract_static_props = GlobalOptions.po_abstract_static_props
-
-let with_abstract_static_props po b =
-  { po with GlobalOptions.po_abstract_static_props = b }
-
-let parser_errors_only = GlobalOptions.po_parser_errors_only
-
-let with_parser_errors_only po b =
-  { po with GlobalOptions.po_parser_errors_only = b }
-
-let disallow_func_ptrs_in_constants =
-  GlobalOptions.po_disallow_func_ptrs_in_constants
-
-let with_disallow_func_ptrs_in_constants po b =
-  { po with GlobalOptions.po_disallow_func_ptrs_in_constants = b }
-
-let disable_xhp_element_mangling = GlobalOptions.po_disable_xhp_element_mangling
-
-let with_disable_xhp_element_mangling po b =
-  { po with GlobalOptions.po_disable_xhp_element_mangling = b }
-
-let allow_unstable_features = GlobalOptions.po_allow_unstable_features
-
-let with_allow_unstable_features po b =
-  { po with GlobalOptions.po_allow_unstable_features = b }
-
-let disable_xhp_children_declarations =
-  GlobalOptions.po_disable_xhp_children_declarations
-
-let with_disable_xhp_children_declarations po b =
-  { po with GlobalOptions.po_disable_xhp_children_declarations = b }
-
-let enable_xhp_class_modifier = GlobalOptions.po_enable_xhp_class_modifier
-
-let with_enable_xhp_class_modifier po b =
-  { po with GlobalOptions.po_enable_xhp_class_modifier = b }
-
-let enable_enum_classes = GlobalOptions.po_enable_enum_classes
-
-let with_enable_enum_classes po b =
-  { po with GlobalOptions.po_enable_enum_classes = b }
-
-let with_enable_enum_supertyping po b =
-  { po with GlobalOptions.po_enable_enum_supertyping = b }
-
-let disable_hh_ignore_error = GlobalOptions.po_disable_hh_ignore_error
-
-let disallow_fun_and_cls_meth_pseudo_funcs =
-  GlobalOptions.po_disallow_fun_and_cls_meth_pseudo_funcs
-
-let with_disallow_fun_and_cls_meth_pseudo_funcs po b =
-  { po with GlobalOptions.po_disallow_fun_and_cls_meth_pseudo_funcs = b }
-
-let disallow_inst_meth = GlobalOptions.po_disallow_inst_meth
-
-let with_disallow_inst_meth po b =
-  { po with GlobalOptions.po_disallow_inst_meth = b }
-
-let interpret_soft_types_as_like_types =
-  GlobalOptions.po_interpret_soft_types_as_like_types
-
-let with_interpret_soft_types_as_like_types po b =
-  { po with GlobalOptions.po_interpret_soft_types_as_like_types = b }
-
-let with_everything_sdt po b = { po with GlobalOptions.tco_everything_sdt = b }
-
-let make
-    ~auto_namespace_map
-    ~codegen
-    ~disable_lval_as_an_expression
-    ~enable_class_level_where_clauses
-    ~disable_legacy_soft_typehints
-    ~allow_new_attribute_syntax
-    ~disable_legacy_attribute_syntax
-    ~const_default_func_args
-    ~const_default_lambda_args
-    ~disallow_silence
-    ~const_static_props
-    ~abstract_static_props
-    ~disallow_func_ptrs_in_constants
-    ~enable_xhp_class_modifier
-    ~disable_xhp_element_mangling
-    ~allow_unstable_features
-    ~disable_xhp_children_declarations
-    ~enable_enum_classes
-    ~disable_hh_ignore_error
-    ~disallow_fun_and_cls_meth_pseudo_funcs
-    ~interpret_soft_types_as_like_types
-    ~disallow_inst_meth
-    ~enable_systemlib_annotations =
-  GlobalOptions.
-    {
-      default with
-      po_auto_namespace_map = auto_namespace_map;
-      po_codegen = codegen;
-      po_disable_lval_as_an_expression = disable_lval_as_an_expression;
-      po_enable_class_level_where_clauses = enable_class_level_where_clauses;
-      po_disable_legacy_soft_typehints = disable_legacy_soft_typehints;
-      po_allow_new_attribute_syntax = allow_new_attribute_syntax;
-      po_disable_legacy_attribute_syntax = disable_legacy_attribute_syntax;
-      po_const_default_func_args = const_default_func_args;
-      po_const_default_lambda_args = const_default_lambda_args;
-      po_disallow_silence = disallow_silence;
-      tco_const_static_props = const_static_props;
-      po_abstract_static_props = abstract_static_props;
-      po_disallow_func_ptrs_in_constants = disallow_func_ptrs_in_constants;
-      po_enable_xhp_class_modifier = enable_xhp_class_modifier;
-      po_disable_xhp_element_mangling = disable_xhp_element_mangling;
-      po_allow_unstable_features = allow_unstable_features;
-      po_disable_xhp_children_declarations = disable_xhp_children_declarations;
-      po_enable_enum_classes = enable_enum_classes;
-      po_disable_hh_ignore_error = disable_hh_ignore_error;
-      po_disallow_fun_and_cls_meth_pseudo_funcs =
-        disallow_fun_and_cls_meth_pseudo_funcs;
-      po_interpret_soft_types_as_like_types = interpret_soft_types_as_like_types;
-      po_disallow_inst_meth = disallow_inst_meth;
-      tco_enable_systemlib_annotations = enable_systemlib_annotations;
-    }
+let default =
+  {
+    disable_lval_as_an_expression = true (* false in rust *);
+    const_static_props = false;
+    const_default_func_args = false;
+    abstract_static_props = false;
+    disallow_func_ptrs_in_constants = false;
+    enable_xhp_class_modifier = false;
+    disable_xhp_element_mangling = false;
+    allow_unstable_features = false;
+    hhvm_compat_mode = false;
+    hhi_mode = false;
+    codegen = false;
+    disable_legacy_soft_typehints = true;
+    disable_xhp_children_declarations = false;
+    const_default_lambda_args = false;
+    interpret_soft_types_as_like_types = false;
+    is_systemlib = false;
+    disallow_static_constants_in_default_func_args = false;
+    auto_namespace_map = [];
+    everything_sdt = false;
+    deregister_php_stdlib = false;
+    stack_size = 32 * 1024 * 1024;
+    keep_user_attributes = false;
+    union_intersection_type_hints = false;
+    unwrap_concurrent = false;
+    disallow_silence = false;
+    no_parser_readonly_check = false;
+    disable_hh_ignore_error = 0;
+    allowed_decl_fixme_codes = ISet.empty;
+    use_legacy_experimental_feature_config = true;
+    experimental_features = SMap.empty;
+    consider_unspecified_experimental_features_released = true;
+    package_info = Package_info.empty;
+    package_support_multifile_tests = false;
+    enable_class_pointer_hint = true;
+    disallow_non_annotated_memoize = false;
+    treat_non_annotated_memoize_as_kbic = false;
+    ignore_string_methods = true;
+    enable_intrinsics_extension = false;
+  }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
@@ -211,27 +112,33 @@ type ffi_t =
   * bool
   * bool
   * bool
+  * Experimental_features.feature_status SMap.t
+  * bool
+  * bool
   * bool
   * bool
 
-let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
-  ( hhvm_compat_mode,
-    hhi_mode,
-    codegen,
-    disable_lval_as_an_expression po,
-    disable_legacy_soft_typehints po,
-    const_static_props po,
-    disable_legacy_attribute_syntax po,
-    const_default_func_args po,
-    abstract_static_props po,
-    disallow_func_ptrs_in_constants po,
-    enable_xhp_class_modifier po,
-    disable_xhp_element_mangling po,
-    disable_xhp_children_declarations po,
-    enable_enum_classes po,
-    const_default_lambda_args po,
-    allow_unstable_features po,
-    disallow_fun_and_cls_meth_pseudo_funcs po,
-    interpret_soft_types_as_like_types po,
-    disallow_inst_meth po,
-    enable_systemlib_annotations po )
+let to_rust_ffi_t po =
+  ( po.hhvm_compat_mode,
+    po.hhi_mode,
+    po.codegen,
+    po.disable_lval_as_an_expression,
+    po.disable_legacy_soft_typehints,
+    po.const_static_props,
+    po.const_default_func_args,
+    po.abstract_static_props,
+    po.disallow_func_ptrs_in_constants,
+    po.enable_xhp_class_modifier,
+    po.disable_xhp_element_mangling,
+    po.disable_xhp_children_declarations,
+    po.const_default_lambda_args,
+    po.allow_unstable_features,
+    po.interpret_soft_types_as_like_types,
+    po.is_systemlib,
+    po.disallow_static_constants_in_default_func_args,
+    po.use_legacy_experimental_feature_config,
+    po.experimental_features,
+    po.consider_unspecified_experimental_features_released,
+    po.enable_class_pointer_hint,
+    po.ignore_string_methods,
+    po.enable_intrinsics_extension )

@@ -7,18 +7,18 @@
 /*
  * Pass readdir() a directory handle pointing to an empty directory to test behaviour
  */
-function mysort($a,$b) {
+function mysort($a,$b) :mixed{
     return strlen($a) > strlen($b) ? 1 : -1;
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing readdir() : usage variations ***\n";
 
-$path = __SystemLib\hphp_test_tmppath('readdir_variation2');
+$path = sys_get_temp_dir().'/'.'readdir_variation2';
 mkdir($path);
 $dir_handle = opendir($path);
 
 echo "\n-- Pass an empty directory to readdir() --\n";
-$entries = varray[];
+$entries = vec[];
 while(FALSE !== ($file = readdir($dir_handle))){
     $entries[] = $file;
 }

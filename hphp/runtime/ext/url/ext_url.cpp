@@ -199,7 +199,7 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
   }
 }
 
-const StaticString s_arg_separator_output("arg_separator.output");
+const StaticString s_arg_separator_output("&");
 
 Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
                            const Variant& numeric_prefix /* = null_string */,
@@ -212,7 +212,7 @@ Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
 
   String arg_sep;
   if (arg_separator.empty()) {
-    arg_sep = HHVM_FN(ini_get)(s_arg_separator_output).toString();
+    arg_sep = s_arg_separator_output;
   } else {
     arg_sep = arg_separator;
   }
@@ -295,27 +295,27 @@ Variant HHVM_FUNCTION(parse_url, const String& url,
   return ret.toVariant();
 }
 
-String HHVM_FUNCTION(rawurldecode, const String& str) {
+StringRet HHVM_FUNCTION(rawurldecode, const String& str) {
   return StringUtil::UrlDecode(str, false);
 }
 
-String HHVM_FUNCTION(rawurlencode, const String& str) {
+StringRet HHVM_FUNCTION(rawurlencode, const String& str) {
   return StringUtil::UrlEncode(str, false);
 }
 
-String HHVM_FUNCTION(urldecode, const String& str) {
+StringRet HHVM_FUNCTION(urldecode, const String& str) {
   return StringUtil::UrlDecode(str, true);
 }
 
-String HHVM_FUNCTION(urlencode, const String& str) {
+StringRet HHVM_FUNCTION(urlencode, const String& str) {
   return StringUtil::UrlEncode(str, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 struct StandardURLExtension final : Extension {
-  StandardURLExtension() : Extension("url") {}
-  void moduleInit() override {
+  StandardURLExtension() : Extension("url", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  void moduleRegisterNative() override {
     HHVM_RC_INT(PHP_URL_SCHEME, k_PHP_URL_SCHEME);
     HHVM_RC_INT(PHP_URL_HOST, k_PHP_URL_HOST);
     HHVM_RC_INT(PHP_URL_PORT, k_PHP_URL_PORT);
@@ -336,8 +336,6 @@ struct StandardURLExtension final : Extension {
     HHVM_FE(rawurlencode);
     HHVM_FE(urldecode);
     HHVM_FE(urlencode);
-
-    loadSystemlib();
   }
 } s_standardurl_extension;
 

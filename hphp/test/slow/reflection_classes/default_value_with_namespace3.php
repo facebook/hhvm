@@ -4,7 +4,7 @@ namespace A {
     const SORT_NUMERIC = 42;
   }
   class Bar {
-    function foo($k = I::SORT_NUMERIC) { \var_dump($k); }
+    function foo($k = I::SORT_NUMERIC) :mixed{ \var_dump($k); }
   }
 }
 namespace {

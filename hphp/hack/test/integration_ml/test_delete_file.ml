@@ -6,15 +6,15 @@ module Test = Integration_test_base
 let foo_contents =
   "<?hh
     class Foo {
-        public static function g(): string {
-            return 'a';
+        public static function g(): int {
+            return 1;
         }
     }
 "
 
 let bar_contents =
   "<?hh
-        function h(): string {
+        function h(): int {
             return Foo::g();
         }
 "
@@ -32,7 +32,7 @@ let test () =
   in
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";
-  (match Errors.get_error_list env.errorl with
+  (match Diagnostics.get_diagnostic_list env.diagnostics with
   | [] -> ()
   | _ -> Test.fail "Expected no errors");
   let (env, loop_output) =
@@ -47,7 +47,9 @@ let test () =
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";
   let expected_error =
-    "File \"/bar.php\", line 3, characters 20-22:\n"
+    "ERROR: File \"/bar.php\", line 3, characters 20-22:\n"
     ^ "Unbound name: `Foo` (an object type) (Naming[2049])\n"
   in
-  Test.assertSingleError expected_error (Errors.get_error_list env.errorl)
+  Test.assertSingleDiagnostic
+    expected_error
+    (Diagnostics.get_diagnostic_list env.diagnostics)

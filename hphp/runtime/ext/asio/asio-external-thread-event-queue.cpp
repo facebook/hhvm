@@ -16,11 +16,11 @@
 */
 
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
-#include <mutex>
 
-#include "hphp/runtime/ext/asio/asio-session.h"
+#include <folly/Likely.h>
+
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
-#include "hphp/system/systemlib.h"
+#include "hphp/util/configs/eval.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,6 +28,10 @@ namespace HPHP {
 AsioExternalThreadEventQueue::AsioExternalThreadEventQueue()
     : m_received(nullptr), m_queue(nullptr), m_queueMutex(),
       m_queueCondition() {
+}
+
+bool AsioExternalThreadEventQueue::hasReceived() {
+  return m_received;
 }
 
 /**
@@ -73,6 +77,12 @@ bool AsioExternalThreadEventQueue::tryReceiveSome() {
   return m_received;
 }
 
+bool AsioExternalThreadEventQueue::receiveSomeUntil(
+    std::chrono::time_point<std::chrono::steady_clock> waketime) {
+  receiveSomeUntilImpl(waketime);
+  return m_received;
+}
+
 /**
  * Receive at least one finished event, or until waketime (a steady_clock time)
  * is reached.
@@ -80,7 +90,7 @@ bool AsioExternalThreadEventQueue::tryReceiveSome() {
  * Returns true if events were received; if utime is passed as zero, no timeout
  * is set and this method is guaranteed to return true.
  */
-bool AsioExternalThreadEventQueue::receiveSomeUntil(
+bool AsioExternalThreadEventQueue::receiveSomeUntilImpl(
     std::chrono::time_point<std::chrono::steady_clock> waketime) {
   assertx(!m_received);
 

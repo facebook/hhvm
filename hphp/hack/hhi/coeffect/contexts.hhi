@@ -46,13 +46,13 @@
 
 // We represent a context as an intersection type of all the
 // capabilities it includes, so enable the `&` type syntax.
-<<file:__EnableUnstableFeatures('union_intersection_type_hints')>>
+<<file: __EnableUnstableFeatures('union_intersection_type_hints')>>
 
 /**
  * This namespace defines all the contexts available in HHVM, the Hack
  * runtime. When your code runs, HHVM will check that your functions have
  * the necessary capabilities in their contexts.
- */ 
+ */
 namespace HH\Contexts {
 
   /**
@@ -68,15 +68,12 @@ namespace HH\Contexts {
    *
    * `defaults` functions may call into `zoned` functions, but not the
    * other way around.
-   *
-   * `defaults` also excludes the capabilities required to call (or be called
-   * from) `zoned_with` functions.
    */
   type defaults = (
     \HH\Capabilities\WriteProperty &
     \HH\Capabilities\AccessGlobals &
     \HH\Capabilities\RxLocal &
-    \HH\Capabilities\System &
+    \HH\Capabilities\SystemLocal &
     \HH\Capabilities\ImplicitPolicyLocal &
     \HH\Capabilities\IO &
   );
@@ -106,12 +103,44 @@ namespace HH\Contexts {
   );
 
   /**
+   * The `leak_safe_shallow` context is a less restricted form of the
+   * `leak_safe` context, to help with gradual migration to `leak_safe`.
+   *
+   * Functions with the `leak_shallow` context have the same
+   * restrictions as `leak_safe` for internal operations (e.g. no mutating
+   * static variables). They are also allowed to call `leak_safe_local` or
+   * `leak_safe_shallow` functions.
+   *
+   * See also `leak_safe_local`.
+   */
+  type leak_safe_shallow = (
+    \HH\Capabilities\WriteProperty &
+    \HH\Capabilities\ReadGlobals &
+    \HH\Capabilities\SystemShallow &
+  );
+
+  /**
+   * The `leak_safe_local` context is the least restricted form of the
+   * `leak_safe` context, to help with gradual migration to `leak_safe`.
+   *
+   * Functions with the `leak_safe_local` context have the same restrictions
+   * as `leak_safe` for internal operations (e.g. no mutating static
+   * variables). They are also allowed to call `leak_safe_local` or
+   * `leak_safe_shallow` functions and their leak-safe counterparts,
+   * and even `defaults` functions.
+   */
+  type leak_safe_local = (
+    \HH\Capabilities\WriteProperty &
+    \HH\Capabilities\ReadGlobals &
+    \HH\Capabilities\SystemLocal &
+  );
+
+  /**
    * `zoned` includes all the capabilities of `leak_safe`, but also allows
    * accessing the current zone policy.
    *
-   * `zoned` functions may be called from either `defaults` functions or
-   * `zoned_with` functions. `zoned` is more restrictive, so it cannot call
-   * into `defaults` or `zoned_with` functions.
+   * `zoned` functions may be called from `defaults` functions.
+   * `zoned` is more restrictive, so it cannot call into `defaults` functions.
    */
   type zoned = (
     \HH\Capabilities\WriteProperty &
@@ -127,7 +156,7 @@ namespace HH\Contexts {
    * Functions with the `zoned_shallow` context have the same
    * restrictions as `zoned` for internal operations (e.g. no mutating
    * static variables). They are also allowed to call `zoned_local` or
-   * `zoned_shallow` functions.
+   * `zoned_shallow` functions, as well as `leak_safe_shallow` functions.
    *
    * See also `zoned_local`.
    */
@@ -135,7 +164,7 @@ namespace HH\Contexts {
     \HH\Capabilities\WriteProperty &
     \HH\Capabilities\ReadGlobals &
     \HH\Capabilities\ImplicitPolicyShallow &
-    \HH\Capabilities\System &
+    \HH\Capabilities\SystemShallow &
   );
 
   /**
@@ -145,30 +174,14 @@ namespace HH\Contexts {
    * Functions with the `zoned_local` context have the same restrictions
    * as `zoned` for internal operations (e.g. no mutating static
    * variables). They are also allowed to call `zoned_local` or
-   * `zoned_shallow` functions, or even `defaults` functions.
+   * `zoned_shallow` functions and their leak-safe counterparts,
+   * and even `defaults` functions.
    */
   type zoned_local = (
     \HH\Capabilities\WriteProperty &
     \HH\Capabilities\ReadGlobals &
     \HH\Capabilities\ImplicitPolicyLocal &
-    \HH\Capabilities\System &
-  );
-
-  /**
-   * The `zoned_with<Foo>` context allows your function to be used with
-   * other `zoned_with<Foo>` functions.
-   *
-   * This is similar to `zoned`, but allows you define multiple distinct
-   * zones.
-   *
-   * `zoned_with` functions require a special entry point, and cannot be
-   * called from `defaults` functions.
-   */
-  type zoned_with<T> = (
-    \HH\Capabilities\WriteProperty &
-    \HH\Capabilities\ReadGlobals &
-    \HH\Capabilities\ImplicitPolicyOf<T> &
-    \HH\Capabilities\System &
+    \HH\Capabilities\SystemLocal &
   );
 
   /**
@@ -185,14 +198,15 @@ namespace HH\Contexts {
   /**
    * The `globals` context gives your function the capability to read
    * and write global state, such as static properties on classes.
-   * 
+   *
    * See `read_globals` if you only need to read global state.
    */
   type globals = \HH\Capabilities\AccessGlobals;
 
   type rx = (\HH\Capabilities\Rx & \HH\Capabilities\WriteProperty);
   // type rx_shallow = (\HH\Capabilities\RxShallow & rx);
-  type rx_shallow = (\HH\Capabilities\RxShallow & \HH\Capabilities\WriteProperty);
+  type rx_shallow =
+    (\HH\Capabilities\RxShallow & \HH\Capabilities\WriteProperty);
   // type rx_local = (\HH\Capabilities\RxLocal & rx_shallow);
   type rx_local = (\HH\Capabilities\RxLocal & \HH\Capabilities\WriteProperty);
 }

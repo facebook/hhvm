@@ -10,7 +10,7 @@
 
 // declaring a class
 class sample  {
-  public function __toString() {
+  public function __toString() :mixed{
     return "object";
   }
 }
@@ -22,52 +22,13 @@ echo "*** Testing strrchr() function: with unexpected inputs for haystack ***\n"
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values
-$haystacks =  varray [
-
-  // integer values
-  0,
-  1,
-  12345,
-  -2345,
-
-  // float values
-  10.5,
-  -10.5,
-  10.5e10,
-  10.6E-10,
-  .5,
-
-  // array values
-  varray[],
-  varray[0],
-  varray[1],
-  varray[1, 2],
-  darray['color' => 'red', 'item' => 'pen'],
-
-  // boolean values
-  true,
-  false,
-  TRUE,
-  FALSE,
-
-  // null vlaues
-  NULL,
-  null,
-
-  // objects
-  new sample(),
-
+$haystacks =  vec[
   // empty string
   "",
   '',
-
-  // resource
-  $file_handle,
-
-
 ];
 
-$needles =  varray [
+$needles =  vec[
   //integer numeric strings
   "0",
   "1",

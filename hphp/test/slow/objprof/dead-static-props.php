@@ -1,6 +1,6 @@
 <?hh
 
-function gen() {
+function gen() :mixed{
 
   sleep(1);
   $sprop = '$sprop_'.time() % 60;
@@ -16,7 +16,7 @@ EOD
   fclose($f);
 }
 
-function visit_root($node) {
+function visit_root($node) :mixed{
   if (!isset($node['type'])) return;
   if ($node['type'] === 'HPHP::StaticPropData' ||
       $node['type'] === 'HPHP::StaticMultiPropData') {
@@ -27,7 +27,7 @@ function visit_root($node) {
 function entrypoint_deadstaticprops(): void {
 
   echo "start\n";
-  \HH\global_set('filename', '/tmp/dead-static-props.php');
+  \HH\global_set('filename', sys_get_temp_dir().'/dead-static-props.php');
   gen();
   include \HH\global_get('filename');
   $c = new C;

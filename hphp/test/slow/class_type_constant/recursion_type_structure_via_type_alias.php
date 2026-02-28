@@ -7,6 +7,6 @@ class A {
 
 type T = A::B;
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   var_dump(\HH\type_structure('T'));
 }

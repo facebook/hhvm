@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1766() {
+function main_1766() :mixed{
 error_reporting(0);
 var_dump(range('', '', 1));
 var_dump(range('', '', -1));

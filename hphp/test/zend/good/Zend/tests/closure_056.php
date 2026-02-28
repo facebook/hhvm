@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-    static function foo() {
+    static function foo() :mixed{
         $f = function() {
             return self::class;
         };

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type Tbool = bool;
 type Tint = int;
@@ -26,7 +26,7 @@ function main(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_ta_primitive() {
+function main_is_expression_ta_primitive() :mixed{
 main(true);
 main(0);
 main(1.5);

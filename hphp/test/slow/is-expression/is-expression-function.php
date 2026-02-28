@@ -8,6 +8,6 @@ function is_function(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_function() {
+function main_is_expression_function() :mixed{
 is_function(() ==> 1);
 }

@@ -24,5 +24,5 @@ type MyChildShapeFix = MyChildShape;
 function foo(MyParentShape $x): MyChildShape {
   // MyChildShape isn't a subtype of MyParentShape (it's the other way around)
   // return $x; // this is an error, (expected)
-  return $x['inner']; // this should also be an error but isn't
+  return $x['inner']; // this is an error (expected)
 }

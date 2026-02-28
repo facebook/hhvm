@@ -18,13 +18,13 @@
 
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/url-file.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/url/ext_url.h"
 #include "hphp/runtime/server/cli-server.h"
+#include "hphp/util/configs/server.h"
 #include <memory>
 
 namespace HPHP {
@@ -46,7 +46,7 @@ const StaticString
 req::ptr<File> HttpStreamWrapper::open(const String& filename,
                                        const String& mode, int /*options*/,
                                        const req::ptr<StreamContext>& context) {
-  if (RuntimeOption::ServerHttpSafeMode && !is_cli_server_mode()) {
+  if (Cfg::Server::HttpSafeMode && !is_cli_server_mode()) {
     return nullptr;
   }
 
@@ -100,13 +100,13 @@ req::ptr<File> HttpStreamWrapper::open(const String& filename,
       ignore_errors = opts[s_ignore_errors].toBoolean();
     }
     if (opts.exists(s_proxy)) {
-      Variant host = f_parse_url(opts[s_proxy].toString(), k_PHP_URL_HOST);
-      Variant port = f_parse_url(opts[s_proxy].toString(), k_PHP_URL_PORT);
+      Variant host = HHVM_FN(parse_url)(opts[s_proxy].toString(), k_PHP_URL_HOST);
+      Variant port = HHVM_FN(parse_url)(opts[s_proxy].toString(), k_PHP_URL_PORT);
       if (!same(host, false) && !same(port, false)) {
         proxy_host = host.toString();
         proxy_port = port.toInt64();
-        Variant user = f_parse_url(opts[s_proxy].toString(), k_PHP_URL_USER);
-        Variant pass = f_parse_url(opts[s_proxy].toString(), k_PHP_URL_PASS);
+        Variant user = HHVM_FN(parse_url)(opts[s_proxy].toString(), k_PHP_URL_USER);
+        Variant pass = HHVM_FN(parse_url)(opts[s_proxy].toString(), k_PHP_URL_PASS);
         if (!same(user, false) && !same(pass, false)) {
           proxy_user = user.toString();
           proxy_pass = pass.toString();

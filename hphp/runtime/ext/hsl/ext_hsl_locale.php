@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 /*
    +----------------------------------------------------------------------+
@@ -18,7 +18,7 @@
 
 namespace HH\Lib\_Private\_Locale {
 
-<<__NativeData("HSLLocale")>>
+<<__NativeData>>
 final class Locale {
   private function __construct() {}
   <<__Native>>

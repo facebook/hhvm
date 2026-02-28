@@ -227,8 +227,6 @@ private:
   friend struct c_Vector;
   friend struct c_Map;
   friend struct c_ImmMap;
-  friend struct c_AwaitAllWaitHandle;
-  friend struct c_GenMapWaitHandle;
 
   static void compileTimeAssertions() {
     // For performance, all native collection classes have their m_size field
@@ -241,8 +239,8 @@ private:
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct c_Map : BaseMap {
-  DECLARE_COLLECTIONS_CLASS(Map);
+struct c_Map : BaseMap, SystemLib::ClassLoader<"HH\\Map"> {
+  DECLARE_COLLECTIONS_CLASS(Map)
 
   explicit c_Map()
     : BaseMap(c_Map::classof(), HeaderKind::Map) { }
@@ -260,19 +258,13 @@ struct c_Map : BaseMap {
   Object getImmutableCopy();
  protected:
   friend struct collections::CollectionsExtension;
-  Object php_add(const Variant& pair) {
+  void php_add(const Variant& pair) {
     add(pair);
-    return Object{this};
   }
-  Object php_addAll(const Variant& it) {
+  void php_addAll(const Variant& it) {
     addAllPairs(it);
-    return Object{this};
   }
-  Object php_clear() {
-    clear();
-    return Object{this};
-  }
-  Object php_removeKey(const Variant& key) {
+  void php_removeKey(const Variant& key) {
     auto const ktv = tvClassToString(*key.asTypedValue());
     DataType t = type(ktv);
     if (t == KindOfInt64) {
@@ -282,7 +274,6 @@ struct c_Map : BaseMap {
     } else {
       throwBadKeyType();
     }
-    return Object{this};
   }
   void php_reserve(int64_t cap) {
     if (cap < 0) {
@@ -292,9 +283,8 @@ struct c_Map : BaseMap {
     }
     reserve(cap);
   }
-  Object php_set(const Variant& key, const Variant& value) {
+  void php_set(const Variant& key, const Variant& value) {
     set(key, value);
-    return Object{this};
   }
   Object php_setAll(const Variant& it) {
     setAll(it);
@@ -304,7 +294,7 @@ struct c_Map : BaseMap {
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct c_ImmMap : BaseMap {
+struct c_ImmMap : BaseMap, SystemLib::ClassLoader<"HH\\ImmMap"> {
   DECLARE_COLLECTIONS_CLASS(ImmMap)
 
  public:
@@ -325,10 +315,7 @@ struct c_ImmMap : BaseMap {
 namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 
-extern const StaticString
-  s_MapIterator;
-
-struct MapIterator {
+struct MapIterator : SystemLib::ClassLoader<"MapIterator"> {
   MapIterator() {}
   MapIterator(const MapIterator& src) = delete;
   MapIterator& operator=(const MapIterator& src) {
@@ -339,9 +326,7 @@ struct MapIterator {
   ~MapIterator() {}
 
   static Object newInstance() {
-    static Class* cls = Class::lookup(s_MapIterator.get());
-    assertx(cls);
-    return Object{cls};
+    return Object{classof()};
   }
 
   void setMap(BaseMap* mp) {

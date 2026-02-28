@@ -1,1 +1,2 @@
-No errors
+ERROR: File "construct_where.php", line 9, characters 49-50:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])

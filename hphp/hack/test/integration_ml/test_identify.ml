@@ -24,12 +24,8 @@ let test () =
 
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   TestDisk.set hhconfig_filename hhconfig_contents;
-  let hhconfig_path =
-    Relative_path.create Relative_path.Root hhconfig_filename
-  in
-  let options = ServerArgs.default_options ~root in
   let (custom_config, _) =
-    ServerConfig.load ~silent:false hhconfig_path options
+    ServerConfig.load ~silent:false ~from:"" ~cli_config_overrides:[]
   in
   let env =
     Integration_test_base.setup_server
@@ -48,7 +44,11 @@ let test () =
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  let symbols = IdentifySymbolService.all_symbols ctx tast in
+  let symbols =
+    IdentifySymbolService.all_symbols
+      ctx
+      tast.Tast_with_dynamic.under_normal_assumptions
+  in
   Asserter.Int_asserter.assert_equals
     7
     (List.length symbols)

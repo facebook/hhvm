@@ -1,0 +1,20 @@
+ERROR: File "parameter_modifiers_optional_optional.php", line 3, characters 32-32:
+A right parenthesis `)` is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_optional_optional.php", line 3, characters 32-32:
+Encountered unexpected text ``, was expecting a type hint. (Parsing[1002])
+ERROR: File "parameter_modifiers_optional_optional.php", line 3, characters 59-65:
+Cannot use collection initialization for non-collection class. (Parsing[1002])
+ERROR: File "parameter_modifiers_optional_optional.php", line 3, characters 52-52:
+Unbound name: `)` (a global constant) (Naming[2049])
+ERROR: File "parameter_modifiers_optional_optional.php", line 3, characters 56-56:
+Unbound name: `)` (a global constant) (Naming[2049])
+ERROR: File "parameter_modifiers_optional_optional.php", line 3, characters 57-57:
+Unbound name: `:` (a global constant) (Naming[2049])
+ERROR: File "parameter_modifiers_optional_optional.php", line 3, characters 59-62:
+Unexpected collection type `void` (Naming[2013])
+ERROR: File "parameter_modifiers_optional_optional.php", line 3, characters 52-52:
+Unbound global constant (Typing) (Typing[4106])
+ERROR: File "parameter_modifiers_optional_optional.php", line 3, characters 56-56:
+Unbound global constant (Typing) (Typing[4106])
+ERROR: File "parameter_modifiers_optional_optional.php", line 3, characters 57-57:
+Unbound global constant (Typing) (Typing[4106])

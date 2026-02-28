@@ -13,6 +13,6 @@ class C implements IB {
 
 
 <<__EntryPoint>>
-function main_require_constraint_hoistability() {
+function main_require_constraint_hoistability() :mixed{
 echo 'Done', "\n";
 }

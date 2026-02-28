@@ -1,11 +1,11 @@
 <?hh
 class myIterator implements Iterator {
 
-    function current() {}
-    function next() {}
-    function key() {}
-    function valid() {}
-    function rewind() {}
+    function current() :mixed{}
+    function next() :mixed{}
+    function key() :mixed{}
+    function valid() :mixed{}
+    function rewind() :mixed{}
 
 }
 <<__EntryPoint>> function main(): void {

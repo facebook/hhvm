@@ -26,21 +26,21 @@
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/memo-cache.h"
-#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
-#include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/mcgen-async.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/translation-stats.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
@@ -49,25 +49,38 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgNop(IRLS&, const IRInstruction*) {}
 void cgDefConst(IRLS&, const IRInstruction*) {}
 void cgEndGuards(IRLS&, const IRInstruction*) {}
-void cgJmpPlaceholder(IRLS&, const IRInstruction*) {}
 
 ///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+void allocRootFrame(Vout& v, const IRInstruction* inst) {
+  assertx(v.unit().frames.empty());
+  v.unit().fpToFrame.emplace(inst->dst(), 0);
+  v.unit().frames.emplace_back(
+    inst->marker().func(), 0, SBInvOffset{0}, Vframe::Top, 0, v.weight()
+  );
+}
+}
 
 void cgDefFP(IRLS& env, const IRInstruction* inst) {
   auto const fp = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
   v << defvmfp{fp};
+
+  allocRootFrame(v, inst);
 }
 
 void cgDefFrameRelSP(IRLS& env, const IRInstruction* inst) {
@@ -101,6 +114,33 @@ void cgDefFuncPrologueNumArgs(IRLS& env, const IRInstruction* inst) {
 void cgDefFuncPrologueCtx(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   v << copy{r_func_prologue_ctx(), dstLoc(env, inst, 0).reg()};
+}
+
+void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{rvmsp(), dstLoc(env, inst, 0).reg()};
+
+  allocRootFrame(v, inst);
+}
+
+void cgDefFuncEntryPrevFP(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{rvmfp(), dstLoc(env, inst, 0).reg()};
+}
+
+void cgDefFuncEntryArFlags(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{r_func_entry_ar_flags(), dstLoc(env, inst, 0).reg()};
+}
+
+void cgDefFuncEntryCalleeId(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{r_func_entry_callee_id(), dstLoc(env, inst, 0).reg()};
+}
+
+void cgDefFuncEntryCtx(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{r_func_entry_ctx(), dstLoc(env, inst, 0).reg()};
 }
 
 void cgStVMFP(IRLS& env, const IRInstruction* inst) {
@@ -154,12 +194,12 @@ void cgMov(IRLS& env, const IRInstruction* inst) {
 
 void cgUnreachable(IRLS& env, const IRInstruction* inst) {
   auto reason = inst->extra<AssertReason>()->reason;
-  vmain(env) << trap{reason};
+  vmain(env) << trap{reason, Fixup::none()};
 }
 
 void cgEndBlock(IRLS& env, const IRInstruction* inst) {
-  auto reason = inst->extra<AssertReason>()->reason;
-  vmain(env) << trap{reason};
+  auto reason = inst->extra<EndBlock>()->reason;
+  vmain(env) << trap{reason, Fixup::none()};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -190,7 +230,7 @@ void cgInterpOneCF(IRLS& env, const IRInstruction* inst) {
   v << lea{sp[cellsToBytes(extra->spOffset.offset)], sync_sp};
   v << syncvmsp{sync_sp};
 
-  assertx(tc::ustubs().interpOneCFHelpers.count(extra->opcode));
+  assertx(tc::ustubs().interpOneCFHelpers.contains(extra->opcode));
 
   // We pass the Offset in the third argument register.
   v << ldimml{extra->bcOff, rarg(2)};
@@ -200,8 +240,8 @@ void cgInterpOneCF(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPL_OPCODE_CALL(GetTime);
-IMPL_OPCODE_CALL(GetTimeNs);
+IMPL_OPCODE_CALL(GetTime)
+IMPL_OPCODE_CALL(GetTimeNs)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -218,7 +258,7 @@ void getMemoKeyImpl(IRLS& env, const IRInstruction* inst, bool sync) {
 
   auto args = argGroup(env, inst);
   if (s->isA(TKeyset) || s->isA(TArrLike) || s->isA(TObj) || s->isA(TStr) ||
-      s->isA(TDbl) || s->isA(TLazyCls)) {
+      s->isA(TDbl) || s->isA(TLazyCls) || s->isA(TCls)) {
     args.ssa(0, s->isA(TDbl));
   } else {
     args.typedValue(0);
@@ -230,6 +270,9 @@ void getMemoKeyImpl(IRLS& env, const IRInstruction* inst, bool sync) {
     if (s->isA(TStr)) return CallSpec::direct(serialize_memoize_param_str);
     if (s->isA(TLazyCls)) {
       return CallSpec::direct(serialize_memoize_param_lazycls);
+    }
+    if (s->isA(TCls)) {
+      return CallSpec::direct(serialize_memoize_param_cls);
     }
     if (s->isA(TDbl))     return CallSpec::direct(serialize_memoize_param_dbl);
     if (s->isA(TObj)) {
@@ -943,7 +986,7 @@ void cgRBTraceMsg(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPL_OPCODE_CALL(IncCallCounter);
+IMPL_OPCODE_CALL(IncCallCounter)
 
 void cgIncStat(IRLS& env, const IRInstruction *inst) {
   auto const stat = Stats::StatCounter(inst->src(0)->intVal());
@@ -955,11 +998,18 @@ void cgIncProfCounter(IRLS& env, const IRInstruction* inst) {
   auto const counterAddr = profData()->transCounterAddr(transID);
   auto& v = vmain(env);
 
-  if (RuntimeOption::EvalJitPGORacyProfiling) {
+  if (Cfg::Jit::PGORacyProfiling) {
     v << decqm{v.cns(counterAddr)[0], v.makeReg()};
   } else {
     v << decqmlock{v.cns(counterAddr)[0], v.makeReg()};
   }
+}
+
+void cgIncStatCounter(IRLS& env, const IRInstruction* inst) {
+  auto const transID = inst->extra<TransIDData>()->transId;
+  auto const counterAddr = globalTransStats()->transStatsCounterAddr(transID);
+  auto& v = vmain(env);
+  v << decqmlock{v.cns(counterAddr)[0], v.makeReg()};
 }
 
 void cgCheckCold(IRLS& env, const IRInstruction* inst) {
@@ -969,7 +1019,7 @@ void cgCheckCold(IRLS& env, const IRInstruction* inst) {
 
   auto const sf = v.makeReg();
   v << decqmlock{v.cns(counterAddr)[0], sf};
-  if (RuntimeOption::EvalJitFilterLease) {
+  if (Cfg::Jit::FilterLease) {
     auto filter = v.makeBlock();
     v << jcc{CC_LE, sf, {label(env, inst->next()), filter}};
     v = filter;
@@ -988,8 +1038,8 @@ void cgCheckCold(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgLdUnitPerRequestFilepath(IRLS& env, const IRInstruction* inst) {
-  assertx(!RuntimeOption::RepoAuthoritative);
-  assertx(RuntimeOption::EvalReuseUnitsByHash);
+  assertx(!Cfg::Repo::Authoritative);
+  assertx(Cfg::Eval::ReuseUnitsByHash);
 
   auto const handle = inst->extra<LdUnitPerRequestFilepath>()->handle;
   assertx(rds::isNormalHandle(handle));
@@ -1003,10 +1053,10 @@ void cgLdUnitPerRequestFilepath(IRLS& env, const IRInstruction* inst) {
     auto const sf = checkRDSHandleInitialized(v, handle);
     unlikelyIfThen(
       v, vcold(env), CC_NE, sf,
-      [&] (Vout& v) { v << trap{TRAP_REASON}; }
+      [&] (Vout& v) { v << trap{TRAP_REASON, Fixup::none()}; }
     );
   }
-  emitLdLowPtr(v, rvmtl()[handle], dst, sizeof(LowStringPtr));
+  emitLdPackedPtr<const StringData>(v, rvmtl()[handle], dst);
 }
 
 static StringData* dirFromFilepathImpl(const StringData* filepath) {
@@ -1022,6 +1072,39 @@ void cgDirFromFilepath(IRLS& env, const IRInstruction* inst) {
     callDest(env, inst),
     SyncOptions::None,
     argGroup(env, inst).ssa(0)
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgStaticAnalysisError(IRLS& env, const IRInstruction* inst) {
+  if (Cfg::Eval::CrashOnStaticAnalysisError) {
+    auto& v = vmain(env);
+    v << trap{TRAP_REASON, makeFixup(inst->marker(), SyncOptions::Sync)};
+    return;
+  }
+
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(raiseStaticAnalysisError),
+    kVoidDest,
+    SyncOptions::Sync,
+    argGroup(env, inst)
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgRetranslateOptAsync(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(mcgen::enqueueAsyncTranslateOptRequest),
+    kVoidDest,
+    SyncOptions::None,
+    argGroup(env, inst)
+      .imm(inst->marker().sk().func())
   );
 }
 

@@ -46,22 +46,12 @@ module Client_actual = struct
 
   let init root =
     let socket_file = Config.socket_file root in
-    let sock_path = Socket.get_path socket_file in
+    let sock_path = Socket.make_valid_socket_path socket_file in
     (* Copied wholesale from MonitorConnection *)
-    let sockaddr =
-      if Sys.win32 then (
-        let ic = In_channel.create ~binary:true sock_path in
-        let port = Option.value_exn (In_channel.input_binary_int ic) in
-        In_channel.close ic;
-        Unix.(ADDR_INET (inet_addr_loopback, port))
-      ) else
-        Unix.ADDR_UNIX sock_path
-    in
+    let sockaddr = Unix.ADDR_UNIX sock_path in
     try
-      let (tic, _) = Timeout.open_connection sockaddr in
-      let reader =
-        Buffered_line_reader.create @@ Timeout.descr_of_in_channel @@ tic
-      in
+      let (ic, _oc) = Unix.open_connection sockaddr in
+      let reader = Buffered_line_reader.create @@ Unix.descr_of_in_channel ic in
       Some { state = ref @@ Unknown reader }
     with
     | Unix.Unix_error (Unix.ENOENT, _, _) -> None
@@ -73,29 +63,28 @@ module Client_actual = struct
     | Settled -> Some Responses.Settled
     | Mid_update reader
     | Unknown reader
-      when Buffered_line_reader.is_readable reader ->
-      begin
-        try
-          let msg = Buffered_line_reader.get_next_line reader in
-          let msg = Responses.of_string msg in
-          let response =
-            match msg with
-            | Responses.Unknown -> Responses.Unknown
-            | Responses.Mid_update ->
-              instance.state := Mid_update reader;
-              Responses.Mid_update
-            | Responses.Settled ->
-              instance.state := Settled;
-              ignore_unix_error Unix.close @@ Buffered_line_reader.get_fd reader;
-              Responses.Settled
-          in
-          Some response
-        with
-        | Unix.Unix_error (Unix.EPIPE, _, _)
-        | End_of_file ->
-          instance.state := Failed;
-          None
-      end
+      when Buffered_line_reader.is_readable reader -> begin
+      try
+        let msg = Buffered_line_reader.get_next_line reader in
+        let msg = Responses.of_string msg in
+        let response =
+          match msg with
+          | Responses.Unknown -> Responses.Unknown
+          | Responses.Mid_update ->
+            instance.state := Mid_update reader;
+            Responses.Mid_update
+          | Responses.Settled ->
+            instance.state := Settled;
+            ignore_unix_error Unix.close @@ Buffered_line_reader.get_fd reader;
+            Responses.Settled
+        in
+        Some response
+      with
+      | Unix.Unix_error (Unix.EPIPE, _, _)
+      | End_of_file ->
+        instance.state := Failed;
+        None
+    end
     | Mid_update _ -> Some Responses.Mid_update
     | Unknown _ -> Some Responses.Unknown
 

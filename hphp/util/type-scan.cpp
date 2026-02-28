@@ -69,7 +69,7 @@ const folly::F14FastSet<std::string> forbidden_template = {
 };
 
 const folly::F14FastSet<std::string> forced_conservative = {
-  "boost::variant",
+  "std::variant",
   "boost::Optional",
   "std::optional",
   "std::function"
@@ -125,15 +125,15 @@ const Metadata* g_metadata_table = stub_metadata_table;
 std::size_t g_metadata_table_size = 2;
 
 bool isIgnoredType(const std::string& name) {
-  return ignored.count(stripTemplateArgs(name));
+  return ignored.contains(stripTemplateArgs(name));
 }
 
 bool isForbiddenTemplate(const std::string& name) {
-  return forbidden_template.count(stripTemplateArgs(name));
+  return forbidden_template.contains(stripTemplateArgs(name));
 }
 
 bool isForcedConservativeTemplate(const std::string& name) {
-  return forced_conservative.count(stripTemplateArgs(name));
+  return forced_conservative.contains(stripTemplateArgs(name));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -152,7 +152,7 @@ void init(const std::string& extractPath,
   // problems. Fixed in https://reviews.llvm.org/D56928. Clang builds also
   // need -fstandalone-debug to emit full types in DWARF.
   return;
-#elif defined(__linux__) || defined(__FreeBSD__)
+#elif defined(__linux__) 
 
   using init_func_t = const Metadata*(*)(std::size_t&);
 

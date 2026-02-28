@@ -1,5 +1,5 @@
 <?hh
 
 function f(): void {
-  xhprof_frame_begin(3);
+  fb_output_compression(3);
 }

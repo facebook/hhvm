@@ -7,38 +7,38 @@
  */
 
 // Output is in the format expected by JsonTestRunner.
-function say($val) {
-  fwrite(STDERR, json_encode($val, JSON_UNESCAPED_SLASHES) . "\n");
+function say($val) :mixed{
+  fwrite(HH\stderr(), json_encode($val, JSON_UNESCAPED_SLASHES) . "\n");
 }
 
-function finish($status) {
+function finish($status) :mixed{
 
 
 
-  say(darray['op' => 'test_done',
+  say(dict['op' => 'test_done',
             'test' => ToolsFbmakeTestBinaryWrapperPhp::$current,
             'details' => '',
             'status' => $status]);
-  ToolsFbmakeTestBinaryWrapperPhp::$results[] = darray[
+  ToolsFbmakeTestBinaryWrapperPhp::$results[] = dict[
     'name'   => ToolsFbmakeTestBinaryWrapperPhp::$current,
     'status' => $status,
   ];
   ToolsFbmakeTestBinaryWrapperPhp::$current = '';
 }
 
-function start($test) {
+function start($test) :mixed{
 
 
   ToolsFbmakeTestBinaryWrapperPhp::$current = $test;
-  say(darray['op'    => 'start',
+  say(dict['op'    => 'start',
             'test'  => ToolsFbmakeTestBinaryWrapperPhp::$current]);
 }
 
-function test_is_running() {
+function test_is_running() :mixed{
   return \HH\global_get('current') != '';
 }
 
-function loop_tests($cmd, $line_func) {
+function loop_tests($cmd, $line_func) :mixed{
 
 
   $ftest = popen($cmd, 'r');
@@ -62,7 +62,7 @@ function loop_tests($cmd, $line_func) {
     return;
   }
 
-  say(darray['op'      => 'all_done',
+  say(dict['op'      => 'all_done',
             'results' => ToolsFbmakeTestBinaryWrapperPhp::$results]);
 }
 
@@ -87,7 +87,7 @@ async function main(): Awaitable<void> {
   );
 
   // Currently running test, and the results of each test.
-  ToolsFbmakeTestBinaryWrapperPhp::$results = varray[];
+  ToolsFbmakeTestBinaryWrapperPhp::$results = vec[];
   ToolsFbmakeTestBinaryWrapperPhp::$current = '';
 
   loop_tests($cmd, function ($line) {

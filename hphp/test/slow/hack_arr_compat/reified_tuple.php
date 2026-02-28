@@ -5,7 +5,7 @@ function check<reify T>($x): T {
 }
 
 <<__EntryPoint>>
-function main() {
-  print('varray: '); print(json_encode(check<(int, int)>(varray[]))."\n");
-  print('darray: '); print(json_encode(check<(int, int)>(darray[]))."\n");
+function main() :mixed{
+  print('varray: '); print(json_encode(check<(int, int)>(vec[]))."\n");
+  print('darray: '); print(json_encode(check<(int, int)>(dict[]))."\n");
 }

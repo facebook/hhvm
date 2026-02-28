@@ -8,6 +8,6 @@ class C {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo "ok\n";
 }

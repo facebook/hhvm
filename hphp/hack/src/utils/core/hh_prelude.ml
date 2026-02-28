@@ -6,7 +6,7 @@
  *
  *)
 
-include Core_kernel
+include Core
 
 (** The equality function in Pervasives is backed by compiler magic (called
     compare_val), which operates on the memory representation of values to
@@ -28,8 +28,8 @@ include Core_kernel
     string), you can add `open Int.Replace_polymorphic_compare` to the top of
     the file.
 
-    With ocaml 4.08 and later, Core_kernel is binding (=) to Int.equal, let's
-    do the same.
+    With ocaml 4.08 and later, Core/Core_kernel is binding (=) to Int.equal,
+    let's do the same.
 *)
 let ( = ) : int -> int -> bool = Int.equal
 
@@ -55,3 +55,44 @@ let ( = ) : int -> int -> bool = Int.equal
 let ( <> ) (x : int) (y : int) = not (Int.equal x y)
 
 module Unix = Caml_unix
+module Sys = Stdlib.Sys
+
+module Option = struct
+  include Option
+
+  module Let_syntax = struct
+    include Option.Let_syntax
+
+    let ( let* ) = Option.( >>= )
+
+    let ( and* ) = Option.both
+
+    let ( let+ ) = Option.( >>| )
+
+    let ( and+ ) = Option.both
+  end
+end
+
+module List = struct
+  include List
+
+  module Let_syntax = struct
+    include List.Let_syntax
+
+    let ( let* ) = List.( >>= )
+
+    let ( let+ ) = List.( >>| )
+  end
+end
+
+module Result = struct
+  include Result
+
+  module Let_syntax = struct
+    include Result.Let_syntax
+
+    let ( let* ) = Result.( >>= )
+
+    let ( let+ ) = Result.( >>| )
+  end
+end

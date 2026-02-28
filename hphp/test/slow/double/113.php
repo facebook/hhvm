@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_113() {
+function main_113() :mixed{
 $foo = 1 + HH\Lib\Legacy_FIXME\cast_for_arithmetic("10.5");
 $foo__str = (string)($foo);
 print("$foo__str ");

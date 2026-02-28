@@ -6,8 +6,8 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
 include Set.Make (StringKey)
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 let pp_limit ?(max_elts = None) fmt sset =
   Format.fprintf fmt "@[<2>{";
@@ -53,3 +53,8 @@ let pp_large ?(max_elts = 5) fmt sset =
 
 let show_large ?(max_elts = 5) sset =
   Format.asprintf "%a" (pp_large ~max_elts) sset
+
+let yojson_of_t t =
+  elements t
+  |> List.sort StringKey.compare
+  |> yojson_of_list StringKey.yojson_of_t

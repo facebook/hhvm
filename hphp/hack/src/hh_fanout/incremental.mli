@@ -86,7 +86,9 @@ class type cursor =
     cursor), then returns `None` instead of `Some cursor`.
     *)
     method calculate_errors :
-      Provider_context.t -> MultiWorker.worker list -> Errors.t * cursor option
+      Provider_context.t ->
+      MultiWorker.worker list ->
+      Diagnostics.t * cursor option
   end
 
 class type state =

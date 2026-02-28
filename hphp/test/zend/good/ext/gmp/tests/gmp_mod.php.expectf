@@ -1,7 +1,7 @@
 
-Warning: gmp_mod() expects exactly 2 parameters, 0 given in %s/gmp_mod.php on line 3
+Warning: gmp_mod() expects exactly 2 positional parameters, 0 given in %s/gmp_mod.php on line 3
 
-Warning: gmp_mod() expects exactly 2 parameters, 1 given in %s/gmp_mod.php on line 4
+Warning: gmp_mod() expects exactly 2 positional parameters, 1 given in %s/gmp_mod.php on line 4
 
 Warning: gmp_mod(): Unable to convert variable to GMP - string is not an integer in %s/gmp_mod.php on line 5
 bool(false)

@@ -19,46 +19,13 @@ $fp = fopen(__FILE__, "r");
 
 
 // array with different values as width
-$values =  varray [
+$values =  vec[
   // zerovalue for width
   0,
 
   // -ve value for width
   -1,
   -10,
-
-  // array values
-  varray[],
-  varray[0],
-  varray[1],
-  varray[1, 2],
-  darray['color' => 'red', 'item' => 'pen'],
-
-  // boolean values
-  true,
-  false,
-  TRUE,
-  FALSE,
-
-  // string values
-  "string",
-  'string',
-
-  // objects
-  new stdClass(),
-
-  // Null value
-  NULL,
-  null,
-
-  // empty string
-  "",
-  '',
-
-  // resource variable
-  $fp,
-
-
 ];
 
 

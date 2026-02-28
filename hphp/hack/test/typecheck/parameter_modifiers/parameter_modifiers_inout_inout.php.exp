@@ -1,0 +1,4 @@
+ERROR: File "parameter_modifiers_inout_inout.php", line 4, characters 30-34:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_inout_inout.php", line 4, characters 30-34:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])

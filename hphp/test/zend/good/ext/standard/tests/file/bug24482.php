@@ -6,7 +6,7 @@ chdir('..'); // move up to ext/standard/tests
 
 $globdirs = glob(__DIR__."/../../../../../../sample_dir/*", GLOB_ONLYDIR);
 
-$dirs = varray[];
+$dirs = vec[];
 $dh = opendir(__DIR__."/../../../../../../sample_dir/");
 while (is_string($file = readdir($dh))) {
     if ($file[0] === ".") continue;

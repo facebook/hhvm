@@ -1,4 +1,4 @@
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
   .numiters 2;
   .declvars $0 $1 $2 $3 $4;
   NewDictArray 3
@@ -18,11 +18,13 @@
   SetL $0
   PopC
 
-  CGetL $0
-  IterInit 0 K:$2 V:$1 endOuter
+  IterInit <WithKeys> 0 $0 endOuter
   .try {
   startOuter:
-
+    IterGetValue <WithKeys> 0 $0
+    PopL $1
+    IterGetKey <WithKeys> 0 $0
+    PopL $2
     String "\n"
     CGetL2 $1
     Concat
@@ -35,10 +37,13 @@
     Print
     PopC
 
-    CGetL $0
-    IterInit 1 K:$4 V:$3 endInner
+    IterInit <WithKeys> 1 $0 endInner
     .try {
     startInner:
+      IterGetValue <WithKeys> 1 $0
+      PopL $3
+      IterGetKey <WithKeys> 1 $0
+      PopL $4
       String "\n"
       CGetL2 $3
       Concat
@@ -54,14 +59,14 @@
       IterFree 1
       IterFree 0
       Jmp endOuter
-      IterNext 1 K:$4 V:$3 startInner
+      IterNext <WithKeys> 1 $0 startInner
       Jmp endInner
     } .catch {
       IterFree 1
       Throw
     }
   endInner:
-    IterNext 0 K:$2 V:$1 startOuter
+    IterNext <WithKeys> 0 $0 startOuter
     Jmp endOuter
   } .catch {
     IterFree 0
@@ -69,5 +74,5 @@
   }
 endOuter:
   Int 1
-  RetC
+  RetC None
 }

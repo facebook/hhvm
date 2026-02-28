@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 class :baz extends XHPTest {}
 class :foo extends XHPTest {
   attribute string bar;

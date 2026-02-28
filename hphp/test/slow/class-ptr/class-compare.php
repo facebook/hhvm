@@ -1,186 +1,428 @@
 <?hh
 
-class foobar {}
-function foobar() {}
+<<__DynamicallyReferenced>> class foobar {}
+function foobar() :mixed{}
 class StrObj {
   public function __construct(private string $s)[] {}
-  public function __toString(): string { return $this->s; }
+  public function __toString()[]: string { return $this->s; }
 }
 class Wrapper { public function __construct(private mixed $w)[] {} }
 
-function LV($x)  { return __hhvm_intrinsics\launder_value($x); }
-function CLS($c) { return __hhvm_intrinsics\create_class_pointer($c); }
+function LV($x)  :mixed{ return __hhvm_intrinsics\launder_value($x); }
+function CLS($c) :mixed{ return HH\classname_to_class($c); }
 
-function WRAPA($x) { return LV(varray[$x]); }
-function WRAPO($x) { return LV(new Wrapper($x)); }
-function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
+function vLV($x) :mixed{ return LV(vec[$x]); }
+function wLV($x) :mixed{ return LV(new Wrapper($x)); }
+function pLV($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
 
-<<__NEVER_INLINE>> function print_header($title) {
+<<__NEVER_INLINE>> function print_header($title) :mixed{
   echo "$title\n";
   echo "+------------+------+------+------+------+------+------+\n";
   echo "| VAR        | <    | <=   | >    | >=   | ==   | ===  |\n";
   echo "+============+======+======+======+======+======+======+";
 }
-<<__NEVER_INLINE>> function begin_row($var, $wrap = null) {
+<<__NEVER_INLINE>> function begin_row($var, $wrap = null) :mixed{
   printf("\n| %-10s |", $wrap !== null ? $wrap."(\$$var)" : "\$$var");
 }
-<<__NEVER_INLINE>> function C(bool $v) {
+<<__NEVER_INLINE>> function C(bool $v) :mixed{
   printf(" %s    |", $v ? 'T' : 'F');
 }
-<<__NEVER_INLINE>> function print_footer() {
+<<__NEVER_INLINE>> function print_divider() :mixed{
+  echo "\n+------------+------+------+------+------+------+------+";
+}
+<<__NEVER_INLINE>> function print_footer() :mixed{
   echo "\n+------------+------+------+------+------+------+------+\n\n";
 }
 
-<<__NEVER_INLINE>> function static_compare() {
-  $cm = foobar::class;
-  $va = 'foobar';
-  $oa = new StrObj('foobar');
-  $fa = CLS('foobar');
+<<__NEVER_INLINE>> function static_compare() :mixed{
+  // lcl for lazy class, using 3 chars instead of lcls so the cases align better
+  $lcl = foobar::class;
+  $str = 'foobar';
+  $obj = new StrObj('foobar');
+  $cls = CLS('foobar');
 
-  $xx = varray[$cm]; $vx = varray[$va]; $ox = varray[$oa]; $fx = varray[$fa];
+  // v prefix for vec
+  $vlcl = vec[$lcl];
+  $vstr = vec[$str];
+  $vobj = vec[$obj];
+  $vcls = vec[$cls];
 
-  $xy = new Wrapper($cm); $vy = new Wrapper($va); $oy = new Wrapper($oa);
-  $fy = new Wrapper($fa);
+  // w prefix for Wrapper
+  $wlcl = new Wrapper($lcl);
+  $wstr = new Wrapper($str);
+  $wobj = new Wrapper($obj);
+  $wcls = new Wrapper($cls);
 
-  $xz = new stdClass; $xz->v = $cm; $vz = new stdClass; $vz->v = $va;
-  $oz = new stdClass; $oz->v = $oa; $fz = new stdClass; $fz->v = $fa;
+  // p prefix for property
+  $plcl = new stdClass; $plcl->v = $lcl;
+  $pstr = new stdClass; $pstr->v = $str;
+  $pobj = new stdClass; $pobj->v = $obj;
+  $pcls = new stdClass; $pcls->v = $cls;
 
-  print_header('[static] $cm ? VAR');
-  begin_row('va');
-    C($cm<$va);C($cm<=$va);C($cm>$va);C($cm>=$va);C($cm==$va);C($cm===$va);
-  begin_row('oa');
-    C(HH\Lib\Legacy_FIXME\lt($cm, $oa));C(HH\Lib\Legacy_FIXME\lte($cm, $oa));C(HH\Lib\Legacy_FIXME\gt($cm, $oa));C(HH\Lib\Legacy_FIXME\gte($cm, $oa));C(HH\Lib\Legacy_FIXME\eq($cm, $oa));C($cm===$oa);
-  begin_row('fa');
-    C($cm<$fa);C($cm<=$fa);C($cm>$fa);C($cm>=$fa);C($cm==$fa);C($cm===$fa);
+  // Note: we're not doing a total comparison here -- the wrap lines always
+  // compare wrap-to-wrap.
 
-  begin_row('va', 'WRAPA');
-    C($xx<$vx);C($xx<=$vx);C($xx>$vx);C($xx>=$vx);C($xx==$vx);C($xx===$vx);
-  begin_row('oa', 'WRAPA');
-    C(HH\Lib\Legacy_FIXME\lt($xx, $ox));C(HH\Lib\Legacy_FIXME\lte($xx, $ox));C(HH\Lib\Legacy_FIXME\gt($xx, $ox));C(HH\Lib\Legacy_FIXME\gte($xx, $ox));C(HH\Lib\Legacy_FIXME\eq($xx, $ox));C($xx===$ox);
-  begin_row('fa', 'WRAPA');
-    C($xx<$fx);C($xx<=$fx);C($xx>$fx);C($xx>=$fx);C($xx==$fx);C($xx===$fx);
+  //// $lcl
 
-  begin_row('va', 'WRAPO');
-    C($xy<$vy);C($xy<=$vy);C($xy>$vy);C($xy>=$vy);C($xy==$vy);C($xy===$vy);
-  begin_row('oa', 'WRAPO');
-    C(HH\Lib\Legacy_FIXME\lt($xy, $oy));C(HH\Lib\Legacy_FIXME\lte($xy, $oy));C(HH\Lib\Legacy_FIXME\gt($xy, $oy));C(HH\Lib\Legacy_FIXME\gte($xy, $oy));C(HH\Lib\Legacy_FIXME\eq($xy, $oy));C($xy===$oy);
-  begin_row('fa', 'WRAPO');
-    C($xy<$fy);C($xy<=$fy);C($xy>$fy);C($xy>=$fy);C($xy==$fy);C($xy===$fy);
+  print_header('[static] $lcl ? VAR');
+  begin_row('lcl');
+    C($lcl<$lcl);C($lcl<=$lcl);C($lcl>$lcl);C($lcl>=$lcl);C($lcl==$lcl);C($lcl===$lcl);
+  begin_row('str');
+    C($lcl<$str);C($lcl<=$str);C($lcl>$str);C($lcl>=$str);C($lcl==$str);C($lcl===$str);
+  begin_row('cls');
+    C($lcl<$cls);C($lcl<=$cls);C($lcl>$cls);C($lcl>=$cls);C($lcl==$cls);C($lcl===$cls);
+  begin_row('obj');
+    C(HH\Lib\Legacy_FIXME\lt($lcl, $obj));C(HH\Lib\Legacy_FIXME\lte($lcl, $obj));C(HH\Lib\Legacy_FIXME\gt($lcl, $obj));C(HH\Lib\Legacy_FIXME\gte($lcl, $obj));C(HH\Lib\Legacy_FIXME\eq($lcl, $obj));C($lcl===$obj);
+  print_divider();
 
-  begin_row('va', 'WRAPD');
-    C($xz<$vz);C($xz<=$vz);C($xz>$vz);C($xz>=$vz);C($xz==$vz);C($xz===$vz);
-  begin_row('oa', 'WRAPD');
-    C(HH\Lib\Legacy_FIXME\lt($xz, $oz));C(HH\Lib\Legacy_FIXME\lte($xz, $oz));C(HH\Lib\Legacy_FIXME\gt($xz, $oz));C(HH\Lib\Legacy_FIXME\gte($xz, $oz));C(HH\Lib\Legacy_FIXME\eq($xz, $oz));C($xz===$oz);
-  begin_row('fa', 'WRAPD');
-    C($xz<$fz);C($xz<=$fz);C($xz>$fz);C($xz>=$fz);C($xz==$fz);C($xz===$fz);
+  begin_row('lcl', 'v');
+    C($vlcl<$vlcl);C($vlcl<=$vlcl);C($vlcl>$vlcl);C($vlcl>=$vlcl);C($vlcl==$vlcl);C($vlcl===$vlcl);
+  begin_row('str', 'v');
+    C($vlcl<$vstr);C($vlcl<=$vstr);C($vlcl>$vstr);C($vlcl>=$vstr);C($vlcl==$vstr);C($vlcl===$vstr);
+  begin_row('cls', 'v');
+    C($vlcl<$vcls);C($vlcl<=$vcls);C($vlcl>$vcls);C($vlcl>=$vcls);C($vlcl==$vcls);C($vlcl===$vcls);
+  begin_row('obj', 'v');
+    C(HH\Lib\Legacy_FIXME\lt($vlcl, $vobj));C(HH\Lib\Legacy_FIXME\lte($vlcl, $vobj));C(HH\Lib\Legacy_FIXME\gt($vlcl, $vobj));C(HH\Lib\Legacy_FIXME\gte($vlcl, $vobj));C(HH\Lib\Legacy_FIXME\eq($vlcl, $vobj));C($vlcl===$vobj);
+  print_divider();
+
+  begin_row('lcl', 'w');
+    C($wlcl<$wlcl);C($wlcl<=$wlcl);C($wlcl>$wlcl);C($wlcl>=$wlcl);C($wlcl==$wlcl);C($wlcl===$wlcl);
+  begin_row('str', 'w');
+    C($wlcl<$wstr);C($wlcl<=$wstr);C($wlcl>$wstr);C($wlcl>=$wstr);C($wlcl==$wstr);C($wlcl===$wstr);
+  begin_row('cls', 'w');
+    C($wlcl<$wcls);C($wlcl<=$wcls);C($wlcl>$wcls);C($wlcl>=$wcls);C($wlcl==$wcls);C($wlcl===$wcls);
+  begin_row('obj', 'w');
+    C(HH\Lib\Legacy_FIXME\lt($wlcl, $wobj));C(HH\Lib\Legacy_FIXME\lte($wlcl, $wobj));C(HH\Lib\Legacy_FIXME\gt($wlcl, $wobj));C(HH\Lib\Legacy_FIXME\gte($wlcl, $wobj));C(HH\Lib\Legacy_FIXME\eq($wlcl, $wobj));C($wlcl===$wobj);
+  print_divider();
+
+  begin_row('lcl', 'p');
+    C($plcl<$plcl);C($plcl<=$plcl);C($plcl>$plcl);C($plcl>=$plcl);C($plcl==$plcl);C($plcl===$plcl);
+  begin_row('str', 'p');
+    C($plcl<$pstr);C($plcl<=$pstr);C($plcl>$pstr);C($plcl>=$pstr);C($plcl==$pstr);C($plcl===$pstr);
+  begin_row('cls', 'p');
+    C($plcl<$pcls);C($plcl<=$pcls);C($plcl>$pcls);C($plcl>=$pcls);C($plcl==$pcls);C($plcl===$pcls);
+  begin_row('obj', 'p');
+    C(HH\Lib\Legacy_FIXME\lt($plcl, $pobj));C(HH\Lib\Legacy_FIXME\lte($plcl, $pobj));C(HH\Lib\Legacy_FIXME\gt($plcl, $pobj));C(HH\Lib\Legacy_FIXME\gte($plcl, $pobj));C(HH\Lib\Legacy_FIXME\eq($plcl, $pobj));C($plcl===$pobj);
   print_footer();
 
-  print_header('[static] VAR ? $cm');
-  begin_row('va');
-    C($va<$cm);C($va<=$cm);C($va>$cm);C($va>=$cm);C($va==$cm);C($va===$cm);
-  begin_row('oa');
-    C(HH\Lib\Legacy_FIXME\lt($oa, $cm));C(HH\Lib\Legacy_FIXME\lte($oa, $cm));C(HH\Lib\Legacy_FIXME\gt($oa, $cm));C(HH\Lib\Legacy_FIXME\gte($oa, $cm));C(HH\Lib\Legacy_FIXME\eq($oa, $cm));C($oa===$cm);
-  begin_row('fa');
-    C($fa<$cm);C($fa<=$cm);C($fa>$cm);C($fa>=$cm);C($fa==$cm);C($fa===$cm);
+  print_header('[static] VAR ? $lcl');
+  begin_row('lcl');
+    C($lcl<$lcl);C($lcl<=$lcl);C($lcl>$lcl);C($lcl>=$lcl);C($lcl==$lcl);C($lcl===$lcl);
+  begin_row('str');
+    C($str<$lcl);C($str<=$lcl);C($str>$lcl);C($str>=$lcl);C($str==$lcl);C($str===$lcl);
+  begin_row('cls');
+    C($cls<$lcl);C($cls<=$lcl);C($cls>$lcl);C($cls>=$lcl);C($cls==$lcl);C($cls===$lcl);
+  begin_row('obj');
+    C(HH\Lib\Legacy_FIXME\lt($obj, $lcl));C(HH\Lib\Legacy_FIXME\lte($obj, $lcl));C(HH\Lib\Legacy_FIXME\gt($obj, $lcl));C(HH\Lib\Legacy_FIXME\gte($obj, $lcl));C(HH\Lib\Legacy_FIXME\eq($obj, $lcl));C($obj===$lcl);
+  print_divider();
 
-  begin_row('va', 'WRAPA');
-    C($vx<$xx);C($vx<=$xx);C($vx>$xx);C($vx>=$xx);C($vx==$xx);C($vx===$xx);
-  begin_row('oa', 'WRAPA');
-    C(HH\Lib\Legacy_FIXME\lt($ox, $xx));C(HH\Lib\Legacy_FIXME\lte($ox, $xx));C(HH\Lib\Legacy_FIXME\gt($ox, $xx));C(HH\Lib\Legacy_FIXME\gte($ox, $xx));C(HH\Lib\Legacy_FIXME\eq($ox, $xx));C($ox===$xx);
-  begin_row('fa', 'WRAPA');
-    C($fx<$xx);C($fx<=$xx);C($fx>$xx);C($fx>=$xx);C($fx==$xx);C($fx===$xx);
+  begin_row('lcl', 'v');
+    C($vlcl<$vlcl);C($vlcl<=$vlcl);C($vlcl>$vlcl);C($vlcl>=$vlcl);C($vlcl==$vlcl);C($vlcl===$vlcl);
+  begin_row('str', 'v');
+    C($vstr<$vlcl);C($vstr<=$vlcl);C($vstr>$vlcl);C($vstr>=$vlcl);C($vstr==$vlcl);C($vstr===$vlcl);
+  begin_row('cls', 'v');
+    C($vcls<$vlcl);C($vcls<=$vlcl);C($vcls>$vlcl);C($vcls>=$vlcl);C($vcls==$vlcl);C($vcls===$vlcl);
+  begin_row('obj', 'v');
+    C(HH\Lib\Legacy_FIXME\lt($vobj, $vlcl));C(HH\Lib\Legacy_FIXME\lte($vobj, $vlcl));C(HH\Lib\Legacy_FIXME\gt($vobj, $vlcl));C(HH\Lib\Legacy_FIXME\gte($vobj, $vlcl));C(HH\Lib\Legacy_FIXME\eq($vobj, $vlcl));C($vobj===$vlcl);
+  print_divider();
 
-  begin_row('va', 'WRAPO');
-    C($vy<$xy);C($vy<=$xy);C($vy>$xy);C($vy>=$xy);C($vy==$xy);C($vy===$xy);
-  begin_row('oa', 'WRAPO');
-    C(HH\Lib\Legacy_FIXME\lt($oy, $xy));C(HH\Lib\Legacy_FIXME\lte($oy, $xy));C(HH\Lib\Legacy_FIXME\gt($oy, $xy));C(HH\Lib\Legacy_FIXME\gte($oy, $xy));C(HH\Lib\Legacy_FIXME\eq($oy, $xy));C($oy===$xy);
-  begin_row('fa', 'WRAPO');
-    C($fy<$xy);C($fy<=$xy);C($fy>$xy);C($fy>=$xy);C($fy==$xy);C($fy===$xy);
+  begin_row('lcl', 'w');
+    C($wlcl<$wlcl);C($wlcl<=$wlcl);C($wlcl>$wlcl);C($wlcl>=$wlcl);C($wlcl==$wlcl);C($wlcl===$wlcl);
+  begin_row('str', 'w');
+    C($wstr<$wlcl);C($wstr<=$wlcl);C($wstr>$wlcl);C($wstr>=$wlcl);C($wstr==$wlcl);C($wstr===$wlcl);
+  begin_row('cls', 'w');
+    C($wcls<$wlcl);C($wcls<=$wlcl);C($wcls>$wlcl);C($wcls>=$wlcl);C($wcls==$wlcl);C($wcls===$wlcl);
+  begin_row('obj', 'w');
+    C(HH\Lib\Legacy_FIXME\lt($wobj, $wlcl));C(HH\Lib\Legacy_FIXME\lte($wobj, $wlcl));C(HH\Lib\Legacy_FIXME\gt($wobj, $wlcl));C(HH\Lib\Legacy_FIXME\gte($wobj, $wlcl));C(HH\Lib\Legacy_FIXME\eq($wobj, $wlcl));C($wobj===$wlcl);
+  print_divider();
 
-  begin_row('va', 'WRAPD');
-    C($vz<$xz);C($vz<=$xz);C($vz>$xz);C($vz>=$xz);C($vz==$xz);C($vz===$xz);
-  begin_row('oa', 'WRAPD');
-    C(HH\Lib\Legacy_FIXME\lt($oz, $xz));C(HH\Lib\Legacy_FIXME\lte($oz, $xz));C(HH\Lib\Legacy_FIXME\gt($oz, $xz));C(HH\Lib\Legacy_FIXME\gte($oz, $xz));C(HH\Lib\Legacy_FIXME\eq($oz, $xz));C($oz===$xz);
-  begin_row('fa', 'WRAPD');
-    C($fz<$xz);C($fz<=$xz);C($fz>$xz);C($fz>=$xz);C($fz==$xz);C($fz===$xz);
+  begin_row('lcl', 'p');
+    C($plcl<$plcl);C($plcl<=$plcl);C($plcl>$plcl);C($plcl>=$plcl);C($plcl==$plcl);C($plcl===$plcl);
+  begin_row('str', 'p');
+    C($pstr<$plcl);C($pstr<=$plcl);C($pstr>$plcl);C($pstr>=$plcl);C($pstr==$plcl);C($pstr===$plcl);
+  begin_row('cls', 'p');
+    C($pcls<$plcl);C($pcls<=$plcl);C($pcls>$plcl);C($pcls>=$plcl);C($pcls==$plcl);C($pcls===$plcl);
+  begin_row('obj', 'p');
+    C(HH\Lib\Legacy_FIXME\lt($pobj, $plcl));C(HH\Lib\Legacy_FIXME\lte($pobj, $plcl));C(HH\Lib\Legacy_FIXME\gt($pobj, $plcl));C(HH\Lib\Legacy_FIXME\gte($pobj, $plcl));C(HH\Lib\Legacy_FIXME\eq($pobj, $plcl));C($pobj===$plcl);
+  print_footer();
+
+  //// $cls
+
+  print_header('[static] $cls ? VAR');
+  begin_row('lcl');
+    C($cls<$lcl);C($cls<=$lcl);C($cls>$lcl);C($cls>=$lcl);C($cls==$lcl);C($cls===$lcl);
+  begin_row('str');
+    C($cls<$str);C($cls<=$str);C($cls>$str);C($cls>=$str);C($cls==$str);C($cls===$str);
+  begin_row('cls');
+    C($cls<$cls);C($cls<=$cls);C($cls>$cls);C($cls>=$cls);C($cls==$cls);C($cls===$cls);
+  begin_row('obj');
+    C(HH\Lib\Legacy_FIXME\lt($cls, $obj));C(HH\Lib\Legacy_FIXME\lte($cls, $obj));C(HH\Lib\Legacy_FIXME\gt($cls, $obj));C(HH\Lib\Legacy_FIXME\gte($cls, $obj));C(HH\Lib\Legacy_FIXME\eq($cls, $obj));C($cls===$obj);
+  print_divider();
+
+  begin_row('lcl', 'v');
+    C($vcls<$vlcl);C($vcls<=$vlcl);C($vcls>$vlcl);C($vcls>=$vlcl);C($vcls==$vlcl);C($vcls===$vlcl);
+  begin_row('str', 'v');
+    C($vcls<$vstr);C($vcls<=$vstr);C($vcls>$vstr);C($vcls>=$vstr);C($vcls==$vstr);C($vcls===$vstr);
+  begin_row('cls', 'v');
+    C($vcls<$vcls);C($vcls<=$vcls);C($vcls>$vcls);C($vcls>=$vcls);C($vcls==$vcls);C($vcls===$vcls);
+  begin_row('obj', 'v');
+    C(HH\Lib\Legacy_FIXME\lt($vcls, $vobj));C(HH\Lib\Legacy_FIXME\lte($vcls, $vobj));C(HH\Lib\Legacy_FIXME\gt($vcls, $vobj));C(HH\Lib\Legacy_FIXME\gte($vcls, $vobj));C(HH\Lib\Legacy_FIXME\eq($vcls, $vobj));C($vcls===$vobj);
+  print_divider();
+
+  begin_row('lcl', 'w');
+    C($wcls<$wlcl);C($wcls<=$wlcl);C($wcls>$wlcl);C($wcls>=$wlcl);C($wcls==$wlcl);C($wcls===$wlcl);
+  begin_row('str', 'w');
+    C($wcls<$wstr);C($wcls<=$wstr);C($wcls>$wstr);C($wcls>=$wstr);C($wcls==$wstr);C($wcls===$wstr);
+  begin_row('cls', 'w');
+    C($wcls<$wcls);C($wcls<=$wcls);C($wcls>$wcls);C($wcls>=$wcls);C($wcls==$wcls);C($wcls===$wcls);
+  begin_row('obj', 'w');
+    C(HH\Lib\Legacy_FIXME\lt($wcls, $wobj));C(HH\Lib\Legacy_FIXME\lte($wcls, $wobj));C(HH\Lib\Legacy_FIXME\gt($wcls, $wobj));C(HH\Lib\Legacy_FIXME\gte($wcls, $wobj));C(HH\Lib\Legacy_FIXME\eq($wcls, $wobj));C($wcls===$wobj);
+  print_divider();
+
+  begin_row('lcl', 'p');
+    C($pcls<$plcl);C($pcls<=$plcl);C($pcls>$plcl);C($pcls>=$plcl);C($pcls==$plcl);C($pcls===$plcl);
+  begin_row('str', 'p');
+    C($pcls<$pstr);C($pcls<=$pstr);C($pcls>$pstr);C($pcls>=$pstr);C($pcls==$pstr);C($pcls===$pstr);
+  begin_row('cls', 'p');
+    C($pcls<$pcls);C($pcls<=$pcls);C($pcls>$pcls);C($pcls>=$pcls);C($pcls==$pcls);C($pcls===$pcls);
+  begin_row('obj', 'p');
+    C(HH\Lib\Legacy_FIXME\lt($pcls, $pobj));C(HH\Lib\Legacy_FIXME\lte($pcls, $pobj));C(HH\Lib\Legacy_FIXME\gt($pcls, $pobj));C(HH\Lib\Legacy_FIXME\gte($pcls, $pobj));C(HH\Lib\Legacy_FIXME\eq($pcls, $pobj));C($pcls===$pobj);
+  print_footer();
+
+  print_header('[static] VAR ? $cls');
+  begin_row('lcl');
+    C($lcl<$cls);C($lcl<=$cls);C($lcl>$cls);C($lcl>=$cls);C($lcl==$cls);C($lcl===$cls);
+  begin_row('str');
+    C($str<$cls);C($str<=$cls);C($str>$cls);C($str>=$cls);C($str==$cls);C($str===$cls);
+  begin_row('cls');
+    C($cls<$cls);C($cls<=$cls);C($cls>$cls);C($cls>=$cls);C($cls==$cls);C($cls===$cls);
+  begin_row('obj');
+    C(HH\Lib\Legacy_FIXME\lt($obj, $cls));C(HH\Lib\Legacy_FIXME\lte($obj, $cls));C(HH\Lib\Legacy_FIXME\gt($obj, $cls));C(HH\Lib\Legacy_FIXME\gte($obj, $cls));C(HH\Lib\Legacy_FIXME\eq($obj, $cls));C($obj===$cls);
+  print_divider();
+
+  begin_row('lcl', 'v');
+    C($vlcl<$vcls);C($vlcl<=$vcls);C($vlcl>$vcls);C($vlcl>=$vcls);C($vlcl==$vcls);C($vlcl===$vcls);
+  begin_row('str', 'v');
+    C($vstr<$vcls);C($vstr<=$vcls);C($vstr>$vcls);C($vstr>=$vcls);C($vstr==$vcls);C($vstr===$vcls);
+  begin_row('cls', 'v');
+    C($vcls<$vcls);C($vcls<=$vcls);C($vcls>$vcls);C($vcls>=$vcls);C($vcls==$vcls);C($vcls===$vcls);
+  begin_row('obj', 'v');
+    C(HH\Lib\Legacy_FIXME\lt($vobj, $vcls));C(HH\Lib\Legacy_FIXME\lte($vobj, $vcls));C(HH\Lib\Legacy_FIXME\gt($vobj, $vcls));C(HH\Lib\Legacy_FIXME\gte($vobj, $vcls));C(HH\Lib\Legacy_FIXME\eq($vobj, $vcls));C($vobj===$vcls);
+  print_divider();
+
+  begin_row('lcl', 'w');
+    C($wlcl<$wcls);C($wlcl<=$wcls);C($wlcl>$wcls);C($wlcl>=$wcls);C($wlcl==$wcls);C($wlcl===$wcls);
+  begin_row('str', 'w');
+    C($wstr<$wcls);C($wstr<=$wcls);C($wstr>$wcls);C($wstr>=$wcls);C($wstr==$wcls);C($wstr===$wcls);
+  begin_row('cls', 'w');
+    C($wcls<$wcls);C($wcls<=$wcls);C($wcls>$wcls);C($wcls>=$wcls);C($wcls==$wcls);C($wcls===$wcls);
+  begin_row('obj', 'w');
+    C(HH\Lib\Legacy_FIXME\lt($wobj, $wcls));C(HH\Lib\Legacy_FIXME\lte($wobj, $wcls));C(HH\Lib\Legacy_FIXME\gt($wobj, $wcls));C(HH\Lib\Legacy_FIXME\gte($wobj, $wcls));C(HH\Lib\Legacy_FIXME\eq($wobj, $wcls));C($wobj===$wcls);
+  print_divider();
+
+  begin_row('lcl', 'p');
+    C($plcl<$pcls);C($plcl<=$pcls);C($plcl>$pcls);C($plcl>=$pcls);C($plcl==$pcls);C($plcl===$pcls);
+  begin_row('str', 'p');
+    C($pstr<$pcls);C($pstr<=$pcls);C($pstr>$pcls);C($pstr>=$pcls);C($pstr==$pcls);C($pstr===$pcls);
+  begin_row('cls', 'p');
+    C($pcls<$pcls);C($pcls<=$pcls);C($pcls>$pcls);C($pcls>=$pcls);C($pcls==$pcls);C($pcls===$pcls);
+  begin_row('obj', 'p');
+    C(HH\Lib\Legacy_FIXME\lt($pobj, $pcls));C(HH\Lib\Legacy_FIXME\lte($pobj, $pcls));C(HH\Lib\Legacy_FIXME\gt($pobj, $pcls));C(HH\Lib\Legacy_FIXME\gte($pobj, $pcls));C(HH\Lib\Legacy_FIXME\eq($pobj, $pcls));C($pobj===$pcls);
   print_footer();
 }
 
-<<__NEVER_INLINE>> function dynamic_compare() {
-  $cm = LV(foobar::class);
-  $va = LV('foobar');
-  $oa = LV(new StrObj('foobar'));
-  $fa = LV(CLS('foobar'));
+<<__NEVER_INLINE>> function dynamic_compare() :mixed{
+  $lcl = LV(foobar::class);
+  $str = LV('foobar');
+  $obj = LV(new StrObj('foobar'));
+  $cls = LV(CLS('foobar'));
 
-  $xx = WRAPA($cm); $vx = WRAPA($va); $ox = WRAPA($oa); $fx = WRAPA($fa);
+  $vlcl = vLV($lcl);
+  $vstr = vLV($str);
+  $vobj = vLV($obj);
+  $vcls = vLV($cls);
 
-  $xy = WRAPO($cm); $vy = WRAPO($va); $oy = WRAPO($oa); $fy = WRAPO($fa);
+  $wlcl = wLV($lcl);
+  $wstr = wLV($str);
+  $wobj = wLV($obj);
+  $wcls = wLV($cls);
 
-  $xz = WRAPD($cm); $vz = WRAPD($va); $oz = WRAPD($oa); $fz = WRAPD($fa);
+  $plcl = pLV($lcl);
+  $pstr = pLV($str);
+  $pobj = pLV($obj);
+  $pcls = pLV($cls);
 
-  print_header('[dynamic] $cm ? VAR');
-  begin_row('va');
-    C($cm<$va);C($cm<=$va);C($cm>$va);C($cm>=$va);C($cm==$va);C($cm===$va);
-  begin_row('oa');
-    C(HH\Lib\Legacy_FIXME\lt($cm, $oa));C(HH\Lib\Legacy_FIXME\lte($cm, $oa));C(HH\Lib\Legacy_FIXME\gt($cm, $oa));C(HH\Lib\Legacy_FIXME\gte($cm, $oa));C(HH\Lib\Legacy_FIXME\eq($cm, $oa));C($cm===$oa);
-  begin_row('fa');
-    C($cm<$fa);C($cm<=$fa);C($cm>$fa);C($cm>=$fa);C($cm==$fa);C($cm===$fa);
+  //// $lcl
 
-  begin_row('va', 'WRAPA');
-    C($xx<$vx);C($xx<=$vx);C($xx>$vx);C($xx>=$vx);C($xx==$vx);C($xx===$vx);
-  begin_row('oa', 'WRAPA');
-    C(HH\Lib\Legacy_FIXME\lt($xx, $ox));C(HH\Lib\Legacy_FIXME\lte($xx, $ox));C(HH\Lib\Legacy_FIXME\gt($xx, $ox));C(HH\Lib\Legacy_FIXME\gte($xx, $ox));C(HH\Lib\Legacy_FIXME\eq($xx, $ox));C($xx===$ox);
-  begin_row('fa', 'WRAPA');
-    C($xx<$fx);C($xx<=$fx);C($xx>$fx);C($xx>=$fx);C($xx==$fx);C($xx===$fx);
+  print_header('[dynamic] $lcl ? VAR');
+  begin_row('lcl');
+    C($lcl<$lcl);C($lcl<=$lcl);C($lcl>$lcl);C($lcl>=$lcl);C($lcl==$lcl);C($lcl===$lcl);
+  begin_row('str');
+    C($lcl<$str);C($lcl<=$str);C($lcl>$str);C($lcl>=$str);C($lcl==$str);C($lcl===$str);
+  begin_row('cls');
+    C($lcl<$cls);C($lcl<=$cls);C($lcl>$cls);C($lcl>=$cls);C($lcl==$cls);C($lcl===$cls);
+  begin_row('obj');
+    C(HH\Lib\Legacy_FIXME\lt($lcl, $obj));C(HH\Lib\Legacy_FIXME\lte($lcl, $obj));C(HH\Lib\Legacy_FIXME\gt($lcl, $obj));C(HH\Lib\Legacy_FIXME\gte($lcl, $obj));C(HH\Lib\Legacy_FIXME\eq($lcl, $obj));C($lcl===$obj);
+  print_divider();
 
-  begin_row('va', 'WRAPO');
-    C($xy<$vy);C($xy<=$vy);C($xy>$vy);C($xy>=$vy);C($xy==$vy);C($xy===$vy);
-  begin_row('oa', 'WRAPO');
-    C(HH\Lib\Legacy_FIXME\lt($xy, $oy));C(HH\Lib\Legacy_FIXME\lte($xy, $oy));C(HH\Lib\Legacy_FIXME\gt($xy, $oy));C(HH\Lib\Legacy_FIXME\gte($xy, $oy));C(HH\Lib\Legacy_FIXME\eq($xy, $oy));C($xy===$oy);
-  begin_row('fa', 'WRAPO');
-    C($xy<$fy);C($xy<=$fy);C($xy>$fy);C($xy>=$fy);C($xy==$fy);C($xy===$fy);
+  begin_row('lcl', 'v');
+    C($vlcl<$vlcl);C($vlcl<=$vlcl);C($vlcl>$vlcl);C($vlcl>=$vlcl);C($vlcl==$vlcl);C($vlcl===$vlcl);
+  begin_row('str', 'v');
+    C($vlcl<$vstr);C($vlcl<=$vstr);C($vlcl>$vstr);C($vlcl>=$vstr);C($vlcl==$vstr);C($vlcl===$vstr);
+  begin_row('cls', 'v');
+    C($vlcl<$vcls);C($vlcl<=$vcls);C($vlcl>$vcls);C($vlcl>=$vcls);C($vlcl==$vcls);C($vlcl===$vcls);
+  begin_row('obj', 'v');
+    C(HH\Lib\Legacy_FIXME\lt($vlcl, $vobj));C(HH\Lib\Legacy_FIXME\lte($vlcl, $vobj));C(HH\Lib\Legacy_FIXME\gt($vlcl, $vobj));C(HH\Lib\Legacy_FIXME\gte($vlcl, $vobj));C(HH\Lib\Legacy_FIXME\eq($vlcl, $vobj));C($vlcl===$vobj);
+  print_divider();
 
-  begin_row('va', 'WRAPD');
-    C($xz<$vz);C($xz<=$vz);C($xz>$vz);C($xz>=$vz);C($xz==$vz);C($xz===$vz);
-  begin_row('oa', 'WRAPD');
-    C(HH\Lib\Legacy_FIXME\lt($xz, $oz));C(HH\Lib\Legacy_FIXME\lte($xz, $oz));C(HH\Lib\Legacy_FIXME\gt($xz, $oz));C(HH\Lib\Legacy_FIXME\gte($xz, $oz));C(HH\Lib\Legacy_FIXME\eq($xz, $oz));C($xz===$oz);
-  begin_row('fa', 'WRAPD');
-    C($xz<$fz);C($xz<=$fz);C($xz>$fz);C($xz>=$fz);C($xz==$fz);C($xz===$fz);
+  begin_row('lcl', 'w');
+    C($wlcl<$wlcl);C($wlcl<=$wlcl);C($wlcl>$wlcl);C($wlcl>=$wlcl);C($wlcl==$wlcl);C($wlcl===$wlcl);
+  begin_row('str', 'w');
+    C($wlcl<$wstr);C($wlcl<=$wstr);C($wlcl>$wstr);C($wlcl>=$wstr);C($wlcl==$wstr);C($wlcl===$wstr);
+  begin_row('cls', 'w');
+    C($wlcl<$wcls);C($wlcl<=$wcls);C($wlcl>$wcls);C($wlcl>=$wcls);C($wlcl==$wcls);C($wlcl===$wcls);
+  begin_row('obj', 'w');
+    C(HH\Lib\Legacy_FIXME\lt($wlcl, $wobj));C(HH\Lib\Legacy_FIXME\lte($wlcl, $wobj));C(HH\Lib\Legacy_FIXME\gt($wlcl, $wobj));C(HH\Lib\Legacy_FIXME\gte($wlcl, $wobj));C(HH\Lib\Legacy_FIXME\eq($wlcl, $wobj));C($wlcl===$wobj);
+  print_divider();
+
+  begin_row('lcl', 'p');
+    C($plcl<$plcl);C($plcl<=$plcl);C($plcl>$plcl);C($plcl>=$plcl);C($plcl==$plcl);C($plcl===$plcl);
+  begin_row('str', 'p');
+    C($plcl<$pstr);C($plcl<=$pstr);C($plcl>$pstr);C($plcl>=$pstr);C($plcl==$pstr);C($plcl===$pstr);
+  begin_row('cls', 'p');
+    C($plcl<$pcls);C($plcl<=$pcls);C($plcl>$pcls);C($plcl>=$pcls);C($plcl==$pcls);C($plcl===$pcls);
+  begin_row('obj', 'p');
+    C(HH\Lib\Legacy_FIXME\lt($plcl, $pobj));C(HH\Lib\Legacy_FIXME\lte($plcl, $pobj));C(HH\Lib\Legacy_FIXME\gt($plcl, $pobj));C(HH\Lib\Legacy_FIXME\gte($plcl, $pobj));C(HH\Lib\Legacy_FIXME\eq($plcl, $pobj));C($plcl===$pobj);
   print_footer();
 
-  print_header('[dynamic] VAR ? $cm');
-  begin_row('va');
-    C($va<$cm);C($va<=$cm);C($va>$cm);C($va>=$cm);C($va==$cm);C($va===$cm);
-  begin_row('oa');
-    C(HH\Lib\Legacy_FIXME\lt($oa, $cm));C(HH\Lib\Legacy_FIXME\lte($oa, $cm));C(HH\Lib\Legacy_FIXME\gt($oa, $cm));C(HH\Lib\Legacy_FIXME\gte($oa, $cm));C(HH\Lib\Legacy_FIXME\eq($oa, $cm));C($oa===$cm);
-  begin_row('fa');
-    C($fa<$cm);C($fa<=$cm);C($fa>$cm);C($fa>=$cm);C($fa==$cm);C($fa===$cm);
+  print_header('[dynamic] VAR ? $lcl');
+  begin_row('lcl');
+    C($lcl<$lcl);C($lcl<=$lcl);C($lcl>$lcl);C($lcl>=$lcl);C($lcl==$lcl);C($lcl===$lcl);
+  begin_row('str');
+    C($str<$lcl);C($str<=$lcl);C($str>$lcl);C($str>=$lcl);C($str==$lcl);C($str===$lcl);
+  begin_row('cls');
+    C($cls<$lcl);C($cls<=$lcl);C($cls>$lcl);C($cls>=$lcl);C($cls==$lcl);C($cls===$lcl);
+  begin_row('obj');
+    C(HH\Lib\Legacy_FIXME\lt($obj, $lcl));C(HH\Lib\Legacy_FIXME\lte($obj, $lcl));C(HH\Lib\Legacy_FIXME\gt($obj, $lcl));C(HH\Lib\Legacy_FIXME\gte($obj, $lcl));C(HH\Lib\Legacy_FIXME\eq($obj, $lcl));C($obj===$lcl);
+  print_divider();
 
-  begin_row('va', 'WRAPA');
-    C($vx<$xx);C($vx<=$xx);C($vx>$xx);C($vx>=$xx);C($vx==$xx);C($vx===$xx);
-  begin_row('oa', 'WRAPA');
-    C(HH\Lib\Legacy_FIXME\lt($ox, $xx));C(HH\Lib\Legacy_FIXME\lte($ox, $xx));C(HH\Lib\Legacy_FIXME\gt($ox, $xx));C(HH\Lib\Legacy_FIXME\gte($ox, $xx));C(HH\Lib\Legacy_FIXME\eq($ox, $xx));C($ox===$xx);
-  begin_row('fa', 'WRAPA');
-    C($fx<$xx);C($fx<=$xx);C($fx>$xx);C($fx>=$xx);C($fx==$xx);C($fx===$xx);
+  begin_row('lcl', 'v');
+    C($vlcl<$vlcl);C($vlcl<=$vlcl);C($vlcl>$vlcl);C($vlcl>=$vlcl);C($vlcl==$vlcl);C($vlcl===$vlcl);
+  begin_row('str', 'v');
+    C($vstr<$vlcl);C($vstr<=$vlcl);C($vstr>$vlcl);C($vstr>=$vlcl);C($vstr==$vlcl);C($vstr===$vlcl);
+  begin_row('cls', 'v');
+    C($vcls<$vlcl);C($vcls<=$vlcl);C($vcls>$vlcl);C($vcls>=$vlcl);C($vcls==$vlcl);C($vcls===$vlcl);
+  begin_row('obj', 'v');
+    C(HH\Lib\Legacy_FIXME\lt($vobj, $vlcl));C(HH\Lib\Legacy_FIXME\lte($vobj, $vlcl));C(HH\Lib\Legacy_FIXME\gt($vobj, $vlcl));C(HH\Lib\Legacy_FIXME\gte($vobj, $vlcl));C(HH\Lib\Legacy_FIXME\eq($vobj, $vlcl));C($vobj===$vlcl);
+  print_divider();
 
-  begin_row('va', 'WRAPO');
-    C($vy<$xy);C($vy<=$xy);C($vy>$xy);C($vy>=$xy);C($vy==$xy);C($vy===$xy);
-  begin_row('oa', 'WRAPO');
-    C(HH\Lib\Legacy_FIXME\lt($oy, $xy));C(HH\Lib\Legacy_FIXME\lte($oy, $xy));C(HH\Lib\Legacy_FIXME\gt($oy, $xy));C(HH\Lib\Legacy_FIXME\gte($oy, $xy));C(HH\Lib\Legacy_FIXME\eq($oy, $xy));C($oy===$xy);
-  begin_row('fa', 'WRAPO');
-    C($fy<$xy);C($fy<=$xy);C($fy>$xy);C($fy>=$xy);C($fy==$xy);C($fy===$xy);
+  begin_row('lcl', 'w');
+    C($wlcl<$wlcl);C($wlcl<=$wlcl);C($wlcl>$wlcl);C($wlcl>=$wlcl);C($wlcl==$wlcl);C($wlcl===$wlcl);
+  begin_row('str', 'w');
+    C($wstr<$wlcl);C($wstr<=$wlcl);C($wstr>$wlcl);C($wstr>=$wlcl);C($wstr==$wlcl);C($wstr===$wlcl);
+  begin_row('cls', 'w');
+    C($wcls<$wlcl);C($wcls<=$wlcl);C($wcls>$wlcl);C($wcls>=$wlcl);C($wcls==$wlcl);C($wcls===$wlcl);
+  begin_row('obj', 'w');
+    C(HH\Lib\Legacy_FIXME\lt($wobj, $wlcl));C(HH\Lib\Legacy_FIXME\lte($wobj, $wlcl));C(HH\Lib\Legacy_FIXME\gt($wobj, $wlcl));C(HH\Lib\Legacy_FIXME\gte($wobj, $wlcl));C(HH\Lib\Legacy_FIXME\eq($wobj, $wlcl));C($wobj===$wlcl);
+  print_divider();
 
-  begin_row('va', 'WRAPD');
-    C($vz<$xz);C($vz<=$xz);C($vz>$xz);C($vz>=$xz);C($vz==$xz);C($vz===$xz);
-  begin_row('oa', 'WRAPD');
-    C(HH\Lib\Legacy_FIXME\lt($oz, $xz));C(HH\Lib\Legacy_FIXME\lte($oz, $xz));C(HH\Lib\Legacy_FIXME\gt($oz, $xz));C(HH\Lib\Legacy_FIXME\gte($oz, $xz));C(HH\Lib\Legacy_FIXME\eq($oz, $xz));C($oz===$xz);
-  begin_row('fa', 'WRAPD');
-    C($fz<$xz);C($fz<=$xz);C($fz>$xz);C($fz>=$xz);C($fz==$xz);C($fz===$xz);
+  begin_row('lcl', 'p');
+    C($plcl<$plcl);C($plcl<=$plcl);C($plcl>$plcl);C($plcl>=$plcl);C($plcl==$plcl);C($plcl===$plcl);
+  begin_row('str', 'p');
+    C($pstr<$plcl);C($pstr<=$plcl);C($pstr>$plcl);C($pstr>=$plcl);C($pstr==$plcl);C($pstr===$plcl);
+  begin_row('cls', 'p');
+    C($pcls<$plcl);C($pcls<=$plcl);C($pcls>$plcl);C($pcls>=$plcl);C($pcls==$plcl);C($pcls===$plcl);
+  begin_row('obj', 'p');
+    C(HH\Lib\Legacy_FIXME\lt($pobj, $plcl));C(HH\Lib\Legacy_FIXME\lte($pobj, $plcl));C(HH\Lib\Legacy_FIXME\gt($pobj, $plcl));C(HH\Lib\Legacy_FIXME\gte($pobj, $plcl));C(HH\Lib\Legacy_FIXME\eq($pobj, $plcl));C($pobj===$plcl);
+  print_footer();
+
+  //// $cls
+
+  print_header('[dynamic] $cls ? VAR');
+  begin_row('lcl');
+    C($cls<$lcl);C($cls<=$lcl);C($cls>$lcl);C($cls>=$lcl);C($cls==$lcl);C($cls===$lcl);
+  begin_row('str');
+    C($cls<$str);C($cls<=$str);C($cls>$str);C($cls>=$str);C($cls==$str);C($cls===$str);
+  begin_row('cls');
+    C($cls<$cls);C($cls<=$cls);C($cls>$cls);C($cls>=$cls);C($cls==$cls);C($cls===$cls);
+  begin_row('obj');
+    C(HH\Lib\Legacy_FIXME\lt($cls, $obj));C(HH\Lib\Legacy_FIXME\lte($cls, $obj));C(HH\Lib\Legacy_FIXME\gt($cls, $obj));C(HH\Lib\Legacy_FIXME\gte($cls, $obj));C(HH\Lib\Legacy_FIXME\eq($cls, $obj));C($cls===$obj);
+  print_divider();
+
+  begin_row('lcl', 'v');
+    C($vcls<$vlcl);C($vcls<=$vlcl);C($vcls>$vlcl);C($vcls>=$vlcl);C($vcls==$vlcl);C($vcls===$vlcl);
+  begin_row('str', 'v');
+    C($vcls<$vstr);C($vcls<=$vstr);C($vcls>$vstr);C($vcls>=$vstr);C($vcls==$vstr);C($vcls===$vstr);
+  begin_row('cls', 'v');
+    C($vcls<$vcls);C($vcls<=$vcls);C($vcls>$vcls);C($vcls>=$vcls);C($vcls==$vcls);C($vcls===$vcls);
+  begin_row('obj', 'v');
+    C(HH\Lib\Legacy_FIXME\lt($vcls, $vobj));C(HH\Lib\Legacy_FIXME\lte($vcls, $vobj));C(HH\Lib\Legacy_FIXME\gt($vcls, $vobj));C(HH\Lib\Legacy_FIXME\gte($vcls, $vobj));C(HH\Lib\Legacy_FIXME\eq($vcls, $vobj));C($vcls===$vobj);
+  print_divider();
+
+  begin_row('lcl', 'w');
+    C($wcls<$wlcl);C($wcls<=$wlcl);C($wcls>$wlcl);C($wcls>=$wlcl);C($wcls==$wlcl);C($wcls===$wlcl);
+  begin_row('str', 'w');
+    C($wcls<$wstr);C($wcls<=$wstr);C($wcls>$wstr);C($wcls>=$wstr);C($wcls==$wstr);C($wcls===$wstr);
+  begin_row('cls', 'w');
+    C($wcls<$wcls);C($wcls<=$wcls);C($wcls>$wcls);C($wcls>=$wcls);C($wcls==$wcls);C($wcls===$wcls);
+  begin_row('obj', 'w');
+    C(HH\Lib\Legacy_FIXME\lt($wcls, $wobj));C(HH\Lib\Legacy_FIXME\lte($wcls, $wobj));C(HH\Lib\Legacy_FIXME\gt($wcls, $wobj));C(HH\Lib\Legacy_FIXME\gte($wcls, $wobj));C(HH\Lib\Legacy_FIXME\eq($wcls, $wobj));C($wcls===$wobj);
+  print_divider();
+
+  begin_row('lcl', 'p');
+    C($pcls<$plcl);C($pcls<=$plcl);C($pcls>$plcl);C($pcls>=$plcl);C($pcls==$plcl);C($pcls===$plcl);
+  begin_row('str', 'p');
+    C($pcls<$pstr);C($pcls<=$pstr);C($pcls>$pstr);C($pcls>=$pstr);C($pcls==$pstr);C($pcls===$pstr);
+  begin_row('cls', 'p');
+    C($pcls<$pcls);C($pcls<=$pcls);C($pcls>$pcls);C($pcls>=$pcls);C($pcls==$pcls);C($pcls===$pcls);
+  begin_row('obj', 'p');
+    C(HH\Lib\Legacy_FIXME\lt($pcls, $pobj));C(HH\Lib\Legacy_FIXME\lte($pcls, $pobj));C(HH\Lib\Legacy_FIXME\gt($pcls, $pobj));C(HH\Lib\Legacy_FIXME\gte($pcls, $pobj));C(HH\Lib\Legacy_FIXME\eq($pcls, $pobj));C($pcls===$pobj);
+  print_footer();
+
+  print_header('[dynamic] VAR ? $cls');
+  begin_row('lcl');
+    C($lcl<$cls);C($lcl<=$cls);C($lcl>$cls);C($lcl>=$cls);C($lcl==$cls);C($lcl===$cls);
+  begin_row('str');
+    C($str<$cls);C($str<=$cls);C($str>$cls);C($str>=$cls);C($str==$cls);C($str===$cls);
+  begin_row('cls');
+    C($cls<$cls);C($cls<=$cls);C($cls>$cls);C($cls>=$cls);C($cls==$cls);C($cls===$cls);
+  begin_row('obj');
+    C(HH\Lib\Legacy_FIXME\lt($obj, $cls));C(HH\Lib\Legacy_FIXME\lte($obj, $cls));C(HH\Lib\Legacy_FIXME\gt($obj, $cls));C(HH\Lib\Legacy_FIXME\gte($obj, $cls));C(HH\Lib\Legacy_FIXME\eq($obj, $cls));C($obj===$cls);
+  print_divider();
+
+  begin_row('lcl', 'v');
+    C($vlcl<$vcls);C($vlcl<=$vcls);C($vlcl>$vcls);C($vlcl>=$vcls);C($vlcl==$vcls);C($vlcl===$vcls);
+  begin_row('str', 'v');
+    C($vstr<$vcls);C($vstr<=$vcls);C($vstr>$vcls);C($vstr>=$vcls);C($vstr==$vcls);C($vstr===$vcls);
+  begin_row('cls', 'v');
+    C($vcls<$vcls);C($vcls<=$vcls);C($vcls>$vcls);C($vcls>=$vcls);C($vcls==$vcls);C($vcls===$vcls);
+  begin_row('obj', 'v');
+    C(HH\Lib\Legacy_FIXME\lt($vobj, $vcls));C(HH\Lib\Legacy_FIXME\lte($vobj, $vcls));C(HH\Lib\Legacy_FIXME\gt($vobj, $vcls));C(HH\Lib\Legacy_FIXME\gte($vobj, $vcls));C(HH\Lib\Legacy_FIXME\eq($vobj, $vcls));C($vobj===$vcls);
+  print_divider();
+
+  begin_row('lcl', 'w');
+    C($wlcl<$wcls);C($wlcl<=$wcls);C($wlcl>$wcls);C($wlcl>=$wcls);C($wlcl==$wcls);C($wlcl===$wcls);
+  begin_row('str', 'w');
+    C($wstr<$wcls);C($wstr<=$wcls);C($wstr>$wcls);C($wstr>=$wcls);C($wstr==$wcls);C($wstr===$wcls);
+  begin_row('cls', 'w');
+    C($wcls<$wcls);C($wcls<=$wcls);C($wcls>$wcls);C($wcls>=$wcls);C($wcls==$wcls);C($wcls===$wcls);
+  begin_row('obj', 'w');
+    C(HH\Lib\Legacy_FIXME\lt($wobj, $wcls));C(HH\Lib\Legacy_FIXME\lte($wobj, $wcls));C(HH\Lib\Legacy_FIXME\gt($wobj, $wcls));C(HH\Lib\Legacy_FIXME\gte($wobj, $wcls));C(HH\Lib\Legacy_FIXME\eq($wobj, $wcls));C($wobj===$wcls);
+  print_divider();
+
+  begin_row('lcl', 'p');
+    C($plcl<$pcls);C($plcl<=$pcls);C($plcl>$pcls);C($plcl>=$pcls);C($plcl==$pcls);C($plcl===$pcls);
+  begin_row('str', 'p');
+    C($pstr<$pcls);C($pstr<=$pcls);C($pstr>$pcls);C($pstr>=$pcls);C($pstr==$pcls);C($pstr===$pcls);
+  begin_row('cls', 'p');
+    C($pcls<$pcls);C($pcls<=$pcls);C($pcls>$pcls);C($pcls>=$pcls);C($pcls==$pcls);C($pcls===$pcls);
+  begin_row('obj', 'p');
+    C(HH\Lib\Legacy_FIXME\lt($pobj, $pcls));C(HH\Lib\Legacy_FIXME\lte($pobj, $pcls));C(HH\Lib\Legacy_FIXME\gt($pobj, $pcls));C(HH\Lib\Legacy_FIXME\gte($pobj, $pcls));C(HH\Lib\Legacy_FIXME\eq($pobj, $pcls));C($pobj===$pcls);
   print_footer();
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   static_compare();
   dynamic_compare();
 }

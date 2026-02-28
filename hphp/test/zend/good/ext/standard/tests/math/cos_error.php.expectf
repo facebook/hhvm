@@ -1,8 +1,8 @@
 
 Too many arguments
 
-Warning: cos() expects exactly 1 parameter, 2 given in %s/cos_error.php on line 11
+Warning: cos() expects exactly 1 positional parameter, 2 given in %s/cos_error.php on line 11
 
 Too few arguments
 
-Warning: cos() expects exactly 1 parameter, 0 given in %s/cos_error.php on line 14
+Warning: cos() expects exactly 1 positional parameter, 0 given in %s/cos_error.php on line 14

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_array_boolean_cast() {
+function main_array_boolean_cast() :mixed{
 $config = simplexml_load_string('<config><prepare /></config>');
 $configArray = darray($config);
 

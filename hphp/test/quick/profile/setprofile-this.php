@@ -12,7 +12,7 @@ class A {
 }
 class C {
   use logger;
-  public function method() {
+  public function method() :mixed{
     echo "\nC method\n";
     return new A;
   }
@@ -23,7 +23,7 @@ abstract final class ProfilerStatics {
   public static $threw = false;
 }
 
-function profiler($event, $name, $info) {
+function profiler($event, $name, $info) :mixed{
   if ($name == 'get_class') return;
 
   if ($event == 'exit') --ProfilerStatics::$indent;
@@ -38,7 +38,7 @@ function profiler($event, $name, $info) {
   }
 }
 
-function main() {
+function main() :mixed{
   try {
     new C();
   } catch (Exception $e) {

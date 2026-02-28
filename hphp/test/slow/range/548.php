@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_548() {
+function main_548() :mixed{
 foreach (range("0 xxx", "12 yyy") as $number) {
   echo $number . "
 ";

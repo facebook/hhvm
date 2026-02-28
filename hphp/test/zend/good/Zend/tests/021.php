@@ -14,7 +14,7 @@ var_dump($c ?: $d);
 
 var_dump(1 ?: print(2));
 
-$e = darray[];
+$e = dict[];
 
 $e['e'] = 'e';
 $e['e'] = $e['e'] ?: 'e';

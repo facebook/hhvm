@@ -1,0 +1,7 @@
+File "dep_types_and_null2.php", line 17, characters 3-13:
+  ?exact C
+File "dep_types_and_null2.php", line 19, characters 3-13:
+  ?exact C
+File "dep_types_and_null2.php", line 22, characters 3-13:
+  ~exact C
+No errors

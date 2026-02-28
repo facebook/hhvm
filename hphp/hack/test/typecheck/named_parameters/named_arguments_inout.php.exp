@@ -1,0 +1,8 @@
+ERROR: File "named_arguments_inout.php", line 4, characters 11-11:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+ERROR: File "named_arguments_inout.php", line 4, characters 11-11:
+You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
+ERROR: File "named_arguments_inout.php", line 4, characters 11-13:
+You cannot use this syntax with `inout`. (Parsing[1002])
+ERROR: File "named_arguments_inout.php", line 4, characters 1-15:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])

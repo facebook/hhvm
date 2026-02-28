@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/jit/target-profile.h"
 
-#include "hphp/runtime/base/rds.h"
-
 #include "hphp/runtime/vm/jit/prof-data.h"
 
 #include <string>

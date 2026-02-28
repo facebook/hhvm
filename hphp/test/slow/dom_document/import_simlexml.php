@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_import_simlexml() {
+function main_import_simlexml() :mixed{
 $xml = simplexml_load_string(<<<XML
 <top>
     <first>

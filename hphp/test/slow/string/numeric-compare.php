@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_numeric_compare() {
+function main_numeric_compare() :mixed{
 $a = '123123123123123123123';
 $b = '123123123123123123124';
 $c = '1231231231231231231234';

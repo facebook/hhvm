@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>>
 function main_entry(): void {
-      $str = "中国abc + abc ?!？！字符＃　china string";
+      $str = "\xe4\xb8\xad\xe5\x9b\xbdabc + abc ?!\xef\xbc\x9f\xef\xbc\x81\xe5\xad\x97\xe7\xac\xa6\xef\xbc\x83\xe3\x80\x80china string";
 
       $reg = "\w+";
 

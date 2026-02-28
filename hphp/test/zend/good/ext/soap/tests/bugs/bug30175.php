@@ -2,7 +2,7 @@
 
 class LocalSoapClient extends SoapClient {
 
-  function __dorequest($request, $location, $action, $version, $one_way = 0) {
+  function __dorequest($request, $location, $action, $version, $one_way = 0) :mixed{
     return <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope
@@ -29,5 +29,5 @@ EOF;
 function main_entry(): void {
 
   $client = new LocalSoapClient(dirname(__FILE__)."/bug30175.wsdl");
-  var_dump($client->__soapcall('qwebGetHostInfo', varray[]));
+  var_dump($client->__soapcall('qwebGetHostInfo', vec[]));
 }

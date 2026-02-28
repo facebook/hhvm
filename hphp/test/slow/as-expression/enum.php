@@ -10,7 +10,7 @@ enum Bar: string {
   B = '2';
 }
 
-function as_foo(mixed $x) {
+function as_foo(mixed $x) :mixed{
   try {
     var_dump($x as Foo);
   } catch (TypeAssertionException $_) {
@@ -18,7 +18,7 @@ function as_foo(mixed $x) {
   }
 }
 
-function as_bar(mixed $x) {
+function as_bar(mixed $x) :mixed{
   try {
     var_dump($x as Bar);
   } catch (TypeAssertionException $_) {

@@ -12,6 +12,7 @@ import uuid
 from typing import (
     Callable,
     Iterator,
+    List,
     Mapping,
     NamedTuple,
     Optional,
@@ -22,9 +23,12 @@ from typing import (
     TypeVar,
 )
 
-from hh_paths import hh_client
-from jsonrpc_stream import JsonRpcStreamReader, JsonRpcStreamWriter
-from utils import Json
+from hphp.hack.test.integration.hh_paths import hh_client
+from hphp.hack.test.integration.jsonrpc_stream import (
+    JsonRpcStreamReader,
+    JsonRpcStreamWriter,
+)
+from hphp.hack.test.integration.utils import Json
 
 
 # pyre-fixme[4]: Attribute must be annotated.
@@ -61,14 +65,20 @@ class LspCommandProcessor:
 
     @classmethod
     @contextlib.contextmanager
-    def create(cls: Type[U], env: Mapping[str, str]) -> Iterator[U]:
-        args = ["--enhanced-hover", "--verbose"]
+    def create(
+        cls: Type[U],
+        env: Mapping[str, str],
+        lsp_args: List[str],
+        repo_dir: str,
+    ) -> Iterator[U]:
+        args = lsp_args + ["--enhanced-hover", "--verbose"]
         proc = subprocess.Popen(
             [hh_client, "lsp"] + args,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=None,  # so hh_client inherits (=> writes to) our own stderr
             env=env,
+            cwd=repo_dir,
         )
 
         # Use the unbuffered versions of these streams, as the buffered versions
@@ -209,6 +219,15 @@ class LspCommandProcessor:
             transcript = self._scribe(transcript, sent=None, received=message)
         return transcript
 
+    def _remove_diagnostic_data(self, params: Json) -> Json:
+        if "diagnostics" in params:
+            diagnostics = params["diagnostics"]
+            if isinstance(diagnostics, list):
+                for diagnostic in diagnostics:
+                    if "data" in diagnostic:
+                        del diagnostic["data"]
+        return params
+
     def _wait_for_message_from_server(
         self,
         transcript: Transcript,
@@ -222,7 +241,7 @@ class LspCommandProcessor:
                 transcript_id not in processed_transcript_ids
                 and entry.received is not None
                 and entry.received.get("method") == method
-                and entry.received.get("params") == params
+                and self._remove_diagnostic_data(entry.received.get("params")) == params
             )
 
         while not any(
@@ -232,9 +251,7 @@ class LspCommandProcessor:
             timeout_seconds = 30.0
             message = self._try_read_logged(timeout_seconds=timeout_seconds)
             comment = comment or "<none>"
-            assert (
-                message is not None
-            ), f"""\
+            assert message is not None, f"""\
 Timed out after {timeout_seconds} seconds while waiting for a {method!r} message
 to be sent from the server (comment: {comment}), which must not have an ID in
 {processed_transcript_ids!r}. The message was expected to have params:

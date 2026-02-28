@@ -3,17 +3,17 @@
 class A {
   public static $arr = dict[
     'foo' => foo<>,
-    'meth' => class_meth(Cls::class, 'meth'),
+    'meth' => Cls::meth<>,
   ];
 
   const arr2 = dict[
     'foo' => foo<>,
-    'meth' => class_meth(Cls::class, 'meth'),
+    'meth' => Cls::meth<>,
   ];
 }
 
 <<__EntryPoint>>
-function main_constant_functions() {
+function main_constant_functions() :mixed{
   $count = __hhvm_intrinsics\apc_fetch_no_check('count');
   if ($count === false) {
      $count = 0;

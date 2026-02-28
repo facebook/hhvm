@@ -9,6 +9,6 @@ function entrypoint_1188(): void {
     $f = 'sscanf';
   }
   $auth = "24\tLewis Carroll";
-  list($id, $first, $last) = $f($auth, "%d\t%s %s");
+  list($id, $first, $last) = HH\dynamic_fun($f)($auth, "%d\t%s %s");
   echo "$id,$first,$last\n";
 }

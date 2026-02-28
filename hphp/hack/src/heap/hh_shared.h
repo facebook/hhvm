@@ -14,11 +14,12 @@ CAMLprim value hh_shared_init(
     value shm_dir_val,
     value num_workers_val
 );
-value hh_check_heap_overflow(void);
+CAMLprim value hh_check_heap_overflow(void);
 /* Must be called by every worker before any operation is performed. */
-value hh_connect(value connector, value worker_id_val);
+CAMLprim value hh_connect(value connector, value worker_id_val);
 /* Can only be called after init or after earlier connect. */
-value hh_get_handle(void);
+CAMLprim value hh_get_handle(void);
+CAMLprim value hh_get_worker_id(void);
 
 /*****************************************************************************/
 /* Heap diagnostics. */
@@ -42,9 +43,12 @@ CAMLprim value hh_counter_next(void);
 /*****************************************************************************/
 CAMLprim value hh_stop_workers(void);
 CAMLprim value hh_resume_workers(void);
-CAMLprim value hh_check_should_exit(void);
+CAMLprim value hh_raise_if_should_exit(void);
+CAMLprim value hh_should_exit (void);
 CAMLprim value hh_set_can_worker_stop(value val);
 CAMLprim value hh_malloc_trim(void);
+CAMLprim value hh_set_allow_removes(value val);
+CAMLprim value hh_set_allow_hashtable_writes_by_current_process(value val);
 
 /*****************************************************************************/
 /* Global storage. */
@@ -66,19 +70,6 @@ CAMLprim value hh_collect(void);
 CAMLprim value hh_get_and_deserialize(value key);
 
 /*****************************************************************************/
-/* Raw access for network proxying.
-   hh_get_raw key |> hh_deserialize_raw = hh_get key
-   hh_serialize_raw data |> hh_add_raw key = hh_add key data
- */
-/*****************************************************************************/
-/* The key MUST be present. */
-CAMLprim value hh_get_raw(value key);
-CAMLprim value hh_add_raw(value key, value heap_entry);
-CAMLprim value hh_serialize_raw(value data);
-CAMLprim value hh_deserialize_raw(value heap_entry);
-
-
-/*****************************************************************************/
 /* Hashtable operations. */
 /*****************************************************************************/
 /* Returns the size of the value associated to a given key.
@@ -97,5 +88,11 @@ value hh_mem(value key);
 void hh_move(value key1, value key2);
 /* Removes a key from the hash table. */
 CAMLprim value hh_remove(value key);
+
+/*****************************************************************************/
+/* Utility */
+/*****************************************************************************/
+/* Get the hash of a string, based on MD5. */
+CAMLprim value hh_get_hash_ocaml(value key);
 
 #endif

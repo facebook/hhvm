@@ -14,20 +14,17 @@
 //! generator. This parser tracks and returns this kind of data in its state.
 
 use bumpalo::Bump;
-use decl_mode_smart_constructors::{DeclModeSmartConstructors, State as DeclModeState};
-use parser::{
-    parser::Parser,
-    parser_env::ParserEnv,
-    smart_constructors_wrappers::WithKind,
-    source_text::SourceText,
-    syntax_by_ref::{
-        positioned_syntax::PositionedSyntax,
-        positioned_token::{PositionedToken, TokenFactory},
-        positioned_value::PositionedValue,
-    },
-    syntax_error::SyntaxError,
-};
-use stack_limit::StackLimit;
+use decl_mode_smart_constructors::DeclModeSmartConstructors;
+use decl_mode_smart_constructors::State as DeclModeState;
+use parser::parser::Parser;
+use parser::parser_env::ParserEnv;
+use parser::smart_constructors_wrappers::WithKind;
+use parser::source_text::SourceText;
+use parser::syntax_by_ref::positioned_syntax::PositionedSyntax;
+use parser::syntax_by_ref::positioned_token::PositionedToken;
+use parser::syntax_by_ref::positioned_token::TokenFactory;
+use parser::syntax_by_ref::positioned_value::PositionedValue;
+use parser::syntax_error::SyntaxError;
 
 pub type SmartConstructors<'src, 'arena> = WithKind<
     DeclModeSmartConstructors<
@@ -46,7 +43,6 @@ pub fn parse_script<'src, 'arena>(
     arena: &'arena Bump,
     source: &SourceText<'src>,
     env: ParserEnv,
-    stack_limit: Option<&'src StackLimit>,
 ) -> (
     PositionedSyntax<'arena>,
     Vec<SyntaxError>,
@@ -58,7 +54,7 @@ pub fn parse_script<'src, 'arena>(
         arena,
     ));
     let mut parser = Parser::new(source, env, sc);
-    let root = parser.parse_script(stack_limit);
+    let root = parser.parse_script();
     let errors = parser.errors();
     let sc_state = parser.into_sc_state();
     (root, errors, sc_state)

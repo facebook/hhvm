@@ -16,13 +16,13 @@
 
 #include "hphp/runtime/server/memory-stats.h"
 
+#include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/util/process.h"
 
 #include <algorithm>
 #include <cstdio>
-#include <fstream>
 #include <ios>
 #include <iostream>
 #include <sstream>
@@ -54,14 +54,14 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
   }
   w->beginObject("Memory");
 
-  w->writeEntry("VmSize", ProcStatus::VmSizeKb.load(std::memory_order_relaxed));
-  w->writeEntry("VmRSS", ProcStatus::VmRSSKb.load(std::memory_order_relaxed));
-  w->writeEntry("mem.rss", ProcStatus::VmRSSKb.load(std::memory_order_relaxed));
+  w->writeEntry("VmSize", ProcStatus::VmSizeKb.load(std::memory_order_acquire));
+  w->writeEntry("VmRSS", ProcStatus::VmRSSKb.load(std::memory_order_acquire));
+  w->writeEntry("mem.rss", ProcStatus::VmRSSKb.load(std::memory_order_acquire));
   w->writeEntry("PeakUsage",
-                ProcStatus::VmHWMKb.load(std::memory_order_relaxed));
-  w->writeEntry("VmSwap", ProcStatus::VmSwapKb.load(std::memory_order_relaxed));
+                ProcStatus::VmHWMKb.load(std::memory_order_acquire));
+  w->writeEntry("VmSwap", ProcStatus::VmSwapKb.load(std::memory_order_acquire));
   w->writeEntry("HugetlbPages",
-                ProcStatus::HugetlbPagesKb.load(std::memory_order_relaxed));
+                ProcStatus::HugetlbPagesKb.load(std::memory_order_acquire));
   w->writeEntry("adjustedRSS", ProcStatus::adjustedRssKb());
   w->writeEntry("mem.rss_adjusted", ProcStatus::adjustedRssKb());
 
@@ -85,6 +85,11 @@ namespace {
 ServiceData::CounterCallback s_counters(
   [](std::map<std::string, int64_t>& counters) {
     counters["mem.low-mapped"] = alloc::getLowMapped();
+    counters["mem.mid-mapped"] = alloc::getMidMapped();
+    // this isn't really a counter, but whatever. we need a way for callers
+    // to query if this build is limited by lowptr memory or not
+    counters["mem.use-low-ptr"] = use_lowptr ? 1 : 0;
+    counters["mem.used-ptrmode"] = use_packedptr ? 3 : (use_lowptr ? 2 : 1);
 
     counters["mem.unit-size"] = MemoryStats::TotalSize(AllocKind::Unit);
     counters["mem.func-size"] = MemoryStats::TotalSize(AllocKind::Func);
@@ -100,16 +105,21 @@ ServiceData::CounterCallback s_counters(
     counters["mem.static-array-size"] =
       MemoryStats::TotalSize(AllocKind::StaticArray);
 
+    counters["mem.struct-layout-count"] = bespoke::numStructLayouts();
+
     counters["mem.huge-tlb-pages-kb"] =
-      ProcStatus::HugetlbPagesKb.load(std::memory_order_relaxed);
+      ProcStatus::HugetlbPagesKb.load(std::memory_order_acquire);
     counters["mem.vm-size-kb"] =
-      ProcStatus::VmSizeKb.load(std::memory_order_relaxed);
+      ProcStatus::VmSizeKb.load(std::memory_order_acquire);
     counters["mem.vm-rss-kb"] =
-      ProcStatus::VmRSSKb.load(std::memory_order_relaxed);
+      ProcStatus::VmRSSKb.load(std::memory_order_acquire);
     counters["mem.peak-usage-kb"] =
-      ProcStatus::VmHWMKb.load(std::memory_order_relaxed);
+      ProcStatus::VmHWMKb.load(std::memory_order_acquire);
     counters["mem.vm-swap-kb"] =
-      ProcStatus::VmSwapKb.load(std::memory_order_relaxed);
+      ProcStatus::VmSwapKb.load(std::memory_order_acquire);
+    if (ProcStatus::valid()) {
+      counters["mem.vm-rss-adjusted-kb"] = ProcStatus::adjustedRssKb();
+    }
   }
 );
 

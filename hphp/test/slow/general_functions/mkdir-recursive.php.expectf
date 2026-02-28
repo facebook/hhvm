@@ -1,0 +1,2 @@
+Warning: mkdir(): File exists in %s/test/slow/general_functions/mkdir-recursive.php on line 6
+bool(false)

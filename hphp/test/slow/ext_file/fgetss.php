@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_fgetss() {
-$tempfile = tempnam('/tmp', 'vmextfiletest');
+function main_fgetss() :mixed{
+$tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
 fputs($f, "<html><head>testing</head><body> fgetss</body></html>\n");

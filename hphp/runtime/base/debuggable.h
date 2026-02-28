@@ -35,8 +35,8 @@ struct IDebuggable {
     SupportVerb = 4,
   };
 
-  typedef std::pair<const char*, std::string> InfoEntry;
-  typedef std::vector<InfoEntry> InfoVec;
+  using InfoEntry = std::pair<const char*, std::string>;
+  using InfoVec = std::vector<InfoEntry>;
 
 public:
   static void Add(InfoVec& out, const char* name, const std::string& value);

@@ -18,61 +18,30 @@
 #include "hphp/runtime/ext/extension-registry.h"
 
 #include <cstdio>
+#include <vector>
 
-#include "hphp/util/exception.h"
 #include "hphp/util/assertions.h"
 #include "hphp/runtime/ext/apache/ext_apache.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
-#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/config.h"
+#include "hphp/runtime/vm/builtin-symbol-map.h"
 #include "hphp/runtime/vm/native-func-table.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/system/systemlib.h"
 
-#include <map>
-#include <vector>
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Extension::Extension(const char* name, const char* version /* = "" */)
+Extension::Extension(const char* name, const char* version, const char* oncall)
     : m_name(name)
-    , m_version(version ? version : "") {
+    , m_version(version)
+    , m_oncall(oncall) {
   ExtensionRegistry::registerExtension(this);
 }
 
-const static std::string
-  s_systemlibPhpName("systemlib.php"),
-  s_systemlibHhasName("systemlib.hhas.");
-
 bool Extension::IsSystemlibPath(const std::string& name) {
   return !name.compare(0, 2, "/:");
-}
-
-void Extension::CompileSystemlib(const std::string &slib,
-                                 const std::string &name,
-                                 const Native::FuncTable& nativeFuncs) {
-  // TODO (t3443556) Bytecode repo compilation expects that any errors
-  // encountered during systemlib compilation have valid filename pointers
-  // which won't be the case for now unless these pointers are long-lived.
-  auto const moduleName = makeStaticString("/:" + name);
-  auto const unit = compile_systemlib_string(slib.c_str(), slib.size(),
-                                             moduleName->data(),
-                                             nativeFuncs);
-  always_assert_flog(unit, "No unit created for systemlib `{}'", moduleName);
-
-  if (auto const info = unit->getFatalInfo()) {
-    std::fprintf(stderr, "Systemlib `%s' contains a fataling unit: %s, %d\n",
-                 name.c_str(),
-                 info->m_fatalMsg.c_str(),
-                 info->m_fatalLoc.line1);
-    _Exit(0);
-  }
-
-  unit->merge();
-  SystemLib::addPersistentUnit(unit);
 }
 
 /**
@@ -82,34 +51,33 @@ void Extension::CompileSystemlib(const std::string &slib,
  * If {name} is not passed, then {m_name} is assumed.
  */
 void Extension::loadSystemlib(const std::string& name) {
-  assertx(!name.empty());
-#ifdef _MSC_VER
-  std::string section("ext_");
-#else
-  std::string section("ext.");
-#endif
-  section += HHVM_FN(md5)(name, false).substr(0, 12).data();
-  std::string hhas;
-  std::string slib = get_systemlib(&hhas, section, m_dsoName);
-  if (!slib.empty()) {
-    std::string phpname = s_systemlibPhpName + name;
-    CompileSystemlib(slib, phpname, m_nativeFuncs);
+  auto const moduleName = std::string("/:ext_"+name);
+  auto const unit = get_systemlib(moduleName, this);
+  always_assert_flog(unit, "No unit created for systemlib `{}'", moduleName);
+  if (auto const info = unit->getFatalInfo()) {
+    std::fprintf(stderr, "Systemlib `%s' contains a fataling unit: %s, %d\n",
+                 moduleName.c_str(),
+                 info->m_fatalMsg.c_str(),
+                 info->m_fatalLoc.line1);
+    _Exit(HPHP_EXIT_FAILURE);
   }
-  if (!hhas.empty()) {
-    std::string hhasname = s_systemlibHhasName + name;
-    CompileSystemlib(hhas, hhasname, m_nativeFuncs);
-  }
+
+  unit->merge();
+  SystemLib::addPersistentUnit(unit);
 }
 
 void Extension::moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*hdf*/)
 {}
 
+void Extension::moduleInit()
+{}
+
+void Extension::moduleRegisterNative()
+{}
+
 void Extension::moduleInfo(Array &info) {
   info.set(String(m_name), true);
 }
-
-void Extension::moduleInit()
-{}
 
 void Extension::cliClientInit()
 {}
@@ -146,6 +114,42 @@ void Extension::registerExtensionFunction(const String& name) {
 
 const std::vector<StringData*>& Extension::getExtensionFunctions() const {
   return m_functions;
+}
+
+std::vector<std::string> Extension::hackFiles() const {
+  return {toLower(std::string(m_name) + ".php")};
+}
+
+void Extension::loadEmitters() {
+  for (auto const& name : hackFiles()) {
+    loadSystemlib(name);
+  }
+}
+
+void Extension::loadDecls() {
+  // Look for "ext.{namehash}" in the binary and grab its decls
+  for (auto const& name : hackFiles()) {
+    loadDeclsFrom(name);
+  }
+}
+
+void Extension::loadDeclsFrom(const std::string& name) {
+  auto serialized_decls = get_embedded_section("/:ext_" + name + ".decls");
+  always_assert(serialized_decls.size() > 0);
+  Native::registerBuiltinSymbols(serialized_decls);
+}
+
+void Extension::deserialize(BlobDecoder& sd) {
+  auto init = sd.readArrayInitWithLazyCount<VecInit>(
+    [&](VecInit& v) {
+      std::string_view sv;
+      sd(sv);
+      auto sd = StringData::MakeUncounted(sv);
+      v.append(make_tv<KindOfPersistentString>(sd));
+    });
+  auto d = init.toArray();
+  MakeUncountedEnv env {nullptr, nullptr};
+  setWarmupData(d->makeUncounted(env, false));
 }
 
 /////////////////////////////////////////////////////////////////////////////

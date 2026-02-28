@@ -1,5 +1,7 @@
 *** Testing fgetcsv() : reading the blank line ***
 
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation14.php on line 13
+
 -- Testing fgetcsv() with file opened using r mode --
 vec(1) {
   NULL

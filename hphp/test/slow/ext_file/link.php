@@ -2,9 +2,9 @@
 
 
 <<__EntryPoint>>
-function main_link() {
-$tempfile = tempnam('/tmp', 'vmextfiletest');
-$tempfile2 = tempnam('/tmp', 'vmextfiletest');
+function main_link() :mixed{
+$tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
+$tempfile2 = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 unlink($tempfile2);
 var_dump(file_exists($tempfile2));

@@ -9,11 +9,11 @@ class Foo {
     $this->{$k}->prop = 2;
   }
 
-  public function getFoo() { return $this->foo; }
-  public function getBar() { return $this->bar; }
+  public function getFoo() :mixed{ return $this->foo; }
+  public function getBar() :mixed{ return $this->bar; }
 }
 
-function main() {
+function main() :mixed{
   $a = new Foo('foo');
   var_dump($a->getFoo());
   var_dump($a->getBar());
@@ -22,6 +22,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_private_props_016() {
+function main_private_props_016() :mixed{
 main();
 }

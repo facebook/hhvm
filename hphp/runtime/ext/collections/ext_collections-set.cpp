@@ -1,20 +1,14 @@
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 
 #include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
-#include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/collections/hash-collection.h"
-#include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/native.h"
 
 namespace HPHP {
-/////////////////////////////////////////////////////////////////////////////
-
-Class* c_Set::s_cls;
-Class* c_ImmSet::s_cls;
 
 /////////////////////////////////////////////////////////////////////////////
 // BaseSet
@@ -529,12 +523,6 @@ c_ImmSet* c_ImmSet::Clone(ObjectData* obj) {
 }
 
 namespace collections {
-/////////////////////////////////////////////////////////////////////////////
-
-const StaticString
-  s_HH_Set("HH\\Set"),
-  s_HH_ImmSet("HH\\ImmSet"),
-  s_SetIterator("SetIterator");
 
 /////////////////////////////////////////////////////////////////////////////
 // SetIterator
@@ -561,17 +549,14 @@ static void HHVM_METHOD(SetIterator, rewind) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-void CollectionsExtension::initSet() {
+void CollectionsExtension::registerNativeSet() {
   HHVM_ME(SetIterator, current);
   HHVM_ME(SetIterator, key);
   HHVM_ME(SetIterator, valid);
   HHVM_ME(SetIterator, next);
   HHVM_ME(SetIterator, rewind);
 
-  Native::registerNativeDataInfo<SetIterator>(
-    s_SetIterator.get(),
-    Native::NDIFlags::NO_SWEEP
-  );
+  Native::registerNativeDataInfo<SetIterator>(Native::NDIFlags::NO_SWEEP);
 
 #define BASE_ME(mn, impl) \
   HHVM_NAMED_ME(HH\\Set,    mn, impl); \
@@ -579,8 +564,6 @@ void CollectionsExtension::initSet() {
   BASE_ME(__construct,   &BaseSet::init);
   BASE_ME(count,         &BaseSet::size);
   BASE_ME(contains,      &BaseSet::php_contains);
-  BASE_ME(toVArray,      &BaseSet::toVArray);
-  BASE_ME(toDArray,      &BaseSet::toDArray);
   BASE_ME(toKeysArray,   &BaseSet::toKeysArray);
   BASE_ME(toValuesArray, &BaseSet::toValuesArray);
   BASE_ME(getIterator,   &BaseSet::getIterator);
@@ -617,27 +600,22 @@ void CollectionsExtension::initSet() {
   HHVM_NAMED_ME(HH\\ImmSet, toImmMap,    materialize<c_ImmMap>);
   HHVM_NAMED_ME(HH\\ImmSet, toSet,       materialize<c_Set>);
 
-  HHVM_NAMED_ME(HH\\Set, add,            &c_Set::php_add);
-  HHVM_NAMED_ME(HH\\Set, addAll,         &c_Set::php_addAll);
-  HHVM_NAMED_ME(HH\\Set, addAllKeysOf,   &c_Set::php_addAllKeysOf);
-  HHVM_NAMED_ME(HH\\Set, clear,          &c_Set::php_clear);
-  HHVM_NAMED_ME(HH\\Set, remove,         &c_Set::php_remove);
-  HHVM_NAMED_ME(HH\\Set, removeAll,      &c_Set::php_removeAll);
-  HHVM_NAMED_ME(HH\\Set, reserve,        &c_Set::php_reserve);
-  HHVM_NAMED_ME(HH\\Set, toImmSet,       &c_Set::getImmutableCopy);
+  // We don't need a wrapper function for `clear` as it's not overloaded.
+  HHVM_NAMED_ME(HH\\Set, clearNative,         &c_Set::clear);
+  HHVM_NAMED_ME(HH\\Set, removeNative,        &c_Set::php_remove);
+  HHVM_NAMED_ME(HH\\Set, removeAllNative,     &c_Set::php_removeAll);
+  HHVM_NAMED_ME(HH\\Set, addNative,           &c_Set::php_add);
+  HHVM_NAMED_ME(HH\\Set, addAllNative,        &c_Set::php_addAll);
+  HHVM_NAMED_ME(HH\\Set, addAllKeysOfNative,  &c_Set::php_addAllKeysOf);
 
-  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_Set);
-  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_ImmSet);
+  HHVM_NAMED_ME(HH\\Set, reserve,  &c_Set::php_reserve);
+  HHVM_NAMED_ME(HH\\Set, toImmSet, &c_Set::getImmutableCopy);
 
-  loadSystemlib("collections-set");
+  Native::registerNativePropHandler<CollectionPropHandler>(c_Set::className());
+  Native::registerNativePropHandler<CollectionPropHandler>(c_ImmSet::className());
 
-  c_Set::s_cls = Class::lookup(s_HH_Set.get());
-  assertx(c_Set::s_cls);
-  finishClass<c_Set>();
-
-  c_ImmSet::s_cls = Class::lookup(s_HH_ImmSet.get());
-  assertx(c_ImmSet::s_cls);
-  finishClass<c_ImmSet>();
+  Native::registerClassExtraDataHandler(c_Set::className(), finish_class<c_Set>);
+  Native::registerClassExtraDataHandler(c_ImmSet::className(), finish_class<c_ImmSet>);
 }
 
 /////////////////////////////////////////////////////////////////////////////

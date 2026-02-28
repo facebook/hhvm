@@ -1,1 +1,4 @@
-No errors
+WARN: File "bug_union_inter1.php", line 6, characters 13-28:
+This `is` check is always `false`. The expression on the left has type `int` which shares no values with `string`. (Warn[12010])
+WARN: File "bug_union_inter1.php", line 6, characters 33-46:
+This `is` check is always `false`. The expression on the left has type `int` which shares no values with `bool`. (Warn[12010])

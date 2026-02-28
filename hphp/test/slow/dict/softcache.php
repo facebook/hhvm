@@ -44,7 +44,7 @@ final class SimpleSoftCache2<Tk1, Tk2, Tv> {
 
 
 <<__EntryPoint>>
-function main_softcache() {
+function main_softcache() :mixed{
 $c = new SimpleSoftCache2;
 $c->set('a', dict[1=>2,'1'=>'2']);
 $c->set2('a', 'b', 'c');

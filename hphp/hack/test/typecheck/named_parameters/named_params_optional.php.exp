@@ -1,0 +1,10 @@
+ERROR: File "named_params_optional.php", line 24, characters 29-30:
+Invalid argument (Typing[4110])
+  File "named_params_optional.php", line 8, characters 9-11:
+  Expected `int`
+  File "named_params_optional.php", line 24, characters 29-30:
+  But got `string`
+ERROR: File "named_params_optional.php", line 27, characters 3-30:
+Unexpected named argument: d (Typing[4500])
+  File "named_params_optional.php", line 6, characters 10-29:
+  Definition is here

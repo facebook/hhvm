@@ -2,7 +2,7 @@
 
 function fix_exceptions() {
 set_error_handler(function (int $errno, string $errmsg, string $file, int $line) {
-  $errnames = darray[
+  $errnames = dict[
     E_NOTICE => 'E_NOTICE',
     E_WARNING => 'E_WARNING',
     E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR'

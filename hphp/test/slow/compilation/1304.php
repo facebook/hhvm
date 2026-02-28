@@ -1,7 +1,7 @@
 <?hh
 
 class C {
-  function foo($a) {
+  function foo($a) :mixed{
     try {
       var_dump($this + $a);
     } catch (Exception $e) {
@@ -46,7 +46,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function main_1304() {
+function main_1304() :mixed{
 $obj = new C;
 $obj->foo(1);
 }

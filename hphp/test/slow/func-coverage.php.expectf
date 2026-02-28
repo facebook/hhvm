@@ -3,10 +3,12 @@ a
 b
 c
 >>>>>> COVERAGE_STOP
-dict(4) {
+dict(5) {
   ["b"]=>
   string(%d) "%s/func-coverage.php"
   ["__hhvm_intrinsics\launder_value"]=>
+  string(0) ""
+  ["HH\dynamic_fun"]=>
   string(0) ""
   ["c"]=>
   string(%d) "%s/func-coverage.php"
@@ -142,10 +144,12 @@ a
 b
 c
 >>>>>> COVERAGE_STOP
-dict(4) {
+dict(5) {
   ["b"]=>
   string(%d) "%s/func-coverage.php"
   ["__hhvm_intrinsics\launder_value"]=>
+  string(0) ""
+  ["HH\dynamic_fun"]=>
   string(0) ""
   ["c"]=>
   string(%d) "%s/func-coverage.php"
@@ -281,10 +285,12 @@ a
 b
 c
 >>>>>> COVERAGE_STOP
-dict(4) {
+dict(5) {
   ["b"]=>
   string(%d) "%s/func-coverage.php"
   ["__hhvm_intrinsics\launder_value"]=>
+  string(0) ""
+  ["HH\dynamic_fun"]=>
   string(0) ""
   ["c"]=>
   string(%d) "%s/func-coverage.php"
@@ -420,10 +426,12 @@ a
 b
 c
 >>>>>> COVERAGE_STOP
-dict(4) {
+dict(5) {
   ["b"]=>
   string(%d) "%s/func-coverage.php"
   ["__hhvm_intrinsics\launder_value"]=>
+  string(0) ""
+  ["HH\dynamic_fun"]=>
   string(0) ""
   ["c"]=>
   string(%d) "%s/func-coverage.php"

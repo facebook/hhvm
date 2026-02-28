@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1421() {
+function main_1421() :mixed{
 $a = HH\Lib\Legacy_FIXME\cast_for_arithmetic("123.456") + 123;
 var_dump($a);
 $a = HH\Lib\Legacy_FIXME\cast_for_arithmetic("123.456") + 456.123;

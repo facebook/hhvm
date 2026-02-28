@@ -1,14 +1,14 @@
 <?hh
-function printFunc($rf) {
+function printFunc($rf) :mixed{
   $rps = $rf->getParameters();
   foreach($rps as $rp) {
     var_dump($rp->getTypeText());
   }
   var_dump($rf->getReturnTypeText());
 }
-function printClass($rc) {
+function printClass($rc) :mixed{
   $rms = $rc->getMethods();
-  $meths = darray[];
+  $meths = dict[];
   foreach($rms as $rm) {
     $meths[$rm->getName()] = $rm;
   }
@@ -17,7 +17,7 @@ function printClass($rc) {
     printFunc($meth);
   }
   $rps = $rc->getProperties();
-  $props = darray[];
+  $props = dict[];
   foreach($rps as $rp) {
     $props[$rp->getName()] = $rp;
   }
@@ -33,7 +33,7 @@ class C {
 
 
 <<__EntryPoint>>
-function main_this() {
+function main_this() :mixed{
 $rc = new ReflectionClass('C');
 printClass($rc);
 }

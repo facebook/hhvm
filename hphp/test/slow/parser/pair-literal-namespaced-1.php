@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_pair_literal_namespaced_1() {
+function main_pair_literal_namespaced_1() :mixed{
 \HH\Pair { 1 };
 }

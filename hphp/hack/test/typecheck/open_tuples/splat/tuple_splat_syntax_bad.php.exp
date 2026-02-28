@@ -1,0 +1,14 @@
+ERROR: File "tuple_splat_syntax_bad.php", line 6, characters 36-50:
+There must be no elements following a variadic or splat element (Parsing[1002])
+ERROR: File "tuple_splat_syntax_bad.php", line 9, characters 36-53:
+There must be only one variadic or splat element (Parsing[1002])
+ERROR: File "tuple_splat_syntax_bad.php", line 12, characters 36-59:
+There must be no elements following a variadic or splat element (Parsing[1002])
+ERROR: File "tuple_splat_syntax_bad.php", line 15, characters 36-59:
+There must be no splat elements following an optional element (Parsing[1002])
+ERROR: File "tuple_splat_syntax_bad.php", line 18, characters 36-53:
+There must be only one variadic or splat element (Parsing[1002])
+ERROR: File "tuple_splat_syntax_bad.php", line 22, characters 45-68:
+Cannot use `optional` on variadic or splat parameters (Parsing[1002])
+ERROR: File "tuple_splat_syntax_bad.php", line 24, characters 45-62:
+A splat element cannot also be variadic (Parsing[1002])

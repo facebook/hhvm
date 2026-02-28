@@ -1,11 +1,11 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function foo() {
+function foo() :mixed{
   var_dump('foo');
 }
 
-function bar() {
+function bar() :mixed{
   var_dump('bar');
 }
 <<__EntryPoint>> function main(): void {

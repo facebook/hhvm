@@ -1,0 +1,16 @@
+ERROR: File "shape_put_wrong_arg1.php", line 4, characters 10-36:
+Invalid return type (Typing[4110])
+  File "shape_put_wrong_arg1.php", line 3, characters 32-38:
+  Expected `shape()`
+  File "shape_put_wrong_arg1.php", line 4, characters 22-22:
+  But got `int`
+ERROR: File "shape_put_wrong_arg1.php", line 4, characters 22-22:
+Invalid argument (Typing[4110])
+  File "Shapes.hhi", line 109, characters 7-16:
+  Expected `shape(...)`
+  File "shape_put_wrong_arg1.php", line 4, characters 22-22:
+  But got `int`
+ERROR: File "shape_put_wrong_arg1.php", line 4, characters 22-22:
+This is not an object of type `KeyedContainer`, this is an int (Typing[4370])
+  File "shape_put_wrong_arg1.php", line 4, characters 22-22:
+  Definition is here

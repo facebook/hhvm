@@ -2,7 +2,7 @@
 class Base {
   private $p1='sadf';
 
-  function getFields($obj){
+  function getFields($obj):mixed{
     return get_object_vars($obj);
   }
 }

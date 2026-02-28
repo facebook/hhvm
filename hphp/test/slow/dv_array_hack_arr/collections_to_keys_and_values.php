@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function test($c) {
+function test($c) :mixed{
   echo "====================================================\n";
   var_dump($c->toKeysArray());
   var_dump($c->toValuesArray());
@@ -9,7 +9,7 @@ function test($c) {
 
 
 <<__EntryPoint>>
-function main_collections_to_keys_and_values() {
+function main_collections_to_keys_and_values() :mixed{
 test(Vector{});
 test(Map{});
 test(Set{});

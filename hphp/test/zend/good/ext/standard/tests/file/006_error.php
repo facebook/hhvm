@@ -27,7 +27,7 @@ var_dump( fileperms("/no/such/file/dir") );
 echo "\n";
 
 /* With args less than expected */
-$file_path = __SystemLib\hphp_test_tmppath('006_error.tmp');
+$file_path = sys_get_temp_dir().'/'.'006_error.tmp';
 fclose(fopen($file_path, "w"));
 try { var_dump( chmod($file_path) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( chmod("nofile") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

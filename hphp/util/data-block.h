@@ -71,6 +71,8 @@ struct DataBlock {
   DataBlock(DataBlock&& other) = default;
   DataBlock& operator=(DataBlock&& other) = default;
 
+  static constexpr size_t kPageSize = 2*1024*1024; // 2MB page
+
   /**
    * Uses an existing chunk of memory.
    *
@@ -97,7 +99,8 @@ struct DataBlock {
   }
 
   void alignFrontier(size_t align) {
-    assertx(align == 1 || align == 2 || align == 4 || align == 8 || align == 16);
+    assertx(align == 1 || align == 2 || align == 4 || align == 8 ||
+            align == 16 || align == kPageSize);
 
     auto const mask = align - 1;
     auto const nf = (uint8_t*)(((uintptr_t)m_frontier + mask) & ~mask);
@@ -124,6 +127,16 @@ struct DataBlock {
 
   template<typename T> T* alloc(size_t align = 16, int n = 1) {
     return (T*)allocRaw(sizeof(T) * n, align);
+  }
+
+  DataBlock allocChild(size_t size, const char* name) {
+    constexpr size_t Mask = kPageSize - 1;
+    size = (size + Mask) & ~Mask;
+
+    auto const start = allocRaw(size, kPageSize);
+    DataBlock r;
+    r.init((Address)start, size, name);
+    return r;
   }
 
   bool canEmit(size_t nBytes) {

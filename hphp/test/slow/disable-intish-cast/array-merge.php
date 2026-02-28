@@ -1,12 +1,12 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
-  $a = darray[
+function main() :mixed{
+  $a = dict[
     "10" => "string_A",
     10   => "int_A",
   ];
-  $b = darray[
+  $b = dict[
     10   => "int_B",
     "10" => "string_B",
     ];

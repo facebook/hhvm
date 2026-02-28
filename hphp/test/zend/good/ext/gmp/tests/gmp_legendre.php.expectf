@@ -25,9 +25,9 @@ bool(false)
 Warning: gmp_legendre(): Unable to convert variable to GMP - wrong type in %s/gmp_legendre.php on line 20
 bool(false)
 
-Warning: gmp_legendre() expects exactly 2 parameters, 3 given in %s/gmp_legendre.php on line 22
+Warning: gmp_legendre() expects exactly 2 positional parameters, 3 given in %s/gmp_legendre.php on line 22
 
-Warning: gmp_legendre() expects exactly 2 parameters, 1 given in %s/gmp_legendre.php on line 23
+Warning: gmp_legendre() expects exactly 2 positional parameters, 1 given in %s/gmp_legendre.php on line 23
 
-Warning: gmp_legendre() expects exactly 2 parameters, 0 given in %s/gmp_legendre.php on line 24
+Warning: gmp_legendre() expects exactly 2 positional parameters, 0 given in %s/gmp_legendre.php on line 24
 Done

@@ -1,9 +1,9 @@
 <?hh
 
 class A {
-  private $a = varray['apple'];
+  private $a = vec['apple'];
   private $b = 'banana';
-  static function foo() {
+  static function foo() :mixed{
     $b = new A();
     unset($b->b);
     var_dump($b);
@@ -14,6 +14,6 @@ class A {
 }
 
 <<__EntryPoint>>
-function main_689() {
+function main_689() :mixed{
 A::foo();
 }

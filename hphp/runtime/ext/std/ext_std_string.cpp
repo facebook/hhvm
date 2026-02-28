@@ -177,15 +177,13 @@ Variant HHVM_FUNCTION(vprintf, const Variant& vformat, const Variant& args) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void StandardExtension::initString() {
+void StandardExtension::registerNativeString() {
   HHVM_FE(wordwrap);
 
   HHVM_FE(sprintf);
   HHVM_FE(vsprintf);
   HHVM_FE(printf);
   HHVM_FE(vprintf);
-
-  loadSystemlib("std_string");
 }
 
 }

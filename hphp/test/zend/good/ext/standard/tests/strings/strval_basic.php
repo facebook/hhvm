@@ -14,7 +14,7 @@ EOT;
 
 
 //array of values to iterate over
-$values = varray[
+$values = vec[
             // Simple strings
 /*1*/        "Hello World",
             'Hello World',

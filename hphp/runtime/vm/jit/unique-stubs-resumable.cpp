@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
-#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/resumable.h"
 
@@ -48,11 +47,13 @@
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 
+#include "hphp/util/configs/jit.h"
+
 namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(ustubs);
+TRACE_SET_MOD(ustubs)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -61,13 +62,13 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 void alignJmpTarget(CodeBlock& cb) {
-  if (RuntimeOption::EvalJitAlignUniqueStubs) {
+  if (Cfg::Jit::AlignUniqueStubs) {
     align(cb, nullptr, Alignment::JmpTarget, AlignContext::Dead);
   }
 }
 
 void alignCacheLine(CodeBlock& cb) {
-  if (RuntimeOption::EvalJitAlignUniqueStubs) {
+  if (Cfg::Jit::AlignUniqueStubs) {
     align(cb, nullptr, Alignment::CacheLine, AlignContext::Dead);
   }
 }
@@ -105,7 +106,7 @@ constexpr ptrdiff_t agToAr(ptrdiff_t off) {
  * is none (or if surprise flags are set), return nullptr.
  */
 c_AsyncFunctionWaitHandle* getFastRunnableAFWH() {
-  if (checkSurpriseFlags()) return nullptr;
+  if (stackLimitAndSurprise().hasSurprise()) return nullptr;
   auto const ctx = AsioSession::Get()->getCurrentContext();
 
   auto const afwh = ctx->maybePopFast();
@@ -128,8 +129,8 @@ void freeAFWH(c_AsyncFunctionWaitHandle* wh) {
  * Store the result provided by `data' and `type' into the wait handle `wh'
  * and mark it as succeeded.
  *
- * Note that this overwrites parentChain and contextIdx, so these fields need
- * to be loaded before the result is stored.
+ * Note that this overwrites parentChain and contextStateIndex, so these fields
+ * need to be loaded before the result is stored.
  */
 void storeWHResult(Vout& v, PhysReg data, PhysReg type, Vptr wh,
                    A::Kind whKind) {
@@ -153,27 +154,43 @@ void storeAGWHResult(Vout& v, PhysReg data, PhysReg type, Vreg wh) {
  * Unblock the chain of blockables. Calls into native code if the pointer to
  * the first blockable is non-null.
  */
-void unblockParents(Vout& v, Vreg firstBl) {
+void unblockParents(Vout& v, Vreg firstBl, SBInvOffset spOff) {
   auto const sf = v.makeReg();
   v << testq{firstBl, firstBl, sf};
 
   ifThen(v, CC_NZ, sf, [&] (Vout& v) {
-    v << vcall{CallSpec::direct(AsioBlockableChain::UnblockJitHelper),
-               v.makeVcallArgs({{rvmfp(), rvmsp(), firstBl}}),
+    v << vcall{CallSpec::direct(AsioBlockableChain::Unblock),
+               v.makeVcallArgs({{firstBl}}),
                v.makeTuple({}),
-               Fixup::none()};
+               Fixup::asioStub(spOff)};
   });
 }
 
-TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner) {
+namespace {
+constexpr ptrdiff_t ar_rel(ptrdiff_t off) {
+  return off - c_AsyncFunctionWaitHandle::arOff();
+}
+} // namespace
+
+TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner, const UniqueStubs& us,
+                        const char* /*name*/) {
   alignCacheLine(cb);
 
   auto const ret = vwrap(cb, data, [] (Vout& v) {
+    // wh->m_implicitContext = *ImplicitContext::activeCtx
+    markRDSAccess(v, ImplicitContext::activeCtx.handle());
+    auto const implicitContext = v.makeReg();
+    v << load{rvmtl()[ImplicitContext::activeCtx.handle()], implicitContext};
+    v << store{
+      implicitContext,
+      rvmfp()[ar_rel(c_AsyncFunctionWaitHandle::implicitContextOff())]
+    };
+
     // Set rvmfp() to the suspending WaitHandle's parent frame.
     v << load{rvmfp()[AROFF(m_sfp)], rvmfp()};
   });
 
-  *inner = vwrap(cb, data, [] (Vout& v) {
+  *inner = vwrap(cb, data, [&] (Vout& v) {
     auto const slow_path = Vlabel(v.makeBlock());
 
     auto const afwh = v.makeReg();
@@ -201,15 +218,17 @@ TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner) {
       afwh[AFWH::stateOff()]
     };
 
-    if (RO::EvalEnableImplicitContext) {
-      markRDSAccess(v, ImplicitContext::activeCtx.handle());
-      auto const implicitContext = v.makeReg();
-      v << load {
-        afwh[c_ResumableWaitHandle::implicitContextOff()],
-        implicitContext
-      };
-      v << store{implicitContext, rvmtl()[ImplicitContext::activeCtx.handle()]};
-    }
+    markRDSAccess(v, ImplicitContext::activeCtx.handle());
+    auto const newIC = v.makeReg();
+    auto const prevIC = v.makeReg();
+    v << load{rvmtl()[ImplicitContext::activeCtx.handle()], prevIC};
+    v << load {
+      afwh[c_AsyncFunctionWaitHandle::implicitContextOff()],
+      newIC
+    };
+    emitIncRef(v, newIC, TRAP_REASON);
+    emitDecRef(v, prevIC, TRAP_REASON);
+    v << store{newIC, rvmtl()[ImplicitContext::activeCtx.handle()]};
 
     auto const child = v.makeReg();
     v << load{afwh[AFWH::childrenOff() + AFWH::Node::childOff()], child};
@@ -242,7 +261,7 @@ TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner) {
     // populating top of the stack with the returned null.
     v = slow_path;
     v << syncvmrettype{v.cns(KindOfNull)};
-    v << leavetc{vm_regs_with_sp() | rret_type()};
+    v << leavetc{vm_regs_with_sp() | rret_type(), us.enterTCExit};
   });
 
   return ret;
@@ -269,13 +288,13 @@ void asyncFuncMaybeRetToAsyncFunc(Vout& v, PhysReg rdata, PhysReg rtype,
   v << cmpqim{0, parentBl[afwhToBl(AFWH::resumeAddrOff())], isNullAddr};
   ifThen(v, CC_E, isNullAddr, cannotResume);
 
-  // Check parentBl->getWH()->getContextIdx() == child->getContextIdx().
+  // Check parentBl->getWH()->getContextStateIndex() == child->getContextStateIndex().
   auto const childContextIdx = v.makeReg();
   auto const parentContextIdx = v.makeReg();
   auto const inSameContext = v.makeReg();
 
-  v << loadb{rvmfp()[afwhToAr(AFWH::contextIdxOff())], childContextIdx};
-  v << loadb{parentBl[afwhToBl(AFWH::contextIdxOff())], parentContextIdx};
+  v << loadb{rvmfp()[afwhToAr(AFWH::ctxStateIdxOff())], childContextIdx};
+  v << loadb{parentBl[afwhToBl(AFWH::ctxStateIdxOff())], parentContextIdx};
   v << cmpb{parentContextIdx, childContextIdx, inSameContext};
   ifThen(v, CC_NE, inSameContext, cannotResume);
 
@@ -321,7 +340,7 @@ void asyncFuncMaybeRetToAsyncFunc(Vout& v, PhysReg rdata, PhysReg rtype,
       emitDecRef(v, wh, TRAP_REASON);
 
       // Unblock all remaining parents. This may free the wh.
-      unblockParents(v, nextBl);
+      unblockParents(v, nextBl, SBInvOffset{1});
     }
   );
 
@@ -336,12 +355,16 @@ void asyncFuncMaybeRetToAsyncFunc(Vout& v, PhysReg rdata, PhysReg rtype,
   );
   v << storebi{runningState, parentBl[afwhToBl(AFWH::stateOff())]};
 
-  if (RO::EvalEnableImplicitContext) {
-    markRDSAccess(v, ImplicitContext::activeCtx.handle());
-    auto const implicitContext = v.makeReg();
-    v << load{parentBl[afwhToBl(AFWH::implicitContextOff())], implicitContext};
-    v << store{implicitContext, rvmtl()[ImplicitContext::activeCtx.handle()]};
-  }
+  markRDSAccess(v, ImplicitContext::activeCtx.handle());
+  auto const newIC = v.makeReg();
+  auto const prevIC = v.makeReg();
+
+  v << load{rvmtl()[ImplicitContext::activeCtx.handle()], prevIC};
+  v << load{parentBl[afwhToBl(AFWH::implicitContextOff())], newIC};
+
+  emitIncRef(v, newIC, TRAP_REASON);
+  emitDecRef(v, prevIC, TRAP_REASON);
+  v << store{newIC, rvmtl()[ImplicitContext::activeCtx.handle()]};
 
   // Transfer control to the resume address.
   v << jmpm{rvmfp()[afwhToAr(AFWH::resumeAddrOff())], vm_regs_with_sp()};
@@ -355,7 +378,7 @@ void asyncFuncRetOnly(Vout& v, PhysReg data, PhysReg type, Vreg parentBl) {
   // Transfer the return value from return registers into the AFWH, mark
   // it as finished and unblock all parents.
   storeAFWHResult(v, data, type);
-  unblockParents(v, parentBl);
+  unblockParents(v, parentBl, SBInvOffset{0});
 
   // Get the pointer to the AFWH before losing FP.
   auto const wh = v.makeReg();
@@ -386,7 +409,7 @@ void asyncGenRetYieldOnly(Vout& v, PhysReg data, PhysReg type) {
   // Transfer the return value from return registers into the AGWH, mark
   // it as finished and unblock all parents.
   storeAGWHResult(v, data, type, wh);
-  unblockParents(v, parentBl);
+  unblockParents(v, parentBl, SBInvOffset{0});
 
   // Unlink the async generator from the async generator wait handle.
   v << storeqi{0, wh[AGWH::generatorOff()]};
@@ -405,10 +428,11 @@ void asyncGenRetYieldOnly(Vout& v, PhysReg data, PhysReg type) {
   emitDecRefWorkObj(v, wh, TRAP_REASON);
 }
 
-TCA emitAsyncFuncRet(CodeBlock& cb, DataBlock& data, TCA switchCtrl) {
+TCA emitAsyncFuncRet(CodeBlock& cb, DataBlock& data, TCA switchCtrl, const char* name) {
   alignCacheLine(cb);
 
-  return vwrap(cb, data, [&] (Vout& v) {
+  CGMeta meta;
+  auto const start = vwrap(cb, data, meta, [&] (Vout& v) {
     auto const slowPath = Vlabel(v.makeBlock());
 
     // Load ptr to the first parent's blockable.
@@ -444,20 +468,29 @@ TCA emitAsyncFuncRet(CodeBlock& cb, DataBlock& data, TCA switchCtrl) {
     v = slowPath;
     asyncFuncRetOnly(v, rarg(0), rarg(1), parentBl);
     v << jmpi{switchCtrl, vm_regs_with_sp()};
-  });
+  }, name);
+
+  meta.process(nullptr);
+  return start;
 }
 
-TCA emitAsyncFuncRetSlow(CodeBlock& cb, DataBlock& data, TCA asyncFuncRet) {
+TCA emitAsyncFuncRetSlow(CodeBlock& cb, DataBlock& data, TCA asyncFuncRet,
+                         const UniqueStubs& us, const char* name) {
   alignJmpTarget(cb);
 
-  return vwrap(cb, data, [&] (Vout& v) {
+  CGMeta meta;
+  auto const start = vwrap(cb, data, meta, [&] (Vout& v) {
     auto const slowPath = Vlabel(v.makeBlock());
 
     // Check for surprise *after* the return event hook was called.
     irlower::emitCheckSurpriseFlags(v, rvmsp(), slowPath);
 
     // The return event hook cleared the surprise, continue on the fast path.
-    v << jmpi{asyncFuncRet, vm_regs_with_sp() | rarg(0) | rarg(1)};
+    if (LIKELY(!Cfg::Eval::FastMethodInterceptNoAsyncOpt)) {
+      v << jmpi{asyncFuncRet, vm_regs_with_sp() | rarg(0) | rarg(1)};
+    } else {
+      v << jmp{slowPath};
+    }
 
     // Slow path.
     v = slowPath;
@@ -470,12 +503,16 @@ TCA emitAsyncFuncRetSlow(CodeBlock& cb, DataBlock& data, TCA asyncFuncRet) {
     // properly deal with the surprise when resuming the next function.
     asyncFuncRetOnly(v, rarg(0), rarg(1), parentBl);
     v << syncvmrettype{v.cns(KindOfNull)};
-    v << leavetc{vm_regs_with_sp() | rret_type()};
-  });
+    v << leavetc{vm_regs_with_sp() | rret_type(), us.enterTCExit};
+  }, name);
+
+  meta.process(nullptr);
+  return start;
 }
 
 TCA emitAsyncGenRetR(CodeBlock& cb, DataBlock& data, TCA switchCtrl,
-                     TCA* asyncGenRetYieldR) {
+                     TCA* asyncGenRetYieldR, const UniqueStubs& us,
+                     const char* /*name*/) {
   alignCacheLine(cb);
 
   auto const ret = vwrap(cb, data, [] (Vout& v) {
@@ -484,7 +521,8 @@ TCA emitAsyncGenRetR(CodeBlock& cb, DataBlock& data, TCA switchCtrl,
     v << fallthru{vm_regs_with_sp() | rarg(1)};
   });
 
-  *asyncGenRetYieldR = vwrap(cb, data, [&] (Vout& v) {
+  CGMeta meta;
+  *asyncGenRetYieldR = vwrap(cb, data, meta, [&] (Vout& v) {
     auto const turtlePath = Vlabel(v.makeBlock());
 
     // Check for surprise.
@@ -502,13 +540,15 @@ TCA emitAsyncGenRetR(CodeBlock& cb, DataBlock& data, TCA switchCtrl,
     // properly deal with the surprise when resuming the next function.
     asyncGenRetYieldOnly(v, rarg(0), rarg(1));
     v << syncvmrettype{v.cns(KindOfNull)};
-    v << leavetc{vm_regs_with_sp() | rret_type()};
+    v << leavetc{vm_regs_with_sp() | rret_type(), us.enterTCExit};
   });
+
+  meta.process(nullptr);
 
   return ret;
 }
 
-TCA emitAsyncGenYieldR(CodeBlock& cb, DataBlock& data, TCA asyncGenRetYieldR) {
+TCA emitAsyncGenYieldR(CodeBlock& cb, DataBlock& data, TCA asyncGenRetYieldR, const char* name) {
   alignJmpTarget(cb);
 
   return vwrap(cb, data, [&] (Vout& v) {
@@ -540,7 +580,7 @@ TCA emitAsyncGenYieldR(CodeBlock& cb, DataBlock& data, TCA asyncGenRetYieldR) {
     v << copy{vec, rarg(0)};
     v << copy{v.cns(KindOfVec), rarg(1)};
     v << jmpi{asyncGenRetYieldR, vm_regs_with_sp() | rarg(0) | rarg(1)};
-  });
+  }, name);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -572,19 +612,19 @@ void UniqueStubs::emitAllResumable(CodeCache& code, Debug::DebugInfo& dbg) {
     return start;                                                  \
   }()
 
-#define ADD(name, v, stub) name = EMIT(#name, v, [&] { return (stub); })
+#define ADD(name, v, stub, ...) name = EMIT(#name, v, [&] { return stub(__VA_ARGS__, #name); })
   TCA switchCtrl;
   ADD(asyncSwitchCtrl,
       hotView(),
-      emitAsyncSwitchCtrl(hot(), data, &switchCtrl));
-  ADD(asyncFuncRet, hotView(), emitAsyncFuncRet(hot(), data, switchCtrl));
-  ADD(asyncFuncRetSlow, view, emitAsyncFuncRetSlow(cold, data, asyncFuncRet));
+      emitAsyncSwitchCtrl, hot(), data, &switchCtrl, *this);
+  ADD(asyncFuncRet, hotView(), emitAsyncFuncRet, hot(), data, switchCtrl);
+  ADD(asyncFuncRetSlow, view, emitAsyncFuncRetSlow, cold, data, asyncFuncRet, *this);
 
   TCA asyncGenRetYieldR;
   ADD(asyncGenRetR, hotView(),
-      emitAsyncGenRetR(hot(), data, switchCtrl, &asyncGenRetYieldR));
+      emitAsyncGenRetR, hot(), data, switchCtrl, &asyncGenRetYieldR, *this);
   ADD(asyncGenYieldR, hotView(),
-      emitAsyncGenYieldR(hot(), data, asyncGenRetYieldR));
+      emitAsyncGenYieldR, hot(), data, asyncGenRetYieldR);
 #undef ADD
 }
 

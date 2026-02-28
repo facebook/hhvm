@@ -17,11 +17,11 @@ class X extends A {
     Y::A => 24,
   };
 
-  function getPub() { return $this->pub; }
-  function getProt() { return $this->prot; }
+  function getPub() :mixed{ return $this->pub; }
+  function getProt() :mixed{ return $this->prot; }
 }
 
-function test() {
+function test() :mixed{
   return new X;
 }
 

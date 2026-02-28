@@ -1,0 +1,14 @@
+f [fromPackages] abstract.php
+f [fromPackages] basic-soft.php
+f [fromPackages] basic.php
+f [fromPackages] interface.php
+f [fromPackages] noactivedeployement.php
+f [fromPackages] soft.php
+f [fromPackages] soft_sampled.php
+f [fromPackages] soft_unsampled.php
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'Package softbar should be loaded' in %s/requirepackage/basic-soft.php:5
+Stack trace:
+#0 %s/requirepackage/basic-soft.php(5): HH\invariant_violation()
+#1 %s/requirepackage/basic-soft.php(12): a()
+#2 (): basic_soft()
+#3 {main}

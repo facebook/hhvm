@@ -22,19 +22,21 @@ val get_spread_attributes :
   Pos.t ->
   Decl_provider.class_decl ->
   Typing_defs.locl_ty ->
-  env * (Aast.pstring * (Pos.t * Typing_defs.locl_ty)) list
+  (env * Typing_error.t option)
+  * (Aast.pstring * (Pos.t * Typing_defs.locl_ty)) list
 
 (**
  * Verify that an XHP body expression is legal.
  *)
-val is_xhp_child : env -> Pos.t -> Typing_defs.locl_ty -> bool
+val is_xhp_child :
+  env -> Pos.t -> Typing_defs.locl_ty -> bool * Typing_error.t option
 
 (* Rewrites an Xml node into a New node. The resulting New expression has
  * four arguments. This mimics the rewrite undergone before the emitter is
  * run.
  *
  * For example,
- * `<p colur='blue'>Hi</p>z`
+ * `<p colour='blue'>Hi</p>;`
  * becomes
  * `new :p(darray['colour' => 'blue'], varray['Hi'],"",1);`
  *
@@ -44,3 +46,18 @@ val is_xhp_child : env -> Pos.t -> Typing_defs.locl_ty -> bool
  *)
 val rewrite_xml_into_new :
   Pos.t -> sid -> Nast.xhp_attribute list -> Nast.expr list -> Nast.expr
+
+(* Rewrites an Xml attribute access into a call to getAttribute. The
+ * resulting Call expression has one argument fake string argument to match the
+ * expected parameter of getAttribute.
+ *
+ * For example,
+ * `$xml->:attr;`
+ * becomes
+ * `$xml->getAttribute('');`
+ *
+ * The null flavor argument is indicates an expression of the form
+ * `$xml?->:attr`
+ *)
+val rewrite_attribute_access_into_call :
+  Pos.t -> Nast.expr -> operator_null_flavor -> Nast.expr

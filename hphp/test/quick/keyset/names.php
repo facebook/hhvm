@@ -2,26 +2,26 @@
 
 namespace keyset {
 const STUFF = 12;
-function keyset() { return 0; }
-function foo() { return 1; }
+function keyset() :mixed{ return 0; }
+function foo() :mixed{ return 1; }
 }
 
 namespace alpha {
 const STUFF = 12;
-function keyset() { return 0; }
-function foo() { return 1; }
+function keyset() :mixed{ return 0; }
+function foo() :mixed{ return 1; }
 }
 
 namespace beta\keyset {
 const STUFF = 12;
-function keyset() { return 0; }
-function foo() { return 1; }
+function keyset() :mixed{ return 0; }
+function foo() :mixed{ return 1; }
 }
 
 namespace {
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(\keyset\keyset());
   var_dump(\keyset\foo());
   var_dump(\keyset\STUFF);

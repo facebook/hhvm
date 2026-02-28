@@ -14,8 +14,8 @@ class JsonTest2 implements JsonSerializable {
     public function __construct() {
         $this->test = '123';
     }
-    public function jsonSerialize() {
-        return darray[
+    public function jsonSerialize() :mixed{
+        return dict[
             'test' => $this->test,
             'me'   => $this
         ];

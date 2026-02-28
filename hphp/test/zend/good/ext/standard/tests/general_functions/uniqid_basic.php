@@ -14,7 +14,7 @@ echo "\n\n";
 echo "uniqid() with a prefix\n";
 
 // Use a fixed prefix so we can ensure length of o/p id is fixed
-$prefix = varray [
+$prefix = vec[
                 99999,
                 "99999",
                 10.5e2,

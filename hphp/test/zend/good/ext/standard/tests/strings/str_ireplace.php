@@ -21,17 +21,17 @@ var_dump(str_ireplace("tt", "aaa", "ttttTttttttttTT"));
 var_dump(str_ireplace_with_count("tt", "aaa", "ttttTttttttttTT", inout $count));
 var_dump($count);
 
-var_dump(str_ireplace(varray["tt", "tt"], "aaa", "ttttTttttttttTT"));
-var_dump(str_ireplace(varray["tt", "tt"], varray["aaa"], "ttttTttttttttTT"));
-var_dump(str_ireplace(varray["tt", "y"], varray["aaa", "bbb"], "ttttTttttttttTT"));
+var_dump(str_ireplace(vec["tt", "tt"], "aaa", "ttttTttttttttTT"));
+var_dump(str_ireplace(vec["tt", "tt"], vec["aaa"], "ttttTttttttttTT"));
+var_dump(str_ireplace(vec["tt", "y"], vec["aaa", "bbb"], "ttttTttttttttTT"));
 
-var_dump(str_ireplace(varray["tt", "tt"], "aaa", "ttttTttttttttTT"));
-var_dump(str_ireplace(varray["tt", "tt"], varray["aaa"], "ttttTttttttttTT"));
-var_dump(str_ireplace(varray["tt", "y"], varray["aaa", "bbb"], "ttttTttttttttTT"));
+var_dump(str_ireplace(vec["tt", "tt"], "aaa", "ttttTttttttttTT"));
+var_dump(str_ireplace(vec["tt", "tt"], vec["aaa"], "ttttTttttttttTT"));
+var_dump(str_ireplace(vec["tt", "y"], vec["aaa", "bbb"], "ttttTttttttttTT"));
 
-var_dump(str_ireplace(varray["tt", "y"], varray["aaa", "bbb"], varray["ttttTttttttttTT", "aayyaayasdayYahsdYYY"]));
-var_dump(str_ireplace(varray["tt", "y"], varray["aaa", "bbb"], darray["key"=>"ttttTttttttttTT", "test"=>"aayyaayasdayYahsdYYY"]));
-var_dump(str_ireplace(darray["t"=>"tt", "y"=>"y"], darray["a"=>"aaa", "b"=>"bbb"], darray["key"=>"ttttTttttttttTT", "test"=>"aayyaayasdayYahsdYYY"]));
+var_dump(str_ireplace(vec["tt", "y"], vec["aaa", "bbb"], vec["ttttTttttttttTT", "aayyaayasdayYahsdYYY"]));
+var_dump(str_ireplace(vec["tt", "y"], vec["aaa", "bbb"], dict["key"=>"ttttTttttttttTT", "test"=>"aayyaayasdayYahsdYYY"]));
+var_dump(str_ireplace(dict["t"=>"tt", "y"=>"y"], dict["a"=>"aaa", "b"=>"bbb"], dict["key"=>"ttttTttttttttTT", "test"=>"aayyaayasdayYahsdYYY"]));
 
 /* separate testcase for str_ireplace() off-by-one */
 

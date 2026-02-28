@@ -1,0 +1,1300 @@
+Test 0
+'foo' === true = bool(false)
+'foo'  eq true = bool(true)
+'foo'  lt true = bool(false)
+'foo' lte true = bool(true)
+'foo'  gt true = bool(false)
+'foo' gte true = bool(true)
+
+true === 'foo' = bool(false)
+true  eq 'foo' = bool(true)
+true  lt 'foo' = bool(false)
+true lte 'foo' = bool(true)
+true  gt 'foo' = bool(false)
+true gte 'foo' = bool(true)
+
+Test 1
+'foo' === false = bool(false)
+'foo'  eq false = bool(false)
+'foo'  lt false = bool(false)
+'foo' lte false = bool(false)
+'foo'  gt false = bool(true)
+'foo' gte false = bool(true)
+
+false === 'foo' = bool(false)
+false  eq 'foo' = bool(false)
+false  lt 'foo' = bool(true)
+false lte 'foo' = bool(true)
+false  gt 'foo' = bool(false)
+false gte 'foo' = bool(false)
+
+Test 2
+'foo' === 0 = bool(false)
+'foo'  eq 0 = bool(true)
+'foo'  lt 0 = bool(false)
+'foo' lte 0 = bool(true)
+'foo'  gt 0 = bool(false)
+'foo' gte 0 = bool(true)
+
+0 === 'foo' = bool(false)
+0  eq 'foo' = bool(true)
+0  lt 'foo' = bool(false)
+0 lte 'foo' = bool(true)
+0  gt 'foo' = bool(false)
+0 gte 'foo' = bool(true)
+
+Test 3
+'foo' === 1 = bool(false)
+'foo'  eq 1 = bool(false)
+'foo'  lt 1 = bool(true)
+'foo' lte 1 = bool(true)
+'foo'  gt 1 = bool(false)
+'foo' gte 1 = bool(false)
+
+1 === 'foo' = bool(false)
+1  eq 'foo' = bool(false)
+1  lt 'foo' = bool(false)
+1 lte 'foo' = bool(false)
+1  gt 'foo' = bool(true)
+1 gte 'foo' = bool(true)
+
+Test 4
+'foo' === 0 = bool(false)
+'foo'  eq 0 = bool(true)
+'foo'  lt 0 = bool(false)
+'foo' lte 0 = bool(true)
+'foo'  gt 0 = bool(false)
+'foo' gte 0 = bool(true)
+
+0 === 'foo' = bool(false)
+0  eq 'foo' = bool(true)
+0  lt 'foo' = bool(false)
+0 lte 'foo' = bool(true)
+0  gt 'foo' = bool(false)
+0 gte 'foo' = bool(true)
+
+Test 5
+'foo' === 1 = bool(false)
+'foo'  eq 1 = bool(false)
+'foo'  lt 1 = bool(true)
+'foo' lte 1 = bool(true)
+'foo'  gt 1 = bool(false)
+'foo' gte 1 = bool(false)
+
+1 === 'foo' = bool(false)
+1  eq 'foo' = bool(false)
+1  lt 'foo' = bool(false)
+1 lte 'foo' = bool(false)
+1  gt 'foo' = bool(true)
+1 gte 'foo' = bool(true)
+
+Test 6
+'foo' === 'foo' = bool(true)
+'foo'  eq 'foo' = bool(true)
+'foo'  lt 'foo' = bool(false)
+'foo' lte 'foo' = bool(true)
+'foo'  gt 'foo' = bool(false)
+'foo' gte 'foo' = bool(true)
+
+'foo' === 'foo' = bool(true)
+'foo'  eq 'foo' = bool(true)
+'foo'  lt 'foo' = bool(false)
+'foo' lte 'foo' = bool(true)
+'foo'  gt 'foo' = bool(false)
+'foo' gte 'foo' = bool(true)
+
+Test 7
+'foo' === foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 25
+bool(true)
+'foo'  eq foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 26
+bool(true)
+'foo'  lt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+bool(false)
+'foo' lte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+bool(true)
+'foo'  gt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+bool(false)
+'foo' gte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+bool(true)
+
+foo::class === 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 25
+bool(true)
+foo::class  eq 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 26
+bool(true)
+foo::class  lt 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+bool(false)
+foo::class lte 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+bool(true)
+foo::class  gt 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+bool(false)
+foo::class gte 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+bool(true)
+
+Test 8
+'foo' === foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 25
+bool(true)
+'foo'  eq foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 26
+bool(true)
+'foo'  lt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+bool(false)
+'foo' lte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+bool(true)
+'foo'  gt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+bool(false)
+'foo' gte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+bool(true)
+
+foo::class === 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 25
+bool(true)
+foo::class  eq 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 26
+bool(true)
+foo::class  lt 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+bool(false)
+foo::class lte 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+bool(true)
+foo::class  gt 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+bool(false)
+foo::class gte 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+bool(true)
+
+Test 9
+'foo' === dict [
+  0 => 'foo',
+] = bool(false)
+'foo'  eq dict [
+  0 => 'foo',
+] = bool(false)
+'foo'  lt dict [
+  0 => 'foo',
+] = Cannot compare string and HH\dict using a relational operator
+'foo' lte dict [
+  0 => 'foo',
+] = Cannot compare string and HH\dict using a relational operator
+'foo'  gt dict [
+  0 => 'foo',
+] = Cannot compare string and HH\dict using a relational operator
+'foo' gte dict [
+  0 => 'foo',
+] = Cannot compare string and HH\dict using a relational operator
+
+dict [
+  0 => 'foo',
+] === 'foo' = bool(false)
+dict [
+  0 => 'foo',
+]  eq 'foo' = bool(false)
+dict [
+  0 => 'foo',
+]  lt 'foo' = Cannot compare HH\dict and string using a relational operator
+dict [
+  0 => 'foo',
+] lte 'foo' = Cannot compare HH\dict and string using a relational operator
+dict [
+  0 => 'foo',
+]  gt 'foo' = Cannot compare HH\dict and string using a relational operator
+dict [
+  0 => 'foo',
+] gte 'foo' = Cannot compare HH\dict and string using a relational operator
+
+Test 10
+'foo' === vec [
+  'foo',
+] = bool(false)
+'foo'  eq vec [
+  'foo',
+] = bool(false)
+'foo'  lt vec [
+  'foo',
+] = Cannot compare string and HH\vec using a relational operator
+'foo' lte vec [
+  'foo',
+] = Cannot compare string and HH\vec using a relational operator
+'foo'  gt vec [
+  'foo',
+] = Cannot compare string and HH\vec using a relational operator
+'foo' gte vec [
+  'foo',
+] = Cannot compare string and HH\vec using a relational operator
+
+vec [
+  'foo',
+] === 'foo' = bool(false)
+vec [
+  'foo',
+]  eq 'foo' = bool(false)
+vec [
+  'foo',
+]  lt 'foo' = Cannot compare HH\vec and string using a relational operator
+vec [
+  'foo',
+] lte 'foo' = Cannot compare HH\vec and string using a relational operator
+vec [
+  'foo',
+]  gt 'foo' = Cannot compare HH\vec and string using a relational operator
+vec [
+  'foo',
+] gte 'foo' = Cannot compare HH\vec and string using a relational operator
+
+Test 11
+'foo' === vec [
+  'foo',
+] = bool(false)
+'foo'  eq vec [
+  'foo',
+] = bool(false)
+'foo'  lt vec [
+  'foo',
+] = Cannot compare string and HH\vec using a relational operator
+'foo' lte vec [
+  'foo',
+] = Cannot compare string and HH\vec using a relational operator
+'foo'  gt vec [
+  'foo',
+] = Cannot compare string and HH\vec using a relational operator
+'foo' gte vec [
+  'foo',
+] = Cannot compare string and HH\vec using a relational operator
+
+vec [
+  'foo',
+] === 'foo' = bool(false)
+vec [
+  'foo',
+]  eq 'foo' = bool(false)
+vec [
+  'foo',
+]  lt 'foo' = Cannot compare HH\vec and string using a relational operator
+vec [
+  'foo',
+] lte 'foo' = Cannot compare HH\vec and string using a relational operator
+vec [
+  'foo',
+]  gt 'foo' = Cannot compare HH\vec and string using a relational operator
+vec [
+  'foo',
+] gte 'foo' = Cannot compare HH\vec and string using a relational operator
+
+Test 12
+'foo' === dict [
+  0 => 'foo',
+] = bool(false)
+'foo'  eq dict [
+  0 => 'foo',
+] = bool(false)
+'foo'  lt dict [
+  0 => 'foo',
+] = Cannot compare string and HH\dict using a relational operator
+'foo' lte dict [
+  0 => 'foo',
+] = Cannot compare string and HH\dict using a relational operator
+'foo'  gt dict [
+  0 => 'foo',
+] = Cannot compare string and HH\dict using a relational operator
+'foo' gte dict [
+  0 => 'foo',
+] = Cannot compare string and HH\dict using a relational operator
+
+dict [
+  0 => 'foo',
+] === 'foo' = bool(false)
+dict [
+  0 => 'foo',
+]  eq 'foo' = bool(false)
+dict [
+  0 => 'foo',
+]  lt 'foo' = Cannot compare HH\dict and string using a relational operator
+dict [
+  0 => 'foo',
+] lte 'foo' = Cannot compare HH\dict and string using a relational operator
+dict [
+  0 => 'foo',
+]  gt 'foo' = Cannot compare HH\dict and string using a relational operator
+dict [
+  0 => 'foo',
+] gte 'foo' = Cannot compare HH\dict and string using a relational operator
+
+Test 13
+'foo' === dict [
+  0 => 'foo',
+] = bool(false)
+'foo'  eq dict [
+  0 => 'foo',
+] = bool(false)
+'foo'  lt dict [
+  0 => 'foo',
+] = Cannot compare string and HH\dict using a relational operator
+'foo' lte dict [
+  0 => 'foo',
+] = Cannot compare string and HH\dict using a relational operator
+'foo'  gt dict [
+  0 => 'foo',
+] = Cannot compare string and HH\dict using a relational operator
+'foo' gte dict [
+  0 => 'foo',
+] = Cannot compare string and HH\dict using a relational operator
+
+dict [
+  0 => 'foo',
+] === 'foo' = bool(false)
+dict [
+  0 => 'foo',
+]  eq 'foo' = bool(false)
+dict [
+  0 => 'foo',
+]  lt 'foo' = Cannot compare HH\dict and string using a relational operator
+dict [
+  0 => 'foo',
+] lte 'foo' = Cannot compare HH\dict and string using a relational operator
+dict [
+  0 => 'foo',
+]  gt 'foo' = Cannot compare HH\dict and string using a relational operator
+dict [
+  0 => 'foo',
+] gte 'foo' = Cannot compare HH\dict and string using a relational operator
+
+Test 14
+'foo' === keyset [
+  'foo',
+] = bool(false)
+'foo'  eq keyset [
+  'foo',
+] = bool(false)
+'foo'  lt keyset [
+  'foo',
+] = Cannot compare string and HH\keyset using a relational operator
+'foo' lte keyset [
+  'foo',
+] = Cannot compare string and HH\keyset using a relational operator
+'foo'  gt keyset [
+  'foo',
+] = Cannot compare string and HH\keyset using a relational operator
+'foo' gte keyset [
+  'foo',
+] = Cannot compare string and HH\keyset using a relational operator
+
+keyset [
+  'foo',
+] === 'foo' = bool(false)
+keyset [
+  'foo',
+]  eq 'foo' = bool(false)
+keyset [
+  'foo',
+]  lt 'foo' = Cannot compare HH\keyset and string using a relational operator
+keyset [
+  'foo',
+] lte 'foo' = Cannot compare HH\keyset and string using a relational operator
+keyset [
+  'foo',
+]  gt 'foo' = Cannot compare HH\keyset and string using a relational operator
+keyset [
+  'foo',
+] gte 'foo' = Cannot compare HH\keyset and string using a relational operator
+
+--- test lazy class --- 
+Test 0
+foo::class === true = bool(false)
+foo::class  eq true = bool(true)
+foo::class  lt true = bool(false)
+foo::class lte true = bool(true)
+foo::class  gt true = bool(false)
+foo::class gte true = bool(true)
+
+true === foo::class = bool(false)
+true  eq foo::class = bool(true)
+true  lt foo::class = bool(false)
+true lte foo::class = bool(true)
+true  gt foo::class = bool(false)
+true gte foo::class = bool(true)
+
+Test 1
+foo::class === false = bool(false)
+foo::class  eq false = bool(false)
+foo::class  lt false = bool(false)
+foo::class lte false = bool(false)
+foo::class  gt false = bool(true)
+foo::class gte false = bool(true)
+
+false === foo::class = bool(false)
+false  eq foo::class = bool(false)
+false  lt foo::class = bool(true)
+false lte foo::class = bool(true)
+false  gt foo::class = bool(false)
+false gte foo::class = bool(false)
+
+Test 2
+foo::class === 0 = bool(false)
+foo::class  eq 0 = bool(true)
+foo::class  lt 0 = bool(false)
+foo::class lte 0 = bool(true)
+foo::class  gt 0 = bool(false)
+foo::class gte 0 = bool(true)
+
+0 === foo::class = bool(false)
+0  eq foo::class = bool(true)
+0  lt foo::class = bool(false)
+0 lte foo::class = bool(true)
+0  gt foo::class = bool(false)
+0 gte foo::class = bool(true)
+
+Test 3
+foo::class === 1 = bool(false)
+foo::class  eq 1 = bool(false)
+foo::class  lt 1 = bool(true)
+foo::class lte 1 = bool(true)
+foo::class  gt 1 = bool(false)
+foo::class gte 1 = bool(false)
+
+1 === foo::class = bool(false)
+1  eq foo::class = bool(false)
+1  lt foo::class = bool(false)
+1 lte foo::class = bool(false)
+1  gt foo::class = bool(true)
+1 gte foo::class = bool(true)
+
+Test 4
+foo::class === 0 = bool(false)
+foo::class  eq 0 = bool(true)
+foo::class  lt 0 = bool(false)
+foo::class lte 0 = bool(true)
+foo::class  gt 0 = bool(false)
+foo::class gte 0 = bool(true)
+
+0 === foo::class = bool(false)
+0  eq foo::class = bool(true)
+0  lt foo::class = bool(false)
+0 lte foo::class = bool(true)
+0  gt foo::class = bool(false)
+0 gte foo::class = bool(true)
+
+Test 5
+foo::class === 1 = bool(false)
+foo::class  eq 1 = bool(false)
+foo::class  lt 1 = bool(true)
+foo::class lte 1 = bool(true)
+foo::class  gt 1 = bool(false)
+foo::class gte 1 = bool(false)
+
+1 === foo::class = bool(false)
+1  eq foo::class = bool(false)
+1  lt foo::class = bool(false)
+1 lte foo::class = bool(false)
+1  gt foo::class = bool(true)
+1 gte foo::class = bool(true)
+
+Test 6
+foo::class === 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 25
+bool(true)
+foo::class  eq 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 26
+bool(true)
+foo::class  lt 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+bool(false)
+foo::class lte 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+bool(true)
+foo::class  gt 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+bool(false)
+foo::class gte 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+bool(true)
+
+'foo' === foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 25
+bool(true)
+'foo'  eq foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 26
+bool(true)
+'foo'  lt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+bool(false)
+'foo' lte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+bool(true)
+'foo'  gt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+bool(false)
+'foo' gte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+bool(true)
+
+Test 7
+foo::class === foo::class = bool(true)
+foo::class  eq foo::class = bool(true)
+foo::class  lt foo::class = bool(false)
+foo::class lte foo::class = bool(true)
+foo::class  gt foo::class = bool(false)
+foo::class gte foo::class = bool(true)
+
+foo::class === foo::class = bool(true)
+foo::class  eq foo::class = bool(true)
+foo::class  lt foo::class = bool(false)
+foo::class lte foo::class = bool(true)
+foo::class  gt foo::class = bool(false)
+foo::class gte foo::class = bool(true)
+
+Test 8
+foo::class === foo::class = bool(true)
+foo::class  eq foo::class = bool(true)
+foo::class  lt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+bool(false)
+foo::class lte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+bool(true)
+foo::class  gt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+bool(false)
+foo::class gte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+bool(true)
+
+foo::class === foo::class = bool(true)
+foo::class  eq foo::class = bool(true)
+foo::class  lt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+bool(false)
+foo::class lte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+bool(true)
+foo::class  gt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+bool(false)
+foo::class gte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+bool(true)
+
+Test 9
+foo::class === dict [
+  0 => 'foo',
+] = bool(false)
+foo::class  eq dict [
+  0 => 'foo',
+] = bool(false)
+foo::class  lt dict [
+  0 => 'foo',
+] = Cannot compare lazy class and HH\dict using a relational operator
+foo::class lte dict [
+  0 => 'foo',
+] = Cannot compare lazy class and HH\dict using a relational operator
+foo::class  gt dict [
+  0 => 'foo',
+] = Cannot compare lazy class and HH\dict using a relational operator
+foo::class gte dict [
+  0 => 'foo',
+] = Cannot compare lazy class and HH\dict using a relational operator
+
+dict [
+  0 => 'foo',
+] === foo::class = bool(false)
+dict [
+  0 => 'foo',
+]  eq foo::class = bool(false)
+dict [
+  0 => 'foo',
+]  lt foo::class = Cannot compare HH\dict and lazy class using a relational operator
+dict [
+  0 => 'foo',
+] lte foo::class = Cannot compare HH\dict and lazy class using a relational operator
+dict [
+  0 => 'foo',
+]  gt foo::class = Cannot compare HH\dict and lazy class using a relational operator
+dict [
+  0 => 'foo',
+] gte foo::class = Cannot compare HH\dict and lazy class using a relational operator
+
+Test 10
+foo::class === vec [
+  'foo',
+] = bool(false)
+foo::class  eq vec [
+  'foo',
+] = bool(false)
+foo::class  lt vec [
+  'foo',
+] = Cannot compare lazy class and HH\vec using a relational operator
+foo::class lte vec [
+  'foo',
+] = Cannot compare lazy class and HH\vec using a relational operator
+foo::class  gt vec [
+  'foo',
+] = Cannot compare lazy class and HH\vec using a relational operator
+foo::class gte vec [
+  'foo',
+] = Cannot compare lazy class and HH\vec using a relational operator
+
+vec [
+  'foo',
+] === foo::class = bool(false)
+vec [
+  'foo',
+]  eq foo::class = bool(false)
+vec [
+  'foo',
+]  lt foo::class = Cannot compare HH\vec and lazy class using a relational operator
+vec [
+  'foo',
+] lte foo::class = Cannot compare HH\vec and lazy class using a relational operator
+vec [
+  'foo',
+]  gt foo::class = Cannot compare HH\vec and lazy class using a relational operator
+vec [
+  'foo',
+] gte foo::class = Cannot compare HH\vec and lazy class using a relational operator
+
+Test 11
+foo::class === vec [
+  'foo',
+] = bool(false)
+foo::class  eq vec [
+  'foo',
+] = bool(false)
+foo::class  lt vec [
+  'foo',
+] = Cannot compare lazy class and HH\vec using a relational operator
+foo::class lte vec [
+  'foo',
+] = Cannot compare lazy class and HH\vec using a relational operator
+foo::class  gt vec [
+  'foo',
+] = Cannot compare lazy class and HH\vec using a relational operator
+foo::class gte vec [
+  'foo',
+] = Cannot compare lazy class and HH\vec using a relational operator
+
+vec [
+  'foo',
+] === foo::class = bool(false)
+vec [
+  'foo',
+]  eq foo::class = bool(false)
+vec [
+  'foo',
+]  lt foo::class = Cannot compare HH\vec and lazy class using a relational operator
+vec [
+  'foo',
+] lte foo::class = Cannot compare HH\vec and lazy class using a relational operator
+vec [
+  'foo',
+]  gt foo::class = Cannot compare HH\vec and lazy class using a relational operator
+vec [
+  'foo',
+] gte foo::class = Cannot compare HH\vec and lazy class using a relational operator
+
+Test 12
+foo::class === dict [
+  0 => 'foo',
+] = bool(false)
+foo::class  eq dict [
+  0 => 'foo',
+] = bool(false)
+foo::class  lt dict [
+  0 => 'foo',
+] = Cannot compare lazy class and HH\dict using a relational operator
+foo::class lte dict [
+  0 => 'foo',
+] = Cannot compare lazy class and HH\dict using a relational operator
+foo::class  gt dict [
+  0 => 'foo',
+] = Cannot compare lazy class and HH\dict using a relational operator
+foo::class gte dict [
+  0 => 'foo',
+] = Cannot compare lazy class and HH\dict using a relational operator
+
+dict [
+  0 => 'foo',
+] === foo::class = bool(false)
+dict [
+  0 => 'foo',
+]  eq foo::class = bool(false)
+dict [
+  0 => 'foo',
+]  lt foo::class = Cannot compare HH\dict and lazy class using a relational operator
+dict [
+  0 => 'foo',
+] lte foo::class = Cannot compare HH\dict and lazy class using a relational operator
+dict [
+  0 => 'foo',
+]  gt foo::class = Cannot compare HH\dict and lazy class using a relational operator
+dict [
+  0 => 'foo',
+] gte foo::class = Cannot compare HH\dict and lazy class using a relational operator
+
+Test 13
+foo::class === dict [
+  0 => 'foo',
+] = bool(false)
+foo::class  eq dict [
+  0 => 'foo',
+] = bool(false)
+foo::class  lt dict [
+  0 => 'foo',
+] = Cannot compare lazy class and HH\dict using a relational operator
+foo::class lte dict [
+  0 => 'foo',
+] = Cannot compare lazy class and HH\dict using a relational operator
+foo::class  gt dict [
+  0 => 'foo',
+] = Cannot compare lazy class and HH\dict using a relational operator
+foo::class gte dict [
+  0 => 'foo',
+] = Cannot compare lazy class and HH\dict using a relational operator
+
+dict [
+  0 => 'foo',
+] === foo::class = bool(false)
+dict [
+  0 => 'foo',
+]  eq foo::class = bool(false)
+dict [
+  0 => 'foo',
+]  lt foo::class = Cannot compare HH\dict and lazy class using a relational operator
+dict [
+  0 => 'foo',
+] lte foo::class = Cannot compare HH\dict and lazy class using a relational operator
+dict [
+  0 => 'foo',
+]  gt foo::class = Cannot compare HH\dict and lazy class using a relational operator
+dict [
+  0 => 'foo',
+] gte foo::class = Cannot compare HH\dict and lazy class using a relational operator
+
+Test 14
+foo::class === keyset [
+  'foo',
+] = bool(false)
+foo::class  eq keyset [
+  'foo',
+] = bool(false)
+foo::class  lt keyset [
+  'foo',
+] = Cannot compare lazy class and HH\keyset using a relational operator
+foo::class lte keyset [
+  'foo',
+] = Cannot compare lazy class and HH\keyset using a relational operator
+foo::class  gt keyset [
+  'foo',
+] = Cannot compare lazy class and HH\keyset using a relational operator
+foo::class gte keyset [
+  'foo',
+] = Cannot compare lazy class and HH\keyset using a relational operator
+
+keyset [
+  'foo',
+] === foo::class = bool(false)
+keyset [
+  'foo',
+]  eq foo::class = bool(false)
+keyset [
+  'foo',
+]  lt foo::class = Cannot compare HH\keyset and lazy class using a relational operator
+keyset [
+  'foo',
+] lte foo::class = Cannot compare HH\keyset and lazy class using a relational operator
+keyset [
+  'foo',
+]  gt foo::class = Cannot compare HH\keyset and lazy class using a relational operator
+keyset [
+  'foo',
+] gte foo::class = Cannot compare HH\keyset and lazy class using a relational operator
+
+--- test class --- 
+Test 0
+foo::class === true = bool(false)
+foo::class  eq true = bool(true)
+foo::class  lt true = bool(false)
+foo::class lte true = bool(true)
+foo::class  gt true = bool(false)
+foo::class gte true = bool(true)
+
+true === foo::class = bool(false)
+true  eq foo::class = bool(true)
+true  lt foo::class = bool(false)
+true lte foo::class = bool(true)
+true  gt foo::class = bool(false)
+true gte foo::class = bool(true)
+
+Test 1
+foo::class === false = bool(false)
+foo::class  eq false = bool(false)
+foo::class  lt false = bool(false)
+foo::class lte false = bool(false)
+foo::class  gt false = bool(true)
+foo::class gte false = bool(true)
+
+false === foo::class = bool(false)
+false  eq foo::class = bool(false)
+false  lt foo::class = bool(true)
+false lte foo::class = bool(true)
+false  gt foo::class = bool(false)
+false gte foo::class = bool(false)
+
+Test 2
+foo::class === 0 = bool(false)
+foo::class  eq 0 = bool(true)
+foo::class  lt 0 = bool(false)
+foo::class lte 0 = bool(true)
+foo::class  gt 0 = bool(false)
+foo::class gte 0 = bool(true)
+
+0 === foo::class = bool(false)
+0  eq foo::class = bool(true)
+0  lt foo::class = bool(false)
+0 lte foo::class = bool(true)
+0  gt foo::class = bool(false)
+0 gte foo::class = bool(true)
+
+Test 3
+foo::class === 1 = bool(false)
+foo::class  eq 1 = bool(false)
+foo::class  lt 1 = bool(true)
+foo::class lte 1 = bool(true)
+foo::class  gt 1 = bool(false)
+foo::class gte 1 = bool(false)
+
+1 === foo::class = bool(false)
+1  eq foo::class = bool(false)
+1  lt foo::class = bool(false)
+1 lte foo::class = bool(false)
+1  gt foo::class = bool(true)
+1 gte foo::class = bool(true)
+
+Test 4
+foo::class === 0 = bool(false)
+foo::class  eq 0 = bool(true)
+foo::class  lt 0 = bool(false)
+foo::class lte 0 = bool(true)
+foo::class  gt 0 = bool(false)
+foo::class gte 0 = bool(true)
+
+0 === foo::class = bool(false)
+0  eq foo::class = bool(true)
+0  lt foo::class = bool(false)
+0 lte foo::class = bool(true)
+0  gt foo::class = bool(false)
+0 gte foo::class = bool(true)
+
+Test 5
+foo::class === 1 = bool(false)
+foo::class  eq 1 = bool(false)
+foo::class  lt 1 = bool(true)
+foo::class lte 1 = bool(true)
+foo::class  gt 1 = bool(false)
+foo::class gte 1 = bool(false)
+
+1 === foo::class = bool(false)
+1  eq foo::class = bool(false)
+1  lt foo::class = bool(false)
+1 lte foo::class = bool(false)
+1  gt foo::class = bool(true)
+1 gte foo::class = bool(true)
+
+Test 6
+foo::class === 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 25
+bool(true)
+foo::class  eq 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 26
+bool(true)
+foo::class  lt 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+bool(false)
+foo::class lte 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+bool(true)
+foo::class  gt 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+bool(false)
+foo::class gte 'foo' = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+bool(true)
+
+'foo' === foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 25
+bool(true)
+'foo'  eq foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 26
+bool(true)
+'foo'  lt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+bool(false)
+'foo' lte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+bool(true)
+'foo'  gt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+bool(false)
+'foo' gte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+bool(true)
+
+Test 7
+foo::class === foo::class = bool(true)
+foo::class  eq foo::class = bool(true)
+foo::class  lt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+bool(false)
+foo::class lte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+bool(true)
+foo::class  gt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+bool(false)
+foo::class gte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+bool(true)
+
+foo::class === foo::class = bool(true)
+foo::class  eq foo::class = bool(true)
+foo::class  lt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+bool(false)
+foo::class lte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+bool(true)
+foo::class  gt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+bool(false)
+foo::class gte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+bool(true)
+
+Test 8
+foo::class === foo::class = bool(true)
+foo::class  eq foo::class = bool(true)
+foo::class  lt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+bool(false)
+foo::class lte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+bool(true)
+foo::class  gt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+bool(false)
+foo::class gte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+bool(true)
+
+foo::class === foo::class = bool(true)
+foo::class  eq foo::class = bool(true)
+foo::class  lt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 27
+bool(false)
+foo::class lte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 28
+bool(true)
+foo::class  gt foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 29
+bool(false)
+foo::class gte foo::class = 
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+
+Notice: Implicit Class to string conversion for comparison in %s/cmp.php on line 30
+bool(true)
+
+Test 9
+foo::class === dict [
+  0 => 'foo',
+] = bool(false)
+foo::class  eq dict [
+  0 => 'foo',
+] = bool(false)
+foo::class  lt dict [
+  0 => 'foo',
+] = Cannot compare class and HH\dict using a relational operator
+foo::class lte dict [
+  0 => 'foo',
+] = Cannot compare class and HH\dict using a relational operator
+foo::class  gt dict [
+  0 => 'foo',
+] = Cannot compare class and HH\dict using a relational operator
+foo::class gte dict [
+  0 => 'foo',
+] = Cannot compare class and HH\dict using a relational operator
+
+dict [
+  0 => 'foo',
+] === foo::class = bool(false)
+dict [
+  0 => 'foo',
+]  eq foo::class = bool(false)
+dict [
+  0 => 'foo',
+]  lt foo::class = Cannot compare HH\dict and class using a relational operator
+dict [
+  0 => 'foo',
+] lte foo::class = Cannot compare HH\dict and class using a relational operator
+dict [
+  0 => 'foo',
+]  gt foo::class = Cannot compare HH\dict and class using a relational operator
+dict [
+  0 => 'foo',
+] gte foo::class = Cannot compare HH\dict and class using a relational operator
+
+Test 10
+foo::class === vec [
+  'foo',
+] = bool(false)
+foo::class  eq vec [
+  'foo',
+] = bool(false)
+foo::class  lt vec [
+  'foo',
+] = Cannot compare class and HH\vec using a relational operator
+foo::class lte vec [
+  'foo',
+] = Cannot compare class and HH\vec using a relational operator
+foo::class  gt vec [
+  'foo',
+] = Cannot compare class and HH\vec using a relational operator
+foo::class gte vec [
+  'foo',
+] = Cannot compare class and HH\vec using a relational operator
+
+vec [
+  'foo',
+] === foo::class = bool(false)
+vec [
+  'foo',
+]  eq foo::class = bool(false)
+vec [
+  'foo',
+]  lt foo::class = Cannot compare HH\vec and class using a relational operator
+vec [
+  'foo',
+] lte foo::class = Cannot compare HH\vec and class using a relational operator
+vec [
+  'foo',
+]  gt foo::class = Cannot compare HH\vec and class using a relational operator
+vec [
+  'foo',
+] gte foo::class = Cannot compare HH\vec and class using a relational operator
+
+Test 11
+foo::class === vec [
+  'foo',
+] = bool(false)
+foo::class  eq vec [
+  'foo',
+] = bool(false)
+foo::class  lt vec [
+  'foo',
+] = Cannot compare class and HH\vec using a relational operator
+foo::class lte vec [
+  'foo',
+] = Cannot compare class and HH\vec using a relational operator
+foo::class  gt vec [
+  'foo',
+] = Cannot compare class and HH\vec using a relational operator
+foo::class gte vec [
+  'foo',
+] = Cannot compare class and HH\vec using a relational operator
+
+vec [
+  'foo',
+] === foo::class = bool(false)
+vec [
+  'foo',
+]  eq foo::class = bool(false)
+vec [
+  'foo',
+]  lt foo::class = Cannot compare HH\vec and class using a relational operator
+vec [
+  'foo',
+] lte foo::class = Cannot compare HH\vec and class using a relational operator
+vec [
+  'foo',
+]  gt foo::class = Cannot compare HH\vec and class using a relational operator
+vec [
+  'foo',
+] gte foo::class = Cannot compare HH\vec and class using a relational operator
+
+Test 12
+foo::class === dict [
+  0 => 'foo',
+] = bool(false)
+foo::class  eq dict [
+  0 => 'foo',
+] = bool(false)
+foo::class  lt dict [
+  0 => 'foo',
+] = Cannot compare class and HH\dict using a relational operator
+foo::class lte dict [
+  0 => 'foo',
+] = Cannot compare class and HH\dict using a relational operator
+foo::class  gt dict [
+  0 => 'foo',
+] = Cannot compare class and HH\dict using a relational operator
+foo::class gte dict [
+  0 => 'foo',
+] = Cannot compare class and HH\dict using a relational operator
+
+dict [
+  0 => 'foo',
+] === foo::class = bool(false)
+dict [
+  0 => 'foo',
+]  eq foo::class = bool(false)
+dict [
+  0 => 'foo',
+]  lt foo::class = Cannot compare HH\dict and class using a relational operator
+dict [
+  0 => 'foo',
+] lte foo::class = Cannot compare HH\dict and class using a relational operator
+dict [
+  0 => 'foo',
+]  gt foo::class = Cannot compare HH\dict and class using a relational operator
+dict [
+  0 => 'foo',
+] gte foo::class = Cannot compare HH\dict and class using a relational operator
+
+Test 13
+foo::class === dict [
+  0 => 'foo',
+] = bool(false)
+foo::class  eq dict [
+  0 => 'foo',
+] = bool(false)
+foo::class  lt dict [
+  0 => 'foo',
+] = Cannot compare class and HH\dict using a relational operator
+foo::class lte dict [
+  0 => 'foo',
+] = Cannot compare class and HH\dict using a relational operator
+foo::class  gt dict [
+  0 => 'foo',
+] = Cannot compare class and HH\dict using a relational operator
+foo::class gte dict [
+  0 => 'foo',
+] = Cannot compare class and HH\dict using a relational operator
+
+dict [
+  0 => 'foo',
+] === foo::class = bool(false)
+dict [
+  0 => 'foo',
+]  eq foo::class = bool(false)
+dict [
+  0 => 'foo',
+]  lt foo::class = Cannot compare HH\dict and class using a relational operator
+dict [
+  0 => 'foo',
+] lte foo::class = Cannot compare HH\dict and class using a relational operator
+dict [
+  0 => 'foo',
+]  gt foo::class = Cannot compare HH\dict and class using a relational operator
+dict [
+  0 => 'foo',
+] gte foo::class = Cannot compare HH\dict and class using a relational operator
+
+Test 14
+foo::class === keyset [
+  'foo',
+] = bool(false)
+foo::class  eq keyset [
+  'foo',
+] = bool(false)
+foo::class  lt keyset [
+  'foo',
+] = Cannot compare class and HH\keyset using a relational operator
+foo::class lte keyset [
+  'foo',
+] = Cannot compare class and HH\keyset using a relational operator
+foo::class  gt keyset [
+  'foo',
+] = Cannot compare class and HH\keyset using a relational operator
+foo::class gte keyset [
+  'foo',
+] = Cannot compare class and HH\keyset using a relational operator
+
+keyset [
+  'foo',
+] === foo::class = bool(false)
+keyset [
+  'foo',
+]  eq foo::class = bool(false)
+keyset [
+  'foo',
+]  lt foo::class = Cannot compare HH\keyset and class using a relational operator
+keyset [
+  'foo',
+] lte foo::class = Cannot compare HH\keyset and class using a relational operator
+keyset [
+  'foo',
+]  gt foo::class = Cannot compare HH\keyset and class using a relational operator
+keyset [
+  'foo',
+] gte foo::class = Cannot compare HH\keyset and class using a relational operator

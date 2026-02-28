@@ -1,6 +1,6 @@
 <?hh
 
-function main(bool $x, bool $y) {
+function main(bool $x, bool $y) :mixed{
   if (!$x && !$y) {
     $z = $x == $y;
     var_dump($z);
@@ -9,6 +9,6 @@ function main(bool $x, bool $y) {
 
 
 <<__EntryPoint>>
-function main_jmp_local_004() {
+function main_jmp_local_004() :mixed{
 main(true, true);
 }

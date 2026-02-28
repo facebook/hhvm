@@ -5,8 +5,8 @@
 */
 
 function test_splice ($replacement)
-{
-    $input_array=varray[0,1];
+:mixed{
+    $input_array=vec[0,1];
     var_dump (array_splice(inout $input_array, 2,0,$replacement));
     var_dump ($input_array);
 }

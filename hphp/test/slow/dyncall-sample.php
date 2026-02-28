@@ -1,15 +1,15 @@
 <?hh
 
-<<__DynamicallyCallable(0)>> function foo() {}
-<<__DynamicallyCallable(0)>> function bar() { echo "bar\n"; }
+<<__DynamicallyCallable(0)>> function foo() :mixed{}
+<<__DynamicallyCallable(0)>> function bar() :mixed{ echo "bar\n"; }
 
-class Klass { <<__DynamicallyCallable(0)>> static function funktion() {} }
+class Klass { <<__DynamicallyCallable(0)>> static function funktion() :mixed{} }
 <<__DynamicallyConstructible(0)>> class Alpha {
-  <<__DynamicallyCallable(0)>> function beta() { echo "Beta\n"; }
+  <<__DynamicallyCallable(0)>> function beta() :mixed{ echo "Beta\n"; }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo "Raw function call\n";
   foo(); bar();
 
@@ -40,38 +40,38 @@ function main() {
   echo "Raw class method call\n";
   Klass::funktion();
 
-  $cm = class_meth(Klass::class, 'funktion');
+  $cm = Klass::funktion<>;
 
   echo "Class method pointer call\n";
   $cm();
 
-  $cm2 = __hhvm_intrinsics\launder_value(class_meth(Klass::class, 'funktion'));
+  $cm2 = __hhvm_intrinsics\launder_value(Klass::funktion<>);
 
   echo "Class method pointer call (laundered)\n";
   $cm2();
 
-  $klass = __hhvm_intrinsics\launder_value('klass');
+  $klass = __hhvm_intrinsics\launder_value('Klass');
   $funktion = __hhvm_intrinsics\launder_value('funktion');
 
   echo "Class/method string call (laundered)\n";
-  Klass::$funktion();
+  HH\dynamic_class_meth(Klass::class, $funktion)();
   $klass::funktion();
-  $klass::$funktion();
+  HH\dynamic_class_meth($klass, $funktion)();
 
-  $klass2 = 'klass';
+  $klass2 = 'Klass';
   $funktion2 = 'funktion';
 
   echo "Class/method string call\n";
-  Klass::$funktion2();
+  HH\dynamic_class_meth(Klass::class, $funktion2)();
   $klass2::funktion();
-  $klass2::$funktion2();
+  HH\dynamic_class_meth($klass2, $funktion2)();
 
-  $arr = varray[Klass::class, 'funktion'];
+  $arr = vec[Klass::class, 'funktion'];
 
   echo "Class/method array call\n";
   $arr();
 
-  $arr2 = __hhvm_intrinsics\launder_value(varray[Klass::class, 'funktion']);
+  $arr2 = __hhvm_intrinsics\launder_value(vec[Klass::class, 'funktion']);
 
   echo "Class/method array call (laundered)\n";
   $arr2();
@@ -79,7 +79,7 @@ function main() {
   echo "Raw method call\n";
   (new Alpha)->beta();
 
-  $alpha = __hhvm_intrinsics\launder_value('alpha');
+  $alpha = __hhvm_intrinsics\launder_value('Alpha');
   $beta = __hhvm_intrinsics\launder_value('beta');
 
   echo "Method string call (laundered)\n";
@@ -87,7 +87,7 @@ function main() {
   (new $alpha)->beta();
   (new $alpha)->$beta();
 
-  $alpha2 = 'alpha';
+  $alpha2 = 'Alpha';
   $beta2 = 'beta';
 
   echo "Method string call\n";
@@ -95,12 +95,12 @@ function main() {
   (new $alpha2)->beta();
   (new $alpha2)->$beta2();
 
-  $iarr = varray[new Alpha, 'beta'];
+  $iarr = vec[new Alpha, 'beta'];
 
   echo "Method array call\n";
   $iarr();
 
-  $iarr2 = __hhvm_intrinsics\launder_value(varray[new Alpha, 'beta']);
+  $iarr2 = __hhvm_intrinsics\launder_value(vec[new Alpha, 'beta']);
 
   echo "Method array call (laundered)\n";
   $iarr2();

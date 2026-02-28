@@ -1,5 +1,5 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$rc = new ReflectionClass('XsltProcessor');
-echo $rc->getMethod('setSecurityPrefs')->invoke(new XmlReader(), 0xdeadbeef);
+$rc = new ReflectionClass('XSLTProcessor');
+echo $rc->getMethod('setSecurityPrefs')->invoke(new XMLReader(), 0xdeadbeef);
 }

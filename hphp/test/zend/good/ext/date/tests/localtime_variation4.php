@@ -13,7 +13,7 @@ date_default_timezone_set("UTC");
 $is_associative = true;
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
 
       'Octal 0' => 00,
       'Octal 10' => 012,

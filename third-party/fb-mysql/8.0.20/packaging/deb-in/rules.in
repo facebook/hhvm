@@ -1,0 +1,110 @@
+#!/usr/bin/make -f
+
+# Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2.0,
+# as published by the Free Software Foundation.
+#
+# This program is also distributed with certain software (including
+# but not limited to OpenSSL) that is licensed under separate terms,
+# as designated in a particular file or component or in included license
+# documentation.  The authors of MySQL hereby grant you an additional
+# permission to link the program and your derivative works with the
+# separately licensed software that they have included with MySQL.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License, version 2.0, for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+
+%:
+	dh $@
+
+export DH_VERBOSE=1
+export CFLAGS=
+export CXXFLAGS=
+
+override_dh_auto_configure:
+	@echo "RULES.$@"
+
+	@DEB_RULES_DEBUG_CMAKE@
+
+	mkdir release && cd release && \
+	cmake .. \
+		-DBUILD_CONFIG=mysql_release \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DINSTALL_LIBDIR=lib/$(DEB_HOST_MULTIARCH) \
+		-DSYSCONFDIR=/etc/mysql \
+		-DMYSQL_UNIX_ADDR=/var/run/mysqld/mysqld.sock \
+		-DWITH_INNODB_MEMCACHED=1 \
+		-DWITH_MECAB=system \
+		-DWITH_NUMA=ON \
+		-DCOMPILATION_COMMENT="MySQL @DEB_PRODUCTNAMEC@ - @DEB_LICENSENAME@" \
+		-DCOMPILATION_COMMENT_SERVER="MySQL @DEB_PRODUCTNAMEC@ Server - @DEB_LICENSENAME@" \
+		-DINSTALL_LAYOUT=DEB \
+		-DREPRODUCIBLE_BUILD=OFF \
+		-DDEB_PRODUCT=@DEB_PRODUCT@ \
+		@DEB_CMAKE_EXTRAS@
+
+	touch $@
+
+override_dh_auto_build:
+	@echo "RULES.$@"
+	@DEB_RULES_DEBUG_MAKE@
+	cd release && \
+	$(MAKE) -j8 VERBOSE=1
+	touch $@
+
+override_dh_auto_test:
+	@echo "RULES.$@"
+	export CTEST_OUTPUT_ON_FAILURE=1
+	cd release && \
+	make test || true
+	touch $@
+
+@DEB_RULES_STRIP@
+@DEB_NDB_RULES_STRIP@
+
+override_dh_auto_install:
+
+	@echo "RULES.$@"
+	# complete install first
+	cd release && \
+	$(MAKE) install DESTDIR=../debian/tmp
+	@DEB_RULES_DEBUG_EXTRA@
+	# Add helper functions for maintainer scripts
+	install -m 0644 debian/extra/mysql-helpers debian/tmp/usr/share/mysql-@MYSQL_BASE_VERSION@/
+	# add apparmor profile
+	@DEB_RULES_INSTALL_APPARMOR@
+	# add systemd script
+	install -m 0755 debian/extra/mysql-systemd-start debian/tmp/usr/share/mysql-@MYSQL_BASE_VERSION@/
+	touch $@
+
+override_dh_installinit:
+	@echo "RULES.$@"
+	@DEB_RULES_APPARMOR_LOAD@
+	dh_systemd_enable --name=mysql
+	dh_installinit --name=mysql -- defaults 19 21
+	dh_installinit --name=mysql@ -- disable
+	dh_installinit --name=mysqlrouter -- defaults 19 21
+	dh_systemd_start --restart-after-upgrade
+	touch $@
+
+override_dh_install:
+	dh_install --fail-missing \
+		-Xusr/bin/i_mysql_client_test \
+		-Xmysql.server \
+		-Xmysql.info \
+		-XChangeLog \
+		-Xusr/share/man/man1/mysqlman.1
+
+# Since this dynamic library is included in both server and router, stripping
+# it leads to file conflict errors when trying to install dbgsym-deb packages
+# for both.
+override_dh_strip:
+	dh_strip -Xlibprotobuf-lite

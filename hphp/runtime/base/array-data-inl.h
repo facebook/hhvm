@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/safe-cast.h"
@@ -71,7 +70,6 @@ ALWAYS_INLINE void ArrayData::decRefAndRelease() {
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayFunction dispatch.
 
-NO_PROFILING
 inline void ArrayData::release() DEBUG_NOEXCEPT {
   assertx(!hasMultipleRefs());
   g_array_funcs.release[kind()](this);
@@ -135,7 +133,8 @@ inline bool ArrayData::hasStrKeyTable() const {
 }
 
 inline uint8_t ArrayData::auxBits() const {
-  return safe_cast<uint8_t>(m_aux16 & (kLegacyArray | kSampledArray));
+  return safe_cast<uint8_t>(m_aux16 &
+                            (kLegacyArray | kSampledArray | kMayContainCounted));
 }
 
 inline uint8_t ArrayData::sizeIndex() const {

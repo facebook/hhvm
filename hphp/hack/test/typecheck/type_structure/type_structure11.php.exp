@@ -1,0 +1,2 @@
+WARN: File "type_structure11.php", line 14, characters 10-58:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `classname<TQ>` which is a subtype of `nonnull`. (Warn[12011])

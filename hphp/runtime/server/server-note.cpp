@@ -16,7 +16,6 @@
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/tv-conversions.h"
-#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

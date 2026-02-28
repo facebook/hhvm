@@ -1,13 +1,13 @@
 <?hh
 
-function VC($x, $y) {
+function VC($x, $y) :mixed{
   var_dump(abs($x - $y) < 0.00001);
 }
 
 
 
 <<__EntryPoint>>
-function main_math_misc() {
+function main_math_misc() :mixed{
 var_dump(pi());
 var_dump(M_PI);
 

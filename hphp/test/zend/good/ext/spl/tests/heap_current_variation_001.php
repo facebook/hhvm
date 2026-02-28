@@ -3,7 +3,7 @@
 class myHeap extends SplHeap
 {
     public function compare($v1, $v2)
-    {
+:mixed    {
         throw new Exception('');
     }
 }

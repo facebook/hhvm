@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class GoodExample {
   public function __construct(public int $p) {}

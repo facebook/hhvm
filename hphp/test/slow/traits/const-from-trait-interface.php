@@ -11,7 +11,7 @@ class C {
 class D extends C {}
 
 <<__EntryPoint>>
-function main_const_from_trait_interface() {
+function main_const_from_trait_interface() :mixed{
 $c = new D;
 var_dump($c is I);
 }

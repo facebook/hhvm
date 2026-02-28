@@ -1,7 +1,7 @@
 <?hh
 
 function traverse_xml($xml, $pad = '')
-{
+:mixed{
   $name = $xml->getName();
   echo "$pad<$name";
   foreach($xml->attributes() as $attr => $value)

@@ -1,0 +1,1122 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <thrift/compiler/generate/t_whisker_generator.h>
+
+#include <thrift/compiler/ast/t_program_bundle.h>
+#include <thrift/compiler/ast/type_visitor.h>
+#include <thrift/compiler/detail/system.h>
+#include <thrift/compiler/generate/common.h>
+#include <thrift/compiler/sema/schematizer.h>
+#include <thrift/compiler/whisker/ast.h>
+#include <thrift/compiler/whisker/parser.h>
+#include <thrift/compiler/whisker/source_location.h>
+#include <thrift/compiler/whisker/standard_library.h>
+
+#include <cassert>
+#include <cstddef>
+#include <fstream>
+
+#include <fmt/ranges.h>
+
+#include <boost/algorithm/string/split.hpp>
+
+namespace w = whisker::make;
+using whisker::array;
+using whisker::i64;
+using whisker::map;
+using whisker::object;
+using whisker::prototype;
+using whisker::prototype_database;
+using whisker::string;
+
+namespace dsl = whisker::dsl;
+using dsl::function;
+using dsl::prototype_builder;
+
+namespace apache::thrift::compiler {
+
+prototype<t_node>::ptr t_whisker_generator::make_prototype_for_node(
+    const prototype_database&) const {
+  prototype_builder<h_node> def;
+  def.property("lineno", [&](const t_node& self) {
+    auto loc = self.src_range().begin;
+    return loc != source_location()
+        ? i64(source_mgr().resolve_location(self.src_range().begin).line())
+        : i64(0);
+  });
+  return std::move(def).make();
+}
+
+prototype<t_named>::ptr t_whisker_generator::make_prototype_for_named(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_named>::extends(proto.of<t_node>());
+  def.property("name", mem_fn(&t_named::name));
+  def.property("scoped_name", mem_fn(&t_named::get_scoped_name));
+  def.property("doc", mem_fn(&t_named::doc));
+  def.property("docs?", mem_fn(&t_named::has_doc));
+  def.property("generated?", mem_fn(&t_named::generated));
+  def.property("program", mem_fn(&t_named::program, proto.of<t_program>()));
+  def.property(
+      "structured_annotations",
+      mem_fn(&t_named::structured_annotations, proto.of<t_const>()));
+  def.property("unstructured_annotations", [](const t_named& self) {
+    whisker::array::raw result;
+    result.reserve(self.unstructured_annotations().size());
+    for (const t_annotation& annotation : self.unstructured_annotations()) {
+      result.emplace_back(
+          w::map({
+              {"key", w::string(annotation.first)},
+              {"value", w::string(annotation.second.value)},
+          }));
+    }
+    return w::array(std::move(result));
+  });
+  def.property("is_runtime_annotation?", [](const t_named& self) {
+    return is_runtime_annotation(self);
+  });
+  def.property("has_runtime_annotation?", [](const t_named& self) {
+    return has_runtime_annotation(self);
+  });
+  def.property("uri", mem_fn(&t_named::uri));
+
+  def.property("definition_key", [this](const t_named& named) {
+    map::raw m;
+    detail::schematizer s(*named.program()->global_scope(), source_mgr_, {});
+    auto unescaped = s.identify_definition(named);
+    std::string escaped;
+    for (unsigned char chr : unescaped) {
+      fmt::format_to(std::back_inserter(escaped), "\\x{:02x}", chr);
+    }
+    m["buffer"] = escaped;
+    // NOTE: this is not the same as `string.len self.definition_key` because
+    // of escape sequences!
+    m["length"] = i64(detail::schematizer::definition_identifier_length());
+    return map::of(std::move(m));
+  });
+
+  return std::move(def).make();
+}
+
+namespace {
+// mem_fn wrapper checking whether a collection is non-empty
+template <typename Self>
+auto is_non_empty_collection(auto (Self::*function)() const) {
+  return [function](const Self& self) -> whisker::object {
+    return whisker::object(!(self.*function)().empty());
+  };
+}
+
+// mem_fn over a t_type, but after resolving any typedefs first
+template <typename R>
+static auto true_type_mem_fn(R (t_type::*function)() const) {
+  return [function](const t_type& self) -> whisker::object {
+    return whisker::object(
+        std::decay_t<R>((self.get_true_type()->*function)()));
+  };
+}
+
+} // namespace
+
+object resolve_derived_t_type(
+    const prototype_database& proto, const t_type& self) {
+  return self.visit(
+      [&](const t_typedef& typedef_) -> object {
+        return object(proto.create<t_typedef>(typedef_));
+      },
+      [&](const t_primitive_type& primitive) -> object {
+        return object(proto.create<t_primitive_type>(primitive));
+      },
+      [&](const t_list& list) -> object {
+        return object(proto.create<t_list>(list));
+      },
+      [&](const t_set& set) -> object {
+        return object(proto.create<t_set>(set));
+      },
+      [&](const t_map& map) -> object {
+        return object(proto.create<t_map>(map));
+      },
+      [&](const t_enum& enum_) -> object {
+        return object(proto.create<t_enum>(enum_));
+      },
+      [&](const t_union& union_) -> object {
+        return object(proto.create<t_union>(union_));
+      },
+      [&](const t_exception& exception_) -> object {
+        return object(proto.create<t_exception>(exception_));
+      },
+      [&](const t_struct& struct_) -> object {
+        // All other t_struct subtypes (t_throws, t_paramlist) should be opaque
+        // to Whisker to avoid additional tech debt.
+        return object(proto.create<t_struct>(struct_));
+      },
+      [](const t_service&) -> object {
+        // This is tech debt from a time before t_interaction was moved out of
+        // t_type (for return types). This case should no longer happen in
+        // practice.
+        throw whisker::eval_error("t_type -> t_service is not supported");
+      });
+}
+
+prototype<t_type>::ptr t_whisker_generator::make_prototype_for_type(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_type>::extends(proto.of<t_named>());
+
+  def.property("true_type", [&](const t_type& self) {
+    return resolve_derived_t_type(proto, *self.get_true_type());
+  });
+
+  // clang-format off
+  def.property("typedef?",          mem_fn(&t_type::is<t_typedef>));
+
+  // Operations which resolve any typedefs first, before evaluating
+  def.property("void?",             true_type_mem_fn(&t_type::is_void));
+  def.property("primitive?",        true_type_mem_fn(&t_type::is<t_primitive_type>));
+  def.property("string?",           true_type_mem_fn(&t_type::is_string));
+  def.property("bool?",             true_type_mem_fn(&t_type::is_bool));
+  def.property("byte?",             true_type_mem_fn(&t_type::is_byte));
+  def.property("i16?",              true_type_mem_fn(&t_type::is_i16));
+  def.property("i32?",              true_type_mem_fn(&t_type::is_i32));
+  def.property("i64?",              true_type_mem_fn(&t_type::is_i64));
+  def.property("float?",            true_type_mem_fn(&t_type::is_float));
+  def.property("double?",           true_type_mem_fn(&t_type::is_double));
+  def.property("enum?",             true_type_mem_fn(&t_type::is<t_enum>));
+  def.property("structured?",       true_type_mem_fn(&t_type::is<t_structured>));
+  def.property("struct?",           true_type_mem_fn(&t_type::is<t_struct>));
+  def.property("union?",            true_type_mem_fn(&t_type::is<t_union>));
+  def.property("exception?",        true_type_mem_fn(&t_type::is<t_exception>));
+  def.property("container?",        true_type_mem_fn(&t_type::is<t_container>));
+  def.property("list?",             true_type_mem_fn(&t_type::is<t_list>));
+  def.property("set?",              true_type_mem_fn(&t_type::is<t_set>));
+  def.property("map?",              true_type_mem_fn(&t_type::is<t_map>));
+  def.property("binary?",           true_type_mem_fn(&t_type::is_binary));
+  def.property("string_or_binary?", true_type_mem_fn(&t_type::is_string_or_binary));
+  def.property("any_int?",          true_type_mem_fn(&t_type::is_any_int));
+  def.property("floating_point?",   true_type_mem_fn(&t_type::is_floating_point));
+  // clang-format on
+
+  def.property("full_name", mem_fn(&t_type::get_full_name));
+
+  return std::move(def).make();
+}
+
+prototype<t_typedef>::ptr t_whisker_generator::make_prototype_for_typedef(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_typedef>::extends(proto.of<t_type>());
+  def.property("resolved", [&](const t_typedef& self) {
+    return resolve_derived_t_type(proto, self.type().deref());
+  });
+  return std::move(def).make();
+}
+
+prototype<t_structured>::ptr t_whisker_generator::make_prototype_for_structured(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_structured>::extends(proto.of<t_type>());
+  def.property("fields", mem_fn(&t_structured::fields, proto.of<t_field>()));
+  def.property("fields?", mem_fn(&t_structured::has_fields));
+  def.property(
+      "fields_in_serialization_order", [&proto](const t_structured& self) {
+        return self.has_structured_annotation(kSerializeInFieldIdOrderUri)
+            ? to_array(self.fields_id_order(), proto.of<t_field>())
+            : to_array(self.fields(), proto.of<t_field>());
+      });
+  def.property(
+      "has_serialize_in_field_id_order_annotation?",
+      [](const t_structured& self) {
+        return self.has_structured_annotation(kSerializeInFieldIdOrderUri);
+      });
+  return std::move(def).make();
+}
+
+prototype<t_struct>::ptr t_whisker_generator::make_prototype_for_struct(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_struct>::extends(proto.of<t_structured>());
+  return std::move(def).make();
+}
+
+prototype<t_paramlist>::ptr t_whisker_generator::make_prototype_for_paramlist(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_paramlist>::extends(proto.of<t_structured>());
+  return std::move(def).make();
+}
+
+prototype<t_throws>::ptr t_whisker_generator::make_prototype_for_throws(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_throws>::extends(proto.of<t_structured>());
+  return std::move(def).make();
+}
+
+prototype<t_union>::ptr t_whisker_generator::make_prototype_for_union(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_union>::extends(proto.of<t_structured>());
+  return std::move(def).make();
+}
+
+prototype<t_exception>::ptr t_whisker_generator::make_prototype_for_exception(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_exception>::extends(proto.of<t_structured>());
+  def.property("blame", [](const t_exception& self) -> whisker::string {
+    switch (self.blame()) {
+      case t_error_blame::server:
+        return "SERVER";
+      case t_error_blame::client:
+        return "CLIENT";
+      default:
+        return "UNSPECIFIED";
+    }
+  });
+  def.property("kind", [](const t_exception& self) -> whisker::string {
+    switch (self.kind()) {
+      case t_error_kind::transient:
+        return "TRANSIENT";
+      case t_error_kind::stateful:
+        return "STATEFUL";
+      case t_error_kind::permanent:
+        return "PERMANENT";
+      default:
+        return "UNSPECIFIED";
+    }
+  });
+  def.property("safety", [](const t_exception& self) -> whisker::string {
+    switch (self.safety()) {
+      case t_error_safety::safe:
+        return "SAFE";
+      default:
+        return "UNSPECIFIED";
+    }
+  });
+  def.property(
+      "message_field", [&proto](const t_exception& self) -> whisker::object {
+        return proto.create_nullable<t_field>(self.get_message_field());
+      });
+  return std::move(def).make();
+}
+
+prototype<t_primitive_type>::ptr
+t_whisker_generator::make_prototype_for_primitive_type(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_primitive_type>::extends(proto.of<t_type>());
+  return std::move(def).make();
+}
+
+prototype<t_field>::ptr t_whisker_generator::make_prototype_for_field(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_field>::extends(proto.of<t_named>());
+  def.property("id", [](const t_field& self) { return i64(self.id()); });
+  def.property("type", [&](const t_field& self) {
+    return resolve_derived_t_type(proto, self.type().deref());
+  });
+  def.property("default_value", [&](const t_field& self) {
+    return proto.create_nullable<t_const_value>(self.default_value());
+  });
+  def.property("unqualified?", [](const t_field& self) {
+    return self.qualifier() == t_field_qualifier::none;
+  });
+  def.property("required?", [](const t_field& self) {
+    return self.qualifier() == t_field_qualifier::required;
+  });
+  def.property("optional?", [](const t_field& self) {
+    return self.qualifier() == t_field_qualifier::optional;
+  });
+  def.property("terse?", [](const t_field& self) {
+    return self.qualifier() == t_field_qualifier::terse;
+  });
+  def.property("deprecated?", [](const t_field& self) {
+    return self.has_structured_annotation(kDeprecatedUri);
+  });
+  def.property("deprecation_message", [](const t_field& self) {
+    if (const t_const* deprecated_annotation =
+            self.find_structured_annotation_or_null(kDeprecatedUri)) {
+      if (const t_const_value* msg_value =
+              deprecated_annotation
+                  ->get_value_from_structured_annotation_or_null("message")) {
+        return whisker::make::string(
+            get_escaped_string(msg_value->get_string()));
+      }
+      return whisker::make::string("This field is deprecated");
+    }
+    return whisker::make::null;
+  });
+  return std::move(def).make();
+}
+
+prototype<t_enum>::ptr t_whisker_generator::make_prototype_for_enum(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_enum>::extends(proto.of<t_type>());
+  def.property("values", mem_fn(&t_enum::values, proto.of<t_enum_value>()));
+  def.property("unused", [](const t_enum& self) { return i64(self.unused()); });
+  return std::move(def).make();
+}
+
+prototype<t_enum_value>::ptr t_whisker_generator::make_prototype_for_enum_value(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_enum_value>::extends(proto.of<t_named>());
+  def.property(
+      "value", [](const t_enum_value& self) { return i64(self.get_value()); });
+  return std::move(def).make();
+}
+
+prototype<t_const>::ptr t_whisker_generator::make_prototype_for_const(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_const>::extends(proto.of<t_named>());
+  def.property("generated?", mem_fn(&t_const::generated));
+  def.property("type", [&](const t_const& self) {
+    return resolve_derived_t_type(proto, self.type_ref().deref());
+  });
+  def.property("value", [&](const t_const& self) {
+    return proto.create<t_const_value>(*self.value());
+  });
+  def.property("is_runtime_annotation?", [](const t_const& self) {
+    return is_runtime_annotation(*self.type());
+  });
+  return std::move(def).make();
+}
+
+prototype<t_const_value>::ptr
+t_whisker_generator::make_prototype_for_const_value(
+    const prototype_database& proto) const {
+  prototype_builder<h_const_value> def;
+  using cv = t_const_value::t_const_value_kind;
+  def.property("type", [&proto](const t_const_value& self) {
+    if (self.type().empty()) {
+      throw whisker::eval_error("Const value has indeterminate type");
+    }
+    return resolve_derived_t_type(proto, self.type().deref());
+  });
+  def.property("bool?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_BOOL;
+  });
+  def.property("double?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_DOUBLE;
+  });
+  def.property("integer?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_INTEGER && !self.is_enum();
+  });
+  def.property("enum?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_INTEGER && self.is_enum();
+  });
+  def.property("enum_value?", [](const t_const_value& self) {
+    return self.get_enum_value() != nullptr;
+  });
+  def.property("string?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_STRING;
+  });
+  def.property("map?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_MAP && !self.type().empty() &&
+        self.type()->get_true_type()->is<t_map>();
+  });
+  def.property("list?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_LIST;
+  });
+  def.property("container?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_MAP || self.kind() == cv::CV_LIST;
+  });
+
+  def.property("empty_container?", [](const t_const_value& self) {
+    return (self.kind() == cv::CV_MAP && self.get_map().empty()) ||
+        (self.kind() == cv::CV_LIST && self.get_list().empty());
+  });
+  def.property("structured?", [](const t_const_value& self) {
+    return self.kind() == cv::CV_MAP && !self.type().empty() &&
+        self.type()->get_true_type()->is<t_structured>();
+  });
+  def.property("nonzero?", [](const t_const_value& self) {
+    switch (self.kind()) {
+      case cv::CV_DOUBLE:
+        return w::boolean(self.get_double() != 0.0);
+      case cv::CV_BOOL:
+        return w::boolean(self.get_bool());
+      case cv::CV_INTEGER:
+        return w::boolean(self.get_integer() != 0);
+      default:
+        return w::null;
+    }
+  });
+
+  def.property("integer_value", [](const t_const_value& self) {
+    return self.kind() == cv::CV_INTEGER ? w::i64(self.get_integer()) : w::null;
+  });
+  def.property("double_value", [](const t_const_value& self) {
+    return self.kind() == cv::CV_DOUBLE ? w::f64(self.get_double()) : w::null;
+  });
+  def.property("bool_value", [](const t_const_value& self) {
+    return self.kind() == cv::CV_BOOL ? w::boolean(self.get_bool()) : w::null;
+  });
+  def.property("enum_value", [&proto](const t_const_value& self) {
+    return proto.create_nullable<t_enum_value>(self.get_enum_value());
+  });
+  def.property("string_value", [](const t_const_value& self) {
+    return self.kind() == cv::CV_STRING
+        ? w::string(get_escaped_string(self.get_string()))
+        : w::null;
+  });
+  def.property("string_length", [](const t_const_value& self) {
+    return self.kind() == cv::CV_STRING
+        ? w::i64((long)self.get_string().length())
+        : w::null;
+  });
+
+  def.property("enum_name", [](const t_const_value& self) {
+    return self.kind() == cv::CV_INTEGER && self.is_enum()
+        ? w::string(self.get_enum()->name())
+        : w::null;
+  });
+
+  // Returns an array of the elements in a structured const value.
+  // Each array element is a map containing a reference to the corresponding
+  // field ("field") and the const value being set ("value").
+  def.property("structured_elements", [&proto](const t_const_value& self) {
+    const t_structured* strct = self.type().empty()
+        ? nullptr
+        : self.type()->get_true_type()->try_as<t_structured>();
+    if (strct == nullptr) {
+      return w::null;
+    }
+    whisker::array::raw result;
+    for (const auto& [key_const_val, val_const_val] : self.get_map()) {
+      const t_field* field =
+          strct->get_field_by_name(key_const_val->get_string());
+      assert(field != nullptr);
+      result.emplace_back(
+          w::map({
+              {"field", w::native_handle(proto.create<t_field>(*field))},
+              {"value",
+               w::native_handle(proto.create<t_const_value>(*val_const_val))},
+          }));
+    }
+    return w::array(result);
+  });
+
+  def.property("list_elements", [&proto](const t_const_value& self) {
+    return self.kind() == cv::CV_LIST
+        ? to_array(self.get_list(), proto.of<t_const_value>())
+        : w::null;
+  });
+
+  def.property("map_elements", [&proto](const t_const_value& self) {
+    if (self.kind() != cv::CV_MAP) {
+      return w::null;
+    }
+    // Result must be a list, rather than Whisker map, because Whisker map only
+    // supports string keys, while our Thrift map key can be any const
+    whisker::array::raw result;
+    for (const auto& [key_const_val, val_const_val] : self.get_map()) {
+      result.emplace_back(
+          w::map({
+              {"key",
+               w::native_handle(proto.create<t_const_value>(*key_const_val))},
+              {"value",
+               w::native_handle(proto.create<t_const_value>(*val_const_val))},
+          }));
+    }
+    return w::array(result);
+  });
+  def.property("owner", mem_fn(&t_const_value::get_owner, proto.of<t_const>()));
+  def.function(
+      "referenceable_from?",
+      [](const t_const_value& self, function::context ctx) {
+        ctx.declare_arity(1);
+        ctx.declare_named_arguments({});
+        const t_const* from_const =
+            ctx.raw().positional_arguments()[0].is_null()
+            ? nullptr
+            : ctx.argument<whisker::native_handle<t_const>>(0).ptr().get();
+        // value can be referenced if it is not anonymous, and is being
+        // referenced from any const that's not the owner
+        return self.get_owner() != nullptr && self.get_owner() != from_const;
+      });
+
+  return std::move(def).make();
+}
+
+prototype<t_container>::ptr t_whisker_generator::make_prototype_for_container(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_container>::extends(proto.of<t_type>());
+  return std::move(def).make();
+}
+
+prototype<t_map>::ptr t_whisker_generator::make_prototype_for_map(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_map>::extends(proto.of<t_container>());
+  def.property("key_type", [&](const t_map& self) {
+    return resolve_derived_t_type(proto, self.key_type().deref());
+  });
+  def.property("val_type", [&](const t_map& self) {
+    return resolve_derived_t_type(proto, self.val_type().deref());
+  });
+  return std::move(def).make();
+}
+
+prototype<t_set>::ptr t_whisker_generator::make_prototype_for_set(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_set>::extends(proto.of<t_container>());
+  def.property("elem_type", [&](const t_set& self) {
+    return resolve_derived_t_type(proto, self.elem_type().deref());
+  });
+  return std::move(def).make();
+}
+
+prototype<t_list>::ptr t_whisker_generator::make_prototype_for_list(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_list>::extends(proto.of<t_container>());
+  def.property("elem_type", [&](const t_list& self) {
+    return resolve_derived_t_type(proto, self.elem_type().deref());
+  });
+  return std::move(def).make();
+}
+
+prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_program>::extends(proto.of<t_named>());
+  def.property("package", mem_fn(&t_program::package, proto.of<t_package>()));
+  def.property("doc", mem_fn(&t_program::doc));
+  def.property("include_prefix", mem_fn(&t_program::include_prefix));
+  def.property("includes", mem_fn(&t_program::includes, proto.of<t_include>()));
+  def.property("autogen_path", [](const t_program& self) {
+    std::string path = self.path();
+    // use posix path separators, even on windows, for autogen comment
+    // to avoid spurious fixture regen diffs
+    std::replace(path.begin(), path.end(), '\\', '/');
+    return path;
+  });
+  def.property("namespaces", [&](const t_program& self) -> map::ptr {
+    map::raw result;
+    for (const auto& [language, value] : self.namespaces()) {
+      result[language] = string(value->ns());
+    }
+    return map::of(std::move(result));
+  });
+  def.function(
+      "namespace_of", [&](const t_program& self, function::context ctx) {
+        ctx.declare_arity(0);
+        ctx.declare_named_arguments({"language"});
+        return self.get_namespace(*ctx.named_argument<string>("language"));
+      });
+
+  def.property("structured_definitions", [&](const t_program& self) {
+    array::raw result;
+    result.reserve(self.structured_definitions().size());
+    for (const t_structured* structured : self.structured_definitions()) {
+      result.emplace_back(resolve_derived_t_type(proto, *structured));
+    }
+    return array::of(std::move(result));
+  });
+  def.property("services", mem_fn(&t_program::services, proto.of<t_service>()));
+  def.property(
+      "interactions",
+      mem_fn(&t_program::interactions, proto.of<t_interaction>()));
+  def.property("typedefs", mem_fn(&t_program::typedefs, proto.of<t_typedef>()));
+  def.property("enums", mem_fn(&t_program::enums, proto.of<t_enum>()));
+  def.property("consts", mem_fn(&t_program::consts, proto.of<t_const>()));
+
+  def.property("definition_key", [this](const t_program& self) {
+    map::raw m;
+    detail::schematizer s(*self.global_scope(), source_mgr_, {});
+    auto id = std::to_string(s.identify_program(self));
+    // NOTE: this overrides a property on t_named which is not the strlen,
+    // but this is the same as the strlen. Provided for consistency to avoid
+    // bugs when using the base implementation.
+    m["length"] = i64(id.length());
+    m["buffer"] = std::move(id);
+    return map::of(std::move(m));
+  });
+  def.property("schema_name", [this](const t_program& self) {
+    auto name = detail::schematizer::name_schema(source_mgr_, self);
+    if (self.find({name, source_range{}})) {
+      return object(std::move(name));
+    }
+    return object();
+  });
+  def.property("uris", [](const t_program& self) {
+    array::raw result;
+    for (const auto& struct_def : self.structured_definitions()) {
+      if (!struct_def->uri().empty()) {
+        result.emplace_back(struct_def->uri());
+      }
+    }
+    for (const auto& enum_def : self.enums()) {
+      if (!enum_def->uri().empty()) {
+        result.emplace_back(enum_def->uri());
+      }
+    }
+    return array::of(std::move(result));
+  });
+
+  def.property("constants?", is_non_empty_collection(&t_program::consts));
+  def.property("enums?", is_non_empty_collection(&t_program::enums));
+  def.property(
+      "interactions?", is_non_empty_collection(&t_program::interactions));
+  def.property("services?", is_non_empty_collection(&t_program::services));
+  def.property(
+      "structs?", is_non_empty_collection(&t_program::structured_definitions));
+  def.property("typedefs?", is_non_empty_collection(&t_program::typedefs));
+  def.property("unions?", [](const t_program& self) {
+    return std::any_of(
+        self.structs_and_unions().begin(),
+        self.structs_and_unions().end(),
+        std::mem_fn(&t_structured::is<t_union>));
+  });
+
+  return std::move(def).make();
+}
+
+prototype<t_package>::ptr t_whisker_generator::make_prototype_for_package(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_package>::extends(proto.of<t_node>());
+  def.property("explicit?", mem_fn(&t_package::is_explicit));
+  def.property("empty?", mem_fn(&t_package::empty));
+  def.property("name", mem_fn(&t_package::name));
+  return std::move(def).make();
+}
+
+prototype<t_include>::ptr t_whisker_generator::make_prototype_for_include(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_include>::extends(proto.of<t_node>());
+  def.property("program", [&](const t_include& self) {
+    return proto.create<t_program>(*self.get_program());
+  });
+  return std::move(def).make();
+}
+
+prototype<t_sink>::ptr t_whisker_generator::make_prototype_for_sink(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_sink>::extends(proto.of<t_node>());
+  def.property("elem_type", [&proto](const t_sink& self) {
+    return resolve_derived_t_type(proto, self.elem_type().deref());
+  });
+  def.property("exceptions", [&proto](const t_sink& self) {
+    return to_array(get_elems(self.sink_exceptions()), proto.of<t_field>());
+  });
+  def.property("final_response_exceptions", [&proto](const t_sink& self) {
+    return to_array(
+        get_elems(self.final_response_exceptions()), proto.of<t_field>());
+  });
+  def.property("final_response_type", [&proto](const t_sink& self) {
+    const t_type_ref& response = self.final_response_type();
+    return response.empty() ? w::null
+                            : resolve_derived_t_type(proto, *response);
+  });
+  return std::move(def).make();
+}
+
+prototype<t_stream>::ptr t_whisker_generator::make_prototype_for_stream(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_stream>::extends(proto.of<t_node>());
+  def.property("elem_type", [&proto](const t_stream& self) {
+    return resolve_derived_t_type(proto, self.elem_type().deref());
+  });
+  def.property("exceptions", [&proto](const t_stream& self) {
+    return to_array(get_elems(self.exceptions()), proto.of<t_field>());
+  });
+  return std::move(def).make();
+}
+
+prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_function>::extends(proto.of<t_named>());
+
+  def.property("params", mem_fn(&t_function::params, proto.of<t_paramlist>()));
+  def.property("exceptions", [&proto](const t_function& self) {
+    return to_array(get_elems(self.exceptions()), proto.of<t_field>());
+  });
+  def.property("sink", mem_fn(&t_function::sink, proto.of<t_sink>()));
+  def.property("stream", mem_fn(&t_function::stream, proto.of<t_stream>()));
+
+  def.property("return_type", [&](const t_function& function) {
+    const t_type* type = function.return_type().get_type();
+    return resolve_derived_t_type(proto, *type);
+  });
+
+  def.property("oneway?", [](const t_function& self) {
+    return self.qualifier() == t_function_qualifier::oneway;
+  });
+  def.property("void?", [](const t_function& self) {
+    return self.return_type()->is_void() && !self.interaction() &&
+        !self.sink_or_stream();
+  });
+  def.property("exceptions?", [](const t_function& self) {
+    return !get_elems(self.exceptions()).empty();
+  });
+  def.property("priority", [](const t_function& self) -> whisker::string {
+    if (const t_const* val =
+            self.find_structured_annotation_or_null(kPriorityUri)) {
+      return val->get_value_from_structured_annotation("level")
+          .get_enum_value()
+          ->name();
+    }
+    return self.get_unstructured_annotation("priority", "NORMAL");
+  });
+  def.property("qualifier", [](const t_function& self) -> whisker::string {
+    switch (self.qualifier()) {
+      case t_function_qualifier::oneway:
+        return "OneWay";
+      case t_function_qualifier::idempotent:
+        return "Idempotent";
+      case t_function_qualifier::readonly:
+        return "ReadOnly";
+      default:
+        return "Unspecified";
+    }
+  });
+
+  // Interaction methods
+  def.property(
+      "starts_interaction?", mem_fn(&t_function::is_interaction_constructor));
+  def.property("creates_interaction?", [](const t_function& self) {
+    return !self.interaction().empty();
+  });
+  def.property("created_interaction", [&proto](const t_function& self) {
+    return self.interaction().empty()
+        ? w::null
+        : w::native_handle(proto.create<t_interaction>(
+              self.interaction()->as<t_interaction>()));
+  });
+
+  // Sink methods
+  def.property("sink_or_stream?", [](const t_function& self) {
+    return self.sink_or_stream() != nullptr;
+  });
+  def.property(
+      "sink?", [](const t_function& self) { return self.sink() != nullptr; });
+  def.property("sink_has_first_response?", [](const t_function& self) {
+    return !self.has_void_initial_response() && self.sink() != nullptr;
+  });
+  def.property("sink_exceptions?", [](const t_function& self) {
+    return !get_elems(self.sink()->sink_exceptions()).empty();
+  });
+  def.property("sink_final_response_exceptions?", [](const t_function& self) {
+    return !get_elems(self.sink()->final_response_exceptions()).empty();
+  });
+
+  // Stream methods
+  def.property("stream?", [](const t_function& self) {
+    return self.stream() != nullptr;
+  });
+  def.property(
+      "bidirectional_stream?", mem_fn(&t_function::is_bidirectional_stream));
+  def.property("stream_has_first_response?", [](const t_function& self) {
+    return !self.has_void_initial_response() && self.stream() != nullptr;
+  });
+  def.property("initial_response?", [](const t_function& self) {
+    return !self.return_type()->is_void();
+  });
+  def.property("stream_exceptions?", [](const t_function& self) {
+    return !get_elems(self.stream()->exceptions()).empty();
+  });
+
+  return std::move(def).make();
+}
+
+prototype<t_interface>::ptr t_whisker_generator::make_prototype_for_interface(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_interface>::extends(proto.of<t_type>());
+  def.property(
+      "functions", mem_fn(&t_interface::functions, proto.of<t_function>()));
+  def.property("interaction?", [](const t_interface& self) {
+    return self.is<t_interaction>();
+  });
+  return std::move(def).make();
+}
+
+prototype<t_service>::ptr t_whisker_generator::make_prototype_for_service(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_service>::extends(proto.of<t_interface>());
+
+  def.property("extends", mem_fn(&t_service::extends, proto.of<t_service>()));
+  def.property("interactions", [&proto](const t_service& self) {
+    // This property retrieves the interactions initiated by this service alone
+    std::vector<const t_interaction*> interactions;
+    interactions.reserve(self.functions().size());
+    for (const auto& function : self.functions()) {
+      if (const auto& interaction = function.interaction()) {
+        auto* ptr = &interaction->as<t_interaction>();
+        if (std::find(interactions.begin(), interactions.end(), ptr) !=
+            interactions.end()) {
+          continue; // Already seen this interaction.
+        }
+        interactions.push_back(ptr);
+      }
+    }
+    return to_array(interactions, proto.of<t_interaction>());
+  });
+
+  def.property("has_bidirectional_streams?", [](const t_service& self) {
+    return std::any_of(
+        self.functions().begin(),
+        self.functions().end(),
+        [](const t_function& function) {
+          return function.is_bidirectional_stream();
+        });
+  });
+
+  return std::move(def).make();
+}
+
+prototype<t_interaction>::ptr
+t_whisker_generator::make_prototype_for_interaction(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_interaction>::extends(proto.of<t_interface>());
+  return std::move(def).make();
+}
+
+void t_whisker_generator::define_prototypes(prototype_database& db) const {
+  // WARNING: the order of these calls must be sorted with base classes first.
+  // The derived classes require the base class prototypes to be defined first.
+  //
+  // As a reference, the `make_prototype_for_*` family of functions are declared
+  // in the same order.
+  db.define(make_prototype_for_node(db));
+  db.define(make_prototype_for_named(db));
+
+  db.define(make_prototype_for_type(db));
+  db.define(make_prototype_for_typedef(db));
+  db.define(make_prototype_for_structured(db));
+  db.define(make_prototype_for_struct(db));
+  db.define(make_prototype_for_paramlist(db));
+  db.define(make_prototype_for_throws(db));
+  db.define(make_prototype_for_union(db));
+  db.define(make_prototype_for_exception(db));
+
+  db.define(make_prototype_for_primitive_type(db));
+  db.define(make_prototype_for_field(db));
+  db.define(make_prototype_for_enum(db));
+  db.define(make_prototype_for_enum_value(db));
+  db.define(make_prototype_for_const(db));
+  db.define(make_prototype_for_const_value(db));
+
+  db.define(make_prototype_for_container(db));
+  db.define(make_prototype_for_map(db));
+  db.define(make_prototype_for_set(db));
+  db.define(make_prototype_for_list(db));
+
+  db.define(make_prototype_for_program(db));
+
+  db.define(make_prototype_for_package(db));
+  db.define(make_prototype_for_include(db));
+  db.define(make_prototype_for_sink(db));
+  db.define(make_prototype_for_stream(db));
+  db.define(make_prototype_for_function(db));
+
+  db.define(make_prototype_for_interface(db));
+  db.define(make_prototype_for_service(db));
+  db.define(make_prototype_for_interaction(db));
+
+  define_additional_prototypes(db);
+}
+
+using fs_path = std::filesystem::path;
+
+class t_whisker_generator::whisker_source_parser
+    : public whisker::source_resolver {
+ public:
+  explicit whisker_source_parser(
+      whisker::source_manager src_manager, std::string template_prefix)
+      : template_prefix_(std::move(template_prefix)),
+        src_manager_(std::move(src_manager)) {}
+
+  resolve_import_result resolve_import(
+      std::string_view combined_path,
+      source_location include_from,
+      diagnostics_engine& diags) override {
+    std::vector<std::string> path_parts;
+    boost::algorithm::split(
+        path_parts, combined_path, [](char c) { return c == '/'; });
+    std::string path = normalize_path(path_parts, include_from);
+
+    if (auto cached = cached_asts_.find(path); cached != cached_asts_.end()) {
+      if (!cached->second.has_value()) {
+        return whisker::unexpected(parsing_error());
+      }
+      return &cached->second.value();
+    }
+
+    std::optional<source_view> source_code = src_manager_.get_file(path);
+    if (!source_code.has_value()) {
+      return nullptr;
+    }
+    auto ast = whisker::parse(*source_code, diags);
+    auto [result, inserted] =
+        cached_asts_.insert({std::move(path), std::move(ast)});
+    assert(inserted);
+    if (!result->second.has_value()) {
+      return whisker::unexpected(parsing_error());
+    }
+    return &result->second.value();
+  }
+
+  whisker::source_manager& source_manager() { return src_manager_; }
+
+ private:
+  std::string normalize_path(
+      const std::vector<std::string>& macro_path,
+      source_location include_from) const {
+    // The template_prefix will be added to the partial path, e.g.,
+    // "field/member" --> "cpp2/field/member"
+    std::string template_prefix;
+
+    auto start = macro_path.begin();
+    if (include_from == source_location()) {
+      // If include_from is empty, we use the stored template_prefix
+      template_prefix = template_prefix_;
+    } else if (*start != "..") {
+      fs_path current_file_path =
+          src_manager_.resolve_location(include_from).file_name();
+      template_prefix = current_file_path.begin()->generic_string();
+    } else {
+      // If path starts with "..", the template_prefix will be the second
+      // element, and the template_name starts at the 3rd element. e.g.,
+      // "../cpp2/field/member": template_prefix = "cpp2"
+      ++start;
+      template_prefix = *start++;
+    }
+
+    // Whisker always breaks down the path into components. However, the
+    // template_map stores them as one concatenated string.
+    return fmt::format(
+        "{}/{}", template_prefix, fmt::join(start, macro_path.end(), "/"));
+  }
+
+  std::string template_prefix_;
+  whisker::source_manager src_manager_;
+  std::unordered_map<std::string, std::optional<whisker::ast::root>>
+      cached_asts_;
+};
+
+void t_whisker_generator::initialize_context() {
+  context_visitor visitor;
+  context_.register_visitors(visitor);
+  initialize_context(visitor);
+  for (const t_program& p : program_bundle_.programs()) {
+    whisker_generator_visitor_context ctx;
+    visitor(ctx, p);
+  }
+}
+
+t_whisker_generator::cached_render_state& t_whisker_generator::render_state() {
+  if (!cached_render_state_) {
+    // Ideally we'd call initialize_context in the constructor, but the derived
+    // initializer initialize_context(visitor) is virtual, and calling it from
+    // the constructor would not call the derived class's implementation
+    initialize_context();
+
+    whisker::render_options options;
+
+    auto source_resolver = std::make_shared<whisker_source_parser>(
+        template_source_manager(), template_prefix());
+    options.src_resolver = source_resolver;
+
+    strictness_options strict = strictness();
+    const auto level_for = [](bool strict) {
+      return strict ? diagnostic_level::error : diagnostic_level::debug;
+    };
+    options.strict_boolean_conditional = level_for(strict.boolean_conditional);
+    options.strict_printable_types = level_for(strict.printable_types);
+    options.strict_undefined_variables = level_for(strict.undefined_variables);
+
+    auto prototypes = std::make_unique<prototype_database>();
+    define_prototypes(*prototypes);
+
+    whisker::load_standard_library(options.globals);
+    options.globals.merge(globals(*prototypes));
+
+    cached_render_state_ = cached_render_state{
+        whisker::diagnostics_engine(
+            source_resolver->source_manager(),
+            [](const diagnostic& d) { fmt::print(stderr, "{}\n", d); },
+            diagnostic_params::only_errors()),
+        source_resolver,
+        std::move(options),
+        std::move(prototypes),
+    };
+  }
+
+  assert(cached_render_state_.has_value());
+  return *cached_render_state_;
+}
+
+std::string t_whisker_generator::render(
+    std::string_view template_file, const whisker::object& context) {
+  cached_render_state& state = render_state();
+  const whisker::ast::root& ast = whisker::visit(
+      state.source_resolver->resolve_import(
+          template_file, {}, state.diagnostic_engine),
+      [&](const whisker::ast::root* resolved) -> const whisker::ast::root& {
+        if (resolved == nullptr) {
+          throw std::runtime_error{
+              fmt::format("Failed to find template '{}'", template_file)};
+        }
+        return *resolved;
+      },
+      [&](const whisker::source_resolver::parsing_error&)
+          -> const whisker::ast::root& {
+        throw std::runtime_error{
+            fmt::format("Failed to parse template '{}'", template_file)};
+      });
+
+  std::ostringstream out;
+  if (!whisker::render(
+          out, ast, context, state.diagnostic_engine, state.render_options)) {
+    throw std::runtime_error{
+        fmt::format("Failed to render template '{}'", template_file)};
+  }
+  return out.str();
+}
+
+void t_whisker_generator::write_to_file(
+    const std::filesystem::path& output_file, std::string_view data) {
+  auto abs_path = detail::make_abs_path(fs_path(get_out_dir()), output_file);
+  std::filesystem::create_directories(abs_path.parent_path());
+
+  {
+    std::ofstream output{abs_path.string()};
+    if (!output) {
+      throw std::runtime_error(
+          fmt::format("Could not open '{}' for writing.", abs_path.string()));
+    }
+    output << data;
+    if (!data.ends_with('\n')) {
+      // Terminate with newline.
+      output << '\n';
+    }
+  }
+  record_genfile(abs_path.string());
+}
+
+void t_whisker_generator::render_to_file(
+    const std::filesystem::path& output_file,
+    std::string_view template_file,
+    const whisker::object& context) {
+  write_to_file(output_file, render(template_file, context));
+}
+
+void whisker_generator_context::register_visitors(
+    t_whisker_generator::context_visitor& visitor) {
+  using context = t_whisker_generator::whisker_generator_visitor_context;
+  visitor.add_interface_visitor(
+      [this](const context&, const t_interface& node) {
+        for (const t_function& function : node.functions()) {
+          function_parents_[&function] = &node;
+        }
+      });
+  visitor.add_structured_definition_visitor(
+      [this](const context&, const t_structured& node) {
+        for (const t_field& field : node.fields()) {
+          field_parents_[&field] = &node;
+        }
+      });
+}
+
+} // namespace apache::thrift::compiler

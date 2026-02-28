@@ -5,14 +5,14 @@
 
 #![allow(unused_variables)]
 
-use parser_core_types::{
-    lexable_token::LexableToken,
-    lexable_trivia::{LexableTrivia, LexableTrivium},
-    token_factory::{TokenFactory, Trivia},
-    token_kind::TokenKind,
-    trivia_factory::TriviaFactory,
-    trivia_kind::TriviaKind,
-};
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::lexable_trivia::LexableTrivia;
+use parser_core_types::lexable_trivia::LexableTrivium;
+use parser_core_types::token_factory::TokenFactory;
+use parser_core_types::token_factory::Trivia;
+use parser_core_types::token_kind::TokenKind;
+use parser_core_types::trivia_factory::TriviaFactory;
+use parser_core_types::trivia_kind::TriviaKind;
 use smart_constructors::NodeType;
 
 mod pair_smart_constructors_generated;
@@ -29,9 +29,9 @@ where
     N0: NodeType,
     N1: NodeType,
 {
-    type R = Node<N0, N1>;
+    type Output = Node<N0, N1>;
 
-    fn extract(self) -> Self::R {
+    fn extract(self) -> Self::Output {
         self
     }
 
@@ -341,6 +341,13 @@ where
         )
     }
     #[inline]
+    fn make_ignore(offset: usize, width: usize) -> Self::Trivium {
+        PairTrivium(
+            T0::make_ignore(offset, width),
+            T1::make_ignore(offset, width),
+        )
+    }
+    #[inline]
     fn make_ignore_error(offset: usize, width: usize) -> Self::Trivium {
         PairTrivium(
             T0::make_ignore_error(offset, width),
@@ -399,6 +406,12 @@ where
         Self(
             T0::make_fix_me(offset, width),
             T1::make_fix_me(offset, width),
+        )
+    }
+    fn make_ignore(offset: usize, width: usize) -> Self {
+        Self(
+            T0::make_ignore(offset, width),
+            T1::make_ignore(offset, width),
         )
     }
     fn make_ignore_error(offset: usize, width: usize) -> Self {

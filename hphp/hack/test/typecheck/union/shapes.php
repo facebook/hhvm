@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type s = shape('x' => int, 'y' => int, 'z' => int, ?'t' => int);
 type sdots = shape('x' => int, 'y' => int, 'z' => int, ?'t' => int, ...);

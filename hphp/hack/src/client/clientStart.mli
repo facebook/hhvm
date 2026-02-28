@@ -12,10 +12,8 @@ type env = {
   from: string;
   no_load: bool;
   watchman_debug_logging: bool;
-  log_inference_constraints: bool;
   silent: bool;
   exit_on_failure: bool;
-  ai_mode: string option;
   ignore_hh_version: bool;
   save_64bit: string option;
   save_human_readable_64bit_dep_map: string option;
@@ -26,6 +24,7 @@ type env = {
   custom_hhi_path: string option;
   custom_telemetry_data: (string * string) list;
   allow_non_opt_build: bool;
+  preexisting_warnings: bool;
 }
 
 val main : env -> Exit_status.t Lwt.t

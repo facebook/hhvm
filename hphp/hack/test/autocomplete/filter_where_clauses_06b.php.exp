@@ -1,0 +1,8 @@
+toEqual
+  INSERT toEqual(${1:\$expected})
+  function(T1 $expected): void
+SORT TEXT: none
+greaterThan
+  INSERT greaterThan(${1:\$expected})
+  function(num $expected): void
+SORT TEXT: none

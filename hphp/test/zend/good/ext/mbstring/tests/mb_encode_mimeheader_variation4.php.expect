@@ -1,0 +1,17 @@
+*** Testing mb_encode_mimeheader() : usage variations ***
+
+-- Iteration 1 --
+string(113) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?= =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 2 --
+string(113) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?= =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 3 --
+string(119) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=string =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 4 --
+string(119) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=string =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+-- Iteration 5 --
+string(121) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=hello wo =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+Done

@@ -1,0 +1,10 @@
+ERROR: File "class_missing_label_case.php", line 11, characters 15-21:
+Invalid argument (Typing[4110])
+  File "class_missing_label_case.php", line 11, characters 15-21:
+  Expected a class with a constant `carrot`
+  File "class_missing_label_case.php", line 8, characters 41-41:
+  But got `E`
+  File "class_missing_label_case.php", line 3, characters 12-12:
+  `E` is defined here
+  File "class_missing_label_case.php", line 5, characters 7-12:
+  Did you mean `CARROT`?

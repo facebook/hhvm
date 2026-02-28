@@ -1,6 +1,12 @@
-File "shape_idx_generic1.php", line 5, characters 10-32:
-Invalid return type (Typing[4110])
-File "shape_idx_generic1.php", line 4, characters 52-54:
-Expected `int`
-File "shape_idx_generic1.php", line 4, characters 33-36:
-But got `?int`
+ERROR: File "shape_idx_generic1.php", line 5, characters 22-23:
+Invalid argument (Typing[4110])
+  File "Shapes.hhi", line 42, characters 19-24:
+  Expected `shape(?'x' => _, ...)`
+  File "shape_idx_generic1.php", line 4, characters 45-45:
+  But got `T as shape('x' => ?int, ...)`
+ERROR: File "shape_idx_generic1.php", line 5, characters 22-23:
+Invalid argument (Typing[4110])
+  File "shape_idx_generic1.php", line 4, characters 52-54:
+  Expected `int`
+  File "shape_idx_generic1.php", line 4, characters 33-36:
+  But got `null`

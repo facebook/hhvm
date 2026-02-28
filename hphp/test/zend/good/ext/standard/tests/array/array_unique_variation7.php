@@ -11,7 +11,7 @@
 echo "*** Testing array_unique() : array with binary data for \$input argument ***\n";
 
 // array with binary values
-$input = darray[0 => b"1", 1 => b"hello", 2 => "world", "str1" => "hello", "str2" => "world"];
+$input = dict[0 => b"1", 1 => b"hello", 2 => "world", "str1" => "hello", "str2" => "world"];
 
 var_dump( array_unique($input) );
 

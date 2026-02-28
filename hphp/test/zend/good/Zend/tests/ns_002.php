@@ -2,7 +2,7 @@
 namespace test\ns1;
 
 class Foo {
-  static function bar() {
+  static function bar() :mixed{
     echo __CLASS__,"\n";
   }
 }

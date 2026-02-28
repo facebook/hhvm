@@ -1,14 +1,14 @@
 <?hh
 
 trait t {
-  public static function f($o) {
+  public static function f($o) :mixed{
     $o->blah();
   }
 }
 
 class c {
   use t;
-  private function blah() {
+  private function blah() :mixed{
     echo "private function\n";
   }
 }

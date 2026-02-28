@@ -4,9 +4,9 @@
 class c {
 }
 
-function main($a) {
+function main($a) :mixed{
   return $a[c::BAR];
 }
 <<__EntryPoint>> function main_entry(): void {
-var_dump(main(darray['hello there' => 'success']));
+var_dump(main(dict['hello there' => 'success']));
 }

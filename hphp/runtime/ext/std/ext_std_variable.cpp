@@ -16,25 +16,18 @@
 */
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 
-#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
-#include "hphp/runtime/vm/jit/translator-inline.h"
-
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
-#include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/server/http-protocol.h"
 
-#include "hphp/util/hphp-config.h"
-#include "hphp/util/logger.h"
-
-#include <folly/Likely.h>
+#include "hphp/util/configs/errorhandling.h"
+#include "hphp/util/configs/eval.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,19 +58,15 @@ String HHVM_FUNCTION(gettype, const Variant& v) {
   if (v.isNull()) {
     return s_NULL;
   }
-  if (RuntimeOption::EvalClassAsStringGetType &&
+  if (Cfg::Eval::ClassAsStringGetType &&
       (v.isLazyClass() || v.isClass())) {
     return s_string;
   }
   return getDataTypeString(v.getType());
 }
 
-String HHVM_FUNCTION(get_resource_type, const Resource& handle) {
+String HHVM_FUNCTION(get_resource_type, const OptResource& handle) {
   return handle->o_getResourceName();
-}
-
-bool HHVM_FUNCTION(boolval, const Variant& v) {
-  return v.toBoolean();
 }
 
 int64_t HHVM_FUNCTION(intval, const Variant& v, int64_t base /* = 10 */) {
@@ -125,7 +114,7 @@ bool HHVM_FUNCTION(HH_is_php_array, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(is_array, const Variant& v) {
-  if (RO::EvalLogOnIsArrayFunction) {
+  if (Cfg::Eval::LogOnIsArrayFunction) {
     raise_notice("call to deprecated builtin is_array()");
   }
   return is_any_array(v.asTypedValue());
@@ -250,10 +239,15 @@ ALWAYS_INLINE Variant var_export_impl(const Variant& expression,
       vs.serialize(expression, ret);
       res = true;
     }
-  } catch (StringBufferLimitException& e) {
+  } catch (StringBufferLimitException& ) {
     raise_notice("var_export() exceeded max bytes limit");
   }
   return res;
+}
+
+Variant HHVM_FUNCTION(print_debug_display, const Variant& expression, bool ret) {
+  VariableSerializer vs(VariableSerializer::Type::DebuggerDump, 0, 2);
+  return vs.serialize(expression, ret);
 }
 
 Variant HHVM_FUNCTION(var_export, const Variant& expression,
@@ -289,6 +283,16 @@ void HHVM_FUNCTION(var_dump, const Variant& expression,
 void HHVM_FUNCTION(debug_zval_dump, const Variant& variable) {
   VariableSerializer vs(VariableSerializer::Type::DebugDump);
   vs.serialize(variable, false);
+}
+
+void HHVM_FUNCTION(debugger_dump, const Variant& variable) {
+  if (!variable.isNull()) {
+    VariableSerializer vs(VariableSerializer::Type::DebuggerDump, 0, 2);
+    vs.serialize(variable,
+                false, // ret
+                false // keepCount
+                );
+  }
 }
 
 /*
@@ -440,6 +444,10 @@ struct SerializeOptions {
   bool ignoreLateInit = false;
   bool serializeProvenanceAndLegacy = false;
   bool disallowObjects = false;
+  bool disallowCollections = false;
+  // When serializing a class or lazy class, do not promote them to strings
+  bool keepClasses = false;
+  bool ignoreStringSizeLimit = false;
 };
 
 ALWAYS_INLINE String serialize_impl(const Variant& value,
@@ -448,14 +456,30 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
   switch (value.getType()) {
     case KindOfClass:
     case KindOfLazyClass:
+      if (opts.keepClasses) {
+        auto const str = isClassType(value.getType())
+          ? value.toClassVal()->name()
+          : value.toLazyClassVal().name();
+        auto const size = str->size();
+        StringBuffer sb;
+        sb.append("l:");
+        sb.append(size);
+        sb.append(":\"");
+        sb.append(str->data(), size);
+        sb.append("\";");
+        return sb.detach();
+      }
+      [[fallthrough]];
     case KindOfPersistentString:
     case KindOfString: {
+      auto const op = "serialize()";
       auto const str =
         isStringType(value.getType()) ? value.getStringData() :
-        isClassType(value.getType()) ? classToStringHelper(value.toClassVal()) :
-        lazyClassToStringHelper(value.toLazyClassVal());
+        isClassType(value.getType()) ?
+          classToStringHelper(value.toClassVal(), op) :
+          lazyClassToStringHelper(value.toLazyClassVal(), op);
       auto const size = str->size();
-      if (size >= RuntimeOption::MaxSerializedStringSize) {
+      if (size >= Cfg::ErrorHandling::MaxSerializedStringSize) {
         throw Exception("Size of serialized string (%ld) exceeds max", size);
       }
       StringBuffer sb;
@@ -485,6 +509,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRFunc:
+    case KindOfEnumClassLabel:
       break;
   }
   VariableSerializer vs(VariableSerializer::Type::Serialize);
@@ -494,7 +519,10 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
   if (opts.warnOnPHPArrays)     vs.setPHPWarn();
   if (opts.ignoreLateInit)      vs.setIgnoreLateInit();
   if (opts.serializeProvenanceAndLegacy) vs.setSerializeProvenanceAndLegacy();
-  if (opts.disallowObjects)      vs.setDisallowObjects();
+  if (opts.disallowObjects)     vs.setDisallowObjects();
+  if (opts.disallowCollections) vs.setDisallowCollections();
+  if (opts.keepClasses)         vs.setKeepClasses();
+  if (opts.ignoreStringSizeLimit) vs.setIgnoreStringSizeLimit();
   if (pure) vs.setPure();
   // Keep the count so recursive calls to serialize() embed references properly.
   return vs.serialize(value, true, true);
@@ -517,7 +545,10 @@ const StaticString
   s_warnOnPHPArrays("warnOnPHPArrays"),
   s_ignoreLateInit("ignoreLateInit"),
   s_disallowObjects("disallowObjects"),
-  s_serializeProvenanceAndLegacy("serializeProvenanceAndLegacy");
+  s_disallowCollections("disallowCollections"),
+  s_serializeProvenanceAndLegacy("serializeProvenanceAndLegacy"),
+  s_ignoreStringSizeLimit("ignoreStringSizeLimit"),
+  s_keepClasses("keepClasses");
 
 String HHVM_FUNCTION(HH_serialize_with_options,
                      const Variant& value, const Array& options) {
@@ -537,17 +568,16 @@ String HHVM_FUNCTION(HH_serialize_with_options,
     options[s_serializeProvenanceAndLegacy].toBoolean();
   opts.disallowObjects = options.exists(s_disallowObjects) &&
     options[s_disallowObjects].toBoolean();
+  opts.disallowCollections = options.exists(s_disallowCollections) &&
+    options[s_disallowCollections].toBoolean();
+  opts.keepClasses = options.exists(s_keepClasses) &&
+    options[s_keepClasses].toBoolean();
+  opts.ignoreStringSizeLimit = options.exists(s_ignoreStringSizeLimit) &&
+    options[s_ignoreStringSizeLimit].toBoolean();
   return serialize_impl(value, opts, false);
 }
 
 String serialize_keep_dvarrays(const Variant& value) {
-  SerializeOptions opts;
-  opts.keepDVArrays = true;
-  return serialize_impl(value, opts, false);
-}
-
-String HHVM_FUNCTION(hhvm_intrinsics_serialize_keep_dvarrays,
-                     const Variant& value) {
   SerializeOptions opts;
   opts.keepDVArrays = true;
   return serialize_impl(value, opts, false);
@@ -560,6 +590,24 @@ Variant HHVM_FUNCTION(unserialize, const String& str,
     VariableUnserializer::Type::Serialize,
     options
   );
+}
+
+Variant HHVM_FUNCTION(unserialize_slice, const String& str, int64_t start, int64_t length,
+                                   const Array& options) {
+  // unserialize_from_buffer accepts empty strings. We ban them here to guarantee behavior
+  // consistent with other apis.
+  if (start < 0 || length <= 0 || (size_t)start + (size_t)length > (size_t)str.size()) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Invalid start or length"
+    );
+  }
+  return unserialize_from_buffer(
+    str.data()+start,
+    length,
+    VariableUnserializer::Type::Serialize,
+    options,
+    false
+    );
 }
 
 Variant HHVM_FUNCTION(unserialize_pure, const String& str,
@@ -587,9 +635,10 @@ void HHVM_FUNCTION(parse_str,
 bool HHVM_FUNCTION(HH_is_late_init_prop_init,
                    const Object& obj,
                    const String& name) {
-  auto const ctx = fromCaller(
-    [] (const BTFrame& frm) { return frm.func()->cls(); }
+  auto const func = fromCaller(
+    [] (const BTFrame& frm) { return frm.func(); }
   );
+  auto const ctx = MemberLookupContext(func->cls(), func->moduleName());
   auto const val = obj->getPropIgnoreLateInit(ctx, name.get());
   if (!val) {
     SystemLib::throwInvalidArgumentExceptionObject(
@@ -612,9 +661,10 @@ bool HHVM_FUNCTION(HH_is_late_init_sprop_init,
       folly::sformat("Unknown class {}", clsName)
     );
   }
-  auto const ctx = fromCaller(
-    [] (const BTFrame& frm) { return frm.func()->cls(); }
+  auto const func =fromCaller(
+    [] (const BTFrame& frm) { return frm.func(); }
   );
+  auto const ctx =  MemberLookupContext(func->cls(), func->unit()->moduleName());
   auto const lookup = cls->getSPropIgnoreLateInit(ctx, name.get());
   if (!lookup.val || !lookup.accessible) {
     SystemLib::throwInvalidArgumentExceptionObject(
@@ -634,7 +684,7 @@ bool HHVM_FUNCTION(HH_global_key_exists, StringArg key) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-void StandardExtension::initVariable() {
+void StandardExtension::registerNativeVariable() {
   HHVM_FE(is_null);
   HHVM_FE(is_bool);
   HHVM_FE(is_int);
@@ -660,7 +710,6 @@ void StandardExtension::initVariable() {
   HHVM_FALIAS(HH\\is_meth_caller, HH_is_meth_caller);
   HHVM_FE(is_object);
   HHVM_FE(is_resource);
-  HHVM_FE(boolval);
   HHVM_FE(intval);
   HHVM_FE(floatval);
   HHVM_FALIAS(doubleval, floatval);
@@ -669,31 +718,28 @@ void StandardExtension::initVariable() {
   HHVM_FE(get_resource_type);
   HHVM_FE(print_r);
   HHVM_FE(print_r_pure);
+  HHVM_FE(print_debug_display);
   HHVM_FE(var_export);
   HHVM_FE(var_export_pure);
   HHVM_FE(debug_zval_dump);
+  HHVM_FE(debugger_dump);
   HHVM_FE(var_dump);
   HHVM_FE(serialize);
   HHVM_FE(serialize_pure);
   HHVM_FE(unserialize);
   HHVM_FE(unserialize_pure);
+  HHVM_FE(unserialize_slice);
   HHVM_FE(parse_str);
   HHVM_FALIAS(HH\\object_prop_array, HH_object_prop_array);
   HHVM_FALIAS(HH\\serialize_with_options, HH_serialize_with_options);
-  HHVM_FALIAS(HH\\Lib\\_Private\\Native\\first, HH_first);
-  HHVM_FALIAS(HH\\Lib\\_Private\\Native\\last, HH_last);
-  HHVM_FALIAS(HH\\Lib\\_Private\\Native\\first_key, HH_first_key);
-  HHVM_FALIAS(HH\\Lib\\_Private\\Native\\last_key, HH_last_key);
+  // Clang 15 doesn't like the HHVM_FALIAS macro with \\N
+  HHVM_FALIAS_FE_STR("HH\\Lib\\_Private\\Native\\first", HH_first);
+  HHVM_FALIAS_FE_STR("HH\\Lib\\_Private\\Native\\last", HH_last);
+  HHVM_FALIAS_FE_STR("HH\\Lib\\_Private\\Native\\first_key", HH_first_key);
+  HHVM_FALIAS_FE_STR("HH\\Lib\\_Private\\Native\\last_key", HH_last_key);
   HHVM_FALIAS(HH\\is_late_init_prop_init, HH_is_late_init_prop_init);
   HHVM_FALIAS(HH\\is_late_init_sprop_init, HH_is_late_init_sprop_init);
   HHVM_FALIAS(HH\\global_key_exists, HH_global_key_exists);
-
-  if (RuntimeOption::EnableIntrinsicsExtension) {
-    HHVM_FALIAS(__hhvm_intrinsics\\serialize_keep_dvarrays,
-                hhvm_intrinsics_serialize_keep_dvarrays);
-  }
-
-  loadSystemlib("std_variable");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

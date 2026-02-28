@@ -27,7 +27,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
 
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 #include "hphp/util/rds-local.h"
 
 #include <vector>
@@ -128,7 +128,7 @@ private:
 };
 static_assert(sizeof(MemoSlot) == sizeof(TypedValue), "");
 
-#ifdef _MSC_VER
+#if defined(__x86_64__)
 #pragma pack(push, 1)
 #endif
 
@@ -141,10 +141,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
                                // finished. Set during construction to
                                // temporarily allow writing to const props.
     UsedMemoCache      = 0x10, // Object has had data set in its memo slots
-    HasUninitProps     = 0x20, // The object's properties are being initialized
-    BigAllocSize       = 0x40, // The object was allocated using Big Size
+    BigAllocSize       = 0x20, // The object was allocated using Big Size
 #ifndef NDEBUG
-    SmallAllocSize     = 0x80, // For Debug, the object was allocated with
+    SmallAllocSize     = 0x40, // For Debug, the object was allocated with
                                // small buffers. If needed can be removed to
                                // free up Attribute bits.
 #else
@@ -196,11 +195,11 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   void setWeakRefed() { setAttribute(IsWeakRefed); }
 
+  void setReifiedGenerics(Class*, ArrayData*);
+
  private:
   template <bool Unlocked, typename Init>
   static ObjectData* newInstanceImpl(Class*, Init);
-
-  void setReifiedGenerics(Class*, ArrayData*);
 
 
   /*
@@ -218,9 +217,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     uint8_t flags;
   };
   static Alloc allocMemoInit(Class* cls);
-
-  template <bool Unlocked>
-  static ObjectData* newInstanceSlow(Class*);
  public:
   /*
    * Call newInstance() to instantiate a PHP object. The initial ref-count will
@@ -304,13 +300,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   // Temporarily set the IsBeingConstructed bit
   void unlockObject();
 
-  // Set if we might re-enter while some of the properties contain
-  // garbage, eg after calling newInstanceNoPropInit, and before
-  // initializing all the props.
-  bool hasUninitProps() const;
-  void setHasUninitProps();
-  void clearHasUninitProps();
-
   // Whether the object is a collection, [and [not] mutable].
   bool isCollection() const;
   bool isMutableCollection() const;
@@ -356,7 +345,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
  public:
 
-  Array o_toIterArray(const String& context);
+  Array o_toIterArray(const Class* ctx);
 
   Variant o_get(const String& s, bool error = true,
                 const String& context = null_string);
@@ -491,14 +480,18 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
  public:
   // never box the lval returned from getPropLval; use propB instead
-  tv_lval getPropLval(const Class*, const StringData*);
-  tv_rval getProp(const Class*, const StringData*) const;
+  tv_lval getPropLval(const MemberLookupContext&, const StringData*);
+  tv_rval getProp(const MemberLookupContext&, const StringData*) const;
   // Like getProp() but does not throw for <<__LateInit>>. Value can be
   // KindOfUninit.
-  tv_rval getPropIgnoreLateInit(const Class* ctx,
+  tv_rval getPropIgnoreLateInit(const MemberLookupContext& ctx,
                                 const StringData* key) const;
   // don't use getPropIgnoreAccessibility in new code
   tv_lval getPropIgnoreAccessibility(const StringData*);
+
+  void deserializeAllLazyProps();
+  static void deserializeLazyProp(tv_lval prop);
+  static bool isLazyProp(tv_rval prop);
 
  private:
   struct PropLookup {
@@ -514,7 +507,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   template <bool forWrite, bool forRead, bool ignoreLateInit>
   ALWAYS_INLINE
-  PropLookup getPropImpl(const Class*, const StringData*);
+  PropLookup getPropImpl(const MemberLookupContext&, const StringData*);
 
   enum class PropMode : int {
     ReadNoWarn,
@@ -523,25 +516,25 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   };
 
   template<PropMode mode>
-  tv_lval propImpl(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op = ReadonlyOp::Any);
+  tv_lval propImpl(TypedValue* tvRef, const MemberLookupContext& ctx, const StringData* key, const ReadonlyOp op = ReadonlyOp::Any);
 
   void setDynProp(const StringData* key, TypedValue val);
 
  public:
-  tv_lval prop(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op);
-  tv_lval propW(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op);
-  tv_lval propU(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op);
-  tv_lval propD(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op);
+  tv_lval prop(TypedValue* tvRef, const MemberLookupContext& ctx, const StringData* key, const ReadonlyOp op);
+  tv_lval propW(TypedValue* tvRef, const MemberLookupContext& ctx, const StringData* key, const ReadonlyOp op);
+  tv_lval propU(TypedValue* tvRef, const MemberLookupContext& ctx, const StringData* key, const ReadonlyOp op);
+  tv_lval propD(TypedValue* tvRef, const MemberLookupContext& ctx, const StringData* key, const ReadonlyOp op);
 
-  bool propIsset(const Class* ctx, const StringData* key);
+  bool propIsset(const MemberLookupContext& ctx, const StringData* key);
 
-  void setProp(Class* ctx, const StringData* key, TypedValue val, ReadonlyOp op = ReadonlyOp::Any);
-  tv_lval setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,
+  void setProp(const MemberLookupContext& ctx, const StringData* key, TypedValue val, ReadonlyOp op = ReadonlyOp::Any);
+  tv_lval setOpProp(TypedValue& tvRef, const MemberLookupContext& ctx, SetOpOp op,
                     const StringData* key, TypedValue* val);
 
-  TypedValue incDecProp(Class* ctx, IncDecOp op, const StringData* key);
+  TypedValue incDecProp(const MemberLookupContext& ctx, IncDecOp op, const StringData* key);
 
-  void unsetProp(Class* ctx, const StringData* key);
+  void unsetProp(const MemberLookupContext& ctx, const StringData* key);
 
   tv_lval makeDynProp(const StringData* key);
 
@@ -574,22 +567,24 @@ private:
   // coercing class_meth types.
   void verifyPropTypeHintImpl(tv_lval, const Class::Prop&) const;
 
-// offset:  0       8       12      16
-// 64bit:   header  cls             [subclass][props...]
-// lowptr:  header  cls     [subclass][props...]
+// offset:     0       8       12      16
+// 64bit:      header  cls             [subclass][props...]
+// packedptr:  header  cls     [subclass][props...]
 
 private:
-  const LowPtr<Class> m_cls;
+  const PackedPtr<Class> m_cls;
 };
-#ifdef _MSC_VER
+#if defined(__x86_64__)
 #pragma pack(pop)
 #endif
 
-#ifdef _MSC_VER
+#if defined(__x86_64__)
 static_assert(sizeof(ObjectData) == (use_lowptr ? 12 : 16),
               "Change this only on purpose");
+static_assert(alignof(ObjectData) == 1);
 #else
 static_assert(sizeof(ObjectData) == 16, "Change this only on purpose");
+static_assert(alignof(ObjectData) == 8);
 #endif
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -615,13 +610,13 @@ ALWAYS_INLINE void tvWriteObject(ObjectData* pobj, TypedValue* to) {
   CLASSNAME_IS(#originalName)                                          \
   friend ObjectData* new_##originalName##_Instance(Class*);            \
   friend void delete_##originalName(ObjectData*, const Class*);        \
-  static HPHP::LowPtr<Class> s_classOf;                                \
-  static inline HPHP::LowPtr<Class>& classof() {                       \
+  static HPHP::PackedPtr<Class> s_classOf;                             \
+  static inline HPHP::PackedPtr<Class>& classof() {                    \
     return s_classOf;                                                  \
   }
 
 #define IMPLEMENT_CLASS_NO_SWEEP(cls)                                  \
-  HPHP::LowPtr<Class> c_##cls::s_classOf;
+  HPHP::PackedPtr<Class> c_##cls::s_classOf;
 
 namespace req {
 

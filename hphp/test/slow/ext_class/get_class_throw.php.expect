@@ -1,0 +1,6 @@
+string(59) "get_class() expects exactly 1 positional parameter, 0 given"
+string(77) "Argument 1 passed to get_class() must be an instance of HH\object, null given"
+string(76) "Argument 1 passed to get_class() must be an instance of HH\object, int given"
+string(78) "Argument 1 passed to get_class() must be an instance of HH\object, float given"
+string(79) "Argument 1 passed to get_class() must be an instance of HH\object, string given"
+string(8) "stdClass"

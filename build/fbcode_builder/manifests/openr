@@ -1,0 +1,38 @@
+[manifest]
+name = openr
+fbsource_path = facebook/openr
+shipit_project = openr
+shipit_fbcode_builder = true
+
+[git]
+repo_url = https://github.com/facebook/openr.git
+
+[build.os=linux]
+builder = cmake
+# openr files take a lot of RAM to compile.
+job_weight_mib = 3072
+
+[build.not(os=linux)]
+# boost.fiber is required and that is not available on macos.
+builder = nop
+
+[dependencies]
+boost
+fb303
+fbthrift
+folly
+googletest
+re2
+range-v3
+
+[cmake.defines.test=on]
+BUILD_TESTS=ON
+ADD_ROOT_TESTS=OFF
+
+[cmake.defines.test=off]
+BUILD_TESTS=OFF
+
+
+[shipit.pathmap]
+fbcode/openr = openr
+fbcode/openr/public_tld = .

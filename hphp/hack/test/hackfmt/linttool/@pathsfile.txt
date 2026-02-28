@@ -1,0 +1,7 @@
+This file is never actually read.
+Instead, ./pathsfile.txt is read.
+
+This is because when `hackfmt --linttool`
+gets an unflagged argument starting with '@' it
+treats the input as a file containing newline-separated
+paths.

@@ -34,10 +34,17 @@ val force_break_recheck_loop_for_test : bool -> unit
 
 val program_init : ServerEnv.genv -> ServerEnv.env -> ServerEnv.env
 
+(** Does a bunch of operations to get the server up and running, among other things:
+  - Initialize shared memory
+  - Create a unique init ID
+  - Creates a bunch of files for IPC, e.g. for errors and status transmission.
+  - Configure GC
+  - initialize logging
+  - initialize workers *)
 val setup_server :
   informant_managed:bool ->
   monitor_pid:int option ->
   ServerArgs.options ->
   ServerConfig.t ->
   ServerLocalConfig.t ->
-  ServerEnv.genv * ServerEnv.env
+  MultiWorker.worker list * ServerEnv.env

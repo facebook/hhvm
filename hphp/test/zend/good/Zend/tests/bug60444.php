@@ -6,7 +6,7 @@ class Foo {
     }
 }
 class Some {
-    public static function foo(Foo $foo) {
+    public static function foo(Foo $foo) :mixed{
     }
 }
 <<__EntryPoint>> function main(): void {

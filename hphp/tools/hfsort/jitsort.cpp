@@ -20,7 +20,6 @@
 #include "hphp/util/light-process.h"
 #endif
 #include "hphp/util/logger.h"
-#include "hphp/util/string-vsnprintf.h"
 
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
@@ -28,14 +27,13 @@
 #include "hphp/tools/hfsort/hfutil.h"
 
 #include <assert.h>
-#include <zlib.h>
 #include <ctype.h>
 
 namespace HPHP { namespace hfsort {
 
 constexpr uint32_t kPageSize = 2 << 20;
 
-typedef std::map<uint32_t,std::vector<TargetId>> Group2BaseMap;
+using Group2BaseMap = std::map<uint32_t,std::vector<TargetId>>;
 
 void error(const char* msg) {
   Logger::Error("JitSort: %s\n", msg);

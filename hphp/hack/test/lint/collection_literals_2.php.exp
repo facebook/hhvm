@@ -1,4 +1,4 @@
 File "collection_literals_2.php", line 3, characters 10-10:
-collection_literals_2.php only declares `f`, it should be named f.php instead. (Lint[5564])
+f is the only function declared in collection_literals_2.php, so that file should be named f.php instead. (Lint[5564])
 File "collection_literals_2.php", line 4, characters 14-19:
 Use `Vector {...}` instead of `new Vector(...)` (Lint[5002])

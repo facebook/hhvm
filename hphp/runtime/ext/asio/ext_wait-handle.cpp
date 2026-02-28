@@ -18,7 +18,6 @@
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 
 #include "hphp/runtime/ext/asio/ext_asio.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/asio/asio-context-enter.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
@@ -26,10 +25,13 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_priority-bridge-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -39,12 +41,12 @@ namespace HPHP {
 const StaticString s_result("<result>");
 const StaticString s_exception("<exception>");
 
-void HHVM_STATIC_METHOD(Awaitable, setOnIoWaitEnterCallback,
+void HHVM_STATIC_METHOD(Awaitable, setOnIOWaitEnterCallback,
                         const Variant& callback) {
   AsioSession::Get()->setOnIOWaitEnter(callback);
 }
 
-void HHVM_STATIC_METHOD(Awaitable, setOnIoWaitExitCallback,
+void HHVM_STATIC_METHOD(Awaitable, setOnIOWaitExitCallback,
                         const Variant& callback) {
   AsioSession::Get()->setOnIOWaitExit(callback);
 }
@@ -92,22 +94,28 @@ size_t asio_object_size(const ObjectData* od) {
     X(Sleep)
     X(ExternalThreadEvent)
     X(AsyncGenerator)
+    X(PriorityBridge)
 #undef X
     case c_Awaitable::Kind::AwaitAll:
       return obj->asAwaitAll()->heapSize();
+    case c_Awaitable::Kind::Concurrent:
+      return obj->asConcurrent()->heapSize();
     case c_Awaitable::Kind::AsyncFunction:
       return obj->asAsyncFunction()->resumable()->size();
   }
   always_assert(false);
 }
 
-void AsioExtension::initWaitHandle() {
+void AsioExtension::initNativeWaitHandle() {
   // ensure AsioBlockable* fields are pointer-followable
   (void)type_scan::getIndexForMalloc<AsioBlockable>();
+}
+
+void AsioExtension::registerNativeWaitHandle() {
 #define WH_SME(meth) \
   HHVM_STATIC_MALIAS(HH\\Awaitable, meth, Awaitable, meth)
-  WH_SME(setOnIoWaitEnterCallback);
-  WH_SME(setOnIoWaitExitCallback);
+  WH_SME(setOnIOWaitEnterCallback);
+  WH_SME(setOnIOWaitExitCallback);
   WH_SME(setOnJoinCallback);
 #undef WH_SME
 
@@ -118,58 +126,16 @@ void AsioExtension::initWaitHandle() {
   WH_ME(isFailed);
   WH_ME(getName);
 #undef WH_ME
+
+  Native::registerClassExtraDataHandler(
+    c_Awaitable::className(), finish_class<c_Awaitable>);
 }
 
 const StaticString
   s_DoNotNewInstance("Awaitables may not be directly instantiated");
 
-static ObjectData* asioInstanceCtor(Class*) {
+ObjectData* asioInstanceCtor(Class*) {
   SystemLib::throwExceptionObject(s_DoNotNewInstance);
-}
-
-// Asio's memory layout relies on the following invariants:
-//   * Inextensible: private final (do-nothing) constructor in base class
-//   * No declared properties
-// This guarantees that there will be no overlap between internal asio state
-// and declared property slots, and that instance methods can only be called
-// on the official, systemlib base classes.
-template<class T> typename
-  std::enable_if<std::is_base_of<c_Awaitable, T>::value, void>::type
-finish_class() {
-  DEBUG_ONLY auto const wh = c_Awaitable::classof();
-  auto cls = const_cast<Class*>(T::classof());
-  assertx(wh && cls);
-  assertx((cls == wh) || (cls->classof(wh)));
-  assertx(cls->numDeclProperties() == 0);
-  assertx(cls->numStaticProperties() == 0);
-  assertx(!cls->hasMemoSlots());
-  DEBUG_ONLY auto const ctor = cls->getCtor();
-  assertx(ctor == wh->getCtor());
-  assertx(ctor->attrs() & AttrPrivate);
-
-  cls->allocExtraData();
-  assertx(!cls->m_extra->m_nativeDataInfo);
-  assertx(!cls->m_extra->m_instanceCtor);
-  assertx(!cls->m_extra->m_instanceCtorUnlocked);
-  assertx(!cls->m_extra->m_instanceDtor);
-  cls->m_extra.raw()->m_instanceCtor = asioInstanceCtor;
-  cls->m_extra.raw()->m_instanceCtorUnlocked = asioInstanceCtor;
-  cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
-  cls->m_releaseFunc = T::instanceDtor;
-}
-
-void AsioExtension::finishClasses() {
-  finish_class<c_Awaitable>();
-  finish_class<c_WaitableWaitHandle>();
-  finish_class<c_AwaitAllWaitHandle>();
-  finish_class<c_ResumableWaitHandle>();
-  finish_class<c_AsyncFunctionWaitHandle>();
-  finish_class<c_AsyncGeneratorWaitHandle>();
-  finish_class<c_StaticWaitHandle>();
-  finish_class<c_ConditionWaitHandle>();
-  finish_class<c_SleepWaitHandle>();
-  finish_class<c_RescheduleWaitHandle>();
-  finish_class<c_ExternalThreadEventWaitHandle>();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

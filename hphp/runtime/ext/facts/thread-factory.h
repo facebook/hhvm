@@ -24,8 +24,8 @@
 namespace HPHP {
 namespace Facts {
 
-std::shared_ptr<folly::ThreadFactory>
-make_thread_factory(folly::StringPiece name);
+std::shared_ptr<folly::ThreadFactory> make_thread_factory(
+    folly::StringPiece name);
 
 } // namespace Facts
 } // namespace HPHP

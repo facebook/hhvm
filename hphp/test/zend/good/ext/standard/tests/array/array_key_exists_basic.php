@@ -13,7 +13,7 @@ echo "*** Testing array_key_exists() : basic functionality ***\n";
 
 $key1 = 'key';
 $key2 = 'val';
-$search = darray[0 => 'one', 'key' => 'value', 1 => 'val'];
+$search = dict[0 => 'one', 'key' => 'value', 1 => 'val'];
 var_dump(array_key_exists($key1, $search));
 var_dump(array_key_exists($key2, $search));
 

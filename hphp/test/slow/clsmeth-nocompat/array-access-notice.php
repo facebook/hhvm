@@ -1,6 +1,6 @@
 <?hh
 
-function handle_error($_no, $str, ...) {
+function handle_error($_no, $str, ...$_rest) :mixed{
   if ($str === 'Cannot use a scalar value as an array') {
     echo "** SCALAR AS ARRAY\n";
     return true;
@@ -8,11 +8,11 @@ function handle_error($_no, $str, ...) {
   return false;
 }
 
-class Foo { static function bar() {} }
-function LV($x) { return __hhvm_intrinsics\launder_value($x); }
+class Foo { static function bar() :mixed{} }
+function LV($x) :mixed{ return __hhvm_intrinsics\launder_value($x); }
 
-function array_get_static() {
-  $m = class_meth(Foo::class, 'bar');
+function array_get_static() :mixed{
+  $m = Foo::bar<>;
 
   var_dump($m[0], $m[1]);
   var_dump($m[LV(0)], $m[LV(1)]);
@@ -30,8 +30,8 @@ function array_get_static() {
   //var_dump($m[LV(0)] ^ $m[LV(1)]);
 }
 
-function array_get_dynamic() {
-  $m = LV(class_meth(Foo::class, 'bar'));
+function array_get_dynamic() :mixed{
+  $m = LV(Foo::bar<>);
 
   var_dump($m[0], $m[1]);
   var_dump($m[LV(0)], $m[LV(1)]);
@@ -49,36 +49,36 @@ function array_get_dynamic() {
   //var_dump($m[LV(0)] ^ $m[LV(1)]);
 }
 
-function array_set_static() {
-  $m = class_meth(Foo::class, 'bar');
+function array_set_static() :mixed{
+  $m = Foo::bar<>;
   $m[0] = 'Alpha';
   var_dump($m);
 
-  $m = class_meth(Foo::class, 'bar');
+  $m = Foo::bar<>;
   $m[0][1] = 'x';
   var_dump($m);
 
-  $m = class_meth(Foo::class, 'bar');
+  $m = Foo::bar<>;
   $m[1] .= '-xyz';
   var_dump($m);
 }
 
-function array_set_dynamic() {
-  $m = LV(class_meth(Foo::class, 'bar'));
+function array_set_dynamic() :mixed{
+  $m = LV(Foo::bar<>);
   $m[0] = 'Alpha';
   var_dump($m);
 
-  $m = LV(class_meth(Foo::class, 'bar'));
+  $m = LV(Foo::bar<>);
   $m[0][1] = 'x';
   var_dump($m);
 
-  $m = LV(class_meth(Foo::class, 'bar'));
+  $m = LV(Foo::bar<>);
   $m[1] .= '-xyz';
   var_dump($m);
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(handle_error<>);
 
   array_get_static();  array_get_static();  array_get_static();

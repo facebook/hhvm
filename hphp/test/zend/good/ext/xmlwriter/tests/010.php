@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$file = __SystemLib\hphp_test_tmppath('010.tmp');
+$file = sys_get_temp_dir().'/'.'010.tmp';
 
 $xw = xmlwriter_open_uri($file);
 
@@ -17,7 +17,7 @@ unset($xw);
 
 var_dump(file_get_contents($file));
 
-@unlink($file);
+unlink($file);
 
 echo "Done\n";
 }

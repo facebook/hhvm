@@ -5,7 +5,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing is_int(), is_integer() & is_long()  with valid integer values ***\n";
 // different valid  integer vlaues
-$valid_ints = varray[
+$valid_ints = vec[
   0,
   1,
   -1,
@@ -43,7 +43,7 @@ $dfp = opendir ( dirname(__FILE__) );
 
 
 // other types in a array
-$not_int_types = varray [
+$not_int_types = vec[
   /* float values */
   -2147483649, // float value
   2147483648,  // float value
@@ -69,18 +69,18 @@ $not_int_types = varray [
   $dfp,
 
   /* arrays */
-  varray[],
-  varray[0],
-  varray[1],
-  varray[NULL],
-  varray[null],
-  varray["string"],
-  varray[true],
-  varray[TRUE],
-  varray[false],
-  varray[FALSE],
-  varray[1,2,3,4],
-  darray[1 => "One", "two" => 2],
+  vec[],
+  vec[0],
+  vec[1],
+  vec[NULL],
+  vec[null],
+  vec["string"],
+  vec[true],
+  vec[TRUE],
+  vec[false],
+  vec[FALSE],
+  vec[1,2,3,4],
+  dict[1 => "One", "two" => 2],
 
   /* strings */
   "",

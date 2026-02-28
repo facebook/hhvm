@@ -51,13 +51,11 @@
    ----------------------------------------------------------------------------
  */
 
-#include "gd.h"
-#include "gdfonts.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
 
-#include "wbmp.h"
+#include "hphp/runtime/ext/gd/libgd/wbmp.h"
 
 
 /* gd_putout

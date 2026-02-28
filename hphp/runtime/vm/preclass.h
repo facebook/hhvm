@@ -16,18 +16,21 @@
 
 #pragma once
 
-#include "hphp/runtime/base/atomic-shared-ptr.h"
 #include "hphp/runtime/base/attr.h"
+#include "hphp/runtime/base/lazy-string-data.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/user-attributes.h"
-#include "hphp/runtime/base/atomic-countable.h"
 #include "hphp/runtime/vm/containers.h"
+#include "hphp/runtime/vm/generics-info.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
+#include "hphp/util/atomic-countable.h"
+#include "hphp/util/atomic-shared-ptr.h"
 #include "hphp/util/fixed-vector.h"
+#include "hphp/util/ptr.h"
 
 #include <type_traits>
 #include <unordered_set>
@@ -38,7 +41,7 @@ namespace HPHP {
 struct Class;
 struct Func;
 struct ObjectData;
-struct NamedEntity;
+struct NamedType;
 struct StaticCoeffects;
 struct StringData;
 struct Unit;
@@ -49,11 +52,21 @@ namespace Native { struct NativeDataInfo; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using TraitNameSet = std::set<LowStringPtr,
-                              string_data_lti>;
+/*
+ * On ARM not all builtin function pointers are 8 byte aligned. So we can't use
+ * PackedPtr for them.
+ * We can also not always use SmallPtr because in devbuilds the function pointers
+ * are sometimes > 4 GB.
+ * So we use FullPtr in devbuilds and SmallPtr otherwise.
+ */
 
-using BuiltinCtorFunction = LowPtr<ObjectData*(Class*)>;
-using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*)>;
+#ifdef FULLPTR_FOR_BUILTINS
+using BuiltinCtorFunction = FullPtr<ObjectData*(Class*)>;
+using BuiltinDtorFunction = FullPtr<void(ObjectData*, const Class*)>;
+#else
+using BuiltinCtorFunction = SmallPtr<ObjectData*(Class*)>;
+using BuiltinDtorFunction = SmallPtr<void(ObjectData*, const Class*)>;
+#endif
 
 /*
  * A PreClass represents the source-level definition of a PHP class, interface,
@@ -69,9 +82,6 @@ using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*)>;
  */
 struct PreClass : AtomicCountable {
   friend struct PreClassEmitter;
-  using UpperBoundVec = VMCompactVector<TypeConstraint>;
-  using UpperBoundMap = vm_flat_map<const StringData*, UpperBoundVec>;
-
   /////////////////////////////////////////////////////////////////////////////
   // Types.
 
@@ -79,25 +89,26 @@ struct PreClass : AtomicCountable {
    * Instance property information.
    */
   struct Prop {
-    Prop(PreClass* preClass,
-         const StringData* name,
-         Attr attrs,
-         const StringData* userType,
-         const TypeConstraint& typeConstraint,
-         const CompactVector<TypeConstraint>& ubs,
-         const StringData* docComment,
-         const TypedValue& val,
-         RepoAuthType repoAuthType,
-         UserAttributeMap userAttributes);
+    Prop(
+      PreClass* preClass,
+      const StringData* name,
+      Attr attrs,
+      const StringData* userType,
+      TypeIntersectionConstraint&& constraints,
+      const StringData* docComment,
+      const TypedValue& val,
+      RepoAuthType repoAuthType,
+      UserAttributeMap userAttributes
+    );
 
     void prettyPrint(std::ostream&, const PreClass*) const;
 
     const StringData* name()           const { return m_name; }
-    const StringData* mangledName()    const { return m_mangledName; }
     Attr              attrs()          const { return m_attrs; }
     const StringData* userType()       const { return m_userType; }
-    const TypeConstraint& typeConstraint() const { return m_typeConstraint; }
-    const UpperBoundVec& upperBounds() const { return m_ubs; }
+    const TypeIntersectionConstraint& typeConstraints() const {
+      return m_typeConstraints;
+    }
     const StringData* docComment()     const { return m_docComment; }
     const TypedValue& val()            const { return m_val; }
     RepoAuthType      repoAuthType()   const { return m_repoAuthType; }
@@ -105,15 +116,13 @@ struct PreClass : AtomicCountable {
                       userAttributes() const { return m_userAttributes; }
 
   private:
-    LowStringPtr m_name;
-    LowStringPtr m_mangledName;
+    PackedStringPtr m_name;
     Attr m_attrs;
-    LowStringPtr m_userType;
-    LowStringPtr m_docComment;
+    PackedStringPtr m_userType;
+    PackedStringPtr m_docComment;
     TypedValue m_val;
     RepoAuthType m_repoAuthType;
-    TypeConstraint m_typeConstraint;
-    UpperBoundVec m_ubs;
+    TypeIntersectionConstraint m_typeConstraints;
     UserAttributeMap m_userAttributes;
   };
 
@@ -156,25 +165,25 @@ struct PreClass : AtomicCountable {
     }
     bool isFromTrait()     const { return m_fromTrait; }
     bool isAbstractAndUninit()   const {
-      return (m_val.constModifiers().isAbstract() &&
+      return (m_val.constModifierFlags().isAbstract &&
               !m_val.is_init() &&
               m_val.is_const_val_missing());
     }
     bool isAbstract()            const {
-      return m_val.constModifiers().isAbstract();
+      return m_val.constModifierFlags().isAbstract;
     }
-    ConstModifiers::Kind kind()  const { return m_val.constModifiers().kind(); }
+    ConstModifierFlags::Kind kind()  const { return m_val.constModifierFlags().kind; }
     Invariance invariance() const { return m_invariance; }
 
     StaticCoeffects coeffects()  const;
 
   private:
-    LowStringPtr m_name;
+    PackedStringPtr m_name;
     // The original class which defined this constant, if
     // non-null. This is normally the PreClass where this constant
     // exists. However if this is non-null, HHBBC has propagated the
     // constant and we need to preserve the original declaring class.
-    LowStringPtr m_cls;
+    PackedStringPtr m_cls;
     /* m_aux.u_isAbstractConst indicates an abstract constant. A TypedValue
      * with KindOfUninit represents a constant whose value is not
      * statically available (e.g. "const X = self::Y + 5;") */
@@ -187,83 +196,24 @@ struct PreClass : AtomicCountable {
   };
 
   /*
-   * Trait precedence rule.  Describes a usage of the `insteadof' operator.
-   *
-   * @see: http://php.net/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
-   */
-  struct TraitPrecRule {
-    TraitPrecRule();
-    TraitPrecRule(const StringData* selectedTraitName,
-                  const StringData* methodName);
-
-    const StringData* methodName()        const { return m_methodName; }
-    const StringData* selectedTraitName() const { return m_selectedTraitName; }
-    const TraitNameSet& otherTraitNames() const { return m_otherTraitNames; }
-
-    void addOtherTraitName(const StringData* traitName);
-
-    template<class SerDe> void serde(SerDe& sd) {
-      sd(m_methodName)(m_selectedTraitName)(m_otherTraitNames);
-    }
-
-  private:
-    LowStringPtr m_methodName;
-    LowStringPtr m_selectedTraitName;
-    TraitNameSet m_otherTraitNames;
-  };
-
-  /*
-   * Trait alias rule.  Describes a usage of the `as' operator.
-   *
-   * @see: http://php.net/manual/en/language.oop5.traits.php#language.oop5.traits.conflict
-   */
-  struct TraitAliasRule {
-    TraitAliasRule();
-    TraitAliasRule(const StringData* traitName,
-                   const StringData* origMethodName,
-                   const StringData* newMethodName,
-                   Attr modifiers);
-
-    const StringData* traitName()      const { return m_traitName; }
-    const StringData* origMethodName() const { return m_origMethodName; }
-    const StringData* newMethodName()  const { return m_newMethodName; }
-    Attr              modifiers()      const { return m_modifiers; }
-
-    template<class SerDe> void serde(SerDe& sd) {
-      sd(m_traitName)(m_origMethodName)(m_newMethodName)(m_modifiers);
-    }
-
-    /*
-     * Pair of (new name, original name) representing the rule.
-     *
-     * This is the format for alias rules expected by reflection.
-     */
-    using NamePair = std::pair<LowStringPtr,LowStringPtr>;
-
-    /*
-     * Get the rule as a NamePair.
-     */
-    NamePair asNamePair() const;
-
-  private:
-    LowStringPtr m_traitName;
-    LowStringPtr m_origMethodName;
-    LowStringPtr m_newMethodName;
-    Attr         m_modifiers;
-  };
-
-  /*
    * Trait and interface requirements.
    *
-   * Represents a `require implements' or `require extends' declaration.
+   * Represents a `require implements', `require extends', `require class',
+   * or `require this as' declaration.
    */
+  enum RequirementKind {
+    RequirementImplements = 0,
+    RequirementExtends    = 0x1,
+    RequirementClass      = 0x2,
+    RequirementThisAs     = 0x3,
+  };
+
   struct ClassRequirement {
     ClassRequirement();
-    ClassRequirement(const StringData* req, bool isExtends);
+    ClassRequirement(const StringData* req, const RequirementKind reqKind);
 
     const StringData* name() const;
-    bool is_extends() const;
-    bool is_implements() const;
+    RequirementKind kind() const;
     bool is_same(const ClassRequirement* other) const;
     size_t hash() const;
 
@@ -280,25 +230,22 @@ struct PreClass : AtomicCountable {
   };
 
 private:
-  typedef IndexedStringMap<Func*,Slot> MethodMap;
-  typedef IndexedStringMap<Prop,Slot> PropMap;
-  typedef IndexedStringMap<Const,Slot> ConstMap;
+  using MethodMap = IndexedStringMap<Func*,Slot>;
+  using PropMap = IndexedStringMap<Prop,Slot>;
+  using ConstMap = IndexedStringMap<Const,Slot>;
 
 public:
-  typedef VMFixedVector<LowStringPtr> InterfaceVec;
-  typedef VMFixedVector<LowStringPtr> IncludedEnumsVec;
-  typedef VMFixedVector<LowStringPtr> UsedTraitVec;
-  typedef VMFixedVector<ClassRequirement> ClassRequirementsVec;
-  typedef VMFixedVector<TraitPrecRule> TraitPrecRuleVec;
-  typedef VMFixedVector<TraitAliasRule> TraitAliasRuleVec;
+  using InterfaceVec = VMFixedVector<PackedStringPtr>;
+  using IncludedEnumsVec = VMFixedVector<PackedStringPtr>;
+  using UsedTraitVec = VMFixedVector<PackedStringPtr>;
+  using ClassRequirementsVec = VMFixedVector<ClassRequirement>;
 
 
   /////////////////////////////////////////////////////////////////////////////
   // Construction and destruction.
 
   PreClass(Unit* unit, int line1, int line2, const StringData* n,
-           Attr attrs, const StringData* parent, const StringData* docComment,
-           Id id);
+           Attr attrs, const StringData* parent, const StringData* docComment);
   ~PreClass();
 
   void atomicRelease();
@@ -311,10 +258,9 @@ public:
    * Basic info.
    */
   Unit*             unit()         const { return m_unit; }
-  NamedEntity*      namedEntity()  const { return m_namedEntity; }
+  NamedType*        namedType()    const { return m_namedType; }
   int               line1()        const { return m_line1; }
   int               line2()        const { return m_line2; }
-  Id                id()           const { return m_id; }
   Attr              attrs()        const { return m_attrs; }
   const StringData* name()         const { return m_name; }
   const StringData* parent()       const { return m_parent; }
@@ -351,8 +297,6 @@ public:
   const IncludedEnumsVec& includedEnums()    const { return m_includedEnums; }
   const UsedTraitVec& usedTraits()           const { return m_usedTraits; }
   const ClassRequirementsVec& requirements() const { return m_requirements; }
-  const TraitPrecRuleVec& traitPrecRules()   const { return m_traitPrecRules; }
-  const TraitAliasRuleVec& traitAliasRules() const { return m_traitAliasRules; }
   const UserAttributeMap& userAttributes()   const { return m_userAttributes; }
 
   /*
@@ -393,10 +337,17 @@ public:
   const ConstMap& constantsMap() const { return m_constants; }
 
   /*
-   * NativeData type declared in <<__NativeData("Type")>>.
+   * NativeData type declared in <<__NativeData>>.
    */
   const Native::NativeDataInfo* nativeDataInfo() const {
     return m_nativeDataInfo;
+  }
+
+  const folly::Range<const PackedStringPtr*> typeParamNames() const {
+    return folly::Range<const PackedStringPtr*>(
+      m_typeParamNames.begin(),
+      m_typeParamNames.end()
+    );
   }
 
 
@@ -435,6 +386,7 @@ public:
    */
   static constexpr Offset nameOffset()  { return offsetof(PreClass, m_name); }
   static constexpr Offset attrsOffset() { return offsetof(PreClass, m_attrs); }
+  static constexpr Offset unitOffset() { return offsetof(PreClass, m_unit); }
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -455,14 +407,13 @@ public:
 
 private:
   Unit* m_unit;
-  LowPtr<NamedEntity> m_namedEntity;
+  PackedPtr<NamedType> m_namedType;
   int m_line1;
   int m_line2;
-  Id m_id;
   Attr m_attrs;
-  LowStringPtr m_name;
-  LowStringPtr m_parent;
-  LowStringPtr m_docComment;
+  PackedStringPtr m_name;
+  PackedStringPtr m_parent;
+  PackedStringPtr m_docComment;
   int32_t m_numDeclMethods;
   Slot m_ifaceVtableSlot{kInvalidSlot};
   TypeConstraint m_enumBaseTy;
@@ -470,17 +421,16 @@ private:
   IncludedEnumsVec m_includedEnums;
   UsedTraitVec m_usedTraits;
   ClassRequirementsVec m_requirements;
-  TraitPrecRuleVec m_traitPrecRules;
-  TraitAliasRuleVec m_traitAliasRules;
   UserAttributeMap m_userAttributes;
   const Native::NativeDataInfo *m_nativeDataInfo{nullptr};
   MethodMap m_methods;
   PropMap m_properties;
   ConstMap m_constants;
   int64_t m_dynConstructSampleRate;
+  FixedVector<PackedStringPtr> m_typeParamNames;
 };
 
-typedef AtomicSharedPtr<PreClass> PreClassPtr;
+using PreClassPtr = AtomicSharedPtr<PreClass>;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

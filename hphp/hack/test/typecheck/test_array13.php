@@ -10,6 +10,6 @@
  */
 
 function test(): void {
-  $v = darray['f' => varray[1, 2], 'b' => 0];
+  $v = dict['f' => vec[1, 2], 'b' => 0];
   $v['f'][0] = 1;
 }

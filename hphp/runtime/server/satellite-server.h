@@ -31,8 +31,6 @@ struct SatelliteServer {
   enum class Type {
     Unknown,
 
-    KindOfInternalPageServer,  // handles restricted URLs
-    KindOfRPCServer,           // invokes one PHP function and returns JSON
     KindOfXboxServer,          // handles internal xbox tasks
   };
 
@@ -83,18 +81,9 @@ public:
   // for all libevent servers
   std::chrono::seconds getTimeoutSeconds() const { return m_timeoutSeconds;}
 
-  // only for InternalPageServer
-  const std::set<std::string> &getURLs() const { return m_urls;}
-
   // only for RPCServer
-  int getMaxRequest() const { return m_maxRequest;}
-  int getMaxDuration() const { return m_maxDuration;}
   const std::string &getReqInitFunc() const { return m_reqInitFunc;}
   const std::string &getReqInitDoc() const { return m_reqInitDoc;}
-  const std::string &getPassword() const { return m_password;}
-  const std::set<std::string> &getPasswords() const { return m_passwords;}
-  bool alwaysReset() const { return m_alwaysReset;}
-  const std::set<std::string> &getFunctions() const { return m_functions; }
   Transport::Method getMethod() const { return m_method;}
 
 protected:
@@ -102,16 +91,11 @@ protected:
   SatelliteServer::Type m_type;
   int m_port = 0;
   int m_threadCount = 5;
-  int m_maxRequest = 500;
-  int m_maxDuration = 120;
   std::string m_serverIP;
   std::chrono::seconds m_timeoutSeconds;
   std::set<std::string> m_urls; // url regex patterns
   std::string m_reqInitFunc;
   std::string m_reqInitDoc;
-  std::string m_password;
-  std::set<std::string> m_passwords;
-  bool m_alwaysReset = false;
   std::set<std::string> m_functions;
   Transport::Method m_method;
 };

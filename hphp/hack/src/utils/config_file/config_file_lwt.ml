@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Core
 include Config_file_version
 
 type t = Config_file_common.t
@@ -17,12 +17,11 @@ let file_path_relative_to_repo_root =
 
 let empty = Config_file_common.empty
 
-let parse_hhconfig (fn : string) : (string * t, string) Lwt_result.t =
+let parse_hhconfig (fn : string) : (t, string) Lwt_result.t =
   let%lwt contents = Lwt_utils.read_all fn in
   match contents with
-  | Ok contents ->
-    let parsed = Config_file_common.parse_contents contents in
-    let hash = Sha1.digest contents in
-    Lwt.return_ok (hash, parsed)
+  | Ok hhconfig_contents ->
+    let parsed = Config_file_common.parse_contents hhconfig_contents in
+    Lwt.return_ok parsed
   | Error message ->
     Lwt.return_error (Printf.sprintf "Could not load hhconfig: %s" message)

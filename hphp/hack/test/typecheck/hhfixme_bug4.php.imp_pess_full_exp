@@ -1,0 +1,12 @@
+File "hhfixme_bug4.php", line 12, characters 12-12:
+Invalid return type (Typing[4110])
+  File "hhfixme_bug4.php", line 4, characters 32-35:
+  Expected `void`
+  File "hhfixme_bug4.php", line 12, characters 12-12:
+  But got `int`
+File "hhfixme_bug4.php", line 6, characters 13-176:
+This function can exit with and without returning a value (Typing[4421])
+  File "hhfixme_bug4.php", line 12, characters 5-13:
+  Returning a value here.
+  File "hhfixme_bug4.php", line 10, characters 5-11:
+  Returning without a value here

@@ -1,0 +1,1 @@
+Fatal error: Trait 'T' requires extension of 'T2', but T2 is not an extendable class in %s

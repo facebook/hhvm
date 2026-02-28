@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 
-function runtest() {
+function runtest() :mixed{
 
 
    //correct php53 behaviour is to ignore the FILE_USE_INCLUDE_PATH unless the file already exists
@@ -26,7 +26,7 @@ require_once('fopen_include_path.inc');
 
 echo "*** Testing file_put_contents() : variation ***\n";
 
-$thisTestDir = __SystemLib\hphp_test_tmppath('dir');
+$thisTestDir = sys_get_temp_dir().'/'.'dir';
 mkdir($thisTestDir);
 $oldDirPath = getcwd();
 chdir($thisTestDir);

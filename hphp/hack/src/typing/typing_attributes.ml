@@ -8,16 +8,15 @@
  *)
 
 open Hh_prelude
-open Typing_reason
 open Typing_env_types
 module SN = Naming_special_names
 module MakeType = Typing_make_type
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
 type attribute_interface_name = string
 
 type new_object_checker =
-  Pos.t -> env -> Typing_defs.pos_string -> Nast.expr list -> env
+  Pos.t -> env -> Typing_defs.pos_string -> Nast.argument list -> env
 
 let check_implements
     (check_new_object : new_object_checker)
@@ -31,26 +30,25 @@ let check_implements
     | None -> "this expression"
     (* this case should never execute *)
   in
-  let enable_systemlib_annotations =
-    TypecheckerOptions.enable_systemlib_annotations (Typing_env.get_tcopt env)
+  let is_systemlib =
+    TypecheckerOptions.is_systemlib (Typing_env.get_tcopt env)
   in
-  if String_utils.string_starts_with attr_name "__" then
+  if String.is_prefix attr_name ~prefix:"__" then
     (* Check against builtins *)
     let check_attr map =
       match SMap.find_opt attr_name map with
-      | Some (intfs, _docs) ->
-        let check_locations =
-          TypecheckerOptions.check_attribute_locations
-            (Typing_env.get_tcopt env)
-        in
+      | Some attr_info ->
         if
-          check_locations
-          && (not @@ List.mem intfs attr_interface ~equal:String.equal)
+          not
+          @@ List.mem
+               attr_info.SN.UserAttributes.contexts
+               attr_interface
+               ~equal:String.equal
         then
-          Errors.add_typing_error
-            Typing_error.(
-              primary
-              @@ Primary.Wrong_expression_kind_builtin_attribute
+          Diagnostics.add_diagnostic
+            Nast_check_error.(
+              to_user_diagnostic
+              @@ Wrong_expression_kind_builtin_attribute
                    { expr_kind; pos = attr_pos; attr_name });
         true
       | None -> false
@@ -58,8 +56,7 @@ let check_implements
     let () =
       if
         check_attr SN.UserAttributes.as_map
-        || enable_systemlib_annotations
-           && check_attr SN.UserAttributes.systemlib_map
+        || (is_systemlib && check_attr SN.UserAttributes.systemlib_map)
       then
         ()
       else
@@ -67,51 +64,39 @@ let check_implements
           let bindings = SMap.bindings SN.UserAttributes.as_map in
           let filtered_bindings =
             List.filter
-              ~f:(fun (_, (list, _)) ->
-                List.mem list attr_interface ~equal:String.equal)
+              ~f:(fun (_, attr_info) ->
+                List.mem
+                  attr_info.SN.UserAttributes.contexts
+                  attr_interface
+                  ~equal:String.equal)
               bindings
           in
           List.map ~f:fst filtered_bindings
         in
 
         let closest_attr_name =
-          Typing_env.most_similar
-            attr_name
-            all_valid_user_attributes
-            (fun name -> name)
+          String_utils.most_similar attr_name all_valid_user_attributes Fn.id
         in
 
-        Errors.add_naming_error
-        @@ Naming_error.Unbound_attribute_name
-             { pos = attr_pos; attr_name; closest_attr_name }
+        let custom_err_config =
+          TypecheckerOptions.custom_error_config (Typing_env.get_tcopt env)
+        in
+        Diagnostics.add_diagnostic
+          (Naming_error_utils.to_user_diagnostic
+             (Naming_error.Unbound_attribute_name
+                { pos = attr_pos; attr_name; closest_attr_name })
+             custom_err_config)
     in
 
     env
   else
-    match
-      ( Typing_env.get_class env attr_name,
-        Typing_env.get_class env attr_interface )
-    with
-    | (Some attr_class, Some intf_class) ->
+    match Typing_env.get_class env attr_name with
+    | Decl_entry.Found attr_class ->
       (* Found matching class *)
       let attr_cid = (Cls.pos attr_class, Cls.name attr_class) in
-      (* successful exit condition: attribute class is subtype of correct interface
-       * and its args satisfy the attribute class constructor *)
-      let attr_locl_ty : Typing_defs.locl_ty =
-        MakeType.class_type
-          (Rwitness_from_decl (Cls.pos attr_class))
-          (Cls.name attr_class)
-          []
-      in
-      let interface_locl_ty : Typing_defs.locl_ty =
-        MakeType.class_type
-          (Rwitness_from_decl (Cls.pos intf_class))
-          (Cls.name intf_class)
-          []
-      in
-      if not (Typing_subtype.is_sub_type env attr_locl_ty interface_locl_ty)
-      then (
-        Errors.add_typing_error
+      if not (Cls.has_ancestor attr_class attr_interface) then (
+        Typing_error_utils.add_typing_error
+          ~env
           Typing_error.(
             primary
             @@ Primary.Wrong_expression_kind_attribute
@@ -121,15 +106,27 @@ let check_implements
                    attr_name;
                    attr_class_pos = Cls.pos attr_class;
                    attr_class_name = Cls.name attr_class;
-                   intf_name = Cls.name intf_class;
+                   intf_name = attr_interface;
                  });
         env
       ) else
-        check_new_object attr_pos env attr_cid params
+        check_new_object
+          attr_pos
+          env
+          attr_cid
+          (List.map ~f:(fun e -> Aast_defs.Anormal e) params)
+    | Decl_entry.NotYetAvailable ->
+      (* A retry will happen. Don't emit error to avoid error-based backtracking *)
+      env
     | _ ->
-      Errors.add_naming_error
-      @@ Naming_error.Unbound_attribute_name
-           { pos = attr_pos; attr_name; closest_attr_name = None };
+      let custom_err_config =
+        TypecheckerOptions.custom_error_config (Typing_env.get_tcopt env)
+      in
+      Diagnostics.add_diagnostic
+        (Naming_error_utils.to_user_diagnostic
+           (Naming_error.Unbound_attribute_name
+              { pos = attr_pos; attr_name; closest_attr_name = None })
+           custom_err_config);
       env
 
 let check_def env check_new_object (kind : attribute_interface_name) attributes

@@ -1,6 +1,6 @@
-File "T90599414.php", line 6, characters 3-10:
-Invalid index type for this Map (Typing[4324])
+ERROR: File "T90599414.php", line 6, characters 3-10:
+Typing error (Typing[4110])
   File "T90599414.php", line 5, characters 8-13:
-  Expected `arraykey` because type parameter `Tk` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
+  Expected `arraykey`
   File "T90599414.php", line 6, characters 6-9:
   But got `null`

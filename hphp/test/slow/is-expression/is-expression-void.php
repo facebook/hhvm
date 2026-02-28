@@ -12,7 +12,7 @@ function return_void(): void {}
 
 
 <<__EntryPoint>>
-function main_is_expression_void() {
+function main_is_expression_void() :mixed{
 is_void(return_void());
 is_void(null);
 is_void(-1);

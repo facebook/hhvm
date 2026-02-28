@@ -6,7 +6,7 @@
  */
 
 // Define error handler
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) :mixed{
     if (error_reporting() != 0) {
         // report non-silenced errors
         echo "Error: $err_no - $err_msg, $filename($linenum)\n";
@@ -16,7 +16,7 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 // define some classes
 class classWithToString
 {
-    public function __toString() {
+    public function __toString() :mixed{
         return "Class A object";
     }
 }
@@ -41,11 +41,11 @@ hello world
 EOT;
 
 // add arrays
-$index_array = varray [1, 2, 3];
-$assoc_array = darray ['one' => 1, 'two' => 2];
+$index_array = vec[1, 2, 3];
+$assoc_array = dict['one' => 1, 'two' => 2];
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
 
       // int data
       'int 0' => 0,
@@ -61,10 +61,10 @@ $inputs = darray[
       'float .5' => .5,
 
       // array data
-      'empty array' => varray[],
+      'empty array' => vec[],
       'int indexed array' => $index_array,
       'associative array' => $assoc_array,
-      'nested arrays' => varray['foo', $index_array, $assoc_array],
+      'nested arrays' => vec['foo', $index_array, $assoc_array],
 
       // null data
       'uppercase NULL' => NULL,

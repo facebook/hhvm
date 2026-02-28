@@ -1,0 +1,98 @@
+vec(5) {
+  int(1)
+  int(2)
+  int(30)
+  int(4)
+  int(5)
+}
+vec(5) {
+  int(1)
+  int(2)
+  int(30)
+  int(40)
+  int(50)
+}
+vec(5) {
+  int(1)
+  int(2)
+  int(30)
+  int(4)
+  int(50)
+}
+vec(5) {
+  int(1)
+  int(2)
+  int(30)
+  int(40)
+  int(5)
+}
+vec(9) {
+  int(1)
+  int(2)
+  int(30)
+  int(40)
+  int(5)
+  int(8)
+  int(9)
+  int(10)
+  int(11)
+}
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+vec(5) {
+  int(1)
+  int(2)
+  int(30)
+  int(4)
+  int(5)
+}
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(50)
+}
+vec(3) {
+  int(1)
+  string(1) "a"
+  int(333)
+}
+vec(3) {
+  int(1)
+  string(3) "aaa"
+  int(333)
+}
+vec(3) {
+  int(1)
+  string(1) "a"
+  int(222)
+}
+vec(6) {
+  int(1)
+  string(3) "aaa"
+  int(222)
+  int(2)
+  int(3)
+  int(4)
+}
+vec(6) {
+  int(1)
+  string(3) "aaa"
+  int(333)
+  int(2)
+  int(3)
+  int(4)
+}

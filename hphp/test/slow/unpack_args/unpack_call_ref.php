@@ -66,11 +66,11 @@ function has_ref(
   $p62,
   $p63,
   inout $p_that_happens_to_be_by_reference,
-) {
+) :mixed{
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $args = range(0, 64);
   has_ref(...$args);
 }

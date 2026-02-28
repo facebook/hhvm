@@ -1,0 +1,6 @@
+ERROR: File "nullable_dict_eq_null.php", line 7, characters 12-13:
+Invalid return type (Typing[4110])
+  File "nullable_dict_eq_null.php", line 3, characters 71-77:
+  Expected `nonnull`
+  File "nullable_dict_eq_null.php", line 3, characters 46-50:
+  But got `mixed`

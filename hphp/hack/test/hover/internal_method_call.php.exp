@@ -1,0 +1,3 @@
+Defined in `A`
+---
+internal function bar(): void

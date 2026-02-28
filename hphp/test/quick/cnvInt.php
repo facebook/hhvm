@@ -1,6 +1,6 @@
 <?hh
 
-function foo($v) {
+function foo($v) :mixed{
   return (int)$v;
 }
 function foo2(): void {
@@ -10,11 +10,11 @@ function foo2(): void {
   var_dump(foo(9007199254740992));
   var_dump(foo(1.1));
   var_dump(foo("abc"));
-  var_dump(foo(varray[123]));
+  var_dump(foo(vec[123]));
 }
 class C { public $foo = "bar"; }
 
-function bar($i) {
+function bar($i) :mixed{
   $v1 = "undefined";
   $v2 = "undefined";
   $v3 = "undefined";
@@ -36,8 +36,8 @@ function bar($i) {
     $v7 = "1.1";
     $v8 = "abc";
     $v9 = new C;
-    $v10 = varray[];
-    $v11 = varray[123];
+    $v10 = vec[];
+    $v11 = vec[123];
   }
   var_dump((int)$v1);
   var_dump((int)$v2);
@@ -58,7 +58,7 @@ function bar($i) {
 
 
 
-function baz($i) {
+function baz($i) :mixed{
   if ($i >= 1) {
     $s1 = '5.3xxx';
     $s2 = '7yyy';

@@ -11,6 +11,6 @@ function entrypoint_xsltprocessor_registerPHPFunctionsarraynotallowed(
   }
   $proc = XSLTPrepare::getProc();
   $proc->importStylesheet($phpfuncxsl);
-  var_dump($proc->registerPHPFunctions(varray[]));
+  var_dump($proc->registerPHPFunctions(vec[]));
   var_dump($proc->transformToXML(XSLTPrepare::getDOM()));
 }

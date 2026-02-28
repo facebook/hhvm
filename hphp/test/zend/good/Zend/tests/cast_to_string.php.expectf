@@ -1,7 +1,7 @@
 string(6) "string"
 string(7) "8754456"
 string(0) ""
-string(1) "%r\x00%r"
+string(1) "%h{00}"
 string(7) "9876545"
 string(3) "0.1"
 string(%d) "%s to string conversion"

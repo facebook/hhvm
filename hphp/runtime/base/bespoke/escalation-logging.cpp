@@ -59,13 +59,13 @@ void logEscalation(const ArrayData* ad, SrcKey sk,
 //////////////////////////////////////////////////////////////////////////////
 
 void logGuardFailure(const ArrayData* ad, jit::ArrayLayout layout, SrcKey sk) {
-  if (!StructuredLog::coinflip(RO::EvalBespokeEscalationSampleRate)) return;
+  if (!StructuredLog::coinflip(Cfg::Eval::BespokeEscalationSampleRate)) return;
   auto const reason = layout.describe();
   logEscalation(ad, sk, "GuardFailure", reason.data());
 }
 
 void logEscalateToVanilla(const BespokeArray* bad, const char* reason) {
-  if (!StructuredLog::coinflip(RO::EvalBespokeEscalationSampleRate)) return;
+  if (!StructuredLog::coinflip(Cfg::Eval::BespokeEscalationSampleRate)) return;
   logEscalation(bad, getSrcKey(), "EscalateToVanilla", reason);
 }
 

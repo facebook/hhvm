@@ -28,6 +28,8 @@
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/type-system.h"
 
+#include "hphp/util/configs/jit.h"
+
 namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
@@ -37,28 +39,19 @@ namespace HPHP::HHBBC {
  * will return non-static objects, or throw exceptions (e.g. tvAdd()
  * with an array and an int).
  *
- * This routine converts these things back to types.  In the case of
- * an exception it returns TInitCell.
+ * This routine converts these things back to types. In the case of
+ * an exception it returns std::nullopt.
  */
 template<class Pred>
 Optional<Type> eval_cell(Pred p) {
   try {
-    assertx(!RuntimeOption::EvalJit);
+    assertx(!Cfg::Jit::Enabled);
     ThrowAllErrorsSetter taes;
 
     TypedValue c = p();
     if (isRefcountedType(c.m_type)) tvAsVariant(&c).setEvalScalar();
 
-    /*
-     * We need to get rid of statics if we're not actually going to do
-     * constant propagation.  When ConstantProp is on, the types we
-     * create here can reflect that we'll be changing bytecode later
-     * to actually make these into non-reference-counted SStr or
-     * SArrs.  If we leave the bytecode alone, though, it generally
-     * won't actually be static at runtime.
-     */
-    auto const t = from_cell(c);
-    return options.ConstantProp ? t : loosen_staticness(t);
+    return from_cell(c);
   } catch (const Object&) {
     return std::nullopt;
   } catch (const std::exception&) {
@@ -69,7 +62,7 @@ Optional<Type> eval_cell(Pred p) {
 }
 
 template<typename Pred>
-Optional<typename std::result_of<Pred()>::type>
+Optional<typename std::invoke_result<Pred>::type>
 eval_cell_value(Pred p) {
   try {
     ThrowAllErrorsSetter taes;

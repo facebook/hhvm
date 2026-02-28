@@ -19,11 +19,9 @@
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/tc.h"
-#include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
@@ -32,6 +30,7 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/data-block.h"
 
 #include <vector>
@@ -48,7 +47,7 @@ IRMetadataUpdater::IRMetadataUpdater(const Venv& env, AsmInfo* asm_info)
     m_area_to_blockinfos.resize(m_env.text.areas().size());
     for (auto& r : m_area_to_blockinfos) r.resize(m_env.unit.blocks.size());
   }
-  if (transdb::enabled() || RuntimeOption::EvalJitUseVtuneAPI) {
+  if (transdb::enabled() || Cfg::Jit::UseVtuneAPI) {
     m_bcmap = &env.meta.bcMap;
   }
 }
@@ -75,6 +74,7 @@ void IRMetadataUpdater::register_inst(const Vinstr& inst) {
     if (m_bcmap->empty() || m_bcmap->back().sk != sk) {
       m_bcmap->push_back(TransBCMapping{
         sk.unit()->sha1(),
+        sk.unit()->sn(),
         sk,
         m_env.text.main().code.frontier(),
         m_env.text.cold().code.frontier(),
@@ -247,123 +247,6 @@ bool emit(Venv& env, const fallbackcc& i) {
     IncomingBranch::jccFrom(jcc), i.target, i.spOff, true /* fallback */});
   return true;
 }
-
-bool emit(Venv& env, const movqs& i) {
-  auto const mov = emitSmashableMovq(*env.cb, env.meta, i.s.q(), r64(i.d));
-  if (i.addr.isValid()) {
-    env.vaddrs[i.addr] = mov;
-  }
-  return true;
-}
-
-bool emit(Venv& env, const jmps& i) {
-  auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
-  env.jmps.push_back({jmp, i.targets[0]});
-  if (i.jmp_addr.isValid()) {
-    env.vaddrs[i.jmp_addr] = jmp;
-  }
-  if (i.taken_addr.isValid()) {
-    env.pending_vaddrs.push_back({i.taken_addr, i.targets[1]});
-  }
-  return true;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Computes inline frames for each block in unit. Inline frames are dominated
- * by an inlinestart instruction and post-dominated by an inlineend instruction.
- * This function annotates Vblocks with their associated frame, and populates
- * the frame vector. Additionally, inlinestart and inlineend instructions are
- * replaced by jmp instructions.
- */
-void computeFrames(Vunit& unit) {
-  auto const topFunc = unit.context ? unit.context->initSrcKey.func() : nullptr;
-
-  auto const rpo = sortBlocks(unit);
-
-  assertx(unit.frames.size() == Vframe::Root);
-  unit.frames.emplace_back(
-    topFunc, 0, SBInvOffset{0}, Vframe::Top, 0, unit.blocks[rpo[0]].weight
-  );
-  unit.blocks[rpo[0]].frame = 0;
-  unit.blocks[rpo[0]].pending_frames = 0;
-  for (auto const b : rpo) {
-    auto& block = unit.blocks[b];
-    int pending = block.pending_frames;
-    assert_flog(block.frame != -1, "Block frames cannot be uninitialized.");
-
-    if (block.code.empty()) continue;
-
-    auto const next_frame = [&] () -> int {
-      auto frame = block.frame;
-      for (auto& inst : block.code) {
-        auto origin = inst.origin;
-        switch (inst.op) {
-        case Vinstr::inlinestart: {
-          // Each inlined frame will have a single start but may have multiple
-          // ends, and so we need to propagate this state here so that it only
-          // happens once per frame.
-          for (auto f = frame; f != Vframe::Top; f = unit.frames[f].parent) {
-            unit.frames[f].inclusive_cost += inst.inlinestart_.cost;
-            unit.frames[f].num_inner_frames++;
-          }
-
-          auto const sbToRootSbOff =
-            unit.frames[frame].sbToRootSbOff +
-            origin->marker().bcSPOff().offset +
-            inst.inlinestart_.func->numSlotsInFrame();
-
-          unit.frames.emplace_back(
-            inst.inlinestart_.func,
-            origin->marker().bcOff(),
-            sbToRootSbOff,
-            frame,
-            inst.inlinestart_.cost,
-            block.weight
-          );
-          frame = inst.inlinestart_.id = unit.frames.size() - 1;
-          pending++;
-          break;
-        }
-        case Vinstr::inlineend:
-          frame = unit.frames[frame].parent;
-          pending--;
-          break;
-        case Vinstr::pushframe:
-          pending--;
-          break;
-        default: break;
-        }
-      }
-      return frame;
-    }();
-
-    for (auto const s : succs(block)) {
-      auto& sblock = unit.blocks[s];
-      assert_flog(
-        (sblock.frame == -1 || sblock.frame == next_frame) &&
-        (sblock.pending_frames == -1 || sblock.pending_frames == pending),
-        "Blocks must be dominated by a single inline frame at the same depth,"
-        "{} cannot have frames {} ({}) and {} ({}) at depths {} and {}.",
-        s,
-        sblock.frame,
-        unit.frames[sblock.frame].func
-          ? unit.frames[sblock.frame].func->fullName()->data()
-          : "(null)",
-        next_frame,
-        unit.frames[next_frame].func
-          ? unit.frames[next_frame].func->fullName()->data()
-          : "(null)",
-        sblock.pending_frames,
-        pending
-      );
-      sblock.frame = next_frame;
-      sblock.pending_frames = pending;
-    }
-  }
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 

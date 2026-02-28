@@ -1,2 +1,1 @@
 extension iconv
-function iconv_mime_decode_headers

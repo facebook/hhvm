@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_wrapper() {
+function main_wrapper() :mixed{
 $loremIpsum = <<<LOREM_IPSUM
 Lorem ipsum dolor sit amet,
 consectetur adipiscing elit,

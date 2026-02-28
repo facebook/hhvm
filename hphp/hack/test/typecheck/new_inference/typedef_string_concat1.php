@@ -1,5 +1,5 @@
 //// def.php
-<?hh // strict
+<?hh
 
 newtype TDef = int;
 class Vals {
@@ -7,7 +7,7 @@ class Vals {
 }
 
 //// use.php
-<?hh  // strict
+<?hh
 
 class C {
   private TDef $x = Vals::foo;

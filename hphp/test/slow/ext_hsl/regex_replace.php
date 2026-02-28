@@ -1,6 +1,6 @@
 <?hh
 
-function test_one($name, $haystack, $pattern, $replacement) {
+function test_one($name, $haystack, $pattern, $replacement) :mixed{
   echo "-- $name --\n";
   echo "args: $haystack, $pattern, $replacement\n";
   list ($result, $error) =
@@ -9,7 +9,7 @@ function test_one($name, $haystack, $pattern, $replacement) {
   var_dump($result);
 }
 
-<<__EntryPoint>> function test() {
+<<__EntryPoint>> function test() :mixed{
   // Set low backtrack limit to trigger PREG_BACKTRACK_LIMIT_ERROR
   ini_set('pcre.backtrack_limit', 2);
 

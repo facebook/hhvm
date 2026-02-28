@@ -18,6 +18,9 @@
 #error "unwind-inl.h should only be included by unwind.h"
 #endif
 
+#include "hphp/util/assertions.h"
+#include "hphp/util/trace.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

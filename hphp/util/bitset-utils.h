@@ -24,7 +24,7 @@ namespace HPHP {
 // Return the index of the first set bit in a bitset, or bitset.size() if none.
 template <size_t N>
 inline size_t bitset_find_first(const std::bitset<N>& bitset) {
-#if defined(__GNUC__) && !defined(__APPLE__)
+#if defined(__GLIBCXX__)
   // GNU provides non-standard (its a hold over from the original SGI
   // implementation) _Find_first(), which efficiently returns the index of the
   // first set bit.
@@ -42,7 +42,7 @@ inline size_t bitset_find_first(const std::bitset<N>& bitset) {
 template <size_t N>
 inline size_t bitset_find_next(const std::bitset<N>& bitset, size_t prev) {
   assertx(prev < bitset.size());
-#if defined(__GNUC__) && !defined(__APPLE__)
+#if defined(__GLIBCXX__)
   // GNU provides non-standard (its a hold over from the original SGI
   // implementation) _Find_next(), which given an index, efficiently returns
   // the index of the first set bit after the index.
@@ -174,4 +174,3 @@ inline std::bitset<N>& fill0(std::bitset<N>& bitset,
 }
 
 } // HPHP
-

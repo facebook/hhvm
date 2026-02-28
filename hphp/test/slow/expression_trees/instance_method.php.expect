@@ -1,0 +1,2 @@
+$p->bar("hello")
+$c->bar("world")

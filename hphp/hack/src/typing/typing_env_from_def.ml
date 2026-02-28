@@ -20,11 +20,9 @@ module MakeType = Typing_make_type
 open Aast
 
 let fun_env ?origin ctx fd =
-  let f = fd.fd_fun in
-  let file = Pos.filename (fst f.f_name) in
-  let droot = Some (Typing_deps.Dep.Fun (snd f.f_name)) in
+  let file = Pos.filename (fst fd.fd_name) in
+  let droot = Some (Typing_deps.Dep.Fun (snd fd.fd_name)) in
   let env = Typing_env_types.empty ?origin ctx file ~mode:fd.fd_mode ~droot in
-  Typing_inference_env.Identifier_provider.reinitialize ();
   env
 
 (* Given a class definition construct a type consisting of the
@@ -32,13 +30,11 @@ let fun_env ?origin ctx fd =
 let get_self_from_c c =
   let tparams =
     List.map c.c_tparams ~f:(fun { tp_name = (p, s); _ } ->
-        mk
-          ( Reason.Rwitness_from_decl (Pos_or_decl.of_raw_pos p),
-            Tgeneric (s, []) ))
+        mk (Reason.witness_from_decl (Pos_or_decl.of_raw_pos p), Tgeneric s))
   in
   let (name_pos, name) = c.c_name in
   let name_pos = Pos_or_decl.of_raw_pos name_pos in
-  mk (Reason.Rwitness_from_decl name_pos, Tapply ((name_pos, name), tparams))
+  mk (Reason.witness_from_decl name_pos, Tapply ((name_pos, name), tparams))
 
 (** Set 'self' identifier and type in environment. *)
 let set_self env c =
@@ -51,15 +47,14 @@ let set_self env c =
     | Ast_defs.Cenum_class _
     | Ast_defs.Cenum ->
       ( env,
-        MakeType.class_type (Reason.Rwitness (fst c.c_name)) (snd c.c_name) []
-      )
+        MakeType.class_type (Reason.witness (fst c.c_name)) (snd c.c_name) [] )
     | Ast_defs.Cinterface
     | Ast_defs.Cclass _
     | Ast_defs.Ctrait ->
       let ((env, ty_err_opt), res) =
         Typing_phase.localize_no_subst env ~ignore_errors:true self
       in
-      Option.iter ty_err_opt ~f:Errors.add_typing_error;
+      Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
       (env, res)
   in
   let env = Env.set_self env self_id self_ty in
@@ -94,23 +89,27 @@ let class_env ?origin ctx c =
   let file = Pos.filename (fst c.c_name) in
   let droot = Some (Typing_deps.Dep.Type (snd c.c_name)) in
   let env = Typing_env_types.empty ?origin ctx file ~mode:c.c_mode ~droot in
-  Typing_inference_env.Identifier_provider.reinitialize ();
+  let env = Env.set_current_module env c.c_module in
   let env = set_self env c in
   let env = set_parent env c in
   env
 
 let typedef_env ?origin ctx t =
-  let file = Pos.filename (fst t.t_kind) in
+  let t_kind =
+    match t.t_assignment with
+    | SimpleTypeDef { tvh_vis = _; tvh_hint } -> tvh_hint
+    | CaseType (variant, _rest) -> variant.tctv_hint
+  in
+  let file = Pos.filename (fst t_kind) in
   let droot = Some (Typing_deps.Dep.Type (snd t.t_name)) in
   let env = Typing_env_types.empty ?origin ctx file ~mode:t.t_mode ~droot in
-  Typing_inference_env.Identifier_provider.reinitialize ();
   env
 
 let gconst_env ?origin ctx cst =
   let file = Pos.filename (fst cst.cst_name) in
   let droot = Some (Typing_deps.Dep.GConst (snd cst.cst_name)) in
   let env = Typing_env_types.empty ?origin ctx file ~mode:cst.cst_mode ~droot in
-  Typing_inference_env.Identifier_provider.reinitialize ();
+  let env = Env.set_current_module env cst.cst_module in
   env
 
 let module_env ?origin ctx md =

@@ -1,0 +1,51 @@
+Code actions available:
+------------------------------------------
+Add override for TheParent::foo (CodeActionKind: "refactor") SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "command":{
+    "arguments":[
+      {"end":{"character":4,"line":10},"start":{"character":4,"line":10}},
+      {
+        "arguments":[],
+        "command":"editor.action.inlineSuggest.trigger",
+        "title":"Trigger Inline Suggest"
+      }
+    ],
+    "command":"hack.setSelection",
+    "title":"Set Cursor Selection"
+  },
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"\n  <<__Override>>\n  public function foo(): void {\n    \n  }\n\n",
+          "range":{"end":{"character":55,"line":7},"start":{"character":55,"line":7}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Add override for TheParent::foo"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+class TheParent {
+  public function foo(): void {}
+  private function privFunc(): void {}
+}
+
+class B extends /*range-start*/TheParent/*range-end*/ {
+  <<__Override>>
+  public function foo(): void {
+    >||<
+  }
+
+}
+

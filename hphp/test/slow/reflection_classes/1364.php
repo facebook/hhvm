@@ -7,7 +7,7 @@ class C1 {
   public static int $sField;
 }
 class C2 extends C1 {
-  public int $field;
+  public string $field;
   private int $pField;
 }
 trait T {
@@ -20,7 +20,7 @@ class TI {
 }
 
 <<__EntryPoint>>
-function main_1364() {
+function main_1364() :mixed{
 $rc = new ReflectionClass('C1');
 $rp = $rc->getProperty('pp');
 var_dump($rp->getTypeText());

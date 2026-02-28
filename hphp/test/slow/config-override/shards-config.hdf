@@ -14,15 +14,6 @@ Tiers {
     DisableShards = true
   }
 
-  log_arrprov_ShardedRollout {
-    Shard = 0
-    ShardCount = 1
-    overwrite {
-      Eval {
-        LogArrayIterProfile = true
-      }
-    }
-  }
 }
 
 LintExcludePatterns {

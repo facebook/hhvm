@@ -21,7 +21,6 @@
 
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/util/alloc-defs.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/health-monitor-types.h"
 #include "hphp/util/logger.h"
@@ -35,8 +34,8 @@ int32_t MaxUpdatePeriod;
 auto DampenTime = std::chrono::milliseconds{0};
 int32_t ProcStatusUpdateSeconds;
 
-struct HostHealthMonitorExtension final : public Extension {
-  HostHealthMonitorExtension() : Extension("hosthealthmonitor", "1.0") {}
+struct HostHealthMonitorExtension final : Extension {
+  HostHealthMonitorExtension() : Extension("hosthealthmonitor", "1.0", NO_ONCALL_YET) {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf globalConfig) override {
     Config::Bind(Enabled, ini, globalConfig,
@@ -48,6 +47,9 @@ struct HostHealthMonitorExtension final : public Extension {
     if (dampenMs > 0) DampenTime = std::chrono::milliseconds(dampenMs);
     Config::Bind(ProcStatusUpdateSeconds, ini, globalConfig,
                  "HealthMonitor.ProcStatusUpdateSeconds", 1);
+  }
+  std::vector<std::string> hackFiles() const override {
+    return {};
   }
 } s_host_health_monitor_extension;
 
@@ -107,7 +109,13 @@ void HostHealthMonitor::monitor() {
                                   {ServiceData::StatsType::AVG},
                                   {std::chrono::seconds(5),
                                    std::chrono::seconds(60)});
-  m_stopped.store(false, std::memory_order_relaxed);
+  // This is invert of health.level, going from 0 to 100
+  m_illnessLevelCounter =
+    ServiceData::createTimeSeries("illness.level",
+                                  {ServiceData::StatsType::AVG},
+                                  {std::chrono::seconds(5),
+                                   std::chrono::seconds(60)});
+  m_stopped.store(false, std::memory_order_release);
   std::unique_lock<std::mutex> guard(m_condvar_lock);
   std::chrono::milliseconds dura(MaxUpdatePeriod);
   auto next = std::chrono::steady_clock::now();
@@ -129,7 +137,9 @@ void HostHealthMonitor::monitor() {
       }
     }
     if (notify) notifyObservers(newStatus);
-    m_healthLevelCounter->addValue(healthLevelToInt(m_status));
+    const auto healthLevel = healthLevelToInt(m_status);
+    m_healthLevelCounter->addValue(healthLevel);
+    m_illnessLevelCounter->addValue(100 /* max health */ - healthLevel);
     ProcStatus::checkUpdate(ProcStatusUpdateSeconds);
     next += dura;
     auto const now = std::chrono::steady_clock::now();

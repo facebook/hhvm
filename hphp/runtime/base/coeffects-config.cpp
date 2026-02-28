@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/hack/src/hackc/hhbc-unit.h"
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/vm/coeffects.h"
 
@@ -22,7 +23,7 @@
 
 #include <queue>
 
-TRACE_SET_MOD(coeffects);
+TRACE_SET_MOD(coeffects)
 
 namespace HPHP {
 
@@ -57,10 +58,11 @@ static std::vector<CapabilityCombinator>& getCapabilityCombinator() {
   X(rx)
 
 #define ZONED_COEFFECTS \
-  X(zoned_with)         \
   X(zoned_local)        \
   X(zoned_shallow)      \
   X(zoned)              \
+  X(leak_safe_local)    \
+  X(leak_safe_shallow)  \
   X(leak_safe)          \
   X(globals)            \
   X(read_globals)       \
@@ -176,14 +178,13 @@ void initCapabilityGraphs() {
                     addEdges(createNode(Cap::s_globals),
                              read_globals),
                     zoned),
-           addEdges(createNode(Cap::s_zoned_with, true),
-                    addEdges(zoned,
-                             addEdges(createNode(Cap::s_leak_safe),
-                                      addEdges(createNode(Cap::s_write_props),
-                                               addEdges(createNode(Cap::s_write_this_props),
-                                                        zoned_maybe)),
-                                      addEdges(read_globals,
-                                               zoned_maybe)))));
+                  addEdges(zoned,
+                            addEdges(createNode(Cap::s_leak_safe, true),
+                                    addEdges(createNode(Cap::s_write_props),
+                                              addEdges(createNode(Cap::s_write_this_props),
+                                                      zoned_maybe)),
+                                    addEdges(read_globals,
+                                              zoned_maybe))));
 }
 
 } //namespace
@@ -382,6 +383,7 @@ RuntimeCoeffects CoeffectsConfig::escapesTo(const std::string& coeffect) {
   }
   if (CoeffectsConfig::zonedEnforcementLevel()) {
     if (coeffect == C::s_zoned_local) return RuntimeCoeffects::defaults();
+    if (coeffect == C::s_leak_safe_local) return RuntimeCoeffects::defaults();
   }
   if (coeffect == C::s_86backdoor) return RuntimeCoeffects::defaults();
   if (coeffect == C::s_86backdoor_globals_leak_safe) {
@@ -398,6 +400,27 @@ StaticCoeffects CoeffectsConfig::combine(const StaticCoeffects a,
     result |= std::max(a.value() & mask, b.value() & mask);
   }
   return StaticCoeffects::fromValue(result);
+}
+
+std::string CoeffectsConfig::fromHackCCtx(const hackc::hhbc::Ctx& ctx) {
+  switch (ctx) {
+    case hackc::hhbc::Ctx::Defaults:       return C::s_defaults;
+    case hackc::hhbc::Ctx::WriteThisProps: return C::s_write_this_props;
+    case hackc::hhbc::Ctx::WriteProps:     return C::s_write_props;
+    case hackc::hhbc::Ctx::RxLocal:        return C::s_rx_local;
+    case hackc::hhbc::Ctx::RxShallow:      return C::s_rx_shallow;
+    case hackc::hhbc::Ctx::Rx:             return C::s_rx;
+    case hackc::hhbc::Ctx::ZonedLocal:     return C::s_zoned_local;
+    case hackc::hhbc::Ctx::ZonedShallow:   return C::s_zoned_shallow;
+    case hackc::hhbc::Ctx::Zoned:          return C::s_zoned;
+    case hackc::hhbc::Ctx::LeakSafeLocal:  return C::s_leak_safe_local;
+    case hackc::hhbc::Ctx::LeakSafeShallow:return C::s_leak_safe_shallow;
+    case hackc::hhbc::Ctx::LeakSafe:       return C::s_leak_safe;
+    case hackc::hhbc::Ctx::ReadGlobals:    return C::s_read_globals;
+    case hackc::hhbc::Ctx::Globals:        return C::s_globals;
+    case hackc::hhbc::Ctx::Pure:           return C::s_pure;
+  }
+  not_reached();
 }
 
 std::vector<std::string>
@@ -426,7 +449,7 @@ CoeffectsConfig::toStringList(const StaticCoeffects input) {
     if (std::all_of(caps.begin(),
                     caps.end(),
                     [&] (const std::string& s) {
-                      return capabilities.count(s) > 0;
+                      return capabilities.contains(s);
                     })) {
       result.push_back(name);
     }

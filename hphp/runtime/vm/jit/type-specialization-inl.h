@@ -243,7 +243,7 @@ inline bool ClassSpec::operator<=(const ClassSpec& rhs) const {
   if (lhs == Bottom() || rhs == Top()) return true;
   if (lhs == Top() || rhs == Bottom()) return false;
 
-  return !rhs.exact() && lhs.cls()->subtypeOf(rhs.cls());
+  return !rhs.exact() && lhs.cls()->classof(rhs.cls());
 }
 
 inline ClassSpec ClassSpec::operator|(const ClassSpec& rhs) const {

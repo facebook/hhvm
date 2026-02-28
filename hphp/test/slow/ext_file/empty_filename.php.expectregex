@@ -1,6 +1,0 @@
-Warning\: chmod\(\)\: No such file or directory in [^\r\n]+\/test\/slow\/ext_file\/empty_filename.php on line 3
-bool\(false\)
-bool\(false\)
-
-Warning\: disk_free_space\(\)\: (No such file or directory|Operation not permitted) in [^\r\n]+\/test\/slow\/ext_file\/empty_filename.php on line 5
-bool\(false\)

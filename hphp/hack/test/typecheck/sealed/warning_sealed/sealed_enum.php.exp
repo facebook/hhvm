@@ -1,0 +1,2 @@
+WARN: File "sealed_enum.php", line 5, characters 3-10:
+Enum `B` in sealed allowlist for `E`, but does not use `E` (Warn[12035])

@@ -1,6 +1,6 @@
 <?hh
 trait T {
-  final static function f() {
+  final static function f() :mixed{
     echo "Hello\n";
   }
 }

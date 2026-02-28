@@ -1,8 +1,8 @@
-<?hh // partial
+<?hh
 class Foo {
   public int $prop = 44;
 
-  public function foo() : readonly {
+  public function foo() :readonly mixed{
     $x = function (): readonly {
       echo '$x';
       echo "\n";

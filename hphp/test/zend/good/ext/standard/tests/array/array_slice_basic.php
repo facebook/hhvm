@@ -11,7 +11,7 @@
 echo "*** Testing array_slice() : basic functionality ***\n";
 
 
-$input = darray['one' => 1, 'two' => 2, 0 => 3, 23 => 4];
+$input = dict['one' => 1, 'two' => 2, 0 => 3, 23 => 4];
 $offset = 2;
 $length = 2;
 $preserve_keys = true;

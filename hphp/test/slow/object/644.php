@@ -7,7 +7,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function main_644() {
+function main_644() :mixed{
 $obj1 = new A();
  $obj2 = new A();
  $obj2->a++;

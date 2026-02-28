@@ -1,0 +1,10 @@
+[cells]
+gh_facebookincubator_fizz = .
+
+[cell_aliases]
+root = gh_facebookincubator_fizz
+
+[oss]
+internal_cell = fbcode
+project_dirs = fizz
+prefix_mappings = fbcode//folly->gh_facebook_folly//folly

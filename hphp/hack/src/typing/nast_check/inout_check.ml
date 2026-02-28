@@ -17,8 +17,8 @@ let check_param _env params p user_attributes name =
       | Ast_defs.Pinout _ ->
         let pos = param.param_pos in
         if SSet.mem name SN.Members.as_set then
-          Errors.add_nast_check_error
-          @@ Nast_check_error.Inout_params_special pos
+          Diagnostics.add_diagnostic
+            Nast_check_error.(to_user_diagnostic @@ Inout_params_special pos)
       | Ast_defs.Pnormal -> ());
   let inout =
     List.find params ~f:(fun x ->
@@ -34,46 +34,22 @@ let check_param _env params p user_attributes name =
         SN.UserAttributes.uaMemoizeLSB
         user_attributes
     then
-      Errors.add_nast_check_error
-      @@ Nast_check_error.Inout_params_memoize
-           { pos = p; param_pos = param.param_pos }
+      Diagnostics.add_diagnostic
+        Nast_check_error.(
+          to_user_diagnostic
+          @@ Inout_params_memoize { pos = p; param_pos = param.param_pos })
   | _ -> ()
-
-let check_callconv_expr ((_, p, _) as e) =
-  let rec check_callconv_expr_helper (_, _, expr_) =
-    match expr_ with
-    | Lvar (_, x)
-      when not
-             (String.equal (Local_id.to_string x) SN.SpecialIdents.this
-             || String.equal
-                  (Local_id.to_string x)
-                  SN.SpecialIdents.dollardollar) ->
-      ()
-    | Array_get (e2, Some _) -> check_callconv_expr_helper e2
-    | _ ->
-      Errors.add_nast_check_error @@ Nast_check_error.Inout_argument_bad_expr p
-  in
-  check_callconv_expr_helper e
 
 let handler =
   object
     inherit Nast_visitor.handler_base
 
-    method! at_fun_ env f =
-      let (p, name) = f.f_name in
+    method! at_fun_def env fd =
+      let f = fd.fd_fun in
+      let (p, name) = fd.fd_name in
       check_param env f.f_params p f.f_user_attributes name
 
     method! at_method_ env m =
       let (p, name) = m.m_name in
       check_param env m.m_params p m.m_user_attributes name
-
-    method! at_expr _ (_, _, e) =
-      match e with
-      | Call (_fn, _targs, args, _unpacked_arg) ->
-        List.iter
-          ~f:(function
-            | (Ast_defs.Pnormal, _) -> ()
-            | (Ast_defs.Pinout _, e) -> check_callconv_expr e)
-          args
-      | _ -> ()
   end

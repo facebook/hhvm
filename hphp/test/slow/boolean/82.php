@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_82() {
+function main_82() :mixed{
 var_dump(false);
 }

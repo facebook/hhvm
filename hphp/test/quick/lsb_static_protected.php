@@ -3,27 +3,27 @@
 class A {
     <<__LSB>> protected static ?string $x = null;
 
-    static function init() {
+    static function init() :mixed{
         if (static::$x === null) static::$x = static::class;
     }
 
-    static function afunc() {
+    static function afunc() :mixed{
         static::init();
         var_dump(self::$x . " " . static::$x);
     }
 
-    static function apeek() {
+    static function apeek() :mixed{
         var_dump(A::$x . " " . B::$x);
     }
 }
 
 class B extends A {
-    static function bfunc() {
+    static function bfunc() :mixed{
         static::init();
         var_dump(self::$x . " " . static::$x);
     }
 
-    static function bpeek() {
+    static function bpeek() :mixed{
         var_dump(A::$x . " " . B::$x);
     }
 }

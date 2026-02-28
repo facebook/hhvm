@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // This file test is a basic test that new class_id produces a expression
 // dependent type.

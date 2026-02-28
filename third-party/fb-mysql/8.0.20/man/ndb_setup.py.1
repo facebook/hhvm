@@ -1,0 +1,786 @@
+'\" t
+.\"     Title: \fBndb_setup.py\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_SETUP\&.PY\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_setup.py \- Start browser\-based Auti\-Installer for NDB Cluster
+.SH "SYNOPSIS"
+.HP \w'\fBndb_setup\&.py\ [\fR\fB\fIoptions\fR\fR\fB]\fR\ 'u
+\fBndb_setup\&.py [\fR\fB\fIoptions\fR\fR\fB]\fR
+.SH "DESCRIPTION"
+.PP
+\fBndb_setup\&.py\fR
+starts the NDB Cluster Auto\-Installer and opens the installer\*(Aqs Start page in the default Web browser\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBImportant\fR
+.ps -1
+.br
+.PP
+This program is intended to be invoked as a normal user, and not with the
+mysql, system
+root
+or other administrative account\&.
+.sp .5v
+.RE
+.PP
+This section describes usage of and program options for the command\-line tool only\&. For information about using the Auto\-Installer GUI that is spawned when
+\fBndb_setup\&.py\fR
+is invoked, see
+\m[blue]\fBThe NDB Cluster Auto\-Installer (NDB 7\&.5)\fR\m[]\&\s-2\u[1]\d\s+2\&.
+Usage
+.PP
+All platforms:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_setup\&.py [\fIoptions\fR]
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Additionally, on Windows platforms only:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+setup\&.bat [\fIoptions\fR]
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The following table includes all options that are supported by the NDB Cluster installation and configuration program
+\fBndb_setup\&.py\fR\&. Additional descriptions follow the table\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.271.\ \&Command\-line options for the ndb_setup\&.py program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+\fB--browser-start-page=filename\fR,
+.PP
+\fB \fR\fB-s\fR\fB \fR
+T}:T{
+Page that the web browser opens when starting
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--ca-certs-file=filename\fR,
+.PP
+\fB \fR\fB-a\fR\fB \fR
+T}:T{
+File containing list of client certificates allowed to connect to the
+              server
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--cert-file=filename\fR,
+.PP
+\fB \fR\fB-c\fR\fB \fR
+T}:T{
+File containing X509 certificate that identifies the server. (Default:
+              mcc/cfg.pem in the installation share directory)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--debug-level=level\fR,
+.PP
+\fB \fR\fB-d\fR\fB \fR
+T}:T{
+Python logging module debug level. One of DEBUG, INFO, WARNING
+              (default), ERROR, or CRITICAL
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--help\fR,
+.PP
+\fB \fR\fB-h\fR\fB \fR
+T}:T{
+Print help message
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--key-file=file\fR,
+.PP
+\fB \fR\fB-k\fR\fB \fR
+T}:T{
+Specify file containing private key (if not included in --cert-file)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--no-browser\fR,
+.PP
+\fB \fR\fB-n\fR\fB \fR
+T}:T{
+Do not open the start page in a browser, merely start the tool
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--port=#\fR,
+.PP
+\fB \fR\fB-p\fR\fB \fR
+T}:T{
+Specify the port used by the web server
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--server-log-file=file\fR,
+.PP
+\fB \fR\fB-o\fR\fB \fR
+T}:T{
+Log requests to this file. Use '-' to force logging to stderr instead
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--server-name=name\fR,
+.PP
+\fB \fR\fB-N\fR\fB \fR
+T}:T{
+The name of the server to connect with
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--use-http\fR,
+.PP
+\fB \fR\fB-H\fR\fB \fR
+T}:T{
+Use unencrypted (HTTP) client/server connection
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--use-https\fR,
+.PP
+\fB \fR\fB-S\fR\fB \fR
+T}:T{
+Use encrypted (HTTPS) client/server connection
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-browser\-start\-page=\fR\fB\fIfile\fR\fR,
+\fB\-s\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--browser-start-page=filename
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+index.html
+T}
+.TE
+.sp 1
+Specify the file to open in the browser as the installation and configuration Start page\&. The default is
+index\&.html\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ca\-certs\-file=\fR\fB\fIfile\fR\fR,
+\fB\-a\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--ca-certs-file=filename
+T}
+T{
+\fBType\fR
+T}:T{
+File name
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+[none]
+T}
+.TE
+.sp 1
+Specify a file containing a list of client certificates which are allowed to connect to the server\&. The default is an empty string, which means that no client authentication is used\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-cert\-file=\fR\fB\fIfile\fR\fR,
+\fB\-c\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--cert-file=filename
+T}
+T{
+\fBType\fR
+T}:T{
+File name
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+/usr/share/mysql/mcc/cfg.pem
+T}
+.TE
+.sp 1
+Specify a file containing an X509 certificate which identifies the server\&. It is possible for the certificate to be self\-signed\&. The default is
+cfg\&.pem\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-debug\-level=\fR\fB\fIlevel\fR\fR,
+\fB\-d\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--debug-level=level
+T}
+T{
+\fBType\fR
+T}:T{
+Enumeration
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+WARNING
+T}
+T{
+\fBValid Values\fR
+T}:T{
+.PP
+WARNING
+.PP
+DEBUG
+.PP
+INFO
+.PP
+ERROR
+.PP
+CRITICAL
+T}
+.TE
+.sp 1
+Set the Python logging module debug level\&. This is one of
+DEBUG,
+INFO,
+WARNING,
+ERROR, or
+CRITICAL\&.
+WARNING
+is the default\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-help\fR,
+\fB\-h\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--help
+T}
+.TE
+.sp 1
+Print a help message\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-key\-file=\fR\fB\fIfile\fR\fR,
+\fB\-d\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--key-file=file
+T}
+T{
+\fBType\fR
+T}:T{
+File name
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+[none]
+T}
+.TE
+.sp 1
+Specify a file containing the private key if this is not included in the X509 certificate file (\fB\-\-cert\-file\fR)\&. The default is an empty string, which means that no such file is used\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-no\-browser\fR,
+\fB\-n\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--no-browser
+T}
+.TE
+.sp 1
+Start the installation and configuration tool, but do not open the Start page in a browser\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-port=\fR\fB\fI#\fR\fR,
+\fB\-p\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--port=#
+T}
+T{
+\fBType\fR
+T}:T{
+Numeric
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+8081
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+1
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+65535
+T}
+.TE
+.sp 1
+Set the port used by the web server\&. The default is 8081\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-server\-log\-file=\fR\fB\fIfile\fR\fR,
+\fB\-o\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--server-log-file=file
+T}
+T{
+\fBType\fR
+T}:T{
+File name
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+ndb_setup.log
+T}
+T{
+\fBValid Values\fR
+T}:T{
+.PP
+ndb_setup.log
+.PP
+-
+(Log to stderr)
+T}
+.TE
+.sp 1
+Log requests to this file\&. The default is
+ndb_setup\&.log\&. To specify logging to
+stderr, rather than to a file, use a
+\-
+(dash character) for the file name\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-server\-name=\fR\fB\fIhost\fR\fR,
+\fB\-N\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--server-name=name
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+localhost
+T}
+.TE
+.sp 1
+Specify the host name or IP address for the browser to use when connecting\&. The default is
+localhost\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-use\-http\fR,
+\fB\-H\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--use-http
+T}
+.TE
+.sp 1
+Make the browser use HTTP to connect with the server\&. This means that the connection is unencrypted and not secured in any way\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-use\-https\fR,
+\fB\-S\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--use-https
+T}
+.TE
+.sp 1
+Make the browser use a secure (HTTPS) connection with the server\&.
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "NOTES"
+.IP " 1." 4
+The NDB Cluster Auto-Installer (NDB 7.5)
+.RS 4
+\%https://dev.mysql.com/doc/refman/5.7/en/mysql-cluster-install-auto.html
+.RE
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

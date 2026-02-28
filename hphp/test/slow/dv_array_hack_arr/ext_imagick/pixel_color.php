@@ -3,7 +3,7 @@
 // hphp doesn't support this at this moment
 // ini_set('precision', 3);
 
-function dump($exp) {
+function dump($exp) :mixed{
   $ret = print_r($exp, true);
   $count = -1;
   $ret = preg_replace_callback(
@@ -35,7 +35,7 @@ dump($pixel->getHSL());
 dump($pixel->getColor(true));
 
 $pixel = new ImagickPixel('#F02B88');
-$colors = varray[
+$colors = vec[
   Imagick::COLOR_BLACK,
   Imagick::COLOR_BLUE,
   Imagick::COLOR_CYAN,

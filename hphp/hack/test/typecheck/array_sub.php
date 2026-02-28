@@ -10,7 +10,7 @@
  */
 
 function get_keys<T1, T2>(darray<T1, T2> $x): varray<T1> {
-  $result = varray[];
+  $result = vec[];
   foreach ($x as $k => $v) {
     $result[] = $k;
   }

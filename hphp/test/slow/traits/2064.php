@@ -1,10 +1,10 @@
 <?hh
 
 trait T {
-  public static function goo() {
+  public static function goo() :mixed{
     return static::class;
   }
-  public static function foo() {
+  public static function foo() :mixed{
      return self::goo();
   }
 }
@@ -13,7 +13,7 @@ class A {
  }
 
 <<__EntryPoint>>
-function main_2064() {
+function main_2064() :mixed{
 var_dump(A::goo());
 var_dump(A::foo());
 }

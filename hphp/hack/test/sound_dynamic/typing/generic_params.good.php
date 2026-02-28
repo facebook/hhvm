@@ -16,13 +16,22 @@ class SimpleBox<<<__RequireDynamic>> T> {
 
 <<__SupportDynamicType>>
 interface Getter<<<__RequireDynamic>> +T> {
-  public function get(): T;
+  public function get(): ~T;
 }
 
 <<__SupportDynamicType>>
 class ROBox<<<__RequireDynamic>> +T> implements Getter<vec<T>> {
-  public function __construct(private vec<T> $item) { }
-  public function get(): vec<T> { return $this->item; }
+  public function __construct(private ~vec<T> $item) { }
+  public function get(): ~vec<T> { return $this->item; }
+}
+
+function getVec():~vec<int> {
+  return HH\FIXME\UNSAFE_CAST<vec<string>,vec<int>>(vec["A"]);
+}
+<<__EntryPoint>>
+function breakit():~int {
+  $x = new ROBox<int>(getVec());
+  return $x->get()[0];
 }
 
 <<__SupportDynamicType>>

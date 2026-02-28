@@ -34,8 +34,7 @@ struct embedded_data {
 #endif
 };
 
-bool get_embedded_data(const char* section, embedded_data* desc,
-                       const std::string& filename = "");
+bool get_embedded_data(const char* section, embedded_data* desc);
 
 std::string read_embedded_data(const embedded_data& desc);
 

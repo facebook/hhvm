@@ -1,10 +1,10 @@
-File "splice_err6.php", line 10, characters 29-35:
-Typing error (Typing[4110])
+ERROR: File "splice_err6.php", line 10, characters 29-35:
+Typing error (Typing[4429])
   File "splice_err6.php", line 10, characters 29-39:
   Expected `num` because this is used in an arithmetic operation
   File "splice_err6.php", line 10, characters 29-35:
   But got `string`
-File "splice_err6.php", line 10, characters 29-39:
+ERROR: File "splice_err6.php", line 10, characters 29-39:
 Invalid argument (Typing[4110])
   File "splice_err6.php", line 5, characters 14-19:
   Expected `string`

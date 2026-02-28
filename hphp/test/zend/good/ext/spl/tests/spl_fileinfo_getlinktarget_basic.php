@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$link = __SystemLib\hphp_test_tmppath('test_link');
+$link = sys_get_temp_dir().'/'.'test_link';
 symlink(__FILE__, $link );
 $fileInfo = new SplFileInfo($link);
 

@@ -5,7 +5,7 @@
                 If the filename ends in suffix this will also be cut off.
 */
 
-function check_basename( $path_arrays ) {
+function check_basename( $path_arrays ) :mixed{
    $loop_counter = 1;
    foreach ($path_arrays as $path) {
      echo "\n--Iteration $loop_counter--\n"; $loop_counter++;
@@ -20,66 +20,61 @@ function check_basename( $path_arrays ) {
 }
 
 <<__EntryPoint>> function main(): void {
-$file_path_variations = varray [
+$file_path_variations = vec[
   /* paths with shortcut home dir char, with suffix variation */
-  varray["~/home/user/bar"],
-  varray["~/home/user/bar", ""],
-  varray["~/home/user/bar", NULL],
-  varray["~/home/user/bar", ' '],
-  varray["~/home/user/bar.tar", ".tar"],
-  varray["~/home/user/bar.tar", "~"],
-  varray["~/home/user/bar.tar/", "~"],
-  varray["~/home/user/bar.tar/", ""],
-  varray["~/home/user/bar.tar", NULL],
-  varray["~/home/user/bar.tar", ''],
-  varray["~/home/user/bar.tar", " "],
+  vec["~/home/user/bar"],
+  vec["~/home/user/bar", ""],
+  vec["~/home/user/bar", ' '],
+  vec["~/home/user/bar.tar", ".tar"],
+  vec["~/home/user/bar.tar", "~"],
+  vec["~/home/user/bar.tar/", "~"],
+  vec["~/home/user/bar.tar/", ""],
+  vec["~/home/user/bar.tar", ''],
+  vec["~/home/user/bar.tar", " "],
 
   /* paths with hostname:dir notation, with suffix variation */
-  varray["hostname:/home/usr/bar.tar"],
-  varray["hostname:/home/user/bar.tar", "home"],
-  varray["hostname:/home/user/tbar.gz", "bar.gz"],
-  varray["hostname:/home/user/tbar.gz", "/bar.gz"],
-  varray["hostname:/home/user/tbar.gz", "/bar.gz/"],
-  varray["hostname:/home/user/tbar.gz/", "/bar.gz/"],
-  varray["hostname:/home/user/tbar.gz/", "/bar.gz/"],
-  varray["hostname:/home/user/My Pics.gz/", "/bar.gz/"],
-  varray["hostname:/home/user/My Pics.gz/", "Pics.gz/"],
-  varray["hostname:/home/user/My Pics.gz/", "Pics.gz"],
-  varray["hostname:/home/user/My Pics.gz/", ".gz"],
-  varray["hostname:/home/user/My Pics.gz/"],
-  varray["hostname:/home/user/My Pics.gz/", NULL],
-  varray["hostname:/home/user/My Pics.gz/", ' '],
-  varray["hostname:/home/user/My Pics.gz/", ''],
-  varray["hostname:/home/user/My Pics.gz/", "My Pics.gz"],
+  vec["hostname:/home/usr/bar.tar"],
+  vec["hostname:/home/user/bar.tar", "home"],
+  vec["hostname:/home/user/tbar.gz", "bar.gz"],
+  vec["hostname:/home/user/tbar.gz", "/bar.gz"],
+  vec["hostname:/home/user/tbar.gz", "/bar.gz/"],
+  vec["hostname:/home/user/tbar.gz/", "/bar.gz/"],
+  vec["hostname:/home/user/tbar.gz/", "/bar.gz/"],
+  vec["hostname:/home/user/My Pics.gz/", "/bar.gz/"],
+  vec["hostname:/home/user/My Pics.gz/", "Pics.gz/"],
+  vec["hostname:/home/user/My Pics.gz/", "Pics.gz"],
+  vec["hostname:/home/user/My Pics.gz/", ".gz"],
+  vec["hostname:/home/user/My Pics.gz/"],
+  vec["hostname:/home/user/My Pics.gz/", ' '],
+  vec["hostname:/home/user/My Pics.gz/", ''],
+  vec["hostname:/home/user/My Pics.gz/", "My Pics.gz"],
 
   /* paths with numeirc strings */
-  varray["10.5"],
-  varray["10.5", ".5"],
-  varray["10.5", "10.5"],
-  varray["10"],
-  varray["105", "5"],
-  varray["/10.5"],
-  varray["10.5/"],
-  varray["10/10.gz"],
-  varray["0"],
-  varray['0'],
+  vec["10.5"],
+  vec["10.5", ".5"],
+  vec["10.5", "10.5"],
+  vec["10"],
+  vec["105", "5"],
+  vec["/10.5"],
+  vec["10.5/"],
+  vec["10/10.gz"],
+  vec["0"],
+  vec['0'],
 
   /* paths and suffix given as same */
-  varray["bar.gz", "bar.gz"],
-  varray["/bar.gz", "/bar.gz"],
-  varray["/bar.gz/", "/bar.gz/"],
-  varray[" ", " "],
-  varray[' ', ' '],
-  varray[NULL, NULL],
+  vec["bar.gz", "bar.gz"],
+  vec["/bar.gz", "/bar.gz"],
+  vec["/bar.gz/", "/bar.gz/"],
+  vec[" ", " "],
+  vec[' ', ' '],
 
   /* path with spaces */
-  varray[" "],
-  varray[' '],
+  vec[" "],
+  vec[' '],
 
   /* empty paths */
-  varray[""],
-  varray[''],
-  varray[NULL]
+  vec[""],
+  vec[''],
 ];
 
 echo "*** Testing possible variations in path and suffix ***\n";

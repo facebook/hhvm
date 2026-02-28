@@ -10,20 +10,22 @@
 (* Note: While Pos.string prints out positions as closed intervals, pos_start
  * and pos_end actually form a half-open interval (i.e. pos_end points to the
  * character *after* the last character of the relevant lexeme.) *)
-type 'a pos [@@deriving eq, ord, show]
+type 'a pos [@@deriving eq, hash, ord, show]
 
 (** The underlying type used to construct Pos instances.
  *
  * See "val make: 'a -> b -> 'a pos" *)
 type b = Pos_source.t
 
-type t = Relative_path.t pos [@@deriving eq]
+type t = Relative_path.t pos [@@deriving eq, hash]
 
 val pp : Format.formatter -> t -> unit
 
 type absolute = string pos [@@deriving eq, ord, show]
 
 val none : t
+
+val hash : t -> int
 
 val filename : 'a pos -> 'a
 
@@ -42,8 +44,10 @@ val end_line_column : 'a pos -> int * int
 (** Return line number, beginning of line character number and character number of start position. *)
 val line_beg_offset : t -> int * int * int
 
+val end_line_beg_offset : t -> int * int * int
+
 (** For spans over just one line, return the line number, start column and end column.
-    This returns a closed interval.
+    This returns a closed interval. Both line and column numbers are one-based.
     Undefined for multi-line spans. *)
 val info_pos : 'a pos -> int * int * int
 
@@ -54,9 +58,9 @@ val info_pos_extended : 'a pos -> int * int * int * int
 (** Return start character number and end character number. *)
 val info_raw : 'a pos -> int * int
 
-(** Return start line, start column, end line and end column.
+(** Return start line, start column, end line and end column, as 1-based indices.
     This returns a half-open interval. *)
-val destruct_range : 'a pos -> int * int * int * int
+val destruct_range_one_based : 'a pos -> int * int * int * int
 
 val length : 'a pos -> int
 
@@ -82,7 +86,10 @@ val multiline_json : absolute -> Hh_json.json
 
 val multiline_json_no_filename : 'a pos -> Hh_json.json
 
-val inside : 'a pos -> int -> int -> bool
+(** [inside_one_based span line_one_based column_one_based] determines
+  whether the cursor at `line_one_based` and `column_one_based` is inside the `span`.
+  `line_one_based` and `column_one_based` are one-based indices. *)
+val inside_one_based : 'a pos -> int -> int -> bool
 
 val exactly_matches_range :
   'a pos ->
@@ -129,6 +136,9 @@ val get_text_from_pos : content:string -> 'a pos -> string
 (* Advance the ending position by one character *)
 val advance_one : 'a pos -> 'a pos
 
+(* Advance the ending position by consuming the string *)
+val advance_string : string -> 'a pos -> 'a pos
+
 (* Reduce the size of this position element by one character on the left and
  * one character on the right.  For example, if you've captured a position
  * that includes outside apostrophes, this will shrink it to only the contents
@@ -141,7 +151,13 @@ val compare : t -> t -> int
 
 val set_file : 'a -> 'b pos -> 'a pos
 
-val set_line_end : int -> 'a pos -> 'a pos
+(* Return a zero-width position that occurs at the start of input position. *)
+val shrink_to_start : 'a pos -> 'a pos
+
+(* Return a zero-width position that occurs at the end of input position. *)
+val shrink_to_end : 'a pos -> 'a pos
+
+val set_col_start : int -> 'a pos -> 'a pos
 
 val set_col_end : int -> 'a pos -> 'a pos
 

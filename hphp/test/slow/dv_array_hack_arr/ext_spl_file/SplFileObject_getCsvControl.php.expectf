@@ -1,5 +1,0 @@
-vec(3) {
-  %unicode|string%(1) ","
-  %unicode|string%(1) """
-  %unicode|string%(1) "\"
-}

@@ -32,7 +32,7 @@
  * "Compound Document Format", nor the "Channel Definition Format".
  */
 
-#include "file.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/file.h"
 
 #ifndef lint
 FILE_RCSID("@(#)$File: cdf.c,v 1.53 2013/02/26 16:20:42 christos Exp $")
@@ -61,7 +61,7 @@ FILE_RCSID("@(#)$File: cdf.c,v 1.53 2013/02/26 16:20:42 christos Exp $")
 #define EFTYPE EINVAL
 #endif
 
-#include "cdf.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/cdf.h"
 
 #ifdef CDF_DEBUG
 #define DPRINTF(a) printf a, fflush(stdout)

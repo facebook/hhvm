@@ -9,7 +9,7 @@ class B extends A {
 }
 
 class C extends A {
-  public function test($obj) {
+  public function test($obj) :mixed{
     var_dump($obj->x);
   }
 }

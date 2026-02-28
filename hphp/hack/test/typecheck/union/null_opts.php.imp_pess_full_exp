@@ -1,0 +1,17 @@
+File "null_opts.php", line 13, characters 3-13:
+  null
+File "null_opts.php", line 16, characters 3-13:
+  ?int
+File "null_opts.php", line 19, characters 3-13:
+  ?nonnull
+File "null_opts.php", line 22, characters 3-13:
+  ?int
+File "null_opts.php", line 25, characters 3-13:
+  ?int
+File "null_opts.php", line 28, characters 3-13:
+  ?(int | string)
+File "null_opts.php", line 31, characters 3-13:
+  ?(int | string)
+File "null_opts.php", line 34, characters 3-13:
+  ?(int | bool | string)
+No errors

@@ -31,6 +31,14 @@ namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Env {
+  Env(Vunit& unit, const jit::vector<Vlabel>& labels)
+      : unit(unit)
+      , preds(computePreds(unit)) {
+    init(labels);
+  }
+
+  void init(const jit::vector<Vlabel>& labels);
+
   Vunit& unit;
 
   // Number of uses of each Vreg.
@@ -42,6 +50,9 @@ struct Env {
 
   // Vregs which are constants, or copies of constants.
   jit::vector<Optional<Vconst>> consts;
+
+  // Predecessors for each block.
+  const PredVector preds;
 };
 
 template<Vinstr::Opcode op>
@@ -123,8 +134,15 @@ inline bool simplify_impl(Env& env, Vlabel b, size_t i, const Vinstr& instr) {
   });
 }
 
-namespace x64   { bool simplify(Env& env, Vlabel b, size_t i); }
-namespace arm   { bool simplify(Env& env, Vlabel b, size_t i); }
+namespace x64 {
+bool simplify(Env& env, Vlabel b, size_t i);
+bool psimplify(Env& env, Vlabel b, size_t i);
+}
+
+namespace arm {
+bool simplify(Env& env, Vlabel b, size_t i);
+bool psimplify(Env& env, Vlabel b, size_t i);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

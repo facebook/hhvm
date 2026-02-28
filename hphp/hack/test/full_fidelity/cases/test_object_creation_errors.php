@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 $p1 = new Point;     // error2038
 $p1 = new Point();  // legal

@@ -22,7 +22,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 void CmdShell::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);

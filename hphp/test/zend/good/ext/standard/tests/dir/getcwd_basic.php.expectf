@@ -1,4 +1,4 @@
 *** Testing getcwd() : basic functionality ***
 string(%d) "%s"
-string(%d) "%s%egetcwd_basic"
+string(%d) "%s/getcwd_basic"
 ===DONE===

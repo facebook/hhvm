@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type s = shape('blah' => int);
 function f(s $s): int {

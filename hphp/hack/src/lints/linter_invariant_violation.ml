@@ -18,15 +18,15 @@ class condition_visitor =
       | Nast.String _ -> CKString
       | Nast.True -> CKLiteral true
       | Nast.False -> CKLiteral false
-      | Nast.Unop (Ast_defs.Unot, e') ->
-        begin
-          match parent#on_expr acc e' with
-          | CKLiteral v -> CKUnaryNot v
-          | CKUnaryNot v -> CKUnaryNot (not v)
-          | e -> e
-        end
+      | Nast.Unop (Ast_defs.Unot, e') -> begin
+        match parent#on_expr acc e' with
+        | CKLiteral v -> CKUnaryNot v
+        | CKUnaryNot v -> CKUnaryNot (not v)
+        | e -> e
+      end
       | _ -> CKUnknown
   end
+  [@alert "-deprecated"]
 
 module VisitorFunctor (Parent : BodyVisitorModule) : BodyVisitorModule = struct
   class visitor lint_env =
@@ -45,9 +45,12 @@ module VisitorFunctor (Parent : BodyVisitorModule) : BodyVisitorModule = struct
              Nast.Expr
                ( _,
                  _,
-                 Nast.Call
-                   ((_, _, Nast.Id (_, "\\HH\\invariant_violation")), _, _, _)
-               ) );
+                 Nast.(
+                   Call
+                     {
+                       func = (_, _, Nast.Id (_, "\\HH\\invariant_violation"));
+                       _;
+                     }) ) );
           ] ->
             true
           | _ -> false
@@ -60,7 +63,7 @@ module VisitorFunctor (Parent : BodyVisitorModule) : BodyVisitorModule = struct
               if is_invariant_violation_call then
                 "invariant('error message') will never or always crash. Did you mean invariant_violation()?"
               else
-                "Putting a string literal in the condition of an if statement guarantees it will always or never trigger."
+                "Putting a string literal in the condition of an `if` statement guarantees it will always or never trigger."
             in
             Some err_msg
           | CKUnaryNot true when is_invariant_violation_call ->
@@ -77,7 +80,7 @@ module VisitorFunctor (Parent : BodyVisitorModule) : BodyVisitorModule = struct
         in
         begin
           match err_msg with
-          | Some err_msg -> Lints_errors.if_literal p err_msg
+          | Some err_msg -> Lints_diagnostics.if_literal p err_msg
           | None -> ()
         end;
         parent#on_if () (ty, p, e) b1 b2

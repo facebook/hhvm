@@ -1,5 +1,5 @@
 <?hh
-function foo1() {
+function foo1() :mixed{
     try {
         throw new Exception("not catch");
         return true;
@@ -11,7 +11,7 @@ function foo1() {
     }
 }
 
-function foo2() {
+function foo2() :mixed{
     try  {
         try {
             throw new Exception("catched");
@@ -26,7 +26,7 @@ function foo2() {
     }
 }
 
-function foo3() {
+function foo3() :mixed{
     try {
         throw new Exception("not catched");
         return true;

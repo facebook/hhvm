@@ -2,7 +2,7 @@
 $ch = curl_init();
 $init = memory_get_usage();
 for ($i = 0; $i < 10000; $i++) {
-    curl_setopt($ch, CURLOPT_HTTPHEADER, varray[ "SOAPAction: getItems" ]);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, vec[ "SOAPAction: getItems" ]);
 }
 
 $preclose = memory_get_usage();

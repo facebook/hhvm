@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_0() {
+function main_0() :mixed{
 print 'Hello, World!';
 }

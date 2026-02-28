@@ -1,0 +1,263 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+Generates a top-level file to be imported in the user's service code. It provides
+wrappers for each of the service handlers that the user is then able to extend.
+}}
+{{#import "common/common" as m_common}}
+{{#import "common/fields" as m_fields}}
+{{#import "common/functions" as m_functions}}
+{{#import "common/typehints" as typehints}}
+{{#import "common/types" as m_types}}
+{{#partial m_common.auto_generated_py}}
+import builtins
+
+
+from abc import ABCMeta
+import typing as _typing
+
+import folly.iobuf as _fbthrift_iobuf
+
+import apache.thrift.metadata.thrift_types as _fbthrift_metadata
+{{#if python.generate_immutable_types?}}
+from {{program.base_library_package}}.serializer import serialize_iobuf, deserialize, Protocol
+{{/if python.generate_immutable_types?}}
+{{#if python.generate_mutable_types?}}
+import {{program.base_library_package}}.mutable_containers as _fbthrift_python_mutable_containers
+from {{program.base_library_package}}.mutable_serializer import serialize_iobuf, deserialize, Protocol
+{{/if python.generate_mutable_types?}}
+from {{program.base_library_package}}.server import ServiceInterface as _fbthrift_ServiceInterface, RpcKind, PythonUserException
+
+import {{program.module_path}}.{{#partial m_types.import_path}} as {{program.module_mangle}}__{{#partial m_types.import_path}}
+import {{program.module_path}}.thrift_metadata as {{program.module_mangle}}__thrift_metadata
+{{#each program.include_namespaces as |include|}}
+  {{#if include.has_services?}}
+import {{include.included_module_path}}.{{> services/service_import_path}}
+  {{/if include.has_services?}}
+  {{#if include.has_types?}}
+import {{include.included_module_path}}.{{#partial m_types.import_path}} as {{include.included_module_mangle}}__{{#partial m_types.import_path}}
+  {{/if include.has_types?}}
+{{/each}}
+{{#each program.adapter_modules as |module_path|}}
+import {{module_path}}
+{{/each}}
+{{#each program.adapter_type_hint_modules as |module_path|}}
+import {{module_path}}
+{{/each}}
+
+{{#each program.services as |service|}}
+class {{service.name}}Interface(
+  {{#if (object.notnull? service.extends)}}
+      {{#service.extends}}{{#service:external_program?}}
+    {{service:program.module_path}}.{{> services/service_import_path}}.{{/service:external_program?}}{{service:name}}Interface,
+      {{/service.extends}}
+    {{#else}}
+    _fbthrift_ServiceInterface,
+  {{/if (object.notnull? service.extends)}}
+    metaclass=ABCMeta
+):
+
+    @staticmethod
+    def service_name() -> bytes:
+        return b"{{service.name}}"
+
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+        functionTable = {
+        {{#each service.supported_functions as |function|}}
+            b"{{function.name}}": ({{#function}}{{> services/function_kind }}{{/function}}, self._fbthrift__handler_{{function.name}}),
+        {{/each}}
+        }
+        return {**super().getFunctionTable(), **functionTable}
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "{{program.name}}.{{service.name}}"
+
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return {{program.module_mangle}}__thrift_metadata.gen_metadata_service_{{service.name}}()
+
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return {{program.module_mangle}}__thrift_metadata._fbthrift_metadata_service_response_{{service.name}}()
+
+
+{{#each service.supported_functions as |function|}}
+
+    {{#if (not function.bidirectional_stream?)}}{{#if (not function.stream?)}}async {{/if}}{{#if function.stream_has_first_response?}}async {{/if}}def {{function.name}}(
+            self{{#each function.params.fields as |field|}},
+            {{field.py_name}}: {{#partial typehints.pep484_type type=field.type}}{{/each}}
+        ) -> {{> services/service_func_return_type }}:
+        raise NotImplementedError("async def {{function.name}} is not implemented")
+
+    {{#if function.stream?}}
+    async def _fbthrift__stream_wrapper_{{function.name}}(self, stream_generator: _typing.AsyncIterator[{{#partial typehints.pep484_type type=function.stream.elem_type}}], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
+        {{#if (array.empty? function.stream.exceptions)}}
+        async for item in stream_generator:
+            yield serialize_iobuf({{#partial m_functions.second_return_type service=service function=function}}(success=item), protocol)
+        {{#else}}
+        try:
+            async for item in stream_generator:
+                yield serialize_iobuf({{#partial m_functions.second_return_type service=service function=function}}(success=item), protocol)
+        {{#each (array.enumerate function.stream.exceptions) as |index field|}}
+        except {{field.type.module_mangle}}.{{#partial m_types.unadapted_name type=field.type}} as e:
+            return_struct = {{#partial m_functions.second_return_type service=service function=function}}({{#partial m_fields.exception_field_name field=field index=index}}=e)
+            buf = serialize_iobuf(return_struct, protocol)
+            exp = PythonUserException('{{field.type.py3_namespace}}{{#partial m_types.unadapted_name type=field.type}}', str(e), buf)
+            raise exp
+        {{/each}}
+        {{/if (array.empty? function.stream.exceptions)}}
+
+    {{#else if function.sink?}}
+    def _fbthrift__sink_wrapper_{{function.name}}(
+        self,
+        handler_sink_callback: {{> services/sink_callback }},
+        protocol: Protocol
+    ) -> _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_fbthrift_iobuf.IOBuf]]:
+        async def _fbthrift_iobuf_sink_callback(
+            _iobuf_agen: _typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]],
+        ) -> _fbthrift_iobuf.IOBuf:
+            async def _handler_agen() -> _typing.AsyncGenerator[{{#partial typehints.pep484_type type=function.sink.elem_type}}, None]:
+                async for iobuf_item in _iobuf_agen():
+                    sink_elem = deserialize(
+                        {{> services/function_struct_prefix}}_result_sink_elem,
+                        iobuf_item,
+                        protocol
+                    )
+                    {{#if (array.empty? function.sink.exceptions)}}
+                    assert sink_elem.success is not None, "unexpected empty sink element"
+                    yield sink_elem.success
+                    {{#else}}
+                    if sink_elem.success is not None:
+                        yield sink_elem.success
+                        continue
+                    for _ex_fld_name, ex in sink_elem:
+                        if ex is not None:
+                            # pyre-ignore[48]: Invalid Exception
+                            raise ex
+                    assert sink_elem.success is not None, "unexpected empty sink element"
+                    {{/if (array.empty? function.sink.exceptions)}}
+
+            {{#if (array.empty? function.sink.final_response_exceptions)}}
+            final_resp = await handler_sink_callback(_handler_agen())
+            return_struct = {{> services/function_struct_prefix}}_result_sink_final(success=final_resp)
+            {{#else}}
+            try:
+                final_resp = await handler_sink_callback(_handler_agen())
+                return_struct = {{> services/function_struct_prefix}}_result_sink_final(success=final_resp)
+            {{#each (array.enumerate function.sink.final_response_exceptions) as |index field|}}
+            except {{field.type.module_mangle}}.{{#partial m_types.unadapted_name type=field.type}} as ex:
+                return_struct = {{> services/function_struct_prefix}}_result_sink_final({{#partial m_fields.exception_field_name field=field index=index}}=ex)
+            {{/each}}
+            {{/if (array.empty? function.sink.final_response_exceptions)}}
+            return serialize_iobuf(return_struct, protocol)
+
+        return _fbthrift_iobuf_sink_callback
+
+
+    {{/if function.stream?}}
+    {{#else}}
+
+    async def {{function.name}}(
+            self{{#each function.params.fields as |field|}},
+            {{field.py_name}}: {{#partial typehints.pep484_type type=field.type}}{{/each}}
+        ) -> {{> services/service_func_return_type }}:
+            raise NotImplementedError("async def {{function.name}} is not implemented")
+
+    def _fbthrift__bidi_wrapper_{{function.name}}(
+        self,
+        handler_bidi_callback: {{> services/bidi_callback }},
+        protocol: Protocol
+    ) -> _typing.Callable[[_typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]], _typing.Awaitable[_typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]]]:
+        async def _fbthrift_iobuf_bidi_callback(
+            _iobuf_agen: _typing.Callable[[], _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]],
+        ) -> _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]:
+            async def _handle_sink() -> _typing.AsyncGenerator[{{#partial typehints.pep484_type type=function.sink.elem_type}}, None]:
+                async for iobuf_item in _iobuf_agen():
+                    sink_elem = deserialize(
+                        {{> services/function_struct_prefix}}_result_sink_elem,
+                        iobuf_item,
+                        protocol
+                    )
+                    {{#if (array.empty? function.sink.exceptions)}}
+                    assert sink_elem.success is not None, "unexpected empty sink element"
+                    yield sink_elem.success
+                    {{#else}}
+                    if sink_elem.success is not None:
+                        yield sink_elem.success
+                        continue
+                    for _ex_fld_name, ex in sink_elem:
+                        if ex is not None:
+                            # pyre-ignore[48]: Invalid Exception
+                            raise ex
+                    assert sink_elem.success is not None, "unexpected empty sink element"
+                    {{/if (array.empty? function.sink.exceptions)}}
+
+            async def _handle_stream(stream_generator: _typing.AsyncIterator[{{#partial typehints.pep484_type type=function.stream.elem_type}}]) -> _typing.AsyncGenerator[_fbthrift_iobuf.IOBuf, None]:
+                {{#if (array.empty? function.stream.exceptions)}}
+                async for item in stream_generator:
+                    yield serialize_iobuf({{program.module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service.name}}_{{function.name}}_result_stream_elem(success=item), protocol)
+                {{#else}}
+                try:
+                    async for item in stream_generator:
+                        yield serialize_iobuf({{program.module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service.name}}_{{function.name}}_result_stream_elem(success=item), protocol)
+                {{#each (array.enumerate function.stream.exceptions) as |index field|}}
+                except {{field.type.module_mangle}}.{{#partial m_types.unadapted_name type=field.type}} as e:
+                    return_struct = {{program.module_mangle}}__{{#partial m_types.import_path}}._fbthrift_{{service.name}}_{{function.name}}_result_stream_elem({{#partial m_fields.exception_field_name field=field index=index}}=e)
+                    buf = serialize_iobuf(return_struct, protocol)
+                    exp = PythonUserException('{{field.type.py3_namespace}}{{#partial m_types.unadapted_name type=field.type}}', str(e), buf)
+                    raise exp
+                {{/each}}
+                {{/if (array.empty? function.stream.exceptions)}}
+            return _handle_stream(handler_bidi_callback(_handle_sink()))
+
+        return _fbthrift_iobuf_bidi_callback
+    {{/if (not function.bidirectional_stream?)}}
+    async def _fbthrift__handler_{{function.name}}(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) {{!
+            }}-> {{> services/service_handler_return_type }}:
+        args_struct = deserialize({{#partial m_functions.args_type service=service function=function}}, args, protocol)
+        {{! TODO: call the postWrite hook here }}
+        {{#if function.exceptions?}}
+        try:
+            {{> services/get_handler_result }}
+        {{#each (array.enumerate function.exceptions) as |index field|}}
+        except {{field.type.module_mangle}}.{{#partial m_types.unadapted_name type=field.type}} as e:
+            return_struct = {{#partial m_functions.return_type service=service function=function}}({{#partial m_fields.exception_field_name field=field index=index}}=e)
+            buf = serialize_iobuf(return_struct, protocol)
+            exp = PythonUserException('{{field.type.py3_namespace}}{{#partial m_types.unadapted_name type=field.type}}', str(e), buf)
+            raise exp
+        {{/each}}
+        {{#else}}
+        {{> services/get_handler_result }}
+        {{/if function.exceptions?}}
+        {{#if (not function.oneway?)}}
+          {{#if (not function.sink_or_stream?)}}
+        return serialize_iobuf(return_struct, protocol)
+          {{/if (not function.sink_or_stream?)}}
+          {{#if (not function.bidirectional_stream?)}}
+            {{#if function.stream?}}
+        return (serialize_iobuf(return_struct, protocol), return_stream)
+            {{#else if function.sink?}}
+        return (serialize_iobuf(return_struct, protocol), return_sink_callback)
+            {{/if function.stream?}}
+          {{#else}}
+        return (serialize_iobuf(return_struct, protocol), return_bidi_callback)
+          {{/if (not function.bidirectional_stream?)}}
+        {{/if (not function.oneway?)}}
+
+{{/each}}
+{{/each}}

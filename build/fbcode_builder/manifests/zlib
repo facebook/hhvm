@@ -1,0 +1,28 @@
+[manifest]
+name = zlib
+
+[debs]
+zlib1g-dev
+
+[homebrew]
+zlib
+
+[rpms.not(distro=fedora)]
+zlib-devel
+zlib-static
+
+[rpms.distro=fedora]
+zlib-ng-compat-devel
+zlib-ng-compat-static
+
+[pps]
+zlib
+
+[download]
+url = https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz
+sha256 = 9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23
+
+[build]
+builder = cmake
+subdir = zlib-1.3.1
+patchfile = zlib_dont_build_more_than_needed.patch

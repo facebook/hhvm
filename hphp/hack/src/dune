@@ -1,8 +1,9 @@
 (env
  (_
   (flags
-   (:standard -w @a-4-29-35-41-42-44-45-48-50-70 \ -strict-sequence))))
-
+   ; Disable warning 40 (which was only there for compatibility with an older inference algo)
+   ; https://www.lexifi.com/blog/ocaml/type-based-selection-label-and-constructors/
+   (:standard -w @a-4-29-35-41-42-44-45-48-50-70-40 \ -strict-sequence))))
 
 (executable
  (name hh_single_type_check)
@@ -12,41 +13,47 @@
   (:standard
    (:include dune_config/ld-opts.sexp)))
  (libraries
-  ifc
-  ifc_lib
-  client_color_file
-  client_coverage_metric
-  client_find_refs_print
+  camlp-streams
+  classish_positions_cli_lib
   client_get_definition
   client_highlight_refs
+  code_actions_cli_lib
+  count_imprecise_types
+  custom_error_types
+  decl_fold_options
   decl_parser_options
   default_injector_config
+  dep_hash_to_symbol
   direct_decl_parser
   direct_decl_utils
   gen_deps
-  glean_dependency_graph_convert
+  hh_server_provider_backend_stubs
+  hh_single_common
   hhi
+  hhi_get
   naming_ast_print
   memtrace
+  package_info
+  package_config
   parent
-  server_coverage_metric_utils
-  server_color_file
+  rust_provider_backend_stubs
+  refactor_sd
+  remove_dead_unsafe_casts
   server_env
   server_env_build
+  code_actions_services
   server_file_outline
   server_find_refs
-  server_global_inference
   server_go_to
-  server_highlight_refs
+  ide_highlight_refs
+  ide_diagnostics_cli_lib
   server_symbol_info_service_utils
-  shape_analysis
   sys_utils
-  tast_typecheck
   temp_file
   typing
-  typing_serialization
   utils_core
-  utils_multifile))
+  utils_multifile
+  write_symbol_info))
 
 (executable
  (name hh_single_ai)
@@ -60,7 +67,6 @@
   default_injector_config
   hhi
   sys_utils
-  tast_typecheck
   temp_file
   typing
   utils_core
@@ -76,12 +82,51 @@
  (libraries
   default_injector_config
   file_content
+  hh_single_common
   hhi
   search
   server_autocomplete_services
+  ide_search
+  server_services
   string
   sys_utils
   utils_core))
+
+(executable
+ (name hh_single_ide_format)
+ (modules hh_single_ide_format)
+ (modes
+  exe
+  byte_complete)
+ (link_flags
+  (:standard
+   (:include dune_config/ld-opts.sexp)))
+ (libraries
+  build_options
+  default_injector_config
+  ide_format
+  ide_rpc_api_types
+  exec_command
+  lwt_utils
+  server_command_types
+  utils_core))
+
+(library
+  (name hh_single_common)
+  (modules hh_single_common)
+  (libraries server_files))
+
+; for rapid iteration only: in prod we use hh_client
+(executable
+ (name hack_notebook_convert)
+ (modules hack_notebook_convert)
+ (modes exe byte_complete)
+ (link_flags
+  (:standard
+   (:include dune_config/ld-opts.sexp)))
+ (libraries
+  default_injector_config
+  notebook_convert))
 
 (executable
  (name hh_server)
@@ -117,7 +162,7 @@
   file_content
   gen_deps
   hhi
-  hh_server_monitor
+  monitor_client_api
   lwt_utils
   parent
   server
@@ -156,11 +201,15 @@
   (:standard
    (:include dune_config/ld-opts.sexp)))
  (libraries
+  decl_fold_options
   decl_parser_options
   decl_provider
   default_injector_config
   direct_decl_parser
   file_provider
+  hh_server_provider_backend_stubs
+  ocamlrep_marshal_ffi
+  package_info
   ppxlib.print_diff
   provider_context
   provider_utils
@@ -178,8 +227,10 @@
   default_injector_config
   folly_stubs
   hackfmt
+  hg
+  linttool
   hackfmt_debug
-  utils_config_file
+  config_file
   utils_ocaml_overrides))
 
 (executable
@@ -190,18 +241,37 @@
    (:include dune_config/ld-opts.sexp)))
  (libraries core_kernel str parser_schema collections utils_core))
 
+ (executable
+  (name hh_single_fanout)
+  (modules hh_single_fanout)
+  (modes exe byte_complete)
+  (link_flags
+   (:standard
+    (:include dune_config/ld-opts.sexp)))
+ (libraries
+    decl_redecl_service
+    default_injector_config
+    dep_hash_to_symbol
+    direct_decl_service
+    naming_table
+    server_incremental
+    typing_check_job
+    typing_deps)
+  (preprocess
+    (pps ppx_deriving.std)))
+
 (alias
  (name exe)
  (deps
   hackfmt.exe
   hh_client.exe
-  hh_fanout/hh_fanout.exe
   hh_parse.exe
   hh_server.exe
   hh_single_decl.exe
   hh_single_type_check.exe
   hh_single_complete.exe
   hh_single_ai.exe
+  hh_single_fanout.exe
   ai/zoncolan.exe))
 
 (alias
@@ -221,9 +291,9 @@
  (deps
   hackfmt.bc.exe
   hh_client.bc.exe
-  hh_fanout/hh_fanout.bc.exe
   hh_parse.bc.exe
   hh_server.bc.exe
   hh_single_type_check.bc.exe
   hh_single_complete.bc.exe
+  hh_single_fanout.bc.exe
   hh_single_ai.bc.exe))

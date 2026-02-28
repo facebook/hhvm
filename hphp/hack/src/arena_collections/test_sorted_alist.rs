@@ -3,8 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{AssocListMut, SortedAssocList};
 use bumpalo::Bump;
+
+use crate::AssocListMut;
+use crate::SortedAssocList;
 
 fn new<'a, K: Copy + Ord, V: Copy>(
     b: &'a Bump,

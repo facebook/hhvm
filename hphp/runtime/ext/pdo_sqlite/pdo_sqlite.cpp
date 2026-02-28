@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include <sqlite3.h>
 
 namespace HPHP {
 
@@ -31,7 +30,7 @@ IMPLEMENT_DEFAULT_EXTENSION_VERSION(pdo_sqlite, 1.0.1);
 ///////////////////////////////////////////////////////////////////////////////
 
 struct PDOSqliteStatement : PDOStatement {
-  DECLARE_RESOURCE_ALLOCATION(PDOSqliteStatement);
+  DECLARE_RESOURCE_ALLOCATION(PDOSqliteStatement)
   PDOSqliteStatement(sqlite3 *db, sqlite3_stmt* stmt);
   ~PDOSqliteStatement() override;
 
@@ -94,12 +93,12 @@ PDOSqliteConnection::~PDOSqliteConnection() {
 }
 
 bool PDOSqliteConnection::create(const Array& options) {
-  String filename = data_source.substr(0,1) == ":" ? String(data_source) :
-                    File::TranslatePath(data_source);
+  String filename = m_data_source.substr(0,1) == ":" ? String(m_data_source) :
+                    File::TranslatePath(m_data_source);
   if (filename.empty()) {
     throw_pdo_exception(Array(),
                         "safe_mode/open_basedir prohibits opening %s",
-                        data_source.c_str());
+                        m_data_source.c_str());
     return false;
   }
 
@@ -386,6 +385,7 @@ bool PDOSqliteStatement::executer() {
 
   case SQLITE_ERROR:
     sqlite3_reset(m_stmt);
+    [[fallthrough]];
   case SQLITE_MISUSE:
   case SQLITE_BUSY:
   default:
@@ -417,6 +417,7 @@ bool PDOSqliteStatement::fetcher(PDOFetchOrientation /*ori*/, long /*offset*/) {
 
   case SQLITE_ERROR:
     sqlite3_reset(m_stmt);
+    [[fallthrough]];
   default:
     handleError(__FILE__, __LINE__);
     return false;
@@ -607,7 +608,7 @@ bool PDOSqliteStatement::getColumnMeta(int64_t colno, Array &ret) {
   switch (sqlite3_column_type(m_stmt, colno)) {
   case SQLITE_NULL:    ret.set(s_native_type, s_null);    break;
   case SQLITE_FLOAT:   ret.set(s_native_type, s_double);  break;
-  case SQLITE_BLOB:    flags.append(s_blob);
+  case SQLITE_BLOB:    flags.append(s_blob); [[fallthrough]];
   case SQLITE_TEXT:    ret.set(s_native_type, s_string);  break;
   case SQLITE_INTEGER: ret.set(s_native_type, s_integer); break;
   }

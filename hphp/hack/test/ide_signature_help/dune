@@ -1,0 +1,21 @@
+(rule
+ (alias ide_signature_help)
+ (deps
+  %{exe:../../src/hh_single_type_check.exe}
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/ide_signature_help/*.php)
+  (glob_files %{project_root}/hack/test/ide_signature_help/*.exp))
+ (action
+  (run
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/ide_signature_help
+   --program
+   %{exe:../../src/hh_single_type_check.exe}
+   --flags
+   --ide-signature-help)))
+
+(alias
+ (name runtest)
+ (deps
+  (alias ide_signature_help)))

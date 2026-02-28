@@ -38,6 +38,8 @@ struct CmdExtended : DebuggerCommand {
   bool onServer(DebuggerProxy&) override;
   void onClient(DebuggerClient&) override;
 
+  std::string name() const override { return "extended"; }
+
 private:
   const ExtendedCommandMap& getCommandMap();
   void invokeList(DebuggerClient& client, const std::string& cls);

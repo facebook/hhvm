@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 namespace {
   namespace HH\Lib\Dict {

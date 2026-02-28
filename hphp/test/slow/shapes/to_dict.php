@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_to_dict() {
+function main_to_dict() :mixed{
 $s = shape(
   'x' => 4
 );

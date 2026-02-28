@@ -17,8 +17,6 @@
 
 #include "hphp/runtime/ext/filter/logical_filters.h"
 
-#include <pcre.h>
-
 #include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/base/array-init.h"
@@ -31,7 +29,6 @@
 #include "hphp/runtime/ext/filter/sanitizing_filters.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/runtime/ext/url/ext_url.h"
 
 #define FORMAT_IPV4  4
 #define FORMAT_IPV6  6
@@ -54,9 +51,10 @@ static int php_filter_parse_int(const char *str, unsigned int str_len,
   switch (*str) {
     case '-':
       sign = 1;
-      /* fallthrough */
+      [[fallthrough]];
     case '+':
       str++;
+      break;
     default:
       break;
   }
@@ -379,7 +377,7 @@ Variant php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) {
     RETURN_VALIDATION_FAILED
   }
 
-  int matches = preg_match(regexp, value).toInt32();
+  auto matches = (int)preg_match(regexp, value).toInt64();
 
   if (matches <= 0) {
     RETURN_VALIDATION_FAILED
@@ -410,8 +408,8 @@ Variant php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) {
     RETURN_VALIDATION_FAILED
   }
 
-  if (!url.scheme.isNull() && (url.scheme.get()->isame(s_http.get()) ||
-                               url.scheme.get()->isame(s_https.get()))) {
+  if (!url.scheme.isNull() && (url.scheme.get()->same_nocase(s_http.get()) ||
+                               url.scheme.get()->same_nocase(s_https.get()))) {
 
     if (url.host.isNull()) {
       goto bad_url;
@@ -482,7 +480,7 @@ Variant php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) {
     RETURN_VALIDATION_FAILED
   }
 
-  int matches = preg_match(regexp, value).toInt32();
+  auto matches = (int)preg_match(regexp, value).toInt64();
 
   if (matches <= 0) {
     RETURN_VALIDATION_FAILED

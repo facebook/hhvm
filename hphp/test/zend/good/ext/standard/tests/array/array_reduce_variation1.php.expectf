@@ -1,8 +1,0 @@
-*** Testing array_reduce() : variation ***
-
---- Testing with a callback with too few parameters ---
-int(2)
-
---- Testing with a callback with too many parameters ---
-string(49) "threeArgs() expects exactly 3 parameters, 2 given"
-===DONE===

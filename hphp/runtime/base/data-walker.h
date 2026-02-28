@@ -70,8 +70,8 @@ struct DataWalker {
   using PointerSet = req::fast_set<const HeapObject*,
                                    pointer_hash<const HeapObject>>;
 
-  using PointerMap = req::fast_map<HeapObject*, HeapObject*,
-                                   pointer_hash<HeapObject>>;
+  using ArrayMap = req::fast_map<ArrayData*, ArrayData*,
+                                 pointer_hash<ArrayData>>;
 
 public:
   /*
@@ -90,7 +90,7 @@ public:
   }
 
   DataFeature traverseData(ArrayData* data,
-                           PointerMap* seenArrs = nullptr) const {
+                           ArrayMap* seenArrs = nullptr) const {
     // keep track of visited nodes in an array or object graph
     PointerSet visited;
     DataFeature features;
@@ -102,7 +102,7 @@ private:
   void traverseData(ArrayData* data,
                     DataFeature& features,
                     PointerSet& visited,
-                    PointerMap* seenArrs = nullptr) const;
+                    ArrayMap* seenArrs = nullptr) const;
   void traverseData(ObjectData* data,
                     DataFeature& features,
                     PointerSet& visited) const;
@@ -110,7 +110,7 @@ private:
   bool visitTypedValue(TypedValue rval,
                        DataFeature& features,
                        PointerSet& visited,
-                       PointerMap* seenArrs = nullptr) const;
+                       ArrayMap* seenArrs = nullptr) const;
   bool markVisited(HeapObject* ptr,
                    DataFeature& features,
                    PointerSet& visited) const;
@@ -126,4 +126,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 }
-

@@ -12,7 +12,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing mb_regex_encoding() : usage variations ***\n";
 
-$encoding = varray['UCS-4',            /*1*/
+$encoding = vec['UCS-4',            /*1*/
                   'UCS-4BE',
                   'UCS-4LE',
                   'UCS-2',

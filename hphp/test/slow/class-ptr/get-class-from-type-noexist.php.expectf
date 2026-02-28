@@ -1,0 +1,1 @@
+Fatal error: when resolving type constant D::T, class C not found in %s/class-ptr/get-class-from-type-noexist.php on line 8

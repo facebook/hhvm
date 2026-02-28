@@ -38,22 +38,21 @@ let nice_kill env =
   Hh_logger.log "[%s] ClientStop.nice_kill" (Connection_tracker.log_id tracker);
   try
     match MonitorConnection.connect_and_shut_down ~tracker env.root with
-    | Ok shutdown_result ->
-      begin
-        match shutdown_result with
-        | ServerMonitorUtils.SHUTDOWN_VERIFIED ->
-          Printf.eprintf "Successfully killed server for %s\n%!" root_s
-        | ServerMonitorUtils.SHUTDOWN_UNVERIFIED ->
-          Printf.eprintf
-            "Failed to kill server nicely for %s (Shutdown not verified)\n%!"
-            root_s;
-          raise FailedToKill
-      end
-    | Error (ServerMonitorUtils.Build_id_mismatched _) ->
+    | Ok shutdown_result -> begin
+      match shutdown_result with
+      | MonitorUtils.SHUTDOWN_VERIFIED ->
+        Printf.eprintf "Successfully killed server for %s\n%!" root_s
+      | MonitorUtils.SHUTDOWN_UNVERIFIED ->
+        Printf.eprintf
+          "Failed to kill server nicely for %s (Shutdown not verified)\n%!"
+          root_s;
+        raise FailedToKill
+    end
+    | Error (MonitorUtils.Build_id_mismatched_monitor_will_terminate _) ->
       Printf.eprintf "Successfully killed server for %s\n%!" root_s
     | Error
-        ServerMonitorUtils.(
-          Connect_to_monitor_failure { server_exists = false; _ }) ->
+        MonitorUtils.(Connect_to_monitor_failure { server_exists = false; _ })
+      ->
       Printf.eprintf "No server to kill for %s\n%!" root_s
     | Error _ ->
       Printf.eprintf "Failed to kill server nicely for %s\n%!" root_s;
@@ -101,7 +100,6 @@ let do_kill env =
     | FailedToKill -> raise Exit_status.(Exit_with Kill_error))
 
 let main (env : env) : Exit_status.t Lwt.t =
-  HackEventLogger.set_from env.from;
   HackEventLogger.client_stop ();
   do_kill env;
   Lwt.return Exit_status.No_error

@@ -1,11 +1,11 @@
 <?hh
 
-function send($msg_id, $msg) {
+function send($msg_id, $msg) :mixed{
   $errcode = NULL;
   msg_send($msg_id, 1, $msg, true, true, inout $errcode);
 }
 
-function receive($msg_id) {
+function receive($msg_id) :mixed{
   $size = 0x7fffffffffffffff; // MAX_INT_64
   $msg_type = 10;
   $msg = NULL;
@@ -16,7 +16,7 @@ function receive($msg_id) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $msg_id = msg_get_queue(619158, 0600);
 
   send($msg_id, "hello");

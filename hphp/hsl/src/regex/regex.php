@@ -109,7 +109,7 @@ function replace(
   $offset = _Private\validate_offset($offset, Str\length($haystack));
 
   if ($offset === 0) {
-    list ($result, $error) =
+    list($result, $error) =
       _Private\_Regex\replace($haystack, $pattern, $replacement);
     if ($error is nonnull) {
       throw new namespace\Exception($pattern, $error);
@@ -119,12 +119,12 @@ function replace(
 
   $haystack1 = Str\slice($haystack, 0, $offset);
   $haystack2 = Str\slice($haystack, $offset);
-  list ($result, $error) =
+  list($result, $error) =
     _Private\_Regex\replace($haystack2, $pattern, $replacement);
   if ($error is nonnull) {
     throw new namespace\Exception($pattern, $error);
   }
-  return $haystack1 . ($result as nonnull);
+  return $haystack1.($result as nonnull);
 }
 
 /**
@@ -192,11 +192,7 @@ function split(
   if ($limit === null) {
     $limit = \INF;
   }
-  invariant(
-    $limit > 1,
-    'Expected limit greater than 1, got %d.',
-    $limit,
-  );
+  invariant($limit > 1, 'Expected limit greater than 1, got %d.', $limit);
   $haystack_length = Str\length($haystack);
   $result = vec[];
   $offset = 0;
@@ -233,5 +229,5 @@ function split(
  * @guide /hack/built-in-types/string
  */
 function to_string(Pattern<Match> $pattern)[]: string {
-  return $pattern as string;
+  return $pattern;
 }

@@ -17,6 +17,8 @@
 #include <memory>
 #include <algorithm>
 
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/perf-warning.h"
@@ -40,7 +42,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(pgo);
+TRACE_SET_MOD(pgo)
 
 namespace {
 
@@ -62,22 +64,37 @@ struct Former {
   void countPredsHelper(TransID tid) {
     assertx(!m_visited.contains(tid));
 
-    m_visited.insert(tid);
-    m_visiting.insert(tid);
+    std::vector<TransID> stack;
+    stack.push_back(tid);
 
-    auto const arcs = m_cfg.outArcs(tid);
+    while (!stack.empty()) {
+      TransID node = stack.back();
+      stack.pop_back();
 
-    for (auto const arc : arcs) {
-      auto const dst = arc->dst();
+      // New node never seen before.
+      if (!m_visited.contains(node) && !m_visiting.contains(node)) {
+        m_visiting.insert(node);
+        m_visited.insert(node);
+        // Push node back onto the stack so we know when we're done visiting all
+        // it's descendents.  This is needed to detect backedges.
+        stack.push_back(node);
 
-      if (m_visiting.contains(dst)) continue; // backedge
-      m_pendingPreds[dst]++;
-      if (!m_visited.contains(dst)) {
-        countPredsHelper(dst);
+        auto const outArcs = m_cfg.outArcs(node);
+        for (auto const arc : outArcs | std::views::reverse) {
+          auto const dst = arc->dst();
+          if (m_visiting.contains(dst)) continue; // backedge
+          m_pendingPreds[dst]++;
+          if (!m_visited.contains(dst)) {
+            stack.push_back(dst);
+          }
+        }
+
+      } else if (m_visiting.contains(node)) {
+        // We were already visiting this node, so now we're done visiting its
+        // descendents.
+        m_visiting.erase(node);
       }
     }
-
-    m_visiting.erase(tid);
   }
 
   void countPreds(TransID head) {
@@ -100,13 +117,13 @@ struct Former {
 
   RegionDescPtr go(TransID head) {
     m_region = std::make_shared<RegionDesc>();
-    if (RuntimeOption::EvalJitPGORegionSelector == "wholecfg") {
+    if (Cfg::Jit::PGORegionSelector == "wholecfg") {
       m_minBlockWeight = 0;
       m_minArcProb = 0;
     } else {
-      auto const minBlkPerc = RuntimeOption::EvalJitPGOMinBlockCountPercent;
+      auto const minBlkPerc = Cfg::Jit::PGOMinBlockCountPercent;
       m_minBlockWeight = minBlkPerc * m_cfg.weight(head) / 100.0;
-      m_minArcProb = RuntimeOption::EvalJitPGOMinArcProbability;
+      m_minArcProb = Cfg::Jit::PGOMinArcProbability;
     }
 
     countPreds(head);
@@ -250,7 +267,7 @@ private:
     auto firstDead = std::remove_if(
       begin(arcs), end(arcs), [&](const TransCFG::Arc* arc) {
         auto const rec = m_profData->transRec(arc->dst());
-        const bool ok = allowedSks.count(rec->srcKey());
+        const bool ok = allowedSks.contains(rec->srcKey());
         ITRACE(5, "Arc {} -> {} {}included\n",
                arc->src(), arc->dst(), ok ? "" : "not ");
         return !ok;
@@ -295,7 +312,7 @@ private:
       if (!m_inlining) {
         logLowPriPerfWarning(
           "selectHotCFG",
-          RO::EvalSelectHotCFGSampleRate * kDefaultPerfWarningRate,
+          Cfg::Eval::SelectHotCFGSampleRate * kDefaultPerfWarningRate,
           [&](StructuredLogEntry& cols) {
             cols.setInt("maxBCInstrSize", m_numBCInstrs);
             cols.setInt("tidRegionInstrSize", tidInstrs);
@@ -402,10 +419,10 @@ void scaleProfCounts(HotTransContext& ctx, RegionDescPtr region) {
   }
 
   auto const setScale = [&] (TransID tid, double scale) {
-    assertx(!scales.count(tid));
+    assertx(!scales.contains(tid));
     scales.emplace(tid, scale);
     for (auto const b : merged[tid]) {
-      assertx(!scales.count(b));
+      assertx(!scales.contains(b));
       scales.emplace(b, scale);
     }
   };
@@ -416,7 +433,7 @@ void scaleProfCounts(HotTransContext& ctx, RegionDescPtr region) {
 
     assertx(region->blockProfCountScale(bid) == 1.0);
 
-    if (inEntryChain.count(bid)) {
+    if (inEntryChain.contains(bid)) {
       ITRACE(5, "    entry block. No scaling\n");
       setScale(bid, 1.0);
       continue;
@@ -430,7 +447,7 @@ void scaleProfCounts(HotTransContext& ctx, RegionDescPtr region) {
       auto const predWeight = ctx.cfg->weight(pred);
       ITRACE(5, "    pred {} (weight {})\n", pred, predWeight);
 
-      if (!inRegion.count(pred)) {
+      if (!inRegion.contains(pred)) {
         ITRACE(5, "      not in region\n");
         totalPredWeight += predWeight;
         continue;
@@ -519,16 +536,19 @@ RegionDescPtr selectHotCFG(HotTransContext& ctx, bool* truncated) {
   region->chainRetransBlocks();
 
   // Relax the region guards.
-  if (RuntimeOption::EvalRegionRelaxGuards) {
+  if (Cfg::Eval::RegionRelaxGuards) {
     ITRACE(3, "selectHotCFG: before optimizeProfiledGuards:\n{}\n",
            show(*region));
     optimizeProfiledGuards(*region, *ctx.profData);
   }
 
-  ITRACE(1, "selectHotCFG: final version after optimizeProfiledGuards:\n{}\n",
-         show(*region));
+  ITRACE(3, "selectHotCFG: before findDominators:\n{}\n", show(*region));
+  region->findDominators();
 
   scaleProfCounts(ctx, region);
+
+  ITRACE(1, "selectHotCFG: final version:\n{}\n",
+         show(*region));
 
   return region;
 }

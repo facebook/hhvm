@@ -51,7 +51,7 @@ struct InstructionBuilder {
     void* const vpBuffer = &buffer;
     Edge edges[2];
 
-    new (vpBuffer) IRInstruction(op, bcctx, hasEdges(op) ? edges : nullptr);
+    new (vpBuffer) IRInstruction(op, std::move(bcctx), hasEdges(op) ? edges : nullptr);
     auto const inst = static_cast<IRInstruction*>(vpBuffer);
 
     SCOPE_EXIT {
@@ -128,7 +128,9 @@ private:
    * Setter for exit label.
    */
   void setter(IRInstruction* inst, Block* target) {
-    assertx(!target || inst->hasEdges());
+    assert_flog(!target || inst->hasEdges(),
+      fmt::format("{}: Mismatch between declared edges and specified target", inst->op())
+    );
     inst->setTaken(target);
   }
 
@@ -164,10 +166,10 @@ private:
 }
 
 template<class Func, class... Args>
-typename std::result_of<Func(IRInstruction*)>::type
+typename std::invoke_result<Func, IRInstruction*>::type
 makeInstruction(Func func, Args&&... args) {
-  typedef typename std::result_of<Func(IRInstruction*)>::type Ret;
-  return irunit_detail::InstructionBuilder<Ret,Func>(func).go(args...);
+  typedef typename std::invoke_result<Func, IRInstruction*>::type Ret;
+  return irunit_detail::InstructionBuilder<Ret,Func>(func).go(std::forward<Args>(args)...);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

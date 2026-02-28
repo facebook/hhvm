@@ -4,9 +4,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 
-use crate::lexable_trivia::{LexableTrivia, LexableTrivium};
+use crate::lexable_trivia::LexableTrivia;
+use crate::lexable_trivia::LexableTrivium;
 use crate::trivia_factory::SimpleTriviaFactory;
 use crate::trivia_kind::TriviaKind;
 
@@ -77,6 +79,13 @@ impl LexableTrivium for MinimalTrivium {
     fn make_fix_me(_offset: usize, width: usize) -> Self {
         Self {
             kind: TriviaKind::FixMe,
+            width,
+        }
+    }
+
+    fn make_ignore(_offset: usize, width: usize) -> Self {
+        Self {
+            kind: TriviaKind::Ignore,
             width,
         }
     }

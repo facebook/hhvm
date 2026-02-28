@@ -285,7 +285,6 @@ let keyword_table =
   ; "finally"      , (Lang_Normal, FINALLY)
   ; "throw"        , (Lang_Normal, THROW)
   ; "exit"         , (Lang_Normal, EXIT)
-  ; "die"          , (Lang_Normal, EXIT)
   ; "array"        , (Lang_FB_sensitive, ARRAY)
   ; "darray"       , (Lang_FB_sensitive, ARRAY)
   ; "varray"       , (Lang_FB_sensitive, ARRAY)

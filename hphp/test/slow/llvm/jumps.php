@@ -1,7 +1,7 @@
 <?hh
 
 
-function jccMain($i) {
+function jccMain($i) :mixed{
   if (!$i) {
     echo "i is falsey\n";
   } else {
@@ -17,7 +17,7 @@ function jccMain($i) {
 
 
 <<__EntryPoint>>
-function main_jumps() {
+function main_jumps() :mixed{
 jccMain(0);
 jccMain(2);
 }

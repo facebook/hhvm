@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/watchman.h"
+
 #include <chrono>
 #include <memory>
 #include <string>
@@ -25,9 +27,8 @@
 #include <folly/executors/GlobalExecutor.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/futures/FutureSplitter.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
-#include "hphp/runtime/base/watchman.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/optional.h"
@@ -36,7 +37,9 @@
 namespace HPHP {
 namespace {
 
-TRACE_SET_MOD(watchman);
+TRACE_SET_MOD(watchman)
+
+WatchmanProfiler s_profiler = nullptr;
 
 /**
  * Result of connecting and watching
@@ -49,7 +52,7 @@ struct WatchData {
 class WatchmanImpl final : public Watchman,
                            public std::enable_shared_from_this<WatchmanImpl> {
 public:
-  WatchmanImpl(folly::fs::path path, Optional<std::string> sockPath)
+  WatchmanImpl(std::filesystem::path path, Optional<std::string> sockPath)
       : m_path{std::move(path)}, m_sockPath{std::move(sockPath)} {
   }
 
@@ -136,15 +139,28 @@ public:
 private:
   folly::SemiFuture<folly::dynamic>
   query(folly::dynamic queryObj, int nReconnects) {
+    auto const preLockTime = std::chrono::steady_clock::now();
     auto data = m_data.lock();
+    auto const preExecTime = std::chrono::steady_clock::now();
     return data->m_watchFuture.getFuture()
         .via(&m_exec)
-        .thenValue([queryObj](WatchData&& watchData) {
+        .thenValue([queryObj, preLockTime, preExecTime](WatchData&& watchData) {
+          auto const execTime = std::chrono::steady_clock::now();
           return watchData.m_client->query(
-              queryObj, std::move(watchData.m_watchPath));
-        })
-        .thenValue([](watchman::QueryResult&& res) mutable {
-          return std::move(res.raw_);
+            queryObj,
+            std::move(watchData.m_watchPath)
+            ).deferValue(
+              [queryObj, preLockTime, preExecTime, execTime] (
+                watchman::QueryResult&& res
+              ) {
+                if (s_profiler) {
+                  (s_profiler)(
+                    res, queryObj, preLockTime, preExecTime, execTime
+                  );
+                }
+                return std::move(res.raw_);
+              }
+            );
         })
         .thenError([weakThis = weak_from_this(), queryObj, nReconnects](
                        const folly::exception_wrapper& e) mutable {
@@ -241,13 +257,15 @@ private:
                 });
           }
           sharedThis->runCallbacks(queryObj, std::move(results));
-        });
+        }, fmt::format("hphp-watchman-subscription-{}", m_nextSubscriptionId++));
   }
 
   folly::IOThreadPoolExecutor m_exec{1};
 
-  const folly::fs::path m_path;
+  const std::filesystem::path m_path;
   const Optional<std::string> m_sockPath;
+
+  std::atomic<uint64_t> m_nextSubscriptionId{0};
 
   struct Data {
     // This future must complete before you can perform query() or subscribe()
@@ -264,11 +282,15 @@ private:
 Watchman::~Watchman() = default;
 
 std::shared_ptr<Watchman> Watchman::get(
-    const folly::fs::path& path, const Optional<std::string>& sockPath) {
+    const std::filesystem::path& path, const Optional<std::string>& sockPath) {
   assertx(path.is_absolute());
   auto watchman = std::make_shared<WatchmanImpl>(path, sockPath);
   watchman->reconnect();
   return watchman;
+}
+
+void Watchman::setProfiler(WatchmanProfiler&& prof) {
+  s_profiler = std::move(prof);
 }
 
 } // namespace HPHP

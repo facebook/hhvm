@@ -54,6 +54,8 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(TimerPool, s_timer_pool);
 
 namespace {
 
+bool Enabled;
+
 const StaticString
   s_IOWait("IOWait"),
   s_ResumeAwait("ResumeAwait"),
@@ -76,11 +78,11 @@ void IntervalTimer::RunCallbacks(
   IntervalTimer::SampleType type,
   c_WaitableWaitHandle* wh
 ) {
-  clearSurpriseFlag(IntervalTimerFlag);
+  stackLimitAndSurprise().clearFlag(IntervalTimerFlag);
 
   auto const timers = s_timer_pool->timers(); // makes a copy!
   for (auto timer : timers) {
-    if (!s_timer_pool->timers().count(timer)) {
+    if (!s_timer_pool->timers().contains(timer)) {
       // This timer has been removed from the pool by one of the callbacks.
       continue;
     }
@@ -172,11 +174,13 @@ void HHVM_METHOD(IntervalTimer, __construct,
 }
 
 void HHVM_METHOD(IntervalTimer, start) {
+  if (!Enabled) return;
   auto data = Native::data<IntervalTimer>(this_);
   data->start();
 }
 
 void HHVM_METHOD(IntervalTimer, stop) {
+  if (!Enabled) return;
   auto data = Native::data<IntervalTimer>(this_);
   data->stop();
 }
@@ -184,17 +188,19 @@ void HHVM_METHOD(IntervalTimer, stop) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static struct IntervalTimerExtension final : Extension {
-  IntervalTimerExtension() : Extension("intervaltimer") {}
+  IntervalTimerExtension() : Extension("intervaltimer", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
-  void moduleInit() override {
+  void moduleLoad(const IniSetting::Map& ini, Hdf hdf) override {
+    Config::Bind(Enabled, ini, hdf, "IntervalTimer.Enable", true);
+  }
+
+  void moduleRegisterNative() override {
     HHVM_ME(IntervalTimer, __construct);
     HHVM_ME(IntervalTimer, start);
     HHVM_ME(IntervalTimer, stop);
     Native::registerNativeDataInfo<IntervalTimer>(
       IntervalTimer::c_ClassName.get(),
       Native::NDIFlags::NO_SWEEP);
-
-    loadSystemlib("intervaltimer");
   }
 } s_intervaltimer_extension;
 

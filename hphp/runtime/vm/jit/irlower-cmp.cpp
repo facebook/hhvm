@@ -22,7 +22,6 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -35,7 +34,7 @@
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -244,39 +243,39 @@ void cgCmpDbl(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPL_OPCODE_CALL(GtStr);
-IMPL_OPCODE_CALL(GteStr);
-IMPL_OPCODE_CALL(LtStr);
-IMPL_OPCODE_CALL(LteStr);
-IMPL_OPCODE_CALL(EqStr);
-IMPL_OPCODE_CALL(NeqStr);
-IMPL_OPCODE_CALL(SameStr);
-IMPL_OPCODE_CALL(NSameStr);
-IMPL_OPCODE_CALL(CmpStr);
+IMPL_OPCODE_CALL(GtStr)
+IMPL_OPCODE_CALL(GteStr)
+IMPL_OPCODE_CALL(LtStr)
+IMPL_OPCODE_CALL(LteStr)
+IMPL_OPCODE_CALL(EqStr)
+IMPL_OPCODE_CALL(NeqStr)
+IMPL_OPCODE_CALL(SameStr)
+IMPL_OPCODE_CALL(NSameStr)
+IMPL_OPCODE_CALL(CmpStr)
 
-IMPL_OPCODE_CALL(GtObj);
-IMPL_OPCODE_CALL(GteObj);
-IMPL_OPCODE_CALL(LtObj);
-IMPL_OPCODE_CALL(LteObj);
-IMPL_OPCODE_CALL(EqObj);
-IMPL_OPCODE_CALL(NeqObj);
-IMPL_OPCODE_CALL(CmpObj);
+IMPL_OPCODE_CALL(GtObj)
+IMPL_OPCODE_CALL(GteObj)
+IMPL_OPCODE_CALL(LtObj)
+IMPL_OPCODE_CALL(LteObj)
+IMPL_OPCODE_CALL(EqObj)
+IMPL_OPCODE_CALL(NeqObj)
+IMPL_OPCODE_CALL(CmpObj)
 
-IMPL_OPCODE_CALL(GtArrLike);
-IMPL_OPCODE_CALL(GteArrLike);
-IMPL_OPCODE_CALL(LtArrLike);
-IMPL_OPCODE_CALL(LteArrLike);
-IMPL_OPCODE_CALL(EqArrLike);
-IMPL_OPCODE_CALL(NeqArrLike);
-IMPL_OPCODE_CALL(SameArrLike);
-IMPL_OPCODE_CALL(NSameArrLike);
-IMPL_OPCODE_CALL(CmpArrLike);
+IMPL_OPCODE_CALL(GtArrLike)
+IMPL_OPCODE_CALL(GteArrLike)
+IMPL_OPCODE_CALL(LtArrLike)
+IMPL_OPCODE_CALL(LteArrLike)
+IMPL_OPCODE_CALL(EqArrLike)
+IMPL_OPCODE_CALL(NeqArrLike)
+IMPL_OPCODE_CALL(SameArrLike)
+IMPL_OPCODE_CALL(NSameArrLike)
+IMPL_OPCODE_CALL(CmpArrLike)
 
-IMPL_OPCODE_CALL(GtRes);
-IMPL_OPCODE_CALL(GteRes);
-IMPL_OPCODE_CALL(LtRes);
-IMPL_OPCODE_CALL(LteRes);
-IMPL_OPCODE_CALL(CmpRes);
+IMPL_OPCODE_CALL(GtRes)
+IMPL_OPCODE_CALL(GteRes)
+IMPL_OPCODE_CALL(LtRes)
+IMPL_OPCODE_CALL(LteRes)
+IMPL_OPCODE_CALL(CmpRes)
 
 #define CMP_DATA_OPS        \
   CDO(Obj,  Same,   CC_E)   \
@@ -305,8 +304,27 @@ void cgEqFunc(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const sf = v.makeReg();
 
-  emitCmpLowPtr<Func>(v, sf, s1, s0);
+  v << cmpq{s1, s0, sf};
   v << setcc{CC_E, sf, d};
+}
+
+void cgEqFuncId(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<EqFuncId>();
+  auto const funcPtr = extra->func;
+  auto const func = srcLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+  #ifdef USE_LOWPTR
+    assertx(Cfg::Repo::Authoritative);
+    v << cmpq{func, v.cns(funcPtr), sf};
+  #else
+    auto const funcId = funcPtr->getFuncId();
+    auto const off = Func::funcIdOffset();
+    assertx(!funcId.isInvalid() && !funcId.isDummy());
+    v << cmplim{(int32_t)funcId.toInt(), func[off], sf};
+  #endif
+  ifThen(v, CC_NE, sf, label(env, inst->taken()));
 }
 
 void cgDbgAssertFunc(IRLS& env, const IRInstruction* inst) {
@@ -315,7 +333,7 @@ void cgDbgAssertFunc(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const sf = v.makeReg();
   v << cmplim{(int32_t)func->getFuncId().toInt(), fp[AROFF(m_funcId)], sf};
-  ifThen(v, CC_NE, sf, [&](Vout& v) { v << trap{TRAP_REASON}; });
+  ifThen(v, CC_NE, sf, [&](Vout& v) { v << trap{TRAP_REASON, Fixup::none()}; });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

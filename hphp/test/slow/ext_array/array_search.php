@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_array_search() {
-$array = darray[
+function main_array_search() :mixed{
+$array = dict[
   0 => "blue",
   1 => "red",
   2 => "green",

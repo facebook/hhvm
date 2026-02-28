@@ -1,12 +1,14 @@
-File "idx3_2.php", line 10, characters 10-11:
+ERROR: File "idx3_2.php", line 10, characters 10-11:
 Invalid return type (Typing[4110])
   File "idx3_2.php", line 7, characters 15-20:
   Expected `string`
   File "idx3_2.php", line 3, characters 27-29:
   But got `int`
-  File "collections/Map.hhi", line 55, characters 108-109:
+  File "collections/Map.hhi", line 58, characters 32-33:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 1064, characters 63-64:
+  File "collections/interfaces.hhi", line 1111, characters 26-27:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 810, characters 68-69:
+  File "collections/interfaces.hhi", line 845, characters 26-27:
+    via this generic `Tv`
+  File "idx.hhi", line 34, characters 8-9:
     via this generic `Tv`

@@ -1,10 +1,10 @@
 <?hh
 
 class A {
- function test(A $a) {
+ function test(A $a) :mixed{
  $a->foo();
 }
- function foo() {
+ function foo() :mixed{
  print 'foo';
 }
 }

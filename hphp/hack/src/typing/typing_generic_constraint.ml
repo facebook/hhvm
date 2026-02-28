@@ -32,12 +32,7 @@ let check_constraint
     let (env, ecstr_ty) = Env.expand_type env cstr_ty in
     match ck with
     | Ast_defs.Constraint_as ->
-      TUtils.sub_type
-        ~coerce:(Some Typing_logic.CoerceToDynamic)
-        env
-        ety
-        cstr_ty
-        on_error
+      TUtils.sub_type ~class_sub_classname:false env ety cstr_ty on_error
     | Ast_defs.Constraint_eq ->
       (* An equality constraint is the same as two commuting `as`
        * constraints, i.e. X=Y is { X as Y, Y as X }. Thus, add
@@ -45,29 +40,14 @@ let check_constraint
        * both sides of the equation simultaniously, to preserve an
        * easier convergence indication. *)
       let (env, e1) =
-        TUtils.sub_type
-          ~coerce:(Some Typing_logic.CoerceToDynamic)
-          env
-          ecstr_ty
-          ty
-          on_error
+        TUtils.sub_type ~class_sub_classname:false env ecstr_ty ty on_error
       in
       let (env, e2) =
-        TUtils.sub_type
-          ~coerce:(Some Typing_logic.CoerceToDynamic)
-          env
-          ety
-          cstr_ty
-          on_error
+        TUtils.sub_type ~class_sub_classname:false env ety cstr_ty on_error
       in
       (env, Option.merge e1 e2 ~f:Typing_error.both)
     | Ast_defs.Constraint_super ->
-      TUtils.sub_type
-        ~coerce:(Some Typing_logic.CoerceToDynamic)
-        env
-        ecstr_ty
-        ty
-        on_error
+      TUtils.sub_type ~class_sub_classname:false env ecstr_ty ty on_error
 
 let check_tparams_constraint (env : env) ~use_pos ck ~cstr_ty ty =
   check_constraint env ck ty ~cstr_ty

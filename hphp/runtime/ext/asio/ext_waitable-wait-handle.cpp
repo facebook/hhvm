@@ -18,17 +18,18 @@
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 
 #include "hphp/runtime/base/implicit-context.h"
-#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-context-enter.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_priority-bridge-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
 
@@ -42,8 +43,8 @@ void c_WaitableWaitHandle::join() {
 
   assertx(!isFinished());
 
-  auto const context =
-    RO::EvalEnableImplicitContext ? *ImplicitContext::activeCtx : nullptr;
+  assertx(*ImplicitContext::activeCtx);
+  auto const savedIC = *ImplicitContext::activeCtx;
 
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnJoin())) {
@@ -56,14 +57,13 @@ void c_WaitableWaitHandle::join() {
 
   // import this wait handle to the newly created context
   // throws if cross-context cycle found
-  asio::enter_context(this, session->getCurrentContextIdx());
+  asio::enter_context_state(this, session->getCurrentContextStateIndex());
 
   // run queues until we are finished
   session->getCurrentContext()->runUntil(this);
   assertx(isFinished());
-  if (RO::EvalEnableImplicitContext) {
-    *ImplicitContext::activeCtx = context;
-  }
+  assertx(savedIC);
+  ImplicitContext::setActive(Object{savedIC});
 }
 
 String c_WaitableWaitHandle::getName() {
@@ -72,10 +72,12 @@ String c_WaitableWaitHandle::getName() {
     case Kind::AsyncFunction:       return asAsyncFunction()->getName();
     case Kind::AsyncGenerator:      return asAsyncGenerator()->getName();
     case Kind::AwaitAll:            return asAwaitAll()->getName();
+    case Kind::Concurrent:          return asConcurrent()->getName();
     case Kind::Condition:           return asCondition()->getName();
     case Kind::Reschedule:          return asReschedule()->getName();
     case Kind::Sleep:               return asSleep()->getName();
     case Kind::ExternalThreadEvent: return asExternalThreadEvent()->getName();
+    case Kind::PriorityBridge:      return asPriorityBridge()->getName();
   }
   not_reached();
 }
@@ -88,7 +90,9 @@ c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
     case Kind::AsyncFunction:       return asAsyncFunction()->getChild();
     case Kind::AsyncGenerator:      return asAsyncGenerator()->getChild();
     case Kind::AwaitAll:            return asAwaitAll()->getChild();
+    case Kind::Concurrent:          return asConcurrent()->getChild();
     case Kind::Condition:           return asCondition()->getChild();
+    case Kind::PriorityBridge:      return asPriorityBridge()->getChild();
     case Kind::Reschedule:          return nullptr;
     case Kind::Sleep:               return nullptr;
     case Kind::ExternalThreadEvent: return nullptr;
@@ -141,41 +145,6 @@ c_WaitableWaitHandle::throwCycleException(c_WaitableWaitHandle* child) const {
 
   SystemLib::throwInvalidOperationExceptionObject(
     folly::join("", exception_msg_items));
-}
-
-
-Array c_WaitableWaitHandle::getDependencyStack() {
-  if (isFinished()) return empty_vec_array();
-  auto result = Array::CreateVec();
-  hphp_hash_set<c_WaitableWaitHandle*> visited;
-  auto current_handle = this;
-  auto session = AsioSession::Get();
-  while (current_handle != nullptr) {
-    result.append(make_tv<KindOfObject>(current_handle));
-    visited.insert(current_handle);
-    auto context_idx = current_handle->getContextIdx();
-
-    // 1. find parent in the same context
-    auto p = current_handle->getParentChain().firstInContext(context_idx);
-    if (p && visited.find(p) == visited.end()) {
-      current_handle = p;
-      continue;
-    }
-
-    // 2. cross the context boundary
-    auto context = session->getContext(context_idx);
-    if (!context) {
-      break;
-    }
-    current_handle = c_ResumableWaitHandle::getRunning(context->getSavedFP());
-    auto target_context_idx =
-      current_handle ? current_handle->getContextIdx() : 0;
-    while (context_idx > target_context_idx) {
-      --context_idx;
-      result.append(null_object);
-    }
-  }
-  return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

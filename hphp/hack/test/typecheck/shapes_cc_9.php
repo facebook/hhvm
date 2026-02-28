@@ -1,5 +1,5 @@
 //// newtype.php
-<?hh // strict
+<?hh
 
 newtype bar = int;
 class C1 {
@@ -8,7 +8,7 @@ class C1 {
 
 
 //// def.php
-<?hh // strict
+<?hh
 
 newtype foo = bar;
 class C2 {
@@ -16,7 +16,7 @@ class C2 {
 }
 
 //// use.php
-<?hh // strict
+<?hh
 
 // Reject: type of keys is opaque
 type myshape = shape(C2::FOO => int);

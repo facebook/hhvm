@@ -12,7 +12,7 @@ class A {
     $this->d = $p4;
   }
 }
-function gen() {
+function gen() :AsyncGenerator<mixed,mixed,void>{
   $obj = new A(1, 2, 3, 4);
   foreach ($obj as $key => $val) {
     yield null;
@@ -29,6 +29,6 @@ function gen() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   foreach (gen() as $_) {}
 }

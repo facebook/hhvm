@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function expects_vec_func_str(Vector<(function(): string)> $vec): void {}
 

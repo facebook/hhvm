@@ -10,7 +10,7 @@ class X {
 
 
 <<__EntryPoint>>
-function main_clone_method() {
+function main_clone_method() :mixed{
 $x = new X;
 $x->val = 2;
 var_dump($x->mul());

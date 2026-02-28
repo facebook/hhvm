@@ -16,7 +16,6 @@
 #include "hphp/runtime/base/rds-util.h"
 
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/named-entity.h"
 
 #include "hphp/runtime/vm/jit/target-cache.h"
 
@@ -47,14 +46,14 @@ bindConstMemoCache(const Func* func, const Class* cls,
     ConstMemoCache { func->getFuncId(), cls, paramVals, asyncEager }
   );
   {
-    folly::SharedMutex::WriteHolder wlock{s_constMemoLock};
+    std::unique_lock wlock{s_constMemoLock};
     s_funcToConstMemoCaches.emplace(std::pair{func, cls}, ret);
   }
   return ret;
 }
 
 void clearConstMemoCache(const Func* func, const Class* cls) {
-  folly::SharedMutex::ReadHolder rlock{s_constMemoLock};
+  std::shared_lock rlock{s_constMemoLock};
   auto const range = s_funcToConstMemoCaches.equal_range(std::pair{func, cls});
   for (auto p = range.first; p != range.second; ++p) {
     auto const link = p->second;

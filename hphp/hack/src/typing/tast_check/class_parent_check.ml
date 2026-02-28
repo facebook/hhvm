@@ -10,54 +10,99 @@
 open Aast
 open Base
 module Env = Tast_env
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
-let check_is_class env ~require_class_check (p, h) =
+let check_is_class env ~require_constraint_check (p, h) =
+  let (is_req_class_check, is_req_this_as_check) =
+    match require_constraint_check with
+    | Some RequireClass -> (true, false)
+    | Some RequireThisAs -> (false, true)
+    | _ -> (false, false)
+  in
   match h with
-  | Aast.Happly ((_, name), _) ->
-    begin
-      match Env.get_class env name with
-      | None -> ()
-      | Some cls ->
-        let kind = Cls.kind cls in
-        let name = Cls.name cls in
-        if Ast_defs.is_c_class kind then (
-          if Cls.final cls && not require_class_check then
-            Errors.add_nast_check_error
-            @@ Nast_check_error.Requires_final_class { pos = p; name }
-        ) else
-          Errors.add_nast_check_error
-          @@ Nast_check_error.Requires_non_class
-               { pos = p; name; kind = Ast_defs.string_of_classish_kind kind }
-    end
-  | Aast.Habstr (name, _) ->
-    Errors.add_nast_check_error
-    @@ Nast_check_error.Requires_non_class { pos = p; name; kind = "a generic" }
+  | Aast.Happly ((_, name), _) -> begin
+    match Env.get_class env name with
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      ()
+    | Decl_entry.Found cls ->
+      let kind = Cls.kind cls in
+      let name = Cls.name cls in
+      let is_interface = Ast_defs.is_c_interface (Cls.kind cls) in
+      if Ast_defs.is_c_class kind then (
+        if Cls.final cls && not is_req_class_check then
+          Diagnostics.add_diagnostic
+            Nast_check_error.(
+              to_user_diagnostic
+              @@ Requires_final_class { pos = p; name; is_req_this_as_check })
+        else if Cls.final cls && is_req_this_as_check then
+          Diagnostics.add_diagnostic
+            Nast_check_error.(
+              to_user_diagnostic
+              @@ Requires_final_class { pos = p; name; is_req_this_as_check })
+      ) else
+        Diagnostics.add_diagnostic
+          Nast_check_error.(
+            to_user_diagnostic
+            @@ Requires_non_class
+                 {
+                   pos = p;
+                   name;
+                   kind = Ast_defs.string_of_classish_kind kind;
+                   is_interface;
+                   is_req_this_as_check;
+                 })
+  end
+  | Aast.Habstr name ->
+    Diagnostics.add_diagnostic
+      Nast_check_error.(
+        to_user_diagnostic
+        @@ Requires_non_class
+             {
+               pos = p;
+               name;
+               kind = "a generic";
+               is_interface = false;
+               is_req_this_as_check;
+             })
   | _ ->
-    Errors.add_nast_check_error
-    @@ Nast_check_error.Requires_non_class
-         { pos = p; name = "This"; kind = "an invalid type hint" }
+    Diagnostics.add_diagnostic
+      Nast_check_error.(
+        to_user_diagnostic
+        @@ Requires_non_class
+             {
+               pos = p;
+               name = "This";
+               kind = "an invalid type hint";
+               is_interface = false;
+               is_req_this_as_check;
+             })
 
 let check_is_interface (env, error_verb) (p, h) =
   match h with
-  | Aast.Happly ((_, name), _) ->
-    begin
-      match Env.get_class env name with
-      | None -> ()
-      | Some cls when Ast_defs.is_c_interface (Cls.kind cls) -> ()
-      | Some cls ->
-        Errors.add_nast_check_error
-        @@ Nast_check_error.Non_interface
-             { pos = p; name = Cls.name cls; verb = error_verb }
-    end
+  | Aast.Happly ((_, name), _) -> begin
+    match Env.get_class env name with
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      ()
+    | Decl_entry.Found cls when Ast_defs.is_c_interface (Cls.kind cls) -> ()
+    | Decl_entry.Found cls ->
+      Diagnostics.add_diagnostic
+        Nast_check_error.(
+          to_user_diagnostic
+          @@ Non_interface { pos = p; name = Cls.name cls; verb = error_verb })
+  end
   | Aast.Habstr _ ->
-    Errors.add_nast_check_error
-    @@ Nast_check_error.Non_interface
-         { pos = p; name = "generic"; verb = error_verb }
+    Diagnostics.add_diagnostic
+      Nast_check_error.(
+        to_user_diagnostic
+        @@ Non_interface { pos = p; name = "generic"; verb = error_verb })
   | _ ->
-    Errors.add_nast_check_error
-    @@ Nast_check_error.Non_interface
-         { pos = p; name = "invalid type hint"; verb = error_verb }
+    Diagnostics.add_diagnostic
+      Nast_check_error.(
+        to_user_diagnostic
+        @@ Non_interface
+             { pos = p; name = "invalid type hint"; verb = error_verb })
 
 let check_is_trait env (p, h) =
   match h with
@@ -65,14 +110,18 @@ let check_is_trait env (p, h) =
     let type_info = Env.get_class env name in
     begin
       match type_info with
-      | None -> ()
-      | Some cls when Ast_defs.is_c_trait (Cls.kind cls) -> ()
-      | Some cls ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        ()
+      | Decl_entry.Found cls when Ast_defs.is_c_trait (Cls.kind cls) -> ()
+      | Decl_entry.Found cls ->
         let name = Cls.name cls in
         let kind = Cls.kind cls in
-        Errors.add_nast_check_error
-        @@ Nast_check_error.Uses_non_trait
-             { pos = p; name; kind = Ast_defs.string_of_classish_kind kind }
+        Diagnostics.add_diagnostic
+          Nast_check_error.(
+            to_user_diagnostic
+            @@ Uses_non_trait
+                 { pos = p; name; kind = Ast_defs.string_of_classish_kind kind })
     end
   | _ -> failwith "assertion failure: trait isn't an Happly"
 
@@ -81,7 +130,7 @@ let hint_happly_to_string h =
   | Aast.Happly ((_, name), _) -> Some name
   | _ -> None
 
-let duplicated_used_traits c =
+let duplicated_used_traits env c =
   let traits = Hashtbl.create (module String) in
   List.iter
     ~f:(fun (p, h) ->
@@ -93,7 +142,8 @@ let duplicated_used_traits c =
     ~f:(fun ~key ~data ->
       if List.length data > 1 then
         let (pos, class_name) = c.c_name in
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
+          ~env
           Typing_error.(
             primary
             @@ Primary.Trait_reuse_inside_class
@@ -110,11 +160,25 @@ let handler =
     inherit Tast_visitor.handler_base
 
     method! at_class_ env c =
-      let (req_extends, req_implements, req_class) = split_reqs c.c_reqs in
+      let (req_extends, req_implements, req_class, req_this_as) =
+        split_reqs c.c_reqs
+      in
       List.iter c.c_uses ~f:(check_is_trait env);
-      duplicated_used_traits c;
-      List.iter req_extends ~f:(check_is_class ~require_class_check:false env);
-      List.iter c.c_implements ~f:(check_is_interface (env, `implement));
-      List.iter req_implements ~f:(check_is_interface (env, `req_implement));
-      List.iter req_class ~f:(check_is_class ~require_class_check:true env)
+      let Equal = Tast_env.eq_typing_env in
+      duplicated_used_traits env c;
+      List.iter
+        req_extends
+        ~f:(check_is_class env ~require_constraint_check:None);
+      List.iter
+        c.c_implements
+        ~f:(check_is_interface (env, Nast_check_error.Vimplement));
+      List.iter
+        req_implements
+        ~f:(check_is_interface (env, Nast_check_error.Vreq_implement));
+      List.iter
+        req_class
+        ~f:(check_is_class env ~require_constraint_check:(Some RequireClass));
+      List.iter
+        req_this_as
+        ~f:(check_is_class env ~require_constraint_check:(Some RequireThisAs))
   end

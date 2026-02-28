@@ -1,3 +1,3 @@
 <?hh
-<<__EntryPoint>> function main() { $testid = getenv('TESTID');
+<<__EntryPoint>> function main() :mixed{ $testid = getenv('TESTID');
 echo "Hello, World!{$testid}"; }

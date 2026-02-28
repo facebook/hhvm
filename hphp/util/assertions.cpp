@@ -19,10 +19,7 @@
 #include <folly/Format.h>
 
 #include <cstdio>
-#include <functional>
-#include <iostream>
 #include <string>
-#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

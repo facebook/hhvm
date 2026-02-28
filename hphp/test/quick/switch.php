@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $a = 2;
   switch ($a) {
     case ++$a:
@@ -14,7 +14,7 @@ function main() {
       break;
   }
 
-  $a = varray[2];
+  $a = vec[2];
   switch ($a[0]) {
     case ++$a[0]:
       echo "nope: pre-inc\n";
@@ -27,7 +27,7 @@ function main() {
       break;
   }
 
-  $a = varray[10];
+  $a = vec[10];
   $ten = 10;
   switch ($a[0]) {
     case $ten:
@@ -39,7 +39,7 @@ function main() {
   }
 }
 
-function strswitch() {
+function strswitch() :mixed{
   $a = 'luke';
   switch ($a) {
     case 'leia':

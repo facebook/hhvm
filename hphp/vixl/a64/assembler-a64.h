@@ -23,9 +23,7 @@
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-#ifndef VIXL_A64_ASSEMBLER_A64_H_
-#define VIXL_A64_ASSEMBLER_A64_H_
+#pragma once
 
 #include <list>
 
@@ -584,6 +582,23 @@ class Label {
 };
 
 
+// Control how scaled- and unscaled-offset loads and stores are generated.
+enum LoadStoreScalingOption {
+  // Prefer scaled-immediate-offset instructions, but emit unscaled-offset,
+  // register-offset, pre-index or post-index instructions if necessary.
+  PreferScaledOffset,
+
+  // Prefer unscaled-immediate-offset instructions, but emit scaled-offset,
+  // register-offset, pre-index or post-index instructions if necessary.
+  PreferUnscaledOffset,
+
+  // Require scaled-immediate-offset instructions.
+  RequireScaledOffset,
+
+  // Require unscaled-immediate-offset instructions.
+  RequireUnscaledOffset
+};
+
 // TODO: Obtain better values for these, based on real-world data.
 const int kLiteralPoolCheckInterval = 4 * KBytes;
 const int kRecommendedLiteralPoolRange = 2 * kLiteralPoolCheckInterval;
@@ -999,6 +1014,30 @@ class Assembler {
             StatusFlags nzcv,
             Condition cond);
 
+  // CRC-32 checksum from byte
+  void crc32b(const Register& wd, const Register& wn, const Register& wm);
+
+  // CRC-32 checksum from half-word.
+  void crc32h(const Register& wd, const Register& wn, const Register& wm);
+
+  // CRC-32 checksum from word.
+  void crc32w(const Register& wd, const Register& wn, const Register& wm);
+
+  // CRC-32 checksum from double word.
+  void crc32x(const Register& wd, const Register& wn, const Register& xm);
+
+  // CRC-32 C checksum from byte.
+  void crc32cb(const Register& wd, const Register& wn, const Register& wm);
+
+  // CRC-32 C checksum from half-word.
+  void crc32ch(const Register& wd, const Register& wn, const Register& wm);
+
+  // CRC-32 C checksum from word.
+  void crc32cw(const Register& wd, const Register& wn, const Register& wm);
+
+  // CRC-32C checksum from double word.
+  void crc32cx(const Register& wd, const Register& wn, const Register& xm);
+
   // Multiply.
   void mul(const Register& rd, const Register& rn, const Register& rm);
 
@@ -1122,7 +1161,7 @@ class Assembler {
             const MemOperand& dst);
 
   // Load Add - Large System Extension
-  void ldaddal(const Register& rs, const Register& rt, const MemOperand& src);
+  void ldadd(const Register& rs, const Register& rt, const MemOperand& src);
 
   // Load literal to register.
   void ldr(const Register& rt, uint64_t imm);
@@ -1182,6 +1221,9 @@ class Assembler {
 
   // Move inverted operand to register.
   void mvn(const Register& rd, const Operand& operand);
+
+  // Move inverted operand to register.
+  void mvn(const VRegister& vd, const VRegister& vn);
 
   // System instructions.
   // Move to register from system register.
@@ -1268,6 +1310,9 @@ class Assembler {
 
   // FP compare immediate.
   void fcmp(const FPRegister& fn, double value);
+
+  // FP compare registers.
+  void fcmeq(const VRegister& vd, const VRegister& vn, const VRegister& vm);
 
   // FP conditional compare.
   void fccmp(const FPRegister& fn,
@@ -1574,6 +1619,10 @@ class Assembler {
     return shift_amount << ImmShiftLS_offset;
   }
 
+  static Instr ImmPrefetchOperation(int imm5) {
+    return imm5 << ImmPrefetchOperation_offset;
+  }
+
   static Instr ImmException(int imm16) {
     assert(is_uint16(imm16));
     return imm16 << ImmException_offset;
@@ -1687,8 +1736,19 @@ class Assembler {
                        NEONLoadStoreMultiStructOp op);
   Instr LoadStoreStructAddrModeField(const MemOperand& addr);
 
+  Instr LoadStoreMemOperand(const MemOperand& addr,
+                            LSDataSize size,
+                            LoadStoreScalingOption option);
+
   static bool IsImmLSUnscaled(ptrdiff_t offset);
   static bool IsImmLSScaled(ptrdiff_t offset, LSDataSize size);
+
+  void Prefetch(PrefetchOperation op,
+                const MemOperand& addr,
+                LoadStoreScalingOption option = PreferScaledOffset);
+  void Prefetch(int op,
+                const MemOperand& addr,
+                LoadStoreScalingOption option = PreferScaledOffset);
 
   void Logical(const Register& rd,
                const Register& rn,
@@ -1864,5 +1924,3 @@ class BlockLiteralPoolScope {
   Assembler* assm_;
 };
 }  // namespace vixl
-
-#endif  // VIXL_A64_ASSEMBLER_A64_H_

@@ -1,11 +1,11 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 if (!extension_loaded("openssl"))
-    die("skip");
+    exit("skip");
 if (!in_array('aes-128-gcm', openssl_get_cipher_methods()))
-    die("skip: aes-128-gcm not available");
+    exit("skip: aes-128-gcm not available");
 if (!in_array('aes-192-gcm', openssl_get_cipher_methods()))
-    die("skip: aes-192-gcm not available");
+    exit("skip: aes-192-gcm not available");
 if (!in_array('aes-256-gcm', openssl_get_cipher_methods()))
-    die("skip: aes-256-gcm not available");
+    exit("skip: aes-256-gcm not available");
 }

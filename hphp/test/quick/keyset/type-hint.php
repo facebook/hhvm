@@ -70,7 +70,7 @@ function takes_mixed(<<__Soft>> mixed $m): mixed {
   return $m;
 }
 
-function test_all_hints($x) {
+function test_all_hints($x) :mixed{
   echo "====================================================\n";
   var_dump($x);
   $funs = vec[
@@ -108,7 +108,7 @@ function test_all_hints($x) {
   var_dump($x);
 }
 
-function test_keyset_hint($x) {
+function test_keyset_hint($x) :mixed{
   echo "====================================================\n";
   var_dump($x);
   $funs = vec[
@@ -152,8 +152,8 @@ test_keyset_hint(717);
 test_keyset_hint(1.234);
 test_keyset_hint("string");
 test_keyset_hint(new stdClass);
-test_keyset_hint(varray[]);
-test_keyset_hint(varray[1, 2, 3]);
+test_keyset_hint(vec[]);
+test_keyset_hint(vec[1, 2, 3]);
 test_keyset_hint(vec[]);
 test_keyset_hint(vec[1, 'a', 2, 'b']);
 test_keyset_hint(dict[]);

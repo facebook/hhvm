@@ -5,10 +5,10 @@
  * Function is implemented in Zend/zend_builtin_functions.c
  */
 <<__DynamicallyCallable>>
-function f() {}
+function f() :mixed{}
 class C {
   <<__DynamicallyCallable>>
-  static function f() {}
+  static function f() :mixed{}
 }
 <<__EntryPoint>>
 function main_entry(): void {

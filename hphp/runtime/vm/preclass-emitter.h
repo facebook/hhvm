@@ -44,10 +44,7 @@ struct BuiltinObjExtents {
 };
 
 struct PreClassEmitter {
-  typedef std::vector<FuncEmitter*> MethodVec;
-  using UpperBoundVec = CompactVector<TypeConstraint>;
-  using UpperBoundMap =
-    std::unordered_map<const StringData*, CompactVector<TypeConstraint>>;
+  using MethodVec = std::vector<FuncEmitter*>;
 
   struct Prop {
     Prop()
@@ -63,8 +60,7 @@ struct PreClassEmitter {
          const StringData* n,
          Attr attrs,
          const StringData* userType,
-         const TypeConstraint& typeConstraint,
-         const UpperBoundVec& ubs,
+         TypeIntersectionConstraint&& typeConstraints,
          const StringData* docComment,
          const TypedValue* val,
          RepoAuthType repoAuthType,
@@ -74,8 +70,9 @@ struct PreClassEmitter {
     const StringData* name() const { return m_name; }
     Attr attrs() const { return m_attrs; }
     const StringData* userType() const { return m_userType; }
-    const TypeConstraint& typeConstraint() const { return m_typeConstraint; }
-    const UpperBoundVec& upperBounds() const { return m_ubs; }
+    const TypeIntersectionConstraint& typeConstraints() const {
+      return m_typeConstraints;
+    }
     const StringData* docComment() const { return m_docComment; }
     const TypedValue& val() const { return m_val; }
     RepoAuthType repoAuthType() const { return m_repoAuthType; }
@@ -88,8 +85,7 @@ struct PreClassEmitter {
         (m_docComment)
         (m_val)
         (m_repoAuthType)
-        (m_typeConstraint)
-        (m_ubs)
+        (m_typeConstraints)
         (m_userAttributes)
         ;
     }
@@ -97,19 +93,18 @@ struct PreClassEmitter {
   private:
     friend struct PreClassEmitter;
 
-    LowStringPtr m_name;
+    PackedStringPtr m_name;
     Attr m_attrs;
-    LowStringPtr m_userType;
-    LowStringPtr m_docComment;
+    PackedStringPtr m_userType;
+    PackedStringPtr m_docComment;
     TypedValue m_val;
     RepoAuthType m_repoAuthType;
-    TypeConstraint m_typeConstraint;
-    UpperBoundVec m_ubs{};
+    TypeIntersectionConstraint m_typeConstraints{};
     UserAttributeMap m_userAttributes;
   };
 
   struct Const {
-    using CoeffectsVec = std::vector<LowStringPtr>;
+    using CoeffectsVec = std::vector<PackedStringPtr>;
     using Invariance = PreClass::Const::Invariance;
 
     Const()
@@ -118,7 +113,7 @@ struct PreClassEmitter {
       , m_val(make_tv<KindOfUninit>())
       , m_coeffects({})
       , m_resolvedTypeStructure()
-      , m_kind(ConstModifiers::Kind::Value)
+      , m_kind(ConstModifierFlags::Kind::Value)
       , m_invariance(Invariance::None)
       , m_isAbstract(false)
       , m_fromTrait(false)
@@ -128,7 +123,7 @@ struct PreClassEmitter {
           const TypedValue* val,
           CoeffectsVec coeffects,
           Array resolvedTypeStructure,
-          ConstModifiers::Kind kind,
+          ConstModifierFlags::Kind kind,
           Invariance invariance,
           bool isAbstract,
           bool fromTrait)
@@ -156,7 +151,7 @@ struct PreClassEmitter {
     const Array& resolvedTypeStructure() const {
       return m_resolvedTypeStructure;
     }
-    ConstModifiers::Kind kind() const { return m_kind; }
+    ConstModifierFlags::Kind kind() const { return m_kind; }
     Invariance invariance() const { return m_invariance; }
     bool isFromTrait() const { return m_fromTrait; }
 
@@ -174,42 +169,41 @@ struct PreClassEmitter {
                       m_resolvedTypeStructure.isDict() &&
                       !m_resolvedTypeStructure.empty() &&
                       m_resolvedTypeStructure->isStatic() &&
-                      m_kind == ConstModifiers::Kind::Type &&
+                      m_kind == ConstModifierFlags::Kind::Type &&
                       m_val.has_value()));
       assertx(IMPLIES(m_invariance != Invariance::None,
                       !m_resolvedTypeStructure.isNull()));
     }
 
    private:
-    LowStringPtr m_name;
+   PackedStringPtr m_name;
     // Class which originally defined this const, if HHBBC has
     // propagated the definition (nullptr otherwise).
-    LowStringPtr m_cls;
+    PackedStringPtr m_cls;
     Optional<TypedValue> m_val;
     CoeffectsVec m_coeffects;
     Array m_resolvedTypeStructure;
-    ConstModifiers::Kind m_kind;
+    ConstModifierFlags::Kind m_kind;
     Invariance m_invariance;
     bool m_isAbstract;
     bool m_fromTrait;
   };
 
-  typedef IndexedStringMap<Prop, Slot> PropMap;
-  typedef IndexedStringMap<Const, Slot> ConstMap;
+  using PropMap = IndexedStringMap<Prop, Slot>;
+  using ConstMap = IndexedStringMap<Const, Slot>;
 
-  PreClassEmitter(UnitEmitter& ue, Id id, const std::string& name);
+  PreClassEmitter(const StringData* name);
   ~PreClassEmitter();
 
   void init(int line1, int line2, Attr attrs,
-            const StringData* parent, const StringData* docComment);
+            const StringData* parent, const StringData* docComment,
+            bool isSystemLib);
 
-  UnitEmitter& ue() const { return m_ue; }
   const StringData* name() const { return m_name; }
   Attr attrs() const { return m_attrs; }
   void setAttrs(Attr attrs) { m_attrs = attrs; }
   void setEnumBaseTy(TypeConstraint ty) { m_enumBaseTy = ty; }
   const TypeConstraint& enumBaseTy() const { return m_enumBaseTy; }
-  Id id() const { return m_id; }
   void setIfaceVtableSlot(Slot s) { m_ifaceVtableSlot = s; }
   const MethodVec& methods() const { return m_methods; }
   bool hasMethod(const StringData* name) const {
@@ -226,64 +220,63 @@ struct PreClassEmitter {
   const ConstMap::Builder& constMap() const { return m_constMap; }
   const StringData* docComment() const { return m_docComment; }
   const StringData* parentName() const { return m_parent; }
-  static bool IsAnonymousClassName(const std::string& name) {
+  static bool IsAnonymousClassName(std::string_view name) {
     return name.find('$') != std::string::npos;
   }
 
   void setDocComment(const StringData* sd) { m_docComment = sd; }
 
   void addInterface(const StringData* n);
-  const std::vector<LowStringPtr>& interfaces() const {
+  const std::vector<PackedStringPtr>& interfaces() const {
     return m_interfaces;
   }
   void addEnumInclude(const StringData* n);
-  const std::vector<LowStringPtr>& enumIncludes() const {
+  const std::vector<PackedStringPtr>& enumIncludes() const {
     return m_enumIncludes;
   }
   bool addMethod(FuncEmitter* method);
-  void renameMethod(const StringData* oldName, const StringData *newName);
-  bool addProperty(const StringData* n,
-                   Attr attrs,
-                   const StringData* userType,
-                   const TypeConstraint& typeConstraint,
-                   const UpperBoundVec& ubs,
-                   const StringData* docComment,
-                   const TypedValue* val,
-                   RepoAuthType,
-                   UserAttributeMap);
-  bool addConstant(const StringData* n,
-                   const StringData* cls,
-                   const TypedValue* val,
-                   Array resolvedTypeStructure,
-                   ConstModifiers::Kind kind,
-                   Const::Invariance invariance,
-                   bool fromTrait,
-                   bool isAbstract);
-  bool addContextConstant(const StringData* n,
-                          Const::CoeffectsVec coeffects,
-                          bool isAbstract,
-                          bool fromTrait = false);
-  bool addAbstractConstant(const StringData* n,
-                           ConstModifiers::Kind kind =
-                             ConstModifiers::Kind::Value,
-                           bool fromTrait = false);
+  bool addProperty(
+    const StringData* n,
+    Attr attrs,
+    const StringData* userType,
+    TypeIntersectionConstraint&& typeConstraints,
+    const StringData* docComment,
+    const TypedValue* val,
+    RepoAuthType,
+    UserAttributeMap
+  );
+  bool addConstant(
+    const StringData* n,
+    const StringData* cls,
+    const TypedValue* val,
+    Array resolvedTypeStructure,
+    ConstModifierFlags::Kind kind,
+    Const::Invariance invariance,
+    bool fromTrait,
+    bool isAbstract
+  );
+  void setTypeParamNames(std::vector<PackedStringPtr>&& typeParamNames);
+  folly::Range<const PackedStringPtr*> getTypeParamNames() const;
+  bool addContextConstant(
+    const StringData* n,
+    Const::CoeffectsVec coeffects,
+    bool isAbstract,
+    bool fromTrait = false
+  );
+  bool addAbstractConstant(
+    const StringData* n,
+    ConstModifierFlags::Kind kind =
+    ConstModifierFlags::Kind::Value,
+    bool fromTrait = false);
   void addUsedTrait(const StringData* traitName);
   void addClassRequirement(const PreClass::ClassRequirement req) {
     m_requirements.push_back(req);
   }
-  void addTraitPrecRule(const PreClass::TraitPrecRule &rule);
-  void addTraitAliasRule(const PreClass::TraitAliasRule &rule);
-  const std::vector<LowStringPtr>& usedTraits() const {
+  const std::vector<PackedStringPtr>& usedTraits() const {
     return m_usedTraits;
   }
   const std::vector<PreClass::ClassRequirement>& requirements() const {
     return m_requirements;
-  }
-  const std::vector<PreClass::TraitAliasRule>& traitAliasRules() const {
-    return m_traitAliasRules;
-  }
-  const std::vector<PreClass::TraitPrecRule>& traitPrecRules() const {
-    return m_traitPrecRules;
   }
 
   void setUserAttributes(UserAttributeMap map) {
@@ -307,34 +300,30 @@ struct PreClassEmitter {
   }
 
  private:
-  typedef hphp_hash_map<LowStringPtr,
-                        FuncEmitter*,
-                        string_data_hash,
-                        string_data_isame> MethodMap;
+  using MethodMap = hphp_hash_map<
+    PackedStringPtr, FuncEmitter*, string_data_hash, string_data_same
+  >;
 
-  UnitEmitter& m_ue;
   int m_line1;
   int m_line2;
-  LowStringPtr m_name;
+  PackedStringPtr m_name;
   Attr m_attrs;
-  LowStringPtr m_parent;
-  LowStringPtr m_docComment;
+  PackedStringPtr m_parent;
+  PackedStringPtr m_docComment;
   TypeConstraint m_enumBaseTy;
-  Id m_id;
   Slot m_ifaceVtableSlot{kInvalidSlot};
   int m_memoizeInstanceSerial{0};
 
-  std::vector<LowStringPtr> m_interfaces;
-  std::vector<LowStringPtr> m_enumIncludes;
-  std::vector<LowStringPtr> m_usedTraits;
+  std::vector<PackedStringPtr> m_interfaces;
+  std::vector<PackedStringPtr> m_enumIncludes;
+  std::vector<PackedStringPtr> m_usedTraits;
   std::vector<PreClass::ClassRequirement> m_requirements;
-  std::vector<PreClass::TraitPrecRule> m_traitPrecRules;
-  std::vector<PreClass::TraitAliasRule> m_traitAliasRules;
   UserAttributeMap m_userAttributes;
   MethodVec m_methods;
   MethodMap m_methodMap;
   PropMap::Builder m_propMap;
   ConstMap::Builder m_constMap;
+  FixedVector<PackedStringPtr> m_typeParamNames;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

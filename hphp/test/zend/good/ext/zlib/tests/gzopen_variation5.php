@@ -1,13 +1,13 @@
 <?hh
 
-function runtest() {
+function runtest() :mixed{
 	$tmpfile = 'gzopen_variation5.tmp';
 	$h = gzopen($tmpfile, "w", 1);
 	fwrite($h, "This is the test file");
 	fclose($h);
 
 
-	$h = @gzopen($tmpfile, "r");
+	$h = gzopen($tmpfile, "r");
 	if ($h === false) {
 	   echo "Not created in working dir\n";
 	}
@@ -17,7 +17,7 @@ function runtest() {
 	   unlink($tmpfile);
 	}
 
-	$h = @gzopen('dir1/'.$tmpfile, "r");
+	$h = gzopen('dir1/'.$tmpfile, "r");
 	if ($h === false) {
 	   echo "Not created in dir1\n";
 	}
@@ -38,7 +38,7 @@ function main_entry(): void {
   require_once('gzopen_include_path.inc');
 
   echo "*** Testing gzopen() : variation ***\n";
-  $thisTestDir = __SystemLib\hphp_test_tmppath("gzopenVariation5.dir");
+  $thisTestDir = sys_get_temp_dir().'/'."gzopenVariation5.dir";
   mkdir($thisTestDir);
   chdir($thisTestDir);
 

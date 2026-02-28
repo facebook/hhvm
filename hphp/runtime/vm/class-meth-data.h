@@ -18,7 +18,8 @@
 
 #include "hphp/runtime/base/countable.h"
 #include "hphp/util/type-scan.h"
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
+#include "hphp/util/check-size.h"
 
 namespace HPHP {
 
@@ -28,10 +29,8 @@ struct String;
 
 struct ClsMethData {
 #ifdef USE_LOWPTR
-  using low_storage_t = uint32_t;
   using cls_meth_t = ClsMethData;
 #else
-  using low_storage_t = uintptr_t;
   using cls_meth_t = ClsMethData*;
 #endif
 
@@ -42,11 +41,11 @@ struct ClsMethData {
   bool validate() const;
 
   Class* getCls() const {
-    return reinterpret_cast<Class*>(m_cls);
+    return m_cls;
   }
 
   Func* getFunc() const {
-    return reinterpret_cast<Func*>(m_func);
+    return m_func;
   }
 
   String getClsStr() const;
@@ -66,13 +65,16 @@ struct ClsMethData {
 private:
   ClsMethData(Class* cls, Func* func);
 
-  low_storage_t m_cls;
-  low_storage_t m_func;
+  UninitPackedPtr<Class> m_cls;
+  UninitPackedPtr<Func> m_func;
 };
 
+static_assert(std::is_trivial_v<ClsMethData>);
+static_assert(CheckSize<ClsMethData, use_lowptr ? 8 : 16>(), "");
+
 #ifdef USE_LOWPTR
-static_assert(sizeof(ClsMethData) == 8);
 static_assert(ClsMethData::clsOffset() == 0, "Class offset must be 0");
 static_assert(ClsMethData::funcOffset() == 4, "Func offset must be 4");
 #endif
+
 } // namespace HPHP

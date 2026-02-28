@@ -2,16 +2,16 @@
 
 class B {
   protected static $x;
-  function goB() {
+  function goB() :mixed{
     self::$x = 2;
     var_dump(self::$x);
   }
 }
 class D extends B {
-  static $x = 'constant string';
+  public static $x = 'constant string';
 }
 class Y extends D {
-  function go() {
+  function go() :mixed{
     var_dump(self::$x);
     var_dump(B::$x);
   }
@@ -19,7 +19,7 @@ class Y extends D {
 
 
 <<__EntryPoint>>
-function main_public_static_props_001() {
+function main_public_static_props_001() :mixed{
 (new B)->goB();
 (new Y)->go();
 }

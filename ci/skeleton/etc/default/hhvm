@@ -1,0 +1,29 @@
+## This is a configuration file for /etc/init.d/hhvm.
+## Overwrite start up configuration of the hhvm service.
+##
+## This file is sourced by /bin/sh from /etc/init.d/hhvm.
+
+## Configuration file location.
+## Default: "/etc/hhvm/server.ini"
+## Examples:
+##   "/etc/hhvm/conf.d/fastcgi.ini" Load configuration file from Debian/Ubuntu conf.d style location
+#CONFIG_FILE="/etc/hhvm/server.ini"
+
+## User to run the service as.
+## Default: "www-data"
+## Examples:
+##   "hhvm"   Custom 'hhvm' user
+##   "nobody" RHEL/CentOS 'www-data' equivalent
+#RUN_AS_USER="www-data"
+#RUN_AS_GROUP="www-data"
+
+## Add additional arguments to the hhvm service start up that you can't put in CONFIG_FILE for some reason.
+## Default: ""
+## Examples:
+##   "-vLog.Level=Debug"                Enable debug log level
+##   "-vServer.DefaultDocument=app.php" Change the default document
+#ADDITIONAL_ARGS=""
+
+## PID file location.
+## Default: "/var/run/hhvm/pid"
+#PIDFILE="/var/run/hhvm/pid"

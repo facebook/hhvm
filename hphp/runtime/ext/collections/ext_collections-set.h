@@ -264,7 +264,7 @@ private:
 /////////////////////////////////////////////////////////////////////////////
 // c_Set
 
-struct c_Set : BaseSet {
+struct c_Set : BaseSet, SystemLib::ClassLoader<"HH\\Set"> {
   DECLARE_COLLECTIONS_CLASS(Set)
 
  public:
@@ -283,26 +283,19 @@ struct c_Set : BaseSet {
   friend struct collections::CollectionsExtension;
 
   Object getImmutableCopy();
-  Object php_add(const Variant& val) {
+  void php_add(const Variant& val) {
     add(val);
-    return Object{this};
   }
-  Object php_addAll(const Variant& it) {
+  void php_addAll(const Variant& it) {
     addAll(it);
-    return Object{this};
   }
-  Object php_addAllKeysOf(const Variant& container) {
+  void php_addAllKeysOf(const Variant& container) {
     if (!container.isNull()) {
       auto const& containerCell = container_as_tv(container);
       addAllKeysOf(containerCell);
     }
-    return Object{this};
   }
-  Object php_clear() {
-    clear();
-    return Object{this};
-  }
-  Object php_remove(const Variant& key) {
+  void php_remove(const Variant& key) {
     auto const ktv = tvClassToString(*key.asTypedValue());
     DataType t = type(ktv);
     if (t == KindOfInt64) {
@@ -312,9 +305,8 @@ struct c_Set : BaseSet {
     } else {
       throwBadValueType();
     }
-    return Object{this};
   }
-  Object php_removeAll(const Variant& it) {
+  void php_removeAll(const Variant& it) {
     size_t sz;
     ArrayIter iter = getArrayIterHelper(it, sz);
     for (; iter; ++iter) {
@@ -328,7 +320,6 @@ struct c_Set : BaseSet {
         throwBadValueType();
       }
     }
-    return Object{this};
   }
   void php_reserve(int64_t cap) {
     if (UNLIKELY(cap < 0)) {
@@ -343,7 +334,7 @@ struct c_Set : BaseSet {
 ///////////////////////////////////////////////////////////////////////////////
 // class ImmSet
 
-struct c_ImmSet : BaseSet {
+struct c_ImmSet : BaseSet, SystemLib::ClassLoader<"HH\\ImmSet"> {
   DECLARE_COLLECTIONS_CLASS(ImmSet)
 
   explicit c_ImmSet()
@@ -359,10 +350,7 @@ struct c_ImmSet : BaseSet {
 namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 
-extern const StaticString
-  s_SetIterator;
-
-struct SetIterator {
+struct SetIterator : SystemLib::ClassLoader<"SetIterator"> {
   SetIterator() {}
   SetIterator(const SetIterator& src) = delete;
   SetIterator& operator=(const SetIterator& src) {
@@ -373,9 +361,7 @@ struct SetIterator {
   ~SetIterator() {}
 
   static Object newInstance() {
-    static Class* cls = Class::lookup(s_SetIterator.get());
-    assertx(cls);
-    return Object{cls};
+    return Object{classof()};
   }
 
   void setSet(BaseSet* mp) {

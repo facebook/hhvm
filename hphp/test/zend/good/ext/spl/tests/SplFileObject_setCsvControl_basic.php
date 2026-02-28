@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>>
 function main(): void {
-chdir(__SystemLib\hphp_test_tmproot());
+chdir(sys_get_temp_dir());
 file_put_contents('csv_control_data.csv',
 <<<CDATA
 'groene appelen'|10

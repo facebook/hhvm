@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_ext_ctype() {
+function main_ext_ctype() :mixed{
 var_dump(ctype_alnum("abc123"));
 var_dump(!ctype_alnum("!@#$^"));
 

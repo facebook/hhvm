@@ -14,15 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/stats.h"
+
+#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/irlower-internal.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -33,6 +36,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
@@ -40,14 +44,16 @@
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgBeginCatch(IRLS& env, const IRInstruction* /*inst*/) {
+void cgBeginCatch(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
+  auto const dst = dstLoc(env, inst, 0).reg();
 
   v << landingpad{};
+  v << copy{rret(0), dst};
   emitIncStat(v, Stats::TC_CatchTrace);
 }
 
@@ -57,6 +63,7 @@ void cgEndCatch(IRLS& env, const IRInstruction* inst) {
   auto const data = inst->extra<EndCatch>();
   if (data->stublogue == EndCatchData::FrameMode::Stublogue) {
     assertx(data->teardown == EndCatchData::Teardown::NA);
+    assertx(data->vmspOffset == std::nullopt);
     assertx(inst->marker().prologue());
 
     // The caller is allowed to optimize away writes to the space reserved for
@@ -77,22 +84,38 @@ void cgEndCatch(IRLS& env, const IRInstruction* inst) {
     return;
   }
 
+  auto const syncVMSP = [&](TCA helper) -> TCA {
+    auto const ssp = v.makeReg();
+    auto const sp = srcLoc(env, inst, 1).reg();
+    auto const offset = data->offset.offset;
+    v << lea{sp[cellsToBytes(offset)], ssp};
+    v << syncvmsp{ssp};
+    return helper;
+  };
+
+  auto const doSync = !data->vmspOffset.has_value()
+    || data->vmspOffset.value().offset != data->offset.offset;
   auto const helper = [&]() -> TCA {
     switch (data->teardown) {
       case EndCatchData::Teardown::None:
-        return tc::ustubs().endCatchSkipTeardownHelper;
+        return doSync
+          ? syncVMSP(tc::ustubs().endCatchSkipTeardownSyncVMSP)
+          : tc::ustubs().endCatchSkipTeardownHelper;
       case EndCatchData::Teardown::OnlyThis:
-        return tc::ustubs().endCatchTeardownThisHelper;
+        return doSync
+          ? syncVMSP(tc::ustubs().endCatchTeardownThisSyncVMSP)
+          : tc::ustubs().endCatchTeardownThisHelper;
       case EndCatchData::Teardown::Full:
-        return tc::ustubs().endCatchHelper;
+        return doSync
+          ? syncVMSP(tc::ustubs().endCatchSyncVMSPHelper)
+          : tc::ustubs().endCatchHelper;
       case EndCatchData::Teardown::NA:
         always_assert(false && "Stublogue should not be emitting vasm");
     }
     not_reached();
   }();
 
-  // endCatch*Helpers only expect vm_regs_no_sp() to be alive.
-  v << jmpi{helper, vm_regs_no_sp()};
+  v << jmpi{helper, doSync ? vm_regs_with_sp() : vm_regs_no_sp()};
 }
 
 void cgUnwindCheckSideExit(IRLS& env, const IRInstruction* inst) {
@@ -113,25 +136,12 @@ void cgLdUnwinderValue(IRLS& env, const IRInstruction* inst) {
   loadTV(v, inst->dst(), dstLoc(env, inst, 0), rvmtl()[unwinderTVOff()]);
 }
 
-void cgEnterTCUnwind(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<EnterTCUnwind>();
+void cgStUnwinderExn(IRLS& env, const IRInstruction* inst) {
   auto const exn = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
   markRDSAccess(v, g_unwind_rds.handle());
-  markRDSAccess(v, g_unwind_rds.handle());
-  v << storebi{1, rvmtl()[unwinderSideEnterOff()]};
   v << store{exn, rvmtl()[unwinderExnOff()]};
-
-  auto const target = [&] {
-    if (extra->teardown) return tc::ustubs().endCatchHelper;
-    if (inst->func()->hasThisInBody()) {
-      return tc::ustubs().endCatchTeardownThisHelper;
-    }
-    return tc::ustubs().endCatchSkipTeardownHelper;
-  }();
-
-  v << jmpi{target, vm_regs_with_sp()};
 }
 
 IMPL_OPCODE_CALL(DebugBacktrace)
@@ -140,12 +150,12 @@ IMPL_OPCODE_CALL(DebugBacktrace)
 
 static void raiseForbiddenDynCall(const Func* func) {
   auto dynCallable = func->isDynamicallyCallable();
-  assertx(!dynCallable || RO::EvalForbidDynamicCallsWithAttr);
+  assertx(!dynCallable || Cfg::Eval::ForbidDynamicCallsWithAttr);
   auto level = func->isMethod()
     ? (func->isStatic()
-        ? RO::EvalForbidDynamicCallsToClsMeth
-        : RO::EvalForbidDynamicCallsToInstMeth)
-    : RO::EvalForbidDynamicCallsToFunc;
+        ? Cfg::Eval::ForbidDynamicCallsToClsMeth
+        : Cfg::Eval::ForbidDynamicCallsToInstMeth)
+    : Cfg::Eval::ForbidDynamicCallsToFunc;
   if (level <= 0) return;
   if (dynCallable && level < 2) return;
 
@@ -166,7 +176,7 @@ static void raiseForbiddenDynCall(const Func* func) {
 }
 
 static void raiseForbiddenDynConstruct(const Class* cls) {
-  auto level = RO::EvalForbidDynamicConstructs;
+  auto level = Cfg::Eval::ForbidDynamicConstructs;
   assertx(level > 0);
   assertx(!cls->isDynamicallyConstructible());
 
@@ -201,6 +211,17 @@ void cgRaiseForbiddenDynConstruct(IRLS& env, const IRInstruction* inst) {
                kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
 }
 
+void cgRaiseMissingDynamicallyReferenced(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(raiseMissingDynamicallyReferenced),
+    callDest(env, inst),
+    SyncOptions::Sync,
+    argGroup(env, inst).ssa(0)
+  );
+}
+
 void cgThrowLateInitPropError(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(vmain(env), env, CallSpec::direct(throw_late_init_prop),
                kVoidDest, SyncOptions::Sync,
@@ -215,16 +236,47 @@ void cgRaiseCoeffectsCallViolation(IRLS& env, const IRInstruction* inst) {
                argGroup(env, inst).imm(data->func).ssa(0).ssa(1));
 }
 
+void cgRaiseModuleBoundaryViolation(IRLS& env, const IRInstruction* inst) {
+  auto const data = inst->extra<OptClassAndFuncData>();
+  auto const [target, args] = [&]() -> std::pair<CallSpec, ArgGroup> {
+    if (inst->src(0)->isA(TFunc)) {
+      using Fn = void(*)(const Class*, const Func* callee, const StringData*);
+      return {
+        CallSpec::direct(static_cast<Fn>(raiseModuleBoundaryViolation)),
+        argGroup(env, inst).imm(data->cls).ssa(0).imm(data->func->moduleName())
+      };
+    };
+    assertx(inst->src(0)->isA(TCls));
+    using Fn = void(*)(const Class*, const StringData*);
+    return {
+      CallSpec::direct(static_cast<Fn>(raiseModuleBoundaryViolation)),
+      argGroup(env, inst).ssa(0).imm(data->func->moduleName())
+    };
+  }();
+  cgCallHelper(vmain(env), env, target, kVoidDest, SyncOptions::Sync, args);
+}
+
+void cgRaiseModulePropertyViolation(IRLS& env, const IRInstruction* inst) {
+  auto const data = inst->extra<ModulePropAccessData>();
+  using Fn = void(*)(const Class*, const StringData* prop, const StringData*, bool);
+  auto const target = CallSpec::direct(static_cast<Fn>(raiseModulePropertyViolation));
+  auto const args = argGroup(env, inst)
+    .imm(data->propCls)
+    .imm(data->propName)
+    .imm(data->caller->moduleName())
+    .imm(data->is_static);
+  cgCallHelper(vmain(env), env, target, kVoidDest, SyncOptions::Sync, args);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(InitThrowableFileAndLine)
-IMPL_OPCODE_CALL(ZeroErrorLevel)
-IMPL_OPCODE_CALL(RestoreErrorLevel)
 
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(CheckClsMethFunc)
 IMPL_OPCODE_CALL(CheckClsReifiedGenericMismatch)
+IMPL_OPCODE_CALL(CheckClsRGSoft)
 IMPL_OPCODE_CALL(CheckFunReifiedGenericMismatch)
 IMPL_OPCODE_CALL(CheckInOutMismatch)
 IMPL_OPCODE_CALL(CheckReadonlyMismatch)
@@ -234,12 +286,15 @@ IMPL_OPCODE_CALL(RaiseCoeffectsFunParamTypeViolation)
 IMPL_OPCODE_CALL(RaiseError)
 IMPL_OPCODE_CALL(RaiseTooManyArg)
 IMPL_OPCODE_CALL(RaiseNotice)
+IMPL_OPCODE_CALL(ThrowMissingNamedArgument)
+IMPL_OPCODE_CALL(ThrowNamedArgumentNameMismatch)
 IMPL_OPCODE_CALL(ThrowUndefPropException)
 IMPL_OPCODE_CALL(ThrowUninitLoc)
 IMPL_OPCODE_CALL(RaiseWarning)
 IMPL_OPCODE_CALL(ThrowArrayIndexException)
 IMPL_OPCODE_CALL(ThrowArrayKeyException)
 IMPL_OPCODE_CALL(ThrowAsTypeStructException)
+IMPL_OPCODE_CALL(ThrowAsTypeStructError)
 IMPL_OPCODE_CALL(ThrowCallReifiedFunctionWithoutGenerics)
 IMPL_OPCODE_CALL(ThrowDivisionByZeroException)
 IMPL_OPCODE_CALL(ThrowHasThisNeedStatic)
@@ -255,7 +310,6 @@ IMPL_OPCODE_CALL(ThrowMustBeMutableException)
 IMPL_OPCODE_CALL(ThrowMustBeReadonlyException)
 IMPL_OPCODE_CALL(ThrowMustBeValueTypeException)
 IMPL_OPCODE_CALL(ThrowOutOfBounds)
-IMPL_OPCODE_CALL(ThrowParameterWrongType)
 IMPL_OPCODE_CALL(ThrowReadonlyMismatch)
 
 ///////////////////////////////////////////////////////////////////////////////

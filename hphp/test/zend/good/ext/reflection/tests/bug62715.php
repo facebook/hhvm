@@ -1,6 +1,6 @@
 <?hh
 
-function test(PDO $a = null, $b = 0, AnyArray $c) {}
+function test(PDO $a = null, $b = 0, AnyArray $c) :mixed{}
 <<__EntryPoint>> function main(): void {
 $r = new ReflectionFunction('test');
 foreach ($r->getParameters() as $p) {

@@ -28,7 +28,7 @@ heredoc string\twith!@# and 123
 Test this!!!
 EOT;
 
-$array = darray [
+$array = dict[
   $simple_heredoc1 => "Heredoc", 
   $simple_heredoc2 => "HEREDOC",
   $multiline_heredoc => "heredoc string\twith!@# and 123\nTest this!!!"

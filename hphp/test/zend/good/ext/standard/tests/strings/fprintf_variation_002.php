@@ -1,10 +1,10 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$int_variation = varray[ "%d", "%-d", "%+d", "%7.2d", "%-7.2d", "%07.2d", "%-07.2d", "%'#7.2d" ];
-$int_numbers = varray[ 0, 1, -1, 2.7, -2.7, 23333333, -23333333, "1234" ];
+$int_variation = vec[ "%d", "%-d", "%+d", "%7.2d", "%-7.2d", "%07.2d", "%-07.2d", "%'#7.2d" ];
+$int_numbers = vec[ 0, 1, -1, 2.7, -2.7, 23333333, -23333333, "1234" ];
 
 /* creating dumping file */
-$data_file = __SystemLib\hphp_test_tmppath('fprintf_variation_002.phpt.txt');
+$data_file = sys_get_temp_dir().'/'.'fprintf_variation_002.phpt.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

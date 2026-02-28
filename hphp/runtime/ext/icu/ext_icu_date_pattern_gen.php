@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Generates localized date and/or time format pattern strings suitable for use
  * in IntlDateFormatter.
@@ -45,7 +45,7 @@
  *   IntlDatePatternGenerator::PATTERN_CONFLICT
  *
  */
-<<__NativeData("IntlDatePatternGenerator")>>
+<<__NativeData>>
 class IntlDatePatternGenerator {
 
   /**

@@ -17,24 +17,18 @@
 #include "hphp/runtime/vm/jit/vasm-prof.h"
 
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
-#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
-#include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -43,18 +37,16 @@
 #include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
-#include "hphp/util/dataflow-worklist.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/struct-log.h"
 
-#include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 
 #include <string>
-#include <vector>
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(prof_branch);
+TRACE_SET_MOD(prof_branch)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -70,7 +62,7 @@ rds::Link<uint32_t, rds::Mode::Local> s_counter;
  */
 void reset_counter() {
   assertx(s_counter.bound());
-  *s_counter = RuntimeOption::EvalProfBranchSampleFreq;
+  *s_counter = Cfg::Eval::ProfBranchSampleFreq;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -328,7 +320,7 @@ VasmID vasm_id_for(Env& env, const Vinstr& inst, Vlabel b) {
     env.unit.blocks[b].area_idx,
     string_tag_for(inst)
   };
-};
+}
 
 /*
  * Pack the BranchID for the branch instruction that terminates `b'.

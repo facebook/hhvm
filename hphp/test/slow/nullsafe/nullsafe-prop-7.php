@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class X {
   function __construct() {
@@ -10,7 +10,7 @@ class X {
 
 
 <<__EntryPoint>>
-function main_nullsafe_prop_7() {
+function main_nullsafe_prop_7() :mixed{
 echo "not reached";
 
 new X;

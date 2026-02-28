@@ -1,6 +1,6 @@
 <?hh
 
-function foo(inout int $x) {
+function foo(inout int $x) :mixed{
   $x = 42;
 }
 
@@ -8,11 +8,11 @@ function inc(int $x): int {
   return $x + 1;
 }
 
-function bar(callable $f) {
+function bar(callable $f) :mixed{
   return $f('callable check');
 }
 
-function call_f((function(int): int) $f) {
+function call_f((function(int): int) $f) :mixed{
   return $f(0);
 }
 
@@ -20,10 +20,10 @@ class C {
   function __construct() {
     $this->th = 'th';
   }
-  public static function isOdd($i) { return $i % 2 == 1;}
-  public function isOddInst($i) { return $i % 2 == 1;}
-  public function filter($data)  {
-    $callback = inst_meth($this, 'isOddInst');
+  public static function isOdd($i) :mixed{ return $i % 2 == 1;}
+  public function isOddInst($i) :mixed{ return $i % 2 == 1;}
+  public function filter($data)  :mixed{
+    $callback = ($i) ==> $this->isOddInst($i);
     return $data->filter($callback);
   }
 
@@ -31,11 +31,11 @@ class C {
     return $x;
   }
 
-  public function ref(inout $x) {
+  public function ref(inout $x) :mixed{
     return 0;
   }
 
-  public function meth(inout string $x) {
+  public function meth(inout string $x) :mixed{
     $x = $x . $this->th;
     return "inst_" . $x;
   }
@@ -57,13 +57,13 @@ function main_entry(): void {
     Vector {1, 2, 3},
     Vector {1, 2}
   };
-  var_dump($v->map(meth_caller('HH\Vector', 'count')));
-  var_dump(meth_caller('HH\Vector', 'count')->getClassName());
-  var_dump(meth_caller('HH\Vector', 'count')->getMethodName());
+  var_dump($v->map(meth_caller(Vector::class, 'count')));
+  var_dump(meth_caller(Vector::class, 'count')->getClassName());
+  var_dump(meth_caller(Vector::class, 'count')->getMethodName());
 
   $s = Vector {'1', '2', '3'};
   $data = $s->map(intval<>);
-  var_dump($data->filter(class_meth('C', 'isOdd')));
+  var_dump($data->filter(C::isOdd<>));
   var_dump((new C)->filter($data));
 
   $caller = meth_caller(C::class, 'id');
@@ -77,12 +77,6 @@ function main_entry(): void {
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }
-
-  $c = new C();
-  $meth = inst_meth($c, 'meth');
-  $str = 'me';
-  var_dump($meth(inout $str));
-  var_dump($str);
 
   print_r($f);
   var_export($f);

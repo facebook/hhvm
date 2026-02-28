@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // Bad because duplicate variables on LHS
 function test(varray<int> $a): int {

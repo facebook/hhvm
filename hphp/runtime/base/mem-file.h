@@ -27,7 +27,7 @@ namespace HPHP {
  * memory based files.
  */
 struct MemFile : File {
-  DECLARE_RESOURCE_ALLOCATION(MemFile);
+  DECLARE_RESOURCE_ALLOCATION(MemFile)
 
   explicit MemFile(const String& wrapper_type = null_string,
                    const String& stream_type = empty_string_ref);
@@ -36,12 +36,12 @@ struct MemFile : File {
           const String& stream_type = empty_string_ref);
   ~MemFile() override;
 
-  CLASSNAME_IS("MemFile");
+  CLASSNAME_IS("MemFile")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
   bool open(const String& filename, const String& mode) override;
-  bool close() override;
+  bool close(int* unused = nullptr) final;
   int64_t readImpl(char *buffer, int64_t length) override;
   int getc() override;
   int64_t writeImpl(const char *buffer, int64_t length) override;
@@ -51,6 +51,7 @@ struct MemFile : File {
   bool eof() override;
   bool rewind() override;
   bool flush() override;
+  bool lock(int operation, bool &wouldblock) override;
 
   Array getMetaData() override;
 
@@ -61,10 +62,7 @@ protected:
   int64_t m_len;      // length of the memory file
   int64_t m_cursor;   // m_data's read position
   bool m_malloced;    // whether to free m_data on delete
-
-  bool closeImpl();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

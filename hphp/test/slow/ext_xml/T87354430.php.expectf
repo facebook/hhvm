@@ -1,0 +1,2 @@
+
+Catchable fatal error: Argument 1 to XMLReader::expand() must be of type ?DOMNode, stdClass given in %s on line 5

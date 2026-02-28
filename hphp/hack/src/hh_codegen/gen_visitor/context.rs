@@ -3,15 +3,19 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use super::{gen_helper, syn_helper::*};
-use anyhow::{anyhow, Result};
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::collections::VecDeque;
+use std::path::Path;
+
+use anyhow::Result;
+use anyhow::anyhow;
 use proc_macro2::TokenStream;
 use quote::format_ident;
-use std::{
-    collections::{HashMap, HashSet, VecDeque},
-    path::Path,
-};
 use syn::*;
+
+use super::gen_helper;
+use super::syn_helper::*;
 
 pub struct Context<'a> {
     /// type declerations, no visit function will be generated for
@@ -19,9 +23,6 @@ pub struct Context<'a> {
     pub defs: HashMap<String, &'a Item>,
     /// modules contain the `defs`.
     pub mods: HashSet<String>,
-    /// root is a type from `defs`, a visit function will be generated
-    /// if a type is in `defs` and transitively depended by `root`.
-    pub root: &'a str,
     /// a set of types transitively depended by `root`.
     types: Vec<String>,
     /// a list of type parameters in the root type
@@ -57,7 +58,6 @@ impl<'a> Context<'a> {
         Ok(Self {
             mods,
             defs,
-            root,
             root_ty_params,
             types,
             context: "Context".into(),
@@ -113,7 +113,7 @@ impl<'a> Context<'a> {
     pub fn non_alias_types(&'a self) -> impl Iterator<Item = impl AsRef<str> + 'a> {
         self.types
             .iter()
-            .filter(move |ty| self.defs.get(*ty).map_or(false, |def| !is_alias(*def)))
+            .filter(move |ty| self.defs.get(*ty).map_or(false, |def| !is_alias(def)))
     }
 
     fn get_ty_names_<'b>(defs: &'b HashMap<String, &'b Item>) -> HashSet<&'b str> {

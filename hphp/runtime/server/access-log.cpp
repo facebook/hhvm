@@ -15,34 +15,26 @@
 */
 #include "hphp/runtime/server/access-log.h"
 
-#include <sstream>
 #include <string>
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
 
-#include <signal.h>
-#include <time.h>
-#include <stdio.h>
-
-#include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/timestamp.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/log-writer.h"
-#include "hphp/runtime/server/server-note.h"
-#include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/server/request-uri.h"
-#include "hphp/util/process.h"
-#include "hphp/util/atomic.h"
-#include "hphp/util/compatibility.h"
-#include "hphp/util/hardware-counter.h"
-#include "hphp/util/timer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 Mutex AccessLogFileData::m_lock;
 std::unordered_map<std::string, AccessLogFileData::factory_t>
 AccessLogFileData::m_factories;
+
+AccessLogFileData::AccessLogFileData(const std::string& baseDir,
+                                     const std::string& fil,
+                                     const std::string& lnk,
+                                     const std::string& fmt,
+                                     int mpl)
+  : AccessLogFileData(PATH_CONCAT(baseDir, fil), PATH_CONCAT(baseDir, lnk), fmt, mpl) {}
 
 AccessLogFileData::AccessLogFileData(const std::string& fil,
                                      const std::string& lnk,
@@ -122,6 +114,14 @@ void AccessLog::init(const std::string &defaultFormat,
     writer->init(username, m_fGetThreadData);
     m_files.push_back(writer);
   }
+}
+
+void AccessLog::init(const std::string &format,
+                     const std::string &baseDir,
+                     const std::string &symLink,
+                     const std::string &file,
+                     const std::string &username) {
+  init(format, PATH_CONCAT(baseDir, symLink), PATH_CONCAT(baseDir, file), username);
 }
 
 void AccessLog::init(const std::string &format,

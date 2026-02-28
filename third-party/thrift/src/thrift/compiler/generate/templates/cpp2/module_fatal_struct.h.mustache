@@ -1,0 +1,68 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{> Autogen}}
+#pragma once
+
+{{#program:thrift_includes}}
+#include  "{{program:include_prefix}}{{program:name}}_fatal_types.h"
+{{/program:thrift_includes}}
+
+#include "{{program:include_prefix}}{{program:name}}_types.h"
+
+#include "{{program:include_prefix}}{{program:name}}_fatal.h"
+
+#include <fatal/type/traits.h>
+#include <fatal/type/list.h>
+
+namespace {{program:cpp_qualified_namespace}} {
+
+namespace __fbthrift_refl {
+namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
+
+{{#program:structs}}{{^struct:union?}}
+class {{struct:cpp_name}}_struct_traits {
+  {{#struct:fields}}
+  struct __fbthrift_member_{{field:cpp_name}} {
+    using owner = {{struct:cpp_fullname}};
+    using name = __fbthrift_strings_{{program:name}}::{{field:name_hash}};
+    using tag = ::apache::thrift::ident::{{field:cpp_name}};
+  };
+  {{/struct:fields}}
+
+  struct __fbthrift_member {
+    {{#struct:fields}}
+    using {{field:cpp_name}} = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_{{field:cpp_name}}>;
+    {{/struct:fields}}
+  };
+ public:
+  using type = {{struct:cpp_fullname}};
+  using member = __fbthrift_member;
+  using members = ::fatal::list<
+      {{#struct:fields}}
+      member::{{field:cpp_name}}{{^last?}},{{/last?}}
+      {{/struct:fields}}
+  >;
+};
+
+{{/struct:union?}}{{/program:structs}}
+} // __fbthrift_refl
+
+{{#program:structs}}{{^struct:union?}}
+THRIFT_REGISTER_STRUCT_TRAITS({{#struct:extra_namespace}}{{struct:extra_namespace}}::{{/struct:extra_namespace}}{{struct:cpp_name}}, __fbthrift_refl::{{struct:cpp_name}}_struct_traits);
+{{/struct:union?}}{{/program:structs}}
+} // namespace {{program:cpp_qualified_namespace}}

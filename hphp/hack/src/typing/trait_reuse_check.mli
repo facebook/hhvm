@@ -22,7 +22,8 @@ val method_import_via_diamond_error :
   second_using_trait:Decl_provider.class_decl ->
   Typing_error.t
 
-val generic_property_import_via_diamond_error :
+val property_import_via_diamond_error :
+  generic:bool ->
   Typing_env_types.env ->
   Pos.t * string ->
   string * Typing_defs.class_elt ->

@@ -1,13 +1,13 @@
 <?hh
 
 class Chickpea {
-  public function __toString() {
+  public function __toString() :mixed{
     chickpea();
     return 'chickpea';
   }
 }
 
-function main() {
+function main() :mixed{
   ob_start(function($str) {
     return new Chickpea();
   });
@@ -21,6 +21,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_handler_retval_fatal() {
+function main_handler_retval_fatal() :mixed{
 main();
 }

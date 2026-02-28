@@ -14,7 +14,7 @@
  * for MOpMode::Unset.
  */
 class A {
-  private $x = varray[1,2,3];
+  private $x = vec[1,2,3];
   public function __construct() {
     unset($this->x);
     $y = $this;
@@ -23,15 +23,15 @@ class A {
     var_dump($y);
     var_dump($this);
   }
-  public function getter() { return $this->x; }
+  public function getter() :mixed{ return $this->x; }
 }
 
-function main() {
+function main() :mixed{
   $a = new A();
   return $a->getter();
 }
 
 <<__EntryPoint>>
-function main_private_props_017() {
+function main_private_props_017() :mixed{
 main();
 }

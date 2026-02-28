@@ -5,10 +5,10 @@ class C {
   const type B = self::A;
 }
 
-function f<reify T>() {
+function f<reify T>() :mixed{
   echo "hello\n";
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   f<C::A>();
 }

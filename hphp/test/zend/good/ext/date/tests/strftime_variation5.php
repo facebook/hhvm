@@ -13,7 +13,7 @@ date_default_timezone_set("Asia/Calcutta");
 $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
       'Year as decimal number without a century' => "%y",
       'Year as decimal number including the century' => "%Y",
       'Time zone offset' => "%Z",

@@ -1,18 +1,19 @@
-Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/test/slow/ext_class/is-subclass-of-opt.php on line 25
 
-Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/test/slow/ext_class/is-subclass-of-opt.php on line 26
+Warning: Argument 2 passed to is_subclass_of() must be an instance of string, B given in %s on line 25
 
-Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/test/slow/ext_class/is-subclass-of-opt.php on line 25
+Warning: Argument 2 passed to is_subclass_of() must be an instance of string, B given in %s on line 26
 
-Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/test/slow/ext_class/is-subclass-of-opt.php on line 26
+Warning: Argument 2 passed to is_subclass_of() must be an instance of string, B given in %s on line 25
 
-Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/test/slow/ext_class/is-subclass-of-opt.php on line 25
+Warning: Argument 2 passed to is_subclass_of() must be an instance of string, B given in %s on line 26
 
-Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/test/slow/ext_class/is-subclass-of-opt.php on line 26
+Warning: Argument 2 passed to is_subclass_of() must be an instance of string, B given in %s on line 25
 
-Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/test/slow/ext_class/is-subclass-of-opt.php on line 25
+Warning: Argument 2 passed to is_subclass_of() must be an instance of string, B given in %s on line 26
 
-Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/test/slow/ext_class/is-subclass-of-opt.php on line 26
+Warning: Argument 2 passed to is_subclass_of() must be an instance of string, B given in %s on line 25
+
+Warning: Argument 2 passed to is_subclass_of() must be an instance of string, B given in %s on line 26
 vec(10) {
   bool(true)
   bool(false)

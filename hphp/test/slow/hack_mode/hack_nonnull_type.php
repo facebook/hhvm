@@ -7,7 +7,7 @@ type Something = nonnull;
 newtype Foo = nonnull;
 
 class C {
-  static vec<nonnull> $z;
+  public static vec<nonnull> $z;
   const type T = nonnull;
 
 }
@@ -18,7 +18,7 @@ function test() : void {
 
 
 <<__EntryPoint>>
-function main_hack_nonnull_type() {
+function main_hack_nonnull_type() :mixed{
 test();
 var_dump("done");
 }

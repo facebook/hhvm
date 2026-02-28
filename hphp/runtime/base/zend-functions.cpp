@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/base/zend-functions.h"
 
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/util/configs/php7.h"
 #include "hphp/util/fast_strtoll_base10.h"
 #include "hphp/zend/zend-strtod.h"
 
@@ -69,7 +69,7 @@ DataType is_numeric_string(const char *str, int length, int64_t *lval,
     /* Handle hex numbers
      * str is used instead of ptr to disallow signs and keep old behavior */
     if (length > 2 && *str == '0' && (str[1] == 'x' || str[1] == 'X')) {
-      if (!RuntimeOption::PHP7_NoHexNumerics) {
+      if (!Cfg::PHP7::NoHexNumerics) {
         base = 16;
         ptr += 2;
       }
@@ -168,19 +168,6 @@ DataType is_numeric_string(const char *str, int length, int64_t *lval,
     *dval = local_dval;
   }
   return KindOfDouble;
-}
-
-bool is_valid_var_name(const char *var_name, int len) {
-  if (!var_name ||
-      (!isalpha((int)((unsigned char *)var_name)[0]) && var_name[0] != '_')) {
-    return false;
-  }
-  for (int i = 1; i < len; i++) {
-    if (!isalnum((int)((unsigned char *)var_name)[i]) && var_name[i] != '_') {
-      return false;
-    }
-  }
-  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

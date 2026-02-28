@@ -22,12 +22,7 @@
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
-
-#include <boost/filesystem/operations.hpp>
-
-#include <memory>
 
 #include <folly/portability/Stdlib.h>
 #include <folly/portability/SysStat.h>
@@ -45,10 +40,9 @@ req::ptr<MemFile> FileStreamWrapper::openFromCache(const String& filename,
     return nullptr;
   }
 
-  String relative =
-    FileCache::GetRelativePath(File::TranslatePath(filename).c_str());
+  String path = File::TranslatePath(filename);
   auto file = req::make<MemFile>();
-  bool ret = file->open(relative, mode);
+  bool ret = file->open(path, mode);
   if (ret) {
     return file;
   }
@@ -75,8 +69,7 @@ FileStreamWrapper::open(const String& filename, const String& mode, int options,
 
   if (options & File::USE_INCLUDE_PATH) {
     struct stat s;
-    String resolved_fname = resolveVmInclude(fname.get(), "", &s,
-                                             Native::s_noNativeFuncs);
+    String resolved_fname = resolveVmInclude(fname.get(), "", &s);
     if (!resolved_fname.isNull()) {
       fname = resolved_fname;
     }
@@ -120,7 +113,7 @@ int FileStreamWrapper::unlink(const String& path) {
 
 int FileStreamWrapper::rename(const String& oldname, const String& newname) {
   int ret =
-    RuntimeOption::UseDirectCopy ?
+    Cfg::Server::UseDirectCopy ?
       FileUtil::directRename(File::TranslatePath(oldname).data(),
                              File::TranslatePath(newname).data())
                                  :
@@ -158,10 +151,8 @@ int FileStreamWrapper::mkdir_recursive(const String& path, int mode) {
   for (p = dir + 1; *p; p++) {
     if (FileUtil::isDirSeparator(*p)) {
       *p = '\0';
-      if (::access(dir, F_OK) < 0) {
-        if (::mkdir(dir, mode) < 0) {
-          return -1;
-        }
+      if (::mkdir(dir, mode) < 0) {
+        if (!*(p+1) || errno != EEXIST) return -1;
       }
       *p = FileUtil::getDirSeparator();
     }
@@ -178,7 +169,6 @@ int FileStreamWrapper::mkdir_recursive(const String& path, int mode) {
 
 Optional<std::string> FileStreamWrapper::getxattr(const char* path,
                                                   const char* xattr) {
-#if defined(__linux__)
   std::string buf;
   buf.resize(64);
 
@@ -194,7 +184,6 @@ Optional<std::string> FileStreamWrapper::getxattr(const char* path,
     if (actualSize < 0) break;
     buf.resize(std::max<size_t>(actualSize, buf.size()));
   }
-#endif
   return std::nullopt;
 }
 

@@ -1,2 +1,1 @@
 extension mbstring
-function mb_strtoupper

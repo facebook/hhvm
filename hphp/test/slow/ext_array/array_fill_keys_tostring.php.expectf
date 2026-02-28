@@ -1,1 +1,1 @@
-Fatal error: (hhvm.hack.strict_array_fill_keys=error) keys must be ints or strings in %s/array_fill_keys_tostring.php on line 7
+Fatal error: keys must be ints or strings in %s/array_fill_keys_tostring.php on line 7

@@ -3,17 +3,17 @@
 /**
  * my doc comment
  */
-function foo () {
+function foo () :mixed{
     $d = 5;
 }
 
 /***
  * not a doc comment
  */
-function bar () {}
+function bar () :mixed{}
 
 
-function dumpFuncInfo($name) {
+function dumpFuncInfo($name) :mixed{
     $funcInfo = new ReflectionFunction($name);
     var_dump($funcInfo->getDocComment());
 }

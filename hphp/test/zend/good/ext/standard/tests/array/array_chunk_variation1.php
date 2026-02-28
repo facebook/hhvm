@@ -16,7 +16,7 @@ $size = 10;
 
 
 //array of values to iterate over
-$values = varray[
+$values = vec[
 
         // int data
 /*1*/   0,

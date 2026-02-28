@@ -11,7 +11,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing join() : usage variations ***\n";
 
-$glues = varray [
+$glues = vec[
   "TRUE",
   true,
   false,
@@ -25,7 +25,7 @@ $glues = varray [
   '\0'
 ];
 
-$pieces = varray [
+$pieces = vec[
   2,
   0,
   -639,

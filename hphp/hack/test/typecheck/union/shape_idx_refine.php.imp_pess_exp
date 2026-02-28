@@ -1,0 +1,12 @@
+ERROR: File "shape_idx_refine.php", line 17, characters 10-11:
+Invalid return type (Typing[4110])
+  File "shape_idx_refine.php", line 4, characters 24-26:
+  Expected `int`
+  File "shape_idx_refine.php", line 13, characters 12-21:
+  But got `nonnull`
+ERROR: File "shape_idx_refine.php", line 30, characters 12-13:
+Invalid return type (Typing[4110])
+  File "shape_idx_refine.php", line 4, characters 24-26:
+  Expected `int`
+  File "shape_idx_refine.php", line 28, characters 13-22:
+  But got `nonnull`

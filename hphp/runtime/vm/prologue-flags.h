@@ -32,7 +32,7 @@ namespace HPHP {
  *
  * Bit 0: flag indicating whether generics are on the stack
  * Bit 1: flag indicating whether this is a dynamic call
- * Bit 2: always set to 0
+ * Bit 2: flag indicating whether named arguments were provided
  * Bit 3: always set to 0
  * Bit 4: flag indicating whether async eager return was requested
  * Bits 5-31: call offset (from the beginning of the function's entry point)
@@ -43,16 +43,16 @@ struct PrologueFlags {
   enum Flags {
     HasGenerics,
     IsDynamicCall,
-    ReservedZero0,
-    ReservedZero1,
+    HasNamedArguments,
+    ReservedZero,
     AsyncEagerReturn,
     CallOffsetStart,
     GenericsBitmapStart = 32,
     CoeffectsStart = 48,
   };
 
-  PrologueFlags(bool hasGenerics, bool isDynamicCall, bool asyncEagerReturn,
-                Offset callOffset, uint16_t genericsBitmap,
+  PrologueFlags(bool hasGenerics, bool isDynamicCall, bool hasNamedArguments,
+                bool asyncEagerReturn, Offset callOffset, uint16_t genericsBitmap,
                 RuntimeCoeffects coeffects) {
     auto const callOffsetBits = (uint64_t)callOffset << Flags::CallOffsetStart;
     assertx((callOffsetBits >> Flags::GenericsBitmapStart) == 0);
@@ -60,6 +60,7 @@ struct PrologueFlags {
     m_bits =
       ((hasGenerics ? 1 : 0) << Flags::HasGenerics) |
       ((isDynamicCall ? 1 : 0) << Flags::IsDynamicCall) |
+      ((hasNamedArguments ? 1 : 0) << Flags::HasNamedArguments) |
       ((asyncEagerReturn ? 1 : 0) << Flags::AsyncEagerReturn) |
       callOffsetBits |
       ((uint64_t)genericsBitmap << Flags::GenericsBitmapStart) |

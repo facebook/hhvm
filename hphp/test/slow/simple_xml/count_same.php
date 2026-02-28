@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $x = new SimpleXMLElement(
     '<a><b/><b/><c/></a>'
   );
@@ -8,6 +8,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_count_same() {
+function main_count_same() :mixed{
 main();
 }

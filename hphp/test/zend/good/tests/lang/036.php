@@ -3,7 +3,7 @@ class par {
     private $id = "foo";
 
     function displayMe()
-    {
+:mixed    {
         print $this->id;
     }
 }
@@ -11,7 +11,7 @@ class par {
 class chld extends par {
     public $id = "bar";
     function displayHim()
-    {
+:mixed    {
         parent::displayMe();
     }
 }

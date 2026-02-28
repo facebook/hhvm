@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   if (!function_exists('apache_note')) {
     return false;
   }
@@ -9,6 +9,6 @@ function test() {
 
 
 <<__EntryPoint>>
-function main_apache_enabled() {
+function main_apache_enabled() :mixed{
 var_dump(test());
 }

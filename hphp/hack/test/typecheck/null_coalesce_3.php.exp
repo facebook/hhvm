@@ -1,0 +1,12 @@
+WARN: File "null_coalesce_3.php", line 9, characters 7-17:
+This `is` check is always `false`. The expression on the left has type `nonnull` which shares no values with `null`. (Warn[12010])
+WARN: File "null_coalesce_3.php", line 11, characters 8-15:
+This null coalesce will always evaluate to its left-hand side. (Warn[12023])
+  File "null_coalesce_3.php", line 4, characters 3-9:
+  The expression on the left has type `nonnull` which can never be `null`.
+WARN: File "null_coalesce_3.php", line 13, characters 7-16:
+This `is` check is always `true`. The expression on the left has type `null` which is a subtype of `null`. (Warn[12009])
+WARN: File "null_coalesce_3.php", line 15, characters 8-14:
+This null coalesce will always evaluate to its right-hand side. (Warn[12023])
+  File "null_coalesce_3.php", line 5, characters 3-6:
+  The expression on the left has type `null` which is always `null`.

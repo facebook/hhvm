@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing log1p() : basic functionality ***\n";
 
-$values = varray[23,
+$values = vec[23,
                 -23,
                 2.345e1,
                 -2.345e1,

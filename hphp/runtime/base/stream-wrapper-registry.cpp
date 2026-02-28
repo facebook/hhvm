@@ -16,12 +16,10 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/data-stream-wrapper.h"
-#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/glob-stream-wrapper.h"
 #include "hphp/runtime/base/http-stream-wrapper.h"
 #include "hphp/runtime/base/php-stream-wrapper.h"
-#include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/string-hash-set.h"
 #include "hphp/runtime/base/string-hash-map.h"
@@ -37,7 +35,7 @@ static hphp_string_map<Wrapper*> s_wrappers;
 static RDS_LOCAL(Wrapper*, rl_fileHandler);
 
 bool registerWrapper(const std::string &scheme, Wrapper *wrapper) {
-  assertx(!s_wrappers.count(scheme));
+  assertx(!s_wrappers.contains(scheme));
   s_wrappers[scheme] = wrapper;
   return true;
 }
@@ -127,6 +125,10 @@ void RegisterCoreWrappers() {
   s_http_stream_wrapper.registerAs("https");
   s_data_stream_wrapper.registerAs("data");
   s_glob_stream_wrapper.registerAs("glob");
+}
+
+Stream::Wrapper* getThreadLocalFileHandler() {
+  return *rl_fileHandler;
 }
 
 void setThreadLocalFileHandler(Stream::Wrapper* wrapper) {

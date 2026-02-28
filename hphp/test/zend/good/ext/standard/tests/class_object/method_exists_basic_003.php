@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function method_exists_basic_003(): void {
 var_dump(method_exists('UndefC', 'func'));
 
 echo "Done";

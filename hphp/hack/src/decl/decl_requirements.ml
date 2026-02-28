@@ -18,12 +18,8 @@ let make_substitution class_type class_parameters =
 
 (* Accumulate requirements so that we can successfully check the bodies
  * of trait methods / check that classes satisfy these requirements *)
-let flatten_parent_class_reqs
-    env
-    class_cache
-    shallow_class
-    (req_ancestors, req_ancestors_extends)
-    parent_ty =
+let flatten_parent_class_reqs env class_cache shallow_class acc parent_ty =
+  let (req_ancestors, req_ancestors_extends) = acc in
   let (_, (parent_pos, parent_name), parent_params) =
     Decl_utils.unwrap_class_type parent_ty
   in
@@ -64,7 +60,8 @@ let flatten_parent_class_reqs
     | Ast_defs.Cenum_class _ ->
       assert false)
 
-let declared_class_req env class_cache (requirements, req_extends) req_ty =
+let declared_class_req env class_cache acc req_ty =
+  let (requirements, req_extends) = acc in
   let (_, (req_pos, req_name), _) = Decl_utils.unwrap_class_type req_ty in
   let req_type =
     Decl_env.get_class_and_add_dep
@@ -96,12 +93,26 @@ let declared_class_req env class_cache (requirements, req_extends) req_ty =
     in
     (requirements, req_extends)
 
-let declared_class_req_classes required_classes req_ty =
-  let (_, (req_pos, _), _) = Decl_utils.unwrap_class_type req_ty in
-  (req_pos, req_ty) :: required_classes
+let declared_class_req_non_strict env class_cache required_classes req =
+  let elab req_ty =
+    let (_, (req_pos, req_name), _) = Decl_utils.unwrap_class_type req_ty in
+    let _ =
+      (* ensure we add a dependecy even if we don't need the class itself *)
+      Decl_env.get_class_and_add_dep
+        ~cache:class_cache
+        ~shmem_fallback:false
+        ~fallback:Decl_env.no_fallback
+        env
+        req_name
+    in
+    (req_pos, req_ty)
+  in
+  match req with
+  | DCR_Equal req_ty -> CR_Equal (elab req_ty) :: required_classes
+  | DCR_Subtype req_ty -> CR_Subtype (elab req_ty) :: required_classes
 
-let flatten_parent_class_class_reqs
-    env class_cache req_classes_ancestors parent_ty =
+let flatten_parent_class_reqs_non_strict
+    env class_cache req_constraints_ancestors parent_ty =
   let (_, (parent_pos, parent_name), parent_params) =
     Decl_utils.unwrap_class_type parent_ty
   in
@@ -116,15 +127,20 @@ let flatten_parent_class_class_reqs
   match parent_type with
   | None ->
     (* The class lives in PHP *)
-    req_classes_ancestors
+    req_constraints_ancestors
   | Some parent_type ->
     let subst = make_substitution parent_type parent_params in
     List.rev_map_append
-      parent_type.dc_req_class_ancestors
-      req_classes_ancestors
-      ~f:(fun (_p, ty) ->
-        let ty = Inst.instantiate subst ty in
-        (parent_pos, ty))
+      parent_type.dc_req_constraints_ancestors
+      req_constraints_ancestors
+      ~f:(fun cr ->
+        let elab (_p, ty) =
+          let ty = Inst.instantiate subst ty in
+          (parent_pos, ty)
+        in
+        match cr with
+        | CR_Equal req_ty -> CR_Equal (elab req_ty)
+        | CR_Subtype req_ty -> CR_Subtype (elab req_ty))
 
 (* Cheap hack: we cannot do unification / subtyping in the decl phase because
  * the type arguments of the types that we are trying to unify may not have
@@ -146,23 +162,22 @@ let naive_dedup req_extends =
         let hl = List.map hl ~f:Decl_pos_utils.NormalizeSig.ty in
         begin
           try
-            let hl' = String.Table.find_exn h name in
+            let hl' = Hashtbl.find_exn h name in
             if not (List.equal equal_decl_ty hl hl') then
               raise Exit
             else
               None
           with
           | Exit
-          | Caml.Not_found
+          | Stdlib.Not_found
           | Not_found_s _ ->
-            String.Table.set h ~key:name ~data:hl;
+            Hashtbl.set h ~key:name ~data:hl;
             Some (parent_pos, ty)
         end
       | _ -> Some (parent_pos, ty))
 
 let get_class_requirements env class_cache shallow_class =
-  let req_ancestors_extends = SSet.empty in
-  let acc = ([], req_ancestors_extends) in
+  let acc = ([], SSet.empty) in
   let acc =
     List.fold_left
       ~f:(declared_class_req env class_cache)
@@ -193,18 +208,20 @@ let get_class_requirements env class_cache shallow_class =
   let (req_extends, req_ancestors_extends) = acc in
   let req_extends = naive_dedup req_extends in
 
-  let req_classes =
+  let req_constraints =
     List.fold_left
-      ~f:declared_class_req_classes
+      ~f:(declared_class_req_non_strict env class_cache)
       ~init:[]
-      shallow_class.sc_req_class
+      shallow_class.sc_req_constraints
   in
-  let req_classes =
+  let req_constraints =
     List.fold_left
-      ~f:(flatten_parent_class_class_reqs env class_cache)
-      ~init:req_classes
+      ~f:(flatten_parent_class_reqs_non_strict env class_cache)
+      ~init:req_constraints
       shallow_class.sc_uses
   in
-  let req_classes = naive_dedup req_classes in
-
-  (req_extends, req_ancestors_extends, req_classes)
+  {
+    cr_req_ancestors = req_extends;
+    cr_req_ancestors_extends = req_ancestors_extends;
+    cr_req_constraints_ancestors = req_constraints;
+  }

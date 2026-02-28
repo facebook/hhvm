@@ -18,7 +18,6 @@
 #include <sstream>
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
-#include "hphp/runtime/vm/resumable.h"
 
 namespace HPHP::jit::irgen {
 
@@ -58,7 +57,6 @@ std::string show(const IRGS& irgs) {
 
   header(folly::format(" {} stack element(s): ",
                        stackDepth).str());
-  assertx(spOffset <= curFunc(irgs)->maxStackCells());
 
   for (auto i = 0; i < stackDepth; ) {
     auto const spRel = offsetFromIRSP(irgs, BCSPRelOffset{i});

@@ -1,7 +1,7 @@
 <?hh
 
 function foo ($a)
-{
+:mixed{
     $a=sprintf("%02d",$a);
     var_dump($a);
 }

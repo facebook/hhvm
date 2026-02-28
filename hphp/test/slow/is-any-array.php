@@ -1,18 +1,18 @@
-<?hh // strict
+<?hh
 
 class Foo { }
 
-function flib_is_any_array($x) {
+function flib_is_any_array($x) :mixed{
   return is_array($x) || is_vec($x) || is_dict($x) || is_keyset($x);
 }
 
 
 <<__EntryPoint>>
-function main_is_any_array() {
-$foo = varray[
-  varray[],
-  darray[],
-  varray[],
+function main_is_any_array() :mixed{
+$foo = vec[
+  vec[],
+  dict[],
+  vec[],
   vec[],
   dict[],
   keyset[],

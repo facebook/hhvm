@@ -1,0 +1,12 @@
+ERROR: File "newtype_local_arraykey.php", line 5, characters 15-27:
+Some type arguments violate their constraints (Typing[4323])
+  File "hackarray.hhi", line 33, characters 24-25:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 33, characters 30-37:
+  This type constraint is violated
+  File "hackarray.hhi", line 33, characters 30-37:
+  Expected `arraykey`
+  File "newtype_local_arraykey.php", line 5, characters 20-20:
+  But got `mixed`
+  File "newtype_local_arraykey.php", line 3, characters 9-9:
+    by the definition of `N`

@@ -3,7 +3,7 @@
 // Usually, me and Vince would be happy with some freeze-dried Taster's Choice.
 
 class G {
-  async function doit() {
+  async function doit() :Awaitable<mixed>{
     await RescheduleWaitHandle::create(0, 3);
     return 1;
   }
@@ -30,7 +30,7 @@ async function B($v): Awaitable<void> {
   await C($v);
 }
 
-function obtainWait() {
+function obtainWait() :mixed{
   return new G()->doit();
 }
 

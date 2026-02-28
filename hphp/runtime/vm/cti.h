@@ -17,26 +17,33 @@
 #ifndef _incl_HPHP_RUNTIME_VM_CTI_H
 #define _incl_HPHP_RUNTIME_VM_CTI_H
 
-#include "hphp/util/data-block.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/rds-header.h"
-#include "hphp/util/asm-x64.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
 
+#include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/codecache.h"
+#include "hphp/util/data-block.h"
+
+#if defined(__x86_64__)
+#define CTI_SUPPORTED 1
+#endif
+
 namespace HPHP {
 struct Func;
 struct ExecutionContext;
 
-enum class ExecMode { Normal=0, BB=1, Debugger=2, Coverage=4 };
+enum class ExecMode : uint32_t { Normal=0, Debugger=1, Coverage=2 };
 
-// native and virtual pc pair. passed and stored by value
+// ip is always a native code address, pc can either be a virtual pc
+// or a packed JitResumeAddr. Passed and stored by value.
 struct PcPair { CodeAddress ip; PC pc; };
 
 // signature for g_enterBytecode
-using EntryStub = jit::TCA (*)(ExecMode, PcPair, rds::Header*);
+using EntryStub = uint64_t(*)(ExecMode, PcPair);
 
 inline ExecMode operator|(ExecMode m1, ExecMode m2) {
   return ExecMode(int(m1) | int(m2));
@@ -49,8 +56,7 @@ inline int operator&(ExecMode m1, ExecMode m2) {
 // known target
 constexpr inline bool isBranch(Op opcode) {
   return isConditionalJmp(opcode) ||
-         opcode == OpIterInit || opcode == OpLIterInit ||
-         opcode == OpIterNext || opcode == OpLIterNext;
+         opcode == OpIterInit || opcode == OpIterNext;
 }
 
 // simple bytecodes always move pc to the next bytecode.
@@ -79,7 +85,7 @@ void free_cti(Offset cti_entry, uint32_t nbytes);
 jit::TCA lookup_cti(const Func*, Offset cti_entry, PC pc, PC unitpc);
 
 inline bool cti_enabled() {
-  return jit::CodeCache::ABytecodeSize != 0;
+  return Cfg::CodeCache::ABytecodeSize != 0;
 }
 
 // global data
@@ -87,6 +93,7 @@ extern EntryStub g_enterCti;
 extern CodeAddress g_exitCti;
 extern const CodeAddress cti_ops[];
 extern const CodeAddress ctid_ops[];
+extern const CodeAddress updateCoverageFunc;
 
 constexpr auto kCtiIndirectJmpSize = 2;
 

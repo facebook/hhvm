@@ -1,6 +1,0 @@
-File "awaitable_non_async.php", line 5, characters 10-11:
-Invalid return type (Typing[4110])
-File "awaitable_non_async.php", line 4, characters 42-48:
-Expected `dynamic`
-File "awaitable_non_async.php", line 4, characters 22-24:
-But got `int`

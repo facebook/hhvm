@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface I1 {
   abstract const type T as mixed;

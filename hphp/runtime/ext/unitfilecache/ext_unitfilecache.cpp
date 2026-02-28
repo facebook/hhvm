@@ -16,7 +16,6 @@
 */
 
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/extension.h"
 
 #include "hphp/runtime/vm/bytecode.h"
@@ -87,8 +86,8 @@ std::unique_ptr<UnitEmitter> cache_hook(
   const char* filenamePtr,
   const SHA1& sha1,
   folly::StringPiece::size_type codeLen,
-  const std::function<std::unique_ptr<UnitEmitter>(bool)>& compile,
-  const Native::FuncTable& nativeFuncs
+  HhvmDeclProvider* provider,
+  const std::function<std::unique_ptr<UnitEmitter>(bool)>& compile
 ) {
   assertx(s_state);
 
@@ -111,7 +110,8 @@ std::unique_ptr<UnitEmitter> cache_hook(
       size_t blobSize;
       query.getBlob(0, blob, blobSize);
 
-      auto ue = std::make_unique<UnitEmitter>(sha1, SHA1{}, nativeFuncs);
+      auto const& packageInfo = RepoOptions::forFile(filename).packageInfo();
+      auto ue = std::make_unique<UnitEmitter>(sha1, SHA1{}, packageInfo);
       BlobDecoder decoder{blob, blobSize};
       ue->m_filepath = makeStaticString(filename);
       ue->serde(decoder, false);
@@ -159,7 +159,7 @@ std::unique_ptr<UnitEmitter> cache_hook(
 ///////////////////////////////////////////////////////////////////////////////
 
 static struct UnitFileCacheExtension final : Extension {
-  UnitFileCacheExtension() : Extension("unitfilecache") {}
+  UnitFileCacheExtension() : Extension("unitfilecache", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
     static std::string filename;
@@ -182,6 +182,10 @@ static struct UnitFileCacheExtension final : Extension {
         }
       }
     }
+  }
+
+  std::vector<std::string> hackFiles() const override {
+    return {};
   }
 } s_unitfilecache_extension;
 

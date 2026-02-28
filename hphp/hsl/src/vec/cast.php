@@ -14,6 +14,7 @@ namespace HH\Lib\Vec;
  * Casts the given traversable to a vec, resetting the legacy array mark
  * if applicable.
  */
+<<__NoAutoLikes>>
 function cast_clear_legacy_array_mark<T>(
   Traversable<T> $x,
 )[]: vec<T> {

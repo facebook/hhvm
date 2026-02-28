@@ -26,11 +26,11 @@ bool(false)
 Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s/gmp_pown.php on line 23
 bool(false)
 
-Warning: gmp_powm() expects exactly 3 parameters, 2 given in %s/gmp_pown.php on line 24
+Warning: gmp_powm() expects exactly 3 positional parameters, 2 given in %s/gmp_pown.php on line 24
 
-Warning: gmp_powm() expects exactly 3 parameters, 1 given in %s/gmp_pown.php on line 25
+Warning: gmp_powm() expects exactly 3 positional parameters, 1 given in %s/gmp_pown.php on line 25
 
-Warning: gmp_powm() expects exactly 3 parameters, 0 given in %s/gmp_pown.php on line 26
+Warning: gmp_powm() expects exactly 3 positional parameters, 0 given in %s/gmp_pown.php on line 26
 
 Warning: gmp_powm(): Exponent must not be negative in %s/gmp_pown.php on line 29
 bool(false)

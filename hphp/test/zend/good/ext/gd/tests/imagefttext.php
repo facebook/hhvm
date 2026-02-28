@@ -1,6 +1,6 @@
 <?hh
 
-    function testrun($im, $fontfile) {
+    function testrun($im, $fontfile) :mixed{
         $sx = imagesx($im);
         $sy = imagesy($im);
 
@@ -8,7 +8,7 @@
         $colour_b = imagecolorallocate($im, 0, 0, 0);
 
         imagefilledrectangle($im, 0, 0, $sx - 1, $sy - 1, $colour_b);
-        imagefttext($im, $sy * 0.75, 0, 0, $sy - 1, $colour_w, $fontfile, "A", darray[]);
+        imagefttext($im, $sy * 0.75, 0, 0, $sy - 1, $colour_w, $fontfile, "A", dict[]);
 
         $cnt = 0;
         for ($y = 0; $y < $sy; ++$y) {

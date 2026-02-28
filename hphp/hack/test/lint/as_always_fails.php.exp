@@ -1,2 +1,4 @@
 File "as_always_fails.php", line 8, characters 3-9:
-This `as` assertion will always fail. The expression on the left is an instance of `A`. It can never be an instance of `C` because there is no class that is both `A` and `C`. (Lint[5629])
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `A` which shares no values with `C`. (Lint[5629])
+File "as_always_fails.php", line 8, characters 3-9:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using a type assertion through `as`. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5808])

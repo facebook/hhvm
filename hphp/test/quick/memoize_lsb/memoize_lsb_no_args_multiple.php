@@ -46,7 +46,7 @@ class B extends Base {
   }
 }
 
-function main() {
+function main() :mixed{
   Base::$side_effects = vec[];
   $results = vec[
     B::memo5(),

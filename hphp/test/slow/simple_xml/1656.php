@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1656() {
+function main_1656() :mixed{
 $a = simplexml_load_string('<?xml version="1.0" encoding="utf-8"?><node a="b"><subnode attr1="value1" attr2="value2">test</subnode><subnode><subsubnode>test</subsubnode></subnode><test>v</test></node>');
 var_dump($a->attributes());
 var_dump((string)$a->subnode->offsetGet(0));

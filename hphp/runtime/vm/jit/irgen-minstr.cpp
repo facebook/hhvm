@@ -19,9 +19,7 @@
 
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/vm/native-prop-handler.h"
 
-#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/array-access-profile.h"
 #include "hphp/runtime/vm/jit/cow-profile.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
@@ -30,6 +28,7 @@
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/vm/jit/irgen-arith.h"
+#include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-incdec.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
@@ -43,10 +42,9 @@
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/struct-log.h"
-
-#include <sstream>
 
 namespace HPHP::jit::irgen {
 
@@ -69,7 +67,6 @@ enum class SimpleOp {
 // Property information.
 
 struct PropInfo {
-  using UpperBoundVec = PreClass::UpperBoundVec;
   PropInfo(Slot slot,
            uint16_t index,
            bool isConst,
@@ -77,9 +74,8 @@ struct PropInfo {
            bool lateInit,
            bool lateInitCheck,
            Type knownType,
-           const HPHP::TypeConstraint* typeConstraint,
-           const UpperBoundVec* ubs,
-           const Class* objClass,
+           const HPHP::TypeIntersectionConstraint* typeConstraints,
+           const Class::Prop* objProp,
            const Class* propClass)
     : slot{slot}
     , index{index}
@@ -88,9 +84,8 @@ struct PropInfo {
     , lateInit{lateInit}
     , lateInitCheck{lateInitCheck}
     , knownType{std::move(knownType)}
-    , typeConstraint{typeConstraint}
-    , ubs{ubs}
-    , objClass{objClass}
+    , typeConstraints{typeConstraints}
+    , objProp{objProp}
     , propClass{propClass}
   {}
 
@@ -101,10 +96,10 @@ struct PropInfo {
   bool lateInit{false};
   bool lateInitCheck{false};
   Type knownType{TCell};
-  const HPHP::TypeConstraint* typeConstraint{nullptr};
-  const UpperBoundVec* ubs{nullptr};
-  const Class* objClass{nullptr};
+  const HPHP::TypeIntersectionConstraint* typeConstraints{nullptr};
+  const Class::Prop* objProp{nullptr};
   const Class* propClass{nullptr};
+
 };
 
 Type knownTypeForProp(const Class::Prop& prop,
@@ -112,10 +107,8 @@ Type knownTypeForProp(const Class::Prop& prop,
                       const Class* ctx,
                       bool ignoreLateInit) {
   auto knownType = TCell;
-  if (RuntimeOption::EvalCheckPropTypeHints >= 3 &&
-      (!prop.typeConstraint.isUpperBound() ||
-       RuntimeOption::EvalEnforceGenericsUB >= 2)) {
-    knownType = typeFromPropTC(prop.typeConstraint, propCls, ctx, false);
+  if (Cfg::Eval::CheckPropTypeHints >= 3) {
+    knownType = typeFromPropTC(prop.typeConstraints, propCls, ctx, false);
     if (!(prop.attrs & AttrNoImplicitNullable)) knownType |= TInitNull;
   }
   knownType &= typeFromRAT(prop.repoAuthType, ctx);
@@ -149,9 +142,10 @@ getPropertyOffset(IRGS& env,
   auto const name = keyType.strVal();
 
   auto const ctx = curClass(env);
+  auto const moduleName = curUnit(env)->moduleName();
 
   // We need to check that baseClass cannot change between requests.
-  if (!(baseClass->preClass()->attrs() & AttrUnique)) {
+  if (!(baseClass->preClass()->attrs() & AttrPersistent)) {
     if (!ctx) return std::nullopt;
     if (!ctx->classof(baseClass)) {
       if (baseClass->classof(ctx)) {
@@ -166,9 +160,10 @@ getPropertyOffset(IRGS& env,
       }
     }
   }
+  auto const propCtx = MemberLookupContext(ctx, moduleName);
 
   // Lookup the index of the property based on ctx and baseClass
-  auto const lookup = baseClass->getDeclPropSlot(ctx, name);
+  auto const lookup = baseClass->getDeclPropSlot(propCtx, name);
   auto const slot = lookup.slot;
 
   // If we couldn't find a property that is accessible in the current context,
@@ -197,9 +192,8 @@ getPropertyOffset(IRGS& env,
     prop.attrs & AttrLateInit,
     (prop.attrs & AttrLateInit) && !ignoreLateInit,
     knownTypeForProp(prop, baseClass, ctx, ignoreLateInit),
-    &prop.typeConstraint,
-    &prop.ubs,
-    baseClass,
+    &prop.typeConstraints,
+    &prop,
     prop.cls
   );
 }
@@ -221,7 +215,7 @@ bool prop_ignores_tvref(IRGS& env, SSATmp* base, const SSATmp* key) {
   // If the property name is known, try to look it up and get its RAT.
   if (key->hasConstVal(TStr)) {
     auto const keyStr = key->strVal();
-    auto const ctx = curClass(env);
+    auto const ctx = MemberLookupContext(curClass(env), curUnit(env)->moduleName());
     auto const lookup = cls->getDeclPropSlot(ctx, keyStr);
     if (lookup.slot != kInvalidSlot && lookup.accessible) {
       isDeclared = true;
@@ -298,20 +292,6 @@ SSATmp* ptrToUninit(IRGS& env) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-/*
- * This is called in a few places to be consistent with old minstrs, and should
- * be revisited once they're gone. It probably doesn't make sense to always
- * guard on an object class when we have one.
- */
-void specializeObjBase(IRGS& env, SSATmp* base) {
-  if (base && base->isA(TObj) && base->type().clsSpec().cls()) {
-    env.irb->constrainValue(
-      base, GuardConstraint(base->type().clsSpec().cls()));
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
 // Intermediate ops
 
 Optional<PropInfo>
@@ -321,7 +301,8 @@ getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
   auto const baseCls = base->type().clsSpec().cls();
   auto const info = getPropertyOffset(env, baseCls, keyType, ignoreLateInit);
   if (!info) return info;
-  specializeObjBase(env, base);
+
+  env.irb->constrainValue(base, GuardConstraint(info->propClass));
   return info;
 }
 
@@ -335,7 +316,7 @@ SSATmp* emitPropSpecialized(
   assertx(base->isA(TObj));
 
   assertx(IMPLIES(propInfo.lateInitCheck, propInfo.lateInit));
-
+  emitModuleBoundaryCheckKnown(env, propInfo.objProp);
   if (!propInfo.lateInitCheck &&
       (propInfo.lateInit ||
        mode != MOpMode::Warn ||
@@ -670,6 +651,7 @@ SSATmp* emitCGetElemQuiet(IRGS& env, SSATmp* base, SSATmp* key,
     case SimpleOp::Pair:
     case SimpleOp::Map:
       assertx(mode != MOpMode::InOut);
+      [[fallthrough]];
     case SimpleOp::None:
       return gen(env, CGetElem, MOpModeData{mode}, base, key);
   }
@@ -742,31 +724,6 @@ SimpleOp simpleCollectionOp(Type baseType, Type keyType, bool readInst,
   }
 
   return SimpleOp::None;
-}
-
-void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
-  if (!name->isA(TStr)) PUNT(BaseG-non-string-name);
-  auto base_mode = mode != MOpMode::Unset ? mode : MOpMode::None;
-
-  profiledGlobalAccess(
-    env,
-    name,
-    [&] (Block*) { return gen(env, BaseG, MOpModeData{base_mode}, name); },
-    [&] (SSATmp* ptr, Type) {
-      stMBase(env, ptr);
-      return cns(env, TBottom);
-    },
-    [&] {
-      auto const ptr = [&] {
-        if (base_mode == MOpMode::None) return ptrToInitNull(env);
-        return gen(env, BaseG, MOpModeData{base_mode}, name);
-      }();
-      stMBase(env, ptr);
-      return cns(env, TBottom);
-    },
-    true
-  );
-  gen(env, StMROProp, cns(env, false));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1114,53 +1071,29 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
 }
 
 Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
-  auto block = defBlock(env, Block::Hint::Unused);
+  return makeCatchBlock(env, [&]{
+    ifElse(
+      env,
+      [&] (Block* taken) {
+        gen(env, UnwindCheckSideExit, taken, fp(env), sp(env));
+      },
+      [&] {
+        // Side-exit from a catch block due to an InvalidSetMException.
+        // Note: MIState was already killed by BeginCatch.
+        hint(env, Block::Hint::Unused);
 
-  BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), block);
-  gen(env, BeginCatch);
-
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      gen(env, UnwindCheckSideExit, taken, fp(env), sp(env));
-    },
-    [&] {
-      assertx(!env.irb->fs().stublogue());
-      hint(env, Block::Hint::Unused);
-      if (spillInlinedFrames(env)) {
-        gen(env, StVMFP, fp(env));
-        gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
-        gen(env, StVMReturnAddr, cns(env, 0));
+        // For consistency with the interpreter, decref the rhs before we decref
+        // the stack inputs, and decref the ratchet storage after the stack
+        // inputs.
+        popDecRef(env, DecRefProfileId::Default, DataTypeGeneric);
+        for (int i = 0; i < nDiscard; ++i) {
+          popDecRef(env, static_cast<DecRefProfileId>(i), DataTypeGeneric);
+        }
+        push(env, gen(env, LdUnwinderValue, TCell));
+        gen(env, Jmp, makeExit(env, nextSrcKey(env)));
       }
-
-      auto const data = EndCatchData {
-        spOffBCFromIRSP(env),
-        EndCatchData::CatchMode::SideExit,
-        EndCatchData::FrameMode::Phplogue,
-        EndCatchData::Teardown::Full
-      };
-      gen(env, EndCatch, data, fp(env), sp(env));
-    }
-  );
-
-  // Fallthrough from here on is side-exiting due to an InvalidSetMException.
-  hint(env, Block::Hint::Unused);
-
-  // For consistency with the interpreter, decref the rhs before we decref the
-  // stack inputs, and decref the ratchet storage after the stack inputs.
-  popDecRef(env, DecRefProfileId::Default, DataTypeGeneric);
-  for (int i = 0; i < nDiscard; ++i) {
-    popDecRef(env, static_cast<DecRefProfileId>(i), DataTypeGeneric);
-  }
-  auto const val = gen(env, LdUnwinderValue, TCell);
-  push(env, val);
-
-  // The minstr is done here, so we want to drop a FinishMemberOp to kill off
-  // stores to MIState.
-  gen(env, FinishMemberOp);
-
-  gen(env, Jmp, makeExit(env, nextSrcKey(env)));
-  return block;
+    );
+  });
 }
 
 SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
@@ -1187,23 +1120,20 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
       *propInfo
     );
 
-    SSATmp* newVal = nullptr;
-    verifyPropType(
+    SSATmp* newVal = verifyPropType(
       env,
       gen(env, LdObjClass, base),
-      propInfo->typeConstraint,
-      propInfo->ubs,
+      propInfo->typeConstraints,
       propInfo->slot,
       value,
       key,
-      false,
-      &newVal
+      false
     );
 
     auto const oldVal = gen(env, LdMem, propInfo->knownType, propPtr);
     gen(env, IncRef, newVal);
     gen(env, StMem, propPtr, newVal);
-    decRef(env, oldVal, DecRefProfileId::Default);
+    decRef(env, oldVal);
   } else {
     gen(
       env,
@@ -1317,9 +1247,6 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value, Finish finish) {
 void setNewElemVecImpl(IRGS& env, uint32_t nDiscard, SSATmp* basePtr,
                        Type baseType, SSATmp* value) {
   assertx(baseType <= TVec);
-  auto const maybeCyclic = value->type().maybe(baseType);
-
-  if (maybeCyclic) gen(env, IncRef, value);
 
   static const StaticString s_ArrayCOW{"NewElemVecCOW"};
   auto const profile = TargetProfile<COWProfile>{
@@ -1355,12 +1282,12 @@ void setNewElemVecImpl(IRGS& env, uint32_t nDiscard, SSATmp* basePtr,
     );
   }
 
-  if (!maybeCyclic) gen(env, IncRef, value);
+  gen(env, IncRef, value);
 }
 
 SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
-  auto value = topC(env);
   auto const baseType = env.irb->fs().mbase().type;
+  auto value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
 
   // We load the member base pointer before calling makeCatchSet() to avoid
   // mismatched in-states for any catch block edges we emit later on.
@@ -1374,11 +1301,8 @@ SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
     gen(env, SetNewElemDict, basePtr, value);
   } else if (baseType <= TKeyset) {
     constrainBase(env);
-    if (!value->type().isKnownDataType()) {
-      PUNT(SetM-NewElem-Keyset-ValueNotKnown);
-    }
     value = convertClassKey(env, value);
-    if (!value->isA(TInt | TStr)) {
+    if (!value->type().maybe(TInt | TStr)) {
       auto const base = extractBase(env);
       gen(env, ThrowInvalidArrayKey, base, value);
     } else {
@@ -1436,7 +1360,7 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, Finish finish) {
       } else if (t == TStaticStr) {
         // Base is a string. Stack result is a new string so we're responsible
         // for decreffing value.
-        decRef(env, value, DecRefProfileId::Default);
+        decRef(env, value);
         value = result;
       } else {
         assertx(t == (TStaticStr | TNullptr));
@@ -1484,10 +1408,27 @@ SSATmp* ldPropAddr(IRGS& env, SSATmp* obj, Block* taken,
 
   auto const data = IndexData { cls->propSlotToIndex(slot) };
 
+  auto const TSerializedAsAPCTypedValue =
+      TUninit | TInitNull | TBool | TInt | TDbl | TStr | TLazyCls;
+  auto const maybe_lazy = !(type <= TSerializedAsAPCTypedValue) &&
+                          cls->mayUseLazyAPCDeserialization();
+
+  if (maybe_lazy) gen(env, DeserializeLazyProp, data, obj);
+
   return taken
     ? gen(env, LdInitPropAddr, taken, data, type & TInitCell, obj)
     : gen(env, LdPropAddr, data, type, obj);
 }
+
+SSATmp* ldClosureArg(IRGS& env, SSATmp* obj, const Class* cls, Slot slot, const Type& type) {
+  assertx(type <= TCell);
+  assertx(cls != nullptr);
+  assertx(slot != kInvalidSlot);
+
+  auto const data = IndexData { cls->propSlotToIndex(slot) };
+  return gen(env, LdClosureArg, data, type, obj);
+}
+
 
 SSATmp* ptrToInitNull(IRGS& env) {
   // Nothing is allowed to write anything to the init null variant, so this
@@ -1523,7 +1464,7 @@ SSATmp* incDecDictImpl(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key,
     curClass(env)
   ).first;
 
-  if (isIncDecO(op) || !lhsType.maybe(TInt)) {
+  if (!lhsType.maybe(TInt)) {
     return gen(
       env,
       IncDecElem,
@@ -1584,7 +1525,7 @@ SSATmp* incDecVecImpl(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
     curClass(env)
   ).first;
 
-  if (isIncDecO(op) || !lhsType.maybe(TInt)) {
+  if (!lhsType.maybe(TInt)) {
     return gen(
       env,
       IncDecElem,
@@ -1795,9 +1736,6 @@ Optional<Type> simpleSetOpType(SetOpOp op) {
     case SetOpOp::OrEqual:
     case SetOpOp::XorEqual:    return TInt;
     case SetOpOp::ConcatEqual: return TStr;
-    case SetOpOp::PlusEqualO:
-    case SetOpOp::MinusEqualO:
-    case SetOpOp::MulEqualO:
     case SetOpOp::DivEqual:
     case SetOpOp::ModEqual:
     case SetOpOp::PowEqual:
@@ -1825,9 +1763,6 @@ SSATmp* simpleSetOpAction(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
       case SetOpOp::OrEqual:     return OrInt;
       case SetOpOp::XorEqual:    return XorInt;
       case SetOpOp::ConcatEqual: return ConcatStrStr;
-      case SetOpOp::PlusEqualO:
-      case SetOpOp::MinusEqualO:
-      case SetOpOp::MulEqualO:
       case SetOpOp::DivEqual:
       case SetOpOp::ModEqual:
       case SetOpOp::PowEqual:
@@ -1850,24 +1785,12 @@ bool propertyMayBeCountable(const Class::Prop& prop) {
   // here because the classes they refer to may not yet be defined. We return
   // `true` for these cases. Doing so doesn't cause unnecessary pessimization,
   // because subtypes of Object are going to be countable anyway.
-  auto const& tc = prop.typeConstraint;
-  if (tc.isObject() || tc.isThis() || tc.isUnresolved()) return true;
   if (prop.repoAuthType.name()) return true;
   auto const type = knownTypeForProp(prop, nullptr, nullptr, true);
   return type.maybe(jit::TCounted);
 }
 
 //////////////////////////////////////////////////////////////////////
-
-void emitBaseGC(IRGS& env, uint32_t idx, MOpMode mode) {
-  auto name = top(env, BCSPRelOffset{safe_cast<int32_t>(idx)});
-  baseGImpl(env, name, mode);
-}
-
-void emitBaseGL(IRGS& env, int32_t locId, MOpMode mode) {
-  auto name = ldLoc(env, locId, DataTypeSpecific);
-  baseGImpl(env, name, mode);
-}
 
 void emitBaseSC(IRGS& env,
                 uint32_t propIdx,
@@ -2076,9 +1999,6 @@ SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
     case SetOpOp::PlusEqual:   return Op::Add;
     case SetOpOp::MinusEqual:  return Op::Sub;
     case SetOpOp::MulEqual:    return Op::Mul;
-    case SetOpOp::PlusEqualO:  return std::nullopt;
-    case SetOpOp::MinusEqualO: return std::nullopt;
-    case SetOpOp::MulEqualO:   return std::nullopt;
     case SetOpOp::DivEqual:    return std::nullopt;
     case SetOpOp::ConcatEqual: return std::nullopt;
     case SetOpOp::ModEqual:    return std::nullopt;
@@ -2129,8 +2049,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
       verifyPropType(
         env,
         gen(env, LdObjClass, base),
-        propInfo->typeConstraint,
-        propInfo->ubs,
+        propInfo->typeConstraints,
         propInfo->slot,
         result,
         key,
@@ -2168,14 +2087,14 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
      * check isn't necessary.
      */
     auto const fast = [&]{
-      if (RuntimeOption::EvalCheckPropTypeHints <= 0) return true;
-      if (!propInfo->typeConstraint ||
-          !propInfo->typeConstraint->isCheckable()) {
+      if (Cfg::Eval::CheckPropTypeHints <= 0) return true;
+      if (!propInfo->typeConstraints ||
+          !propInfo->typeConstraints->isCheckable()) {
         return true;
       }
       if (op != SetOpOp::ConcatEqual) return false;
       if (propInfo->knownType <= TStr) return true;
-      return propInfo->typeConstraint->alwaysPasses(KindOfString);
+      return propInfo->typeConstraints->alwaysPasses(KindOfString);
     }();
 
     if (!fast) {
@@ -2200,7 +2119,7 @@ void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {
   auto rhs = topC(env);
 
   auto const finish = [&] (SSATmp* result) {
-    popDecRef(env, DecRefProfileId::Default);
+    popDecRef(env);
     mFinalImpl(env, nDiscard, result);
   };
   auto const result = [&] {
@@ -2230,13 +2149,28 @@ void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {
 }
 
 void emitUnsetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
-  auto key = memberKey(env, mk);
+  auto const key = memberKey(env, mk);
+  assertx(key->type().isKnownDataType());
+
+  auto const base = extractBase(env);
 
   if (mcodeIsProp(mk.mcode)) {
-    gen(env, UnsetProp, extractBase(env), key);
+    gen(env, UnsetProp, base, key);
   } else {
     assertx(mcodeIsElem(mk.mcode));
-    gen(env, UnsetElem, ldMBase(env), key);
+
+    if (base->type().subtypeOfAny(TVec, TDict, TKeyset)) {
+      if (!key->type().subtypeOfAny(TInt, TStr)) {
+        gen(env, ThrowInvalidArrayKey, base, key);
+        return;
+      }
+
+      auto const newArr = gen(env, BespokeUnset, base, key);
+      gen(env, StMem, ldMBase(env), newArr);
+    } else {
+      // Slow path for handling collections and weird base types.
+      gen(env, UnsetElem, ldMBase(env), key);
+    }
   }
 
   mFinalImpl(env, nDiscard, nullptr);
@@ -2248,7 +2182,7 @@ void logArrayAccessProfile(IRGS& env, SSATmp* arr, SSATmp* key,
                            MOpMode mode, const ArrayAccessProfile& profile) {
   // We generate code for many accesses each time we call retranslateAll.
   // We don't want production webservers to log when they do so.
-  if (!RO::EvalLogArrayAccessProfile) return;
+  if (!Cfg::Eval::LogArrayAccessProfile) return;
   if (env.inlineState.conjure) return;
 
   auto const marker  = makeMarker(env, curSrcKey(env));
@@ -2257,8 +2191,8 @@ void logArrayAccessProfile(IRGS& env, SSATmp* arr, SSATmp* key,
 
   std::vector<std::string> inline_state_string;
   std::vector<folly::StringPiece> inline_state;
-  for (auto const& state : env.inlineState.bcStateStack) {
-    inline_state_string.push_back(show(state));
+  for (auto const& frame : env.inlineState.frames) {
+    inline_state_string.push_back(show(frame.callerSk));
     inline_state.push_back(inline_state_string.back());
   }
 
@@ -2269,7 +2203,7 @@ void logArrayAccessProfile(IRGS& env, SSATmp* arr, SSATmp* key,
   entry.setStr("source_file", func->filename()->data());
   entry.setInt("source_line", marker.sk().lineNumber());
   entry.setInt("prof_count", curProfCount(env));
-  entry.setInt("inline_depth", env.inlineState.depth);
+  entry.setInt("inline_depth", inlineDepth(env));
   entry.setVec("inline_state", inline_state);
   entry.setStr("arr_type", arr->type().toString());
   entry.setStr("key_type", key->type().toString());
@@ -2284,7 +2218,7 @@ void annotArrayAccessProfile(IRGS& env,
                              SSATmp* key,
                              const ArrayAccessProfile& profile,
                              const ArrayAccessProfile::Result& result) {
-  if (!RuntimeOption::EvalDumpArrAccProf) return;
+  if (!Cfg::Eval::DumpArrAccProf) return;
 
   auto const fnName = curFunc(env)->fullName()->data();
 

@@ -6,7 +6,7 @@ class MyClass {
   }
 }
 
-async function test() {
+async function test() :Awaitable<mixed>{
   $my = new MyClass();
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
   return 42;

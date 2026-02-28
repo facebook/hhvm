@@ -17,10 +17,8 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/tv-arith.h"
-#include "hphp/runtime/vm/hhbc.h"
 
 #include "hphp/runtime/vm/jit/call-spec.h"
-#include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -33,7 +31,7 @@
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -109,8 +107,6 @@ void implShift(Vout& v, IRLS& env, const IRInstruction* inst) {
   AO(AddOffset, BinopSF,  addq)    \
   AO(SubInt,    BinopSF,  subq)    \
   AO(MulInt,    BinopSF,  imul)    \
-  AO(AddIntO,   ArithO,   addq)    \
-  AO(SubIntO,   ArithO,   subq)    \
   AO(MulIntO,   ArithO,   imul)    \
   AO(AddDbl,    Binop,    addsd)   \
   AO(SubDbl,    Binop,    subsd)   \
@@ -195,9 +191,6 @@ auto setOpOpToHelper(SetOpOp op) {
     case SetOpOp::XorEqual:    return tvBitXorEq;
     case SetOpOp::SlEqual:     return tvShlEq;
     case SetOpOp::SrEqual:     return tvShrEq;
-    case SetOpOp::PlusEqualO:  return tvAddEqO;
-    case SetOpOp::MinusEqualO: return tvSubEqO;
-    case SetOpOp::MulEqualO:   return tvMulEqO;
   }
   not_reached();
 }
@@ -240,9 +233,6 @@ void cgOutlineSetOp(IRLS& env, const IRInstruction* inst) {
       case S::XorEqual:    return outlineSetOpImpl<S::XorEqual>;
       case S::SlEqual:     return outlineSetOpImpl<S::SlEqual>;
       case S::SrEqual:     return outlineSetOpImpl<S::SrEqual>;
-      case S::PlusEqualO:  return outlineSetOpImpl<S::PlusEqualO>;
-      case S::MinusEqualO: return outlineSetOpImpl<S::MinusEqualO>;
-      case S::MulEqualO:   return outlineSetOpImpl<S::MulEqualO>;
     }
     not_reached();
   }();
@@ -258,6 +248,10 @@ void cgOutlineSetOp(IRLS& env, const IRInstruction* inst) {
       .typedValue(1)
   );
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+IMPL_OPCODE_CALL(PseudoRandomInt)
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -31,9 +31,12 @@ namespace HPHP {
  * See asio-external-thread-event.h for more details.
  */
 struct AsioExternalThreadEvent;
-struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
-  WAITHANDLE_CLASSOF(ExternalThreadEventWaitHandle);
-  WAITHANDLE_DTOR(ExternalThreadEventWaitHandle);
+struct c_ExternalThreadEventWaitHandle final :
+    c_WaitableWaitHandle,
+    SystemLib::ClassLoader<"HH\\ExternalThreadEventWaitHandle"> {
+  using SystemLib::ClassLoader<"HH\\ExternalThreadEventWaitHandle">::classof;
+  using SystemLib::ClassLoader<"HH\\ExternalThreadEventWaitHandle">::className;
+  WAITHANDLE_DTOR(ExternalThreadEventWaitHandle)
   void sweep();
 
   explicit c_ExternalThreadEventWaitHandle()
@@ -58,7 +61,7 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   bool cancel(const Object& exception);
   void process();
   String getName();
-  void exitContext(context_idx_t ctx_idx);
+  void exitContext(ContextIndex contextIdx);
   void registerToContext();
   void unregisterFromContext();
 
@@ -85,13 +88,6 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
 
   friend struct SweepableMember<c_ExternalThreadEventWaitHandle>;
 };
-
-void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnCreateCallback,
-                        const Variant& callback);
-void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnSuccessCallback,
-                        const Variant& callback);
-void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnFailCallback,
-                        const Variant& callback);
 
 inline c_ExternalThreadEventWaitHandle* c_Awaitable::asExternalThreadEvent() {
   assertx(getKind() == Kind::ExternalThreadEvent);

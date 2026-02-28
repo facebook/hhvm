@@ -2,10 +2,10 @@
 
 class Foo{}
 
-function f(resource $r) {
+function f(resource $r) :mixed{
 }
 <<__EntryPoint>> function main(): void {
-$r = STDIN;
+$r = HH\stdin();
 var_dump($r);
 var_dump($r is resource);
 f($r);

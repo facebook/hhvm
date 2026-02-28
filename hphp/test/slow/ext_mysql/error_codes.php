@@ -1,13 +1,13 @@
 <?hh
 
-function test_error_code($value) {
+function test_error_code($value) :mixed{
   print($value."\n");
   invariant($value is int, 'Value is not int');
   invariant($value > 0, 'Value is not greater than 0');
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   // This test does NOT test the exact values of different MySQL error codes,
   // because these codes can change as we upgrade the MySQL library. However,
   // we do test that the error code constants exist and have non-zero values.

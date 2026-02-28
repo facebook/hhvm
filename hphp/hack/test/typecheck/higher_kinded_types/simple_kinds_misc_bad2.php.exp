@@ -1,4 +1,0 @@
-File "simple_kinds_misc_bad2.php", line 8, characters 14-16:
-This is a fully-applied type, but a type constructor expecting a single (fully-applied) type argument was expected here. (Typing[4383])
-File "simple_kinds_misc_bad2.php", line 5, characters 19-20:
-We are expecting a type constructor expecting a single (fully-applied) type argument due to the definition of T2 here.

@@ -23,9 +23,7 @@
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-#ifndef VIXL_A64_CONSTANTS_A64_H_
-#define VIXL_A64_CONSTANTS_A64_H_
+#pragma once
 
 namespace vixl {
 
@@ -113,6 +111,10 @@ V_(ImmLSUnsigned, 21, 10, Bits)                                                \
 V_(ImmLSPair, 21, 15, SignedBits)                                              \
 V_(SizeLS, 31, 30, Bits)                                                       \
 V_(ImmShiftLS, 12, 12, Bits)                                                   \
+V_(ImmPrefetchOperation, 4, 0, Bits)                                           \
+V_(PrefetchHint, 4, 3, Bits)                                                   \
+V_(PrefetchTarget, 2, 1, Bits)                                                 \
+V_(PrefetchStream, 0, 0, Bits)                                                 \
                                                                                \
 /* Other immediates */                                                         \
 V_(ImmUncondBranch, 25, 0, SignedBits)                                         \
@@ -132,7 +134,34 @@ V_(CRm, 11, 8, Bits)                                                           \
 /* Large System Extension */                                                   \
 V_(Ar, 23, 22, Bits)                                                           \
 V_(Opc, 14, 12, Bits)                                                          \
-
+                                                                               \
+/* NEON generic fields */                                                      \
+V_(NEONQ, 30, 30, Bits)                                                        \
+V_(NEONSize, 23, 22, Bits)                                                     \
+V_(NEONLSSize, 11, 10, Bits)                                                   \
+V_(NEONS, 12, 12, Bits)                                                        \
+V_(NEONL, 21, 21, Bits)                                                        \
+V_(NEONM, 20, 20, Bits)                                                        \
+V_(NEONH, 11, 11, Bits)                                                        \
+V_(ImmNEONExt, 14, 11, Bits)                                                   \
+V_(ImmNEON5, 20, 16, Bits)                                                     \
+V_(ImmNEON4, 14, 11, Bits)                                                     \
+                                                                               \
+/* NEON extra fields */                                                        \
+V_(ImmRotFcadd, 12, 12, Bits)                                                  \
+V_(ImmRotFcmlaVec, 12, 11, Bits)                                               \
+V_(ImmRotFcmlaSca, 14, 13, Bits)                                               \
+                                                                               \
+/* NEON Modified Immediate fields */                                           \
+V_(ImmNEONabc, 18, 16, Bits)                                                   \
+V_(ImmNEONdefgh, 9, 5, Bits)                                                   \
+V_(NEONModImmOp, 29, 29, Bits)                                                 \
+V_(NEONCmode, 15, 12, Bits)                                                    \
+                                                                               \
+/* NEON Shift Immediate fields */                                              \
+V_(ImmNEONImmhImmb, 22, 16, Bits)                                              \
+V_(ImmNEONImmh, 22, 19, Bits)                                                  \
+V_(ImmNEONImmb, 18, 16, Bits)
 
 
 #define SYSTEM_REGISTER_FIELDS_LIST(V_, M_)                                    \
@@ -255,6 +284,46 @@ enum SystemHint {
   SEVL  = 5
 };
 
+enum PrefetchOperation {
+  PLDL1KEEP = 0x00,
+  PLDL1STRM = 0x01,
+  PLDL2KEEP = 0x02,
+  PLDL2STRM = 0x03,
+  PLDL3KEEP = 0x04,
+  PLDL3STRM = 0x05,
+
+  PrfUnallocated06 = 0x06,
+  PrfUnallocated07 = 0x07,
+
+  PLIL1KEEP = 0x08,
+  PLIL1STRM = 0x09,
+  PLIL2KEEP = 0x0a,
+  PLIL2STRM = 0x0b,
+  PLIL3KEEP = 0x0c,
+  PLIL3STRM = 0x0d,
+
+  PrfUnallocated0e = 0x0e,
+  PrfUnallocated0f = 0x0f,
+
+  PSTL1KEEP = 0x10,
+  PSTL1STRM = 0x11,
+  PSTL2KEEP = 0x12,
+  PSTL2STRM = 0x13,
+  PSTL3KEEP = 0x14,
+  PSTL3STRM = 0x15,
+
+  PrfUnallocated16 = 0x16,
+  PrfUnallocated17 = 0x17,
+  PrfUnallocated18 = 0x18,
+  PrfUnallocated19 = 0x19,
+  PrfUnallocated1a = 0x1a,
+  PrfUnallocated1b = 0x1b,
+  PrfUnallocated1c = 0x1c,
+  PrfUnallocated1d = 0x1d,
+  PrfUnallocated1e = 0x1e,
+  PrfUnallocated1f = 0x1f,
+};
+
 // System/special register names.
 // This information is not encoded as one field but as the concatenation of
 // multiple fields (Op0<0>, Op1, Crn, Crm, Op2).
@@ -322,6 +391,13 @@ enum NEONFormatField {
   NEON_2D               = 0x00C00000 | NEON_Q
 };
 
+enum NEONFPFormatField : uint32_t {
+  NEONFPFormatFieldMask = 0x40400000,
+  NEON_FP_2S = FP32,
+  NEON_FP_4S = FP32 | NEON_Q,
+  NEON_FP_2D = FP64 | NEON_Q
+};
+
 enum NEONLSFormatField {
   NEONLSFormatFieldMask = 0x40000C00,
   LS_NEON_8B            = 0x00000000,
@@ -332,6 +408,15 @@ enum NEONLSFormatField {
   LS_NEON_4S            = LS_NEON_2S | NEON_Q,
   LS_NEON_1D            = 0x00000C00,
   LS_NEON_2D            = LS_NEON_1D | NEON_Q
+};
+
+enum NEONScalarFormatField {
+  NEONScalarFormatFieldMask = 0x00C00000,
+  NEONScalar                = 0x10000000,
+  NEON_B                    = 0x00000000,
+  NEON_H                    = 0x00400000,
+  NEON_S                    = 0x00800000,
+  NEON_D                    = 0x00C00000
 };
 
 // PC relative addressing.
@@ -707,18 +792,6 @@ enum LoadLiteralOp {
   V(LD, R, s,   0x84400000),  \
   V(LD, R, d,   0xC4400000)
 
-
-// Load/store unscaled offset.
-enum LoadStoreUnscaledOffsetOp {
-  LoadStoreUnscaledOffsetFixed = 0x38000000,
-  LoadStoreUnscaledOffsetFMask = 0x3B200C00,
-  LoadStoreUnscaledOffsetMask  = 0xFFE00C00,
-  #define LOAD_STORE_UNSCALED(A, B, C, D)  \
-  A##U##B##_##C = LoadStoreUnscaledOffsetFixed | D
-  LOAD_STORE_OP_LIST(LOAD_STORE_UNSCALED)
-  #undef LOAD_STORE_UNSCALED
-};
-
 // Load/store (post, pre, offset and unsigned.)
 enum LoadStoreOp {
   LoadStoreOpMask   = 0xC4C00000,
@@ -727,6 +800,18 @@ enum LoadStoreOp {
   LOAD_STORE_OP_LIST(LOAD_STORE),
   #undef LOAD_STORE
   PRFM = 0xC0800000
+};
+
+// Load/store unscaled offset.
+enum LoadStoreUnscaledOffsetOp {
+  LoadStoreUnscaledOffsetFixed = 0x38000000,
+  LoadStoreUnscaledOffsetFMask = 0x3B200C00,
+  LoadStoreUnscaledOffsetMask  = 0xFFE00C00,
+  PRFUM                        = LoadStoreUnscaledOffsetFixed | PRFM,
+  #define LOAD_STORE_UNSCALED(A, B, C, D)  \
+  A##U##B##_##C = LoadStoreUnscaledOffsetFixed | D
+  LOAD_STORE_OP_LIST(LOAD_STORE_UNSCALED)
+  #undef LOAD_STORE_UNSCALED
 };
 
 // Load/store post index.
@@ -1174,6 +1259,85 @@ enum FPFixedPointConvertOp {
   UCVTF_dx_fixed  = UCVTF_fixed | SixtyFourBits | FP64
 };
 
+// NEON instructions with two register operands.
+enum NEON2RegMiscOp : uint32_t {
+  NEON2RegMiscFixed = 0x0E200800,
+  NEON2RegMiscFMask = 0x9F3E0C00,
+  NEON2RegMiscMask = 0xBF3FFC00,
+  NEON2RegMiscUBit = 0x20000000,
+  NEON_REV64 = NEON2RegMiscFixed | 0x00000000,
+  NEON_REV32 = NEON2RegMiscFixed | 0x20000000,
+  NEON_REV16 = NEON2RegMiscFixed | 0x00001000,
+  NEON_SADDLP = NEON2RegMiscFixed | 0x00002000,
+  NEON_UADDLP = NEON_SADDLP | NEON2RegMiscUBit,
+  NEON_SUQADD = NEON2RegMiscFixed | 0x00003000,
+  NEON_USQADD = NEON_SUQADD | NEON2RegMiscUBit,
+  NEON_CLS = NEON2RegMiscFixed | 0x00004000,
+  NEON_CLZ = NEON2RegMiscFixed | 0x20004000,
+  NEON_CNT = NEON2RegMiscFixed | 0x00005000,
+  NEON_RBIT_NOT = NEON2RegMiscFixed | 0x20005000,
+  NEON_SADALP = NEON2RegMiscFixed | 0x00006000,
+  NEON_UADALP = NEON_SADALP | NEON2RegMiscUBit,
+  NEON_SQABS = NEON2RegMiscFixed | 0x00007000,
+  NEON_SQNEG = NEON2RegMiscFixed | 0x20007000,
+  NEON_CMGT_zero = NEON2RegMiscFixed | 0x00008000,
+  NEON_CMGE_zero = NEON2RegMiscFixed | 0x20008000,
+  NEON_CMEQ_zero = NEON2RegMiscFixed | 0x00009000,
+  NEON_CMLE_zero = NEON2RegMiscFixed | 0x20009000,
+  NEON_CMLT_zero = NEON2RegMiscFixed | 0x0000A000,
+  NEON_ABS = NEON2RegMiscFixed | 0x0000B000,
+  NEON_NEG = NEON2RegMiscFixed | 0x2000B000,
+  NEON_XTN = NEON2RegMiscFixed | 0x00012000,
+  NEON_SQXTUN = NEON2RegMiscFixed | 0x20012000,
+  NEON_SHLL = NEON2RegMiscFixed | 0x20013000,
+  NEON_SQXTN = NEON2RegMiscFixed | 0x00014000,
+  NEON_UQXTN = NEON_SQXTN | NEON2RegMiscUBit,
+  NEON2RegMiscOpcode = 0x0001F000,
+  NEON_RBIT_NOT_opcode = NEON_RBIT_NOT & NEON2RegMiscOpcode,
+  NEON_NEG_opcode = NEON_NEG & NEON2RegMiscOpcode,
+  NEON_XTN_opcode = NEON_XTN & NEON2RegMiscOpcode,
+  NEON_UQXTN_opcode = NEON_UQXTN & NEON2RegMiscOpcode,
+  // These instructions use only one bit of the size field. The other bit is
+  // used to distinguish between instructions.
+  NEON2RegMiscFPMask = NEON2RegMiscMask | 0x00800000,
+  NEON_FABS = NEON2RegMiscFixed | 0x0080F000,
+  NEON_FNEG = NEON2RegMiscFixed | 0x2080F000,
+  NEON_FCVTN = NEON2RegMiscFixed | 0x00016000,
+  NEON_FCVTXN = NEON2RegMiscFixed | 0x20016000,
+  NEON_FCVTL = NEON2RegMiscFixed | 0x00017000,
+  NEON_FRINTN = NEON2RegMiscFixed | 0x00018000,
+  NEON_FRINTA = NEON2RegMiscFixed | 0x20018000,
+  NEON_FRINTP = NEON2RegMiscFixed | 0x00818000,
+  NEON_FRINTM = NEON2RegMiscFixed | 0x00019000,
+  NEON_FRINTX = NEON2RegMiscFixed | 0x20019000,
+  NEON_FRINTZ = NEON2RegMiscFixed | 0x00819000,
+  NEON_FRINTI = NEON2RegMiscFixed | 0x20819000,
+  NEON_FCVTNS = NEON2RegMiscFixed | 0x0001A000,
+  NEON_FCVTNU = NEON_FCVTNS | NEON2RegMiscUBit,
+  NEON_FCVTPS = NEON2RegMiscFixed | 0x0081A000,
+  NEON_FCVTPU = NEON_FCVTPS | NEON2RegMiscUBit,
+  NEON_FCVTMS = NEON2RegMiscFixed | 0x0001B000,
+  NEON_FCVTMU = NEON_FCVTMS | NEON2RegMiscUBit,
+  NEON_FCVTZS = NEON2RegMiscFixed | 0x0081B000,
+  NEON_FCVTZU = NEON_FCVTZS | NEON2RegMiscUBit,
+  NEON_FCVTAS = NEON2RegMiscFixed | 0x0001C000,
+  NEON_FCVTAU = NEON_FCVTAS | NEON2RegMiscUBit,
+  NEON_FSQRT = NEON2RegMiscFixed | 0x2081F000,
+  NEON_SCVTF = NEON2RegMiscFixed | 0x0001D000,
+  NEON_UCVTF = NEON_SCVTF | NEON2RegMiscUBit,
+  NEON_URSQRTE = NEON2RegMiscFixed | 0x2081C000,
+  NEON_URECPE = NEON2RegMiscFixed | 0x0081C000,
+  NEON_FRSQRTE = NEON2RegMiscFixed | 0x2081D000,
+  NEON_FRECPE = NEON2RegMiscFixed | 0x0081D000,
+  NEON_FCMGT_zero = NEON2RegMiscFixed | 0x0080C000,
+  NEON_FCMGE_zero = NEON2RegMiscFixed | 0x2080C000,
+  NEON_FCMEQ_zero = NEON2RegMiscFixed | 0x0080D000,
+  NEON_FCMLE_zero = NEON2RegMiscFixed | 0x2080D000,
+  NEON_FCMLT_zero = NEON2RegMiscFixed | 0x0080E000,
+  NEON_FCVTL_opcode = NEON_FCVTL & NEON2RegMiscOpcode,
+  NEON_FCVTN_opcode = NEON_FCVTN & NEON2RegMiscOpcode
+};
+
 // NEON instructions with three same-type operands.
 enum NEON3SameOp {
   NEON3SameFixed = 0x0E200400,
@@ -1526,5 +1690,3 @@ enum UnallocatedOp {
 };
 
 }  // namespace vixl
-
-#endif  // VIXL_A64_CONSTANTS_A64_H_

@@ -8,9 +8,9 @@
 
 open Hh_prelude
 
-(* Ideally, this exception should not be part of this mli, but there is one
-   place where we catch all exceptions and we need to ignore this one. TODO: clean that up somehow *)
-exception Defer
+(** Check if an exception is the internal Defer exception. This allows external code
+    to handle this exception without exposing the actual exception type. *)
+val is_defer_exn : exn -> bool
 
 (** A [deferment] is a file which contains a decl that we need to fetch before
     we continue with our scheduled typechecking work. The handler of exception [Defer (d.php, "\\D")]

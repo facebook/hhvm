@@ -4,11 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 pub mod args;
-pub mod by_ref_context;
 pub mod by_ref_node;
+pub mod context;
 
 use std::fmt::Write;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 
 pub use anyhow::Result;
 
@@ -16,7 +17,7 @@ pub fn parse_all(files: &[PathBuf]) -> Result<Vec<(&Path, Vec<syn::Item>)>> {
     files
         .iter()
         .map(|filename| -> Result<(&Path, Vec<syn::Item>)> {
-            let src = std::fs::read_to_string(&filename)?;
+            let src = std::fs::read_to_string(filename)?;
             let file = syn::parse_file(&src)?;
             Ok((filename, file.items.into_iter().collect()))
         })
@@ -48,26 +49,29 @@ pub fn insert_header(s: &str, command: &str) -> Result<String> {
     write!(
         &mut content,
         "
-// Copyright (c) Facebook, Inc. and its affiliates.
+// Copyright (c) Meta Platforms, Inc. and affiliates.
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the \"hack\" directory of this source tree.
 //
-// @{} <<SignedSource::*O*zOeWoEQle#+L!plEphiEmie@IsG>>
+// {}
 //
 // To regenerate this file, run:
 //   {}
 
 {}
 ",
-        "generated", command, s
+        signed_source::SIGNING_TOKEN,
+        command,
+        s
     )?;
     Ok(content)
 }
 
 pub mod gen_helpers {
     use proc_macro2::TokenStream;
-    use quote::{format_ident, quote};
+    use quote::format_ident;
+    use quote::quote;
 
     pub fn gen_module_uses(ms: impl Iterator<Item = impl AsRef<str>>) -> TokenStream {
         let mods = ms.map(|m| format_ident!("{}", m.as_ref()));
@@ -80,7 +84,8 @@ pub mod gen_helpers {
 pub mod syn_helpers {
     use std::collections::HashSet;
 
-    use anyhow::{anyhow, Result};
+    use anyhow::Result;
+    use anyhow::anyhow;
     use syn::*;
 
     pub fn get_ty_def_name(i: &Item) -> Result<String> {

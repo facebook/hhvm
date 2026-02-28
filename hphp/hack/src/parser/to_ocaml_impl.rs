@@ -3,16 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep::{ptr::UnsafeOcamlPtr, Allocator, OpaqueValue, ToOcamlRep};
-use parser_core_types::{
-    lexable_token::LexableToken,
-    positioned_trivia::PositionedTrivium,
-    syntax_by_ref::{
-        positioned_token::PositionedToken, positioned_value::PositionedValue, syntax::Syntax,
-        syntax_variant_generated::SyntaxVariant,
-    },
-    syntax_kind::SyntaxKind,
-};
+use ocamlrep::Allocator;
+use ocamlrep::ToOcamlRep;
+use ocamlrep::Value;
+use ocamlrep::ptr::UnsafeOcamlPtr;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::positioned_trivia::PositionedTrivium;
+use parser_core_types::syntax_by_ref::positioned_token::PositionedToken;
+use parser_core_types::syntax_by_ref::positioned_value::PositionedValue;
+use parser_core_types::syntax_by_ref::syntax::Syntax;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant;
+use parser_core_types::syntax_kind::SyntaxKind;
 
 pub struct WithContext<'a, T: ?Sized> {
     pub t: &'a T,
@@ -20,11 +21,8 @@ pub struct WithContext<'a, T: ?Sized> {
 }
 
 pub trait ToOcaml {
-    fn to_ocaml<'a, A: Allocator>(
-        &'a self,
-        alloc: &'a A,
-        source_text: UnsafeOcamlPtr,
-    ) -> OpaqueValue<'a>;
+    fn to_ocaml<'a, A: Allocator>(&'a self, alloc: &'a A, source_text: UnsafeOcamlPtr)
+    -> Value<'a>;
 }
 
 impl<T: ToOcaml> ToOcaml for [T] {
@@ -32,7 +30,7 @@ impl<T: ToOcaml> ToOcaml for [T] {
         &'a self,
         alloc: &'a A,
         source_text: UnsafeOcamlPtr,
-    ) -> OpaqueValue<'a> {
+    ) -> Value<'a> {
         let mut hd = alloc.add(&());
         for val in self.iter().rev() {
             let mut block = alloc.block_with_size(2);
@@ -49,7 +47,7 @@ impl ToOcaml for Syntax<'_, PositionedToken<'_>, PositionedValue<'_>> {
         &'a self,
         alloc: &'a A,
         source_text: UnsafeOcamlPtr,
-    ) -> OpaqueValue<'a> {
+    ) -> Value<'a> {
         let value = self.value.to_ocaml(alloc, source_text);
 
         let syntax = match &self.children {
@@ -70,13 +68,15 @@ impl ToOcaml for Syntax<'_, PositionedToken<'_>, PositionedValue<'_>> {
                 block.build()
             }
             _ => {
+                // TODO: rewrite this iteratively.
                 let tag = self.kind().ocaml_tag();
                 let n = self.iter_children().count();
                 let mut block = alloc.block_with_size_and_tag(n, tag);
-                self.iter_children().fold(0, |i, field| {
-                    let field = field.to_ocaml(alloc, source_text);
-                    alloc.set_field(&mut block, i, field);
-                    i + 1
+                stack_limit::maybe_grow(|| {
+                    for (i, field) in self.iter_children().enumerate() {
+                        let field = field.to_ocaml(alloc, source_text);
+                        alloc.set_field(&mut block, i, field);
+                    }
                 });
                 block.build()
             }
@@ -93,7 +93,7 @@ impl ToOcaml for PositionedTrivium {
         &'a self,
         alloc: &'a A,
         source_text: UnsafeOcamlPtr,
-    ) -> OpaqueValue<'a> {
+    ) -> Value<'a> {
         // From full_fidelity_positioned_trivia.ml:
         // type t = {
         //   kind: TriviaKind.t;
@@ -115,7 +115,7 @@ impl ToOcaml for PositionedToken<'_> {
         &'a self,
         alloc: &'a A,
         source_text: UnsafeOcamlPtr,
-    ) -> OpaqueValue<'a> {
+    ) -> Value<'a> {
         // From full_fidelity_positioned_token.ml:
         // type t = {
         //   kind: TokenKind.t;
@@ -151,7 +151,7 @@ impl ToOcaml for PositionedValue<'_> {
         &'a self,
         alloc: &'a A,
         source_text: UnsafeOcamlPtr,
-    ) -> OpaqueValue<'a> {
+    ) -> Value<'a> {
         match self {
             PositionedValue::TokenValue(t) => {
                 let mut block = alloc.block_with_size_and_tag(1, TOKEN_VALUE_VARIANT);

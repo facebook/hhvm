@@ -1,10 +1,11 @@
 <?hh
 
-function foo() { return 1; }
+function foo() :mixed{ return 1; }
 
-function main() {
+function main() :mixed{
   $x = null;
-  $y = $z = foo();
+  $z = foo();
+  $y = $z;
   try {
     $f = $y + $z;  // Add is constprop, and generally a PEI
     $x = "heh";
@@ -19,6 +20,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_constprop_exceptions() {
+function main_constprop_exceptions() :mixed{
 main();
 }

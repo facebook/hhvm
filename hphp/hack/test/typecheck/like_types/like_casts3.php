@@ -1,11 +1,11 @@
 <?hh
 
 function f<Tf as (function (int): num)>(dynamic $d): void {
-  $d as ~Tf; // TODO
+  $d as ~Tf;
 }
 
 function g<Tg super (function (num): int)>(dynamic $d): void {
-  $d as ~Tg; // TODO
+  $d as ~Tg;
 }
 
 function h<Th>(dynamic $d): void {

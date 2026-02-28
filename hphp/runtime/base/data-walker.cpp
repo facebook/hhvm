@@ -29,7 +29,7 @@ namespace HPHP {
 void DataWalker::traverseData(ArrayData* data,
                               DataFeature& features,
                               PointerSet& visited,
-                              PointerMap* seenArrs) const {
+                              ArrayMap* seenArrs) const {
   // Static and Uncounted arrays are never circular, never contain
   // objects or resources, so there's no need to traverse them.
   if (!data->isRefCounted()) return;
@@ -89,9 +89,9 @@ ALWAYS_INLINE
 bool DataWalker::visitTypedValue(TypedValue rval,
                                  DataFeature& features,
                                  PointerSet& visited,
-                                 PointerMap* seenArrs) const {
-  auto const serialize_funcs = RuntimeOption::EvalAPCSerializeFuncs;
-  auto const serialize_clsmeth = RO::EvalAPCSerializeClsMeth;
+                                 ArrayMap* seenArrs) const {
+  auto const serialize_funcs = Cfg::Eval::APCSerializeFuncs;
+  auto const serialize_clsmeth = Cfg::Eval::APCSerializeClsMeth;
 
   if (rval.m_type == KindOfObject) {
     features.hasNonPersistable = true;
@@ -134,7 +134,7 @@ inline void DataWalker::objectFeature(ObjectData* pobj,
                                       DataFeature& features) const {
   if (pobj->isCollection()) return;
   if (m_feature == LookupFeature::DetectSerializable &&
-      pobj->instanceof(SystemLib::s_SerializableClass)) {
+      pobj->instanceof(SystemLib::getSerializableClass())) {
     features.hasSerializable = true;
   }
 }

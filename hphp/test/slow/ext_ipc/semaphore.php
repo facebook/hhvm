@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_semaphore() {
+function main_semaphore() :mixed{
 $sem = sem_get(0xDEADBEEF);
 if ($sem === false) { echo "failed\n"; exit(1); }
 $now = microtime(true);

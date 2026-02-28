@@ -6,8 +6,8 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
 include Set.Make (IntKey)
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 let pp fmt iset =
   Format.fprintf fmt "@[<2>{";
@@ -31,3 +31,6 @@ let pp fmt iset =
 let show iset = Format.asprintf "%a" pp iset
 
 let to_string = show
+
+let yojson_of_t t =
+  elements t |> List.sort IntKey.compare |> yojson_of_list IntKey.yojson_of_t

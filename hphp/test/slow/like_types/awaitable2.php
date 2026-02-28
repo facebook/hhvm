@@ -1,9 +1,10 @@
 <?hh
+<<file:__EnableUnstableFeatures('like_type_hints')>>
 
 /**
- * Like-types are treated as mixed, allowing any return value.
+ * Like-types are enforced at their inner type, so this enforces as Awaitable<int>
  */
-async function f(mixed $x): Awaitable<~int> {
+async function f(mixed $x): Awaitable<<<__Soft>> ~int> {
   return $x;
 }
 

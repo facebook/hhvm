@@ -20,14 +20,13 @@
 #include <queue>
 #include <functional>
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include <folly/String.h>
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/vm/as-shared.h"
-#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
@@ -36,11 +35,13 @@
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
+
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/match.h"
 
 namespace HPHP {
 
-TRACE_SET_MOD(disas);
+TRACE_SET_MOD(disas)
 
 namespace {
 
@@ -137,9 +138,9 @@ std::string opt_escaped_long(const StringData* sd) {
 
 struct EHCatchLegacy { std::string label; };
 struct EHCatch { Offset end; };
-using EHInfo = boost::variant<EHCatchLegacy, EHCatch>;
+using EHInfo = std::variant<EHCatchLegacy, EHCatch>;
 using UBMap =
-  std::unordered_map<const StringData*, std::vector<TypeConstraint>>;
+  std::unordered_map<const StringData*, TypeIntersectionConstraint>;
 struct FuncInfo {
   FuncInfo(const Unit* u, const Func* f) : unit(u), func(f) {}
 
@@ -155,9 +156,6 @@ struct FuncInfo {
 
   // Try/catch protected region starts in order.
   std::vector<std::pair<Offset,const EHEnt*>> ehStarts;
-
-  // Upper-bounds for params and return types
-  UBMap ubs;
 };
 
 FuncInfo find_func_info(const Func* func) {
@@ -209,27 +207,9 @@ FuncInfo find_func_info(const Func* func) {
     }
   };
 
-  auto find_upper_bounds = [&] {
-    if (func->hasParamsWithMultiUBs()) {
-      auto const& params = func->params();
-      for (auto const& p : func->paramUBs()) {
-        auto const& typeName = params[p.first].typeConstraint.typeName();
-        auto& v = finfo.ubs[typeName];
-        if (v.empty()) v.assign(std::begin(p.second), std::end(p.second));
-      }
-    }
-    if (func->hasReturnWithMultiUBs()) {
-      auto& v = finfo.ubs[func->returnTypeConstraint().typeName()];
-      if (v.empty()) {
-        v.assign(std::begin(func->returnUBs()), std::end(func->returnUBs()));
-      }
-    }
-  };
-
   find_jump_targets();
   find_eh_entries();
   find_dv_entries();
-  find_upper_bounds();
   return finfo;
 }
 
@@ -253,7 +233,7 @@ std::string jmp_label(const FuncInfo& finfo, Offset tgt) {
   auto const it  = finfo.labels.find(tgt);
   always_assert(it != end(finfo.labels));
   return it->second;
-};
+}
 
 void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   auto const startPc = pc;
@@ -301,8 +281,9 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 
   auto print_mk = [&] (MemberKey m) {
     if (m.mcode == MEL || m.mcode == MPL) {
+      // FIXME: encode NamedLocal properly in hhas
       std::string ret = memberCodeString(m.mcode);
-      folly::toAppend(':', loc_name(finfo, m.iva), " ", subopToName(m.rop), &ret);
+      folly::toAppend(':', loc_name(finfo, m.local.id), " ", subopToName(m.rop), &ret);
       return ret;
     }
     return show(m);
@@ -317,14 +298,17 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     auto const aeLabel = fca.asyncEagerOffset != kInvalidOffset
       ? rel_label(fca.asyncEagerOffset)
       : "-";
-    return show(fca, fca.inoutArgs, fca.readonlyArgs, aeLabel, fca.context);
+    return show(fca, fca.inoutArgs, fca.readonlyArgs,
+                fca.namedArgNames, aeLabel, fca.context);
   };
 
   auto const print_nla = [&](const NamedLocal& nla) {
+    auto const locName = loc_name(finfo, nla.id);
+    if (nla.name == kInvalidLocalName) return folly::sformat("{};_", locName);
     auto const sd = finfo.func->localVarName(nla.name);
-    if (!sd) return folly::sformat("{};_", loc_name(finfo, nla.id));
+    if (!sd) return folly::sformat("{};_", locName);
     auto const name = folly::cEscape<std::string>(sd->slice());
-    return folly::sformat("{};\"{}\"", loc_name(finfo, nla.id), name);
+    return folly::sformat("{};\"{}\"", locName, name);
   };
 
 #define IMM_BLA    print_switch();
@@ -336,8 +320,8 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_ILA    out.fmt(" {}", loc_name(finfo, decode_iva(pc)));
 #define IMM_IA     out.fmt(" {}", decode_iva(pc));
 #define IMM_DA     out.fmt(" {}", decode<double>(pc));
-#define IMM_SA     out.fmt(" {}", \
-                           escaped(finfo.unit->lookupLitstrId(decode<Id>(pc))));
+#define IMM_SA     out.fmt(" {}", escaped(finfo.unit->lookupLitstrId(decode<Id>(pc))));
+
 #define IMM_RATA   out.fmt(" {}", show(decodeRAT(finfo.unit, pc)));
 #define IMM_AA     out.fmt(" @A_{}", decode<Id>(pc));
 #define IMM_BA     out.fmt(" {}", rel_label(decode<Offset>(pc)));
@@ -347,8 +331,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_KA     out.fmt(" {}", print_mk(decode_member_key(pc, finfo.unit)));
 #define IMM_LAR    out.fmt(" {}", show(decodeLocalRange(pc)));
 #define IMM_ITA    out.fmt(" {}", print_ita(decodeIterArgs(pc)));
-#define IMM_FCA    out.fmt(" {}", print_fca(decodeFCallArgs(thisOpcode, pc, \
-                                                            finfo.unit)));
+#define IMM_FCA    out.fmt(" {}", print_fca(decodeFCallArgs(thisOpcode, pc, finfo.unit)));
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x
@@ -405,7 +388,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 
 void print_func_directives(Output& out, const FuncInfo& finfo) {
   const Func* func = finfo.func;
-  if (RuntimeOption::EvalDisassemblerDocComments) {
+  if (Cfg::Eval::DisassemblerDocComments) {
     if (func->docComment() && !func->docComment()->empty()) {
       out.fmtln(".doc {};", escaped_long(func->docComment()));
     }
@@ -434,6 +417,7 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
     }
     out.fmtln(".declvars {};", folly::join(" ", locals));
   }
+
   auto const coeffects = func->staticCoeffectNames();
   if (!coeffects.empty()) {
     std::vector<std::string> names;
@@ -498,7 +482,7 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
     for (; ehIter != ehStop && ehIter->first == off; ++ehIter) {
       auto const info = finfo.ehInfo.find(ehIter->second);
       always_assert(info != end(finfo.ehInfo));
-      match<void>(
+      match(
         info->second,
         [&] (const EHCatch& ehCatch) {
           assertx(ehIter->second->m_past == ehIter->second->m_handler);
@@ -515,7 +499,7 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
     }
 
     // Then, print labels if we have any.  This order keeps the labels
-    // from dangling on weird sides of .try_fault or .try_catch
+    // from dangling on weird sides of .try_catch
     // braces.
     while (lblIter != lblStop && lblIter->first < off) ++lblIter;
     if (lblIter != lblStop && lblIter->first == off) {
@@ -536,21 +520,27 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
   }
 }
 
-std::string type_constraint(const TypeConstraint &tc) {
+std::string type_constraint(const TypeConstraint& tc) {
   std::string typeName = tc.typeName() ? escaped(tc.typeName()) : "N";
   return folly::format("{} {} ",
                        typeName,
                        type_flags_to_string(tc.flags())).str();
 }
-std::string opt_type_info(const StringData *userType,
-                          const TypeConstraint &tc) {
-  if (userType || tc.typeName() || tc.flags()) {
-    std::string utype = userType ? escaped(userType) : "N";
-    return folly::format("<{} {}> ",
-                         utype,
-                         type_constraint(tc)).str();
+
+std::string opt_type_constraint(const TypeConstraint& tc) {
+  if (!tc.typeName() && !tc.flags()) return "";
+  return folly::format("<{}> ", type_constraint(tc)).str();
+}
+
+std::string type_info(const StringData* userType,
+                      const TypeIntersectionConstraint& tcs) {
+  std::string utype = userType ? escaped(userType) : "N";
+  std::string constraints;
+  for (auto const& tc : tcs.range()) {
+    if (constraints != "") constraints += ", ";
+    constraints += opt_type_constraint(tc);
   }
-  return "";
+  return folly::format("{} {}", utype, constraints).str();
 }
 
 std::string opt_attrs(AttrContext ctx, Attr attrs,
@@ -586,13 +576,18 @@ std::string func_param_list(const FuncInfo& finfo) {
     if (func->isReadonly(i)) {
       ret += "readonly ";
     }
-    ret += opt_type_info(func->params()[i].userType,
-                         func->params()[i].typeConstraint);
+    if (func->isNamed(i)) {
+      ret += "named ";
+    }
+    ret += type_info(
+      func->params()[i].userType.get(func->unit()),
+      func->params()[i].typeConstraints
+    );
     ret += folly::format("{}", loc_name(finfo, i)).str();
     if (func->params()[i].hasDefaultValue()) {
       auto const off = func->params()[i].funcletOff;
       ret += folly::format(" = {}", jmp_label(finfo, off)).str();
-      if (auto const code = func->params()[i].phpCode) {
+      if (auto const code = func->params()[i].phpCode.get(func->unit())) {
         ret += folly::format("({})", escaped_long(code)).str();
       }
     }
@@ -616,40 +611,31 @@ std::string func_flag_list(const FuncInfo& finfo) {
   return " ";
 }
 
-// We do not need to emit shadowed type parameters in disassembly
-// because we do not emit any type parameters for classes.
-// We need to emit the empty list so that assembler can parse it.
-std::string opt_shadowed_tparams() {
-  return "{}";
-}
-
-std::string opt_ubs(const UBMap& ubs) {
-  std::string ret = {};
-  ret += "{";
-  for (auto const& p : ubs) {
-    ret += "(";
-    ret += p.first->data();
-    ret += " as ";
-    bool first = true;
-    for (auto const& ub : p.second) {
-      if (!first) ret += ", ";
-      ret += opt_type_info(nullptr, ub);
-      first = false;
+std::string func_tparam_names(const Func* func) {
+  std::vector<std::string> names;
+  if (func->hasExtendedSharedData()) {
+    auto const& info = func->getGenericsInfo();
+    for (auto const& param : info.m_typeParamInfo) {
+      names.push_back(escaped(param.m_typeName->slice()));
     }
-    ret += ")";
   }
-  ret += "}";
-  return ret;
+
+  return names.empty()
+    ? ""
+    : folly::sformat("[{}]", folly::join(" ", names));
 }
 
 void print_func(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
-
-  out.fmtln(".function{}{}{} {}{}({}){}{{",
-    opt_ubs(finfo.ubs),
+  auto const tparams = func_tparam_names(func);
+  out.fmtln(".function{}{} {} {}{}({}){}{{",
     opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
     format_line_pair(func),
-    opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
+    tparams,
+    type_info(
+      func->returnUserType(),
+      func->returnTypeConstraints()
+    ),
     func->name(),
     func_param_list(finfo),
     func_flag_list(finfo));
@@ -669,7 +655,7 @@ std::string member_tv_initializer(TypedValue cell) {
 
 void print_class_constant(Output& out, const PreClass::Const* cns) {
   switch (cns->kind()) {
-    case ConstModifiers::Kind::Context:
+    case ConstModifierFlags::Kind::Context:
       out.indent();
       out.fmt(".ctx {}", cns->name());
       if (cns->isAbstract()) {
@@ -681,7 +667,7 @@ void print_class_constant(Output& out, const PreClass::Const* cns) {
       out.fmt(";");
       out.nl();
       break;
-    case ConstModifiers::Kind::Value:
+    case ConstModifierFlags::Kind::Value:
       if (cns->isAbstract()) {
         out.fmtln(".const {} isAbstract;", cns->name());
       } else {
@@ -689,7 +675,7 @@ void print_class_constant(Output& out, const PreClass::Const* cns) {
         out.fmtln(".const {} = {};", cns->name(), member_tv_initializer(cns->val()));
       }
       break;
-    case ConstModifiers::Kind::Type:
+    case ConstModifierFlags::Kind::Type:
       out.indent();
       out.fmt(".const {} isType", cns->name());
       if (cns->isAbstract()) {
@@ -706,39 +692,48 @@ void print_class_constant(Output& out, const PreClass::Const* cns) {
 
 const StaticString s_coeffectsProp("86coeffects");
 
-// TODO: T112774575 remove isTest flag when HackC Translator is complete
 template<class T>
-void print_prop_or_field_impl(Output& out, const T& f, bool isTest) {
-  if (isTest && f.name() == s_coeffectsProp.get()) return;
+void print_prop_or_field_impl(Output& out, const T& f) {
   out.fmtln(".property{}{} {}{} =",
     opt_attrs(AttrContext::Prop, f.attrs(), &f.userAttributes()),
-    RuntimeOption::EvalDisassemblerDocComments &&
-    RuntimeOption::EvalDisassemblerPropDocComments
+    Cfg::Eval::DisassemblerDocComments &&
+    Cfg::Eval::DisassemblerPropDocComments
       ? opt_escaped_long(f.docComment())
       : std::string(""),
-    opt_type_info(f.userType(), f.typeConstraint()),
+    type_info(f.userType(), f.typeConstraints()),
     f.name()->data());
   indented(out, [&] {
       out.fmtln("{};", member_tv_initializer(f.val()));
   });
 }
 
-template<bool isTest = false>
 void print_property(Output& out, const PreClass::Prop* prop) {
-  print_prop_or_field_impl(out, *prop, isTest);
+  print_prop_or_field_impl(out, *prop);
+}
+
+std::string cls_tparam_names(const PreClass* preCls) {
+  if (preCls->typeParamNames().empty()) return "";
+  std::vector<std::string> names;
+  for (auto const& name : preCls->typeParamNames()) {
+    names.emplace_back(escaped(name));
+  }
+  return folly::sformat(" [{}]", folly::join(" ", names));
 }
 
 void print_method(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
-  out.fmtln(".method{}{}{}{} {}{}({}){}{{",
-    opt_shadowed_tparams(),
-    opt_ubs(finfo.ubs),
+  out.fmtln(".method{}{} {} {}{}({}){}{{",
     opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
     format_line_pair(func),
-    opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
+    func_tparam_names(func),
+    type_info(
+      func->returnUserType(),
+      func->returnTypeConstraints()
+    ),
     func->name(),
     func_param_list(finfo),
-    func_flag_list(finfo));
+    func_flag_list(finfo)
+  );
   indented(out, [&] {
     print_func_directives(out, finfo);
     print_func_body(out, finfo);
@@ -786,54 +781,25 @@ void print_cls_used_traits(Output& out, const PreClass* cls) {
     out.fmt(" {}", traits[i].get());
   }
 
-  auto& precRules  = cls->traitPrecRules();
-  auto& aliasRules = cls->traitAliasRules();
-  if (precRules.empty() && aliasRules.empty()) {
-    out.fmt(";");
-    out.nl();
-    return;
-  }
-
-  out.fmt(" {{");
+  out.fmt(";");
   out.nl();
-  indented(out, [&] {
-    for (auto& prec : precRules) {
-      out.fmtln("{}::{} insteadof{};",
-        prec.selectedTraitName()->data(),
-        prec.methodName()->data(),
-        [&]() -> std::string {
-          auto ret = std::string{};
-          for (auto& name : prec.otherTraitNames()) {
-            ret += folly::format(" {}", name.get()).str();
-          }
-          return ret;
-        }()
-      );
-    }
-
-    for (auto& alias : aliasRules) {
-      out.fmtln("{}{} as{}{};",
-        alias.traitName()->empty()
-          ? std::string{}
-          : folly::format("{}::", alias.traitName()).str(),
-        alias.origMethodName()->data(),
-        opt_attrs(AttrContext::TraitImport, alias.modifiers()),
-        alias.newMethodName() != alias.origMethodName()
-          ? std::string(" ") + alias.newMethodName()->data()
-          : std::string{}
-      );
-    }
-  });
-  out.fmtln("}}");
 }
 
 void print_requirement(Output& out, const PreClass::ClassRequirement& req) {
-  out.fmtln(".require {} <{}>;", req.is_extends() ? "extends" : "implements",
-            req.name()->data());
+  auto const kind = [&] {
+    switch (req.kind()) {
+      case PreClass::RequirementExtends: return "extends";
+      case PreClass::RequirementImplements: return "implements";
+      case PreClass::RequirementClass: return "class";
+      case PreClass::RequirementThisAs: return "this as";
+    }
+    not_reached();
+  }();
+  out.fmtln(".require {} <{}>;", kind, req.name()->data());
 }
 
 void print_cls_directives(Output& out, const PreClass* cls) {
-  if (RuntimeOption::EvalDisassemblerDocComments) {
+  if (Cfg::Eval::DisassemblerDocComments) {
     if (cls->docComment() && !cls->docComment()->empty()) {
       out.fmtln(".doc {};", escaped_long(cls->docComment()));
     }
@@ -846,20 +812,6 @@ void print_cls_directives(Output& out, const PreClass* cls) {
   for (auto* m : cls->allMethods())    print_method(out, m);
 }
 
-void print_cls_directives_test(Output& out, const PreClass* cls) {
-  if (RuntimeOption::EvalDisassemblerDocComments) {
-    if (cls->docComment() && !cls->docComment()->empty()) {
-      out.fmtln(".doc {};", escaped_long(cls->docComment()));
-    }
-  }
-  print_cls_enum_ty(out, cls);
-  print_cls_used_traits(out, cls);
-  for (auto& r : cls->requirements())  print_requirement(out, r);
-  for (auto& c : cls->allConstants())  print_class_constant(out, &c);
-  for (auto& p : cls->allProperties()) print_property<true>(out, &p);
-}
-
-template<bool isTest = false>
 void print_cls(Output& out, const PreClass* cls) {
   out.indent();
   auto name = cls->name()->toCppString();
@@ -869,45 +821,55 @@ void print_cls(Output& out, const PreClass* cls) {
       name = name.substr(0, p);
     }
   }
-  UBMap cls_ubs;
-  for (auto const& prop : cls->allProperties()) {
-    if (prop.upperBounds().empty()) continue;
-    auto& v = cls_ubs[prop.typeConstraint().typeName()];
-    if (v.empty()) {
-      v.assign(std::begin(prop.upperBounds()), std::end(prop.upperBounds()));
-    }
-  }
 
-  out.fmt(".class {} {} {}{}",
-    opt_ubs(cls_ubs),
+  out.fmt(".class {} {}{} {}",
     opt_attrs(AttrContext::Class, cls->attrs(), &cls->userAttributes()),
     name,
-    format_line_pair(cls));
+    format_line_pair(cls),
+    cls_tparam_names(cls)
+  );
   print_cls_inheritance_list(out, cls);
   print_enum_includes(out, cls);
   out.fmt(" {{");
   out.nl();
-  if (isTest) {
-    indented(out, [&] { print_cls_directives_test(out, cls); });
-  } else {
-    indented(out, [&] { print_cls_directives(out, cls); });
-  }
+  indented(out, [&] { print_cls_directives(out, cls); });
   out.fmtln("}}");
   out.nl();
 }
 
 void print_alias(Output& out, const PreTypeAlias& alias) {
-  auto flags = TypeConstraintFlags::NoFlags;
-  if (alias.nullable) flags = flags | TypeConstraintFlags::Nullable;
-  TypeConstraint constraint(alias.value, flags);
+  std::string type_constraints;
+  for (auto const& tv : eachTypeConstraintInUnion(alias.value)) {
+    if (!type_constraints.empty()) type_constraints.append(",");
+    type_constraints.append(folly::to<std::string>(
+      "<",
+      type_constraint(tv),
+      ">"));
+  }
 
-  out.fmtln(".alias{} {} = <{}> ({}, {}) {};",
+  auto const kind = [&]() {
+    switch (alias.kind) {
+      case AliasKind::TypeAlias: return "alias";
+      case AliasKind::CaseType: return "case_type";
+    }
+  }();
+
+  std::string resolved;
+  if (!alias.resolvedTypeStructure.isNull()) {
+    resolved = folly::to<std::string>(
+      " => ", escaped_long(alias.resolvedTypeStructure.get())
+    );
+  }
+
+  out.fmtln(".{}{} {} = {} ({}, {}) {}{};",
+            kind,
             opt_attrs(AttrContext::Alias, alias.attrs, &alias.userAttrs),
             (const StringData*)alias.name,
-            type_constraint(constraint),
+            type_constraints,
             alias.line0,
             alias.line1,
-            escaped_long(alias.typeStructure.get()));
+            escaped_long(alias.typeStructure.get()),
+            resolved);
 }
 
 void print_constant(Output& out, const Constant& cns) {
@@ -923,6 +885,11 @@ void print_module(Output& out, const Module& m) {
             m.name,
             m.line0,
             m.line1);
+  if (Cfg::Eval::DisassemblerDocComments) {
+    if (m.docComment && !m.docComment->empty()) {
+      out.fmtln(".doc {};", escaped_long(m.docComment));
+    }
+  }
   out.fmtln("}}");
   out.nl();
 }
@@ -989,15 +956,6 @@ void print_unit(Output& out, const Unit* unit) {
   out.fmtln("# {} ends here", unit->origFilepath());
 }
 
-void print_unit_test(Output& out, const Unit* unit) {
-  out.fmtln("# {} starts here", unit->origFilepath());
-  out.nl();
-  for (auto& cls : unit->preclasses())    print_cls<true>(out, cls.get());
-  for (auto& alias : unit->typeAliases()) print_alias(out, alias);
-  for (auto& c : unit->constants())       print_constant(out, c);
-  out.fmtln("# {} ends here", unit->origFilepath());
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -1008,17 +966,11 @@ void print_unit_test(Output& out, const Unit* unit) {
  *
  * - .line/.srcpos directives
  *
- * TODO: T112774575 remove isTest flag when HackC Translator is complete
- *
  */
-std::string disassemble(const Unit* unit, bool isTest) {
+std::string disassemble(const Unit* unit) {
   std::ostringstream os;
   Output out { os };
-  if (isTest) {
-    print_unit_test(out, unit);
-  } else {
-    print_unit(out, unit);
-  }
+  print_unit(out, unit);
   return os.str();
 }
 

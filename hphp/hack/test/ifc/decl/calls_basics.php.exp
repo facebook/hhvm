@@ -1,4 +1,0 @@
-=== IFC analysis results for calls_basics.php
-Decls:
-  class \C: { policied_props = [a:A, b:B] }
-  

@@ -34,7 +34,6 @@ using std::string;
 namespace HPHP { namespace jit {
 
 #if defined(__x86_64__)
-#if defined(HAVE_LIBXED)
 
 const char* OfflineCode::getArchName() { return "X64"; }
 
@@ -152,10 +151,7 @@ TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
 
     // Get disassembled instruction in codeStr
     if (!xed_format_context(xed_syntax, &xedd, codeStr,
-                            MAX_INSTR_ASM_LEN, (uint64_t)ip, nullptr
-#if XED_ENCODE_ORDER_MAX_ENTRIES != 28 // Newer version of XED library
-                            , 0
-#endif
+                            MAX_INSTR_ASM_LEN, (uint64_t)ip, nullptr, 0
                            )) {
       error("disasm error: xed_format_context failed");
     }
@@ -167,7 +163,7 @@ TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
     //    move r10, IMMEDIATE
     //    call r10
     xed_iclass_enum_t iclass = xed_decoded_inst_get_iclass(&xedd);
-    string callDest = "";
+    string callDest;
 
     if (iclass == XED_ICLASS_CALL_NEAR || iclass == XED_ICLASS_CALL_FAR) {
       const xed_inst_t    *xi       = xed_decoded_inst_inst(&xedd);
@@ -229,10 +225,6 @@ TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
   }
   return regionInfo;
 }
-#else
-  // cmake should prevent this.
-#error "tc-print on x86_64 requires libxed"
-#endif
 #endif
 
 } } // HPHP::jit

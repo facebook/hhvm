@@ -17,8 +17,6 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/datatype-macros.h"
 
-#include "hphp/runtime/base/runtime-option.h"
-
 namespace HPHP {
 
 namespace {
@@ -47,6 +45,7 @@ static_assert(!isStringType(KindOfPersistentKeyset),"");
 static_assert(!isStringType(KindOfKeyset),          "");
 static_assert(!isStringType(KindOfObject),          "");
 static_assert(!isStringType(KindOfResource),        "");
+static_assert(!isStringType(KindOfEnumClassLabel),  "");
 
 static_assert(isVecType(KindOfVec),                 "");
 static_assert(isVecType(KindOfPersistentVec),       "");
@@ -63,6 +62,7 @@ static_assert(!isVecType(KindOfPersistentString),   "");
 static_assert(!isVecType(KindOfString),             "");
 static_assert(!isVecType(KindOfObject),             "");
 static_assert(!isVecType(KindOfResource),           "");
+static_assert(!isVecType(KindOfEnumClassLabel),     "");
 
 static_assert(isDictType(KindOfDict),               "");
 static_assert(isDictType(KindOfPersistentDict),     "");
@@ -79,6 +79,7 @@ static_assert(!isDictType(KindOfPersistentString),  "");
 static_assert(!isDictType(KindOfString),            "");
 static_assert(!isDictType(KindOfObject),            "");
 static_assert(!isDictType(KindOfResource),          "");
+static_assert(!isDictType(KindOfEnumClassLabel),    "");
 
 static_assert(isKeysetType(KindOfKeyset),           "");
 static_assert(isKeysetType(KindOfPersistentKeyset), "");
@@ -95,6 +96,7 @@ static_assert(!isKeysetType(KindOfPersistentString),"");
 static_assert(!isKeysetType(KindOfString),          "");
 static_assert(!isKeysetType(KindOfObject),          "");
 static_assert(!isKeysetType(KindOfResource),        "");
+static_assert(!isKeysetType(KindOfEnumClassLabel),  "");
 
 static_assert(isArrayLikeType(KindOfVec),               "");
 static_assert(isArrayLikeType(KindOfPersistentVec),     "");
@@ -111,6 +113,7 @@ static_assert(!isArrayLikeType(KindOfPersistentString), "");
 static_assert(!isArrayLikeType(KindOfString),           "");
 static_assert(!isArrayLikeType(KindOfObject),           "");
 static_assert(!isArrayLikeType(KindOfResource),         "");
+static_assert(!isArrayLikeType(KindOfEnumClassLabel),   "");
 
 static_assert(isNullType(KindOfUninit),            "");
 static_assert(isNullType(KindOfNull),              "");
@@ -127,6 +130,7 @@ static_assert(!isNullType(KindOfPersistentString), "");
 static_assert(!isNullType(KindOfString),           "");
 static_assert(!isNullType(KindOfObject),           "");
 static_assert(!isNullType(KindOfResource),         "");
+static_assert(!isNullType(KindOfEnumClassLabel),   "");
 
 static_assert(isRealType(KindOfUninit), "");
 static_assert(isRealType(KindOfNull), "");
@@ -143,6 +147,7 @@ static_assert(isRealType(KindOfPersistentString), "");
 static_assert(isRealType(KindOfString), "");
 static_assert(isRealType(KindOfObject), "");
 static_assert(isRealType(KindOfResource), "");
+static_assert(isRealType(KindOfEnumClassLabel), "");
 
 static_assert(dt_with_rc(KindOfString) == KindOfString, "");
 static_assert(dt_with_rc(KindOfPersistentString) == KindOfString, "");
@@ -189,6 +194,7 @@ static_assert(!isRefcountedType(KindOfPersistentString), "");
 static_assert(!isRefcountedType(KindOfPersistentVec),    "");
 static_assert(!isRefcountedType(KindOfPersistentDict),   "");
 static_assert(!isRefcountedType(KindOfPersistentKeyset), "");
+static_assert(!isRefcountedType(KindOfEnumClassLabel),   "");
 
 /* Too many cases to test exhaustively, so try to capture most scenarios */
 static_assert(!equivDataTypes(KindOfNull, KindOfUninit),             "");
@@ -217,58 +223,6 @@ static_assert(!equivDataTypes(KindOfString, KindOfPersistentKeyset),"");
 } // namespace
 
 ///////////////////////////////////////////////////////////////////////////////
-
-MaybeDataType get_datatype(
-  const std::string& name,
-  bool can_be_collection,
-  bool is_nullable,
-  bool is_soft
-) {
-  if (can_be_collection) {
-    if (!strcasecmp(name.c_str(), "HH\\vec"))    return KindOfVec;
-    if (!strcasecmp(name.c_str(), "HH\\dict"))   return KindOfDict;
-    if (!strcasecmp(name.c_str(), "HH\\keyset")) return KindOfKeyset;
-    if (!strcasecmp(name.c_str(), "HH\\varray")) return KindOfVec;
-    if (!strcasecmp(name.c_str(), "HH\\darray")) return KindOfDict;
-    if (!strcasecmp(name.c_str(), "HH\\varray_or_darray")) return std::nullopt;
-    if (!strcasecmp(name.c_str(), "HH\\vec_or_dict")) return std::nullopt;
-    if (!strcasecmp(name.c_str(), "HH\\AnyArray")) return std::nullopt;
-    return KindOfObject;
-  }
-  if (is_nullable || is_soft) {
-    return std::nullopt;
-  }
-  if (!strcasecmp(name.c_str(), "null") ||
-      !strcasecmp(name.c_str(), "HH\\null") ||
-      !strcasecmp(name.c_str(), "HH\\void") ||
-      !strcasecmp(name.c_str(), "HH\\noreturn") ||
-      !strcasecmp(name.c_str(), "HH\\nothing")) {
-    return KindOfNull;
-  }
-  if (!strcasecmp(name.c_str(), "HH\\bool"))     return KindOfBoolean;
-  if (!strcasecmp(name.c_str(), "HH\\int"))      return KindOfInt64;
-  if (!strcasecmp(name.c_str(), "HH\\float"))    return KindOfDouble;
-  if (!strcasecmp(name.c_str(), "HH\\num"))      return std::nullopt;
-  if (!strcasecmp(name.c_str(), "HH\\arraykey")) return std::nullopt;
-  if (!strcasecmp(name.c_str(), "HH\\string"))   return KindOfString;
-  if (!strcasecmp(name.c_str(), "HH\\dict"))     return KindOfDict;
-  if (!strcasecmp(name.c_str(), "HH\\vec"))      return KindOfVec;
-  if (!strcasecmp(name.c_str(), "HH\\keyset"))   return KindOfKeyset;
-  if (!strcasecmp(name.c_str(), "HH\\varray"))   return KindOfVec;
-  if (!strcasecmp(name.c_str(), "HH\\darray"))   return KindOfDict;
-  if (!strcasecmp(name.c_str(), "HH\\varray_or_darray")) return std::nullopt;
-  if (!strcasecmp(name.c_str(), "HH\\vec_or_dict")) return std::nullopt;
-  if (!strcasecmp(name.c_str(), "HH\\AnyArray")) return std::nullopt;
-  if (!strcasecmp(name.c_str(), "HH\\resource")) return KindOfResource;
-  if (!strcasecmp(name.c_str(), "HH\\mixed"))    return std::nullopt;
-  if (!strcasecmp(name.c_str(), "HH\\nonnull"))  return std::nullopt;
-  if (!strcasecmp(name.c_str(), "HH\\classname") &&
-      RO::EvalClassPassesClassname) {
-    return std::nullopt;
-  }
-
-  return KindOfObject;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -5,14 +5,14 @@ class ErrorCodes {
     const WARNING = "Warning\n";
     const INFO = "Informational message\n";
 
-    static function print_fatal_error_codes() {
+    static function print_fatal_error_codes() :mixed{
         echo "self::FATAL = " . self::FATAL;
     }
 }
 
 class ErrorCodesDerived extends ErrorCodes {
     const FATAL = "Worst error\n";
-    static function print_fatal_error_codes() {
+    static function print_fatal_error_codes() :mixed{
         echo "self::FATAL = " . self::FATAL;
         echo "parent::FATAL = " . parent::FATAL;
     }

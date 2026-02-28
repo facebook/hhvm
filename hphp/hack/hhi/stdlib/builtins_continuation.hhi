@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,12 +9,9 @@
  */
 
 <<__PHPStdLib>>
-function hphp_create_continuation($clsname, $funcname, $origFuncName, $args = null) { }
-class DummyContinuation {
-  public function __construct() { }
-  public function current() { }
-  public function key() { }
-  public function next() { }
-  public function rewind() { }
-  public function valid() { }
-}
+function hphp_create_continuation(
+  HH\FIXME\MISSING_PARAM_TYPE $clsname,
+  HH\FIXME\MISSING_PARAM_TYPE $funcname,
+  HH\FIXME\MISSING_PARAM_TYPE $origFuncName,
+  HH\FIXME\MISSING_PARAM_TYPE $args = null,
+): HH\FIXME\MISSING_RETURN_TYPE {}

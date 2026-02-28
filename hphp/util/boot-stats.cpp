@@ -103,10 +103,11 @@ ResourceUsage BootStats::Impl::computeDeltaFromLast() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-BootStats::Block::Block(const std::string& name, bool enabled) {
+BootStats::Block::Block(const std::string& name, bool enabled, bool publishWallTime) {
   if (!enabled) return;
   m_name = name;
   m_enabled = true;
+  m_publishWallTime = publishWallTime;
   m_start = ResourceUsage::sinceEpoch();
   Logger::FInfo("BootStats: {}...", name);
 }
@@ -116,6 +117,10 @@ BootStats::Block::~Block() {
   auto total = ResourceUsage::sinceEpoch() - m_start;
   Logger::FInfo("BootStats: {} block done, took {}", m_name, total.toString());
   BootStats::add(m_name, total);
+  if (m_publishWallTime) {
+    auto const counter = ServiceData::createCounter("jit." + m_name + ".time");
+    counter->setValue(std::chrono::duration_cast<std::chrono::milliseconds>(total.wall()).count());     
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -130,17 +135,13 @@ void BootStats::start() {
   BootStats::s_instance = std::make_unique<BootStats::Impl>();
 }
 
-void BootStats::done() {
+void BootStats::done(bool log) {
   if (!s_started) return;
   s_started = false;
 
-  auto total = ResourceUsage::sinceEpoch() - s_start;
-  Logger::FInfo("BootStats: all done, took {} total", total.toString());
-
-  BootStats::s_instance->add("TOTAL", total);
   BootStats::s_instance->dumpMarks();
 
-  if (StructuredLog::enabled()) {
+  if (log && StructuredLog::enabled()) {
     std::lock_guard<std::mutex> lock(s_instance->m_marks_guard_);
     StructuredLogEntry cols;
     for (auto const& sample : s_instance->m_marks) {
@@ -150,8 +151,8 @@ void BootStats::done() {
     for (auto const& strCol : s_instance->m_strs) {
       cols.setStr(strCol.first, strCol.second);
     }
-    for (auto const& intCol : s_instance->m_strs) {
-      cols.setStr(intCol.first, intCol.second);
+    for (auto const& intCol : s_instance->m_ints) {
+      cols.setInt(intCol.first, intCol.second);
     }
     StructuredLog::log("hhvm_boot_timer", cols);
     cols.clear();
@@ -167,6 +168,15 @@ void BootStats::mark(const std::string& info) {
   auto elapsed = BootStats::s_instance->computeDeltaFromLast();
   Logger::FInfo("BootStats: {} done, took {}", info, elapsed.toString());
   BootStats::s_instance->add(info, elapsed);
+}
+
+void BootStats::markFromStart(const std::string& info) {
+  if (!s_started) return;
+  {
+    std::lock_guard<std::mutex> lock(s_instance->m_last_guard_);
+    s_instance->m_last = s_start;
+  }
+  mark(info);
 }
 
 void BootStats::add(const std::string& info, const ResourceUsage value) {

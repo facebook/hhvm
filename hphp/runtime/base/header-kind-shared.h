@@ -34,13 +34,13 @@ namespace HPHP {
 // These values must match the values of the corresponding variants in
 // HeaderKind. This is statically enforced in header-kind.h
 enum class CollectionType : uint8_t {
-  Vector = 0x11,
-  Map = 0x12,
-  Set = 0x13,
-  Pair = 0x14,
-  ImmVector = 0x15,
-  ImmMap = 0x16,
-  ImmSet = 0x17,
+  Vector = 0x12,
+  Map = 0x13,
+  Set = 0x14,
+  Pair = 0x15,
+  ImmVector = 0x16,
+  ImmMap = 0x17,
+  ImmSet = 0x18,
 };
 
 inline constexpr bool isVectorCollection(CollectionType ctype) {

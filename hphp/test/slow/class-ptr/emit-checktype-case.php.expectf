@@ -1,0 +1,7 @@
+
+Notice: Class C was loaded from a string, but it is missing the __DynamicallyReferenced attribute in %s/class-ptr/emit-checktype-case.php on line 9
+hello
+bye
+
+Notice: Class C was loaded from a string, but it is missing the __DynamicallyReferenced attribute in %s/class-ptr/emit-checktype-case.php on line 13
+bye

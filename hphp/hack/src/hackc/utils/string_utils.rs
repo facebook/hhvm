@@ -3,12 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use escaper::*;
-use lazy_static::lazy_static;
-use naming_special_names_rust::{classes as ns_classes, members};
-use regex::Regex;
 use std::borrow::Cow;
 use std::cell::Cell;
+
+use bstr::BStr;
+use escaper::*;
+use lazy_static::lazy_static;
+use naming_special_names_rust::classes as ns_classes;
+use naming_special_names_rust::members;
+use regex::Regex;
 
 lazy_static! {
     static ref HH_NS_RE: Regex = Regex::new(r"^\\?HH\\").unwrap();
@@ -47,7 +50,7 @@ impl std::fmt::Debug for GetName {
     }
 }
 
-thread_local!(static MANGLE_XHP_MODE: Cell<bool> = Cell::new(true));
+thread_local!(static MANGLE_XHP_MODE: Cell<bool> = const { Cell::new(true) });
 
 pub fn without_xhp_mangling<T>(f: impl FnOnce() -> T) -> T {
     MANGLE_XHP_MODE.with(|cur| {
@@ -59,7 +62,7 @@ pub fn without_xhp_mangling<T>(f: impl FnOnce() -> T) -> T {
 }
 
 pub fn is_xhp(name: &str) -> bool {
-    name.chars().next().map_or(false, |c| c == ':')
+    name.starts_with(':')
 }
 
 pub fn clean(s: &str) -> &str {
@@ -79,7 +82,7 @@ pub fn mangle_xhp_id(mut name: String) -> String {
         if is_xhp(&name) {
             name.replace_range(..1, "xhp_")
         }
-        name.replace(":", "__").replace("-", "_")
+        name.replace(':', "__").replace('-', "_")
     } else {
         name
     }
@@ -89,10 +92,10 @@ fn unmangle_xhp_id(name: &str) -> String {
     if name.starts_with("xhp_") {
         format!(
             ":{}",
-            lstrip(name, "xhp_").replace("__", ":").replace("_", "-")
+            lstrip(name, "xhp_").replace("__", ":").replace('_', "-")
         )
     } else {
-        name.replace("__", ":").replace("_", "-")
+        name.replace("__", ":").replace('_', "-")
     }
 }
 
@@ -144,6 +147,10 @@ pub fn strip_global_ns_bslice(s: &[u8]) -> &[u8] {
     s.strip_prefix(b"\\").unwrap_or(s)
 }
 
+pub fn strip_global_ns_bstr(s: &BStr) -> &BStr {
+    s.strip_prefix(b"\\").unwrap_or(s).into()
+}
+
 // Strip zero or more chars followed by a backslash
 pub fn strip_ns(s: &str) -> &str {
     s.rfind('\\').map_or(s, |i| &s[i + 1..])
@@ -189,8 +196,12 @@ pub fn is_static(s: impl AsRef<str>) -> bool {
     s.as_ref().eq_ignore_ascii_case(ns_classes::STATIC)
 }
 
+pub fn class_id_is_dynamic(s: &str) -> bool {
+    is_self(s) || is_parent(s) || is_static(s)
+}
+
 pub fn is_class(s: impl AsRef<str>) -> bool {
-    s.as_ref().eq_ignore_ascii_case(members::M_CLASS)
+    s.as_ref() == members::M_CLASS
 }
 
 pub fn mangle_meth_caller(mangled_cls_name: &str, f_name: &str) -> String {
@@ -326,14 +337,23 @@ pub mod closures {
 }
 
 pub mod reified {
+    #[derive(Debug, PartialEq, Eq)]
+    pub enum ReifiedTparam {
+        Fun(usize),
+        Class(usize),
+    }
+
     pub static PROP_NAME: &str = "86reified_prop";
     pub static INIT_METH_NAME: &str = "86reifiedinit";
     pub static INIT_METH_PARAM_NAME: &str = "$__typestructures";
     pub static GENERICS_LOCAL_NAME: &str = "$0ReifiedGenerics";
     pub static CAPTURED_PREFIX: &str = "$__captured$reifiedgeneric$";
 
-    pub fn reified_generic_captured_name(is_fun: bool, i: usize) -> String {
-        let type_ = if is_fun { "function" } else { "class" };
+    pub fn reified_generic_captured_name(i: ReifiedTparam) -> String {
+        let (type_, i) = match i {
+            ReifiedTparam::Fun(i) => ("function", i),
+            ReifiedTparam::Class(i) => ("class", i),
+        };
         // to_string() due to T52404885
         format!("$__captured$reifiedgeneric${}${}", type_, i)
     }
@@ -351,7 +371,7 @@ pub mod reified {
         )
     }
 
-    pub fn is_captured_generic(id: &str) -> Option<(bool, u32)> {
+    pub fn get_captured_generic(id: &str) -> Option<ReifiedTparam> {
         if id.starts_with(CAPTURED_PREFIX) {
             if let [name, i] = id
                 .trim_start_matches(CAPTURED_PREFIX)
@@ -359,14 +379,10 @@ pub mod reified {
                 .collect::<Vec<_>>()
                 .as_slice()
             {
-                let is_captured = match *name {
-                    "function" => true,
-                    "class" => false,
-                    _ => return None,
-                };
-                let captured_id = i.parse();
-                if let Ok(captured) = captured_id {
-                    return Some((is_captured, captured));
+                return match *name {
+                    "function" => i.parse().map_or(None, |i| Some(ReifiedTparam::Fun(i))),
+                    "class" => i.parse().map_or(None, |i| Some(ReifiedTparam::Class(i))),
+                    _ => None,
                 };
             }
         };
@@ -511,9 +527,11 @@ mod string_utils_tests {
     fn is_class_test() {
         let s1 = "class";
         let s2 = "not_a_class";
+        let s3 = "CLASS";
 
         assert!(super::is_class(s1));
         assert!(!super::is_class(s2));
+        assert!(!super::is_class(s3));
     }
 
     #[test]
@@ -634,7 +652,7 @@ mod string_utils_tests {
 
         #[test]
         fn test_negative_nan() {
-            assert_eq!(float::to_string(-std::f32::NAN), "NAN")
+            assert_eq!(float::to_string(-f32::NAN), "NAN")
         }
     }
 
@@ -869,16 +887,16 @@ mod string_utils_tests {
         #[test]
         fn test_is_captured_generic() {
             assert_eq!(
-                reified::is_captured_generic("$__captured$reifiedgeneric$function$1"),
-                Some((true, 1))
+                reified::get_captured_generic("$__captured$reifiedgeneric$function$1"),
+                Some(reified::ReifiedTparam::Fun(1))
             );
             assert_eq!(
-                reified::is_captured_generic("$__captured$reifiedgeneric$class$1"),
-                Some((false, 1))
+                reified::get_captured_generic("$__captured$reifiedgeneric$class$1"),
+                Some(reified::ReifiedTparam::Class(1))
             );
-            assert_eq!(reified::is_captured_generic("function$1"), None);
+            assert_eq!(reified::get_captured_generic("function$1"), None);
             assert_eq!(
-                reified::is_captured_generic("$__captured$reifiedgeneric$function1"),
+                reified::get_captured_generic("$__captured$reifiedgeneric$function1"),
                 None
             );
         }

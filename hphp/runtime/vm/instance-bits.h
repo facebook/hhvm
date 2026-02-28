@@ -26,7 +26,9 @@
 
 namespace HPHP {
 
+struct Class;
 struct StringData;
+
 namespace jit {
 struct ProfDataSerializer;
 struct ProfDataDeserializer;
@@ -69,7 +71,7 @@ template<class Init, class Uninit>
 void ifInitElse(Init init, Uninit uninit) {
   if (g_initFlag.load(std::memory_order_acquire)) return init();
 
-  folly::SharedMutex::ReadHolder l(g_clsInitLock);
+  std::shared_lock l(g_clsInitLock);
 
   if (g_initFlag.load(std::memory_order_acquire)) {
     init();
@@ -79,9 +81,9 @@ void ifInitElse(Init init, Uninit uninit) {
 }
 
 /*
- * Called to record an instanceof check for `name', during the warmup phase.
+ * Called to record an instanceof check for `cls'.
  */
-void profile(const StringData* name);
+void profile(const Class* cls);
 
 /*
  * Query or ensure the initialized state of InstanceBits. All calls to lookup()
@@ -120,4 +122,3 @@ void deserialize(jit::ProfDataDeserializer&);
 //////////////////////////////////////////////////////////////////////
 
 }
-

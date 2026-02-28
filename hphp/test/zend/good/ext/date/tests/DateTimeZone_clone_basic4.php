@@ -1,7 +1,7 @@
 <?hh
 
 class DateTimeZoneExt1 extends DateTimeZone {
-	public function __clone() {
+	public function __clone() :mixed{
 		echo "-- DateTimeExt1 __clone magic method called --\n"; 
 	}
 }

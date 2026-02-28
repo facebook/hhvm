@@ -3,12 +3,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use bumpalo::Bump;
-use serde::de::{
-    DeserializeSeed, Deserializer, EnumAccess, MapAccess, SeqAccess, VariantAccess, Visitor,
-};
+use std::any;
+use std::fmt;
 use std::marker::PhantomData;
-use std::{any, fmt, mem};
+use std::mem;
+
+use bumpalo::Bump;
+use serde::de::DeserializeSeed;
+use serde::de::Deserializer;
+use serde::de::EnumAccess;
+use serde::de::MapAccess;
+use serde::de::SeqAccess;
+use serde::de::VariantAccess;
+use serde::de::Visitor;
 
 #[repr(C)]
 pub struct ArenaDeserializer<'arena, 'de, D> {

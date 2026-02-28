@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function apply<T>(
   (function(T): T) $func,

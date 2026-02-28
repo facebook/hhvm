@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/vm/class-meth-data.h"
 
-#include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/util/hash-map.h"
@@ -36,22 +35,14 @@ ClsMethDataMap s_map;
 
 #endif
 
-template <class T>
-static ClsMethData::low_storage_t to_low(T* px) {
-  ClsMethData::low_storage_t ones = ~0;
-  auto ptr = reinterpret_cast<uintptr_t>(px);
-  always_assert((ptr & ones) == ptr);
-  return (ClsMethData::low_storage_t)(ptr);
-}
-
 }
 
 ClsMethData::ClsMethData(Class* cls, Func* func)
-  : m_cls{to_low(cls)}
-  , m_func{to_low(func)} {
+  : m_cls{cls}
+  , m_func{func} {
   assertx(cls);
   assertx(func);
-};
+}
 
 ClsMethData::cls_meth_t ClsMethData::make(Class* cls, Func* func) {
 #ifdef USE_LOWPTR

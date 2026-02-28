@@ -7,7 +7,7 @@
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 
 	
-	$err_type = darray [
+	$err_type = dict[
 				1	=> "Error",			// E_ERROR
 				2	=> "Warning",			// E_WARINING
 				4	=> "Parsing Error",	// E_PARSE
@@ -37,7 +37,7 @@ function set_custom_error_handler() {
 
 // Var def for testing
 function t_ary() {
-	return darray[
+	return dict[
 		's1' => '���ܸ�EUC-JP��ʸ����',
 		's2' => 'English Text'
 		];

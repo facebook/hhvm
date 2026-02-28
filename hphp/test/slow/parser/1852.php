@@ -2,10 +2,10 @@
 
 
 <<__EntryPoint>>
-function main_1852() {
+function main_1852() :mixed{
 ($a) = 1;
 var_dump($a);
-$b = varray[];
+$b = vec[];
 ($b)[] = 2;
 var_dump($b[0]);
 $c = new stdClass;

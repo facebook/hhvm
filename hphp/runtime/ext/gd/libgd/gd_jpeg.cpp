@@ -27,11 +27,10 @@
 #include <limits.h>
 #include <string.h>
 
-#include "gd.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
 /* TBB: move this up so include files are not brought in */
 /* JCE: arrange HAVE_LIBJPEG so that it can be set in gd.h */
-#ifdef HAVE_GD_JPG
-#include "gdhelpers.h"
+#include "hphp/runtime/ext/gd/libgd/gdhelpers.h"
 #undef HAVE_STDLIB_H
 
 /* 1.8.1: remove dependency on jinclude.h */
@@ -42,11 +41,10 @@ static const char *const GD_JPEG_VERSION = "1.0";
 
 namespace {
 
-typedef struct _jmpbuf_wrapper
-{
+struct jmpbuf_wrapper {
   jmp_buf jmpbuf;
   int ignore_warning;
-} jmpbuf_wrapper;
+};
 
 }
 
@@ -444,8 +442,8 @@ gdImagePtr gdImageCreateFromJpegCtxEx (gdIOCtx * infile, int ignore_warning)
 
   if (cinfo.out_color_space == JCS_CMYK) {
     for (i = 0; i < cinfo.output_height; i++) {
-      register JSAMPROW currow = row;
-      register int *tpix = im->tpixels[i];
+      JSAMPROW currow = row;
+      int *tpix = im->tpixels[i];
       nrows = jpeg_read_scanlines (&cinfo, rowptr, 1);
       if (nrows != 1) {
         php_gd_error_ex(E_WARNING, "gd-jpeg: error: jpeg_read_scanlines returns %u, expected 1", nrows);
@@ -457,8 +455,8 @@ gdImagePtr gdImageCreateFromJpegCtxEx (gdIOCtx * infile, int ignore_warning)
     }
   } else {
     for (i = 0; i < cinfo.output_height; i++) {
-      register JSAMPROW currow = row;
-      register int *tpix = im->tpixels[i];
+      JSAMPROW currow = row;
+      int *tpix = im->tpixels[i];
       nrows = jpeg_read_scanlines (&cinfo, rowptr, 1);
       if (nrows != 1) {
         php_gd_error_ex(E_WARNING, "gd-jpeg: error: jpeg_read_scanlines returns %u, expected 1", nrows);
@@ -515,16 +513,15 @@ static int CMYKToRGB(int c, int m, int y, int k, int inverted)
 
 /* Expanded data source object for gdIOCtx input */
 
-typedef struct
-{
+struct my_source_mgr {
   struct jpeg_source_mgr pub; /* public fields */
 
   gdIOCtx *infile;    /* source stream */
   unsigned char *buffer;  /* start of buffer */
   boolean start_of_file;  /* have we gotten any data yet? */
-} my_source_mgr;
+};
 
-typedef my_source_mgr *my_src_ptr;
+using my_src_ptr = my_source_mgr *;
 
 #define INPUT_BUF_SIZE  4096  /* choose an efficiently fread'able size */
 
@@ -719,14 +716,13 @@ void jpeg_gdIOCtx_src (j_decompress_ptr cinfo, gdIOCtx * infile)
 
 /* Expanded data destination object for stdio output */
 
-typedef struct
-{
+struct my_destination_mgr {
   struct jpeg_destination_mgr pub; /* public fields */
   gdIOCtx *outfile;    /* target stream */
   unsigned char *buffer;     /* start of buffer */
-} my_destination_mgr;
+};
 
-typedef my_destination_mgr *my_dest_ptr;
+using my_dest_ptr = my_destination_mgr *;
 
 #define OUTPUT_BUF_SIZE  4096 /* choose an efficiently fwrite'able size */
 
@@ -832,5 +828,3 @@ void jpeg_gdIOCtx_dest (j_compress_ptr cinfo, gdIOCtx * outfile)
   dest->pub.term_destination = term_destination;
   dest->outfile = outfile;
 }
-
-#endif /* HAVE_JPEG */

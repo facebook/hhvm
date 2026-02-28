@@ -3,7 +3,7 @@
 class c{
 
 }
-function main($o) {
+function main($o) :mixed{
   if (false) {}
   $o->foo();
 }

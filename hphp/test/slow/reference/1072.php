@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_1072() {
-$a = varray[1, 2];
+function main_1072() :mixed{
+$a = vec[1, 2];
  foreach ($a as $b) {
  $b++;
 }

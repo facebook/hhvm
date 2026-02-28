@@ -13,6 +13,7 @@ type mode =
   | To_bser
   | To_json
   | Roundtrip
+[@@warning "-unused-constructor" (* remove when implemented *)]
 
 let run_test mode path : unit =
   match mode with

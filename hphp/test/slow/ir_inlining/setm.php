@@ -7,18 +7,18 @@ class SetM {
     $this->x = "asdasd";
   }
 
-  public function clearX() {
+  public function clearX() :mixed{
     $this->x = null;
   }
 }
 
-function main() {
+function main() :mixed{
   $x = new SetM();
   $x->clearX();
 }
 
 
 <<__EntryPoint>>
-function main_setm() {
+function main_setm() :mixed{
 main();
 }

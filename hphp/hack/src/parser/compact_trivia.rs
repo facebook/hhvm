@@ -6,25 +6,27 @@
 
 use bitflags::bitflags;
 
-use crate::{
-    lexable_trivia::LexableTrivia, minimal_trivia::MinimalTrivium,
-    trivia_factory::SimpleTriviaFactory, trivia_kind::TriviaKind,
-};
+use crate::lexable_trivia::LexableTrivia;
+use crate::minimal_trivia::MinimalTrivium;
+use crate::trivia_factory::SimpleTriviaFactory;
+use crate::trivia_kind::TriviaKind;
 
 bitflags! {
-    pub struct TriviaKinds : u8 {
-        const WHITE_SPACE        = 1 << TriviaKind::WhiteSpace as u8;
-        const END_OF_LINE        = 1 << TriviaKind::EndOfLine as u8;
-        const DELIMITED_COMMENT  = 1 << TriviaKind::DelimitedComment as u8;
-        const SINGLELINE_COMMENT = 1 << TriviaKind::SingleLineComment as u8;
-        const FIX_ME             = 1 << TriviaKind::FixMe as u8;
-        const IGNORE_ERROR       = 1 << TriviaKind::IgnoreError as u8;
-        const FALL_THROUGH       = 1 << TriviaKind::FallThrough as u8;
-        const EXTRA_TOKEN_ERROR  = 1 << TriviaKind::ExtraTokenError as u8;
-        // NB: There are currently exactly 8 TriviaKinds, so we cannot add more
-        // without changing the representation of this bitflags type. Making it
-        // larger would require changing CompactToken too, since it currently
-        // depends upon TriviaKinds fitting into a u8.
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
+    pub struct TriviaKinds : u16 {
+        const WHITE_SPACE        = 1 << TriviaKind::WhiteSpace as u16;
+        const END_OF_LINE        = 1 << TriviaKind::EndOfLine as u16;
+        const DELIMITED_COMMENT  = 1 << TriviaKind::DelimitedComment as u16;
+        const SINGLELINE_COMMENT = 1 << TriviaKind::SingleLineComment as u16;
+        const FIX_ME             = 1 << TriviaKind::FixMe as u16;
+        const IGNORE             = 1 << TriviaKind::Ignore as u16;
+        const IGNORE_ERROR       = 1 << TriviaKind::IgnoreError as u16;
+        const FALL_THROUGH       = 1 << TriviaKind::FallThrough as u16;
+        const EXTRA_TOKEN_ERROR  = 1 << TriviaKind::ExtraTokenError as u16;
+        // NB: If we need more than 16 TriviaKinds, making this a u32
+        // may require changing CompactToken too, since SmallToken currently
+        // relies upon TriviaKinds fitting into a u16 in order to itself fit into
+        // 2 64-bit words.
     }
 }
 
@@ -36,6 +38,7 @@ impl TriviaKinds {
             TriviaKind::DelimitedComment => Self::DELIMITED_COMMENT,
             TriviaKind::SingleLineComment => Self::SINGLELINE_COMMENT,
             TriviaKind::FixMe => Self::FIX_ME,
+            TriviaKind::Ignore => Self::IGNORE,
             TriviaKind::IgnoreError => Self::IGNORE_ERROR,
             TriviaKind::FallThrough => Self::FALL_THROUGH,
             TriviaKind::ExtraTokenError => Self::EXTRA_TOKEN_ERROR,

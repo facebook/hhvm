@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/jit.h"
 
 namespace HPHP::jit::irlower {
 
@@ -189,7 +190,7 @@ void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
     auto const data = materialize(v, dataSrc);
     auto const sf = v.makeReg();
     if (type < TObj) {
-      emitCmpLowPtr(v, sf, type.clsSpec().cls(),
+      emitCmpPackedPtr(v, sf, type.clsSpec().cls(),
                     data[ObjectData::getVMClassOffset()]);
     } else {
       v << cmpq{v.cns(type.clsSpec().cls()), data, sf};
@@ -225,7 +226,7 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
                   Loc typeSrc, Loc dataSrc, Vreg sf, JmpFn doJcc) {
   // Note: If you add new supported type tests, you should update
   // negativeCheckType() to indicate whether it is precise or not.
-  always_assert(!type.hasConstVal());
+  always_assert(type <= TCls || !type.hasConstVal());
   always_assert_flog(
     !type.subtypeOfAny(TCountedStr, TPersistentArrLike),
     "Unsupported type in emitTypeTest(): {}", type
@@ -236,7 +237,7 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
 
   // Profile the type being guarded. We skip TUncounted here because that's
   // handled in emitIsTVTypeRefCounted, which has a number of other callers.
-  if (RuntimeOption::EvalJitProfileGuardTypes && type != TUncounted) {
+  if (Cfg::Jit::ProfileGuardTypes && type != TUncounted) {
     emitProfileGuardType(v, type);
   }
 

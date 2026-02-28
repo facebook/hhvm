@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_835() {
+function main_835() :mixed{
 $c1 = Map {
 'a' => 0, 'b' => 3, 'c' => 6, 'd' => 9}
 ;

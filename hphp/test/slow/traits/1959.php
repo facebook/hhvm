@@ -1,16 +1,16 @@
 <?hh
 
 trait Company {
-  public function getName() {
+  public function getName() :mixed{
     return 'Facebook';
   }
 }
 class English {
   use Company;
-  public function getHi() {
+  public function getHi() :mixed{
     return "Hi ";
   }
-  public function sayHello() {
+  public function sayHello() :mixed{
     echo $this->getHi() . $this->getName();
   }
 }

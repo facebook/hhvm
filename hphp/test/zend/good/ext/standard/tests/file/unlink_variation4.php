@@ -8,7 +8,7 @@
 
 
 // temp file used
-$filename = __SystemLib\hphp_test_tmppath('unlink_variation4.tmp');
+$filename = sys_get_temp_dir().'/'.'unlink_variation4.tmp';
 
 echo "*** Testing unlink() on deleted file ***\n";
 // create temp file

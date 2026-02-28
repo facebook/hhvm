@@ -1,3 +1,3 @@
-<?hh // strict
+<?hh
 
 type Foo<T> = Bar\X<T>;

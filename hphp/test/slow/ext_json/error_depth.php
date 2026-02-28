@@ -1,10 +1,10 @@
 <?hh
 
 <<__EntryPoint>>
-function main_error_depth() {
-  $array = varray[];
+function main_error_depth() :mixed{
+  $array = vec[];
   for ($i=0; $i<550; $i++) {
-    $array = varray[$array];
+    $array = vec[$array];
   }
 
   $error = null;

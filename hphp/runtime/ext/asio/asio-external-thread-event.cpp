@@ -16,7 +16,6 @@
 */
 
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
-#include <thread>
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 

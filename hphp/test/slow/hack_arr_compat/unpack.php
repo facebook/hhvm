@@ -1,6 +1,6 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(unpack("c*", "hello"));
 }

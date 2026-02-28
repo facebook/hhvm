@@ -6,7 +6,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
 type 'a t = {
   incoming: 'a list;
   outgoing: 'a list;

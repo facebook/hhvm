@@ -1,10 +1,10 @@
 <?hh
 
-function cmp($a, $b) {
+function cmp($a, $b) :mixed{
   throw new Exception('Surprise!');
 }
-function test() {
-  $a = varray[1,2,3];
+function test() :mixed{
+  $a = vec[1,2,3];
   try {
     usort(inout $a, cmp<>);
     var_dump('unreached');
@@ -15,6 +15,6 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_1774() {
+function main_1774() :mixed{
 test();
 }

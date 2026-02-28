@@ -19,11 +19,12 @@
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/str-key-table.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
+
+#include "hphp/util/blob-encoder.h"
 
 #include <folly/Likely.h>
 
@@ -41,11 +42,17 @@ struct Array;
 struct MakeUncountedEnv;
 struct String;
 struct StringData;
+struct Unit;
+struct UnitEmitter;
 struct Variant;
 
 namespace bespoke {
   struct LoggingArray;
   struct MonotypeVec;
+
+  namespace detail_struct_data_layout {
+    struct TypePosValLayout;
+  }
 
   // Type-safe layout index, so that we can't mix it up with other ints.
   struct LayoutIndex {
@@ -136,6 +143,12 @@ struct ArrayData : MaybeCountable {
    * for arrays produced by native constructors - e.g. builtins, varargs.
    */
   static auto constexpr kSampledArray = 8;
+
+  /*
+   * Indicates that this array-like may have ref-counted elements. Currently
+   * this bit is used only for StructDicts.
+   */
+  static auto constexpr kMayContainCounted = 16;
 
   /*
    * See notes on the m_layout_index field for constraints on this value.
@@ -380,6 +393,14 @@ public:
   TypedValue get(const Variant& k, bool error = false) const;
 
   /*
+   * Set the element at position `pos' to `v'. `v' must be a TInitCell.
+   *
+   * Returns `this' if copy/escalation are not needed, or a copied/escalated
+   * array data if they are.
+   */
+  ArrayData* setPosMove(ssize_t pos, TypedValue v);
+
+  /*
    * Set the element at key `k' to `v'. `v' must be a TInitCell.
    *
    * Semantically, setMove() methods 1) do a set, 2) dec-ref the value, and
@@ -512,6 +533,13 @@ public:
   ArrayData* copy() const;
 
   /////////////////////////////////////////////////////////////////////////////
+  // Allocation for static arrays
+
+  static void* AllocStatic(size_t size);
+
+  static void FreeStatic(void* ptr);
+
+  /////////////////////////////////////////////////////////////////////////////
   // Other functions.
   //
   // You should avoid adding methods to this section.  If the logic you're
@@ -571,7 +599,7 @@ public:
    */
   template <typename Fn, class... Args> ALWAYS_INLINE
   static typename std::enable_if<
-    std::is_same<typename std::result_of<Fn(Args...)>::type, void>::value,
+    std::is_same<typename std::invoke_result<Fn, Args...>::type, void>::value,
     bool
   >::type call_helper(Fn f, Args&&... args) {
     f(std::forward<Args>(args)...);
@@ -580,7 +608,7 @@ public:
 
   template <typename Fn, class... Args> ALWAYS_INLINE
   static typename std::enable_if<
-    std::is_same<typename std::result_of<Fn(Args...)>::type, bool>::value,
+    std::is_same<typename std::invoke_result<Fn, Args...>::type, bool>::value,
     bool
   >::type call_helper(Fn f, Args&&... args) {
     return f(std::forward<Args>(args)...);
@@ -641,6 +669,7 @@ protected:
   friend struct c_ImmMap;
   friend struct bespoke::LoggingArray;
   friend struct bespoke::MonotypeVec;
+  friend struct bespoke::detail_struct_data_layout::TypePosValLayout;
 
   uint32_t m_size;
 
@@ -747,6 +776,7 @@ struct ArrayFunctions {
   TypedValue (*getPosKey[NK])(const ArrayData*, ssize_t pos);
   TypedValue (*getPosVal[NK])(const ArrayData*, ssize_t pos);
   bool (*posIsValid[NK])(const ArrayData*, ssize_t pos);
+  ArrayData* (*setPosMove[NK])(ArrayData*, ssize_t pos, TypedValue v);
   ArrayData* (*setIntMove[NK])(ArrayData*, int64_t k, TypedValue v);
   ArrayData* (*setStrMove[NK])(ArrayData*, StringData* k, TypedValue v);
   bool (*isVectorData[NK])(const ArrayData*);
@@ -798,6 +828,24 @@ extern const ArrayFunctions g_array_funcs;
 [[noreturn]] void throwInvalidKeysetOperation();
 [[noreturn]] void throwVarrayUnsetException();
 [[noreturn]] void throwVecUnsetException();
+
+///////////////////////////////////////////////////////////////////////////////
+
+template<>
+struct BlobEncoderHelper<const ArrayData*> {
+  static void serde(BlobEncoder&, const ArrayData*);
+  static void serde(BlobDecoder&, const ArrayData*&,
+                    bool makeStatic = true);
+
+  // If set, will utilize the UnitEmitter's array table.
+  static __thread UnitEmitter* tl_unitEmitter;
+  // Likewise, but only for lazy loading (so only deserializing
+  // supported).
+  static __thread Unit* tl_unit;
+  // If true, will ignore tl_unitEmitter/tl_unit for top array, but
+  // not for any children.
+  static __thread bool tl_defer;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 

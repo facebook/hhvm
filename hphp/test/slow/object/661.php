@@ -14,7 +14,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $obj = new A(1, 2, 3, 4);
   foreach ($obj as $key => $val) {
     if ($val == 2) {

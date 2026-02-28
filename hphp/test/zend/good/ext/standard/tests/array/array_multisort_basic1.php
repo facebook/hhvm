@@ -8,8 +8,8 @@
 echo "*** Testing array_multisort() : basic functionality ***\n";
 
 // Initialise all required variables
-$ar1 = darray["row1" => 2, "row2" => 1, "row3" => 1];
-$ar2 = darray["row1" => "2", "row2" => "aa", "row3" => "1"];
+$ar1 = dict["row1" => 2, "row2" => 1, "row3" => 1];
+$ar2 = dict["row1" => "2", "row2" => "aa", "row3" => "1"];
 
 echo "\n-- Testing array_multisort() function with all normal arguments --\n";
 $asc = SORT_ASC;

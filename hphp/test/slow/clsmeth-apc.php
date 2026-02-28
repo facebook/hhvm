@@ -1,14 +1,14 @@
 <?hh
 
-class C { static function f() {} }
+class C { static function f() :mixed{} }
 
 <<__EntryPoint>>
-function main() {
-  apc_store('mainf', class_meth(C::class, 'f'));
-  apc_store('maina', varray[1, class_meth(C::class, 'f'), 'foo']);
+function main() :mixed{
+  apc_store('mainf', C::f<>);
+  apc_store('maina', vec[1, C::f<>, 'foo']);
 
-  apc_store('sysf', class_meth(Map::class, 'fromItems'));
-  apc_store('sysa', varray[10, class_meth(Map::class, 'fromItems'), 'foo']);
+  apc_store('sysf', HH\Map::fromItems<>);
+  apc_store('sysa', vec[10, HH\Map::fromItems<>, 'foo']);
 
   var_dump(__hhvm_intrinsics\apc_fetch_no_check('mainf'));
   var_dump(__hhvm_intrinsics\apc_fetch_no_check('maina'));

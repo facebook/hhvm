@@ -1,0 +1,44 @@
+exception MyException
+break list
+run
+exception NotAnException
+break list
+break clear all
+exception Exception
+break list
+@ throw_exception()
+break clear all
+run
+exception MyException
+@ throw_myexception()
+break clear all
+run
+exception error
+@ error_undefined_class()
+break clear all
+run
+exception Exception
+@ \Outer\throw_exception()
+break clear all
+run
+exception \Outer\MyException
+@ Outer\throw_myexception()
+break clear all
+run
+exception error
+@ \Outer\error_undefined_class()
+break clear all
+run
+exception Exception
+@ \Outer\Inner\throw_exception()
+break clear all
+run
+exception Outer\Inner\MyException
+@ Outer\Inner\throw_myexception()
+break clear all
+run
+exception error
+@ \Outer\Inner\error_undefined_class()
+break clear all
+run
+quit

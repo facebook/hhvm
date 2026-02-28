@@ -18,7 +18,6 @@
 #include "hphp/runtime/server/fastcgi/fastcgi-server.h"
 #include "hphp/util/logger.h"
 
-#include <folly/Memory.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 
@@ -136,7 +135,7 @@ bool KVParser::parseKeyValueLength(Cursor& cursor,
     return false;
   }
   auto peeked = cursor.peek();
-  if (*peeked.first & 0x80) { // highest bit is set
+  if (*peeked.data() & 0x80) { // highest bit is set
     if (available < sizeof(uint32_t)) {
       return false;
     }
@@ -227,6 +226,10 @@ void FastCGISession::dropConnection(const std::string& /* errorMsg */) {
 }
 
 void FastCGISession::dumpConnectionState(uint8_t /*loglevel*/) { /* nop */
+}
+
+const folly::SocketAddress& FastCGISession::getPeerAddress() const noexcept {
+  return m_peerAddr;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

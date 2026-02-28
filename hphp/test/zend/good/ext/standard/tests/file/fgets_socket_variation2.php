@@ -3,7 +3,7 @@ const LINE_OF_DATA = "12345678\n";
 
 // create a file
 <<__EntryPoint>> function main(): void {
-$filename = __SystemLib\hphp_test_tmppath('fgets_socket_variation2.tmp');
+$filename = sys_get_temp_dir().'/'.'fgets_socket_variation2.tmp';
 $fd = fopen($filename, "w+");
 
 // populate the file with lines of data
@@ -17,11 +17,13 @@ for ($i=0; $i<100; $i++) {
   /* Setup socket server */
   $errno = null;
   $errstr = null;
-  $server = @stream_socket_server(
+  error_reporting(0);
+  $server = stream_socket_server(
     "tcp://127.0.0.1:$port",
     inout $errno,
     inout $errstr
   );
+  error_reporting(E_ALL);
   if ($server) {
     break;
   }
@@ -31,7 +33,7 @@ for ($i=0; $i<100; $i++) {
 $client = fsockopen("tcp://127.0.0.1:$port", -1, inout $errno, inout $errstr);
 
 if (!$client) {
-    die("Unable to create socket");
+    exit("Unable to create socket");
 }
 
 /* Accept that connection */

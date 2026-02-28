@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : string formats with float values ***\n";
 
 // array of float values 
-$float_values = varray[
+$float_values = vec[
   -2147483649,
   2147483648,
   -0x80000001, // float value, beyond max negative int
@@ -26,7 +26,7 @@ $float_values = varray[
 ];
 
 // array of string formats
-$string_formats = varray[ 
+$string_formats = vec[ 
   "%s", "%hs", "%ls", 
   "%Ls"," %s", "%s ", 
   "\t%s", "\n%s", "%4s",

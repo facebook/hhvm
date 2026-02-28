@@ -2,11 +2,11 @@
 
 -- Testing wordwrap() function with Zero arguments --
 
-Warning: wordwrap() expects at least 1 parameter, 0 given in %s/wordwrap_error.php on line 11
+Warning: wordwrap() expects at least 1 positional parameter, 0 given in %s/wordwrap_error.php on line 11
 
 -- Testing wordwrap() function with more than expected no. of arguments --
 
-Warning: wordwrap() expects at most 4 parameters, 5 given in %s/wordwrap_error.php on line 21
+Warning: wordwrap() expects at most 4 positional parameters, 5 given in %s/wordwrap_error.php on line 21
 
 -- Testing wordwrap() function with negative/zero value for width argument --
 -- width = 0 & cut = false --

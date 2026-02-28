@@ -1,8 +1,0 @@
-File "switch_bad.php", line 5, characters 11-12:
-This switch statement is not exhaustive. The expression it scrutinises has a type with infinitely many values and the statement does not have a default case. If none of the cases match, an exception will be thrown. Consider adding a default case. (Lint[5640])
-File "switch_bad.php", line 6, characters 10-14:
-Switch statements use `===` equality. Comparing values of type `string` with `float` may not give the desired result. (Lint[5614])
-File "switch_bad.php", line 14, characters 11-12:
-This switch statement is not exhaustive. The expression it scrutinises has a type with infinitely many values and the statement does not have a default case. If none of the cases match, an exception will be thrown. Consider adding a default case. (Lint[5640])
-File "switch_bad.php", line 15, characters 10-16:
-Switch statements use `===` equality. Comparing values of type `B` with `A` may not give the desired result. (Lint[5614])

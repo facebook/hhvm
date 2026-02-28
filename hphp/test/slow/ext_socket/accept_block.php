@@ -2,13 +2,13 @@
 
 
 <<__EntryPoint>>
-function main_accept_block() {
+function main_accept_block() :mixed{
 $socket = null;
 while (!$socket) {
   $port = rand(50000, 65535);
   $errno = null;
   $errstr = null;
-  $socket = @stream_socket_server(
+  $socket = stream_socket_server(
     "tcp://127.0.0.1:$port",
     inout $errno,
     inout $errstr,

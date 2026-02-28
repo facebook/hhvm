@@ -1,0 +1,10 @@
+#
+#  Example Makefile for building the jxpretty example
+#
+
+CC = gcc
+
+jxpretty:
+	$(CC) -o $@ -std=c99 -Wall -Wextra -O2 -Isrc \
+		src/duktape.c examples/jxpretty/jxpretty.c \
+		-lm

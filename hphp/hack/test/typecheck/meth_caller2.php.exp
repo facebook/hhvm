@@ -1,6 +1,0 @@
-File "meth_caller2.php", line 17, characters 10-37:
-Invalid return type (Typing[4110])
-File "meth_caller2.php", line 16, characters 32-34:
-Expected `int`
-File "meth_caller2.php", line 13, characters 26-29:
-But got `void`

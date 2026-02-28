@@ -1,0 +1,152 @@
+ERROR: File "tconst_mixed_upper_bound_tany.php", line 17, characters 3-22:
+You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error 2129 in declarations (Naming[2129])
+ERROR: File "tconst_mixed_upper_bound_tany.php", line 18, characters 16-17:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "tconst_mixed_upper_bound_tany.php", line 25, characters 3-22:
+You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error 2129 in declarations (Naming[2129])
+ERROR: File "tconst_mixed_upper_bound_tany.php", line 26, characters 16-17:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "tconst_mixed_upper_bound_tany.php", line 49, characters 18-19:
+Invalid argument (Typing[4110])
+  File "tconst_mixed_upper_bound_tany.php", line 31, characters 21-23:
+  Expected `int`
+  File "tconst_mixed_upper_bound_tany.php", line 18, characters 20-28:
+  But got `Notif::TRenderer as Renderer`
+  by accessing the type constant `TRenderer`
+  File "tconst_mixed_upper_bound_tany.php", line 41, characters 39-43:
+  on an object of type Notif
+  File "tconst_mixed_upper_bound_tany.php", line 16, characters 55-56:
+    via this generic `TR`
+ERROR: File "tconst_mixed_upper_bound_tany.php", line 49, characters 18-19:
+Invalid argument (Typing[4110])
+  File "tconst_mixed_upper_bound_tany.php", line 31, characters 21-23:
+  Expected `int`
+  File "tconst_mixed_upper_bound_tany.php", line 18, characters 20-28:
+  But got `Renderer`
+  by accessing the type constant `TRenderer`
+  File "tconst_mixed_upper_bound_tany.php", line 41, characters 39-43:
+  on an object of type Notif
+  File "tconst_mixed_upper_bound_tany.php", line 16, characters 55-56:
+    via this generic `TR`
+ERROR: File "tconst_mixed_upper_bound_tany.php", line 63, characters 18-19:
+Invalid argument (Typing[4110])
+  File "tconst_mixed_upper_bound_tany.php", line 31, characters 21-23:
+  Expected `int`
+  File "tconst_mixed_upper_bound_tany.php", line 26, characters 20-28:
+  But got `Notif::TRenderer as Renderer`
+  by accessing the type constant `TRenderer`
+  File "tconst_mixed_upper_bound_tany.php", line 58, characters 40-44:
+  on an object of type Notif
+  File "tconst_mixed_upper_bound_tany.php", line 24, characters 16-17:
+    via this generic `TR`
+ERROR: File "tconst_mixed_upper_bound_tany.php", line 63, characters 18-19:
+Invalid argument (Typing[4110])
+  File "tconst_mixed_upper_bound_tany.php", line 31, characters 21-23:
+  Expected `int`
+  File "tconst_mixed_upper_bound_tany.php", line 26, characters 20-28:
+  But got `Renderer`
+  by accessing the type constant `TRenderer`
+  File "tconst_mixed_upper_bound_tany.php", line 58, characters 40-44:
+  on an object of type Notif
+  File "tconst_mixed_upper_bound_tany.php", line 24, characters 16-17:
+    via this generic `TR`
+ERROR: File "tconst_mixed_upper_bound_tany.php", line 75, characters 18-19:
+Invalid argument (Typing[4110])
+  File "tconst_mixed_upper_bound_tany.php", line 31, characters 21-23:
+  Expected `int`
+  File "tconst_mixed_upper_bound_tany.php", line 18, characters 20-28:
+  But got `Notif::TRenderer as Renderer`
+  by accessing the type constant `TRenderer`
+  File "tconst_mixed_upper_bound_tany.php", line 70, characters 48-52:
+  on an object of type Notif
+  File "tconst_mixed_upper_bound_tany.php", line 16, characters 55-56:
+    via this generic `TR`
+ERROR: File "tconst_mixed_upper_bound_tany.php", line 75, characters 18-19:
+Invalid argument (Typing[4110])
+  File "tconst_mixed_upper_bound_tany.php", line 31, characters 21-23:
+  Expected `int`
+  File "tconst_mixed_upper_bound_tany.php", line 18, characters 20-28:
+  But got `Renderer`
+  by accessing the type constant `TRenderer`
+  File "tconst_mixed_upper_bound_tany.php", line 70, characters 48-52:
+  on an object of type Notif
+  File "tconst_mixed_upper_bound_tany.php", line 16, characters 55-56:
+    via this generic `TR`
+ERROR: File "tconst_mixed_upper_bound_tany.php", line 84, characters 14-16:
+Invalid argument (Typing[4110])
+  File "tconst_mixed_upper_bound_tany.php", line 31, characters 21-23:
+  Expected `int`
+  File "tconst_mixed_upper_bound_tany.php", line 18, characters 20-28:
+  But got `<expr#2>::TRenderer as Notif::TRenderer`
+  by accessing the type constant `TRenderer`
+  File "tconst_mixed_upper_bound_tany.php", line 82, characters 28-32:
+  on the expression dependent type <expr#2>
+  File "tconst_mixed_upper_bound_tany.php", line 83, characters 20-21:
+    where `<expr#2>` is a reference to this expression
+  File "tconst_mixed_upper_bound_tany.php", line 16, characters 55-56:
+    via this generic `TR`
+ERROR: File "tconst_mixed_upper_bound_tany.php", line 84, characters 14-16:
+Invalid argument (Typing[4110])
+  File "tconst_mixed_upper_bound_tany.php", line 31, characters 21-23:
+  Expected `int`
+  File "tconst_mixed_upper_bound_tany.php", line 18, characters 20-28:
+  But got `Notif::TRenderer where \Notif::TRenderer super <expr#2>::TRenderer, \Notif::TRenderer as Renderer`
+  by accessing the type constant `TRenderer`
+  File "tconst_mixed_upper_bound_tany.php", line 82, characters 28-32:
+  on the expression dependent type <expr#2>
+  File "tconst_mixed_upper_bound_tany.php", line 83, characters 20-21:
+    where `<expr#2>` is a reference to this expression
+  File "tconst_mixed_upper_bound_tany.php", line 16, characters 55-56:
+    via this generic `TR`
+ERROR: File "tconst_mixed_upper_bound_tany.php", line 84, characters 14-16:
+Invalid argument (Typing[4110])
+  File "tconst_mixed_upper_bound_tany.php", line 31, characters 21-23:
+  Expected `int`
+  File "tconst_mixed_upper_bound_tany.php", line 18, characters 20-28:
+  But got `Renderer`
+  by accessing the type constant `TRenderer`
+  File "tconst_mixed_upper_bound_tany.php", line 82, characters 28-32:
+  on the expression dependent type <expr#2>
+  File "tconst_mixed_upper_bound_tany.php", line 83, characters 20-21:
+    where `<expr#2>` is a reference to this expression
+  File "tconst_mixed_upper_bound_tany.php", line 16, characters 55-56:
+    via this generic `TR`
+ERROR: File "tconst_mixed_upper_bound_tany.php", line 87, characters 14-16:
+Invalid argument (Typing[4110])
+  File "tconst_mixed_upper_bound_tany.php", line 31, characters 21-23:
+  Expected `int`
+  File "tconst_mixed_upper_bound_tany.php", line 26, characters 20-28:
+  But got `<expr#2>::TRenderer as Notif::TRenderer`
+  by accessing the type constant `TRenderer`
+  File "tconst_mixed_upper_bound_tany.php", line 82, characters 28-32:
+  on the expression dependent type <expr#2>
+  File "tconst_mixed_upper_bound_tany.php", line 86, characters 26-27:
+    where `<expr#2>` is a reference to this expression
+  File "tconst_mixed_upper_bound_tany.php", line 24, characters 16-17:
+    via this generic `TR`
+ERROR: File "tconst_mixed_upper_bound_tany.php", line 87, characters 14-16:
+Invalid argument (Typing[4110])
+  File "tconst_mixed_upper_bound_tany.php", line 31, characters 21-23:
+  Expected `int`
+  File "tconst_mixed_upper_bound_tany.php", line 26, characters 20-28:
+  But got `Notif::TRenderer where \Notif::TRenderer super <expr#2>::TRenderer, \Notif::TRenderer as Renderer`
+  by accessing the type constant `TRenderer`
+  File "tconst_mixed_upper_bound_tany.php", line 82, characters 28-32:
+  on the expression dependent type <expr#2>
+  File "tconst_mixed_upper_bound_tany.php", line 86, characters 26-27:
+    where `<expr#2>` is a reference to this expression
+  File "tconst_mixed_upper_bound_tany.php", line 24, characters 16-17:
+    via this generic `TR`
+ERROR: File "tconst_mixed_upper_bound_tany.php", line 87, characters 14-16:
+Invalid argument (Typing[4110])
+  File "tconst_mixed_upper_bound_tany.php", line 31, characters 21-23:
+  Expected `int`
+  File "tconst_mixed_upper_bound_tany.php", line 26, characters 20-28:
+  But got `Renderer`
+  by accessing the type constant `TRenderer`
+  File "tconst_mixed_upper_bound_tany.php", line 82, characters 28-32:
+  on the expression dependent type <expr#2>
+  File "tconst_mixed_upper_bound_tany.php", line 86, characters 26-27:
+    where `<expr#2>` is a reference to this expression
+  File "tconst_mixed_upper_bound_tany.php", line 24, characters 16-17:
+    via this generic `TR`

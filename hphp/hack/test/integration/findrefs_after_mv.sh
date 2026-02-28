@@ -38,7 +38,7 @@ export HH_TMPDIR="$hh_tmpdir"
 
 # write files
 cat <<EOF > "c.php"
-<?hh // strict
+<?hh
 class C {
   public static function cf(): void {D::df();}
 }
@@ -46,7 +46,7 @@ EOF
 test -f "c.php" || err 30 'cannot write c.php'
 
 cat <<EOF > "d.php"
-<?hh // strict
+<?hh
 class D {
   public static function df(): void {C::cf();}
 }
@@ -63,7 +63,6 @@ cat <<EOF > "hh.conf"
 use_mini_state = false
 load_state_natively_v4 = false
 lazy_decl = true
-lazy_parse = true
 lazy_init2 = true
 max_workers = 1
 remote_type_check_enabled = false

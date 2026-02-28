@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function main(mixed $x): void {
   if ($x is bool) {
@@ -16,7 +16,7 @@ function main(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_primitive() {
+function main_is_expression_primitive() :mixed{
 main(true);
 main(0);
 main(1.5);

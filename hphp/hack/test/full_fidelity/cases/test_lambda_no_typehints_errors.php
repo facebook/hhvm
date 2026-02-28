@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /* There should be no errors due to the absence of typehints on $a and $b */
 function test():void {

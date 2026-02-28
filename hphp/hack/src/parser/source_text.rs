@@ -4,11 +4,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep::ptr::UnsafeOcamlPtr;
-use ocamlrep::rc::RcOc;
-use ocamlrep::{FromOcamlRep, ToOcamlRep};
-use oxidized::relative_path::RelativePath;
 use std::rc::Rc;
+use std::sync::Arc;
+
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
+use ocamlrep::ptr::UnsafeOcamlPtr;
+use relative_path::RelativePath;
 
 pub const INVALID: char = '\x00';
 
@@ -23,7 +25,7 @@ struct SourceTextImpl<'a> {
     // with compiler trying to guide us towards unicode semantics.
     text: &'a [u8],
 
-    file_path: RcOc<RelativePath>,
+    file_path: Arc<RelativePath>,
 
     ocaml_source_text: Option<UnsafeOcamlPtr>,
 }
@@ -31,12 +33,12 @@ struct SourceTextImpl<'a> {
 pub struct SourceText<'a>(Rc<SourceTextImpl<'a>>);
 
 impl<'a> SourceText<'a> {
-    pub fn make(file_path: RcOc<RelativePath>, text: &'a [u8]) -> Self {
+    pub fn make(file_path: Arc<RelativePath>, text: &'a [u8]) -> Self {
         Self::make_with_raw(file_path, text, 0)
     }
 
     pub fn make_with_raw(
-        file_path: RcOc<RelativePath>,
+        file_path: Arc<RelativePath>,
         text: &'a [u8],
         ocaml_source_text: usize,
     ) -> Self {
@@ -55,8 +57,8 @@ impl<'a> SourceText<'a> {
         self.0.file_path.as_ref()
     }
 
-    pub fn file_path_rc(&self) -> RcOc<RelativePath> {
-        RcOc::clone(&self.0.file_path)
+    pub fn file_path_rc(&self) -> Arc<RelativePath> {
+        Arc::clone(&self.0.file_path)
     }
 
     pub fn text(&self) -> &'a [u8] {
@@ -97,10 +99,7 @@ impl<'a> SourceText<'a> {
 }
 
 impl<'content> ToOcamlRep for SourceText<'content> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         // A SourceText with no associated ocaml_source_text cannot be converted
         // to OCaml yet (we'd need to construct the OffsetMap). We still
         // construct some in test cases, so just panic upon attempts to convert.
@@ -111,7 +110,7 @@ impl<'content> ToOcamlRep for SourceText<'content> {
 impl<'content> FromOcamlRep for SourceText<'content> {
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
         let block = ocamlrep::from::expect_tuple(value, 4)?;
-        let file_path: RcOc<RelativePath> = ocamlrep::from::field(block, 0)?;
+        let file_path: Arc<RelativePath> = ocamlrep::from::field(block, 0)?;
         // Unsafely transmute away the lifetime of `value` and allow the caller
         // to choose the lifetime. This is no more unsafe than what we already
         // do by storing the ocaml_source_text pointer--if the OCaml source text

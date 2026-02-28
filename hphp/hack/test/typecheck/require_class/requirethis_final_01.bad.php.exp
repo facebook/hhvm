@@ -1,0 +1,4 @@
+ERROR: File "requirethis_final_01.bad.php", line 12, characters 21-21:
+`C` is a `final` class, so it cannot be extended. (NastCheck[3072])
+  File "requirethis_final_01.bad.php", line 12, characters 21-21:
+  Try using `require class` instead of `require this as`.

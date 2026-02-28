@@ -1,0 +1,64 @@
+dict(3) {
+  ["kind"]=>
+  int(31)
+  ["union_types"]=>
+  vec(2) {
+    dict(1) {
+      ["kind"]=>
+      int(4)
+    }
+    dict(2) {
+      ["kind"]=>
+      int(14)
+      ["fields"]=>
+      dict(1) {
+        ["x"]=>
+        dict(4) {
+          ["kind"]=>
+          int(32)
+          ["case_type"]=>
+          string(1) "C"
+          ["alias"]=>
+          string(1) "T"
+          ["nullable"]=>
+          bool(true)
+        }
+      }
+    }
+  }
+  ["case_type"]=>
+  string(1) "C"
+}
+dict(4) {
+  ["kind"]=>
+  int(31)
+  ["union_types"]=>
+  vec(2) {
+    dict(1) {
+      ["kind"]=>
+      int(4)
+    }
+    dict(2) {
+      ["kind"]=>
+      int(14)
+      ["fields"]=>
+      dict(1) {
+        ["x"]=>
+        dict(4) {
+          ["kind"]=>
+          int(32)
+          ["case_type"]=>
+          string(1) "C"
+          ["alias"]=>
+          string(1) "T"
+          ["nullable"]=>
+          bool(true)
+        }
+      }
+    }
+  }
+  ["case_type"]=>
+  string(1) "C"
+  ["alias"]=>
+  string(1) "T"
+}

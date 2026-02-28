@@ -39,32 +39,60 @@
       },
       {
         "kind":"module_declaration",
-        "module_declaration_keyword":{
+        "module_declaration_new_keyword":{
+          "kind":"token",
+          "token":{
+            "kind":"new",
+            "text":"new",
+            "offset":5,
+            "leading_width":2,
+            "width":3,
+            "trailing_width":1,
+            "leading":[
+              {"kind":"end_of_line","text":"\n","offset":5,"width":1},
+              {"kind":"end_of_line","text":"\n","offset":6,"width":1}
+            ],
+            "trailing":[{"kind":"whitespace","text":" ","offset":10,"width":1}],
+            "line_number":4
+          }
+        },
+        "module_declaration_module_keyword":{
           "kind":"token",
           "token":{
             "kind":"module",
             "text":"module",
-            "offset":5,
-            "leading_width":1,
+            "offset":11,
+            "leading_width":0,
             "width":6,
             "trailing_width":1,
-            "leading":[{"kind":"end_of_line","text":"\n","offset":5,"width":1}],
-            "trailing":[{"kind":"whitespace","text":" ","offset":12,"width":1}],
-            "line_number":3
+            "leading":[],
+            "trailing":[{"kind":"whitespace","text":" ","offset":17,"width":1}],
+            "line_number":4
           }
         },
         "module_declaration_name":{
-          "kind":"token",
-          "token":{
-            "kind":"name",
-            "text":"Baz",
-            "offset":13,
-            "leading_width":0,
-            "width":3,
-            "trailing_width":1,
-            "leading":[],
-            "trailing":[{"kind":"whitespace","text":" ","offset":16,"width":1}],
-            "line_number":3
+          "kind":"module_name",
+          "module_name_parts":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"list_item",
+                "list_item":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"name",
+                    "text":"Baz",
+                    "offset":18,
+                    "leading_width":0,
+                    "width":3,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":21,"width":1}],
+                    "line_number":4
+                  }
+                }
+              }
+            ]
           }
         },
         "module_declaration_left_brace":{
@@ -72,13 +100,13 @@
           "token":{
             "kind":"{",
             "text":"{",
-            "offset":17,
+            "offset":22,
             "leading_width":0,
             "width":1,
             "trailing_width":1,
             "leading":[],
-            "trailing":[{"kind":"end_of_line","text":"\n","offset":18,"width":1}],
-            "line_number":3
+            "trailing":[{"kind":"end_of_line","text":"\n","offset":23,"width":1}],
+            "line_number":4
           }
         }
       },
@@ -89,13 +117,13 @@
           "token":{
             "kind":"end_of_file",
             "text":"",
-            "offset":19,
+            "offset":24,
             "leading_width":0,
             "width":0,
             "trailing_width":0,
             "leading":[],
             "trailing":[],
-            "line_number":4
+            "line_number":5
           }
         }
       }

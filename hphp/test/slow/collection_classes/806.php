@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_806() {
+function main_806() :mixed{
 $v = new Vector;
 $v[] = 7;
 $v[] = 'foo';

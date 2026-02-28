@@ -9,7 +9,7 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Test stripos() function: binary safe ***\n";
-$haystacks = varray[
+$haystacks = vec[
   "Hello".chr(0)."World",
   chr(0)."Hello World",
   "Hello World".chr(0),

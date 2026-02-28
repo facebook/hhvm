@@ -1,5 +1,5 @@
 <?hh
 
 function test(): mixed {
-  meth_caller('NoSuchClass', 'foo');
+  meth_caller(NoSuchClass::class, 'foo');
 }

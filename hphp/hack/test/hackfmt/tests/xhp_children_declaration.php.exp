@@ -1,7 +1,6 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-
 final class :format-xhp:part1 {
   children (
     :fb:fundingsource:data-table:header,

@@ -6,17 +6,17 @@
  */
 
 
-function oneArg($v) {
+function oneArg($v) :mixed{
   return $v;
 }
 
-function threeArgs($v, $w, $x) {
+function threeArgs($v, $w, $x) :mixed{
   return $v + $w + $x;
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_reduce() : variation ***\n";
 
-$array = varray[1];
+$array = vec[1];
 
 echo "\n--- Testing with a callback with too few parameters ---\n";
 var_dump(array_reduce($array, oneArg<>, 2));

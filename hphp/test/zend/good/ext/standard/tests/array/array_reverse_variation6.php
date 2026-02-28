@@ -11,16 +11,16 @@
 echo "*** Testing array_reverse() : usage variations ***\n";
 
 // Initializing the 2-d arrays
-$two_dimensional_array = varray[
+$two_dimensional_array = vec[
 
   // associative array
-  darray['color' => 'red', 'item' => 'pen', 'place' => 'LA'],
+  dict['color' => 'red', 'item' => 'pen', 'place' => 'LA'],
 
    // numeric array
-   varray[1, 2, 3, 4, 5],
+   vec[1, 2, 3, 4, 5],
 
    // combination of numeric and associative arrays
-   darray['a' => 'green', 0 => 'red', 1 => 'brown', 2 => 33, 3 => 88, 4 => 'orange', 'item' => 'ball']
+   dict['a' => 'green', 0 => 'red', 1 => 'brown', 2 => 33, 3 => 88, 4 => 'orange', 'item' => 'ball']
 ];
 
 // calling array_reverse() with various types of 2-d arrays

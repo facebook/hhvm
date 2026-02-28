@@ -1,4 +1,2 @@
-File "typedefs.php", line 6, characters 1-51:
+ERROR: File "typedefs.php", line 6, characters 1-51:
 No code may exist outside of namespace {} (Parsing[1002])
-File "typedefs.php", line 10, characters 16-31:
-Too few type arguments for this type (Naming[2071])

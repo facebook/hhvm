@@ -1,5 +1,5 @@
 <?hh
-function foo () {
+function foo () :mixed{
     for($i = 0; $i < 5; $i++) {
         do {
             try {

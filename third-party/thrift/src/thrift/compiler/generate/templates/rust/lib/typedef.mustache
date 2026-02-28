@@ -1,0 +1,64 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{#if typedef:docs?}}
+#[doc = {{typedef:docs}}]
+{{/if typedef:docs?}}{{!
+}}{{#if (not typedef:newtype?)}}{{!
+}}{{#if typedef:has_adapter?}}
+pub type {{typedef:rust_name}} = {{!
+  }}{{#if typedef:adapter_transitive_only?}}{{!
+    }}{{#typedef:type}}{{> lib/type}}{{/typedef:type}}{{!
+  }}{{#else}}{{!
+    }}{{typedef:adapter_qualified}}::AdaptedType{{!
+  }}{{/if typedef:adapter_transitive_only?}};
+{{/if typedef:has_adapter?}}{{!
+}}{{#if (not typedef:has_adapter?)}}{{!
+  }}{{#typedef:type}}
+pub type {{typedef:rust_name}} = {{!
+    }}{{#if (not (string.empty? typedef:rust_type))}}::{{typedef:rust_type}}{{> lib/type_generics}}{{!
+    }}{{#else}}{{> lib/type}}{{/if (not (string.empty? typedef:rust_type))}}{{!
+}};
+{{#if typedef:constructor?}}
+#[doc(hidden)]
+pub use {{type:package}}::__constructors::{{type:rust_name}} as {{typedef:rust_name}};
+{{/if typedef:constructor?}}
+  {{/typedef:type}}{{!
+}}{{/if (not typedef:has_adapter?)}}{{!
+}}{{/if (not typedef:newtype?)}}{{!
+}}{{#if typedef:newtype?}}
+#[derive({{!
+    }}{{#if (not typedef:has_adapter?)}}{{!
+    }}Default, {{!
+    }}{{/if (not typedef:has_adapter?)}}{{!
+    }}{{#if typedef:copy?}}Copy, {{/if typedef:copy?}}{{!
+    }}Clone, Debug, PartialEq{{!
+    }}{{#if typedef:ord?}}, Eq, PartialOrd, Ord, Hash{{/if typedef:ord?}}{{!
+    }}{{#if typedef:serde?}}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/if typedef:serde?}}{{!
+    }}{{#if program:valuable?}}, ::valuable::Valuable{{/if program:valuable?}}{{!
+}})]
+pub struct {{typedef:rust_name}}(pub {{!
+  }}{{#if typedef:has_adapter?}}{{!
+    }}{{typedef:adapter_qualified}}::AdaptedType{{!
+  }}{{/if typedef:has_adapter?}}{{!
+  }}{{#if (not typedef:has_adapter?)}}{{!
+    }}{{#if (not (string.empty? typedef:rust_type))}}::{{typedef:rust_type}}{{!
+    }}{{#else}}{{#typedef:type}}{{> lib/type}}{{/typedef:type}}{{/if (not (string.empty? typedef:rust_type))}}{{!
+  }}{{/if (not typedef:has_adapter?)}}{{!
+}});
+{{/if typedef:newtype?}}

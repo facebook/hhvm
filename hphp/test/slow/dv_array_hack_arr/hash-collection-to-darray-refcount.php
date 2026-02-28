@@ -1,6 +1,6 @@
 <?hh
 
-function hopefully_doesnt_dangle() {
+function hopefully_doesnt_dangle() :mixed{
   $x = new HH\Set();
   $x[] = 42;
   $x[] = "hello";

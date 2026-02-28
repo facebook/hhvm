@@ -1,4 +1,4 @@
-File "abstract_redeclare_abstract_class_constant_bad.php--file2.php", line 3, characters 26-26:
+ERROR: File "abstract_redeclare_abstract_class_constant_bad.php--file2.php", line 3, characters 26-26:
 Some members in class `B` are incompatible with those declared in type `A` (Typing[4348])
   File "abstract_redeclare_abstract_class_constant_bad.php--file1.php", line 5, characters 18-20:
   Expected `int`

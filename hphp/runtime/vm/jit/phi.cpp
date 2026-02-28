@@ -28,7 +28,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(hhir_phi);
+TRACE_SET_MOD(hhir_phi)
 
 namespace {
 

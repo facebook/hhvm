@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : unsigned formats with boolean values ***\n";
 
 // array of boolean values 
-$boolean_values = varray[
+$boolean_values = vec[
   true,
   false,
   TRUE,
@@ -15,7 +15,7 @@ $boolean_values = varray[
 ];
 
 // array of unsigned formats
-$unsigned_formats = varray[ 
+$unsigned_formats = vec[ 
   "%u", "%hu", "%lu",
   "%Lu", " %u", "%u ",   
   "\t%u", "\n%u", "%4u", 

@@ -2,8 +2,9 @@
 
 
 <<__EntryPoint>>
-function main_udg_sock() {
-$socket = '/tmp/socktest'.rand();
+function main_udg_sock() :mixed{
+$sockdir = getenv('HPHP_TEST_SOCKETDIR') ?? sys_get_temp_dir();
+$socket = $sockdir.'/socktest'.rand();
 $data = 'Data to be sent';
 
 // Create the server side

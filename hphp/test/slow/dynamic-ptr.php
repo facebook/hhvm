@@ -1,16 +1,16 @@
 <?hh
 
-function no_dyn() { echo __FUNCTION__."\n"; }
-<<__DynamicallyCallable>> function dyn() { echo __FUNCTION__."\n"; }
+function no_dyn() :mixed{ echo __FUNCTION__."\n"; }
+<<__DynamicallyCallable>> function dyn() :mixed{ echo __FUNCTION__."\n"; }
 
 class Cls {
-  static function static_no_dyn() { echo __METHOD__."\n"; }
-  function inst_no_dyn() { echo __METHOD__."\n"; }
-  <<__DynamicallyCallable>> static function static_dyn() {echo __METHOD__."\n";}
-  <<__DynamicallyCallable>> function inst_dyn() { echo __METHOD__."\n"; }
+  static function static_no_dyn() :mixed{ echo __METHOD__."\n"; }
+  function inst_no_dyn() :mixed{ echo __METHOD__."\n"; }
+  <<__DynamicallyCallable>> static function static_dyn() :mixed{echo __METHOD__."\n";}
+  <<__DynamicallyCallable>> function inst_dyn() :mixed{ echo __METHOD__."\n"; }
 }
 
-function test_it($fname, $cname = null) {
+function test_it($fname, $cname = null) :mixed{
   try {
     if ($cname) $f = HH\dynamic_class_meth($cname, $fname);
     else        $f = HH\dynamic_fun($fname);
@@ -22,7 +22,7 @@ function test_it($fname, $cname = null) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(($_n, $str) ==> { echo "Warning: $str\n"; return true; });
 
   test_it('dyn');

@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_dateformat_parse_optional_arg() {
+function main_dateformat_parse_optional_arg() :mixed{
 $df = new IntlDateFormatter(Locale::getDefault(), 2, -1,
                             "America/Los_Angeles", 1, "MM*yyyy*dd");
 $df->setLenient(false);

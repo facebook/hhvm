@@ -1,0 +1,10 @@
+%A
+%|{Detected jit::trap at 0x%s: from fbcode/hphp/runtime/vm/jit/irlower-intrinsic.cpp:%d|fbcode/hphp/runtime/vm/bytecode.cpp:%d: void HPHP::iopStaticAnalysisError(): assertion `!Cfg::Eval::CrashOnStaticAnalysisError' failed.}
+%A
+PHP Stacktrace:
+
+#0  foo() called at [%s/static-analysis-error.php:9]
+#1  bar() called at [%s/static-analysis-error.php:13]
+#2  biz() called at [%s/static-analysis-error.php:18]
+#3  buz() called at [%s/static-analysis-error.php:28]
+#4  main()

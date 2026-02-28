@@ -19,39 +19,27 @@
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/str-key-table.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/tv-val.h"
-#include "hphp/runtime/base/variable-serializer.h"
 
-#include "hphp/runtime/vm/member-operations.h"
-
-#include "hphp/util/alloc.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/hash.h"
-#include "hphp/util/lock.h"
 #include "hphp/util/trace.h"
 
-#include <folly/CPortability.h>
 #include <folly/portability/Constexpr.h>
 
 #include <algorithm>
-#include <utility>
 
 #include "hphp/runtime/base/vanilla-dict-defs.h"
-#include "hphp/runtime/base/vanilla-vec-defs.h"
 
 namespace HPHP {
 
-TRACE_SET_MOD(runtime);
+TRACE_SET_MOD(runtime)
 
 static_assert(
   VanillaDict::computeAllocBytes(VanillaDict::SmallScale) +
@@ -89,7 +77,7 @@ struct VanillaDict::DictInitializer {
     ad->m_scale_used   = scale;
     ad->m_nextKI       = 0;
     ad->initHeader_16(HeaderKind::Dict, StaticValue, aux);
-    *ad->mutableKeyTypes() = VanillaDictKeys::Empty();
+    *ad->mutableKeyTypes() = ArrayKeyTypes::Empty();
     ad->mutableStrKeyTable()->reset();
     assertx(ad->checkInvariants());
   }
@@ -109,7 +97,7 @@ struct VanillaDict::MarkedDictArrayInitializer {
     ad->m_scale_used    = scale;
     ad->m_nextKI        = 0;
     ad->initHeader_16(HeaderKind::Dict, StaticValue, aux);
-    *ad->mutableKeyTypes() = VanillaDictKeys::Empty();
+    *ad->mutableKeyTypes() = ArrayKeyTypes::Empty();
     ad->mutableStrKeyTable()->reset();
     assertx(ad->checkInvariants());
   }
@@ -129,7 +117,7 @@ ArrayData* VanillaDict::MakeReserveDict(uint32_t size) {
 
   auto const aux = packSizeIndexAndAuxBits(index, 0);
   ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
-  *ad->mutableKeyTypes() = VanillaDictKeys::Empty();
+  *ad->mutableKeyTypes() = ArrayKeyTypes::Empty();
   ad->m_size          = 0;
   ad->m_layout_index  = kVanillaLayoutIndex;
   ad->m_scale_used    = scale; // used=0
@@ -154,7 +142,7 @@ VanillaDict* VanillaDict::MakeStructDict(uint32_t size,
   auto const aux   = packSizeIndexAndAuxBits(index, 0);
 
   ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
-  *ad->mutableKeyTypes() = VanillaDictKeys::StaticStrs();
+  *ad->mutableKeyTypes() = ArrayKeyTypes::StaticStrs();
   ad->m_size             = size;
   ad->m_layout_index     = kVanillaLayoutIndex;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
@@ -196,7 +184,7 @@ VanillaDict* VanillaDict::AllocStructDict(uint32_t size, const int32_t* hash) {
   auto const aux   = packSizeIndexAndAuxBits(index, 0);
 
   ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
-  *ad->mutableKeyTypes() = VanillaDictKeys::StaticStrs();
+  *ad->mutableKeyTypes() = ArrayKeyTypes::StaticStrs();
   ad->m_size             = size;
   ad->m_layout_index     = kVanillaLayoutIndex;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
@@ -229,7 +217,7 @@ VanillaDict* VanillaDict::MakeDict(uint32_t size, const TypedValue* kvs) {
 
   ad->initHash(scale);
   ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
-  *ad->mutableKeyTypes() = VanillaDictKeys::Empty();
+  *ad->mutableKeyTypes() = ArrayKeyTypes::Empty();
   ad->m_size             = size;
   ad->m_layout_index     = kVanillaLayoutIndex;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
@@ -291,7 +279,7 @@ VanillaDict* VanillaDict::MakeDictNatural(uint32_t size, const TypedValue* vals)
 
   ad->initHash(scale);
   ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
-  *ad->mutableKeyTypes() = VanillaDictKeys::Ints();
+  *ad->mutableKeyTypes() = ArrayKeyTypes::Ints();
   ad->m_size             = size;
   ad->m_layout_index     = kVanillaLayoutIndex;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
@@ -469,13 +457,13 @@ ArrayData* VanillaDict::MakeUncounted(
   return ad;
 }
 
-ArrayData* VanillaDict::MakeDictFromAPC(const APCArray* apc, bool isLegacy) {
+ArrayData* VanillaDict::MakeDictFromAPC(const APCArray* apc, bool pure, bool isLegacy) {
   assertx(apc->isHashed());
   auto const apcSize = apc->size();
   DictInit init{apcSize};
   for (uint32_t i = 0; i < apcSize; ++i) {
-    init.setValidKey(apc->getHashedKey(i)->toLocal(),
-                     apc->getHashedVal(i)->toLocal());
+    init.setValidKey(apc->getHashedKey(i)->toLocal(true /* pure irrelevant for arraykey */),
+                     apc->getHashedVal(i)->toLocal(pure));
   }
   auto const ad = init.create();
   ad->setLegacyArrayInPlace(isLegacy);
@@ -656,7 +644,7 @@ bool VanillaDict::IsVectorData(const ArrayData* ad) {
 
 NEVER_INLINE
 int32_t* warnUnbalanced(VanillaDict* a, size_t n, int32_t* ei) {
-  if (n > size_t(RuntimeOption::MaxArrayChain)) {
+  if (n > size_t(Cfg::Server::MaxArrayChain)) {
     decRefArr(a->asArrayData()); // otherwise, a leaks when exn propagates
     raise_error("Array is too unbalanced (%lu)", n);
   }
@@ -812,11 +800,7 @@ VanillaDict* VanillaDict::prepareForInsert(bool copy) {
   return this;
 }
 
-void VanillaDict::compact(bool renumber /* = false */) {
-  // Set m_nextKI to 0 for now to prepare for renumbering integer keys
-  if (UNLIKELY(renumber)) m_nextKI = 0;
-
-  // Perform compaction
+void VanillaDict::compact() {
   auto elms = data();
   auto const mask = this->mask();
   auto const table = initHash(m_scale);
@@ -829,21 +813,16 @@ void VanillaDict::compact(bool renumber /* = false */) {
     if (toPos != frPos) {
       toE = elms[frPos];
     }
-    if (UNLIKELY(renumber && toE.hasIntKey())) {
-      toE.setIntKey(m_nextKI, hash_int64(m_nextKI));
-      m_nextKI++;
-    }
     *findForNewInsert(table, mask, toE.probe()) = toPos;
   }
 
   m_used = m_size;
-  // Even if renumber is true, we'll leave string keys in the array untouched,
-  // so the only keyTypes update we can do here is to unset the tombstone bit.
+  // We leave string keys in the array untouched, so the only keyTypes update
+  // we can do here is to unset the tombstone bit.
   mutableKeyTypes()->makeCompact();
   assertx(checkInvariants());
 }
 
-template <bool Move>
 void VanillaDict::nextInsert(TypedValue v) {
   assertx(m_nextKI >= 0);
   assertx(!isFull());
@@ -860,11 +839,7 @@ void VanillaDict::nextInsert(TypedValue v) {
   e->setIntKey(ki, h);
   mutableKeyTypes()->recordInt();
   m_nextKI = static_cast<uint64_t>(ki) + 1; // Update next free element.
-  if constexpr (Move) {
-    tvCopy(v, e->data);
-  } else {
-    tvDup(v, e->data);
-  }
+  tvCopy(v, e->data);
 }
 
 template <class K> ALWAYS_INLINE
@@ -947,11 +922,21 @@ void VanillaDict::AppendTombstoneInPlace(ArrayData* ad) {
   a->m_used++;
 }
 
+ArrayData* VanillaDict::SetPosMove(ArrayData* ad, ssize_t pos, TypedValue v) {
+  assertx(PosIsValid(ad, pos));
+  assertx(v.m_type != KindOfUninit);
+  assertx(ad->cowCheck() || ad->notCyclic(v));
+  auto const result = ad->cowCheck() ? VanillaDict::Copy(ad) : ad;
+  tvMove(v, as(result)->data()[pos].data);
+  if (ad != result && ad->decReleaseCheck()) VanillaDict::Release(ad);
+  return result;
+}
+
 ArrayData* VanillaDict::SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
   assertx(v.m_type != KindOfUninit);
   assertx(ad->cowCheck() || ad->notCyclic(v));
-  auto const preped = as(ad)->prepareForInsert(ad->cowCheck());
-  auto const result = preped->update(k, v);
+  auto const prepped = as(ad)->prepareForInsert(ad->cowCheck());
+  auto const result = prepped->update(k, v);
   if (ad != result && ad->decReleaseCheck()) VanillaDict::Release(ad);
   return result;
 }
@@ -967,8 +952,8 @@ ArrayData* VanillaDict::SetIntInPlace(ArrayData* ad, int64_t k, TypedValue v) {
 ArrayData* VanillaDict::SetStrMoveSkipConflict(ArrayData* ad, StringData* k, TypedValue v) {
   assertx(v.m_type != KindOfUninit);
   assertx(ad->cowCheck() || ad->notCyclic(v));
-  auto const preped = as(ad)->prepareForInsert(ad->cowCheck());
-  auto const result = preped->updateSkipConflict(k, v);
+  auto const prepped = as(ad)->prepareForInsert(ad->cowCheck());
+  auto const result = prepped->updateSkipConflict(k, v);
   if (ad != result && ad->decReleaseCheck()) VanillaDict::Release(ad);
   return result;
 }
@@ -976,8 +961,8 @@ ArrayData* VanillaDict::SetStrMoveSkipConflict(ArrayData* ad, StringData* k, Typ
 ArrayData* VanillaDict::SetIntMoveSkipConflict(ArrayData* ad, int64_t k, TypedValue v) {
   assertx(v.m_type != KindOfUninit);
   assertx(ad->cowCheck() || ad->notCyclic(v));
-  auto const preped = as(ad)->prepareForInsert(ad->cowCheck());
-  auto const result = preped->updateSkipConflict(k, v);
+  auto const prepped = as(ad)->prepareForInsert(ad->cowCheck());
+  auto const result = prepped->updateSkipConflict(k, v);
   if (ad != result && ad->decReleaseCheck()) VanillaDict::Release(ad);
   return result;
 }
@@ -985,8 +970,8 @@ ArrayData* VanillaDict::SetIntMoveSkipConflict(ArrayData* ad, int64_t k, TypedVa
 ArrayData* VanillaDict::SetStrMove(ArrayData* ad, StringData* k, TypedValue v) {
   assertx(v.m_type != KindOfUninit);
   assertx(ad->cowCheck() || ad->notCyclic(v));
-  auto const preped = as(ad)->prepareForInsert(ad->cowCheck());
-  auto const result = preped->update(k, v);
+  auto const prepped = as(ad)->prepareForInsert(ad->cowCheck());
+  auto const result = prepped->update(k, v);
   if (ad != result && ad->decReleaseCheck()) VanillaDict::Release(ad);
   return result;
 }
@@ -1072,7 +1057,7 @@ ArrayData* VanillaDict::AppendMove(ArrayData* ad, TypedValue v) {
   }
   auto const nextKI = int64_t(uint64_t(maxIntKey) + 1);
 
-  if (nextKI != a->m_nextKI && RO::EvalDictDArrayAppendNotices) {
+  if (nextKI != a->m_nextKI && Cfg::Eval::DictDArrayAppendNotices) {
     // Try to eliminate the internal index used for "append", replacing it
     // with a simple set of the key equal to the array's size. If we can make
     // this change now, we can drop appends completely as a follow-up.
@@ -1087,7 +1072,7 @@ ArrayData* VanillaDict::AppendMove(ArrayData* ad, TypedValue v) {
     return a;
   }
   auto const res = a->prepareForInsert(copy);
-  res->nextInsert<true>(v);
+  res->nextInsert(v);
   if (res != a && a->decReleaseCheck()) VanillaDict::Release(a);
   return res;
 }
@@ -1168,61 +1153,6 @@ VanillaDict* VanillaDict::CopyReserve(const VanillaDict* src,
   return ad;
 }
 
-NEVER_INLINE
-ArrayData* VanillaDict::ArrayMergeGeneric(VanillaDict* ret,
-                                         const ArrayData* elems) {
-  assertx(ret->isVanillaDict());
-
-  for (ArrayIter it(elems); !it.end(); it.next()) {
-    Variant key = it.first();
-    auto const value = it.secondVal();
-    if (key.asTypedValue()->m_type == KindOfInt64) {
-      ret->nextInsert<false>(value);
-    } else {
-      StringData* sd = key.getStringData();
-      auto const lval = ret->addLvalImpl(sd);
-      assertx(value.m_type != KindOfUninit);
-      tvSet(value, lval);
-    }
-  }
-  return ret;
-}
-
-ArrayData* VanillaDict::Merge(ArrayData* ad, const ArrayData* elems) {
-  assertx(as(ad)->checkInvariants());
-  auto const ret = CopyReserve(as(ad), ad->size() + elems->size());
-  assertx(ret->hasExactlyOneRef());
-  *ret->mutableKeyTypes() = as(ad)->keyTypes();
-
-  if (elems->isVanillaDict()) {
-    auto const rhs = as(elems);
-    auto srcElem = rhs->data();
-    auto const srcStop = rhs->data() + rhs->m_used;
-
-    for (; srcElem != srcStop; ++srcElem) {
-      if (isTombstone(srcElem->data.m_type)) continue;
-
-      if (srcElem->hasIntKey()) {
-        ret->nextInsert<false>(srcElem->data);
-      } else {
-        auto const lval = ret->addLvalImpl(srcElem->skey);
-        assertx(srcElem->data.m_type != KindOfUninit);
-        tvSet(srcElem->data, lval);
-      }
-    }
-    return ret;
-  }
-
-  if (UNLIKELY(!elems->isVanillaVec())) {
-    return ArrayMergeGeneric(ret, elems);
-  }
-
-  VanillaVec::IterateV(elems, [&](TypedValue tv) {
-    ret->nextInsert<false>(tv);
-  });
-  return ret;
-}
-
 ArrayData* VanillaDict::PopMove(ArrayData* ad, Variant& value) {
   if (ad->empty()) {
     value = uninit_null();
@@ -1243,16 +1173,10 @@ ArrayData* VanillaDict::PopMove(ArrayData* ad, Variant& value) {
 
 }
 
-ArrayData* VanillaDict::Renumber(ArrayData* adIn) {
-  auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
-  as(ad)->compact(true);
-  return ad;
-}
-
 void VanillaDict::OnSetEvalScalar(ArrayData* ad) {
   auto a = as(ad);
   if (UNLIKELY(a->m_size < a->m_used)) {
-    a->compact(/*renumber=*/false);
+    a->compact();
   }
   a->mutableKeyTypes()->makeStatic();
   auto elm = a->data();

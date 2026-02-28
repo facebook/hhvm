@@ -59,12 +59,21 @@ struct TransProfCounters {
     if (it == m_regionIndices.end()) return std::nullopt;
     return it->second;
   }
+  Optional<Indices>
+  findIndices(const std::string& name) const {
+    auto const it = m_uniqueStubIndices.find(name);
+    if (it == m_uniqueStubIndices.end()) return std::nullopt;
+    return it->second;
+  }
 
   auto& getIndices(const PrologueID& pid) {
     return m_prologueIndices[pid];
   }
   auto& getIndices(const RegionEntryKey& regionKey) {
     return m_regionIndices[regionKey];
+  }
+  auto& getIndices(const std::string& name) {
+    return m_uniqueStubIndices[name];
   }
 
   /*
@@ -73,7 +82,7 @@ struct TransProfCounters {
    */
   template <typename K>
   T* addCounter(const K& key, const M& meta) {
-    folly::SharedMutex::WriteHolder lock(m_lock);
+    std::unique_lock lock(m_lock);
     auto& indices = getIndices(key);
     auto const index = m_meta.size();
     m_meta.push_back(meta);
@@ -87,7 +96,7 @@ struct TransProfCounters {
    */
   template <typename K>
   Optional<T> getFirstCounter(const K& key) {
-    folly::SharedMutex::ReadHolder lock(m_lock);
+    std::shared_lock lock(m_lock);
     auto const& opt = findIndices(key);
     if (opt == std::nullopt) return std::nullopt;
     auto const& indices = opt.value();
@@ -102,7 +111,7 @@ struct TransProfCounters {
    */
   template <typename K>
   jit::vector<T> getCounters(const K& key, jit::vector<M>& meta) const {
-    folly::SharedMutex::ReadHolder lock(m_lock);
+    std::shared_lock lock(m_lock);
     meta.clear();
     jit::vector<T> counters;
     auto const& opt = findIndices(key);
@@ -119,15 +128,16 @@ struct TransProfCounters {
    * Free the memory used to keep all the counters.
    */
   void freeCounters() {
-    folly::SharedMutex::WriteHolder lock(m_lock);
+    std::unique_lock lock(m_lock);
     m_meta.clear();
     m_regionIndices.clear();
     m_prologueIndices.clear();
+    m_uniqueStubIndices.clear();
     m_counters.clear();
   }
 
   void serialize(ProfDataSerializer& ser) {
-    folly::SharedMutex::WriteHolder lock(m_lock);
+    std::unique_lock lock(m_lock);
     auto write_counters = [&](const Indices& indices) {
       write_raw(ser, indices.size());
       for (auto index : indices) {
@@ -152,10 +162,17 @@ struct TransProfCounters {
       write_prologueid(ser, pid);
       write_counters(indices);
     }
+    write_raw(ser, m_uniqueStubIndices.size());
+    for (auto& it : m_uniqueStubIndices) {
+      auto const& name      = it.first;
+      auto const& indices   = it.second;
+      write_string(ser, name);
+      write_counters(indices);
+    }
   }
 
   void deserialize(ProfDataDeserializer& des) {
-    folly::SharedMutex::WriteHolder lock(m_lock);
+    std::unique_lock lock(m_lock);
     auto deserialize_counters = [&]
       (Indices& indices, size_t& index)
     {
@@ -188,6 +205,13 @@ struct TransProfCounters {
       auto& indices = m_prologueIndices[pid];
       deserialize_counters(indices, index);
     }
+    size_t nstubs;
+    read_raw(des, nstubs);
+    while (nstubs--) {
+      auto const name = read_cpp_string(des);
+      auto& indices = m_uniqueStubIndices[name];
+      deserialize_counters(indices, index);
+    }
   }
 
  private:
@@ -202,6 +226,9 @@ struct TransProfCounters {
   // Map for prologues.
   hphp_hash_map<PrologueID,Indices,
                 PrologueID::Hasher,PrologueID::Eq> m_prologueIndices;
+
+  // Map for unique stubs.
+  hphp_string_map<Indices> m_uniqueStubIndices;
 
   // This lock protects all concurrent accesses to the vectors and map above.
   mutable folly::SharedMutex m_lock;

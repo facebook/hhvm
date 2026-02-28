@@ -1,9 +1,9 @@
-<?hh // partial
+<?hh
 
 /**
  * Represents a connection to a set of memcached servers.
  */
-<<__NativeData("MemcachedData")>>
+<<__NativeData>>
 class Memcached {
   // Signifies we have provide a session handler
   const HAVE_SESSION = false;
@@ -339,7 +339,7 @@ class Memcached {
    *   Memcached::RES_NOTFOUND if the key does not exist.
    */
   public function get(mixed $key,
-                      ?mixed $cache_cb = null): mixed {
+                      mixed $cache_cb = null): mixed {
     return $this->getByKey('', $key, $cache_cb);
   }
 
@@ -727,7 +727,7 @@ class Memcached {
       if (is_int($key)) {
         // numeric strings (e.g. '5') become integers as array keys
         $key = (string)$key;
-      } elseif (!is_string($key)) {
+      } else if (!is_string($key)) {
         continue;
       }
       if (!$this->setByKey($server_key, $key, $value, $expiration)) {

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_632() {
+function main_632() :mixed{
 $a = 1;
  $a = 'test';
  var_dump(~$a);

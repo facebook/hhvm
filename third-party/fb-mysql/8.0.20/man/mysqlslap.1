@@ -1,0 +1,1330 @@
+'\" t
+.\"     Title: \fBmysqlslap\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBMYSQLSLAP\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+mysqlslap \- load emulation client
+.SH "SYNOPSIS"
+.HP \w'\fBmysqlslap\ [\fR\fB\fIoptions\fR\fR\fB]\fR\ 'u
+\fBmysqlslap [\fR\fB\fIoptions\fR\fR\fB]\fR
+.SH "DESCRIPTION"
+.PP
+\fBmysqlslap\fR
+is a diagnostic program designed to emulate client load for a MySQL server and to report the timing of each stage\&. It works as if multiple clients are accessing the server\&.
+.PP
+Invoke
+\fBmysqlslap\fR
+like this:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlslap [\fR\fB\fIoptions\fR\fR\fB]\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Some options such as
+\fB\-\-create\fR
+or
+\fB\-\-query\fR
+enable you to specify a string containing an SQL statement or a file containing statements\&. If you specify a file, by default it must contain one statement per line\&. (That is, the implicit statement delimiter is the newline character\&.) Use the
+\fB\-\-delimiter\fR
+option to specify a different delimiter, which enables you to specify statements that span multiple lines or place multiple statements on a single line\&. You cannot include comments in a file;
+\fBmysqlslap\fR
+does not understand them\&.
+.PP
+\fBmysqlslap\fR
+runs in three stages:
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 1.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  1." 4.2
+.\}
+Create schema, table, and optionally any stored programs or data to use for the test\&. This stage uses a single client connection\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 2.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  2." 4.2
+.\}
+Run the load test\&. This stage can use many client connections\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 3.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  3." 4.2
+.\}
+Clean up (disconnect, drop table if specified)\&. This stage uses a single client connection\&.
+.RE
+.PP
+Examples:
+.PP
+Supply your own create and query SQL statements, with 50 clients querying and 200 selects for each (enter the command on a single line):
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysqlslap \-\-delimiter=";"
+  \-\-create="CREATE TABLE a (b int);INSERT INTO a VALUES (23)"
+  \-\-query="SELECT * FROM a" \-\-concurrency=50 \-\-iterations=200
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Let
+\fBmysqlslap\fR
+build the query SQL statement with a table of two
+INT
+columns and three
+VARCHAR
+columns\&. Use five clients querying 20 times each\&. Do not create the table or insert the data (that is, use the previous test\*(Aqs schema and data):
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysqlslap \-\-concurrency=5 \-\-iterations=20
+  \-\-number\-int\-cols=2 \-\-number\-char\-cols=3
+  \-\-auto\-generate\-sql
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Tell the program to load the create, insert, and query SQL statements from the specified files, where the
+create\&.sql
+file has multiple table creation statements delimited by
+\*(Aq;\*(Aq
+and multiple insert statements delimited by
+\*(Aq;\*(Aq\&. The
+\fB\-\-query\fR
+file will have multiple queries delimited by
+\*(Aq;\*(Aq\&. Run all the load statements, then run all the queries in the query file with five clients (five times each):
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysqlslap \-\-concurrency=5
+  \-\-iterations=5 \-\-query=query\&.sql \-\-create=create\&.sql
+  \-\-delimiter=";"
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fBmysqlslap\fR
+supports the following options, which can be specified on the command line or in the
+[mysqlslap]
+and
+[client]
+groups of an option file\&. For information about option files used by MySQL programs, see
+Section\ \&4.2.2.2, \(lqUsing Option Files\(rq\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-help\fR,
+\fB\-?\fR
+.sp
+Display a help message and exit\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-auto\-generate\-sql\fR,
+\fB\-a\fR
+.sp
+Generate SQL statements automatically when they are not supplied in files or using command options\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-auto\-generate\-sql\-add\-autoincrement\fR
+.sp
+Add an
+AUTO_INCREMENT
+column to automatically generated tables\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-auto\-generate\-sql\-execute\-number=\fR\fB\fIN\fR\fR
+.sp
+Specify how many queries to generate automatically\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-auto\-generate\-sql\-guid\-primary\fR
+.sp
+Add a GUID\-based primary key to automatically generated tables\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-auto\-generate\-sql\-load\-type=\fR\fB\fItype\fR\fR
+.sp
+Specify the test load type\&. The permissible values are
+read
+(scan tables),
+write
+(insert into tables),
+key
+(read primary keys),
+update
+(update primary keys), or
+mixed
+(half inserts, half scanning selects)\&. The default is
+mixed\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-auto\-generate\-sql\-secondary\-indexes=\fR\fB\fIN\fR\fR
+.sp
+Specify how many secondary indexes to add to automatically generated tables\&. By default, none are added\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-auto\-generate\-sql\-unique\-query\-number=\fR\fB\fIN\fR\fR
+.sp
+How many different queries to generate for automatic tests\&. For example, if you run a
+key
+test that performs 1000 selects, you can use this option with a value of 1000 to run 1000 unique queries, or with a value of 50 to perform 50 different selects\&. The default is 10\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-auto\-generate\-sql\-unique\-write\-number=\fR\fB\fIN\fR\fR
+.sp
+How many different queries to generate for
+\fB\-\-auto\-generate\-sql\-write\-number\fR\&. The default is 10\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-auto\-generate\-sql\-write\-number=\fR\fB\fIN\fR\fR
+.sp
+How many row inserts to perform\&. The default is 100\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-commit=\fR\fB\fIN\fR\fR
+.sp
+How many statements to execute before committing\&. The default is 0 (no commits are done)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-compress\fR,
+\fB\-C\fR
+.sp
+Compress all information sent between the client and the server if possible\&. See
+Section\ \&4.2.6, \(lqConnection Compression Control\(rq\&.
+.sp
+As of MySQL 8\&.0\&.18, this option is deprecated\&. It will be removed in a future MySQL version\&. See
+the section called \(lqLegacy Connection Compression Configuration\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-compression\-algorithms=\fR\fB\fIvalue\fR\fR
+The permitted compression algorithms for connections to the server\&. The available algorithms are the same as for the
+protocol_compression_algorithms
+system variable\&. The default value is
+uncompressed\&.
+.sp
+For more information, see
+Section\ \&4.2.6, \(lqConnection Compression Control\(rq\&.
+.sp
+This option was added in MySQL 8\&.0\&.18\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-concurrency=\fR\fB\fIN\fR\fR,
+\fB\-c \fR\fB\fIN\fR\fR
+.sp
+The number of parallel clients to simulate\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-create=\fR\fB\fIvalue\fR\fR
+.sp
+The file or string containing the statement to use for creating the table\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-create\-schema=\fR\fB\fIvalue\fR\fR
+.sp
+The schema in which to run the tests\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+If the
+\fB\-\-auto\-generate\-sql\fR
+option is also given,
+\fBmysqlslap\fR
+drops the schema at the end of the test run\&. To avoid this, use the
+\fB\-\-no\-drop\fR
+option as well\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-csv[=\fR\fB\fIfile_name\fR\fR\fB]\fR
+.sp
+Generate output in comma\-separated values format\&. The output goes to the named file, or to the standard output if no file is given\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-debug[=\fR\fB\fIdebug_options\fR\fR\fB]\fR,
+\fB\-# [\fR\fB\fIdebug_options\fR\fR\fB]\fR
+.sp
+Write a debugging log\&. A typical
+\fIdebug_options\fR
+string is
+d:t:o,\fIfile_name\fR\&. The default is
+d:t:o,/tmp/mysqlslap\&.trace\&.
+.sp
+This option is available only if MySQL was built using
+\fBWITH_DEBUG\fR\&. MySQL release binaries provided by Oracle are
+\fInot\fR
+built using this option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-debug\-check\fR
+.sp
+Print some debugging information when the program exits\&.
+.sp
+This option is available only if MySQL was built using
+\fBWITH_DEBUG\fR\&. MySQL release binaries provided by Oracle are
+\fInot\fR
+built using this option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-debug\-info\fR,
+\fB\-T\fR
+.sp
+Print debugging information and memory and CPU usage statistics when the program exits\&.
+.sp
+This option is available only if MySQL was built using
+\fBWITH_DEBUG\fR\&. MySQL release binaries provided by Oracle are
+\fInot\fR
+built using this option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-default\-auth=\fR\fB\fIplugin\fR\fR
+.sp
+A hint about which client\-side authentication plugin to use\&. See
+Section\ \&6.2.17, \(lqPluggable Authentication\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-defaults\-extra\-file=\fR\fB\fIfile_name\fR\fR
+.sp
+Read this option file after the global option file but (on Unix) before the user option file\&. If the file does not exist or is otherwise inaccessible, an error occurs\&.
+\fIfile_name\fR
+is interpreted relative to the current directory if given as a relative path name rather than a full path name\&.
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-defaults\-file=\fR\fB\fIfile_name\fR\fR
+.sp
+Use only the given option file\&. If the file does not exist or is otherwise inaccessible, an error occurs\&.
+\fIfile_name\fR
+is interpreted relative to the current directory if given as a relative path name rather than a full path name\&.
+.sp
+Exception: Even with
+\fB\-\-defaults\-file\fR, client programs read
+\&.mylogin\&.cnf\&.
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-defaults\-group\-suffix=\fR\fB\fIstr\fR\fR
+.sp
+Read not only the usual option groups, but also groups with the usual names and a suffix of
+\fIstr\fR\&. For example,
+\fBmysqlslap\fR
+normally reads the
+[client]
+and
+[mysqlslap]
+groups\&. If the
+\fB\-\-defaults\-group\-suffix=_other\fR
+option is given,
+\fBmysqlslap\fR
+also reads the
+[client_other]
+and
+[mysqlslap_other]
+groups\&.
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-delimiter=\fR\fB\fIstr\fR\fR,
+\fB\-F \fR\fB\fIstr\fR\fR
+.sp
+The delimiter to use in SQL statements supplied in files or using command options\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-detach=\fR\fB\fIN\fR\fR
+.sp
+Detach (close and reopen) each connection after each
+\fIN\fR
+statements\&. The default is 0 (connections are not detached)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-enable\-cleartext\-plugin\fR
+.sp
+Enable the
+mysql_clear_password
+cleartext authentication plugin\&. (See
+Section\ \&6.4.1.4, \(lqClient-Side Cleartext Pluggable Authentication\(rq\&.)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-engine=\fR\fB\fIengine_name\fR\fR,
+\fB\-e \fR\fB\fIengine_name\fR\fR
+.sp
+The storage engine to use for creating tables\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-get\-server\-public\-key\fR
+.sp
+Request from the server the RSA public key that it uses for key pair\-based password exchange\&. This option applies to clients that connect to the server using an account that authenticates with the
+caching_sha2_password
+authentication plugin\&. For connections by such accounts, the server does not send the public key to the client unless requested\&. The option is ignored for accounts that do not authenticate with that plugin\&. It is also ignored if RSA\-based password exchange is not needed, as is the case when the client connects to the server using a secure connection\&.
+.sp
+If
+\fB\-\-server\-public\-key\-path=\fR\fB\fIfile_name\fR\fR
+is given and specifies a valid public key file, it takes precedence over
+\fB\-\-get\-server\-public\-key\fR\&.
+.sp
+For information about the
+caching_sha2_password
+plugin, see
+Section\ \&6.4.1.2, \(lqCaching SHA-2 Pluggable Authentication\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-host=\fR\fB\fIhost_name\fR\fR,
+\fB\-h \fR\fB\fIhost_name\fR\fR
+.sp
+Connect to the MySQL server on the given host\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-iterations=\fR\fB\fIN\fR\fR,
+\fB\-i \fR\fB\fIN\fR\fR
+.sp
+The number of times to run the tests\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-login\-path=\fR\fB\fIname\fR\fR
+.sp
+Read options from the named login path in the
+\&.mylogin\&.cnf
+login path file\&. A
+\(lqlogin path\(rq
+is an option group containing options that specify which MySQL server to connect to and which account to authenticate as\&. To create or modify a login path file, use the
+\fBmysql_config_editor\fR
+utility\&. See
+\fBmysql_config_editor\fR(1)\&.
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-no\-drop\fR
+.sp
+Prevent
+\fBmysqlslap\fR
+from dropping any schema it creates during the test run\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-no\-defaults\fR
+.sp
+Do not read any option files\&. If program startup fails due to reading unknown options from an option file,
+\fB\-\-no\-defaults\fR
+can be used to prevent them from being read\&.
+.sp
+The exception is that the
+\&.mylogin\&.cnf
+file, if it exists, is read in all cases\&. This permits passwords to be specified in a safer way than on the command line even when
+\fB\-\-no\-defaults\fR
+is used\&. (\&.mylogin\&.cnf
+is created by the
+\fBmysql_config_editor\fR
+utility\&. See
+\fBmysql_config_editor\fR(1)\&.)
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-number\-char\-cols=\fR\fB\fIN\fR\fR,
+\fB\-x \fR\fB\fIN\fR\fR
+.sp
+The number of
+VARCHAR
+columns to use if
+\fB\-\-auto\-generate\-sql\fR
+is specified\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-number\-int\-cols=\fR\fB\fIN\fR\fR,
+\fB\-y \fR\fB\fIN\fR\fR
+.sp
+The number of
+INT
+columns to use if
+\fB\-\-auto\-generate\-sql\fR
+is specified\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-number\-of\-queries=\fR\fB\fIN\fR\fR
+.sp
+Limit each client to approximately this many queries\&. Query counting takes into account the statement delimiter\&. For example, if you invoke
+\fBmysqlslap\fR
+as follows, the
+;
+delimiter is recognized so that each instance of the query string counts as two queries\&. As a result, 5 rows (not 10) are inserted\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqlslap \-\-delimiter=";" \-\-number\-of\-queries=10\fR
+         \fB\-\-query="use test;insert into t values(null)"\fR
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-only\-print\fR
+.sp
+Do not connect to databases\&.
+\fBmysqlslap\fR
+only prints what it would have done\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-password[=\fR\fB\fIpassword\fR\fR\fB]\fR,
+\fB\-p[\fR\fB\fIpassword\fR\fR\fB]\fR
+.sp
+The password of the MySQL account used for connecting to the server\&. The password value is optional\&. If not given,
+\fBmysqlslap\fR
+prompts for one\&. If given, there must be
+\fIno space\fR
+between
+\fB\-\-password=\fR
+or
+\fB\-p\fR
+and the password following it\&. If no password option is specified, the default is to send no password\&.
+.sp
+Specifying a password on the command line should be considered insecure\&. To avoid giving the password on the command line, use an option file\&. See
+Section\ \&6.1.2.1, \(lqEnd-User Guidelines for Password Security\(rq\&.
+.sp
+To explicitly specify that there is no password and that
+\fBmysqlslap\fR
+should not prompt for one, use the
+\fB\-\-skip\-password\fR
+option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-pipe\fR,
+\fB\-W\fR
+.sp
+On Windows, connect to the server using a named pipe\&. This option applies only if the server was started with the
+named_pipe
+system variable enabled to support named\-pipe connections\&. In addition, the user making the connection must be a member of the Windows group specified by the
+named_pipe_full_access_group
+system variable\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-plugin\-dir=\fR\fB\fIdir_name\fR\fR
+.sp
+The directory in which to look for plugins\&. Specify this option if the
+\fB\-\-default\-auth\fR
+option is used to specify an authentication plugin but
+\fBmysqlslap\fR
+does not find it\&. See
+Section\ \&6.2.17, \(lqPluggable Authentication\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-port=\fR\fB\fIport_num\fR\fR,
+\fB\-P \fR\fB\fIport_num\fR\fR
+.sp
+For TCP/IP connections, the port number to use\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-post\-query=\fR\fB\fIvalue\fR\fR
+.sp
+The file or string containing the statement to execute after the tests have completed\&. This execution is not counted for timing purposes\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-post\-system=\fR\fB\fIstr\fR\fR
+.sp
+The string to execute using
+system()
+after the tests have completed\&. This execution is not counted for timing purposes\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-pre\-query=\fR\fB\fIvalue\fR\fR
+.sp
+The file or string containing the statement to execute before running the tests\&. This execution is not counted for timing purposes\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-pre\-system=\fR\fB\fIstr\fR\fR
+.sp
+The string to execute using
+system()
+before running the tests\&. This execution is not counted for timing purposes\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-print\-defaults\fR
+.sp
+Print the program name and all options that it gets from option files\&.
+.sp
+For additional information about this and other option\-file options, see
+Section\ \&4.2.2.3, \(lqCommand-Line Options that Affect Option-File Handling\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-protocol={TCP|SOCKET|PIPE|MEMORY}\fR
+.sp
+The connection protocol to use for connecting to the server\&. It is useful when the other connection parameters normally result in use of a protocol other than the one you want\&. For details on the permissible values, see
+Section\ \&4.2.4, \(lqConnecting to the MySQL Server Using Command Options\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-query=\fR\fB\fIvalue\fR\fR,
+\fB\-q \fR\fB\fIvalue\fR\fR
+.sp
+The file or string containing the
+SELECT
+statement to use for retrieving data\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-server\-public\-key\-path=\fR\fB\fIfile_name\fR\fR
+.sp
+The path name to a file containing a client\-side copy of the public key required by the server for RSA key pair\-based password exchange\&. The file must be in PEM format\&. This option applies to clients that authenticate with the
+sha256_password
+or
+caching_sha2_password
+authentication plugin\&. This option is ignored for accounts that do not authenticate with one of those plugins\&. It is also ignored if RSA\-based password exchange is not used, as is the case when the client connects to the server using a secure connection\&.
+.sp
+If
+\fB\-\-server\-public\-key\-path=\fR\fB\fIfile_name\fR\fR
+is given and specifies a valid public key file, it takes precedence over
+\fB\-\-get\-server\-public\-key\fR\&.
+.sp
+For
+sha256_password, this option applies only if MySQL was built using OpenSSL\&.
+.sp
+For information about the
+sha256_password
+and
+caching_sha2_password
+plugins, see
+Section\ \&6.4.1.3, \(lqSHA-256 Pluggable Authentication\(rq, and
+Section\ \&6.4.1.2, \(lqCaching SHA-2 Pluggable Authentication\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-shared\-memory\-base\-name=\fR\fB\fIname\fR\fR
+.sp
+On Windows, the shared\-memory name to use for connections made using shared memory to a local server\&. The default value is
+MYSQL\&. The shared\-memory name is case\-sensitive\&.
+.sp
+This option applies only if the server was started with the
+shared_memory
+system variable enabled to support shared\-memory connections\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-silent\fR,
+\fB\-s\fR
+.sp
+Silent mode\&. No output\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-socket=\fR\fB\fIpath\fR\fR,
+\fB\-S \fR\fB\fIpath\fR\fR
+.sp
+For connections to
+localhost, the Unix socket file to use, or, on Windows, the name of the named pipe to use\&.
+.sp
+On Windows, this option applies only if the server was started with the
+named_pipe
+system variable enabled to support named\-pipe connections\&. In addition, the user making the connection must be a member of the Windows group specified by the
+named_pipe_full_access_group
+system variable\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-sql\-mode=\fR\fB\fImode\fR\fR
+.sp
+Set the SQL mode for the client session\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ssl*\fR
+.sp
+Options that begin with
+\fB\-\-ssl\fR
+specify whether to connect to the server using SSL and indicate where to find SSL keys and certificates\&. See
+the section called \(lqCommand Options for Encrypted Connections\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ssl\-fips\-mode={OFF|ON|STRICT}\fR
+Controls whether to enable FIPS mode on the client side\&. The
+\fB\-\-ssl\-fips\-mode\fR
+option differs from other
+\fB\-\-ssl\-\fR\fB\fIxxx\fR\fR
+options in that it is not used to establish encrypted connections, but rather to affect which cryptographic operations are permitted\&. See
+Section\ \&6.5, \(lqFIPS Support\(rq\&.
+.sp
+These
+\fB\-\-ssl\-fips\-mode\fR
+values are permitted:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+OFF: Disable FIPS mode\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+ON: Enable FIPS mode\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+STRICT: Enable
+\(lqstrict\(rq
+FIPS mode\&.
+.RE
+.sp
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+If the OpenSSL FIPS Object Module is not available, the only permitted value for
+\fB\-\-ssl\-fips\-mode\fR
+is
+OFF\&. In this case, setting
+\fB\-\-ssl\-fips\-mode\fR
+to
+ON
+or
+STRICT
+causes the client to produce a warning at startup and to operate in non\-FIPS mode\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-tls\-ciphersuites=\fR\fB\fIciphersuite_list\fR\fR
+.sp
+The permissible ciphersuites for encrypted connections that use TLSv1\&.3\&. The value is a list of one or more colon\-separated ciphersuite names\&. The ciphersuites that can be named for this option depend on the SSL library used to compile MySQL\&. For details, see
+Section\ \&6.3.2, \(lqEncrypted Connection TLS Protocols and Ciphers\(rq\&.
+.sp
+This option was added in MySQL 8\&.0\&.16\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-tls\-version=\fR\fB\fIprotocol_list\fR\fR
+.sp
+The permissible TLS protocols for encrypted connections\&. The value is a list of one or more comma\-separated protocol names\&. The protocols that can be named for this option depend on the SSL library used to compile MySQL\&. For details, see
+Section\ \&6.3.2, \(lqEncrypted Connection TLS Protocols and Ciphers\(rq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-user=\fR\fB\fIuser_name\fR\fR,
+\fB\-u \fR\fB\fIuser_name\fR\fR
+.sp
+The user name of the MySQL account to use for connecting to the server\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-verbose\fR,
+\fB\-v\fR
+.sp
+Verbose mode\&. Print more information about what the program does\&. This option can be used multiple times to increase the amount of information\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-version\fR,
+\fB\-V\fR
+.sp
+Display version information and exit\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-zstd\-compression\-level=\fR\fB\fIlevel\fR\fR
+The compression level to use for connections to the server that use the
+zstd
+compression algorithm\&. The permitted levels are from 1 to 22, with larger values indicating increasing levels of compression\&. The default
+zstd
+compression level is 3\&. The compression level setting has no effect on connections that do not use
+zstd
+compression\&.
+.sp
+For more information, see
+Section\ \&4.2.6, \(lqConnection Compression Control\(rq\&.
+.sp
+This option was added in MySQL 8\&.0\&.18\&.
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

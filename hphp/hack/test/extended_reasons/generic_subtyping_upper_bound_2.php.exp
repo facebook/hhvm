@@ -1,0 +1,349 @@
+error: Typing[4323] Invalid argument
+
+File generic_subtyping_upper_bound_2.php, line 12, character 20 - line 12, character 21:
+
+  7 | class D extends B {}
+  8 | 
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 12 |   rcvr_both_bounds(»$x«);
+ 13 | }
+
+T is a constrained type parameter
+
+File generic_subtyping_upper_bound_2.php, line 9, character 27 - line 9, character 27:
+
+ 7 | class D extends B {}
+ 8 | 
+ 9 | function rcvr_both_bounds<»T« as D as B>(T $x): void {}
+10 | 
+11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+12 |   rcvr_both_bounds($x);
+13 | }
+
+This type constraint is violated
+
+File generic_subtyping_upper_bound_2.php, line 9, character 32 - line 9, character 32:
+
+ 7 | class D extends B {}
+ 8 | 
+ 9 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
+10 | 
+11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+12 |   rcvr_both_bounds($x);
+13 | }
+
+Expected D
+
+File generic_subtyping_upper_bound_2.php, line 9, character 32 - line 9, character 32:
+
+ 7 | class D extends B {}
+ 8 | 
+ 9 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
+10 | 
+11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+12 |   rcvr_both_bounds($x);
+13 | }
+
+But got A
+
+File generic_subtyping_upper_bound_2.php, line 11, character 52 - line 11, character 52:
+
+  7 | class D extends B {}
+  8 | 
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(»T« $x): void {
+ 12 |   rcvr_both_bounds($x);
+ 13 | }
+
+  by the definition of T
+
+File generic_subtyping_upper_bound_2.php, line 11, character 49 - line 11, character 49:
+
+  7 | class D extends B {}
+  8 | 
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as »A«>(T $x): void {
+ 12 |   rcvr_both_bounds($x);
+ 13 | }
+
+Here's why:
+
+
+  Step 1 of 3                                                                   
+
+I started by checking this subtype relationship.
+
+The subtype comes from this function or method declaration
+
+File generic_subtyping_upper_bound_2.php, line 9, character 10 - line 9, character 25:
+
+ 7 | class D extends B {}
+ 8 | 
+ 9 | function »rcvr_both_bounds«<T as D as B>(T $x): void {}
+10 | 
+11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+12 |   rcvr_both_bounds($x);
+13 | }
+
+The supertype comes from this expression
+
+File generic_subtyping_upper_bound_2.php, line 12, character 3 - line 12, character 22:
+
+  7 | class D extends B {}
+  8 | 
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 12 |   »rcvr_both_bounds($x)«;
+ 13 | }
+
+
+  Step 2 of 3                                                                   
+
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
+
+The subtype comes from this hint
+
+File generic_subtyping_upper_bound_2.php, line 11, character 52 - line 11, character 52:
+
+  7 | class D extends B {}
+  8 | 
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(»T« $x): void {
+ 12 |   rcvr_both_bounds($x);
+ 13 | }
+
+and flows into this expression
+
+File generic_subtyping_upper_bound_2.php, line 11, character 54 - line 11, character 55:
+
+  7 | class D extends B {}
+  8 | 
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(T »$x«): void {
+ 12 |   rcvr_both_bounds($x);
+ 13 | }
+
+as the parameter hint
+
+which itself flows into this expression
+
+File generic_subtyping_upper_bound_2.php, line 12, character 20 - line 12, character 21:
+
+  7 | class D extends B {}
+  8 | 
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 12 |   rcvr_both_bounds(»$x«);
+ 13 | }
+
+as the type of the local variable
+
+The supertype comes from this constraint on the generic parameter
+
+File generic_subtyping_upper_bound_2.php, line 9, character 32 - line 9, character 32:
+
+ 7 | class D extends B {}
+ 8 | 
+ 9 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
+10 | 
+11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+12 |   rcvr_both_bounds($x);
+13 | }
+
+
+  Step 3 of 3                                 (here is where the error occurred) 
+
+The subtype declares an upper bound so next I checked that was a subtype of the supertype.
+
+The subtype comes from this hint
+
+File generic_subtyping_upper_bound_2.php, line 11, character 49 - line 11, character 49:
+
+  7 | class D extends B {}
+  8 | 
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as »A«>(T $x): void {
+ 12 |   rcvr_both_bounds($x);
+ 13 | }
+
+which is defined here
+
+File generic_subtyping_upper_bound_2.php, line 4, character 7 - line 4, character 7:
+
+ 3 | 
+ 4 | class »A« {}
+ 5 | class B extends A {}
+ 6 | class C extends B {}
+ 7 | class D extends B {}
+
+The supertype is the same as before.
+
+File generic_subtyping_upper_bound_2.php, line 9, character 32 - line 9, character 32:
+
+ 7 | class D extends B {}
+ 8 | 
+ 9 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
+10 | 
+11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+12 |   rcvr_both_bounds($x);
+13 | }
+
+error: Typing[4323] Invalid argument
+
+File generic_subtyping_upper_bound_2.php, line 12, character 20 - line 12, character 21:
+
+  7 | class D extends B {}
+  8 | 
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 12 |   rcvr_both_bounds(»$x«);
+ 13 | }
+
+T is a constrained type parameter
+
+File generic_subtyping_upper_bound_2.php, line 9, character 27 - line 9, character 27:
+
+ 7 | class D extends B {}
+ 8 | 
+ 9 | function rcvr_both_bounds<»T« as D as B>(T $x): void {}
+10 | 
+11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+12 |   rcvr_both_bounds($x);
+13 | }
+
+This type constraint is violated
+
+File generic_subtyping_upper_bound_2.php, line 9, character 32 - line 9, character 32:
+
+ 7 | class D extends B {}
+ 8 | 
+ 9 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
+10 | 
+11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+12 |   rcvr_both_bounds($x);
+13 | }
+
+Expected D
+
+File generic_subtyping_upper_bound_2.php, line 9, character 32 - line 9, character 32:
+
+ 7 | class D extends B {}
+ 8 | 
+ 9 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
+10 | 
+11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+12 |   rcvr_both_bounds($x);
+13 | }
+
+But got T as A
+
+File generic_subtyping_upper_bound_2.php, line 11, character 52 - line 11, character 52:
+
+  7 | class D extends B {}
+  8 | 
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(»T« $x): void {
+ 12 |   rcvr_both_bounds($x);
+ 13 | }
+
+Here's why:
+
+
+  Step 1 of 2                                                                   
+
+I started by checking this subtype relationship.
+
+The subtype comes from this function or method declaration
+
+File generic_subtyping_upper_bound_2.php, line 9, character 10 - line 9, character 25:
+
+ 7 | class D extends B {}
+ 8 | 
+ 9 | function »rcvr_both_bounds«<T as D as B>(T $x): void {}
+10 | 
+11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+12 |   rcvr_both_bounds($x);
+13 | }
+
+The supertype comes from this expression
+
+File generic_subtyping_upper_bound_2.php, line 12, character 3 - line 12, character 22:
+
+  7 | class D extends B {}
+  8 | 
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 12 |   »rcvr_both_bounds($x)«;
+ 13 | }
+
+
+  Step 2 of 2                                 (here is where the error occurred) 
+
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
+
+The subtype comes from this hint
+
+File generic_subtyping_upper_bound_2.php, line 11, character 52 - line 11, character 52:
+
+  7 | class D extends B {}
+  8 | 
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(»T« $x): void {
+ 12 |   rcvr_both_bounds($x);
+ 13 | }
+
+and flows into this expression
+
+File generic_subtyping_upper_bound_2.php, line 11, character 54 - line 11, character 55:
+
+  7 | class D extends B {}
+  8 | 
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(T »$x«): void {
+ 12 |   rcvr_both_bounds($x);
+ 13 | }
+
+as the parameter hint
+
+which itself flows into this expression
+
+File generic_subtyping_upper_bound_2.php, line 12, character 20 - line 12, character 21:
+
+  7 | class D extends B {}
+  8 | 
+  9 | function rcvr_both_bounds<T as D as B>(T $x): void {}
+ 10 | 
+ 11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+ 12 |   rcvr_both_bounds(»$x«);
+ 13 | }
+
+as the type of the local variable
+
+The supertype comes from this constraint on the generic parameter
+
+File generic_subtyping_upper_bound_2.php, line 9, character 32 - line 9, character 32:
+
+ 7 | class D extends B {}
+ 8 | 
+ 9 | function rcvr_both_bounds<T as »D« as B>(T $x): void {}
+10 | 
+11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
+12 |   rcvr_both_bounds($x);
+13 | }
+

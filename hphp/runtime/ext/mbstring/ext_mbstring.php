@@ -1,4 +1,8 @@
-<?hh // partial
+<?hh
+
+const int MB_OVERLOAD_MAIL = 1;
+const int MB_OVERLOAD_STRING = 2;
+const int MB_OVERLOAD_REGEX = 4;
 
 /**
  * Returns an array containing all supported encodings.
@@ -7,7 +11,7 @@
  *
  */
 <<__Native>>
-function mb_list_encodings()[]: varray;
+function mb_list_encodings()[]: varray<string>;
 
 /**
  * @param string $name
@@ -140,7 +144,7 @@ function mb_convert_kana(string $str,
 function mb_convert_variables(string $to_encoding,
                               mixed $from_encoding,
                               inout mixed $vars,
-                              ...$argv)[read_globals]: mixed;
+                              mixed... $argv)[read_globals]: mixed;
 
 /**
  * Decodes encoded-word string str in MIME header.
@@ -566,8 +570,8 @@ function mb_output_handler(string $contents, int $status)[leak_safe]: string;
  */
 <<__Native>>
 function mb_parse_str(string $encoded_string,
-                      <<__OutOnly("darray")>>
-                      inout mixed $result)[leak_safe]: bool;
+                      <<__OutOnly>>
+                      inout dict<arraykey, mixed> $result)[leak_safe]: bool;
 
 /**
  * Get a MIME charset string for a specific encoding.

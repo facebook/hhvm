@@ -235,7 +235,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::mulsd:
     case Vinstr::neg:
     case Vinstr::nop:
-    case Vinstr::not:
+    case Vinstr::not_:
     case Vinstr::notb:
     case Vinstr::orbi:
     case Vinstr::orwi:
@@ -247,6 +247,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::sar:
     case Vinstr::sarq:
     case Vinstr::sarqi:
+    case Vinstr::sbfizq:
     case Vinstr::setcc:
     case Vinstr::shl:
     case Vinstr::shr:
@@ -278,6 +279,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::testw:
     case Vinstr::testwi:
     case Vinstr::ubfmli:
+    case Vinstr::ubfmliq:
     case Vinstr::ucomisd:
     case Vinstr::unpcklpd:
     case Vinstr::xorb:
@@ -306,10 +308,11 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::defvmsp:
     case Vinstr::defvmfp:
     case Vinstr::leap:
-    case Vinstr::leav:
     case Vinstr::load:
     case Vinstr::loadb:
     case Vinstr::loadl:
+    case Vinstr::loadpair:
+    case Vinstr::loadpairl:
     case Vinstr::loadqd:
     case Vinstr::loadqp:
     case Vinstr::loadsbl:
@@ -360,7 +363,6 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::calls:
     case Vinstr::callstub:
     case Vinstr::conjure:
-    case Vinstr::conjureuse:
     case Vinstr::contenter:
     case Vinstr::cqo:
     case Vinstr::debugtrap:
@@ -377,11 +379,12 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::incwm:
     case Vinstr::inittc:
     case Vinstr::inlineend:
+    case Vinstr::inlinesideexit:
     case Vinstr::inlinestart:
     case Vinstr::jcc:
     case Vinstr::jcci:
+    case Vinstr::interceptjcc:
     case Vinstr::jmp:
-    case Vinstr::jmps:
     case Vinstr::jmpi:
     case Vinstr::jmpm:
     case Vinstr::jmpr:
@@ -390,7 +393,6 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::leavetc:
     case Vinstr::loadstubret:
     case Vinstr::mcprep:
-    case Vinstr::movqs:
     case Vinstr::msr:
     case Vinstr::nothrow:
     case Vinstr::orbim:
@@ -409,7 +411,6 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::prefetch:
     case Vinstr::push:
     case Vinstr::pushf:
-    case Vinstr::pushframe:
     case Vinstr::pushm:
     case Vinstr::pushp:
     case Vinstr::pushpm:
@@ -417,8 +418,11 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::recordbasenativesp:
     case Vinstr::unrecordbasenativesp:
     case Vinstr::recordstack:
+    case Vinstr::restoreripm:
+    case Vinstr::restorerips:
     case Vinstr::resumetc:
     case Vinstr::ret:
+    case Vinstr::saverips:
     case Vinstr::store:
     case Vinstr::storeb:
     case Vinstr::storebi:
@@ -429,6 +433,8 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::storeups:
     case Vinstr::storew:
     case Vinstr::storewi:
+    case Vinstr::storepair:
+    case Vinstr::storepairl:
     case Vinstr::stublogue:
     case Vinstr::stubret:
     case Vinstr::stubtophp:

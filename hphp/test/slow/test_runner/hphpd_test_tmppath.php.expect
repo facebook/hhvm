@@ -1,4 +1,4 @@
-string(16) "root ends with /"
+string(24) "root does not end with /"
 bool(true)
 string(21) "path starts with root"
 bool(true)

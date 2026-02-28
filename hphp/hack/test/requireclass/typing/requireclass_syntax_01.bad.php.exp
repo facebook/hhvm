@@ -1,8 +1,0 @@
-File "requireclass_syntax_01.bad.php", line 11, characters 17-17:
-Only traits may use `require class` (Naming[2119])
-File "requireclass_syntax_01.bad.php", line 15, characters 17-17:
-Only traits may use `require class` (Naming[2119])
-File "requireclass_syntax_01.bad.php", line 14, characters 7-7:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "requireclass_syntax_01.bad.php", line 15, characters 17-17:
-  This requires to be exactly C

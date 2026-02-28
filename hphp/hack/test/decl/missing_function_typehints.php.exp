@@ -1,6 +1,6 @@
 [("\\f",
   (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None; fe_module = None;
+     { Typing_defs.fe_deprecated = None; fe_module = None; fe_package = None;
        fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([3:10-11]),
@@ -8,26 +8,25 @@
            { ft_tparams = []; ft_where_constraints = [];
              ft_params =
              [{ fp_pos = [3:12-14]; fp_name = (Some "$x");
-                fp_type =
-                { et_enforced = Typing_defs_core.Unenforced;
-                  et_type = (Rwitness_from_decl ([3:12-14]), Tany) };
+                fp_type = (Rwitness_from_decl ([3:12-14]), Tany);
                 fp_flags =
-                (make_fp_flags ~accept_disposable:false ~has_default:false
-                  ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                  ~ifc_can_call:false ~readonly:false);
-                 }
+                { Typing_defs_flags.FunParam.accept_disposable = false;
+                  inout = false; is_optional = false; readonly = false;
+                  ignore_readonly_error = false; splat = false; named = false
+                  };
+                fp_def_value = None }
                ];
              ft_implicit_params = { capability = (CapDefaults [3:10-11]) };
-             ft_ret =
-             { et_enforced = Typing_defs_core.Unenforced;
-               et_type = (Rwitness_from_decl ([3:10-11]), Tany) };
+             ft_ret = (Rwitness_from_decl ([3:10-11]), Tany);
              ft_flags =
-             (make_ft_flags FSync ~return_disposable:false
-               ~returns_readonly:false ~support_dynamic_type:false
-               ~readonly_this:false ~is_memoized:false ~variadic:false);
-             ft_ifc_decl = FDPolicied {PUBLIC} }));
+             { Typing_defs_flags.Fun.return_disposable = false;
+               async = false; generator = false; fun_kind = FSync;
+               is_function_pointer = false; returns_readonly = false;
+               readonly_this = false; support_dynamic_type = false;
+               is_memoized = false; variadic = false };
+             ft_instantiated = true }));
        fe_pos = [3:10-11]; fe_php_std_lib = false;
-       fe_support_dynamic_type = false }))
+       fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+       fe_no_auto_likes = false;
+       fe_package_requirement = Typing_defs.RPNormal }))
   ]
-
-They matched!

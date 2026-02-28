@@ -2,24 +2,24 @@
 
 class IteratorClass implements Iterator {
   public function __construct() { }
-  public function key() { }
-  public function current() { }
-  function next() { }
-  function valid() { }
-  function rewind() { }
+  public function key() :mixed{ }
+  public function current() :mixed{ }
+  function next() :mixed{ }
+  function valid() :mixed{ }
+  function rewind() :mixed{ }
 }
 class DerivedClass extends IteratorClass {}
 class NonIterator {}
 
-function dump_iterateable($class) {
+function dump_iterateable($class) :mixed{
   $reflection = new ReflectionClass($class);
   var_dump($reflection->isIterateable());
 }
 
 
 <<__EntryPoint>>
-function main_reflection_class_is_iterateable() {
-$classes = varray["IteratorClass", "DerivedClass", "NonIterator"];
+function main_reflection_class_is_iterateable() :mixed{
+$classes = vec["IteratorClass", "DerivedClass", "NonIterator"];
 
 foreach ($classes as $class) {
   echo "Is $class iterateable? ";

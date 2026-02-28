@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_110() {
+function main_110() :mixed{
 $a = 1/3;
  var_dump($a);
 }

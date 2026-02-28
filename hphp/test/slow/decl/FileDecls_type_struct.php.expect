@@ -1,0 +1,81 @@
+NULL
+dict(2) {
+  ["type"]=>
+  string(3) "int"
+  ["kind"]=>
+  string(9) "primitive"
+}
+dict(3) {
+  ["type"]=>
+  string(75) "shape(?'first' => string, 'second' => ?HH\dict<int, shape('other' => int)>)"
+  ["kind"]=>
+  string(5) "shape"
+  ["subtypes"]=>
+  vec(2) {
+    dict(3) {
+      ["name"]=>
+      string(5) "first"
+      ["is_optional"]=>
+      bool(true)
+      ["type"]=>
+      dict(2) {
+        ["type"]=>
+        string(6) "string"
+        ["kind"]=>
+        string(9) "primitive"
+      }
+    }
+    dict(2) {
+      ["name"]=>
+      string(6) "second"
+      ["type"]=>
+      dict(4) {
+        ["type"]=>
+        string(35) "HH\dict<int, shape('other' => int)>"
+        ["kind"]=>
+        string(5) "apply"
+        ["is_nullable"]=>
+        bool(true)
+        ["subtypes"]=>
+        vec(2) {
+          dict(1) {
+            ["type"]=>
+            dict(2) {
+              ["type"]=>
+              string(3) "int"
+              ["kind"]=>
+              string(9) "primitive"
+            }
+          }
+          dict(1) {
+            ["type"]=>
+            dict(3) {
+              ["type"]=>
+              string(21) "shape('other' => int)"
+              ["kind"]=>
+              string(5) "shape"
+              ["subtypes"]=>
+              vec(1) {
+                dict(2) {
+                  ["name"]=>
+                  string(5) "other"
+                  ["type"]=>
+                  dict(2) {
+                    ["type"]=>
+                    string(3) "int"
+                    ["kind"]=>
+                    string(9) "primitive"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+Shape field: first
+It is of type string and it is optional
+Shape field: second
+It is of type HH\dict<int, shape('other' => int)> and it is not optional

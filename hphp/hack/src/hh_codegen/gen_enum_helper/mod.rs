@@ -6,29 +6,32 @@
 
 mod ref_kind;
 
-use crate::{common::*, quote_helper::*};
+use std::fmt::Write;
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
+use std::path::PathBuf;
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
+use anyhow::anyhow;
+use clap::Parser;
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
+use quote::format_ident;
+use quote::quote;
 use ref_kind::RefKind;
-use std::{
-    fmt::Write,
-    fs::File,
-    io::Read,
-    path::{Path, PathBuf},
-};
-use structopt::StructOpt;
 use syn::*;
 
-#[derive(Debug, StructOpt)]
+use crate::common::*;
+use crate::quote_helper::*;
+
+#[derive(Debug, Parser)]
 pub struct Args {
     /// Rust files containing the enum types for which codegen will be performed.
-    #[structopt(short, long)]
+    #[clap(short, long)]
     input: Vec<String>,
 
     /// The directory to which generated files will be written.
-    #[structopt(short, long, parse(from_os_str))]
+    #[clap(short, long)]
     output: PathBuf,
 }
 
@@ -40,7 +43,6 @@ pub fn run(args: &Args) -> Result<Vec<(PathBuf, String)>> {
     for input in inputs {
         let (file, uses) = parse_input_arg(input);
         eprintln!("Process: {}", file);
-        eprintln!("Uses: {:?}", uses);
         let mut output_filename = Path::new(file)
             .file_stem()
             .ok_or_else(|| anyhow!("Unable to get file stem"))?
@@ -89,6 +91,7 @@ fn mk_file(file: &syn::File, uses: Vec<&str>) -> TokenStream {
     let enums = get_enums(file);
     let content = enums.into_iter().map(mk_impl);
     quote! {
+        #![allow(clippy::all)]
         #(use #uses;)*
         #(#content)*
     }
@@ -301,5 +304,5 @@ fn unbox(ty: &Type) -> Vec<&Type> {
             }
         }
     }
-    return vec![];
+    vec![]
 }

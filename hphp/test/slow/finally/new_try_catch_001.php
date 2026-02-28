@@ -1,9 +1,9 @@
 <?hh
 
-function blah() {
-  $xs = varray[1, 2, 3];
-  $ys = varray[1, 2, 3];
-  $zs = varray[1, 2, 3];
+function blah() :mixed{
+  $xs = vec[1, 2, 3];
+  $ys = vec[1, 2, 3];
+  $zs = vec[1, 2, 3];
   try {
     foreach ($xs as $x) {
       foreach ($ys as $y) {
@@ -31,6 +31,6 @@ function blah() {
 
 
 <<__EntryPoint>>
-function main_new_try_catch_001() {
+function main_new_try_catch_001() :mixed{
 var_dump(blah());
 }

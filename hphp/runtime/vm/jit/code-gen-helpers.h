@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/immed.h"
+#include "hphp/util/ptr.h"
 #include "hphp/util/ringbuffer.h"
 
 namespace HPHP {
@@ -55,12 +56,22 @@ void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref);
 /*
  * Load the LowPtr<T> at `mem', with storage size `size', into `reg'.
  */
-void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size);
+void ldLowPtrImpl(Vout& v, Vptr mem, Vreg reg, size_t size);
+
+template <typename T>
+void emitLdPackedPtr(Vout& v, Vptr mem, Vreg reg) {
+  ldLowPtrImpl(v, mem, reg, PackedPtr<T>::bits);
+}
 
 /*
  * Store the LowPtr<T> in `reg' into `mem', with storage size `size'.
  */
-void emitStLowPtr(Vout& v, Vreg reg, Vptr mem, size_t size);
+void stLowPtrImpl(Vout& v, Vreg reg, Vptr mem, size_t size);
+
+template <typename T>
+void emitStPackedPtr(Vout& v, Vreg reg, Vptr mem) {
+  stLowPtrImpl(v, reg, mem, PackedPtr<T>::bits);
+}
 
 /*
  * Copy two 64-bit values, `s0' and `s1', into one 128-bit register, `d0'.
@@ -227,6 +238,7 @@ Vreg emitLdObjClass(Vout& v, Vreg obj, Vreg d);
  * Internal helpers for LowPtr comparisons.
  */
 void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vptr mem, size_t size);
+void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vreg reg, size_t size);
 void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg, Vptr mem, size_t size);
 void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg1, Vreg reg2, size_t size);
 
@@ -234,24 +246,24 @@ void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg1, Vreg reg2, size_t size);
  * Compare two LowPtrs, setting the result in `sf'.
  */
 template<class T>
-void emitCmpLowPtr(Vout& v, Vreg sf, const T* c, Vptr mem) {
-  cmpLowPtrImpl(v, sf, c, mem, sizeof(LowPtr<T>));
+void emitCmpPackedPtr(Vout& v, Vreg sf, const T* c, Vptr mem) {
+  cmpLowPtrImpl(v, sf, c, mem, PackedPtr<T>::bits);
 }
 
 template<class T>
-void emitCmpLowPtr(Vout& v, Vreg sf, Vreg reg, Vptr mem) {
-  cmpLowPtrImpl(v, sf, reg, mem, sizeof(LowPtr<T>));
+void emitCmpPackedPtr(Vout& v, Vreg sf, const T* c, Vreg reg) {
+  cmpLowPtrImpl(v, sf, c, reg, PackedPtr<T>::bits);
 }
 
 template<class T>
-void emitCmpLowPtr(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
-  cmpLowPtrImpl(v, sf, reg1, reg2, sizeof(LowPtr<T>));
+void emitCmpPackedPtr(Vout& v, Vreg sf, Vreg reg, Vptr mem) {
+  cmpLowPtrImpl(v, sf, reg, mem, PackedPtr<T>::bits);
 }
 
-/*
- * Compare `val' against the live Class::veclen_t at `mem'.
- */
-void emitCmpVecLen(Vout& v, Vreg sf, Immed val, Vptr mem);
+template<class T>
+void emitCmpPackedPtr(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
+  cmpLowPtrImpl(v, sf, reg1, reg2, PackedPtr<T>::bits);
+}
 
 /*
  * emit an isCollection(obj) range check. The returned status

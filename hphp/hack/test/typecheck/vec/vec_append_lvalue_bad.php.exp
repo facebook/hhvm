@@ -1,2 +1,2 @@
-File "vec_append_lvalue_bad.php", line 10, characters 4-9:
+ERROR: File "vec_append_lvalue_bad.php", line 10, characters 4-9:
 You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])

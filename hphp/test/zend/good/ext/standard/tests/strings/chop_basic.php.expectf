@@ -1,9 +1,0 @@
-*** Testing chop() : basic functionality ***
-string(11) "hello world"
-string(16) "hello world%r\x09%r
-
-%r\x00\x0b%r"
-string(18) "hello world%r\x09%r
-
-%r\x00\x0b%r  "
-Done

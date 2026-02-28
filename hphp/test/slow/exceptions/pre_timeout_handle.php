@@ -1,10 +1,10 @@
 <?hh
 
-function randomFunction() {
+function randomFunction() :mixed{
   rand() * rand();
 }
 
-async function genLongFunction() {
+async function genLongFunction() :Awaitable<mixed>{
   echo "Testing handle during IO\n";
   set_pre_timeout_handler(1, ($handle) ==> {
     var_dump($handle);
@@ -29,6 +29,6 @@ async function genLongFunction() {
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   \HH\Asio\join(genLongFunction());
 }

@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_uniqid_long_prefix() {
+function main_uniqid_long_prefix() :mixed{
 $prefix = str_repeat('0!1@2#3$4%5^6&7*', 17); // 272 characters
 $id = uniqid($prefix, true);
 var_dump(strlen($id) > 272);

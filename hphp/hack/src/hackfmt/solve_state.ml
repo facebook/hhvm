@@ -81,10 +81,11 @@ let build_lines env chunk_group rbm nesting_set =
     else
       0
   in
-  let rec aux remaining_chunks acc =
-    let (acc_len, acc_rules) = acc in
+  (* We write this in a tail recursive fashion because stuff can get big:
+       See T184724848 *)
+  let rec aux remaining_chunks (acc_len, acc_rules, acc_res) =
     match remaining_chunks with
-    | [] -> [(get_overflow env acc_len, acc_rules)]
+    | [] -> (get_overflow env acc_len, acc_rules) :: acc_res
     | hd :: tl ->
       (* TODO: consider adding parent rules *)
       let rule = hd.Chunk.rule in
@@ -95,12 +96,15 @@ let build_lines env chunk_group rbm nesting_set =
         + get_prefix_whitespace_length env hd ~is_split
       in
       if is_split then
-        (get_overflow env acc_len, acc_rules)
-        :: aux tl (chunk_len, ISet.add rule ISet.empty)
+        aux
+          tl
+          ( chunk_len,
+            ISet.add rule ISet.empty,
+            (get_overflow env acc_len, acc_rules) :: acc_res )
       else
-        aux tl (chunk_len + acc_len, ISet.add rule acc_rules)
+        aux tl (chunk_len + acc_len, ISet.add rule acc_rules, acc_res)
   in
-  aux chunks (0, ISet.empty)
+  List.rev @@ aux chunks (0, ISet.empty, [])
 
 let build_candidate_rules_and_update_rbm rbm lines rule_dependency_map =
   let bound_rules = get_bound_ruleset rbm in
@@ -166,8 +170,7 @@ let make env chunk_group rbm =
   let (nesting_set, _) =
     List.fold_left
       chunks
-      ~init:
-        (ISet.empty, ISet.empty)
+      ~init:(ISet.empty, ISet.empty)
         (* We only care about the first occurance of each nesting id *)
       ~f:(fun (nset, idset) c ->
         let nid = Chunk.get_nesting_id c in
@@ -305,7 +308,7 @@ let is_overlapping s1 s2 =
 
 let compare_rule_sets s1 s2 =
   let bound_rule_ids =
-    Caml.List.sort_uniq Int.compare @@ IMap.keys s1.rbm @ IMap.keys s2.rbm
+    Stdlib.List.sort_uniq Int.compare @@ IMap.keys s1.rbm @ IMap.keys s2.rbm
   in
   let is_split rule_id state =
     IMap.find_opt rule_id state.rbm |> Option.value ~default:false

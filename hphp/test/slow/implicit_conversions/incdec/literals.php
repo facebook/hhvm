@@ -63,7 +63,7 @@ function preinc(): void {
     echo ++$l;
   });
   with_exn(() ==> {
-    $l = STDIN;
+    $l = HH\stdin();
     echo ++$l;
   });
   echo ">\n";
@@ -123,7 +123,7 @@ function postinc(): void {
     echo "\n$l";
   });
   with_exn(() ==> {
-    $l = STDIN;
+    $l = HH\stdin();
     echo $l++;
     echo "\n$l";
   });
@@ -175,7 +175,7 @@ function predec(): void {
     echo --$l;
   });
   with_exn(() ==> {
-    $l = STDIN;
+    $l = HH\stdin();
     echo --$l;
   });
   echo ">\n";
@@ -235,7 +235,7 @@ function postdec(): void {
     echo "\n$l";
   });
   with_exn(() ==> {
-    $l = STDIN;
+    $l = HH\stdin();
     echo $l--;
     echo "\n$l";
   });

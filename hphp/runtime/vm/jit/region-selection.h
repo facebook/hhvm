@@ -106,6 +106,19 @@ struct RegionDesc {
   void sortBlocks();
 
   /*
+   * Initialize reverse post order indices.
+   */
+  void initRpoIds();
+
+  /*
+   * Compute a dominating block for each block and save this information into
+   * this RegionDesc.
+   *
+   * Requires blocks to be sorted in a reverse post order (see sortBlocks()).
+   */
+  void findDominators();
+
+  /*
    * Returns the last BC offset in the region that corresponds to the
    * function where the region starts.  This will normally be the offset
    * of the last instruction in the last block, except if the function
@@ -136,6 +149,8 @@ struct RegionDesc {
   void              addArc(BlockId src, BlockId dst);
   void              removeArc(BlockId src, BlockId dst);
   void              addMerged(BlockId fromId, BlockId intoId);
+  Optional<BlockId> idom(BlockId id) const;
+  uint32_t          rpoId(BlockId id) const;
   Optional<BlockId> prevRetrans(BlockId id) const;
   Optional<BlockId> nextRetrans(BlockId id) const;
   void              clearPrevRetrans(BlockId id);
@@ -172,6 +187,8 @@ private:
     BlockIdSet               merged; // other blocks that got merged into this
     BlockId                  prevRetransId{kInvalidTransID};
     BlockId                  nextRetransId{kInvalidTransID};
+    BlockId                  idom{kInvalidTransID};
+    uint32_t                 rpoId{std::numeric_limits<uint32_t>::max()};
     double                   profCountScale{1.0};
     bool                     hasIncoming{false};
     explicit BlockData(BlockPtr b = nullptr) : block(b) {}
@@ -367,23 +384,16 @@ private:
  * types that we need to be compiling for. There is no implication that
  * the region selected will necessarily be specialized for those types.
  */
-struct RegionContext {
-  struct LiveType;
 
+using LiveTypesVec = jit::small_vector<RegionDesc::TypedLocation, 10>;
+
+struct RegionContext {
   RegionContext(SrcKey sk, SBInvOffset spOff)
     : sk(sk), spOffset(spOff) {}
 
   SrcKey sk;
-  jit::vector<LiveType> liveTypes;
+  LiveTypesVec liveTypes;
   SBInvOffset spOffset;
-};
-
-/*
- * Live information about the type of a local or stack slot.
- */
-struct RegionContext::LiveType {
-  Location location;
-  Type type;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -454,7 +464,7 @@ struct RegionEntryKey {
 /*
  * Select a compilation region corresponding to the given context.
  * The shape of the region selected is controlled by
- * RuntimeOption::EvalJitRegionSelector.
+ * Cfg::Jit::RegionSelector.
  *
  * This function may return nullptr.
  *
@@ -464,12 +474,6 @@ struct RegionEntryKey {
  */
 RegionDescPtr selectRegion(const RegionContext& context, TransKind kind);
 
-/*
- * Select a compilation region based on profiling information.  This
- * is used in JitPGO mode.  Argument transId specifies the profiling
- * translation that triggered the profiling-based region selection.
- */
-RegionDescPtr selectHotRegion(TransID transId);
 
 /*
  * Select a compilation region as long as possible using the given context.
@@ -537,7 +541,7 @@ void optimizeProfiledGuards(RegionDesc& region, const ProfData& profData);
 
 /*
  * Returns the PGO region selector to be used for the given `func'.
- * This depends on the value of RuntimeOption::EvalJitPGORegionSelector
+ * This depends on the value of Cfg::Jit::PGORegionSelector
  * and the given `func'.
  */
 PGORegionMode pgoRegionMode(const Func& func);
@@ -561,7 +565,6 @@ std::string show(RegionDesc::TypedLocation);
 std::string show(const RegionDesc::GuardedLocation&);
 std::string show(const GuardedLocations&);
 std::string show(const PostConditions&);
-std::string show(RegionContext::LiveType);
 std::string show(const RegionContext&);
 std::string show(const RegionDesc::Block&);
 std::string show(const RegionDesc&);

@@ -8,10 +8,10 @@
  *)
 
 (* This `.mli` file was generated automatically. It may include extra
-definitions that should not actually be exposed to the caller. If you notice
-that this interface file is a poor interface, please take a few minutes to
-clean it up manually, and then delete this comment once the interface is in
-shape. *)
+   definitions that should not actually be exposed to the caller. If you notice
+   that this interface file is a poor interface, please take a few minutes to
+   clean it up manually, and then delete this comment once the interface is in
+   shape. *)
 
 type range_replace = {
   remove_range: Lsp.range;
@@ -23,16 +23,24 @@ val progress_and_actionRequired_counter : int ref
 
 val url_scheme_regex : Str.regexp
 
-val lsp_uri_to_path : Lsp.documentUri -> string
+val lsp_uri_to_path : Lsp.DocumentUri.t -> string
 
-val path_to_lsp_uri : string -> default_path:string -> Lsp.documentUri
+(** If given a relative path with a dummy prefix, the file
+uri will include a fake prefix like '/dummy_from_path_to_lsp_uri/' *)
+val path_to_lsp_uri : Relative_path.t -> Lsp.DocumentUri.t
+
+(** prefer [path_to_lsp_uri] *)
+val path_string_to_lsp_uri : string -> default_path:string -> Lsp.DocumentUri.t
 
 val lsp_textDocumentIdentifier_to_filename :
   Lsp.TextDocumentIdentifier.t -> string
 
-val lsp_position_to_fc : Lsp.position -> File_content.position
+val lsp_position_to_fc : Lsp.position -> File_content.Position.t
 
 val lsp_range_to_fc : Lsp.range -> File_content.range
+
+val lsp_range_to_pos :
+  line_to_offset:(int -> int) -> Relative_path.t -> Lsp.range -> Pos.t
 
 val lsp_edit_to_fc :
   Lsp.DidChange.textDocumentContentChangeEvent -> File_content.text_edit
@@ -46,6 +54,24 @@ val get_char_from_lsp_position : string -> Lsp.position -> char
 
 val apply_changes_unsafe :
   string -> Lsp.DidChange.textDocumentContentChangeEvent list -> string
+
+val sym_occ_kind_to_lsp_sym_info_kind :
+  SymbolOccurrence.kind -> Lsp.SymbolInformation.symbolKind
+
+(** Correctly handles our various positions:
+  * - real positions
+  * - .hhconfig error positions, which have dummy start/ends
+  * - and [Pos.none]
+  * Special handling is required, as the LSP
+  * specification requires line and character >= 0, and VSCode silently
+  * drops diagnostics that violate the spec in this way *)
+val hack_pos_to_lsp_range : equal:('a -> 'a -> bool) -> 'a Pos.pos -> Lsp.range
+
+(** You probably want [hack_pos_to_lsp_range].
+ * Equivalent to `[hack_pos_to_lsp_range] sans handling of special positions and with the following transformation:
+ * {r with start = {line = r.start.line + 1; character = r.start.character + 1}; end_ = {r.end_ with line = r.end_.line + 1}}
+ * where `r` is a range produced by [hack_pos_to_lsp_range] *)
+val hack_pos_to_lsp_range_adjusted : 'a Pos.pos -> Lsp.range
 
 val pos_compare : Lsp.position -> Lsp.position -> int
 
@@ -103,3 +129,5 @@ val showMessage_info : Jsonrpc.writer -> string -> unit
 val showMessage_warning : Jsonrpc.writer -> string -> unit
 
 val showMessage_error : Jsonrpc.writer -> string -> unit
+
+val title_of_command_or_action : 'a Lsp.CodeAction.command_or_action_ -> string

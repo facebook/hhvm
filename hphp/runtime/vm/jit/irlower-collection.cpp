@@ -18,16 +18,13 @@
 
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/collections/hash-collection.h"
 
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
-#include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -44,7 +41,7 @@
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -123,6 +120,7 @@ void cgLdColVec(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
+  // Can't use ConstVector, as that includes Pair.
   always_assert_flog(
     ty == TBottom ||
     collections::isType(cls, CollectionType::Vector, CollectionType::ImmVector),

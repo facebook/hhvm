@@ -5,7 +5,7 @@
                 If the filename ends in suffix this will also be cut off.
 */
 
-function check_basename( $path_arrays ) {
+function check_basename( $path_arrays ) :mixed{
    $loop_counter = 1;
    foreach ($path_arrays as $path) {
      echo "\n--Iteration $loop_counter--\n"; $loop_counter++;
@@ -20,52 +20,52 @@ function check_basename( $path_arrays ) {
 }
 
 <<__EntryPoint>> function main(): void {
-$file_paths = varray [
+$file_paths = vec[
   /* simple paths */
-  varray["bar"],
-  varray["/foo/bar"],
-  varray["foo/bar"],
-  varray["/bar"],
+  vec["bar"],
+  vec["/foo/bar"],
+  vec["foo/bar"],
+  vec["/bar"],
 
   /* simple paths with trailing slashes */
-  varray["bar/"],
-  varray["/bar/"],
-  varray["/foo/bar/"],
-  varray["foo/bar/"],
-  varray["/bar/"],
+  vec["bar/"],
+  vec["/bar/"],
+  vec["/foo/bar/"],
+  vec["foo/bar/"],
+  vec["/bar/"],
 
   /* paths with suffix removal */
-  varray["bar.gz", ".gz"],
-  varray["bar.gz", "bar.gz"],
-  varray["/foo/bar.gz", ".gz"],
-  varray["foo/bar.gz", ".gz"],
-  varray["/bar.gz", ".gz"],
+  vec["bar.gz", ".gz"],
+  vec["bar.gz", "bar.gz"],
+  vec["/foo/bar.gz", ".gz"],
+  vec["foo/bar.gz", ".gz"],
+  vec["/bar.gz", ".gz"],
 
   /* paths with suffix and trailing slashes with suffix removal*/
-  varray["bar.gz/", ".gz"],
-  varray["/bar.gz/", ".gz"],
-  varray["/foo/bar.gz/", ".gz"],
-  varray["foo/bar.gz/", ".gz"],
-  varray["/bar.gz/", ".gz"],
+  vec["bar.gz/", ".gz"],
+  vec["/bar.gz/", ".gz"],
+  vec["/foo/bar.gz/", ".gz"],
+  vec["foo/bar.gz/", ".gz"],
+  vec["/bar.gz/", ".gz"],
 
   /* paths with basename only suffix, with suffix removal*/
-  varray["/.gz", ".gz"],
-  varray[".gz", ".gz"],
-  varray["/foo/.gz", ".gz"],
+  vec["/.gz", ".gz"],
+  vec[".gz", ".gz"],
+  vec["/foo/.gz", ".gz"],
 
   /* paths with basename only suffix & trailing slashes, with suffix removal*/
-  varray[".gz/", ".gz"],
-  varray["/foo/.gz/", ".gz"],
-  varray["foo/.gz/", ".gz"],
+  vec[".gz/", ".gz"],
+  vec["/foo/.gz/", ".gz"],
+  vec["foo/.gz/", ".gz"],
 
   /* paths with binary value to check if the function is binary safe*/
-  varray["foo".chr(0)."bar"],
-  varray["/foo".chr(0)."bar"],
-  varray["/foo".chr(0)."bar/"],
-  varray["foo".chr(0)."bar/"],
-  varray["foo".chr(0)."bar/test"],
-  varray["/foo".chr(0)."bar/bar.gz", ".gz"],
-  varray["/foo".chr(0)."bar/bar.gz"]
+  vec["foo".chr(0)."bar"],
+  vec["/foo".chr(0)."bar"],
+  vec["/foo".chr(0)."bar/"],
+  vec["foo".chr(0)."bar/"],
+  vec["foo".chr(0)."bar/test"],
+  vec["/foo".chr(0)."bar/bar.gz", ".gz"],
+  vec["/foo".chr(0)."bar/bar.gz"]
 ];
 
 echo "*** Testing basic operations ***\n";

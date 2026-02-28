@@ -2,7 +2,7 @@
 
 class X {
 }
-function bug() {
+function bug() :mixed{
   if (!\HH\global_get('x')) {
     return;
   }
@@ -10,7 +10,7 @@ function bug() {
 }
 
 <<__EntryPoint>>
-function main_1749() {
+function main_1749() :mixed{
 ;
 var_dump(bug());
 }

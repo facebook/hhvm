@@ -1,14 +1,14 @@
 <?hh
 
 <<__Deprecated('', 0)>>
-function f() {}
+function f() :mixed{}
 <<__Deprecated('', 1)>>
-function g() {}
+function g() :mixed{}
 
 class Errors { public static int $errors = 0; }
 
 <<__EntryPoint>>
-function main_deprecated_disabled() {
+function main_deprecated_disabled() :mixed{
 $errors = 0;
 set_error_handler(function () {
   Errors::$errors++;

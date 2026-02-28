@@ -1,0 +1,144 @@
+ERROR: File "subtype.php", line 21, characters 25-60:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+ERROR: File "subtype.php", line 34, characters 3-12:
+A `where` type constraint is violated here (Typing[4323])
+  File "subtype.php", line 23, characters 10-19:
+  This is the method with `where` type constraints
+  File "subtype.php", line 34, characters 41-68:
+  Expected a class with `{type T = string}`
+  File "subtype.php", line 23, characters 49-50:
+    via this generic `Tb`
+  File "subtype.php", line 34, characters 14-38:
+  But got `Box with { type T = int }`
+  File "subtype.php", line 23, characters 43-44:
+    via this generic `Ta`
+  File "subtype.php", line 34, characters 61-66:
+  This `as` or `=` refinement constraint is violated
+  File "subtype.php", line 34, characters 61-66:
+  Expected `string`
+  File "subtype.php", line 34, characters 34-36:
+  But got `int`
+ERROR: File "subtype.php", line 34, characters 3-12:
+A `where` type constraint is violated here (Typing[4323])
+  File "subtype.php", line 23, characters 10-19:
+  This is the method with `where` type constraints
+  File "subtype.php", line 34, characters 41-68:
+  Expected a class with `{type T = string}`
+  File "subtype.php", line 23, characters 49-50:
+    via this generic `Tb`
+  File "subtype.php", line 34, characters 14-38:
+  But got `Box with { type T = int }`
+  File "subtype.php", line 23, characters 43-44:
+    via this generic `Ta`
+  File "subtype.php", line 34, characters 61-66:
+  This `super` refinement constraint is violated
+  File "subtype.php", line 34, characters 34-36:
+  Expected `int`
+  File "subtype.php", line 34, characters 61-66:
+  But got `string`
+ERROR: File "subtype.php", line 35, characters 3-12:
+A `where` type constraint is violated here (Typing[4323])
+  File "subtype.php", line 23, characters 10-19:
+  This is the method with `where` type constraints
+  File "subtype.php", line 35, characters 19-46:
+  Expected a class with `{type T = string}`
+  File "subtype.php", line 23, characters 49-50:
+    via this generic `Tb`
+  File "subtype.php", line 35, characters 14-16:
+  But got `Box`
+  File "subtype.php", line 23, characters 43-44:
+    via this generic `Ta`
+ERROR: File "subtype.php", line 35, characters 3-12:
+A `where` type constraint is violated here (Typing[4323])
+  File "subtype.php", line 23, characters 10-19:
+  This is the method with `where` type constraints
+  File "subtype.php", line 35, characters 19-46:
+  Expected a class with `{type T = string}`
+  File "subtype.php", line 23, characters 49-50:
+    via this generic `Tb`
+  File "subtype.php", line 35, characters 14-16:
+  But got `Box`
+  File "subtype.php", line 23, characters 43-44:
+    via this generic `Ta`
+  File "subtype.php", line 35, characters 39-44:
+  This `as` or `=` refinement constraint is violated
+  File "subtype.php", line 35, characters 39-44:
+  Expected `string`
+  File "subtype.php", line 9, characters 28-32:
+  But got `mixed`
+ERROR: File "subtype.php", line 35, characters 3-12:
+A `where` type constraint is violated here (Typing[4323])
+  File "subtype.php", line 23, characters 10-19:
+  This is the method with `where` type constraints
+  File "subtype.php", line 35, characters 19-46:
+  Expected a class with `{type T = string}`
+  File "subtype.php", line 23, characters 49-50:
+    via this generic `Tb`
+  File "subtype.php", line 35, characters 14-16:
+  But got `Box`
+  File "subtype.php", line 23, characters 43-44:
+    via this generic `Ta`
+  File "subtype.php", line 35, characters 39-44:
+  This `super` refinement constraint is violated
+  File "subtype.php", line 9, characters 23-23:
+  Expected `nothing` because the type constant T lacks a constraint
+  File "subtype.php", line 35, characters 39-44:
+  But got `string`
+ERROR: File "subtype.php", line 36, characters 3-12:
+A `where` type constraint is violated here (Typing[4323])
+  File "subtype.php", line 23, characters 10-19:
+  This is the method with `where` type constraints
+  File "subtype.php", line 36, characters 22-46:
+  Expected a class with `{type T = int}`
+  File "subtype.php", line 23, characters 49-50:
+    via this generic `Tb`
+  File "subtype.php", line 36, characters 14-19:
+  But got `StrBox`
+  File "subtype.php", line 23, characters 43-44:
+    via this generic `Ta`
+  File "subtype.php", line 36, characters 42-44:
+  This `as` or `=` refinement constraint is violated
+  File "subtype.php", line 36, characters 42-44:
+  Expected `int`
+  File "subtype.php", line 17, characters 18-23:
+  But got `string`
+ERROR: File "subtype.php", line 36, characters 3-12:
+A `where` type constraint is violated here (Typing[4323])
+  File "subtype.php", line 23, characters 10-19:
+  This is the method with `where` type constraints
+  File "subtype.php", line 36, characters 22-46:
+  Expected a class with `{type T = int}`
+  File "subtype.php", line 23, characters 49-50:
+    via this generic `Tb`
+  File "subtype.php", line 36, characters 14-19:
+  But got `StrBox`
+  File "subtype.php", line 23, characters 43-44:
+    via this generic `Ta`
+  File "subtype.php", line 36, characters 42-44:
+  This `super` refinement constraint is violated
+  File "subtype.php", line 17, characters 18-23:
+  Expected `string`
+  File "subtype.php", line 36, characters 42-44:
+  But got `int`
+ERROR: File "subtype.php", line 37, characters 3-12:
+A `where` type constraint is violated here (Typing[4323])
+  File "subtype.php", line 23, characters 10-19:
+  This is the method with `where` type constraints
+  File "subtype.php", line 37, characters 30-43:
+  Expected a class with `{type T super C3 as C2}`
+  File "subtype.php", line 23, characters 49-50:
+    via this generic `Tb`
+  File "subtype.php", line 37, characters 14-27:
+  But got `Box with { type T as C2 super C4 }`
+  File "subtype.php", line 23, characters 43-44:
+    via this generic `Ta`
+  File "subtype.php", line 37, characters 37-38:
+  This `super` refinement constraint is violated
+  File "subtype.php", line 37, characters 21-22:
+  Expected `C4`
+  File "subtype.php", line 21, characters 49-51:
+    via this generic `Tlo`
+  File "subtype.php", line 37, characters 37-38:
+  But got `C3`
+  File "subtype.php", line 21, characters 49-51:
+    via this generic `Tlo`

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 /*
  * It is permissible to drop optional fields and include additional fields in a
@@ -16,5 +16,5 @@ type ShapeWithKnownAndUnknownFields = shape(
 function foo(ShapeWithKnownAndUnknownFields $argument): void {}
 
 function bar(): void {
-  foo(shape('a' => 42, 'b' => "b string", 'd' => 9000.1, 'e' => varray[]));
+  foo(shape('a' => 42, 'b' => "b string", 'd' => 9000.1, 'e' => vec[]));
 }

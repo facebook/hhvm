@@ -1,11 +1,11 @@
 <?hh
 
 abstract class fail {
-    abstract function show();
+    abstract function show():mixed;
 }
 
 class pass extends fail {
-    function show() {
+    function show() :mixed{
         echo "Call to function show()\n";
     }
 }

@@ -1,0 +1,3 @@
+cpp2: mstch_cpp2 src/module.thrift
+rust: mstch_rust src/module.thrift
+py3: mstch_py3 src/module.thrift

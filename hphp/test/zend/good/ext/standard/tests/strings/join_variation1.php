@@ -12,7 +12,7 @@
 // define a class
 class test {
   public $t = 10;
-  function __toString() {
+  function __toString() :mixed{
     return  "testObject";
   }
 }
@@ -21,14 +21,14 @@ class test {
 function main(): void {
   echo "*** Testing join() : usage variations ***\n";
   // initialize all required variables
-  $pieces = varray["element1", "element2"];
+  $pieces = vec["element1", "element2"];
 
 
   // get a resource variable
   $fp = fopen(__FILE__, "r");
 
   // array with different values
-  $values = varray[
+  $values = vec[
     // integer values
     0,
     1,

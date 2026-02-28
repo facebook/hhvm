@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -13,7 +13,7 @@ function g(int $x): void {}
 
 function f(): void {
   $x = 2;
-  foreach (varray[] as $_) {
+  foreach (vec[] as $_) {
     g($x);
 
     if (true) {

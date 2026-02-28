@@ -17,9 +17,10 @@
 
 #include <string>
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include "hphp/runtime/vm/jit/alias-class.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vm-reg-liveness.h"
 
 namespace HPHP::jit {
@@ -72,8 +73,8 @@ struct IRInstruction;
  * primarily used for inout stack slots with CallBuiltin.
  *
  * `backtrace' represents the set of locals that may be accessed due to
- * backtracing. They are currently separated out to avoid pessimizing the loads
- * AliasClass.
+ * backtracing. They are currently separated out from loads and by frame to
+ * avoid pessimizing the AliasClass.
  *
  * If there is an overlap between `loads' and `kills', then `kills' takes
  * precedence for locations that are contained in both (i.e. those locations
@@ -85,7 +86,7 @@ struct GeneralEffects   { AliasClass loads;
                           AliasClass moves;
                           AliasClass kills;
                           AliasClass inout;
-                          AliasClass backtrace; };
+                          jit::vector<AliasClass> backtrace; };
 
 /*
  * The effect of definitely loading from an abstract location, without
@@ -124,23 +125,31 @@ struct PureInlineCall { AliasClass base; SSATmp* fp; AliasClass actrec; };
  * it writes to them first, and which it generally may write to.  (This is used
  * for killing stack slots below the call depth and MInstrState locations)
  *
+ * The `uninits' set contains stack locations of inputs semantically containing
+ * TUninit, but with the responsibility of the callee to store that TUninit.
+ * Caller can treat these locations as killed.
+ *
  * The `inputs' set contains stack locations the call will read as arguments.
+ * In case of InlineSideExit, this is the complete frame.
  *
  * The `actrec' set contains stack locations the call will write ActRec to.
  *
  * The `outputs' set contains stack locations the call will write inout
  * variables to.
  *
- * The `locals` set contains frame locations that the call might read.
+ * The `locals` set contains frame locations that the call might read. There
+ * is one AliasClass per frame, as we pessimize unions of ALocals of different
+ * frames.
  *
  * Note that calls that have been weakened to CallBuiltin use GeneralEffects,
  * not CallEffects.
  */
 struct CallEffects    { AliasClass kills;
+                        AliasClass uninits;
                         AliasClass inputs;
                         AliasClass actrec;
                         AliasClass outputs;
-                        AliasClass locals; };
+                        jit::vector<AliasClass> backtrace; };
 
 /*
  * ReturnEffects is a return from the top level php function, ending the entire
@@ -160,13 +169,15 @@ struct ReturnEffects  { AliasClass kills; };
 /*
  * ExitEffects contains two sets of alias classes, representing locations that
  * are considered live exiting the region, and locations that will never be
- * read (unless written again) after exiting the region (`kills').  Various
- * instructions that exit regions populate these in different ways.
+ * read (unless written again) after exiting the region (`kills' and 'uninits').
+ * Various instructions that exit regions populate these in different ways.
  *
  * ExitEffects instructions require inlined frames to be spilled immediatelly
  * prior to the instruction, see spillInlinedFrames() for more details.
  */
-struct ExitEffects    { AliasClass live; AliasClass kills; };
+struct ExitEffects    { AliasClass live;
+                        AliasClass kills;
+                        AliasClass uninits; };
 
 /*
  * "Irrelevant" effects means it doesn't do anything we currently care about
@@ -181,16 +192,16 @@ struct IrrelevantEffects {};
  */
 struct UnknownEffects {};
 
-using MemEffects = boost::variant< GeneralEffects
-                                 , PureLoad
-                                 , PureStore
-                                 , PureInlineCall
-                                 , CallEffects
-                                 , ReturnEffects
-                                 , ExitEffects
-                                 , IrrelevantEffects
-                                 , UnknownEffects
-                                 >;
+using MemEffects = std::variant< GeneralEffects
+                               , PureLoad
+                               , PureStore
+                               , PureInlineCall
+                               , CallEffects
+                               , ReturnEffects
+                               , ExitEffects
+                               , IrrelevantEffects
+                               , UnknownEffects
+                               >;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -205,7 +216,7 @@ MemEffects memory_effects(const IRInstruction&);
  * canonical name (chasing passthrough instructions like canonical() from
  * analysis.h)
  */
-MemEffects canonicalize(MemEffects);
+MemEffects canonicalize(const MemEffects&);
 
 /*
  * Return an alias class representing the pointee of the given value,
@@ -217,7 +228,7 @@ AliasClass pointee(const Type&);
 /*
  * Produces a string about some MemEffects for debug-printing.
  */
-std::string show(MemEffects);
+std::string show(const MemEffects&);
 
 /*
  * Given a known VMReg liveness, computes a more precise GeneralEffects.
@@ -226,7 +237,7 @@ std::string show(MemEffects);
  * For Live VMRegState, the VMRegs may not be stored.
  */
 GeneralEffects general_effects_for_vmreg_liveness(
-    GeneralEffects l, KnownRegState liveness);
+    const GeneralEffects& l, KnownRegState liveness);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -242,6 +253,19 @@ GeneralEffects general_effects_for_vmreg_liveness(
  */
 bool hasMInstrBaseEffects(const IRInstruction& inst);
 Optional<Type> mInstrBaseEffects(const IRInstruction& inst, Type old);
+
+template<class F>
+void for_each_frame_location(SSATmp* fp, const Func* func, F fun) {
+  fun(AActRec { fp }, "ActRec");
+  fun(AMIStateAny, "MInstr State");
+
+  if (auto const nlocals = func->numLocals()) {
+    fun(ALocal { fp, AliasIdSet::IdRange(0, nlocals) }, "Local");
+  }
+  if (auto const niters = func->numIterators()) {
+    fun(aiter_range(fp, 0, niters), "Iterator");
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

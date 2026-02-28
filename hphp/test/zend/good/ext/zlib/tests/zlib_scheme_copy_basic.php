@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $inputFileName = dirname(__FILE__)."/004.txt.gz";
-$outputFileName = __SystemLib\hphp_test_tmppath('tmp');
+$outputFileName = sys_get_temp_dir().'/'.'tmp';
 
 $srcFile = "compress.zlib://$inputFileName";
 $destFile = "compress.zlib://$outputFileName";

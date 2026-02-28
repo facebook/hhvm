@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_sncompress() {
+function main_sncompress() :mixed{
 $str = "Holy fuck. Are they actually going to get there?";
 
 $ret = snappy_compress($str);

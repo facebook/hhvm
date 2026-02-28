@@ -1,15 +1,15 @@
 <?hh
 
 trait T {
-  abstract static function foo();
+  abstract static function foo():mixed;
 }
 abstract class C {
   use T;
 }
 
 <<__EntryPoint>>
-function main() {
-  $f = class_meth(C::class, 'foo');
+function main() :mixed{
+  $f = C::foo<>;
   echo "FAIL\n";
   var_dump($f());
 }

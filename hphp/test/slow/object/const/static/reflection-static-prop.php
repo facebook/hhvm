@@ -1,8 +1,8 @@
 <?hh
 
 class A {
-  static int $bar = 20;
-  <<__Const>> static int $foo = 24;
+  public static int $bar = 20;
+  <<__Const>> public static int $foo = 24;
 }
 
 <<__EntryPoint>> function main(): void {

@@ -1,1 +1,2 @@
-No errors
+WARN: File "option3.php", line 6, characters 7-28:
+This `is` check is always `true`. The expression on the left has type `(int, int)` which is a subtype of `?(num, arraykey)`. (Warn[12009])

@@ -87,7 +87,13 @@
  (modules relative_path)
  (libraries collections sys_utils)
  (preprocess
-  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
+  (pps
+    ppx_hash
+    ppx_sexp_conv
+    ppx_yojson_conv
+    lwt_ppx
+    ppx_deriving.std
+    ppx_deriving.enum)))
 
 (library
  (name cli_args)
@@ -95,7 +101,12 @@
  (modules cli_args cli_args_sig)
  (preprocess
   (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
- (libraries collections hh_json relative_path sys_utils utils_core))
+ (libraries
+  collections
+  hg
+  hh_json
+  relative_path
+  sys_utils utils_core))
 
 (library
  (name decl_reference)
@@ -115,7 +126,7 @@
   pos_source
   pos_span_tiny)
  (preprocess
-  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+  (pps ppx_hash ppx_sexp_conv lwt_ppx ppx_deriving.std ppx_deriving.enum))
  (libraries relative_path))
 
 (library
@@ -180,6 +191,14 @@
  (modules connection_tracker))
 
 (library
+ (name aast_names_utils)
+ (wrapped false)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (libraries annotated_ast utils_core)
+ (modules aast_names_utils))
+
+(library
  (name biglist)
  (wrapped false)
  (preprocess
@@ -194,3 +213,14 @@
   (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
  (libraries utils_core sys_utils)
  (modules memory_stats))
+
+(library
+ (name gc_utils)
+ (modules gc_utils)
+ (libraries utils_core))
+
+(library
+ (name visitors_runtime)
+ (wrapped false)
+ (modules visitors_runtime)
+ (libraries core_kernel visitors.runtime))

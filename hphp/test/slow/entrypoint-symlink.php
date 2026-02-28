@@ -6,6 +6,6 @@
 // target file
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo 'HI!';
 }

@@ -23,20 +23,18 @@
 
 #include "hphp/util/bisector.h"
 #include "hphp/util/bitset-utils.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/vm/jit/alias-analysis.h"
-#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
-#include "hphp/runtime/vm/jit/state-multi-map.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vm-reg-liveness.h"
@@ -142,7 +140,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(hhir_store);
+TRACE_SET_MOD(hhir_store)
 
 namespace {
 
@@ -158,83 +156,95 @@ using PostOrderId = uint32_t;
       haven't processed it yet),
     - Instruction, in which case it holds a pointer to the
       store which is available there,
-    - Phi..Phi+kMaxTrackedAlocs, in which case it holds a pointer to the
+    - Phi, in which case it holds a pointer to the
       Block where the phi would have to be inserted, or
     - Bad which means that although stores are available on all
       paths to this point they're not compatible in some way.
 
     - Pending and Processed are used while building phis to handle
       cycles of phis.
-
-  For the Phi case, we just need to ensure that we can differentiate
-  Phis in the same block for different ALocations; this is just used
-  for the same() method for the combine_ts().
 */
 struct TrackedStore {
   enum Kind : int16_t {
     Unseen,
     Instruction,
     Phi,
-    Bad = Phi + kMaxTrackedALocs,
+    Bad,
     Pending,
     Processed,
   };
 
   TrackedStore() = default;
   TrackedStore(const TrackedStore&) = default;
-  explicit TrackedStore(IRInstruction* i) { m_ptr.set(Instruction, i); }
-  explicit TrackedStore(Block* b, uint32_t id) {
-    m_ptr.set(static_cast<Kind>(Phi + id), b);
-  }
 
-  static TrackedStore BadVal() { TrackedStore s; s.setBad(); return s; }
   const IRInstruction* instruction() const {
-    return kind() == Instruction ?
-      static_cast<const IRInstruction*>(m_ptr.ptr()) : nullptr;
+    return isInstruction() ? m_inst : nullptr;
   }
   IRInstruction* instruction() {
-    return kind() == Instruction ?
-      static_cast<IRInstruction*>(m_ptr.ptr()) : nullptr;
+    return isInstruction() ? m_inst : nullptr;
+  }
+  const IRInstruction* candidateStore() const {
+    assertx(isInstruction() || isPhi());
+    return m_inst;
   }
   const Block* block() const {
-    return isPhi() ? static_cast<const Block*>(m_ptr.ptr()) : nullptr;
+    return isPhi() ? m_ptr.ptr() : nullptr;
   }
   Block* block() {
-    return isPhi() ? static_cast<Block*>(m_ptr.ptr()) : nullptr;
+    return isPhi() ? m_ptr.ptr() : nullptr;
   }
   Block* pending() {
-    return kind() == Pending ? static_cast<Block*>(m_ptr.ptr()) : nullptr;
+    return kind() == Pending ? m_ptr.ptr() : nullptr;
   }
   const Block* pending() const {
-    return kind() == Pending ? static_cast<const Block*>(m_ptr.ptr()) : nullptr;
+    return kind() == Pending ? m_ptr.ptr() : nullptr;
   }
   IRInstruction* processed() {
-    return kind() == Processed ?
-      static_cast<IRInstruction*>(m_ptr.ptr()) : nullptr;
+    return kind() == Processed ? m_inst : nullptr;
   }
   const IRInstruction* processed() const {
-    return kind() == Processed ?
-      static_cast<const IRInstruction*>(m_ptr.ptr()) : nullptr;
+    return kind() == Processed ? m_inst : nullptr;
   }
   bool isUnseen() const {
     return kind() == Unseen;
   }
+  bool isInstruction() const {
+    return kind() == Instruction;
+  }
+  bool isPhi() const {
+    return kind() == Phi;
+  }
   bool isBad() const {
     return kind() == Bad;
   }
-  bool isPhi() const {
-    return kind() >= Phi && kind() < Bad;
+  void setInstruction(IRInstruction* inst) {
+    assertx(isUnseen() || isInstruction());
+    setInstructionUnsafe(inst);
   }
-  void set(IRInstruction* inst) { m_ptr.set(Instruction, inst); }
-  void set(Block* block, uint32_t id) {
-    m_ptr.set(static_cast<Kind>(Phi + id), block);
+  void setInstructionUnsafe(IRInstruction* inst) {
+    m_ptr.set(Instruction, nullptr);
+    m_inst = inst;
   }
-  void setPending(Block* block) { m_ptr.set(Pending, block); }
-  void setProcessed(IRInstruction* inst) { m_ptr.set(Processed, inst); }
-  void reset() { m_ptr.set(Unseen, nullptr); }
-  void setBad() { m_ptr.set(Bad, nullptr); }
+  void setPhi(Block* block) {
+    assertx(isInstruction() || isPhi());
+    assertx(m_inst);
+    m_ptr.set(Phi, block);
+  }
+  void setPending(Block* block) {
+    m_ptr.set(Pending, block);
+    m_inst = nullptr;
+  }
+  void setProcessed(IRInstruction* inst) {
+    m_ptr.set(Processed, nullptr);
+    m_inst = inst;
+  }
+  void setBad() {
+    m_ptr.set(Bad, nullptr);
+    m_inst = nullptr;
+  }
   bool same(const TrackedStore& other) const {
-    return kind() == other.kind() && m_ptr.ptr() == other.m_ptr.ptr();
+    // In phis, m_inst is just a candidate store. We don't care which one.
+    return m_ptr == other.m_ptr && (isPhi() || m_inst == other.m_inst);
   }
   friend DEBUG_ONLY bool operator>=(const TrackedStore& a,
                                     const TrackedStore& b) {
@@ -253,7 +263,8 @@ struct TrackedStore {
   }
  private:
   Kind kind() const { return m_ptr.tag(); }
-  CompactTaggedPtr<void, Kind> m_ptr;
+  CompactTaggedPtr<Block, Kind> m_ptr;
+  IRInstruction* m_inst;
 };
 
 struct StoreKey {
@@ -305,7 +316,6 @@ struct Global {
     , poBlockList(poSortCfg(unit))
     , ainfo(collect_aliases(unit, poBlockList))
     , blockStates(unit, BlockState{})
-    , seenStores(unit, 0)
     , vmRegsLiveness(analyzeVMRegLiveness(unit, poBlockList))
   {}
 
@@ -328,9 +338,7 @@ struct Global {
   StateVector<Block,BlockState> blockStates;
   jit::vector<IRInstruction*> reStores;
   // Used to prevent cycles in find_candidate_store
-  StateVector<Block,uint32_t> seenStores;
   StateVector<IRInstruction,KnownRegState> vmRegsLiveness;
-  uint32_t seenStoreId{0};
   bool needsReflow{false};
 };
 
@@ -382,7 +390,7 @@ Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
 
 void set_movable_store(Local& env, uint32_t bit, IRInstruction& inst) {
   env.global.trackedStoreMap[
-    StoreKey { inst.block(), StoreKey::Out, bit }].set(&inst);
+    StoreKey { inst.block(), StoreKey::Out, bit }].setInstruction(&inst);
 }
 
 bool isDead(Local& env, int bit) {
@@ -400,7 +408,7 @@ bool removeDead(Local& env, IRInstruction& inst, bool trash) {
   FTRACE(4, "      dead (removed)\n");
 
   IRInstruction* dbgInst = nullptr;
-  if (trash && RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (trash && Cfg::HHIR::GenerateAsserts) {
     switch (inst.op()) {
     case StStk:
     case StStkMeta:
@@ -485,7 +493,7 @@ void store(Local& env, AliasClass acls) {
   mayStore(env, acls);
   auto const canon = canonicalize(acls);
   mustStoreSet(env, env.global.ainfo.expand(canon));
-};
+}
 
 void kill(Local& env, AliasClass acls) {
   auto const canon = canonicalize(acls);
@@ -541,7 +549,7 @@ void visit(Local& env, IRInstruction& inst) {
       mustStore(env, *bit);
       if (!l.value || l.value->inst()->block() != inst.block()) return;
       auto const le = memory_effects(*l.value->inst());
-      auto pl = boost::get<PureLoad>(&le);
+      auto pl = std::get_if<PureLoad>(&le);
       if (!pl) return;
       auto lbit = pure_store_bit(env, pl->src);
       if (!lbit || *lbit != *bit) return;
@@ -560,7 +568,7 @@ void visit(Local& env, IRInstruction& inst) {
     mayStore(env, l.dst);
   };
 
-  if (inst.is(BeginCatch)) {
+  auto const doBeginCatch = [&] {
     // The unwinder fixes up the VMRegs before entering a catch trace, so we
     // must account for these effects. Otherwise, store-elim may sink sync
     // operations across the catch trace boundary.
@@ -574,12 +582,11 @@ void visit(Local& env, IRInstruction& inst) {
     doMustStore(AVMSP);
     doMustStore(AVMPC);
     doMustStore(AVMRetAddr);
-    return;
-  }
+  };
 
-  match<void>(
+  match(
     effects,
-    [&] (IrrelevantEffects) {
+    [&] (const IrrelevantEffects&) {
       switch (inst.op()) {
       case AssertLoc:
         load(env, ALocal { inst.src(0), inst.extra<AssertLoc>()->locId });
@@ -591,7 +598,7 @@ void visit(Local& env, IRInstruction& inst) {
         return;
       }
     },
-    [&] (UnknownEffects) {
+    [&] (const UnknownEffects&) {
       addAllLoad(env);
       env.mayStore.set();
       if (env.global.vmRegsLiveness[inst] == KnownRegState::Dead) {
@@ -600,11 +607,11 @@ void visit(Local& env, IRInstruction& inst) {
         kill(env, AVMRegAny);
       }
     },
-    [&] (PureLoad l) {
+    [&] (const PureLoad& l) {
       if (auto bit = pure_store_bit(env, l.src)) {
         if (env.reStores[*bit]) {
           auto const st = memory_effects(*env.global.reStores[*bit]);
-          auto const pst = boost::get<PureStore>(&st);
+          auto const pst = std::get_if<PureStore>(&st);
           if (pst && pst->value && pst->value == inst.dst()) {
             FTRACE(4, "Killing self-store: {}\n",
                    env.global.reStores[*bit]->toString());
@@ -615,18 +622,22 @@ void visit(Local& env, IRInstruction& inst) {
       }
       load(env, l.src);
     },
-    [&] (GeneralEffects preL)  {
+    [&] (const GeneralEffects& preL)  {
       auto const liveness = env.global.vmRegsLiveness[inst];
       auto const l = general_effects_for_vmreg_liveness(preL, liveness);
       load(env, l.loads);
       load(env, l.inout);
-      load(env, l.backtrace);
+      for (auto const& frame : l.backtrace) {
+        load(env, frame);
+      }
       mayStore(env, l.stores);
       mayStore(env, l.inout);
       kill(env, l.kills);
+
+      if (inst.is(BeginCatch)) doBeginCatch();
     },
 
-    [&] (ReturnEffects l) {
+    [&] (const ReturnEffects& l) {
       // Return from the main function.  Locations other than the frame and
       // stack (e.g. object properties and whatnot) are always live on a
       // function return---so mark everything read before we start killing
@@ -641,12 +652,13 @@ void visit(Local& env, IRInstruction& inst) {
       }
     },
 
-    [&] (ExitEffects l) {
+    [&] (const ExitEffects& l) {
       load(env, l.live);
+      kill(env, l.uninits);
       kill(env, l.kills);
     },
 
-    [&] (PureInlineCall l) {
+    [&] (const PureInlineCall& l) {
       store(env, l.base);
       load(env, l.actrec);
     },
@@ -656,18 +668,21 @@ void visit(Local& env, IRInstruction& inst) {
      * register state (which must be dirty), but we can be more precise about
      * everything else.
      */
-    [&] (CallEffects l) {
+    [&] (const CallEffects& l) {
       store(env, l.outputs);
       load(env, AHeapAny);
       load(env, AVMRegState);
       load(env, ARdsAny);
-      load(env, l.locals);
+      for (auto const& frame : l.backtrace) {
+        load(env, frame);
+      }
       load(env, l.inputs);
-      store(env, l.actrec);
+      kill(env, l.actrec);
+      kill(env, l.uninits);
       kill(env, l.kills);
     },
 
-    [&] (PureStore l) { doPureStore(l); }
+    [&] (const PureStore& l) { doPureStore(l); }
   );
 }
 
@@ -788,7 +803,7 @@ void resolve_cycle(Global& genv, TrackedStore& ts, Block* blk, uint32_t id) {
   }
   auto const cand = stores[0];
   if (stores.size() == 1) {
-    ts.set(cand);
+    ts.setInstructionUnsafe(cand);
     return;
   }
   jit::vector<uint32_t> srcsToPhi;
@@ -806,7 +821,7 @@ void resolve_cycle(Global& genv, TrackedStore& ts, Block* blk, uint32_t id) {
   if (!srcsToPhi.size()) {
     // the various stores all had the same inputs
     // so nothing to do.
-    ts.set(cand);
+    ts.setInstructionUnsafe(cand);
     return;
   }
   bool needsProcessed = false;
@@ -837,7 +852,7 @@ void resolve_cycle(Global& genv, TrackedStore& ts, Block* blk, uint32_t id) {
   if (needsProcessed) {
     ts.setProcessed(inst);
   } else {
-    ts.set(inst);
+    ts.setInstructionUnsafe(inst);
   }
 }
 
@@ -949,9 +964,9 @@ IRInstruction* resolve_ts(Global& genv, Block* blk,
   if (w != StoreKey::In || blk != ts.block()) {
     ITRACE(7, "direct recur: B{}:{} -> B{}:In\n",
            blk->id(), show(w), ts.block()->id());
-    ts.set(resolve_ts(genv, ts.block(), StoreKey::In, id));
+    ts.setInstructionUnsafe(resolve_ts(genv, ts.block(), StoreKey::In, id));
   } else {
-    ts.set(resolve_flat(genv, blk, id, ts));
+    ts.setInstructionUnsafe(resolve_flat(genv, blk, id, ts));
   }
   auto const rep = ts.instruction();
 
@@ -1116,53 +1131,6 @@ void compute_anticipated(Global& genv,
     });
 }
 
-TrackedStore find_candidate_store_helper(Global& genv, TrackedStore ts,
-                                         uint32_t id) {
-  auto block = ts.block();
-  assertx(block);
-  TrackedStore ret;
-  if (genv.seenStores[block] == genv.seenStoreId) return ret;
-
-  // look for a candidate in the immediate predecessors
-  block->forEachPred([&](Block* pred) {
-      if (ret.isBad() || ret.instruction()) return;
-      auto const pred_ts =
-        genv.trackedStoreMap[StoreKey { pred, StoreKey::Out, id }];
-      if (pred_ts.isBad() || pred_ts.instruction()) {
-        ret = pred_ts;
-        return;
-      }
-    });
-
-  if (ret.isBad() || ret.instruction()) return ret;
-
-  genv.seenStores[block] = genv.seenStoreId;
-  // recursively search the predecessors
-  block->forEachPred([&](Block* pred) {
-      if (ret.isBad() || ret.instruction()) return;
-      auto const pred_ts =
-        genv.trackedStoreMap[StoreKey { pred, StoreKey::Out, id }];
-      if (!pred_ts.block()) {
-        always_assert_flog(pred_ts.isUnseen(),
-                           "pred_ts: {}", pred_ts.toString());
-        return;
-      }
-      ret = find_candidate_store_helper(genv, pred_ts, id);
-    });
-
-  return ret;
-}
-
-/*
- * Find a candidate store instruction; any one will do, because
- * compatibility between stores is transitive.
- */
-TrackedStore find_candidate_store(Global& genv, TrackedStore ts, uint32_t id) {
-  if (!ts.block()) return ts;
-  genv.seenStoreId++;
-  return find_candidate_store_helper(genv, ts, id);
-}
-
 bool pureStoreSupportsPhi(Opcode op) {
   switch (op) {
     /* Instructions that require constant arguments cannot have different
@@ -1178,19 +1146,25 @@ bool pureStoreSupportsPhi(Opcode op) {
   }
 }
 
-TrackedStore combine_ts(Global& genv, uint32_t id,
-                        TrackedStore s1,
-                        TrackedStore s2, Block* succ) {
-  if (s1.same(s2)) return s1;
-  if (s1.isUnseen() || s2.isBad()) return s2;
-  if (s2.isUnseen() || s1.isBad()) return s1;
+/*
+ * Combine the `src` TrackedStore into the `dst`. Return true iff changed.
+ */
+bool combine_ts(Block* dstBlk, TrackedStore& dst, TrackedStore src) {
+  if (src.same(dst) || src.isUnseen() || dst.isBad()) return false;
+  if (dst.isUnseen() || src.isBad()) {
+    dst = src;
+    return true;
+  }
 
   enum class Compat { Same, Compat, Bad };
-  auto compat = [](TrackedStore store1, TrackedStore store2) {
-    auto i1 = store1.instruction();
-    auto i2 = store2.instruction();
+  auto const compat = [](const IRInstruction* i1, const IRInstruction* i2) {
     assertx(i1 && i2);
     if (i1->op() != i2->op()) return Compat::Bad;
+    assertx(i1->hasExtra() == i2->hasExtra());
+    if (i1->hasExtra() &&
+        !equalsExtra(i1->op(), i1->rawExtra(), i2->rawExtra())) {
+      return Compat::Bad;
+    }
     if (i1->numSrcs() != i2->numSrcs()) return Compat::Bad;
     for (auto i = i1->numSrcs(); i--; ) {
       // Ptr and Lval types are imcompatible, as one requires two register,
@@ -1210,28 +1184,22 @@ TrackedStore combine_ts(Global& genv, uint32_t id,
       }
     }
     return Compat::Same;
-  };
+  }(src.candidateStore(), dst.candidateStore());
 
-  auto trackedBlock = [&]() {
-    return TrackedStore(succ, id);
-  };
-
-  if (s1.block() || s2.block()) {
-    auto c1 = find_candidate_store(genv, s1, id);
-    auto c2 = find_candidate_store(genv, s2, id);
-    if (c1.instruction() && c2.instruction() &&
-        compat(c1, c2) != Compat::Bad) {
-      return trackedBlock();
-    }
-    return TrackedStore::BadVal();
+  switch (compat) {
+    case Compat::Same:
+      if (src.instruction() && dst.instruction()) return false;
+      [[fallthrough]];
+    case Compat::Compat:
+      if (dst.isPhi() && dst.block() == dstBlk) return false;
+      dst.setPhi(dstBlk);
+      return true;
+    case Compat::Bad:
+      dst.setBad();
+      return true;
   }
 
-  switch (compat(s1, s2)) {
-    case Compat::Same:   return s1;
-    case Compat::Compat: return trackedBlock();
-    case Compat::Bad:    break;
-  }
-  return TrackedStore::BadVal();
+  not_reached();
 }
 
 /*
@@ -1240,10 +1208,9 @@ TrackedStore combine_ts(Global& genv, uint32_t id,
 TrackedStore recompute_ts(Global& genv, uint32_t id, Block* succ) {
   TrackedStore ret;
   succ->forEachPred([&](Block* pred) {
-      auto const ts =
-        genv.trackedStoreMap[StoreKey { pred, StoreKey::Out, id }];
-      ret = combine_ts(genv, id, ts, ret, succ);
-    });
+    auto const ts = genv.trackedStoreMap[StoreKey { pred, StoreKey::Out, id }];
+    combine_ts(succ, ret, ts);
+  });
   return ret;
 }
 
@@ -1262,24 +1229,32 @@ void compute_available_stores(
     genv, blockAnalysis,
     [](Block* blk, BlockState& state) {
       if (blk->numPreds()) state.ppIn.set();
+      if (blk->numSuccs()) state.ppOut.set();
     },
     [&](Block* blk, const BlockAnalysis& transfer, BlockState& state) {
-      state.ppOut = transfer.avlLoc | (state.ppIn & ~transfer.alteredAvl);
-      auto propagate = state.ppOut & ~transfer.avlLoc;
+      bool changedOut = false;
       bitset_for_each_set(
-        propagate,
+        state.ppIn,
         [&](uint32_t i) {
-          auto const& tsIn =
-            genv.trackedStoreMap[StoreKey { blk, StoreKey::In, i }];
-          auto& tsOut =
-            genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }];
-          assertx(!tsIn.isUnseen());
-          tsOut = tsIn;
-          if (tsOut.isBad()) {
-            state.ppOut[i] = false;
+          auto const tsNew = recompute_ts(genv, i, blk);
+          assertx(!tsNew.isUnseen());
+          auto& ts = genv.trackedStoreMap[StoreKey { blk, StoreKey::In, i }];
+          if (!tsNew.same(ts)) {
+            assertx(tsNew >= ts);
+            ts = tsNew;
+            if (ts.isBad()) {
+              state.ppIn[i] = false;
+            } else if (!transfer.avlLoc[i] && !transfer.alteredAvl[i]) {
+              changedOut = true;
+              genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }] = ts;
+            }
           }
         }
       );
+
+      auto const oldPpOut = state.ppOut;
+      state.ppOut = transfer.avlLoc | (state.ppIn & ~transfer.alteredAvl);
+
       auto showv DEBUG_ONLY = [&] (StoreKey::Where w, const ALocBits& pp) {
         std::string r;
         bitset_for_each_set(
@@ -1306,34 +1281,13 @@ void compute_available_stores(
              show(transfer.alteredAvl),
              show(state.ppOut),
              showv(StoreKey::Out, state.ppOut));
-      return true;
+
+      return changedOut || state.ppOut != oldPpOut;
     },
     [&](const BlockState& state, BlockState& succState,
         dataflow_worklist<PostOrderId, std::less<PostOrderId>>&) {
-      auto const oldPpIn = succState.ppIn;
       succState.ppIn &= state.ppOut;
-      bool changed = succState.ppIn != oldPpIn;
-      auto blk = genv.poBlockList[state.id];
-      auto succ = genv.poBlockList[succState.id];
-      bitset_for_each_set(
-        succState.ppIn,
-        [&](uint32_t i) {
-          auto& ts =
-            genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }];
-          auto& tsSucc =
-            genv.trackedStoreMap[StoreKey { succ, StoreKey::In, i }];
-          auto tsNew = succ->numPreds() == 1 ? ts : recompute_ts(genv, i, succ);
-          if (!tsNew.same(tsSucc)) {
-            changed = true;
-            assertx(tsNew >= tsSucc);
-            tsSucc = tsNew;
-            if (tsSucc.isBad()) {
-              succState.ppIn[i] = false;
-            }
-          }
-        }
-      );
-      return changed;
+      return true;
     });
 }
 
@@ -1496,7 +1450,7 @@ void optimizeStores(IRUnit& unit) {
 
   compute_anticipated(genv, blockAnalysis);
 
-  if (!RuntimeOption::EvalHHIRStorePRE) {
+  if (!Cfg::HHIR::StorePRE) {
     /*
      * We've reached a fixed point.
      * Delete redundant stores

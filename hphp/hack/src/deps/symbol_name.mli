@@ -45,7 +45,7 @@ end
 (** [Symbol_name.Set] is a set that's currently implemented as SSet but we're
 transitioning to make it into a set of an opaque type. *)
 module type Set = sig
-  include Caml.Set.S
+  include Stdlib.Set.S
 
   val pp : Format.formatter -> t -> unit
 

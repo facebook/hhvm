@@ -1,10 +1,10 @@
 <?hh
 
-function bar($a, $b) {
+function bar($a, $b) :mixed{
   return __hhvm_intrinsics\launder_value(array_key_exists($b, $a));
 }
 
-function foo($v) {
+function foo($v) :mixed{
   $m = dict[];
   foreach ($v as $t) {
     $a1 = $t[0];
@@ -22,6 +22,6 @@ function foo($v) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(foo(__hhvm_intrinsics\launder_value(vec[])));
 }

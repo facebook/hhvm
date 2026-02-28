@@ -3,24 +3,23 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8a4e87f55860aac00d466a14d8888c84>>
+// @generated SignedSource<<b6908fc9c840bea0613e241a20ead3b4>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized_regen.sh
+//   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
 
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
+pub use typing_defs::*;
 
 #[allow(unused_imports)]
 use crate::*;
-
-pub use typing_defs::*;
 
 /// A substitution context contains all the information necessary for
 /// changing the type of an inherited class element to the class that is
@@ -67,6 +66,8 @@ pub use typing_defs::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (show, ord)")]
+#[rust_to_ocaml(prefix = "sc_")]
 #[repr(C)]
 pub struct SubstContext {
     pub subst: s_map::SMap<Ty>,
@@ -91,6 +92,7 @@ pub struct SubstContext {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(u8)]
 pub enum SourceType {
     Child,
@@ -108,31 +110,6 @@ arena_deserializer::impl_deserialize_in_arena!(SourceType);
 
 #[derive(
     Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(u8)]
-pub enum LinearizationKind {
-    MemberResolution,
-    AncestorTypes,
-}
-impl TrivialDrop for LinearizationKind {}
-arena_deserializer::impl_deserialize_in_arena!(LinearizationKind);
-
-#[derive(
-    Clone,
     Debug,
     Deserialize,
     Eq,
@@ -146,8 +123,10 @@ arena_deserializer::impl_deserialize_in_arena!(LinearizationKind);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C, u8)]
 pub enum DeclError {
+    #[rust_to_ocaml(name = "Wrong_extend_kind")]
     WrongExtendKind {
         pos: pos::Pos,
         kind: ast_defs::ClassishKind,
@@ -156,10 +135,15 @@ pub enum DeclError {
         parent_kind: ast_defs::ClassishKind,
         parent_name: String,
     },
-    CyclicClassDef {
+    #[rust_to_ocaml(name = "Wrong_use_kind")]
+    WrongUseKind {
         pos: pos::Pos,
-        stack: s_set::SSet,
+        name: String,
+        parent_pos: pos_or_decl::PosOrDecl,
+        parent_name: String,
     },
+    #[rust_to_ocaml(name = "Cyclic_class_def")]
+    CyclicClassDef { pos: pos::Pos, stack: s_set::SSet },
 }
 
 #[derive(
@@ -177,6 +161,37 @@ pub enum DeclError {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "elt_")]
+#[repr(C)]
+pub struct Element {
+    pub flags: typing_defs_flags::class_elt::ClassElt,
+    pub origin: String,
+    pub visibility: CeVisibility,
+    pub deprecated: Option<String>,
+    pub sealed_allowlist: Option<s_set::SSet>,
+    pub sort_text: Option<String>,
+    pub overlapping_tparams: Option<s_set::SSet>,
+    pub package_requirement: Option<PackageRequirement>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "dc_")]
 #[repr(C)]
 pub struct DeclClassType {
     pub need_init: bool,
@@ -189,10 +204,10 @@ pub struct DeclClassType {
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
     pub module: Option<ast_defs::Id>,
+    pub is_module_level_trait: bool,
     pub name: String,
     pub pos: pos_or_decl::PosOrDecl,
     pub tparams: Vec<Tparam>,
-    pub where_constraints: Vec<WhereConstraint>,
     /// class name to the subst_context that must be applied to that class
     pub substs: s_map::SMap<SubstContext>,
     pub consts: s_map::SMap<ClassConst>,
@@ -204,19 +219,34 @@ pub struct DeclClassType {
     pub construct: (Option<Element>, ConsistentKind),
     pub ancestors: s_map::SMap<Ty>,
     pub support_dynamic_type: bool,
+    /// All the `require extends` and `require implements`,
+    /// possibly inherited from interface or trait ancestors.
+    /// Does not include `require class`
     pub req_ancestors: Vec<Requirement>,
+    /// All the `require extends` and `require implements`,
+    /// possibly inherited from interface or trait ancestors,
+    /// plus some extends and other ancestors of these.
+    /// Does not include `require class`
     pub req_ancestors_extends: s_set::SSet,
-    /// dc_req_class_ancestors gathers all the `require class`
-    /// requirements declared in ancestors.  Remark that `require class`
-    /// requirements are _not_ stored in `dc_req_ancestors` or
-    /// `dc_req_ancestors_extends` fields.
-    pub req_class_ancestors: Vec<Requirement>,
+    /// dc_req_constraints_ancestors gathers all the `require class` and
+    /// `require this as` requirements declared in ancestors.  Remark that
+    /// `require class` and `require this as` requirements are _not_ stored
+    /// in `dc_req_ancestors` or `dc_req_ancestors_extends` fields.
+    pub req_constraints_ancestors: Vec<ConstraintRequirement>,
     pub extends: s_set::SSet,
     pub sealed_whitelist: Option<s_set::SSet>,
     pub xhp_attr_deps: s_set::SSet,
     pub xhp_enum_values: s_map::SMap<Vec<ast_defs::XhpEnumValue>>,
+    pub xhp_marked_empty: bool,
     pub enum_type: Option<EnumType>,
     pub decl_errors: Vec<DeclError>,
+    pub docs_url: Option<String>,
+    /// Wether this interface has attribute __UNSAFE_AllowMultipleInstantiations.
+    pub allow_multiple_instantiations: bool,
+    /// The string provided by the __AutocompleteSortText attribute used for sorting
+    /// autocomplete results.
+    pub sort_text: Option<String>,
+    pub package: Option<aast_defs::PackageMembership>,
 }
 
 #[derive(
@@ -234,10 +264,11 @@ pub struct DeclClassType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "cr_req_")]
 #[repr(C)]
-pub struct Element {
-    pub flags: typing_defs_flags::class_elt::ClassElt,
-    pub origin: String,
-    pub visibility: CeVisibility,
-    pub deprecated: Option<String>,
+pub struct ClassRequirements {
+    pub ancestors: Vec<typing_defs::Requirement>,
+    pub ancestors_extends: s_set::SSet,
+    pub constraints_ancestors: Vec<typing_defs::ConstraintRequirement>,
 }

@@ -15,10 +15,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_AWAIT_ALL_WAIT_HANDLE_H_
-#define incl_HPHP_EXT_ASIO_AWAIT_ALL_WAIT_HANDLE_H_
+#pragma once
 
-#include "hphp/runtime/base/vanilla-dict.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/ext/extension.h"
 
@@ -26,15 +26,15 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class AwaitAllWaitHandle
 
-struct BaseMap;
-struct BaseVector;
-
 /**
  * A wait handle that waits for a list of wait handles. The wait handle succeeds
  * with null once all given wait handles are finished (succeeded or failed).
  */
-struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
-  WAITHANDLE_CLASSOF(AwaitAllWaitHandle);
+struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle,
+    SystemLib::ClassLoader<"HH\\AwaitAllWaitHandle"> {
+  using SystemLib::ClassLoader<"HH\\AwaitAllWaitHandle">::classof;
+  using SystemLib::ClassLoader<"HH\\AwaitAllWaitHandle">::className;
+
   static void instanceDtor(ObjectData* obj, const Class*) {
     auto wh = wait_handle<c_AwaitAllWaitHandle>(obj);
     auto const sz = wh->heapSize();
@@ -58,13 +58,6 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
       decRefObj(m_children[i].m_child);
     }
   }
-
-  // [frame, last) are the set of locals, and cnt is number of
-  // non-finished wait handles in that range.
-  static ObjectData* fromFrameNoCheck(const ActRec* fp,
-                                      uint32_t first,
-                                      uint32_t last,
-                                      uint32_t cnt);
 
  public:
   struct Node final {
@@ -114,7 +107,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   template<typename Iter>
   static Object Create(Iter iter);
   static req::ptr<c_AwaitAllWaitHandle> Alloc(int32_t cnt);
-  void initialize(context_idx_t ctx_idx);
+  void initialize(ContextStateIndex ctxStateIdx);
   void markAsFinished(void);
   void markAsFailed(const Object& exception);
   void setState(uint8_t state) { setKindState(Kind::AwaitAll, state); }
@@ -126,10 +119,6 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
                                    const Array& dependencies);
   friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
                                    const Array& dependencies);
-  friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromMap,
-                          const Variant& dependencies);
-  friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
-                          const Variant& dependencies);
  private:
   uint32_t const m_cap; // how many children we have room for.
   uint32_t m_unfinished; // index of the first unfinished child
@@ -140,17 +129,6 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   static const int8_t STATE_BLOCKED = 2;
 };
 
-void HHVM_STATIC_METHOD(AwaitAllWaitHandle, setOnCreateCallback,
-                        const Variant& callback);
-Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,
-                          const Array& dependencies);
-Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
-                          const Array& dependencies);
-Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromMap,
-                          const Variant& dependencies);
-Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
-                          const Variant& dependencies);
-
 inline c_AwaitAllWaitHandle* c_Awaitable::asAwaitAll() {
   assertx(getKind() == Kind::AwaitAll);
   return static_cast<c_AwaitAllWaitHandle*>(this);
@@ -159,6 +137,6 @@ inline c_AwaitAllWaitHandle* c_Awaitable::asAwaitAll() {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
+#define incl_HPHP_EXT_ASIO_AWAIT_ALL_WAIT_HANDLE_H_
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle-inl.h"
-
-#endif // incl_HPHP_EXT_ASIO_AWAIT_ALL_WAIT_HANDLE_H_
+#undef incl_HPHP_EXT_ASIO_AWAIT_ALL_WAIT_HANDLE_H_

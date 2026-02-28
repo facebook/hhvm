@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   // php://input is backed by a MemFile
   $f = fopen('php://input', 'r');
   var_dump(fstat($f));
@@ -8,6 +8,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_fstat_memfile() {
+function main_fstat_memfile() :mixed{
 main();
 }

@@ -14,29 +14,25 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/coeffects-config.h"
-#include "hphp/runtime/server/source-root-info.h"
-#include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/base/vanilla-dict.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
-#include "hphp/runtime/ext/generator/ext_generator.h"
-#include "hphp/runtime/vm/bytecode.h"
+
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/conv-10.h"
+#include "hphp/util/random.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/text-util.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/ext/string/ext_string.h"
 
-#include <folly/tracing/StaticTracepoint.h>
+#include <usdt/usdt.h>
 #include <folly/Random.h>
 
 namespace HPHP {
 
-TRACE_SET_MOD(runtime);
+TRACE_SET_MOD(runtime)
 
 /**
  * print_string will decRef the string
@@ -67,7 +63,7 @@ void print_boolean(bool val) {
  */
 StringData* concat_ss(StringData* v1, StringData* v2) {
   if (v1->cowCheck()) {
-    FOLLY_SDT(hhvm, hhvm_cow_concat, v1->size(), v2->size());
+    USDT(hhvm, hhvm_cow_concat, v1->size(), v2->size());
     StringData* ret = StringData::Make(v1, v2);
     // Because v1 was shared, we know this won't release the string.
     v1->decRefCount();
@@ -76,7 +72,7 @@ StringData* concat_ss(StringData* v1, StringData* v2) {
 
   auto const rhs = v2->slice();
   UNUSED auto const lsize = v1->size();
-  FOLLY_SDT(hhvm, hhvm_mut_concat, lsize, rhs.size());
+  USDT(hhvm, hhvm_mut_concat, lsize, rhs.size());
   auto const ret = v1->append(rhs);
   if (UNLIKELY(ret != v1)) {
     // had to realloc even though count==1
@@ -106,7 +102,7 @@ StringData* concat_si(StringData* v1, int64_t v2) {
   auto const s2 = conv_10(v2, intbuf + sizeof(intbuf));
   if (v1->cowCheck()) {
     auto const s1 = v1->slice();
-    FOLLY_SDT(hhvm, hhvm_cow_concat, s1.size(), s2.size());
+    USDT(hhvm, hhvm_cow_concat, s1.size(), s2.size());
     auto const ret = StringData::Make(s1, s2);
     // Because v1 was shared, we know this won't release it.
     v1->decRefCount();
@@ -114,7 +110,7 @@ StringData* concat_si(StringData* v1, int64_t v2) {
   }
 
   UNUSED auto const lsize = v1->size();
-  FOLLY_SDT(hhvm, hhvm_mut_concat, lsize, s2.size());
+  USDT(hhvm, hhvm_mut_concat, lsize, s2.size());
   auto const ret = v1->append(s2);
   if (UNLIKELY(ret != v1)) {
     // had to realloc even though count==1
@@ -129,7 +125,7 @@ StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3) {
     auto s1 = v1->slice();
     auto s2 = v2->slice();
     auto s3 = v3->slice();
-    FOLLY_SDT(hhvm, hhvm_cow_concat, s1.size(), s2.size() + s3.size());
+    USDT(hhvm, hhvm_cow_concat, s1.size(), s2.size() + s3.size());
     StringData* ret = StringData::Make(s1, s2, s3);
     // Because v1 was shared, we know this won't release it.
     v1->decRefCount();
@@ -137,7 +133,7 @@ StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3) {
   }
 
   UNUSED auto const lsize = v1->size();
-  FOLLY_SDT(hhvm, hhvm_mut_concat, lsize, v2->size() + v3->size());
+  USDT(hhvm, hhvm_mut_concat, lsize, v2->size() + v3->size());
   auto const ret = v1->append(v2->slice(), v3->slice());
   if (UNLIKELY(ret != v1)) {
     // had to realloc even though count==1
@@ -154,8 +150,7 @@ StringData* concat_s4(StringData* v1, StringData* v2,
     auto s2 = v2->slice();
     auto s3 = v3->slice();
     auto s4 = v4->slice();
-    FOLLY_SDT(hhvm, hhvm_cow_concat, s1.size(),
-              s2.size() + s3.size() + s4.size());
+    USDT(hhvm, hhvm_cow_concat, s1.size(), s2.size() + s3.size() + s4.size());
     StringData* ret = StringData::Make(s1, s2, s3, s4);
     // Because v1 was shared, we know this won't release it.
     v1->decRefCount();
@@ -163,8 +158,7 @@ StringData* concat_s4(StringData* v1, StringData* v2,
   }
 
   UNUSED auto const lsize = v1->size();
-  FOLLY_SDT(hhvm, hhvm_mut_concat, lsize,
-            v2->size() + v3->size() + v4->size());
+  USDT(hhvm, hhvm_mut_concat, lsize, v2->size() + v3->size() + v4->size());
   auto const ret = v1->append(v2->slice(), v3->slice(), v4->slice());
   if (UNLIKELY(ret != v1)) {
     // had to realloc even though count==1
@@ -178,8 +172,10 @@ void raiseWarning(const StringData* sd) {
   raise_warning("%s", sd->data());
 }
 
-void raiseNotice(const StringData* sd) {
-  raise_notice("%s", sd->data());
+void raiseNotice(uint32_t sampleRate, const StringData* sd) {
+  if (folly::Random::oneIn(sampleRate, threadLocalRng64())) {
+    raise_notice("%s", sd->data());
+  }
 }
 
 void throwArrayIndexException(const ArrayData* ad, const int64_t index) {
@@ -295,7 +291,7 @@ namespace {
 std::string formatArgumentErrMsg(const Func* func, const char* amount,
                                  uint32_t expected, uint32_t got) {
   return folly::sformat(
-    "{}() expects {} {} parameter{}, {} given",
+    "{}() expects {} {} positional parameter{}, {} given",
     func->fullNameWithClosureName(),
     amount,
     expected,
@@ -306,18 +302,42 @@ std::string formatArgumentErrMsg(const Func* func, const char* amount,
 
 }
 
-void throwMissingArgument(const Func* func, int got) {
-  auto const expected = func->numRequiredParams();
+void throwMissingPositionalArgument(const Func* func, int got) {
+  auto const expected = func->numRequiredPositionalParams();
   assertx(got < expected);
-  auto const amount = expected < func->numParams() ? "at least" : "exactly";
+  auto const amount = expected < func->numParams() - func->numNamedParams() ? "at least" : "exactly";
   auto const errMsg = formatArgumentErrMsg(func, amount, expected, got);
   SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
 }
 
+void throwMissingNamedArgument(const Func* func, int got) {
+  auto const expected = func->numRequiredNamedParams();
+  assertx(got < expected);
+  auto const errMsg = folly::sformat(
+    "{}() expects {} required named parameter{}, {} given",
+    func->fullNameWithClosureName(),
+    expected,
+    expected == 1 ? "" : "s",
+    got
+  );
+
+  SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
+}
+
+void throwNamedArgumentNameMismatch(const Func* func, const StringData* argName) {
+  auto const errMsg = folly::sformat(
+    "Named argument {} does not match any named parameter in call to {}",
+    argName->toCppString(),
+    func->fullNameWithClosureName()
+  );
+  SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
+}
+
+// TODO(named_params) this needs to be made named-args aware.
 void raiseTooManyArguments(const Func* func, int got) {
   assertx(!func->hasVariadicCaptureParam());
 
-  if (!RuntimeOption::EvalWarnOnTooManyArguments && !func->isCPPBuiltin()) {
+  if (!Cfg::Eval::WarnOnTooManyArguments && !func->isCPPBuiltin()) {
     return;
   }
 
@@ -326,13 +346,16 @@ void raiseTooManyArguments(const Func* func, int got) {
   auto const amount = func->numRequiredParams() < total ? "at most" : "exactly";
   auto const errMsg = formatArgumentErrMsg(func, amount, total, got);
 
-  if (RuntimeOption::EvalWarnOnTooManyArguments > 1 || func->isCPPBuiltin()) {
+  if (Cfg::Eval::WarnOnTooManyArguments > 1 || func->isCPPBuiltin()) {
+    // TODO(named_params): Once we have named param support, this should always
+    // throw.
     SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
   } else {
     raise_warning(errMsg);
   }
 }
 
+// TODO(named_params) this needs to be made named-args aware.
 void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs) {
   SCOPE_EXIT { decRefArr(unpackArgs); };
   if (unpackArgs->empty()) return;
@@ -386,7 +409,7 @@ void raiseCoeffectsCallViolation(const Func* callee,
 
   assertx(!provided.canCall(required));
   if (provided.canCallWithWarning(required)) {
-    if (*rl_num_coeffect_violations >= RO::EvalCoeffectViolationWarningMax) {
+    if (*rl_num_coeffect_violations >= Cfg::Eval::CoeffectViolationWarningMax) {
       return;
     }
     (*rl_num_coeffect_violations)++;
@@ -421,19 +444,121 @@ void raiseCoeffectsFunParamCoeffectRulesViolation(const Func* f) {
   raise_warning(errMsg);
 }
 
-//////////////////////////////////////////////////////////////////////
+namespace {
 
-int64_t zero_error_level() {
-  auto& id = RequestInfo::s_requestInfo.getNoCheck()->m_reqInjectionData;
-  auto level = id.getErrorReportingLevel();
-  id.setErrorReportingLevel(0);
-  return level;
+void moduleBoundaryViolationImpl(
+  std::string symbol,
+  const StringData* symbolModule,
+  const StringData* fromModule,
+  bool soft
+) {
+  assertx(Cfg::Eval::EnforceModules);
+  // Internal symbols must always have a module
+  assertx(symbolModule != nullptr);
+  assertx(fromModule != nullptr);
+  assertx(symbolModule != fromModule);
+  assertx(!symbol.empty());
+  // Don't throw error in debugger when bypassCheck is on
+  if (!g_context.isNull() && g_context->debuggerSettings.bypassCheck) return;
+  auto const errMsg = folly::sformat(
+    "Accessing {}internal {} in module {} from {} is not allowed",
+    soft ? "soft " : "",
+    symbol,
+    symbolModule,
+    Module::isDefault(fromModule)
+      ? "the default module"
+      : folly::sformat("module {}", fromModule)
+  );
+  if (Cfg::Eval::EnforceModules > 1 && !soft) {
+    SystemLib::throwModuleBoundaryViolationExceptionObject(errMsg);
+  }
+  raise_warning(errMsg);
 }
 
-void restore_error_level(int64_t oldLevel) {
-  auto& id = RequestInfo::s_requestInfo.getNoCheck()->m_reqInjectionData;
-  if (id.getErrorReportingLevel() == 0) {
-    id.setErrorReportingLevel(oldLevel);
+} // namespace
+
+void raiseModulePropertyViolation(
+  const Class* cls,
+  const StringData* prop,
+  const StringData* callerModule,
+  bool is_static = false
+) {
+  if (!Cfg::Eval::EnforceModules) return;
+  assertx(cls);
+  assertx(prop);
+  auto const attrs = [&] {
+    if (is_static) {
+      auto const propSlot = cls->lookupSProp(prop);
+      return cls->staticProperties()[propSlot].attrs;
+    }
+    auto const propSlot = cls->lookupDeclProp(prop);
+    return cls->declProperties()[propSlot].attrs;
+  }();
+  assertx(attrs & AttrInternal);
+  auto const soft = attrs & AttrInternalSoft;
+
+  auto const msg = is_static ? "static property {}::${}" : "property {}::${}";
+  return moduleBoundaryViolationImpl(
+    folly::sformat(msg, cls->name(), prop->data()),
+    cls->moduleName(),
+    callerModule,
+    soft
+  );
+}
+
+void raiseModuleBoundaryViolation(const Class* ctx,
+                                  const Func* callee,
+                                  const StringData* callerModule) {
+  if (!Cfg::Eval::EnforceModules) return;
+
+  assertx(callee);
+  assertx(IMPLIES(callee->isMethod(), ctx));
+  assertx(callee->isInternal());
+  return moduleBoundaryViolationImpl(
+    ctx && callee->isMethod()
+        ? folly::sformat("method {}::{}", ctx->name(), callee->name())
+        : folly::sformat("function {}", callee->name()),
+    callee->moduleName(),
+    callerModule,
+    callee->attrs() & AttrInternalSoft
+  );
+}
+
+void raiseModuleBoundaryViolation(const Class* cls,
+                                  const StringData* callerModule) {
+  if (!Cfg::Eval::EnforceModules) return;
+
+  assertx(cls);
+  assertx(cls->isInternal());
+  auto const symbolType =
+    isEnum(cls) ? "enum" : (isEnumClass(cls) ? "enum class" : "class");
+  return moduleBoundaryViolationImpl(
+    folly::sformat("{} {}", symbolType, cls->name()),
+    cls->moduleName(),
+    callerModule,
+    cls->attrs() & AttrInternalSoft
+  );
+}
+
+const StaticString s___DynamicallyReferenced("__DynamicallyReferenced");
+
+void raiseMissingDynamicallyReferenced(const Class* cls) {
+  if (folly::Random::oneIn(Cfg::Eval::DynamicallyReferencedNoticeSampleRate, threadLocalRng64())) {
+    auto const& attrs = cls->preClass()->userAttributes();
+    auto const it = attrs.find(s___DynamicallyReferenced.get());
+    if (it != attrs.end()) {
+      assertx(tvIsVec(it->second));
+      auto const args = val(it->second).parr;
+      assertx(args->size() == 1);
+      auto const rate = tvAssertInt(args->at(int64_t{0}));
+      if (folly::Random::oneIn(rate, threadLocalRng64())) {
+        raise_notice(Strings::SOFT_MISSING_DYNAMICALLY_REFERENCED,
+                     cls->name()->data(),
+                     rate);
+      }
+    } else {
+      raise_notice(Strings::MISSING_DYNAMICALLY_REFERENCED, cls->name()->data());
+    }
   }
 }
 

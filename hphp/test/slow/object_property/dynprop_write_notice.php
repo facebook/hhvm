@@ -1,6 +1,6 @@
 <?hh
 
-function test($thing) {
+function test($thing) :mixed{
   echo "==== " . get_class($thing) . " ====\n";
   $thing->dynprop = 3;
   $propname = __hhvm_intrinsics\launder_value("dynprop") . "2";
@@ -15,7 +15,7 @@ function test($thing) {
 
 class C {}
 
-function error_boundary(inout $x, $fn) {
+function error_boundary(inout $x, $fn) :mixed{
   try {
     $fn(inout $x);
   } catch (Exception $e) {
@@ -24,7 +24,7 @@ function error_boundary(inout $x, $fn) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   test(new C());
   test(gmp_init(0));
   test(new stdClass());

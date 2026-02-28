@@ -1,0 +1,57 @@
+error: Typing[4472] Cannot access MyInternClass defined in package pkg2, which may not be available, within a reifiable type constant [1]
+-> MyInternClass is defined in cross_package_reifiable_typeconsts.php--bar.php [2]
+-> MyInternClass belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+-> The type constant T2 is declared <<__Reifiable>> here [5]
+
+cross_package_reifiable_typeconsts.php--foo.php:11:19
+     4 | abstract class MyProdBase {
+     5 |   abstract const type T1;
+[5]  6 |   <<__Reifiable>> abstract const type T2;
+     7 | }
+     8 | 
+     9 | class MyProd extends MyProdBase {
+    10 |   const type T1 = MyInternClass; // error when package_allow_all_tconst_violations is turned off
+[1] 11 |   const type T2 = MyInternClass; // error when package_allow_reifiable_tconst_violations is off
+    12 | }
+    13 | 
+
+cross_package_reifiable_typeconsts.php--bar.php:4:7
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+[2]  4 | class MyInternClass {}
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot access MyInternClass defined in package pkg2, which may not be available, within a reifiable type constant [1]
+-> MyInternClass is defined in cross_package_reifiable_typeconsts.php--bar.php [2]
+-> MyInternClass belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+-> The type constant T3 is declared <<__Reifiable>> here [5]
+
+cross_package_reifiable_typeconsts.php--foo.php:15:35
+      13 | 
+      14 | class MyProdDirect {
+[1,5] 15 |   <<__Reifiable>> const type T3 = MyInternClass; // error: reifiable directly on the const type itself
+      16 | }
+
+cross_package_reifiable_typeconsts.php--bar.php:4:7
+       1 | <?hh
+       2 | // package pkg2
+[3]    3 | <<file: __PackageOverride('pkg2')>>
+[2]    4 | class MyInternClass {}
+
+PACKAGES.toml:3:11
+       1 | [packages]
+       2 | 
+[4]    3 | [packages.pkg1]
+       4 | include_paths=["//"]
+       5 | 
+
+2 errors found

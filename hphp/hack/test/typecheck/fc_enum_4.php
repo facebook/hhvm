@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // Should fail because bool
 enum Foo: bool {

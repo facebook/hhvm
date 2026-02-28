@@ -1,4 +1,4 @@
-File "typing.extends0.bad.php", line 44, characters 16-19:
+ERROR: File "typing.extends0.bad.php", line 44, characters 16-19:
 Invalid argument (Typing[4110])
   File "typing.extends0.bad.php", line 39, characters 13-13:
   Expected `F`

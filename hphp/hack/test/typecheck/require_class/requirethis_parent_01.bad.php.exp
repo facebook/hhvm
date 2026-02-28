@@ -1,0 +1,4 @@
+ERROR: File "requirethis_parent_01.bad.php", line 15, characters 9-14:
+parent is undefined (Typing[4076])
+  File "requirethis_parent_01.bad.php", line 12, characters 21-21:
+  The class required here has no parent

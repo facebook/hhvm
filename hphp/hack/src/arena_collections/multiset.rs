@@ -23,13 +23,15 @@
 use std::borrow::Borrow;
 use std::fmt::Debug;
 
+use arena_trait::TrivialDrop;
 use bumpalo::Bump;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Serialize;
 
-use arena_trait::TrivialDrop;
-use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
-
-use crate::{AssocList, AssocListMut, SortedAssocList};
+use crate::AssocList;
+use crate::AssocListMut;
+use crate::SortedAssocList;
 
 /// A readonly array-based multiset.
 ///
@@ -50,8 +52,9 @@ impl<'a, T: 'a> MultiSet<'a, T> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::MultiSet;
+    /// use arena_collections::MultiSetMut;
     /// use bumpalo::Bump;
-    /// use arena_collections::{MultiSet, MultiSetMut};
     ///
     /// let b = Bump::new();
     /// let mut set = MultiSetMut::new_in(&b);
@@ -72,8 +75,9 @@ impl<'a, T: 'a> MultiSet<'a, T> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::MultiSet;
+    /// use arena_collections::MultiSetMut;
     /// use bumpalo::Bump;
-    /// use arena_collections::{MultiSet, MultiSetMut};
     ///
     /// let b = Bump::new();
     /// let mut set = MultiSetMut::new_in(&b);
@@ -97,8 +101,9 @@ impl<'a, T: 'a> MultiSet<'a, T> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::MultiSet;
+    /// use arena_collections::MultiSetMut;
     /// use bumpalo::Bump;
-    /// use arena_collections::{MultiSet, MultiSetMut};
     ///
     /// let b = Bump::new();
     /// let mut set = MultiSetMut::new_in(&b);
@@ -116,8 +121,9 @@ impl<'a, T: 'a> MultiSet<'a, T> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::MultiSet;
+    /// use arena_collections::MultiSetMut;
     /// use bumpalo::Bump;
-    /// use arena_collections::{MultiSet, MultiSetMut};
     ///
     /// let b = Bump::new();
     /// let mut set = MultiSetMut::new_in(&b);
@@ -140,7 +146,8 @@ impl<'a, T: 'a> MultiSet<'a, T> {
     /// # Examples
     ///
     /// ```
-    /// use arena_collections::{AssocList, MultiSet};
+    /// use arena_collections::AssocList;
+    /// use arena_collections::MultiSet;
     ///
     /// const EMPTY_MULTISET: MultiSet<'_, i32> = MultiSet::from_slice(&[]);
     /// assert!(EMPTY_MULTISET.is_empty());
@@ -187,8 +194,8 @@ impl<'bump, T> MultiSetMut<'bump, T> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::MultiSetMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut set: MultiSetMut<i32> = MultiSetMut::new_in(&b);
@@ -211,8 +218,8 @@ impl<'bump, T> MultiSetMut<'bump, T> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::MultiSetMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     ///
@@ -245,8 +252,8 @@ impl<'bump, T> MultiSetMut<'bump, T> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::MultiSetMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut set = MultiSetMut::new_in(&b);
@@ -268,8 +275,8 @@ impl<'bump, T> MultiSetMut<'bump, T> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::MultiSetMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut set = MultiSetMut::new_in(&b);
@@ -290,8 +297,8 @@ impl<'bump, T> MultiSetMut<'bump, T> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::MultiSetMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut set = MultiSetMut::new_in(&b);
@@ -314,8 +321,8 @@ impl<'bump, T> MultiSetMut<'bump, T> {
     /// # Examples
     ///
     /// ```
-    /// use bumpalo::Bump;
     /// use arena_collections::MultiSetMut;
+    /// use bumpalo::Bump;
     ///
     /// let b = Bump::new();
     /// let mut set = MultiSetMut::new_in(&b);
@@ -338,8 +345,9 @@ impl<'bump, T> MultiSetMut<'bump, T> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::MultiSet;
+    /// use arena_collections::MultiSetMut;
     /// use bumpalo::Bump;
-    /// use arena_collections::{MultiSet, MultiSetMut};
     ///
     /// let b = Bump::new();
     /// let mut set = MultiSetMut::new_in(&b);
@@ -362,8 +370,9 @@ impl<'bump, T> MultiSetMut<'bump, T> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::MultiSet;
+    /// use arena_collections::MultiSetMut;
     /// use bumpalo::Bump;
-    /// use arena_collections::{MultiSet, MultiSetMut};
     ///
     /// let b = Bump::new();
     /// let mut set = MultiSetMut::new_in(&b);
@@ -384,8 +393,9 @@ impl<'bump, T> MultiSetMut<'bump, T> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::MultiSet;
+    /// use arena_collections::MultiSetMut;
     /// use bumpalo::Bump;
-    /// use arena_collections::{MultiSet, MultiSetMut};
     ///
     /// let b = Bump::new();
     /// let mut set = MultiSetMut::new_in(&b);
@@ -448,8 +458,9 @@ impl<'a, T> SortedSet<'a, T> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::MultiSetMut;
+    /// use arena_collections::SortedSet;
     /// use bumpalo::Bump;
-    /// use arena_collections::{MultiSetMut, SortedSet};
     ///
     /// let b = Bump::new();
     /// let mut set = MultiSetMut::new_in(&b);
@@ -470,8 +481,9 @@ impl<'a, T> SortedSet<'a, T> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::MultiSetMut;
+    /// use arena_collections::SortedSet;
     /// use bumpalo::Bump;
-    /// use arena_collections::{MultiSetMut, SortedSet};
     ///
     /// let b = Bump::new();
     /// let mut set = MultiSetMut::new_in(&b);
@@ -494,8 +506,9 @@ impl<'a, T> SortedSet<'a, T> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::MultiSetMut;
+    /// use arena_collections::SortedSet;
     /// use bumpalo::Bump;
-    /// use arena_collections::{MultiSetMut, SortedSet};
     ///
     /// let b = Bump::new();
     /// let mut set = MultiSetMut::new_in(&b);
@@ -514,8 +527,9 @@ impl<'a, T> SortedSet<'a, T> {
     /// # Examples
     ///
     /// ```
+    /// use arena_collections::MultiSetMut;
+    /// use arena_collections::SortedSet;
     /// use bumpalo::Bump;
-    /// use arena_collections::{MultiSetMut, SortedSet};
     ///
     /// let b = Bump::new();
     /// let mut set = MultiSetMut::new_in(&b);
@@ -570,12 +584,9 @@ impl<'a, T: Ord> From<MultiSetMut<'a, T>> for SortedSet<'a, T> {
 }
 
 impl<T: ToOcamlRep + Ord> ToOcamlRep for SortedSet<'_, T> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         let len = self.len();
-        let mut iter = self.iter();
+        let mut iter = self.iter().map(|x| x.to_ocamlrep(alloc));
         let (value, _) = ocamlrep::sorted_iter_to_ocaml_set(&mut iter, alloc, len);
         value
     }

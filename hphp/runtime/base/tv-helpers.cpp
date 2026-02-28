@@ -46,6 +46,7 @@ bool tvIsPlausible(const TypedValue cell) {
       case KindOfInt64:
       case KindOfDouble:
         return;
+      case KindOfEnumClassLabel:
       case KindOfPersistentString:
         assertPtr(cell.m_data.pstr);
         assertx(cell.m_data.pstr->kindIsValid());

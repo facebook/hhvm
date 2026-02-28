@@ -1,6 +1,6 @@
 <?hh
 
-function escalate_keys() {
+function escalate_keys() :mixed{
   $base = __hhvm_intrinsics\launder_value(17);
   $f = () ==> dict['a' => vec[$base * 1], 'b' => vec[$base * 2]];
   $a = json_decode('"a"');
@@ -22,7 +22,7 @@ function escalate_keys() {
   print(json_encode($x)."\n");
 }
 
-function escalate_vals() {
+function escalate_vals() :mixed{
   $base = __hhvm_intrinsics\launder_value(17);
   $x = dict['a' => $base * 1, 'b' => $base * 2, 'c' => $base * 3];
   unset($x['a']);
@@ -33,7 +33,7 @@ function escalate_vals() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   escalate_keys();
   escalate_vals();
 }

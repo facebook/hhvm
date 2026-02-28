@@ -18,8 +18,9 @@
 
 #include "hphp/util/address-range.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/service-data.h"
 
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
 
 namespace HPHP::alloc {
 
@@ -27,37 +28,40 @@ static_assert(sizeof(RangeState) <= 64, "");
 static_assert(alignof(RangeState) <= 64, "");
 using RangeStateStorage = std::aligned_storage<sizeof(RangeState), 64>::type;
 
-RangeArenaStorage g_lowerArena{};
 RangeArenaStorage g_lowArena{};
+RangeArenaStorage g_lowSmallArena{};
 RangeArenaStorage g_highArena{};
 RangeArenaStorage g_coldArena{};
-RangeArenaStorage g_lowColdArena{};
-RangeStateStorage g_ranges[5];
+RangeStateStorage g_ranges[AddrRangeClass::NumRangeClasses];
 ArenaArray g_arenas;
-PreMappedArena* g_arena0;               // arena 0, if we end up injecting pages
+std::vector<PreMappedArena*> g_auto_arenas;
 std::vector<PreMappedArena*> g_local_arenas; // keyed by numa node id
 
 NEVER_INLINE RangeState& getRange(AddrRangeClass index) {
   auto result = reinterpret_cast<RangeState*>(g_ranges + index);
   if (!result->low()) {
     static std::atomic_flag lock = ATOMIC_FLAG_INIT;
-    while (lock.test_and_set(std::memory_order_acquire)) {
+    while (lock.test_and_set(std::memory_order_acq_rel)) {
       // Spin while another thread initializes the ranges. We don't really reach
       // here, because the function is called very early during process
       // initialization when there is only one thread. Do it just for extra
       // safety in case someone starts to abuse the code.
     }
     if (!result->high()) {
-      new (&(g_ranges[AddrRangeClass::VeryLow]))
-        RangeState(lowArenaMinAddr(), 2ull << 30);
       new (&(g_ranges[AddrRangeClass::Low]))
-        RangeState(2ull << 30, kLowArenaMaxAddr - kLowEmergencySize);
+        RangeState(lowArenaMinAddr(), kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize);
+      new (&(g_ranges[AddrRangeClass::LowSmall]))
+        RangeState(kLowArenaMaxAddr - kLowEmergencySize - kLowSmallArenaSize, kLowArenaMaxAddr - kLowEmergencySize);
       new (&(g_ranges[AddrRangeClass::LowEmergency]))
         RangeState(kLowArenaMaxAddr - kLowEmergencySize, kLowArenaMaxAddr);
+      new (&(g_ranges[AddrRangeClass::Mid]))
+        RangeState(kLowArenaMaxAddr, kMidArenaMaxAddr);
       new (&(g_ranges[AddrRangeClass::Uncounted]))
-        RangeState(kLowArenaMaxAddr, kHighArenaMaxAddr);
+        RangeState(kMidArenaMaxAddr, kHighArenaMaxAddr);
       new (&(g_ranges[AddrRangeClass::UncountedCold]))
         RangeState(kHighArenaMaxAddr, kUncountedMaxAddr);
+      new (&(g_ranges[AddrRangeClass::Global]))
+        RangeState(kArena0Base, kArena0Base); // need to reinitialize when used.
     }
     lock.clear(std::memory_order_release);
     assertx(result->high());
@@ -68,7 +72,7 @@ NEVER_INLINE RangeState& getRange(AddrRangeClass index) {
 //////////////////////////////////////////////////////////////////////
 
 template<typename ExtentAllocator>
-std::string ManagedArena<ExtentAllocator>::reportStats() {
+std::string ManagedArena<ExtentAllocator>::reportStats() const {
   char buffer[128];
   using Traits = extent_allocator_traits<ExtentAllocator>;
   std::snprintf(buffer, sizeof(buffer),
@@ -134,8 +138,6 @@ void ManagedArena<ExtentAllocator>::updateHook() {
                 &hooks_ptr, sizeof(hooks_ptr))) {
       throw std::runtime_error{command};
     }
-#if (JEMALLOC_VERSION_MAJOR > 5) || \
-  ((JEMALLOC_VERSION_MAJOR == 5) && (JEMALLOC_VERSION_MINOR >= 1))
     // Avoid asking excessive memory through the hook, in order to make better
     // use of preallocated pages.
     std::snprintf(command, sizeof(command),
@@ -145,18 +147,29 @@ void ManagedArena<ExtentAllocator>::updateHook() {
       throw std::runtime_error{command};
     }
   }
-#endif
 }
 
 template void ManagedArena<MultiRangeExtentAllocator>::create();
 template void ManagedArena<MultiRangeExtentAllocator>::updateHook();
 template size_t ManagedArena<MultiRangeExtentAllocator>::unusedSize();
-template std::string ManagedArena<MultiRangeExtentAllocator>::reportStats();
+template std::string ManagedArena<MultiRangeExtentAllocator>::reportStats() const;
 
 template void ManagedArena<DefaultExtentAllocator>::create();
 template void ManagedArena<DefaultExtentAllocator>::updateHook();
 template void ManagedArena<RangeFallbackExtentAllocator>::create();
 template void ManagedArena<RangeFallbackExtentAllocator>::updateHook();
+
+namespace {
+ServiceData::CounterCallback s_arena_usage([](ServiceData::CounterMap& counters) {
+  #define INSERT(which) \
+    if (auto a = alloc::which ## Arena()) { \
+      counters.emplace("admin." #which "_arena_usage", s_pageSize * mallctl_pactive(a->id())); \
+    }
+
+  INSERT(low)
+  INSERT(high)
+});
+}
 
 }
 

@@ -16,8 +16,8 @@ class privateCtorNew {
 }
 
 <<__EntryPoint>>
-function main() {
-  $classes = varray["noCtor", "publicCtorNew", "protectedCtorNew", "privateCtorNew"];
+function main() :mixed{
+  $classes = vec["noCtor", "publicCtorNew", "protectedCtorNew", "privateCtorNew"];
 
   foreach($classes  as $class ) {
     $reflectionClass = new ReflectionClass($class);

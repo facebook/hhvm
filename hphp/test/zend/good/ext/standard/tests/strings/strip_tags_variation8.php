@@ -12,7 +12,7 @@ echo "*** Testing strip_tags() : usage variations ***\n";
 
 $strings = "<html>hello</html> \tworld... <p>strip_tags_test\v\f</p><?hh hello\t wo\rrld?>";
 
-$quotes = varray [
+$quotes = vec[
   "<nnn>",
   '<nnn>',
   "<abc>",

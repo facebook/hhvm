@@ -1,0 +1,4 @@
+WARN: File "52-type-assertions-03.hack", line 5, characters 3-27:
+This `is` check is always `true`. The expression on the left has type `(int, float, null)` which is a subtype of `(int, float, ?bool)`. (Warn[12009])
+WARN: File "52-type-assertions-03.hack", line 8, characters 3-27:
+This `is` check is always `true`. The expression on the left has type `shape('foo' => int)` which is a subtype of `shape('foo' => int)`. (Warn[12009])

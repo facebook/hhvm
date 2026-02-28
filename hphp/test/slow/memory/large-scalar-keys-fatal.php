@@ -670,6 +670,6 @@ const ARR = dict[
 ];
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(count(ARR));
 }

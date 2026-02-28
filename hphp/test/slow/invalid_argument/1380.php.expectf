@@ -1,4 +1,2 @@
-Warning: mysql_fetch_array() expects parameter 1 to be resource, null given in %s/test/slow/invalid_argument/1380.php on line 6
-
-Warning: supplied argument is not a valid MySQL result resource in %s/test/slow/invalid_argument/1380.php on line 7
+Warning: supplied argument is not a valid MySQL result resource in %s/test/slow/invalid_argument/1380.php on line 5
 bool(false)

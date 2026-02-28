@@ -1,11 +1,11 @@
 <?hh
 
 class pass {
-    protected function fail() {
+    protected function fail() :mixed{
         echo "Call fail()\n";
     }
 
-    public function good() {
+    public function good() :mixed{
         $this->fail();
     }
 }

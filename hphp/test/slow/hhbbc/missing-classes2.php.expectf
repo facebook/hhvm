@@ -1,0 +1,2 @@
+Fatal error: Class Bad1 may not inherit from final class (T) in %s/missing-classes2.php on line 16
+

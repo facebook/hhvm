@@ -1,12 +1,12 @@
 <?hh
 
 class C {
-  function simpleRet($x) {
+  function simpleRet($x) :mixed{
     return 1;
   }
 }
 
-function foo() {
+function foo() :mixed{
   $x = new C;
   $y = $x->simpleRet($x);
   var_dump($x);

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -13,7 +13,7 @@ interface I {
 }
 
 class B {
-  static int $x = 0;
+  public static int $x = 0;
 }
 
 class A extends B implements I {

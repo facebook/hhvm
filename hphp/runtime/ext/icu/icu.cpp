@@ -18,7 +18,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/util/rds-local.h"
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 
@@ -75,7 +74,7 @@ static RDS_LOCAL(std::string, s_defaultLocale);
 
 void IntlExtension::bindIniSettings() {
   s_defaultLocale.getCheck();
-  IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(this, IniSetting::Mode::Request,
                    "intl.default_locale", "",
                    s_defaultLocale.get()
                  );
@@ -96,7 +95,7 @@ bool SetDefaultLocale(const String& locale) {
 /////////////////////////////////////////////////////////////////////////////
 // Common extension init
 
-void IntlExtension::bindConstants() {
+void IntlExtension::registerNativeConstants() {
 #ifdef U_ICU_DATA_VERSION
   HHVM_RC_STR(INTL_ICU_DATA_VERSION, U_ICU_DATA_VERSION);
 #endif
@@ -306,7 +305,7 @@ double VariantToMilliseconds(const Variant& arg) {
     return U_MILLIS_PER_SECOND * arg.toDouble();
   }
   if (arg.isObject() &&
-      arg.toObject()->instanceof(SystemLib::s_DateTimeInterfaceClass)) {
+      arg.toObject()->instanceof(SystemLib::getDateTimeInterfaceClass())) {
     return U_MILLIS_PER_SECOND *
            (double) DateTimeData::getTimestamp(arg.toObject());
   }

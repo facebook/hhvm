@@ -1,0 +1,6 @@
+File "asyncgen11.php", line 4, characters 3-12:
+Invalid `yield` (Typing[4110])
+  File "asyncgen11.php", line 3, characters 36-38:
+  Expected `int`
+  File "asyncgen11.php", line 4, characters 9-12:
+  But got `null` because `yield x` is equivalent to `yield null => x` in an `async` function

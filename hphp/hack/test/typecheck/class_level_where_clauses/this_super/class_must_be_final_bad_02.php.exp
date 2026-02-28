@@ -1,8 +1,0 @@
-File "class_must_be_final_bad_02.php", line 12, characters 7-15:
-A `where` type constraint is violated here (Typing[4323])
-  File "class_must_be_final_bad_02.php", line 12, characters 28-28:
-  This is the class with `where` type constraints
-  File "class_must_be_final_bad_02.php", line 14, characters 32-35:
-  Expected `this`
-  File "class_must_be_final_bad_02.php", line 14, characters 19-27:
-  But got `MustFinal`

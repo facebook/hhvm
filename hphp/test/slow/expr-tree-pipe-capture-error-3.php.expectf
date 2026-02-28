@@ -1,0 +1,2 @@
+
+Fatal error: Cannot use unstable feature: `capture_pipe_variables` in %s/expr-tree-pipe-capture-error-3.php on line 5

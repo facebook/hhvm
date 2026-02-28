@@ -1,29 +1,29 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 <<__DynamicallyCallable>>
-function foo() {}
+function foo() :mixed{}
 
 class A {
   <<__DynamicallyCallable>>
-  public function foo() {}
+  public function foo() :mixed{}
   <<__DynamicallyCallable>>
-  public static function bar() {}
+  public static function bar() :mixed{}
 }
 
-function corge() {}
+function corge() :mixed{}
 
 class A1 {
-  public function corge() {}
-  public static function flob() {}
+  public function corge() :mixed{}
+  public static function flob() :mixed{}
 }
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   echo "======== Called without using a function pointer ========\n\n";
   $foo = 'foo';
   $a_obj = new A();
   $a_bar = 'A::bar';
-  $a_foo = varray[new A, 'foo'];
+  $a_foo = vec[new A, 'foo'];
   $a = 'A';
   $bar = 'bar';
 
@@ -41,7 +41,7 @@ function test() {
   $corge = 'corge';
   $a1_obj = new A1();
   $a1_flob = 'A1::flob';
-  $a1_corge = varray[new A1, 'corge'];
+  $a1_corge = vec[new A1, 'corge'];
   $a1 = 'A1';
   $flob = 'flob';
 
@@ -56,4 +56,4 @@ function test() {
   HH\dynamic_class_meth($a1, $flob)();
 }
 
-function wrap($e) { echo "Exception: {$e->getMessage()}\n"; }
+function wrap($e) :mixed{ echo "Exception: {$e->getMessage()}\n"; }

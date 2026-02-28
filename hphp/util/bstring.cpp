@@ -32,7 +32,7 @@ bool bstrcaseeq(const char* left, const char* right, size_t n) {
   // Fast case sensitive comparison, unrolled to do 8 bytes at a time.
   size_t i = 0;
 #if !FOLLY_SANITIZE
-  typedef uint64_t widecmp_t;
+  using widecmp_t = uint64_t;
   if (n >= sizeof(widecmp_t)) {
     while (*(const widecmp_t*)(&left[i]) == *(const widecmp_t*)(&right[i])) {
       i += sizeof(widecmp_t);

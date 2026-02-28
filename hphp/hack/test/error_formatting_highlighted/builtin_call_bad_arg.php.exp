@@ -1,18 +1,18 @@
-Typing[4110] Invalid argument [1]
--> Expected string [2]
+error: Typing[4110] Invalid argument [1]
+-> Expected bool [2]
 -> But got int [1]
 
-builtin_call_bad_arg.php:4:22
+builtin_call_bad_arg.php:4:25
      2 | 
      3 | function f(): void {
-[1]  4 |   xhprof_frame_begin(3);
+[1]  4 |   fb_output_compression(3);
      5 | }
 
-/tmp/mo1CEtdD5D/builtins_fb.hhi:71:29
-    69 | function xhprof_network_disable();
-    70 | <<__PHPStdLib>>
-[2] 71 | function xhprof_frame_begin(string $name);
-    72 | <<__PHPStdLib>>
-    73 | function xhprof_frame_end();
+/tmp/BThVDFvqHB/builtins_fb.hhi:82:5
+    80 |   <<__PHPStdLib>>
+    81 |   function fb_output_compression(
+[2] 82 |     bool $new_value,
+    83 |   ): \HH\FIXME\MISSING_RETURN_TYPE;
+    84 |   <<__PHPStdLib>>
 
-1 error found.
+1 error found

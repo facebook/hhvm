@@ -6,16 +6,18 @@ class C {
   public function __construct($val) {
     $this->x = $val;
   }
-  public function getX() {
+  public function getX() :mixed{
     return $this->x;
   }
-  public function incX() {
-    return $this->x++;
+  public function incX() :mixed{
+    $__lval_tmp_0 = $this->x;
+    $this->x++;
+    return $__lval_tmp_0;
   }
 }
 
 
-function foo($o){
+function foo($o):mixed{
   echo $o->getX();
   echo "\n";
   echo $o->incX();

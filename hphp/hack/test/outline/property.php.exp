@@ -11,6 +11,7 @@ C
     position: line 5, characters 5-8
     span: line 5, character 5 - line 5, character 8
     modifiers: public 
+    detail: ?string $foo
 
   bar
     kind: property
@@ -18,6 +19,7 @@ C
     position: line 6, characters 5-8
     span: line 6, character 5 - line 6, character 16
     modifiers: public 
+    detail: ?string $bar
 
   :xhp_property
     kind: property
@@ -25,6 +27,7 @@ C
     position: line 9, characters 12-23
     span: line 9, character 12 - line 9, character 23
     modifiers: public 
+    detail: string :xhp_property
 
   :xhp_enum_property
     kind: property
@@ -32,6 +35,7 @@ C
     position: line 10, characters 25-41
     span: line 10, character 25 - line 10, character 48
     modifiers: public 
+    detail: :xhp_enum_property
 
   __construct
     kind: method
@@ -39,6 +43,9 @@ C
     position: line 12, characters 19-29
     span: line 12, character 3 - line 17, character 3
     modifiers: public 
+    detail: function(
+    $not_a_property,
+    public string
     params:
       $not_a_property
         kind: param

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface I {}
 abstract class C implements I {}
@@ -32,7 +32,7 @@ function is_D(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_class1() {
+function main_is_expression_class1() :mixed{
 $d = new D();
 is_D($d);
 is_C($d);

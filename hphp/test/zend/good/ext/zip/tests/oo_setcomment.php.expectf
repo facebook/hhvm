@@ -1,3 +1,4 @@
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/zip/tests/oo_setcomment.php on line 9
 bool(true)
 bool(true)
 bool(true)

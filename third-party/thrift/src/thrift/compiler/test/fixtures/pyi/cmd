@@ -1,0 +1,2 @@
+pyi: mstch_pyi:json src/shared.thrift
+pyi_asyncio: mstch_pyi:asyncio,json src/shared.thrift

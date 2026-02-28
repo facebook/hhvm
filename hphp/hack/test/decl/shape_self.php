@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class TestClass {
   const string KEY = 'key';

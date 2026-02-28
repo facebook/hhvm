@@ -15,7 +15,7 @@
 echo "*** Testing arsort() : usage variations ***\n";
 
 // an array contains unsorted octal values
-$unsorted_oct_array = darray [
+$unsorted_oct_array = dict[
    01235 => 01235, 0321 => 0321, 0345 => 0345, 066 => 066, 0772 => 0772,
    077 => 077, -066 => -066, -0345 => -0345, 0 => 0
 ];

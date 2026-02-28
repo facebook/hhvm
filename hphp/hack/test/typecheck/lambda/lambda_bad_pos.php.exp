@@ -1,4 +1,4 @@
-File "lambda_bad_pos.php", line 26, characters 34-35:
+ERROR: File "lambda_bad_pos.php", line 26, characters 34-35:
 Invalid return type (Typing[4323])
   File "lambda_bad_pos.php", line 6, characters 21-22:
   `Tv` is a constrained type parameter
@@ -8,11 +8,9 @@ Invalid return type (Typing[4323])
   Expected `arraykey`
   File "lambda_bad_pos.php", line 25, characters 22-22:
   But got `C`
-  File "hackarray.hhi", line 45, characters 73-73:
+  File "hackarray.hhi", line 52, characters 72-72:
     via this generic `T`
-  File "hackarray.hhi", line 19, characters 119-120:
+  File "hackarray.hhi", line 22, characters 35-36:
     via this generic `Tv`
-  File "interfaces.hhi", line 110, characters 99-100:
-    via this generic `Tv`
-  File "rx/interfaces.hhi", line 35, characters 63-64:
+  File "interfaces.hhi", line 115, characters 49-50:
     via this generic `Tv`

@@ -12,7 +12,7 @@ class C implements I {
 // abstract constant declaration 'I::foo'
 const foo = 123;
 
-function main() {
+function main() :mixed{
   var_dump(foo);
   var_dump(C::foo);
   echo 'Done', "\n";
@@ -20,6 +20,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_abstract_const8() {
+function main_abstract_const8() :mixed{
 main();
 }

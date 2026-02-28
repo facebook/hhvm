@@ -30,7 +30,6 @@
 #endif
 #include <unistd.h>
 
-#include "hphp/util/kernel-version.h"
 #include "hphp/util/numa.h"
 #include "hphp/util/portability.h"
 
@@ -44,6 +43,14 @@
 
 #include <atomic>
 #include <stdexcept>
+
+#ifndef MAP_HUGE_2MB
+#define MAP_HUGE_2MB (21 << 26)
+#endif
+
+#ifndef MAP_HUGE_1GB
+#define MAP_HUGE_1GB (30 << 26)
+#endif
 
 namespace HPHP {
 
@@ -155,35 +162,35 @@ HugePageInfo read_hugepage_info(size_t pagesize, int node /* = -1 */) {
     return HugePageInfo{0, 0};
   }
 #ifdef __linux__
-  if (node >= 0) {
-    auto const readNumFrom = [] (const char* path) {
-      unsigned result = 0;
-      char buffer[32];
-      memset(buffer, 0, sizeof(buffer));
-      int fd = open(path, O_RDONLY);
-      if (fd < 0) return result;
-      bool done = false;
-      do {
-        ssize_t bytes = read(fd, buffer, 20);
-        if (bytes == 0) break;          // EOF
-        if (bytes < 0) {
-          if (errno == EINTR) continue; // try again
-          break;                        // totally failed
+  auto const readNumFrom = [](const char* path) {
+    unsigned result = 0;
+    char buffer[32];
+    memset(buffer, 0, sizeof(buffer));
+    int fd = open(path, O_RDONLY);
+    if (fd < 0) return result;
+    bool done = false;
+    do {
+      ssize_t bytes = read(fd, buffer, 20);
+      if (bytes == 0) break;          // EOF
+      if (bytes < 0) {
+        if (errno == EINTR) continue; // try again
+        break;                        // totally failed
+      }
+      for (ssize_t i = 0; i < bytes; ++i) {
+        char c = buffer[i];
+        // only read numbers, and stop on white space, etc.
+        if (c < '0' || c > '9') {
+          done = true;
+          break;
         }
-        for (ssize_t i = 0; i < bytes; ++i) {
-          char c = buffer[i];
-          // only read numbers, and stop on white space, etc.
-          if (c < '0' || c > '9') {
-            done = true;
-            break;
-          }
-          result = result * 10 + c - '0';
-        }
-      } while (!done);
-      close(fd);
-      return result;
-    };
+        result = result * 10 + c - '0';
+      }
+    } while (!done);
+    close(fd);
+    return result;
+  };
 
+  if (node >= 0) {
     char fileName[256];
     memcpy(fileName, "/sys/devices/system/node/node", 29);
     assert(strlen("/sys/devices/system/node/node") == 29);
@@ -223,6 +230,19 @@ HugePageInfo read_hugepage_info(size_t pagesize, int node /* = -1 */) {
     auto const info = read_hugepage_info(pagesize, i);
     nr_huge += info.nr_hugepages;
     free_huge += info.free_hugepages;
+  }
+  char* overcommit_path = nullptr;
+  if (pagesize == size1g) {
+    overcommit_path =
+    "/sys/kernel/mm/hugepages/hugepages-1048576kB/nr_overcommit_hugepages";
+  } else if (pagesize == size2m) {
+    overcommit_path =
+    "/sys/kernel/mm/hugepages/hugepages-2048kB/nr_overcommit_hugepages";
+  }
+  if (overcommit_path) {
+    unsigned nr_overcommit = readNumFrom(overcommit_path);
+    nr_huge += nr_overcommit;
+    free_huge += nr_overcommit;
   }
 #endif
   return HugePageInfo{nr_huge, free_huge};
@@ -265,18 +285,10 @@ bool auto_mount_hugetlbfs() {
 // mincore() can be used to check if a memory region is stilled mapped in.
 NEVER_INLINE void* mmap_2m_impl(void* addr, bool fixed) {
   void* ret = MAP_FAILED;
-  int flags = MAP_ANONYMOUS | MAP_PRIVATE | MAP_HUGETLB;
+  int flags = MAP_ANONYMOUS | MAP_PRIVATE | MAP_HUGETLB | MAP_HUGE_2MB;
   if (fixed) {
     flags |= MAP_FIXED;
     assert(addr != nullptr);
-  }
-  // MAP_HUGE_2MB can be specified after 3.8 kernel.
-  static KernelVersion version;
-  if (version.m_major > 3 || (version.m_major == 3 && version.m_minor >= 8)) {
-#ifndef MAP_HUGE_2MB
-#define MAP_HUGE_2MB (21 << 26)
-#endif
-    flags |= MAP_HUGE_2MB;
   }
   ret = mmap(addr, size2m, PROT_READ | PROT_WRITE, flags, -1, 0);
   if (ret == MAP_FAILED) {
@@ -352,20 +364,11 @@ inline void* mmap_1g_impl(void* addr, bool map_fixed) {
   }
 
   if (ret == MAP_FAILED) {
-    // MAP_HUGE_1GB is available in 3.9 and later kernels
-    KernelVersion version;
-    if (version.m_major > 3 || (version.m_major == 3 && version.m_minor >= 9)) {
-#ifndef MAP_HUGE_1GB
-#define MAP_HUGE_1GB (30 << 26)
-#endif
-      int flags = MAP_SHARED | MAP_ANONYMOUS | MAP_HUGETLB | MAP_HUGE_1GB |
-        (map_fixed ? MAP_FIXED : 0);
-      ret = mmap(addr, size1g, PROT_READ | PROT_WRITE, flags, -1, 0);
-      if (ret == MAP_FAILED) {
-        record_err_msg("mmap() with MAP_HUGE_1GB failed: ");
-        return nullptr;
-      }
-    } else {
+    int flags = MAP_SHARED | MAP_ANONYMOUS | MAP_HUGETLB | MAP_HUGE_1GB |
+      (map_fixed ? MAP_FIXED : 0);
+    ret = mmap(addr, size1g, PROT_READ | PROT_WRITE, flags, -1, 0);
+    if (ret == MAP_FAILED) {
+      record_err_msg("mmap() with MAP_HUGE_1GB failed: ");
       return nullptr;
     }
   }
@@ -390,32 +393,6 @@ inline void* mmap_1g_impl(void* addr, bool map_fixed) {
   }
 
   return ret;
-}
-#endif
-
-#ifdef HAVE_NUMA
-namespace {
-// We support at most 32 NUMA nodes (numa_node_set in 32-bit), so a single
-// unsigned long is more than enough for the mask.  This can be used in jemalloc
-// allocation hooks, so it is wise to avoid calling malloc/free here, even
-// though jemalloc might still be able to handle reentrance correctly.  Thus, we
-// bypass libnuma and do the syscalls directly here.
-struct SavedNumaPolicy {
-  bool needRestore{false};
-  int oldPolicy{0};
-  unsigned long oldMask{0};
-
-  // Save NUMA policy for the current thread.
-  void save() {
-    needRestore = !get_mempolicy(&oldPolicy, &oldMask, sizeof(oldMask),
-                                 nullptr, 0);
-  }
-  ~SavedNumaPolicy() {
-    if (needRestore) {
-      set_mempolicy(oldPolicy, &oldMask, sizeof(oldMask));
-    }
-  }
-};
 }
 #endif
 
@@ -512,7 +489,11 @@ int remap_interleaved_2m_pages(void* addr, size_t pages) {
 void* mmap_1g(void* addr, int node, bool map_fixed) {
 #ifdef __linux__
   if (s_num1GPages >= kMaxNum1GPages) return nullptr;
-  if (get_huge1g_info(node).free_hugepages <= 0) return nullptr;
+  if (get_huge1g_info(node).free_hugepages <= 0) {
+    if (numa_num_nodes > 1) return nullptr;
+    // We allow allocation from overcommit if there is only one node.
+    if (get_huge1g_info().free_hugepages <= 0) return nullptr;
+  }
   if (node >= 0 && !numa_node_allowed(node)) return nullptr;
 #ifdef HAVE_NUMA
   SavedNumaPolicy numaPolicy;

@@ -2,16 +2,16 @@
 
 // force existence of bar() frame
 <<__NEVER_INLINE>>
-function bar($name) {
+function bar($name) :mixed{
   echo "calling bar($name)\n";
 }
 
-function foo(string $name) {
+function foo(string $name) :mixed{
   HH\set_frame_metadata($name);
   bar($name);
 }
 
-function main() {
+function main() :mixed{
   foo('hello');
   foo('world');
 }

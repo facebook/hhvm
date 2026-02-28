@@ -1,7 +1,7 @@
 <?hh
 
 function start_element($xp, $elem, $attribs)
-{
+:mixed{
 	print "<$elem";
 	if (sizeof($attribs)) {
 	    foreach ($attribs as $k => $v) {
@@ -12,7 +12,7 @@ function start_element($xp, $elem, $attribs)
 }
 
 function end_element($xp, $elem)
-{
+:mixed{
 	print "</$elem>\n";
 }
 <<__EntryPoint>>

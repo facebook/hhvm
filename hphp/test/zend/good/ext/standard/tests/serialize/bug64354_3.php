@@ -1,20 +1,20 @@
 <?hh
 class A {
-    public function __sleep() {
+    public function __sleep() :mixed{
         throw new Exception("Failed");
     }
 }
 
 class B implements Serializable {
-    public function serialize() {
+    public function serialize() :mixed{
         return NULL;
     }
 
-    public function unserialize($data) {
+    public function unserialize($data) :mixed{
     }
 }
 <<__EntryPoint>> function main(): void {
-$data = varray[new A, new B];
+$data = vec[new A, new B];
 
 try {
     serialize($data);

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1577() {
+function main_1577() :mixed{
 echo <<<EOT
 \t
 \r

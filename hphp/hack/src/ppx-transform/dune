@@ -1,0 +1,8 @@
+(library
+ (name ppx_transform)
+ (wrapped false)
+ (modules ppx_transform)
+ (kind ppx_rewriter)
+ (libraries ppxlib)
+ (preprocess
+   (pps ppxlib.metaquot)))

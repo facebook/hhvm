@@ -1,0 +1,14 @@
+----HANDLER----
+string(3) "foo"
+NULL
+vec(2) {
+  string(4) "Hey!"
+  int(1)
+}
+---------------
+
+Fatal error: Uncaught exception 'RuntimeException' with message 'The callback for fb_intercept2 cannot have inout parameters' in %s/intercept-inout-callback.php:17
+Stack trace:
+#0 %s/intercept-inout-callback.php(26): foo()
+#1 (): main()
+#2 {main}

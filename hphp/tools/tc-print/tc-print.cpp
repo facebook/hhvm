@@ -17,7 +17,6 @@
 #include "hphp/tools/tc-print/tc-print.h"
 
 #include <stdio.h>
-#include <assert.h>
 #include <unistd.h>
 
 #include <cstdint>
@@ -29,9 +28,9 @@
 #include <boost/uuid/uuid_generators.hpp>
 
 #include <folly/Format.h>
-#include <folly/dynamic.h>
-#include <folly/DynamicConverter.h>
-#include <folly/json.h>
+#include <folly/json/dynamic.h>
+#include <folly/json/DynamicConverter.h>
+#include <folly/json/json.h>
 #include <folly/Singleton.h>
 
 #include "hphp/util/build-info.h"
@@ -47,7 +46,7 @@
 #include "hphp/tools/tc-print/repo-wrapper.h"
 #include "hphp/tools/tc-print/std-logger.h"
 #include "hphp/tools/tc-print/tc-print-logger.h"
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
 #include "hphp/facebook/extensions/scribe/ext_scribe.h"
 #include "hphp/tools/tc-print/facebook/db-logger.h"
 #endif
@@ -58,6 +57,7 @@ using namespace HPHP::jit;
 #define MAX_SYM_LEN       10240
 
 std::string     dumpDir("/tmp");
+std::string     configFile;
 std::string     profFileName;
 std::string     repoFileName;
 uint32_t        nTopTrans       = 0;
@@ -81,7 +81,7 @@ std::string     selectedFuncName;
 TCA             minAddr         = 0;
 TCA             maxAddr         = (TCA)-1;
 uint32_t        annotationsVerbosity = 2;
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
 bool            printToDB       = false;
 std::string     hiveTable;
 #endif
@@ -128,6 +128,8 @@ void usage() {
     "translations by density (count / size) of the selected perf event\n"
     "    -d <DIRECTORY>  : looks for dump file in <DIRECTORY> "
     "(default: /tmp)\n"
+    "    -c <CONFIG.HDF> : uses the specified config file\n"
+    "    -F <FUNC_NAME>  : prints the translations for the given function\n"
     "    -f <FUNC_ID>    : prints the translations for the given "
     "<FUNC_ID>, sorted by start offset\n"
     "    -g <FUNC_ID>    : prints the CFG among the translations for the "
@@ -156,7 +158,7 @@ void usage() {
     "Pass a comma-separated list of events to replace the default set.\n"
     "    -b              : prints bytecode stats\n"
     "    -B <OPCODE>     : used in conjunction with -e, prints the top "
-    "bytecode translationc event type. Pass '%s' to get a "
+    "bytecode translation event type. Pass '%s' to get a "
     "list of valid opcodes.\n"
     "    -i              : reports inclusive stats by including helpers "
     "(perf data must include call graph information)\n"
@@ -170,7 +172,7 @@ void usage() {
     "    -j              : outputs tc-dump in JSON format (not compatible with "
     "some other flags).\n"
     // TODO(T52857399) - investigate compatibility with other flags
-    #ifdef FACEBOOK
+    #ifdef HHVM_FACEBOOK
     "    -H <HIVE_TABLE> : used with -j, write the JSON output to Hive in the "
     "table <HIVE_TABLE>\n"
     "    -x              : log translations to database\n"
@@ -203,7 +205,7 @@ void parseOptions(int argc, char *argv[]) {
   opterr = 0;
   char* sortByArg = nullptr;
   while ((c = getopt(argc, argv,
-                     "hDd:F:f:G:g:ip:st:u:S:T:o:r:e:E:bB:v:k:a:A:n:jH:x"))
+                     "hDd:F:f:G:g:ip:st:u:S:T:o:r:e:E:bB:v:k:a:A:n:jH:xc:"))
          != -1) {
     switch (c) {
       case 'A':
@@ -223,6 +225,9 @@ void parseOptions(int argc, char *argv[]) {
         exit(0);
       case 'd':
         dumpDir = optarg;
+        break;
+      case 'c':
+        configFile = optarg;
         break;
       case 'F':
         creationOrder = true;
@@ -271,6 +276,7 @@ void parseOptions(int argc, char *argv[]) {
         break;
       case 'S':
         sortBySize = true;
+        [[fallthrough]];
       case 'T':
         if (sscanf(optarg, "%u", &nTopFuncs) != 1) {
           usage();
@@ -336,13 +342,15 @@ void parseOptions(int argc, char *argv[]) {
         if (optopt == 'd' || optopt == 'c' || optopt == 'p' || optopt == 't') {
           fprintf (stderr, "Error: -%c expects an argument\n\n", optopt);
         }
+        usage();
+        exit(1);
       case 'o':
         hostOpcodes = true;
         break;
       case 'j':
         useJSON = true;
         break;
-      #ifdef FACEBOOK
+      #ifdef HHVM_FACEBOOK
       case 'x':
         printToDB = true;
         break;
@@ -593,7 +601,7 @@ dynamic getAnnotation(const Annotations& annotations) {
 
 dynamic getTransRec(const TransRec* tRec,
                     const PerfEventsMap<TransID>& transPerfEvents) {
-  auto const guards = dynamic(tRec->guards.begin(), tRec->guards.end());
+  auto const guards = dynamic::array_range(tRec->guards);
 
   auto const sk = tRec->src;
   auto const resumeMode = [&] {
@@ -605,15 +613,23 @@ dynamic getTransRec(const TransRec* tRec,
     always_assert(false);
   }();
 
-  const dynamic src = dynamic::object("sha1", tRec->sha1.toString())
+  auto const offset = sk.prologue() || sk.funcEntry()
+    ? 0  // Unable to lookup entry offset, assume main entry.
+    : sk.offset();
+
+  dynamic src = dynamic::object("sha1", tRec->sha1.toString())
                                      ("funcId", sk.funcID().toInt())
                                      ("funcName", tRec->funcName)
                                      ("resumeMode", resumeMode)
                                      ("hasThis", sk.hasThis())
                                      ("prologue", sk.prologue())
                                      ("funcEntry", sk.funcEntry())
-                                     ("bcStartOffset", sk.printableOffset())
+                                     ("bcStartOffset", offset)
                                      ("guards", guards);
+
+  if (sk.prologue() || sk.funcEntry()) {
+    src["numEntryArgs"] = sk.numEntryArgs();
+  }
 
   const dynamic result = dynamic::object("id", tRec->id)
                                         ("src", src)
@@ -677,8 +693,15 @@ dynamic getTrans(TransID transId) {
       );
     }
 
+    auto const offset = [&]() {
+      if (!sk.prologue() && !sk.funcEntry()) return sk.offset();
+      if (sk.valid()) return sk.entryOffset();
+      // Unable to lookup entry offset, assume main entry.
+      return 0;
+    }();
+
     blocks.push_back(dynamic::object("sha1", block.sha1.toString())
-                                    ("start", sk.printableOffset())
+                                    ("start", offset)
                                     ("end", block.bcPast)
                                     ("unit", sk.valid() ?
                                              byteInfo.str() :
@@ -769,8 +792,12 @@ void printTrans(TransID transId) {
       auto sk = block.sk;
       if (!sk.valid()) {
         byteInfo << folly::format(
-          "<<< couldn't find func in {} to print bytecode range [{},{}) >>>\n",
-          block.sha1, block.sk.printableOffset(), block.bcPast);
+          "<<< couldn't find func in {} to print bytecode range [{}{},{}) >>>\n",
+          block.sha1,
+          block.sk.prologue() || block.sk.funcEntry() ? "numEntryArgs " : "",
+          block.sk.prologue() || block.sk.funcEntry()
+            ? block.sk.numEntryArgs() : block.sk.offset(),
+          block.bcPast);
         continue;
       }
 
@@ -882,7 +909,9 @@ void printCFG() {
       continue;
     }
 
-    auto const bcStart = TREC(tid)->src.printableOffset();
+    auto const bcStart = sk.prologue() || sk.funcEntry()
+      ? folly::sformat("numEntryArgs {}", TREC(tid)->src.numEntryArgs())
+      : TREC(tid)->src.printableOffset();
     uint32_t bcStop = TREC(tid)->bcPast();
     auto const shape = [&] {
       switch (TREC(tid)->kind) {
@@ -913,7 +942,7 @@ void printTopFuncs() {
     auto tRec = TREC(t);
     if (!tRec->isValid()) continue;
     auto funcId = tRec->src.funcID();
-    if (funcStrs.count(funcId)) continue;
+    if (funcStrs.contains(funcId)) continue;
     auto funcName = tRec->funcName;
     funcStrs[funcId] = folly::sformat("{:<6}: {}", funcId, funcName);
   }
@@ -1061,7 +1090,7 @@ void printTopBytecodes(const OfflineTransData* tdata,
     const TransFragment& tfrag = ranking[i].second;
     const TransRec* trec = tdata->getTransRec(tfrag.tid);
 
-    Unit* unit = g_repo->getUnit(trec->sha1);
+    Unit* unit = g_repo->getUnit(trec->sn);
     always_assert(unit);
 
     g_logger->printGeneric("\n====================\n");
@@ -1124,7 +1153,7 @@ int main(int argc, char *argv[]) {
 
   parseOptions(argc, argv);
 
-  #ifdef FACEBOOK
+  #ifdef HHVM_FACEBOOK
   Optional<DBLogger> dblogger = std::nullopt;
   if (printToDB) {
     dblogger = DBLogger{};
@@ -1137,8 +1166,15 @@ int main(int argc, char *argv[]) {
   transCode = new OfflineCode(dumpDir,
                               g_transData->getMainBase(),
                               g_transData->getColdBase(),
-                              g_transData->getFrozenBase());
-  g_repo = new RepoWrapper(g_transData->getRepoSchema(), repoFileName, !useJSON);
+                              g_transData->getFrozenBase(),
+                              g_transData->getBlockMap());
+  Hdf config = !configFile.empty()
+    ? Hdf{configFile}
+    : Hdf{};
+  g_repo = new RepoWrapper(g_transData->getRepoSchema(),
+                           repoFileName,
+                           config,
+                           !useJSON);
   g_transData->loadTCData(g_repo);
   g_annotations = std::make_unique<AnnotationCache>(dumpDir);
 
@@ -1189,7 +1225,7 @@ int main(int argc, char *argv[]) {
     auto const jsonStr = folly::toJson(tcObj);
     std::cout << jsonStr << std::endl;
 
-    #ifdef FACEBOOK
+    #ifdef HHVM_FACEBOOK
     if (!hiveTable.empty()) {
       auto const uuid = boost::uuids::random_generator()();
       auto const uuidStr = boost::uuids::to_string(uuid);

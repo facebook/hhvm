@@ -206,6 +206,18 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
     }
   }
 
+  for (auto& r : meta.trapFixups) {
+    if (auto const adjusted = rel.adjustedAddressAfter(r.first)) {
+      r.first = adjusted;
+    }
+  }
+
+  for (auto& it : meta.interceptTCAs) {
+    if (auto const adjusted = rel.adjustedAddressAfter(it.second)) {
+      it.second = adjusted;
+    }
+  }
+
   if (!meta.bcMap.empty()) {
     /*
      * Most of the time we want to adjust to a corresponding "before" address
@@ -324,6 +336,16 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
   }
   updatedCP.swap(meta.codePointers);
 
+  decltype(meta.nativeCalls) updatedNC;
+  for (auto& nc : meta.nativeCalls) {
+    if (auto adjusted = rel.adjustedAddressAfter(nc.first)) {
+      updatedNC[adjusted] = nc.second;
+    } else {
+      updatedNC[nc.first] = nc.second;
+    }
+  }
+  updatedNC.swap(meta.nativeCalls);
+
   if (asmInfo) {
     assertx(asmInfo->validate());
     rel.fixupRanges(asmInfo, AreaIndex::Main);
@@ -347,9 +369,6 @@ void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
 }
 void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups) {
   return ARCH_SWITCH_CALL(adjustCodeForRelocation, rel, fixups);
-}
-void findFixups(TCA start, TCA end, CGMeta& fixups) {
-  return ARCH_SWITCH_CALL(findFixups, start, end, fixups);
 }
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& destBlock,

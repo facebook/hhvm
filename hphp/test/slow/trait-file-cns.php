@@ -1,7 +1,7 @@
 <?hh
 
 trait T {
-  function foo() {
+  function foo() :mixed{
     var_dump(__FILE__);
     var_dump(__DIR__);
     if (substr(__FILE__, 0, strlen(__DIR__)) === __DIR__) {
@@ -13,7 +13,7 @@ trait T {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   include __FILE__.'.inc';
 
   (new C)->foo();

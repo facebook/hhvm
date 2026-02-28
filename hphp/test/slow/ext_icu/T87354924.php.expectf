@@ -1,0 +1,2 @@
+
+Catchable fatal error: Argument 1 passed to IntlTimeZone::hasSameRules() must be an instance of IntlTimeZone, stdClass given in %s on line 5

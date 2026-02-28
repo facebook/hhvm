@@ -1,5 +1,5 @@
 module List = struct
-  include Core_kernel.List
+  include Core.List
 
   let unzip4 xyzws =
     let rec aux ((xs, ys, zs, ws) as acc) = function
@@ -93,23 +93,32 @@ module List = struct
 
   let map_env_ty_err_opt
       env xs ~(f : 'a -> 'b -> ('a * 'e option) * 'c) ~combine_ty_errs =
-    let rec aux env xs counter =
+    let rec aux env ty_err_opts xs counter =
       match xs with
       | [] -> ((env, []), [])
       | [y1] ->
         let ((env, ty_err_opt), z1) = f env y1 in
-        ((env, Option.to_list ty_err_opt), [z1])
+        let ty_errs =
+          List.filter_map (fun x -> x) (ty_err_opt :: ty_err_opts)
+        in
+        ((env, ty_errs), [z1])
       | [y1; y2] ->
         let ((env, ty_err_opt1), z1) = f env y1 in
         let ((env, ty_err_opt2), z2) = f env y2 in
-        let ty_errs = List.filter_map (fun x -> x) [ty_err_opt1; ty_err_opt2] in
+        let ty_errs =
+          List.filter_map
+            (fun x -> x)
+            (ty_err_opt1 :: ty_err_opt2 :: ty_err_opts)
+        in
         ((env, ty_errs), [z1; z2])
       | [y1; y2; y3] ->
         let ((env, ty_err_opt1), z1) = f env y1 in
         let ((env, ty_err_opt2), z2) = f env y2 in
         let ((env, ty_err_opt3), z3) = f env y3 in
         let ty_errs =
-          List.filter_map (fun x -> x) [ty_err_opt1; ty_err_opt2; ty_err_opt3]
+          List.filter_map
+            (fun x -> x)
+            (ty_err_opt1 :: ty_err_opt2 :: ty_err_opt3 :: ty_err_opts)
         in
         ((env, ty_errs), [z1; z2; z3])
       | [y1; y2; y3; y4] ->
@@ -120,7 +129,11 @@ module List = struct
         let ty_errs =
           List.filter_map
             (fun x -> x)
-            [ty_err_opt1; ty_err_opt2; ty_err_opt3; ty_err_opt4]
+            (ty_err_opt1
+            :: ty_err_opt2
+            :: ty_err_opt3
+            :: ty_err_opt4
+            :: ty_err_opts)
         in
         ((env, ty_errs), [z1; z2; z3; z4])
       | [y1; y2; y3; y4; y5] ->
@@ -132,7 +145,12 @@ module List = struct
         let ty_errs =
           List.filter_map
             (fun x -> x)
-            [ty_err_opt1; ty_err_opt2; ty_err_opt3; ty_err_opt4; ty_err_opt5]
+            (ty_err_opt1
+            :: ty_err_opt2
+            :: ty_err_opt3
+            :: ty_err_opt4
+            :: ty_err_opt5
+            :: ty_err_opts)
         in
         ((env, ty_errs), [z1; z2; z3; z4; z5])
       | y1 :: y2 :: y3 :: y4 :: y5 :: ys ->
@@ -141,21 +159,30 @@ module List = struct
         let ((env, ty_err_opt3), z3) = f env y3 in
         let ((env, ty_err_opt4), z4) = f env y4 in
         let ((env, ty_err_opt5), z5) = f env y5 in
-        let err =
-          List.filter_map
-            (fun x -> x)
-            [ty_err_opt1; ty_err_opt2; ty_err_opt3; ty_err_opt4; ty_err_opt5]
+        let ty_err_opts =
+          ty_err_opt1
+          :: ty_err_opt2
+          :: ty_err_opt3
+          :: ty_err_opt4
+          :: ty_err_opt5
+          :: ty_err_opts
         in
         let (env, zs) =
           if counter > 1000 then
-            let (env, zs) = rev_map_env_ty_err_opt env ys ~f ~err in
+            let (env, zs) =
+              rev_map_env_ty_err_opt
+                env
+                ys
+                ~f
+                ~err:(List.filter_map (fun x -> x) ty_err_opts)
+            in
             (env, rev zs)
           else
-            aux env ys (counter + 1)
+            aux env ty_err_opts ys (counter + 1)
         in
         (env, z1 :: z2 :: z3 :: z4 :: z5 :: zs)
     in
-    let ((env, ty_errs), xs) = aux env xs 0 in
+    let ((env, ty_errs), xs) = aux env [] xs 0 in
     ((env, combine_ty_errs ty_errs), xs)
 
   let map_env_err_res env xs ~f =
@@ -259,6 +286,14 @@ module List = struct
       | (env, true) -> (env, true)
       | (env, false) -> exists_env env xs ~f)
 
+  let rec for_all_env env xs ~f =
+    match xs with
+    | [] -> (env, true)
+    | x :: xs ->
+      (match f env x with
+      | (env, false) -> (env, false)
+      | (env, true) -> for_all_env env xs ~f)
+
   let rec replicate ~num x =
     match num with
     | 0 -> []
@@ -270,7 +305,7 @@ module List = struct
 end
 
 module Result = struct
-  include Core_kernel.Result
+  include Core.Result
 
   let fold t ~ok ~error =
     match t with

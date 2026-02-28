@@ -1,0 +1,40 @@
+ERROR: File "tc_in_enum_class.php", line 103, characters 10-24:
+Typing error (Typing[4110])
+  File "tc_in_enum_class.php", line 47, characters 23-25:
+  Expected `int`
+  File "tc_in_enum_class.php", line 91, characters 29-44:
+  But got `<expr#9>::T::TSource`
+  File "tc_in_enum_class.php", line 91, characters 38-44:
+  This type argument to `IAntGetter` only allows supertypes (it is contravariant)
+ERROR: File "tc_in_enum_class.php", line 103, characters 10-24:
+Typing error (Typing[4110])
+  File "tc_in_enum_class.php", line 47, characters 23-25:
+  Expected `int`
+  File "tc_in_enum_class.php", line 91, characters 29-44:
+  But got `IAntParent::T::TSource`
+  File "tc_in_enum_class.php", line 91, characters 38-44:
+  This type argument to `IAntGetter` only allows supertypes (it is contravariant)
+ERROR: File "tc_in_enum_class.php", line 103, characters 10-24:
+Typing error (Typing[4110])
+  File "tc_in_enum_class.php", line 47, characters 23-25:
+  Expected `int`
+  File "tc_in_enum_class.php", line 91, characters 29-44:
+  But got `ParentAccessors::TSource`
+  File "tc_in_enum_class.php", line 91, characters 38-44:
+  This type argument to `IAntGetter` only allows supertypes (it is contravariant)
+ERROR: File "tc_in_enum_class.php", line 103, characters 10-24:
+Typing error (Typing[4110])
+  File "tc_in_enum_class.php", line 47, characters 23-25:
+  Expected `int`
+  File "tc_in_enum_class.php", line 91, characters 29-44:
+  But got `mixed`
+  File "tc_in_enum_class.php", line 91, characters 38-44:
+  This type argument to `IAntGetter` only allows supertypes (it is contravariant)
+ERROR: File "tc_in_enum_class.php", line 103, characters 20-23:
+Invalid argument (Typing[4110])
+  File "tc_in_enum_class.php", line 103, characters 20-23:
+  Expected a class with a constant `Bar`
+  File "tc_in_enum_class.php", line 90, characters 24-30:
+  But got `<expr#9>::T`
+  File "tc_in_enum_class.php", line 103, characters 10-13:
+    where `<expr#9>` is a reference to this expression

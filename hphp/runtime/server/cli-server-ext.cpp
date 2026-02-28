@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
-TRACE_SET_MOD(clisrv);
+TRACE_SET_MOD(clisrv)
 
 #include "hphp/runtime/server/cli-server-impl.h"
 

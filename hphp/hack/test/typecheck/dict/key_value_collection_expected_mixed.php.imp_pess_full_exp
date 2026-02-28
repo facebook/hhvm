@@ -1,0 +1,18 @@
+File "key_value_collection_expected_mixed.php", line 10, characters 5-60:
+Invalid index type for this dict (Typing[4110])
+  File "key_value_collection_expected_mixed.php", line 11, characters 7-8:
+  Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
+  File "key_value_collection_expected_mixed.php", line 8, characters 15-19:
+  But got `float`
+File "key_value_collection_expected_mixed.php", line 10, characters 5-60:
+Invalid index type for this dict (Typing[4110])
+  File "key_value_collection_expected_mixed.php", line 13, characters 7-8:
+  Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
+  File "key_value_collection_expected_mixed.php", line 8, characters 34-34:
+  But got `C`
+File "key_value_collection_expected_mixed.php", line 12, characters 7-8:
+Invalid index type for this dict (Typing[4110])
+  File "key_value_collection_expected_mixed.php", line 12, characters 7-8:
+  Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
+  File "key_value_collection_expected_mixed.php", line 8, characters 25-28:
+  But got `?int`

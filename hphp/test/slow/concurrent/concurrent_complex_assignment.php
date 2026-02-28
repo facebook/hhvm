@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 async function foo1(): Awaitable<void> {
   $obj = new stdClass();
@@ -20,6 +20,6 @@ async function gen_id<T>(T $x): Awaitable<T> {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   \HH\Asio\join(foo1());
 }

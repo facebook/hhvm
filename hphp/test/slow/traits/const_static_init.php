@@ -28,7 +28,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(C::TWENTY_FOUR1);  // trait -> trait
   var_dump(C::FORTY_EIGHT1);  // trait -> interface
   var_dump(C::THIRTY_TWO1);   // interface -> interface

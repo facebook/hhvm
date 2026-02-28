@@ -1,1 +1,6 @@
-No errors
+WARN: File "option3.php", line 4, characters 16-37:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `(int, int)` which is a subtype of `?(int, arraykey)`. (Warn[12011])
+WARN: File "option3.php", line 5, characters 16-46:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `(int, int)` which is a subtype of `?(int, arraykey)`. (Warn[12011])
+WARN: File "option3.php", line 9, characters 3-24:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `(int, int)` which is a subtype of `?(int, arraykey)`. (Warn[12011])

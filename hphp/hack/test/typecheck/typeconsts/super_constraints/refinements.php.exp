@@ -1,0 +1,18 @@
+ERROR: File "refinements.php", line 20, characters 8-9:
+Invalid argument (Typing[4110])
+  File "refinements.php", line 17, characters 15-44:
+  Expected a class with `{type Ta super One}`
+  File "refinements.php", line 19, characters 15-17:
+  But got `<expr#2> as Foo`
+  File "refinements.php", line 20, characters 8-9:
+    where `<expr#2>` is a reference to this expression
+  File "refinements.php", line 17, characters 15-44:
+  Expected a class with `{type Ta super One}`
+  File "refinements.php", line 19, characters 15-17:
+  But got `Foo`
+  File "refinements.php", line 17, characters 40-42:
+  This `super` refinement constraint is violated
+  File "refinements.php", line 8, characters 39-41:
+  Expected `Two`
+  File "refinements.php", line 17, characters 40-42:
+  But got `One`

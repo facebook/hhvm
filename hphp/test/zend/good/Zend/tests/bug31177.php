@@ -1,15 +1,15 @@
 <?hh
 class DbGow {
 
-    public function query() {
+    public function query() :mixed{
         throw new Exception;
     }
 
-    public function select() {
+    public function select() :mixed{
         return new DbGowRecordSet($this->query());
     }
 
-    public function select2() {
+    public function select2() :mixed{
         new DbGowRecordSet($this->query());
     }
 

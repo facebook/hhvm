@@ -1,8 +1,8 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
 }
-function test() {
+function test() :mixed{
   foo()->bar();
 }
 <<__EntryPoint>> function main(): void { echo "Done.\n"; }

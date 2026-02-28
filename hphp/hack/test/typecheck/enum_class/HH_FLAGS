@@ -1,1 +1,1 @@
---enable-enum-supertyping
+--config enable_experimental_tc_features=sound_enum_class_this_type

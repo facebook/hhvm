@@ -1,0 +1,16 @@
+WARN: File "multi_class_bad3.php", line 13, characters 12-20:
+Interface `IB` in sealed allowlist for `I`, but does not extend `I` (Warn[12035])
+ERROR: File "multi_class_bad3.php", line 4, characters 11-20:
+Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag (Typing[4475])
+  File "multi_class_bad3.php", line 4, characters 24-25:
+  This is the type `IC`, which includes **instances of the class C**
+  File "multi_class_bad3.php", line 7, characters 11-12:
+    via the sealed interface `IC`
+  File "multi_class_bad3.php", line 4, characters 29-29:
+  It overlaps with `I`, which includes **instances of the class B**
+  File "multi_class_bad3.php", line 14, characters 11-11:
+    via the sealed interface `I`
+  File "multi_class_bad3.php", line 17, characters 11-12:
+    via the sealed interface `IB`
+  File "multi_class_bad3.php", line 4, characters 11-20:
+  Because **instances of the class C** contains **instances of the class B**, `IC` and `I` cannot be in the same case type

@@ -1,0 +1,28 @@
+ERROR: File "trait_implements_use_bounds_not_subtypes.php", line 31, characters 7-9:
+Some members in class `Tr3` are incompatible with those declared in type `Tr1` (Typing[4340])
+  File "trait_implements_use_bounds_not_subtypes.php", line 14, characters 23-24:
+  The constraint on this type constant is inconsistent with its parent
+  File "trait_implements_use_bounds_not_subtypes.php", line 18, characters 29-39:
+  Expected `UpperBound2`
+  File "trait_implements_use_bounds_not_subtypes.php", line 14, characters 29-39:
+  But got `UpperBound1`
+ERROR: File "trait_implements_use_bounds_not_subtypes.php", line 33, characters 28-39:
+Invalid type hint (Typing[4090])
+  File "trait_implements_use_bounds_not_subtypes.php", line 33, characters 38-39:
+  No type constant `T3` in `UpperBound1`
+  File "trait_implements_use_bounds_not_subtypes.php", line 3, characters 11-21:
+  Declaration of `UpperBound1` is here
+ERROR: File "trait_implements_use_bounds_not_subtypes.php", line 38, characters 7-9:
+Some members in class `Tr4` are incompatible with those declared in type `Tr2` (Typing[4340])
+  File "trait_implements_use_bounds_not_subtypes.php", line 22, characters 23-24:
+  The constraint on this type constant is inconsistent with its parent
+  File "trait_implements_use_bounds_not_subtypes.php", line 26, characters 29-39:
+  Expected `UpperBound1`
+  File "trait_implements_use_bounds_not_subtypes.php", line 22, characters 29-39:
+  But got `UpperBound2`
+ERROR: File "trait_implements_use_bounds_not_subtypes.php", line 39, characters 28-39:
+Invalid type hint (Typing[4090])
+  File "trait_implements_use_bounds_not_subtypes.php", line 39, characters 38-39:
+  No type constant `T2` in `UpperBound2`
+  File "trait_implements_use_bounds_not_subtypes.php", line 7, characters 11-21:
+  Declaration of `UpperBound2` is here

@@ -9,12 +9,13 @@
 type env = {
   mode: FileInfo.mode;
   droot: Typing_deps.Dep.dependent Typing_deps.Dep.variant option;
+  droot_member: Typing_pessimisation_deps.dependent_member option;
+      (** The child/member of [droot] currently under consideration.
+        * Used for fine-grained dependency tracking. *)
   ctx: Provider_context.t;
 }
 
 val tcopt : env -> TypecheckerOptions.t
-
-val add_extends_dependency : env -> string -> unit
 
 type class_cache = Decl_store.class_entries SMap.t
 
@@ -37,11 +38,6 @@ val get_class_and_add_dep :
   env ->
   string ->
   Decl_defs.decl_class_type option
-
-val get_construct :
-  env ->
-  Decl_defs.decl_class_type ->
-  Decl_defs.element option * Typing_defs.consistent_kind
 
 val make_decl_pos : env -> Pos.t -> Pos_or_decl.t
 

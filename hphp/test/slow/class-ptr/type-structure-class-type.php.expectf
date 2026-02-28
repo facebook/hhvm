@@ -1,0 +1,41 @@
+Notice: Implicit string to Class conversion for classname C for type_structure() in %s/class-ptr/type-structure-class-type.php on line 19
+
+Notice: Implicit string to Class conversion for classname C for type_structure() in %s/class-ptr/type-structure-class-type.php on line 20
+
+Notice: Implicit string to Class conversion for classname C for type_structure() in %s/class-ptr/type-structure-class-type.php on line 21
+dict(2) {
+  ["kind"]=>
+  int(33)
+  ["alias"]=>
+  string(1) "T"
+}
+dict(3) {
+  ["kind"]=>
+  int(4)
+  ["opaque"]=>
+  bool(true)
+  ["alias"]=>
+  string(1) "U"
+}
+dict(2) {
+  ["kind"]=>
+  int(34)
+  ["alias"]=>
+  string(1) "V"
+}
+dict(1) {
+  ["kind"]=>
+  int(33)
+}
+dict(3) {
+  ["kind"]=>
+  int(4)
+  ["opaque"]=>
+  bool(true)
+  ["alias"]=>
+  string(12) "HH\classname"
+}
+dict(1) {
+  ["kind"]=>
+  int(34)
+}

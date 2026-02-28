@@ -43,6 +43,7 @@ class body_visitor =
      * is the function / method body) and the inner if-else / loop blocks *)
     method on_body = this#on_block
   end
+  [@alert "-deprecated"]
 
 module type BodyVisitorModule = sig
   (* each on_* method in the visitor should call its counterpart in the parent
@@ -99,10 +100,10 @@ class virtual ['a] abstract_file_visitor :
       List.fold_left ast ~init:context ~f:(fun context def ->
           match def with
           | Fun f ->
-            let f = Errors.ignore_ (fun () -> Naming.fun_def ctx f) in
+            let f = Diagnostics.ignore_ (fun () -> Naming.fun_def ctx f) in
             this#on_fun_def context env f
           | Class c ->
-            let c = Errors.ignore_ (fun () -> Naming.class_ ctx c) in
+            let c = Diagnostics.ignore_ (fun () -> Naming.class_ ctx c) in
             this#on_class context env c
           | _ -> context)
 
@@ -131,9 +132,7 @@ class body_visitor_adder body_visitor =
   object
     inherit [unit] abstract_file_visitor
 
-    method! on_fun_def () _env fd =
-      let fun_ = fd.fd_fun in
-      add_visitor fun_.f_name body_visitor
+    method! on_fun_def () _env fd = add_visitor fd.fd_name body_visitor
 
     method! on_method () _env _class meth = add_visitor meth.m_name body_visitor
   end
@@ -144,7 +143,7 @@ let body_visitor_invoker =
 
     method! on_fun_def () env fd =
       let fun_ = fd.fd_fun in
-      let module Visitor = (val Hashtbl.find body_visitors (fst fun_.f_name)) in
+      let module Visitor = (val Hashtbl.find body_visitors (fst fd.fd_name)) in
       let nb = fun_.f_body in
       let env = { env with cfun = Some fd } in
       (new Visitor.visitor env)#on_body () nb.fb_ast

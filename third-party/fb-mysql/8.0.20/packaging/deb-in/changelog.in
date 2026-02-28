@@ -1,0 +1,135 @@
+mysql-@DEB_PRODUCTNAME@ (@DEB_SERVERVERSION@@DEB_PLATFORMRELEASE@) @DEB_CODENAME@; urgency=low
+
+  * New Release. For release notes, please refer to
+    https://dev.mysql.com/doc/relnotes/mysql/@MYSQL_BASE_VERSION@/en/news-@MAJOR_VERSION@-@MINOR_VERSION@-@PATCH_VERSION@.html
+
+ -- MySQL Release Engineering <mysql-build@oss.oracle.com>  @DEB_CHANGELOG_TIMESTAMP@
+
+mysql-@DEB_PRODUCTNAME@ (5.7.7-rc-3ubuntu15.04) vivid; urgency=low
+
+  * new upstream release
+  * forked packaging source from utopic to vivid
+  * updated Standards-Version to 3.9.6 in d/control
+  * apparmor profile updated to allow read on all files under /etc/mysql
+  * added new conf files under d/extra/*.conf
+  * mysql_plugin moved from client to server pkg
+  * innochecksum moved from client to server pkg
+  * server pkg now replaces client pkg
+  * added systemd service profile and script
+  * new /etc/mysql/my.cnf management scheme added for Ubuntu 15.04
+    as discussed in Dec 2014 for native packaging source
+  * added dh "--with systemd" for enabling systemd
+  * mysql-common now conflicts with
+    mysql-server-5.6, mysql-server-core-5.6
+    mysql-client-5.6, mysql-client-core-5.6
+  * mysql-*-server no more provides
+    mysql-server-5.6, mysql-server-core-5.6
+  * mysql-*-client no more provides
+    mysql-client-5.6, mysql-client-core-5.6
+
+ -- Akhil Mohan <akhil.mohan@oracle.com>  Mon, 15 Jun 2015 16:48:05 +0530
+
+mysql-@DEB_PRODUCTNAME@ (5.7.7-rc-2ubuntu15.04) vivid; urgency=low
+
+  * new upstream release
+  * forked packaging source from utopic to vivid
+
+ -- Akhil Mohan <akhil.mohan@oracle.com>  Wed, 15 Apr 2015 20:27:33 +0530
+
+mysql-@DEB_PRODUCTNAME@ (5.7.7-rc-1ubuntu14.10) utopic; urgency=low
+
+  * new upstream release
+  * updated d/extra/my.cnf to remove option sql_mode
+  * non-essential tools, files and plugins have been moved to
+    mysql-@DEB_PRODUCTNAME@-test pkg.
+    mysql-@DEB_PRODUCTNAME@-test now replaces mysql-@DEB_PRODUCTNAME@-{server,client}
+    (Closes: #20546298)
+    (Closes: #20636865)
+  * mysql-@DEB_PRODUCTNAME@-test now depends on perl, python, libmysqlclient-dev
+    mysql-@DEB_PRODUCTNAME@-server now depends on psmisc
+    (Closes: #20561621)
+  * mysql-*-server.{mysql.init,postinst,templates} updated to deprecate
+    my_i_db and use msyqld --initialize-insecure to create system tables.
+    Now if user does not provide password or it is not possible to
+    receive password from user then UNIX socket authentication will be
+    enabled to secure the deployment by default.
+    mysql-@DEB_PRODUCTNAME@-server now depends on mysql-@DEB_PRODUCTNAME@-client
+    (Closes: #20613327)
+
+ -- Akhil Mohan <akhil.mohan@oracle.com>  Fri, 27 Feb 2015 10:01:55 +0530
+
+mysql-@DEB_PRODUCTNAME@ (5.7.6-m16-1ubuntu14.10) utopic; urgency=low
+
+  * new upstream release
+  * init script will now run my_i_db if data dir is not present or empty
+  * forked packaging source from trusty and rebranded for utopic
+  * updated d/m-c-source.install to pack *.xz packaging source archive
+  * added more system resources to app armor profile
+  * dh_apparmor to now run before dh_installinit in d/rules
+  * libmysqlclient-dev now replaces mysql-client-{,core-}5.6
+  * mysql-@DEB_PRODUCTNAME@-server now recommends mysql-client
+  * mysql-@DEB_PRODUCTNAME@-server now depends on apparmor
+  * d/compat incremented to 9 from 8
+  * d/control updated to build depend on debhelper 9
+  * added d/*.lintian-overrides and d/source/lintian-overrides
+  * d/rules updated to reflect correct file permissions
+  * bumped up libmysqlclient version 18 => 20
+  * added new plugins to source/include-binaries
+    replication_observers_example
+    rewriter
+    rewrite_example
+  * new binary mysql_ssl_rsa_setup added to d/mysql-*-server.install
+  * provisioned handling of data files directory /var/lib/mysql-files
+  * cmake option to specify data dir in d/rules is now removed
+    as default path in cmake layout for DEB is now /var/lib/mysql
+
+ -- Akhil Mohan <akhil.mohan@oracle.com>  Fri, 23 Jan 2015 19:59:33 +0530
+
+mysql-@DEB_PRODUCTNAME@ (5.7.5-m15-1ubuntu14.04) trusty; urgency=low
+
+  * new upstream release
+  * added fakeroot as build-dep in d/control
+  * added d/*.dirs for bench, dev and test pkg
+  * updated d/rules to make compilation verbose
+  * removed default CFLAGS, CXXFLAGS in d/rules
+  * removed extra whitespaces in d/*.postrm
+  * added CMake option to download boost if not available
+  * removed extra file modification steps in d/rules
+  * removed hotcopy, mysql_zap from d/mysql-@DEB_PRODUCTNAME@-server
+  * removed mysql_waitpid from d/mysql-@DEB_PRODUCTNAME@-client
+  * added patch for testsuite search paths under d/patches
+  * modified cmake option for testsuite in d/rules
+  * removed patch d/fix-mysql_install_db.patch
+  * enabled one patch in d/patches/series
+  * removed extra permissions check in d/rules when fixed in source
+  * modified d/mysql-*-server.postinst to stop removing /usr/my.cnf
+  * modified d/*-test.* for updated location of testsuite
+  * updated d/{mysql-*-server.install,rules} to include debug plugins
+  * updated d/rules to remove storage engine cmake options
+  * modified data dir permission in d/*server.{pre,post}inst
+  * updated d/source/include-binaries to add debug plugins
+  * updated d/rules to rename debug plugins
+  * updated d/source/include-binaries to add mysql_no_login.so
+  * updated d/rules to increment -j8 as make option
+  * updated CMake option WITH_EXTRA_CHARSETS from complex to all
+  * updated d/*-server.postinst to call m_i_db with --datadir --insecure
+    --mysqld-file
+  * updated d/*-server.postinst to remove manual creation mysql db dir
+  * removed test db prompt in d/*-server.{postinst,templates,config}
+  * updated app armor profile to allow access to socket lock file
+
+ -- Akhil Mohan <akhil.mohan@oracle.com>  Fri, 08 Aug 2014 11:27:30 +0530
+
+mysql-@DEB_PRODUCTNAME@ (5.7.4-m14-2ubuntu14.04) trusty; urgency=low
+
+  * modified path for source tar in source pkg
+  * obscured actual filenames in d/source/include-binaries
+  * modified d/rules to handle obscured filenames
+
+ -- Akhil Mohan <akhil.mohan@oracle.com>  Mon, 05 May 2014 15:45:10 +0530
+
+mysql-@DEB_PRODUCTNAME@ (5.7.4-m14-1ubuntu14.04) trusty; urgency=low
+
+  * new upstream release
+
+ -- Akhil Mohan <akhil.mohan@oracle.com>  Fri, 28 Feb 2014 18:06:30 +0530

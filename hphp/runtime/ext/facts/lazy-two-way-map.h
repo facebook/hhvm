@@ -20,29 +20,34 @@
 #include <memory>
 #include <vector>
 
-#include <folly/hash/Hash.h>
-
-#include "hphp/runtime/ext/facts/path-versions.h"
-#include "hphp/runtime/ext/facts/symbol-types.h"
+#include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/util/hash-map.h"
-#include "hphp/util/hash-set.h"
+#include "hphp/util/optional.h"
 
 namespace HPHP {
 namespace Facts {
 
-namespace detail {
+template <typename Key>
+StringPtr getVersionKey(const Key& key);
 
-inline const Path& getPathFromKey(const Path& path) {
-  return path;
-}
-inline const Path& getPathFromKey(const MethodDecl& methodDecl) {
-  return methodDecl.m_type.m_path;
-}
-template <typename Key> const Path& getPathFromKey(const Key& key) {
-  return key.m_path;
-}
+struct LazyTwoWayMapVersionProvider {
+  virtual ~LazyTwoWayMapVersionProvider() {}
 
-} // namespace detail
+  virtual void bumpVersion(const StringPtr& key) noexcept {
+    auto& version = ++m_versionMap[key];
+    always_assert(version != 0);
+  }
+
+  virtual std::uint64_t getVersion(const StringPtr& key) const noexcept {
+    auto const versionIt = m_versionMap.find(key);
+    if (versionIt == m_versionMap.end()) {
+      return 0;
+    }
+    return versionIt->second;
+  }
+
+  hphp_hash_map<StringPtr, std::uint64_t> m_versionMap;
+};
 
 /**
  * A map representing a many-to-many relationship between keys and values.
@@ -50,13 +55,10 @@ template <typename Key> const Path& getPathFromKey(const Key& key) {
  * This data structure overlays a source DB which contains stale data.
  */
 template <
-    // Must have std::hash and operator== defined. Must either be a Path, or
-    // have a field which contains a Path.
-    typename Key,
-    // Must also have std::hash and operator== defined
-    typename Value>
+    typename Key, // Must have std::hash and operator== defined.
+    typename Value // Must also have std::hash and operator== defined
+    >
 struct LazyTwoWayMap {
-
   using Keys = std::vector<Key>;
   using Values = std::vector<Value>;
 
@@ -65,9 +67,8 @@ struct LazyTwoWayMap {
     hphp_hash_map<Key, uint64_t> m_keys;
   };
 
-  explicit LazyTwoWayMap(std::shared_ptr<PathVersions> versions)
-      : m_versions{std::move(versions)} {
-  }
+  explicit LazyTwoWayMap(std::shared_ptr<LazyTwoWayMapVersionProvider> versions)
+      : m_versions{std::move(versions)} {}
 
   /**
    * The `const` methods which return an `Optional` will return `std::nullopt`
@@ -87,9 +88,14 @@ struct LazyTwoWayMap {
     }
     return valuesIt->second;
   }
-  Values getValuesForKey(Key key, const Values& valuesFromSource) noexcept {
-    // Data from the DB is always considered to be more stale than data in the
-    // map, and gets a version number of 0.
+
+  // Gets the set of values associated for a key.  If the values have not been
+  // previously populated, they will be initialized with the provided values
+  // from the source.  The source is always considered to be more stale than
+  // values that are already in the map.
+  Values getValuesForKey(
+      const Key& key,
+      const Values& valuesFromSource) noexcept {
     if (getVersion(key) == 0) {
       setValuesForKey(key, valuesFromSource);
     } else {
@@ -101,7 +107,7 @@ struct LazyTwoWayMap {
     return valuesFromSource;
   }
 
-  Optional<Keys> getKeysForValue(Value value) const noexcept {
+  Optional<Keys> getKeysForValue(const Value& value) const noexcept {
     auto const versionedKeysIt = m_valueToKeys.find(value);
     if (versionedKeysIt == m_valueToKeys.end()) {
       return {};
@@ -122,24 +128,36 @@ struct LazyTwoWayMap {
     }
     return keys;
   }
-  Keys getKeysForValue(Value value, const Keys& keysFromSource) noexcept {
-    VersionedKeys& versionedKeys = m_valueToKeys[value];
+
+  Keys getKeysForValue(
+      const Value& value,
+      const Keys& keysFromSource) noexcept {
+    VersionedKeys* versionedKeys;
+    auto const it = m_valueToKeys.find(value);
+    if (it != m_valueToKeys.end()) {
+      versionedKeys = &it->second;
+    } else if (!keysFromSource.empty()) {
+      versionedKeys = &m_valueToKeys[value];
+    } else {
+      // Do not create an empty placeholder for a missing symbol
+      return {};
+    }
 
     // Data in the DB is always considered to be more stale than data in the
     // map, and gets a version number of 0.
     for (auto const& key : keysFromSource) {
-      versionedKeys.m_keys.insert({key, 0});
+      versionedKeys->m_keys.insert({key, 0});
     }
 
     // Mark our list of keys as filled from the DB
-    versionedKeys.m_complete = true;
+    versionedKeys->m_complete = true;
 
     // Remove keys from older versions of files past
-    removeStaleKeys(versionedKeys);
+    removeStaleKeys(*versionedKeys);
 
     Keys keys;
-    keys.reserve(versionedKeys.m_keys.size());
-    for (auto const& [key, _] : versionedKeys.m_keys) {
+    keys.reserve(versionedKeys->m_keys.size());
+    for (auto const& [key, _] : versionedKeys->m_keys) {
       keys.push_back(key);
     }
     return keys;
@@ -152,7 +170,6 @@ struct LazyTwoWayMap {
    * in that path.
    */
   void setValuesForKey(const Key& key, Values newValues) noexcept {
-
     // Erase old mappings.
     auto& existingValues = m_keyToValues[key];
     for (const Value& value : existingValues) {
@@ -176,9 +193,9 @@ struct LazyTwoWayMap {
     existingValues = std::move(newValues);
   }
 
-private:
+ private:
   uint64_t getVersion(const Key& key) const noexcept {
-    return m_versions->getVersion(detail::getPathFromKey(key));
+    return m_versions->getVersion(getVersionKey<Key>(key));
   }
 
   void removeStaleKeys(VersionedKeys& versionedKeys) const noexcept {
@@ -195,7 +212,7 @@ private:
 
   hphp_hash_map<Key, Values> m_keyToValues;
   hphp_hash_map<Value, VersionedKeys> m_valueToKeys;
-  std::shared_ptr<PathVersions> m_versions;
+  std::shared_ptr<LazyTwoWayMapVersionProvider> m_versions;
 };
 
 } // namespace Facts

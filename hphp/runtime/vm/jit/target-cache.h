@@ -23,7 +23,8 @@ struct ActRec;
 struct ArrayData;
 struct Class;
 struct Func;
-struct NamedEntity;
+struct NamedType;
+struct PackageInfo;
 struct StringData;
 struct TypedValue;
 }
@@ -72,7 +73,8 @@ struct ClassCache {
   };
 
   static rds::Handle alloc();
-  static const Class* lookup(rds::Handle, StringData* lookup);
+  static const Class* lookup(rds::Handle, StringData* lookup, LdClsFallback);
+  static void loadFail(const StringData* name, const LdClsFallback fallback);
 
   Pair m_pairs[kNumLines];
 };
@@ -88,10 +90,10 @@ struct TSClassCache {
 
   struct Pair {
     ArrayData*  m_key;
-    LowPtr<const Class> m_value;
+    PackedPtr<const Class> m_value;
   };
 
-  static LowPtr<const Class> write(rds::Handle, ArrayData* lookup);
+  static const Class* write(rds::Handle, ArrayData* lookup);
 
   Pair m_pairs[kNumLines];
 };
@@ -100,26 +102,28 @@ struct TSClassCache {
 //////////////////////////////////////////////////////////////////////
 
 struct StaticMethodCache {
-  LowPtr<const Func> m_func;
-  LowPtr<const Class> m_cls;
+  PackedPtr<const Func> m_func;
+  PackedPtr<const Class> m_cls;
 
   static rds::Handle alloc(const StringData* cls,
                       const StringData* meth,
-                      const char* ctxName);
+                      const StringData* ctxName);
   static const Func* lookup(rds::Handle chand,
-                            const NamedEntity* ne, const StringData* cls,
-                            const StringData* meth, const Class* ctx);
+                            const NamedType* ne, const StringData* cls,
+                            const StringData* meth, const Class* ctx,
+                            const Func* callerFunc);
 };
 
 struct StaticMethodFCache {
-  LowPtr<const Func> m_func;
+  PackedPtr<const Func> m_func;
   int m_static;
 
   static rds::Handle alloc(const StringData* cls,
                       const StringData* meth,
-                      const char* ctxName);
+                      const StringData* ctxName);
   static const Func* lookup(rds::Handle chand, const Class* cls,
-                            const StringData* meth, const Class* ctx);
+                            const StringData* meth, const Class* ctx,
+                            const Func* callerFunc);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -139,11 +143,13 @@ struct Entry {
 
 const Func* handleDynamicCall(const Class* cls,
                               const StringData* name,
-                              const Class* ctx);
+                              const Class* ctx,
+                              const Func* callerFunc);
 
 const Func* handleStaticCall(const Class* cls,
                              const StringData* name,
                              const Class* ctx,
+                             const Func* callerFunc,
                              rds::Handle mce_handle,
                              uintptr_t mcePrime);
 
@@ -152,4 +158,3 @@ const Func* handleStaticCall(const Class* cls,
 //////////////////////////////////////////////////////////////////////
 
 }
-

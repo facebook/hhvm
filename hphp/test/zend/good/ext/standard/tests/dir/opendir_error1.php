@@ -16,7 +16,7 @@ try { var_dump( opendir() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->
 
 //Test opendir with one more than the expected number of arguments
 echo "\n-- Testing opendir() function with more than expected no. of arguments --\n";
-$path = __SystemLib\hphp_test_tmppath('opendir_error');
+$path = sys_get_temp_dir().'/'.'opendir_error';
 mkdir($path);
 $context = stream_context_create();
 

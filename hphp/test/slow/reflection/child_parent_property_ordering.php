@@ -9,12 +9,12 @@ class A {
 
 class B extends A {
   public $foo = null;
-  protected $bar = varray[];
+  protected $bar = vec[];
 }
 
 
 <<__EntryPoint>>
-function main_child_parent_property_ordering() {
+function main_child_parent_property_ordering() :mixed{
 $class = new ReflectionClass("B");
 var_dump($class->getProperties());
 }

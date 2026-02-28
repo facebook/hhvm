@@ -18,7 +18,6 @@
 
 #include <folly/portability/GTest.h>
 
-#include <unordered_map>
 #include <vector>
 
 namespace HPHP {

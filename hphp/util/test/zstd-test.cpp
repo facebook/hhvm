@@ -97,7 +97,7 @@ TEST(ZstdTest, Chunks) {
 }
 
 TEST(ZstdTest, ContextReuseSingleShot) {
-  auto codec = folly::io::getCodec(folly::io::CodecType::ZSTD);
+  auto codec = folly::compression::getCodec(folly::compression::CodecType::ZSTD);
 
   size_t len1;
   size_t len2;
@@ -138,7 +138,7 @@ TEST(ZstdTest, ContextReuseSingleShot) {
 }
 
 TEST(ZstdTest, ContextReuseStreamed) {
-  auto codec = folly::io::getCodec(folly::io::CodecType::ZSTD);
+  auto codec = folly::compression::getCodec(folly::compression::CodecType::ZSTD);
 
   size_t full_len1;
   size_t full_len2;
@@ -197,12 +197,52 @@ TEST(ZstdTest, ContextReuseStreamed) {
 }
 
 TEST(ZstdTest, Checksumming) {
-  auto codec = folly::io::getCodec(folly::io::CodecType::ZSTD);
+  auto codec = folly::compression::getCodec(folly::compression::CodecType::ZSTD);
   size_t len1;
   size_t len2;
 
   {
     ZstdCompressor compressor(1);
+    auto len = kTestInput.size();
+    auto out = compressor.compress(kTestInput.data(), len, true);
+
+    EXPECT_NE(out.data(), nullptr);
+    EXPECT_NE(len, 0);
+
+    auto compressed = std::string{out.data(), len};
+    auto uncompressed = codec->uncompress(compressed);
+
+    EXPECT_EQ(uncompressed, kTestInput);
+
+    len1 = len;
+  }
+
+  {
+    ZstdCompressor compressor(1, true);
+    auto len = kTestInput.size();
+    auto out = compressor.compress(kTestInput.data(), len, true);
+
+    EXPECT_NE(out.data(), nullptr);
+    EXPECT_NE(len, 0);
+
+    auto compressed = std::string{out.data(), len};
+    auto uncompressed = codec->uncompress(compressed);
+
+    EXPECT_EQ(uncompressed, kTestInput);
+
+    len2 = len;
+  }
+
+  EXPECT_LT(len1, len2);
+}
+
+TEST(ZstdTest, Superblock) {
+  auto codec = folly::compression::getCodec(folly::compression::CodecType::ZSTD);
+  size_t len1;
+  size_t len2;
+
+  {
+    ZstdCompressor compressor(1, false, 0, kTestInput.size() / 4);
     auto len = kTestInput.size();
     auto out = compressor.compress(kTestInput.data(), len, true);
 

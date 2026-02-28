@@ -7,12 +7,13 @@
  *
  *)
 
-type t = int [@@deriving eq]
+type t = int [@@deriving eq, hash]
 
 val dummy : t
 
 val is_dummy : t -> bool
 
+(** Character offset (from the beginning of file) of the beginning of line of this position. *)
 val beg_of_line : t -> int
 
 val line : t -> int

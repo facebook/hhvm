@@ -25,7 +25,7 @@ class test1 {
 class test2 {
   // no data members
 
-  public function display() {
+  public function display() :mixed{
     echo " Class Name : test2\n";
   }
 }
@@ -41,12 +41,12 @@ abstract class abstract_class {
   public $member1;
   private $member2;
 
-  abstract protected function display();
+  abstract protected function display():mixed;
 }
 
 // implement abstract 'abstract_class' class
 class concrete_class extends abstract_class {
-  protected function display() {
+  protected function display() :mixed{
     echo " class name is : concrete_class \n ";
   }
 }
@@ -57,7 +57,7 @@ function main(): void {
 
   echo "--- Testing sizeof() with objects which doesn't implement Countable interface ---\n";
 
-  $objects = varray[
+  $objects = vec[
   /* 1  */  new test(),
             new test1(),
             new test2(),

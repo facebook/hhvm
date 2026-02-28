@@ -10,7 +10,7 @@
     "kind": "primitive",
     "name": "int"
   },
-  "expected_type": "float",
+  "expected_type": "~float",
   "full_expected_type": {
     "src_pos": {
       "filename": "/return_expr_only.php",

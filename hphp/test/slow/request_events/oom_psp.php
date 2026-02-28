@@ -1,6 +1,6 @@
 <?hh
 function foo(): void {
-  $x = varray[];
+  $x = vec[];
   while (true) {
     $x[] = str_repeat("asd", 1000);
   }

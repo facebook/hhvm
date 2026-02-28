@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 // Reason for shape type should point to the last operation that modified it
 

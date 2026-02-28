@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_2133() {
+function main_2133() :mixed{
 $c = new UConverter('utf-8', 'latin1');
 var_dump(UConverter::LATIN_1 === $c->getSourceType());
 var_dump(UConverter::UTF8    === $c->getDestinationType());

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_mb_misc() {
+function main_mb_misc() :mixed{
 var_dump(mb_http_input());
 var_dump(mb_http_output());
 var_dump(mb_language());

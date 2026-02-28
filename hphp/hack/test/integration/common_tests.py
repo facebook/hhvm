@@ -12,10 +12,10 @@ import subprocess
 import sys
 import tempfile
 import time
-from typing import ClassVar, List, Mapping, Optional, Tuple, NamedTuple
+from typing import ClassVar, Dict, List, Mapping, NamedTuple, Optional, Tuple
 
-from hh_paths import hackfmt, hh_client, hh_server
-from test_case import TestCase, TestDriver
+from hphp.hack.test.integration.hh_paths import hackfmt, hh_client, hh_server
+from hphp.hack.test.integration.test_case import TestCase, TestDriver
 
 
 class AllLogs(NamedTuple):
@@ -24,22 +24,24 @@ class AllLogs(NamedTuple):
     client_log: str
     current_server_log: str
     current_monitor_log: str
+    lsp_log: str
+    ide_log: str
 
 
 class CommonTestDriver(TestDriver):
-
     # This needs to be overridden in child classes. The files in this
     # directory will be used to set up the initial environment for each
     # test.
     template_repo: ClassVar[str]
     repo_dir: ClassVar[str]
-    test_env: ClassVar[Mapping[str, str]]
+    test_env: ClassVar[Dict[str, str]]
     base_tmp_dir: ClassVar[str]
     hh_tmp_dir: ClassVar[str]
     bin_dir: ClassVar[str]
 
     @classmethod
     def setUpClass(cls, template_repo: str) -> None:
+        print("running CommonTestDriver.setUpClass")
         cls.template_repo = template_repo
         cls.maxDiff = 2000
         cls.base_tmp_dir = tempfile.mkdtemp()
@@ -59,7 +61,6 @@ class CommonTestDriver(TestDriver):
             **{
                 "HH_TEST_MODE": "1",
                 "HH_TMPDIR": cls.hh_tmp_dir,
-                "HACKFMT_TEST_PATH": hackfmt,
                 "PATH": (
                     "%s:%s:/bin:/usr/bin:/usr/local/bin" % (hh_server_dir, cls.bin_dir)
                 ),
@@ -71,13 +72,12 @@ class CommonTestDriver(TestDriver):
 
     @classmethod
     def tearDownClass(cls) -> None:
+        print("running CommonTestDriver.tearDownClass")
         shutil.rmtree(cls.base_tmp_dir)
         shutil.rmtree(cls.bin_dir)
         shutil.rmtree(cls.hh_tmp_dir)
 
-    def write_load_config(
-        self, use_serverless_ide: bool = False, use_saved_state: bool = False
-    ) -> None:
+    def write_load_config(self, use_saved_state: bool = False) -> None:
         """
         Writes out a script that will print the list of changed files,
         and adds the path to that script to .hhconfig
@@ -97,6 +97,7 @@ class CommonTestDriver(TestDriver):
         changed_files: Optional[List[str]] = None,
         saved_state_path: Optional[str] = None,
         args: Optional[List[str]] = None,
+        wait_for_server: bool = True,
     ) -> None:
         """Start an hh_server. changed_files is ignored here (as it
         has no meaning) and is only exposed in this API for the derived
@@ -108,7 +109,8 @@ class CommonTestDriver(TestDriver):
             args = []
         cmd = [hh_server, "--daemon", "--max-procs", "2", self.repo_dir] + args
         self.proc_call(cmd)
-        self.wait_until_server_ready()
+        if wait_for_server:
+            self.wait_until_server_ready()
 
     def stop_hh_server(self, retries: int = 3) -> None:
         (_, _, exit_code) = self.proc_call([hh_client, "stop", self.repo_dir])
@@ -120,6 +122,7 @@ class CommonTestDriver(TestDriver):
             self.assertEqual(exit_code, 0, msg="Stopping hh_server failed")
 
     def setUp(self) -> None:
+        print("running CommonTestDriver.setUp")
         shutil.copytree(self.template_repo, self.repo_dir)
 
     def tearDownWithRetries(self, retries: int = 3) -> None:
@@ -127,6 +130,7 @@ class CommonTestDriver(TestDriver):
         shutil.rmtree(self.repo_dir)
 
     def tearDown(self) -> None:
+        print("running CommonTestDriver.tearDown")
         self.tearDownWithRetries()
 
     @classmethod
@@ -195,6 +199,12 @@ class CommonTestDriver(TestDriver):
         client_file = cls.proc_call(
             [hh_client, "--client-logname", repo_dir], log=False
         )[0].strip()
+        lsp_file = cls.proc_call([hh_client, "--lsp-logname", repo_dir], log=False)[
+            0
+        ].strip()
+        ide_file = cls.proc_call([hh_client, "--ide-logname", repo_dir], log=False)[
+            0
+        ].strip()
         # Server log
         try:
             with open(server_file) as f:
@@ -250,6 +260,18 @@ class CommonTestDriver(TestDriver):
                 client_log = "%s\n%s\n" % (old_client_log, client_log)
         except Exception:
             pass
+        # Lsp log
+        try:
+            with open(lsp_file) as f:
+                lsp_log = f.read()
+        except Exception as err:
+            lsp_log = lsp_file + " - " + format(err)
+        # Ide log
+        try:
+            with open(ide_file) as f:
+                ide_log = f.read()
+        except Exception as err:
+            ide_log = ide_file + " - " + format(err)
         # All together...
         return AllLogs(
             all_server_logs=all_server_logs,
@@ -257,6 +279,8 @@ class CommonTestDriver(TestDriver):
             client_log=client_log,
             current_server_log=current_server_log,
             current_monitor_log=current_monitor_log,
+            lsp_log=lsp_log,
+            ide_log=ide_log,
         )
 
     def run_check(
@@ -264,28 +288,19 @@ class CommonTestDriver(TestDriver):
     ) -> Tuple[str, str, int]:
         options = [] if options is None else options
         root = self.repo_dir + os.path.sep
+        args = [
+            hh_client,
+            "check",
+            "--retries",
+            "240",
+            "--error-format",
+            "raw",
+            self.repo_dir,
+        ] + list(map(lambda x: x.format(root=root), options))
         return self.proc_call(
-            [
-                hh_client,
-                "check",
-                "--retries",
-                "240",
-                "--error-format",
-                "raw",
-                self.repo_dir,
-            ]
-            + list(map(lambda x: x.format(root=root), options)),
+            args,
             stdin=stdin,
         )
-
-    # Check to see if you can run hackfmt
-    def run_hackfmt_check(self) -> bool:
-        try:
-            (stdout_data, stderr_data, retcode) = self.proc_call([hackfmt, "-help"])
-            return retcode == 0
-        # If the file isn't found you will get this
-        except FileNotFoundError:
-            return False
 
     def run_hackfmt(
         self,
@@ -302,7 +317,7 @@ class CommonTestDriver(TestDriver):
         return True
 
     # Runs `hh_client check` asserting the stdout is equal the expected.
-    # Returns stderr.
+    # Returns stdout and stderr.
     # Note: assert_laoded_mini_state is ignored here and only used
     # in some derived classes.
     def check_cmd(
@@ -311,7 +326,7 @@ class CommonTestDriver(TestDriver):
         stdin: Optional[str] = None,
         options: Optional[List[str]] = None,
         assert_loaded_saved_state: bool = False,
-    ) -> str:
+    ) -> Tuple[str, str]:
         (output, err, retcode) = self.run_check(stdin, options)
         root = self.repo_dir + os.path.sep
         if retcode != 0:
@@ -319,10 +334,22 @@ class CommonTestDriver(TestDriver):
         if expected_output is not None:
             # pyre-fixme[8]: Attribute has type `int`; used as `None`.
             self.maxDiff = None
-            self.assertCountEqual(
-                map(lambda x: x.format(root=root), expected_output), output.splitlines()
-            )
-        return err
+            expected_lines = [x.format(root=root) for x in expected_output]
+            try:
+                # assertCountEqual basically sorts the two lists and determines
+                # if the sorted outputs are equal. We use this because we want
+                # to be insensitive to non-determinism in error message order.
+                self.assertCountEqual(expected_lines, output.splitlines())
+            except Exception:
+                # the error messages produced by assertCountEqual can be quite hard
+                # to read. Let's just write everything out plainly.
+                nl = "\n"
+                print(
+                    f"EXPECTED OUTPUT\n{nl.join(expected_lines)}\nACTUAL OUTPUT:\n{output}\n",
+                    file=sys.stderr,
+                )
+                raise
+        return output, err
 
     def check_cmd_and_json_cmd(
         self,
@@ -404,7 +431,6 @@ class CommonTestDriver(TestDriver):
 # The most basic of tests.
 # Exercises server responsiveness, and updating errors after changing files
 class BarebonesTests(TestCase[CommonTestDriver]):
-
     # hh should should work with 0 retries.
     def test_responsiveness(self) -> None:
         self.test_driver.start_hh_server()
@@ -429,7 +455,7 @@ class BarebonesTests(TestCase[CommonTestDriver]):
 
         self.test_driver.check_cmd(
             [
-                "{root}foo_4.php:4:24,26: Invalid return type (Typing[4110])",
+                "ERROR: {root}foo_4.php:4:24,26: Invalid return type (Typing[4110])",
                 "  {root}foo_4.php:3:27,29: Expected `int`",
                 "  {root}foo_4.php:4:24,26: But got `string`",
             ]
@@ -452,10 +478,10 @@ class BarebonesTests(TestCase[CommonTestDriver]):
 
         self.test_driver.check_cmd(
             [
-                "{root}foo_4.php:3:19,21: Name already bound: `FOO` (Naming[2012])",
-                "  {root}foo_3.php:7:15,17: Previous definition `F~~oo~~` differs only by case ",
-                "{root}foo_4.php:4:22,22: Name already bound: `H` (Naming[2012])",
-                "  {root}foo_3.php:3:18,18: Previous definition `~~h~~` differs only by case ",
+                "ERROR: {root}foo_4.php:3:19,21: Name already bound: `FOO` (Naming[2012])",
+                "  {root}foo_3.php:7:15,17: Previous definition is here",
+                "ERROR: {root}foo_4.php:4:22,22: Name already bound: `H` (Naming[2012])",
+                "  {root}foo_3.php:3:18,18: Previous definition is here",
             ]
         )
 
@@ -481,7 +507,7 @@ class BarebonesTests(TestCase[CommonTestDriver]):
         self.test_driver.start_hh_server(changed_files=["class_1.php"])
         self.test_driver.check_cmd(
             [
-                "{root}class_3.php:5:12,19: Invalid return type (Typing[4110])",
+                "ERROR: {root}class_3.php:5:12,19: Invalid return type (Typing[4110])",
                 "  {root}class_3.php:4:28,30: Expected `int`",
                 "  {root}class_1.php:4:51,54: But got `bool`",
             ]
@@ -498,13 +524,52 @@ class CommonTests(BarebonesTests):
         """
         self.test_driver.start_hh_server()
 
-        stderr = self.test_driver.check_cmd([], options=["--json"])
-        last_line = stderr.splitlines()[-1]
-        output = json.loads(last_line)
+        stdout, _ = self.test_driver.check_cmd(None, options=["--json"])
+        output = json.loads(stdout)
 
         self.assertEqual(output["errors"], [])
         self.assertEqual(output["passed"], True)
         self.assertIn("version", output)
+
+    def test_jsonl_no_errors(self) -> None:
+        self.test_driver.start_hh_server()
+        stdout, _ = self.test_driver.check_cmd(None, options=["--jsonl"])
+        lines = [
+            json.loads(line) for line in stdout.strip().split("\n") if line.strip()
+        ]
+        self.assertTrue(len(lines) >= 1)
+        summary = lines[-1]
+        self.assertEqual(summary["kind"], "summary")
+        self.assertTrue(summary["passed"])
+        self.assertIn("version", summary)
+        self.assertEqual(summary["error_count"], 0)
+        self.assertEqual(summary["warning_count"], 0)
+
+    def test_jsonl_with_errors(self) -> None:
+        with open(os.path.join(self.test_driver.repo_dir, "jsonl_err.php"), "w") as f:
+            f.write("<?hh\nfunction jsonl_err(): int { return 'oops'; }\n")
+
+        self.test_driver.start_hh_server(changed_files=["jsonl_err.php"])
+        stdout, _ = self.test_driver.check_cmd(None, options=["--jsonl"])
+        lines = [
+            json.loads(line) for line in stdout.strip().split("\n") if line.strip()
+        ]
+        diagnostics = [line for line in lines if line["kind"] == "diagnostic"]
+        summaries = [line for line in lines if line["kind"] == "summary"]
+        self.assertTrue(len(diagnostics) > 0)
+        self.assertEqual(len(summaries), 1)
+        summary = summaries[0]
+        self.assertFalse(summary["passed"])
+        self.assertGreater(summary["error_count"], 0)
+        for d in diagnostics:
+            self.assertEqual(d["kind"], "diagnostic")
+            self.assertIn(d["severity"], ["error", "warning"])
+            self.assertIn("message", d)
+
+    def test_jsonl_and_json_mutually_exclusive(self) -> None:
+        self.test_driver.start_hh_server()
+        (_, _, retcode) = self.test_driver.run_check(options=["--json", "--jsonl"])
+        self.assertNotEqual(retcode, 0)
 
     def test_modify_file(self) -> None:
         """
@@ -524,7 +589,7 @@ class CommonTests(BarebonesTests):
 
         self.test_driver.check_cmd(
             [
-                "{root}foo_2.php:4:24,26: Invalid return type (Typing[4110])",
+                "ERROR: {root}foo_2.php:4:24,26: Invalid return type (Typing[4110])",
                 "  {root}foo_2.php:3:27,29: Expected `int`",
                 "  {root}foo_2.php:4:24,26: But got `string`",
             ]
@@ -541,8 +606,8 @@ class CommonTests(BarebonesTests):
 
         self.test_driver.check_cmd(
             [
-                "{root}foo_1.php:4:20,20: Unbound name (typing): `g` (Typing[4107])",
-                "{root}foo_1.php:4:20,20: Unbound name: `g` (a global function) (Naming[2049])",
+                "ERROR: {root}foo_1.php:4:20,20: Unbound name (typing): `g` (Typing[4107])",
+                "ERROR: {root}foo_1.php:4:20,20: Unbound name: `g` (a global function) (Naming[2049])",
             ]
         )
 
@@ -557,8 +622,8 @@ class CommonTests(BarebonesTests):
         os.remove(os.path.join(self.test_driver.repo_dir, "foo_2.php"))
         self.test_driver.check_cmd(
             [
-                "{root}foo_1.php:4:20,20: Unbound name: `g` (a global function) (Naming[2049])",
-                "{root}foo_1.php:4:20,20: Unbound name (typing): `g` (Typing[4107])",
+                "ERROR: {root}foo_1.php:4:20,20: Unbound name: `g` (a global function) (Naming[2049])",
+                "ERROR: {root}foo_1.php:4:20,20: Unbound name (typing): `g` (Typing[4107])",
             ]
         )
 
@@ -573,7 +638,7 @@ class CommonTests(BarebonesTests):
 
         self.test_driver.check_cmd(
             [
-                "{root}foo_2_dup.php:3:18,18: Name already bound: `g` (Naming[2012])",
+                "ERROR: {root}foo_2_dup.php:3:18,18: Name already bound: `g` (Naming[2012])",
                 "  {root}foo_2.php:3:18,18: Previous definition is here",
             ]
         )
@@ -608,7 +673,7 @@ class CommonTests(BarebonesTests):
 
         self.test_driver.check_cmd(
             [
-                "{root}foo_1.php:4:24,26: Invalid return type (Typing[4110])",
+                "ERROR: {root}foo_1.php:4:24,26: Invalid return type (Typing[4110])",
                 "  {root}foo_1.php:3:27,32: Expected `string`",
                 "  {root}bar_2.php:3:23,25: But got `int`",
             ]
@@ -692,7 +757,7 @@ class CommonTests(BarebonesTests):
         self.test_driver.check_cmd_and_json_cmd(
             [],
             [
-                '[{{"full_name":"FbidMapField::FBID","pos":{{"filename":"{root}enum_1.php","line":4,"char_start":3,"char_end":6}},"kind":"const"}}]'
+                '[{{"full_name":"FbidMapField::FBID","pos":{{"filename":"{root}enum_1.php","line":4,"char_start":3,"char_end":6}},"kind":"class constant"}}]'
             ],
             options=["--identify", "FbidMapField::FBID"],
         )
@@ -703,112 +768,6 @@ class CommonTests(BarebonesTests):
                 '[{{"full_name":"f","pos":{{"filename":"{root}foo_1.php","line":3,"char_start":18,"char_end":18}},"kind":"function"}}]'
             ],
             options=["--identify", "f"],
-        )
-
-    def test_ide_find_refs(self) -> None:
-        self.test_driver.start_hh_server()
-
-        self.test_driver.check_cmd_and_json_cmd(
-            [
-                "Foo",
-                'File "{root}foo_3.php", line 10, characters 17-19:',
-                "1 total results",
-            ],
-            [
-                '[{{"name":"Foo","filename":"{root}foo_3.php",'
-                '"line":10,"char_start":17,"char_end":19}}]'
-            ],
-            options=["--ide-find-refs", "1:20"],
-            stdin="<?hh function test(Foo $foo) { new Foo(); }",
-        )
-
-    def test_ide_highlight_refs(self) -> None:
-        self.test_driver.start_hh_server()
-
-        self.test_driver.check_cmd_and_json_cmd(
-            ["line 1, characters 20-22", "line 1, characters 36-38", "2 total results"],
-            [
-                '[{{"line":1,"char_start":20,"char_end":22}},'
-                '{{"line":1,"char_start":36,"char_end":38}}]'
-            ],
-            options=["--ide-highlight-refs", "1:20"],
-            stdin="<?hh function test(Foo $foo) { new Foo(); }",
-        )
-
-    def test_search(self) -> None:
-        """
-        Test hh_client --search
-        """
-
-        self.test_driver.start_hh_server()
-
-        self.test_driver.check_cmd_and_json_cmd(
-            [
-                'File "{root}foo_3.php", line 9, characters 18-40: some_long_function_name, function'
-            ],
-            [
-                '[{{"name":"some_long_function_name","filename":"{root}foo_3.php","desc":"function","line":9,"char_start":18,"char_end":40,"scope":""}}]'
-            ],
-            options=["--search", "some_lo"],
-        )
-
-    def test_search_case_insensitive1(self) -> None:
-        """
-        Test that global search is not case sensitive
-        """
-        self.maxDiff = None
-        self.test_driver.start_hh_server()
-
-        self.test_driver.check_cmd(
-            [
-                'File "{root}foo_4.php", line 4, characters 10-24: '
-                "aaaaaaaaaaa_fun, function",
-                'File "{root}foo_4.php", line 3, characters 7-23: '
-                "Aaaaaaaaaaa_class, class",
-            ],
-            options=["--search", "Aaaaaaaaaaa"],
-        )
-
-    def test_search_case_insensitive2(self) -> None:
-        """
-        Test that global search is not case sensitive
-        """
-        self.test_driver.start_hh_server()
-
-        self.test_driver.check_cmd(
-            [
-                'File "{root}foo_4.php", line 4, characters 10-24: '
-                "aaaaaaaaaaa_fun, function",
-                'File "{root}foo_4.php", line 3, characters 7-23: '
-                "Aaaaaaaaaaa_class, class",
-            ],
-            options=["--search", "aaaaaaaaaaa"],
-        )
-
-    def test_auto_complete(self) -> None:
-        """
-        Test hh_client --auto-complete
-        """
-
-        self.test_driver.start_hh_server()
-
-        self.test_driver.check_cmd_and_json_cmd(
-            ["some_long_function_name (function(): void)"],
-            [
-                # test the --json output because the non-json one doesn't contain
-                # the filename, and we are especially interested in testing file
-                # paths
-                # the doubled curly braces are because this string gets passed
-                # through format()
-                '[{{"name":"some_long_function_name",'
-                '"type":"(function(): void)",'
-                '"pos":{{"filename":"{root}foo_3.php",'
-                '"line":9,"char_start":18,"char_end":40}},'
-                '"func_details":{{"min_arity":0,"return_type":"void","params":[]}},'
-                '"expected_ty":false}}]'
-            ],
-            options=["--auto-complete"],
-            stdin="<?hh function f() { some_AUTO332\n",
         )
 
     def test_list_files(self) -> None:
@@ -839,6 +798,22 @@ class CommonTests(BarebonesTests):
             options=["--type-at-pos", "{root}foo_3.php:11:14"],
         )
 
+    def test_type_at_pos_poly_function(self) -> None:
+        """
+        Test hh_client --type-at-pos
+        """
+        self.test_driver.start_hh_server()
+
+        self.test_driver.check_cmd_and_json_cmd(
+            ["(function<T as Bigly super Smol>(T): T)"],
+            [
+                '{{"type":"(function<T as Bigly super Smol>(T): T)",'
+                + '"pos":{{"filename":"","line":0,"char_start":0,"char_end":0}},'
+                + '"full_type":{{"src_pos":{{"filename":"{root}foo_poly_function.php","line":7,"char_start":3,"char_end":59}},"kind":"function","tparams":[{{"name":"T","constraints":[{{"kind":"as","type":{{"src_pos":{{"filename":"{root}foo_poly_function.php","line":7,"char_start":36,"char_end":40}},"kind":"class","name":"\\\\Bigly","args":[]}}}},{{"kind":"super","type":{{"src_pos":{{"filename":"{root}foo_poly_function.php","line":7,"char_start":48,"char_end":51}},"kind":"class","name":"\\\\Smol","args":[]}}}}],"user_attributes":[{{"name":"__NoAutoBound"}}]}}],"params":[{{"callConvention":"normal","type":{{"src_pos":{{"filename":"{root}foo_poly_function.php","line":7,"char_start":54,"char_end":54}},"kind":"generic","name":"T"}}}}],"result":{{"src_pos":{{"filename":"{root}foo_poly_function.php","line":7,"char_start":58,"char_end":58}},"kind":"generic","name":"T"}}}}}}'
+            ],
+            options=["--type-at-pos", "{root}foo_poly_function.php:9:4"],
+        )
+
     def test_type_at_pos_batch(self) -> None:
         """
         Test hh_client --type-at-pos-batch
@@ -857,6 +832,95 @@ class CommonTests(BarebonesTests):
                 + '"name":"string"}}}}'
             ],
             options=["--type-at-pos-batch", "{root}foo_3.php:11:14"],
+        )
+
+    def test_type_at_pos_batch_readonly(self) -> None:
+        """
+        Test hh_client --type-at-pos-batch
+        """
+        self.test_driver.start_hh_server()
+
+        self.test_driver.check_cmd(
+            [
+                '{{"position":'
+                + '{{"file":"{root}foo_readonly.php",'
+                + '"line":4,'
+                + '"character":4}}'
+                + ',"type":{{'
+                + '"src_pos":{{"filename":"{root}foo_readonly.php","line":3,"char_start":23,"char_end":81}},'
+                + '"kind":"function",'
+                + '"readonly_this":true,'
+                + '"tparams":[],'
+                + '"params":[{{"callConvention":"normal","readonly":true,"type":{{'
+                + '"src_pos":{{"filename":"{root}foo_readonly.php","line":3,"char_start":51,"char_end":53}},"kind":"primitive","name":"int"}}}}],'
+                + '"readonly_return":true,'
+                + '"result":{{"src_pos":{{"filename":"{root}foo_readonly.php","line":3,"char_start":78,"char_end":80}},"kind":"primitive","name":"int"}},'
+                + '"capability":{{"src_pos":{{"filename":"{root}foo_readonly.php","line":3,"char_start":56,"char_end":66}},"kind":"class","name":"\\\\HH\\\\Capabilities\\\\WriteProperty","args":[]}}}}'
+                + "}}"
+            ],
+            options=["--type-at-pos-batch", "{root}foo_readonly.php:4:4"],
+        )
+
+    def test_type_at_pos_batch_optional(self) -> None:
+        """
+        Test hh_client --type-at-pos-batch
+        """
+        self.test_driver.start_hh_server()
+
+        self.test_driver.check_cmd(
+            [
+                '{{"position":'
+                + '{{"file":"{root}foo_optional.php",'
+                + '"line":4,'
+                + '"character":4}}'
+                + ',"type":{{'
+                + '"src_pos":{{"filename":"{root}foo_optional.php","line":3,"char_start":23,"char_end":57}},'
+                + '"kind":"function",'
+                + '"tparams":[],'
+                + '"params":[{{"callConvention":"normal","type":{{'
+                + '"src_pos":{{"filename":"{root}foo_optional.php","line":3,"char_start":33,"char_end":35}},"kind":"primitive","name":"int"}}}},'
+                + '{{"callConvention":"normal",'
+                + '"optional":true,'
+                + '"type":{{"src_pos":{{"filename":"{root}foo_optional.php","line":3,"char_start":47,"char_end":50}},"kind":"primitive","name":"bool"}}}}],'
+                + '"result":{{"src_pos":{{"filename":"{root}foo_optional.php","line":3,"char_start":54,"char_end":56}},"kind":"primitive","name":"int"}}}}'
+                + "}}"
+            ],
+            options=["--type-at-pos-batch", "{root}foo_optional.php:4:4"],
+        )
+
+    def test_type_at_pos_batch_splices(self) -> None:
+        """
+        Test hh_client --type-at-pos-batch for ET splices
+        """
+        self.test_driver.start_hh_server()
+
+        self.test_driver.check_cmd(
+            [
+                '{{"position":'
+                + '{{"file":"{root}et_splices.php",'
+                + '"line":7,'
+                + '"character":46}}'
+                + ',"type":{{'
+                + '"src_pos":{{"filename":"{root}et_splices.php","line":84,"char_start":39,"char_end":48}},'
+                + '"kind":"class",'
+                + '"name":"\\\\ExampleInt",'
+                + '"args":[]}}'
+                + "}}",
+                '{{"position":'
+                + '{{"file":"{root}et_splices.php",'
+                + '"line":7,'
+                + '"character":40}}'
+                + ',"type":{{'
+                + '"src_pos":{{"filename":"{root}et_splices.php","line":7,"char_start":40,"char_end":40}},'
+                + '"kind":"primitive",'
+                + '"name":"int"}}'
+                + "}}",
+            ],
+            options=[
+                "--type-at-pos-batch",
+                "{root}et_splices.php:7:40",
+                "{root}et_splices.php:7:46",
+            ],
         )
 
     def test_ide_get_definition(self) -> None:
@@ -913,6 +977,7 @@ class CommonTests(BarebonesTests):
                 '  position: File "", line 1, characters 15-17:',
                 '  span: File "", line 1, character 6 - line 1, character 22:',
                 "  modifiers: ",
+                "  detail: function()",
                 "  params:",
                 "",
             ],
@@ -965,49 +1030,6 @@ class CommonTests(BarebonesTests):
             "ClassToBeIdentified::methodToBeIdentified () }",
         )
 
-    def test_abnormal_typechecker_exit_message(self) -> None:
-        """
-        Tests that the monitor outputs a useful message when its typechecker
-        exits abnormally.
-        """
-
-        self.test_driver.start_hh_server()
-        logs = self.test_driver.get_all_logs(self.test_driver.repo_dir)
-        monitor_logs = logs.current_monitor_log
-        m = re.search(
-            "Just started typechecker server with pid: ([0-9]+)", monitor_logs
-        )
-        self.assertIsNotNone(m)
-        assert m is not None, "for mypy"
-        pid = m.group(1)
-        self.assertIsNotNone(pid)
-        os.kill(int(pid), signal.SIGTERM)
-        # We've sent a kill signal to the server, but it may take some time for
-        # the server to actually die. For instance, it may be attempting to
-        # print a backtrace in the signal handler, which takes less than a
-        # second in @mode/opt-clang, but can take minutes in @mode/dev. If we
-        # attempt to connect before the server process actually dies, the
-        # monitor will happily hand us off to the dying server, which will
-        # abruptly close our connection when its process exits. What we want
-        # instead is to connect to the monitor after its waitpid on the server
-        # completes, so that it can report to us the signal which killed the
-        # server. We can't waitpid here because the server isn't a child of this
-        # process, so we poll the monitor logs until the monitor records the
-        # TYPECHECKER_EXIT event.
-        attempts = 0
-        while attempts < 5 * 60:
-            logs = self.test_driver.get_all_logs(self.test_driver.repo_dir)
-            monitor_logs = logs.current_monitor_log
-            m = re.search("TYPECHECKER_EXIT", monitor_logs)
-            if m is not None:
-                break
-            attempts += 1
-            time.sleep(1)
-        client_error = self.test_driver.check_cmd(
-            expected_output=None, assert_loaded_saved_state=False
-        )
-        self.assertIn("Last server killed by signal", client_error)
-
     def test_duplicate_parent(self) -> None:
         """
         This checks that we handle duplicate parent classes, i.e. when Bar
@@ -1038,9 +1060,9 @@ class CommonTests(BarebonesTests):
         self.test_driver.start_hh_server(changed_files=["foo_4.php", "foo_5.php"])
         self.test_driver.check_cmd(
             [
-                "{root}foo_4.php:3:19,21: Name already bound: `Foo` (Naming[2012])",
+                "ERROR: {root}foo_4.php:3:19,21: Name already bound: `Foo` (Naming[2012])",
                 "  {root}foo_3.php:7:15,17: Previous definition is here",
-                "{root}foo_5.php:6:28,29: No class variable `$y` in `Bar` (Typing[4090])",
+                "ERROR: {root}foo_5.php:6:28,29: No class variable `$y` in `Bar` (Typing[4090])",
                 "  {root}foo_5.php:3:19,21: Declaration of `Bar` is here",
             ]
         )
@@ -1048,7 +1070,7 @@ class CommonTests(BarebonesTests):
         os.remove(os.path.join(self.test_driver.repo_dir, "foo_4.php"))
         self.test_driver.check_cmd(
             [
-                "{root}foo_5.php:6:28,29: No class variable `$y` in `Bar` (Typing[4090])",
+                "ERROR: {root}foo_5.php:6:28,29: No class variable `$y` in `Bar` (Typing[4090])",
                 "  {root}foo_5.php:3:19,21: Declaration of `Bar` is here",
             ]
         )
@@ -1069,12 +1091,12 @@ class CommonTests(BarebonesTests):
         with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
             f.write(
                 """<?hh
-
+            <<__SupportDynamicType>>
             class Bar extends Foo {
                 public function f(): void {}
                 public function g(): void {}
             }
-
+            <<__SupportDynamicType>>
             class Baz extends Bar {
                 public function g(): void {
                     $this->f();
@@ -1087,23 +1109,22 @@ class CommonTests(BarebonesTests):
         self.test_driver.check_cmd_and_json_cmd(
             ["Rewrote 1 file."],
             [
-                '[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":74,"char_end":75,"line":4,"col_start":33,'
-                '"col_end":33,"patch_type":"replace","replacement":"wat"}},'
-                '{{"char_start":254,"char_end":255,"line":10,"col_start":28,'
-                '"col_end":28,"patch_type":"replace","replacement":"wat"}}]}}]'
+                '[{{"filename":"{root}foo_4.php","patches":['
+                '{{"char_start":110,"char_end":111,"line":4,"col_start":33,"col_end":33,"patch_type":"replace","replacement":"wat"}},'
+                '{{"char_start":326,"char_end":327,"line":10,"col_start":28,"col_end":28,"patch_type":"replace","replacement":"wat"}},'
+                '{{"char_start":78,"char_end":78,"line":4,"col_start":1,"col_end":1,"patch_type":"insert","replacement":"\\n                <<__Deprecated(\\"Use `wat` instead\\")>>\\n                public function f(): void {{\\n                  $this->wat();\\n                }}\\n"}}'
+                "]}}]"
             ],
             options=["--refactor", "Method", "Bar::f", "Bar::wat"],
         )
         self.test_driver.check_cmd_and_json_cmd(
             ["Rewrote 1 file."],
             [
-                '[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":121,"char_end":122,"line":5,"col_start":33,'
-                '"col_end":33,"patch_type":"replace",'
-                '"replacement":"overrideMe"}},{{"char_start":217,'
-                '"char_end":218,"line":9,"col_start":33,"col_end":33,'
-                '"patch_type":"replace","replacement":"overrideMe"}}]}}]'
+                '[{{"filename":"{root}foo_4.php","patches":['
+                '{{"char_start":306,"char_end":307,"line":10,"col_start":33,"col_end":33,"patch_type":"replace","replacement":"overrideMe"}},'
+                '{{"char_start":438,"char_end":439,"line":14,"col_start":33,"col_end":33,"patch_type":"replace","replacement":"overrideMe"}},'
+                '{{"char_start":274,"char_end":274,"line":10,"col_start":1,"col_end":1,"patch_type":"insert","replacement":"\\n                <<__Deprecated(\\"Use `overrideMe` instead\\")>>\\n                public function g(): void {{\\n                  $this->overrideMe();\\n                }}\\n"}}'
+                "]}}]"
             ],
             options=["--refactor", "Method", "Bar::g", "Bar::overrideMe"],
         )
@@ -1113,12 +1134,22 @@ class CommonTests(BarebonesTests):
             self.assertEqual(
                 out,
                 """<?hh
-
+            <<__SupportDynamicType>>
             class Bar extends Foo {
+
+                <<__Deprecated("Use `wat` instead")>>
+                public function f(): void {
+                  $this->wat();
+                }
                 public function wat(): void {}
+
+                <<__Deprecated("Use `overrideMe` instead")>>
+                public function g(): void {
+                  $this->overrideMe();
+                }
                 public function overrideMe(): void {}
             }
-
+            <<__SupportDynamicType>>
             class Baz extends Bar {
                 public function overrideMe(): void {
                     $this->wat();
@@ -1235,6 +1266,30 @@ class CommonTests(BarebonesTests):
 """,
             )
 
+        # test no double-rename (T157645473)
+        with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
+            f.write(
+                """<?hh
+                class Foo {
+                  const type TEntry = int;
+                  public function main(): self::TEntry {
+                    return 3;
+                  }
+                }
+
+            """
+            )
+        self.test_driver.start_hh_server(changed_files=["foo_4.php"])
+
+        self.test_driver.check_cmd_and_json_cmd(
+            ["Rewrote 1 file."],
+            [
+                '[{{"filename":"{root}foo_4.php","patches":[{{"char_start":27,"char_end":30,"line":2,"col_start":23,"col_end":25,"patch_type":"replace","replacement":"Bar"}}'
+                "]}}]"
+            ],
+            options=["--refactor", "Class", "Foo", "Bar"],
+        )
+
     def test_refactor_functions(self) -> None:
         with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
             f.write(
@@ -1253,25 +1308,23 @@ class CommonTests(BarebonesTests):
         self.test_driver.check_cmd_and_json_cmd(
             ["Rewrote 1 file."],
             [
-                '[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":127,"char_end":130,"line":8,"col_start":22,'
-                '"col_end":24,"patch_type":"replace","replacement":"woah"}},'
-                '{{"char_start":56,"char_end":59,"line":4,"col_start":17,'
-                '"col_end":19,"patch_type":"replace","replacement":"woah"}}]'
-                "}}]"
+                '[{{"filename":"{root}foo_4.php","patches":['
+                '{{"char_start":127,"char_end":130,"line":8,"col_start":22,"col_end":24,"patch_type":"replace","replacement":"woah"}},'
+                '{{"char_start":56,"char_end":59,"line":4,"col_start":17,"col_end":19,"patch_type":"replace","replacement":"woah"}},'
+                '{{"char_start":105,"char_end":105,"line":7,"col_start":1,"col_end":1,"patch_type":"insert","replacement":"\\n            <<__Deprecated(\\"Use `woah` instead\\")>>\\n            function wat(): void {{\\n              woah();\\n            }}\\n"}}'
+                "]}}]"
             ],
             options=["--refactor", "Function", "wat", "woah"],
         )
         self.test_driver.check_cmd_and_json_cmd(
             ["Rewrote 2 files."],
             [
-                '[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":87,"char_end":88,"line":5,"col_start":24,'
-                '"col_end":24,"patch_type":"replace","replacement":"fff"}}]}},'
-                '{{"filename":"{root}foo_1.php","patches":[{{'
-                '"char_start":23,"char_end":24,"line":3,"col_start":18,'
-                '"col_end":18,"patch_type":"replace","replacement":"fff"}}]'
-                "}}]"
+                '[{{"filename":"{root}foo_4.php","patches":['
+                '{{"char_start":87,"char_end":88,"line":5,"col_start":24,"col_end":24,"patch_type":"replace","replacement":"fff"}}'
+                ']}},{{"filename":"{root}foo_1.php","patches":['
+                '{{"char_start":23,"char_end":24,"line":3,"col_start":18,"col_end":18,"patch_type":"replace","replacement":"fff"}},'
+                '{{"char_start":5,"char_end":5,"line":2,"col_start":1,"col_end":1,"patch_type":"insert","replacement":"\\n        <<__Deprecated(\\"Use `fff` instead\\")>>\\n        function f(): int {{\\n          return fff();\\n        }}\\n"}}'
+                "]}}]"
             ],
             options=["--refactor", "Function", "f", "fff"],
         )
@@ -1287,6 +1340,11 @@ class CommonTests(BarebonesTests):
                 return fff();
             }
 
+            <<__Deprecated("Use `woah` instead")>>
+            function wat(): void {
+              woah();
+            }
+
             function woah(): void {}
             """,
             )
@@ -1296,6 +1354,11 @@ class CommonTests(BarebonesTests):
             self.assertEqual(
                 out,
                 """<?hh
+
+        <<__Deprecated("Use `fff` instead")>>
+        function f(): int {
+          return fff();
+        }
 
         function fff(): int {
             return g() + 1;
@@ -1391,7 +1454,7 @@ class CommonTests(BarebonesTests):
         with open(os.path.join(self.test_driver.repo_dir, "hh.conf"), "a") as f:
             f.write(
                 "use_watchman = true\n"
-                + "interrupt_on_watchman = true\n"
+                + "interrupt_on_file_changes = true\n"
                 + "interrupt_on_client = true\n"
                 + "watchman_subscribe_v2 = true\n"
             )
@@ -1402,37 +1465,6 @@ class CommonTests(BarebonesTests):
             ["string"], options=["--type-at-pos", "{root}foo_3.php:11:14"]
         )
         self.test_driver.stop_hh_loop_forever()
-
-    def test_status_single(self) -> None:
-        """
-        Test hh_client check --single
-        """
-        self.test_driver.start_hh_server()
-
-        with open(
-            os.path.join(self.test_driver.repo_dir, "typing_error.php"), "w"
-        ) as f:
-            f.write("<?hh //strict\n function aaaa(): int { return h(); }")
-
-        self.test_driver.check_cmd(
-            [
-                "{root}typing_error.php:2:32,34: Invalid return type (Typing[4110])",
-                "  {root}typing_error.php:2:19,21: Expected `int`",
-                "  {root}foo_3.php:3:23,28: But got `string`",
-            ],
-            options=["--single", "{root}typing_error.php"],
-            stdin="",
-        )
-
-        self.test_driver.check_cmd(
-            [
-                ":2:32,34: Invalid return type (Typing[4110])",
-                "  :2:19,21: Expected `int`",
-                "  {root}foo_3.php:3:23,28: But got `string`",
-            ],
-            options=["--single", "-"],
-            stdin="<?hh //strict\n function aaaa(): int { return h(); }",
-        )
 
     def test_incremental_typecheck_same_file(self) -> None:
         self.maxDiff = None

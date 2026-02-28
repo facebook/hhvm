@@ -1,10 +1,10 @@
 <?hh
 <<__DynamicallyCallable>>
-function f($a) {
+function f($a) :mixed{
   echo $a;
   echo "\n";
 }
 <<__EntryPoint>> function main(): void {
 $name = "f";
-$name("param");
+HH\dynamic_fun($name)("param");
 }

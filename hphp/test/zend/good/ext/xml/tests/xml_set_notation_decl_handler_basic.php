@@ -9,7 +9,7 @@ class XML_Parser
 {
 
     function unparsed_entity_decl_handler($parser, $entity_name, $base, $system_ID, $public_ID, $notation_name)
-      {
+:mixed      {
           echo "unparsed_entity_decl_handler called\n";
          echo "...Entity name=" . $entity_name . "\n";
          echo "...Base=" . (string)($base) . "\n";
@@ -19,7 +19,7 @@ class XML_Parser
       }
 
       function notation_decl_handler($parser, $name, $base, $system_ID,$public_ID)
-      {
+:mixed      {
           echo "notation_decl_handler called\n";
          echo "...Name=" . $name . "\n";
          echo "...Base=" . (string)($base) . "\n";
@@ -28,7 +28,7 @@ class XML_Parser
       }
 
     function parse($data)
-    {
+:mixed    {
         $parser = xml_parser_create();
         xml_set_object($parser, $this);
         xml_set_notation_decl_handler($parser, "notation_decl_handler");
@@ -51,7 +51,7 @@ $xml = <<<HERE
 HERE;
 
 echo "Simple test of xml_set_notation_decl_handler(() function\n";
-$p1 = new Xml_Parser();
+$p1 = new XML_Parser();
 $p1->parse($xml);
 echo "Done\n";
 }

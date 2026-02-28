@@ -99,6 +99,7 @@ TEST(Type, KnownDataType) {
     TRes,
     TBool,
     TLazyCls,
+    TEnumClassLabel,
     TUninit,
     TInitNull
   };
@@ -239,9 +240,10 @@ TEST(Type, ToString) {
   EXPECT_EQ("Keyset", TKeyset.toString());
 
   EXPECT_EQ("LazyCls", TLazyCls.toString());
+  EXPECT_EQ("EnumClassLabel", TEnumClassLabel.toString());
 
-  auto const sub = Type::SubObj(SystemLib::s_HH_IteratorClass);
-  auto const exact = Type::ExactObj(SystemLib::s_HH_IteratorClass);
+  auto const sub = Type::SubObj(SystemLib::getHH_IteratorClass());
+  auto const exact = Type::ExactObj(SystemLib::getHH_IteratorClass());
 
   EXPECT_EQ("Obj<=HH\\Iterator", sub.toString());
   EXPECT_EQ("Obj=HH\\Iterator", exact.toString());
@@ -270,9 +272,9 @@ TEST(Type, ToString) {
   EXPECT_EQ("{Obj<=HH\\Iterator|Int}", (TInt | sub).toString());
 
   EXPECT_EQ("Cls<=HH\\Iterator",
-            Type::SubCls(SystemLib::s_HH_IteratorClass).toString());
+            Type::SubCls(SystemLib::getHH_IteratorClass()).toString());
   EXPECT_EQ("Cls=HH\\Iterator",
-            Type::ExactCls(SystemLib::s_HH_IteratorClass).toString());
+            Type::ExactCls(SystemLib::getHH_IteratorClass()).toString());
 
   EXPECT_EQ("{ABC|Func}", (TABC | TFunc).toString());
 
@@ -428,9 +430,9 @@ TEST(Type, GuardConstraints) {
 
 TEST(Type, RelaxType) {
   auto gc = GuardConstraint{DataTypeSpecialized};
-  gc.setDesiredClass(SystemLib::s_HH_IteratorClass);
+  gc.setDesiredClass(SystemLib::getHH_IteratorClass());
   gc.category = DataTypeSpecialized;
-  auto subIter = Type::SubObj(SystemLib::s_HH_IteratorClass);
+  auto subIter = Type::SubObj(SystemLib::getHH_IteratorClass());
   EXPECT_EQ("Obj<=HH\\Iterator", subIter.toString());
   EXPECT_EQ(subIter, relaxType(subIter, gc.category));
 }
@@ -487,7 +489,7 @@ TEST(Type, Specialized) {
   // Checking specialization dropping.  We cannot specialize on two dimensions
   // (e.g. array-like and object) at the same time.
   EXPECT_EQ(TStaticVec | TObj, constVec | TObj);
-  auto const subIter = Type::SubObj(SystemLib::s_HH_IteratorClass);
+  auto const subIter = Type::SubObj(SystemLib::getHH_IteratorClass());
   EXPECT_EQ(TVec | TObj, TVec | subIter);
 
   auto const vecOrInt = TVec | TInt;
@@ -500,7 +502,7 @@ TEST(Type, Specialized) {
   EXPECT_EQ(TStr, iterOrStr - subIter);
   EXPECT_EQ(subIter, iterOrStr - TStr);
 
-  auto const subCls = Type::SubCls(SystemLib::s_HH_IteratorClass);
+  auto const subCls = Type::SubCls(SystemLib::getHH_IteratorClass());
   EXPECT_EQ(TCls, TCls - subCls);
 
   auto const lclsOrStr = TLazyCls | TStr;
@@ -588,8 +590,8 @@ TEST(Type, SpecializedArrays) {
 }
 
 TEST(Type, SpecializedObjects) {
-  auto const A = SystemLib::s_HH_IteratorClass;
-  auto const B = SystemLib::s_HH_TraversableClass;
+  auto const A = SystemLib::getHH_IteratorClass();
+  auto const B = SystemLib::getHH_TraversableClass();
   EXPECT_TRUE(A->classof(B));
 
   auto const obj = TObj;
@@ -631,8 +633,8 @@ TEST(Type, SpecializedObjects) {
 }
 
 TEST(Type, SpecializedClass) {
-  auto const A = SystemLib::s_HH_IteratorClass;
-  auto const B = SystemLib::s_HH_TraversableClass;
+  auto const A = SystemLib::getHH_IteratorClass();
+  auto const B = SystemLib::getHH_TraversableClass();
 
   EXPECT_TRUE(A->classof(B));
 
@@ -739,8 +741,11 @@ TEST(Type, Const) {
   auto const rat2 = RepoAuthType::Array::packed(RepoAuthType::Array::Empty::No,
                                                 RepoAuthType(RepoAuthType::Tag::Int));
   auto const ratArray2 = Type::Dict(rat2);
-  EXPECT_EQ(ratArray1, ratArray1 & ratArray2);
-  EXPECT_EQ(ratArray1, ratArray2 & ratArray1);
+
+  // Read function chooseRATArray in hphp/runtime/vm/jit/type-specialization.cpp
+  // to understand the behavior of this intersection
+  EXPECT_EQ(ratArray2, ratArray1 & ratArray2);
+  EXPECT_EQ(ratArray2, ratArray2 & ratArray1);
   EXPECT_TRUE(ratArray1 <= TArrLike);
   EXPECT_TRUE(ratArray1 < TArrLike);
   EXPECT_TRUE(ratArray1 <= TDict);
@@ -862,7 +867,7 @@ TEST(Type, BespokeVec) {
 }
 
 TEST(Type, BespokeVecRAT) {
-  RO::EvalBespokeArrayLikeMode = 2;
+  Cfg::Eval::BespokeArrayLikeMode = 2;
   auto const foo_layout = ArrayLayout{
     bespoke::testing::makeDummyLayout("foo", {ArrayLayout::Bespoke()})
   };
@@ -925,7 +930,7 @@ TEST(Type, BespokeHierarchy) {
    *  |   \   / \
    * bar  bat(L) ter
    */
-  RO::EvalBespokeArrayLikeMode = 2;
+  Cfg::Eval::BespokeArrayLikeMode = 2;
   bespoke::Layout::ClearHierarchy();
   auto const foo_layout = ArrayLayout{
     bespoke::testing::makeDummyAbstractLayout("foo", {ArrayLayout::Bespoke()})
@@ -1099,7 +1104,7 @@ TEST(Type, BespokeRanges) {
    *  |
    * qop
    */
-  RO::EvalBespokeArrayLikeMode = 2;
+  Cfg::Eval::BespokeArrayLikeMode = 2;
   bespoke::Layout::ClearHierarchy();
   auto const foo_layout = ArrayLayout{
     bespoke::testing::makeDummyAbstractLayout("foo", {ArrayLayout::Bespoke()})

@@ -28,13 +28,10 @@
 #include <algorithm>
 #include <cmath>
 
-#ifndef _MSC_VER
 #include <monetary.h>
-#endif
 
 #include "hphp/util/bstring.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -748,8 +745,10 @@ String string_strip_tags(const char *s, const int len,
         state=2;
         break;
       }
+      [[fallthrough]];
 
     case 'E':
+      [[fallthrough]];
     case 'e':
       /* !DOCTYPE exception */
       if (state==3 && p > s+6
@@ -762,7 +761,7 @@ String string_strip_tags(const char *s, const int len,
         state = 1;
         break;
       }
-      /* fall-through */
+      [[fallthrough]];
 
     case 'l':
 
@@ -775,7 +774,7 @@ String string_strip_tags(const char *s, const int len,
         break;
       }
 
-      /* fall-through */
+      [[fallthrough]];
     default:
     reg_char:
       if (state == 0) {
@@ -967,7 +966,7 @@ Variant string_base_to_numeric(const char *s, int len, int base) {
         fnum = num;
         mode = 1;
       }
-      /* fall-through */
+      [[fallthrough]];
     case 1: /* Float */
       fnum = fnum * base + c;
     }
@@ -1300,6 +1299,7 @@ ssize_t php_base64_decode(const char *str, int length, bool strict,
       return -1;
     case 2:
       k++;
+      [[fallthrough]];
     case 3:
       result[k] = 0;
     }
@@ -1366,50 +1366,26 @@ String string_escape_shell_arg(const char *str) {
   String ret(safe_address(l, 4, 3), ReserveString); /* worst case */
   cmd = ret.mutableData();
 
-#ifdef _MSC_VER
-  cmd[y++] = '"';
-#else
   cmd[y++] = '\'';
-#endif
 
   for (x = 0; x < l; x++) {
     switch (str[x]) {
-#ifdef _MSC_VER
-    case '"':
-    case '%':
-    case '!':
-      cmd[y++] = ' ';
-      break;
-#else
     case '\'':
       cmd[y++] = '\'';
       cmd[y++] = '\\';
       cmd[y++] = '\'';
-#endif
-      /* fall-through */
+      [[fallthrough]];
     default:
       cmd[y++] = str[x];
     }
   }
-#ifdef _MSC_VER
-  if (y > 0 && '\\' == cmd[y - 1]) {
-    int k = 0, n = y - 1;
-    for (; n >= 0 && '\\' == cmd[n]; n--, k++);
-    if (k % 2) {
-      cmd[y++] = '\\';
-    }
-  }
-
-  cmd[y++] = '"';
-#else
   cmd[y++] = '\'';
-#endif
   ret.setSize(y);
   return ret;
 }
 
 String string_escape_shell_cmd(const char *str) {
-  register int x, y, l;
+  int x, y, l;
   char *cmd;
   char *p = nullptr;
 
@@ -1419,7 +1395,6 @@ String string_escape_shell_cmd(const char *str) {
 
   for (x = 0, y = 0; x < l; x++) {
     switch (str[x]) {
-#ifndef _MSC_VER
     case '"':
     case '\'':
       if (!p && (p = (char *)memchr(str + x + 1, str[x], l - x - 1))) {
@@ -1431,16 +1406,6 @@ String string_escape_shell_cmd(const char *str) {
       }
       cmd[y++] = str[x];
       break;
-#else
-    /* % is Windows specific for environmental variables, ^%PATH% will
-    output PATH while ^%PATH^% will not. escapeshellcmd->val will
-    escape all % and !.
-    */
-    case '%':
-    case '!':
-    case '"':
-    case '\'':
-#endif
     case '#': /* This is character-set independent */
     case '&':
     case ';':
@@ -1462,12 +1427,8 @@ String string_escape_shell_cmd(const char *str) {
     case '\\':
     case '\x0A': /* excluding these two */
     case '\xFF':
-#ifdef _MSC_VER
-      cmd[y++] = '^';
-#else
       cmd[y++] = '\\';
-#endif
-      /* fall-through */
+      [[fallthrough]];
     default:
       cmd[y++] = str[x];
     }
@@ -1887,7 +1848,7 @@ char _codes[26] = { 1,16,4,16,9,2,4,16,9,2,0,2,2,2,1,4,0,2,4,4,1,0,0,0,8,0};
 /*----------------------------- */
 
 /* I suppose I could have been using a character pointer instead of
- * accesssing the array directly... */
+ * accessing the array directly... */
 
 /* Look at the next letter in the word */
 #define Next_Letter ((char)toupper(word[w_idx+1]))
@@ -2033,7 +1994,7 @@ String string_metaphone(const char *input, int word_len, long max_phonemes,
 
     /* THOUGHT:  It would be nice if, rather than having things like...
      * well, SCI.  For SCI you encode the S, then have to remember
-     * to skip the C.  So the phonome SCI invades both S and C.  It would
+     * to skip the C.  So the phoneme SCI invades both S and C.  It would
      * be better, IMHO, to skip the C from the S part of the encoding.
      * Hell, I'm trying it.
      */
@@ -2238,7 +2199,7 @@ String string_metaphone(const char *input, int word_len, long max_phonemes,
  * _cyr_cp866     - for x-cp866 charset
  * _cyr_mac       - for x-mac-cyrillic charset
  */
-typedef unsigned char _cyr_charset_table[512];
+using _cyr_charset_table = unsigned char[512];
 
 static const _cyr_charset_table _cyr_win1251 = {
   0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
@@ -2464,7 +2425,7 @@ string_convert_hebrew_string(const String& inStr, int /*max_chars_per_line*/,
   const char *tmp;
   char *heb_str, *broken_str;
   char *target;
-  int block_start, block_end, block_type, block_length, i;
+  int block_start, block_end, block_type, i;
   long max_chars=0;
   int begin, end, char_count, orig_begin;
 
@@ -2476,8 +2437,6 @@ string_convert_hebrew_string(const String& inStr, int /*max_chars_per_line*/,
   target = heb_str+str_len;
   *target = 0;
   target--;
-
-  block_length=0;
 
   if (isheb(*tmp)) {
     block_type = HEB_BLOCK_TYPE_HEB;
@@ -2493,7 +2452,6 @@ string_convert_hebrew_string(const String& inStr, int /*max_chars_per_line*/,
               (int)*(tmp+1)=='\n' ) && block_end<str_len-1) {
         tmp++;
         block_end++;
-        block_length++;
       }
       for (i = block_start; i<= block_end; i++) {
         *target = str[i];
@@ -2519,7 +2477,6 @@ string_convert_hebrew_string(const String& inStr, int /*max_chars_per_line*/,
              (int)*(tmp+1)!='\n' && block_end < str_len-1) {
         tmp++;
         block_end++;
-        block_length++;
       }
       while ((_isblank((int)*tmp) ||
               ispunct((int)*tmp)) && *tmp!='/' &&

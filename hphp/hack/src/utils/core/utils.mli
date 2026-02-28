@@ -8,10 +8,10 @@
  *)
 
 (* This `.mli` file was generated automatically. It may include extra
-definitions that should not actually be exposed to the caller. If you notice
-that this interface file is a poor interface, please take a few minutes to
-clean it up manually, and then delete this comment once the interface is in
-shape. *)
+   definitions that should not actually be exposed to the caller. If you notice
+   that this interface file is a poor interface, please take a few minutes to
+   clean it up manually, and then delete this comment once the interface is in
+   shape. *)
 
 type callstack = Callstack of string [@@deriving show]
 
@@ -43,7 +43,7 @@ val wfold_left2 : ('a -> 'b -> 'c -> 'a) -> 'a -> 'b list -> 'c list -> 'a
 
 val sl : string list -> string
 
-val maybe : ('a -> 'b -> unit) -> 'a -> 'b option -> unit
+val maybe : ('env -> 'a -> unit) -> 'env -> 'a option -> unit
 
 val unsafe_opt_note : string -> 'a option -> 'a
 
@@ -53,18 +53,18 @@ val try_with_stack : (unit -> 'a) -> ('a, Exception.t) result
 
 val set_of_list : SSet.elt list -> SSet.t
 
-(* Strip NS removes only the leading backslash *)
+(** Strip NS removes only the leading backslash *)
 val strip_ns : string -> string
 
-(* Strip XHP removes only the leading colon *)
+(** Strip XHP removes only the leading colon *)
 val strip_xhp_ns : string -> string
 
-(* Strip Both removes either leading backslash and colon, or both *)
+(** Strip Both removes either leading backslash and colon, or both *)
 val strip_both_ns : string -> string
 
 val strip_hh_lib_ns : string -> string
 
-(* Strip All removes all backslash-based namespaces, but does nothing to XHP *)
+(** Strip All removes all backslash-based namespaces, but does nothing to XHP *)
 val strip_all_ns : string -> string
 
 (** A\B\C -> \A\B\C *)

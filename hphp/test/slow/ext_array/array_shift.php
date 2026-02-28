@@ -1,25 +1,25 @@
 <?hh
 
-function a() {
-  $input = darray["a" => 1, "b" => 2];
+function a() :mixed{
+  $input = dict["a" => 1, "b" => 2];
   array_shift(inout $input);
   var_dump($input);
 }
 
-function b() {
-  $input = darray["a" => 1, 23 => 2];
+function b() :mixed{
+  $input = dict["a" => 1, 23 => 2];
   array_shift(inout $input);
   var_dump($input);
 }
 
-function c() {
-  $input = darray["a" => 1, -23 => 2];
+function c() :mixed{
+  $input = dict["a" => 1, -23 => 2];
   array_shift(inout $input);
   var_dump($input);
 }
 
-function d() {
-  $input = varray["orange", "banana", "apple", "raspberry"];
+function d() :mixed{
+  $input = vec["orange", "banana", "apple", "raspberry"];
   $fruit = array_shift(inout $input);
   var_dump($input);
   var_dump($fruit);
@@ -27,7 +27,7 @@ function d() {
 
 
 <<__EntryPoint>>
-function main_array_shift() {
+function main_array_shift() :mixed{
 a();
 b();
 c();

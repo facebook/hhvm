@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
-#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -36,7 +35,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/runtime/ext/asio/asio-blockable.h"
-#include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
@@ -49,7 +48,7 @@
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -251,15 +250,15 @@ namespace {
 
 constexpr ptrdiff_t ar_rel(ptrdiff_t off) {
   return off - AFWH::arOff();
-};
+}
 
 /*
  * Check if obj is an Awaitable. Passes CC_BE on sf if it is.
  */
 void emitIsAwaitable(Vout& v, Vreg obj, Vreg sf) {
   auto constexpr minwh = (int)HeaderKind::WaitHandle;
-  auto constexpr maxwh = (int)HeaderKind::AwaitAllWH;
-  static_assert(maxwh - minwh == 2, "WH range check needs updating");
+  auto constexpr maxwh = (int)HeaderKind::ConcurrentWH;
+  static_assert(maxwh - minwh == 3, "WH range check needs updating");
 
   auto const kind = v.makeReg();
   auto const wh_index = v.makeReg();
@@ -271,7 +270,9 @@ void emitIsAwaitable(Vout& v, Vreg obj, Vreg sf) {
 }
 
 IMPL_OPCODE_CALL(CreateAFWH)
+IMPL_OPCODE_CALL(CreateAFWHL)
 IMPL_OPCODE_CALL(CreateAGWH)
+IMPL_OPCODE_CALL(CreateFSWH)
 IMPL_OPCODE_CALL(AFWHPrepareChild)
 
 void cgCreateSSWH(IRLS& env, const IRInstruction* inst) {
@@ -319,13 +320,13 @@ void cgCreateSSWH(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-void cgCreateAAWH(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<CreateAAWHData>();
+void cgCreateCCWH(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<CreateCCWHData>();
 
   cgCallHelper(
     vmain(env),
     env,
-    CallSpec::direct(c_AwaitAllWaitHandle::fromFrameNoCheck),
+    CallSpec::direct(c_ConcurrentWaitHandle::fromFrameNoCheck),
     callDest(env, inst),
     SyncOptions::Sync,
     argGroup(env, inst)
@@ -426,35 +427,27 @@ void cgAFWHBlockOn(IRLS& env, const IRInstruction* inst) {
 
   auto const blockableOff = AFWH::childrenOff() + AFWH::Node::blockableOff();
 
-  // parent->m_blockable.m_bits = child->m_parentChain.m_firstParent|Kind::AFWH;
+  // parent->m_blockable.m_bits = child->m_parentChain.m_lastParent|Kind::AFWH;
   static_assert(
     uint8_t(AsioBlockable::Kind::AsyncFunctionWaitHandleNode) == 0,
     "AFWH kind must be 0."
   );
-  auto const firstParentOff = c_WaitableWaitHandle::parentChainOff() +
-                              AsioBlockableChain::firstParentOff();
-  auto const nextParentOff = blockableOff + AsioBlockable::bitsOff();
+  auto const lastParentOff = c_WaitableWaitHandle::parentChainOff() +
+                              AsioBlockableChain::lastParentOff();
+  auto const prevParentOff = blockableOff + AsioBlockable::bitsOff();
 
-  auto const firstParent = v.makeReg();
-  v << load{child[firstParentOff], firstParent};
-  v << store{firstParent, parentAR[ar_rel(nextParentOff)]};
+  auto const lastParent = v.makeReg();
+  v << load{child[lastParentOff], lastParent};
+  v << store{lastParent, parentAR[ar_rel(prevParentOff)]};
 
-  // child->m_parentChain.m_firstParent = &parent->m_blockable;
+  // child->m_parentChain.m_lastParent = &parent->m_blockable;
   auto objToAR = v.makeReg();
   v << lea{parentAR[ar_rel(blockableOff)], objToAR};
-  v << store{objToAR, child[firstParentOff]};
+  v << store{objToAR, child[lastParentOff]};
 
   // parent->m_child = child;
   auto const childOff = AFWH::childrenOff() + AFWH::Node::childOff();
   v << store{child, parentAR[ar_rel(childOff)]};
-
-  if (RO::EvalEnableImplicitContext) {
-    // parent->m_implicitContext = *ImplicitContext::activeCtx
-    markRDSAccess(v, ImplicitContext::activeCtx.handle());
-    auto const implicitContext = v.makeReg();
-    v << load{rvmtl()[ImplicitContext::activeCtx.handle()], implicitContext};
-    v << store{implicitContext, parentAR[ar_rel(AFWH::implicitContextOff())]};
-  }
 }
 
 void cgAFWHPushTailFrame(IRLS& env, const IRInstruction* inst) {

@@ -26,7 +26,7 @@ class B extends A {
     public $e;
 }
 <<__EntryPoint>> function main(): void {
-foreach(varray['A', 'B'] as $class) {
+foreach(vec['A', 'B'] as $class) {
     $rc = new ReflectionClass($class);
     $rps = $rc->getProperties();
     foreach($rps as $rp) {

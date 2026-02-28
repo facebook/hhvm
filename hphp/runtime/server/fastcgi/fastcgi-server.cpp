@@ -17,6 +17,7 @@
 #include "hphp/runtime/server/fastcgi/fastcgi-server.h"
 
 #include "hphp/runtime/server/http-server.h"
+#include "hphp/util/configs/server.h"
 
 namespace HPHP {
 
@@ -25,8 +26,8 @@ namespace HPHP {
 bool FastCGIAcceptor::canAccept(const folly::SocketAddress& /*address*/) {
   // TODO: Support server IP whitelist.
   auto const cons = m_server->getLibEventConnectionCount();
-  return (RuntimeOption::ServerConnectionLimit == 0 ||
-          cons < RuntimeOption::ServerConnectionLimit);
+  return (Cfg::Server::ConnectionLimit == 0 ||
+          cons < Cfg::Server::ConnectionLimit);
 }
 
 void FastCGIAcceptor::onNewConnection(
@@ -38,7 +39,7 @@ void FastCGIAcceptor::onNewConnection(
   folly::SocketAddress localAddress;
   try {
     sock->getLocalAddress(&localAddress);
-  } catch (std::system_error& e) {
+  } catch (std::system_error&) {
     // If getSockName fails it's bad news; abort the connection
     return;
   }
@@ -55,7 +56,7 @@ void FastCGIAcceptor::onNewConnection(
   // NB: ~ManagedConnection will call removeConnection() before the session
   //     destroys itself.
   Acceptor::addConnection(session);
-};
+}
 
 void FastCGIAcceptor::onConnectionsDrained() {
   m_server->onConnectionsDrained();
@@ -70,11 +71,11 @@ FastCGIServer::FastCGIServer(const std::string &address,
   : Server(address, port),
     m_worker(&m_eventBaseManager),
     m_dispatcher(workers, workers,
-                 RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
-                 RuntimeOption::ServerThreadDropStack,
+                 Cfg::Server::ThreadDropCacheTimeoutSeconds,
+                 Cfg::Server::ThreadDropStack,
                  this,
-                 RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
-                 RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds,
+                 Cfg::Server::ThreadJobLIFOSwitchThreshold,
+                 Cfg::Server::ThreadJobMaxQueuingMilliSeconds,
                  RequestPriority::k_numPriorities) {
   folly::SocketAddress sock_addr;
   if (useFileSocket) {
@@ -85,33 +86,35 @@ FastCGIServer::FastCGIServer(const std::string &address,
   } else {
     sock_addr.setFromHostPort(address, port);
   }
-  m_socketConfig.bindAddress = sock_addr;
-  m_socketConfig.acceptBacklog = RuntimeOption::ServerBacklog;
+  auto accConfig = std::make_shared<wangle::ServerSocketConfig>();
+  accConfig->bindAddress = sock_addr;
+  accConfig->acceptBacklog = Cfg::Server::Backlog;
   std::chrono::seconds timeout;
-  if (RuntimeOption::ConnectionTimeoutSeconds >= 0) {
-    timeout = std::chrono::seconds(RuntimeOption::ConnectionTimeoutSeconds);
+  if (Cfg::Server::ConnectionTimeoutSeconds >= 0) {
+    timeout = std::chrono::seconds(Cfg::Server::ConnectionTimeoutSeconds);
   } else {
     // default to 2 minutes
     timeout = std::chrono::seconds(120);
   }
-  m_socketConfig.connectionIdleTimeout = timeout;
+  accConfig->connectionIdleTimeout = timeout;
+  m_socketConfig = std::move(accConfig);
 }
 
 void FastCGIServer::start() {
   // It's not safe to call this function more than once
   m_socket.reset(new folly::AsyncServerSocket(m_worker.getEventBase()));
   try {
-    m_socket->bind(m_socketConfig.bindAddress);
+    m_socket->bind(m_socketConfig->bindAddress);
   } catch (const std::system_error& ex) {
     Logger::Error(std::string(ex.what()));
-    if (m_socketConfig.bindAddress.getFamily() == AF_UNIX) {
-      throw FailedToListenException(m_socketConfig.bindAddress.getPath());
+    if (m_socketConfig->bindAddress.getFamily() == AF_UNIX) {
+      throw FailedToListenException(m_socketConfig->bindAddress.getPath());
     }
-    throw FailedToListenException(m_socketConfig.bindAddress.getAddressStr(),
-                                  m_socketConfig.bindAddress.getPort());
+    throw FailedToListenException(m_socketConfig->bindAddress.getAddressStr(),
+                                  m_socketConfig->bindAddress.getPort());
   }
-  if (m_socketConfig.bindAddress.getFamily() == AF_UNIX) {
-    auto path = m_socketConfig.bindAddress.getPath();
+  if (m_socketConfig->bindAddress.getFamily() == AF_UNIX) {
+    auto path = m_socketConfig->bindAddress.getPath();
     chmod(path.c_str(), 0760);
   }
   m_acceptor.reset(new FastCGIAcceptor(m_socketConfig, this));
@@ -123,7 +126,7 @@ void FastCGIServer::start() {
       // we mutate m_socket is done within the event base.
       return;
     }
-    m_socket->listen(m_socketConfig.acceptBacklog);
+    m_socket->listen(m_socketConfig->acceptBacklog);
     m_socket->startAccepting();
   });
   setStatus(RunStatus::RUNNING);
@@ -149,14 +152,14 @@ void FastCGIServer::stop() {
     // connections; there is no way to do a partial shutdown of a server socket
     m_socket->stopAccepting();
 
-    if (RuntimeOption::ServerGracefulShutdownWait > 0) {
+    if (Cfg::Server::GracefulShutdownWait > 0) {
       // Gracefully drain any incomplete requests. We cannot go offline until
       // they are finished as we own their dispatcher and event base.
       if (m_acceptor) {
-        m_acceptor->drainAllConnections();
+        m_acceptor->startDrainingAllConnections();
       }
 
-      std::chrono::seconds s(RuntimeOption::ServerGracefulShutdownWait);
+      std::chrono::seconds s(Cfg::Server::GracefulShutdownWait);
       std::chrono::milliseconds m(s);
       scheduleTimeout(m);
     } else {

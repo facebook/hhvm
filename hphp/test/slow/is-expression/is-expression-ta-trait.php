@@ -15,6 +15,6 @@ function is_trait(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_ta_trait() {
+function main_is_expression_ta_trait() :mixed{
 is_trait(new MyClass());
 }

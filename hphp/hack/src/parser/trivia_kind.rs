@@ -17,7 +17,7 @@
  *
  */
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep::{FromOcamlRep, ToOcamlRep};
 
 #[derive(Debug, Copy, Clone, FromOcamlRep, ToOcamlRep, PartialEq)]
 #[repr(u8)]
@@ -27,9 +27,10 @@ pub enum TriviaKind {
     DelimitedComment = 2,
     SingleLineComment = 3,
     FixMe = 4,
-    IgnoreError = 5,
-    FallThrough = 6,
-    ExtraTokenError = 7,
+    Ignore = 5,
+    IgnoreError = 6,
+    FallThrough = 7,
+    ExtraTokenError = 8,
 }
 
 impl TriviaKind {
@@ -40,6 +41,7 @@ impl TriviaKind {
             TriviaKind::DelimitedComment => "delimited_comment",
             TriviaKind::SingleLineComment => "single_line_comment",
             TriviaKind::FixMe => "fix_me",
+            TriviaKind::Ignore => "ignore",
             TriviaKind::IgnoreError => "ignore_error",
             TriviaKind::FallThrough => "fall_through",
             TriviaKind::ExtraTokenError => "extra_token_error",

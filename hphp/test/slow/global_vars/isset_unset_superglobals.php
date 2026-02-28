@@ -2,11 +2,11 @@
 
 
 <<__EntryPoint>>
-function main_isset_unset_superglobals() {
-var_dump(isset($_GET));
+function main_isset_unset_superglobals() :mixed{
+var_dump(\HH\global_isset('_GET'));
 
-$_GET = 1;
-$_GET;
+\HH\global_set('_GET',  1);
+\HH\global_get('_GET');
 
-unset($_GET);
+\HH\global_unset('_GET');
 }

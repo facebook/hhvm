@@ -31,9 +31,12 @@ namespace HPHP {
  *
  * RescheduleWaitHandle is guaranteed to never finish immediately.
  */
-struct c_RescheduleWaitHandle final : c_WaitableWaitHandle {
-  WAITHANDLE_CLASSOF(RescheduleWaitHandle);
-  WAITHANDLE_DTOR(RescheduleWaitHandle);
+struct c_RescheduleWaitHandle final :
+    c_WaitableWaitHandle,
+    SystemLib::ClassLoader<"HH\\RescheduleWaitHandle"> {
+  using SystemLib::ClassLoader<"HH\\RescheduleWaitHandle">::classof;
+  using SystemLib::ClassLoader<"HH\\RescheduleWaitHandle">::className;
+  WAITHANDLE_DTOR(RescheduleWaitHandle)
 
   explicit c_RescheduleWaitHandle()
     : c_WaitableWaitHandle(classof(), HeaderKind::WaitHandle,
@@ -43,7 +46,7 @@ struct c_RescheduleWaitHandle final : c_WaitableWaitHandle {
  public:
   void run();
   String getName();
-  void exitContext(context_idx_t ctx_idx);
+  void exitContext(ContextIndex contextIdx);
   void scheduleInContext();
 
  private:
@@ -59,9 +62,6 @@ struct c_RescheduleWaitHandle final : c_WaitableWaitHandle {
  public:
   static const int8_t STATE_SCHEDULED = 2; // waiting in priority queue
 };
-
-Object HHVM_STATIC_METHOD(RescheduleWaitHandle, create,
-                          int64_t queue, int64_t priority);
 
 inline c_RescheduleWaitHandle* c_Awaitable::asReschedule() {
   assertx(getKind() == Kind::Reschedule);

@@ -7,7 +7,7 @@
 
 class caseSensitivityTest {}
 class caseSensitivityTestChild extends caseSensitivityTest {}
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function is_subclass_of_variation_003(): void {
 echo "*** Testing is_subclass_of() : usage variations ***\n";
 
 echo "*** Testing is_a() : usage variations ***\n";

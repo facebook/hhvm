@@ -19,22 +19,40 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
 #include <folly/Random.h>
 
 namespace HPHP {
+
+template<class TGetCtx>
+void verifyParamType(const Func* func, int32_t id, tv_lval val,
+                     TGetCtx getCtx) {
+  assertx(id < func->numNonVariadicParams());
+  assertx(func->numParams() == int(func->params().size()));
+  if (func->params()[id].isOutOnly()) return;
+
+  for (auto const& tc : func->params()[id].typeConstraints.range()) {
+    if (tc.isCheckable()) {
+      auto const ctx = tc.isThis() ? getCtx() : nullptr;
+      tc.verifyParam(val, ctx, func, id);
+    }
+  }
+}
 
 /*
  * RAII wrapper for popping/pushing generics from/to the VM stack.
@@ -87,13 +105,13 @@ inline void callerDynamicCallChecks(const Func* func,
   auto dynCallable = func->isDynamicallyCallable();
   if (dynCallable) {
     if (allowDynCallNoPointer) return;
-    if (!RO::EvalForbidDynamicCallsWithAttr) return;
+    if (!Cfg::Eval::ForbidDynamicCallsWithAttr) return;
   }
   auto level = func->isMethod()
     ? (func->isStatic()
-        ? RO::EvalForbidDynamicCallsToClsMeth
-        : RO::EvalForbidDynamicCallsToInstMeth)
-    : RO::EvalForbidDynamicCallsToFunc;
+        ? Cfg::Eval::ForbidDynamicCallsToClsMeth
+        : Cfg::Eval::ForbidDynamicCallsToInstMeth)
+    : Cfg::Eval::ForbidDynamicCallsToFunc;
   if (level <= 0) return;
   if (dynCallable && level < 2) return;
 
@@ -114,7 +132,7 @@ inline void callerDynamicCallChecks(const Func* func,
 }
 
 inline void callerDynamicConstructChecks(const Class* cls) {
-  auto level = RO::EvalForbidDynamicConstructs;
+  auto level = Cfg::Eval::ForbidDynamicConstructs;
   if (level <= 0 || cls->isDynamicallyConstructible()) return;
 
   if (auto const rate = cls->dynConstructSampleRate()) {
@@ -147,7 +165,7 @@ inline void calleeDynamicCallChecks(const Func* func, bool dynamicCall,
     Strings::FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE :
     Strings::FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE;
 
-  if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) {
+  if (Cfg::Eval::NoticeOnBuiltinDynamicCalls && func->isBuiltin()) {
     raise_notice(
       error_msg,
       func->fullName()->data()
@@ -195,7 +213,7 @@ inline void calleeGenericsChecks(const Func* callee, bool hasGenerics) {
   }
 
   if (!hasGenerics) {
-    if (!areAllGenericsSoft(callee->getReifiedGenericsInfo())) {
+    if (!areAllGenericsSoft(callee->getGenericsInfo())) {
       throw_call_reified_func_without_generics(callee);
     }
 
@@ -213,18 +231,101 @@ inline void calleeGenericsChecks(const Func* callee, bool hasGenerics) {
   checkFunReifiedGenericMismatch(callee, val(generics).parr);
 }
 
+inline void initFuncNamedParamDefaults(const Func* callee, uint32_t& numArgsInclUnpack,
+                                       const ArrayData* namedArgNames) {
+  auto numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
+  assertx(callee->numNamedParams() >= numNamedArgs);
+  if (callee->numNamedParams() == numNamedArgs) {
+    return;
+  }
+
+  auto numPositionalArgs = numArgsInclUnpack - numNamedArgs;
+  auto numPositionalParams = callee->numNonVariadicParams() - callee->numNamedParams();
+  auto const hasVariadics = numPositionalArgs > numPositionalParams ? 1 : 0;
+
+  CoeffectsSaver cs{callee->hasCoeffectsLocal()};
+  GenericsSaver gs{callee->hasReifiedGenerics()};
+  PackedStringPtr const* namedParamNames = callee->sortedNamedParamNames();
+  auto stackPos =
+    [&](const size_t argPos) { return numArgsInclUnpack - argPos - 1; };
+  std::vector<TypedValue> values(numArgsInclUnpack + callee->numNamedParams() - numNamedArgs);
+  if (hasVariadics) {
+    assertx(numPositionalArgs == numPositionalParams + 1);
+    values.back() = *vmStack().indC(0);
+  }
+  auto argIdx = 0;
+  for (auto paramIdx = 0; paramIdx < values.size() - hasVariadics; ++paramIdx) {
+    auto const& param = callee->params()[paramIdx];
+    if (paramIdx < callee->numNamedParams()) {
+      auto paramName = namedParamNames[paramIdx];
+      if (argIdx < numNamedArgs && paramName == namedArgNames->at(argIdx).val().pstr) {
+        values[paramIdx] = *vmStack().indC(stackPos(argIdx++));
+      } else {
+        values[paramIdx] = param.defaultValue;
+      }
+    } else {
+      values[paramIdx] = *vmStack().indC(stackPos(argIdx++));
+    }
+  }
+
+  vmStack().nalloc(values.size() - numArgsInclUnpack);
+  numArgsInclUnpack = values.size();
+  for (size_t i = 0; i < values.size(); ++i) {
+    *vmStack().indTV(stackPos(i)) = values[i];
+  }
+}
+
+/*
+ * Ensure that all passed named arguments match a named parameter, and that
+ * there are no missing required named parameters.
+ */
+inline void calleeNamedArgChecks(const Func* callee,
+                                 uint32_t& numArgsInclUnpack,
+                                 const ArrayData* namedArgNames) {
+  uint32_t namedParamCount = callee->numNamedParams();
+  int namedArgNamesSize = namedArgNames ? namedArgNames->size() : 0;
+  PackedStringPtr const* namedParamNames = callee->sortedNamedParamNames();
+
+  // Iterate and find the number of named arguments that were required
+  auto requiredNamedArgCount = callee->numRequiredNamedParams();
+  auto paramIdx = 0;
+  for (auto argIdx = 0; argIdx < namedArgNamesSize; ++argIdx) {
+    auto argName = namedArgNames->at(argIdx).val().pstr;
+
+    while (paramIdx < namedParamCount && namedParamNames[paramIdx] != argName) {
+      if (!callee->params()[paramIdx].hasDefaultValue()) --requiredNamedArgCount;
+      paramIdx++;
+    }
+    if (paramIdx >= namedParamCount) {
+      throwNamedArgumentNameMismatch(callee, argName);
+    }
+    paramIdx++;
+  }
+
+  while (paramIdx < namedParamCount) {
+    if (!callee->params()[paramIdx].hasDefaultValue()) --requiredNamedArgCount;
+    paramIdx++;
+  }
+  if (callee->numRequiredNamedParams() != requiredNamedArgCount) {
+    throwMissingNamedArgument(callee, requiredNamedArgCount);
+  }
+
+  initFuncNamedParamDefaults(callee, numArgsInclUnpack, namedArgNames);
+}
+
 /*
  * Check for too few or too many arguments and trim extra args.
  */
 inline void calleeArgumentArityChecks(const Func* callee,
-                                      uint32_t numArgsInclUnpack) {
-  if (numArgsInclUnpack < callee->numRequiredParams()) {
-    throwMissingArgument(callee, numArgsInclUnpack);
+                                      uint32_t& numArgsInclUnpack,
+                                      uint32_t numPositionalArgs) {
+  if (numPositionalArgs < callee->numRequiredPositionalParams()) {
+    throwMissingPositionalArgument(callee, numPositionalArgs);
   }
-
   if (numArgsInclUnpack > callee->numParams()) {
     assertx(!callee->hasVariadicCaptureParam());
     assertx(numArgsInclUnpack == callee->numNonVariadicParams() + 1);
+    --numArgsInclUnpack;
 
     GenericsSaver gs{callee->hasReifiedGenerics()};
 
@@ -233,17 +334,40 @@ inline void calleeArgumentArityChecks(const Func* callee,
     vmStack().popC();
 
     if (numUnpackArgs != 0) {
-      raiseTooManyArguments(callee, numArgsInclUnpack + numUnpackArgs - 1);
+      raiseTooManyArguments(callee, numArgsInclUnpack + numUnpackArgs);
     }
   }
 }
 
+inline void calleeArgumentTypeChecks(const Func* callee,
+                                     uint32_t numArgsInclUnpack,
+                                     void* prologueCtx) {
+  auto const getCtx = [&] () -> const Class* {
+    if (!callee->cls()) return nullptr;
+    assertx(prologueCtx);
+    auto const ctx = callee->isClosureBody()
+      ? reinterpret_cast<c_Closure*>(prologueCtx)->getThisOrClass()
+      : prologueCtx;
+    return callee->isStatic()
+      ? reinterpret_cast<Class*>(ctx)
+      : reinterpret_cast<ObjectData*>(ctx)->getVMClass();
+  };
+
+  auto const numArgs =
+    std::min(numArgsInclUnpack, callee->numNonVariadicParams());
+  auto const firstArgIdx =
+    numArgsInclUnpack - 1 + (callee->hasReifiedGenerics() ? 1 : 0);
+  for (auto i = 0; i < numArgs; ++i) {
+    verifyParamType(callee, i, vmStack().indC(firstArgIdx - i), getCtx);
+  }
+}
+
 inline void initFuncInputs(const Func* callee, uint32_t numArgsInclUnpack) {
-  assertx(numArgsInclUnpack <= callee->numNonVariadicParams() + 1);
+  assertx(numArgsInclUnpack <= callee->numParams());
 
   // All arguments already initialized. Extra arguments already popped
   // by calleeArgumentArityChecks().
-  if (LIKELY(numArgsInclUnpack >= callee->numParams())) return;
+  if (LIKELY(numArgsInclUnpack == callee->numParams())) return;
 
   CoeffectsSaver cs{callee->hasCoeffectsLocal()};
   GenericsSaver gs{callee->hasReifiedGenerics()};
@@ -263,17 +387,6 @@ inline void initFuncInputs(const Func* callee, uint32_t numArgsInclUnpack) {
 }
 
 /*
- * This helper only does a stack overflow check for the native stack.
- * Both native and VM stack overflows are independently possible.
- */
-inline void checkNativeStack() {
-  // Check whether we're going out of bounds of our native stack.
-  if (LIKELY(stack_in_bounds())) return;
-  TRACE_MOD(Trace::gc, 1, "Maximum stack depth exceeded.\n");
-  throw_stack_overflow();
-}
-
-/*
  * This helper does a stack overflow check on *both* the native stack
  * and the VM stack.
  *
@@ -290,7 +403,7 @@ void checkStack(Stack& stk, const Func* f, int32_t extraCells) {
    * All stack checks are inflated by stackCheckPadding() to ensure
    * there is space both for calling leaf functions /and/ for
    * re-entry.  (See kStackCheckReenterPadding and
-   * RuntimeOption::EvalStackCheckLeafPadding.)
+   * Cfg::Eval::StackCheckLeafPadding.)
    */
   auto limit = f->maxStackCells() + stackCheckPadding() + extraCells;
   if (LIKELY(stack_in_bounds() && !stk.wouldOverflow(limit))) return;

@@ -13,7 +13,7 @@ setlocale(LC_ALL, "en_US");
 date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
       'Newline character' => "%n",
       'Tab character' => "%t"
 ];

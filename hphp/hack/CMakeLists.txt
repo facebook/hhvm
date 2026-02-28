@@ -1,5 +1,7 @@
 option(BUILD_HACK "True if we should build the Hack typechecker." ON)
 
+include(CMakeParseArguments)
+
 if (NOT BUILD_HACK)
   message(STATUS "Skipping hack")
   return()
@@ -117,16 +119,7 @@ invoke_dune(hack_dune_debug debug)
 invoke_dune(hack_dune_test test)
 invoke_dune(hack_dune all)
 
-set(CARGO_BUILD "${CMAKE_SOURCE_DIR}/hphp/hack/scripts/build_rust_to_ocaml.sh")
-
-set(OPCODES "${CMAKE_BINARY_DIR}/hphp/tools/opcodes.rs")
-
-add_executable(gen-rust1 "${CMAKE_SOURCE_DIR}/hphp/tools/hhbc-gen/gen-rust.cpp")
-add_custom_command(
-  OUTPUT "${OPCODES}"
-  COMMAND gen-rust1 > "${OPCODES}"
-  COMMENT "Generating opcodes.rs"
-)
+set(INVOKE_CARGO "${CMAKE_SOURCE_DIR}/hphp/hack/scripts/invoke_cargo.sh")
 
 if(DEFINED ENV{HACKDEBUG})
   set(PROFILE "debug")
@@ -134,76 +127,86 @@ else()
   set(PROFILE "release")
 endif()
 
+set(RUST_OPCODES_DIR "${CMAKE_BINARY_DIR}/hphp/hack/src/hackc")
+set(RUST_OPCODES "${RUST_OPCODES_DIR}/opcodes.rs")
+
 set(HHBC_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc")
 set(HHBC_AST_SRCS
-  "hhbc/hackc_unit.rs"
-  "hhbc/hhas_adata.rs"
-  "hhbc/hhas_attribute.rs"
-  "hhbc/hhas_body.rs"
-  "hhbc/hhas_class.rs"
-  "hhbc/hhas_coeffects.rs"
-  "hhbc/hhas_constant.rs"
-  "hhbc/hhas_function.rs"
-  "hhbc/hhas_method.rs"
-  "hhbc/hhas_module.rs"
-  "hhbc/hhas_param.rs"
-  "hhbc/hhas_pos.rs"
-  "hhbc/hhas_property.rs"
-  "hhbc/hhas_symbol_refs.rs"
-  "hhbc/hhas_type.rs"
-  "hhbc/hhas_type_const.rs"
-  "hhbc/hhas_typedef.rs"
-  "hhbc/hhbc_ast.rs"
-  "hhbc/hhbc_ast_ffi_cbindgen.rs"  # Intentionally not in a crate.
-  "hhbc/hhbc_id.rs"
-  "hhbc/opcodes.rs"
-  "hhbc/typed_value.rs"
+  "${HHBC_PREFIX}/hhbc/adata.rs"
+  "${HHBC_PREFIX}/hhbc/attribute.rs"
+  "${HHBC_PREFIX}/hhbc/body.rs"
+  "${HHBC_PREFIX}/hhbc/class.rs"
+  "${HHBC_PREFIX}/hhbc/coeffects.rs"
+  "${HHBC_PREFIX}/hhbc/constant.rs"
+  "${HHBC_PREFIX}/hhbc/function.rs"
+  "${HHBC_PREFIX}/hhbc/id.rs"
+  "${HHBC_PREFIX}/hhbc/instruct.rs"
+  "${HHBC_PREFIX}/hhbc/method.rs"
+  "${HHBC_PREFIX}/hhbc/module.rs"
+  "${HHBC_PREFIX}/hhbc/param.rs"
+  "${HHBC_PREFIX}/hhbc/pos.rs"
+  "${HHBC_PREFIX}/hhbc/property.rs"
+  "${HHBC_PREFIX}/hhbc/symbol_refs.rs"
+  "${HHBC_PREFIX}/hhbc/types.rs"
+  "${HHBC_PREFIX}/hhbc/type_const.rs"
+  "${HHBC_PREFIX}/hhbc/typedef.rs"
+  "${HHBC_PREFIX}/hhbc/typed_value.rs"
+  "${HHBC_PREFIX}/hhbc/unit.rs"
+  "${HHBC_PREFIX}/hhbc/unit_cbindgen.rs"  # Not in a crate.
+  "${RUST_OPCODES}"
 )
-foreach(src ${HHBC_AST_SRCS})
-  string(APPEND HHBC_AST_SRC_ARG "${HHBC_PREFIX}/${src},")
-endforeach()
 
 set(NAMING_SPECIAL_NAMES_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/naming")
 set(NAMING_SPECIAL_NAMES_SRCS
-   "naming_special_names.rs"
-   "naming_special_names_ffi_cbindgen.rs"
+   "${NAMING_SPECIAL_NAMES_PREFIX}/naming_special_names.rs"
+   "${NAMING_SPECIAL_NAMES_PREFIX}/naming_special_names_ffi_cbindgen.rs"
 )
-foreach(src ${NAMING_SPECIAL_NAMES_SRCS})
-  string(APPEND NAMING_SPECIAL_NAMES_SRC_ARG "${NAMING_SPECIAL_NAMES_PREFIX}/${src},")
-endforeach()
 
 set(FFI_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/ffi")
 set(FFI_SRCS
-   "ffi.rs"
-   "ffi_ffi_cbindgen.rs"
+   "${FFI_PREFIX}/ffi.rs"
+   "${FFI_PREFIX}/ffi_ffi_cbindgen.rs"
 )
-foreach(src ${FFI_SRCS})
-  string(APPEND FFI_SRC_ARG "${FFI_PREFIX}/${src},")
-endforeach()
 
-set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hackc/hhbc-ast.h")
+add_custom_command(
+  OUTPUT ${RUST_OPCODES}
+  COMMAND
+    ${CMAKE_COMMAND} -E make_directory "${RUST_OPCODES_DIR}" &&
+    . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
+    ${INVOKE_CARGO} dump-opcodes dump-opcodes --exe &&
+    ${INVOKE_CARGO} dump-opcodes dump-opcodes --bin dump_opcodes
+      -o "${RUST_OPCODES}"
+  COMMENT "Generating Rust opcode struct for cbindgen to use to generate hhbc-unit.h"
+  DEPENDS "${OPCODE_DATA}"
+)
+
+set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hackc/hhbc-unit.h")
 set(FFI_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/utils/ffi.h")
 set(NAMING_SPECIAL_NAMES_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/naming/naming-special-names.h")
 set(TYPE_CONSTRAINT_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/type-constraint-flags.h")
 set(FCALL_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/fcall-args-flags.h")
 set(HHBC_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/hhbc-shared.h")
 set(ATTR_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/base/attr.h")
+set(FFI_EXTRA_HEADER "${CMAKE_SOURCE_DIR}/hphp/hack/src/utils/ffi/ffi_extra.h")
 
 add_custom_command(
   OUTPUT ${HHBC_AST_HEADER}
   COMMAND
    . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
-    ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
-      --header "${FFI_HEADER}" --srcs "${FFI_SRC_ARG}"
-      --namespaces "HPHP,hackc" &&
-    ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
-      --header "${NAMING_SPECIAL_NAMES_HEADER}" --srcs "${NAMING_SPECIAL_NAMES_SRC_ARG}" --namespaces "HPHP,hackc,hhbc"
-      --namespaces "HPHP,hackc" &&
-    ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
-      --header "${HHBC_AST_HEADER}" --srcs "${HHBC_AST_SRC_ARG}" --namespaces "HPHP,hackc,hhbc"
+    ${INVOKE_CARGO} ffi_cbindgen ffi_cbindgen --exe &&
+    ${INVOKE_CARGO} ffi_cbindgen ffi_cbindgen --bin ffi_cbindgen
+      --header "${FFI_HEADER}" --namespaces "HPHP,hackc"
+      --includes "${FFI_EXTRA_HEADER}"
+      ${FFI_SRCS} &&
+    ${INVOKE_CARGO} ffi_cbindgen ffi_cbindgen --bin ffi_cbindgen
+      --header "${NAMING_SPECIAL_NAMES_HEADER}" --namespaces "HPHP,hackc,hhbc"
+      ${NAMING_SPECIAL_NAMES_SRCS} &&
+    ${INVOKE_CARGO} ffi_cbindgen ffi_cbindgen --bin ffi_cbindgen
+      --header "${HHBC_AST_HEADER}" --namespaces "HPHP,hackc,hhbc"
       --includes "${FFI_HEADER},${NAMING_SPECIAL_NAMES_HEADER},${TYPE_CONSTRAINT_HEADER},${ATTR_HEADER},${FCALL_HEADER},${HHBC_HEADER}"
-  DEPENDS rustc cargo "${OPCODES}"
-  COMMENT "Generating hhbc-ast.h"
+      ${HHBC_AST_SRCS}
+  DEPENDS rustc cargo "${RUST_OPCODES}"
+  COMMENT "Generating hhbc-unit.h"
 )
 
 add_custom_target(
@@ -214,50 +217,122 @@ add_custom_target(
 add_library("hhbc_ast_header" INTERFACE)
 add_dependencies("hhbc_ast_header" "hhbc_ast_cbindgen")
 
-add_custom_target(hack_rust_ffi_bridge_targets)
+add_custom_target(hackc_options)
+include(HHVMRenderConfigSpecification)
+HHVM_RENDER_CONFIG_SPECIFICATION(
+  hackc_options
+  TYPE hackc
+  OUTPUT_PATH "${CMAKE_BINARY_DIR}/hphp/hack/src/hackc/compile"
+)
 
 # Compiling cxx entrypoints for hhvm
-function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
-  set(FFI_BRIDGE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/${FFI_BRIDGE_DIR}")
-  set(FFI_BRIDGE_BIN "${RUST_FFI_BUILD_ROOT}/hphp/hack/${FFI_BRIDGE_DIR}")
+#
+# Usage:
+#     build_cxx_bridge(
+#       name
+#       DIR directory
+#       [EXTRA_SRCS src [src ...]]
+#       [LINK_LIBS lib [lib ...]]
+#     )
+#
+# Where:
+#   `name` is the target name of the cxx_bridge.
+#   `directory` is the required directory of the cxx_bridge sources.
+#   `src` are extra source files to include in the bridge.
+#   `lib` are extra link libraries to include in the bridge.
+#
+function(build_cxx_bridge NAME)
+  cmake_parse_arguments(CXX_BRIDGE "" "DIR" "EXTRA_SRCS;LINK_LIBS" ${ARGN})
 
-  set(RUST_PART_LIB "${FFI_BRIDGE_BIN}/${PROFILE}/${CMAKE_STATIC_LIBRARY_PREFIX}${NAME}_ffi${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  set(RUST_PART_CXX "${FFI_BRIDGE_BIN}/${NAME}_ffi.cpp")
-  set(RUST_PART_HEADER "${FFI_BRIDGE_BIN}/${NAME}_ffi.rs")
-  set(GENERATED "${FFI_BRIDGE_BIN}/cxxbridge/${NAME}_ffi/${NAME}_ffi")
+  if ("${CXX_BRIDGE_DIR}" STREQUAL "")
+    message(FATAL_ERROR "Missing DIR parameter")
+  endif()
+  if (NOT "${CXX_BRIDGE_UNPARSED_ARGUMENTS}" STREQUAL "")
+    message(FATAL_ERROR "Unexpected parameters: ${CXX_BRIDGE_UNPARSED_ARGUMENTS}")
+  endif()
+
+  set(FFI_BRIDGE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/${CXX_BRIDGE_DIR}")
+  set(FFI_BRIDGE_BIN "${RUST_FFI_BUILD_ROOT}/hphp/hack/${CXX_BRIDGE_DIR}")
+
+  set(RUST_PART_LIB "${FFI_BRIDGE_BIN}/${PROFILE}/${CMAKE_STATIC_LIBRARY_PREFIX}${NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(RUST_PART_CXX "${FFI_BRIDGE_BIN}/${NAME}.cpp")
+  set(RUST_PART_HEADER "${FFI_BRIDGE_BIN}/${NAME}.rs.h")
+  set(GENERATED "${FFI_BRIDGE_BIN}/cxxbridge/${NAME}/${NAME}")
   set(GENERATED_CXXBRIDGE "${FFI_BRIDGE_BIN}/cxxbridge")
 
   add_custom_command(
-      OUTPUT ${RUST_PART_CXX}
+      OUTPUT
+        ${RUST_PART_CXX}
+        ${RUST_PART_HEADER}
+        ${RUST_PART_LIB}
+        ${GENERATED_CXXBRIDGE}
       COMMAND
         ${CMAKE_COMMAND} -E make_directory "${FFI_BRIDGE_BIN}" &&
         . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
-        ${CARGO_BUILD} "${NAME}_ffi" "${NAME}_ffi" --cxx "${FFI_BRIDGE_BIN}" &&
+        ${INVOKE_CARGO} "${NAME}" "${NAME}" --target-dir "${FFI_BRIDGE_BIN}" &&
         ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.cc" "${RUST_PART_CXX}" &&
         ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.h" "${RUST_PART_HEADER}"
       WORKING_DIRECTORY ${FFI_BRIDGE_SRC}
-      DEPENDS rustc cargo "${OPCODES}"
+      DEPENDS rustc cargo "${OPCODE_DATA}"
   )
   add_custom_target(
     "${NAME}_cxx"
-    DEPENDS ${RUST_PART_CXX}
+    DEPENDS ${RUST_PART_LIB}
   )
+  add_library("${NAME}" STATIC ${RUST_PART_CXX} ${CXX_BRIDGE_EXTRA_SRCS} )
+  add_dependencies(hack_rust_ffi_bridge_targets "${NAME}")
+  add_library("${NAME}_rust_part" STATIC IMPORTED)
+  add_dependencies("${NAME}_rust_part" "${NAME}_cxx")
 
-  add_library("${NAME}_ffi" STATIC ${RUST_PART_CXX} ${ARGN})
-  add_dependencies("${NAME}_ffi" rustc cargo "${NAME}_cxx")
-  add_dependencies(hack_rust_ffi_bridge_targets "${NAME}_ffi")
-  target_link_libraries("${NAME}_ffi" PUBLIC ${RUST_PART_LIB})
-  # `-iquote` is like `-I` (or target_include_directories()`), except:
-  # - it takes precedence over `-I`
-  # - it only applies to `#include "foo"`, not `#include <foo>`
-  target_compile_options("${NAME}_ffi" INTERFACE "-iquote" "${RUST_FFI_BUILD_ROOT}")
-  target_compile_options("${NAME}_ffi" PUBLIC "-iquote" "${GENERATED_CXXBRIDGE}")
+  # Intentionally create link-time cyclic dependency between ${NAME}_rust_part
+  # and ${NAME} so that CMake will automatically construct the link line so
+  # that the linker will scan through involved static libraries multiple times.
+  set_target_properties(
+    "${NAME}_rust_part"
+    PROPERTIES
+    IMPORTED_LOCATION ${RUST_PART_LIB}
+    IMPORTED_LINK_DEPENDENT_LIBRARIES "${NAME}"
+  )
+  target_link_libraries(
+    "${NAME}"
+    PUBLIC
+      "${NAME}_rust_part"
+      ${CXX_BRIDGE_LINK_LIBS}
+  )
+  target_include_directories("${NAME}" INTERFACE "${RUST_FFI_BUILD_ROOT}")
+  target_include_directories("${NAME}" PRIVATE "${GENERATED_CXXBRIDGE}")
 endfunction()
 
-build_cxx_bridge(parser "src/parser/ffi_bridge")
-build_cxx_bridge(compiler "src/hackc/ffi_bridge")
-build_cxx_bridge(hhvm_types "src/hackc/hhvm_cxx/hhvm_types" "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_types/as-base-ffi.cpp")
-build_cxx_bridge(hhvm_hhbc_defs "src/hackc/hhvm_cxx/hhvm_hhbc_defs" "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_hhbc_defs/as-hhbc-ffi.cpp")
+build_cxx_bridge(
+  package_ffi
+  DIR "src/package/ffi_bridge"
+)
+build_cxx_bridge(
+  parser_ffi
+  DIR "src/parser/ffi_bridge"
+)
+build_cxx_bridge(
+  compiler_ffi
+  DIR "src/hackc/ffi_bridge"
+  EXTRA_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/ffi_bridge/external_decl_provider.cpp"
+  LINK_LIBS hdf
+)
+build_cxx_bridge(
+  hdf
+  DIR "src/utils/hdf"
+  EXTRA_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/hdf/hdf-wrap.cpp"
+  LINK_LIBS folly
+)
+build_cxx_bridge(
+  hhvm_types_ffi
+  DIR "src/hackc/hhvm_cxx/hhvm_types"
+  EXTRA_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_types/as-base-ffi.cpp"
+)
+build_cxx_bridge(
+ hhvm_hhbc_defs_ffi
+ DIR "src/hackc/hhvm_cxx/hhvm_hhbc_defs"
+ EXTRA_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_hhbc_defs/as-hhbc-ffi.cpp"
+)
 
 if (NOT LZ4_FOUND)
   add_dependencies(hack_dune lz4)
@@ -267,11 +342,9 @@ endif()
 
 # Intentionally not using `hack_dune_debug` as it generates output files of a
 # different format (bytecode instead of raw executables, which is useful if
-# you're working with Hack, but means that e.g. hhvm can't find
-# `hh_single_compile` in the source tree. Keep it around, but require it to be
-# explicitly used
-add_custom_target(hack ALL DEPENDS hack_dune "${OPCODES}")
-add_custom_target(hack_test DEPENDS hack_dune_test "${OPCODES}")
+# you're working with Hack. Keep it around, but require it to be explicitly used
+add_custom_target(hack ALL DEPENDS hack_dune "${OPCODE_DATA}")
+add_custom_target(hack_test DEPENDS hack_dune_test "${OPCODE_DATA}")
 
 configure_file(dev_env.sh.in dev_env.sh ESCAPE_QUOTES @ONLY)
 configure_file(dev_env_common.sh.in dev_env_common.sh ESCAPE_QUOTES @ONLY)

@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_rewind() {
+function main_rewind() :mixed{
 $sample_dir = __DIR__.'/../../sample_dir';
 $iterator = new FilesystemIterator(
   $sample_dir,

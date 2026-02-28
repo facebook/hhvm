@@ -1,0 +1,1 @@
+--config allowed_files_for_ignore_readonly=ignored_readonly_error.good.php,test_coerce.php,test_bidirectional.php

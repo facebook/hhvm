@@ -1,0 +1,18 @@
+ERROR: File "negative_reified.php", line 11, characters 7-13:
+Invalid return type (Typing[4110])
+  File "negative_reified.php", line 5, characters 54-56:
+  Expected `int`
+  File "negative_reified.php", line 5, characters 24-33:
+  But got `Reified<T>`
+ERROR: File "negative_reified.php", line 11, characters 7-13:
+Invalid return type (Typing[4110])
+  File "negative_reified.php", line 5, characters 54-56:
+  Expected `int`
+  File "negative_reified.php", line 7, characters 18-29:
+  But got `(Reified<T> & not Reified<int>)` from this `is` expression test
+ERROR: File "negative_reified.php", line 11, characters 7-13:
+Invalid return type (Typing[4110])
+  File "negative_reified.php", line 5, characters 54-56:
+  Expected `int`
+  File "negative_reified.php", line 7, characters 18-29:
+  But got `not Reified<int>` from this `is` expression test

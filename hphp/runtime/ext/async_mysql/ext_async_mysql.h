@@ -43,12 +43,12 @@ namespace db = facebook::db;
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlConnectionPool
 
-struct AsyncMysqlConnectionPool {
+struct AsyncMysqlConnectionPool :
+    SystemLib::ClassLoader<"AsyncMysqlConnectionPool"> {
   AsyncMysqlConnectionPool() = default;
   void sweep();
 
   std::shared_ptr<am::AsyncConnectionPool> m_async_pool;
-  static const StaticString s_className;
 
   AsyncMysqlConnectionPool(const AsyncMysqlConnectionPool&) = delete;
   AsyncMysqlConnectionPool& operator=(const AsyncMysqlConnectionPool&) = delete;
@@ -57,7 +57,7 @@ struct AsyncMysqlConnectionPool {
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlConnection
 
-struct AsyncMysqlConnection {
+struct AsyncMysqlConnection : SystemLib::ClassLoader<"AsyncMysqlConnection"> {
   AsyncMysqlConnection();
   AsyncMysqlConnection(const AsyncMysqlConnection&) = delete;
   AsyncMysqlConnection& operator=(const AsyncMysqlConnection&) = delete;
@@ -67,15 +67,14 @@ struct AsyncMysqlConnection {
   void setClientStats(db::ClientPerfStats perfStats);
   void verifyValidConnection();
   bool isValidConnection();
-  static Class* getClass();
   static Object newInstance(
       std::unique_ptr<am::Connection> conn,
       std::shared_ptr<am::ConnectOperation> conn_op = nullptr,
       db::ClientPerfStats clientStats = db::ClientPerfStats());
-  using AttributeMap = std::unordered_map<std::string, std::string>;
+  using AttributeMap = am::AttributeMap;
   Object query(
       ObjectData* this_,
-      am::Query query,
+      const am::Query& query,
       int64_t timeout_micros = -1,
       const AttributeMap& queryAttributes = AttributeMap());
 
@@ -87,15 +86,12 @@ struct AsyncMysqlConnection {
   // Only available if the connection was created inside the AsyncMysqlClient.
   db::ClientPerfStats m_clientStats;
   std::shared_ptr<am::ConnectOperation> m_op;
-
-  static Class* s_class;
-  static const StaticString s_className;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // class MySSLContext
 
-struct MySSLContextProvider {
+struct MySSLContextProvider : SystemLib::ClassLoader<"MySSLContextProvider"> {
   MySSLContextProvider() {}
   explicit MySSLContextProvider(
       std::shared_ptr<am::SSLOptionsProviderBase> provider);
@@ -104,12 +100,8 @@ struct MySSLContextProvider {
 
   static Object newInstance(
       std::shared_ptr<am::SSLOptionsProviderBase> ssl_provider);
-  static Class* getClass();
   std::shared_ptr<am::SSLOptionsProviderBase> getSSLProvider();
   void setSSLProvider(std::shared_ptr<am::SSLOptionsProviderBase> ssl_provider);
-
-  static Class* s_class;
-  static const StaticString s_className;
 
   std::shared_ptr<am::SSLOptionsProviderBase> m_provider;
 };
@@ -117,13 +109,10 @@ struct MySSLContextProvider {
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlConnectionOptions
 
-struct AsyncMysqlConnectionOptions {
+struct AsyncMysqlConnectionOptions :
+    SystemLib::ClassLoader<"AsyncMysqlConnectionOptions"> {
   AsyncMysqlConnectionOptions();
-  static Class* getClass();
   const am::ConnectionOptions& getConnectionOptions();
-
-  static Class* s_class;
-  static const StaticString s_className;
 
   am::ConnectionOptions m_conn_opts;
   TYPE_SCAN_IGNORE_FIELD(m_conn_opts);
@@ -149,6 +138,7 @@ struct AsyncMysqlResult {
 
   void sweep() { m_op.reset(); }
 
+  bool sslSessionReused();
   String getSslCertCn();
   String getSslCertSan();
   String getSslCertExtensions();
@@ -161,15 +151,13 @@ struct AsyncMysqlResult {
 // Intended to just hold extra data about the Operation. This should be created
 // in `AsyncMysqlConnection`.
 
-struct AsyncMysqlConnectResult : AsyncMysqlResult {
+struct AsyncMysqlConnectResult :
+    AsyncMysqlResult,
+    SystemLib::ClassLoader<"AsyncMysqlConnectResult"> {
   AsyncMysqlConnectResult() = default;
   ~AsyncMysqlConnectResult() override {}
-  static Class* getClass();
   static Object newInstance(std::shared_ptr<am::Operation> op,
                             db::ClientPerfStats clientStats);
-
-  static Class* s_class;
-  static const StaticString s_className;
 
   AsyncMysqlConnectResult(const AsyncMysqlConnectResult&) = delete;
   AsyncMysqlConnectResult& operator=(const AsyncMysqlConnectResult&) = delete;
@@ -179,16 +167,14 @@ struct AsyncMysqlConnectResult : AsyncMysqlResult {
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlErrorResult
 
-struct AsyncMysqlErrorResult : AsyncMysqlResult {
+struct AsyncMysqlErrorResult :
+    AsyncMysqlResult,
+    SystemLib::ClassLoader<"AsyncMysqlErrorResult"> {
   AsyncMysqlErrorResult() = default;
   ~AsyncMysqlErrorResult() override {}
 
-  static Class* getClass();
   static Object newInstance(std::shared_ptr<am::Operation> op,
                             db::ClientPerfStats clientStats);
-
-  static Class* s_class;
-  static const StaticString s_className;
 
   AsyncMysqlErrorResult(const AsyncMysqlErrorResult&) = delete;
   AsyncMysqlErrorResult& operator=(const AsyncMysqlErrorResult&) = delete;
@@ -197,7 +183,8 @@ struct AsyncMysqlErrorResult : AsyncMysqlResult {
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlQueryErrorResult
 
-struct AsyncMysqlQueryErrorResult {
+struct AsyncMysqlQueryErrorResult :
+    SystemLib::ClassLoader<"AsyncMysqlQueryErrorResult"> {
   AsyncMysqlQueryErrorResult();
   AsyncMysqlQueryErrorResult(const AsyncMysqlQueryErrorResult&) = delete;
   AsyncMysqlQueryErrorResult& operator=(const AsyncMysqlQueryErrorResult&) =
@@ -206,14 +193,11 @@ struct AsyncMysqlQueryErrorResult {
   void create(std::shared_ptr<am::Operation> op,
               db::ClientPerfStats values,
               req::ptr<c_Vector> results);
-  static Class* getClass();
   static Object newInstance(std::shared_ptr<am::Operation> op,
                             db::ClientPerfStats values,
                             req::ptr<c_Vector> results);
 
   req::ptr<c_Vector> m_query_results;
-  static Class* s_class;
-  static const StaticString s_className;
 
   // extends AsyncMysqlErrorResult
   //
@@ -234,7 +218,7 @@ struct AsyncMysqlQueryErrorResult {
 struct FieldIndex {
   explicit FieldIndex(const am::RowFields* row_fields);
 
-  size_t getFieldIndex(String field_name) const;
+  size_t getFieldIndex(const String& field_name) const;
   String getFieldString(size_t field_index) const;
 
  private:
@@ -249,18 +233,19 @@ struct FieldIndex {
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlQueryResult
 
-struct AsyncMysqlQueryResult : AsyncMysqlResult {
+struct AsyncMysqlQueryResult :
+    AsyncMysqlResult,
+    SystemLib::ClassLoader<"AsyncMysqlQueryResult"> {
   AsyncMysqlQueryResult() = default;
   ~AsyncMysqlQueryResult() override {}
   void sweep();
   void
-  create(std::shared_ptr<am::Operation> op, db::ClientPerfStats values,
+  create(std::shared_ptr<am::FetchOperation> op, db::ClientPerfStats values,
          am::QueryResult query_result, bool noIndexUsed);
   Object buildRows(bool as_maps, bool typed_values);
   Array buildTypedVecMaps();
-  static Class* getClass();
   static Object
-  newInstance(std::shared_ptr<am::Operation> op, db::ClientPerfStats values,
+  newInstance(std::shared_ptr<am::FetchOperation> op, db::ClientPerfStats values,
               am::QueryResult query_result, bool noIndexUsed);
 
   std::unique_ptr<am::QueryResult> m_query_result;
@@ -268,8 +253,6 @@ struct AsyncMysqlQueryResult : AsyncMysqlResult {
 
   // Created here for buildRows and passed to RowBlocks
   req::shared_ptr<FieldIndex> m_field_index;
-  static Class* s_class;
-  static const StaticString s_className;
 
   AsyncMysqlQueryResult(const AsyncMysqlQueryResult&) = delete;
   AsyncMysqlQueryResult& operator=(const AsyncMysqlQueryResult&) = delete;
@@ -372,21 +355,18 @@ struct AsyncMysqlConnectAndMultiQueryEvent final : AsioExternalThreadEvent {
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlRowBlock
 
-struct AsyncMysqlRowBlock {
+struct AsyncMysqlRowBlock : SystemLib::ClassLoader<"AsyncMysqlRowBlock"> {
   AsyncMysqlRowBlock() = default;
 
   void sweep();
   size_t getIndexFromVariant(const Variant& field);
   template <typename FieldType>
   FieldType getFieldAs(int64_t row, const Variant& field);
-  static Class* getClass();
   static Object newInstance(am::RowBlock* row_block,
                             req::shared_ptr<FieldIndex> indexer);
 
   std::unique_ptr<am::RowBlock> m_row_block;
   req::shared_ptr<FieldIndex> m_field_index;
-  static Class* s_class;
-  static const StaticString s_className;
 
   AsyncMysqlRowBlock(const AsyncMysqlRowBlock&) = delete;
   AsyncMysqlRowBlock& operator=(const AsyncMysqlRowBlock&) = delete;
@@ -395,15 +375,13 @@ struct AsyncMysqlRowBlock {
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlRowBlockIterator
 
-struct AsyncMysqlRowBlockIterator {
+struct AsyncMysqlRowBlockIterator :
+    SystemLib::ClassLoader<"AsyncMysqlRowBlockIterator"> {
   AsyncMysqlRowBlockIterator() = default;
-  static Class* getClass();
   static Object newInstance(Object row_block, size_t row_number);
 
   Object m_row_block;
   size_t m_row_number;
-  static Class* s_class;
-  static const StaticString s_className;
 
   AsyncMysqlRowBlockIterator(const AsyncMysqlRowBlockIterator&) = delete;
   AsyncMysqlRowBlockIterator& operator=(const AsyncMysqlRowBlockIterator&) =
@@ -413,16 +391,13 @@ struct AsyncMysqlRowBlockIterator {
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlRow
 
-struct AsyncMysqlRow {
+struct AsyncMysqlRow : SystemLib::ClassLoader<"AsyncMysqlRow"> {
   AsyncMysqlRow() = default;
 
-  static Class* getClass();
   static Object newInstance(Object row_block, size_t row_number);
 
   Object m_row_block;
   size_t m_row_number;
-  static Class* s_class;
-  static const StaticString s_className;
 
   AsyncMysqlRow(const AsyncMysqlRow&) = delete;
   AsyncMysqlRow& operator=(const AsyncMysqlRow&) = delete;
@@ -431,16 +406,13 @@ struct AsyncMysqlRow {
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlRowIterator
 
-struct AsyncMysqlRowIterator {
+struct AsyncMysqlRowIterator : SystemLib::ClassLoader<"AsyncMysqlRowIterator"> {
   AsyncMysqlRowIterator() = default;
 
-  static Class* getClass();
   static Object newInstance(Object row, size_t field_number);
 
   Object m_row;
   size_t m_field_number;
-  static Class* s_class;
-  static const StaticString s_className;
 
   AsyncMysqlRowIterator(const AsyncMysqlRowIterator&) = delete;
   AsyncMysqlRowIterator& operator=(const AsyncMysqlRowIterator&) = delete;

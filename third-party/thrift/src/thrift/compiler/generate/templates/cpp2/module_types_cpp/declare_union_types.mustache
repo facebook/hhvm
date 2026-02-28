@@ -1,0 +1,33 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+namespace apache { namespace thrift {
+
+folly::Range<{{struct:cpp_fullname}}::Type const*> const TEnumTraits<{{struct:cpp_fullname}}::Type>::values = {{!
+    }}folly::range(TEnumDataStorage<{{struct:cpp_fullname}}::Type>::values);
+folly::Range<std::string_view const*> const TEnumTraits<{{struct:cpp_fullname}}::Type>::names = {{!
+    }}folly::range(TEnumDataStorage<{{struct:cpp_fullname}}::Type>::names);
+
+bool TEnumTraits<{{struct:cpp_fullname}}::Type>::findName(type value, std::string_view* out) noexcept {
+  return ::apache::thrift::detail::st::enum_find_name(value, out);
+}
+
+bool TEnumTraits<{{struct:cpp_fullname}}::Type>::findValue(std::string_view name, type* out) noexcept {
+  return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+}} // apache::thrift

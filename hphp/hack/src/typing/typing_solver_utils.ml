@@ -8,6 +8,7 @@
 
 open Hh_prelude
 open Typing_defs
+open Typing_defs_constraints
 open Typing_env_types
 module Env = Typing_env
 module ITySet = Internal_type_set
@@ -26,7 +27,7 @@ let filter_locl_types types =
 
 (** If a type variable appear in one of its own lower bounds under a combination
     of unions and intersections, it can be simplified away from this lower bound by
-    replacing any of its occurences with nothing.
+    replacing any of its occurrences with nothing.
     E.g.
     - if #1 has lower bound (#1 | A), the lower bound can be simplified to
     (nothing | A) = A.
@@ -38,10 +39,10 @@ let remove_tyvar_from_lower_bound env var lower_bound =
   let rec remove env ty =
     let (env, ty) = Env.expand_type env ty in
     match deref ty with
-    | (_, Tvar v) when Ident.equal v var -> (env, MakeType.nothing Reason.none)
+    | (_, Tvar v) when Tvid.equal v var -> (env, MakeType.nothing Reason.none)
     | (r, Toption ty) ->
       let (env, ty) = remove env ty in
-      (env, MakeType.nullable_locl r ty)
+      (env, MakeType.nullable r ty)
     | (r, Tunion tyl) ->
       let (env, tyl) = List.fold_map tyl ~init:env ~f:remove in
       let tyl = List.filter tyl ~f:(fun ty -> not (is_nothing ty)) in
@@ -58,7 +59,10 @@ let remove_tyvar_from_lower_bound env var lower_bound =
     | (r, Tnewtype (name, [tyarg], _))
       when String.equal name Naming_special_names.Classes.cSupportDyn ->
       let (env, ty) = remove env tyarg in
-      (env, MakeType.supportdyn r ty)
+      if is_nothing ty then
+        (env, MakeType.nothing r)
+      else
+        (env, MakeType.supportdyn r ty)
     | _ -> (env, ty)
   and remove_i env ty =
     match ty with
@@ -86,7 +90,7 @@ let remove_tyvar_from_lower_bounds env var lower_bounds =
 
 (** If a type variable appear in one of its own upper bounds under a combination
     of unions and intersections, it can be simplified away from this upper bound by
-    replacing any of its occurences with mixed.
+    replacing any of its occurrences with mixed.
     E.g.
     - if #1 has upper bound (#1 & A), the upper bound can be simplified to
     (mixed & A) = A.
@@ -99,26 +103,27 @@ let remove_tyvar_from_upper_bound env var upper_bound =
     || ty_equal ty (MakeType.intersection Reason.none [])
   in
   let rec remove env ty =
-    let (env, ty) = Env.expand_type env ty in
-    match deref ty with
-    | (_, Tvar v) when Ident.equal v var -> (env, MakeType.mixed Reason.none)
-    | (r, Toption ty) ->
-      let (env, ty) = remove env ty in
-      (env, MakeType.nullable_locl r ty)
-    | (r, Tunion tyl) ->
-      let (env, tyl) = List.fold_map tyl ~init:env ~f:remove in
-      let ty =
-        if List.exists tyl ~f:is_mixed then
-          MakeType.mixed r
-        else
-          MakeType.union r tyl
-      in
-      (env, ty)
-    | (r, Tintersection tyl) ->
-      let (env, tyl) = List.fold_map tyl ~init:env ~f:remove in
-      let tyl = List.filter tyl ~f:(fun ty -> not (is_mixed ty)) in
-      (env, MakeType.intersection r tyl)
-    | _ -> (env, ty)
+    Typing_utils.map_supportdyn env ty (fun env ty ->
+        let (env, ty) = Env.expand_type env ty in
+        match deref ty with
+        | (_, Tvar v) when Tvid.equal v var -> (env, MakeType.mixed Reason.none)
+        | (r, Toption ty) ->
+          let (env, ty) = remove env ty in
+          (env, MakeType.nullable r ty)
+        | (r, Tunion tyl) ->
+          let (env, tyl) = List.fold_map tyl ~init:env ~f:remove in
+          let ty =
+            if List.exists tyl ~f:is_mixed then
+              MakeType.mixed r
+            else
+              MakeType.union r tyl
+          in
+          (env, ty)
+        | (r, Tintersection tyl) ->
+          let (env, tyl) = List.fold_map tyl ~init:env ~f:remove in
+          let tyl = List.filter tyl ~f:(fun ty -> not (is_mixed ty)) in
+          (env, MakeType.intersection r tyl)
+        | _ -> (env, ty))
   and remove_i env ty =
     match ty with
     | LoclType ty ->
@@ -174,7 +179,7 @@ let var_occurs_in_ty env var ty =
       method! on_tvar (env, occurs) r v =
         let (env, ety) = Env.expand_var env r v in
         match get_node ety with
-        | Tvar v -> (env, Ident.equal v var)
+        | Tvar v -> (env, Tvid.equal v var)
         | _ -> this#on_type (env, occurs) ety
 
       method! on_type (env, occurs) ty =
@@ -194,20 +199,18 @@ let err_if_var_in_ty_pure env var ty =
         primary
         @@ Primary.Unification_cycle
              {
-               pos = get_pos ty |> Pos_or_decl.unsafe_to_raw_pos;
+               pos = Env.get_tyvar_pos env var;
                ty_name =
-                 lazy
-                   Typing_print.(
-                     with_blank_tyvars (fun () -> full_rec env var ty));
+                 lazy Typing_print.(full_rec ~hide_internals:true env var ty);
              })
     in
-    (MakeType.err (get_reason ty), Some ty_err)
+    (MakeType.union (get_reason ty) [], Some ty_err)
   else
     (ty, None)
 
 let err_if_var_in_ty env var ty =
   match err_if_var_in_ty_pure env var ty with
   | (ty, Some err) ->
-    Errors.add_typing_error err;
+    Typing_error_utils.add_typing_error ~env err;
     ty
   | (ty, _) -> ty

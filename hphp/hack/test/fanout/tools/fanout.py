@@ -12,9 +12,9 @@ import attr
 
 from .fanout_test_driver import (
     Binaries,
-    run_scenario_saved_state_init,
     run_scenario_incremental_no_old_decls,
     run_scenario_incremental_with_old_decls,
+    run_scenario_saved_state_init,
 )
 from .fanout_test_parser import FanoutTest
 
@@ -35,11 +35,10 @@ class Mode(Enum):
 
 
 @attr.s(auto_attribs=True)
-class Opts(object):
+class Opts:
     hh_client: str
     hh_server: str
     hh_single_type_check: str
-    legacy_hh_fanout: str
     debug: bool
     mode: Mode
     input_file: str
@@ -48,7 +47,6 @@ class Opts(object):
         return Binaries(
             hh_client=self.hh_client,
             hh_server=self.hh_server,
-            legacy_hh_fanout=self.legacy_hh_fanout,
             hh_single_type_check=self.hh_single_type_check,
         )
 
@@ -62,7 +60,6 @@ def go(opts: Opts) -> None:
     logging.debug("hh_client: %s", opts.hh_client)
     logging.debug("hh_server: %s", opts.hh_server)
     logging.debug("hh_single_type_check: %s", opts.hh_single_type_check)
-    logging.debug("legacy_hh_fanout: %s", opts.legacy_hh_fanout)
     logging.debug("mode: %s", opts.mode)
     logging.debug("input_file: %s", opts.input_file)
 
@@ -82,7 +79,6 @@ def main() -> None:
     parser.add_argument("--hh-client", type=os.path.abspath)
     parser.add_argument("--hh-server", type=os.path.abspath)
     parser.add_argument("--hh-single-type-check", type=os.path.abspath)
-    parser.add_argument("--legacy-hh-fanout", type=os.path.abspath)
     parser.add_argument("--debug", action="store_true")
     parser.add_argument(
         "--mode", type=Mode, choices=list(Mode), default=Mode.SAVED_STATE_INIT

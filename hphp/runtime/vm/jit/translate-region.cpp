@@ -16,26 +16,23 @@
 
 #include "hphp/runtime/vm/jit/translate-region.h"
 
-#include "hphp/util/arch.h"
+#include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/ringbuffer.h"
-#include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
-#include "hphp/runtime/base/coeffects-config.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tracing.h"
 
-#include "hphp/runtime/ext/asio/ext_wait-handle.h"
-
 #include "hphp/runtime/vm/bc-pattern.h"
-#include "hphp/runtime/vm/super-inlining-bros.h"
 
-#include "hphp/runtime/vm/hhbc-codec.h"
+#include "hphp/runtime/vm/jit/inline-stitching.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
+#include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-func-prologue.h"
+#include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
-#include "hphp/runtime/vm/jit/irgen-sib.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
@@ -44,12 +41,13 @@
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/translation-stats.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-TRACE_SET_MOD(trans);
+TRACE_SET_MOD(trans)
 
 namespace HPHP::jit {
 
@@ -99,7 +97,7 @@ BlockIdToIRBlockMap createBlockMap(irgen::IRGS& irgs,
     ret[id] = iBlock;
     FTRACE(1,
            "createBlockMaps: RegionBlock {} => IRBlock {} (BC offset = {})\n",
-           id, iBlock->id(), rBlock->start().offset());
+           id, iBlock->id(), rBlock->start().printableOffset());
   }
 
   return ret;
@@ -122,18 +120,18 @@ void setIRBlock(irgen::IRGS& irgs,
 
   assertx(!irb.hasBlock(sk));
   FTRACE(3, "  setIRBlock: blockId {}, offset {} => IR Block {}\n",
-         blockId, sk.offset(), iit->second->id());
+         blockId, sk.printableOffset(), iit->second->id());
   irb.setBlock(sk, iit->second);
 }
 
 /*
  * Set IRBuilder's Blocks for srcBlockId's successors' offsets within
- * the region.  It also sets the guard-failure block, if any.
+ * the region.  It also returns the guard-failure block, if any.
  */
-void setSuccIRBlocks(irgen::IRGS& irgs,
-                     const RegionDesc& region,
-                     RegionDesc::BlockId srcBlockId,
-                     const BlockIdToIRBlockMap& blockIdToIRBlock) {
+Block* setSuccIRBlocks(irgen::IRGS& irgs,
+                       const RegionDesc& region,
+                       RegionDesc::BlockId srcBlockId,
+                       const BlockIdToIRBlockMap& blockIdToIRBlock) {
   FTRACE(3, "setSuccIRBlocks: srcBlockId = {}\n", srcBlockId);
   auto& irb = *irgs.irb;
   irb.resetOffsetMapping();
@@ -143,28 +141,9 @@ void setSuccIRBlocks(irgen::IRGS& irgs,
   if (auto nextRetrans = region.nextRetrans(srcBlockId)) {
     auto it = blockIdToIRBlock.find(nextRetrans.value());
     assertx(it != blockIdToIRBlock.end());
-    irb.setGuardFailBlock(it->second);
-  } else {
-    irb.resetGuardFailBlock();
+    return it->second;
   }
-}
-
-bool blockHasUnprocessedPred(
-  const RegionDesc&             region,
-  RegionDesc::BlockId           blockId,
-  const RegionDesc::BlockIdSet& processedBlocks)
-{
-  for (auto predId : region.preds(blockId)) {
-    if (processedBlocks.count(predId) == 0) {
-      return true;
-    }
-  }
-  if (auto prevRetrans = region.prevRetrans(blockId)) {
-    if (processedBlocks.count(prevRetrans.value()) == 0) {
-      return true;
-    }
-  }
-  return false;
+  return nullptr;
 }
 
 /*
@@ -174,7 +153,31 @@ bool blockHasUnprocessedPred(
  * hold, emits such type assertions.
  */
 void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
-  if (!sk.funcEntry()) return;
+  assertx(sk.funcEntry());
+
+  uint32_t loc = 0;
+
+  // Set types of passed arguments. They were already type checked.
+  auto const numArgs = sk.numEntryArgs();
+  for (; loc < numArgs; ++loc) {
+    auto const t = typeFromFuncParam(func, loc);
+    irgen::assertTypeLocation(irgs, Location::Local { loc }, t);
+  }
+
+  // Non-passed positional parameters contain uninitialized garbage.
+  auto const numNonVariadicParams = func->numNonVariadicParams();
+  loc = numNonVariadicParams;
+
+  // Set the type of ...$args parameter.
+  if (func->hasVariadicCaptureParam()) {
+    assertx(func->numNonVariadicParams() == loc);
+    auto const t = numArgs == numNonVariadicParams
+      ? TVec : Type::cns(staticEmptyVec());
+    irgen::assertTypeLocation(irgs, Location::Local { loc }, t);
+    loc++;
+  }
+
+  assertx(loc == func->numParams());
 
   if (func->isClosureBody()) {
     // In a closure, non-parameter locals can have types other than Uninit
@@ -182,7 +185,7 @@ void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
     // on hhbbc to assert these types.
     return;
   }
-  auto loc = func->numParams();
+
   if (func->hasReifiedGenerics()) {
     // The next non-parameter local contains the reified generics.
     assertx(func->reifiedGenericsLocalId() == loc);
@@ -215,35 +218,51 @@ struct ArrayReachInfo {
  */
 void emitGuards(irgen::IRGS& irgs,
                 const RegionDesc::Block& block,
-                bool isEntry) {
+                bool isEntry,
+                Block* guardFailBlock) {
   auto const sk = block.start();
-  auto& typePreConditions = block.typePreConditions();
-
   if (isEntry) {
     irgen::ringbufferEntry(irgs, Trace::RBTypeTraceletGuards, sk);
+  }
+
+  if (sk.nonTrivialFuncEntry()) {
     emitEntryAssertions(irgs, block.func(), sk);
+  }
+  if (Cfg::Jit::CollectTranslationStats) {
+    auto transStats = globalTransStats();
+    assertx(transStats != nullptr);
+    TransID transStatsID = transStats->initTransStats(irgs.context.kind, sk);
+    assertx(transStatsID != kInvalidTransID);
+    gen(irgs, IncStatCounter, TransIDData{transStatsID});
   }
 
   // Emit type guards/preconditions.
-  for (auto const& preCond : typePreConditions) {
+  assertx(IMPLIES(sk.trivialDVFuncEntry(), block.typePreConditions().empty()));
+  for (auto const& preCond : block.typePreConditions()) {
     auto const type = preCond.type;
     auto const loc  = preCond.location;
     assertx(IMPLIES(type.arrSpec(), irgs.context.kind == TransKind::Live));
-    irgen::checkType(irgs, loc, type, sk);
+    if (guardFailBlock == nullptr) guardFailBlock = irgen::makeExit(irgs, sk);
+    irgen::checkType(irgs, loc, type, guardFailBlock);
   }
 
   // Finish emitting guards, and emit profiling counters.
   if (isEntry) {
     irgen::gen(irgs, EndGuards);
-
-    if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
+    if (RI().m_coverage.m_should_use_per_file_coverage &&
+        !sk.trivialDVFuncEntry()) {
       irgen::checkCoverage(irgs);
+    }
+
+    if (Cfg::Debugger::EnableVSDebugger && Cfg::Eval::EmitDebuggerIntrCheck &&
+        !sk.trivialDVFuncEntry()) {
+      irgen::checkDebuggerIntr(irgs, curSrcKey(irgs));
     }
 
     if (irgs.context.kind == TransKind::Profile) {
       assertx(irgs.context.transIDs.size() == 1);
       auto const transID = *irgs.context.transIDs.begin();
-      if (sk.funcEntry() && !mcgen::retranslateAllEnabled()) {
+      if (sk.nonTrivialFuncEntry() && !mcgen::retranslateAllEnabled()) {
         irgen::checkCold(irgs, transID);
       } else {
         irgen::incProfCounter(irgs, transID);
@@ -253,7 +272,7 @@ void emitGuards(irgen::IRGS& irgs,
     // Increment the count for the latest call for optimized translations if we're
     // going to serialize the profile data.
     if (irgs.context.kind == TransKind::Optimize && isJitSerializing() &&
-        sk.funcEntry() && RuntimeOption::EvalJitPGOOptCodeCallGraph) {
+        sk.nonTrivialFuncEntry() && Cfg::Jit::PGOOptCodeCallGraph) {
       irgen::gen(irgs, IncCallCounter, FuncData { curFunc(irgs) }, irgen::fp(irgs));
     }
 
@@ -265,32 +284,104 @@ void emitGuards(irgen::IRGS& irgs,
   }
 }
 
-/*
- * Returns the id of the next region block in workQ whose
- * corresponding IR block is currently reachable from the IR unit's
- * entry, or std::nullopt if no such block exists.  Furthermore, any
- * unreachable blocks appearing before the first reachable block are
- * moved to the end of workQ.
- */
-Optional<RegionDesc::BlockId> nextReachableBlock(
-  jit::queue<RegionDesc::BlockId>& workQ,
-  const irgen::IRBuilder& irb,
-  const BlockIdToIRBlockMap& blockIdToIRBlock
-) {
-  auto const size = workQ.size();
-  for (size_t i = 0; i < size; i++) {
-    auto const regionBlockId = workQ.front();
-    workQ.pop();
-    auto it = blockIdToIRBlock.find(regionBlockId);
-    assertx(it != blockIdToIRBlock.end());
-    auto irBlock = it->second;
-    if (irb.canStartBlock(irBlock)) return regionBlockId;
-    // Put the block back at the end of workQ, since it may become
-    // reachable after processing some of the other blocks.
-    workQ.push(regionBlockId);
+struct BlockWorkQueue {
+  explicit BlockWorkQueue(const RegionDesc& region)
+    : m_region(region)
+    , m_numUnprocPreds(jit::vector<int>(region.blocks().size()))
+  {
+    for (auto rpoId = 0; rpoId < m_region.blocks().size(); ++rpoId) {
+      auto const& bid = m_region.blocks()[rpoId]->id();
+      m_numUnprocPreds[rpoId] =
+        m_region.preds(bid).size() + (m_region.prevRetrans(bid) ? 1 : 0);
+      if (m_numUnprocPreds[rpoId] == 0) m_queue.push(rpoId);
+    }
   }
-  return std::nullopt;
-}
+
+  /*
+   * Returns the id of the next reachable region block to process and a flag
+   * indicating whether this block has any still potentially reachable
+   * unprocessed predecessors, or std::nullopt if no such block exists.
+   */
+  Optional<std::pair<RegionDesc::BlockId, bool>> nextReachable(
+    const irgen::IRBuilder& irb,
+    const BlockIdToIRBlockMap& blockIdToIRBlock
+  ) {
+    // Process block's successor edges. Decrements the number of unprocessed
+    // predecessors of each successor and enqueues them if there are none left.
+    auto const processSuccs = [&](RegionDesc::BlockId bid) {
+      auto const handleSucc = [&](RegionDesc::BlockId succId) {
+        auto const succRpoId = m_region.rpoId(succId);
+        if (--m_numUnprocPreds[succRpoId] == 0) {
+          m_queue.push(succRpoId);
+        }
+      };
+
+      for (auto succId : m_region.succs(bid)) handleSucc(succId);
+      if (auto succId = m_region.nextRetrans(bid)) handleSucc(*succId);
+    };
+
+    // Check if the IR block corresponding to the region block is reachable.
+    auto const reachable = [&](RegionDesc::BlockId bid) {
+      auto const it = blockIdToIRBlock.find(bid);
+      assertx(it != blockIdToIRBlock.end());
+      auto irBlock = it->second;
+      return irb.canStartBlock(irBlock);
+    };
+
+    // Check if the dominator of the block was already processed.
+    DEBUG_ONLY auto const processedDominator = [&](RegionDesc::BlockId bid) {
+      auto const idom = m_region.idom(bid);
+      if (!idom) return true;
+
+      auto const idomRpoId = m_region.rpoId(*idom);
+      return m_numUnprocPreds[idomRpoId] <= 0;
+    };
+
+    // Find any block with no pending unprocessed predecessors and process it.
+    // If this block is unreachable, it can't possibly get reachable again.
+    // We still need to process its successors to unblock their processing.
+    while (!m_queue.empty()) {
+      auto const rpoId = m_queue.front();
+      m_queue.pop();
+
+      auto const bid = m_region.blocks()[rpoId]->id();
+      processSuccs(bid);
+      if (reachable(bid)) return std::make_pair(bid, false);
+    }
+
+    // If we are here, all remaining blocks are either unreachable, or depend
+    // on a loop. Find the first reachable block in RPO order and process it.
+    // This is a good heuristics to reduce the number of blocks processed
+    // with unprocessed predecessors. Loops are rare, so use a linear scan.
+    for (auto rpoId = 0; rpoId < m_region.blocks().size(); ++rpoId) {
+      // Skip already processed blocks.
+      if (m_numUnprocPreds[rpoId] <= 0) continue;
+
+      auto const bid = m_region.blocks()[rpoId]->id();
+
+      // Skip unreachable blocks.
+      if (!reachable(bid)) continue;
+
+      // Dominator block must have been processed, otherwise `bid' would not
+      // be reachable. We assert it here and assume it at recoverLocalState().
+      assertx(processedDominator(bid));
+
+      // Clear the number of unprocessed preds so that we don't get processed
+      // again.
+      m_numUnprocPreds[rpoId] = 0;
+      processSuccs(bid);
+      return std::make_pair(bid, true);
+    }
+
+    // No reachable blocks found. The end.
+    return std::nullopt;
+  }
+
+private:
+  const RegionDesc& m_region;
+  jit::vector<int> m_numUnprocPreds;
+  jit::queue<int> m_queue;
+};
 
 /*
  * Returns whether or not block `bid' is in the retranslation chain
@@ -314,35 +405,43 @@ bool inEntryRetransChain(RegionDesc::BlockId bid, const RegionDesc& region) {
  * Otherwise, select a region for `callee' if one is not already present in
  * `retry'.  Update `inl' and return the region if it's inlinable.
  */
-RegionDescPtr getInlinableCalleeRegion(const irgen::IRGS& irgs,
-                                       SrcKey entry,
-                                       Type ctxType,
-                                       const ProfSrcKey& psk,
-                                       int& calleeCost) {
+irgen::RegionAndLazyUnit getInlinableCalleeRegionAndLazyUnit(
+  const irgen::IRGS& irgs,
+  SrcKey entry,
+  Type ctxType,
+  const ProfSrcKey& psk,
+  int& calleeCost,
+  const std::vector<Type>& inputTypes
+) {
   assertx(entry.funcEntry());
   if (isProfiling(irgs.context.kind) || irgs.inlineState.conjure) {
-    return nullptr;
+    return {psk.srcKey, nullptr};
   }
   if (!irgs.region || !irgs.retryContext) {
-    return nullptr;
+    return {psk.srcKey, nullptr};
   }
   auto annotationsPtr = mcgen::dumpTCAnnotation(irgs.context.kind) ?
                         irgs.unit.annotationData.get() : nullptr;
-  if (!canInlineAt(psk.srcKey, entry, annotationsPtr)) return nullptr;
+  if (!canInlineAt(psk.srcKey, entry, annotationsPtr)) {
+    return {psk.srcKey, nullptr};
+  }
+
 
   auto const& inlineBlacklist = irgs.retryContext->inlineBlacklist;
   if (inlineBlacklist.find(psk) != inlineBlacklist.end()) {
-    return nullptr;
+    return {psk.srcKey, nullptr};
   }
 
-  auto calleeRegion = selectCalleeRegion(irgs, entry, ctxType, psk.srcKey);
-  if (!calleeRegion || calleeRegion->instrSize() > irgs.budgetBCInstrs) {
-    return nullptr;
+  auto regionAndLazyUnit = selectCalleeRegion(irgs, entry, ctxType, psk.srcKey,
+                                              inputTypes);
+  if (!regionAndLazyUnit.region()) {
+    return {psk.srcKey, nullptr};
   }
-
-  calleeCost = costOfInlining(psk.srcKey, entry.func(), *calleeRegion,
-                              annotationsPtr);
-  return calleeRegion;
+  if (!shouldInline(irgs, psk.srcKey, entry.func(), regionAndLazyUnit,
+                    calleeCost)) {
+    return {psk.srcKey, nullptr};
+  }
+  return regionAndLazyUnit;
 }
 
 static bool needsSurpriseCheck(Op op) {
@@ -383,9 +482,10 @@ Optional<unsigned> scheduleSurprise(const RegionDesc::Block& block) {
     if (sk.funcEntry()) continue;
 
     auto const backwards = [&]{
-      auto const offsets = instrJumpOffsets(sk.pc());
+      auto const offset = sk.offset();
+      auto const offsets = instrJumpTargets(sk.func()->entry(), offset);
       return std::any_of(
-        offsets.begin(), offsets.end(), [] (Offset o) { return o < 0; }
+        offsets.begin(), offsets.end(), [=] (Offset o) { return o < offset; }
       );
     };
     if (i == block.length() - 1 && needsSurpriseCheck(sk.op()) && backwards()) {
@@ -404,29 +504,134 @@ TransID canonTransID(const TransIDSet& tids) {
   return tids.size() == 0 ? kInvalidTransID : *tids.begin();
 }
 
+/*
+ * Find a set of locals that might be modified on any paths between `from' and
+ * `to', where `from' is a dominator of `to'.
+ */
+boost::dynamic_bitset<> findModifiedLocals(
+  const RegionDesc& region,
+  RegionDesc::BlockId from,
+  RegionDesc::BlockId to
+) {
+  FTRACE(2, "findModifiedLocals B{} -> B{}\n", from, to);
+  auto const numLocals = region.block(to)->func()->numLocals();
+  auto modified = boost::dynamic_bitset<>(numLocals);
+  auto seen = RegionDesc::BlockIdSet{from};
+  auto queue = RegionDesc::BlockIdVec{};
+
+  if (auto const pr = region.prevRetrans(to)) queue.push_back(*pr);
+  for (auto const pred : region.preds(to)) queue.push_back(pred);
+
+  while (!queue.empty()) {
+    auto const bid = queue.back();
+    queue.pop_back();
+
+    if (!seen.insert(bid).second) continue;
+
+    if (auto const pr = region.prevRetrans(bid)) queue.push_back(*pr);
+    for (auto const pred : region.preds(bid)) queue.push_back(pred);
+
+    auto const& b = *region.block(bid);
+
+    auto sk = b.start();
+    for (uint32_t i = 0; i < b.length(); ++i, sk.advance(b.func())) {
+      if (sk.funcEntry()) continue;
+      auto const& ii = getInstrInfo(sk.op());
+      if (ii.out & InstrFlags::Local) {
+        modified[getLocalOperand(sk)] = true;
+      }
+      if (sk.op() == Op::BaseL) {
+        // While BaseL does not directly modify a local, it is a starting
+        // instruction of a linear sequence of MInstrs that will end up
+        // modifying it.
+        auto const mode = MOpMode(getImm(sk.pc(), 1).u_OA);
+        switch (mode) {
+          case MOpMode::None:
+          case MOpMode::Warn:
+            break;
+          case MOpMode::Define:
+          case MOpMode::Unset:
+          case MOpMode::InOut:
+            modified[getLocalOperand(sk)] = true;
+            break;
+        }
+      }
+    }
+  }
+
+  return modified;
+}
+
+/*
+ * Given a block with unprocessed preds with cleared local state, attempt
+ * to recover the state of locals using an immediate dominator of the block.
+ *
+ * Find all locals that are guaranteed to not be modified and recover the state
+ * from successors of the immediate dominator. Since every path to the current
+ * block must go through one of these blocks and the local is not modified
+ * afterwards, the state can be reused.
+ */
+void recoverLocalState(
+  irgen::IRGS& env,
+  RegionDesc::BlockId bid,
+  const BlockIdToIRBlockMap& blockIdToIRBlock
+) {
+  auto const idom = env.region->idom(bid);
+  if (!idom) return;
+
+  // Dominator block must have been processed, otherwise `bid' would not
+  // be reachable. This is asserted by BlockWorkQueue::nextReachable().
+  auto const modifiedLocals = findModifiedLocals(*env.region, *idom, bid);
+
+  std::vector<Block*> idomSuccs;
+  auto const add = [&](RegionDesc::BlockId bid) {
+    auto const it = blockIdToIRBlock.find(bid);
+    assertx(it != blockIdToIRBlock.end());
+    auto const irBlock = it->second;
+
+    // If we don't have a state for a successor, it is not directly reachable
+    // from the immediate dominator. It is safe to ignore even if it becomes
+    // reachable later, as all paths to this successor from the idom must go
+    // via other successors.
+    if (!env.irb->fs().hasStateFor(irBlock)) return;
+
+    idomSuccs.push_back(irBlock);
+  };
+  if (auto const nr = env.region->nextRetrans(*idom)) add(*nr);
+  for (auto const succ : env.region->succs(*idom)) add(succ);
+
+  for (auto i = 0; i < modifiedLocals.size(); ++i) {
+    if (!modifiedLocals[i]) {
+      env.irb->fs().recoverLocal(idomSuccs, i);
+    }
+  }
+}
+
 TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                                 const RegionDesc& region,
                                 double profFactor,
                                 bool ignoresBCSize = false) {
-  const Timer irGenTimer(Timer::irGenRegionAttempt);
+  const Timer irGenTimer(
+    Timer::irGenRegionAttempt, irgs.unit.logEntry().get_pointer());
   auto& irb = *irgs.irb;
   auto prevRegion      = irgs.region;      irgs.region      = &region;
   auto prevProfFactor  = irgs.profFactor;  irgs.profFactor  = profFactor;
   auto prevProfTransIDs = irgs.profTransIDs; irgs.profTransIDs = TransIDSet{};
   auto prevOffsetMapping = irb.saveAndClearOffsetMapping();
-  auto prevGuardFailBlock = irb.guardFailBlock(); irb.resetGuardFailBlock();
+  auto prevEHBlockMapping = irb.saveAndClearEHBlockMapping();
+  // Note: no need to save/restore m_skToEHDecRefBlockMap, it is uniquely keyed.
   SCOPE_EXIT {
     irgs.region      = prevRegion;
     irgs.profFactor  = prevProfFactor;
     irgs.profTransIDs = prevProfTransIDs;
     irb.restoreOffsetMapping(std::move(prevOffsetMapping));
-    irb.setGuardFailBlock(prevGuardFailBlock);
+    irb.restoreEHBlockMapping(std::move(prevEHBlockMapping));
   };
 
   FTRACE(1, "translateRegion (mode={}, profFactor={:.2}) starting with:\n{}\n",
          show(irgs.context.kind), profFactor, show(region));
 
-  if (RuntimeOption::EvalDumpRegion &&
+  if (Cfg::Eval::DumpRegion &&
       mcgen::dumpTCAnnotation(irgs.context.kind)) {
     irgs.unit.annotationData->add("RegionDesc", show(region));
   }
@@ -463,15 +668,10 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     irgen::endBlock(irgs, region.start());
   }
 
-  RegionDesc::BlockIdSet processedBlocks;
+  auto workQ = BlockWorkQueue(region);
 
-  auto& blocks = region.blocks();
-
-  jit::queue<RegionDesc::BlockId> workQ;
-  for (auto& block : blocks) workQ.push(block->id());
-
-  while (auto optBlockId = nextReachableBlock(workQ, irb, blockIdToIRBlock)) {
-    auto const blockId = optBlockId.value();
+  while (auto optBlockId = workQ.nextReachable(irb, blockIdToIRBlock)) {
+    auto const [blockId, hasUnprocPred] = *optBlockId;
     auto const& block  = *region.block(blockId);
     auto sk            = block.start();
     bool emitedSurpriseCheck = false;
@@ -493,8 +693,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     // region block, and it also sets the map from BC offsets to IR
     // blocks for the successors of this block in the region.
     auto const irBlock = blockIdToIRBlock[blockId];
-    const bool hasUnprocPred = blockHasUnprocessedPred(region, blockId,
-                                                       processedBlocks);
     // Note: a block can have an unprocessed predecessor even if the
     // region is acyclic, e.g. if the IR was able to prove a path was
     // unfeasible due to incompatible types.
@@ -505,19 +703,22 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         blockId
       );
     }
-    setSuccIRBlocks(irgs, region, blockId, blockIdToIRBlock);
+    // If we cleared local state due to unprocessed preds, try to restore it
+    // from its immediate dominator's output state.
+    if (hasUnprocPred) recoverLocalState(irgs, blockId, blockIdToIRBlock);
+
+    auto const guardFailBlock =
+      setSuccIRBlocks(irgs, region, blockId, blockIdToIRBlock);
 
     // Emit the type predictions for this region block. If this is the first
     // instruction in the region, we check inner type eagerly, insert
     // `EndGuards` after the checks, and generate profiling code in profiling
     // translations.
     auto const isEntry = &block == region.entry().get() && !inlining;
-    emitGuards(irgs, block, isEntry);
-    irb.resetGuardFailBlock();
+    emitGuards(irgs, block, isEntry, guardFailBlock);
 
     if (irb.inUnreachableState()) {
       FTRACE(1, "translateRegion: skipping unreachable block: {}\n", blockId);
-      processedBlocks.insert(blockId);
       continue;
     }
 
@@ -543,11 +744,11 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       try {
         irgs.skipSurpriseCheck = emitedSurpriseCheck;
         translateInstr(irgs, inst);
-      } catch (const RetryIRGen& e) {
+      } catch (const RetryIRGen&) {
         return TranslateResult::Retry;
       } catch (const FailedIRGen& exn) {
         ProfSrcKey psk2{canonTransID(irgs.profTransIDs), sk};
-        always_assert_flog(!irgs.retryContext->toInterp.count(psk2),
+        always_assert_flog(!irgs.retryContext->toInterp.contains(psk2),
                            "IR generation failed with {}\n",
                            exn.what());
         FTRACE(1, "ir generation for {} failed with {}\n",
@@ -579,8 +780,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         }
       }
     }
-
-    processedBlocks.insert(blockId);
   }
 
   if (!inlining) {
@@ -597,7 +796,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
                                     const TransContext& context,
                                     PostConditions& pConds) noexcept {
-  Timer irGenTimer(Timer::irGenRegion);
+  Timer irGenTimer(Timer::irGenRegion, nullptr);
   SCOPE_ASSERT_DETAIL("RegionDesc") { return show(region); };
 
   tracing::Block _{"hhir-gen", [&] { return traceProps(context); }};
@@ -611,8 +810,8 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
 
   while (true) {
     int32_t budgetBCInstrs = context.kind == TransKind::Live
-      ? RuntimeOption::EvalJitMaxLiveRegionInstrs
-      : RuntimeOption::EvalJitMaxRegionInstrs;
+      ? Cfg::Jit::MaxLiveRegionInstrs
+      : Cfg::Jit::MaxRegionInstrs;
     unit = std::make_unique<IRUnit>(context,
                                     std::make_unique<AnnotationData>());
     unit->initLogEntry(context.initSrcKey.func());
@@ -651,7 +850,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
     // region selection whenever we decide to retranslate.
     assertx(pConds.changed.empty() && pConds.refined.empty());
     if (context.kind == TransKind::Profile &&
-        RuntimeOption::EvalJitPGOUsePostConditions) {
+        Cfg::Jit::PGOUsePostConditions) {
       auto const lastSrcKey = region.lastSrcKey();
       auto const mainExits = findMainExitBlocks(irgs.unit, lastSrcKey);
       if (mainExits.size() > 0) {
@@ -695,246 +894,9 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
   return unit;
 }
 
-namespace {
-
-struct FuncROMs {
-  std::mutex lock;
-
-  // Precondition vectors are the ctxType (possibly TNullptr) followed by the
-  // arg types.
-  std::vector<std::vector<Type>> negativePreconditions;
-  struct ROM {
-    bool unwrapEager;
-    std::vector<Type> preconditions;
-    ROMHandle rom;
-  };
-  std::vector<ROM> roms;
-
-  bool willFail(const std::vector<Type>& args) const {
-    for (auto const& negativePrecond : negativePreconditions) {
-      if (args.size() != negativePrecond.size()) continue;
-      bool equiv = true;
-      for (size_t i = 0; i < args.size() && equiv; i++) {
-        if (negativePrecond[i] != args[i]) equiv = false;
-      }
-      if (equiv) return true;
-    }
-    return false;
-  }
-  void recordFailure(const std::vector<Type>& args) {
-    negativePreconditions.emplace_back(args);
-  }
-  const ROMData* cached(bool unwrapEager, const std::vector<Type>& args) const {
-    for (auto const& rom : roms) {
-      if (args.size() != rom.preconditions.size()) continue;
-      bool acceptable = unwrapEager == rom.unwrapEager;
-      for (size_t i = 0; i < args.size() && acceptable; i++) {
-        // TODO(michaelofarrell): Once we support optimizing a rom for improved
-        // types we can change the type equality here to a subtype check.
-        if (!(args[i] == rom.preconditions[i])) acceptable = false;
-      }
-      if (acceptable) return &(rom.rom.get());
-    }
-    return nullptr;
-  }
-  void cache(bool unwrapEager, const std::vector<Type>& args, ROMHandle&& rom) {
-    roms.emplace_back(ROM{unwrapEager, args, std::move(rom)});
-  }
-};
-std::mutex s_romCacheLock;
-hphp_hash_map<FuncId, FuncROMs> s_romCache;
-
-std::pair<std::unique_lock<std::mutex>, FuncROMs*> getROMs(const Func* func) {
-  std::unique_lock<std::mutex> guard(s_romCacheLock);
-  auto const [it, _] = s_romCache.try_emplace(func->getFuncId());
-  return {std::unique_lock<std::mutex>(it->second.lock), &(it->second)};
-}
-}
-
-bool irGenTrySuperInlineFCall(irgen::IRGS& irgs, const Func* callee,
-                              const FCallArgs& fca, SSATmp* ctx,
-                              bool dynamicCall) {
-  if (!RuntimeOption::EvalJitAttemptSuperInlining) return false;
-  if (Treadmill::sessionKind() != Treadmill::SessionKind::TranslateWorker) {
-    // This is only safe to run during retranslate all.  We could return
-    // cached ROMs for live translations after if we wanted.
-    return false;
-  }
-  if (!RuntimeOption::RepoAuthoritative) {
-    // Super inlining is not safe under non repo auth mode.
-    return false;
-  }
-  bool unwrapEager = fca.asyncEagerOffset != kInvalidOffset;
-  FTRACE_MOD(Trace::sib, 1, "\nTrying to super inline {}call from {} to {} "
-             "with {} args and stack:\n{}\n",
-             unwrapEager ? "unwrapped " : "",
-             curFunc(irgs)->fullName()->data(),
-             callee->fullName()->data(),
-             fca.numArgs,
-             show(irgs));
-
-  auto const refuse = [] (std::string msg) {
-    FTRACE_MOD(Trace::sib, 1, "Refusing super inlining: {}\n", msg);
-    return false;
-  };
-
-  // Try super inlining :)
-  //
-  // TODO(michaelofarrell):
-  //  - Cache ROM or failures
-  //  - Log refusal reason
-  if (dynamicCall) {
-    // TODO what does this bool even meean.  Pretty sure it is the same as the
-    // call context value which we set to false in inlineInterp, so for now
-    // this is correct.
-    return refuse("dynamic call");
-  }
-
-  if (callee->numInOutParams()) return refuse("callee has inout params");
-
-  auto const firstArgPos = static_cast<int32_t>(fca.numInputs()) - 1;
-  ctx = ctx ? ctx : cns(irgs, nullptr);
-  auto const& ctxType = ctx->type();
-  std::vector<Type> argTypes;
-  std::vector<TypedValue> args;
-
-  auto const addArg = [&] (const Type& type) {
-    argTypes.push_back(type);
-    if (type <= TNullptr) {
-      args.push_back(make_tv<KindOfNull>());
-    } else if (auto const tv = type.tv()) {
-      args.push_back(*tv);
-    } else {
-      auto const mbox = MysteryBox::Make(type).detach()->hdr();
-      args.push_back(make_tv<KindOfResource>(mbox));
-    }
-  };
-
-  addArg(ctxType);
-
-  auto const coeffects = curFunc(irgs) && CoeffectsConfig::enabled()
-    ? curCoeffects(irgs)
-    : cns(irgs, RuntimeCoeffects::none().value());
-  if (!coeffects->hasConstVal(TInt)) return refuse("caller coeffects unknown");
-  addArg(coeffects->type());
-
-  auto const numArgsInclUnpack = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
-  for (int32_t i = 0; i < numArgsInclUnpack; ++i) {
-    // TODO(michaelofarrell): revisit guard constraint
-    // DataTypeGeneric is used because we're just passing the locals into the
-    // callee.  It's up to the callee to constrain further if needed.
-    auto type = irgen::publicTopType(irgs, BCSPRelOffset{firstArgPos - i});
-    assertx(type <= TCell);
-
-    // If we don't have sufficient type information to inline the region return
-    // early.
-    if (type == TBottom) return refuse("TBottom arg");
-    addArg(type);
-  }
-
-  if (fca.hasUnpack()) {
-    const int32_t ix = fca.numArgs;
-    auto const ty = irgen::publicTopType(irgs, BCSPRelOffset{firstArgPos - ix});
-    if (!(ty <= TVec)) {
-      return refuse("non TVec unpack param");
-    }
-  }
-
-  // args[0]: context
-  // args[1]: coeffects
-  // args[2, 3, ...]: actual arguments
-  assertx(args.size() == numArgsInclUnpack + 2);
-  if (ctxType <= TBottom) return refuse("TBottom ctx");
-
-  UNUSED bool cached = false;
-  uint64_t numOps = 0;
-  const ROMData* rom = nullptr;
-  {
-    auto const [guard, roms] = getROMs(callee);
-
-    if (roms->willFail(argTypes)) {
-      return refuse("inline interp/building ROM will fail");
-    }
-
-    if ((rom = roms->cached(unwrapEager, argTypes))) {
-      cached = true;
-      FTRACE_MOD(Trace::sib, 1, "Found cached ROM for {}\n",
-                 callee->fullName()->data());
-    } else {
-      auto const origUnwrapEager = unwrapEager;
-      auto romTmp = [&] () -> Optional<ROMHandle> {
-        VMProtect::Pause pause{};
-        assertx(args.size() > 0);
-        auto const size = args.size() - 2;
-        auto const data = args.data() + 2;
-        auto const coeffects = RuntimeCoeffects::fromValue(args[1].val().num);
-        auto rom = runInlineInterp(callee, args[0], size, data, coeffects,
-                                   &numOps);
-        // Basic rom optimization.
-        if (!rom) return std::nullopt;
-        return optimizeROM(std::move(*rom), unwrapEager, args[0], size, data);
-      }();
-
-      if (!romTmp) {
-        roms->recordFailure(argTypes);
-        return refuse("inline interp/building ROM failed");
-      }
-
-      if (origUnwrapEager != unwrapEager &&
-          (rom = roms->cached(unwrapEager, argTypes))) {
-        cached = true;
-        FTRACE_MOD(Trace::sib, 1, "Found cached ROM for {} (after realizing "
-                   "unwrap fails)\n", callee->fullName()->data());
-      } else {
-        // Cache the ROM so it isn't ever destroyed.  We could
-        // consider building a sorted ROM segment for storing the
-        // ROMs themselves.  For now they are held in a unique_ptr
-        // that could be point anywhere.
-        rom = &(romTmp->get());
-        roms->cache(unwrapEager, argTypes, std::move(*romTmp));
-      }
-    }
-  }
-
-  // Let's-a-go!
-  FTRACE_MOD(Trace::sib, 1, "Built ROM succesfully\n");
-  FTRACE_MOD(Trace::sib, 1, "!!! ROM {} interps:{} {}\n",
-             cached ? "(cached)" : "",
-             numOps,
-             showShort(*rom));
-
-  std::vector<SSATmp*> ssa_args;
-  for (int32_t i = numArgsInclUnpack; i-- > 0;) {
-    ssa_args.push_back(topC(irgs, BCSPRelOffset{i}));
-  }
-
-  ifElse(irgs, [&] (Block* fail) {
-    assertx(fail);
-    auto const roots = irgenROM(irgs, *rom, ctx, ssa_args, fail);
-    assertx(roots.size() == 1);
-    discard(irgs, kNumActRecCells + numArgsInclUnpack);
-    if (!(ctx->isA(TNullptr))) decRef(irgs, ctx, DecRefProfileId::Default);
-    int i = 0;
-    for (auto const& arg : ssa_args) {
-      decRef(irgs, arg, static_cast<DecRefProfileId>(i++));
-    }
-    irgen::push(irgs, roots[0]);
-  }, [&] {
-    if (unwrapEager) {
-      auto const asyncEagerOffset = bcOff(irgs) + fca.asyncEagerOffset;
-      jmpImpl(irgs, SrcKey{curSrcKey(irgs), asyncEagerOffset});
-    } else {
-      auto sk = curSrcKey(irgs);
-      sk.advance();
-      jmpImpl(irgs, sk);
-    }
-  });
-
-  return irgs.irb->inUnreachableState();
-}
-
 bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
-                         Offset asyncEagerOffset) {
+                         Offset asyncEagerOffset, SSATmp* calleeFP,
+                         uint32_t argc, const std::vector<Type>& inputTypes) {
   assertx(entry.funcEntry());
   ctx = ctx ? ctx : cns(irgs, nullptr);
 
@@ -942,32 +904,37 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
   int calleeCost{0};
 
   // See if we have a callee region we can inline.
-  auto const calleeRegion = getInlinableCalleeRegion(
-    irgs, entry, ctx->type(), psk, calleeCost);
+  auto calleeRegionAndUnit = getInlinableCalleeRegionAndLazyUnit(
+    irgs, entry, ctx->type(), psk, calleeCost, inputTypes);
+  auto const calleeRegion = calleeRegionAndUnit.region();
   if (!calleeRegion) return false;
 
   // We shouldn't be inlining profiling translations.
   assertx(irgs.context.kind != TransKind::Profile);
-  assertx(calleeRegion->instrSize() <= irgs.budgetBCInstrs);
-  assert_flog(calleeRegion->start() == entry,
+  assertx(calleeRegion->instrSize() <= irgs.budgetBCInstrs || calleeCost <= Cfg::HHIR::AlwaysInlineVasmCostLimit);
+  assert_flog(calleeRegion->start().func() == entry.func() &&
+              calleeRegion->start().funcEntry() && entry.funcEntry() &&
+              calleeRegion->start().numEntryArgs() >= entry.numEntryArgs(),
               "{} != {}", show(calleeRegion->start()), show(entry));
 
   FTRACE(1, "\nstarting inlined call from {} to {} with {} args "
          "and stack:\n{}\n",
          curFunc(irgs)->fullName()->data(),
          entry.func()->fullName()->data(),
-         entry.func()->getEntryNumParams(entry.entryOffset()),
+         entry.numEntryArgs(),
          show(irgs));
 
-  auto const returnBlock = irgen::defBlock(irgs);
-  auto const suspendRetBlock = irgen::defBlock(irgs);
-  auto const endCatchBlock = irgen::defBlock(irgs, Block::Hint::Unused);
-  auto const returnTarget = InlineReturnTarget {
-    returnBlock, suspendRetBlock, endCatchBlock, asyncEagerOffset
-  };
-  auto const callFuncOff = bcOff(irgs);
+  if (Cfg::HHIR::EnableInliningPass) {
+    auto stitchContext = irgen::InlineStitchingContext {
+      irgs.unit, *calleeRegionAndUnit.unit(), irgs.irb.get(), psk.srcKey, entry,
+      fp(irgs), sp(irgs), ctx, irgs,
+    };
+    irgen::stitchCalleeUnit(stitchContext);
+    return true;
+  }
 
-  irgen::beginInlining(irgs, entry, ctx, callFuncOff, returnTarget, calleeCost);
+  emitInitFuncInputsInline(irgs, entry.func(), argc, calleeFP);
+  beginInlining(irgs, entry, ctx, asyncEagerOffset, calleeCost, calleeFP);
 
   SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
     { return show(*calleeRegion); };
@@ -987,7 +954,7 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
                 calleeProfFactor);
   }
 
-  auto const ignoreBCSize = calleeCost <= RO::EvalHHIRAlwaysInlineVasmCostLimit;
+  auto const ignoreBCSize = calleeCost <= Cfg::HHIR::AlwaysInlineVasmCostLimit;
   auto result = irGenRegionImpl(irgs, *calleeRegion, calleeProfFactor,
                                 ignoreBCSize);
   assertx(irgs.budgetBCInstrs >= 0);
@@ -1020,8 +987,8 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
 
   while (true) {
     const int32_t budgetBCInstrs = ctx.kind == TransKind::Live
-      ? RuntimeOption::EvalJitMaxLiveRegionInstrs
-      : RuntimeOption::EvalJitMaxRegionInstrs;
+      ? Cfg::Jit::MaxLiveRegionInstrs
+      : Cfg::Jit::MaxRegionInstrs;
     // TODO: ctx contains caller info, make inlining cost calc caller agnostic
     unit = std::make_unique<IRUnit>(ctx, std::make_unique<AnnotationData>());
     irgen::IRGS irgs{*unit, &region, budgetBCInstrs, &retryContext};
@@ -1039,21 +1006,12 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
 
     auto const func = region.entry()->func();
 
-    auto const returnBlock = irgen::defBlock(irgs);
-    auto const suspendRetBlock = irgen::defBlock(irgs);
-    auto const endCatchBlock = irgen::defBlock(irgs, Block::Hint::Unused);
-    auto const returnTarget = InlineReturnTarget {
-      returnBlock, suspendRetBlock, endCatchBlock, kInvalidOffset
-    };
-
-    // Set the profCount of the entry and return blocks we just created.
+    // Set the profCount of the entry block we just created.
     unit->entry()->setProfCount(curProfCount(irgs));
-    returnBlock->setProfCount(curProfCount(irgs));
 
     SCOPE_ASSERT_DETAIL("Inline-IRUnit") { return show(*unit); };
     irgs.irb->startBlock(unit->entry(), false /* hasUnprocPred */);
-    irgen::conjureBeginInlining(irgs, region.start(), ctxType, inputTypes,
-                                returnTarget);
+    irgen::conjureBeginInlining(irgs, region.start(), ctxType, inputTypes);
 
     try {
       auto const result = irGenRegionImpl(irgs, region, 1 /* profFactor */,

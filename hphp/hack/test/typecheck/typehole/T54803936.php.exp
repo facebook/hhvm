@@ -1,1 +1,2 @@
-No errors
+WARN: File "T54803936.php", line 10, characters 7-20:
+Duplicated property `x` in `TraitTestClass` (defined in `TraitBar` and `TraitFoo`): all instances will be aliased at runtime (Warn[12008])

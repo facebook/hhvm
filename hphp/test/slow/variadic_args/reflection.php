@@ -1,6 +1,6 @@
 <?hh
 
-function reflect_func($name) {
+function reflect_func($name) :mixed{
   echo "\n", '* ',__FUNCTION__, ": ", $name, "\n";
   $rf = new ReflectionFunction($name);
   var_dump($rf->isVariadic());
@@ -9,7 +9,7 @@ function reflect_func($name) {
   }
 }
 
-function reflect_meth($class, $name) {
+function reflect_meth($class, $name) :mixed{
   echo "\n", '* ', __FUNCTION__, ": ", $class, '::', $name, "\n";
   $rf = new ReflectionMethod($class, $name);
   var_dump($rf->isVariadic());
@@ -18,7 +18,7 @@ function reflect_meth($class, $name) {
   }
 }
 
-function reflect_param(ReflectionParameter $param) {
+function reflect_param(ReflectionParameter $param) :mixed{
   var_dump($param->getName());
   echo '  ', 'optional: ', var_export($param->isOptional(), true), "\n";
   echo '  ', 'variadic: ', var_export($param->isVariadic(), true), "\n";
@@ -26,14 +26,14 @@ function reflect_param(ReflectionParameter $param) {
     var_export($param->isDefaultValueAvailable(), true), "\n";
 }
 
-function main() {
+function main() :mixed{
   reflect_func('variadic_only_no_vv');
   reflect_func('variadic_some');
   reflect_meth('C', 'variadic_only');
   reflect_meth('C', 'st_variadic_some');
 
   echo "\n", '* reflect func (direct construction)', "\n";
-  reflect_param(new ReflectionParameter(varray['C', 'variadic_some'], 'v'));
+  reflect_param(new ReflectionParameter(vec['C', 'variadic_some'], 'v'));
   echo "\n", '* reflect meth (direct construction)', "\n";
   reflect_param(new ReflectionParameter('variadic_some', 'v'));
 }
@@ -41,7 +41,7 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_reflection() {
+function main_reflection() :mixed{
 error_reporting(-1);
 require_once __DIR__.'/variadic_funcs.inc';
 main();

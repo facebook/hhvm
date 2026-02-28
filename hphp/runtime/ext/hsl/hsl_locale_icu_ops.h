@@ -40,7 +40,7 @@ namespace HPHP {
     virtual bool starts_with(const String& str, const String& prefix) const override;
     virtual bool starts_with_ci(const String& str, const String& prefix) const override;
     virtual bool ends_with(const String& str, const String& suffix) const override;
-    virtual bool ends_with_ci(const String& str, const String& suffix) const override; 
+    virtual bool ends_with_ci(const String& str, const String& suffix) const override;
 
     virtual String strip_prefix(const String& str, const String& prefix) const override;
     virtual String strip_suffix(const String& str, const String& suffix) const override;

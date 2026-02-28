@@ -16,9 +16,7 @@ except ImportError:
     from typing import _ForwardRef as ForwardRef
 
 # pyre-fixme[5]: Global expression must be annotated.
-# pyre-fixme[6]: Expected `Tuple[typing.Type[Variable[typing._KT]],
-#  typing.Type[Variable[typing._VT_co](covariant)]]` for 1st param but got
-#  `Tuple[typing.Type[str], ForwardRef]`.
+# pyre-fixme[16]: Module `typing` has no attribute `_ForwardRef`.
 JsonObject = Mapping[str, ForwardRef("Json")]
 # pyre-fixme[5]: Global expression must be annotated.
 # pyre-fixme[16]: `Iterable` has no attribute `__getitem__`.
@@ -94,7 +92,7 @@ def fixup_hhi_json(payload: Json) -> Json:
     def interpolate(json: JsonScalar) -> JsonScalar:
         if isinstance(json, str):
             json = re.sub(
-                "/tmp[\\d\\w_]*/hhi_[\\dabcdef]*/", "/cleansed_hhi_path/", json
+                "/[a-zA-Z0-9/_]*/hhi_[0-9a-f]*/", "/tmp/cleansed_hhi_path/", json
             )
         return json
 
@@ -127,7 +125,6 @@ def uninterpolate_variables(payload: Json, variables: VariableMap) -> Json:
     )
 
     for variable, value in variable_bindings:
-
         # pyre-fixme[53]: Captured variable `value` is not annotated.
         def uninterpolate(json: JsonScalar) -> JsonScalar:
             if isinstance(json, str):

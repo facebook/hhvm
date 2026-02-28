@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$salts = darray[b'32' => b'$2a$32$CCCCCCCCCCCCCCCCCCCCCC$',
+$salts = dict[b'32' => b'$2a$32$CCCCCCCCCCCCCCCCCCCCCC$',
                b'33' => b'$2a$33$CCCCCCCCCCCCCCCCCCCCCC$',
                b'34' => b'$2a$34$CCCCCCCCCCCCCCCCCCCCCC$',
                b'35' => b'$2a$35$CCCCCCCCCCCCCCCCCCCCCC$',

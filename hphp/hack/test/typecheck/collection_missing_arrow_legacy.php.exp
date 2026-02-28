@@ -1,0 +1,6 @@
+ERROR: File "collection_missing_arrow_legacy.php", line 5, characters 8-25:
+Cannot use value initializer for `Map`. It requires `key => value`. (Parsing[1002])
+ERROR: File "collection_missing_arrow_legacy.php", line 5, characters 13-24:
+Keys must be specified for `\HH\Map` initialization (Naming[2034])
+ERROR: File "collection_missing_arrow_legacy.php", line 5, characters 13-24:
+Variable `__internal_placeholder` is undefined, or not always defined. (Naming[2050])

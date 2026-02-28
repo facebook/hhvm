@@ -1,0 +1,6 @@
+(library
+ (name hack_event_logger_types)
+ (wrapped false)
+ (libraries
+  saved_state_rollouts
+  utils_core))

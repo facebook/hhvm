@@ -1,3 +1,3 @@
-<?hh // strict
+<?hh
 
 type A = tuple<int>;

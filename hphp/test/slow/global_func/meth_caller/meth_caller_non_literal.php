@@ -1,8 +1,8 @@
 <?hh
 
-class A { function afunc($x) { return $x; } }
+class A { function afunc($x) :mixed{ return $x; } }
 
-function test_builtins($m) {
+function test_builtins($m) :mixed{
   if ($m is __SystemLib\MethCallerHelper) {
     var_dump($m->getClassName(), $m->getMethodName());
   }
@@ -12,9 +12,9 @@ function test_builtins($m) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   test_builtins(HH\meth_caller(A::class, "afunc"));
-  $carr = varray[A::class];
+  $carr = vec[A::class];
   $func_n = "afunc";
   foreach ($carr as $c) {
     $m = new __SystemLib\MethCallerHelper($c, $func_n);

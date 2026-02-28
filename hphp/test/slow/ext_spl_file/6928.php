@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_6928() {
+function main_6928() :mixed{
 $text =  "a\tb\tc\t\n";
 $text .= "a\tb\tc\n";
 $text .= "1\t2\t";

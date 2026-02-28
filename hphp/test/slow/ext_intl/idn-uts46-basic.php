@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_idn_uts46_basic() {
+function main_idn_uts46_basic() :mixed{
 $utf8dn = "www.fu\xc3\x9fball.com";
 $asciiNonTrans = "www.xn--fuball-cta.com";
 

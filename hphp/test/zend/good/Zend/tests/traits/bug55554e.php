@@ -3,13 +3,13 @@
 // Ensuring that the collision still occurs as expected.
 
 trait TC1 {
-    public function ReportCollision() {
+    public function ReportCollision() :mixed{
         echo "TC1 executed\n";
     }
 }
 
 trait TC2 {
-    public function ReportCollision() {
+    public function ReportCollision() :mixed{
         echo "TC1 executed\n";
     }
 }

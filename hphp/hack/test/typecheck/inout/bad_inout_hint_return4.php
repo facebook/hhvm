@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function foo(): (function(inout int): int) {
   return function(int $x) {

@@ -19,10 +19,6 @@
 namespace HPHP::Intl {
 //////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_IntlIterator("IntlIterator");
-
-Class* IntlIterator::c_IntlIterator = nullptr;
-
 #define II_GET(dest, src, def) \
   auto dest = IntlIterator::Get(src); \
   if (!dest) { \
@@ -64,16 +60,14 @@ static bool HHVM_METHOD(IntlIterator, valid) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initIterator() {
+void IntlExtension::registerNativeIterator() {
   HHVM_ME(IntlIterator, current);
   HHVM_ME(IntlIterator, key);
   HHVM_ME(IntlIterator, next);
   HHVM_ME(IntlIterator, rewind);
   HHVM_ME(IntlIterator, valid);
 
-  Native::registerNativeDataInfo<IntlIterator>(s_IntlIterator.get());
-
-  loadSystemlib("icu_iterator");
+  Native::registerNativeDataInfo<IntlIterator>();
 }
 
 //////////////////////////////////////////////////////////////////////////////

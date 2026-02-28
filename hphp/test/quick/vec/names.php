@@ -2,26 +2,26 @@
 
 namespace vec {
 const STUFF = 12;
-function vec() { return 0; }
-function foo() { return 1; }
+function vec() :mixed{ return 0; }
+function foo() :mixed{ return 1; }
 }
 
 namespace alpha {
 const STUFF = 12;
-function vec() { return 0; }
-function foo() { return 1; }
+function vec() :mixed{ return 0; }
+function foo() :mixed{ return 1; }
 }
 
 namespace beta\vec {
 const STUFF = 12;
-function vec() { return 0; }
-function foo() { return 1; }
+function vec() :mixed{ return 0; }
+function foo() :mixed{ return 1; }
 }
 
 namespace {
-function vecnest(vec<vec<int>> $foo) {}
+function vecnest(vec<vec<int>> $foo) :mixed{}
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(\vec\vec());
   var_dump(\vec\foo());
   var_dump(\vec\STUFF);

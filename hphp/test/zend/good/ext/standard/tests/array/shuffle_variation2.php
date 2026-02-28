@@ -12,14 +12,14 @@
 echo "*** Testing shuffle() : with multi-dimensional array ***\n";
 
 // initialise the multi-dimensional array
-$array_arg = varray[
-  varray[1, 2, 3],
-  varray[4, 5, 6],
-  varray[7, 8, 9],
-  varray[10000, 20000000, 30000000],
-  varray[0, 0, 0],
-  varray[012, 023, 034],
-  varray[0x1, 0x0, 0xa]
+$array_arg = vec[
+  vec[1, 2, 3],
+  vec[4, 5, 6],
+  vec[7, 8, 9],
+  vec[10000, 20000000, 30000000],
+  vec[0, 0, 0],
+  vec[012, 023, 034],
+  vec[0x1, 0x0, 0xa]
 
 ];
 

@@ -45,7 +45,7 @@ function random_string(
     $unpacked_bits = 0; // A count of how many unused, unpacked bits we have
     for ($i = 0; $i < $urandom_length && $length > 0; ++$i) {
       // Unpack 8 bits
-      $unpacked_data = ($unpacked_data << 8) | \unpack('C', $data[$i])[1];
+      $unpacked_data = ($unpacked_data << 8) | \ord($data[$i]);
       $unpacked_bits += 8;
 
       // While we have enough bits to select a character from the alphabet, keep

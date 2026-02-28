@@ -3,11 +3,11 @@ namespace X;
 use X as Y;
 class X {
     const C = "const ok\n";
-    static $var = "var ok\n";
+    public static $var = "var ok\n";
     function __construct() {
         echo "class ok\n";
     }
-    static function bar() {
+    static function bar() :mixed{
         echo "method ok\n";
     }
 }

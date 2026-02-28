@@ -1,7 +1,0 @@
-File "t_as_like.php", line 13, characters 3-13:
-  Contain<Tx>
-  where Tx super dynamic, Tx as ~arraykey
-File "t_as_like.php", line 15, characters 3-13:
-  Tx
-  where Tx super dynamic, Tx as ~arraykey
-No errors

@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/rclass-meth-data.h"
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"

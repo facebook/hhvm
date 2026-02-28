@@ -4,7 +4,7 @@
  *
  * @param array $regs
  */
-function base64_encode_var_dump($regs) {
+function base64_encode_var_dump($regs) :mixed{
 	if ($regs) {
 		echo "array(" . count($regs) . ") {\n";
 		foreach ($regs as $key => $value) {
@@ -39,7 +39,7 @@ function main_entry(): void {
   //contains japanese characters, ASCII digits and different, UTF-8 encoded digits
   $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
 
-  $character_classes = varray [b'[[:alnum:]]+', /*1*/
+  $character_classes = vec[b'[[:alnum:]]+', /*1*/
                               b'[[:alpha:]]+',
                               b'[[:ascii:]]+',
                               b'[[:blank:]]+',
@@ -56,7 +56,7 @@ function main_entry(): void {
   $iterator = 1;
   $regs = null;
   foreach ($character_classes as $pattern) {
-  	if (is_array(@$regs)) {
+  	if (is_array($regs)) {
   		$regs = null;
   	}
   	echo "\n-- Iteration $iterator --\n";

@@ -7,7 +7,7 @@
 echo "*** Testing strip_tags() : basic functionality ***\n";
 
 // array of arguments
-$string_array = varray [
+$string_array = vec[
   "<html>hello</html>",
   '<html>hello</html>',
   "<?hh echo hello ?>",

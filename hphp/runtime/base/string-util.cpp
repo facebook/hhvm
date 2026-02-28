@@ -76,7 +76,7 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
         ret.append(input.substr(pos0, pos - pos0));
         pos += len;
         pos0 = pos;
-      } while ((pos = input.find(delimiter, pos)) >= 0 && --limit > 1);
+      } while (--limit > 1 && (pos = input.find(delimiter, pos)) >= 0);
 
       if (pos0 <= input.size()) {
         ret.append(input.substr(pos0));
@@ -253,7 +253,7 @@ String StringUtil::HtmlEncodeExtra(const String& input, QuoteStyle quoteStyle,
   if (nbsp) {
     flags |= STRING_HTML_ENCODE_NBSP;
   }
-  if (RuntimeOption::Utf8izeReplace) {
+  if (Cfg::Server::Utf8izeReplace) {
     flags |= STRING_HTML_ENCODE_UTF8IZE_REPLACE;
   }
   if (!*charset || strcasecmp(charset, "UTF-8") == 0) {
@@ -289,7 +289,7 @@ String StringUtil::HtmlEncodeExtra(const String& input, QuoteStyle quoteStyle,
       raise_error("Unknown quote style: %d", (int)quoteStyle);
   }
 
-  if (quoteStyle != QuoteStyle::FBUtf8Only && extra.toBoolean()) {
+  if (quoteStyle != QuoteStyle::FBUtf8Only && !extra.empty()) {
     tmp = *am;
     am = &tmp;
     for (ArrayIter iter(extra); iter; ++iter) {

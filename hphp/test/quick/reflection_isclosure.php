@@ -1,12 +1,12 @@
 <?hh
 
 <<__DynamicallyCallable>>
-function not_a_closure() {
+function not_a_closure() :mixed{
   return 1;
 }
 
 <<__DynamicallyCallable>>
-function is_a_generator() {
+function is_a_generator() :AsyncGenerator<mixed,mixed,void>{
   yield 1;
   yield 2;
 }

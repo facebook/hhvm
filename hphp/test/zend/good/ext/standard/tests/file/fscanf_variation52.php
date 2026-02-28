@@ -11,12 +11,12 @@
 echo "*** Test fscanf(): to read an empty file ***\n"; 
 
 // various formats
-$formats = varray[ "%d", "%f", "%e", "%u", " %s", "%x", "%o"];
+$formats = vec[ "%d", "%f", "%e", "%u", " %s", "%x", "%o"];
 
 $counter = 1;
 
 // various read modes
-$modes = varray["r", "rb", "rt", "r+", "r+b", "r+t",
+$modes = vec["r", "rb", "rt", "r+", "r+b", "r+t",
                "w+", "w+b", "w+t",
                "a+", "a+b", "a+t"
          ];
@@ -26,7 +26,7 @@ $counter = 1;
 foreach($modes as $mode) {
   
   // create an empty file
-  $filename = __SystemLib\hphp_test_tmppath('fscanf_variation52.tmp');
+  $filename = sys_get_temp_dir().'/'.'fscanf_variation52.tmp';
   $file_handle = fopen($filename, "w");
   if($file_handle == false)
     exit("Error:failed to open file $filename");

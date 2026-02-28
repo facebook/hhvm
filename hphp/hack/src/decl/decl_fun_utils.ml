@@ -12,32 +12,11 @@ open Aast
 open Typing_defs
 module SN = Naming_special_names
 
-let get_classname_or_literal_attribute_param = function
-  | [(_, _, String s)] -> Some s
-  | [(_, _, Class_const ((_, _, CI (_, s)), (_, name)))]
-    when String.equal name SN.Members.mClass ->
-    Some s
-  | _ -> None
-
-let find_policied_attribute user_attributes : ifc_fun_decl =
-  match Naming_attributes.find SN.UserAttributes.uaPolicied user_attributes with
-  | Some { ua_params; _ } ->
-    (match get_classname_or_literal_attribute_param ua_params with
-    | Some s -> FDPolicied (Some s)
-    | None -> FDPolicied None)
-  | None
-    when Naming_attributes.mem SN.UserAttributes.uaInferFlows user_attributes ->
-    FDInferFlows
-  | None -> default_ifc_fun_decl
-
 let has_accept_disposable_attribute user_attributes =
   Naming_attributes.mem SN.UserAttributes.uaAcceptDisposable user_attributes
 
-let has_external_attribute user_attributes =
-  Naming_attributes.mem SN.UserAttributes.uaExternal user_attributes
-
-let has_can_call_attribute user_attributes =
-  Naming_attributes.mem SN.UserAttributes.uaCanCall user_attributes
+let has_ignore_readonly_error_attribute user_attributes =
+  Naming_attributes.mem SN.UserAttributes.uaIgnoreReadonlyError user_attributes
 
 let has_return_disposable_attribute user_attributes =
   Naming_attributes.mem SN.UserAttributes.uaReturnDisposable user_attributes
@@ -46,95 +25,31 @@ let has_memoize_attribute user_attributes =
   Naming_attributes.mem SN.UserAttributes.uaMemoize user_attributes
   || Naming_attributes.mem SN.UserAttributes.uaMemoizeLSB user_attributes
 
-exception Gi_reinfer_type_not_supported
+let hint_to_type_opt env hint = Option.map hint ~f:(Decl_hint.hint env)
 
-let cut_namespace id =
-  let ids = String.split id ~on:'\\' in
-  List.last_exn ids
+let hint_to_type ~default env hint =
+  Option.value (hint_to_type_opt env hint) ~default
 
-let rec reinfer_type_to_string_exn ty =
-  match ty with
-  | Tmixed -> "mixed"
-  | Tnonnull -> "nonnull"
-  | Tdynamic -> "dynamic"
-  | Tunion [] -> "nothing"
-  | Tthis -> "this"
-  | Tprim prim -> string_of_tprim prim
-  | Tapply ((_p, id), _tyl) -> cut_namespace id
-  | Taccess (ty, id) ->
-    let s = reinfer_type_to_string_exn (get_node ty) in
-    Printf.sprintf "%s::%s" s (snd id)
-  | _ -> raise Gi_reinfer_type_not_supported
+let make_wildcard_ty pos =
+  mk (Reason.witness_from_decl pos, Typing_defs.Twildcard)
 
-let reinfer_type_to_string_opt ty =
-  try Some (reinfer_type_to_string_exn ty) with
-  | Gi_reinfer_type_not_supported -> None
-
-let must_reinfer_type tcopt (ty : decl_phase ty_) =
-  let reinfer_types = GlobalOptions.tco_gi_reinfer_types tcopt in
-  match reinfer_type_to_string_opt ty with
-  | None -> false
-  | Some ty_str -> List.mem reinfer_types ty_str ~equal:String.equal
-
-let hint_to_type_opt ~is_lambda env reason hint =
-  let ty = Option.map hint ~f:(Decl_hint.hint env) in
-  let tcopt = Provider_context.get_tcopt env.Decl_env.ctx in
-  let tco_global_inference = GlobalOptions.tco_global_inference tcopt in
-  let tvar = mk (reason, Tvar 0) in
-  if tco_global_inference && not is_lambda then
-    let ty =
-      match ty with
-      | None -> tvar
-      | Some ty ->
-        let rec create_vars_for_reinfer_types ty =
-          match deref ty with
-          | (r, Tapply (id, [ty']))
-            when String.equal (snd id) SN.Classes.cAwaitable ->
-            let ty' = create_vars_for_reinfer_types ty' in
-            mk (r, Tapply (id, [ty']))
-          | (r, Toption ty') ->
-            let ty' = create_vars_for_reinfer_types ty' in
-            mk (r, Toption ty')
-          | (r, Tapply ((_p, id), []))
-            when String.equal (cut_namespace id) "PHPism_FIXME_Array" ->
-            if must_reinfer_type tcopt (get_node ty) then
-              let tvar = mk (r, Tvar 0) in
-              mk (r, Tvec_or_dict (tvar, tvar))
-            else
-              ty
-          | (_r, ty_) ->
-            if must_reinfer_type tcopt ty_ then
-              tvar
-            else
-              ty
-        in
-        create_vars_for_reinfer_types ty
-    in
-    Some ty
-  else
-    ty
-
-let hint_to_type ~is_lambda ~default env reason hint =
-  Option.value (hint_to_type_opt ~is_lambda env reason hint) ~default
-
-let make_param_ty env ~is_lambda param =
+let make_param_ty env param =
   let param_pos = Decl_env.make_decl_pos env param.param_pos in
   let ty =
-    let r = Reason.Rwitness_from_decl param_pos in
     hint_to_type
-      ~is_lambda
-      ~default:(mk (r, Typing_defs.make_tany ()))
+      ~default:(make_wildcard_ty param_pos)
       env
-      (Reason.Rglobal_fun_param param_pos)
       (hint_of_type_hint param.param_type_hint)
   in
   let ty =
-    match get_node ty with
-    | t when param.param_is_variadic ->
+    if Aast_utils.is_param_variadic param then
       (* When checking a call f($a, $b) to a function f(C ...$args),
        * both $a and $b must be of type C *)
-      mk (Reason.Rvar_param_from_decl param_pos, t)
-    | _ -> ty
+      with_reason ty (Reason.var_param_from_decl param_pos)
+    else if Aast_utils.is_param_splat param then
+      with_reason ty (Reason.tuple_from_splat param_pos)
+    else
+      ty
   in
   let mode = get_param_mode param.param_callconv in
   {
@@ -145,46 +60,47 @@ let make_param_ty env ~is_lambda param =
         None
       else
         Some param.param_name);
-    fp_type = { et_type = ty; et_enforced = Unenforced };
+    fp_type = ty;
     fp_flags =
       make_fp_flags
         ~mode
         ~accept_disposable:
           (has_accept_disposable_attribute param.param_user_attributes)
-        ~has_default:(Option.is_some param.param_expr)
-        ~ifc_external:(has_external_attribute param.param_user_attributes)
-        ~ifc_can_call:(has_can_call_attribute param.param_user_attributes)
-        ~readonly:(Option.is_some param.param_readonly);
+        ~is_optional:(Option.is_some (Aast_utils.get_param_default param))
+        ~readonly:(Option.is_some param.param_readonly)
+        ~ignore_readonly_error:
+          (has_ignore_readonly_error_attribute param.param_user_attributes)
+        ~splat:(Option.is_some param.param_splat)
+        ~named:(Option.is_some param.param_named);
+    fp_def_value = None;
   }
 
-let ret_from_fun_kind
-    ?(is_constructor = false) ~is_lambda env (pos : pos) kind hint =
+let ret_from_fun_kind ?(is_constructor = false) env (pos : pos) kind hint =
   let pos = Decl_env.make_decl_pos env pos in
-  let default = mk (Reason.Rwitness_from_decl pos, Typing_defs.make_tany ()) in
   let ret_ty () =
     if is_constructor then
-      mk (Reason.Rwitness_from_decl pos, Tprim Tvoid)
+      mk (Reason.witness_from_decl pos, Tprim Tvoid)
     else
-      hint_to_type ~is_lambda ~default env (Reason.Rglobal_fun_ret pos) hint
+      hint_to_type ~default:(make_wildcard_ty pos) env hint
   in
   match hint with
   | None ->
     (match kind with
     | Ast_defs.FGenerator ->
-      let r = Reason.Rret_fun_kind_from_decl (pos, kind) in
+      let r = Reason.ret_fun_kind_from_decl (pos, kind) in
       mk
         ( r,
           Tapply
             ((pos, SN.Classes.cGenerator), [ret_ty (); ret_ty (); ret_ty ()]) )
     | Ast_defs.FAsyncGenerator ->
-      let r = Reason.Rret_fun_kind_from_decl (pos, kind) in
+      let r = Reason.ret_fun_kind_from_decl (pos, kind) in
       mk
         ( r,
           Tapply
             ( (pos, SN.Classes.cAsyncGenerator),
               [ret_ty (); ret_ty (); ret_ty ()] ) )
     | Ast_defs.FAsync ->
-      let r = Reason.Rret_fun_kind_from_decl (pos, kind) in
+      let r = Reason.ret_fun_kind_from_decl (pos, kind) in
       mk (r, Tapply ((pos, SN.Classes.cAwaitable), [ret_ty ()]))
     | Ast_defs.FSync -> ret_ty ())
   | Some _ -> ret_ty ()
@@ -197,32 +113,81 @@ let where_constraint env (ty1, ck, ty2) =
 (* Functions building the types for the parameters of a function *)
 (* It's not completely trivial because of optional arguments  *)
 
-let check_params paraml =
-  (* We wish to give an error on the first non-default parameter
-     after a default parameter. That is:
-     function foo(int $x, ?int $y = null, int $z)
-     is an error on $z. *)
-  (* TODO: This check doesn't need to be done at type checking time; it is
-     entirely syntactic. When we switch over to the FFP, remove this code. *)
-  let rec loop seen_default paraml =
-    match paraml with
-    | [] -> ()
-    | param :: rl ->
-      if param.param_is_variadic then
-        ()
-      (* Assume that a variadic parameter is the last one we need
-            to check. We've already given a parse error if the variadic
-            parameter is not last. *)
-      else if seen_default && Option.is_none param.param_expr then
-        Errors.add_typing_error
-          Typing_error.(primary @@ Primary.Previous_default param.param_pos)
-      (* We've seen at least one required parameter, and there's an
-          optional parameter after it.  Given an error, and then stop looking
-          for more errors in this parameter list. *)
+(** Check for `optional` keyword where it isn't allowed. Example: `function foo(optional int $x): void {}` (should be a default arg instead) *)
+let check_params_for_bad_optional_keyword ~from_abstract_method env paraml :
+    Typing_error.t list =
+  List.filter_map paraml ~f:(fun param ->
+      let is_optional_not_default =
+        Aast_utils.is_param_optional param
+        && Option.is_none (Aast_utils.get_param_default param)
+      in
+      if is_optional_not_default then
+        if
+          not
+            (TypecheckerOptions.enable_abstract_method_optional_parameters
+               (Decl_env.tcopt env))
+        then
+          Some
+            Typing_error.(
+              primary
+              @@ Primary.Optional_parameter_not_supported param.param_pos)
+        else if not from_abstract_method then
+          Some
+            Typing_error.(
+              primary @@ Primary.Optional_parameter_not_abstract param.param_pos)
+        else
+          None
       else
-        loop (Option.is_some param.param_expr) rl
-  in
-  loop false paraml
+        None)
 
-let make_params env ~is_lambda paraml =
-  List.map paraml ~f:(make_param_ty env ~is_lambda)
+(** Required positional parameters must not come before optional positional parameters.
+    For example: function foo(int $x, ?int $y = null, int $z)
+    produces an error for parameter $z *)
+let check_params_for_required_after_optional ~from_abstract_method paraml :
+    Typing_error.t option =
+  let open struct
+    type ('a, 'b) t =
+      | Init
+      | Seen_optional_or_default
+      | Found_required_after_optional_or_default of ('a, 'b) Aast_defs.fun_param
+  end in
+  let positional_params =
+    List.filter paraml ~f:(fun param -> Option.is_none param.param_named)
+  in
+  let res =
+    List.fold positional_params ~init:Init ~f:(fun state param : _ t ->
+        let is_optional_or_default =
+          Option.is_some (Aast_utils.get_param_default param)
+          || Aast_utils.is_param_optional param
+        in
+        match state with
+        | Init when is_optional_or_default -> Seen_optional_or_default
+        | Init -> Init
+        | Seen_optional_or_default
+          when is_optional_or_default
+               || Aast_utils.is_param_variadic param
+               || Aast_utils.is_param_splat param ->
+          Seen_optional_or_default
+        | Seen_optional_or_default ->
+          Found_required_after_optional_or_default param
+        | Found_required_after_optional_or_default _ -> state)
+  in
+  match res with
+  | Init
+  | Seen_optional_or_default ->
+    None
+  | Found_required_after_optional_or_default param when from_abstract_method ->
+    Some
+      Typing_error.(
+        primary @@ Primary.Previous_default_or_optional param.param_pos)
+  | Found_required_after_optional_or_default param ->
+    Some Typing_error.(primary @@ Primary.Previous_default param.param_pos)
+
+let check_params ~from_abstract_method env paraml : Typing_error.t list =
+  let err =
+    check_params_for_required_after_optional ~from_abstract_method paraml
+  in
+  Option.to_list err
+  @ check_params_for_bad_optional_keyword ~from_abstract_method env paraml
+
+let make_params env paraml = List.map paraml ~f:(make_param_ty env)

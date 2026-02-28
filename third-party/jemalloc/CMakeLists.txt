@@ -28,8 +28,8 @@ if (NOT FORCE_TP_JEMALLOC)
   check_cxx_source_compiles("
 #include <jemalloc/jemalloc.h>
 
-#if JEMALLOC_VERSION_MAJOR < 5
-# error jemalloc version >= 5.0 required
+#if JEMALLOC_VERSION_MAJOR < 5 || (JEMALLOC_VERSION_MAJOR == 5 && JEMALLOC_VERSION_MINOR < 3)
+# error jemalloc version >= 5.3 required
 #endif
 
   int main(void) { return 0; }" JEMALLOC_VERSION_MINIMUM)

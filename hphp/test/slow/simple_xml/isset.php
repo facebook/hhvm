@@ -1,7 +1,7 @@
 <?hh
-function test_isset($str) {
+function test_isset($str) :mixed{
   $xml = '<field Default="' . $str . '"/>';
-  $field = new SimpleXmlElement($xml);
+  $field = new SimpleXMLElement($xml);
   var_dump(isset($field));
   var_dump($field->offsetExists('Default') && $field->offsetGet('Default') !== null);
   var_dump($field->offsetExists('XXX') && $field->offsetGet('XXX') !== null);
@@ -9,7 +9,7 @@ function test_isset($str) {
 
 
 <<__EntryPoint>>
-function main_isset() {
+function main_isset() :mixed{
 test_isset("");
 test_isset("No");
 test_isset("Yes");

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main_entry() {
+<?hh <<__EntryPoint>> function main_entry() :mixed{
 $overflown = str_repeat('C', 8476509);
 $msgid     = "msgid";
 $domain    = "domain";

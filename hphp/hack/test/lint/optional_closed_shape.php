@@ -6,8 +6,8 @@ function closed_shape(): ?shape('hello' => string) {
 
 function test_closed(): void {
   $s = closed_shape();
-  echo Shapes::idx($s, 'not_a_key');        // no error, lint
-  $x = $s['not_a_key'] ?? 'bli';            // no error, lint
+  echo Shapes::idx($s, 'not_a_key');        // error, no lint
+  $x = $s['not_a_key'] ?? 'bli';            // error, no lint
   $s as nonnull;
   echo Shapes::idx($s, 'not_a_key');        // error, no lint
   echo Shapes::at($s, 'not_a_key');         // throw, error, no lint

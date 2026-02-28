@@ -1,0 +1,9 @@
+File "tuple_splat_syntax.php", line 14, characters 3-14:
+  (bool, ...(int, string))
+File "tuple_splat_syntax.php", line 15, characters 3-14:
+  (float, ...(int, string))
+File "tuple_splat_syntax.php", line 23, characters 3-14:
+  (bool, ...(int, string))
+File "tuple_splat_syntax.php", line 24, characters 3-14:
+  (float, ...T) where T as (mixed...)
+No errors

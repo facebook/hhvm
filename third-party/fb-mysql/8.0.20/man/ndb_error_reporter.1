@@ -1,0 +1,313 @@
+'\" t
+.\"     Title: \fBndb_error_reporter\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_ERROR_REPORTER\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_error_reporter \- NDB error\-reporting utility
+.SH "SYNOPSIS"
+.HP \w'\fBndb_error_reporter\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBndb_error_reporter \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+\fBndb_error_reporter\fR
+creates an archive from data node and management node log files that can be used to help diagnose bugs or other problems with a cluster\&.
+\fIIt is highly recommended that you make use of this utility when filing reports of bugs in NDB Cluster\fR\&.
+.PP
+The following table includes command options specific to the NDB Cluster program
+\fBndb_error_reporter\fR\&. Additional descriptions follow the table\&. For options common to most NDB Cluster programs (including
+\fBndb_error_reporter\fR), see
+Options Common to NDB Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.260.\ \&Command\-line options for the ndb_error_reporter program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+\fB \fR\fB--connection-timeout=timeout\fR\fB \fR
+T}:T{
+Number of seconds to wait when connecting to nodes before timing out
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--dry-scp\fR\fB \fR
+T}:T{
+Disable scp with remote hosts; used only for testing
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--fs\fR\fB \fR
+T}:T{
+Include file system data in error report; can use a large amount of disk
+              space
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--skip-nodegroup=nodegroup_id\fR\fB \fR
+T}:T{
+Skip all nodes in the node group having this ID
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+Usage
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_error_reporter \fIpath/to/config\-file\fR [\fIusername\fR] [\fIoptions\fR]
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This utility is intended for use on a management node host, and requires the path to the management host configuration file (usually named
+config\&.ini)\&. Optionally, you can supply the name of a user that is able to access the cluster\*(Aqs data nodes using SSH, to copy the data node log files\&.
+\fBndb_error_reporter\fR
+then includes all of these files in archive that is created in the same directory in which it is run\&. The archive is named
+ndb_error_report_\fIYYYYMMDDhhmmss\fR\&.tar\&.bz2, where
+\fIYYYYMMDDhhmmss\fR
+is a datetime string\&.
+.PP
+\fBndb_error_reporter\fR
+also accepts the options listed here:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-connection\-timeout=\fR\fB\fItimeout\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--connection-timeout=timeout
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+0
+T}
+.TE
+.sp 1
+Wait this many seconds when trying to connect to nodes before timing out\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-dry\-scp\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--dry-scp
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+TRUE
+T}
+.TE
+.sp 1
+Run
+\fBndb_error_reporter\fR
+without using scp from remote hosts\&. Used for testing only\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-fs\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--fs
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Copy the data node file systems to the management host and include them in the archive\&.
+.sp
+Because data node file systems can be extremely large, even after being compressed, we ask that you please do
+\fInot\fR
+send archives created using this option to Oracle unless you are specifically requested to do so\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-skip\-nodegroup=\fR\fB\fInodegroup_id\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--connection-timeout=timeout
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+0
+T}
+.TE
+.sp 1
+Skip all nodes belong to the node group having the supplied node group ID\&.
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

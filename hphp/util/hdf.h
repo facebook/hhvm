@@ -16,20 +16,16 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <map>
 #include <set>
 #include <vector>
 #include <unordered_map>
 
-#include <boost/container/flat_set.hpp>
-
 #include "hphp/neo/neo_hdf.h"
 
 #include "hphp/util/exception.h"
-#include "hphp/util/functional.h"
-#include "hphp/util/hash-map.h"
-#include "hphp/util/hash-set.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,6 +46,9 @@ namespace HPHP {
  */
 struct HdfRaw; // reference counting HDF* raw pointer, implmented in .cpp file
 struct Hdf {
+
+  friend struct IniSettingMap;
+
   /**
    * Constructors.
    */
@@ -110,6 +109,7 @@ struct Hdf {
    * Read or dump this entire tree in HDF format.
    */
   void fromString(const char *input);
+  void fromString(const std::string &input) { fromString(input.c_str()); }
   const char *toString() const;
   void write(const char *filename) const;
   void write(const std::string &filename) const { write(filename.c_str());}
@@ -141,18 +141,11 @@ struct Hdf {
   uint64_t configGetUInt64(uint64_t defValue = 0) const;
   double configGetDouble(double defValue = 0) const;
 
-  void configGet(std::vector<uint32_t> &values) const;
+  void configGet(std::vector<int32_t> &values) const;
   void configGet(std::vector<std::string> &values) const;
   void configGet(std::set<std::string> &values) const;
-  void configGet(std::set<std::string, stdltistr> &values) const;
-  void configGet(boost::container::flat_set<std::string> &values) const;
   void configGet(std::unordered_map<std::string, int> &values) const;
   void configGet(std::map<std::string, std::string> &values) const;
-  void configGet(std::map<std::string, std::string, stdltistr> &values) const;
-  void configGet(hphp_string_imap<std::string> &values) const;
-  void configGet(hphp_fast_string_map<std::string> &values) const;
-  void configGet(hphp_fast_string_imap<std::string> &values) const;
-  void configGet(hphp_fast_string_set& values) const;
 
   /**
    * Helper function to convert a config string value to bool.
@@ -177,6 +170,12 @@ struct Hdf {
   void set(uint64_t value);
   void set(double value);
 
+  /**
+  * Set a sub-node's value. If the sub-node doesn't exist, it will be created.
+  */
+  void set(const char *name, const char *value);
+  void set(const std::string &name, const std::string &value){ set(name.c_str(), value.c_str());}
+
   Hdf &operator=(const char *value) { set(value); return *this;}
   Hdf &operator=(const std::string &value) { set(value); return *this;}
   Hdf &operator=(bool   value) { set(value); return *this;}
@@ -196,6 +195,8 @@ struct Hdf {
    */
   std::string getFullPath() const;
   std::string getName(bool markVisited = true) const;
+  std::string getFileName(bool markVisited = true) const;
+  bool isWildcardName() const;
 
   /**
    * Get this node's parent.
@@ -351,7 +352,7 @@ private:
   mutable char *m_dump; // entire tree dump in HDF format
 
   /**
-   * There are only two different "modes" of an Hdf object: hdf_ being null or
+   * There are only two different "modes" of an Hdf object: m_hdf being null or
    * non-null. First case is when we proactively constructed an Hdf object by
    * either opening a file or starting from scratch by calling Hdf(). Second
    * case is when we attach a raw HDF*, almost exclusively used by iterations.
@@ -387,7 +388,7 @@ private:
 struct HdfException : Exception {
   HdfException(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
     ATTRIBUTE_PRINTF(2,3);
-  EXCEPTION_COMMON_IMPL(HdfException);
+  EXCEPTION_COMMON_IMPL(HdfException)
 };
 
 /**
@@ -398,7 +399,7 @@ struct HdfDataTypeException : HdfException {
     : HdfException("HDF node [%s]'s value \"%s\" is not %s",
                    hdf->getFullPath().c_str(), value, type) {
   }
-  EXCEPTION_COMMON_IMPL(HdfDataTypeException);
+  EXCEPTION_COMMON_IMPL(HdfDataTypeException)
 };
 
 /**
@@ -409,7 +410,7 @@ struct HdfDataValueException : HdfException {
     : HdfException("HDF node [%s]'s value \"%s\" is not expected %s",
                    hdf->getFullPath().c_str(), hdf->configGet(""), expected) {
   }
-  EXCEPTION_COMMON_IMPL(HdfDataValueException);
+  EXCEPTION_COMMON_IMPL(HdfDataValueException)
 };
 
 /**
@@ -419,7 +420,7 @@ struct HdfInvalidOperation : HdfException {
   explicit HdfInvalidOperation(const char *operation)
     : HdfException("Invalid operation: %s", operation) {
   }
-  EXCEPTION_COMMON_IMPL(HdfInvalidOperation);
+  EXCEPTION_COMMON_IMPL(HdfInvalidOperation)
 };
 
 ///////////////////////////////////////////////////////////////////////////////

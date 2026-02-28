@@ -1,0 +1,14 @@
+int(4)
+int(5)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+string(73) "Argument 1 passed to strlen() must be an instance of string, HH\vec given"
+string(68) "Argument 1 passed to strlen() must be an instance of string, A given"
+string(68) "Argument 1 passed to strlen() must be an instance of string, B given"

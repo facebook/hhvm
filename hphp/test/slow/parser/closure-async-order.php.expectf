@@ -1,6 +1,6 @@
 vec(1) {
-  object(ReflectionParameter) (3) {
-    ["info"]=>
+  object(ReflectionParameter) (2) {
+    ["info":"ReflectionParameter":private]=>
     dict(12) {
       ["index"]=>
       int(0)
@@ -19,12 +19,7 @@ vec(1) {
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
-      object(Closure$%s) (1) {
-        ["parameter"]=>
-        dict(1) {
-          ["$x"]=>
-          string(10) "<required>"
-        }
+      object(Closure$%s) (0) {
       }
       ["defaultText"]=>
       string(24) "async function ($x) {
@@ -38,14 +33,5 @@ vec(1) {
     }
     ["name"]=>
     string(1) "a"
-    ["paramTypeInfo"]=>
-    dict(3) {
-      ["name"]=>
-      string(0) ""
-      ["nullable"]=>
-      bool(true)
-      ["builtin"]=>
-      bool(false)
-    }
   }
 }

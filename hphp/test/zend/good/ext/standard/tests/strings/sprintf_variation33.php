@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : octal formats with boolean values ***\n";
 
 // array of boolean values 
-$boolean_values = varray[
+$boolean_values = vec[
   true,
   false,
   TRUE,
@@ -15,7 +15,7 @@ $boolean_values = varray[
 ];
 
 // array of octal formats
-$octal_formats = varray[ 
+$octal_formats = vec[ 
   "%o", "%ho", "%lo", 
   "%Lo", " %o", "%o ",                        
   "\t%o", "\n%o", "%4o",

@@ -1,7 +1,7 @@
 <?hh
 
-function aggregate_step ($var) { return $var; }
-function aggregate_final ($var) { return $var; }
+function aggregate_step ($var) :mixed{ return $var; }
+function aggregate_final ($var) :mixed{ return $var; }
 <<__EntryPoint>> function main(): void {
 $db = new SQLite3(':memory:');
 

@@ -4,7 +4,7 @@ class c {
   public $prop = 'old value';
 }
 
-function propget($o, $p) {
+function propget($o, $p) :mixed{
   try {
     return $o->$p;
   } catch (UndefinedPropertyException $e) {
@@ -12,7 +12,7 @@ function propget($o, $p) {
   }
 }
 
-function propset($o, $p, $v) {
+function propset($o, $p, $v) :mixed{
   $o->$p = $v;
 }
 

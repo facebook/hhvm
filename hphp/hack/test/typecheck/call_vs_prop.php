@@ -21,12 +21,10 @@ function testit():void {
   $f = $c->foo;
 
   $sx = $c::bar();
-  $sy = $c::$bar();
   $sz = ($c::$bar)();
 
   expectString($x);
   expectInt($y);
   expectString($sx);
-  expectInt($sy);
   expectInt($sz);
 }

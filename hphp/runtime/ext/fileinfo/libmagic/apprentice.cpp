@@ -29,14 +29,14 @@
  * apprentice - make one pass through /etc/magic, learning its secrets.
  */
 
-#include "file.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/file.h"
 
 #ifndef  lint
 FILE_RCSID("@(#)$File: apprentice.c,v 1.191 2013/02/26 21:02:48 christos Exp $")
 #endif  /* lint */
 
-#include "magic.h"
-#include "patchlevel.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/magic.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/patchlevel.h"
 #include <stdlib.h>
 
 #if defined(__hpux) && !defined(HAVE_STRTOULL)
@@ -148,7 +148,7 @@ private struct {
   { NULL, 0, NULL }
 };
 
-#include "data_file.inc"
+#include "hphp/runtime/ext/fileinfo/libmagic/data_file.inc"
 
 struct type_tbl_s {
   const char name[16];
@@ -996,7 +996,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
         }
         continue;
       }
-      /*FALLTHROUGH*/
+      [[fallthrough]];
     default:
     again:
       switch (parse(ms, &me, line, lineno, action)) {
@@ -2090,7 +2090,7 @@ check_format_type(const char *ptr, int type)
   switch (type) {
   case FILE_FMT_QUAD:
     quad = 1;
-    /*FALLTHROUGH*/
+    [[fallthrough]];
   case FILE_FMT_NUM:
     if (*ptr == '-')
       ptr++;
@@ -2356,7 +2356,7 @@ getstr(struct magic_set *ms, struct magic *m, const char *s, int warn)
               "escaped tab found, use \\t instead");
           warn = 0;  /* already did */
         }
-        /*FALLTHROUGH*/
+        [[fallthrough]];
       default:
         if (warn) {
           if (isprint((unsigned char)c)) {
@@ -2376,7 +2376,7 @@ getstr(struct magic_set *ms, struct magic *m, const char *s, int warn)
                 "\\%03o", c);
           }
         }
-        /*FALLTHROUGH*/
+        [[fallthrough]];
       /* space, perhaps force people to use \040? */
       case ' ':
 #if 0
@@ -2574,7 +2574,7 @@ eatsize(const char **p)
   case 'b':    /* char/byte */
   case 'c':    /* char/byte */
     l++;
-    /*FALLTHROUGH*/
+    [[fallthrough]];
   default:
     break;
   }

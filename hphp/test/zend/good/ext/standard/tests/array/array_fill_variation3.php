@@ -11,7 +11,7 @@
 // define a class
 class test {
   public $t = 10;
-  function __toString() {
+  function __toString() :mixed{
     return "testObject";
   }
 }
@@ -26,7 +26,7 @@ function main(): void {
 
 
   //array of different values for 'val' argument
-  $values = varray[
+  $values = vec[
             // empty string
   /* 1  */  "",
             '',

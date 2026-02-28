@@ -29,6 +29,11 @@ namespace HPHP {
 extern uint32_t numa_num_nodes;
 extern uint32_t numa_node_set;
 
+// When use_nuca is true, each node is actually a NUCA node, which usually contains
+// a smaller number of CPU cores. We currently only use this when there is a single
+// NUMA node.
+extern bool use_nuca;
+
 #ifdef HAVE_NUMA
 
 extern uint32_t numa_node_mask;
@@ -74,6 +79,24 @@ inline bool numa_node_allowed(uint32_t node) {
   if (numa_node_set == 0) return true;
   return numa_node_set & (1u << node);
 }
+
+/*
+ * Bind the current worker thread to an appropriate NUCA node.
+ */
+void nuca_bind_thread();
+
+// Utility to save previous NUMA policy while doing node-specific allocations.
+// Note that we cannot call `malloc()` in the implementation here, because we
+// want to use it in jemalloc allocation hooks.
+struct SavedNumaPolicy {
+  bool needRestore{false};
+  int oldPolicy{0};
+  unsigned long oldMask{0};
+
+  // Save NUMA policy for the current thread.
+  void save();
+  ~SavedNumaPolicy();
+};
 
 #else // HAVE_NUMA undefined
 

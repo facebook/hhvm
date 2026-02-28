@@ -14,11 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
@@ -27,6 +25,8 @@
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/hfsort.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
@@ -35,7 +35,7 @@
 
 #include <vector>
 
-TRACE_SET_MOD(funcorder);
+TRACE_SET_MOD(funcorder)
 
 namespace HPHP::jit::FuncOrder {
 
@@ -45,6 +45,9 @@ namespace {
 
 // Cached function order.
 std::vector<FuncId> s_funcOrder;
+
+// Cached function callsite counts.
+jit::hash_map<FuncId, uint32_t> s_funcTargetCounts;
 
 // Map from calls' return address to the the FuncId of the top-level function
 // containing that call.
@@ -197,7 +200,7 @@ createCallGraphFromOptCode(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
 hfsort::TargetGraph
 createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
   BootStats::Block timer("RTA_create_callgraph",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
 
   // If we have the call counters collected from optimized code use them to
   // build the call graph; otherwise, use the estimates based on profile code.
@@ -230,11 +233,15 @@ std::pair<std::vector<FuncId>, uint64_t> hfsortFuncs() {
   // inlining.
   std::pair<std::vector<FuncId>, uint64_t> ret;
 
-  const bool serverMode = RuntimeOption::ServerExecutionMode();
+  const bool serverMode = Cfg::Server::Mode;
   jit::hash_map<hfsort::TargetId, FuncId> target2FuncId;
   auto cg = createCallGraph(target2FuncId);
+  for (auto& arc: cg.arcs) {
+    auto callee = target2FuncId[arc.dst];
+    s_funcTargetCounts[callee]++;
+  }
 
-  if (RuntimeOption::EvalJitPGODumpCallGraph) {
+  if (Cfg::Jit::PGODumpCallGraph) {
     Treadmill::Session ts(Treadmill::SessionKind::Retranslate);
     cg.printDot("/tmp/cg-pgo.dot",
                 [&](hfsort::TargetId targetId) -> const char* {
@@ -249,7 +256,7 @@ std::pair<std::vector<FuncId>, uint64_t> hfsortFuncs() {
   }
 
   std::vector<hfsort::Cluster> clusters;
-  if (RuntimeOption::EvalJitPGOHFSortPlus) {
+  if (Cfg::Jit::PGOHFSortPlus) {
     clusters = hfsort::hfsortPlus(cg);
   } else {
     clusters = hfsort::clusterize(cg);
@@ -259,7 +266,7 @@ std::pair<std::vector<FuncId>, uint64_t> hfsortFuncs() {
     Logger::Info("retranslateAll: finished clusterizing the functions");
   }
 
-  if (RuntimeOption::EvalJitPGODumpCallGraph) {
+  if (Cfg::Jit::PGODumpCallGraph) {
     Treadmill::Session ts(Treadmill::SessionKind::Retranslate);
 
     print("/tmp/hotfuncs-pgo.txt", clusters, target2FuncId);
@@ -297,7 +304,7 @@ std::pair<std::vector<FuncId>, uint64_t> hfsortFuncs() {
       Logger::Info("retranslateAll: %lu functions had no samples!", extra);
     }
     for (int i = 0; i < cg.targets.size(); ++i) {
-      if (!seen.count(i)) {
+      if (!seen.contains(i)) {
         addFuncId(i);
       }
     }
@@ -316,6 +323,10 @@ const std::vector<FuncId>& get() {
   return s_funcOrder;
 }
 
+const jit::hash_map<FuncId, uint32_t>& getTargetCounts() {
+  return s_funcTargetCounts;
+}
+
 uint64_t compute() {
   auto ret = hfsortFuncs();
   // Append any functions previously in s_funcOrder that are missing in the
@@ -323,7 +334,7 @@ uint64_t compute() {
   hphp_hash_set<FuncId> optSet;
   optSet.insert(ret.first.begin(), ret.first.end());
   for (auto fid : s_funcOrder) {
-    if (optSet.count(fid) == 0) ret.first.push_back(fid);
+    if (!optSet.contains(fid)) ret.first.push_back(fid);
   }
   s_funcOrder = std::move(ret.first);
   return ret.second;
@@ -333,6 +344,7 @@ void serialize(ProfDataSerializer& ser) {
   write_raw(ser, safe_cast<uint32_t>(s_funcOrder.size()));
   for (auto const funcId : s_funcOrder) {
     write_func_id(ser, funcId);
+    write_raw(ser, s_funcTargetCounts[funcId]);
   }
 }
 
@@ -340,8 +352,12 @@ void deserialize(ProfDataDeserializer& des) {
   auto const sz = read_raw<uint32_t>(des);
   s_funcOrder.clear();
   s_funcOrder.reserve(sz);
+  s_funcTargetCounts.clear();
+  s_funcTargetCounts.reserve(sz);
   for (auto i = sz; i > 0; --i) {
-    s_funcOrder.push_back(read_func_id(des));
+    auto funcId = read_func_id(des);
+    s_funcOrder.push_back(funcId);
+    s_funcTargetCounts[funcId] = read_raw<uint32_t>(des);
   }
 }
 

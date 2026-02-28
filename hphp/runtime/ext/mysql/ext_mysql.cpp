@@ -17,7 +17,6 @@
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 
 #include <folly/ScopeGuard.h>
-#include <folly/String.h>
 #include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/base/array-init.h"
@@ -26,7 +25,6 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
-#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -431,14 +429,14 @@ static Variant HHVM_FUNCTION(mysql_list_processes,
 ///////////////////////////////////////////////////////////////////////////////
 // row operations
 
-static bool HHVM_FUNCTION(mysql_data_seek, const Resource& result, int64_t row) {
+static bool HHVM_FUNCTION(mysql_data_seek, const OptResource& result, int64_t row) {
   auto res = php_mysql_extract_result(result);
   if (res == nullptr) return false;
 
   return res->seekRow(row);
 }
 
-static Variant HHVM_FUNCTION(mysql_fetch_array, const Resource& result,
+static Variant HHVM_FUNCTION(mysql_fetch_array, const OptResource& result,
                                          int64_t result_type /* = 3 */) {
   return php_mysql_fetch_hash(result, result_type);
 }
@@ -448,7 +446,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_object,
                       const String& class_name /* = "stdClass" */,
                       const Variant& params /* = null */) {
 
-  Resource result = var_result.isResource() ? var_result.toResource()
+  OptResource result = var_result.isResource() ? var_result.toResource()
                                             : null_resource;
   Variant properties = php_mysql_fetch_hash(result, PHP_MYSQL_ASSOC);
   if (!same(properties, false)) {
@@ -467,7 +465,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_object,
     obj->o_setArray(properties.toArray());
 
     // And finally initialize the object by calling the constructor.
-    obj = init_object(class_name, paramsArray, obj.get());
+    obj = init_object(class_name, paramsArray, nullptr /* namedArgNames */, obj.get());
 
     return obj;
   }
@@ -475,7 +473,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_object,
   return false;
 }
 
-Variant HHVM_FUNCTION(mysql_fetch_lengths, const Resource& result) {
+Variant HHVM_FUNCTION(mysql_fetch_lengths, const OptResource& result) {
   auto res = php_mysql_extract_result(result);
   if (res == nullptr) return false;
 
@@ -510,7 +508,7 @@ Variant HHVM_FUNCTION(mysql_fetch_lengths, const Resource& result) {
   return ret;
 }
 
-static Variant HHVM_FUNCTION(mysql_result, const Resource& result, int64_t row,
+static Variant HHVM_FUNCTION(mysql_result, const OptResource& result, int64_t row,
                                     const Variant& field /* = 0 */) {
   auto res = php_mysql_extract_result(result);
   if (res == nullptr) return false;
@@ -575,7 +573,7 @@ static Variant HHVM_FUNCTION(mysql_result, const Resource& result, int64_t row,
         return false;
       }
     } else {
-      field_offset = field.toInt32();
+      field_offset = (int)field.toInt64();
       if (field_offset < 0 ||
           field_offset >= (int)res->getFieldCount()) {
         raise_warning("Bad column offset specified");
@@ -601,7 +599,7 @@ static Variant HHVM_FUNCTION(mysql_result, const Resource& result, int64_t row,
 ///////////////////////////////////////////////////////////////////////////////
 // result functions
 
-Variant HHVM_FUNCTION(mysql_num_fields, const Resource& result) {
+Variant HHVM_FUNCTION(mysql_num_fields, const OptResource& result) {
   auto res = php_mysql_extract_result(result);
   if (res) {
     return res->getFieldCount();
@@ -609,7 +607,7 @@ Variant HHVM_FUNCTION(mysql_num_fields, const Resource& result) {
   return false;
 }
 
-Variant HHVM_FUNCTION(mysql_num_rows, const Resource& result) {
+Variant HHVM_FUNCTION(mysql_num_rows, const OptResource& result) {
   auto res = php_mysql_extract_result(result);
   if (res) {
     return res->getRowCount();
@@ -617,7 +615,7 @@ Variant HHVM_FUNCTION(mysql_num_rows, const Resource& result) {
   return false;
 }
 
-static bool HHVM_FUNCTION(mysql_free_result, const Resource& result) {
+static bool HHVM_FUNCTION(mysql_free_result, const OptResource& result) {
   auto res = php_mysql_extract_result(result);
   if (res) {
     res->close();
@@ -647,7 +645,7 @@ StaticString
   s_zerofill("zerofill");
 }
 
-static Variant HHVM_FUNCTION(mysql_fetch_field, const Resource& result,
+static Variant HHVM_FUNCTION(mysql_fetch_field, const OptResource& result,
                                          int64_t field /* = -1 */) {
   auto res = php_mysql_extract_result(result);
   if (res == nullptr) return false;
@@ -675,36 +673,36 @@ static Variant HHVM_FUNCTION(mysql_fetch_field, const Resource& result,
   return ObjectData::FromArray(props.create());
 }
 
-static bool HHVM_FUNCTION(mysql_field_seek, const Resource& result, int64_t field) {
+static bool HHVM_FUNCTION(mysql_field_seek, const OptResource& result, int64_t field) {
   auto res = php_mysql_extract_result(result);
   if (res == nullptr) return false;
   return res->seekField(field);
 }
 
-static Variant HHVM_FUNCTION(mysql_field_name, const Resource& result,
+static Variant HHVM_FUNCTION(mysql_field_name, const OptResource& result,
                                                int64_t field) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_NAME);
 }
-static Variant HHVM_FUNCTION(mysql_field_table, const Resource& result,
+static Variant HHVM_FUNCTION(mysql_field_table, const OptResource& result,
                                                 int64_t field) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_TABLE);
 }
-static Variant HHVM_FUNCTION(mysql_field_len, const Resource& result,
+static Variant HHVM_FUNCTION(mysql_field_len, const OptResource& result,
                                               int64_t field) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_LEN);
 }
-static Variant HHVM_FUNCTION(mysql_field_type, const Resource& result,
+static Variant HHVM_FUNCTION(mysql_field_type, const OptResource& result,
                                                int64_t field) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_TYPE);
 }
-static Variant HHVM_FUNCTION(mysql_field_flags, const Resource& result,
+static Variant HHVM_FUNCTION(mysql_field_flags, const OptResource& result,
                                                 int64_t field) {
   return php_mysql_field_info(result, field, PHP_MYSQL_FIELD_FLAGS);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void mysqlExtension::moduleInit() {
+void mysqlExtension::moduleRegisterNative() {
   HHVM_FE(mysql_connect);
   HHVM_FE(mysql_connect_with_db);
   HHVM_FE(mysql_connect_with_ssl);
@@ -758,10 +756,6 @@ void mysqlExtension::moduleInit() {
   HHVM_RC_INT(MYSQL_ASSOC, PHP_MYSQL_ASSOC);
   HHVM_RC_INT(MYSQL_BOTH, PHP_MYSQL_BOTH);
   HHVM_RC_INT(MYSQL_NUM, PHP_MYSQL_NUM);
-  HHVM_RC_INT(MYSQL_CLIENT_COMPRESS, 32);
-  HHVM_RC_INT(MYSQL_CLIENT_IGNORE_SPACE, 256);
-  HHVM_RC_INT(MYSQL_CLIENT_INTERACTIVE, 1024);
-  HHVM_RC_INT(MYSQL_CLIENT_SSL, 2048);
 
   // The following MySQL client errors all come from include/errmsg.h in the MySQL source
   //
@@ -831,7 +825,7 @@ void mysqlExtension::moduleInit() {
   HHVM_RC_INT(MYSQL_CLIENT_CR_INSECURE_API_ERR, CR_INSECURE_API_ERR)
   HHVM_RC_INT(MYSQL_CLIENT_CR_FILE_NAME_TOO_LONG, CR_FILE_NAME_TOO_LONG)
   HHVM_RC_INT(MYSQL_CLIENT_CR_SSL_FIPS_MODE_ERR, CR_SSL_FIPS_MODE_ERR)
-  HHVM_RC_INT(MYSQL_CLIENT_CR_COMPRESSION_NOT_SUPPORTED, CR_COMPRESSION_NOT_SUPPORTED)
+  HHVM_RC_INT(MYSQL_CLIENT_CR_COMPRESSION_NOT_SUPPORTED, CR_DEPRECATED_COMPRESSION_NOT_SUPPORTED)
 
   // We can't add the following yet as some builds are not using a new enough MySQL client
 
@@ -839,16 +833,11 @@ void mysqlExtension::moduleInit() {
   // HHVM_RC_INT(MYSQL_CLIENT_CR_COMPRESSION_WRONGLY_CONFIGURED, CR_COMPRESSION_WRONGLY_CONFIGURED)
   // Added in MySQL 8.0.20
   // HHVM_RC_INT(MYSQL_CLIENT_CR_KERBEROS_USER_NOT_FOUND, CR_KERBEROS_USER_NOT_FOUND)
-
-  loadSystemlib("mysql");
 }
 
 mysqlExtension s_mysql_extension;
 
 bool mysqlExtension::ReadOnly = false;
-#ifdef FACEBOOK
-bool mysqlExtension::Localize = false;
-#endif
 int mysqlExtension::ConnectTimeout = 1000;
 int mysqlExtension::ReadTimeout = 60000;
 int mysqlExtension::WaitTimeout = -1;
@@ -858,25 +847,8 @@ int mysqlExtension::MaxRetryQueryOnFail = 1;
 std::string mysqlExtension::Socket = "";
 bool mysqlExtension::TypedResults = true;
 
-int mysqlExtension::debuggerSupport() {
-  return SupportInfo;
-}
-
-void mysqlExtension::debuggerInfo(InfoVec &info) {
-  auto count = MySQL::NumCachedConnections();
-  Add(info, "Persistent", FormatNumber("%" PRId64, count));
-  AddServerStats(info, "sql.conn"       );
-  AddServerStats(info, "sql.reconn_new" );
-  AddServerStats(info, "sql.reconn_ok"  );
-  AddServerStats(info, "sql.reconn_old" );
-  AddServerStats(info, "sql.query"      );
-}
-
 void mysqlExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(ReadOnly, ini, config, "MySQL.ReadOnly", false);
-#ifdef FACEBOOK
-  Config::Bind(Localize, ini, config, "MySQL.Localize", false);
-#endif
   Config::Bind(ConnectTimeout, ini, config, "MySQL.ConnectTimeout", 1000);
   Config::Bind(ReadTimeout, ini, config, "MySQL.ReadTimeout", 60000);
   Config::Bind(WaitTimeout, ini, config, "MySQL.WaitTimeout", -1);

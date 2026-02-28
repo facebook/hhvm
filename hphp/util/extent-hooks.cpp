@@ -20,7 +20,7 @@
 #include "hphp/util/managed-arena.h"
 #include <folly/portability/SysMman.h>
 
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
 
 namespace HPHP::alloc {
 
@@ -53,7 +53,7 @@ extent_purge_lazy(extent_hooks_t* /*extent_hooks*/, void* addr, size_t size,
 
 static bool extent_split(extent_hooks_t* /*extent_hooks*/, void* /*addr*/,
                          size_t /*size*/, size_t /*sizea*/, size_t /*sizeb*/,
-                         bool /*comitted*/, unsigned /*arena_ind*/) {
+                         bool /*committed*/, unsigned /*arena_ind*/) {
   return false;
 }
 
@@ -117,7 +117,7 @@ extent_alloc(extent_hooks_t* extent_hooks, void* addr,
     // RangeMapper::addMappingImpl() holds the lock on RangeState when adding
     // new mappings, so no additional locking is needed here.
     if (auto addr = rangeMapper->alloc(size, alignment)) {
-      extAlloc->m_allocatedSize.fetch_add(size, std::memory_order_relaxed);
+      extAlloc->m_allocatedSize.fetch_add(size, std::memory_order_acq_rel);
       return addr;
     }
   }
@@ -151,7 +151,7 @@ extent_alloc(extent_hooks_t* extent_hooks, void* addr,
     return fallback_hooks->alloc(extent_hooks, addr, size, alignment,
                                  zero, commit, arena_ind);
   }
-  if (auto addr = extAlloc->getLowMapper()->alloc(size, alignment)) return addr;
+  if (auto addr = extAlloc->m_mapper->alloc(size, alignment)) return addr;
   return fallback_hooks->alloc(extent_hooks, addr, size, alignment,
                                zero, commit, arena_ind);
 }

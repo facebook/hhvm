@@ -1,0 +1,8 @@
+object(stdClass) (0) {
+}
+
+Warning: Value returned from function boom() must be of type @stdclass, null given in %s on line 8
+NULL
+
+Warning: Value returned from function gone() must be of type @stdclass, null given in %s on line 14
+NULL

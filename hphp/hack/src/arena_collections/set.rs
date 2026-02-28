@@ -3,13 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use serde::{Deserialize, Serialize};
+use arena_trait::Arena;
+use arena_trait::TrivialDrop;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 
-use crate::map::{Map, MapIter};
-use arena_trait::{Arena, TrivialDrop};
-use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
+use crate::map::Map;
+use crate::map::MapIter;
 
-/// An arena-allocated map.
+/// An arena-allocated set.
 ///
 /// See `Map` for more info.
 #[derive(Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -37,12 +41,9 @@ impl<K> Default for Set<'_, K> {
 }
 
 impl<K: ToOcamlRep + Ord> ToOcamlRep for Set<'_, K> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         let len = self.count();
-        let mut iter = self.iter();
+        let mut iter = self.iter().map(|x| x.to_ocamlrep(alloc));
         let (value, _) = ocamlrep::sorted_iter_to_ocaml_set(&mut iter, alloc, len);
         value
     }
@@ -203,19 +204,15 @@ impl<'a, T: Ord> Iterator for Intersection<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        for x in self.iter.by_ref() {
-            if self.other.mem(x) {
-                return Some(x);
-            }
-        }
-        None
+        self.iter.by_ref().find(|&x| self.other.mem(x))
     }
 }
 
 #[cfg(test)]
 pub mod tests_macro {
-    use super::*;
     use bumpalo::Bump;
+
+    use super::*;
 
     #[test]
     fn test_empty() {
@@ -231,8 +228,9 @@ pub mod tests_macro {
 
 #[cfg(test)]
 pub mod tests_iter {
-    use super::*;
     use bumpalo::Bump;
+
+    use super::*;
 
     #[test]
     fn test_empty() {

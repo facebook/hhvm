@@ -2,63 +2,65 @@
     { c_span = [3:1-32]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = true; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-13], "\\:hello"); c_tparams = []; c_extends = [([3:22-29], (Happly (([3:22-29], "\\XHPTest"), [])))]; 
-      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-      c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = []; 
-      c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
-      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+      c_implements = []; c_consts = []; c_typeconsts = []; c_vars = []; 
+      c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-      c_doc_comment = None; c_emit_id = None; c_internal = false });
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = [{ ua_name = ([3:7-13], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Class
      { c_span = [4:1-52]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = true; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([4:7-13], "\\:selam"); c_tparams = []; c_extends = [([4:22-29], (Happly (([4:22-29], "\\XHPTest"), [])))]; 
-       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = [([4:41-49], (Happly (([4:41-49], "\\XHPChild"), [])))]; 
-       c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-       c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = [([4:41-49], (Happly (([4:41-49], "\\XHPChild"), [])))]; 
+       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
+       c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-       c_doc_comment = None; c_emit_id = None; c_internal = false });
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = [{ ua_name = ([4:7-13], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Class
      { c_span = [5:1-52]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = true; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([5:7-13], "\\:salut"); c_tparams = []; c_extends = [([5:22-29], (Happly (([5:22-29], "\\XHPTest"), [])))]; 
-       c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = [([5:41-49], (Happly (([5:41-49], "\\XHPChild"), [])))]; 
-       c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = []; 
-       c_methods = []; c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = [([5:41-49], (Happly (([5:41-49], "\\XHPChild"), [])))]; 
+       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
+       c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-       c_doc_comment = None; c_emit_id = None; c_internal = false });
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = [{ ua_name = ([5:7-13], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-11], "\\f");
        fd_fun =
        { f_span = [7:1-12:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([7:15-19], (Hprim Tvoid)))); 
-         f_name = ([7:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([7:15-19], (Hprim Tvoid)))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([8:3-11:12],
              (Expr
-                ((:hello), [8:3-11:11],
-                 (Xml (([8:4-9], "\\:hello"), [], [((:selam), [9:5-14], (Xml (([9:6-11], "\\:selam"), [], []))); ((:salut), [10:5-14], (Xml (([10:6-11], "\\:salut"), [], [])))])))))
+                ((exact :hello), [8:3-11:11],
+                 (Xml (([8:4-9], "\\:hello"), [], [((exact :selam), [9:5-14], (Xml (([9:6-11], "\\:selam"), [], []))); ((exact :salut), [10:5-14], (Xml (([10:6-11], "\\:salut"), [], [])))])))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
-       fd_internal = false })
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None })

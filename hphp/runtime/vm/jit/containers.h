@@ -32,6 +32,7 @@
 #include <boost/version.hpp>
 #include <folly/container/F14Map.h>
 #include <folly/container/F14Set.h>
+#include <folly/small_vector.h>
 
 #include "hphp/util/sparse-id-containers.h"
 
@@ -76,6 +77,9 @@ using array = std::array<T, N>;
 
 template<class T>
 using vector = std::vector<T>;
+
+template<class T, std::size_t N>
+using small_vector = folly::small_vector<T, N>;
 
 template<class T>
 using deque = std::deque<T>;

@@ -1,0 +1,55 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#let partial service_qualified_name |service|}}
+{{#pragma ignore-newlines}}
+{{#each service.program.cppNamespaces as |ns|}}::{{ns}}{{/each}}
+::{{service.cpp_name}}
+{{/let partial}}
+{{> common/auto_generated_c}}
+{{^program:auto_migrate?}}
+
+#include "{{program:include_prefix}}gen-py3/{{program:name}}/metadata.h"
+
+#include "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_handlers.h"
+
+{{#program:cppNamespaces}}namespace {{.}} {
+{{/program:cppNamespaces}}
+::apache::thrift::metadata::ThriftMetadata {{program:name}}_getThriftModuleMetadata() {
+  ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
+  ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
+{{#program:enums}}
+  ::apache::thrift::detail::md::EnumMetadata<{{enum:cpp_name}}>::gen(metadata);
+{{/program:enums}}
+{{#program:filtered_structs}}
+{{#struct:exception?}}
+  ::apache::thrift::detail::md::ExceptionMetadata<{{struct:name}}>::gen(metadata);
+{{/struct:exception?}}
+{{^struct:exception?}}
+  ::apache::thrift::detail::md::StructMetadata<{{struct:name}}>::gen(metadata);
+{{/struct:exception?}}
+{{/program:filtered_structs}}
+{{#program:services}}
+  ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<{{!
+    }}{{#partial service_qualified_name service=service:self}}>>::gen(response);
+{{/program:services}}
+  return metadata;
+}
+{{#program:cppNamespaces}}
+} // namespace {{.}}
+{{/program:cppNamespaces}}
+{{/program:auto_migrate?}}

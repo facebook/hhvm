@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 async function genString(string $s): Awaitable<string> { return $s; }
 

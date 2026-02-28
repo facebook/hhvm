@@ -61,13 +61,6 @@ val cprintf :
   ('a, unit, string, unit) format4 ->
   'a
 
-(* These two functions provide a four-state TTY-friendly spinner that
- * a client can output between sleeps if it happens to be waiting on
- * a busy server (e.g. one that's initializing) *)
-val spinner : ?angery_reaccs_only:bool -> unit -> string
-
-val spinner_used : unit -> bool
-
 (* Output a "clear current line" escape sequence to out_channel if it's
  * a TTY and a newline otherwise *)
 val print_clear_line : out_channel -> unit

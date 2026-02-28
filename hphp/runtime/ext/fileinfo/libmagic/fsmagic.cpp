@@ -29,13 +29,13 @@
  * fsmagic - magic based on filesystem info - directory, special files, etc.
  */
 
-#include "file.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/file.h"
 
 #ifndef  lint
 FILE_RCSID("@(#)$File: fsmagic.c,v 1.67 2013/03/17 15:43:20 christos Exp $")
 #endif  /* lint */
 
-#include "magic.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/magic.h"
 #include <string.h>
 #include <stdlib.h>
 

@@ -38,7 +38,7 @@ struct c_ExternalThreadEventWaitHandle;
 struct AsioExternalThreadEventQueue final {
   AsioExternalThreadEventQueue();
 
-  bool hasReceived() { return m_received; }
+  bool hasReceived();
   c_ExternalThreadEventWaitHandle* lastReceived() { return m_received; }
   void processAllReceived();
   bool abandonAllReceived(c_ExternalThreadEventWaitHandle* wait_handle);
@@ -50,6 +50,9 @@ struct AsioExternalThreadEventQueue final {
   void send(c_ExternalThreadEventWaitHandle* wait_handle);
 
 private:
+  bool receiveSomeUntilImpl(
+      std::chrono::time_point<std::chrono::steady_clock> waketime);
+
   c_ExternalThreadEventWaitHandle* m_received;
   std::atomic<c_ExternalThreadEventWaitHandle*> m_queue;
   std::mutex m_queueMutex;

@@ -24,7 +24,7 @@
 #include <mutex>
 #include <queue>
 
-namespace HPHP::coro {
+namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -81,7 +81,7 @@ struct TicketQueue : BlockingQueue<CPUThreadPoolExecutor::CPUTask> {
 
   // Implement interface that CPUThreadPoolExecutor expects:
 
-  BlockingQueueAddResult add(T item) override {
+  BlockingQueueAddResult add(T&& item) override {
     return add(std::move(item), stamp());
   }
 
@@ -159,7 +159,7 @@ protected:
   // KeepAlive interface:
   bool keepAliveAcquire() noexcept override {
     auto const DEBUG_ONLY count =
-      m_counter.fetch_add(1, std::memory_order_relaxed);
+      m_counter.fetch_add(1, std::memory_order_acq_rel);
     assertx(count > 0);
     return true;
   }
@@ -212,9 +212,9 @@ void TicketExecutor::addWithTicket(Func func, Ticket ticket) {
 
   // See CPUThreadPoolExecutor.cpp why this is needed
   auto const mayNeedToAddThreads =
-    minThreads_.load(std::memory_order_relaxed) == 0 ||
-    (activeThreads_.load(std::memory_order_relaxed) <
-     maxThreads_.load(std::memory_order_relaxed));
+    minThreads_.load(std::memory_order_acquire) == 0 ||
+    (activeThreads_.load(std::memory_order_acquire) <
+     maxThreads_.load(std::memory_order_acquire));
 
   Executor::KeepAlive<> ka = mayNeedToAddThreads
     ? getKeepAliveToken(this)

@@ -11,4 +11,4 @@ val get_class_requirements :
   Decl_env.env ->
   Decl_env.class_cache ->
   Shallow_decl_defs.shallow_class ->
-  Typing_defs.requirement list * SSet.t * Typing_defs.requirement list
+  Decl_defs.class_requirements

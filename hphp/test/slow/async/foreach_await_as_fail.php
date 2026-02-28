@@ -1,10 +1,10 @@
 <?hh
 
-function generator() {
+function generator() :AsyncGenerator<mixed,mixed,void>{
   yield 42;
 }
 
-async function foo() {
+async function foo() :Awaitable<mixed>{
   foreach (generator() await as $value) {
     echo "$value\n";
   }
@@ -12,6 +12,6 @@ async function foo() {
 
 
 <<__EntryPoint>>
-function main_foreach_await_as_fail() {
+function main_foreach_await_as_fail() :mixed{
 HH\Asio\join(foo());
 }

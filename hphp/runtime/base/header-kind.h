@@ -43,7 +43,8 @@ enum class HeaderKind : uint8_t {
 
   // Valid kinds for an ObjectData; all but Object and NativeObject are
   // isCppBuiltin()
-  Object, NativeObject, WaitHandle, AsyncFuncWH, AwaitAllWH, Closure,
+  Object, NativeObject, WaitHandle, AsyncFuncWH, AwaitAllWH, ConcurrentWH,
+  Closure,
   // Collections. Vector and ImmSet are used for range checks; be careful
   // when adding new collection kinds.
   Vector, Map, Set, Pair, ImmVector, ImmMap, ImmSet,
@@ -61,7 +62,7 @@ enum class HeaderKind : uint8_t {
   Slab, // header for a contiguous "slab" of small objects
 };
 const unsigned NumHeaderKinds = unsigned(HeaderKind::Slab) + 1;
-extern const std::array<char*,NumHeaderKinds> header_names;
+extern const std::array<const char*,NumHeaderKinds> header_names;
 
 inline bool haveCount(HeaderKind k) {
   return uint8_t(k) < uint8_t(HeaderKind::AsyncFuncFrame);
@@ -112,14 +113,16 @@ enum class GCBits : uint8_t {};
  * Refcounted types have a 32-bit RefCount normally, or 8-bit plus 24 bits of
  * padding with ONE_BIT_REFCOUNT.
  *
- * 0       32     40      48            56
+ * 0       32     40      48             56
  * [ cnt | kind | marks | arrBits      | sizeClass ] (vanilla) Vec
  * [ cnt | kind | marks | arrBits      | keyTypes  ] (vanilla) Dict
  * [ cnt | kind | marks |                          ] (vanilla) Keyset
  * [ cnt | kind | marks | arrBits      | extraData ] any BespokeArray
- * [ cnt | kind | marks | sizeClass    | isSymbol  ] String
+ * [ cnt | kind | marks | sizeClass:16             ] String (ref-counted)
  * [ cnt | kind | marks | heapSize:16              ] Resource (ResourceHdr)
  * [ cnt | kind | marks | Attribute    |           ] Object..ImmSet (ObjectData)
+ * 0       32     40      48             63
+ * [ cnt | kind | marks | color:1      | isSymbol  ] String (cnt = StaticValue | UncountedValue)
  *
  * Note: arrBits includes several flags, mostly from the Hack array migration:
  *  - 1 bit for hasAPCTypedValue
@@ -128,7 +131,7 @@ enum class GCBits : uint8_t {};
  *  - 1 bit for isSampledArray
  *  - 4 bits unused
  *
- * Now that HAM is done, we can merge the VanillaDictKeys bitset (which also
+ * Now that HAM is done, we can merge the ArrayKeyTypes bitset (which also
  * uses 4 bits) into this field, so the highest byte is always the size class.
  *
  * Note: when an ObjectData is preceded by a special header (AsyncFuncFrame,
@@ -256,7 +259,7 @@ namespace detail {
 // pass the isCppBuiltin() predicate.
 constexpr auto FirstCppBuiltin = HeaderKind::WaitHandle;
 constexpr auto LastCppBuiltin = HeaderKind::ImmSet;
-static_assert(uint8_t(LastCppBuiltin) - uint8_t(FirstCppBuiltin) == 10,
+static_assert(uint8_t(LastCppBuiltin) - uint8_t(FirstCppBuiltin) == 11,
               "keep predicate in sync with enum");
 }
 
@@ -272,10 +275,12 @@ inline constexpr bool hasInstanceDtor(HeaderKind k) {
   return k >= HeaderKind::NativeObject && k <= detail::LastCppBuiltin;
 }
 
-inline constexpr bool isWaithandleKind(HeaderKind k) {
-  return k >= HeaderKind::WaitHandle && k <= HeaderKind::AwaitAllWH;
-  static_assert((int)HeaderKind::AwaitAllWH - (int)HeaderKind::WaitHandle == 2,
-                "isWaithandleKind requires updating");
+inline constexpr bool isWaitHandleKind(HeaderKind k) {
+  return k >= HeaderKind::WaitHandle && k <= HeaderKind::ConcurrentWH;
+  static_assert(
+    (int)HeaderKind::ConcurrentWH - (int)HeaderKind::WaitHandle == 3,
+    "isWaitHandleKind requires updating"
+  );
 }
 
 }

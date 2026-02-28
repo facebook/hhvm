@@ -1,0 +1,2 @@
+-d hhvm.log.level=Verbose
+-vServer.TrackRequestFanout=false

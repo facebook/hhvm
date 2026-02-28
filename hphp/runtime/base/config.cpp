@@ -16,13 +16,12 @@
 
 #include "hphp/runtime/base/config.h"
 
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/filesystem.hpp>
 
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -32,6 +31,60 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+template<typename T>
+void hdfConfigGetSet(const Hdf& hdf, T& values) {
+  values.clear();
+  for (Hdf child = hdf.firstChild(); child.exists(); child = child.next()) {
+    values.insert(child.configGetString(""));
+  }
+}
+
+template<typename T>
+void hdfConfigGetMap(const Hdf& hdf, T& values) {
+  values.clear();
+  for (Hdf child = hdf.firstChild(); child.exists(); child = child.next()) {
+    values[child.getName()] = child.configGetString("");
+  }
+}
+
+template<typename T>
+void hdfConfigGet(const Hdf& hdf, T& values) {
+  hdf.configGet(values);
+}
+
+void hdfConfigGet(const Hdf& hdf, boost::container::flat_set<std::string>& values) {
+  hdfConfigGetSet(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, std::set<std::string, stdltistr>& values) {
+  hdfConfigGetSet(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, hphp_fast_string_set& values) {
+  hdfConfigGetSet(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, std::map<std::string, std::string,
+                    stdltistr>& values) {
+  hdfConfigGetMap(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, hphp_string_imap<std::string>& values) {
+  hdfConfigGetMap(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, hphp_fast_string_map<std::string>& values) {
+  hdfConfigGetMap(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, hphp_fast_string_imap<std::string>& values) {
+  hdfConfigGetMap(hdf, values);
+}
+
+}
+
 std::string
 Config::IniName(const Hdf& config, bool /*prepend_hhvm*/ /* = true */) {
   return Config::IniName(config.getFullPath());
@@ -39,7 +92,7 @@ Config::IniName(const Hdf& config, bool /*prepend_hhvm*/ /* = true */) {
 
 std::string Config::IniName(const std::string& config,
                             bool prepend_hhvm /* = true */) {
-  std::string out = "";
+  std::string out;
   if (prepend_hhvm) {
     out += "hhvm.";
   }
@@ -93,7 +146,7 @@ void Config::ParseIniString(const std::string &iniStr, IniSettingMap &ini,
 }
 
 void Config::ParseHdfString(const std::string &hdfStr, Hdf &hdf) {
-  hdf.fromString(hdfStr.c_str());
+  hdf.fromString(hdfStr);
 }
 
 void Config::ParseConfigFile(const std::string &filename, IniSettingMap &ini,
@@ -106,6 +159,9 @@ void Config::ParseConfigFile(const std::string &filename, IniSettingMap &ini,
     // TODO(#5151773): Have a non-invasive warning if HDF file does not end
     // .hdf
     Config::ParseHdfFile(filename, hdf);
+    // Store the filename in the hdf object.
+    const std::string node_name = "Metadata.ConfigFileName";
+    hdf.set(node_name, filename);
   }
 }
 
@@ -139,7 +195,7 @@ void Config::ReplaceIncludesWithIni(const std::string& original_ini_filename,
     // Anything that is not a syntactically correct #include "file" after
     // this pre-processing, will be treated as an ini comment and processed
     // as such in the ini parser
-    auto pos = line.find_first_not_of(" ");
+    auto pos = line.find_first_not_of(' ');
     if (pos == std::string::npos ||
         line.compare(pos, strlen("#include"), "#include") != 0) {
       // treat as normal ini line, including comment that doesn't start with
@@ -148,8 +204,8 @@ void Config::ReplaceIncludesWithIni(const std::string& original_ini_filename,
       continue;
     }
     pos += strlen("#include");
-    auto start = line.find_first_not_of(" ", pos);
-    auto end = line.find_last_not_of(" ");
+    auto start = line.find_first_not_of(' ', pos);
+    auto end = line.find_last_not_of(' ');
     if ((start == std::string::npos || line[start] != '"') ||
         (end == start || line[end] != '"')) {
       with_includes += line + "\n"; // treat as normal comment
@@ -157,12 +213,12 @@ void Config::ReplaceIncludesWithIni(const std::string& original_ini_filename,
     }
     std::string file = line.substr(start + 1, end - start - 1);
     const std::string logger_file = file;
-    boost::filesystem::path p(file);
+    std::filesystem::path p(file);
     if (!p.is_absolute()) {
-      boost::filesystem::path opath(original_ini_filename);
+      std::filesystem::path opath(original_ini_filename);
       p = opath.parent_path()/p;
     }
-    if (boost::filesystem::exists(p)) {
+    if (std::filesystem::exists(p)) {
       std::ifstream ifs(p.string());
       const std::string contents((std::istreambuf_iterator<char>(ifs)),
                                  std::istreambuf_iterator<char>());
@@ -266,7 +322,7 @@ void Config::Bind(T& loc, const IniSetting::Map &ini, const Hdf& config, \
                   const T defValue /* = 0ish */, \
                   const bool prepend_hhvm /* = true */) { \
   loc = Get##METHOD(ini, config, name, defValue, prepend_hhvm); \
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, \
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Config, \
                    IniName(name, prepend_hhvm), &loc); \
 }
 
@@ -297,7 +353,7 @@ T Config::Get##METHOD(const IniSetting::Map& ini, const Hdf& config, \
     /** have an hdf value, that it maintains its edge as beating out **/ \
     /** ini                                                          **/ \
     if (hdf.exists() && !hdf.isEmpty()) { \
-      hdf.configGet(hdf_ret); \
+      hdfConfigGet(hdf, hdf_ret); \
       if (hdf_ret != ini_ret) { \
         ini_ret = hdf_ret; \
         IniSetting::SetSystem(ini_name, ini_get(ini_ret)); \
@@ -306,7 +362,7 @@ T Config::Get##METHOD(const IniSetting::Map& ini, const Hdf& config, \
     return ini_ret; \
   } \
   if (hdf.exists() && !hdf.isEmpty()) { \
-    hdf.configGet(hdf_ret); \
+    hdfConfigGet(hdf, hdf_ret); \
     return hdf_ret; \
   } \
   return defValue; \
@@ -316,11 +372,11 @@ void Config::Bind(T& loc, const IniSetting::Map& ini, const Hdf& config, \
                   const T& defValue /* = T() */, \
                   const bool prepend_hhvm /* = true */) { \
   loc = Get##METHOD(ini, config, name, defValue, prepend_hhvm); \
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, \
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Config, \
                    IniName(name, prepend_hhvm), &loc); \
 }
 
-CONTAINER_CONFIG_BODY(std::vector<uint32_t>, UInt32Vector)
+CONTAINER_CONFIG_BODY(std::vector<int32_t>, Int32Vector)
 CONTAINER_CONFIG_BODY(std::vector<std::string>, StrVector)
 namespace { using simap = std::unordered_map<std::string, int>; }
 CONTAINER_CONFIG_BODY(simap, IntMap)
@@ -332,32 +388,7 @@ CONTAINER_CONFIG_BODY(ConfigSetC, SetC)
 CONTAINER_CONFIG_BODY(ConfigFlatSet, FlatSet)
 CONTAINER_CONFIG_BODY(ConfigIMap, IMap)
 CONTAINER_CONFIG_BODY(ConfigIFastMap, IFastMap)
-CONTAINER_CONFIG_BODY(ConfigFastSet, FastSet);
-
-static HackStrictOption GetHackStrictOption(const IniSettingMap& ini,
-                                            const Hdf& config,
-                                            const std::string& name /* = "" */,
-                                            HackStrictOption def
-                                           ) {
-  auto val = Config::GetString(ini, config, name);
-  if (val.empty()) {
-    return def;
-  }
-  if (val == "warn") {
-    return HackStrictOption::WARN;
-  }
-  bool ret;
-  ini_on_update(val, ret);
-  return ret ? HackStrictOption::ON : HackStrictOption::OFF;
-}
-
-void Config::Bind(HackStrictOption& loc, const IniSettingMap& ini,
-                  const Hdf& config, const std::string& name /* = "" */,
-                  HackStrictOption def) {
-  // Currently this doens't bind to ini_get since it is hard to thread through
-  // an enum
-  loc = GetHackStrictOption(ini, config, name, def);
-}
+CONTAINER_CONFIG_BODY(ConfigFastSet, FastSet)
 
 // No `ini` binding yet. Hdf still takes precedence but will be removed
 // once we have made all options ini-aware. All new settings should
@@ -385,19 +416,47 @@ void Config::Iterate(std::function<void (const IniSettingMap&,
   }
 }
 
+bool valueMatchesPattern(const std::string &value,
+                         std::string &pattern,
+                         const std::string &suffix) {
+  if (!suffix.empty()) pattern += suffix;
+  Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
+                                  CopyString),
+                           String(value.c_str(), value.size(),
+                                  CopyString));
+  return ret.toInt64() > 0;
+}
+
 bool Config::matchHdfPattern(const std::string &value,
                              const IniSettingMap& ini, Hdf hdfPattern,
                              const std::string& name,
                              const std::string& suffix) {
   std::string pattern = Config::GetString(ini, hdfPattern, name, "", false);
   if (!pattern.empty()) {
-    if (!suffix.empty()) pattern += suffix;
-    Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
-                                    CopyString),
-                             String(value.c_str(), value.size(),
-                                    CopyString));
-    if (ret.toInt64() <= 0) {
+    if (!valueMatchesPattern(value, pattern, suffix)) {
       return false;
+    }
+  }
+  return true;
+}
+
+bool Config::matchHdfPatternSet(const std::string &value,
+                                const IniSettingMap& ini, Hdf hdfPattern,
+                                const std::string& name) {
+  std::vector<std::string> patterns = Config::GetStrVector(ini,
+                                                           hdfPattern,
+                                                           name,
+                                                           std::vector<std::string>{},
+                                                           false);
+  if (!patterns.empty()) {
+    String valueString = String(value.c_str(), value.size(), CopyString);
+    for (std::string pattern: patterns) {
+      if (!pattern.empty()) {
+        // PatternSets are applied only to multiline values
+        if (!valueMatchesPattern(value, pattern, "m")) {
+          return false;
+        }
+      }
     }
   }
   return true;

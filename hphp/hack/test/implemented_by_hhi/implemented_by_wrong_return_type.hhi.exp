@@ -1,0 +1,6 @@
+ERROR: File "implemented_by_wrong_return_type.hhi", line 5, characters 21-40:
+The method must be implemented by a function with a compatible type. (Typing[4110])
+  File "implemented_by_wrong_return_type.hhi", line 6, characters 31-36:
+  Expected `string`
+  File "implemented_by_wrong_return_type.hhi", line 2, characters 35-37:
+  But got `int`

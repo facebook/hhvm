@@ -5,7 +5,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use proc_macro2::TokenStream;
-use quote::{quote, ToTokens};
+use quote::ToTokens;
+use quote::quote;
 
 pub fn join(mut tokens: impl Iterator<Item = impl ToTokens>, sep: impl ToTokens) -> TokenStream {
     let mut acc: Vec<TokenStream> = vec![];

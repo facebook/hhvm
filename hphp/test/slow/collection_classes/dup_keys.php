@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   $m = Map { '42' => '65', 42 => 65 };
   var_dump($m, $m->toDArray());
   $s = Set { '42', 42 };
@@ -9,6 +9,6 @@ function test() {
 
 
 <<__EntryPoint>>
-function main_dup_keys() {
+function main_dup_keys() :mixed{
 test();
 }

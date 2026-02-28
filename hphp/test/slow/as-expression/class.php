@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface I {}
 abstract class C implements I {}
@@ -32,7 +32,7 @@ function as_D(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_class() {
+function main_class() :mixed{
 $d = new D();
 as_D($d);
 as_C($d);

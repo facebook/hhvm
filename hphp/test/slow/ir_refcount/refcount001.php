@@ -5,21 +5,21 @@ class X {
   function __construct(varray $x) {
     $this->rc_prop = $x;
   }
-  function thing() {
+  function thing() :mixed{
     return $this->rc_prop;
   }
 }
 
-function go() {
-  var_dump((new X(varray[new stdClass]))->thing());
-  var_dump((new X(varray[new stdClass]))->thing());
-  var_dump((new X(varray[new stdClass]))->thing());
-  var_dump((new X(varray[new stdClass]))->thing());
+function go() :mixed{
+  var_dump((new X(vec[new stdClass]))->thing());
+  var_dump((new X(vec[new stdClass]))->thing());
+  var_dump((new X(vec[new stdClass]))->thing());
+  var_dump((new X(vec[new stdClass]))->thing());
   var_dump((new X("yoyoyo"))->thing());
 }
 
 
 <<__EntryPoint>>
-function main_refcount001() {
+function main_refcount001() :mixed{
 go();
 }

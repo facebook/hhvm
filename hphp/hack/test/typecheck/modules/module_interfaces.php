@@ -1,29 +1,31 @@
-//// modules.php
+//// module_A.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+new module A {}
 
-module A {}
-module B {}
+//// module_B.php
+<?hh
+new module B {}
+
 //// A.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Internal>>
-interface A {}
+module A;
+
+internal interface A {}
 
 interface A2 {}
 
 interface A3 {
-  <<__Internal>>
-  public function f(): void;
+  internal function f(): void;
   // Ok! But it's not possible to implement this outside the module
 }
 
 //// B.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('B')>>
+
+module B;
 
 class B implements A {} // Bad
 

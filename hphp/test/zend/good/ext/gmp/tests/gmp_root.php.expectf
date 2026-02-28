@@ -1,5 +1,5 @@
 
-Warning: gmp_root() expects exactly 2 parameters, 0 given in %s/gmp_root.php on line 3
+Warning: gmp_root() expects exactly 2 positional parameters, 0 given in %s/gmp_root.php on line 3
 object(GMP) (1) {
   ["num"]=>
   string(2) "10"

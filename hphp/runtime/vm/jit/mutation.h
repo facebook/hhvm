@@ -70,12 +70,17 @@ void moveToBlock(Block::iterator first,
  * Walk the cfg of the given unit, recomputing output types of all instructions
  * from their inputs.
  *
- * The new types of any changed SSATmps must be related to their old
- * types.  However, notice that the new types may result in
- * inconsistent operand types for instructions that are unreachable
- * (but not yet removed from the IR unit).
+ * The new types of any changed SSATmps must be related to their old types.
+ * However, notice that the new types may result in inconsistent operand types
+ * for instructions that are unreachable (but not yet removed from the IR
+ * unit).
+ *
+ * Returns true if the reachable portion of the unit contains any Bottom types.
+ * This means no instruction in the rpoSort reachable blocks may def a Bottom
+ * unless that instruction has a reachable taken edge but an unreachable next
+ * edge.
  */
-void reflowTypes(IRUnit&);
+bool reflowTypes(IRUnit&);
 
 /*
  * Recomputes the output type of each of inst's dests.

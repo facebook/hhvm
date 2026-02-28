@@ -1,11 +1,11 @@
 <?hh
 
 class Something {
-  static public function thrower() {
+  static public function thrower() :mixed{
     throw new Exception('heh');
   }
 
-  static public function blah(?string $x = null) {
+  static public function blah(?string $x = null) :mixed{
     if ($x) {
       try {
         self::thrower();
@@ -17,11 +17,11 @@ class Something {
     }
   }
 
-  static public function looper() {
+  static public function looper() :mixed{
     for (;;) {}
   }
 
-  static public function blah2(?string $x = null) {
+  static public function blah2(?string $x = null) :mixed{
     if ($x) {
       return self::looper();
     }

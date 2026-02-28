@@ -8,6 +8,6 @@ abstract class A {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo "ok\n";
 }

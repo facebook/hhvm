@@ -22,6 +22,7 @@ use namespace HH\Lib\Math;
  * Time complexity: O(n)
  * Space complexity: O(n)
  */
+<<__NoAutoLikes>>
 function chunk<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Tv> $traversable,
   int $size,
@@ -72,13 +73,18 @@ function count_values<Tv as arraykey>(
  * Space complexity: O(n), where n is the combined size of all the
  * `$traversables`
  */
+<<__NoAutoLikes>>
 function flatten<Tk as arraykey, Tv>(
-  Traversable<KeyedContainer<Tk, Tv>> $traversables,
+  Traversable<KeyedContainer<Tk, Tv>> $keyed_containers,
 )[]: dict<Tk, Tv> {
   $result = dict[];
-  foreach ($traversables as $traversable) {
-    foreach ($traversable as $key => $value) {
-      $result[$key] = $value;
+  foreach ($keyed_containers as $keyed_container) {
+    if (!$result) {
+      $result = dict($keyed_container);
+    } else {
+      foreach ($keyed_container as $key => $value) {
+        $result[$key] = $value;
+      }
     }
   }
   return $result;
@@ -90,6 +96,7 @@ function flatten<Tk as arraykey, Tv>(
  * Time complexity: O(n)
  * Space complexity: O(n)
  */
+<<__NoAutoLikes>>
 function fill_keys<Tk as arraykey, Tv>(
   Traversable<Tk> $keys,
   Tv $value,
@@ -111,6 +118,7 @@ function fill_keys<Tk as arraykey, Tv>(
  * Time complexity: O(n)
  * Space complexity: O(n)
  */
+<<__NoAutoLikes>>
 function flip<Tk, Tv as arraykey>(
   KeyedTraversable<Tk, Tv> $traversable,
 )[]: dict<Tv, Tk> {
@@ -125,7 +133,7 @@ function flip<Tk, Tv as arraykey>(
  * Returns a new dict where each value is the result of calling the given
  * function on the corresponding key.
  *
- * - To use an async function, see `Dict\from_key_async()`.
+ * - To use an async function, see `Dict\from_keys_async()`.
  * - To create a dict from values, see `Dict\from_values()`.
  * - To create a dict from key/value tuples, see `Dict\from_entries()`.
  *
@@ -158,6 +166,7 @@ function from_keys<Tk as arraykey, Tv>(
  * Time complexity: O(n)
  * Space complexity: O(n)
  */
+<<__NoAutoLikes>>
 function from_entries<Tk as arraykey, Tv>(
   Traversable<(Tk, Tv)> $entries,
 )[]: dict<Tk, Tv> {
@@ -285,7 +294,7 @@ function map_with_key<Tk as arraykey, Tv1, Tv2>(
  *  - keys are the result of calling `$key_func` on the original value.
  * In the case of duplicate keys, later values will overwrite the previous ones.
  *
- * Time complexity: O(n * (f1 + f2), where f1 is the complexity of `$value_func`
+ * Time complexity: O(n * (f1 + f2)), where f1 is the complexity of `$value_func`
  * and f2 is the complexity of `$key_func`
  * Space complexity: O(n)
  */

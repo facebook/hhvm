@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class C implements HH\ClassAttribute {}
 class F implements HH\FunctionAttribute {}

@@ -1,4 +1,18 @@
-File "fully_qualified.bad.php", line 9, characters 8-8:
+ERROR: File "fully_qualified.bad.php", line 9, characters 8-8:
 Unbound name: `F` (an object type) (Naming[2049])
-File "fully_qualified.bad.php", line 8, characters 8-8:
-Unknown constant B in E (Typing[4394])
+ERROR: File "fully_qualified.bad.php", line 8, characters 8-10:
+This label is not a valid reference to a member of the given enum class (Typing[4110])
+  File "fully_qualified.bad.php", line 8, characters 9-10:
+  Expected a class with a constant `B`
+  File "fully_qualified.bad.php", line 8, characters 8-8:
+  But got `E`
+  File "fully_qualified.bad.php", line 3, characters 12-12:
+  `E` is defined here
+  File "fully_qualified.bad.php", line 4, characters 7-7:
+  Did you mean `A`?
+ERROR: File "fully_qualified.bad.php", line 9, characters 8-10:
+This label is not a valid reference to a member of the given enum class (Typing[4110])
+  File "fully_qualified.bad.php", line 9, characters 9-10:
+  Expected a class with a constant `A`
+  File "fully_qualified.bad.php", line 9, characters 8-8:
+  But got `F`

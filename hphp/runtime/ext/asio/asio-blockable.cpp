@@ -16,12 +16,12 @@
 */
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 
-#include "hphp/runtime/base/type-array.h"
-#include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_priority-bridge-wait-handle.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
@@ -59,6 +59,13 @@ inline c_AwaitAllWaitHandle::Node* getAwaitAllWaitHandleNode(
   return getContainingObject<c_AwaitAllWaitHandle::Node>(blockable);
 }
 
+inline c_ConcurrentWaitHandle::Node* getConcurrentWaitHandleNode(
+  const AsioBlockable* blockable
+) {
+  assertx(blockable->getKind() == Kind::ConcurrentWaitHandleNode);
+  return getContainingObject<c_ConcurrentWaitHandle::Node>(blockable);
+}
+
 inline c_ConditionWaitHandle* getConditionWaitHandle(
   const AsioBlockable* blockable
 ) {
@@ -66,54 +73,76 @@ inline c_ConditionWaitHandle* getConditionWaitHandle(
   return getContainingObject<c_ConditionWaitHandle>(blockable);
 }
 
-inline void exitContextImpl(
-  c_WaitableWaitHandle* waitHandle,
-  context_idx_t ctx_idx
+inline c_PriorityBridgeWaitHandle* getPriorityBridgeWaitHandle(
+  const AsioBlockable* blockable
 ) {
-  assertx(AsioSession::Get()->getContext(ctx_idx));
+  assertx(blockable->getKind() == Kind::PriorityBridgeWaitHandle);
+  return getContainingObject<c_PriorityBridgeWaitHandle>(blockable);
+}
+
+inline void exitContextImpl(
+  std::vector<AsioBlockableChain>& worklist,
+  c_WaitableWaitHandle* waitHandle,
+  ContextIndex contextIdx
+) {
+  assertx(AsioSession::Get()->getContext(contextIdx));
   assertx(!waitHandle->isFinished());
-  assertx(waitHandle->getContextIdx() <= ctx_idx);
+  assertx(waitHandle->getContextIndex() <= contextIdx);
 
   // Not in a context being exited.
-  if (waitHandle->getContextIdx() != ctx_idx) {
+  if (waitHandle->getContextIndex() != contextIdx) {
     return;
   }
 
   // Move the wait handle to the parent context.
-  waitHandle->setContextIdx(ctx_idx - 1);
+  waitHandle->setContextStateIndex(contextIdx.parent().toRegular());
 
-  // Recursively move all the parents to the parent context.
-  waitHandle->getParentChain().exitContext(ctx_idx);
+  // Request exit to the parent context for all parents.
+  worklist.emplace_back(waitHandle->getParentChain());
 }
 
 inline void exitContextImpl(
+  std::vector<AsioBlockableChain>& worklist,
   c_AsyncFunctionWaitHandle::Node* node,
-  context_idx_t ctx_idx
+  ContextIndex contextIdx
 ) {
   if (node->isFirstUnfinishedChild()) {
-    exitContextImpl(node->getWaitHandle(), ctx_idx);
+    exitContextImpl(worklist, node->getWaitHandle(), contextIdx);
   }
 }
 
 inline void exitContextImpl(
+  std::vector<AsioBlockableChain>& worklist,
   c_AwaitAllWaitHandle::Node* node,
-  context_idx_t ctx_idx
+  ContextIndex contextIdx
 ) {
   if (node->isFirstUnfinishedChild()) {
-    exitContextImpl(node->getWaitHandle(), ctx_idx);
+    exitContextImpl(worklist, node->getWaitHandle(), contextIdx);
   }
 }
 
 inline void exitContextImpl(
+  std::vector<AsioBlockableChain>& worklist,
+  c_ConcurrentWaitHandle::Node* node,
+  ContextIndex contextIdx
+) {
+  if (node->isFirstUnfinishedChild()) {
+    exitContextImpl(worklist, node->getWaitHandle(), contextIdx);
+  }
+}
+
+inline void exitContextImpl(
+  std::vector<AsioBlockableChain>& worklist,
   c_ConditionWaitHandle* waitHandle,
-  context_idx_t ctx_idx
+  ContextIndex contextIdx
 ) {
   // ConditionWaitHandle may finish before its children do.
   if (waitHandle->isFinished()) {
     return;
   }
 
-  exitContextImpl(static_cast<c_WaitableWaitHandle*>(waitHandle), ctx_idx);
+  exitContextImpl(
+    worklist, static_cast<c_WaitableWaitHandle*>(waitHandle), contextIdx);
 }
 
 } // anon namespace
@@ -126,16 +155,20 @@ c_WaitableWaitHandle* AsioBlockable::getWaitHandle() const {
       return getAsyncGeneratorWaitHandle(this);
     case Kind::AwaitAllWaitHandleNode:
       return getAwaitAllWaitHandleNode(this)->getWaitHandle();
+    case Kind::ConcurrentWaitHandleNode:
+      return getConcurrentWaitHandleNode(this)->getWaitHandle();
     case Kind::ConditionWaitHandle:
       return getConditionWaitHandle(this);
+    case Kind::PriorityBridgeWaitHandle:
+      return getPriorityBridgeWaitHandle(this);
   }
   not_reached();
 }
 
 void AsioBlockableChain::unblock() {
-  while (auto cur = m_firstParent) {
-    m_firstParent = cur->getNextParent();
-    cur->updateNextParent(nullptr);
+  while (auto cur = m_lastParent) {
+    m_lastParent = cur->getPrevParent();
+    cur->updatePrevParent(nullptr);
     // the onUnblocked handler may free cur
     switch (cur->getKind()) {
       case Kind::AsyncFunctionWaitHandleNode:
@@ -147,81 +180,101 @@ void AsioBlockableChain::unblock() {
       case Kind::AwaitAllWaitHandleNode:
         getAwaitAllWaitHandleNode(cur)->onUnblocked();
         break;
+      case Kind::ConcurrentWaitHandleNode:
+        getConcurrentWaitHandleNode(cur)->onUnblocked();
+        break;
       case Kind::ConditionWaitHandle:
         getConditionWaitHandle(cur)->onUnblocked();
         break;
-    }
-  }
-}
-
-void AsioBlockableChain::exitContext(context_idx_t ctx_idx) {
-  for (auto cur = m_firstParent; cur; cur = cur->getNextParent()) {
-    switch (cur->getKind()) {
-      case Kind::AsyncFunctionWaitHandleNode:
-        exitContextImpl(getAsyncFunctionWaitHandleNode(cur), ctx_idx);
-        break;
-      case Kind::AsyncGeneratorWaitHandle:
-        exitContextImpl(getAsyncGeneratorWaitHandle(cur), ctx_idx);
-        break;
-      case Kind::AwaitAllWaitHandleNode:
-        exitContextImpl(getAwaitAllWaitHandleNode(cur), ctx_idx);
-        break;
-      case Kind::ConditionWaitHandle:
-        exitContextImpl(getConditionWaitHandle(cur), ctx_idx);
+      case Kind::PriorityBridgeWaitHandle:
+        getPriorityBridgeWaitHandle(cur)->onUnblocked();
         break;
     }
   }
 }
 
-// Currently only AAWH utilizes this to handle failures.
-void AsioBlockableChain::removeFromChain(AsioBlockable* ab) {
-  AsioBlockable* prev = nullptr;
-  for (AsioBlockable* cur = m_firstParent, *next; cur; cur = next) {
-    next = cur->getNextParent();
-    if (ab == cur) {
-      // Found the AAWH we need to remove
-      assertx(cur->getKind() == Kind::AwaitAllWaitHandleNode);
-      if (!prev) {
-        m_firstParent = next;
-      } else {
-        prev->updateNextParent(next);
+void AsioBlockableChain::exitContext(ContextIndex contextIdx) {
+  std::vector<AsioBlockableChain> worklist = { *this };
+  while (!worklist.empty()) {
+    auto const lastParent = worklist.back().m_lastParent;
+    worklist.pop_back();
+
+    for (auto cur = lastParent; cur; cur = cur->getPrevParent()) {
+      switch (cur->getKind()) {
+        case Kind::AsyncFunctionWaitHandleNode:
+          exitContextImpl(
+            worklist, getAsyncFunctionWaitHandleNode(cur), contextIdx);
+          break;
+        case Kind::AsyncGeneratorWaitHandle:
+          exitContextImpl(worklist, getAsyncGeneratorWaitHandle(cur), contextIdx);
+          break;
+        case Kind::AwaitAllWaitHandleNode:
+          exitContextImpl(worklist, getAwaitAllWaitHandleNode(cur), contextIdx);
+          break;
+        case Kind::ConcurrentWaitHandleNode:
+          exitContextImpl(worklist, getConcurrentWaitHandleNode(cur), contextIdx);
+          break;
+        case Kind::ConditionWaitHandle:
+          exitContextImpl(worklist, getConditionWaitHandle(cur), contextIdx);
+          break;
+        case Kind::PriorityBridgeWaitHandle:
+          exitContextImpl(worklist, getPriorityBridgeWaitHandle(cur), contextIdx);
+          break;
       }
-      cur->updateNextParent(nullptr);
+    }
+  }
+}
+
+// Currently only AAWH and CCWH utilizes this to handle failures.
+void AsioBlockableChain::removeFromChain(AsioBlockable* ab) {
+  AsioBlockable* next = nullptr;
+  for (AsioBlockable* cur = m_lastParent, *prev; cur; cur = prev) {
+    prev = cur->getPrevParent();
+    if (ab == cur) {
+      // Found the AAWH or CCWH we need to remove
+      assertx(cur->getKind() == Kind::AwaitAllWaitHandleNode ||
+              cur->getKind() == Kind::ConcurrentWaitHandleNode);
+      if (!next) {
+        m_lastParent = prev;
+      } else {
+        next->updatePrevParent(prev);
+      }
+      cur->updatePrevParent(nullptr);
       return;
     }
-    prev = cur;
+    next = cur;
   }
   // We should always be able to find the parent.
   assertx(false);
 }
 
 c_WaitableWaitHandle*
-AsioBlockableChain::firstInContext(context_idx_t ctx_idx) {
-  for (auto cur = m_firstParent; cur; cur = cur->getNextParent()) {
+AsioBlockableChain::firstInContext(ContextStateIndex ctxStateIdx) {
+  // Returns the first wait handle in the parent chain that matches the given
+  // ContextStateIndex. If no match is found, returns the first wait handle with
+  // a matching ContextIndex (if there is one).
+  c_WaitableWaitHandle* result = nullptr;
+  c_WaitableWaitHandle* ctxResult = nullptr;
+
+  // Iterate through parents looking for a match. Continue until the last
+  // matching parent is found (i.e. first one that got enqueued) in order to
+  // maintain stacktrace consistency as more parents are added.
+  for (auto cur = m_lastParent; cur; cur = cur->getPrevParent()) {
     auto const wh = cur->getWaitHandle();
-    if (!wh->isFinished() && wh->getContextIdx() == ctx_idx) {
-      return wh;
+    if (!wh->isFinished() &&
+        wh->getContextStateIndex() == ctxStateIdx) {
+      result = wh;
+    }
+    if (!wh->isFinished() &&
+        wh->getContextIndex() == ctxStateIdx.contextIndex()) {
+      ctxResult = wh;
     }
   }
-  return nullptr;
+
+  return result ? result : ctxResult;
 }
 
-void AsioBlockableChain::UnblockJitHelper(ActRec* ar,
-                                          TypedValue* sp,
-                                          AsioBlockableChain chain) {
-  assertx(regState() == VMRegState::DIRTY);
-  regState() = VMRegState::CLEAN;
-  SCOPE_EXIT { regState() = VMRegState::DIRTY; };
-
-  auto prevAr = g_context->getOuterVMFrame(ar);
-  const Func* prevF = prevAr->func();
-  auto& regs = vmRegs();
-  regs.stack.top() = sp;
-  assertx(vmStack().isValidAddress((uintptr_t)vmsp()));
-  regs.pc = prevF->at(ar->callOffset());
-  regs.fp = prevAr;
-  regs.jitReturnAddr = nullptr;
-
+void AsioBlockableChain::Unblock(AsioBlockableChain chain) {
   chain.unblock();
 }
 

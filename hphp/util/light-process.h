@@ -16,10 +16,6 @@
 
 #pragma once
 
-#ifdef _MSC_VER
-# error LightProcess is not supported under MSVC!
-#endif
-
 #include <string>
 #include <vector>
 #include <cstdio>
@@ -98,6 +94,8 @@ struct LightProcess {
    * processes will delegate to a light process pool run by the client.
    */
   static int createDelegate();
+  static int cloneDelegate();
+  static void shutdownDelegate();
 
   static std::unique_ptr<LightProcess> setThreadLocalAfdtOverride(int fd);
   static std::unique_ptr<LightProcess> setThreadLocalAfdtOverride(
@@ -127,10 +125,6 @@ private:
   Mutex m_procMutex;
   int m_afdt_fd;
   std::map<FILE*, pid_t> m_popenMap;
-
- public:
-  // whether to abort when user change fails.
-  static bool g_strictUser;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -24,6 +24,6 @@ class F {
 
 
 <<__EntryPoint>>
-function main_type_annotation_typeaccess3() {
+function main_type_annotation_typeaccess3() :mixed{
 var_dump(type_structure(C::class, 'U'));
 }

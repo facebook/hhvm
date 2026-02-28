@@ -27,7 +27,7 @@ class B extends A {
 
 
 <<__EntryPoint>>
-function main_redeclare3() {
+function main_redeclare3() :mixed{
 new B();
 echo "DONE\n";
 }

@@ -1,0 +1,281 @@
+Errors:
+  [10:13-15] Invalid argument
+  [9:17-36] Too few positional arguments (required 1 but got 0)
+  [7:20-42] Because of this definition
+  [11:13-15] Invalid argument
+  [9:41-68] Too many mandatory arguments (expected 1 but got 2)
+  [7:20-42] Because of this definition
+  [12:13-23] Too few positional arguments (required 1 but got 0)
+  [7:20-42] Definition is here
+  [13:13-16:4] Invalid argument
+  [13:13-16:4] Too many mandatory arguments (expected 1 but got 2)
+  [7:20-42] Because of this definition
+  [13:13-16:4] Too many positional arguments (expected 1 but got 2)
+  [7:20-42] Definition is here
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-13], "\\foo");
+      fd_fun =
+      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((~string), (Some ([3:22-28], (Happly (([3:22-28], "\\HH\\string"), [])))));
+        f_params =
+        [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:14-17], (Hprim Tint)))); 
+           param_pos = [3:18-20]; param_name = "$_"; param_info = Param_required; 
+           param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+           param_named = None; param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-14], (Return (Some ((string), [4:10-13], (String "A")))))] }; 
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-13], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-19], "\\expectFun");
+       fd_fun =
+       { f_span = [7:1-55]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([7:47-51], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = ((function(int): ~string));
+            param_type_hint =
+            (((function(int): ~string)),
+             (Some ([7:20-42],
+                    (Happly (([7:20-42], "\\HH\\supportdyn"),
+                       [([7:20-42],
+                         (Hfun
+                            { hf_is_readonly = None; hf_tparams = []; 
+                              hf_param_tys = [([7:30-33], (Hprim Tint))];
+                              hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
+                              hf_variadic_ty = None; hf_ctxs = None; 
+                              hf_return_ty = ([7:35-41], (Hlike ([7:35-41], (Happly (([7:35-41], "\\HH\\string"), []))))); 
+                              hf_is_readonly_return = None }))
+                         ]
+                       )))));
+            param_pos = [7:43-45]; param_name = "$_"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-19], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-19], "\\expectInt");
+       fd_fun =
+       { f_span = [8:1-36]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([8:28-32], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = (int); param_type_hint = ((int), (Some ([8:20-23], (Hprim Tint)))); 
+            param_pos = [8:24-26]; param_name = "$_"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-19], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-16], "\\testIt");
+       fd_fun =
+       { f_span = [9:1-17:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([9:73-77], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = ((function(): ~string));
+            param_type_hint =
+            (((function(): ~string)),
+             (Some ([9:17-36],
+                    (Happly (([9:17-36], "\\HH\\supportdyn"),
+                       [([9:17-36],
+                         (Hfun
+                            { hf_is_readonly = None; hf_tparams = []; 
+                              hf_param_tys = []; hf_param_info = []; 
+                              hf_variadic_ty = None; hf_ctxs = None; 
+                              hf_return_ty = ([9:29-35], (Hlike ([9:29-35], (Happly (([9:29-35], "\\HH\\string"), []))))); 
+                              hf_is_readonly_return = None }))
+                         ]
+                       )))));
+            param_pos = [9:37-39]; param_name = "$f"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None };
+           { param_annotation = ((function(int, bool): ~string));
+             param_type_hint =
+             (((function(int, bool): ~string)),
+              (Some ([9:41-68],
+                     (Happly (([9:41-68], "\\HH\\supportdyn"),
+                        [([9:41-68],
+                          (Hfun
+                             { hf_is_readonly = None; hf_tparams = []; 
+                               hf_param_tys = [([9:51-54], (Hprim Tint)); ([9:55-59], (Hprim Tbool))];
+                               hf_param_info =
+                               [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None });
+                                 (Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
+                               hf_variadic_ty = None; hf_ctxs = None; 
+                               hf_return_ty = ([9:61-67], (Hlike ([9:61-67], (Happly (([9:61-67], "\\HH\\string"), []))))); 
+                               hf_is_readonly_return = None }))
+                          ]
+                        )))));
+             param_pos = [9:69-71]; param_name = "$g"; param_info = Param_required; 
+             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+             param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([10:3-17],
+             (Expr
+                ((void), [10:3-16],
+                 (Call
+                    { func = (((function((function(int): ~string) $_): void)), [10:3-12], (Id ([10:3-12], "\\expectFun"))); 
+                      targs = [];
+                      args =
+                      [(Anormal
+                          (((function(): ~string)), [10:13-15], (Hole ((((function(): ~string)), [10:13-15], (Lvar ([10:13-15], $f))), ((function(): ~string)), ((function(int): ~string)), Typing))))
+                        ];
+                      unpacked_arg = None }))));
+             ([11:3-17],
+              (Expr
+                 ((void), [11:3-16],
+                  (Call
+                     { func = (((function((function(int): ~string) $_): void)), [11:3-12], (Id ([11:3-12], "\\expectFun"))); 
+                       targs = [];
+                       args =
+                       [(Anormal
+                           (((function(int, bool): ~string)), [11:13-15],
+                            (Hole ((((function(int, bool): ~string)), [11:13-15], (Lvar ([11:13-15], $g))), ((function(int, bool): ~string)), ((function(int): ~string)), Typing))))
+                         ];
+                       unpacked_arg = None }))));
+             ([12:3-25],
+              (Expr
+                 ((void), [12:3-24],
+                  (Call
+                     { func = (((function((function(int): ~string) $_): void)), [12:3-12], (Id ([12:3-12], "\\expectFun"))); 
+                       targs = [];
+                       args =
+                       [(Anormal
+                           (((function(): nothing)), [12:13-23],
+                            (Hole (
+                               (((function(int): ~string)), [12:13-23],
+                                (Lfun (
+                                   { f_span = [12:13-23]; f_readonly_this = None; 
+                                     f_annotation = (); f_readonly_ret = None; 
+                                     f_tparams = []; f_ret = ((~string), None); 
+                                     f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
+                                     f_body = { fb_ast = [([12:20-23], (Return (Some ((string), [12:20-23], (String "A")))))] }; 
+                                     f_fun_kind = FSync; f_user_attributes = []; 
+                                     f_external = false; f_hidden = false; 
+                                     f_doc_comment = None },
+                                   []))),
+                               ((function(): nothing)), ((function(int): ~string)), Typing))))
+                         ];
+                       unpacked_arg = None }))));
+             ([13:3-16:6],
+              (Expr
+                 ((void), [13:3-16:5],
+                  (Call
+                     { func = (((function((function(int): ~string) $_): void)), [13:3-12], (Id ([13:3-12], "\\expectFun"))); 
+                       targs = [];
+                       args =
+                       [(Anormal
+                           (((function(int $x, bool $b): ~string)), [13:13-16:4],
+                            (Hole (
+                               (((function(nothing $x, bool $b): nothing)), [13:13-16:4],
+                                (Hole (
+                                   (((function(int $x, bool $b): ~string)), [13:13-16:4],
+                                    (Lfun (
+                                       { f_span = [13:13-16:4]; f_readonly_this = None; 
+                                         f_annotation = (); f_readonly_ret = None; 
+                                         f_tparams = []; f_ret = ((~string), None);
+                                         f_params =
+                                         [{ param_annotation = (int); 
+                                            param_type_hint = ((int), None); 
+                                            param_pos = [13:14-16]; param_name = "$x"; 
+                                            param_info = Param_required; 
+                                            param_readonly = None; param_splat = None; 
+                                            param_callconv = Pnormal; 
+                                            param_named = None; param_user_attributes = []; 
+                                            param_visibility = None };
+                                           { param_annotation = (bool); 
+                                             param_type_hint = ((bool), (Some ([13:18-22], (Hprim Tbool)))); 
+                                             param_pos = [13:23-25]; 
+                                             param_name = "$b"; param_info = Param_required; 
+                                             param_readonly = None; param_splat = None; 
+                                             param_callconv = Pnormal; 
+                                             param_named = None; param_user_attributes = []; 
+                                             param_visibility = None }
+                                           ];
+                                         f_ctxs = None; f_unsafe_ctxs = None;
+                                         f_body =
+                                         { fb_ast =
+                                           [([14:5-19],
+                                             (Expr
+                                                ((void), [14:5-18],
+                                                 (Call
+                                                    { func = (((function(int $_): void)), [14:5-14], (Id ([14:5-14], "\\expectInt"))); 
+                                                      targs = []; args = [(Anormal ((int), [14:15-17], (Lvar ([14:15-17], $x))))]; 
+                                                      unpacked_arg = None }))));
+                                             ([15:5-16], (Return (Some ((string), [15:12-15], (String "B")))))]
+                                           };
+                                         f_fun_kind = FSync; f_user_attributes = []; 
+                                         f_external = false; f_hidden = false; 
+                                         f_doc_comment = None },
+                                       []))),
+                                   ((function(nothing $x, bool $b): nothing)), ((function(int): ~string)), Typing))),
+                               ((function(int $x, bool $b): ~string)), ((function(int): ~string)), Typing))))
+                         ];
+                       unpacked_arg = None }))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-16], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-19], "\\expectFun");
+       fd_fun =
+       { f_span = [7:1-55]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((dynamic), (Some ([7:47-51], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = (dynamic);
+            param_type_hint =
+            ((dynamic),
+             (Some ([7:20-42],
+                    (Happly (([7:20-42], "\\HH\\supportdyn"),
+                       [([7:20-42],
+                         (Hfun
+                            { hf_is_readonly = None; hf_tparams = []; 
+                              hf_param_tys = [([7:30-33], (Hprim Tint))];
+                              hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
+                              hf_variadic_ty = None; hf_ctxs = None; 
+                              hf_return_ty = ([7:35-41], (Hlike ([7:35-41], (Happly (([7:35-41], "\\HH\\string"), []))))); 
+                              hf_is_readonly_return = None }))
+                         ]
+                       )))));
+            param_pos = [7:43-45]; param_name = "$_"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-19], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None })

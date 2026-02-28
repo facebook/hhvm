@@ -14,4 +14,4 @@ vec(1) {
   int(25)
 }
 
-Catchable fatal error: Argument 1 passed to Test::f1() must be an instance of HH\%rvarray|vec%r, int given in %s/test/zend/good/tests/classes/type_hinting_003.php on line 35
+Catchable fatal error: Argument 1 passed to Test::f1() must be an instance of HH\varray, int given in %s/test/zend/good/tests/classes/type_hinting_003.php on line 35

@@ -1,0 +1,2 @@
+ERROR: File "reify_class_tparam_instance_method_bad.php", line 8, characters 8-35:
+Invalid function reference. This function requires reified generics. Prefer using a lambda instead. (Typing[4381])

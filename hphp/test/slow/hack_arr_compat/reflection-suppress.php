@@ -9,7 +9,7 @@ enum BarEnum : string {
 function foobar(
   $_a = BarEnum::BAR,
   $_b = BarEnum::FOO,
-) {
+) :mixed{
 }
 <<__EntryPoint>> function main(): void {
 new ReflectionFunction('foobar') |> $$->getParameters();

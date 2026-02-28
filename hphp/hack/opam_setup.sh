@@ -8,6 +8,11 @@
 
 set -euf
 
+VERBOSE=${VERBOSE:-0}
+if [ "${VERBOSE}" -eq "1" ]; then
+  set -x
+fi
+
 unset DUNE_BUILD_DIR
 
 if [ -z "$1" ]; then
@@ -38,6 +43,11 @@ fi
 export OPAMROOT="$OPAMROOT"
 mkdir -p "$OPAMROOT"
 export OPAMYES="1"
+
+# Prevents opam from trying to invoke brew install and dpkg, because all the
+# dependencies should have been installed by Nix, Apt or Homebrew.
+export OPAMASSUMEDEPEXTS="1"
+export OPAMNODEPEXTS="1"
 
 # shellcheck disable=SC1090
 source "$SOURCE_ROOT/opam_helpers.sh"

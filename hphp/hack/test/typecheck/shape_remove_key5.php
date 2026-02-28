@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /**
  * removeKey allows unsetting any key, but it still must be statically

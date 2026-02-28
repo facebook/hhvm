@@ -1,0 +1,14 @@
+float(0)
+float(-0)
+float(2.2360679774998)
+float(1.5811388300842)
+float(NAN)
+float(1.4973266176756)
+string(68) "Argument 1 passed to sqrt() must be an instance of float, bool given"
+string(68) "Argument 1 passed to sqrt() must be an instance of float, bool given"
+string(68) "Argument 1 passed to sqrt() must be an instance of float, null given"
+string(70) "Argument 1 passed to sqrt() must be an instance of float, string given"
+string(70) "Argument 1 passed to sqrt() must be an instance of float, string given"
+string(72) "Argument 1 passed to sqrt() must be an instance of float, stdClass given"
+string(70) "Argument 1 passed to sqrt() must be an instance of float, HH\vec given"
+string(70) "Argument 1 passed to sqrt() must be an instance of float, HH\vec given"

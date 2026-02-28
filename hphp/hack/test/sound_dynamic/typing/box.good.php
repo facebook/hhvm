@@ -1,7 +1,7 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<__SupportDynamicType>>
+<<__DynamicallyReferenced>>
 class BoxInt {
   public function __construct(private int $x) {}
   public function set(int $y) : void {$this->x = $y;}

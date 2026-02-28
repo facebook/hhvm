@@ -1,7 +1,7 @@
 <?hh
 class A extends \SplFileInfo
 {
-        public function __toString() {return ' -expected- ';}
+        public function __toString() :mixed{return ' -expected- ';}
 }
 <<__EntryPoint>> function main(): void {
 $a = new A('/');

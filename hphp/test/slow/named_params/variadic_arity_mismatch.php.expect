@@ -1,0 +1,6 @@
+Caught RuntimeException: foo() expects 2 required named parameters, 1 given
+Function did not throw
+Caught RuntimeException: Named argument c does not match any named parameter in call to foo
+Caught RuntimeException: foo() expects 2 required named parameters, 1 given
+Function did not throw
+Caught RuntimeException: foo() expects at least 1 positional parameter, 0 given

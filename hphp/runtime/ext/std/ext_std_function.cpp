@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <vector>
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/container-functions.h"
@@ -28,8 +29,7 @@
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/util/exception.h"
+#include "hphp/util/configs/hacklang.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,7 +67,7 @@ Variant HHVM_FUNCTION(call_user_func, const Variant& function,
                       const Array& params /* = null_array */) {
     auto const warning = "call_user_func() is deprecated and subject"
    " to removal from the Hack language";
-   switch (RuntimeOption::DisableCallUserFunc) {
+   switch (Cfg::HackLang::PhpismDisableCallUserFunc) {
      case 0:  break;
      case 1:  raise_warning(warning); break;
      default: raise_error(warning);
@@ -81,7 +81,7 @@ Variant HHVM_FUNCTION(call_user_func_array, const Variant& function,
                       const Variant& params) {
   auto const warning = "call_user_func_array() is deprecated and subject"
   " to removal from the Hack language";
-  switch (RuntimeOption::DisableCallUserFuncArray) {
+  switch (Cfg::HackLang::PhpismDisableCallUserFuncArray) {
     case 0:  break;
     case 1:  raise_warning(warning); break;
     default: raise_error(warning);
@@ -103,8 +103,8 @@ const StaticString s_call_user_func("call_user_func");
 const StaticString s_call_user_func_array("call_user_func_array");
 
 Array hhvm_get_frame_args(const ActRec* ar) {
-  while (ar && (ar->func()->name()->isame(s_call_user_func.get()) ||
-                ar->func()->name()->isame(s_call_user_func_array.get()))) {
+  while (ar && (ar->func()->name() == s_call_user_func.get() ||
+                ar->func()->name() == s_call_user_func_array.get())) {
     ar = g_context->getPrevVMState(ar);
   }
 
@@ -140,20 +140,6 @@ void HHVM_FUNCTION(register_shutdown_function, const Variant& function) {
   g_context->registerShutdownFunction(function, ExecutionContext::ShutDown);
 }
 
-void StandardExtension::initFunction() {
-  HHVM_FE(get_defined_functions);
-  HHVM_FE(function_exists);
-  HHVM_FE(is_callable);
-  HHVM_FE(is_callable_with_name);
-  HHVM_FE(call_user_func);
-  HHVM_FE(call_user_func_array);
-  HHVM_FE(register_postsend_function);
-  HHVM_FE(register_shutdown_function);
-  HHVM_FALIAS(HH\\fun_get_function, HH_fun_get_function);
-
-  loadSystemlib("std_function");
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 String HHVM_FUNCTION(HH_fun_get_function, TypedValue v) {
@@ -168,6 +154,20 @@ String HHVM_FUNCTION(HH_fun_get_function, TypedValue v) {
       folly::sformat("Argument 1 passed to {}() must be a fun",
       __FUNCTION__+5));
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void StandardExtension::registerNativeFunction() {
+  HHVM_FE(get_defined_functions);
+  HHVM_FE(function_exists);
+  HHVM_FE(is_callable);
+  HHVM_FE(is_callable_with_name);
+  HHVM_FE(call_user_func);
+  HHVM_FE(call_user_func_array);
+  HHVM_FE(register_postsend_function);
+  HHVM_FE(register_shutdown_function);
+  HHVM_FALIAS(HH\\fun_get_function, HH_fun_get_function);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $io = 1;
   $do = 1.5;
 
@@ -10,15 +10,19 @@ function main() {
   $ix = 10;
   $dx = 10.7;
 
-  var_dump($io **= $ix);
-  var_dump($dx **= $dx);
+  $io **= $ix;
+  var_dump($io);
+  $dx **= $dx;
+  var_dump($dx);
 
-  var_dump($it **= $dt);
-  var_dump($dt **= $it);
+  $it **= $dt;
+  var_dump($it);
+  $dt **= $it;
+  var_dump($dt);
 }
 
 
 <<__EntryPoint>>
-function main_power_assign() {
+function main_power_assign() :mixed{
 main();
 }

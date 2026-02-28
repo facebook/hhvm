@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_construct_persistent() {
+function main_construct_persistent() :mixed{
 $memc1 = new Memcached("test");
 $memc1->setOption(Memcached::OPT_PREFIX_KEY, 'php');
 var_dump($memc1->getOption(Memcached::OPT_PREFIX_KEY));

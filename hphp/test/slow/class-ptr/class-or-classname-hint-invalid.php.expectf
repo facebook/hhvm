@@ -1,0 +1,12 @@
+
+Warning: Argument 1 to f() must be of type @HH\class_or_classname, bool given in %s/class-ptr/class-or-classname-hint-invalid.php on line 8
+
+Warning: Argument 1 to f() must be of type @HH\class_or_classname, float given in %s/class-ptr/class-or-classname-hint-invalid.php on line 9
+
+Warning: Argument 1 to f() must be of type @HH\class_or_classname, int given in %s/class-ptr/class-or-classname-hint-invalid.php on line 10
+
+Warning: Argument 1 to f() must be of type @HH\class_or_classname, HH\vec given in %s/class-ptr/class-or-classname-hint-invalid.php on line 11
+
+Warning: Argument 1 to f() must be of type @HH\class_or_classname, HH\dict given in %s/class-ptr/class-or-classname-hint-invalid.php on line 12
+
+Warning: Argument 1 to f() must be of type @HH\class_or_classname, A given in %s/class-ptr/class-or-classname-hint-invalid.php on line 13

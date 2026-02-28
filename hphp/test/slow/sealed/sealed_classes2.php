@@ -1,5 +1,7 @@
 <?hh
 
+namespace SealedClass2;
+
 <<__Sealed(SomeOtherClass::class)>>
 class SomeSealedClass {}
 

@@ -1,10 +1,10 @@
 dict(0) {
 }
 
-Warning: get_object_vars() expects parameter 1 to be object, boolean given in %s/test/slow/get_object_vars/1538.php on line 6
+Warning: Argument 1 passed to get_object_vars() must be an instance of HH\object, bool given in %s/1538.php on line 9
 
-Warning: get_object_vars() expects parameter 1 to be object, boolean given in %s/test/slow/get_object_vars/1538.php on line 7
+Warning: Argument 1 passed to get_object_vars() must be an instance of HH\object, bool given in %s/1538.php on line 10
 
-Warning: get_object_vars() expects parameter 1 to be object, string given in %s/test/slow/get_object_vars/1538.php on line 8
+Warning: Argument 1 passed to get_object_vars() must be an instance of HH\object, string given in %s/1538.php on line 11
 
-Warning: get_object_vars() expects parameter 1 to be object, integer given in %s/test/slow/get_object_vars/1538.php on line 9
+Warning: Argument 1 passed to get_object_vars() must be an instance of HH\object, int given in %s/1538.php on line 12

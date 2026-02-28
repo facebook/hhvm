@@ -1,57 +1,62 @@
 <?hh
 
-function non_zoned($fn) {
-  if ($fn) $fn(null);
+<<__DynamicallyCallable>> function non_zoned($fn) :mixed{
+  if ($fn) HH\dynamic_fun($fn)(null);
 }
 
-function zoned_local($fn)[zoned_local] {
-  if ($fn) $fn(null);
+<<__DynamicallyCallable>> function zoned_local($fn)[zoned_local] :mixed{
+  if ($fn) HH\dynamic_fun($fn)(null);
 }
 
-function zoned_shallow($fn)[zoned_shallow] {
-  if ($fn) $fn(null);
+<<__DynamicallyCallable>> function zoned_shallow($fn)[zoned_shallow] :mixed{
+  if ($fn) HH\dynamic_fun($fn)(null);
 }
 
-function zoned($fn)[zoned] {
-  if ($fn) $fn(null);
+<<__DynamicallyCallable>> function zoned($fn)[zoned] :mixed{
+  if ($fn) HH\dynamic_fun($fn)(null);
 }
 
-function zoned_with($fn)[zoned_with] {
-  if ($fn) $fn(null);
+<<__DynamicallyCallable>> function leak_safe_local($fn)[leak_safe_local] :mixed{
+  if ($fn) HH\dynamic_fun($fn)(null);
 }
 
-function leak_safe($fn)[leak_safe] {
-  if ($fn) $fn(null);
+<<__DynamicallyCallable>> function leak_safe_shallow($fn)[leak_safe_shallow] :mixed{
+  if ($fn) HH\dynamic_fun($fn)(null);
 }
 
-function read_globals($fn)[read_globals] {
-  if ($fn) $fn(null);
+<<__DynamicallyCallable>> function leak_safe($fn)[leak_safe] :mixed{
+  if ($fn) HH\dynamic_fun($fn)(null);
 }
 
-function globals($fn)[globals] {
-  if ($fn) $fn(null);
+<<__DynamicallyCallable>> function read_globals($fn)[read_globals] :mixed{
+  if ($fn) HH\dynamic_fun($fn)(null);
 }
 
-function write_props($fn)[write_props] {
-  if ($fn) $fn(null);
+<<__DynamicallyCallable>> function globals($fn)[globals] :mixed{
+  if ($fn) HH\dynamic_fun($fn)(null);
 }
 
-function write_this_props($fn)[write_this_props] {
-  if ($fn) $fn(null);
+<<__DynamicallyCallable>> function write_props($fn)[write_props] :mixed{
+  if ($fn) HH\dynamic_fun($fn)(null);
 }
 
-function pure($fn)[] {
-  if ($fn) $fn(null);
+<<__DynamicallyCallable>> function write_this_props($fn)[write_this_props] :mixed{
+  if ($fn) HH\dynamic_fun($fn)(null);
+}
+
+<<__DynamicallyCallable>> function pure($fn)[] :mixed{
+  if ($fn) HH\dynamic_fun($fn)(null);
 }
 
 <<__EntryPoint>>
-function main()[zoned_with, defaults] {
+function main()[defaults] :mixed{
   $functions = vec[
     'non_zoned',
     'zoned_local',
     'zoned_shallow',
     'zoned',
-    'zoned_with',
+    'leak_safe_local',
+    'leak_safe_shallow',
     'leak_safe',
     'globals',
     'read_globals',
@@ -62,7 +67,7 @@ function main()[zoned_with, defaults] {
   foreach ($functions as $caller) {
     foreach ($functions as $callee) {
       echo "$caller -> $callee:";
-      $caller($callee);
+      HH\dynamic_fun($caller)($callee);
       echo " ok\n";
     }
   }

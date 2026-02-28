@@ -1,0 +1,18 @@
+{
+  "arrowParens": "always",
+  "bracketSameLine": true,
+  "bracketSpacing": false,
+  "printWidth": 80,
+  "proseWrap": "never",
+  "singleQuote": true,
+  "trailingComma": "all",
+  "overrides": [
+    {
+      "files": "*.md",
+      "options": {
+        "proseWrap": "always",
+        "embeddedLanguageFormatting": "off"
+      }
+    }
+  ]
+}

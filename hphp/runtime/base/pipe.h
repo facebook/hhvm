@@ -25,7 +25,7 @@ namespace HPHP {
  * Wrapper around popen/pclose.
  */
 struct Pipe : PlainFile {
-  DECLARE_RESOURCE_ALLOCATION(Pipe);
+  DECLARE_RESOURCE_ALLOCATION(Pipe)
 
   Pipe();
   virtual ~Pipe();
@@ -35,10 +35,7 @@ struct Pipe : PlainFile {
 
   // implementing File
   bool open(const String& filename, const String& mode) override;
-  bool close() override;
-
-private:
-  bool closeImpl();
+  bool close(int* raw_pclose_return = nullptr) final;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

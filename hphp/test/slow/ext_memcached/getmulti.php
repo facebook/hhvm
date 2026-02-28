@@ -4,7 +4,7 @@ $m = new Memcached();
 $m->addServer('localhost', '11211');
 
 class Foo {
-    function __toString()[] {
+    function __toString()[] :mixed{
         return 'a-foo';
     }
 }

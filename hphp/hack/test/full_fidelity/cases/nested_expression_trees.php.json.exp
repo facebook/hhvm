@@ -323,7 +323,7 @@
                       "line_number":6
                     }
                   },
-                  "prefixed_code_expression":{
+                  "prefixed_code_body":{
                     "kind":"token",
                     "token":{
                       "kind":"name",
@@ -376,17 +376,37 @@
               {
                 "kind":"expression_statement",
                 "expression_statement_expression":{
-                  "kind":"token",
-                  "token":{
-                    "kind":"`",
-                    "text":"`",
-                    "offset":110,
-                    "leading_width":0,
-                    "width":1,
-                    "trailing_width":0,
-                    "leading":[],
-                    "trailing":[],
-                    "line_number":6
+                  "kind":"prefixed_code",
+                  "prefixed_code_left_backtick":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"`",
+                      "text":"`",
+                      "offset":110,
+                      "leading_width":0,
+                      "width":1,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":6
+                    }
+                  },
+                  "prefixed_code_body":{
+                    "kind":"prefixed_code",
+                    "prefixed_code_left_backtick":{
+                      "kind":"token",
+                      "token":{
+                        "kind":"`",
+                        "text":"`",
+                        "offset":111,
+                        "leading_width":0,
+                        "width":1,
+                        "trailing_width":0,
+                        "leading":[],
+                        "trailing":[],
+                        "line_number":6
+                      }
+                    }
                   }
                 },
                 "expression_statement_semicolon":{
@@ -394,11 +414,11 @@
                   "token":{
                     "kind":";",
                     "text":";",
-                    "offset":111,
-                    "leading_width":1,
+                    "offset":112,
+                    "leading_width":0,
                     "width":1,
                     "trailing_width":1,
-                    "leading":[{"kind":"extra_token_error","text":"`","offset":111,"width":1}],
+                    "leading":[],
                     "trailing":[{"kind":"end_of_line","text":"\n","offset":113,"width":1}],
                     "line_number":6
                   }

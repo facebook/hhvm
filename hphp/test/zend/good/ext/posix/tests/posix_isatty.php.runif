@@ -1,2 +1,1 @@
 extension posix
-function posix_isatty

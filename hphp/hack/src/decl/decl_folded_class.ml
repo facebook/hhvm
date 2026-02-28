@@ -26,10 +26,7 @@ module SN = Naming_special_names
 
 type class_entries = Decl_defs.decl_class_type * Decl_store.class_members option
 
-type lazy_member_lookup_error =
-  | LMLEShallowClassNotFound
-  | LMLEMemberNotFound
-[@@deriving show]
+module Members = Decl_members.Make (Decl_enforceability_shallow.Provider)
 
 (*****************************************************************************)
 (* Checking that the kind of a class is compatible with its parent
@@ -69,6 +66,28 @@ let check_extend_kind
            name = child_name;
          })
 
+let check_use_kind
+    (parent_pos : Pos_or_decl.t)
+    (parent_kind : Ast_defs.classish_kind)
+    (parent_name : string)
+    (parent_is_internal : bool)
+    (child_pos : Pos_or_decl.t)
+    (child_kind : Ast_defs.classish_kind)
+    (child_name : string)
+    (child_is_module_level_trait : bool) : decl_error option =
+  match (parent_kind, child_kind) with
+  | (Ast_defs.Ctrait, Ast_defs.Ctrait)
+    when child_is_module_level_trait && parent_is_internal ->
+    Some
+      (Wrong_use_kind
+         {
+           parent_pos;
+           parent_name;
+           pos = Pos_or_decl.unsafe_to_raw_pos child_pos;
+           name = child_name;
+         })
+  | _ -> None
+
 (*****************************************************************************)
 (* Functions used retrieve everything implemented in parent classes
  * The return values:
@@ -80,13 +99,8 @@ let check_extend_kind
 (*****************************************************************************)
 
 let member_heaps_enabled (ctx : Provider_context.t) : bool =
-  (* We can only disable member heaps when the direct decl parser is enabled,
-     as there's no caching mechanism for shallow decls when the FFP is used
-     to parse decls. The absence of such caching makes not writing to the
-     member heaps prohibitively slow. *)
   let tco = Provider_context.get_tcopt ctx in
-  TypecheckerOptions.(
-    (not (use_direct_decl_parser tco)) || populate_member_heaps tco)
+  TypecheckerOptions.(populate_member_heaps tco)
 
 (**
  * Adds the traits/classes which are part of a class' hierarchy.
@@ -105,21 +119,40 @@ let add_grand_parents_or_traits
   let class_pos = fst shallow_class.sc_name in
   let classish_kind = shallow_class.sc_kind in
   let class_name = snd shallow_class.sc_name in
+  let class_is_module_level_trait =
+    Attributes.mem
+      SN.UserAttributes.uaModuleLevelTrait
+      shallow_class.sc_user_attributes
+  in
   let decl_errors =
-    if phys_equal pass `Extends_pass then
-      match
-        check_extend_kind
-          parent_pos
-          parent_type.dc_kind
-          parent_type.dc_name
-          class_pos
-          classish_kind
-          class_name
-      with
+    match pass with
+    | `Extends_pass ->
+      (match
+         check_extend_kind
+           parent_pos
+           parent_type.dc_kind
+           parent_type.dc_name
+           class_pos
+           classish_kind
+           class_name
+       with
       | Some err -> err :: decl_errors
-      | None -> decl_errors
-    else
-      decl_errors
+      | None -> decl_errors)
+    | `Traits_pass ->
+      (match
+         check_use_kind
+           parent_pos
+           parent_type.dc_kind
+           parent_type.dc_name
+           parent_type.dc_internal
+           class_pos
+           classish_kind
+           class_name
+           class_is_module_level_trait
+       with
+      | Some err -> err :: decl_errors
+      | None -> decl_errors)
+    | `Xhp_pass -> decl_errors
   in
 
   (* If we are crawling the xhp attribute deps, we need to merge their xhp deps
@@ -139,7 +172,7 @@ let get_class_parent_or_trait
     (parent_cache : Decl_store.class_entries SMap.t)
     ((parents, pass, decl_errors) :
       SSet.t * [ `Extends_pass | `Traits_pass | `Xhp_pass ] * decl_error list)
-    (ty : Typing_defs.decl_phase Typing_defs.ty) : SSet.t * 'a * decl_error list
+    (ty : Typing_defs.decl_phase Typing_defs.ty) : SSet.t * _ * decl_error list
     =
   let (_, (parent_pos, parent), _) = Decl_utils.unwrap_class_type ty in
   (* If we already had this exact trait, we need to flag trait reuse *)
@@ -158,10 +191,12 @@ let get_class_parent_or_trait
     let acc = (parents, pass, decl_errors) in
     add_grand_parents_or_traits parent_pos shallow_class acc parent_type
 
+(** The first set is the names of the `extend`ed parents, `use`d traits and XHP attributes.
+    It does not include the `implement`ed interfaces. *)
 let get_class_parents_and_traits
     (env : Decl_env.env)
     (shallow_class : Shallow_decl_defs.shallow_class)
-    parent_cache
+    ~parent_cache
     decl_errors : SSet.t * SSet.t * decl_error list =
   let parents = SSet.empty in
   (* extends parents *)
@@ -246,32 +281,65 @@ let synthesize_typeconst_defaults
     (typeconsts, consts)
   | _ -> (typeconsts, consts)
 
-let get_sealed_whitelist (c : Shallow_decl_defs.shallow_class) : SSet.t option =
-  match Attributes.find SN.UserAttributes.uaSealed c.sc_user_attributes with
+let extract_sealed_classnames attrs : SSet.t option =
+  match attrs with
   | None -> None
-  | Some { ua_classname_params; _ } -> Some (SSet.of_list ua_classname_params)
+  | Some { ua_params; _ } ->
+    let cn_params =
+      List.filter_map
+        ~f:(function
+          | Classname cn -> Some cn
+          | _ -> None)
+        ua_params
+    in
+    Some (SSet.of_list cn_params)
 
-let get_implements (env : Decl_env.env) parent_cache (ht : Typing_defs.decl_ty)
-    : Typing_defs.decl_ty SMap.t =
-  let (_r, (_p, c), paraml) = Decl_utils.unwrap_class_type ht in
+let get_class_sealed_allowlist (c : Shallow_decl_defs.shallow_class) :
+    SSet.t option =
+  extract_sealed_classnames
+    (Attributes.find SN.UserAttributes.uaSealed c.sc_user_attributes)
+
+let get_method_sealed_allowlist (m : Shallow_decl_defs.shallow_method) :
+    SSet.t option =
+  extract_sealed_classnames
+    (Attributes.find SN.UserAttributes.uaSealed m.sm_attributes)
+
+let get_overlapping_tparams (m : Shallow_decl_defs.shallow_method) :
+    SSet.t option =
+  match Attributes.find SN.UserAttributes.uaOverlapping m.sm_attributes with
+  | None -> None
+  | Some { ua_params; _ } ->
+    let params =
+      List.filter_map
+        ~f:(function
+          | String s -> Some s
+          | _ -> None)
+        ua_params
+    in
+    Some (SSet.of_list params)
+
+let get_instantiated_ancestors_and_self
+    (env : Decl_env.env) parent_cache (ht : Typing_defs.decl_ty) :
+    Typing_defs.decl_ty SMap.t =
+  let (_r, (_p, class_name), paraml) = Decl_utils.unwrap_class_type ht in
   let class_ =
     Decl_env.get_class_and_add_dep
       ~cache:parent_cache
       ~shmem_fallback:false
       ~fallback:Decl_env.no_fallback
       env
-      c
+      class_name
   in
   match class_ with
   | None ->
     (* The class lives in PHP land *)
-    SMap.singleton c ht
+    SMap.singleton class_name ht
   | Some class_ ->
     let subst = Inst.make_subst class_.dc_tparams paraml in
-    let sub_implements =
+    let instantiated_ancestors =
       SMap.map (fun ty -> Inst.instantiate subst ty) class_.dc_ancestors
     in
-    SMap.add c ht sub_implements
+    SMap.add class_name ht instantiated_ancestors
 
 let visibility
     (class_id : string)
@@ -285,23 +353,16 @@ let visibility
     (match module_ with
     | Some m -> Vinternal (snd m)
     | None -> Vpublic)
+  | ProtectedInternal ->
+    (match module_ with
+    | Some m -> Vprotected_internal { class_id; module_ = snd m }
+    | None -> Vprotected class_id)
 
 let build_constructor_fun_elt
     ~(ctx : Provider_context.t)
     ~(elt_origin : string)
-    ~(method_ : Shallow_decl_defs.shallow_method) =
-  let pos = fst method_.sm_name in
-  let fe =
-    {
-      fe_module = None;
-      fe_pos = pos;
-      fe_internal = false;
-      fe_deprecated = method_.sm_deprecated;
-      fe_type = method_.sm_type;
-      fe_php_std_lib = false;
-      fe_support_dynamic_type = false;
-    }
-  in
+    ~(method_ : Shallow_decl_defs.shallow_method) : Typing_defs.fun_elt =
+  let fe = Members.build_constructor method_ in
   (if member_heaps_enabled ctx then
     Decl_store.((get ()).add_constructor elt_origin fe));
   fe
@@ -328,12 +389,18 @@ let build_constructor
           ~synthesized:false
           ~superfluous_override:false
           ~dynamicallycallable:false
-          ~readonly_prop:false
-          ~support_dynamic_type:false
-          ~needs_init:false;
+          ~readonly_prop_or_needs_concrete:false
+          ~support_dynamic_type:(sm_support_dynamic_type method_)
+          ~needs_init:false
+          ~no_auto_likes:(sm_no_auto_likes method_)
+          ~safe_global_variable:false;
       elt_visibility = vis;
       elt_origin = class_name;
       elt_deprecated = method_.sm_deprecated;
+      elt_sealed_allowlist = None;
+      elt_sort_text = method_.sm_sort_text;
+      elt_overlapping_tparams = get_overlapping_tparams method_;
+      elt_package_requirement = Some method_.sm_package_requirement;
     }
   in
   let fe = build_constructor_fun_elt ~ctx ~elt_origin:class_name ~method_ in
@@ -369,17 +436,6 @@ let constructor_decl_eager
   in
   (cstr, Decl_utils.coalesce_consistent pconsist cconsist)
 
-let constructor_decl_lazy
-    ~(sh : SharedMem.uses) (ctx : Provider_context.t) ~(elt_origin : string) :
-    (Typing_defs.fun_elt, lazy_member_lookup_error) result =
-  let SharedMem.Uses = sh in
-  match Shallow_classes_provider.get ctx elt_origin with
-  | None -> Error LMLEShallowClassNotFound
-  | Some class_ ->
-    (match class_.sc_constructor with
-    | None -> Error LMLEMemberNotFound
-    | Some method_ -> Ok (build_constructor_fun_elt ~ctx ~elt_origin ~method_))
-
 let class_const_fold
     (c : Shallow_decl_defs.shallow_class)
     (acc : Typing_defs.class_const SMap.t)
@@ -401,37 +457,43 @@ let class_const_fold
 
 (* Every class, interface, and trait implicitly defines a ::class to
  * allow accessing its fully qualified name as a string *)
-let class_class_decl (class_id : Typing_defs.pos_id) : Typing_defs.class_const =
+let class_class_decl (ctx : Provider_context.t) (class_id : Typing_defs.pos_id)
+    : Typing_defs.class_const =
   let (pos, name) = class_id in
-  let reason = Reason.Rclass_class (pos, name) in
-  let classname_ty =
-    mk (reason, Tapply ((pos, SN.Classes.cClassname), [mk (reason, Tthis)]))
+  let tco = Provider_context.get_tcopt ctx in
+  (* Examples: classname<C>, class<C>, concrete<classname<C>> ... *)
+  let cc_type =
+    let reason = Reason.class_class (pos, name) in
+    let classname_or_class_ptr_ty =
+      if TypecheckerOptions.(class_class_type tco) then
+        mk (reason, Tclass_ptr (mk (reason, Tthis)))
+      else
+        mk (reason, Tapply ((pos, SN.Classes.cClassname), [mk (reason, Tthis)]))
+    in
+    classname_or_class_ptr_ty
   in
   {
     cc_abstract = CCConcrete;
     cc_pos = pos;
     cc_synthesized = true;
-    cc_type = classname_ty;
+    cc_type;
     cc_origin = name;
     cc_refs = [];
   }
 
 let build_prop_sprop_ty
     ~(ctx : Provider_context.t)
+    ~(this_class : shallow_class option)
     ~(is_static : bool)
     ~(elt_origin : string)
     (sp : Shallow_decl_defs.shallow_prop) : Typing_defs.decl_ty =
-  let (sp_pos, sp_name) = sp.sp_name in
-  let ty =
-    match sp.sp_type with
-    | None -> mk (Reason.Rwitness_from_decl sp_pos, Typing_defs.make_tany ())
-    | Some ty' -> ty'
-  in
+  let ty = Members.build_property ~ctx ~this_class sp in
   (if member_heaps_enabled ctx then
+    let (_pos, name) = sp.sp_name in
     if is_static then
-      Decl_store.((get ()).add_static_prop (elt_origin, sp_name) ty)
+      Decl_store.((get ()).add_static_prop (elt_origin, name) ty)
     else
-      Decl_store.((get ()).add_prop (elt_origin, sp_name) ty));
+      Decl_store.((get ()).add_prop (elt_origin, name) ty));
   ty
 
 let prop_decl_eager
@@ -441,7 +503,14 @@ let prop_decl_eager
     (sp : Shallow_decl_defs.shallow_prop) :
     (Decl_defs.element * Typing_defs.decl_ty option) SMap.t =
   let elt_origin = snd c.sc_name in
-  let ty = build_prop_sprop_ty ~ctx ~is_static:false ~elt_origin sp in
+  let ty =
+    build_prop_sprop_ty
+      ~ctx
+      ~this_class:(Some c)
+      ~is_static:false
+      ~elt_origin
+      sp
+  in
   let vis = visibility (snd c.sc_name) c.sc_module sp.sp_visibility in
   let elt =
     {
@@ -456,33 +525,22 @@ let prop_decl_eager
           ~lateinit:(sp_lateinit sp)
           ~abstract:(sp_abstract sp)
           ~dynamicallycallable:false
-          ~readonly_prop:(sp_readonly sp)
+          ~readonly_prop_or_needs_concrete:(sp_readonly sp)
           ~support_dynamic_type:false
-          ~needs_init:(sp_needs_init sp);
+          ~needs_init:(sp_needs_init sp)
+          ~safe_global_variable:false
+          ~no_auto_likes:false;
       elt_visibility = vis;
       elt_origin;
       elt_deprecated = None;
+      elt_sealed_allowlist = None;
+      elt_sort_text = None;
+      elt_overlapping_tparams = None;
+      elt_package_requirement = None;
     }
   in
   let acc = SMap.add (snd sp.sp_name) (elt, Some ty) acc in
   acc
-
-let prop_decl_lazy
-    ~(sh : SharedMem.uses)
-    (ctx : Provider_context.t)
-    ~(elt_origin : string)
-    ~(sp_name : string) : (Typing_defs.decl_ty, lazy_member_lookup_error) result
-    =
-  let SharedMem.Uses = sh in
-  match Shallow_classes_provider.get ctx elt_origin with
-  | None -> Error LMLEShallowClassNotFound
-  | Some class_ ->
-    (match
-       List.find class_.sc_props ~f:(fun prop ->
-           String.equal (snd prop.sp_name) sp_name)
-     with
-    | None -> Error LMLEMemberNotFound
-    | Some sp -> Ok (build_prop_sprop_ty ~ctx ~is_static:false ~elt_origin sp))
 
 let static_prop_decl_eager
     ~(ctx : Provider_context.t)
@@ -491,7 +549,9 @@ let static_prop_decl_eager
     (sp : Shallow_decl_defs.shallow_prop) :
     (Decl_defs.element * Typing_defs.decl_ty option) SMap.t =
   let elt_origin = snd c.sc_name in
-  let ty = build_prop_sprop_ty ~ctx ~is_static:true ~elt_origin sp in
+  let ty =
+    build_prop_sprop_ty ~ctx ~this_class:(Some c) ~is_static:true ~elt_origin sp
+  in
   let vis = visibility (snd c.sc_name) c.sc_module sp.sp_visibility in
   let elt =
     {
@@ -506,41 +566,30 @@ let static_prop_decl_eager
           ~abstract:(sp_abstract sp)
           ~synthesized:false
           ~dynamicallycallable:false
-          ~readonly_prop:(sp_readonly sp)
+          ~readonly_prop_or_needs_concrete:(sp_readonly sp)
           ~support_dynamic_type:false
-          ~needs_init:false;
+          ~needs_init:false
+          ~no_auto_likes:false
+          ~safe_global_variable:(sp_safe_global_variable sp);
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = None;
+      elt_sealed_allowlist = None;
+      elt_sort_text = None;
+      elt_overlapping_tparams = None;
+      elt_package_requirement = None;
     }
   in
   let acc = SMap.add (snd sp.sp_name) (elt, Some ty) acc in
   acc
 
-let static_prop_decl_lazy
-    ~(sh : SharedMem.uses)
-    (ctx : Provider_context.t)
-    ~(elt_origin : string)
-    ~(sp_name : string) : (Typing_defs.decl_ty, lazy_member_lookup_error) result
-    =
-  let SharedMem.Uses = sh in
-  match Shallow_classes_provider.get ctx elt_origin with
-  | None -> Error LMLEShallowClassNotFound
-  | Some class_ ->
-    (match
-       List.find class_.sc_sprops ~f:(fun prop ->
-           String.equal (snd prop.sp_name) sp_name)
-     with
-    | None -> Error LMLEMemberNotFound
-    | Some sp -> Ok (build_prop_sprop_ty ~ctx ~is_static:true ~elt_origin sp))
-
 (* each concrete type constant T = <sometype> implicitly defines a
-class constant with the same name which is TypeStructure<sometype> *)
+   class constant with the same name which is TypeStructure<sometype> *)
 let typeconst_structure
     (c : Shallow_decl_defs.shallow_class)
     (stc : Shallow_decl_defs.shallow_typeconst) : Typing_defs.class_const =
   let pos = fst stc.stc_name in
-  let r = Reason.Rwitness_from_decl pos in
+  let r = Reason.witness_from_decl pos in
   let tsid = (pos, SN.FB.cTypeStructure) in
   let ts_ty =
     mk (r, Tapply (tsid, [mk (r, Taccess (mk (r, Tthis), stc.stc_name))]))
@@ -549,7 +598,7 @@ let typeconst_structure
     match stc.stc_kind with
     | TCAbstract { atc_default = default; _ } ->
       CCAbstract (Option.is_some default)
-    | _ -> CCConcrete
+    | TCConcrete _ -> CCConcrete
   in
   {
     cc_abstract = abstract;
@@ -560,16 +609,37 @@ let typeconst_structure
     cc_refs = [];
   }
 
+let maybe_add_supportdyn_bound ctx p kind =
+  if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
+    match kind with
+    | TCAbstract { atc_as_constraint = None; atc_super_constraint; atc_default }
+      ->
+      TCAbstract
+        {
+          atc_as_constraint =
+            Some
+              (Decl_enforceability.supportdyn_mixed
+                 p
+                 (Typing_defs.Reason.witness_from_decl p));
+          atc_super_constraint;
+          atc_default;
+        }
+    | TCAbstract _
+    | TCConcrete _ ->
+      kind
+  else
+    kind
+
 let typeconst_fold
+    (ctx : Provider_context.t)
     (c : Shallow_decl_defs.shallow_class)
     (acc : Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t)
     (stc : Shallow_decl_defs.shallow_typeconst) :
     Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t =
   let (typeconsts, consts) = acc in
   match c.sc_kind with
+  | Ast_defs.Cenum -> acc
   | Ast_defs.Cenum_class _
-  | Ast_defs.Cenum ->
-    acc
   | Ast_defs.Ctrait
   | Ast_defs.Cinterface
   | Ast_defs.Cclass _ ->
@@ -598,7 +668,11 @@ let typeconst_fold
       {
         ttc_synthesized = false;
         ttc_name = stc.stc_name;
-        ttc_kind = stc.stc_kind;
+        ttc_kind =
+          (if stc.stc_is_ctx then
+            stc.stc_kind
+          else
+            maybe_add_supportdyn_bound ctx (fst stc.stc_name) stc.stc_kind);
         ttc_origin = c_name;
         ttc_enforceable = enforceable;
         ttc_reifiable = reifiable;
@@ -611,23 +685,14 @@ let typeconst_fold
 
 let build_method_fun_elt
     ~(ctx : Provider_context.t)
+    ~(this_class : shallow_class option)
     ~(is_static : bool)
     ~(elt_origin : string)
+    ~(no_auto_likes : bool)
     (m : Shallow_decl_defs.shallow_method) : Typing_defs.fun_elt =
-  let (pos, id) = m.sm_name in
-  let support_dynamic_type = sm_support_dynamic_type m in
-  let fe =
-    {
-      fe_module = None;
-      fe_pos = pos;
-      fe_internal = false;
-      fe_deprecated = None;
-      fe_type = m.sm_type;
-      fe_php_std_lib = false;
-      fe_support_dynamic_type = support_dynamic_type;
-    }
-  in
+  let fe = Members.build_method ~ctx ~this_class ~no_auto_likes m in
   (if member_heaps_enabled ctx then
+    let (_pos, id) = m.sm_name in
     if is_static then
       Decl_store.((get ()).add_static_method (elt_origin, id) fe)
     else
@@ -652,9 +717,30 @@ let method_decl_eager
     | (Some ({ elt_visibility = Vprotected _ as parent_vis; _ }, _), Protected)
       ->
       parent_vis
+    | ( Some ({ elt_visibility = Vprotected_internal { class_id; _ }; _ }, _),
+        ProtectedInternal ) ->
+      visibility class_id c.sc_module m.sm_visibility
     | _ -> visibility (snd c.sc_name) c.sc_module m.sm_visibility
   in
   let support_dynamic_type = sm_support_dynamic_type m in
+  let sealed_allowlist = get_method_sealed_allowlist m in
+  let parent_sort_text =
+    match SMap.find_opt id acc with
+    | Some ({ elt_sort_text = _ as parent_text; _ }, _) -> parent_text
+    | _ -> None
+  in
+  let sort_text =
+    match m.sm_sort_text with
+    | Some text -> Some text
+    | _ -> parent_sort_text
+  in
+  let parent_no_auto_likes =
+    match SMap.find_opt id acc with
+    | Some ({ elt_flags; _ }, _) ->
+      Typing_defs_flags.ClassElt.is_no_auto_likes elt_flags
+    | _ -> false
+  in
+  let no_auto_likes = parent_no_auto_likes || sm_no_auto_likes m in
   let elt =
     {
       elt_flags =
@@ -668,40 +754,31 @@ let method_decl_eager
           ~const:false
           ~lateinit:false
           ~dynamicallycallable:(sm_dynamicallycallable m)
-          ~readonly_prop:false
+          ~readonly_prop_or_needs_concrete:(sm_needs_concrete m)
           ~support_dynamic_type
-          ~needs_init:false;
+          ~needs_init:false
+          ~no_auto_likes
+          ~safe_global_variable:false;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = m.sm_deprecated;
+      elt_sealed_allowlist = sealed_allowlist;
+      elt_sort_text = sort_text;
+      elt_overlapping_tparams = get_overlapping_tparams m;
+      elt_package_requirement = Some m.sm_package_requirement;
     }
   in
-  let fe = build_method_fun_elt ~ctx ~is_static ~elt_origin:elt.elt_origin m in
+  let fe =
+    build_method_fun_elt
+      ~ctx
+      ~this_class:(Some c)
+      ~is_static
+      ~elt_origin:elt.elt_origin
+      ~no_auto_likes
+      m
+  in
   let acc = SMap.add id (elt, Some fe) acc in
   acc
-
-let method_decl_lazy
-    ~(sh : SharedMem.uses)
-    (ctx : Provider_context.t)
-    ~(is_static : bool)
-    ~(elt_origin : string)
-    ~(sm_name : string) : (Typing_defs.fun_elt, lazy_member_lookup_error) result
-    =
-  let SharedMem.Uses = sh in
-  match Shallow_classes_provider.get ctx elt_origin with
-  | None -> Error LMLEShallowClassNotFound
-  | Some class_ ->
-    let methods =
-      if is_static then
-        class_.sc_static_methods
-      else
-        class_.sc_methods
-    in
-    (match
-       List.find methods ~f:(fun m -> String.equal (snd m.sm_name) sm_name)
-     with
-    | None -> Error LMLEMemberNotFound
-    | Some sm -> Ok (build_method_fun_elt ~ctx ~is_static ~elt_origin sm))
 
 let rec declare_class_and_parents
     ~(sh : SharedMem.uses)
@@ -755,7 +832,9 @@ and class_decl_if_missing
   match Decl_store.((get ()).get_class class_name) with
   | Some decl -> Some (decl, None)
   | None ->
-    (match Shallow_classes_provider.get class_env.ctx class_name with
+    (match
+       Decl_provider_internals.get_shallow_class class_env.ctx class_name
+     with
     | None -> None
     | Some shallow_class ->
       let ((class_, _) as result) =
@@ -774,13 +853,18 @@ and class_decl
   let is_abstract = class_is_abstract c in
   let const = Attrs.mem SN.UserAttributes.uaConst c.sc_user_attributes in
   (* Support both attribute and keyword for now, until typechecker changes are made *)
-  let internal =
-    Attrs.mem SN.UserAttributes.uaInternal c.sc_user_attributes || c.sc_internal
-  in
-  let (_p, cls_name) = c.sc_name in
+  let internal = c.sc_internal in
+  let (p, cls_name) = c.sc_name in
   let class_dep = Dep.Type cls_name in
-  let env = { Decl_env.mode = c.sc_mode; droot = Some class_dep; ctx } in
-  let inherited = Decl_inherit.make env c ~cache:parents in
+  let env =
+    {
+      Decl_env.mode = c.sc_mode;
+      droot = Some class_dep;
+      droot_member = None;
+      ctx;
+    }
+  in
+  let inherited = Decl_inherit.make c ~cache:parents in
   let props = inherited.Decl_inherit.ih_props in
   let props =
     List.fold_left ~f:(prop_decl_eager ~ctx c) ~init:props c.sc_props
@@ -796,16 +880,21 @@ and class_decl
   let consts =
     List.fold_left ~f:(class_const_fold c) ~init:consts c.sc_consts
   in
-  let consts = SMap.add SN.Members.mClass (class_class_decl c.sc_name) consts in
+  let consts =
+    if not (String.equal SN.Classes.cString (snd c.sc_name)) then
+      SMap.add SN.Members.mClass (class_class_decl ctx c.sc_name) consts
+    else
+      consts
+  in
   let typeconsts = inherited.Decl_inherit.ih_typeconsts in
   let (typeconsts, consts) =
     List.fold_left
       c.sc_typeconsts
-      ~f:(typeconst_fold c)
+      ~f:(typeconst_fold ctx c)
       ~init:(typeconsts, consts)
   in
   let (typeconsts, consts) =
-    if Ast_defs.is_c_normal c.sc_kind then
+    if Ast_defs.is_c_concrete c.sc_kind then
       let consts = SMap.map synthesize_const_defaults consts in
       SMap.fold synthesize_typeconst_defaults typeconsts (typeconsts, consts)
     else
@@ -831,7 +920,21 @@ and class_decl
     | Some (elt, _) when get_elt_abstract elt -> false
     | _ -> true
   in
-  let impl = c.sc_extends @ c.sc_implements @ c.sc_uses in
+  (* Order matters - the earlier, the higher precedence its ancestors will have.
+   * /!\ For soundness, the order here must be consistent with the traversal order for method folding!
+   * see decl_inherit.ml
+   * A type may implement an interface or use a trait at multiple instantations,
+   * e.g. I<int> and I<string>. The order here determines which one will be used:
+   * we'll use the first one encountered during traversal.
+   * Since this is a recursive function, ancestor traversal is in effect a depth-first
+   * traversal.
+   * For interfaces, the typechecking code forces the winner instantiation
+   * to be a subtype of each of the loser instantiations. This is necessary for soundness.
+   * Users can influence which instantiation wins by reordering direct parents.
+   * It's important that we start traversal with interfaces here,
+   * otherwise interfaces which are ancestors of the base class would always win,
+   * with no easy way to override them. *)
+  let impl = c.sc_implements @ c.sc_extends @ c.sc_uses in
   let (impl, parents) =
     match
       List.find c.sc_methods ~f:(fun sm ->
@@ -853,19 +956,31 @@ and class_decl
           SMap.add SN.Classes.cStringishObject stringish_cls parents
       in
       let ty =
-        mk (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringishObject), []))
+        mk (Reason.hint pos, Tapply ((pos, SN.Classes.cStringishObject), []))
       in
       (ty :: impl, parents)
     | _ -> (impl, parents)
   in
-  let impl = List.map impl ~f:(get_implements env parents) in
-  let impl = List.fold_right impl ~f:(SMap.fold SMap.add) ~init:SMap.empty in
-  let (extends, xhp_attr_deps, decl_errors) =
-    get_class_parents_and_traits env c parents decl_errors
+  let impl =
+    List.map impl ~f:(get_instantiated_ancestors_and_self env parents)
   in
-  let (req_ancestors, req_ancestors_extends, req_class_ancestors) =
+  let impl =
+    List.fold
+      impl
+      ~f:(SMap.union ~combine:(fun _ ty1 _ty2 -> Some ty1))
+      ~init:SMap.empty
+  in
+  let (extends, xhp_attr_deps, decl_errors) =
+    get_class_parents_and_traits env c ~parent_cache:parents decl_errors
+  in
+  let {
+    cr_req_ancestors;
+    cr_req_ancestors_extends;
+    cr_req_constraints_ancestors;
+  } =
     Decl_requirements.get_class_requirements env parents c
   in
+
   let enum = c.sc_enum_type in
   let enum_inner_ty = SMap.find_opt SN.FB.tInner typeconsts in
   let is_enum_class = Ast_defs.is_c_enum_class c.sc_kind in
@@ -900,7 +1015,27 @@ and class_decl
       env
       c
   in
-  let sealed_whitelist = get_sealed_whitelist c in
+  let dc_tparams =
+    Decl_enforceability.maybe_add_supportdyn_constraints
+      ~this_class:(Some c)
+      ctx
+      p
+      c.sc_tparams
+  in
+  let sealed_whitelist = get_class_sealed_allowlist c in
+  let ua_sort_text =
+    match
+      Attributes.find
+        SN.UserAttributes.uaAutocompleteSortText
+        c.sc_user_attributes
+    with
+    | None -> None
+    | Some { ua_params; _ } ->
+      List.find_map ua_params ~f:(function
+          | String s -> Some s
+          | _ -> None)
+  in
+
   let tc =
     {
       dc_final = c.sc_final;
@@ -913,10 +1048,11 @@ and class_decl
       dc_is_xhp = c.sc_is_xhp;
       dc_has_xhp_keyword = c.sc_has_xhp_keyword;
       dc_module = c.sc_module;
+      dc_is_module_level_trait =
+        Attributes.mem SN.UserAttributes.uaModuleLevelTrait c.sc_user_attributes;
       dc_name = snd c.sc_name;
       dc_pos = fst c.sc_name;
-      dc_tparams = c.sc_tparams;
-      dc_where_constraints = c.sc_where_constraints;
+      dc_tparams;
       dc_substs = inherited.Decl_inherit.ih_substs;
       dc_consts = consts;
       dc_typeconsts = typeconsts;
@@ -926,36 +1062,43 @@ and class_decl
       dc_smethods = SMap.map fst static_methods;
       dc_construct = Tuple.T2.map_fst ~f:(Option.map ~f:fst) cstr;
       dc_ancestors = impl;
-      dc_support_dynamic_type = c.sc_support_dynamic_type;
+      dc_support_dynamic_type =
+        c.sc_support_dynamic_type
+        || inherited.Decl_inherit.ih_support_dynamic_type
+           && TypecheckerOptions.implicit_inherit_sdt
+                (Provider_context.get_tcopt ctx)
+        || Attributes.mem
+             SN.UserAttributes.uaDynamicallyReferenced
+             c.sc_user_attributes;
       dc_extends = extends;
       dc_sealed_whitelist = sealed_whitelist;
       dc_xhp_attr_deps = xhp_attr_deps;
       dc_xhp_enum_values = c.sc_xhp_enum_values;
-      dc_req_ancestors = req_ancestors;
-      dc_req_ancestors_extends = req_ancestors_extends;
-      dc_req_class_ancestors = req_class_ancestors;
+      dc_xhp_marked_empty = c.sc_xhp_marked_empty;
+      dc_req_ancestors = cr_req_ancestors;
+      dc_req_ancestors_extends = cr_req_ancestors_extends;
+      dc_req_constraints_ancestors = cr_req_constraints_ancestors;
       dc_enum_type = enum;
       dc_decl_errors = decl_errors;
+      dc_docs_url = c.sc_docs_url;
+      dc_allow_multiple_instantiations =
+        Attributes.mem
+          SN.UserAttributes.uaUnsafeAllowMultipleInstantiations
+          c.sc_user_attributes;
+      dc_sort_text = ua_sort_text;
+      dc_package = c.sc_package;
     }
   in
+  let filter_snd map = SMap.filter_map (fun _k v -> snd v) map in
   let member_heaps_values =
     {
-      Decl_store.m_static_properties = SMap.filter_map snd static_props;
-      m_properties = SMap.filter_map snd props;
-      m_static_methods = SMap.filter_map snd static_methods;
-      m_methods = SMap.filter_map snd methods;
+      Decl_store.m_static_properties = filter_snd static_props;
+      m_properties = filter_snd props;
+      m_static_methods = filter_snd static_methods;
+      m_methods = filter_snd methods;
       m_constructor = Option.(cstr |> fst >>= snd);
     }
   in
-  SMap.iter
-    begin
-      fun x _ ->
-      Typing_deps.add_idep
-        (Provider_context.get_deps_mode ctx)
-        (Dep.Type cls_name)
-        (Dep.Type x)
-    end
-    impl;
   (tc, member_heaps_values)
 
 let class_decl_if_missing

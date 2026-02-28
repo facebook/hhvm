@@ -11,13 +11,13 @@ $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
 // array of resource values
-$resource_values = varray [
+$resource_values = vec[
   $fp,
   $dfp
 ];
 
 // array of string formats
-$string_formats = varray[ 
+$string_formats = vec[ 
   "%s", "%hs", "%ls", 
   "%Ls"," %s", "%s ", 
   "\t%s", "\n%s", "%4s",

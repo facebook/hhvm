@@ -1,15 +1,15 @@
 <?hh
 
-function nop($en,$es) {}
+function nop($en,$es) :mixed{}
 
 class X {
-  function bar() {
+  function bar() :mixed{
     var_dump($this);
   }
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   if (__hhvm_intrinsics\launder_value(1)) {
     include '1474-1.inc';
   } else {

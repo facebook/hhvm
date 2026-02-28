@@ -9,7 +9,7 @@ function add_word_helper<T>((function(): T) $callback): T {
 function add_word(varray<string> $words): varray<string> {
   return add_word_helper(() ==> {
     if (count($words) == 0){
-      $words = varray['current'];
+      $words = vec['current'];
     }
 
     $words[] = 'events';
@@ -19,5 +19,5 @@ function add_word(varray<string> $words): varray<string> {
 }
 
 function main(): void {
-  var_dump(add_word(varray['when', 'in', 'the', 'course', 'of', 'human']));
+  var_dump(add_word(vec['when', 'in', 'the', 'course', 'of', 'human']));
 }

@@ -21,10 +21,13 @@
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
+#include "hphp/util/configs/pageletserver.h"
+#include "hphp/util/configs/xbox.h"
 
 ///////////////////////////////////////////////////////////////////////////////
+
+using namespace HPHP;
 
 bool TestExtServer::RunTests(const std::string &which) {
   bool ret = true;
@@ -34,12 +37,12 @@ bool TestExtServer::RunTests(const std::string &which) {
   std::string root = std::string(HHVM_FN(getcwd)().toString().c_str()) +
                      "/test/ext/";
 
-  RuntimeOption::SourceRoot = root;
-  RuntimeOption::PageletServerThreadCount = 10;
+  HPHP::Cfg::Server::SourceRoot = root;
+  Cfg::PageletServer::ThreadCount = 10;
   PageletServer::Restart();
 
-  RuntimeOption::XboxServerThreadCount = 10;
-  RuntimeOption::XboxServerInfoReqInitDoc = root + "test_xbox_init.php";
+  Cfg::Xbox::ServerInfoThreadCount = 10;
+  Cfg::Xbox::ServerInfoRequestInitDocument = root + "test_xbox_init.php";
   XboxServer::Restart();
 
   RUN_TEST(test_pagelet_server_task_start);
@@ -73,13 +76,13 @@ bool TestExtServer::test_pagelet_server_task_result() {
   String baseheader("MyHeader: ");
   String basepost("postparam=");
 
-  std::vector<Resource> tasks;
+  std::vector<OptResource> tasks;
   tasks.reserve(TEST_SIZE);
   for (int i = 0; i < TEST_SIZE; ++i) {
     String url = baseurl + String(i);
     String header = baseheader + String(i);
     String post = basepost + String(i);
-    Resource task = HHVM_FN(pagelet_server_task_start)(url,
+    OptResource task = HHVM_FN(pagelet_server_task_start)(url,
       make_vec_array(header), post);
     tasks.push_back(task);
   }
@@ -142,7 +145,7 @@ bool TestExtServer::test_xbox_task_status() {
 }
 
 bool TestExtServer::test_xbox_task_result() {
-  Resource task = HHVM_FN(xbox_task_start)("hello");
+  OptResource task = HHVM_FN(xbox_task_start)("hello");
   HHVM_FN(xbox_task_status)(task);
   Variant ret;
   VS(HHVM_FN(xbox_task_result)(task, 0, ret), 200);

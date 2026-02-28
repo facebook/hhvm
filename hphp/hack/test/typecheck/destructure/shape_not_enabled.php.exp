@@ -1,0 +1,12 @@
+ERROR: File "shape_not_enabled.php", line 4, characters 3-18:
+Cannot use unstable feature: `shape_destructure` (Parsing[1002])
+ERROR: File "shape_not_enabled.php", line 5, characters 3-59:
+Cannot use unstable feature: `shape_destructure` (Parsing[1002])
+ERROR: File "shape_not_enabled.php", line 5, characters 13-40:
+Cannot use unstable feature: `shape_destructure` (Parsing[1002])
+ERROR: File "shape_not_enabled.php", line 5, characters 20-35:
+Cannot use unstable feature: `shape_destructure` (Parsing[1002])
+ERROR: File "shape_not_enabled.php", line 5, characters 43-58:
+Cannot use unstable feature: `shape_destructure` (Parsing[1002])
+ERROR: File "shape_not_enabled.php", line 7, characters 3-15:
+Cannot use unstable feature: `shape_destructure` (Parsing[1002])

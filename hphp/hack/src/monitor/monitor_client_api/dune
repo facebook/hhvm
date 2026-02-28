@@ -1,0 +1,13 @@
+(library
+ (name monitor_client_api)
+ (wrapped false)
+ (libraries
+  messages
+  monitor_rpc
+  server_command_types
+  server_files
+  socket
+  connection_tracker
+  core_kernel)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))

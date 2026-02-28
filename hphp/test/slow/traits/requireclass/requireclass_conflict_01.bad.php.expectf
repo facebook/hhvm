@@ -1,0 +1,1 @@
+Fatal error: Trait 'T2' requires extension of 'C', but C is not an extendable class in %s/requireclass_conflict_01.bad.php on line 9

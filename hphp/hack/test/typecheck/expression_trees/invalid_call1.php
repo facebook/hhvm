@@ -5,7 +5,7 @@
 final class MyClass {
   public static function bar(
     ExampleContext $_,
-  ): ExprTree<ExampleDsl, ExampleDsl::TAst, (function(ExampleString): ExampleInt)> {
+  ): ExampleExpression<(function(ExampleString): ExampleInt)> {
     throw new Exception();
   }
 }

@@ -30,7 +30,8 @@ namespace HPHP {
 
 // We want to avoid potential include cycle with func.h/class.h, so putting
 // forward declarations here is more feasible and simpler.
-const StringData* classToStringHelper(const Class* cls);
+const StringData* classToStringHelper(const Class* cls,
+                                      const char* source);
 [[noreturn]] void invalidFuncConversion(const char*);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,6 +55,7 @@ inline bool tvToBool(TypedValue cell) {
     case KindOfKeyset:        return !cell.m_data.parr->empty();
     case KindOfObject:        return cell.m_data.pobj->toBoolean();
     case KindOfResource:      return cell.m_data.pres->data()->o_toBoolean();
+    case KindOfEnumClassLabel:
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
@@ -67,6 +69,7 @@ inline bool tvToBool(TypedValue cell) {
 inline int64_t tvToInt(TypedValue cell) {
   assertx(tvIsPlausible(cell));
 
+  auto const op = "int conversion";
   switch (cell.m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -90,16 +93,20 @@ inline int64_t tvToInt(TypedValue cell) {
       return cell.m_data.pobj->toInt64();
     case KindOfResource:
       return cell.m_data.pres->data()->o_toInt64();
-    case KindOfRFunc:         raise_convert_rfunc_to_type("int"); break;
+    case KindOfRFunc:
+      throw_convert_rfunc_to_type("int");
     case KindOfFunc:
       invalidFuncConversion("int");
     case KindOfClass:
-      return classToStringHelper(cell.m_data.pclass)->toInt64();
+      return classToStringHelper(cell.m_data.pclass, op)->toInt64();
     case KindOfLazyClass:
-      return lazyClassToStringHelper(cell.m_data.plazyclass)->toInt64();
+      return lazyClassToStringHelper(cell.m_data.plazyclass, op)->toInt64();
     case KindOfClsMeth:
       throwInvalidClsMethToType("int");
-    case KindOfRClsMeth:      raise_convert_rcls_meth_to_type("int"); break;
+    case KindOfRClsMeth:
+      throw_convert_rcls_meth_to_type("int");
+    case KindOfEnumClassLabel:
+      throw_convert_ecl_to_type("int");
   }
   not_reached();
 }
@@ -124,32 +131,14 @@ inline TypedValue tvToKey(TypedValue cell, const ArrayData* ad) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline TypedNum stringToNumeric(
-  const StringData* sd,
-    ConvNoticeLevel level,
-    const StringData* notice_reason) {
-    int64_t ival;
-  double dval;
-  auto const dt = sd->isNumericWithVal(ival, dval, true /* allow_errors */);
-  handleConvNoticeLevel(
-    level, "string", dt == KindOfDouble ? "double" : "int", notice_reason);
-  return dt == KindOfInt64 ? make_tv<KindOfInt64>(ival) :
-         dt == KindOfDouble ? make_tv<KindOfDouble>(dval) :
-         make_tv<KindOfInt64>(0);
-}
-
-
-inline TypedNum stringToNumeric(const StringData* sd) {
-  return stringToNumeric(sd, ConvNoticeLevel::None, nullptr);
-}
-
 inline TypedValue tvClassToString(TypedValue key) {
+  auto const op = "string key conversion";
   if (isClassType(type(key))) {
-    auto const keyStr = classToStringHelper(val(key).pclass);
+    auto const keyStr = classToStringHelper(val(key).pclass, op);
     return make_tv<KindOfPersistentString>(keyStr);
   }
   if (isLazyClassType(type(key))) {
-    auto const keyStr = lazyClassToStringHelper(val(key).plazyclass);
+    auto const keyStr = lazyClassToStringHelper(val(key).plazyclass, op);
     return make_tv<KindOfPersistentString>(keyStr);
   }
   return key;

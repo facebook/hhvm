@@ -10,13 +10,13 @@
  */
 
 class C {
-    function f() {}
-    function g() {}
-    function h() {}
+    function f() :mixed{}
+    function g() :mixed{}
+    function h() :mixed{}
 }
 
 class D {}
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_class_methods_basic_001(): void {
 echo "*** Testing get_class_methods() : basic functionality ***\n";
 
 echo "Argument is class name:\n";

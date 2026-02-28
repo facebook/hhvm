@@ -1,4 +1,4 @@
-File "capitalization7.php", line 9, characters 7-15:
+ERROR: File "capitalization7.php", line 9, characters 7-15:
 No instance method `camelcase` in `C` (Typing[4053])
   File "capitalization7.php", line 4, characters 19-27:
   Did you mean `camel~~C~~ase` instead (which only differs by case)?

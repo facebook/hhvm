@@ -1,6 +1,6 @@
 <?hh
 
-function f() {
+function f() :mixed{
   var_dump(\HH\global_get('a'));
   \HH\global_set('a', -1);
   var_dump(\HH\global_get('a'));

@@ -1,0 +1,4 @@
+__PKGROOT__/bin/hhvm-gdb __PKGROOT__/bin
+__PKGROOT__/bin/hphpize __PKGROOT__/bin
+__PKGROOT__/include/hphp __PKGROOT__/include
+__PKGROOT__/lib __PKGROOT__/

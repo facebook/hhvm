@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /**
  * Setting an out-of range key in tuple-like array downgrades it to a vec-like
@@ -6,7 +6,7 @@
  */
 
 function test(): void {
-  $a = varray[4, 'aaa'];
+  $a = vec[4, 'aaa'];
   $a[99] = 4;
   hh_show($a);
   take_string($a[1]);

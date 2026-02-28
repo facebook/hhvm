@@ -3,367 +3,200 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import copy
-import enum
-import json
 import os
-import re
-import unittest
-import urllib.parse
-from typing import Iterable, List, Mapping, Tuple
+from pathlib import Path
+from typing import Union
 
-import common_tests
-from hh_paths import hh_server
-from lspcommand import LspCommandProcessor, Transcript
-from lsptestspec import LspTestSpec, NoResponse, line
-from test_case import TestCase
-from utils import Json, JsonObject, interpolate_variables
+from hphp.hack.test.integration.lsp_test_base import LspTestBase
+from hphp.hack.test.integration.lsptestspec import line, LspTestSpec, NoResponse
 
-
-class LspTestDriver(common_tests.CommonTestDriver):
-    def write_load_config(
-        self, use_serverless_ide: bool = False, use_saved_state: bool = False
-    ) -> None:
-        # Will use the .hhconfig already in the repo directory
-        # As for hh.conf, we'll write it explicitly each test.
-        with open(os.path.join(self.repo_dir, "hh.conf"), "w") as f:
-            f.write(
-                """
-use_watchman = true
-watchman_subscribe_v2 = true
-interrupt_on_watchman = true
-interrupt_on_client = true
-max_workers = 2
-load_state_natively_v4 = {use_saved_state}
-use_mini_state = {use_saved_state}
-require_mini_state = {use_saved_state}
-lazy_decl = {use_saved_state}
-lazy_parse = {use_saved_state}
-lazy_init2 = {use_saved_state}
-symbolindex_search_provider = SqliteIndex
-allow_unstable_features = true
-ide_serverless = {use_serverless_ide}
-""".format(
-                    use_saved_state=str(use_saved_state).lower(),
-                    use_serverless_ide=str(use_serverless_ide).lower(),
-                )
-            )
-
-    def write_naming_table_saved_state(self) -> str:
-        naming_table_saved_state_path = os.path.join(
-            self.repo_dir, "naming_table_saved_state.sqlite"
-        )
-        (stdout, stderr, retcode) = self.proc_call(
-            [
-                hh_server,
-                "--check",
-                self.repo_dir,
-                "--save-naming",
-                naming_table_saved_state_path,
-            ]
-        )
-        assert retcode == 0, (
-            f"Failed to save naming table saved state: {retcode}\n"
-            + f"STDOUT:\n{stdout}\n"
-            + f"STDERR:\n{stderr}\n"
-        )
-        return naming_table_saved_state_path
+"""
+Existence of this file indicates that a Hack notebook is stopped at a breakpoint
+"""
+_HHVM_IS_PAUSED_FILE: Path = Path.home() / ".vscode-sockets/hhvm-paused"
 
 
-class TestLsp(TestCase[LspTestDriver]):
-    @classmethod
-    def get_test_driver(cls) -> LspTestDriver:
-        return LspTestDriver()
-
-    @classmethod
-    def get_template_repo(cls) -> str:
-        return "hphp/hack/test/integration/data/lsp_exchanges/"
-
-    def repo_file(self, file: str) -> str:
-        return os.path.join(self.test_driver.repo_dir, file)
-
-    def read_repo_file(self, file: str) -> str:
-        with open(self.repo_file(file), "r") as f:
-            return f.read()
-
-    def repo_file_uri(self, file: str) -> str:
-        return urllib.parse.urljoin("file://", self.repo_file(file))
-
-    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
-    def parse_test_data(self, file: str, variables: Mapping[str, str]) -> Json:
-        text = self.read_repo_file(file)
-        data: Json = json.loads(text)
-        data = interpolate_variables(data, variables)
-        return data
-
-    def load_test_data(
-        self, test_name: str, variables: Mapping[str, str]
-    ) -> Tuple[Json, Json]:
-        test = self.parse_test_data(test_name + ".json", variables)
-        expected = self.parse_test_data(test_name + ".expected", variables)
-        return (test, expected)
-
-    def write_observed(self, test_name: str, observed_transcript: Json) -> None:
-        file = os.path.join(self.test_driver.template_repo, test_name + ".observed.log")
-        text = json.dumps(
-            list(self.get_important_received_items(observed_transcript)), indent=2
-        )
-        with open(file, "w") as f:
-            f.write(text)
-
-    # pyre-fixme[11]: Annotation `JsonObject` is not defined as a type.
-    def order_response(self, response: JsonObject) -> str:
-        if "id" in response:
-            return str(response["id"])
-        else:
-            return json.dumps(response, indent=2)
-
-    # sorts a list of responses using the 'id' parameter so they can be
-    # compared in sequence even if they came back from the server out of sequence.
-    # this can happen based on how json rpc is specified to work.
-    # if 'id' isn't present the response is a notification.  we sort notifications
-    # by their entire text.
-    def sort_responses(self, responses: Iterable[JsonObject]) -> List[JsonObject]:
-        return sorted(responses, key=lambda response: self.order_response(response))
-
-    # removes stack traces from error responses since these can be noisy
-    # as code changes and they contain execution environment specific details
-    # by ignoring these when comparing responses we might miss some minor issues
-    # but will still catch the core error being thrown or not.
-    def sanitize_exceptions(
-        self, responses: Iterable[JsonObject]
-    ) -> Iterable[JsonObject]:
-        sanitized = copy.deepcopy(responses)
-        for response in sanitized:
-            if "error" in response:
-                if "data" in response["error"]:
-                    if "stack" in response["error"]["data"]:
-                        del response["error"]["data"]["stack"]
-                    if "current_stack" in response["error"]["data"]:
-                        del response["error"]["data"]["current_stack"]
-                    if "server_finale_stack" in response["error"]["data"]:
-                        del response["error"]["data"]["server_finale_stack"]
-        return sanitized
-
-    # dumps an LSP response into a standard json format that can be used for
-    # doing precise text comparison in a way that is human readable in the case
-    # of there being an error.
-    def serialize_responses(self, responses: Iterable[Json]) -> List[str]:
-        return [json.dumps(response, indent=2) for response in responses]
-
-    # generates received responses from an LSP communication transcript
-    # ignoring the non-deterministic ones "progress" and "actionRequired"
-    def get_important_received_items(self, transcript: Transcript) -> Iterable[Json]:
-        for entry in transcript.values():
-            received = entry.received or None
-            if received is None:
-                continue
-            method = received.get("method") or ""
-            if method in [
-                "window/progress",
-                "window/actionRequired",
-                "window/showStatus",
-                "telemetry/event",
-            ]:
-                continue
-            yield received
-
-    # gets a set of loaded responses ready for validation by sorting them
-    # by id and serializing them for precise text comparison
-    def prepare_responses(self, responses: Iterable[JsonObject]) -> List[str]:
-        return self.serialize_responses(
-            self.sanitize_exceptions(self.sort_responses(responses))
-        )
-
-    def run_lsp_test(
-        self,
-        test_name: str,
-        test: Json,
-        expected: Json,
-        wait_for_server: bool,
-        use_serverless_ide: bool,
-    ) -> None:
-        if wait_for_server:
-            assert not use_serverless_ide, (
-                "Warning: both `wait_for_server` and `use_serverless_ide` "
-                + "were set to `True` for testing in "
-                + self.run_lsp_test.__name__
-                + ". "
-                + "While this is a possible test case, it hasn't been written yet, "
-                + "so it's more likely that this is a mistake "
-                + "and you're accidentally relying on hh_server to fulfill "
-                + "serverless IDE requests."
-                + "(If you're writing that test, "
-                + "then it's time to remove this assertion.)"
-            )
-
-            # wait until hh_server is ready before starting lsp
-            self.test_driver.run_check()
-        elif use_serverless_ide:
-            self.test_driver.stop_hh_server()
-
-        with LspCommandProcessor.create(self.test_driver.test_env) as lsp:
-            observed_transcript = lsp.communicate(test)
-
-        self.write_observed(test_name, observed_transcript)
-
-        expected_items = self.prepare_responses(expected)
-        observed_items = self.prepare_responses(
-            list(self.get_important_received_items(observed_transcript))
-        )
-
-        if not use_serverless_ide:
-            # If the server's busy, maybe the machine's just under too much
-            # pressure to give results in a timely fashion. Doing a retry would
-            # only defer the question of what to do in that case, so instead
-            # we'll just skip.
-            self.throw_on_skip(observed_transcript)
-
-        # validation checks that the number of items matches and that
-        # the responses are exactly identical to what we expect
-        self.assertEqual(
-            len(expected_items),
-            len(observed_items),
-            "Wrong count. Observed this:\n"
-            + json.dumps(observed_transcript, indent=2, separators=(",", ": ")),
-        )
-        for i in range(len(expected_items)):
-            self.assertEqual(expected_items[i], observed_items[i])
-
-    def throw_on_skip(self, transcript: Transcript) -> None:
-        failure_messages = ["Server busy", "timed out"]
-        for entry in transcript.values():
-            received = entry.received
-            if received is None:
-                continue
-            if received.get("error"):
-                message = received["error"]["message"]
-                for failure_message in failure_messages:
-                    if failure_message in message:
-                        raise unittest.SkipTest(message)
-
-    def prepare_server_environment(self) -> None:
-        self.maxDiff = None
-        self.test_driver.write_load_config(use_serverless_ide=False)
-        self.test_driver.start_hh_server()
-        (output, err, _) = self.test_driver.run_check()
-        if "Error: Ran out of retries" in err:
-            raise unittest.SkipTest("Hack server could not be launched")
-        self.assertEqual(output.strip(), "No errors!")
-
-    def prepare_serverless_ide_environment(self) -> Mapping[str, str]:
-        self.maxDiff = None
-        self.test_driver.write_load_config(
-            use_serverless_ide=True, use_saved_state=False
-        )
-        naming_table_saved_state_path = (
-            self.test_driver.write_naming_table_saved_state()
-        )
-        return {"naming_table_saved_state_path": naming_table_saved_state_path}
-
-    def load_and_run(
-        self,
-        test_name: str,
-        variables: Mapping[str, str],
-        wait_for_server: bool = True,
-        use_serverless_ide: bool = False,
-    ) -> None:
-        test, expected = self.load_test_data(test_name, variables)
-        self.run_lsp_test(
-            test_name=test_name,
-            test=test,
-            expected=expected,
-            wait_for_server=wait_for_server,
-            use_serverless_ide=use_serverless_ide,
-        )
-
-    def run_spec(
-        self,
-        spec: LspTestSpec,
-        variables: Mapping[str, str],
-        wait_for_server: bool,
-        use_serverless_ide: bool,
-    ) -> None:
-        if wait_for_server:
-            # wait until hh_server is ready before starting lsp
-            self.test_driver.run_check()
-        elif use_serverless_ide:
-            self.test_driver.stop_hh_server()
-
-        with LspCommandProcessor.create(
-            self.test_driver.test_env
-        ) as lsp_command_processor:
-            (observed_transcript, error_details) = spec.run(
-                lsp_command_processor=lsp_command_processor, variables=variables
-            )
-        file = os.path.join(self.test_driver.template_repo, spec.name + ".sent.log")
-        text = json.dumps(
-            [
-                sent
-                for sent, _received in observed_transcript.values()
-                if sent is not None
-            ],
-            indent=2,
-        )
-        with open(file, "w") as f:
-            f.write(text)
-
-        file = os.path.join(self.test_driver.template_repo, spec.name + ".received.log")
-        text = json.dumps(
-            [
-                received
-                for _sent, received in observed_transcript.values()
-                if received is not None
-            ],
-            indent=2,
-        )
-        with open(file, "w") as f:
-            f.write(text)
-
-        if not use_serverless_ide:
-            # If the server's busy, maybe the machine's just under too much
-            # pressure to give results in a timely fashion. Doing a retry would
-            # only defer the question of what to do in that case, so instead
-            # we'll just skip.
-            self.throw_on_skip(observed_transcript)
-
-        if error_details is not None:
-            raise AssertionError(error_details)
-
-    def setup_php_file(self, test_php: str) -> Mapping[str, str]:
-        # We want the path to the builtins directory. This is best we can do.
-        (output, err, retcode) = self.test_driver.run_check(
-            options=["--identify-function", "2:21", "--json"],
-            stdin="<?hh\nfunction f():void {PHP_EOL;}\n",
-        )
-        if retcode == 7:
-            self.skipTest(
-                "Could not discover builtins directory -- "
-                + "got exit code 7 (either Out_of_time or Out_of_retries). "
-                + "The test machine is likely under too much load."
-            )
-        self.assertEqual(retcode, 0)
-        constants_path = json.loads(output)[0]["definition_pos"]["filename"]
-        return {
-            "hhi_path": re.sub("/constants.hhi$", "", constants_path),
-            "root_path": self.test_driver.repo_dir,
-            "php_file_uri": self.repo_file_uri(test_php),
-            "php_file": self.read_repo_file(test_php),
-        }
-
+class TestLsp(LspTestBase):
     def test_init_shutdown(self) -> None:
-        self.prepare_server_environment()
+        variables = self.write_hhconf_and_naming_table()
+        self.load_and_run("initialize_shutdown", variables)
 
-        self.load_and_run(
-            "initialize_shutdown", {"root_path": self.test_driver.repo_dir}
+    def test_optional_param_completion(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("optional_param_completion.php"))
+        spec = (
+            self.initialize_spec(LspTestSpec("optional_param_completion"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .notification(
+                comment="Insert the beginning of a method call",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 4, "character": 0},
+                                "end": {"line": 4, "character": 0},
+                            },
+                            "text": "$mfc->doSt",
+                        }
+                    ],
+                },
+            )
+            .request(
+                line=line(),
+                comment="autocomplete method",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 4, "character": 10},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "doStuff",
+                            "kind": 2,
+                            "detail": "function(int $x, optional int $y): void",
+                            "sortText": "doStuff",
+                            "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 4, "character": 6},
+                                    "end": {"line": 4, "character": 10},
+                                },
+                                # We don't want to require the user to provide optional arguments, so
+                                # only insert $x, not $y.
+                                "newText": "doStuff(${1:\\$x})",
+                            },
+                            "data": {
+                                "fullname": "doStuff",
+                                "filename": "${root_path}/optional_param_completion.php",
+                                "line": 8,
+                                "char": 19,
+                                "base_class": "\\MyFooCompletion",
+                            },
+                        }
+                    ],
+                },
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
+        self.run_spec(spec, variables)
+
+    def test_all_optional_params_completion(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("all_optional_params_completion.php"))
+        spec = (
+            self.initialize_spec(LspTestSpec("all_optional_params_completion"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .notification(
+                comment="Insert the beginning of a method call",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 4, "character": 0},
+                                "end": {"line": 4, "character": 0},
+                            },
+                            "text": "$mfc->doSt",
+                        }
+                    ],
+                },
+            )
+            .request(
+                line=line(),
+                comment="autocomplete method",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 4, "character": 10},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "doStuff",
+                            "kind": 2,
+                            "detail": "function(optional int $x, optional int $y): void",
+                            "sortText": "doStuff",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 4, "character": 6},
+                                    "end": {"line": 4, "character": 10},
+                                },
+                                "newText": "doStuff()",
+                            },
+                            "data": {
+                                "fullname": "doStuff",
+                                "filename": "${root_path}/all_optional_params_completion.php",
+                                "line": 8,
+                                "char": 19,
+                                "base_class": "\\MyFooCompletionOptional",
+                            },
+                        }
+                    ],
+                },
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_completion(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("completion.php"))
-        self.test_driver.stop_hh_server()
         spec = (
-            self.initialize_spec(LspTestSpec("ide_completion"), use_serverless_ide=True)
+            self.initialize_spec(LspTestSpec("ide_completion"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .notification(
+                comment="LocalIndex doesn't have any names in its SymbolIndex, so let's index these files...",
+                method="workspace/didChangeWatchedFiles",
+                params={
+                    "changes": [
+                        {
+                            "uri": "file://${root_path}/completion.php",
+                            "type": 2,
+                        },
+                        {
+                            "uri": "file://${root_path}/xhp_class_definitions.php",
+                            "type": 2,
+                        },
+                        {
+                            "uri": "file://${root_path}/completion_extras_namespace.php",
+                            "type": 2,
+                        },
+                    ]
+                },
+            )
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -406,7 +239,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "'x'",
                             "kind": 12,
                             "detail": "literal",
-                            "inlineDetail": "literal",
                             "sortText": "'x'",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -427,7 +259,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "'y'",
                             "kind": 12,
                             "detail": "literal",
-                            "inlineDetail": "literal",
                             "sortText": "'y'",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -479,7 +310,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "'x",
                             "kind": 12,
                             "detail": "literal",
-                            "inlineDetail": "literal",
                             "sortText": "'x",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -500,7 +330,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "'y",
                             "kind": 12,
                             "detail": "literal",
-                            "inlineDetail": "literal",
                             "sortText": "'y",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -552,7 +381,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -560,7 +388,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 6},
                                 },
-                                "newText": "ab:cd:alpha",
+                                "newText": "ab:cd:alpha>$0</ab:cd:alpha>",
                             },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
@@ -568,7 +396,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -576,7 +403,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 6},
                                 },
-                                "newText": "ab:cd:text",
+                                "newText": "ab:cd:text>$0</ab:cd:text>",
                             },
                             "data": {"fullname": ":ab:cd:text"},
                         },
@@ -584,7 +411,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "xhp:enum-attribute",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "xhp:enum-attribute",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -592,7 +418,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 6},
                                 },
-                                "newText": "xhp:enum-attribute",
+                                "newText": "xhp:enum-attribute>$0</xhp:enum-attribute>",
                             },
                             "data": {"fullname": ":xhp:enum-attribute"},
                         },
@@ -600,7 +426,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "xhp:generic",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "xhp:generic",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -608,7 +433,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 6},
                                 },
-                                "newText": "xhp:generic",
+                                "newText": "xhp:generic>$0</xhp:generic>",
                             },
                             "data": {"fullname": ":xhp:generic"},
                         },
@@ -647,7 +472,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -655,7 +479,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 7},
                                 },
-                                "newText": "ab:cd:alpha",
+                                "newText": "ab:cd:alpha>$0</ab:cd:alpha>",
                             },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
@@ -663,7 +487,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -671,7 +494,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 7},
                                 },
-                                "newText": "ab:cd:text",
+                                "newText": "ab:cd:text>$0</ab:cd:text>",
                             },
                             "data": {"fullname": ":ab:cd:text"},
                         },
@@ -710,7 +533,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -718,7 +540,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 9},
                                 },
-                                "newText": "ab:cd:alpha",
+                                "newText": "ab:cd:alpha>$0</ab:cd:alpha>",
                             },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
@@ -726,7 +548,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -734,7 +555,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 9},
                                 },
-                                "newText": "ab:cd:text",
+                                "newText": "ab:cd:text>$0</ab:cd:text>",
                             },
                             "data": {"fullname": ":ab:cd:text"},
                         },
@@ -771,9 +592,8 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": "width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": "width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -793,9 +613,8 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": "color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": "color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -846,9 +665,8 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": "width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": "width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -868,9 +686,8 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": "color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": "color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -923,7 +740,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -939,7 +755,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -955,7 +770,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":xhp:enum-attribute",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":xhp:enum-attribute",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -971,7 +785,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":xhp:generic",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":xhp:generic",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1018,7 +831,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1034,7 +846,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": ":ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": ":ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1059,8 +870,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": ":ab:cd:alpha",
                     "kind": 7,
                     "detail": "class",
-                    "inlineDetail": "class",
-                    "itemType": ":ab:cd:alpha",
                     "insertText": ":ab:cd:alpha",
                     "insertTextFormat": 1,
                     "data": {"fullname": ":ab:cd:alpha"},
@@ -1069,8 +878,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": ":ab:cd:alpha",
                     "kind": 7,
                     "detail": "class",
-                    "inlineDetail": "class",
-                    "itemType": ":ab:cd:alpha",
                     "documentation": {
                         "kind": "markdown",
                         "value": ":ab:cd:alpha docblock",
@@ -1113,7 +920,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:alpha",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:alpha",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1121,7 +927,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 7},
                                 },
-                                "newText": "ab:cd:alpha",
+                                "newText": "ab:cd:alpha>$0</ab:cd:alpha>",
                             },
                             "data": {"fullname": ":ab:cd:alpha"},
                         },
@@ -1129,7 +935,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "ab:cd:text",
                             "kind": 7,
                             "detail": "class",
-                            "inlineDetail": "class",
                             "sortText": "ab:cd:text",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1137,7 +942,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                     "start": {"line": 3, "character": 6},
                                     "end": {"line": 3, "character": 7},
                                 },
-                                "newText": "ab:cd:text",
+                                "newText": "ab:cd:text>$0</ab:cd:text>",
                             },
                             "data": {"fullname": ":ab:cd:text"},
                         },
@@ -1153,7 +958,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "ab:cd:alpha",
                     "kind": 7,
                     "detail": "class",
-                    "inlineDetail": "class",
                     "insertText": "ab:cd:alpha",
                     "insertTextFormat": 1,
                     "data": {"fullname": ":ab:cd:alpha"},
@@ -1162,7 +966,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "ab:cd:alpha",
                     "kind": 7,
                     "detail": "class",
-                    "inlineDetail": "class",
                     "documentation": {
                         "kind": "markdown",
                         "value": ":ab:cd:alpha docblock",
@@ -1202,9 +1005,8 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": ":width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": ":width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1224,9 +1026,8 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": ":color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": ":color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1277,9 +1078,8 @@ class TestLsp(TestCase[LspTestDriver]):
                     "items": [
                         {
                             "label": ":width",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?int",
-                            "inlineDetail": "?int",
                             "sortText": ":width",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1299,9 +1099,8 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         {
                             "label": ":color",
-                            "kind": 10,
+                            "kind": 5,
                             "detail": "?string",
-                            "inlineDetail": "?string",
                             "sortText": ":color",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1354,7 +1153,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "test_function",
                             "kind": 3,
                             "detail": "function",
-                            "inlineDetail": "function",
                             "sortText": "test_function",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1378,12 +1176,11 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "test_function",
                     "kind": 3,
                     "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
                     "insertText": "test_function",
                     "insertTextFormat": 1,
                     "data": {
                         "filename": "${root_path}/completion.php",
+                        "fullname": "test_function",
                         "line": 8,
                         "char": 10,
                     },
@@ -1392,8 +1189,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "test_function",
                     "kind": 3,
                     "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
                     "documentation": {
                         "kind": "markdown",
                         "value": "test_function docblock.",
@@ -1402,6 +1197,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "insertTextFormat": 1,
                     "data": {
                         "filename": "${root_path}/completion.php",
+                        "fullname": "test_function",
                         "line": 8,
                         "char": 10,
                     },
@@ -1465,8 +1261,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "label": "class",
                             "kind": 21,
-                            "detail": "classname<this>",
-                            "inlineDetail": "classname<this>",
+                            "detail": "class<this>",
                             "sortText": "class",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1488,7 +1283,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "Bard",
                             "kind": 21,
                             "detail": "Elsa",
-                            "inlineDetail": "Elsa",
                             "sortText": "Bard",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1510,7 +1304,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "Alonso",
                             "kind": 21,
                             "detail": "Elsa",
-                            "inlineDetail": "Elsa",
                             "sortText": "Alonso",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1531,102 +1324,126 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "label": "isValid",
                             "kind": 2,
-                            "detail": "function(mixed $value): bool",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "bool",
+                            "detail": "function(mixed $value)[]: bool",
                             "sortText": "isValid",
-                            "insertText": "isValid(${1:\\$value})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "isValid(${1:\\$value})",
+                            },
                             "data": {
                                 "fullname": "isValid",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 46,
-                                "char": 32,
+                                "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
+                                "line": 51,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
                         {
                             "label": "getValues",
                             "kind": 2,
-                            "detail": "function(): dict<string, Elsa>",
-                            "inlineDetail": "()",
-                            "itemType": "dict<string, Elsa>",
+                            "detail": "function()[]: dict<string, Elsa>",
                             "sortText": "getValues",
-                            "insertText": "getValues()",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "getValues()",
+                            },
                             "data": {
                                 "fullname": "getValues",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 33,
-                                "char": 32,
+                                "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
+                                "line": 34,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
                         {
                             "label": "getNames",
                             "kind": 2,
-                            "detail": "function(): dict<Elsa, string>",
-                            "inlineDetail": "()",
-                            "itemType": "dict<Elsa, string>",
+                            "detail": "function()[]: dict<Elsa, string>",
                             "sortText": "getNames",
-                            "insertText": "getNames()",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "getNames()",
+                            },
                             "data": {
                                 "fullname": "getNames",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 41,
-                                "char": 32,
+                                "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
+                                "line": 43,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
                         {
                             "label": "coerce",
                             "kind": 2,
-                            "detail": "function(mixed $value): ?Elsa",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "?Elsa",
+                            "detail": "function(mixed $value)[]: ?Elsa",
                             "sortText": "coerce",
-                            "insertText": "coerce(${1:\\$value})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "coerce(${1:\\$value})",
+                            },
                             "data": {
                                 "fullname": "coerce",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 52,
-                                "char": 32,
+                                "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
+                                "line": 58,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
                         {
                             "label": "assertAll",
                             "kind": 2,
-                            "detail": "function(Traversable<mixed> $values): Container<Elsa>",
-                            "inlineDetail": "(Traversable<mixed> $values)",
-                            "itemType": "Container<Elsa>",
+                            "detail": "function(Traversable<mixed> $values)[]: Container<Elsa>",
                             "sortText": "assertAll",
-                            "insertText": "assertAll(${1:\\$values})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "assertAll(${1:\\$values})",
+                            },
                             "data": {
                                 "fullname": "assertAll",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 64,
-                                "char": 32,
+                                "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
+                                "line": 72,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
                         {
                             "label": "assert",
                             "kind": 2,
-                            "detail": "function(mixed $value): Elsa",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "Elsa",
+                            "detail": "function(mixed $value)[]: Elsa",
                             "sortText": "assert",
-                            "insertText": "assert(${1:\\$value})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "assert(${1:\\$value})",
+                            },
                             "data": {
                                 "fullname": "assert",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 58,
-                                "char": 32,
+                                "filename": "/tmp/catg/tmpykiuvuh4/hhi_7a9178f/BuiltinEnum.hhi",
+                                "line": 65,
+                                "char": 34,
                                 "base_class": "\\Elsa",
                             },
                         },
@@ -1649,56 +1466,6 @@ class TestLsp(TestCase[LspTestDriver]):
                         }
                     ],
                 },
-            )
-            .request(
-                line=line(),
-                comment="docblock resolve after 'switch (Elsa::Alonso) { case Elsa::'",
-                method="completionItem/resolve",
-                params={
-                    "label": "isValid",
-                    "kind": 2,
-                    "detail": "function(mixed $value): bool",
-                    "inlineDetail": "(mixed $value)",
-                    "itemType": "bool",
-                    "insertTextFormat": 1,
-                    "textEdit": {
-                        "range": {
-                            "start": {"line": 3, "character": 35},
-                            "end": {"line": 3, "character": 35},
-                        },
-                        "newText": "isValid",
-                    },
-                    "data": {
-                        "filename": "${hhi_path}/BuiltinEnum.hhi",
-                        "line": 46,
-                        "char": 32,
-                    },
-                },
-                result={
-                    "label": "isValid",
-                    "kind": 2,
-                    "detail": "function(mixed $value): bool",
-                    "inlineDetail": "(mixed $value)",
-                    "itemType": "bool",
-                    "documentation": {
-                        "kind": "markdown",
-                        "value": "Returns whether or not the value is defined as a constant.",
-                    },
-                    "insertTextFormat": 1,
-                    "textEdit": {
-                        "range": {
-                            "start": {"line": 3, "character": 35},
-                            "end": {"line": 3, "character": 35},
-                        },
-                        "newText": "isValid",
-                    },
-                    "data": {
-                        "filename": "${hhi_path}/BuiltinEnum.hhi",
-                        "line": 46,
-                        "char": 32,
-                    },
-                },
-                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -1742,7 +1509,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "test_func",
                             "kind": 3,
                             "detail": "function",
-                            "inlineDetail": "function",
                             "sortText": "test_func",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1789,11 +1555,15 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "interfaceDocBlockMethod",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "interfaceDocBlockMethod",
-                            "insertText": "interfaceDocBlockMethod()",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 34},
+                                    "end": {"line": 3, "character": 41},
+                                },
+                                "newText": "interfaceDocBlockMethod()",
+                            },
                             "data": {
                                 "fullname": "interfaceDocBlockMethod",
                                 "filename": "${root_path}/completion.php",
@@ -1814,8 +1584,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "interfaceDocBlockMethod",
                     "kind": 2,
                     "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
                     "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
@@ -1826,6 +1594,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     },
                     "data": {
                         "filename": "${root_path}/completion.php",
+                        "fullname": "interfaceDocBlockMethod",
                         "line": 18,
                         "char": 19,
                     },
@@ -1834,8 +1603,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     "label": "interfaceDocBlockMethod",
                     "kind": 2,
                     "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
                     "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
@@ -1846,6 +1613,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     },
                     "data": {
                         "filename": "${root_path}/completion.php",
+                        "fullname": "interfaceDocBlockMethod",
                         "line": 18,
                         "char": 19,
                     },
@@ -1882,8 +1650,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "label": "class",
                             "kind": 21,
-                            "detail": "classname<this>",
-                            "inlineDetail": "classname<this>",
+                            "detail": "class<this>",
                             "sortText": "class",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -1905,11 +1672,15 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "test_do_not_use",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "~test_do_not_use",
-                            "insertText": "test_do_not_use()",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "test_do_not_use()",
+                            },
                             "data": {
                                 "fullname": "test_do_not_use",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1922,11 +1693,15 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getName",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "getName",
-                            "insertText": "getName()",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "getName()",
+                            },
                             "data": {
                                 "fullname": "getName",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1939,11 +1714,15 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "getAttributes_DO_NOT_USE",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "~getAttributes_DO_NOT_USE",
-                            "insertText": "getAttributes_DO_NOT_USE()",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "getAttributes_DO_NOT_USE()",
+                            },
                             "data": {
                                 "fullname": "getAttributes_DO_NOT_USE",
                                 "filename": "${root_path}/completion_extras.php",
@@ -1956,11 +1735,15 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "__getLoader",
                             "kind": 2,
                             "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
                             "sortText": "~__getLoader",
-                            "insertText": "__getLoader()",
-                            "insertTextFormat": 2,
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "__getLoader()",
+                            },
                             "data": {
                                 "fullname": "__getLoader",
                                 "filename": "${root_path}/completion_extras.php",
@@ -2003,9 +1786,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "label": "$mylambda",
                             "kind": 6,
-                            "detail": "local variable",
-                            "inlineDetail": "(int $n)",
-                            "itemType": "int",
+                            "detail": "(function(int $n): int)",
                             "sortText": "$mylambda",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2033,9 +1814,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 params={
                     "label": "$mylambda",
                     "kind": 6,
-                    "detail": "local variable",
-                    "inlineDetail": "(num $n)",
-                    "itemType": "int",
+                    "detail": "(function(int $n): int)",
                     "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
@@ -2046,6 +1825,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     },
                     "data": {
                         "filename": "${root_path}/completion.php",
+                        "fullname": "function",
                         "line": 30,
                         "char": 15,
                     },
@@ -2053,9 +1833,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "label": "$mylambda",
                     "kind": 6,
-                    "detail": "local variable",
-                    "inlineDetail": "(num $n)",
-                    "itemType": "int",
+                    "detail": "(function(int $n): int)",
                     "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
@@ -2066,6 +1844,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     },
                     "data": {
                         "filename": "${root_path}/completion.php",
+                        "fullname": "function",
                         "line": 30,
                         "char": 15,
                     },
@@ -2104,7 +1883,6 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "MyEnum::TYPE_C",
                             "kind": 13,
                             "detail": "enum",
-                            "inlineDetail": "enum",
                             "sortText": "MyEnum::TYPE_C",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2123,32 +1901,9 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                         },
                         {
-                            "label": "MyEnum::TYPE_A",
-                            "kind": 13,
-                            "detail": "enum",
-                            "inlineDetail": "enum",
-                            "sortText": "MyEnum::TYPE_A",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 36},
-                                    "end": {"line": 3, "character": 36},
-                                },
-                                "newText": "MyEnum::TYPE_A",
-                            },
-                            "data": {
-                                "fullname": "MyEnum::TYPE_A",
-                                "filename": "${root_path}/xhp_class_definitions.php",
-                                "line": 13,
-                                "char": 14,
-                                "base_class": "\\MyEnum",
-                            },
-                        },
-                        {
                             "label": "MyEnum::TYPE_B",
                             "kind": 13,
                             "detail": "enum",
-                            "inlineDetail": "enum",
                             "sortText": "MyEnum::TYPE_B",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2160,6 +1915,27 @@ class TestLsp(TestCase[LspTestDriver]):
                             },
                             "data": {
                                 "fullname": "MyEnum::TYPE_B",
+                                "filename": "${root_path}/xhp_class_definitions.php",
+                                "line": 13,
+                                "char": 14,
+                                "base_class": "\\MyEnum",
+                            },
+                        },
+                        {
+                            "label": "MyEnum::TYPE_A",
+                            "kind": 13,
+                            "detail": "enum",
+                            "sortText": "MyEnum::TYPE_A",
+                            "insertTextFormat": 1,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 36},
+                                    "end": {"line": 3, "character": 36},
+                                },
+                                "newText": "MyEnum::TYPE_A",
+                            },
+                            "data": {
+                                "fullname": "MyEnum::TYPE_A",
                                 "filename": "${root_path}/xhp_class_definitions.php",
                                 "line": 13,
                                 "char": 14,
@@ -2201,10 +1977,9 @@ class TestLsp(TestCase[LspTestDriver]):
                             "label": "string",
                             "kind": 25,
                             "detail": "builtin",
-                            "inlineDetail": "builtin",
                             "documentation": {
                                 "kind": "markdown",
-                                "value": "A sequence of zero or more characters. Strings are usually manipulated with functions from the `Str\\` namespace",
+                                "value": "A sequence of characters.",
                             },
                             "sortText": "string",
                             "insertTextFormat": 1,
@@ -2216,55 +1991,7 @@ class TestLsp(TestCase[LspTestDriver]):
                                 "newText": "string",
                             },
                             "data": {"fullname": "string"},
-                        },
-                        {
-                            "label": "StringBuffer",
-                            "kind": 7,
-                            "detail": "class",
-                            "inlineDetail": "class",
-                            "sortText": "StringBuffer",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 5},
-                                    "end": {"line": 3, "character": 10},
-                                },
-                                "newText": "StringBuffer",
-                            },
-                            "data": {"fullname": "StringBuffer"},
-                        },
-                        {
-                            "label": "Stringish",
-                            "kind": 8,
-                            "detail": "interface",
-                            "inlineDetail": "interface",
-                            "sortText": "Stringish",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 5},
-                                    "end": {"line": 3, "character": 10},
-                                },
-                                "newText": "Stringish",
-                            },
-                            "data": {"fullname": "Stringish"},
-                        },
-                        {
-                            "label": "StringishObject",
-                            "kind": 8,
-                            "detail": "interface",
-                            "inlineDetail": "interface",
-                            "sortText": "StringishObject",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 5},
-                                    "end": {"line": 3, "character": 10},
-                                },
-                                "newText": "StringishObject",
-                            },
-                            "data": {"fullname": "StringishObject"},
-                        },
+                        }
                     ],
                 },
                 powered_by="serverless_ide",
@@ -2278,9 +2005,8 @@ class TestLsp(TestCase[LspTestDriver]):
                     "detail": "builtin",
                     "documentation": {
                         "kind": "markdown",
-                        "value": "A sequence of zero or more characters. Strings are usually manipulated with functions from the `Str\\` namespace",
+                        "value": "A sequence of characters.",
                     },
-                    "inlineDetail": "builtin",
                     "insertText": "string",
                     "insertTextFormat": 1,
                     "kind": 25,
@@ -2292,9 +2018,8 @@ class TestLsp(TestCase[LspTestDriver]):
                     "detail": "builtin",
                     "documentation": {
                         "kind": "markdown",
-                        "value": "A sequence of zero or more characters. Strings are usually manipulated with functions from the `Str\\` namespace",
+                        "value": "A sequence of characters.",
                     },
-                    "inlineDetail": "builtin",
                     "insertText": "string",
                     "insertTextFormat": 1,
                     "kind": 25,
@@ -2306,1211 +2031,14 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
-
-    def test_serverless_ide_completion_legacy(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
-        variables.update(self.setup_php_file("completion.php"))
-        self.test_driver.stop_hh_server()
-
-        spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_completion_legacy"), use_serverless_ide=True
-            )
-            .notification(
-                method="textDocument/didOpen",
-                params={
-                    "textDocument": {
-                        "uri": "${php_file_uri}",
-                        "languageId": "hack",
-                        "version": 1,
-                        "text": "${php_file}",
-                    }
-                },
-            )
-            .notification(
-                comment="Add '$x = <'",
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "contentChanges": [
-                        {
-                            "range": {
-                                "start": {"line": 3, "character": 0},
-                                "end": {"line": 3, "character": 0},
-                            },
-                            "text": "$x = <",
-                        }
-                    ],
-                },
-            )
-            .request(
-                line=line(),
-                comment="autocomplete after '$x = <' legacy",
-                method="textDocument/completion",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 3, "character": 6},
-                },
-                result={
-                    "isIncomplete": False,
-                    "items": [
-                        {
-                            "label": "ab:cd:alpha",
-                            "kind": 7,
-                            "detail": "class",
-                            "inlineDetail": "class",
-                            "sortText": "ab:cd:alpha",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 6},
-                                    "end": {"line": 3, "character": 6},
-                                },
-                                "newText": "ab:cd:alpha",
-                            },
-                            "data": {"fullname": ":ab:cd:alpha"},
-                        },
-                        {
-                            "label": "ab:cd:text",
-                            "kind": 7,
-                            "detail": "class",
-                            "inlineDetail": "class",
-                            "sortText": "ab:cd:text",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 6},
-                                    "end": {"line": 3, "character": 6},
-                                },
-                                "newText": "ab:cd:text",
-                            },
-                            "data": {"fullname": ":ab:cd:text"},
-                        },
-                        {
-                            "label": "xhp:enum-attribute",
-                            "kind": 7,
-                            "detail": "class",
-                            "inlineDetail": "class",
-                            "sortText": "xhp:enum-attribute",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 6},
-                                    "end": {"line": 3, "character": 6},
-                                },
-                                "newText": "xhp:enum-attribute",
-                            },
-                            "data": {"fullname": ":xhp:enum-attribute"},
-                        },
-                        {
-                            "label": "xhp:generic",
-                            "kind": 7,
-                            "detail": "class",
-                            "inlineDetail": "class",
-                            "sortText": "xhp:generic",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 6},
-                                    "end": {"line": 3, "character": 6},
-                                },
-                                "newText": "xhp:generic",
-                            },
-                            "data": {"fullname": ":xhp:generic"},
-                        },
-                    ],
-                },
-                powered_by="serverless_ide",
-            )
-            .notification(
-                comment="Add '$x = <a'",
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "contentChanges": [
-                        {
-                            "range": {
-                                "start": {"line": 3, "character": 0},
-                                "end": {"line": 3, "character": 6},
-                            },
-                            "text": "$x = <a",
-                        }
-                    ],
-                },
-            )
-            .request(
-                line=line(),
-                comment="autocomplete after '$x = <a'",
-                method="textDocument/completion",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 3, "character": 7},
-                },
-                result={
-                    "isIncomplete": False,
-                    "items": [
-                        {
-                            "label": "ab:cd:alpha",
-                            "kind": 7,
-                            "detail": "class",
-                            "inlineDetail": "class",
-                            "sortText": "ab:cd:alpha",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 6},
-                                    "end": {"line": 3, "character": 7},
-                                },
-                                "newText": "ab:cd:alpha",
-                            },
-                            "data": {"fullname": ":ab:cd:alpha"},
-                        },
-                        {
-                            "label": "ab:cd:text",
-                            "kind": 7,
-                            "detail": "class",
-                            "inlineDetail": "class",
-                            "sortText": "ab:cd:text",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 6},
-                                    "end": {"line": 3, "character": 7},
-                                },
-                                "newText": "ab:cd:text",
-                            },
-                            "data": {"fullname": ":ab:cd:text"},
-                        },
-                    ],
-                },
-                powered_by="serverless_ide",
-            )
-            .notification(
-                comment="Add '$x = <ab:'",
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "contentChanges": [
-                        {
-                            "range": {
-                                "start": {"line": 3, "character": 0},
-                                "end": {"line": 3, "character": 7},
-                            },
-                            "text": "$x = <ab:",
-                        }
-                    ],
-                },
-            )
-            .request(
-                line=line(),
-                comment="autocomplete after '$x = <ab:'.",
-                method="textDocument/completion",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 3, "character": 9},
-                },
-                result={
-                    "isIncomplete": False,
-                    "items": [
-                        {
-                            "label": "ab:cd:alpha",
-                            "kind": 7,
-                            "detail": "class",
-                            "inlineDetail": "class",
-                            "sortText": "ab:cd:alpha",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 6},
-                                    "end": {"line": 3, "character": 9},
-                                },
-                                "newText": "ab:cd:alpha",
-                            },
-                            "data": {"fullname": ":ab:cd:alpha"},
-                        },
-                        {
-                            "label": "ab:cd:text",
-                            "kind": 7,
-                            "detail": "class",
-                            "inlineDetail": "class",
-                            "sortText": "ab:cd:text",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 6},
-                                    "end": {"line": 3, "character": 9},
-                                },
-                                "newText": "ab:cd:text",
-                            },
-                            "data": {"fullname": ":ab:cd:text"},
-                        },
-                    ],
-                },
-                powered_by="serverless_ide",
-            )
-            .notification(
-                comment="Add '$x = <ab:cd:text '",
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "contentChanges": [
-                        {
-                            "range": {
-                                "start": {"line": 3, "character": 0},
-                                "end": {"line": 3, "character": 9},
-                            },
-                            "text": "$x = <ab:cd:text ",
-                        }
-                    ],
-                },
-            )
-            .request(
-                line=line(),
-                comment="autocomplete after '$x = <ab:cd:text '",
-                method="textDocument/completion",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 3, "character": 17},
-                },
-                result={
-                    "isIncomplete": False,
-                    "items": [
-                        {
-                            "label": "width",
-                            "kind": 10,
-                            "detail": "?int",
-                            "inlineDetail": "?int",
-                            "sortText": "width",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 17},
-                                    "end": {"line": 3, "character": 17},
-                                },
-                                "newText": "width",
-                            },
-                            "data": {
-                                "fullname": ":width",
-                                "filename": "${root_path}/xhp_class_definitions.php",
-                                "line": 5,
-                                "char": 27,
-                                "base_class": "\\:ab:cd:text",
-                            },
-                        },
-                        {
-                            "label": "color",
-                            "kind": 10,
-                            "detail": "?string",
-                            "inlineDetail": "?string",
-                            "sortText": "color",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 17},
-                                    "end": {"line": 3, "character": 17},
-                                },
-                                "newText": "color",
-                            },
-                            "data": {
-                                "fullname": ":color",
-                                "filename": "${root_path}/xhp_class_definitions.php",
-                                "line": 5,
-                                "char": 13,
-                                "base_class": "\\:ab:cd:text",
-                            },
-                        },
-                    ],
-                },
-                powered_by="serverless_ide",
-            )
-            .notification(
-                comment="Add '$x = <ab:cd:text w'",
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "contentChanges": [
-                        {
-                            "range": {
-                                "start": {"line": 3, "character": 0},
-                                "end": {"line": 3, "character": 17},
-                            },
-                            "text": "$x = <ab:cd:text w",
-                        }
-                    ],
-                },
-            )
-            .request(
-                line=line(),
-                comment="autocomplete after '$x = <ab:cd:text w'",
-                method="textDocument/completion",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 3, "character": 18},
-                },
-                result={
-                    "isIncomplete": False,
-                    "items": [
-                        {
-                            "label": "width",
-                            "kind": 10,
-                            "detail": "?int",
-                            "inlineDetail": "?int",
-                            "sortText": "width",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 17},
-                                    "end": {"line": 3, "character": 18},
-                                },
-                                "newText": "width",
-                            },
-                            "data": {
-                                "fullname": ":width",
-                                "filename": "${root_path}/xhp_class_definitions.php",
-                                "line": 5,
-                                "char": 27,
-                                "base_class": "\\:ab:cd:text",
-                            },
-                        },
-                        {
-                            "label": "color",
-                            "kind": 10,
-                            "detail": "?string",
-                            "inlineDetail": "?string",
-                            "sortText": "color",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 17},
-                                    "end": {"line": 3, "character": 18},
-                                },
-                                "newText": "color",
-                            },
-                            "data": {
-                                "fullname": ":color",
-                                "filename": "${root_path}/xhp_class_definitions.php",
-                                "line": 5,
-                                "char": 13,
-                                "base_class": "\\:ab:cd:text",
-                            },
-                        },
-                    ],
-                },
-                powered_by="serverless_ide",
-            )
-            .notification(
-                comment="Add '$x = new :''",
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "contentChanges": [
-                        {
-                            "range": {
-                                "start": {"line": 3, "character": 0},
-                                "end": {"line": 3, "character": 18},
-                            },
-                            "text": "$x = new :",
-                        }
-                    ],
-                },
-            )
-            .request(
-                line=line(),
-                comment="autocomplete after '$x = new :'",
-                method="textDocument/completion",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 3, "character": 10},
-                },
-                result={
-                    "isIncomplete": False,
-                    "items": [
-                        {
-                            "label": ":ab:cd:alpha",
-                            "kind": 7,
-                            "detail": "class",
-                            "inlineDetail": "class",
-                            "sortText": ":ab:cd:alpha",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 9},
-                                    "end": {"line": 3, "character": 10},
-                                },
-                                "newText": ":ab:cd:alpha",
-                            },
-                            "data": {"fullname": ":ab:cd:alpha"},
-                        },
-                        {
-                            "label": ":ab:cd:text",
-                            "kind": 7,
-                            "detail": "class",
-                            "inlineDetail": "class",
-                            "sortText": ":ab:cd:text",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 9},
-                                    "end": {"line": 3, "character": 10},
-                                },
-                                "newText": ":ab:cd:text",
-                            },
-                            "data": {"fullname": ":ab:cd:text"},
-                        },
-                        {
-                            "label": ":xhp:enum-attribute",
-                            "kind": 7,
-                            "detail": "class",
-                            "inlineDetail": "class",
-                            "sortText": ":xhp:enum-attribute",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 9},
-                                    "end": {"line": 3, "character": 10},
-                                },
-                                "newText": ":xhp:enum-attribute",
-                            },
-                            "data": {"fullname": ":xhp:enum-attribute"},
-                        },
-                        {
-                            "label": ":xhp:generic",
-                            "kind": 7,
-                            "detail": "class",
-                            "inlineDetail": "class",
-                            "sortText": ":xhp:generic",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 9},
-                                    "end": {"line": 3, "character": 10},
-                                },
-                                "newText": ":xhp:generic",
-                            },
-                            "data": {"fullname": ":xhp:generic"},
-                        },
-                    ],
-                },
-                powered_by="serverless_ide",
-            )
-            .notification(
-                comment="Add '$x = new :a'",
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "contentChanges": [
-                        {
-                            "range": {
-                                "start": {"line": 3, "character": 0},
-                                "end": {"line": 3, "character": 10},
-                            },
-                            "text": "$x = new :a",
-                        }
-                    ],
-                },
-            )
-            .request(
-                line=line(),
-                comment="autocomplete after '$x = new :a'",
-                method="textDocument/completion",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 3, "character": 11},
-                },
-                result={
-                    "isIncomplete": False,
-                    "items": [
-                        {
-                            "label": ":ab:cd:alpha",
-                            "kind": 7,
-                            "detail": "class",
-                            "inlineDetail": "class",
-                            "sortText": ":ab:cd:alpha",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 9},
-                                    "end": {"line": 3, "character": 11},
-                                },
-                                "newText": ":ab:cd:alpha",
-                            },
-                            "data": {"fullname": ":ab:cd:alpha"},
-                        },
-                        {
-                            "label": ":ab:cd:text",
-                            "kind": 7,
-                            "detail": "class",
-                            "inlineDetail": "class",
-                            "sortText": ":ab:cd:text",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 9},
-                                    "end": {"line": 3, "character": 11},
-                                },
-                                "newText": ":ab:cd:text",
-                            },
-                            "data": {"fullname": ":ab:cd:text"},
-                        },
-                    ],
-                },
-                powered_by="serverless_ide",
-            )
-            # Note that this request sent should match the result given in the previous example
-            .request(
-                line=line(),
-                comment="autocomplete resolving after '$x = new :a'",
-                method="completionItem/resolve",
-                params={
-                    "label": ":ab:cd:alpha",
-                    "kind": 7,
-                    "detail": "class",
-                    "inlineDetail": "class",
-                    "itemType": ":ab:cd:alpha",
-                    "insertText": ":ab:cd:alpha",
-                    "insertTextFormat": 1,
-                    "data": {"fullname": ":ab:cd:alpha"},
-                },
-                result={
-                    "label": ":ab:cd:alpha",
-                    "kind": 7,
-                    "detail": "class",
-                    "inlineDetail": "class",
-                    "itemType": ":ab:cd:alpha",
-                    "documentation": {
-                        "kind": "markdown",
-                        "value": ":ab:cd:alpha docblock",
-                    },
-                    "insertText": ":ab:cd:alpha",
-                    "insertTextFormat": 1,
-                    "data": {"fullname": ":ab:cd:alpha"},
-                },
-                powered_by="serverless_ide",
-            )
-            .notification(
-                comment="Add '$x = <ab:cd:text/>; $y = $x->'",
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "contentChanges": [
-                        {
-                            "range": {
-                                "start": {"line": 3, "character": 0},
-                                "end": {"line": 3, "character": 11},
-                            },
-                            "text": "$x = <ab:cd:text/>; $y = $x->",
-                        }
-                    ],
-                },
-            )
-            .request(
-                line=line(),
-                comment="autocomplete after '$x = <ab:cd:text/>; $y = $x->'",
-                method="textDocument/completion",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 3, "character": 29},
-                },
-                result={
-                    "isIncomplete": False,
-                    "items": [
-                        {
-                            "label": ":width",
-                            "kind": 10,
-                            "detail": "?int",
-                            "inlineDetail": "?int",
-                            "sortText": ":width",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 29},
-                                    "end": {"line": 3, "character": 29},
-                                },
-                                "newText": ":width",
-                            },
-                            "data": {
-                                "fullname": ":width",
-                                "filename": "${root_path}/xhp_class_definitions.php",
-                                "line": 5,
-                                "char": 27,
-                                "base_class": "\\:ab:cd:text",
-                            },
-                        },
-                        {
-                            "label": ":color",
-                            "kind": 10,
-                            "detail": "?string",
-                            "inlineDetail": "?string",
-                            "sortText": ":color",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 29},
-                                    "end": {"line": 3, "character": 29},
-                                },
-                                "newText": ":color",
-                            },
-                            "data": {
-                                "fullname": ":color",
-                                "filename": "${root_path}/xhp_class_definitions.php",
-                                "line": 5,
-                                "char": 13,
-                                "base_class": "\\:ab:cd:text",
-                            },
-                        },
-                    ],
-                },
-                powered_by="serverless_ide",
-            )
-            .notification(
-                comment="Add '$x = <ab:cd:text/>; $y = $x->:'",
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "contentChanges": [
-                        {
-                            "range": {
-                                "start": {"line": 3, "character": 0},
-                                "end": {"line": 3, "character": 29},
-                            },
-                            "text": "$x = <ab:cd:text/>; $y = $x->:",
-                        }
-                    ],
-                },
-            )
-            .request(
-                line=line(),
-                comment="autocomplete after '$x = <ab:cd:text/>; $y = $x->:'",
-                method="textDocument/completion",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 3, "character": 30},
-                },
-                result={
-                    "isIncomplete": False,
-                    "items": [
-                        {
-                            "label": ":width",
-                            "kind": 10,
-                            "detail": "?int",
-                            "inlineDetail": "?int",
-                            "sortText": ":width",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 29},
-                                    "end": {"line": 3, "character": 30},
-                                },
-                                "newText": ":width",
-                            },
-                            "data": {
-                                "fullname": ":width",
-                                "filename": "${root_path}/xhp_class_definitions.php",
-                                "line": 5,
-                                "char": 27,
-                                "base_class": "\\:ab:cd:text",
-                            },
-                        },
-                        {
-                            "label": ":color",
-                            "kind": 10,
-                            "detail": "?string",
-                            "inlineDetail": "?string",
-                            "sortText": ":color",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 29},
-                                    "end": {"line": 3, "character": 30},
-                                },
-                                "newText": ":color",
-                            },
-                            "data": {
-                                "fullname": ":color",
-                                "filename": "${root_path}/xhp_class_definitions.php",
-                                "line": 5,
-                                "char": 13,
-                                "base_class": "\\:ab:cd:text",
-                            },
-                        },
-                    ],
-                },
-                powered_by="serverless_ide",
-            )
-            .notification(
-                comment="Add 'test_fun'",
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "contentChanges": [
-                        {
-                            "range": {
-                                "start": {"line": 3, "character": 0},
-                                "end": {"line": 3, "character": 30},
-                            },
-                            "text": "test_fun",
-                        }
-                    ],
-                },
-            )
-            .request(
-                line=line(),
-                comment="autocomplete after 'test_fun'",
-                method="textDocument/completion",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 3, "character": 8},
-                },
-                result={
-                    "isIncomplete": False,
-                    "items": [
-                        {
-                            "label": "test_function",
-                            "kind": 3,
-                            "detail": "function",
-                            "inlineDetail": "function",
-                            "sortText": "test_function",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 0},
-                                    "end": {"line": 3, "character": 8},
-                                },
-                                "newText": "test_function",
-                            },
-                            "data": {"fullname": "test_function"},
-                        }
-                    ],
-                },
-                powered_by="serverless_ide",
-            )
-            .request(
-                line=line(),
-                comment="autocomplete resolving after 'test_fun'",
-                method="completionItem/resolve",
-                params={
-                    "label": "test_function",
-                    "kind": 3,
-                    "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
-                    "insertText": "test_function",
-                    "insertTextFormat": 1,
-                    "data": {
-                        "filename": "${root_path}/completion.php",
-                        "line": 8,
-                        "char": 10,
-                    },
-                },
-                result={
-                    "label": "test_function",
-                    "kind": 3,
-                    "detail": "function(): void",
-                    "inlineDetail": "()",
-                    "itemType": "void",
-                    "documentation": {
-                        "kind": "markdown",
-                        "value": "test_function docblock.",
-                    },
-                    "insertText": "test_function",
-                    "insertTextFormat": 1,
-                    "data": {
-                        "filename": "${root_path}/completion.php",
-                        "line": 8,
-                        "char": 10,
-                    },
-                },
-                powered_by="serverless_ide",
-            )
-            .notification(
-                comment="Add 'switch (Elsa::Alonso) { case Elsa:'",
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "contentChanges": [
-                        {
-                            "range": {
-                                "start": {"line": 3, "character": 0},
-                                "end": {"line": 3, "character": 8},
-                            },
-                            "text": "switch (Elsa::Alonso) { case Elsa:",
-                        }
-                    ],
-                },
-            )
-            .request(
-                line=line(),
-                comment="autocomplete after 'switch (Elsa::Alonso) { case Elsa:'",
-                method="textDocument/completion",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 3, "character": 34},
-                },
-                result={"isIncomplete": False, "items": []},
-                powered_by="serverless_ide",
-            )
-            .notification(
-                comment="Add 'switch (Elsa::Alonso) { case Elsa::'",
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "contentChanges": [
-                        {
-                            "range": {
-                                "start": {"line": 3, "character": 0},
-                                "end": {"line": 3, "character": 34},
-                            },
-                            "text": "switch (Elsa::Alonso) { case Elsa::",
-                        }
-                    ],
-                },
-            )
-            .request(
-                line=line(),
-                comment="autocomplete after 'switch (Elsa::Alonso) { case Elsa::'",
-                method="textDocument/completion",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 3, "character": 35},
-                },
-                result={
-                    "isIncomplete": False,
-                    "items": [
-                        {
-                            "label": "class",
-                            "kind": 21,
-                            "detail": "classname<this>",
-                            "inlineDetail": "classname<this>",
-                            "sortText": "class",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 35},
-                                    "end": {"line": 3, "character": 35},
-                                },
-                                "newText": "class",
-                            },
-                            "data": {
-                                "fullname": "class",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 3,
-                                "char": 6,
-                                "base_class": "\\Elsa",
-                            },
-                        },
-                        {
-                            "label": "Bard",
-                            "kind": 21,
-                            "detail": "Elsa",
-                            "inlineDetail": "Elsa",
-                            "sortText": "Bard",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 35},
-                                    "end": {"line": 3, "character": 35},
-                                },
-                                "newText": "Bard",
-                            },
-                            "data": {
-                                "fullname": "Bard",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 3,
-                                "char": 12,
-                                "base_class": "\\Elsa",
-                            },
-                        },
-                        {
-                            "label": "Alonso",
-                            "kind": 21,
-                            "detail": "Elsa",
-                            "inlineDetail": "Elsa",
-                            "sortText": "Alonso",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 35},
-                                    "end": {"line": 3, "character": 35},
-                                },
-                                "newText": "Alonso",
-                            },
-                            "data": {
-                                "fullname": "Alonso",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 3,
-                                "char": 12,
-                                "base_class": "\\Elsa",
-                            },
-                        },
-                        {
-                            "label": "isValid",
-                            "kind": 2,
-                            "detail": "function(mixed $value): bool",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "bool",
-                            "sortText": "isValid",
-                            "insertText": "isValid(${1:\\$value})",
-                            "insertTextFormat": 2,
-                            "data": {
-                                "fullname": "isValid",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 46,
-                                "char": 32,
-                                "base_class": "\\Elsa",
-                            },
-                        },
-                        {
-                            "label": "getValues",
-                            "kind": 2,
-                            "detail": "function(): dict<string, Elsa>",
-                            "inlineDetail": "()",
-                            "itemType": "dict<string, Elsa>",
-                            "sortText": "getValues",
-                            "insertText": "getValues()",
-                            "insertTextFormat": 2,
-                            "data": {
-                                "fullname": "getValues",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 33,
-                                "char": 32,
-                                "base_class": "\\Elsa",
-                            },
-                        },
-                        {
-                            "label": "getNames",
-                            "kind": 2,
-                            "detail": "function(): dict<Elsa, string>",
-                            "inlineDetail": "()",
-                            "itemType": "dict<Elsa, string>",
-                            "sortText": "getNames",
-                            "insertText": "getNames()",
-                            "insertTextFormat": 2,
-                            "data": {
-                                "fullname": "getNames",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 41,
-                                "char": 32,
-                                "base_class": "\\Elsa",
-                            },
-                        },
-                        {
-                            "label": "coerce",
-                            "kind": 2,
-                            "detail": "function(mixed $value): ?Elsa",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "?Elsa",
-                            "sortText": "coerce",
-                            "insertText": "coerce(${1:\\$value})",
-                            "insertTextFormat": 2,
-                            "data": {
-                                "fullname": "coerce",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 52,
-                                "char": 32,
-                                "base_class": "\\Elsa",
-                            },
-                        },
-                        {
-                            "label": "assertAll",
-                            "kind": 2,
-                            "detail": "function(Traversable<mixed> $values): Container<Elsa>",
-                            "inlineDetail": "(Traversable<mixed> $values)",
-                            "itemType": "Container<Elsa>",
-                            "sortText": "assertAll",
-                            "insertText": "assertAll(${1:\\$values})",
-                            "insertTextFormat": 2,
-                            "data": {
-                                "fullname": "assertAll",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 64,
-                                "char": 32,
-                                "base_class": "\\Elsa",
-                            },
-                        },
-                        {
-                            "label": "assert",
-                            "kind": 2,
-                            "detail": "function(mixed $value): Elsa",
-                            "inlineDetail": "(mixed $value)",
-                            "itemType": "Elsa",
-                            "sortText": "assert",
-                            "insertText": "assert(${1:\\$value})",
-                            "insertTextFormat": 2,
-                            "data": {
-                                "fullname": "assert",
-                                "filename": "${hhi_path}/BuiltinEnum.hhi",
-                                "line": 58,
-                                "char": 32,
-                                "base_class": "\\Elsa",
-                            },
-                        },
-                    ],
-                },
-                powered_by="serverless_ide",
-            )
-            .notification(
-                comment="Add 'switch (Elsa::Alonso) { case Elsa::Alonso:'",
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "contentChanges": [
-                        {
-                            "range": {
-                                "start": {"line": 3, "character": 0},
-                                "end": {"line": 3, "character": 35},
-                            },
-                            "text": "switch (Elsa::Alonso) { case Elsa::Alonso:",
-                        }
-                    ],
-                },
-            )
-            .request(
-                line=line(),
-                comment="autocomplete after 'switch (Elsa::Alonso) { case Elsa::Alonso:'",
-                method="textDocument/completion",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 3, "character": 42},
-                },
-                result={"isIncomplete": False, "items": []},
-                powered_by="serverless_ide",
-            )
-            .notification(
-                comment="Add 'DeprecatedClass::'",
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "contentChanges": [
-                        {
-                            "range": {
-                                "start": {"line": 3, "character": 0},
-                                "end": {"line": 3, "character": 41},
-                            },
-                            "text": "DeprecatedClass::",
-                        }
-                    ],
-                },
-            )
-            .request(
-                line=line(),
-                comment="autocomplete after 'DeprecatedClass::'",
-                method="textDocument/completion",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 3, "character": 17},
-                },
-                result={
-                    "isIncomplete": False,
-                    "items": [
-                        {
-                            "label": "class",
-                            "kind": 21,
-                            "detail": "classname<this>",
-                            "inlineDetail": "classname<this>",
-                            "sortText": "class",
-                            "insertTextFormat": 1,
-                            "textEdit": {
-                                "range": {
-                                    "start": {"line": 3, "character": 17},
-                                    "end": {"line": 3, "character": 17},
-                                },
-                                "newText": "class",
-                            },
-                            "data": {
-                                "fullname": "class",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 8,
-                                "char": 13,
-                                "base_class": "\\DeprecatedClass",
-                            },
-                        },
-                        {
-                            "label": "test_do_not_use",
-                            "kind": 2,
-                            "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
-                            "sortText": "~test_do_not_use",
-                            "insertText": "test_do_not_use()",
-                            "insertTextFormat": 2,
-                            "data": {
-                                "fullname": "test_do_not_use",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 12,
-                                "char": 26,
-                                "base_class": "\\DeprecatedClass",
-                            },
-                        },
-                        {
-                            "label": "getName",
-                            "kind": 2,
-                            "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
-                            "sortText": "getName",
-                            "insertText": "getName()",
-                            "insertTextFormat": 2,
-                            "data": {
-                                "fullname": "getName",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 9,
-                                "char": 26,
-                                "base_class": "\\DeprecatedClass",
-                            },
-                        },
-                        {
-                            "label": "getAttributes_DO_NOT_USE",
-                            "kind": 2,
-                            "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
-                            "sortText": "~getAttributes_DO_NOT_USE",
-                            "insertText": "getAttributes_DO_NOT_USE()",
-                            "insertTextFormat": 2,
-                            "data": {
-                                "fullname": "getAttributes_DO_NOT_USE",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 11,
-                                "char": 26,
-                                "base_class": "\\DeprecatedClass",
-                            },
-                        },
-                        {
-                            "label": "__getLoader",
-                            "kind": 2,
-                            "detail": "function(): void",
-                            "inlineDetail": "()",
-                            "itemType": "void",
-                            "sortText": "~__getLoader",
-                            "insertText": "__getLoader()",
-                            "insertTextFormat": 2,
-                            "data": {
-                                "fullname": "__getLoader",
-                                "filename": "${root_path}/completion_extras.php",
-                                "line": 10,
-                                "char": 26,
-                                "base_class": "\\DeprecatedClass",
-                            },
-                        },
-                    ],
-                },
-                powered_by="serverless_ide",
-            )
-            .request(line=line(), method="shutdown", params={}, result=None)
-            .notification(method="exit", params={})
-        )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_definition(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("definition.php"))
-        self.test_driver.stop_hh_server()
-
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_definition"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_definition"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -3717,18 +2245,17 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_overridden_definition(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("override.php"))
-        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_overridden_definition"),
-                use_serverless_ide=True,
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -3742,7 +2269,7 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             .request(
                 line=line(),
-                comment="find overridden method from trait. It's arbitrary which one we pick. This test embodies current (alphabetical) implementation.",
+                comment="find overridden method from trait. It's arbitrary which one we pick. This test embodies the current implementation.",
                 method="textDocument/definition",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -3750,7 +2277,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result=[
                     {
-                        "uri": "file://${root_path}/override.php",
+                        "uri": "${php_file_uri}",
                         "range": {
                             "start": {"line": 7, "character": 18},
                             "end": {"line": 7, "character": 21},
@@ -3762,7 +2289,7 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             .request(
                 line=line(),
-                comment="find overridden static method. It's arbitrary which one we pick. This test embodies current (alphabetical) implementation.",
+                comment="find overridden static method. It's arbitrary which one we pick. This test embodies the current implementation.",
                 method="textDocument/definition",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -3803,17 +2330,14 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_document_symbol(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("definition.php"))
-        self.test_driver.stop_hh_server()
-
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_document_symbol"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_document_symbol"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -3832,205 +2356,51 @@ class TestLsp(TestCase[LspTestDriver]):
                 params={"textDocument": {"uri": "${php_file_uri}"}},
                 result=[
                     {
-                        "name": "First",
-                        "kind": 14,
-                        "location": {
-                            "uri": "file://${root_path}/definition.php",
-                            "range": {
-                                "start": {"line": 50, "character": 18},
-                                "end": {"line": 50, "character": 47},
-                            },
-                        },
-                        "containerName": "MyEnumClass",
-                    },
-                    {
-                        "name": "MyEnumClass",
-                        "kind": 10,
-                        "location": {
-                            "uri": "file://${root_path}/definition.php",
-                            "range": {
-                                "start": {"line": 49, "character": 0},
-                                "end": {"line": 52, "character": 1},
-                            },
-                        },
-                    },
-                    {
-                        "name": "testClassMemberInsideConstructorInvocation",
+                        "name": "has_anno",
                         "kind": 12,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 44, "character": 0},
-                                "end": {"line": 46, "character": 1},
+                                "start": {"line": 63, "character": 9},
+                                "end": {"line": 65, "character": 1},
                             },
                         },
+                        "detail": "function(): void { // span should start on this line",
                     },
                     {
-                        "name": "MyString",
-                        "kind": 14,
+                        "name": "prop",
+                        "kind": 7,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 41, "character": 8},
-                                "end": {"line": 41, "character": 29},
+                                "start": {"line": 60, "character": 14},
+                                "end": {"line": 60, "character": 23},
                             },
                         },
-                        "containerName": "HasString",
+                        "detail": "int $prop",
+                        "containerName": "HasAnnos",
                     },
                     {
-                        "name": "HasString",
-                        "kind": 5,
-                        "location": {
-                            "uri": "file://${root_path}/definition.php",
-                            "range": {
-                                "start": {"line": 40, "character": 0},
-                                "end": {"line": 42, "character": 1},
-                            },
-                        },
-                    },
-                    {
-                        "name": "__construct",
+                        "name": "foo",
                         "kind": 6,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 37, "character": 2},
-                                "end": {"line": 37, "character": 43},
+                                "start": {"line": 57, "character": 18},
+                                "end": {"line": 57, "character": 32},
                             },
                         },
-                        "containerName": "TakesString",
+                        "detail": "function(): void",
+                        "containerName": "HasAnnos",
                     },
                     {
-                        "name": "TakesString",
+                        "name": "HasAnnos",
                         "kind": 5,
                         "location": {
-                            "uri": "file://${root_path}/definition.php",
+                            "uri": "${php_file_uri}",
                             "range": {
-                                "start": {"line": 36, "character": 0},
-                                "end": {"line": 38, "character": 1},
-                            },
-                        },
-                    },
-                    {
-                        "name": "FF",
-                        "kind": 5,
-                        "location": {
-                            "uri": "file://${root_path}/definition.php",
-                            "range": {
-                                "start": {"line": 26, "character": 0},
-                                "end": {"line": 26, "character": 11},
-                            },
-                        },
-                    },
-                    {
-                        "name": "__construct",
-                        "kind": 6,
-                        "location": {
-                            "uri": "file://${root_path}/definition.php",
-                            "range": {
-                                "start": {"line": 21, "character": 2},
-                                "end": {"line": 23, "character": 3},
-                            },
-                        },
-                        "containerName": "EE",
-                    },
-                    {
-                        "name": "EE",
-                        "kind": 5,
-                        "location": {
-                            "uri": "file://${root_path}/definition.php",
-                            "range": {
-                                "start": {"line": 20, "character": 0},
-                                "end": {"line": 24, "character": 1},
-                            },
-                        },
-                    },
-                    {
-                        "name": "CC",
-                        "kind": 5,
-                        "location": {
-                            "uri": "file://${root_path}/definition.php",
-                            "range": {
-                                "start": {"line": 14, "character": 0},
-                                "end": {"line": 15, "character": 1},
-                            },
-                        },
-                    },
-                    {
-                        "name": "__construct",
-                        "kind": 6,
-                        "location": {
-                            "uri": "file://${root_path}/definition.php",
-                            "range": {
-                                "start": {"line": 11, "character": 2},
-                                "end": {"line": 11, "character": 40},
-                            },
-                        },
-                        "containerName": "BB",
-                    },
-                    {
-                        "name": "BB",
-                        "kind": 5,
-                        "location": {
-                            "uri": "file://${root_path}/definition.php",
-                            "range": {
-                                "start": {"line": 10, "character": 0},
-                                "end": {"line": 12, "character": 1},
-                            },
-                        },
-                    },
-                    {
-                        "name": "a_definition",
-                        "kind": 12,
-                        "location": {
-                            "uri": "file://${root_path}/definition.php",
-                            "range": {
-                                "start": {"line": 2, "character": 0},
-                                "end": {"line": 4, "character": 1},
-                            },
-                        },
-                    },
-                    {
-                        "name": "b_definition",
-                        "kind": 12,
-                        "location": {
-                            "uri": "file://${root_path}/definition.php",
-                            "range": {
-                                "start": {"line": 6, "character": 0},
-                                "end": {"line": 8, "character": 1},
-                            },
-                        },
-                    },
-                    {
-                        "name": "DD",
-                        "kind": 5,
-                        "location": {
-                            "uri": "file://${root_path}/definition.php",
-                            "range": {
-                                "start": {"line": 17, "character": 0},
-                                "end": {"line": 18, "character": 1},
-                            },
-                        },
-                    },
-                    {
-                        "name": "test",
-                        "kind": 12,
-                        "location": {
-                            "uri": "file://${root_path}/definition.php",
-                            "range": {
-                                "start": {"line": 28, "character": 0},
-                                "end": {"line": 34, "character": 1},
-                            },
-                        },
-                    },
-                    {
-                        "name": "MyEnumClassKind",
-                        "kind": 5,
-                        "location": {
-                            "uri": "file://${root_path}/definition.php",
-                            "range": {
-                                "start": {"line": 48, "character": 0},
-                                "end": {"line": 48, "character": 24},
+                                "start": {"line": 55, "character": 10},
+                                "end": {"line": 61, "character": 1},
                             },
                         },
                     },
@@ -4046,141 +2416,244 @@ class TestLsp(TestCase[LspTestDriver]):
                         },
                         "containerName": "MyEnumClass",
                     },
+                    {
+                        "name": "MyEnumClassKind",
+                        "kind": 5,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 48, "character": 6},
+                                "end": {"line": 48, "character": 24},
+                            },
+                        },
+                    },
+                    {
+                        "name": "test",
+                        "kind": 12,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 28, "character": 9},
+                                "end": {"line": 34, "character": 1},
+                            },
+                        },
+                        "detail": "function(): void",
+                    },
+                    {
+                        "name": "DD",
+                        "kind": 5,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 17, "character": 6},
+                                "end": {"line": 18, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "b_definition",
+                        "kind": 12,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 6, "character": 9},
+                                "end": {"line": 8, "character": 1},
+                            },
+                        },
+                        "detail": "function(): int",
+                    },
+                    {
+                        "name": "a_definition",
+                        "kind": 12,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 2, "character": 9},
+                                "end": {"line": 4, "character": 1},
+                            },
+                        },
+                        "detail": "function(): int",
+                    },
+                    {
+                        "name": "BB",
+                        "kind": 5,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 10, "character": 6},
+                                "end": {"line": 12, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "__construct",
+                        "kind": 6,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 11, "character": 18},
+                                "end": {"line": 11, "character": 40},
+                            },
+                        },
+                        "detail": "function(int $i)",
+                        "containerName": "BB",
+                    },
+                    {
+                        "name": "CC",
+                        "kind": 5,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 14, "character": 6},
+                                "end": {"line": 15, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "EE",
+                        "kind": 5,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 20, "character": 6},
+                                "end": {"line": 24, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "__construct",
+                        "kind": 6,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 21, "character": 18},
+                                "end": {"line": 23, "character": 3},
+                            },
+                        },
+                        "detail": "function()",
+                        "containerName": "EE",
+                    },
+                    {
+                        "name": "FF",
+                        "kind": 5,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 26, "character": 6},
+                                "end": {"line": 26, "character": 11},
+                            },
+                        },
+                    },
+                    {
+                        "name": "TakesString",
+                        "kind": 5,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 36, "character": 6},
+                                "end": {"line": 38, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "__construct",
+                        "kind": 6,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 37, "character": 18},
+                                "end": {"line": 37, "character": 43},
+                            },
+                        },
+                        "detail": "function(string $s)",
+                        "containerName": "TakesString",
+                    },
+                    {
+                        "name": "HasString",
+                        "kind": 5,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 40, "character": 6},
+                                "end": {"line": 42, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "MyString",
+                        "kind": 14,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 41, "character": 8},
+                                "end": {"line": 41, "character": 29},
+                            },
+                        },
+                        "detail": 'MyString = "myString"',
+                        "containerName": "HasString",
+                    },
+                    {
+                        "name": "testClassMemberInsideConstructorInvocation",
+                        "kind": 12,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 44, "character": 9},
+                                "end": {"line": 46, "character": 1},
+                            },
+                        },
+                        "detail": "function(): void",
+                    },
+                    {
+                        "name": "MyEnumClass",
+                        "kind": 10,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 49, "character": 11},
+                                "end": {"line": 52, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "First",
+                        "kind": 14,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 50, "character": 18},
+                                "end": {"line": 50, "character": 47},
+                            },
+                        },
+                        "containerName": "MyEnumClass",
+                    },
+                    {
+                        "name": "bar",
+                        "kind": 6,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 60, "character": 55},
+                                "end": {"line": 60, "character": 69},
+                            },
+                        },
+                        "detail": "function(): void",
+                        "containerName": "HasAnnos",
+                    },
                 ],
                 powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
-
-    def initialize_spec(
-        self,
-        spec: LspTestSpec,
-        use_serverless_ide: bool,
-        supports_status: bool = False,  # does the caller wish to see all status messages?
-        supports_init: bool = False,  # do we wish to interact with init, rather than waiting for init ok?
-    ) -> LspTestSpec:
-        if use_serverless_ide:
-            initialization_options = {
-                "namingTableSavedStatePath": "${naming_table_saved_state_path}",
-                "namingTableSavedStateTestDelay": 0.0,
-            }
-            if supports_init:
-                # A small delay, since otherwise init completes immediately
-                # This isn't very racy. All we need is a tiny delay so that
-                # other things which are in the queue get processed, rather
-                # than continuing synchronously
-                initialization_options["namingTableSavedStateTestDelay"] = 0.5
-        else:
-            initialization_options = {}
-
-        window_capabilities = {}
-        if supports_status:
-            window_capabilities["status"] = {"dynamicRegistration": False}
-
-        spec = spec.ignore_notifications(method="telemetry/event").request(
-            line=line(),
-            method="initialize",
-            params={
-                "initializationOptions": initialization_options,
-                "processId": None,
-                "rootPath": "${root_path}",
-                "capabilities": {
-                    "window": window_capabilities,
-                    "textDocument": {
-                        "completion": {"completionItem": {"snippetSupport": True}}
-                    },
-                },
-            },
-            result={
-                "capabilities": {
-                    "textDocumentSync": {
-                        "openClose": True,
-                        "change": 2,
-                        "willSave": False,
-                        "willSaveWaitUntil": True,
-                        "save": {"includeText": False},
-                    },
-                    "hoverProvider": True,
-                    "completionProvider": {
-                        "resolveProvider": True,
-                        "triggerCharacters": [
-                            "$",
-                            ">",
-                            "\\",
-                            ":",
-                            "<",
-                            "[",
-                            "'",
-                            '"',
-                            "{",
-                            "#",
-                        ],
-                    },
-                    "signatureHelpProvider": {"triggerCharacters": ["(", ","]},
-                    "definitionProvider": True,
-                    "typeDefinitionProvider": True,
-                    "referencesProvider": True,
-                    "documentHighlightProvider": True,
-                    "documentSymbolProvider": True,
-                    "workspaceSymbolProvider": True,
-                    "codeActionProvider": True,
-                    "documentFormattingProvider": True,
-                    "documentRangeFormattingProvider": True,
-                    "documentOnTypeFormattingProvider": {
-                        "firstTriggerCharacter": ";",
-                        "moreTriggerCharacter": ["}"],
-                    },
-                    "renameProvider": True,
-                    "implementationProvider": True,
-                    "typeCoverageProvider": True,
-                    "rageProvider": True,
-                }
-            },
-        )
-        if use_serverless_ide:
-            spec = spec.wait_for_server_request(
-                method="client/registerCapability",
-                params={
-                    "registrations": [
-                        {
-                            "id": "did-change-watched-files",
-                            "method": "workspace/didChangeWatchedFiles",
-                            "registerOptions": {
-                                "watchers": [
-                                    {
-                                        "globPattern": "**/*.{php,phpt,hack,hackpartial,hck,hh,hhi,xhp}",
-                                        "kind": 7,
-                                    }
-                                ]
-                            },
-                        }
-                    ]
-                },
-                result=None,
-            )
-        if not supports_status:
-            spec = spec.ignore_status_diagnostics(True)
-
-        if use_serverless_ide and not supports_init:
-            spec = spec.wait_for_notification(
-                comment="wait for sIDE to finish init",
-                method="telemetry/event",
-                params={"type": 4, "message": "[client-ide] Finished init: ok"},
-            )
-
-        return spec
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_type_definition(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("type_definition.php"))
-        self.test_driver.stop_hh_server()
-
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_type_definition"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_type_definition"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -4314,17 +2787,14 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_hover(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("hover.php"))
-        self.test_driver.stop_hh_server()
-
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_hover"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_hover"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -4346,7 +2816,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "int"},
+                        {"language": "hack", "value": "function b_hover(): int"},
+                        "---",
                         "A comment describing b_hover.",
                     ],
                     "range": {
@@ -4378,6 +2849,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "contents": [
                         {"language": "hack", "value": "string"},
+                        "---",
                         {"language": "hack", "value": "Parameter: $s"},
                     ]
                 },
@@ -4394,6 +2866,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "contents": [
                         {"language": "hack", "value": "int"},
+                        "---",
                         {"language": "hack", "value": "Parameter: $i"},
                     ]
                 },
@@ -4410,8 +2883,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "contents": [
                         {"language": "hack", "value": "THE_ANSWER"},
+                        "---",
                         "A comment describing THE_ANSWER",
-                        "int THE_ANSWER = 42",
                     ],
                     "range": {
                         "start": {"line": 15, "character": 9},
@@ -4427,17 +2900,6 @@ class TestLsp(TestCase[LspTestDriver]):
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
                     "position": {"line": 3, "character": 1},
-                },
-                result=None,
-                powered_by="serverless_ide",
-            )
-            .request(
-                line=line(),
-                comment="hover over a keyword",
-                method="textDocument/hover",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 2, "character": 1},
                 },
                 result=None,
                 powered_by="serverless_ide",
@@ -4486,6 +2948,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "contents": [
                         {"language": "hack", "value": "final class CopyrightClass"},
+                        "---",
                         "Testing copyright removal",
                     ],
                     "range": {
@@ -4506,6 +2969,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "contents": [
                         {"language": "hack", "value": "final class GeneratedClass"},
+                        "---",
                         "Testing generated text removal",
                     ],
                     "range": {
@@ -4525,7 +2989,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public ?string name"},
+                        {"language": "hack", "value": "attribute ?string name"},
+                        "---",
                         ":xhp:enum-attribute::name docblock",
                     ],
                     "range": {
@@ -4545,7 +3010,10 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public ?MyEnum enum-attribute"}
+                        {
+                            "language": "hack",
+                            "value": "attribute ?MyEnum enum-attribute",
+                        }
                     ],
                     "range": {
                         "start": {"line": 62, "character": 33},
@@ -4564,7 +3032,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public ?ID<EntSomething> id"}
+                        {"language": "hack", "value": "attribute ?ID<EntSomething> id"}
                     ],
                     "range": {
                         "start": {"line": 63, "character": 15},
@@ -4599,7 +3067,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public ?string name"},
+                        {"language": "hack", "value": "attribute ?string name"},
+                        "---",
                         ":xhp:enum-attribute::name docblock",
                     ],
                     "range": {
@@ -4612,18 +3081,17 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_file_touched_on_disk(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("hover.php"))
-        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_file_on_disk_change"),
-                use_serverless_ide=True,
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -4639,14 +3107,6 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="workspace/didChangeWatchedFiles",
                 params={"changes": [{"uri": "${php_file_uri}", "type": 2}]},
             )
-            .wait_for_notification(
-                comment="wait for sIDE to process file change",
-                method="telemetry/event",
-                params={
-                    "type": 4,
-                    "message": "[client-ide] Done processing file changes",
-                },
-            )
             .request(
                 line=line(),
                 method="textDocument/hover",
@@ -4656,7 +3116,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "int"},
+                        {"language": "hack", "value": "function b_hover(): int"},
+                        "---",
                         "A comment describing b_hover.",
                     ],
                     "range": {
@@ -4669,17 +3130,16 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_file_hover_with_errors(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("hover_with_errors.php"))
-        self.test_driver.stop_hh_server()
-
         spec = (
             self.initialize_spec(
-                LspTestSpec("serverless_ide_hover_with_errors"), use_serverless_ide=True
+                LspTestSpec("serverless_ide_file_hover_with_errors"),
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -4689,18 +3149,6 @@ class TestLsp(TestCase[LspTestDriver]):
                         "version": 1,
                         "text": "${php_file}",
                     }
-                },
-            )
-            .notification(
-                method="workspace/didChangeWatchedFiles",
-                params={"changes": [{"uri": "${php_file_uri}", "type": 2}]},
-            )
-            .wait_for_notification(
-                comment="wait for sIDE to process file change",
-                method="telemetry/event",
-                params={
-                    "type": 4,
-                    "message": "[client-ide] Done processing file changes",
                 },
             )
             .request(
@@ -4713,14 +3161,16 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
+                        "Defined in `HoverWithErrorsClass`",
+                        "---",
                         {
                             "language": "hack",
                             "value": "public static function staticMethod(string $z): void",
                         },
+                        "---",
                         'During testing, we\'ll remove the "public" tag from this '
                         "method\n"
                         "to ensure that we can still get IDE services",
-                        "Full name: `HoverWithErrorsClass::staticMethod`",
                     ],
                     "range": {
                         "end": {"character": 39, "line": 14},
@@ -4755,14 +3205,16 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result={
                     "contents": [
+                        "Defined in `HoverWithErrorsClass`",
+                        "---",
                         {
                             "language": "hack",
                             "value": "public static function staticMethod(string $z): void",
                         },
+                        "---",
                         'During testing, we\'ll remove the "public" tag from this '
                         "method\n"
                         "to ensure that we can still get IDE services",
-                        "Full name: `HoverWithErrorsClass::staticMethod`",
                     ],
                     "range": {
                         "end": {"character": 39, "line": 14},
@@ -4774,20 +3226,14 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_formatting(self) -> None:
-        # This test will fail if hackfmt can't be found
-        if not self.test_driver.run_hackfmt_check():
-            raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
-
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("messy.php"))
-
-        self.test_driver.stop_hh_server()
-
         spec = (
-            self.initialize_spec(LspTestSpec("formatting"), use_serverless_ide=True)
+            self.initialize_spec(LspTestSpec("formatting"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -4809,11 +3255,10 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=[
                     {
                         "range": {
-                            "start": {"line": 0, "character": 0},
+                            "start": {"line": 3, "character": 0},
                             "end": {"line": 11, "character": 0},
                         },
-                        "newText": "<?hh //strict\n\nfunction x(): string {\n"
-                        + '     $a = "this";\n\n'
+                        "newText": '     $a = "this";\n\n'
                         + '     $b = "is";\n\n'
                         + '     $c = "messy";\n\n'
                         + '     $d = ".";\n'
@@ -4824,22 +3269,14 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_rangeformatting(self) -> None:
-        # This test will fail if hackfmt can't be found
-        if not self.test_driver.run_hackfmt_check():
-            raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
-
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("messy.php"))
-
-        self.test_driver.stop_hh_server()
-
         spec = (
-            self.initialize_spec(
-                LspTestSpec("range_formatting"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("range_formatting"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -4875,20 +3312,15 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_ontypeformatting(self) -> None:
-        # This test will fail if hackfmt can't be found
-        if not self.test_driver.run_hackfmt_check():
-            raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
-
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("ontypeformatting.php"))
 
         spec = (
-            self.initialize_spec(
-                LspTestSpec("ontypeformatting"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("ontypeformatting"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -4948,14 +3380,14 @@ class TestLsp(TestCase[LspTestDriver]):
             .notification(method="exit", params={})
         )
 
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
-    def test_did_change(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("didchange.php")
+    def test_top_level_def_name_at_pos(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("completion.php"))
         spec = (
-            self.initialize_spec(LspTestSpec("did_change"), use_serverless_ide=False)
-            .wait_for_hh_server_ready()
+            self.initialize_spec(LspTestSpec("top_level_def_name_at_pos"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -4966,6 +3398,71 @@ class TestLsp(TestCase[LspTestDriver]):
                         "text": "${php_file}",
                     }
                 },
+            )
+            .request(
+                line=line(),
+                method="custom/topLevelDefNameAtPos",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 17, "character": 18},
+                },
+                result="CompletionClass",
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                method="custom/topLevelDefNameAtPos",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 12, "character": 1},
+                },
+                result="CompletionInterface",
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                method="custom/topLevelDefNameAtPos",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 16, "character": 0},
+                },
+                result="CompletionClass",
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                method="custom/topLevelDefNameAtPos",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 18, "character": 1},
+                },
+                result="CompletionClass",
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
+    def test_did_change(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("didchange.php"))
+        spec = (
+            self.initialize_spec(LspTestSpec("did_change"))
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${php_file_uri}", "diagnostics": []},
             )
             .notification(
                 method="textDocument/didChange",
@@ -5010,15 +3507,139 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+        self.run_spec(spec, variables)
+
+    def test_fixme(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("fixme.php"))
+        spec = (
+            self.initialize_spec(LspTestSpec("fixme"))
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${php_file_uri}", "diagnostics": []},
+            )
+            .notification(
+                comment="disable the first fixme by turning 'HH_FIXME' into 'NO_FIXME'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 5},
+                                "end": {"line": 3, "character": 7},
+                            },
+                            "text": "NO",
+                        }
+                    ],
+                },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 4, "character": 9},
+                                "end": {"line": 4, "character": 10},
+                            },
+                            "severity": 1,
+                            "code": 4110,
+                            "source": "Hack",
+                            "message": "Invalid return type",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 2, "character": 25},
+                                            "end": {"line": 2, "character": 31},
+                                        },
+                                    },
+                                    "message": "Expected string",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 4, "character": 9},
+                                            "end": {"line": 4, "character": 10},
+                                        },
+                                    },
+                                    "message": "But got int",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 2, "character": 25},
+                                            "end": {"line": 2, "character": 31},
+                                        },
+                                    },
+                                    "message": "Expected string",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 4, "character": 9},
+                                            "end": {"line": 4, "character": 10},
+                                        },
+                                    },
+                                    "message": "But got int",
+                                },
+                            ],
+                        }
+                    ],
+                },
+            )
+            .notification(
+                comment="restore the first fixme by turning 'NO_FIXME' back 'HH_FIXME'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 5},
+                                "end": {"line": 3, "character": 7},
+                            },
+                            "text": "HH",
+                        }
+                    ],
+                },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${php_file_uri}", "diagnostics": []},
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
 
     def test_go_to_implementation(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("go_to_implementation.php")
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("go_to_implementation.php"))
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
         spec = (
-            self.initialize_spec(
-                LspTestSpec("test_go_to_implementation"), use_serverless_ide=False
-            )
+            self.initialize_spec(LspTestSpec("test_go_to_implementation"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .wait_for_hh_server_ready()
             .notification(
                 method="textDocument/didOpen",
@@ -5033,7 +3654,7 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             .request(
                 line=line(),
-                comment="go to implemenetation: abstract class",
+                comment="go to implementation: abstract class",
                 method="textDocument/implementation",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -5051,7 +3672,7 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             .request(
                 line=line(),
-                comment="go to implemenetation: interface",
+                comment="go to implementation: interface",
                 method="textDocument/implementation",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -5069,7 +3690,7 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             .request(
                 line=line(),
-                comment="go to implemenetation: trait",
+                comment="go to implementation: trait",
                 method="textDocument/implementation",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -5087,7 +3708,7 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             .request(
                 line=line(),
-                comment="go to implemenetation: method",
+                comment="go to implementation: method",
                 method="textDocument/implementation",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
@@ -5106,16 +3727,14 @@ class TestLsp(TestCase[LspTestDriver]):
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+        self.run_spec(spec, variables)
 
     def test_signature_help(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("signaturehelp.php")
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("signaturehelp.php"))
         spec = (
-            self.initialize_spec(
-                LspTestSpec("test_signature_help"), use_serverless_ide=False
-            )
-            .wait_for_hh_server_ready()
+            self.initialize_spec(LspTestSpec("test_signature_help"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -5134,9 +3753,10 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 16, "character": 18},
+                    "position": {"line": 18, "character": 18},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5144,7 +3764,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 16, "character": 19},
+                    "position": {"line": 18, "character": 19},
                 },
                 result={
                     "signatures": [
@@ -5157,6 +3777,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5165,9 +3786,10 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 16, "character": 20},
+                    "position": {"line": 18, "character": 20},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5176,9 +3798,10 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 17, "character": 20},
+                    "position": {"line": 19, "character": 20},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5187,7 +3810,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 17, "character": 21},
+                    "position": {"line": 19, "character": 21},
                 },
                 result={
                     "signatures": [
@@ -5201,6 +3824,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5209,7 +3833,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 17, "character": 22},
+                    "position": {"line": 19, "character": 22},
                 },
                 result={
                     "signatures": [
@@ -5223,6 +3847,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 1,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5231,7 +3856,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 17, "character": 23},
+                    "position": {"line": 19, "character": 23},
                 },
                 result={
                     "signatures": [
@@ -5245,6 +3870,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 1,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5253,7 +3879,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 17, "character": 24},
+                    "position": {"line": 19, "character": 24},
                 },
                 result={
                     "signatures": [
@@ -5267,6 +3893,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 1,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5275,9 +3902,126 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 17, "character": 25},
+                    "position": {"line": 19, "character": 25},
                 },
                 result=None,
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="signature help for 2-argument generic instance method"
+                " (left of opening paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 20, "character": 19},
+                },
+                result=None,
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="signature help for 2-argument generic instance method"
+                " (right of opening paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 20, "character": 20},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "public function genericMethod"
+                            "(int $x1, int $x2): void",
+                            "documentation": "Generic instance method with doc block",
+                            "parameters": [{"label": "$x1"}, {"label": "$x2"}],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 0,
+                },
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="signature help for 2-argument generic instance method"
+                " (left of first comma)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 20, "character": 21},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "public function genericMethod"
+                            "(int $x1, int $x2): void",
+                            "documentation": "Generic instance method with doc block",
+                            "parameters": [{"label": "$x1"}, {"label": "$x2"}],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 1,
+                },
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="signature help for 2-argument generic instance method"
+                " (right of first comma)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 20, "character": 23},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "public function genericMethod"
+                            "(int $x1, int $x2): void",
+                            "documentation": "Generic instance method with doc block",
+                            "parameters": [{"label": "$x1"}, {"label": "$x2"}],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 1,
+                },
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="signature help for 2-argument generic instance method"
+                " (left of closing paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 20, "character": 23},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "public function genericMethod"
+                            "(int $x1, int $x2): void",
+                            "documentation": "Generic instance method with doc block",
+                            "parameters": [{"label": "$x1"}, {"label": "$x2"}],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 1,
+                },
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="signature help for 2-argument generic instance method"
+                " (right of closing paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 20, "character": 25},
+                },
+                result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5286,9 +4030,10 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 18, "character": 23},
+                    "position": {"line": 21, "character": 23},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5297,7 +4042,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 18, "character": 24},
+                    "position": {"line": 21, "character": 24},
                 },
                 result={
                     "signatures": [
@@ -5311,6 +4056,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5319,9 +4065,10 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 19, "character": 17},
+                    "position": {"line": 22, "character": 17},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5330,7 +4077,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 19, "character": 18},
+                    "position": {"line": 22, "character": 18},
                 },
                 result={
                     "signatures": [
@@ -5344,6 +4091,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5352,9 +4100,10 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 20, "character": 26},
+                    "position": {"line": 23, "character": 26},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5363,9 +4112,10 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 20, "character": 26},
+                    "position": {"line": 23, "character": 26},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5374,12 +4124,12 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 20, "character": 27},
+                    "position": {"line": 23, "character": 27},
                 },
                 result={
                     "signatures": [
                         {
-                            "label": "function Derp\\Lib\\Herp\\aliased_global_func(string $s): void",
+                            "label": "function aliased_global_func(string $s): void",
                             "documentation": "Namespace-aliased function with doc block",
                             "parameters": [{"label": "$s"}],
                         }
@@ -5387,6 +4137,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5395,12 +4146,12 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 20, "character": 28},
+                    "position": {"line": 23, "character": 28},
                 },
                 result={
                     "signatures": [
                         {
-                            "label": "function Derp\\Lib\\Herp\\aliased_global_func(string $s): void",
+                            "label": "function aliased_global_func(string $s): void",
                             "documentation": "Namespace-aliased function with doc block",
                             "parameters": [{"label": "$s"}],
                         }
@@ -5408,6 +4159,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5416,7 +4168,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 21, "character": 30},
+                    "position": {"line": 24, "character": 30},
                 },
                 result={
                     "signatures": [
@@ -5435,6 +4187,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5443,7 +4196,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 22, "character": 30},
+                    "position": {"line": 25, "character": 30},
                 },
                 result={
                     "signatures": [
@@ -5461,6 +4214,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5469,7 +4223,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/signatureHelp",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 23, "character": 30},
+                    "position": {"line": 26, "character": 30},
                 },
                 result={
                     "signatures": [
@@ -5493,21 +4247,21 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeSignature": 0,
                     "activeParameter": 0,
                 },
+                powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+        self.run_spec(spec, variables)
 
     def test_signature_help_lambda(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("signaturehelp_lambda.php")
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("signaturehelp_lambda.php"))
         spec = (
             self.initialize_spec(
                 LspTestSpec("test_serverless_ide_signature_help_lambda"),
-                use_serverless_ide=False,
             )
-            .wait_for_hh_server_ready()
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -5540,6 +4294,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         }
                     ],
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5559,6 +4314,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         }
                     ],
                 },
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5569,6 +4325,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     "position": {"line": 10, "character": 15},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(
                 line=line(),
@@ -5579,41 +4336,43 @@ class TestLsp(TestCase[LspTestDriver]):
                     "position": {"line": 10, "character": 16},
                 },
                 result=None,
+                powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+        self.run_spec(spec, variables)
 
-    def test_rename(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("rename.php")
-        self.load_and_run("rename", variables)
+    def test_rename_ok(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("rename.php"))
+        variables.update(
+            {
+                "rename2_file_uri": self.repo_file_uri("rename2.php"),
+                "rename2_file": self.read_repo_file("rename2.php"),
+            }
+        )
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
+        self.load_and_run("rename_ok", variables)
 
-    def test_references(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("references.php")
-        self.load_and_run("references", variables)
+    def test_rename_with_server(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("rename.php"))
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
+        self.load_and_run("rename_with_server", variables)
 
-    def test_non_existing_method(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("nomethod.php")
-        self.load_and_run("nomethod", variables)
-
-    def test_bad_call(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("bad_call.php")
-        self.load_and_run("bad_call", variables)
-
-    def test_code_action_missing_method(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
-        variables.update(self.setup_php_file("code_action_missing_method.php"))
-        self.test_driver.stop_hh_server()
+    def test_rename_in_interface(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("rename_in_interface.php"))
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
 
         spec = (
-            self.initialize_spec(
-                LspTestSpec("code_action_missing_method"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("rename_in_interface"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .wait_for_hh_server_ready()
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -5625,6 +4384,190 @@ class TestLsp(TestCase[LspTestDriver]):
                     }
                 },
             )
+            .request(
+                line=line(),
+                method="textDocument/rename",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 19},
+                    "newName": "previouslyCalledSomeMethod",
+                },
+                result={
+                    "changes": {
+                        "${php_file_uri}": [
+                            {
+                                "range": {
+                                    "start": {"line": 3, "character": 18},
+                                    "end": {"line": 3, "character": 28},
+                                },
+                                "newText": "previouslyCalledSomeMethod",
+                            },
+                        ]
+                    }
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
+    def test_rename_let(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        file_base_name = "rename_let.php"
+        php_file_uri = self.repo_file_uri(file_base_name)
+        contents = """<?hh
+<<file: __EnableUnstableFeatures('typed_local_variables')>>
+function f(): void {
+  $z = 3;
+  let $xyz: int = $z;
+  $xyz;
+}"""
+        variables.update({"php_file_uri": php_file_uri, "contents": contents})
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
+
+        spec = (
+            self.initialize_spec(LspTestSpec("rename_let"))
+            .write_to_disk(
+                comment="create file ${file_base_name}",
+                uri="${php_file_uri}",
+                contents="${contents}",
+                notify=False,
+            )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .wait_for_hh_server_ready()
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${contents}",
+                    }
+                },
+            )
+            .request(
+                line=line(),
+                method="textDocument/rename",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 4, "character": 6},
+                    "newName": "$ab",
+                },
+                result={
+                    "changes": {
+                        "${php_file_uri}": [
+                            {
+                                "range": {
+                                    "start": {"line": 4, "character": 6},
+                                    "end": {"line": 4, "character": 10},
+                                },
+                                "newText": "$ab",
+                            },
+                            {
+                                "range": {
+                                    "start": {"line": 5, "character": 2},
+                                    "end": {"line": 5, "character": 6},
+                                },
+                                "newText": "$ab",
+                            },
+                        ]
+                    }
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+        self.run_spec(spec, variables)
+
+    def test_references_ok(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("references.php"))
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
+        self.load_and_run("references_ok", variables)
+
+    def test_references_server_cancel(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("references.php"))
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
+        self.load_and_run("references_server_cancel", variables)
+
+    def test_references_client_cancel(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("references.php"))
+        self.test_driver.start_hh_server()
+        self.load_and_run("references_client_cancel", variables)
+
+    def test_references_client_retry_after_cancel(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("references.php"))
+        self.test_driver.start_hh_server()
+        self.load_and_run("references_client_retry_after_cancel", variables)
+
+    def test_references_client_double_cancel(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("references.php"))
+        self.test_driver.start_hh_server()
+        self.load_and_run("references_client_double_cancel", variables)
+
+    def test_references_with_server(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("references.php"))
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
+        self.load_and_run("references_with_server", variables)
+
+    def test_references_partial_with_server(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("references.php"))
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
+        self.load_and_run("references_partial_with_server", variables)
+
+    def test_references_partial_with_server_2(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("references.php"))
+        self.test_driver.start_hh_server()
+        self.test_driver.run_check()
+        self.load_and_run("references_partial_with_server_2", variables)
+
+    def test_references_no_server(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("references.php"))
+        self.load_and_run("references_no_server", variables)
+
+    def test_non_existing_method(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("nomethod.php"))
+        self.load_and_run("nomethod", variables)
+
+    def test_bad_call(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("bad_call.php"))
+        self.load_and_run("bad_call", variables)
+
+    def test_code_action_missing_method(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("code_action_missing_method.php"))
+
+        spec = (
+            self.initialize_spec(LspTestSpec("code_action_missing_method"))
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 comment="make local, unsaved change to the file",
                 method="textDocument/didChange",
@@ -5733,7 +4676,7 @@ function call_method(ClassWithFooBar $mc): void {
                                     },
                                 ],
                             }
-                        ],
+                        ]
                     },
                 },
                 result=[
@@ -5741,91 +4684,513 @@ function call_method(ClassWithFooBar $mc): void {
                         "title": "Change to ->foobar",
                         "kind": "quickfix",
                         "diagnostics": [],
-                        "edit": {
-                            "changes": {
-                                "${root_path}/code_action_missing_method.php": [
-                                    {
-                                        "range": {
-                                            "start": {"line": 7, "character": 7},
-                                            "end": {"line": 7, "character": 13},
-                                        },
-                                        "newText": "foobar",
-                                    }
-                                ]
+                        "data": {
+                            "originalRequest": {
+                                "textDocument": {"uri": "${php_file_uri}"},
+                                "range": {
+                                    "start": {"line": 7, "character": 7},
+                                    "end": {"line": 7, "character": 13},
+                                },
+                                "context": {
+                                    "diagnostics": [
+                                        {
+                                            "range": {
+                                                "start": {"line": 7, "character": 7},
+                                                "end": {"line": 7, "character": 13},
+                                            },
+                                            "severity": 1,
+                                            "code": 4053,
+                                            "source": "Hack",
+                                            "message": "No instance method foobaz in ClassWithFooBar",
+                                            "relatedInformation": [
+                                                {
+                                                    "location": {
+                                                        "uri": "${php_file_uri}",
+                                                        "range": {
+                                                            "start": {
+                                                                "line": 3,
+                                                                "character": 18,
+                                                            },
+                                                            "end": {
+                                                                "line": 3,
+                                                                "character": 24,
+                                                            },
+                                                        },
+                                                    },
+                                                    "message": "Did you mean foobar instead?",
+                                                },
+                                                {
+                                                    "location": {
+                                                        "uri": "${php_file_uri}",
+                                                        "range": {
+                                                            "start": {
+                                                                "line": 6,
+                                                                "character": 21,
+                                                            },
+                                                            "end": {
+                                                                "line": 6,
+                                                                "character": 36,
+                                                            },
+                                                        },
+                                                    },
+                                                    "message": "This is why I think it is an object of type ClassWithFooBar",
+                                                },
+                                                {
+                                                    "location": {
+                                                        "uri": "${php_file_uri}",
+                                                        "range": {
+                                                            "start": {
+                                                                "line": 2,
+                                                                "character": 6,
+                                                            },
+                                                            "end": {
+                                                                "line": 2,
+                                                                "character": 21,
+                                                            },
+                                                        },
+                                                    },
+                                                    "message": "Declaration of ClassWithFooBar is here",
+                                                },
+                                            ],
+                                            "relatedLocations": [
+                                                {
+                                                    "location": {
+                                                        "uri": "${php_file_uri}",
+                                                        "range": {
+                                                            "start": {
+                                                                "line": 3,
+                                                                "character": 18,
+                                                            },
+                                                            "end": {
+                                                                "line": 3,
+                                                                "character": 24,
+                                                            },
+                                                        },
+                                                    },
+                                                    "message": "Did you mean foobar instead?",
+                                                },
+                                                {
+                                                    "location": {
+                                                        "uri": "${php_file_uri}",
+                                                        "range": {
+                                                            "start": {
+                                                                "line": 6,
+                                                                "character": 21,
+                                                            },
+                                                            "end": {
+                                                                "line": 6,
+                                                                "character": 36,
+                                                            },
+                                                        },
+                                                    },
+                                                    "message": "This is why I think it is an object of type ClassWithFooBar",
+                                                },
+                                                {
+                                                    "location": {
+                                                        "uri": "${php_file_uri}",
+                                                        "range": {
+                                                            "start": {
+                                                                "line": 2,
+                                                                "character": 6,
+                                                            },
+                                                            "end": {
+                                                                "line": 2,
+                                                                "character": 21,
+                                                            },
+                                                        },
+                                                    },
+                                                    "message": "Declaration of ClassWithFooBar is here",
+                                                },
+                                            ],
+                                        }
+                                    ]
+                                },
                             }
                         },
-                    }
+                    },
+                    {
+                        "title": "Extract into variable",
+                        "kind": "refactor",
+                        "diagnostics": [],
+                        "data": {
+                            "originalRequest": {
+                                "textDocument": {"uri": "${php_file_uri}"},
+                                "range": {
+                                    "start": {"line": 7, "character": 7},
+                                    "end": {"line": 7, "character": 13},
+                                },
+                                "context": {
+                                    "diagnostics": [
+                                        {
+                                            "range": {
+                                                "start": {"line": 7, "character": 7},
+                                                "end": {"line": 7, "character": 13},
+                                            },
+                                            "severity": 1,
+                                            "code": 4053,
+                                            "source": "Hack",
+                                            "message": "No instance method foobaz in ClassWithFooBar",
+                                            "relatedInformation": [
+                                                {
+                                                    "location": {
+                                                        "uri": "${php_file_uri}",
+                                                        "range": {
+                                                            "start": {
+                                                                "line": 3,
+                                                                "character": 18,
+                                                            },
+                                                            "end": {
+                                                                "line": 3,
+                                                                "character": 24,
+                                                            },
+                                                        },
+                                                    },
+                                                    "message": "Did you mean foobar instead?",
+                                                },
+                                                {
+                                                    "location": {
+                                                        "uri": "${php_file_uri}",
+                                                        "range": {
+                                                            "start": {
+                                                                "line": 6,
+                                                                "character": 21,
+                                                            },
+                                                            "end": {
+                                                                "line": 6,
+                                                                "character": 36,
+                                                            },
+                                                        },
+                                                    },
+                                                    "message": "This is why I think it is an object of type ClassWithFooBar",
+                                                },
+                                                {
+                                                    "location": {
+                                                        "uri": "${php_file_uri}",
+                                                        "range": {
+                                                            "start": {
+                                                                "line": 2,
+                                                                "character": 6,
+                                                            },
+                                                            "end": {
+                                                                "line": 2,
+                                                                "character": 21,
+                                                            },
+                                                        },
+                                                    },
+                                                    "message": "Declaration of ClassWithFooBar is here",
+                                                },
+                                            ],
+                                            "relatedLocations": [
+                                                {
+                                                    "location": {
+                                                        "uri": "${php_file_uri}",
+                                                        "range": {
+                                                            "start": {
+                                                                "line": 3,
+                                                                "character": 18,
+                                                            },
+                                                            "end": {
+                                                                "line": 3,
+                                                                "character": 24,
+                                                            },
+                                                        },
+                                                    },
+                                                    "message": "Did you mean foobar instead?",
+                                                },
+                                                {
+                                                    "location": {
+                                                        "uri": "${php_file_uri}",
+                                                        "range": {
+                                                            "start": {
+                                                                "line": 6,
+                                                                "character": 21,
+                                                            },
+                                                            "end": {
+                                                                "line": 6,
+                                                                "character": 36,
+                                                            },
+                                                        },
+                                                    },
+                                                    "message": "This is why I think it is an object of type ClassWithFooBar",
+                                                },
+                                                {
+                                                    "location": {
+                                                        "uri": "${php_file_uri}",
+                                                        "range": {
+                                                            "start": {
+                                                                "line": 2,
+                                                                "character": 6,
+                                                            },
+                                                            "end": {
+                                                                "line": 2,
+                                                                "character": 21,
+                                                            },
+                                                        },
+                                                    },
+                                                    "message": "Declaration of ClassWithFooBar is here",
+                                                },
+                                            ],
+                                        }
+                                    ]
+                                },
+                            }
+                        },
+                    },
+                    {
+                        "title": "Devmate Quick Fix - No instance method `foobaz` in `ClassWithFooBar`",
+                        "kind": "quickfix",
+                        "diagnostics": [],
+                        "edit": {"changes": {}},
+                        "command": {
+                            "title": "Devmate Quick Fix - No instance method `foobaz` in `ClassWithFooBar`",
+                            "command": "code-compose.show-inline-chat",
+                            "arguments": [
+                                {
+                                    "entrypoint": "FixLintErrorCodeAction",
+                                    "predefinedPrompt": {
+                                        "command": "Devmate Quick Fix",
+                                        "displayPrompt": "Devmate Quick Fix - No instance method `foobaz` in `ClassWithFooBar`",
+                                        "userPrompt": "The following snippet of Hack code contains a subtyping error. Line numbers have been inlucded for your reference.You should focus on this code when suggesting a fix and ignore what the user has selected:\n<SNIPPET>\n```hack\n 7 | function call_method(ClassWithFooBar $mc): void {\n 8 |   $mc->[DIAGNOSTIC_START]foobar[DIAGNOSTIC_END]();\n 9 | }\n```\n</SNIPPET>\nThe following diagnostic contains a detailed description of how the typechecker discovered the error.\nEach step describes how a type flowed from hints to expressions or how the subtype error was discovered when checking two types.\nThe contained code fragments highlight relevant hints, statements and expression using the characters '»' and '«' to indicate the code element .\nThe code fragments are given with line numbers to help you understand the context of the error. You should never use those line numbers in suggested edits.\n<DIAGNOSTIC>\n\n```hack\nerror: Typing[4053] No instance method foobaz in ClassWithFooBar\n\nFile code_action_missing_method.php, line 8, character 8 - line 8, character 13:\n\n 5 | }\n 6 | \n 7 | function call_method(ClassWithFooBar $mc): void {\n 8 |   $mc->»foobar«();\n 9 | }\n\nDid you mean foobar instead?\n\nFile code_action_missing_method.php, line 4, character 19 - line 4, character 24:\n\n 1 | <?hh\n 2 | \n 3 | class ClassWithFooBar {\n 4 |   public function »foobar«(): void {}\n 5 | }\n 6 | \n 7 | function call_method(ClassWithFooBar $mc): void {\n\nThis is why I think it is an object of type ClassWithFooBar\n\nFile code_action_missing_method.php, line 7, character 22 - line 7, character 36:\n\n 5 | }\n 6 | \n 7 | function call_method(»ClassWithFooBar« $mc): void {\n 8 |   $mc->foobar();\n 9 | }\n\nDeclaration of ClassWithFooBar is here\n\nFile code_action_missing_method.php, line 3, character 7 - line 3, character 21:\n\n 1 | <?hh\n 2 | \n 3 | class »ClassWithFooBar« {\n 4 |   public function foobar(): void {}\n 5 | }\n 6 | \n 7 | function call_method(ClassWithFooBar $mc): void {\n\n\n```\n\n</DIAGNOSTIC>\n\nEdit the code contained in the <SNIPPET> in a way that would fix the error. The suggested edit should be valid Hack code and shouldn't contain line numbers shown in the diagnostic message.\nIf there are multiple ways to fix this issue, please return in the code section the most strightforward one that is part of <SNIPPET>, any further suggestions can be added in the explanation section.",
+                                        "description": "Devmate Quick Fix",
+                                        "model": "iCodeLlama 3.1 70B",
+                                    },
+                                    "overrideSelection": {
+                                        "start": {"line": 6, "character": 0},
+                                        "end": {"line": 8, "character": 1},
+                                    },
+                                    "webviewStartLine": 6,
+                                    "extras": {"lineAgnosticHash": "6c30c21bea1128b0"},
+                                }
+                            ],
+                        },
+                        "data": {"isAI": True},
+                    },
+                    {
+                        "title": "Devmate Agent Fix - No instance method `foobaz` in `ClassWithFooBar`",
+                        "kind": "quickfix",
+                        "diagnostics": [],
+                        "edit": {"changes": {}},
+                        "command": {
+                            "title": "Devmate Agent Fix - No instance method `foobaz` in `ClassWithFooBar`",
+                            "command": "code-compose.chat.prompt",
+                            "arguments": [
+                                {
+                                    "displayPrompt": "Devmate Agent Fix - No instance method `foobaz` in `ClassWithFooBar`",
+                                    "modelPrompt": "You will be given a Hack code snippet and a detailed diagnostic explaining a problem with the code and all the names and locations of all related expressions, hints, statements and definitions.\n\n```hack\n 7 | function call_method(ClassWithFooBar $mc): void {\n 8 |   $mc->[DIAGNOSTIC_START]foobar[DIAGNOSTIC_END]();\n 9 | }\nThe following diagnostic contains a detailed description of how the typechecker discovered the error.\nEach step describes how a type flowed from hints to expressions or how the subtype error was discovered when checking two types.\nThe contained code fragments highlight relevant hints, statements and expression using the characters '»' and '«' to indicate the code element .\nThe code fragments are given with line numbers to help you understand the context of the error. You should never use those line numbers in suggested edits.\n<DIAGNOSTIC>\n\n```hack\nerror: Typing[4053] No instance method foobaz in ClassWithFooBar\n\nFile code_action_missing_method.php, line 8, character 8 - line 8, character 13:\n\n 5 | }\n 6 | \n 7 | function call_method(ClassWithFooBar $mc): void {\n 8 |   $mc->»foobar«();\n 9 | }\n\nDid you mean foobar instead?\n\nFile code_action_missing_method.php, line 4, character 19 - line 4, character 24:\n\n 1 | <?hh\n 2 | \n 3 | class ClassWithFooBar {\n 4 |   public function »foobar«(): void {}\n 5 | }\n 6 | \n 7 | function call_method(ClassWithFooBar $mc): void {\n\nThis is why I think it is an object of type ClassWithFooBar\n\nFile code_action_missing_method.php, line 7, character 22 - line 7, character 36:\n\n 5 | }\n 6 | \n 7 | function call_method(»ClassWithFooBar« $mc): void {\n 8 |   $mc->foobar();\n 9 | }\n\nDeclaration of ClassWithFooBar is here\n\nFile code_action_missing_method.php, line 3, character 7 - line 3, character 21:\n\n 1 | <?hh\n 2 | \n 3 | class »ClassWithFooBar« {\n 4 |   public function foobar(): void {}\n 5 | }\n 6 | \n 7 | function call_method(ClassWithFooBar $mc): void {\n\n\n```\n\n</DIAGNOSTIC>\n\nYour task is to help the user to understand and fix the error by using any tool you think is appropriate and following these steps:\n\n1. Read the diagnostic and understand how the type type error was discovered and the role of each type definition, hint, expression and statement; you may open and read any file mentioned in the diagnostic and search for the names of the definitions, hints, expressions and statements mentioned in the diagnostic. DO NOT focus solely on the position the error was found - the cause of the error may be several steps earlier in the diagnostic and occur in another part of the code mentioned in the diagnostic. The diagnostic will help you think about making changes to various parts of the code may affect the error.\n\n2. Explain the complete diagnostic to the user in your own words, using the names of the definitions, hints, expressions and statements mentioned in the diagnostic;\n\n3. Based on your explanation and the context of the problem, consider which declarations, hints, expressions and statements contained in the diagnostic could be changed to fix the problem.\n\n4. Create edits for the changes you wish to make in order to fix the problem and explain your reasoning; these changes may be in any file mentioned in the diagnostic;\n\n5. Ensure the proposed solution is syntactically correct and does not introduce new errors or warnings;\n\n6. Evaluate the proposed solution and explain why it is the best solution to the problem. Whilst evaluating, please consider the following:\n- Does the solution introduce type errors (BAD)\n- Does the solution reduce code quality by circumventing the typechecker (e.g. using `as` instead of `is`, using `UNSAFE_CAST` etc) (BAD)\n- Does the solution change the behavior of the program (BAD)\n\n7. If your proposed solution is good, generate an edit that will fix the problem and return it in the code section of the response. If your proposed solution is not good, go back to step 1 and try again.\n",
+                                    "model": "CLAUDE_37_SONNET",
+                                    "action": "DEVMATE",
+                                    "trigger": "FixLintErrorCodeAction",
+                                    "triggerType": "CodeAction",
+                                    "correlationId": "6c30c21bea1128b0",
+                                }
+                            ],
+                        },
+                        "data": {"isAI": True},
+                    },
                 ],
                 powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
-    def test_non_blocking(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("non_blocking.php")
-        self.test_driver.start_hh_loop_forever_assert_timeout()
+    def test_code_action_flip_around_comma(self) -> None:
+        """This test is mainly for testing lazy code action resolution:
+        - The server returns a code action with neither 'edit' nor 'command' field
+        - The client must send `codeAction/resolve`
+        - The server then replies with a complete code action
+        """
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("code_action_flip_around_comma.php"))
+
         spec = (
-            self.initialize_spec(LspTestSpec("non_blocking"), use_serverless_ide=False)
-            .ignore_notifications(method="textDocument/publishDiagnostics")
-            .wait_for_hh_server_ready()
-            .request(
-                line=line(),
-                method="textDocument/definition",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 7, "character": 11},
-                },
-                result=[
-                    {
-                        "uri": "file://${root_path}/non_blocking.php",
-                        "range": {
-                            "start": {"line": 2, "character": 9},
-                            "end": {"line": 2, "character": 32},
-                        },
-                        "title": "non_blocking_definition",
-                    }
-                ],
-                wait_id="definition request",
-            )
+            self.initialize_spec(LspTestSpec("code_action_flip_around_comma"))
             .notification(
-                comment="remove hh_loop_forever() invocation to break the infinite loop",
                 method="textDocument/didOpen",
                 params={
                     "textDocument": {
-                        "uri": "${root_path}/__hh_loop_forever_foo.php",
+                        "uri": "${php_file_uri}",
                         "languageId": "hack",
                         "version": 1,
-                        "text": """\
-<?hh // strict
-
-function __hh_loop_forever_foo(): int {
-  return 4;
-}
-""",
+                        "text": "${php_file}",
                     }
                 },
             )
-            .wait_for_response(wait_id="definition request")
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .request(
+                line=line(),
+                comment="get actions",
+                method="textDocument/codeAction",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "range": {
+                        "start": {"line": 3, "character": 10},
+                        "end": {"line": 3, "character": 10},
+                    },
+                    "context": {"diagnostics": []},
+                },
+                result=[
+                    {
+                        "title": "Flip around comma",
+                        "kind": "refactor",
+                        "diagnostics": [],
+                        "data": {
+                            "originalRequest": {
+                                "textDocument": {"uri": "${php_file_uri}"},
+                                "range": {
+                                    "start": {"line": 3, "character": 10},
+                                    "end": {"line": 3, "character": 10},
+                                },
+                                "context": {"diagnostics": []},
+                            }
+                        },
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="resolve code action",
+                method="codeAction/resolve",
+                params={
+                    "title": "Flip around comma",
+                    "data": {
+                        "originalRequest": {
+                            "textDocument": {"uri": "${php_file_uri}"},
+                            "range": {
+                                "start": {"line": 3, "character": 10},
+                                "end": {"line": 3, "character": 10},
+                            },
+                            "context": {"diagnostics": []},
+                        },
+                    },
+                    "kind": "refactor",
+                    "diagnostics": [],
+                },
+                result={
+                    "title": "Flip around comma",
+                    "kind": "refactor",
+                    "diagnostics": [],
+                    "edit": {
+                        "changes": {
+                            "${php_file_uri}": [
+                                {
+                                    "range": {
+                                        "start": {"line": 3, "character": 6},
+                                        "end": {"line": 3, "character": 19},
+                                    },
+                                    "newText": '"b", "a", "c"',
+                                }
+                            ]
+                        }
+                    },
+                },
+                powered_by="serverless_ide",
+            )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+        self.run_spec(spec, variables)
+
+    def test_code_action_content_modified(self) -> None:
+        """Test that we handle the following situation gracefully:
+        - client sends textDocument/codeAction
+        - server sends back a partially-resolved code action
+        - client sends codeAction/resolve with a *different* position s.t.
+        the server can't find a code action with the given position and title.
+        We should reply with an LSP error `ContentModified`, per
+        https://github.com/microsoft/language-server-protocol/issues/1738
+        """
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("code_action_flip_around_comma.php"))
+
+        spec = (
+            self.initialize_spec(LspTestSpec("code_action_flip_around_comma"))
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .request(
+                line=line(),
+                comment="get actions",
+                method="textDocument/codeAction",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "range": {
+                        "start": {"line": 3, "character": 10},
+                        "end": {"line": 3, "character": 10},
+                    },
+                    "context": {"diagnostics": []},
+                },
+                result=[
+                    {
+                        "title": "Flip around comma",
+                        "kind": "refactor",
+                        "diagnostics": [],
+                        "data": {
+                            "originalRequest": {
+                                "textDocument": {"uri": "${php_file_uri}"},
+                                "range": {
+                                    "start": {"line": 3, "character": 10},
+                                    "end": {"line": 3, "character": 10},
+                                },
+                                "context": {"diagnostics": []},
+                            },
+                        },
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="resolve code action",
+                method="codeAction/resolve",
+                params={
+                    "title": "Flip around comma",
+                    "data": {
+                        "originalRequest": {
+                            "textDocument": {"uri": "${php_file_uri}"},
+                            "range": {
+                                "start": {"line": 3, "character": 2},
+                                "end": {"line": 3, "character": 3},
+                            },
+                            "context": {"diagnostics": []},
+                        },
+                    },
+                    "kind": "refactor",
+                    "diagnostics": [],
+                },
+                result={
+                    "code": -32801,
+                    "message": "Expected the code action requested with codeAction/resolve to be findable.\nNote: This error message may be caused by the source text changing between\nwhen the code action menu pops up and when the user selects the code action.\nIn such cases we may not be able to find a code action at the same location with\nthe same title, so cannot resolve the code action.\n        ",
+                },
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_hierarchy_file_change_on_disk(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("incremental_derived.php"))
         changed_php_file_uri = self.repo_file("incremental_base.php")
         variables.update({"changed_php_file_uri": changed_php_file_uri})
-        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_hierarchy_file_change_on_disk"),
-                use_serverless_ide=True,
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -5847,8 +5212,12 @@ function __hh_loop_forever_foo(): int {
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public function foo(): int"},
-                        "Full name: `BaseClassIncremental::foo`",
+                        "Defined in `BaseClassIncremental`",
+                        "---",
+                        {
+                            "language": "hack",
+                            "value": "public function foo(): int",
+                        },
                     ],
                     "range": {
                         "start": {"line": 7, "character": 12},
@@ -5860,7 +5229,7 @@ function __hh_loop_forever_foo(): int {
             .write_to_disk(
                 uri=changed_php_file_uri,
                 contents="""\
-<?hh // strict
+<?hh
 class BaseClassIncremental {
   public function foo(): string { return ''; }
 }
@@ -5877,8 +5246,12 @@ class BaseClassIncremental {
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "public function foo(): string"},
-                        "Full name: `BaseClassIncremental::foo`",
+                        "Defined in `BaseClassIncremental`",
+                        "---",
+                        {
+                            "language": "hack",
+                            "value": "public function foo(): string",
+                        },
                     ],
                     "range": {
                         "start": {"line": 7, "character": 12},
@@ -5891,18 +5264,117 @@ class BaseClassIncremental {
             .notification(method="exit", params={})
         )
 
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
+
+    def test_incrementality(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("incrementality_use.php"))
+        parent_php_file_uri = self.repo_file("incrementality_parent.php")
+        variables.update({"parent_php_file_uri": parent_php_file_uri})
+        child_php_file_uri = self.repo_file("incrementality_child.php")
+        variables.update({"child_php_file_uri": child_php_file_uri})
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("incrementality"),
+            )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${parent_php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": self.read_repo_file("incrementality_parent.php"),
+                    }
+                },
+            )
+            .request(
+                line=line(),
+                comment="hover before change to class hierarchy should be `int`",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 6},
+                },
+                result={
+                    "contents": [
+                        "Defined in `Parentt`",
+                        "---",
+                        {
+                            "language": "hack",
+                            "value": "public function m(int $_): void",
+                        },
+                    ],
+                    "range": {
+                        "start": {"line": 3, "character": 6},
+                        "end": {"line": 3, "character": 7},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .write_to_disk(
+                uri=parent_php_file_uri,
+                contents="""\
+<?hh
+
+class Parentt {
+  public function m(string $_): void {}
+}
+""",
+                notify=True,
+            )
+            .request(
+                line=line(),
+                comment="hover after change to class hierarchy should be `string`",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 6},
+                },
+                result={
+                    "contents": [
+                        "Defined in `Parentt`",
+                        "---",
+                        {
+                            "language": "hack",
+                            "value": "public function m(string $_): void",
+                        },
+                    ],
+                    "range": {
+                        "start": {"line": 3, "character": 6},
+                        "end": {"line": 3, "character": 7},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_decl_in_unsaved_buffer_changed(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("hover.php"))
-        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_decl_in_unsaved_buffer_changed"),
-                use_serverless_ide=True,
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -5924,7 +5396,8 @@ class BaseClassIncremental {
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "int"},
+                        {"language": "hack", "value": "function b_hover(): int"},
+                        "---",
                         "A comment describing b_hover.",
                     ],
                     "range": {
@@ -5942,7 +5415,7 @@ class BaseClassIncremental {
                     "contentChanges": [
                         {
                             "text": """\
-<?hh // strict
+<?hh
 // comment
 function a_hover(): int {
   return b_hover();
@@ -5966,7 +5439,8 @@ function b_hover(): string {
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "string"},
+                        {"language": "hack", "value": "function b_hover(): string"},
+                        "---",
                         "A comment describing b_hover differently.",
                     ],
                     "range": {
@@ -5980,19 +5454,18 @@ function b_hover(): string {
             .notification(method="exit", params={})
         )
 
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_decl_two_unsaved_buffers(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("unsaved1.php"))
         variables.update({"unsaved2_file_uri": self.repo_file_uri("unsaved2.php")})
-        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
                 LspTestSpec("test_serverless_ide_decl_two_unsaved_buffers"),
-                use_serverless_ide=True,
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 comment="open 'unsaved1.php', since we'll be hovering in it",
                 method="textDocument/didOpen",
@@ -6014,7 +5487,7 @@ function b_hover(): string {
                         "languageId": "hack",
                         "version": 1,
                         "text": """\
-<?hh  //strict
+<?hh
 function unsaved_bar(): bool { return true; }
 """,
                     }
@@ -6047,7 +5520,7 @@ function unsaved_bar(): bool { return true; }
                     "contentChanges": [
                         {
                             "text": """\
-<?hh  //strict
+<?hh
 function unsaved_bar(): string { return "hello"; }
 """
                         }
@@ -6088,7 +5561,7 @@ function unsaved_bar(): string { return "hello"; }
                 comment="save signature in 'unsaved2' to return string",
                 uri=variables["unsaved2_file_uri"],
                 contents="""\
-<?hh // strict
+<?hh
 function unsaved_bar(): string { return "hello"; }
 """,
                 notify=True,
@@ -6116,60 +5589,17 @@ function unsaved_bar(): string { return "hello"; }
             .notification(method="exit", params={})
         )
 
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_hover_without_file_open(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("hover.php"))
-        self.test_driver.stop_hh_server()
 
         spec = (
             self.initialize_spec(
                 LspTestSpec("test_hover_without_file_open"),
-                use_serverless_ide=True,
-                supports_status=True,
             )
             .ignore_notifications(method="textDocument/publishDiagnostics")
-            .ignore_requests(
-                comment="Ignore 'initializing...' messages since they're racy",
-                method="window/showStatus",
-                params={
-                    "type": 2,
-                    "actions": [{"title": "Restart hh_server"}],
-                    "message": "Hack IDE: initializing.\nhh_server: stopped.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="another racy initializing, before hh_server has even responded",
-                method="window/showStatus",
-                params={
-                    "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="another racy initialization to ignore, again before hh_server",
-                method="window/showStatus",
-                params={
-                    "type": 3,
-                    "actions": [],
-                    "message": "Hack IDE: ready.",
-                    "shortMessage": "Hack: ready",
-                },
-            )
-            .wait_for_server_request(
-                method="window/showStatus",
-                params={
-                    "actions": [{"title": "Restart hh_server"}],
-                    "message": "Hack IDE: ready.\nhh_server: stopped.",
-                    "shortMessage": "Hack: ready",
-                    "type": 3,
-                },
-                result=NoResponse(),
-            )
             .request(
                 line=line(),
                 comment="hover before file_open will fail",
@@ -6202,52 +5632,7 @@ function unsaved_bar(): string { return "hello"; }
                 result={
                     "contents": [
                         {"language": "hack", "value": "string"},
-                        {"language": "hack", "value": "Parameter: $s"},
-                    ]
-                },
-                powered_by="serverless_ide",
-            )
-            .request(
-                line=line(),
-                method="$test/shutdownServerlessIde",
-                params={},
-                result=None,
-                powered_by="serverless_ide",
-            )
-            .wait_for_server_request(
-                method="window/showStatus",
-                params={
-                    "actions": [
-                        {"title": "Restart Hack IDE"},
-                        {"title": "Restart hh_server"},
-                    ],
-                    "message": "Hack IDE has failed. See Output›Hack for details.\nhh_server: stopped.",
-                    "shortMessage": "Hack: failed",
-                    "type": 1,
-                },
-                result={"title": "Restart Hack IDE"},
-            )
-            .wait_for_server_request(
-                method="window/showStatus",
-                params={
-                    "actions": [{"title": "Restart hh_server"}],
-                    "message": "Hack IDE: ready.\nhh_server: stopped.",
-                    "shortMessage": "Hack: ready",
-                    "type": 3,
-                },
-                result=NoResponse(),
-            )
-            .request(
-                line=line(),
-                comment="hover after restart will succeed",
-                method="textDocument/hover",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 26, "character": 20},
-                },
-                result={
-                    "contents": [
-                        {"language": "hack", "value": "string"},
+                        "---",
                         {"language": "hack", "value": "Parameter: $s"},
                     ]
                 },
@@ -6271,394 +5656,14 @@ function unsaved_bar(): string { return "hello"; }
             .notification(method="exit", params={})
         )
 
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
-
-    def test_hh_server_status_diagnostic(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
-        variables.update(self.setup_php_file("unsaved1.php"))
-        variables.update(
-            {
-                "unsaved2_file_uri": self.repo_file_uri("unsaved2.php"),
-                "unsaved2_file": self.read_repo_file("unsaved2.php"),
-            }
-        )
-        self.test_driver.stop_hh_server()
-
-        spec = (
-            self.initialize_spec(
-                LspTestSpec("test_hh_server_status_diagnostic"), use_serverless_ide=True
-            )
-            .ignore_status_diagnostics(False)
-            .notification(
-                method="textDocument/didOpen",
-                params={
-                    "textDocument": {
-                        "uri": "${php_file_uri}",
-                        "languageId": "hack",
-                        "version": 1,
-                        "text": "${php_file}",
-                    }
-                },
-            )
-            .wait_for_notification(
-                comment="After didOpen(file1), the hh_server_status diagnostic should appear in file1",
-                method="textDocument/publishDiagnostics",
-                params={
-                    "uri": "${php_file_uri}",
-                    "diagnostics": [
-                        {
-                            "range": {
-                                "start": {"line": 0, "character": 0},
-                                "end": {"line": 0, "character": 1},
-                            },
-                            "severity": 1,
-                            "source": "hh_server",
-                            "message": "hh_server isn't running, so there may be undetected errors. Try `hh` at the command line... hh_server: stopped.",
-                            "relatedInformation": [],
-                            "relatedLocations": [],
-                        }
-                    ],
-                    "isStatusFB": True,
-                },
-            )
-            .notification(
-                method="textDocument/didOpen",
-                params={
-                    "textDocument": {
-                        "uri": "${unsaved2_file_uri}",
-                        "languageId": "hack",
-                        "version": 1,
-                        "text": "${unsaved2_file}",
-                    }
-                },
-            )
-            .wait_for_notification(
-                comment="After didOpen(file2), the hh_server_status diagnostic should disappear from file1",
-                method="textDocument/publishDiagnostics",
-                params={
-                    "uri": "${php_file_uri}",
-                    "diagnostics": [],
-                    "isStatusFB": True,
-                },
-            )
-            .wait_for_notification(
-                comment="After didOpen(file2), the hh_server_status diagnostic should reappear in file2",
-                method="textDocument/publishDiagnostics",
-                params={
-                    "uri": "${unsaved2_file_uri}",
-                    "diagnostics": [
-                        {
-                            "range": {
-                                "start": {"line": 0, "character": 0},
-                                "end": {"line": 0, "character": 1},
-                            },
-                            "severity": 1,
-                            "source": "hh_server",
-                            "message": "hh_server isn't running, so there may be undetected errors. Try `hh` at the command line... hh_server: stopped.",
-                            "relatedInformation": [],
-                            "relatedLocations": [],
-                        }
-                    ],
-                    "isStatusFB": True,
-                },
-            )
-            .notification(
-                method="textDocument/didClose",
-                params={"textDocument": {"uri": "${unsaved2_file_uri}"}},
-            )
-            .wait_for_notification(
-                comment="After didClose(file2), the hh_server_status diagnostic should disappear from file2",
-                method="textDocument/publishDiagnostics",
-                params={
-                    "uri": "${unsaved2_file_uri}",
-                    "diagnostics": [],
-                    "isStatusFB": True,
-                },
-            )
-            .wait_for_notification(
-                comment="After didClose(file2), the hh_server_status diagnostic should reappear in file1",
-                method="textDocument/publishDiagnostics",
-                params={
-                    "uri": "${php_file_uri}",
-                    "diagnostics": [
-                        {
-                            "range": {
-                                "start": {"line": 0, "character": 0},
-                                "end": {"line": 0, "character": 1},
-                            },
-                            "severity": 1,
-                            "source": "hh_server",
-                            "message": "hh_server isn't running, so there may be undetected errors. Try `hh` at the command line... hh_server: stopped.",
-                            "relatedInformation": [],
-                            "relatedLocations": [],
-                        }
-                    ],
-                    "isStatusFB": True,
-                },
-            )
-            .notification(
-                method="textDocument/didClose",
-                params={"textDocument": {"uri": "${php_file_uri}"}},
-            )
-            .wait_for_notification(
-                comment="After didClose(file1), the hh_server_status diagnostic should disappear from file1",
-                method="textDocument/publishDiagnostics",
-                params={
-                    "uri": "${php_file_uri}",
-                    "diagnostics": [],
-                    "isStatusFB": True,
-                },
-            )
-            .request(line=line(), method="shutdown", params={}, result=None)
-            .notification(method="exit", params={})
-        )
-
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
-
-    def _sanitize_gutter_line_numbers(self, s: str) -> str:
-        gutter_line_number_re = re.compile(r"^[ ]*[0-9]+ \|", re.MULTILINE)
-        return re.sub(gutter_line_number_re, " XXXX |", s)
-
-    def test_lsptestspec_incorrect_request_result(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
-        variables.update(self.setup_php_file("hover.php"))
-        self.test_driver.stop_hh_server()
-
-        spec = (
-            self.initialize_spec(
-                LspTestSpec("test_lsptestspec_incorrect_request_result"),
-                use_serverless_ide=True,
-            )
-            .notification(
-                method="textDocument/didOpen",
-                params={
-                    "textDocument": {
-                        "uri": "${php_file_uri}",
-                        "languageId": "hack",
-                        "version": 1,
-                        "text": "${php_file}",
-                    }
-                },
-            )
-            .request(
-                line=line(),
-                comment="hover over function invocation",
-                method="textDocument/hover",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 3, "character": 16},
-                },
-                result={
-                    "contents": [
-                        {"language": "hack", "value": "int"},
-                        "INCORRECT COMMENT HERE",
-                    ],
-                    "range": {
-                        "start": {"line": 3, "character": 9},
-                        "end": {"line": 3, "character": 16},
-                    },
-                },
-                powered_by="serverless_ide",
-            )
-            .request(line=line(), method="shutdown", params={}, result=None)
-            .notification(method="exit", params={})
-        )
-        try:
-            self.run_spec(
-                spec,
-                variables=variables,
-                wait_for_server=False,
-                use_serverless_ide=True,
-            )
-            raise AssertionError("Expected an error here")
-        except AssertionError as e:
-            self.assertEqual(
-                self._sanitize_gutter_line_numbers(str(e)),
-                """\
-Test case test_lsptestspec_incorrect_request_result failed with 1 errors:
-
-Error 1/1:
-Description: Request with ID 5 (comment: 'hover over function invocation') \
-got an incorrect result:
-
-(- is expected lines, + is actual lines)
-- {'contents': [{'language': 'hack', 'value': 'int'}, 'INCORRECT COMMENT HERE'],
-?                                                    ---------------------------
-
-+ {'contents': [{'language': 'hack', 'value': 'int'},
-+               'A comment describing b_hover.'],
-   'range': {'end': {'character': 16, 'line': 3},
-             'start': {'character': 9, 'line': 3}}}
-
-Context:
-This was the associated request:
-
-hphp/hack/test/integration/test_lsp.py
- XXXX |             .request(
- XXXX |                 line=line(),
- XXXX |                 comment="hover over function invocation",
- XXXX |                 method="textDocument/hover",
- XXXX |                 params={
- XXXX |                     "textDocument": {"uri": "${php_file_uri}"},
- XXXX |                     "position": {"line": 3, "character": 16},
- XXXX |                 },
- XXXX |                 result={
- XXXX |                     "contents": [
- XXXX |                         {"language": "hack", "value": "int"},
- XXXX |                         "INCORRECT COMMENT HERE",
- XXXX |                     ],
- XXXX |                     "range": {
- XXXX |                         "start": {"line": 3, "character": 9},
- XXXX |                         "end": {"line": 3, "character": 16},
- XXXX |                     },
- XXXX |                 },
- XXXX |                 powered_by="serverless_ide",
- XXXX |             )
-
-Remediation:
-1) If this was unexpected, then the language server is buggy and should be
-fixed.
-
-2) If this was expected, you can update your request with the following code to
-make it match:
-
-    .request(
-        line=line(),
-        comment='hover over function invocation',
-        method='textDocument/hover',
-        params={'textDocument': {'uri': '${php_file_uri}'}, \
-'position': {'line': 3, 'character': 16}},
-        result={'contents': [{'language': 'hack', 'value': 'int'}, \
-'A comment describing b_hover.'], \
-'range': {'start': {'line': 3, 'character': 9}, \
-'end': {'line': 3, 'character': 16}}},
-        powered_by='serverless_ide',
-    )
-
-If you want to examine the raw LSP logs, you can check the `.sent.log` and
-`.received.log` files that were generated in the template repo for this test.\
-""",
-            )
-
-    def test_lsptestspec_unexpected_notification(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("didchange.php")
-        spec = (
-            self.initialize_spec(LspTestSpec("did_change"), use_serverless_ide=False)
-            .wait_for_hh_server_ready()
-            .notification(
-                method="textDocument/didOpen",
-                params={
-                    "textDocument": {
-                        "uri": "${php_file_uri}",
-                        "languageId": "hack",
-                        "version": 1,
-                        "text": "${php_file}",
-                    }
-                },
-            )
-            .notification(
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "contentChanges": [
-                        {
-                            "range": {
-                                "start": {"line": 7, "character": 11},
-                                "end": {"line": 7, "character": 12},
-                            },
-                            "text": "a",
-                        }
-                    ],
-                },
-            )
-            .wait_for_notification(
-                method="textDocument/publishDiagnostics",
-                params={
-                    "uri": "${php_file_uri}",
-                    "diagnostics": [
-                        {
-                            "range": {
-                                "start": {"line": 7, "character": 11},
-                                "end": {"line": 7, "character": 11},
-                            },
-                            "severity": 1,
-                            "code": 1002,
-                            "source": "Hack",
-                            "message": "A semicolon ; is expected here.",
-                            "relatedLocations": [],
-                            "relatedInformation": [],
-                        }
-                    ],
-                },
-            )
-            .request(line=line(), method="shutdown", params={}, result=None)
-            .notification(method="exit", params={})
-        )
-        try:
-            self.run_spec(
-                spec, variables, wait_for_server=True, use_serverless_ide=False
-            )
-            raise AssertionError("Expected an error here")
-        except AssertionError as e:
-            self.assertEqual(
-                self._sanitize_gutter_line_numbers(str(e)),
-                """\
-Test case did_change failed with 1 errors:
-
-Error 1/1:
-Description: An unexpected notification of type \
-'textDocument/publishDiagnostics' was sent by the language server.
-Here is the notification payload:
-
-  {'jsonrpc': '2.0',
-   'method': 'textDocument/publishDiagnostics',
-   'params': {'diagnostics': [],
-              'uri': '__PHP_FILE_URI__'}}
-
-Context:
-This was the most recent request issued from the language client before it
-received the notification:
-
-hphp/hack/test/integration/test_lsp.py
- XXXX |             .request(line=line(), method="shutdown", params={}, result=None)
-
-Remediation:
-1) If this was unexpected, then the language server is buggy and should be
-fixed.
-
-2) If all notifications of type 'textDocument/publishDiagnostics' should be \
-ignored, add this directive
-anywhere in your test:
-
-    .ignore_notifications(method='textDocument/publishDiagnostics')
-
-3) If this single instance of the notification was expected, add this directive
-to your test to wait for it before proceeding:
-
-    .wait_for_notification(
-        method='textDocument/publishDiagnostics',
-        params={'uri': '${php_file_uri}', 'diagnostics': []},
-    )
-
-If you want to examine the raw LSP logs, you can check the `.sent.log` and
-`.received.log` files that were generated in the template repo for this test.\
-"""
-                # There's an instance of a literal `${php_file_uri}` in there
-                # which we don't want to change, so use a different name than
-                # that one.
-                .replace("__PHP_FILE_URI__", variables["php_file_uri"]),
-            )
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_highlight(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("highlight.php"))
-        self.test_driver.stop_hh_server()
-
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_highlight"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_highlight"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -6696,67 +5701,633 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 result=None,
             )
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
-    def test_serverless_ide_coverage(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
-        variables.update(self.setup_php_file("coverage.php"))
-        self.test_driver.stop_hh_server()
+    def test_status_running(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("hover.php"))
 
         spec = (
             self.initialize_spec(
-                LspTestSpec("serverless_ide_coverage"), use_serverless_ide=True
+                LspTestSpec("status_running"),
+                has_status_capability=True,
+            )
+            .ignore_requests(
+                comment="Ignore all status requests not explicitly waited for in the test",
+                method="window/showStatus",
+                params=None,
+            )
+            .start_hh_server("starting")
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
+                    "message": "<ROOT>\n\nHack IDE support is ready\n\nhh_server is ready",
+                    "shortMessage": "Hack",
+                    "type": 3,
+                },
+                result=NoResponse(),
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
+    def test_serverless_ide_status_stopped(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("hover.php"))
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_status_stopped"),
+                has_status_capability=True,
+            )
+            .ignore_requests(
+                comment="Ignore all status requests not explicitly waited for in the test",
+                method="window/showStatus",
+                params=None,
+            )
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
+                    "type": 1,
+                    "message": "<ROOT>\n\nHack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: hh_server stopped",
+                },
+                result=NoResponse(),
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
+    def test_standalone_status(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("hover.php"))
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_standalone_status"),
+                has_status_capability=True,
+            )
+            .ignore_requests(
+                comment="Ignore all status requests not explicitly waited for in the test",
+                method="window/showStatus",
+                params=None,
+            )
+            .wait_for_server_request(
+                comment="standalone status upon startup when it starts with hh_server stopped",
+                method="window/showStatus",
+                params={
+                    "message": "<ROOT>\n\nHack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: hh_server stopped",
+                    "type": 1,
+                },
+                result=NoResponse(),
+            )
+            .start_hh_server("Restart HH Server")
+            .wait_for_server_request(
+                comment="standalone status when hh_server transitions to starting up",
+                method="window/showStatus",
+                params={
+                    "message": "<ROOT>\n\nHack IDE support is ready\n\nhh_server is ready",
+                    "shortMessage": "Hack",
+                    "type": 3,
+                },
+                result=NoResponse(),
+            )
+            .stop_hh_server("Shutdown HH Server")
+            .wait_for_server_request(
+                comment="standalone status when hh_server transitions to stopped",
+                method="window/showStatus",
+                params={
+                    "message": "<ROOT>\n\nHack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: hh_server stopped",
+                    "type": 1,
+                },
+                result=NoResponse(),
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
+    def test_standalone_errors(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("hover.php"))
+        errors_a_uri = self.repo_file_uri("errors_a.php")
+        errors_b_uri = self.repo_file_uri("errors_b.php")
+        variables.update({"errors_a_uri": errors_a_uri, "errors_b_uri": errors_b_uri})
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_standalone_errors"),
+                has_status_capability=True,
+            )
+            .ignore_requests(
+                comment="Ignore all status requests not explicitly waited for in the test",
+                method="window/showStatus",
+                params=None,
+            )
+            .write_to_disk(
+                comment="create file errors_a.php",
+                uri="${errors_a_uri}",
+                contents="<?hh\nfunction aaa(): int { return 1 }\n",
+                notify=False,
+            )
+            .write_to_disk(
+                comment="create file errors_b.php",
+                uri="${errors_b_uri}",
+                contents="<?hh\nfunction bbb(): int { return 2 }\n",
+                notify=False,
+            )
+            .notification(
+                comment="open errors_b.php",
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${errors_b_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "<?hh\nfunction bbb(): int { return 2 }\n",
+                    }
+                },
+            )
+            .notification(
+                comment="open errors_a.php",
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${errors_a_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "<?hh\nfunction aaa(): int { return 1 }\n",
+                    }
+                },
+            )
+            .notification(
+                comment="edit errors_a.php",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${errors_a_uri}", "version": 1},
+                    "contentChanges": [
+                        {
+                            "text": "<?hh\n\n\n\nfunction aaa(): int { return 1 }\n",
+                        }
+                    ],
+                },
+            )
+            .wait_for_notification(
+                comment="standalone should report a squiggle in errors_a.php from serverless",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 4, "character": 31},
+                                "end": {"line": 4, "character": 31},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon ; is expected here.",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .start_hh_server("start HH Server")
+            .wait_for_notification(
+                comment="standalone should report a squiggle in errors_b.php from errors.bin",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_b_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 31},
+                                "end": {"line": 1, "character": 31},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon ; is expected here.",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .start_hh_server("start HH Server")
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                comment="standalone should clean up squiggles - a",
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${errors_a_uri}", "diagnostics": []},
+            )
+            .wait_for_notification(
+                comment="standalone should clean up squiggles - b",
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${errors_b_uri}", "diagnostics": []},
+            )
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
+    def test_live_squiggles(self) -> None:
+        """This tests that "live squiggles" (those from clientIdeDaemon) are correctly
+        produced by didOpen, didChange, codeAction and publishDiagnostics."""
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("hover.php"))
+        errors_a_uri = self.repo_file_uri("errors_a.php")
+        errors_b_uri = self.repo_file_uri("errors_b.php")
+        variables.update({"errors_a_uri": errors_a_uri, "errors_b_uri": errors_b_uri})
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_live_squiggles"),
+            )
+            .write_to_disk(
+                comment="create file errors_a.php",
+                uri="${errors_a_uri}",
+                contents="<?hh\nfunction aaa() { }\n",
+                notify=False,
+            )
+            .notification(
+                comment="open errors_a.php",
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${errors_a_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "<?hh\nfunction aaa() { }\n",
+                    }
+                },
+            )
+            .wait_for_notification(
+                comment="didOpen should report a live squiggle in errors_a.php",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 9},
+                                "end": {"line": 1, "character": 12},
+                            },
+                            "severity": 1,
+                            "code": 4030,
+                            "source": "Hack",
+                            "message": "Was expecting a return type hint",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .notification(
+                comment="change errors_a.php",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${errors_a_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 0},
+                                "end": {"line": 1, "character": 0},
+                            },
+                            "text": "\n",
+                        }
+                    ],
+                },
+            )
+            .wait_for_notification(
+                comment="didChange should update live squiggles in errors_a.php (one line down from what we got in didOpen)",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 9},
+                                "end": {"line": 2, "character": 12},
+                            },
+                            "severity": 1,
+                            "code": 4030,
+                            "source": "Hack",
+                            "message": "Was expecting a return type hint",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .write_to_disk(
+                comment="create file errors_b.php and send didChangeWatchedFiles",
+                uri="${errors_b_uri}",
+                contents="<?hh\nfunction bbb(): int { return 2; }\n",
+                notify=True,
+            )
+            .request(
+                line=line(),
+                comment="send codeAction to trigger errors to be refreshed",
+                method="textDocument/codeAction",
+                params={
+                    "textDocument": {"uri": "${errors_a_uri}"},
+                    "range": {
+                        "start": {"line": 0, "character": 0},
+                        "end": {"line": 0, "character": 0},
+                    },
+                    "context": {"diagnostics": []},
+                },
+                result=[],
+                powered_by="serverless_ide",
+            )
+            .wait_for_notification(
+                comment="codeAction should update live squiggles in errors_a.php (same as what we had from didChange)",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 9},
+                                "end": {"line": 2, "character": 12},
+                            },
+                            "severity": 1,
+                            "code": 4030,
+                            "source": "Hack",
+                            "message": "Was expecting a return type hint",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .notification(
+                method="textDocument/didClose",
+                params={"textDocument": {"uri": "${errors_a_uri}"}},
+            )
+            .wait_for_notification(
+                comment="didClose should update live squiggles in (unsaved) errors_a.php back to what they were on disk",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 9},
+                                "end": {"line": 1, "character": 12},
+                            },
+                            "severity": 1,
+                            "code": 4030,
+                            "source": "Hack",
+                            "message": "Was expecting a return type hint",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                comment="shutdown should clear out live squiggles",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [],
+                },
+            )
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
+    def test_squiggle_sequence(self) -> None:
+        """This tests that diagnostics come at the right time"""
+        variables = self.write_hhconf_and_naming_table()
+        squiggle_sequence_uri = self.repo_file_uri("squiggle_sequence.php")
+        variables.update({"squiggle_sequence_uri": squiggle_sequence_uri})
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_squiggle_sequence"),
+            )
+            .write_to_disk(
+                uri="${squiggle_sequence_uri}",
+                contents="<?hh\nfunction squiggle_sequence_foo(): void {\n\n}\n",
+                notify=False,
             )
             .notification(
                 method="textDocument/didOpen",
                 params={
                     "textDocument": {
-                        "uri": "${php_file_uri}",
+                        "uri": "${squiggle_sequence_uri}",
                         "languageId": "hack",
                         "version": 1,
-                        "text": "${php_file}",
+                        "text": "<?hh\nfunction squiggle_sequence_foo(): void {\n\n}\n",
                     }
                 },
             )
             .request(
                 line=line(),
-                comment="Check type coverage",
-                method="textDocument/typeCoverage",
-                params={"textDocument": {"uri": "${php_file_uri}"}},
+                method="textDocument/codeAction",
+                params={
+                    "textDocument": {"uri": "${squiggle_sequence_uri}"},
+                    "range": {
+                        "start": {"line": 2, "character": 0},
+                        "end": {"line": 2, "character": 0},
+                    },
+                    "context": {"diagnostics": []},
+                },
+                result=[],
+                powered_by="serverless_ide",
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${squiggle_sequence_uri}",
+                    "diagnostics": [],
+                },
+            )
+            .notification(
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${squiggle_sequence_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 0},
+                                "end": {"line": 2, "character": 0},
+                            },
+                            "text": "squiggle_sequence_f",
+                        }
+                    ],
+                },
+            )
+            .request(
+                line=line(),
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${squiggle_sequence_uri}"},
+                    "position": {"line": 2, "character": 11},
+                },
                 result={
-                    "coveredPercent": 100,
-                    "uncoveredRanges": [],
-                    "defaultMessage": "Un-type checked code. Consider adding type annotations.",
+                    "isIncomplete": False,
+                    "items": [],
                 },
                 powered_by="serverless_ide",
             )
-            .request(
-                line=line(),
-                comment="Shutdown",
-                method="shutdown",
-                params={},
-                result=None,
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${squiggle_sequence_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 19},
+                                "end": {"line": 3, "character": 0},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon ; is expected here.",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        }
+                    ],
+                },
             )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
-    def test_status_stopped(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("hover.php")
-        self.test_driver.stop_hh_server()
+    def test_parsing_squiggles_priority(self) -> None:
+        """This tests that parsing squiggles suppress typing squiggles from clientIdeDaemon"""
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("hover.php"))
+        errors_a_uri = self.repo_file_uri("errors_a.php")
+        variables.update({"errors_a_uri": errors_a_uri})
 
         spec = (
             self.initialize_spec(
-                LspTestSpec("status_stopped"),
-                use_serverless_ide=False,
-                supports_status=True,
+                LspTestSpec("test_parsing_squiggles_priority"),
+            )
+            .write_to_disk(
+                comment="create file errors_a.php",
+                uri="${errors_a_uri}",
+                contents="<?hh\nfunction aaa(): int { return $undefined }\n",
+                notify=False,
+            )
+            .notification(
+                comment="open errors_a.php",
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${errors_a_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "<?hh\nfunction aaa(): int { return $undefined }\n",
+                    }
+                },
+            )
+            .wait_for_notification(
+                comment="didOpen should report only a parsing squiggle in errors_a.php",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 40},
+                                "end": {"line": 1, "character": 40},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon ; is expected here.",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .notification(
+                comment="change errors_a.php",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${errors_a_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 39},
+                                "end": {"line": 1, "character": 39},
+                            },
+                            "text": ";",
+                        }
+                    ],
+                },
+            )
+            .wait_for_notification(
+                comment="didChange should update live squiggles in errors_a.php (now revealing the typing error)",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 29},
+                                "end": {"line": 1, "character": 39},
+                            },
+                            "severity": 1,
+                            "code": 2050,
+                            "source": "Hack",
+                            "message": "Variable $undefined is undefined, or not always defined.",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                comment="shutdown should clear out live squiggles",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [],
+                },
+            )
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
+    def test_serverless_ide_falls_back_to_full_index(self) -> None:
+        # Test recovery behavior when we fail to load a naming table, but we're
+        # permitted to fall back to the full index naming table build.
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("hover.php"))
+        assert "naming_table_saved_state_path" in variables
+        variables["naming_table_saved_state_path"] = "/tmp/nonexistent"
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_falls_back_to_full_index"),
+                has_status_capability=True,
+                wait_for_init_done=False,
+            )
+            .ignore_requests(
+                comment="Ignore all status requests not explicitly waited for in the test",
+                method="window/showStatus",
+                params=None,
             )
             .wait_for_server_request(
+                comment="standalone status upon startup when it starts with hh_server stopped",
                 method="window/showStatus",
                 params={
-                    "shortMessage": "Hack: stopped",
-                    "message": "hh_server: stopped.",
-                    "actions": [{"title": "Restart hh_server"}],
+                    "message": "<ROOT>\n\nHack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: hh_server stopped",
                     "type": 1,
                 },
                 result=NoResponse(),
@@ -6764,188 +6335,15 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=False)
-
-    def test_status_running(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("hover.php")
-
-        spec = (
-            self.initialize_spec(
-                LspTestSpec("status_running"),
-                use_serverless_ide=False,
-                supports_status=True,
-            )
-            .ignore_requests(
-                comment="Ignore initializing... requests since they're racy",
-                method="window/showStatus",
-                params={
-                    "type": 2,
-                    "shortMessage": "Hack: initializing",
-                    "message": "hh_server initializing: processing [<test> seconds]",
-                    "actions": [],
-                },
-            )
-            .wait_for_server_request(
-                method="window/showStatus",
-                params={"actions": [], "message": "hh_server: ready.", "type": 3},
-                result=NoResponse(),
-            )
-            .request(line=line(), method="shutdown", params={}, result=None)
-            .notification(method="exit", params={})
+        self.run_spec(
+            spec,
+            variables,
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
-    def test_serverless_ide_status_stopped(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
-        variables.update(self.setup_php_file("hover.php"))
-        self.test_driver.stop_hh_server()
-
-        spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_status_stopped"),
-                use_serverless_ide=True,
-                supports_status=True,
-            )
-            .ignore_requests(
-                comment="ignore initializing... messages since they're kind of racy",
-                method="window/showStatus",
-                params={
-                    "type": 2,
-                    "actions": [{"title": "Restart hh_server"}],
-                    "message": "Hack IDE: initializing.\nhh_server: stopped.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="another racy initialization to ignore, before hh_server has even reported its status",
-                method="window/showStatus",
-                params={
-                    "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="another racy initialization to ignore, again before hh_server",
-                method="window/showStatus",
-                params={
-                    "type": 3,
-                    "actions": [],
-                    "message": "Hack IDE: ready.",
-                    "shortMessage": "Hack: ready",
-                },
-            )
-            .wait_for_server_request(
-                method="window/showStatus",
-                params={
-                    "message": "Hack IDE: ready.\nhh_server: stopped.",
-                    "shortMessage": "Hack: ready",
-                    "actions": [{"title": "Restart hh_server"}],
-                    "type": 3,
-                },
-                result=NoResponse(),
-            )
-            .request(line=line(), method="shutdown", params={}, result=None)
-            .notification(method="exit", params={})
-        )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
-
-    def test_serverless_ide_status_restart(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
-        variables.update(self.setup_php_file("hover.php"))
-
-        spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_status_restart"),
-                use_serverless_ide=True,
-                supports_status=True,
-            )
-            .ignore_requests(
-                comment="Ignore initializing messages since they're racy",
-                method="window/showStatus",
-                params={
-                    "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.\nhh_server initializing: processing [<test> seconds]",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="Another form of initializing to ignore",
-                method="window/showStatus",
-                params={
-                    "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.\nhh_server: ready.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="Another form of initializing to ignore before we've even heard the first peep from hh_server",
-                method="window/showStatus",
-                params={
-                    "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="another racy initialization to ignore, again before hh_server",
-                method="window/showStatus",
-                params={
-                    "type": 3,
-                    "actions": [],
-                    "message": "Hack IDE: ready.",
-                    "shortMessage": "Hack: ready",
-                },
-            )
-            .wait_for_server_request(
-                method="window/showStatus",
-                params={
-                    "actions": [],
-                    "message": "Hack IDE: ready.\nhh_server: ready.",
-                    "shortMessage": "Hack: ready",
-                    "type": 3,
-                },
-                result=NoResponse(),
-            )
-            .request(
-                line=line(),
-                method="$test/shutdownServerlessIde",
-                params={},
-                result=None,
-                powered_by="serverless_ide",
-            )
-            .wait_for_server_request(
-                method="window/showStatus",
-                params={
-                    "actions": [{"title": "Restart Hack IDE"}],
-                    "message": "Hack IDE has failed. See Output›Hack for details.\nhh_server: ready.",
-                    "shortMessage": "Hack: failed",
-                    "type": 1,
-                },
-                result={"title": "Restart Hack IDE"},
-            )
-            .wait_for_server_request(
-                method="window/showStatus",
-                params={
-                    "actions": [],
-                    "message": "Hack IDE: ready.\nhh_server: ready.",
-                    "shortMessage": "Hack: ready",
-                    "type": 3,
-                },
-                result=NoResponse(),
-            )
-            .request(line=line(), method="shutdown", params={}, result=None)
-            .notification(method="exit", params={})
-        )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
-
-    def test_serverless_ide_failed_to_load_saved_state(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+    def test_serverless_ide_failed_to_load_saved_state_no_full_index(self) -> None:
+        # This test examines the failure behavior when the naming table is
+        # non-existent and we are *not* falling back to full index.
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("hover.php"))
         assert "naming_table_saved_state_path" in variables
         variables["naming_table_saved_state_path"] = "/tmp/nonexistent"
@@ -6953,63 +6351,33 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         spec = (
             self.initialize_spec(
                 LspTestSpec("serverless_ide_status_failed_to_load_saved_state"),
-                use_serverless_ide=True,
-                supports_status=True,
-                supports_init=True,
+                has_status_capability=True,
+                wait_for_init_done=False,
             )
             .ignore_requests(
-                comment="Ignore initializing since they're kind of racy",
+                comment="Ignore all status requests not explicitly waited for in the test",
                 method="window/showStatus",
-                params={
-                    "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.\nhh_server initializing: processing [<test> seconds]",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="Ignore another form of initializing",
-                method="window/showStatus",
-                params={
-                    "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.\nhh_server: ready.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="Ignore another form of initializing, from before we've even heard the first peep out of hh_server",
-                method="window/showStatus",
-                params={
-                    "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="Ignore another form of initializing, again before hh_server",
-                method="window/showStatus",
-                params={
-                    "type": 1,
-                    "actions": [{"title": "Restart Hack IDE"}],
-                    "message": "Hack IDE has failed. See Output›Hack for details.",
-                    "shortMessage": "Hack: failed",
-                },
+                params=None,
             )
             .wait_for_notification(
                 method="window/logMessage",
                 params={
                     "type": 1,
-                    "message": "Hack IDE has failed.\nThis is unexpected.\nPlease file a bug within your IDE.\nMore details: http://dummy/HH_TEST_MODE",
+                    "message": "A watchman fault stops Hack from working.\nThis is not a bug in Hack or VSCode.\nConsider consulting Watchman Users group for advice.\nMore details: http://dummy/HH_TEST_MODE",
+                },
+            )
+            .wait_for_notification(
+                method="window/showMessage",
+                params={
+                    "type": 1,
+                    "message": "A watchman fault stops Hack from working. See Output\u203aHack for details.",
                 },
             )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "actions": [{"title": "Restart Hack IDE"}],
-                    "message": "Hack IDE has failed. See Output›Hack for details.\nhh_server: ready.",
-                    "shortMessage": "Hack: failed",
+                    "message": "<ROOT>\n\nA watchman fault stops Hack from working. See Output\u203aHack for details.\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: watchman fault",
                     "type": 1,
                 },
                 result=NoResponse(),
@@ -7017,16 +6385,31 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
+        # By setting `fall_back_to_full_index` to `False`, the IDE will give up once it fails to load a saved state instead of attempting the naming table build.
+        self.run_spec(
+            spec,
+            variables,
+            fall_back_to_full_index=False,
+        )
 
     def test_workspace_symbol(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("didchange.php")
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("didchange.php"))
         spec = (
-            self.initialize_spec(
-                LspTestSpec("test_workspace_symbol"), use_serverless_ide=False
+            self.initialize_spec(LspTestSpec("test_workspace_symbol"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .notification(
+                comment="LocalIndex doesn't have any names in its SymbolIndex, so let's index these files...",
+                method="workspace/didChangeWatchedFiles",
+                params={
+                    "changes": [
+                        {
+                            "uri": "file://${root_path}/completion_extras_namespace.php",
+                            "type": 2,
+                        }
+                    ]
+                },
             )
-            .wait_for_hh_server_ready()
             .request(
                 line=line(),
                 comment="Look up symbols",
@@ -7045,217 +6428,15 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                         },
                     }
                 ],
-            )
-            .request(
-                line=line(),
-                comment="Look up symbols starting with 'test_f' within multiple namespaces",
-                method="workspace/symbol",
-                params={"query": "test_f"},
-                result=[
-                    {
-                        "name": "test_function",
-                        "kind": 12,
-                        "location": {
-                            "uri": "file://${root_path}/completion.php",
-                            "range": {
-                                "start": {"line": 7, "character": 9},
-                                "end": {"line": 7, "character": 22},
-                            },
-                        },
-                    },
-                    {
-                        "name": "TestNS\\test_func",
-                        "kind": 12,
-                        "location": {
-                            "uri": "file://${root_path}/completion_extras_namespace.php",
-                            "range": {
-                                "start": {"line": 4, "character": 9},
-                                "end": {"line": 4, "character": 25},
-                            },
-                        },
-                    },
-                ],
+                powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
-
-    def test_serverless_ide_during_hh_server_restart(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
-        variables.update(self.setup_php_file("didchange.php"))
-        spec = (
-            self.initialize_spec(
-                LspTestSpec("test_serverless_ide_during_hh_server_restart"),
-                use_serverless_ide=True,
-            )
-            .notification(
-                method="textDocument/didOpen",
-                params={
-                    "textDocument": {
-                        "uri": "${php_file_uri}",
-                        "languageId": "hack",
-                        "version": 1,
-                        "text": "${php_file}",
-                    }
-                },
-            )
-            .notification(
-                comment="Send a 'didChange' notification before HH Server is functional.",
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "contentChanges": [
-                        {
-                            "range": {
-                                "start": {"line": 7, "character": 9},
-                                "end": {"line": 7, "character": 11},
-                            },
-                            "text": "'foo'",
-                        }
-                    ],
-                },
-            )
-            .start_hh_server("Start HH Server; should detect the bad edit")
-            .wait_for_notification(
-                method="textDocument/publishDiagnostics",
-                params={
-                    "uri": "${php_file_uri}",
-                    "diagnostics": [
-                        {
-                            "code": 4110,
-                            "message": "Invalid return type",
-                            "range": {
-                                "end": {"character": 14, "line": 7},
-                                "start": {"character": 9, "line": 7},
-                            },
-                            "relatedInformation": [
-                                {
-                                    "location": {
-                                        "range": {
-                                            "end": {"character": 27, "line": 6},
-                                            "start": {"character": 24, "line": 6},
-                                        },
-                                        "uri": "${php_file_uri}",
-                                    },
-                                    "message": "Expected int",
-                                },
-                                {
-                                    "location": {
-                                        "range": {
-                                            "end": {"character": 14, "line": 7},
-                                            "start": {"character": 9, "line": 7},
-                                        },
-                                        "uri": "${php_file_uri}",
-                                    },
-                                    "message": "But got string",
-                                },
-                            ],
-                            "relatedLocations": [
-                                {
-                                    "location": {
-                                        "range": {
-                                            "end": {"character": 27, "line": 6},
-                                            "start": {"character": 24, "line": 6},
-                                        },
-                                        "uri": "${php_file_uri}",
-                                    },
-                                    "message": "Expected int",
-                                },
-                                {
-                                    "location": {
-                                        "range": {
-                                            "end": {"character": 14, "line": 7},
-                                            "start": {"character": 9, "line": 7},
-                                        },
-                                        "uri": "${php_file_uri}",
-                                    },
-                                    "message": "But got string",
-                                },
-                            ],
-                            "severity": 1,
-                            "source": "Hack",
-                        }
-                    ],
-                },
-            )
-            .stop_hh_server("Shutdown HH Server")
-            .start_hh_server("Restart HH Server")
-            .wait_for_notification(
-                comment="On startup it thinks everything is okay ...",
-                method="textDocument/publishDiagnostics",
-                params={"uri": "${php_file_uri}", "diagnostics": []},
-            )
-            .wait_for_notification(
-                comment="But then hh_server sends a hello message and it gets the edited files, which leads it to see the problem.",
-                method="textDocument/publishDiagnostics",
-                params={
-                    "uri": "${php_file_uri}",
-                    "diagnostics": [
-                        {
-                            "code": 4110,
-                            "message": "Invalid return type",
-                            "range": {
-                                "end": {"character": 14, "line": 7},
-                                "start": {"character": 9, "line": 7},
-                            },
-                            "relatedInformation": [
-                                {
-                                    "location": {
-                                        "range": {
-                                            "end": {"character": 27, "line": 6},
-                                            "start": {"character": 24, "line": 6},
-                                        },
-                                        "uri": "${php_file_uri}",
-                                    },
-                                    "message": "Expected int",
-                                },
-                                {
-                                    "location": {
-                                        "range": {
-                                            "end": {"character": 14, "line": 7},
-                                            "start": {"character": 9, "line": 7},
-                                        },
-                                        "uri": "${php_file_uri}",
-                                    },
-                                    "message": "But got string",
-                                },
-                            ],
-                            "relatedLocations": [
-                                {
-                                    "location": {
-                                        "range": {
-                                            "end": {"character": 27, "line": 6},
-                                            "start": {"character": 24, "line": 6},
-                                        },
-                                        "uri": "${php_file_uri}",
-                                    },
-                                    "message": "Expected int",
-                                },
-                                {
-                                    "location": {
-                                        "range": {
-                                            "end": {"character": 14, "line": 7},
-                                            "start": {"character": 9, "line": 7},
-                                        },
-                                        "uri": "${php_file_uri}",
-                                    },
-                                    "message": "But got string",
-                                },
-                            ],
-                            "severity": 1,
-                            "source": "Hack",
-                        }
-                    ],
-                },
-            )
-            .request(line=line(), method="shutdown", params={}, result=None)
-            .notification(method="exit", params={})
-        )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_naming_error1(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("didchange.php"))
         variables.update(
             {
@@ -7271,9 +6452,7 @@ function main(): int {
             }
         )
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_naming_error1"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_naming_error1"))
             .write_to_disk(
                 uri="${main_file}", contents="${main_file_contents}", notify=True
             )
@@ -7288,6 +6467,38 @@ function main(): int {
                     }
                 },
             )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "file://${main_file}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 11},
+                                "end": {"line": 2, "character": 14},
+                            },
+                            "severity": 1,
+                            "code": 2049,
+                            "source": "Hack",
+                            "message": "Unbound name: aaa (a global function)",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 11},
+                                "end": {"line": 2, "character": 14},
+                            },
+                            "severity": 1,
+                            "code": 4107,
+                            "source": "Hack",
+                            "message": "Unbound name (typing): aaa",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
+                    ],
+                },
+            )
             .request(
                 line=line(),
                 comment="Ensure that hover over `aaa` works even when the name is not yet defined",
@@ -7297,7 +6508,7 @@ function main(): int {
                     "position": {"line": 2, "character": 13},
                 },
                 result={
-                    "contents": [{"language": "hack", "value": "_"}],
+                    "contents": [{"language": "hack", "value": "nothing"}],
                     "range": {
                         "start": {"line": 2, "character": 11},
                         "end": {"line": 2, "character": 14},
@@ -7388,13 +6599,16 @@ function aaa(): string {
                 powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={"uri": "file://${main_file}", "diagnostics": []},
+            )
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_naming_error2(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
-        self.test_driver.stop_hh_server()
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("naming_error_caller.php"))
         variables.update(
             {
@@ -7404,9 +6618,7 @@ function aaa(): string {
             }
         )
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_naming_error2"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_naming_error2"))
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -7417,6 +6629,10 @@ function aaa(): string {
                         "text": "${php_file}",
                     }
                 },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${php_file_uri}", "diagnostics": []},
             )
             .write_to_disk(
                 comment="create copy",
@@ -7452,11 +6668,10 @@ function aaa(): string {
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_naming_error3(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
-        self.test_driver.stop_hh_server()
+        variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("naming_error_caller.php"))
         variables.update(
             {
@@ -7466,9 +6681,7 @@ function aaa(): string {
             }
         )
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_naming_error3"), use_serverless_ide=True
-            )
+            self.initialize_spec(LspTestSpec("serverless_ide_naming_error3"))
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -7479,6 +6692,10 @@ function aaa(): string {
                         "text": "${php_file}",
                     }
                 },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${php_file_uri}", "diagnostics": []},
             )
             .write_to_disk(
                 comment="create copy",
@@ -7514,56 +6731,38 @@ function aaa(): string {
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_requests_before_init(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
-        variables["root_path"] = self.test_driver.repo_dir
-        self.test_driver.stop_hh_server()
+        variables = self.write_hhconf_and_naming_table()
 
         spec = (
             self.initialize_spec(
                 LspTestSpec("test_serverless_ide_requests_before_init"),
-                use_serverless_ide=True,
-                supports_status=True,
-                supports_init=True,
+                has_status_capability=True,
+                wait_for_init_done=False,
             )
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .ignore_requests(
-                comment="Ignore 'initializing...' messages since they're racy",
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "actions": [{"title": "Restart hh_server"}],
-                    "message": "Hack IDE: initializing.\nhh_server: stopped.",
+                    "message": "<ROOT>\n\nHack IDE support is initializing (loading saved state)\n\nhh_server is stopped. Try running `hh` at the command-line.",
                     "shortMessage": "Hack: initializing",
                 },
             )
             .ignore_requests(
-                comment="another racy initialization, before we've yet heard from hh_server",
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "actions": [],
-                    "message": "Hack IDE: initializing.",
-                    "shortMessage": "Hack: initializing",
-                },
-            )
-            .ignore_requests(
-                comment="another racy initialization, if HackIDE is done before hh_server has yet sent status",
-                method="window/showStatus",
-                params={
-                    "type": 3,
-                    "actions": [],
-                    "message": "Hack IDE: ready.",
-                    "shortMessage": "Hack: ready",
+                    "message": "<ROOT>\n\nHack is working on IDE requests\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: hh_server stopped",
                 },
             )
             .write_to_disk(
                 notify=True,
-                wait=False,
                 uri="file://${root_path}/beforeInit1.php",
-                contents="<?hh // strict\nfunction beforeInit1(): int {\n  return 42;\n}\n",
+                contents="<?hh\nfunction beforeInit1(): int {\n  return 42;\n}\n",
             )
             .notification(
                 comment="open a file before init has finished",
@@ -7573,7 +6772,7 @@ function aaa(): string {
                         "uri": "file://${root_path}/beforeInit2.php",
                         "languageId": "hack",
                         "version": 1,
-                        "text": "<?hh // strict\nfunction beforeInit2(): void {\n  $foo = beforeInit1();\n}\n",
+                        "text": "<?hh\nfunction beforeInit2(): void {\n  $foo = beforeInit1();\n}\n",
                     }
                 },
             )
@@ -7599,26 +6798,26 @@ function aaa(): string {
                         "location": {
                             "uri": "file://${root_path}/beforeInit2.php",
                             "range": {
-                                "start": {"line": 1, "character": 0},
+                                "start": {"line": 1, "character": 9},
                                 "end": {"line": 3, "character": 1},
                             },
                         },
+                        "detail": "function(): void",
                     }
                 ],
                 powered_by="serverless_ide",
             )
             .wait_for_notification(
-                comment="wait for sIDE to init",
+                comment="wait for clientIdeDaemon to init",
                 method="telemetry/event",
                 params={"type": 4, "message": "[client-ide] Finished init: ok"},
             )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "actions": [{"title": "Restart hh_server"}],
-                    "message": "Hack IDE: ready.\nhh_server: stopped.",
-                    "shortMessage": "Hack: ready",
-                    "type": 3,
+                    "type": 1,
+                    "message": "<ROOT>\n\nHack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: hh_server stopped",
                 },
                 result=NoResponse(),
             )
@@ -7643,20 +6842,25 @@ function aaa(): string {
             .notification(method="exit", params={})
         )
 
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
 
     def test_serverless_ide_workspace_symbol(self) -> None:
-        variables = dict(self.prepare_serverless_ide_environment())
-        variables["root_path"] = self.test_driver.repo_dir
-        self.test_driver.stop_hh_server()
+        variables = self.write_hhconf_and_naming_table()
 
         spec = (
-            self.initialize_spec(
-                LspTestSpec("serverless_ide_workspace_symbol"), use_serverless_ide=True
+            self.initialize_spec(LspTestSpec("serverless_ide_workspace_symbol"))
+            .notification(
+                comment="LocalIndex doesn't have any names in its SymbolIndex, so let's index this file...",
+                method="workspace/didChangeWatchedFiles",
+                params={
+                    "changes": [
+                        {"uri": "file://${root_path}/definition.php", "type": 2}
+                    ]
+                },
             )
             .request(
                 line=line(),
-                comment="workspace symbol call, global, powered by sqlite (generated during serverless-ide-init)",
+                comment="workspace symbol call, global (derived from SymbolIndex)",
                 method="workspace/symbol",
                 params={"query": "TakesString"},
                 result=[
@@ -7676,7 +6880,7 @@ function aaa(): string {
             )
             .request(
                 line=line(),
-                comment="workspace symbol call, member (derived from naming-table)",
+                comment="workspace symbol call, member (derived from SymbolIndex followed by naming-table)",
                 method="workspace/symbol",
                 params={"query": "TakesString::"},
                 result=[
@@ -7697,4 +6901,1274 @@ function aaa(): string {
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+        self.run_spec(spec, variables)
+
+    def test_errors_before_init(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update({"php_file_uri": self.repo_file_uri("php_file.php")})
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("errors_before_init"),
+                wait_for_init_done=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "<?hh\nfunction f(): int { return 1 }\n",
+                    }
+                },
+            )
+            .wait_for_notification(
+                method="telemetry/event",
+                params={"type": 4, "message": "[client-ide] Finished init: ok"},
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 29},
+                                "end": {"line": 1, "character": 29},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon ; is expected here.",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="the codeAction request will push diagnostics if they've not already been pushed",
+                line=line(),
+                method="textDocument/codeAction",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "range": {
+                        "start": {"line": 0, "character": 0},
+                        "end": {"line": 0, "character": 0},
+                    },
+                    "context": {"diagnostics": []},
+                },
+                result=[],
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${php_file_uri}", "diagnostics": []},
+            )
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
+    def test_skip_errors(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update({"php_file_uri": self.repo_file_uri("php_file.php")})
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("skip_errors"),
+                wait_for_init_done=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "<?hh\nfunction f(): int { return 1 }\n",
+                    }
+                },
+            )
+            .notification(
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 0},
+                                "end": {"line": 1, "character": 30},
+                            },
+                            "text": "function f(): int { return 12 }",
+                        }
+                    ],
+                },
+            )
+            .notification(
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 0},
+                                "end": {"line": 1, "character": 31},
+                            },
+                            "text": "function f(): int { return 123 }",
+                        }
+                    ],
+                },
+            )
+            .wait_for_notification(
+                method="telemetry/event",
+                params={"type": 4, "message": "[client-ide] Finished init: ok"},
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 31},
+                                "end": {"line": 1, "character": 31},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon ; is expected here.",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        }
+                    ],
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${php_file_uri}", "diagnostics": []},
+            )
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
+    def test_toplevel_statements(self) -> None:
+        """
+        regression test for:
+        - T170543625: presence of a top-level statement shouldn't suppress type errors in the rest of the file
+        - T170543963: type errors within top-level statements should be shown
+        """
+        variables = self.write_hhconf_and_naming_table()
+        file_base_name = "toplevel_statements.php"
+        php_file_uri = self.repo_file_uri(file_base_name)
+        contents = """<?hh
+
+$x = 3;
+$x + 1;     // OK
+$x + true; // should be an error here
+
+function expect_type_errors_inside(): void {
+  3 + true; // should be an error here
+}
+"""
+        variables.update({"php_file_uri": php_file_uri, "contents": contents})
+        spec = (
+            self.initialize_spec(LspTestSpec("toplevel_statements"))
+            .write_to_disk(
+                comment="create file ${file_base_name}",
+                uri="${php_file_uri}",
+                contents="${contents}",
+                notify=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${contents}",
+                    }
+                },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 0},
+                                "end": {"line": 2, "character": 7},
+                            },
+                            "severity": 1,
+                            "code": 2128,
+                            "source": "Hack",
+                            "message": "Hack does not support top level statements. Use the __EntryPoint attribute on a function instead",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 7},
+                            },
+                            "severity": 1,
+                            "code": 2128,
+                            "source": "Hack",
+                            "message": "Hack does not support top level statements. Use the __EntryPoint attribute on a function instead",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 4, "character": 0},
+                                "end": {"line": 4, "character": 10},
+                            },
+                            "severity": 1,
+                            "code": 2128,
+                            "source": "Hack",
+                            "message": "Hack does not support top level statements. Use the __EntryPoint attribute on a function instead",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 4, "character": 5},
+                                "end": {"line": 4, "character": 9},
+                            },
+                            "severity": 1,
+                            "code": 4429,
+                            "source": "Hack",
+                            "message": "Typing error",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 4, "character": 0},
+                                            "end": {"line": 4, "character": 9},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 4, "character": 5},
+                                            "end": {"line": 4, "character": 9},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 4, "character": 0},
+                                            "end": {"line": 4, "character": 9},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 4, "character": 5},
+                                            "end": {"line": 4, "character": 9},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 7, "character": 6},
+                                "end": {"line": 7, "character": 10},
+                            },
+                            "severity": 1,
+                            "code": 4429,
+                            "source": "Hack",
+                            "message": "Typing error",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 7, "character": 2},
+                                            "end": {"line": 7, "character": 10},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 7, "character": 6},
+                                            "end": {"line": 7, "character": 10},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 7, "character": 2},
+                                            "end": {"line": 7, "character": 10},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 7, "character": 6},
+                                            "end": {"line": 7, "character": 10},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                comment="shutdown should clear out live squiggles",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [],
+                },
+            )
+        )
+        self.run_spec(spec, variables)
+
+    def test_toplevel_statements_await(self) -> None:
+        """
+        regression test for:
+        - T171537862: presence of a top-level await shouldn't suppress type errros in the rest of the file
+        - T170614550: correct type errors for top-level statements (`$await gen_int()` + true should error)
+        """
+        variables = self.write_hhconf_and_naming_table()
+        file_base_name = "toplevel_statements.php"
+        php_file_uri = self.repo_file_uri(file_base_name)
+        contents = """<?hh
+$b = await async_bool();
+$b + 1; // should be a type error here
+async function async_bool(): Awaitable<bool> {
+    return true;
+}
+
+function expect_type_errors_inside(): void {
+3 + true; // should be a type error here
+}
+"""
+        variables.update({"php_file_uri": php_file_uri, "contents": contents})
+        spec = (
+            self.initialize_spec(LspTestSpec("toplevel_statements"))
+            .write_to_disk(
+                comment="create file ${file_base_name}",
+                uri="${php_file_uri}",
+                contents="${contents}",
+                notify=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${contents}",
+                    }
+                },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 0},
+                                "end": {"line": 1, "character": 24},
+                            },
+                            "severity": 1,
+                            "code": 2128,
+                            "source": "Hack",
+                            "message": "Hack does not support top level statements. Use the __EntryPoint attribute on a function instead",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 0},
+                                "end": {"line": 2, "character": 7},
+                            },
+                            "severity": 1,
+                            "code": 2128,
+                            "source": "Hack",
+                            "message": "Hack does not support top level statements. Use the __EntryPoint attribute on a function instead",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 2, "character": 0},
+                                "end": {"line": 2, "character": 2},
+                            },
+                            "severity": 1,
+                            "code": 4429,
+                            "source": "Hack",
+                            "message": "Typing error",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 2, "character": 0},
+                                            "end": {"line": 2, "character": 6},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 3, "character": 39},
+                                            "end": {"line": 3, "character": 43},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 2, "character": 0},
+                                            "end": {"line": 2, "character": 6},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 3, "character": 39},
+                                            "end": {"line": 3, "character": 43},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 8, "character": 4},
+                                "end": {"line": 8, "character": 8},
+                            },
+                            "severity": 1,
+                            "code": 4429,
+                            "source": "Hack",
+                            "message": "Typing error",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 8, "character": 0},
+                                            "end": {"line": 8, "character": 8},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 8, "character": 4},
+                                            "end": {"line": 8, "character": 8},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 8, "character": 0},
+                                            "end": {"line": 8, "character": 8},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 8, "character": 4},
+                                            "end": {"line": 8, "character": 8},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                comment="shutdown should clear out live squiggles",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [],
+                },
+            )
+        )
+        self.run_spec(spec, variables)
+
+    def test_notebook_mode(self) -> None:
+        """
+        When `--notebook-mode` is passed to `hh lsp`:
+        - There should be NO parse errors for top-level statements
+        - There should be NO error for top-level await
+        - If HHVM is paused at a breakpoint, there should be no undefined vars
+        when not stopped at a breakpoint
+        """
+        try:
+            # Ensure magic file not present.
+            # See also `test_notebook_mode_at_breakpoint`, where we test the behavior when
+            # the magic file is present.
+            os.remove(_HHVM_IS_PAUSED_FILE)
+        except FileNotFoundError:
+            pass
+        variables = self.write_hhconf_and_naming_table()
+        file_base_name = "notebook_mode.php"
+        php_file_uri = self.repo_file_uri(file_base_name)
+        contents = r"""<?hh
+
+async function gen_bool(): Awaitable<bool> {
+    return true;
+}
+$s = "";                // OK top-level statement, because we pass '--notebook-mode' to the LSP
+$s + 3;                 // Error, expected num but got string
+$i = await gen_bool();  // OK top-level await, because we pass '--notebook-mode' to the LSP
+$i + 3;                 // Error, expected num but got bool
+echo $undefined_var;
+class :el {
+  public function __construct(
+    public darray<string,mixed> $x, // Attributes
+    public varray<mixed> $y, // Children
+    public string $z, // Filename
+    public int $s, // Line number
+  ) {}
+}
+<el />;
+
+"""
+        variables.update({"php_file_uri": php_file_uri, "contents": contents})
+        spec = (
+            self.initialize_spec(LspTestSpec("notebook_mode"))
+            .write_to_disk(
+                comment="create file ${file_base_name}",
+                uri="${php_file_uri}",
+                contents="${contents}",
+                notify=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${contents}",
+                    }
+                },
+            )
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 9, "character": 5},
+                                "end": {"line": 9, "character": 19},
+                            },
+                            "severity": 1,
+                            "code": 2050,
+                            "source": "Hack",
+                            "message": "Variable $undefined_var is undefined, or not always defined.",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 5, "character": 0},
+                                            "end": {"line": 5, "character": 7},
+                                        },
+                                    },
+                                    "message": "Did you mean $s instead?",
+                                }
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 5, "character": 0},
+                                            "end": {"line": 5, "character": 7},
+                                        },
+                                    },
+                                    "message": "Did you mean $s instead?",
+                                }
+                            ],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 6, "character": 0},
+                                "end": {"line": 6, "character": 2},
+                            },
+                            "severity": 1,
+                            "code": 4429,
+                            "source": "Hack",
+                            "message": "Typing error",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 6, "character": 0},
+                                            "end": {"line": 6, "character": 6},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 5, "character": 5},
+                                            "end": {"line": 5, "character": 7},
+                                        },
+                                    },
+                                    "message": "But got string",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 6, "character": 0},
+                                            "end": {"line": 6, "character": 6},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 5, "character": 5},
+                                            "end": {"line": 5, "character": 7},
+                                        },
+                                    },
+                                    "message": "But got string",
+                                },
+                            ],
+                        },
+                        {
+                            "range": {
+                                "start": {"line": 8, "character": 0},
+                                "end": {"line": 8, "character": 2},
+                            },
+                            "severity": 1,
+                            "code": 4429,
+                            "source": "Hack",
+                            "message": "Typing error",
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 8, "character": 0},
+                                            "end": {"line": 8, "character": 6},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 2, "character": 37},
+                                            "end": {"line": 2, "character": 41},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 8, "character": 0},
+                                            "end": {"line": 8, "character": 6},
+                                        },
+                                    },
+                                    "message": "Expected num because this is used in an arithmetic operation",
+                                },
+                                {
+                                    "location": {
+                                        "uri": "${php_file_uri}",
+                                        "range": {
+                                            "start": {"line": 2, "character": 37},
+                                            "end": {"line": 2, "character": 41},
+                                        },
+                                    },
+                                    "message": "But got bool",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                comment="shutdown should clear out live squiggles",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [],
+                },
+            )
+        )
+        self.run_spec(spec, variables, lsp_extra_args=["--notebook-mode"])
+
+    def test_toplevel_statements_package(self) -> None:
+        """
+        Regression test: top-level statements should get their package based on
+        the file path, not None.
+
+        When the synthesized function wrapping top-level statements has the
+        correct package (derived from the file path), cross-package access is
+        allowed when the file's package includes the target package.
+
+        With fd_package = None (the old behavior), the top-level statement
+        would be in "the default package" which doesn't include pkg_b,
+        producing a spurious cross-package error (4472).
+        """
+        repo_dir = self.test_driver.repo_dir
+
+        os.makedirs(os.path.join(repo_dir, "a"), exist_ok=True)
+        os.makedirs(os.path.join(repo_dir, "b"), exist_ok=True)
+
+        with open(os.path.join(repo_dir, "PACKAGES.toml"), "w") as f:
+            f.write(
+                """\
+[packages]
+[packages.pkg_a]
+include_paths=["//a/"]
+includes=["pkg_b"]
+
+[packages.pkg_b]
+include_paths=["//b/"]
+
+[deployments]
+"""
+            )
+
+        # Create target function in pkg_b
+        with open(os.path.join(repo_dir, "b", "target.php"), "w") as f:
+            f.write("<?hh\nfunction target_fn_in_pkg_b(): int {\n    return 42;\n}\n")
+
+        variables = self.write_hhconf_and_naming_table()
+        file_base_name = "a/caller.php"
+        php_file_uri = self.repo_file_uri(file_base_name)
+        contents = "<?hh\n$x = target_fn_in_pkg_b();\n"
+        variables.update({"php_file_uri": php_file_uri, "contents": contents})
+
+        spec = (
+            self.initialize_spec(LspTestSpec("toplevel_statements_package"))
+            .write_to_disk(
+                comment="create caller file with top-level statement",
+                uri="${php_file_uri}",
+                contents="${contents}",
+                notify=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${contents}",
+                    }
+                },
+            )
+            .wait_for_notification(
+                comment="expect only the 2128 top-level-statement error, "
+                "no 4472 cross-package error (because pkg_a includes pkg_b)",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 0},
+                                "end": {"line": 1, "character": 26},
+                            },
+                            "severity": 1,
+                            "code": 2128,
+                            "source": "Hack",
+                            "message": "Hack does not support top level statements. Use the __EntryPoint attribute on a function instead",
+                            "relatedInformation": [],
+                            "relatedLocations": [],
+                        },
+                    ],
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                comment="shutdown should clear diagnostics",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [],
+                },
+            )
+        )
+        self.run_spec(spec, variables)
+
+    def test_file_outline_detail(self) -> None:
+        """
+        Test that file outline symbols contain [the `detail` field](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#documentSymbol), where applicable.
+        Afaict this field isn't user-visible in VSCode. Our use case is to provide additional context to AI code assist tooling.
+        The key piece of information not already provided is the type hints from the definition site, but we also include additional information that may help tooling,
+        such as parameter names of functions and methods.
+        """
+        variables = self.write_hhconf_and_naming_table()
+        file_base_name = "file_outline.php"
+        php_file_uri = self.repo_file_uri(file_base_name)
+        contents = """<?hh
+class CC {
+  public static abstract final readonly int $prop;
+  const type T = int;
+  const vec<int> NUMBERS = vec[1, 2, 3];
+  public readonly function foo(inout arraykey $x) {
+    $x = 1;
+  }
+  public static async function bar(): Awaitable<void> {}
+}
+
+function baz<T>(readonly T $x): readonly T {
+  return $x;
+}
+"""
+        variables.update({"php_file_uri": php_file_uri, "contents": contents})
+        spec = (
+            self.initialize_spec(LspTestSpec("notebook_mode"))
+            .write_to_disk(
+                comment="create file ${file_base_name}",
+                uri="${php_file_uri}",
+                contents="${contents}",
+                notify=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${contents}",
+                    }
+                },
+            )
+            .request(
+                line=line(),
+                method="textDocument/documentSymbol",
+                params={"textDocument": {"uri": "${php_file_uri}"}},
+                result=[
+                    {
+                        "name": "baz",
+                        "kind": 12,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 11, "character": 9},
+                                "end": {"line": 13, "character": 1},
+                            },
+                        },
+                        "detail": "function<T>(readonly T $x): readonly T",
+                    },
+                    {
+                        "name": "bar",
+                        "kind": 6,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 8, "character": 31},
+                                "end": {"line": 8, "character": 56},
+                            },
+                        },
+                        "detail": "function(): Awaitable<void>",
+                        "containerName": "CC",
+                    },
+                    {
+                        "name": "NUMBERS",
+                        "kind": 14,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 4, "character": 17},
+                                "end": {"line": 4, "character": 39},
+                            },
+                        },
+                        "detail": "vec<int> NUMBERS = vec[1, 2, 3]",
+                        "containerName": "CC",
+                    },
+                    {
+                        "name": "prop",
+                        "kind": 7,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 2, "character": 44},
+                                "end": {"line": 2, "character": 49},
+                            },
+                        },
+                        "detail": "readonly int $prop",
+                        "containerName": "CC",
+                    },
+                    {
+                        "name": "CC",
+                        "kind": 5,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 1, "character": 6},
+                                "end": {"line": 9, "character": 1},
+                            },
+                        },
+                    },
+                    {
+                        "name": "T",
+                        "kind": 5,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 3, "character": 13},
+                                "end": {"line": 3, "character": 21},
+                            },
+                        },
+                        "detail": "const type T = int;",
+                        "containerName": "CC",
+                    },
+                    {
+                        "name": "foo",
+                        "kind": 6,
+                        "location": {
+                            "uri": "${php_file_uri}",
+                            "range": {
+                                "start": {"line": 5, "character": 27},
+                                "end": {"line": 7, "character": 3},
+                            },
+                        },
+                        "detail": "function(inout arraykey $x)",
+                        "containerName": "CC",
+                    },
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                method="shutdown",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                    }
+                },
+                result=None,
+            )
+        )
+        self.run_spec(spec, variables)
+
+    def run_serverless_ide_will_save_wait_until(
+        self,
+        variables: dict[str, str],
+        filename: str,
+        expected_result: list[dict[str, Union[dict[str, dict[str, int]], str]]],
+    ) -> None:
+        variables.update(self.setup_php_file(filename))
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_will_save_wait_until_" + filename),
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .request(
+                line=line(),
+                comment="willSaveWaitUntil",
+                method="textDocument/willSaveWaitUntil",
+                params={"textDocument": {"uri": "${php_file_uri}"}, "reason": 1},
+                result=expected_result,
+            )
+            .request(
+                line=line(),
+                comment="shutdown",
+                method="shutdown",
+                params={},
+                result=None,
+            )
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
+    def test_initialize_will_save_wait_until_is_disabled(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        spec = (
+            LspTestSpec("test_initialize_will_save_wait_until_is_disabled")
+            .ignore_notifications(method="telemetry/event")
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .ignore_requests(
+                method="client/registerCapability",
+                params={
+                    "registrations": [
+                        {
+                            "id": "did-change-watched-files",
+                            "method": "workspace/didChangeWatchedFiles",
+                            "registerOptions": {
+                                "watchers": [
+                                    {
+                                        "globPattern": "**/*.{php,phpt,hack,hackpartial,hck,hh,hhi,xhp}",
+                                        "kind": 7,
+                                    }
+                                ]
+                            },
+                        }
+                    ]
+                },
+            )
+            .request(
+                line=line(),
+                method="initialize",
+                params={
+                    "initializationOptions": {},
+                    "processId": None,
+                    "rootPath": "${root_path}",
+                    "capabilities": {},
+                },
+                result={
+                    "capabilities": {
+                        "textDocumentSync": {
+                            "openClose": True,
+                            "change": 2,
+                            "willSave": False,
+                            "willSaveWaitUntil": False,
+                            "save": {"includeText": False},
+                        },
+                        "hoverProvider": True,
+                        "completionProvider": {
+                            "resolveProvider": True,
+                            "triggerCharacters": [
+                                "$",
+                                ">",
+                                "\\",
+                                ":",
+                                "<",
+                                "[",
+                                "'",
+                                '"',
+                                "{",
+                                "#",
+                            ],
+                        },
+                        "signatureHelpProvider": {"triggerCharacters": ["(", ","]},
+                        "definitionProvider": True,
+                        "typeDefinitionProvider": True,
+                        "referencesProvider": True,
+                        "documentHighlightProvider": True,
+                        "documentSymbolProvider": True,
+                        "workspaceSymbolProvider": True,
+                        "codeActionProvider": {"resolveProvider": True},
+                        "documentFormattingProvider": True,
+                        "documentRangeFormattingProvider": True,
+                        "documentOnTypeFormattingProvider": {
+                            "firstTriggerCharacter": ";",
+                            "moreTriggerCharacter": ["}"],
+                        },
+                        "renameProvider": True,
+                        "implementationProvider": True,
+                        "rageProvider": True,
+                        "experimental": {"snippetTextEdit": True, "autoCloseJsx": True},
+                    }
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, lsp_extra_args=["--disable-format-on-save"])
+
+    def test_serverless_ide_will_save_wait_until_no_format(
+        self,
+    ) -> None:
+        variables = self.write_hhconf_and_naming_table()
+
+        for filename in [
+            "unformatted_with_format_and_generated.php",
+            "unformatted_with_noformat.php",
+        ]:
+            self.run_serverless_ide_will_save_wait_until(variables, filename, [])
+
+    def test_serverless_ide_will_save_wait_until_format(
+        self,
+    ) -> None:
+        variables = self.write_hhconf_and_naming_table()
+
+        for filename, expected_result in [
+            (
+                "formatted.php",
+                [
+                    {
+                        "range": {
+                            "start": {"line": 0, "character": 0},
+                            "end": {"line": 0, "character": 0},
+                        },
+                        "newText": "",
+                    }
+                ],
+            ),
+            (
+                "unformatted.php",
+                [
+                    {
+                        "range": {
+                            "start": {"line": 2, "character": 0},
+                            "end": {"line": 5, "character": 0},
+                        },
+                        "newText": 'function unformatted(): string {\n  return "this file should be formatted on save";\n}\n',
+                    }
+                ],
+            ),
+            (
+                "unformatted_and_partially_generated.php",
+                [
+                    {
+                        "range": {
+                            "start": {"line": 5, "character": 0},
+                            "end": {"line": 6, "character": 0},
+                        },
+                        "newText": "  return true;\n",
+                    }
+                ],
+            ),
+        ]:
+            self.run_serverless_ide_will_save_wait_until(
+                variables, filename, expected_result
+            )
+
+    def test_will_save_wait_until_newlines_at_top(self) -> None:
+        """
+        Test our handling of textDocument/willSaveWaitUntil:
+        we shouldn't have any extra newlines at the top (T188437747)
+        """
+        variables = self.write_hhconf_and_naming_table()
+        file_base_name = "will_save_wait_until_newlines_at_top.php"
+        php_file_uri = self.repo_file_uri(file_base_name)
+        contents = """<?hh
+
+
+
+class C2 {}
+"""
+        variables.update({"php_file_uri": php_file_uri, "contents": contents})
+        spec = (
+            self.initialize_spec(LspTestSpec("notebook_mode"))
+            .write_to_disk(
+                comment="create file ${file_base_name}",
+                uri="${php_file_uri}",
+                contents="${contents}",
+                notify=False,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${contents}",
+                    }
+                },
+            )
+            .request(
+                line=line(),
+                method="textDocument/willSaveWaitUntil",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                    },
+                    # TextDocumentSaveReason.Manual (user saved)
+                    # https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentSaveReason
+                    "reason": 1,
+                },
+                result=[
+                    {
+                        "range": {
+                            "start": {"line": 1, "character": 0},
+                            "end": {"line": 3, "character": 0},
+                        },
+                        "newText": "",
+                    }
+                ],
+            )
+            .request(
+                line=line(),
+                method="shutdown",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                    }
+                },
+                result=None,
+            )
+        )
+        self.run_spec(spec, variables)

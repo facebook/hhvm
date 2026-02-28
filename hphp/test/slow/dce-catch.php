@@ -2,7 +2,7 @@
 
 class C {}
 
-function f($x) {
+function f($x) :mixed{
   try {
     return $x->missing;
   } catch (Exception $e) {
@@ -11,7 +11,7 @@ function f($x) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $x = dict['a' => 'b', 'c' => f(new C())];
   var_dump($x['a']);
 }

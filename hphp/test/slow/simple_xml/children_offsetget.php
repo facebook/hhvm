@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_children_offsetget() {
+function main_children_offsetget() :mixed{
 $element = simplexml_load_string(<<<EOF
 <root>
   <hello>world</hello>

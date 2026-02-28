@@ -4,49 +4,49 @@
 class IterableObj implements Iterator {
   private int $position = 0;
   public function __construct() { $this->position = 0; }
-  public function rewind() { $this->position = 0; }
-  public function current() {
+  public function rewind() :mixed{ $this->position = 0; }
+  public function current() :mixed{
     if ($this->position == 0) return "abc";
     if ($this->position == 1) return "def";
     if ($this->position == 2) return "ghi";
   }
-  public function key() {
+  public function key() :mixed{
     if ($this->position == 0) return 100;
     if ($this->position == 1) return 200;
     if ($this->position == 2) return 300;
   }
-  public function next() { ++$this->position; }
-  public function valid() { return $this->position < 3; }
+  public function next() :mixed{ ++$this->position; }
+  public function valid() :mixed{ return $this->position < 3; }
 }
 
 class ThrowIterableObj implements Iterator {
   private int $position = 0;
   public function __construct() { $this->position = 0; }
-  public function rewind() { $this->position = 0; }
-  public function current() {
+  public function rewind() :mixed{ $this->position = 0; }
+  public function current() :mixed{
     if ($this->position == 0) return "abc";
     if ($this->position == 1) return "def";
     if ($this->position == 2) return "ghi";
   }
-  public function key() {
+  public function key() :mixed{
     if ($this->position == 0) return 100;
     if ($this->position == 1) return 200;
     if ($this->position == 2) return 300;
   }
-  public function next() {
+  public function next() :mixed{
     ++$this->position;
     if ($this->position == 2) throw new Exception("ThrowIterableObj");
   }
-  public function valid() { return $this->position < 3; }
+  public function valid() :mixed{ return $this->position < 3; }
 }
 
 class AggregateObj implements IteratorAggregate {
-  public function getIterator() {
+  public function getIterator() :mixed{
     return new IterableObj();
   }
 }
 
-function convert_from($ks) {
+function convert_from($ks) :mixed{
   echo "====================================================\n";
   var_dump($ks);
   echo "----------------------------------------------------\n";
@@ -73,7 +73,7 @@ function convert_from($ks) {
   echo "====================================================\n";
 }
 
-function convert_to($from) {
+function convert_to($from) :mixed{
   echo "====================================================\n";
   var_dump($from);
   echo "----------------------------------------------------\n";
@@ -86,17 +86,17 @@ function convert_to($from) {
 }
 
 <<__EntryPoint>> function main(): void {
-  convert_to(varray[]);
-  convert_to(varray[100, 'val1', 'val2', 400, null, true, 1.234, new stdClass]);
-  convert_to(varray[100, 200, 'a', 'b']);
-  convert_to(varray['1', 1]);
-  convert_to(varray['abc', 123, 'abc', 123]);
-  convert_to(darray[1 => 10, 'key1' => 'val1', 5 => 'val2', 'key2' => 7,
+  convert_to(vec[]);
+  convert_to(vec[100, 'val1', 'val2', 400, null, true, 1.234, new stdClass]);
+  convert_to(vec[100, 200, 'a', 'b']);
+  convert_to(vec['1', 1]);
+  convert_to(vec['abc', 123, 'abc', 123]);
+  convert_to(dict[1 => 10, 'key1' => 'val1', 5 => 'val2', 'key2' => 7,
               10 => null, 15 => true, 'key3' => 1.234,
               'key4' => new stdClass]);
-  convert_to(darray['a' => 100, 'b' => 200, 100 => 'a', 200 => 'b']);
-  convert_to(darray['a' => '1', 'b' => 1]);
-  convert_to(darray[100 => 'abc', 200 => 123, 300 => 'abc', 400 => 123]);
+  convert_to(dict['a' => 100, 'b' => 200, 100 => 'a', 200 => 'b']);
+  convert_to(dict['a' => '1', 'b' => 1]);
+  convert_to(dict[100 => 'abc', 200 => 123, 300 => 'abc', 400 => 123]);
 
   convert_to(vec[]);
   convert_to(vec[1, 2, 'a', 'b', 3, 4, false, null, 5.67, new stdClass]);

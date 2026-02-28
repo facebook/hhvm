@@ -13,7 +13,7 @@
  *              It returns true if the element is even number else returns false
  */
 function even($input)
-{
+:mixed{
   return ($input % 2 == 0);
 }
 <<__EntryPoint>> function main(): void {
@@ -21,7 +21,7 @@ echo "*** Testing array_filter() : basic functionality ***\n";
 
 
 // Initialise all required variables
-$input = varray[1, 2, 3, 0, -1];  // 0 will be considered as FALSE and removed in default callback
+$input = vec[1, 2, 3, 0, -1];  // 0 will be considered as FALSE and removed in default callback
 
 // with all possible arguments
 var_dump( array_filter($input,even<>) );

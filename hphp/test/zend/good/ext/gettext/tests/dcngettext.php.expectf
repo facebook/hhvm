@@ -1,5 +1,5 @@
 
-Warning: dcngettext() expects exactly 5 parameters, 4 given in %s/dcngettext.php on line 3
+Warning: dcngettext() expects exactly 5 positional parameters, 4 given in %s/dcngettext.php on line 3
 string(1) "1"
 string(4) "test"
 string(4) "test"

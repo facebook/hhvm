@@ -6,11 +6,10 @@
  *
  *)
 
-(** [can_access env ~current ~target] returns whether a symbol defined in
-  * module [current] is allowed to access an internal symbol defined in
-  * [target] under [env].
+(** [can_access_internal ~env ~current ~target target_pos] returns whether a symbol defined in
+  * module [current] is allowed to access an internal symbol defined in [target] under [env].
   *)
-val can_access :
+val can_access_internal :
   env:Typing_env_types.env ->
   current:string option ->
   target:string option ->
@@ -19,3 +18,5 @@ val can_access :
   | `Outside of string
   | `OutsideViaTrait of Pos_or_decl.t
   ]
+
+val is_class_visible : Typing_env_types.env -> Decl_provider.class_decl -> bool

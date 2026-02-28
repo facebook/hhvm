@@ -1,0 +1,2 @@
+(4,5)-(4,31) The `__RequirePackage` attribute expects exactly 1 argument, 2 given
+(6,22)-(6,25) The first argument to `__(Soft)RequirePackage` must be a string literal

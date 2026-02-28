@@ -8,10 +8,10 @@
  */
 
 class D1 {
-  private function foo() {
+  private function foo() :mixed{
     echo "D1::foo " . (isset($this) ? "true\n" : "false\n");
   }
-  public function test() {
+  public function test() :mixed{
     D1::foo();
   }
 }
@@ -19,17 +19,17 @@ class E1 extends D1 {
 }
 
 class D5 {
-  private function foo() {
+  private function foo() :mixed{
     echo "D5::foo " . (isset($this) ? "true\n" : "false\n");
   }
-  public function test() {
+  public function test() :mixed{
     F5::foo();
   }
 }
 class E5 extends D5 {
 }
 class X5 extends D5 {
-  private function foo() {
+  private function foo() :mixed{
     echo "X5::foo\n";
   }
 }

@@ -2,16 +2,16 @@
 
 
 class someclass {
-  static public function yo() {
-    return $_ENV['hey'] ?? false;
+  static public function yo() :mixed{
+    return \HH\global_get('_ENV')['hey'] ?? false;
   }
 }
 
-function asd() { return mt_rand() ? 'a' : 2; }
-function array_of_one() { return varray[asd()]; }
-function main() {
+function asd() :mixed{ return mt_rand() ? 'a' : 2; }
+function array_of_one() :mixed{ return vec[asd()]; }
+function main() :mixed{
   $time = asd();
-  $items = darray[];
+  $items = dict[];
   if (someclass::yo()) {
     $items = array_of_one();
   }
@@ -20,6 +20,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_array_possibly_empty_003() {
+function main_array_possibly_empty_003() :mixed{
 main();
 }

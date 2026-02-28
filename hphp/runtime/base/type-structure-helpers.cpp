@@ -17,6 +17,8 @@
 #include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
+#include <folly/Random.h>
+
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -26,7 +28,6 @@
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/unit-cache.h"
 
-#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/type-constraint.h"
@@ -34,9 +35,48 @@
 
 #include "hphp/system/systemlib.h"
 
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/random.h"
+
 namespace HPHP {
 
 const StaticString s_unresolved("[unresolved]");
+const StaticString s_allows_unknown_fields("allows_unknown_fields");
+const StaticString s_elem_types("elem_types");
+const StaticString s_optional_elem_types("optional_elem_types");
+const StaticString s_param_types("param_types");
+const StaticString s_return_type("return_type");
+const StaticString s_variadic_type("variadic_type");
+const StaticString s_fields("fields");
+const StaticString s_kind("kind");
+const StaticString s_value("value");
+const StaticString s_nullable("nullable");
+const StaticString s_soft("soft");
+const StaticString s_opaque("opaque");
+const StaticString s_optional_shape_field("optional_shape_field");
+const StaticString s_classname("classname");
+const StaticString s_wildcard("_");
+const StaticString s_name("name");
+const StaticString s_generic_types("generic_types");
+const StaticString s_is_cls_cns("is_cls_cns");
+const StaticString s_access_list("access_list");
+const StaticString s_root_name("root_name");
+const StaticString s_alias("alias");
+const StaticString s_case_type("case_type");
+const StaticString s_callable("callable");
+const StaticString s_exact("exact");
+const StaticString s_typevars("typevars");
+const StaticString s_typevar_types("typevar_types");
+const StaticString s_union_types("union_types");
+const StaticString s_hh_this(annotTypeName(AnnotType::This));
+const StaticString s_type_structure_non_existant_class(
+  "HH\\__internal\\type_structure_non_existant_class");
+
+// Fixed error messages
+const StaticString s_reified_type_must_be_ts(
+  "Reified type must be a type structure");
+const StaticString s_new_instance_of_not_string(
+  "You cannot create a new instance of this type as it is not a string");
 
 namespace {
 
@@ -50,14 +90,16 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
     case KindOfRFunc:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       return false;
 
     case KindOfClass:
     case KindOfLazyClass: {
       auto const cls = lookupClass();
       if (cls && interface_supports_string(cls->name())) {
-        if (RuntimeOption::EvalRaiseClassConversionWarning) {
-          raise_class_to_string_conversion_warning();
+        if (folly::Random::oneIn(Cfg::Eval::RaiseClassConversionNoticeSampleRate, threadLocalRng64())) {
+          // TODO(vmladenov) appears untested
+          raise_class_to_string_conversion_notice("instanceof");
         }
         return true;
       }
@@ -104,8 +146,8 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
 
 } // namespace
 
-bool tvInstanceOf(const TypedValue* tv, const NamedEntity* ne) {
-  return tvInstanceOfImpl(tv, [ne]() { return Class::lookup(ne); });
+bool tvInstanceOf(const TypedValue* tv, const NamedType* ne) {
+  return tvInstanceOfImpl(tv, [ne]() { return ne->getCachedClass(); });
 }
 
 bool tvInstanceOf(const TypedValue* tv, const Class* cls) {
@@ -145,6 +187,13 @@ Optional<ArrayData*> getGenericTypesOpt(const ArrayData* ts) {
   return generics_field.val().parr;
 }
 
+bool typeStructureIsType(
+  const ArrayData* input,
+  const ArrayData* type,
+  bool& warn,
+  bool strict
+);
+
 bool typeStructureIsTypeList(
   const ArrayData*,
   const ArrayData*,
@@ -152,6 +201,50 @@ bool typeStructureIsTypeList(
   bool&,
   bool
 );
+
+bool caseTypeIsType(
+  const StringData* inputCaseType,
+  const ArrayData* input,
+  const StringData* typeCaseType,
+  const ArrayData* type,
+  bool& warn,
+  bool strict
+) {
+  if (!inputCaseType) return false;
+  if (!typeCaseType) return false;
+  if (!inputCaseType->tsame(typeCaseType)) {
+    return false;
+  }
+
+  bool result = true;
+
+  auto inputTypevar = get_ts_typevar_types_opt(input);
+  auto typeTypevar = get_ts_typevar_types_opt(type);
+  if (inputTypevar || typeTypevar) {
+    if (!inputTypevar) return false;
+    if (!typeTypevar) return false;
+
+    IterateKV(
+      inputTypevar,
+      [&](TypedValue inputK, TypedValue inputV) {
+        if (!tvIsString(inputK) || !tvIsArrayLike(inputV)) {
+          result = false;
+          return true;
+        }
+        auto typeV = typeTypevar->get(inputK.m_data.pstr);
+        if (!typeV.is_init()) {
+          result = false;
+        } else if (!tvIsArrayLike(typeV)) {
+          result = false;
+        } else {
+          result = typeStructureIsType(inputV.m_data.parr, typeV.m_data.parr, warn, strict);
+        }
+        return !result;
+      });
+  }
+
+  return result;
+}
 
 /*
  * Checks whether the `input` type structure is of the type denoted by the type
@@ -180,6 +273,15 @@ bool typeStructureIsType(
   assertx(input && type);
   if (input == type) return true; // shortcut
   if (!strict && isWildCard(input)) return true;
+
+  // Case types compare by witness, only allowing exact same case type
+  // to be equal to it.
+  auto const inputCaseType = get_ts_case_type_opt(input);
+  auto const typeCaseType = get_ts_case_type_opt(type);
+  if (inputCaseType || typeCaseType) {
+    return caseTypeIsType(inputCaseType, input, typeCaseType, type, warn, strict);
+  }
+
   auto tsKind = get_ts_kind(type);
   switch (tsKind) {
     case TypeStructure::Kind::T_int:
@@ -204,7 +306,9 @@ bool typeStructureIsType(
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
-    case TypeStructure::Kind::T_any_array: {
+    case TypeStructure::Kind::T_any_array:
+    case TypeStructure::Kind::T_class_ptr:
+    case TypeStructure::Kind::T_class_or_classname: {
       if (is_ts_nullable(type)) {
         auto const inputT = get_ts_kind(input);
         return inputT == tsKind || inputT == TypeStructure::Kind::T_null;
@@ -220,7 +324,7 @@ bool typeStructureIsType(
         input,
         [&](TypedValue k, TypedValue v1) {
           assertx(tvIsString(k));
-          if (k.m_data.pstr->isame(s_alias.get())) return false;
+          if (k.m_data.pstr->same(s_alias.get())) return false;
           auto const v2 = type->get(k.m_data.pstr);
           if (v2.is_init() && tvEqual(v1, v2)) return false;
           result = false;
@@ -236,7 +340,7 @@ bool typeStructureIsType(
       if (!classname_field.is_init()) return false;
       assertx(isStringType(classname_field.type()));
       auto const name = classname_field.val().pstr;
-      if (!name->isame(get_ts_classname(type))) return false;
+      if (!name->tsame(get_ts_classname(type))) return false;
       auto const inputGenerics = getGenericTypesOpt(input);
       auto const typeGenerics = getGenericTypesOpt(type);
       if (!inputGenerics) {
@@ -249,6 +353,7 @@ bool typeStructureIsType(
                                                      strict);
     }
     case TypeStructure::Kind::T_tuple:
+      if (get_ts_kind(input) != TypeStructure::Kind::T_tuple) return false;
       return typeStructureIsTypeList(
         get_ts_elem_types(input),
         get_ts_elem_types(type),
@@ -257,6 +362,7 @@ bool typeStructureIsType(
         strict
       );
     case TypeStructure::Kind::T_shape: {
+      if (get_ts_kind(input) != TypeStructure::Kind::T_shape) return false;
       auto const inputFields = get_ts_fields(input);
       auto const typeFields = get_ts_fields(type);
       if (inputFields->size() != typeFields->size()) return false;
@@ -273,7 +379,7 @@ bool typeStructureIsType(
         typeFields,
         [&](TypedValue k, TypedValue v) {
           assertx(tvIsDict(v));
-          auto typeField = getShapeFieldElement(v);
+          auto typeField = Array(getShapeFieldElement(v));
           auto const tv = inputFields->get(k);
           if (!tv.is_init()) {
             result = false;
@@ -285,13 +391,13 @@ bool typeStructureIsType(
             result = false;
             return true; // short circuit
           }
-          auto inputField = getShapeFieldElement(tv);
+          auto inputField = Array(getShapeFieldElement(tv));
           // If this field is associated with the value, kill it
           // This is safe since we already checked this above
-          auto cleanedInput = inputField->removeMove(s_optional_shape_field.get());
-          auto cleanedType = typeField->removeMove(s_optional_shape_field.get());
-          if (!typeStructureIsType(cleanedInput, cleanedType, warn, strict)) {
-            if (warn || is_ts_soft(typeField)) {
+          inputField.remove(StrNR{s_optional_shape_field.get()});
+          typeField.remove(StrNR{s_optional_shape_field.get()});
+          if (!typeStructureIsType(inputField.get(), typeField.get(), warn, strict)) {
+            if (warn || is_ts_soft(typeField.get())) {
               willWarn = true;
               warn = false;
               return false;
@@ -334,6 +440,9 @@ bool typeStructureIsType(
     case TypeStructure::Kind::T_reifiedtype:
     case TypeStructure::Kind::T_unresolved:
       raise_error("Invalid generics for type structure");
+    case TypeStructure::Kind::T_union:
+    case TypeStructure::Kind::T_recursiveUnion:
+      always_assert(false && "should be caught by above earlier check");
   }
   not_reached();
 }
@@ -348,27 +457,26 @@ bool typeStructureIsTypeList(
   assertx(inputL && typeL);
   auto const size = typeL->size();
   if (inputL->size() != size) return false;
-  std::vector<TypeParamInfo> tpinfo;
-  bool found = false;
+  const VMFixedVector<TypeParamInfo>* tpinfo = nullptr;
   if (!strict && clsname) {
-    if (auto const cls = Class::load(clsname)) {
-      found = true;
-      tpinfo = cls->getReifiedGenericsInfo().m_typeParamInfo;
-      if (tpinfo.size() == 0) return true;
-      if (tpinfo.size() != size) return false;
+    auto const cls = Class::load(clsname);
+    if (cls->hasReifiedGenerics()) {
+      tpinfo = &cls->getGenericsInfo().m_typeParamInfo;
+      if (tpinfo->size() == 0) return true;
+      if (tpinfo->size() != size) return false;
     }
   }
   // If any of the generics will warn, we need to keep track of it and only warn
   // if none of the other ones raise an error
   bool willWarn = false;
   for (size_t i = 0; i < size; ++i) {
-    if (found && !tpinfo[i].m_isReified) continue;
+    if (tpinfo && !(*tpinfo)[i].m_isReified) continue;
     auto const inputElem = inputL->get(i);
     auto const typeElem = typeL->get(i);
     assertx(tvIsDict(inputElem) && tvIsDict(typeElem));
     if (!typeStructureIsType(inputElem.val().parr, typeElem.val().parr,
                              warn, strict)) {
-      if (warn || (found && (tpinfo[i].m_isWarn ||
+      if (warn || (tpinfo && ((*tpinfo)[i].m_isWarn ||
                              is_ts_soft(typeElem.val().parr)))) {
         willWarn = true;
         warn = false;
@@ -382,13 +490,33 @@ bool typeStructureIsTypeList(
   return false;
 }
 
+/*
+ * Semantics of checkTypeStructureMatchesTVImpl varies depending on this enum
+ *    Shallow (used for enforcement):
+ *      enums checked only up to base type,
+ *      tuple and shapes only checked up to vec/dict,
+ *      varray and darray are not distinguished,
+ *      reject attempts to test erased generics
+ *    Deep (used for "is type" testing or "as type" assertion operations):
+ *      enums matter,
+ *      deep tuple and shape checking,
+ *      varray and darray are treated as vec and dict,
+ *      reject attempts to test erased generics
+ *    DeepIgnoreErased (used for checked casts when enabled):
+ *      enums matter,
+ *      deep tuple and shape checking,
+ *      varray and darray are treated as vec and dict,
+ *      ignore attempts to test erased generics
+ */
+enum class CheckOpKind : uint8_t { Shallow = 0, Deep = 1, DeepIgnoreErased = 2 };
+
 ALWAYS_INLINE
 bool checkReifiedGenericsMatch(
   const Array& ts,
   TypedValue c1,
   const StringData* name,
   bool& warn,
-  bool strict // whether to return false on erased generics
+  CheckOpKind opkind
 ) {
   if (!ts.exists(s_generic_types)) return true;
   // TODO(T31677864): Handle non KindOfObject types
@@ -397,7 +525,7 @@ bool checkReifiedGenericsMatch(
   auto const cls = Class::load(name);
   assertx(cls);
   if (!cls->hasReifiedGenerics()) {
-    if (!strict) return true;
+    if (opkind == CheckOpKind::DeepIgnoreErased || opkind == CheckOpKind::Shallow) return true;
     // Before returning false, lets check if all the generics are wildcards
     // If not all wildcard, since this is not a reified class, then it is false
     return isTSAllWildcards(ts.get());
@@ -420,8 +548,8 @@ bool checkReifiedGenericsMatch(
         get_ts_name(tsvalue)->equal(s_wildcard.get())) {
       continue;
     }
-    if (!typeStructureIsType(objrg.val().parr, tsvalue, warn, strict)) {
-      auto const tpinfo = cls->getReifiedGenericsInfo().m_typeParamInfo;
+    if (!typeStructureIsType(objrg.val().parr, tsvalue, warn, opkind == CheckOpKind::Deep)) {
+      auto const& tpinfo = cls->getGenericsInfo().m_typeParamInfo;
       assertx(tpinfo.size() == size);
       if (warn || tpinfo[i].m_isWarn || is_ts_soft(tsvalue)) {
         willWarn = true;
@@ -455,9 +583,9 @@ bool isTSAllWildcards(const ArrayData* ts) {
   return allWildcard;
 }
 
-// This function will always be called after `VerifyParamType` instruction, so
-// we can make the assumption that if `param` is an object, outermost type in
-// `type_` is correct.
+// This function will always be called after the prologue parameter type
+// verification, so we can make the assumption that if `param` is an object,
+// outermost type in `type_` is correct.
 // This function will only be called when either `param` is an object or `type_`
 // is a primitive reified type parameter
 bool verifyReifiedLocalType(
@@ -473,12 +601,13 @@ bool verifyReifiedLocalType(
   auto const isObj = tvIsObject(param);
   // If it is not coming from a reified type variable and it is an object,
   // we do not need to run the check if the object in question does not have
-  // reified generics since `VerifyParamType` should have taken care of it
+  // reified generics since the parameter type verification should have taken
+  // care of it
   if (!isTypeVar && isObj) {
     auto const obj = val(param).pobj;
     auto const objcls = obj->getVMClass();
-    // Since we already checked that the class matches in VerifyParamType using
-    // the type annotation
+    // The parameter type verification in the prologue already checked that
+    // the class matches the type annocation.
     if (!objcls->hasReifiedGenerics() && !objcls->hasReifiedParent()) {
       return true;
     }
@@ -492,10 +621,10 @@ bool verifyReifiedLocalType(
       bool persistent = true;
       type = TypeStructure::resolve(type, ctx, func->cls(),
                                     req::vector<Array>(), persistent);
-    } catch (Exception& e) {
+    } catch (Exception& ) {
       if (is_ts_soft(type_)) warn = true;
       return false;
-    } catch (Object& e) {
+    } catch (Object& ) {
       if (is_ts_soft(type_)) warn = true;
       return false;
     }
@@ -506,13 +635,7 @@ bool verifyReifiedLocalType(
 /*
  * Shared implementation for checkTypeStructureMatchesTV().
  *
- * If `isOrAsOp` is set, we are running this check for "is type" testing or "as
- * type" assertion operations.  For these operations, we reject comparisons
- * over {v,d,}array since we do want not users to be able distinguish
- * {v,d,}arrays while HAM is in progress (i.e., we only allow checking
- * {,v,d}arrays as ArrLike, not at any finer granularity).  Being able to tell
- * between them cripples the ability to transparently switch between them in
- * userland.
+ * See description of CheckOpKind above for its meaning.
  */
 template <bool gen_error>
 bool checkTypeStructureMatchesTVImpl(
@@ -522,7 +645,7 @@ bool checkTypeStructureMatchesTVImpl(
   std::string& expectedType,
   std::string& errorKey,
   bool& warn,
-  bool isOrAsOp
+  CheckOpKind kind
 ) {
   auto const errOnLen = [&givenType](auto cell, auto len) {
     if (!gen_error) return;
@@ -550,12 +673,8 @@ bool checkTypeStructureMatchesTVImpl(
   if (isNullType(type) && tv.is_init() && tv.val().num) {
     return true;
   }
-  assertx(ts.exists(s_kind));
 
-  auto const ts_kind = static_cast<TypeStructure::Kind>(
-    ts[s_kind].toInt64Val()
-  );
-
+  auto const ts_kind = TypeStructure::kind(ts);
   auto const result = [&] {
     switch (ts_kind) {
     case TypeStructure::Kind::T_void:
@@ -573,7 +692,7 @@ bool checkTypeStructureMatchesTVImpl(
       return isIntType(type) || isDoubleType(type);
     case TypeStructure::Kind::T_arraykey:
       if (isClassType(type) || isLazyClassType(type)) {
-        if (RO::EvalClassIsStringNotices) {
+        if (Cfg::Eval::ClassIsStringNotices) {
           raise_notice("Class used in is_string");
         }
         return true;
@@ -582,22 +701,31 @@ bool checkTypeStructureMatchesTVImpl(
 
     case TypeStructure::Kind::T_string:
       if (isClassType(type) || isLazyClassType(type)) {
-        if (RO::EvalClassIsStringNotices) {
+        if (Cfg::Eval::ClassIsStringNotices) {
           raise_notice("Class used in is_string");
         }
         return true;
       }
       return isStringType(type);
 
+    case TypeStructure::Kind::T_class_ptr:
+      // TODO(T199611023) When we enforce inner class types, this can be relaxed
+      raise_warning("Using TypeStructure to check class type");
+      return isClassType(type) || isLazyClassType(type);
+    case TypeStructure::Kind::T_class_or_classname:
+      // This is banned by the typechecker, same as the previous case.
+      raise_warning("Using TypeStructure to check class_or_classname type");
+      return isStringType(type) || isLazyClassType(type) || isClassType(type);
+
     case TypeStructure::Kind::T_resource:
       return isResourceType(type) &&
-             !reinterpret_cast<const Resource*>(&data.pres)->isInvalid();
+             !reinterpret_cast<const OptResource*>(&data.pres)->isInvalid();
 
     case TypeStructure::Kind::T_darray:
-      return isOrAsOp ? is_dict(&c1) : is_vec(&c1) || is_dict(&c1);
+      return kind != CheckOpKind::Shallow ? is_dict(&c1) : is_vec(&c1) || is_dict(&c1);
 
     case TypeStructure::Kind::T_varray:
-      return isOrAsOp ? is_vec(&c1) : is_vec(&c1) || is_dict(&c1);
+      return kind != CheckOpKind::Shallow ? is_vec(&c1) : is_vec(&c1) || is_dict(&c1);
 
     case TypeStructure::Kind::T_varray_or_darray:
       return is_vec(&c1) || is_dict(&c1);
@@ -620,10 +748,13 @@ bool checkTypeStructureMatchesTVImpl(
     case TypeStructure::Kind::T_enum: {
       assertx(ts.exists(s_classname));
       auto const cls = Class::load(ts[s_classname].asCStrRef().get());
-      if (!isOrAsOp) {
-        if (auto const dt = cls ? cls->enumBaseTy() : std::nullopt) {
-          return equivDataTypes(*dt, type);
-        }
+      if (kind == CheckOpKind::Shallow) {
+        // N.B. This is currently broken for enums declared with the underlying
+        //      type classname<T>, where it will cause us to accept both int and
+        //      string.
+        auto const dt = cls ? cls->enumBaseTy().underlyingDataType()
+                            : std::nullopt;
+        if (dt) return equivDataTypes(*dt, type);
         return isIntType(type) || isStringType(type);
       }
       return cls && enumHasValue(cls, &c1);
@@ -640,12 +771,12 @@ bool checkTypeStructureMatchesTVImpl(
       auto const name = ts[s_classname].asCStrRef().get();
       return
         tvInstanceOfImpl(&c1, [&] { return Class::load(name); }) &&
-        checkReifiedGenericsMatch(ts, c1, name, warn, isOrAsOp);
+        checkReifiedGenericsMatch(ts, c1, name, warn, kind);
     }
 
     case TypeStructure::Kind::T_tuple: {
       if (!isVecType(type)) return false;
-      if (!isOrAsOp) return true;
+      if (kind == CheckOpKind::Shallow) return true;
 
       auto const ad = data.parr;
       assertx(ts.exists(s_elem_types));
@@ -670,7 +801,7 @@ bool checkTypeStructureMatchesTVImpl(
             auto const& ts2 = asCArrRef(&tv);
             auto thisElemWarns = false;
             if (!checkTypeStructureMatchesTVImpl<gen_error>(
-              ts2, v, givenType, expectedType, errorKey, thisElemWarns, isOrAsOp
+              ts2, v, givenType, expectedType, errorKey, thisElemWarns, kind
             )) {
               errOnKey(k);
               if (thisElemWarns) {
@@ -695,7 +826,7 @@ bool checkTypeStructureMatchesTVImpl(
 
     case TypeStructure::Kind::T_shape: {
       if (!isDictType(type)) return false;
-      if (!isOrAsOp) return true;
+      if (kind == CheckOpKind::Shallow) return true;
 
       auto const ad = data.parr;
       assertx(ts.exists(s_fields));
@@ -746,7 +877,7 @@ bool checkTypeStructureMatchesTVImpl(
           numExpectedFields++;
           if (!checkTypeStructureMatchesTVImpl<gen_error>(
             ArrNR(tsField), field, givenType,
-            expectedType, errorKey, thisFieldWarns, isOrAsOp
+            expectedType, errorKey, thisFieldWarns, kind
           )) {
             errOnKey(k);
             if (thisFieldWarns) {
@@ -767,6 +898,22 @@ bool checkTypeStructureMatchesTVImpl(
       return !warn;
     }
 
+    case TypeStructure::Kind::T_union: {
+      bool match = false;
+      IterateV(
+        get_ts_union_types(ts.get()),
+        [&](TypedValue ty) {
+          assertx(isArrayLikeType(ty.m_type));
+          match |= checkTypeStructureMatchesTVImpl<false>(
+            Array{ty.m_data.parr}, c1, givenType, expectedType, errorKey, warn,
+            kind
+          );
+          return match;
+        }
+      );
+      return match;
+    }
+
     case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_unresolved:
@@ -779,6 +926,7 @@ bool checkTypeStructureMatchesTVImpl(
 
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_typevar:
+    case TypeStructure::Kind::T_recursiveUnion:
       // For is/as, we will not get here since we'll throw an error on the
       // resolution pass.
       // For parameter/return type verification, we don't check these types, so
@@ -807,7 +955,29 @@ bool checkTypeStructureMatchesTV(const Array& ts, TypedValue c1) {
   std::string givenType, expectedType, errorKey;
   bool warn = false;
   return checkTypeStructureMatchesTVImpl<false>(
-    ts, c1, givenType, expectedType, errorKey, warn, true);
+    ts, c1, givenType, expectedType, errorKey, warn, CheckOpKind::Deep);
+}
+
+bool checkForVerifyTypeStructureMatchesTV(
+  const Array& ts,
+  TypedValue c1,
+  std::string& givenType,
+  std::string& expectedType,
+  std::string& errorKey
+) {
+  bool warn = false;
+  auto const ts_kind = TypeStructure::kind(ts);
+  // For the VerifyType instruction we don't want to flag `nothing` (as people write UNSAFE_CAST<mixed,nothing>)
+  // or class pointers and classnames
+  if (ts_kind == TypeStructure::Kind::T_class_or_classname || ts_kind == TypeStructure::Kind::T_nothing) {
+    return true;
+  }
+  if (c1.m_type == KindOfClass || c1.m_type == KindOfLazyClass) {
+    return true;
+  }
+
+  return checkTypeStructureMatchesTVImpl<true>(
+    ts, c1, givenType, expectedType, errorKey, warn, CheckOpKind::DeepIgnoreErased);
 }
 
 bool checkTypeStructureMatchesTV(
@@ -819,7 +989,7 @@ bool checkTypeStructureMatchesTV(
 ) {
   bool warn = false;
   return checkTypeStructureMatchesTVImpl<true>(
-    ts, c1, givenType, expectedType, errorKey, warn, true);
+    ts, c1, givenType, expectedType, errorKey, warn, CheckOpKind::Deep);
 }
 
 bool checkTypeStructureMatchesTV(
@@ -829,7 +999,7 @@ bool checkTypeStructureMatchesTV(
 ) {
   std::string givenType, expectedType, errorKey;
   return checkTypeStructureMatchesTVImpl<false>(
-    ts, c1, givenType, expectedType, errorKey, warn, false);
+    ts, c1, givenType, expectedType, errorKey, warn, CheckOpKind::Shallow);
 }
 
 ALWAYS_INLINE
@@ -863,8 +1033,7 @@ bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
     if (dryrun) return true;
     raise_error("\"is\" and \"as\" operators cannot be used with %s", errMsg);
   };
-  assertx(ts.exists(s_kind));
-  auto ts_kind = static_cast<TypeStructure::Kind>(ts[s_kind].toInt64Val());
+  auto ts_kind = TypeStructure::kind(ts);
   switch (ts_kind) {
     case TypeStructure::Kind::T_int:
     case TypeStructure::Kind::T_bool:
@@ -900,6 +1069,20 @@ bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
         errorOnIsAsExpressionInvalidTypesList(tv.val().parr, dryrun, true) :
         false;
     }
+    case TypeStructure::Kind::T_union: {
+      bool error = false;
+      IterateV(
+        get_ts_union_types(ts.get()),
+        [&](TypedValue ty) {
+          assertx(isArrayLikeType(ty.m_type));
+          error |= errorOnIsAsExpressionInvalidTypes(
+            Array{ty.m_data.parr}, dryrun, allowWildcard
+          );
+          return error;
+        }
+      );
+      return error;
+    }
     case TypeStructure::Kind::T_fun:
       return err("a function");
     case TypeStructure::Kind::T_typevar:
@@ -921,6 +1104,15 @@ bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
       return errorOnIsAsExpressionInvalidTypesList(tsFields, dryrun,
                                                    allowWildcard);
     }
+    case TypeStructure::Kind::T_class_ptr:
+      // classname<T> is not a valid type for is/as or reification so let's
+      // preserve this restriction for class<T> initially
+      return err("a class type");
+    case TypeStructure::Kind::T_class_or_classname:
+      // same as class<T>, will not support this in is/as
+      return err("a class_or_classname type");
+    case TypeStructure::Kind::T_recursiveUnion:
+      return err("a recursive case type");
   }
   not_reached();
 }
@@ -947,9 +1139,11 @@ bool typeStructureCouldBeNonStatic(const ArrayData* ts) {
     case TypeStructure::Kind::T_any_array:
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_reifiedtype:
+    case TypeStructure::Kind::T_class_ptr:
+    case TypeStructure::Kind::T_class_or_classname:
       return true;
     case TypeStructure::Kind::T_unresolved: {
-      if (get_ts_classname(ts)->isame(s_hh_this.get())) return true;
+      if (get_ts_classname(ts)->tsame(s_hh_this.get())) return true;
       bool genericsCouldBeNonStatic = false;
       auto const generics = ts->get(s_generic_types.get());
       if (generics.is_init()) {
@@ -966,6 +1160,24 @@ bool typeStructureCouldBeNonStatic(const ArrayData* ts) {
         );
       }
       return genericsCouldBeNonStatic;
+    }
+    case TypeStructure::Kind::T_union: {
+      bool match = false;
+      IterateV(
+        get_ts_union_types(ts),
+        [&](TypedValue ty) {
+          assertx(isArrayLikeType(ty.m_type));
+          match |= typeStructureCouldBeNonStatic(ty.m_data.parr);
+          return match;
+        }
+      );
+      return match;
+    }
+    case TypeStructure::Kind::T_recursiveUnion: {
+      // We don't need to dig through the recursive union - if it contains
+      // 'this' (which it probably won't since 'this' isn't allowed in a case
+      // type) then it will be found on a different path.
+      return false;
     }
     case TypeStructure::Kind::T_null:
     case TypeStructure::Kind::T_void:
@@ -1001,12 +1213,9 @@ Array resolveAndVerifyTypeStructure(
   assertx(ts.isDict());
   auto const handleResolutionException = [&](auto const& errMsg) {
     if (!suppress || !IsOrAsOp) raise_error(errMsg);
-    if (RuntimeOption::EvalIsExprEnableUnresolvedWarning) raise_warning(errMsg);
+    if (Cfg::Eval::IsExprEnableUnresolvedWarning) raise_warning(errMsg);
     auto unresolved = Array::CreateDict();
-    unresolved.set(
-      s_kind,
-      Variant(static_cast<uint8_t>(TypeStructure::Kind::T_unresolved))
-    );
+    TypeStructure::setKind(unresolved, TypeStructure::Kind::T_unresolved);
     unresolved.set(s_classname, Variant(s_unresolved));
     return unresolved;
   };
@@ -1018,7 +1227,7 @@ Array resolveAndVerifyTypeStructure(
   } catch (Exception& e) {
     // Catch and throw again so we get a line number
     resolved = handleResolutionException(e.getMessage());
-  } catch (Object& e) {
+  } catch (Object& ) {
     std::string errMsg = "unable to resolve anonymous type structure";
     resolved = handleResolutionException(errMsg);
   }
@@ -1037,7 +1246,8 @@ template Array resolveAndVerifyTypeStructure<false>(
 void throwTypeStructureDoesNotMatchTVException(
   std::string& givenType,
   std::string& expectedType,
-  std::string& errorKey
+  std::string& errorKey,
+  bool raiseError
 ) {
   assertx(!givenType.empty());
   assertx(!expectedType.empty());
@@ -1048,7 +1258,12 @@ void throwTypeStructureDoesNotMatchTVException(
     error = folly::sformat("Expected {} at {}, got {}",
       expectedType, errorKey, givenType);
   }
-  SystemLib::throwTypeAssertionExceptionObject(error);
+  if (raiseError) {
+    std::string full_error = folly::sformat("Typed local assignment: {}", error);
+    raise_typehint_error(full_error);
+  } else {
+    SystemLib::throwTypeAssertionExceptionObject(error);
+  }
 }
 
 bool doesTypeStructureContainTUnresolved(const ArrayData* ts) {
@@ -1056,7 +1271,7 @@ bool doesTypeStructureContainTUnresolved(const ArrayData* ts) {
   IterateKV(
     ts,
     [&] (TypedValue k, TypedValue v) {
-      if (tvIsInt(v) && tvIsString(k) && k.m_data.pstr->isame(s_kind.get()) &&
+      if (tvIsInt(v) && tvIsString(k) && k.m_data.pstr->same(s_kind.get()) &&
           static_cast<TypeStructure::Kind>(v.m_data.num) ==
           TypeStructure::Kind::T_unresolved) {
         result = true;

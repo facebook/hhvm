@@ -1,2 +1,5 @@
-(4,10)-(4,17) Use of the `{}` subscript operator is deprecated;  use `[]` instead.
+(4,12)-(4,12) A semicolon `;` is expected here.
+(4,16)-(4,17) Encountered unexpected token `}`.
+(7,1)-(7,19) Declarations are not supported outside global scope
 (8,10)-(8,19) An Elvis operator `?:` is expected here.
+(9,2)-(10,1) Inline function definitions are not supported in Hack

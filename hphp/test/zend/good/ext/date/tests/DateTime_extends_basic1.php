@@ -6,7 +6,7 @@ class DateTimeExt extends DateTime
 	public static $format = "F j, Y, g:i:s a";
 	
 	public function __toString()
-	{
+:mixed	{
 		return parent::format(self::$format);
 	}
 }

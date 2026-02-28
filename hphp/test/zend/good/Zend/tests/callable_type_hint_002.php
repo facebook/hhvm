@@ -1,9 +1,9 @@
 <?hh
 
 class bar {
-    static function foo(callable $arg) {}
+    static function foo(callable $arg) :mixed{}
 }
-function foo(callable $bar) {
+function foo(callable $bar) :mixed{
 }
 <<__EntryPoint>> function main(): void {
 $closure = function (callable $arg) {};

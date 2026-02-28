@@ -28,6 +28,7 @@ pub fn node_impl() -> TokenStream {
         impl<'a> Node<'a> for isize {}
         impl<'a> Node<'a> for str {}
         impl<'a> Node<'a> for bstr::BStr {}
+        impl<'a> Node<'a> for crate::aast_defs::PackageMembership {}
         impl<'a> Node<'a> for crate::file_info::Mode {}
         impl<'a> Node<'a> for crate::local_id::LocalId<'a> {}
         impl<'a> Node<'a> for crate::method_flags::MethodFlags {}
@@ -36,6 +37,7 @@ pub fn node_impl() -> TokenStream {
         impl<'a> Node<'a> for crate::tany_sentinel::TanySentinel {}
         impl<'a> Node<'a> for crate::typing_defs_flags::FunParamFlags {}
         impl<'a> Node<'a> for crate::typing_defs_flags::FunTypeFlags {}
+        impl<'a> Node<'a> for rc_pos::Pos {}
 
         impl<'a, T: Node<'a> + ?Sized> Node<'a> for &'a T {
             fn recurse(&'a self, v: &mut dyn Visitor<'a>) {

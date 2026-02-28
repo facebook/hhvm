@@ -1,0 +1,2 @@
+ERROR: File "gating_function.php", line 3, characters 39-55:
+Cannot use unstable feature: `no_disjoint_union` (Parsing[1002])

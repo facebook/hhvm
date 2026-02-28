@@ -1,11 +1,11 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   echo "a\n";
   exit(1);
 }
 
-function main() {
+function main() :mixed{
   var_dump(pcntl_signal(SIGUSR1, foo<>));
   $pid = posix_getpid();
   posix_kill($pid, SIGUSR1);
@@ -16,6 +16,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_1563() {
+function main_1563() :mixed{
 main();
 }

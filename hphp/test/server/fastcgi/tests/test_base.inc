@@ -2,11 +2,11 @@
 
 function init() {
   require __DIR__ . '/../../util/server_tests.inc';
-  ServerUtilServerTests::$LOG_ROOT = '/tmp/hhvm_server';
+  ServerUtilServerTests::$LOG_ROOT = ServerUtilServerTests::working_dir() . '/hhvm_server';
   require __DIR__ . '/../Adoy/Client.php';
 
   ServerUtilServerTests::$DOC_ROOT = dirname(__DIR__).'/server_root';
-  ServerUtilServerTests::$request = fun('fastcgi_request');
+  ServerUtilServerTests::$request = fastcgi_request<>;
 }
 
 function runTest($testController, $customArgs = '') {
@@ -19,19 +19,20 @@ function runTest($testController, $customArgs = '') {
     $testController($serverPort);
     stopServer($adminPort, $serverProc);
   } catch (Exception $e) {
-    error_log("Caught exception, test failed, pid=$pid, exn=".$e->getMessage());
+    error_log("Caught exception, test failed, pid=$pid, exn=\n".(string)$e);
     killChildren($pid);
     if ($serverProc) proc_close($serverProc);
     error_log('test failed');
+    exit(-1);
   }
 }
 
-function fastcgi_request($host, $port, $path, $post = darray[], $headers = darray[], $extra_args = darray[]) {
+function fastcgi_request($host, $port, $path, $post = dict[], $headers = dict[], $extra_args = dict[]) {
   try {
     $client = new \Adoy\FastCGI\Client($host, $port);
     $content = http_build_query($post);
 
-    $args = array_merge(darray[
+    $args = array_merge(dict[
       'GATEWAY_INTERFACE' => 'FastCGI/1.0',
       'REQUEST_METHOD' => (!($post ?? false)) ? 'GET' : 'POST',
       'SERVER_SOFTWARE' => 'php/fcgiclient',
@@ -56,7 +57,10 @@ function fastcgi_request($host, $port, $path, $post = darray[], $headers = darra
     $args['SCRIPT_NAME'] = $path;
     $args['DOCUMENT_ROOT'] = $doc_root;
 
-    @$result = $client->request($args, $content);
+    $error = error_reporting();
+    error_reporting(0);
+    $result = $client->request($args, $content);
+    error_reporting($error);
 
     $pos = strpos($result, "\r\n\r\n");
     if ($pos !== false) {
@@ -64,7 +68,7 @@ function fastcgi_request($host, $port, $path, $post = darray[], $headers = darra
     }
     return trim($result);
   } catch (Exception $e) {
-    tlog("request exception: " . $e->getMessage() .'('.$e->getTraceAsString().')');
+    tlog("request exception:\n" . (string)$e);
     return "";
   }
 }

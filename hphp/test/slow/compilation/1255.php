@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1255() {
+function main_1255() :mixed{
 if (!$a = true) {
 }
 }

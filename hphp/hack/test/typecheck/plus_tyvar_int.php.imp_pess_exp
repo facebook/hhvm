@@ -1,0 +1,8 @@
+ERROR: File "plus_tyvar_int.php", line 9, characters 14-22:
+Invalid argument (Typing[4110])
+  File "plus_tyvar_int.php", line 3, characters 21-23:
+  Expected `int`
+  File "plus_tyvar_int.php", line 9, characters 14-22:
+  But got `float` because this is the result of an arithmetic operation with a `num` as the first argument, and no `float`s.
+  File "plus_tyvar_int.php", line 9, characters 14-18:
+  Here is why I think the argument is a `num`: this is a `num` because a type could not be determined here

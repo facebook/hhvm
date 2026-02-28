@@ -623,6 +623,11 @@ void Disassembler::VisitDataProcessing2Source(Instruction* instr) {
     FORMAT(ASRV, "asr");
     FORMAT(RORV, "ror");
     #undef FORMAT
+    case CRC32CX: {
+      mnemonic = "crc32cx";
+      form = "'Wd, 'Wn, 'Xm";
+      break;
+    }
     default: form = "(DataProcessing2Source)";
   }
   Format(instr, mnemonic, form);
@@ -873,11 +878,12 @@ void Disassembler::VisitLoadStoreUnscaledOffset(Instruction* instr) {
     case LDUR_x:   mnemonic = "ldur"; form = form_x; break;
     case LDUR_s:   mnemonic = "ldur"; form = form_s; break;
     case LDUR_d:   mnemonic = "ldur"; form = form_d; break;
-    case LDURSB_x: form = form_x;  // Fall through.
+    case LDURSB_x: form = form_x; [[fallthrough]];
     case LDURSB_w: mnemonic = "ldursb"; break;
-    case LDURSH_x: form = form_x;  // Fall through.
+    case LDURSH_x: form = form_x;  [[fallthrough]];
     case LDURSH_w: mnemonic = "ldursh"; break;
     case LDURSW_x: mnemonic = "ldursw"; form = form_x; break;
+    case PRFUM: mnemonic = "prfum"; form = "'PrefOp, ['Xns'ILS]"; break;
     default: form = "(LoadStoreUnscaledOffset)";
   }
   Format(instr, mnemonic, form);
@@ -1018,7 +1024,7 @@ void Disassembler::VisitFPCompare(Instruction* instr) {
 
   switch (instr->Mask(FPCompareMask)) {
     case FCMP_s_zero:
-    case FCMP_d_zero: form = form_zero;  // Fall through.
+    case FCMP_d_zero: form = form_zero; [[fallthrough]];
     case FCMP_s:
     case FCMP_d: mnemonic = "fcmp"; break;
     default: form = "(FPCompare)";
@@ -1615,7 +1621,7 @@ int Disassembler::SubstituteShiftField(Instruction* instr, const char* format) {
   switch (format[1]) {
     case 'D': {  // HDP.
       assert(instr->ShiftDP() != ROR);
-    }  // Fall through.
+    } [[fallthrough]];
     case 'L': {  // HLo.
       if (instr->ImmDPShift() != 0) {
         const char* shift_type[] = {"lsl", "lsr", "asr", "ror"};
@@ -1775,7 +1781,7 @@ int Disassembler::SubstitutePrefetchField(Instruction* instr,
 int Disassembler::SubstituteInstructionAttributes(Instruction* instr,
                                           const char* format) {
   assert(format[0] == 'l');
-  const char* lse_op[] = { "add", "clr", "eor", "set", 
+  const char* lse_op[] = { "add", "clr", "eor", "set",
                            "smax", "smin", "umax", "umin" };
   const char* lse_size[] = { "b", "h", "", "" };
   const char* lse_semantic[] = { "", "l", "a", "al" };

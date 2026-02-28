@@ -1,5 +1,5 @@
 <?hh
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo "Hello world!\n";
 }

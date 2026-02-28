@@ -1,0 +1,15 @@
+[packages]
+
+[packages.foo]
+include_paths=[
+    "//doesnotexist.php",
+    "//doesnotexist/",
+] # well-formed but nonexistent paths
+
+[packages.bar]
+include_paths=[
+    "bar",
+    "//bar",
+    "bar/",
+    "*",
+] # ill-formed and nonexistent

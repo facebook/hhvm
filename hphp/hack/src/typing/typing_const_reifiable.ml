@@ -13,7 +13,8 @@ open Typing_defs
 let check_reifiable env tc attr_pos =
   let check_impl kind ty =
     let emit_err pos ty_info =
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
+        ~env
         Typing_error.(
           primary @@ Primary.Reifiable_attr { pos; ty_info; attr_pos; kind })
     in
@@ -26,7 +27,6 @@ let check_reifiable env tc attr_pos =
   in
   match tc.ttc_kind with
   | TCConcrete { tc_type } -> check_impl `ty tc_type
-  | TCAbstract { atc_as_constraint; atc_super_constraint; atc_default } ->
-    Option.iter ~f:(check_impl `ty) atc_default;
-    Option.iter ~f:(check_impl `cnstr) atc_as_constraint;
-    Option.iter ~f:(check_impl `cnstr) atc_super_constraint
+  | TCAbstract { atc_as_constraint = _; atc_super_constraint = _; atc_default }
+    ->
+    Option.iter ~f:(check_impl `ty) atc_default

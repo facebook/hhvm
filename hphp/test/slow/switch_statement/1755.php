@@ -1,9 +1,9 @@
 <?hh
 
 class Evil {
-  public function __toString()[] { return "Evil"; }
+  public function __toString()[] :mixed{ return "Evil"; }
 }
-function f_1($x) {
+function f_1($x) :mixed{
   switch (HH\Lib\Legacy_FIXME\string_cast_for_switch($x, "123", "0", "0", dict[
   "123" => 123,
   "4abc" => 4,
@@ -24,7 +24,7 @@ function f_1($x) {
  break;
   }
 }
-function f_2($x) {
+function f_2($x) :mixed{
   var_dump($x);
  print "  goes to:";
   switch (HH\Lib\Legacy_FIXME\string_cast_for_switch($x, "foo", "foo", "0", dict[
@@ -53,7 +53,7 @@ function f_2($x) {
  break;
   }
 }
-function g_2($x) {
+function g_2($x) :mixed{
   var_dump($x);
  print "  goes to:";
   switch (HH\Lib\Legacy_FIXME\string_cast_for_switch($x, null, "", "", dict[
@@ -68,7 +68,7 @@ function g_2($x) {
  break;
   }
 }
-function h_2($x) {
+function h_2($x) :mixed{
   var_dump($x);
  print "  goes to:";
   switch (HH\Lib\Legacy_FIXME\string_cast_for_switch($x, "3.0", null, null, dict[
@@ -86,7 +86,7 @@ function h_2($x) {
   default: print "";
   }
 }
-function f_3($x) {
+function f_3($x) :mixed{
   switch ($x) {
   case "bar": print "bar";
   case "foo": print "foo";
@@ -96,7 +96,7 @@ function f_3($x) {
 }
 
 <<__EntryPoint>>
-function main_1755() {
+function main_1755() :mixed{
 f_1("");
 f_1(null);
 f_1(false);
@@ -117,7 +117,7 @@ f_2(2.0);
 f_2(true);
 f_2(false);
 f_2(null);
-f_2(varray[]);
+f_2(vec[]);
 f_2(3.21200);
 g_2(0);
 g_2(null);

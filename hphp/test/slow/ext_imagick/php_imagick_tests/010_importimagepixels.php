@@ -4,15 +4,16 @@
 <<__EntryPoint>> function main(): void {
 $count = 2000 * 3;
 $pixels =
-   array_merge(array_pad(varray[], $count, 0),
-               array_pad(varray[], $count, 255),
-               array_pad(varray[], $count, 0),
-               array_pad(varray[], $count, 255),
-               array_pad(varray[], $count, 0));
+   array_merge(array_pad(vec[], $count, 0),
+               array_pad(vec[], $count, 255),
+               array_pad(vec[], $count, 0),
+               array_pad(vec[], $count, 255),
+               array_pad(vec[], $count, 0));
 
 /* Width and height. The area is amount of pixels divided
    by three. Three comes from 'RGB', three values per pixel */
-$width = $height = 100;
+$height = 100;
+$width = $height;
 
 /* Create empty image */
 $im = new Imagick();

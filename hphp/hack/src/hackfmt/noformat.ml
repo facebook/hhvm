@@ -38,7 +38,7 @@ let is_begin_manual_section_tag text =
     let (_ : int) = Str.search_forward begin_manual_section_regexp text 0 in
     true
   with
-  | Caml.Not_found -> false
+  | Stdlib.Not_found -> false
 
 let is_end_manual_section_tag text = String.equal text end_manual_section_tag
 
@@ -50,7 +50,7 @@ let add_fixme_ranges fixmes trivia =
   in
   let add_fixme_range fixmes trivium =
     match Trivia.kind trivium with
-    | Full_fidelity_trivia_kind.(FixMe | IgnoreError) ->
+    | Full_fidelity_trivia_kind.(FixMe | Ignore | IgnoreError) ->
       trivium_range trivium :: fixmes
     | Full_fidelity_trivia_kind.(DelimitedComment | SingleLineComment)
       when is_lint_ignore (Trivia.text trivium) ->
@@ -137,9 +137,7 @@ let get_suppressed_formatting_ranges env line_boundaries tree =
       let whole_file = [(0, String.length text)] in
       if is_generated_file text then
         whole_file
-      else if
-        is_partially_generated_file text && not (List.is_empty manual_sections)
-      then
+      else if is_partially_generated_file text then
         Interval.diff_sorted_lists whole_file manual_sections
         |> List.map ~f:expand_to_line_boundaries
       else

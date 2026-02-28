@@ -11,9 +11,10 @@ open Hh_prelude
 module Bucket = Hack_bucket
 open ServerEnv
 
-let indexing ?hhi_filter ~(telemetry_label : string) (genv : ServerEnv.genv) :
+let directory_walk
+    ?hhi_filter ~(telemetry_label : string) (genv : ServerEnv.genv) :
     Relative_path.t list Bucket.next * float =
-  ServerProgress.send_progress "indexing";
+  Server_progress.write "indexing";
   let t = Unix.gettimeofday () in
   let get_next =
     ServerUtils.make_next
@@ -25,16 +26,16 @@ let indexing ?hhi_filter ~(telemetry_label : string) (genv : ServerEnv.genv) :
   let t = Hh_logger.log_duration ("indexing " ^ telemetry_label) t in
   (get_next, t)
 
-let parsing
-    ~(lazy_parse : bool)
+(** This parses files with the direct decl parser and uses the result to update
+  the naming table in the provided env. *)
+let parse_files_and_update_forward_naming_table
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     ~(get_next : Relative_path.t list Bucket.next)
     ?(count : int option)
-    ?(always_cache_asts : bool = false)
     (t : float)
     ~(trace : bool)
-    ~(cache_decls : bool)
+    ~(decl_mode : Direct_decl_service.direct_decl_mode)
     ~(telemetry_label : string)
     ~(cgroup_steps : CgroupProfiler.step_group)
     ~(worker_call : MultiWorker.call_wrapper) : ServerEnv.env * float =
@@ -42,46 +43,20 @@ let parsing
   @@ fun _cgroup_step ->
   begin
     match count with
-    | None -> ServerProgress.send_progress "%s" "parsing"
-    | Some c -> ServerProgress.send_progress "parsing %d files" c
+    | None -> Server_progress.write "parsing"
+    | Some c -> Server_progress.write "parsing %d files" c
   end;
-  let quick = lazy_parse in
   let ctx = Provider_utils.ctx_from_server_env env in
-  let (fast, errorl, _failed_parsing) =
-    if genv.local_config.ServerLocalConfig.use_direct_decl_parser then
-      if always_cache_asts then
-        Ast_and_decl_service.go
-          ctx
-          ~quick
-          ~show_all_errors:true
-          genv.workers
-          ~get_next
-          ~trace
-          ~cache_decls
-          ~worker_call
-          env.popt
-      else
-        ( Direct_decl_service.go
-            ctx
-            genv.workers
-            ~ide_files:Relative_path.Set.empty
-            ~get_next
-            ~trace
-            ~cache_decls,
-          Errors.empty,
-          Relative_path.Set.empty )
-    else
-      Parsing_service.go_DEPRECATED
-        ctx
-        ~quick
-        ~show_all_errors:true
-        genv.workers
-        Relative_path.Set.empty
-        ~get_next
-        ~trace
-        env.popt
+  let defs_per_file =
+    Direct_decl_service.go
+      ctx
+      ~worker_call
+      genv.workers
+      ~get_next
+      ~trace
+      ~decl_mode
   in
-  let naming_table = Naming_table.update_many env.naming_table fast in
+  let naming_table = Naming_table.update_many env.naming_table defs_per_file in
   let hs = SharedMem.SMTelemetry.heap_size () in
   Stats.(stats.init_parsing_heap_size <- hs);
 
@@ -94,32 +69,29 @@ let parsing
     hs
     ~parsed_count:count
     ~desc:telemetry_label;
-  let env =
-    { env with naming_table; errorl = Errors.merge errorl env.errorl }
-  in
+  let env = { env with naming_table } in
   (env, Hh_logger.log_duration ("Parsing " ^ telemetry_label) t)
 
-let naming
+let update_reverse_naming_table_from_env_and_get_duplicate_name_errors
     (env : ServerEnv.env)
     (t : float)
     ~(telemetry_label : string)
     ~(cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
   CgroupProfiler.step_start_end cgroup_steps telemetry_label
   @@ fun _cgroup_step ->
-  ServerProgress.send_progress "resolving symbol references";
+  Server_progress.with_message "resolving symbol references" @@ fun () ->
   let ctx = Provider_utils.ctx_from_server_env env in
   let count = ref 0 in
   let env =
     Naming_table.fold
       env.naming_table
-      ~f:(fun k v env ->
+      ~f:(fun k fi env ->
         count := !count + 1;
-        let (errorl, failed_naming) =
-          Naming_global.ndecl_file_error_if_already_bound ctx k v
+        let failed_naming =
+          Naming_global.ndecl_file_and_get_conflict_files ctx k fi.FileInfo.ids
         in
         {
           env with
-          errorl = Errors.merge errorl env.errorl;
           failed_naming =
             Relative_path.Set.union env.failed_naming failed_naming;
         })
@@ -132,8 +104,30 @@ let naming
     ~start_t:t;
   (env, Hh_logger.log_duration ("Naming " ^ telemetry_label) t)
 
+let validate_no_errors (errors : Diagnostics.t) : unit =
+  let witness_opt =
+    Diagnostics.fold_errors errors ~init:None ~f:(fun path error _acc ->
+        Some (path, error))
+  in
+  match witness_opt with
+  | None -> ()
+  | Some (path, error) ->
+    let error = User_diagnostic.to_absolute error |> Diagnostics.to_string in
+    Hh_logger.log "Unexpected error during init: %s" error;
+    HackEventLogger.invariant_violation_bug
+      "unexpected error during init"
+      ~path
+      ~data:error;
+    ()
+
 let log_type_check_end
-    env genv ~start_t ~count ~desc ~init_telemetry ~typecheck_telemetry : unit =
+    env
+    genv
+    ~start_t
+    ~total_rechecked_count
+    ~desc
+    ~init_telemetry
+    ~typecheck_telemetry : unit =
   let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
 
   let telemetry =
@@ -143,7 +137,9 @@ let log_type_check_end
          ~value:(ServerEnv.Init_telemetry.get init_telemetry)
     |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
     |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
-    |> Telemetry.object_ ~key:"errors" ~value:(Errors.as_telemetry env.errorl)
+    |> Telemetry.object_
+         ~key:"errors"
+         ~value:(Diagnostics.as_telemetry_summary env.diagnostics)
     |> Telemetry.object_
          ~key:"repo_states"
          ~value:(Watchman.RepoStates.get_as_telemetry ())
@@ -151,13 +147,13 @@ let log_type_check_end
   HackEventLogger.type_check_end
     (Some telemetry)
     ~heap_size:(SharedMem.SMTelemetry.heap_size ())
-    ~started_count:count
-    ~count
+    ~started_count:total_rechecked_count
+    ~total_rechecked_count
     ~desc
     ~experiments:genv.local_config.ServerLocalConfig.experiments
     ~start_t
 
-let type_check
+let defer_or_do_type_check
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (files_to_check : Relative_path.t list)
@@ -165,19 +161,20 @@ let type_check
     (t : float)
     ~(telemetry_label : string)
     ~(cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
-  (* No type checking in AI mode *)
-  if Option.is_some (ServerArgs.ai_mode genv.options) then
-    (env, t)
-  else if
-    ServerArgs.check_mode genv.options
-    || Option.is_some (ServerArgs.save_filename genv.options)
-  then (
-    (* Prechecked files are not supported in check/saving-state modes, we
+  if ServerArgs.check_mode genv.options then (
+    (* Prechecked files are not supported in check mode, we
      * should always recheck everything necessary up-front. *)
     assert (
       match env.prechecked_files with
       | Prechecked_files_disabled -> true
       | _ -> false);
+    (* Streaming errors aren't supported for these niche cases: for simplicity, the only
+       code that sets up and tears down streaming errors is in [ServerTypeCheck.type_check].
+       Our current code calls into typing_check_service.ml without having done that set up,
+       and so we will override whatever was set before and disable it now. *)
+    Hh_logger.log "Streaming errors disabled for eager init";
+    Server_progress.enable_error_production false;
+    Server_progress.write "typechecking";
 
     let count = List.length files_to_check in
     let logstring =
@@ -197,60 +194,68 @@ let type_check
           ServerCheckUtils.user_filter_type_check_files
             ~to_recheck:files_to_check_set
             ~reparsed:Relative_path.Set.empty
-            ~is_ide_file:(fun _ -> false)
         in
         Relative_path.Set.elements filtered_check
     in
     let (_new_t : float) = Hh_logger.log_duration logstring t in
-    let count = List.length files_to_check in
-    let logstring = Printf.sprintf "type-check %d files" count in
+    let total_rechecked_count = List.length files_to_check in
+    let logstring =
+      Printf.sprintf "type-check %d files" total_rechecked_count
+    in
     Hh_logger.log "Begin %s" logstring;
     let {
-      Typing_check_service.errors = errorl;
-      delegate_state;
+      Typing_check_service.diagnostics = errorl;
       telemetry = typecheck_telemetry;
       _;
     } =
-      let memory_cap =
-        genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
-      in
       let longlived_workers =
         genv.local_config.ServerLocalConfig.longlived_workers
       in
-      let remote_execution = env.ServerEnv.remote_execution in
-      let hulk_lite = genv.local_config.ServerLocalConfig.hulk_lite in
-      let hulk_heavy = genv.local_config.ServerLocalConfig.hulk_heavy in
+      let hh_distc_config =
+        let use_distc = genv.local_config.ServerLocalConfig.use_distc in
+        Option.some_if
+          use_distc
+          Typing_check_service.
+            {
+              enable_fanout_aware_distc =
+                genv.ServerEnv.local_config
+                  .ServerLocalConfig.enable_fanout_aware_distc;
+              fanout_threshold =
+                genv.ServerEnv.local_config
+                  .ServerLocalConfig.hh_distc_fanout_threshold;
+              fanout_full_init_threshold =
+                genv.ServerEnv.local_config
+                  .ServerLocalConfig.hh_distc_fanout_full_init_threshold;
+            }
+      in
+      let root = ServerArgs.root genv.ServerEnv.options in
       let ctx = Provider_utils.ctx_from_server_env env in
       CgroupProfiler.step_start_end cgroup_steps telemetry_label @@ fun () ->
       Typing_check_service.go
         ctx
         genv.workers
-        env.typing_service.delegate_state
         (Telemetry.create ())
         files_to_check
-        ~memory_cap
+        ~root:(Some root)
         ~longlived_workers
-        ~hulk_lite
-        ~hulk_heavy
-        ~remote_execution
+        ~hh_distc_config
         ~check_info:
           (ServerCheckUtils.get_check_info
              ~check_reason:(ServerEnv.Init_telemetry.get_reason init_telemetry)
+             ~log_errors:true
+             ~discard_warnings:(ServerEnv.discard_warnings env)
              genv
              env)
+        ~warnings_saved_state:ServerEnv.(env.init_env.mergebase_warning_hashes)
     in
     let env =
-      {
-        env with
-        typing_service = { env.typing_service with delegate_state };
-        errorl = Errors.merge errorl env.errorl;
-      }
+      { env with diagnostics = Diagnostics.merge errorl env.diagnostics }
     in
     log_type_check_end
       env
       genv
       ~start_t:t
-      ~count
+      ~total_rechecked_count
       ~desc:telemetry_label
       ~init_telemetry
       ~typecheck_telemetry;

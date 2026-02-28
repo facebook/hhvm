@@ -16,7 +16,6 @@
 */
 #include "hphp/runtime/ext/gd/ext_gd.h"
 
-#include <sys/types.h>
 #include <sys/stat.h>
 
 #include "hphp/runtime/base/array-init.h"
@@ -24,7 +23,6 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -40,10 +38,11 @@
 #include "hphp/runtime/ext/gd/libgd/gdfontl.h"  /* 4 Large font */
 #include "hphp/runtime/ext/gd/libgd/gdfontg.h"  /* 5 Giant font */
 #include <zlib.h>
-#include <set>
 
+#include <folly/ScopeGuard.h>
 #include <folly/portability/Stdlib.h>
 #include <folly/portability/Unistd.h>
+#include <libheif/heif.h>
 
 /* Section Filters Declarations */
 /* IMPORTANT NOTE FOR NEW FILTER
@@ -71,8 +70,6 @@
 #define IMAGE_TYPE_JPEG 2
 #define IMAGE_TYPE_PNG 4
 #define IMAGE_TYPE_WBMP 8
-#define IMAGE_TYPE_XPM 16
-#define IMAGE_TYPE_WEBP 32
 
 //#define IM_MEMORY_CHECK
 
@@ -138,9 +135,9 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
-    assertx(m_mallocSize <= (size_t)RuntimeOption::ImageMemoryMaxBytes);
-    if (size > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
-        m_mallocSize + size > (size_t)RuntimeOption::ImageMemoryMaxBytes) {
+    assertx(m_mallocSize <= (size_t)Cfg::Server::ImageMemoryMaxBytes);
+    if (size > (size_t)Cfg::Server::ImageMemoryMaxBytes ||
+        m_mallocSize + size > (size_t)Cfg::Server::ImageMemoryMaxBytes) {
       return nullptr;
     }
 
@@ -165,10 +162,10 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
-    assertx(m_mallocSize <= (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize <= (size_t)Cfg::Server::ImageMemoryMaxBytes);
     size_t bytes = nmemb * size;
-    if (bytes > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
-        m_mallocSize + bytes > (size_t)RuntimeOption::ImageMemoryMaxBytes) {
+    if (bytes > (size_t)Cfg::Server::ImageMemoryMaxBytes ||
+        m_mallocSize + bytes > (size_t)Cfg::Server::ImageMemoryMaxBytes) {
       return nullptr;
     }
 
@@ -204,10 +201,10 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     void *lnPtr = (char *)sizePtr - sizeof(ln);
     int count = m_alloced.erase((char*)sizePtr - sizeof(ln));
     assertx(count == 1); // double free on failure
-    assertx(m_mallocSize <= (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize <= (size_t)Cfg::Server::ImageMemoryMaxBytes);
     local_free(lnPtr);
 #else
-    assertx(m_mallocSize <= (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize <= (size_t)Cfg::Server::ImageMemoryMaxBytes);
     local_free(sizePtr);
 #endif
   }
@@ -218,7 +215,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
-    assertx(m_mallocSize <= (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize <= (size_t)Cfg::Server::ImageMemoryMaxBytes);
 
 #ifdef IM_MEMORY_CHECK
     if (!ptr) return imMalloc(size, ln);
@@ -241,8 +238,8 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 
 #ifdef IM_MEMORY_CHECK
     void *lnPtr = (char *)sizePtr - sizeof(ln);
-    if (size > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
-        m_mallocSize + diff > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
+    if (size > (size_t)Cfg::Server::ImageMemoryMaxBytes ||
+        m_mallocSize + diff > (size_t)Cfg::Server::ImageMemoryMaxBytes ||
         !(tmp = local_realloc(lnPtr, sizeof(ln) + sizeof(size) + size))) {
       int count = m_alloced.erase(ptr);
       assertx(count == 1); // double free on failure
@@ -259,8 +256,8 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     }
     return ((char *)tmp + sizeof(ln) + sizeof(size));
 #else
-    if (size > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
-        m_mallocSize + diff > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
+    if (size > (size_t)Cfg::Server::ImageMemoryMaxBytes ||
+        m_mallocSize + diff > (size_t)Cfg::Server::ImageMemoryMaxBytes ||
         !(tmp = local_realloc(sizePtr, sizeof(size) + size))) {
       local_free(sizePtr);
       return nullptr;
@@ -402,7 +399,7 @@ static char *php_strdup_impl(const char* s
   } while (0)
 #endif
 
-typedef enum {
+enum image_filetype {
   IMAGE_FILETYPE_UNKNOWN=0,
   IMAGE_FILETYPE_GIF=1,
   IMAGE_FILETYPE_JPEG,
@@ -423,9 +420,11 @@ typedef enum {
   IMAGE_FILETYPE_XBM,
   IMAGE_FILETYPE_ICO,
   IMAGE_FILETYPE_WEBP,
+  IMAGE_FILETYPE_AVIF,
+  IMAGE_FILETYPE_HEIC,
 
   IMAGE_FILETYPE_COUNT /* Must remain last */
-} image_filetype;
+};
 
 
 // PHP extension STANDARD: image.c
@@ -1378,7 +1377,7 @@ static int php_get_xbm(const req::ptr<File>& stream, struct gfxinfo **result) {
   if (!stream->rewind()) {
     return 0;
   }
-  while (!(fline = HHVM_FN(fgets)(Resource(stream), 0).toString()).empty()) {
+  while (!(fline = HHVM_FN(fgets)(OptResource(stream), 0).toString()).empty()) {
     iname = (char *)IM_MALLOC(fline.size() + 1);
     CHECK_ALLOC_R(iname, (fline.size() + 1), 0);
     if (sscanf(fline.c_str(), "#define %s %d", iname, &value) == 2) {
@@ -1489,6 +1488,7 @@ static struct gfxinfo *php_handle_webp(const req::ptr<File>& stream) {
   }
 
   result = (struct gfxinfo *)IM_CALLOC(1, sizeof(struct gfxinfo));
+  CHECK_ALLOC_R(result, (sizeof(struct gfxinfo)), nullptr);
 
   switch (format) {
     case ' ':
@@ -1509,8 +1509,133 @@ static struct gfxinfo *php_handle_webp(const req::ptr<File>& stream) {
   return result;
 }
 
+static int64_t heif_get_position(void* userdata) {
+  auto stream = static_cast<File*>(userdata);
+  return stream->tell();
+}
+
+static int heif_read(void* data, size_t size, void* userdata) {
+  auto stream = static_cast<File*>(userdata);
+
+  // Special handling as read doesn't like 0 passed in for size
+  if (size == 0) {
+    return heif_error_Ok;
+  }
+  // An attempt was made to use readImpl instead to avoid memcpy, but
+  // unfortunately, tell() returns wrong position if readImpl is used.
+  String result = stream->read(size);
+  if (result.length() != size) {
+    return 1; // Failure
+  }
+  memcpy(data, result.data(), size);
+  return heif_error_Ok;
+}
+
+static int heif_seek(int64_t position, void* userdata) {
+  auto stream = static_cast<File*>(userdata);
+  if (!stream->seekable()) {
+    return 1; // Failure
+  }
+  if (stream->seek(position, SEEK_SET)) {
+    return heif_error_Ok;
+  }
+  return 1; // Failure
+}
+
+static heif_reader_grow_status heif_wait_for_file_size(
+    int64_t targetSize,
+    void* userdata) {
+  const auto currentPos = heif_get_position(userdata);
+  if (targetSize <= currentPos) {
+    return heif_reader_grow_status_size_reached;
+  }
+
+  auto stream = static_cast<File*>(userdata);
+  if (!stream->seek(0, SEEK_END)) {
+    return heif_reader_grow_status_error;
+  }
+  const auto fileSize = stream->tell();
+  if (fileSize < 0) {
+    return heif_reader_grow_status_error;
+  }
+  // Restore current position
+  if (!stream->seek(currentPos, SEEK_SET)) {
+    return heif_reader_grow_status_error;
+  }
+  if (targetSize > fileSize) {
+    return heif_reader_grow_status_size_beyond_eof;
+  }
+  return heif_reader_grow_status_size_reached;
+}
+
+static heif_reader create_heif_reader() {
+  return heif_reader{
+    .reader_api_version = 1,
+    .get_position = &heif_get_position,
+    .read = &heif_read,
+    .seek = &heif_seek,
+    .wait_for_file_size = &heif_wait_for_file_size};
+}
+
+static struct gfxinfo *php_handle_heif(const req::ptr<File>& stream) {
+  struct gfxinfo *result = nullptr;
+
+  if (!stream->rewind()) {
+    return nullptr;
+  }
+
+  heif_context* ctx = heif_context_alloc();
+  SCOPE_EXIT {
+    heif_context_free(ctx);
+  };
+
+  heif_reader reader = create_heif_reader();
+  auto err = heif_context_read_from_reader(ctx, &reader, stream.get(), nullptr);
+  if (err.code != 0) {
+    raise_notice("Heif context read failed: %s", err.message);
+    return nullptr;
+  }
+
+  heif_image_handle* handle;
+  err = heif_context_get_primary_image_handle(ctx, &handle);
+  if (err.code != 0) {
+    // Unable to get image handle
+    raise_notice("Failed to get primary image handle: %s", err.message);
+    return nullptr;
+  }
+
+  SCOPE_EXIT {
+    heif_image_handle_release(handle);
+  };
+
+  result = (struct gfxinfo *)IM_CALLOC(1, sizeof(struct gfxinfo));
+  CHECK_ALLOC_R(result, (sizeof(struct gfxinfo)), nullptr);
+
+  result->width = heif_image_handle_get_width(handle);
+  result->height = heif_image_handle_get_height(handle);
+  // It is easier to not set bits/channels because it will require actual
+  // decoding of the image bitstream to get the information using libheif.
+  result->bits = 0;
+  result->channels = 0;
+  return result;
+}
+
+static heif_brand2 php_get_heif(const req::ptr<File>& stream) {
+  if (!stream->rewind()) {
+    return heif_unknown_brand;
+  }
+
+  String fileType = stream->read(12);
+  if (fileType.length() != 12) {
+    return heif_unknown_brand;
+  }
+
+  return heif_read_main_brand(reinterpret_cast<const uint8_t*>(
+    fileType.c_str()), 12);
+}
+
 /* Convert internal image_type to mime type */
-static char *php_image_type_to_mime_type(int image_type) {
+static const char *php_image_type_to_mime_type(int image_type) {
   switch( image_type) {
   case IMAGE_FILETYPE_GIF:
     return "image/gif";
@@ -1542,6 +1667,10 @@ static char *php_image_type_to_mime_type(int image_type) {
     return "image/vnd.microsoft.icon";
   case IMAGE_FILETYPE_WEBP:
     return "image/webp";
+  case IMAGE_FILETYPE_AVIF:
+    return "image/avif";
+  case IMAGE_FILETYPE_HEIC:
+    return "image/heic";
   default:
   case IMAGE_FILETYPE_UNKNOWN:
     return "application/octet-stream"; /* suppose binary format */
@@ -1628,6 +1757,12 @@ static int php_getimagetype(const req::ptr<File>& file) {
   }
 
   /* AFTER ALL ABOVE FAILED */
+  auto heifBrand = php_get_heif(file);
+  if (heifBrand == heif_brand2_heic || heifBrand == heif_brand2_heix) {
+    return IMAGE_FILETYPE_HEIC;
+  } else if (heifBrand == heif_brand2_avif) {
+    return IMAGE_FILETYPE_AVIF;
+  }
   if (php_get_wbmp(file, nullptr, 1)) {
     return IMAGE_FILETYPE_WBMP;
   }
@@ -1669,6 +1804,10 @@ String HHVM_FUNCTION(image_type_to_mime_type, int64_t imagetype) {
       return "image/vnd.microsoft.icon";
     case IMAGE_FILETYPE_WEBP:
       return "image/webp";
+    case IMAGE_FILETYPE_AVIF:
+      return "image/avif";
+    case IMAGE_FILETYPE_HEIC:
+      return "image/heic";
     default:
     case IMAGE_FILETYPE_UNKNOWN:
       return "application/octet-stream"; /* suppose binary format */
@@ -1711,6 +1850,10 @@ Variant HHVM_FUNCTION(image_type_to_extension,
     return include_dot ? String(".ico") : String("ico");
   case IMAGE_FILETYPE_WEBP:
     return include_dot ? String(".webp") : String("webp");
+  case IMAGE_FILETYPE_AVIF:
+    return include_dot ? String(".avif") : String("avif");
+  case IMAGE_FILETYPE_HEIC:
+    return include_dot ? String(".heic") : String("heic");
   default:
     return false;
   }
@@ -1723,7 +1866,7 @@ const StaticString
   s_linespacing("linespacing");
 
 
-gdImagePtr get_valid_image_resource(const Resource& image) {
+gdImagePtr get_valid_image_resource(const OptResource& image) {
   auto img_res = dyn_cast_or_null<Image>(image);
   if (!img_res || !img_res->get()) {
     raise_warning("supplied resource is not a valid Image resource");
@@ -1787,6 +1930,12 @@ Variant getImageSize(const req::ptr<File>& stream, Array& imageinfo) {
   case IMAGE_FILETYPE_WEBP:
     result = php_handle_webp(stream);
     break;
+  case IMAGE_FILETYPE_AVIF:
+    result = php_handle_heif(stream);
+    break;
+  case IMAGE_FILETYPE_HEIC:
+    result = php_handle_heif(stream);
+    break;
   default:
   case IMAGE_FILETYPE_UNKNOWN:
     break;
@@ -1833,15 +1982,6 @@ Variant HHVM_FUNCTION(getimagesizefromstring, const String& imagedata,
   }
   return false;
 }
-
-// PHP extension gd.c
-#define HAVE_GDIMAGECREATEFROMPNG 1
-
-#if HAVE_LIBTTF|HAVE_LIBFREETYPE
-#ifndef ENABLE_GD_TTF
-#define ENABLE_GD_TTF
-#endif
-#endif
 
 #define PHP_GDIMG_TYPE_GIF      1
 #define PHP_GDIMG_TYPE_PNG      2
@@ -1901,7 +2041,7 @@ static void _php_image_output_ctxfree(struct gdIOCtx *ctx) {
     IM_FREE(ctx);
   }
 }
-static bool _php_image_output_ctx(const Resource& image, const String& filename,
+static bool _php_image_output_ctx(const OptResource& image, const String& filename,
                                   int quality, int basefilter, int image_type,
                                   char* /*tn*/, void (*func_p)()) {
   gdImagePtr im = get_valid_image_resource(image);
@@ -1939,6 +2079,7 @@ static bool _php_image_output_ctx(const Resource& image, const String& filename,
       raise_warning("Invalid threshold value '%d'. "
                       "It must be between 0 and 255", q);
     }
+    [[fallthrough]];
   case PHP_GDIMG_TYPE_JPG:
     ((void(*)(gdImagePtr, gdIOCtx *, int))(func_p))(im, ctx, q);
     break;
@@ -2045,9 +2186,6 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
   int color, color_org, median;
   int x, y;
   float x_ratio, y_ratio;
-#ifdef HAVE_GD_JPG
-  // long ignore_warning;
-#endif
 
   /* Check threshold value */
   if (threshold < 0 || threshold > 8) {
@@ -2077,7 +2215,6 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
     }
     break;
 
-#ifdef HAVE_GD_JPG
   case PHP_GDIMG_TYPE_JPG:
     im_org = gdImageCreateFromJpeg(org);
     if (im_org == nullptr) {
@@ -2086,10 +2223,8 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
       return false;
     }
     break;
-#endif /* HAVE_GD_JPG */
 
 
-#ifdef HAVE_GD_PNG
   case PHP_GDIMG_TYPE_PNG:
     im_org = gdImageCreateFromPng(org);
     if (im_org == nullptr) {
@@ -2098,18 +2233,6 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
       return false;
     }
     break;
-#endif /* HAVE_GD_PNG */
-
-#ifdef HAVE_LIBVPX
-  case PHP_GDIMG_TYPE_WEBP:
-    im_org = gdImageCreateFromWebp(org);
-    if (im_org == nullptr) {
-      raise_warning("Unable to open '%s' Not a valid webp file",
-                      f_org.c_str());
-      return false;
-    }
-    break;
-#endif /* HAVE_LIBVPX */
 
   default:
     raise_warning("Format not supported");
@@ -2207,7 +2330,7 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
 
 // For quality and type, -1 means that the argument does not exist
 static bool
-_php_image_output(const Resource& image, const String& filename, int quality,
+_php_image_output(const OptResource& image, const String& filename, int quality,
                   int type, int image_type, char* /*tn*/, void (*func_p)()) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -2344,14 +2467,11 @@ _php_image_output(const Resource& image, const String& filename, int quality,
 static gdImagePtr _php_image_create_from(const String& filename,
                                          int srcX, int srcY,
                                          int width, int height,
-                                         int image_type, char *tn,
+                                         int image_type, const char *tn,
                                          gdImagePtr(*func_p)(),
                                          gdImagePtr(*ioctx_func_p)()) {
   VMRegAnchor _;
   gdImagePtr im = nullptr;
-#ifdef HAVE_GD_JPG
-  // long ignore_warning;
-#endif
 
   if (image_type == PHP_GDIMG_TYPE_GD2PART) {
     if (width < 1 || height < 1) {
@@ -2412,17 +2532,10 @@ static gdImagePtr _php_image_create_from(const String& filename,
       im = ((gdImagePtr(*)(FILE *, int, int, int, int))(func_p))
              (fp, srcX, srcY, width, height);
       break;
-#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
-    case PHP_GDIMG_TYPE_XPM:
-      im = gdImageCreateFromXpm(filename);
-      break;
-#endif
 
-#ifdef HAVE_GD_JPG
     case PHP_GDIMG_TYPE_JPG:
       im = gdImageCreateFromJpeg(fp);
       break;
-#endif
 
     default:
       im = ((gdImagePtr(*)(FILE*))(func_p))(fp);
@@ -2514,7 +2627,7 @@ static int _php_image_type (char data[8]) {
   return -1;
 }
 
-gdImagePtr _php_image_create_from_string(const String& image, char *tn,
+gdImagePtr _php_image_create_from_string(const String& image, const char *tn,
                                          gdImagePtr (*ioctx_func_p)()) {
   VMRegAnchor _;
   gdIOCtx *io_ctx;
@@ -2600,7 +2713,7 @@ static void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y,
  * arg = 2  ImageString
  * arg = 3  ImageStringUp
  */
-static bool php_imagechar(const Resource& image, int size, int x, int y,
+static bool php_imagechar(const OptResource& image, int size, int x, int y,
                           const String& c, int color, int mode) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -2638,7 +2751,7 @@ static bool php_imagechar(const Resource& image, int size, int x, int y,
 
 /* arg = 0  normal polygon
    arg = 1  filled polygon */
-static bool php_imagepolygon(const Resource& image,
+static bool php_imagepolygon(const OptResource& image,
                              const Array& points, int num_points,
                              int color, int filled) {
   gdImagePtr im = get_valid_image_resource(image);
@@ -2663,10 +2776,10 @@ static bool php_imagepolygon(const Resource& image,
 
   for (i = 0; i < num_points; i++) {
     if (points.exists(i * 2)) {
-      pts[i].x = points[i * 2].toInt32();
+      pts[i].x = (int)points[i * 2].toInt64();
     }
     if (points.exists(i * 2 + 1)) {
-      pts[i].y = points[i * 2 + 1].toInt32();
+      pts[i].y = (int)points[i * 2 + 1].toInt64();
     }
   }
 
@@ -2781,12 +2894,8 @@ static int php_imagefontsize(int size, int arg) {
   return (arg ? font->h : font->w);
 }
 
-#ifdef ENABLE_GD_TTF
 #define TTFTEXT_DRAW 0
 #define TTFTEXT_BBOX 1
-#endif
-
-#ifdef ENABLE_GD_TTF
 
 static Variant php_imagettftext_common(int mode, int extended,
                                        const Variant& arg1,
@@ -2815,7 +2924,7 @@ static Variant php_imagettftext_common(int mode, int extended,
     str = arg4.toString();
     extrainfo = arg5;
   } else {
-    Resource image = arg1.toResource();
+    OptResource image = arg1.toResource();
     ptsize = arg2.toDouble();
     angle = arg3.toDouble();
     x = arg4.toInt64();
@@ -2846,8 +2955,8 @@ static Variant php_imagettftext_common(int mode, int extended,
   }
 
   FILE *fp = nullptr;
-  if (!RuntimeOption::FontPath.empty()) {
-    fontname = String(RuntimeOption::FontPath.c_str()) +
+  if (!Cfg::Server::FontPath.empty()) {
+    fontname = String(Cfg::Server::FontPath.c_str()) +
                HHVM_FN(basename)(fontname);
   }
   auto stream = php_open_plain_file(fontname, "rb", &fp);
@@ -2857,7 +2966,6 @@ static Variant php_imagettftext_common(int mode, int extended,
   }
   stream->close();
 
-#ifdef USE_GD_IMGSTRTTF
   if (extended) {
     error = gdImageStringFTEx(im, brect, col, (char*)fontname.c_str(),
                               ptsize, angle, x, y, (char*)str.c_str(),
@@ -2867,10 +2975,6 @@ static Variant php_imagettftext_common(int mode, int extended,
     error = gdImageStringFT(im, brect, col, (char*)fontname.c_str(),
                             ptsize, angle, x, y, (char*)str.c_str());
   }
-#else /* !USE_GD_IMGSTRTTF */
-  error = gdttf(im, brect, col, fontname.c_str(),
-                ptsize, angle, x, y, str.c_str());
-#endif
 
   if (error) {
     raise_warning("%s", error);
@@ -2889,7 +2993,6 @@ static Variant php_imagettftext_common(int mode, int extended,
     brect[7]
   );
 }
-#endif  /* ENABLE_GD_TTF */
 
 const StaticString
   s_GD_Version("GD Version"),
@@ -2913,18 +3016,8 @@ Array HHVM_FUNCTION(gd_info) {
 
   ret.set(s_GD_Version, PHP_GD_VERSION_STRING);
 
-#ifdef ENABLE_GD_TTF
   ret.set(s_FreeType_Support, true);
-#if HAVE_LIBFREETYPE
   ret.set(s_FreeType_Linkage, s_with_freetype);
-#elif HAVE_LIBTTF
-  ret.set(s_FreeType_Linkage, s_with_TTF_library);
-#else
-  ret.set(s_FreeType_Linkage, s_with_unknown_library);
-#endif
-#else
-  ret.set(s_FreeType_Support, false);
-#endif
 
 #ifdef HAVE_LIBT1
   ret.set(s_T1Lib_Support, true);
@@ -2933,22 +3026,10 @@ Array HHVM_FUNCTION(gd_info) {
 #endif
   ret.set(s_GIF_Read_Support, true);
   ret.set(s_GIF_Create_Support, true);
-#ifdef HAVE_GD_JPG
   ret.set(s_JPG_Support, true);
-#else
-  ret.set(s_JPG_Support, false);
-#endif
-#ifdef HAVE_GD_PNG
   ret.set(s_PNG_Support, true);
-#else
-  ret.set(s_PNG_Support, false);
-#endif
   ret.set(s_WBMP_Support, true);
-#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
-  ret.set(s_XPM_Support, true);
-#else
   ret.set(s_XPM_Support, false);
-#endif
   ret.set(s_XBM_Support, true);
 #if defined(USE_GD_JISX0208) && defined(HAVE_GD_BUNDLED)
   ret.set(s_JIS_mapped_Japanese_Font_Support, true);
@@ -2969,7 +3050,7 @@ Variant HHVM_FUNCTION(imageloadfont, const String& /*file*/) {
   // https://github.com/php/php-src/commit/9a60aed6d1925c98b1b40c19b40f5b4b65baa
 }
 
-bool HHVM_FUNCTION(imagesetstyle, const Resource& image, const Array& style) {
+bool HHVM_FUNCTION(imagesetstyle, const OptResource& image, const Array& style) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   int *stylearr;
@@ -2992,7 +3073,7 @@ const StaticString
   s_width("width"),
   s_height("height");
 
-Variant HHVM_FUNCTION(imagecrop, const Resource& image, const Array& rect) {
+Variant HHVM_FUNCTION(imagecrop, const OptResource& image, const Array& rect) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   gdImagePtr imcropped = nullptr;
@@ -3031,7 +3112,7 @@ Variant HHVM_FUNCTION(imagecrop, const Resource& image, const Array& rect) {
 }
 
 Variant HHVM_FUNCTION(imagecropauto,
-                      const Resource& image,
+                      const OptResource& image,
                       int64_t mode /* = -1 */,
                       double threshold /* = 0.5f */,
                       int64_t color /* = -1 */) {
@@ -3041,6 +3122,7 @@ Variant HHVM_FUNCTION(imagecropauto,
   switch (mode) {
     case -1:
       mode = GD_CROP_DEFAULT;
+      [[fallthrough]];
     case GD_CROP_DEFAULT:
     case GD_CROP_TRANSPARENT:
     case GD_CROP_BLACK:
@@ -3084,13 +3166,13 @@ Variant HHVM_FUNCTION(imagecreatetruecolor, int64_t width, int64_t height) {
   return Variant(req::make<Image>(im));
 }
 
-bool f_imageistruecolor(const Resource& image) {
+bool HHVM_FUNCTION(imageistruecolor, const OptResource& image) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return im->trueColor;
 }
 
-Variant HHVM_FUNCTION(imagetruecolortopalette, const Resource& image,
+Variant HHVM_FUNCTION(imagetruecolortopalette, const OptResource& image,
     bool dither, int64_t ncolors) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3103,8 +3185,8 @@ Variant HHVM_FUNCTION(imagetruecolortopalette, const Resource& image,
   return true;
 }
 
-Variant HHVM_FUNCTION(imagecolormatch, const Resource& image1,
-                                       const Resource& image2) {
+Variant HHVM_FUNCTION(imagecolormatch, const OptResource& image1,
+                                       const OptResource& image2) {
   gdImagePtr im1 = get_valid_image_resource(image1);
   if (!im1) return false;
   gdImagePtr im2 = get_valid_image_resource(image2);
@@ -3131,14 +3213,14 @@ Variant HHVM_FUNCTION(imagecolormatch, const Resource& image1,
 }
 
 bool HHVM_FUNCTION(imagesetthickness,
-    const Resource& image, int64_t thickness) {
+    const OptResource& image, int64_t thickness) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   gdImageSetThickness(im, thickness);
   return true;
 }
 
-bool HHVM_FUNCTION(imagefilledellipse, const Resource& image,
+bool HHVM_FUNCTION(imagefilledellipse, const OptResource& image,
     int64_t cx, int64_t cy, int64_t width, int64_t height, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3146,7 +3228,7 @@ bool HHVM_FUNCTION(imagefilledellipse, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imagefilledarc, const Resource& image,
+bool HHVM_FUNCTION(imagefilledarc, const OptResource& image,
     int64_t cx, int64_t cy, int64_t width, int64_t height,
     int64_t start, int64_t end, int64_t color, int64_t style) {
   gdImagePtr im = get_valid_image_resource(image);
@@ -3158,7 +3240,7 @@ bool HHVM_FUNCTION(imagefilledarc, const Resource& image,
 }
 
 Variant HHVM_FUNCTION(imageaffine,
-                      const Resource& image,
+                      const OptResource& image,
                       const Array& affine /* = Array() */,
                       const Array& clip /* = Array() */) {
   gdImagePtr src = get_valid_image_resource(image);
@@ -3347,7 +3429,7 @@ Variant HHVM_FUNCTION(imageaffinematrixget,
   return ret;
 }
 
-bool HHVM_FUNCTION(imagealphablending, const Resource& image,
+bool HHVM_FUNCTION(imagealphablending, const OptResource& image,
                                        bool blendmode) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3355,14 +3437,14 @@ bool HHVM_FUNCTION(imagealphablending, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imagesavealpha, const Resource& image, bool saveflag) {
+bool HHVM_FUNCTION(imagesavealpha, const OptResource& image, bool saveflag) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   gdImageSaveAlpha(im, saveflag);
   return true;
 }
 
-bool HHVM_FUNCTION(imagelayereffect, const Resource& image, int64_t effect) {
+bool HHVM_FUNCTION(imagelayereffect, const OptResource& image, int64_t effect) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   gdImageAlphaBlending(im, effect);
@@ -3370,7 +3452,7 @@ bool HHVM_FUNCTION(imagelayereffect, const Resource& image, int64_t effect) {
 }
 
 Variant HHVM_FUNCTION(imagecolorallocatealpha,
-    const Resource& image,
+    const OptResource& image,
     int64_t red, int64_t green, int64_t blue, int64_t alpha) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3381,7 +3463,7 @@ Variant HHVM_FUNCTION(imagecolorallocatealpha,
   return ct;
 }
 
-Variant HHVM_FUNCTION(imagecolorresolvealpha, const Resource& image,
+Variant HHVM_FUNCTION(imagecolorresolvealpha, const OptResource& image,
     int64_t red, int64_t green, int64_t blue, int64_t alpha) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3389,14 +3471,14 @@ Variant HHVM_FUNCTION(imagecolorresolvealpha, const Resource& image,
 }
 
 Variant HHVM_FUNCTION(imagecolorclosestalpha,
-    const Resource& image,
+    const OptResource& image,
     int64_t red, int64_t green, int64_t blue, int64_t alpha) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return gdImageColorClosestAlpha(im, red, green, blue, alpha);
 }
 
-Variant HHVM_FUNCTION(imagecolorexactalpha, const Resource& image,
+Variant HHVM_FUNCTION(imagecolorexactalpha, const OptResource& image,
     int64_t red, int64_t green, int64_t blue, int64_t alpha) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3404,7 +3486,7 @@ Variant HHVM_FUNCTION(imagecolorexactalpha, const Resource& image,
 }
 
 bool HHVM_FUNCTION(imagecopyresampled,
-    const Resource& dst_im, const Resource& src_im,
+    const OptResource& dst_im, const OptResource& src_im,
     int64_t dst_x, int64_t dst_y, int64_t src_x, int64_t src_y,
     int64_t dst_w, int64_t dst_h, int64_t src_w, int64_t src_h) {
   gdImagePtr im_src = get_valid_image_resource(src_im);
@@ -3417,7 +3499,7 @@ bool HHVM_FUNCTION(imagecopyresampled,
 }
 
 Variant
-HHVM_FUNCTION(imagerotate, const Resource& source_image, double angle,
+HHVM_FUNCTION(imagerotate, const OptResource& source_image, double angle,
               int64_t bgd_color, int64_t /*ignore_transparent*/ /* = 0 */) {
   gdImagePtr im_src = get_valid_image_resource(source_image);
   if (!im_src) return false;
@@ -3426,7 +3508,7 @@ HHVM_FUNCTION(imagerotate, const Resource& source_image, double angle,
   return Variant(req::make<Image>(im_dst));
 }
 
-bool HHVM_FUNCTION(imagesettile, const Resource& image, const Resource& tile) {
+bool HHVM_FUNCTION(imagesettile, const OptResource& image, const OptResource& tile) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   gdImagePtr til = get_valid_image_resource(tile);
@@ -3437,7 +3519,7 @@ bool HHVM_FUNCTION(imagesettile, const Resource& image, const Resource& tile) {
 }
 
 bool HHVM_FUNCTION(imagesetbrush,
-    const Resource& image, const Resource& brush) {
+    const OptResource& image, const OptResource& brush) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   gdImagePtr tile = get_valid_image_resource(brush);
@@ -3449,7 +3531,7 @@ bool HHVM_FUNCTION(imagesetbrush,
 }
 
 bool HHVM_FUNCTION(imagesetinterpolation,
-    const Resource& image, int64_t method /*=GD_BILINEAR_FIXED*/) {
+    const OptResource& image, int64_t method /*=GD_BILINEAR_FIXED*/) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   if (method == -1) method = GD_BILINEAR_FIXED;
@@ -3472,19 +3554,9 @@ Variant HHVM_FUNCTION(imagecreate, int64_t width, int64_t height) {
 int64_t HHVM_FUNCTION(imagetypes) {
   int ret=0;
   ret = IMAGE_TYPE_GIF;
-#ifdef HAVE_GD_JPG
   ret |= IMAGE_TYPE_JPEG;
-#endif
-#ifdef HAVE_GD_PNG
   ret |= IMAGE_TYPE_PNG;
-#endif
   ret |= IMAGE_TYPE_WBMP;
-#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
-  ret |= IMAGE_TYPE_XPM;
-#endif
-#ifdef HAVE_LIBVPX
-  ret |= IMAGE_TYPE_WEBP;
-#endif
   return ret;
 }
 
@@ -3501,33 +3573,13 @@ Variant HHVM_FUNCTION(imagecreatefromstring, const String& data) {
   imtype = _php_image_type(sig);
   switch (imtype) {
   case PHP_GDIMG_TYPE_JPG:
-#ifdef HAVE_GD_JPG
     im = _php_image_create_from_string(data, "JPEG",
       (gdImagePtr(*)())gdImageCreateFromJpegCtx);
-#else
-    raise_warning("No JPEG support");
-    return false;
-#endif
     break;
 
   case PHP_GDIMG_TYPE_PNG:
-#ifdef HAVE_GD_PNG
     im = _php_image_create_from_string(data, "PNG",
       (gdImagePtr(*)())gdImageCreateFromPngCtx);
-#else
-    raise_warning("No PNG support");
-    return false;
-#endif
-    break;
-
-  case PHP_GDIMG_TYPE_WEBP:
-#ifdef HAVE_LIBVPX
-    im = _php_image_create_from_string(data, "WEBP",
-      (gdImagePtr(*)())gdImageCreateFromWebpCtx);
-#else
-    raise_warning("No webp support (libvpx is needed)");
-    return false;
-#endif
     break;
 
   case PHP_GDIMG_TYPE_GIF:
@@ -3569,7 +3621,6 @@ Variant HHVM_FUNCTION(imagecreatefromgif, const String& filename) {
   return Variant(req::make<Image>(im));
 }
 
-#ifdef HAVE_GD_JPG
 Variant HHVM_FUNCTION(imagecreatefromjpeg, const String& filename) {
   gdImagePtr im =
     _php_image_create_from(filename, -1, -1, -1, -1,
@@ -3581,9 +3632,7 @@ Variant HHVM_FUNCTION(imagecreatefromjpeg, const String& filename) {
   }
   return Variant(req::make<Image>(im));
 }
-#endif
 
-#ifdef HAVE_GD_PNG
 Variant HHVM_FUNCTION(imagecreatefrompng, const String& filename) {
   gdImagePtr im =
     _php_image_create_from(filename, -1, -1, -1, -1,
@@ -3595,21 +3644,6 @@ Variant HHVM_FUNCTION(imagecreatefrompng, const String& filename) {
   }
   return Variant(req::make<Image>(im));
 }
-#endif
-
-#ifdef HAVE_LIBVPX
-Variant HHVM_FUNCTION(imagecreatefromwebp, const String& filename) {
-  gdImagePtr im =
-    _php_image_create_from(filename, -1, -1, -1, -1,
-                           PHP_GDIMG_TYPE_WEBP, "WEBP",
-                           (gdImagePtr(*)())gdImageCreateFromWebp,
-                           (gdImagePtr(*)())gdImageCreateFromWebpCtx);
-  if (im == nullptr) {
-    return false;
-  }
-  return Variant(req::make<Image>(im));
-}
-#endif
 
 Variant HHVM_FUNCTION(imagecreatefromxbm, const String& filename) {
   gdImagePtr im =
@@ -3622,20 +3656,6 @@ Variant HHVM_FUNCTION(imagecreatefromxbm, const String& filename) {
   }
   return Variant(req::make<Image>(im));
 }
-
-#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
-Variant HHVM_FUNCTION(imagecreatefromxpm, const String& filename) {
-  gdImagePtr im =
-    _php_image_create_from(filename, -1, -1, -1, -1,
-                           PHP_GDIMG_TYPE_XPM, "XPM",
-                           (gdImagePtr(*)())gdImageCreateFromXpm,
-                           (gdImagePtr(*)())nullptr);
-  if (im == nullptr) {
-    return false;
-  }
-  return Variant(req::make<Image>(im));
-}
-#endif
 
 Variant HHVM_FUNCTION(imagecreatefromwbmp, const String& filename) {
   gdImagePtr im =
@@ -3687,43 +3707,29 @@ Variant HHVM_FUNCTION(imagecreatefromgd2part,
   return Variant(req::make<Image>(im));
 }
 
-bool HHVM_FUNCTION(imagegif, const Resource& image,
+bool HHVM_FUNCTION(imagegif, const OptResource& image,
     const String& filename /* = null_string */) {
   return _php_image_output_ctx(image, filename, -1, -1,
                                PHP_GDIMG_TYPE_GIF, "GIF",
                                (void (*)())gdImageGifCtx);
 }
 
-#ifdef HAVE_GD_PNG
-bool HHVM_FUNCTION(imagepng, const Resource& image,
+bool HHVM_FUNCTION(imagepng, const OptResource& image,
     const String& filename /* = null_string */,
     int64_t quality /* = -1 */, int64_t filters /* = -1 */) {
   return _php_image_output_ctx(image, filename, quality, filters,
                                PHP_GDIMG_TYPE_PNG, "PNG",
                                (void (*)())gdImagePngCtxEx);
 }
-#endif
 
-#ifdef HAVE_LIBVPX
-bool HHVM_FUNCTION(imagewebp, const Resource& image,
-    const String& filename /* = null_string */,
-    int64_t quality /* = 80 */) {
-  return _php_image_output_ctx(image, filename, quality, -1,
-                               PHP_GDIMG_TYPE_WEBP, "WEBP",
-                               (void (*)())gdImageWebpCtx);
-}
-#endif
-
-#ifdef HAVE_GD_JPG
-bool HHVM_FUNCTION(imagejpeg, const Resource& image,
+bool HHVM_FUNCTION(imagejpeg, const OptResource& image,
     const String& filename /* = null_string */, int64_t quality /* = -1 */) {
   return _php_image_output_ctx(image, filename, quality, -1,
                                PHP_GDIMG_TYPE_JPG, "JPEG",
                                (void (*)())gdImageJpegCtx);
 }
-#endif
 
-bool HHVM_FUNCTION(imagewbmp, const Resource& image,
+bool HHVM_FUNCTION(imagewbmp, const OptResource& image,
     const String& filename /* = null_string */,
     int64_t foreground /* = -1 */) {
   return _php_image_output_ctx(image, filename, foreground, -1,
@@ -3731,13 +3737,13 @@ bool HHVM_FUNCTION(imagewbmp, const Resource& image,
                                (void (*)())gdImageWBMPCtx);
 }
 
-bool HHVM_FUNCTION(imagegd, const Resource& image,
+bool HHVM_FUNCTION(imagegd, const OptResource& image,
     const String& filename /* = null_string */) {
   return _php_image_output(image, filename, -1, -1, PHP_GDIMG_TYPE_GD, "GD",
                            (void (*)())gdImageGd);
 }
 
-bool HHVM_FUNCTION(imagegd2, const Resource& image,
+bool HHVM_FUNCTION(imagegd2, const OptResource& image,
     const String& filename /* = null_string */,
     int64_t chunk_size /* = 0 */, int64_t type /* = 0 */) {
   return _php_image_output(image, filename, chunk_size, type,
@@ -3745,7 +3751,7 @@ bool HHVM_FUNCTION(imagegd2, const Resource& image,
                            (void (*)())gdImageGd2);
 }
 
-bool HHVM_FUNCTION(imagedestroy, const Resource& image) {
+bool HHVM_FUNCTION(imagedestroy, const OptResource& image) {
   auto img_res = cast<Image>(image);
   gdImagePtr im = img_res->get();
   if (!im) return false;
@@ -3754,7 +3760,7 @@ bool HHVM_FUNCTION(imagedestroy, const Resource& image) {
 }
 
 Variant HHVM_FUNCTION(imagecolorallocate,
-    const Resource& image,
+    const OptResource& image,
     int64_t red, int64_t green, int64_t blue) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3766,8 +3772,8 @@ Variant HHVM_FUNCTION(imagecolorallocate,
 }
 
 Variant HHVM_FUNCTION(imagepalettecopy,
-    const Resource& dst,
-    const Resource& src) {
+    const OptResource& dst,
+    const OptResource& src) {
   gdImagePtr dstim = cast<Image>(dst)->get();
   gdImagePtr srcim = cast<Image>(src)->get();
   if (!dstim || !srcim)
@@ -3777,7 +3783,7 @@ Variant HHVM_FUNCTION(imagepalettecopy,
 }
 
 Variant HHVM_FUNCTION(imagecolorat,
-    const Resource& image, int64_t x, int64_t y) {
+    const OptResource& image, int64_t x, int64_t y) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   if (gdImageTrueColor(im)) {
@@ -3798,20 +3804,20 @@ Variant HHVM_FUNCTION(imagecolorat,
 }
 
 Variant HHVM_FUNCTION(imagecolorclosest,
-    const Resource& image, int64_t red, int64_t green, int64_t blue) {
+    const OptResource& image, int64_t red, int64_t green, int64_t blue) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return gdImageColorClosest(im, red, green, blue);
 }
 
-Variant HHVM_FUNCTION(imagecolorclosesthwb, const Resource& image,
+Variant HHVM_FUNCTION(imagecolorclosesthwb, const OptResource& image,
     int64_t red, int64_t green, int64_t blue) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return gdImageColorClosestHWB(im, red, green, blue);
 }
 
-bool HHVM_FUNCTION(imagecolordeallocate, const Resource& image,
+bool HHVM_FUNCTION(imagecolordeallocate, const OptResource& image,
                                          int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3828,21 +3834,21 @@ bool HHVM_FUNCTION(imagecolordeallocate, const Resource& image,
   }
 }
 
-Variant HHVM_FUNCTION(imagecolorresolve, const Resource& image,
+Variant HHVM_FUNCTION(imagecolorresolve, const OptResource& image,
     int64_t red, int64_t green, int64_t blue) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return gdImageColorResolve(im, red, green, blue);
 }
 
-Variant HHVM_FUNCTION(imagecolorexact, const Resource& image,
+Variant HHVM_FUNCTION(imagecolorexact, const OptResource& image,
     int64_t red, int64_t green, int64_t blue) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return gdImageColorExact(im, red, green, blue);
 }
 
-Variant HHVM_FUNCTION(imagecolorset, const Resource& image,
+Variant HHVM_FUNCTION(imagecolorset, const OptResource& image,
     int64_t index, int64_t red, int64_t green, int64_t blue) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3862,7 +3868,7 @@ const StaticString
   s_blue("blue"),
   s_alpha("alpha");
 
-Variant HHVM_FUNCTION(imagecolorsforindex, const Resource& image,
+Variant HHVM_FUNCTION(imagecolorsforindex, const OptResource& image,
                                            int64_t index) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3879,7 +3885,7 @@ Variant HHVM_FUNCTION(imagecolorsforindex, const Resource& image,
   return false;
 }
 
-bool HHVM_FUNCTION(imagegammacorrect, const Resource& image,
+bool HHVM_FUNCTION(imagegammacorrect, const OptResource& image,
     double inputgamma, double outputgamma) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3916,7 +3922,7 @@ bool HHVM_FUNCTION(imagegammacorrect, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imagesetpixel, const Resource& image,
+bool HHVM_FUNCTION(imagesetpixel, const OptResource& image,
     int64_t x, int64_t y, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3924,7 +3930,7 @@ bool HHVM_FUNCTION(imagesetpixel, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imageline, const Resource& image,
+bool HHVM_FUNCTION(imageline, const OptResource& image,
     int64_t x1, int64_t y1, int64_t x2, int64_t y2, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3934,7 +3940,7 @@ bool HHVM_FUNCTION(imageline, const Resource& image,
 }
 
 bool HHVM_FUNCTION(imagedashedline,
-    const Resource& image,
+    const OptResource& image,
     int64_t x1, int64_t y1, int64_t x2, int64_t y2, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3942,7 +3948,7 @@ bool HHVM_FUNCTION(imagedashedline,
   return true;
 }
 
-bool HHVM_FUNCTION(imagerectangle, const Resource& image,
+bool HHVM_FUNCTION(imagerectangle, const OptResource& image,
     int64_t x1, int64_t y1, int64_t x2, int64_t y2, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3950,7 +3956,7 @@ bool HHVM_FUNCTION(imagerectangle, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imagefilledrectangle, const Resource& image,
+bool HHVM_FUNCTION(imagefilledrectangle, const OptResource& image,
     int64_t x1, int64_t y1, int64_t x2, int64_t y2, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3958,7 +3964,7 @@ bool HHVM_FUNCTION(imagefilledrectangle, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imagearc, const Resource& image,
+bool HHVM_FUNCTION(imagearc, const OptResource& image,
     int64_t cx, int64_t cy, int64_t width, int64_t height,
     int64_t start, int64_t end, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
@@ -3970,7 +3976,7 @@ bool HHVM_FUNCTION(imagearc, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imageellipse, const Resource& image,
+bool HHVM_FUNCTION(imageellipse, const OptResource& image,
     int64_t cx, int64_t cy, int64_t width, int64_t height, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3979,7 +3985,7 @@ bool HHVM_FUNCTION(imageellipse, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imagefilltoborder, const Resource& image,
+bool HHVM_FUNCTION(imagefilltoborder, const OptResource& image,
     int64_t x, int64_t y, int64_t border, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3987,7 +3993,7 @@ bool HHVM_FUNCTION(imagefilltoborder, const Resource& image,
   return true;
 }
 
-bool HHVM_FUNCTION(imagefill, const Resource& image,
+bool HHVM_FUNCTION(imagefill, const OptResource& image,
     int64_t x, int64_t y, int64_t color) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -3995,13 +4001,13 @@ bool HHVM_FUNCTION(imagefill, const Resource& image,
   return true;
 }
 
-Variant HHVM_FUNCTION(imagecolorstotal, const Resource& image) {
+Variant HHVM_FUNCTION(imagecolorstotal, const OptResource& image) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return (gdImageColorsTotal(im));
 }
 
-Variant HHVM_FUNCTION(imagecolortransparent, const Resource& image,
+Variant HHVM_FUNCTION(imagecolortransparent, const OptResource& image,
                                              int64_t color /* = -1 */) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -4012,7 +4018,7 @@ Variant HHVM_FUNCTION(imagecolortransparent, const Resource& image,
   return gdImageGetTransparent(im);
 }
 
-TypedValue HHVM_FUNCTION(imageinterlace, const Resource& image,
+TypedValue HHVM_FUNCTION(imageinterlace, const OptResource& image,
                          TypedValue interlace /* = 0 */) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return make_tv<KindOfBoolean>(false);
@@ -4023,12 +4029,12 @@ TypedValue HHVM_FUNCTION(imageinterlace, const Resource& image,
   return make_tv<KindOfInt64>(gdImageGetInterlaced(im));
 }
 
-bool HHVM_FUNCTION(imagepolygon, const Resource& image,
+bool HHVM_FUNCTION(imagepolygon, const OptResource& image,
     const Array& points, int64_t num_points, int64_t color) {
   return php_imagepolygon(image, points, num_points, color, 0);
 }
 
-bool HHVM_FUNCTION(imagefilledpolygon, const Resource& image,
+bool HHVM_FUNCTION(imagefilledpolygon, const OptResource& image,
     const Array& points, int64_t num_points, int64_t color) {
   return php_imagepolygon(image, points, num_points, color, 1);
 }
@@ -4041,31 +4047,31 @@ int64_t HHVM_FUNCTION(imagefontheight, int64_t font) {
   return php_imagefontsize(font, 1);
 }
 
-bool HHVM_FUNCTION(imagechar, const Resource& image,
+bool HHVM_FUNCTION(imagechar, const OptResource& image,
     int64_t font, int64_t x, int64_t y,
     const String& c, int64_t color) {
   return php_imagechar(image, font, x, y, c, color, 0);
 }
 
-bool HHVM_FUNCTION(imagecharup, const Resource& image,
+bool HHVM_FUNCTION(imagecharup, const OptResource& image,
     int64_t font, int64_t x, int64_t y,
     const String& c, int64_t color) {
   return php_imagechar(image, font, x, y, c, color, 1);
 }
 
-bool HHVM_FUNCTION(imagestring, const Resource& image,
+bool HHVM_FUNCTION(imagestring, const OptResource& image,
     int64_t font, int64_t x, int64_t y,
     const String& str, int64_t color) {
   return php_imagechar(image, font, x, y, str, color, 2);
 }
 
-bool HHVM_FUNCTION(imagestringup, const Resource& image,
+bool HHVM_FUNCTION(imagestringup, const OptResource& image,
     int64_t font, int64_t x, int64_t y,
     const String& str, int64_t color) {
   return php_imagechar(image, font, x, y, str, color, 3);
 }
 
-bool HHVM_FUNCTION(imagecopy, const Resource& dst_im, const Resource& src_im,
+bool HHVM_FUNCTION(imagecopy, const OptResource& dst_im, const OptResource& src_im,
     int64_t dst_x, int64_t dst_y,
     int64_t src_x, int64_t src_y, int64_t src_w, int64_t src_h) {
   gdImagePtr im_src = cast<Image>(src_im)->get();
@@ -4076,8 +4082,8 @@ bool HHVM_FUNCTION(imagecopy, const Resource& dst_im, const Resource& src_im,
   return true;
 }
 
-bool HHVM_FUNCTION(imagecopymerge, const Resource& dst_im,
-    const Resource& src_im,
+bool HHVM_FUNCTION(imagecopymerge, const OptResource& dst_im,
+    const OptResource& src_im,
     int64_t dst_x, int64_t dst_y, int64_t src_x, int64_t src_y,
     int64_t src_w, int64_t src_h, int64_t pct) {
   gdImagePtr im_src = cast<Image>(src_im)->get();
@@ -4089,8 +4095,8 @@ bool HHVM_FUNCTION(imagecopymerge, const Resource& dst_im,
   return true;
 }
 
-bool HHVM_FUNCTION(imagecopymergegray, const Resource& dst_im,
-    const Resource& src_im,
+bool HHVM_FUNCTION(imagecopymergegray, const OptResource& dst_im,
+    const OptResource& src_im,
     int64_t dst_x, int64_t dst_y,
     int64_t src_x, int64_t src_y,
     int64_t src_w, int64_t src_h, int64_t pct) {
@@ -4103,8 +4109,8 @@ bool HHVM_FUNCTION(imagecopymergegray, const Resource& dst_im,
   return true;
 }
 
-bool HHVM_FUNCTION(imagecopyresized, const Resource& dst_im,
-    const Resource& src_im,
+bool HHVM_FUNCTION(imagecopyresized, const OptResource& dst_im,
+    const OptResource& src_im,
     int64_t dst_x, int64_t dst_y, int64_t src_x, int64_t src_y,
     int64_t dst_w, int64_t dst_h, int64_t src_w, int64_t src_h) {
   gdImagePtr im_src = cast<Image>(src_im)->get();
@@ -4121,19 +4127,18 @@ bool HHVM_FUNCTION(imagecopyresized, const Resource& dst_im,
   return true;
 }
 
-Variant HHVM_FUNCTION(imagesx, const Resource& image) {
+Variant HHVM_FUNCTION(imagesx, const OptResource& image) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return gdImageSX(im);
 }
 
-Variant HHVM_FUNCTION(imagesy, const Resource& image) {
+Variant HHVM_FUNCTION(imagesy, const OptResource& image) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return gdImageSY(im);
 }
 
-#if defined(ENABLE_GD_TTF) && HAVE_LIBFREETYPE
 Variant HHVM_FUNCTION(imageftbbox, double size, double angle,
     const String& font_file, const String& text,
     const Array& extrainfo /*=[] */) {
@@ -4142,7 +4147,7 @@ Variant HHVM_FUNCTION(imageftbbox, double size, double angle,
 }
 
 Variant HHVM_FUNCTION(imagefttext,
-    const Resource& image,
+    const OptResource& image,
     const Variant& size, const Variant& angle,
     int64_t x, int64_t y, int64_t col,
     const String& font_file, const String& text,
@@ -4150,16 +4155,14 @@ Variant HHVM_FUNCTION(imagefttext,
   return php_imagettftext_common(TTFTEXT_DRAW, 1,
     image, size, angle, x, y, col, font_file, text, extrainfo);
 }
-#endif
 
-#ifdef ENABLE_GD_TTF
 Variant HHVM_FUNCTION(imagettfbbox, double size, double angle,
                      const String& fontfile, const String& text) {
   return php_imagettftext_common(TTFTEXT_BBOX, 0,
                                  size, angle, fontfile, text);
 }
 
-Variant HHVM_FUNCTION(imagettftext, const Resource& image,
+Variant HHVM_FUNCTION(imagettftext, const OptResource& image,
     const Variant& size, const Variant& angle,
     int64_t x, int64_t y, int64_t color,
     const String& fontfile, const String& text) {
@@ -4167,9 +4170,8 @@ Variant HHVM_FUNCTION(imagettftext, const Resource& image,
                                  image, size.toDouble(), angle.toDouble(),
                                  x, y, color, fontfile, text);
 }
-#endif
 
-bool HHVM_FUNCTION(image2wbmp, const Resource& image,
+bool HHVM_FUNCTION(image2wbmp, const OptResource& image,
                    const String& filename /* = null_string */,
                    int64_t threshold /* = -1 */) {
   return _php_image_output(image, filename, threshold, -1,
@@ -4189,7 +4191,7 @@ bool HHVM_FUNCTION(png2wbmp, const String& pngname, const String& wbmpname,
                             threshold, PHP_GDIMG_TYPE_PNG);
 }
 
-bool HHVM_FUNCTION(imagefilter, const Resource& res,
+bool HHVM_FUNCTION(imagefilter, const OptResource& res,
     int64_t filtertype,
     const Variant& arg1 /*=0*/, const Variant& arg2 /*=0*/,
     const Variant& arg3 /*=0*/, const Variant& arg4 /*=0*/) {
@@ -4232,7 +4234,7 @@ bool HHVM_FUNCTION(imagefilter, const Resource& res,
   return false;
 }
 
-bool HHVM_FUNCTION(imageflip, const Resource& image, int64_t mode /* = -1 */) {
+bool HHVM_FUNCTION(imageflip, const OptResource& image, int64_t mode /* = -1 */) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   if (mode == -1) mode = GD_FLIP_HORINZONTAL;
@@ -4321,7 +4323,7 @@ static int hphp_gdImageConvolution(gdImagePtr src, float filter[3][3],
   return 1;
 }
 
-bool HHVM_FUNCTION(imageconvolution, const Resource& image,
+bool HHVM_FUNCTION(imageconvolution, const OptResource& image,
     const Array& matrix, double div, double offset) {
   gdImagePtr im_src = cast<Image>(image)->get();
   if (!im_src) return false;
@@ -4359,14 +4361,14 @@ bool HHVM_FUNCTION(imageconvolution, const Resource& image,
   }
 }
 
-bool HHVM_FUNCTION(imageantialias, const Resource& image, bool on) {
+bool HHVM_FUNCTION(imageantialias, const OptResource& image, bool on) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   SetAntiAliased(im, on);
   return true;
 }
 
-Variant HHVM_FUNCTION(imagescale, const Resource& image, int64_t newwidth,
+Variant HHVM_FUNCTION(imagescale, const OptResource& image, int64_t newwidth,
   int64_t newheight /* =-1 */, int64_t method /*=GD_BILINEAR_FIXED*/) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
@@ -4512,7 +4514,7 @@ Variant HHVM_FUNCTION(iptcembed, const String& iptcdata,
   }
 
   if (spool < 2) {
-    auto stat = HHVM_FN(fstat)(Resource(file));
+    auto stat = HHVM_FN(fstat)(OptResource(file));
     // TODO(t7561579) until we can properly handle non-file streams here, don't
     // pretend we can and crash.
     if (!stat.isArray()) {
@@ -4919,13 +4921,14 @@ Variant HHVM_FUNCTION(iptcparse, const String& iptcblock) {
 #define PMI_YCBCR               6
 #define PMI_CIELAB              8
 
-typedef const struct {
+struct _tag_info_type {
   unsigned short Tag;
-  char *Desc;
-} tag_info_type;
+  const char *Desc;
+};
+using tag_info_type = const struct _tag_info_type;
 
-typedef tag_info_type tag_info_array[];
-typedef tag_info_type *tag_table_type;
+using tag_info_array = tag_info_type[];
+using tag_table_type = tag_info_type *;
 
 #define TAG_TABLE_END \
   {((unsigned short)TAG_NONE),           "No tag value"},\
@@ -5322,28 +5325,28 @@ static const tag_info_array tag_table_VND_OLYMPUS = {
   TAG_TABLE_END
 };
 
-typedef enum mn_byte_order_t {
+enum mn_byte_order_t {
   MN_ORDER_INTEL = 0,
   MN_ORDER_MOTOROLA = 1,
   MN_ORDER_NORMAL
-} mn_byte_order_t;
+};
 
-typedef enum mn_offset_mode_t {
+enum mn_offset_mode_t {
   MN_OFFSET_NORMAL,
   MN_OFFSET_MAKER,
   MN_OFFSET_GUESS
-} mn_offset_mode_t;
+};
 
-typedef struct {
+struct maker_note_type {
   tag_table_type tag_table;
-  char *make;
-  char *model;
-  char *id_string;
+  const char *make;
+  const char *model;
+  const char *id_string;
   int id_string_len;
   int offset;
   mn_byte_order_t byte_order;
   mn_offset_mode_t offset_mode;
-} maker_note_type;
+};
 
 static const maker_note_type maker_note_array[] = {
   { tag_table_VND_CANON, "Canon", nullptr, nullptr,
@@ -5363,7 +5366,7 @@ static const maker_note_type maker_note_array[] = {
 };
 
 /* Get headername for tag_num or nullptr if not defined */
-static char * exif_get_tagname(int tag_num, char *ret, int len,
+static const char * exif_get_tagname(int tag_num, char *ret, int len,
                                tag_table_type tag_table) {
   int i, t;
   char tmp[32];
@@ -5403,17 +5406,17 @@ static char * exif_get_tagname(int tag_num, char *ret, int len,
 #define DWORD unsigned int
 #endif
 
-typedef struct {
+struct signed_rational {
   int num;
   int den;
-} signed_rational;
+};
 
-typedef struct {
+struct unsigned_rational {
   unsigned int num;
   unsigned int den;
-} unsigned_rational;
+};
 
-typedef union _image_info_value {
+union image_info_value {
   char *s;
   unsigned u;
   int i;
@@ -5421,22 +5424,22 @@ typedef union _image_info_value {
   double d;
   signed_rational sr;
   unsigned_rational ur;
-  union _image_info_value *list;
-} image_info_value;
+  union image_info_value *list;
+};
 
-typedef struct {
+struct image_info_data {
   WORD tag;
   WORD format;
   DWORD length;
   DWORD dummy;  /* value ptr of tiff directory entry */
   char *name;
   image_info_value value;
-} image_info_data;
+};
 
-typedef struct {
+struct image_info_list {
   int count;
   image_info_data *list;
-} image_info_list;
+};
 
 #define SECTION_FILE        0
 #define SECTION_COMPUTED    1
@@ -5554,38 +5557,38 @@ static char *exif_get_sectionlist(int sectionlist) {
    Used to store camera data as extracted from the various ways that
    it can be stored in a nexif header
 */
-typedef struct {
+struct file_section {
   int type;
   size_t size;
   unsigned char *data;
-} file_section;
+};
 
-typedef struct {
+struct file_section_list {
   int count;
   file_section *list;
-} file_section_list;
+};
 
-typedef struct {
+struct thumbnail_data {
   image_filetype filetype;
   size_t width, height;
   size_t size;
   size_t offset;
   char *data;
-} thumbnail_data;
+};
 
-typedef struct {
+struct xp_field_type {
   char *value;
   size_t size;
   int tag;
-} xp_field_type;
+};
 
-typedef struct {
+struct xp_field_list {
   int count;
   xp_field_type *list;
-} xp_field_list;
+};
 
 /* This structure is used to store a section of a Jpeg file. */
-typedef struct {
+struct image_info_type {
   req::ptr<File> infile;
   String FileName;
   time_t FileDateTime;
@@ -5634,14 +5637,14 @@ typedef struct {
   int ifd_nesting_level;
   /* internal */
   file_section_list file;
-} image_info_type;
+};
 
-typedef struct {
-    int     bits_per_sample;
-    size_t  width;
-    size_t  height;
-    int     num_components;
-} jpeg_sof_info;
+struct jpeg_sof_info {
+  int     bits_per_sample;
+  size_t  width;
+  size_t  height;
+  int     num_components;
+};
 
 /* forward declarations */
 static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo,
@@ -5698,7 +5701,7 @@ static size_t php_strnlen(char* str, size_t maxlen) {
 
 /* Add a value to image_info */
 static void exif_iif_add_value(image_info_type *image_info, int section_index,
-                               char *name, int tag, int format, int length,
+                               const char *name, int tag, int format, int length,
                                void* value, int motorola_intel) {
   size_t idex;
   void *vptr;
@@ -5750,12 +5753,14 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index,
      * return;
      */
     info_data->tag = TAG_FMT_UNDEFINED;/* otherwise not freed from memory */
+    [[fallthrough]];
   case TAG_FMT_SBYTE:
   case TAG_FMT_BYTE:
     /* in contrast to strings bytes do not need to allocate buffer for
        nullptr if length==0 */
     if (!length)
       break;
+    [[fallthrough]];
   case TAG_FMT_UNDEFINED:
     if (value) {
       /* do not recompute length here */
@@ -5823,6 +5828,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index,
 
       case TAG_FMT_SINGLE:
         info_value->f = *(float *)value;
+        break;
 
       case TAG_FMT_DOUBLE:
         info_value->d = *(double *)value;
@@ -5836,7 +5842,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index,
 
 /* Add a tag from IFD to image_info */
 static void exif_iif_add_tag(image_info_type *image_info, int section_index,
-                             char *name, int tag, int format,
+                             const char *name, int tag, int format,
                              size_t length, void* value) {
   exif_iif_add_value(image_info, section_index, name, tag, format,
                      (int)length, value, image_info->motorola_intel);
@@ -6937,14 +6943,14 @@ exif_process_SOFn(unsigned char* Data, int /*marker*/, jpeg_sof_info* result) {
 
 /* Parse the marker stream until SOS or EOI is seen; */
 static int exif_scan_JPEG_header(image_info_type *ImageInfo) {
-  int section, sn;
+  int sn;
   int marker = 0, last_marker = M_PSEUDO, comment_correction=1;
   int ll, lh;
   unsigned char *Data;
   size_t fpos, size, got, itemlen;
   jpeg_sof_info  sof_info;
 
-  for(section=0;;section++) {
+  while(true) {
     // get marker byte, swallowing possible padding
     // some software does not count the length bytes of COM section
     // one company doing so is very much envolved in JPEG...
@@ -7507,6 +7513,7 @@ static void exif_iif_free(image_info_type *image_info, int section_index) {
            buffer for nullptr if length==0 */
         if (image_info->info_list[section_index].list[i].length<1)
           break;
+        [[fallthrough]];
       default:
       case TAG_FMT_UNDEFINED:
       case TAG_FMT_STRING:
@@ -7622,7 +7629,7 @@ static void exif_iif_add_int(image_info_type *image_info, int section_index,
 
 /* Add a string value to image_info MUST BE NUL TERMINATED */
 static void exif_iif_add_str(image_info_type *image_info,
-                             int section_index, char *name, char *value) {
+                             int section_index, const char *name, char *value) {
   image_info_data  *info_data;
   image_info_data  *list;
 
@@ -7863,6 +7870,7 @@ static void add_assoc_image_info(Array &value, bool sub_array,
                 }
                 break;
               }
+              [[fallthrough]];
             case TAG_FMT_USHORT:
             case TAG_FMT_ULONG:
               if (l==1) {
@@ -7891,6 +7899,7 @@ static void add_assoc_image_info(Array &value, bool sub_array,
                 }
                 break;
               }
+              [[fallthrough]];
             case TAG_FMT_SSHORT:
             case TAG_FMT_SLONG:
               if (l==1) {
@@ -7943,9 +7952,7 @@ static void add_assoc_image_info(Array &value, bool sub_array,
 }
 
 Variant HHVM_FUNCTION(exif_tagname, int64_t index) {
-  char *szTemp;
-
-  szTemp = exif_get_tagname(index, nullptr, 0, tag_table_IFD);
+  auto szTemp = exif_get_tagname(index, nullptr, 0, tag_table_IFD);
   if (index <0 || !szTemp || !szTemp[0]) {
     return false;
   } else {
@@ -8179,22 +8186,20 @@ Variant HHVM_FUNCTION(exif_imagetype, const String& filename) {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ExifExtension final : Extension {
-  ExifExtension() : Extension("exif", NO_EXTENSION_VERSION_YET) {}
+  ExifExtension() : Extension("exif", "1.0", "images_infra_backend") {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_FE(exif_imagetype);
     HHVM_FE(exif_read_data);
     HHVM_FE(exif_tagname);
     HHVM_FE(exif_thumbnail);
-
-    loadSystemlib();
   }
 } s_exif_extension;
 
 struct GdExtension final : Extension {
-  GdExtension() : Extension("gd", NO_EXTENSION_VERSION_YET) {}
+  GdExtension() : Extension("gd", "1.0", "images_infra_backend") {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_FE(gd_info);
     HHVM_FE(getimagesize);
     HHVM_FE(getimagesizefromstring);
@@ -8236,21 +8241,11 @@ struct GdExtension final : Extension {
     HHVM_FE(imagecreatefromgd);
     HHVM_FE(imagecreatefromgd2);
     HHVM_FE(imagecreatefromgif);
-#ifdef HAVE_GD_JPG
     HHVM_FE(imagecreatefromjpeg);
-#endif
-#ifdef HAVE_GD_PNG
     HHVM_FE(imagecreatefrompng);
-#endif
-#ifdef HAVE_LIBVPX
-    HHVM_FE(imagecreatefromwebp);
-#endif
     HHVM_FE(imagecreatefromstring);
     HHVM_FE(imagecreatefromwbmp);
     HHVM_FE(imagecreatefromxbm);
-#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
-    HHVM_FE(imagecreatefromxpm);
-#endif
     HHVM_FE(imagecreatetruecolor);
     HHVM_FE(imagecrop);
     HHVM_FE(imagecropauto);
@@ -8271,28 +8266,19 @@ struct GdExtension final : Extension {
     HHVM_FE(imageflip);
     HHVM_FE(imagefontheight);
     HHVM_FE(imagefontwidth);
-#if defined(ENABLE_GD_TTF) && HAVE_LIBFREETYPE
     HHVM_FE(imageftbbox);
     HHVM_FE(imagefttext);
-#endif
     HHVM_FE(imagegammacorrect);
     HHVM_FE(imagegd2);
     HHVM_FE(imagegd);
     HHVM_FE(imagegif);
     HHVM_FE(imageinterlace);
     HHVM_FE(imageistruecolor);
-#ifdef HAVE_GD_JPG
     HHVM_FE(imagejpeg);
-#endif
     HHVM_FE(imagelayereffect);
     HHVM_FE(imageline);
     HHVM_FE(imageloadfont);
-#ifdef HAVE_GD_PNG
     HHVM_FE(imagepng);
-#endif
-#ifdef HAVE_LIBVPX
-    HHVM_FE(imagewebp);
-#endif
     HHVM_FE(imagepolygon);
     HHVM_FE(imagerectangle);
     HHVM_FE(imagerotate);
@@ -8309,10 +8295,8 @@ struct GdExtension final : Extension {
     HHVM_FE(imagesx);
     HHVM_FE(imagesy);
     HHVM_FE(imagetruecolortopalette);
-#ifdef ENABLE_GD_TTF
     HHVM_FE(imagettfbbox);
     HHVM_FE(imagettftext);
-#endif
     HHVM_FE(imagetypes);
     HHVM_FE(imagewbmp);
 
@@ -8329,8 +8313,6 @@ struct GdExtension final : Extension {
     HHVM_RC_INT(IMG_JPEG, IMAGE_TYPE_JPEG);
     HHVM_RC_INT(IMG_PNG, IMAGE_TYPE_PNG);
     HHVM_RC_INT(IMG_WBMP, IMAGE_TYPE_WBMP);
-    HHVM_RC_INT(IMG_XPM, IMAGE_TYPE_XPM);
-    HHVM_RC_INT(IMG_WEBP, IMAGE_TYPE_XPM);
 
     /* special colours for gd */
     HHVM_RC_INT(IMG_COLOR_TILED, gdTiled);
@@ -8422,24 +8404,20 @@ struct GdExtension final : Extension {
     HHVM_RC_INT(IMAGETYPE_XBM, IMAGE_FILETYPE_XBM);
     HHVM_RC_INT(IMAGETYPE_ICO, IMAGE_FILETYPE_ICO);
     HHVM_RC_INT(IMAGETYPE_WEBP, IMAGE_FILETYPE_WEBP);
+    HHVM_RC_INT(IMAGETYPE_AVIF, IMAGE_FILETYPE_AVIF);
+    HHVM_RC_INT(IMAGETYPE_HEIC, IMAGE_FILETYPE_HEIC);
     HHVM_RC_INT(IMAGETYPE_UNKNOWN, IMAGE_FILETYPE_UNKNOWN);
     HHVM_RC_INT(IMAGETYPE_COUNT, IMAGE_FILETYPE_COUNT);
     HHVM_RC_INT(IMAGETYPE_SWC, IMAGE_FILETYPE_SWC);
     HHVM_RC_INT(IMAGETYPE_JPEG2000, IMAGE_FILETYPE_JPC);
 
-#ifdef GD_VERSION_STRING
     HHVM_RC_STR(GD_VERSION, GD_VERSION_STRING);
-#endif
 
-#if defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && \
-    defined(GD_RELEASE_VERSION) && defined(GD_EXTRA_VERSION)
     HHVM_RC_INT_SAME(GD_MAJOR_VERSION);
     HHVM_RC_INT_SAME(GD_MINOR_VERSION);
     HHVM_RC_INT_SAME(GD_RELEASE_VERSION);
     HHVM_RC_STR_SAME(GD_EXTRA_VERSION);
-#endif
 
-#ifdef HAVE_GD_PNG
     HHVM_RC_INT(PNG_NO_FILTER, 0x00);
     HHVM_RC_INT(PNG_FILTER_NONE, 0x08);
     HHVM_RC_INT(PNG_FILTER_SUB, 0x10);
@@ -8447,11 +8425,6 @@ struct GdExtension final : Extension {
     HHVM_RC_INT(PNG_FILTER_AVG, 0x40);
     HHVM_RC_INT(PNG_FILTER_PAETH, 0x80);
     HHVM_RC_INT(PNG_ALL_FILTERS, 0x08 | 0x10 | 0x20 | 0x40 | 0x80);
-#endif
-
-    HHVM_RC_BOOL(GD_BUNDLED, true);
-
-    loadSystemlib();
   }
 } s_gd_extension;
 

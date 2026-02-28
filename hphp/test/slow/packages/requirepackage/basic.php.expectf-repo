@@ -1,0 +1,16 @@
+f [fromPackages] abstract.php
+f [fromPackages] basic-soft.php
+f [fromPackages] basic.php
+f [fromPackages] interface.php
+f [fromPackages] noactivedeployement.php
+f [fromPackages] soft.php
+f [fromPackages] soft_sampled.php
+f [fromPackages] soft_unsampled.php
+string(9) "in A::bar"
+
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'Package bat should be loaded' in %s/requirepackage/basic.php:12
+Stack trace:
+#0 %s/requirepackage/basic.php(12): HH\invariant_violation()
+#1 %s/requirepackage/basic.php(22): b()
+#2 (): main()
+#3 {main}

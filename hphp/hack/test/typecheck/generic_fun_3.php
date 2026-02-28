@@ -1,11 +1,11 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function darray_filter<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Tv> $traversable,
   ?(function(Tv): bool) $f,
 ): darray<Tk, Tv> {
-  return darray[];
+  return dict[];
 }
 
 function is_not_null<T>(T $x): bool {
@@ -14,7 +14,7 @@ function is_not_null<T>(T $x): bool {
 class C {}
 class D {}
 function testit(varray<?C> $vc, varray<?D> $vd): void {
-  $func = fun('is_not_null');
+  $func = is_not_null<>;
   $a = darray_filter($vd, $func);
   $b = darray_filter($vc, $func);
 }

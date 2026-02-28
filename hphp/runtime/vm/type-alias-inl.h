@@ -25,46 +25,12 @@ struct StringData;
 struct ArrayData;
 
 ///////////////////////////////////////////////////////////////////////////////
-// Static constructors.
-
-inline TypeAlias TypeAlias::Invalid(const PreTypeAlias* alias) {
-  TypeAlias req(alias);
-  req.invalid = true;
-  return req;
-}
-
-inline TypeAlias TypeAlias::From(const PreTypeAlias* alias) {
-  assertx(alias->type != AnnotType::Object);
-  assertx(alias->type != AnnotType::Unresolved);
-
-  TypeAlias req(alias);
-  req.type = alias->type;
-  req.nullable = alias->nullable;
-  return req;
-}
-
-inline TypeAlias TypeAlias::From(TypeAlias req, const PreTypeAlias* alias) {
-  assertx(alias->type == AnnotType::Unresolved);
-
-  req.m_preTypeAlias = alias;
-  if (req.invalid) {
-    return req; // Do nothing.
-  }
-
-  assertx(req.type != AnnotType::Unresolved);
-  assertx((req.type == AnnotType::Object) == (req.klass != nullptr));
-  req.nullable |= alias->nullable;
-  return req;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Comparison.
 
 inline bool TypeAlias::same(const TypeAlias& req) const {
-  return (invalid && req.invalid) ||
-         (type == AnnotType::Mixed && req.type == AnnotType::Mixed) ||
-         (type == req.type && nullable == req.nullable &&
-          klass == req.klass);
+  if (invalid != req.invalid) return false;
+  if (invalid) return true;
+  return value == req.value;
 }
 
 inline bool operator==(const TypeAlias& l,

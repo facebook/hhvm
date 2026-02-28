@@ -1,0 +1,935 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "module",
+  "constants" : {
+    "myStruct" : {
+      "lineno" : 79,
+      "value" : { "major" : 42, "abstract" : "abstract", "my_enum" : 2 },
+      "type_enum" : "STRUCT",
+      "spec_args" : "MyStruct",
+      "source_range" : {
+        "begin" : {
+          "line" : 79,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 83,
+          "column" : 3
+        }
+      }
+    }
+  },
+  "includes": {
+    "cpp" : {
+      "path" : "thrift/annotation/cpp.thrift"
+    },
+    "go" : {
+      "path" : "thrift/annotation/go.thrift"
+    },
+    "hack" : {
+      "path" : "thrift/annotation/hack.thrift"
+    },
+    "thrift" : {
+      "path" : "thrift/annotation/thrift.thrift"
+    }
+  },
+  "enumerations" : {
+    "MyEnum" : {
+      "lineno" : 28,
+      "structured_annotations" : {
+        "cpp.Name" : { "value" : "YourEnum" }
+      },
+      "constants" : {
+        "MyValue1" : 0,
+        "MyValue2" : 1,
+        "DOMAIN" : 2
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 28,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 34,
+          "column" : 2
+        }
+      }
+    }
+  },
+  "typedefs" : {
+    "AwesomeStruct" : {
+      "lineno" : 74,
+      "type_enum" : "STRUCT",
+      "spec_args" : "MyStruct",
+      "structured_annotations" : {
+        "go.Name" : { "name" : "IncredibleStruct" }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 74,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 75,
+          "column" : 31
+        }
+      }
+    },
+    "FantasticStruct" : {
+      "lineno" : 76,
+      "type_enum" : "STRUCT",
+      "spec_args" : "MyStruct",
+      "structured_annotations" : {
+        "go.Name" : { "name" : "BrilliantStruct" }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 76,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 77,
+          "column" : 33
+        }
+      }
+    },
+    "list_string_6884" : {
+      "lineno" : 140,
+      "type_enum" : "LIST",
+      "spec_args" : { "type_enum" : "STRING", "spec_args" : null} ,
+      "structured_annotations" : {
+        "cpp.Type" : { "name" : "std::deque<std::string>" }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 140,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 141,
+          "column" : 38
+        }
+      }
+    }
+  },
+  "structs" : {
+    "MyStructNestedAnnotation" : {
+      "lineno" : 36,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 37,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 37,
+              "column" : 18
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 36,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 38,
+          "column" : 2
+        }
+      }
+    },
+    "MyUnion" : {
+      "lineno" : 40,
+      "is_exception" : false,
+      "is_union" : true,
+      "structured_annotations" : {
+        "cpp.Adapter" : { "name" : "::StaticCast" },
+        "cpp.Name" : { "value" : "YourUnion" }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 40,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 42,
+          "column" : 17
+        }
+      }
+    },
+    "MyException" : {
+      "lineno" : 43,
+      "is_exception" : true,
+      "is_union" : false,
+      "structured_annotations" : {
+        "cpp.Name" : { "value" : "YourException" },
+        "cpp.Adapter" : { "name" : "::StaticCast" }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 43,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 45,
+          "column" : 30
+        }
+      }
+    },
+    "MyStruct" : {
+      "lineno" : 48,
+      "is_exception" : false,
+      "is_union" : false,
+      "annotations" : {
+        "android.generate_builder" : {
+          "value" : "1",
+          "source_range" : {
+            "begin" : {
+              "line" : 70,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 70,
+              "column" : 27
+            }
+          }
+        }
+,
+        "thrift.uri" : {
+          "value" : "facebook.com/thrift/compiler/test/fixtures/basic_annotations/src/module/MyStruct",
+          "source_range" : {
+            "begin" : {
+              "line" : 71,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 71,
+              "column" : 98
+            }
+          }
+        }
+      },
+      "structured_annotations" : {
+        "cpp.Name" : { "value" : "YourStruct" },
+        "hack.Attributes" : { "attributes" : [ "\\SomeClass(\\AnotherClass::class)" ] },
+        "cpp.Adapter" : { "name" : "::StaticCast" }
+      },
+      "fields" : {
+        "major" : {
+          "type_enum" : "I64",
+          "spec_args" : null,
+          "required" : true,
+          "structured_annotations" : {
+            "cpp.Name" : { "value" : "majorVer" },
+            "go.Name" : { "name" : "MajorVer" }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 53,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 55,
+              "column" : 16
+            }
+          }
+        },
+        "abstract" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "annotations" : {
+            "java.swift.name" : {
+              "value" : "_abstract",
+              "source_range" : {
+                "begin" : {
+                  "line" : 59,
+                  "column" : 23
+                },
+                "end" : {
+                  "line" : 59,
+                  "column" : 52
+                }
+              }
+            }
+          },
+          "structured_annotations" : {
+            "go.Name" : { "name" : "AbstractName" },
+            "go.Tag" : { "tag" : "tag:\"some_abstract\"" }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 57,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 59,
+              "column" : 54
+            }
+          }
+        },
+        "annotation_with_quote" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "structured_annotations" : {
+            "go.Tag" : { "tag" : "tag:\"somevalue\"" }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 61,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 62,
+              "column" : 35
+            }
+          }
+        },
+        "class_" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "annotations" : {
+            "java.swift.name" : {
+              "value" : "class_",
+              "source_range" : {
+                "begin" : {
+                  "line" : 63,
+                  "column" : 21
+                },
+                "end" : {
+                  "line" : 63,
+                  "column" : 47
+                }
+              }
+            }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 63,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 63,
+              "column" : 49
+            }
+          }
+        },
+        "annotation_with_trailing_comma" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "annotations" : {
+            "custom" : {
+              "value" : "test",
+              "source_range" : {
+                "begin" : {
+                  "line" : 64,
+                  "column" : 45
+                },
+                "end" : {
+                  "line" : 64,
+                  "column" : 60
+                }
+              }
+            }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 64,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 64,
+              "column" : 62
+            }
+          }
+        },
+        "empty_annotations" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 65,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 65,
+              "column" : 34
+            }
+          }
+        },
+        "my_enum" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "MyEnum",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 66,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 66,
+              "column" : 21
+            }
+          }
+        },
+        "cpp_type_annotation" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "list_string_6884",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 67,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 67,
+              "column" : 43
+            }
+          }
+        },
+        "my_union" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "MyUnion",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 68,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 68,
+              "column" : 23
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 48,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 72,
+          "column" : 2
+        }
+      }
+    },
+    "SecretStruct" : {
+      "lineno" : 114,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "id" : {
+          "type_enum" : "I64",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 115,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 115,
+              "column" : 13
+            }
+          }
+        },
+        "password" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "annotations" : {
+            "java.sensitive" : {
+              "value" : "1",
+              "source_range" : {
+                "begin" : {
+                  "line" : 116,
+                  "column" : 53
+                },
+                "end" : {
+                  "line" : 116,
+                  "column" : 74
+                }
+              }
+            }
+          },
+          "structured_annotations" : {
+            "thrift.DeprecatedUnvalidatedAnnotations" : { "items" : { "java.sensitive" : "1" } }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 116,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 117,
+              "column" : 22
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 114,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 118,
+          "column" : 2
+        }
+      }
+    }
+  },
+  "services" : {
+    "MyService" : {
+      "lineno" : 85,
+      "functions" : {
+        "MyService.ping" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [
+            "MyException"
+          ],
+          "source_range" : {
+            "begin" : {
+              "line" : 86,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 86,
+              "column" : 48
+            }
+          }
+        },
+        "MyService.getRandomData" : {
+          "return_type" : {
+            "type_enum" : "STRING",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 87,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 87,
+              "column" : 26
+            }
+          }
+        },
+        "MyService.hasDataById" : {
+          "return_type" : {
+            "type_enum" : "BOOL",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "name" : "id",
+              "type_enum" : "I64",
+              "spec_args" : null
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 88,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 88,
+              "column" : 31
+            }
+          }
+        },
+        "MyService.getDataById" : {
+          "return_type" : {
+            "type_enum" : "STRING",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "name" : "id",
+              "type_enum" : "I64",
+              "spec_args" : null
+            }
+          ],
+          "throws" : [],
+          "structured_annotations" : {
+            "go.Name" : { "name" : "GoGetDataById" }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 89,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 90,
+              "column" : 33
+            }
+          }
+        },
+        "MyService.putDataById" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "name" : "id",
+              "type_enum" : "I64",
+              "spec_args" : null
+            },
+            {
+              "name" : "data",
+              "type_enum" : "STRING",
+              "spec_args" : null,
+              "structured_annotations" : {
+                "MyStructNestedAnnotation" : { "name" : "argument" }
+              }
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 91,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 95,
+              "column" : 5
+            }
+          }
+        },
+        "MyService.lobDataById" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [
+            {
+              "name" : "id",
+              "type_enum" : "I64",
+              "spec_args" : null
+            },
+            {
+              "name" : "data",
+              "type_enum" : "STRING",
+              "spec_args" : null,
+              "annotations" : {
+                "cpp.name" : {
+                  "value" : "dataStr",
+                  "source_range" : {
+                    "begin" : {
+                      "line" : 96,
+                      "column" : 54
+                    },
+                    "end" : {
+                      "line" : 96,
+                      "column" : 74
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 96,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 96,
+              "column" : 77
+            }
+          }
+        },
+        "MyService.doNothing" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "structured_annotations" : {
+            "cpp.Name" : { "value" : "cppDoNothing" },
+            "go.Name" : { "name" : "GoDoNothing" }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 97,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 99,
+              "column" : 20
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 85,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 100,
+          "column" : 2
+        }
+      }
+
+    },
+    "MyServicePrioParent" : {
+      "lineno" : 102,
+      "functions" : {
+        "MyServicePrioParent.ping" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "structured_annotations" : {
+            "thrift.Priority" : { "level" : 2 }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 103,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 104,
+              "column" : 15
+            }
+          }
+        },
+        "MyServicePrioParent.pong" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "structured_annotations" : {
+            "thrift.Priority" : { "level" : 0 }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 105,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 106,
+              "column" : 15
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 102,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 107,
+          "column" : 2
+        }
+      }
+
+    },
+    "MyServicePrioChild" : {
+      "extends" : {
+        "type_enum" : "SERVICE",
+        "spec_args" : "MyServicePrioParent"
+      },
+      "lineno" : 109,
+      "functions" : {
+        "MyServicePrioChild.pang" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "structured_annotations" : {
+            "thrift.Priority" : { "level" : 4 }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 110,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 111,
+              "column" : 15
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 109,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 112,
+          "column" : 2
+        }
+      }
+
+    },
+    "BadService" : {
+      "lineno" : 125,
+      "structured_annotations" : {
+        "cpp.Name" : { "value" : "GoodService" }
+      },
+      "functions" : {
+        "BadService.createBadInteraction" : {
+          "return_type" : {
+            "type_enum" : "SERVICE",
+            "spec_args" : "BadInteraction"
+          },
+          "args" : [],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 127,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 127,
+              "column" : 27
+            }
+          }
+        },
+        "BadService.bar" : {
+          "return_type" : {
+            "type_enum" : "I32",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 128,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 128,
+              "column" : 13
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 125,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 129,
+          "column" : 2
+        }
+      }
+
+    },
+    "FooBarBazService" : {
+      "lineno" : 131,
+      "functions" : {
+        "FooBarBazService.foo" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "structured_annotations" : {
+            "go.Name" : { "name" : "FooStructured" }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 132,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 133,
+              "column" : 14
+            }
+          }
+        },
+        "FooBarBazService.bar" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "structured_annotations" : {
+            "go.Name" : { "name" : "BarNonStructured" }
+          },
+          "source_range" : {
+            "begin" : {
+              "line" : 134,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 135,
+              "column" : 14
+            }
+          }
+        },
+        "FooBarBazService.baz" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 136,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 136,
+              "column" : 14
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 131,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 137,
+          "column" : 2
+        }
+      }
+
+    }
+  }
+}

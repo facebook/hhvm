@@ -1,20 +1,20 @@
 <?hh
 
-function f() {
+function f() :mixed{
   $x = 1;
   // HHBBC should erase the as expression
   $x as int;
   echo "done\n";
 }
 
-function g() {
+function g() :mixed{
   $x = 1;
   $x as string;
   // as will thow so, HHBBC should erase the echo
   echo "unreachable\n";
 }
 
-function h() {
+function h() :mixed{
   $x = 1;
   try {
     $x as string;
@@ -27,7 +27,7 @@ function h() {
 
 
 <<__EntryPoint>>
-function main_as_expression_hhbbc_opts() {
+function main_as_expression_hhbbc_opts() :mixed{
 f();
 try {
   g();

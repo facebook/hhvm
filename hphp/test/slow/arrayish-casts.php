@@ -2,37 +2,37 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 class A {
-  public static function meth() {}
+  public static function meth() :mixed{}
 }
 
-function foo() {}
+function foo() :mixed{}
 
-function varrayCast($x) {
+function varrayCast($x) :mixed{
   return varray($x);
 }
 
-function darrayCast($x) {
+function darrayCast($x) :mixed{
   return darray($x);
 }
 
-function dictCast($x) {
+function dictCast($x) :mixed{
   return dict($x);
 }
 
-function vecCast($x) {
+function vecCast($x) :mixed{
   return vec($x);
 }
 
-function keysetCast($x) {
+function keysetCast($x) :mixed{
   return keyset($x);
 }
 
-function getFun() {
+function getFun() :mixed{
   return __hhvm_intrinsics\launder_value(foo<>);
 }
 
-function getMeth() {
-  return __hhvm_intrinsics\launder_value(HH\class_meth(A::class, 'meth'));
+function getMeth() :mixed{
+  return __hhvm_intrinsics\launder_value(A::meth<>);
 }
 
 <<__EntryPoint>>

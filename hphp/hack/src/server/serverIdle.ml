@@ -8,8 +8,6 @@
  *)
 
 open Hh_prelude
-open String_utils
-open SearchServiceRunner
 
 (*****************************************************************************)
 (* Periodically called by the daemon *)
@@ -115,6 +113,7 @@ let exit_if_unused () =
 (* The registered jobs *)
 (*****************************************************************************)
 let init (genv : ServerEnv.genv) (root : Path.t) : unit =
+  ignore genv;
   let jobs =
     [
       (* I'm not sure explicitly invoking the Gc here is necessary, but
@@ -154,13 +153,6 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
         fun ~env ->
           EventLogger.flush ();
           env );
-      ( Periodical.always,
-        fun ~env ->
-          let ctx = Provider_utils.ctx_from_server_env env in
-          let local_symbol_table =
-            SearchServiceRunner.run genv ctx env.ServerEnv.local_symbol_table
-          in
-          { env with ServerEnv.local_symbol_table } );
       ( Periodical.one_day,
         fun ~env ->
           exit_if_unused ();
@@ -179,19 +171,19 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
             ~f:
               begin
                 fun fn ->
-                let fn = Filename.concat GlobalConfig.tmp_dir fn in
-                if
-                  (try Sys.is_directory fn with
-                  | _ -> false)
-                  (* We don't want to touch things like .watchman_failed *)
-                  || string_starts_with fn "."
-                  || not (ServerFiles.is_of_root root fn)
-                then
-                  ()
-                else
-                  Sys_utils.try_touch
-                    (Sys_utils.Touch_existing { follow_symlinks = false })
-                    fn
+                  let fn = Filename.concat GlobalConfig.tmp_dir fn in
+                  if
+                    (try Sys.is_directory fn with
+                    | _ -> false)
+                    (* We don't want to touch things like .watchman_failed *)
+                    || String.is_prefix fn ~prefix:"."
+                    || not (ServerFiles.is_of_root root fn)
+                  then
+                    ()
+                  else
+                    Sys_utils.try_touch
+                      (Sys_utils.Touch_existing { follow_symlinks = false })
+                      fn
               end
             (Sys.readdir GlobalConfig.tmp_dir);
           env );

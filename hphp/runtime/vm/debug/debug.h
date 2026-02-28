@@ -44,6 +44,7 @@ struct DebugInfo {
     pidMapOverlayStart = from;
     pidMapOverlayEnd = to;
   }
+  std::string perfMapName() const { return m_perfMapName; }
 
  private:
   void recordPerfJitTracelet(TCRange range,
@@ -56,6 +57,7 @@ struct DebugInfo {
   int perfJitDumpTrace(const void* startAddr,
                        const unsigned int size,
                        const char* symName);
+  void writeToPidMap(uint64_t start, uint64_t size, const char* name);
 
   /* maintain separate dwarf info for a and acold, so that we
    * don't emit dwarf info for the two in the same ELF file.
@@ -70,6 +72,7 @@ struct DebugInfo {
    */
   FILE* m_perfMap{nullptr};
   std::string m_perfMapName;
+  bool m_perfMapEnabled{false};
 
   /*
    * jitdump file will store the generated code in /tmp/jit-<pid>.dump

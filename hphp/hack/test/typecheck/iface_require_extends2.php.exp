@@ -1,4 +1,4 @@
-File "iface_require_extends2.php", line 23, characters 10-22:
+ERROR: File "iface_require_extends2.php", line 23, characters 10-22:
 No instance method `methodOfSuper` in `IMarked` (Typing[4053])
   File "iface_require_extends2.php", line 19, characters 19-32:
   Did you mean `methodOfMarked` instead?
@@ -6,7 +6,7 @@ No instance method `methodOfSuper` in `IMarked` (Typing[4053])
   This is why I think it is an object of type IMarked
   File "iface_require_extends2.php", line 16, characters 11-17:
   Declaration of `IMarked` is here
-File "iface_require_extends2.php", line 24, characters 11-15:
+ERROR: File "iface_require_extends2.php", line 24, characters 11-15:
 Invalid argument (Typing[4110])
   File "iface_require_extends2.php", line 29, characters 18-22:
   Expected `Super`

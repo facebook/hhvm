@@ -1,6 +1,6 @@
 <?hh
 
-function Test ($a) {
+function Test ($a) :mixed{
     if ($a<3) {
         return(3);
     }

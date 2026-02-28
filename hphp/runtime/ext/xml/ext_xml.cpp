@@ -14,16 +14,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/xml/ext_xml.h"
 
 #include <folly/ScopeGuard.h>
 
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/root-map.h"
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -44,65 +43,8 @@ enum php_xml_option {
 };
 
 static struct XMLExtension final : Extension {
-  XMLExtension() : Extension("xml", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
-    HHVM_FE(xml_parser_create);
-    HHVM_FE(xml_parser_free);
-    HHVM_FE(xml_parse);
-    HHVM_FE(xml_parse_into_struct);
-    HHVM_FE(xml_parser_create_ns);
-    HHVM_FE(xml_parser_get_option);
-    HHVM_FE(xml_parser_set_option);
-    HHVM_FE(xml_set_character_data_handler);
-    HHVM_FE(xml_set_default_handler);
-    HHVM_FE(xml_set_element_handler);
-    HHVM_FE(xml_set_processing_instruction_handler);
-    HHVM_FE(xml_set_start_namespace_decl_handler);
-    HHVM_FE(xml_set_end_namespace_decl_handler);
-    HHVM_FE(xml_set_unparsed_entity_decl_handler);
-    HHVM_FE(xml_set_external_entity_ref_handler);
-    HHVM_FE(xml_set_notation_decl_handler);
-    HHVM_FE(xml_set_object);
-    HHVM_FE(xml_get_current_byte_index);
-    HHVM_FE(xml_get_current_column_number);
-    HHVM_FE(xml_get_current_line_number);
-    HHVM_FE(xml_get_error_code);
-    HHVM_FE(xml_error_string);
-    HHVM_FE(utf8_decode);
-    HHVM_FE(utf8_encode);
-
-    HHVM_RC_INT_SAME(XML_ERROR_ASYNC_ENTITY);
-    HHVM_RC_INT_SAME(XML_ERROR_ATTRIBUTE_EXTERNAL_ENTITY_REF);
-    HHVM_RC_INT_SAME(XML_ERROR_BAD_CHAR_REF);
-    HHVM_RC_INT_SAME(XML_ERROR_BINARY_ENTITY_REF);
-    HHVM_RC_INT_SAME(XML_ERROR_DUPLICATE_ATTRIBUTE);
-    HHVM_RC_INT_SAME(XML_ERROR_EXTERNAL_ENTITY_HANDLING);
-    HHVM_RC_INT_SAME(XML_ERROR_INCORRECT_ENCODING);
-    HHVM_RC_INT_SAME(XML_ERROR_INVALID_TOKEN);
-    HHVM_RC_INT_SAME(XML_ERROR_JUNK_AFTER_DOC_ELEMENT);
-    HHVM_RC_INT_SAME(XML_ERROR_MISPLACED_XML_PI);
-    HHVM_RC_INT_SAME(XML_ERROR_NONE);
-    HHVM_RC_INT_SAME(XML_ERROR_NO_ELEMENTS);
-    HHVM_RC_INT_SAME(XML_ERROR_NO_MEMORY);
-    HHVM_RC_INT_SAME(XML_ERROR_PARAM_ENTITY_REF);
-    HHVM_RC_INT_SAME(XML_ERROR_PARTIAL_CHAR);
-    HHVM_RC_INT_SAME(XML_ERROR_RECURSIVE_ENTITY_REF);
-    HHVM_RC_INT_SAME(XML_ERROR_SYNTAX);
-    HHVM_RC_INT_SAME(XML_ERROR_TAG_MISMATCH);
-    HHVM_RC_INT_SAME(XML_ERROR_UNCLOSED_CDATA_SECTION);
-    HHVM_RC_INT_SAME(XML_ERROR_UNCLOSED_TOKEN);
-    HHVM_RC_INT_SAME(XML_ERROR_UNDEFINED_ENTITY);
-    HHVM_RC_INT_SAME(XML_ERROR_UNKNOWN_ENCODING);
-
-    HHVM_RC_INT(XML_OPTION_CASE_FOLDING,    PHP_XML_OPTION_CASE_FOLDING);
-    HHVM_RC_INT(XML_OPTION_TARGET_ENCODING, PHP_XML_OPTION_TARGET_ENCODING);
-    HHVM_RC_INT(XML_OPTION_SKIP_TAGSTART,   PHP_XML_OPTION_SKIP_TAGSTART);
-    HHVM_RC_INT(XML_OPTION_SKIP_WHITE,      PHP_XML_OPTION_SKIP_WHITE);
-
-    HHVM_RC_STR(XML_SAX_IMPL, "expat");
-
-    loadSystemlib();
-  }
+  XMLExtension() : Extension("xml", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  void moduleRegisterNative() override;
 } s_xml_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -112,7 +54,7 @@ struct XmlParser : SweepableResourceData {
   XmlParser() {}
   ~XmlParser() override;
   void cleanupImpl();
-  CLASSNAME_IS("xml");
+  CLASSNAME_IS("xml")
   const String& o_getClassNameHook() const override;
 
   int case_folding{0};
@@ -194,11 +136,11 @@ inline void clearParser(const req::ptr<XmlParser>& p) {
 
 }
 
-typedef struct {
+struct xml_encoding {
   XML_Char *name;
   char (*decoding_function)(unsigned short);
   unsigned short (*encoding_function)(unsigned char);
-} xml_encoding;
+};
 
 static XML_Char * xml_globals_default_encoding = (XML_Char*)"UTF-8";
 // for xml_parse_into_struct
@@ -754,7 +696,7 @@ static void xml_set_handler(Variant * handler, const Variant& data) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Resource HHVM_FUNCTION(xml_parser_create,
+OptResource HHVM_FUNCTION(xml_parser_create,
                        const Variant& encoding /* = uninit_variant */) {
   const String& strEncoding = encoding.isNull()
                             ? null_string
@@ -762,7 +704,7 @@ Resource HHVM_FUNCTION(xml_parser_create,
   return php_xml_parser_create_impl(strEncoding, null_string, 0).toResource();
 }
 
-Resource HHVM_FUNCTION(xml_parser_create_ns,
+OptResource HHVM_FUNCTION(xml_parser_create_ns,
                        const Variant& encoding /* = uninit_variant */,
                        const Variant& separator /* = uninit_variant */) {
   const String& strEncoding = encoding.isNull()
@@ -775,7 +717,7 @@ Resource HHVM_FUNCTION(xml_parser_create_ns,
 }
 
 bool HHVM_FUNCTION(xml_parser_free,
-                   const Resource& parser) {
+                   const OptResource& parser) {
   auto p = cast<XmlParser>(parser);
   if (p->isparsing == 1) {
     raise_warning("Parser cannot be freed while it is parsing.");
@@ -786,7 +728,7 @@ bool HHVM_FUNCTION(xml_parser_free,
 }
 
 int64_t HHVM_FUNCTION(xml_parse,
-                      const Resource& parser,
+                      const OptResource& parser,
                       const String& data,
                       bool is_final /* = true */) {
   // XML_Parse can reenter the VM, and it will do so after we've lost
@@ -804,7 +746,7 @@ int64_t HHVM_FUNCTION(xml_parse,
 }
 
 int64_t HHVM_FUNCTION(xml_parse_into_struct,
-                      const Resource& parser,
+                      const OptResource& parser,
                       const String& data,
                       Array& values,
                       Array& index) {
@@ -834,7 +776,7 @@ int64_t HHVM_FUNCTION(xml_parse_into_struct,
 }
 
 Variant HHVM_FUNCTION(xml_parser_get_option,
-                      const Resource& parser,
+                      const OptResource& parser,
                       int64_t option) {
   auto p = cast<XmlParser>(parser);
   switch (option) {
@@ -850,7 +792,7 @@ Variant HHVM_FUNCTION(xml_parser_get_option,
 }
 
 bool HHVM_FUNCTION(xml_parser_set_option,
-                   const Resource& parser,
+                   const OptResource& parser,
                    int64_t option,
                    const Variant& value) {
   auto p = cast<XmlParser>(parser);
@@ -883,7 +825,7 @@ bool HHVM_FUNCTION(xml_parser_set_option,
 }
 
 bool HHVM_FUNCTION(xml_set_character_data_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& handler) {
   auto p = cast<XmlParser>(parser);
   xml_set_handler(&p->characterDataHandler, handler);
@@ -892,7 +834,7 @@ bool HHVM_FUNCTION(xml_set_character_data_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_default_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& handler) {
   auto p = cast<XmlParser>(parser);
   xml_set_handler(&p->defaultHandler, handler);
@@ -901,7 +843,7 @@ bool HHVM_FUNCTION(xml_set_default_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_element_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& start_element_handler,
                    const Variant& end_element_handler) {
   auto p = cast<XmlParser>(parser);
@@ -913,7 +855,7 @@ bool HHVM_FUNCTION(xml_set_element_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_processing_instruction_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& handler) {
   auto p = cast<XmlParser>(parser);
   xml_set_handler(&p->processingInstructionHandler, handler);
@@ -923,7 +865,7 @@ bool HHVM_FUNCTION(xml_set_processing_instruction_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_start_namespace_decl_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& handler) {
   auto p = cast<XmlParser>(parser);
   xml_set_handler(&p->startNamespaceDeclHandler, handler);
@@ -932,7 +874,7 @@ bool HHVM_FUNCTION(xml_set_start_namespace_decl_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_end_namespace_decl_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& handler) {
   auto p = cast<XmlParser>(parser);
   xml_set_handler(&p->endNamespaceDeclHandler, handler);
@@ -941,7 +883,7 @@ bool HHVM_FUNCTION(xml_set_end_namespace_decl_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_unparsed_entity_decl_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& handler) {
   auto p = cast<XmlParser>(parser);
   xml_set_handler(&p->unparsedEntityDeclHandler, handler);
@@ -950,7 +892,7 @@ bool HHVM_FUNCTION(xml_set_unparsed_entity_decl_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_external_entity_ref_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& handler) {
   auto p = cast<XmlParser>(parser);
   xml_set_handler(&p->externalEntityRefHandler, handler);
@@ -959,7 +901,7 @@ bool HHVM_FUNCTION(xml_set_external_entity_ref_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_notation_decl_handler,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& handler) {
   auto p = cast<XmlParser>(parser);
   xml_set_handler(&p->notationDeclHandler, handler);
@@ -968,7 +910,7 @@ bool HHVM_FUNCTION(xml_set_notation_decl_handler,
 }
 
 bool HHVM_FUNCTION(xml_set_object,
-                   const Resource& parser,
+                   const OptResource& parser,
                    const Variant& object) {
   auto p = cast<XmlParser>(parser);
   p->object = object;
@@ -976,25 +918,25 @@ bool HHVM_FUNCTION(xml_set_object,
 }
 
 int64_t HHVM_FUNCTION(xml_get_current_byte_index,
-                      const Resource& parser) {
+                      const OptResource& parser) {
   auto p = cast<XmlParser>(parser);
   return XML_GetCurrentByteIndex(p->parser);
 }
 
 int64_t HHVM_FUNCTION(xml_get_current_column_number,
-                      const Resource& parser) {
+                      const OptResource& parser) {
   auto p = cast<XmlParser>(parser);
   return XML_GetCurrentColumnNumber(p->parser);
 }
 
 int64_t HHVM_FUNCTION(xml_get_current_line_number,
-                      const Resource& parser) {
+                      const OptResource& parser) {
   auto p = cast<XmlParser>(parser);
   return XML_GetCurrentLineNumber(p->parser);
 }
 
 int64_t HHVM_FUNCTION(xml_get_error_code,
-                      const Resource& parser) {
+                      const OptResource& parser) {
   auto p = cast<XmlParser>(parser);
   return XML_GetErrorCode(p->parser);
 }
@@ -1032,6 +974,65 @@ String HHVM_FUNCTION(utf8_encode,
   assertx(newlen <= maxSize);
   str.shrink(newlen);
   return str;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void XMLExtension::moduleRegisterNative() {
+  HHVM_FE(xml_parser_create);
+  HHVM_FE(xml_parser_free);
+  HHVM_FE(xml_parse);
+  HHVM_FE(xml_parse_into_struct);
+  HHVM_FE(xml_parser_create_ns);
+  HHVM_FE(xml_parser_get_option);
+  HHVM_FE(xml_parser_set_option);
+  HHVM_FE(xml_set_character_data_handler);
+  HHVM_FE(xml_set_default_handler);
+  HHVM_FE(xml_set_element_handler);
+  HHVM_FE(xml_set_processing_instruction_handler);
+  HHVM_FE(xml_set_start_namespace_decl_handler);
+  HHVM_FE(xml_set_end_namespace_decl_handler);
+  HHVM_FE(xml_set_unparsed_entity_decl_handler);
+  HHVM_FE(xml_set_external_entity_ref_handler);
+  HHVM_FE(xml_set_notation_decl_handler);
+  HHVM_FE(xml_set_object);
+  HHVM_FE(xml_get_current_byte_index);
+  HHVM_FE(xml_get_current_column_number);
+  HHVM_FE(xml_get_current_line_number);
+  HHVM_FE(xml_get_error_code);
+  HHVM_FE(xml_error_string);
+  HHVM_FE(utf8_decode);
+  HHVM_FE(utf8_encode);
+
+  HHVM_RC_INT_SAME(XML_ERROR_ASYNC_ENTITY);
+  HHVM_RC_INT_SAME(XML_ERROR_ATTRIBUTE_EXTERNAL_ENTITY_REF);
+  HHVM_RC_INT_SAME(XML_ERROR_BAD_CHAR_REF);
+  HHVM_RC_INT_SAME(XML_ERROR_BINARY_ENTITY_REF);
+  HHVM_RC_INT_SAME(XML_ERROR_DUPLICATE_ATTRIBUTE);
+  HHVM_RC_INT_SAME(XML_ERROR_EXTERNAL_ENTITY_HANDLING);
+  HHVM_RC_INT_SAME(XML_ERROR_INCORRECT_ENCODING);
+  HHVM_RC_INT_SAME(XML_ERROR_INVALID_TOKEN);
+  HHVM_RC_INT_SAME(XML_ERROR_JUNK_AFTER_DOC_ELEMENT);
+  HHVM_RC_INT_SAME(XML_ERROR_MISPLACED_XML_PI);
+  HHVM_RC_INT_SAME(XML_ERROR_NONE);
+  HHVM_RC_INT_SAME(XML_ERROR_NO_ELEMENTS);
+  HHVM_RC_INT_SAME(XML_ERROR_NO_MEMORY);
+  HHVM_RC_INT_SAME(XML_ERROR_PARAM_ENTITY_REF);
+  HHVM_RC_INT_SAME(XML_ERROR_PARTIAL_CHAR);
+  HHVM_RC_INT_SAME(XML_ERROR_RECURSIVE_ENTITY_REF);
+  HHVM_RC_INT_SAME(XML_ERROR_SYNTAX);
+  HHVM_RC_INT_SAME(XML_ERROR_TAG_MISMATCH);
+  HHVM_RC_INT_SAME(XML_ERROR_UNCLOSED_CDATA_SECTION);
+  HHVM_RC_INT_SAME(XML_ERROR_UNCLOSED_TOKEN);
+  HHVM_RC_INT_SAME(XML_ERROR_UNDEFINED_ENTITY);
+  HHVM_RC_INT_SAME(XML_ERROR_UNKNOWN_ENCODING);
+
+  HHVM_RC_INT(XML_OPTION_CASE_FOLDING,    PHP_XML_OPTION_CASE_FOLDING);
+  HHVM_RC_INT(XML_OPTION_TARGET_ENCODING, PHP_XML_OPTION_TARGET_ENCODING);
+  HHVM_RC_INT(XML_OPTION_SKIP_TAGSTART,   PHP_XML_OPTION_SKIP_TAGSTART);
+  HHVM_RC_INT(XML_OPTION_SKIP_WHITE,      PHP_XML_OPTION_SKIP_WHITE);
+
+  HHVM_RC_STR(XML_SAX_IMPL, "expat");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

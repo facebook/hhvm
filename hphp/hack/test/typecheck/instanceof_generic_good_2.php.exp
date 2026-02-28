@@ -1,4 +1,4 @@
-File "instanceof_generic_good_2.php", line 14, characters 31-44:
+ERROR: File "instanceof_generic_good_2.php", line 14, characters 31-44:
 Invalid return type (Typing[4336])
   File "instanceof_generic_good_2.php", line 16, characters 16-25:
   Expected `TvInternal`

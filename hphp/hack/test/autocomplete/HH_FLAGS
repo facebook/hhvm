@@ -1,1 +1,2 @@
 --auto-complete
+--extra-builtin ./hhi/extra_builtin_named_params.hhi

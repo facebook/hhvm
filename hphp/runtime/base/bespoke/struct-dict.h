@@ -21,11 +21,19 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/key-order.h"
 #include "hphp/runtime/base/bespoke/layout.h"
+#include "hphp/runtime/base/bespoke/struct-data-layout.h"
 #include "hphp/runtime/base/string-data.h"
+
+#include "hphp/util/configs/eval.h"
 
 namespace HPHP::bespoke {
 
 struct StructLayout;
+
+namespace detail_struct_data_layout {
+struct TypePosValLayout;
+struct UnalignedTVLayout;
+}
 
 /*
  * Hidden-class style layout for a dict/darray. Static string keys are stored
@@ -33,17 +41,24 @@ struct StructLayout;
  * to physical slots. Each array has space for all of its layout's slots.
  */
 struct StructDict : public BespokeArray {
-  static StructDict* MakeFromVanilla(ArrayData* ad, const StructLayout* layout);
+
+  static StructDict* MakeFromVanilla(ArrayData*, const StructLayout*);
 
   template<bool Static>
   static StructDict* MakeReserve(const StructLayout* layout, bool legacy);
 
   static StructDict* MakeEmpty(const StructLayout* layout);
-  static StructDict* AllocStructDict(uint8_t sizeIndex, uint32_t extra);
+  static StructDict* AllocStructDict(uint8_t sizeIndex,
+                                     uint32_t extra,
+                                     bool mayContainCounted);
 
-  static StructDict* MakeStructDict(
-      uint8_t sizeIndex, uint32_t extra, uint32_t size,
+  static StructDict* MakeStructDictSmall(
+      uint8_t sizeIndex, uint32_t extra, uint32_t size, bool mayContainCounted,
       const uint8_t* slots, const TypedValue* vals);
+
+  static StructDict* MakeStructDictBig(
+      uint8_t sizeIndex, uint32_t extra, uint32_t size, bool mayContainCounted,
+      const uint16_t* slots, const TypedValue* vals);
 
   static size_t sizeFromLayout(const StructLayout*);
 
@@ -61,48 +76,54 @@ struct StructDict : public BespokeArray {
   BESPOKE_LAYOUT_FUNCTIONS(StructDict)
 #undef X
 
+  bool isBigStruct() const;
+
   const StructLayout* layout() const;
 
   size_t numFields() const;
-  size_t typeOffset() const;
-  size_t valueOffset() const;
+
   size_t positionOffset() const;
 
-  const DataType* rawTypes() const;
-  DataType* rawTypes();
-  const Value* rawValues() const;
-  Value* rawValues();
-  const uint8_t* rawPositions() const;
-  uint8_t* rawPositions();
-  TypedValue typedValueUnchecked(Slot slot) const;
+  const void* rawPositions() const;
+  void* rawPositions();
+
+  tv_lval lvalUnchecked(Slot slot);
+  tv_rval rvalUnchecked(Slot slot) const;
 
   ArrayData* escalateWithCapacity(size_t capacity, const char* reason) const;
   arr_lval elemImpl(StringData* k, bool throwOnMissing);
   StructDict* copy() const;
+  bool mayContainCounted() const { return m_aux16 & kMayContainCounted; }
   void incRefValues();
   void decRefValues();
 
   void addNextSlot(Slot slot);
-  void removeSlot(Slot slot);
-  Slot getSlotInPos(size_t pos) const;
   bool checkInvariants() const;
 
-  static constexpr size_t valueOffsetOffset() {
-    return offsetof(StructDict, m_extra_hi8);
+  static size_t numFieldsOffset() {
+    return StructDataLayout::numFieldsOffset();
   }
-  static constexpr size_t valueOffsetSize() {
-    return sizeof(m_extra_hi8);
-  }
-
-  static constexpr size_t numFieldsOffset() {
-    return offsetof(StructDict, m_extra_lo8);
-  }
-  static constexpr size_t numFieldsSize() {
-    return sizeof(m_extra_lo8);
+  static size_t numFieldsSize() {
+    return StructDataLayout::numFieldsSize();
   }
 
   static TypedValue NvGetStrNonStatic(
       const StructDict* sad, const StringData* k);
+
+  friend detail_struct_data_layout::TypePosValLayout;
+  friend detail_struct_data_layout::UnalignedTVLayout;
+
+private:
+  template<typename PosType>
+  static StructDict* MakeFromVanillaImpl(ArrayData*, const StructLayout*);
+
+  template<typename PosType>
+  static StructDict* MakeStructDict(
+    uint8_t sizeIndex, uint32_t extra, uint32_t size, bool mayContainCounted,
+    const PosType* slots, const TypedValue* tvs);
+
+  template<typename PosType> void removeSlot(Slot slot);
+  template<typename PosType> Slot getSlotInPos(size_t pos) const;
 };
 
 /*
@@ -121,8 +142,9 @@ struct StructDict : public BespokeArray {
  *     make some fields required, we can skip existence checks on lookup.
  */
 struct StructLayout : public ConcreteLayout {
+
   struct Field {
-    LowStringPtr key;
+    PackedStringPtr key;
     bool required = false;
     uint8_t type_mask = 0;
 
@@ -147,10 +169,12 @@ struct StructLayout : public ConcreteLayout {
   static const StructLayout* GetLayout(const FieldVector&, bool create);
   static const StructLayout* Deserialize(LayoutIndex index, const FieldVector&);
 
+  bool isBigStruct() const;
   size_t numFields() const;
   size_t sizeIndex() const;
   uint32_t extraInitializer() const;
   size_t numRequiredFields() const { return m_num_required_fields; }
+  bool mayContainCounted() const { return m_may_contain_counted; }
 
   static Slot keySlot(LayoutIndex index, const StringData* key);
   static Slot keySlotStatic(LayoutIndex index, const StringData* key);
@@ -161,11 +185,6 @@ struct StructLayout : public ConcreteLayout {
 
   const Field& field(Slot slot) const;
 
-  // Types come first in a StructDict payload, so this offset can be static.
-  static constexpr size_t staticTypeOffset() { return sizeof(StructDict); }
-
-  size_t typeOffset() const { return typeOffsetForSlot(0); }
-  size_t valueOffset() const { return valueOffsetForSlot(0); }
   size_t positionOffset() const;
 
   // Offset of DataType and Value for 'slot' from beginning of a StructDict.
@@ -191,30 +210,43 @@ struct StructLayout : public ConcreteLayout {
 
   Optional<int64_t> numElements() const override;
 
-  void createColoringHashMap() const;
+  void createColoringHashMap(size_t numColoredFields) const;
 
   // Perfect hashing implementation.
+  // If maybeDup is true, a hash miss does not imply that the field is not
+  // present in the layout and StructLayout::m_key_to_slot needs to be checked.
   struct PerfectHashEntry {
-    LowStringPtr str;
-    uint16_t valueOffset;
+    PackedStringPtr str;
     uint8_t typeMask;
-    uint8_t slot;
+    bool maybeDup;
+    uint16_t slot;
   };
+  static_assert(!use_lowptr || sizeof(PerfectHashEntry) == 8);
 
-  static constexpr size_t kMaxColor = 255;
+  static constexpr size_t kMaxColor = 511;
+  static_assert(kMaxColor > 2);
   using PerfectHashTable = PerfectHashEntry[kMaxColor + 1];
 
   static PerfectHashTable* hashTable(const Layout* layout);
   static PerfectHashTable* hashTableSet();
+  static size_t maxColoredFields();
+  static void setMaxColoredFields(size_t);
 
   static constexpr size_t fieldsOffset() {
     return offsetof(StructLayout, m_fields);
   }
 
+  static size_t maxNumKeys() {
+    return std::min<size_t>(
+      Cfg::Eval::BespokeStructDictMaxNumKeys,
+      std::numeric_limits<StructDataLayout::PosType>::max()
+    );
+  }
+
 private:
   // Callers must check whether the key is static before using one of these
   // wrapper types. The wrappers dispatch to the right hash/equal function.
-  struct StaticKey { LowStringPtr key; };
+  struct StaticKey { PackedStringPtr key; };
   struct NonStaticKey { const StringData* key; };
 
   // Use heterogeneous lookup to optimize the lookup for static keys.
@@ -235,21 +267,17 @@ private:
 
   StructLayout(LayoutIndex index, const FieldVector&);
 
-  // Fields used to initialize a new StructDict. The "m_extra_initializer" is
-  // computed when we create the layout and used to initialize three fields in
-  // the array header in one go in the JIT.
-  //
-  // The field's layout should pun our usage of ArrayData's m_extra field.
+  friend detail_struct_data_layout::TypePosValLayout;
+  friend detail_struct_data_layout::UnalignedTVLayout;
+
   union {
-    struct {
-      uint8_t m_num_fields;
-      uint8_t m_value_offset_in_values;
-      bespoke::LayoutIndex m_layout_index;
-    };
+    StructDataLayout::HeaderData m_header;
     uint32_t m_extra_initializer;
   };
+  static_assert(sizeof(StructDataLayout::HeaderData) == 4);
   uint8_t m_size_index;
-  uint8_t m_num_required_fields = 0;
+  bool m_may_contain_counted;
+  uint16_t m_num_required_fields = 0;
 
   folly::F14FastMap<StaticKey, Slot, Hash, Equal> m_key_to_slot;
 
@@ -271,4 +299,7 @@ struct TopStructLayout : public AbstractLayout {
   Type getTypeBound(Type slot) const override;
 };
 
+// This returns a valid number after FinalizeHierarchy
+// in non-jumpstart consumers only.
+size_t numStructLayoutsCreated();
 }

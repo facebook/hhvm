@@ -15,7 +15,7 @@ var_dump(setlocale(LC_NUMERIC, "fr-CH"));
 var_dump(setlocale(LC_NUMERIC, "fr-FR"));
 // var_dump(setlocale(LC_NUMERIC, "XXX"));  // returns False as there is no such locale on system
 
-$s = varray[
+$s = vec[
     "",
     "0", "00", "0377", "0xEEFFAA00", "0X1234EF",
     " 0", "  00", "   0377", "    0xEEFFAA00", "     0X1234EF",

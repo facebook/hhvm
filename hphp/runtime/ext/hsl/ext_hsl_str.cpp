@@ -27,13 +27,8 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/system/systemlib.h"
 
-#include <functional>
-
 #include <unicode/locid.h>
 #include <unicode/unistr.h>
-#include <unicode/uchar.h>
-
-#include <ctype.h>
 
 namespace HPHP {
 namespace {
@@ -236,7 +231,7 @@ Array HHVM_FUNCTION(split_l,
                     const Variant& limit,
                     const Variant& maybe_loc) {
   if (str.empty()) {
-    return make_vec_array(empty_string());
+    return  make_vec_array(empty_string());
   }
 
   int64_t int_limit = limit.isNull() ? k_PHP_INT_MAX : limit.asInt64Val();
@@ -246,7 +241,6 @@ Array HHVM_FUNCTION(split_l,
   if (int_limit < 0) {
     SystemLib::throwInvalidArgumentExceptionObject("Limit must be >= 0");
   }
-
   return get_ops(maybe_loc)->split(str, delimiter, int_limit);
 }
 
@@ -443,12 +437,14 @@ String HHVM_FUNCTION(replace_every_nonrecursive_ci_l,
 }
 
 struct HSLStrExtension final : Extension {
-  HSLStrExtension() : Extension("hsl_str", "0.1") {}
+  HSLStrExtension() : Extension("hsl_str", "0.1", NO_ONCALL_YET) {}
 
   void moduleInit() override {
     s_byte_ops = new HSLLocaleByteOps();
     s_bytes_locale = Locale::getCLocale().get();
+  }
 
+  void moduleRegisterNative() override {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\strlen_l, strlen_l);
     // - clang doesn't like the HHVM_FALIAS macro with \\u
     // - \\\\ gets different results in gcc, leading to 'undefined native function'
@@ -499,8 +495,6 @@ struct HSLStrExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_every_ci_l, replace_every_ci_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_every_nonrecursive_l, replace_every_nonrecursive_l);
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_every_nonrecursive_ci_l, replace_every_nonrecursive_ci_l);
-
-    loadSystemlib();
   }
 } s_hsl_str_extension;
 

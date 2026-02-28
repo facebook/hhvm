@@ -1,0 +1,742 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#pragma once
+
+#include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+#include <thrift/compiler/ast/t_program.h>
+#include <thrift/compiler/ast/uri.h>
+#include <thrift/compiler/generate/cpp/util.h>
+#include <thrift/compiler/generate/t_whisker_generator.h>
+#include <thrift/compiler/sema/sema_context.h>
+#include <thrift/compiler/whisker/mstch_compat.h>
+
+namespace apache::thrift::compiler {
+
+class mstch_base;
+struct mstch_context;
+
+struct mstch_element_position {
+  mstch_element_position() = default;
+  mstch_element_position(size_t index, size_t size)
+      : index(index), first(index == 0), last(index == size - 1) {}
+
+  int32_t index = 0;
+  bool first = false;
+  bool last = false;
+};
+
+// A factory creating mstch objects wrapping Thrift AST nodes.
+// Node: A Thrift AST node type to be wrapped.
+// Args: Additional arguments passed to an mstch object constructor.
+template <typename Node, typename... Args>
+class mstch_factory {
+ public:
+  using node_type = Node; // Thrift AST node type.
+
+  virtual ~mstch_factory() = default;
+
+  // Creates an mstch object that wraps a Thrift AST node and provides access
+  // to its properties. The `ctx` object is owned by `t_mstch_generator` and
+  // persists throughout the generation phase.
+  virtual std::shared_ptr<mstch_base> make_mstch_object(
+      const Node* node,
+      mstch_context& ctx,
+      mstch_element_position pos = {},
+      Args...) const = 0;
+
+  std::shared_ptr<mstch_base> make_mstch_object(
+      const Node& node,
+      mstch_context& ctx,
+      mstch_element_position pos = {},
+      Args... args) const {
+    return make_mstch_object(&node, ctx, pos, args...);
+  }
+};
+
+using mstch_program_factory = mstch_factory<t_program>;
+using mstch_service_factory = mstch_factory<t_service>;
+using mstch_interaction_factory =
+    mstch_factory<t_interaction, const t_service*>;
+using mstch_function_factory = mstch_factory<t_function>;
+using mstch_type_factory = mstch_factory<t_type>;
+using mstch_typedef_factory = mstch_factory<t_typedef>;
+using mstch_struct_factory = mstch_factory<t_structured>;
+using mstch_field_factory = mstch_factory<t_field>;
+using mstch_enum_factory = mstch_factory<t_enum>;
+using mstch_const_factory =
+    mstch_factory<t_const, const t_const*, const t_field*>;
+using mstch_stream_factory = mstch_factory<t_stream>;
+
+class mstch_factories {
+ public:
+  std::unique_ptr<mstch_program_factory> program_factory;
+  std::unique_ptr<mstch_service_factory> service_factory;
+  std::unique_ptr<mstch_interaction_factory> interaction_factory;
+  std::unique_ptr<mstch_function_factory> function_factory;
+  std::unique_ptr<mstch_type_factory> type_factory;
+  std::unique_ptr<mstch_typedef_factory> typedef_factory;
+  std::unique_ptr<mstch_struct_factory> struct_factory;
+  std::unique_ptr<mstch_field_factory> field_factory;
+  std::unique_ptr<mstch_enum_factory> enum_factory;
+  std::unique_ptr<mstch_const_factory> const_factory;
+
+  mstch_factories();
+
+  struct no_data {};
+
+  // Adds a factory for the mstch object type MstchType.
+  // data: Optional data to be passed by value as the last argument to an
+  //       mstch object constructor.
+  //
+  // Example:
+  //   factories.set<my_mstch_program>();
+  //
+  // where my_mstch_program is a subclass of mstch_program.
+  template <typename MstchType, typename Data = no_data>
+  void add(Data data = {}) {
+    typename MstchType::ast_type* tag = nullptr;
+    make<MstchType>(get(tag), data);
+  }
+
+ protected:
+  ~mstch_factories() = default;
+
+ private:
+  template <typename Data, typename MstchType, typename Node, typename... Args>
+  class mstch_factory_impl : public mstch_factory<Node, Args...> {
+   private:
+    Data data_;
+
+   public:
+    explicit mstch_factory_impl(Data data) : data_(data) {}
+
+    std::shared_ptr<mstch_base> make_mstch_object(
+        const Node* node,
+        mstch_context& ctx,
+        mstch_element_position pos,
+        Args... args) const override {
+      return std::make_shared<MstchType>(node, ctx, pos, args..., data_);
+    }
+  };
+
+  template <typename MstchType, typename Node, typename... Args>
+  class mstch_factory_impl<no_data, MstchType, Node, Args...>
+      : public mstch_factory<Node, Args...> {
+   public:
+    explicit mstch_factory_impl(no_data) {}
+
+    std::shared_ptr<mstch_base> make_mstch_object(
+        const Node* node,
+        mstch_context& ctx,
+        mstch_element_position pos,
+        Args... args) const override {
+      return std::make_shared<MstchType>(node, ctx, pos, args...);
+    }
+  };
+
+  // Returns a factory using a pointer to AST type for tag dispatch.
+  auto& get(t_program*) { return program_factory; }
+  auto& get(t_service*) { return service_factory; }
+  auto& get(t_interaction*) { return interaction_factory; }
+  auto& get(t_function*) { return function_factory; }
+  auto& get(t_type*) { return type_factory; }
+  auto& get(t_typedef*) { return typedef_factory; }
+  auto& get(t_structured*) { return struct_factory; }
+  auto& get(t_field*) { return field_factory; }
+  auto& get(t_enum*) { return enum_factory; }
+  auto& get(t_const*) { return const_factory; }
+
+  template <typename MstchType, typename Node, typename... Args, typename Data>
+  void make(std::unique_ptr<mstch_factory<Node, Args...>>& factory, Data data) {
+    using factory_impl = mstch_factory_impl<Data, MstchType, Node, Args...>;
+    factory = std::make_unique<factory_impl>(data);
+  }
+};
+
+// Mstch object construction context.
+struct mstch_context : mstch_factories {
+  using compiler_options_map = std::map<std::string, std::string, std::less<>>;
+  const compiler_options_map* options = nullptr;
+
+  std::unordered_map<std::string, std::shared_ptr<mstch_base>> enum_cache;
+  std::unordered_map<std::string, std::shared_ptr<mstch_base>> struct_cache;
+  std::unordered_map<std::string, std::shared_ptr<mstch_base>> service_cache;
+  std::unordered_map<std::string, std::shared_ptr<mstch_base>> program_cache;
+
+  node_metadata_cache metadata_cache;
+
+  const whisker::prototype_database* prototypes = nullptr;
+  const whisker_generator_context* whisker_context = nullptr;
+
+  node_metadata_cache& cache() { return metadata_cache; }
+};
+
+std::shared_ptr<mstch_base> make_mstch_program_cached(
+    const t_program* program,
+    mstch_context& ctx,
+    mstch_element_position pos = {});
+
+std::shared_ptr<mstch_base> make_mstch_service_cached(
+    const t_program* program,
+    const t_service* service,
+    mstch_context& ctx,
+    mstch_element_position pos = {});
+
+// A base class for mstch object types that wrap Thrift AST nodes. It is called
+// mstch_base rather than mstch_node to avoid confusion with mstch::node.
+class mstch_base : public mstch::object {
+ public:
+  mstch_base(mstch_context& ctx, mstch_element_position pos)
+      : context_(ctx), pos_(pos) {
+    register_methods(
+        this,
+        {
+            {"first?", &mstch_base::first},
+            {"last?", &mstch_base::last},
+        });
+  }
+  virtual ~mstch_base() = default;
+
+  mstch::node first() { return pos_.first; }
+  mstch::node last() { return pos_.last; }
+
+  template <typename T>
+  whisker::object make_self(const T& node) {
+    return whisker::object(
+        whisker::native_handle<T>(
+            whisker::manage_as_static(node), context_.prototypes->of<T>()));
+  }
+
+  template <typename Container, typename Factory, typename... Args>
+  mstch::array make_mstch_array(
+      const Container& container, const Factory& factory, const Args&... args) {
+    mstch::array a;
+    size_t i = 0;
+    for (auto&& element : container) {
+      auto pos = mstch_element_position(i, container.size());
+      a.push_back(factory.make_mstch_object(element, context_, pos, args...));
+      ++i;
+    }
+    return a;
+  }
+
+  template <typename C, typename... Args>
+  mstch::array make_mstch_services(const C& container, const Args&... args) {
+    return make_mstch_array(container, context_.service_factory.get(), args...);
+  }
+
+  template <typename C, typename... Args>
+  mstch::array make_mstch_interactions(
+      const C& container,
+      const t_service* containing_service,
+      const Args&... args) {
+    if (context_.interaction_factory) {
+      return make_mstch_array(
+          container,
+          *context_.interaction_factory,
+          args...,
+          containing_service);
+    }
+    return make_mstch_array(container, *context_.service_factory);
+  }
+
+  template <typename C, typename... Args>
+  mstch::array make_mstch_fields(const C& container, const Args&... args) {
+    return make_mstch_array(container, *context_.field_factory, args...);
+  }
+
+  template <typename C, typename... Args>
+  mstch::array make_mstch_functions(const C& container, const Args&... args) {
+    return make_mstch_array(container, *context_.function_factory, args...);
+  }
+
+  template <typename C, typename... Args>
+  mstch::array make_mstch_typedefs(const C& container, const Args&... args) {
+    return make_mstch_array(container, *context_.typedef_factory, args...);
+  }
+
+  template <typename C, typename... Args>
+  mstch::array make_mstch_types(const C& container, const Args&... args) {
+    return make_mstch_array(container, *context_.type_factory, args...);
+  }
+
+  template <typename Item, typename Factory, typename Cache>
+  mstch::node make_mstch_element_cached(
+      const Item& item,
+      const Factory& factory,
+      Cache& cache,
+      const std::string& id,
+      size_t element_index,
+      size_t element_count) {
+    std::string elem_id = id + item->name();
+    auto itr = cache.find(elem_id);
+    if (itr == cache.end()) {
+      auto pos = mstch_element_position(element_index, element_count);
+      itr = cache.emplace_hint(
+          itr, elem_id, factory.make_mstch_object(item, context_, pos));
+    }
+    return itr->second;
+  }
+
+  template <typename Container, typename Factory, typename Cache>
+  mstch::array make_mstch_array_cached(
+      const Container& container,
+      const Factory& factory,
+      Cache& cache,
+      const std::string& id) {
+    mstch::array a;
+    for (size_t i = 0; i < container.size(); ++i) {
+      a.push_back(make_mstch_element_cached(
+          container[i], factory, cache, id, i, container.size()));
+    }
+    return a;
+  }
+
+  bool has_option(const std::string& option) const;
+  std::string get_option(const std::string& option) const;
+
+ protected:
+  mstch_context& context_;
+  const mstch_element_position pos_;
+
+  const whisker_generator_context& whisker_context() const {
+    return *context_.whisker_context;
+  }
+};
+
+class mstch_program : public mstch_base {
+ public:
+  using ast_type = t_program;
+
+  mstch_program(
+      const t_program* p, mstch_context& ctx, mstch_element_position pos)
+      : mstch_base(ctx, pos), program_(p) {
+    register_methods(
+        this,
+        {
+            {"self", &mstch_program::self},
+            {"program:self", &mstch_program::self},
+            {"program:structs", &mstch_program::structs},
+            {"program:enums", &mstch_program::enums},
+            {"program:services", &mstch_program::services},
+            {"program:interactions", &mstch_program::interactions},
+            {"program:typedefs", &mstch_program::typedefs},
+            {"program:constants", &mstch_program::constants},
+        });
+  }
+
+  virtual std::string get_program_namespace(const t_program*) { return {}; }
+
+  whisker::object self() { return make_self(*program_); }
+
+  mstch::node structs();
+  mstch::node enums();
+  mstch::node services();
+  mstch::node interactions();
+  mstch::node typedefs();
+  mstch::node constants();
+
+ protected:
+  const t_program* program_;
+};
+
+class mstch_service : public mstch_base {
+ public:
+  using ast_type = t_service;
+
+  mstch_service(
+      const t_service* s,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_service* containing_service = nullptr)
+      : mstch_base(ctx, pos),
+        service_(s),
+        containing_service_(containing_service),
+        functions_(s->functions().copy()) {
+    assert(containing_service_ == nullptr || service_->is<t_interaction>());
+
+    register_methods(
+        this,
+        {
+            {"self", &mstch_service::self_unqualified},
+            {"service:self", &mstch_service::self_service},
+            // In mstch, interactions are bound as "service:*" and
+            // "service:self" defaults to the t_service prototype. This provides
+            // a way to access the interaction Whisker prototype from mstch
+            {"interaction:self", &mstch_service::self_interaction},
+
+            {"service:functions", &mstch_service::functions},
+            {"service:functions?", &mstch_service::has_functions},
+            {"service:extends", &mstch_service::extends},
+            {"service:extends?", &mstch_service::has_extends},
+            {"service:streams?", &mstch_service::has_streams},
+            {"service:sinks?", &mstch_service::has_sinks},
+            {"service:parent_service_name",
+             &mstch_service::parent_service_name},
+            {"service:interactions", &mstch_service::interactions},
+            {"service:interactions?", &mstch_service::has_interactions},
+        });
+
+    // Collect performed interactions and cache them.
+    std::set<const t_interaction*> seen;
+    for (const auto* function : get_functions()) {
+      if (const t_type_ref& interaction_ref = function->interaction()) {
+        const t_interaction& interaction = interaction_ref->as<t_interaction>();
+        if (!seen.insert(&interaction).second) {
+          continue; // Already seen this interaction.
+        }
+        interactions_.push_back(&interaction);
+      }
+    }
+  }
+
+  virtual std::string get_service_namespace(const t_program*) { return {}; }
+
+  /** Un-qualified self - return most derived prototype */
+  whisker::object self_unqualified() {
+    if (const t_interaction* interaction = service_->try_as<t_interaction>()) {
+      return make_self<t_interaction>(*interaction);
+    }
+    return make_self<t_service>(*service_);
+  }
+  /**
+   * service:self - returns service prototype, but accepts interactions for
+   * backwards compatibility
+   */
+  whisker::object self_service() { return make_self<t_service>(*service_); }
+  /** interaction:self - must be an interaction */
+  whisker::object self_interaction() {
+    if (const t_interaction* interaction = service_->try_as<t_interaction>()) {
+      return make_self<t_interaction>(*interaction);
+    }
+    throw whisker::eval_error("interaction:self used on non-interaction node");
+  }
+  mstch::node has_functions() { return !get_functions().empty(); }
+  mstch::node has_extends() { return service_->extends() != nullptr; }
+  mstch::node functions();
+  mstch::node extends();
+
+  mstch::node parent_service_name() { return parent_service()->name(); }
+
+  mstch::node has_streams() {
+    auto& funcs = get_functions();
+    return std::any_of(funcs.cbegin(), funcs.cend(), [](const auto& func) {
+      return func->stream() != nullptr;
+    });
+  }
+
+  mstch::node has_sinks() {
+    auto& funcs = get_functions();
+    return std::any_of(funcs.cbegin(), funcs.cend(), [](const auto& func) {
+      return func->sink() != nullptr;
+    });
+  }
+
+  mstch::node has_interactions() { return !interactions_.empty(); }
+  mstch::node interactions() {
+    return make_mstch_interactions(interactions_, service_);
+  }
+  mstch::node is_interaction() { return service_->is<t_interaction>(); }
+
+  ~mstch_service() override = default;
+
+ protected:
+  const t_service* service_;
+  std::vector<const t_interaction*> interactions_;
+
+  // If `service_` is really an interaction, `containing_service_` is the
+  // service it belongs to.
+  const t_service* containing_service_ = nullptr;
+
+  mstch::node make_mstch_extended_service_cached(const t_service* service);
+  virtual const std::vector<const t_function*>& get_functions() const {
+    // Ideally, we would make this return node_list_view<const t_function> (i.e.
+    // service_->functions() directly), but the cpp2 generator overrides this
+    // method with an implementation returning a subset.
+    // Since node_list_view<T> must be over an std::vector<std::unique_ptr<T>>,
+    // and we can't steal ownership of all the functions, we must make a copy.
+    return functions_;
+  }
+  const t_service* parent_service() const {
+    return service_->is<t_interaction>() ? containing_service_ : service_;
+  }
+
+ private:
+  std::vector<const t_function*> functions_;
+};
+
+class mstch_function : public mstch_base {
+ public:
+  using ast_type = t_function;
+
+  mstch_function(
+      const t_function* f, mstch_context& ctx, mstch_element_position pos)
+      : mstch_base(ctx, pos), function_(f) {
+    register_methods(
+        this,
+        {
+            {"self", &mstch_function::self},
+            {"function:self", &mstch_function::self},
+            {"function:return_type", &mstch_function::return_type},
+            {"function:exceptions", &mstch_function::exceptions},
+            {"function:args", &mstch_function::arg_list},
+
+            // Sink methods:
+            {"function:sink_first_response_type",
+             &mstch_function::sink_first_response_type},
+            {"function:sink_elem_type", &mstch_function::sink_elem_type},
+            {"function:sink_exceptions", &mstch_function::sink_exceptions},
+            {"function:sink_final_response_type",
+             &mstch_function::sink_final_reponse_type},
+            {"function:sink_final_response_exceptions",
+             &mstch_function::sink_final_response_exceptions},
+
+            // Stream methods:
+            {"function:stream_first_response_type",
+             &mstch_function::stream_first_response_type},
+            {"function:stream_elem_type", &mstch_function::stream_elem_type},
+            {"function:stream_exceptions", &mstch_function::stream_exceptions},
+        });
+  }
+
+  whisker::object self() { return make_self(*function_); }
+
+  mstch::node return_type();
+  mstch::node exceptions();
+
+  mstch::node arg_list();
+
+  mstch::node sink_first_response_type();
+  mstch::node sink_elem_type();
+  mstch::node sink_exceptions();
+  mstch::node sink_final_reponse_type();
+  mstch::node sink_final_response_exceptions();
+
+  mstch::node stream_elem_type();
+  mstch::node stream_first_response_type();
+  mstch::node stream_exceptions();
+
+ protected:
+  const t_function* function_;
+
+  mstch::node make_exceptions(const t_throws* exceptions) {
+    return exceptions ? make_mstch_fields(exceptions->fields()) : mstch::node();
+  }
+
+  const t_interface& interface() const {
+    const t_interface* parent =
+        whisker_context().get_function_parent(function_);
+    assert(parent != nullptr);
+    return *parent;
+  }
+};
+
+class mstch_type : public mstch_base {
+ public:
+  using ast_type = t_type;
+
+  mstch_type(const t_type* t, mstch_context& ctx, mstch_element_position pos)
+      : mstch_base(ctx, pos), type_(t), resolved_type_(t->get_true_type()) {
+    register_methods(
+        this,
+        {
+            {"self", &mstch_type::self},
+            {"type:self", &mstch_type::self},
+            {"type:structured", &mstch_type::get_structured},
+            {"type:enum", &mstch_type::get_enum},
+            {"type:list_elem_type", &mstch_type::get_list_type},
+            {"type:set_elem_type", &mstch_type::get_set_type},
+            {"type:key_type", &mstch_type::get_key_type},
+            {"type:value_type", &mstch_type::get_value_type},
+            {"type:typedef_type", &mstch_type::get_typedef_type},
+            {"type:typedef", &mstch_type::get_typedef},
+        });
+  }
+
+  whisker::object self() {
+    return resolve_derived_t_type(*context_.prototypes, *type_);
+  }
+
+  virtual std::string get_type_namespace(const t_program*) { return ""; }
+  mstch::node get_structured();
+  mstch::node get_enum();
+  mstch::node get_list_type();
+  mstch::node get_set_type();
+  mstch::node get_key_type();
+  mstch::node get_value_type();
+  mstch::node get_typedef_type();
+  mstch::node get_typedef();
+
+ protected:
+  const t_type* type_;
+  const t_type* resolved_type_;
+};
+
+class mstch_typedef : public mstch_base {
+ public:
+  using ast_type = t_typedef;
+
+  mstch_typedef(
+      const t_typedef* t, mstch_context& ctx, mstch_element_position pos)
+      : mstch_base(ctx, pos), typedef_(t) {
+    register_methods(
+        this,
+        {
+            {"self", &mstch_typedef::self},
+            {"typedef:self", &mstch_typedef::self},
+            {"typedef:type", &mstch_typedef::type},
+        });
+  }
+
+  whisker::object self() { return make_self(*typedef_); }
+  mstch::node type();
+
+ protected:
+  const t_typedef* typedef_;
+};
+
+class mstch_struct : public mstch_base {
+ public:
+  using ast_type = t_structured;
+
+  mstch_struct(
+      const t_structured* s, mstch_context& ctx, mstch_element_position pos)
+      : mstch_base(ctx, pos), struct_(s) {
+    register_methods(
+        this,
+        {
+            {"self", &mstch_struct::self},
+            {"struct:self", &mstch_struct::self},
+            // In mstch, exceptions are bound as "struct:*" and "struct:self"
+            // defaults to the t_structured prototype. This provides a way to
+            // access the exception Whisker prototype from mstch
+            {"exception:self", &mstch_struct::self_exception},
+
+            {"struct:fields", &mstch_struct::fields},
+            {"struct:fields_in_serialization_order",
+             &mstch_struct::fields_in_serialization_order},
+        });
+  }
+
+  whisker::object self() {
+    return resolve_derived_t_type(*context_.prototypes, *struct_);
+  }
+  whisker::object self_exception() {
+    if (const t_exception* ex = struct_->try_as<t_exception>()) {
+      return make_self<t_exception>(*ex);
+    }
+
+    throw whisker::eval_error("exception:self used on non-exception node");
+  }
+  mstch::node fields();
+
+  mstch::node fields_in_serialization_order() {
+    if (struct_->has_structured_annotation(kSerializeInFieldIdOrderUri)) {
+      return make_mstch_fields(struct_->fields_id_order());
+    }
+
+    return make_mstch_fields(struct_->fields());
+  }
+
+ protected:
+  const t_structured* struct_;
+};
+
+class mstch_field : public mstch_base {
+ public:
+  using ast_type = t_field;
+
+  mstch_field(const t_field* f, mstch_context& ctx, mstch_element_position pos)
+      : mstch_base(ctx, pos), field_(f) {
+    register_methods(
+        this,
+        {
+            {"self", &mstch_field::self},
+            {"field:self", &mstch_field::self},
+            {"field:type", &mstch_field::type},
+            {"field:index", &mstch_field::index},
+        });
+  }
+
+  whisker::object self() { return make_self(*field_); }
+  mstch::node type();
+  mstch::node index() { return pos_.index; }
+
+ protected:
+  const t_field* field_;
+};
+
+class mstch_enum : public mstch_base {
+ public:
+  using ast_type = t_enum;
+
+  mstch_enum(const t_enum* e, mstch_context& ctx, mstch_element_position pos)
+      : mstch_base(ctx, pos), enum_(e) {
+    register_methods(
+        this,
+        {
+            {"self", &mstch_enum::self},
+            {"enum:self", &mstch_enum::self},
+        });
+  }
+
+  whisker::object self() { return make_self(*enum_); }
+
+ protected:
+  const t_enum* enum_;
+};
+
+class mstch_const : public mstch_base {
+ public:
+  using ast_type = t_const;
+
+  mstch_const(
+      const t_const* c,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_const* current_const,
+      const t_field* field)
+      : mstch_base(ctx, pos),
+        const_(c),
+        current_const_(current_const),
+        field_(field) {
+    register_methods(
+        this,
+        {
+            {"self", &mstch_const::self},
+            {"constant:self", &mstch_const::self},
+            {"constant:type", &mstch_const::type},
+        });
+  }
+
+  whisker::object self() { return make_self(*const_); }
+  mstch::node type();
+
+ protected:
+  const t_const* const_;
+  const t_const* current_const_;
+  const t_field* field_;
+};
+
+} // namespace apache::thrift::compiler

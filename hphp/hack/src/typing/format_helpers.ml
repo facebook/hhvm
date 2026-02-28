@@ -81,7 +81,16 @@ let colon ppf _ =
 
 let semicolon ppf _ = string ppf ";"
 
+let semi_sep ppf _ =
+  semicolon ppf ();
+  sp ppf ()
+
 let arrow ppf _ = string ppf "->"
+
+let with_ ppf _ =
+  sp ppf ();
+  string ppf "with";
+  sp ppf ()
 
 let fat_arrow ppf _ =
   sp ppf ();

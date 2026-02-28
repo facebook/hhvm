@@ -1,0 +1,10 @@
+int(1)
+int(1)
+
+Warning: Argument 2 passed to Foo::foo1() must be upper-bounded by int, string given
+int(1)
+int(1)
+int(1)
+int(1)
+
+Warning: Argument 1 passed to Foo::foo3() must be upper-bounded by int, string given

@@ -1,0 +1,6 @@
+ERROR: File "parameter_modifiers_readonly_inout.php", line 4, characters 42-43:
+Inout readonly parameters are not currently supported (Parsing[1002])
+ERROR: File "parameter_modifiers_readonly_inout.php", line 5, characters 32-36:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_readonly_inout.php", line 5, characters 32-36:
+Encountered unexpected text `inout`, was expecting a type hint. (Parsing[1002])

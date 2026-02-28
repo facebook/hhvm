@@ -12,7 +12,7 @@ namespace Test {
     }
   }
 
-  function foo() {
+  function foo() :mixed{
     $custom_map = new Map();
     \var_dump($custom_map is \HH\Map); // False
   }
@@ -21,7 +21,7 @@ namespace Test {
 
 namespace {
 
-  function bar() {
+  function bar() :mixed{
     $builtin_map = new Map();
     \var_dump($builtin_map is HH\Map); // True
   }

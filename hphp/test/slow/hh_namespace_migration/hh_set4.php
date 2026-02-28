@@ -11,12 +11,12 @@ class Set {
   }
 }
 
-function main() {
+function main() :mixed{
   $custom_set = new Set();
 }
 
 
 <<__EntryPoint>>
-function main_hh_set4() {
+function main_hh_set4() :mixed{
 main();
 }

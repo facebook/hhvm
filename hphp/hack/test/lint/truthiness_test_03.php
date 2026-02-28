@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test(Traversable<int> $x): void {
   if ($x) {

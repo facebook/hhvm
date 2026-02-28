@@ -1,15 +1,15 @@
 <?hh
 
 class Foo {
-  static $heh = varray[];
-  function go() {
-    self::$heh = varray[self::$heh];
+  public static $heh = vec[];
+  function go() :mixed{
+    self::$heh = vec[self::$heh];
   }
 }
 
 
 <<__EntryPoint>>
-function main_public_static_props_005() {
+function main_public_static_props_005() :mixed{
 (new Foo)->go();
 var_dump(Foo::$heh);
 }

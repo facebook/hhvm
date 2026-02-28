@@ -49,21 +49,6 @@ inline bool ffs64(I64 input, J64 &out) {
     :
     "cc"
   );
-#elif defined(__powerpc64__)
-  // In PowerPC 64, bit 0 is the most significant
-  asm volatile (
-    "neg    %0, %2\n\t"     // 2-complement of input, using retval as temp
-    "and    %0, %2, %0\n\t"
-    "cntlzd %1, %0\n\t"     // count leading zeros (starting from index 0)
-    "cmpdi  %1, 64\n\t"
-    "li     %0, 1\n\t"      // using retval as temp
-    "iseleq %0, 0, %0\n\t"  // (input == 0) ? 0 : 1
-    "neg    %1, %1\n\t"
-    "addi   %1, %1, 63\n\t":// 63 - amount of leading zeros -> position in LSB
-    "+r"(retval), "=r"(out):// +r else %0 and %2 will be the same register
-    "r"(input):
-    "cr0"
-  );
 #else
   out = folly::findFirstSet(input);
   retval = input != 0;
@@ -94,19 +79,6 @@ inline bool fls64(I64 input, J64 &out) {
     "r"(input):
     "cc"
   );
-#elif defined(__powerpc64__)
-  // In PowerPC 64, bit 0 is the most significant
-  asm volatile (
-    "cntlzd %1, %2\n\t"     // count leading zeros (starting from index 0)
-    "cmpdi  %1, 64\n\t"
-    "li     %0, 1\n\t"      // using retval as temp
-    "iseleq %0, 0, %0\n\t"  // (input == 0) ? 0 : 1
-    "neg    %1, %1\n\t"
-    "addi   %1, %1, 63\n\t":// 63 - amount of leading zeros -> position in LSB
-    "=r"(retval), "=r"(out):
-    "r"(input):
-    "cr0"
-  );
 #else
   out = folly::findLastSet(input) - 1;
   retval = input != 0;
@@ -127,13 +99,6 @@ inline size_t fls64(size_t x) {
            : "r"(x)    // Inputs.
            );
   return ret;
-#elif defined(__powerpc64__)
-  size_t ret;
-  __asm__ ("cntlzd %0, %1"
-           : "=r"(ret) // Outputs.
-           : "r"(x)    // Inputs.
-           );
-  return 63 - ret;
 #elif defined(__aarch64__)
   size_t ret;
   __asm__ ("clz %x0, %x1"
@@ -201,4 +166,3 @@ inline bool bitvec_test(const uint64_t* bits, size_t index) {
 }
 
 } // HPHP
-

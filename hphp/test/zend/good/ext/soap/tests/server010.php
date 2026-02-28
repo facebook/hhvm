@@ -2,12 +2,13 @@
 class foo {
   private $sum = 0;
 
-  function Sum($num) {
-    return $this->sum += $num;
+  function Sum($num) :mixed{
+    $this->sum += $num;
+    return $this->sum;
   }
 }
 <<__EntryPoint>> function main(): void {
-$server = new soapserver(null,darray['uri'=>"http://testuri.org"]);
+$server = new SoapServer(null,dict['uri'=>"http://testuri.org"]);
 $server->setClass("foo");
 $server->setpersistence(SOAP_PERSISTENCE_REQUEST);
 

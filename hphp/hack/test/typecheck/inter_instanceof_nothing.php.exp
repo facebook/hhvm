@@ -1,1 +1,2 @@
-No errors
+WARN: File "inter_instanceof_nothing.php", line 20, characters 6-12:
+This `is` check is always `false`. The expression on the left has type `null` which shares no values with `A`. (Warn[12010])

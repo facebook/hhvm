@@ -8,6 +8,6 @@ interface A {
 }
 
  <<__EntryPoint>>
-function main_1241() {
+function main_1241() :mixed{
 $obj = new C();
 }

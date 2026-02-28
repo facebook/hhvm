@@ -21,12 +21,11 @@
 #include <algorithm>
 #include <utility>
 
-#include "hphp/util/trace.h"
-
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/decref-profile.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
-#include "hphp/runtime/vm/jit/irgen-inlining.h"
+#include "hphp/runtime/vm/jit/irgen-control.h"
+#include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -37,9 +36,11 @@
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
+#include "hphp/util/configs/sandbox.h"
+#include "hphp/util/trace.h"
+
 namespace HPHP::jit::irgen {
 
-TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 // Convenient short-hand state accessors
@@ -51,7 +52,8 @@ inline SSATmp* sp(const IRGS& env) { return env.irb->fs().sp(); }
 inline SSATmp* anyStackRegister(const IRGS& env) {
   if (sp(env)->inst()->is(DefRegSP)) return sp(env);
   assertx(sp(env)->inst()->is(DefFrameRelSP));
-  assertx(sp(env)->inst()->src(0)->inst()->is(DefFP, DefFuncEntryFP));
+  assertx(sp(env)->inst()->src(0)->inst()->is(
+    DefFP, DefFuncEntryFP, EnterFrame));
   return sp(env)->inst()->src(0);
 }
 
@@ -108,13 +110,24 @@ inline SSATmp* curRequiredCoeffects(IRGS& env) {
 }
 
 inline SSATmp* curCoeffects(IRGS& env) {
+  auto const op = curSrcKey(env).op();
+  if (op == Op::IterGetKey || op == Op::IterGetValue) {
+    // Match C++ implementation in iter.cpp.
+    return cns(env, RuntimeCoeffects::fixme().value());
+  }
   auto const coeffects = curRequiredCoeffects(env);
   auto const mask = [&]() -> RuntimeCoeffects::storage_t {
     auto const escapes = curFunc(env)->coeffectEscapes();
-    if (curSrcKey(env).op() != Op::FCallCtor) return escapes.value();
+    if (op != Op::FCallCtor) return escapes.value();
     return escapes.value() | RuntimeCoeffects::write_this_props().value();
   }();
   return gen(env, OrInt, coeffects, cns(env, mask));
+}
+
+inline RuntimeCoeffects providedCoeffectsKnownStatically(const Func* func) {
+  assertx(!func->hasCoeffectsLocal());
+  return RuntimeCoeffects::fromValue(func->requiredCoeffects().value() |
+                                     func->coeffectEscapes().value());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -125,7 +138,13 @@ inline Block* defBlock(IRGS& env, Block::Hint hint = Block::Hint::Neither) {
 }
 
 inline void hint(IRGS& env, Block::Hint h) {
-  env.irb->curBlock()->setHint(h);
+  // Force IRBuilder to start a new block if we're currently at a block end,
+  // it's likely that the caller intended for only the ->next() branch of this
+  // block to be marked as unlikely.
+  if (!env.irb->inUnreachableState()) {
+    env.irb->ensureBlockAppendable();
+    env.irb->curBlock()->setHint(h);
+  }
 }
 
 /*
@@ -171,6 +190,21 @@ template<> struct BranchPairImpl<SSATmp*> {
   }
 };
 
+inline void jmp(IRGS& env, Block* target) {
+  // Nothing to do.
+  if (env.irb->inUnreachableState()) return;
+
+  // If the last instruction ends the block, avoid new Jmp-only block.
+  auto const cur = env.irb->curBlock();
+  if (!cur->empty() && cur->back().isBlockEnd()) {
+    assertx(!cur->back().isTerminal());
+    cur->back().setNext(target);
+    return;
+  }
+
+  gen(env, Jmp, target);
+}
+
 /*
  * cond() generates if-then-else blocks within a trace.  The caller supplies
  * lambdas to create the branch, next-body, and taken-body.  The next and
@@ -185,20 +219,24 @@ template<> struct BranchPairImpl<SSATmp*> {
  */
 template<class Branch, class Next, class Taken>
 SSATmp* cond(IRGS& env, Branch branch, Next next, Taken taken) {
-  auto const taken_block = defBlock(env);
-  auto const done_block  = defBlock(env);
+  auto const hint = env.irb->curBlock()->hint();
+  auto const taken_block = defBlock(env, std::min(hint, Block::Hint::Neither));
+  auto const done_block  = defBlock(env, hint);
 
   // Jmp to the done block with the given tmp. Returns a tmp whose type we
   // should union into the phi at the start of the done block, or nullptr,
   // if the block constructor didn't return a tmp.
   auto const jmp_to_done = [&](SSATmp* tmp) -> SSATmp* {
-    if (tmp && env.irb->inUnreachableState()) {
-      return cns(env, TBottom);
-    } else if (tmp) {
-      gen(env, Jmp, done_block, tmp);
-    } else {
-      gen(env, Jmp, done_block);
+    if (!tmp) {
+      jmp(env, done_block);
+      return nullptr;
     }
+
+    if (env.irb->inUnreachableState()) {
+      return cns(env, TBottom);
+    }
+
+    gen(env, Jmp, done_block, tmp);
     return tmp;
   };
 
@@ -206,11 +244,14 @@ SSATmp* cond(IRGS& env, Branch branch, Next next, Taken taken) {
   auto const v1 = jmp_to_done(BranchImpl<T>::go(branch, taken_block, next));
 
   env.irb->appendBlock(taken_block);
-  auto const v2 = jmp_to_done(taken());
+  auto const v2 = !env.irb->inUnreachableState()
+    ? jmp_to_done(taken())
+    : (v1 != nullptr ? cns(env, TBottom) : nullptr);
   assertx(!v1 == !v2);
 
   env.irb->appendBlock(done_block);
   if (v1) {
+    if (env.irb->inUnreachableState()) return cns(env, TBottom);
     auto const bcctx = env.irb->nextBCContext();
     auto const label = env.unit.defLabel(1, done_block, bcctx);
     auto const result = label->dst(0);
@@ -233,8 +274,9 @@ std::pair<SSATmp*, SSATmp*> condPair(IRGS& env,
                                      Branch branch,
                                      Next next,
                                      Taken taken) {
-  auto const taken_block = defBlock(env);
-  auto const done_block  = defBlock(env);
+  auto const hint = env.irb->curBlock()->hint();
+  auto const taken_block = defBlock(env, std::min(hint, Block::Hint::Neither));
+  auto const done_block  = defBlock(env, hint);
 
   using T = decltype(branch(taken_block));
   auto const v1 = BranchPairImpl<T>::go(branch, taken_block, next);
@@ -263,88 +305,26 @@ std::pair<SSATmp*, SSATmp*> condPair(IRGS& env,
  *
  * Code emitted in the {next,taken} lambda will be executed iff the branch
  * emitted in the branch lambda is {not,} taken.
- *
- * TODO(#11019533): Fix undefined behavior if any of the blocks ends up
- * unreachable as a result of simplification (or funky irgen).
  */
 template<class Branch, class Next, class Taken>
 void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
-  auto const next_block  = defBlock(env);
-  auto const taken_block = defBlock(env);
-  auto const done_block  = defBlock(env);
+  auto const hint = env.irb->curBlock()->hint();
+  auto const taken_block = defBlock(env, std::min(hint, Block::Hint::Neither));
+  auto const done_block = defBlock(env, hint);
 
   branch(taken_block);
-  auto const branch_block = env.irb->curBlock();
 
-  if (branch_block->empty() || !branch_block->back().isBlockEnd()) {
-    gen(env, Jmp, next_block);
-  } else if (!branch_block->back().isTerminal()) {
-    branch_block->back().setNext(next_block);
+  if (!env.irb->inUnreachableState()) {
+    next();
+    jmp(env, done_block);
   }
-  // The above logic ensures that `branch_block' always ends with an
-  // isBlockEnd() instruction, so its out state is meaningful.
-  env.irb->fs().setSaveOutState(branch_block);
-  env.irb->appendBlock(next_block);
-  next();
 
-  // Patch the last block added by the Next lambda to jump to the done block.
-  // Note that last might not be taken_block.
-  auto const cur = env.irb->curBlock();
-  if (cur->empty() || !cur->back().isBlockEnd()) {
-    gen(env, Jmp, done_block);
-  } else if (!cur->back().isTerminal()) {
-    cur->back().setNext(done_block);
-  }
   env.irb->appendBlock(taken_block);
-  taken();
-
-  // Patch the last block added by the Taken lambda to jump to the done block.
-  // Note that last might not be taken_block.
-  auto const last = env.irb->curBlock();
-  if (last->empty() || !last->back().isBlockEnd()) {
-    gen(env, Jmp, done_block);
-  } else if (!last->back().isTerminal()) {
-    last->back().setNext(done_block);
+  if (!env.irb->inUnreachableState()) {
+    taken();
+    jmp(env, done_block);
   }
-  env.irb->appendBlock(done_block);
-}
 
-/*
- * Implementation for ifThen() and ifElse().
- *
- * TODO(#11019533): Fix undefined behavior if any of the blocks ends up
- * unreachable as a result of simplification (or funky irgen).
- */
-template<bool on_true, class Branch, class Succ>
-void ifBranch(IRGS& env, Branch branch, Succ succ) {
-  auto const succ_block = defBlock(env);
-  auto const done_block = defBlock(env);
-
-  auto const cond_block    = on_true ? succ_block : done_block;
-  auto const default_block = on_true ? done_block : succ_block;
-
-  branch(cond_block);
-  auto const branch_block = env.irb->curBlock();
-
-  if (branch_block->empty() || !branch_block->back().isBlockEnd()) {
-    gen(env, Jmp, default_block);
-  } else if (!branch_block->back().isTerminal()) {
-    branch_block->back().setNext(default_block);
-  }
-  // The above logic ensures that `branch_block' always ends with an
-  // isBlockEnd() instruction, so its out state is meaningful.
-  env.irb->fs().setSaveOutState(branch_block);
-  env.irb->appendBlock(succ_block);
-  succ();
-
-  // Patch the last block added by `succ' to jump to the done block.  Note that
-  // `last' might not be `succ_block'.
-  auto const last = env.irb->curBlock();
-  if (last->empty() || !last->back().isBlockEnd()) {
-    gen(env, Jmp, done_block);
-  } else if (!last->back().isTerminal()) {
-    last->back().setNext(done_block);
-  }
   env.irb->appendBlock(done_block);
 }
 
@@ -356,7 +336,7 @@ void ifBranch(IRGS& env, Branch branch, Succ succ) {
  */
 template<class Branch, class Taken>
 void ifThen(IRGS& env, Branch branch, Taken taken) {
-  ifBranch<true>(env, branch, taken);
+  ifThenElse(env, branch, []{}, taken);
 }
 
 /*
@@ -367,7 +347,17 @@ void ifThen(IRGS& env, Branch branch, Taken taken) {
  */
 template<class Branch, class Next>
 void ifElse(IRGS& env, Branch branch, Next next) {
-  ifBranch<false>(env, branch, next);
+  auto const hint = env.irb->curBlock()->hint();
+  auto const done_block = defBlock(env, hint);
+
+  branch(done_block);
+
+  if (!env.irb->inUnreachableState()) {
+    next();
+    jmp(env, done_block);
+  }
+
+  env.irb->appendBlock(done_block);
 }
 
 /*
@@ -540,7 +530,7 @@ inline SSATmp* pop(IRGS& env, GuardConstraint gc = DataTypeSpecific) {
   auto const knownType = env.irb->stack(offset, gc).type;
   auto value = gen(env, LdStk, knownType, IRSPRelOffsetData{offset}, sp(env));
   env.irb->fs().decBCSPDepth();
-  FTRACE(2, "popping {}\n", *value->inst());
+  FTRACE_MOD(Trace::hhir, 2, "popping {}\n", *value->inst());
   return value;
 }
 
@@ -548,7 +538,10 @@ inline SSATmp* popC(IRGS& env, GuardConstraint gc = DataTypeSpecific) {
   return assertType(pop(env, gc), TInitCell);
 }
 
-inline SSATmp* popCU(IRGS& env) { return assertType(pop(env), TCell); }
+inline SSATmp* popCU(IRGS& env) {
+  return assertType(pop(env, DataTypeGeneric), TCell);
+}
+
 inline SSATmp* popU(IRGS& env) {
   auto const offset = offsetFromIRSP(env, BCSPRelOffset{0});
   gen(env, AssertStk, TUninit, IRSPRelOffsetData{offset}, sp(env));
@@ -559,7 +552,8 @@ inline void discard(IRGS& env, uint32_t n = 1) {
   env.irb->fs().decBCSPDepth(n);
 }
 
-inline void decRef(IRGS& env, SSATmp* tmp, DecRefProfileId locId) {
+inline void decRef(IRGS& env, SSATmp* tmp,
+                   DecRefProfileId locId = DecRefProfileId::Default) {
   gen(env, DecRef, DecRefData(static_cast<int>(locId)), tmp);
 }
 
@@ -567,14 +561,15 @@ inline void decRefNZ(IRGS& env, SSATmp* tmp, int locId=-1) {
   gen(env, DecRefNZ, DecRefData(locId), tmp);
 }
 
-inline void popDecRef(
-    IRGS& env, DecRefProfileId locId, GuardConstraint gc = DataTypeGeneric) {
+inline void popDecRef(IRGS& env,
+                      DecRefProfileId locId = DecRefProfileId::Default,
+                      GuardConstraint gc = DataTypeGeneric) {
   auto const val = pop(env, gc);
   decRef(env, val, locId);
 }
 
 inline SSATmp* push(IRGS& env, SSATmp* tmp) {
-  FTRACE(2, "pushing {}\n", *tmp->inst());
+  FTRACE_MOD(Trace::hhir, 2, "pushing {}\n", *tmp->inst());
   env.irb->fs().incBCSPDepth();
   auto const offset = offsetFromIRSP(env, BCSPRelOffset{0});
   gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), tmp);
@@ -601,7 +596,7 @@ inline void allocActRec(IRGS& env) {
 
 inline Type topType(IRGS& env, BCSPRelOffset idx = BCSPRelOffset{0},
                     GuardConstraint gc = DataTypeSpecific) {
-  FTRACE(5, "Asking for type of stack elem {}\n", idx.offset);
+  FTRACE_MOD(Trace::hhir, 5, "Asking for type of stack elem {}\n", idx.offset);
   return env.irb->stack(offsetFromIRSP(env, idx), gc).type;
 }
 
@@ -631,7 +626,7 @@ inline SSATmp* apparate(IRGS& env, Type type) {
 
 inline BCMarker makeMarker(IRGS& env, SrcKey sk) {
   auto const stackOff = spOffBCFromStackBase(env);
-  FTRACE(2, "makeMarker: sk {} sp {}\n", showShort(sk), stackOff.offset);
+  FTRACE_MOD(Trace::hhir, 2, "makeMarker: sk {} sp {}\n", showShort(sk), stackOff.offset);
 
   return BCMarker {
     sk,
@@ -679,64 +674,130 @@ inline SSATmp* ldCtxCls(IRGS& env) {
 //////////////////////////////////////////////////////////////////////
 // Other common helpers
 
-inline bool classIsUnique(const Class* cls) {
-  return cls && cls->isUnique();
+inline const Func::FuncLookup
+lookupKnownFuncMaybe(IRGS& env, const StringData* name) {
+  return Func::lookupKnownMaybe(name, curUnit(env));
 }
 
-inline bool classIsUniqueNormalClass(const Class* cls) {
-  return classIsUnique(cls) && isNormalClass(cls);
+inline const Func* lookupKnownFunc(IRGS& env,const StringData* name) {
+  auto const res = lookupKnownFuncMaybe(env, name);
+  switch (res.tag) {
+    case Func::FuncLookupResult::Exact:
+      return res.func;
+    case Func::FuncLookupResult::None:
+    case Func::FuncLookupResult::Maybe:
+      return nullptr;
+  }
 }
 
-inline bool classIsUniqueInterface(const Class* cls) {
-  return classIsUnique(cls) && isInterface(cls);
+inline const Class* lookupKnownWithUnit(IRGS& env, const Class* cls) {
+  auto const unit = curUnit(env);
+  if (cls && cls->preClass()->unit() == unit) return cls;
+  return Class::lookupKnown(cls, curClass(env));
 }
 
-inline bool classIsPersistentOrCtxParent(IRGS& env, const Class* cls) {
-  if (!cls) return false;
-  if (classHasPersistentRDS(cls)) return true;
-  if (!curClass(env)) return false;
-  return curClass(env)->classof(cls);
+inline const Class* lookupKnownWithUnit(IRGS& env, const StringData* name) {
+  auto const ne = NamedType::getOrCreate(name);
+  auto const cls = ne->clsList();
+  return lookupKnownWithUnit(env, cls);
 }
 
-inline bool classIsUniqueOrCtxParent(IRGS& env, const Class* cls) {
-  if (!cls) return false;
-  if (classIsUnique(cls)) return true;
-  if (!curClass(env)) return false;
-  return curClass(env)->classof(cls);
+inline const Class* lookupKnown(IRGS& env, const Class* cls) {
+  return Class::lookupKnown(cls, curClass(env));
 }
 
-inline const Class* lookupUniqueClass(IRGS& env,
-                                      const StringData* name,
-                                      bool trustUnit = false) {
-  // TODO: Once top level code is entirely dead it should be safe to always
-  // trust the unit.
-  return Class::lookupUniqueInContext(
-    name, curClass(env), trustUnit ? curUnit(env) : nullptr);
+inline const Class* lookupKnown(IRGS& env, const StringData* name) {
+  auto const ne = NamedType::getOrCreate(name);
+  auto const cls = ne->clsList();
+  return lookupKnown(env, cls);
+}
+
+inline Class::ClassLookup lookupKnownMaybe(IRGS& env, const Class* cls) {
+  return Class::lookupKnownMaybe(cls, curClass(env));
+}
+
+inline Class::ClassLookup lookupKnownMaybe(IRGS& env, const StringData* name) {
+  auto const ne = NamedType::getOrCreate(name);
+  auto const cls = ne->clsList();
+  return lookupKnownMaybe(env, cls);
+}
+
+// If we manipulate the stack before generating a may-throw IR op, we have to
+// record the updated stack offset in the marker, so that the catch block of
+// the IR op will have the correct memory effects.
+inline void updateStackOffset(IRGS& env) {
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
 }
 
 inline SSATmp* ldCls(IRGS& env,
                      SSATmp* lazyClassOrName,
-                     Block* ctrace = nullptr) {
+                     LdClsFallback fallback = LdClsFallback::Fatal) {
   auto const isLazy = lazyClassOrName->isA(TLazyCls);
   assertx(lazyClassOrName->isA(TStr) || isLazy);
   if (lazyClassOrName->hasConstVal()) {
     auto const cnameStr = isLazy ? lazyClassOrName->lclsVal().name() :
                                    lazyClassOrName->strVal();
-    if (auto const cls = lookupUniqueClass(env, cnameStr)) {
-      if (!classIsPersistentOrCtxParent(env, cls)) {
-        auto const clsName = isLazy ? cns(env, cnameStr) : lazyClassOrName;
-        gen(env, LdClsCached, ctrace, clsName);
-      }
-      return cns(env, cls);
-    }
+    auto const data = [&](uint32_t id, bool success) {
+      return LoggingSpeculateData {
+        cnameStr,
+        curClass(env) ? curClass(env)->name() : nullptr,
+        nullptr,
+        Op::ResolveClass,
+        id,
+        success,
+      };
+    };
+    auto const lookup = lookupKnownMaybe(env, cnameStr);
     auto const clsName = isLazy ? cns(env, cnameStr) : lazyClassOrName;
-    return gen(env, LdClsCached, ctrace, clsName);
+    switch (lookup.tag) {
+      case Class::ClassLookupResult::Exact:
+        return cns(env, lookup.cls);
+      case Class::ClassLookupResult::None:
+        if (Cfg::Sandbox::Speculate && Cfg::Eval::LogClsSpeculation) {
+          gen(env, LogClsSpeculation, data(ClassId::Invalid, false));
+        }
+        return gen(env, LdClsCached, LdClsFallbackData { fallback }, clsName);
+      case Class::ClassLookupResult::Maybe:
+        gen(env, LdClsCached, LdClsFallbackData { fallback }, clsName);
+        auto const isEqual = gen(env, EqClassId, ClassIdData(lookup.cls));
+        return cond(
+          env,
+          [&] (Block* taken) {
+            gen(env, JmpZero, taken, isEqual);
+          },
+          [&] {
+            updateStackOffset(env);
+            if (Cfg::Eval::LogClsSpeculation) {
+              gen(env, LogClsSpeculation, data(lookup.cls->classId().id(), true));
+            }
+            return cns(env, lookup.cls);
+          },
+          [&] {
+            hint(env, Block::Hint::Unlikely);
+            updateStackOffset(env);
+            if (Cfg::Eval::LogClsSpeculation) {
+              gen(env, LogClsSpeculation, data(lookup.cls->classId().id(), false));
+            }
+            // Side-exit to not pessimize exact class returned
+            gen(env, Jmp, makeExitSlow(env));
+            return cns(env, TBottom);
+          }
+        );
+    }
   }
   auto const ctxClass = curClass(env);
   auto const ctxTmp = ctxClass ? cns(env, ctxClass) : cns(env, nullptr);
   auto const clsName =
     isLazy ? gen(env, LdLazyClsName, lazyClassOrName) : lazyClassOrName;
-  return gen(env, LdCls, ctrace, clsName, ctxTmp);
+  return gen(env, LdCls, LdClsFallbackData { fallback }, clsName, ctxTmp);
+}
+
+inline SSATmp* lookupCls(IRGS& env, const StringData* clsName) {
+  if (auto const knownCls = lookupKnown(env, clsName)) {
+    return cns(env, knownCls);
+  }
+  return gen(env, LookupClsCached, cns(env, clsName));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -886,7 +947,7 @@ inline void decRefLocalsInline(IRGS& env) {
 inline void decRefThis(IRGS& env) {
   if (!curFunc(env)->hasThisInBody()) return;
   auto const ctx = ldCtx(env);
-  decRef(env, ctx, DecRefProfileId::Default);
+  decRef(env, ctx);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -895,7 +956,7 @@ inline void decRefThis(IRGS& env) {
  * Creates a catch block and calls body immediately as the catch block begins
  */
 template<class Body>
-Block* create_catch_block(
+Block* makeCatchBlock(
     IRGS& env, Body body,
     EndCatchData::CatchMode mode = EndCatchData::CatchMode::UnwindOnly,
     int32_t offsetToAdjustSPForCall = 0) {
@@ -907,30 +968,14 @@ Block* create_catch_block(
   env.irb->fs().setBCSPOff(exnState.syncedSpLevel - offsetToAdjustSPForCall);
   updateMarker(env);
 
-  gen(env, BeginCatch);
+  auto const ty = Type::SubObj(SystemLib::getThrowableClass()) | TNullptr;
+  auto const exc = gen(env, BeginCatch, ty);
+  // VMSP is always synced at BeginCatch
+  auto const vmspOffset = spOffBCFromIRSP(env);
+
   body();
 
-  // If we are unwinding from an inlined function, try a special logic that
-  // may eliminate the need to spill the current frame.
-  if (isInlining(env) && mode == EndCatchData::CatchMode::UnwindOnly) {
-    if (endCatchFromInlined(env)) return catchBlock;
-  }
-
-  if (spillInlinedFrames(env)) {
-    gen(env, StVMFP, fp(env));
-    gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
-    gen(env, StVMReturnAddr, cns(env, 0));
-  }
-
-  auto const stublogue = env.irb->fs().stublogue();
-  auto const data = EndCatchData {
-    spOffBCFromIRSP(env),
-    mode,
-    stublogue ?
-      EndCatchData::FrameMode::Stublogue : EndCatchData::FrameMode::Phplogue,
-    stublogue ? EndCatchData::Teardown::NA : EndCatchData::Teardown::Full
-  };
-  gen(env, EndCatch, data, fp(env), sp(env));
+  emitHandleException(env, mode, exc, vmspOffset);
   return catchBlock;
 }
 

@@ -20,7 +20,7 @@ class A extends B {
 }
 
 <<__EntryPoint>>
-function main_2062() {
+function main_2062() :mixed{
 $x = new A();
 $s = serialize($x);
 echo $s . "\n";

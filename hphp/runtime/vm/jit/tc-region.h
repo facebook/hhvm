@@ -32,7 +32,7 @@ struct RegionTranslator final : Translator {
   RegionDescPtr region{nullptr};
   bool hasLoop{false};
   SBInvOffset spOff{};
-  jit::vector<RegionContext::LiveType> liveTypes{};
+  LiveTypesVec liveTypes{};
   int prevNumTranslations{-1};
   GrowableVector<IncomingBranch> tailBranches;
 
@@ -53,6 +53,7 @@ struct RegionTranslator final : Translator {
   void gen() override;
   void publishMetaImpl() override;
   void publishCodeImpl() override;
+  bool exceededMaxLiveTranslations(int numTrans);
 };
 
 }

@@ -47,7 +47,7 @@ it's bright,but i cann't see it.
 this\line is /with\slashs
 EOT;
 
-$heredoc_strings = varray[
+$heredoc_strings = vec[
   $null_string,
   $blank_line,
   $multiline_string,

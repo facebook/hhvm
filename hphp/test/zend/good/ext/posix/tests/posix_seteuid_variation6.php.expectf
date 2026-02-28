@@ -1,9 +1,0 @@
-*** Test substituting argument 1 with string values ***
-
-Warning: posix_seteuid() expects parameter 1 to be integer, string given in %s/posix_seteuid_variation6.php on line 21
-
-Warning: posix_seteuid() expects parameter 1 to be integer, string given in %s/posix_seteuid_variation6.php on line 21
-
-Warning: posix_seteuid() expects parameter 1 to be integer, string given in %s/posix_seteuid_variation6.php on line 21
-
-Warning: posix_seteuid() expects parameter 1 to be integer, string given in %s/posix_seteuid_variation6.php on line 21

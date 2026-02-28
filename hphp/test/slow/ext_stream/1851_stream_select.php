@@ -2,11 +2,11 @@
 
 // Issue #1851.
 <<__EntryPoint>>
-function main_1851_stream_select() {
+function main_1851_stream_select() :mixed{
 $stream = fopen("php://temp", "r");
 
-$read_streams = varray[$stream];
-$write_streams = varray[];
+$read_streams = vec[$stream];
+$write_streams = vec[];
 $except = null;
 
 $result = stream_select(

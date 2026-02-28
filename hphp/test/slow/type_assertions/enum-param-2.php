@@ -1,14 +1,14 @@
 <?hh
 
-function a() {
+function a() :mixed{
   include_once __DIR__.'/enum-param.php';
 }
 
-function b() {
+function b() :mixed{
   include 'enum-param-2.inc';
 }
 
-function test2(NotAnObject $o) {
+function test2(NotAnObject $o) :mixed{
   var_dump($o);
 }
 <<__EntryPoint>>

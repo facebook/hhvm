@@ -1,0 +1,9 @@
+($z,$y = false) ==> {
+$x = $y;
+if ($x __ampamp $z) {
+return;} else {
+}
+for ($i = 0;;$i __lessThan 2;$i = $i __plus 1;) {
+break;}
+while ($x) {
+continue;}}

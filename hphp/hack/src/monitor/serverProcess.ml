@@ -13,7 +13,7 @@ type process_data = {
   start_t: float;
   in_fd: Unix.file_descr; [@opaque]
       (** Get occasional updates about status/busyness from typechecker here. *)
-  out_fds: (string * Unix.file_descr) list; [@opaque]
+  out_fds: Unix.file_descr MonitorRpc.PipeTypeMap.t; [@opaque]
       (** Send client's File Descriptors to the typechecker over this. *)
   last_request_handoff: float ref;
 }
@@ -67,7 +67,7 @@ type server_process =
    * logic; so the only safe thing to do is enter the Died_config_changed
    * state until the *next* client that connects.
    *
-   * These transitions are centralized in ServerMonitor.kill_and_maybe_restart_server
+   * These transitions are centralized in MonitorMain.kill_and_maybe_restart_server
    * Don't do them elsewhere or you will screw it up.
    *
    * State transition looks sort of like:

@@ -1,14 +1,16 @@
-//// modules.php
+//// module_here.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
-
-module here {}
-module there {}
-module elsewhere {}
+new module here {}
+//// module_there.php
+<?hh
+new module there {}
+//// module_elsewhere.php
+<?hh
+new module elsewhere {}
 
 //// here.php
 <?hh
-<<file:__EnableUnstableFeatures('modules'), __Module('here')>>
+module here;
 
 function foo():void { }
 
@@ -18,7 +20,7 @@ newtype Topaque = string;
 
 //// there.php
 <?hh
-<<file:__EnableUnstableFeatures('modules'), __Module('there')>>
+module there;
 
 class C {
   public function bar():void { }
@@ -26,9 +28,9 @@ class C {
 
 //// elsewhere.php
 <?hh
-<<file:__EnableUnstableFeatures('modules'), __Module('elsewhere')>>
+module elsewhere;
 
-<<__Module('elsewhere')>>
+
 enum E : int {
   A = 3;
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_preg_match_stack() {
+function main_preg_match_stack() :mixed{
 $str = <<<'EOD'
 <div class="operations_half_width clearfloat"><form id="copy_db_form" class="ajax" method="post" action="db_operations.php"onsubmit="return emptyFormElements(this, 'newname')"><input type="hidden" name="db_collation" value="db1" />
 <input type="hidden" name="db_copy" value="true" />

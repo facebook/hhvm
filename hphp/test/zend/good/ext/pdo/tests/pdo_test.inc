@@ -3,7 +3,7 @@
 
 function updateEnv() {
 	if (getenv('PDOTEST_DSN') === false) {
-		$conf = PDOTest::get_config(dirname($_SERVER['PHP_SELF']).'/common.phpt');
+		$conf = PDOTest::get_config(dirname(\HH\global_get('_SERVER')['PHP_SELF']).'/common.phpt');
 		foreach($conf['ENV'] as $n=>$v) putenv("$n=$v");
 	}
 }
@@ -28,12 +28,12 @@ class PDOTest {
 		$db = new $classname($dsn, $user, $pass, $attr);
 
 		if (!$db) {
-			die("Could not create PDO object (DSN=$dsn, user=$user)\n");
+			exit("Could not create PDO object (DSN=$dsn, user=$user)\n");
 		}
 
 		// clean up any crufty test tables we might have left behind
 		// on a previous run
-		$test_tables = varray[
+		$test_tables = vec[
 			'test',
 			'test2',
 			'classtypes'
@@ -54,7 +54,7 @@ class PDOTest {
 		try {
 			$db = PDOTest::factory();
 		} catch (PDOException $e) {
-			die("skip " . $e->getMessage());
+			exit("skip " . $e->getMessage());
 		}
 	}
 

@@ -1,2 +1,4 @@
-File "unnamed_variadic_method_parameter.php", line 4, characters 31-33:
+ERROR: File "unnamed_variadic_method_parameter.php", line 4, characters 34-34:
+A variable name is expected here. (Parsing[1002])
+ERROR: File "unnamed_variadic_method_parameter.php", line 4, characters 31-33:
 Was expecting a type hint on this variadic parameter (Typing[4033])

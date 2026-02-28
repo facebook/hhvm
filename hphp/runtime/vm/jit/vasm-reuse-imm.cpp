@@ -25,10 +25,11 @@
 
 #include "hphp/util/arch.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/jit.h"
 
 #include <cstdlib>
 
-TRACE_SET_MOD(vasm);
+TRACE_SET_MOD(vasm)
 
 namespace HPHP::jit {
 
@@ -79,7 +80,7 @@ Optional<int> reuseCandidate(Env& env, int64_t p, Vreg& reg) {
 template <typename Inst>
 void reuseImmq(Env& env, const Inst& /*inst*/, Vlabel /*b*/, size_t i) {
   // leaky bucket
-  env.immStateVec[i % RuntimeOption::EvalJitLdimmqSpan].reset();
+  env.immStateVec[i % Cfg::Jit::LdimmqSpan].reset();
 }
 
 template<typename ReuseImm>
@@ -97,13 +98,13 @@ void reuseImmq(Env& env, const ldimmq& ld, Vlabel b, size_t i) {
         if (off.value() == 0) {
           v << copy{base, ld.d};
         } else {
-          v << addqi{off.value(), base, ld.d, v.makeReg()};
+          v << lea{base[off.value()], ld.d};
         }
       });
       return;
     }
   }
-  env.immStateVec[i % RuntimeOption::EvalJitLdimmqSpan] = ImmState{ld.s, ld.d};
+  env.immStateVec[i % Cfg::Jit::LdimmqSpan] = ImmState{ld.s, ld.d};
 }
 
 void reuseImmq(Env& env, Vlabel b, size_t i) {
@@ -133,10 +134,10 @@ void reuseImmq(Vunit& unit) {
   assertx(check(unit));
   auto& blocks = unit.blocks;
 
-  if (RuntimeOption::EvalJitLdimmqSpan <= 0) return;
+  if (Cfg::Jit::LdimmqSpan <= 0) return;
 
   Env env { unit };
-  env.immStateVec.resize(RuntimeOption::EvalJitLdimmqSpan);
+  env.immStateVec.resize(Cfg::Jit::LdimmqSpan);
 
   auto const labels = sortBlocks(unit);
 

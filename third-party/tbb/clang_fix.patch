@@ -1,0 +1,13 @@
+diff --git a/third-party/tbb/src/build/linux.gcc.inc b/third-party/tbb/src/build/linux.gcc.inc
+index 214b38377bc..91345012017 100644
+--- a/third-party/tbb/src/build/linux.gcc.inc
++++ b/third-party/tbb/src/build/linux.gcc.inc
+@@ -67,7 +67,7 @@ endif
+ # elimination of stores done outside the object lifetime
+ ifneq (,$(shell $(CONLY) -dumpfullversion -dumpversion | egrep  "^([6-9]|1[0-9])"))
+     # keep pre-contruction stores for zero initialization
+-    DSE_KEY = -flifetime-dse=1
++    DSE_KEY =
+ endif
+ 
+ ifeq ($(cfg), release)

@@ -1,8 +1,0 @@
-C: (Minor_change
-      { mro_positions_changed = false;
-        member_diff =
-        { consts = { "X" -> Modified }; typeconsts = { "T" -> Modified };
-          props = { "x" -> Modified }; sprops = { "$y" -> Modified };
-          methods = { "f" -> Modified }; smethods = { "g" -> Modified };
-          constructor = Modified }
-        })

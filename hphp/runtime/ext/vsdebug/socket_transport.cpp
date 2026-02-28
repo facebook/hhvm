@@ -14,13 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/ext/vsdebug/socket_transport.h"
+
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
-#include "hphp/runtime/ext/vsdebug/socket_transport.h"
+#include "hphp/util/configs/debugger.h"
 #include "hphp/util/user-info.h"
 
 #include <pwd.h>
 #include <grp.h>
+#include <sys/socket.h>
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -186,13 +189,13 @@ void SocketTransport::listenForClientConnection() {
     hint.ai_socktype = SOCK_STREAM;
     hint.ai_flags = AI_PASSIVE;
 
-    if (RuntimeOption::DebuggerDisableIPv6) {
+    if (Cfg::Debugger::DisableIPv6) {
       hint.ai_family = AF_INET;
     }
 
-    const auto name = RuntimeOption::DebuggerServerIP.empty()
+    const auto name = Cfg::Debugger::ServerIP.empty()
       ? "localhost"
-      : RuntimeOption::DebuggerServerIP.c_str();
+      : Cfg::Debugger::ServerIP.c_str();
     if (getaddrinfo(name, std::to_string(m_listenPort).c_str(), &hint, &ai)) {
       VSDebugLogger::Log(
         VSDebugLogger::LogLevelError,
@@ -300,7 +303,7 @@ bool SocketTransport::bindAndListenDomain(std::vector<int>& socketFds) {
   struct sockaddr_un addr;
   std::string socketPath = m_domainSocketPath;
 
-  int sockFd = socket(AF_UNIX, SOCK_STREAM, 0);
+  int sockFd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
   if (sockFd < 0) {
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelError,
@@ -358,7 +361,7 @@ bool SocketTransport::bindAndListenTCP(
   std::vector<int>& socketFds
 ) {
   int fd = socket(address->ai_family,
-                  address->ai_socktype,
+                  address->ai_socktype | SOCK_CLOEXEC,
                   address->ai_protocol);
 
   if (fd < 0) {

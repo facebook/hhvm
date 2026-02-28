@@ -151,7 +151,7 @@ struct UniqueStubs {
    *            jmp from functionSurprisedOrStackOverflow
    * @context:  stub
    */
-  TCA functionEnterHelper;
+  TCA functionSurprised;
 
   /*
    * Handle either a surprise condition or a stack overflow.
@@ -163,6 +163,20 @@ struct UniqueStubs {
    * @context:  stub
    */
   TCA functionSurprisedOrStackOverflow;
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Inlining.
+
+  /*
+   * Handle side exit from an inlined frame to a translation given by rarg(0).
+   * Initializes the native frame portion of the ActRec, sets m_funcId to
+   * rarg(1), m_callOffAndFlags to rarg(2), then jumps to rarg(0).
+   *
+   * @reached:  inlinesideexit from TC
+   * @context:  func body
+   */
+  TCA inlineSideExit;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -383,7 +397,7 @@ struct UniqueStubs {
    *
    * The endCatchStublogueHelper passes the current vmfp() and RIP saved in
    * the stublogue header. Unwinder uses it to determine the catch trace of
-   * the return adddress belonging to the same logical vmfp().
+   * the return address belonging to the same logical vmfp().
    *
    * The endCatchStubloguePrologueHelper initializes the ActRec space pointed
    * to by the rvmsp() to uninits and continues at endCatchStublogueHelper.
@@ -392,7 +406,10 @@ struct UniqueStubs {
    * load vmfp and vmsp and jump there.  Otherwise, we call _Unwind_Resume.
    */
   TCA resumeCPPUnwind;
+  TCA endCatchSyncVMSPHelper;
+  TCA endCatchSkipTeardownSyncVMSP;
   TCA endCatchSkipTeardownHelper;
+  TCA endCatchTeardownThisSyncVMSP;
   TCA endCatchTeardownThisHelper;
   TCA endCatchHelper;
   TCA endCatchHelperPast;
@@ -415,6 +432,13 @@ struct UniqueStubs {
    */
   TCA handleTranslate;
   TCA handleTranslateFuncEntry;
+  /*
+   * Same as `handleTranslateFuncEntry`, but serves as the entry stub for
+   * func entries, and assumes that the caller knows that it's calling the
+   * main func entry, i.e. that numArgs == numNonVariadicParams. Responsible
+   * for creating a translation and setting the funcEntry appropriately.
+   */
+   TCA handleTranslateMainFuncEntry;
 
   /*
    * Handle a request to retranslate the code at the given current location.

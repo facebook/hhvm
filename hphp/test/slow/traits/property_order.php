@@ -13,7 +13,7 @@ class X extends U {
   public $x1, $x2, $x3, $x4;
 }
 
-function main() {
+function main() :mixed{
   $r = new ReflectionClass('X');
   $props = $r->getProperties();
   foreach ($props as $p) {
@@ -23,6 +23,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_property_order() {
+function main_property_order() :mixed{
 main();
 }

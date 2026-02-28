@@ -31,16 +31,19 @@ namespace HPHP {
 struct APCArray {
   static APCHandle::Pair MakeSharedVec(ArrayData* data,
                                        APCHandleLevel level,
-                                       bool unserializeObj);
+                                       bool unserializeObj,
+                                       bool pure);
   static APCHandle::Pair MakeSharedDict(ArrayData* data,
                                         APCHandleLevel level,
-                                        bool unserializeObj);
+                                        bool unserializeObj,
+                                        bool pure);
   static APCHandle::Pair MakeSharedKeyset(ArrayData* data,
                                           APCHandleLevel level,
                                           bool unserializeObj);
 
   static APCHandle* MakeUncountedArray(
-      ArrayData* ad, DataWalker::PointerMap* seen);
+      ArrayData* ad, MakeUncountedEnv::ArrayMap* seen,
+      MakeUncountedEnv::StringSet* seenStrings);
 
   static APCHandle::Pair MakeSharedEmptyVec();
   static void Delete(APCHandle* handle);
@@ -67,17 +70,17 @@ struct APCArray {
     return reinterpret_cast<const APCArray*>(handle);
   }
 
-  ArrayData* toLocalVec() const {
-    return VanillaVec::MakeVecFromAPC(this);
+  ArrayData* toLocalVec(bool pure) const {
+    return VanillaVec::MakeVecFromAPC(this, pure);
   }
-  ArrayData* toLocalLegacyVec() const {
-    return VanillaVec::MakeVecFromAPC(this, /*isLegacy=*/true);
+  ArrayData* toLocalLegacyVec(bool pure) const {
+    return VanillaVec::MakeVecFromAPC(this, pure, /*isLegacy=*/true);
   }
-  ArrayData* toLocalDict() const {
-    return VanillaDict::MakeDictFromAPC(this);
+  ArrayData* toLocalDict(bool pure) const {
+    return VanillaDict::MakeDictFromAPC(this, pure);
   }
-  ArrayData* toLocalLegacyDict() const {
-    return VanillaDict::MakeDictFromAPC(this, /*isLegacy=*/true);
+  ArrayData* toLocalLegacyDict(bool pure) const {
+    return VanillaDict::MakeDictFromAPC(this, pure, /*isLegacy=*/true);
   }
   ArrayData* toLocalKeyset() const {
     return VanillaKeyset::MakeSetFromAPC(this);
@@ -135,16 +138,20 @@ struct APCArray {
     return m_handle.kind() == APCKind::SharedKeyset;
   }
 
+  bool toLocalMayRaise() const {
+    return m_may_raise;
+  }
+
 private:
   enum class PackedCtor {};
   APCArray(PackedCtor, APCKind kind, size_t size)
-    : m_handle(kind, kInvalidDataType), m_size(size) {
+    : m_handle(kind, kInvalidDataType), m_may_raise(false), m_size(size) {
     assertx(isPacked());
   }
 
   enum class HashedCtor {};
   APCArray(HashedCtor, APCKind kind, size_t size)
-    : m_handle(kind, kInvalidDataType), m_size(size) {
+    : m_handle(kind, kInvalidDataType), m_may_raise(false), m_size(size) {
     assertx(isHashed());
   }
   ~APCArray();
@@ -154,12 +161,12 @@ private:
 
 private:
   template <typename A, typename B>
-  static APCHandle::Pair MakeSharedImpl(ArrayData*, APCHandleLevel, A, B);
+  static APCHandle::Pair MakeSharedImpl(ArrayData*, APCHandleLevel, A, B, bool);
 
   static APCHandle::Pair MakeHash(ArrayData* data, APCKind kind,
-                                  bool unserializeObj);
+                                  bool unserializeObj, bool pure);
   static APCHandle::Pair MakePacked(ArrayData* data, APCKind kind,
-                                    bool unserializeObj);
+                                    bool unserializeObj, bool pure);
 
 private:
   friend size_t getMemSize(const APCArray*);
@@ -177,10 +184,10 @@ private:
 
 private:
   APCHandle m_handle;
+  bool m_may_raise;
   uint32_t m_size;
 };
 
 //////////////////////////////////////////////////////////////////////
 
 }
-

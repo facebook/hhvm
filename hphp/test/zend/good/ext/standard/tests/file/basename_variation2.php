@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$paths = varray [
+$paths = vec[
 
 	"foo",
 	"foo/",
@@ -15,7 +15,7 @@ $paths = varray [
 
 ];
 
-$suffixes = varray [
+$suffixes = vec[
 
 	".bar",
 	".b",

@@ -1,4 +1,4 @@
-File "fun_no_ret.php", line 14, characters 10-13:
+ERROR: File "fun_no_ret.php", line 14, characters 10-13:
 Invalid return type (Typing[4110])
   File "fun_no_ret.php", line 12, characters 17-19:
   Expected `int`

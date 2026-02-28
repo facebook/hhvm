@@ -1,4 +1,10 @@
-File "enum_class_wrong_nested.php", line 9, characters 8-10:
+ERROR: File "enum_class_wrong_nested.php", line 9, characters 8-10:
 Invalid label qualifier. Only names or qualified names are allowed at this position. (Parsing[1002])
-File "enum_class_wrong_nested.php", line 9, characters 8-10:
+ERROR: File "enum_class_wrong_nested.php", line 9, characters 8-10:
 Unbound name: `E#A` (an object type) (Naming[2049])
+ERROR: File "enum_class_wrong_nested.php", line 9, characters 8-12:
+This label is not a valid reference to a member of the given enum class (Typing[4110])
+  File "enum_class_wrong_nested.php", line 9, characters 11-12:
+  Expected a class with a constant `B`
+  File "enum_class_wrong_nested.php", line 9, characters 8-10:
+  But got `E#A`

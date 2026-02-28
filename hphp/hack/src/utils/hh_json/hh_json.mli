@@ -21,9 +21,19 @@ type json =
 
 exception Syntax_error of string
 
+val of_yojson : Yojson.Safe.t -> json
+
+val of_yojson_opt : Yojson.Safe.t option -> json
+
+val to_yojson : json -> Yojson.Safe.t
+
+val yojson_of_json : json -> Yojson.Safe.t
+
+val of_opt : ('a -> json) -> 'a option -> json
+
 (* A function conforming to `show`'s pretty printing signature;
     calls `json_to_multiline` internally
- *)
+*)
 val pp_json : Format.formatter -> json -> unit
 
 (** Calling this with [~pretty:true] is the same as calling [json_to_multiline] *)
@@ -82,9 +92,9 @@ val get_number_int_exn : json -> int
 
 val get_bool_exn : json -> bool
 
-val opt_string_to_json : string option -> json
+val string_opt : string option -> json
 
-val opt_int_to_json : int option -> json
+val int_opt : int option -> json
 
 val int_ : int -> json
 
@@ -97,6 +107,8 @@ val bool_ : bool -> json
 val opt_ : ('a -> json) -> 'a option -> json
 
 val array_ : ('a -> json) -> 'a list -> json
+
+val string_map : ('a -> json) -> 'a SMap.t -> json
 
 (* Types and functions for monadic API for traversing a JSON object. *)
 

@@ -4,17 +4,17 @@
 
 function foo(
   ExampleContext $_,
-): ExprTree<Code, string, (function(ExampleString): ExampleInt)> {
+): ExprTree<ExampleDsl, string, (function(ExampleString): ExampleInt)> {
   return
-    Code`(ExampleString $x) ==> { return 1; }`;
+    ExampleDsl`(ExampleString $x) ==> { return 1; }`;
 }
 
 class MyParent {
   public static function bar(ExampleContext $_):
-    ExprTree<Code, string, (function(ExampleString): ExampleInt)>
+    ExprTree<ExampleDsl, string, (function(ExampleString): ExampleInt)>
   {
     return
-      Code`(ExampleString $x) ==> { return 1; }`;
+      ExampleDsl`(ExampleString $x) ==> { return 1; }`;
   }
 }
 
@@ -22,14 +22,14 @@ class MyChild extends MyParent {}
 
 <<__EntryPoint>>
 function test(): void {
-  require 'expression_tree.inc';
+  require __DIR__.'/../../../hack/test/expr_tree.php';
 
-  $et = Code`foo("bar")`;
+  $et = ExampleDsl`foo("bar")`;
   print_et($et);
 
-  $et = Code`MyParent::bar("hello")`;
+  $et = ExampleDsl`MyParent::bar("hello")`;
   print_et($et);
 
-  $et = Code`MyChild::bar("world")`;
+  $et = ExampleDsl`MyChild::bar("world")`;
   print_et($et);
 }

@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$a = varray[
-	varray[1,2,3],
+$a = vec[
+	vec[1,2,3],
 	"",
 	1,
 	2.5,
@@ -12,7 +12,7 @@ $a = varray[
 	true,
 	false,
 	new stdClass,
-	varray[],
+	vec[],
 	-PHP_INT_MAX-1,
 	(string)(-PHP_INT_MAX-1),
 ];

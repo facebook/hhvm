@@ -3,25 +3,23 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<26ab1db7ab3e97793327f5a15810e581>>
+// @generated SignedSource<<e269113b4bb46a8bb1439e75a1b4a68b>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized_regen.sh
+//   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
 
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
+pub use typing_defs_core::*;
+pub use typing_defs_flags::*;
 
 #[allow(unused_imports)]
 use crate::*;
-
-pub use typing_defs_flags::*;
-
-pub use typing_defs_core::*;
 
 /// Origin of Class Constant References:
 /// In order to be able to detect cycle definitions like
@@ -52,8 +50,10 @@ pub use typing_defs_core::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum ClassConstFrom {
+    #[rust_to_ocaml(name = "Self")]
     Self_,
     From(String),
 }
@@ -85,6 +85,7 @@ pub enum ClassConstFrom {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
 pub struct ClassConstRef(pub ClassConstFrom, pub String);
 
@@ -103,10 +104,14 @@ pub struct ClassConstRef(pub ClassConstFrom, pub String);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (show, eq)")]
+#[rust_to_ocaml(prefix = "cd_")]
 #[repr(C)]
 pub struct ConstDecl {
     pub pos: pos_or_decl::PosOrDecl,
     pub type_: Ty,
+    pub value: Option<String>,
+    pub package: Option<aast_defs::PackageMembership>,
 }
 
 #[derive(
@@ -124,6 +129,31 @@ pub struct ConstDecl {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[repr(C, u8)]
+pub enum PackageRequirement {
+    RPRequire(PosString),
+    RPSoft(PosString),
+    RPNormal,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "ce_")]
 #[repr(C)]
 pub struct ClassElt {
     pub visibility: CeVisibility,
@@ -134,6 +164,10 @@ pub struct ClassElt {
     /// pos of the type of the elt
     pub pos: lazy::Lazy<pos_or_decl::PosOrDecl>,
     pub flags: typing_defs_flags::class_elt::ClassElt,
+    pub sealed_allowlist: Option<s_set::SSet>,
+    pub sort_text: Option<String>,
+    pub overlapping_tparams: Option<s_set::SSet>,
+    pub package_requirement: Option<PackageRequirement>,
 }
 
 #[derive(
@@ -151,16 +185,22 @@ pub struct ClassElt {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (show, eq)")]
+#[rust_to_ocaml(prefix = "fe_")]
 #[repr(C)]
 pub struct FunElt {
     pub deprecated: Option<String>,
     pub module: Option<ast_defs::Id>,
+    pub package: Option<aast_defs::PackageMembership>,
     /// Top-level functions have limited visibilities
     pub internal: bool,
     pub type_: Ty,
     pub pos: pos_or_decl::PosOrDecl,
     pub php_std_lib: bool,
     pub support_dynamic_type: bool,
+    pub no_auto_dynamic: bool,
+    pub no_auto_likes: bool,
+    pub package_requirement: PackageRequirement,
 }
 
 #[derive(
@@ -180,6 +220,7 @@ pub struct FunElt {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum ClassConstKind {
     CCAbstract(bool),
@@ -201,6 +242,8 @@ pub enum ClassConstKind {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "cc_")]
 #[repr(C)]
 pub struct ClassConst {
     pub synthesized: bool,
@@ -228,6 +271,7 @@ pub struct ClassConst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C)]
 pub struct ModuleDefType {
     pub mdt_pos: pos_or_decl::PosOrDecl,
@@ -261,6 +305,7 @@ pub struct ModuleDefType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
 pub struct Requirement(pub pos_or_decl::PosOrDecl, pub Ty);
 
@@ -279,6 +324,32 @@ pub struct Requirement(pub pos_or_decl::PosOrDecl, pub Ty);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[repr(C, u8)]
+pub enum ConstraintRequirement {
+    #[rust_to_ocaml(name = "CR_Equal")]
+    CREqual(Requirement),
+    #[rust_to_ocaml(name = "CR_Subtype")]
+    CRSubtype(Requirement),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[rust_to_ocaml(prefix = "atc_")]
 #[repr(C)]
 pub struct AbstractTypeconst {
     pub as_constraint: Option<Ty>,
@@ -301,6 +372,7 @@ pub struct AbstractTypeconst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
 pub struct ConcreteTypeconst {
     pub tc_type: Ty,
@@ -321,6 +393,8 @@ pub struct ConcreteTypeconst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "patc_")]
 #[repr(C)]
 pub struct PartiallyAbstractTypeconst {
     pub constraint: Ty,
@@ -342,6 +416,7 @@ pub struct PartiallyAbstractTypeconst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
 pub enum Typeconst {
     TCAbstract(AbstractTypeconst),
@@ -363,6 +438,8 @@ pub enum Typeconst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "ttc_")]
 #[repr(C)]
 pub struct TypeconstType {
     pub synthesized: bool,
@@ -385,7 +462,7 @@ pub struct TypeconstType {
     /// [Pos_or_decl.none].
     ///
     /// To manage the difference between legacy and shallow decl, use
-    /// [Typing_classes_heap.Api.get_typeconst_enforceability] rather than
+    /// [Folded_class.get_typeconst_enforceability] rather than
     /// accessing this field directly.
     pub enforceable: (pos_or_decl::PosOrDecl, bool),
     pub reifiable: Option<pos_or_decl::PosOrDecl>,
@@ -408,6 +485,8 @@ pub struct TypeconstType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[rust_to_ocaml(prefix = "te_")]
 #[repr(C)]
 pub struct EnumType {
     pub base: Ty,
@@ -430,16 +509,30 @@ pub struct EnumType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
-pub struct TypedefType {
-    pub module: Option<ast_defs::Id>,
-    pub pos: pos_or_decl::PosOrDecl,
-    pub vis: aast::TypedefVisibility,
-    pub tparams: Vec<Tparam>,
-    pub constraint: Option<Ty>,
-    pub type_: Ty,
-    pub is_ctx: bool,
-    pub attributes: Vec<UserAttribute>,
+pub struct TypedefCaseTypeVariant(pub Ty, pub Vec<WhereConstraint>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[repr(C, u8)]
+pub enum TypedefTypeAssignment {
+    SimpleTypeDef(ast_defs::TypedefVisibility, Ty),
+    CaseType(TypedefCaseTypeVariant, Vec<TypedefCaseTypeVariant>),
 }
 
 #[derive(
@@ -457,15 +550,79 @@ pub struct TypedefType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[rust_to_ocaml(prefix = "td_")]
+#[repr(C)]
+pub struct TypedefType {
+    pub module: Option<ast_defs::Id>,
+    pub pos: pos_or_decl::PosOrDecl,
+    pub tparams: Vec<Tparam>,
+    pub as_constraint: Option<Ty>,
+    pub super_constraint: Option<Ty>,
+    pub type_assignment: TypedefTypeAssignment,
+    pub is_ctx: bool,
+    pub attributes: Vec<UserAttribute>,
+    pub internal: bool,
+    pub docs_url: Option<String>,
+    pub package: Option<aast_defs::PackageMembership>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
 #[repr(C, u8)]
 pub enum DeserializationError {
     /// The type was valid, but some component thereof was a decl_ty when we
     /// expected a locl_phase ty, or vice versa.
+    #[rust_to_ocaml(name = "Wrong_phase")]
     WrongPhase(String),
     /// The specific type or some component thereof is not one that we support
     /// deserializing, usually because not enough information was serialized to be
     /// able to deserialize it again.
+    #[rust_to_ocaml(name = "Not_supported")]
     NotSupported(String),
     /// The input JSON was invalid for some reason.
+    #[rust_to_ocaml(name = "Deserialization_error")]
     DeserializationError(String),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show { with_path = false }")]
+#[repr(C, u8)]
+pub enum VisibilityBehavior {
+    #[rust_to_ocaml(name = "Always_expand_newtype")]
+    AlwaysExpandNewtype,
+    #[rust_to_ocaml(name = "Expand_visible_newtype_only")]
+    ExpandVisibleNewtypeOnly,
+    #[rust_to_ocaml(name = "Never_expand_newtype")]
+    NeverExpandNewtype,
+    #[rust_to_ocaml(name = "Resolve_type_structure")]
+    ResolveTypeStructure(Option<String>),
 }

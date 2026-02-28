@@ -1,0 +1,4 @@
+ERROR: File "T219758824.php", line 7, characters 14-23:
+Variable `$undefined` is undefined, or not always defined. (Naming[2050])
+  File "", line 0, characters 0-0:
+  Did you mean `$this` instead?

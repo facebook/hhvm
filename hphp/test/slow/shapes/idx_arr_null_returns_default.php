@@ -1,8 +1,8 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
-  foo(darray[]);
+function main() :mixed{
+  foo(dict[]);
   foo(null);
 }
 

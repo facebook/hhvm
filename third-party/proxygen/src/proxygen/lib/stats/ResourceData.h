@@ -1,0 +1,478 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+#pragma once
+
+#include <chrono>
+#include <folly/logging/xlog.h>
+#include <glog/stl_logging.h>
+#include <stdint.h>
+#include <vector>
+
+#include <proxygen/lib/stats/PeriodicStatsDataBase.h>
+
+namespace proxygen {
+
+struct CpuStats {
+  double cpuUsageRatio;
+  std::vector<double> cpuCoreUsageRatios;
+  double cpuUtilPercentileConfigured = 0;
+  double cpuRatioUtilPercentile = 0;
+  double cpuSoftIrqUsageRatio = 0;
+  std::vector<double> softIrqCpuCoreRatioUtils;
+  // this field is only used to calculate
+  // pro-rate softirq of cgroup
+  double cpuSysUsageRatio = 0;
+};
+
+/**
+ * Container struct to store various resource utilization data.
+ */
+struct ResourceData : public PeriodicStatsDataBase {
+ public:
+  ResourceData() = default;
+  virtual ~ResourceData() = default;
+
+  /**
+   * Gets the cpu ratio utilization (0, 1.0 over the last update interval)
+   * Note for the purposes of this implementation, a core is considered
+   * utilized should it not be idle (i.e. excludes both idle and iowait
+   * proc stats).
+   */
+  [[nodiscard]] double getCpuRatioUtil(bool normalized = true) const {
+    return normalized ? std::min(1.0, cpuRatioUtil_) : cpuRatioUtil_;
+  }
+
+  /**
+   * Gets the cpu percentage utilization (0-100 over last update interval)
+   * Note for the purposes of this implementation, a core is considered
+   * utilized should it not be idle (i.e. excludes both idle and iowait
+   * proc stats)
+   *
+   * Cgroup CPU utilization might be significantly off during peak utilization
+   * i.e. way above 100% due to CPU throttling, pass `normalized` as false if
+   * you want to see values above 100, for example if you aggregate values over
+   * some window.
+   */
+  [[nodiscard]] double getCpuPctUtil(bool normalized = true) const {
+    return getPctFromRatio(getCpuRatioUtil(normalized));
+  }
+
+  /**
+   * Gets the cpu utilization ratio (0-1.0 over last update interval),
+   * aggregated over all cores using a configured quantile.
+   * Utilized = non-idle and non-iowait
+   *
+   * Cgroup CPU utilization might be significantly off during peak utilization
+   * i.e. way above 100% due to CPU throttling, pass `normalized` as false if
+   * you want to see values above 100, for example if you aggregate values over
+   * some window.
+   */
+  [[nodiscard]] double getCpuUtilPercentileRatio(bool normalized = true) const {
+    return normalized ? std::min(1.0, cpuRatioUtilPercentile_)
+                      : cpuRatioUtilPercentile_;
+  }
+
+  /**
+   * Gets the cpu percentage utilization (0-100 over last update interval),
+   * aggregated over all cores using a configured quantile.
+   * Utilized = non-idle and non-iowait
+   *
+   * Cgroup CPU utilization might be significantly off during peak utilization
+   * i.e. way above 100% due to CPU throttling, pass `normalized` as false if
+   * you want to see values above 100, for example if you aggregate values over
+   * some window.
+   */
+  [[nodiscard]] double getCpuUtilPercentile(bool normalized = true) const {
+    return getPctFromRatio(getCpuUtilPercentileRatio(normalized));
+  }
+
+  /**
+   * Gets the quantile configured for producing the aggregation from
+   * getCpuUtilPercentile().
+   */
+  [[nodiscard]] double getCpuUtilPercentileConfigured() const {
+    return cpuUtilPercentileConfigured_;
+  }
+
+  /**
+   * Gets the average soft cpu ratio utilization (0, 1.0 over the last update
+   * interval).
+   */
+  [[nodiscard]] double getSoftIrqCpuRatioUtil() const {
+    return cpuSoftIrqRatioUtil_;
+  }
+
+  /**
+   * Gets the soft cpu ratio utilization (0, 1.0 over the last update interval)
+   * for each cpu core in the system.  Note for the purposes of this
+   * implementation, a core is considered utilized should it not be idle
+   * (i.e. excludes both idle and iowait proc stats).
+   */
+  [[nodiscard]] const std::vector<double>& getSoftIrqCpuCoreRatioUtils() const {
+    return softIrqCpuCoreRatioUtils_;
+  }
+
+  /**
+   * Gets the number of employed cpu cores as inferred by the length of the
+   * per core soft utilization data already queried.
+   */
+  [[nodiscard]] uint64_t getNumLogicalCpuCores() const {
+    return softIrqCpuCoreRatioUtils_.size();
+  }
+
+  /**
+   * Returns the percentage that maps to the specified ratio in the range
+   * [0.0, 1.0].
+   */
+  static double getPctFromRatio(double ratio) {
+    return ratio * 100;
+  }
+
+  // Gets the unused memory (free/available) of the system in bytes
+  [[nodiscard]] uint64_t getUnusedMemBytes() const {
+    return totalMemBytes_ - usedMemBytes_;
+  }
+
+  // Gets the used memory of the system in bytes
+  [[nodiscard]] uint64_t getUsedMemBytes() const {
+    return usedMemBytes_;
+  }
+
+  [[nodiscard]] double getMemPressureFullAvg10Pct() const {
+    return memPressureFullAvg10Pct_;
+  }
+
+  [[nodiscard]] double getMemPressureFullAvg60Pct() const {
+    return memPressureFullAvg60Pct_;
+  }
+
+  [[nodiscard]] double getMemPressureFullAvg300Pct() const {
+    return memPressureFullAvg300Pct_;
+  }
+
+  [[nodiscard]] double getMemPressureSomeAvg10Pct() const {
+    return memPressureSomeAvg10Pct_;
+  }
+
+  [[nodiscard]] double getMemPressureSomeAvg60Pct() const {
+    return memPressureSomeAvg60Pct_;
+  }
+
+  [[nodiscard]] double getMemPressureSomeAvg300Pct() const {
+    return memPressureSomeAvg300Pct_;
+  }
+
+  [[nodiscard]] int64_t getMemEventsHighCount() const {
+    return memEventsHighCount_;
+  }
+
+  [[nodiscard]] int64_t getMemEventsMaxCount() const {
+    return memEventsMaxCount_;
+  }
+
+  [[nodiscard]] double getCpuPressureAvg10Pct() const {
+    return cpuPressureAvg10Pct_;
+  }
+
+  [[nodiscard]] double getCpuPressureAvg60Pct() const {
+    return cpuPressureAvg60Pct_;
+  }
+
+  [[nodiscard]] double getCpuPressureAvg300Pct() const {
+    return cpuPressureAvg300Pct_;
+  }
+
+  [[nodiscard]] double getIoPressureAvg10Pct() const {
+    return ioPressureAvg10Pct_;
+  }
+
+  [[nodiscard]] double getIoPressureAvg60Pct() const {
+    return ioPressureAvg60Pct_;
+  }
+
+  [[nodiscard]] double getIoPressureAvg300Pct() const {
+    return ioPressureAvg300Pct_;
+  }
+
+  // Gets the total memory of the system in bytes
+  [[nodiscard]] uint64_t getTotalMemBytes() const {
+    return totalMemBytes_;
+  }
+
+  /**
+   * Gets the unused memory (0-100 Free/available) of the system as a
+   * percent
+   */
+  [[nodiscard]] double getFreeMemPct() const {
+    return 100 - getUsedMemPct();
+  }
+
+  // Gets the used memory (0-100) of the system as a percent
+  [[nodiscard]] double getUsedMemPct() const {
+    return ((double)usedMemBytes_) / totalMemBytes_ * 100;
+  }
+
+  // Gets the used anonymous memory (0-1.0) of the system as a ratio
+  [[nodiscard]] double getUsedMemRatio() const {
+    return ((double)usedMemBytes_) / totalMemBytes_;
+  }
+
+  // Returns current level of TCP memory consumption
+  // measured in memory pages
+  [[nodiscard]] uint64_t getTcpMemPages() const {
+    return tcpMemoryPages_;
+  }
+
+  // Returns Low TCP Memory threshold measured in memory pages
+  [[nodiscard]] uint64_t getLowTcpMemLimitPages() const {
+    return minTcpMemLimit_;
+  }
+
+  // Returns Pressure TCP Memory threshold measured in memory pages
+  [[nodiscard]] uint64_t getPressureTcpMemLimitPages() const {
+    return pressureTcpMemLimit_;
+  }
+
+  // Returns Low TCP Memory threshold measured in memory pages
+  [[nodiscard]] uint64_t getMaxTcpMemLimitPages() const {
+    return maxTcpMemLimit_;
+  }
+
+  // Gets the used TCP memory (0-1.0) as a ratio to max TCP mem limit
+  [[nodiscard]] double getTcpMemRatio() const {
+    return calculateRatio(tcpMemoryPages_, maxTcpMemLimit_);
+  }
+
+  // Gets the low TCP memory threshold (0-1.0) as a ratio to
+  // max TCP mem limit
+  [[nodiscard]] double getLowTcpMemLimitRatio() const {
+    return calculateRatio(minTcpMemLimit_, maxTcpMemLimit_);
+  }
+
+  // Gets the TCP memory pressure threshold (0-1.0) as a ratio to
+  // max TCP mem limit
+  [[nodiscard]] double getPressureTcpMemLimitRatio() const {
+    return calculateRatio(pressureTcpMemLimit_, maxTcpMemLimit_);
+  }
+
+  // Gets the used TCP memory (0-100) of the system as a percent
+  [[nodiscard]] double getUsedTcpMemPct() const {
+    return getTcpMemRatio() * 100;
+  }
+
+  // Gets the low TCP memory threshold (0-100) of the system as a percent
+  [[nodiscard]] double getLowTcpMemThresholdPct() const {
+    return getLowTcpMemLimitRatio() * 100;
+  }
+
+  // Gets the Pressure TCP memory threshold (0-100) of the system as a percent
+  [[nodiscard]] double getPressureTcpMemThresholdPct() const {
+    return getPressureTcpMemLimitRatio() * 100;
+  }
+
+  // Returns True if TCP memory fields were initialized successfully,
+  // returns False otherwise
+  [[nodiscard]] bool tcpMemoryStatsCollected() const {
+    return tcpMemoryPages_ != 0 && maxTcpMemLimit_ != 0 &&
+           pressureTcpMemLimit_ != 0 && minTcpMemLimit_ != 0;
+  }
+
+  // Returns current level of UDP memory consumption
+  // measured in memory pages
+  [[nodiscard]] uint64_t getUdpMemPages() const {
+    return udpMemoryPages_;
+  }
+
+  // Returns Low UDP Memory threshold measured in memory pages
+  [[nodiscard]] uint64_t getLowUdpMemLimitPages() const {
+    return minUdpMemLimit_;
+  }
+
+  // Returns Pressure UDP Memory threshold measured in memory pages
+  [[nodiscard]] uint64_t getPressureUdpMemLimitPages() const {
+    return pressureUdpMemLimit_;
+  }
+
+  // Returns Low UDP Memory threshold measured in memory pages
+  [[nodiscard]] uint64_t getMaxUdpMemLimitPages() const {
+    return maxUdpMemLimit_;
+  }
+
+  // Gets the used UDP memory (0-1.0) as a ratio to max UDP mem limit
+  [[nodiscard]] double getUdpMemRatio() const {
+    return calculateRatio(udpMemoryPages_, maxUdpMemLimit_);
+  }
+
+  // Gets the low UDP memory threshold (0-1.0) as a ratio to
+  // max UDP mem limit
+  [[nodiscard]] double getLowUdpMemLimitRatio() const {
+    return calculateRatio(minUdpMemLimit_, maxUdpMemLimit_);
+  }
+
+  // Gets the UDP memory pressure threshold (0-1.0) as a ratio to
+  // max UDP mem limit
+  [[nodiscard]] double getPressureUdpMemLimitRatio() const {
+    return calculateRatio(pressureUdpMemLimit_, maxUdpMemLimit_);
+  }
+
+  // Gets the used UDP memory (0-100) of the system as a percent
+  [[nodiscard]] double getUsedUdpMemPct() const {
+    return getUdpMemRatio() * 100;
+  }
+
+  // Gets the low UDP memory threshold (0-100) of the system as a percent
+  [[nodiscard]] double getLowUdpMemThresholdPct() const {
+    return getLowUdpMemLimitRatio() * 100;
+  }
+
+  // Gets the Pressure UDP memory threshold (0-100) of the system as a percent
+  [[nodiscard]] double getPressureUdpMemThresholdPct() const {
+    return getPressureUdpMemLimitRatio() * 100;
+  }
+
+  // Returns True if UDP memory fields were initialized successfully,
+  // returns False otherwise
+  [[nodiscard]] bool udpMemoryStatsCollected() const {
+    return udpMemoryPages_ != 0 && maxUdpMemLimit_ != 0 &&
+           pressureUdpMemLimit_ != 0 && minUdpMemLimit_ != 0;
+  }
+
+  void setCpuStats(CpuStats&& cpuStats) {
+    cpuRatioUtil_ = cpuStats.cpuUsageRatio;
+    cpuCoreUsageRatios_ = std::move(cpuStats.cpuCoreUsageRatios);
+    cpuUtilPercentileConfigured_ = cpuStats.cpuUtilPercentileConfigured;
+    cpuRatioUtilPercentile_ = cpuStats.cpuRatioUtilPercentile;
+    cpuSoftIrqRatioUtil_ = cpuStats.cpuSoftIrqUsageRatio;
+    softIrqCpuCoreRatioUtils_ = std::move(cpuStats.softIrqCpuCoreRatioUtils);
+  }
+
+  void setMemStats(uint64_t usedMemBytes, uint64_t totalMemBytes) {
+    usedMemBytes_ = usedMemBytes;
+    totalMemBytes_ = totalMemBytes;
+  }
+
+  void setCpuPressureStats(double avg10, double avg60, double avg300) {
+    cpuPressureAvg10Pct_ = avg10;
+    cpuPressureAvg60Pct_ = avg60;
+    cpuPressureAvg300Pct_ = avg300;
+  }
+
+  void setMemPressureFullStats(double avg10, double avg60, double avg300) {
+    memPressureFullAvg10Pct_ = avg10;
+    memPressureFullAvg60Pct_ = avg60;
+    memPressureFullAvg300Pct_ = avg300;
+  }
+
+  void setMemPressureSomeStats(double avg10, double avg60, double avg300) {
+    memPressureSomeAvg10Pct_ = avg10;
+    memPressureSomeAvg60Pct_ = avg60;
+    memPressureSomeAvg300Pct_ = avg300;
+  }
+
+  void setMemEventsStats(int64_t highCount, int64_t maxCount) {
+    memEventsHighCount_ = highCount;
+    memEventsMaxCount_ = maxCount;
+  }
+
+  void setIoPressureStats(double avg10, double avg60, double avg300) {
+    ioPressureAvg10Pct_ = avg10;
+    ioPressureAvg60Pct_ = avg60;
+    ioPressureAvg300Pct_ = avg300;
+  }
+
+  /**
+   * Sets the structure fields describing TCP memory state.
+   */
+  void setTcpMemStats(uint64_t current,
+                      uint64_t minThreshold,
+                      uint64_t pressureThreshold,
+                      uint64_t maxThreshold) {
+    tcpMemoryPages_ = current;
+    minTcpMemLimit_ = minThreshold;
+    pressureTcpMemLimit_ = pressureThreshold;
+    maxTcpMemLimit_ = maxThreshold;
+  }
+
+  /**
+   * Sets the structure fields describing UDP memory state.
+   */
+  void setUdpMemStats(uint64_t current,
+                      uint64_t minThreshold,
+                      uint64_t pressureThreshold,
+                      uint64_t maxThreshold) {
+    udpMemoryPages_ = current;
+    minUdpMemLimit_ = minThreshold;
+    pressureUdpMemLimit_ = pressureThreshold;
+    maxUdpMemLimit_ = maxThreshold;
+  }
+
+ protected:
+  // Convert an absolute integer value and max limit to a float point ratio.
+  [[nodiscard]] double calculateRatio(uint64_t value, uint64_t maxLimit) const {
+    if (maxLimit != 0) {
+      return double(value) / maxLimit;
+    }
+    return 0.0;
+  }
+
+  // Resource utilization metrics
+  double cpuRatioUtil_{0};
+  std::vector<double> cpuCoreUsageRatios_;
+  double cpuRatioUtilPercentile_{0};
+  double cpuUtilPercentileConfigured_{61};
+  double cpuSoftIrqRatioUtil_{0};
+  std::vector<double> softIrqCpuCoreRatioUtils_;
+  uint64_t usedMemBytes_{0};
+  uint64_t totalMemBytes_{0};
+  uint64_t tcpMemoryPages_{0};
+  uint64_t maxTcpMemLimit_{0};
+  uint64_t pressureTcpMemLimit_{0};
+  uint64_t minTcpMemLimit_{0};
+  uint64_t udpMemoryPages_{0};
+  uint64_t maxUdpMemLimit_{0};
+  uint64_t pressureUdpMemLimit_{0};
+  uint64_t minUdpMemLimit_{0};
+
+  // Pressure metrics (experimental)
+  double cpuPressureAvg10Pct_{0};
+  double cpuPressureAvg60Pct_{0};
+  double cpuPressureAvg300Pct_{0};
+
+  double memPressureFullAvg10Pct_{0};
+  double memPressureFullAvg60Pct_{0};
+  double memPressureFullAvg300Pct_{0};
+
+  double memPressureSomeAvg10Pct_{0};
+  double memPressureSomeAvg60Pct_{0};
+  double memPressureSomeAvg300Pct_{0};
+
+  int64_t memEventsHighCount_{0};
+  int64_t memEventsMaxCount_{0};
+
+  double ioPressureAvg10Pct_{0};
+  double ioPressureAvg60Pct_{0};
+  double ioPressureAvg300Pct_{0};
+};
+
+/**
+ * A class that abstracts away actually fetching the underlying data.
+ * Handles abstraction of the fetching (from particular OSes, container
+ * systems, etc)
+ */
+class Resources {
+ public:
+  virtual ~Resources() = default;
+
+  /**
+   * getCurrentData performs the querying resource utilization metrics.
+   */
+  virtual ResourceData getCurrentData() = 0;
+};
+
+} // namespace proxygen

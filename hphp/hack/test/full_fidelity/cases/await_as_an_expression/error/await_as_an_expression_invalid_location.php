@@ -1,5 +1,5 @@
 <?hh
-
+<<file:__EnableUnstableFeatures('allow_extended_await_syntax', 'allow_conditional_await_syntax')>>
 async function foo(): Awaitable<void> {
   $x = 1 ? (await genx()) : 2;
   $x = 1 ? 2 : (await genx());

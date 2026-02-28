@@ -1,0 +1,19 @@
+dict(3) {
+  ["kind"]=>
+  int(31)
+  ["union_types"]=>
+  vec(2) {
+    dict(2) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(1) "A"
+    }
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["case_type"]=>
+  string(1) "C"
+}

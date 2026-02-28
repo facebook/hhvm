@@ -10,5 +10,5 @@ function my_example(darray<int, int> $items): void {
 
 <<__EntryPoint>>
 function main():void {
-  my_example(darray[2 => 3]);
+  my_example(dict[2 => 3]);
 }

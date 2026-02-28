@@ -1,12 +1,12 @@
 <?hh
 
 interface test {
-    public function bar();
+    public function bar():mixed;
 }
 
 class foo implements test {
 
-    public function bar($foo = NULL) {
+    public function bar($foo = NULL) :mixed{
         echo "foo\n";
     }
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_525() {
-$a = darray['a' => 1, 3 => 3];
- var_dump(array_merge($a, darray['b' => 2]));
+function main_525() :mixed{
+$a = dict['a' => 1, 3 => 3];
+ var_dump(array_merge($a, dict['b' => 2]));
 }

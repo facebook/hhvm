@@ -3,6 +3,6 @@
 function main_entry(): void {
   var_dump(
     grapheme_substr('FOK', 1, 20), // expected: OK
-    grapheme_substr('한국어', 1, 20) //expected: 국어
+    grapheme_substr("\xed\x95\x9c\xea\xb5\xad\xec\x96\xb4", 1, 20) //expected: \xea\xb5\xad\xec\x96\xb4
   );
 }

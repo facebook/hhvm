@@ -1,0 +1,16 @@
+<?hh
+<<file:__EnableUnstableFeatures('named_parameters_use')>>
+
+function main(): void {
+  test_named_args(1, the_arg_name= 2, 3);
+  test_named_args(1, the_arg_name =2, 3);
+  test_named_args(1, the_arg_name = 2, 3);
+  test_named_args(1, the_arg_name=2);
+  test_named_args(
+    x1 = 1,
+    x1=1,
+    x1 =        1,
+    x1 = 1,
+    ntrligtghevfvivfnhkhelicebh9402849028490498nnhrjhfhkkhnjinhrivnecgfvtuibjfjeedge = 1,
+      );
+}

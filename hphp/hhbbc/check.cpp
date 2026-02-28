@@ -17,7 +17,6 @@
 #include <boost/dynamic_bitset.hpp>
 #include <algorithm>
 #include <iterator>
-#include <set>
 
 #include <folly/gen/Base.h>
 
@@ -25,9 +24,9 @@
 
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/class-util.h"
+#include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/representation.h"
-#include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/wide-func.h"
 
 namespace HPHP::HHBBC::php {
@@ -109,7 +108,7 @@ void checkExnTreeBasic(const php::Func& f,
 
 bool DEBUG_ONLY checkExnTree(const php::Func& f) {
   boost::dynamic_bitset<> seenIds;
-  ExnNodeId idx{0};
+  DEBUG_ONLY ExnNodeId idx{0};
   for (auto& n : f.exnNodes) {
     if (n.parent == NoExnNodeId && n.idx != NoExnNodeId) {
       assertx(n.idx == idx);
@@ -152,46 +151,80 @@ bool check(const php::Func& f) {
   if (f.isClosureBody) {
     assertx(f.cls);
     assertx(f.cls->parentName);
-    assertx(f.cls->parentName->isame(s_Closure.get()));
+    assertx(f.cls->parentName->tsame(s_Closure.get()));
   }
 
   assertx(checkExnTree(f));
   return true;
 }
 
-bool check(const php::Class& c) {
-  assertx(checkName(c.name));
-  for (DEBUG_ONLY auto& m : c.methods) assertx(check(*m));
+bool check(const php::Class& c, bool checkMeths) {
+  if (!debug) return true;
+
+  always_assert(checkName(c.name));
+  if (checkMeths) {
+    for (auto& m : c.methods) {
+      if (!m) continue;
+      always_assert(check(*m));
+    }
+  }
+
+  always_assert(
+    IMPLIES(c.attrs & AttrNoOverride, c.attrs & AttrNoOverrideRegular)
+  );
 
   // Some invariants about Closure classes.
   auto const isClo = is_closure(c);
-  if (c.closureContextCls) {
-    assertx(c.closureContextCls->unit == c.unit);
-    assertx(isClo);
-  }
+  always_assert(IMPLIES(c.closureContextCls, isClo));
+  always_assert(IMPLIES(c.closureDeclFunc, isClo));
+  always_assert(IMPLIES(c.closureDeclFunc, !c.closureContextCls));
+  always_assert(IMPLIES(c.closureContextCls, !c.closureDeclFunc));
   if (isClo) {
-    assertx(c.methods.size() == 1 || c.methods.size() == 2);
-    assertx(c.methods[0]->name->isame(s_invoke.get()));
-    assertx(c.methods[0]->isClosureBody);
-    assertx(c.methods.size() == 1);
+    always_assert(c.closures.empty());
+    always_assert(c.closureContextCls || c.closureDeclFunc);
+    always_assert(c.methods.size() == 1);
+    always_assert(c.methods[0]->name == s_invoke.get());
+    always_assert(c.methods[0]->isClosureBody);
   } else {
-    assertx(!c.closureContextCls);
+    for (auto const& clo : c.closures) {
+      always_assert(is_closure(*clo));
+      always_assert(clo->closureContextCls &&
+                    clo->closureContextCls->tsame(c.name));
+      always_assert(!clo->closureDeclFunc);
+      always_assert(check(*clo, checkMeths));
+    }
+  }
+
+  // All regular constants on the class should have unique names.
+  SStringSet constants;
+  for (auto const& cns : c.constants) {
+    always_assert_flog(constants.emplace(cns.name).second,
+                       "Non-unique constant {}::{}",
+                       c.name, cns.name);
   }
 
   return true;
 }
 
-bool check(const php::Unit& u) {
-  for (DEBUG_ONLY auto& c : u.classes) assertx(check(*c));
-  for (DEBUG_ONLY auto& f : u.funcs)   assertx(check(*f));
+bool check(const php::Unit& u, const IIndex& index) {
+  index.for_each_unit_class(
+    u, [&] (const php::Class& c) { assertx(check(c)); }
+  );
+  index.for_each_unit_func(
+    u, [&] (const php::Func& f) { assertx(check(f)); }
+  );
   return true;
 }
 
 bool check(const php::Program& p) {
   trace_time tracer("check");
   parallel::for_each(
-    p.units,
-    [] (const std::unique_ptr<php::Unit>& u) { assertx(check(*u)); }
+    p.classes,
+    [] (const std::unique_ptr<php::Class>& c) { assertx(check(*c)); }
+  );
+  parallel::for_each(
+    p.funcs,
+    [] (const std::unique_ptr<php::Func>& f) { assertx(check(*f)); }
   );
   return true;
 }

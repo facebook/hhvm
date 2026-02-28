@@ -17,36 +17,30 @@
 #define HPHP_HEAP_SCAN_H
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/rds-header.h"
-#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/resource-data.h"
-#include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/base/vanilla-dict.h"
-#include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
-#include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
-#include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
-#include "hphp/runtime/ext/extension-registry.h"
-#include "hphp/runtime/ext/generator/ext_generator.h"
-
-#include "hphp/runtime/server/server-note.h"
+#include "hphp/runtime/ext/asio/ext_wait-handle.h"
+#include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
+#include "hphp/runtime/ext/collections/hash-collection.h"
 
 #include "hphp/runtime/vm/named-entity.h"
-#include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/runtime.h"
-
-#include "hphp/util/hphp-config.h"
 
 #include "hphp/util/rds-local.h"
 #include "hphp/util/type-scan.h"
@@ -130,6 +124,10 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
       // scan C++ properties after [ObjectData] header. should pick up
       // unioned and bit-packed fields
       return static_cast<const c_AwaitAllWaitHandle*>(h)->scan(scanner);
+    case HeaderKind::ConcurrentWH:
+      // scan C++ properties after [ObjectData] header. should pick up
+      // unioned and bit-packed fields
+      return static_cast<const c_ConcurrentWaitHandle*>(h)->scan(scanner);
     case HeaderKind::AsyncFuncWH:
       return scanAFWH(static_cast<const c_Awaitable*>(h), scanner);
     case HeaderKind::NativeData: {
@@ -205,8 +203,14 @@ inline void c_AwaitAllWaitHandle::scan(type_scan::Scanner& scanner) const {
   ObjectData::scan(scanner); // in case of dynprops
 }
 
+inline void c_ConcurrentWaitHandle::scan(type_scan::Scanner& scanner) const {
+  scanner.scanByIndex(m_tyindex, this, heapSize());
+  ObjectData::scan(scanner); // in case of dynprops
+}
+
 inline void c_Awaitable::scan(type_scan::Scanner& scanner) const {
-  assertx(kind() != HeaderKind::AwaitAllWH);
+  assertx(kind() != HeaderKind::AwaitAllWH &&
+          kind() != HeaderKind::ConcurrentWH);
   auto const size =
     kind() == HeaderKind::AsyncFuncWH ? sizeof(c_AsyncFunctionWaitHandle) :
               asio_object_size(this);

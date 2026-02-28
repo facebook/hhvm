@@ -4,7 +4,7 @@ class C<<<__Soft>> reify T> {}
 
 class D extends C {}
 
-function f<<<__Soft>> reify T>() {}
+function f<<<__Soft>> reify T>() :mixed{}
 
 <<__EntryPoint>>
 function main(): void {

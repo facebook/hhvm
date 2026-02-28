@@ -5,8 +5,8 @@ import json
 import os
 from typing import ClassVar, Dict, List, Optional, Type
 
-import test_case
-from common_tests import CommonTestDriver
+import hphp.hack.test.integration.test_case as test_case
+from glean.schema.gencode.types import GenCode
 from glean.schema.hack.types import (
     ClassConstDeclaration,
     ClassConstDefinition,
@@ -18,18 +18,27 @@ from glean.schema.hack.types import (
     EnumDeclaration,
     EnumDefinition,
     Enumerator,
+    FileCall,
     FileDeclarations,
+    FilePackage,
     FileXRefs,
     FunctionDeclaration,
     FunctionDefinition,
     GlobalConstDeclaration,
     GlobalConstDefinition,
+    GlobalNamespaceAlias,
+    HackToThrift,
+    IndexerInputsHash,
+    InheritedMembers,
     InterfaceDeclaration,
     InterfaceDefinition,
+    MemberCluster,
     MethodDeclaration,
     MethodDefinition,
     MethodOccurrence,
     MethodOverrides,
+    ModuleDeclaration,
+    ModuleDefinition,
     NamespaceDeclaration,
     NamespaceQName,
     PropertyDeclaration,
@@ -41,10 +50,12 @@ from glean.schema.hack.types import (
     TypeConstDefinition,
     TypedefDeclaration,
     TypedefDefinition,
+    TypeInfo,
 )
 from glean.schema.src.types import FileLines
-from hh_paths import hh_server
-from thrift.py3 import Protocol, Struct, deserialize
+from hphp.hack.test.integration.common_tests import CommonTestDriver
+from hphp.hack.test.integration.hh_paths import hh_server
+from thrift.py3 import deserialize, Protocol, Struct
 
 
 class WriteSymbolInfoTests(test_case.TestCase[CommonTestDriver]):
@@ -65,7 +76,6 @@ use_mini_state = true
 use_watchman = true
 watchman_subscribe_v2 = true
 lazy_decl = true
-lazy_parse = true
 lazy_init2 = true
 incremental_init = true
 enable_fuzzy_search = false
@@ -127,6 +137,7 @@ max_workers = 2
 
     def predicate_name_to_type(self, predicate_name: str) -> Optional[Type[Struct]]:
         predicate_dict = {
+            "hack.FileCall": FileCall,
             "hack.ClassConstDeclaration": ClassConstDeclaration,
             "hack.ClassConstDefinition": ClassConstDefinition,
             "hack.ClassDeclaration": ClassDeclaration,
@@ -138,17 +149,23 @@ max_workers = 2
             "hack.EnumDefinition": EnumDefinition,
             "hack.Enumerator": Enumerator,
             "hack.FileDeclarations": FileDeclarations,
+            "hack.FilePackage": FilePackage,
             "hack.FileXRefs": FileXRefs,
             "hack.FunctionDeclaration": FunctionDeclaration,
             "hack.FunctionDefinition": FunctionDefinition,
             "hack.GlobalConstDeclaration": GlobalConstDeclaration,
             "hack.GlobalConstDefinition": GlobalConstDefinition,
+            "hack.InheritedMembers": InheritedMembers,
             "hack.InterfaceDeclaration": InterfaceDeclaration,
             "hack.InterfaceDefinition": InterfaceDefinition,
+            "hack.IndexerInputsHash": IndexerInputsHash,
+            "hack.MemberCluster": MemberCluster,
             "hack.MethodDeclaration": MethodDeclaration,
             "hack.MethodDefinition": MethodDefinition,
             "hack.MethodOccurrence": MethodOccurrence,
             "hack.MethodOverrides": MethodOverrides,
+            "hack.ModuleDeclaration": ModuleDeclaration,
+            "hack.ModuleDefinition": ModuleDefinition,
             "hack.NamespaceDeclaration": NamespaceDeclaration,
             "hack.NamespaceQName": NamespaceQName,
             "hack.PropertyDeclaration": PropertyDeclaration,
@@ -160,7 +177,11 @@ max_workers = 2
             "hack.TypeConstDefinition": TypeConstDefinition,
             "hack.TypedefDeclaration": TypedefDeclaration,
             "hack.TypedefDefinition": TypedefDefinition,
+            "hack.TypeInfo": TypeInfo,
+            "hack.HackToThrift": HackToThrift,
+            "hack.GlobalNamespaceAlias": GlobalNamespaceAlias,
             "src.FileLines": FileLines,
+            "gencode.GenCode": GenCode,
         }
         predicate_base = predicate_name[: predicate_name.rfind(".")]
         return predicate_dict.get(predicate_base)
@@ -183,8 +204,6 @@ max_workers = 2
             hh_server,
             "--max-procs",
             "2",
-            "--config",
-            "symbolindex_search_provider=NoIndex",
             self.test_driver.repo_dir,
         ] + args
         self.test_driver.proc_call(cmd)

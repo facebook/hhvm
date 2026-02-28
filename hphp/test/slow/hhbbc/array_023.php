@@ -1,8 +1,8 @@
 <?hh
 
-function junk() { return 2; }
-function bar() {
-  $x = darray['y' => junk(), 'x' => new stdClass()];
+function junk() :mixed{ return 2; }
+function bar() :mixed{
+  $x = dict['y' => junk(), 'x' => new stdClass()];
   $x['x']->hehe ??= 0;
   $x['x']->hehe += 1;
   $val = $x['x'];
@@ -11,6 +11,6 @@ function bar() {
 }
 
 <<__EntryPoint>>
-function main_array_023() {
+function main_array_023() :mixed{
 bar();
 }

@@ -29,9 +29,12 @@ namespace HPHP {
 /**
  * A wait handle that sleeps until a give time passes.
  */
-struct c_SleepWaitHandle final : c_WaitableWaitHandle {
-  WAITHANDLE_CLASSOF(SleepWaitHandle);
-  WAITHANDLE_DTOR(SleepWaitHandle);
+struct c_SleepWaitHandle final :
+    c_WaitableWaitHandle,
+    SystemLib::ClassLoader<"HH\\SleepWaitHandle"> {
+  using SystemLib::ClassLoader<"HH\\SleepWaitHandle">::classof;
+  using SystemLib::ClassLoader<"HH\\SleepWaitHandle">::className;
+  WAITHANDLE_DTOR(SleepWaitHandle)
 
   explicit c_SleepWaitHandle()
     : c_WaitableWaitHandle(classof(), HeaderKind::WaitHandle,
@@ -40,29 +43,26 @@ struct c_SleepWaitHandle final : c_WaitableWaitHandle {
 
  public:
   bool cancel(const Object& exception);
+  bool cancelNoThrow();
   bool process();
   String getName();
-  void exitContext(context_idx_t ctx_idx);
-  AsioSession::TimePoint getWakeTime() const { return m_waketime; };
+  void exitContext(ContextIndex contextIdx);
+  AsioSession::TimePoint getWakeTime() const { return m_waketime; }
   void registerToContext();
   void unregisterFromContext();
 
  private:
   void setState(uint8_t state) { setKindState(Kind::Sleep, state); }
   void initialize(int64_t usecs);
+  bool cancelImpl(const Object* exception);
 
   AsioSession::TimePoint m_waketime;
   friend Object HHVM_STATIC_METHOD(SleepWaitHandle, create, int64_t usecs);
+  friend struct Replayer;
 
  public:
   static const int8_t STATE_WAITING = 2;
 };
-
-void HHVM_STATIC_METHOD(SleepWaitHandle, setOnCreateCallback,
-                        const Variant& callback);
-void HHVM_STATIC_METHOD(SleepWaitHandle, setOnSuccessCallback,
-                        const Variant& callback);
-Object HHVM_STATIC_METHOD(SleepWaitHandle, create, int64_t usecs);
 
 inline c_SleepWaitHandle* c_Awaitable::asSleep() {
   assertx(getKind() == Kind::Sleep);

@@ -20,9 +20,8 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 
-#include <boost/variant.hpp>
+#include <variant>
 #include <folly/Format.h>
-#include <folly/Hash.h>
 
 #include <string>
 #include <type_traits>
@@ -33,7 +32,7 @@ namespace HPHP::rds {
 
 namespace {
 
-struct SymbolKind : boost::static_visitor<std::string> {
+struct SymbolKind {
   std::string operator()(LinkName k) const { return k.type; }
   std::string operator()(LinkID k) const { return k.type; }
   std::string operator()(ClsConstant) const { return "ClsConstant"; }
@@ -50,7 +49,7 @@ struct SymbolKind : boost::static_visitor<std::string> {
   std::string operator()(ConstMemoCache) const { return "ConstMemoCache"; }
 };
 
-struct SymbolRep : boost::static_visitor<std::string> {
+struct SymbolRep {
   std::string operator()(LinkName k) const { return k.name->data(); }
   std::string operator()(LinkID) const { return ""; }
 
@@ -58,8 +57,20 @@ struct SymbolRep : boost::static_visitor<std::string> {
     return k.clsName->data() + std::string("::") + k.cnsName->data();
   }
 
-  std::string operator()(StaticMethod k)  const { return k.name->data(); }
-  std::string operator()(StaticMethodF k) const { return k.name->data(); }
+  std::string operator()(StaticMethod k) const {
+    return folly::to<std::string>(
+        k.clsName->toCppString(), "::",
+        k.methName->toCppString(), ":",
+        k.ctxName->toCppString()
+    );
+  }
+  std::string operator()(StaticMethodF k) const {
+    return folly::to<std::string>(
+        k.clsName->toCppString(), "::",
+        k.methName->toCppString(), ":",
+        k.ctxName->toCppString()
+    );
+  }
 
   std::string operator()(Profile k) const {
     return folly::format(
@@ -114,7 +125,7 @@ struct SymbolRep : boost::static_visitor<std::string> {
   }
 };
 
-struct SymbolEq : boost::static_visitor<bool> {
+struct SymbolEq {
   template<class T, class U>
   typename std::enable_if<
     !std::is_same<T,U>::value,
@@ -122,7 +133,7 @@ struct SymbolEq : boost::static_visitor<bool> {
   >::type operator()(const T&, const U&) const { return false; }
 
   bool operator()(LinkName k1, LinkName k2) const {
-    return strcmp(k1.type, k2.type) == 0 && k1.name->isame(k2.name);
+    return strcmp(k1.type, k2.type) == 0 && k1.name->tsame(k2.name);
   }
   bool operator()(LinkID k1, LinkID k2) const {
     return strcmp(k1.type, k2.type) == 0;
@@ -131,7 +142,7 @@ struct SymbolEq : boost::static_visitor<bool> {
   bool operator()(ClsConstant k1, ClsConstant k2) const {
     assertx(k1.clsName->isStatic() && k1.cnsName->isStatic());
     assertx(k2.clsName->isStatic() && k2.cnsName->isStatic());
-    return k1.clsName->isame(k2.clsName) &&
+    return k1.clsName->tsame(k2.clsName) &&
            k1.cnsName == k2.cnsName;
   }
 
@@ -149,8 +160,12 @@ struct SymbolEq : boost::static_visitor<bool> {
       std::is_same<T,StaticMethodF>::value,
     bool
   >::type operator()(const T& t1, const T& t2) const {
-    assertx(t1.name->isStatic() && t2.name->isStatic());
-    return t1.name->isame(t2.name);
+    assertx(t1.clsName->isStatic() && t2.clsName->isStatic());
+    assertx(t1.methName->isStatic() && t2.methName->isStatic());
+    assertx(t1.ctxName->isStatic() && t2.ctxName->isStatic());
+    return t1.clsName->tsame(t2.clsName) &&
+           t1.methName == t2.methName &&
+           t1.ctxName->tsame(t2.ctxName);
   }
 
   bool operator()(SPropCache k1, SPropCache k2) const {
@@ -189,7 +204,7 @@ struct SymbolEq : boost::static_visitor<bool> {
   }
 };
 
-struct SymbolHash : boost::static_visitor<size_t> {
+struct SymbolHash {
   // NOTE: Any hash functions that are not stable across HHVM
   // restarts should be overridden with an appropriate hash in
   // SymbolStableHash below.
@@ -217,8 +232,16 @@ struct SymbolHash : boost::static_visitor<size_t> {
     );
   }
 
-  size_t operator()(StaticMethod k)  const { return k.name->hash(); }
-  size_t operator()(StaticMethodF k) const { return k.name->hash(); }
+  size_t operator()(StaticMethod k)  const {
+    return folly::hash::hash_combine(
+      k.clsName->hash(), k.methName->hash(), k.ctxName->hash()
+    );
+  }
+  size_t operator()(StaticMethodF k)  const {
+    return folly::hash::hash_combine(
+      k.clsName->hash(), k.methName->hash(), k.ctxName->hash()
+    );
+  }
 
   size_t operator()(SPropCache k) const {
     return folly::hash::hash_combine(
@@ -294,19 +317,19 @@ struct SymbolStableHash : SymbolHash {
 }
 
 std::string symbol_kind(const Symbol& sym) {
-  return boost::apply_visitor(SymbolKind(), sym);
+  return std::visit(SymbolKind(), sym);
 }
 std::string symbol_rep(const Symbol& sym) {
-  return boost::apply_visitor(SymbolRep(), sym);
+  return std::visit(SymbolRep(), sym);
 }
 bool symbol_eq(const Symbol& sym1, const Symbol& sym2) {
-  return boost::apply_visitor(SymbolEq(), sym1, sym2);
+  return std::visit(SymbolEq(), sym1, sym2);
 }
 size_t symbol_hash(const Symbol& sym) {
-  return boost::apply_visitor(SymbolHash(), sym);
+  return std::visit(SymbolHash(), sym);
 }
 size_t symbol_stable_hash(const Symbol& sym) {
-  return boost::apply_visitor(SymbolStableHash(), sym);
+  return std::visit(SymbolStableHash(), sym);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

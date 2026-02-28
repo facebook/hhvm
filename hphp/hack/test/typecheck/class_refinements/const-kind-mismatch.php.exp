@@ -1,0 +1,8 @@
+ERROR: File "const-kind-mismatch.php", line 8, characters 46-46:
+Invalid class refinement (Typing[4470])
+  File "const-kind-mismatch.php", line 8, characters 30-32:
+  Constant `C` in `Box` is not a type, did you mean ctx?
+ERROR: File "const-kind-mismatch.php", line 10, characters 45-45:
+Invalid class refinement (Typing[4470])
+  File "const-kind-mismatch.php", line 10, characters 30-32:
+  Constant `T` in `Box` is not a ctx, did you mean type?

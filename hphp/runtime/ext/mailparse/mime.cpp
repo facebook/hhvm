@@ -371,7 +371,7 @@ bool MimePart::getStructure(Enumerator *id, void *ptr) {
   char *buf = (char*)malloc(buf_size);
   buf[0] = '\0';
   while (id && i < buf_size) {
-    sprintf(intbuf, "%d", id->id);
+    snprintf(intbuf, 16, "%d", id->id);
     len = strlen(intbuf);
     if (len > (buf_size-i)) {
       raise_warning("too many nested sections in message");
@@ -389,7 +389,7 @@ bool MimePart::getStructure(Enumerator *id, void *ptr) {
                           "developers.", buf_size).c_str());
       }
     }
-    sprintf(&buf[i], "%s%c", intbuf, id->next ? '.' : '\0');
+    snprintf(&buf[i], buf_size-i, "%s%c", intbuf, id->next ? '.' : '\0');
     i += len + (id->next ? 1 : 0);
     id = id->next;
   }
@@ -424,12 +424,12 @@ bool MimePart::findPart(Enumerator *id, void *ptr) {
   return true;
 }
 
-Resource MimePart::findByName(const char *name) {
+OptResource MimePart::findByName(const char *name) {
   struct find_part_struct find;
   find.searchfor = name;
   find.foundpart = NULL;
   enumerateParts(&MimePart::findPart, &find);
-  return Resource{find.foundpart};
+  return OptResource{find.foundpart};
 }
 
 static int filter_into_work_buffer(int c, void *dat) {
@@ -536,7 +536,7 @@ const StaticString
   s_mime_version("mime-version"),
   s_content_transfer_encoding("content-transfer-encoding");
 
-Variant MimePart::getPartData() {
+Array MimePart::getPartData() {
   Array ret = Array::CreateDict();
 
   ret.set(s_headers, m_headers);
@@ -646,7 +646,7 @@ req::ptr<MimePart> MimePart::createChild(int startpos, bool inherit) {
   m_parsedata.lastpart = child;
   child->m_parent = this;
 
-  m_children.append(Resource(child));
+  m_children.append(OptResource(child));
   child->m_startpos = child->m_endpos = child->m_bodystart =
     child->m_bodyend = startpos;
 

@@ -4,7 +4,7 @@ function darray_recursive($x) {
   if (!HH\is_php_array($x)) {
     return $x;
   }
-  $result = darray[];
+  $result = dict[];
   foreach ($x as $k => $v) {
     $result[$k] = darray_recursive($v);
   }
@@ -116,62 +116,62 @@ function fb_cs_entrypoint(): void {
   fb_cs_test("012301230123012");
 
   fb_cs_test(
-    HH\array_mark_legacy(varray[]),
-    HH\array_mark_legacy(darray[]),
+    HH\array_mark_legacy(vec[]),
+    HH\array_mark_legacy(dict[]),
 
-    HH\array_mark_legacy(varray[12345,"abc",0.1234]),
+    HH\array_mark_legacy(vec[12345,"abc",0.1234]),
     vec[12345,"abc",0.1234],
-    HH\array_mark_legacy(darray[1 => 12345]),
+    HH\array_mark_legacy(dict[1 => 12345]),
     dict[1 => 12345],
-    HH\array_mark_legacy(darray[1 => 12345, "a" => 123124, "sdf" => 0.1234]),
+    HH\array_mark_legacy(dict[1 => 12345, "a" => 123124, "sdf" => 0.1234]),
     dict[1 => 12345, "a" => 123124, "sdf" => 0.1234],
 
-    HH\array_mark_legacy_recursive(varray[varray["a"]]),
-    vec[HH\array_mark_legacy(varray["a"])],
-    HH\array_mark_legacy(varray[vec["a"]]),
+    HH\array_mark_legacy_recursive(vec[vec["a"]]),
+    vec[HH\array_mark_legacy(vec["a"])],
+    HH\array_mark_legacy(vec[vec["a"]]),
     vec[vec["a"]],
 
-    HH\array_mark_legacy_recursive(varray[1, varray["a"]]),
-    vec[1, HH\array_mark_legacy(varray["a"])],
-    HH\array_mark_legacy(varray[1, vec["a"]]),
+    HH\array_mark_legacy_recursive(vec[1, vec["a"]]),
+    vec[1, HH\array_mark_legacy(vec["a"])],
+    HH\array_mark_legacy(vec[1, vec["a"]]),
     vec[1, vec["a"]],
 
-    HH\array_mark_legacy_recursive(varray[varray["a"]]),
-    HH\array_mark_legacy(varray[vec["a"]]),
-    vec[HH\array_mark_legacy(varray["a"])],
+    HH\array_mark_legacy_recursive(vec[vec["a"]]),
+    HH\array_mark_legacy(vec[vec["a"]]),
+    vec[HH\array_mark_legacy(vec["a"])],
 
-    HH\array_mark_legacy_recursive(varray[varray["a"], 1]),
-    HH\array_mark_legacy(varray[vec["a"], 1]),
-    vec[HH\array_mark_legacy(varray["a"]), 1],
+    HH\array_mark_legacy_recursive(vec[vec["a"], 1]),
+    HH\array_mark_legacy(vec[vec["a"], 1]),
+    vec[HH\array_mark_legacy(vec["a"]), 1],
     vec[vec["a"], 1],
 
-    HH\array_mark_legacy_recursive(varray[varray["a"], varray[1]]),
-    vec[HH\array_mark_legacy(varray["a"]), HH\array_mark_legacy(varray[1])],
-    HH\array_mark_legacy(varray[HH\array_mark_legacy(varray["a"]), vec[1]]),
-    vec[vec["a"], HH\array_mark_legacy(varray[1])],
-    HH\array_mark_legacy(varray[vec["a"], vec[1]]),
+    HH\array_mark_legacy_recursive(vec[vec["a"], vec[1]]),
+    vec[HH\array_mark_legacy(vec["a"]), HH\array_mark_legacy(vec[1])],
+    HH\array_mark_legacy(vec[HH\array_mark_legacy(vec["a"]), vec[1]]),
+    vec[vec["a"], HH\array_mark_legacy(vec[1])],
+    HH\array_mark_legacy(vec[vec["a"], vec[1]]),
     vec[vec["a"], vec[1]],
 
-    HH\array_mark_legacy(varray[new stdClass(), new stdClass()]),
-    HH\array_mark_legacy(darray[42 => new stdClass(), 47 => new stdClass()]),
+    HH\array_mark_legacy(vec[new stdClass(), new stdClass()]),
+    HH\array_mark_legacy(dict[42 => new stdClass(), 47 => new stdClass()]),
   );
 
   // Test list-like darray/dict
   fb_cs_test(
     //k0=int,k1=int
-    HH\array_mark_legacy(darray[0 => 'a', 1 => 'b']),
+    HH\array_mark_legacy(dict[0 => 'a', 1 => 'b']),
     dict[0 => 'a', 1 => 'b'],
 
     //k0=str,k1=str
-    HH\array_mark_legacy(darray['0' => 'a', '1' => 'b']),
+    HH\array_mark_legacy(dict['0' => 'a', '1' => 'b']),
     dict['0' => 'a', '1' => 'b'],
 
     //k0=int,k1=str
-    HH\array_mark_legacy(darray[0 => 'a', '1' => 'b']),
+    HH\array_mark_legacy(dict[0 => 'a', '1' => 'b']),
     dict[0 => 'a', '1' => 'b'],
 
     //k0=str,k1=int
-    HH\array_mark_legacy(darray['0' => 'a', 1 => 'b']),
+    HH\array_mark_legacy(dict['0' => 'a', 1 => 'b']),
     dict['0' => 'a', 1 => 'b'],
 
     // keysets that are list like
@@ -185,33 +185,33 @@ function fb_cs_entrypoint(): void {
 
   // Test skips
   fb_cs_test(
-    HH\array_mark_legacy(darray[0 => "a", 1 => "b", 3 => "c"]),
+    HH\array_mark_legacy(dict[0 => "a", 1 => "b", 3 => "c"]),
     dict[0 => "a", 1 => "b", 3 => "c"],
     dict['0' => "a", '1' => "b", '3' => "c"],
     dict['0' => "a", 1 => "b", '3' => "c"],
-    HH\array_mark_legacy(darray[1 => "a", 2 => "b", 3 => "c"]),
+    HH\array_mark_legacy(dict[1 => "a", 2 => "b", 3 => "c"]),
     dict[1 => "a", 2 => "b", 3 => "c"],
-    HH\array_mark_legacy(darray[0 => "a", 2 => "b", 3 => "c"]),
+    HH\array_mark_legacy(dict[0 => "a", 2 => "b", 3 => "c"]),
     dict[0 => "a", 2 => "b", 3 => "c"],
     dict['0' => "a", '2' => "b", '3' => "c"],
-    HH\array_mark_legacy(darray[3 => "a"]),
+    HH\array_mark_legacy(dict[3 => "a"]),
     dict[3 => "a"],
-    HH\array_mark_legacy(darray[2 => 2, 1 => 1, 3 => 3]),
+    HH\array_mark_legacy(dict[2 => 2, 1 => 1, 3 => 3]),
     dict[2 => 2, 1 => 1, 3 => 3],
   );
   // Test for overflow (1ull << 63) - 1
-  fb_cs_test(varray[9223372036854775807, 'a']);
+  fb_cs_test(vec[9223372036854775807, 'a']);
 
   // Test each power of two, +/- 1 and the negatives of them
   // Test a single number and packed inside an array
   for ($i = 0; $i < 64; ++$i) {
     $n = 1 << $i;
-    fb_cs_test($n);    fb_cs_test(varray[$n]);
-    fb_cs_test($n-1);  fb_cs_test(varray[$n-1]);
-    fb_cs_test($n+1);  fb_cs_test(varray[$n+1]);
-    fb_cs_test(-$n);   fb_cs_test(varray[-$n]);
-    fb_cs_test(-$n-1); fb_cs_test(varray[-$n-1]);
-    fb_cs_test(-$n+1); fb_cs_test(varray[-$n+1]);
+    fb_cs_test($n);    fb_cs_test(vec[$n]);
+    fb_cs_test($n-1);  fb_cs_test(vec[$n-1]);
+    fb_cs_test($n+1);  fb_cs_test(vec[$n+1]);
+    fb_cs_test(-$n);   fb_cs_test(vec[-$n]);
+    fb_cs_test(-$n-1); fb_cs_test(vec[-$n-1]);
+    fb_cs_test(-$n+1); fb_cs_test(vec[-$n+1]);
   }
 
   echo "====\n";

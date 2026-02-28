@@ -3,16 +3,16 @@
 trait ATrait
 {
     function setRequired()
-    {
+:mixed    {
         $this->setAttribute();
     }
 
-    abstract function setAttribute();
+    abstract function setAttribute():mixed;
 }
 
 class Base
 {
-    function setAttribute() { }
+    function setAttribute() :mixed{ }
 }
 
 class MyClass extends Base

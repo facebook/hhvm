@@ -1,0 +1,131 @@
+*** Testing possible variations in path and suffix ***
+
+--Iteration 1--
+string(3) "bar"
+
+--Iteration 2--
+string(3) "bar"
+
+--Iteration 3--
+string(3) "bar"
+
+--Iteration 4--
+string(3) "bar"
+
+--Iteration 5--
+string(7) "bar.tar"
+
+--Iteration 6--
+string(7) "bar.tar"
+
+--Iteration 7--
+string(7) "bar.tar"
+
+--Iteration 8--
+string(7) "bar.tar"
+
+--Iteration 9--
+string(7) "bar.tar"
+
+--Iteration 10--
+string(7) "bar.tar"
+
+--Iteration 11--
+string(7) "bar.tar"
+
+--Iteration 12--
+string(1) "t"
+
+--Iteration 13--
+string(7) "tbar.gz"
+
+--Iteration 14--
+string(7) "tbar.gz"
+
+--Iteration 15--
+string(7) "tbar.gz"
+
+--Iteration 16--
+string(7) "tbar.gz"
+
+--Iteration 17--
+string(10) "My Pics.gz"
+
+--Iteration 18--
+string(10) "My Pics.gz"
+
+--Iteration 19--
+string(3) "My "
+
+--Iteration 20--
+string(7) "My Pics"
+
+--Iteration 21--
+string(10) "My Pics.gz"
+
+--Iteration 22--
+string(10) "My Pics.gz"
+
+--Iteration 23--
+string(10) "My Pics.gz"
+
+--Iteration 24--
+string(10) "My Pics.gz"
+
+--Iteration 25--
+string(4) "10.5"
+
+--Iteration 26--
+string(2) "10"
+
+--Iteration 27--
+string(4) "10.5"
+
+--Iteration 28--
+string(2) "10"
+
+--Iteration 29--
+string(2) "10"
+
+--Iteration 30--
+string(4) "10.5"
+
+--Iteration 31--
+string(4) "10.5"
+
+--Iteration 32--
+string(5) "10.gz"
+
+--Iteration 33--
+string(1) "0"
+
+--Iteration 34--
+string(1) "0"
+
+--Iteration 35--
+string(6) "bar.gz"
+
+--Iteration 36--
+string(6) "bar.gz"
+
+--Iteration 37--
+string(6) "bar.gz"
+
+--Iteration 38--
+string(1) " "
+
+--Iteration 39--
+string(1) " "
+
+--Iteration 40--
+string(1) " "
+
+--Iteration 41--
+string(1) " "
+
+--Iteration 42--
+string(0) ""
+
+--Iteration 43--
+string(0) ""
+Done

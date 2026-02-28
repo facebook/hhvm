@@ -20,14 +20,17 @@ use namespace HH\Lib\Vec;
  * If no $comparator is provided, the `<=>` operator will be used.
  * This will sort numbers by value, strings by alphabetical order
  * or by the numeric value, if the strings are well-formed numbers,
- * and DateTime/DateTimeImmutable by their unixtime.
+ * and DateTime/DateTimeImmutable by their unixtime. If the comparison
+ * operator `<=>` is not useful on Tv and no $comparator is provided,
+ * the result of is_sorted will not be useful.
+ *
+ * When specified, a comparator should exhibit the same behavior as the `<=>`
+ * operator: a negative value when the left operand compares less than the
+ * right operand, 0 when the operands compare equal, and a positive value when
+ * the left operand compares greater than the right operand.
  *
  * To check the order of other types or mixtures of the
  * aforementioned types, see C\is_sorted_by.
- *
- * If the comparison operator `<=>` is not useful on Tv
- * and no $comparator is provided, the result of is_sorted
- * will not be useful.
  *
  * Time complexity: O((n * c), where c is the complexity of the
  * comparator function (which is O(1) if not provided explicitly)
@@ -64,14 +67,17 @@ function is_sorted<Tv>(
  * If no $comparator is provided, the `<=>` operator will be used.
  * This will sort numbers by value, strings by alphabetical order
  * or by the numeric value, if the strings are well-formed numbers,
- * and DateTime/DateTimeImmutable by their unixtime.
+ * and DateTime/DateTimeImmutable by their unixtime. If the comparison
+ * operator `<=>` is not useful on Ts and no $comparator is provided, the
+ * result of is_sorted_by will not be useful.
+ *
+ * When specified, a comparator should exhibit the same behavior as the `<=>`
+ * operator: a negative value when the left operand compares less than the
+ * right operand, 0 when the operands compare equal, and a positive value when
+ * the left operand compares greater than the right operand.
  *
  * To check the order without a mapping function,
  * see `C\is_sorted`.
- *
- * If the comparison operator `<=>` is not useful on Ts
- * and no $comparator is provided, the result of is_sorted_by
- * will not be useful.
  *
  * Time complexity: O((n * c), where c is the complexity of the
  * comparator function (which is O(1) if not provided explicitly)

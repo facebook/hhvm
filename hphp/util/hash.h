@@ -16,22 +16,26 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <array>
 #include <cstring>
+#include <memory>
+#include <random>
+#include <stdint.h>
+#include <string_view>
 
 #include "hphp/util/portability.h"
 
-#ifndef FACEBOOK
+#ifndef HHVM_FACEBOOK
 #  include "hphp/util/hphp-config.h"
 #endif
 
-#if defined(__x86_64__) && !defined(_MSC_VER)
+#if defined(__x86_64__)
 #  include <nmmintrin.h>
 #  if (!defined USE_HWCRC)
 #    define USE_HWCRC
 #  endif
-#elif defined __aarch64__ && defined ENABLE_AARCH64_CRC
-#  if (!defined USE_HWCRC)
+#elif defined(__aarch64__) && defined(__ARM_FEATURE_CRC32)
+#  if !defined(USE_HWCRC)
 #    define USE_HWCRC
 #  endif
 #else
@@ -69,7 +73,7 @@ inline size_t hash_int64_fallback(uint64_t key) {
 ALWAYS_INLINE size_t hash_int64(uint64_t k) {
 #if defined(USE_HWCRC) && defined(__SSE4_2__)
   return _mm_crc32_u64(0, k);
-#elif defined(USE_HWCRC) && defined(ENABLE_AARCH64_CRC)
+#elif defined(USE_HWCRC) && defined(__ARM_FEATURE_CRC32)
   size_t res;
   __asm("crc32cx %w0, wzr, %x1\n" : "=r"(res) : "r"(k));
   return res;
@@ -85,7 +89,7 @@ inline size_t hash_int64_pair(uint64_t k1, uint64_t k2) {
   // differently from (k2, k1).
   k1 += k1;
   return _mm_crc32_u64(k1, k2);
-#elif defined(USE_HWCRC) && defined(ENABLE_AARCH64_CRC)
+#elif defined(USE_HWCRC) && defined(__ARM_FEATURE_CRC32)
   size_t res;
   k1 += k1;
   __asm("crc32cx %w0, %w1, %x2\n" : "=r"(res) : "r"(k2), "r"(k1));
@@ -178,25 +182,26 @@ ALWAYS_INLINE void hash128(const void *key, size_t len, uint64_t seed,
   uint64_t k2 = 0;
   switch(len & 15)
   {
-  case 15: k2 ^= uint64_t(getblock8<caseSensitive>(tail, 14)) << 48;
-  case 14: k2 ^= uint64_t(getblock8<caseSensitive>(tail, 13)) << 40;
-  case 13: k2 ^= uint64_t(getblock8<caseSensitive>(tail, 12)) << 32;
-  case 12: k2 ^= uint64_t(getblock8<caseSensitive>(tail, 11)) << 24;
-  case 11: k2 ^= uint64_t(getblock8<caseSensitive>(tail, 10)) << 16;
-  case 10: k2 ^= uint64_t(getblock8<caseSensitive>(tail,  9)) << 8;
+  case 15: k2 ^= uint64_t(getblock8<caseSensitive>(tail, 14)) << 48; [[fallthrough]];
+  case 14: k2 ^= uint64_t(getblock8<caseSensitive>(tail, 13)) << 40; [[fallthrough]];
+  case 13: k2 ^= uint64_t(getblock8<caseSensitive>(tail, 12)) << 32; [[fallthrough]];
+  case 12: k2 ^= uint64_t(getblock8<caseSensitive>(tail, 11)) << 24; [[fallthrough]];
+  case 11: k2 ^= uint64_t(getblock8<caseSensitive>(tail, 10)) << 16; [[fallthrough]];
+  case 10: k2 ^= uint64_t(getblock8<caseSensitive>(tail,  9)) << 8;  [[fallthrough]];
   case  9: k2 ^= uint64_t(getblock8<caseSensitive>(tail,  8)) << 0;
            k2 *= c2; k2  = ROTL64(k2,33); k2 *= c1; h2 ^= k2;
+           [[fallthrough]];
 
-  case  8: k1 ^= uint64_t(getblock8<caseSensitive>(tail,  7)) << 56;
-  case  7: k1 ^= uint64_t(getblock8<caseSensitive>(tail,  6)) << 48;
-  case  6: k1 ^= uint64_t(getblock8<caseSensitive>(tail,  5)) << 40;
-  case  5: k1 ^= uint64_t(getblock8<caseSensitive>(tail,  4)) << 32;
-  case  4: k1 ^= uint64_t(getblock8<caseSensitive>(tail,  3)) << 24;
-  case  3: k1 ^= uint64_t(getblock8<caseSensitive>(tail,  2)) << 16;
-  case  2: k1 ^= uint64_t(getblock8<caseSensitive>(tail,  1)) << 8;
+  case  8: k1 ^= uint64_t(getblock8<caseSensitive>(tail,  7)) << 56; [[fallthrough]];
+  case  7: k1 ^= uint64_t(getblock8<caseSensitive>(tail,  6)) << 48; [[fallthrough]];
+  case  6: k1 ^= uint64_t(getblock8<caseSensitive>(tail,  5)) << 40; [[fallthrough]];
+  case  5: k1 ^= uint64_t(getblock8<caseSensitive>(tail,  4)) << 32; [[fallthrough]];
+  case  4: k1 ^= uint64_t(getblock8<caseSensitive>(tail,  3)) << 24; [[fallthrough]];
+  case  3: k1 ^= uint64_t(getblock8<caseSensitive>(tail,  2)) << 16; [[fallthrough]];
+  case  2: k1 ^= uint64_t(getblock8<caseSensitive>(tail,  1)) << 8;  [[fallthrough]];
   case  1: k1 ^= uint64_t(getblock8<caseSensitive>(tail,  0)) << 0;
            k1 *= c1; k1  = ROTL64(k1,31); k1 *= c2; h1 ^= k1;
-  };
+  }
 
   //----------
   // finalization
@@ -222,7 +227,7 @@ ALWAYS_INLINE void hash128(const void *key, size_t len, uint64_t seed,
 //   i: case-insensitive;
 //   unsafe: safe for strings aligned at 8-byte boundary;
 
-#if defined USE_HWCRC && (defined __SSE4_2__ || defined ENABLE_AARCH64_CRC)
+#if defined USE_HWCRC && (defined(__SSE4_2__) || defined(__ARM_FEATURE_CRC32))
 
 // We will surely use CRC32, these are implemented directly in hash-crc-*.S
 strhash_t hash_string_cs_unsafe(const char *arKey, uint32_t nKeyLength);
@@ -255,6 +260,16 @@ strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength) {
 }
 
 #endif
+
+// Convenience wrapper for std::string_view
+inline strhash_t hash_string_cs(std::string_view s) {
+  return hash_string_cs(s.data(), s.size());
+}
+
+// These functions implement hashing in software. And will return the same thing
+// between different hardware
+strhash_t hash_string_cs_software(const char*, uint32_t);
+strhash_t hash_string_i_software(const char*, uint32_t);
 
 // This function returns true and sets the res parameter if arKey
 // is a non-empty string that matches one of the following conditions:
@@ -326,9 +341,194 @@ size_t consistent_hash(int64_t key, size_t buckets, int64_t salt = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Tabulation hashing implementation with optional twisted tabulation extension.
+ *
+ * Tabulation hashing is a simple and efficient hashing technique that
+ * provides strong theoretical guarantees, including k-independence
+ * for certain values of k.  It works by splitting the input into
+ * blocks, using each block as an index into a randomly-initialized
+ * lookup table, and XORing the results together.
+ *
+ * When D > 0, this implements "twisted" or "mixed" tabulation
+ * hashing, which provides even stronger guarantees by introducing
+ * additional derived blocks that are hashed through a second layer of
+ * tables.
+ *
+ * Template parameters:
+ *   I: Input type (must be unsigned integral). The value to be hashed.
+ *   O: Output type (defaults to I). Can be an integral type or std::array
+ *      of integral types for wider hash outputs.
+ *   B: Block type (defaults to uint8_t). The input is split into blocks of
+ *      this size. Smaller blocks use less memory but may be slower.
+ *   D: Number of expanded/derived blocks (defaults to 0). When D > 0, enables
+ *      twisted tabulation hashing for stronger theoretical properties.
+ *
+ * Example usage:
+ *   std::mt19937_64 rng(seed);
+ *   TabulationHash<uint64_t> hash(rng);
+ *   uint64_t result = hash(12345);
+ */
+template <typename I, typename O = I, typename B = uint8_t, size_t D = 0>
+struct TabulationHash {
+  using Input = I;
+  using Output = O;
+  using Block = B;
+
+  static_assert(std::is_integral_v<Input> && !std::is_signed_v<Input>);
+  static_assert(std::is_integral_v<Block> && !std::is_signed_v<Block>);
+  static_assert(std::numeric_limits<Input>::digits %
+                std::numeric_limits<Block>::digits == 0);
+
+  /**
+   * Construct a tabulation hash function with random tables.
+   *
+   * @param r A random number generator (e.g., std::mt19937_64) used to
+   *          initialize the lookup tables. Different generators produce
+   *          different hash functions.
+   */
+  template <typename R> explicit TabulationHash(R&&);
+
+  /**
+   * Hash an input value.
+   *
+   * This operation is thread-safe and can be called concurrently from
+   * multiple threads on the same hash instance.
+   *
+   * @param v The value to hash (must be of type Input).
+   * @return The hash value of type Output.
+   */
+  Output operator()(Input v) const noexcept;
+
+private:
+
+  // Helper to XOR two arrays element-wise (for std::array Output types).
+  template <typename T, size_t N>
+  static void exclusive_or(std::array<T, N>& a, const std::array<T, N>& b) {
+    static_assert(std::is_integral_v<T> && !std::is_signed_v<T>);
+    for (size_t i = 0; i < N; ++i) a[i] ^= b[i];
+  }
+  // Helper to XOR two scalar values (for integral Output types).
+  template <typename T> static void exclusive_or(T& a, const T& b) {
+    static_assert(std::is_integral_v<T> && !std::is_signed_v<T>);
+    a ^= b;
+  }
+
+  // Wrapper for std::uniform_int_distribution to generate random values
+  // of type T (either integral types or std::array).
+  template <typename T>
+  struct Distribution {
+    template <typename R> T operator()(R&& r) { return d(r); }
+    std::uniform_int_distribution<T> d;
+  };
+
+  // Specialization for generating random std::array values.
+  template <typename T, size_t N>
+  struct Distribution<std::array<T, N>> {
+    template <typename R>
+    std::array<T, N> operator()(R&& r) {
+      std::array<T, N> out;
+      for (size_t i = 0; i < N; ++i) out[i] = d(r);
+      return out;
+    }
+    std::uniform_int_distribution<T> d;
+  };
+
+  // Number of blocks the input is split into (e.g., 8 for uint64_t with uint8_t blocks).
+  static constexpr size_t kNumInputBlocks =
+    std::numeric_limits<Input>::digits / std::numeric_limits<Block>::digits;
+  // Number of expanded/derived blocks for twisted tabulation (0 for simple tabulation).
+  static constexpr size_t kNumExpandedBlocks = D;
+  // Size of each lookup table dimension (e.g., 256 for uint8_t blocks).
+  static constexpr size_t kBlockSize =
+    size_t{std::numeric_limits<Block>::max()} + 1;
+
+  // Type of lookup table mapping Block -> Output.
+  using ToOutput = std::array<Output, kBlockSize>;
+
+  // Type representing expanded/derived blocks for twisted tabulation.
+  using Expanded = std::array<Block, kNumExpandedBlocks>;
+  // Type of lookup table mapping Block -> Expanded.
+  using ToExpanded = std::array<Expanded, kBlockSize>;
+
+  // Internal state containing all lookup tables.
+  struct State {
+    // table1: Maps each input block directly to an Output value.
+    // One table per input block position.
+    std::array<ToOutput, kNumInputBlocks> table1{};
+    // table2: Maps each input block to derived/expanded blocks.
+    // Only used when D > 0 (twisted tabulation).
+    std::array<ToExpanded, kNumInputBlocks> table2{};
+    // table3: Maps each expanded block to an Output value.
+    // Only used when D > 0 (twisted tabulation).
+    std::array<ToOutput, kNumExpandedBlocks> table3{};
+  };
+  std::shared_ptr<State> state;
+};
+
+template <typename I, typename O, typename B, size_t D>
+template <typename R>
+TabulationHash<I, O, B, D>::TabulationHash(R&& r) {
+  Distribution<Output> distrib1;
+  std::uniform_int_distribution<Block> distrib2;
+
+  state = std::make_shared<State>();
+
+  // Initialize table1: Direct input block -> output mappings.
+  // For each position in the input, create a random lookup table.
+  for (auto& t1 : state->table1) {
+    for (auto& t2 : t1) t2 = distrib1(r);
+  }
+  // Initialize table2: Input block -> expanded block mappings.
+  // Only used for twisted tabulation (when D > 0).
+  for (auto& t1 : state->table2) {
+    for (auto& t2 : t1) {
+      for (auto& t3 : t2) t3 = distrib2(r);
+    }
+  }
+  // Initialize table3: Expanded block -> output mappings.
+  // Only used for twisted tabulation (when D > 0).
+  for (auto& t1 : state->table3) {
+    for (auto& t2 : t1) t2 = distrib1(r);
+  }
 }
 
-#if defined(USE_HWCRC) && !defined(__SSE4_2__) && !defined(_MSC_VER)
+template <typename I, typename O, typename B, size_t D>
+TabulationHash<I, O, B, D>::Output
+TabulationHash<I, O, B, D>::operator()(Input v) const noexcept {
+  Output out{};
+  Expanded expanded{};
+
+  auto const& table1 = state->table1;
+  auto const& table2 = state->table2;
+  // Phase 1: Process each block of the input value.
+  // For each block position i, extract the i-th block from v and use it
+  // to look up values in table1[i] and table2[i], XORing the results.
+  for (size_t i = 0; i < kNumInputBlocks; ++i) {
+    // Use the current low block as an index into table1 and XOR its output.
+    exclusive_or(out, table1[i][static_cast<Block>(v)]);
+    // Use the current low block to generate expanded blocks (for twisted tabulation).
+    auto const& t = table2[i][static_cast<Block>(v)];
+    for (size_t j = 0; j < kNumExpandedBlocks; ++j) expanded[j] ^= t[j];
+    // Shift to the next block.
+    v >>= std::numeric_limits<Block>::digits;
+  }
+
+  // Phase 2: Process the expanded/derived blocks (twisted tabulation).
+  // Only executes when D > 0. Each expanded block is used as an index
+  // into table3 to produce additional output that is XORed into the result.
+  auto const& table3 = state->table3;
+  for (size_t i = 0; i < kNumExpandedBlocks; ++i) {
+    exclusive_or(out, table3[i][expanded[i]]);
+  }
+  return out;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+}
+
+#if defined(USE_HWCRC) && !defined(__SSE4_2__)
 // The following functions are implemented in ASM directly for x86_64 and ARM
 extern "C" {
   HPHP::strhash_t hash_string_cs_crc(const char*, uint32_t);

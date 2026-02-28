@@ -13,6 +13,6 @@ class C extends A { const v = 44; }
 
 
 <<__EntryPoint>>
-function main_interface_override() {
+function main_interface_override() :mixed{
 var_dump(X::v, A::v, B::v, C::v);
 }

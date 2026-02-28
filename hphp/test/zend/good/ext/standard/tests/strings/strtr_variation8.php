@@ -11,7 +11,7 @@
 
 //defining a class
 class sample  {
-  public function __toString() {
+  public function __toString() :mixed{
     return "sample object";
   }
 }
@@ -26,7 +26,7 @@ $file_handle = fopen(__FILE__, "r");
 $str = "012atm";
 
 // array of inputs for 'replace_pairs' argument
-$replace_pairs_arr =  varray [
+$replace_pairs_arr =  vec[
 
   // integer values
   0,
@@ -39,9 +39,9 @@ $replace_pairs_arr =  varray [
   10.5e10,
 
   // array values
-  varray[],
-  varray[0],
-  varray[1, 2],
+  vec[],
+  vec[0],
+  vec[1, 2],
 
   // boolean values
   true,

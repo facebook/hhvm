@@ -1,18 +1,18 @@
 //// modules.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
 
-module A {}
+
+new module A {}
 
 //// A.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules'), __Module("A")>>
+
+module A;
 
 class A {
-  <<__Internal>>
-  public int $x = 0;
+  internal int $x = 0;
 }
 
 //// f.php

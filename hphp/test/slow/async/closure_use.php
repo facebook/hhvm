@@ -1,13 +1,13 @@
 <?hh
 
-function block() {
+function block() :mixed{
   return RescheduleWaitHandle::create(
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
   );
 }
 <<__EntryPoint>>
-function main_closure_use() {
+function main_closure_use() :mixed{
 ;
 
 // closure in use param
@@ -28,8 +28,15 @@ var_dump(HH\Asio\join($y($callback)));
 
 $env = 3;
 
-$inc = async function () use ($env) { return ++$env; };
-$incB = async function () use ($env) { await block(); return ++$env; };
+$inc = async function () use ($env) {
+  ++$env;
+ return $env;
+};
+$incB = async function () use ($env) {
+  await block();
+  ++$env;
+  return $env;
+};
 
 var_dump(HH\Asio\join($inc()));
 var_dump(HH\Asio\join($incB()));

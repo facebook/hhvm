@@ -3,6 +3,6 @@
 namespace foo;
 
 <<__EntryPoint>>
-function main_hashbang() {
+function main_hashbang() :mixed{
 print "Works!\n";
 }

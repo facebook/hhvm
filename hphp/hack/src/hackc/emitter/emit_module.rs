@@ -2,37 +2,40 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
 use env::emitter::Emitter;
 use error::Result;
-use ffi::{Maybe, Slice, Str};
-use hhbc::{hhas_module::HhasModule, hhas_pos::HhasSpan, ClassName};
+use ffi::Maybe;
+use hhbc::Module;
+use hhbc::ModuleName;
+use hhbc::Span;
 use oxidized::ast;
 
-pub fn emit_module<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl>,
-    ast_module: &'a ast::Module,
-) -> Result<HhasModule<'arena>> {
+use crate::emit_attribute;
+
+pub fn emit_module<'a>(emitter: &mut Emitter, ast_module: &'a ast::ModuleDef) -> Result<Module> {
     let attributes = emit_attribute::from_asts(emitter, &ast_module.user_attributes)?;
-    let name = ClassName::from_ast_name_and_mangle(alloc, &ast_module.name.1);
-    let span = HhasSpan::from_pos(&ast_module.span);
-    Ok(HhasModule {
-        attributes: Slice::fill_iter(alloc, attributes.into_iter()),
+    let name = ModuleName::intern(&ast_module.name.1);
+    let span = Span::from_pos(&ast_module.span);
+    let doc_comment = ast_module.doc_comment.clone();
+
+    Ok(Module {
+        attributes: attributes.into(),
         name,
         span,
+        doc_comment: doc_comment
+            .map(|(_, comment)| comment.into_bytes().into())
+            .into(),
     })
 }
 
-pub fn emit_modules_from_program<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl>,
+pub fn emit_modules_from_program<'a>(
+    emitter: &mut Emitter,
     ast: &'a [ast::Def],
-) -> Result<Vec<HhasModule<'arena>>> {
+) -> Result<Vec<Module>> {
     ast.iter()
         .filter_map(|def| {
             if let ast::Def::Module(md) = def {
-                Some(emit_module(alloc, emitter, md))
+                Some(emit_module(emitter, md))
             } else {
                 None
             }
@@ -40,28 +43,10 @@ pub fn emit_modules_from_program<'a, 'arena, 'decl>(
         .collect()
 }
 
-pub fn emit_module_use_from_program<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    prog: &[ast::Def],
-) -> Maybe<Str<'arena>> {
+pub fn emit_module_use_from_program(prog: &[ast::Def]) -> Maybe<ModuleName> {
     for node in prog.iter() {
-        // TODO T115356820: This is temporary until parser support is added
-        if let ast::Def::FileAttributes(fa) = node {
-            for attr in fa.user_attributes.iter() {
-                if attr.name.1 == "__Module" {
-                    match attr.params[..] {
-                        [ast::Expr(_, _, ast::Expr_::String(ref ctx))] => {
-                            return Maybe::Just(Str::new_str(
-                                e.alloc,
-                                // FIXME: This is not safe--string literals are binary strings.
-                                // There's no guarantee that they're valid UTF-8.
-                                unsafe { std::str::from_utf8_unchecked(ctx.as_slice()) },
-                            ));
-                        }
-                        _ => continue,
-                    }
-                }
-            }
+        if let ast::Def::SetModule(s) = node {
+            return Maybe::Just(ModuleName::intern(&s.1));
         }
     }
     Maybe::Nothing

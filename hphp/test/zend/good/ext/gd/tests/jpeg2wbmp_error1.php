@@ -6,8 +6,8 @@ function entrypoint_jpeg2wbmp_error1(): void {
   $text_color = imagecolorallocate($im, 255, 255, 255);
   imagestring($im, 1, 5, 5,  'A Simple Text String', $text_color);
 
-  $file = __SystemLib\hphp_test_tmppath('simpletext.jpg');
-  $file2 = __SystemLib\hphp_test_tmppath('simpletext.wbmp');
+  $file = sys_get_temp_dir().'/'.'simpletext.jpg';
+  $file2 = sys_get_temp_dir().'/'.'simpletext.wbmp';
 
   // Save the image as 'simpletext.jpg'
   imagejpeg($im, $file);

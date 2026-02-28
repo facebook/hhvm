@@ -1,25 +1,29 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
-# Make `get_target_property()` on a target that does not exist a fatal error
-# https://cmake.org/cmake/help/v3.0/policy/CMP0045.html
-cmake_policy(SET CMP0045 NEW)
-# ditto for add_dependencies(): https://cmake.org/cmake/help/v3.0/policy/CMP0046.html
-cmake_policy(SET CMP0046 NEW)
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 
-# This needs to be done before any languages are enabled or
-# projects are created.
-INCLUDE("${CMAKE_CURRENT_SOURCE_DIR}/CMake/VisualStudioToolset.cmake")
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Create symlink to compile_commands.json for IDE to pick it up
+execute_process(
+  COMMAND
+    ${CMAKE_COMMAND} -E create_symlink
+    ${CMAKE_BINARY_DIR}/compile_commands.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json)
 
 # includes
-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
+SET(
+  CMAKE_MODULE_PATH
+  "${CMAKE_CURRENT_SOURCE_DIR}/CMake"
+  "${CMAKE_CURRENT_SOURCE_DIR}/build/fbcode_builder/CMake"
+  ${CMAKE_MODULE_PATH}
+)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 PROJECT(hhvm C CXX ASM)
 
 include(HHVMProject)
-
-if (MSVC)
-  enable_language(ASM_MASM)
-endif()
 
 MARK_AS_ADVANCED(CLEAR CMAKE_INSTALL_PREFIX)
 IF(APPLE)
@@ -53,18 +57,9 @@ if(NOT SKIP_CCACHE)
       message(STATUS "Found ccache: ${CCACHE_FOUND} - enabling ccache as compiler wrapper")
     else()
       message(STATUS "Found ccache - ccache already in use as C and/or CXX compiler wrapper")
-   endif()
+    endif()
   endif(CCACHE_FOUND)
 endif(NOT SKIP_CCACHE)
-
-# 3rd party library
-IF(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third-party/CMakeLists.txt")
-  MESSAGE(FATAL_ERROR "third-party/CMakeLists.txt missing. "
-                      "Try updating your submodule with:
-rm -r third-party
-git submodule update --init --recursive
-")
-ENDIF()
 
 INCLUDE(HPHPFunctions)
 INCLUDE(CheckFunctionExists)
@@ -73,7 +68,6 @@ SET(HPHP_HOME ${CMAKE_CURRENT_SOURCE_DIR})
 SET(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third-party")
 SET(TP_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/third-party")
 
-include(MSVCDefaults)
 include(Options)
 include(HPHPCompiler)
 include(HPHPFindLibs)

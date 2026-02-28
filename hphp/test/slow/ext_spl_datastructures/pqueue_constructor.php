@@ -5,8 +5,8 @@ class MyPriorityQueue extends \SplPriorityQueue {
     $this->setExtractFlags(self::EXTR_DATA);
   }
 
-  public function sort() {
-    $sortedList = varray[];
+  public function sort() :mixed{
+    $sortedList = vec[];
 
     while ($this->valid()) {
       $sortedList[] = $this->extract();
@@ -18,11 +18,11 @@ class MyPriorityQueue extends \SplPriorityQueue {
 
 
 <<__EntryPoint>>
-function main_pqueue_constructor() {
-$data  = varray[
-  varray['test1', 1],
-  varray['test3', 3],
-  varray['test2', 2],
+function main_pqueue_constructor() :mixed{
+$data  = vec[
+  vec['test1', 1],
+  vec['test3', 3],
+  vec['test2', 2],
 ];
 $queue = new MyPriorityQueue();
 

@@ -1,0 +1,12 @@
+ERROR: File "meth_caller_bad_exact.php", line 15, characters 23-33:
+Invalid argument (Typing[4110])
+  File "meth_caller_bad_exact.php", line 6, characters 23-26:
+  Expected `<expr#11> as Base`
+  File "meth_caller_bad_exact.php", line 15, characters 3-16:
+    where `<expr#11>` is a reference to this expression
+  File "meth_caller_bad_exact.php", line 12, characters 21-24:
+  But got `Base`
+  File "meth_caller_bad_exact.php", line 10, characters 26-29:
+  Since `Base` is not final
+  File "meth_caller_bad_exact.php", line 12, characters 21-24:
+  this might not be a `Base`

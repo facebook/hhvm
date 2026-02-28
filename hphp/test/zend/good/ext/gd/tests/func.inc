@@ -83,7 +83,7 @@ function test_to_truecolor($image)
  */
 function save_actual_image($image)
 {
-  $pathinfo = pathinfo($_SERVER['SCRIPT_FILENAME']);
+  $pathinfo = pathinfo(\HH\global_get('_SERVER')['SCRIPT_FILENAME']);
   $filename = "{$pathinfo['dirname']}/{$pathinfo['filename']}.out.png";
   imagepng($image, $filename);
 }

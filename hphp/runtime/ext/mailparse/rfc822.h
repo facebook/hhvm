@@ -18,33 +18,28 @@
 #ifndef php_mailparse_rfc822_h
 #define php_mailparse_rfc822_h
 
-typedef struct _php_rfc822_token php_rfc822_token_t;
-typedef struct _php_rfc822_tokenized php_rfc822_tokenized_t;
-typedef struct _php_rfc822_address php_rfc822_address_t;
-typedef struct _php_rfc822_addresses php_rfc822_addresses_t;
-
 #define php_rfc822_token_is_atom(tok)  \
   ( (tok) == 0 || (tok) == '"' || (tok) == '(' )
 
-struct _php_rfc822_token {
+struct php_rfc822_token_t {
   int token;
   const char *value;
   int valuelen;
 };
 
-struct _php_rfc822_tokenized {
+struct php_rfc822_tokenized_t {
   php_rfc822_token_t *tokens;
   int ntokens;
   char *buffer;
 };
 
-struct _php_rfc822_address {
+struct php_rfc822_address_t {
   char *name;
   char *address;
   int is_group;
 };
 
-struct _php_rfc822_addresses {
+struct php_rfc822_addresses_t {
   php_rfc822_address_t *addrs;
   int naddrs;
 };
@@ -70,4 +65,3 @@ char *php_rfc822_recombine_tokens(php_rfc822_tokenized_t *toks,
 void php_rfc822_print_tokens(php_rfc822_tokenized_t *toks);
 
 #endif
-

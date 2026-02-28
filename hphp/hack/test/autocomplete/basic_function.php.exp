@@ -1,1 +1,4 @@
-my_favorite (function(): void)
+my_favorite
+  INSERT my_favorite
+  function
+SORT TEXT: none

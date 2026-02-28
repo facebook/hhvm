@@ -10,7 +10,7 @@ class D2 extends Base implements IHeh, IHeh2 {}
 class D3 extends Base implements IHeh2 {}
 
 
-function f() {
+function f() :mixed{
   return new D1();
 }
 
@@ -25,7 +25,7 @@ function main() : IHeh {
 }
 
 <<__EntryPoint>>
-function main_interface_instanceof() {
+function main_interface_instanceof() :mixed{
   main();
   echo "Hello\n";
 }

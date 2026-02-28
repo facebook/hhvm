@@ -1,74 +1,78 @@
-File "supportdynamic.bad.php", line 4, characters 3-8:
-This is not an object of type `KeyedContainer`, this is a nonnull value (Typing[4005])
-  File "supportdynamic.hhi", line 7, characters 36-42:
-  Definition is here
-File "supportdynamic.bad.php", line 5, characters 3-11:
+WARN: File "supportdynamic.bad.php", line 8, characters 3-9:
+You are using the `?->` operator but this object is of type nonnull which cannot be null. You can use the `->` operator instead. (Warn[12029])
+WARN: File "supportdynamic.bad.php", line 10, characters 3-9:
+You are using the `?->` operator but this object is of type supportdyn<nonnull> which cannot be null. You can use the `->` operator instead. (Warn[12029])
+ERROR: File "supportdynamic.bad.php", line 4, characters 3-8:
+Typing error (Typing[4110])
+  File "supportdynamic.bad.php", line 4, characters 3-8:
+  Expected an array that can be indexed
+  File "supportdynamic.bad.php", line 3, characters 26-32:
+  But got `nonnull`
+ERROR: File "supportdynamic.bad.php", line 5, characters 3-11:
 a nonnull value does not allow array append (Typing[4006])
-  File "supportdynamic.hhi", line 7, characters 36-42:
+  File "supportdynamic.bad.php", line 3, characters 26-32:
   Definition is here
-File "supportdynamic.bad.php", line 6, characters 3-5:
+ERROR: File "supportdynamic.bad.php", line 6, characters 3-5:
 Was expecting a class, but got a nonnull value (Typing[4026])
-File "supportdynamic.bad.php", line 7, characters 8-8:
+ERROR: File "supportdynamic.bad.php", line 7, characters 8-8:
 You are trying to access the method `m` but this is a nonnull value. Use a **specific** class or interface name. (Typing[4062])
-  File "supportdynamic.hhi", line 7, characters 36-42:
+  File "supportdynamic.bad.php", line 3, characters 26-32:
   Definition is here
-File "supportdynamic.bad.php", line 8, characters 9-9:
+ERROR: File "supportdynamic.bad.php", line 8, characters 9-9:
 You are trying to access the method `m` but this is a nonnull value. Use a **specific** class or interface name. (Typing[4062])
-  File "supportdynamic.hhi", line 7, characters 36-42:
+  File "supportdynamic.bad.php", line 3, characters 26-32:
   Definition is here
-File "supportdynamic.bad.php", line 9, characters 3-5:
+ERROR: File "supportdynamic.bad.php", line 9, characters 3-5:
 Typing error (Typing[4062])
   File "supportdynamic.bad.php", line 9, characters 8-8:
   You are trying to access the property `p` but this is a nonnull value. Use a **specific** class or interface name.
-  File "supportdynamic.hhi", line 7, characters 36-42:
+  File "supportdynamic.bad.php", line 3, characters 26-32:
   Definition is here
-File "supportdynamic.bad.php", line 10, characters 3-5:
-Typing error (Typing[4110])
-  File "supportdynamic.bad.php", line 10, characters 3-9:
-  Expected `null` (use of `?->` operator)
-  File "supportdynamic.hhi", line 7, characters 36-42:
+ERROR: File "supportdynamic.bad.php", line 10, characters 3-5:
+Typing error (Typing[4062])
+  File "supportdynamic.bad.php", line 10, characters 9-9:
+  You are trying to access the property `p` but this is a nonnull value. Use a **specific** class or interface name.
+  File "supportdynamic.bad.php", line 3, characters 26-32:
+  Definition is here
+ERROR: File "supportdynamic.bad.php", line 11, characters 9-11:
+String concatenation can only be performed on string and int arguments (Typing[4110])
+  File "supportdynamic.bad.php", line 11, characters 9-11:
+  Expected `string` or `int`
+  File "supportdynamic.bad.php", line 3, characters 26-32:
   But got `nonnull`
-File "supportdynamic.bad.php", line 11, characters 9-11:
-Expected an object convertible to string but got a value of type supportdyn<nonnull> (Typing[4318])
-File "supportdynamic.bad.php", line 12, characters 3-5:
-Typing error (Typing[4110])
+ERROR: File "supportdynamic.bad.php", line 12, characters 3-5:
+Typing error (Typing[4429])
   File "supportdynamic.bad.php", line 12, characters 3-9:
   Expected `num` because this is used in an arithmetic operation
-  File "supportdynamic.hhi", line 7, characters 36-42:
+  File "supportdynamic.bad.php", line 3, characters 26-32:
   But got `nonnull`
-File "supportdynamic.bad.php", line 16, characters 12-14:
+ERROR: File "supportdynamic.bad.php", line 16, characters 12-14:
 Invalid `foreach` (Typing[4110])
   File "supportdynamic.bad.php", line 16, characters 12-14:
-  Expected `Traversable<[unresolved]>` because this is used in a `foreach` statement
-  File "supportdynamic.hhi", line 7, characters 36-42:
+  Expected an array that can be traversed with foreach because this is used in a `foreach` statement
+  File "supportdynamic.bad.php", line 15, characters 21-39:
   But got `nonnull`
-  File "supportdynamic.hhi", line 6, characters 29-29:
-    via this generic `T`
-File "supportdynamic.bad.php", line 17, characters 12-14:
+ERROR: File "supportdynamic.bad.php", line 17, characters 12-14:
 Invalid `foreach` (Typing[4110])
   File "supportdynamic.bad.php", line 17, characters 12-14:
-  Expected `KeyedTraversable<[unresolved], [unresolved]>` because this is used in a `foreach` statement
-  File "supportdynamic.hhi", line 7, characters 36-42:
+  Expected an array that can be traversed with foreach because this is used in a `foreach` statement
+  File "supportdynamic.bad.php", line 15, characters 21-39:
   But got `nonnull`
-  File "supportdynamic.hhi", line 6, characters 29-29:
-    via this generic `T`
-File "supportdynamic.bad.php", line 18, characters 3-11:
+ERROR: File "supportdynamic.bad.php", line 18, characters 3-11:
 `await` can only operate on an `Awaitable` (Typing[4110])
   File "supportdynamic.bad.php", line 18, characters 3-11:
-  Expected `Awaitable<[unresolved]>`
-  File "supportdynamic.hhi", line 7, characters 36-42:
+  Expected `Awaitable<nothing>`
+  File "supportdynamic.bad.php", line 15, characters 32-38:
   But got `nonnull`
-  File "supportdynamic.hhi", line 6, characters 29-29:
-    via this generic `T`
-File "supportdynamic.bad.php", line 23, characters 27-30:
+ERROR: File "supportdynamic.bad.php", line 23, characters 27-30:
 Invalid type hint (Typing[4062])
   File "supportdynamic.bad.php", line 23, characters 30-30:
   You are trying to access the type constant `C` but this is a nonnull value
-  File "supportdynamic.hhi", line 6, characters 29-29:
+  File "supportdynamic.bad.php", line 21, characters 21-27:
   Definition is here
-File "supportdynamic.bad.php", line 25, characters 6-6:
+ERROR: File "supportdynamic.bad.php", line 25, characters 6-6:
 Enums must be `int` or `string` or `arraykey`, not `supportdyn<nonnull>` (Typing[4024])
-File "supportdynamic.bad.php", line 26, characters 16-34:
-Wrong number of type arguments (expected 0, got 1) (Typing[4101])
-  File "supportdynamic.hhi", line 7, characters 8-21:
+ERROR: File "supportdynamic.bad.php", line 26, characters 16-39:
+Wrong number of type arguments (expected 1, got 2) (Typing[4101])
+  File "supportdynamic.hhi", line 6, characters 11-20:
   Definition is here

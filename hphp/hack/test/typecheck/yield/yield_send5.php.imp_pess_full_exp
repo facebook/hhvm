@@ -1,0 +1,6 @@
+File "yield_send5.php", line 7, characters 5-6:
+Invalid argument (Typing[4110])
+  File "yield_send5.php", line 3, characters 12-14:
+  Expected `int`
+  File "yield_send5.php", line 6, characters 8-27:
+  But got `?_` (`$generator->send()` can always send a `null` back to a `yield`)

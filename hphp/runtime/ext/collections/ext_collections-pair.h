@@ -16,8 +16,8 @@ void deepCopy(tv_lval);
 struct PairIterator;
 }
 
-struct c_Pair : ObjectData {
-  DECLARE_COLLECTIONS_CLASS_NOCTOR(Pair);
+struct c_Pair : c_Collection, SystemLib::ClassLoader<"HH\\Pair"> {
+  DECLARE_COLLECTIONS_CLASS_NOCTOR(Pair)
 
   static ObjectData* instanceCtor(Class* /*cls*/) {
     SystemLib::throwInvalidOperationExceptionObject(
@@ -27,8 +27,7 @@ struct c_Pair : ObjectData {
 
   c_Pair() = delete;
   explicit c_Pair(const TypedValue& e0, const TypedValue& e1)
-    : ObjectData(c_Pair::classof(), NoInit{}, ObjectData::NoAttrs,
-                 HeaderKind::Pair)
+    : c_Collection(c_Pair::classof(), HeaderKind::Pair)
     , m_size(2)
   {
     tvDup(e0, elm0);
@@ -36,8 +35,7 @@ struct c_Pair : ObjectData {
   }
   enum class NoIncRef {};
   explicit c_Pair(const TypedValue& e0, const TypedValue& e1, NoIncRef)
-    : ObjectData(c_Pair::classof(), NoInit{}, ObjectData::NoAttrs,
-                 HeaderKind::Pair)
+    : c_Collection(c_Pair::classof(), HeaderKind::Pair)
     , m_size(2)
   {
     tvCopy(e0, elm0);
@@ -126,9 +124,6 @@ struct c_Pair : ObjectData {
 
   Array toPHPArrayImpl() const;
 
-  Array toVArrayImpl() const;
-  Array toDArrayImpl() const;
-
   Object getIterator();
 
   [[noreturn]] static void throwBadKeyType();
@@ -162,10 +157,7 @@ struct c_Pair : ObjectData {
 namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 
-extern const StaticString
-  s_PairIterator, s_HH_Pair;
-
-struct PairIterator {
+struct PairIterator : SystemLib::ClassLoader<"PairIterator"> {
   PairIterator() {}
   PairIterator(const PairIterator& src) = delete;
   PairIterator& operator=(const PairIterator& src) {
@@ -176,9 +168,7 @@ struct PairIterator {
   ~PairIterator() {}
 
   static Object newInstance() {
-    static Class* cls = Class::lookup(s_PairIterator.get());
-    assertx(cls);
-    return Object{cls};
+    return Object{ classof() };
   }
 
   void setPair(c_Pair* pr) {

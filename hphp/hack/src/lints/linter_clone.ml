@@ -15,7 +15,7 @@ module VisitorFunctor (Parent : BodyVisitorModule) : BodyVisitorModule = struct
       inherit Parent.visitor env as parent
 
       method! on_clone () (ty, p, e) =
-        Lints_errors.clone_use p;
+        Lints_diagnostics.clone_use p;
         parent#on_clone () (ty, p, e)
     end
 end

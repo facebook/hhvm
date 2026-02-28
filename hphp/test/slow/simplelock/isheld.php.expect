@@ -1,0 +1,14 @@
+thread
+thread: bool(true)
+thread: bool(true)
+thread: bool(true)
+thread: bool(true)
+main: bool(true)
+main: bool(true)
+main: bool(true)
+main: bool(true)
+main: bool(true)
+main: bool(false)
+main: bool(false)
+main: bool(false)
+Main done.

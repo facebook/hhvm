@@ -1,0 +1,94 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <folly/result/or_unwind_epitaph.h>
+
+#include <folly/portability/GTest.h>
+#include <folly/result/gtest_helpers.h>
+
+// NB These tests are a bit over-elaborate / redundant with others, but the
+// hope is they give a clear picture of the usage of `or_unwind_epitaph`.
+
+#if FOLLY_HAS_RESULT
+
+namespace folly::test {
+
+const auto test_file_name = std::source_location::current().file_name();
+
+// Verify epitaphs were added to the error.
+void checkEpitaphError(folly::result<> res, std::string_view msg) {
+  ASSERT_FALSE(res.has_value());
+  ASSERT_FALSE(res.has_stopped());
+  EXPECT_EQ(
+      msg, fmt::format("{}", folly::get_exception<std::logic_error>(res)));
+}
+
+// Value path: returns the value without formatting.
+RESULT_CO_TEST(OrUnwindRich, value) {
+  EXPECT_EQ(42, co_await or_unwind_epitaph(result<int>{42}, "unused"));
+  co_await or_unwind_epitaph(result<>{}, "unused");
+}
+
+// Errors propagate with epitaphs -- message & source location.
+TEST(OrUnwindRich, error) {
+  std::uint_least32_t err_line = 0;
+  auto expectedMsg = [&](std::string_view msgViaCtx) {
+    return fmt::format(
+        "std::logic_error: {} @ {}:{}", msgViaCtx, test_file_name, err_line);
+  };
+
+  checkEpitaphError( // `result` in error-or-stopped state
+    [&]() -> result<> {
+      result<int> r{error_or_stopped{std::logic_error{"err1"}}};
+      err_line = std::source_location::current().line() + 1;
+      (void)co_await or_unwind_epitaph(std::move(r), "ctx1");
+    }(),
+    expectedMsg("err1 [via] ctx1"));
+
+  checkEpitaphError( // `error_or_stopped`
+    [&]() -> result<> {
+      error_or_stopped eos{std::logic_error{"err2"}};
+      err_line = std::source_location::current().line() + 1;
+      co_await or_unwind_epitaph(std::move(eos), "ctx2");
+    }(),
+    expectedMsg("err2 [via] ctx2"));
+
+  checkEpitaphError( // `result` with format args
+    [&]() -> result<> {
+      result<int> r{error_or_stopped{std::logic_error{"err3"}}};
+      err_line = std::source_location::current().line() + 1;
+      (void)co_await or_unwind_epitaph(std::move(r), "x={} y={}", 10, 20);
+    }(),
+    expectedMsg("err3 [via] x=10 y=20"));
+}
+
+// Stopped state propagates with epitaphs.
+TEST(OrUnwindRich, stopped) {
+  std::uint_least32_t err_line = 0;
+  auto res = [&]() -> result<int> {
+    err_line = std::source_location::current().line() + 1;
+    co_return co_await or_unwind_epitaph(result<int>{stopped_result}, "ctx");
+  }();
+  EXPECT_TRUE(res.has_stopped());
+  auto msg = "folly::OperationCancelled: coroutine operation cancelled";
+  EXPECT_EQ(
+      fmt::format("{} [via] ctx @ {}:{}", msg, test_file_name, err_line),
+      fmt::format("{}", std::move(res).error_or_stopped()));
+}
+
+} // namespace folly::test
+
+#endif // FOLLY_HAS_RESULT

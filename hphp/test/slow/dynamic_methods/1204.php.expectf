@@ -1,0 +1,4 @@
+
+Warning: Method A::dyn_test not marked dynamic in %s/dynamic_methods/1204.php on line 14
+string(2) "gs"
+string(2) "gs"

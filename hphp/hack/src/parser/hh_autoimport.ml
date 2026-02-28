@@ -9,7 +9,7 @@
 
 open Hh_prelude
 
-(** The names of autoimport types. *)
+(** see .mli *)
 let types =
   [
     "AnyArray";
@@ -21,7 +21,9 @@ let types =
     "Awaitable";
     "AwaitAllWaitHandle";
     "classname";
+    "concrete";
     "Collection";
+    "ConcurrentWaitHandle";
     "ConditionWaitHandle";
     "Container";
     "darray";
@@ -45,14 +47,15 @@ let types =
     "ObjprofPathsStats";
     "ObjprofStringStats";
     "Pair";
+    "PriorityBridgeWaitHandle";
     "RescheduleWaitHandle";
     "ResumableWaitHandle";
     "Set";
     "Shapes";
     "SleepWaitHandle";
     "StaticWaitHandle";
+    "string";
     "supportdyn";
-    "supportdynamic";
     "Traversable";
     "typename";
     "TypeStructure";
@@ -66,11 +69,9 @@ let types =
     "XenonSample";
   ]
 
-(** The names of autoimport functions. *)
 let funcs =
   [
-    "asio_get_current_context_idx";
-    "asio_get_running_in_context";
+    "asio_get_current_context_depth";
     "asio_get_running";
     "class_meth";
     "darray";
@@ -102,20 +103,18 @@ let funcs =
     "meth_caller";
     "objprof_get_data";
     "objprof_get_paths";
-    "objprof_get_strings";
     "server_warmup_status";
     "thread_mark_stack";
     "thread_memory_stats";
     "type_structure";
+    "type_structure_for_alias";
     "varray";
     "vec";
     "xenon_get_data";
   ]
 
-(** The names of autoimport constants. *)
 let consts = []
 
-(** The names of autoimport namespaces. *)
 let namespaces = ["Rx"]
 
 (** Whether the given string is the name of an autoimport type. *)
@@ -123,8 +122,6 @@ let is_hh_autoimport =
   let h = HashSet.of_list types in
   (fun x -> HashSet.mem h x)
 
-(** Strip any `HH\\` prefix from the provided string if the string
-  is the name of a autoimport type. *)
 let strip_HH_namespace_if_autoimport id =
   match String.chop_prefix ~prefix:"HH\\" id with
   | Some stripped_id when is_hh_autoimport stripped_id -> stripped_id

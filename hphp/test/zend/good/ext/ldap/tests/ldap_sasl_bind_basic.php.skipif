@@ -1,8 +1,0 @@
-<?hh
-// Note that this directory also has a config.runif file that gates this test
-<<__EntryPoint>> function skipif(): void {
-  if (!function_exists("ldap_sasl_bind")) die("skip LDAP extension not compiled with SASL support");
-  require_once('connect.inc');
-  require_once('skipifbindfailure.inc');
-  skip_if_bind_failure();
-}

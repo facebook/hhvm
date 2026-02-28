@@ -1,4 +1,4 @@
-File "yield_lambda1.php", line 6, characters 10-13:
+ERROR: File "yield_lambda1.php", line 6, characters 10-13:
 Invalid return type (Typing[4110])
   File "yield_lambda1.php", line 4, characters 17-19:
   Expected `int`

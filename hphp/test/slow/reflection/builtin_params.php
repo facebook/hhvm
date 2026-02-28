@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   foreach ((new ReflectionFunction('date'))->getParameters() as $param) {
     var_dump($param->isOptional());
     var_dump($param->isDefaultValueAvailable());
@@ -21,6 +21,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_builtin_params() {
+function main_builtin_params() :mixed{
 main();
 }

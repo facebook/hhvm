@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // alias C to D and A to B
 namespace D {
   function x() : void {

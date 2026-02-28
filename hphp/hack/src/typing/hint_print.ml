@@ -25,13 +25,11 @@ let any_type_name = "ANY_TYPE"
 
 let rec pp_hint ~is_ctx ppf (pos, hint_) =
   match hint_ with
-  | Aast.Hany
-  | Aast.Herr ->
-    Fmt.string ppf any_type_name
   | Aast.Hthis -> Fmt.string ppf "this"
   | Aast.Hdynamic -> Fmt.string ppf "dynamic"
   | Aast.Hnothing -> Fmt.string ppf "nothing"
   | Aast.Hmixed -> Fmt.string ppf "mixed"
+  | Aast.Hwildcard -> Fmt.string ppf "_"
   | Aast.Hnonnull -> Fmt.string ppf "nonnull"
   | Aast.Hvar name -> Fmt.string ppf name
   | Aast.Hfun_context name -> Fmt.(prefix (const string "ctx ") string) ppf name
@@ -41,8 +39,9 @@ let rec pp_hint ~is_ctx ppf (pos, hint_) =
     Fmt.(prefix (const string "~") @@ pp_hint ~is_ctx:false) ppf hint
   | Aast.Hsoft hint ->
     Fmt.(prefix (const string "@") @@ pp_hint ~is_ctx:false) ppf hint
-  | Aast.Htuple hints ->
-    Fmt.(parens @@ list ~sep:comma @@ pp_hint ~is_ctx:false) ppf hints
+  (* TODO optional and variadic components T201398626 T201398652 *)
+  | Aast.(Htuple { tup_required; tup_extra = _ }) ->
+    Fmt.(parens @@ list ~sep:comma @@ pp_hint ~is_ctx:false) ppf tup_required
   | Aast.Hunion hints ->
     Fmt.(parens @@ list ~sep:vbar @@ pp_hint ~is_ctx:false) ppf hints
   | Aast.Hintersection hints when is_ctx ->
@@ -55,6 +54,44 @@ let rec pp_hint ~is_ctx ppf (pos, hint_) =
       pair ~sep:dbl_colon (pp_hint ~is_ctx:false) @@ list ~sep:dbl_colon string)
       ppf
       (root, List.map ~f:snd ids)
+  | Aast.Hrefinement (ty, members) ->
+    let pp_bounds ~is_ctx ppf bounds =
+      let bound ppf (kind, hint) =
+        Fmt.string
+          ppf
+          (match kind with
+          | `E -> "= "
+          | `L -> "as "
+          | `U -> "super ");
+        pp_hint ~is_ctx ppf hint
+      in
+      Fmt.list ~sep:Fmt.(const string " ") bound ppf bounds
+    in
+    let member ppf = function
+      | Aast.Rtype (ident, ref) ->
+        Fmt.string ppf ("type " ^ snd ident ^ " ");
+        pp_bounds
+          ~is_ctx:false
+          ppf
+          (match ref with
+          | Aast.TRexact hint -> [(`E, hint)]
+          | Aast.TRloose { Aast.tr_lower; tr_upper } ->
+            List.map tr_lower ~f:(fun x -> (`L, x))
+            @ List.map tr_upper ~f:(fun x -> (`U, x)))
+      | Aast.Rctx (ident, ref) ->
+        Fmt.string ppf ("ctx " ^ snd ident ^ " ");
+        pp_bounds
+          ~is_ctx:true
+          ppf
+          (match ref with
+          | Aast.CRexact hint -> [(`E, hint)]
+          | Aast.CRloose { Aast.cr_lower; cr_upper } ->
+            let opt_map = Option.value_map ~default:[] in
+            opt_map cr_lower ~f:(fun x -> [(`L, x)])
+            @ opt_map cr_upper ~f:(fun x -> [(`U, x)]))
+    in
+    Fmt.(suffix with_ (pp_hint ~is_ctx:false)) ppf ty;
+    Fmt.(braces (list ~sep:semi_sep member)) ppf members
   | Aast.Hvec_or_dict (None, vhint) ->
     Fmt.(prefix (const string "vec_or_dict") @@ angles @@ pp_hint ~is_ctx:false)
       ppf
@@ -68,10 +105,16 @@ let rec pp_hint ~is_ctx ppf (pos, hint_) =
       (khint, vhint)
   | Aast.Happly ((p, name), hs) when is_ctx ->
     pp_hint ~is_ctx:false ppf (pos, Aast.Happly ((p, strip_ns name), hs))
-  | Aast.Habstr (name, [])
+  | Aast.Habstr name
   | Aast.Happly ((_, name), []) ->
     Fmt.string ppf name
-  | Aast.Habstr (name, hints)
+  | Aast.Hclass_ptr (kind, h) ->
+    let kind =
+      match kind with
+      | Aast.CKclass -> "class"
+      | Aast.CKenum -> "enum"
+    in
+    Fmt.(prefix (const string kind) @@ angles @@ pp_hint ~is_ctx:false) ppf h
   | Aast.Happly ((_, name), hints) ->
     Fmt.(
       prefix (const string name)
@@ -157,15 +200,16 @@ and pp_shape_field ppf Aast.{ sfi_optional; sfi_name; sfi_hint } =
     ((sfi_optional, sfi_name), sfi_hint)
 
 and pp_shape_field_name ppf = function
-  | Ast_defs.SFlit_int (_, s) -> Fmt.string ppf s
   | Ast_defs.SFlit_str (_, s) -> Fmt.(quote string) ppf s
+  | Ast_defs.SFclassname (_, s) ->
+    Fmt.(prefix (const string "nameof") string) ppf s
   | Ast_defs.SFclass_const ((_, c), (_, s)) ->
     Fmt.(pair ~sep:dbl_colon string string) ppf (c, s)
 
 and pp_contexts ppf (_, ctxts) =
   Fmt.(brackets @@ list ~sep:comma @@ pp_hint ~is_ctx:true) ppf ctxts
 
-let rec pp_binop ppf = function
+let pp_binop ppf = function
   | Ast_defs.Plus -> Fmt.string ppf "+"
   | Ast_defs.Minus -> Fmt.string ppf "-"
   | Ast_defs.Star -> Fmt.string ppf "*"
@@ -190,8 +234,10 @@ let rec pp_binop ppf = function
   | Ast_defs.Xor -> Fmt.string ppf "^"
   | Ast_defs.Cmp -> Fmt.string ppf "<=>"
   | Ast_defs.QuestionQuestion -> Fmt.string ppf "??"
-  | Ast_defs.Eq (Some op) -> Fmt.(suffix (const string "=") pp_binop) ppf op
-  | Ast_defs.Eq _ -> Fmt.string ppf "="
+
+let pp_assign ppf = function
+  | Some op -> Fmt.(suffix (const string "=") pp_binop) ppf op
+  | None -> Fmt.string ppf "="
 
 let pp_unop ppf op =
   match op with
@@ -238,24 +284,6 @@ let pp_lid ppf lid =
 let rec pp_expr ppf (_, _, expr_) = pp_expr_ ppf expr_
 
 and pp_expr_ ppf = function
-  | Aast.Darray (kv_ty_opt, kvs) ->
-    Fmt.(
-      prefix (const string "darray")
-      @@ pair
-           ~sep:nop
-           (option @@ angles @@ pair ~sep:comma pp_targ pp_targ)
-           (brackets @@ list ~sep:comma @@ pair ~sep:fat_arrow pp_expr pp_expr))
-      ppf
-      (kv_ty_opt, kvs)
-  | Aast.Varray (k_ty_opt, ks) ->
-    Fmt.(
-      prefix (const string "varray")
-      @@ pair
-           ~sep:nop
-           (option @@ angles pp_targ)
-           (brackets @@ list ~sep:comma pp_expr))
-      ppf
-      (k_ty_opt, ks)
   | Aast.Shape flds ->
     Fmt.(
       prefix (const string "shape")
@@ -264,7 +292,7 @@ and pp_expr_ ppf = function
       @@ pair ~sep:fat_arrow pp_shape_field_name pp_expr)
       ppf
       flds
-  | Aast.ValCollection (kind, targ_opt, exprs) ->
+  | Aast.ValCollection ((_, kind), targ_opt, exprs) ->
     let delim =
       match kind with
       | Aast_defs.Keyset
@@ -280,7 +308,7 @@ and pp_expr_ ppf = function
            (delim @@ list ~sep:comma pp_expr))
       ppf
       (kind, (targ_opt, exprs))
-  | Aast.KeyValCollection (kind, targs_opt, flds) ->
+  | Aast.KeyValCollection ((_, kind), targs_opt, flds) ->
     let delim =
       match kind with
       | Aast_defs.Dict -> Fmt.brackets
@@ -306,11 +334,11 @@ and pp_expr_ ppf = function
     Fmt.(pair ~sep:nop pp_expr @@ brackets @@ option pp_expr)
       ppf
       (arr_expr, idx_expr_opt)
-  | Aast.(Obj_get (obj_expr, get_expr, OG_nullsafe, Is_method)) ->
+  | Aast.(Obj_get (obj_expr, get_expr, Nullsafe, Is_method)) ->
     Fmt.(pair ~sep:arrow (suffix (const string "?") pp_expr) pp_expr)
       ppf
       (obj_expr, get_expr)
-  | Aast.(Obj_get (obj_expr, get_expr, OG_nullsafe, _)) ->
+  | Aast.(Obj_get (obj_expr, get_expr, Nullsafe, _)) ->
     Fmt.(parens @@ pair ~sep:arrow (suffix (const string "?") pp_expr) pp_expr)
       ppf
       (obj_expr, get_expr)
@@ -318,21 +346,17 @@ and pp_expr_ ppf = function
     Fmt.(pair ~sep:arrow pp_expr pp_expr) ppf (obj_expr, get_expr)
   | Aast.(Obj_get (obj_expr, get_expr, _, _)) ->
     Fmt.(parens @@ pair ~sep:arrow pp_expr pp_expr) ppf (obj_expr, get_expr)
-  | Aast.(Class_get (class_id, class_get_expr, Is_method)) ->
-    Fmt.(pair ~sep:dbl_colon pp_class_id pp_class_get_expr)
-      ppf
-      (class_id, class_get_expr)
-  | Aast.Class_get (class_id, class_get_expr, _) ->
-    Fmt.(parens @@ pair ~sep:dbl_colon pp_class_id pp_class_get_expr)
-      ppf
-      (class_id, class_get_expr)
+  | Aast.(Class_get (class_id, (_, cname), Is_method)) ->
+    Fmt.(pair ~sep:dbl_colon pp_class_id string) ppf (class_id, cname)
+  | Aast.Class_get (class_id, (_, cname), _) ->
+    Fmt.(parens @@ pair ~sep:dbl_colon pp_class_id string) ppf (class_id, cname)
   | Aast.Class_const (class_id, (_, cname)) ->
     Fmt.(pair ~sep:dbl_colon pp_class_id string) ppf (class_id, cname)
-  | Aast.Call (fn, targs, exprs, expr_opt) ->
+  | Aast.(Call { func; targs; args; unpacked_arg }) ->
     Fmt.(pair ~sep:nop pp_expr @@ pair ~sep:nop pp_targs pp_arg_exprs)
       ppf
-      (fn, (targs, (exprs, expr_opt)))
-  | Aast.FunctionPointer (id, targs) ->
+      (func, (targs, (args, unpacked_arg)))
+  | Aast.FunctionPointer (id, targs, _) ->
     Fmt.(pair ~sep:nop pp_function_ptr_id (angles @@ list ~sep:comma pp_targ))
       ppf
       (id, targs)
@@ -366,12 +390,33 @@ and pp_expr_ ppf = function
     Fmt.(pair ~sep:nop pp_expr pp_unop) ppf (expr, unop)
   | Aast.Unop (unop, expr) ->
     Fmt.(pair ~sep:nop pp_unop pp_expr) ppf (unop, expr)
-  | Aast.Binop (op, e1, e2) ->
+  | Aast.(Binop { bop; lhs; rhs }) ->
     Fmt.(pair ~sep:sp pp_expr @@ pair ~sep:sp pp_binop pp_expr)
       ppf
-      (e1, (op, e2))
-  | Aast.Pipe (_lid, e1, e2) ->
-    Fmt.(pair ~sep:(const string " |> ") pp_expr pp_expr) ppf (e1, e2)
+      (lhs, (bop, rhs))
+  | Aast.Assign (lhs, bop, rhs) ->
+    Fmt.(pair ~sep:sp pp_expr @@ pair ~sep:sp pp_assign pp_expr)
+      ppf
+      (lhs, (bop, rhs))
+  | Aast.Pipe (_lid, e1, e2, null_flavor) ->
+    let is_nullsafe =
+      match null_flavor with
+      | Aast.Nullsafe -> true
+      | _ -> false
+    in
+    Fmt.(
+      pair
+        ~sep:
+          (const
+             string
+             (if is_nullsafe then
+               " |?> "
+             else
+               " |> "))
+        pp_expr
+        pp_expr)
+      ppf
+      (e1, e2)
   | Aast.Eif (cond, Some texpr, fexpr) ->
     Fmt.(
       pair ~sep:(const string " ? ") pp_expr @@ pair ~sep:colon pp_expr pp_expr)
@@ -383,11 +428,11 @@ and pp_expr_ ppf = function
     Fmt.(pair ~sep:(const string " is ") pp_expr @@ pp_hint ~is_ctx:false)
       ppf
       (expr, hint)
-  | Aast.As (expr, hint, false) ->
+  | Aast.As Aast.{ expr; hint; is_nullable = false; enforce_deep = _ } ->
     Fmt.(pair ~sep:(const string " as ") pp_expr @@ pp_hint ~is_ctx:false)
       ppf
       (expr, hint)
-  | Aast.As (expr, hint, true) ->
+  | Aast.As Aast.{ expr; hint; is_nullable = true; enforce_deep = _ } ->
     Fmt.(pair ~sep:(const string " ?as ") pp_expr @@ pp_hint ~is_ctx:false)
       ppf
       (expr, hint)
@@ -401,20 +446,8 @@ and pp_expr_ ppf = function
       @@ pair ~sep:nop pp_class_id
       @@ pair ~sep:nop pp_targs pp_arg_exprs)
       ppf
-      ( class_id,
-        (targs, (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) exprs, expr_opt))
-      )
+      (class_id, (targs, (exprs, expr_opt)))
   | Aast.Lplaceholder _ -> Fmt.string ppf "$_"
-  | Aast.Fun_id (_, name) ->
-    Fmt.(prefix (const string "fun") @@ quote string) ppf name
-  | Aast.Method_id (expr, (_, meth)) ->
-    Fmt.(
-      prefix (const string "inst_meth")
-      @@ parens
-      @@ pair ~sep:comma pp_expr
-      @@ quote string)
-      ppf
-      (expr, meth)
   | Aast.Pair (targs_opt, fst, snd) ->
     Fmt.(
       prefix (const string "Pair")
@@ -425,13 +458,16 @@ and pp_expr_ ppf = function
       ppf
       (targs_opt, (fst, snd))
   | Aast.Hole (expr, _, _, _) -> pp_expr ppf expr
-  | Aast.EnumClassLabel (opt_sid, name) ->
-    begin
-      match opt_sid with
-      | None -> Fmt.(prefix dbl_hash string) ppf name
-      | Some (_, class_name) ->
-        Fmt.(pair ~sep:dbl_hash Fmt.string string) ppf (class_name, name)
-    end
+  | Aast.EnumClassLabel (opt_sid, name) -> begin
+    match opt_sid with
+    | None -> Fmt.(prefix dbl_hash string) ppf name
+    | Some (_, class_name) ->
+      Fmt.(pair ~sep:dbl_hash Fmt.string string) ppf (class_name, name)
+  end
+  | Aast.Invalid (Some expr) -> pp_expr ppf expr
+  | Aast.Package (_, id) -> Fmt.string ppf id
+  | Aast.Nameof cid -> Fmt.(prefix (const string "nameof") pp_class_id) ppf cid
+  | Aast.Invalid _
   | Aast.Efun _
   | Aast.Lfun _
   | Aast.Xml _
@@ -439,7 +475,6 @@ and pp_expr_ ppf = function
   | Aast.Collection _
   | Aast.ExpressionTree _
   | Aast.Method_caller _
-  | Aast.Smethod_id _
   | Aast.ET_Splice _
   | Aast.Omitted ->
     ()
@@ -458,10 +493,13 @@ and pp_arg_exprs ppf (exprs, expr_opt) =
       ppf
       (exprs, expr_opt)
 
-and pp_arg ppf (pk, e) =
-  match pk with
-  | Ast_defs.Pnormal -> pp_expr ppf e
-  | Ast_defs.Pinout _ -> Fmt.(pair ~sep:sp pp_paramkind pp_expr) ppf (pk, e)
+and pp_arg ppf arg =
+  match arg with
+  | Aast_defs.Anormal e -> pp_expr ppf e
+  | Aast_defs.Ainout (pos, e) ->
+    Fmt.(pair ~sep:sp pp_paramkind pp_expr) ppf (Ast_defs.Pinout pos, e)
+  | Aast_defs.Anamed ((_, name), e) ->
+    Fmt.(pair ~sep:equal_to string pp_expr) ppf (name, e)
 
 and pp_afield ppf = function
   | Aast.AFvalue expr -> pp_expr ppf expr
@@ -475,10 +513,6 @@ and pp_class_id ppf (_, _, class_id_) =
   | Aast.CIself -> Fmt.string ppf "self"
   | Aast.CI (_, name) -> Fmt.string ppf name
   | Aast.CIexpr expr -> pp_expr ppf expr
-
-and pp_class_get_expr ppf = function
-  | Aast.CGexpr expr -> pp_expr ppf expr
-  | Aast.CGstring (_, name) -> Fmt.string ppf name
 
 and pp_function_ptr_id ppf = function
   | Aast.FP_id (_, name) -> Fmt.string ppf name
@@ -532,7 +566,6 @@ let rec pp_tparam
       {
         tp_variance;
         tp_name = (_, name);
-        tp_parameters;
         tp_constraints;
         tp_reified;
         tp_user_attributes;
@@ -540,7 +573,7 @@ let rec pp_tparam
   Format.(
     fprintf
       ppf
-      {|%a %a %a%s %a %a |}
+      {|%a %a %a%s %a |}
       pp_user_attrs
       tp_user_attributes
       pp_tp_reified
@@ -548,8 +581,6 @@ let rec pp_tparam
       pp_variance
       tp_variance
       name
-      pp_tparams
-      tp_parameters
       Fmt.(list ~sep:sp pp_constraint)
       tp_constraints)
 

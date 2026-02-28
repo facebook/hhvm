@@ -186,6 +186,11 @@ struct IRInstruction {
    * Whether the dest produces a reference.
    */
   bool producesReference() const;
+  
+  /*
+   * Whether the dest produces a completely new value with refcount 1
+   */
+  bool producesNewReference() const;
 
   /*
    * Get the src that is passed through.
@@ -368,6 +373,11 @@ struct IRInstruction {
   const IRExtraData* rawExtra() const;
 
   /*
+   * Adjust IRExtraData's stack offsets by delta.
+   */
+  void updateStackOffsetsExtra(int32_t delta);
+
+  /*
    * Set the ExtraData for this instruction.
    *
    * The lifetime of the ExtraData must outlast this IRInstruction (and any of
@@ -493,8 +503,16 @@ Type outputType(const IRInstruction*, int dstId = 0);
  */
 Type thisTypeFromFunc(const Func* func);
 
+/*
+ * Return a type of $this/static::class context at the time of function call
+ * (prologue and func entry).
+ */
+Type callCtxType(const Func* func);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
 
+#define incl_HPHP_VM_JIT_INSTRUCTION_INL_H_
 #include "hphp/runtime/vm/jit/ir-instruction-inl.h"
+#undef incl_HPHP_VM_JIT_INSTRUCTION_INL_H_

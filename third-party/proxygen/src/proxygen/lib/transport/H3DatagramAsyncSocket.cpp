@@ -1,0 +1,458 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+#include <proxygen/lib/transport/H3DatagramAsyncSocket.h>
+
+#include <fizz/backend/openssl/certificate/CertUtils.h>
+#include <folly/FileUtil.h>
+#include <proxygen/httpserver/samples/hq/HQParams.h>
+#include <proxygen/lib/transport/ConnectUDPUtils.h>
+#include <quic/common/udpsocket/FollyQuicAsyncUDPSocket.h>
+#include <quic/fizz/client/handshake/FizzClientQuicHandshakeContext.h>
+#include <utility>
+#include <wangle/acceptor/TransportInfo.h>
+
+namespace proxygen {
+
+using folly::AsyncSocketException;
+
+H3DatagramAsyncSocket::H3DatagramAsyncSocket(folly::EventBase* evb,
+                                             Options options)
+    : folly::AsyncUDPSocket(evb),
+      evb_(evb),
+      options_(std::move(options)),
+      transportConnected_(false),
+      pendingEOM_(false),
+      inResumeRead_(false) {
+}
+
+const folly::AsyncTransportCertificate* FOLLY_NULLABLE
+H3DatagramAsyncSocket::getPeerCertificate() const {
+  if (!upstreamSession_) {
+    return nullptr;
+  }
+  if (const auto sock = upstreamSession_->getQuicSocket()) {
+    return sock->getPeerCertificate().get();
+  }
+  return nullptr;
+}
+
+const folly::SocketAddress& H3DatagramAsyncSocket::address() const {
+  static folly::SocketAddress localFallbackAddress;
+  if (!upstreamSession_) {
+    return localFallbackAddress;
+  }
+  return upstreamSession_->getLocalAddress();
+}
+
+void H3DatagramAsyncSocket::closeWithError(const AsyncSocketException& ex) {
+  if (pendingError_.has_value()) {
+    LOG(ERROR) << "Multiple errors. Previous error: '" << pendingError_->what()
+               << "'";
+    return;
+  }
+  if (!readCallback_) {
+    LOG(ERROR)
+        << "Error with readCallback not set. Will deliver when resuming reads.";
+    pendingError_ = ex;
+    return;
+  }
+  readCallback_->onReadError(ex);
+  closeRead();
+}
+
+void H3DatagramAsyncSocket::connectSuccess() {
+  if (!options_.httpRequest_) {
+    closeWithError({AsyncSocketException::BAD_ARGS, "No HTTP Request"});
+    return;
+  }
+
+  if (!upstreamSession_) {
+    closeWithError({AsyncSocketException::INTERNAL_ERROR,
+                    "ConnectSuccess with invalid session"});
+    return;
+  }
+
+  // Send the HTTPMessage
+  txn_ = upstreamSession_->newTransaction(this);
+  if (!txn_ || !txn_->canSendHeaders()) {
+    closeWithError({AsyncSocketException::INTERNAL_ERROR, "Transaction Error"});
+    return;
+  }
+  if (options_.rfcMode_) {
+    options_.httpRequest_->getHeaders().set("Capsule-Protocol", "?1");
+  }
+  txn_->sendHeaders(*options_.httpRequest_);
+  upstreamSession_->closeWhenIdle();
+  transportConnected_ = true;
+}
+
+void H3DatagramAsyncSocket::onReplaySafe() {
+}
+
+void H3DatagramAsyncSocket::connectError(quic::QuicError error) {
+  closeWithError({AsyncSocketException::NETWORK_ERROR,
+                  fmt::format("connectError: '{}'", error.message)});
+}
+
+void H3DatagramAsyncSocket::setTransaction(
+    proxygen::HTTPTransaction* /*txn*/) noexcept {
+  CHECK(!txn_);
+}
+
+void H3DatagramAsyncSocket::detachTransaction() noexcept {
+  VLOG(4) << "Transaction Detached";
+  txn_ = nullptr;
+}
+
+void H3DatagramAsyncSocket::onHeadersComplete(
+    std::unique_ptr<proxygen::HTTPMessage> msg) noexcept {
+  if (msg->getStatusCode() != 200) {
+    closeWithError(
+        {AsyncSocketException::INTERNAL_ERROR,
+         fmt::format("HTTP Error: status code {}", msg->getStatusCode())});
+    return;
+  }
+
+  // Upstream ready to receive buffers.
+  for (auto& datagram : writeBuf_) {
+    txn_->sendDatagram(std::move(datagram));
+  }
+  writeBuf_.clear();
+}
+
+void H3DatagramAsyncSocket::onDatagram(
+    std::unique_ptr<folly::IOBuf> datagram) noexcept {
+  if (options_.rfcMode_) {
+    auto stripped = stripContextId(std::move(datagram));
+    if (!stripped.has_value()) {
+      // Non-zero context ID or malformed — silently drop
+      VLOG(4) << "Dropping datagram with non-zero or invalid context ID";
+      return;
+    }
+    datagram = std::move(stripped.value());
+  }
+
+  if (!readCallback_) {
+    if (readBuf_.size() < rcvBufPkts_) {
+      // buffer until reads are resumed
+      readBuf_.emplace_back(std::move(datagram));
+    } else {
+      VLOG_EVERY_N(2, 1000) << "Dropped incoming datagram.";
+    }
+    return;
+  }
+
+  deliverDatagram(std::move(datagram));
+}
+
+void H3DatagramAsyncSocket::deliverDatagram(
+    std::unique_ptr<folly::IOBuf> datagram) noexcept {
+  void* buf{nullptr};
+  size_t len{0};
+  ReadCallback::OnDataAvailableParams params;
+  CHECK(readCallback_);
+  CHECK(datagram);
+  if (!readCallback_->shouldOnlyNotify()) {
+
+    readCallback_->getReadBuffer(&buf, &len);
+    if (buf == nullptr || len == 0 ||
+        len < datagram->computeChainDataLength()) {
+      LOG(ERROR) << "Buffer too small to deliver "
+                 << datagram->computeChainDataLength() << " bytes datagram";
+      return;
+    }
+    datagram->coalesce();
+    memcpy(buf, datagram->data(), datagram->length());
+    readCallback_->onDataAvailable((upstreamSession_
+                                        ? upstreamSession_->getPeerAddress()
+                                        : connectAddress_),
+                                   size_t(datagram->length()),
+                                   /*truncated*/ false,
+                                   params);
+  } else {
+    datagram->coalesce();
+    pendingDelivery_ = std::move(datagram);
+    readCallback_->onNotifyDataAvailable(*this);
+  }
+}
+
+ssize_t H3DatagramAsyncSocket::recvmsg(struct msghdr* msg, int /*flags*/) {
+  if (!pendingDelivery_) {
+    return 0;
+  }
+  // This isn't ideal because we are doing double copies, but it is a
+  // limitation of the interface for now.
+  memcpy(msg->msg_iov[0].iov_base,
+         pendingDelivery_->data(),
+         pendingDelivery_->length());
+  ssize_t ret = pendingDelivery_->length();
+  pendingDelivery_ = nullptr;
+  return ret;
+}
+
+int H3DatagramAsyncSocket::recvmmsg(struct mmsghdr* msgvec,
+                                    unsigned int vlen,
+                                    unsigned int flags,
+                                    struct timespec* /*timeout*/) {
+  CHECK_GT(vlen, 0);
+  auto bytesReceived = recvmsg(&msgvec->msg_hdr, flags);
+  if (bytesReceived < 0) {
+    return -1;
+  }
+  msgvec->msg_len = bytesReceived;
+  return 1;
+}
+
+void H3DatagramAsyncSocket::onBody(
+    std::unique_ptr<folly::IOBuf> body) noexcept {
+  if (!options_.capsuleCallback_) {
+    return;
+  }
+  // TODO this only supports parsing capsules that come in one
+  // onBody call and isn't a proper streaming parser.
+  folly::io::Cursor cursor(body.get());
+  auto leftToParse = body->computeChainDataLength();
+  while (leftToParse > 0) {
+    auto typeRes = quic::follyutils::decodeQuicInteger(cursor, leftToParse);
+    if (!typeRes) {
+      LOG(ERROR) << "Failed to decode capsule type.";
+      return;
+    }
+    auto [type, typeLen] = typeRes.value();
+    leftToParse -= typeLen;
+    auto capLengthRes =
+        quic::follyutils::decodeQuicInteger(cursor, leftToParse);
+    if (!capLengthRes) {
+      LOG(ERROR) << "Failed to decode capsule length: type=" << type;
+      return;
+    }
+    auto [capLength, capLengthLen] = capLengthRes.value();
+    leftToParse -= capLengthLen;
+    if (capLength > leftToParse) {
+      LOG(ERROR) << "Not enough data for capsule: type=" << type
+                 << " length=" << capLength;
+      return;
+    }
+    H3Capsule ret{.type = type, .length = capLength, .data = nullptr};
+    cursor.cloneAtMost(ret.data, capLength);
+    options_.capsuleCallback_(std::move(ret));
+  }
+}
+
+void H3DatagramAsyncSocket::onTrailers(
+    std::unique_ptr<proxygen::HTTPHeaders> /*trailers*/) noexcept {
+}
+
+void H3DatagramAsyncSocket::onEOM() noexcept {
+  if (!readCallback_) {
+    // close when resuming reads, after flushing buffered datagrams
+    pendingEOM_ = true;
+  } else {
+    closeRead();
+  }
+}
+
+void H3DatagramAsyncSocket::onUpgrade(
+    proxygen::UpgradeProtocol /*protocol*/) noexcept {
+  closeWithError(
+      {AsyncSocketException::NOT_SUPPORTED, "onUpgrade not supported"});
+}
+
+void H3DatagramAsyncSocket::onError(
+    const proxygen::HTTPException& error) noexcept {
+  closeWithError({AsyncSocketException::INTERNAL_ERROR, error.describe()});
+}
+
+void H3DatagramAsyncSocket::onEgressPaused() noexcept {
+}
+
+void H3DatagramAsyncSocket::onEgressResumed() noexcept {
+}
+
+void H3DatagramAsyncSocket::startClient() {
+  quic::TransportSettings transportSettings;
+  transportSettings.datagramConfig.enabled = true;
+  transportSettings.maxRecvPacketSize = options_.maxDatagramSize_;
+  transportSettings.canIgnorePathMTU = true;
+  if (sndBufPkts_ > 0) {
+    transportSettings.datagramConfig.writeBufSize = sndBufPkts_;
+  }
+  if (rcvBufPkts_ > 0) {
+    transportSettings.datagramConfig.readBufSize = rcvBufPkts_;
+  }
+  if (!upstreamSession_) {
+    auto qEvb = std::make_shared<quic::FollyQuicEventBase>(evb_);
+    auto sock = std::make_unique<quic::FollyQuicAsyncUDPSocket>(qEvb);
+    auto fizzClientContext =
+        quic::FizzClientQuicHandshakeContext::Builder()
+            .setFizzClientContext(createFizzClientContext())
+            .setCertificateVerifier(options_.certVerifier_)
+            .build();
+    auto client = std::make_shared<quic::QuicClientTransport>(
+        qEvb, std::move(sock), fizzClientContext);
+    CHECK(connectAddress_.isInitialized());
+    client->addNewPeerAddress(connectAddress_);
+    if (!options_.hostname_.empty()) {
+      client->setHostname(options_.hostname_);
+    }
+    if (bindAddress_.isInitialized()) {
+      client->setLocalAddress(bindAddress_);
+    }
+    client->setCongestionControllerFactory(
+        std::make_shared<quic::DefaultCongestionControllerFactory>());
+    transportSettings.datagramConfig.enabled = true;
+    client->setTransportSettings(transportSettings);
+    if (options_.rfcMode_) {
+      client->setSupportedVersions({quic::QuicVersion::QUIC_V1});
+    } else {
+      client->setSupportedVersions({quic::QuicVersion::MVFST});
+    }
+
+    wangle::TransportInfo tinfo;
+    upstreamSession_ =
+        new proxygen::HQUpstreamSession(options_.txnTimeout_,
+                                        options_.connectTimeout_,
+                                        nullptr, // controller
+                                        tinfo,
+                                        nullptr); // codecfiltercallback
+    upstreamSession_->setSocket(client);
+    upstreamSession_->setConnectCallback(this);
+    upstreamSession_->setInfoCallback(this);
+    if (options_.rfcMode_) {
+      upstreamSession_->setEgressSettings(
+          {{proxygen::SettingsId::_HQ_DATAGRAM_RFC, 1},
+           {proxygen::SettingsId::ENABLE_CONNECT_PROTOCOL, 1}});
+    } else {
+      upstreamSession_->setEgressSettings(
+          {{proxygen::SettingsId::_HQ_DATAGRAM, 1}});
+    }
+
+    VLOG(4) << "connecting to " << connectAddress_.describe();
+    upstreamSession_->startNow();
+    client->start(upstreamSession_, upstreamSession_);
+  }
+}
+
+std::shared_ptr<fizz::client::FizzClientContext>
+H3DatagramAsyncSocket::createFizzClientContext() {
+  auto ctx = std::make_shared<fizz::client::FizzClientContext>();
+
+  if (options_.certAndKey_.has_value()) {
+    std::string certData;
+    folly::readFile(options_.certAndKey_->first.c_str(), certData);
+    std::string keyData;
+    folly::readFile(options_.certAndKey_->second.c_str(), keyData);
+    auto cert = fizz::openssl::CertUtils::makeSelfCert(certData, keyData);
+    auto certMgr = std::make_shared<fizz::client::CertManager>();
+    certMgr->addCert(std::move(cert));
+    ctx->setClientCertManager(std::move(certMgr));
+  }
+
+  std::vector<std::string> supportedAlpns =
+      quic::samples::kDefaultSupportedAlpns;
+  ctx->setSupportedAlpns(supportedAlpns);
+  ctx->setRequireAlpn(true);
+  ctx->setSendEarlyData(false);
+  return ctx;
+}
+
+ssize_t H3DatagramAsyncSocket::write(const folly::SocketAddress& address,
+                                     const std::unique_ptr<folly::IOBuf>& buf) {
+  if (!buf) {
+    LOG(ERROR) << "Invalid write data";
+    errno = EINVAL;
+    return -1;
+  }
+  if (!connectAddress_.isInitialized()) {
+    LOG(ERROR) << "Socket not connected. Must call connect()";
+    errno = ENOTCONN;
+    return -1;
+  }
+  // Can only write to the one address we are connected to
+  if (address != connectAddress_) {
+    LOG(ERROR) << "Socket can only write to address " << connectAddress_;
+    errno = EINVAL;
+    return -1;
+  }
+  auto size = buf->computeChainDataLength();
+  if (!transportConnected_) {
+    if (writeBuf_.size() < sndBufPkts_) {
+      VLOG(10) << "Socket not connected yet. Buffering datagram";
+      auto bufCopy = buf->clone();
+      if (options_.rfcMode_) {
+        bufCopy = prependContextId(std::move(bufCopy));
+      }
+      writeBuf_.emplace_back(std::move(bufCopy));
+      return size;
+    }
+    LOG(ERROR) << "Socket write buffer is full. Discarding datagram";
+    errno = ENOBUFS;
+    return -1;
+  }
+  if (!txn_) {
+    LOG(ERROR) << "Unable to create HTTP/3 transaction. Discarding datagram";
+    errno = ECANCELED;
+    return -1;
+  }
+  if (size > txn_->getDatagramSizeLimit()) {
+    LOG(ERROR) << "Datagram too large len=" << size
+               << " transport max datagram size len="
+               << txn_->getDatagramSizeLimit() << ". Discarding datagram";
+    errno = EMSGSIZE;
+    return -1;
+  }
+  auto datagramBuf = buf->clone();
+  if (options_.rfcMode_) {
+    datagramBuf = prependContextId(std::move(datagramBuf));
+  }
+  if (!txn_->sendDatagram(std::move(datagramBuf))) {
+    LOG(ERROR) << "Transport write buffer is full. Discarding datagram";
+    // sendDatagram can only fail for exceeding the maximum size (checked
+    // above) and if the write buffer is full
+    errno = ENOBUFS;
+    return -1;
+  }
+  return size;
+}
+
+void H3DatagramAsyncSocket::resumeRead(ReadCallback* cob) {
+  // TODO: avoid re-entrancy
+  if (inResumeRead_) {
+    return;
+  }
+  SCOPE_EXIT {
+    inResumeRead_ = false;
+  };
+  inResumeRead_ = true;
+  readCallback_ = CHECK_NOTNULL(cob);
+  folly::DelayedDestruction::DestructorGuard dg(this);
+  // if there are buffered datagrams, deliver those first.
+  auto it = readBuf_.begin();
+  while (it != readBuf_.end()) {
+    // the read callback could be reset from onDataAvailable
+    if (readCallback_) {
+      deliverDatagram(std::move(*it));
+      it = readBuf_.erase(it);
+    } else {
+      return;
+    }
+  }
+  // then, deliver errors
+  if (pendingError_.has_value()) {
+    auto err = *pendingError_;
+    pendingError_ = folly::none;
+    readCallback_->onReadError(err);
+    closeRead();
+  } else if (pendingEOM_) {
+    // or close reads if EOM was seen already
+    pendingEOM_ = false;
+    closeRead();
+  }
+}
+} // namespace proxygen

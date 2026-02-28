@@ -81,6 +81,14 @@ int dyn_call_error_level(const php::Func*);
  */
 bool has_coeffects_local(const php::Func*);
 
+std::string func_fullname(const php::Func&);
+
+/*
+ * Whether this function is one of the special 86*init functions on a
+ * class.
+ */
+bool is_86init_func(const php::Func&);
+
 //////////////////////////////////////////////////////////////////////
 
 }

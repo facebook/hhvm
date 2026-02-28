@@ -1,10 +1,10 @@
 <?hh
 
 <<__EntryPoint>>
-function main_next() {
+function main_next() :mixed{
 $sample_dir = __DIR__.'/../../sample_dir';
 $iterator = new FilesystemIterator($sample_dir);
-$ret = varray[];
+$ret = vec[];
 while($iterator->valid()) {
   $ret[] = $iterator->getFilename();
   $iterator->next();

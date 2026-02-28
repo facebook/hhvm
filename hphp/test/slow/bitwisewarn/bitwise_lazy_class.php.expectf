@@ -1,0 +1,5 @@
+string(1) "C"
+
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Cannot perform a bitwise operation on lazy class and string' in %s
+Stack trace:
+#0 {main}

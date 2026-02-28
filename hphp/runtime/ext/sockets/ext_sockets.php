@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Creates and returns a socket resource, also referred to as an endpoint of

@@ -1,6 +1,6 @@
 <?hh
 
-function foo($v) {
+function foo($v) :mixed{
   return (float)$v;
 }
 function foo2(): void {
@@ -10,7 +10,7 @@ function foo2(): void {
   var_dump(foo(9007199254740992));
   var_dump(foo(1.1));
   var_dump(foo("abc"));
-  var_dump(foo(varray[123]));
+  var_dump(foo(vec[123]));
   try {
     var_dump(foo(new C));
   } catch (TypecastException $e) {
@@ -18,7 +18,7 @@ function foo2(): void {
   }
 }
 class C { public $foo = "bar"; }
-function real($i) {
+function real($i) :mixed{
   $v1 = "undefined";
   $v2 = "undefined";
   $v3 = "undefined";
@@ -40,8 +40,8 @@ function real($i) {
     $v7 = "1.1";
     $v8 = "abc";
     $v9 = new C;
-    $v10 = varray[];
-    $v11 = varray[123];
+    $v10 = vec[];
+    $v11 = vec[123];
   }
   var_dump((float)$v1);
   var_dump((float)$v2);
@@ -60,7 +60,7 @@ function real($i) {
   var_dump((float)$v11);
 }
 
-function baz($i) {
+function baz($i) :mixed{
   if ($i >= 1) {
     $s1 = '5.3xxx';
     $s2 = '7yyy';

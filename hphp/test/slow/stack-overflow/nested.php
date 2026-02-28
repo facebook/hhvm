@@ -1,7 +1,7 @@
 <?hh
 
 
-function foo($x) {
+function foo($x) :mixed{
   bar(
 
     foo($x)
@@ -9,12 +9,12 @@ function foo($x) {
   );
 }
 
-function bar($x) {
+function bar($x) :mixed{
   var_dump(__METHOD__);
 }
 
 
 <<__EntryPoint>>
-function main_nested() {
+function main_nested() :mixed{
 foo(0);
 }

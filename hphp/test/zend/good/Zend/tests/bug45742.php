@@ -6,7 +6,7 @@ class Constants {
 }
 
 class ArrayProperty {
-    public static $array = darray[
+    public static $array = dict[
         Constants::A => 23,
         Constants::B => 42,
     ];

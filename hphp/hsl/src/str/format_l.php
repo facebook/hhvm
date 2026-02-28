@@ -20,10 +20,15 @@ use namespace HH\Lib\_Private\_Str;
  * @guide /hack/built-in-types/string
  * @guide /hack/functions/format-strings
  */
-function format_l(
+<<__NoAutoLikes>>
+function format_l<Targs as (mixed...)>(
   Locale\Locale $locale,
-  SprintfFormatString $format_string,
-  mixed ...$format_args
+  \HH\TypedFormatString<SprintfFormat, Targs> $format_string,
+  ... Targs $format_args,
 )[]: string {
-  return _Str\vsprintf_l($locale, $format_string as string, $format_args);
+  return _Str\vsprintf_l(
+    $locale,
+    $format_string,
+    HH\FIXME\UNSAFE_CAST<(mixed...), vec<mixed>>($format_args),
+  );
 }

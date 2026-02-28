@@ -1,0 +1,12 @@
+NotKeyedByICAndLeakIC__DO_NOT_USE
+  INSERT NotKeyedByICAndLeakIC__DO_NOT_USE
+  ~string
+SORT TEXT: none
+MakeICInaccessible
+  INSERT MakeICInaccessible
+  ~string
+SORT TEXT: none
+KeyedByIC
+  INSERT KeyedByIC
+  ~string
+SORT TEXT: none

@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   var_dump(file_exists('this+is-a.valid123scheme://example.com'));
   var_dump(file_exists('this+is_not_a.valid123scheme://example.com'));
   var_dump(file_exists('/this+is-not-a.valid123scheme://example.com'));
@@ -11,6 +11,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_scheme_chars() {
+function main_scheme_chars() :mixed{
 main();
 }

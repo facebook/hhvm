@@ -18,7 +18,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(C::FOO);
   var_dump(C::DEFAULT);
 }

@@ -1,0 +1,4 @@
+ERROR: File "no_functions_01.php", line 5, characters 12-12:
+Unbound name: `D` (an object type) (Naming[2049])
+ERROR: File "no_functions_01.php", line 5, characters 3-10:
+The `__Sealed` attribute cannot be used on a function. (Typing[4231])

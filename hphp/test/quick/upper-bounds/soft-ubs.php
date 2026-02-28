@@ -15,7 +15,7 @@ class Bar<T as int> {
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(Bar::baz(null));
   var_dump(foo('a'));
   var_dump(Bar::baz('b'));

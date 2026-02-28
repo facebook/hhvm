@@ -1,12 +1,12 @@
 
-Warning: gmp_sub() expects exactly 2 parameters, 0 given in %s/gmp_sub.php on line 3
+Warning: gmp_sub() expects exactly 2 positional parameters, 0 given in %s/gmp_sub.php on line 3
 
-Warning: gmp_sub() expects exactly 2 parameters, 1 given in %s/gmp_sub.php on line 4
+Warning: gmp_sub() expects exactly 2 positional parameters, 1 given in %s/gmp_sub.php on line 4
 
 Warning: gmp_sub(): Unable to convert variable to GMP - string is not an integer in %s/gmp_sub.php on line 5
 bool(false)
 
-Warning: gmp_sub() expects exactly 2 parameters, 3 given in %s/gmp_sub.php on line 6
+Warning: gmp_sub() expects exactly 2 positional parameters, 3 given in %s/gmp_sub.php on line 6
 
 Warning: gmp_sub(): Unable to convert variable to GMP - wrong type in %s/gmp_sub.php on line 7
 bool(false)

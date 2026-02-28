@@ -6,12 +6,12 @@ final class ScopeGuardAsyncDispose {
   }
 }
 
-async function one() {
+async function one() :Awaitable<mixed>{
   await using new ScopeGuardAsyncDispose();
   throw new Exception('from one');
 }
 
-async function two() {
+async function two() :Awaitable<mixed>{
   await using (new ScopeGuardAsyncDispose()) {
     throw new Exception('from two');
   }
@@ -19,7 +19,7 @@ async function two() {
 
 
 <<__EntryPoint>>
-function main_async_dispose() {
+function main_async_dispose() :mixed{
 try {
   HH\Asio\join(one());
 } catch (Exception $e) {

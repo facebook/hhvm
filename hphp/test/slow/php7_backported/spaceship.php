@@ -1,23 +1,23 @@
 <?hh <<__EntryPoint>> function main(): void {
-$valid_true = varray[1, "1", "true", 1.0];
-$valid_false = varray[0, "", 0.0, NULL];
+$valid_true = vec[1, "1", "true", 1.0];
+$valid_false = vec[0, "", 0.0, NULL];
 
 $int1 = 679;
 $int2 = -67835;
-$valid_int1 = varray["678", "678abc", " 678", "678  ", 678.0, 6.789E2, "+678", +678];
-$valid_int2 = varray["-67836", "-67836abc", " -67836", "-67836  ", -67835.0001, -6.78351E4];
-$invalid_int1 = varray[679, "679"];
-$invalid_int2 = varray[-67835, "-67835"];
+$valid_int1 = vec["678", "678abc", " 678", "678  ", 678.0, 6.789E2, "+678", +678];
+$valid_int2 = vec["-67836", "-67836abc", " -67836", "-67836  ", -67835.0001, -6.78351E4];
+$invalid_int1 = vec[679, "679"];
+$invalid_int2 = vec[-67835, "-67835"];
 
 $float1 = 57385.45835;
 $float2 = -67345.76567;
-$valid_float1 = varray["57385.45834",  "57385.45834aaa", "  57385.45834", 5.738545834e4];
-$valid_float2 = varray["-67345.76568", "-67345.76568aaa", "  -67345.76568", -6.734576568E4];
-$invalid_float1 = varray[57385.45835, 5.738545835e4];
-$invalid_float2 = varray[-67345.76567, -6.734576567E4];
+$valid_float1 = vec["57385.45834",  "57385.45834aaa", "  57385.45834", 5.738545834e4];
+$valid_float2 = vec["-67345.76568", "-67345.76568aaa", "  -67345.76568", -6.734576568E4];
+$invalid_float1 = vec[57385.45835, 5.738545835e4];
+$invalid_float2 = vec[-67345.76567, -6.734576567E4];
 
 
-$toCompare = varray[
+$toCompare = vec[
 // boolean test will result in both sides being converted to boolean so !0 = true and true is not > true for example
 // also note that a string of "0" is converted to false but a string of "0.0" is converted to true
 // false cannot be tested as 0 can never be > 0 or 1

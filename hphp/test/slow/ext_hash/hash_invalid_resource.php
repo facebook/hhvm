@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_hash_invalid_resource() {
+function main_hash_invalid_resource() :mixed{
 $ctx = hash_init('md5');
 hash_update($ctx, 'The quick brown fox ');
 hash_update($ctx, 'jumped over the lazy dog.');

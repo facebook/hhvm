@@ -1,12 +1,12 @@
 <?hh
 
-function funk($alice, $bob) {
+function funk($alice, $bob) :mixed{
   echo "Args: $alice $bob\n";
   debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $use_by_val = 123;
 
   $c = function($arg, $dv = 500) use ($use_by_val) {
@@ -28,6 +28,4 @@ function main() {
   var_dump($use_by_val);
   $debuginfo = $c->__debugInfo();
   var_dump(is_darray($debuginfo));
-  var_dump(is_darray($debuginfo['static']));
-  var_dump(is_darray($debuginfo['parameter']));
 }

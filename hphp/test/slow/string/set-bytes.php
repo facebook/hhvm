@@ -2,11 +2,11 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 <<__NEVER_INLINE>>
-function get_key() {
+function get_key() :mixed{
   return 'a';
 }
 
-function test_string() {
+function test_string() :mixed{
   echo ">>> Testing strings <<<\n";
   $s = "This string is 34 characters long.";
   $s2 = $s;
@@ -34,7 +34,7 @@ function test_string() {
   echo ">>> End of strings <<<\n";
 }
 
-function test_primitive() {
+function test_primitive() :mixed{
   echo ">>> Testing primitive types <<<\n";
   $s = "The quick brown fox jumps over the lazy dog.";
 
@@ -61,7 +61,7 @@ function test_primitive() {
   echo ">>> End of primitive types <<<\n";
 }
 
-function test_vec() {
+function test_vec() :mixed{
   echo ">>> Testing vecs <<<\n";
   $blank = str_repeat('-', 32);
   $s = $blank;
@@ -111,7 +111,7 @@ function test_vec() {
   echo ">>> End of vecs <<<\n";
 }
 
-function try_func($f) {
+function try_func($f) :mixed{
   try {
     $f();
     echo "Function did not throw\n";
@@ -120,7 +120,7 @@ function try_func($f) {
   }
 }
 
-function failures() {
+function failures() :mixed{
   echo ">>> Testing failure cases <<<\n";
   $s = "This string is 34 characters long.";
 

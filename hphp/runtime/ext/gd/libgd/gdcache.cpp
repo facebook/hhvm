@@ -1,5 +1,5 @@
-#include "gd.h"
-#include "gdhelpers.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
+#include "hphp/runtime/ext/gd/libgd/gdhelpers.h"
 
 #ifdef HAVE_LIBFREETYPE
 #define NEED_CACHE 1
@@ -148,12 +148,10 @@ gdCacheGet (gdCache_head_t * head, void *keydata)
 
 #include <stdio.h>
 
-typedef struct
-{
+struct key_value_t {
   int key;
   int value;
-}
-key_value_t;
+};
 
 static int
 cacheTest (void *map, void *key)

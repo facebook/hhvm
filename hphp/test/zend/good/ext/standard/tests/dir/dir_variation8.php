@@ -17,8 +17,8 @@ $file_path = dirname(__FILE__);
 $dir_path = $file_path."/dir_variation81";
 $sub_dir_path = $dir_path."/sub_dir1";
 
-try { @mkdir($dir_path1); } catch (Exception $e) { var_dump($e->getMessage()); }
-@mkdir($sub_dir_path);
+try { mkdir($dir_path1); } catch (Exception $e) { var_dump($e->getMessage()); }
+mkdir($sub_dir_path);
 
 /* with different wildcard characters */
 

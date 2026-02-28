@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class A<T> {
   public function __construct(public T $x) {}

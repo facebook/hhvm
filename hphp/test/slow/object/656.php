@@ -3,7 +3,7 @@
 class EE extends Exception {
 }
 class E extends EE {
-  function foo() {
+  function foo() :mixed{
 }
   function __construct() {
     echo 'MAKING E';
@@ -12,6 +12,6 @@ class E extends EE {
 }
 
 <<__EntryPoint>>
-function main_656() {
+function main_656() :mixed{
 new E;
 }

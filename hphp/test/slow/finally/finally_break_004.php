@@ -1,8 +1,8 @@
 <?hh
 
-function blah() {
-  $xs = varray[11, 22, 33, 44, 55];
-  $ys = varray['a', 'b', 'c', 'd', 'e', 'f'];
+function blah() :mixed{
+  $xs = vec[11, 22, 33, 44, 55];
+  $ys = vec['a', 'b', 'c', 'd', 'e', 'f'];
 
   foreach ($ys as $y) {
     echo "begin outer loop $y\n";
@@ -53,6 +53,6 @@ function blah() {
 
 
 <<__EntryPoint>>
-function main_finally_break_004() {
+function main_finally_break_004() :mixed{
 blah();
 }

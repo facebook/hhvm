@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function consumeArrayOfIntToString(darray<int, string> $_): void {}
 
@@ -7,7 +7,7 @@ function consumeArrayOfIntToString(darray<int, string> $_): void {}
  * AKvarray, in another to AKdarray. Should be unresolved of those two afterwards.
  */
 function test(): void {
-  $array = varray[];
+  $array = vec[];
   if (true) {
     $array[] = '';
   } else {

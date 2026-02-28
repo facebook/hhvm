@@ -29,7 +29,7 @@ namespace HPHP {
  * This is the runtime representation of a constant.
  */
 struct Constant {
-  LowStringPtr name;
+  PackedStringPtr name;
   TypedValue val;
   Attr attrs;
 
@@ -72,17 +72,7 @@ struct Constant {
    * `cnsName' for this request.
    */
   static TypedValue load(const StringData* cnsName);
-
-  /*
-   * Define a constant with name `cnsName' with a magic callback. The
-   * TypedValue should be KindOfUninit, with a Native::ConstantCallback in
-   * its m_data.pcnt.
-   *
-   * The canonical examples are STDIN, STDOUT, and STDERR.
-   */
-  static bool defNativeConstantCallback(const StringData* cnsName, TypedValue cell);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

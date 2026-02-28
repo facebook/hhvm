@@ -47,8 +47,8 @@ struct BCPattern {
 
   struct Atom;
 
-  typedef std::vector<Atom> Expr;
-  typedef std::vector<PC> CaptureVec;
+  using Expr = std::vector<Atom>;
+  using CaptureVec = std::vector<PC>;
 
   /**
    * Opcode plus pattern-matching metadata.
@@ -171,14 +171,15 @@ public:
    * Match against bytecode.
    */
   Result matchAnchored(const Func* func);
-  Result matchAnchored(PC start, PC end);
+  Result matchAnchored(PC entry, Offset start, Offset end);
 
 private:
-  PC next(PC pc) {
-    return pc + instrLen(pc);
+  Offset next(PC entry, Offset off) {
+    return off + instrLen(entry + off);
   }
 
-  void matchAnchored(const Expr& pattern, PC start, PC end, Result& result);
+  void matchAnchored(const Expr& pattern, PC entry, Offset start, Offset end,
+                     Result& result);
 
 private:
   Expr m_pattern;

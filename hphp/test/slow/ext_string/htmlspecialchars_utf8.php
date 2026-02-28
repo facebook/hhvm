@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_htmlspecialchars_utf8() {
-$inputs = varray[
+function main_htmlspecialchars_utf8() :mixed{
+$inputs = vec[
   "Foo\xc0barbaz",
   "\xc2\"",
   "\xc2\xa0",

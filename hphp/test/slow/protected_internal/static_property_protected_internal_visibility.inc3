@@ -1,0 +1,10 @@
+<?hh
+
+module M2;
+
+class B {
+  public static function foobar(): void {
+    // Not OK since foo is both protected and internal
+    A::$foo.'bar';
+  }
+}

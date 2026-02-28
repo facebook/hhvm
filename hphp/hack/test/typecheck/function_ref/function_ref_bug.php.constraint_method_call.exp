@@ -1,0 +1,8 @@
+ERROR: File "function_ref_bug.php", line 17, characters 13-39:
+Invalid argument (Typing[4411])
+  File "function_ref_bug.php", line 17, characters 13-39:
+  Function readonly mismatch
+  File "function_ref_bug.php", line 17, characters 13-39:
+  This function is not marked readonly
+  File "function_ref_bug.php", line 20, characters 10-14:
+  This function is marked readonly

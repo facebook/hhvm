@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_824() {
+function main_824() :mixed{
 $v = Vector {
 11, 42, 73}
 ;

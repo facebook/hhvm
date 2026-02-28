@@ -1,0 +1,8 @@
+ERROR: File "make_inv_then_invoke.php", line 23, characters 13-15:
+No instance method `foo` in `B` (Typing[4053])
+  File "make_inv_then_invoke.php", line 19, characters 25-25:
+  This is why I think it is an object of type B
+  File "make_inv_then_invoke.php", line 19, characters 25-25:
+  This type argument to `Inv` must match exactly (it is invariant)
+  File "make_inv_then_invoke.php", line 4, characters 7-7:
+  Declaration of `B` is here

@@ -55,6 +55,28 @@ inline bool is_single_throw(const php::Block& b) {
   return b.hhbcs.size() == 1 && b.hhbcs.back().op == Op::Throw;
 }
 
+inline bool is_unsetl_throw(const php::Block& b) {
+  if (b.hhbcs.empty() || b.hhbcs.back().op != Op::Throw) return false;
+  for (auto const& bc : b.hhbcs) {
+    switch (bc.op) {
+      case Op::Nop:
+      case Op::UnsetL:
+      case Op::Throw:
+        break;
+      default:
+        return false;
+    }
+  }
+  return true;
+}
+
+// Does this block end with StaticAnalysisError?
+inline bool is_fatal_block(const php::Block& b, size_t offset = 0) {
+  if (offset + 1 != b.hhbcs.size()) return false;
+  auto const& bc = b.hhbcs.back();
+  return bc.op == Op::StaticAnalysisError;
+}
+
 /*
  * Walk through single_nop blocks to the next block that actually does
  * something.

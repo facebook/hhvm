@@ -1,0 +1,406 @@
+Schema {
+  1: programs (list) = list<struct>[3] {
+    [0] = Program {
+      1: attrs (struct) = DefinitionAttrs {
+        1: name (string) = "module",
+        2: uri (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification_before",
+      },
+      2: id (i64) = 6318900912073763317,
+      3: includes (list) = list<i64>[1] {
+        [0] = 3872087236752240982,
+      },
+      8: definitionKeys (list) = list<string>[2] {
+        [0] = "s\033r\330^\364\206\253u \253}\250\235\270;",
+        [1] = "<\272\351\016t\227TT\022\351\244P\0301\234r",
+      },
+      5: path (string) = "thrift/compiler/test/fixtures/default_values_rectification_before/src/module.thrift",
+    },
+    [1] = Program {
+      1: attrs (struct) = DefinitionAttrs {
+        1: name (string) = "thrift",
+        2: uri (string) = "facebook.com/thrift/annotation",
+      },
+      2: id (i64) = 3872087236752240982,
+      3: includes (list) = list<i64>[1] {
+        [0] = -3050215275751179326,
+      },
+      8: definitionKeys (list) = list<string>[26] {
+        [0] = "Uv\357\216Tl\037ej\203\210yj7>w",
+        [1] = "t\222\266\204.\374\254\033S\247\222n\326^:\251",
+        [2] = "\017\265a_\236\227\033`[_\nTew\3061",
+        [3] = "\336\352\233\352N0\210\303\352\371\251\200\253\351E\357",
+        [4] = "p\030\001\316\223\016Z\322'\177}\212(\?\"\033",
+        [5] = "\354\017ER\375n$/J\261\010\017\277A\274\?",
+        [6] = "F\214\266\363.\005p\336\023\353\242,\362\277D\215",
+        [7] = "\230\374KseX\253\214\3059`x{HQ7",
+        [8] = "\242^\353(\366\324D\036\342\363\n\315\351$~\226",
+        [9] = "\240v(rUs\271\"5\300\017\255EC\256\014",
+        [10] = "\205\016b\210x\032\243\347\366\266\355!\363\233\327$",
+        [11] = "\253\214\325A[\353\020,\316\036k'\245\240/U",
+        [12] = "\255\343\351\207\270\2607\367\344\364\000R\373\222']",
+        [13] = "+\304xm\371\321\003\237\035\r\222\243\3430\275\203",
+        [14] = "\275Y\274\261\347\345D\375\271a\354bpT\257<",
+        [15] = "`\240\013\023y4\211!\030\275\311\rp\320\225\217",
+        [16] = "\334\314O\200\220:\364l\373\256HA\255\1777\325",
+        [17] = "\n\030\211\201\230\200\273\253(l\206,\3008\337\201",
+        [18] = "\256\262\232\351qR*X\371\334\006Z\322\312\201\264",
+        [19] = "\331\346\241j\030f\216\214\001\243\253\276S\302'\357",
+        [20] = "\241\245\337v\222\031\256#\335\310K+B\247\370\302",
+        [21] = "^%\305[o\017\230n\213Ba0\322F\034\274",
+        [22] = "\232\266\352\357\272\257\204\261P|\266\203\247\2440\333",
+        [23] = "-n-\211D\004\335\203\001~z\331\306\3610W",
+        [24] = "\020\027\310\314\354!\274\235\302\033\005\005(F\033\022",
+        [25] = "\t\254\370\t\235V\256\362&\231\213\237\263\371F\354",
+      },
+      5: path (string) = "thrift/annotation/thrift.thrift",
+      7: namespaces (map) = map<string,string>[7] {
+        "android" -> "com.facebook.thrift.annotation_deprecated",
+        "go" -> "thrift.annotation.thrift",
+        "hs" -> "Facebook.Thrift.Annotation.Thrift",
+        "java" -> "com.facebook.thrift.annotation_deprecated",
+        "js" -> "thrift.annotation.thrift",
+        "py" -> "thrift.annotation.thrift",
+        "py.asyncio" -> "facebook_thrift_asyncio.annotation.thrift",
+      },
+    },
+    [2] = Program {
+      1: attrs (struct) = DefinitionAttrs {
+        1: name (string) = "scope",
+        2: uri (string) = "facebook.com/thrift/annotation",
+        6: docs (struct) = DocBlock {
+          1: contents (string) = "Annotations that indicate which IDL definition a structured annotation can\nbe placed on.\n\nFor example:\n  include \"thrift/annotat[...](389)",
+          2: sourceRange (struct) = SourceRange {
+            1: programId (i64) = -3050215275751179326,
+            2: beginLine (i32) = 19,
+            3: beginColumn (i32) = 1,
+            4: endLine (i32) = 35,
+            5: endColumn (i32) = 4,
+          },
+        },
+      },
+      2: id (i64) = -3050215275751179326,
+      8: definitionKeys (list) = list<string>[20] {
+        [0] = "8\222\345M\250\372\307|,#\014\375\017\247\205\354",
+        [1] = "{Z\177\217(\2164vx\317O\313\n7\010j",
+        [2] = "@C\263\304\025\311\274\302j\271\276\250'\265H\205",
+        [3] = "\235L\"\303\260H\245\253\376\236p\314`oa,",
+        [4] = "\022Ye\?;\353+S\307\031@\271\256\305\307\241",
+        [5] = ":\301\203\021\215\215Y\032 \030%S\246w\240A",
+        [6] = "\341\240\331\255'O\376\343o\304g\207\261\241;\036",
+        [7] = "\013A\226\243\366\336\370%G_\326v_\006xi",
+        [8] = "/H\223\017&\000\270\250\016pa\275\271,\010\366",
+        [9] = "\327\2163G\025i\021 \020 \020\026\245)\337\341",
+        [10] = "\t\234\326q\357\330#\033\314\274D\244z\224\222M",
+        [11] = "}\371\002\020\372\327\347\250\034\307\353M\240&\210G",
+        [12] = "\211\220DX\177M\376\341T2\021I\"d\241i",
+        [13] = "\271yQG\256\355\263)\260>\251)Z\240y\371",
+        [14] = "#\237\\\241\216p\234_\272`.\310k\234\264\221",
+        [15] = "\275\344\333\321/\n\341~\263\304\336xT,N\025",
+        [16] = "ft\346m\276\355\244{\371\016,O]\035OR",
+        [17] = "\360\245\311\226\207\354e\263\267\343\264\344/\211\375+",
+        [18] = "\214\360f\2515N\037\220\234\307\274@k\305\250{",
+        [19] = "\204\365\0070\365#\323\323\020\273\004\212\246\243g}",
+      },
+      5: path (string) = "thrift/annotation/scope.thrift",
+      7: namespaces (map) = map<string,string>[6] {
+        "android" -> "com.facebook.thrift.annotation_deprecated",
+        "go" -> "thrift.annotation.scope",
+        "java" -> "com.facebook.thrift.annotation_deprecated",
+        "js" -> "thrift.annotation.scope",
+        "py" -> "thrift.annotation.scope",
+        "py.asyncio" -> "facebook_thrift_asyncio.annotation.scope",
+      },
+    },
+  },
+  3: valuesMap (map) = map<i64,struct>[7] {
+    -8442774064920780172 -> Value {
+      1: boolValue (bool) = true,
+    },
+    -7354011236927394272 -> Value {
+      4: i32Value (i32) = 42,
+    },
+    -6184641776889516003 -> Value {
+      11: objectValue (struct) = Object {
+        1: type (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification_before/EmptyStruct",
+        2: members (map) = map<i16,struct>[0] {
+        },
+      },
+    },
+    -3251352998482926443 -> Value {
+      1: boolValue (bool) = false,
+    },
+    2649958233193026888 -> Value {
+      14: listValue (list) = list<struct>[2] {
+        [0] = Value {
+          4: i32Value (i32) = 1,
+        },
+        [1] = Value {
+          4: i32Value (i32) = 2,
+        },
+      },
+    },
+    5223775973731705452 -> Value {
+      4: i32Value (i32) = 0,
+    },
+    8863055147593237692 -> Value {
+      14: listValue (list) = list<struct>[0] {
+      },
+    },
+  },
+  8: definitionsMap (map) = map<string,struct>[2] {
+    "<\272\351\016t\227TT\022\351\244P\0301\234r" -> Definition {
+      1: structDef (struct) = Struct {
+        1: attrs (struct) = DefinitionAttrs {
+          1: name (string) = "TestStruct",
+          2: uri (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification_before/TestStruct",
+          7: sourceRange (struct) = SourceRange {
+            1: programId (i64) = 6318900912073763317,
+            2: beginLine (i32) = 23,
+            3: beginColumn (i32) = 1,
+            4: endLine (i32) = 43,
+            5: endColumn (i32) = 2,
+          },
+        },
+        2: fields (list) = list<struct>[8] {
+          [0] = Field {
+            1: id (i16) = 1,
+            3: type (struct) = TypeStruct {
+              1: name (struct) = TypeName {
+                4: i32Type (i32) = 0,
+              },
+              2: params (list) = list<struct>[0] {
+              },
+            },
+            4: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "unqualified_int_field",
+              7: sourceRange (struct) = SourceRange {
+                1: programId (i64) = 6318900912073763317,
+                2: beginLine (i32) = 24,
+                3: beginColumn (i32) = 3,
+                4: endLine (i32) = 24,
+                5: endColumn (i32) = 36,
+              },
+            },
+            5: customDefault (i64) = 5223775973731705452,
+          },
+          [1] = Field {
+            1: id (i16) = 2,
+            3: type (struct) = TypeStruct {
+              1: name (struct) = TypeName {
+                1: boolType (i32) = 0,
+              },
+              2: params (list) = list<struct>[0] {
+              },
+            },
+            4: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "unqualified_bool_field",
+              7: sourceRange (struct) = SourceRange {
+                1: programId (i64) = 6318900912073763317,
+                2: beginLine (i32) = 26,
+                3: beginColumn (i32) = 3,
+                4: endLine (i32) = 26,
+                5: endColumn (i32) = 42,
+              },
+            },
+            5: customDefault (i64) = -3251352998482926443,
+          },
+          [2] = Field {
+            1: id (i16) = 3,
+            3: type (struct) = TypeStruct {
+              1: name (struct) = TypeName {
+                14: listType (i32) = 0,
+              },
+              2: params (list) = list<struct>[1] {
+                [0] = TypeStruct {
+                  1: name (struct) = TypeName {
+                    4: i32Type (i32) = 0,
+                  },
+                  2: params (list) = list<struct>[0] {
+                  },
+                },
+              },
+            },
+            4: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "unqualified_list_field",
+              7: sourceRange (struct) = SourceRange {
+                1: programId (i64) = 6318900912073763317,
+                2: beginLine (i32) = 28,
+                3: beginColumn (i32) = 3,
+                4: endLine (i32) = 28,
+                5: endColumn (i32) = 44,
+              },
+            },
+            5: customDefault (i64) = 8863055147593237692,
+          },
+          [3] = Field {
+            1: id (i16) = 4,
+            3: type (struct) = TypeStruct {
+              1: name (struct) = TypeName {
+                11: structType (struct) = TypeUri {
+                  4: definitionKey (string) = "s\033r\330^\364\206\253u \253}\250\235\270;",
+                },
+              },
+              2: params (list) = list<struct>[0] {
+              },
+            },
+            4: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "unqualified_struct_field",
+              7: sourceRange (struct) = SourceRange {
+                1: programId (i64) = 6318900912073763317,
+                2: beginLine (i32) = 30,
+                3: beginColumn (i32) = 3,
+                4: endLine (i32) = 30,
+                5: endColumn (i32) = 48,
+              },
+            },
+            5: customDefault (i64) = -6184641776889516003,
+          },
+          [4] = Field {
+            1: id (i16) = 5,
+            2: qualifier (i32) = 1,
+            3: type (struct) = TypeStruct {
+              1: name (struct) = TypeName {
+                4: i32Type (i32) = 0,
+              },
+              2: params (list) = list<struct>[0] {
+              },
+            },
+            4: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "optional_int_field",
+              8: annotations (map) = map<string,struct>[1] {
+                "facebook.com/thrift/annotation/AllowUnsafeOptionalCustomDefaultValue" -> Annotation {
+                },
+              },
+              9: annotationsByKey (map) = map<string,struct>[1] {
+                "\241\245\337v\222\031\256#\335\310K+B\247\370\302" -> Annotation {
+                },
+              },
+              7: sourceRange (struct) = SourceRange {
+                1: programId (i64) = 6318900912073763317,
+                2: beginLine (i32) = 32,
+                3: beginColumn (i32) = 3,
+                4: endLine (i32) = 33,
+                5: endColumn (i32) = 43,
+              },
+            },
+            5: customDefault (i64) = -7354011236927394272,
+          },
+          [5] = Field {
+            1: id (i16) = 6,
+            2: qualifier (i32) = 1,
+            3: type (struct) = TypeStruct {
+              1: name (struct) = TypeName {
+                1: boolType (i32) = 0,
+              },
+              2: params (list) = list<struct>[0] {
+              },
+            },
+            4: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "optional_bool_field",
+              8: annotations (map) = map<string,struct>[1] {
+                "facebook.com/thrift/annotation/AllowUnsafeOptionalCustomDefaultValue" -> Annotation {
+                },
+              },
+              9: annotationsByKey (map) = map<string,struct>[1] {
+                "\241\245\337v\222\031\256#\335\310K+B\247\370\302" -> Annotation {
+                },
+              },
+              7: sourceRange (struct) = SourceRange {
+                1: programId (i64) = 6318900912073763317,
+                2: beginLine (i32) = 35,
+                3: beginColumn (i32) = 3,
+                4: endLine (i32) = 36,
+                5: endColumn (i32) = 47,
+              },
+            },
+            5: customDefault (i64) = -8442774064920780172,
+          },
+          [6] = Field {
+            1: id (i16) = 7,
+            2: qualifier (i32) = 1,
+            3: type (struct) = TypeStruct {
+              1: name (struct) = TypeName {
+                14: listType (i32) = 0,
+              },
+              2: params (list) = list<struct>[1] {
+                [0] = TypeStruct {
+                  1: name (struct) = TypeName {
+                    4: i32Type (i32) = 0,
+                  },
+                  2: params (list) = list<struct>[0] {
+                  },
+                },
+              },
+            },
+            4: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "optional_list_field",
+              8: annotations (map) = map<string,struct>[1] {
+                "facebook.com/thrift/annotation/AllowUnsafeOptionalCustomDefaultValue" -> Annotation {
+                },
+              },
+              9: annotationsByKey (map) = map<string,struct>[1] {
+                "\241\245\337v\222\031\256#\335\310K+B\247\370\302" -> Annotation {
+                },
+              },
+              7: sourceRange (struct) = SourceRange {
+                1: programId (i64) = 6318900912073763317,
+                2: beginLine (i32) = 38,
+                3: beginColumn (i32) = 3,
+                4: endLine (i32) = 39,
+                5: endColumn (i32) = 54,
+              },
+            },
+            5: customDefault (i64) = 2649958233193026888,
+          },
+          [7] = Field {
+            1: id (i16) = 8,
+            2: qualifier (i32) = 1,
+            3: type (struct) = TypeStruct {
+              1: name (struct) = TypeName {
+                11: structType (struct) = TypeUri {
+                  4: definitionKey (string) = "s\033r\330^\364\206\253u \253}\250\235\270;",
+                },
+              },
+              2: params (list) = list<struct>[0] {
+              },
+            },
+            4: attrs (struct) = DefinitionAttrs {
+              1: name (string) = "optional_struct_field",
+              8: annotations (map) = map<string,struct>[1] {
+                "facebook.com/thrift/annotation/AllowUnsafeOptionalCustomDefaultValue" -> Annotation {
+                },
+              },
+              9: annotationsByKey (map) = map<string,struct>[1] {
+                "\241\245\337v\222\031\256#\335\310K+B\247\370\302" -> Annotation {
+                },
+              },
+              7: sourceRange (struct) = SourceRange {
+                1: programId (i64) = 6318900912073763317,
+                2: beginLine (i32) = 41,
+                3: beginColumn (i32) = 3,
+                4: endLine (i32) = 42,
+                5: endColumn (i32) = 54,
+              },
+            },
+            5: customDefault (i64) = -6184641776889516003,
+          },
+        },
+      },
+    },
+    "s\033r\330^\364\206\253u \253}\250\235\270;" -> Definition {
+      1: structDef (struct) = Struct {
+        1: attrs (struct) = DefinitionAttrs {
+          1: name (string) = "EmptyStruct",
+          2: uri (string) = "facebook.com/thrift/compiler/test/fixtures/default_values_rectification_before/EmptyStruct",
+          7: sourceRange (struct) = SourceRange {
+            1: programId (i64) = 6318900912073763317,
+            2: beginLine (i32) = 21,
+            3: beginColumn (i32) = 1,
+            4: endLine (i32) = 21,
+            5: endColumn (i32) = 22,
+          },
+        },
+      },
+    },
+  },
+}

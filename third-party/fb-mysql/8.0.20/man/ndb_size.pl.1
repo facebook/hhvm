@@ -1,0 +1,411 @@
+'\" t
+.\"     Title: \fBndb_size.pl\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_SIZE\&.PL\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_size.pl \- NDBCLUSTER Size Requirement Estimator
+.SH "SYNOPSIS"
+.HP \w'\fBndb_size\&.pl\ \fR\fB\fIarguments\fR\fR\ 'u
+\fBndb_size\&.pl \fR\fB\fIarguments\fR\fR
+.SH "DESCRIPTION"
+.PP
+This is a Perl script that can be used to estimate the amount of space that would be required by a MySQL database if it were converted to use the
+NDBCLUSTER
+storage engine\&. Unlike the other utilities discussed in this section, it does not require access to an NDB Cluster (in fact, there is no reason for it to do so)\&. However, it does need to access the MySQL server on which the database to be tested resides\&.
+Requirements
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A running MySQL server\&. The server instance does not have to provide support for NDB Cluster\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A working installation of Perl\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The
+DBI
+module, which can be obtained from CPAN if it is not already part of your Perl installation\&. (Many Linux and other operating system distributions provide their own packages for this library\&.)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A MySQL user account having the necessary privileges\&. If you do not wish to use an existing account, then creating one using
+GRANT USAGE ON \fIdb_name\fR\&.*\(emwhere
+\fIdb_name\fR
+is the name of the database to be examined\(emis sufficient for this purpose\&.
+.RE
+.PP
+ndb_size\&.pl
+can also be found in the MySQL sources in
+storage/ndb/tools\&.
+.PP
+The following table includes options that are specific to the NDB Cluster program
+\fBndb_size\&.pl\fR\&. Additional descriptions follow the table\&. For options common to most NDB Cluster programs (including
+\fBndb_size\&.pl\fR), see
+Options Common to NDB Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.273.\ \&Command\-line options for the ndb_size\&.pl program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+\fB \fR\fB--database=dbname\fR\fB \fR
+T}:T{
+The database or databases to examine; accepts a comma-delimited list;
+              the default is ALL (use all databases found on the server)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--hostname[:port]\fR\fB \fR
+T}:T{
+Specify host and optional port as host[:port]
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--socket=file_name\fR\fB \fR
+T}:T{
+Specify a socket to connect to
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--user=string\fR\fB \fR
+T}:T{
+Specify a MySQL user name
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--password=string\fR\fB \fR
+T}:T{
+Specify a MySQL user password
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--format=string\fR\fB \fR
+T}:T{
+Set output format (text or HTML)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--excludetables=tbl_list\fR\fB \fR
+T}:T{
+Skip any tables in a comma-separated list of tables
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--excludedbs=db_list\fR\fB \fR
+T}:T{
+Skip any databases in a comma-separated list of databases
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--savequeries=file\fR\fB \fR
+T}:T{
+Saves all queries to the database into the file specified
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--loadqueries=file\fR\fB \fR
+T}:T{
+Loads all queries from the file specified; does not connect to a
+              database
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--real_table_name=table\fR\fB \fR
+T}:T{
+Designates a table to handle unique index size calculations
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+Usage
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+perl ndb_size\&.pl [\-\-database={\fIdb_name\fR|ALL}] [\-\-hostname=\fIhost\fR[:\fIport\fR]] [\-\-socket=\fIsocket\fR] \e
+      [\-\-user=\fIuser\fR] [\-\-password=\fIpassword\fR]  \e
+      [\-\-help|\-h] [\-\-format={html|text}] \e
+      [\-\-loadqueries=\fIfile_name\fR] [\-\-savequeries=\fIfile_name\fR]
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+By default, this utility attempts to analyze all databases on the server\&. You can specify a single database using the
+\fB\-\-database\fR
+option; the default behavior can be made explicit by using
+ALL
+for the name of the database\&. You can also exclude one or more databases by using the
+\fB\-\-excludedbs\fR
+option with a comma\-separated list of the names of the databases to be skipped\&. Similarly, you can cause specific tables to be skipped by listing their names, separated by commas, following the optional
+\fB\-\-excludetables\fR
+option\&. A host name can be specified using
+\fB\-\-hostname\fR; the default is
+localhost\&. You can specify a port in addition to the host using
+\fIhost\fR:\fIport\fR
+format for the value of
+\fB\-\-hostname\fR\&. The default port number is 3306\&. If necessary, you can also specify a socket; the default is
+/var/lib/mysql\&.sock\&. A MySQL user name and password can be specified the corresponding options shown\&. It also possible to control the format of the output using the
+\fB\-\-format\fR
+option; this can take either of the values
+html
+or
+text, with
+text
+being the default\&. An example of the text output is shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_size\&.pl \-\-database=test \-\-socket=/tmp/mysql\&.sock\fR
+ndb_size\&.pl report for database: \*(Aqtest\*(Aq (1 tables)
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+Connected to: DBI:mysql:host=localhost;mysql_socket=/tmp/mysql\&.sock
+Including information for versions: 4\&.1, 5\&.0, 5\&.1
+test\&.t1
+\-\-\-\-\-\-\-
+DataMemory for Columns (* means varsized DataMemory):
+         Column Name            Type  Varsized   Key  4\&.1  5\&.0   5\&.1
+     HIDDEN_NDB_PKEY          bigint             PRI    8    8     8
+                  c2     varchar(50)         Y         52   52    4*
+                  c1         int(11)                    4    4     4
+                                                       \-\-   \-\-    \-\-
+Fixed Size Columns DM/Row                              64   64    12
+   Varsize Columns DM/Row                               0    0     4
+DataMemory for Indexes:
+   Index Name                 Type        4\&.1        5\&.0        5\&.1
+      PRIMARY                BTREE         16         16         16
+                                           \-\-         \-\-         \-\-
+       Total Index DM/Row                  16         16         16
+IndexMemory for Indexes:
+               Index Name        4\&.1        5\&.0        5\&.1
+                  PRIMARY         33         16         16
+                                  \-\-         \-\-         \-\-
+           Indexes IM/Row         33         16         16
+Summary (for THIS table):
+                                 4\&.1        5\&.0        5\&.1
+    Fixed Overhead DM/Row         12         12         16
+           NULL Bytes/Row          4          4          4
+           DataMemory/Row         96         96         48
+                    (Includes overhead, bitmap and indexes)
+  Varsize Overhead DM/Row          0          0          8
+   Varsize NULL Bytes/Row          0          0          4
+       Avg Varside DM/Row          0          0         16
+                 No\&. Rows          0          0          0
+        Rows/32kb DM Page        340        340        680
+Fixedsize DataMemory (KB)          0          0          0
+Rows/32kb Varsize DM Page          0          0       2040
+  Varsize DataMemory (KB)          0          0          0
+         Rows/8kb IM Page        248        512        512
+         IndexMemory (KB)          0          0          0
+Parameter Minimum Requirements
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+* indicates greater than default
+                Parameter     Default        4\&.1         5\&.0         5\&.1
+          DataMemory (KB)       81920          0           0           0
+       NoOfOrderedIndexes         128          1           1           1
+               NoOfTables         128          1           1           1
+         IndexMemory (KB)       18432          0           0           0
+    NoOfUniqueHashIndexes          64          0           0           0
+           NoOfAttributes        1000          3           3           3
+             NoOfTriggers         768          5           5           5
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+For debugging purposes, the Perl arrays containing the queries run by this script can be read from the file specified using can be saved to a file using
+\fB\-\-savequeries\fR; a file containing such arrays to be read during script execution can be specified using
+\fB\-\-loadqueries\fR\&. Neither of these options has a default value\&.
+.PP
+To produce output in HTML format, use the
+\fB\-\-format\fR
+option and redirect the output to a file, as shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_size\&.pl \-\-database=test \-\-socket=/tmp/mysql\&.sock \-\-format=html > ndb_size\&.html\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+(Without the redirection, the output is sent to
+stdout\&.)
+.PP
+The output from this script includes the following information:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Minimum values for the
+DataMemory,
+IndexMemory,
+MaxNoOfTables,
+MaxNoOfAttributes,
+MaxNoOfOrderedIndexes, and
+MaxNoOfTriggers
+configuration parameters required to accommodate the tables analyzed\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Memory requirements for all of the tables, attributes, ordered indexes, and unique hash indexes defined in the database\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The
+IndexMemory
+and
+DataMemory
+required per table and table row\&.
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

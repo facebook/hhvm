@@ -1,0 +1,16 @@
+
+(executable
+ (name codemod_safe_abstract)
+ (modes exe)
+ (preprocess (pps ppx_yojson_conv))
+ (libraries
+    utils_core
+    default_injector_config
+    parser
+    errors
+    hackfmt
+    pos))
+
+(alias
+ (name codemod_safe_abstract)
+ (deps codemod_safe_abstract.exe))

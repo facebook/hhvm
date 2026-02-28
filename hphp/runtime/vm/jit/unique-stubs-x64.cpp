@@ -17,9 +17,7 @@
 #include "hphp/runtime/vm/jit/unique-stubs-x64.h"
 
 #include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/bytecode.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
@@ -37,12 +35,13 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(ustubs);
+TRACE_SET_MOD(ustubs)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -104,7 +103,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data,
     emit_destroy(v);
 
     v << ret{live};
-  }, CodeKind::CrossTrace, true);
+  }, nullptr, CodeKind::CrossTrace, true);
 
   meta.process(nullptr);
   return addr;
@@ -142,7 +141,8 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
     ifThen(v, cc, sf, [&] (Vout& v) {
       v << load{d, dataVal};
-      v << call{releaseFake, dataVal | typeVal};
+      v << call{releaseFake, dataVal | typeVal, nullptr /* watch */,
+                true /* stackUnaligned */};
     });
   };
 
@@ -157,7 +157,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
       v << cmpq{typePtr, end, sf};
       return sf;
     });
-  }, true);
+  }, nullptr, true);
 
   for (auto i = kNumFreeLocalsHelpers - 1; i >= 0; --i) {
     us.freeLocalsHelpers[i] = vwrap(cb, data, [&] (Vout& v) {
@@ -169,7 +169,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
       } else {
         v << fallthru{};
       }
-    }, true);
+    }, nullptr, true);
   }
 
   auto const release = emitDecRefHelper(
@@ -205,7 +205,7 @@ void assert_tc_saved_rip(void* sp) {
 }
 
 TCA emitCallToExit(CodeBlock& cb, DataBlock& /*data*/, const UniqueStubs& us) {
-  NEW_X64_ASM(a, cb);
+  X64Assembler a(cb);
 
   // Emit a byte of padding. This is a kind of hacky way to avoid
   // hitting an assert in recordGdbStub when we call it with stub - 1
@@ -213,7 +213,7 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& /*data*/, const UniqueStubs& us) {
   a.emitNop(1);
 
   auto const start = a.frontier();
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (Cfg::HHIR::GenerateAsserts) {
     always_assert(rarg(0) != rret(0) &&
                   rarg(0) != rret(1));
     a.movq(rsp(), rarg(0));

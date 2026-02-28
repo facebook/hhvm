@@ -16,7 +16,7 @@ try { var_dump( array_shift() ); } catch (Exception $e) { echo "\n".'Warning: '.
 
 //Test array_shift with one more than the expected number of arguments
 echo "\n-- Testing array_shift() function with more than expected no. of arguments --\n";
-$stack = varray[1, 2];
+$stack = vec[1, 2];
 $extra_arg = 10;
 try { var_dump( array_shift(inout $stack, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 

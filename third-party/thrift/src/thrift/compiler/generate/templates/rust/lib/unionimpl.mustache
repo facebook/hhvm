@@ -1,0 +1,139 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{#if struct:union?}}
+impl ::std::default::Default for {{struct:rust_name}} {
+    fn default() -> Self {
+        Self::UnknownField(-1)
+    }
+}
+
+impl ::fbthrift::GetTType for {{struct:rust_name}} {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+{{#if (not (string.empty? struct:uri))}}
+
+impl ::fbthrift::GetUri for self::{{struct:rust_name}} {
+    fn uri() -> &'static ::std::primitive::str {
+        "{{struct:uri}}"
+    }
+}
+{{/if (not (string.empty? struct:uri))}}
+
+impl ::fbthrift::GetTypeNameType for self::{{struct:rust_name}} {
+    fn type_name_type() -> fbthrift::TypeNameType {
+        ::fbthrift::TypeNameType::UnionType
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for {{struct:rust_name}}
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_struct_begin("{{struct:name}}");
+        match self {{> lib/block}}{{!
+            }}{{#struct:fields}}
+            Self::{{field:rust_name}}(inner) => {
+                p.write_field_begin({{!
+                    }}"{{field:name}}", {{!
+                    }}{{#field:type}}{{> lib/ttype}}{{/field:type}}, {{!
+                    }}{{field:id}}{{!
+                }});
+                {{#field:type}}{{#if field:type_annotation?}}{{> lib/annfieldwrite}}{{#else}}{{> lib/write}}{{/if field:type_annotation?}}{{/field:type}}({{!
+                }}{{#if field:has_adapter?}}&{{field:adapter_qualified}}::to_thrift_field::<{{struct:rust_name}}>({{/if field:has_adapter?}}{{!
+                }}inner{{!
+                }}{{#if field:has_adapter?}}, {{field:id}}){{/if field:has_adapter?}}{{!
+                }}, p);
+                p.write_field_end();
+            }{{!
+            }}{{/struct:fields}}
+            Self::UnknownField(_) => {}
+        }
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for {{struct:rust_name}}
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            {{#each struct:fields_by_name as |field|}}
+            ::fbthrift::Field::new("{{field.name}}", {{#field.type}}{{> lib/ttype}}{{/field.type}}, {{field.id}}),
+            {{/each}}
+        ];
+        let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a {{struct:name}}")?;
+        let {{#if struct:fields?}}mut {{/if struct:fields?}}once = false;
+        let {{#if struct:fields?}}mut {{/if struct:fields?}}alt = ::std::option::Option::None;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32, once) {
+                (::fbthrift::TType::Stop, _, _) => break,{{!
+                }}{{#struct:fields}}
+                ({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:id}}, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::{{field:rust_name}}({{!
+                    }}{{#if field:has_adapter?}}{{field:adapter_qualified}}::from_thrift_field::<{{struct:rust_name}}>({{/if field:has_adapter?}}{{!
+                    }}{{#field:type}}::anyhow::Context::context({{#if field:type_annotation?}}{{> lib/annfieldread}}{{#else}}{{> lib/read}}{{/if field:type_annotation?}}{{/field:type}}(p), ::fbthrift::errors::DeserializingFieldError { field: "{{field:name}}", strct: "{{struct:name}}"})?{{!
+                    }}{{#if field:has_adapter?}}, {{field:id}})?{{/if field:has_adapter?}}{{!
+                    }}));
+                }{{!
+                }}{{/struct:fields}}
+                (fty, _, false) => p.skip(fty)?,
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
+                    "{{struct:name}}".to_string(),
+                    badty,
+                    badid,
+                ))),
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(alt.unwrap_or_default())
+    }
+}
+
+impl {{struct:rust_name}} {
+    /// Return current union variant name as a tuple of (Rust name, original name).
+    pub fn variant_name(&self) -> ::std::option::Option<(&'static ::std::primitive::str, &'static ::std::primitive::str)> {
+        match self {
+            {{#struct:fields}}
+            Self::{{field:rust_name}}(_) => ::std::option::Option::Some(("{{field:rust_name}}", "{{field:name}}")),
+            {{/struct:fields}}
+            Self::UnknownField(_) => ::std::option::Option::None,
+        }
+    }
+
+    /// Return all union variant names as a tuple of (Rust name, original name).
+    pub fn variant_names() -> &'static [(&'static ::std::primitive::str, &'static ::std::primitive::str)] {
+        &[
+            {{#struct:fields}}
+            ("{{field:rust_name}}", "{{field:name}}"),
+            {{/struct:fields}}
+        ]
+    }
+}
+{{#if program:rust_gen_native_metadata?}}
+{{> lib/metadata/struct}}
+{{/if program:rust_gen_native_metadata?}}
+{{/if struct:union?}}

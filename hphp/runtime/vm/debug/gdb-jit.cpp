@@ -15,14 +15,13 @@
 */
 #include "hphp/runtime/vm/debug/gdb-jit.h"
 #include "hphp/util/lock.h"
-#include "hphp/runtime/base/execution-context.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 
 #include <folly/portability/SysMman.h>
 
 using namespace HPHP;
+using namespace HPHP::Debug;
 
 struct jit_descriptor __jit_debug_descriptor = { 1, 0, 0, 0 };
 

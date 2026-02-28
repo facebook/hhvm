@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_number_formatter_format_string() {
+function main_number_formatter_format_string() :mixed{
 $formatter = NumberFormatter::create("en_US", NumberFormatter::DEFAULT_STYLE);
 $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 2);
 

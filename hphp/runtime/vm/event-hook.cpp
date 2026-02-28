@@ -28,7 +28,6 @@
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/asio/asio-session.h"
-#include "hphp/runtime/ext/hotprofiler/ext_hotprofiler.h"
 #include "hphp/runtime/ext/intervaltimer/ext_intervaltimer.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
@@ -43,9 +42,11 @@
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/interp-helpers.h"
-#include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/setprofile.h"
 #include "hphp/util/struct-log.h"
 
 namespace HPHP {
@@ -57,6 +58,8 @@ const StaticString
   s_parent_frame_ptr("parent_frame_ptr"),
   s_this_ptr("this_ptr"),
   s_this_obj("this_obj"),
+  s_file("file"),
+  s_line("line"),
   s_enter("enter"),
   s_exit("exit"),
   s_suspend("suspend"),
@@ -68,43 +71,51 @@ const StaticString
 
 RDS_LOCAL_NO_CHECK(uint64_t, rl_func_sequence_id){0};
 
-// implemented in runtime/ext/ext_hotprofiler.cpp
-extern void begin_profiler_frame(Profiler *p,
-                                 const char *symbol);
-extern void end_profiler_frame(Profiler *p,
-                               const TypedValue *retval,
-                               const char *symbol);
-
 void EventHook::Enable() {
-  setSurpriseFlag(EventHookFlag);
+  stackLimitAndSurprise().setFlag(EventHookFlag);
 }
 
 void EventHook::Disable() {
-  clearSurpriseFlag(EventHookFlag);
+  if (g_context->m_internalEventHookCallback == nullptr) {
+    stackLimitAndSurprise().clearFlag(EventHookFlag);
+  }
+}
+
+void EventHook::EnableInternal(ExecutionContext::InternalEventHookCallbackType
+                              callback) {
+  g_context->m_internalEventHookCallback = callback;
+  stackLimitAndSurprise().setFlag(EventHookFlag);
+}
+
+void EventHook::DisableInternal() {
+  if (g_context->m_setprofileCallback.isNull()) {
+    stackLimitAndSurprise().clearFlag(EventHookFlag);
+  }
+  g_context->m_internalEventHookCallback = nullptr;
 }
 
 void EventHook::EnableAsync() {
-  setSurpriseFlag(AsyncEventHookFlag);
+  stackLimitAndSurprise().setFlag(AsyncEventHookFlag);
 }
 
 void EventHook::DisableAsync() {
-  clearSurpriseFlag(AsyncEventHookFlag);
+  stackLimitAndSurprise().clearFlag(AsyncEventHookFlag);
 }
 
 void EventHook::EnableDebug() {
-  setSurpriseFlag(DebuggerHookFlag);
+  stackLimitAndSurprise().setFlag(DebuggerHookFlag);
 }
 
 void EventHook::DisableDebug() {
-  clearSurpriseFlag(DebuggerHookFlag);
+  stackLimitAndSurprise().clearFlag(DebuggerHookFlag);
 }
 
 void EventHook::EnableIntercept() {
-  setSurpriseFlag(InterceptFlag);
+  stackLimitAndSurprise().setFlag(InterceptFlag);
 }
 
 void EventHook::DisableIntercept() {
-  clearSurpriseFlag(InterceptFlag);
+  stackLimitAndSurprise().clearFlag(InterceptFlag);
 }
 
 struct ExecutingSetprofileCallbackGuard {
@@ -118,7 +129,7 @@ struct ExecutingSetprofileCallbackGuard {
 };
 
 void EventHook::DoMemoryThresholdCallback() {
-  clearSurpriseFlag(MemThresholdFlag);
+  stackLimitAndSurprise().clearFlag(MemThresholdFlag);
   if (!g_context->m_memThresholdCallback.isNull()) {
     VMRegAnchor _;
     try {
@@ -156,7 +167,7 @@ Array getReifiedClasses(const ActRec* ar) {
   using K = TypeStructure::Kind;
 
   auto const func = ar->func();
-  auto const& tparams = func->getReifiedGenericsInfo();
+  auto const& tparams = func->getGenericsInfo();
   VecInit clist{tparams.m_typeParamInfo.size()};
 
   auto const loc = frame_local(ar, ar->func()->numParams());
@@ -171,6 +182,7 @@ Array getReifiedClasses(const ActRec* ar) {
   for (auto const& pinfo : tparams.m_typeParamInfo) {
     if (!pinfo.m_isReified) {
       clist.append(init_null());
+      idx++;
       continue;
     }
     auto const ts = generics->at(idx++);
@@ -192,6 +204,8 @@ Array getReifiedClasses(const ActRec* ar) {
       clist.append(String{xhpNameFromTS(ArrNR{val(ts).parr})});
       break;
 
+    case K::T_union:
+    case K::T_recursiveUnion:
     case K::T_void:
     case K::T_int:
     case K::T_bool:
@@ -218,6 +232,8 @@ Array getReifiedClasses(const ActRec* ar) {
     case K::T_null:
     case K::T_nothing:
     case K::T_dynamic:
+    case K::T_class_ptr:
+    case K::T_class_or_classname:
       clist.append(init_null());
       break;
 
@@ -233,8 +249,8 @@ Array getReifiedClasses(const ActRec* ar) {
 }
 
 ALWAYS_INLINE
-ActRec* getParentFrame(const ActRec* ar) {
-  return g_context->getPrevVMStateSkipFrame(ar);
+ActRec* getParentFrame(const ActRec* ar, Offset* prevPc = nullptr) {
+  return g_context->getPrevVMStateSkipFrame(ar, prevPc);
 }
 
 void addFramePointers(const ActRec* ar, Array& frameinfo, bool isCall) {
@@ -251,7 +267,7 @@ void addFramePointers(const ActRec* ar, Array& frameinfo, bool isCall) {
     frameinfo.set(s_this_ptr, Variant(intptr_t(this_)));
 
     if ((g_context->m_setprofileFlags & EventHook::ProfileThisObject) != 0
-        && !RuntimeOption::SetProfileNullThisObject && this_) {
+        && !Cfg::SetProfile::NullThisObject && this_) {
       frameinfo.set(s_this_obj, Variant(this_));
     }
   }
@@ -263,8 +279,26 @@ void addFramePointers(const ActRec* ar, Array& frameinfo, bool isCall) {
   }
 }
 
+void addFileLine(const ActRec* ar, Array& frameinfo) {
+  if ((g_context->m_setprofileFlags & EventHook::ProfileFileLine) != 0) {
+    Offset offset;
+    ActRec* parent_ar = getParentFrame(ar, &offset);
+    if (parent_ar != nullptr) {
+      frameinfo.set(s_file, Variant(const_cast<StringData*>(parent_ar->func()->filename())));
+      frameinfo.set(s_line, Variant(parent_ar->func()->getLineNumber(offset)));
+    }
+  }
+}
+
 inline bool isResumeAware() {
   return (g_context->m_setprofileFlags & EventHook::ProfileResumeAware) != 0;
+}
+
+void runInternalEventHook(const ActRec* ar,
+                          ExecutionContext::InternalEventHook event_type) {
+  if (g_context->m_internalEventHookCallback != nullptr) {
+    g_context->m_internalEventHookCallback(ar, event_type);
+  }
 }
 
 void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
@@ -290,6 +324,9 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
   }
 
   addFramePointers(ar, frameinfo, !isResume);
+  if (!isResume) {
+    addFileLine(ar, frameinfo);
+  }
 
   if (!isResume && ar->func()->hasReifiedGenerics()) {
     // Add reified generics only if this is a function call.
@@ -302,9 +339,8 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
     frameinfo
   );
 
-  ImplicitContext::Saver s;
-  g_context->invokeFunc(func, params, ctx.this_, ctx.cls,
-                        RuntimeCoeffects::defaults(), ctx.dynamic);
+  g_context->invokeFunc(func, params, nullptr /* namedArgNames */, ctx.this_,
+                        ctx.cls, RuntimeCoeffects::defaults(), ctx.dynamic);
 }
 
 void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
@@ -337,8 +373,9 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
     frameinfo
   );
 
-  ImplicitContext::Saver s;
-  g_context->invokeFunc(func, params, ctx.this_, ctx.cls,
+  // TODO(named_params) add user profiler support for calls with named args.
+  const ArrayData* namedArgNames = nullptr;
+  g_context->invokeFunc(func, params, namedArgNames, ctx.this_, ctx.cls,
                         RuntimeCoeffects::defaults(), ctx.dynamic);
 }
 
@@ -373,9 +410,9 @@ static Variant call_intercept_handler(
   par.append(called_on);
   par.append(args);
 
-  ImplicitContext::Saver s;
   auto ret = Variant::attach(
-    g_context->invokeFunc(f, par.toVariant(), callCtx.this_, callCtx.cls,
+    g_context->invokeFunc(f, par.toVariant(), nullptr /* namedArgNames */,
+                          callCtx.this_, callCtx.cls,
                           RuntimeCoeffects::defaults(), callCtx.dynamic)
   );
 
@@ -430,10 +467,11 @@ static Variant call_intercept_handler_callback(
     assertx(tvIsVec(generics));
     return Array(val(generics).parr);
   }();
-  ImplicitContext::Saver s;
+  // TODO(named_params) support calls with named args in fb_intercept2
+  const ArrayData* namedArgNames = nullptr;
   return Variant::attach(
-    g_context->invokeFunc(f, args, callCtx.this_, callCtx.cls,
-                          RuntimeCoeffects::defaults(),
+    g_context->invokeFunc(f, args, namedArgNames, callCtx.this_,
+                          callCtx.cls, RuntimeCoeffects::defaults(),
                           callCtx.dynamic, false, false, readonly_return,
                           std::move(reifiedGenerics))
   );
@@ -445,7 +483,10 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   assertx(!isResumed(ar));
 
   const Func* func = ar->func();
-  if (LIKELY(!func->maybeIntercepted())) return true;
+  if (LIKELY(!Cfg::Eval::FastMethodIntercept && !func->maybeIntercepted())) {
+    return true;
+  }
+  assertx(func->isInterceptable() && func->maybeIntercepted());
 
   Variant* h = get_intercept_handler(func);
   if (!h) return true;
@@ -462,19 +503,6 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     ar->setLocalsDecRefd();
     frame_free_locals_inl_no_hook(ar, ar->func()->numFuncEntryInputs());
   };
-
-  /*
-   * In production mode, only functions that we have assumed can be
-   * intercepted during static analysis should actually be
-   * intercepted.
-   */
-  if (RuntimeOption::RepoAuthoritative &&
-      !RuntimeOption::EvalJitEnableRenameFunction) {
-    if (!(func->attrs() & AttrInterceptable)) {
-      raise_error("fb_intercept2 was used on a non-interceptable function (%s) "
-                  "in RepoAuthoritative mode", func->fullName()->data());
-    }
-  }
 
   PC savePc = vmpc();
 
@@ -578,27 +606,6 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   return true;
 }
 
-const char* EventHook::GetFunctionNameForProfiler(const Func* func,
-                                                  int funcType) {
-  const char* name;
-  switch (funcType) {
-    case EventHook::NormalFunc:
-      name = func->fullName()->data();
-      if (name[0] == '\0') {
-        // We're evaling some code for internal purposes, most
-        // likely getting the default value for a function parameter
-        name = "{internal}";
-      }
-      break;
-    case EventHook::Eval:
-      name = "_";
-      break;
-    default:
-      not_reached();
-  }
-  return name;
-}
-
 static bool shouldLog(const Func* /*func*/) {
   return RID().logFunctionCalls();
 }
@@ -629,6 +636,9 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType,
     if (shouldRunUserProfiler(ar->func())) {
       runUserProfilerOnFunctionEnter(ar, isResume);
     }
+    runInternalEventHook(ar, isResume
+                                 ? ExecutionContext::InternalEventHook::Resume
+                                 : ExecutionContext::InternalEventHook::Call);
     if (shouldLog(ar->func())) {
       StructuredLogEntry sample;
       sample.setStr("event_name", "function_enter");
@@ -636,17 +646,11 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType,
       sample.setInt("is_resume", isResume);
       logCommon(sample, ar, flags);
     }
-    auto profiler = RequestInfo::s_requestInfo->m_profiler;
-    if (profiler != nullptr &&
-        !(profiler->shouldSkipBuiltins() && ar->func()->isBuiltin())) {
-      begin_profiler_frame(profiler,
-                           GetFunctionNameForProfiler(ar->func(), funcType));
-    }
   }
 
   // Debugger hook
   if (flags & DebuggerHookFlag) {
-    DEBUGGER_ATTACHED_ONLY(phpDebuggerFuncEntryHook(ar));
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerFuncEntryHook(ar, isResume));
   }
 }
 
@@ -657,7 +661,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
   // Inlined calls normally skip the function enter and exit events. If we
   // side exit in an inlined callee, we short-circuit here in order to skip
   // exit events that could unbalance the call stack.
-  if (RuntimeOption::EvalJit && ar->isInlined()) {
+  if (Cfg::Jit::Enabled && ar->isInlined()) {
     return;
   }
 
@@ -676,8 +680,12 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
 
   // Run callbacks only if it's safe to do so, i.e., not when
   // there's a pending exception or we're unwinding from a C++ exception.
+  // It's not safe to run callbacks when we are in the middle of resolving a
+  // constant since we maintain a static array with sentinel bits to detect
+  // recursively defined constants which could be modified by a callback.
   if (RequestInfo::s_requestInfo->m_pendingException == nullptr
-      && (!unwind || phpException)) {
+      && (!unwind || phpException)
+      && ar->func()->name() != s_86cinit.get()) {
 
     // Memory Threhsold
     if (flags & MemThresholdFlag) {
@@ -696,17 +704,6 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
 
   // User profiler
   if (flags & EventHookFlag) {
-    auto profiler = RequestInfo::s_requestInfo->m_profiler;
-    if (profiler != nullptr &&
-        !(profiler->shouldSkipBuiltins() && ar->func()->isBuiltin())) {
-      // NB: we don't have a function type flag to match what we got in
-      // onFunctionEnter. That's okay, though... we tolerate this in
-      // TraceProfiler.
-      end_profiler_frame(profiler,
-                         retval,
-                         GetFunctionNameForProfiler(ar->func(), NormalFunc));
-    }
-
     if (shouldRunUserProfiler(ar->func())) {
       if (RequestInfo::s_requestInfo->m_pendingException != nullptr) {
         // Avoid running PHP code when exception from destructor is pending.
@@ -719,6 +716,13 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
         // Avoid running PHP code when unwinding C++ exception.
       }
     }
+    if (!unwind) {
+      runInternalEventHook(ar, isSuspend
+                               ? ExecutionContext::InternalEventHook::Suspend
+                               : ExecutionContext::InternalEventHook::Return);
+    } else {
+      runInternalEventHook(ar, ExecutionContext::InternalEventHook::Unwind);
+    }
     if (shouldLog(ar->func())) {
       StructuredLogEntry sample;
       sample.setStr("event_name", "function_exit");
@@ -729,7 +733,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
 
   // Debugger hook
   if (flags & DebuggerHookFlag) {
-    DEBUGGER_ATTACHED_ONLY(phpDebuggerFuncExitHook(ar));
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerFuncExitHook(ar, isSuspend));
   }
 }
 
@@ -739,6 +743,12 @@ uint64_t EventHook::onFunctionCallJit(const ActRec* ar, int funcType) {
     // Not intercepted, no return address.
     return 0;
   }
+
+  // We may have entered with the CLEAN_VERIFY state set by the JIT, but
+  // the functionEnterHelper is going to return to the parent frame, bypassing
+  // the JIT logic that resets this state. Set the state to DIRTY so it won't
+  // leak to other C++ calls.
+  regState() = VMRegState::DIRTY;
 
   // If we entered this frame from the interpreter, use the resumeHelper,
   // as the retHelper logic has been already performed and the frame has
@@ -753,10 +763,15 @@ uint64_t EventHook::onFunctionCallJit(const ActRec* ar, int funcType) {
 bool EventHook::onFunctionCall(const ActRec* ar, int funcType,
                                EventHook::Source sourceType) {
   assertx(!isResumed(ar));
+  const Func* func = ar->func();
   auto const flags = handle_request_surprise();
-  if (flags & InterceptFlag &&
-      !RunInterceptHandler(const_cast<ActRec*>(ar))) {
-    return false;
+
+  if ((Cfg::Eval::FastMethodIntercept && func->maybeIntercepted() && is_intercepted(func))
+      || (!Cfg::Eval::FastMethodIntercept && (flags & InterceptFlag))) {
+    if (!RunInterceptHandler(const_cast<ActRec*>(ar))) {
+      assertx(func->isInterceptable());
+      return false;
+    }
   }
 
   // Xenon
@@ -768,17 +783,22 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType,
     }
   }
 
-  // Memory Threhsold
-  if (flags & MemThresholdFlag) {
-    DoMemoryThresholdCallback();
-  }
-  // Time Thresholds
-  if (flags & TimedOutFlag) {
-    RID().invokeUserTimeoutCallback();
-  }
+  // It's not safe to run callbacks when we are in the middle of resolving a
+  // constant since we maintain a static array with sentinel bits to detect
+  // recursively defined constants which could be modified by a callback.
+  if (func->name() != s_86cinit.get()) {
+    // Memory Threhsold
+    if (flags & MemThresholdFlag) {
+      DoMemoryThresholdCallback();
+    }
+    // Time Thresholds
+    if (flags & TimedOutFlag) {
+      RID().invokeUserTimeoutCallback();
+    }
 
-  if (flags & IntervalTimerFlag) {
-    IntervalTimer::RunCallbacks(IntervalTimer::EnterSample);
+    if (flags & IntervalTimerFlag) {
+      IntervalTimer::RunCallbacks(IntervalTimer::EnterSample);
+    }
   }
 
   onFunctionEnter(ar, funcType, flags, false);
@@ -926,6 +946,7 @@ void EventHook::onFunctionSuspendAwaitR(ActRec* suspending,
   assertx(suspending->func()->isAsync());
   assertx(isResumed(suspending));
   assertx(child->isWaitHandle());
+  assertx(!static_cast<c_Awaitable*>(child)->isFinished());
 
   auto const flags = handle_request_surprise();
   onFunctionExit(suspending, nullptr, false, nullptr, flags, true, sourceType);
@@ -946,6 +967,12 @@ void EventHook::onFunctionSuspendAwaitR(ActRec* suspending,
         );
       }
     }
+  }
+
+  if (UNLIKELY(static_cast<c_Awaitable*>(child)->isFinished())) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      "The suspend await event hook entered a new asio scheduler context and "
+      "awaited the same child, revoking the reason for suspension.");
   }
 }
 
@@ -1056,7 +1083,7 @@ void EventHook::onFunctionUnwind(ActRec* ar,
 
   // TODO(#2329497) can't handle_request_surprise() yet, unwinder unable to
   // replace fault
-  auto const flags = stackLimitAndSurprise().load() & kSurpriseFlagMask;
+  auto const flags = stackLimitAndSurprise().fetchFlags();
   onFunctionExit(ar, nullptr, true, phpException, flags, false, EventHook::Source::Unwinder);
 }
 

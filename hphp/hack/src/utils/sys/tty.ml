@@ -109,26 +109,8 @@ let should_color color_mode =
   | Color_Never -> false
   | Color_Auto -> supports_color () || force_color
 
-let emoji_spinner =
-  List.map
-  (* Some terminals display the emoji using only one column, even though they
-     may take up two columns, and put the cursor immediately after it in an
-     illegible manner. Add an extra space to separate the cursor from the emoji. *)
-    ~f:(fun x -> x ^ " ")
-    [
-      "\xF0\x9F\x98\xA1";
-      (* Angry Face *)
-      "\xF0\x9F\x98\x82";
-      (* Face With Tears of Joy *)
-      "\xF0\x9F\xA4\x94";
-      (* Thinking Face *)
-      "\xF0\x9F\x92\xAF";
-      (* Hundred Points *)
-    ]
-
 (* See https://github.com/yarnpkg/yarn/issues/405. *)
-let supports_emoji () =
-  (not (String.equal Sys.os_type "Win32")) && supports_color ()
+let supports_emoji () = supports_color ()
 
 let apply_color ?(color_mode = Color_Auto) c s : string =
   if should_color color_mode then
@@ -150,20 +132,6 @@ let cprint ?(color_mode = Color_Auto) ?(out_channel = Stdio.stdout) strs =
 
 let cprintf ?(color_mode = Color_Auto) ?(out_channel = Stdio.stdout) c =
   Printf.ksprintf (print_one ~color_mode ~out_channel c)
-
-let (spinner, spinner_used) =
-  let state = ref 0 in
-  ( (fun ?(angery_reaccs_only = false) () ->
-      let spinner =
-        if angery_reaccs_only then
-          emoji_spinner
-        else
-          ["-"; "\\"; "|"; "/"]
-      in
-      let str = List.nth_exn spinner (!state % 4) in
-      state := !state + 1;
-      str),
-    (fun () -> !state <> 0) )
 
 (* ANSI escape sequence to clear whole line *)
 let clear_line_seq = "\r\x1b[0K"
@@ -196,7 +164,7 @@ let read_choice message choices =
     Stdio.printf
       "%s (%s)%!"
       message
-      (String.concat ~sep:"|" (List.map choices ~f:String_utils.string_of_char));
+      (String.concat ~sep:"|" (List.map choices ~f:(String.make 1)));
     let choice = read_char () in
     Stdio.print_endline "";
     if List.mem ~equal:Char.equal choices choice then
@@ -222,7 +190,7 @@ let eprintf fmt =
  * [1]: http://invisible-island.net/ncurses/man/tput.1.html
  *)
 let get_term_cols () =
-  if (not Sys.unix) || not (supports_color ()) then
+  if not (supports_color ()) then
     None
   else
     Option.map ~f:int_of_string (Sys_utils.exec_read "tput cols")

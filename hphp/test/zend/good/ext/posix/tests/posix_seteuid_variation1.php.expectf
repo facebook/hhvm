@@ -1,7 +1,0 @@
-Warning: posix_seteuid() expects parameter 1 to be integer, vec given in %s/test/zend/good/ext/posix/tests/posix_seteuid_variation1.php on line 15
-
-Warning: posix_seteuid() expects parameter 1 to be integer, vec given in %s/test/zend/good/ext/posix/tests/posix_seteuid_variation1.php on line 15
-
-Warning: posix_seteuid() expects parameter 1 to be integer, dict given in %s/test/zend/good/ext/posix/tests/posix_seteuid_variation1.php on line 15
-
-Warning: posix_seteuid() expects parameter 1 to be integer, vec given in %s/test/zend/good/ext/posix/tests/posix_seteuid_variation1.php on line 15

@@ -1,11 +1,11 @@
-<?hh //strict
+<?hh
 
 class P {
   public function __construct(public int $i) { }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $ro = readonly new P(1);
   $mut = new P(1);
   $p = Map {1 => $ro, 2 => $mut};

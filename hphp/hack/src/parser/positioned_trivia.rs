@@ -4,10 +4,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::lexable_trivia::{LexableTrivia, LexableTrivium};
+use ocamlrep::ToOcamlRep;
+
+use crate::lexable_trivia::LexableTrivia;
+use crate::lexable_trivia::LexableTrivium;
 use crate::source_text::SourceText;
 use crate::trivia_kind::TriviaKind;
-use ocamlrep_derive::ToOcamlRep;
 
 #[derive(Debug, Clone, PartialEq, ToOcamlRep)]
 pub struct PositionedTrivium {
@@ -95,6 +97,14 @@ impl LexableTrivium for PositionedTrivium {
     fn make_fix_me(offset: usize, width: usize) -> Self {
         Self {
             kind: TriviaKind::FixMe,
+            offset,
+            width,
+        }
+    }
+
+    fn make_ignore(offset: usize, width: usize) -> Self {
+        Self {
+            kind: TriviaKind::Ignore,
             offset,
             width,
         }

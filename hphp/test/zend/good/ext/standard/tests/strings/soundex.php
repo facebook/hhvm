@@ -2,9 +2,8 @@
 <<__EntryPoint>> function main(): void {
 var_dump(soundex(""));
 var_dump(soundex('-1'));
-try { var_dump(soundex(varray[])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-$array = varray[
+$array = vec[
 "From",
 "that",
 "time",

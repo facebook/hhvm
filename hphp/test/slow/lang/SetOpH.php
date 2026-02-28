@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$lefts = varray[
+$lefts = vec[
   0,
   123,
   true,

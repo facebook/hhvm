@@ -1,3 +1,3 @@
 <?hh
 
-function Foo() {}
+function Foo() {} // ok, functions are case sensitive

@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/base/debuggable.h"
+#include "hphp/runtime/base/request-id.h"
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-string.h"
@@ -27,6 +28,7 @@
 
 #include "proxygen/lib/http/HTTPHeaders.h"
 
+#include <chrono>
 #include <list>
 #include <string>
 #include <utility>
@@ -38,6 +40,9 @@ namespace HPHP {
 struct Array;
 struct Variant;
 struct ResponseCompressorManager;
+namespace stream_transport {
+struct StreamTransport;
+}
 struct StructuredLogEntry;
 
 using HeaderMap = hphp_fast_string_imap<TinyVector<std::string>>;
@@ -118,8 +123,17 @@ public:
 
   void onRequestStart(const timespec &queueTime);
   const timespec &getQueueTime() const { return m_queueTime; }
+  const std::chrono::steady_clock::time_point getQueueTimePoint() const {
+    return timespecToSteadyTimePoint(m_queueTime);
+  }
   const timespec &getWallTime() const { return m_wallTime; }
+  const std::chrono::steady_clock::time_point getWallTimePoint() const {
+    return timespecToSteadyTimePoint(m_wallTime);
+  }
   const timespec &getCpuTime() const { return m_cpuTime; }
+  const std::chrono::steady_clock::time_point getCpuTimePoint() const {
+    return timespecToSteadyTimePoint(m_cpuTime);
+  }
   const int64_t &getInstructions() const { return m_instructions; }
   const int64_t &getSleepTime() const { return m_sleepTime; }
   void incSleepTime(unsigned int seconds) { m_sleepTime += seconds; }
@@ -138,6 +152,12 @@ public:
   StructuredLogEntry* createStructuredLogEntry();
   StructuredLogEntry* getStructuredLogEntry();
   void resetStructuredLogEntry();
+
+  /*
+   * Manage root request id.
+   */
+  RequestId getRootRequestId() const { return m_root_req_id; }
+  void setRootRequestId(RequestId id) { m_root_req_id = id; }
 
   ///////////////////////////////////////////////////////////////////////////
   // Functions sub-classes have to implement.
@@ -163,17 +183,39 @@ public:
    */
   virtual const char *getServerName() {
     return "";
-  };
+  }
   virtual const std::string& getServerAddr() {
     auto const& ipv4 = RuntimeOption::GetServerPrimaryIPv4();
     return ipv4.empty() ? RuntimeOption::GetServerPrimaryIPv6() : ipv4;
-  };
+  }
   virtual uint16_t getServerPort() {
-    return RuntimeOption::ServerPort;
-  };
+    return Cfg::Server::Port;
+  }
   virtual const char *getServerSoftware() {
     return "HPHP";
-  };
+  }
+
+  /**
+   * Get stream transport if it has one, otherwise returns nullptr
+   */
+  virtual std::shared_ptr<stream_transport::StreamTransport>
+  getStreamTransport() const {
+    return nullptr;
+  }
+  /**
+   * Is this a streaming transport?
+   */
+  virtual bool isStreamTransport() const {
+    return false;
+  }
+
+  /**
+   * Returns true if post data should be read.
+   */
+  virtual bool shouldReadPostData() {
+    return getMethod() == Transport::Method::POST &&
+      !isStreamTransport();
+  }
 
   /**
    * POST request's data.
@@ -182,6 +224,14 @@ public:
   virtual bool hasMorePostData() { return false; }
   virtual const void *getMorePostData(size_t &size) { size = 0;return nullptr; }
   virtual bool getFiles(std::string& /*files*/) { return false; }
+
+  /**
+   * This callback should be called when the StreamTransport is ready
+   * to receive data.
+   * This is relevant only for transports that have a StreamTransport.
+   */
+  virtual void onStreamReady() {}
+
   /**
    * Is this a GET, POST or anything?
    */
@@ -202,7 +252,7 @@ public:
   /**
    * Get transport params.
    */
-  virtual void getTransportParams(HeaderMap& /*serverParams*/){};
+  virtual void getTransportParams(HeaderMap& /*serverParams*/){}
 
   /**
    * Get a description of the type of transport.
@@ -307,7 +357,7 @@ public:
                const Array& /*responseHeaders*/, const void* /*data*/,
                int /*size*/, bool /*eom*/) {
     return 0;
-  };
+  }
 
   /**
    * Stream body and/or EOM marker for a pushed resource
@@ -394,6 +444,7 @@ public:
 
   /**
    * Sending back a response.
+   * These APIs should not be used for streaming treansports.
    */
   void setResponse(int code, const char *info = nullptr);
   const std::string &getResponseInfo() const { return m_responseCodeInfo; }
@@ -401,7 +452,20 @@ public:
   void sendRaw(const char *data, int size, int code = 200,
                bool precompressed = false, bool chunked = false,
                const char *codeInfo = nullptr);
+
+  /**
+   * Sending response for streaming transports.
+   */
+  virtual void sendStreamResponse(const void* /*data*/, int /*size*/) {}
+  virtual void sendStreamEOM() {}
 private:
+  const std::chrono::steady_clock::time_point timespecToSteadyTimePoint(const  timespec &ts) const {
+    auto duration = std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+      std::chrono::seconds{ts.tv_sec} + std::chrono::nanoseconds{ts.tv_nsec}
+    );
+    return std::chrono::steady_clock::time_point(duration);
+  }
+
   void sendRawInternal(const char *data, int size, int code = 200,
                        bool precompressed = false,
                        const char *codeInfo = nullptr);
@@ -422,11 +486,12 @@ public:
   // TODO: support rfc1867
   virtual bool isUploadedFile(const String& filename);
 
+  // For streaming transports, only getResponseSentSize is valid.
   int getResponseSize() const { return m_responseSize; }
-  int getResponseCode() const { return m_responseCode; }
-
   int getResponseTotalSize() const { return m_responseTotalSize; }
   int getResponseSentSize() const { return m_responseSentSize; }
+
+  int getResponseCode() const { return m_responseCode; }
   int64_t getFlushTime() const { return m_flushTimeUs; }
   int getLastChunkSentSize();
   void getChunkSentSizes(Array &ret);
@@ -486,6 +551,7 @@ protected:
   bool m_headerSent{};
   bool m_firstHeaderSet{};
   bool m_sendEnded{};
+  bool m_sendStarted{false};
   bool m_sendContentType{true};
   bool m_isSSL{};
   int m_responseCode{-1};
@@ -508,6 +574,8 @@ protected:
   ThreadType m_threadType{ThreadType::RequestThread};
 
   Optional<rqtrace::Trace> m_requestTrace;
+
+  RequestId m_root_req_id;
 
   // helpers
   void parseGetParams();

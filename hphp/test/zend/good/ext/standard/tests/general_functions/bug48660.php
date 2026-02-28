@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$ini_location = __SystemLib\hphp_test_tmppath('bug48660.tmp');
+$ini_location = sys_get_temp_dir().'/'.'bug48660.tmp';
 
 // Build ini data
 $ini_data = '

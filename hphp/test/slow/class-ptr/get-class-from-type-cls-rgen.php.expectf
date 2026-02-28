@@ -1,0 +1,5 @@
+called f
+called f
+called f
+
+Fatal error: when resolving anonymous type structure, class E not found in %s/class-ptr/get-class-from-type-cls-rgen.php on line 36

@@ -16,19 +16,14 @@
 
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/tv-mutate.h"
-#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
-#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/fixup.h"
-#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
@@ -40,21 +35,17 @@
 #include "hphp/util/dwarf-reg.h"
 #include "hphp/util/eh-frame.h"
 #include "hphp/util/exception.h"
-#include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/unwind-itanium.h"
 
 #include <folly/ScopeGuard.h>
 
-#include <memory>
 #include <typeinfo>
 
-#ifndef _MSC_VER
 #include <cxxabi.h>
 #include <unwind.h>
-#endif
 
-TRACE_SET_MOD(unwind);
+TRACE_SET_MOD(unwind)
 
 namespace HPHP::jit {
 
@@ -129,8 +120,7 @@ TCA lookup_catch_trace(TCA rip) {
  * Look up the catch trace for the return address in `ctx', and install it by
  * updating the unwind RDS info, as well as the IP in `ctx'.
  */
-void install_catch_trace(_Unwind_Context* ctx, TCA rip,
-                         bool do_side_exit, TypedValue unwinder_tv) {
+void install_catch_trace(_Unwind_Context* ctx, TCA rip) {
   auto catchTrace = lookup_catch_trace(rip);
   if (!catchTrace) {
     FTRACE(1, "no catch trace entry for ip {}; installing default catch trace "
@@ -141,25 +131,10 @@ void install_catch_trace(_Unwind_Context* ctx, TCA rip,
 
   FTRACE(1, "installing catch trace {} for call {} with tv {}, "
          "returning _URC_INSTALL_CONTEXT\n",
-         catchTrace, rip, unwinder_tv.pretty());
-
-  // If the catch trace isn't going to finish by calling
-  // __cxxabiv1::__cxa_rethrow, we consume the exception here.
-  //
-  // In theory, the unwind API will let us set registers in the frame before
-  // executing our landing pad. In practice, trying to use their recommended
-  // scratch registers results in a SEGV inside _Unwind_SetGR, so we pass
-  // things to the handler using the RDS. This also simplifies the handler code
-  // because it doesn't have to worry about saving its arguments somewhere
-  // while executing the exit trace.
-  if (do_side_exit) {
-    __cxxabiv1::__cxa_end_catch();
-    g_unwind_rds->exn = nullptr;
-    g_unwind_rds->tv = unwinder_tv;
-  }
-  g_unwind_rds->doSideExit = do_side_exit;
-
+         catchTrace, rip, g_unwind_rds->tv.pretty());
   _Unwind_SetIP(ctx, (uint64_t)catchTrace);
+  _Unwind_SetGR(ctx, __builtin_eh_return_data_regno(0),
+                (uintptr_t)g_unwind_rds->exn.left());
   regState() = VMRegState::DIRTY;
 }
 
@@ -247,13 +222,33 @@ tc_unwind_personality(int version,
            g_unwind_rds->exn.left()->kindIsValid()) ||
           g_unwind_rds->exn.right() ||
           (g_unwind_rds->exn.isNull() && ism));
-  g_unwind_rds->isFirstFrame = true;
 
-  auto const tv = ism ? ism->tv() : TypedValue{};
+  // In theory, the unwind API will let us set registers in the frame before
+  // executing our landing pad. In practice, trying to use their recommended
+  // scratch registers results in a SEGV inside _Unwind_SetGR, so we pass
+  // things to the handler using the RDS. This also simplifies the handler code
+  // because it doesn't have to worry about saving its arguments somewhere
+  // while executing the exit trace.
+  g_unwind_rds->doSideExit = ism;
+  g_unwind_rds->tv = ism ? ism->tv() : TypedValue{};
+
+  if (ism) {
+    // If the catch trace is going to side exit, we won't have an opportunity
+    // to consume the exception later, so consume it here.
+    assertx(lookup_catch_trace(ip));
+    __cxxabiv1::__cxa_end_catch();
+  } else if (g_unwind_rds->exn.left()) {
+    // We consume Hack exceptions early and convert them to the situation
+    // equivalent to a side entry. This unifies the logic for both situations
+    // and gives us flexibility to handle Hack exceptions from catch blocks.
+    g_unwind_rds->exn.left()->incRefCount();
+    __cxxabiv1::__cxa_end_catch();
+  }
+
 
   // If we have a catch trace at the IP in the frame given by `context',
   // install it otherwise install the default catch trace.
-  install_catch_trace(context, ip, bool(ism), tv);
+  install_catch_trace(context, ip);
   return _URC_INSTALL_CONTEXT;
 }
 
@@ -274,10 +269,6 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
     auto savedRip = reinterpret_cast<TCA>(fp->m_savedRip);
 
     regState() = VMRegState::CLEAN;
-    if (!g_unwind_rds->exn.isNull() && !g_unwind_rds->isFirstFrame) {
-      lockObjectWhileUnwinding(vmpc(), vmStack());
-    }
-    g_unwind_rds->isFirstFrame = false;
 
     if (isVMFrame(fp)) {
       ITRACE(2, "fp {} {}, sfp {} {}\n",
@@ -288,13 +279,20 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
       if (!g_unwind_rds->exn.isNull()) {
         auto phpException = g_unwind_rds->exn.left();
         auto const result = unwindVM(g_unwind_rds->exn, sfp, teardown);
-        if (!(result & UnwindReachedGoal)) {
-          if (!g_unwind_rds->sideEnter) __cxxabiv1::__cxa_end_catch();
-          else if (phpException)        phpException->decReleaseCheck();
+        if (result == UnwinderResult::ReplaceWithPendingException) {
+          ITRACE(1, "tc_unwind_resume: replacing Hack exception with a pending "
+                    "C++ exception\n");
+          assertx(phpException);
+          decRefObj(phpException);
+          assertx(RI().m_pendingException != nullptr);
+          return {sfp, tc::ustubs().throwExceptionWhileUnwinding};
+        }
+        if (result != UnwinderResult::ReachedGoal) {
+          assertx(phpException);
+          phpException->decReleaseCheck();
           g_unwind_rds->doSideExit = true;
-          g_unwind_rds->sideEnter = false;
 
-          if (result & UnwindFSWH) {
+          if (result == UnwinderResult::FSWH) {
             auto const vmfp_ = vmfp();
             if (!vmfp_ || vmfp_ == sfp) {
               g_unwind_rds->savedRip = savedRip;
@@ -305,7 +303,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
                 : tc::ustubs().unwinderAsyncNullRet;
               ITRACE(1, "tc_unwind_resume returning to {} with fp {}\n",
                         tc::ustubs().describe(ret), sfp);
-              return {ret, sfp};
+              return {sfp, ret};
             }
             // we haven't fully unwound but we need to resume execution since
             // we have a FSWH on our hand
@@ -313,30 +311,25 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
           }
           regState() = VMRegState::DIRTY;
           FTRACE(1, "Resuming from resumeHelper with fp {}\n", fp);
-          return {tc::ustubs().resumeHelperFromInterp, fp};
+          return {fp, tc::ustubs().resumeHelperFromInterp};
         }
+        // If we were handling a Hack exception, unwindVM() may have reentered
+        // VM via EventHook::FunctionUnwind and corrupted our state.
+        if (phpException) g_unwind_rds->exn = phpException;
       }
     }
 
     if (savedRip == tc::ustubs().callToExit) {
       // If we're the top VM frame, there's nothing we need to do; we can just
       // let the native C++ unwinder take over.
-      if (g_unwind_rds->sideEnter) {
-        ITRACE(1, "top VM frame, sideEnter is set, enter itanium unwinder "
-                  "by throwing\n");
-        // Looks like we got here having skipped itanium unwinder, lets enter
-        g_unwind_rds->sideEnter = false;
-        // We can only side enter with a PHP exception
-        assertx(g_unwind_rds->exn.left());
-        return {tc::ustubs().throwExceptionWhileUnwinding, sfp};
+      if (g_unwind_rds->exn.left()) {
+        ITRACE(1, "top VM frame, Hack exception, enter itanium unwinder "
+                  "by throwing it\n");
+        return {sfp, tc::ustubs().throwExceptionWhileUnwinding};
       }
-      ITRACE(1, "top VM frame, passing back to _Unwind_Resume\n");
 
-      switch (arch()) {
-        case Arch::ARM:
-        case Arch::X64:
-          return {nullptr, sfp};
-      }
+      ITRACE(1, "top VM frame, passing back to _Unwind_Resume\n");
+      return {sfp, nullptr};
     }
 
     auto catchTrace = lookup_catch_trace(savedRip);
@@ -348,7 +341,8 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown) {
     if (catchTrace) {
       ITRACE(1, "tc_unwind_resume returning catch trace {} with fp: {}\n",
              catchTrace, fp);
-      return {catchTrace, fp};
+      regState() = VMRegState::DIRTY;
+      return {fp, catchTrace};
     }
 
     ITRACE(1, "No catch trace entry for {}; continuing\n",
@@ -369,7 +363,8 @@ TCUnwindInfo tc_unwind_resume_stublogue(ActRec* fp, TCA savedRip) {
     ITRACE(1,
            "tc_unwind_resume_stublogue returning catch trace {} with fp: {}\n",
            catchTrace, fp);
-    return {catchTrace, fp};
+    regState() = VMRegState::DIRTY;
+    return {fp, catchTrace};
   }
 
   // The caller of this stublogue doesn't have a catch trace. Continue with

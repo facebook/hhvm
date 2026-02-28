@@ -1,0 +1,1 @@
+Fatal error: Trait T is public and therefore cannot define the internal method bar in %s/internal_methods_03.inc0 on line 5

@@ -5,6 +5,6 @@ class A {
   const type C = self::B;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   var_dump(\HH\type_structure_classname(A::class, 'B'));
 }

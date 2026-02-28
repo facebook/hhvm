@@ -1,8 +1,8 @@
 <?hh
 
 class A {
-  public darray<string, int> $id_by_event = darray[];
-  public darray<string, varray<int>> $ids_by_event = darray[];
+  public darray<string, int> $id_by_event = dict[];
+  public darray<string, varray<int>> $ids_by_event = dict[];
 
   public function fail(?string $event)[]: void {
     if ($event !== null) {

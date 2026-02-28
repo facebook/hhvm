@@ -1,7 +1,7 @@
 <?hh
 
 
-function jmpfuse($str) {
+function jmpfuse($str) :mixed{
   $pos = 0;
   while (strlen($str) > $pos + 2 &&
          $str[$pos] == '/' &&

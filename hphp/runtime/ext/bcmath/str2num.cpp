@@ -29,14 +29,8 @@
 
 *************************************************************************/
 
-#include "config.h"
-#include <stdio.h>
-#include <assert.h>
-#include <stdlib.h>
 #include <ctype.h>
-#include <stdarg.h>
-#include "bcmath.h"
-#include "private.h"
+#include "hphp/runtime/ext/bcmath/bcmath.h"
 
 /* Convert strings to bc numbers.  Base 10 only.*/
 
@@ -109,4 +103,3 @@ bc_str2num (bc_num *num, char *str, int scale TSRMLS_DC)
   if (bc_is_zero (*num))
     (*num)->n_sign = PLUS;
 }
-

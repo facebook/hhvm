@@ -1,1 +1,1 @@
-Fatal error: Const class D cannot extend non-const parent C in %s/const_with_non_const_parent.php on line 4
+Fatal error: Classes, interfaces, traits and enums may not be declared `__Const` in %s/const_with_non_const_parent.php on line 4

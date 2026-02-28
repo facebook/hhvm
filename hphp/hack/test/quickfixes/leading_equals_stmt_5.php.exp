@@ -1,0 +1,7 @@
+convert to 'debugger_dump'
+
+<?hh
+
+function foo(int $x): void {
+  debugger_dump($x);
+}

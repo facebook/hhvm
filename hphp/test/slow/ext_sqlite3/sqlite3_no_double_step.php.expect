@@ -1,0 +1,19 @@
+=== Test 1: query() + fetcharray loop ===
+rows: row1, row2, row3
+count: 3
+pass: yes
+
+=== Test 2: prepare + execute + fetcharray ===
+value: row1
+next: false
+
+=== Test 3: re-execute same statement ===
+value: row2
+next: false
+
+=== Test 4: write query + fetcharray ===
+fetcharray after INSERT: false
+
+=== Test 5: columntype after execute ===
+columntype: 3
+is_text: yes

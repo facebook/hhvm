@@ -1,4 +1,0 @@
-File "safe_member_selection.php", line 8, characters 17-17:
-This property returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "safe_member_selection.php", line 4, characters 60-61:
-  The property is defined here.

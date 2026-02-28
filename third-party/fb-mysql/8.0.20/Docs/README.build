@@ -1,0 +1,97 @@
+Copyright (c) 2003, 2019, Oracle and/or its affiliates. All rights reserved.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License, version 2.0,
+as published by the Free Software Foundation.
+
+This program is also distributed with certain software (including
+but not limited to OpenSSL) that is licensed under separate terms,
+as designated in a particular file or component or in included license
+documentation.  The authors of MySQL hereby grant you an additional
+permission to link the program and your derivative works with the
+separately licensed software that they have included with MySQL.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License, version 2.0, for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+
+Build Instructions for MySQL Server
+===================================
+
+The recommended way to build MySQL for developers:
+
+cd <some build directory>
+cmake <path to source directory>
+make
+
+This will give you a release build, with compiler options taken from
+../cmake/build_configurations/compiler_options.cmake
+and "feature set" taken from
+../cmake/build_configurations/feature_set.cmake
+
+Adding -DWITH_DEBUG=1 to the cmake command line gives you a debug build.
+
+
+Building on Windows is slightly different:
+cd <some build directory>
+cmake <path to source directory> -G <generator>
+
+We only support Visual Studio as generator and only 64 bit ("Win64").
+
+cmake --build . --config Debug
+or
+cmake --build . --config RelWithDebInfo
+
+
+If you have special needs, you can disable the defaults by setting
+these cmake variables off:
+
+WITH_DEFAULT_COMPILER_OPTIONS
+WITH_DEFAULT_FEATURE_SET
+
+Building MySQL from source requires SSL headers and libraries to be
+available. The default value for the cmake variable WITH_SSL is "system".
+This means that on UNIX systems, you should install the appropriate
+OpenSSL developer package.
+
+For Windows users, please see
+   https://wiki.openssl.org/index.php/Binaries
+For Mac users, please see
+   http://brewformulas.org/Openssl
+
+You may also build OpenSSL yourself, and do
+   cmake -DWITH_SSL=</path/to/custom/openssl>
+in order to build MySQL.
+===
+
+It is possible to compile with Clang on Windows, which compiles faster
+and also yields faster binaries, but this is experimental and not officially
+supported. To compile, use LLVM 6.0.1 or newer from releases.llvm.org
+(Clang/C2, which is Microsoft's own version of Clang, is not supported),
+and put a Windows compile of Ninja in your path. Then execute the following
+in a shell:
+
+  "c:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
+  set PATH=<path to Ninja>;%PATH%
+  "c:\Program Files\CMake 3.8\bin\cmake.exe" -G Ninja -DCMAKE_C_COMPILER="c:/program files/llvm/msbuild-bin/cl.exe" -DCMAKE_CXX_COMPILER="c:/program files/llvm/msbuild-bin/cl.exe" -DCMAKE_LINKER="c:/program files/llvm/bin/lld-link.exe" -DWITH_BOOST=<path to Boost> ..
+  ninja
+
+This configuration also supports ASAN (-DWITH_ASAN=1), although currently only
+when linking with MSVC's linker (not with LLD).
+
+For running tests with --parallel, you may need to add --build-thread= (500 is
+a reasonable value to try).
+
+===
+
+Note: For building with unit tests, you need to tell cmake where to find
+the sources, see ../unittest/gunit/CMakeLists.txt
+You should *not* 'make install' googletest/googlemock on your system,
+the libraries must be built from source, with the unit tests.
+
+Note: You need to tell cmake where to find boost, see ../cmake/boost.cmake

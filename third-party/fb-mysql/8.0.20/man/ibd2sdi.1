@@ -1,0 +1,518 @@
+'\" t
+.\"     Title: \fBibd2sdi\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBIBD2SDI\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ibd2sdi \- InnoDB utility for extracting serialized dictionary information (SDI) from an InnoDB tablespace
+.SH "SYNOPSIS"
+.HP \w'\fBibd2sdi\ [\fR\fB\fIoptions\fR\fR\fB]\ \fR\fB\fIfile_name1\fR\fR\fB\ [\fR\fB\fIfile_name2\ file_name3\ \&.\&.\&.]\fR\fR\ 'u
+\fBibd2sdi [\fR\fB\fIoptions\fR\fR\fB] \fR\fB\fIfile_name1\fR\fR\fB [\fR\fB\fIfile_name2 file_name3 \&.\&.\&.]\fR\fR
+.SH "DESCRIPTION"
+.PP
+\fBibd2sdi\fR
+is a utility for extracting
+serialized dictionary information
+(SDI) from
+InnoDB
+tablespace files\&. SDI data is present all persistent
+InnoDB
+tablespace files\&.
+.PP
+\fBibd2sdi\fR
+can be run on
+file\-per\-table
+tablespace files (*\&.ibd
+files),
+general tablespace
+files (*\&.ibd
+files),
+system tablespace
+files (ibdata*
+files), and the data dictionary tablespace (mysql\&.ibd)\&. It is not supported for use with temporary tablespaces or undo tablespaces\&.
+.PP
+\fBibd2sdi\fR
+can be used at runtime or while the server is offline\&. During
+DDL
+operations,
+ROLLBACK
+operations, and undo log purge operations related to SDI, there may be a short interval of time when
+\fBibd2sdi\fR
+fails to read SDI data stored in the tablespace\&.
+.PP
+\fBibd2sdi\fR
+performs an uncommitted read of SDI from the specified tablespace\&. Redo logs and undo logs are not accessed\&.
+.PP
+Invoke the
+\fBibd2sdi\fR
+utility like this:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBibd2sdi [\fR\fB\fIoptions\fR\fR\fB] \fR\fB\fIfile_name1\fR\fR\fB [\fR\fB\fIfile_name2 file_name3 \&.\&.\&.\fR\fR\fB]\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fBibd2sdi\fR
+supports multi\-file tablespaces like the
+InnoDB
+system tablespace, but it cannot be run on more than one tablespace at a time\&. For multi\-file tablespaces, specify each file:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBibd2sdi ibdata1 ibdata2\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The files of a multi\-file tablespace must be specified in order of the ascending page number\&. If two successive files have the same space ID, the later file must start with the last page number of the previous file + 1\&.
+.PP
+\fBibd2sdi\fR
+outputs SDI (containing id, type, and data fields) in
+JSON
+format\&.
+ibd2sdi Options
+.PP
+\fBibd2sdi\fR
+supports the following options:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-help\fR,
+\fB\-h\fR
+.sp
+Displays command\-line help\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBibd2sdi \-\-help\fR
+Usage: \&./ibd2sdi [\-v] [\-c <strict\-check>] [\-d <dump file name>] [\-n] filename1 [filenames]
+See http://dev\&.mysql\&.com/doc/refman/8\&.0/en/ibd2sdi\&.html for usage hints\&.
+  \-h, \-\-help          Display this help and exit\&.
+  \-v, \-\-version       Display version information and exit\&.
+  \-#, \-\-debug[=name]  Output debug log\&. See
+                      http://dev\&.mysql\&.com/doc/refman/8\&.0/en/dbug\-package\&.html
+  \-d, \-\-dump\-file=name 
+                      Dump the tablespace SDI into the file passed by user\&.
+                      Without the filename, it will default to stdout
+  \-s, \-\-skip\-data     Skip retrieving data from SDI records\&. Retrieve only id
+                      and type\&.
+  \-i, \-\-id=#          Retrieve the SDI record matching the id passed by user\&.
+  \-t, \-\-type=#        Retrieve the SDI records matching the type passed by
+                      user\&.
+  \-c, \-\-strict\-check=name 
+                      Specify the strict checksum algorithm by the user\&.
+                      Allowed values are innodb, crc32, none\&.
+  \-n, \-\-no\-check      Ignore the checksum verification\&.
+  \-p, \-\-pretty        Pretty format the SDI output\&.If false, SDI would be not
+                      human readable but it will be of less size
+                      (Defaults to on; use \-\-skip\-pretty to disable\&.)
+Variables (\-\-variable\-name=value)
+and boolean options {FALSE|TRUE}  Value (after reading options)
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\- \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+debug                             (No default value)
+dump\-file                         (No default value)
+skip\-data                         FALSE
+id                                0
+type                              0
+strict\-check                      crc32
+no\-check                          FALSE
+pretty                            TRUE
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-version\fR,
+\fB\-v\fR
+.sp
+Displays MySQL version information\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBibd2sdi \-\-version\fR
+ibd2sdi  Ver 8\&.0\&.3\-dmr for Linux on x86_64 (Source distribution)
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-debug[=\fR\fB\fIdebug_options\fR\fR\fB]\fR,
+\fB\-# [\fR\fB\fIdebug_options\fR\fR\fB]\fR
+.sp
+Prints a debug log\&. For debug options, refer to
+Section\ \&29.5.4, \(lqThe DBUG Package\(rq\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBibd2sdi \-\-debug=d:t /tmp/ibd2sdi\&.trace\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+This option is available only if MySQL was built using
+\fBWITH_DEBUG\fR\&. MySQL release binaries provided by Oracle are
+\fInot\fR
+built using this option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-dump\-file=\fR,
+\fB\-d\fR
+.sp
+Dumps serialized dictionary information (SDI) into the specified dump file\&. If a dump file is not specified, the tablespace SDI is dumped to
+stdout\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBibd2sdi \-\-dump\-file=\fR\fB\fIfile_name\fR\fR\fB \&.\&./data/test/t1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-skip\-data\fR,
+\fB\-s\fR
+.sp
+Skips retrieval of
+data
+field values from the serialized dictionary information (SDI) and only retrieves the
+id
+and
+type
+field values, which are primary keys for SDI records\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBibd2sdi \-\-skip\-data \&.\&./data/test/t1\&.ibd\fR
+["ibd2sdi"
+,
+{
+	"type": 1,
+	"id": 330
+}
+,
+{
+	"type": 2,
+	"id": 7
+}
+]
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-id=\fR\fB\fI#\fR\fR,
+\fB\-i \fR\fB\fI#\fR\fR
+.sp
+Retrieves serialized dictionary information (SDI) matching the specified table or tablespace object id\&. An object id is unique to the object type\&. Table and tablespace object IDs are also found in the
+id
+column of the
+mysql\&.tables
+and
+mysql\&.tablespace
+data dictionary tables\&. For information about data dictionary tables, see
+Section\ \&14.1, \(lqData Dictionary Schema\(rq\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBibd2sdi \-\-id=7 \&.\&./data/test/t1\&.ibd\fR
+["ibd2sdi"
+,
+{
+	"type": 2,
+	"id": 7,
+	"object":
+		{
+    "mysqld_version_id": 80003,
+    "dd_version": 80003,
+    "sdi_version": 1,
+    "dd_object_type": "Tablespace",
+    "dd_object": {
+        "name": "test/t1",
+        "comment": "",
+        "options": "",
+        "se_private_data": "flags=16417;id=2;server_version=80003;space_version=1;",
+        "engine": "InnoDB",
+        "files": [
+            {
+                "ordinal_position": 1,
+                "filename": "\&./test/t1\&.ibd",
+                "se_private_data": "id=2;"
+            }
+        ]
+    }
+}
+}
+]
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-type=\fR\fB\fI#\fR\fR,
+\fB\-t \fR\fB\fI#\fR\fR
+.sp
+Retrieves serialized dictionary information (SDI) matching the specified object type\&. SDI is provided for table (type=1) and tablespace (type=2) objects\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBibd2sdi \-\-type=2 \&.\&./data/test/t1\&.ibd\fR
+["ibd2sdi"
+,
+{
+	"type": 2,
+	"id": 7,
+	"object":
+		{
+    "mysqld_version_id": 80003,
+    "dd_version": 80003,
+    "sdi_version": 1,
+    "dd_object_type": "Tablespace",
+    "dd_object": {
+        "name": "test/t1",
+        "comment": "",
+        "options": "",
+        "se_private_data": "flags=16417;id=2;server_version=80003;space_version=1;",
+        "engine": "InnoDB",
+        "files": [
+            {
+                "ordinal_position": 1,
+                "filename": "\&./test/t1\&.ibd",
+                "se_private_data": "id=2;"
+            }
+        ]
+    }
+}
+}
+]
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-strict\-check\fR,
+\fB\-c\fR
+.sp
+Specifies a strict checksum algorithm for validating the checksum of pages that are read\&. Options include
+innodb,
+crc32, and
+none\&.
+.sp
+In this example, the strict version of the
+innodb
+checksum algorithm is specified:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBibd2sdi \-\-strict\-check=innodb \&.\&./data/test/t1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+In this example, the strict version of
+crc32
+checksum algorithm is specified:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBibd2sdi \-c crc32 \&.\&./data/test/t1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+If you do not specify the
+\fB\-\-strict\-check\fR
+option, validation is performed against non\-strict
+innodb,
+crc32
+and
+none
+checksums\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-no\-check\fR,
+\fB\-n\fR
+.sp
+Skips checksum validation for pages that are read\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBibd2sdi \-\-no\-check \&.\&./data/test/t1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-pretty\fR,
+\fB\-p\fR
+.sp
+Outputs SDI data in JSON pretty print format\&. Enabled by default\&. If disabled, SDI is not human readable but is smaller in size\&. Use
+\-\-skip\-pretty
+to disable\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBibd2sdi \-\-skip\-pretty \&.\&./data/test/t1\&.ibd\fR
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

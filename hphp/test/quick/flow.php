@@ -1,10 +1,10 @@
 <?hh
 
-function f() {
+function f() :mixed{
   return 2 + 3 + 4;
 }
 
-function g() {
+function g() :mixed{
   return 1 + 7;
 }
 

@@ -1,7 +1,7 @@
 <?hh
 
 function foo()
-{
+:mixed{
     print "foo";
 }
 <<__EntryPoint>> function main(): void {

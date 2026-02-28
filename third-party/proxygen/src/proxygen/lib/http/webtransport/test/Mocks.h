@@ -1,0 +1,154 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+#pragma once
+
+#include <folly/portability/GMock.h>
+#include <proxygen/lib/http/webtransport/WebTransport.h>
+
+namespace proxygen::test {
+
+using GenericApiRet = folly::Expected<folly::Unit, WebTransport::ErrorCode>;
+
+class MockStreamReadHandle : public WebTransport::StreamReadHandle {
+ public:
+  explicit MockStreamReadHandle(uint64_t inId)
+      : WebTransport::StreamReadHandle(inId) {
+  }
+
+  using ReadStreamDataRet = folly::SemiFuture<WebTransport::StreamData>;
+  MOCK_METHOD(ReadStreamDataRet, readStreamData, ());
+  MOCK_METHOD(GenericApiRet, stopSending, (uint32_t));
+};
+
+class MockStreamWriteHandle : public WebTransport::StreamWriteHandle {
+ public:
+  explicit MockStreamWriteHandle(uint64_t inId)
+      : WebTransport::StreamWriteHandle(inId) {
+  }
+
+  using WriteStreamDataRet =
+      folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>;
+  MOCK_METHOD(WriteStreamDataRet,
+              writeStreamData,
+              (std::unique_ptr<folly::IOBuf>,
+               bool,
+               WebTransport::ByteEventCallback*));
+  MOCK_METHOD(
+      (folly::Expected<folly::SemiFuture<uint64_t>, WebTransport::ErrorCode>),
+      awaitWritable,
+      ());
+
+  MOCK_METHOD(GenericApiRet, resetStream, (uint32_t));
+  MOCK_METHOD(GenericApiRet, setPriority, (quic::PriorityQueue::Priority));
+  MOCK_METHOD(quic::PriorityQueue::Priority, getPriority, (), (const));
+};
+
+class MockWebTransport : public WebTransport {
+ public:
+  MockWebTransport() {
+    EXPECT_CALL(*this, createUniStream()).WillRepeatedly([&] {
+      auto id = nextUniStreamId_;
+      nextUniStreamId_ += 4;
+      auto handle = new testing::NiceMock<MockStreamWriteHandle>(id);
+      writeHandles_.emplace(id, handle);
+      return handle;
+    });
+    EXPECT_CALL(*this, createBidiStream()).WillRepeatedly([&] {
+      auto id = nextBidiStreamId_;
+      nextBidiStreamId_ += 4;
+      BidiStreamHandle handle(
+          {.readHandle = new MockStreamReadHandle(id),
+           .writeHandle = new testing::NiceMock<MockStreamWriteHandle>(id)});
+      readHandles_.emplace(id, handle.readHandle);
+      writeHandles_.emplace(id, handle.writeHandle);
+      return handle;
+    });
+  }
+  using CreateUniStreamRet = folly::Expected<StreamWriteHandle*, ErrorCode>;
+  MOCK_METHOD(CreateUniStreamRet, createUniStream, ());
+
+  using CreateBidiStreamRet = folly::Expected<BidiStreamHandle, ErrorCode>;
+  MOCK_METHOD(CreateBidiStreamRet, createBidiStream, ());
+
+  using AwaitStreamCreditRet = folly::SemiFuture<folly::Unit>;
+  MOCK_METHOD(AwaitStreamCreditRet, awaitUniStreamCredit, ());
+  MOCK_METHOD(AwaitStreamCreditRet, awaitBidiStreamCredit, ());
+
+  using ReadStreamDataRet =
+      folly::Expected<folly::SemiFuture<StreamData>, WebTransport::ErrorCode>;
+  MOCK_METHOD(ReadStreamDataRet, readStreamData, (uint64_t));
+  MOCK_METHOD(MockStreamWriteHandle::WriteStreamDataRet,
+              writeStreamData,
+              (uint64_t,
+               std::unique_ptr<folly::IOBuf>,
+               bool,
+               WebTransport::ByteEventCallback*));
+  MOCK_METHOD(GenericApiRet, resetStream, (uint64_t, uint32_t));
+  MOCK_METHOD(GenericApiRet,
+              setPriority,
+              (uint64_t, quic::PriorityQueue::Priority));
+  MOCK_METHOD(GenericApiRet,
+              setPriorityQueue,
+              (std::unique_ptr<quic::PriorityQueue>),
+              (noexcept));
+  MOCK_METHOD(GenericApiRet, stopSending, (uint64_t, uint32_t));
+  MOCK_METHOD(GenericApiRet, sendDatagram, (std::unique_ptr<folly::IOBuf>));
+  MOCK_METHOD((const folly::SocketAddress&), getLocalAddress, (), (const));
+  MOCK_METHOD(quic::TransportInfo, getTransportInfo, (), (const, override));
+  MOCK_METHOD((const folly::SocketAddress&), getPeerAddress, (), (const));
+  MOCK_METHOD(GenericApiRet, closeSession, (folly::Optional<uint32_t>));
+  MOCK_METHOD(
+      (folly::Expected<folly::SemiFuture<uint64_t>, WebTransport::ErrorCode>),
+      awaitWritable,
+      (uint64_t));
+
+  void cleanupStream(uint64_t id) {
+    auto handleIt = writeHandles_.find(id);
+    if (handleIt != writeHandles_.end()) {
+      delete handleIt->second;
+      writeHandles_.erase(handleIt);
+    }
+  }
+
+  void cleanupReadHandle(uint64_t id) {
+    auto handleIt = readHandles_.find(id);
+    if (handleIt != readHandles_.end()) {
+      delete handleIt->second;
+      readHandles_.erase(handleIt);
+    }
+  }
+
+  uint64_t nextBidiStreamId_{0};
+  uint64_t nextUniStreamId_{2};
+  std::map<uint64_t, StreamHandleBase*> writeHandles_;
+  std::map<uint64_t, StreamHandleBase*> readHandles_;
+};
+
+class MockWebTransportHandler : public WebTransportHandler {
+ public:
+  MOCK_METHOD(void,
+              onNewUniStream,
+              (WebTransport::StreamReadHandle * readHandle),
+              (noexcept, override));
+  MOCK_METHOD(void,
+              onNewBidiStream,
+              (WebTransport::BidiStreamHandle bidiHandle),
+              (noexcept, override));
+  MOCK_METHOD(void,
+              onDatagram,
+              (std::unique_ptr<folly::IOBuf> datagram),
+              (noexcept, override));
+  MOCK_METHOD(void,
+              onSessionEnd,
+              (folly::Optional<uint32_t> error),
+              (noexcept, override));
+  MOCK_METHOD(void, onSessionDrain, (), (noexcept, override));
+};
+
+} // namespace proxygen::test

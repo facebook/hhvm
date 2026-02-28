@@ -14,7 +14,7 @@ echo "*** Testing strspn() : with different mask strings and default start and l
 
 // initialing required variables
 // defining different strings
-$strings = varray[
+$strings = vec[
                    "",
            '',
            "\n",
@@ -35,7 +35,7 @@ $strings = varray[
                    ];
 
 // define the array of mask strings
-$mask_array = varray[
+$mask_array = vec[
             "",
             '',
             "f\n\trelshti \l",

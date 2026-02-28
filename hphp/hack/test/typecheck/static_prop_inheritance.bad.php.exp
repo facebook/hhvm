@@ -1,0 +1,4 @@
+WARN: File "static_prop_inheritance.bad.php", line 7, characters 17-17:
+Static property is overridden: `$p` (Warn[12021])
+  File "static_prop_inheritance.bad.php", line 8, characters 17-24:
+  Overriding static property is here

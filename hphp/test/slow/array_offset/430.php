@@ -3,17 +3,17 @@
 class A {
   const i1= -1;
   const i2= -2;
-  static $s = -4;
+  public static $s = -4;
 }
 class B {
-  static $s = -5;
+  public static $s = -5;
 }
 
 <<__EntryPoint>>
-function main_430() {
+function main_430() :mixed{
 ;
 ;
-$attr=darray[];
+$attr=dict[];
 $attr[A::i1]='abc';
 $attr[A::i2]='def';
 $attr[-3]='ghi';

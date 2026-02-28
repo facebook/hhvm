@@ -1,0 +1,10 @@
+ERROR: File "async_lambda.php", line 6, characters 3-26:
+Typing error (Typing[4323])
+  File "collections/Set.hhi", line 198, characters 25-26:
+  `Tu` is a constrained type parameter
+  File "collections/Set.hhi", line 198, characters 31-38:
+  This type constraint is violated
+  File "collections/Set.hhi", line 198, characters 31-38:
+  Expected `arraykey`
+  File "async_lambda.php", line 6, characters 11-25:
+  But got `Awaitable<int>` (result of an `async` function)

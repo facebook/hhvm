@@ -18,7 +18,6 @@
 #include "hphp/tools/hfsort/hfutil.h"
 #include "hphp/tools/hfsort/jitsort.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/process.h"
 
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>

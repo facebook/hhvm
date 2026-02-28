@@ -1,12 +1,12 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-foreach(varray[varray[1,2], varray[3,4]] as list($a, $b)) {
+foreach(vec[vec[1,2], vec[3,4]] as list($a, $b)) {
     var_dump($a . $b);
 }
 
-$array = varray[
-    varray['a', 'b'],
-    varray['c', 'd'],
+$array = vec[
+    vec['a', 'b'],
+    vec['c', 'd'],
 ];
 
 foreach ($array as list($a, $b)) {
@@ -14,9 +14,9 @@ foreach ($array as list($a, $b)) {
 }
 
 
-$multi = varray[
-    varray[varray[1,2], varray[3,4]],
-    varray[varray[5,6], varray[7,8]],
+$multi = vec[
+    vec[vec[1,2], vec[3,4]],
+    vec[vec[5,6], vec[7,8]],
 ];
 
 foreach ($multi as list(list($a, $b), list($c, $d))) {

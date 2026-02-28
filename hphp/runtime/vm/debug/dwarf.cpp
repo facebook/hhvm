@@ -16,18 +16,9 @@
 #include "hphp/runtime/vm/debug/dwarf.h"
 
 #include <stdio.h>
-#include "debug.h"
+#include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debug/gdb-jit.h"
-
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-
-#if !defined(__APPLE__) && !defined(__FreeBSD__) && !defined(_MSC_VER)
 #include "hphp/runtime/vm/debug/elfwriter.h"
-#define USE_ELF_WRITER 1
-#endif
-
 
 namespace HPHP {
 namespace Debug {
@@ -37,12 +28,8 @@ int g_dwarfCallback(LIBDWARF_CALLBACK_NAME_TYPE name, int size,
                     Dwarf_Unsigned link, Dwarf_Unsigned info,
                     Dwarf_Unsigned* /*sect_name_index*/, Dwarf_Ptr handle,
                     int* /*error*/) {
-#ifdef USE_ELF_WRITER
   ElfWriter *e = reinterpret_cast<ElfWriter *>(handle);
   return e->dwarfCallback(name, size, type, flags, link, info);
-#else
-  return 0;
-#endif
 }
 
 void DwarfBuf::byte(uint8_t c) {
@@ -130,10 +117,8 @@ void DwarfInfo::compactChunks() {
     m_dwarfChunks[j] = nullptr;
   }
   m_dwarfChunks[i] = chunk;
-#ifdef USE_ELF_WRITER
   // register compacted chunk with gdb
   ElfWriter e = ElfWriter(chunk);
-#endif
 }
 
 static Mutex s_lock(RankLeaf);
@@ -191,7 +176,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range,
       chunk = new DwarfChunk();
       m_dwarfChunks.push_back(chunk);
     } else if (m_dwarfChunks[0]->m_functions.size()
-                 < RuntimeOption::EvalGdbSyncChunks) {
+                 < Cfg::Eval::GdbSyncChunks) {
       // reuse first chunk
       chunk = m_dwarfChunks[0];
       chunk->clearSynced();
@@ -204,11 +189,9 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range,
     f->m_chunk = chunk;
   }
 
-#ifdef USE_ELF_WRITER
-  if (f->m_chunk->m_functions.size() >= RuntimeOption::EvalGdbSyncChunks) {
+  if (f->m_chunk->m_functions.size() >= Cfg::Eval::GdbSyncChunks) {
     ElfWriter e = ElfWriter(f->m_chunk);
   }
-#endif
 
   return f->m_chunk;
 }
@@ -219,9 +202,7 @@ void DwarfInfo::syncChunks() {
   for (i = 0; i < m_dwarfChunks.size(); i++) {
     if (m_dwarfChunks[i] && !m_dwarfChunks[i]->isSynced()) {
       unregister_gdb_chunk(m_dwarfChunks[i]);
-#ifdef USE_ELF_WRITER
       ElfWriter e = ElfWriter(m_dwarfChunks[i]);
-#endif
     }
   }
 }

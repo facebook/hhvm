@@ -10,8 +10,13 @@
 open Hh_prelude
 open Aast
 open Typing_defs
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module SN = Naming_special_names
+
+[@@@alert "-dependencies"]
+(* linting is not fanout-aware, so it's safe
+ * to use non-dep-aware functions here
+ *)
 
 let has_override_attribute m =
   List.exists m.m_user_attributes ~f:(fun ua ->
@@ -35,61 +40,93 @@ let should_check_ancestor_method ancestor_class ancestor_method =
     match ancestor_method.ce_visibility with
     | Vpublic
     | Vprotected _
-    | Vinternal _ ->
+    | Vinternal _
+    | Vprotected_internal _ ->
       true
     | Vprivate _ -> false
 
-let check_methods ctx c cls ~static =
-  let ancestor_names = Cls.all_ancestor_names cls in
-  let reqs = Cls.all_ancestor_req_names cls in
-  (* filter out interfaces *)
+let rec parent_hint_name (_p, hint) =
+  match hint with
+  | Happly ((_, name), _) -> Some name
+  | Hrefinement (hint, _) -> parent_hint_name hint
+  | Hprim _
+  | Hoption _
+  | Hlike _
+  | Hfun _
+  | Htuple _
+  | Hclass_ptr _
+  | Hshape _
+  | Haccess _
+  | Hsoft _
+  | Hmixed
+  | Hwildcard
+  | Hnonnull
+  | Habstr _
+  | Hvec_or_dict _
+  | Hthis
+  | Hdynamic
+  | Hnothing
+  | Hunion _
+  | Hintersection _
+  | Hfun_context _
+  | Hvar _ ->
+    None
+
+let ancestors_providing_methods
+    ({ c_extends; c_implements; c_uses; c_reqs; _ } : (_, _) class_) =
   let reqs =
-    List.filter
-      ~f:(fun class_name ->
-        match Decl_provider.get_class ctx class_name with
-        | None -> false
-        | Some cls -> not (Ast_defs.is_c_interface (Cls.kind cls)))
-      reqs
+    List.filter_map c_reqs ~f:(fun (hint, req_kind) ->
+        match req_kind with
+        | RequireExtends ->
+          (* We only care if this is a parent that is a class. *)
+          Some hint
+        | RequireImplements
+        | RequireClass
+        | RequireThisAs ->
+          None)
   in
-  let ancestor_names = ancestor_names @ reqs in
+  c_extends @ c_implements @ c_uses @ reqs
+  |> List.filter_map ~f:parent_hint_name
+
+let check_methods ctx c cls ~static =
+  let ancestor_names = ancestors_providing_methods c in
   let get_method =
     if static then
       Cls.get_smethod
     else
       Cls.get_method
   in
-  (* For each method, *)
   let (_, static_methods, c_methods) = split_methods c.c_methods in
+  (* For each method of the shallow class... *)
   (if static then
     static_methods
   else
     c_methods)
   |> Sequence.of_list
-  (* which doesn't have the override attribute, *)
+  (* ... which doesn't have the override attribute, *)
   |> Sequence.filter ~f:(fun m -> not (has_override_attribute m))
-  (* and is not the constructor, *)
+  (* ... and is not the constructor, *)
   |> Sequence.filter ~f:(fun m ->
          not (String.equal (snd m.m_name) SN.Members.__construct))
   |> Sequence.iter ~f:(fun m ->
          let (p, mid) = m.m_name in
          let matching_ancestor =
-           ancestor_names
-           (* inspect each ancestor, *)
-           |> List.filter_map ~f:(Decl_provider.get_class ctx)
-           (* and if it has a method with the same name, and either that method
-              is non-private or the ancestor is a trait, *)
-           |> List.filter_map ~f:(fun ancestor ->
-                  match get_method ancestor mid with
-                  | None -> None
-                  | Some ancestor_method ->
-                    if should_check_ancestor_method ancestor ancestor_method
-                    then
-                      Some ancestor_method
-                    else
-                      None)
-           (* get the class which defined that method, *)
-           |> List.filter_map ~f:(fun m ->
-                  Decl_provider.get_class ctx m.ce_origin)
+           (* inspect each ancestor, and if it has a method with the same name,
+              and either that method is non-private or the ancestor is a trait,*)
+           List.filter_map ancestor_names ~f:(fun c ->
+               let open Option.Monad_infix in
+               Decl_provider.get_class ctx c |> Decl_entry.to_option
+               >>= fun ancestor ->
+               (match get_method ancestor mid with
+               | None -> None
+               | Some ancestor_method ->
+                 if should_check_ancestor_method ancestor ancestor_method then
+                   Some ancestor_method
+                 else
+                   None)
+               >>= fun m ->
+               (* get the class which defined that method, *)
+               Decl_provider.get_class ctx m.ce_origin |> Decl_entry.to_option)
            (* as long as it and this class are of the same kind. *)
            |> List.filter ~f:(both_are_or_are_not_interfaces cls)
            (* If such a class exists... *)
@@ -98,8 +135,16 @@ let check_methods ctx c cls ~static =
          match matching_ancestor with
          | Some ancestor ->
            (* ...then this method should have had the override attribute. *)
-           Lints_errors.missing_override_attribute
-             p
+           let first_attr_pos =
+             Option.map
+               ~f:(fun ua -> fst ua.ua_name)
+               (List.hd m.m_user_attributes)
+           in
+
+           Lints_diagnostics.missing_override_attribute
+             ~meth_pos:m.m_span
+             ~name_pos:p
+             ~first_attr_pos
              ~class_name:(Cls.name ancestor)
              ~method_name:mid
          | None -> ())
@@ -112,8 +157,10 @@ let handler =
       let cid = snd c.c_name in
       let ctx = Tast_env.get_ctx env in
       match Decl_provider.get_class ctx cid with
-      | None -> ()
-      | Some cls ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        ()
+      | Decl_entry.Found cls ->
         check_methods ctx c cls ~static:false;
         check_methods ctx c cls ~static:true
   end

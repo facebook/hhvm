@@ -13,7 +13,7 @@ mkdir -p "$(dirname "${OUTPUT_FILE}")"
 set -e
 
 (
-  find "${ROOT}" -name "*.php" -o -name "*.hack" | while read -r FILE; do
+  find "${ROOT}" -name "*.php" -o -name "*.hack" | sort | while read -r FILE; do
     echo "///// ${FILE} /////"
     if grep -qE "^namespace .*;" "$FILE"; then
       # [?] is a bit strange, but works with both BSD and GNU sed :)

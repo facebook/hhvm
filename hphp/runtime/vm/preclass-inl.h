@@ -18,6 +18,8 @@
 #error "preclass-inl.h should only be included by preclass.h"
 #endif
 
+#include "hphp/util/assertions.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -55,55 +57,13 @@ inline Func* PreClass::lookupMethod(const StringData* methName) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// PreClass::TraitPrecRule.
-
-inline
-PreClass::TraitPrecRule::TraitPrecRule()
-  : m_methodName(nullptr)
-  , m_selectedTraitName(nullptr)
-{}
-
-inline
-PreClass::TraitPrecRule::TraitPrecRule(const StringData* selectedTraitName,
-                                       const StringData* methodName)
-  : m_methodName(methodName)
-  , m_selectedTraitName(selectedTraitName)
-{}
-
-inline void
-PreClass::TraitPrecRule::addOtherTraitName(const StringData* traitName) {
-  m_otherTraitNames.insert(traitName);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// PreClass::TraitAliasRule.
-
-inline
-PreClass::TraitAliasRule::TraitAliasRule()
-  : m_traitName(nullptr)
-  , m_origMethodName(nullptr)
-  , m_newMethodName(nullptr)
-  , m_modifiers(AttrNone)
-{}
-
-inline
-PreClass::TraitAliasRule::TraitAliasRule(const StringData* traitName,
-                                         const StringData* origMethodName,
-                                         const StringData* newMethodName,
-                                         Attr modifiers)
-  : m_traitName(traitName)
-  , m_origMethodName(origMethodName)
-  , m_newMethodName(newMethodName)
-  , m_modifiers(modifiers)
-{}
-
-///////////////////////////////////////////////////////////////////////////////
 // PreClass::ClassRequirement.
 
 namespace {
-  uintptr_t packCR(const StringData* req, bool isExtends) {
+  inline uintptr_t
+  packCR(const StringData* req, PreClass::RequirementKind reqKind) {
     auto reqPtr = reinterpret_cast<uintptr_t>(req);
-    return isExtends ? (reqPtr | 0x1) : reqPtr;
+    return reqPtr | reqKind;
   }
 }
 
@@ -114,23 +74,19 @@ PreClass::ClassRequirement::ClassRequirement()
 
 inline
 PreClass::ClassRequirement::ClassRequirement(const StringData* req,
-                                             bool isExtends)
-  : m_word(packCR(req, isExtends))
+                                             PreClass::RequirementKind reqKind)
+  : m_word(packCR(req, reqKind))
 {}
 
 /*
  * Accessors.
  */
 inline const StringData* PreClass::ClassRequirement::name() const {
-  return reinterpret_cast<const StringData*>(m_word & ~0x1);
+  return reinterpret_cast<const StringData*>(m_word & ~0x3);
 }
 
-inline bool PreClass::ClassRequirement::is_extends() const {
-  return m_word & 0x1;
-}
-
-inline bool PreClass::ClassRequirement::is_implements() const {
-  return !is_extends();
+inline PreClass::RequirementKind PreClass::ClassRequirement::kind() const {
+  return static_cast<PreClass::RequirementKind>(m_word & 0x3);
 }
 
 inline bool PreClass::ClassRequirement::is_same(
@@ -149,9 +105,9 @@ template<class SerDe>
 typename std::enable_if<SerDe::deserializing>::type
 PreClass::ClassRequirement::serde(SerDe& sd) {
   const StringData* sd_name;
-  bool sd_is_extends;
-  sd(sd_name)(sd_is_extends);
-  m_word = packCR(sd_name, sd_is_extends);
+  RequirementKind sd_reqKind;
+  sd(sd_name)(sd_reqKind);
+  m_word = packCR(sd_name, sd_reqKind);
 }
 
 /*
@@ -160,7 +116,7 @@ PreClass::ClassRequirement::serde(SerDe& sd) {
 template<class SerDe>
 typename std::enable_if<!SerDe::deserializing>::type
 PreClass::ClassRequirement::serde(SerDe& sd) {
-  sd(name())(is_extends());
+  sd(name())(kind());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

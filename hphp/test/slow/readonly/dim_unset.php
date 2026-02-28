@@ -1,7 +1,7 @@
 <?hh
 
 class Foo2 {
-  public int $x;
+  public mixed $x;
   public function __construct(num $x = 0) {
     $this->x = $x;
   }

@@ -1,0 +1,14 @@
+*** Testing mcrypt_ecb() : usage variation ***
+
+--uppercase NULL--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--lowercase null--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--empty string DQ--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+
+--empty string SQ--
+string(32) "6438db90653c4d300909aa02fd6163c2"
+===DONE===

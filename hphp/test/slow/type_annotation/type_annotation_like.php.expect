@@ -1,31 +1,25 @@
 === A ===
-string(7) "~HH\int"
-dict(2) {
-  ["like"]=>
-  bool(true)
+string(6) "HH\int"
+dict(1) {
   ["kind"]=>
   int(1)
 }
 === B ===
-string(15) "HH\vec<~HH\int>"
+string(14) "HH\vec<HH\int>"
 dict(2) {
   ["kind"]=>
   int(20)
   ["generic_types"]=>
   vec(1) {
-    dict(2) {
-      ["like"]=>
-      bool(true)
+    dict(1) {
       ["kind"]=>
       int(1)
     }
   }
 }
 === C ===
-string(27) "~HH\dict<HH\string, HH\int>"
-dict(3) {
-  ["like"]=>
-  bool(true)
+string(26) "HH\dict<HH\string, HH\int>"
+dict(2) {
   ["kind"]=>
   int(19)
   ["generic_types"]=>
@@ -41,7 +35,7 @@ dict(3) {
   }
 }
 === D ===
-string(28) "(HH\int, ~HH\float, HH\bool)"
+string(27) "(HH\int, HH\float, HH\bool)"
 dict(2) {
   ["kind"]=>
   int(10)
@@ -51,9 +45,7 @@ dict(2) {
       ["kind"]=>
       int(1)
     }
-    dict(2) {
-      ["like"]=>
-      bool(true)
+    dict(1) {
       ["kind"]=>
       int(3)
     }
@@ -64,7 +56,7 @@ dict(2) {
   }
 }
 === E ===
-string(46) "HH\shape('x'=>HH\string, 'y'=>HH\vec<~HH\int>)"
+string(45) "HH\shape('x'=>HH\string, 'y'=>HH\vec<HH\int>)"
 dict(2) {
   ["kind"]=>
   int(14)
@@ -81,9 +73,7 @@ dict(2) {
       int(20)
       ["generic_types"]=>
       vec(1) {
-        dict(2) {
-          ["like"]=>
-          bool(true)
+        dict(1) {
           ["kind"]=>
           int(1)
         }
@@ -92,14 +82,12 @@ dict(2) {
   }
 }
 === F ===
-string(22) "(function (): ~HH\int)"
+string(21) "(function (): HH\int)"
 dict(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  dict(2) {
-    ["like"]=>
-    bool(true)
+  dict(1) {
     ["kind"]=>
     int(1)
   }
@@ -108,48 +96,38 @@ dict(3) {
   }
 }
 === G ===
-string(11) "~HH\this::F"
-dict(4) {
+string(10) "HH\this::F"
+dict(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  dict(2) {
-    ["like"]=>
-    bool(true)
+  dict(1) {
     ["kind"]=>
     int(1)
   }
   ["param_types"]=>
   vec(0) {
   }
-  ["like"]=>
-  bool(true)
 }
 === H ===
-string(8) "~?HH\int"
-dict(3) {
+string(7) "?HH\int"
+dict(2) {
   ["nullable"]=>
-  bool(true)
-  ["like"]=>
   bool(true)
   ["kind"]=>
   int(1)
 }
 === I ===
-string(2) "~C"
-dict(3) {
-  ["like"]=>
-  bool(true)
+string(1) "C"
+dict(2) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(1) "C"
 }
 === J ===
-string(7) "~HH\int"
-dict(2) {
-  ["like"]=>
-  bool(true)
+string(6) "HH\int"
+dict(1) {
   ["kind"]=>
   int(1)
 }

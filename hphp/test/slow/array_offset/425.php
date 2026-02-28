@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_425() {
-  $a = darray['A' => 10];
+function main_425() :mixed{
+  $a = dict['A' => 10];
  ++$a['A'];
  var_dump($a);
 }

@@ -19,7 +19,6 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <thread>
 #include <vector>
 
 #include <folly/Random.h>
@@ -149,7 +148,7 @@ struct TickRequest {
   State m_state;
   TickingClock* m_clock;
 };
-typedef std::shared_ptr<TickRequest> TickRequestPtr;
+using TickRequestPtr = std::shared_ptr<TickRequest>;
 
 struct TickRequestFactory {
   explicit TickRequestFactory(TickingClock* clock) : m_clock(clock) {}

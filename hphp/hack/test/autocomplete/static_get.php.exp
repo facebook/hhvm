@@ -1,4 +1,16 @@
-class classname<this>
-X int
-$x int
-f (function(): _)
+class
+  INSERT class
+  class<this>
+SORT TEXT: none
+X
+  INSERT X
+  int
+SORT TEXT: none
+$x
+  INSERT $x
+  int
+SORT TEXT: none
+f
+  INSERT f()
+  function(): _
+SORT TEXT: none

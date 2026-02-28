@@ -20,7 +20,7 @@ function entrypoint_rbbiter_getRuleStatusVec_basic(): void {
 !!safe_reverse;
 RULES;
   $rbbi = new IntlRuleBasedBreakIterator($rules);
-  $rbbi->setText('sdfkjsdf88á.... ,;');
+  $rbbi->setText("sdfkjsdf88\xc3\xa1.... ,;");
 
   do {
   	var_dump($rbbi->current(), $rbbi->getRuleStatusVec());

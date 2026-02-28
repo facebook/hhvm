@@ -1,7 +1,0 @@
-=== Shape analysis results for access.php
-Constraints for \f:
-Allocated at [4:3-18]
-SK #{0} [4:3-18] : shape(a => int)
-SK #{} ?1 : shape(a => int)
-[4:3-18] ⊆ ?1
-

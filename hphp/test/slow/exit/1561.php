@@ -1,10 +1,10 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
  return false;
  }
 
 <<__EntryPoint>>
-function main_1561() {
+function main_1561() :mixed{
 foo() || exit("foobar");
 }

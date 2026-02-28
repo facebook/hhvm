@@ -3,11 +3,11 @@
 class MySerializable implements Serializable {
   public function __construct(public $foo)[] {}
 
-  public function serialize() {
+  public function serialize() :mixed{
     return serialize($this->foo);
   }
 
-  public function unserialize($str) {
+  public function unserialize($str) :mixed{
     $this->foo = unserialize($str);
   }
 }
@@ -18,5 +18,5 @@ class A {}
   $s = new MySerializable(new A());
 
   var_dump(unserialize(serialize($s)));
-  var_dump(unserialize(serialize($s), darray['allowed_classes' => false]));
+  var_dump(unserialize(serialize($s), dict['allowed_classes' => false]));
 }

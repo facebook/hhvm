@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_preg_match_literal() {
+function main_preg_match_literal() :mixed{
 $subject = "Quick brown fox";
 var_dump(preg_match("#^Quick#", $subject));
 var_dump(preg_match("/fox\$/", $subject));
@@ -11,7 +11,7 @@ var_dump(preg_match("%fox\$%", "x"));
 var_dump(preg_match("%bcd%", "abcdef"));
 var_dump(preg_match("%^bcd%", "abcdef"));
 
-$matches = darray[];
+$matches = dict[];
   var_dump(preg_match_with_matches("%bcd%", "abcdbcdef", inout $matches));
   var_dump(count($matches));
 var_dump(utf8_decode($matches[0]));

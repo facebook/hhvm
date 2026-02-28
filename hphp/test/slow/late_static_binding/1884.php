@@ -1,12 +1,12 @@
 <?hh
 
 class S {
-  public static function t($arg) {
+  public static function t($arg) :mixed{
     echo $arg;
   }
 }
 class C {
-  public static function d() {
+  public static function d() :mixed{
     echo static::class;
     S::t(static::class);
     echo static::class;
@@ -14,6 +14,6 @@ class C {
 }
 
 <<__EntryPoint>>
-function main_1884() {
+function main_1884() :mixed{
 C::d();
 }

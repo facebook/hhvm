@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1280() {
+function main_1280() :mixed{
 $a = 'test';
  $a = 123;
  switch ($a) {

@@ -29,7 +29,7 @@ namespace HPHP {
 
 static uintptr_t excludeLow, excludeLen;
 
-#ifdef HAVE_LIBXED
+#if defined(__x86_64__)
 
 // XED callback function to get a symbol from an address
 static int addressToSymbol(xed_uint64_t address, char* symbolBuffer,
@@ -46,7 +46,9 @@ static int addressToSymbol(xed_uint64_t address, char* symbolBuffer,
   *offset = 0;
   return 1;
 }
-#endif /* HAVE_LIBXED */
+#endif /* __x86_64__ */
+
+
 
 void Disasm::ExcludedAddressRange(void* low, size_t len) {
   excludeLow = uintptr_t(low);
@@ -56,28 +58,25 @@ void Disasm::ExcludedAddressRange(void* low, size_t len) {
 Disasm::Disasm(const Disasm::Options& opts)
     : m_opts(opts)
 {
-#ifdef HAVE_LIBXED
+#if defined(__x86_64__)
   xed_state_init(&m_xedState, XED_MACHINE_MODE_LONG_64,
                  XED_ADDRESS_WIDTH_64b, XED_ADDRESS_WIDTH_64b);
   xed_tables_init();
-#if XED_ENCODE_ORDER_MAX_ENTRIES == 28 // Older version of XED library
-  xed_register_disassembly_callback(addressToSymbol);
-#endif
-#endif // HAVE_LIBXED
+#endif // __x86_64__
 }
 
-#ifdef HAVE_LIBXED
+#if defined(__x86_64__)
 
 #define MAX_INSTR_ASM_LEN 128
 
 static const xed_syntax_enum_t s_xed_syntax =
   getenv("HHVM_INTEL_DISAS") ? XED_SYNTAX_INTEL : XED_SYNTAX_ATT;
-#endif // HAVE_LIBXED
+#endif // __x86_64__
 
 void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
                     uint8_t* codeEndAddr, uint64_t adjust) {
 
-#ifdef HAVE_LIBXED
+#if defined(__x86_64__)
   auto const endClr = m_opts.m_color.empty() ? "" : ANSI_COLOR_END;
   char codeStr[MAX_INSTR_ASM_LEN];
   xed_uint8_t *frontier;
@@ -104,11 +103,8 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
     auto const syntax = m_opts.m_forceAttSyntax ? XED_SYNTAX_ATT
                                                 : s_xed_syntax;
     if (!xed_format_context(syntax, &xedd, codeStr,
-                            MAX_INSTR_ASM_LEN, ip - adjust, nullptr
-#if XED_ENCODE_ORDER_MAX_ENTRIES != 28 // Newer version of XED library
-                            , addressToSymbol
-#endif
-                           )) {
+                            MAX_INSTR_ASM_LEN, ip - adjust, nullptr,
+                            addressToSymbol)) {
       out << folly::format("xed_format_context failed at address {}\n",
                            frontier);
       return;
@@ -155,7 +151,7 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
   }
 #else
   out << "This binary was compiled without disassembly support\n";
-#endif // HAVE_LIBXED
+#endif // __x86_64__
 }
 
 } // namespace HPHP

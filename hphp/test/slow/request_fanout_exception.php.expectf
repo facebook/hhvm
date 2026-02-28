@@ -1,0 +1,4 @@
+Caught RequestFanoutLimitExceededException, now rethrowing
+Fatal error: Uncaught exception 'RequestFanoutLimitExceededException' with message 'Request Fanout limit exceeded'%A
+Stack trace:
+#0 {main}

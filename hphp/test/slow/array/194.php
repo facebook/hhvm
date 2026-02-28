@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_194() {
-$a = varray[];
+function main_194() :mixed{
+$a = vec[];
  foreach ($a as $item) print '['.$item.']';
 }

@@ -9,7 +9,7 @@
                 contains a valid method name;
                 returns true if valid function name, false otherwise
 */
-function check_iscallable_objects($methods, $loop_counter) {
+function check_iscallable_objects($methods, $loop_counter) :mixed{
   $counter = 1;
   foreach ($methods as $method) {
     echo "-- Innerloop iteration $counter of Outerloop iteration ".$loop_counter." --\n";
@@ -29,24 +29,24 @@ class object_class {
   public $value = 100;
 
   /* static method */
-  static public function foo() {
+  static public function foo() :mixed{
   }
 
-  public function foo1() {
+  public function foo1() :mixed{
   }
   /* function name with mixed string and integer */
-  public function x123() {
+  public function x123() :mixed{
   }
   /* function name as NULL */
-  public function null() {
+  public function null() :mixed{
   }
   /* function name having boolean value */
-  public function TRUE() {
+  public function TRUE() :mixed{
   }
 
-  protected function foo2() {
+  protected function foo2() :mixed{
   }
-  private function foo3() {
+  private function foo3() :mixed{
   }
 }
 
@@ -60,7 +60,7 @@ class contains_object_class {
    public $class_object1;
    public $no_member_class_object;
 
-   public function func() {
+   public function func() :mixed{
      echo "func() is called \n";
    }
 
@@ -83,7 +83,7 @@ function main(): void {
   var_dump(is_callable('object_class::foo()')); //expected: false
 
   echo "\n** Testing normal operations of is_callable() on objects **\n";
-  $objects = varray[
+  $objects = vec[
     new object_class,
     new no_member_class,
     new contains_object_class,
@@ -100,17 +100,17 @@ function main(): void {
   $loop_counter = 1;
   foreach ($objects as $object) {
     echo "--- Outerloop iteration ".$loop_counter." ---\n";
-    $methods = varray[
-      varray[$object, 'foo1'],
-      varray[$object, 'foo2'],
-      varray[$object, 'foo3'],
-      varray[$object, 'x123'],
-      varray[$object, 'null'],
-      varray[$object, 'TRUE'],
-      varray[$object, '123'],
-      varray[@$temp_class_obj->value, 100],
-      varray[$object, 'func'],
-      varray['object_class', 'foo1'],
+    $methods = vec[
+      vec[$object, 'foo1'],
+      vec[$object, 'foo2'],
+      vec[$object, 'foo3'],
+      vec[$object, 'x123'],
+      vec[$object, 'null'],
+      vec[$object, 'TRUE'],
+      vec[$object, '123'],
+      vec[$temp_class_obj->value, 100],
+      vec[$object, 'func'],
+      vec['object_class', 'foo1'],
     ];
     /* use check_iscallable_objects() to check whether given object/string
        has valid method name */

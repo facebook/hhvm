@@ -1,1 +1,1 @@
-Fatal error: `<<__MemoizeLSB>>` and `<<__PolicyShardedMemoizeLSB>>` can only be applied to static methods in %s on line 6
+Fatal error: `<<__MemoizeLSB>>` can only be applied to static methods in %s on line 6

@@ -3,10 +3,10 @@
 class foo {
     public $x = 1;
 
-    public function getX() {
+    public function getX() :mixed{
         return $this->x;
     }
-    public function setX($val) {
+    public function setX($val) :mixed{
         $this->x = $val;
         return $this;
     }

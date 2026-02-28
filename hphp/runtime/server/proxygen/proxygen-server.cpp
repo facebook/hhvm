@@ -23,13 +23,12 @@
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/proxygen/proxygen-transport.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/runtime/base/crash-reporter.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/url.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/util/alloc.h"
-#include "hphp/util/compatibility.h"
 #include "hphp/util/process.h"
 
 #include <folly/portability/Unistd.h>
@@ -45,12 +44,13 @@ using folly::AsyncServerSocket;
 using wangle::Acceptor;
 
 HPHPSessionAcceptor::HPHPSessionAcceptor(
-    const proxygen::AcceptorConfiguration& config,
+    std::shared_ptr<const proxygen::AcceptorConfiguration> config,
     ProxygenServer *server,
     HPHPWorkerThread *worker)
-      : HTTPSessionAcceptor(config),
+      : HTTPSessionAcceptor(std::move(config)),
         m_server(server),
-        m_worker(worker) {
+        m_worker(worker),
+        m_controllerPtr(new proxygen::SimpleController(this)) {
 }
 
 bool HPHPSessionAcceptor::canAccept(const SocketAddress& /*address*/) {
@@ -125,7 +125,7 @@ void HPHPWorkerThread::cleanup() {
 }
 
 void HPHPWorkerThread::addPendingTransport(ProxygenTransport& transport) {
-  m_pendingTransportsCount.fetch_add(1, std::memory_order_acquire);
+  m_pendingTransportsCount.fetch_add(1, std::memory_order_acq_rel);
   if (m_server->partialPostEchoEnabled()) {
     const auto status = m_server->getStatus();
     transport.setShouldRepost(status == ProxygenServer::RunStatus::STOPPING
@@ -137,7 +137,7 @@ void HPHPWorkerThread::addPendingTransport(ProxygenTransport& transport) {
 void HPHPWorkerThread::removePendingTransport(ProxygenTransport& transport) {
   if (transport.is_linked()) {
     transport.unlink();
-    m_pendingTransportsCount.fetch_sub(1, std::memory_order_release);
+    m_pendingTransportsCount.fetch_sub(1, std::memory_order_acq_rel);
   }
 }
 
@@ -217,24 +217,23 @@ ProxygenServer::ProxygenServer(
       m_accept_sock_ssl(options.m_sslFD),
       m_dispatcher(options.m_maxThreads,
                    options.m_maxQueue,
-                   RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
-                   RuntimeOption::ServerThreadDropStack,
-                   this, RuntimeOption::ServerThreadJobLIFOSwitchThreshold,
-                   RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds,
+                   Cfg::Server::ThreadDropCacheTimeoutSeconds,
+                   Cfg::Server::ThreadDropStack,
+                   this, Cfg::Server::ThreadJobLIFOSwitchThreshold,
+                   Cfg::Server::ThreadJobMaxQueuingMilliSeconds,
                    kNumPriorities,
                    options.m_hugeThreads,
                    options.m_initThreads,
                    options.m_hugeStackKb,
-                   options.m_extraKb,
-                   options.m_legacyBehavior) {
-  always_assert_flog(RuntimeOption::ServerIOThreadCount > 0,
+                   options.m_extraKb) {
+  always_assert_flog(Cfg::Server::IOThreadCount > 0,
                      "Proxygen must have at least 1 thread to function.");
-  for (int i = 0; i < RuntimeOption::ServerIOThreadCount; i++) {
+  for (int i = 0; i < Cfg::Server::IOThreadCount; i++) {
     m_workers.emplace_back(
       std::make_unique<HPHPWorkerThread>(&m_eventBaseManager, this));
   }
-  m_httpAcceptors.resize(RuntimeOption::ServerIOThreadCount);
-  m_httpsAcceptors.resize(RuntimeOption::ServerIOThreadCount);
+  m_httpAcceptors.resize(Cfg::Server::IOThreadCount);
+  m_httpsAcceptors.resize(Cfg::Server::IOThreadCount);
 
   if (options.m_loop_sample_rate > 0) {
     for (int i = 0; i < m_workers.size(); i++) {
@@ -249,36 +248,31 @@ ProxygenServer::ProxygenServer(
   } else {
     address.setFromHostPort(options.m_address, options.m_port);
   }
-  m_httpConfig.bindAddress = address;
-  m_httpConfig.acceptBacklog = RuntimeOption::ServerBacklog;
-  m_httpsConfig.acceptBacklog = RuntimeOption::ServerBacklog;
+  m_httpConfig->bindAddress = address;
+  m_httpConfig->acceptBacklog = Cfg::Server::Backlog;
+  m_httpsConfig->acceptBacklog = Cfg::Server::Backlog;
   // TODO: proxygen only supports downstream keep-alive
   std::chrono::seconds timeout;
-  if (RuntimeOption::ConnectionTimeoutSeconds > 0) {
-    timeout = std::chrono::seconds(RuntimeOption::ConnectionTimeoutSeconds);
+  if (Cfg::Server::ConnectionTimeoutSeconds > 0) {
+    timeout = std::chrono::seconds(Cfg::Server::ConnectionTimeoutSeconds);
   } else {
     // default to 50s (to match libevent)
     timeout = std::chrono::seconds(50);
   }
-  m_httpConfig.connectionIdleTimeout = timeout;
-  m_httpConfig.transactionIdleTimeout = timeout;
-  m_httpsConfig.connectionIdleTimeout = timeout;
-  m_httpsConfig.transactionIdleTimeout = timeout;
+  m_httpConfig->connectionIdleTimeout = timeout;
+  m_httpConfig->transactionIdleTimeout = timeout;
+  m_httpsConfig->connectionIdleTimeout = timeout;
+  m_httpsConfig->transactionIdleTimeout = timeout;
 
   // Set flow control (for uploads) to 1MB.  We could also make this
   // configurable if needed
-  m_httpsConfig.initialReceiveWindow = kStreamFlowControl;
-  m_httpsConfig.receiveSessionWindowSize = kConnFlowControl;
-  if (RuntimeOption::ServerEnableH2C) {
-    m_httpConfig.allowedPlaintextUpgradeProtocols = {
-      proxygen::http2::kProtocolCleartextString };
-    m_httpConfig.initialReceiveWindow = kStreamFlowControl;
-    m_httpConfig.receiveSessionWindowSize = kConnFlowControl;
+  m_httpsConfig->initialReceiveWindow = kStreamFlowControl;
+  m_httpsConfig->receiveSessionWindowSize = kConnFlowControl;
+  if (Cfg::Server::EnableH2C) {
+    m_httpConfig->initialReceiveWindow = kStreamFlowControl;
+    m_httpConfig->receiveSessionWindowSize = kConnFlowControl;
   }
 
-  if (!options.m_takeoverFilename.empty()) {
-    m_takeover_agent.reset(new TakeoverAgent(options.m_takeoverFilename));
-  }
   const std::vector<std::chrono::seconds> levels {
     std::chrono::seconds(10), std::chrono::seconds(120)};
   ProxygenTransport::s_requestErrorCount =
@@ -297,43 +291,21 @@ ProxygenServer::~ProxygenServer() {
   Logger::Info("%p: ProxygenServer destroyed", this);
 }
 
-int ProxygenServer::onTakeoverRequest(TakeoverAgent::RequestType type) {
-  if (type == TakeoverAgent::RequestType::LISTEN_SOCKET) {
-    // Subsequent calls to ProxygenServer::stop() won't do anything.
-    // The server continues accepting until RequestType::TERMINATE is
-    // seen.
-    setStatus(RunStatus::STOPPING);
-  } else if (type == TakeoverAgent::RequestType::TERMINATE) {
-    stopListening(true /*hard*/);
-    // No need to do m_takeover_agent->stop(), as the afdt server is
-    // going to be closed when this returns.
-  }
-  return 0;
-}
-
-void ProxygenServer::takeoverAborted() {
-  m_httpServerSocket.reset();
-}
-
-void ProxygenServer::addTakeoverListener(TakeoverListener* listener) {
-  if (m_takeover_agent) {
-    m_takeover_agent->addTakeoverListener(listener);
-  }
-}
-
-void ProxygenServer::removeTakeoverListener(TakeoverListener* listener) {
-  if (m_takeover_agent) {
-    m_takeover_agent->removeTakeoverListener(listener);
-  }
+DispatcherStats ProxygenServer::getDispatcherStats() {
+  return m_dispatcher.getDispatcherStats();
 }
 
 std::unique_ptr<HPHPSessionAcceptor> ProxygenServer::createAcceptor(
-    const proxygen::AcceptorConfiguration& config,
+    std::shared_ptr<const proxygen::AcceptorConfiguration> config,
     HPHPWorkerThread *worker) {
-  return std::make_unique<HPHPSessionAcceptor>(config, this, worker);
+  return std::make_unique<HPHPSessionAcceptor>(std::move(config), this, worker);
 }
 
 void ProxygenServer::start() {
+  start(true);
+}
+
+void ProxygenServer::start(bool beginAccepting) {
   m_httpServerSocket.reset(new AsyncServerSocket(m_workers[0]->getEventBase()));
   bool needListen = true;
   auto failedToListen = [](const std::exception& ex,
@@ -345,10 +317,10 @@ void ProxygenServer::start() {
   /*
    * Order of setting up m_httpServerSocket (for the main server only, not
    * including admin server, etc.).
-   * (1) Try to use RuntimeOption::ServerPortFd (the inherited socket should
+   * (1) Try to use Cfg::Server::PortFd (the inherited socket should
    * have already been bound to a proper port, but isn't listening yet).
    * (2) If (1) fails, and try to take over the socket of an old server.
-   * (3) If both (1) and (2) fail, try to bind to RuntimeOption::ServerPort.
+   * (3) If both (1) and (2) fail, try to bind to Cfg::Server::Port.
    */
   bool socketSetupSucceeded = false;
   if (m_accept_sock >= 0) {
@@ -358,43 +330,20 @@ void ProxygenServer::start() {
       socketSetupSucceeded = true;
       Logger::Info("inheritfd: successfully inherited fd %d for server",
                    m_accept_sock);
-    } catch (const std::exception& ex) {
+    } catch (const std::exception&) {
       Logger::Warning("inheritfd: failed to inherit fd %d for server",
                       m_accept_sock);
     }
   }
-  if (!socketSetupSucceeded && m_takeover_agent) {
-    m_accept_sock = m_takeover_agent->takeover();
-    if (m_accept_sock >= 0) {
-      try {
-        m_httpServerSocket->useExistingSocket(
-          folly::NetworkSocket::fromFd(m_accept_sock));
-        needListen = false;
-        m_takeover_agent->requestShutdown();
-        socketSetupSucceeded = true;
-        Logger::Info("takeover: using takeover fd %d for server",
-                     m_accept_sock);
-      } catch (const std::exception& ex) {
-        Logger::Warning("takeover: failed to takeover fd %d for server",
-                        m_accept_sock);
-      }
-    }
-  }
   if (!socketSetupSucceeded) {
     // make it possible to quickly reuse the port when needed.
-    auto const allowReuse =
-      RuntimeOption::StopOldServer || m_takeover_agent;
+    auto const allowReuse = Cfg::Server::StopOld;
     m_httpServerSocket->setReusePortEnabled(allowReuse);
     try {
-      m_httpServerSocket->bind(m_httpConfig.bindAddress);
+      m_httpServerSocket->bind(m_httpConfig->bindAddress);
     } catch (const std::exception& ex) {
-      failedToListen(ex, m_httpConfig.bindAddress);
+      failedToListen(ex, m_httpConfig->bindAddress);
     }
-  }
-
-  if (m_takeover_agent) {
-    m_takeover_agent->setupFdServer(m_workers[0]->getEventBase()->getLibeventBase(),
-                                    m_httpServerSocket->getNetworkSocket().toFd(), this);
   }
 
   for (int i = 0; i < m_workers.size(); i++) {
@@ -403,21 +352,20 @@ void ProxygenServer::start() {
     m_httpAcceptors[i] = std::move(acceptor);
   }
 
-  if (m_httpConfig.isSSL() || m_httpsConfig.isSSL()) {
-
-    if (!RuntimeOption::SSLCertificateDir.empty()) {
+  if (m_httpsConfig->isSSL()) {
+    if (!Cfg::Server::SSLCertificateDir.empty()) {
       m_filePoller = std::make_unique<wangle::FilePoller>(
           kPollInterval);
 
       CertReloader::load(
-        RuntimeOption::SSLCertificateDir,
+        Cfg::Server::SSLCertificateDir,
         std::bind(&ProxygenServer::resetSSLContextConfigs,
           this,
           std::placeholders::_1));
 
       m_filePoller->addFileToTrack(
-        RuntimeOption::SSLCertificateDir,
-        [this, dir = RuntimeOption::SSLCertificateDir] {
+        Cfg::Server::SSLCertificateDir,
+        [this, dir = Cfg::Server::SSLCertificateDir] {
           CertReloader::load(
             dir,
             std::bind(&ProxygenServer::resetSSLContextConfigs,
@@ -426,7 +374,7 @@ void ProxygenServer::start() {
         });
     }
   }
-  if (m_httpsConfig.isSSL()) {
+  if (m_httpsConfig->isSSL()) {
     m_httpsServerSocket.reset(
       new AsyncServerSocket(m_workers[0]->getEventBase()));
     try {
@@ -436,11 +384,11 @@ void ProxygenServer::start() {
         m_httpsServerSocket->useExistingSocket(
           folly::NetworkSocket::fromFd(m_accept_sock_ssl));
       } else {
-        m_httpsServerSocket->setReusePortEnabled(RuntimeOption::StopOldServer);
-        m_httpsServerSocket->bind(m_httpsConfig.bindAddress);
+        m_httpsServerSocket->setReusePortEnabled(Cfg::Server::StopOld);
+        m_httpsServerSocket->bind(m_httpsConfig->bindAddress);
       }
     } catch (const std::system_error& ex) {
-      failedToListen(ex, m_httpsConfig.bindAddress);
+      failedToListen(ex, m_httpsConfig->bindAddress);
     }
 
     for (int i = 0; i < m_workers.size(); i++) {
@@ -450,16 +398,15 @@ void ProxygenServer::start() {
                        m_workers[i]->getEventBase());
       } catch (const std::exception& ex) {
         // Could be some cert thing
-        failedToListen(ex, m_httpsConfig.bindAddress);
+        failedToListen(ex, m_httpsConfig->bindAddress);
       }
       m_httpsAcceptors[i] = std::move(acceptor);
     }
   }
 
-  if (!RuntimeOption::SSLTicketSeedFile.empty() &&
-      (!m_httpsAcceptors.empty() || m_httpConfig.isSSL())) {
+  if (!Cfg::Server::SSLTicketSeedFile.empty() && !m_httpsAcceptors.empty()) {
     // setup ticket seed watcher
-    const auto& ticketPath = RuntimeOption::SSLTicketSeedFile;
+    const auto& ticketPath = Cfg::Server::SSLTicketSeedFile;
     auto seeds = wangle::TLSCredProcessor::processTLSTickets(ticketPath);
     if (seeds) {
       updateTLSTicketSeeds(std::move(*seeds));
@@ -474,21 +421,21 @@ void ProxygenServer::start() {
 
   if (needListen) {
     try {
-      m_httpServerSocket->listen(m_httpConfig.acceptBacklog);
+      m_httpServerSocket->listen(m_httpConfig->acceptBacklog);
     } catch (const std::system_error& ex) {
-      failedToListen(ex, m_httpConfig.bindAddress);
+      failedToListen(ex, m_httpConfig->bindAddress);
     }
   }
   if (m_httpsServerSocket) {
     try {
-      m_httpsServerSocket->listen(m_httpsConfig.acceptBacklog);
+      m_httpsServerSocket->listen(m_httpsConfig->acceptBacklog);
     } catch (const std::system_error& ex) {
-      failedToListen(ex, m_httpsConfig.bindAddress);
+      failedToListen(ex, m_httpsConfig->bindAddress);
     }
   }
-  m_httpServerSocket->startAccepting();
-  if (m_httpsServerSocket) {
-    m_httpsServerSocket->startAccepting();
+
+  if (beginAccepting) {
+    startAccepting();
   }
 
   setStatus(RunStatus::RUNNING);
@@ -497,6 +444,13 @@ void ProxygenServer::start() {
     worker->start();
   }
   m_dispatcher.start();
+}
+
+void ProxygenServer::startAccepting() {
+  m_httpServerSocket->startAccepting();
+  if (m_httpsServerSocket) {
+    m_httpsServerSocket->startAccepting();
+  }
 }
 
 void ProxygenServer::waitForEnd() {
@@ -550,18 +504,12 @@ void ProxygenServer::stop() {
     m_filePoller->stop();
   }
 
-  if (m_takeover_agent) {
-    m_workers[0]->getEventBase()->runInEventBaseThread([this] {
-        m_takeover_agent->stop();
-      });
-  }
-
   // close listening sockets, this will initiate draining, including closing
   // idle conns
   m_workers[0]->getEventBase()->runInEventBaseThread([this] {
       // Only wait ServerPreShutdownWait seconds for the page server.
-      int delayMilliSeconds = RuntimeOption::ServerPreShutdownWait * 1000;
-      if (delayMilliSeconds < 0 || getPort() != RuntimeOption::ServerPort) {
+      int delayMilliSeconds = Cfg::Server::PreShutdownWait * 1000;
+      if (delayMilliSeconds < 0 || getPort() != Cfg::Server::Port) {
         delayMilliSeconds = 0;
       }
       m_workers[0]->getEventBase()->runAfterDelay([this] { stopListening(); },
@@ -587,13 +535,13 @@ void ProxygenServer::stopListening(bool hard) {
     }
   }
 
-  if (RuntimeOption::ServerShutdownListenWait > 0) {
-    std::chrono::seconds s(RuntimeOption::ServerShutdownListenWait);
+  if (Cfg::Server::ShutdownListenWait > 0) {
+    std::chrono::seconds s(Cfg::Server::ShutdownListenWait);
     VLOG(4) << this << ": scheduling shutdown listen timeout="
             << s.count() << " port=" << m_port;
     scheduleTimeout(s);
-    if (RuntimeOption::ServerShutdownEOMWait > 0) {
-      int delayMilliSeconds = RuntimeOption::ServerShutdownEOMWait * 1000;
+    if (Cfg::Server::ShutdownEOMWait > 0) {
+      int delayMilliSeconds = Cfg::Server::ShutdownEOMWait * 1000;
       m_workers[0]->getEventBase()->runAfterDelay([this] {
 
         auto const accelerateShutdown = [this] {
@@ -696,9 +644,9 @@ void ProxygenServer::stopVM() {
 void ProxygenServer::vmStopped() {
   m_shutdownState = ShutdownState::DRAINING_WRITES;
   HttpServer::MarkShutdownStat(ShutdownEvent::SHUTDOWN_DRAIN_WRITES);
-  if (!drained() && RuntimeOption::ServerGracefulShutdownWait > 0) {
+  if (!drained() && Cfg::Server::GracefulShutdownWait > 0) {
     m_workers[0]->getEventBase()->runInEventBaseThread([&] {
-        std::chrono::seconds s(RuntimeOption::ServerGracefulShutdownWait);
+        std::chrono::seconds s(Cfg::Server::GracefulShutdownWait);
         VLOG(4) << this << ": scheduling graceful timeout=" << s.count() <<
           " port=" << m_port;
         scheduleTimeout(s);
@@ -709,8 +657,11 @@ void ProxygenServer::vmStopped() {
 }
 
 void ProxygenServer::forceStop() {
+  auto evb = m_workers[0]->getEventBase();
+  evb->checkIsInEventBaseThread();
+  if (getStatus() == RunStatus::STOPPED) return;
   Logger::Info("%p: forceStop ProxygenServer port=%d, enqueued=%d, conns=%d",
-               this, m_port, m_enqueuedCount.load(std::memory_order_relaxed),
+               this, m_port, m_enqueuedCount.load(std::memory_order_acquire),
                getLibEventConnectionCount());
   m_httpServerSocket.reset();
   m_httpsServerSocket.reset();
@@ -762,7 +713,7 @@ void ProxygenServer::forceStop() {
 }
 
 void ProxygenServer::reportShutdownStatus() {
-  if (m_port != RuntimeOption::ServerPort) return;
+  if (m_port != Cfg::Server::Port) return;
   if (getStatus() == RunStatus::STOPPED) return;
   Logger::FInfo("Shutdown state={}, a/q/e/p {}/{}/{}/{}, RSS={}Mb",
                 static_cast<int>(m_shutdownState),
@@ -776,8 +727,8 @@ void ProxygenServer::reportShutdownStatus() {
 }
 
 bool ProxygenServer::canAccept() {
-  return (RuntimeOption::ServerConnectionLimit == 0 ||
-          getLibEventConnectionCount() < RuntimeOption::ServerConnectionLimit);
+  return (Cfg::Server::ConnectionLimit == 0 ||
+          getLibEventConnectionCount() < Cfg::Server::ConnectionLimit);
 }
 
 int ProxygenServer::getLibEventConnectionCount() {
@@ -808,8 +759,8 @@ void ProxygenServer::resetSSLContextConfigs(
   std::vector<wangle::SSLContextConfig> configs;
   // always include the default cert/key
   auto cfg = createContextConfig({
-        RuntimeOption::SSLCertificateFile,
-        RuntimeOption::SSLCertificateKeyFile}, true);
+        Cfg::Server::SSLCertificateFile,
+        Cfg::Server::SSLCertificateKeyFile}, true);
   configs.emplace_back(cfg);
 
   for (const auto& path : paths) {
@@ -819,15 +770,8 @@ void ProxygenServer::resetSSLContextConfigs(
   for (int i = 0; i < m_workers.size(); i++) {
     auto evb = m_workers[i]->getEventBase();
     evb->runInEventBaseThread([this, configs, i] {
-        if (m_httpsAcceptors[i] && m_httpsConfig.isSSL()) {
-          m_httpsAcceptors[i]->getServerSocketConfig(
-            ).updateSSLContextConfigs(configs);
-          m_httpsAcceptors[i]->resetSSLContextConfigs();
-        }
-        if (m_httpAcceptors[i] && m_httpConfig.isSSL()) {
-          m_httpAcceptors[i]->getServerSocketConfig(
-            ).updateSSLContextConfigs(configs);
-          m_httpAcceptors[i]->resetSSLContextConfigs();
+        if (m_httpsAcceptors[i] && m_httpsConfig->isSSL()) {
+          m_httpsAcceptors[i]->resetSSLContextConfigs(configs);
         }
     });
   }
@@ -841,10 +785,6 @@ void ProxygenServer::updateTLSTicketSeeds(wangle::TLSTicketKeySeeds seeds) {
           m_httpsAcceptors[i]->setTLSTicketSecrets(
               seeds.oldSeeds, seeds.currentSeeds, seeds.newSeeds);
         }
-        if (m_httpAcceptors[i] && m_httpConfig.isSSL()) {
-          m_httpAcceptors[i]->setTLSTicketSecrets(
-              seeds.oldSeeds, seeds.currentSeeds, seeds.newSeeds);
-        }
     });
   }
 }
@@ -853,27 +793,17 @@ bool ProxygenServer::enableSSL(int port) {
   if (port == 0) {
     return false;
   }
-  SocketAddress address = m_httpConfig.bindAddress;
+  SocketAddress address = m_httpConfig->bindAddress;
   address.setPort(port);
 
-  m_httpsConfig.bindAddress = address;
-  m_httpsConfig.strictSSL = false;
+  m_httpsConfig->bindAddress = address;
+  m_httpsConfig->strictSSL = false;
 
-  m_httpsConfig.sslContextConfigs.emplace_back(
+  m_httpsConfig->sslContextConfigs.emplace_back(
       createContextConfig({
-        RuntimeOption::SSLCertificateFile,
-        RuntimeOption::SSLCertificateKeyFile}, true));
+        Cfg::Server::SSLCertificateFile,
+        Cfg::Server::SSLCertificateKeyFile}, true));
   m_https = true;
-  return true;
-}
-
-bool ProxygenServer::enableSSLWithPlainText() {
-  m_httpConfig.strictSSL = false;
-  m_httpConfig.sslContextConfigs.emplace_back(
-      createContextConfig({
-        RuntimeOption::SSLCertificateFile,
-        RuntimeOption::SSLCertificateKeyFile}, true));
-  m_httpConfig.allowInsecureConnectionsOnSecureServer = true;
   return true;
 }
 
@@ -882,12 +812,12 @@ wangle::SSLContextConfig ProxygenServer::createContextConfig(
     bool isDefault) {
   wangle::SSLContextConfig sslCtxConfig;
 
-  if (RuntimeOption::SSLClientAuthLevel == 2) {
-    sslCtxConfig.clientCAFile = RuntimeOption::SSLClientCAFile;
+  if (Cfg::Server::SSLClientAuthLevel == 2) {
+    sslCtxConfig.clientCAFiles = std::vector<std::string>{Cfg::Server::SSLClientCAFile};
     sslCtxConfig.clientVerification =
       folly::SSLContext::VerifyClientCertificate::ALWAYS;
-  } else if (RuntimeOption::SSLClientAuthLevel == 1) {
-    sslCtxConfig.clientCAFile = RuntimeOption::SSLClientCAFile;
+  } else if (Cfg::Server::SSLClientAuthLevel == 1) {
+    sslCtxConfig.clientCAFiles = std::vector<std::string>{Cfg::Server::SSLClientCAFile};
     sslCtxConfig.clientVerification =
       folly::SSLContext::VerifyClientCertificate::IF_PRESENTED;
   } else {
@@ -900,8 +830,8 @@ wangle::SSLContextConfig ProxygenServer::createContextConfig(
     sslCtxConfig.sslVersion = folly::SSLContext::TLSv1_2;
     sslCtxConfig.isDefault = isDefault;
     sslCtxConfig.setNextProtocols({
-      std::begin(RuntimeOption::ServerNextProtocols),
-      std::end(RuntimeOption::ServerNextProtocols)
+      std::begin(Cfg::Server::SSLNextProtocols),
+      std::end(Cfg::Server::SSLNextProtocols)
     });
   } catch (const std::exception& ex) {
     Logger::Error("Invalid certificate file or key file: %s", ex.what());
@@ -910,15 +840,19 @@ wangle::SSLContextConfig ProxygenServer::createContextConfig(
 }
 
 void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
-  if (CrashingThread.load(std::memory_order_relaxed) != 0) {
+  if (CrashingThread.load(std::memory_order_acquire) != 0) {
     Logger::Error("Discarding request while crashing");
     if (m_shutdownState == ShutdownState::SHUTDOWN_NONE) {
       m_shutdownState = ShutdownState::DRAINING_READS;
     }
     m_httpServerSocket.reset();
     m_httpsServerSocket.reset();
-    if (RuntimeOption::Server503OnShutdownAbort) {
-      transport->sendString("", 503);
+    if (Cfg::Server::Five0ThreeOnShutdownAbort) {
+      if (Cfg::Server::Five0ThreeRetryAfterSeconds >= 0) {
+        transport->addHeader("Retry-After", folly::to<std::string>(
+              Cfg::Server::Five0ThreeRetryAfterSeconds).c_str());
+      }
+      transport->sendString("Service Unavailable", 503);
       transport->onSendEnd();
     } else {
       transport->abort();
@@ -932,13 +866,17 @@ void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
     RequestPriority priority = getRequestPriority(transport->getUrl());
     VLOG(4) << this << ": enqueing request with path=" << transport->getUrl() <<
       " and priority=" << priority;
-    m_enqueuedCount.fetch_add(1, std::memory_order_release);
+    m_enqueuedCount.fetch_add(1, std::memory_order_acq_rel);
     transport->setEnqueued();
     m_dispatcher.enqueue(std::make_shared<ProxygenJob>(transport), priority);
   } else {
     // VM is shutdown
-    if (RuntimeOption::Server503OnShutdownAbort) {
-      transport->sendString("", 503);
+    if (Cfg::Server::Five0ThreeOnShutdownAbort) {
+      if (Cfg::Server::Five0ThreeRetryAfterSeconds >= 0) {
+        transport->addHeader("Retry-After", folly::to<std::string>(
+              Cfg::Server::Five0ThreeRetryAfterSeconds).c_str());
+      }
+      transport->sendString("Service Unavailable", 503);
       transport->onSendEnd();
     } else {
       transport->abort();
@@ -949,7 +887,7 @@ void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
 }
 
 void ProxygenServer::decrementEnqueuedCount() {
-  auto const cnt = m_enqueuedCount.fetch_sub(1, std::memory_order_acquire);
+  auto const cnt = m_enqueuedCount.fetch_sub(1, std::memory_order_acq_rel);
   if (cnt == 1) {
     auto const evb = m_workers[0]->getEventBase();
     evb->runInEventBaseThread([this] {
@@ -971,8 +909,8 @@ void ProxygenServer::decrementEnqueuedCount() {
 ProxygenServer::RequestPriority ProxygenServer::getRequestPriority(
   const char *uri) {
   auto const command = URL::getCommand(URL::getServerObject(uri));
-  if (RuntimeOption::ServerHighPriorityEndPoints.find(command) ==
-      RuntimeOption::ServerHighPriorityEndPoints.end()) {
+  if (Cfg::Server::HighPriorityEndPoints.find(command) ==
+      Cfg::Server::HighPriorityEndPoints.end()) {
     return PRIORITY_NORMAL;
   }
   return PRIORITY_HIGH;

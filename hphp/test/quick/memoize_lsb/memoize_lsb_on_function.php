@@ -1,5 +1,5 @@
 <?hh
 
 <<__MemoizeLSB>>
-function foo() { }
+function foo() :mixed{ }
 

@@ -1,8 +1,8 @@
 <?hh
 
 <<__EntryPoint>>
-function main_test_curl_multi_except() {
-  $port = $_ENV['SERVERPORT'];
+function main_test_curl_multi_except() :mixed{
+  $port = \HH\global_get('_ENV')['SERVERPORT'];
   $host = php_uname('n');
   $url = "http://$host:$port/hello.php";
 
@@ -11,7 +11,7 @@ function main_test_curl_multi_except() {
 
   curl_setopt($ch1, CURLOPT_URL, $url);
   curl_setopt($ch1, CURLOPT_HEADER, 0);
-  curl_setopt($ch1, CURLOPT_WRITEFUNCTION, 'except');
+  curl_setopt($ch1, CURLOPT_WRITEFUNCTION, HH\dynamic_fun('except'));
   curl_setopt($ch2, CURLOPT_URL, $url);
   curl_setopt($ch2, CURLOPT_HEADER, 0);
 
@@ -42,6 +42,6 @@ function main_test_curl_multi_except() {
   echo $ret;
 }
 
-function except() {
+<<__DynamicallyCallable>> function except() :mixed{
   throw new Exception("oops");
 }

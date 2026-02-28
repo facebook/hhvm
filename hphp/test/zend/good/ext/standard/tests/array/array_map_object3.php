@@ -13,10 +13,10 @@
  */
 class ParentClass {
   public $var1 = 10;
-  <<__DynamicallyCallable>> public static function staticParent1($n) {
+  <<__DynamicallyCallable>> public static function staticParent1($n) :mixed{
     return $n;
   }
-  <<__DynamicallyCallable>> private static function staticParent2($n) {
+  <<__DynamicallyCallable>> private static function staticParent2($n) :mixed{
     return $n;
   }
 }
@@ -27,10 +27,10 @@ class ChildClass extends ParentClass {
     $this->parent_obj = new ParentClass();
   }
   public $var2 = 5;
-  <<__DynamicallyCallable>> public static function staticChild($n) {
+  <<__DynamicallyCallable>> public static function staticChild($n) :mixed{
     return $n;
   }
-  <<__DynamicallyCallable>> public function nonstaticChild($n) {
+  <<__DynamicallyCallable>> public function nonstaticChild($n) :mixed{
     return $n;
   }
 }
@@ -39,22 +39,22 @@ class ChildClass extends ParentClass {
 function main(): void {
   echo "*** Testing array_map() : class methods as callback function ***\n";
 
-  $arr1 = varray[1, 5, 7];
+  $arr1 = vec[1, 5, 7];
 
   $childobj = new ChildClass();
   $parentobj = new ParentClass();
 
   echo "-- accessing parent method from child class --\n";
-  var_dump( array_map(varray['ChildClass', 'staticParent1'], $arr1) );
+  var_dump( array_map(vec['ChildClass', 'staticParent1'], $arr1) );
 
   echo "-- accessing child method from parent class --\n";
-  var_dump( array_map(varray['ParentClass', 'staticChild'], $arr1) );
+  var_dump( array_map(vec['ParentClass', 'staticChild'], $arr1) );
 
   echo "-- accessing parent method using child class object --\n";
-  var_dump( array_map(varray[$childobj, 'staticParent1'], $arr1) );
+  var_dump( array_map(vec[$childobj, 'staticParent1'], $arr1) );
 
   echo "-- accessing child method using parent class object --\n";
-  var_dump( array_map(varray[$parentobj, 'staticChild'], $arr1) );
+  var_dump( array_map(vec[$parentobj, 'staticChild'], $arr1) );
 
   echo "Done";
 }

@@ -3,7 +3,7 @@ class mytest
 {
   const classConstant = '01';
 
-  private $classArray = darray[ mytest::classConstant => 'value' ];
+  private $classArray = dict[ mytest::classConstant => 'value' ];
 
   public function __construct()
   {
@@ -16,6 +16,6 @@ const normalConstant = '01';
 <<__EntryPoint>> function main(): void {
 $classtest = new mytest();
 
-$normalArray = darray[ normalConstant => 'value' ];
+$normalArray = dict[ normalConstant => 'value' ];
 print_r($normalArray);
 }

@@ -7,19 +7,19 @@ class c2 {
     public $max = 3;
     public $num = 0;
 
-    function current() {
+    function current() :mixed{
         echo __METHOD__ . "\n";
         return $this->num;
     }
-    function next() {
+    function next() :mixed{
         echo __METHOD__ . "\n";
         $this->num++;
     }
-    function valid() {
+    function valid() :mixed{
         echo __METHOD__ . "\n";
         return $this->num < $this->max;
     }
-    function key() {
+    function key() :mixed{
         echo __METHOD__ . "\n";
         switch($this->num) {
             case 0: return "1st";

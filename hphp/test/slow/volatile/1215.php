@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1215() {
+function main_1215() :mixed{
 for ($i = 0;
  $i < 4;
  $i++) {

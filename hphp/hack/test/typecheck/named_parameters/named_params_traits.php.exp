@@ -1,0 +1,12 @@
+ERROR: File "named_params_traits.php", line 48, characters 9-38:
+Missing required named argument: label (Typing[4499])
+  File "named_params_traits.php", line 5, characters 19-30:
+  Definition is here
+ERROR: File "named_params_traits.php", line 51, characters 9-50:
+Unexpected named argument: unknown (Typing[4500])
+  File "named_params_traits.php", line 5, characters 19-30:
+  Definition is here
+ERROR: File "named_params_traits.php", line 54, characters 10-26:
+Missing required named argument: name (Typing[4499])
+  File "named_params_traits.php", line 22, characters 19-33:
+  Definition is here

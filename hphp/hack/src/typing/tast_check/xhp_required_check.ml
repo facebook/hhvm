@@ -10,14 +10,15 @@ open Hh_prelude
 open Aast
 open Typing_defs
 open Utils
-module S = Core_kernel.Sequence
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module Env = Tast_env
 
 let collect_attrs_from_ty_sid ?(include_optional = false) env add bag sid =
   match Env.get_class env sid with
-  | None -> bag
-  | Some c ->
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    bag
+  | Decl_entry.Found c ->
     let should_collect ce =
       match Typing_defs.get_ce_xhp_attr ce with
       | Some { Xhp_attribute.xa_has_default; xa_tag = None; _ }
@@ -34,10 +35,24 @@ let collect_attrs_from_ty_sid ?(include_optional = false) env add bag sid =
 
 let rec collect_attrs_from_ty env set ty =
   let (_, ty) = Env.expand_type env ty in
+  let ty = Tast_env.strip_dynamic env ty in
   match get_node ty with
-  | Tunion (ty :: tys) ->
-    let collect = collect_attrs_from_ty env SSet.empty in
-    List.fold (List.map tys ~f:collect) ~init:(collect ty) ~f:SSet.inter
+  (* Collect attrs from each conjunct *)
+  | Tintersection tys -> List.fold tys ~f:(collect_attrs_from_ty env) ~init:set
+  | Tunion tys ->
+    (* Filter out dynamic, as we conservatively assume that anything dynamic
+     * has the appropriate required attrs *)
+    let tys =
+      let Equal = Tast_env.eq_typing_env in
+      List.filter tys ~f:(fun ty -> not (Typing_utils.is_dynamic env ty))
+    in
+    begin
+      match tys with
+      | [] -> set
+      | ty :: tys ->
+        let collect = collect_attrs_from_ty env SSet.empty in
+        List.fold (List.map tys ~f:collect) ~init:(collect ty) ~f:SSet.inter
+    end
   | Tclass ((_, sid), _, _) ->
     collect_attrs_from_ty_sid
       ~include_optional:true
@@ -67,23 +82,33 @@ let check_attrs pos env sid attrs =
   else
     SMap.iter
       (fun attr origin_sid ->
+        let attr_name = Utils.strip_xhp_ns attr in
         let ty_reason_msg =
           lazy
             (match Env.get_class env origin_sid with
-            | None -> []
-            | Some ty ->
+            | Decl_entry.DoesNotExist
+            | Decl_entry.NotYetAvailable ->
+              []
+            | Decl_entry.Found ty ->
+              let pos =
+                match Tast_env.get_prop env ty attr with
+                | Some attr_decl -> Lazy.force attr_decl.ce_pos
+                | None -> Cls.pos ty
+              in
               Reason.to_string
-                ("The attribute " ^ attr ^ " is declared in this class.")
-                (Reason.Rwitness_from_decl (Cls.pos ty)))
+                ("The attribute `" ^ attr_name ^ "` is declared here.")
+                (Reason.witness_from_decl pos))
         in
-        Errors.add_typing_error
+        let Equal = Tast_env.eq_typing_env in
+        Typing_error_utils.add_typing_error
+          ~env
           Typing_error.(
             xhp
             @@ Primary.Xhp.Missing_xhp_required_attr
-                 { pos; attr; ty_reason_msg }))
+                 { pos; attr = attr_name; ty_reason_msg }))
       missing_attrs
 
-let make_handler ctx =
+let create_handler ctx =
   let handler =
     object
       inherit Tast_visitor.handler_base

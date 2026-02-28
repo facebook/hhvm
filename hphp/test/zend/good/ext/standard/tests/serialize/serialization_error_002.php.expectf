@@ -5,6 +5,8 @@ Notice: %s
 bool(false)
 bool(false)
 unserialize error and deserialized false are identical? 1
+
+Notice: Unable to unserialize: [obvious non-serialized data]. Expected ':' but got 'b'. in %s/test/zend/good/ext/standard/tests/serialize/serialization_error_002.php on line 15
 bool(false)
 bool(true)
 Done

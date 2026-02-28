@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_fscanf() {
-$tempfile = tempnam('/tmp', 'vmextfiletest');
+function main_fscanf() :mixed{
+$tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
 fputs($f, "testing fscanf");

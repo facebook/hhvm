@@ -105,6 +105,8 @@ SQLite SQLite::connect(const char* path, OpenMode mode) {
       case OpenMode::ReadOnly:
         return SQLITE_OPEN_READONLY;
       case OpenMode::ReadWrite:
+        return SQLITE_OPEN_READWRITE;
+      case OpenMode::ReadWriteCreate:
         return SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
     }
     not_reached();
@@ -162,6 +164,11 @@ bool SQLite::isReadOnly(const char* dbName) const {
 
 std::string SQLite::errMsg() const noexcept { return {sqlite3_errmsg(m_dbc)}; }
 
+bool SQLite::hasTable(const char* tableName) const {
+  return SQLITE_OK == sqlite3_table_column_metadata(m_dbc, "main", tableName, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr);
+}
+
 SQLite::SQLite(sqlite3* dbc)
     : m_dbc{dbc},
       m_beginStmt{*this, "BEGIN"},
@@ -199,7 +206,7 @@ void SQLite::txPop() {
     SQLiteQuery query{m_rollbackStmt};
     try {
       query.step();
-    } catch (const SQLiteExc& ex) {
+    } catch (const SQLiteExc& ) {
       /*
        * Having a rollback fail is actually a normal, expected case,
        * so just swallow this.
@@ -320,6 +327,7 @@ SQLiteStmt::SQLiteStmt(SQLite& db, const std::string_view sql) {
 
 SQLiteQuery SQLiteStmt::query() noexcept {
   assertx(!m_queryExists);
+  assertx(m_stmt != nullptr);
   m_queryExists = true;
   return SQLiteQuery{*this};
 }
@@ -488,6 +496,18 @@ Optional<const std::string_view> SQLiteQuery::getNullableString(
     return {};
   }
   return {getString(iCol)};
+}
+
+std::string_view SQLite::openModeName(SQLite::OpenMode mode) noexcept {
+  switch(mode) {
+    case SQLite::OpenMode::ReadOnly:
+      return "READ";
+    case SQLite::OpenMode::ReadWrite:
+      return "READ/WRITE";
+    case SQLite::OpenMode::ReadWriteCreate:
+      return "READ/WRITE/CREATE";
+  }
+  not_reached();
 }
 
 SQLiteQuery::SQLiteQuery(SQLiteStmt& stmt) : m_stmt{&stmt} {}

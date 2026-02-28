@@ -1,0 +1,66 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{!
+Definitions for constant values. These are included from the types.pyx file
+and define Python objects that can be imported from the end-user's Python
+file.
+}}
+{{#let export partial inplace_const_value |value|}}
+{{#pragma ignore-newlines}}
+{{#let ttype = value.type.true_type}}
+
+  {{#if value.double?}}
+{{value.double_value}}
+  {{#else if (or value.bool? (and value.integer? ttype.bool?))}}
+{{#if value.nonzero?}}True{{#else}}False{{/if}}
+  {{#else if value.integer?}}
+{{value.integer_value}}{{#if ttype.floating_point?}}.0{{/if}}
+  {{#else if value.string?}}
+{{#if ttype.binary?}}b"{{value.string_value}}"{{#else}}"{{value.unicode_value}}"{{/if}}
+
+  {{#else if value.enum?}}
+{{#if (not value.enum_value?)}}__BadEnum({{/if}}
+{{#if (and ttype.enum? ttype.need_module_path?)}}{{ttype.module_path_period_separated}}.{{/if}}
+{{value.enum_name}}{{#if value.enum_value?}}.{{value.py3_enum_value_name}}{{/if}}
+{{#if (not value.enum_value?)}}, {{value.integer_value}}){{/if}}
+
+  {{#else if value.structured?}}
+{{#if ttype.need_module_path?}}{{ttype.module_path_period_separated}}.{{/if}}{{ttype.name}}
+(
+    {{#each (array.enumerate value.structured_elements with_last=true) as |i elem last?|}}
+{{elem.field.name}}={{#partial inplace_const_value value=elem.value}}{{#if (not last?)}}, {{/if}}
+    {{/each}}
+)
+
+  {{#else if value.map?}}
+{{ttype.flat_name}}( { {{!}}
+    {{#each (array.enumerate value.map_elements with_last=true) as |i elem last?|}}
+{{#partial inplace_const_value value=elem.key}}: {{#partial inplace_const_value value=elem.value}}{{#if (not last?)}}, {{/if}}
+    {{/each}}
+ })
+
+  {{#else if value.list?}}{{! list and set }}
+{{ttype.flat_name}}((
+    {{#each value.list_elements as |elem|}}
+      {{! trailing comma required, even for a single item }}
+{{#partial inplace_const_value value=elem}}, {{!}}
+    {{/each}}
+))
+
+  {{/if value.double?}}
+{{/let partial}}

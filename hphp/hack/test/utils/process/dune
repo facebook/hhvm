@@ -1,0 +1,11 @@
+(executable
+ (name process_test)
+ (libraries
+  asserter
+  default_injector_config
+  future
+  process
+  process_types
+  sys_utils
+  temp_file
+  unit_test))

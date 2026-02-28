@@ -3,7 +3,7 @@
 class A<T> {}
 class B<T> {}
 
-function f<T>($x) {
+function f<T>($x) :mixed{
   return $x is A<B<T>>;
 }
 

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_xmlreader_null_byte() {
+function main_xmlreader_null_byte() :mixed{
 $file = '/etc/passwd'.chr(0).'asdf';
 
 $reader = new XMLReader();

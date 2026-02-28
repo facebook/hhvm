@@ -1,0 +1,161 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{#if enum:docs?}}
+#[doc = {{enum:docs}}]
+{{/if enum:docs?}}
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash{{!
+    }}{{#if enum:serde?}}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/if enum:serde?}}{{!
+    }}{{#if program:valuable?}}, ::valuable::Valuable{{/if program:valuable?}}{{#if (not (string.empty? enum:derive))}}, {{enum:derive}}{{/if (not (string.empty? enum:derive))}}{{!
+}})]
+pub struct {{enum:rust_name}}(pub ::std::primitive::i32);
+
+impl {{enum:rust_name}} {{> lib/block}}{{!
+    }}{{#each enum:values as |enum_value|}}
+    {{#if enum_value.docs?}}
+    #[doc = {{enum_value.docs}}]
+    {{/if enum_value.docs?}}
+    pub const {{enum_value.rust_name}}: Self = {{!
+        }}{{enum:rust_name}}({{enum_value.value}}i32);{{!
+    }}{{/each}}
+}
+
+impl ::fbthrift::ThriftEnum for {{enum:rust_name}} {
+    fn enumerate() -> &'static [(Self, &'static ::std::primitive::str)] {
+        &[
+            {{#each enum:values as |enum_value|}}
+            (Self::{{enum_value.rust_name}}, "{{enum_value.name}}"),
+            {{/each}}
+        ]
+    }
+
+    fn variants() -> &'static [&'static ::std::primitive::str] {
+        &[
+            {{#each enum:values as |enum_value|}}
+            "{{enum_value.name}}",
+            {{/each}}
+        ]
+    }
+
+    fn variant_values() -> &'static [Self] {
+        &[
+            {{#each enum:values as |enum_value|}}
+            Self::{{enum_value.rust_name}},
+            {{/each}}
+        ]
+    }
+
+    fn inner_value(&self) -> i32 {
+        self.0
+    }
+}
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for {{enum:rust_name}} {
+    fn default() -> Self {
+        {{#if (not (has_compiler_option? "deprecated_default_enum_min_i32"))}}
+        Self(0)
+        {{#else}}
+        Self(::std::primitive::i32::MIN)
+        {{/if (not (has_compiler_option? "deprecated_default_enum_min_i32"))}}
+    }
+}
+
+impl<'a> ::std::convert::From<&'a {{enum:rust_name}}> for ::std::primitive::i32 {
+    #[inline]
+    fn from(x: &'a {{enum:rust_name}}) -> Self {
+        x.0
+    }
+}
+
+impl ::std::convert::From<{{enum:rust_name}}> for ::std::primitive::i32 {
+    #[inline]
+    fn from(x: {{enum:rust_name}}) -> Self {
+        x.0
+    }
+}
+
+impl ::std::convert::From<::std::primitive::i32> for {{enum:rust_name}} {
+    #[inline]
+    fn from(x: ::std::primitive::i32) -> Self {
+        Self(x)
+    }
+}
+
+impl ::std::fmt::Display for {{enum:rust_name}} {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {{> lib/block}}
+        static VARIANTS_BY_NUMBER: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
+            {{#each enum:variants_by_number as |variant|}}
+            ("{{variant.name}}", {{variant.value}}),
+            {{/each}}
+        ];
+        ::fbthrift::help::enum_display(VARIANTS_BY_NUMBER, fmt, self.0)
+    }
+}
+
+impl ::std::fmt::Debug for {{enum:rust_name}} {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(fmt, "{{enum:name}}::{}", self)
+    }
+}
+
+impl ::std::str::FromStr for {{enum:rust_name}} {
+    type Err = ::anyhow::Error;
+
+    fn from_str(string: &::std::primitive::str) -> ::std::result::Result<Self, Self::Err> {
+        static VARIANTS_BY_NAME: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
+            {{#each enum:variants_by_name as |variant|}}
+            ("{{variant.name}}", {{variant.value}}),
+            {{/each}}
+        ];
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "{{enum:name}}").map(Self)
+    }
+}
+
+impl ::fbthrift::GetTType for {{enum:rust_name}} {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+{{#if (not (string.empty? enum:uri))}}
+
+impl ::fbthrift::GetUri for self::{{enum:rust_name}} {
+    fn uri() -> &'static ::std::primitive::str {
+        "{{enum:uri}}"
+    }
+}
+{{/if (not (string.empty? enum:uri))}}
+
+impl<P> ::fbthrift::Serialize<P> for {{enum:rust_name}}
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn rs_thrift_write(&self, p: &mut P) {
+        p.write_i32(self.into())
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for {{enum:rust_name}}
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn rs_thrift_read(p: &mut P) -> ::anyhow::Result<Self> {
+        ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
+    }
+}
+{{! line break }}

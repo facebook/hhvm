@@ -1,8 +1,8 @@
 <?hh
 
 class DerivedException extends Exception {
-  protected $message = 'Derived message';
-  protected $code = 12345;
+  protected string $message = 'Derived message';
+  protected int $code = 12345;
 }
 <<__EntryPoint>> function main(): void {
 try {

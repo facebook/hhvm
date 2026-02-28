@@ -1,0 +1,60 @@
+ERROR: File "compare.php", line 9, characters 10-17:
+Typing error (Typing[4240])
+  File "compare.php", line 9, characters 10-17:
+  Expected `(num | DateTime | DateTimeImmutable | string)` because this is the result of a comparison
+  File "compare.php", line 7, characters 16-19:
+  But got `null`
+ERROR: File "compare.php", line 9, characters 10-17:
+Typing error (Typing[4240])
+  File "compare.php", line 9, characters 10-17:
+  Expected `DateTimeImmutable` because this is the result of a comparison
+  File "compare.php", line 7, characters 16-19:
+  But got `null`
+ERROR: File "compare.php", line 9, characters 10-17:
+Typing error (Typing[4240])
+  File "compare.php", line 9, characters 10-17:
+  Expected `DateTime` because this is the result of a comparison
+  File "compare.php", line 7, characters 16-19:
+  But got `null`
+ERROR: File "compare.php", line 9, characters 10-17:
+Typing error (Typing[4240])
+  File "compare.php", line 9, characters 10-17:
+  Expected `num` because this is the result of a comparison
+  File "compare.php", line 7, characters 16-19:
+  But got `null`
+ERROR: File "compare.php", line 9, characters 10-17:
+Typing error (Typing[4240])
+  File "compare.php", line 9, characters 10-17:
+  Expected `string` because this is the result of a comparison
+  File "compare.php", line 7, characters 16-19:
+  But got `null`
+ERROR: File "compare.php", line 15, characters 10-16:
+Typing error (Typing[4240])
+  File "compare.php", line 15, characters 10-16:
+  Expected `(num | DateTime | DateTimeImmutable | string)` because this is the result of a comparison
+  File "compare.php", line 13, characters 19-25:
+  But got `null`
+ERROR: File "compare.php", line 15, characters 10-16:
+Typing error (Typing[4240])
+  File "compare.php", line 15, characters 10-16:
+  Expected `DateTimeImmutable` because this is the result of a comparison
+  File "compare.php", line 13, characters 19-25:
+  But got `null`
+ERROR: File "compare.php", line 15, characters 10-16:
+Typing error (Typing[4240])
+  File "compare.php", line 15, characters 10-16:
+  Expected `DateTime` because this is the result of a comparison
+  File "compare.php", line 13, characters 19-25:
+  But got `null`
+ERROR: File "compare.php", line 15, characters 10-16:
+Typing error (Typing[4240])
+  File "compare.php", line 15, characters 10-16:
+  Expected `num` because this is the result of a comparison
+  File "compare.php", line 13, characters 19-25:
+  But got `null`
+ERROR: File "compare.php", line 15, characters 10-16:
+Typing error (Typing[4240])
+  File "compare.php", line 15, characters 10-16:
+  Expected `string` because this is the result of a comparison
+  File "compare.php", line 13, characters 19-25:
+  But got `null`

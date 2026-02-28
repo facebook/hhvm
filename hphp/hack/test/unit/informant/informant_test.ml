@@ -1,10 +1,10 @@
 open Hh_prelude
 
-module Report_comparator :
-  Asserter.Comparator with type t = Informant_sig.report = struct
-  open Informant_sig
+module Report_comparator : Asserter.Comparator with type t = Informant.report =
+struct
+  open Informant
 
-  type t = Informant_sig.report
+  type t = Informant.report
 
   let to_string v =
     match v with
@@ -25,7 +25,7 @@ module Tools = struct
   let test_transition
       informant transition hg_rev server_status expected_report assert_msg =
     set_next_watchman_state_transition transition hg_rev;
-    let report = HhMonitorInformant.report informant server_status in
+    let report = Informant.report informant server_status in
     Report_asserter.assert_equals expected_report report assert_msg
 end
 
@@ -39,9 +39,9 @@ let basic_setup_rev_5_and_200_and_start_informant temp_dir =
   Watchman.Mocking.get_changes_returns
     (Watchman.Watchman_pushed (Watchman.Files_changed SSet.empty));
   let informant =
-    HhMonitorInformant.init
+    Informant.init
       {
-        HhMonitorInformant.root = temp_dir;
+        Informant.root = temp_dir;
         allow_subscriptions = true;
         min_distance_restart = 100;
         use_dummy = false;
@@ -50,11 +50,8 @@ let basic_setup_rev_5_and_200_and_start_informant temp_dir =
         is_saved_state_precomputed = false;
       }
   in
-  let report = HhMonitorInformant.report informant Informant_sig.Server_alive in
-  Report_asserter.assert_equals
-    Informant_sig.Move_along
-    report
-    "no distance moved";
+  let report = Informant.report informant Informant.Server_alive in
+  Report_asserter.assert_equals Informant.Move_along report "no distance moved";
   informant
 
 (** When base revision has changed significantly, informant asks
@@ -71,15 +68,15 @@ let test_informant_restarts_significant_move temp_dir =
     informant
     Tools.State_enter
     Tools.hg_rev_5
-    Informant_sig.Server_alive
-    Informant_sig.Move_along
+    Informant.Server_alive
+    Informant.Move_along
     "state enter insignificant distance";
   Tools.test_transition
     informant
     Tools.State_leave
     Tools.hg_rev_5
-    Informant_sig.Server_alive
-    Informant_sig.Move_along
+    Informant.Server_alive
+    Informant.Move_along
     "state leave insignificant distance";
 
   (* Move significant distance. *)
@@ -87,22 +84,22 @@ let test_informant_restarts_significant_move temp_dir =
     informant
     Tools.State_enter
     Tools.hg_rev_200
-    Informant_sig.Server_alive
-    Informant_sig.Move_along
+    Informant.Server_alive
+    Informant.Move_along
     "state enter significant distance";
   Tools.test_transition
     informant
     Tools.State_leave
     Tools.hg_rev_200
-    Informant_sig.Server_alive
-    Informant_sig.Move_along
+    Informant.Server_alive
+    Informant.Move_along
     "state leave significant distance";
   Tools.test_transition
     informant
     Tools.Changed_merge_base
     Tools.hg_rev_200
-    Informant_sig.Server_alive
-    Informant_sig.Restart_server
+    Informant.Server_alive
+    Informant.Restart_server
     "Move forward significant distance";
 
   (* Informant now sitting at revision 200. Moving to 230 no restart. *)
@@ -110,22 +107,22 @@ let test_informant_restarts_significant_move temp_dir =
     informant
     Tools.State_enter
     Tools.hg_rev_230
-    Informant_sig.Server_alive
-    Informant_sig.Move_along
+    Informant.Server_alive
+    Informant.Move_along
     "state enter insignificant distance";
   Tools.test_transition
     informant
     Tools.State_leave
     Tools.hg_rev_230
-    Informant_sig.Server_alive
-    Informant_sig.Move_along
+    Informant.Server_alive
+    Informant.Move_along
     "state leave insignificant distance";
   Tools.test_transition
     informant
     Tools.Changed_merge_base
     Tools.hg_rev_230
-    Informant_sig.Server_alive
-    Informant_sig.Move_along
+    Informant.Server_alive
+    Informant.Move_along
     "Changed merge base insignificant distance";
 
   (* Moving back to 200 no restart. *)
@@ -133,22 +130,22 @@ let test_informant_restarts_significant_move temp_dir =
     informant
     Tools.State_enter
     Tools.hg_rev_200
-    Informant_sig.Server_alive
-    Informant_sig.Move_along
+    Informant.Server_alive
+    Informant.Move_along
     "state enter insignificant distance";
   Tools.test_transition
     informant
     Tools.State_leave
     Tools.hg_rev_200
-    Informant_sig.Server_alive
-    Informant_sig.Move_along
+    Informant.Server_alive
+    Informant.Move_along
     "state leave insignificant distance";
   Tools.test_transition
     informant
     Tools.Changed_merge_base
     Tools.hg_rev_200
-    Informant_sig.Server_alive
-    Informant_sig.Move_along
+    Informant.Server_alive
+    Informant.Move_along
     "Changed_merge_base insignificant distance";
 
   (* Moving back to SVN rev 5 (hg_rev_5) restarts. *)
@@ -156,29 +153,37 @@ let test_informant_restarts_significant_move temp_dir =
     informant
     Tools.State_enter
     Tools.hg_rev_5
-    Informant_sig.Server_alive
-    Informant_sig.Move_along
+    Informant.Server_alive
+    Informant.Move_along
     "state enter significant distance";
   Tools.test_transition
     informant
     Tools.State_leave
     Tools.hg_rev_5
-    Informant_sig.Server_alive
-    Informant_sig.Move_along
+    Informant.Server_alive
+    Informant.Move_along
     "state leave significant distance";
   Tools.test_transition
     informant
     Tools.Changed_merge_base
     Tools.hg_rev_5
-    Informant_sig.Server_alive
-    Informant_sig.Restart_server
+    Informant.Server_alive
+    Informant.Restart_server
     "Move back significant distance";
   true
 
-let run_test test = Tempfile.with_tempdir test
+let () =
+  EventLogger.init_fake ();
+  Relative_path.(set_path_prefix Root (Path.make "/tmp"));
+  Relative_path.(set_path_prefix Root (Path.make Sys_utils.temp_dir_name));
+  let hhconfig_path = Relative_path.(create Root "/tmp/.hhconfig") in
+  Disk.write_file
+    ~file:(Relative_path.to_absolute hhconfig_path)
+    ~contents:"assume_php = false";
 
-let tests =
-  [
-    ( "test_informant_restarts_significant_move",
-      (fun () -> run_test test_informant_restarts_significant_move) );
-  ]
+  Unit_test.run_all
+    [
+      ( "test_informant_restarts_significant_move",
+        fun () ->
+          Tempfile.with_tempdir test_informant_restarts_significant_move );
+    ]

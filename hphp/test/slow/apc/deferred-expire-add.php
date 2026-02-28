@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $ok = false;
   if (apc_fetch('bar', inout $ok) === false) {
     apc_add('bar', true);

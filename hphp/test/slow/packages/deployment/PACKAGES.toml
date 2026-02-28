@@ -1,0 +1,23 @@
+[packages]
+
+[packages.softprod]
+include_paths=["//softprod/"]
+
+[packages.prod]
+include_paths=["//prod/", "//"]
+soft_includes=["softprod"]
+
+[packages.intern]
+include_paths=["//prod/intern/"]
+includes=["prod"]
+soft_includes=["softprod"]
+
+[deployments]
+
+[deployments.my-prod]
+packages = ["prod"]
+soft_packages = ["softprod"]
+
+[deployments.my-intern]
+packages = ["intern", "prod"]
+soft_packages = ["softprod"]

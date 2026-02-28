@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface I1 {
   public function foo(): mixed;

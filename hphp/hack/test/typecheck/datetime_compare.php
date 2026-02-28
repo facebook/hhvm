@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test_compare(DateTime $d): bool {
   $new_datetime = new DateTime();

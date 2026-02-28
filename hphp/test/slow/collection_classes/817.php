@@ -1,7 +1,7 @@
 <?hh
 
-function main() {
-  $ctypes = darray[
+function main() :mixed{
+  $ctypes = dict[
     'Vector' => new Vector(),
     'Map' => new Map(),
   ];
@@ -64,6 +64,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_817() {
+function main_817() :mixed{
 main();
 }

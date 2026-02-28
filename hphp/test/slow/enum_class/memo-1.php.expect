@@ -1,0 +1,8 @@
+enum class label (#KeyedByIC)
+string(9) "KeyedByIC"
+enum class label (#KeyedByIC)
+string(9) "KeyedByIC"
+enum class label (#MakeICInaccessible)
+string(18) "MakeICInaccessible"
+enum class label (#MakeICInaccessible)
+string(18) "MakeICInaccessible"

@@ -1,8 +1,8 @@
 <?hh <<__EntryPoint>> function main(): void {
-$post = $_POST;
+$post = \HH\global_get('_POST');
 parse_str("a=Hello+World", inout $post);
-$_POST = $post;
-$_REQUEST = array_merge($_REQUEST, $_POST);
+\HH\global_set('_POST',  $post);
+\HH\global_set('_REQUEST', array_merge(\HH\global_get('_REQUEST'), \HH\global_get('_POST')));
 
-echo $_POST['a'];
+echo \HH\global_get('_POST')['a'];
 }

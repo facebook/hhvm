@@ -21,7 +21,7 @@
 
 namespace HPHP::bespoke {
 
-TRACE_SET_MOD(bespoke);
+TRACE_SET_MOD(bespoke)
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -111,6 +111,12 @@ EntryTypes EntryTypes::ForArray(const ArrayData* ad) {
   auto state = EntryTypes(KeyTypes::Empty, ValueTypes::Empty, kInvalidDataType);
   IterateKV(ad, [&](auto k, auto v) { state = state.with(k, v); });
   return state;
+}
+
+EntryTypes EntryTypes::with(TypedValue v) const {
+  auto const valuePair = valueTypesForValue(v, valueTypes, valueDatatype);
+
+  return EntryTypes(keyTypes, valuePair.first, valuePair.second);
 }
 
 EntryTypes EntryTypes::with(TypedValue k, TypedValue v) const {

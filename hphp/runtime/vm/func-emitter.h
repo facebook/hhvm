@@ -52,42 +52,24 @@ struct NativeFunctionInfo;
 struct FuncEmitter {
   /////////////////////////////////////////////////////////////////////////////
   // Types.
-
-  using UpperBoundVec = CompactVector<TypeConstraint>;
-  using UpperBoundMap =
-    std::unordered_map<const StringData*, CompactVector<TypeConstraint>>;
-  struct ParamInfo : public Func::ParamInfo {
-    ParamInfo() {}
-
-    template<class SerDe>
-    void serde(SerDe& sd) {
-      Func::ParamInfo* parent = this;
-      parent->serde(sd);
-      sd(upperBounds);
-    }
-
-    UpperBoundVec upperBounds;
-  };
-
-  typedef std::vector<ParamInfo> ParamInfoVec;
-  typedef std::vector<EHEnt> EHEntVec;
+  using ParamInfoVec = std::vector<Func::ParamInfo>;
+  using EHEntVec = std::vector<EHEnt>;
 
   using CoeffectRuleVec = std::vector<CoeffectRule>;
-  using StaticCoeffectsVec = std::vector<LowStringPtr>;
+  using StaticCoeffectsVec = std::vector<PackedStringPtr>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Initialization and execution.
 
-  FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n);
-  FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
-              PreClassEmitter* pce);
+  FuncEmitter(int sn, Id id, const StringData* n);
+  FuncEmitter(int sn, const StringData* n, PreClassEmitter* pce);
   ~FuncEmitter();
 
   /*
    * Just set some fields when we start and stop emitting.
    */
   void init(int l1, int l2, Attr attrs_,
-            const StringData* docComment_);
+            const StringData* docComment_, bool isSystemLib);
   void finish();
 
   /*
@@ -118,7 +100,6 @@ struct FuncEmitter {
   /*
    * Get the associated Unit and PreClass emitters.
    */
-  UnitEmitter& ue() const;
   PreClassEmitter* pce() const;
 
   /*
@@ -165,7 +146,7 @@ struct FuncEmitter {
   /*
    * Add a parameter and corresponding named local.
    */
-  void appendParam(const StringData* name, const ParamInfo& info);
+  void appendParam(const StringData* name, const Func::ParamInfo& info);
 
   /*
    * Get the local variable name -> id map.
@@ -209,7 +190,6 @@ public:
    */
   std::pair<int,int> getLocation() const;
 
-  Native::NativeFunctionInfo getNativeInfo() const;
   String nativeFullname() const;
 
   /////////////////////////////////////////////////////////////////////////////
@@ -228,12 +208,6 @@ public:
    * attributes are returned as an integer.
    */
   int parseNativeAttributes(Attr& attrs_) const;
-
-  /*
-   * Fix some attributes based on the current runtime options that may
-   * have been stored incorrectly in the repo.
-   */
-  Attr fix_attrs(Attr a) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode.
@@ -254,7 +228,7 @@ public:
    */
   void setBc(const unsigned char* bc, size_t bclen);
   void setBcToken(Func::BCPtr::Token token, size_t bclen);
-  Optional<Func::BCPtr::Token> loadBc();
+  Optional<Func::BCPtr::Token> loadBc(int64_t unitSn);
 
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode emit.
@@ -314,6 +288,13 @@ public:
    */
   void recordSourceLocation(const Location::Range& sLoc, Offset start);
 
+  const folly::Range<const PackedStringPtr*> getTypeParamNames() const {
+    return folly::Range<const PackedStringPtr*>(
+      typeParamNames.data(),
+      typeParamNames.size()
+    );
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
@@ -324,7 +305,6 @@ private:
   /*
    * Metadata.
    */
-  UnitEmitter& m_ue;
   PreClassEmitter* m_pce;
 
   int m_sn;
@@ -340,16 +320,15 @@ public:
    */
   int line1;
   int line2;
-  LowStringPtr name;
+  PackedStringPtr name;
   Attr attrs;
 
   ParamInfoVec params;
   int16_t maxStackCells{0};
 
-  MaybeDataType hniReturnType;
-  TypeConstraint retTypeConstraint;
-  LowStringPtr retUserType;
-  UpperBoundVec retUpperBounds;
+  LazyStringData retUserType;
+  TypeIntersectionConstraint retTypeConstraints;
+  std::vector<PackedStringPtr> typeParamNames;
   StaticCoeffectsVec staticCoeffects;
   CoeffectRuleVec coeffectRules;
 
@@ -366,13 +345,13 @@ public:
       bool isNative            : 1;
       bool isGenerator         : 1;
       bool isPairGenerator     : 1;
-      bool hasParamsWithMultiUBs : 1;
-      bool hasReturnWithMultiUBs : 1;
+      bool requiresFromOriginalModule : 1;
     };
   };
 
-  LowStringPtr docComment;
-  LowStringPtr originalFilename;
+  PackedStringPtr docComment;
+  PackedStringPtr originalUnit;
+  PackedStringPtr originalModuleName;
 
   UserAttributeMap userAttributes;
 

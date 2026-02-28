@@ -6,21 +6,21 @@
        sc_name = ([5:11-22], "\\HH\\Rx\\Traversable");
        sc_tparams =
        [{ Typing_defs_core.tp_variance = Covariant;
-          tp_name = ([5:24-26], "Tv"); tp_tparams = []; tp_constraints = [];
+          tp_name = ([5:24-26], "Tv"); tp_constraints = [];
           tp_reified = Erased; tp_user_attributes = [] }
          ];
-       sc_where_constraints = [];
        sc_extends =
        [(Rhint ([5:36-55]),
          (Tapply (([5:36-51], "\\HH\\Traversable"),
-            [(Rhint ([5:52-54]), (Tgeneric ("Tv", [])))])))
+            [(Rhint ([5:52-54]), (Tgeneric "Tv"))])))
          ];
        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-       sc_typeconsts = []; sc_props = []; sc_sprops = [];
-       sc_constructor = None; sc_static_methods = []; sc_methods = [];
-       sc_user_attributes = []; sc_enum_type = None }));
+       sc_xhp_marked_empty = false; sc_req_extends = [];
+       sc_req_implements = []; sc_req_constraints = []; sc_implements = [];
+       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+       sc_props = []; sc_sprops = []; sc_constructor = None;
+       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+       sc_enum_type = None; sc_docs_url = None; sc_package = None }));
   ("\\HH\\Rx\\Iterator",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mhhi; sc_final = false;
@@ -29,21 +29,19 @@
         sc_name = ([7:11-19], "\\HH\\Rx\\Iterator");
         sc_tparams =
         [{ Typing_defs_core.tp_variance = Covariant;
-           tp_name = ([7:21-23], "Tv"); tp_tparams = []; tp_constraints = [];
+           tp_name = ([7:21-23], "Tv"); tp_constraints = [];
            tp_reified = Erased; tp_user_attributes = [] }
           ];
-        sc_where_constraints = [];
         sc_extends =
         [(Rhint ([7:33-58]),
           (Tapply (([7:33-54], "\\HH\\Rx\\Traversable"),
-             [(Rhint ([7:55-57]), (Tgeneric ("Tv", [])))])))
+             [(Rhint ([7:55-57]), (Tgeneric "Tv"))])))
           ];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None }))
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_constraints = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None; sc_docs_url = None; sc_package = None }))
   ]
-
-They matched!

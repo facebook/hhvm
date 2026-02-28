@@ -2,9 +2,48 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use eq_modulo_pos::EqModuloPos;
+use serde::Deserialize;
 
+use crate::aast_defs::*;
+use crate::ast_defs::*;
 use crate::pos::Pos;
-use crate::{aast_defs::*, ast_defs::*};
+
+impl<En, Ex> Argument<En, Ex> {
+    pub fn to_expr(self) -> Expr<En, Ex> {
+        match self {
+            Argument::Anormal(e) => e,
+            Argument::Ainout(_, e) => e,
+            // TODO(named_params): I'm not sure if it's ok to extract
+            // the expression here while losing the name.
+            Argument::Anamed(_, e) => e,
+        }
+    }
+
+    pub fn to_expr_ref(&self) -> &Expr<En, Ex> {
+        match self {
+            Argument::Anormal(e) => e,
+            Argument::Ainout(_, e) => e,
+            Argument::Anamed(_, e) => e,
+        }
+    }
+
+    pub fn to_expr_mut(&mut self) -> &mut Expr<En, Ex> {
+        match self {
+            Argument::Anormal(e) => e,
+            Argument::Ainout(_, e) => e,
+            Argument::Anamed(_, e) => e,
+        }
+    }
+
+    pub fn is_inout(&self) -> bool {
+        matches!(self, Argument::Ainout(_, _))
+    }
+
+    pub fn is_lvar(&self) -> bool {
+        matches!(self.to_expr_ref(), Expr(_, _, Expr_::Lvar(_)))
+    }
+}
 
 impl Lid {
     pub fn new(p: Pos, s: String) -> Self {
@@ -21,6 +60,10 @@ impl Lid {
 
     pub fn pos(&self) -> &Pos {
         &self.0
+    }
+
+    pub fn as_local_id(&self) -> &LocalId {
+        &self.1
     }
 }
 
@@ -58,6 +101,7 @@ impl AsRef<str> for Visibility {
             Public => "public",
             Protected => "protected",
             Internal => "internal",
+            ProtectedInternal => "protected internal",
         }
     }
 }
@@ -65,5 +109,34 @@ impl AsRef<str> for Visibility {
 impl std::fmt::Display for Visibility {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.as_ref())
+    }
+}
+
+impl<'a> ocamlrep::FromOcamlRepIn<'a> for PackageMembership {
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        _alloc: &'a bumpalo::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
+        use ocamlrep::FromOcamlRep;
+        Self::from_ocamlrep(value)
+    }
+}
+arena_deserializer::impl_deserialize_in_arena!(PackageMembership);
+
+impl EqModuloPos for PackageMembership {
+    fn eq_modulo_pos(&self, rhs: &Self) -> bool {
+        self == rhs
+    }
+    fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
+        self == rhs
+    }
+}
+impl PackageMembership {
+    pub fn to_arena_allocated<'a>(&self, arena: &'a bumpalo::Bump) -> &'a PackageMembership {
+        use PackageMembership::*;
+        match self {
+            PackageConfigAssignment(x) => arena.alloc(PackageConfigAssignment(x.clone())),
+            PackageOverride(p, x) => arena.alloc(PackageOverride(p.clone(), x.clone())),
+        }
     }
 }

@@ -24,6 +24,7 @@
 #include <folly/ScopeGuard.h>
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/lock-free-ptr-wrapper.h"
 #include "hphp/util/smalllocks.h"
 
 namespace HPHP {
@@ -80,7 +81,7 @@ struct LockFreeLazy {
    * if present() has already returned true and you know there's no
    * concurrent reset() calls.
    */
-  const T& rawGet();
+  const T& rawGet() const;
 
   /*
    * Check (without blocking) whether there's a contained value. This
@@ -96,9 +97,10 @@ struct LockFreeLazy {
    * value. Concurrent calls to reset() are allowed. Only one thread
    * will destroy the value. However no concurrent calls to get() are
    * allowed at the same time as calling reset(). This invalidates any
-   * references previously returned from get().
+   * references previously returned from get(). Returns true if this
+   * call successfully resets, false otherwise.
    */
-  void reset();
+  bool reset();
 
 private:
   typename std::aligned_storage<sizeof(T), alignof(T)>::type m_storage;
@@ -148,7 +150,7 @@ const T& LockFreeLazy<T>::get(const F& f) {
       // that we're updating the value.
     } else if (m_state.compare_exchange_weak(current,
                                              State::Updating,
-                                             std::memory_order_relaxed)) {
+                                             std::memory_order_acq_rel)) {
       // We updated the state, so we're responsible now for updating
       // the value.
       SCOPE_FAIL{
@@ -169,18 +171,18 @@ const T& LockFreeLazy<T>::get(const F& f) {
   }
 }
 
-template<typename T> const T& LockFreeLazy<T>::rawGet() {
+template<typename T> const T& LockFreeLazy<T>::rawGet() const {
   assertx(present());
-  return *std::launder(reinterpret_cast<T*>(&m_storage));
+  return *std::launder(reinterpret_cast<const T*>(&m_storage));
 }
 
-template<typename T> void LockFreeLazy<T>::reset() {
+template<typename T> bool LockFreeLazy<T>::reset() {
   // This logic is very similar to get(), except the meaning of Empty
   // and Present are effectively reversed.
   while (true) {
     auto current = m_state.load(std::memory_order_acquire);
     if (current == State::Empty) {
-      return;
+      return false;
     } else if (current == State::Updating) {
       futex_wait(
         reinterpret_cast<std::atomic<uint32_t>*>(&m_state),
@@ -188,13 +190,108 @@ template<typename T> void LockFreeLazy<T>::reset() {
       );
     } else if (m_state.compare_exchange_weak(current,
                                              State::Updating,
-                                             std::memory_order_relaxed)) {
+                                             std::memory_order_acq_rel)) {
       std::launder(reinterpret_cast<T*>(&m_storage))->~T();
       m_state.store(State::Empty, std::memory_order_release);
       futex_wake(reinterpret_cast<std::atomic<uint32_t>*>(&m_state), INT_MAX);
-      return;
+      return true;
     }
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * LockFreeLazyPtr is like LockFreeLazy, but space optimized for the
+ * case where you're wrapping a pointer (to a heap allocated
+ * value). Nullptr is used to indicate "not present", so that must not
+ * be a valid value.
+ *
+ * If Delete is true, the pointer will be freed (via delete) when the
+ * value is cleared. If false, it will not be.
+ */
+
+template <typename T, bool Delete = true>
+struct LockFreeLazyPtr {
+  LockFreeLazyPtr() : m_ptr{nullptr} {}
+
+  LockFreeLazyPtr(const LockFreeLazyPtr&) = delete;
+  LockFreeLazyPtr(LockFreeLazyPtr&&) = delete;
+  LockFreeLazyPtr& operator=(const LockFreeLazyPtr&) = delete;
+  LockFreeLazyPtr& operator=(LockFreeLazyPtr&&) = delete;
+
+  ~LockFreeLazyPtr();
+
+  /*
+   * Return a const reference to the value the pointer points to, if
+   * present. If not, call the given callable to obtain the pointer
+   * and store it This call may block if another thread is calculating
+   * the pointer. Concurrent calls to get() are allowed. Only one
+   * thread will calculate the pointer. However no concurrent calls to
+   * reset() are allowed at the same time as calling get(). The
+   * returned reference will remain valid as long as this
+   * LockFreeLazyPtr is alive, and reset() has not been called.
+   *
+   * The callable must return a non-null pointer which can be freed
+   * via delete.
+   */
+  template <typename F> const T& get(const F&);
+
+  /*
+   * Check (without blocking) whether there's a contained value. This
+   * must be used carefully, as concurrent get() or reset() calls can
+   * change this result at any instant.
+   */
+  bool present() const;
+
+  /*
+   * Delete the value pointed to by the contained pointer (if any) and
+   * set the pointer to nullptr. After this calling this, any
+   * subsequent calls to get() will re-calculate the value. This call
+   * may block if another thread is destroying the value. Concurrent
+   * calls to reset() are allowed. Only one thread will destroy the
+   * value. However no concurrent calls to get() are allowed at the
+   * same time as calling reset(). This invalidates any references
+   * previously returned from get(). Returns true if this call
+   * successfully resets, false otherwise.
+   */
+  bool reset();
+private:
+  LockFreePtrWrapper<const T*> m_ptr;
+};
+
+template <typename T> using LockFreeLazyPtrNoDelete = LockFreeLazyPtr<T, false>;
+
+//////////////////////////////////////////////////////////////////////
+
+template<typename T, bool D> LockFreeLazyPtr<T, D>::~LockFreeLazyPtr() {
+  if (!D) return;
+  if (auto const p = m_ptr.copy()) delete p;
+}
+
+template<typename T, bool D> template<typename F>
+const T& LockFreeLazyPtr<T, D>::get(const F& f) {
+  if (auto const p = m_ptr.copy()) return *p;
+  auto lock = m_ptr.lock_for_update();
+  if (auto const p = m_ptr.copy()) return *p;
+  const T* newPtr = f();
+  assertx(newPtr);
+  lock.update(std::move(newPtr));
+  return *m_ptr.copy();
+}
+
+template<typename T, bool D> bool LockFreeLazyPtr<T, D>::present() const {
+  return m_ptr.copy() != nullptr;
+}
+
+template<typename T, bool D> bool LockFreeLazyPtr<T, D>::reset() {
+  if (auto const p = m_ptr.copy(); !p) return false;
+  auto lock = m_ptr.lock_for_update();
+  auto const p = m_ptr.copy();
+  if (!p) return false;
+  if (D) delete p;
+  lock.update(nullptr);
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////

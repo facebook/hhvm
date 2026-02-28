@@ -1,7 +1,7 @@
 <?hh
 
 <<__ALWAYS_INLINE>>
-async function foo($b, $n) {
+async function foo($b, $n) :Awaitable<mixed>{
   if ($b) {
     await RescheduleWaitHandle::create(0, 0);
   }
@@ -9,13 +9,13 @@ async function foo($b, $n) {
 }
 
 <<__ALWAYS_INLINE>>
-async function bar($a) {
+async function bar($a) :Awaitable<mixed>{
   $n1 = await $a;
   $n2 = await foo(false, 100);
   return $n1 + $n2;
 }
 
-async function main() {
+async function main() :Awaitable<mixed>{
   $x = foo(false, 1);
   $y = foo(true, 1);
   $b = bar($x);

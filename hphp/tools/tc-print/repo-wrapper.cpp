@@ -18,12 +18,11 @@
 #include <cstdio>
 
 #include "hphp/hhvm/process-init.h"
-#include "hphp/util/hdf.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/configs/repo.h"
+#include "hphp/util/hdf.h"
 #include "hphp/compiler/option.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/config.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -34,6 +33,7 @@ namespace HPHP { namespace jit {
 
 RepoWrapper::RepoWrapper(const char* repoSchema,
                          const std::string& repoFileName,
+                         Hdf& config,
                          const bool shouldPrint) {
   if (setenv("HHVM_RUNTIME_REPO_SCHEMA", repoSchema, 1 /* overwrite */)) {
     fprintf(stderr, "Could not set repo schema");
@@ -45,79 +45,63 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   }
 
   register_process_init();
-  hphp_thread_init();
+  hphp_thread_init(true);
   g_context.getCheck();
+
   IniSetting::Map ini = IniSetting::Map::object;
-  Hdf config;
   RuntimeOption::Load(ini, config);
 
   hasRepo = !repoFileName.empty();
   if (hasRepo) RepoFile::init(repoFileName);
 
-  RuntimeOption::AlwaysUseRelativePath = false;
-  RuntimeOption::SafeFileAccess = false;
-  RuntimeOption::EvalAllowHhas = true;
-  RuntimeOption::SandboxMode = true; // So we get Unit::m_funcTable
-  RuntimeOption::RepoAuthoritative = true;
-  RuntimeOption::EvalLowStaticArrays = false; // save some low mem
+  Cfg::Server::AlwaysUseRelativePath = false;
+  Cfg::Server::SafeFileAccess = false;
+  Cfg::Eval::AllowHhas = true;
+  Cfg::Sandbox::Mode = true; // So we get Unit::m_funcTable
+  Cfg::Repo::Authoritative = true;
+  Cfg::Eval::LowStaticArrays = false; // save some low mem
+  Cfg::Eval::VerifySystemLibHasNativeImpl = false;
 
   if (hasRepo) {
     RepoFile::loadGlobalTables();
     RepoFile::globalData().load();
   }
-
-  std::string hhasLib;
-  auto const phpLib = get_systemlib(&hhasLib);
-  if (!phpLib.empty()) {
-    auto phpUnit = compile_string(phpLib.c_str(), phpLib.size(),
-                                  "systemlib.php",
-                                  Native::s_systemNativeFuncs,
-                                  RepoOptions::defaults());
-    addUnit(phpUnit);
-  }
-  if (!hhasLib.empty()) {
-    auto hhasUnit = compile_string(hhasLib.c_str(), hhasLib.size(),
-                                   "systemlib.hhas",
-                                   Native::s_systemNativeFuncs,
-                                   RepoOptions::defaults());
-    addUnit(hhasUnit);
-  }
-
-  SystemLib::s_inited = true;
 }
 
 RepoWrapper::~RepoWrapper() {
   CacheType::const_iterator it;
   for (it = unitCache.begin(); it != unitCache.end(); it++) delete it->second;
+
+  hphp_thread_exit(true);
 }
 
 void RepoWrapper::addUnit(Unit* unit) {
-  unitCache.insert({unit->sha1(), unit});
+  unitCache.insert({unit->sn(), unit});
 }
 
-Unit* RepoWrapper::getUnit(SHA1 sha1) {
+Unit* RepoWrapper::getUnit(int64_t sn) {
   if (!hasRepo) return nullptr;
 
-  CacheType::const_iterator it = unitCache.find(sha1);
+  CacheType::const_iterator it = unitCache.find(sn);
   if (it != unitCache.end()) return it->second;
 
   auto const unit = [&] () -> Unit* {
-    auto const path = RepoFile::findUnitPath(sha1);
+    auto const path = RepoFile::findUnitPath(sn);
     if (!path) return nullptr;
     auto const ue =
-      RepoFile::loadUnitEmitter(path, path, Native::s_noNativeFuncs, false);
+      RepoFile::loadUnitEmitter(path, nullptr, false);
     if (!ue) return nullptr;
     return ue->create().release();
   }();
 
-  if (unit) unitCache.insert({sha1, unit});
+  if (unit) unitCache.insert({sn, unit});
   return unit;
 }
 
-Func* RepoWrapper::getFunc(SHA1 sha1, Id funcSn) {
+Func* RepoWrapper::getFunc(int64_t sn, Id funcSn) {
   if (!hasRepo) return nullptr;
 
-  auto const unit = getUnit(sha1);
+  auto const unit = getUnit(sn);
   if (!unit) {
     return nullptr;
   }

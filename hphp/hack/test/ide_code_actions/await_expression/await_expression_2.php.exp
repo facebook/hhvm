@@ -1,0 +1,38 @@
+Code actions available:
+------------------------------------------
+await expression (CodeActionKind: "refactor") SELECTED
+Extract into variable (CodeActionKind: "refactor")
+Devmate Quick Fix - Typing error (CodeActionKind: "quickfix")
+Devmate Agent Fix - Typing error (CodeActionKind: "quickfix")
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"return /*range-start*/await gen_int()/*range-end*/ + 3;",
+          "range":{"end":{"character":51,"line":8},"start":{"character":2,"line":8}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"await expression"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+async function gen_int(): Awaitable<int> {
+  return 1;
+}
+
+
+async function repro(): Awaitable<mixed> {
+  return /*range-start*/await gen_int()/*range-end*/ + 3;
+}
+

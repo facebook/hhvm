@@ -40,7 +40,7 @@ trait CodegenAssertUnchanged {
     ?string $token = null,
   ): void {
     $token = $token ?? self::findToken();
-    $exp = self::getTokenToExpected()[$token ?? self::findToken()];
+    $exp = self::getTokenToExpected()[$token];
     expect($exp)->toEqual(
       $value,
       "The value for token (%s) has changed.\nExpected: %s\nActual: %s",
@@ -90,7 +90,7 @@ trait CodegenAssertUnchanged {
     // Get caller function name
     $stack = \debug_backtrace();
     foreach ($stack as $function) {
-      $function_name = $function['function'];
+      $function_name = Shapes::at($function, 'function');
       if (Str\starts_with($function_name, 'test')) {
         $token = $function_name;
         break;

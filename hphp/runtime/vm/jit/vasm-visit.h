@@ -376,18 +376,34 @@ struct DfsWalker {
   explicit DfsWalker(const Vunit& u)
     : unit(u)
     , visited(u.blocks.size())
-  {}
+    , complete(u.blocks.size())
+  {
+    stack.reserve(u.blocks.size());
+  }
 
   template<class Pre, class Post>
-  void dfs(Vlabel b, Pre pre, Post post) {
-    if (visited.test(b)) return;
-    visited.set(b);
-
-    pre(b);
-    for (auto s : succs(unit.blocks[b])) {
-      dfs(s, pre, post);
+  void dfs(Vlabel block, Pre pre, Post post) {
+    auto const enqueue = [this] (Vlabel b) {
+      if (visited.test(b)) return;
+      stack.emplace_back(b);
+    };
+    enqueue(block);
+    while (!stack.empty()) {
+      block = stack.back();
+      if (!visited.test(block)) {
+        visited.set(block);
+        pre(block);
+        for (auto s : succs(unit.blocks[block])) {
+          enqueue(s);
+        }
+      } else {
+        stack.pop_back();
+        if (!complete.test(block)) {
+          complete.set(block);
+          post(block);
+        }
+      }
     }
-    post(b);
   }
 
   template<class Pre, class Post>
@@ -398,6 +414,8 @@ struct DfsWalker {
 private:
   const Vunit& unit;
   boost::dynamic_bitset<> visited;
+  boost::dynamic_bitset<> complete;
+  jit::vector<Vlabel> stack;
 };
 
 /*

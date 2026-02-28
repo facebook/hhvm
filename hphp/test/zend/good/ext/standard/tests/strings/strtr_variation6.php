@@ -11,7 +11,7 @@
 
 //defining a class
 class sample  {
-  public function __toString() {
+  public function __toString() :mixed{
     return "sample object";
   }
 }
@@ -26,7 +26,7 @@ $file_handle = fopen(__FILE__, "r");
 $str = "012atm";
 
 // array of values for 'from'
-$from_arr =  varray [
+$from_arr =  vec[
 
           // integer values
 /*1*/      0,

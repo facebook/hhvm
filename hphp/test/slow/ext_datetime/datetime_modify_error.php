@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_datetime_modify_error() {
+function main_datetime_modify_error() :mixed{
 date_default_timezone_set("Europe/Berlin");
 
 $datetime = new DateTime('2015-01-08');

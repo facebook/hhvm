@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 enum Size: int {
   SMALL = 0;

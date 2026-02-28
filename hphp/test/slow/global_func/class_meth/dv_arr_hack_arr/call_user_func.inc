@@ -13,6 +13,6 @@ class C {
   }
 }
 
-function afunc($x) {
+<<__DynamicallyCallable>> function afunc($x) {
     return $x * 3;
 }

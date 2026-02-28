@@ -1,6 +1,6 @@
 <?hh
 class TestSoapClient extends SoapClient{
-  function __dorequest($request, $location, $action, $version, $one_way = 0) {
+  function __dorequest($request, $location, $action, $version, $one_way = 0) :mixed{
           echo $request;
           exit;
     }
@@ -12,13 +12,13 @@ class book{
 
 }
 
-function book_to_xml($book) {
+function book_to_xml($book) :mixed{
     throw new SoapFault("Client", "Conversion Error");
 }
 <<__EntryPoint>> function main(): void {
-$options=darray[
+$options=dict[
         'actor' =>'http://schemas.nothing.com',
-        'typemap' => varray[darray["type_ns"   => "http://schemas.nothing.com",
+        'typemap' => vec[dict["type_ns"   => "http://schemas.nothing.com",
                                  "type_name" => "book",
                                  "to_xml"  => book_to_xml<>]]
         ];
@@ -28,7 +28,7 @@ $book = new book();
 $book->a = "foo";
 $book->b = "bar";
 try {
-    $ret = $client->__soapcall('dotest', varray[$book]);
+    $ret = $client->__soapcall('dotest', vec[$book]);
 } catch (SoapFault $e) {
     $ret = "SoapFault = " . $e->faultcode . " - " . $e->faultstring;
 }

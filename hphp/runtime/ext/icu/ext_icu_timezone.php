@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
-<<__NativeData("IntlTimeZone")>>
+<<__NativeData>>
 class IntlTimeZone {
 
   /**
@@ -84,7 +84,7 @@ class IntlTimeZone {
   <<__Native>>
   public static function getCanonicalID(
     string $zoneId,
-    <<__OutOnly("KindOfBoolean")>> inout mixed $isSystemID,
+    <<__OutOnly>> inout bool $isSystemID,
   ): mixed;
 
 
@@ -176,8 +176,8 @@ class IntlTimeZone {
   public function getOffset(
     float $date,
     bool $local,
-    <<__OutOnly('KindOfInt64')>> inout int $rawOffset,
-    <<__OutOnly('KindOfInt64')>> inout int $dstOffset,
+    <<__OutOnly>> inout int $rawOffset,
+    <<__OutOnly>> inout int $dstOffset,
   ): bool;
 
   /**

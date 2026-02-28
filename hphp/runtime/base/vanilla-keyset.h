@@ -376,6 +376,7 @@ public:
   static bool ExistsStr(const ArrayData*, const StringData*);
   static arr_lval LvalInt(ArrayData*, int64_t);
   static arr_lval LvalStr(ArrayData*, StringData*);
+  static ArrayData* SetPosMove(ArrayData*, ssize_t, TypedValue);
   static ArrayData* SetIntMove(ArrayData*, int64_t, TypedValue);
   static ArrayData* SetStrMove(ArrayData*, StringData*, TypedValue);
   static ArrayData* RemoveIntMove(ArrayData*, int64_t);

@@ -1,0 +1,8 @@
+*** Testing strtok() : with first argument as non-string ***
+
+--- Testing strtok() by supplying different values for 'str' argument ---
+-- Iteration 1 --
+bool(false)
+-- Iteration 2 --
+bool(false)
+Done

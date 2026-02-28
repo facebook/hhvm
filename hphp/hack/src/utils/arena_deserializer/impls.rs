@@ -3,13 +3,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::seed::ArenaSeed;
-use bumpalo::collections::Vec as ArenaVec;
-use bumpalo::Bump;
-use serde::de::{Deserializer, SeqAccess, Visitor};
-use serde::Deserialize;
 use std::fmt;
 use std::marker::PhantomData;
+
+use bumpalo::Bump;
+use bumpalo::collections::Vec as ArenaVec;
+use ocamlrep_caml_builtins::Int64;
+use serde::Deserialize;
+use serde::de::Deserializer;
+use serde::de::SeqAccess;
+use serde::de::Visitor;
+
+use crate::seed::ArenaSeed;
 
 pub trait DeserializeInArena<'arena>: Sized {
     fn deserialize_in_arena<D>(arena: &'arena Bump, deserializer: D) -> Result<Self, D::Error>
@@ -90,6 +95,7 @@ impl_deserialize_in_arena!(usize);
 impl_deserialize_in_arena!(f32);
 impl_deserialize_in_arena!(f64);
 impl_deserialize_in_arena!(char);
+impl_deserialize_in_arena!(Int64);
 
 impl<'arena> DeserializeInArena<'arena> for &'arena str {
     fn deserialize_in_arena<D>(arena: &'arena Bump, deserializer: D) -> Result<Self, D::Error>
@@ -201,7 +207,7 @@ where
             where
                 A: SeqAccess<'arena>,
             {
-                let mut vec = Vec::new();
+                let mut vec = Vec::with_capacity(seq.size_hint().unwrap_or(0));
                 let seed = ArenaSeed::new();
                 while let Some(value) = seq.next_element_seed(seed)? {
                     vec.push(value);

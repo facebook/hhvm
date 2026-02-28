@@ -6,19 +6,19 @@
 
 class foo
 {
-  function __toString() {
+  function __toString() :mixed{
     return "Object";
   }
 }
 
 <<__EntryPoint>> function main(): void {
 echo "*** Testing implode() for basic opeartions ***\n";
-$arrays = varray [
-  varray[1,2],
-  varray[1.1,2.2],
-  varray[false,true],
-  varray[],
-  varray["a","aaaa","b","bbbb","c","ccccccccccccccccccccc"]
+$arrays = vec[
+  vec[1,2],
+  vec[1.1,2.2],
+  vec[false,true],
+  vec[],
+  vec["a","aaaa","b","bbbb","c","ccccccccccccccccccccc"]
 ];
 /* loop to output string with ', ' as $glue, using implode() */
 foreach ($arrays as $array) {
@@ -28,7 +28,7 @@ foreach ($arrays as $array) {
 
 echo "\n*** Testing implode() with variations of glue ***\n";
 /* checking possible variations */
-$pieces = varray [
+$pieces = vec[
   2,
   0,
   -639,
@@ -40,7 +40,7 @@ $pieces = varray [
   " ",
   "string\x00with\x00...\0"
 ];
-$glues = varray [
+$glues = vec[
   "TRUE",
   true,
   false,
@@ -67,7 +67,7 @@ var_dump( implode("") );
 echo "\n*** Testing implode() on objects ***\n";
 /* checking on objects */
 $obj = new foo(); //creating new object
-$arr = varray[$obj, $obj];
+$arr = vec[$obj, $obj];
 var_dump( implode(",", $arr) );
 var_dump($arr);
 
@@ -80,7 +80,7 @@ $file_handle = fopen(__FILE__, "r");
 $dir_handle = opendir( dirname(__FILE__) );
 
 /* store resources in array for comparison */
-$resources = varray[$file_handle, $dir_handle];
+$resources = vec[$file_handle, $dir_handle];
 
 var_dump( implode("::", $resources) );
 
@@ -98,7 +98,7 @@ var_dump( implode("glue",1234) );
 var_dump( implode("glue", NULL) );
 
 /* pieces as NULL array */
-var_dump( implode(",", varray[NULL]) );
+var_dump( implode(",", vec[NULL]) );
 
 /* integer as glue */
 var_dump( implode(12, "pieces") );

@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   $x = Map {};
   $y = Map {'a' => 1, 'b' => 2};
   $x->differenceByKey($y);
@@ -7,6 +7,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_map_difference_by_key_bug() {
+function main_map_difference_by_key_bug() :mixed{
 main();
 }

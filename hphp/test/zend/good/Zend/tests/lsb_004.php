@@ -1,7 +1,7 @@
 <?hh
 
 class TestClass {
-    public static function getClassName() {
+    public static function getClassName() :mixed{
         return static::class;
     }
 }

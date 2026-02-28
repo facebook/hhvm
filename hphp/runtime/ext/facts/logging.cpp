@@ -51,7 +51,6 @@ folly::SynchronizedPtr<std::unique_ptr<Cronolog>> make_synchronized_crono(
     const std::string& link,
     const std::string& owner,
     int period_multiple) {
-
   if (file_template.empty() || link.empty()) {
     throw std::runtime_error("File template and link are required settings.");
   }
@@ -95,7 +94,7 @@ bool isTtyHelper(FILE* fp) {
  * information.
  */
 struct CronoLogWriter final : public folly::LogWriter {
-public:
+ public:
   struct Options {
     std::string file_template;
     std::string link;
@@ -110,11 +109,10 @@ public:
             options.file_template,
             options.link,
             options.owner,
-            options.period_multiple)}
-      , m_tty{isTtyHelper(m_crono.wlock()->getOutputFile())}
-      , m_flush{options.flush_after_write}
-      , m_drop_on_error{options.drop_on_error} {
-  }
+            options.period_multiple)},
+        m_tty{isTtyHelper(m_crono.wlock()->getOutputFile())},
+        m_flush{options.flush_after_write},
+        m_drop_on_error{options.drop_on_error} {}
 
   void writeMessage(folly::StringPiece buffer, uint32_t flags = 0) override {
     auto crono = m_crono.wlock();
@@ -157,7 +155,7 @@ public:
     return m_tty;
   }
 
-private:
+ private:
   folly::SynchronizedPtr<std::unique_ptr<Cronolog>> m_crono;
   const bool m_tty;
   const bool m_flush;
@@ -169,18 +167,17 @@ private:
  * selects a destination file to write to using the Cronolog class.
  */
 struct CronoLogHandlerFactory final : public folly::LogHandlerFactory {
-public:
-  explicit CronoLogHandlerFactory(const std::string& owner) : m_owner(owner) {
-  }
+ public:
+  explicit CronoLogHandlerFactory(const std::string& owner) : m_owner(owner) {}
 
   folly::StringPiece getType() const override {
     return "crono";
   }
 
-  std::shared_ptr<folly::LogHandler>
-  createHandler(const Options& options) override;
+  std::shared_ptr<folly::LogHandler> createHandler(
+      const Options& options) override;
 
-private:
+ private:
   std::string m_owner;
   struct WriterFactory;
 };
@@ -207,14 +204,13 @@ private:
  */
 struct CronoLogHandlerFactory::WriterFactory final
     : public folly::StandardLogHandlerFactory::WriterFactory {
-
-public:
+ public:
   explicit WriterFactory(const std::string& owner) {
     m_options.owner = owner;
   }
 
-  bool
-  processOption(folly::StringPiece name, folly::StringPiece value) override {
+  bool processOption(folly::StringPiece name, folly::StringPiece value)
+      override {
     try {
       if (name == "file_template") {
         m_options.file_template = value.str();
@@ -254,23 +250,22 @@ public:
     }
   }
 
-private:
+ private:
   bool m_async = true;
   CronoLogWriter::Options m_options;
 };
 
-std::shared_ptr<folly::LogHandler>
-CronoLogHandlerFactory::createHandler(const Options& options) {
+std::shared_ptr<folly::LogHandler> CronoLogHandlerFactory::createHandler(
+    const Options& options) {
   WriterFactory writerFactory(m_owner);
   return folly::StandardLogHandlerFactory::createHandler(
       getType(), &writerFactory, options);
 }
 
 struct HhvmLogWriter final : public folly::LogWriter {
-
-public:
-  void
-  writeMessage(folly::StringPiece buffer, uint32_t /* flags */ = 0) override {
+ public:
+  void writeMessage(folly::StringPiece buffer, uint32_t /* flags */ = 0)
+      override {
     Logger::Error(buffer.str());
   }
 
@@ -278,8 +273,7 @@ public:
     Logger::Error(buffer);
   }
 
-  void flush() override {
-  }
+  void flush() override {}
 
   bool ttyOutput() const override {
     return false;
@@ -287,8 +281,7 @@ public:
 };
 
 struct HhvmLogFormatter final : public folly::LogFormatter {
-
-public:
+ public:
   std::string formatMessage(
       const folly::LogMessage& message,
       const folly::LogCategory* /* handlerCategory */) override {
@@ -319,24 +312,24 @@ public:
  * writes to a log using the Logger::Error method.
  */
 struct HhvmLogHandlerFactory final : public folly::LogHandlerFactory {
-public:
+ public:
   folly::StringPiece getType() const override {
     return "hhvm";
   }
 
-  std::shared_ptr<folly::LogHandler>
-  createHandler(const Options& options) override;
+  std::shared_ptr<folly::LogHandler> createHandler(
+      const Options& options) override;
 
-private:
+ private:
   struct WriterFactory;
   struct FormatterFactory;
 };
 
 struct HhvmLogHandlerFactory::FormatterFactory final
     : public folly::StandardLogHandlerFactory::FormatterFactory {
-
   bool processOption(
-      folly::StringPiece /* name */, folly::StringPiece /* value */) override {
+      folly::StringPiece /* name */,
+      folly::StringPiece /* value */) override {
     return false;
   }
 
@@ -357,10 +350,9 @@ struct HhvmLogHandlerFactory::FormatterFactory final
  */
 struct HhvmLogHandlerFactory::WriterFactory final
     : public folly::StandardLogHandlerFactory::WriterFactory {
-
-public:
-  bool
-  processOption(folly::StringPiece name, folly::StringPiece value) override {
+ public:
+  bool processOption(folly::StringPiece name, folly::StringPiece value)
+      override {
     try {
       if (name == "async") {
         m_async = folly::to<bool>(value);
@@ -382,12 +374,12 @@ public:
     }
   }
 
-private:
+ private:
   bool m_async = false;
 };
 
-std::shared_ptr<folly::LogHandler>
-HhvmLogHandlerFactory::createHandler(const Options& options) {
+std::shared_ptr<folly::LogHandler> HhvmLogHandlerFactory::createHandler(
+    const Options& options) {
   WriterFactory writerFactory;
   FormatterFactory formatterFactory;
   return folly::StandardLogHandlerFactory::createHandler(
@@ -397,11 +389,10 @@ HhvmLogHandlerFactory::createHandler(const Options& options) {
 } // namespace
 
 AsyncLogWriter::AsyncLogWriter(std::unique_ptr<folly::LogWriter> writer)
-    : m_is_tty{writer->ttyOutput()}
-    , m_writer{std::move(writer)}
-    , m_exec{std::make_unique<folly::ScopedEventBaseThread>("AsyncLogging")}
-    , m_syncedFuture{folly::makeFuture().via(m_exec.get())} {
-}
+    : m_is_tty{writer->ttyOutput()},
+      m_writer{std::move(writer)},
+      m_exec{std::make_unique<folly::ScopedEventBaseThread>("AsyncLogging")},
+      m_syncedFuture{folly::makeFuture().via(m_exec.get())} {}
 
 void AsyncLogWriter::writeMessage(folly::StringPiece buffer, uint32_t flags) {
   writeMessage(buffer.str(), flags);
@@ -433,7 +424,6 @@ void enableFactsLogging(
     const std::string& owner,
     const std::string& options,
     bool allow_propagation) {
-
   folly::LoggerDB::get().registerHandlerFactory(
       std::make_unique<CronoLogHandlerFactory>(owner));
 

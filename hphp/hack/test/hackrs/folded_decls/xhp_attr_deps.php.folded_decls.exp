@@ -1,0 +1,58 @@
+FoldedClass {
+    name: "\\:quux",
+    kind: Cclass(
+        Concrete,
+    ),
+    is_xhp: true,
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: class<this>,
+            origin: "\\:quux",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\:bar",
+    kind: Cclass(
+        Concrete,
+    ),
+    is_xhp: true,
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: class<this>,
+            origin: "\\:bar",
+            refs: [],
+        },
+    },
+    xhp_attr_deps: {
+        "\\:quux",
+    },
+}
+FoldedClass {
+    name: "\\:foo",
+    kind: Cclass(
+        Concrete,
+    ),
+    is_xhp: true,
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: class<this>,
+            origin: "\\:foo",
+            refs: [],
+        },
+    },
+    xhp_attr_deps: {
+        "\\:bar",
+        "\\:quux",
+    },
+}

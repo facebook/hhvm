@@ -6,7 +6,7 @@
  *               filesystem or disk partition
  */
 <<__EntryPoint>> function main(): void {
-$file_path = __SystemLib\hphp_test_tmproot();
+$file_path = sys_get_temp_dir();
 
 echo "*** Testing with a directory ***\n";
 var_dump( disk_free_space($file_path."/..") ); 
@@ -20,7 +20,7 @@ echo "\n*** Testing with different directory combinations ***";
 $dir = "/disk_free_space";
 mkdir($file_path.$dir);
 
-$dirs_arr = varray[
+$dirs_arr = vec[
   ".",
   $file_path.$dir,
   $file_path."/.".$dir,

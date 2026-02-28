@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_expression_method_call() {
+function main_expression_method_call() :mixed{
 var_dump(
   (true ? Vector{1} : Vector{2})->add(3)
 );

@@ -27,6 +27,7 @@
 #include <functional>
 #include <set>
 #include <string>
+#include <variant>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,66 +35,7 @@ namespace HPHP {
 struct Array;
 struct Extension;
 struct String;
-
-bool ini_on_update(const Variant& value, bool& p);
-bool ini_on_update(const Variant& value, double& p);
-bool ini_on_update(const Variant& value, char& p);
-bool ini_on_update(const Variant& value, int16_t& p);
-bool ini_on_update(const Variant& value, int32_t& p);
-bool ini_on_update(const Variant& value, int64_t& p);
-bool ini_on_update(const Variant& value, unsigned char& p);
-bool ini_on_update(const Variant& value, uint16_t& p);
-bool ini_on_update(const Variant& value, uint32_t& p);
-bool ini_on_update(const Variant& value, uint64_t& p);
-bool ini_on_update(const Variant& value, std::string& p);
-bool ini_on_update(const Variant& value, String& p);
-bool ini_on_update(const Variant& value, Array& p);
-bool ini_on_update(const Variant& value, std::set<std::string>& p);
-bool ini_on_update(const Variant& value, std::vector<uint32_t>& p);
-bool ini_on_update(const Variant& value, std::vector<std::string>& p);
-bool ini_on_update(const Variant& value,
-                   std::unordered_map<std::string, int>& p);
-bool ini_on_update(const Variant& value,
-                   std::map<std::string, std::string>& p);
-bool ini_on_update(const Variant& value,
-                   std::map<std::string, std::string, stdltistr>& p);
-bool ini_on_update(const Variant& value,
-                   std::set<std::string, stdltistr>& p);
-bool ini_on_update(const Variant& value,
-                   boost::container::flat_set<std::string>& p);
-bool ini_on_update(const Variant& value,
-                   hphp_string_imap<std::string>& p);
-bool ini_on_update(const Variant& value,
-                   hphp_fast_string_map<std::string>& p);
-bool ini_on_update(const Variant& value,
-                   hphp_fast_string_imap<std::string>& p);
-bool ini_on_update(const Variant& value, hphp_fast_string_set& p);
-
-Variant ini_get(bool& p);
-Variant ini_get(double& p);
-Variant ini_get(char& p);
-Variant ini_get(int16_t& p);
-Variant ini_get(int32_t& p);
-Variant ini_get(int64_t& p);
-Variant ini_get(unsigned char& p);
-Variant ini_get(uint16_t& p);
-Variant ini_get(uint32_t& p);
-Variant ini_get(uint64_t& p);
-Variant ini_get(std::string& p);
-Variant ini_get(String& p);
-Variant ini_get(Array& p);
-Variant ini_get(std::set<std::string>& p);
-template<typename T>
-Variant ini_get(std::vector<T>& p);
-Variant ini_get(std::unordered_map<std::string, int>& p);
-Variant ini_get(std::map<std::string, std::string>& p);
-Variant ini_get(std::map<std::string, std::string, stdltistr>& p);
-Variant ini_get(std::set<std::string, stdltistr>& p);
-Variant ini_get(boost::container::flat_set<std::string>& p);
-Variant ini_get(hphp_string_imap<std::string>& p);
-Variant ini_get(hphp_fast_string_map<std::string>& p);
-Variant ini_get(hphp_fast_string_imap<std::string>& p);
-Variant ini_get(hphp_fast_string_set& p);
+struct StructuredLogEntry;
 
 /**
  * If given an ini setting like "hhvm.abc[def][ghi]=yyy" and we have
@@ -173,7 +115,7 @@ public:
 
   struct ParserCallback {
     explicit ParserCallback(ParserCallbackMode mode) : mode_(mode) {}
-    virtual ~ParserCallback() {};
+    virtual ~ParserCallback() {}
     virtual void onSection(const std::string &name, void *arg);
     virtual void onLabel(const std::string &name, void *arg);
     virtual void onEntry(const std::string &key, const std::string &value,
@@ -231,19 +173,10 @@ public:
     void onConstant(std::string& result, const std::string& name) override;
   };
 
-  enum Mode {
-    PHP_INI_NONE   = 0,
-    // These 3 match zend
-    PHP_INI_USER   = (1u << 0),
-    PHP_INI_PERDIR = (1u << 1),
-    PHP_INI_SYSTEM = (1u << 2),
-
-    PHP_INI_ONLY   = (1u << 3),
-    PHP_INI_ALL    = (1u << 4),
-
-    PHP_INI_SET_USER   = PHP_INI_USER | PHP_INI_ALL,
-    PHP_INI_SET_EVERY  = PHP_INI_ONLY | PHP_INI_SYSTEM | PHP_INI_PERDIR |
-                         PHP_INI_SET_USER,
+  enum class Mode {
+    Request,  // A value that can be set per request
+    Config,   // A value that can be set through configuration
+    Constant, // A constant value decided at compile time. Can not be set
   };
 
 public:
@@ -261,7 +194,16 @@ public:
   static std::string Get(const String& name);
   static Array GetAll(const String& extension, bool details);
   static std::string GetAllAsJSON();
+  static folly::dynamic GetAllAsDynamic();
+  static size_t HashAll(const hphp_fast_string_set& toLog,
+                        const hphp_fast_string_set& toExclude);
+  static void Log(StructuredLogEntry& ent, const hphp_fast_string_set& toLog,
+                  const hphp_fast_string_set& toExclude);
 
+  static bool canSet(int64_t settingMode, Mode checkMode) {
+    return canSet(static_cast<Mode>(settingMode), checkMode);
+  }
+  static bool canSet(Mode settingMode, Mode checkMode);
   /**
    * Change an INI setting as if it was in the php.ini file
    */
@@ -291,29 +233,71 @@ public:
   /**
    * Get the mode for a setting
    */
-  static bool GetMode(const String& name, Mode& mode);
+  static Optional<Mode> GetMode(const String& name);
+
+#define INI_COMMA ,
+#define INI_TYPES(X) \
+  X(bool) \
+  X(double) \
+  INI_TYPES4(X, X, X, X) \
+  X(std::string) \
+  X(std::vector<int32_t>) \
+  X(std::vector<std::string>) \
+  X(std::unordered_map<std::string INI_COMMA int>) \
+  X(Array)
+
+#define INI_TYPES4(N, U, M, S) \
+  N(char) \
+  N(int16_t) \
+  N(int32_t) \
+  N(int64_t) \
+  U(unsigned char) \
+  U(uint16_t) \
+  U(uint32_t) \
+  U(uint64_t) \
+  M(std::map<std::string INI_COMMA std::string>) \
+  M(std::map<std::string INI_COMMA std::string INI_COMMA stdltistr>) \
+  M(hphp_string_imap<std::string>) \
+  M(hphp_fast_string_map<std::string>) \
+  M(hphp_fast_string_imap<std::string>) \
+  S(std::set<std::string>) \
+  S(std::set<std::string INI_COMMA stdltistr>) \
+  S(boost::container::flat_set<std::string>) \
+  S(hphp_fast_string_set)
 
   template<class T>
-  struct SetAndGet {
-    explicit SetAndGet(
+  struct SetAndGetImpl {
+    SetAndGetImpl(
       std::function<bool (const T&)> setter,
-      std::function<T ()> getter)
-      : setter(setter),
-        getter(getter) {}
+      std::function<T ()> getter,
+      T* val = nullptr
+    ) : setter(setter)
+      , getter(getter)
+      , val(val)
+    {}
+    explicit SetAndGetImpl(T* val) : val(val) {}
 
-    explicit SetAndGet() {}
-
-    std::function<bool (const T&)> setter;
-    std::function<T ()> getter;
+    std::function<bool (const T&)> setter{nullptr};
+    std::function<T ()> getter{nullptr};
+    T* val{nullptr};
   };
+
+  template<class T>
+  struct SetAndGet : SetAndGetImpl<std::remove_cv_t<T>> {
+    using SetAndGetImpl<std::remove_cv_t<T>>::SetAndGetImpl;
+  };
+
+#define F(Ty) SetAndGetImpl<Ty>,
+  using OptionData = std::variant<INI_TYPES(F) std::nullptr_t>;
+#undef F
 
   /**
    * The heavy lifting of creating ini settings. First of all, if you don't
    * have to use this method, please don't. Instead use the simpler:
    *
-   *   IniSetting::Bind(this, PHP_INI_SYSTEM, "my.ini", &some_global_var);
+   *   IniSetting::Bind(this, IniSetting::Mode::Config, "my.ini", &some_global_var);
    *     or
-   *   IniSetting::Bind(this, PHP_INI_ALL, "my.ini", &some_thread_local_var);
+   *   IniSetting::Bind(this, IniSetting::Mode::Request, "my.ini", &some_thread_local_var);
    *
    * If you have to do something special before your variable is set or gotten
    * then you can use this function to add callbacks. Both callbacks are
@@ -325,47 +309,14 @@ public:
   template<class T>
   static void Bind(const Extension* extension, const Mode mode,
                    const std::string& name, const char *defaultValue,
-                   SetAndGet<T> callbacks, T* p = nullptr) {
-    auto callback_set = callbacks.setter;
-    auto setter = [callback_set, p](const Variant &value) {
-      T v;
-      auto ret = ini_on_update(value, v);
-      if (!ret) {
-        return false;
-      }
-      if (callback_set) {
-        ret = callback_set(v);
-        if (!ret) {
-          return false;
-        }
-      }
-      if (p) {
-        *p = v;
-      }
-      return true;
-    };
-    auto callback_get = callbacks.getter;
-    auto getter = [callback_get, p]() {
-      T v;
-      if (callback_get) {
-        v = callback_get();
-      } else if (p) {
-        v = *p;
-      }
-      return ini_get(v);
-    };
-    Bind(extension, mode, name, setter, getter);
-    auto hasSystemDefault = ResetSystemDefault(name);
-    if (!hasSystemDefault && defaultValue) {
-      setter(defaultValue);
-    }
+                   SetAndGetImpl<T> callbacks) {
+    Bind(extension, mode, name, OptionData(callbacks), defaultValue);
   }
 
   template<class T>
   static void Bind(const Extension* extension, const Mode mode,
-                   const std::string& name, SetAndGet<T> callbacks,
-                   T* p = nullptr) {
-    Bind(extension, mode, name, nullptr, callbacks, p);
+                   const std::string& name, SetAndGet<T> callbacks) {
+    Bind(extension, mode, name, nullptr, callbacks);
   }
 
   /**
@@ -378,7 +329,7 @@ public:
   template<class T>
   static void Bind(const Extension* extension, const Mode mode,
                    const std::string& name, const char *defaultValue, T *p) {
-    Bind(extension, mode, name, defaultValue, SetAndGet<T>(), p);
+    Bind(extension, mode, name, defaultValue, SetAndGet<T>(p));
   }
 
   template<class T>
@@ -420,8 +371,8 @@ private:
     const Extension* extension,
     const Mode mode,
     const std::string& name,
-    std::function<bool(const Variant&)>updateCallback,
-    std::function<Variant()> getCallback);
+    OptionData callbacks,
+    const char* defaultValue);
 };
 
 int64_t convert_bytes_to_long(folly::StringPiece value);
@@ -430,6 +381,14 @@ std::string convert_long_to_bytes(int64_t value);
 void add_default_config_files_globbed(
   const char *default_config_file,
   std::function<void (const char *filename)> cb);
+
+#define F(Ty) \
+  Variant ini_get(Ty&); \
+  bool ini_on_update(const Variant&, Ty&);
+
+INI_TYPES(F)
+
+#undef F
 
 ///////////////////////////////////////////////////////////////////////////////
 }

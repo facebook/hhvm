@@ -7,6 +7,10 @@ final class Test {
 <<__EntryPoint>>
 function main(): void {
   $f = Test::foo<int>;
-  $g = (string)$f;
-  var_dump($g);
+  try {
+    $g = (string)$f;
+    var_dump($g);
+  } catch (Exception $e) {
+    echo $e."\n";
+  } finally {}
 }

@@ -21,7 +21,7 @@ enum Enum3 : string {
   VAL6 = 'val6';
 }
 
-enum Enum4 : mixed {
+enum Enum4 : arraykey {
   VAL1 = 1;
   VAL2 = 'val2';
   VAL3 = 3;
@@ -432,7 +432,7 @@ class G extends F {
   public Alias12 $p50;
   public ?Alias1 $p51;
 
-  public static function test() {
+  public static function test() :mixed{
     new A();
     new B();
     new C();

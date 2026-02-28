@@ -1,10 +1,10 @@
 <?hh
 
 class C {
-  static function f($x) {
+  static function f($x) :mixed{
     return $x;
   }
 
-  static $x = "foo" |> f($$);
+  public static $x = "foo" |> f($$);
 }
 

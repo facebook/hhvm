@@ -7,6 +7,6 @@ final class :Foo {
 
 
 <<__EntryPoint>>
-function main_xhp_using() {
+function main_xhp_using() :mixed{
 echo "Done.\n";
 }

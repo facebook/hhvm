@@ -1,6 +1,15 @@
-<?hh // partial
+<?hh
 
 namespace {
+
+const int INFO_GENERAL = 1 << 0;
+const int INFO_CREDITS = 1 << 1;
+const int INFO_CONFIGURATION = 1 << 2;
+const int INFO_MODULES = 1 << 3;
+const int INFO_ENVIRONMENT = 1 << 4;
+const int INFO_VARIABLES = 1 << 5;
+const int INFO_LICENSE = 1 << 6;
+const int INFO_ALL = -1;
 
 /* Loads the PHP extension given by the parameter library.  Use
  * extension_loaded() to test whether a given extension is already available
@@ -19,7 +28,7 @@ function extension_loaded(string $name)[read_globals]: bool;
  * the PHP interpreter.
  */
 <<__Native>>
-function get_loaded_extensions(bool $zend_extensions = false)[read_globals]: varray;
+function get_loaded_extensions(bool $zend_extensions = false)[read_globals]: varray<string>;
 
 /* This function returns the names of all the functions defined in the module
  * indicated by module_name or false if $module_name is not a valid extension.
@@ -43,7 +52,7 @@ function get_current_user(): string;
  * includes those created by extensions.
  */
 <<__Native>>
-function get_defined_constants(bool $categorize = false): darray;
+function get_defined_constants(bool $categorize = false): darray<string, mixed>;
 
 <<__Native>>
 function get_include_path(): string;
@@ -60,11 +69,24 @@ function set_include_path(mixed $new_include_path): string;
  * include_once(), require() or require_once().
  */
 <<__Native>>
-function get_included_files(): varray;
+function get_included_files(): varray<string>;
 
-function get_required_files(): varray {
+function get_required_files(): varray<string> {
   return get_included_files();
 }
+
+/* For the duration of the request, keep track of all files that were
+ * invovled in autoloading
+ */
+<<__Native>>
+function record_visited_files(): void;
+
+/* Return a list of all files that were involved in autoloading for
+ * this request. Recording of visited files starts when the method
+ * record_visited_files is called.
+ */
+<<__Native>>
+function get_visited_files(): keyset<string>;
 
 <<__Native>>
 function getenv(string $varname)[read_globals]: mixed;
@@ -103,8 +125,10 @@ function getmyuid(): mixed;
  * as options takes a string (where each character is the option).
  */
 <<__Native>>
-function getopt(string $options,
-                mixed $longopts = null): darray;
+function getopt(
+  string $options,
+  mixed $longopts = null,
+): darray<arraykey, mixed>;
 
 /* Similar to getopt but accepts an inout optind which controls the argument
  * at which parsing begins. Sets the optind to the index of the first unparsed
@@ -119,25 +143,43 @@ function getopt_with_optind(string $options,
  * call.
  */
 <<__Native>>
-function getrusage(int $who = 0): darray;
+function getrusage(int $who = 0): shape(
+  'ru_oublock' => int,
+  'ru_inblock' => int,
+  'ru_msgsnd' => int,
+  'ru_msgrcv' => int,
+  'ru_maxrss' => int,
+  'ru_ixrss' => int,
+  'ru_idrss' => int,
+  'ru_minflt' => int,
+  'ru_majflt' => int,
+  'ru_nsignals' => int,
+  'ru_nvcsw' => int,
+  'ru_nivcsw' => int,
+  'ru_nswap' => int,
+  'ru_utime_tv_usec' => int,
+  'ru_utime_tv_sec' => int,
+  'ru_stime_tv_usec' => int,
+  'ru_stime_tv_sec' => int,
+);
 
 /* Gets resolution of system clock. "man 3 clock_getres" for more details.
  */
 <<__Native>>
 function clock_getres(int $clk_id,
-                      <<__OutOnly('KindOfInt64')>>
-                      inout mixed $sec,
-                      <<__OutOnly('KindOfInt64')>>
-                      inout mixed $nsec): bool;
+                      <<__OutOnly>>
+                      inout int $sec,
+                      <<__OutOnly>>
+                      inout int $nsec): bool;
 
 /* Gets time of a system clock. "man 3 clock_gettime" for more details.
  */
 <<__Native>>
 function clock_gettime(int $clk_id,
-                       <<__OutOnly('KindOfInt64')>>
-                       inout mixed $sec,
-                       <<__OutOnly('KindOfInt64')>>
-                       inout mixed $nsec)[leak_safe]: bool;
+                       <<__OutOnly>>
+                       inout int $sec,
+                       <<__OutOnly>>
+                       inout int $nsec)[leak_safe]: bool;
 
 /* Same as clock_gettime(), but returns a single integer in nanoseconds.
  * Returns -1 if invalid or non-supported clock is specified.
@@ -148,12 +190,12 @@ function clock_gettime_ns(int $clk_id)[leak_safe]: int;
 /* Gets number of processors.
  */
 <<__Native>>
-function cpu_get_count(): int;
+function cpu_get_count()[read_globals]: int;
 
 /* Gets processor model.
  */
 <<__Native>>
-function cpu_get_model(): string;
+function cpu_get_model()[read_globals]: string;
 
 /* Returns the value of the configuration option on success.
  */
@@ -163,8 +205,10 @@ function ini_get(string $varname)[read_globals]: mixed;
 /* Gets all configuration options
  */
 <<__Native>>
-function ini_get_all(string $extension = "",
-                     bool $details = true): darray;
+function ini_get_all(
+  string $extension = "",
+  bool $details = true,
+): darray<string, mixed>;
 
 /* Restores a given configuration option to its original value.
  */
@@ -239,6 +283,22 @@ function hphp_memory_start_interval(): bool;
  */
 <<__Native>>
 function hphp_memory_stop_interval(): bool;
+
+/* Set the OOM multiplier for the current request. A multiplier larger than 1
+ * can increase the chance of survival (without any guarantee) when the host
+ * runs out of memory, but doing so can make other requests suffer. Thus,
+ * discipline is required to manipulate this value. And HHVM could decide to
+ * reject values that are deemed unreasonable.
+ *
+ * Right now, this function is experimental. So you should refrain from using it
+ * without checking with the HHVM team first. The multiplier will also be
+ * applied to cost attribution, i.e., larger multiplier means you pay more for
+ * the execution of the request.
+ *
+ * Returns whether the multiplier was successfuly changed.
+ */
+<<__Native>>
+function set_oom_multiplier(int $m): bool;
 
 /* Retrieve a path to the loaded php.ini file.
  */
@@ -347,6 +407,33 @@ function version_compare(string $version1,
                          string $version2,
                          string $sop = "")[]: mixed;
 
+/* rds_bytes() returns a shape of all RDS memory utilization in bytes.
+ * You should assume this is an implementation detail of HHVM and is subject
+ * to change.
+ */
+<<__Native>>
+function rds_bytes(): shape(
+  "used_bytes" => int,
+  "used_local_bytes" => int, 
+  "used_persistent_bytes" => int,
+);
+
+<<__Native>>
+function tc_usage(): dict<string, shape(
+  "capacity" => int,
+  "used" => int,
+  "global" => bool
+)>;
+
+<<__Native>>
+function get_active_worker_counts(): shape(
+  "pagelet_workers" => int,
+  "xbox_workers" => int,
+  "http_workers" => int,
+  "cli_workers" => int,
+);
+
+
 } // root namespace
 
 namespace __SystemLib {
@@ -361,26 +448,44 @@ namespace __SystemLib {
       $this->body = $this->element('body');
     }
 
-    private function is_cli() { return \php_sapi_name() == 'cli'; }
+    private function is_cli(): bool { return \php_sapi_name() == 'cli'; }
 
-    private function appendChildren(\DOMElement $el, ?varray $children) {
-      if ($children) {
+    private function appendChildren(
+      \DOMElement $el,
+      ?varray<mixed> $children,
+    ): void {
+      if ($children is nonnull) {
         foreach ($children as $v) {
           if ($v === null) {
           } else if ($v is \DOMElement) {
             $el->appendChild($v);
           } else if (\HH\is_any_array($v)) {
-            $this->appendChildren($el, $v);
+            $this->appendChildren(
+              $el,
+              HH\FIXME\UNSAFE_CAST<AnyArray<arraykey, mixed>, varray<mixed>>($v),
+            );
           } else {
-            $el->appendChild($this->xml->createTextNode($v));
+            $el->appendChild(
+              HH\FIXME\UNSAFE_CAST<mixed, \DOMNode>(
+                $this->xml->createTextNode(
+                  HH\FIXME\UNSAFE_CAST<mixed, string>($v),
+                )
+              )
+            );
           }
         }
       }
     }
 
-    private function element(string $tag, ?darray $attr = null, ...$children) {
-      $el = $this->xml->createElement($tag);
-      if ($attr) {
+    private function element(
+      string $tag,
+      ?darray<string, string> $attr = null,
+      mixed... $children
+    ): \DOMElement {
+      $el = HH\FIXME\UNSAFE_CAST<mixed, \DOMElement>(
+        $this->xml->createElement($tag)
+      );
+      if ($attr is nonnull) {
         foreach ($attr as $k => $v) {
           $el->setAttribute($k, $v);
         }
@@ -389,36 +494,43 @@ namespace __SystemLib {
       return $el;
     }
 
-    private function tr(string $l, mixed $d) {
+    private function tr(string $l, mixed $d): \DOMElement {
       return
         $this->element(
-          'tr', darray[],
-          $this->element('td', darray['class' => 'l'], $l),
-          $this->element('td', darray['class' => 'r'], $d));
+          'tr', dict[],
+          $this->element('td', dict['class' => 'l'], $l),
+          $this->element('td', dict['class' => 'r'], $d));
     }
 
-    private function table(string $title, darray $data) {
+    private function table(
+      string $title,
+      darray<string, mixed> $data,
+    ): ?varray<\DOMElement> {
       if ($this->is_cli()) {
         echo $title . "\n";
         echo "\n";
         foreach ($data as $k => $v) {
-          echo $k . " => " . \print_r($v, true) . "\n";
+          echo $k .
+            " => " .
+            HH\FIXME\UNSAFE_CAST<mixed, string>(\print_r($v, true)) .
+            "\n";
         }
         echo "\n";
+        return null;
       } else {
-        $children = darray[];
+        $children = dict[];
         foreach ($data as $k => $v) {
           \array_push(inout $children, $this->tr($k, \print_r($v, true)));
         }
-        return varray[
+        return vec[
           $this->element('hr'),
-          $this->element('h2', darray[], $title),
-          $this->element('table', darray[], $children)
+          $this->element('h2', dict[], $title),
+          $this->element('table', dict[], $children)
         ];
       }
     }
 
-    private function appendHead(\DOMElement $html) {
+    private function appendHead(\DOMElement $html): void {
       $style =
         'body { margin: auto; text-align: center; width: 600px; }' .
         'hr { margin-top: 30px; }' .
@@ -429,26 +541,26 @@ namespace __SystemLib {
 
       $html->appendChild(
         $this->element(
-          'head', darray[],
-          $this->element('title', darray[], "HHVM phpinfo"),
-          $this->element('style', darray['type' => 'text/css'], $style)));
+          'head', dict[],
+          $this->element('title', dict[], "HHVM phpinfo"),
+          $this->element('style', dict['type' => 'text/css'], $style)));
     }
 
-    private function reportVersionTitle() {
+    private function reportVersionTitle(): void {
       if ($this->is_cli()) {
         echo 'HHVM Version => ' . \HHVM_VERSION . "\n";
       } else {
         $this->body->appendChild(
-          $this->element('h1', darray[], 'HHVM Version ' . \HHVM_VERSION));
+          $this->element('h1', dict[], 'HHVM Version ' . \HHVM_VERSION));
       }
     }
 
-    private function reportVersions() {
+    private function reportVersions(): void {
       if (!$this->is_cli()) {
-        $this->body->appendChild($this->element('h2', darray[], 'Version'));
+        $this->body->appendChild($this->element('h2', dict[], 'Version'));
       }
 
-      $data = darray[
+      $data = dict[
         'Version' => \HHVM_VERSION,
         'Version ID' => \HHVM_VERSION_ID,
         'Debug' => \HHVM_DEBUG,
@@ -460,26 +572,33 @@ namespace __SystemLib {
       $this->appendChildren($this->body, $this->table('Version', $data));
     }
 
-    private function reportIni() {
+    private function reportIni(): void {
       $this->appendChildren($this->body,
                             $this->table('INI', \ini_get_all('', false)));
     }
 
-    private function reportHeaders() {
-      if (!\function_exists('getallheaders')) return;
+    private function reportHeaders(): void {
+      if (!\function_exists('HH\\get_headers_secure')) return;
+      $headers = dict[];
+      foreach (\HH\get_headers_secure() as $k => $vs) {
+        // preserve "last seen header" behavior of `getallheaders`
+        $headers[$k] = $vs[\count($vs) - 1];
+      }
       $this->appendChildren($this->body,
-                            $this->table('Headers', \getallheaders()));
+                            $this->table('Headers', $headers));
     }
 
-    private function reportMap(string $name, darray $map) {
-      $data = darray[];
+    private function reportMap(string $name, darray<string, mixed> $map): void {
+      $data = dict[];
       foreach ($map as $k => $v) {
-        $data[\sprintf("%s['%s']", $name, $k)] = $v;
+        $data[
+          HH\FIXME\UNSAFE_CAST<mixed, string>(\sprintf("%s['%s']", $name, $k))
+        ] = $v;
       }
       $this->appendChildren($this->body, $this->table($name, $data));
     }
 
-    public function report() {
+    public function report(): void {
 
       $html = $this->element('html');
 
@@ -498,14 +617,24 @@ namespace __SystemLib {
       $this->reportIni();
       $this->reportHeaders();
 
-      $this->reportMap('$_SERVER', $_SERVER);
-      $this->reportMap('$_ENV', $_ENV);
+      $this->reportMap(
+        '$_SERVER',
+        HH\FIXME\UNSAFE_CAST<mixed, darray<string, mixed>>(
+          \HH\global_get('_SERVER')
+        ),
+      );
+      $this->reportMap(
+        '$_ENV',
+        HH\FIXME\UNSAFE_CAST<mixed, darray<string, mixed>>(
+          \HH\global_get('_ENV')
+        ),
+      );
 
       if (!$this->is_cli()) {
         $this->body->appendChild($this->element('br'));
         $this->xml->appendChild($html);
         \header('content-type: text/html; charset=UTF-8');
-        echo $this->xml->saveHTML();
+        echo HH\FIXME\UNSAFE_CAST<mixed, arraykey>($this->xml->saveHTML());
       }
     }
   }

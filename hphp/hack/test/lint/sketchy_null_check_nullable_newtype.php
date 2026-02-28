@@ -1,10 +1,10 @@
 //// file1.php
-<?hh // strict
+<?hh
 
 newtype Foo as ?int = ?int;
 
 //// file2.php
-<?hh // strict
+<?hh
 
 function test(Foo $x): void {
   if ($x) {

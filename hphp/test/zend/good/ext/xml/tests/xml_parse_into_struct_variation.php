@@ -9,8 +9,8 @@ echo "*** Testing xml_parse_into_struct() : variation ***\n";
 
 $simple = "<main><para><note>simple note</note></para><para><note>simple note</note></para></main>";
 $p = xml_parser_create();
-$vals = varray[];
-$index = varray[];
+$vals = vec[];
+$index = vec[];
 xml_parse_into_struct($p, $simple, inout $vals, inout $index);
 xml_parser_free($p);
 echo "Index array\n";

@@ -1,0 +1,7 @@
+convert to 'debugger_dump'
+
+<?hh
+
+function foo(): void {
+  debugger_dump(1);
+}

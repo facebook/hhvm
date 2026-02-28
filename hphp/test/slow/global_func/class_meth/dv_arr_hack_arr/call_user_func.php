@@ -1,6 +1,6 @@
 <?hh
 
-function test($f) {
+function test($f) :mixed{
   try {
     \var_dump(fb_call_user_func_async(__DIR__.'/call_user_func.inc', $f, 2));
   } catch (Exception $e) {
@@ -9,14 +9,14 @@ function test($f) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   require_once 'call_user_func.inc';
 
   test('afunc');
   test('afunc');
   test(darray(vec['C', 'cfunc']));
-  \var_dump(is_callable(HH\class_meth('C', 'cfunc')));
-  \var_dump(call_user_func_array(HH\class_meth('C', 'cfunc'), darray(vec[2])));
-  register_postsend_function(HH\class_meth('C', 'postSend'));
-  register_shutdown_function(HH\class_meth('C', 'onShutdown'));
+  \var_dump(is_callable(C::cfunc<>));
+  \var_dump(call_user_func_array(C::cfunc<>, darray(vec[2])));
+  register_postsend_function(C::postSend<>);
+  register_shutdown_function(C::onShutdown<>);
 }

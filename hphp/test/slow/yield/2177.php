@@ -4,7 +4,7 @@ class IntRef {
   public function __construct(public int $val)[] {}
 }
 
-function makeClosureCont() {
+function makeClosureCont() :mixed{
   $ref = new IntRef(0);
   return function () use ($ref) {
     yield $ref->val++;
@@ -16,13 +16,13 @@ function makeClosureCont() {
 abstract final class GenStatics {
   public static $x = 0;
 }
-function gen() {
+function gen() :AsyncGenerator<mixed,mixed,void>{
   yield GenStatics::$x++;
   yield GenStatics::$x++;
 }
 
 <<__EntryPoint>>
-function main_2177() {
+function main_2177() :mixed{
 $cc = makeClosureCont();
 foreach ($cc() as $v) {
  var_dump($v);

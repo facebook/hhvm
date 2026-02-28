@@ -1,0 +1,27 @@
+File "lvar_expr_dependent3.php", line 13, characters 5-22:
+  ~<expr#9>::T where <expr#9>::T as C::T
+File "lvar_expr_dependent3.php", line 14, characters 5-22:
+  ~<expr#9>::T where <expr#9>::T as C::T
+File "lvar_expr_dependent3.php", line 17, characters 5-22:
+  ~<expr#10>::T where <expr#10>::T as C::T
+File "lvar_expr_dependent3.php", line 22, characters 9-26:
+  ~<expr#10>::T where <expr#10>::T as C::T
+File "lvar_expr_dependent3.php", line 25, characters 9-26:
+  ~<expr#11>::T where <expr#11>::T as C::T
+File "lvar_expr_dependent3.php", line 29, characters 5-22:
+  ~<expr#11>::T where <expr#11>::T as C::T
+File "lvar_expr_dependent3.php", line 33, characters 9-26:
+  ~<expr#11>::T where <expr#11>::T as C::T
+File "lvar_expr_dependent3.php", line 36, characters 9-26:
+  ~<expr#12>::T where <expr#12>::T as C::T
+File "lvar_expr_dependent3.php", line 40, characters 9-26:
+  ~<expr#13>::T where <expr#13>::T as C::T
+File "lvar_expr_dependent3.php", line 44, characters 9-26:
+  ~<expr#11>::T where <expr#11>::T as C::T
+File "lvar_expr_dependent3.php", line 47, characters 9-26:
+  ~<expr#14>::T where <expr#14>::T as C::T
+File "lvar_expr_dependent3.php", line 51, characters 9-26:
+  ~<expr#11>::T where <expr#11>::T as C::T
+File "lvar_expr_dependent3.php", line 54, characters 5-22:
+  ~<expr#16>::T where <expr#16>::T as C::T
+No errors

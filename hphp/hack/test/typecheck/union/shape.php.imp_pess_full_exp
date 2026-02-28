@@ -1,0 +1,9 @@
+File "shape.php--file2.php", line 17, characters 3-13:
+  shape(?'a' => ?A)
+File "shape.php--file2.php", line 24, characters 3-13:
+  shape(?'b' => ?B)
+File "shape.php--file2.php", line 17, characters 3-13:[2]
+  dynamic
+File "shape.php--file2.php", line 24, characters 3-13:[2]
+  dynamic
+No errors

@@ -20,11 +20,8 @@ DEFAULT_OUT_EXT = ".out"
 DEFAULT_EXP_EXT = ".exp"
 
 flags_pessimise_unsupported = [
-    "--like-casts",
     "--complex-coercion",
-    "--like-types-all",
-    "--enable-higher-kinded-types",
-    "--enable-class-level-where-clauses",
+    "--enable-global-access-check",
 ]
 max_workers = 48
 verbose = False
@@ -51,9 +48,85 @@ class VerifyPessimisationOptions(Enum):
     all = "all"
     added = "added"
     removed = "removed"
+    full = "full"
 
     def __str__(self) -> str:
         return self.value
+
+
+def should_auto_update() -> bool:
+    """True iff UPDATE environment variable is set to 'always' (case insensitive)."""
+    # Check for UPDATE environment variable with case insensitive key matching
+    update_value = None
+    for key, value in os.environ.items():
+        if key.lower() == "update":
+            update_value = value.lower()
+            break
+
+    if update_value is None:
+        return False
+
+    if update_value == "always":
+        return True
+    elif update_value == "":
+        return False
+    else:
+        print(
+            f"Warning: Invalid UPDATE value '{update_value}'. Valid values are 'always' or unset (case insensitive)."
+        )
+        return False
+
+
+def filter_test_files(files: List[str], test_base_path: str) -> List[str]:
+    """Filter files based on TEST_FILTER environment variable.
+
+    TEST_FILTER can be:
+    - A relative path to a file (e.g., 'xhp_type_constant/xhp_type_constant_simple.php')
+    - A relative path to a directory (e.g., 'xhp_type_constant')
+    - Multiple paths separated by commas
+
+    Paths are relative to the test base path.
+    """
+    filter_value = os.getenv("TEST_FILTER")
+    if not filter_value:
+        return files
+
+    # Normalize the test base path
+    test_base_path = os.path.normpath(os.path.realpath(test_base_path))
+
+    # Parse filter patterns (comma-separated)
+    patterns = [p.strip() for p in filter_value.split(",") if p.strip()]
+
+    if not patterns:
+        return files
+
+    # Build list of absolute paths to match
+    filter_paths = []
+    for pattern in patterns:
+        # Make absolute path from pattern
+        abs_pattern = os.path.normpath(
+            os.path.realpath(os.path.join(test_base_path, pattern))
+        )
+        filter_paths.append(abs_pattern)
+
+    # Filter files
+    filtered = []
+    for file in files:
+        abs_file = os.path.normpath(os.path.realpath(file))
+        for filter_path in filter_paths:
+            # Match if file is the filter path, or if file is under a directory filter path
+            if abs_file == filter_path or abs_file.startswith(filter_path + os.sep):
+                filtered.append(file)
+                break
+
+    if filtered:
+        print(
+            f"TEST_FILTER: Running {len(filtered)} of {len(files)} tests matching: {filter_value}"
+        )
+    else:
+        print(f"Warning: TEST_FILTER '{filter_value}' matched no tests")
+
+    return filtered
 
 
 """
@@ -146,6 +219,7 @@ def check_output(
     ignore_error_text: bool,
     only_compare_error_lines: bool,
     verify_pessimisation: VerifyPessimisationOptions,
+    check_expected_included_in_actual: bool,
 ) -> Result:
     if only_compare_error_lines:
         (failed, out) = check_output_error_lines_only(case.file_path)
@@ -154,6 +228,8 @@ def check_output(
         out_path = (
             case.file_path + out_extension
             if verify_pessimisation == VerifyPessimisationOptions.no
+            or verify_pessimisation == VerifyPessimisationOptions.full
+            or out_extension == ".pess.out"
             else case.file_path + ".pess" + out_extension
         )
         try:
@@ -163,7 +239,12 @@ def check_output(
             out_path = os.path.realpath(out_path)
             output = "Output file " + out_path + " was not found!"
         return check_result(
-            case, default_expect_regex, ignore_error_text, verify_pessimisation, output
+            case,
+            default_expect_regex,
+            ignore_error_text,
+            verify_pessimisation,
+            check_expected_included_in_actual=check_expected_included_in_actual,
+            out=output,
         )
 
 
@@ -185,6 +266,7 @@ def run_batch_tests(
     get_flags: Callable[[str], List[str]],
     out_extension: str,
     verify_pessimisation: VerifyPessimisationOptions,
+    check_expected_included_in_actual: bool,
     only_compare_error_lines: bool = False,
 ) -> List[Result]:
     """
@@ -255,6 +337,7 @@ def run_batch_tests(
                 ignore_error_text=ignore_error_text,
                 only_compare_error_lines=only_compare_error_lines,
                 verify_pessimisation=verify_pessimisation,
+                check_expected_included_in_actual=check_expected_included_in_actual,
             )
             results.append(result)
         return results
@@ -289,9 +372,10 @@ def run_test_program(
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
     verify_pessimisation: VerifyPessimisationOptions,
+    check_expected_included_in_actual: bool,
     timeout: Optional[float] = None,
+    filter_glog_failures: bool = False,
 ) -> List[Result]:
-
     """
     Run the program and return a list of results.
     """
@@ -332,12 +416,16 @@ def run_test_program(
                 # we don't care about nonzero exit codes... for instance, type
                 # errors cause hh_single_type_check to produce them
                 output = str(e.output)
+        if filter_glog_failures:
+            glog_message_re = r"COULD NOT CREATE A LOGGINGFILE .+\!|Could not create logging file: No such file or directory\n|(E|I|W)\d{4} .*\n"
+            output = re.sub(glog_message_re, r"", output)
         return check_result(
             test_case,
             default_expect_regex,
             ignore_error_text,
             verify_pessimisation,
-            output,
+            check_expected_included_in_actual=check_expected_included_in_actual,
+            out=output,
         )
 
     executor = ThreadPoolExecutor(max_workers=max_workers)
@@ -389,6 +477,7 @@ def compare_expected(
     if (
         verify_pessimisation == VerifyPessimisationOptions.no
         or verify_pessimisation == VerifyPessimisationOptions.all
+        or verify_pessimisation == VerifyPessimisationOptions.full
     ):
         if expected == "No errors" or out == "No errors":
             return expected == out
@@ -414,6 +503,26 @@ def check_result(
     default_expect_regex: Optional[str],
     ignore_error_messages: bool,
     verify_pessimisation: VerifyPessimisationOptions,
+    check_expected_included_in_actual: bool,
+    out: str,
+) -> Result:
+    if check_expected_included_in_actual:
+        return check_included(test_case, out)
+    else:
+        return check_expected_equal_actual(
+            test_case,
+            default_expect_regex,
+            ignore_error_messages,
+            verify_pessimisation,
+            out,
+        )
+
+
+def check_expected_equal_actual(
+    test_case: TestCase,
+    default_expect_regex: Optional[str],
+    ignore_error_messages: bool,
+    verify_pessimisation: VerifyPessimisationOptions,
     out: str,
 ) -> Result:
     """
@@ -433,6 +542,7 @@ def check_result(
             (
                 ignore_error_messages
                 or verify_pessimisation != VerifyPessimisationOptions.no
+                and verify_pessimisation != VerifyPessimisationOptions.full
             )
             and compare_expected(expected, normalized_out, verify_pessimisation)
         )
@@ -444,6 +554,24 @@ def check_result(
         )
     )
     return Result(test_case=test_case, output=out, is_failure=not is_ok)
+
+
+def check_included(test_case: TestCase, output: str) -> Result:
+    sections = output.split("--\n")
+    expected_sections = test_case.expected.split("--\n")
+    is_failure = False
+    output = ""
+    for section, expected_section in zip(sections, expected_sections):
+        elts = set(section.splitlines())
+        expected_elts = set(expected_section.splitlines())
+        for expected_elt in expected_elts:
+            if expected_elt not in elts:
+                is_failure = True
+                break
+        for elt in expected_elts.intersection(elts):
+            output += elt + "\n"
+        output += "--\n"
+    return Result(test_case, output, is_failure)
 
 
 def record_results(results: List[Result], out_ext: str) -> None:
@@ -502,45 +630,32 @@ def report_failures(
         if dump_on_failure:
             dump_failures(failures)
         fnames = [failure.test_case.file_path for failure in failures]
+
+        # Check if UPDATE environment variable is set to 'always'
+        if should_auto_update():
+            print("UPDATE=always detected. Automatically updating snapshots...")
+            execute_snapshot_update(
+                failures,
+                out_extension,
+                expect_extension,
+                fallback_expect_extension,
+                verify_pessimisation,
+                no_copy,
+            )
+            return
+
         print("To review the failures, use the following command: ")
 
-        first_test_file = os.path.realpath(failures[0].test_case.file_path)
-        out_dir: str  # for Pyre
-        (exp_dir, out_dir) = get_exp_out_dirs(first_test_file)
-
-        # Get a full path to 'review.sh' so this command be run
-        # regardless of your current directory.
-        review_script = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "review.sh"
+        # Build and print the review command
+        review_command = build_review_command(
+            failures,
+            out_extension,
+            expect_extension,
+            fallback_expect_extension,
+            verify_pessimisation,
+            no_copy,
         )
-        if not os.path.isfile(review_script):
-            review_script = "./hphp/hack/test/review.sh"
-
-        def fname_map_var(f: str) -> str:
-            return "hphp/hack/" + os.path.relpath(f, out_dir)
-
-        env_vars = []
-        if out_extension != DEFAULT_OUT_EXT:
-            env_vars.append("OUT_EXT=%s" % out_extension)
-        if expect_extension != DEFAULT_EXP_EXT:
-            env_vars.append("EXP_EXT=%s" % expect_extension)
-        if fallback_expect_extension is not None:
-            env_vars.append("FALLBACK_EXP_EXT=%s " % fallback_expect_extension)
-        if verify_pessimisation != VerifyPessimisationOptions.no:
-            env_vars.append("VERIFY_PESSIMISATION=true")
-        if no_copy:
-            env_vars.append("UPDATE=never")
-
-        env_vars.extend(["SOURCE_ROOT=%s" % exp_dir, "OUTPUT_ROOT=%s" % out_dir])
-
-        print(
-            "%s %s %s"
-            % (
-                " ".join(env_vars),
-                review_script,
-                " ".join(map(fname_map_var, fnames)),
-            )
-        )
+        print(review_command)
 
         # If more than 75% of files have changed, we're probably doing
         # a transformation to all the .exp files.
@@ -549,6 +664,124 @@ def report_failures(
                 "\nJust want to update all the %s files? Use UPDATE=always with the above command."
                 % expect_extension
             )
+
+
+def build_review_command_parts(
+    failures: List[Result],
+    out_extension: str,
+    expect_extension: str,
+    fallback_expect_extension: Optional[str],
+    verify_pessimisation: VerifyPessimisationOptions,
+    no_copy: bool,
+    update_mode: Optional[str] = None,
+) -> Tuple[Dict[str, str], List[str]]:
+    """
+    Build the environment variables and command arguments for the review script.
+    Returns (env_vars_dict, command_args_list).
+    """
+    first_test_file = os.path.realpath(failures[0].test_case.file_path)
+    out_dir: str  # for Pyre
+    (exp_dir, out_dir) = get_exp_out_dirs(first_test_file)
+
+    # Get a full path to 'review.sh' so this command be run
+    # regardless of your current directory.
+    review_script = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "review.sh"
+    )
+    if not os.path.isfile(review_script):
+        review_script = "./hphp/hack/test/review.sh"
+
+    def fname_map_var(f: str) -> str:
+        return "hphp/hack/" + os.path.relpath(f, out_dir)
+
+    env_vars = {}
+    if out_extension != DEFAULT_OUT_EXT:
+        env_vars["OUT_EXT"] = out_extension
+    if expect_extension != DEFAULT_EXP_EXT:
+        env_vars["EXP_EXT"] = expect_extension
+    if fallback_expect_extension is not None:
+        env_vars["FALLBACK_EXP_EXT"] = fallback_expect_extension
+    if verify_pessimisation != VerifyPessimisationOptions.no:
+        env_vars["VERIFY_PESSIMISATION"] = "true"
+    if no_copy:
+        env_vars["UPDATE"] = "never"
+    if update_mode is not None:
+        env_vars["UPDATE"] = update_mode
+
+    env_vars["SOURCE_ROOT"] = exp_dir
+    env_vars["OUTPUT_ROOT"] = out_dir
+
+    fnames = [failure.test_case.file_path for failure in failures]
+    command_args = [review_script] + [fname_map_var(f) for f in fnames]
+
+    return (env_vars, command_args)
+
+
+def build_review_command(
+    failures: List[Result],
+    out_extension: str,
+    expect_extension: str,
+    fallback_expect_extension: Optional[str],
+    verify_pessimisation: VerifyPessimisationOptions,
+    no_copy: bool,
+) -> str:
+    """
+    Build the review command string that can be used to update snapshots.
+    """
+    env_vars, command_args = build_review_command_parts(
+        failures,
+        out_extension,
+        expect_extension,
+        fallback_expect_extension,
+        verify_pessimisation,
+        no_copy,
+    )
+
+    # Format as shell command string for display
+    env_str = " ".join(f"{k}={shlex.quote(v)}" for k, v in env_vars.items())
+    cmd_str = " ".join(shlex.quote(arg) for arg in command_args)
+    return f"{env_str} {cmd_str}"
+
+
+def execute_snapshot_update(
+    failures: List[Result],
+    out_extension: str,
+    expect_extension: str,
+    fallback_expect_extension: Optional[str],
+    verify_pessimisation: VerifyPessimisationOptions,
+    no_copy: bool,
+) -> None:
+    """
+    Execute the snapshot update by running the review script with UPDATE=always.
+    """
+    # Build the command parts with UPDATE=always
+    env_vars, command_args = build_review_command_parts(
+        failures,
+        out_extension,
+        expect_extension,
+        fallback_expect_extension,
+        verify_pessimisation,
+        no_copy,
+        update_mode="always",
+    )
+
+    env = os.environ.copy()
+    env.update(env_vars)
+
+    try:
+        result = subprocess.run(
+            command_args, env=env, capture_output=True, text=True, cwd=os.getcwd()
+        )
+        if result.returncode != 0:
+            print(
+                f"Warning: Snapshot update command failed with return code {result.returncode}"
+            )
+            if result.stderr:
+                print(f"Error output: {result.stderr}")
+        else:
+            print(f"Successfully updated {len(failures)} snapshot files.")
+    except Exception as e:
+        print(f"Error executing snapshot update: {e}")
 
 
 def dump_failures(failures: List[Result]) -> None:
@@ -589,7 +822,9 @@ def files_with_ext(files: List[str], ext: str) -> List[str]:
     return filtered_files
 
 
-def list_test_files(root: str, disabled_ext: str, test_ext: str) -> List[str]:
+def list_test_files(
+    root: str, disabled_ext: str, test_ext: str, include_directories: bool
+) -> List[str]:
     if os.path.isfile(root):
         if root.endswith(test_ext):
             return [root]
@@ -597,12 +832,19 @@ def list_test_files(root: str, disabled_ext: str, test_ext: str) -> List[str]:
             return []
     elif os.path.isdir(root):
         result: List[str] = []
+        if include_directories and root.endswith(test_ext):
+            result.append(root)
         children = os.listdir(root)
         disabled = files_with_ext(children, disabled_ext)
         for child in children:
             if child != "disabled" and child not in disabled:
                 result.extend(
-                    list_test_files(os.path.join(root, child), disabled_ext, test_ext)
+                    list_test_files(
+                        os.path.join(root, child),
+                        disabled_ext,
+                        test_ext,
+                        include_directories,
+                    )
                 )
         return result
     elif os.path.islink(root):
@@ -648,10 +890,11 @@ def run_tests(
     verify_pessimisation: VerifyPessimisationOptions,
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
+    check_expected_included_in_actual: bool,
     timeout: Optional[float] = None,
     only_compare_error_lines: bool = False,
+    filter_glog_failures: bool = False,
 ) -> List[Result]:
-
     # for each file, create a test case
     test_cases = [
         TestCase(
@@ -673,6 +916,7 @@ def run_tests(
             get_flags,
             out_extension,
             verify_pessimisation,
+            check_expected_included_in_actual,
             only_compare_error_lines,
         )
     else:
@@ -686,7 +930,9 @@ def run_tests(
             mode_flag,
             get_flags,
             verify_pessimisation,
+            check_expected_included_in_actual=check_expected_included_in_actual,
             timeout=timeout,
+            filter_glog_failures=filter_glog_failures,
         )
 
     failures = [result for result in results if result.is_failure]
@@ -721,6 +967,7 @@ def run_idempotence_tests(
     default_expect_regex: Optional[str],
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
+    check_expected_included_in_actual: bool,
 ) -> None:
     idempotence_test_cases = [
         TestCase(
@@ -741,6 +988,7 @@ def run_idempotence_tests(
         mode_flag,
         get_flags,
         VerifyPessimisationOptions.no,
+        check_expected_included_in_actual=check_expected_included_in_actual,
     )
 
     num_idempotence_results = len(idempotence_results)
@@ -791,7 +1039,8 @@ def get_flags_dummy(args_flags: List[str]) -> Callable[[str], List[str]]:
     return get_flags
 
 
-if __name__ == "__main__":
+def main() -> None:
+    global max_workers, dump_on_failure, verbose, args
     parser = argparse.ArgumentParser()
     parser.add_argument("test_path", help="A file or a directory. ")
     parser.add_argument("--program", type=os.path.abspath)
@@ -800,6 +1049,7 @@ if __name__ == "__main__":
     parser.add_argument("--fallback-expect-extension", type=str)
     parser.add_argument("--default-expect-regex", type=str)
     parser.add_argument("--in-extension", type=str, default=".php")
+    parser.add_argument("--include-directories", action="store_true")
     parser.add_argument("--disabled-extension", type=str, default=".no_typecheck")
     parser.add_argument("--verbose", action="store_true")
     parser.add_argument(
@@ -812,7 +1062,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--diff",
         action="store_true",
-        help="On test failure, show the content of " "the files and a diff",
+        help="On test failure, show the content of the files and a diff",
     )
     parser.add_argument("--mode-flag", type=str)
     parser.add_argument("--flags", nargs=argparse.REMAINDER)
@@ -839,6 +1089,12 @@ if __name__ == "__main__":
         "but only compare the error line numbers.",
     )
     parser.add_argument(
+        "--check-expected-included-in-actual",
+        action="store_true",
+        help="Check that the set of lines in the expected file is included in the set"
+        " of lines in the output",
+    )
+    parser.add_argument(
         "--timeout",
         type=int,
         help="Timeout in seconds for each test, in non-batch mode.",
@@ -859,6 +1115,16 @@ if __name__ == "__main__":
         default=VerifyPessimisationOptions.no,
         help="Experimental test suite for hh_pessimisation",
     )
+    parser.add_argument(
+        "--normalize-paths",
+        action="store_true",
+        help="Match on normalized file paths in error messages",
+    )
+    parser.add_argument(
+        "--filter-glog-failures",
+        action="store_true",
+        help='Filters out glog messages of the "COULD NOT CREATE A LOGGINGFILE" form.',
+    )
     parser.epilog = (
         "%s looks for a file named HH_FLAGS in the same directory"
         " as the test files it is executing. If found, the "
@@ -866,7 +1132,7 @@ if __name__ == "__main__":
         "<program> in addition to any arguments "
         "specified by --flags" % parser.prog
     )
-    args: argparse.Namespace = parser.parse_args()
+    args = parser.parse_args()
 
     max_workers = args.max_workers
     verbose = args.verbose
@@ -882,21 +1148,25 @@ if __name__ == "__main__":
     # directory. buck1 runs this test from fbsource/fbocde, buck2 runs
     # it from fbsource.
     if os.path.basename(os.getcwd()) != "fbsource":
-
         # If running under buck1 then we are in fbcode, if running
         # under dune then some ancestor directory of fbcode. These two
         # cases are handled by the logic of this script and
         # 'review.sh' and there are no adjustments to make.
         pass
     else:
-
         # The buck2 case has us running in fbsource. This puts us in
         # fbcode.
         os.chdir("fbcode")
 
     files: List[str] = list_test_files(
-        args.test_path, args.disabled_extension, args.in_extension
+        args.test_path,
+        args.disabled_extension,
+        args.in_extension,
+        args.include_directories,
     )
+
+    # Filter files based on TEST_FILTER environment variable
+    files = filter_test_files(files, args.test_path)
 
     if len(files) == 0:
         raise Exception("Could not find any files to test in " + args.test_path)
@@ -921,8 +1191,10 @@ if __name__ == "__main__":
         args.verify_pessimisation,
         mode_flag,
         get_flags,
+        check_expected_included_in_actual=args.check_expected_included_in_actual,
         timeout=args.timeout,
         only_compare_error_lines=args.only_compare_error_lines,
+        filter_glog_failures=args.filter_glog_failures,
     )
 
     # Doesn't make sense to check failures for idempotence
@@ -937,4 +1209,12 @@ if __name__ == "__main__":
             args.default_expect_regex,
             mode_flag,
             get_flags,
+            check_expected_included_in_actual=args.check_expected_included_in_actual,
         )
+
+
+args: argparse.Namespace
+
+
+if __name__ == "__main__":
+    main()

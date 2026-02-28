@@ -1,10 +1,10 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-if (!gc_enabled()) die("skip");
+if (!gc_enabled()) exit("skip");
 // We've seen that with Interp/Eager, some of the WeakRef'd objects end up as
 // stale pointers on the C++ stack, and get conservatively scanned. As such,
 // we skip the modes that have shown this behavior. As the state that causes
 // this test to fail is non-determinstic, this condition might need to be
 // revisited.
-if (ini_get("hhvm.eager_gc") && !ini_get("hhvm.jit")) die("skip");
+if (ini_get("hhvm.eager_gc") && !ini_get("hhvm.jit")) exit("skip");
 }

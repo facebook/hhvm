@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-chdir(__SystemLib\hphp_test_tmproot());
+chdir(sys_get_temp_dir());
 mkdir('test_dir_ptfi');
 $dirIterator = new DirectoryIterator('test_dir_ptfi');
 var_dump(decoct($dirIterator->getInode()));

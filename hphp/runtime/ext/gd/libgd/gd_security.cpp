@@ -7,10 +7,8 @@
    * Based on netpbm fixes by Alan Cox.
    *
  */
-#include <stdio.h>
-#include <stdlib.h>
 #include <limits.h>
-#include "gd.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
 
 int overflow2(int a, int b)
 {

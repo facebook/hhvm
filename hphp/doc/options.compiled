@@ -153,7 +153,6 @@ flood error logs.
     PathDebug = false
 
     # startup options
-    TakeoverFilename = filename   # for port takeover between server instances
     DefaultDocument = index.php
     StartupDocument = filename
     RequestInitFunction = function_name
@@ -241,23 +240,6 @@ used for PHP responses in case no other charset has been set explicitly.
 
     APC {
       EnableApc = true
-      PrimeLibrary = filename
-      LoadThread = 2
-      CompletionKeys {
-        * = key name
-      }
-
-- APC Priming
-
-There is a way to prepare APC items in dry format, serialized in binary files,
-and these files can be loaded (or "primed") extremely fast at startup time.
-To prepare these .cpp files, check apc_sample_serializer.php for one way
-of doing it. Once prepared, we can compiled them into .so that can be loaded
-through PrimeLibrary option. The loading can be done in parallel with
-LoadThread count of threads. Once loading is done, it can write to APC with
-some specified keys in CompletionKeys to tell web application about priming.
-
-
       ExpireOnSets = false
       PurgeFrequency = 4096
 
@@ -371,61 +353,18 @@ to block access to certain files (ex. .htaccess.)
     Password =
   }
 
-= Satellite Servers
-
-  Satellites {
-    * {
-      Type = RPCServer | InternalPageServer
-
-      Port = 0  # disabled
-      ThreadCount = 5
-
-      # only for RPCServer
-      MaxRequest = 500
-      MaxDuration = 120    # in seconds
-      TimeoutSeconds = 30  # default to RequestTimeoutSeconds
-      RequestInitFunction = on_init
-      RequestInitDocument = filename
-      Password = authentication
-
-      # only for InternalPageServer
-      BlockMainServer = true
-      URLs {
-        * = pattern
-      }
-    }
-  }
-
-- RPCServer
-
-Please refer to its documentation for more details.
-
-- Internal Page Server
-
-Serves internal pages over a private port. These pages will become unavailable
-to main HTTP port if BlockMainServer is turned on. Use URLs to specify regex
-patterns for pages to server over this port.
-
   Xbox {
     ServerInfo {
-      ThreadCount = 0
-      Port = 0
-      MaxRequest = 500
-      MaxDuration = 120
-      RequestInitFunction =
-      RequestInitDocument =
+      ThreadCount = 64
+      MaxQueueLength = 500
     }
-    ProcessMessageFunc = xbox_process_message
-    DefaultLocalTimeoutMilliSeconds = 500
-    DefaultRemoteTimeoutSeconds = 5
   }
 
 - Xbox Server
 
 An xbox server provides cross-machine communication, similar to a message
 queuing system. It also allows local processing of messages, then working as
-a multithreading facility for PHP execution. More documentation will be coming
-for xbox applications.
+a multithreading facility for PHP execution.
 
   PageletServer {
     ThreadCount = 0
@@ -563,17 +502,6 @@ This specifies the maximum number of seconds spent for generating a stack trace
 when hhvm is crashed. The default is 0 which means no timeout. This can be set
 to prevent from deadlocks in the backtrace handler.
 
-- APCSize
-
-There are options for APC size profiling. If enabled, APC overall size will be
-updated every time a store or delete happens. This allows querying apc stats
-on admin port. 'CountPrime' controls whether size stats includes primed keys.
-'Group' controls whether stats break-down by key groups get profiled.
-'SpecialPrefix' and 'SpecialMiddle' are used for aggregating some keys groups.
-'Individual' controls whether size profiling is enabled for each key, which
-could incur some space overhead. 'FetchStats' can be enabled to also profile
-apc_fetch, which further increases time overhead.
-'FetchStats' implies 'Individual', and 'Individual' implies 'Group'
 
 = Sandbox Environment
 
@@ -654,7 +582,6 @@ users can use the same machine serving their own source files.
     }
 
     TimeoutsUseWallTime = true
-    CheckFlushOnUserClose = true
 
     # Causes HHVM to disallow constructs that are unavailable when Repo.Authoritative
     # is active, without requiring you to run in Repo.Authoritative.
@@ -679,12 +606,6 @@ configuration, disable this when tuning.
 
 Determines whether or not to interpret set_time_limit timeouts as wall time or
 CPU time (which the reference implementation uses.) Defaults to wall time.
-
-- CheckFlushOnUserClose
-
-Determines whether or not close() for user streams (registered by
-stream_wrapper_register) will consider the return value of the implicit call to
-flush() when calculating its return value.
 
 = MySQL
 

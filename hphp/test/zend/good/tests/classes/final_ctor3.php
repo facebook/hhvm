@@ -1,9 +1,9 @@
 <?hh
 class A {
-    final function A() { }
+    final function A() :mixed{ }
 }
 class B extends A {
-    function A() { }
+    function A() :mixed{ }
 }
 
 <<__EntryPoint>>

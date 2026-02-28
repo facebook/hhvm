@@ -24,16 +24,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <folly/portability/SysResource.h>
-#ifdef __FreeBSD__
-#include <sys/param.h>
-#endif
-#ifdef __linux__
 #include <sys/sysmacros.h>
-#endif
-#include <folly/portability/Unistd.h>
 #include <pwd.h>
 
 #include <folly/container/Array.h>
+#include <folly/portability/Unistd.h>
 #include <folly/system/Pid.h>
 #include <folly/String.h>
 
@@ -50,75 +45,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 static struct POSIXExtension final : Extension {
-  POSIXExtension() : Extension("posix", "1.0") {}
-  void moduleInit() override {
-    HHVM_RC_INT(POSIX_S_IFMT, S_IFMT);
-    HHVM_RC_INT(POSIX_S_IFSOCK, S_IFSOCK);
-    HHVM_RC_INT(POSIX_S_IFLNK, S_IFLNK);
-    HHVM_RC_INT(POSIX_S_IFREG, S_IFREG);
-    HHVM_RC_INT(POSIX_S_IFBLK, S_IFBLK);
-    HHVM_RC_INT(POSIX_S_IFDIR, S_IFDIR);
-    HHVM_RC_INT(POSIX_S_IFCHR, S_IFCHR);
-    HHVM_RC_INT(POSIX_S_IFIFO, S_IFIFO);
-    HHVM_RC_INT(POSIX_S_ISUID, S_ISUID);
-    HHVM_RC_INT(POSIX_S_ISGID, S_ISGID);
-    HHVM_RC_INT(POSIX_S_ISVTX, S_ISVTX);
-    HHVM_RC_INT(POSIX_S_IRWXU, S_IRWXU);
-    HHVM_RC_INT(POSIX_S_IRUSR, S_IRUSR);
-    HHVM_RC_INT(POSIX_S_IWUSR, S_IWUSR);
-    HHVM_RC_INT(POSIX_S_IXUSR, S_IXUSR);
-    HHVM_RC_INT(POSIX_S_IRWXG, S_IRWXG);
-    HHVM_RC_INT(POSIX_S_IRGRP, S_IRGRP);
-    HHVM_RC_INT(POSIX_S_IWGRP, S_IWGRP);
-    HHVM_RC_INT(POSIX_S_IXGRP, S_IXGRP);
-    HHVM_RC_INT(POSIX_S_IRWXO, S_IRWXO);
-    HHVM_RC_INT(POSIX_S_IROTH, S_IROTH);
-    HHVM_RC_INT(POSIX_S_IWOTH, S_IWOTH);
-    HHVM_RC_INT(POSIX_S_IXOTH, S_IXOTH);
-    HHVM_RC_INT(POSIX_F_OK, F_OK);
-    HHVM_RC_INT(POSIX_X_OK, X_OK);
-    HHVM_RC_INT(POSIX_W_OK, W_OK);
-    HHVM_RC_INT(POSIX_R_OK, R_OK);
-
-    HHVM_FE(posix_access);
-    HHVM_FE(posix_ctermid);
-    HHVM_FE(posix_get_last_error);
-    HHVM_FE(posix_errno);
-    HHVM_FE(posix_getcwd);
-    HHVM_FE(posix_getegid);
-    HHVM_FE(posix_geteuid);
-    HHVM_FE(posix_getgid);
-    HHVM_FE(posix_getgrgid);
-    HHVM_FE(posix_getgrnam);
-    HHVM_FE(posix_getgroups);
-    HHVM_FE(posix_getlogin);
-    HHVM_FE(posix_getpgid);
-    HHVM_FE(posix_getpgrp);
-    HHVM_FE(posix_getpid);
-    HHVM_FE(posix_getppid);
-    HHVM_FE(posix_getpwnam);
-    HHVM_FE(posix_getpwuid);
-    HHVM_FE(posix_getrlimit);
-    HHVM_FE(posix_getsid);
-    HHVM_FE(posix_getuid);
-    HHVM_FE(posix_initgroups);
-    HHVM_FE(posix_isatty);
-    HHVM_FE(posix_kill);
-    HHVM_FE(posix_mkfifo);
-    HHVM_FE(posix_mknod);
-    HHVM_FE(posix_setegid);
-    HHVM_FE(posix_seteuid);
-    HHVM_FE(posix_setgid);
-    HHVM_FE(posix_setpgid);
-    HHVM_FE(posix_setsid);
-    HHVM_FE(posix_setuid);
-    HHVM_FE(posix_strerror);
-    HHVM_FE(posix_times);
-    HHVM_FE(posix_ttyname);
-    HHVM_FE(posix_uname);
-
-    loadSystemlib();
-  }
+  POSIXExtension() : Extension("posix", "1.0", NO_ONCALL_YET) {}
+  void moduleRegisterNative() override;
 } s_posix_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -249,11 +177,7 @@ Variant HHVM_FUNCTION(posix_getgroups) {
 }
 
 Variant HHVM_FUNCTION(posix_getlogin) {
-#if !defined(__APPLE__) && !defined(__FreeBSD__)
   char buf[L_cuserid];
-#else
-  char buf[MAXLOGNAME];
-#endif
   if (!getlogin_r(buf, sizeof(buf) - 1)) {
     return String(buf, CopyString);
   }
@@ -414,7 +338,7 @@ static int php_posix_get_fd(const Variant& fd) {
     }
     nfd = f->fd();
   } else {
-    nfd = fd.toInt32();
+    nfd = (int)fd.toInt64();
   }
   return nfd;
 }
@@ -569,10 +493,77 @@ Variant HHVM_FUNCTION(posix_uname) {
     , s_release,    String(u.release,    CopyString)
     , s_version,    String(u.version,    CopyString)
     , s_machine,    String(u.machine,    CopyString)
-#if defined(_GNU_SOURCE) && defined(__linux__)
+#if defined(_GNU_SOURCE)
     , s_domainname, String(u.domainname, CopyString)
 #endif
   );
+}
+
+void POSIXExtension::moduleRegisterNative() {
+  HHVM_RC_INT(POSIX_S_IFMT, S_IFMT);
+  HHVM_RC_INT(POSIX_S_IFSOCK, S_IFSOCK);
+  HHVM_RC_INT(POSIX_S_IFLNK, S_IFLNK);
+  HHVM_RC_INT(POSIX_S_IFREG, S_IFREG);
+  HHVM_RC_INT(POSIX_S_IFBLK, S_IFBLK);
+  HHVM_RC_INT(POSIX_S_IFDIR, S_IFDIR);
+  HHVM_RC_INT(POSIX_S_IFCHR, S_IFCHR);
+  HHVM_RC_INT(POSIX_S_IFIFO, S_IFIFO);
+  HHVM_RC_INT(POSIX_S_ISUID, S_ISUID);
+  HHVM_RC_INT(POSIX_S_ISGID, S_ISGID);
+  HHVM_RC_INT(POSIX_S_ISVTX, S_ISVTX);
+  HHVM_RC_INT(POSIX_S_IRWXU, S_IRWXU);
+  HHVM_RC_INT(POSIX_S_IRUSR, S_IRUSR);
+  HHVM_RC_INT(POSIX_S_IWUSR, S_IWUSR);
+  HHVM_RC_INT(POSIX_S_IXUSR, S_IXUSR);
+  HHVM_RC_INT(POSIX_S_IRWXG, S_IRWXG);
+  HHVM_RC_INT(POSIX_S_IRGRP, S_IRGRP);
+  HHVM_RC_INT(POSIX_S_IWGRP, S_IWGRP);
+  HHVM_RC_INT(POSIX_S_IXGRP, S_IXGRP);
+  HHVM_RC_INT(POSIX_S_IRWXO, S_IRWXO);
+  HHVM_RC_INT(POSIX_S_IROTH, S_IROTH);
+  HHVM_RC_INT(POSIX_S_IWOTH, S_IWOTH);
+  HHVM_RC_INT(POSIX_S_IXOTH, S_IXOTH);
+  HHVM_RC_INT(POSIX_F_OK, F_OK);
+  HHVM_RC_INT(POSIX_X_OK, X_OK);
+  HHVM_RC_INT(POSIX_W_OK, W_OK);
+  HHVM_RC_INT(POSIX_R_OK, R_OK);
+
+  HHVM_FE(posix_access);
+  HHVM_FE(posix_ctermid);
+  HHVM_FE(posix_get_last_error);
+  HHVM_FE(posix_errno);
+  HHVM_FE(posix_getcwd);
+  HHVM_FE(posix_getegid);
+  HHVM_FE(posix_geteuid);
+  HHVM_FE(posix_getgid);
+  HHVM_FE(posix_getgrgid);
+  HHVM_FE(posix_getgrnam);
+  HHVM_FE(posix_getgroups);
+  HHVM_FE(posix_getlogin);
+  HHVM_FE(posix_getpgid);
+  HHVM_FE(posix_getpgrp);
+  HHVM_FE(posix_getpid);
+  HHVM_FE(posix_getppid);
+  HHVM_FE(posix_getpwnam);
+  HHVM_FE(posix_getpwuid);
+  HHVM_FE(posix_getrlimit);
+  HHVM_FE(posix_getsid);
+  HHVM_FE(posix_getuid);
+  HHVM_FE(posix_initgroups);
+  HHVM_FE(posix_isatty);
+  HHVM_FE(posix_kill);
+  HHVM_FE(posix_mkfifo);
+  HHVM_FE(posix_mknod);
+  HHVM_FE(posix_setegid);
+  HHVM_FE(posix_seteuid);
+  HHVM_FE(posix_setgid);
+  HHVM_FE(posix_setpgid);
+  HHVM_FE(posix_setsid);
+  HHVM_FE(posix_setuid);
+  HHVM_FE(posix_strerror);
+  HHVM_FE(posix_times);
+  HHVM_FE(posix_ttyname);
+  HHVM_FE(posix_uname);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

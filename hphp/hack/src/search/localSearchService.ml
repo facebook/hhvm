@@ -8,6 +8,7 @@
  *)
 open Hh_prelude
 open SearchUtils
+open SearchTypes
 
 (* How many locally changed files are in this env? *)
 let count_local_fileinfos ~(sienv : si_env) : int =
@@ -29,107 +30,30 @@ let get_tombstone (path : Relative_path.t) : int64 =
   let path_hash = SharedMemHash.hash_string fixed_path_str in
   path_hash
 
-(* This function is used if fast-facts-parser fails to scan the file *)
-let convert_fileinfo_to_contents
-    ~(ctx : Provider_context.t)
-    ~(sienv : SearchUtils.si_env)
-    ~(info : FileInfo.t)
-    ~(filepath : string) : SearchUtils.si_capture =
-  let append_item
-      (kind : SearchUtils.si_kind)
-      (acc : SearchUtils.si_capture)
-      (name : string) =
-    let (sif_kind, sif_is_abstract, sif_is_final) =
-      (* FFP produces more detailed information about classes
-       * than we can get from FileInfo.t objects.  Since this function is only
-       * called when a file has been modified locally, it's safe to call
-       * decl_provider - this information has already been cached. *)
-      if is_si_class kind && sienv.sie_resolve_local_decl then
-        match Decl_provider.get_class ctx name with
-        | Some cls ->
-          let is_final = Decl_provider.Class.final cls in
-          let is_abstract = Decl_provider.Class.abstract cls in
-          let real_kind = Decl_provider.Class.kind cls in
-          let converted_kind =
-            match real_kind with
-            | Ast_defs.Cclass _ -> SI_Class
-            | Ast_defs.Cinterface -> SI_Interface
-            | Ast_defs.Ctrait -> SI_Trait
-            | Ast_defs.Cenum_class _
-            | Ast_defs.Cenum ->
-              SI_Enum
-          in
-          (converted_kind, is_abstract, is_final)
-        | None -> (kind, false, false)
-      else
-        (kind, false, false)
-    in
-    let item =
-      {
-        (* Only strip Hack namespaces. XHP must have a preceding colon *)
-        sif_name = Utils.strip_ns name;
-        sif_kind;
-        sif_filepath = filepath;
-        sif_is_abstract;
-        sif_is_final;
-      }
-    in
-    item :: acc
-  in
-  let fold_full
-      (kind : SearchUtils.si_kind)
-      (acc : SearchUtils.si_capture)
-      (list : FileInfo.id list) : SearchUtils.si_capture =
-    List.fold list ~init:acc ~f:(fun inside_acc (_, name, _) ->
-        append_item kind inside_acc name)
-  in
-  let acc = fold_full SI_Function [] info.FileInfo.funs in
-  let acc = fold_full SI_Class acc info.FileInfo.classes in
-  let acc = fold_full SI_Typedef acc info.FileInfo.typedefs in
-  let acc = fold_full SI_GlobalConstant acc info.FileInfo.consts in
-  acc
-
-(* Update files when they were discovered *)
-let update_file
-    ~(ctx : Provider_context.t)
+(** see .mli **)
+let update_file_from_addenda
     ~(sienv : si_env)
     ~(path : Relative_path.t)
-    ~(info : FileInfo.t) : si_env =
+    ~(addenda : FileInfo.si_addendum list) : si_env =
   let tombstone = get_tombstone path in
   let filepath = Relative_path.suffix path in
-  let contents =
-    try
-      let full_filename = Relative_path.to_absolute path in
-      if Sys.file_exists full_filename then
-        let popt = Provider_context.get_popt ctx in
-        let namespace_map = ParserOptions.auto_namespace_map popt in
-        let contents = IndexBuilder.parse_one_file ~namespace_map ~path in
-        if List.length contents = 0 then
-          convert_fileinfo_to_contents ~ctx ~sienv ~info ~filepath
-        else
-          contents
-      else
-        convert_fileinfo_to_contents ~ctx ~sienv ~info ~filepath
-    with
-    | _ -> convert_fileinfo_to_contents ~ctx ~sienv ~info ~filepath
+  let contents : SearchUtils.si_capture =
+    List.map addenda ~f:(fun addendum ->
+        {
+          sif_name = addendum.FileInfo.sia_name;
+          sif_kind = addendum.FileInfo.sia_kind;
+          sif_filepath = filepath;
+          sif_is_abstract = addendum.FileInfo.sia_is_abstract;
+          sif_is_final = addendum.FileInfo.sia_is_final;
+        })
   in
   {
     sienv with
     lss_fullitems =
       Relative_path.Map.add sienv.lss_fullitems ~key:path ~data:contents;
-    lss_tombstones = Tombstone_set.add sienv.lss_tombstones tombstone;
-  }
-
-let update_file_facts
-    ~(sienv : si_env) ~(path : Relative_path.t) ~(facts : Facts.facts) : si_env
-    =
-  let tombstone = get_tombstone path in
-  let contents = IndexBuilder.convert_facts ~path ~facts in
-  {
-    sienv with
-    lss_fullitems =
-      Relative_path.Map.add sienv.lss_fullitems ~key:path ~data:contents;
-    lss_tombstones = Tombstone_set.add sienv.lss_tombstones tombstone;
+    lss_tombstones = Relative_path.Set.add sienv.lss_tombstones path;
+    lss_tombstone_hashes =
+      Tombstone_set.add sienv.lss_tombstone_hashes tombstone;
   }
 
 (* Remove files from local when they are deleted *)
@@ -138,40 +62,47 @@ let remove_file ~(sienv : si_env) ~(path : Relative_path.t) : si_env =
   {
     sienv with
     lss_fullitems = Relative_path.Map.remove sienv.lss_fullitems path;
-    lss_tombstones = Tombstone_set.add sienv.lss_tombstones tombstone;
+    lss_tombstones = Relative_path.Set.add sienv.lss_tombstones path;
+    lss_tombstone_hashes =
+      Tombstone_set.add sienv.lss_tombstone_hashes tombstone;
   }
 
 (* Exception we use to short-circuit out of a loop if we find enough results.
  * May be worth rewriting this in the future to use `fold_until` rather than
  * exceptions *)
-exception BreakOutOfScan of si_results
+exception BreakOutOfScan of si_item list
 
 (* Search local changes for symbols matching this prefix *)
 let search_local_symbols
     ~(sienv : si_env)
     ~(query_text : string)
     ~(max_results : int)
-    ~(context : autocomplete_type option)
-    ~(kind_filter : si_kind option) : si_results =
+    ~(context : autocomplete_type)
+    ~(kind_filter : FileInfo.si_kind option) : si_item list =
   (* case insensitive search, must include namespace, escaped for regex *)
   let query_text_regex_case_insensitive =
     Str.regexp_case_fold (Str.quote query_text)
   in
   (* case insensitive search, break out if max results reached *)
   let check_symbol_and_add_to_accumulator_and_break_if_max_reached
-      ~(acc : si_results)
+      ~(acc : si_item list)
       ~(symbol : si_fullitem)
-      ~(context : autocomplete_type option)
-      ~(kind_filter : si_kind option)
-      ~(path : Relative_path.t) : si_results =
+      ~(context : autocomplete_type)
+      ~(kind_filter : FileInfo.si_kind option)
+      ~(path : Relative_path.t) : si_item list =
     let is_valid_match =
       match (context, kind_filter) with
-      | (Some Actype, _) -> SearchUtils.valid_for_actype symbol
-      | (Some Acnew, _) -> SearchUtils.valid_for_acnew symbol
-      | (Some Acid, _) -> SearchUtils.valid_for_acid symbol
-      | (Some Actrait_only, _) -> is_si_trait symbol.sif_kind
-      | (_, Some kind_match) -> equal_si_kind symbol.sif_kind kind_match
-      | _ -> true
+      | (Actype, _) -> SearchTypes.valid_for_actype symbol.SearchUtils.sif_kind
+      | (Acnew, _) ->
+        SearchTypes.valid_for_acnew symbol.SearchUtils.sif_kind
+        && not symbol.SearchUtils.sif_is_abstract
+      | (Acclassish, _) ->
+        SearchTypes.valid_for_acclassish symbol.SearchUtils.sif_kind
+      | (Acid, _) -> SearchTypes.valid_for_acid symbol.SearchUtils.sif_kind
+      | (Actrait_only, _) -> is_si_trait symbol.sif_kind
+      | (Ac_workspace_symbol, Some kind_match) ->
+        FileInfo.equal_si_kind symbol.sif_kind kind_match
+      | (Ac_workspace_symbol, None) -> true
     in
     if
       is_valid_match
@@ -186,7 +117,7 @@ let search_local_symbols
         {
           si_name = fullname;
           si_kind = symbol.sif_kind;
-          si_filehash = get_tombstone path;
+          si_file = SI_Path path;
           si_fullname = fullname;
         }
         :: acc
@@ -220,11 +151,12 @@ let search_local_symbols
   | BreakOutOfScan acc -> acc
 
 (* Filter the results to extract any dead objects *)
-let extract_dead_results
-    ~(sienv : SearchUtils.si_env) ~(results : SearchUtils.si_results) :
-    si_results =
-  List.filter results ~f:(fun r ->
-      let is_valid_result =
-        not (Tombstone_set.mem sienv.lss_tombstones r.si_filehash)
-      in
-      is_valid_result)
+let extract_dead_results ~(sienv : SearchUtils.si_env) ~(results : si_item list)
+    : si_item list =
+  List.filter results ~f:(fun item ->
+      match item.si_file with
+      | SearchTypes.SI_Path path ->
+        not (Relative_path.Set.mem sienv.lss_tombstones path)
+      | SearchTypes.SI_Filehash hash_str ->
+        let hash = Int64.of_string hash_str in
+        not (Tombstone_set.mem sienv.lss_tombstone_hashes hash))

@@ -1,6 +1,6 @@
 <?hh
 
-function foo($a) {
+function foo($a) :mixed{
   list($x, $y) = 'x'.$a;
   return $x + $y;
 }

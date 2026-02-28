@@ -1,5 +1,5 @@
 <?hh
-function main() {
+function main() :mixed{
   $containers = Vector {
     Vector {1, 2, 3, 4},
     ImmVector {1, 2, 3, 4},
@@ -14,7 +14,7 @@ function main() {
   foreach ($containers as $c) {
     $name = get_class($c);
     echo "$name\n";
-    foreach (varray[~PHP_INT_MAX, -1, 0, 1, 2, 6, PHP_INT_MAX] as $n) {
+    foreach (vec[~PHP_INT_MAX, -1, 0, 1, 2, 6, PHP_INT_MAX] as $n) {
       if ($name === Set::class ||
           $name === ImmSet::class ||
           $name === LazyIterableView::class) {
@@ -47,6 +47,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_take_takewhile() {
+function main_take_takewhile() :mixed{
 main();
 }

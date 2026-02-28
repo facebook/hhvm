@@ -1,6 +1,6 @@
 <?hh
 
-function test(closure $a) {
+function test(Closure $a) :mixed{
   var_dump($a());
 }
 

@@ -4,11 +4,11 @@
  * Cause errors (like division by zero) to raise an exception instead of
  * emitting warnings.
  */
-function errorHandler($errno, $errstr, $errfile, $errline) {
+function errorHandler($errno, $errstr, $errfile, $errline) :mixed{
   throw new Exception;
 }
 
-function do_is_numeric($x) {
+function do_is_numeric($x) :mixed{
   $numeric = is_numeric($x) ? "true" : "false";
   $int_cast = var_export((int) $x, true);
   $float_cast = var_export((float) $x, true);
@@ -28,7 +28,7 @@ abstract class Operator {
   const MINMIN = '--';
 }
 
-function do_op($x, $op, $y) {
+function do_op($x, $op, $y) :mixed{
   $res = '??';
 
   try {
@@ -79,7 +79,7 @@ function do_op($x, $op, $y) {
  * already.
  */
 
-function do_all_op($op) {
+function do_all_op($op) :mixed{
   do_op(10, $op, "10");
   do_op(10, $op, "010");
   do_op(0x10, $op, "0x10");

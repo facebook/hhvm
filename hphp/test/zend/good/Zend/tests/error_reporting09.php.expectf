@@ -1,3 +1,0 @@
-Fatal error: Uncaught exception 'UndefinedVariableException' with message 'Undefined variable: undef' in %s/error_reporting09.php:9
-Stack trace:
-%A

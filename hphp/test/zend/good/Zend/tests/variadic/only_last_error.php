@@ -1,4 +1,4 @@
 <?hh
 
-function test($foo, ...$bar, $baz) {}
+function test($foo, ...$bar, $baz) :mixed{}
 

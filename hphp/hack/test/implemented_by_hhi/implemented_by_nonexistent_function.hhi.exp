@@ -1,0 +1,2 @@
+ERROR: File "implemented_by_nonexistent_function.hhi", line 3, characters 21-42:
+Unbound name (typing): `nonexistent_function` (Typing[4107])

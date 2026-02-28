@@ -1,7 +1,7 @@
 <?hh
 
 class klass implements Countable {
-  public function count() { return 123; }
+  public function count() :mixed{ return 123; }
 }
 
 <<__EntryPoint>> function main(): void {

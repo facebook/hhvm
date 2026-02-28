@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_107() {
+function main_107() :mixed{
 var_dump(0.0);
 }

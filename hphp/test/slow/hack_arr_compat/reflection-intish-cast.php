@@ -1,12 +1,12 @@
 <?hh
 
 <<__EntryPoint>>
-function main () {
+function main () :mixed{
   try {
     var_dump(new ReflectionClass('42'));
   } catch (Exception $e) {}
 
-  var_dump(call_user_func(varray['42', 'foo']));
+  var_dump(call_user_func(vec['42', 'foo']));
   $x = new stdClass();
   $x->{42} = 'foo';
 

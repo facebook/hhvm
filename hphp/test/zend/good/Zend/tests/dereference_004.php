@@ -1,13 +1,13 @@
 <?hh
 
 class foo {
-    public $x = varray[];
+    public $x = vec[];
     public function __construct() {
-        $h = varray[];
+        $h = vec[];
         $h[] = new stdClass;
         $this->x = $h;
     }
-    public function __invoke() {
+    public function __invoke() :mixed{
         return $this->x;
     }
 }

@@ -1,4 +1,5 @@
 Awaitable
+---
 An `Awaitable` value represents a value that is fetched
 asynchronously, such as a database access. `Awaitable` values are
 usually returned by `async` functions.

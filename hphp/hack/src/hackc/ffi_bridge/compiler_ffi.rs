@@ -4,583 +4,930 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-// Module containing conversion methods between the Rust Facts and
-// Rust/C++ shared Facts (in the compile_ffi module)
 mod compiler_ffi_impl;
+mod ext_decl;
+pub mod external_decl_provider;
 
-use anyhow::{anyhow, Result};
-use arena_deserializer::serde::Deserialize;
-use bincode::Options;
+use std::ffi::OsStr;
+use std::ffi::c_void;
+use std::os::unix::ffi::OsStrExt;
+use std::path::PathBuf;
+use std::str::FromStr;
+use std::sync::Arc;
+
+use anyhow::Result;
 use compile::EnvFlags;
 use cxx::CxxString;
-use decl_provider::{
-    external::{ExternalDeclProvider, ProviderFunc},
-    DeclProvider,
-};
-use facts_rust::facts;
-use hhbc::hackc_unit;
-use no_pos_hash::position_insensitive_hash;
-use oxidized::file_info::NameType;
-use oxidized::relative_path::{Prefix, RelativePath};
-use oxidized_by_ref::decl_parser_options;
+use decl_provider::DeclProvider;
+use decl_provider::SelfProvider;
+use direct_decl_parser::DeclParserOptions;
+use direct_decl_parser::ParsedFile;
+use external_decl_provider::ExternalDeclProvider;
+use hhbc::Unit;
+use options::Hhvm;
+use options::ParserOptions;
+use oxidized::experimental_features::FeatureStatus;
 use parser_core_types::source_text::SourceText;
+use relative_path::Prefix;
+use relative_path::RelativePath;
+use serde::Deserialize;
+use sha1::Digest;
+use sha1::Sha1;
 
 #[allow(clippy::derivable_impls)]
-#[cxx::bridge]
-pub mod compile_ffi {
+#[cxx::bridge(namespace = "HPHP::hackc")]
+mod ffi {
     struct NativeEnv {
-        /// Pointer to decl_provider opaque state, cast to usize. 0 means null.
+        /// Pointer to decl_provider opaque object, cast to usize. 0 means null.
         decl_provider: usize,
 
-        /// Pointer to decl_provider ProviderFunc, cast to usize. 0 means null.
-        decl_getter: usize,
-
         filepath: String,
-        aliased_namespaces: String,
-        include_roots: String,
-        emit_class_pointers: i32,
-        check_int_overflow: i32,
+        aliased_namespaces: Vec<StringMapEntry>,
+        include_roots: Vec<StringMapEntry>,
+        experimental_features: Vec<StringMapEntry>,
 
-        /// compiler::HHBCFlags
-        hhbc_flags: u32,
+        hhbc_flags: HhbcFlags,
+        parser_flags: ParserFlags,
+        flags: EnvFlags,
 
-        /// compiler::ParserFlags
-        parser_flags: u32,
-
-        /// compiler::EnvFlags
-        flags: u8,
+        use_legacy_experimental_feature_config: bool,
+        consider_unspecified_experimental_features_released: bool,
     }
 
-    pub struct DeclResult {
-        hash: u64,
-        serialized: Box<Bytes>,
-        decls: Box<Decls>,
-        attributes: Box<FileAttributes>,
-        bump: Box<Bump>,
+    struct StringMapEntry {
+        key: String,
+        value: String,
+    }
+
+    /// compiler::EnvFlags exposed to C++
+    struct EnvFlags {
+        is_systemlib: bool,
+        for_debugger_eval: bool,
+        disable_toplevel_elaboration: bool,
+        enable_ir: bool,
+    }
+
+    struct DeclParserConfig {
+        aliased_namespaces: Vec<StringMapEntry>,
+        disable_xhp_element_mangling: bool,
+        interpret_soft_types_as_like_types: bool,
+        enable_xhp_class_modifier: bool,
+        php5_compat_mode: bool,
+        hhvm_compat_mode: bool,
+        include_assignment_values: bool,
+        enable_class_pointer_hint: bool,
+        disallow_non_annotated_memoize: bool,
+        treat_non_annotated_memoize_as_kbic: bool,
+        use_obr_decls: bool,
+    }
+
+    pub struct DeclsAndBlob {
+        serialized: Vec<u8>,
+        decls: Box<DeclsHolder>,
         has_errors: bool,
     }
 
-    #[derive(Debug)]
-    enum TypeKind {
-        Class,
-        Record,
-        Interface,
-        Enum,
-        Trait,
-        TypeAlias,
-        Unknown,
-        Mixed,
+    /// Toplevel symbols from a single source file
+    #[derive(Debug, Default, PartialEq)]
+    pub struct FileSymbols {
+        types: Vec<String>,
+        functions: Vec<String>,
+        constants: Vec<String>,
+        modules: Vec<String>,
     }
 
     #[derive(Debug, PartialEq)]
-    struct Attribute {
+    pub struct ExtDeclAttribute {
         name: String,
         args: Vec<String>,
+        raw_val: String,
     }
 
     #[derive(Debug, PartialEq)]
-    struct MethodFacts {
-        attributes: Vec<Attribute>,
+    pub struct ExtDeclEnumType {
+        base: String,
+        constraint: String,
+        includes: Vec<String>,
     }
 
     #[derive(Debug, PartialEq)]
-    struct Method {
+    pub struct ExtDeclMethodParam {
         name: String,
-        methfacts: MethodFacts,
+        type_: String,
+        accept_disposable: bool,
+        is_inout: bool,
+        has_default: bool,
+        is_readonly: bool,
+        is_optional: bool,
+        is_named: bool,
+        def_value: String,
     }
 
     #[derive(Debug, PartialEq)]
-    pub struct TypeFacts {
-        pub base_types: Vec<String>,
-        pub kind: TypeKind,
-        pub attributes: Vec<Attribute>,
-        pub flags: isize,
-        pub require_extends: Vec<String>,
-        pub require_implements: Vec<String>,
-        pub methods: Vec<Method>,
+    pub struct ExtDeclSignature {
+        tparams: Vec<ExtDeclTparam>,
+        where_constraints: Vec<ExtDeclTypeConstraint>,
+        return_type: String,
+        params: Vec<ExtDeclMethodParam>,
+        implicit_params: String,
+        return_disposable: bool,
+        is_coroutine: bool,
+        is_async: bool,
+        is_generator: bool,
+        instantiated_targs: bool,
+        is_function_pointer: bool,
+        returns_readonly: bool,
+        readonly_this: bool,
+        support_dynamic_type: bool,
+        is_memoized: bool,
+        variadic: bool,
     }
 
     #[derive(Debug, PartialEq)]
-    struct TypeFactsByName {
+    pub struct ExtDeclMethod {
         name: String,
-        typefacts: TypeFacts,
+        type_: String,
+
+        attributes: Vec<ExtDeclAttribute>,
+        signature: Vec<ExtDeclSignature>,
+
+        // The source is Visibility in ast_defs.rs
+        // Private / Public / Protected / Internal
+        visibility: String,
+
+        // The source is MethodFlags(u8 enum) in method_flags.rs
+        is_abstract: bool,
+        is_final: bool,
+        is_dynamicallycallable: bool,
+        is_override: bool,
+        is_php_std_lib: bool,
+        supports_dynamic_type: bool,
     }
 
-    #[derive(Debug, Default, PartialEq)]
-    struct Facts {
-        pub types: Vec<TypeFactsByName>,
+    #[derive(Debug, PartialEq)]
+    pub struct ExtDeclFileFunc {
+        name: String,
+        type_: String,
+        module: String,
+        internal: bool,
+        php_std_lib: bool,
+        support_dynamic_type: bool,
+        no_auto_dynamic: bool,
+        no_auto_likes: bool,
+        signature: Vec<ExtDeclSignature>,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub struct ExtDeclModule {
+        name: String,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub struct ExtDeclTypeDef {
+        name: String,
+        module: String,
+        visibility: String,
+        tparams: Vec<ExtDeclTparam>,
+        as_constraint: String,
+        super_constraint: String,
+        type_: String,
+        is_ctx: bool,
+        attributes: Vec<ExtDeclAttribute>,
+        internal: bool,
+        docs_url: String,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub struct ExtDeclTypeStructureSubType {
+        name: String,
+        optional: bool,
+        type_: ExtDeclTypeStructure,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub struct ExtDeclTypeStructure {
+        type_: String,
+        nullable: bool,
+        kind: String,
+        subtypes: Vec<ExtDeclTypeStructureSubType>,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub struct ExtDeclFileConst {
+        name: String,
+        type_: String,
+        value: String,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub struct ExtDeclClassConst {
+        name: String,
+        type_: String,
+        is_abstract: bool,
+        value: String,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub struct ExtDeclClassConstVec {
+        pub vec: Vec<ExtDeclClassConst>,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub struct ExtDeclClassTypeConst {
+        name: String,
+        kind: String,
+        is_ctx: bool,
+        enforceable: bool,
+        reifiable: bool,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub struct ExtDeclTypeConstraint {
+        kind: String,
+        type_: String,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub struct ExtDeclTparam {
+        variance: String,
+        name: String,
+        constraints: Vec<ExtDeclTypeConstraint>,
+        reified: String,
+        user_attributes: Vec<ExtDeclAttribute>,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub struct ExtDeclProp {
+        name: String,
+        type_: String,
+        visibility: String,
+        is_abstract: bool,
+        is_const: bool,
+        is_lateinit: bool,
+        is_readonly: bool,
+        needs_init: bool,
+        is_php_std_lib: bool,
+        is_lsb: bool,
+        is_safe_global_variable: bool,
+        no_auto_likes: bool,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub struct ExtDeclClass {
+        kind: String, // ClassishKind (cls, iface, trait, enum)
+        name: String,
+
+        // Optional strings
+        module: String,
+        docs_url: String,
+
+        // Flags
+        final_: bool,
+        abstract_: bool,
+        is_xhp: bool,
+        internal: bool,
+        has_xhp_keyword: bool,
+        xhp_marked_empty: bool,
+        support_dynamic_type: bool,
+        is_strict: bool,
+
+        // Special Params
+        tparams: Vec<ExtDeclTparam>,
+        xhp_attr_uses: Vec<String>,
+
+        // Implementation
+        extends: Vec<String>,
+        uses: Vec<String>,
+        implements: Vec<String>,
+        require_extends: Vec<String>,
+        require_implements: Vec<String>,
+        require_class: Vec<String>,
+        require_this_as: Vec<String>,
+
+        // Nested/Complex Types
+        user_attributes: Vec<ExtDeclAttribute>,
+        methods: Vec<ExtDeclMethod>,
+        static_methods: Vec<ExtDeclMethod>,
+        consts: Vec<ExtDeclClassConst>,
+        typeconsts: Vec<ExtDeclClassTypeConst>,
+        constructor: Vec<ExtDeclMethod>,
+        enum_type: Vec<ExtDeclEnumType>,
+        props: Vec<ExtDeclProp>,
+        sprops: Vec<ExtDeclProp>,
+        // Not supported yet
+        //xhp_enum_values,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub struct ExtDeclFile {
+        typedefs: Vec<ExtDeclTypeDef>,
+        functions: Vec<ExtDeclFileFunc>,
+        constants: Vec<ExtDeclFileConst>,
+        file_attributes: Vec<ExtDeclAttribute>,
+        modules: Vec<ExtDeclModule>,
+        classes: Vec<ExtDeclClass>,
+        disable_xhp_element_mangling: bool,
+        has_first_pass_parse_errors: bool,
+        is_strict: bool,
+    }
+
+    #[derive(Default, Debug, PartialEq, Serialize, Deserialize, Clone)]
+    pub struct FileFacts {
+        pub types: Vec<TypeFacts>,
         pub functions: Vec<String>,
         pub constants: Vec<String>,
-        pub type_aliases: Vec<String>,
-        pub file_attributes: Vec<Attribute>,
+        pub modules: Vec<ModuleFacts>,
+        pub file_attributes: Vec<AttrFacts>,
+        pub module_membership: String, // Empty means none. Cannot use Option in ffi.
+        pub package_membership: String, // Empty means none. Cannot use Option in ffi.
+        pub sha1sum: String,
     }
 
-    #[derive(Debug, Default)]
-    pub struct FactsResult {
-        facts: Facts,
-        md5sum: String,
-        sha1sum: String,
-        has_errors: bool,
+    #[derive(Debug, PartialEq, Serialize, Deserialize, Default, Clone)]
+    pub struct TypeFacts {
+        pub name: String,
+        pub kind: TypeKind,
+        pub flags: u8,
+
+        /// List of attributes and their arguments
+        pub attributes: Vec<AttrFacts>,
+
+        /// List of types which this `extends`, `implements`, or `use`s
+        pub base_types: Vec<String>,
+
+        /// List of classes which this `require class`
+        pub require_class: Vec<String>,
+
+        /// List of classes which this `require this as`
+        pub require_this_as: Vec<String>,
+
+        /// List of classes or interfaces which this `require extends`
+        pub require_extends: Vec<String>,
+
+        /// List of interfaces which this `require implements`
+        pub require_implements: Vec<String>,
+
+        pub methods: Vec<MethodFacts>,
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+    pub enum TypeKind {
+        Unknown = 0,
+        Class = 1,
+        Interface = 2,
+        Enum = 4,
+        Trait = 8,
+        TypeAlias = 16,
+    }
+
+    /// Represents `<<IAmAnAttribute(0, 'Hello', null)>>` as
+    /// `{"IAmAnAttribute", vec[0, "Hello", null]}`
+    #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+    pub struct AttrFacts {
+        pub name: String,
+        pub args: Vec<String>, // Really Vec<hackc::AttrValue>, but all variants are String
+    }
+
+    #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+    pub struct MethodFacts {
+        pub name: String,
+        pub attributes: Vec<AttrFacts>,
+    }
+
+    // Currently module facts are empty, but added for backward compatibility
+    #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+    pub struct ModuleFacts {
+        pub name: String,
     }
 
     extern "Rust" {
-        type Bump;
-        type Bytes;
-        type Decls;
-        type DeclParserOptions;
-        type HackCUnitWrapper;
-        type FileAttributes;
+        type DeclsHolder;
+        type UnitWrapper;
 
-        fn make_env_flags(
-            is_systemlib: bool,
-            is_evaled: bool,
-            for_debugger_eval: bool,
-            disable_toplevel_elaboration: bool,
-        ) -> u8;
-
-        /// Compile Hack source code to a HackCUnit or an error.
-        unsafe fn hackc_compile_unit_from_text_cpp_ffi(
+        /// Compile Hack source code to a Unit or an error.
+        unsafe fn compile_unit_from_text(
             env: &NativeEnv,
-            source_text: &CxxString,
-        ) -> Result<Box<HackCUnitWrapper>>;
+            source_text: &[u8],
+        ) -> Result<Box<UnitWrapper>>;
 
         /// Compile Hack source code to either HHAS or an error.
-        fn hackc_compile_from_text_cpp_ffi(
-            env: &NativeEnv,
-            source_text: &CxxString,
-        ) -> Result<Vec<u8>>;
+        fn compile_from_text(env: &NativeEnv, source_text: &[u8]) -> Result<Vec<u8>>;
 
-        /// Dump expression trees interleaved with source, for debugging.
-        fn hackc_dump_expr_trees(env: &NativeEnv);
-
-        fn hackc_create_direct_decl_parse_options(
-            flags: i32,
-            aliased_namespaces: &CxxString,
-        ) -> Box<DeclParserOptions>;
+        /// Invoke the hackc direct decl parser and return every shallow decl in the file,
+        /// as well as a serialized blob holding the same content.
+        fn direct_decl_parse_and_serialize(
+            config: &DeclParserConfig,
+            filename: &CxxString,
+            text: &[u8],
+        ) -> DeclsAndBlob;
 
         /// Invoke the hackc direct decl parser and return every shallow decl in the file.
-        fn hackc_direct_decl_parse(
-            options: &DeclParserOptions,
+        /// Return Err(_) if there were decl parsing errors, which will translate to
+        /// throwing an exception to the C++ caller.
+        fn parse_decls(
+            config: &DeclParserConfig,
             filename: &CxxString,
-            text: &CxxString,
-        ) -> DeclResult;
+            text: &[u8],
+        ) -> Result<Box<DeclsHolder>>;
 
-        /// Return true if this symbol is in the given Decls.
-        fn hackc_decl_exists(
-            decls: &Decls,
-            kind: i32, /* HPHP::AutoloadMap::KindOf */
-            symbol: &str,
-        ) -> bool;
+        fn hash_unit(unit: &UnitWrapper) -> [u8; 20];
 
-        /// Testing: pretty-print Decls to stdout.
-        fn hackc_print_decls(decls: &Decls);
+        /// Return true if this type (class or alias) is in the given Decls.
+        fn type_exists(decls: &DeclsHolder, symbol: &str) -> bool;
 
-        /// Testing: print the size of this Bytes to stdout.
-        fn hackc_print_serialized_size(bytes: &Bytes);
+        /// For testing: return true if deserializing produces the expected Decls.
+        fn verify_deserialization(decls: &DeclsAndBlob) -> bool;
 
-        /// For testing: return true if deserializing these bytes produces the expected Decls.
-        unsafe fn hackc_verify_deserialization(serialized: &Bytes, expected: &Decls) -> bool;
+        /// Extract toplevel symbols from Decls
+        fn decls_to_symbols(decls: &DeclsHolder) -> FileSymbols;
 
-        fn hackc_unit_to_string_cpp_ffi(
-            env: &NativeEnv,
-            prog: &HackCUnitWrapper,
-        ) -> Result<Vec<u8>>;
+        /// Extract hackc::Facts encoded as a binary blob from Decls,
+        /// including the source text SHA1 hash.
+        fn decls_to_facts_binary(decls: &DeclsHolder, sha1sum: &CxxString) -> Result<Vec<u8>>;
 
-        fn hackc_facts_to_json_cpp_ffi(facts: FactsResult, source_text: &CxxString) -> String;
+        /// Decode a binary facts blob back to hackc::FileFacts
+        fn binary_to_facts(json: &CxxString) -> Result<FileFacts>;
 
-        unsafe fn hackc_decls_to_facts_cpp_ffi(
-            decl_flags: i32,
-            decl_result: &DeclResult,
-            source_text: &CxxString,
-        ) -> FactsResult;
+        /// Convert an DeclsHolder struct to binary
+        fn decls_holder_to_binary(decls: &DeclsHolder) -> Result<Vec<u8>>;
+
+        /// Decode a binary DeclsHolder blob back to DeclsHolder
+        fn binary_to_decls_holder(json: &CxxString) -> Result<Box<DeclsHolder>>;
+
+        /// Decode a binary DeclsHolder blob back to DeclsAndBlob
+        fn binary_to_decls_and_blob(json: &CxxString) -> Result<DeclsAndBlob>;
+
+        /// Format facts into a human readable string for debugging.
+        fn facts_debug(facts: &FileFacts) -> String;
+
+        /// Compute a SHA1 hash of a binary-serialized FileFacts.
+        fn hash_facts(facts: &FileFacts) -> [u8; 20];
+
+        /////////////////////// ext_decl.rs API
+        ///
+        /// Extract TypeDecls from DeclsHolder.
+        fn get_file(decls: &DeclsHolder) -> ExtDeclFile;
+        fn get_type_structure(decls: &DeclsHolder, name: &str) -> Vec<ExtDeclTypeStructure>;
+        fn get_shape_keys(decls: &DeclsHolder, name: &str) -> Vec<String>;
+
+        fn get_classes(decls: &DeclsHolder) -> Vec<ExtDeclClass>;
+        fn get_class(decls: &DeclsHolder, name: &str) -> Vec<ExtDeclClass>;
+
+        fn get_class_methods(decls: &DeclsHolder, kls: &str) -> Vec<ExtDeclMethod>;
+        fn get_class_method(decls: &DeclsHolder, kls: &str, name: &str) -> Vec<ExtDeclMethod>;
+
+        fn get_class_smethods(decls: &DeclsHolder, kls: &str) -> Vec<ExtDeclMethod>;
+        fn get_class_smethod(decls: &DeclsHolder, kls: &str, name: &str) -> Vec<ExtDeclMethod>;
+
+        fn get_class_consts(decls: &DeclsHolder, kls: &str) -> Vec<ExtDeclClassConst>;
+        fn get_class_const(decls: &DeclsHolder, kls: &str, name: &str) -> Vec<ExtDeclClassConst>;
+
+        fn get_class_typeconsts(decls: &DeclsHolder, kls: &str) -> Vec<ExtDeclClassTypeConst>;
+        fn get_class_typeconst(
+            decls: &DeclsHolder,
+            kls: &str,
+            name: &str,
+        ) -> Vec<ExtDeclClassTypeConst>;
+
+        fn get_class_props(decls: &DeclsHolder, kls: &str) -> Vec<ExtDeclProp>;
+        fn get_class_prop(decls: &DeclsHolder, kls: &str, name: &str) -> Vec<ExtDeclProp>;
+
+        fn get_class_sprops(decls: &DeclsHolder, kls: &str) -> Vec<ExtDeclProp>;
+        fn get_class_sprop(decls: &DeclsHolder, kls: &str, name: &str) -> Vec<ExtDeclProp>;
+
+        fn get_class_attributes(decls: &DeclsHolder, kls: &str) -> Vec<ExtDeclAttribute>;
+        fn get_class_attribute(decls: &DeclsHolder, kls: &str, name: &str)
+        -> Vec<ExtDeclAttribute>;
+
+        fn get_file_attributes(decls: &DeclsHolder) -> Vec<ExtDeclAttribute>;
+        fn get_file_attribute(decls: &DeclsHolder, name: &str) -> Vec<ExtDeclAttribute>;
+
+        fn get_file_consts(decls: &DeclsHolder) -> Vec<ExtDeclFileConst>;
+        fn get_file_const(decls: &DeclsHolder, name: &str) -> Vec<ExtDeclFileConst>;
+
+        fn get_file_funcs(decls: &DeclsHolder) -> Vec<ExtDeclFileFunc>;
+        fn get_file_func(decls: &DeclsHolder, name: &str) -> Vec<ExtDeclFileFunc>;
+
+        fn get_file_modules(decls: &DeclsHolder) -> Vec<ExtDeclModule>;
+        fn get_file_module(decls: &DeclsHolder, name: &str) -> Vec<ExtDeclModule>;
+        fn get_file_module_membership(decls: &DeclsHolder) -> String;
+
+        fn get_file_typedefs(decls: &DeclsHolder) -> Vec<ExtDeclTypeDef>;
+        fn get_file_typedef(decls: &DeclsHolder, name: &str) -> Vec<ExtDeclTypeDef>;
+
+        /// Dereference a BytesId whose newtype has been laundered away by the bridge.
+        /// SAFETY: i must have been a valid BytesId from a previous intern_bytes()
+        /// call in this process.
+        unsafe fn deref_bytes(i: u32) -> &'static [u8];
+
+        fn get_public_api_for_class(decls: &DeclsHolder, name: &str) -> Vec<String>;
+    }
+
+    extern "C++" {
+        include!("hphp/hack/src/hackc/compile/options_gen.h");
+        type HhbcFlags = options::HhbcFlags;
+        type ParserFlags = options::ParserFlags;
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////////
-// Opaque to C++.
-
-#[repr(C)]
-pub struct Bump(bumpalo::Bump);
-#[repr(C)]
-pub struct Bytes(ffi::Bytes);
-#[repr(C)]
-pub struct Decls(direct_decl_parser::Decls<'static>);
-#[repr(C)]
-pub struct FileAttributes(&'static [&'static oxidized_by_ref::typing_defs::UserAttribute<'static>]);
-#[repr(C)]
-pub struct DeclParserOptions(
-    decl_parser_options::DeclParserOptions<'static>,
-    bumpalo::Bump,
-);
-
-#[repr(C)]
-pub struct HackCUnitWrapper(hackc_unit::HackCUnit<'static>, bumpalo::Bump);
-
-///////////////////////////////////////////////////////////////////////////////////
-
-fn make_env_flags(
-    is_systemlib: bool,
-    is_evaled: bool,
-    for_debugger_eval: bool,
-    disable_toplevel_elaboration: bool,
-) -> u8 {
-    let mut flags = EnvFlags::empty();
-    if is_systemlib {
-        flags |= EnvFlags::IS_SYSTEMLIB;
-    }
-    if is_evaled {
-        flags |= EnvFlags::IS_EVALED;
-    }
-    if for_debugger_eval {
-        flags |= EnvFlags::FOR_DEBUGGER_EVAL;
-    }
-    if disable_toplevel_elaboration {
-        flags |= EnvFlags::DISABLE_TOPLEVEL_ELABORATION;
-    }
-    flags.bits()
+// Opaque to C++, so we don't need repr(C).
+#[derive(Debug)]
+pub struct DeclsHolder {
+    parsed_file: ParsedFile,
 }
 
-impl compile_ffi::NativeEnv {
-    fn to_compile_env<'a>(env: &'a compile_ffi::NativeEnv) -> Option<compile::NativeEnv<&'a str>> {
-        use std::os::unix::ffi::OsStrExt;
+// This is accessed in test_ffi.cpp; hence repr(C)
+#[derive(Debug)]
+#[repr(C)]
+pub struct UnitWrapper(Unit);
+
+///////////////////////////////////////////////////////////////////////////////////
+impl ffi::NativeEnv {
+    fn to_compile_env(&self) -> Option<compile::NativeEnv> {
         Some(compile::NativeEnv {
             filepath: RelativePath::make(
-                oxidized::relative_path::Prefix::Dummy,
-                std::path::PathBuf::from(std::ffi::OsStr::from_bytes(env.filepath.as_bytes())),
+                Prefix::Dummy,
+                PathBuf::from(OsStr::from_bytes(self.filepath.as_bytes())),
             ),
-            aliased_namespaces: &env.aliased_namespaces,
-            include_roots: &env.include_roots,
-            emit_class_pointers: env.emit_class_pointers,
-            check_int_overflow: env.check_int_overflow,
-            hhbc_flags: compile::HHBCFlags::from_bits(env.hhbc_flags)?,
-            parser_flags: compile::ParserFlags::from_bits(env.parser_flags)?,
-            flags: compile::EnvFlags::from_bits(env.flags)?,
+            hhvm: Hhvm {
+                include_roots: (self.include_roots.iter())
+                    .map(|e| (e.key.clone().into(), e.value.clone().into()))
+                    .collect(),
+                parser_options: ParserOptions {
+                    auto_namespace_map: (self.aliased_namespaces.iter())
+                        .map(|e| (e.key.clone(), e.value.clone()))
+                        .collect(),
+                    experimental_features: (self.experimental_features.iter())
+                        .filter_map(|e| {
+                            FeatureStatus::from_str(&e.value)
+                                .ok()
+                                .map(|status| (e.key.clone(), status))
+                        })
+                        .collect(),
+                    use_legacy_experimental_feature_config: self
+                        .use_legacy_experimental_feature_config,
+                    consider_unspecified_experimental_features_released: self
+                        .consider_unspecified_experimental_features_released,
+                    enable_intrinsics_extension: self.hhbc_flags.enable_intrinsics_extension,
+                    ..self.parser_flags.to_parser_options()
+                },
+            },
+            hhbc_flags: self.hhbc_flags,
+            flags: EnvFlags {
+                is_systemlib: self.flags.is_systemlib,
+                for_debugger_eval: self.flags.for_debugger_eval,
+                disable_toplevel_elaboration: self.flags.disable_toplevel_elaboration,
+                enable_ir: self.flags.enable_ir,
+                ..Default::default()
+            },
         })
     }
 }
 
-fn hackc_compile_from_text_cpp_ffi(
-    env: &compile_ffi::NativeEnv,
-    source_text: &CxxString,
-) -> Result<Vec<u8>, String> {
-    stack_limit::with_elastic_stack(|stack_limit| {
-        let native_env: compile::NativeEnv<&str> =
-            compile_ffi::NativeEnv::to_compile_env(env).unwrap();
-        let compile_env = compile::Env::<&str> {
-            filepath: native_env.filepath.clone(),
-            config_jsons: vec![],
-            config_list: vec![],
-            flags: native_env.flags,
-        };
+fn hash_unit(UnitWrapper(unit): &UnitWrapper) -> [u8; 20] {
+    use bincode::Options;
+    let mut hasher = Sha1::new();
+    let w = std::io::BufWriter::new(&mut hasher);
+    bincode::options()
+        .serialize_into(w, &intern::WithIntern(unit))
+        .unwrap();
+    hasher.finalize().into()
+}
 
-        let text = SourceText::make(
-            ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
-            source_text.as_bytes(),
-        );
-        let mut output = Vec::new();
-        let alloc = bumpalo::Bump::new();
-        let decl_allocator = bumpalo::Bump::new();
+fn compile_from_text(env: &ffi::NativeEnv, source_text: &[u8]) -> Result<Vec<u8>, String> {
+    let native_env = env.to_compile_env().unwrap();
+    let text = SourceText::make(
+        std::sync::Arc::new(native_env.filepath.clone()),
+        source_text,
+    );
 
-        let decl_provider = if env.decl_getter != 0 {
-            let decl_getter_ptr = env.decl_getter as *const ();
-            let hhvm_provider_ptr = env.decl_provider as *const ();
-            let c_decl_getter_fn =
-                unsafe { std::mem::transmute::<*const (), ProviderFunc<'_>>(decl_getter_ptr) };
-            let c_hhvm_provider_ptr = unsafe {
-                std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr)
-            };
-            Some(ExternalDeclProvider {
-                provider: c_decl_getter_fn,
-                data: c_hhvm_provider_ptr,
-                arena: &decl_allocator,
-            })
+    let external_decl_provider: Option<Arc<dyn DeclProvider>> = if env.decl_provider != 0 {
+        #[allow(clippy::arc_with_non_send_sync)]
+        Some(Arc::new(ExternalDeclProvider::new(
+            env.decl_provider as *const c_void,
+        )))
+    } else {
+        None
+    };
+
+    let decl_provider = SelfProvider::wrap_existing_provider(
+        external_decl_provider,
+        native_env.to_decl_parser_options(),
+        text.clone(),
+    );
+
+    let mut output = Vec::new();
+    compile::from_text(
+        &mut output,
+        text,
+        &native_env,
+        decl_provider,
+        &mut Default::default(),
+    )
+    .map_err(|e| e.to_string())?;
+    Ok(output)
+}
+
+fn type_exists(holder: &DeclsHolder, symbol: &str) -> bool {
+    let input_symbol_formatted = symbol.starts_with('\\');
+    // TODO T123158488: fix case insensitive lookups
+    holder.parsed_file.decls.types().any(|(sym, _)| {
+        if !input_symbol_formatted {
+            &sym[1..] == symbol
         } else {
-            None
-        };
-
-        compile::from_text(
-            &alloc,
-            &compile_env,
-            stack_limit,
-            &mut output,
-            text,
-            Some(&native_env),
-            decl_provider
-                .as_ref()
-                .map(|provider| provider as &dyn DeclProvider<'_>),
-            &mut Default::default(),
-        )?;
-        Ok(output)
+            sym == symbol
+        }
     })
-    .map_err(|e| e.to_string())?
-    .map_err(|e: anyhow::Error| format!("{}", e))
 }
 
-fn hackc_dump_expr_trees(env: &compile_ffi::NativeEnv) {
-    let native_env: compile::NativeEnv<&str> = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
-    let env: compile::Env<&str> = compile::Env {
-        filepath: native_env.filepath,
-        flags: native_env.flags,
-        config_jsons: Default::default(),
-        config_list: Default::default(),
-    };
-    compile::dump_expr_tree::desugar_and_print(&env);
-}
-
-fn hackc_decl_exists(
-    decls: &Decls,
-    kind: i32, /* HPHP::AutoloadMap::KindOf */
-    symbol: &str,
-) -> bool {
-    let kind = match kind {
-        0 => NameType::Class,
-        1 => NameType::Fun,
-        2 => NameType::Const,
-        3 => NameType::Typedef,
-        _ => panic!("Requested kind of decl is not an available option"),
-    };
-    decls.0.get(kind, symbol) != None
-}
-
-fn hackc_print_decls(decls: &Decls) {
-    println!("{:#?}", decls.0)
-}
-
-fn hackc_print_serialized_size(serialized: &Bytes) {
-    println!("Decl-serialized size: {:#?}", serialized.0.len);
-}
-
-pub fn hackc_create_direct_decl_parse_options(
-    flags: i32,
-    aliased_namespaces: &CxxString,
-) -> Box<DeclParserOptions> {
-    let bump = bumpalo::Bump::new();
-    let alloc: &'static bumpalo::Bump =
-        unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
-    let config_opts =
-        options::Options::from_configs(&[aliased_namespaces.to_str().unwrap()], &[]).unwrap();
-    let auto_namespace_map = match config_opts.hhvm.aliased_namespaces.get().as_map() {
-        Some(m) => bumpalo::collections::Vec::from_iter_in(
-            m.iter().map(|(k, v)| {
-                (
-                    alloc.alloc_str(k.as_str()) as &str,
-                    alloc.alloc_str(v.as_str()) as &str,
-                )
-            }),
-            alloc,
-        ),
-        None => {
-            bumpalo::vec![in alloc;]
+pub fn direct_decl_parse_and_serialize(
+    config: &ffi::DeclParserConfig,
+    filename: &CxxString,
+    text: &[u8],
+) -> ffi::DeclsAndBlob {
+    match parse_decls(config, filename, text) {
+        Ok(decls) | Err(DeclsError(decls, _)) => {
+            let serialized = decl_provider::serialize_decls(&decls.parsed_file.decls).unwrap();
+            let has_errors = decls.parsed_file.has_first_pass_parse_errors;
+            ffi::DeclsAndBlob {
+                serialized,
+                decls,
+                has_errors,
+            }
         }
     }
-    .into_bump_slice();
+}
 
-    let opts = decl_parser_options::DeclParserOptions {
-        auto_namespace_map,
-        disable_xhp_element_mangling: ((1 << 0) & flags) != 0,
-        interpret_soft_types_as_like_types: ((1 << 1) & flags) != 0,
-        allow_new_attribute_syntax: ((1 << 2) & flags) != 0,
-        enable_xhp_class_modifier: ((1 << 3) & flags) != 0,
-        php5_compat_mode: ((1 << 4) & flags) != 0,
-        hhvm_compat_mode: ((1 << 5) & flags) != 0,
+pub fn parse_decls(
+    config: &ffi::DeclParserConfig,
+    filename: &CxxString,
+    text: &[u8],
+) -> Result<Box<DeclsHolder>, DeclsError> {
+    let decl_opts = DeclParserOptions {
+        auto_namespace_map: (config.aliased_namespaces.iter())
+            .map(|e| (e.key.clone(), e.value.clone()))
+            .collect(),
+        disable_xhp_element_mangling: config.disable_xhp_element_mangling,
+        interpret_soft_types_as_like_types: config.interpret_soft_types_as_like_types,
+        enable_xhp_class_modifier: config.enable_xhp_class_modifier,
+        php5_compat_mode: config.php5_compat_mode,
+        hhvm_compat_mode: config.hhvm_compat_mode,
+        include_assignment_values: config.include_assignment_values,
+        enable_class_pointer_hint: config.enable_class_pointer_hint,
+        disallow_non_annotated_memoize: config.disallow_non_annotated_memoize,
+        treat_non_annotated_memoize_as_kbic: config.treat_non_annotated_memoize_as_kbic,
+        keep_user_attributes: true,
         ..Default::default()
     };
-
-    Box::new(DeclParserOptions(opts, bump))
-}
-
-impl compile_ffi::DeclResult {
-    fn new(
-        hash: u64,
-        serialized: Bytes,
-        decls: Decls,
-        attributes: FileAttributes,
-        bump: Bump,
-        has_errors: bool,
-    ) -> Self {
-        Self {
-            hash,
-            serialized: Box::new(serialized),
-            decls: Box::new(decls),
-            attributes: Box::new(attributes),
-            bump: Box::new(bump),
-            has_errors,
-        }
+    let path = PathBuf::from(OsStr::from_bytes(filename.as_bytes()));
+    let relpath = RelativePath::make(Prefix::Root, path);
+    let parsed_file: ParsedFile =
+        direct_decl_parser::parse_decls_for_bytecode(&decl_opts, relpath, text);
+    let has_errors = parsed_file.has_first_pass_parse_errors;
+    let holder = Box::new(DeclsHolder { parsed_file });
+    match has_errors {
+        false => Ok(holder),
+        true => Err(DeclsError(
+            holder,
+            PathBuf::from(OsStr::from_bytes(filename.as_bytes())),
+        )),
     }
 }
 
-pub fn hackc_direct_decl_parse(
-    opts: &DeclParserOptions,
-    filename: &CxxString,
-    text: &CxxString,
-) -> compile_ffi::DeclResult {
-    use std::os::unix::ffi::OsStrExt;
+#[derive(thiserror::Error, Debug)]
+#[error("{}: File contained first-pass parse errors", .1.display())]
+pub struct DeclsError(Box<DeclsHolder>, PathBuf);
 
-    let bump = bumpalo::Bump::new();
-    let alloc: &'static bumpalo::Bump =
-        unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
+fn verify_deserialization(result: &ffi::DeclsAndBlob) -> bool {
+    let decls = decl_provider::deserialize_decls(&result.serialized).unwrap();
+    decls == result.decls.parsed_file.decls
+}
 
-    let opts: &decl_parser_options::DeclParserOptions<'static> = &opts.0;
-    let opts: &decl_parser_options::DeclParserOptions<'static> = unsafe {
-        std::mem::transmute::<
-            &'_ decl_parser_options::DeclParserOptions<'static>,
-            &'static decl_parser_options::DeclParserOptions<'static>,
-        >(opts)
+fn compile_unit_from_text(
+    env: &ffi::NativeEnv,
+    source_text: &[u8],
+) -> Result<Box<UnitWrapper>, String> {
+    let native_env = env.to_compile_env().unwrap();
+    let text = SourceText::make(
+        std::sync::Arc::new(native_env.filepath.clone()),
+        source_text,
+    );
+
+    let external_decl_provider: Option<Arc<dyn DeclProvider>> = if env.decl_provider != 0 {
+        #[allow(clippy::arc_with_non_send_sync)]
+        Some(Arc::new(ExternalDeclProvider::new(
+            env.decl_provider as *const c_void,
+        )))
+    } else {
+        None
     };
 
-    let text = text.as_bytes();
-    let path = std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes()));
-    let filename = RelativePath::make(Prefix::Root, path);
-    let result: direct_decl_parser::ParsedFile<'static> =
-        direct_decl_parser::parse_decls_without_reference_text(opts, filename, text, alloc, None);
+    let decl_provider = SelfProvider::wrap_existing_provider(
+        external_decl_provider,
+        native_env.to_decl_parser_options(),
+        text.clone(),
+    );
 
-    let op = bincode::config::Options::with_native_endian(bincode::options());
-    let data = op
-        .serialize(&result.decls)
-        .map_err(|e| format!("failed to serialize, error: {}", e))
-        .unwrap();
-
-    compile_ffi::DeclResult::new(
-        position_insensitive_hash(&result.decls),
-        Bytes(ffi::Bytes::from(data)),
-        Decls(result.decls),
-        FileAttributes(result.file_attributes),
-        Bump(bump),
-        result.has_first_pass_parse_errors,
-    )
-}
-
-unsafe fn hackc_verify_deserialization(serialized: &Bytes, expected: &Decls) -> bool {
-    let arena = bumpalo::Bump::new();
-    let data = serialized.0.as_slice();
-
-    let op = bincode::config::Options::with_native_endian(bincode::options());
-    let mut de = bincode::de::Deserializer::from_slice(data, op);
-
-    let de = arena_deserializer::ArenaDeserializer::new(&arena, &mut de);
-    let decls = direct_decl_parser::Decls::deserialize(de)
-        .map_err(|e| format!("failed to deserialize, error: {}", e))
-        .unwrap();
-
-    decls == expected.0
-}
-
-fn hackc_compile_unit_from_text_cpp_ffi(
-    env: &compile_ffi::NativeEnv,
-    source_text: &CxxString,
-) -> Result<Box<HackCUnitWrapper>, String> {
-    stack_limit::with_elastic_stack(|stack_limit| {
-        let bump = bumpalo::Bump::new();
-        let alloc: &'static bumpalo::Bump =
-            unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
-        let native_env: compile::NativeEnv<&str> =
-            compile_ffi::NativeEnv::to_compile_env(env).unwrap();
-        let compile_env = compile::Env::<&str> {
-            filepath: native_env.filepath.clone(),
-            config_jsons: vec![],
-            config_list: vec![],
-            flags: native_env.flags,
-        };
-        let text = SourceText::make(
-            ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
-            source_text.as_bytes(),
-        );
-
-        let decl_allocator = bumpalo::Bump::new();
-        let decl_provider = if env.decl_getter != 0 {
-            let decl_getter_ptr = env.decl_getter as *const ();
-            let hhvm_provider_ptr = env.decl_provider as *const ();
-            let c_decl_getter_fn =
-                unsafe { std::mem::transmute::<*const (), ProviderFunc<'_>>(decl_getter_ptr) };
-            let c_hhvm_provider_ptr = unsafe {
-                std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr)
-            };
-            Some(ExternalDeclProvider {
-                provider: c_decl_getter_fn,
-                data: c_hhvm_provider_ptr,
-                arena: &decl_allocator,
-            })
-        } else {
-            None
-        };
-
-        let compile_result = compile::unit_from_text(
-            alloc,
-            &compile_env,
-            stack_limit,
-            text,
-            Some(&native_env),
-            decl_provider
-                .as_ref()
-                .map(|provider| provider as &dyn DeclProvider<'_>),
-            &mut Default::default(),
-        );
-
-        match compile_result {
-            Ok(unit) => Ok(Box::new(HackCUnitWrapper(unit, bump))),
-            Err(e) => Err(anyhow!("{}", e)),
-        }
-    })
-    .map_err(|e| format!("{}", e))
-    .expect("hackc_compile_unit_from_text_cpp_ffi: retry failed")
-    .map_err(|e| e.to_string())
-}
-
-#[no_mangle]
-pub fn hackc_unit_to_string_cpp_ffi(
-    env: &compile_ffi::NativeEnv,
-    prog: &HackCUnitWrapper,
-) -> Result<Vec<u8>, String> {
-    let native_env: compile::NativeEnv<&str> = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
-    let env = compile::Env::<&str> {
-        filepath: native_env.filepath.clone(),
-        config_jsons: vec![],
-        config_list: vec![],
-        flags: native_env.flags,
-    };
-    let mut output = Vec::new();
-    compile::unit_to_string(&env, Some(&native_env), &mut output, &prog.0)
-        .map(|_| output)
+    compile::unit_from_text(text, &native_env, decl_provider, &mut Default::default())
+        .map(|unit| Box::new(UnitWrapper(unit)))
         .map_err(|e| e.to_string())
 }
 
-pub fn hackc_facts_to_json_cpp_ffi(
-    facts: compile_ffi::FactsResult,
-    source_text: &CxxString,
-) -> String {
-    if facts.has_errors {
-        String::new()
-    } else {
-        let facts = facts::Facts::from(facts.facts);
-        let text = source_text.as_bytes();
-        facts.to_json(text)
+fn decls_to_symbols(holder: &DeclsHolder) -> ffi::FileSymbols {
+    facts::Facts::from_decls(&holder.parsed_file).into()
+}
+
+fn decls_to_facts_binary(decls: &DeclsHolder, sha1sum: &CxxString) -> Result<Vec<u8>> {
+    use bincode::Options;
+    let facts = facts::Facts::from_decls(&decls.parsed_file);
+    let file_facts = ffi::FileFacts::from_facts(facts, sha1sum.to_string_lossy().into_owned());
+    let mut buf = Vec::new();
+    bincode::options().serialize_into(&mut buf, &file_facts)?;
+    Ok(buf)
+}
+
+fn binary_to_facts(blob: &CxxString) -> bincode::Result<ffi::FileFacts> {
+    use bincode::Options;
+    bincode::options().deserialize_from(blob.as_bytes())
+}
+
+fn decls_holder_to_binary(decls: &DeclsHolder) -> bincode::Result<Vec<u8>> {
+    use bincode::Options;
+    let mut buf = Vec::new();
+    bincode::options().serialize_into(&mut buf, &decls.parsed_file)?;
+    Ok(buf)
+}
+
+fn binary_to_decls_holder(blob: &CxxString) -> bincode::Result<Box<DeclsHolder>> {
+    use bincode::Options;
+    let data = blob.as_bytes();
+    let op = bincode::options().with_native_endian();
+    let mut de = bincode::de::Deserializer::from_slice(data, op);
+    let parsed_file = ParsedFile::deserialize(&mut de)?;
+    Ok(Box::new(DeclsHolder { parsed_file }))
+}
+
+fn binary_to_decls_and_blob(blob: &CxxString) -> bincode::Result<ffi::DeclsAndBlob> {
+    let decls = binary_to_decls_holder(blob)?;
+    let serialized = decl_provider::serialize_decls(&decls.parsed_file.decls).unwrap();
+    let has_errors = decls.parsed_file.has_first_pass_parse_errors;
+    Ok(ffi::DeclsAndBlob {
+        serialized,
+        has_errors,
+        decls,
+    })
+}
+
+fn facts_debug(facts: &ffi::FileFacts) -> String {
+    format!("{facts:#?}")
+}
+
+fn hash_facts(facts: &ffi::FileFacts) -> [u8; 20] {
+    let mut hasher = Sha1::new();
+    let w = std::io::BufWriter::new(&mut hasher);
+    bincode::serialize_into(w, facts).unwrap();
+    hasher.finalize().into()
+}
+
+fn get_classes(holder: &DeclsHolder) -> Vec<ffi::ExtDeclClass> {
+    ext_decl::get_classes(&holder.parsed_file)
+}
+
+fn get_class(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclClass> {
+    match ext_decl::get_class(&holder.parsed_file, name) {
+        Some(v) => vec![v],
+        None => vec![],
     }
 }
 
-pub fn hackc_decls_to_facts_cpp_ffi(
-    decl_flags: i32,
-    decl_result: &compile_ffi::DeclResult,
-    source_text: &CxxString,
-) -> compile_ffi::FactsResult {
-    let text = source_text.as_bytes();
-    let (md5sum, sha1sum) = facts::md5_and_sha1(text);
-    if decl_result.has_errors {
-        compile_ffi::FactsResult {
-            has_errors: true,
-            ..Default::default()
-        }
-    } else {
-        let disable_xhp_element_mangling = ((1 << 0) & decl_flags) != 0;
-        let facts = compile_ffi::Facts::from(facts::Facts::facts_of_decls(
-            &(*decl_result.decls).0,
-            (*decl_result.attributes).0,
-            disable_xhp_element_mangling,
-        ));
-        compile_ffi::FactsResult {
-            facts,
-            md5sum,
-            sha1sum,
-            has_errors: false,
-        }
+fn get_class_methods(holder: &DeclsHolder, kls: &str) -> Vec<ffi::ExtDeclMethod> {
+    ext_decl::get_class_methods(&holder.parsed_file, kls, "")
+}
+
+fn get_class_method(holder: &DeclsHolder, kls: &str, name: &str) -> Vec<ffi::ExtDeclMethod> {
+    ext_decl::get_class_methods(&holder.parsed_file, kls, name)
+}
+
+fn get_class_smethods(holder: &DeclsHolder, kls: &str) -> Vec<ffi::ExtDeclMethod> {
+    ext_decl::get_class_smethods(&holder.parsed_file, kls, "")
+}
+
+fn get_class_smethod(holder: &DeclsHolder, kls: &str, name: &str) -> Vec<ffi::ExtDeclMethod> {
+    ext_decl::get_class_smethods(&holder.parsed_file, kls, name)
+}
+
+fn get_class_consts(holder: &DeclsHolder, kls: &str) -> Vec<ffi::ExtDeclClassConst> {
+    ext_decl::get_class_consts(&holder.parsed_file, kls, "")
+}
+
+fn get_class_const(holder: &DeclsHolder, kls: &str, name: &str) -> Vec<ffi::ExtDeclClassConst> {
+    ext_decl::get_class_consts(&holder.parsed_file, kls, name)
+}
+
+fn get_class_typeconsts(holder: &DeclsHolder, kls: &str) -> Vec<ffi::ExtDeclClassTypeConst> {
+    ext_decl::get_class_typeconsts(&holder.parsed_file, kls, "")
+}
+
+fn get_class_typeconst(
+    holder: &DeclsHolder,
+    kls: &str,
+    name: &str,
+) -> Vec<ffi::ExtDeclClassTypeConst> {
+    ext_decl::get_class_typeconsts(&holder.parsed_file, kls, name)
+}
+
+fn get_class_props(holder: &DeclsHolder, kls: &str) -> Vec<ffi::ExtDeclProp> {
+    ext_decl::get_class_props(&holder.parsed_file, kls, "")
+}
+
+fn get_class_prop(holder: &DeclsHolder, kls: &str, name: &str) -> Vec<ffi::ExtDeclProp> {
+    ext_decl::get_class_props(&holder.parsed_file, kls, name)
+}
+
+fn get_class_sprops(holder: &DeclsHolder, kls: &str) -> Vec<ffi::ExtDeclProp> {
+    ext_decl::get_class_sprops(&holder.parsed_file, kls, "")
+}
+
+fn get_class_sprop(holder: &DeclsHolder, kls: &str, name: &str) -> Vec<ffi::ExtDeclProp> {
+    ext_decl::get_class_sprops(&holder.parsed_file, kls, name)
+}
+
+fn get_class_attributes(holder: &DeclsHolder, kls: &str) -> Vec<ffi::ExtDeclAttribute> {
+    ext_decl::get_class_attributes(&holder.parsed_file, kls, "")
+}
+
+fn get_class_attribute(holder: &DeclsHolder, kls: &str, name: &str) -> Vec<ffi::ExtDeclAttribute> {
+    ext_decl::get_class_attributes(&holder.parsed_file, kls, name)
+}
+
+fn get_file_attributes(holder: &DeclsHolder) -> Vec<ffi::ExtDeclAttribute> {
+    ext_decl::get_file_attributes(&holder.parsed_file, "")
+}
+
+fn get_file_attribute(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclAttribute> {
+    ext_decl::get_file_attributes(&holder.parsed_file, name)
+}
+
+fn get_file_consts(holder: &DeclsHolder) -> Vec<ffi::ExtDeclFileConst> {
+    ext_decl::get_file_consts(&holder.parsed_file, "")
+}
+
+fn get_file_const(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclFileConst> {
+    ext_decl::get_file_consts(&holder.parsed_file, name)
+}
+
+fn get_file_funcs(holder: &DeclsHolder) -> Vec<ffi::ExtDeclFileFunc> {
+    ext_decl::get_file_funcs(&holder.parsed_file, "")
+}
+
+fn get_file_func(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclFileFunc> {
+    ext_decl::get_file_funcs(&holder.parsed_file, name)
+}
+
+fn get_file_modules(holder: &DeclsHolder) -> Vec<ffi::ExtDeclModule> {
+    ext_decl::get_file_modules(&holder.parsed_file, "")
+}
+
+fn get_file_module(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclModule> {
+    ext_decl::get_file_modules(&holder.parsed_file, name)
+}
+
+fn get_file_module_membership(holder: &DeclsHolder) -> String {
+    ext_decl::get_file_module_membership(&holder.parsed_file)
+}
+
+fn get_file_typedefs(holder: &DeclsHolder) -> Vec<ffi::ExtDeclTypeDef> {
+    ext_decl::get_file_typedefs(&holder.parsed_file, "")
+}
+
+fn get_file_typedef(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclTypeDef> {
+    ext_decl::get_file_typedefs(&holder.parsed_file, name)
+}
+
+fn get_file(holder: &DeclsHolder) -> ffi::ExtDeclFile {
+    ext_decl::get_file(&holder.parsed_file)
+}
+
+fn get_type_structure(holder: &DeclsHolder, name: &str) -> Vec<ffi::ExtDeclTypeStructure> {
+    ext_decl::get_type_structure(&holder.parsed_file, name)
+}
+
+fn get_shape_keys(holder: &DeclsHolder, name: &str) -> Vec<String> {
+    ext_decl::get_shape_keys(&holder.parsed_file, name)
+}
+
+fn get_public_api_for_class(holder: &DeclsHolder, name: &str) -> Vec<String> {
+    match ext_decl::get_public_api_for_class(&holder.parsed_file, name) {
+        Ok(string) => vec![string],
+        Err(_) => vec![],
+    }
+}
+
+// SAFETY: i must be a raw bitcast from a valid BytesId
+unsafe fn deref_bytes(i: u32) -> &'static [u8] {
+    unsafe {
+        use intern::InternId;
+        let biased = i.try_into().expect("raw id should be nonzero");
+        intern::string::BytesId::from_raw(biased).as_bytes()
     }
 }

@@ -8,8 +8,8 @@
 
 // an ordinary if having 2 actions on TRUE and none on FALSE
 
-function processTransaction() { echo "Inside processTransaction\n"; }
-function postMessage() { echo "Inside postMessage\n"; }
+function processTransaction() :mixed{ echo "Inside processTransaction\n"; }
+function postMessage() :mixed{ echo "Inside postMessage\n"; }
 
 class Name
 {
@@ -37,8 +37,8 @@ if (0)
 
 // use if with all scalar types + array
 
-$colors = varray["red", "white", "blue"];
-$scalarValueList = varray[10, -100, 0, 1.234, 0.0, TRUE, FALSE, NULL, 'xx', "", $colors];
+$colors = vec["red", "white", "blue"];
+$scalarValueList = vec[10, -100, 0, 1.234, 0.0, TRUE, FALSE, NULL, 'xx', "", $colors];
 
 foreach ($scalarValueList as $e)
 {
@@ -85,14 +85,14 @@ if (1)
 else    // this else does go with the outer if
     echo "Path 3\n";
 
-// test elseif
+// test else if
 
 $a = 10;
 if ($a < 0)
     ; // ...
-elseif ($a == 0)
+else if ($a == 0)
     ; // ...
-elseif ($a < 10)
+else if ($a < 10)
     ; // ...
 else
     ; // ...

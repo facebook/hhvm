@@ -3,7 +3,7 @@
 class Foo {
 }
 
-function pure_function_many_locals($a) {
+function pure_function_many_locals($a) :mixed{
   $x = new Foo;
   $xx = new Foo;
   $xxx = new Foo;
@@ -17,15 +17,15 @@ function pure_function_many_locals($a) {
   return 7;
 }
 
-function pure_function_2($a, $b) {
+function pure_function_2($a, $b) :mixed{
   return pure_function_many_locals($a) + pure_function_many_locals($b);
 }
 
-function pure_function_no_profile() {
+function pure_function_no_profile() :mixed{
   echo "yep\n";
 }
 
-function profiler(...$args) {
+function profiler(...$args) :mixed{
   // Calling functions from within the profiler function should note
   // use the profile (it would cause an infinite loop)
   pure_function_no_profile();

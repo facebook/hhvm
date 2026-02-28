@@ -8,12 +8,14 @@
 trait MyTrait {}
 interface I {}
 class MyClass {}
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_declared_traits_basic_001(): void {
 echo "*** Testing get_declared_traits() : basic functionality ***\n";
 
 // Zero arguments
 echo "\n-- Testing get_declared_traits() function with Zero arguments --\n";
-var_dump(get_declared_traits());
+$traits = get_declared_traits();
+sort(inout $traits);
+var_dump($traits);
 
 foreach (get_declared_traits() as $trait) {
     if (!trait_exists($trait)) {

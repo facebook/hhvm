@@ -1,0 +1,6 @@
+Parser {
+  Hack.Lang.UseLegacyExperimentalFeatureConfig = false
+  Hack.Lang.ExperimentalFeatures {
+    test_feature = OngoingRelease
+  }
+}

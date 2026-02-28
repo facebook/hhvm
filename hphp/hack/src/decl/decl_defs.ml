@@ -13,6 +13,20 @@ open Typing_defs
 (** Exception representing not finding a class during decl *)
 exception Decl_not_found of string
 
+let raise_decl_not_found (path : Relative_path.t option) (name : string) : 'a =
+  HackEventLogger.decl_consistency_bug ?path ~data:name "Decl_not_found";
+  let err_str =
+    Printf.sprintf
+      "%s not found in %s"
+      name
+      (Option.value_map path ~default:"_" ~f:Relative_path.to_absolute)
+  in
+  Hh_logger.log
+    "Decl_not_found: %s\n%s"
+    err_str
+    (Exception.get_current_callstack_string 99 |> Exception.clean_stack);
+  raise (Decl_not_found err_str)
+
 (** A substitution context contains all the information necessary for
  * changing the type of an inherited class element to the class that is
  * inheriting the class element. It's best illustrated via an example.
@@ -63,103 +77,6 @@ type source_type =
   | ReqClass
 [@@deriving eq, show]
 
-(* Is this bit set in the flags? *)
-let is_set bit flags = not (Int.equal 0 (Int.bit_and bit flags))
-
-(* Set a single bit to a boolean value *)
-let set_bit bit value flags =
-  if value then
-    Int.bit_or bit flags
-  else
-    Int.bit_and (Int.bit_not bit) flags
-
-(* MRO element flags *)
-
-(** True if this element is included in the linearization (directly or
-    indirectly) because of a require extends relationship. *)
-let mro_via_req_extends = 1 lsl 1
-
-(** True if this element is included in the linearization (directly or
-    indirectly) because of a require implements relationship. *)
-let mro_via_req_impl = 1 lsl 2
-
-(** True if this element is included in the linearization because of any
-    XHP-attribute-inclusion relationship, and thus, the linearized class
-    inherits only the XHP attributes from this element. *)
-let mro_xhp_attrs_only = 1 lsl 3
-
-(** True if this element is included in the linearization because of a
-    interface-implementation relationship, and thus, the linearized class
-    inherits only the class constants and type constants from this element. *)
-let mro_consts_only = 1 lsl 4
-
-(** True if this element is included in the linearization via an unbroken chain
-    of trait-use relationships, and thus, the linearized class inherits the
-    private members of this element (on account of the runtime behavior where
-    they are effectively copied into the linearized class). *)
-let mro_copy_private_members = 1 lsl 5
-
-(** True if this element is included in the linearization via an unbroken chain
-    of abstract classes, and thus, abstract type constants with default values
-    are inherited unchanged. When this flag is not set, a concrete class was
-    present in the chain. Since we convert abstract type constants with
-    defaults to concrete ones when they are included in a concrete class, any
-    type constant which 1) is abstract, 2) has a default, and 3) was inherited
-    from an ancestor with this flag not set, should be inherited as a concrete
-    type constant instead. *)
-let mro_passthrough_abstract_typeconst = 1 lsl 6
-
-(** True if this element is included in the linearization (directly or
-    indirectly) because of a require class relationship. *)
-let mro_via_req_class = 1 lsl 7
-
-type mro_element = {
-  mro_name: string;  (** The class's name *)
-  mro_use_pos: Pos_or_decl.t;
-      (** The position at which this element was directly included in the hierarchy.
-          If C extends B extends A, the use_pos of A in C's linearization will be the
-          position of the class name A in the line "class B extends A". *)
-  mro_ty_pos: Pos_or_decl.t;
-      (** Like mro_use_pos, but includes type arguments (if any). *)
-  mro_flags: int;
-      (** Bitflag which specifies in what contexts that element of the linearization should or
-          should not be used. *)
-  mro_type_args: decl_ty list;
-      (** The type arguments with which this ancestor class was instantiated. The
-          first class in the linearization (the one which was linearized) will have
-          an empty list here, even when it takes type parameters. *)
-  mro_cyclic: SSet.t option;
-      (** When this is [Some], this mro_element represents an attempt to include a
-          linearization within itself. We include these in the linearization for the
-          sake of error reporting (they will not occur in correct programs). The
-          SSet.t is the set of class names known to have been involved in the
-          inclusion of this class in the linearization. *)
-  mro_trait_reuse: string option;
-      (** When this is [Some], this mro_element represents the use of a trait which
-          was already used earlier in the linearization. Normally, we do not emit
-          duplicate mro_elements at all--we include these in the linearization only
-          for error detection. The string is the name of the class through which this
-          trait was most recently included (as a duplicate). *)
-  mro_required_at: Pos_or_decl.t option;
-      (** If this element is included in the linearization because it was directly
-          required by some ancestor, this will be [Some], and the position will be
-          the location where this requirement was most recently included into the
-          hierarchy. *)
-}
-[@@deriving eq, show]
-
-type lin = {
-  lin_member: mro_element list;
-  lin_ancestor: mro_element list;
-}
-
-type linearization = mro_element Sequence.t
-
-type linearization_kind =
-  | Member_resolution
-  | Ancestor_types
-[@@deriving show, ord]
-
 type decl_error =
   | Wrong_extend_kind of {
       pos: Pos.t;
@@ -169,10 +86,29 @@ type decl_error =
       parent_kind: Ast_defs.classish_kind;
       parent_name: string;
     }
+  | Wrong_use_kind of {
+      pos: Pos.t;
+      name: string;
+      parent_pos: Pos_or_decl.t;
+      parent_name: string;
+    }
   | Cyclic_class_def of {
       pos: Pos.t;
       stack: SSet.t;
     }
+[@@deriving show]
+
+type element = {
+  elt_flags: Typing_defs_flags.ClassElt.t;
+  elt_origin: string;
+  elt_visibility: ce_visibility;
+  elt_deprecated: string option;
+  elt_sealed_allowlist: SSet.t option;
+  elt_sort_text: string option;
+  (* Derived from <<__Overlapping(_)>> attribute *)
+  elt_overlapping_tparams: SSet.t option;
+  elt_package_requirement: package_requirement option;
+}
 [@@deriving show]
 
 type decl_class_type = {
@@ -186,10 +122,10 @@ type decl_class_type = {
   dc_is_xhp: bool;
   dc_has_xhp_keyword: bool;
   dc_module: Ast_defs.id option;
+  dc_is_module_level_trait: bool;
   dc_name: string;
   dc_pos: Pos_or_decl.t;
   dc_tparams: decl_tparam list;
-  dc_where_constraints: decl_where_constraint list;
   dc_substs: subst_context SMap.t;
       (** class name to the subst_context that must be applied to that class *)
   dc_consts: class_const SMap.t;
@@ -202,28 +138,42 @@ type decl_class_type = {
   dc_ancestors: decl_ty SMap.t;
   dc_support_dynamic_type: bool;
   dc_req_ancestors: requirement list;
+      (** All the `require extends` and `require implements`,
+          possibly inherited from interface or trait ancestors.
+          Does not include `require class` *)
   dc_req_ancestors_extends: SSet.t;
-  dc_req_class_ancestors: requirement list;
-      (** dc_req_class_ancestors gathers all the `require class`
-        * requirements declared in ancestors.  Remark that `require class`
-        * requirements are _not_ stored in `dc_req_ancestors` or
-        *`dc_req_ancestors_extends` fields.
-        *)
+      (** All the `require extends` and `require implements`,
+          possibly inherited from interface or trait ancestors,
+          plus some extends and other ancestors of these.
+          Does not include `require class` *)
+  dc_req_constraints_ancestors: constraint_requirement list;
+      (** dc_req_constraints_ancestors gathers all the `require class` and
+          `require this as` requirements declared in ancestors.  Remark that
+          `require class` and `require this as` requirements are _not_ stored
+           in `dc_req_ancestors` or `dc_req_ancestors_extends` fields. *)
   dc_extends: SSet.t;
   dc_sealed_whitelist: SSet.t option;
   dc_xhp_attr_deps: SSet.t;
   dc_xhp_enum_values: Ast_defs.xhp_enum_value list SMap.t;
+  dc_xhp_marked_empty: bool;
   dc_enum_type: enum_type option;
   dc_decl_errors: decl_error list;
+  dc_docs_url: string option;
+  dc_allow_multiple_instantiations: bool;
+      (** Wether this interface has attribute __UNSAFE_AllowMultipleInstantiations. *)
+  dc_sort_text: string option;
+      (** The string provided by the __AutocompleteSortText attribute used for sorting
+          autocomplete results. *)
+  dc_package: Aast_defs.package_membership option;
 }
 [@@deriving show]
 
-and element = {
-  elt_flags: Typing_defs_flags.ClassElt.t;
-  elt_origin: string;
-  elt_visibility: ce_visibility;
-  elt_deprecated: string option;
+type class_requirements = {
+  cr_req_ancestors: Typing_defs.requirement list;
+  cr_req_ancestors_extends: SSet.t;
+  cr_req_constraints_ancestors: Typing_defs.constraint_requirement list;
 }
+[@@deriving show]
 
 let get_elt_abstract elt = Typing_defs_flags.ClassElt.is_abstract elt.elt_flags
 

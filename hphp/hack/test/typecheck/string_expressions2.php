@@ -11,7 +11,7 @@
 
 class Meh {
   public static function foo(): void {
-    $blah = varray[3, 4, 5];
+    $blah = vec[3, 4, 5];
     print "Hello, $blah[0]dude"; // hphp output: Hello, 3dude
   }
 }

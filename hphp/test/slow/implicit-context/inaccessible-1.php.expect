@@ -1,0 +1,26 @@
+  Before: C
+memoNoArgOK passed
+  After: C
+------------------------
+  Before: C
+memoOK passed
+  After: C
+------------------------
+  Before: C
+null
+memoNoArgFail passed
+  After: C
+------------------------
+  Before: C
+null
+memoFail passed
+  After: C
+------------------------
+  Before: C
+memoNoArgExn failed with: oh no exception
+  After: C
+------------------------
+  Before: C
+memoExn failed with: oh no exception
+  After: C
+------------------------

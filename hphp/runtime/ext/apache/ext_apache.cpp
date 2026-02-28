@@ -18,14 +18,11 @@
 #include "hphp/runtime/ext/apache/ext_apache.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/util/health-monitor-types.h"
-#include "hphp/util/text-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,15 +49,6 @@ Variant HHVM_FUNCTION(apache_note, const String& note_name,
     return prev;
   }
   return false;
-}
-
-Array HHVM_FUNCTION(apache_request_headers) {
-  Transport *transport = g_context->getTransport();
-  if (transport) {
-    auto const& headers = transport->getHeaders();
-    return get_headers(headers);
-  }
-  return empty_dict_array();
 }
 
 static Array get_raw_headers(const proxygen::HTTPHeaders &headers) {
@@ -114,7 +102,7 @@ Array HHVM_FUNCTION(apache_get_config) {
   if (HttpServer::Server) {
     workers = HttpServer::Server->getPageServer()->getActiveWorker();
     queued = HttpServer::Server->getPageServer()->getQueuedJobs();
-    queued -= HttpServer::QueueDiscount.load(std::memory_order_relaxed);
+    queued -= HttpServer::QueueDiscount.load(std::memory_order_acquire);
     if (queued < 0)
       queued = 0;
     health_level = (int)(ApacheExtension::GetHealthLevel());
@@ -122,7 +110,7 @@ Array HHVM_FUNCTION(apache_get_config) {
 
   return make_dict_array(
     s_restart_time, HttpServer::StartTime,
-    s_max_clients, RuntimeOption::ServerThreadCount,
+    s_max_clients, Cfg::Server::ThreadCount,
     s_active_clients, workers,
     s_queued_requests, queued,
     s_health_level, health_level
@@ -140,24 +128,18 @@ Array HHVM_FUNCTION(get_headers_secure) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ApacheExtension::ApacheExtension() : Extension("apache") {}
+ApacheExtension::ApacheExtension() : Extension("apache", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
 ApacheExtension::~ApacheExtension() {}
 
-void ApacheExtension::moduleInit() {
+void ApacheExtension::moduleRegisterNative() {
   HHVM_FE(apache_note);
   HHVM_FE(apache_notes);
-  HHVM_FE(apache_request_headers);
   HHVM_FE(apache_response_headers);
   HHVM_FE(apache_setenv);
-  HHVM_FALIAS(getallheaders, apache_request_headers);
   HHVM_FE(apache_get_config);
   HHVM_FALIAS(HH\\get_headers_secure, get_headers_secure);
   HHVM_FALIAS(HH\\get_proxygen_headers, get_proxygen_headers);
-
-  HHVM_RC_INT(APACHE_MAP, 200);
-
-  loadSystemlib();
 }
 
 static ApacheExtension s_apache_extension;

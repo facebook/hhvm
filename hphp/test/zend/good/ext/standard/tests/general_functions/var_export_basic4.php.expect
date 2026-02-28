@@ -1,0 +1,100 @@
+*** Testing var_export() with valid strings ***
+
+*** Output for strings ***
+
+-- Iteration: "" --
+''
+''
+string(2) "''"
+
+
+-- Iteration: " " --
+' '
+' '
+string(3) "' '"
+
+
+-- Iteration: '' --
+''
+''
+string(2) "''"
+
+
+-- Iteration: ' ' --
+' '
+' '
+string(3) "' '"
+
+
+-- Iteration: "string" --
+'string'
+'string'
+string(8) "'string'"
+
+
+-- Iteration: 'string' --
+'string'
+'string'
+string(8) "'string'"
+
+
+-- Iteration: "\0Hello\0 World\0" --
+'' . "\0" . 'Hello' . "\0" . ' World' . "\0" . ''
+'' . "\0" . 'Hello' . "\0" . ' World' . "\0" . ''
+string(49) "'' . "\0" . 'Hello' . "\0" . ' World' . "\0" . ''"
+
+
+-- Iteration: "NULL" --
+'NULL'
+'NULL'
+string(6) "'NULL'"
+
+
+-- Iteration: 'null' --
+'null'
+'null'
+string(6) "'null'"
+
+
+-- Iteration: "FALSE" --
+'FALSE'
+'FALSE'
+string(7) "'FALSE'"
+
+
+-- Iteration: 'false' --
+'false'
+'false'
+string(7) "'false'"
+
+
+-- Iteration: "\x0b" --
+''
+''
+string(3) "''"
+
+
+-- Iteration: "\0" --
+'' . "\0" . ''
+'' . "\0" . ''
+string(14) "'' . "\0" . ''"
+
+
+-- Iteration: '\0' --
+'\\0'
+'\\0'
+string(5) "'\\0'"
+
+
+-- Iteration: '\060' --
+'\\060'
+'\\060'
+string(7) "'\\060'"
+
+
+-- Iteration: "\070" --
+'8'
+'8'
+string(3) "'8'"
+
+===DONE===

@@ -1,6 +1,6 @@
 <?hh
 
-function f(mixed $x) {
+function f(mixed $x) :mixed{
   try {
     $x as shape('hi' => int, 'wow' => string);
     echo "\n";
@@ -9,7 +9,7 @@ function f(mixed $x) {
   }
 }
 
-function g(mixed $x) {
+function g(mixed $x) :mixed{
   try {
     $x as shape('hi' => int, 'wow' => string, ...);
     echo "OK\n";
@@ -18,7 +18,7 @@ function g(mixed $x) {
   }
 }
 
-function h(mixed $x) {
+function h(mixed $x) :mixed{
   try {
     $x as shape(?'hi' => int, 'wow' => string);
     echo "OK\n";
@@ -27,7 +27,7 @@ function h(mixed $x) {
   }
 }
 
-function test($arr, $f) {
+function test($arr, $f) :mixed{
   foreach ($arr as $a) {
     $f($a);
   }
@@ -36,7 +36,7 @@ function test($arr, $f) {
 
 
 <<__EntryPoint>>
-function main_shape_errors() {
+function main_shape_errors() :mixed{
 $arr = vec[
   shape('hi' => 'wow'),
   shape('hi' => 1, 'wow' => 2),

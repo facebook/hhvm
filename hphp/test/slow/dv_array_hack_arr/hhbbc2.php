@@ -1,24 +1,24 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function get1() {
+function get1() :mixed{
   if (__hhvm_intrinsics\launder_value(true)) {
-    return varray['a', 'b', 'c'];
+    return vec['a', 'b', 'c'];
   } else {
-    return varray[];
+    return vec[];
   }
 }
-function get2() {
+function get2() :mixed{
   if (__hhvm_intrinsics\launder_value(true)) {
-    return darray[0 => 'a', 1 => 'b', 2 => 'c'];
+    return dict[0 => 'a', 1 => 'b', 2 => 'c'];
   } else {
-    return darray[];
+    return dict[];
   }
 }
 
-function foo() { return get1() === get2(); }
+function foo() :mixed{ return get1() === get2(); }
 
 <<__EntryPoint>>
-function main_hhbbc2() {
+function main_hhbbc2() :mixed{
 var_dump(foo());
 }

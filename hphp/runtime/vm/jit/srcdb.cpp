@@ -16,18 +16,12 @@
 
 #include "hphp/runtime/vm/jit/srcdb.h"
 
-#include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/treadmill.h"
-
-#include "hphp/runtime/vm/jit/cg-meta.h"
-#include "hphp/runtime/vm/jit/relocation.h"
-#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/tc.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
-#include <cstdarg>
 #include <cstdint>
 #include <string>
 
@@ -153,7 +147,7 @@ void SrcRec::chainFrom(IncomingBranch br, TCA stub) {
         m_incomingBranches.size());
   br.patch(destAddr);
 
-  if (RuntimeOption::EvalEnableReusableTC) {
+  if (Cfg::Eval::EnableReusableTC) {
     tc::recordJump(br.toSmash(), this);
   }
 }
@@ -164,8 +158,8 @@ void SrcRec::newTranslation(TransLoc loc,
   // When translation punts due to hitting limit, will generate one
   // more translation that will call the interpreter.
   assertx(m_translations.size() <=
-          std::max(RuntimeOption::EvalJitMaxProfileTranslations,
-                   RuntimeOption::EvalJitMaxTranslations));
+          std::max(Cfg::Jit::MaxProfileTranslations,
+                   Cfg::Jit::MaxTranslations));
 
   TRACE(1, "SrcRec(%p)::newTranslation @%p, ", this, loc.entry());
 
@@ -256,13 +250,13 @@ void SrcRec::replaceOldTranslations(TCA transStub) {
   auto translations = std::move(m_translations);
   m_tailFallbackJumps.clear();
   m_topTranslation = nullptr;
-  assertx(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
+  assertx(!Cfg::Repo::Authoritative || Cfg::Jit::PGO);
   patchIncomingBranches(transStub);
 
   // Now that we've smashed all the IBs for these translations they should be
   // unreachable-- to prevent a race we treadmill here and then reclaim their
   // associated TC space
-  if (RuntimeOption::EvalEnableReusableTC) {
+  if (Cfg::Eval::EnableReusableTC) {
     tc::reclaimTranslations(std::move(translations));
     return;
   }

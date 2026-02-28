@@ -3,14 +3,6 @@ add_library(mcrouter INTERFACE)
 include(ExternalProject)
 include(HPHPFunctions)
 
-SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
-  MCROUTER_DOWNLOAD_ARGS
-  SOURCE_URL "https://github.com/facebook/mcrouter/archive/refs/tags/v2022.03.14.00.tar.gz"
-  SOURCE_HASH "SHA256=f5e74e03c3523947eae64d2536898910438d611d91ac7494472b80469a1bec77"
-  # The tarball name is just the tag name, which can conflict in the cache
-  FILENAME_PREFIX "mcrouter-"
-)
-
 set(
   MCROUTER_DEPS
   boost
@@ -27,21 +19,22 @@ add_dependencies(mcrouter_deps ragel)
 
 ExternalProject_Add(
   bundled_mcrouter
-  ${MCROUTER_DOWNLOAD_ARGS}
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
+  BUILD_ALWAYS ON
   PATCH_COMMAND
-    "${CMAKE_COMMAND}" -E create_symlink 
+    "${CMAKE_COMMAND}" -E create_symlink
     "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter-CMakeLists.txt"
     "CMakeLists.txt"
     &&
-    "${CMAKE_COMMAND}" -E create_symlink 
+    "${CMAKE_COMMAND}" -E create_symlink
     "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter-thrift-codegen.cmake"
     "mcrouter-thrift-codegen.cmake"
     &&
-    "${CMAKE_COMMAND}" -E copy 
+    "${CMAKE_COMMAND}" -E copy
     "${CMAKE_CURRENT_SOURCE_DIR}/config.h"
     "mcrouter/"
     &&
-    "${CMAKE_COMMAND}" -E copy 
+    "${CMAKE_COMMAND}" -E copy
     "${CMAKE_CURRENT_SOURCE_DIR}/config-impl.h"
     "mcrouter/"
   CMAKE_ARGS
@@ -52,16 +45,19 @@ ExternalProject_Add(
     -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
     -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
     -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
+    -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
+    -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
 
     "-DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}"
     "-DBOOST_INCLUDE_DIR=$<TARGET_PROPERTY:boost,INTERFACE_INCLUDE_DIRECTORIES>"
-    "-DGLOG_INCLUDE_DIR=${LIBGLOG_INCLUDE_DIR}"
+    "-DGLOG_INCLUDE_DIR=${GLOG_INCLUDE_DIR}"
     "-DJEMALLOC_INCLUDE_DIR=$<TARGET_PROPERTY:jemalloc,INTERFACE_INCLUDE_DIRECTORIES>"
     "-DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}"
 
     "-Dragel_EXECUTABLE=$<TARGET_FILE:ragel>"
 
-    "-Dfmt_DIR=${FMT_INSTALL_DIR}/lib/cmake/fmt"
+    "-Dfmt_DIR=${fmt_DIR}"
     "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
     "-Dfizz_DIR=${FIZZ_INSTALL_DIR}/lib/cmake/fizz"
     "-DFBThrift_DIR=${THRIFT_INSTALL_DIR}/lib/cmake/fbthrift"

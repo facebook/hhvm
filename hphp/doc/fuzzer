@@ -21,7 +21,7 @@ The OCaml base of the tool can be run by itself with
 
 and can be built with
 
- buck build @mode/<MODE> //hphp/runtime/vm/verifier/fuzzer:fuzzer
+ buck build @//mode/<MODE> //hphp/runtime/vm/verifier/fuzzer:fuzzer
 
 but this is unlikely to be useful to a user. The Python script is much more
 useful for testing purposes.

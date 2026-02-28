@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright(c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -8,44 +8,62 @@
  *
  */
 
-const int FILEINFO_NONE = 0;
-const int FILEINFO_SYMLINK = 2;
-const int FILEINFO_MIME = 1040;
-const int FILEINFO_MIME_TYPE = 16;
-const int FILEINFO_MIME_ENCODING = 1024;
-const int FILEINFO_DEVICES = 8;
-const int FILEINFO_CONTINUE = 32;
-const int FILEINFO_PRESERVE_ATIME = 128;
-const int FILEINFO_RAW = 256;
+const int FILEINFO_NONE;
+const int FILEINFO_SYMLINK;
+const int FILEINFO_MIME;
+const int FILEINFO_MIME_TYPE;
+const int FILEINFO_MIME_ENCODING;
+const int FILEINFO_DEVICES;
+const int FILEINFO_CONTINUE;
+const int FILEINFO_PRESERVE_ATIME;
+const int FILEINFO_RAW;
 
 <<__PHPStdLib>>
-function finfo_open(int $options = FILEINFO_NONE, $magic_file = null) {}
+function finfo_open(
+  int $options = FILEINFO_NONE,
+  HH\FIXME\MISSING_PARAM_TYPE $magic_file = null,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function finfo_close(resource $finfo);
+function finfo_close(resource $finfo): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function finfo_set_flags(resource $finfo, int $options) {}
+function finfo_set_flags(
+  resource $finfo,
+  int $options,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function finfo_file(resource $finfo, $file_name, int $options = FILEINFO_NONE, $context = null) {}
+function finfo_file(
+  resource $finfo,
+  HH\FIXME\MISSING_PARAM_TYPE $file_name,
+  int $options = FILEINFO_NONE,
+  HH\FIXME\MISSING_PARAM_TYPE $context = null,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function finfo_buffer(resource $finfo, $string, int $options = FILEINFO_NONE, $context = null);
+function finfo_buffer(
+  resource $finfo,
+  HH\FIXME\MISSING_PARAM_TYPE $string,
+  int $options = FILEINFO_NONE,
+  HH\FIXME\MISSING_PARAM_TYPE $context = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mime_content_type($filename) {}
+function mime_content_type(
+  HH\FIXME\MISSING_PARAM_TYPE $filename,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 
 class finfo {
   // Methods
   public function __construct(
     int $options = FILEINFO_NONE,
-    $magic_file = null,
+    HH\FIXME\MISSING_PARAM_TYPE $magic_file = null,
   );
   public function buffer(
-    $string = null,
+    HH\FIXME\MISSING_PARAM_TYPE $string = null,
     int $options = FILEINFO_NONE,
-    $context = null,
+    HH\FIXME\MISSING_PARAM_TYPE $context = null,
   ): string;
   public function file(
-    $file_name = null,
+    HH\FIXME\MISSING_PARAM_TYPE $file_name = null,
     int $options = FILEINFO_NONE,
-    $context = null,
+    HH\FIXME\MISSING_PARAM_TYPE $context = null,
   ): string;
   public function set_flags(int $options): bool;
 

@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/jit/vasm-block-counters.h"
 
-#include "hphp/runtime/base/runtime-option.h"
-
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/trans-prof-counters.h"
@@ -27,11 +25,12 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
 #include <type_traits>
 
-TRACE_SET_MOD(vasm_block_count);
+TRACE_SET_MOD(vasm_block_count)
 
 namespace HPHP { namespace jit {
 
@@ -68,7 +67,7 @@ void insert(Vunit& unit, const T& key) {
   assertx(checkNoCriticalEdges(unit));
   assertx(checkNoSideExits(unit));
 
-  auto const blocks = sortBlocks(unit);
+auto const blocks = sortBlocks(unit);
   for (auto const b : blocks) {
     auto& block = unit.blocks[b];
 
@@ -108,7 +107,10 @@ std::string checkProfile(const Vunit& unit,
                          const jit::vector<Vlabel>& sortedBlocks,
                          const jit::vector<int64_t>& counters,
                          const jit::vector<VOpRaw>& opcodes) {
-  auto const kind = unit.context->kind == TransKind::OptPrologue ? "prologue" : "region";
+
+  auto const kind = unit.context
+    ? unit.context->kind == TransKind::OptPrologue ? "prologue" : "region"
+    : "unique stub";
   if (counters.size() == 0) return folly::sformat("no profile for this {}", kind);
 
   std::string errorMsg;
@@ -116,7 +118,10 @@ std::string checkProfile(const Vunit& unit,
 
   auto report = [&] {
     if (!errorMsg.empty()) return;
-    if (unit.context->kind == TransKind::OptPrologue) {
+    if (!unit.context) {
+      errorMsg = std::string(unit.name) + "\n";
+      FTRACE(1, "VasmBlockCounters::checkProfile: UniqueStub={}", errorMsg);
+    } else if (unit.context->kind == TransKind::OptPrologue) {
       errorMsg = show(unit.context->pid) + "\n";
       FTRACE(1, "VasmBlockCounters::checkProfile: PrologueID={}", errorMsg);
     } else {
@@ -159,7 +164,7 @@ std::string checkProfile(const Vunit& unit,
 
   // Consider the profile to match even if we have some opcode mismatches.
   if (opcodeMismatches <=
-      RuntimeOption::EvalJitPGOVasmBlockCountersMaxOpMismatches) {
+      Cfg::Jit::PGOVasmBlockCountersMaxOpMismatches) {
     return "";
   }
   return errorMsg;
@@ -189,7 +194,7 @@ void setWeights(Vunit& unit, const T& key) {
 
   if (errorMsg == "") {
     // Check that enough profile was collected.
-    if (counters[0] >= RuntimeOption::EvalJitPGOVasmBlockCountersMinEntryValue) {
+    if (counters[0] >= Cfg::Jit::PGOVasmBlockCountersMinEntryValue) {
       enoughProfile = true;
       // Update the block weights.
       for (size_t index = 0; index < sortedBlocks.size(); index++) {
@@ -200,13 +205,17 @@ void setWeights(Vunit& unit, const T& key) {
         // Drop the separation between the main, cold and frozen areas, to avoid
         // scaling of the block weights based on the area since we have accurate
         // counters.  The code-layout pass may re-split the code into
-        // hot/cold/frozen later.
-        block.area_idx = AreaIndex::Main;
+        // hot/cold/frozen later.  If JitPGOLayoutResplitFrozen is false, leave
+        // frozen blocks alone as we won't move them to another area.
+        if (block.area_idx != AreaIndex::Frozen ||
+            Cfg::Jit::PGOLayoutResplitFrozen) {
+          block.area_idx = AreaIndex::Main;
+        }
       }
     }
   }
 
-  if (RuntimeOption::EvalDumpVBC) {
+  if (Cfg::Eval::DumpVBC) {
     unit.annotations.emplace_back("VasmBlockCounters",
                                   errorMsg != "" ? errorMsg :
                                   enoughProfile ? "matches" :
@@ -224,7 +233,7 @@ void setWeights(Vunit& unit, const T& key) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Optional<uint64_t> getRegionWeight(const RegionDesc& region) {
-  if (!RO::EvalJitPGOVasmBlockCounters || !isJitDeserializing()) {
+  if (!Cfg::Jit::PGOVasmBlockCounters || !isJitDeserializing()) {
     return std::nullopt;
   }
   auto const key = RegionEntryKey(region);
@@ -245,10 +254,18 @@ void update(Vunit& unit, const T& key){
 }
 
 void profileGuidedUpdate(Vunit& unit) {
-  if (!RuntimeOption::EvalJitPGOVasmBlockCounters) return;
+  if (!Cfg::Jit::PGOVasmBlockCounters) return;
+
+  if (unit.name){
+    // unique stub
+    std::string name(unit.name);
+    update(unit, name);
+    return;
+  }
+
   if (!unit.context) return;
   auto const optimizePrologue = unit.context->kind == TransKind::OptPrologue &&
-    RuntimeOption::EvalJitPGOVasmBlockCountersOptPrologue;
+    Cfg::Jit::PGOVasmBlockCountersOptPrologue;
 
   if (unit.context->kind == TransKind::Optimize) {
     auto const regionPtr = unit.context->region;

@@ -1,2 +1,2 @@
-File "override_attr_10.php", line 14, characters 20-22:
+ERROR: File "override_attr_10.php", line 14, characters 20-22:
 `BadC` has no parent class with a method `foo` to override (Typing[4087])

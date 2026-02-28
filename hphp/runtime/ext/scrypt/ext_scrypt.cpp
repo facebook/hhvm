@@ -24,7 +24,6 @@
 
 #include <string>
 #include <stdlib.h>
-#include <stdio.h>
 #include <cmath>
 
 namespace {
@@ -75,10 +74,9 @@ Variant HHVM_FUNCTION(scrypt_enc, const String& password, const String& salt,
 
 struct ScryptExtension : Extension {
   public:
-    ScryptExtension(): Extension("scrypt") {}
-    void moduleInit() override {
+    ScryptExtension(): Extension("scrypt", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+    void moduleRegisterNative() override {
       HHVM_FE(scrypt_enc);
-      loadSystemlib();
     }
 } s_scrypt_extension;
 

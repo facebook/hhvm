@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_1251() {
+function main_1251() :mixed{
 $a = (int)(date('d')) % 10;
 }

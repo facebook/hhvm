@@ -18,7 +18,7 @@ final class D extends C {}
 
 
 <<__EntryPoint>>
-function main_is_expression_this2() {
+function main_is_expression_this2() :mixed{
 C::isThis(new C());
 C::isThis(new D());
 C::isThis(new stdClass());

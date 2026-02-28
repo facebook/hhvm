@@ -10,11 +10,11 @@
 echo "*** Testing fgetc() : usage variations ***\n";
 echo "-- Testing fgetc() with files opened with different read modes --\n";
 
-$file_modes = varray[ "a+", "a+b", "a+t", 
+$file_modes = vec[ "a+", "a+b", "a+t", 
                      "x+", "x+b", "x+t", 
                      "w+", "w+b", "w+t" ];
 
-$filename = __SystemLib\hphp_test_tmppath('fgetc_variation4.tmp');
+$filename = sys_get_temp_dir().'/'.'fgetc_variation4.tmp';
 foreach ($file_modes as $file_mode ) {
   echo "-- File opened in mode : $file_mode --\n";
 

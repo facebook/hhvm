@@ -1,4 +1,4 @@
-File "method_dispatch_08.php", line 26, characters 9-10:
+ERROR: File "method_dispatch_08.php", line 26, characters 9-10:
 No instance method `f2` in `A` (Typing[4053])
   File "method_dispatch_08.php", line 18, characters 26-27:
   Did you mean static method `f2` instead?

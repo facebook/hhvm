@@ -1,0 +1,6 @@
+ERROR: File "expr_dep_escapes_2.php", line 19, characters 10-13:
+Invalid return type (Typing[4110])
+  File "expr_dep_escapes_2.php", line 14, characters 18-20:
+  Expected `int`
+  File "expr_dep_escapes_2.php", line 15, characters 9-28:
+  But got `Foo<I>` because method or function was called on dynamic or like-type

@@ -1,24 +1,24 @@
 <?hh
 
-function f() {}
+function f() :mixed{}
 
 class C {
-  public static function foo() {}
-  private static function bar() {}
+  public static function foo() :mixed{}
+  private static function bar() :mixed{}
 }
 
 class D {
-  public function foo() {}
-  private function bar() {}
+  public function foo() :mixed{}
+  private function bar() :mixed{}
 }
 
 interface I {
-  public function foo();
+  public function foo():mixed;
 }
 
 abstract class A {
-  public function foo() {}
-  abstract public function bar();
+  public function foo() :mixed{}
+  abstract public function bar():mixed;
 }
 
 <<__EntryPoint>> function main(): void {
@@ -31,32 +31,32 @@ var_dump(is_callable('asdfjkl'));
 echo "\n";
 
 // user public static method
-var_dump(is_callable(varray['C','foo']));
+var_dump(is_callable(vec['C','foo']));
 // user private static method
-var_dump(is_callable(varray['C','bar']));
+var_dump(is_callable(vec['C','bar']));
 // nonexistent static method
-var_dump(is_callable(varray['C','asdfjkl']));
+var_dump(is_callable(vec['C','asdfjkl']));
 echo "\n";
 
 $obj = new D;
 // user public instance method
-var_dump(is_callable(varray[$obj,'foo']));
+var_dump(is_callable(vec[$obj,'foo']));
 // user private instance method
-var_dump(is_callable(varray[$obj,'bar']));
+var_dump(is_callable(vec[$obj,'bar']));
 // nonexistent instance method
-var_dump(is_callable(varray[$obj,'asdfjkl']));
+var_dump(is_callable(vec[$obj,'asdfjkl']));
 echo "\n";
 
 // user interface method
-var_dump(is_callable(varray['I','foo']));
+var_dump(is_callable(vec['I','foo']));
 // nonexistent interface method
-var_dump(is_callable(varray['I','asdfjkl']));
+var_dump(is_callable(vec['I','asdfjkl']));
 echo "\n";
 
 // user abstract class non-abstract function
-var_dump(is_callable(varray['A', 'foo']));
+var_dump(is_callable(vec['A', 'foo']));
 // user abstract class abstract function
-var_dump(is_callable(varray['A', 'bar']));
+var_dump(is_callable(vec['A', 'bar']));
 // nonexistent abstract class method
-var_dump(is_callable(varray['A', 'asdfghjk']));
+var_dump(is_callable(vec['A', 'asdfghjk']));
 }

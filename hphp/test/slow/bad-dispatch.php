@@ -1,12 +1,12 @@
 <?hh
 
 class Foo {
-  <<__DynamicallyCallable>> function a() {}
-  <<__DynamicallyCallable>> static function b() {}
+  <<__DynamicallyCallable>> function a() :mixed{}
+  <<__DynamicallyCallable>> static function b() :mixed{}
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $foo = 'Foo';
   $a = 'a';
   $b = 'b';
@@ -14,7 +14,7 @@ function main() {
   (new Foo)->a();
   (new $foo)->$a();
   Foo::b();
-  $foo::$b();
+  HH\dynamic_class_meth($foo, $b)();
 
   try {
     Foo::a();
@@ -23,8 +23,8 @@ function main() {
   }
 
   try {
-    $foo::$a();
-  } catch (BadMethodCallException $e) {
+    HH\dynamic_class_meth($foo, $a)();
+  } catch (InvalidArgumentException $e) {
     var_dump($e->getMessage());
   }
 

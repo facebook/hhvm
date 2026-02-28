@@ -5,7 +5,7 @@
 # array(0,1,2,3,4)
 .adata my_array = """D:5:{i:0;i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:4;i:4;}""";
 
-.function ["__EntryPoint"("""y:0:{}""")] main() {
+.function ["__EntryPoint"("""y:0:{}""")] N main() {
          .numiters 1;
          .declvars $arr $foo;
 
@@ -14,10 +14,11 @@
          PopC
 
          # Loop over array and jump to each label.
-         CGetL $arr
-         IterInit 0 NK V:$foo endfor
+         IterInit <> 0 $arr endfor
          .try {
-loop:      CGetL $foo
+loop:      IterGetValue <> 0 $arr
+           PopL $foo
+           CGetL $foo
            Switch Unbounded 0 <label_0 label_1 label_2 label_3 label_4>
 
 label_0:   String "label_0\n"
@@ -32,12 +33,12 @@ label_4:   String "label_4\n"
 
 printer:   Print
            PopC
-           IterNext 0 NK V:$foo loop
+           IterNext <> 0 $arr loop
            Jmp endfor
          } .catch {
            IterFree 0
            Throw
          }
 endfor:  Int 1
-         RetC
+         RetC None
 }

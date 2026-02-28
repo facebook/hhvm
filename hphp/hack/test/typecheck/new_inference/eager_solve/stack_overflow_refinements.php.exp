@@ -1,3 +1,82 @@
 File "stack_overflow_refinements.php", line 47, characters 3-13:
   A<T>
-No errors
+WARN: File "stack_overflow_refinements.php", line 6, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 7, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 8, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 9, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 10, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 11, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 12, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 13, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 14, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 15, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 16, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 17, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 18, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 19, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 20, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 21, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 22, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 23, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 24, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 25, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 26, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 27, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 28, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 29, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 30, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 31, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 32, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 33, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 34, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 35, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 36, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 37, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 38, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 39, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 40, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 41, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 42, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 43, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 44, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])
+WARN: File "stack_overflow_refinements.php", line 45, characters 9-18:
+This `is` check is always `true`. The expression on the left has type `A<T>` which is a subtype of `A<T>`. (Warn[12009])

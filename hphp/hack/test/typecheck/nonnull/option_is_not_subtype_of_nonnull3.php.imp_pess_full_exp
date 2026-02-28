@@ -1,0 +1,6 @@
+File "option_is_not_subtype_of_nonnull3.php", line 8, characters 12-23:
+Invalid return type (Typing[4110])
+  File "option_is_not_subtype_of_nonnull3.php", line 7, characters 26-32:
+  Expected `~nonnull`
+  File "option_is_not_subtype_of_nonnull3.php", line 4, characters 11-12:
+  But got `?T`

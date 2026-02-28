@@ -23,17 +23,17 @@ $formats =
 
 // Arrays of non string values for the format defined in $format.
 // Each sub array contains non string values which correspond to each format in $format
-$args_array = varray[
+$args_array = vec[
 
   // array of float values
-  varray[2.2, .2, 10.2,
+  vec[2.2, .2, 10.2,
         123456.234, -1234.6789, +1234.6789,
         2.1234567e10, +2.7654321e10, -2.7654321e10, 2.1234567e10,
         12345.780, 12.000000011111, -12.00000111111, -123456.234,
         3.33, +4.44, 1.11,-2.22 ],
   
  // array of int values
- varray[2, -2, +2,
+ vec[2, -2, +2,
        123456, -12346789, +12346789,
        123200, +20000, -40000, 22212,
        12345780, 1211111, -12111111, -12345634,
@@ -41,7 +41,7 @@ $args_array = varray[
 
 
   // array of boolean data
-  varray[ true, TRUE, false,
+  vec[ true, TRUE, false,
          TRUE, FALSE, 1,
          true, false, TRUE, FALSE,
          0, 1, 1, 0,

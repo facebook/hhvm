@@ -6,13 +6,12 @@
 use std::hash::Hasher;
 
 use fnv::FnvHasher;
+use ocamlrep::FromOcamlRep;
 
-use oxidized::file_info::NameType;
-
-/// Variant types used in the naming table.
+/// Variant types used in the depgraph table.
 ///
 /// NOTE: Keep in sync with the order of the fields in `Typing_deps.ml`.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, strum::EnumString, FromOcamlRep)]
 #[repr(u8)]
 pub enum DepType {
     GConst = 0,
@@ -28,6 +27,9 @@ pub enum DepType {
     AllMembers = 11,
     GConstName = 12,
     Module = 13,
+    Declares = 14,
+    NotSubtype = 15,
+    File = 16,
 }
 
 impl DepType {
@@ -50,26 +52,10 @@ impl DepType {
             11 => Some(DepType::AllMembers),
             12 => Some(DepType::GConstName),
             13 => Some(DepType::Module),
+            14 => Some(DepType::Declares),
+            15 => Some(DepType::NotSubtype),
+            16 => Some(DepType::File),
             _ => None,
-        }
-    }
-
-    #[inline]
-    pub fn is_toplevel_symbol(self) -> bool {
-        match self {
-            DepType::GConst | DepType::Fun | DepType::Type => true,
-            _ => false,
-        }
-    }
-}
-
-impl From<NameType> for DepType {
-    fn from(name_type: NameType) -> Self {
-        match name_type {
-            NameType::Fun => DepType::Fun,
-            NameType::Const => DepType::GConst,
-            NameType::Class | NameType::Typedef => DepType::Type,
-            NameType::Module => DepType::Module,
         }
     }
 }
@@ -128,4 +114,8 @@ pub fn hash2(dep_type: DepType, type_hash: u64, name2: &[u8]) -> u64 {
     hasher.write_u64(type_hash);
     hasher.write(name2);
     postprocess_hash(dep_type, hasher.finish())
+}
+
+pub fn declares_hash() -> u64 {
+    hash1(DepType::Declares, &[])
 }

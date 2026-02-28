@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_null_timezone() {
+function main_null_timezone() :mixed{
 $time_current_timezone = new DateTime('');
 $time_current_timezone->setTimestamp(1234567890);
 

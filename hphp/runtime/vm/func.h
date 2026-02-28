@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include "hphp/runtime/base/atomic-countable.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/lazy-string-data.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/base/type-string.h"
@@ -28,13 +28,17 @@
 #include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/iter.h"
-#include "hphp/runtime/vm/reified-generics-info.h"
+#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/generics-info.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
 
+#include "hphp/util/atomic.h"
+#include "hphp/util/atomic-countable.h"
+#include "hphp/util/check-size.h"
 #include "hphp/util/fixed-vector.h"
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 
 #include <atomic>
 #include <utility>
@@ -45,11 +49,11 @@ namespace HPHP {
 
 struct ActRec;
 struct Class;
-struct NamedEntity;
+struct NamedFunc;
 struct PreClass;
 struct StringData;
 struct StructuredLogEntry;
-template <typename T> struct AtomicLowPtrVector;
+template <typename T> struct AtomicPackedPtrVector;
 
 /*
  * Signature for native functions called by the hhvm using the hhvm
@@ -66,7 +70,7 @@ using ArFunction = TypedValue* (*)(ActRec* ar);
 struct NativeArgs; // never defined
 using NativeFunction = void(*)(NativeArgs*);
 
-using StaticCoeffectNamesMap = CompactVector<LowStringPtr>;
+using StaticCoeffectNamesMap = CompactVector<PackedStringPtr>;
 
 ///////////////////////////////////////////////////////////////////////////////
 // EH table.
@@ -95,11 +99,6 @@ struct EHEnt {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-template <typename T, size_t Expected, size_t Actual = sizeof(T)>
-constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
-
-///////////////////////////////////////////////////////////////////////////////
 /*
  * Metadata about a PHP function or method.
  *
@@ -126,7 +125,7 @@ struct Func final {
 #ifndef USE_LOWPTR
   // DO NOT access it directly, instead use Func::getFuncVec()
   // Exposed in the header file for gdb python macros
-  static AtomicLowPtrVector<const Func> s_funcVec;
+  static AtomicPackedPtrVector<const Func> s_funcVec;
 #endif
   /////////////////////////////////////////////////////////////////////////////
   // Types.
@@ -137,49 +136,59 @@ struct Func final {
   struct ParamInfo {
     enum class Flags {
       InOut,      // Is this an `inout' parameter?
+      OutOnly,    // Is this an <<__OutOnly>> parameter? Implies InOut.
       Readonly,   // Is this a `readonly` parameter?
-      Variadic,   // Is this a `...' parameter?
-      NativeArg,  // Does this use a NativeArg?
-      AsVariant,  // Native function takes as const Variant&
-      AsTypedValue // Native function takes as TypedValue
+      Variadic,   // Is this a `t...' parameter or a `...t` parameter?
+      Optional,   // Marked as `optional` in an abstract method
+      Splat,      // Is this a `...t` parameter? (Not set for variadic)
+      Named,      // Is this a `named` parameter?
+    };
+
+    enum class BuiltinAbi : uint8_t {
+      Value,            // HPHP::Value, non-floating point
+      FPValue,          // HPHP::Value, floating point (might need a SIMD reg)
+      ValueByRef,       // reference to HPHP::Value
+      TypedValue,       // HPHP::TypedValue
+      TypedValueByRef,  // reference to HPHP::TypedValue (equivalent to Variant)
+      InOutByRef,       // reference to HPHP::Value or HPHP::TypedValue (inout)
     };
 
     ParamInfo();
 
     bool hasDefaultValue() const;
     bool hasScalarDefaultValue() const;
+    bool hasTrivialDefaultValue() const;
     bool isInOut() const;
+    bool isOutOnly() const;
     bool isReadonly() const;
     bool isVariadic() const;
-    bool isNativeArg() const;
-    bool isTakenAsVariant() const;
-    bool isTakenAsTypedValue() const;
+    bool isSplat() const;
+    bool isOptional() const;
+    bool isNamed() const;
     void setFlag(Flags flag);
 
     template<class SerDe> void serde(SerDe& sd);
 
-    // Typehint for builtins.
-    MaybeDataType builtinType{std::nullopt};
     // Flags as defined by the Flags enum.
     uint8_t flags{0};
+    // If this is a builtin, how to pass the value to the C++ impl.
+    BuiltinAbi builtinAbi;
     // DV initializer funclet offset.
     Offset funcletOff{kInvalidOffset};
     // Set to Uninit if there is no DV, or if there's a nonscalar DV.
     TypedValue defaultValue;
     // Eval-able PHP code.
-    LowStringPtr phpCode{nullptr};
+    LazyStringData phpCode;
     // User-annotated type.
-    LowStringPtr userType{nullptr};
+    LazyStringData userType;
     // offset of dvi funclet from cti section base.
     Offset ctiFunclet{kInvalidOffset};
-    TypeConstraint typeConstraint;
+    TypeIntersectionConstraint typeConstraints;
     UserAttributeMap userAttributes;
   };
 
   using ParamInfoVec = VMFixedVector<ParamInfo>;
   using EHEntVec = VMFixedVector<EHEnt>;
-  using UpperBoundVec = VMCompactVector<TypeConstraint>;
-  using ParamUBMap = vm_flat_map<uint32_t, UpperBoundVec>;
   using CoeffectRules = VMFixedVector<CoeffectRule>;
 
   /////////////////////////////////////////////////////////////////////////////
@@ -253,6 +262,18 @@ struct Func final {
    * PreClasses) are not assigned an ID.
    */
   FuncId getFuncId() const;
+
+  /*
+   * Get a function ID that is guaranteed not to be reused during the lifetime
+   * of the process.
+   */
+  uint32_t getStableId() const;
+
+#ifndef USE_LOWPTR
+  static constexpr size_t funcIdOffset() {
+    return offsetof(Func, m_funcId);
+  }
+#endif
 
 private:
   /*
@@ -355,8 +376,8 @@ public:
    *
    * @requires: shared()->m_preClass == nullptr
    */
-  NamedEntity* getNamedEntity();
-  const NamedEntity* getNamedEntity() const;
+  NamedFunc* getNamedFunc();
+  const NamedFunc* getNamedFunc() const;
 
   /**
    * meth_caller
@@ -373,7 +394,7 @@ public:
    * In repo mode, we flatten traits into the classes they're used in, so we
    * need this to track the original file for backtraces and errors.
    */
-  const StringData* originalFilename() const;
+  const StringData* originalUnit() const;
 
   /*
    * The original filename if it is defined, the unit's filename otherwise.
@@ -404,6 +425,14 @@ public:
   Offset bclen() const;
 
   /*
+  * Get a hash of the bytecode of this function. Note that this performs an
+  * order dependent hash of the actual bytes of the bytecode.
+  */
+  uint64_t bcHash() const {
+    return folly::hash::hash_range(entry(), at(bclen()));
+  }
+
+  /*
    * Whether a given PC or Offset (from the beginning of the unit) is within
    * the function's bytecode stream.
    */
@@ -428,12 +457,9 @@ public:
   bool isDVEntry(Offset offset) const;
 
   /*
-   * Number of params required when entering at the given offset.
-   *
-   * Return -1 if an invalid offset is provided.
+   * Has a DV func entry that is non-scalar or requires a runtime type check.
    */
-  int getEntryNumParams(Offset offset) const;
-  int getDVEntryNumParams(Offset offset) const;
+  bool hasNonTrivialDVFuncEntry() const;
 
   /*
    * Get the correct entrypoint (whether the main entry or a DV funclet) when
@@ -451,24 +477,6 @@ public:
 
   /////////////////////////////////////////////////////////////////////////////
   // Return type.                                                       [const]
-
-  /*
-   * CPP builtin's return type. Returns std::nullopt if function is not a CPP
-   * builtin.
-   *
-   * There are a number of caveats regarding this value:
-   *
-   *    - If the return type is std::nullopt, the return is a Variant.
-   *
-   *    - If the return type is a string, array-like, object, ref, or resource
-   *      type, null may also be returned.
-   *
-   *    - Likewise, if the function is marked AttrParamCoerceModeNull, null
-   *      might also be returned.
-   *
-   *    - This list of caveats may be incorrect and/or incomplete.
-   */
-  MaybeDataType hniReturnType() const;
 
   /*
    * Return type inferred by HHBBC's static analysis. TGen if no data is
@@ -491,18 +499,22 @@ public:
   bool isReturnByValue() const;
 
   /*
+   * Builtins can potentially return null when the return type is
+   * specified as a reference type. This function returns true if
+   * the builtin return type is a reference type.
+   * (e.g. ref types like String, Array, Object)
+  */
+  bool hasUntrustedReturnType() const;
+
+  /*
    * The TypeConstraint of the return.
    */
-  const TypeConstraint& returnTypeConstraint() const;
+  const TypeIntersectionConstraint& returnTypeConstraints() const;
 
   /*
    * The user-annotated Hack return type.
    */
   const StringData* returnUserType() const;
-
-  bool hasReturnWithMultiUBs() const;
-  const UpperBoundVec& returnUBs() const;
-
   /////////////////////////////////////////////////////////////////////////////
   // Parameters.                                                        [const]
 
@@ -514,9 +526,20 @@ public:
   const ParamInfoVec& params() const;
 
   /*
-   * Number of parameters (including `...') accepted by the function.
+   * Number of parameters (including `...' and named parameters) accepted by
+   * the function.
    */
   uint32_t numParams() const;
+
+  /*
+   * Number of named parameters accepted by the function.
+   */
+  uint32_t numNamedParams() const;
+
+  /**
+   * Number of positional parameters accepted by the function.
+   */
+  uint32_t numPositionalParams() const;
 
   /*
    * Number of parameters, not including `...', accepted by the function.
@@ -524,17 +547,32 @@ public:
   uint32_t numNonVariadicParams() const;
 
   /*
-   * Number of required parameters, i.e. all arguments starting from
+   * Number of required named parameters.
+   */
+  uint32_t numRequiredNamedParams() const;
+
+  /*
+   * Number of required positional parameters.
+   */
+  uint32_t numRequiredPositionalParams() const;  
+
+  /*
+   * Number of required parameters, i.e. all parameters starting from
    * the returned position have default value.
    */
   uint32_t numRequiredParams() const;
 
   /*
-   * Whether the function is declared with a `...' parameter.
+   * Whether the function is declared with a `...' parameter (variadic, or splat).
    */
   bool hasVariadicCaptureParam() const;
 
   /*
+   * Whether the function is declared with a `...T' parameter (splat).
+   */
+   bool hasSplatParam() const;
+
+   /*
    * Whether the arg-th parameter was declared inout.
    */
   bool isInOut(int32_t arg) const;
@@ -565,10 +603,10 @@ public:
    */
   uint32_t numInOutParamsForArgs(int32_t numArgs) const;
 
-  bool hasParamsWithMultiUBs() const;
-
-  const ParamUBMap& paramUBs() const;
-
+   /*
+   * Whether the arg-th parameter is named.
+   */
+  bool isNamed(int32_t arg) const;
   /////////////////////////////////////////////////////////////////////////////
   // Locals, iterators, and stack.                                      [const]
 
@@ -620,7 +658,14 @@ public:
    *
    * Should not be indexed past numNamedLocals() - 1.
    */
-  LowStringPtr const* localNames() const;
+  PackedStringPtr const* localNames() const;
+
+  /*
+   * Array containing all named param names, sorted lexicographically.
+   *
+   * Should not be indexed past numNamedParams() - 1.
+   */
+  PackedStringPtr const* sortedNamedParamNames() const;
 
   /*
    * Number of stack slots used by locals and iterator cells.
@@ -679,6 +724,16 @@ public:
   bool isAbstract() const;
 
   /*
+   * Is this function declared as internal to its module?
+   */
+  bool isInternal() const;
+
+  /*
+   * What module does this function belong to?
+   */
+  const StringData* moduleName() const;
+
+  /*
    * Whether a function is called non-statically. Generally this means
    * isStatic(), but eg static closures are still called with a valid
    * this pointer.
@@ -712,7 +767,23 @@ public:
    */
   bool isMemoizeWrapperLSB() const;
 
-  bool isPolicyShardedMemoize() const;
+  /*
+   * What kind of memoized function is this?
+   * NB: MemoizeICType must be a unsigned char in order to enable
+   * struct bit packing.
+   */
+  enum MemoizeICType : unsigned char {
+    NoIC = 0,
+    KeyedByIC = 1,
+    MakeICInaccessible = 2,
+    NotKeyedByICAndLeakIC = 3,
+  };
+
+  MemoizeICType memoizeICType() const;
+
+  bool isNoICMemoize() const;
+
+  bool isKeyedByImplicitContextMemoize() const;
 
   /*
    * Is this string the name of a memoize implementation.
@@ -782,7 +853,7 @@ public:
    * The nativeFuncPtr is a type-punned function pointer to the unerlying
    * function which takes the actual argument types, and does the actual work.
    *
-   * These are the functions with names prefixed by f_ or t_.
+   * These are the functions with names prefixed by f_.
    *
    * All C++ builtins have NativeFunctions, with the ironic exception of HNI
    * functions declared with NeedsActRec.
@@ -951,6 +1022,11 @@ public:
   const UserAttributeMap& userAttributes() const;
 
   /*
+   * Get a dict containing user attributes of the function.
+   */
+  Array userAttributesArray() const;
+
+  /*
    * Whether to ignore this function's frame in backtraces.
    */
   bool isNoInjection() const;
@@ -1009,10 +1085,20 @@ public:
   bool hasReifiedGenerics() const;
 
   /*
-   * Returns a ReifiedGenericsInfo containing how many generics this func has,
-   * indices of its reified generics, and which ones are soft reified
+   * Returns GenericsInfo which contains information about each generic
+   * parameter defined on this class whether it is reified, or contains
+   * the soft or warn annotation.
+   *
+   * NB: This getter should only be called when this func is known to
+   * contain extended data which is where the GenericsInfo struct lives.
+   * This can be checked by testing the hasReifiedGenericsInfo flag.
    */
-  const ReifiedGenericsInfo& getReifiedGenericsInfo() const;
+  const GenericsInfo& getGenericsInfo() const;
+
+  /*
+   * Does this function wrap a builtin?
+   */
+  Func* unwrap();
 
   /////////////////////////////////////////////////////////////////////////////
   // Unit table entries.                                                [const]
@@ -1038,14 +1124,6 @@ public:
   // JIT data.
 
   /*
-   * Get the RDS handle for the function with this function's name.
-   *
-   * We can burn these into the TC even when functions are not persistent,
-   * since only a single name-to-function mapping will exist per request.
-   */
-  rds::Handle funcHandle() const;
-
-  /*
    * Get, set and reset the function body code pointer.
    */
   jit::TCA getFuncEntry() const;
@@ -1067,6 +1145,14 @@ public:
    * Reset a specific prologue, or all prologues.
    */
   void resetPrologue(int numParams);
+
+  /*
+   * Bump/reset JIT request count, which counts the number of times the function
+   * is being considered for compilation.
+   */
+  uint8_t incJitReqCount() const;
+  uint8_t readJitReqCount() const;
+  void resetJitReqCount() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Pretty printer.                                                    [const]
@@ -1182,6 +1268,23 @@ public:
   rds::Handle getCoverageHandle() const;
 
   /////////////////////////////////////////////////////////////////////////////
+  // Debugger.
+  /*
+   * Return an RDS handle that when initialized, indicates that this function
+   * needs to be run in the interpreter so that the debugger hooks are run.
+   * Once the handle is initialized, it is not reset
+   * for remainder of the request.
+   */
+  rds::Handle debuggerIntrSetHandle() const;
+  rds::Link<bool, rds::Mode::Normal> debuggerIntrSetLink() const;
+
+  /*
+   * The handle must be bound before inserting debugger interrupt checks
+   * in a function and before resolving any breakpoints in the function.
+   */
+  void ensureDebuggerIntrSetLinkBound() const;
+
+  /////////////////////////////////////////////////////////////////////////////
   // Public setters.
   //
   // TODO(#4504609): These setters are only used by Class at Class creation
@@ -1212,19 +1315,27 @@ public:
   OFF(inoutBits)
   OFF(shared)
   OFF(unit)
-  OFF(methCallerMethName)
+  OFF(funcEntry)
 #undef OFF
 
   static constexpr ptrdiff_t clsOff() {
-    return offsetof(Func, m_u);
+    return offsetof(Func, m_u.m_cls.m_impl);
+  }
+
+  static constexpr ptrdiff_t methCallerMethNameOff() {
+    return offsetof(Func, m_u.m_methCaller.m_methName);
   }
 
   static constexpr ptrdiff_t methCallerClsNameOff() {
-    return offsetof(Func, m_u);
+    return offsetof(Func, m_u.m_methCaller.m_clsName);
   }
 
   static constexpr ptrdiff_t sharedAllFlags() {
     return offsetof(SharedData, m_allFlags);
+  }
+
+  static constexpr ptrdiff_t extendedSharedOriginalModuleName() {
+    return offsetof(ExtendedSharedData, m_originalModuleName);
   }
 
   static uint32_t reifiedGenericsMask() {
@@ -1232,6 +1343,17 @@ public:
     mask.m_allFlags = 0;
     mask.m_hasReifiedGenerics = true;
     return mask.m_allFlags;
+  }
+
+  static uint32_t hasExtendedSharedDataMask() {
+    ExtendedSharedData::Flags mask;
+    mask.m_allFlags = 0;
+    mask.m_hasExtendedSharedData = true;
+    return mask.m_allFlags;
+  }
+
+  bool hasExtendedSharedData() const {
+    return extShared();
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1243,22 +1365,26 @@ public:
   static void def(Func* func);
 
   /*
-   * Look up the defined Func in this request with name `name', or with the name
-   * mapped to the NamedEntity `ne'.
-   *
+   * Look up the defined Func in this request with name `name'
    * Return nullptr if the function is not yet defined in this request.
    */
-  static Func* lookup(const NamedEntity* ne);
   static Func* lookup(const StringData* name);
 
   /*
    * Look up, or autoload and define, the Func in this request with name `name',
-   * or with the name mapped to the NamedEntity `ne'.
+   * or with the name mapped to the NamedFunc `ne'.
    *
-   * @requires: NamedEntity::get(name) == ne
+   * @requires: NamedFunc::get(name) == ne
    */
-  static Func* load(const NamedEntity* ne, const StringData* name);
+  static Func* load(const NamedFunc* ne, const StringData* name);
   static Func* load(const StringData* name);
+
+  /*
+   * Same as Func::load but also checks for module boundary violations
+   */
+  static Func* resolve(const NamedFunc* ne, const StringData* name,
+                       const Func* callerFunc);
+  static Func* resolve(const StringData* name, const Func* callerFunc);
 
   /*
    * Lookup the builtin in this request with name `name', or nullptr if none
@@ -1272,7 +1398,7 @@ public:
   // SharedData.
 
 private:
-  using NamedLocalsMap = IndexedStringMap<LowStringPtr, Id>;
+  using NamedLocalsMap = IndexedStringMap<PackedStringPtr, Id>;
 
   using BCPtr = TokenOrPtr<unsigned char>;
   using LineTablePtr = TokenOrPtr<LineTable>;
@@ -1315,20 +1441,19 @@ private:
      */
     union Flags {
       struct {
-        bool m_isClosureBody : true;
-        bool m_isAsync : true;
-        bool m_isGenerator : true;
-        bool m_isPairGenerator : true;
-        bool m_isGenerated : true;
-        bool m_hasExtendedSharedData : true;
-        bool m_returnByValue : true; // only for builtins
-        bool m_isMemoizeWrapper : true;
-        bool m_isMemoizeWrapperLSB : true;
-        bool m_isPolicyShardedMemoize : true;
-        bool m_isPhpLeafFn : true;
-        bool m_hasReifiedGenerics : true;
-        bool m_hasParamsWithMultiUBs : true;
-        bool m_hasReturnWithMultiUBs : true;
+        bool m_isClosureBody : 1;
+        bool m_isAsync : 1;
+        bool m_isGenerator : 1;
+        bool m_isPairGenerator : 1;
+        bool m_isGenerated : 1;
+        bool m_hasExtendedSharedData : 1;
+        bool m_returnByValue : 1; // only for builtins
+        bool m_isUntrustedReturnType : 1;  // applicable for builtins
+        bool m_isMemoizeWrapper : 1;
+        bool m_isMemoizeWrapperLSB : 1;
+        MemoizeICType m_memoizeICType : 2;
+        bool m_isPhpLeafFn : 1;
+        bool m_hasReifiedGenerics : 1;
       };
       uint16_t m_allFlags;
     };
@@ -1338,10 +1463,12 @@ private:
 
     uint16_t m_sn;
 
-    LowStringPtr m_retUserType;
+    LazyStringData m_retUserType;
     UserAttributeMap m_userAttributes;
-    TypeConstraint m_retTypeConstraint; // NB: sizeof(TypeConstraint) == 12
-    LowStringPtr m_originalFilename;
+    // The link can be bound for const Func.
+    mutable rds::Link<bool, rds::Mode::Normal> m_funcHasDebuggerIntr;
+    PackedStringPtr m_originalUnit;
+    TypeIntersectionConstraint m_retTypeConstraints;
     RepoAuthType m_repoReturnType;
     RepoAuthType m_repoAwaitedReturnType;
 
@@ -1385,7 +1512,7 @@ private:
   struct ExtendedSharedData : SharedData {
     template<class... Args>
     explicit ExtendedSharedData(Args&&... args)
-      : SharedData(std::forward<Args>(args)...)
+    : SharedData(std::forward<Args>(args)...)
     {
       m_allFlags.m_hasExtendedSharedData = true;
     }
@@ -1395,19 +1522,22 @@ private:
 
     ArFunction m_arFuncPtr;
     NativeFunction m_nativeFuncPtr;
-    ReifiedGenericsInfo m_reifiedGenericsInfo;
-    ParamUBMap m_paramUBs;
-    UpperBoundVec m_returnUBs;
+    GenericsInfo m_genericsInfo;
     CoeffectRules m_coeffectRules;
     Offset m_bclen;  // Only read if SharedData::m_bclen is kSmallDeltaLimit
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
     int m_sn;       // Only read if SharedData::m_sn is kSmallDeltaLimit
-    MaybeDataType m_hniReturnType;
     RuntimeCoeffects m_coeffectEscapes{RuntimeCoeffects::none()};
+    // (2 bytes unused)
     int64_t m_dynCallSampleRate;
-    LowStringPtr m_docComment;
+    PackedStringPtr m_docComment;
+    PackedStringPtr m_originalModuleName;
+    // Initialized by Func::finishedEmittingParams. Named parameter names live
+    // in the internal storage of
+    // `m_localNames[0 : m_namedParamCount - 1]`.
+    uint32_t m_namedParamCount;
   };
-  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 288 : 312>(), "");
+  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 232 : 264>(), "");
 
   /*
    * SharedData accessors for internal use.
@@ -1464,10 +1594,10 @@ private:
   Func(const Func&) = default;  // used for clone()
   Func& operator=(const Func&) = delete;
   void init(int numParams);
-  void initPrologues(int numParams);
+  void initProloguesAndFuncEntry(int numParams);
   void setFullName(int numParams);
   void finishedEmittingParams(std::vector<ParamInfo>& pBuilder);
-  void setNamedEntity(const NamedEntity*);
+  void setNamedFunc(const NamedFunc*);
 
   PC loadBytecode();
 
@@ -1495,16 +1625,16 @@ private:
     explicit AtomicAttr(Attr attrs) : m_attrs{attrs} {}
 
     AtomicAttr(const AtomicAttr& o)
-      : m_attrs{o.m_attrs.load(std::memory_order_relaxed)}
+      : m_attrs{o.m_attrs.load(std::memory_order_acquire)}
     {}
 
     AtomicAttr& operator=(Attr attrs) {
-      m_attrs.store(attrs, std::memory_order_relaxed);
+      m_attrs.store(attrs, std::memory_order_release);
       return *this;
     }
 
     /* implicit */ operator Attr() const {
-      return m_attrs.load(std::memory_order_relaxed);
+      return m_attrs.load(std::memory_order_acquire);
     }
 
   private:
@@ -1512,84 +1642,20 @@ private:
   };
 
 public:
-#ifdef USE_LOWPTR
-  using low_storage_t = uint32_t;
-#else
-  using low_storage_t = uintptr_t;
-#endif
-
-private:
-  /*
-   * Lowptr wrapper around std::atomic<Union> for Class* or StringData*
-   */
-  struct UnionWrapper {
-    union U {
-     low_storage_t m_cls;
-     low_storage_t m_methCallerClsName;
-    };
-    std::atomic<U> m_u;
-
-    // constructors
-    explicit UnionWrapper(Class *cls)
-      : m_u([](Class *cls){
-        U u;
-        u.m_cls = to_low(cls);
-        return u; }(cls)) {}
-    explicit UnionWrapper(const StringData *name)
-      : m_u([](const StringData *n){
-        U u;
-        u.m_methCallerClsName = to_low(n, kMethCallerBit);
-        return u; }(name)) {}
-    /* implicit */ UnionWrapper(std::nullptr_t /*px*/)
-      : m_u([](){
-        U u;
-        u.m_cls = 0;
-        return u; }()) {}
-    UnionWrapper(const UnionWrapper& r) :
-      m_u(r.m_u.load()) {
-    }
-
-    // Assignments
-    UnionWrapper& operator=(UnionWrapper r) {
-      m_u.store(r.m_u, std::memory_order_relaxed);
-      return *this;
-    }
-
-    // setter & getter
-    void setCls(Class *cls) {
-      U u;
-      u.m_cls = to_low(cls);
-      m_u.store(u, std::memory_order_relaxed);
-    }
-    Class* cls() const {
-      auto cls = m_u.load(std::memory_order_relaxed).m_cls;
-      assertx(!(cls & kMethCallerBit));
-      return reinterpret_cast<Class*>(cls);
-    }
-    StringData* name() const {
-     auto n = m_u.load(std::memory_order_relaxed).m_methCallerClsName;
-     assertx(n & kMethCallerBit);
-     return reinterpret_cast<StringData*>(n - kMethCallerBit);
-    }
-  };
-
-  template <class T>
-  static Func::low_storage_t to_low(T* px, Func::low_storage_t bit = 0) {
-    Func::low_storage_t ones = ~0;
-    auto ptr = reinterpret_cast<uintptr_t>(px) | bit;
-    always_assert((ptr & ones) == ptr);
-    return (Func::low_storage_t)(ptr);
-  }
 
   /////////////////////////////////////////////////////////////////////////////
   // Atomic Flags.
 
-public:
   enum Flags : uint8_t {
     None             = 0,
     Optimized        = 1 << 0,
     Locked           = 1 << 1,
     MaybeIntercepted = 1 << 2,
+    LockedForPrologueGen = 1 << 3,
+    // A function is marked zombie before the unit or the class of the function
+    // is treadmilled for destruction.
+    Zombie = 1 << 4,
+    LockedForAsyncJit = 1 << 5,
   };
 
  /*
@@ -1603,13 +1669,13 @@ public:
     AtomicFlags& operator=(const AtomicFlags&) = delete;
 
     bool set(Flags flags) {
-      auto const prev = m_flags.fetch_or(flags, std::memory_order_release);
+      auto const prev = m_flags.fetch_or(flags, std::memory_order_acq_rel);
       return prev & flags;
     }
 
     bool unset(Flags flags) {
       auto const prev =
-        m_flags.fetch_and(~uint8_t(flags), std::memory_order_release);
+        m_flags.fetch_and(~uint8_t(flags), std::memory_order_acq_rel);
       return prev & flags;
     }
 
@@ -1672,17 +1738,43 @@ private:
 
 private:
   static constexpr int kMagic = 0xba5eba11;
-  static constexpr intptr_t kNeedsFullName = 0x1;
+  static constexpr uintptr_t kNeedsFullName =
+#ifdef USE_PACKEDPTR
+  0xffffffff << 3;
+#else
+  0x1;
+#endif
 
 public:
+  enum class FuncLookupResult {
+    None,
+    Exact,
+    Maybe,
+  };
+
+  struct FuncLookup {
+    FuncLookupResult tag;
+    const Func* func;
+  };
+  static const FuncLookup lookupKnownMaybe(const StringData* name, const Unit*  unit);
+  static const Func* lookupKnown(const StringData* name, const Unit* unit);
+  static const FuncLookup maybe(const Func* func) {
+    return FuncLookup { FuncLookupResult::Maybe, func };
+  }
+  static const FuncLookup exact(const Func* func) {
+    return FuncLookup { FuncLookupResult::Exact, func };
+  }
+  static const FuncLookup& none() {
+      static FuncLookup lookup { FuncLookupResult::None, nullptr };
+      return lookup;
+  }
+
   // Use by m_inoutBits
   static constexpr uint32_t kInoutFastCheckBits = 31;
 
   static std::atomic<bool>     s_treadmill;
   static std::atomic<uint32_t> s_totalClonedClosures;
 
-  // To conserve space, we use unions for pairs of mutually exclusive fields
-  static auto constexpr kMethCallerBit = 0x1;  // set for m_methCaller
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
   //
@@ -1694,30 +1786,85 @@ private:
   // For asserts only.
   int m_magic;
 #endif
-  AtomicLowPtr<uint8_t> m_funcEntry{nullptr};
+  jit::AtomicLowTCA m_funcEntry{nullptr};
 #ifndef USE_LOWPTR
   FuncId m_funcId{FuncId::Invalid};
 #endif
-  mutable AtomicLowPtr<const StringData> m_fullName{nullptr};
-  LowStringPtr m_name{nullptr};
+  mutable AtomicPackedPtr<const StringData> m_fullName{nullptr};
+  PackedStringPtr m_name{nullptr};
 
-  union {
-    // The first Class in the inheritance hierarchy that declared this method.
-    // Note that this may be an abstract class that did not provide an
-    // implementation.
-    low_storage_t m_baseCls{0};
-    // m_methCallerMethName can be accessed by meth_caller() only
-    low_storage_t m_methCallerMethName;
+  struct ClsOrMethCaller {
+    struct Cls {
+      // The first Class in the inheritance hierarchy that declared this method.
+      // Note that this may be an abstract class that did not provide an
+      // implementation.
+      PackedPtr<Class> m_base{nullptr};
+      // Class that provided this method implementation
+      AtomicPackedPtr<Class> m_impl{nullptr};
+
+      Cls() {}
+
+      Cls(const Cls& o) {
+        m_base = o.m_base;
+        m_impl = o.m_impl;
+      }
+
+      Cls& operator=(const Cls& o) {
+        m_base = o.m_base;
+        m_impl = o.m_impl;
+        return *this;
+      }
+    };
+    struct MethCaller {
+      PackedStringPtr m_methName;
+      // Class name provided by meth_caller()
+      PackedStringPtr m_clsName;
+    };
+
+    // The first part of the union is valid if !isMethCaller
+    // and the second part is valid if isMethCaller
+    union {
+      Cls m_cls;
+      MethCaller m_methCaller;
+    };
+
+    ClsOrMethCaller() {
+      m_cls.m_base = nullptr;
+      m_cls.m_impl = nullptr;
+    }
+
+    ClsOrMethCaller(const ClsOrMethCaller& o) {
+      m_cls = o.m_cls;
+    }
   };
 
-  // m_u is used to represent
-  // the Class that provided this method implementation, or
-  // the class name provided by meth_caller()
-  UnionWrapper m_u{nullptr};
+  ClsOrMethCaller::Cls& clsData() {
+    assertx(!isMethCaller());
+    return m_u.m_cls;
+  }
+
+  const ClsOrMethCaller::Cls& clsData() const {
+    assertx(!isMethCaller());
+    return m_u.m_cls;
+  }
+
+  ClsOrMethCaller::MethCaller& methCallerData() {
+    assertx(isMethCaller());
+    return m_u.m_methCaller;
+  }
+
+  const ClsOrMethCaller::MethCaller& methCallerData() const {
+    assertx(isMethCaller());
+    return m_u.m_methCaller;
+  }
+
+  ClsOrMethCaller m_u;
+
   union {
     Slot m_methodSlot{0};
-    LowPtr<const NamedEntity>::storage_type m_namedEntity;
+    PackedPtr<const NamedFunc> m_namedFunc;
   };
+
   mutable ClonedFlag m_cloned;
   mutable AtomicFlags m_atomicFlags;
   bool m_isPreFunc : 1;
@@ -1725,7 +1872,14 @@ private:
   bool m_shouldSampleJit : 1;
   bool m_hasForeignThis : 1;
   bool m_registeredInDataMap : 1;
-  // 3 free bits + 1 free byte
+  // 3 free bits, and there are some more in AtomicFlags.
+
+  // Number of times the function has been considered in `shouldTranslate()`
+  // when Eval.JitLiveThreshold or Eval.JitProfileThreshold is set. The counter
+  // is reset after PGO, so count for live translation only increases when
+  // optimized code doesn't cover the function sufficiently.
+  mutable CopyableAtomic<uint8_t> m_jitReqCount{0};
+
   RuntimeCoeffects m_requiredCoeffects{RuntimeCoeffects::none()};
   int16_t m_maxStackCells{0};
   Unit* const m_unit;
@@ -1741,10 +1895,10 @@ private:
   AtomicAttr m_attrs;
   // This must be the last field declared in this structure, and the Func class
   // should not be inherited from.
-  AtomicLowPtr<uint8_t> m_prologueTable[1];
+  jit::AtomicLowTCA m_prologueTable[1];
 };
-static constexpr size_t kFuncSize = debug ? (use_lowptr ? 72 : 112)
-                                          : (use_lowptr ? 64 : 104);
+static constexpr size_t kFuncSize = debug ? (use_lowptr ? 72 : 96)
+                                          : (use_lowptr ? 64 : 88);
 static_assert(CheckSize<Func, kFuncSize>(), "");
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1784,7 +1938,7 @@ struct PrologueID {
 
   struct Hasher {
     size_t operator()(PrologueID pid) const {
-      return pid.funcId().toInt() + (size_t(pid.nargs()) << 32);
+      return pid.funcId().toInt() + pid.nargs();
     }
   };
 
@@ -1815,13 +1969,6 @@ inline tracing::Props traceProps(const Func* f) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Bytecode
-
-/*
- * Report capacity of RepoAuthoritative mode bytecode arena.
- *
- * Returns 0 if !RuntimeOption::RepoAuthoritative.
- */
-size_t hhbc_arena_capacity();
 
 unsigned char* allocateBCRegion(const unsigned char* bc, size_t bclen);
 void freeBCRegion(const unsigned char* bc, size_t bclen);

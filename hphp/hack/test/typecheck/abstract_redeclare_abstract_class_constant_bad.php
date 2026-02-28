@@ -1,5 +1,5 @@
 ////file1.php
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 abstract class A {

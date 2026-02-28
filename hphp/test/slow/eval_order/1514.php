@@ -1,26 +1,26 @@
 <?hh
-function t() {
+function t() :mixed{
 
   EvalOrder1514::$t++;
   return true;
 }
-function f() {
+function f() :mixed{
 
   EvalOrder1514::$f++;
   return false;
 }
-function i() {
+function i() :mixed{
 
   EvalOrder1514::$i++;
   return 1;
 }
-function d() {
+function d() :mixed{
 
   EvalOrder1514::$d++;
   return 3.14;
 }
 <<__EntryPoint>>
-function foo() {
+function foo() :mixed{
   var_dump(HH\Lib\Legacy_FIXME\cast_for_arithmetic(t()) + HH\Lib\Legacy_FIXME\cast_for_arithmetic(t()));
   var_dump(HH\Lib\Legacy_FIXME\cast_for_arithmetic(t()) + HH\Lib\Legacy_FIXME\cast_for_arithmetic(f()));
   var_dump(HH\Lib\Legacy_FIXME\cast_for_arithmetic(t()) + HH\Lib\Legacy_FIXME\cast_for_arithmetic(i()));

@@ -25,8 +25,8 @@ namespace HPHP::jit {
 
 inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
   switch (op) {
+    case Op::Enter:
     case Op::Jmp:
-    case Op::JmpNS:
     case Op::JmpZ:
     case Op::JmpNZ:
     case Op::Switch:
@@ -39,20 +39,20 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
     case Op::RetCSuspended:
     case Op::Exit:
     case Op::Fatal:
-    case Op::IterInit:  // May branch to fail case.
-    case Op::LIterInit: // Ditto
-    case Op::IterNext:  // Ditto
-    case Op::LIterNext: // Ditto
+    case Op::StaticAnalysisError:
+    case Op::IterInit: // May branch to fail case.
+    case Op::IterNext: // Ditto
     case Op::Throw:
     case Op::NativeImpl:
-    case Op::BreakTraceHint:
     case Op::MemoGet:
     case Op::MemoGetEager:
       return ControlFlowInfo::BreaksBB;
     case Op::Await:
     case Op::AwaitAll:
+    case Op::AwaitLowPri:
       return inlining ? ControlFlowInfo::ChangesPC : ControlFlowInfo::BreaksBB;
     case Op::FCallClsMethod:
+    case Op::FCallClsMethodM:
     case Op::FCallClsMethodD:
     case Op::FCallClsMethodS:
     case Op::FCallClsMethodSD:
@@ -103,7 +103,6 @@ inline bool opcodeIgnoresInnerType(const Op op) {
 
 inline std::string InputInfo::pretty() const {
   std::string p = show(loc);
-  if (dontBreak) p += ":dc";
   if (dontGuard) p += ":dg";
   return p;
 }

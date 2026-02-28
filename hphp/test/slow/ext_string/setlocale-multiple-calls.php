@@ -1,6 +1,6 @@
 <?hh
 
-function test($cat, $locale) {
+function test($cat, $locale) :mixed{
   var_dump(setlocale($cat, $locale));
   $out = sprintf("%.3f: ", 3.142) .
          strftime("%A %e %B %Y", mktime(0, 0, 0, 12, 22, 1978));
@@ -13,7 +13,7 @@ function test($cat, $locale) {
 
 
 <<__EntryPoint>>
-function main_setlocale_multiple_calls() {
+function main_setlocale_multiple_calls() :mixed{
 test(LC_TIME, 'fr_FR');
 
 // This will fail, but it shouldn't mess up the already set LC_TIME category

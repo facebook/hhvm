@@ -1,0 +1,6 @@
+File "async_lambda_bad.php", line 6, characters 5-32:
+Use `async ... ==> await ...` for lambdas that directly return `Awaitable`s, so stack traces include the lambda position. (Lint[5650])
+File "async_lambda_bad.php", line 13, characters 5-44:
+Use `async ... ==> await ...` for lambdas that directly return `Awaitable`s, so stack traces include the lambda position. (Lint[5650])
+File "async_lambda_bad.php", line 20, characters 5-50:
+Use `async ... ==> await ...` for lambdas that directly return `Awaitable`s, so stack traces include the lambda position. (Lint[5650])

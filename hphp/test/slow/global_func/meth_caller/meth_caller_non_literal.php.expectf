@@ -1,15 +1,17 @@
+
+Warning: getClassName() called on __SystemLib\MethCallerHelper in %s/meth_caller_non_literal.php on line 7
+
+Warning: getMethodName() called on __SystemLib\MethCallerHelper in %s/meth_caller_non_literal.php on line 7
+string(1) "A"
+string(5) "afunc"
 string(1) "A"
 string(5) "afunc"
 
-Warning: getClassName() called on __SystemLib\MethCallerHelper in %sr/meth_caller_non_literal.php on line 7
+Warning: getClassName() called on __SystemLib\MethCallerHelper in %s/meth_caller_non_literal.php on line 7
 
-Warning: getMethodName() called on __SystemLib\MethCallerHelper in %sr/meth_caller_non_literal.php on line 7
+Warning: getMethodName() called on __SystemLib\MethCallerHelper in %s/meth_caller_non_literal.php on line 7
 string(1) "A"
 string(5) "afunc"
-
-Notice: MethCallerHelper is used on meth_caller_get_class() in %sr/meth_caller_non_literal.php on line 10
-
-Notice: MethCallerHelper is used on meth_caller_get_method() in %sr/meth_caller_non_literal.php on line 10
 string(1) "A"
 string(5) "afunc"
 int(1)

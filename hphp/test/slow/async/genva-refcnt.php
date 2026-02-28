@@ -1,13 +1,13 @@
-<?hh // decl
+<?hh
 
 class Marker {
 }
 
-async function foo() {
+async function foo() :Awaitable<mixed>{
   return new Marker();
 }
 
-async function bar() {
+async function bar() :Awaitable<mixed>{
   var_dump(objprof_get_data());
   echo "genva 1\n";
   concurrent {
@@ -34,7 +34,7 @@ async function bar() {
 
 
 <<__EntryPoint>>
-function main_genva_refcnt() {
+function main_genva_refcnt() :mixed{
 \HH\Asio\join(bar());
 echo "exit\n";
 }

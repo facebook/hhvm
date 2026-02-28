@@ -11,7 +11,7 @@
 
 function main(): void {
   $foo = function(darray<string, mixed> $rel): darray<string, mixed> {
-    return darray[
+    return dict[
       'id'       => $rel['id'],
       'relation' => $rel['relation_type'],
     ];

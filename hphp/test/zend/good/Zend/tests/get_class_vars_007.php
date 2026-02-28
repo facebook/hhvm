@@ -5,7 +5,7 @@ class A {
     static private $b, $bb;
     static protected $c, $cc;
 
-    static public function test() {
+    static public function test() :mixed{
         var_dump(get_class_vars(__CLASS__));
     }
 }

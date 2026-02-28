@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
@@ -32,25 +31,25 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/cti.h"
 #include "hphp/runtime/vm/func-emitter.h"
-#include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/source-location.h"
-#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/tc.h"
-#include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/system/systemlib.h"
 
 #include "hphp/util/atomic-vector.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/functional.h"
+#include "hphp/util/ptr.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 
@@ -64,7 +63,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(hhbc);
+TRACE_SET_MOD(hhbc)
+const StaticString s_TrivialHHVMBuiltinWrapper("TrivialHHVMBuiltinWrapper");
 
 std::atomic<bool> Func::s_treadmill;
 
@@ -77,12 +77,21 @@ Mutex g_funcsMutex;
  */
 static std::atomic<FuncId::Int> s_nextFuncId{1};
 #ifndef USE_LOWPTR
-AtomicLowPtrVector<const Func> Func::s_funcVec{0, nullptr};
+AtomicPackedPtrVector<const Func> Func::s_funcVec{0, nullptr};
 static InitFiniNode s_funcVecReinit([]{
-  UnsafeReinitEmptyAtomicLowPtrVector(
-    Func::s_funcVec, RuntimeOption::EvalFuncCountHint);
+  UnsafeReinitEmptyAtomicPackedPtrVector(
+    Func::s_funcVec, Cfg::Eval::FuncCountHint);
 }, InitFiniNode::When::PostRuntimeOptions, "s_funcVec reinit");
+#else
+folly::ConcurrentHashMap<uint32_t, uint32_t> s_stableFuncIDs;
 #endif
+
+static ServiceData::ExportedCounter* s_funcid_counter =
+  ServiceData::createCounter("admin.func_ids");
+static InitFiniNode s_funcidCounterInit([]{
+  // see comment on s_nextFuncId for why we start at 1.
+  s_funcid_counter->setValue(1);
+}, InitFiniNode::When::PostRuntimeOptions, "func_id counter init");
 
 namespace {
 inline int numProloguesForNumParams(int numParams) {
@@ -101,7 +110,7 @@ Func::Func(Unit& unit, const StringData* name, Attr attrs)
   : m_name(name)
   , m_isPreFunc(false)
   , m_hasPrivateAncestor(false)
-  , m_shouldSampleJit(StructuredLog::coinflip(RuntimeOption::EvalJitSampleRate))
+  , m_shouldSampleJit(StructuredLog::coinflip(Cfg::Jit::SampleRate))
   , m_hasForeignThis(false)
   , m_registeredInDataMap(false)
   , m_unit(&unit)
@@ -114,11 +123,9 @@ Func::Func(
   Unit& unit, const StringData* name, Attr attrs,
   const StringData *methCallerCls, const StringData *methCallerMeth)
   : m_name(name)
-  , m_methCallerMethName(to_low(methCallerMeth, kMethCallerBit))
-  , m_u(methCallerCls)
   , m_isPreFunc(false)
   , m_hasPrivateAncestor(false)
-  , m_shouldSampleJit(StructuredLog::coinflip(RuntimeOption::EvalJitSampleRate))
+  , m_shouldSampleJit(StructuredLog::coinflip(Cfg::Jit::SampleRate))
   , m_hasForeignThis(false)
   , m_registeredInDataMap(false)
   , m_unit(&unit)
@@ -127,6 +134,8 @@ Func::Func(
 {
   assertx(methCallerCls != nullptr);
   assertx(methCallerMeth != nullptr);
+  methCallerData().m_methName = methCallerMeth;
+  methCallerData().m_clsName = methCallerCls;
 }
 
 Func::~Func() {
@@ -146,11 +155,12 @@ void* Func::allocFuncMem(int numParams) {
     - sizeof(m_prologueTable);
 
   MemoryStats::LogAlloc(AllocKind::Func, funcSize);
-  return lower_malloc(funcSize);
+  return low_malloc(funcSize);
 }
 
 void Func::destroy(Func* func) {
-  if (jit::mcgen::initialized() && RuntimeOption::EvalEnableReusableTC) {
+  NamedFunc::removeFunc(func);
+  if (jit::mcgen::initialized() && Cfg::Eval::EnableReusableTC) {
     // Free TC-space associated with func
     jit::tc::reclaimFunction(func);
   }
@@ -170,20 +180,20 @@ void Func::destroy(Func* func) {
   if (s_treadmill.load(std::memory_order_acquire)) {
     Treadmill::enqueue([func](){
       func->~Func();
-      lower_free(func);
+      low_free(func);
     });
     return;
   }
 
   func->~Func();
-  lower_free(func);
+  low_free(func);
 }
 
 void Func::freeClone() {
   assertx(isPreFunc());
   assertx(m_cloned.flag.test_and_set());
 
-  if (jit::mcgen::initialized() && RuntimeOption::EvalEnableReusableTC) {
+  if (jit::mcgen::initialized() && Cfg::Eval::EnableReusableTC) {
     // Free TC-space associated with func
     jit::tc::reclaimFunction(this);
   }
@@ -218,10 +228,9 @@ Func* Func::clone(Class* cls, const StringData* name) const {
     : const_cast<Func*>(this);
 
   f->m_cloned.flag.test_and_set();
-  f->initPrologues(numParams);
-  f->m_funcEntry = nullptr;
+  f->initProloguesAndFuncEntry(numParams);
   if (name) f->m_name = name;
-  f->m_u.setCls(cls);
+  f->clsData().m_impl = cls;
   f->setFullName(numParams);
 
   if (f != this) {
@@ -233,11 +242,12 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   f->m_funcId = {FuncId::Invalid};
 #endif
   f->setNewFuncId();
+  f->atomicFlags().unset(Func::Flags::Zombie);
   return f;
 }
 
 void Func::rescope(Class* ctx) {
-  m_u.setCls(ctx);
+  clsData().m_impl = ctx;
   setFullName(numParams());
 }
 
@@ -263,10 +273,10 @@ void Func::init(int numParams) {
     m_attrs = m_attrs | AttrNoInjection;
   }
   assertx(m_name);
-  initPrologues(numParams);
+  initProloguesAndFuncEntry(numParams);
 }
 
-void Func::initPrologues(int numParams) {
+void Func::initProloguesAndFuncEntry(int numParams) {
   int numPrologues = numProloguesForNumParams(numParams);
 
   if (!jit::mcgen::initialized()) {
@@ -278,10 +288,11 @@ void Func::initPrologues(int numParams) {
 
   auto const& stubs = jit::tc::ustubs();
 
-  TRACE(4, "initPrologues func %p %d\n", this, numPrologues);
+  TRACE(4, "initProloguesAndFuncEntry func %p %d\n", this, numPrologues);
   for (int i = 0; i < numPrologues; i++) {
     m_prologueTable[i] = stubs.fcallHelperThunk;
   }
+  m_funcEntry = stubs.handleTranslateMainFuncEntry;
 }
 
 void Func::setFullName(int /*numParams*/) {
@@ -296,15 +307,16 @@ void Func::setFullName(int /*numParams*/) {
     // `methodSlot', which refers to its slot in its `baseCls' (which still
     // points to a subclass of Closure).
     if (!isMethod()) {
-      setNamedEntity(NamedEntity::get(m_name));
+      setNamedFunc(NamedFunc::getOrCreate(m_name));
     }
   }
 }
 
 /* This function is expected to be called after all calls to appendParam
  * are complete. After, m_paramCounts is initialized such that the least
- * significant bit of this->m_paramCounts indicates whether the last param
- * is (non)variadic; and the rest of the bits are the number of params.
+ * significant bit of this->m_paramCounts indicates whether the last
+ * positional param is (non)variadic; and the rest of the bits are the
+ * number of params.
  */
 void Func::finishedEmittingParams(std::vector<ParamInfo>& fParams) {
   assertx(m_paramCounts == 0);
@@ -371,12 +383,24 @@ std::pair<const StringData*, const StringData*> Func::getMethCallerNames(
 // FuncId manipulation.
 
 FuncId::Int Func::maxFuncIdNum() {
-  return s_nextFuncId.load(std::memory_order_relaxed);
+  return s_nextFuncId.load(std::memory_order_acquire);
 }
 
 #ifdef USE_LOWPTR
 void Func::setNewFuncId() {
-  s_nextFuncId.fetch_add(1, std::memory_order_relaxed);
+  auto const id = s_nextFuncId.fetch_add(1, std::memory_order_acq_rel);
+  s_funcid_counter->increment();
+
+  if (!Cfg::Repo::Authoritative) {
+    s_stableFuncIDs.insert_or_assign(getFuncId().toInt(), id);
+  }
+}
+
+uint32_t Func::getStableId() const {
+  if (Cfg::Repo::Authoritative) return getFuncId().toInt();
+  auto const it = s_stableFuncIDs.find(getFuncId().toInt());
+  assertx(it != s_stableFuncIDs.end());
+  return it->second;
 }
 
 const Func* Func::fromFuncId(FuncId id) {
@@ -391,11 +415,16 @@ bool Func::isFuncIdValid(FuncId id) {
 #else
 void Func::setNewFuncId() {
   assertx(m_funcId.isInvalid());
-  m_funcId = {s_nextFuncId.fetch_add(1, std::memory_order_relaxed)};
+  m_funcId = {s_nextFuncId.fetch_add(1, std::memory_order_acq_rel)};
+  s_funcid_counter->increment();
 
   s_funcVec.ensureSize(m_funcId.toInt() + 1);
   assertx(s_funcVec.get(m_funcId.toInt()) == nullptr);
   s_funcVec.set(m_funcId.toInt(), this);
+}
+
+uint32_t Func::getStableId() const {
+  return getFuncId().toInt();
 }
 
 const Func* Func::fromFuncId(FuncId id) {
@@ -428,18 +457,12 @@ bool Func::isDVEntry(Offset offset) const {
   return false;
 }
 
-int Func::getEntryNumParams(Offset offset) const {
-  if (offset == 0) return numNonVariadicParams();
-  return getDVEntryNumParams(offset);
-}
-
-int Func::getDVEntryNumParams(Offset offset) const {
+bool Func::hasNonTrivialDVFuncEntry() const {
   auto const nparams = numNonVariadicParams();
-  for (int i = 0; i < nparams; i++) {
-    const ParamInfo& pi = params()[i];
-    if (pi.hasDefaultValue() && pi.funcletOff == offset) return i;
+  for (auto i = numNamedParams() + numRequiredPositionalParams(); i < nparams; ++i) {
+    if (!params()[i].hasTrivialDefaultValue()) return true;
   }
-  return -1;
+  return false;
 }
 
 Offset Func::getEntryForNumArgs(int numArgsPassed) const {
@@ -472,6 +495,12 @@ bool Func::isReadonly(int32_t arg) const {
   assertx(arg >= 0);
   if (arg >= numParams()) return false;
   return params()[arg].isReadonly();
+}
+
+bool Func::isNamed(int32_t arg) const {
+  assertx(arg >= 0);
+  if (arg >= numParams()) return false;
+  return params()[arg].isNamed();
 }
 
 uint32_t Func::numInOutParams() const {
@@ -514,7 +543,7 @@ uint32_t Func::numClosureUseLocals() const {
 // Persistence.
 
 bool Func::isImmutableFrom(const Class* cls) const {
-  if (!RuntimeOption::RepoAuthoritative) return false;
+  if (!Cfg::Repo::Authoritative) return false;
   assertx(cls && cls->lookupMethod(name()) == this);
   if (attrs() & AttrNoOverride) {
     return true;
@@ -538,21 +567,16 @@ void Func::resetPrologue(int numParams) {
 }
 
 void Func::resetFuncEntry() {
-  m_funcEntry = nullptr;
+  m_funcEntry = jit::tc::ustubs().handleTranslateMainFuncEntry;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Reified Generics
 
-namespace {
-const ReifiedGenericsInfo k_defaultReifiedGenericsInfo{0, false, 0, {}};
-} // namespace
-
-const ReifiedGenericsInfo& Func::getReifiedGenericsInfo() const {
-  if (!shared()->m_allFlags.m_hasReifiedGenerics) return k_defaultReifiedGenericsInfo;
+const GenericsInfo& Func::getGenericsInfo() const {
   auto const ex = extShared();
   assertx(ex);
-  return ex->m_reifiedGenericsInfo;
+  return ex->m_genericsInfo;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -563,9 +587,10 @@ void Func::print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrPublic)    { out << " public"; }
   if (attrs & AttrProtected) { out << " protected"; }
   if (attrs & AttrPrivate)   { out << " private"; }
+  if (attrs & AttrInternal)  { out << " internal"; }
   if (attrs & AttrAbstract)  { out << " abstract"; }
   if (attrs & AttrFinal)     { out << " final"; }
-  if (attrs & AttrNoOverride){ out << " (nooverride)"; }
+  if (attrs & AttrNoOverride){ out << " (no-override)"; }
   if (attrs & AttrInterceptable) { out << " (interceptable)"; }
   if (attrs & AttrPersistent) { out << " (persistent)"; }
   if (attrs & AttrBuiltin) { out << " (builtin)"; }
@@ -574,6 +599,7 @@ void Func::print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrSupportsAsyncEagerReturn) { out << " (can_async_eager_ret)"; }
   if (attrs & AttrDynamicallyCallable) { out << " (dyn_callable)"; }
   if (attrs & AttrIsMethCaller) { out << " (is_meth_caller)"; }
+  if (attrs & AttrNoRecording) { out << " (no_recording)"; }
 }
 
 void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
@@ -606,26 +632,29 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     for (uint32_t i = 0; i < params.size(); ++i) {
       auto const& param = params[i];
       out << " Param: " << localVarName(i)->data();
-      if (param.typeConstraint.hasConstraint()) {
-        out << " " << param.typeConstraint.displayName(cls(), true);
+      for (auto const& tc : param.typeConstraints.range()) {
+        if (tc.hasConstraint()) {
+          out << " " << tc.displayName(cls(), true);
+        }
       }
-      if (param.userType) {
-        out << " (" << param.userType->data() << ")";
+      if (auto userType = param.userType.get(unit())) {
+        out << " (" << userType->data() << ")";
       }
       if (param.funcletOff != kInvalidOffset) {
         out << " DV" << " at " << param.funcletOff;
-        if (param.phpCode) {
-          out << " = " << param.phpCode->data();
+        if (auto phpCode = param.phpCode.get(unit())) {
+          out << " = " << phpCode->data();
         }
       }
       out << std::endl;
     }
 
-    if (returnTypeConstraint().hasConstraint() ||
-        (returnUserType() && !returnUserType()->empty())) {
+    if (returnUserType() && !returnUserType()->empty()) {
       out << " Ret: ";
-      if (returnTypeConstraint().hasConstraint()) {
-        out << " " << returnTypeConstraint().displayName(cls(), true);
+      for (auto const& tc : returnTypeConstraints().range()) {
+        if (tc.hasConstraint()) {
+          out << " " << tc.displayName(cls(), true);
+        }
       }
       if (returnUserType() && !returnUserType()->empty()) {
         out << " (" << returnUserType()->data() << ")";
@@ -705,7 +734,7 @@ Func::SharedData::SharedData(BCPtr bc, Offset bclen,
   : m_bc(bc.isPtr() ? BCPtr::FromPtr(allocateBCRegion(bc.ptr(), bclen)) : bc)
   , m_preClass(preClass)
   , m_line1(line1)
-  , m_originalFilename(nullptr)
+  , m_originalUnit(nullptr)
   , m_cti_base(0)
   , m_numLocals(0)
   , m_numIterators(0)
@@ -717,14 +746,12 @@ Func::SharedData::SharedData(BCPtr bc, Offset bclen,
   m_allFlags.m_isGenerated = false;
   m_allFlags.m_hasExtendedSharedData = false;
   m_allFlags.m_returnByValue = false;
+  m_allFlags.m_isUntrustedReturnType = false;
   m_allFlags.m_isMemoizeWrapper = false;
   m_allFlags.m_isMemoizeWrapperLSB = false;
-  m_allFlags.m_isPolicyShardedMemoize = false;
+  m_allFlags.m_memoizeICType = Func::MemoizeICType::MakeICInaccessible;
   m_allFlags.m_isPhpLeafFn = isPhpLeafFn;
   m_allFlags.m_hasReifiedGenerics = false;
-  m_allFlags.m_hasParamsWithMultiUBs = false;
-  m_allFlags.m_hasReturnWithMultiUBs = false;
-
   m_bclenSmall = std::min<uint32_t>(bclen, kSmallDeltaLimit);
   m_line2Delta = std::min<uint32_t>(line2 - line1, kSmallDeltaLimit);
   m_sn = std::min<uint32_t>(sn, kSmallDeltaLimit);
@@ -787,39 +814,62 @@ void Func::def(Func* func) {
   assertx(!func->isMethod());
 
   // Don't define the __debugger_main() function
-  DEBUGGER_ATTACHED_ONLY(if (func->userAttributes().count(s_DebuggerMain.get())) { return; });
+  DEBUGGER_ATTACHED_ONLY(if (func->userAttributes().contains(s_DebuggerMain.get())) { return; });
 
-  auto const ne = func->getNamedEntity();
+  auto const ne = func->getNamedFunc();
 
   Func* f = ne->getCachedFunc();
   if (f == nullptr) {
-    std::unique_lock<Mutex> l(g_funcsMutex);
-    f = ne->getCachedFunc();
-    if (f == nullptr) {
+    if (Cfg::Eval::LockFreeFuncDef) {
       auto const persistent = func->isPersistent();
-      assertx(!persistent || (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited));
+      assertx(!persistent ||
+              (Cfg::Repo::Authoritative || func->unit()->isSystemLib()));
 
-      if (!ne->m_cachedFunc.bound()) {
-        ne->m_cachedFunc.bind(
-          persistent ? rds::Mode::Persistent : rds::Mode::Normal,
-          rds::LinkName{"Func", func->name()}
-        );
-      }
-      ne->m_cachedFunc.initWith(func);
-      l.unlock();
+      // Binding an RDS handle is an atomic operation. For persistent handles an
+      // initial value can ve specified when binding succeeds which is also
+      // atomically assigned. For normal handles the initial value is ignored.
+      PackedPtr<Func> init = func;
+      ne->m_cachedFunc.bind(
+        persistent ? rds::Mode::Persistent : rds::Mode::Normal,
+        rds::LinkName{"Func", func->name()},
+        &init
+      );
+
+      f = ne->getCachedFunc();
+      if (!f) ne->m_cachedFunc.initWith(func);
+      if (!f || f == func) ne->setFunc(func);
 
       DEBUGGER_ATTACHED_ONLY(phpDebuggerDefFuncHook(func));
+    } else {
+      std::unique_lock<Mutex> l(g_funcsMutex);
+      f = ne->getCachedFunc();
+      if (f == nullptr) {
+        auto const persistent = func->isPersistent();
+        assertx(!persistent || (Cfg::Repo::Authoritative || func->unit()->isSystemLib()));
+
+        if (!ne->m_cachedFunc.bound()) {
+          ne->m_cachedFunc.bind(
+            persistent ? rds::Mode::Persistent : rds::Mode::Normal,
+            rds::LinkName{"Func", func->name()}
+          );
+        }
+        ne->m_cachedFunc.initWith(func);
+        ne->setFunc(func);
+        l.unlock();
+
+        DEBUGGER_ATTACHED_ONLY(phpDebuggerDefFuncHook(func));
+      }
     }
   }
 
-  // If the function didn't exists before we are good
+  // If the function didn't exist before we are good
   if (f == nullptr) {
     return;
   }
 
   // Otherwise check if we match or show the right error message
   if (f == func) {
-    assertx(!RO::RepoAuthoritative ||
+    assertx(!Cfg::Repo::Authoritative ||
             (f->isPersistent() && ne->m_cachedFunc.isPersistent()));
     return;
   }
@@ -831,26 +881,80 @@ void Func::def(Func* func) {
   raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());
 }
 
-Func* Func::lookup(const NamedEntity* ne) {
-  return ne->getCachedFunc();
-}
-
 Func* Func::lookup(const StringData* name) {
-  const NamedEntity* ne = NamedEntity::get(name);
-  return ne->getCachedFunc();
+  const NamedFunc* ne = NamedFunc::getNoCreate(name);
+  return ne ? ne->getCachedFunc() : nullptr;
 }
 
 Func* Func::lookupBuiltin(const StringData* name) {
   // Builtins are either persistent (the normal case), or defined at the
   // beginning of every request (if JitEnableRenameFunction or interception is
   // enabled). In either case, they're unique, so they should be present in the
-  // NamedEntity.
-  auto const ne = NamedEntity::get(name);
-  auto const f = ne->getCachedFunc();
-  return (f && f->isUnique() && f->isBuiltin()) ? f : nullptr;
+  // NamedFunc.
+  auto const f = Func::lookup(name);
+  return (f && f->isPersistent() && f->isBuiltin()) ? f : nullptr;
 }
 
-Func* Func::load(const NamedEntity* ne, const StringData* name) {
+// If the function is a trivial builtin, that is not interceptable, and
+// is persistent, then unwrap it.
+Func* Func::unwrap() {
+  if (!Cfg::Eval::ReplaceTrivialBuiltins) return this;
+  // Already unwrapped
+  if (Cfg::Repo::Authoritative) return this;
+  if (RO::funcIsRenamable(name())) return this;
+
+  auto const it = userAttributes().find(s_TrivialHHVMBuiltinWrapper.get());
+  if (it != userAttributes().end()) {
+    assertx(tvIsVec(it->second));
+    auto const args = it->second.m_data.parr;
+    assertx(args->size() == 1);
+    auto const wrappedFunc = args->at(int64_t{0});
+    assertx(tvIsString(wrappedFunc));
+    assertx(wrappedFunc.m_data.pstr->isStatic());
+    auto const resolved_ne = NamedFunc::getOrCreate(wrappedFunc.m_data.pstr);
+    return resolved_ne->func();
+  }
+  return this;
+}
+
+/*
+ * Find a function which always uniquely maps to the given name in the context
+ * of the given unit. A function so returned can be used directly in the TC as
+ * it will not change.
+ */
+const Func::FuncLookup Func::lookupKnownMaybe(const StringData* name, const Unit* unit) {
+  auto const func = [&]() -> const Func* {
+    auto const ne = NamedFunc::getOrCreate(name);
+    auto const f = ne->func();
+    if (!f) return nullptr;
+    return f->unwrap();
+  }();
+
+  if (!func || RO::funcIsRenamable(func->name())) return Func::none();
+  // In non-repo mode while the function must be available in this unit, it
+  // may be de-duplication on load. This may mean that while the func is
+  // available it is not immutable in the current compilation unit. The order
+  // of the de-duplication can also differ between requests.
+  if (func->isMethCaller() && !Cfg::Repo::Authoritative) return Func::none();
+  assertx(!func->cls());
+  if (func->isPersistent()) return Func::exact(func);
+  if (func->unit() == unit) return Func::exact(func);
+  return Cfg::Sandbox::Speculate ? Func::maybe(func) : Func::none();
+}
+
+inline const Func* Func::lookupKnown(const StringData* name, const Unit* unit) {
+  auto const res = Func::lookupKnownMaybe(name, unit);
+  switch (res.tag) {
+    case Func::FuncLookupResult::Exact:
+      return res.func;
+    case Func::FuncLookupResult::Maybe:
+    case Func::FuncLookupResult::None:
+      return nullptr;
+  }
+}
+
+
+Func* Func::load(const NamedFunc* ne, const StringData* name) {
   Func* func = ne->getCachedFunc();
   if (LIKELY(func != nullptr)) return func;
   if (AutoloadHandler::s_instance->autoloadFunc(
@@ -862,11 +966,12 @@ Func* Func::load(const NamedEntity* ne, const StringData* name) {
 
 Func* Func::load(const StringData* name) {
   String normStr;
-  auto ne = NamedEntity::get(name, true, &normStr);
-
-  // Try to fetch from cache
-  Func* func_ = ne->getCachedFunc();
-  if (LIKELY(func_ != nullptr)) return func_;
+  auto ne = NamedFunc::getNoCreate(name, &normStr);
+  if (ne != nullptr) {
+    // Try to fetch from NamedFunc cache
+    Func* func_ = ne->getCachedFunc();
+    if (LIKELY(func_ != nullptr)) return func_;
+  }
 
   // Normalize the namespace
   if (normStr) {
@@ -874,9 +979,34 @@ Func* Func::load(const StringData* name) {
   }
 
   // Autoload the function
-  return AutoloadHandler::s_instance->autoloadFunc(
-    const_cast<StringData*>(name)
-  ) ? ne->getCachedFunc() : nullptr;
+  auto& handler = AutoloadHandler::s_instance;
+  if (handler->autoloadFunc(const_cast<StringData*>(name))) {
+    if (!ne) ne = NamedFunc::getNoCreate(name, &normStr);
+    if (ne) return ne->getCachedFunc();
+  }
+  return nullptr;
+}
+
+namespace {
+void handleModuleBoundaryViolation(const Func* callee, const Func* caller) {
+  if (!Cfg::Eval::EnforceModules || !callee || !caller) return;
+  if (will_symbol_raise_module_boundary_violation(callee, caller)) {
+    raiseModuleBoundaryViolation(nullptr, callee, caller->moduleName());
+  }
+}
+} // namespace
+
+Func* Func::resolve(const NamedFunc* ne, const StringData* name,
+                    const Func* callerFunc) {
+  Func* func = load(ne, name);
+  handleModuleBoundaryViolation(func, callerFunc);
+  return func;
+}
+
+Func* Func::resolve(const StringData* name, const Func* callerFunc) {
+  Func* func = load(name);
+  handleModuleBoundaryViolation(func, callerFunc);
+  return func;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -886,19 +1016,19 @@ Func::ExtendedLineInfoCache Func::s_extendedLineInfo;
 
 void Func::setLineTable(LineTable lineTable) {
   auto& table = shared()->m_lineTable;
-  table.lock_for_update();
+  auto lock = table.lock_for_update();
   assertx(table.copy().isPtr() && !table.copy().ptr());
-  table.update_and_unlock(
+  lock.update(
     LineTablePtr::FromPtr(new LineTable{std::move(lineTable)})
   );
 }
 
 void Func::setLineTable(LineTablePtr::Token token) {
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
   auto& table = shared()->m_lineTable;
-  table.lock_for_update();
+  auto lock = table.lock_for_update();
   assertx(table.copy().isPtr() && !table.copy().ptr());
-  table.update_and_unlock(LineTablePtr::FromToken(token));
+  lock.update(LineTablePtr::FromToken(token));
 }
 
 void Func::stashExtendedLineTable(SourceLocTable table) const {
@@ -965,21 +1095,18 @@ const LineTable* Func::getLineTable() const {
 const LineTable& Func::getOrLoadLineTable() const {
   if (auto const table = getLineTable()) return *table;
 
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
 
   auto& wrapper = shared()->m_lineTable;
-  wrapper.lock_for_update();
+  auto lock = wrapper.lock_for_update();
 
   auto const table = wrapper.copy();
-  if (table.isPtr()) {
-    wrapper.unlock();
-    return *table.ptr();
-  }
+  if (table.isPtr()) return *table.ptr();
 
   auto newTable = new LineTable{
     FuncEmitter::loadLineTableFromRepo(m_unit->sn(), table.token())
   };
-  wrapper.update_and_unlock(LineTablePtr::FromPtr(newTable));
+  lock.update(LineTablePtr::FromPtr(newTable));
   return *newTable;
 }
 
@@ -989,7 +1116,7 @@ LineTable Func::getOrLoadLineTableCopy() const {
     assertx(table.ptr());
     return *table.ptr();
   }
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
   return FuncEmitter::loadLineTableFromRepo(m_unit->sn(), table.token());
 }
 
@@ -1020,33 +1147,25 @@ int Func::getLineNumber(Offset offset) const {
     return SourceLocation::getLineNumber(getOrLoadLineTable(), offset);
   }
 
-  shared()->m_lineMap.lock_for_update();
-  try {
-    line = findLine();
-    if (line != INT_MIN) {
-      shared()->m_lineMap.unlock();
-      return line;
-    }
+  auto lock = shared()->m_lineMap.lock_for_update();
+  line = findLine();
+  if (line != INT_MIN) return line;
 
-    auto const info = SourceLocation::getLineInfo(getOrLoadLineTable(), offset);
-    auto copy = shared()->m_lineMap.copy();
-    auto const it = std::upper_bound(
-      copy.begin(), copy.end(),
-      info,
-      [&] (const LineInfo& a, const LineInfo& b) {
-        return a.first.base < b.first.past;
-      }
-    );
-    assertx(it == copy.end() ||
-            (it->first.past > offset && it->first.base > offset));
-    copy.insert(it, info);
-    auto old = shared()->m_lineMap.update_and_unlock(std::move(copy));
-    Treadmill::enqueue([old = std::move(old)] () mutable { old.clear(); });
-    return info.second;
-  } catch (...) {
-    shared()->m_lineMap.unlock();
-    throw;
-  }
+  auto const info = SourceLocation::getLineInfo(getOrLoadLineTable(), offset);
+  auto copy = shared()->m_lineMap.copy();
+  auto const it = std::upper_bound(
+    copy.begin(), copy.end(),
+    info,
+    [&] (const LineInfo& a, const LineInfo& b) {
+      return a.first.base < b.first.past;
+    }
+  );
+  assertx(it == copy.end() ||
+          (it->first.past > offset && it->first.base > offset));
+  copy.insert(it, info);
+  auto old = lock.update(std::move(copy));
+  Treadmill::enqueue([old = std::move(old)] () mutable { old.clear(); });
+  return info.second;
 }
 
 bool Func::getSourceLoc(Offset offset, SourceLoc& sLoc) const {
@@ -1074,37 +1193,19 @@ bool Func::getOffsetRange(Offset offset, OffsetRange& range) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Bytecode
 
-namespace {
-
-using BytecodeArena = ReadOnlyArena<VMColdAllocator<char>, false, 8>;
-static BytecodeArena& bytecode_arena() {
-  static BytecodeArena arena(RuntimeOption::EvalHHBCArenaChunkSize);
-  return arena;
-}
-
-}
-
-/*
- * Export for the admin server.
- */
-size_t hhbc_arena_capacity() {
-  if (!RuntimeOption::RepoAuthoritative) return 0;
-  return bytecode_arena().capacity();
-}
-
 unsigned char*
 allocateBCRegion(const unsigned char* bc, size_t bclen) {
   g_hhbc_size->addValue(bclen);
+  auto arena = get_swappable_readonly_arena();
   auto mem = static_cast<unsigned char*>(
-    RuntimeOption::RepoAuthoritative ? bytecode_arena().allocate(bclen)
-                                     : malloc(bclen));
+    arena ? arena->allocate(bclen) : malloc(bclen));
   std::copy(bc, bc + bclen, mem);
   return mem;
 }
 
 void freeBCRegion(const unsigned char* bc, size_t bclen) {
   // Can't free bytecode arena memory.
-  if (RuntimeOption::RepoAuthoritative) return;
+  if (Cfg::Repo::Authoritative) return;
 
   if (debug) {
     // poison released bytecode
@@ -1115,19 +1216,18 @@ void freeBCRegion(const unsigned char* bc, size_t bclen) {
 }
 
 PC Func::loadBytecode() {
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
   auto& wrapper = shared()->m_bc;
-  wrapper.lock_for_update();
+  auto lock = wrapper.lock_for_update();
   auto const bc = wrapper.copy();
-  if (bc.isPtr()) {
-    wrapper.unlock();
-    return bc.ptr();
-  }
+  if (bc.isPtr()) return bc.ptr();
   auto const length = bclen();
   g_hhbc_size->addValue(length);
-  auto mem = (unsigned char*)bytecode_arena().allocate(length);
+  auto arena = get_swappable_readonly_arena();
+  auto mem = static_cast<unsigned char*>(
+    arena ? arena->allocate(length) : malloc(length));
   RepoFile::readRawFromUnit(m_unit->sn(), bc.token(), mem, length);
-  wrapper.update_and_unlock(BCPtr::FromPtr(mem));
+  lock.update(BCPtr::FromPtr(mem));
   return mem;
 }
 
@@ -1176,12 +1276,13 @@ private:
 
 EmbeddedCoverageLinkMap s_covLinks;
 static InitFiniNode s_covLinksReinit([]{
-  if (RO::RepoAuthoritative || !RO::EvalEnableFuncCoverage) return;
-  s_covLinks.emplace(RO::EvalFuncCountHint);
+  if (Cfg::Repo::Authoritative || !Cfg::Eval::EnableFuncCoverage) return;
+  s_covLinks.emplace(Cfg::Eval::FuncCountHint);
 }, InitFiniNode::When::PostRuntimeOptions, "s_funcVec reinit");
 
 InitFiniNode s_clear_called_functions([]{
   tl_called_functions.nullOut();
+  if (s_coverage_index.bound()) *s_coverage_index = 0;
 }, InitFiniNode::When::RequestFini, "tl_called_functions clear");
 }
 
@@ -1193,7 +1294,7 @@ rds::Handle Func::GetCoverageIndex() {
 }
 
 rds::Handle Func::getCoverageHandle() const {
-  assertx(!RO::RepoAuthoritative && RO::EvalEnableFuncCoverage);
+  assertx(!Cfg::Repo::Authoritative && Cfg::Eval::EnableFuncCoverage);
   assertx(!isNoInjection() && !isMethCaller());
 
   CoverageLinkMap::const_accessor cnsAcc;
@@ -1216,12 +1317,12 @@ rds::Handle Func::getCoverageHandle() const {
 void Func::EnableCoverage() {
   assertx(g_context);
 
-  if (RO::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     SystemLib::throwInvalidOperationExceptionObject(
       "Cannot enable function call coverage in repo authoritative mode"
     );
   }
-  if (!RO::EvalEnableFuncCoverage) {
+  if (!Cfg::Eval::EnableFuncCoverage) {
     SystemLib::throwInvalidOperationExceptionObject(
       "Cannot enable function call coverage (you must set "
       "Eval.EnableFuncCoverage = true)"
@@ -1237,6 +1338,25 @@ void Func::EnableCoverage() {
   if (!*tl_saved_coverage_index) *tl_saved_coverage_index = 1;
   *s_coverage_index = (*tl_saved_coverage_index)++;
   tl_called_functions.emplace(Array::CreateDict());
+}
+
+rds::Handle Func::debuggerIntrSetHandle() const {
+  assertx(shared()->m_funcHasDebuggerIntr.bound());
+  return shared()->m_funcHasDebuggerIntr.handle();
+}
+
+rds::Link<bool, rds::Mode::Normal> Func::debuggerIntrSetLink() const {
+  assertx(shared()->m_funcHasDebuggerIntr.bound());
+  return shared()->m_funcHasDebuggerIntr;
+}
+
+void Func::ensureDebuggerIntrSetLinkBound() const {
+  if (!shared()->m_funcHasDebuggerIntr.bound()) {
+    shared()->m_funcHasDebuggerIntr.bind(
+      rds::Mode::Normal,
+      rds::LinkName{"FunctionDebuggerIntr", name()}
+    );
+  }
 }
 
 std::string show(PrologueID pid) {
@@ -1260,7 +1380,7 @@ Array Func::GetCoverage() {
 }
 
 void Func::recordCall() const {
-  if (RO::RepoAuthoritative || !RO::EvalEnableFuncCoverage) return;
+  if (Cfg::Repo::Authoritative || !Cfg::Eval::EnableFuncCoverage) return;
   if (tl_called_functions.isNull()) return;
   if (isNoInjection() || isMethCaller()) return;
 
@@ -1272,7 +1392,7 @@ void Func::recordCall() const {
 }
 
 void Func::recordCallNoCheck() const {
-  assertx(!RO::RepoAuthoritative && RO::EvalEnableFuncCoverage);
+  assertx(!Cfg::Repo::Authoritative && Cfg::Eval::EnableFuncCoverage);
   assertx(!tl_called_functions.isNull());
   assertx(tl_called_functions->isDict());
   assertx(!isNoInjection() && !isMethCaller());

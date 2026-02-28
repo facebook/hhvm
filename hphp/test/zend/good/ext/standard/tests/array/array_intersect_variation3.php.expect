@@ -1,0 +1,239 @@
+*** Testing array_intersect() : Passing different types of arrays to $arr1 argument ***
+-- Iterator 1 --
+dict(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+dict(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+-- Iterator 2 --
+dict(1) {
+  [0]=>
+  float(1.1)
+}
+dict(1) {
+  [0]=>
+  float(1.1)
+}
+-- Iterator 3 --
+dict(2) {
+  [0]=>
+  bool(false)
+  [1]=>
+  bool(true)
+}
+dict(2) {
+  [0]=>
+  bool(false)
+  [1]=>
+  bool(true)
+}
+-- Iterator 4 --
+dict(0) {
+}
+dict(0) {
+}
+-- Iterator 5 --
+dict(1) {
+  [0]=>
+  NULL
+}
+dict(1) {
+  [0]=>
+  NULL
+}
+-- Iterator 6 --
+dict(1) {
+  [1]=>
+  string(5) "aaaa"
+}
+dict(1) {
+  [1]=>
+  string(5) "aaaa"
+}
+-- Iterator 7 --
+dict(1) {
+  [1]=>
+  string(6) "aaaa\r"
+}
+dict(1) {
+  [1]=>
+  string(6) "aaaa\r"
+}
+-- Iterator 8 --
+dict(2) {
+  [2]=>
+  string(88) "hello world	
+1111		 != 2222
+heredoc
+double quoted string. withdifferentwhitespaces"
+  [3]=>
+  string(90) "11 < 12. 123 >22
+'single quoted string'
+"double quoted string"
+2222 != 1111.	 0000 = 0000
+"
+}
+dict(2) {
+  [2]=>
+  string(88) "hello world	
+1111		 != 2222
+heredoc
+double quoted string. withdifferentwhitespaces"
+  [3]=>
+  string(90) "11 < 12. 123 >22
+'single quoted string'
+"double quoted string"
+2222 != 1111.	 0000 = 0000
+"
+}
+-- Iterator 9 --
+dict(2) {
+  [1]=>
+  string(3) "one"
+  [2]=>
+  string(3) "two"
+}
+dict(2) {
+  [1]=>
+  string(3) "one"
+  [2]=>
+  string(3) "two"
+}
+-- Iterator 10 --
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+dict(2) {
+  ["one"]=>
+  int(1)
+  ["two"]=>
+  int(2)
+}
+-- Iterator 11 --
+dict(0) {
+}
+dict(0) {
+}
+-- Iterator 12 --
+dict(1) {
+  ["one"]=>
+  string(3) "ten"
+}
+dict(1) {
+  ["one"]=>
+  string(3) "ten"
+}
+-- Iterator 13 --
+dict(3) {
+  ["one"]=>
+  int(1)
+  [2]=>
+  string(3) "two"
+  [4]=>
+  string(4) "four"
+}
+dict(3) {
+  ["one"]=>
+  int(1)
+  [2]=>
+  string(3) "two"
+  [4]=>
+  string(4) "four"
+}
+-- Iterator 14 --
+dict(2) {
+  ["NULL"]=>
+  NULL
+  ["null"]=>
+  NULL
+}
+dict(2) {
+  ["NULL"]=>
+  NULL
+  ["null"]=>
+  NULL
+}
+-- Iterator 15 --
+dict(2) {
+  ["false"]=>
+  bool(false)
+  ["true"]=>
+  bool(true)
+}
+dict(2) {
+  ["false"]=>
+  bool(false)
+  ["true"]=>
+  bool(true)
+}
+-- Iterator 16 --
+dict(3) {
+  [""]=>
+  string(6) "emptys"
+  ["emptyd"]=>
+  string(0) ""
+  ["emptys"]=>
+  string(0) ""
+}
+dict(3) {
+  [""]=>
+  string(6) "emptys"
+  ["emptyd"]=>
+  string(0) ""
+  ["emptys"]=>
+  string(0) ""
+}
+-- Iterator 17 --
+dict(6) {
+  [1]=>
+  string(0) ""
+  [2]=>
+  string(0) ""
+  [3]=>
+  NULL
+  [4]=>
+  NULL
+  [5]=>
+  bool(false)
+  [6]=>
+  bool(true)
+}
+dict(6) {
+  [1]=>
+  string(0) ""
+  [2]=>
+  string(0) ""
+  [3]=>
+  NULL
+  [4]=>
+  NULL
+  [5]=>
+  bool(false)
+  [6]=>
+  bool(true)
+}
+-- Iterator 18 --
+dict(1) {
+  [0]=>
+  int(5)
+}
+dict(1) {
+  [0]=>
+  int(5)
+}
+-- Iterator 19 --
+dict(0) {
+}
+dict(0) {
+}
+Done

@@ -1,12 +1,12 @@
 <?hh
 
 class Foo {
-  protected function f() {
+  protected function f() :mixed{
     return 'Foo';
   }
 }
 trait T {
-  public function f() {
+  public function f() :mixed{
     return 'Bar';
   }
 }
@@ -15,7 +15,7 @@ class Bar extends Foo {
 }
 
 <<__EntryPoint>>
-function main_2114() {
+function main_2114() :mixed{
 $b = new Bar();
 echo $b->f()."\n";
 }

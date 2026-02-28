@@ -26,7 +26,7 @@ namespace HPHP {
 namespace VSDEBUG {
 
 struct VSDebugExtension final : Extension {
-  VSDebugExtension() : Extension(VSDEBUG_NAME, VSDEBUG_VERSION) { }
+  VSDebugExtension() : Extension(VSDEBUG_NAME, VSDEBUG_VERSION, NO_ONCALL_YET) { }
   ~VSDebugExtension();
 
   void moduleLoad(const IniSetting::Map& ini, const Hdf hdf) override;
@@ -36,6 +36,8 @@ struct VSDebugExtension final : Extension {
   void requestShutdown() override;
   void threadShutdown() override;
   bool moduleEnabled() const override { return m_enabled; }
+
+  std::vector<std::string> hackFiles() const { return {}; }
 
   static Debugger* getDebugger() {
     std::atomic_thread_fence(std::memory_order_acquire);
@@ -64,4 +66,3 @@ private:
 
 }
 }
-

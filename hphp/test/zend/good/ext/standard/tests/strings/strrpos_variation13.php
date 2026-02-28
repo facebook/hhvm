@@ -11,7 +11,7 @@
 echo "*** Test strrpos() function: binary safe ***\n";
 $haystack = "\0Hello\0World\0";
 
-$needles = varray[
+$needles = vec[
   "Hello".chr(0)."World",
   chr(0)."Hello\0",
   chr(0),

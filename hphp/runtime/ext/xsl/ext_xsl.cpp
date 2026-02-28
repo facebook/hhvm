@@ -63,7 +63,7 @@ static void xslt_ext_error_handler(void *,
 // NativeData
 
 const StaticString
-  s_XSLTProcessorData("XSLTProcessorData"),
+  s_XSLTProcessor("XSLTProcessor"),
   s_DOMDocument("DOMDocument"),
   s_DOMElement("DOMElement"),
   s_DOMAttr("DOMAttr"),
@@ -81,7 +81,7 @@ struct XSLTProcessorData {
     if (m_registered_phpfunctions.empty()) {
       m_registered_phpfunctions = Array::CreateDict();
     }
-  };
+  }
 
   ~XSLTProcessorData() {
     sweep();
@@ -263,7 +263,7 @@ static xmlChar *xslt_string_to_xpathexpr(const char *str) {
 }
 
 static Object newNode(const String name, xmlNodePtr obj) {
-  auto const cls = Class::lookup(name.get());
+  auto const cls = Class::load(name.get());
   Object ret{cls};
   auto retData = Native::data<DOMNode>(ret);
   retData->setNode(obj);
@@ -480,18 +480,8 @@ static void HHVM_METHOD(XSLTProcessor, importStylesheet,
     if (doc == nullptr) {
       raise_error("Unable to import stylesheet");
     }
-  } else if (stylesheet.instanceof(SimpleXMLElement_classof())) {
-    auto ssNode = SimpleXMLElement_exportNode(stylesheet);
-    // This doc will be freed by xsltFreeStylesheet.
-    doc = xmlNewDoc((const xmlChar*)"1.0");
-    xmlNodePtr node = xmlCopyNode(ssNode, /*extended*/ 1);
-    if (doc == nullptr || node == nullptr) {
-      raise_error("Unable to import stylesheet");
-    }
-    xmlDocSetRootElement(doc, node);
   } else {
-    raise_error("Object must be an instance of DOMDocument or "
-                "SimpleXMLElement");
+    raise_error("Object must be an instance of DOMDocument");
   }
 
   if (doc) {
@@ -711,11 +701,14 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToXML,
 // extension
 
 struct XSLExtension final : Extension {
-    XSLExtension() : Extension("xsl", "0.1") {};
+    XSLExtension() : Extension("xsl", "0.1", NO_ONCALL_YET) {}
 
     void moduleInit() override {
       xsltSetGenericErrorFunc(nullptr, xslt_ext_error_handler);
       exsltRegisterAll();
+    }
+
+    void moduleRegisterNative() override {
       HHVM_RC_INT(XSL_SECPREF_NONE, k_XSL_SECPREF_NONE);
       HHVM_RC_INT(XSL_SECPREF_READ_FILE, k_XSL_SECPREF_READ_FILE);
       HHVM_RC_INT(XSL_SECPREF_WRITE_FILE, k_XSL_SECPREF_WRITE_FILE);
@@ -740,9 +733,7 @@ struct XSLExtension final : Extension {
       HHVM_ME(XSLTProcessor, transformToXML);
 
       Native::
-        registerNativeDataInfo<XSLTProcessorData>(s_XSLTProcessorData.get());
-
-      loadSystemlib();
+        registerNativeDataInfo<XSLTProcessorData>(s_XSLTProcessor.get());
     }
 } s_xsl_extension;
 

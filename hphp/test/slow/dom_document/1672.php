@@ -1,7 +1,7 @@
 <?hh
 
 function print_node($node)
-{
+:mixed{
   print "Node Name: " . $node->nodeName;
   print "
 Node Type: " . $node->nodeType;
@@ -23,7 +23,7 @@ Node Content: " . $node->nodeValue;
 }
 
 function print_node_list($nodelist)
-{
+:mixed{
   foreach($nodelist as $node)
   {
     print_node($node);
@@ -32,7 +32,7 @@ function print_node_list($nodelist)
 
 
 <<__EntryPoint>>
-function main_1672() {
+function main_1672() :mixed{
 $xmlstr = "<?xml version='1.0' standalone='yes'?>
 <!DOCTYPE chapter SYSTEM '/share/sgml/Norman_Walsh/db3xml10/db3xml10.dtd'
 [ <!ENTITY sp \"spanish\">

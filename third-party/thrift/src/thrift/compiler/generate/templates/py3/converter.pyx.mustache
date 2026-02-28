@@ -1,0 +1,128 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/types" as types}}
+
+{{> common/auto_generated_py}}
+
+from libcpp.memory cimport make_shared, unique_ptr
+from cython.operator cimport dereference as deref, address
+from libcpp.utility cimport move as cmove
+{{^program:gen_py3_cython?}}
+from thrift.py3.types cimport (
+    const_pointer_cast,
+    deref_const as __deref_const,
+)
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as {{!
+    }}_{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
+{{#program:gen_legacy_container_converters?}}
+
+{{#program:inplace_migrate?}}{{^program:auto_migrate?}}
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
+{{/program:auto_migrate?}}{{/program:inplace_migrate?}}
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
+{{#program:includeNamespaces}}
+{{#hasTypes?}}
+import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}thrift_converter as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}thrift_converter
+{{/hasTypes?}}
+{{/program:includeNamespaces}}
+
+{{/program:gen_legacy_container_converters?}}
+{{/program:gen_py3_cython?}}
+{{#program:gen_py3_cython?}}
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as _fbthrift_ctypes
+from thrift.py3.serializer cimport (
+    cserialize as __cserialize,
+    cdeserialize as __cdeserialize,
+)
+from thrift.python.protocol cimport Protocol
+cimport folly.iobuf as _folly__iobuf
+{{/program:gen_py3_cython?}}
+{{#program:inplace_migrate?}}
+{{^program:gen_legacy_container_converters?}}
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
+{{/program:gen_legacy_container_converters?}}
+{{/program:inplace_migrate?}}
+
+
+{{#program:filtered_structs}}
+{{! direct replacement for ._cpp_obj }}
+cdef shared_ptr[_fbthrift_cbindings.{{#partial types.c_binding node=struct:self}}] {{struct:name}}_convert_to_cpp(object inst) except*:
+{{^program:gen_py3_cython?}}
+    {{#program:inplace_migrate?}}{{^program:auto_migrate?}}
+    try:
+        inst = inst._fbthrift__inner
+    except AttributeError:{{! let TypeError happen below}}
+        pass
+
+    {{/program:auto_migrate?}}{{/program:inplace_migrate?}}
+    return make_shared[_fbthrift_cbindings.{{#partial types.c_binding node=struct:self}}](
+        _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter.{{!
+        }}{{struct:name}}_convert_to_cpp(inst)
+    )
+{{/program:gen_py3_cython?}}
+{{#program:gen_py3_cython?}}
+    {{^struct:cpp_noncopyable?}}
+    return make_shared[_fbthrift_cbindings.{{#partial types.c_binding node=struct:self}}](deref(
+        (<_fbthrift_ctypes.{{struct:name}}?>inst).{{#partial types.cpp_obj}}
+    ))
+    {{/struct:cpp_noncopyable?}}{{#struct:cpp_noncopyable?}}
+    cdef unique_ptr[_folly__iobuf.cIOBuf] _fbthrift__iobuf = cmove(
+        __cserialize(
+            (<_fbthrift_ctypes.{{struct:name}}?>inst).{{#partial types.cpp_obj}}.get(),
+            Protocol.BINARY,
+        )
+    )
+    cdef shared_ptr[_fbthrift_cbindings.{{#partial types.c_binding node=struct:self}}] _fbthrift__out = make_shared[_fbthrift_cbindings.{{#partial types.c_binding node=struct:self}}]()
+    __cdeserialize(_fbthrift__iobuf.get(), _fbthrift__out.get(), Protocol.BINARY)
+    return cmove(_fbthrift__out)
+    {{/struct:cpp_noncopyable?}}
+
+{{/program:gen_py3_cython?}}
+{{! direct replacement for ._fbthrift_create }}
+cdef object {{struct:name}}_from_cpp(const shared_ptr[_fbthrift_cbindings.{{#partial types.c_binding node=struct:self}}]& c_struct):
+{{^program:gen_py3_cython?}}
+    _py_struct = _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter.{{!
+            }}{{struct:name}}_from_cpp(deref(const_pointer_cast(c_struct)))
+    {{#program:inplace_migrate?}}{{^program:auto_migrate?}}
+    _py_struct = {{> types/current_module_types}}.{{struct:name}}.from_python(_py_struct)
+    {{/program:auto_migrate?}}{{/program:inplace_migrate?}}
+    return _py_struct
+{{/program:gen_py3_cython?}}
+{{#program:gen_py3_cython?}}
+    return _fbthrift_ctypes.{{struct:name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+{{/program:gen_py3_cython?}}
+
+{{/program:filtered_structs}}
+
+{{#program:gen_legacy_container_converters?}}
+{{#program:containerTypes}}
+cdef {{> types/cython_cpp_type}} {{type:flat_name}}__make_instance(object items) except *:
+{{#program:gen_py3_cython?}}
+    return _fbthrift_ctypes.{{type:flat_name}}__make_instance(items)
+{{/program:gen_py3_cython?}}
+{{^program:auto_migrate?}}{{#program:inplace_migrate?}}
+    return {{> types/current_module_types}}.{{type:flat_name}}__make_instance(items)
+{{/program:inplace_migrate?}}{{/program:auto_migrate?}}
+{{#program:auto_migrate?}}
+    {{> types/make_instance}}
+
+{{/program:auto_migrate?}}
+
+{{/program:containerTypes}}
+{{/program:gen_legacy_container_converters?}}

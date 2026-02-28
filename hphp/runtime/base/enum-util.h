@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#pragma once
+
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/base/typed-value.h"
 

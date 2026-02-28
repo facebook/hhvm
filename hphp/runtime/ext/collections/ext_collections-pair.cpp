@@ -8,13 +8,9 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/vm/native.h"
 
 namespace HPHP { namespace collections {
-/////////////////////////////////////////////////////////////////////////////
-
-const StaticString
-  s_HH_Pair("HH\\Pair"),
-  s_PairIterator("PairIterator");
 
 /////////////////////////////////////////////////////////////////////////////
 // PairIterator
@@ -23,7 +19,7 @@ static Variant HHVM_METHOD(PairIterator, current) {
   return Native::data<PairIterator>(this_)->current();
 }
 
-static Variant HHVM_METHOD(PairIterator, key) {
+static int64_t HHVM_METHOD(PairIterator, key) {
   return Native::data<PairIterator>(this_)->key();
 }
 
@@ -43,8 +39,6 @@ static void HHVM_METHOD(PairIterator, rewind) {
 // Pair
 }
 
-Class* c_Pair::s_cls;
-
 c_Pair::~c_Pair() {
   tvDecRefGen(&elm0);
   tvDecRefGen(&elm1);
@@ -62,14 +56,6 @@ int64_t c_Pair::linearSearch(const Variant& value) const {
 Array c_Pair::toPHPArrayImpl() const {
   return make_dict_array(0, tvAsCVarRef(&elm0),
                          1, tvAsCVarRef(&elm1));
-}
-
-Array c_Pair::toVArrayImpl() const {
-  return make_vec_array(tvAsCVarRef(&elm0), tvAsCVarRef(&elm1));
-}
-
-Array c_Pair::toDArrayImpl() const {
-  return make_dict_array(0, tvAsCVarRef(&elm0), 1, tvAsCVarRef(&elm1));
 }
 
 c_Pair* c_Pair::Clone(ObjectData* obj) {
@@ -121,25 +107,19 @@ Object c_Pair::getIterator() {
 namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 
-void CollectionsExtension::initPair() {
+void CollectionsExtension::registerNativePair() {
   HHVM_ME(PairIterator, current);
   HHVM_ME(PairIterator, key);
   HHVM_ME(PairIterator, valid);
   HHVM_ME(PairIterator, next);
   HHVM_ME(PairIterator, rewind);
 
-  Native::registerNativeDataInfo<PairIterator>(
-    s_PairIterator.get(),
-    Native::NDIFlags::NO_SWEEP
-  );
+  Native::registerNativeDataInfo<PairIterator>(Native::NDIFlags::NO_SWEEP);
 
   HHVM_NAMED_ME(HH\\Pair, values,         materialize<c_ImmVector>);
   HHVM_NAMED_ME(HH\\Pair, at,             &c_Pair::php_at);
   HHVM_NAMED_ME(HH\\Pair, get,            &c_Pair::php_get);
   HHVM_NAMED_ME(HH\\Pair, linearSearch,   &c_Pair::linearSearch);
-  HHVM_NAMED_ME(HH\\Pair, toVArray,       &c_Pair::toVArrayImpl);
-  HHVM_NAMED_ME(HH\\Pair, toDArray,       &c_Pair::toDArrayImpl);
-  HHVM_NAMED_ME(HH\\Pair, toValuesArray,  &c_Pair::toVArrayImpl);
   HHVM_NAMED_ME(HH\\Pair, getIterator,    &c_Pair::getIterator);
 
   HHVM_NAMED_ME(HH\\Pair, toVector,       materialize<c_Vector>);
@@ -149,14 +129,9 @@ void CollectionsExtension::initPair() {
   HHVM_NAMED_ME(HH\\Pair, toSet,          materialize<c_Set>);
   HHVM_NAMED_ME(HH\\Pair, toImmSet,       materialize<c_ImmSet>);
 
-  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_Pair);
+  Native::registerNativePropHandler<CollectionPropHandler>(c_Pair::className());
 
-  loadSystemlib("collections-pair");
-
-  c_Pair::s_cls = Class::lookup(s_HH_Pair.get());
-  assertx(c_Pair::s_cls);
-
-  finishClass<c_Pair>();
+  Native::registerClassExtraDataHandler(c_Pair::className(), finish_class<c_Pair>);
 }
 
 /////////////////////////////////////////////////////////////////////////////

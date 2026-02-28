@@ -4,12 +4,16 @@
 // LICENSE file in the "hack" directory of this source tree.
 use hhbc::Label;
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct LabelGen {
     next: Label,
 }
 
 impl LabelGen {
+    pub fn new() -> Self {
+        Self { next: Label::ZERO }
+    }
+
     pub fn next_regular(&mut self) -> Label {
         let curr = self.next;
         self.next.0 += 1;
@@ -17,6 +21,6 @@ impl LabelGen {
     }
 
     pub fn reset(&mut self) {
-        *self = Default::default();
+        *self = Self::new();
     }
 }

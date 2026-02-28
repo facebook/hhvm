@@ -2,11 +2,9 @@
 
 
 <<__EntryPoint>>
-function main_get_html_trans_table_bad() {
-$encodings = varray[
-  null,
+function main_get_html_trans_table_bad() :mixed{
+$encodings = vec[
   '',
-  5
 ];
 
 foreach ($encodings as $encoding) {

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 namespace {
   xhp class foo:bar extends XHPTest {}

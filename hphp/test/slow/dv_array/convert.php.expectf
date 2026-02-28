@@ -397,19 +397,19 @@ dict(2) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\varray) ==================
-Exception: Null to vec conversion
+Exception: Argument 1 passed to HH\varray() must implement interface HH\Traversable, null given
 ============== test_indirect (HH\varray) ==================
-Exception: Bool to vec conversion
+Exception: Argument 1 passed to HH\varray() must implement interface HH\Traversable, bool given
 ============== test_indirect (HH\varray) ==================
-Exception: Bool to vec conversion
+Exception: Argument 1 passed to HH\varray() must implement interface HH\Traversable, bool given
 ============== test_indirect (HH\varray) ==================
-Exception: String to vec conversion
+Exception: Argument 1 passed to HH\varray() must implement interface HH\Traversable, string given
 ============== test_indirect (HH\varray) ==================
-Exception: Int to vec conversion
+Exception: Argument 1 passed to HH\varray() must implement interface HH\Traversable, int given
 ============== test_indirect (HH\varray) ==================
-Exception: String to vec conversion
+Exception: Argument 1 passed to HH\varray() must implement interface HH\Traversable, string given
 ============== test_indirect (HH\varray) ==================
-Exception: Double to vec conversion
+Exception: Argument 1 passed to HH\varray() must implement interface HH\Traversable, float given
 ============== test_indirect (HH\varray) ==================
 vec(0) {
 }
@@ -472,9 +472,9 @@ vec(3) {
 bool(true)
 bool(false)
 ============== test_indirect (HH\varray) ==================
-Exception: Resource to vec conversion
+Exception: Argument 1 passed to HH\varray() must implement interface HH\Traversable, %SFile given
 ============== test_indirect (HH\varray) ==================
-Exception: Non-iterable object to vec conversion
+Exception: Argument 1 passed to HH\varray() must implement interface HH\Traversable, stdClass given
 ============== test_indirect (HH\varray) ==================
 vec(3) {
   string(3) "abc"
@@ -573,19 +573,19 @@ vec(2) {
 bool(true)
 bool(false)
 ============== test_indirect (HH\darray) ==================
-Exception: Null to dict conversion
+Exception: Argument 1 passed to HH\darray() must implement interface HH\KeyedTraversable, null given
 ============== test_indirect (HH\darray) ==================
-Exception: Bool to dict conversion
+Exception: Argument 1 passed to HH\darray() must implement interface HH\KeyedTraversable, bool given
 ============== test_indirect (HH\darray) ==================
-Exception: Bool to dict conversion
+Exception: Argument 1 passed to HH\darray() must implement interface HH\KeyedTraversable, bool given
 ============== test_indirect (HH\darray) ==================
-Exception: String to dict conversion
+Exception: Argument 1 passed to HH\darray() must implement interface HH\KeyedTraversable, string given
 ============== test_indirect (HH\darray) ==================
-Exception: Int to dict conversion
+Exception: Argument 1 passed to HH\darray() must implement interface HH\KeyedTraversable, int given
 ============== test_indirect (HH\darray) ==================
-Exception: String to dict conversion
+Exception: Argument 1 passed to HH\darray() must implement interface HH\KeyedTraversable, string given
 ============== test_indirect (HH\darray) ==================
-Exception: Double to dict conversion
+Exception: Argument 1 passed to HH\darray() must implement interface HH\KeyedTraversable, float given
 ============== test_indirect (HH\darray) ==================
 dict(0) {
 }
@@ -664,33 +664,15 @@ dict(3) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-Exception: Resource to dict conversion
+Exception: Argument 1 passed to HH\darray() must implement interface HH\KeyedTraversable, %SFile given
 ============== test_indirect (HH\darray) ==================
-Exception: Non-iterable object to dict conversion
+Exception: Argument 1 passed to HH\darray() must implement interface HH\KeyedTraversable, stdClass given
 ============== test_indirect (HH\darray) ==================
-dict(3) {
-  [100]=>
-  string(3) "abc"
-  [200]=>
-  string(3) "def"
-  [300]=>
-  string(3) "ghi"
-}
-bool(false)
-bool(true)
+Exception: Argument 1 passed to HH\darray() must implement interface HH\KeyedTraversable, IterableObj given
 ============== test_indirect (HH\darray) ==================
-Exception: ThrowIterableObj
+Exception: Argument 1 passed to HH\darray() must implement interface HH\KeyedTraversable, ThrowIterableObj given
 ============== test_indirect (HH\darray) ==================
-dict(3) {
-  [100]=>
-  string(3) "abc"
-  [200]=>
-  string(3) "def"
-  [300]=>
-  string(3) "ghi"
-}
-bool(false)
-bool(true)
+Exception: Argument 1 passed to HH\darray() must implement interface HH\KeyedTraversable, AggregateObj given
 ============== test_indirect (HH\darray) ==================
 dict(2) {
   [100]=>

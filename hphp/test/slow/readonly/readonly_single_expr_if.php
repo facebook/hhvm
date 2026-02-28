@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 <<file: __EnableUnstableFeatures('readonly')>>
 
 function is_empty<T>(T $container)[]: bool {

@@ -1,3 +1,0 @@
-#!/bin/sh
-
-exec echo '{"passed":true,"errors":[],"version":"mock"}'

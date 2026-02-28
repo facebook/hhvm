@@ -1,3 +1,3 @@
 <?hh
-function test() { async (): Blah<Foo> ==> {}; }
+function test() :mixed{ async (): Blah<Foo> ==> {}; }
 

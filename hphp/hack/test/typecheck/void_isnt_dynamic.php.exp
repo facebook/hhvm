@@ -1,4 +1,4 @@
-File "void_isnt_dynamic.php", line 3, characters 10-12:
+ERROR: File "void_isnt_dynamic.php", line 3, characters 10-12:
 Invalid return type (Typing[4336])
   File "void_isnt_dynamic.php", line 3, characters 17-23:
   Expected `dynamic`

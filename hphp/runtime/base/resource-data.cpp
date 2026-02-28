@@ -15,12 +15,6 @@
 */
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/variable-serializer.h"
-
-#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,7 +53,7 @@ String ResourceData::o_toString() const {
 }
 
 Array ResourceData::o_toArray() const {
-  return make_vec_array(Variant(Resource(const_cast<ResourceData*>(this))));
+  return make_vec_array(Variant(OptResource(const_cast<ResourceData*>(this))));
 }
 
 const StaticString s_Unknown("Unknown");

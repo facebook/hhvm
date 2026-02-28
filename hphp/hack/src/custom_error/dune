@@ -1,0 +1,53 @@
+(library
+ (name custom_error_types)
+ (wrapped false)
+ (preprocess
+  (pps ppx_deriving.std ppx_compare ppx_sexp_conv))
+ (modules
+   custom_error
+   custom_error_config
+   error_message
+   patt_binding_ty
+   patt_error
+   patt_file
+   patt_naming_error
+   patt_typing_error
+   patt_locl_ty
+   patt_name
+   patt_member_name
+   patt_string
+   patt_var
+   validation_err
+   )
+ (libraries
+  core_kernel
+  relative_path
+  name_context
+  )
+ (foreign_archives custom_error_config_ffi))
+
+(library
+ (name custom_error_config_ffi)
+ (modules)
+ (wrapped false)
+ (foreign_archives custom_error_config_ffi))
+
+(rule
+ (targets libcustom_error_config_ffi.a)
+ (deps
+  (source_tree %{workspace_root}/hack/src))
+ (locks /cargo)
+ (action
+  (run
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
+   custom_error_config_ffi
+   custom_error_config_ffi)))
+
+
+(library
+ (name custom_error_eval)
+ (wrapped false)
+ (preprocess
+  (pps ppx_compare ppx_sexp_conv))
+ (modules custom_error_eval)
+ (libraries core_kernel custom_error_types typing_defs_core typing_defs typing_error name_context naming_error))

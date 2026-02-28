@@ -1,12 +1,12 @@
-<?hh // partial
+<?hh
 
-<<__NativeData("SoapServer")>>
+<<__NativeData>>
 class SoapServer {
 
   <<__Native>>
   public function __construct(
     mixed $wsdl,
-    darray<string, mixed> $options = darray[],
+    darray<string, mixed> $options = dict[],
   ): void;
 
   /**
@@ -115,7 +115,7 @@ class SoapServer {
   public function addSoapHeader(mixed $fault): void;
 }
 
-<<__NativeData("SoapClient")>>
+<<__NativeData>>
 class SoapClient {
 
   // Clean out different kinds of arrays, recursively, from an input. For
@@ -154,14 +154,14 @@ class SoapClient {
   <<__Native>>
   public function __construct(
     mixed $wsdl,
-    darray<string, mixed> $options = darray[],
+    darray<string, mixed> $options = dict[],
   ): void;
 
   <<__Native>>
   private function soapcallImpl(
     string $name,
     varray<mixed> $args,
-    darray $options = darray[],
+    darray $options = dict[],
     mixed $input_headers = null,
   ): mixed;
 
@@ -172,17 +172,17 @@ class SoapClient {
   public function __soapcall(
     string $name,
     varray<mixed> $args,
-    darray $options = darray[],
+    darray $options = dict[],
     mixed $input_headers = null,
   ): mixed {
-    $args = self::cleanArrays($args, HH\array_mark_legacy(darray[]));
+    $args = self::cleanArrays($args, HH\array_mark_legacy(dict[]));
     $ret = $this->soapcallImpl(
       $name,
       varray($args),
       $options,
       $input_headers,
     );
-    return self::cleanArrays($ret, HH\array_mark_legacy(darray[]));
+    return self::cleanArrays($ret, HH\array_mark_legacy(dict[]));
   }
 
   <<__Native>>
@@ -226,6 +226,13 @@ class SoapClient {
  */
 class SoapVar {
 
+  public int $enc_type;
+  public mixed $enc_value;
+  public ?string $enc_stype;
+  public ?string $enc_ns;
+  public ?string $enc_name;
+  public ?string $enc_namens;
+
   <<__Native>>
   public function __construct(mixed $data,
                        mixed $type,
@@ -239,7 +246,7 @@ class SoapVar {
  * Represents parameter to a SOAP call.
  *
  */
-<<__NativeData("SoapParam")>>
+<<__NativeData>>
 class SoapParam {
 
   <<__Native>>
@@ -250,8 +257,13 @@ class SoapParam {
  * Represents a SOAP header.
  *
  */
-<<__NativeData("SoapHeader")>>
+<<__NativeData>>
 class SoapHeader {
+
+  public string $namespace;
+  public string $name;
+  public mixed $data;
+  public bool $mustUnderstand;
 
   <<__Native>>
   public function __construct(string $ns,

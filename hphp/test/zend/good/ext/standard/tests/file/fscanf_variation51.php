@@ -11,23 +11,23 @@
 echo "*** Test fscanf(): to read from a file opened in write only mode ***\n"; 
 
 // create a file
-$filename = __SystemLib\hphp_test_tmppath('fscanf_variation51.tmp');
+$filename = sys_get_temp_dir().'/'.'fscanf_variation51.tmp';
 $file_handle = fopen($filename, "w");
 if($file_handle == false)
   exit("Error:failed to open file $filename");
 //writing data to the file
-@fwrite($file_handle,"sample text\n");
+fwrite($file_handle,"sample text\n");
 
 //closing the file
 fclose($file_handle);
 
 // various formats
-$formats = varray[ "%d", "%f", "%e", "%u", " %s", "%x", "%o"];
+$formats = vec[ "%d", "%f", "%e", "%u", " %s", "%x", "%o"];
 
 $counter = 1;
 
 // various write only modes
-$modes = varray["w", "wb", "wt",
+$modes = vec["w", "wb", "wt",
                "a", "ab", "at",
                "x", "xb", "xt"
          ];

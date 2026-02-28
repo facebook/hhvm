@@ -6,31 +6,13 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Base (* using Hh_prelude would create a circular dependency *)
 
 exception Incorrect_format
 
-let soi = string_of_int
+let string_before s n = String.sub s ~pos:0 ~len:n
 
-let string_of_char = String.make 1
-
-let string_before s n = String.sub s 0 n
-
-let string_after s n = String.sub s n (String.length s - n)
-
-let string_starts_with long short =
-  try
-    let long = String.sub long 0 (String.length short) in
-    long = short
-  with
-  | Invalid_argument _ -> false
-
-let string_ends_with long short =
-  try
-    let len = String.length short in
-    let long = String.sub long (String.length long - len) len in
-    long = short
-  with
-  | Invalid_argument _ -> false
+let string_after s n = String.sub s ~pos:n ~len:(String.length s - n)
 
 (* Returns the index of the first occurrence of string `needle` in string
    `haystack`. If not found, returns -1.
@@ -40,19 +22,19 @@ let substring_index needle =
   (* see Wikipedia pseudocode *)
   let needle_len = String.length needle in
   if needle_len = 0 then raise (Invalid_argument needle);
-  let table = Array.make needle_len 0 in
+  let table = Array.create ~len:needle_len 0 in
   table.(0) <- -1;
   let pos = ref 2 and cnd = ref 0 in
   while !pos < needle_len do
-    if needle.[!pos - 1] = needle.[!cnd] then (
+    if Char.equal needle.[!pos - 1] needle.[!cnd] then (
       table.(!pos) <- !cnd + 1;
-      incr pos;
-      incr cnd
+      Int.incr pos;
+      Int.incr cnd
     ) else if !cnd > 0 then
       cnd := table.(!cnd)
     else (
       table.(!pos) <- 0;
-      incr pos
+      Int.incr pos
     )
   done;
   fun haystack ->
@@ -60,11 +42,11 @@ let substring_index needle =
     let p = ref 0 in
     let q = ref 0 in
     while !p < len && !q < needle_len do
-      if haystack.[!p] = needle.[!q] then (
-        incr p;
-        incr q
+      if Char.equal haystack.[!p] needle.[!q] then (
+        Int.incr p;
+        Int.incr q
       ) else if !q = 0 then
-        incr p
+        Int.incr p
       else
         q := table.(!q)
     done;
@@ -73,32 +55,30 @@ let substring_index needle =
     else
       -1
 
-let is_substring needle =
-  let substring_index_memo = substring_index needle in
-  (fun haystack -> substring_index_memo haystack >= 0)
-
 (* Return a copy of the string with prefixing string removed.
  * The function is a no-op if it s does not start with prefix.
  * Modeled after Python's string.lstrip.
  *)
 let lstrip s prefix =
   let prefix_length = String.length prefix in
-  if string_starts_with s prefix then
-    String.sub s prefix_length (String.length s - prefix_length)
+  if String.is_prefix s ~prefix then
+    String.sub s ~pos:prefix_length ~len:(String.length s - prefix_length)
   else
     s
 
 let rstrip s suffix =
   let result_length = String.length s - String.length suffix in
-  if string_ends_with s suffix then
-    String.sub s 0 result_length
+  if String.is_suffix s ~suffix then
+    String.sub s ~pos:0 ~len:result_length
   else
     s
 
 let rpartition s c =
-  let sep_idx = String.rindex s c in
-  let first = String.sub s 0 sep_idx in
-  let second = String.sub s (sep_idx + 1) (String.length s - sep_idx - 1) in
+  let sep_idx = String.rindex_exn s c in
+  let first = String.sub s ~pos:0 ~len:sep_idx in
+  let second =
+    String.sub s ~pos:(sep_idx + 1) ~len:(String.length s - sep_idx - 1)
+  in
   (first, second)
 
 (** If s is longer than length len, return a copy of s truncated to length len. *)
@@ -106,7 +86,7 @@ let truncate len s =
   if String.length s <= len then
     s
   else
-    String.sub s 0 len
+    String.sub s ~pos:0 ~len
 
 (** [index_not_from_opt str i chars] is like [index_from_opt], but returns the index of the first
     char in [str] after position [i] that is not in [chars] if it exists, or [None] otherwise. *)
@@ -114,7 +94,7 @@ let index_not_from_opt =
   let rec helper i len str chars =
     if i = len then
       None
-    else if not (String.contains chars str.[i]) then
+    else if not (String.mem chars str.[i]) then
       Some i
     else
       helper (i + 1) len str chars
@@ -125,47 +105,9 @@ let index_not_from_opt =
     [str] that is not in [chars] if it exists, or [None] otherwise. *)
 let index_not_opt str chars = index_not_from_opt str 0 chars
 
-(** [rindex_not_from_opt str i chars] is like [rindex_from_opt], but returns the index of the last
-    char in [str] before position [i+1] that is not in [chars] if it exists, or [None] otherwise. *)
-let rec rindex_not_from_opt str i chars =
-  if i < 0 then
-    None
-  else if not (String.contains chars str.[i]) then
-    Some i
-  else
-    rindex_not_from_opt str (i - 1) chars
-
-(** [rindex_not_opt str chars] is like [rindex_opt], but returns the index of the last char in
-    [str] that is not in [chars] if it exists, or [None] otherwise. *)
-let rindex_not_opt str chars =
-  rindex_not_from_opt str (String.length str - 1) chars
-
-let (zero_code, nine_code) = (Char.code '0', Char.code '9')
-
-let is_decimal_digit chr =
-  let code = Char.code chr in
-  zero_code <= code && code <= nine_code
-
-let is_lowercase_char =
-  let (a_code, z_code) = (Char.code 'a', Char.code 'z') in
-  fun chr ->
-    let code = Char.code chr in
-    a_code <= code && code <= z_code
-
-let rec is_not_lowercase str i j =
-  if is_lowercase_char str.[i] then
-    false
-  else if i = j then
-    true
-  else
-    is_not_lowercase str (i + 1) j
-
-(* String provides map and iter but not fold. It also is missing a char_list_of
- * function. Oh well. You can use fold to simulate anything you need, I suppose
- *)
 let fold_left ~f ~acc str =
   let acc = ref acc in
-  String.iter (fun c -> acc := f !acc c) str;
+  String.iter str ~f:(fun c -> acc := f !acc c);
   !acc
 
 let split c = Str.split (Str.regexp @@ Char.escaped c)
@@ -184,8 +126,8 @@ let split2_exn c s =
 (* Replaces all instances of the needle character with the replacement character
  *)
 let replace_char needle replacement =
-  String.map (fun c ->
-      if c = needle then
+  String.map ~f:(fun c ->
+      if Char.equal c needle then
         replacement
       else
         c)
@@ -202,9 +144,9 @@ let split_into_lines str =
     fold_left
       ~f:(fun (idx, (start, lines)) c ->
         (* For \r\n, we've already processed the newline *)
-        if c = '\n' && idx > 0 && str.[idx - 1] = '\r' then
+        if Char.equal c '\n' && idx > 0 && Char.equal str.[idx - 1] '\r' then
           (idx + 1, (idx + 1, lines))
-        else if c = '\n' || c = '\r' then
+        else if Char.equal c '\n' || Char.equal c '\r' then
           (idx + 1, (idx + 1, (start, idx - start) :: lines))
         else
           (idx + 1, (start, lines)))
@@ -212,22 +154,22 @@ let split_into_lines str =
       str
   in
   (* Reverses the list of start,len and turns them into strings *)
-  List.fold_left
-    (fun lines (start, len) -> String.sub str start len :: lines)
-    []
+  List.fold
     ((last_start, String.length str - last_start) :: lines)
+    ~init:[]
+    ~f:(fun lines (start, len) -> String.sub str ~pos:start ~len :: lines)
 
 (* Splits a string into lines, indents each non-empty line, and concats with newlines *)
 let indent indent_size str =
   let padding = String.make indent_size ' ' in
   str
   |> split_into_lines
-  |> List.map (fun str ->
-         if str = "" then
+  |> List.map ~f:(fun str ->
+         if String.equal str "" then
            ""
          else
            padding ^ str)
-  |> String.concat "\n"
+  |> String.concat ~sep:"\n"
 
 (* Splits a string into a list of strings using only "\n" as a delimiter.
  * If the string ends with a delimiter, an empty string representing the
@@ -253,8 +195,8 @@ module Internal = struct
 
   let of_list l =
     let s = Bytes.create (List.length l) in
-    List.iteri (Bytes.set s) l;
-    Bytes.unsafe_to_string s
+    List.iteri l ~f:(fun i c -> Bytes.set s i c);
+    Bytes.unsafe_to_string ~no_mutation_while_string_reachable:s
 end
 
 let to_list = Internal.to_list
@@ -262,7 +204,7 @@ let to_list = Internal.to_list
 let of_list = Internal.of_list
 
 module CharSet = struct
-  include Set.Make (Char)
+  include Stdlib.Set.Make (Stdlib.Char)
 
   let of_string str = of_list (Internal.to_list str)
 
@@ -271,12 +213,12 @@ end
 
 (* Levenshtein distance algorithm.
 
-Based on the public domain implementation at
-https://bitbucket.org/camlspotter/ocaml_levenshtein/src/default/
+   Based on the public domain implementation at
+   https://bitbucket.org/camlspotter/ocaml_levenshtein/src/default/
+*)
 
- *)
-
-let levenshtein_distance ?(upper_bound = max_int) (xs : string) (ys : string) =
+let levenshtein_distance
+    ?(upper_bound = Int.max_value) (xs : string) (ys : string) =
   let xs_len = String.length xs in
   let ys_len = String.length ys in
   let min3 (x : int) y z =
@@ -288,7 +230,9 @@ let levenshtein_distance ?(upper_bound = max_int) (xs : string) (ys : string) =
     in
     m' (m' x y) z
   in
-  let cache = Array.init (xs_len + 1) (fun _ -> Array.make (ys_len + 1) (-1)) in
+  let cache =
+    Array.init (xs_len + 1) ~f:(fun _ -> Array.create ~len:(ys_len + 1) (-1))
+  in
   let rec d i j =
     match (i, j) with
     | (0, _) -> j
@@ -304,7 +248,7 @@ let levenshtein_distance ?(upper_bound = max_int) (xs : string) (ys : string) =
           if upleft >= upper_bound then
             upper_bound
           else
-            let cost = abs (compare xs.[i'] ys.[j']) in
+            let cost = abs (Char.compare xs.[i'] ys.[j']) in
             let upleft' = upleft + cost in
             if upleft' >= upper_bound then
               upper_bound
@@ -318,3 +262,38 @@ let levenshtein_distance ?(upper_bound = max_int) (xs : string) (ys : string) =
   in
   let res = min (d xs_len ys_len) upper_bound in
   res
+
+let most_similar
+    ?max_edit_distance (name : string) (candidates : 'a list) (f : 'a -> string)
+    : 'a option =
+  (* Compare strings case-insensitively. *)
+  let name = String.lowercase name in
+  let f x = String.lowercase (f x) in
+
+  let max_distance =
+    match max_edit_distance with
+    | Some n -> n
+    | None -> Int.max_value
+  in
+  let upper_bound =
+    match max_edit_distance with
+    (* 10 was a pre-existing hard-coded upper bound "optimization"
+       Distances >= 10 are indistinguishable, so we may return a candidate
+       whose true edit distance exceeds 10 if no closer match exists.
+       Keeping so we don't change behavior
+    *)
+    | Some n -> min (n + 1) 10
+    | None -> 10
+  in
+  let distance = levenshtein_distance ~upper_bound in
+
+  fst
+    (List.fold
+       candidates
+       ~init:(None, Int.max_value)
+       ~f:(fun (best_candidate, best_d) candidate ->
+         let d = distance (f candidate) name in
+         if d < best_d && d <= max_distance then
+           (Some candidate, d)
+         else
+           (best_candidate, best_d)))

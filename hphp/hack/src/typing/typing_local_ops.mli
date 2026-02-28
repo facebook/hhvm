@@ -10,19 +10,11 @@ val check_assignment : Typing_env_types.env -> Tast.expr -> Typing_env_types.env
 
 val enforce_io : Pos.t -> Typing_env_types.env -> Typing_env_types.env
 
-val enforce_static_property_access :
-  Pos.t -> Typing_env_types.env -> Typing_env_types.env
-
 val enforce_memoize_object :
   Pos.t -> Typing_env_types.env -> Typing_env_types.env
-
-val enforce_mutable_static_variable :
-  ?msg:string -> Pos.t -> Typing_env_types.env -> Typing_env_types.env
 
 val enforce_enum_class_variant :
   Pos.t -> Typing_env_types.env -> Typing_env_types.env
 
 val check_unset_target :
-  Typing_env_types.env ->
-  (Ast_defs.param_kind * Tast.expr) list ->
-  Typing_env_types.env
+  Typing_env_types.env -> Tast.argument list -> Typing_env_types.env

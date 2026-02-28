@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_598() {
+function main_598() :mixed{
 $a = 't';
  $a = 10;
  $b = 9;

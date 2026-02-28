@@ -1,6 +1,6 @@
 <?hh
 function F()
-{
+:mixed{
     $a = "Hello ";
     return($a);
 }
@@ -10,7 +10,7 @@ abstract final class GStatics {
 }
 
 function G()
-{
+:mixed{
 
   echo GStatics::$myvar . " ";
   echo F();

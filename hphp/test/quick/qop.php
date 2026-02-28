@@ -1,11 +1,11 @@
 <?hh
 
-function id($x) {
+function id($x) :mixed{
   var_dump($x);
   return $x;
 }
 <<__EntryPoint>> function main(): void {
-$arr = varray[null, true, false, 0, 1, 0.0, 1.0, "", "foo", varray[], varray[1]];
+$arr = vec[null, true, false, 0, 1, 0.0, 1.0, "", "foo", vec[], vec[1]];
 
 for ($i = 0; $i < count($arr); ++$i) {
   $x = $arr[$i];

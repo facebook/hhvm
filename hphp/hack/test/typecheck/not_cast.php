@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,8 +9,8 @@
  *
  */
 
-const int object = 1;
+const int double = 1;
 
 function f(): void {
-  $a = (object) >> 1;
+  $a = (double) >> 1;
 }

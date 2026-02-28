@@ -3,51 +3,177 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::borrow::Cow;
+
 use crate::aast::*;
-use crate::ast_defs;
 use crate::pos::Pos;
-use std::{borrow::Cow, boxed::Box};
 
-impl<Ex, En> Program<Ex, En> {
-    pub fn as_slice(&self) -> &[Def<Ex, En>] {
-        self.0.as_slice()
-    }
-
-    pub fn iter(&self) -> std::slice::Iter<'_, Def<Ex, En>> {
-        self.0.iter()
-    }
-
-    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, Def<Ex, En>> {
-        self.0.iter_mut()
+macro_rules! vec_wrapper {
+    (<$($tparam:ident),* $(,)?> $ty:ty , $elem:ty) => {
+        impl<$($tparam,)*> $ty {
+            #[inline]
+            pub fn as_slice(&self) -> &[$elem] {
+                self.0.as_slice()
+            }
+            #[inline]
+            pub fn as_mut_slice(&mut self) -> &mut [$elem] {
+                self.0.as_mut_slice()
+            }
+            #[inline]
+            pub fn len(&self) -> usize {
+                self.0.len()
+            }
+            #[inline]
+            pub fn is_empty(&self) -> bool {
+                self.0.is_empty()
+            }
+            #[inline]
+            pub fn push(&mut self, stmt: $elem) {
+                self.0.push(stmt)
+            }
+            #[inline]
+            pub fn insert(&mut self, index: usize, stmt: $elem) {
+                self.0.insert(index, stmt)
+            }
+            #[inline]
+            pub fn drain<R>(&mut self, range: R) -> std::vec::Drain<'_, $elem>
+            where
+                R: std::ops::RangeBounds<usize>,
+            {
+                self.0.drain(range)
+            }
+            #[inline]
+            pub fn clear(&mut self) {
+                self.0.clear()
+            }
+            #[inline]
+            pub fn iter(&self) -> std::slice::Iter<'_, $elem> {
+                self.0.iter()
+            }
+            #[inline]
+            pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, $elem> {
+                self.0.iter_mut()
+            }
+        }
+        impl<$($tparam,)*> IntoIterator for $ty {
+            type Item = $elem;
+            type IntoIter = std::vec::IntoIter<$elem>;
+            #[inline]
+            fn into_iter(self) -> Self::IntoIter {
+                self.0.into_iter()
+            }
+        }
+        impl<'a, $($tparam,)*> IntoIterator for &'a $ty {
+            type Item = &'a $elem;
+            type IntoIter = std::slice::Iter<'a, $elem>;
+            #[inline]
+            fn into_iter(self) -> Self::IntoIter {
+                self.iter()
+            }
+        }
+        impl<'a, $($tparam,)*> IntoIterator for &'a mut $ty {
+            type Item = &'a mut $elem;
+            type IntoIter = std::slice::IterMut<'a, $elem>;
+            #[inline]
+            fn into_iter(self) -> Self::IntoIter {
+                self.iter_mut()
+            }
+        }
+        impl<$($tparam,)*> AsRef<[$elem]> for $ty {
+            #[inline]
+            fn as_ref(&self) -> &[$elem] {
+                self.as_slice()
+            }
+        }
+        impl<$($tparam,)*> AsMut<[$elem]> for $ty {
+            #[inline]
+            fn as_mut(&mut self) -> &mut [$elem] {
+                self.as_mut_slice()
+            }
+        }
+        impl<$($tparam,)*> std::borrow::Borrow<[$elem]> for $ty {
+            #[inline]
+            fn borrow(&self) -> &[$elem] {
+                self.as_slice()
+            }
+        }
+        impl<$($tparam,)*> std::borrow::BorrowMut<[$elem]> for $ty {
+            #[inline]
+            fn borrow_mut(&mut self) -> &mut [$elem] {
+                self.as_mut_slice()
+            }
+        }
+        impl<$($tparam,)*> std::ops::Deref for $ty {
+            type Target = [$elem];
+            #[inline]
+            fn deref(&self) -> &Self::Target {
+                self.as_slice()
+            }
+        }
+        impl<$($tparam,)*> std::ops::DerefMut for $ty {
+            #[inline]
+            fn deref_mut(&mut self) -> &mut Self::Target {
+                self.as_mut_slice()
+            }
+        }
+        impl<I, $($tparam,)*> std::ops::Index<I> for $ty
+        where I: std::slice::SliceIndex<[$elem]>
+        {
+            type Output = <I as std::slice::SliceIndex<[$elem]>>::Output;
+            #[inline]
+            fn index(&self, index: I) -> &Self::Output {
+                std::ops::Index::index(&self.0, index)
+            }
+        }
+        impl<I, $($tparam,)*> std::ops::IndexMut<I> for $ty
+        where I: std::slice::SliceIndex<[$elem]>
+        {
+            #[inline]
+            fn index_mut(&mut self, index: I) -> &mut Self::Output {
+                std::ops::IndexMut::index_mut(&mut self.0, index)
+            }
+        }
+        impl<$($tparam,)*> Default for $ty {
+            #[inline]
+            fn default() -> Self {
+                Self(Default::default())
+            }
+        }
+        impl<$($tparam,)*> From<Vec<$elem>> for $ty {
+            #[inline]
+            fn from(vec: Vec<$elem>) -> Self {
+                Self(vec)
+            }
+        }
+        impl<$($tparam,)*> From<$ty> for Vec<$elem> {
+            #[inline]
+            fn from(x: $ty) -> Vec<$elem> {
+                x.0
+            }
+        }
+        impl<$($tparam,)*> FromIterator<$elem> for $ty {
+            #[inline]
+            fn from_iter<I>(iter: I) -> Self
+            where I: IntoIterator<Item = $elem>
+            {
+                Self(Vec::from_iter(iter))
+            }
+        }
+        impl<$($tparam,)*> Extend<$elem> for $ty {
+            #[inline]
+            fn extend<T>(&mut self, iter: T)
+            where T: IntoIterator<Item = $elem>
+            {
+                self.0.extend(iter)
+            }
+        }
     }
 }
 
-impl<Ex, En> IntoIterator for Program<Ex, En> {
-    type Item = Def<Ex, En>;
-    type IntoIter = std::vec::IntoIter<Def<Ex, En>>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.0.into_iter()
-    }
-}
-
-impl<'a, Ex, En> IntoIterator for &'a Program<Ex, En> {
-    type Item = &'a Def<Ex, En>;
-    type IntoIter = std::slice::Iter<'a, Def<Ex, En>>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-
-impl<'a, Ex, En> IntoIterator for &'a mut Program<Ex, En> {
-    type Item = &'a mut Def<Ex, En>;
-    type IntoIter = std::slice::IterMut<'a, Def<Ex, En>>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter_mut()
-    }
-}
+vec_wrapper!(<Ex, En> Program<Ex, En>, Def<Ex, En>);
+vec_wrapper!(<Ex, En> Block<Ex, En>, Stmt<Ex, En>);
+vec_wrapper!(<Ex, En> FinallyBlock<Ex, En>, Stmt<Ex, En>);
+vec_wrapper!(<Ex, En> UserAttributes<Ex, En>, UserAttribute<Ex, En>);
 
 impl<Ex, En> Program<Ex, En> {
     pub fn defs(&self) -> DefsIterator<'_, Ex, En> {
@@ -56,6 +182,22 @@ impl<Ex, En> Program<Ex, En> {
             _ => self.iter(),
         };
         DefsIterator { stack: vec![iter] }
+    }
+
+    pub fn first_pos(&self) -> Option<&Pos> {
+        self.iter().find_map(|def| match def {
+            Def::Fun(fd) => Some(fd.name.pos()),
+            Def::Class(class) => Some(class.name.pos()),
+            Def::Stmt(stmt) => Some(&stmt.0),
+            Def::Typedef(td) => Some(td.name.pos()),
+            Def::Constant(gc) => Some(gc.name.pos()),
+            Def::Namespace(ns) => Some(ns.0.pos()),
+            Def::Module(md) => Some(md.name.pos()),
+            Def::SetModule(sid) => Some(sid.pos()),
+            Def::NamespaceUse(sids) => sids.first().map(|(_, sid, _)| sid.pos()),
+            Def::SetNamespaceEnv(..) => None,
+            Def::FileAttributes(fa) => fa.user_attributes.first().map(|ua| ua.name.pos()),
+        })
     }
 }
 
@@ -87,6 +229,7 @@ impl<'a, Ex, En> Iterator for DefsIterator<'a, Ex, En> {
                 Def::Namespace(defs) => self.stack.push(defs.1.iter()),
                 Def::Stmt(_)
                 | Def::Module(_)
+                | Def::SetModule(_)
                 | Def::NamespaceUse(_)
                 | Def::SetNamespaceEnv(_)
                 | Def::FileAttributes(_) => {}
@@ -105,18 +248,32 @@ impl<Ex, En> Stmt<Ex, En> {
     }
 
     pub fn is_assign_expr(&self) -> bool {
-        if let Some(Expr(_, _, Expr_::Binop(bop))) = &self.1.as_expr() {
-            if let (ast_defs::Bop::Eq(_), _, _) = bop.as_ref() {
-                return true;
-            }
+        if let Some(Expr(_, _, Expr_::Assign(_))) = &self.1.as_expr() {
+            return true;
         }
         false
+    }
+
+    pub fn is_null_expr(&self) -> bool {
+        matches!(&self.1.as_expr(), Some(Expr(_, _, Expr_::Null)))
+    }
+
+    pub fn is_declare_local_stmt(&self) -> bool {
+        if let Stmt(_, Stmt_::DeclareLocal(_)) = self {
+            true
+        } else {
+            false
+        }
     }
 }
 
 impl<Ex, En> Expr<Ex, En> {
     pub fn new(ex: Ex, pos: Pos, e: Expr_<Ex, En>) -> Self {
         Self(ex, pos, e)
+    }
+
+    pub fn pos(&self) -> &Pos {
+        &self.1
     }
 
     pub fn lvar_name(&self) -> Option<&str> {
@@ -135,9 +292,6 @@ impl<Ex, En> Expr<Ex, En> {
 }
 
 impl<En> Expr<(), En> {
-    pub fn pos(&self) -> &Pos {
-        &self.1
-    }
     pub fn mk_lvar(p: &Pos, n: &str) -> Self {
         Self::new(
             (),
@@ -146,7 +300,7 @@ impl<En> Expr<(), En> {
         )
     }
 
-    pub fn as_class_get(&self) -> Option<(&ClassId<(), En>, &ClassGetExpr<(), En>, &PropOrMethod)> {
+    pub fn as_class_get(&self) -> Option<(&ClassId<(), En>, &Pstring, &PropOrMethod)> {
         self.2.as_class_get()
     }
 
@@ -196,7 +350,7 @@ impl<Hi> TypeHint<Hi> {
 // This wrapper constructor can avoid other crates (HackNative, etc)
 // depends on ocamlrep.
 pub fn new_nsenv(env: crate::namespace_env::Env) -> Nsenv {
-    ocamlrep::rc::RcOc::new(env)
+    std::sync::Arc::new(env)
 }
 
 impl<Ex, En> Afield<Ex, En> {

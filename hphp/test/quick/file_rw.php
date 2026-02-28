@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-  $fname = __SystemLib\hphp_test_tmppath('data');
+  $fname = sys_get_temp_dir().'/'.'data';
   $w = fopen($fname, "w");
   $r = fopen($fname, "r");
   printf("Read %d bytes\n", strlen(fread($r, 10)));

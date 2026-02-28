@@ -1,7 +1,7 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-function check(mixed $arg, string $descr) {
+function check(mixed $arg, string $descr) :mixed{
   printf(
     "is_dict_or_darray(%s) = %s\n",
     $descr,
@@ -15,10 +15,8 @@ function main(): void {
     tuple(null, 'null'),
     tuple("abc", '"abc"'),
 
-    tuple(varray[1, 2, 3],  'varray[1, 2, 3]'),
     tuple(vec[1, 2, 3],  'vec[1, 2, 3]'),
 
-    tuple(darray["a" => "a"], 'darray["a" => "a"]'),
     tuple(dict["a" => "a"], 'dict["a" => "a"]'),
 
     tuple(keyset[1, 2, 3], 'keyset[1, 2, 3]'),

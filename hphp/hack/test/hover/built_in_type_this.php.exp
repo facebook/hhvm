@@ -1,4 +1,5 @@
 this
+---
 `this` represents the current class.
 
 `this` refers to the type of the current instance at runtime. In a child class, `this` refers to the child class, even if the method is defined in the parent.

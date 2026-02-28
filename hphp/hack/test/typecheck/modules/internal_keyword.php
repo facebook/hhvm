@@ -1,16 +1,25 @@
-//// file1.php
+//// modules.php
 <?hh
-<<file:__EnableUnstableFeatures("modules"), __Module("foo")>>
-module foo {}
+
+
+new module foo {}
+
+//// test.php
+<?hh
+
+module foo;
 class Foo {
   internal function bar(): void {}
 }
+public interface IFoo {
+  public function bar(): void;
+}
 
-internal class FooInternal extends Foo {
+internal class FooInternal extends Foo implements IFoo {
   public function bar(): void {} // ok
 }
 
-trait TFoo {
+internal trait TFoo {
   internal function bar(): void {}
 }
 internal function foo_internal(): void {}
@@ -21,5 +30,7 @@ function test(FooInternal $y): void { // error on typehint
   $x = new Foo(); // ok
   foo_internal(); // error
   $x->bar(); // error
-  $y->bar(); // ok
+  // The following two are both fine at runtime
+  $y->bar(); // error when $y is a FooInternal: $y is opaque
+  ($y as IFoo)->bar(); // ok since $y is now a known type
 }

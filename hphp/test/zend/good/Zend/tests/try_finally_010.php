@@ -1,8 +1,8 @@
 <?hh
-function foo() {
+function foo() :mixed{
     echo "4";
 }
-function bar() {
+function bar() :mixed{
     try {
         echo "2";
         throw new Exception();

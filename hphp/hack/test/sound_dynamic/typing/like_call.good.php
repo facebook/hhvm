@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('like_type_hints')>>
 
 <<__SupportDynamicType>>
 class C { public function p() : bool { return true; } }
@@ -9,7 +10,7 @@ class D<-T> {
 }
 
 <<__SupportDynamicType>>
-function my_plambda<Tv as dynamic>(
+function my_plambda<Tv as supportdyn<mixed>>(
   ~(function(Tv):bool) $lambda,
 ): ~D<Tv> {
   return new D();

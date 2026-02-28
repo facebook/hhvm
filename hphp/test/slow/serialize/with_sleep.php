@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $a = new A;
   $a->e = 1;
   $s = serialize($a);
@@ -11,12 +11,12 @@ class A {
   public $b;
   protected $c;
   private $d;
-  public function __sleep() {
-    return varray['b', 'c', 'd'];
+  public function __sleep() :mixed{
+    return vec['b', 'c', 'd'];
   }
 }
 
 <<__EntryPoint>>
-function main_with_sleep() {
+function main_with_sleep() :mixed{
 main();
 }

@@ -35,7 +35,7 @@ class C {}
 
 let errors =
   {|
-File "/A.php", line 6, characters 31-31:
+ERROR: File "/A.php", line 6, characters 31-31:
 Unbound name: `C` (Naming[2049])
 |}
 
@@ -52,12 +52,8 @@ allowed_decl_fixme_codes = 4336,4422
 let test () =
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   TestDisk.set hhconfig_filename hhconfig_contents;
-  let hhconfig_path =
-    Relative_path.create Relative_path.Root hhconfig_filename
-  in
-  let options = ServerArgs.default_options ~root in
   let (custom_config, _) =
-    ServerConfig.load ~silent:false hhconfig_path options
+    ServerConfig.load ~silent:false ~from:"" ~cli_config_overrides:[]
   in
   let env = Test.setup_server ~custom_config () in
   let env =
@@ -65,7 +61,7 @@ let test () =
       env
       [(a_file_name, a_contents); (b_file_name, b_contents); (c_file_name, "")]
   in
-  Test.assert_env_errors env errors;
+  Test.assert_env_diagnostics env errors;
 
   let (env, _) =
     Test.(
@@ -73,5 +69,5 @@ let test () =
         env
         { default_loop_input with disk_changes = [(c_file_name, c_contents)] })
   in
-  Test.assert_no_errors env;
+  Test.assert_no_diagnostics env;
   ()

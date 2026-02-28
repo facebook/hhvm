@@ -18,11 +18,7 @@
 
 #include "hphp/runtime/base/type-string.h"
 
-#ifdef _MSC_VER
-#include "hphp/util/process.h"
-#else
 #include "hphp/util/light-process.h"
-#endif
 
 namespace HPHP {
 
@@ -33,22 +29,15 @@ Pipe::Pipe() {
 }
 
 Pipe::~Pipe() {
-  closeImpl();
+  Pipe::close();
 }
 
 bool Pipe::open(const String& filename, const String& mode) {
   assertx(m_stream == nullptr);
   assertx(getFd() == -1);
 
-#ifdef _MSC_VER
-  auto old_cwd = Process::GetCurrentDirectory();
-  chdir(g_context->getCwd().data());
-  FILE* f = _popen(filename.data(), mode.data());
-  chdir(old_cwd.c_str());
-#else
   FILE *f = LightProcess::popen(filename.data(), mode.data(),
                                 g_context->getCwd().data());
-#endif
   if (!f) {
     return false;
   }
@@ -57,27 +46,20 @@ bool Pipe::open(const String& filename, const String& mode) {
   return true;
 }
 
-bool Pipe::close() {
-  return closeImpl();
-}
-
-bool Pipe::closeImpl() {
+bool Pipe::close(int* raw_pclose_return) {
   bool ret = true;
-  *s_pcloseRet = 0;
   if (valid() && !isClosed()) {
     assertx(m_stream);
-#ifdef _MSC_VER
-    int pcloseRet = _pclose(m_stream);
-#else
     int pcloseRet = LightProcess::pclose(m_stream);
     if (WIFEXITED(pcloseRet)) pcloseRet = WEXITSTATUS(pcloseRet);
-#endif
-    *s_pcloseRet = pcloseRet;
+    if (raw_pclose_return) *raw_pclose_return = pcloseRet;
     ret = (pcloseRet == 0);
     setIsClosed(true);
     m_stream = nullptr;
+  } else if (raw_pclose_return) {
+    *raw_pclose_return = 0;
   }
-  File::closeImpl();
+  File::close();
   return ret;
 }
 

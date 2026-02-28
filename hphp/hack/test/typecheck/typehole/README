@@ -13,3 +13,7 @@ If any of these tests start "failing" with an error, it's likely that
 the type hole has been fixed. Please move the file to the main
 typecheck directory or an appropriate subdirectory, and check that the
 error makes sense.
+
+The subdirectory typehole_trusted contains a subcategory of type holes whose tasks
+have been tagged with "typehole-trusted". These are "trusted types" holes that can
+make Hack believe that a value has some type when at runtime it has another type.

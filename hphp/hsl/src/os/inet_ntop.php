@@ -37,7 +37,6 @@ function inet_ntop_inet6(in6_addr $addr): string {
   return \inet_ntop($addr as string);
 }
 
-
 /** Convert an INET or INET6 address to presentation format.
  *
  * See `man inet_ntop`
@@ -53,17 +52,11 @@ function inet_ntop(AddressFamily $af, dynamic $addr): string {
   switch ($af) {
     case AddressFamily::AF_INET:
       if (!$addr is int) {
-        _OS\throw_errno(
-          Errno::EINVAL,
-          "AF_INET address must be an int",
-        );
+        _OS\throw_errno(Errno::EINVAL, "AF_INET address must be an int");
       }
       // NetLongs are always uint32
       if ($addr < 0 || $addr >= (1 << 32)) {
-        _OS\throw_errno(
-          Errno::EINVAL,
-          "AF_INET address must fit in a uint32",
-        );
+        _OS\throw_errno(Errno::EINVAL, "AF_INET address must fit in a uint32");
       }
       return inet_ntop_inet($addr);
     case AddressFamily::AF_INET6:
@@ -75,7 +68,7 @@ function inet_ntop(AddressFamily $af, dynamic $addr): string {
       ) {
         _OS\throw_errno(Errno::EINVAL, "AF_INET6 address must be an in6_addr");
       }
-      return inet_ntop_inet6(_OS\string_as_in6_addr_UNSAFE($addr as string));
+      return inet_ntop_inet6(_OS\string_as_in6_addr_UNSAFE($addr));
     default:
       _OS\throw_errno(Errno::EAFNOSUPPORT, 'inet_ntop()');
   }

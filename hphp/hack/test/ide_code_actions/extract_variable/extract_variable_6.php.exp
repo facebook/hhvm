@@ -1,0 +1,31 @@
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: "refactor") SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"$${0:placeholder0} = 1 * 2;\n  $x = /*range-start*/$${0:placeholder0}/*range-end*/ + 3;",
+          "range":{"end":{"character":45,"line":3},"start":{"character":2,"line":3}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into variable"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+function main(string $placeholder_): void {
+  $${0:placeholder0} = 1 * 2;
+  $x = /*range-start*/$${0:placeholder0}/*range-end*/ + 3;
+}
+

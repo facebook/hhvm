@@ -3,7 +3,7 @@
 class A {
   public $a = 1;
   private $b = "hello";
-  protected $c = varray[1, 2];
+  protected $c = vec[1, 2];
 }
 
 class B extends A {
@@ -18,12 +18,12 @@ class C {
     $this->c = log(0.0);
     echo "C has a safe constructor.\n";
   }
-  function __wakeup() {
+  function __wakeup() :mixed{
     echo "C wakes up safely.\n";
   }
-  function __sleep() {
+  function __sleep() :mixed{
     echo "C sleeps safely.\n";
-    return varray['a', 'b', 'c'];
+    return vec['a', 'b', 'c'];
   }
 }
 
@@ -32,12 +32,12 @@ class DangerousClass {
   function __construct() {
     echo "I have dangerous constructor.\n";
   }
-  function __wakeup() {
+  function __wakeup() :mixed{
     echo "I wake up dangerously.\n";
   }
-  function __sleep() {
+  function __sleep() :mixed{
     echo "I sleep dangerously.\n";
-    return varray['danger'];
+    return vec['danger'];
   }
 }
 
@@ -49,10 +49,10 @@ class E {
 }
 
 class F implements Serializable {
-  public function serialize() {
+  public function serialize() :mixed{
     return "SerializedData";
   }
-  public function unserialize($serialized) {
+  public function unserialize($serialized) :mixed{
     echo "unserialize: $serialized\n";
     return $this;
   }
@@ -61,7 +61,7 @@ class F implements Serializable {
 class G extends DangerousClass {
 }
 
-function test_serialization($obj, $class_whitelist) {
+function test_serialization($obj, $class_whitelist) :mixed{
   $str = serialize($obj);
   var_dump($str);
   $new_obj = unserialize($str, darray($class_whitelist));
@@ -72,17 +72,17 @@ function test_serialization($obj, $class_whitelist) {
 }
 
 <<__EntryPoint>> function main(): void {
-  test_serialization(new A, varray[]);
-  test_serialization(new B, varray['A', 'B']);
-  test_serialization(new C, varray['C']);
-  test_serialization(new DangerousClass, varray[]);
-  test_serialization(new E, varray['E']);
-  test_serialization(new F, varray['F']);
-  test_serialization(new G, varray['G']);
-  test_serialization(varray["Hello World<>$%", acos(1.01), log(0.0), 50], varray[]);
+  test_serialization(new A, vec[]);
+  test_serialization(new B, vec['A', 'B']);
+  test_serialization(new C, vec['C']);
+  test_serialization(new DangerousClass, vec[]);
+  test_serialization(new E, vec['E']);
+  test_serialization(new F, vec['F']);
+  test_serialization(new G, vec['G']);
+  test_serialization(vec["Hello World<>$%", acos(1.01), log(0.0), 50], vec[]);
   test_serialization(
-    varray[ new A, varray[new B, varray[new C, varray[new E, varray[new F]]]]],
-    darray[
+    vec[ new A, vec[new B, vec[new C, vec[new E, vec[new F]]]]],
+    dict[
       'abc' => 'A',
       5 => 'C',
       6 => 'E',

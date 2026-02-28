@@ -18,13 +18,13 @@
 
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-key-types.h"
 #include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/hash-table.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-layout.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/vanilla-dict-keys.h"
 
 #include <folly/portability/Constexpr.h>
 
@@ -44,7 +44,7 @@ struct VanillaDictElm {
   // We store values here, but also some information local to this array:
   // data.m_aux.u_hash contains either a negative number (for an int key) or
   // a string hashcode (31-bit and thus non-negative); the high bit is the
-  // int/string key descriminator. data.m_type == kInvalidDataType if this is
+  // int/string key discriminator. data.m_type == kInvalidDataType if this is
   // an empty slot in the array (e.g. after a key is deleted).  It is
   // critical that when we return &data to clients, that they not read or
   // write the m_aux field!
@@ -211,14 +211,14 @@ private:
 public:
   static constexpr size_t kKeyTypesOffset = offsetof(ArrayData, m_extra_lo8);
 
-  const VanillaDictKeys& keyTypes() const {
+  const ArrayKeyTypes& keyTypes() const {
     auto const pointer = uintptr_t(this) + kKeyTypesOffset;
-    return *reinterpret_cast<VanillaDictKeys*>(pointer);
+    return *reinterpret_cast<ArrayKeyTypes*>(pointer);
   }
 
-  VanillaDictKeys* mutableKeyTypes() {
+  ArrayKeyTypes* mutableKeyTypes() {
     auto const pointer = uintptr_t(this) + kKeyTypesOffset;
-    return reinterpret_cast<VanillaDictKeys*>(pointer);
+    return reinterpret_cast<ArrayKeyTypes*>(pointer);
   }
 
 public:
@@ -254,7 +254,7 @@ public:
   static ArrayData* MakeUncounted(
       ArrayData* array, const MakeUncountedEnv& env, bool hasApcTv);
 
-  static ArrayData* MakeDictFromAPC(const APCArray* apc, bool isLegacy = false);
+  static ArrayData* MakeDictFromAPC(const APCArray* apc, bool pure, bool isLegacy = false);
 
   static bool DictEqual(const ArrayData*, const ArrayData*);
   static bool DictNotEqual(const ArrayData*, const ArrayData*);
@@ -297,6 +297,7 @@ public:
   static bool ExistsStr(const ArrayData*, const StringData* k);
   static arr_lval LvalInt(ArrayData* ad, int64_t k);
   static arr_lval LvalStr(ArrayData* ad, StringData* k);
+  static ArrayData* SetPosMove(ArrayData*, ssize_t pos, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
   static ArrayData* SetIntMoveSkipConflict(ArrayData* ad, int64_t k, TypedValue v);
@@ -306,10 +307,8 @@ public:
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* AppendMove(ArrayData*, TypedValue v);
-  static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* PopMove(ArrayData*, Variant& value);
 
-  static ArrayData* Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);
   static void ReleaseUncounted(ArrayData*);
@@ -352,16 +351,7 @@ private:
   static bool DictEqualHelper(const ArrayData*, const ArrayData*, bool);
 
 public:
-
-  uint32_t iterLimit() const { return m_used; }
-
-  // Fetch a value and optional key (if keyPos != nullptr), given an
-  // iterator pos.  Get the value cell, and initialize keyOut.
-  void getArrayElm(ssize_t pos, TypedValue* out, TypedValue* keyOut) const;
-  void getArrayElm(ssize_t pos, TypedValue* out) const;
-
   const TypedValue* getArrayElmPtr(ssize_t pos) const;
-  TypedValue getArrayElmKey(ssize_t pos) const;
 
   bool isTombstone(ssize_t pos) const;
   // Elm's data.m_type == kInvalidDataType for deleted slots.
@@ -427,9 +417,6 @@ public:
   }
 
 private:
-  static TypedValue getElmKey(const Elm& e);
-
-private:
   enum class AllocMode : bool { Request, Static };
 
   static VanillaDict* CopyMixed(const VanillaDict& other, AllocMode);
@@ -462,8 +449,6 @@ private:
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort(bool resetKeys);
 
-  static ArrayData* ArrayMergeGeneric(VanillaDict*, const ArrayData*);
-
   // Assert a bunch of invariants about this array then return true.
   // usage:  assertx(checkInvariants());
   bool checkInvariants() const;
@@ -481,7 +466,6 @@ private:
 
   using HashTable<VanillaDict, VanillaDictElm>::findForRemove;
 
-  template <bool Move>
   void nextInsert(TypedValue);
 
   template <class K> arr_lval addLvalImpl(K k);
@@ -511,7 +495,7 @@ private:
    * for elements. compact() rebuilds the hash table and compacts the
    * elements into the slots with lower addresses.
    */
-  void compact(bool renumber = false);
+  void compact();
 
   bool isZombie() const { return m_used + 1 == 0; }
   void setZombie() { m_used = -uint32_t{1}; }

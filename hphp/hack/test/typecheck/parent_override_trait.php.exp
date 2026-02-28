@@ -1,1 +1,14 @@
-No errors
+ERROR: File "parent_override_trait.php", line 11, characters 7-8:
+Constant FOO1 is defined concretely in multiple ancestors (Typing[4374])
+  File "parent_override_trait.php", line 8, characters 9-12:
+  One conflicting definition is here
+  File "parent_override_trait.php", line 4, characters 9-12:
+  Another conflicting definition is here
+ERROR: File "parent_override_trait.php", line 11, characters 18-19:
+Some members in class `A1` are incompatible with those declared in type `B1` (Typing[4374])
+  File "parent_override_trait.php", line 4, characters 9-12:
+  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
+  File "parent_override_trait.php", line 8, characters 9-12:
+  `FOO1` inherited from `B1`
+  File "parent_override_trait.php", line 4, characters 9-12:
+  conflicts with constant `FOO1` inherited from `T1`.

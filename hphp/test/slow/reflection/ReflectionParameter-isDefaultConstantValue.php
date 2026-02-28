@@ -16,7 +16,7 @@ function burp(string $s = A::CLASS_CONST): void {}
 
 const MY_CONSTANT = 4;
 <<__EntryPoint>>
-function main_reflection_parameter_is_default_constant_value() {
+function main_reflection_parameter_is_default_constant_value() :mixed{
 
 $f = new \ReflectionFunction('foo');
 foreach ($f->getParameters() as $i => $param) {

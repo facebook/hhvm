@@ -19,19 +19,17 @@
 #include <limits>
 #include <algorithm>
 
-#include <folly/CPortability.h>
-#include <folly/ScopeGuard.h>
-#include <folly/tracing/StaticTracepoint.h>
+#include <usdt/usdt.h>
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/double-to-int64.h"
-#include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
-#include "hphp/util/overflow.h"
+
+#include "hphp/util/configs/eval.h"
 
 namespace HPHP {
 
@@ -110,17 +108,6 @@ TypedValue tvArith(Op o, TypedValue c1, TypedValue c2) {
   return tvIsInt(c2)
     ? o(c1.m_data.dbl, c2.m_data.num)
     : o(c1.m_data.dbl, c2.m_data.dbl);
-}
-
-// Check is the function that checks for overflow, Over is the function that
-// returns the overflowed value.
-template<class Op, class Check, class Over>
-TypedValue tvArithO(Op o, Check ck, Over ov, TypedValue c1, TypedValue c2) {
-  check_numeric(c1, c2);
-  int64_t a = c1.m_data.num;
-  int64_t b = c2.m_data.num;
-
-  return (tvIsInt(c1) && tvIsInt(c2) && ck(a,b)) ? ov(a,b) : tvArith(o, c1, c2);
 }
 
 /*
@@ -220,11 +207,26 @@ StringData* stringBitOp(BitOp bop, SzOp sop, StringData* s1, StringData* s2) {
   return newStr;
 }
 
+void raiseBitwiseOpInvalidType() {
+  switch (Cfg::Eval::WarnOnBitwiseOpInvalidType) {
+    case 0:
+      break;
+    case 1:
+      raise_warning("Deprecated operand type (string) for bitwise operation");
+      break;
+    case 2:
+      raise_error("Unsupported operand type (string) for bitwise operation");
+    default:
+      always_assert(false);
+  }
+}
+
 template<template<class> class BitOp, class StrLenOp>
 TypedValue tvBitOp(StrLenOp strLenOp, TypedValue c1, TypedValue c2) {
   assertx(tvIsPlausible(c1));
   assertx(tvIsPlausible(c2));
   if (isStringType(c1.m_type) && isStringType(c2.m_type)) {
+    raiseBitwiseOpInvalidType();
     return make_tv<KindOfString>(
       stringBitOp(
         BitOp<char>(),
@@ -259,7 +261,7 @@ void stringIncDecOp(Op op, tv_lval cell, StringData* sd) {
 }
 
 void raiseIncDecInvalidType(tv_lval cell) {
-  switch (RuntimeOption::EvalWarnOnIncDecInvalidType) {
+  switch (Cfg::Eval::WarnOnIncDecInvalidType) {
     case 0:
       break;
     case 1:
@@ -269,7 +271,6 @@ void raiseIncDecInvalidType(tv_lval cell) {
     case 2:
       raise_error("Unsupported operand type (%s) for IncDec",
                   describe_actual_type(cell).c_str());
-      // fallthrough
     default:
       always_assert(false);
   }
@@ -290,6 +291,7 @@ template<class Op>
 void tvIncDecOp(Op op, tv_lval cell) {
   assertx(tvIsPlausible(*cell));
 
+  auto const source = "increment op";
   switch (type(cell)) {
     case KindOfUninit:
     case KindOfNull:
@@ -312,14 +314,14 @@ void tvIncDecOp(Op op, tv_lval cell) {
 
     case KindOfClass: {
       raiseIncDecInvalidType(cell);
-      auto s = classToStringHelper(val(cell).pclass);
+      auto s = classToStringHelper(val(cell).pclass, source);
       stringIncDecOp(op, cell, const_cast<StringData*>(s));
       return;
     }
 
     case KindOfLazyClass: {
       raiseIncDecInvalidType(cell);
-      auto s = lazyClassToStringHelper(val(cell).plazyclass);
+      auto s = lazyClassToStringHelper(val(cell).plazyclass, source);
       stringIncDecOp(op, cell, const_cast<StringData*>(s));
       return;
     }
@@ -342,6 +344,7 @@ void tvIncDecOp(Op op, tv_lval cell) {
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRFunc:
+    case KindOfEnumClassLabel:
       raiseIncDecInvalidType(cell);
       return;
   }
@@ -351,7 +354,11 @@ void tvIncDecOp(Op op, tv_lval cell) {
 const StaticString s_1("1");
 
 
-struct IncBase {
+struct Inc {
+  void intCase(tv_lval cell) const {
+    auto& n = val(cell).num;
+    n = add_ignore_overflow(n, 1);
+  }
   void dblCase(tv_lval cell) const { ++val(cell).dbl; }
   void nullCase(tv_lval cell) const {
     throwIncDecBadTypeException("null");
@@ -375,45 +382,15 @@ struct IncBase {
   }
 };
 
-struct Inc : IncBase {
-  void intCase(tv_lval cell) const {
-    auto& n = val(cell).num;
-    n = add_ignore_overflow(n, 1);
-  }
-};
-
-struct IncO : IncBase {
-  void intCase(tv_lval cell) const {
-    if (add_overflow(val(cell).num, int64_t{1})) {
-      tvCopy(tvAddO(*cell, make_int(1)), cell);
-    } else {
-      Inc().intCase(cell);
-    }
-  }
-};
-
-struct DecBase {
-  void dblCase(tv_lval cell) { --val(cell).dbl; }
-  void nullCase(tv_lval) const {}
-  void nonNumericString(tv_lval cell) const {
-    raise_notice("Decrement on string '%s'", val(cell).pstr->data());
-  }
-};
-
-struct Dec : DecBase {
+struct Dec {
   void intCase(tv_lval cell) {
     auto& n = val(cell).num;
     n = sub_ignore_overflow(n, 1);
   }
-};
-
-struct DecO : DecBase {
-  void intCase(tv_lval cell) {
-    if (sub_overflow(val(cell).num, int64_t{1})) {
-      tvCopy(tvSubO(*cell, make_int(1)), cell);
-    } else {
-      Dec().intCase(cell);
-    }
+  void dblCase(tv_lval cell) { --val(cell).dbl; }
+  void nullCase(tv_lval) const {}
+  void nonNumericString(tv_lval cell) const {
+    raise_notice("Decrement on string '%s'", val(cell).pstr->data());
   }
 };
 
@@ -425,48 +402,12 @@ TypedValue tvAdd(TypedValue c1, TypedValue c2) {
   return tvArith(Add(), c1, c2);
 }
 
-TypedNum tvSub(TypedValue c1, TypedValue c2) {
+TypedValue tvSub(TypedValue c1, TypedValue c2) {
   return tvArith(Sub(), c1, c2);
 }
 
-TypedNum tvMul(TypedValue c1, TypedValue c2) {
+TypedValue tvMul(TypedValue c1, TypedValue c2) {
   return tvArith(Mul(), c1, c2);
-}
-
-TypedValue tvAddO(TypedValue c1, TypedValue c2) {
-  auto over = [](int64_t a, int64_t b) {
-    if (RuntimeOption::CheckIntOverflow > 1) {
-      SystemLib::throwArithmeticErrorObject(Strings::INTEGER_OVERFLOW);
-    } else if (RuntimeOption::CheckIntOverflow == 1) {
-      raise_warning(Strings::INTEGER_OVERFLOW);
-    }
-    return make_int(a + b);
-  };
-  return tvArithO(Add(), add_overflow<int64_t>, over, c1, c2);
-}
-
-TypedNum tvSubO(TypedValue c1, TypedValue c2) {
-  auto over = [](int64_t a, int64_t b) {
-    if (RuntimeOption::CheckIntOverflow > 1) {
-      SystemLib::throwArithmeticErrorObject(Strings::INTEGER_OVERFLOW);
-    } else if (RuntimeOption::CheckIntOverflow == 1) {
-      raise_warning(Strings::INTEGER_OVERFLOW);
-    }
-    return make_int(a - b);
-  };
-  return tvArithO(Sub(), sub_overflow<int64_t>, over, c1, c2);
-}
-
-TypedNum tvMulO(TypedValue c1, TypedValue c2) {
-  auto over = [](int64_t a, int64_t b) {
-    if (RuntimeOption::CheckIntOverflow > 1) {
-      SystemLib::throwArithmeticErrorObject(Strings::INTEGER_OVERFLOW);
-    } else if (RuntimeOption::CheckIntOverflow == 1) {
-      raise_warning(Strings::INTEGER_OVERFLOW);
-    }
-    return make_int(a * b);
-  };
-  return tvArithO(Mul(), mul_overflow<int64_t>, over, c1, c2);
 }
 
 TypedValue tvDiv(TypedValue c1, TypedValue c2) {
@@ -509,6 +450,14 @@ TypedValue tvBitXor(TypedValue c1, TypedValue c2) {
   );
 }
 
+StringData* strBitXor(StringData* s1, StringData* s2) {
+  return stringBitOp(
+    std::bit_xor<char>(),
+    [] (uint32_t a, uint32_t b) { return std::min(a, b); },
+    s1, s2
+  );
+}
+
 TypedValue tvShl(TypedValue c1, TypedValue c2) {
   if (!tvIsInt(c1) || !tvIsInt(c2)) throwBitOpBadTypesException(&c1, &c2);
   return make_int(shl_ignore_overflow(c1.m_data.num, c2.m_data.num));
@@ -530,10 +479,6 @@ void tvSubEq(tv_lval c1, TypedValue c2) {
 void tvMulEq(tv_lval c1, TypedValue c2) {
   tvOpEq(MulEq(), c1, c2);
 }
-
-void tvAddEqO(tv_lval c1, TypedValue c2) { tvSet(tvAddO(*c1, c2), c1); }
-void tvSubEqO(tv_lval c1, TypedValue c2) { tvSet(tvSubO(*c1, c2), c1); }
-void tvMulEqO(tv_lval c1, TypedValue c2) { tvSet(tvMulO(*c1, c2), c1); }
 
 void tvDivEq(tv_lval c1, TypedValue c2) {
   assertx(tvIsPlausible(*c1));
@@ -566,9 +511,7 @@ void tvShlEq(tv_lval c1, TypedValue c2) { tvSet(tvShl(*c1, c2), c1); }
 void tvShrEq(tv_lval c1, TypedValue c2) { tvSet(tvShr(*c1, c2), c1); }
 
 void tvInc(tv_lval cell) { tvIncDecOp(Inc(), cell); }
-void tvIncO(tv_lval cell) { tvIncDecOp(IncO(), cell); }
 void tvDec(tv_lval cell) { tvIncDecOp(Dec(), cell); }
-void tvDecO(tv_lval cell) { tvIncDecOp(DecO(), cell); }
 
 void tvBitNot(TypedValue& cell) {
   assertx(tvIsPlausible(cell));
@@ -579,29 +522,36 @@ void tvBitNot(TypedValue& cell) {
       break;
 
     case KindOfClass:
-      // Fall-through
+      [[fallthrough]];
     case KindOfLazyClass:
-      cell.m_data.pstr =
-        isClassType(cell.m_type) ?
-        const_cast<StringData*>(classToStringHelper(cell.m_data.pclass)) :
-        const_cast<StringData*>(lazyClassToStringHelper(cell.m_data.plazyclass));
+      {
+        auto const o = "increment op";
+        cell.m_data.pstr =
+          isClassType(cell.m_type) ?
+          const_cast<StringData*>(classToStringHelper(cell.m_data.pclass, o)) :
+          const_cast<StringData*>(lazyClassToStringHelper(cell.m_data.plazyclass,
+                                                          o));
+      }
       cell.m_type = KindOfString;
-      // Fall-through
+      [[fallthrough]];
     case KindOfString:
       if (cell.m_data.pstr->cowCheck()) {
+      [[fallthrough]];
     case KindOfPersistentString:
+        raiseBitwiseOpInvalidType();
         auto const sl = cell.m_data.pstr->slice();
-        FOLLY_SDT(hhvm, hhvm_cow_bitnot, sl.size());
+        USDT(hhvm, hhvm_cow_bitnot, sl.size());
         auto const newSd = StringData::Make(sl, CopyString);
         cell.m_data.pstr->decRefCount(); // can't go to zero
         cell.m_data.pstr = newSd;
         cell.m_type = KindOfString;
       } else {
+        raiseBitwiseOpInvalidType();
         // Unless we go through this branch, the string was just freshly
         // created, so the following mutation will be safe wrt its
         // internal hash caching.
         cell.m_data.pstr->invalidateHash();
-        FOLLY_SDT(hhvm, hhvm_mut_bitnot, cell.m_data.pstr->size());
+        USDT(hhvm, hhvm_mut_bitnot, cell.m_data.pstr->size());
       }
 
       {
@@ -634,6 +584,7 @@ void tvBitNot(TypedValue& cell) {
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRFunc:
+    case KindOfEnumClassLabel:
       raise_error("Unsupported operand type for ~");
   }
 }

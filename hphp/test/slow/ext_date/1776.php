@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1776() {
+function main_1776() :mixed{
 error_reporting(0);
 var_dump(idate('@@'));
 var_dump(idate('@'));

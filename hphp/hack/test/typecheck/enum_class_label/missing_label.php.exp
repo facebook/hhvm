@@ -1,0 +1,10 @@
+ERROR: File "missing_label.php", line 9, characters 8-32:
+This label is not a valid reference to a member of the given enum class (Typing[4110])
+  File "missing_label.php", line 9, characters 25-32:
+  Expected a class with a constant `foobarr`
+  File "missing_label.php", line 9, characters 8-24:
+  But got `VeryLongClassName`
+  File "missing_label.php", line 3, characters 12-28:
+  `VeryLongClassName` is defined here
+  File "missing_label.php", line 5, characters 7-12:
+  Did you mean `foobar`?

@@ -68,14 +68,14 @@ let rec collect_legacy_class
         try
           match Naming_provider.get_class_path ctx cid with
           | None -> raise Exit
-          | Some filename ->
+          | Some _filename ->
             Hh_logger.log "Declaring %s class %s" kind cid;
 
             (* NOTE: the following relies on the fact that declaring a class puts
              * the inheritance hierarchy into the shared memory heaps. When that
              * invariant no longer holds, the following will no longer work. *)
             let (_ : _ option) =
-              Errors.run_in_decl_mode filename (fun () ->
+              Diagnostics.run_in_decl_mode (fun () ->
                   Decl_folded_class.class_decl_if_missing
                     ~sh:SharedMem.Uses
                     ctx
@@ -221,38 +221,17 @@ let collect_legacy_decls ctx classes =
 type saved_shallow_decls = { classes: Shallow_decl_defs.shallow_class SMap.t }
 [@@deriving show]
 
-let class_naming_and_decl_DEPRECATED ctx c =
-  let c = Errors.ignore_ (fun () -> Naming.class_ ctx c) in
-  Shallow_decl.class_DEPRECATED ctx c
-
 let collect_shallow_decls ctx workers classnames =
   let classnames = SSet.elements classnames in
   (* We're only going to fetch the shallow-decls that were explicitly listed;
      we won't look for ancestors. *)
   let job (init : 'a SMap.t) (classnames : string list) : 'a SMap.t =
     List.fold classnames ~init ~f:(fun acc cid ->
-        if
-          TypecheckerOptions.use_direct_decl_parser
-            (Provider_context.get_tcopt ctx)
-        then
-          match Shallow_classes_provider.get ctx cid with
-          | None ->
-            Hh_logger.log "Missing requested shallow class %s" cid;
-            acc
-          | Some data -> SMap.add acc ~key:cid ~data
-        else
-          let ast_opt =
-            match Naming_provider.get_class_path ctx cid with
-            | None -> None
-            | Some file -> Ast_provider.find_class_in_file ctx file cid
-          in
-          match ast_opt with
-          | None ->
-            Hh_logger.log "Missing requested shallow class %s" cid;
-            acc
-          | Some ast ->
-            let data = class_naming_and_decl_DEPRECATED ctx ast in
-            SMap.add acc ~key:cid ~data)
+        match Decl_provider.get_shallow_class ctx cid with
+        | None ->
+          Hh_logger.log "Missing requested shallow class %s" cid;
+          acc
+        | Some data -> SMap.add acc ~key:cid ~data)
   in
   (* The 'classnames' came from a SSet, and therefore all elements are unique.
      So we can safely assume there will be no merge collisions. *)
@@ -273,7 +252,6 @@ let collect_shallow_decls ctx workers classnames =
 
 let restore_shallow_decls decls =
   SMap.iter decls.classes ~f:(fun name cls ->
-      Shallow_classes_heap.Classes.add name cls;
-      Shallow_classes_heap.MemberFilters.add cls);
+      Shallow_classes_heap.Classes.add name cls);
   (* return the number of classes that we restored *)
   SMap.cardinal decls.classes

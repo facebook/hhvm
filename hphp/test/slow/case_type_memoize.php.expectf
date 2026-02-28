@@ -1,0 +1,18 @@
+int(10)
+int(12)
+object(D) (1) {
+  ["x":"D":private]=>
+  string(2) "hi"
+}
+object(D) (1) {
+  ["x":"D":private]=>
+  string(3) "bye"
+}
+bool(true)
+bool(false)
+
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Cannot serialize object of type C because it does not implement HH\IMemoizeParam' in %s/case_type_memoize.php:18
+Stack trace:
+#0 %s/case_type_memoize.php(31): g()
+#1 (): main()
+#2 {main}

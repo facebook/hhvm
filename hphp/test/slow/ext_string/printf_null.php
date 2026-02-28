@@ -2,14 +2,14 @@
 
 
 <<__EntryPoint>>
-function main_printf_null() {
+function main_printf_null() :mixed{
 $format = "(\000)\n";
 
 printf($format);
 
-vprintf($format, varray[]);
+vprintf($format, vec[]);
 
 echo sprintf($format);
 
-echo vsprintf($format, varray[]);
+echo vsprintf($format, vec[]);
 }

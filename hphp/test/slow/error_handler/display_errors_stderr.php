@@ -2,10 +2,10 @@
 
 
 <<__EntryPoint>>
-function main_display_errors_stderr() {
+function main_display_errors_stderr() :mixed{
 ini_set('display_errors', 'stderr');
 var_dump(ini_get('display_errors'));
-fclose(STDOUT);
+fclose(HH\stdout());
 trigger_error('Should see', E_USER_NOTICE);
 
 ini_set('display_errors', 'stdout');

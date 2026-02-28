@@ -13,8 +13,10 @@ type fixmes = Pos.t IMap.t IMap.t [@@deriving show, eq]
 type t = {
   sc_comments: (Pos.t * Prim_defs.comment) list;
   sc_fixmes: fixmes;
+  sc_ignores: fixmes;
   sc_misuses: fixmes;
   sc_error_pos: Pos.t list;
+  sc_bad_ignore_pos: Pos.t list;
 }
 [@@deriving show, eq]
 

@@ -1,6 +1,6 @@
 <?hh
 class Test {
-    static function foo() {}
+    static function foo() :mixed{}
 }
 <<__EntryPoint>> function main(): void {
 var_dump(is_callable("\\\\"));

@@ -1,6 +1,6 @@
 <?hh
 class asserter {
-    public function call($function) {
+    public function call($function) :mixed{
     }
 }
 <<__EntryPoint>> function main(): void {

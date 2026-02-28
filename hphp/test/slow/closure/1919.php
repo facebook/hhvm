@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1919() {
+function main_1919() :mixed{
 $a = function ($a) {
  return $a;
 }

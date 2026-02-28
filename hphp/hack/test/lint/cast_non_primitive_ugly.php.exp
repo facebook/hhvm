@@ -1,0 +1,2 @@
+File "cast_non_primitive_ugly.php", line 12, characters 35-41:
+Explicit `dynamic` type usage in APIs turn off most checks the Hack type checker performs. This frequently leads to reliability issues. (Lint[5809])

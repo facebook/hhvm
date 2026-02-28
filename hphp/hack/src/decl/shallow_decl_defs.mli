@@ -21,6 +21,8 @@ module PropFlags : sig
   val get_needs_init  : t -> bool
   val get_php_std_lib : t -> bool
   val get_readonly    : t -> bool
+  val get_safe_global_variable: t -> bool
+  val get_no_auto_likes : t -> bool
 
   val set_abstract    : bool -> t -> t
   val set_const       : bool -> t -> t
@@ -29,6 +31,8 @@ module PropFlags : sig
   val set_needs_init  : bool -> t -> t
   val set_php_std_lib : bool -> t -> t
   val set_readonly    : bool -> t -> t
+  val set_safe_global_variable: bool -> t -> t
+  val set_no_auto_likes : bool -> t -> t
 
   val make :
     abstract:bool ->
@@ -38,6 +42,8 @@ module PropFlags : sig
     needs_init:bool ->
     php_std_lib:bool ->
     readonly: bool ->
+    safe_global_variable: bool ->
+    no_auto_likes: bool ->
     t
 end
 [@@ocamlformat "disable"]
@@ -53,6 +59,8 @@ module MethodFlags : sig
   val get_dynamicallycallable    : t -> bool
   val get_php_std_lib            : t -> bool
   val get_support_dynamic_type : t -> bool
+  val get_no_auto_likes          : t -> bool
+  val get_needs_concrete : t -> bool
 
   val set_abstract               : bool -> t -> t
   val set_final                  : bool -> t -> t
@@ -60,6 +68,8 @@ module MethodFlags : sig
   val set_dynamicallycallable    : bool -> t -> t
   val set_php_std_lib            : bool -> t -> t
   val set_support_dynamic_type : bool -> t -> t
+  val set_no_auto_likes          : bool -> t -> t
+  val set_needs_concrete         : bool -> t -> t
 
   val make :
     abstract:bool ->
@@ -68,6 +78,8 @@ module MethodFlags : sig
     dynamicallycallable:bool ->
     php_std_lib:bool ->
     support_dynamic_type:bool ->
+    no_auto_likes:bool ->
+    needs_concrete:bool ->
     t
 end
 [@@ocamlformat "disable"]
@@ -77,6 +89,7 @@ type shallow_class_const = {
   scc_name: Typing_defs.pos_id;
   scc_type: decl_ty;
   scc_refs: Typing_defs.class_const_ref list;
+  scc_value: string option;
 }
 [@@deriving eq, show]
 
@@ -92,7 +105,7 @@ type shallow_typeconst = {
 type shallow_prop = {
   sp_name: Typing_defs.pos_id;
   sp_xhp_attr: xhp_attr option;
-  sp_type: decl_ty option;
+  sp_type: decl_ty;
   sp_visibility: Ast_defs.visibility;
   sp_flags: PropFlags.t;
 }
@@ -105,8 +118,19 @@ type shallow_method = {
   sm_deprecated: string option;
   sm_flags: MethodFlags.t;
   sm_attributes: user_attribute list;
+  sm_sort_text: string option;
+  sm_package_requirement: package_requirement;
 }
 [@@deriving eq, show]
+
+type xhp_enum_values = Ast_defs.xhp_enum_value list SMap.t [@@deriving eq, show]
+
+type decl_constraint_requirement =
+  | DCR_Equal of decl_ty
+  | DCR_Subtype of decl_ty
+[@@deriving eq, show]
+
+val to_decl_constraint : decl_constraint_requirement -> decl_ty
 
 type shallow_class = {
   sc_mode: FileInfo.mode;
@@ -119,14 +143,14 @@ type shallow_class = {
   sc_module: Ast_defs.id option;
   sc_name: Typing_defs.pos_id;
   sc_tparams: decl_tparam list;
-  sc_where_constraints: decl_where_constraint list;
   sc_extends: decl_ty list;
   sc_uses: decl_ty list;
   sc_xhp_attr_uses: decl_ty list;
-  sc_xhp_enum_values: Ast_defs.xhp_enum_value list SMap.t;
+  sc_xhp_enum_values: xhp_enum_values;
+  sc_xhp_marked_empty: bool;
   sc_req_extends: decl_ty list;
   sc_req_implements: decl_ty list;
-  sc_req_class: decl_ty list;
+  sc_req_constraints: decl_constraint_requirement list;
   sc_implements: decl_ty list;
   sc_support_dynamic_type: bool;
   sc_consts: shallow_class_const list;
@@ -138,6 +162,8 @@ type shallow_class = {
   sc_methods: shallow_method list;
   sc_user_attributes: user_attribute list;
   sc_enum_type: enum_type option;
+  sc_docs_url: string option;
+  sc_package: Aast_defs.package_membership option;
 }
 [@@deriving eq, show]
 
@@ -155,6 +181,8 @@ val sp_php_std_lib : shallow_prop -> bool
 
 val sp_readonly : shallow_prop -> bool
 
+val sp_safe_global_variable : shallow_prop -> bool
+
 val sm_abstract : shallow_method -> bool
 
 val sm_final : shallow_method -> bool
@@ -166,6 +194,10 @@ val sm_dynamicallycallable : shallow_method -> bool
 val sm_php_std_lib : shallow_method -> bool
 
 val sm_support_dynamic_type : shallow_method -> bool
+
+val sm_no_auto_likes : shallow_method -> bool
+
+val sm_needs_concrete : shallow_method -> bool
 
 type fun_decl = fun_elt [@@deriving show]
 
@@ -184,3 +216,21 @@ type decl =
   | Const of const_decl
   | Module of module_decl
 [@@deriving show]
+
+type named_decl =
+  | NClass of string * class_decl
+  | NFun of string * fun_decl
+  | NTypedef of string * typedef_decl
+  | NConst of string * const_decl
+  | NModule of string * module_decl
+[@@deriving show]
+
+val to_class_decl_opt : decl -> class_decl option
+
+val to_fun_decl_opt : decl -> fun_decl option
+
+val to_typedef_decl_opt : decl -> typedef_decl option
+
+val to_const_decl_opt : decl -> const_decl option
+
+val to_module_decl_opt : decl -> module_decl option

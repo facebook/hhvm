@@ -7,7 +7,7 @@
 
 //defining a class
 class sample  {
-  public function __toString() {
+  public function __toString() :mixed{
     return "sample object";
   }
 }
@@ -19,7 +19,7 @@ echo "*** Testing chr() function: with unexpected inputs for 'ascii' argument **
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $input
-$inputs =  varray [
+$inputs =  vec[
 
           // integer values
 /*1*/      0,
@@ -33,9 +33,9 @@ $inputs =  varray [
           1.1234e6,
 
           // array values
-/*8*/      varray[],
-          varray[0],
-          varray[1, 2],
+/*8*/      vec[],
+          vec[0],
+          vec[1, 2],
 
           // boolean values
 /*11*/      true,

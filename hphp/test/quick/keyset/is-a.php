@@ -3,7 +3,7 @@
 
 class Foo {}
 
-function test_is_a($a, $interfaces) {
+function test_is_a($a, $interfaces) :mixed{
   echo "====================================================\n";
   echo "Testing: ";
   var_dump($a);
@@ -80,7 +80,7 @@ function test_is_a($a, $interfaces) {
   }
 }
 
-function test_is_keyset($val) {
+function test_is_keyset($val) :mixed{
   echo "====================================================\n";
   echo "Testing for is_keyset: ";
   var_dump($val);
@@ -92,7 +92,7 @@ function test_is_keyset($val) {
 }
 
 <<__EntryPoint>> function main(): void {
-  $interfaces = varray[
+  $interfaces = vec[
     "HH\\Traversable",
     "HH\\KeyedTraversable",
     "HH\\Container",
@@ -112,7 +112,7 @@ function test_is_keyset($val) {
   test_is_keyset(1.23);
   test_is_keyset("abcd");
   test_is_keyset(new stdClass);
-  test_is_keyset(varray[1, 2, 3]);
+  test_is_keyset(vec[1, 2, 3]);
   test_is_keyset(Vector{'a', 'b', 'c'});
   test_is_keyset(Map{100 => 'a', 'b' => 200});
   test_is_keyset(Pair{123, 'abc'});

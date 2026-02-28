@@ -1,0 +1,15 @@
+[manifest]
+name = ghc
+
+[download.os=linux]
+url = https://downloads.haskell.org/~ghc/9.2.8/ghc-9.2.8-x86_64-fedora27-linux.tar.xz
+sha256 = 845f63cd365317bb764d81025554a2527dbe315d6fa268c9859e21b911bf2d3c
+
+[build]
+builder = autoconf
+subdir = ghc-9.2.8
+build_in_src_dir = true
+only_install = true
+
+[make.install_args]
+install

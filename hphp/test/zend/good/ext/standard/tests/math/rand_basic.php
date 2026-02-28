@@ -19,14 +19,14 @@ if ($i != 100) {
 
 echo "\nrand() tests with defined min and max value\n";
 
-$min = varray[10,
+$min = vec[10,
              100,
              10.5,
              10.5e3,
              0x10,
              0400];
 
-$max = varray[100,
+$max = vec[100,
              1000,
              19.5,
              10.5e5,
@@ -49,7 +49,7 @@ for ($x = 0; $x < count($min); $x++) {
 }
 
 echo "\nNon-numeric cases\n";
-$min = varray[true,
+$min = vec[true,
              false,
              null,
              "10",
@@ -57,7 +57,7 @@ $min = varray[true,
              "10.5"];
 
 // Eexepcted numerical equivalent of above non-numerics
-$minval = varray[1,
+$minval = vec[1,
                 0,
                 0,
                 10,

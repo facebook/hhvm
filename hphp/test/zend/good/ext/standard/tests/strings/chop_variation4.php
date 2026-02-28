@@ -11,7 +11,7 @@
 echo "*** Testing chop() : string with embedded nulls ***\n";
 
 // defining varous strings with embedded nulls
-$strings_with_nulls = varray[
+$strings_with_nulls = vec[
                    "hello\0world",
                "\0hello",
                "hello\0",

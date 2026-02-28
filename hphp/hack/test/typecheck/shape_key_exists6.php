@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // Not matching return type of keyExists
 

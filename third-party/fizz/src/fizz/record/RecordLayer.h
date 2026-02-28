@@ -1,0 +1,269 @@
+/*
+ *  Copyright (c) 2018-present, Facebook, Inc.
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
+
+#pragma once
+
+#include <fizz/crypto/aead/Aead.h>
+#include <fizz/protocol/Params.h>
+#include <fizz/record/Types.h>
+#include <folly/Optional.h>
+#include <folly/io/IOBufQueue.h>
+
+namespace fizz {
+class ClientExtensions;
+class ServerExtensions;
+
+struct TLSContent {
+  Buf data;
+  ContentType contentType;
+  EncryptionLevel encryptionLevel;
+};
+
+/**
+ * RecordLayerState contains the state of the record layer -- all data
+ * that is needed in order to decrypt/encrypt the _next_ record from the wire/
+ * from the application.
+ */
+struct RecordLayerState {
+  folly::Optional<TrafficKey> key;
+  folly::Optional<uint64_t> sequence;
+};
+
+class ReadRecordLayer {
+ public:
+  template <class T>
+  struct ReadResult {
+    ReadResult() : message(folly::none), sizeHint{0} {}
+    /* implicit */ ReadResult(const folly::None&)
+        : message(folly::none), sizeHint{0} {}
+
+    folly::Optional<T> message;
+
+    // A non-zero size hint indicates the amount of bytes needed to continue
+    // record processing.
+    size_t sizeHint{0};
+
+    static ReadResult from(T&& t) {
+      return from(std::forward<T>(t), 0);
+    }
+
+    static ReadResult from(T&& t, size_t sizeHint) {
+      ReadResult r;
+      r.message = std::forward<T>(t);
+      r.sizeHint = sizeHint;
+      return r;
+    }
+
+    static ReadResult none() {
+      return noneWithSizeHint(0);
+    }
+
+    static ReadResult noneWithSizeHint(size_t s) {
+      ReadResult r;
+      r.sizeHint = s;
+      return r;
+    }
+
+    operator bool() const {
+      return bool(message);
+    }
+
+    [[nodiscard]] bool has_value() const {
+      return message.has_value();
+    }
+
+    auto operator->() -> decltype(this->message.operator->()) {
+      return message.operator->();
+    }
+
+    auto operator->() const -> decltype(this->message.operator->()) {
+      return message.operator->();
+    }
+    auto operator*() -> decltype(this->message.operator*()) {
+      return message.operator*();
+    }
+  };
+
+  virtual ~ReadRecordLayer() = default;
+
+  /**
+   * Reads a fragment from the record layer. Returns an empty optional if
+   * insuficient data available. Throws if data malformed. On success, advances
+   * buf the amount read.
+   */
+  virtual Status read(
+      ReadResult<TLSMessage>& ret,
+      Error& err,
+      folly::IOBufQueue& buf,
+      Aead::AeadOptions options) = 0;
+
+  /**
+   * Get a message from the record layer. Returns none if insufficient data was
+   * available on the socket. Throws on parse error.
+   */
+  virtual Status readEvent(
+      ReadResult<Param>& ret,
+      Error& err,
+      folly::IOBufQueue& socketBuf,
+      Aead::AeadOptions options);
+
+  /**
+   * Check if there is decrypted but unparsed handshake data buffered.
+   */
+  virtual bool hasUnparsedHandshakeData() const;
+
+  /**
+   * Returns the current encryption level of the data that the read record layer
+   * can process.
+   */
+  virtual EncryptionLevel getEncryptionLevel() const = 0;
+
+  /**
+   * Returns a snapshot of the state of the record layer.
+   *
+   * `key`, if set, indicates the keying parameters for the AEAD associated
+   * with this ReadRecordLayer.
+   *
+   * `sequence`, if set, indicates the sequence number of the next expected
+   * record to be read.
+   */
+  virtual RecordLayerState getRecordLayerState() const {
+    return RecordLayerState{};
+  }
+
+  static Status decodeHandshakeMessage(
+      folly::Optional<Param>& ret,
+      Error& err,
+      folly::IOBufQueue& buf);
+
+  /**
+   * Configure the record layer for client-specific behavior.
+   * Implementations can use this to set up custom behavior based on
+   * negotiated parameters.
+   * Default implementation is no-op.
+   */
+  virtual void configureClientRecordLayer(const ClientExtensions*) {}
+
+  /**
+   * Configure the record layer for server-specific behavior.
+   * Implementations can use this to set up custom behavior based on
+   * negotiated parameters.
+   * Default implementation is no-op.
+   */
+  virtual void configureServerRecordLayer(const ServerExtensions*) {}
+
+ private:
+  folly::IOBufQueue unparsedHandshakeData_{
+      folly::IOBufQueue::cacheChainLength()};
+};
+
+class WriteRecordLayer {
+ public:
+  virtual ~WriteRecordLayer() = default;
+
+  virtual Status write(
+      TLSContent& ret,
+      Error& err,
+      TLSMessage&& msg,
+      Aead::AeadOptions options) const = 0;
+
+  Status writeAlert(TLSContent& ret, Error& err, Alert&& alert) const {
+    Buf msg;
+    FIZZ_RETURN_ON_ERROR(encode(msg, err, std::move(alert)));
+    FIZZ_RETURN_ON_ERROR(write(
+        ret,
+        err,
+        TLSMessage{ContentType::alert, std::move(msg)},
+        Aead::AeadOptions()));
+    return Status::Success;
+  }
+
+  Status writeAppData(
+      TLSContent& ret,
+      Error& err,
+      std::unique_ptr<folly::IOBuf>&& appData,
+      Aead::AeadOptions options) const {
+    FIZZ_RETURN_ON_ERROR(write(
+        ret,
+        err,
+        TLSMessage{ContentType::application_data, std::move(appData)},
+        options));
+    return Status::Success;
+  }
+
+  template <typename... Args>
+  Status writeHandshake(
+      TLSContent& ret,
+      Error& err,
+      Buf&& encodedHandshakeMsg,
+      Args&&... args) const {
+    TLSMessage msg{ContentType::handshake, std::move(encodedHandshakeMsg)};
+    addMessage(msg.fragment, std::forward<Args>(args)...);
+    FIZZ_RETURN_ON_ERROR(write(ret, err, std::move(msg), Aead::AeadOptions()));
+    return Status::Success;
+  }
+
+  Status setProtocolVersion(Error& err, ProtocolVersion version) const {
+    ProtocolVersion realVersion;
+    FIZZ_RETURN_ON_ERROR(getRealDraftVersion(realVersion, err, version));
+    if (realVersion == ProtocolVersion::tls_1_3_23) {
+      useAdditionalData_ = false;
+    } else {
+      useAdditionalData_ = true;
+    }
+    return Status::Success;
+  }
+
+  /**
+   * Returns the current encryption level of the data that the write record
+   * layer writes at.
+   */
+  virtual EncryptionLevel getEncryptionLevel() const = 0;
+
+  /**
+   * Returns a snapshot of the state of the record layer.
+   *
+   * `key`, if set, indicates the keying parameters for the AEAD associated
+   * with this WriteRecordLayer.
+   *
+   * `sequence`, if set, indicates the sequence number of the next expected
+   * record to be written.
+   */
+  virtual RecordLayerState getRecordLayerState() const {
+    return RecordLayerState{};
+  }
+
+  /**
+   * Configure the record layer for client-specific behavior.
+   * Implementations can use this to set up custom behavior based on
+   * negotiated parameters.
+   * Default implementation is no-op.
+   */
+  virtual void configureClientRecordLayer(const ClientExtensions*) {}
+
+  /**
+   * Configure the record layer for server-specific behavior.
+   * Implementations can use this to set up custom behavior based on
+   * negotiated parameters.
+   * Default implementation is no-op.
+   */
+  virtual void configureServerRecordLayer(const ServerExtensions*) {}
+
+ protected:
+  mutable bool useAdditionalData_{true};
+
+ private:
+  template <typename... Args>
+  static void addMessage(Buf& buf, Buf&& add, Args&&... args) {
+    buf->prependChain(std::move(add));
+    addMessage(buf, std::forward<Args>(args)...);
+  }
+
+  static void addMessage(Buf& /*buf*/) {}
+};
+} // namespace fizz

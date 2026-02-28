@@ -32,13 +32,13 @@
  * international characters.
  */
 
-#include "file.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/file.h"
 
 #ifndef  lint
 FILE_RCSID("@(#)$File: encoding.c,v 1.7 2012/01/24 19:02:02 christos Exp $")
 #endif  /* lint */
 
-#include "magic.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/magic.h"
 #include <string.h>
 #include <memory.h>
 #include <stdlib.h>
@@ -70,6 +70,9 @@ file_encoding(struct magic_set *ms, const unsigned char *buf, size_t nbytes, uni
   size_t mlen;
   int rv = 1, ucs_type;
   unsigned char *nbuf = NULL;
+
+  const size_t kMaxSize = 64 * 1024;
+  if (nbytes > kMaxSize) nbytes = kMaxSize;
 
   *type = "text";
   mlen = (nbytes + 1) * sizeof(nbuf[0]);

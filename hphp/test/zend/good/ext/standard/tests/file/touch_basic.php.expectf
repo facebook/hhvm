@@ -1,6 +1,8 @@
 *** Testing touch() : basic functionality ***
 
 --- testing touch creates a file ---
+
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/standard/tests/file/touch_basic.php on line 13
 bool(true)
 
  --- testing touch doesn't alter file contents ---

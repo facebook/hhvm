@@ -1,0 +1,2 @@
+WARN: File "like_is_as_always_true.php", line 11, characters 7-16:
+This `is` check is always `false`. The expression on the left has type `Foo<mixed>` which shares no values with `null`. (Warn[12010])

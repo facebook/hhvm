@@ -17,27 +17,20 @@
 
 #include "hphp/runtime/base/bespoke/logging-array.h"
 
-#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/escalation-logging.h"
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke-runtime.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/vm/jit/irgen.h"
-#include "hphp/runtime/vm/jit/punt.h"
-#include "hphp/runtime/vm/jit/ssa-tmp.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
-#include <algorithm>
 #include <atomic>
 
 namespace HPHP::bespoke {
 
-TRACE_SET_MOD(bespoke);
+TRACE_SET_MOD(bespoke)
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -87,8 +80,9 @@ void logEvent(const LoggingArray* lad, ArrayOp op, Ts&&... args) {
   logEvent(lad, lad->entryTypes, lad->keyOrder, op, std::forward<Ts>(args)...);
 }
 
-// PRc|CRc method that returns a copy of the vanilla array `vad` with the
-// sampled bit set, operating in place whenever possible.
+// A method that returns a copy of the vanilla array `vad` with the
+// sampled bit set, operating in place whenever possible. Consumes the
+// reference from the input and produces output with single reference.
 ArrayData* makeSampledArray(ArrayData* vad) {
   assertx(vad->isVanilla());
   auto const result = [&]{
@@ -163,8 +157,8 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
 
   if (ad->isSampledArray() || !ad->isVanilla()) {
     assertx(!profile->key.isRuntimeLocation());
-    DEBUG_ONLY auto const op = *profile->key.op();
-    assertx(isArrLikeCastOp(op) || op == Op::NewObjD);
+    DEBUG_ONLY auto const op = profile->key.op();
+    assertx(!op || isArrLikeCastOp(*op) || *op == Op::NewObjD);
     FTRACE(5, "Skipping logging for {} array.\n",
            ad->isSampledArray() ? "sampled" : "bespoke");
     return ad;
@@ -177,13 +171,13 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
 
   auto const shouldEmitBespoke = [&]{
     if (shouldTestBespokeArrayLikes()) return true;
-    if (RO::EvalEmitLoggingArraySampleRate == 0) return false;
-    if (RO::EvalEmitLoggingArraySampleRate == 1) return true;
+    if (Cfg::Eval::EmitLoggingArraySampleRate == 0) return false;
+    if (Cfg::Eval::EmitLoggingArraySampleRate == 1) return true;
 
     // We want the first sample to be vanilla and the second to be logged.
     auto const skCount = profile->data->sampleCount++;
     FTRACE(5, "Observe SrcKey count: {}\n", skCount);
-    return skCount % RO::EvalEmitLoggingArraySampleRate == 1;
+    return skCount % Cfg::Eval::EmitLoggingArraySampleRate == 1;
   }();
 
   if (!shouldEmitBespoke) {
@@ -232,7 +226,8 @@ void profileArrLikeProps(ObjectData* obj) {
     if (cls->declProperties()[slot].attrs & AttrIsConst) continue;
     auto lval = obj->propLvalAtOffset(slot);
     if (!tvIsArrayLike(lval)) continue;
-    profileArrLikeLval(lval, getLoggingProfile(cls, slot, false));
+    auto profile = getLoggingProfile(cls, slot, LocationType::InstanceProperty);
+    profileArrLikeLval(lval, profile);
   }
 }
 
@@ -247,7 +242,31 @@ void profileArrLikeStaticProps(const Class* cls) {
     if (!owned) continue;
     auto lval = &link->val;
     if (!tvIsArrayLike(lval)) continue;
-    profileArrLikeLval(lval, getLoggingProfile(cls, slot, true));
+    auto profile = getLoggingProfile(cls, slot, LocationType::StaticProperty);
+    profileArrLikeLval(lval, profile);
+  }
+}
+
+void profileArrLikeClsCns(const Class* cls, TypedValue* tv, Slot slot) {
+  if (!g_emitLoggingArrays.load(std::memory_order_acquire)) return;
+  if (!tvIsArrayLike(tv)) return;
+  auto profile = getLoggingProfile(cls, slot, LocationType::TypeConstant);
+  profileArrLikeLval(tv, profile);
+}
+
+void profileArrLikeTypeAlias(const TypeAlias* ta, Array* ts) {
+  if (!g_emitLoggingArrays.load(std::memory_order_acquire)) return;
+
+  auto const ad = ts->get();
+  auto const profile = getLoggingProfile(ta);
+  if (profile) {
+    auto const layout = profile->getLayout();
+    if (layout.bespoke()) {
+      ts->reset(layout.apply(ad));
+    } else {
+      auto loggingAd = maybeMakeLoggingArray(ad, profile);
+      ts->reset(loggingAd);
+    }
   }
 }
 
@@ -296,8 +315,7 @@ LoggingArray* LoggingArray::MakeStatic(ArrayData* ad, LoggingProfile* profile) {
   assertx(ad->isStatic());
 
   auto const size = sizeof(LoggingArray);
-  auto lad = static_cast<LoggingArray*>(
-      RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
+  auto lad = static_cast<LoggingArray*>(ArrayData::AllocStatic(size));
   auto const flags = ad->isLegacyArray() ? kLegacyArray : 0;
   auto const aux = packSizeIndexAndAuxBits(kSizeIndex, flags);
 
@@ -443,7 +461,12 @@ TypedValue LoggingArray::GetPosKey(const LoggingArray* lad, ssize_t pos) {
   return lad->wrapped->nvGetKey(pos);
 }
 TypedValue LoggingArray::GetPosVal(const LoggingArray* lad, ssize_t pos) {
-  return lad->wrapped->nvGetVal(pos);
+  auto const k = lad->wrapped->nvGetKey(pos);
+  tvIsString(k) ?
+    logEvent(lad, ArrayOp::GetStrPos, val(k).pstr) :
+    logEvent(lad, ArrayOp::GetIntPos, val(k).num) ;
+  auto const v = lad->wrapped->nvGetVal(pos);
+  return v;
 }
 
 bool LoggingArray::PosIsValid(const LoggingArray* lad, ssize_t pos) {
@@ -566,9 +589,10 @@ LoggingArray* mutateMove(LoggingArray* lad, EntryTypes ms,
   }
 
   auto const profile = lad->profile;
+  auto const result = LoggingArray::Make(res, profile, ms, ko);
   assertx(lad->decReleaseCheck());
   LoggingArray::ZombieRelease(lad);
-  return LoggingArray::Make(res, profile, ms, ko);
+  return result;
 }
 
 }
@@ -618,6 +642,12 @@ tv_lval LoggingArray::ElemStr(
               mutate(lad, ms, [&](ArrayData* arr) { return arr->lval(k); }));
 }
 
+ArrayData* LoggingArray::SetPosMove(LoggingArray* lad, ssize_t pos, TypedValue v) {
+  auto const ms = lad->entryTypes.with(v);
+  logEvent(lad, ms, ArrayOp::SetPos, v);
+  return mutateMove(lad, ms, lad->keyOrder,
+                    [&](ArrayData* w) { return w->setPosMove(pos, v); });
+}
 ArrayData* LoggingArray::SetIntMove(LoggingArray* lad, int64_t k, TypedValue v) {
   auto const ms = lad->entryTypes.with(make_tv<KindOfInt64>(k), v);
   auto const ko = KeyOrder::MakeInvalid();

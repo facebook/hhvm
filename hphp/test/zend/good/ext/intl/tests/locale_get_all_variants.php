@@ -6,8 +6,8 @@
  */
 
 function ut_main()
-{
-    $locales  = varray[
+:mixed{
+    $locales  = vec[
         'sl_IT_nedis_KIRTI',
         'sl_IT_nedis-a-kirti-x-xyz',
         'sl_IT_rozaj',

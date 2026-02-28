@@ -1,4 +1,0 @@
-File "ifc_basics.php", line 14, characters 5-23:
-Context-implicit policy leaks into `C_lump` via `A`. (Typing[4380])
-  File "ifc_basics.php", line 8, characters 19-22:
-  Leakage source

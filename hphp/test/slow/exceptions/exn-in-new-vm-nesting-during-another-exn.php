@@ -1,9 +1,9 @@
 <?hh
 
-function f() { throw new Exception("Exn coming from f"); }
-function y() { throw new Exception("Exn coming from y"); }
+function f() :mixed{ throw new Exception("Exn coming from f"); }
+function y() :mixed{ throw new Exception("Exn coming from y"); }
 
-function g() {
+function g() :mixed{
   try {
     f();
   } catch (Exception $e) {
@@ -11,7 +11,7 @@ function g() {
   }
 }
 
-function z() {
+function z() :mixed{
   try {
     y();
   } catch (Exception $e) {
@@ -19,14 +19,14 @@ function z() {
   }
 }
 
-function handler($event, $name, $info) {
+function handler($event, $name, $info) :mixed{
   if ($event === 'exit' && $name === 'f') {
     z();
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   fb_setprofile('handler');
   g();
 }

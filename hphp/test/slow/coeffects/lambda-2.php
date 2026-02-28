@@ -1,10 +1,10 @@
 <?hh
 
-function regular() { } // defaults
+function regular() :mixed{ } // defaults
 
-function regular_writeprops()[write_props] { }
+function regular_writeprops()[write_props] :mixed{ }
 
-function f($f)[rx] { $f(); }
+function f($f)[rx] :mixed{ $f(); }
 
 function test(int $times): void {
   switch ($times) {
@@ -34,7 +34,7 @@ function test(int $times): void {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   for ($ctr=0; $ctr < 4; ++$ctr) {
     test($ctr);
   }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_preg_replace_named_subpat() {
+function main_preg_replace_named_subpat() :mixed{
 $content = 'b';
 $pattern = '/(?P<a>.*)/';
 

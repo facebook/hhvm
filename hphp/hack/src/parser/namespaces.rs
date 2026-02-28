@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use naming_special_names_rust as sn;
-use oxidized::{ast::*, namespace_env};
-
 use std::borrow::Cow;
 
-trait NamespaceEnv {
+use naming_special_names_rust as sn;
+use oxidized::ast::*;
+use oxidized::namespace_env;
+
+pub trait NamespaceEnv {
     fn disable_xhp_element_mangling(&self) -> bool;
     fn is_codegen(&self) -> bool;
     fn name(&self) -> Option<&str>;
@@ -25,7 +26,7 @@ impl NamespaceEnv for namespace_env::Env {
         self.disable_xhp_element_mangling
     }
     fn is_codegen(&self) -> bool {
-        self.is_codegen
+        matches!(self.mode, namespace_env::Mode::ForCodegen)
     }
     fn name(&self) -> Option<&str> {
         match &self.name {
@@ -57,37 +58,6 @@ impl NamespaceEnv for namespace_env::Env {
     }
 }
 
-impl NamespaceEnv for oxidized_by_ref::namespace_env::Env<'_> {
-    fn disable_xhp_element_mangling(&self) -> bool {
-        self.disable_xhp_element_mangling
-    }
-    fn is_codegen(&self) -> bool {
-        self.is_codegen
-    }
-    fn name(&self) -> Option<&str> {
-        self.name
-    }
-    fn get_imported_name(
-        &self,
-        kind: ElaborateKind,
-        prefix: &str,
-        has_bslash: bool,
-    ) -> Option<&str> {
-        let uses = {
-            if has_bslash {
-                self.ns_uses
-            } else {
-                match kind {
-                    ElaborateKind::Class => self.class_uses,
-                    ElaborateKind::Fun => self.fun_uses,
-                    ElaborateKind::Const => self.const_uses,
-                }
-            }
-        };
-        uses.get(&prefix).copied()
-    }
-}
-
 #[derive(Clone, Debug, Copy, Eq, PartialEq)]
 pub enum ElaborateKind {
     Fun,
@@ -114,7 +84,7 @@ fn elaborate_into_ns(ns_name: Option<&str>, id: &str) -> String {
     }
 }
 
-fn elaborate_into_current_ns(nsenv: &impl NamespaceEnv, id: &str) -> String {
+pub fn elaborate_into_current_ns(nsenv: &impl NamespaceEnv, id: &str) -> String {
     elaborate_into_ns(nsenv.name(), id)
 }
 
@@ -142,12 +112,12 @@ pub fn elaborate_xhp_namespace(id: &str) -> Option<String> {
 /// not, just relying on the idempotence of this function to make sure everything
 /// works out. (Fully qualifying identifiers is of course idempotent, but there
 /// used to be other schemes here.)
-fn elaborate_raw_id<'a>(
+pub fn elaborate_raw_id<'a>(
     nsenv: &impl NamespaceEnv,
     kind: ElaborateKind,
     id: &'a str,
     elaborate_xhp_namespaces_for_facts: bool,
-) -> Cow<'a, str> {
+) -> Option<String> {
     let id = if kind == ElaborateKind::Class && nsenv.disable_xhp_element_mangling() {
         let qualified = elaborate_xhp_namespace(id);
         match qualified {
@@ -164,7 +134,10 @@ fn elaborate_raw_id<'a>(
     };
     // It is already qualified
     if id.starts_with('\\') {
-        return id;
+        return match id {
+            Cow::Borrowed(..) => None,
+            Cow::Owned(s) => Some(s),
+        };
     }
     let id = id.as_ref();
 
@@ -173,20 +146,20 @@ fn elaborate_raw_id<'a>(
     match kind {
         ElaborateKind::Const => {
             if sn::pseudo_consts::is_pseudo_const(&fqid) {
-                return Cow::Owned(fqid);
+                return Some(fqid);
             }
         }
         ElaborateKind::Fun if sn::pseudo_functions::is_pseudo_function(&fqid) => {
-            return Cow::Owned(fqid);
+            return Some(fqid);
         }
         ElaborateKind::Class if sn::typehints::is_reserved_global_name(id) => {
-            return Cow::Owned(fqid);
+            return Some(fqid);
         }
         ElaborateKind::Class if sn::typehints::is_reserved_hh_name(id) && nsenv.is_codegen() => {
-            return Cow::Owned(elaborate_into_ns(Some("HH"), id));
+            return Some(elaborate_into_ns(Some("HH"), id));
         }
         ElaborateKind::Class if sn::typehints::is_reserved_hh_name(id) => {
-            return Cow::Owned(fqid);
+            return Some(fqid);
         }
         _ => {}
     }
@@ -197,7 +170,7 @@ fn elaborate_raw_id<'a>(
     };
 
     if has_bslash && prefix == "namespace" {
-        return Cow::Owned(elaborate_into_current_ns(
+        return Some(elaborate_into_current_ns(
             nsenv,
             id.trim_start_matches("namespace\\"),
         ));
@@ -209,38 +182,16 @@ fn elaborate_raw_id<'a>(
             let mut s = String::with_capacity(used.len() + without_prefix.len());
             s.push_str(used);
             s.push_str(without_prefix);
-            Cow::Owned(core_utils_rust::add_ns(&s).into_owned())
+            Some(core_utils_rust::add_ns(&s).into_owned())
         }
-        None => Cow::Owned(elaborate_into_current_ns(nsenv, id)),
+        None => Some(elaborate_into_current_ns(nsenv, id)),
     }
 }
 
-pub fn elaborate_id(nsenv: &namespace_env::Env, kind: ElaborateKind, Id(p, id): &Id) -> Id {
-    Id(
-        p.clone(),
-        elaborate_raw_id(nsenv, kind, id, false).into_owned(),
-    )
-}
-
-pub fn elaborate_raw_id_in<'a>(
-    arena: &'a bumpalo::Bump,
-    nsenv: &oxidized_by_ref::namespace_env::Env<'a>,
-    kind: ElaborateKind,
-    id: &'a str,
-    elaborate_xhp_namespaces_for_facts: bool,
-) -> &'a str {
-    match elaborate_raw_id(nsenv, kind, id, elaborate_xhp_namespaces_for_facts) {
-        Cow::Owned(s) => arena.alloc_str(&s),
-        Cow::Borrowed(s) => s,
+pub fn elaborate_id(nsenv: &namespace_env::Env, kind: ElaborateKind, id: &mut Id) {
+    if let Some(s) = elaborate_raw_id(nsenv, kind, &id.1, false) {
+        id.1 = s;
     }
-}
-
-pub fn elaborate_into_current_ns_in<'a>(
-    arena: &'a bumpalo::Bump,
-    nsenv: &oxidized_by_ref::namespace_env::Env<'a>,
-    id: &str,
-) -> &'a str {
-    arena.alloc_str(&elaborate_into_current_ns(nsenv, id))
 }
 
 /// First pass of flattening namespaces, run super early in the pipeline, right
@@ -256,8 +207,10 @@ pub fn elaborate_into_current_ns_in<'a>(
 /// through Happly in hints -- we rely on the idempotence of elaborate_id to
 /// allow us to fix those up during a second pass during naming.
 pub mod toplevel_elaborator {
-    use ocamlrep::rc::RcOc;
-    use oxidized::{ast::*, namespace_env};
+    use std::sync::Arc;
+
+    use oxidized::ast::*;
+    use oxidized::namespace_env;
 
     fn elaborate_xhp_namespace(id: &mut String) {
         if let Some(s) = super::elaborate_xhp_namespace(id.as_str()) {
@@ -283,12 +236,12 @@ pub mod toplevel_elaborator {
     }
 
     fn on_hint(nsenv: &namespace_env::Env, hint: &mut Hint) {
-        if let Hint_::Happly(ref mut id, _) = hint.1.as_mut() {
-            *id = super::elaborate_id(nsenv, super::ElaborateKind::Class, id);
+        if let Hint_::Happly(id, _) = hint.1.as_mut() {
+            super::elaborate_id(nsenv, super::ElaborateKind::Class, id);
         }
     }
 
-    fn on_def(nsenv: &mut RcOc<namespace_env::Env>, acc: &mut Vec<Def>, def: Def) {
+    fn on_def(nsenv: &mut Arc<namespace_env::Env>, acc: &mut Vec<Def>, def: Def) {
         use oxidized::ast::Def as D;
         match def {
             // The default namespace in php is the global namespace specified by
@@ -309,9 +262,9 @@ pub mod toplevel_elaborator {
                 };
                 let mut new_nsenv = nsenv.as_ref().clone();
                 new_nsenv.name = nsname;
-                let new_nsenv = RcOc::new(new_nsenv);
+                let new_nsenv = Arc::new(new_nsenv);
 
-                acc.push(Def::mk_set_namespace_env(RcOc::clone(&new_nsenv)));
+                acc.push(Def::mk_set_namespace_env(Arc::clone(&new_nsenv)));
                 on_program_(new_nsenv, defs, acc);
             }
             D::NamespaceUse(nsu) => {
@@ -330,8 +283,8 @@ pub mod toplevel_elaborator {
                     };
                 }
 
-                let new_nsenv = RcOc::new(new_nsenv);
-                *nsenv = RcOc::clone(&new_nsenv);
+                let new_nsenv = Arc::new(new_nsenv);
+                *nsenv = Arc::clone(&new_nsenv);
                 acc.push(Def::mk_set_namespace_env(new_nsenv));
             }
             D::Class(mut x) => {
@@ -348,61 +301,83 @@ pub mod toplevel_elaborator {
                 c.xhp_attr_uses
                     .iter_mut()
                     .for_each(|ref mut x| on_hint(nsenv, x));
-                c.namespace = RcOc::clone(nsenv);
+                c.namespace = Arc::clone(nsenv);
                 acc.push(Def::Class(x));
             }
             D::Fun(mut x) => {
                 let f = x.as_mut();
-                elaborate_defined_id(nsenv, &mut f.fun.name);
-                f.namespace = RcOc::clone(nsenv);
+                elaborate_defined_id(nsenv, &mut f.name);
+                f.namespace = Arc::clone(nsenv);
                 acc.push(Def::Fun(x));
             }
             D::Typedef(mut x) => {
                 let t = x.as_mut();
                 elaborate_defined_id(nsenv, &mut t.name);
-                t.namespace = RcOc::clone(nsenv);
+                t.namespace = Arc::clone(nsenv);
                 acc.push(Def::Typedef(x));
             }
             D::Constant(mut x) => {
                 let c = x.as_mut();
                 elaborate_defined_id(nsenv, &mut c.name);
-                c.namespace = RcOc::clone(nsenv);
+                c.namespace = Arc::clone(nsenv);
                 acc.push(Def::Constant(x));
             }
             D::FileAttributes(mut f) => {
-                f.as_mut().namespace = RcOc::clone(nsenv);
+                f.as_mut().namespace = Arc::clone(nsenv);
                 acc.push(Def::FileAttributes(f));
             }
             x => acc.push(x),
         }
     }
 
-    fn attach_file_attributes(p: &mut Vec<Def>) {
+    fn attach_file_level_info(p: &mut [Def]) {
         let file_attrs: Vec<FileAttribute> = p
             .iter()
             .filter_map(|x| x.as_file_attributes())
             .cloned()
             .collect();
 
+        let module_name: Option<Id> = p.iter().find_map(|x| x.as_set_module()).cloned();
+
         p.iter_mut().for_each(|x| match x {
-            Def::Class(c) => c.file_attributes = file_attrs.clone(),
-            Def::Fun(f) => f.file_attributes = file_attrs.clone(),
-            Def::Typedef(t) => t.file_attributes = file_attrs.clone(),
-            _ => {}
+            Def::Class(c) => {
+                c.file_attributes = file_attrs.clone();
+                c.module = module_name.clone()
+            }
+            Def::Fun(f) => {
+                f.file_attributes = file_attrs.clone();
+                f.module = module_name.clone()
+            }
+            Def::Typedef(t) => {
+                t.file_attributes = file_attrs.clone();
+                t.module = module_name.clone()
+            }
+            Def::Module(m) => {
+                m.file_attributes = file_attrs.clone();
+            }
+            Def::Constant(c) => {
+                c.module = module_name.clone();
+            }
+            Def::Stmt(_)
+            | Def::Namespace(_)
+            | Def::NamespaceUse(_)
+            | Def::SetNamespaceEnv(_)
+            | Def::FileAttributes(_)
+            | Def::SetModule(_) => {}
         });
     }
 
-    fn on_program_(mut nsenv: RcOc<namespace_env::Env>, p: Vec<Def>, acc: &mut Vec<Def>) {
+    fn on_program_(mut nsenv: Arc<namespace_env::Env>, p: Vec<Def>, acc: &mut Vec<Def>) {
         let mut new_acc = vec![];
         for def in p.into_iter() {
             on_def(&mut nsenv, &mut new_acc, def)
         }
 
-        attach_file_attributes(&mut new_acc);
+        attach_file_level_info(&mut new_acc);
         acc.append(&mut new_acc);
     }
 
-    fn on_program(nsenv: RcOc<namespace_env::Env>, p: Program) -> Program {
+    fn on_program(nsenv: Arc<namespace_env::Env>, p: Program) -> Program {
         let mut acc = vec![];
         on_program_(nsenv, p.0, &mut acc);
         Program(acc)
@@ -413,7 +388,7 @@ pub mod toplevel_elaborator {
     /// incur a perf hit that everybody will have to pay. For codegen purposed
     /// namespaces are propagated to inline declarations
     /// during closure conversion process
-    pub fn elaborate_toplevel_defs(ns: RcOc<namespace_env::Env>, defs: Program) -> Program {
+    pub fn elaborate_toplevel_defs(ns: Arc<namespace_env::Env>, defs: Program) -> Program {
         on_program(ns, defs)
     }
 }

@@ -1,5 +1,5 @@
 <?hh
 
-function f() {
+function f() :mixed{
   ()[this::C] ==> {};
 }

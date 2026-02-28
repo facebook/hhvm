@@ -20,17 +20,14 @@
 
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/tv-conversions.h"
-#include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/runtime/vm/iter.h"
 #include "hphp/runtime/vm/property-profile.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/func-order.h"
@@ -39,16 +36,14 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
 #include "hphp/runtime/ext/array/ext_array.h"
-#include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
-#include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/functioncredential/ext_functioncredential.h"
+#include "hphp/runtime/ext/hsl/ext_hsl_random.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 
-#include "hphp/util/abi-cxx.h"
 #include "hphp/util/assertions.h"
 
 namespace HPHP::jit {
@@ -193,13 +188,12 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {AllocObj,           ObjectData::newInstance<true>, DSSA, SSync,
                            {{SSA, 0}}},
-    {AllocObjReified,    ObjectData::newInstanceReified<true>, DSSA, SSync,
-                           {{SSA, 0}, {SSA, 1}}},
     {InitProps,          &Class::initProps, DNone, SSync,
                            {{extra(&ClassData::cls)}}},
     {InitSProps,         &Class::initSProps, DNone, SSync,
                            {{extra(&ClassData::cls)}}},
     {DebugBacktrace,     debug_backtrace_jit, DSSA, SSync, {{SSA, 0}}},
+    {LdPublicFunc,       loadPublicFunction, DSSA, SSync, {}},
     {InitThrowableFileAndLine,
                          throwable_init_file_and_line_from_builtin,
                            DNone, debug ? SSync : SNone, {{SSA, 0}}},
@@ -212,28 +206,37 @@ static CallMap s_callMap {
     {PrintStr,           print_string, DNone, SSync, {{SSA, 0}}},
     {PrintInt,           print_int, DNone, SSync, {{SSA, 0}}},
     {PrintBool,          print_boolean, DNone, SSync, {{SSA, 0}}},
-    {VerifyParamCls,     VerifyParamTypeSlow, DNone, SSync,
+    {VerifyParamCls,     VerifyParamTypeCls, DNone, SSync,
                            {{SSA, 0}, {SSA, 2},
                             extra(&FuncParamWithTCData::func),
                             extra(&FuncParamWithTCData::paramId),
                             extra(&FuncParamWithTCData::tcAsInt)}},
     {VerifyParamCallable, VerifyParamTypeCallable, DNone, SSync,
                            {{TV, 0},
-                            extra(&FuncParamData::func),
-                            extra(&FuncParamData::paramId)}},
-    {VerifyRetCls,       VerifyRetTypeSlow, DNone, SSync,
+                            extra(&FuncParamWithTCData::func),
+                            extra(&FuncParamWithTCData::paramId),
+                            extra(&FuncParamWithTCData::tcAsInt)}},
+    {VerifyRetCls,       VerifyRetTypeCls, DNone, SSync,
                            {{SSA, 0}, {SSA, 2},
                             extra(&FuncParamWithTCData::func),
                             extra(&FuncParamWithTCData::paramId),
                             extra(&FuncParamWithTCData::tcAsInt)}},
     {VerifyRetCallable,  VerifyRetTypeCallable, DNone, SSync,
                            {{TV, 0},
-                            extra(&FuncParamData::func),
-                            extra(&FuncParamData::paramId)}},
+                            extra(&FuncParamWithTCData::func),
+                            extra(&FuncParamWithTCData::paramId),
+                            extra(&FuncParamWithTCData::tcAsInt)}},
     {ThrowUninitLoc,     throwUndefVariable, DNone, SSync, {{SSA, 0}}},
     {RaiseError,         raise_error_sd, DNone, SSync, {{SSA, 0}}},
     {RaiseWarning,       raiseWarning, DNone, SSync, {{SSA, 0}}},
-    {RaiseNotice,        raiseNotice, DNone, SSync, {{SSA, 0}}},
+    {RaiseNotice,        raiseNotice, DNone, SSync,
+                         {extra(&SampleRateData::sampleRate), {SSA, 0}}},
+    {ThrowMissingNamedArgument,
+                         throwMissingNamedArgument, DNone, SSync,
+                         {extra(&FuncData::func), {SSA, 0}}},
+    {ThrowNamedArgumentNameMismatch,
+                         throwNamedArgumentNameMismatch, DNone, SSync,
+                         {extra(&FuncData::func), {SSA, 0}}},
     {ThrowCannotModifyReadonlyCollection,
                          throw_cannot_modify_readonly_collection, DNone, SSync,
                          {}},
@@ -274,16 +277,11 @@ static CallMap s_callMap {
                           DNone, SSync, {}},
     {ThrowHasThisNeedStatic, throw_has_this_need_static,
                           DNone, SSync, {{SSA, 0}}},
-    {ThrowMissingArg,    throwMissingArgument, DNone, SSync,
+    {ThrowMissingArg,    throwMissingPositionalArgument, DNone, SSync,
                            {extra(&FuncArgData::func),
                             extra(&FuncArgData::argNum)}},
     {ThrowMissingThis,   throw_missing_this,
                           DNone, SSync, {{SSA, 0}}},
-    {ThrowParameterWrongType, throw_parameter_wrong_type, DNone, SSync,
-                                {{TV, 0},
-                                 extra(&FuncArgTypeData::func),
-                                 extra(&FuncArgTypeData::argNum),
-                                 extra(&FuncArgTypeData::type)}},
     {CheckInOutMismatch, checkInOutMismatch, DNone, SSync,
                           {{SSA, 0},
                            extra(&BoolVecArgsData::numArgs),
@@ -371,8 +369,6 @@ static CallMap s_callMap {
                          getSPropOrRaise, DSSA, SSync,
                            {{extra(&ReadonlyData::op)}, {SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
 
-    {ProfileProp,        &PropertyProfile::incCount, DNone, SNone,
-                           {{SSA, 0}, {SSA, 1}}},
 
     {IncCallCounter,     FuncOrder::incCount, DNone, SNone, {{extra(&FuncData::func)}, {SSA, 0}}},
 
@@ -389,10 +385,14 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
 
     /* Async function support helpers */
-    {CreateAFWH,         &c_AsyncFunctionWaitHandle::Create, DSSA, SNone,
+    {CreateAFWH,         &c_AsyncFunctionWaitHandle::Create<false>, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
+    {CreateAFWHL,        &c_AsyncFunctionWaitHandle::Create<true>, DSSA, SNone,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, immed(0)}},
     {CreateAGWH,         &c_AsyncGeneratorWaitHandle::Create, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
+    {CreateFSWH,         &c_StaticWaitHandle::CreateFailed, DSSA, SNone,
+                           {{SSA, 0}}},
     {AFWHPrepareChild,   &c_AsyncFunctionWaitHandle::PrepareChild, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}}},
 
@@ -433,7 +433,11 @@ static CallMap s_callMap {
     /* is/as expressions */
     {IsTypeStruct, isTypeStructHelper, DSSA, SSync,
                     {{SSA, 0}, {TV, 1}, {extra(&RDSHandleData::handle)}}},
+    {IsTypeStructShallow, isTypeStructShallowHelper, DSSA, SSync,
+                    {{SSA, 0}, {TV, 1}, {extra(&RDSHandleData::handle)}}},
     {ThrowAsTypeStructException, throwAsTypeStructExceptionHelper, DNone, SSync,
+                                   {{SSA, 0}, {TV, 1}}},
+    {ThrowAsTypeStructError, throwAsTypeStructErrorHelper, DNone, SSync,
                                    {{SSA, 0}, {TV, 1}}},
 
     /* surprise flag support */
@@ -450,10 +454,6 @@ static CallMap s_callMap {
     {ReturnHook, &EventHook::onFunctionReturnJit, DNone,
                             SSync, {{SSA, 0}, {TV, 1}}},
 
-    /* silence operator support */
-    {ZeroErrorLevel, &zero_error_level, DSSA, SNone, {}},
-    {RestoreErrorLevel, &restore_error_level, DNone, SNone, {{SSA, 0}}},
-
     /* count($mixed) */
     {Count, &countHelper, DSSA, SSync, {{TV, 0}}},
 
@@ -468,10 +468,16 @@ static CallMap s_callMap {
     /* reified generics operations */
     {CheckClsReifiedGenericMismatch, checkClassReifiedGenericMismatch,
                                      DNone, SSync,
-                                     {{extra(&ClassData::cls)}, {SSA, 0}}},
+                                     {{SSA, 0}, {SSA, 1}}},
     {CheckFunReifiedGenericMismatch, checkFunReifiedGenericMismatch,
                                      DNone, SSync,
                                      {{SSA, 0}, {SSA, 1}}},
+    {CheckClsRGSoft, checkClassReifiedGenericsSoft,
+                                     DNone, SSync,
+                                     {{SSA, 0}}},
+    {GetClsRGProp, getClsReifiedGenericsProp,
+                                DSSA, SSync,
+                                {{SSA, 0}, {SSA, 1}}},
     {VerifyReifiedLocalType, VerifyReifiedLocalTypeImpl, DNone, SSync,
                                {{TV, 0}, {SSA, 1}, {SSA, 2},
                                 extra(&FuncParamData::func),
@@ -479,10 +485,25 @@ static CallMap s_callMap {
     {VerifyReifiedReturnType, VerifyReifiedReturnTypeImpl, DNone, SSync,
                                 {{TV, 0}, {SSA, 1}, {SSA, 2},
                                  extra(&FuncData::func)}},
+    {VerifyType, VerifyTypeImpl, DNone, SSync,
+                                {{TV, 0}, {SSA, 1}, {SSA, 2},
+                                 extra(&FuncData::func)}},
     {RecordReifiedGenericsAndGetTSList, recordReifiedGenericsAndGetTSList,
                                         DSSA, SSync, {{SSA, 0}}},
+    {ReifiedInit, tryClassReifiedInit,
+                                     DNone, SSync,
+                                     {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
     {RaiseErrorOnInvalidIsAsExpressionType,
       errorOnIsAsExpressionInvalidTypesHelper, DSSA, SSync, {{SSA, 0}}},
+
+    /* Iterators */
+    {IterExtractBase, Iter::extractBase, DTV, SSync, {{TV, 0}, {SSA, 1}}},
+    {IterInitObj, iter_init_object, DSSA, SSync, {{SSA, 0}}},
+    {IterNextObj, iter_next_object, DSSA, SSync, {{SSA, 0}}},
+
+    /* Random */
+    {PseudoRandomInt, HHVM_FN(HH_pseudorandom_int), DSSA, SNone,
+                      {{SSA, 0}, {SSA, 1}}},
 };
 
 CallMap::CallMap(CallInfoList infos) {
@@ -492,7 +513,7 @@ CallMap::CallMap(CallInfoList infos) {
 }
 
 bool CallMap::hasInfo(Opcode op) {
-  return s_callMap.m_map.count(op) != 0;
+  return s_callMap.m_map.contains(op);
 }
 
 const CallInfo& CallMap::info(Opcode op) {

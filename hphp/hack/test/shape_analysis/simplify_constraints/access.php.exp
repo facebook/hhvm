@@ -1,6 +1,0 @@
-=== Shape analysis results for access.php
-Summary for \f:
-#{0} [4:3-18] :
-  shape(
-    a => int
-  )

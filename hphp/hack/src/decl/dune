@@ -2,7 +2,7 @@
 ; contains "external" function definition in .ml and
 ; the symbol is provided by the ocaml-rs Rust package via caml! macro
 
-(data_only_dirs cargo rust_decl_ffi direct_decl_smart_constructors)
+(data_only_dirs cargo rust_decl_ffi direct_decl_smart_constructors_obr)
 
 ; so dune doesn't look at rust stuff
 
@@ -15,34 +15,31 @@
 (rule
  (targets librust_decl_ffi.a)
  (deps
-  (source_tree %{workspace_root}/src))
+  (source_tree %{workspace_root}/hack/src))
  (locks /cargo)
  (action
   (run
-   %{workspace_root}/scripts/build_rust_to_ocaml.sh
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
    rust_decl_ffi
    rust_decl_ffi)))
 
 (library
- (name affectedDeps)
- (modules affectedDeps)
- (libraries decl_defs typing_defs typing_deps)
+ (name class_diff)
+ (modules class_diff)
+ (libraries
+  decl_defs
+  typing_defs
+  yojson)
  (preprocess
-  (pps ppx_deriving.std)))
-
-(library
- (name classDiff)
- (modules classDiff)
- (libraries decl_defs typing_defs)
- (preprocess
-  (pps ppx_deriving.std)))
+  (pps
+   ppx_deriving.std
+   ppx_yojson_conv)))
 
 (library
  (name decl)
  (modules decl)
  (libraries
-  affectedDeps
-  classDiff
+  class_diff
   ast_provider
   decl_class
   decl_class_elements
@@ -58,7 +55,6 @@
   naming_heap
   procs_procs
   shallow_class_diff
-  shallow_classes_provider
   shallow_decl_defs
   typing_defs)
  (preprocess
@@ -85,22 +81,30 @@
 
 (library
  (name decl_folded_class)
- (modules decl_folded_class decl_inherit decl_requirements)
+ (wrapped false)
+ (modules
+  decl_folded_class
+  decl_inherit
+  decl_requirements)
  (libraries
   ast_provider
   decl_class_elements
+  decl_defs
+  decl_enforceability_shallow
   decl_enum
   decl_env
   decl_fun_utils
   decl_init_check
+  decl_instantiate
+  decl_members
   decl_pos_utils
   decl_store
-  decl_to_typing
+  decl_utils
   naming
   procs_procs
-  shallow_classes_provider
   shallow_decl_defs
-  typing_defs)
+  typing_defs
+  typing_pessimisation_deps)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -112,24 +116,28 @@
   shallow_decl_defs
   pos_or_decl
   typing_defs
-  rust_decl_ffi)
+  rust_decl_ffi
+  search_utils)
  (preprocess
   (pps ppx_deriving.std)))
 
 (library
- (name decl_ancestors)
- (modules decl_ancestors)
- (libraries decl_defs decl_linearize shallow_decl_defs typing_defs)
- (preprocess
-  (pps ppx_deriving.std)))
+ (name decl_members)
+ (modules decl_members)
+ (libraries
+  decl_defs
+  decl_enforceability
+  typing_defs))
 
 (library
  (name decl_class)
  (modules decl_class)
  (libraries
    decl_defs
-   decl_folded_class
+   decl_enforceability_shallow
    decl_instantiate
+   decl_members
+   decl_provider_internals
    decl_store
    decl_subst
    typing_defs)
@@ -150,17 +158,13 @@
   decl_defs
   decl_heap
   decl_pos_utils
+  fanout
+  naming_provider
   provider_context
+  rust_provider_backend_stubs
   typechecker_options
   typing_defs
   typing_deps)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
- (name decl_compare_utils)
- (modules decl_compare_utils)
- (libraries classDiff decl_defs typing_defs)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -172,6 +176,21 @@
   (pps ppx_deriving.std)))
 
 (library
+  (name decl_enforceability)
+  (modules decl_enforceability)
+  (libraries
+   decl_entry
+   decl_env))
+
+(library
+  (name decl_enforceability_shallow)
+  (modules decl_enforceability_shallow)
+  (libraries
+   decl_enforceability
+   decl_provider_internals
+   naming_provider))
+
+(library
  (name decl_enum)
  (modules decl_enum)
  (libraries decl_defs typing_defs)
@@ -181,35 +200,40 @@
 (library
  (name decl_env)
  (modules decl_env)
- (libraries decl_defs decl_store provider_context typing_defs typing_deps)
+ (libraries decl_defs decl_store provider_context typing_defs typing_pessimisation_deps typing_deps)
  (preprocess
   (pps ppx_deriving.std)))
 
 (library
  (name decl_export)
  (modules decl_export)
- (libraries decl decl_defs decl_store naming naming_heap utils_core)
+ (libraries decl decl_defs decl_store decl_provider naming naming_heap utils_core)
  (preprocess
   (pps ppx_deriving.std)))
 
 (library
  (name decl_fun_utils)
  (modules decl_fun_utils)
- (libraries decl_defs decl_env decl_hint typing_defs)
+ (libraries
+  annotated_ast_utils
+  decl_defs
+  decl_env
+  decl_hint
+  typing_defs )
  (preprocess
   (pps ppx_deriving.std)))
 
 (library
  (name decl_heap)
  (modules decl_heap)
- (libraries decl_defs heap_shared_mem provider_backend typing_defs)
+ (libraries decl_defs heap_shared_mem typing_defs)
  (preprocess
   (pps ppx_deriving.std)))
 
 (library
  (name decl_store)
  (modules decl_store)
- (libraries decl_defs decl_heap provider_backend typing_defs)
+ (libraries decl_defs decl_heap typing_defs)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -217,21 +241,6 @@
  (name decl_hint)
  (modules decl_hint)
  (libraries decl_defs decl_env typing_defs)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
- (name decl_inheritance)
- (modules decl_inheritance)
- (libraries
-  bloom_filter
-  decl_defs
-  decl_enum
-  decl_instantiate
-  decl_linearize
-  decl_to_typing
-  shallow_classes_provider
-  typing_defs)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -245,23 +254,12 @@
 (library
  (name decl_instantiate)
  (modules decl_instantiate)
- (libraries decl_defs decl_subst shallow_decl_defs typing_defs)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
- (name decl_linearize)
- (modules decl_linearize)
  (libraries
   decl_defs
-  decl_env
-  decl_instantiate
   decl_subst
-  decl_utils
   shallow_decl_defs
-  shallow_classes_provider
-  linearization_provider
-  typing_defs)
+  typing_defs
+  typing_ast)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -273,26 +271,19 @@
   (pps ppx_deriving.std)))
 
 (library
- (name decl_service)
- (modules decl_service)
- (libraries decl procs_procs utils_core)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
  (name decl_redecl_service)
  (modules decl_redecl_service)
  (libraries
-  affectedDeps
   decl
   decl_class_elements
   decl_compare
-  decl_linearize
+  decl_provider
   heap_global_storage
   naming
   procs_procs
   remote_old_decl_client
-  server_monitor
+  rust_provider_backend_stubs
+  server_progress
   shallow_decl_compare
   typing_deps
   utils_core
@@ -308,13 +299,6 @@
   (pps ppx_deriving.std)))
 
 (library
- (name decl_to_typing)
- (modules decl_to_typing)
- (libraries decl_defs decl_instantiate shallow_decl_defs typing_defs)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
  (name decl_utils)
  (modules decl_utils)
  (libraries
@@ -322,7 +306,9 @@
   naming_attributes
   naming_attributes_params
   shallow_decl_defs
-  typing_defs)
+  typing_defs
+  typing_error
+  )
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -330,15 +316,20 @@
  (name remote_old_decl_client)
  (modules remote_old_decl_client)
  (libraries
-  decl_export
+  db_path_provider
   file_info
+  future
   naming_sqlite
+  process
+  process_types
   provider_context
   shallow_decl_defs
+  sys_username
   sys_utils
+  temp_file
   typing_defs
   remote_old_decls_ffi
-  utils_config_file
+  config_file
   utils_core
   utils_www_root)
  (preprocess
@@ -348,22 +339,31 @@
  (name shallow_class_diff)
  (modules shallow_class_diff)
  (libraries
-  classDiff
+  class_diff
   decl_defs
   decl_pos_utils
   decl_utils
+  package_info
+  provider_context
   shallow_decl_defs
   typing_defs)
  (preprocess
   (pps ppx_deriving.std)))
 
 (library
+ (name fanout)
+ (modules fanout)
+ (libraries
+  typing_deps))
+
+(library
  (name shallow_class_fanout)
  (modules shallow_class_fanout)
  (libraries
-  affectedDeps
-  classDiff
+  class_diff
   decl_defs
+  decl_provider
+  fanout
   naming_provider
   shallow_decl_defs
   typing_defs)
@@ -374,24 +374,11 @@
  (name shallow_classes_heap)
  (modules shallow_classes_heap)
  (libraries
-  bloom_filter
   decl_defs
+  decl_utils
   heap_shared_mem
   naming
   naming_heap
-  shallow_decl
-  shallow_decl_defs
-  typing_defs)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
- (name shallow_decl)
- (modules shallow_decl)
- (libraries
-  decl_defs
-  decl_fun_utils
-  decl_utils
   shallow_decl_defs
   typing_defs)
  (preprocess
@@ -401,13 +388,14 @@
  (name shallow_decl_compare)
  (modules shallow_decl_compare)
  (libraries
-  affectedDeps
-  classDiff
-  decl_compare_utils
+  class_diff
+  decl_compare
   decl_defs
+  package_info
   shallow_class_diff
   shallow_class_fanout
-  shallow_classes_provider
+  decl_provider
+  old_shallow_classes_provider
   shallow_decl_defs
   typing_defs)
  (preprocess
@@ -423,7 +411,7 @@
 (library
  (name decl_counters)
  (modules decl_counters)
- (libraries counters logging utils_core relative_path typing_service_types)
+ (libraries counters logging utils_core relative_path)
  (preprocess
   (pps ppx_deriving.std)))
 

@@ -22,7 +22,7 @@ class C extends A implements I1 {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(C::FOO);
   var_dump(C::BAR);
 }

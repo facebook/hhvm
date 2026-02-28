@@ -1,0 +1,4 @@
+ERROR: File "nameof_await.php", line 6, characters 12-21:
+`await` cannot be used in this location (Parsing[1002])
+ERROR: File "nameof_await.php", line 6, characters 12-21:
+`nameof` can only be used with a class (Parsing[1002])

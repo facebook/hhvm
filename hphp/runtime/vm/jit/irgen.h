@@ -110,7 +110,7 @@ SSATmp* cns(IRGS& env, Args&&... args) {
 /*
  * Type checks and assertions.
  */
-void checkType(IRGS&, const Location&, Type, SrcKey dest);
+void checkType(IRGS&, const Location&, Type, Block* exit);
 void assertTypeStack(IRGS&, BCSPRelOffset, Type);
 void assertTypeLocal(IRGS&, uint32_t id, Type);
 void assertTypeLocation(IRGS&, const Location&, Type);
@@ -126,6 +126,13 @@ void prepareEntry(IRGS&);
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Sync VM regs eagerly
+ */
+void eagerVMSync(IRGS&, IRSPRelOffset spOff);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
  * Support for Profiling counters, including reoptimization (CheckCold).
  */
 void incProfCounter(IRGS&, TransID);
@@ -135,6 +142,16 @@ void checkCold(IRGS&, TransID);
  * Exit if code coverage is enabled for the current function.
  */
 void checkCoverage(IRGS& env);
+
+/*
+ * Exit if debugger interrupt is set on the current function.
+ */
+void checkDebuggerIntr(IRGS& env, SrcKey sk);
+
+/*
+ * Exit if exception breakpoint is set by the debugger.
+ */
+void checkDebuggerExceptionIntr(IRGS& env, Block* slowExit);
 
 uint64_t curProfCount(const IRGS& env);
 uint64_t calleeProfCount(const IRGS& env, const RegionDesc& calleeRegion);
@@ -201,18 +218,18 @@ uint16_t inlineDepth(const IRGS& env);
  *   // ... normal stuff happens ...
  *   // ... probably some StStks due to argument expressions
  *   // FCall*:
- *     fp2   = BeginInlining<offset,func,cost,numArgs> sp fp
+ *     fp2   = DefCalleeFP<offset,func,cost,numArgs> sp fp
  *
  *         // ... callee body ...
  *
- *     EndInlining fp2
+ *     LeaveInlineFrame fp2
  */
 void beginInlining(IRGS& env,
                    SrcKey entry,
                    SSATmp* ctx,
-                   Offset callBcOffset,
-                   InlineReturnTarget returnTarget,
-                   int cost);
+                   Offset asyncEagerOffset,
+                   int cost,
+                   SSATmp* calleeFP);
 
 /*
  * End the current inlined frame, after all its blocks have been emitted.
@@ -233,8 +250,7 @@ bool endInlining(IRGS& env, const RegionDesc& calleeRegion);
 void conjureBeginInlining(IRGS& env,
                           SrcKey entry,
                           Type thisType,
-                          const std::vector<Type>& inputs,
-                          InlineReturnTarget returnTarget);
+                          const std::vector<Type>& inputs);
 
 /*
  * Close an inlined function inserted using conjureBeginInlining; returns false

@@ -1,0 +1,2 @@
+--config enable_no_auto_dynamic=true
+--config enable_abstract_method_optional_parameters=true

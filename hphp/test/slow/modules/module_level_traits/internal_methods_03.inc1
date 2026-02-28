@@ -1,0 +1,7 @@
+<?hh
+
+module MLT_B;
+
+public trait T1 {
+  use T;
+}

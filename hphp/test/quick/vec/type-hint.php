@@ -76,7 +76,7 @@ function takes_vec_or_dict3(<<__Soft>> vec_or_dict<int> $x): vec_or_dict<int> {
   return $x;
 }
 
-function test_all_hints($x) {
+function test_all_hints($x) :mixed{
   echo "====================================================\n";
   var_dump($x);
   $funs = vec[
@@ -116,7 +116,7 @@ function test_all_hints($x) {
   var_dump($x);
 }
 
-function test_vec_hint($x) {
+function test_vec_hint($x) :mixed{
   echo "====================================================\n";
   var_dump($x);
   $funs = vec[
@@ -162,8 +162,8 @@ test_vec_hint(717);
 test_vec_hint(1.234);
 test_vec_hint("string");
 test_vec_hint(new stdClass);
-test_vec_hint(varray[]);
-test_vec_hint(varray[1, 2, 3]);
+test_vec_hint(vec[]);
+test_vec_hint(vec[1, 2, 3]);
 test_vec_hint(dict[]);
 test_vec_hint(dict['a' => 1]);
 test_vec_hint(keyset[]);

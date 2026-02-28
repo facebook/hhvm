@@ -25,7 +25,6 @@
 #include <cstdlib>
 #include <mutex>
 #include <string>
-#include <sys/types.h>
 #include <unistd.h>
 
 namespace HPHP {
@@ -38,7 +37,6 @@ std::mutex mtx;
 std::string repoSchema;
 std::string compiler;
 std::string buildid;
-std::string hhjsbabeltransform;
 int64_t timestamp;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,11 +74,10 @@ void readBuildInfo() {
 
   compiler = get("compiler_id");
   buildid = get("build_id");
-  hhjsbabeltransform = get("hhjs_babel_transform");
 
   try {
     timestamp = std::stoll(get("compiler_ts"));
-  } catch(std::exception& e) {
+  } catch(std::exception& ) {
     timestamp = 0;
   }
 
@@ -120,12 +117,8 @@ folly::StringPiece buildId() {
   return buildid;
 }
 
-folly::StringPiece hhjsBabelTransform() {
-  readBuildInfo();
-  return hhjsbabeltransform;
-}
-
-void replacePlaceholders(std::string& s) {
+void replacePlaceholders(std::string& s,
+                         const hphp_fast_string_map<std::string>& replaces) {
   replacePlaceholder(s, "%{schema}", [] { return repoSchemaId().begin(); });
   replacePlaceholder(s, "%{euid}", [] {
     return folly::to<std::string>(geteuid());
@@ -138,6 +131,13 @@ void replacePlaceholders(std::string& s) {
   replacePlaceholder(s, "%{pid}", [] {
     return folly::to<std::string>(getpid());
   });
+  for (auto& p : replaces) {
+    replacePlaceholder(s, p.first.data(), [&] { return p.second; });
+  }
+}
+
+void replacePlaceholders(std::string& s) {
+  replacePlaceholders(s, {});
 }
 
 ////////////////////////////////////////////////////////////////////////////////

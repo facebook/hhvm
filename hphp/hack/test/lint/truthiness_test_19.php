@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test(Stringish $x): void {
   if ($x) {

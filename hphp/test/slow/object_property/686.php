@@ -3,16 +3,16 @@
 class A {
   private $pri = 'a-pri';
   protected $pro = 'a-pro';
-  function bar() {
+  function bar() :mixed{
     var_dump($this->pri);
   }
-  function bar2() {
+  function bar2() :mixed{
     var_dump($this->pro);
   }
 }
 class B extends A {
   private $pri = 'b-pri';
-  function bar() {
+  function bar() :mixed{
     parent::bar();
     var_dump($this->pri);
   }
@@ -20,7 +20,7 @@ class B extends A {
 class C extends B {
   public $pri = 'c-pri';
   public $pro = 'c-pro';
-  function bar2() {
+  function bar2() :mixed{
     parent::bar2();
     var_dump($this->pro);
   }
@@ -28,7 +28,7 @@ class C extends B {
 class Base {
   protected $pro = 1;
   private $pri = 'base-pri';
-  function q0() {
+  function q0() :mixed{
     var_dump($this->pri);
   }
 }
@@ -36,7 +36,7 @@ class R extends Base {
   public $rpub = 1;
   protected $pro = 2;
   private $pri = 'r-pri';
-  function q() {
+  function q() :mixed{
     var_dump($this->pri);
   }
 }
@@ -44,19 +44,19 @@ class D extends R {
   public $dpub = 'd';
   protected $pro = 'pro';
   private $pri = 'd-pri';
-  function qq() {
+  function qq() :mixed{
     var_dump($this->pri);
   }
 }
 class DD extends D {
   private $pri = 'dd-pri';
-  function qqq() {
+  function qqq() :mixed{
     var_dump($this->pri);
   }
 }
 
 <<__EntryPoint>>
-function main_686() {
+function main_686() :mixed{
   $obj = new B();
   $obj->bar();
   $obj = new C;

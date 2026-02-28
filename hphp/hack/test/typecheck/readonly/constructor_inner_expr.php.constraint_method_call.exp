@@ -1,0 +1,8 @@
+ERROR: File "constructor_inner_expr.php", line 17, characters 7-20:
+Typing error (Typing[4411])
+  File "constructor_inner_expr.php", line 3, characters 28-35:
+  Function readonly return mismatch
+  File "constructor_inner_expr.php", line 3, characters 28-35:
+  This function returns a readonly value
+  File "constructor_inner_expr.php", line 17, characters 7-20:
+  This function does not return a readonly value

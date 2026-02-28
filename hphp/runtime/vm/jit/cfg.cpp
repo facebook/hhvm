@@ -25,7 +25,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 namespace {
 
@@ -155,9 +155,9 @@ bool splitCriticalEdges(IRUnit& unit) {
   });
 
   for (auto b : newCatches) {
-    auto bc = b->next()->begin();
-    assertx(bc->is(BeginCatch));
-    b->prepend(unit.gen(BeginCatch, bc->bcctx()));
+    auto const& bc = b->next()->front();
+    assertx(bc.is(BeginCatch));
+    b->prepend(unit.clone(&bc, bc.dst()));
   }
 
   for (auto b : oldCatches) {
@@ -291,6 +291,47 @@ bool cfgHasLoop(const IRUnit& unit) {
     return false;
   });
   return ret;
+}
+
+
+LoopInfo findBlocksInLoops(const IRUnit& unit, const EdgeSet& backEdges) {
+  jit::hash_map<RegionDesc::BlockId, BlockList> loopEntryBlocks;
+  jit::hash_set<RegionDesc::BlockId> blocks;
+  auto findBlocksInLoop = [&](Edge* backEdge) {
+    auto stack = BlockList{};
+    jit::hash_set<RegionDesc::BlockId> visited;
+    visited.reserve(unit.numBlocks());
+    stack.reserve(unit.numBlocks());
+    stack.push_back(backEdge->from());
+    auto loopHeader = backEdge->to();
+    auto loopHeaderId = loopHeader->id();
+    visited.insert(loopHeaderId);
+    blocks.insert(loopHeaderId);
+
+    // Find all blocks dominated by backEdge->to() that can reach
+    // backEdge->from()
+    while (!stack.empty()) {
+      auto* b = stack.back();
+      stack.pop_back();
+      if (visited.find(b->id()) != visited.end()) continue;
+      blocks.insert(b->id());
+      visited.insert(b->id());
+      b->forEachPred([&] (Block* pred) {
+        stack.push_back(pred);
+      });
+    }
+
+    BlockList entries{};
+    loopHeader->forEachPred([&] (Block* pred) {
+      if (visited.find(pred->id()) != visited.end()) return;
+      entries.push_back(pred);
+    });
+    loopEntryBlocks[loopHeaderId] = std::move(entries);
+  };
+  for (auto edge : backEdges) {
+    findBlocksInLoop(edge);
+  }
+  return {blocks, loopEntryBlocks};
 }
 
 //////////////////////////////////////////////////////////////////////

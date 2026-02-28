@@ -1,6 +1,10 @@
+# pyre-unsafe
 import unittest
 
-from utils import interpolate_variables, uninterpolate_variables
+from hphp.hack.test.integration.utils import (
+    interpolate_variables,
+    uninterpolate_variables,
+)
 
 
 class UtilsTest(unittest.TestCase):

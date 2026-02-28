@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/jit/tc-intercept.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 
 #include "hphp/util/arch.h"
@@ -83,7 +84,7 @@ namespace HPHP::jit::tc {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(reusetc);
+TRACE_SET_MOD(reusetc)
 
 namespace {
 struct FuncInfo {
@@ -121,7 +122,7 @@ struct FuncJob {
   FuncId fid;
 };
 
-using Job = boost::variant<FuncJob, const SrcRec*, TransLoc>;
+using Job = std::variant<FuncJob, const SrcRec*, TransLoc>;
 std::atomic<bool> s_running{false};
 std::queue<Job> s_jobq;
 std::condition_variable s_qcv;
@@ -141,7 +142,7 @@ Optional<Job> dequeueJob() {
     return !s_running.load(std::memory_order_acquire) || !s_jobq.empty();
   });
 
-  if (!s_running.load(std::memory_order_relaxed)) return std::nullopt;
+  if (!s_running.load(std::memory_order_acquire)) return std::nullopt;
   assertx(!s_jobq.empty());
   auto ret = s_jobq.front();
   s_jobq.pop();
@@ -189,6 +190,7 @@ Optional<SmashedCall> eraseSmashedCall(TCA start) {
  */
 void clearTCMaps(TCA start, TCA end) {
   auto const profData = jit::profData();
+  deleteRangeInterceptTCA(start, end);
   while (start < end) {
     bool isBranch, isNop, isCall;
     size_t instSz;
@@ -273,11 +275,19 @@ void clearTransLocMaps(TransLoc loc) {
  * extending length bytes. Use info as the name of the associated CodeBlock.
  */
 void clearRange(TCA start, size_t len, const char* info) {
+  if (len == 0) {
+    return;
+  }
   CodeBlock cb;
   cb.init(start, len, info);
 
   CGMeta fixups;
-  SCOPE_EXIT { assertx(fixups.empty()); };
+  SCOPE_EXIT {
+    // In general, fixups should be empty at this point. However, a fallthru
+    // instruction is appended to any empty block and, on ARM, fallthru
+    // instructions add address immediates in the fixups.addressImmediates.
+    assertx(arch() == Arch::ARM || fixups.empty());
+  };
 
   DataBlock db;
   Vauto vasm { cb, cb, db, fixups };
@@ -405,6 +415,18 @@ int smashedCalls()    { return s_smashedCalls.size(); }
 int smashedBranches() { return s_smashedBranches.size(); }
 int recordedFuncs()   { return s_funcTCData.size(); }
 
+namespace {
+ServiceData::CounterCallback s_counters(
+  [](std::map<std::string, int64_t>& counters) {
+    if (!Cfg::Eval::EnableReusableTC) return;
+
+    counters["jit.tc.smashed_calls"] = s_smashedCalls.size();
+    counters["jit.tc.recorded_funcs"] = s_funcTCData.size();
+    counters["jit.tc.smashed_branches"] = s_smashedBranches.size();
+  }
+);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 void recordFuncCaller(const Func* func, TCA toSmash, ProfTransRec* rec) {
@@ -457,7 +479,7 @@ void reclaimTranslations(GrowableVector<TransLoc>&& trans) {
 
 
 void recycleInit() {
-  if (!RuntimeOption::EvalEnableReusableTC) return;
+  if (!Cfg::Eval::EnableReusableTC) return;
 
   s_running.store(true, std::memory_order_release);
   s_reaper = std::thread([] {
@@ -465,7 +487,7 @@ void recycleInit() {
     SCOPE_EXIT { rds::local::fini(); };
     while (auto j = dequeueJob()) {
       ProfData::Session pds;
-      match<void>(
+      match(
         *j,
         [] (TransLoc loc) { reclaimTranslationSync(loc); },
         [] (const SrcRec* sr) { reclaimSrcRecSync(sr); },

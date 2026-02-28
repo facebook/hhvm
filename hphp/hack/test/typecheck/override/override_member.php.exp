@@ -1,4 +1,4 @@
-File "override_member.php", line 17, characters 10-13:
+ERROR: File "override_member.php", line 17, characters 10-13:
 The property `x` has the wrong type (Typing[4341])
   File "override_member.php", line 17, characters 10-13:
   Typing error
@@ -6,7 +6,7 @@ The property `x` has the wrong type (Typing[4341])
   Expected `int`
   File "override_member.php", line 17, characters 10-13:
   But got `bool`
-File "override_member.php", line 17, characters 10-13:
+ERROR: File "override_member.php", line 17, characters 10-13:
 The property `x` has the wrong type (Typing[4341])
   File "override_member.php", line 17, characters 10-13:
   Typing error

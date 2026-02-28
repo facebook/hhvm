@@ -1,5 +1,5 @@
 //// file1.php
-<?hh // strict
+<?hh
 
 
 class C {

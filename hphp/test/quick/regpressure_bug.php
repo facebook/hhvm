@@ -14,18 +14,18 @@ class IPAddressIsh {
     $this->binary = "asdasd";
   }
 
-  public function toBinary() {
+  public function toBinary() :mixed{
     return $this->binary;
   }
 
-  public final function inSubnetWithMask(IPAddressIsh $subnet, string $mask) {
+  public final function inSubnetWithMask(IPAddressIsh $subnet, string $mask) :mixed{
     // Test case for inlining from FB's IPAddress class, removed real
     // logic.
     echo "pre1\n";
     return ($this->toBinary() & $mask) === ($subnet->toBinary() & $mask);
   }
 
-  public function foobar() {
+  public function foobar() :mixed{
     echo $this->binary;
     echo "\n";
   }

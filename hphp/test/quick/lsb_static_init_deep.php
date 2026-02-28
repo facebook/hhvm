@@ -5,7 +5,7 @@ class A {
   <<__LSB>> protected static $y = Set{1, 2, 3};
   <<__LSB>> public static $z = Map{1 => "foo", 2 => "bar", 3 => "baz"};
 
-  static function dump() {
+  static function dump() :mixed{
     var_dump(static::$x);
     var_dump(static::$y);
     var_dump(static::$z);

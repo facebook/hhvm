@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function m(): Map<string, int> {
   return Map {};

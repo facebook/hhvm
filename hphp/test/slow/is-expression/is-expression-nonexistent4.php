@@ -18,15 +18,5 @@ function fail(
 
 <<__EntryPoint>>
 function main(): void {
-  HH\autoload_set_paths(
-    dict[
-      'class' => dict[],
-      'constant' => dict[],
-      'function' => dict[],
-      'type' => dict[],
-      'failure' => fail<>,
-    ],
-    __DIR__.'/',
-  );
   is_nonexistent(new stdClass());
 }

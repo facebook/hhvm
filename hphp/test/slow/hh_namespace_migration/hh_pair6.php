@@ -2,7 +2,7 @@
 
 // Test that Pair can be accessed through its fully-qualified name.
 
-function main() {
+function main() :mixed{
   $s = HH\Pair { 1, 2 };
   $s2 = \HH\Pair { 4, 5 };
   var_dump($s->count());
@@ -11,6 +11,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_hh_pair6() {
+function main_hh_pair6() :mixed{
 main();
 }

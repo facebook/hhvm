@@ -8,34 +8,35 @@
  *
  */
 
-class FilesystemIterator extends DirectoryIterator
-  implements
-    SeekableIterator<SplFileInfo> {
+class FilesystemIterator extends DirectoryIterator {
 
   // Constants
-  const int CURRENT_AS_PATHNAME = 32;
-  const int CURRENT_AS_FILEINFO = 0;
-  const int CURRENT_AS_SELF = 16;
-  const int CURRENT_MODE_MASK = 240;
-  const int KEY_AS_PATHNAME = 0;
-  const int KEY_AS_FILENAME = 256;
-  const int FOLLOW_SYMLINKS = 512;
-  const int KEY_MODE_MASK = 3840;
-  const int NEW_CURRENT_AND_KEY = 256;
-  const int SKIP_DOTS = 4096;
-  const int UNIX_PATHS = 8192;
+  const int CURRENT_AS_PATHNAME;
+  const int CURRENT_AS_FILEINFO;
+  const int CURRENT_AS_SELF;
+  const int CURRENT_MODE_MASK;
+  const int KEY_AS_PATHNAME;
+  const int KEY_AS_FILENAME;
+  const int FOLLOW_SYMLINKS;
+  const int KEY_MODE_MASK;
+  const int NEW_CURRENT_AND_KEY;
+  const int SKIP_DOTS;
+  const int UNIX_PATHS;
 
   // Properties
-  protected $flags;
+  protected HH\FIXME\MISSING_PROP_TYPE $flags;
 
   // Methods
-  public function __construct($path, $flags = null);
-  public function current();
-  public function getFlags();
-  public function key();
-  public function next();
-  public function rewind();
-  public function setFlags(int $flags);
+  public function __construct(
+    HH\FIXME\MISSING_PARAM_TYPE $path,
+    HH\FIXME\MISSING_PARAM_TYPE $flags = null,
+  );
+  public function current(): ~SplFileInfo;
+  public function getFlags(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function key(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function next(): void;
+  public function rewind(): void;
+  public function setFlags(int $flags): HH\FIXME\MISSING_RETURN_TYPE;
   public function seek(int $position): void;
-  public function __toString();
+  public function __toString(): string;
 }

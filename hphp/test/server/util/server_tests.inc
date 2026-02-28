@@ -1,5 +1,16 @@
 <?hh
 
+function try_unlink(string $s): void {
+  if (file_exists($s)) {
+    unlink($s);
+  }
+}
+
+function try_readfile(string $s): void {
+  if (is_readable($s)) {
+    readfile($s);
+  }
+}
 
 abstract final class ServerUtilServerTests {
   public static $LOG_ROOT;
@@ -14,6 +25,16 @@ abstract final class ServerUtilServerTests {
   }
 
   <<__Memoize>>
+  public static function working_dir() {
+    return sys_get_temp_dir();
+  }
+
+  <<__Memoize>>
+  public static function socket_dir() {
+    return getenv('HPHP_TEST_SOCKETDIR') ?? sys_get_temp_dir();
+  }
+
+  <<__Memoize>>
   public static function error_log_file() {
     return fopen(ServerUtilServerTests::$LOG_ROOT.'_test'.ServerUtilServerTests::test_run_id().".log", 'w');
   }
@@ -22,7 +43,7 @@ abstract final class ServerUtilServerTests {
     if (self::$request !== null) {
       return self::$request;
     }
-    return fun('http_request');
+    return http_request<>;
   }
 }
 
@@ -42,33 +63,57 @@ function dumpLogFilesToStdoutAndDie() {
   sleep(1);
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test$test_run_id.log'");
-  readfile("{$LOG_ROOT}_test$test_run_id.log");
+  try_readfile("{$LOG_ROOT}_test$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_server$test_run_id.log'");
-  readfile("{$LOG_ROOT}_test_server$test_run_id.log");
+  try_readfile("{$LOG_ROOT}_test_server$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_server_stdout$test_run_id.log'");
-  readfile("{$LOG_ROOT}_test_server_stdout$test_run_id.log");
+  try_readfile("{$LOG_ROOT}_test_server_stdout$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_server_stderr$test_run_id.log'");
-  readfile("{$LOG_ROOT}_test_server_stderr$test_run_id.log");
+  try_readfile("{$LOG_ROOT}_test_server_stderr$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_client$test_run_id.log'");
-  readfile("{$LOG_ROOT}_test_client$test_run_id.log");
+  try_readfile("{$LOG_ROOT}_test_client$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_test_sandbox_access.log'");
-  readfile("{$LOG_ROOT}_test_sandbox_access.log");
+  try_readfile("{$LOG_ROOT}_test_sandbox_access.log");
   echo "\n";
   error_log('-------------------------------------------');
   error_log("Contents of '{$LOG_ROOT}_curl$test_run_id.log'");
-  readfile("{$LOG_ROOT}_curl$test_run_id.log");
+  try_readfile("{$LOG_ROOT}_curl$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
+
+  $log_data = file_get_contents("{$LOG_ROOT}_test_server$test_run_id.log");
+  $hits = null;
+  if (
+    $log_data !== false &&
+    preg_match_with_matches(
+      '#\nStack trace in ([a-zA-Z0-9._/-]+)\n#',
+      $log_data,
+      inout $hits,
+    ) !== 0
+  ) {
+    for ($i = 1; $i < count($hits); $i++) {
+      if (is_readable($hits[$i])) {
+        echo "\n";
+        error_log('-------------------------------------------');
+        error_log("Contents of '{$hits[$i]}'");
+        readfile($hits[$i]);
+        echo "\n";
+        error_log('-------------------------------------------');
+      } else {
+        error_log("Unable to read {$hits[$i]}");
+      }
+    }
+  }
   throw new Exception("test failed");
 }
 
@@ -104,7 +149,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
   $includePathConfig = ' -vServer.IncludeSearchPaths.0='.$root;
   $adminPortConfig = $adminPort ? ' -vAdminServer.Port='.$adminPort : '';
   $debugPortConfig = $debugPort ? ' -vEval.Debugger.Port='.$debugPort : '';
-  $useJit = array_key_exists('HHVM_JIT', $_ENV) && $_ENV['HHVM_JIT'] == 1;
+  $useJit = array_key_exists('HHVM_JIT', \HH\global_get('_ENV')) && \HH\global_get('_ENV')['HHVM_JIT'] == 1;
   $jitConfig = ' -vEval.Jit='.($useJit ? "true" : "false");
   // To emulate sandbox setup, let Sandbox.Home be '$home'
   // and user name be 'debugger', so that the server can find the
@@ -112,15 +157,18 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
   $sandboxHomeConfig = ' -vSandbox.Home='.$home;
   $serverId ??= $test_run_id;
 
-  $hhvm = PHP_BINARY;
+  $hhvm = HH\__internal\hhvm_binary();
 
   if (ini_get('hhvm.repo.authoritative')) {
     if (count(ServerUtilServerTests::$repo_builds) === 0) {
       register_shutdown_function(
          function() {
            foreach (ServerUtilServerTests::$repo_builds as $dir) {
-             @unlink($dir . "/hhvm.hhbc");
-             @rmdir($dir);
+             try_unlink($dir . "/hhvm.hhbc");
+             $contents = scandir($dir);
+             if (HH\Lib\C\is_empty($contents)) {
+               rmdir($dir);
+             }
            }
          }
        );
@@ -129,7 +177,10 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
     if (!isset(ServerUtilServerTests::$repo_builds[$repoKey])) {
       ServerUtilServerTests::$repo_builds[$repoKey] =
         "{$LOG_ROOT}_bytecode{$test_run_id}_{$instance_id}";
-      $cmd = "$hhvm --hphp -k1 -l2 -t hhbc -o " . ServerUtilServerTests::$repo_builds[$repoKey] .
+      $cmd = "$hhvm --hphp -l1 -o " . ServerUtilServerTests::$repo_builds[$repoKey] .
+        " -vParserThreadCount=1" .
+        " -vRuntime.ResourceLimit.CoreFileSize=0" .
+        " -vRuntime.Eval.EnableLogBridge=false" .
         " --input-dir $root $repoArgs";
 
       tlog('Building repo with command: '.$cmd);
@@ -150,7 +201,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
     ' -vServer.ExitOnBindFail=true' .
     ' --instance-id=' . $test_run_id .
     ' -vPageletServer.ThreadCount=5' .
-    ' -vPidFile=' . escapeshellarg(__SystemLib\hphp_test_tmppath('www.pid')) .
+    ' -vPidFile=' . escapeshellarg(sys_get_temp_dir().'/'.'www.pid') .
     $portConfig . $srcRootConfig .
     $includePathConfig . $sandboxHomeConfig . $adminPortConfig .
     $debugPortConfig . $jitConfig . ' ' . $customArgs .
@@ -184,8 +235,8 @@ function startServer(inout $serverPort, inout $adminPort, inout $debugPort, $hom
     $cmd = getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
                         $customArgs, $serverId, $repoArgs);
     tlog('Starting server with command: '.$cmd);
-    $pipes = darray[];
-    $serverProc = proc_open($cmd, darray[], inout $pipes);
+    $pipes = dict[];
+    $serverProc = proc_open($cmd, dict[], inout $pipes);
     if (!is_resource($serverProc)) {
       tlog('Failed to start a shell process for the server');
     } else if (waitForServerToGetGoing($serverPort, $serverProc, $serverId, $expect404)) {
@@ -204,7 +255,7 @@ function checkServerId($serverPort, $expectedIds) {
   $matches = null;
   if (preg_match_with_matches('/Hello, World!(.*+)/', $r ?? '', inout $matches)) {
     if (!is_array($expectedIds)) {
-      $expectedIds = varray[$expectedIds];
+      $expectedIds = vec[$expectedIds];
     }
     foreach ($expectedIds as $id) {
       if (HH\Lib\Legacy_FIXME\eq($matches[1], $id)) return true;
@@ -257,45 +308,24 @@ function stopServer($adminPort, $serverProc) {
   }
   proc_close($serverProc);
 
-  @unlink("{$LOG_ROOT}_test$test_run_id.log");
-  @unlink("{$LOG_ROOT}_test_server$test_run_id.log");
-  @unlink("{$LOG_ROOT}_test_server_stderr$test_run_id.log");
-  @unlink("{$LOG_ROOT}_test_server_stdout$test_run_id.log");
-  @unlink("{$LOG_ROOT}_test_client$test_run_id.log");
-  @unlink("{$LOG_ROOT}_client$test_run_id.hhbc");
-  @unlink("{$LOG_ROOT}_curl$test_run_id.log");
-  @unlink("{$LOG_ROOT}_access_log$test_run_id.log");
+  try_unlink("{$LOG_ROOT}_test$test_run_id.log");
+  try_unlink("{$LOG_ROOT}_test_server$test_run_id.log");
+  try_unlink("{$LOG_ROOT}_test_server_stderr$test_run_id.log");
+  try_unlink("{$LOG_ROOT}_test_server_stdout$test_run_id.log");
+  try_unlink("{$LOG_ROOT}_test_client$test_run_id.log");
+  try_unlink("{$LOG_ROOT}_client$test_run_id.hhbc");
+  try_unlink("{$LOG_ROOT}_curl$test_run_id.log");
+  try_unlink("{$LOG_ROOT}_access_log$test_run_id.log");
 
   $next_instance_id = ServerUtilServerTests::$next_instance_id;
   for ($instance_id = 0; $instance_id < $next_instance_id; $instance_id++) {
-    @unlink("{$LOG_ROOT}_server{$test_run_id}_{$instance_id}.hhbc");
+    try_unlink("{$LOG_ROOT}_server{$test_run_id}_{$instance_id}.hhbc");
   }
-}
-
-// Start a new server to takeover the old one, we want to assign a new
-// server id in order to distinguish between the two servers.
-function takeoverOldServer($serverPort, $adminPort, $home, $root,
-                           $socketFile, $oldServerProc, $customArgs,
-                           $serverId) {
-  $status = proc_get_status($oldServerProc);
-  if ($status === false || !$status['running']) {
-    tlog('Old server is not running');
-    return;
-  }
-  $customArgs .= " -vServer.TakeoverFilename={$socketFile}";
-  $cmd = getServerCmd($serverPort, $adminPort, false, $home, $root,
-                      $customArgs, $serverId);
-  $pipes = darray[];
-  $serverProc = proc_open($cmd, darray[], inout $pipes);
-  if (!is_resource($serverProc)) {
-    tlog('Failed to start a shell process for the server');
-    return;
-  }
-  return $serverProc;
 }
 
 <<__DynamicallyCallable>>
-function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
+function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '',
+                      $host_prefix = 'hphpd.debugger') {
 
   if (is_array($path)) {
     $headers = $path[2] ?? null;
@@ -310,14 +340,14 @@ function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
     $post = '--data-urlencode='.urlencode($post);;
   }
   if ($headers) {
-    $s = varray[];
+    $s = vec[];
     foreach ($headers as $h => $v) {
       $s[] = "-H '$h: $v'";
     }
     $headers = implode(" ", $s);
   }
   $url = "http://$host:$port/$path";
-  $host_name = "hphpd.debugger.".\php_uname('n');
+  $host_name = "$host_prefix.".\php_uname('n');
 
   $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;
   $test_run_id = ServerUtilServerTests::test_run_id();
@@ -354,7 +384,7 @@ function request($host, $port, $path) {
   return $request($host, $port, $path);
 }
 
-function killChildren($pid, $safe_children = darray[]) {
+function killChildren($pid, $safe_children = dict[]) {
   $output = null;
   $return_var = -1;
   $childIds = exec("pgrep -f -d , -P $pid", inout $output, inout $return_var);

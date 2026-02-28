@@ -1,8 +1,0 @@
-File "override3.php", line 13, characters 17-17:
-Some members in class `D` are incompatible with those declared in type `C` (Typing[4341])
-  File "override3.php", line 10, characters 19-21:
-  The method `foo` is not compatible with the overridden method
-  File "override3.php", line 5, characters 19-21:
-  This method is `__DynamicallyCallable`.
-  File "override3.php", line 10, characters 19-21:
-  This method is **not**.

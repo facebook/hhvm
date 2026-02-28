@@ -19,14 +19,15 @@
 #include "hphp/runtime/ext/json/JSON_parser.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/struct-log-util.h"
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/util/stack-trace.h"
 #include "hphp/runtime/vm/bytecode.h"
 
 #include "hphp/runtime/ext/string/ext_string.h"
+
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/stack-trace.h"
 
 namespace HPHP {
 
@@ -44,11 +45,15 @@ const int64_t k_JSON_UNESCAPED_UNICODE       = 1ll << 8;
 const int64_t k_JSON_PARTIAL_OUTPUT_ON_ERROR = 1ll << 9;
 const int64_t k_JSON_PRESERVE_ZERO_FRACTION  = 1ll << 10;
 
+// FB json_encode() options
+// WARNING: Add new values to "json_decode() and/or json_encode()" section below
+const int64_t k_JSON_FB_SORT_KEYS  = 1ll << 19;
+
 // json_decode() options
 const int64_t k_JSON_OBJECT_AS_ARRAY   = 1ll << 0;
 const int64_t k_JSON_BIGINT_AS_STRING  = 1ll << 1;
 
-// FB json_decode() options
+// FB json_decode() and/or json_encode() options
 // intentionally higher so when PHP adds more options we're fine
 const int64_t k_JSON_FB_DARRAYS        = 1ll << 19;
 const int64_t k_JSON_FB_LOOSE          = 1ll << 20;
@@ -68,6 +73,7 @@ const int64_t k_JSON_FB_IGNORE_LATEINIT = 1ll << 33;
 const int64_t k_JSON_FB_THRIFT_SIMPLE_JSON = 1ll << 34;
 const int64_t k_JSON_FB_WARN_KEYSETS       = 1ll << 36;
 const int64_t k_JSON_FB_FORCE_HACK_ARRAYS  = 1ll << 37;
+const int64_t k_JSON_FB_FULL_FLOAT_PRECISION  = 1ll << 38;
 
 const int64_t k_JSON_ERROR_NONE
   = json_error_codes::JSON_ERROR_NONE;
@@ -132,11 +138,13 @@ TypedValue json_encode_impl(const Variant& value, int64_t options,
   if (options & k_JSON_FB_WARN_VEC_LIKE_DARRAYS) vs.setVecLikeDArrayWarn();
   if (options & k_JSON_FB_WARN_DICT_LIKE_DARRAYS) vs.setDictLikeDArrayWarn();
   if (options & k_JSON_FB_IGNORE_LATEINIT) vs.setIgnoreLateInit();
+  if (options & k_JSON_FB_SORT_KEYS) vs.setSortArrayKeys();
+  if (options & k_JSON_FB_FULL_FLOAT_PRECISION) vs.setFullFloatPrecision();
   if (pure) vs.setPure();
 
   String json = vs.serializeValue(value, !(options & k_JSON_FB_UNLIMITED));
   assertx(json.get() != nullptr);
-  if (UNLIKELY(StructuredLog::coinflip(RuntimeOption::EvalSerDesSampleRate))) {
+  if (UNLIKELY(StructuredLog::coinflip(Cfg::Eval::SerDesSampleRate))) {
     StructuredLog::logSerDes("json", "ser", json, value);
   }
 
@@ -207,7 +215,7 @@ TypedValue HHVM_FUNCTION(json_decode, const String& json,
   Variant z;
   const auto ok =
     JSON_parser(z, json.data(), json.size(), assoc, depth, parser_options);
-  if (UNLIKELY(StructuredLog::coinflip(RuntimeOption::EvalSerDesSampleRate))) {
+  if (UNLIKELY(StructuredLog::coinflip(Cfg::Eval::SerDesSampleRate))) {
     StructuredLog::logSerDes("json", "des", json, z);
   }
   if (ok) {
@@ -310,8 +318,8 @@ TypedValue HHVM_FUNCTION(json_decode_with_error, const String& json,
 ///////////////////////////////////////////////////////////////////////////////
 
 struct JsonExtension final : Extension {
-  JsonExtension() : Extension("json", "1.2.1") {}
-  void moduleInit() override {
+  JsonExtension() : Extension("json", "1.2.1", NO_ONCALL_YET) {}
+  void moduleRegisterNative() override {
     HHVM_RC_INT(JSON_HEX_TAG, k_JSON_HEX_TAG);
     HHVM_RC_INT(JSON_HEX_AMP, k_JSON_HEX_AMP);
     HHVM_RC_INT(JSON_HEX_APOS, k_JSON_HEX_APOS);
@@ -344,6 +352,8 @@ struct JsonExtension final : Extension {
     HHVM_RC_INT(JSON_FB_THRIFT_SIMPLE_JSON, k_JSON_FB_THRIFT_SIMPLE_JSON);
     HHVM_RC_INT(JSON_FB_WARN_KEYSETS, k_JSON_FB_WARN_KEYSETS);
     HHVM_RC_INT(JSON_FB_FORCE_HACK_ARRAYS, k_JSON_FB_FORCE_HACK_ARRAYS);
+    HHVM_RC_INT(JSON_FB_SORT_KEYS, k_JSON_FB_SORT_KEYS);
+    HHVM_RC_INT(JSON_FB_FULL_FLOAT_PRECISION, k_JSON_FB_FULL_FLOAT_PRECISION);
 
     HHVM_RC_INT(JSON_ERROR_NONE, k_JSON_ERROR_NONE);
     HHVM_RC_INT(JSON_ERROR_DEPTH, k_JSON_ERROR_DEPTH);
@@ -360,8 +370,6 @@ struct JsonExtension final : Extension {
     HHVM_FE(json_encode_pure);
     HHVM_FE(json_decode);
     HHVM_FE(json_decode_with_error);
-
-    loadSystemlib();
   }
 
   void requestInit() override {

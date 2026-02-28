@@ -1,11 +1,11 @@
 //// defn.php
-<?hh // strict
+<?hh
 
 namespace NSTest;
 class C {}
 
 //// usage.php
-<?hh // strict
+<?hh
 
 use NSTest\C;
 function f(): void {

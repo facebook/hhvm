@@ -10,10 +10,15 @@
 open Hh_prelude
 open Aast
 open Typing_defs
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module SN = Naming_special_names
 
-let ft_redundant_tparams env tparams ty =
+[@@@alert "-dependencies"]
+(* linting is not fanout-aware, so it's safe
+ * to use non-dep-aware functions here
+ *)
+
+let ft_redundant_tparams (env : Tast_env.env) overlapping tparams ty =
   let tracked =
     List.fold_left
       tparams
@@ -21,25 +26,31 @@ let ft_redundant_tparams env tparams ty =
       ~init:SSet.empty
   in
   let (positive, negative) =
+    let Equal = Tast_env.eq_typing_env in
     Typing_variance.get_positive_negative_generics
       ~is_mutable:false
       ~tracked
-      (Tast_env.tast_env_as_typing_env env)
+      env
       (SMap.empty, SMap.empty)
       ty
   in
   List.iter tparams ~f:(fun t ->
       let (pos, name) = t.tp_name in
       let pos = Naming_provider.resolve_position (Tast_env.get_ctx env) pos in
-      (* It's only redundant if it's erased and inferred *)
+      (* It's only redundant if it's erased and inferred, and not covered by a non-disjointness check *)
       if
         equal_reify_kind t.tp_reified Erased
         && (not
               (Attributes.mem
                  SN.UserAttributes.uaNonDisjoint
                  t.tp_user_attributes))
+        && (not
+              (Attributes.mem SN.UserAttributes.uaExplicit t.tp_user_attributes))
+        (* Don't track generics that are mentioned in an <<__Overlapping>> attribute *)
         && not
-             (Attributes.mem SN.UserAttributes.uaExplicit t.tp_user_attributes)
+             (match overlapping with
+             | Some s -> SSet.mem name s
+             | None -> false)
       then
         let super_bounds =
           List.filter
@@ -68,10 +79,15 @@ let ft_redundant_tparams env tparams ty =
           begin
             match super_bounds with
             | [] ->
-              Lints_errors.redundant_covariant pos bounds_message "nothing"
-            | [(_, t)] ->
-              Lints_errors.redundant_covariant
+              Lints_diagnostics.redundant_covariant
                 pos
+                name
+                bounds_message
+                "nothing"
+            | [(_, t)] ->
+              Lints_diagnostics.redundant_covariant
+                pos
+                name
                 bounds_message
                 (Tast_env.print_decl_ty env t)
             | _ -> ()
@@ -89,27 +105,42 @@ let ft_redundant_tparams env tparams ty =
           begin
             match as_bounds with
             | [] ->
-              Lints_errors.redundant_contravariant pos bounds_message "mixed"
-            | [(_, t)] ->
-              Lints_errors.redundant_contravariant
+              Lints_diagnostics.redundant_contravariant
                 pos
+                name
+                bounds_message
+                "mixed"
+            | [(_, t)] ->
+              Lints_diagnostics.redundant_contravariant
+                pos
+                name
                 bounds_message
                 (Tast_env.print_decl_ty env t)
-            | _ -> ()
+            | _ ->
+              let ts = List.map as_bounds ~f:snd in
+              (match Tast_env.as_bounds_to_non_intersection_type env ts with
+              (* We can't denote this in source code so don't emit lint warning *)
+              | None -> ()
+              | Some locl_ty ->
+                Lints_diagnostics.redundant_contravariant
+                  pos
+                  name
+                  bounds_message
+                  (Tast_env.print_ty env locl_ty))
           end
-        | (None, None) -> Lints_errors.redundant_generic pos)
+        | (None, None) -> Lints_diagnostics.redundant_generic pos name)
 
 let check_redundant_generics_class_method env (_method_name, method_) =
   match method_.ce_type with
-  | (lazy (ty as ft)) ->
-    begin
-      match get_node ty with
-      | Tfun { ft_tparams; _ } -> ft_redundant_tparams env ft_tparams ft
-      | _ -> assert false
-    end
+  | (lazy (ty as ft)) -> begin
+    match get_node ty with
+    | Tfun { ft_tparams; _ } ->
+      ft_redundant_tparams env method_.ce_overlapping_tparams ft_tparams ft
+    | _ -> assert false
+  end
 
-let check_redundant_generics_fun env ft =
-  ft_redundant_tparams env ft.ft_tparams (mk (Reason.Rnone, Tfun ft))
+let check_redundant_generics_fun (env : Tast_env.env) ft =
+  ft_redundant_tparams env None ft.ft_tparams (mk (Reason.none, Tfun ft))
 
 let check_redundant_generics_class env class_name class_type =
   Cls.methods class_type
@@ -124,19 +155,21 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_fun_ env f =
-      match Decl_provider.get_fun (Tast_env.get_ctx env) (snd f.f_name) with
-      | Some { fe_type; _ } ->
-        begin
-          match get_node fe_type with
-          | Tfun ft -> check_redundant_generics_fun env ft
-          | _ -> ()
-        end
+    method! at_fun_def env fd =
+      match Decl_provider.get_fun (Tast_env.get_ctx env) (snd fd.fd_name) with
+      | Decl_entry.Found { fe_type; _ } -> begin
+        match get_node fe_type with
+        | Tfun ft -> check_redundant_generics_fun env ft
+        | _ -> ()
+      end
       | _ -> ()
 
     method! at_class_ env c =
       let cid = snd c.c_name in
       match Decl_provider.get_class (Tast_env.get_ctx env) cid with
-      | None -> ()
-      | Some cls -> check_redundant_generics_class env (snd c.c_name) cls
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        ()
+      | Decl_entry.Found cls ->
+        check_redundant_generics_class env (snd c.c_name) cls
   end

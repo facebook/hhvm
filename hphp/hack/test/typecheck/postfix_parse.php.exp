@@ -1,4 +1,4 @@
-File "postfix_parse.php", line 15, characters 3-9:
+ERROR: File "postfix_parse.php", line 15, characters 3-9:
 Typing error (Typing[4427])
   File "postfix_parse.php", line 15, characters 3-9:
   Expected `num` because this is used in an arithmetic operation

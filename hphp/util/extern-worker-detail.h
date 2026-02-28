@@ -20,11 +20,12 @@
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/blob-encoder.h"
+#include "hphp/util/trace.h"
 
 #include <folly/String.h>
-#include <folly/portability/Filesystem.h>
 
 #include <chrono>
+#include <filesystem>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -58,54 +59,52 @@ namespace detail {
 // Scoped timing in debug builds. The emitted messages are supplied
 // with lambdas to avoid overhead when the code is compiled out.
 struct Timer {
+  using Clock = std::chrono::steady_clock;
+
   // For when you're going to use stopWithMessage and don't want to
   // provide an initial message.
-  Timer() : m_msg{nullptr} {
-    ONTRACE(2, [this] { m_begin = std::chrono::steady_clock::now(); }());
-  }
+  Timer() : m_begin{Clock::now()}, m_msg{nullptr} {}
 
-  explicit Timer(const char* msg) : m_msg{msg} {
-    ONTRACE(2, [this] { m_begin = std::chrono::steady_clock::now(); }());
-  }
+  explicit Timer(const char* msg) : m_begin{Clock::now()}, m_msg{msg} {}
 
   template <typename F>
-  explicit Timer(const F& f) {
+  explicit Timer(const F& f) : m_begin{Clock::now()} {
     ONTRACE(2, [&] {
       m_str = f();
       m_msg = m_str.c_str();
-      m_begin = std::chrono::steady_clock::now();
     }());
   }
+
+  Clock::duration elapsed() const { return Clock::now() - m_begin; }
 
   // Stop the timer early before destruction with the given message.
   template<typename F>
   void stopWithMessage(const F& f) {
     ONTRACE(2, [&] {
       m_msg = nullptr;
-      FTRACE(2, "{} (took {})\n", f(), elapsed());
+      FTRACE(2, "{} (took {})\n", f(), elapsedStr());
     }());
   }
 
   ~Timer() {
     ONTRACE(2, [this] {
       if (!m_msg) return;
-      FTRACE(2, "{} took {}\n", m_msg, elapsed());
+      FTRACE(2, "{} took {}\n", m_msg, elapsedStr());
     }());
   }
 
 private:
-  std::string elapsed() const {
-    auto const d = std::chrono::duration_cast<std::chrono::duration<double>>(
-      std::chrono::steady_clock::now() - m_begin
-    ).count();
+  std::string elapsedStr() const {
+    namespace C = std::chrono;
+    auto const d = C::duration_cast<C::duration<double>>(elapsed()).count();
     return folly::prettyPrint(d, folly::PRETTY_TIME, false);
   }
 
-  std::chrono::steady_clock::time_point m_begin;
+  Clock::time_point m_begin;
   const char* m_msg;
   std::string m_str;
 
-  TRACE_SET_MOD(extern_worker);
+  TRACE_SET_MOD(extern_worker)
 };
 
 // Execute the given lambda, wrapping it with a Timer.
@@ -122,8 +121,8 @@ template <typename F1, typename F2> auto time(const F1& f1, const F2& f2) {
 //////////////////////////////////////////////////////////////////////
 
 // Read/write to a file
-extern std::string readFile(const folly::fs::path&);
-extern void writeFile(const folly::fs::path&, const char*, size_t);
+extern std::string readFile(const std::filesystem::path&);
+extern void writeFile(const std::filesystem::path&, const char*, size_t);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -246,6 +245,26 @@ template <typename C> struct ReturnRefs {
     typename ToRefReturn<typename Return<decltype(C::run)>::type>::type;
 };
 
+template <typename C> struct FiniRefs {
+  using type =
+    typename ToRefReturn<typename Return<decltype(C::fini)>::type>::type;
+};
+
+// The return type of exec called with a job. This is either
+// ReturnRefs, or a tuple of ReturnRefs and FiniRefs (if fini returns
+// anything).
+template <typename C> struct ExecRet {
+  using type =
+    std::conditional_t<
+      std::is_void_v<typename Return<decltype(C::fini)>::type>,
+      std::vector<typename ReturnRefs<C>::type>,
+      std::tuple<
+        std::vector<typename ReturnRefs<C>::type>,
+        typename FiniRefs<C>::type
+      >
+    >;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 // Iterate over a tuple. Just a wrapper around folly::for_each, which
@@ -281,10 +300,23 @@ template <typename T> struct Tag { using Type = T; };
 // for each type in that tuple. The callable is called with the tuple
 // index as the first parameter, and Tag<T> as the second (where T is
 // the type at that tuple index).
-template <typename Tuple, typename F, size_t... Is>
+template <typename Tuple, typename F, typename... Args>
 auto typesToValuesImpl(F&& f,
-                       std::index_sequence<Is...>) {
-  return std::make_tuple(f(Is, Tag<std::tuple_element_t<Is, Tuple>>{})...);
+                       std::index_sequence<>,
+                       Args&&... args) {
+  return std::make_tuple(std::forward<Args>(args)...);
+}
+
+template <typename Tuple, typename F, typename... Args, size_t I, size_t... Is>
+auto typesToValuesImpl(F&& f,
+                       std::index_sequence<I, Is...>,
+                       Args&&... args) {
+  return typesToValuesImpl<Tuple>(
+    std::forward<F>(f),
+    std::index_sequence<Is...>{},
+    std::forward<Args>(args)...,
+    f(I, Tag<std::tuple_element_t<I, Tuple>>{})
+  );
 }
 
 template <typename Tuple, typename F>
@@ -297,6 +329,32 @@ auto typesToValues(F&& f) {
 
 //////////////////////////////////////////////////////////////////////
 
+// Abstracts away how a worker should obtain it's inputs, and write
+// it's outputs. These functions are tightly coupled with the logic in
+// JobBase::serialize and JobBase::deserialize.
+struct ISource {
+  virtual ~ISource() = default;
+  virtual std::string blob() = 0;
+  virtual Optional<std::string> optBlob() = 0;
+  virtual std::vector<std::string> variadic() = 0;
+  virtual void initDone() = 0;
+  virtual bool inputEnd() const = 0;
+  virtual void nextInput() = 0;
+  virtual void finish() = 0;
+};
+
+struct ISink {
+  virtual ~ISink() = default;
+  virtual void blob(const std::string&) = 0;
+  virtual void optBlob(const Optional<std::string>&) = 0;
+  virtual void variadic(const std::vector<std::string>&) = 0;
+  virtual void nextOutput() = 0;
+  virtual void startFini() = 0;
+  virtual void finish() = 0;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 // Base class for Jobs. This provide a consistent interface to invoke
 // through.
 struct JobBase {
@@ -305,19 +363,28 @@ protected:
   explicit JobBase(const std::string& name);
   virtual ~JobBase() = default;
 
-  template <typename T> static T deserialize(const folly::fs::path&);
-  template <typename T> static void serialize(const T&,
-                                              size_t,
-                                              const folly::fs::path&);
+  template <typename T> static T deserialize(ISource&);
+  template <typename T> static void serialize(const T&, ISink&);
 
 private:
-  virtual void init(const folly::fs::path&) const = 0;
-  virtual void fini() const = 0;
-  virtual void run(const folly::fs::path&, const folly::fs::path&) const = 0;
+  template <typename T> static T deserializeBlob(std::string);
+  template <typename T> static std::string serializeBlob(const T&);
+
+  virtual void init(ISource&) const = 0;
+  virtual void fini(ISink&) const = 0;
+  virtual void run(ISource&, ISink&) const = 0;
 
   std::string m_name;
 
   friend int HPHP::extern_worker::main(int, char**);
+};
+
+//////////////////////////////////////////////////////////////////////
+
+// Thrown by some implementations if the backend is busy. Depending on
+// configuration, we might retry the action automatically.
+struct Throttle : public Error {
+  using Error::Error;
 };
 
 //////////////////////////////////////////////////////////////////////

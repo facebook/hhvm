@@ -18,11 +18,6 @@ type 'a interrupt_config = 'a MultiThreadedCall.interrupt_config
 let single_threaded_call_with_worker_id job merge neutral next =
   let x = ref (next ()) in
   let acc = ref neutral in
-  (* This is a just a sanity check that the job is serializable and so
-   * that the same code will work both in single threaded and parallel
-   * mode.
-   *)
-  let _ = Marshal.to_string job [Marshal.Closures] in
   while not (Hh_bucket.is_done !x) do
     match !x with
     | Hh_bucket.Wait ->
@@ -81,16 +76,59 @@ end)
 
 let call_with_worker_id = Call.call
 
-let call workers ~job ~merge ~neutral ~next =
+let call workers ~(job : 'acc -> 'input -> 'output) ~merge ~neutral ~next =
   let job (_worker_id, a) b = job a b in
   let merge (_worker_id, a) b = merge a b in
   Call.call workers ~job ~merge ~neutral ~next
+
+module type WorkItems_sig = sig
+  type t
+
+  type workitem
+
+  val of_workitem : workitem -> t
+
+  val pop : t -> workitem option * t
+
+  val push : workitem -> t -> t
+end
+
+let call_stateless :
+    (module WorkItems_sig with type workitem = 'input and type t = 'inputs) ->
+    worker list ->
+    job:('acc -> 'input -> 'input * 'output) ->
+    merge:('output -> 'acc -> 'acc) ->
+    neutral:'acc ->
+    inputs:'inputs ->
+    'acc =
+  fun (type input inputs)
+      (module WorkItems : WorkItems_sig
+        with type workitem = input
+         and type t = inputs)
+      workers
+      ~job
+      ~merge
+      ~neutral
+      ~inputs ->
+   let inputs_ref = ref inputs in
+   let next () =
+     let (input, inputs) = WorkItems.pop !inputs_ref in
+     inputs_ref := inputs;
+     match input with
+     | None -> Bucket.Done
+     | Some input -> Bucket.Job input
+   in
+   let merge (input, output) acc =
+     inputs_ref := WorkItems.push input !inputs_ref;
+     merge output acc
+   in
+   call (Some workers) ~job ~merge ~neutral ~next
 
 (* If we ever want this in MultiWorkerLwt then move this into CallFunctor *)
 let call_with_interrupt
     ?on_cancelled workers ~job ~merge ~neutral ~next ~interrupt =
   match workers with
-  | Some workers when List.length workers <> 0 ->
+  | Some workers when not (List.is_empty workers) ->
     Hh_logger.log
       "MultiThreadedCall.call_with_interrupt called with %d workers"
       (List.length workers);
@@ -106,7 +144,7 @@ let call_with_interrupt
     Hh_logger.log "single_threaded_call called with zero workers";
     ( single_threaded_call job merge neutral next,
       interrupt.MultiThreadedCall.env,
-      [] )
+      None )
 
 let next ?progress_fn ?max_size workers =
   Hh_bucket.make

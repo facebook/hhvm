@@ -3,8 +3,8 @@
 
 
 <<__EntryPoint>>
-function main_json_decode() {
-$arr = darray["fbid" => 101501853510151001];
+function main_json_decode() :mixed{
+$arr = dict["fbid" => 101501853510151001];
 var_dump(json_decode(json_encode($arr), true));
 
 var_dump(json_decode("{\"0\":{\"00\":0}}", true));

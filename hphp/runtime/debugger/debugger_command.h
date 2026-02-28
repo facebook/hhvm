@@ -83,6 +83,7 @@ struct DebuggerCommand {
     KindOfMacro               = 1002,
     KindOfConfig              = 1003,
     KindOfInstrument          = 1004,
+    KindOfEvalStream          = 1005,
 
     // DebuggerProxy -> DebuggerClient
     KindOfInterrupt           = 10000,
@@ -95,7 +96,7 @@ struct DebuggerCommand {
   };
 
   static bool Receive(DebuggerThriftBuffer &thrift, DebuggerCommandPtr &cmd,
-                      const char *caller);
+                      const char *caller, bool should_flush, bool should_timeout);
 
 public:
   explicit DebuggerCommand(Type type): m_type(type) {}
@@ -108,6 +109,8 @@ public:
   Type getType() const {
     return m_type;
   }
+
+  virtual std::string name() const = 0;
 
   bool send(DebuggerThriftBuffer&);
   bool recv(DebuggerThriftBuffer&);
@@ -153,4 +156,3 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
-

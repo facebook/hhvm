@@ -1,5 +1,5 @@
 <?hh
-function test($x) {
+function test($x) :mixed{
   var_dump($x->toMap());
   var_dump($x->toImmMap());
   var_dump($x->lazy()->toMap());
@@ -14,7 +14,7 @@ function test($x) {
   var_dump($x->lazy()->keys()->toVector());
   var_dump($x->firstKey(), $x->lastKey());
 }
-function main() {
+function main() :mixed{
   echo "==== Set ====\n";
   test(Set {5, 'a', 0, ''});
   echo "==== ImmSet ====\n";
@@ -22,6 +22,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_set_other_keyed_methods() {
+function main_set_other_keyed_methods() :mixed{
 main();
 }

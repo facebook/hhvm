@@ -12,8 +12,8 @@
 echo "*** Testing array_merge() : usage variations ***\n";
 
 //mixed keys
-$arr1 = darray[0 => 'zero', 20 => 'twenty', 'thirty' => 30, 1 => 'bool'];
-$arr2 = darray[0 => 0, 1 => 1, 2 => 2, '' => 'null', (int)1.234E-10 => 'float'];
+$arr1 = dict[0 => 'zero', 20 => 'twenty', 'thirty' => 30, 1 => 'bool'];
+$arr2 = dict[0 => 0, 1 => 1, 2 => 2, '' => 'null', (int)1.234E-10 => 'float'];
 
 var_dump(array_merge($arr1, $arr2));
 var_dump(array_merge($arr2, $arr1));

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 abstract xhp class foo extends XHPTest {}
 

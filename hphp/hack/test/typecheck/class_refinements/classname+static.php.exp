@@ -1,0 +1,12 @@
+ERROR: File "classname+static.php", line 7, characters 7-17:
+Invalid argument (Typing[4323])
+  File "classname+static.php", line 11, characters 12-15:
+  `TBox` is a constrained type parameter
+  File "classname+static.php", line 11, characters 20-42:
+  This type constraint is violated
+  File "classname+static.php", line 11, characters 20-42:
+  Expected a class with `{type T = _}`
+  File "classname+static.php", line 3, characters 16-18:
+  But got `Box`; implicitly defined constant `::class` is a reference to class `Box`
+  File "classname+static.php", line 7, characters 7-10:
+    where the class `Box` was referenced here via the keyword `self`

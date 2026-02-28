@@ -1,4 +1,4 @@
-File "array_foreach.php", line 20, characters 8-11:
+ERROR: File "array_foreach.php", line 20, characters 8-11:
 Invalid argument (Typing[4110])
   File "array_foreach.php", line 30, characters 15-33:
   Expected `dict<int, string>`

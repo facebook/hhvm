@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/util/hash-map.h"
 #include <folly/Range.h>
 
 namespace HPHP {
@@ -50,19 +51,14 @@ int64_t compilerTimestamp();
 folly::StringPiece buildId();
 
 /*
- * Search path for the hhjs babel transform executable. Paths are formatted as
- * "path1:path2:path3" etc. A path may be absolute like "/usr/bin/exe" or
- * relative, like "{}/my/relative/path/exe". Paths with {} are relative to HHVM.
- */
-folly::StringPiece hhjsBabelTransform();
-
-/*
  * Replace supported %{xxx} placeholders.  These include:
  *
  *  - %{schema} -> repo schema
  *  - %{uid} -> user id
  *  - %{euid} -> effective user id
  */
+void replacePlaceholders(std::string&,
+                         const hphp_fast_string_map<std::string>& replaces);
 void replacePlaceholders(std::string&);
 
 }

@@ -27,6 +27,8 @@ struct CmdContinue : CmdFlowControl {
   void help(DebuggerClient&) override;
   void onSetup(DebuggerProxy&, CmdInterrupt&) override;
   void onBeginInterrupt(DebuggerProxy&, CmdInterrupt&) override;
+
+  std::string name() const override { return "continue"; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

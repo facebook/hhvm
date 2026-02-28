@@ -1,4 +1,4 @@
-File "tapply_is_typedef.php", line 8, characters 18-39:
+ERROR: File "tapply_is_typedef.php", line 8, characters 18-39:
 Some type arguments violate their constraints (Typing[4323])
   File "tapply_is_typedef.php", line 3, characters 22-22:
   `T` is a constrained type parameter

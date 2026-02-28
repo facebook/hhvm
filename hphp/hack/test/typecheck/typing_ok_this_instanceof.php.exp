@@ -1,1 +1,2 @@
-No errors
+WARN: File "typing_ok_this_instanceof.php", line 15, characters 9-18:
+This `is` check is always `false`. The expression on the left has type `this` which shares no values with `B`. (Warn[12010])

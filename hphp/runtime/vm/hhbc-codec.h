@@ -148,7 +148,7 @@ NamedLocal decode_named_local(PC& pc);
  */
 MemberKey decode_member_key(PC& pc, StringDecoder u);
 
-void encode_member_key(MemberKey mk, FuncEmitter& fe);
+void encode_member_key(MemberKey mk, FuncEmitter& fe, UnitEmitter& ue);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -192,21 +192,25 @@ IterArgs decodeIterArgs(const unsigned char*&);
 
 void encodeFCallArgsBase(FuncEmitter&, const FCallArgsBase&,
                          bool hasInoutArgs, bool hasReadonlyArgs,
-                         bool hasAsyncEagerOffset, bool hasContext);
+                         bool hasNamedArgs,  bool hasAsyncEagerOffset,
+                         bool hasContext);
 void encodeFCallArgsBoolVec(FuncEmitter&, int numBytes, const uint8_t*);
 
 FCallArgs decodeFCallArgs(Op, PC&, StringDecoder);
 
-template<typename T, typename IO, typename RO, typename CTX>
+template<typename T, typename IO, typename RO, typename NA, typename CTX>
 void encodeFCallArgs(FuncEmitter& fe, const FCallArgsBase& fca,
                      bool hasInoutArgs, IO emitInoutArgs,
                      bool hasReadonlyArgs, RO emitReadonlyArgs,
+                     bool hasNamedArgs, NA emitNamedArgs,
                      bool hasAsyncEagerOffset, T emitAsyncEagerOffset,
                      bool hasContext, CTX emitContext) {
   encodeFCallArgsBase(fe, fca, hasInoutArgs, hasReadonlyArgs,
-                      hasAsyncEagerOffset, hasContext);
+                      hasNamedArgs, hasAsyncEagerOffset,
+                      hasContext);
   if (hasInoutArgs) emitInoutArgs();
   if (hasReadonlyArgs) emitReadonlyArgs();
+  if (hasNamedArgs) emitNamedArgs();
   if (hasAsyncEagerOffset) emitAsyncEagerOffset();
   if (hasContext) emitContext();
 }

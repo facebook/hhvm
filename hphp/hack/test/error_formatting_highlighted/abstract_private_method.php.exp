@@ -1,4 +1,4 @@
-Parsing[1002] Class E contains an abstract method and must therefore be declared abstract [1]
+error: Parsing[1002] Class E contains an abstract method and must therefore be declared abstract [1]
 
 abstract_private_method.php:3:7
     1 | <?hh
@@ -7,7 +7,7 @@ abstract_private_method.php:3:7
     4 |   private abstract function f(): void;
     5 | }
 
-Parsing[1002] Cannot declare abstract method E::f private [1]
+error: Parsing[1002] Cannot declare abstract method E::f private [1]
 
 abstract_private_method.php:4:3
     2 | 
@@ -15,7 +15,7 @@ abstract_private_method.php:4:3
 [1] 4 |   private abstract function f(): void;
     5 | }
 
-Typing[4465] Method f is abstract but the class is concrete. Either provide an implementation here. [1]
+error: Typing[4465] Method f is abstract but the class is concrete. Either provide an implementation here. [1]
 -> Or make the class abstract. [2]
 
 abstract_private_method.php:4:29
@@ -25,4 +25,4 @@ abstract_private_method.php:4:29
 [1] 4 |   private abstract function f(): void;
     5 | }
 
-3 errors found.
+3 errors found

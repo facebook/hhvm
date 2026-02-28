@@ -1,7 +1,7 @@
 
-Warning: ldap_next_reference() expects exactly 2 parameters, 1 given in %s/ldap_next_reference_error.php on line 5
+Warning: ldap_next_reference() expects exactly 2 positional parameters, 1 given in %s/ldap_next_reference_error.php on line 5
 
-Warning: ldap_next_reference() expects exactly 2 parameters, 3 given in %s/ldap_next_reference_error.php on line 6
+Warning: ldap_next_reference() expects exactly 2 positional parameters, 3 given in %s/ldap_next_reference_error.php on line 6
 
 Warning: Not a valid ldap result entry resource in %s/ldap_next_reference_error.php on line 7
 bool(false)

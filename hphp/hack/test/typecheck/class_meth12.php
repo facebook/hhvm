@@ -8,9 +8,9 @@ class C {
 }
 
 function testit():void {
-  $v = darray[
-    'a' => class_meth(C::class, 'foo'),
-    'b' => fun('bar')
+  $v = dict[
+    'a' => C::foo<>,
+    'b' => bar<>,
   ];
   /* HHFIXME[4104] */
   $v['a'](3, 'b');

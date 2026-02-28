@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $x = __hhvm_intrinsics\launder_value(shape('max' => null, 'min' => 123));
   if ($x is shape('max' => null, 'min' => num)) {
     echo "Match\n";

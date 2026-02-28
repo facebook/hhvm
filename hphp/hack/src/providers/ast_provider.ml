@@ -9,13 +9,6 @@
 
 open Hh_prelude
 
-(*****************************************************************************)
-(* Table containing all the Abstract Syntax Trees (cf ast.ml) for each file.*)
-(*****************************************************************************)
-
-(* We store only the names and declarations in the ParserHeap.
-   The full flag in each function runs a full parsing with method bodies. *)
-
 type parse_type =
   | Decl
   | Full
@@ -47,24 +40,21 @@ module LocalParserCache =
 let parse
     (popt : ParserOptions.t)
     ~(full : bool)
-    ~(source_text : Full_fidelity_source_text.t) : Errors.t * Parser_return.t =
+    ~(source_text : Full_fidelity_source_text.t) :
+    Diagnostics.t * Parser_return.t =
   let path = source_text.Full_fidelity_source_text.file_path in
   let parser_env =
-    Full_fidelity_ast.make_env
-      ~quick_mode:(not full)
-      ~keep_errors:true
-      ~parser_options:popt
-      path
+    Full_fidelity_ast.make_env ~quick_mode:(not full) ~parser_options:popt path
   in
   let (err, result) =
-    Errors.do_with_context path Errors.Parsing @@ fun () ->
+    Diagnostics.do_with_context path @@ fun () ->
     Full_fidelity_ast.from_source_text_with_legacy parser_env source_text
   in
   let ast = result.Parser_return.ast in
   let ast =
     if
       Relative_path.(is_hhi (prefix path))
-      && ParserOptions.deregister_php_stdlib popt
+      && popt.ParserOptions.deregister_php_stdlib
     then
       Nast.deregister_ignored_attributes ast
     else
@@ -72,14 +62,17 @@ let parse
   in
   (err, { result with Parser_return.ast })
 
+(** Look up ast in LocalParserCache.
+  If not found, look up in Ide_parser_cache.
+  If not found, actually parse the file. *)
 let get_from_local_cache ~full ctx file_name =
-  let with_no_err ast = (Errors.empty, ast) in
+  let with_no_err ast = (Diagnostics.empty, ast) in
   let fn = Relative_path.to_absolute file_name in
   match LocalParserCache.get file_name with
   | Some ast -> with_no_err ast
   | None ->
     let popt = Provider_context.get_popt ctx in
-    let f contents =
+    let parse contents =
       let contents =
         if FindUtils.file_filter fn then
           contents
@@ -95,7 +88,7 @@ let get_from_local_cache ~full ctx file_name =
         | Some _ ->
           (* It's up to Parsing_service to add parsing errors. *)
           let (err, result) =
-            Errors.do_with_context file_name Errors.Parsing @@ fun () ->
+            Diagnostics.do_with_context file_name @@ fun () ->
             Full_fidelity_ast.defensive_program
               ~quick:(not full)
               popt
@@ -107,23 +100,20 @@ let get_from_local_cache ~full ctx file_name =
     let (err, ast) =
       Option.value_map
         ~default:(with_no_err [])
-        ~f
-        (File_provider.get_contents
-           file_name
-           ~writeback_disk_contents_in_shmem_provider:
-             (TypecheckerOptions.enable_disk_heap
-                (Provider_context.get_tcopt ctx)))
+        ~f:parse
+        (File_provider.get_contents file_name)
     in
     let ast =
       if
         Relative_path.(is_hhi (prefix file_name))
-        && ParserOptions.deregister_php_stdlib popt
+        && popt.ParserOptions.deregister_php_stdlib
       then
         Nast.deregister_ignored_attributes ast
       else
         ast
     in
-    if full && Errors.is_empty err then LocalParserCache.add file_name ast;
+    if full && Diagnostics.has_no_errors err then
+      LocalParserCache.add file_name ast;
     (err, ast)
 
 let compute_source_text ~(entry : Provider_context.entry) :
@@ -139,14 +129,14 @@ let compute_source_text ~(entry : Provider_context.entry) :
     source_text
 
 (* Note that some callers may not actually need the AST errors. This could be
-improved with a method similar to the TAST-and-errors generation, where the TAST
-errors are not generated unless necessary. *)
+   improved with a method similar to the TAST-and-errors generation, where the TAST
+   errors are not generated unless necessary. *)
 let compute_parser_return_and_ast_errors
     ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) :
-    Parser_return.t * Errors.t =
+    Parser_return.t * Diagnostics.t =
   match entry with
   | {
-   Provider_context.ast_errors = Some ast_errors;
+   Provider_context.ast_diagnostics = Some ast_errors;
    parser_return = Some parser_return;
    _;
   } ->
@@ -154,7 +144,7 @@ let compute_parser_return_and_ast_errors
   | _ ->
     let source_text = compute_source_text ~entry in
     let (ast_errors, parser_return) = parse popt ~full:true ~source_text in
-    entry.Provider_context.ast_errors <- Some ast_errors;
+    entry.Provider_context.ast_diagnostics <- Some ast_errors;
     entry.Provider_context.parser_return <- Some parser_return;
     (parser_return, ast_errors)
 
@@ -172,7 +162,7 @@ let compute_cst ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
 
 let compute_ast_with_error
     ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) :
-    Errors.t * Nast.program =
+    Diagnostics.t * Nast.program =
   let ({ Parser_return.ast; _ }, ast_errors) =
     compute_parser_return_and_ast_errors ~popt ~entry
   in
@@ -190,19 +180,34 @@ let compute_comments ~(popt : ParserOptions.t) ~(entry : Provider_context.entry)
   comments
 
 let compute_file_info
-    ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) : FileInfo.t =
+    ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) : FileInfo.ids =
   let ast = compute_ast ~popt ~entry in
-  let (funs, classes, typedefs, consts, modules) = Nast.get_defs ast in
-  { FileInfo.empty_t with FileInfo.funs; classes; typedefs; consts; modules }
+  Nast.get_def_names ast
 
-let get_ast_with_error ?(full = false) ctx path =
-  Counters.count Counters.Category.Get_ast @@ fun () ->
-  (* If there's a ctx, and this file is in the ctx, then use ctx. *)
-  (* Otherwise, the way we fetch/cache ASTs depends on the provider. *)
+let get_ast_with_error ~(full : bool) ctx path =
+  Counters.count Counters.Category.Ast_provider_get @@ fun () ->
+  let parse_from_disk_no_caching ~apply_file_filter =
+    let absolute_path = Relative_path.to_absolute path in
+    if (not apply_file_filter) || FindUtils.file_filter absolute_path then
+      let contents = Sys_utils.cat absolute_path in
+      let source_text = Full_fidelity_source_text.make path contents in
+      let (err, { Parser_return.ast; _ }) =
+        parse (Provider_context.get_popt ctx) ~full ~source_text
+      in
+      (err, ast)
+    else
+      (Diagnostics.empty, [])
+  in
+
+  (* If there's a ctx, and this file is in the ctx, then use ctx.
+     Otherwise, the way we fetch/cache ASTs depends on the provider. *)
   let entry_opt =
     Relative_path.Map.find_opt (Provider_context.get_entries ctx) path
   in
   match (entry_opt, Provider_context.get_backend ctx) with
+  | (_, Provider_backend.Pessimised_shared_memory info)
+    when not info.Provider_backend.allow_ast_caching ->
+    parse_from_disk_no_caching ~apply_file_filter:true
   | (Some entry, _) ->
     (* See documentation on `entry` for its invariants.
        The compute_ast function will use the cached (full) AST if present,
@@ -212,46 +217,51 @@ let get_ast_with_error ?(full = false) ctx path =
        the file is open in the IDE, and so will benefit from a full AST at
        some time, so we might as well get it now. *)
     compute_ast_with_error ~popt:(Provider_context.get_popt ctx) ~entry
-  | (_, (Provider_backend.Analysis | Provider_backend.Shared_memory)) ->
-    (* Note that we might be looking up the shared ParserHeap directly, *)
-    (* or maybe into a local-change-stack due to quarantine. *)
-    begin
-      match (ParserHeap.get path, full) with
-      | (None, true)
-      | (Some (_, Decl), true) ->
-        (* If we need full, and parser-heap can't provide it, then we *)
-        (* don't want to write a full decl into the parser heap. *)
-        get_from_local_cache ~full ctx path
-      | (None, false) ->
-        (* This is the case where we will write into the parser heap. *)
-        let (err, ast) = get_from_local_cache ~full ctx path in
-        if Errors.is_empty err then ParserHeap.add path (ast, Decl);
-        (err, ast)
-      | (Some (ast, _), _) ->
-        (* It's in the parser-heap! hurrah! *)
-        (Errors.empty, ast)
-    end
+  | ( _,
+      ( Provider_backend.Rust_provider_backend _
+      | Provider_backend.Shared_memory
+      | Provider_backend.Pessimised_shared_memory _ ) ) -> begin
+    (* Note that we might be looking up the shared ParserHeap directly,
+       or maybe into a local-change-stack due to quarantine. *)
+    (* The following code makes sure to only cache `Decl`/non-full ASTs
+       in the ParserHeap, for memory consumption reasons (I assume).
+       As of today, we only ever store `Full` ASTs in the ParserHeap for testing,
+       via `provide_ast_hint`. *)
+    match (ParserHeap.get path, full) with
+    | (Some (ast, Decl), false)
+    | (Some (ast, Full), (true | false)) ->
+      (* It's in the parser-heap! hurrah! *)
+      (Diagnostics.empty, ast)
+    | (None, true)
+    | (Some (_, Decl), true) ->
+      (* If we need full, and parser-heap can't provide it, then we
+         don't want to write a full decl into the parser heap. *)
+      get_from_local_cache ~full ctx path
+    | (None, false) ->
+      (* This is the case where we will write into the parser heap. *)
+      let (err, ast) = get_from_local_cache ~full ctx path in
+      if Diagnostics.has_no_errors err then ParserHeap.add path (ast, Decl);
+      (err, ast)
+  end
+  | (_, Provider_backend.Analysis) -> begin
+    (* Zoncolan has its own caching layers and does not make use of Hack's.
+       However, for unit tests, split files end up in the parser heap.
+    *)
+    match (ParserHeap.get path, full) with
+    | (Some (ast, Full), _) ->
+      (* It's in the parser-heap! hurrah! *)
+      (Diagnostics.empty, ast)
+    | _ -> parse_from_disk_no_caching ~apply_file_filter:false
+  end
   | (_, Provider_backend.Local_memory _) ->
     (* We never cache ASTs for this provider. There'd be no use. *)
     (* The only valuable caching is to cache decls. *)
-    let contents = Sys_utils.cat (Relative_path.to_absolute path) in
-    let source_text = Full_fidelity_source_text.make path contents in
-    let (err, { Parser_return.ast; _ }) =
-      parse (Provider_context.get_popt ctx) ~full ~source_text
-    in
-    (err, ast)
-  | (_, Provider_backend.Decl_service _) ->
-    (* Decl service based checks are supposed to cache ASTs inside Provider_context.entries. *)
-    (* This entries cache supports IDE scenarios of files locally modified in editor, which *)
-    (* also makes it not performant enough on critical bulk checking path. *)
-    (* Caching current AST locally makes it possible to avoid entries overhead, while not *)
-    (* reparsing the file over and over. *)
-    get_from_local_cache ~full ctx path
+    parse_from_disk_no_caching ~apply_file_filter:false
 
-let get_ast ?(full = false) ctx path = get_ast_with_error ~full ctx path |> snd
+let get_ast ~(full : bool) ctx path = get_ast_with_error ~full ctx path |> snd
 
 let get_def
-    ?(full = false)
+    ~(full : bool)
     ctx
     file_name
     (node_getter : Nast.def -> ('a * string) option)
@@ -261,12 +271,11 @@ let get_def
     List.fold_left defs ~init:acc ~f:(fun acc def ->
         match def with
         | Aast.Namespace (_, defs) -> get acc defs
-        | _ ->
-          begin
-            match node_getter def with
-            | Some (node, name) when name_matcher name -> Some node
-            | _ -> acc
-          end)
+        | _ -> begin
+          match node_getter def with
+          | Some (node, name) when name_matcher name -> Some node
+          | _ -> acc
+        end)
   in
   get None defs
 
@@ -277,7 +286,7 @@ let find_class_impl (def : Nast.def) : (Nast.class_ * string) option =
 
 let find_fun_impl def =
   match def with
-  | Aast.Fun f -> Some (f, snd f.Aast.fd_fun.Aast.f_name)
+  | Aast.Fun f -> Some (f, snd f.Aast.fd_name)
   | _ -> None
 
 let find_typedef_impl def =
@@ -296,31 +305,31 @@ let find_module_impl def =
   | _ -> None
 
 let iequal name =
-  let name = Caml.String.lowercase_ascii name in
-  (fun s -> String.equal name (Caml.String.lowercase_ascii s))
+  let name = Stdlib.String.lowercase_ascii name in
+  (fun s -> String.equal name (Stdlib.String.lowercase_ascii s))
 
-let find_class_in_file ?(full = false) ctx file_name name =
+let find_class_in_file ~(full : bool) ctx file_name name =
   get_def ~full ctx file_name find_class_impl (String.equal name)
 
 let find_iclass_in_file ctx file_name iname =
-  get_def ctx file_name find_class_impl (iequal iname)
+  get_def ctx file_name find_class_impl (iequal iname) ~full:false
 
-let find_fun_in_file ?(full = false) ctx file_name name =
+let find_fun_in_file ~(full : bool) ctx file_name name =
   get_def ~full ctx file_name find_fun_impl (String.equal name)
 
 let find_ifun_in_file ctx file_name iname =
-  get_def ctx file_name find_fun_impl (iequal iname)
+  get_def ctx file_name find_fun_impl (iequal iname) ~full:false
 
-let find_typedef_in_file ?(full = false) ctx file_name name =
+let find_typedef_in_file ~(full : bool) ctx file_name name =
   get_def ~full ctx file_name find_typedef_impl (String.equal name)
 
 let find_itypedef_in_file ctx file_name iname =
-  get_def ctx file_name find_typedef_impl (iequal iname)
+  get_def ctx file_name find_typedef_impl (iequal iname) ~full:false
 
-let find_gconst_in_file ?(full = false) ctx file_name name =
+let find_gconst_in_file ~(full : bool) ctx file_name name =
   get_def ~full ctx file_name find_const_impl (String.equal name)
 
-let find_module_in_file ?(full = false) ctx file_name name =
+let find_module_in_file ~(full : bool) ctx file_name name =
   get_def ~full ctx file_name find_module_impl (String.equal name)
 
 let local_changes_push_sharedmem_stack () =
@@ -332,12 +341,12 @@ let provide_ast_hint
     (path : Relative_path.t) (program : Nast.program) (parse_type : parse_type)
     : unit =
   match Provider_backend.get () with
-  | Provider_backend.Analysis
+  | Provider_backend.Analysis -> failwith "Should not write into parser heap"
+  | Provider_backend.Rust_provider_backend _
+  | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
     ParserHeap.write_around path (program, parse_type)
-  | Provider_backend.Local_memory _
-  | Provider_backend.Decl_service _ ->
-    ()
+  | Provider_backend.Local_memory _ -> ()
 
 let remove_batch paths = ParserHeap.remove_batch paths
 

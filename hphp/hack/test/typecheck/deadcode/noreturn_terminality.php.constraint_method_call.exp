@@ -1,0 +1,6 @@
+ERROR: File "noreturn_terminality.php", line 17, characters 10-14:
+Invalid return type (Typing[4336])
+  File "noreturn_terminality.php", line 17, characters 23-30:
+  Expected `noreturn`
+  File "noreturn_terminality.php", line 17, characters 10-14:
+  But got `void` because this function does not always return a value

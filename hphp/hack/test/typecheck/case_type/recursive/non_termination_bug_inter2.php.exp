@@ -1,0 +1,4 @@
+ERROR: File "non_termination_bug_inter2.php", line 10, characters 13-22:
+Invalid `is` expression hint (Typing[4195])
+  File "non_termination_bug_inter2.php", line 10, characters 13-22:
+  The `is` operator cannot be used with a type with generics, because generics are erased at runtime

@@ -8,9 +8,9 @@
 
 echo "*** Testing umask() on file and directory ***\n";
 // temp filename used
-$filename = __SystemLib\hphp_test_tmppath('umask_variation1.tmp');
+$filename = sys_get_temp_dir().'/'.'umask_variation1.tmp';
 // temp dir used
-$dirname = __SystemLib\hphp_test_tmppath('umask_variation1');
+$dirname = sys_get_temp_dir().'/'.'umask_variation1';
 
 for($mask = 0000; $mask <= 0350; $mask++) {
   echo "-- Setting umask to ";

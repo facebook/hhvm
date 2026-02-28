@@ -1,23 +1,25 @@
-//// modules.php
+//// moduleA.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+new module A {}
 
-module A {}
-module B {}
+//// moduleB.php
+<?hh
+new module B {}
 
 //// A.php
 <?hh
-<<file:__EnableUnstableFeatures('modules'), __Module("A")>>
 
-<<__Internal>>
-function a(): void {}
+module A;
+
+internal function a(): void {}
 
 function a2(): void { a(); /* ok */ }
 
 //// B.php
 <?hh
 
-<<file:__EnableUnstableFeatures('modules'), __Module("B")>>
+
+module B;
 
 function b(): void { a(); /* error */ }
 

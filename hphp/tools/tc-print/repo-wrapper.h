@@ -27,7 +27,7 @@ namespace HPHP { namespace jit {
 
 struct RepoWrapper {
 private:
-  typedef std::map<SHA1, Unit*> CacheType;
+  typedef std::map<int64_t, Unit*> CacheType;
 
   CacheType unitCache;
   bool hasRepo;
@@ -38,12 +38,13 @@ private:
 public:
   RepoWrapper(const char* repoSchema,
               const std::string& repoFileName,
+              Hdf& hdf,
               const bool shouldPrint = true);
   ~RepoWrapper();
 
   void addUnit(Unit* u);
-  Unit* getUnit(SHA1 sha1);
-  Func* getFunc(SHA1 sha1, Id funcSn);
+  Unit* getUnit(int64_t sn);
+  Func* getFunc(int64_t sn, Id funcSn);
 };
 
 } }

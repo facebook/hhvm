@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_curl_files() {
+function main_curl_files() :mixed{
 $files = Map {
   "file://" . __FILE__ => null,
   "file://" . __FILE__ . ".expectf" => null,

@@ -3,7 +3,7 @@
 
 
 <<__EntryPoint>>
-function main_mb_encodings() {
+function main_mb_encodings() :mixed{
 var_dump(array_search("UTF-8", mb_list_encodings()) !== false);
 var_dump(mb_list_encodings_alias_names()['Quoted-Printable']);
 var_dump(mb_list_encodings_alias_names('Quoted-Printable'));
@@ -33,6 +33,6 @@ var_dump(mb_detect_encoding($str, "auto"));
 var_dump(mb_detect_encoding($str, "JIS, eucjp-win, sjis-win"));
 
 /* Use array to specify encoding_list  */
-$ary = varray["ASCII", "JIS", "EUC-JP"];
+$ary = vec["ASCII", "JIS", "EUC-JP"];
 var_dump(mb_detect_encoding($str, $ary));
 }

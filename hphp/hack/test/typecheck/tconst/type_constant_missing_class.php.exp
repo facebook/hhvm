@@ -1,8 +1,8 @@
-File "type_constant_missing_class.php", line 2, characters 15-19:
+ERROR: File "type_constant_missing_class.php", line 2, characters 15-19:
 Unbound name: `Bogus` (Naming[2049])
-File "type_constant_missing_class.php", line 4, characters 19-23:
+ERROR: File "type_constant_missing_class.php", line 4, characters 19-23:
 Unbound name: `Bogus` (Naming[2049])
-File "type_constant_missing_class.php", line 7, characters 19-23:
+ERROR: File "type_constant_missing_class.php", line 7, characters 19-23:
 Unbound name: `Bogus` (Naming[2049])
-File "type_constant_missing_class.php", line 16, characters 17-21:
+ERROR: File "type_constant_missing_class.php", line 16, characters 17-21:
 Unbound name: `Bogus` (Naming[2049])

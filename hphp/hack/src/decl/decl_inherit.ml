@@ -27,13 +27,14 @@ module Inst = Decl_instantiate
 
 type inherited = {
   ih_substs: subst_context SMap.t;
-  ih_cstr: (element * fun_elt option) option * consistent_kind;
+  ih_cstr: (Decl_defs.element * fun_elt option) option * consistent_kind;
   ih_consts: class_const SMap.t;
   ih_typeconsts: typeconst_type SMap.t;
-  ih_props: (element * decl_ty option) SMap.t;
-  ih_sprops: (element * decl_ty option) SMap.t;
-  ih_methods: (element * fun_elt option) SMap.t;
-  ih_smethods: (element * fun_elt option) SMap.t;
+  ih_props: (Decl_defs.element * decl_ty option) SMap.t;
+  ih_sprops: (Decl_defs.element * decl_ty option) SMap.t;
+  ih_methods: (Decl_defs.element * fun_elt option) SMap.t;
+  ih_smethods: (Decl_defs.element * fun_elt option) SMap.t;
+  ih_support_dynamic_type: bool;
 }
 
 let empty =
@@ -46,6 +47,7 @@ let empty =
     ih_sprops = SMap.empty;
     ih_methods = SMap.empty;
     ih_smethods = SMap.empty;
+    ih_support_dynamic_type = false;
   }
 
 (*****************************************************************************)
@@ -53,6 +55,83 @@ let empty =
  * we already inherited.
  *)
 (*****************************************************************************)
+
+module type Member_S = sig
+  type t
+
+  val is_abstract : t -> bool
+
+  val is_synthesized : t -> bool
+
+  val has_lsb : t -> bool
+
+  val visibility : t -> ce_visibility
+end
+
+module Decl_defs_element : Member_S with type t = Decl_defs.element = struct
+  type t = Decl_defs.element
+
+  let is_abstract = get_elt_abstract
+
+  let is_synthesized = get_elt_synthesized
+
+  let has_lsb = get_elt_lsb
+
+  let visibility m = m.elt_visibility
+end
+
+module Typing_defs_class_elt : Member_S with type t = Typing_defs.class_elt =
+struct
+  type t = Typing_defs.class_elt
+
+  let is_abstract = get_ce_abstract
+
+  let is_synthesized = get_ce_synthesized
+
+  let has_lsb = get_ce_lsb
+
+  let visibility m = m.ce_visibility
+end
+
+module OverridePrecedence : sig
+  (** The override precedence of a member is used to determine if a member overrides
+    previous members from other parents with the same name. *)
+  type t
+
+  val make : (module Member_S with type t = 'member) -> 'member -> t
+
+  val ( > ) : t -> t -> bool
+
+  val is_highest : t -> bool
+end = struct
+  type t = {
+    is_concrete: bool;
+    is_not_synthesized: bool;
+  }
+
+  let make
+      (type member)
+      (module Member : Member_S with type t = member)
+      (member : member) =
+    {
+      is_concrete = not @@ Member.is_abstract member;
+      is_not_synthesized = not @@ Member.is_synthesized member;
+    }
+
+  let bool_to_int b =
+    if b then
+      1
+    else
+      0
+
+  let to_int { is_concrete; is_not_synthesized } =
+    (2 * bool_to_int is_concrete) + bool_to_int is_not_synthesized
+
+  let ( > ) x y = Int.( > ) (to_int x) (to_int y)
+
+  let is_highest { is_concrete; is_not_synthesized } =
+    is_concrete && is_not_synthesized
+end
 
 (** Reasons to keep the old signature:
   - We don't want to override a concrete method with
@@ -62,12 +141,24 @@ let empty =
     e.g. arising merely from a require-extends declaration in
     a trait.
 When these two considerations conflict, we give precedence to
-abstractness for determining priority of the method. *)
-let should_keep_old_sig (sig_, _) (old_sig, _) =
-  ((not (get_elt_abstract old_sig)) && get_elt_abstract sig_)
-  || Bool.equal (get_elt_abstract old_sig) (get_elt_abstract sig_)
-     && (not (get_elt_synthesized old_sig))
-     && get_elt_synthesized sig_
+abstractness for determining priority of the method.
+It's possible to implement this boolean logic by just comparing
+the boolean tuples (is_concrete, is_non_synthesized) of each member,
+which we do in the OverridePrecedence module. *)
+let should_keep_old_sig
+    ((sig_, _) : Decl_defs.element * fun_elt option)
+    ((old_sig, _) : Decl_defs.element * fun_elt option) : bool =
+  let precedence = OverridePrecedence.make (module Decl_defs_element) in
+  OverridePrecedence.(precedence old_sig > precedence sig_)
+
+let get_updated_sort_text new_sig old_sig =
+  let (sig_decl_element, _) = new_sig in
+  let (old_sig_decl_element, _) = old_sig in
+  match
+    (sig_decl_element.elt_sort_text, old_sig_decl_element.elt_sort_text)
+  with
+  | (None, Some _text) -> old_sig_decl_element.elt_sort_text
+  | _ -> sig_decl_element.elt_sort_text
 
 let add_method name sig_ methods =
   match SMap.find_opt name methods with
@@ -75,15 +166,25 @@ let add_method name sig_ methods =
     (* The method didn't exist so far, let's add it *)
     SMap.add name sig_ methods
   | Some old_sig ->
+    let elt_sort_text = get_updated_sort_text sig_ old_sig in
     if should_keep_old_sig sig_ old_sig then
-      methods
+      let (old_sig_decl_element, old_sig_fun_element) = old_sig in
+      SMap.add
+        name
+        ({ old_sig_decl_element with elt_sort_text }, old_sig_fun_element)
+        methods
     (* Otherwise, we *are* overwriting a method definition. This is
      * OK when a naming conflict is parent class vs trait (trait
      * wins!), but not really OK when the naming conflict is trait vs
      * trait (we rely on HHVM to catch the error at runtime) *)
     else
       let sig_ = Tuple.T2.map_fst sig_ ~f:reset_elt_superfluous_override in
-      SMap.add name sig_ methods
+      let (sig_decl_element, sig_fun_element) = sig_ in
+      SMap.add
+        name
+        ({ sig_decl_element with elt_sort_text }, sig_fun_element)
+        methods
+(* take old and new sig, get sort texts recheck *)
 
 let add_methods methods' acc = SMap.fold add_method methods' acc
 
@@ -119,7 +220,7 @@ let add_const name const acc =
 
 let add_members members acc = SMap.fold SMap.add members acc
 
-let add_typeconst name sig_ typeconsts =
+let add_typeconst c name sig_ typeconsts =
   match SMap.find_opt name typeconsts with
   | None ->
     (* The type constant didn't exist so far, let's add it *)
@@ -137,7 +238,24 @@ let add_typeconst name sig_ typeconsts =
       else
         typeconsts
     in
-    (match (old_sig.ttc_kind, sig_.ttc_kind) with
+    (match
+       ( old_sig.ttc_synthesized,
+         sig_.ttc_synthesized,
+         old_sig.ttc_kind,
+         sig_.ttc_kind )
+     with
+    | (false, true, _, _) when Ast_defs.is_c_class c.sc_kind ->
+      (* Don't replace a type constant with a synthesized type constant. This
+         covers the following case:
+
+         class A { const type T = int; }
+         trait T { require extends A; }
+         class Child extends A {
+            use T;
+         }
+
+         Child should not consider T to be synthesized. *)
+      typeconsts
     (* This covers the following case
      *
      * interface I1 { abstract const type T; }
@@ -147,7 +265,7 @@ let add_typeconst name sig_ typeconsts =
      *
      * Then C::T == I2::T since I2::T is not abstract
      *)
-    | (TCConcrete _, TCAbstract _) -> typeconsts
+    | (_, _, TCConcrete _, TCAbstract _) -> typeconsts
     (* This covers the following case
      *
      * interface I {
@@ -163,10 +281,12 @@ let add_typeconst name sig_ typeconsts =
      * C::T must come from A, not I, as A provides the default that will synthesize
      * into a concrete type constant in C.
      *)
-    | ( TCAbstract { atc_default = Some _; _ },
+    | ( _,
+        _,
+        TCAbstract { atc_default = Some _; _ },
         TCAbstract { atc_default = None; _ } ) ->
       typeconsts
-    | (_, _) ->
+    | (_, _, _, _) ->
       (* When a type constant is declared in multiple parents we need to make a
        * subtle choice of what type we inherit. For example in:
        *
@@ -199,59 +319,48 @@ let add_constructor (cstr, cstr_consist) (acc, acc_consist) =
   in
   (ce, Decl_utils.coalesce_consistent acc_consist cstr_consist)
 
-let add_inherited inherited acc =
+let add_inherited c inherited acc =
   {
     ih_substs =
       SMap.merge
         begin
           fun _ old_subst_opt new_subst_opt ->
-          match (old_subst_opt, new_subst_opt) with
-          | (None, None) -> None
-          | (Some s, None)
-          | (None, Some s) ->
-            Some s
-          (* If the old subst_context came via require extends, then we want to use
-           * the substitutions from the actual extends instead. e.g.,
-           *
-           * class Base<+T> {}
-           * trait MyTrait { require extends Base<mixed>; }
-           * class Child extends Base<int> { use MyTrait; }
-           *
-           * Here the subst_context (MyTrait/[T -> mixed]) should be overridden by
-           * (Child/[T -> int]), because it's the actual extension of class Base.
-           *)
-          | (Some old_subst, Some new_subst) ->
-            if
-              (not new_subst.sc_from_req_extends)
-              || old_subst.sc_from_req_extends
-            then
-              Some new_subst
-            else
-              Some old_subst
+            match (old_subst_opt, new_subst_opt) with
+            | (None, None) -> None
+            | (Some s, None)
+            | (None, Some s) ->
+              Some s
+            (* If the old subst_context came via require extends, then we want to use
+             * the substitutions from the actual extends instead. e.g.,
+             *
+             * class Base<+T> {}
+             * trait MyTrait { require extends Base<mixed>; }
+             * class Child extends Base<int> { use MyTrait; }
+             *
+             * Here the subst_context (MyTrait/[T -> mixed]) should be overridden by
+             * (Child/[T -> int]), because it's the actual extension of class Base.
+             *)
+            | (Some old_subst, Some new_subst) ->
+              if
+                (not new_subst.sc_from_req_extends)
+                || old_subst.sc_from_req_extends
+              then
+                Some new_subst
+              else
+                Some old_subst
         end
         acc.ih_substs
         inherited.ih_substs;
     ih_cstr = add_constructor inherited.ih_cstr acc.ih_cstr;
     ih_consts = SMap.fold add_const inherited.ih_consts acc.ih_consts;
     ih_typeconsts =
-      SMap.fold add_typeconst inherited.ih_typeconsts acc.ih_typeconsts;
+      SMap.fold (add_typeconst c) inherited.ih_typeconsts acc.ih_typeconsts;
     ih_props = add_members inherited.ih_props acc.ih_props;
     ih_sprops = add_members inherited.ih_sprops acc.ih_sprops;
     ih_methods = add_methods inherited.ih_methods acc.ih_methods;
     ih_smethods = add_methods inherited.ih_smethods acc.ih_smethods;
-  }
-
-let collapse_trait_inherited methods smethods acc =
-  let collapse_methods name sigs acc =
-    (* fold_right because when traits get considered in order
-     * T1, T2, T3, the list will be built up as [T3::f; T2::f; T1::f],
-     * so this way we still call add_method in the declared order *)
-    List.fold_right sigs ~f:(add_method name) ~init:acc
-  in
-  {
-    acc with
-    ih_methods = SMap.fold collapse_methods methods acc.ih_methods;
-    ih_smethods = SMap.fold collapse_methods smethods acc.ih_smethods;
+    ih_support_dynamic_type =
+      inherited.ih_support_dynamic_type || acc.ih_support_dynamic_type;
   }
 
 (*****************************************************************************)
@@ -267,8 +376,7 @@ let mark_as_synthesized inh =
     ih_substs =
       SMap.map
         begin
-          fun sc ->
-          { sc with sc_from_req_extends = true }
+          (fun sc -> { sc with sc_from_req_extends = true })
         end
         inh.ih_substs;
     ih_cstr = (Option.map (fst inh.ih_cstr) ~f:mark_elt, snd inh.ih_cstr);
@@ -282,22 +390,27 @@ let mark_as_synthesized inh =
         inh.ih_typeconsts;
     ih_consts =
       SMap.map (fun const -> { const with cc_synthesized = true }) inh.ih_consts;
+    ih_support_dynamic_type = inh.ih_support_dynamic_type;
   }
 
 (*****************************************************************************)
 (* Code filtering the private members (useful for inheritance) *)
 (*****************************************************************************)
 
+let is_private
+    (type member)
+    (module Member : Member_S with type t = member)
+    (member : member) : bool =
+  match Member.visibility member with
+  | Vprivate _ -> not @@ Member.has_lsb member
+  | Vpublic
+  | Vprotected _
+  | Vinternal _
+  | Vprotected_internal _ ->
+    false
+
 let filter_privates class_type =
-  let is_not_private _ elt =
-    match elt.elt_visibility with
-    | Vprivate _ when get_elt_lsb elt -> true
-    | Vprivate _ -> false
-    | Vpublic
-    | Vprotected _
-    | Vinternal _ ->
-      true
-  in
+  let is_not_private _ elt = not @@ is_private (module Decl_defs_element) elt in
   {
     class_type with
     dc_props = SMap.filter is_not_private class_type.dc_props;
@@ -316,9 +429,15 @@ let chown_private_and_protected owner class_type =
      *)
     | Vprotected _ when not (get_elt_synthesized elt) ->
       { elt with elt_visibility = Vprotected owner }
+    | Vprotected_internal { module_; _ } when not (get_elt_synthesized elt) ->
+      {
+        elt with
+        elt_visibility = Vprotected_internal { class_id = owner; module_ };
+      }
     | Vpublic
     | Vprotected _
-    | Vinternal _ ->
+    | Vinternal _
+    | Vprotected_internal _ ->
       elt
   in
   {
@@ -342,7 +461,6 @@ let pair_with_heap_entries :
   SMap.mapi (fun name elt -> (elt, heap_entries >>= SMap.find_opt name)) elts
 
 let inherit_hack_class
-    env
     child
     parent_name
     parent
@@ -365,7 +483,7 @@ let inherit_hack_class
     SMap.map (Inst.instantiate_typeconst_type subst) parent.dc_typeconsts
   in
   let consts = SMap.map (Inst.instantiate_cc subst) parent.dc_consts in
-  let (cstr, constructor_consistency) = Decl_env.get_construct env parent in
+  let (cstr, constructor_consistency) = parent.dc_construct in
   let subst_ctx =
     {
       sc_subst = subst;
@@ -402,6 +520,7 @@ let inherit_hack_class
         pair_with_heap_entries
           parent.dc_smethods
           (parent_members >>| fun m -> m.Decl_store.m_static_methods);
+      ih_support_dynamic_type = parent.dc_support_dynamic_type;
     }
   in
   result
@@ -425,10 +544,10 @@ let inherit_hack_xhp_attrs_only class_type members =
     SMap.fold
       begin
         fun name prop acc ->
-        if Option.is_some (get_elt_xhp_attr prop) then
-          SMap.add name prop acc
-        else
-          acc
+          if Option.is_some (get_elt_xhp_attr prop) then
+            SMap.add name prop acc
+          else
+            acc
       end
       class_type.dc_props
       SMap.empty
@@ -446,47 +565,25 @@ let inherit_hack_xhp_attrs_only class_type members =
 
 (*****************************************************************************)
 
-(** Return all the heap entries for a class names, i.e. the entry from the class heap
-    and optionally all the entries from the property and method heaps.
-    [classes] acts as a cache for entries we already have at hand.
-    Also add dependency to that class. *)
-let heap_entries env class_name (classes : Decl_store.class_entries SMap.t) :
-    Decl_store.class_entries option =
-  match SMap.find_opt class_name classes with
-  | Some (class_, _) as heap_entries ->
-    if not (Pos_or_decl.is_hhi class_.dc_pos) then
-      Decl_env.add_extends_dependency env class_name;
-    heap_entries
-  | None ->
-    Decl_env.add_extends_dependency env class_name;
-    None
-
 (* Include definitions inherited from a class (extends) or a trait (use)
  * or requires extends
  *)
-let from_class env c (parents : Decl_store.class_entries SMap.t) parent_ty :
+let from_class c (parents : Decl_store.class_entries SMap.t) parent_ty :
     inherited =
   let (_, (_, parent_name), parent_class_params) =
     Decl_utils.unwrap_class_type parent_ty
   in
-  match heap_entries env parent_name parents with
+  match SMap.find_opt parent_name parents with
   | None ->
     (* The class lives in PHP, we don't know anything about it *)
     empty
   | Some (class_, parent_members) ->
     (* The class lives in Hack *)
-    inherit_hack_class
-      env
-      c
-      parent_name
-      class_
-      parent_class_params
-      parent_members
+    inherit_hack_class c parent_name class_ parent_class_params parent_members
 
-let from_class_constants_only env (parents : Decl_store.class_entries SMap.t) ty
-    =
+let from_class_constants_only (parents : Decl_store.class_entries SMap.t) ty =
   let (_, (_, class_name), class_params) = Decl_utils.unwrap_class_type ty in
-  match heap_entries env class_name parents with
+  match SMap.find_opt class_name parents with
   | None ->
     (* The class lives in PHP, we don't know anything about it *)
     empty
@@ -494,12 +591,11 @@ let from_class_constants_only env (parents : Decl_store.class_entries SMap.t) ty
     (* The class lives in Hack *)
     inherit_hack_class_constants_only class_ class_params parent_members
 
-let from_class_xhp_attrs_only env (parents : Decl_store.class_entries SMap.t) ty
-    =
+let from_class_xhp_attrs_only (parents : Decl_store.class_entries SMap.t) ty =
   let (_, (_pos, class_name), _class_params) =
     Decl_utils.unwrap_class_type ty
   in
-  match heap_entries env class_name parents with
+  match SMap.find_opt class_name parents with
   | None ->
     (* The class lives in PHP, we don't know anything about it *)
     empty
@@ -507,76 +603,150 @@ let from_class_xhp_attrs_only env (parents : Decl_store.class_entries SMap.t) ty
     (* The class lives in Hack *)
     inherit_hack_xhp_attrs_only class_ parent_members
 
-let from_parent env c (parents : Decl_store.class_entries SMap.t) =
-  let extends =
-    (* In an abstract class or a trait, we assume the interfaces
-     * will be implemented in the future, so we take them as
-     * part of the class (as requested by dependency injection implementers)
-     *)
-    match c.sc_kind with
-    | Ast_defs.Cclass k when Ast_defs.is_abstract k ->
-      c.sc_implements @ c.sc_extends
-    | Ast_defs.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
-    | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> c.sc_extends
-  in
-  let inherited_l = List.map extends ~f:(from_class env c parents) in
-  List.fold_right ~f:add_inherited inherited_l ~init:empty
+let parents_which_provide_members c =
+  (* /!\ For soundness, the traversal order below
+   * must be consistent with traversal order for ancestors
+   * used in decl_folded_class.ml *)
+  (* In an abstract class or a trait, we assume the interfaces
+   * will be implemented in the future, so we take them as
+   * part of the class (as requested by dependency injection implementers) *)
+  match c.sc_kind with
+  | Ast_defs.Cclass k when Ast_defs.is_abstract k ->
+    c.sc_implements @ c.sc_extends
+  | Ast_defs.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
+  | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> c.sc_extends
 
-let from_requirements env c parents acc reqs =
-  let inherited = from_class env c parents reqs in
+let from_parent c (parents : Decl_store.class_entries SMap.t) acc parent =
+  let inherited = from_class c parents parent in
+  add_inherited c inherited acc
+
+let from_requirements c parents acc reqs =
+  let inherited = from_class c parents reqs in
   let inherited = mark_as_synthesized inherited in
-  add_inherited inherited acc
+  add_inherited c inherited acc
 
-let from_trait env c parents (acc, methods, smethods) uses =
-  let ({ ih_methods; ih_smethods; _ } as inherited) =
-    from_class env c parents uses
-  in
-  let inherited =
-    { inherited with ih_methods = SMap.empty; ih_smethods = SMap.empty }
-  in
-  let extend_methods name sig_ methods =
-    let sigs = Option.value ~default:[] (SMap.find_opt name methods) in
-    SMap.add name (sig_ :: sigs) methods
-  in
-  let methods = SMap.fold extend_methods ih_methods methods in
-  let smethods = SMap.fold extend_methods ih_smethods smethods in
-  (add_inherited inherited acc, methods, smethods)
+let from_trait c parents acc uses =
+  let inherited = from_class c parents uses in
+  add_inherited c inherited acc
 
-let from_xhp_attr_use env (parents : Decl_store.class_entries SMap.t) acc uses =
-  let inherited = from_class_xhp_attrs_only env parents uses in
-  add_inherited inherited acc
+let from_xhp_attr_use c (parents : Decl_store.class_entries SMap.t) acc uses =
+  let inherited = from_class_xhp_attrs_only parents uses in
+  add_inherited c inherited acc
 
+(** Inherits constants and type constants from an interface. *)
 let from_interface_constants
-    env (parents : Decl_store.class_entries SMap.t) acc impls =
-  let inherited = from_class_constants_only env parents impls in
-  add_inherited inherited acc
+    c (parents : Decl_store.class_entries SMap.t) acc impls =
+  let inherited = from_class_constants_only parents impls in
+  add_inherited c inherited acc
 
-(*****************************************************************************)
-(* The API to the outside *)
-(*****************************************************************************)
+let has_highest_precedence : (OverridePrecedence.t * 'a) option -> bool =
+  function
+  | Some (precedence, _) -> OverridePrecedence.is_highest precedence
+  | _ -> false
 
-let make env c ~cache:(parents : Decl_store.class_entries SMap.t) =
-  (* members inherited from parent class ... *)
-  let (acc : inherited) = from_parent env c parents in
-  let acc =
-    List.fold_left
-      ~f:(from_requirements env c parents)
-      ~init:acc
-      (c.sc_req_class @ c.sc_req_extends)
+let max_precedence (type a) :
+    (OverridePrecedence.t * a) option ->
+    (OverridePrecedence.t * a) option ->
+    (OverridePrecedence.t * a) option =
+  Option.merge ~f:(fun x y ->
+      let (x_precedence, _) = x and (y_precedence, _) = y in
+      if OverridePrecedence.(y_precedence > x_precedence) then
+        y
+      else
+        x)
+
+let ( >?? )
+    (x : (OverridePrecedence.t * 'a) option)
+    (y : (OverridePrecedence.t * 'a) option lazy_t) :
+    (OverridePrecedence.t * 'a) option =
+  if has_highest_precedence x then
+    x
+  else
+    max_precedence x (Lazy.force y)
+
+let find_first_with_highest_precedence
+    (l : 'a list) ~(f : 'a -> (OverridePrecedence.t * _) option) :
+    (OverridePrecedence.t * _) option =
+  let rec loop found = function
+    | [] -> found
+    | x :: l ->
+      let x = f x in
+      if has_highest_precedence x then
+        x
+      else
+        loop (max_precedence found x) l
   in
-  (* ... are overridden with those inherited from used traits *)
-  let (acc, methods, smethods) =
-    List.fold_left
-      ~f:(from_trait env c parents)
-      ~init:(acc, SMap.empty, SMap.empty)
-      c.sc_uses
-  in
-  let acc = collapse_trait_inherited methods smethods acc in
+  loop None l
+
+type parent_kind =
+  | Parent
+  | Requirement
+  | Trait
+
+type parent = decl_ty
+
+module OrderedParents : sig
+  type t
+
+  (** This provides the parent traversal order for member folding.
+    This is appropriate for all members except XHP attributes and constants.
+    The order is different for those and these are handled elsewhere. *)
+  val get : shallow_class -> t
+
+  val fold : t -> init:'acc -> f:(parent_kind -> 'acc -> parent -> 'acc) -> 'acc
+
+  (** Reverse the ordered parents. *)
+  val rev : t -> t
+
+  val find_map_first_with_highest_precedence :
+    t ->
+    f:(parent_kind -> parent -> (OverridePrecedence.t * 'res) option) ->
+    (OverridePrecedence.t * 'res) option
+end = struct
+  type t = (parent_kind * parent list) list
+
+  let get (c : shallow_class) : t =
+    (* /!\ For soundness, the traversal order below
+     * must be consistent with traversal order for ancestors
+     * used in decl_folded_class.ml *)
+    [
+      (Parent, parents_which_provide_members c |> List.rev);
+      ( Requirement,
+        List.map c.sc_req_constraints ~f:(fun dcr -> to_decl_constraint dcr)
+        @ c.sc_req_extends );
+      (Trait, c.sc_uses);
+    ]
+
+  let fold (t : t) ~init ~(f : parent_kind -> 'acc -> parent -> 'acc) =
+    List.fold t ~init ~f:(fun acc (parent_kind, parents) ->
+        List.fold ~init:acc ~f:(f parent_kind) parents)
+
+  let rev : t -> t = List.rev_map ~f:(Tuple2.map_snd ~f:List.rev)
+
+  (** Apply [f] to each parent to obtain a result and a precedence.
+    Return the result with the highest precedence.
+    If two results have the same highest precedence, return the first one. *)
+  let find_map_first_with_highest_precedence
+      (type res)
+      (t : t)
+      ~(f : parent_kind -> parent -> (OverridePrecedence.t * res) option) :
+      (OverridePrecedence.t * res) option =
+    List.fold t ~init:None ~f:(fun acc (parent_kind, parents) ->
+        acc
+        >?? lazy (find_first_with_highest_precedence parents ~f:(f parent_kind)))
+end
+
+let make c ~cache:(parents : Decl_store.class_entries SMap.t) =
+  let acc = empty in
   let acc =
-    List.fold_left
-      ~f:(from_xhp_attr_use env parents)
-      ~init:acc
-      c.sc_xhp_attr_uses
+    OrderedParents.get c
+    |> OrderedParents.fold ~init:acc ~f:(function
+           | Parent -> from_parent c parents
+           | Requirement -> from_requirements c parents
+           | Trait -> from_trait c parents)
+  in
+  let acc =
+    List.fold_left ~f:(from_xhp_attr_use c parents) ~init:acc c.sc_xhp_attr_uses
   in
   (* todo: what about the same constant defined in different interfaces
    * we implement? We should forbid and say "constant already defined".
@@ -585,7 +755,7 @@ let make env c ~cache:(parents : Decl_store.class_entries SMap.t) =
    *)
   let acc =
     List.fold_left
-      ~f:(from_interface_constants env parents)
+      ~f:(from_interface_constants c parents)
       ~init:acc
       c.sc_req_implements
   in
@@ -596,11 +766,28 @@ let make env c ~cache:(parents : Decl_store.class_entries SMap.t) =
   in
   let acc =
     List.fold_left
-      ~f:(from_interface_constants env parents)
+      ~f:(from_interface_constants c parents)
       ~init:acc
       included_enums
   in
   List.fold_left
-    ~f:(from_interface_constants env parents)
+    ~f:(from_interface_constants c parents)
     ~init:acc
     c.sc_implements
+
+let find_overridden_method
+    (cls : shallow_class) ~(get_method : decl_ty -> class_elt option) :
+    class_elt option =
+  let is_not_private m = not @@ is_private (module Typing_defs_class_elt) m in
+  let precedence : class_elt -> OverridePrecedence.t =
+    OverridePrecedence.make (module Typing_defs_class_elt)
+  in
+  let get_method_with_precedence _ ty =
+    get_method ty |> Option.filter ~f:is_not_private >>| fun method_ ->
+    (precedence method_, method_)
+  in
+  OrderedParents.get cls
+  |> OrderedParents.rev
+  |> OrderedParents.find_map_first_with_highest_precedence
+       ~f:get_method_with_precedence
+  >>| snd

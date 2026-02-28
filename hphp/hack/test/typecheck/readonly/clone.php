@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Bar {
   public int $val= 0;

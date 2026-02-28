@@ -2,20 +2,20 @@
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $dicts = vec[
-    tuple("cookie", $_COOKIE),
-    tuple("env", $_ENV),
-    tuple("files", $_FILES),
-    tuple("get", $_GET),
-    tuple("post", $_POST),
-    tuple("request", $_REQUEST),
-    tuple("server", $_SERVER),
+    tuple("cookie", \HH\global_get('_COOKIE')),
+    tuple("env", \HH\global_get('_ENV')),
+    tuple("files", \HH\global_get('_FILES')),
+    tuple("get", \HH\global_get('_GET')),
+    tuple("post", \HH\global_get('_POST')),
+    tuple("request", \HH\global_get('_REQUEST')),
+    tuple("server", \HH\global_get('_SERVER')),
   ];
   $dfuncs = vec[
-    fun('HH\\is_php_array'),
-    fun('HH\\is_darray'),
-    fun('HH\\is_dict'),
+    HH\is_php_array<>,
+    HH\is_darray<>,
+    HH\is_dict<>,
   ];
   foreach ($dicts as list($name, $d)) {
     echo "$name:\n";

@@ -1,0 +1,16 @@
+break slow/debugger/break2.php:7
+break foo2()
+break cls2::pubObj()
+break cls2::pubCls()
+break list
+run
+@ foo2('test_break6')
+break list
+run
+@ $break6=new cls2()
+@ $break6->pubObj('test_break6')
+run
+@ cls2::pubCls('test_break6')
+break clear all
+run
+quit

@@ -14,7 +14,7 @@ class A {
 
 }
 
-function main() {
+function main() :mixed{
   $a1 = new A();
   $a2 = new A();
 
@@ -48,6 +48,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_deep_copy() {
+function main_deep_copy() :mixed{
 main();
 }

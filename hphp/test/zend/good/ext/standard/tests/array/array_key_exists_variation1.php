@@ -12,7 +12,7 @@
 echo "*** Testing array_key_exists() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$search = darray [0 => 'zero', 'key' => 'val', 1 => 'two'];
+$search = dict[0 => 'zero', 'key' => 'val', 1 => 'two'];
 
 // heredoc string
 $heredoc = <<<EOT
@@ -20,7 +20,7 @@ key
 EOT;
 
 // unexpected values to be passed to $key argument
-$inputs = varray[
+$inputs = vec[
 
        // int data
 /*1*/  0,

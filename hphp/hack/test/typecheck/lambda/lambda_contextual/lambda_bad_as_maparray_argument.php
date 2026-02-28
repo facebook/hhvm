@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class MyClass {
@@ -26,7 +26,7 @@ function expectsMyClosureRunnerMyClass(
 }
 function getThing1(): MyClosureRunner<MyClass> {
   $var = expectsMyClosureRunnerMyClass(
-    darray[
+    dict[
       'a' => new MyClosureRunner(
         function($arg) {
           $arg->missing_method();

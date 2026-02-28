@@ -15,9 +15,6 @@
 */
 #include "hphp/runtime/vm/jit/opt.h"
 
-#include <boost/dynamic_bitset.hpp>
-#include <sstream>
-
 #include "hphp/util/bitset-utils.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/match.h"
@@ -218,7 +215,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(hhir_sinkdefs);
+TRACE_SET_MOD(hhir_sinkdefs)
 
 namespace {
 
@@ -483,6 +480,7 @@ bool conflicts(const IRInstruction& instr,
       }
       return
         load.src.maybe(call.kills) ||
+        load.src.maybe(call.uninits) ||
         load.src.maybe(call.actrec) ||
         load.src.maybe(call.outputs) ||
         load.src.maybe(AHeapAny) ||
@@ -508,7 +506,11 @@ bool conflicts(const IRInstruction& instr,
   assertx(g.stores == AEmpty && g.kills == AEmpty && g.inout == AEmpty);
 
   auto const test_reads = [&] (const AliasClass& acls) {
-    return g.loads.maybe(acls) || g.backtrace.maybe(acls);
+    if (g.loads.maybe(acls)) return true;
+    for (auto const& frame : g.backtrace) {
+      if (frame.maybe(acls)) return true;
+    }
+    return false;
   };
 
   auto const effects = canonicalize(memory_effects(instr));
@@ -525,12 +527,22 @@ bool conflicts(const IRInstruction& instr,
       }
       return
         test_reads(call.kills) ||
+        test_reads(call.uninits) ||
         test_reads(call.actrec) ||
         test_reads(call.outputs) ||
         test_reads(AHeapAny) ||
         test_reads(ARdsAny);
     },
     [&] (const GeneralEffects& g2)   {
+      // Two general effects instructions where one may not be DCEd must
+      // conflict.  Non DCE able instructions might have effects not
+      // enumerated by memory effects.  Notably today we omit certain locations
+      // from being analyzed by memory effects.  Assuming no conlicting effects
+      // means the instructions do not conflict omits the fact they might
+      // conflict on a non tracked location.  Today such locations are read and
+      // written to using may_load_store(AEmpty, AEmpty).
+      if (!canDCE(instr) || !canDCE(sinkee)) return true;
+
       return
         test_reads(g2.stores) ||
         test_reads(g2.kills) ||
@@ -556,7 +568,7 @@ bool conflicts(const IRInstruction& sinkee, const IRInstruction& barrier) {
     return true;
   }
 
-  if (barrier.consumesReferences() && !barrier.is(DecRefNZ)) {
+  if (!barrier.is(DecRefNZ)) {
     // We need to check if the barrier can potentially trigger a
     // DecRef which would release sinkee's def.
     for (auto const src : sinkee.srcs()) {
@@ -614,11 +626,10 @@ TriBool will_conflict(const IRInstruction& inst) {
     effects,
     [&] (const IrrelevantEffects&)   { return TriBool::No; },
     [&] (const GeneralEffects& g)    {
-      if (g.stores != AEmpty || g.kills != AEmpty || g.inout != AEmpty) {
+      if (g.loads != AEmpty || g.stores != AEmpty || g.kills != AEmpty ||
+          g.inout != AEmpty) {
         return TriBool::Maybe;
       }
-      // A load out something ref-counted can be blocked.
-      if (g.loads.maybe(AHeapAny)) return TriBool::Maybe;
       return TriBool::No;
     },
     [&] (const PureLoad& x)          { return TriBool::Maybe; },
@@ -797,7 +808,7 @@ void rewrite_uses(State& state,
       }
       // We handled everything but the last instruction. Do the same
       // check for a different insertion for that.
-      if (insertions.back.count(block)) {
+      if (insertions.back.contains(block)) {
         ITRACE(4, "Back of block{} has a different insertion\n", block->id());
         return false;
       }
@@ -835,7 +846,7 @@ void rewrite_uses(State& state,
     block->forEachSucc(
       [&] (Block* succ) {
         // Already visited, so no need to enqueue
-        if (visited.count(succ)) {
+        if (visited.contains(succ)) {
           ITRACE(4, "Skipping enqueue of successor {} since already visited\n",
                  succ->id());
           return;
@@ -857,7 +868,7 @@ void rewrite_uses(State& state,
         if (succ->numPreds() > 1) {
           // We already inserted a phi here. We would have already
           // rewritten the Jmp source above, so nothing further to do.
-          if (phis.count(succ)) {
+          if (phis.contains(succ)) {
             ITRACE(
               4,
               "Skipping enqueue of successor {} since a phi has been "
@@ -972,7 +983,7 @@ void fixup_anticipated(State& state, SSATmp* tmp, Block& start) {
         begin.set(tmp->id());
         block->forEachPred(
           [&] (Block* pred) {
-            if (visited.count(pred)) return;
+            if (visited.contains(pred)) return;
             visited.emplace(pred);
             worklist.push(pred);
           }

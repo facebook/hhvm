@@ -1,0 +1,6 @@
+WARN: File "disjoint_case.php", line 7, characters 10-12:
+Invalid case: This case will never match.
+A value of type `int` can never be equal to a value of type `string` (Warn[12007])
+WARN: File "disjoint_case.php", line 9, characters 10-13:
+Invalid case: This case will never match.
+A value of type `int` can never be equal to a value of type `bool` (Warn[12007])

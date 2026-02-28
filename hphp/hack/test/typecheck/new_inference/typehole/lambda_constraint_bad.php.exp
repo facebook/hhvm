@@ -1,4 +1,4 @@
-File "lambda_constraint_bad.php", line 18, characters 15-21:
+ERROR: File "lambda_constraint_bad.php", line 18, characters 15-21:
 Invalid argument (Typing[4323])
   File "lambda_constraint_bad.php", line 11, characters 12-12:
   `T` is a constrained type parameter

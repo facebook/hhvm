@@ -29,8 +29,10 @@
 
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_priority-bridge-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
@@ -42,8 +44,10 @@
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/collections/hash-collection.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
+
 #include "hphp/util/bitset-utils.h"
+#include "hphp/util/configs/gc.h"
 
 #include <algorithm>
 
@@ -102,7 +106,7 @@ struct Slab : HeapObject {
 
   static char* align(const void* addr) {
     auto const a = reinterpret_cast<intptr_t>(addr);
-    auto const mask = RO::EvalSlabAllocAlign - 1;
+    auto const mask = Cfg::GC::SlabAllocAlign - 1;
     assertx((mask & (mask + 1)) == 0);
     return reinterpret_cast<char*>(a + (-a & mask));
   }
@@ -137,7 +141,7 @@ private:
   // Start-bit state:
   // 1 = a HeapObject starts at corresponding address AND it has had its header
   //     kind initialized at least once (not necessarily currently accurate but
-  //     definetly does not contain never initialized data)
+  //     definitely does not contain never initialized data)
   // 0 = in the middle of an object OR free space OR a heap object with
   //     uninitialized headers OR a heap object not created through split tail
   uint64_t startsCache_[kNumStarts];
@@ -242,10 +246,12 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* AsyncFunction */
     sizeClass<c_AsyncGeneratorWaitHandle>(),
     0, /* AwaitAll */
+    0, /* Concurrent */
     sizeClass<c_ConditionWaitHandle>(),
     sizeClass<c_RescheduleWaitHandle>(),
     sizeClass<c_SleepWaitHandle>(),
     sizeClass<c_ExternalThreadEventWaitHandle>(),
+    sizeClass<c_PriorityBridgeWaitHandle>(),
   };
 
   // Ordering depends on header-kind.h.
@@ -266,6 +272,7 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* WaitHandle */
     sizeClass<c_AsyncFunctionWaitHandle>(),
     0, /* AwaitAllWH */
+    0, /* ConcurrentWH */
     0, /* Closure */
     sizeClass<c_Vector>(),
     sizeClass<c_Map>(),
@@ -311,6 +318,7 @@ inline size_t allocSize(const HeapObject* h) {
   CHECKSIZE(NativeObject)
   CHECKSIZE(WaitHandle)
   CHECKSIZE(AwaitAllWH)
+  CHECKSIZE(ConcurrentWH)
   CHECKSIZE(Closure)
   CHECKSIZE(AsyncFuncFrame)
   CHECKSIZE(NativeData)
@@ -362,20 +370,25 @@ inline size_t allocSize(const HeapObject* h) {
       auto obj = static_cast<const ObjectData*>(h);
       auto whKind = wait_handle<c_Awaitable>(obj)->getKind();
       size = waithandle_sizes[(int)whKind];
-      assertx(size != 0); // AsyncFuncFrame or AwaitAllWH
+      assertx(size != 0); // AsyncFuncFrame, AwaitAllWH or ConcurrentWH
       assertx(size == MemoryManager::sizeClass(size));
       return size;
     }
-    case HeaderKind::AwaitAllWH:
-      // size = h->m_cap * sz(Node) + sz(c_AAWH)
-      // [ObjectData][children...]
-      size = static_cast<const c_AwaitAllWaitHandle*>(h)->heapSize();
-      break;
     case HeaderKind::AsyncFuncFrame:
       // size = h->obj_offset + C // 32-bit
       // [NativeNode][locals][Resumable][c_AsyncFunctionWaitHandle]
       size = static_cast<const NativeNode*>(h)->obj_offset +
              sizeof(c_AsyncFunctionWaitHandle);
+      break;
+    case HeaderKind::AwaitAllWH:
+      // size = h->m_cap * sz(Node) + sz(c_AAWH)
+      // [ObjectData][children...]
+      size = static_cast<const c_AwaitAllWaitHandle*>(h)->heapSize();
+      break;
+    case HeaderKind::ConcurrentWH:
+      // size = h->m_cap * sz(Node) + sz(c_CCWH)
+      // [ObjectData][children...]
+      size = static_cast<const c_ConcurrentWaitHandle*>(h)->heapSize();
       break;
     case HeaderKind::NativeData: {
       // h->obj_offset + (h+h->obj_offset)->m_cls->m_extra * sz(TV) + sz(OD)
@@ -480,6 +493,21 @@ inline HeapObject* Slab::find(const void* ptr) const {
   return nullptr;
 }
 
+inline HeapObject* MemoryManager::find(const void* p) {
+  if (m_lastInitFreeAllocated != m_stats.mmAllocated()
+      || m_lastInitFreeFreed != m_stats.mm_freed) {
+    initFree();
+  }
+  if (auto const ptr = m_heap.find(p)) {
+    if (UNLIKELY(ptr->kind() != HeaderKind::Slab)) return ptr;
+    auto const slab = static_cast<Slab*>(ptr);
+    auto const obj = slab->find(p);
+    if (obj) return obj;
+    return slab;
+  }
+  return nullptr;
+}
+
 template<class OnBig, class OnSlab>
 void SparseHeap::iterate(OnBig onBig, OnSlab onSlab) {
   // slabs and bigs are sorted; walk through both in address order
@@ -515,6 +543,7 @@ template<class Fn> void SparseHeap::iterate(Fn fn) {
 
 template<class Fn> void MemoryManager::iterate(Fn fn) {
   m_heap.iterate([&](HeapObject* h, size_t allocSize) {
+    assertx(m_stats.mm_freed == m_lastInitFreeFreed);
     if (h->kind() >= HeaderKind::Hole) {
       assertx(unsigned(h->kind()) < NumHeaderKinds);
       // no valid pointer can point here.
@@ -534,9 +563,7 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
   std::vector<const ObjectData*> ptrs;
   forEachHeapObject([&](HeapObject* h, size_t) {
     if (auto obj = innerObj(h)) {
-      if (!obj->hasUninitProps()) {
-        ptrs.push_back(obj);
-      }
+      ptrs.push_back(obj);
     }
   });
   for (auto ptr : ptrs) {

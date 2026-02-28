@@ -1,4 +1,4 @@
-Typing[4064] You are trying to access the method bar but this is a mixed value. Use a specific class or interface name. [1]
+error: Typing[4064] You are trying to access the method bar but this is a mixed value. Use a specific class or interface name. [1]
 -> Definition is here [2]
 
 mixed_method_access.php:4:9
@@ -8,4 +8,4 @@ mixed_method_access.php:4:9
 [1] 4 |   $foo->bar();
     5 | }
 
-1 error found.
+1 error found

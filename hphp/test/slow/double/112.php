@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_112() {
+function main_112() :mixed{
 $a = 1.234;
 echo $a;
 $b = 1.2e3;

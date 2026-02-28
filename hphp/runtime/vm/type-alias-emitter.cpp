@@ -21,9 +21,6 @@
 
 #include "hphp/util/blob-encoder.h"
 
-#include <limits>
-#include <sstream>
-
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,9 +33,8 @@ TypeAliasEmitter::TypeAliasEmitter(UnitEmitter& ue,
   , m_id(id) {}
 
 void TypeAliasEmitter::init(int line0, int line1, Attr attrs,
-                            const StringData* value,
-                            AnnotType type,
-                            bool nullable,
+                            TypeConstraint value,
+                            AliasKind kind,
                             Array typeStructure,
                             Array resolvedTypeStructure) {
   assertx(typeStructure.isDict() &&
@@ -48,20 +44,22 @@ void TypeAliasEmitter::init(int line0, int line1, Attr attrs,
           (resolvedTypeStructure.isDict() &&
            !resolvedTypeStructure.empty() &&
            resolvedTypeStructure->isStatic()));
+  assertx(IMPLIES(kind != AliasKind::CaseType, !value.isUnion()));
+
   m_line0 = line0;
   m_line1 = line1;
   m_attrs = attrs;
   m_value = value;
-  m_type = type;
-  m_nullable = nullable;
+  m_kind = kind;
   m_typeStructure = std::move(typeStructure);
   m_resolvedTypeStructure = std::move(resolvedTypeStructure);
 }
 
 PreTypeAlias TypeAliasEmitter::create(Unit& unit) const {
   return PreTypeAlias {
-    &unit, m_name, m_value, m_attrs, m_type, m_line0, m_line1,
-    m_nullable, m_userAttributes, m_typeStructure, m_resolvedTypeStructure
+    &unit, m_name, m_attrs, m_value, m_line0, m_line1,
+    m_kind, m_userAttributes,
+    m_typeStructure, m_resolvedTypeStructure
   };
 }
 
@@ -71,8 +69,7 @@ template<class SerDe> void TypeAliasEmitter::serdeMetaData(SerDe& sd) {
     (m_line1)
     (m_attrs)
     (m_value)
-    (m_type)
-    (m_nullable)
+    (m_kind)
     (m_userAttributes)
     (m_typeStructure)
     (m_resolvedTypeStructure)

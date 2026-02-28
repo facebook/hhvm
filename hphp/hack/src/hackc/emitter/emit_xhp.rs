@@ -2,22 +2,30 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
 use emit_property::PropAndInit;
 use env::emitter::Emitter;
-use error::{Error, Result};
-use hack_macro::{hack_expr, hack_stmts};
-use hhbc::{hhas_method::HhasMethod, HhasXhpAttribute};
+use error::Error;
+use error::Result;
+use hack_macros::hack_expr;
+use hack_macros::hack_stmts;
+use hhbc::Method;
 use hhbc_string_utils as string_utils;
-use oxidized::{ast::*, ast_defs, pos::Pos};
+use oxidized::ast;
+use oxidized::ast::*;
+use oxidized::ast_defs;
+use oxidized::pos::Pos;
 
-pub fn properties_for_cache<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+use crate::emit_method;
+use crate::emit_property;
+use crate::xhp_attribute::XhpAttribute;
+
+pub fn properties_for_cache<'a>(
+    emitter: &mut Emitter,
     class: &'a Class_,
     class_is_const: bool,
     class_is_closure: bool,
-) -> Result<PropAndInit<'arena>> {
-    let initial_value = Some(Expr((), Pos::make_none(), Expr_::mk_null()));
+) -> Result<PropAndInit> {
+    let initial_value = Some(Expr((), Pos::NONE, Expr_::mk_null()));
     emit_property::from_ast(
         emitter,
         class,
@@ -33,28 +41,27 @@ pub fn properties_for_cache<'a, 'arena, 'decl>(
             typehint: None,
             doc_comment: None,
             user_attributes: &[],
-            id: &ast_defs::Id(Pos::make_none(), "__xhpAttributeDeclarationCache".into()),
+            id: &ast_defs::Id(Pos::NONE, "__xhpAttributeDeclarationCache".into()),
         },
     )
 }
 
-pub fn from_attribute_declaration<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+pub fn from_attribute_declaration<'a>(
+    emitter: &mut Emitter,
     class: &'a Class_,
-    xal: &[HhasXhpAttribute<'_>],
+    xal: &[XhpAttribute<'_>],
     xual: &[Hint],
-) -> Result<HhasMethod<'arena>> {
-    let mut args = vec![(
-        ParamKind::Pnormal,
-        hack_expr!("parent::__xhpAttributeDeclaration()"),
-    )];
+) -> Result<Method> {
+    let mut args = vec![ast::Argument::Anormal(hack_expr!(
+        "parent::__xhpAttributeDeclaration()"
+    ))];
 
     for xua in xual.iter() {
         match xua.1.as_happly() {
             Some((ast_defs::Id(_, s), hints)) if hints.is_empty() => {
                 let s = string_utils::mangle(string_utils::strip_global_ns(s).into());
                 let arg = hack_expr!("#{id(s)}::__xhpAttributeDeclaration()");
-                args.push((ParamKind::Pnormal, arg));
+                args.push(ast::Argument::Anormal(arg));
             }
             _ => {
                 return Err(Error::unrecoverable(
@@ -63,12 +70,8 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
             }
         }
     }
-    args.push((
-        ParamKind::Pnormal,
-        emit_xhp_attribute_array(emitter.alloc, xal)?,
-    ));
-
-    let body = hack_stmts!(
+    args.push(ast::Argument::Anormal(emit_xhp_attribute_array(xal)?));
+    let body = Block(hack_stmts!(
         r#"
             $r = self::$__xhpAttributeDeclarationCache;
             if ($r === null) {
@@ -77,7 +80,7 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
             }
             return $r;
     "#
-    );
+    ));
     from_xhp_attribute_declaration_method(
         emitter,
         class,
@@ -91,13 +94,16 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
     )
 }
 
-pub fn from_children_declaration<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+pub fn from_children_declaration<'a>(
+    emitter: &mut Emitter,
     ast_class: &'a Class_,
     (pos, children): &(&ast_defs::Pos, Vec<&XhpChild>),
-) -> Result<HhasMethod<'arena>> {
+) -> Result<Method> {
     let children_arr = mk_expr(emit_xhp_children_array(children)?);
-    let body = vec![Stmt((*pos).clone(), Stmt_::mk_return(Some(children_arr)))];
+    let body = Block(vec![Stmt(
+        (*pos).clone(),
+        Stmt_::mk_return(Some(children_arr)),
+    )]);
     from_xhp_attribute_declaration_method(
         emitter,
         ast_class,
@@ -111,13 +117,13 @@ pub fn from_children_declaration<'a, 'arena, 'decl>(
     )
 }
 
-pub fn from_category_declaration<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+pub fn from_category_declaration<'a>(
+    emitter: &mut Emitter,
     ast_class: &'a Class_,
     (pos, categories): &(&ast_defs::Pos, Vec<&String>),
-) -> Result<HhasMethod<'arena>> {
+) -> Result<Method> {
     let category_arr = mk_expr(get_category_array(categories));
-    let body = vec![mk_stmt(Stmt_::mk_return(Some(category_arr)))];
+    let body = Block(vec![mk_stmt(Stmt_::mk_return(Some(category_arr)))]);
     from_xhp_attribute_declaration_method(
         emitter,
         ast_class,
@@ -133,18 +139,19 @@ pub fn from_category_declaration<'a, 'arena, 'decl>(
 
 fn get_category_array(categories: &[&String]) -> Expr_ {
     // TODO: is this always 1?
-    Expr_::mk_darray(
+    Expr_::KeyValCollection(Box::new((
+        (Pos::NONE, KvcKind::Dict),
         None,
         categories
             .iter()
             .map(|&s| {
-                (
+                Field(
                     mk_expr(Expr_::String(s.clone().into())),
                     mk_expr(Expr_::Int("1".into())),
                 )
             })
             .collect(),
-    )
+    )))
 }
 
 fn emit_xhp_children_array(children: &[&XhpChild]) -> Result<Expr_> {
@@ -238,21 +245,22 @@ fn emit_xhp_child_decl(unary: &str, child: &XhpChild) -> Result<Expr_> {
             }
         }
         XhpChild::ChildUnary(c, op) => {
-            emit_xhp_child_decl(xhp_child_op_to_int(Some(op)).to_string().as_str(), &**c)
+            emit_xhp_child_decl(xhp_child_op_to_int(Some(op)).to_string().as_str(), c)
         }
         XhpChild::ChildBinary(c1, c2) => get_array3(
             Expr_::Int("5".into()),
-            emit_xhp_child_decl(unary, &**c1)?,
-            emit_xhp_child_decl(unary, &**c2)?,
+            emit_xhp_child_decl(unary, c1)?,
+            emit_xhp_child_decl(unary, c2)?,
         ),
     }
 }
 
 fn get_array3(i0: Expr_, i1: Expr_, i2: Expr_) -> Result<Expr_> {
-    Ok(Expr_::mk_varray(
+    Ok(Expr_::ValCollection(Box::new((
+        (Pos::NONE, VcKind::Vec),
         None,
         vec![mk_expr(i0), mk_expr(i1), mk_expr(i2)],
-    ))
+    ))))
 }
 
 fn xhp_child_op_to_int(op: Option<&XhpChildOp>) -> usize {
@@ -264,10 +272,7 @@ fn xhp_child_op_to_int(op: Option<&XhpChildOp>) -> usize {
     }
 }
 
-fn emit_xhp_attribute_array<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    xal: &[HhasXhpAttribute<'_>],
-) -> Result<Expr> {
+fn emit_xhp_attribute_array(xal: &[XhpAttribute<'_>]) -> Result<Expr> {
     fn hint_to_num(id: &str) -> usize {
         match id {
             "HH\\string" => 1,
@@ -287,15 +292,15 @@ fn emit_xhp_attribute_array<'arena>(
             None => Err(Error::unrecoverable(
                 "Xhp attribute that's supposed to be an enum but not really",
             )),
-            Some(es) => Ok(mk_expr(Expr_::mk_varray(None, es.to_vec()))),
+            Some(es) => Ok(mk_expr(Expr_::ValCollection(Box::new((
+                (Pos::NONE, VcKind::Vec),
+                None,
+                es.to_vec(),
+            ))))),
         }
     }
-    fn get_attribute_array_values<'arena>(
-        alloc: &'arena bumpalo::Bump,
-        id: &str,
-        enum_opt: Option<&Vec<Expr>>,
-    ) -> Result<(Expr, Expr)> {
-        let id = hhbc::ClassName::from_ast_name_and_mangle(alloc, id).unsafe_as_str();
+    fn get_attribute_array_values(id: &str, enum_opt: Option<&Vec<Expr>>) -> Result<(Expr, Expr)> {
+        let id = hhbc::ClassName::from_ast_name_and_mangle(id).as_str();
         let type_ = hint_to_num(id);
         let type_ident = mk_expr(Expr_::Int(type_.to_string()));
         let class_name = match type_ {
@@ -305,30 +310,22 @@ fn emit_xhp_attribute_array<'arena>(
         };
         Ok((class_name, type_ident))
     }
-    fn extract_from_hint<'arena>(
-        alloc: &'arena bumpalo::Bump,
-        hint: &Hint,
-        enum_opt: Option<&Vec<Expr>>,
-    ) -> Result<(Expr, Expr)> {
-        use naming_special_names_rust::fb;
+    fn extract_from_hint(hint: &Hint, enum_opt: Option<&Vec<Expr>>) -> Result<(Expr, Expr)> {
         match &*(hint.1) {
-            Hint_::Happly(ast_defs::Id(_, inc), hs) if inc == fb::INCORRECT_TYPE => match &hs[..] {
-                [h] => extract_from_hint(alloc, h, enum_opt),
-                _ => get_attribute_array_values(alloc, inc, enum_opt),
-            },
-            Hint_::Hlike(h) | Hint_::Hoption(h) => extract_from_hint(alloc, h, enum_opt),
-            Hint_::Happly(ast_defs::Id(_, id), _) => {
-                get_attribute_array_values(alloc, id, enum_opt)
+            Hint_::Hlike(h) | Hint_::Hoption(h) => extract_from_hint(h, enum_opt),
+            Hint_::Happly(ast_defs::Id(_, id), _) => get_attribute_array_values(id, enum_opt),
+            Hint_::HclassPtr(_, _) => get_attribute_array_values("HH\\class", enum_opt),
+            Hint_::Haccess(_, _) => {
+                // TODO: Consider encoding full type access path instead of falling back to mixed
+                // For now, treat type constants as mixed to avoid crashes
+                get_attribute_array_values("HH\\mixed", enum_opt)
             }
             _ => Err(Error::unrecoverable(
                 "There are no other possible xhp attribute hints",
             )),
         }
     }
-    fn inner_array<'arena>(
-        alloc: &'arena bumpalo::Bump,
-        xa: &HhasXhpAttribute<'_>,
-    ) -> Result<Vec<Expr>> {
+    fn inner_array(xa: &XhpAttribute<'_>) -> Result<Vec<Expr>> {
         let enum_opt = xa.maybe_enum.map(|(_, es)| es);
         let expr = match &(xa.class_var).expr {
             Some(e) => e.clone(),
@@ -336,37 +333,40 @@ fn emit_xhp_attribute_array<'arena>(
         };
         let (class_name, hint) = match &xa.type_ {
             // attribute declared with the var identifier - we treat it as mixed
-            None if enum_opt.is_none() => {
-                get_attribute_array_values(alloc, "\\HH\\mixed", enum_opt)
-            }
-            None => get_attribute_array_values(alloc, "enum", enum_opt),
+            None if enum_opt.is_none() => get_attribute_array_values("\\HH\\mixed", enum_opt),
+            None => get_attribute_array_values("enum", enum_opt),
             // As it turns out, if there is a type list, HHVM discards it
-            Some(h) => extract_from_hint(alloc, h, enum_opt),
+            Some(h) => extract_from_hint(h, enum_opt),
         }?;
         let is_required = mk_expr(Expr_::Int(
             (if xa.is_required() { "1" } else { "0" }).into(),
         ));
         Ok(vec![hint, class_name, expr, is_required])
     }
-    fn emit_xhp_attribute<'arena>(
-        alloc: &'arena bumpalo::Bump,
-        xa: &HhasXhpAttribute<'_>,
-    ) -> Result<(Expr, Expr)> {
+    fn emit_xhp_attribute(xa: &XhpAttribute<'_>) -> Result<Field> {
         let k = mk_expr(Expr_::String(
             string_utils::clean(&((xa.class_var).id).1).into(),
         ));
-        let v = mk_expr(Expr_::mk_varray(None, inner_array(alloc, xa)?));
-        Ok((k, v))
+        let v = mk_expr(Expr_::ValCollection(Box::new((
+            (Pos::NONE, VcKind::Vec),
+            None,
+            inner_array(xa)?,
+        ))));
+        Ok(Field(k, v))
     }
     let xal_arr = xal
         .iter()
-        .map(|x| emit_xhp_attribute(alloc, x))
+        .map(|x| emit_xhp_attribute(x))
         .collect::<Result<Vec<_>>>()?;
-    Ok(mk_expr(Expr_::mk_darray(None, xal_arr)))
+    Ok(mk_expr(Expr_::KeyValCollection(Box::new((
+        (Pos::NONE, KvcKind::Dict),
+        None,
+        xal_arr,
+    )))))
 }
 
-fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
+fn from_xhp_attribute_declaration_method<'a>(
+    emitter: &mut Emitter,
     class: &'a Class_,
     pos: Option<Pos>,
     name: &str,
@@ -375,36 +375,37 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
     static_: bool,
     visibility: Visibility,
     fb_ast: Block,
-) -> Result<HhasMethod<'arena>> {
+) -> Result<Method> {
     let meth = Method_ {
-        span: pos.clone().unwrap_or_else(Pos::make_none),
+        span: pos.clone().unwrap_or(Pos::NONE),
         annotation: (),
         final_,
         abstract_,
         static_,
         readonly_this: false, // TODO readonly emitter
         visibility,
-        name: ast_defs::Id(Pos::make_none(), name.into()),
+        name: ast_defs::Id(Pos::NONE, name.into()),
         tparams: vec![],
         where_constraints: vec![],
         params: vec![],
-        ctxs: Some(Contexts(pos.unwrap_or_else(Pos::make_none), vec![])),
+        ctxs: Some(Contexts(pos.unwrap_or(Pos::NONE), vec![])),
         unsafe_ctxs: None,
         body: FuncBody { fb_ast },
         fun_kind: ast_defs::FunKind::FSync,
-        user_attributes: vec![],
+        user_attributes: Default::default(),
         readonly_ret: None, // TODO readonly emitter
         ret: TypeHint((), None),
         external: false,
+        hidden: false,
         doc_comment: None,
     };
     emit_method::from_ast(emitter, class, meth)
 }
 
 fn mk_expr(expr_: Expr_) -> Expr {
-    Expr((), Pos::make_none(), expr_)
+    Expr((), Pos::NONE, expr_)
 }
 
 fn mk_stmt(stmt_: Stmt_) -> Stmt {
-    Stmt(Pos::make_none(), stmt_)
+    Stmt(Pos::NONE, stmt_)
 }

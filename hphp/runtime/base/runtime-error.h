@@ -21,6 +21,7 @@
 
 #include "hphp/util/portability.h"
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 #ifdef ERROR
 #undef ERROR
@@ -40,8 +41,6 @@ struct ArrayData;
 struct StringData;
 struct TypeConstraint;
 struct TypedValue;
-
-enum class HackStrictOption;
 
 enum class ErrorMode {
   ERROR = 1,
@@ -119,10 +118,6 @@ void raise_param_type_warning(
     int param_num,
     const char* expected_type,
     TypedValue actual_value);
-void raise_hack_strict(HackStrictOption option, const char *ini_setting,
-                       const std::string& msg);
-void raise_hack_strict(HackStrictOption option, const char *ini_setting,
-                       const char *fmt, ...);
 
 /*
  * raise_typehint_error() is the same as raise_recoverable_error(), except
@@ -130,8 +125,10 @@ void raise_hack_strict(HackStrictOption option, const char *ini_setting,
  * raise_reified_typehint_error flavor also takes a warn flag that demotes the
  * error to a warning for reified generics migrations purposes
  */
-void raise_typehint_error(const std::string& msg);
+[[noreturn]] void raise_typehint_error(const std::string& msg);
+void raise_typehint_error_without_first_frame(const std::string& msg);
 void raise_reified_typehint_error(const std::string& msg, bool warn);
+void raise_inline_typehint_error(std::string& givenType, std::string& expectedType, std::string& errorKey);
 
 /*
  * raise_return_typehint_error() is the same as raise_recoverable_error(),
@@ -155,13 +152,15 @@ void raise_property_typehint_unset_error(const Class* declCls,
                                          const StringData* propName,
                                          bool isSoft, bool isUB);
 
-void raise_resolve_undefined(const StringData* name, const Class* c = nullptr);
+[[noreturn]] void raise_resolve_func_undefined(const StringData* name, const Class* c = nullptr);
 [[noreturn]] void raise_call_to_undefined(const StringData* name,
                                           const Class* c = nullptr);
+[[noreturn]] void raise_resolve_class_undefined(const StringData* name);
 
-void raise_convert_object_to_string(const char* cls_name);
-void raise_convert_rfunc_to_type(const char* typeName);
-void raise_convert_rcls_meth_to_type(const char* typeName);
+[[noreturn]] void raise_convert_object_to_string(const char* cls_name);
+[[noreturn]] void throw_convert_rfunc_to_type(const char* typeName);
+[[noreturn]] void throw_convert_rcls_meth_to_type(const char* typeName);
+[[noreturn]] void throw_convert_ecl_to_type(const char* typeName);
 
 ///////////////////////////////////////////////////////////////////////////////
 /*
@@ -176,23 +175,23 @@ void raise_hackarr_compat_notice(const std::string& msg);
 
 [[noreturn]] void raise_use_of_specialized_array();
 
-void raise_class_to_string_conversion_warning();
+void raise_class_to_string_conversion_notice(const char* source);
 void raise_class_to_memokey_conversion_warning();
 
 /*
  * RAII mechanism to temporarily suppress lazyclass-to-string conversion notices
  * within a scope.
  */
-struct SuppressClassConversionWarning {
-  SuppressClassConversionWarning();
-  ~SuppressClassConversionWarning();
-  SuppressClassConversionWarning(const SuppressClassConversionWarning&)
+struct SuppressClassConversionNotice {
+  SuppressClassConversionNotice();
+  ~SuppressClassConversionNotice();
+  SuppressClassConversionNotice(const SuppressClassConversionNotice&)
       = delete;
-  SuppressClassConversionWarning(SuppressClassConversionWarning&&) = delete;
-  SuppressClassConversionWarning&
-      operator=(const SuppressClassConversionWarning&) = delete;
-  SuppressClassConversionWarning&
-      operator=(SuppressClassConversionWarning&&) = delete;
+  SuppressClassConversionNotice(SuppressClassConversionNotice&&) = delete;
+  SuppressClassConversionNotice&
+      operator=(const SuppressClassConversionNotice&) = delete;
+  SuppressClassConversionNotice&
+      operator=(SuppressClassConversionNotice&&) = delete;
 private:
   bool old;
 };
@@ -200,7 +199,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void raise_str_to_class_notice(const StringData* name);
+void raise_str_to_class_notice(const StringData* name, jit::StrToClassKind kind);
 
 /*
  * class_meth compact notices.

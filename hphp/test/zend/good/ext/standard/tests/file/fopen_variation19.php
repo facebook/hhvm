@@ -5,14 +5,14 @@
  * Alias to functions:
  */
 
-function readFile2($file) {
+function readFile2($file) :mixed{
    $h = fopen($file, 'r');
    fpassthru($h);
    fclose($h);
    echo "\n";
 }
 
-function appendFile($file) {
+function appendFile($file) :mixed{
    $h = fopen($file, 'a+');
    fwrite($h, ' again!');
    fseek($h, 0);
@@ -21,14 +21,14 @@ function appendFile($file) {
    echo "\n";
 }
 
-function writeFile($file) {
+function writeFile($file) :mixed{
    $h = fopen($file, 'w');
    fwrite($h, 'Goodbye World');
    fclose($h);
    readFile2($file);
 }
 <<__EntryPoint>> function main(): void {
-$tmpDir = __SystemLib\hphp_test_tmppath('fopenVar19.Dir');
+$tmpDir = sys_get_temp_dir().'/'.'fopenVar19.Dir';
 $realFilename = basename(__FILE__).'.real';
 $sortFilename = basename(__FILE__).'.soft';
 $hardFilename = basename(__FILE__).'.hard';

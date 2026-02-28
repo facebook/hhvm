@@ -1,27 +1,40 @@
 [("\\Ta",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_module = None; td_pos = [4:8-10]; td_vis = Transparent;
-       td_tparams = []; td_constraint = None;
-       td_type = (Rhint ([4:13-16]), (Tprim Tint)); td_is_ctx = false;
-       td_attributes = [] }));
+     { Typing_defs.td_module = None; td_pos = [4:8-10]; td_tparams = [];
+       td_as_constraint = None; td_super_constraint = None;
+       td_type_assignment =
+       (Typing_defs.SimpleTypeDef (Transparent,
+          (Rhint ([4:13-16]), (Tprim Tint))));
+       td_is_ctx = false; td_attributes = []; td_internal = false;
+       td_docs_url = None; td_package = None }));
   ("\\Te",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [5:8-10];
-        td_vis = Transparent; td_tparams = []; td_constraint = None;
-        td_type = (Rhint ([5:13-19]), (Tprim Tstring)); td_is_ctx = false;
-        td_attributes = [] }));
+      { Typing_defs.td_module = None; td_pos = [5:8-10]; td_tparams = [];
+        td_as_constraint = None; td_super_constraint = None;
+        td_type_assignment =
+        (Typing_defs.SimpleTypeDef (Transparent,
+           (Rhint ([5:13-19]), (Tapply (([5:13-19], "\\HH\\string"), [])))));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None; td_package = None }));
   ("\\NS\\Ta",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [9:8-10];
-        td_vis = Transparent; td_tparams = []; td_constraint = None;
-        td_type = (Rhint ([9:13-16]), (Tprim Tint)); td_is_ctx = false;
-        td_attributes = [] }));
+      { Typing_defs.td_module = None; td_pos = [9:8-10]; td_tparams = [];
+        td_as_constraint = None; td_super_constraint = None;
+        td_type_assignment =
+        (Typing_defs.SimpleTypeDef (Transparent,
+           (Rhint ([9:13-16]), (Tprim Tint))));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None; td_package = None }));
   ("\\NS\\Te",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [10:8-10];
-        td_vis = Transparent; td_tparams = []; td_constraint = None;
-        td_type = (Rhint ([10:13-19]), (Tprim Tstring)); td_is_ctx = false;
-        td_attributes = [] }));
+      { Typing_defs.td_module = None; td_pos = [10:8-10]; td_tparams = [];
+        td_as_constraint = None; td_super_constraint = None;
+        td_type_assignment =
+        (Typing_defs.SimpleTypeDef (Transparent,
+           (Rhint ([10:13-19]), (Tapply (([10:13-19], "\\HH\\string"), [])))
+           ));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None; td_package = None }));
   ("\\NS\\I",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -30,23 +43,23 @@
         sc_name = ([12:13-14], "\\NS\\I");
         sc_tparams =
         [{ Typing_defs_core.tp_variance = Invariant;
-           tp_name = ([13:5-7], "Ta"); tp_tparams = [];
+           tp_name = ([13:5-7], "Ta");
            tp_constraints =
            [(Constraint_as, (Rhint ([13:11-19]), (Tprim Tarraykey)))];
            tp_reified = Erased; tp_user_attributes = [] };
           { Typing_defs_core.tp_variance = Invariant;
-            tp_name = ([14:5-7], "Tb"); tp_tparams = [];
+            tp_name = ([14:5-7], "Tb");
             tp_constraints =
             [(Constraint_as,
               (Rhint ([14:11-22]),
                (Tapply (([14:11-14], "\\HH\\Map"),
-                  [(Rhint ([14:15-17]), (Tgeneric ("Ta", [])));
-                    (Rhint ([14:19-21]), (Tgeneric ("Te", [])))]
+                  [(Rhint ([14:15-17]), (Tgeneric "Ta"));
+                    (Rhint ([14:19-21]), (Tgeneric "Te"))]
                   ))))
               ];
             tp_reified = Erased; tp_user_attributes = [] };
           { Typing_defs_core.tp_variance = Invariant;
-            tp_name = ([15:5-7], "Tc"); tp_tparams = [];
+            tp_name = ([15:5-7], "Tc");
             tp_constraints =
             [(Constraint_as,
               (Rhint ([15:11-24]),
@@ -58,7 +71,7 @@
               ];
             tp_reified = Erased; tp_user_attributes = [] };
           { Typing_defs_core.tp_variance = Invariant;
-            tp_name = ([16:5-7], "Td"); tp_tparams = [];
+            tp_name = ([16:5-7], "Td");
             tp_constraints =
             [(Constraint_as,
               (Rhint ([16:11-30]),
@@ -72,16 +85,15 @@
               ];
             tp_reified = Erased; tp_user_attributes = [] };
           { Typing_defs_core.tp_variance = Invariant;
-            tp_name = ([17:5-7], "Te"); tp_tparams = []; tp_constraints = [];
+            tp_name = ([17:5-7], "Te"); tp_constraints = [];
             tp_reified = Erased; tp_user_attributes = [] }
           ];
-        sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
-        sc_props = []; sc_sprops = []; sc_constructor = None;
-        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None }))
+        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
+        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
+        sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
+        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+        sc_package = None }))
   ]
-
-They matched!

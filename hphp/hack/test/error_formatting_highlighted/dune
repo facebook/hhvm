@@ -2,15 +2,15 @@
  (alias highlighted_formatting)
  (deps
   %{exe:../../src/hh_single_type_check.exe}
-  %{project_root}/test/verify.py
-  %{project_root}/test/review.sh
-  (glob_files %{project_root}/test/error_formatting_highlighted/*.php)
-  (glob_files %{project_root}/test/error_formatting_highlighted/*.exp)
-  (glob_files %{project_root}/test/error_formatting_highlighted/HH_FLAGS))
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/error_formatting_highlighted/*.php)
+  (glob_files %{project_root}/hack/test/error_formatting_highlighted/*.exp)
+  (glob_files %{project_root}/hack/test/error_formatting_highlighted/HH_FLAGS))
  (action
   (run
-   %{project_root}/test/verify.py
-   %{project_root}/test/error_formatting_highlighted
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/error_formatting_highlighted
    --program
    %{exe:../../src/hh_single_type_check.exe})))
 

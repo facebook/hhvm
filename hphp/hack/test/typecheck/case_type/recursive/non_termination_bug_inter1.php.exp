@@ -1,0 +1,4 @@
+ERROR: File "non_termination_bug_inter1.php", line 9, characters 13-29:
+Invalid `is` expression hint (Typing[4195])
+  File "non_termination_bug_inter1.php", line 9, characters 20-28:
+  The `is` operator cannot be used with a `newtype`

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test<T as vec<int>>(vec<int> $vec, T $list): (int, int) {
   list($x, $y) = $vec;

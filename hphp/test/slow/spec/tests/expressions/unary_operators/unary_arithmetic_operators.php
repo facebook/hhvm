@@ -1,7 +1,7 @@
 <?hh
 
 function DoIt($a)
-{
+:mixed{
     echo "--- start DoIt -------------------------\n\n";
     echo "     original: "; var_dump($a);
     $b = +HH\Lib\Legacy_FIXME\cast_for_arithmetic($a);

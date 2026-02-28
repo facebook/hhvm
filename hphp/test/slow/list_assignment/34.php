@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_34() {
-list(,) = varray[1,2,3];
+function main_34() :mixed{
+list(,) = vec[1,2,3];
 }

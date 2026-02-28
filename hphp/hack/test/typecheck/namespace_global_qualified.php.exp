@@ -1,4 +1,1 @@
-File "namespace_global_qualified.php--N.php", line 2, characters 1-4:
-A .php file must begin with `<?hh`. (Parsing[1002])
-File "namespace_global_qualified.php--test.php", line 2, characters 1-4:
-A .php file must begin with `<?hh`. (Parsing[1002])
+No errors

@@ -23,7 +23,6 @@
 #include "hphp/runtime/ext/bz2/bz2-file.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/vm/native-data.h"
-#include "hphp/util/alloc.h"
 #include <folly/String.h>
 
 // Don't do the do { ... } while(0) trick here because we need 'f' outside of
@@ -75,15 +74,15 @@ static BZ2StreamWrapper s_bzip2_stream_wrapper;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool HHVM_FUNCTION(bzclose, const Resource& bz) {
+bool HHVM_FUNCTION(bzclose, const OptResource& bz) {
   return HHVM_FN(fclose)(bz);
 }
 
-Variant HHVM_FUNCTION(bzread, const Resource& bz, int64_t length /* = 1024 */) {
+Variant HHVM_FUNCTION(bzread, const OptResource& bz, int64_t length /* = 1024 */) {
   return HHVM_FN(fread)(bz, length);
 }
 
-Variant HHVM_FUNCTION(bzwrite, const Resource& bz, const String& data,
+Variant HHVM_FUNCTION(bzwrite, const OptResource& bz, const String& data,
                                int64_t length /* = 0 */) {
   return HHVM_FN(fwrite)(bz, data, length);
 }
@@ -156,22 +155,22 @@ Variant HHVM_FUNCTION(bzopen, const Variant& filename, const String& mode) {
   return Variant(std::move(bz));
 }
 
-bool HHVM_FUNCTION(bzflush, const Resource& bz) {
+bool HHVM_FUNCTION(bzflush, const OptResource& bz) {
   CHECK_BZFILE(bz, f);
   return f->flush();
 }
 
-Variant HHVM_FUNCTION(bzerrstr, const Resource& bz) {
+Variant HHVM_FUNCTION(bzerrstr, const OptResource& bz) {
   CHECK_BZFILE(bz, f);
   return f->errstr();
 }
 
-Variant HHVM_FUNCTION(bzerror, const Resource& bz) {
+Variant HHVM_FUNCTION(bzerror, const OptResource& bz) {
   CHECK_BZFILE(bz, f);
   return f->error();
 }
 
-Variant HHVM_FUNCTION(bzerrno, const Resource& bz) {
+Variant HHVM_FUNCTION(bzerrno, const OptResource& bz) {
   CHECK_BZFILE(bz, f);
   return f->errnu();
 }
@@ -296,11 +295,7 @@ struct ChunkedBunzipper {
       } else {
         m_eof = true;
         BZ2_bzDecompressEnd(&m_bzstream);
-        throw_object(
-          "Exception",
-          make_vec_array(folly::sformat("bz2 error status={}", status))
-        );
-        return empty_string();
+        SystemLib::throwExceptionObject(folly::sformat("bz2 error status={}", status));
       }
     }
 
@@ -309,11 +304,7 @@ struct ChunkedBunzipper {
       BZ2_bzDecompressEnd(&m_bzstream);
     }
     if (!completed) {
-      throw_object(
-        "Exception",
-        make_vec_array("inflate failed: output too large")
-      );
-      return empty_string();
+      SystemLib::throwExceptionObject("inflate failed: output too large");
     }
     return result;
   }
@@ -359,13 +350,13 @@ void HHVM_METHOD(ChunkedBunzipper, close) {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct bz2Extension final : Extension {
-  bz2Extension() : Extension("bz2") {}
+  bz2Extension() : Extension("bz2", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*hdf*/) override {
     s_bzip2_stream_wrapper.registerAs("compress.bzip2");
   }
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_FE(bzclose);
     HHVM_FE(bzread);
     HHVM_FE(bzwrite);
@@ -385,8 +376,6 @@ struct bz2Extension final : Extension {
                   HHVM_MN(ChunkedBunzipper, close));
     Native::registerNativeDataInfo<ChunkedBunzipper>(
       s_SystemLib_ChunkedBunzipper.get());
-
-    loadSystemlib("bz2");
   }
 } s_bz2_extension;
 

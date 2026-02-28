@@ -1,17 +1,17 @@
 <?hh
-function dump($iterable) {
+function dump($iterable) :mixed{
   echo get_class($iterable) . "\n";
   foreach ($iterable as $k => $v) {
     echo "$k => $v\n";
   }
 }
-function dump_set($iterable) {
+function dump_set($iterable) :mixed{
   echo get_class($iterable) . "\n";
   foreach ($iterable as $v) {
     echo "$v\n";
   }
 }
-function test() {
+function test() :mixed{
   $v = Vector {'a', 'b', 'c'};
   $iv = $v->immutable();
   foreach ($v as $k => $val) {
@@ -55,7 +55,7 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_cow_during_iteration() {
+function main_cow_during_iteration() :mixed{
 test();
 echo "Done\n";
 }

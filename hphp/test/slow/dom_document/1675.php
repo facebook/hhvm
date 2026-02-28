@@ -1,7 +1,7 @@
 <?hh
 
 class books extends DOMDocument {
-  function addBook($title, $author) {
+  function addBook($title, $author) :mixed{
     $titleElement = $this->createElement('title');
     $titleElement->appendChild($this->createTextNode($title));
     $authorElement = $this->createElement('author');
@@ -15,7 +15,7 @@ class books extends DOMDocument {
 
 
 <<__EntryPoint>>
-function main_1675() {
+function main_1675() :mixed{
 $dom = new books;
 
 $xml = <<<EOM

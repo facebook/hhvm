@@ -40,8 +40,7 @@ constexpr size_t smashableCmpqLen() { return 8; }
 constexpr size_t smashableCallLen() { return 5; }
 constexpr size_t smashableJmpLen()  { return 5; }
 constexpr size_t smashableJccLen()  { return 6; }
-
-constexpr size_t smashableAlignTo() { return cache_line_size(); }
+constexpr size_t smashableInterceptLen () { return 2; }
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d);
@@ -54,6 +53,8 @@ void smashCmpq(TCA inst, uint32_t imm);
 void smashCall(TCA inst, TCA target);
 void smashJmp(TCA inst, TCA target);
 void smashJcc(TCA inst, TCA target);
+void smashInterceptJcc(TCA inst);
+void smashInterceptJmp(TCA inst);
 
 uint64_t smashableMovqImm(TCA inst);
 uint32_t smashableCmpqImm(TCA inst);
@@ -77,4 +78,3 @@ constexpr size_t kSmashCmpqImmOff = 4;
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-

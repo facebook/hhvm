@@ -16,38 +16,68 @@
 
 #include "hphp/runtime/server/static-content-cache.h"
 
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/server/compression.h"
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
+#include "hphp/util/stack-trace.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticContentCache StaticContentCache::TheCache;
-std::shared_ptr<FileCache> StaticContentCache::TheFileCache;
+std::shared_ptr<VirtualFileSystem> StaticContentCache::TheFileCache;
+
+static StaticString s_file{"file"}, s_line{"line"};
 
 void StaticContentCache::load() {
   BootStats::Block timer("loading static content",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
 
-  if (!RuntimeOption::FileCache.empty()) {
-    TheFileCache = std::make_shared<FileCache>();
-    TheFileCache->loadMmap(RuntimeOption::FileCache.c_str());
+  if (Cfg::Repo::Authoritative && !Cfg::Server::FileCache.empty()) {
+    TheFileCache = std::make_shared<VirtualFileSystem>(
+      Cfg::Server::FileCache, Cfg::Server::SourceRoot);
 
-    Logger::Info("loaded file cache from %s",
-                 RuntimeOption::FileCache.c_str());
+    if (StructuredLog::enabled() &&
+        StructuredLog::coinflip(Cfg::Eval::StaticContentsLogRate)) {
+      TheFileCache->setLogger([](const std::string& path, bool read) {
+        auto record = StructuredLogEntry{};
+        record.setStr("file", path);
+        record.setInt("read", read);
+        bool needsCppStack = true;
+        if (!g_context.isNull()) {
+          VMRegAnchor _;
+          if (vmfp()) {
+            auto const bt =
+              createBacktrace(BacktraceArgs().withArgValues(false));
+            std::vector<std::string> frameStrings;
+            std::vector<folly::StringPiece> frames;
+            for (int i = 0; i < bt.size(); i++) {
+              auto f = tvCastToArrayLike(bt.lookup(i));
+              if (f.exists(s_file)) {
+                auto s = tvCastToString(f.lookup(s_file)).toCppString();
+                if (f.exists(s_line)) {
+                  s += folly::sformat(":{}", tvCastToInt64(f.lookup(s_line)));
+                }
+                frameStrings.emplace_back(std::move(s));
+                frames.push_back(frameStrings.back());
+              }
+            }
+            record.setVec("stack", frames);
+            needsCppStack = false;
+          }
+        }
+        if (needsCppStack) {
+          record.setStackTrace("stack", StackTrace{StackTrace::Force{}});
+        }
+        StructuredLog::log("hhvm_file_cache", record);
+      });
+    }
+
+    Logger::Verbose("loaded file cache from %s",
+                    Cfg::Server::FileCache.c_str());
     return;
   }
-}
-
-bool StaticContentCache::find(const std::string &name, const char *&data,
-                              int &len, bool &compressed) const {
-  if (TheFileCache) {
-    return (data = TheFileCache->read(name.c_str(), len, compressed));
-  }
-  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

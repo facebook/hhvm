@@ -8,7 +8,7 @@
  * Converts comparison result to a character.
  */
 function cmp_to_char( $comp_res )
-{
+:mixed{
     switch( $comp_res )
     {
     case 0:            // UCOL_EQUAL
@@ -27,7 +27,7 @@ function cmp_to_char( $comp_res )
  * using specified locale.
  */
 function compare_pairs( $locale, $test_array )
-{
+:mixed{
     $res_str = '';
 
     $coll = ut_coll_create( $locale );
@@ -50,49 +50,49 @@ function compare_pairs( $locale, $test_array )
 }
 
 function ut_main()
-{
+:mixed{
     $res_str = '';
 
     // Compare strings using en_US locale.
-    $test_params = varray[
-        varray[ 'abc', 'abc' ],
-        varray[ 'Abc', 'abc' ],
-        varray[ 'a'  , 'abc' ],
-        varray[ 'a'  , ''    ],
-        varray[ ''  , ''     ],
-        varray[ 'a'  , 'b'   ],
-        varray[ 'ab'  , 'b'  ],
-        varray[ 'ab'  , 'a'  ],
-        varray[ 123  , 'abc' ],
-        varray[ 'ac' , null  ],
-        varray[ '.'  , '.'   ],
+    $test_params = vec[
+        vec[ 'abc', 'abc' ],
+        vec[ 'Abc', 'abc' ],
+        vec[ 'a'  , 'abc' ],
+        vec[ 'a'  , ''    ],
+        vec[ ''  , ''     ],
+        vec[ 'a'  , 'b'   ],
+        vec[ 'ab'  , 'b'  ],
+        vec[ 'ab'  , 'a'  ],
+        vec[ 123  , 'abc' ],
+        vec[ 'ac' , null  ],
+        vec[ '.'  , '.'   ],
         // Try to compare long strings.
-        varray[ 'abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcde',
+        vec[ 'abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcde',
                'abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdea'],
-        varray[ null , null  ]
+        vec[ null , null  ]
     ];
 
     $res_str .= compare_pairs( 'en_US', $test_params );
 
 
     // Compare strings using ru_RU locale.
-    $test_params = varray[
-        varray[ 'а',   'б' ],
-        varray[ 'а',   'аа' ],
-        varray[ 'аб', 'ба' ],
-        varray[ 'а',   ',' ],
-        varray[ 'а',   'b' ],
-        varray[ 'а',   'bb' ],
-        varray[ 'а',   'ab' ],
-        varray[ 'а',   null ]
+    $test_params = vec[
+        vec[ "\xd0\xb0",   "\xd0\xb1" ],
+        vec[ "\xd0\xb0",   "\xd0\xb0\xd0\xb0" ],
+        vec[ "\xd0\xb0\xd0\xb1", "\xd0\xb1\xd0\xb0" ],
+        vec[ "\xd0\xb0",   ',' ],
+        vec[ "\xd0\xb0",   'b' ],
+        vec[ "\xd0\xb0",   'bb' ],
+        vec[ "\xd0\xb0",   'ab' ],
+        vec[ "\xd0\xb0",   null ]
     ];
 
     $res_str .= compare_pairs( 'ru_RU', $test_params );
 
 
     // Compare strings using lt_LT locale.
-    $test_params = varray[
-        varray[ 'y', 'k' ]
+    $test_params = vec[
+        vec[ 'y', 'k' ]
     ];
 
     $res_str .= compare_pairs( 'lt_LT', $test_params );

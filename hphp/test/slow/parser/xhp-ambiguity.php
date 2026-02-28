@@ -1,5 +1,5 @@
 <?hh
-function test() {
+function test() :mixed{
   /**
    * Rules for XHP names and guidelines for avoid ambiguities:
    *
@@ -78,7 +78,7 @@ function test() {
    *              whitespace before the ':')
    *
    */
-  $a = false?:varray[];
+  $a = false?:vec[];
   $a = false?:floor(12.98);
   $a = b()?:NULL;
 

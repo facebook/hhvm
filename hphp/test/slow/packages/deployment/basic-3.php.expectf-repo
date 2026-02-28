@@ -1,0 +1,17 @@
+f [fromPackages] basic-1.php
+f [fromPackages] basic-2.php
+f [fromPackages] basic-3.php
+f [fromPackages] basic-4.php
+f [fromPackages] if-package-2.php
+f [fromPackages] if-package-3.php
+f [fromPackages] if-package-4.php
+f [fromPackages] if-package-5.php
+f [fromPackages] if-package.php
+f [fromPackages] prod/foo.inc.php
+f [fromPackages] prod/internal_prod/zap.inc.php
+f [fromPackagesSoft] prod/qux.inc.php
+f [fromPackagesSoft] softprod/quz.inc.php
+Warning: File %s/deployment/prod/qux.inc.php is soft-deployed, but its unit was merged in %s/deployment/basic-3.php on line 5
+I am soft-removed from prod
+
+Fatal error: Call to undefined function zot() in %s/deployment/basic-3.php on line 6

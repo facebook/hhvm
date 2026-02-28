@@ -1,7 +1,7 @@
 <?hh
 interface I {
   public function f()
-  {
+:mixed  {
     echo 'This is illegal';
   }
 }

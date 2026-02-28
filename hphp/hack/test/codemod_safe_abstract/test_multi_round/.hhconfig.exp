@@ -1,0 +1,24 @@
+diff --git a/BaseTrait.php b/BaseTrait.php
+--- a/BaseTrait.php
++++ b/BaseTrait.php
+@@ -2,7 +2,7 @@
+ 
+ trait BaseTrait implements BaseInterface {
+   public static abstract function m(): void;
+-
++  <<__NeedsConcrete>>
+   public static function baseMethod(): void {
+     static::m();
+   }
+diff --git a/ConcreteClass.php b/ConcreteClass.php
+--- a/ConcreteClass.php
++++ b/ConcreteClass.php
+@@ -4,7 +4,7 @@
+   use BaseTrait;
+ 
+   public static function m(): void {}
+-
++  <<__NeedsConcrete>>
+   public static function callBase(): void {
+     static::baseMethod();
+   }

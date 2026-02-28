@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function non_blocking_definition(): int {
   return 4;

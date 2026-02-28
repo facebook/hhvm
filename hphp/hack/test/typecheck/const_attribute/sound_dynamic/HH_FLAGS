@@ -1,4 +1,1 @@
---enable-sound-dynamic-type
---like-types-all
---const-attribute
-
+--config const_attribute=true

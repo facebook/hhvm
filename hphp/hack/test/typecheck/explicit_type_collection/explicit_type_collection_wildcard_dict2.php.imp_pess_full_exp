@@ -1,0 +1,8 @@
+File "explicit_type_collection_wildcard_dict2.php", line 6, characters 3-13:
+  dict<string, ~bool>
+File "explicit_type_collection_wildcard_dict2.php", line 5, characters 16-19:
+Wrong type hint (Typing[4110])
+  File "explicit_type_collection_wildcard_dict2.php", line 5, characters 16-19:
+  Expected `bool`
+  File "explicit_type_collection_wildcard_dict2.php", line 5, characters 30-30:
+  But got `int`

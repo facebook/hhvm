@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  function foo($x,$y) {
+  function foo($x,$y) :mixed{
     $a = null;
     if ($x) {
       $a = new X;
@@ -12,7 +12,7 @@ class X {
 }
 
 <<__EntryPoint>>
-function main_1325() {
+function main_1325() :mixed{
 $x = new X;
 var_dump($x->foo(false, true));
 }

@@ -8,7 +8,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function f() {
+function f() :mixed{
   A::g(new B<int>());
   echo "done\n";
 }

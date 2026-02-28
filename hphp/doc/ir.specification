@@ -124,11 +124,14 @@ PRc (ProducesRC)
 
   The instruction produces a value with an unconsumed reference that must be
   consumed, either by DecRefing it or storing it somewhere in memory.
+  The refcount on the produced value could be more than 1 after the instruction.
 
-CRc (ConsumesRC)
+PNRc (ProducesNewRC)
 
-  The instruction consumes a reference to one or more of its sources, either by
-  decreasing its refcount or storing the reference to memory.
+  The instruction produces a new value with an unconsumed reference that must be
+  consumed, either by DecRefing it or storing it somewhere in memory. This is
+  subset of PRc flag. The refcount on the produced value will be exactly 1 after
+  the instruction.
 
 T (Terminal)
 
@@ -182,18 +185,13 @@ Instruction set
   If S0 is not a null pointer, branch to block B. This is used to check the
   return value of a native helper that returns a potentially null StringData*.
 
-| AssertType<T>, DRefineS(0), S(Cell,Mem), P
+| AssertType<T>, DRefineS(0), S(Cell|Nullptr OR Mem), P
 
   Assert that the type of S0 is T, copying it to D.
 
 | CheckTypeMem<T>, ND, S(Mem), B
 
   If the value pointed to by S0 is not type T, branch to the block B.
-
-| CheckIter<iterId,iterType>, ND, S(FramePtr), B
-
-  Check that specialization type of the given iterator `iterId` on the frame S0
-  is `iterType`; if it is not, branch to block B.
 
 | CheckLoc<T,localId>, ND, S(FramePtr), B
 
@@ -248,12 +246,12 @@ Instruction set
   A no-op at runtime, this instruction serves to mark the end of the initial
   sequence of guards in a trace.
 
-| CheckNonNull, DSubtract(0, Nullptr), S(Cls|Func|Obj|Str|Mem|TCA|Nullptr), B
+| CheckNonNull, DSubtract(0, Nullptr), SNullptr(Cls OR Func OR Obj OR Str OR Mem OR TCA OR Dict OR Vec), B|P|LA
 
   If the value in S0 is Nullptr, branch to block B. If S0 cannot be Nullptr, or
   always is Nullptr, this check may be optimized away.
 
-| AssertNonNull, DSubtract(0, Nullptr), S(StaticStr|Nullptr), P
+| AssertNonNull, DSubtract(0, Nullptr), SNullptr(Func OR StaticStr), P
 
   Returns S0, with Nullptr removed from its type. This instruction currently
   supports a very limited range of types but can be expanded if needed.
@@ -271,10 +269,6 @@ Instruction set
 | SubInt, D(Int), S(Int) S(Int), NF
 
 | MulInt, D(Int), S(Int) S(Int), NF
-
-| AddIntO, D(Int), S(Int) S(Int), B
-
-| SubIntO, D(Int), S(Int) S(Int), B
 
 | MulIntO, D(Int), S(Int) S(Int), B
 
@@ -332,8 +326,8 @@ Instruction set
   than their input respectively. Their use requires SSE 4.1, availability
   should be checked before they are emitted.
 
-  AddIntO, SubIntO, MulIntO perform integer arithmetic on S0 and S1, but will
-  branch to block B on integer overflow.
+  MulIntO performs integer arithmetic on S0 and S1, but will branch to
+  block B on integer overflow.
 
 | XorBool, D(Bool), S(Bool) S(Bool), NF
 
@@ -345,28 +339,34 @@ Instruction set
 
   Compute S0 mod S1. If S1 is -1 or 0 the results are undefined.
 
+| PseudoRandomInt, D(Int), S(Int) S(Int), NF
+
+  Generates a pseudorandom integer in the range of <S0, S1>.
+
+  Equivalent to HH\Lib\_Private\Native\pseudorandom_int(S0, S1).
+
 
 3. Type conversions
 
 To vec conversions:
 
-| ConvArrLikeToVec,             D(Vec), S(ArrLike),                  PRc|CRc|LP
+| ConvArrLikeToVec,             D(Vec), S(ArrLike,MMR),                  PRc|LP
 
-| ConvObjToVec,                 D(Vec), S(Obj),                      PRc|CRc
+| ConvObjToVec,                 D(Vec), S(Obj,MMR),                      PRc
 
 
 To dict conversions:
 
-| ConvArrLikeToDict,            D(Dict), S(ArrLike),                 PRc|CRc|LP
+| ConvArrLikeToDict,            D(Dict), S(ArrLike,MMR),                 PRc|LP
 
-| ConvObjToDict,                D(Dict), S(Obj),                     PRc|CRc
+| ConvObjToDict,                D(Dict), S(Obj,MMR),                     PRc
 
 
 To keyset conversions:
 
-| ConvArrLikeToKeyset,          D(Keyset), S(ArrLike),               PRc|CRc|LP
+| ConvArrLikeToKeyset,          D(Keyset), S(ArrLike,MMR),               PRc|LP
 
-| ConvObjToKeyset,              D(Keyset), S(Obj),                   PRc|CRc
+| ConvObjToKeyset,              D(Keyset), S(Obj,MMR),                   PRc
 
 
 To bool conversions:
@@ -429,6 +429,12 @@ To string conversions:
 | DblAsBits,                    D(Int), S(Dbl),                           NF
 
   Reinterpret a double as an integer with the same bit pattern.
+
+| IntAsPtrToElem,              D(PtrToElem), S(Int),                      NF
+
+| PtrToElemAsInt,              D(Int), S(PtrToElem),                      NF
+
+  Reinterpret cast between an integer and a PtrToElem.
 
 | OrdStr,                       D(Int), S(Str),                           NF
 
@@ -605,6 +611,10 @@ To string conversions:
 
   Checks if two Func values are equal.
 
+| EqFuncId<funcId>, D(Bool), S(Func), B
+
+  Tests if the FuncId of S0 matches jit-time funcId.
+
 | EqStrPtr,                    D(Bool), S(Str) S(Str),                    NF
 
   Checks if two string values represent the same underlying string. That is,
@@ -615,21 +625,23 @@ To string conversions:
   Checks if the two arguments represent the same underlying ArrayData. That is,
   that they point at the same underlying storage.
 
-| ProfileInstanceCheck, ND, C(StaticStr), NF
+| ProfileInstanceCheck, ND, S(Cls), NF
 
   Profile that S0 has been used as the RHS of an instance check.
 
-| InstanceOf, D(Bool), S(Cls) S(Cls|Nullptr), NF
+| InstanceOf<canCheckVtable>, D(Bool), S(Cls) S(Cls|Nullptr), NF
 
   Sets D based on whether S0 is a descendant of the class, interface, or trait
   in S1. (Note that this is always false for a trait). S1 may be null at
   runtime if the class is not defined.
 
-| InstanceOfIface, D(Bool), S(Cls) CStr, NF
+  canCheckVtable signals that this opcode may be simplified to
+  InstanceOfIfaceVtable, which we allow when S0 was fetched from an object.
+
+| InstanceOfIface<canCheckVtable>, D(Bool), S(Cls) CStr(), NF
 
   Fast path for interface checks. Sets D based on whether S0 implements S1, but
-  S1 must be a unique interface. This should only be used in repo-authoritative
-  mode.
+  S1 must be a known interface.
 
 | InstanceOfIfaceVtable<iface,canOptimize>, D(Bool), S(Cls), NF
 
@@ -646,9 +658,9 @@ To string conversions:
 
   If strictLikely is true, optimize for the case where S0 is not equal to S1.
 
-| InstanceOfBitmask,           D(Bool), S(Cls) CStr,                      NF
+| InstanceOfBitmask,           D(Bool), S(Cls) CStr(),                      NF
 
-| NInstanceOfBitmask,          D(Bool), S(Cls) CStr,                      NF
+| NInstanceOfBitmask,          D(Bool), S(Cls) CStr(),                      NF
 
   A fast-path for instanceof checks. Sets D based on whether S0 is a descendant
   of the class named by S1, where S1 must have a bit allocated for it in the
@@ -665,7 +677,7 @@ To string conversions:
   Returns whether t instanceof S0 returns true when t is of the given type.
 
 | ResolveTypeStruct<class,suppress,offset,size,isOrAsOp>,
-|   D(Dict), S(StkPtr) S(Cls|Nullptr), NF
+|   D(Dict), S(StkPtr) S(Cls|Nullptr), LA
 
   Applies class/alias resolution on the type structure that is at the stack
   offset given by S0 and offset. If size > 1, combine the type structures on
@@ -682,6 +694,13 @@ To string conversions:
   is a subtype of S0. The input type structure (S0) must be resolved.
   Handle is used for caching purposes.
 
+| IsTypeStructShallow<handle>, D(Bool), S(Dict) S(Cell), LA
+
+  Returns whether S1 matches the type structure of a defined type in S0 and S1
+  is a subtype of S0 (but without recursive behavior, matching the semantics of
+  VerifyReifiedLocalType). The input type structure (S0) must be resolved.
+  Handle is used for caching purposes.
+
 | IsTypeStructCached, D(Bool), S(Dict) S(Cell), B|LA
 
   Checks if S0 is cached in TSClassCache and if so, returns whehter S1 is a
@@ -694,7 +713,13 @@ To string conversions:
 
 | ThrowAsTypeStructException, ND, S(Dict) S(Cell), LA|T
 
-  Throws an exception indicating why S1 does not match the type structure of a
+  Throws an TypehintViolationException indicating why S1 does not match the type structure of a
+  defined type in S0 or why S1 is not a subtype of S0. The input type structure
+  (S0) must be resolved.
+
+| ThrowAsTypeStructError, ND, S(Dict) S(Cell), LA|T
+
+  Throws a recoverable error indicating why S1 does not match the type structure of a
   defined type in S0 or why S1 is not a subtype of S0. The input type structure
   (S0) must be resolved.
 
@@ -703,6 +728,10 @@ To string conversions:
   Raises an error if the type hint for is/as expression contains an invalid
   type such as callables, erased type variables and trait type hints.
   The input type structure (S0) must be resolved.
+
+| ProfileCoeffectFunParam<handle>, ND, S(Cell), ND
+
+  Profile S0 to determine which code paths to emit for coeffect fun param.
 
 | HasToString, D(Bool), S(Obj), NF
 
@@ -739,34 +768,62 @@ To string conversions:
 
   Sets D to true iff S0 is a collection.
 
-| HasReifiedGenerics, D(Bool), S(Func), NF
+| FuncHasReifiedGenerics, D(Bool), S(Func), NF
 
   Set D to true iff S0 is a reified function.
 
+| ClassHasReifiedGenerics, D(Bool), S(Cls), NF
+
+  Set D to true iff S0 is a reified class.
+
+| GetClsRGProp, D(Vec), S(Cls) S(Obj), PRc
+
+  Get the reified generics property for object S1, using the
+  index of this property as stored in class S0.
+
+| HasReifiedParent, D(Bool), S(Cls), NF
+
+  Set D to true iff S0 has a reified parent.
+
+| ReifiedInit, ND, S(Cls) S(Vec) S(Obj), LA
+
+  Invokes setReifiedInit on S2 if S0 or its parent is a reified class,
+  using the generics specified in S1.
+
+| CallViolatesModuleBoundary<caller>, D(Bool), S(Func OR Cls), NF
+
+  Set D to true iff function call from caller to S0 violates module boundary.
+  Requires that S0 is an internal method.
+
 5. Branches
 
-| JmpZero,                          ND, S(Int,Bool),                     B
+| JmpZero,                          ND, S(Int OR Bool),                     B
 
-| JmpNZero,                         ND, S(Int,Bool),                     B
+| JmpNZero,                         ND, S(Int OR Bool),                     B
 
   Conditionally jump to based on S0.
 
-| JmpSSwitchDest, ND, S(TCA) S(StkPtr) S(FramePtr), T
+| JmpExit, ND, S(TCA) S(StkPtr) S(FramePtr), T
 
-  Jump to the target of a sswitch statement, leaving the region, where the
-  target TCA is S0.
-
-| JmpSwitchDest, ND, S(Int) S(StkPtr) S(FramePtr), T
-
-  Jump to the target of a switch statement, leaving the region, using table
-  metadata <JmpSwitchData> and index S0, which must be a valid index in the
-  jump table.
+  Jump to the specified target S0, leaving the region. The binding of the target
+  could be achieved using opcodes such as LdBindAddr, LdSwitchDest, etc.
 
 | ProfileSwitchDest<handle,nCases>, ND, S(Int), NF
 
   Profile a switch statement target.
 
-| CheckSurpriseFlags, ND, S(FramePtr,StkPtr), B
+| LdSwitchDest<cases, targets>, D(TCA), S(Int), NF
+
+  Load the target of a switch statement, using table metadata <JmpSwitchData>
+  and index S0, which must be a valid index in the jump table.
+
+| LdSSwitchDest<numCases, cases, defaultOffset, bcSPOff>, D(TCA), S(Str), NF
+
+  Using the cases in the extra data, create a hash table for destination lookup.
+  Then, lookup the destination for the switched value in the table and yield the
+  default if not present.
+
+| CheckSurpriseFlags, ND, S(FramePtr OR StkPtr), B
 
   Tests the implementation-specific surprise flags. If they're true, branches
   to block B. This is done by comparing an evaluation stack pointer to the RDS
@@ -815,7 +872,7 @@ To string conversions:
   by an Unreachable may be treated as unreachable by the optimizer, and the
   behavior of a program that attempts to execute an Unreachable is undefined.
 
-| EndBlock<AssertReason>, ND, NA, T
+| EndBlock<spOff, func, AssertReason>, ND, NA, T
 
   Halt execution, without implying anything about the reachability of
   instructions preceding this. Intended for use in internal tests or other code
@@ -835,7 +892,7 @@ To string conversions:
   instruction with the same number of sources. Ordinary branch instructions may
   not pass values to a DefLabel.
 
-| Select, DUnion(1,2), S(Bool,Int) S(Top) S(Top), NF
+| Select, DUnion(1,2), S(Bool OR Int) S(Top) S(Top), NF
 
   If S0 is true/non-zero, return S1, otherwise return S2.
 
@@ -908,20 +965,14 @@ To string conversions:
   Map, Set, ImmMap, or ImmSet, and that specific object type must be known at
   compile time.
 
-| LdIterBase<T,iterId>, DParam(ArrLike), S(FramePtr), LA
+| LdIterPos<iterId>, D(Int), S(FramePtr), NF
 
-  Load the base of the iterator with type `T` at `iterId`. `T` must be a valid,
-  DataTypeSpecific-or-better type for the iterator's base; for example, it may
-  be based on an earlier call to CheckIter.
-
-| LdIterPos<T,iterId>, DParam(Int|PtrToElem), S(FramePtr), NF
-
-| LdIterEnd<T,iterId>, DParam(Int|PtrToElem), S(FramePtr), NF
+| LdIterEnd<iterId>, D(Int), S(FramePtr), NF
 
   Load the specified field of the iterator at `iterId`. These ops should only
-  be generated for iterators known to have a specialized type (via CheckIter).
-  The type param `T` should be compatible with this type - i.e. `T` should be
-  either an int or a pointer based on whether it's an index or pointer iter.
+  be generated for iterators known to have a specialized type and the values
+  interpreted accordingly. If the iterator type is pointer based, use
+  IntAsPtrToElem to obtain the pointer.
 
 | LdFrameThis, DParam(Obj), S(FramePtr), NF
 
@@ -930,6 +981,12 @@ To string conversions:
 | LdFrameCls, DParam(Cls), S(FramePtr), NF
 
   Loads into D the value of m_cls from S0.
+
+| LdPublicFunc, D(Func), S(FramePtr), NF
+
+  Load the first function in the stack (beginning with S(0)) that is not marked
+  as AttrNoInjection. If no such function is available then the function from
+  S(0) is returned instead.
 
 | LdClsCtor, D(Func), S(Cls) S(Func), NF
 
@@ -957,43 +1014,40 @@ To string conversions:
   Define a value of type T. This instruction aborts at runtime; it is meant to
   be used in tests or code that is known to be unreachable.
 
-| ConjureUse, ND, S(Cell), NF
-
-  Define a "use" of S0 effectively keeping the value alive. As with Conjure it
-  should not appear in reachable code.
-
-| LdCls, D(Cls), S(Str) C(Cls|Nullptr), NF
+| LdCls<fallback>, DLdCls, S(Str) C(Cls|Nullptr), NF
 
   Loads the class named S0 in the context of the class S1. Invokes autoload and
   may raise an error if the class is not defined. The explicit context
   parameter allows the compiler to simplify this instruction to a DefConst in
   some cases. If S0 is constant, this instruction may be simplified to a
-  LdClsCached.
+  LdClsCached. Takes extra data that specifies the fallback behavior if the
+  class is undefined. If the fallback is set to be silent, the caller must
+  handle the nullptr return.
 
-| LdClsCached, D(Cls), CStr, NF
+| LdClsCached<fallback>, DLdCls, CStr(), NF
 
   Loads the class named S0 via the RDS. Invokes autoload and may raise an error
   if the class is not defined.
 
-| LdClsCachedSafe, D(Cls), CStr, B
+| LookupCls, D(Cls|Nullptr), S(Str), NF
 
-  Loads the class whose name is S0 out of the RDS. If the class is not defined,
-  branch to B.
+  Looks up the class named S0 via the RDS. Returns nullptr if the class is not
+  defined. Does not invoke autoload.
+
+| LookupClsCached, D(Cls|Nullptr), CStr(), NF
+
+  Looks up the class named S0 via the RDS. Returns nullptr if the class is not
+  defined. Does not invoke autoload.
 
 | LdClsInitData, D(PtrToClsInit), S(Cls), NF
 
   Loads the pointer to the property initializer array for class S0.
 
-| LookupClsRDS, D(Cls|Nullptr), S(Str), NF
-
-  Lookup the cached-class RDS handle for a given class name. Dereference that
-  handle and return the associated Class, or null if not present.
-
-| LdCns, D(InitCell), CStr, B
+| LdCns, D(InitCell), CStr(), B
 
   Load the constant named S0, branching to B if isn't present.
 
-| LookupCnsE<T,constName>,  D(InitCell), CStr, PRc
+| LookupCnsE<T,constName>,  D(InitCell), CStr(), PRc
 
   Load a constant via the RDS. Raises a fatal error if it cannot define the
   constant.  This should only be executed if LdCns on the same constant has
@@ -1009,10 +1063,17 @@ To string conversions:
   Lookup a class constant. May raise errors if either the class or constant are
   not defined.
 
-| LookupClsCtxCns, D(Int), S(Cls) S(Str), NF
+| LookupClsCtxCns, D(Int), S(Cls) S(Str) S(Bool), NF
 
   Lookup a class context constant. May raise errors if the context constant
-  is not defined, is abstract or is a type/value constant.
+  is not defined, is abstract or is a type/value constant. Last arg is a
+  bool indicating whether the caller guarantees if an object of this class exists,
+  which enables slot optimizations even without type refinements on the Cls.
+
+| LdClsCtxCns<slot>, D(Int), S(Cls), NF
+
+  Loads the context constant in the slot `slot' on S0. Requires that the slot
+  contains a valid context constant.
 
 | LdSubClsCns<constantName,slot>, D(Uncounted), S(Cls), NF
 
@@ -1041,12 +1102,16 @@ To string conversions:
 
   Load the size of S0's constant table.
 
-| LdResolvedTypeCns<slot>, D(StaticDict), S(Cls), B
+| EqClassId<cls, classId>, D(Bool), NA, NF
+
+  Tests if the ClassId in RDS matches jit-time classId.
+
+| LdResolvedTypeCns<slot>, D(StaticDict), S(Cls), B|LA
 
   Loads the resolved type constant in the slot `slot' on S0 or branches to B if
   the type constant is not resolved.
 
-| LdResolvedTypeCnsNoCheck<slot>, D(StaticDict), S(Cls), NF
+| LdResolvedTypeCnsNoCheck<slot>, D(StaticDict), S(Cls), LA
 
   Loads the resolved type constant in the slot `slot' on S0. The type constant
   is assumed to be present and resolved.
@@ -1137,6 +1202,16 @@ To string conversions:
   method. Returns nullptr if it is an instance method defined in S2's class
   hierarchy, indicating that this legacy call should be handled by interpreter.
 
+| DeserializeLazyProp<index>, ND, S(Obj), NF
+
+  Given the `index` of a property in S0 that may be a handle to some lazily-
+  deserialized APC value, check if the property is lazy and deserialize it in
+  place if so. After this op, the prop will be a valid TypedValue.
+
+| LdClosureArg<T, index>, DParam(Cell), S(Obj), NF
+
+  Loads the argument of closure S0 at physical index `index` into D.
+
 | LdPropAddr<T,index>, D(LvalToProp), S(Obj), NF
 
   Load the address of the object property at physical index `index`.
@@ -1161,10 +1236,10 @@ To string conversions:
   Profile an (attempted) access of a global with name S0.
 
 | LdClsPropAddrOrNull<readonly op>, D(PtrToSProp|Nullptr), S(Cls) S(Str)
-|                     C(Cls|Nullptr) C(Bool) C(Bool), NF
+|                     C(Func) C(Bool) C(Bool), NF
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
-  property name, and S2 is the class representing the context of the code
+  property name, and S2 is the function representing the context of the code
   accessing the property. If class S0 does not have a visible and accessible
   static property named S1, then nullptr is returned. An exception
   will be thrown if the property is marked LateInit and its value is
@@ -1173,10 +1248,10 @@ To string conversions:
   readonly violation with the readonly op.
 
 | LdClsPropAddrOrRaise<readonly op>, D(PtrToSProp), S(Cls) S(Str)
-|                       C(Cls|Nullptr) C(Bool) C(Bool), NF
+|                       C(Func) C(Bool) C(Bool), NF
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
-  property name, and S2 is the class representing the context of the code
+  property name, and S2 is the function representing the context of the code
   accessing the property. If class S0 does not have a visible and accessible
   static property named S1, then nullptr is returned. An exception
   will be thrown if the property is marked LateInit and its value is
@@ -1189,23 +1264,23 @@ To string conversions:
   Lookup the slot index of the static property with the name S1 on the class
   S0, returning -1 if not found.
 
-| LdObjMethodD, D(Func), S(Cls) S(Str), NF
+| LdObjMethodD<opt-class, callerFunc>, D(Func), S(Cls) S(Str), NF
 
   Loads a func pointer pointing to the instance method that would be called
   if a method named S1 is invoked on an instance of S0. Raises a fatal if the
   class does not have an accessible method with the given name.
 
-| LdObjMethodS<methodName>, D(Func), S(Cls) S(Smashable), NF
+| LdObjMethodS<methodName, ctx, callerFunc>, D(Func), S(Cls) S(Smashable), NF
 
   Loads a func pointer pointing to the instance method that would be called
-  if a `methodName` is invoked on an instance of S0. Caches the mapping in
-  the TC cache (using S1) and target cache. Raises a fatal if the class does
-  not have an accessible method with the given name.
+  if a `methodName` is invoked on an instance of S0 from the calling context `ctx`.
+  Caches the mapping in the TC cache (using S1) and target cache. Raises a fatal
+  if the class does not have an accessible method with the given name.
 
-| LdObjInvoke, D(Func), S(Cls), B
+| LdObjInvoke, D(Func|Nullptr), S(Cls), NF
 
-  Try to load a cached non-static __invoke Func from the Class in S0, or branch
-  to block B if it is not present.
+  Load a regular (non-static in prologue) __invoke Func from the Class in S0,
+  or nullptr if it is not present.
 
 | LdObjClass, DLdObjCls, S(Obj), NF
 
@@ -1215,13 +1290,13 @@ To string conversions:
 
   Load the name of the Class* in S0.
 
-| LdLazyCls, D(LazyCls), S(Cls), NF
-
-  Load a lazy class corresponding to the Class* in S0.
-
 | LdLazyClsName, D(StaticStr), S(LazyCls), NF
 
   Load the name of the LazyClass in S0.
+
+| LdEnumClassLabelName, D(StaticStr), S(EnumClassLabel), NF
+
+  Load the name of the EnumClassLabel in S0.
 
 | LdFunc, D(Func|Nullptr), S(Str), NF
 
@@ -1266,7 +1341,7 @@ To string conversions:
 
 | LdFuncCls, D(Cls|Nullptr), S(Func), NF
 
-  Loads the Class* of S0.
+  Loads the Func::cls() of S0, assuming !Func::isMethCaller().
 
 | LdStrLen, D(Int), S(Str), NF
 
@@ -1283,6 +1358,10 @@ To string conversions:
 | LdFuncRequiredCoeffects, D(Int), S(Func), NF
 
   Returns the value of func->requiredCoeffects().
+
+| LdCoeffectFunParamNaive<param-idx>, D(Int), S(Cell), NF
+
+  Returns the coeffects from the S0.
 
 | LdClsFromClsMeth, D(Cls), S(ClsMeth), NF
 
@@ -1312,9 +1391,17 @@ To string conversions:
 
   Load the ArrayData* containing the generics attached to the RFuncData in S0
 
-| LdImplicitContext, D(Obj|InitNull), NA, NF
+| LdImplicitContext, D(Obj), NA, NF
 
   Loads implicit context from RDS.
+
+| LdImplicitContextMemoKey, D(Int), S(Obj), NF
+
+  Loads memo key from implicit context in S0.
+
+| LdMemoAgnosticIC, D(Obj), S(Obj), NF
+
+  Given an Implicit Context, returns the memo agnostic version of it.
 
 7. Allocation
 
@@ -1326,11 +1413,6 @@ To string conversions:
 | AllocObj, DAllocObj, S(Cls), PRc
 
   Allocates a new object of class S1.
-
-| AllocObjReified, DAllocObj, S(Cls) S(Vec), LA|PRc
-
-  Allocates a new object of class S1 and sets S2 as the reified generics of
-  this class. If this class is not reified, this instruction raises an error.
 
 | InitProps<class>, ND, NA, NF
 
@@ -1360,6 +1442,11 @@ To string conversions:
   property in the parent, has a declared type equivalent to the parent
   declaration.
 
+| PropTypeValid, ND, C(Cls), NF
+
+  Check that all properties on S0 carries a type which is valid for a
+  property. This is used when any types requires runtime resolution.
+
 | DebugBacktrace, D(Vec), S(Int), PRc
 
   Obtain stack trace by calling the debug_backtrace() method.
@@ -1369,7 +1456,7 @@ To string conversions:
   Initialize Throwable's file name and line number assuming the stack trace
   was already initialized and the current vmfp() is a built-in.
 
-| NewInstanceRaw<class>, DAllocObj, NA, PRc
+| NewInstanceRaw<class>, DAllocObj, NA, PNRc
 
   Allocates an instance of class.
 
@@ -1381,7 +1468,7 @@ To string conversions:
 
   Call the custom instance constructor of an extension class.
 
-| ConstructClosure<class>, DAllocObj, S(Cls|Obj|Nullptr), CRc|PRc
+| ConstructClosure<class>, DAllocObj, S(Cls|Obj|Nullptr,MR), PNRc
 
   Call the custom instance constructor of a Closure.
 
@@ -1393,7 +1480,7 @@ To string conversions:
 
   Clear the IsBeingConstructed flag on the object.
 
-| NewLoggingArray, DLoggingArrLike, S(Vec,Dict,Keyset), PRc|CRc|LA
+| NewLoggingArray, DLoggingArrLike, S(Vec OR Dict OR Keyset,MMR), PRc|LA
 
   Maybe create a LoggingArray wrapping the vanilla array-like S0. The decision
   may be based on flags or sampling. If we don't create an array, we return S0
@@ -1416,70 +1503,74 @@ To string conversions:
   Log that we failed to guard input S0 to the given type. Useful for catching
   performance bugs in bespoke layout selection, but may have more general use.
 
-| NewDictArray, D(Dict), C(Int), PRc
+| LogClsSpeculation, ND, NA, NF
+
+  Log the result of speculation of a ClassId for sandbox mode.
+
+| NewDictArray, D(Dict), C(Int), PNRc
 
   Allocate a new dict with the expected capacity S0.
 
-| NewKeysetArray<offset,keys>, D(Keyset), S(StkPtr), PRc|CRc
+| NewKeysetArray<offset,keys>, D(Keyset), S(StkPtr,MMR), PNRc
 
   Allocate a new keyset containing N elements off the stack given by S0, at
   `offset'. This instruction moves the elements off the stack without
   manipulating their reference counts.
 
-| AllocVec<size>, D(Vec), NA, PRc
+| AllocVec<size>, D(Vec), NA, PNRc
 
   Allocate a new uninitialized vector array with space for size elements in it.
   The array will be initialized with values using either InitVecElem or
   InitVecElemLoop.
 
-| InitVecElem<index>, ND, S(Vec) S(Cell), CRc
+| InitVecElem<index>, ND, S(Vec) S(Cell,MR), NF
 
   Store the S1 into the slot at index in array S0. This instruction assumes
   that it doesn't have to incref the value being stored. Used to initialize an
   array allocated with AllocVec.
 
-| InitVecElemLoop<offset,size>, ND, S(Vec) S(StkPtr), CRc
+| InitVecElemLoop<offset,size>, ND, S(Vec) S(StkPtr,MR), NF
 
   Move `size' elements from the stack given by S1, at `offset', into the array
   S0.  Assumes that the first element on the stack is the last element in the
   array.  Used to initialize an array allocated with or AllocVec that was too
   big for us to use a series of InitVecElem ops.
 
-| AllocStructDict<keys...>,   D(Dict), NA, PRc
+| AllocStructDict<keys...>,   D(Dict), NA, PNRc
 
   Allocate a new key/value dict or mixed-layout array, given N string literal
   immediates for keys. This op initializes the header and hash table of the
   new array-like, but does not its elements; use InitDictElem for that.
 
-| InitDictElem<index,key>, ND, S(Dict) S(Cell), NF
+| InitDictElem<index,key>, ND, S(Dict) S(Cell,MR), NF
 
   Initialize the element at position `index` in array S0 to have the string
   literal `key` as its key and S1 as its value. This instruction assumes that
   S1 has already been inc-reffed. Used with the result of AllocStructDict.
 
-| NewStructDict<offset,keys...>,   D(Dict), S(StkPtr), PRc|CRc
+| NewStructDict<offset,keys...>,   D(Dict), S(StkPtr,MMR), PNRc
 
   Allocate a new key/value dict, given N string literal immediates for keys
   and N stack elements at `offset` on stack S0 for values.  This op assumes it
   can move values from the stack without inc-reffing them.
 
-| AllocBespokeStructDict<layout>, DStructDict, NA, PRc
+| AllocBespokeStructDict<layout>, DStructDict, NA, PNRc
 
   Allocate a new, empty dict with the bespoke StructLayout `layout`.
 
-| InitStructPositions<slots>, ND, SStructDict, NF
+| InitStructPositions<slots>, ND, SStructDict(), NF
 
   Initialize the size and iterator positions of the bespoke StructDict S0 for
   the fields specified by `slots`. This instruction does not set the elements
   of the dict; use InitStructElem for that.
 
-| InitStructElem<slot,key>, ND, SStructDict S(InitCell), CRc
+| InitStructElem<slot,key>, ND, SStructDict() S(InitCell,MR), NF
 
   Initialize the element at slot `slot` corresponding to `key` in StructDict S0
   with S1. This instruction assumes that S1 has already been inc-reffed.
   Used with the result of AllocUninitBespokeStructDict.
 
-| NewBespokeStructDict<offset,layout,slots...>, DStructDict, S(StkPtr), PRc|CRc
+| NewBespokeStructDict<offset,layout,slots...>, DStructDict, S(StkPtr,MMR), PNRc
 
   Allocate a new dict with the bespoke StructLayout `layout`.  Then, init the
   N fields with the given `slots` with N stack elements starting at `offset`.
@@ -1489,12 +1580,12 @@ To string conversions:
 
   Create an empty new collection of `type'. `type' cannot be Pair.
 
-| NewPair<offset>, DCol, S(Cell) S(Cell), PRc|CRc
+| NewPair<offset>, DCol, S(Cell,MR) S(Cell,MR), PRc
 
   Allocate a new Pair and fill it with the given cells. Ownership of the cells
   is transferred from $1 and $2 to the pair without manipulating the refcounts.
 
-| NewColFromArray<type>, DCol, S(Vec,Dict), PRc|CRc
+| NewColFromArray<type>, DCol, S(Vec OR Dict,MR), PRc
 
   Create a collection of `type` from a Vec or Dict kind. `type` cannot be
   Pair. S0 must be vec kind when `type` is Vector or ImmVector, and must be
@@ -1525,16 +1616,17 @@ To string conversions:
 
 8. Call & Return
 
-| BeginInlining<func, offset>, D(FramePtr), S(StkPtr), NF
+| DefCalleeFP<func, offset>, D(FramePtr), S(StkPtr) S(FramePtr), NF
+
+  Defines a new frame pointer for an ActRec at callBCOff for use in an inlined
+  region. The frame is defined relative to S0, and S1 is the parent frame.
+
+| EnterInlineFrame, ND, S(FramePtr), NF
 
   Marks the start of an inlined function whose stack resides offset cells below
   the SP.
 
-  Defines a new frame pointer for an ActRec at callBCOff for use in an inlined
-  region. In resumed contexts the new frame is computed relative to S0 as S1 is
-  not a stack location.
-
-| EndInlining, ND, S(FramePtr), NF
+| LeaveInlineFrame, ND, S(FramePtr), NF
 
   Marks the end of an inlined function. S0 is no longer a valid frame location.
 
@@ -1551,30 +1643,44 @@ To string conversions:
   The caller frame pointer is passed as S1. This is used to keep track of the
   call chain of inlined functions for simplification and dead code elimination.
 
-| InitFrame<func>, ND, S(StkPtr) S(Int) S(Cls|Obj|Nullptr) S(Int), NF
+| InlineSideExitSyncStack<offset>, ND, S(StkPtr), NF
 
-  Initializes non-native portion of the callee's frame.
+This instruction does nothing, but has memory effects that force the stack
+(determined by `offset') to be materialized. It leaves the stack in an "empty"
+state, as required by the InlineSideExit instruction, so that it could be shared
+between all side exits.
 
-  Temporary opcode that combines the behavior of StFrame{Ctx,Func,Meta},
-  but works with a stack pointer rather than a well-defined frame pointer.
+| InlineSideExit<callee,callBCOff>,
+|   DCall,
+|   S(StkPtr) S(FramePtr) S(FramePtr) S(TCA),
+|   PRc
 
-  `func': the function being called
-  S0: stack pointer pointing to the space reserved for the callee's frame
-  S1: ActRec flags (see ActRec::m_callOffAndFlags)
-  S2: prologue context
-  S3: callee func id
+Ends inlining of the current function and side exits to address S3, which is
+a translation that will continue execution of the current function. Makes sure
+all fields in callee's ActRec S1 are properly populated and the ActRec is linked
+to the caller's ActRec S2 before transfering the control. The instruction
+returns the return value of the function.
 
-| DefFuncEntryFP<func>, D(FramePtr), NA, NF
+This is achieved by calling the inlineSideExit stub and using registers to pass
+all relevant ActRec fields. The stub finishes initialization of the ActRec and
+jumps to S3.
 
-  Initializes native portion of the callee's frame at rvmsp(), links it to the
-  previous frame at rvmfp(), and defines the new frame pointer.
+It could be viewed as performing a work similar to a combination of LeaveInlineFrame,
+ReqBindJmp and CallFuncEntry.
+
+| EnterFrame, D(FramePtr), S(FramePtr) S(FramePtr) S(Int) S(Int), NF
+
+  Initializes native portion of the callee's frame at S0, links it to the
+  previous frame at S1, and defines the new frame pointer.
 
   The function being called is specified in `func'.
+  S2: ActRec flags (see ActRec::m_callOffAndFlags)
+  S3: callee func id
 
 | Call<offset,numParams,callOff,destroyLocals>,
 |   DCall,
-|   S(StkPtr) S(FramePtr) S(Func) S(Cls|Obj|Nullptr) S(Int),
-|   CRc|PRc
+|   S(StkPtr) S(FramePtr) S(Func) S(Cls|Obj|Nullptr,MMR) S(Int),
+|   PRc
 
   Transfer control to the prologue of a callee S2, based on the pre-live
   activation record and set of args on the stack pointed to by S0 at `offset'.
@@ -1583,20 +1689,22 @@ To string conversions:
 
 | CallFuncEntry<target,spOffset,arFlags>,
 |   DCall,
-|   S(StkPtr) S(FramePtr) S(Cls|Obj|Nullptr),
-|   CRc|PRc
+|   S(StkPtr) S(FramePtr) S(Func) S(Cls|Obj|Nullptr,MMR),
+|   PRc
 
-  Transfer control to the func entry at `target' SrcKey, based on the pre-live
+  Transfer control to the func entry of a callee S2, based on the pre-live
   activation record and set of args on the stack pointed to by S0 at `spOffset'.
-  S1 is the current caller frame pointer. S2 is the context (nullptr, $this or
-  static::class).
+  The callee's prologue must match the compile-time known calleePrototype's prologue.
+  S1 is the current caller frame pointer. S3 is the context (nullptr, $this or
+  static::class). If the callee is not statically known, the number of
+  required parameters must match the total number of parameters for correctness.
 
 | NativeImpl<func>, ND, S(FramePtr) S(StkPtr), NF
 
   Execute a call to the native builtin specified by the current function. S0
   and S1 should be the current vmfp and vmsp, respectively.
 
-| CallBuiltin, DBuiltin, S(FramePtr) S(StkPtr) SVar(Mem,Cell,Nullptr), PRc
+| CallBuiltin, DBuiltin, S(FramePtr) S(StkPtr) SVar(Ptr OR Cell OR Nullptr), PRc
 
   Call builtin function with N arguments. S0 and S1 should be the current vmfp
   and vmsp, respectively.
@@ -1727,13 +1835,9 @@ To string conversions:
   Store the TypedValue in S0 into the specified RDS handle. Must store the aux
   bits if `includeAux` is true.
 
-| StImplicitContext, ND, S(Obj|InitNull), NF
+| StImplicitContext, ND, S(Obj), NF
 
   Sets the implicit context to S0.
-
-| StImplicitContextWH, ND, S(Obj), NF
-
-  Stores the implicit context from RDS to the WaitHandle in S0.
 
 | StLoc<localId>, ND, S(FramePtr) S(Cell), NF
 
@@ -1750,22 +1854,14 @@ To string conversions:
   Store S1 to the local variables corresponding to localIds, on the frame
   pointed to by S0.
 
-| StIterBase<iterId>, ND, S(FramePtr) S(ArrLike,Nullptr), LA
+| StIterPos<iterId>, ND, S(FramePtr) S(Int), NF
 
-  Sets the base of the iterator at `iterId` to the pointer S1. The array must
-  match the specialized type of the iterator, or be null (for local iterators).
+| StIterEnd<iterId>, ND, S(FramePtr) S(Int), NF
 
-| StIterType<iterId,iterType>, ND, S(FramePtr), NF
-
-  Sets the type of the iterator at `iterId` to `iterType`. This type must be a
-  specialized type. Also sets auxiliary fields (like next helper index).
-
-| StIterPos<iterId>, ND, S(FramePtr) S(Int|PtrToElem), NF
-
-| StIterEnd<iterId>, ND, S(FramePtr) S(Int|PtrToElem), NF
-
-  Store S1 to the given field of the iterator at `iterId`. S1 must be an int if
-  we're doing index iteration and a pointer if we're doing pointer iteration.
+  Store S1 to the given field of the iterator at `iterId`. These ops should only
+  be generated for iterators known to have a specialized type and the values
+  interpreted accordingly. If the iterator type is pointer based, use
+  PtrToElemAsInt to convert the pointer to an integer.
 
 | StStk<offset>, ND, S(StkPtr) S(Cell), NF
 
@@ -1791,13 +1887,13 @@ To string conversions:
   Load the address of the storage for out parameter `index` provided by the
   callee (the address will be a location on the callee stack).
 
-| RecordReifiedGenericsAndGetTSList, D(Vec), S(Vec), CRc|LA
+| RecordReifiedGenericsAndGetTSList, D(Vec), S(Vec,MMR), LA
 
   Takes a varray of reified generics from the stack and adds them to the reified
   generics table and returns the input varray of reified generics, possibly
   static
 
-| StFrameCtx, ND, S(FramePtr) S(Obj,Cls), NF
+| StFrameCtx, ND, S(FramePtr) S(Obj OR Cls), NF
 
   Store object or class S1 on frame S0.
 
@@ -1825,7 +1921,7 @@ To string conversions:
   to track whether the register state is clean or dirty as
   EagerSyncVMRegs is moved around by store elimination.
 
-| ReqBindJmp<target,invSPOff,irSPOff>, ND, S(StkPtr) S(FramePtr), T
+| ReqBindJmp<target,invSPOff,irSPOff>, ND, S(StkPtr) S(FramePtr) SCrossTrace, T
 
   Emit a jump to a translation starting at `target'. If it does not exist, jump
   to a service request that will translate the code and bind this jump to it.
@@ -1843,6 +1939,12 @@ To string conversions:
   Emit a service request to retranslate the current function with a higher
   optimization gear. This instruction is used in exit traces that trigger
   profile-guided optimizations.
+
+| RetranslateOptAsync, ND, NA, NF
+
+  Trigger background optimization of the current function using profile-guided
+  optimizations. Optimization occurs in a background thread while execution can
+  continue on existing profile translations.
 
 | ReqInterpBBNoTranslate<target,invSPOff,irSPOff>, ND, S(StkPtr) S(FramePtr), T
 
@@ -1862,7 +1964,7 @@ To string conversions:
 
   If S0 is a refcounted type, increment its refcount.
 
-| DecRef<locId>, ND, S(Cell), CRc
+| DecRef<locId>, ND, S(Cell,CR), NF
 
   Decrease the reference count of S0 by one, and call a destructor for types
   that require it if it goes to zero.
@@ -1870,7 +1972,7 @@ To string conversions:
   The locId is just a hint to the runtime indicating which local variable is
   being DecRef'd, if any.
 
-| DecRefNZ<locId>, ND, S(Cell), CRc
+| DecRefNZ<locId>, ND, S(Cell,CR), NF
 
   Decrease the reference count of S0 by one, do not check if it goes to zero.
   This instruction can be used for more efficient code when it is provable that
@@ -1882,15 +1984,15 @@ To string conversions:
   not actually dec-ref it. We can use this op for e.g. iterator output locals,
   because we don't specialize iterators in profiling translations.
 
-| ReleaseShallow<locId>, ND, S(ArrLike), CRc|LA
+| ReleaseShallow<locId>, ND, S(ArrLike|Obj), LA
 
-  Release memory associated with array S0 without performing any other
+  Release memory associated with S0 without performing any other
   operations.
 
-| DecReleaseCheck<locId>, ND, S(Cell), B|P
+| DecReleaseCheck<locId>, ND, S(Cell,MMR), B
 
-  Decrease the refcount of S0 and fall through if the refcount goes to zero.
-  Otherwise, branch to B.
+  If the refcount of S0 is 1, fall through.
+  Otherwise, decrease the refcount of S0 and branch to B.
 
 12. Misc
 
@@ -1947,6 +2049,20 @@ To string conversions:
   May be used only at the beginning of a prologue or a stub used in a prologue
   context.
 
+| DefFuncEntryFP, D(FramePtr), NA, NF
+
+| DefFuncEntryPrevFP, D(FramePtr), NA, NF
+
+  Creates a temporary D representing a callee's and caller's frame pointer.
+
+  May be used only at the beginning of a func entry.
+
+| DefFuncEntryArFlags, D(Int), NA, NF
+
+| DefFuncEntryCalleeId, D(Int), NA, NF
+
+| DefFuncEntryCtx, DParam(Cls|Obj), NA, NF
+
 | ConvFuncPrologueFlagsToARFlags, D(Int), S(Int), NF
 
   Convert a function prologue flags to function entry flags.
@@ -1976,13 +2092,6 @@ To string conversions:
   Does nothing. It's sometimes useful for the simplifier to insert one of these
   in the instruction stream.
 
-| JmpPlaceholder, ND, NA, B
-
-  Does nothing if executed. Semantically, this instruction carries a taken edge
-  to a block of speculatively-generated code during initial IR generation, such
-  as specialized code for an iterator init or next which we may or may not use.
-  If it survives irgen, it should be eliminated in the first DCE pass.
-
 | CheckFuncNeedsCoverage<Func>, ND, NA, B
 
   Checks if Func needs to have coverage information recorded for the current
@@ -2006,18 +2115,32 @@ To string conversions:
   instruction will raise a recoverable fatal error describing the type
   mismatch.
 
-| VerifyParamFail<func,param,tc>, DVerifyParamFail, S(Cell) S(Cls|Nullptr), NF
+| VerifyParamFail<func,param,tc>, ND, S(Cell) S(Cls|Nullptr), NF
 
   Assumes that parameter specified in extra-data in the current function
-  has failed a its type check. Depending on the typehint being verified and
-  a number of runtime options, may coerce the parameter to the correct type i
-  or raise a recoverable fatal error describing the type mismatch.
+  has failed its type check and could not be satisfied by coercing the value.
+  Depending on the typehint being verified and a number of runtime options,
+  may raise a recoverable fatal error describing the type mismatch.
 
 | VerifyParamFailHard<func,param,tc>, ND, S(Cell) S(Cls|Nullptr), T
 
   A terminal version of VerifyParamFail, to be used when the compiler can
   statically prove that this failure will result in a fatal error rather than a
   type coercion.
+
+| VerifyParam<func,param,tc>, ND, S(Cell) S(Cls|Nullptr), NF
+
+  Verify that S0 is compatible with the parameter type hint. The verification
+  is guaranteed to not coerce. If the parameter type hint is `this`, S1 contains
+  class corresponding to `this` type.
+
+| VerifyParamCoerce<func,param,tc>,
+|   DVerifyCoerce,
+|   S(Cell,MMR) S(Cls|Nullptr),
+|   PRc
+
+  Verify that S0 is compatible with the parameter type hint. The verification
+  may coerce and the updated value will be returned.
 
 | VerifyRetCallable<func,param>, ND, S(Cell), NF
 
@@ -2027,7 +2150,7 @@ To string conversions:
 
   Verify a return type hint for a class.
 
-| VerifyRetFail<func,param,tc>, DVerifyParamFail, S(Cell) S(Cls|Nullptr), NF
+| VerifyRetFail<func,param,tc>, ND, S(Cell) S(Cls|Nullptr), NF
 
   Failure to verify a return type hint.
 
@@ -2035,6 +2158,14 @@ To string conversions:
 
   Terminal version of VerifyRetFail, to be used when the compiler can prove
   that this failure will result in a fatal error.
+
+| VerifyRet<func,param,tc>, ND, S(Cell) S(Cls|Nullptr), NF
+
+  Verify a return type hint. The verification is guaranteed to not coerce.
+
+| VerifyRetCoerce<func,param,tc>, DVerifyCoerce, S(Cell,MMR) S(Cls|Nullptr), PRc
+
+  Verify a return type hint. The verification may coerce.
 
 | VerifyPropCls, ND, S(Cls) S(Int) S(Cls|Nullptr) S(Obj) C(Bool), NF
 
@@ -2069,14 +2200,14 @@ To string conversions:
   S1 on S0 including upper-bounds. S3 is true if this is a static property,
   false otherwise.
 
-| VerifyPropCoerce, D(InitCell), S(Cls) S(Int) S(Cell) C(Bool), PRc|CRc
+| VerifyPropCoerce, DVerifyCoerce, S(Cls) S(Int) S(Cell,MMR) C(Bool), PRc
 
   Verify that S2 is compatible with the type hint for the property at slot S1
   on S0. S3 is true if this is a static property, false otherwise. Once support
   for coercing class_meth types is removed this ir instruction can also be
   removed (T61738946).
 
-| VerifyPropCoerceAll, D(InitCell), S(Cls) S(Int) S(Cell) C(Bool), PRc|CRc
+| VerifyPropCoerceAll, D(InitCell), S(Cls) S(Int) S(Cell,MMR) C(Bool), PRc
 
   Verify that S2 is compatible with all type hints for the property at slot S1
   on S0, including upper-bounds. S3 is true if this is a static property,
@@ -2093,16 +2224,21 @@ To string conversions:
   Raises a catchable type hint error if the reified generics of S0 does not
   match the type structure given on S1.
 
+| VerifyType<func>, ND, S(Cell) S(Dict) S(Cls|Nullptr), LA
+
+  Warns or raises a catchable type hint error if value S0 does not
+  match the type structure given on S1.
+
 | ThrowUninitLoc<localId>, ND, S(Str), T
 
   Throws an UndefinedVariableException on an uninitialized local variable.
 
-| ThrowUndefPropException, ND, S(Obj) CStr, T
+| ThrowUndefPropException, ND, S(Obj) CStr(), T
 
   Throws an UndefinedPropertyException on an undefined property named S1 on the
   class of S0.
 
-| RaiseTooManyArg<func>, ND, S(Vec), CRc|LA
+| RaiseTooManyArg<func>, ND, S(Vec,CR), LA
 
   Raise a too many argument warning because extra arguments stored in S0 were
   passed to function func.
@@ -2115,9 +2251,10 @@ To string conversions:
 
   Raises a warning with the text in S0 as its message.
 
-| RaiseNotice, ND, S(Str), NF
+| RaiseNotice<sample rate>, ND, S(Str), NF
 
-  Raises a notice with the text in S0 as its message.
+  Raises a notice with the text in S0 as its message, sampled 1 out of "sample
+  rate" times.
 
 | ThrowHasThisNeedStatic, ND, S(Func), T
 
@@ -2176,6 +2313,12 @@ To string conversions:
   raise a warning or throw an exception indicating that the class specified in
   S0 was constructed dynamically (and should not be).
 
+| RaiseMissingDynamicallyReferenced, ND, S(Cls), NF
+
+  Raise a notice that the provided class (result of classname_to_class) is
+  missing the `<<__DynamicallyReferenced>>` attribute. Notice is sampled at a
+  rate set by `Cfg::Eval::DynamicallyReferencedNoticeSampleRate`.
+
 | RaiseCoeffectsCallViolation<func>, ND, S(Int) S(Int), NF
 
   Depending on the setting of the `CoeffectEnforcementLevels` runtime option,
@@ -2194,23 +2337,41 @@ To string conversions:
   Raises a warning to indicate a violation for the input S0 to coeffect rule
   FunParam uses polymorphic coeffect rules.
 
-| RaiseStrToClassNotice, ND, S(Str), NF
+| RaiseModuleBoundaryViolation<ctx, caller>, ND, S(Func OR Cls), NF
 
-  Raise a notice if a string is implicitly converted to a class.
+  Raises a warning to indicate a module boundary violation resulting from caller
+  attempting to either call, if S0 is Func, or create a pointer to the callee in
+  S0 in context `ctx`.
+
+| RaiseModulePropertyViolation<caller, propCls, propName, is_static>, ND, NA, NF
+  Raises a warning to indicate a module boundary violation resulting from caller
+  attempting to access a property propName from class propCls.
+
+| RaiseStrToClassNotice<kind>, ND, S(Str), NF
+
+  Raise a notice if a class is being loaded from a string e.g. in a `$c::f()`
+  expression where $c is a string. S0 contains the string. Notice is sampled at
+  a rate set by `Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate`. Takes extra
+  data to specialize the error message for different expression kinds.
 
 | CheckClsMethFunc, ND, S(Func), NF
 
   Raises runtime errors if the func in S0 is not a callable static method.
 
-| CheckClsReifiedGenericMismatch<cls>, ND, S(Vec), LA
+| CheckClsReifiedGenericMismatch, ND, S(Cls) S(Vec), LA
 
-  Raises a runtime error unless whether each generic in S0 is reified or erased
-  matches exactly to the expectations of the cls.
+  Raises a runtime error unless whether each generic in S1 is reified or erased
+  matches exactly to the expectations of the cls in S0.
+
+| CheckClsRGSoft, ND, S(Cls), NF
+
+  Raise a warning if all the reified generics on class S0 are soft,
+  otherwise raise an error. S0 must be a reified class.
 
 | CheckFunReifiedGenericMismatch, ND, S(Func) S(Vec), LA
 
-  Raises a runtime error unless whether each generic in S0 is reified or erased
-  matches exactly to the expectations of the func.
+  Raises a runtime error unless whether each generic in S1 is reified or erased
+  matches exactly to the expectations of the func in S0.
 
 | IsFunReifiedGenericsMatched<func>, D(Bool), S(Int), NF
 
@@ -2226,11 +2387,11 @@ To string conversions:
   is not defined. The initialized value is returned. This instruction may raise
   an undefined constant error if autoload cannot define the constant.
 
-| PrintStr,  ND, S(Str),  CRc
+| PrintStr,  ND, S(Str,MMR),  NF
 
-| PrintInt,  ND, S(Int),  CRc
+| PrintInt,  ND, S(Int),  NF
 
-| PrintBool, ND, S(Bool), CRc
+| PrintBool, ND, S(Bool), NF
 
   Print for various types.
 
@@ -2238,40 +2399,40 @@ To string conversions:
 
   Concatenate S0 and S1 after converting S0 to String.
 
-| ConcatStrInt, D(Str), S(Str) S(Int), CRc|PRc
+| ConcatStrInt, D(Str), S(Str,CR) S(Int), PRc
 
   Concatenate S0 and S1 after converting S1 to String.
 
-| ConcatStrStr, D(Str), S(Str) S(Str), CRc|PRc
+| ConcatStrStr, D(Str), S(Str,CR) S(Str), PRc
 
   Concatenate S0 and S1.
 
-| ConcatStr3, D(Str), S(Str) S(Str) S(Str), CRc|PRc
+| ConcatStr3, D(Str), S(Str,CR) S(Str) S(Str), PRc
 
   Concatenate S0, S1, and S2.
 
-| ConcatStr4, D(Str), S(Str) S(Str) S(Str) S(Str), CRc|PRc
+| ConcatStr4, D(Str), S(Str,CR) S(Str) S(Str) S(Str), PRc
 
   Concatenate S0, S1, S2, and S3.
 
-| AddNewElemKeyset, D(Keyset),    S(Keyset) S(InitCell), CRc|PRc
+| AddNewElemKeyset, D(Keyset),    S(Keyset,CR) S(InitCell), PRc
 
-| AddNewElemVec,    DModified(0), S(Vec) S(InitCell),    CRc|PRc
+| AddNewElemVec,    DModified(0), S(Vec,CR) S(InitCell),    PRc
 
   Add S1 as a new element to the array/keyset/vec S0.  (Note: S1 must actually
   be a subtype of InitCell for array invariants, but we can't assert this yet
   in the IR because many eval stack slots are not entirely typed wrt initness
   right now.)
 
-| AKExistsDict, D(Bool), S(Dict) S(Int,Str), NF
+| AKExistsDict, D(Bool), S(Dict) S(Int OR Str), NF
 
   Has the effects of array_key_exists(S0, S1).
 
-| AKExistsKeyset, D(Bool), S(Keyset) S(Int,Str), NF
+| AKExistsKeyset, D(Bool), S(Keyset) S(Int OR Str), NF
 
   Has the effects of array_key_exists(S0, S1).
 
-| AKExistsObj, D(Bool), S(Obj) S(Int,Str), NF
+| AKExistsObj, D(Bool), S(Obj) S(Int OR Str), NF
 
   Has the effects of array_key_exists(S0, S1) on an object S0. This does
   collection accesses.
@@ -2284,19 +2445,19 @@ To string conversions:
   cause GetMemoKey to throw. This op can only be used within functions marked
   as memoize wrappers.
 
-| GetMemoKeyScalar, DMemoKey, S(Uncounted,Str), PRc
+| GetMemoKeyScalar, DMemoKey, S(Uncounted OR Str), PRc
 
   Identical to GetMemoKey but only accepts scalar types and cannot produce
   errors.
 
-| DictIdx<sizeHint>, DDictElem, S(Dict) S(Int,Str) S(Cell), NF
+| DictIdx<sizeHint>, DDictElem, S(Dict) S(Int OR Str) S(Cell), NF
 
   Checks if S0 contains the key S1 and returns the result if found. Otherwise
   S2 is returned. The optimization data `sizeHint` doesn't affect semantics.
   (`sizeHint` describes S0; it's one of {Default, SmallStatic}. Default is a
   hash lookup. For SmallStatic, we'll do a linear scan for static string keys.)
 
-| KeysetIdx, DKeysetElem, S(Keyset) S(Int,Str) S(Cell), NF
+| KeysetIdx, DKeysetElem, S(Keyset) S(Int OR Str) S(Cell), NF
 
   Checks if S0 contains the key S1 and returns the result if found. Otherwise
   S2 is returned.
@@ -2312,12 +2473,6 @@ To string conversions:
   pointing either to the service request (before the service request is
   satisfied) or to the native code for the given target address (once the
   service request is satisfied).
-
-| LdSSwitchDest<numCases, cases, defaultOffset, bcSPOff>, D(TCA), S(Str), NF
-
-  Using the cases in the extra data, create a hash table for destination lookup.
-  Then, lookup the destination for the switched value in the table and yield the
-  default if not present.
 
 | InterpOne<T,spOff,bcOff,numPopped,numPushed>, ND,
 |                                               S(StkPtr) S(FramePtr),
@@ -2385,50 +2540,58 @@ To string conversions:
   Load the context from the closure object S0 into D, assuming `func' is
   S0's closure Func.
 
-| StClosureArg<index>, ND, S(Obj) S(Cell), CRc
+| StClosureArg<index>, ND, S(Obj) S(Cell,MR), NF
 
   Store one of the closure environment arguments (i.e. from the closure's use
   clause) from S1 into the closure object S0.
 
-| CreateGen, DAllocObj, S(FramePtr) C(Int) S(TCA,Nullptr) C(Int), PRc
+| CreateGen, DAllocObj, S(FramePtr) C(Int) S(TCA OR Nullptr) C(Int), PRc
 
   Create a Generator object and suspend the ActRec provided by S0 into its
   embedded ActRec, allocating S1 slots for locals/iterators. Set the native
   resume address to S2 and resume offset to S3.
 
-| CreateAGen, DAllocObj, S(FramePtr) C(Int) S(TCA,Nullptr) C(Int), PRc
+| CreateAGen, DAllocObj, S(FramePtr) C(Int) S(TCA OR Nullptr) C(Int), PRc
 
   Create an AsyncGenerator object and suspend the ActRec provided by S0 into its
   embedded ActRec, allocating S1 slots for locals/iterators. Set the native
   resume address to S2 and resume offset to S3.
 
 | CreateAFWH, DAllocObj,
-|             S(FramePtr) C(Int) S(TCA,Nullptr) C(Int) S(Obj),
-|             CRc|PRc
+|             S(FramePtr) C(Int) S(TCA OR Nullptr) C(Int) S(Obj,MR),
+|             PRc
 
   Create an AsyncFunctionWaitHandle object and suspend the ActRec provided by
   S0 into its embedded ActRec, allocating S1 slots for locals/iterators.  Set
   the native resume address to S2, resume offset to S3, and mark it blocked on
   non-finished child S4.
 
+| CreateAFWHL, DAllocObj, S(FramePtr) C(Int) S(TCA OR Nullptr) C(Int), PRc
+
+  Same as `CreateAFWH`, but force low priority on the awaitable.
+
 | CreateAGWH, DAllocObj,
-|             S(FramePtr) S(TCA,Nullptr) C(Int) S(Obj),
-|             CRc|PRc
+|             S(FramePtr) S(TCA OR Nullptr) C(Int) S(Obj,MR),
+|             PRc
 
   Create an AsyncGeneratorWaitHandle object and link it to the AsyncGenerator
   associated with the ActRec provided by S0.  Set the native resume address
   to S1, resume offset to S2, and mark it blocked on non-finished child S3.
 
-| CreateAAWH<local,count>, DAllocObj, S(FramePtr) S(Int), PRc
+| CreateCCWH<local,count>, DAllocObj, S(FramePtr) S(Int), PRc
 
-  Create an AwaitAllWaitHandle and add the count elements from frame contiguous
+  Create a ConcurrentWaitHandle and add the count elements from frame contiguous
   frame locals beginning at local and extending count locals. S1 denotes the
   total number of non-completed waithandles. All locals must be subclasses of
   WaitHandle.
 
-| CreateSSWH, DAllocObj, S(Cell), CRc|PRc
+| CreateSSWH, DAllocObj, S(Cell,MR), PRc
 
   Call c_StaticWaitHandle::CreateSucceeded.
+
+| CreateFSWH, DAllocObj, S(Cell,MR), PRc
+
+  Call c_StaticWaitHandle::CreateFailed.
 
 | AFWHPrepareChild, ND, S(FramePtr) S(Obj), NF
 
@@ -2457,8 +2620,8 @@ To string conversions:
 
 | ContEnter<spOffset,callBCOffset>,
 |   DGenIter,
-|   S(StkPtr) S(FramePtr) S(FramePtr) S(TCA) S(Cell),
-|   CRc
+|   S(StkPtr) S(FramePtr) S(FramePtr) S(TCA) S(Cell,MMR),
+|   NF
 
   Enters a generator body. S0 + `spOffset' (in cells) is a pointer to the
   stack, S1 is the current frame pointer, S2 is the generator frame pointer
@@ -2506,25 +2669,25 @@ To string conversions:
 
   Change the state of the Generator object which has frame pointer S0.
 
-| LdContArValue, DParam(InitCell), S(FramePtr), PRc
+| LdContArValue, DParam(InitCell), S(FramePtr), NF
 
   Loads 'value' from the Generator object ActRec of which is S0.
 
-| StContArValue, ND, S(FramePtr) S(InitCell), CRc
+| StContArValue, ND, S(FramePtr) S(InitCell,MR), NF
 
   Stores 'value' into the Generator object ActRec of which is S0. S1 is the
   new value.
 
-| LdContArKey, DParam(InitCell), S(FramePtr), PRc
+| LdContArKey, DParam(InitCell), S(FramePtr), NF
 
   Loads 'key' from the Generator object ActRec of which is S0.
 
-| StContArKey, ND, S(FramePtr) S(InitCell), CRc
+| StContArKey, ND, S(FramePtr) S(InitCell,MR), NF
 
   Stores 'key' into the Generator object ActRec of which is S0. S1 is the
   new value.
 
-| AFWHBlockOn, ND, S(FramePtr) S(Obj), CRc
+| AFWHBlockOn, ND, S(FramePtr) S(Obj,MR), NF
 
   Establish dependency between parent AsyncFunctionWaitHandle object, whose
   ActRec is given by S0, and child WaitableWaitHandle object referenced by S1.
@@ -2555,7 +2718,6 @@ To string conversions:
   Loads the AsyncFunctionWaitHandle object's ActRec, given a pointer to the
   AsyncFunctionWaitHandle object in S0.
 
-
 15. Debugging, instrumentation, and profiling
 
 | IncStat, ND, C(Int), NF
@@ -2571,6 +2733,11 @@ To string conversions:
   Increment the counter associated associated with the last call, namely from
   the function containing the previous translation in the call stack into the
   current function given by `callee'.
+
+| IncStatCounter<TransID>, ND, NA, NF
+
+  Increment the TransStats counter associated with translation TransID. Only
+  valid for FuncEntry and Prologue SrcKey's.
 
 | DbgAssertRefCount<AssertReason>, ND, S(Cell), NF
 
@@ -2591,6 +2758,11 @@ To string conversions:
 
   In debug builds, if LocalsDecRefd flag is set on S0, causes runtime failure by
   emitting a trap instruction. Otherwise, this instruction does nothing.
+
+| DbgTrap, ND, NA, NF
+
+  Causes any attached debugger to trap. The process may abort if no debugger is
+  attached.
 
 | DbgTrashStk<offset>, ND, S(StkPtr), NF
 
@@ -2614,72 +2786,55 @@ To string conversions:
 
   Ring buffer tracing.
 
-| ZeroErrorLevel, D(Int), NA, NF
-
-| RestoreErrorLevel, ND, S(Int), NF
-
-  Helper instructions for fast implementation of the PHP error silencing
-  operator (@foo()).
-
-
 16. Iterators
 
-| IterInit<IterData>,   D(Bool), S(ArrLike,Obj) S(FramePtr), CRc|LA
+| IterExtractBase, D(Dict|Vec|Obj), S(Obj) S(Cls|Nullptr), PRc
 
-| IterInitK<IterData>,  D(Bool), S(ArrLike,Obj) S(FramePtr), CRc|LA
+  Extract iterator base from an object. D is:
+  - the underlying vec if S0 is a Vector or ImmVector
+  - the underlying dict if S0 is a Map, ImmMap, Set or ImmSet
+  - a vec of two elements if S0 is a Pair
+  - an object implementing the Iterator interface if S0 is an Iterator or
+    an IteratorAggregate that eventually produces an Iterator
+  - a dict of properties of the object otherwise
 
-| LIterInit<IterData>,  D(Bool), S(ArrLike) S(FramePtr),     LA
+| ProfileIterInit<handle>, ND, S(Vec OR Dict OR Keyset), LA
 
-| LIterInitK<IterData>, D(Bool), S(ArrLike) S(FramePtr),     LA
+  Profile iterator initialization from base S0.
 
-  <IterData> consists of three indices, iterId, keyId and valId. iterId is
-  the index of the iterator variable, keyId and valId are indices of local
-  variables.
+| IterInitArr<IterArgs>, D(Bool), S(ArrLike) S(FramePtr), LA
 
-  Initializes the iterator variable whose index is given by iterId.
-  This instruction creates the appropriate iterator for the array or object that
-  S0 references, and rewinds the new iterator to its start. S0 points to the
-  stack frame containing the iterator and local variables with the indices
-  iterId, keyId and valId.
+  If S0 is an empty array, this instruction returns false.
 
-  If the new iterator is at its end (i.e., has no elements to iterate over),
-  this instruction decrements the refcount of S0 and returns false; otheriwse,
-  it stores a reference to S0 in the new iterator and returns true. If the
-  iterator is not at its end, then this instruction stores the iterator's first
-  value (and key) into the local variable with index valId (and keyId,
-  respectively).
+  Otherwise, it initializes the iterator variable IterArgs.iterId inside the
+  stack frame S1 to the starting position of base S0, then the instruction
+  returns true.
 
-  The LIter variations only accept arrays and do not take ownership of their
-  base. Instead, the base is provided on each operation on the iterator, so
-  that we can avoid inc-ref-ing the base (in cases where that's safe).
+| IterNextArr<IterArgs>, D(Bool), S(ArrLike) S(FramePtr), LA
 
-  This instruction has the ConsumesRC property because it either decrements the
-  reference count of S0 or stores a reference to S0 into the new iterator.
-
-| IterNext<IterData>,   D(Bool), S(FramePtr), NF
-
-| IterNextK<IterData>,  D(Bool), S(FramePtr), NF
-
-| LIterNext<IterData>,  D(Bool), S(ArrLike) S(FramePtr), LA
-
-| LIterNextK<IterData>, D(Bool), S(ArrLike) S(FramePtr), LA
-
-  <IterData> consists of three indices, iterId, keyId and valId. iterId is
-  the index of the iterator variable, keyId and valId are indices of local
-  variables.  S0 points to the stack frame containing the iterator and local
-  variables with the indices iterId, keyId and valId.
-
-  Advances the iterator variable whose index is given by iterId.
+  Advances the iterator variable IterArgs.iterId inside the stack frame S1,
+  using the base S0.
 
   If the iterator has reached the end, this instruction frees the iterator
-  variable and returns false; otherwise, it returns true. If the iterator has
-  not reached its end, then this instruction stores the iterator's next value
-  (and key) into the local variable with index valId (and keyId, respectively).
+  variable and returns false. Otherwise, it returns true.
 
-| IterFree<iterId>, ND, S(FramePtr), NF
+| IterGetKeyArr<IterArgs>, DIterKey, S(ArrLike) S(Int), LA
 
-  Free the iterator variable with id `iterId` in the stack frame of S0.
-  For non-local iterators, this instruction will dec-ref the stored base.
+  Get the key at the iterator position S1 using the base S0. IterArgs.flags
+  determines the interpretation of the position.
+
+| IterGetValArr<IterArgs>, DIterVal, S(ArrLike) S(Int), LA
+
+  Get the value at the iterator position S1 using the base S0. IterArgs.flags
+  determines the interpretation of the position.
+
+| IterInitObj<IterArgs>, D(Bool), S(Obj) S(FramePtr), LA
+
+  Calls S0->rewind(), then S0->valid() and returns its result casted to a bool.
+
+| IterNextObj<IterData>, D(Bool), S(Obj) S(FramePtr), LA
+
+  Calls S0->next(), then S0->valid() and returns its result casted to a bool.
 
 | KillActRec, ND, S(FramePtr), NF
 
@@ -2700,33 +2855,49 @@ To string conversions:
 
 | GetDictPtrIter, D(PtrToElem), S(Dict) S(Int), NF
 
+| GetKeysetPtrIter, D(PtrToElem), S(Keyset) S(Int), NF
+
 | GetVecPtrIter, D(PtrToElem), S(Vec) S(Int), NF
 
-  Returns a pointer to the elm S1 of a vanilla dict or vec S0. S1 does not need
-  to be a valid array position; for example, it may equal the size of the array
-  (so that the "elm" returned is the pointer-iteration end for S0).
+  Returns a pointer to the elm S1 of a vanilla dict, keyset or vec S0. S1 does
+  not need to be a valid array position; for example, it may equal the size of
+  the array (so that the "elm" returned is the pointer-iteration end for S0).
 
 | AdvanceDictPtrIter<offset>, D(PtrToElem), S(PtrToElem), NF
+
+| AdvanceKeysetPtrIter<offset>, D(PtrToElem), S(PtrToElem), NF
 
 | AdvanceVecPtrIter<offset>, D(PtrToElem), S(PtrToElem), NF
 
   Increments the pointer S0 to the array element with the given layout `offset`
   positions forward. `offset` is allowed to be negative.
 
-| LdPtrIterKey<T>, DParam(Int|Str), S(PtrToElem), NF
+| LdPtrIterKey<T>, DIterKey, S(Dict) S(PtrToElem), NF
 
-| LdPtrIterVal<T>, DParam(InitCell), S(PtrToElem), NF
+| LdPtrIterVal<T>, DIterVal, S(ArrLike) S(PtrToElem), NF
 
-  Loads the key or val from the array element pointed to by S0. S0 must be a
-  valid elm; that is, it can't point to the end of the array data. LdPtrIterKey
-  can only be used for mixed elms, but LdPtrIterVal supports mixed and packed.
+  Loads the key or val from the array S0 containing an element pointed to by S1.
+  S1 must be a valid elm; that is, it can't point to the end of the array data.
+  LdPtrIterKey can only be used for VanillaDictElms, but LdPtrIterVal supports
+  UnalignedTypedValues, VanillaDictElms and VanillaKeysetElms.
 
   T is used to type the result. For LdPtrIterKey, it must be a valid type for
   the array's keys - i.e., a subtype of TInt|TStr.
 
+| StPtrIterVal, DofS(0), S(Dict,CR) S(PtrToElem) S(InitCell,MR), PRc
+
+  Store the val S2 to the element of the dict S0 pointed to by S1. S1 must be
+  a valid elm. Expects S0 to have a refcount of 1. Consumes S0 and replaces it
+  with D. Consumes S2 and moves it to the dict.
+
 | EqPtrIter, D(Bool), S(PtrToElem) S(PtrToElem), NF
 
   Compares two pointer iterators for equality.
+
+| CheckPtrIterTombstone, ND, S(Dict OR Keyset) S(PtrToElem), B
+
+  Check whether the element pointed to by S1 of an array S0 contains
+  a tombstone. If so, branch to block B.
 
 
 17. Member instruction support
@@ -2795,11 +2966,6 @@ SetProp will fail if the base is not a subtype of {Obj|Null}.
 Any instructions that take a pointer to an MInstrState struct use the various
 fields of that struct for holding intermediate values.
 
-| BaseG, D(LvalToGbl|LvalToConst), S(Str), NF
-
-  Get a base from global named S0. If it is not a defining BaseG it can also
-  return the init_null_variant
-
 | PropX, DPropLval, S(Cell) S(Cell) S(PtrToMISTemp|Nullptr), NF
 
   Lookup intermediate property in S0, with key S1. An exception is thrown if
@@ -2856,31 +3022,31 @@ fields of that struct for holding intermediate values.
   Like CheckMixedArrayOffset, this check is allowed to have false negatives -
   it may fail even if the array has keys of the given type.
 
-| CheckArrayCOW, DCOW, S(ArrLike), B|PRc|CRc|LP
+| CheckArrayCOW, DCOW, S(ArrLike,MMR), B|PNRc|LP
 
   Check that S0 has a refcount of exactly 1; if not, branch to B.
 
-| CopyArray, DCOW, S(ArrLike), PRc|LP
+| CopyArray, DCOW, S(ArrLike), PNRc|LP
 
   Make a copy of S0 (regardless of its refcount). The resultant copy will
   always be counted with a ref-count of 1. The array must be of a kind that
   allows for counted variants.
 
-| ProfileDictAccess, ND, S(Dict) S(Int,Str), NF
+| ProfileDictAccess, ND, S(Dict) S(Int OR Str), NF
 
   Profile access of the element keyed by S1 in S0, tracking sizes and offsets.
 
-| CheckDictOffset<pos>, ND, S(Dict) S(Int,Str), B
+| CheckDictOffset<pos>, ND, S(Dict) S(Int OR Str), B
 
   Check that `pos' is within the usage bounds of S0 (including tombstones), and
   that S1 exactly matches the element key of S0 at `pos'.  If any of the checks
   fail, branch to B.  This check is allowed to have false negatives.
 
-| ProfileKeysetAccess, ND, S(Keyset) S(Int,Str), NF
+| ProfileKeysetAccess, ND, S(Keyset) S(Int OR Str), NF
 
   Profile access of the element keyed by S1 in S0, tracking sizes and offsets.
 
-| CheckKeysetOffset<pos>, ND, S(Keyset) S(Int,Str), B
+| CheckKeysetOffset<pos>, ND, S(Keyset) S(Int OR Str), B
 
   Check that `pos' is within the usage bounds of S0 (including tombstones), and
   that S1 exactly matches the element key of S0 at `pos'.  If any of the checks
@@ -2896,14 +3062,14 @@ fields of that struct for holding intermediate values.
   If S1 may be present, branches to block B. If we branch here, the key may or
   may not be present.
 
-| ElemDictD, DElemLval, S(Lval) S(Int,Str), NF
+| ElemDictD, DElemLval, S(Lval) S(Int OR Str), NF
 
-| ElemDictU, DElemLval, S(Lval) S(Int,Str), NF
+| ElemDictU, DElemLval, S(Lval) S(Int OR Str), NF
 
   Similar to ElemDX and ElemUX, but specialized for when the base S0 is a
   dict and the key S1 is an int/str.
 
-| ElemDictK, DElemLvalPos, S(Dict) S(Int,Str) S(Int) S(Dict), NF
+| ElemDictK, DElemLvalPos, S(Dict) S(Int OR Str) S(Int) S(Dict), NF
 
   Returns an lval to the element of dict S0 at the known position S2
   (corresponding to the key S1).  S3 is S0 with a potentially more refined type
@@ -2919,29 +3085,29 @@ fields of that struct for holding intermediate values.
   Like ElemX, but used for intermediate element lookups that may modify the
   base as part of an unset operation.
 
-| DictGet, DDictElem, S(Dict) S(Int,Str), NF
+| DictGet, DDictElem, S(Dict) S(Int OR Str), NF
 
   Get element with key S1 from base S0, throwing if the element is not present.
 
-| DictGetQuiet, DDictElem, S(Dict) S(Int,Str), NF
+| DictGetQuiet, DDictElem, S(Dict) S(Int OR Str), NF
 
   Get element with key S1 from base S0, returning null if the element is not
   present.
 
-| DictGetK, DDictElem, S(Dict) S(Int,Str) S(Int), NF
+| DictGetK, DDictElem, S(Dict) S(Int OR Str) S(Int), NF
 
   Like DictGet, but the element for S1 is at a known position S2 in S0.
 
-| KeysetGet, DKeysetElem, S(Keyset) S(Int,Str), NF
+| KeysetGet, DKeysetElem, S(Keyset) S(Int OR Str), NF
 
   Get element with key S1 from base S0, throwing if the element is not present.
 
-| KeysetGetQuiet, DKeysetElem, S(Keyset) S(Int,Str), NF
+| KeysetGetQuiet, DKeysetElem, S(Keyset) S(Int OR Str), NF
 
   Get element with key S1 from base S0, returning null if the element is not
   present.
 
-| KeysetGetK, DKeysetElem, S(Keyset) S(Int,Str) S(Int), NF
+| KeysetGetK, DKeysetElem, S(Keyset) S(Int OR Str) S(Int), NF
 
   Like KeysetGet, but the element for S1 is at a known position S2 in S0.
 
@@ -2950,7 +3116,7 @@ fields of that struct for holding intermediate values.
   Get string representing character at position S1 from base string S0.  Raises
   a notice if the position is out of bounds.
 
-| MapGet, D(InitCell), S(Obj) S(Int,Str), PRc
+| MapGet, D(InitCell), S(Obj) S(Int OR Str), PRc
 
   Get element with key S1 from base S0.
 
@@ -3044,22 +3210,22 @@ fields of that struct for holding intermediate values.
 
   Initialize the memoization instance slots for object S0 of the given class.
 
-| DictSet, DArrLikeSet, S(Dict) S(Int,Str) S(InitCell), PRc|CRc
+| DictSet, DArrLikeSet, S(Dict,CR) S(Int OR Str) S(InitCell,MR), PRc
 
   Set element with key S1 in S0 to S2. The dest will be a new Dict that should
   replace S0.
 
-| BespokeGet, DBespokeElemUninit, S(Vec,Dict,Keyset) S(Int,Str), LA
+| BespokeGet, DBespokeElemUninit, S(Vec OR Dict OR Keyset) S(Int OR Str), LA
 
   Get element with key S1 in the array S0, which may have an arbitrary layout.
   This op returns TUninit if the key is not in the array.
 
-| BespokeGetThrow, DBespokeElem, S(Vec,Dict,Keyset) S(Int,Str), LA
+| BespokeGetThrow, DBespokeElem, S(Vec OR Dict OR Keyset) S(Int OR Str), LA
 
   Get element with key S1 in the array S0, which may have an arbitrary layout.
   This op throws if the key is not in the array.
 
-| BespokeElem, DElemLval, S(Lval) S(Int,Str) C(Bool), LA
+| BespokeElem, DElemLval, S(Lval) S(Int OR Str) C(Bool), LA
 
   Get a half-lval to an element of type T with key S1 in the array S0, which
   may have an arbitrary layout. The op will copy or escalate the S0 as needed,
@@ -3068,17 +3234,22 @@ fields of that struct for holding intermediate values.
   If the key is missing in the array, we'll use S2 to determine what to do.
   If S2 is true, we'll throw; else, we'll return an immutable lval to null.
 
-| BespokeSet, DArrLikeSet, S(Vec,Dict,Keyset) S(Int,Str) S(InitCell), LA|PRc|CRc
+| BespokeSet, DArrLikeSet, S(Vec OR Dict OR Keyset,CR) S(Int OR Str) S(InitCell,MR), LA|PRc
 
   Set element with key S1 in the array S0, which may have an arbitrary layout.
   This op has SetMove semantics; it consumes a refcount on the input array and
   produces one on the output, and does no refcounting to the value S2.
 
-| BespokeUnset, DArrLikeUnset, S(Vec,Dict,Keyset) S(Int,Str), LA|PRc|CRc
+| BespokeSetPos, DArrLikeSetPos, S(Vec OR Dict,CR) S(Int) S(InitCell,MR), LA|PRc
+
+  Set element in the array S0 at a valid position S1 to S2. The array might have
+  an arbitrary layout.
+
+| BespokeUnset, DArrLikeUnset, S(Vec OR Dict OR Keyset,CR) S(Int OR Str), LA|PRc
 
   Unset element with key S1 in the array S0, which may have an arbitrary layout.
 
-| BespokeAppend, DArrLikeAppend, S(Vec,Dict,Keyset) S(InitCell), LA|PRc|CRc
+| BespokeAppend, DArrLikeAppend, S(Vec OR Dict OR Keyset,CR) S(InitCell,CR), LA|PRc
 
   Set element with key S1 in the array S0, which may have an arbitrary layout.
   This op has AppendMove semantics; it consumes a refcount on the input array
@@ -3107,40 +3278,40 @@ fields of that struct for holding intermediate values.
 
   Obtain the value at the valid pos S1 in the array S0.
 
-| BespokeEscalateToVanilla<Layout>, DEscalateToVanilla, SBespokeArr CStr, PRc
+| BespokeEscalateToVanilla<Layout>, DEscalateToVanilla, SBespokeArr() CStr(), PRc
 
   Escalate the bespoke array S0 to a vanilla array for the reason S1.
 
-| LdMonotypeDictTombstones, D(Int), SMonotypeDict, NF
+| LdMonotypeDictTombstones, D(Int), SMonotypeDict(), NF
 
   Returns the number of tombstones in the given MonotypeDict's value array.
   The MonotypeDict's IterEnd is equal to its size plus its tombstone count.
 
-| LdMonotypeDictKey, DBespokePosKey, SMonotypeDict S(Int), NF
+| LdMonotypeDictKey, DBespokePosKey, SMonotypeDict() S(Int), NF
 
-| LdMonotypeDictVal, DBespokePosVal, SMonotypeDict S(Int), NF
+| LdMonotypeDictVal, DBespokePosVal, SMonotypeDict() S(Int), NF
 
   Specializations of BespokeIterGetKey and BespokeIterGetVal for when the base
   is a monotype dict. The GetKey and GetVal ops require that S1 is a valid
   iterator position for S0.
 
-| LdMonotypeVecElem, DBespokeElem, SMonotypeVec S(Int), NF
+| LdMonotypeVecElem, DBespokeElem, SMonotypeVec() S(Int), NF
 
   Loads the element of the monotype vec in S0 at offset S1. This instruction
   assumes that the vec actually contains an element at that offset (i.e. the
   index is within bounds).
 
-| StructDictUnset, DArrLikeUnset, SStructDict C(StaticStr), PRc|CRc
+| StructDictUnset, DArrLikeUnset, SStructDict(CR) C(StaticStr), PRc
 
   Unset element with key S1 in the struct-layout dict S0. This op has move
   semantics: it consumes a refcount on S0 and produces one on the output.
 
-| StructDictSlot, D(Int), SStructDict S(Str), B
+| StructDictSlot, D(Int), SStructDict() S(Str), B
 
   Calculate the slot corresponding to key S1 in struct dict S0, branching if
   that key is not present.
 
-| StructDictElemAddr, D(LvalToElem), SStructDict S(Str) S(Int) SStructDict, NF
+| StructDictElemAddr, D(LvalToElem), SStructDict() S(Str) S(Int) SStructDict(), NF
 
   Calculate the pointer to the value in struct dict S0 corresponding to slot
   S2. S1 is the corresponding key used to calculate the slot, and S3 is the
@@ -3148,23 +3319,44 @@ fields of that struct for holding intermediate values.
   this will correspond to the pre-COW version). S1 and S3 are only used for
   type calculations and not used at runtime.
 
-| StructDictAddNextSlot, ND, SStructDict S(Int), NF
+| StructDictAddNextSlot, ND, SStructDict() S(Int), NF
 
   Mark the slot S1 as being used in struct dict S0. The slot must not have been
   previously in use (its corresponding value must have been Uninit).
 
-| StructDictTypeBoundCheck, DStructTypeBound, S(InitCell) SStructDict S(Int), B|P
+| StructDictTypeBoundCheck, DStructTypeBound, S(InitCell) SStructDict() S(Int), B|P
 
   Check if S0 passes the type bound associated with slot S2 in struct dict
   S1. If not, branch. The returned value is a passthrough of S0, possibly
   refined with what we know statically of the type-bound. This is like a
   CheckType, but the type isn't known statically.
 
-| MapSet, ND, S(Obj) S(Int,Str) S(InitCell), CRc
+| StructDictSlotInPos, D(Int), SStructDict() S(Int), NF
+
+  Returns the slot at iterator position S1 in the struct dict S0.
+
+| LdStructDictKey, DBespokePosKey, SStructDict() S(Int), NF
+
+| LdStructDictVal, DBespokePosVal,  SStructDict() S(Int), NF
+
+  Returns the key or value at slot S1 in the struct dict S0. This slot must be
+  known to be present. (The result of StructDictSlotInPos is always present.)
+
+| LdTypeStructureVal, DBespokeElem, STypeStructure() S(Str), B|LA
+
+  Specialization of BespokeGet for when the base is a type structure. Get
+  element with key S1 in the type structure S0. Branches if the key is not in
+  the type structure.
+
+| LdTypeStructureValCns<key>, DTypeStructElem, STypeStructure(), LA
+
+  Simplification of LdTypeStructureVal for when the key is a constant value.
+
+| MapSet, ND, S(Obj) S(Int OR Str) S(InitCell,CR), NF
 
   Set element with key S1 in S0 to S2.
 
-| VectorSet, ND, S(Obj) S(Int,Str) S(InitCell), CRc
+| VectorSet, ND, S(Obj) S(Int OR Str) S(InitCell,CR), NF
 
   Set element with key S1 in S0 to S2.
 
@@ -3207,15 +3399,15 @@ fields of that struct for holding intermediate values.
 
 | SetNewElemVec,    ND, S(Lval) S(InitCell), NF
 
-| SetNewElemKeyset, ND, S(Lval) S(Int,Str), NF
+| SetNewElemKeyset, ND, S(Lval) S(InitCell), NF
 
   Specializations of SetNewElem for pointers to dicts, vecs, and keysets.
 
-| DictIsset, D(Bool), S(Dict) S(Int,Str), NF
+| DictIsset, D(Bool), S(Dict) S(Int OR Str), NF
 
   Returns true iff the element at key S1 in the base S0 is set.
 
-| KeysetIsset, D(Bool), S(Keyset) S(Int,Str), NF
+| KeysetIsset, D(Bool), S(Keyset) S(Int OR Str), NF
 
   Returns true iff the element at key S1 in the base S0 is set.
 
@@ -3231,7 +3423,7 @@ fields of that struct for holding intermediate values.
 
   Returns true iff the element at key S1 in the base S0 is set.
 
-| MapIsset, D(Bool), S(Obj) S(Int,Str), NF
+| MapIsset, D(Bool), S(Obj) S(Int OR Str), NF
 
   Returns true iff the element at key S1 in the base S0 is set.
 
@@ -3275,11 +3467,6 @@ fields of that struct for holding intermediate values.
   property. S0 is the class the property was declared on. S1 is the property
   name. S2 is true if its a static property, false otherwise.
 
-| ThrowParameterWrongType<expectedType, func, argNum>, ND, S(Cell), T
-
-  Throws a RuntimeException if calling a function with an argument that has the
-  wrong type
-
 | ThrowMustBeMutableException<cls>, ND, S(Str), T
 
   Throws an InvalidOperationException indicating a readonly semantics violation
@@ -3313,6 +3500,14 @@ fields of that struct for holding intermediate values.
 
   Throws an InvalidOperationException indicating a readonly semantics violation
   where a collection is modified.
+
+| ThrowMissingNamedArgument<callee>, ND, S(Int), T
+  Throws an exception to indicate that too few named arguments were
+  passed to the callee.
+
+| ThrowNamedArgumentNameMismatch<callee>, ND, S(Str), T
+  Throws an exception to indicate that a named argument not present in
+  the named parameter list was passed to the callee.
 
 | ProfileType, ND, S(Cell), NF
 
@@ -3395,6 +3590,11 @@ fields of that struct for holding intermediate values.
   Returns the last key from the mixed or dict array in S0.
   If the array is empty, it will return NULL.
 
+| DictIterEnd, D(Int), S(Dict), NF
+
+  Returns the "end" iterator position for the given dict. Unlike the "last"
+  iterator position, the end is never a valid iterator position.
+
 | KeysetFirst, DFirstElem, S(Keyset), NF
 
   Returns the first value(key) from the keyset in S0.
@@ -3405,17 +3605,22 @@ fields of that struct for holding intermediate values.
   Returns the first value(key) from the keyset in S0.
   If the array is empty, it will return NULL.
 
+| KeysetIterEnd, D(Int), S(Keyset), NF
+
+  Returns the "end" iterator position for the given keyset. Unlike the "last"
+  iterator position, the end is never a valid iterator position.
+
 | IsLegacyArrLike, D(Bool), S(Vec|Dict), LA
 
   Returns true iff the given array has the legacy bit set.
 
-| ArrayMarkLegacyShallow,     DModified(0), S(Vec,Dict), CRc|PRc|LA
+| ArrayMarkLegacyShallow,     DModified(0), S(Vec OR Dict,MMR), PRc|LA
 
-| ArrayMarkLegacyRecursive,   DModified(0), S(Vec,Dict), CRc|PRc|LA
+| ArrayMarkLegacyRecursive,   DModified(0), S(Vec OR Dict,MMR), PRc|LA
 
-| ArrayUnmarkLegacyShallow,   DModified(0), S(Vec,Dict), CRc|PRc|LA
+| ArrayUnmarkLegacyShallow,   DModified(0), S(Vec OR Dict,MMR), PRc|LA
 
-| ArrayUnmarkLegacyRecursive, DModified(0), S(Vec,Dict), CRc|PRc|LA
+| ArrayUnmarkLegacyRecursive, DModified(0), S(Vec OR Dict,MMR), PRc|LA
 
   Set or unset the legacy bit on the array-like in S0, copying it if needed.
   The recursive variants traverse through the array-like's transitive elements
@@ -3424,12 +3629,15 @@ fields of that struct for holding intermediate values.
 
 18. Exception/unwinding support
 
-| BeginCatch, ND, NA, NF
+| BeginCatch, DParam(Obj|Nullptr), NA, PRc
 
   Marks the beginning of a catch region. Exact behavior is implementation and
   architecture specific.
 
-| EndCatch<spOffset,mode,stublogue>, ND, S(FramePtr) S(StkPtr), T
+| EndCatch<spOffset,mode,stublogue>,
+|   ND,
+|   S(FramePtr) S(StkPtr) S(Obj|Nullptr,MR),
+|   T
 
   Marks the end of a catch region and returns control to the unwinder.  The
   `spOffset' field represents a logical adjustment to S1 (in cells) to yield
@@ -3452,13 +3660,9 @@ fields of that struct for holding intermediate values.
 
   Loads the value contained by the current unwinder exception.
 
-| EnterTCUnwind<spOff,teardown>, ND, S(Obj), CRc|T
+| StUnwinderExn, ND, S(Obj), NF
 
-  Enters tc_unwind_resume by doing a side enter, i.e. skipping
-  itanium ABI. Stores the exception given by S0 to UnwindRDS's exn
-  field as well as true to sideEnter field.
-
-  If teardown is set, it notifies tc_unwind_resume to also teardown the locals.
+  Stores the exception given by S0 to UnwindRDS's exn field.
 
 19. Function prologues
 
@@ -3481,14 +3685,15 @@ fields of that struct for holding intermediate values.
   Check if the stack depth has exceeded its limit.  If it has, jump to the
   stack overflow helper stub, which will throw.
 
-| CheckSurpriseFlagsEnter<func,argc>, ND, S(FramePtr), NF
+| CheckSurpriseFlagsEnter<func,checkStackOverflow>, ND, S(FramePtr), B
 
-  Test the implementation-specific surprise flags.  If they're nonzero, call
-  the function enter helper.
+  Test the implementation-specific surprise flags. Branch if they are nonzero,
+  or if `checkStackOverflow' flag is true and stack would overflow.
 
-| CheckSurpriseAndStack<func,args>, ND, S(FramePtr), NF
+| HandleSurpriseEnter<func,checkStackOverflow>, ND, S(FramePtr), NF
 
-  Test surprise flags and stack overflow at the same time.
+  Handle the surprise flag or stack overflow condition (if `checkStackOverflow'
+  is true).
 
 | LdARFlags, D(Int), S(FramePtr), NF
 
@@ -3504,6 +3709,12 @@ fields of that struct for holding intermediate values.
   register for the m_type member, and thus ignore m_aux.  LdTVAux is only valid
   when we know that S0's m_type and m_aux were both materialized into the same
   64-bit register.
+
+| StaticAnalysisError, ND, NA, T
+
+  Produces a fatal or fails an assertion depending on the value of
+  Eval.CrashOnStaticAnalysisError to indicate that code presumed to be
+  unreachable during static analysis has been executed.
 
 /* Local Variables: */
 /* fill-column: 79 */

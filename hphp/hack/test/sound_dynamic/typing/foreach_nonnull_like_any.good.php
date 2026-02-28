@@ -1,21 +1,22 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-type FAKE<T> = T;
-
-/* HH_FIXME[4101] Sadly, yes */
-type MISSING = FAKE;
-
-function getMissing(): ~MISSING {
-  return "A";
+namespace HH_FIXME {
+  type MISSING_TYPE_IN_HIERARCHY = mixed;
 }
+namespace Test {
 
-function expectLikeInt(~int $x):void { }
-function testforeach():void {
-  $x = getMissing();
-  if ($x is nonnull) {
-    foreach ($x as $y) {
-      expectLikeInt($y);
+  function getMissing(): ~\HH_FIXME\MISSING_TYPE_IN_HIERARCHY {
+    return "A";
+  }
+
+  function expectLikeInt(~int $x): void {}
+  function testforeach(): void {
+    $x = getMissing();
+    if ($x is nonnull) {
+      foreach ($x as $y) {
+        expectLikeInt($y);
+      }
     }
   }
 }

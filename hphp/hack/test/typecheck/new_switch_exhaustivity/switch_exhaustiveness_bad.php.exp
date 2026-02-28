@@ -1,0 +1,24 @@
+ERROR: File "switch_exhaustiveness_bad.php", line 8, characters 3-45:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "switch_exhaustiveness_bad.php", line 8, characters 11-12:
+  The scrutinee has type `C` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+ERROR: File "switch_exhaustiveness_bad.php", line 14, characters 3-61:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "switch_exhaustiveness_bad.php", line 14, characters 11-12:
+  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+ERROR: File "switch_exhaustiveness_bad.php", line 21, characters 3-69:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "switch_exhaustiveness_bad.php", line 21, characters 11-12:
+  The scrutinee has type `string` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+ERROR: File "switch_exhaustiveness_bad.php", line 28, characters 3-64:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "switch_exhaustiveness_bad.php", line 28, characters 11-12:
+  The scrutinee has type `arraykey` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+ERROR: File "switch_exhaustiveness_bad.php", line 38, characters 3-43:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "switch_exhaustiveness_bad.php", line 38, characters 11-13:
+  The scrutinee has type `(I & J)` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+ERROR: File "switch_exhaustiveness_bad.php", line 44, characters 3-43:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "switch_exhaustiveness_bad.php", line 44, characters 11-12:
+  The scrutinee has type `(bool | string)` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.

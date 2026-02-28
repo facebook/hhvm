@@ -11,41 +11,48 @@
 class RecursiveIteratorIterator<Tv> implements OuterIterator<Tv> {
 
   // Constants
-  const int LEAVES_ONLY = 0;
-  const int SELF_FIRST = 1;
-  const int CHILD_FIRST = 2;
-  const int CATCH_GET_CHILD = 16;
-  const int STATE_NEXT = 10;
-  const int STATE_TEST = 11;
-  const int STATE_SELF = 12;
-  const int STATE_CHILD = 13;
-  const int STATE_START = 14;
-  const int NEXT_COMPLETE = 10;
-  const int NEXT_REPEAT = 11;
+  const int LEAVES_ONLY;
+  const int SELF_FIRST;
+  const int CHILD_FIRST;
+  const int CATCH_GET_CHILD;
+  const int STATE_NEXT;
+  const int STATE_TEST;
+  const int STATE_SELF;
+  const int STATE_CHILD;
+  const int STATE_START;
+  const int NEXT_COMPLETE;
+  const int NEXT_REPEAT;
 
   // Methods
   public function __construct(
     Traversable<Tv> $iterator,
-    $mode = RecursiveIteratorIterator::LEAVES_ONLY,
-    $flags = 0,
+    HH\FIXME\MISSING_PARAM_TYPE $mode = RecursiveIteratorIterator::LEAVES_ONLY,
+    HH\FIXME\MISSING_PARAM_TYPE $flags = 0,
   );
   public function getInnerIterator(): Iterator<Tv>;
-  public function current();
-  public function key();
-  public function next();
-  public function rewind();
-  public function valid();
-  public function beginChildren();
-  public function beginIteration();
-  public function callGetChildren();
-  public function callHasChildren();
-  public function endChildren();
-  public function endIteration();
-  public function getDepth();
-  public function getMaxDepth();
-  public function getSubIterator($level = null);
-  public function nextElement();
-  public function setMaxDepth($max_depth = -1);
-  public function call__($func, $params);
+  public function current(): Tv;
+  public function key(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function next(): void;
+  public function rewind(): void;
+  public function valid(): bool;
+  public function beginChildren(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function beginIteration(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function callGetChildren(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function callHasChildren(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function endChildren(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function endIteration(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getDepth(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getMaxDepth(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getSubIterator(
+    HH\FIXME\MISSING_PARAM_TYPE $level = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function nextElement(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setMaxDepth(
+    HH\FIXME\MISSING_PARAM_TYPE $max_depth = -1,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function call__(
+    HH\FIXME\MISSING_PARAM_TYPE $func,
+    HH\FIXME\MISSING_PARAM_TYPE $params,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
 
 }

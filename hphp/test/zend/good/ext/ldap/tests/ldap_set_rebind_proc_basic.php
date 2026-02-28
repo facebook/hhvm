@@ -1,6 +1,6 @@
 <?hh
 
-function rebind_proc ($ds, $ldap_url) {
+function rebind_proc ($ds, $ldap_url) :mixed{
   // required by most modern LDAP servers, use LDAPv3
   ldap_set_option($ds, LDAP_OPT_PROTOCOL_VERSION, test_protocol_version());
 

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 namespace A {
   class MyStringFileAttribute implements \HH\FileAttribute {

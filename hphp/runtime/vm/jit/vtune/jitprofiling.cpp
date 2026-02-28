@@ -30,9 +30,9 @@
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "jitprofiling.h"
+#include "hphp/runtime/vm/jit/vtune/jitprofiling.h"
 
-#include "ittnotify_config.h"
+#include "hphp/runtime/vm/jit/vtune/ittnotify_config.h"
 
 #if ITT_PLATFORM==ITT_PLATFORM_WIN
 #include <windows.h>
@@ -72,10 +72,10 @@ void* m_libHandle = NULL;
 #define ANDROID_JIT_AGENT_PATH  "/data/intel/libittnotify.so"
 
 /* the function pointers */
-typedef unsigned int(*TPInitialize)(void);
+using TPInitialize = unsigned int(*)(void);
 static TPInitialize FUNC_Initialize=NULL;
 
-typedef unsigned int(*TPNotify)(unsigned int, void*);
+using TPNotify = unsigned int(*)(unsigned int, void*);
 static TPNotify FUNC_NotifyEvent=NULL;
 
 static iJIT_IsProfilingActiveFlags executionMode = iJIT_NOTHING_RUNNING;
@@ -109,11 +109,11 @@ static pthread_key_t threadLocalStorageHandle = (pthread_key_t)0;
 
 #define INIT_TOP_Stack 10000
 
-typedef struct
-{
+struct ThreadStack {
     unsigned int TopStack;
     unsigned int CurrentStack;
-} ThreadStack, *pThreadStack;
+};
+using pThreadStack = ThreadStack *;
 
 /* end of virtual stack. */
 

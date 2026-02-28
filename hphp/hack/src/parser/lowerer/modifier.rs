@@ -5,7 +5,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use oxidized::aast::Visibility;
-use oxidized::aast_defs::UseAsVisibility;
 use parser_core_types::token_kind::TokenKind as TK;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -21,6 +20,7 @@ pub const VAR: Kind = Kind(1u32 << 7);
 pub const ASYNC: Kind = Kind(1u32 << 8);
 pub const READONLY: Kind = Kind(1u32 << 9);
 pub const INTERNAL: Kind = Kind(1u32 << 10);
+pub const PROTECTED_INTERNAL: Kind = Kind(1u32 << 11);
 
 pub fn from_token_kind(t: TK) -> Option<Kind> {
     match t {
@@ -45,25 +45,13 @@ pub fn to_visibility(kind: Kind) -> Option<Visibility> {
         PRIVATE => Some(Visibility::Private),
         PROTECTED => Some(Visibility::Protected),
         INTERNAL => Some(Visibility::Internal),
-        _ => None,
-    }
-}
-
-pub fn to_use_as_visibility(kind: Kind) -> Option<UseAsVisibility> {
-    use UseAsVisibility::*;
-    match kind {
-        PUBLIC => Some(UseAsPublic),
-        PRIVATE => Some(UseAsPrivate),
-        PROTECTED => Some(UseAsProtected),
-        FINAL => Some(UseAsFinal),
+        PROTECTED_INTERNAL => Some(Visibility::ProtectedInternal),
         _ => None,
     }
 }
 
 #[derive(Copy, Clone)]
 pub struct KindSet(u32);
-
-pub const VISIBILITIES: KindSet = KindSet(PRIVATE.0 | PUBLIC.0 | PROTECTED.0 | INTERNAL.0);
 
 impl KindSet {
     pub fn new() -> Self {
@@ -76,13 +64,5 @@ impl KindSet {
 
     pub fn has(&self, kind: Kind) -> bool {
         self.0 & kind.0 > 0
-    }
-
-    pub fn has_any(&self, set: KindSet) -> bool {
-        self.0 & set.0 > 0
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.0 == 0
     }
 }

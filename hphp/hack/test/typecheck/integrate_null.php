@@ -11,9 +11,9 @@
 
 function foo(): int {
   $x = null;
-  foreach (varray[1,2,3] as $y) {
+  foreach (vec[1,2,3] as $y) {
     if ($y % 2) { continue; }
-    $x = varray[$y];
+    $x = vec[$y];
   }
   if (!$x) {
     throw new Exception('Boom');

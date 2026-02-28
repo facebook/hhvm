@@ -35,26 +35,28 @@ function test() : void {
 }
 "
 
-let go_identify expected ~ctx ~entry ~line ~column =
+let go_identify expected ~ctx ~entry pos =
   let actual =
-    ServerIdentifyFunction.go_quarantined_absolute ~ctx ~entry ~line ~column
+    ServerIdentifyFunction.go_quarantined_absolute ~ctx ~entry pos
     |> Nuclide_rpc_message_printer.identify_symbol_response_to_json
   in
+  let (line, column) = File_content.Position.line_column_one_based pos in
   Asserter.Hh_json_json_asserter.assert_equals
     (expected |> Hh_json.json_of_string)
     actual
     (Printf.sprintf "ServerIdentifyFunction at line %d, column %d" line column);
   ()
 
-let go_hover expected ~ctx ~entry ~line ~column =
+let go_hover expected ~ctx ~entry pos =
   let hovers_to_string h =
     List.map h ~f:HoverService.string_of_result |> String.concat ~sep:"; "
   in
-  let actual = ServerHover.go_quarantined ~ctx ~entry ~line ~column in
+  let actual = Ide_hover.go_quarantined ~ctx ~entry pos in
+  let (line, column) = File_content.Position.line_column_one_based pos in
   Asserter.String_asserter.assert_equals
     (expected |> hovers_to_string)
     (actual |> hovers_to_string)
-    (Printf.sprintf "ServerHover at line %d, column %d" line column);
+    (Printf.sprintf "Ide_hover at line %d, column %d" line column);
   ()
 
 let pos_at (line1, column1) (line2, column2) =
@@ -63,6 +65,8 @@ let pos_at (line1, column1) (line2, column2) =
        ~pos_file:Relative_path.default
        ~pos_start:(line1, 0, column1 - 1)
        ~pos_end:(line2, 0, column2))
+
+let make_hack_marked_code s = [Lsp.MarkedCode ("hack", s)]
 
 let identify_tests =
   [
@@ -80,8 +84,9 @@ let identify_tests =
       go_hover
         [
           {
-            HoverService.snippet = "function foo(string $s): string";
-            addendum = ["foo_docblock"];
+            HoverService.snippet =
+              make_hack_marked_code "function foo(string $s): string";
+            addendum = [Lsp.MarkedString "foo_docblock"];
             pos = pos_at (17, 8) (17, 10);
           };
         ] );
@@ -99,8 +104,8 @@ let identify_tests =
       go_hover
         [
           {
-            HoverService.snippet = "class Cardoor";
-            addendum = ["Cardoor_docblock"];
+            HoverService.snippet = [Lsp.MarkedCode ("hack", "class Cardoor")];
+            addendum = [Lsp.MarkedString "Cardoor_docblock"];
             pos = pos_at (20, 8) (20, 14);
           };
         ] );
@@ -119,8 +124,12 @@ let identify_tests =
         [
           {
             HoverService.snippet =
-              "public static function bar<T>(string $x): string";
-            addendum = ["bar_docblock"; "Full name: `Cardoor::bar`"];
+              [
+                Lsp.MarkedString "Defined in `Cardoor`";
+                Lsp.MarkedString "---";
+                Lsp.MarkedCode ("hack", "public static function bar<T>(T $x): T");
+              ];
+            addendum = [Lsp.MarkedString "bar_docblock"];
             pos = pos_at (20, 17) (20, 19);
           };
         ] );
@@ -134,12 +143,8 @@ let test () =
 
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   TestDisk.set hhconfig_filename hhconfig_contents;
-  let hhconfig_path =
-    Relative_path.create Relative_path.Root hhconfig_filename
-  in
-  let options = ServerArgs.default_options ~root in
   let (custom_config, _) =
-    ServerConfig.load ~silent:false hhconfig_path options
+    ServerConfig.load ~silent:false ~from:"" ~cli_config_overrides:[]
   in
   let env =
     Integration_test_base.setup_server
@@ -148,7 +153,7 @@ let test () =
       ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
   in
   let env = Integration_test_base.setup_disk env files in
-  Integration_test_base.assert_no_errors env;
+  Integration_test_base.assert_no_diagnostics env;
 
   let path = Relative_path.from_root ~suffix:"source.php" in
   let (ctx, entry) =
@@ -158,8 +163,8 @@ let test () =
   in
 
   List.iter identify_tests ~f:(fun ((line, column), go) ->
+      let pos = File_content.Position.from_one_based line column in
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          go ~ctx ~entry ~line ~column);
+          go ~ctx ~entry pos);
       ());
-  (* ServerHover.go_quarantined ~ctx ~entry ~line ~column *)
   ()

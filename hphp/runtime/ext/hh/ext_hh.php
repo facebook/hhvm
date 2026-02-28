@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 namespace HH {
 
@@ -8,12 +8,18 @@ namespace HH {
   * <<__Memoize>> functions
   */
 interface IMemoizeParam {
-  abstract const ctx CMemoParam = [defaults];
    /**
    * Serialize this object to a string that can be used as a
    * dictionary key to differentiate instances of this class.
    */
   public function getInstanceKey(): string;
+}
+
+/**
+ * Pure version of IMemoizeParam.
+ */
+interface IPureMemoizeParam extends IMemoizeParam {
+  public function getInstanceKey()[]: string;
 }
 
 /*
@@ -29,67 +35,19 @@ interface UNSAFESingletonMemoizeParam extends IMemoizeParam {
 }
 
 /**
- * Return true if we're using a native autoloader.
- *
- * If we are using a native autoloader, all symbols will be loaded from the
- * first line, and there's no need to call `autoload_set_paths`.
- *
- * If you *do* call `autoload_set_paths` while natively autoloading, you'll
- * disable the native autoloader in favor of your userland autoloader.
- *
- * ```
- * HH\autoload_is_native(); // true
- * HH\autoload_set_paths(darray['class' => darray[]]); // true
- * HH\autoload_is_native(); // false
- * ```
+ * Return true if we're using a native autoloader. If this returns
+ * false, HHVM was not configured to enable autoloading; code can
+ * still access symbols in the same files, or included by require_once().
  */
 <<__Native>>
-function autoload_is_native(): bool;
+function autoload_is_native()[]: bool;
 
-/** Specify a map containing autoload data.
- *
- * The map has the form:
- *
- * ```
- *  array('class'    => array('cls' => 'cls_file.php', ...),
- *        'function' => array('fun' => 'fun_file.php', ...),
- *        'constant' => array('con' => 'con_file.php', ...),
- *        'type'     => array('type' => 'type_file.php', ...),
- *        'failure'  => callable);
- * ```
- *
- *  If the 'failure' element exists, it will be called if the
- *  lookup in the map fails, or the file cant be included. It
- *  takes a kind ('class', 'function' or 'constant') and the
- *  name of the entity we're trying to autoload.
- *
- * If $root is non empty, it is prepended to every filename.
- *
- * @param map The autoload map.
- * @param root Root to be prepended to all paths in the map.
- *
- * @return Boolean TRUE if successful, FALSE otherwise.
+/*
+ * Returns true if the current request is proxying filesystem access and other
+ * system calls to an external client process via the CLI server protocol.
  */
 <<__Native>>
-function autoload_set_paths(mixed $map, string $root): bool;
-
-/**
- * Return all paths currently known to the autoloader.
- *
- * This may or may not be all the paths in your repo. If you call
- * `HH\autoload_set_paths()` with a callback and expect that callback to
- * lazily load paths as it sees new symbols, this function will only return
- * all paths which we have seen during this request.
- *
- * If native autoloading is enabled, or if every path passed to
- * `HH\autoload_set_paths()` was a valid path with all symlinks dereferenced,
- * then each path returned will be an absolute canonical path, with all
- * symlinks dereferenced.
- *
- * Throws InvalidOperationException if autoloading is disabled.
- */
-<<__Native>>
-function autoload_get_paths(): vec<string>;
+function is_cli_server_mode(): bool;
 
 /**
  * Get the path which uniquely defines the given symbol.
@@ -99,13 +57,17 @@ function autoload_get_paths(): vec<string>;
  * Throws InvalidOperationException if native autoloading is disabled.
  */
 <<__Native>>
-function autoload_type_to_path(string $type): ?string;
+function autoload_type_to_path(string $type)[]: ?string;
 <<__Native>>
-function autoload_function_to_path(string $function): ?string;
+function autoload_function_to_path(string $function)[]: ?string;
 <<__Native>>
-function autoload_constant_to_path(string $constant): ?string;
+function autoload_constant_to_path(string $constant)[]: ?string;
 <<__Native>>
-function autoload_type_alias_to_path(string $type_alias): ?string;
+function autoload_module_to_path(string $module)[]: ?string;
+<<__Native>>
+function autoload_type_alias_to_path(string $type_alias)[]: ?string;
+<<__Native>>
+function autoload_type_or_type_alias_to_path(string $type)[]: ?string;
 
 /**
  * Get the types defined in the given path.
@@ -117,13 +79,15 @@ function autoload_type_alias_to_path(string $type_alias): ?string;
  * Throws InvalidOperationException if native autoloading is disabled.
  */
 <<__Native>>
-function autoload_path_to_types(string $path): vec<classname<mixed>>;
+function autoload_path_to_types(string $path)[]: vec<classname<mixed>>;
 <<__Native>>
-function autoload_path_to_functions(string $path): vec<string>;
+function autoload_path_to_functions(string $path)[]: vec<string>;
 <<__Native>>
-function autoload_path_to_constants(string $path): vec<string>;
+function autoload_path_to_constants(string $path)[]: vec<string>;
 <<__Native>>
-function autoload_path_to_type_aliases(string $path): vec<string>;
+function autoload_path_to_modules(string $path)[]: vec<string>;
+<<__Native>>
+function autoload_path_to_type_aliases(string $path)[]: vec<string>;
 
 /**
   * Returns whether the (php) file could be included (eg if its been compiled
@@ -148,7 +112,7 @@ function serialize_memoize_param(mixed $param): arraykey;
  *    or for all static memoized methods if $func is null
  *  - if $cls is null, clear memoization cache for $func
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function clear_static_memoization(?string $cls, ?string $func = null) : bool;
 
 <<__Native>>
@@ -170,14 +134,14 @@ function ffp_parse_string(string $program)[]: ParseTree {
  * Operates on a single class at a time. Clearing the cache for $cls::$func
  * does not clear the cache for $otherClass::$func, for any other class.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function clear_lsb_memoization(string $cls, ?string $func = null) : bool;
 
 /**
  * Clear memoization data on object instance
  */
-<<__Native>>
-function clear_instance_memoization(object $obj) : bool;
+<<__Native("NoRecording")>>
+function clear_instance_memoization(\HH\object $obj) : bool;
 
 /**
  * Attach metadata to the caller's stack frame. The metadata can be retrieved
@@ -230,10 +194,11 @@ function dynamic_fun(string $name)[]: mixed;
 
 /**
  * Construct a cls_meth pointer for the method $cls::$meth. The method should be
- * a static method marked __DynamicallyCallable.
+ * a static method marked __DynamicallyCallable. Raises a notice similar to
+ * $cls::foo() if $cls is a string.
  */
-<<__Native>>
-function dynamic_class_meth(string $cls, string $meth)[]: mixed;
+<<__Native("NoRecording")>>
+function dynamic_class_meth(class_or_classname<mixed> $cls, string $meth)[]: mixed;
 
 /**
  * Same as dynamic_fun but can't be used in RepoAuthoritative mode and
@@ -244,39 +209,28 @@ function dynamic_class_meth(string $cls, string $meth)[]: mixed;
 function dynamic_fun_force(string $name)[]: mixed;
 
 /**
- * Same as dynamic_class_meth but can't be used in RepoAuthoritative mode
- * and doesn't raise warnings or errors
- * on methods not marked __DynamicallyCallable.
+ * Same as dynamic_class_meth but can't be used in RepoAuthoritative mode and
+ * doesn't raise warnings or errors on methods not marked __DynamicallyCallable.
+ * Raises a notice similar to $cls::foo() if $cls is a string.
  */
 <<__Native>>
-function dynamic_class_meth_force(string $cls, string $meth)[]: mixed;
+function dynamic_class_meth_force(class_or_classname<mixed> $cls, string $meth)[]: mixed;
 
-// class-like
-interface ClassLikeAttribute {}
-interface ClassAttribute extends ClassLikeAttribute {}
-interface ClassConstantAttribute {}
-interface EnumAttribute extends ClassLikeAttribute {}
-interface EnumClassAttribute extends ClassLikeAttribute {}
+/**
+ * Creates a LazyClass pointer from input $classname. It does not eagerly
+ * verify that the $classname is in fact a valid class.
+ */
+<<__Native>>
+function classname_from_string_unsafe(string $classname)[]: mixed;
 
-interface TypeAliasAttribute {}
+<<__Native>>
+function class_to_classname(readonly class_or_classname<mixed> $cn)[]: classname<mixed>;
 
-// function-like
-interface FunctionAttribute {}
-interface MethodAttribute {}
+<<__Native("NoRecording")>>
+function get_class_from_object(readonly object $o)[]: class<mixed>;
 
-interface LambdaAttribute {}
-
-// properties
-interface PropertyAttribute {}
-interface InstancePropertyAttribute extends PropertyAttribute {}
-interface StaticPropertyAttribute extends PropertyAttribute {}
-
-interface ParameterAttribute {}
-interface FileAttribute {}
-
-interface TypeParameterAttribute {}
-
-interface TypeConstantAttribute {}
+<<__Native>>
+function get_parent_class_from_class(readonly class<mixed> $c)[]: ?class<mixed>;
 
 /**
  * Begin collecting code coverage on all subsequent calls into files in $files
@@ -356,77 +310,6 @@ function clear_all_coverage_data(): void {
   }
 }
 
-namespace ImplicitContext\_Private {
-
-<<__NativeData("ImplicitContext")>>
-final class ImplicitContextData {}
-
-/**
- * Returns the implicit context keyed by $key or null if such doesn't exist
- */
-<<__Native>>
-function get_implicit_context(string $key)[zoned]: mixed;
-
-/**
- * Sets implicit context $context keyed by $key.
- * Returns the previous implicit context.
- */
-<<__Native>>
-function set_implicit_context(
-  string $key,
-  mixed $context,
-)[zoned]: object /* ImplicitContextData */;
-
-/*
- * Returns the currently implicit context hash or emptry string if
- * no implicit context is set
- */
-<<__Native>>
-function get_implicit_context_memo_key()[zoned]: string;
-
-} // namespace ImplicitContext\_Private
-
-abstract class ImplicitContext {
-  abstract const type T as nonnull;
-
-  protected static async function setAsync<Tout>(
-    this::T $context,
-    (function (): Awaitable<Tout>) $f
-  )[zoned]: Awaitable<Tout> {
-    $prev = ImplicitContext\_Private\set_implicit_context(
-      static::class,
-      $context,
-    );
-    try {
-      $result = $f();
-    } finally {
-      ImplicitContext\_Private\set_implicit_context_by_value($prev);
-    }
-    // Needs to be awaited here so that context dependency is established
-    // between parent/child functions
-    return await $result;
-  }
-
-  protected static function set<Tout>(
-    this::T $context,
-    (function (): Tout) $f
-  )[zoned]: Tout {
-    $prev = ImplicitContext\_Private\set_implicit_context(
-      static::class,
-      $context,
-    );
-    try {
-      return $f();
-    } finally {
-      ImplicitContext\_Private\set_implicit_context_by_value($prev);
-    }
-  }
-
-  protected static function get()[zoned]: this::T {
-    return ImplicitContext\_Private\get_implicit_context(static::class);
-  }
-}
-
 /**
  * Return a vector of lines known to be executable in $file. WARNING: there is
  * no guarantee that these lines will be seen when running code-coverage mode.
@@ -468,10 +351,44 @@ function enable_function_coverage(): void;
 function collect_function_coverage(): dict<string, string>;
 
 /**
- * Return the options for the given root, stored in .hhvmconfig.hdf.
+ * Return all package information from PACKAGES.toml
  */
 <<__Native>>
-function root_options(string $repo): dict<string, mixed>;
+function get_all_packages(
+)[]: dict<string, shape('uses' => vec<string>, 'includes' => vec<string>)>;
+
+/**
+ * Return all deploment information from PACKAGES.toml
+ */
+<<__Native>>
+function get_all_deployments(
+)[]: dict<string, shape('packages' => vec<string>)>;
+
+/*
+ * Returns whether a package named $name exist in the current deployment.
+ */
+<<__Native>>
+function package_exists(string $name)[]: bool;
+
+<<__Native>>
+function active_config_experiments(): vec<string>;
+
+<<__Native>>
+function inactive_config_experiments(): vec<string>;
+
+<<__Native>>
+function mangle_unit_sha1(
+  string $sha1 = '',
+  string $ext = '.php',
+  ?string $repo = null,
+): string;
+
+function unit_schema(?string $repo = null): string {
+  return mangle_unit_sha1('', '.php', $repo);
+}
+
+<<__IsFoldable, __Native>>
+function legacy_is_truthy(readonly mixed $val)[]: bool;
 
 } // HH
 
@@ -487,7 +404,6 @@ interface IMemoizeParam extends \HH\IMemoizeParam {
    * Serialize this object to a string that can be used as a
    * dictionary key to differentiate instances of this class.
    */
-  <<__Pure>>
   public function getInstanceKey(): string;
 }
 }
@@ -523,14 +439,14 @@ function all_request_stats(): mixed; /* darray<string, EventStats>*/
 function all_process_stats(): mixed; /*darray<string, EventStats>*/
 
 /**
- * Return stats for occurences of $event during the current requests up to the
+ * Return stats for occurrences of $event during the current requests up to the
  * call of this function.
  */
 <<__Native>>
 function request_event_stats(string $event): mixed /* EventStats */;
 
 /**
- * Return stats for all occurences of $event during previously completed
+ * Return stats for all occurrences of $event during previously completed
  * requests when this function was called.
  */
 <<__Native>>
@@ -562,84 +478,61 @@ namespace HH\ReifiedGenerics {
 
 }
 
-namespace HH\Coeffects {
+namespace HH\TypeStructure {
 
-  /**
-   * Creates an unsafe way to call a function by providing defaults coeffects.
-   * EXTREMELY UNSAFE. USE WITH CAUTION.
-   */
-  function backdoor<Tout>(
-    (function()[defaults]: Tout) $fn
-  )[/* 86backdoor */]: Tout {
-    $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_value(null);
-    try {
-      return $fn();
-    } finally {
-      \HH\ImplicitContext\_Private\set_implicit_context_by_value($prev);
-    }
-  }
+<<__Native>>
+function get_kind(dict<string, mixed> $ts): int;
 
-  /**
-   * Creates an unsafe way to call a function by providing defaults coeffects.
-   * EXTREMELY UNSAFE. USE WITH CAUTION.
-   */
-  async function backdoor_async<Tout>(
-    (function()[defaults]: Awaitable<Tout>) $fn
-  )[/* 86backdoor */]: Awaitable<Tout> {
-    $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_value(null);
-    try {
-      $result = $fn();
-    } finally {
-      \HH\ImplicitContext\_Private\set_implicit_context_by_value($prev);
-    }
-    // Needs to be awaited here so that context dependency is established
-    // between parent/child functions
-    return await $result;
-  }
+<<__Native>>
+function get_nullable(dict<string, mixed> $ts): bool;
 
-  namespace _Private {
+<<__Native>>
+function get_soft(dict<string, mixed> $ts): bool;
 
-  /**
-   * The internal entry point for zoned_with functions
-   */
-  <<__Native>>
-  function enter_zoned_with<Tout, Tpolicy>(
-    (function()[zoned_with<Tpolicy>]: Tout) $f
-  )[zoned]: mixed /* Tout */;
+<<__Native>>
+function get_opaque(dict<string, mixed> $ts): bool;
 
-  } // namespace _Private
+<<__Native>>
+function get_optional_shape_field(dict<string, mixed> $ts): bool;
 
-  /**
-   * The public entry point for zoned_with functions
-   */
-  function enter_zoned_with<Tout, Tcontext as ImplicitContext, Tval>(
-    classname<Tcontext> $cls,
-    Tval $value,
-    (function()[zoned_with<Tval>]: Tout) $f,
-  )[zoned]: Tout where Tval = Tcontext::T {
-    return $cls::set(
-      $value,
-      ()[zoned] ==> _Private\enter_zoned_with($f)
-    );
-  }
+<<__Native>>
+function get_alias(dict<string, mixed> $ts): string;
 
-  /**
-   * The public entry point for async zoned_with functions
-   */
-  async function enter_zoned_with_async<
-    Tout,
-    Tcontext as ImplicitContext,
-    Tval
-  >(
-    classname<Tcontext> $cls,
-    Tval $value,
-    (function()[zoned_with<Tval>]: Awaitable<Tout>) $f,
-  )[zoned]: Awaitable<Tout> where Tval = Tcontext::T {
-    return await $cls::setAsync(
-      $value,
-      ()[zoned] ==> _Private\enter_zoned_with($f)
-    );
-  }
+<<__Native>>
+function get_typevars(dict<string, mixed> $ts): string;
+
+<<__Native>>
+function get_typevar_types(dict<string, mixed> $ts): dict<string, mixed>;
+
+<<__Native>>
+function get_fields(dict<string, mixed> $ts): dict<string, mixed>;
+
+<<__Native>>
+function get_allows_unknown_fields(dict<string, mixed> $ts): bool;
+
+<<__Native>>
+function get_elem_types(dict<string, mixed> $ts): vec<mixed>;
+
+<<__Native>>
+function get_param_types(dict<string, mixed> $ts): vec<mixed>;
+
+<<__Native>>
+function get_return_type(dict<string, mixed> $ts): dict<string, mixed>;
+
+<<__Native>>
+function get_variadic_type(dict<string, mixed> $ts): dict<string, mixed>;
+
+<<__Native>>
+function get_name(dict<string, mixed> $ts): string;
+
+<<__Native>>
+function get_generic_types(dict<string, mixed> $ts): vec<mixed>;
+
+<<__Native>>
+function get_classname(dict<string, mixed> $ts): string;
+
+<<__Native>>
+function get_exact(dict<string, mixed> $ts): bool;
 
 }
 
@@ -677,35 +570,5 @@ function reflection_class_is_interface(
     mixed $class,
 )[]: bool;
 
-/**
- * List of ids declared for create_opaque_value.
- * Please do not reuse an existing or deprecated id for your new
- * feature.
- */
-enum OpaqueValueId : int {
-  EnumClassLabel = 0;
-}
-
-<<__Native, __NoInjection>>
-function create_opaque_value_internal(int $id, mixed $val)[]: resource;
-
-/**
- * Create an OpaqueValue resource wrapping $val with $id.
- *
- * The value must be memoizable to ensure that equivalent values are only
- * allocated once and will always compare as equal.
- */
-<<__Memoize, __NoInjection>>
-function create_opaque_value(int $id, mixed $val)[]: mixed {
-  return create_opaque_value_internal($id, $val);
-}
-
-/**
- * Returns the value used to construct $res in a call to create_opaque_value,
- * if $res is not an opaque value resource or $id does not match the id used
- * to construct it throw an exception.
- */
-<<__Native, __NoInjection>>
-function unwrap_opaque_value(int $id, resource $res)[]: mixed;
 
 }

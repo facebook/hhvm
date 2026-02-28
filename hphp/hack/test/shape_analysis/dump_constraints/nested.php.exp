@@ -1,9 +1,0 @@
-=== Shape analysis results for nested.php
-Constraints for \f:
-Allocated at [4:15-30]
-Allocated at [4:3-31]
-SK #{0} [4:3-31] : shape(a => \HH\dict<string, int>)
-SK #{1} [4:15-30] : shape(b => int)
-[4:15-30] ⊆ ?1
-[4:3-31] ⊆ ?2
-

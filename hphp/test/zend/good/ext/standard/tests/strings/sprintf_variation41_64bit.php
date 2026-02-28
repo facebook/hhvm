@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : unsigned formats with float values ***\n";
 
 // array of float values 
-$float_values = varray[
+$float_values = vec[
   2147483647,
   0x800000001, // float value, beyond max positive int
   020000000001, // float value, beyond max positive int
@@ -28,7 +28,7 @@ $float_values = varray[
 ];
 
 // array of unsigned formats
-$unsigned_formats = varray[
+$unsigned_formats = vec[
   "%u", "%hu", "%lu",
   "%Lu", " %u", "%u ", 
   "\t%u", "\n%u", "%4u",

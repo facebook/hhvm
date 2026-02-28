@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_829() {
+function main_829() :mixed{
 $mapFn = function ($v) {
  return $v+1;
  }

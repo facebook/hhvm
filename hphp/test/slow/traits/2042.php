@@ -1,7 +1,7 @@
 <?hh
 
-function get_declared_user_traits() {
-  $ret = varray[];
+function get_declared_user_traits() :mixed{
+  $ret = vec[];
   foreach (get_declared_traits() as $v) {
     // exclude system traits
     $rc = new ReflectionClass($v);

@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  static function bar() {
+  static function bar() :mixed{
     $abc = 123;
     $a = function ($abc) use ($abc, $abc) {
       var_dump($abc);
@@ -12,7 +12,7 @@ class Foo {
 }
 
 <<__EntryPoint>>
-function main_1925() {
+function main_1925() :mixed{
 $a = Foo::bar();
 $a(456);
 }

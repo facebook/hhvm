@@ -10,7 +10,7 @@
 
 // declaring a class
 class sample  {
-  public function __toString() {
+  public function __toString() :mixed{
   return "obj-ect";
   }
 }
@@ -24,49 +24,10 @@ $token = '-';
 $file_handle = fopen(__FILE__, 'r');
 
 // array with different values
-$values =  varray [
-
-  // integer values
-  0,
-  1,
-  12345,
-  -2345,
-
-  // float values
-  10.5,
-  -10.5,
-  10.1234567e10,
-  10.7654321E-10,
-  .5,
-
-  // array values
-  varray[],
-  varray[0],
-  varray[1],
-  varray[1, 2],
-  darray['color' => 'red-color', 'item' => 'pen-color'],
-
-  // boolean values
-  true,
-  false,
-  TRUE,
-  FALSE,
-
-  // objects
-  new sample(),
-
+$values =  vec[
   // empty string
   "",
   '',
-
-  // null vlaues
-  NULL,
-  null,
-
-
-
-  // resource
-  $file_handle
 ];
 
 

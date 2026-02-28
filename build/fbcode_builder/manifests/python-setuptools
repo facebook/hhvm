@@ -1,0 +1,22 @@
+[manifest]
+name = python-setuptools
+
+[download]
+url = https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl
+sha256 = 062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922
+
+[build]
+builder = python-wheel
+
+[rpms]
+python3-setuptools
+
+# Centos Stream 9 default python is 3.9, sapling needs 3.10+
+[rpms.all(distro=centos_stream,distro_vers=9)]
+python3.12-setuptools
+
+[homebrew]
+python-setuptools
+
+[debs]
+python3-setuptools

@@ -3,7 +3,7 @@
 class A {
   public $foo;
   public $bar;
-  function q($a) {
+  function q($a) :mixed{
     echo $a;
     $this->foo = 9;
     $this->bar = '3';
@@ -12,7 +12,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function main_1505() {
+function main_1505() :mixed{
 $a = new A();
 var_dump(HH\Lib\Legacy_FIXME\cast_for_arithmetic($a->q('1')->foo) + HH\Lib\Legacy_FIXME\cast_for_arithmetic($a->q('2')->bar));
 var_dump(HH\Lib\Legacy_FIXME\cast_for_arithmetic($a->q('1')->foo) - HH\Lib\Legacy_FIXME\cast_for_arithmetic($a->q('2')->bar));

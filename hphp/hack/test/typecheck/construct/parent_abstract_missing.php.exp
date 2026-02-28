@@ -1,4 +1,10 @@
-File "parent_abstract_missing.php", line 7, characters 5-23:
+ERROR: File "parent_abstract_missing.php", line 7, characters 5-23:
 Cannot call `parent::__construct()`; it is abstract (Typing[4073])
-File "parent_abstract_missing.php", line 3, characters 16-24:
-Declaration is here
+  File "parent_abstract_missing.php", line 3, characters 16-24:
+  Declaration is here
+ERROR: File "parent_abstract_missing.php", line 7, characters 13-23:
+No instance method `__construct` in `BaseClass` (Typing[4053])
+  File "parent_abstract_missing.php", line 5, characters 32-40:
+  This is why I think it is an object of type BaseClass
+  File "parent_abstract_missing.php", line 3, characters 16-24:
+  Declaration of `BaseClass` is here

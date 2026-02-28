@@ -1,10 +1,10 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
 $get = \HH\global_get('_GET');
 parse_str("a=1", inout $get);
 \HH\global_set('_GET', $get);
-$_REQUEST = array_merge($_REQUEST, $_GET);
-echo $_GET['a'];
+\HH\global_set('_REQUEST', array_merge(\HH\global_get('_REQUEST'), \HH\global_get('_GET')));
+echo \HH\global_get('_GET')['a'];
 }

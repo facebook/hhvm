@@ -7,7 +7,7 @@
 */
 
 function doit($p1)  // assigned the value TRUE when called
-{
+:mixed{
     $count = 10;
 //  …
     if ($p1)
@@ -19,7 +19,7 @@ function doit($p1)  // assigned the value TRUE when called
 }
 
 function factorial($i)
-{
+:mixed{
     if ($i > 1) return $i * factorial($i - 1);
     else if ($i == 1) return $i;
     else return 0;
@@ -31,7 +31,7 @@ const COEFFICIENT_2 = 2.345; // define two d-constants
 const FAILURE2 = TRUE;
 
 function globalConst()
-{
+:mixed{
     echo "Inside " . __FUNCTION__ . "\n";
     echo "MAX_HEIGHT2 = " . (string)(MAX_HEIGHT2) . "\n";
     echo "COEFFICIENT_2 = " . (string)(COEFFICIENT_2) . "\n";

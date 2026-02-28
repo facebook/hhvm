@@ -1,16 +1,16 @@
 <?hh
 
 class C<reify T> {
-  function f() {
+  function f() :mixed{
     var_dump(HH\ReifiedGenerics\get_type_structure<T>());
   }
 }
 
 class D<reify T> extends C<bool> {
-  function f() {
+  function f() :mixed{
     var_dump(HH\ReifiedGenerics\get_type_structure<T>());
   }
-  function h() {
+  function h() :mixed{
     $c = new parent();
     $c->f();
   }

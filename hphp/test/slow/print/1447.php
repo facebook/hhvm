@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1447() {
+function main_1447() :mixed{
 serialize(!null);
 serialize(!true);
 serialize(!false);

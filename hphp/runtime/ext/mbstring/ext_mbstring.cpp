@@ -61,11 +61,11 @@ namespace HPHP {
 
 #define PHP_MBSTR_STACK_BLOCK_SIZE 32
 
-typedef struct _php_mb_nls_ident_list {
+struct php_mb_nls_ident_list {
   mbfl_no_language lang;
   mbfl_no_encoding* list;
   int list_size;
-} php_mb_nls_ident_list;
+};
 
 static mbfl_no_encoding php_mb_default_identify_list_ja[] = {
   mbfl_no_encoding_ascii,
@@ -150,7 +150,7 @@ static php_mb_nls_ident_list php_mb_default_identify_list[] = {
 
 ///////////////////////////////////////////////////////////////////////////////
 // globals
-typedef std::map<std::string, php_mb_regex_t *> RegexCache;
+using RegexCache = std::map<std::string, php_mb_regex_t *>;
 
 struct MBGlobals final : RequestEventHandler {
   mbfl_no_language language;
@@ -621,7 +621,7 @@ static int php_mb_parse_encoding_list(const char* value, int value_length,
             ret = 0;
           }
         }
-        p1 = p2 + 1;
+        if (p2 != nullptr) p1 = p2 + 1;
       } while (n < size && p2 != nullptr);
       if (n > 0) {
         if (return_list) {
@@ -1544,7 +1544,7 @@ static Variant php_mb_numericentity_exec(const String& str,
       iconvmap = (int*)req::malloc_noptrs(mapsize * sizeof(int));
       int *mapelm = iconvmap;
       for (ArrayIter iter(convs); iter; ++iter) {
-        *mapelm++ = iter.second().toInt32();
+        *mapelm++ = (int)iter.second().toInt64();
       }
     }
   }
@@ -2084,7 +2084,7 @@ String HHVM_FUNCTION(mb_output_handler,
   return String(reinterpret_cast<char*>(result.val), result.len, AttachString);
 }
 
-typedef struct _php_mb_encoding_handler_info_t {
+struct php_mb_encoding_handler_info_t {
   int data_type;
   const char *separator;
   unsigned int force_register_globals: 1;
@@ -2094,7 +2094,7 @@ typedef struct _php_mb_encoding_handler_info_t {
   enum mbfl_no_language from_language;
   int num_from_encodings;
   mbfl_encoding **from_encodings;
-} php_mb_encoding_handler_info_t;
+};
 
 static mbfl_encoding* _php_mb_encoding_handler_ex
 (const php_mb_encoding_handler_info_t *info, Array& arg, char *res) {
@@ -2690,11 +2690,11 @@ Variant HHVM_FUNCTION(mb_strrpos,
       }
     }
     if (str_flg) {
-      noffset = offset.toInt32();
+      noffset = (int)offset.toInt64();
       enc_name = encoding.data();
     }
   } else {
-    noffset = offset.toInt32();
+    noffset = (int)offset.toInt64();
   }
 
   if (enc_name != nullptr && *enc_name) {
@@ -3160,10 +3160,10 @@ Variant HHVM_FUNCTION(mb_substr_count,
 ///////////////////////////////////////////////////////////////////////////////
 // regex helpers
 
-typedef struct _php_mb_regex_enc_name_map_t {
+struct php_mb_regex_enc_name_map_t {
   const char *names;
   OnigEncoding code;
-} php_mb_regex_enc_name_map_t;
+};
 
 static php_mb_regex_enc_name_map_t enc_name_map[] ={
   {
@@ -3566,7 +3566,7 @@ static Variant _php_mb_regex_ereg_replace_exec(const Variant& pattern,
     spattern = pattern.toString();
   } else {
     /* FIXME: this code is not multibyte aware! */
-    pat_buf[0] = pattern.toByte();
+    pat_buf[0] = (char)pattern.toInt64();
     pat_buf[1] = '\0';
     spattern = String(pat_buf, 1, CopyString);
   }
@@ -4190,7 +4190,7 @@ static int _php_mbstr_parse_mail_headers(Array &ht, const char *str,
           state = 3;
           break;
         }
-        /* break is missing intentionally */
+        [[fallthrough]];
 
       case 3:
         if (crlf_state == -1) {
@@ -4534,22 +4534,15 @@ bool HHVM_FUNCTION(mb_send_mail,
 }
 
 static struct mbstringExtension final : Extension {
-  mbstringExtension() : Extension("mbstring", NO_EXTENSION_VERSION_YET) {}
+  mbstringExtension() : Extension("mbstring", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
   void moduleInit() override {
-    // TODO make these PHP_INI_ALL and thread local once we use them
-    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "mbstring.http_input",
-                     &http_input);
-    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "mbstring.http_output",
-                     &http_output);
-    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+    IniSetting::Bind(this, IniSetting::Mode::Request,
                      "mbstring.substitute_character",
                      &MBSTRG(current_filter_illegal_mode));
+  }
 
-    HHVM_RC_INT(MB_OVERLOAD_MAIL, 1);
-    HHVM_RC_INT(MB_OVERLOAD_STRING, 2);
-    HHVM_RC_INT(MB_OVERLOAD_REGEX, 4);
-
+  void moduleRegisterNative() override {
     HHVM_RC_INT(MB_CASE_UPPER, PHP_UNICODE_CASE_UPPER);
     HHVM_RC_INT(MB_CASE_LOWER, PHP_UNICODE_CASE_LOWER);
     HHVM_RC_INT(MB_CASE_TITLE, PHP_UNICODE_CASE_TITLE);
@@ -4610,18 +4603,8 @@ static struct mbstringExtension final : Extension {
     HHVM_FE(mb_substitute_character);
     HHVM_FE(mb_substr_count);
     HHVM_FE(mb_substr);
-
-    loadSystemlib();
   }
-
-  static std::string http_input;
-  static std::string http_output;
-  static std::string substitute_character;
-
 } s_mbstring_extension;
-
-std::string mbstringExtension::http_input = "pass";
-std::string mbstringExtension::http_output = "pass";
 
 ///////////////////////////////////////////////////////////////////////////////
 }

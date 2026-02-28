@@ -1,6 +1,6 @@
 <?hh
 
-function f(string $key, string $input){
+function f(string $key, string $input):mixed{
   debug_zval_dump($input);
   apc_add($key, $input);
   $after = __hhvm_intrinsics\apc_fetch_no_check($key);

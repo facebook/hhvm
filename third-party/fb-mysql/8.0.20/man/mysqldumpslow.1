@@ -1,0 +1,337 @@
+'\" t
+.\"     Title: \fBmysqldumpslow\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBMYSQLDUMPSLOW\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+mysqldumpslow \- Summarize slow query log files
+.SH "SYNOPSIS"
+.HP \w'\fBmysqldumpslow\ [\fR\fBoptions\fR\fB]\ [\fR\fB\fIlog_file\fR\fR\fB\ \&.\&.\&.]\fR\ 'u
+\fBmysqldumpslow [\fR\fBoptions\fR\fB] [\fR\fB\fIlog_file\fR\fR\fB \&.\&.\&.]\fR
+.SH "DESCRIPTION"
+.PP
+The MySQL slow query log contains information about queries that take a long time to execute (see
+Section\ \&5.4.5, \(lqThe Slow Query Log\(rq)\&.
+\fBmysqldumpslow\fR
+parses MySQL slow query log files and summarizes their contents\&.
+.PP
+Normally,
+\fBmysqldumpslow\fR
+groups queries that are similar except for the particular values of number and string data values\&. It
+\(lqabstracts\(rq
+these values to
+N
+and
+\*(AqS\*(Aq
+when displaying summary output\&. To modify value abstracting behavior, use the
+\fB\-a\fR
+and
+\fB\-n\fR
+options\&.
+.PP
+Invoke
+\fBmysqldumpslow\fR
+like this:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqldumpslow [\fR\fB\fIoptions\fR\fR\fB] [\fR\fB\fIlog_file\fR\fR\fB \&.\&.\&.]\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Example of usage:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBmysqldumpslow\fR
+Reading mysql slow query log from /usr/local/mysql/data/mysqld80\-slow\&.log
+Count: 1  Time=4\&.32s (4s)  Lock=0\&.00s (0s)  Rows=0\&.0 (0), root[root]@localhost
+ insert into t2 select * from t1
+Count: 3  Time=2\&.53s (7s)  Lock=0\&.00s (0s)  Rows=0\&.0 (0), root[root]@localhost
+ insert into t2 select * from t1 limit N
+Count: 3  Time=2\&.13s (6s)  Lock=0\&.00s (0s)  Rows=0\&.0 (0), root[root]@localhost
+ insert into t1 select * from t1
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fBmysqldumpslow\fR
+supports the following options\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-help\fR
+.sp
+Display a help message and exit\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-a\fR
+.sp
+Do not abstract all numbers to
+N
+and strings to
+\*(AqS\*(Aq\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-debug\fR,
+\fB\-d\fR
+.sp
+Run in debug mode\&.
+.sp
+This option is available only if MySQL was built using
+\fBWITH_DEBUG\fR\&. MySQL release binaries provided by Oracle are
+\fInot\fR
+built using this option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-g \fR\fB\fIpattern\fR\fR
+.sp
+Consider only queries that match the (\fBgrep\fR\-style) pattern\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-h \fR\fB\fIhost_name\fR\fR
+.sp
+Host name of MySQL server for
+*\-slow\&.log
+file name\&. The value can contain a wildcard\&. The default is
+*
+(match all)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-i \fR\fB\fIname\fR\fR
+.sp
+Name of server instance (if using
+\fBmysql\&.server\fR
+startup script)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-l\fR
+.sp
+Do not subtract lock time from total time\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-n \fR\fB\fIN\fR\fR
+.sp
+Abstract numbers with at least
+\fIN\fR
+digits within names\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-r\fR
+.sp
+Reverse the sort order\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-s \fR\fB\fIsort_type\fR\fR
+.sp
+How to sort the output\&. The value of
+\fIsort_type\fR
+should be chosen from the following list:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+t,
+at: Sort by query time or average query time
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+l,
+al: Sort by lock time or average lock time
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+r,
+ar: Sort by rows sent or average rows sent
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+c: Sort by count
+.RE
+.sp
+By default,
+\fBmysqldumpslow\fR
+sorts by average query time (equivalent to
+\fB\-s at\fR)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-t \fR\fB\fIN\fR\fR
+.sp
+Display only the first
+\fIN\fR
+queries in the output\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-verbose\fR,
+\fB\-v\fR
+.sp
+Verbose mode\&. Print more information about what the program does\&.
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

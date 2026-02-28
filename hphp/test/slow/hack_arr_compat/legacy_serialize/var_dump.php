@@ -1,6 +1,6 @@
 <?hh
 
-function test($arr) {
+function test($arr) :mixed{
   echo "\n\n----------------------------------------\n";
   echo "*** without legacy bit ***\n";
   var_dump($arr);
@@ -10,7 +10,7 @@ function test($arr) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
 
   $arrays = vec[
     vec[],

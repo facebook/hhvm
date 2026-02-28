@@ -6,5 +6,5 @@ $sealed = null;
 $ekeys = null;
 $iv = null;
 var_dump($pub_key_id);
-var_dump(openssl_seal($inputstr, inout $sealed, inout $ekeys, varray[$pub_key_id, $pub_key_id], 'AES-128-ECB', inout $iv));
+var_dump(openssl_seal($inputstr, inout $sealed, inout $ekeys, vec[$pub_key_id, $pub_key_id], 'AES-128-ECB', inout $iv));
 }

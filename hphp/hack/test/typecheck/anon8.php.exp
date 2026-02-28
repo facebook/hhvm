@@ -1,4 +1,4 @@
-File "anon8.php", line 16, characters 10-11:
+ERROR: File "anon8.php", line 16, characters 10-11:
 Invalid return type (Typing[4041])
   File "anon8.php", line 13, characters 8-43:
   Too many mandatory arguments (expected 0 but got 1)

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f((int, int) $x): void {
   expect_tuple($x as ?(int, arraykey));

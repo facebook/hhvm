@@ -40,6 +40,7 @@
   X(LazyCls)                                    \
   X(Func)                                       \
   X(ClsMeth)                                    \
+  X(EnumClassLabel)                             \
 
 // Counted non-union types which do have Opt variants
 #define HHBBC_TYPE_DECL_SINGLE_COUNTED(X)       \

@@ -1,0 +1,2 @@
+
+Fatal error: static analysis error: supposedly unreachable code was reached in %s/static-analysis-fatal.php on line 5

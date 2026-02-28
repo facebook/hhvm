@@ -15,13 +15,13 @@ module TUtils = Typing_utils
 module MakeType = Typing_make_type
 
 (* If an expression e is of type `opt_ty_maybe`, then this function
-returns the type of `await e`.
+   returns the type of `await e`.
 
-There is the special case that
-  e : ?Awaitable<T> |- await e : ?T
+   There is the special case that
+     e : ?Awaitable<T> |- await e : ?T
 *)
 let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
-  let r = Reason.Rwitness p in
+  let r = Reason.witness p in
   let rec extract_inner env opt_ty_maybe =
     let ((env, e1), e_opt_ty) =
       Typing_solver.expand_type_and_solve
@@ -49,6 +49,11 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
       let ((env, e2), ty) = extract_inner env ty in
       let (env, ty) = TUtils.union env (MakeType.null r) ty in
       ((env, Option.merge e1 e2 ~f:Typing_error.both), ty)
+    | Tnewtype (n, [ty], _)
+      when String.equal n Naming_special_names.Classes.cSupportDyn ->
+      let ((env, e2), ty) = extract_inner env ty in
+      let (env, ty) = TUtils.make_supportdyn r env ty in
+      ((env, Option.merge e1 e2 ~f:Typing_error.both), ty)
     | Tintersection tyl ->
       let ((env, e2), rtyl) =
         TUtils.run_on_intersection_with_ty_err env tyl ~f:extract_inner
@@ -59,9 +64,6 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
     | Tdynamic ->
       (* Awaiting a dynamic results in a new dynamic *)
       ((env, e1), MakeType.dynamic r)
-    | Tunapplied_alias _ ->
-      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-    | Terr
     | Tany _
     | Tvec_or_dict _
     | Tnonnull
@@ -75,16 +77,20 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
     | Ttuple _
     | Tshape _
     | Taccess _
-    | Tneg _ ->
-      let (env, type_var) = Env.fresh_type env p in
+    | Tlabel _
+    | Tneg _
+    | Tclass_ptr _ ->
+      let (env, type_var) =
+        if TUtils.is_tyvar_error env e_opt_ty then
+          Env.fresh_type_error env p
+        else
+          Env.fresh_type env p
+      in
       let expected_type = MakeType.awaitable r type_var in
       let return_type =
         match get_node e_opt_ty with
         | Tany _ -> mk (r, Typing_defs.make_tany ())
-        | Terr -> MakeType.err r
         | Tdynamic -> MakeType.dynamic r
-        | Tunapplied_alias _ ->
-          Typing_defs.error_Tunapplied_alias_in_illegal_context ()
         | Tnonnull
         | Tvec_or_dict _
         | Tprim _
@@ -100,7 +106,9 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
         | Tunion _
         | Tshape _
         | Taccess _
-        | Tneg _ ->
+        | Tlabel _
+        | Tneg _
+        | Tclass_ptr _ ->
           type_var
       in
       let (env, e2) =
@@ -116,15 +124,16 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
   in
   let env = Env.open_tyvars env p in
   let ((env, ty_err_opt), ty) = extract_inner env opt_ty_maybe in
-  let env = Typing_solver.close_tyvars_and_solve env in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
-  (env, ty)
+  let (env, err) = Typing_solver.close_tyvars_and_solve env in
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+  let (env, ty) = Typing_union.simplify_unions env ty in
+  ((env, err), ty)
 
 let overload_extract_from_awaitable env ~p opt_ty_maybe =
   let ((env, ty_err_opt), res) =
     overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe
   in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   (env, res)
 
 let overload_extract_from_awaitable_list_with_ty_err env p tyl =
@@ -150,7 +159,7 @@ let overload_extract_from_awaitable_list env p tyl =
   let ((env, ty_err_opt), res) =
     overload_extract_from_awaitable_list_with_ty_err env p tyl
   in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   (env, res)
 
 let overload_extract_from_awaitable_shape_with_ty_err env p fdm =
@@ -166,5 +175,5 @@ let overload_extract_from_awaitable_shape env p fdm =
   let ((env, ty_err_opt), res) =
     overload_extract_from_awaitable_shape_with_ty_err env p fdm
   in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   (env, res)

@@ -35,7 +35,7 @@ Hello, World\n
 Hello\0World
 identifier_str4;
 
-$strings = varray[
+$strings = vec[
   $str1,
   $str2,
   $str3,

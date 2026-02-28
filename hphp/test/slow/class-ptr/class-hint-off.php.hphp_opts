@@ -1,0 +1,2 @@
+-vRuntime.Hack.Lang.AllowUnstableFeatures=true
+-vRuntime.Hack.Lang.EnableClassPointerHint=false

@@ -3,7 +3,7 @@
 class C {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $things = vec[
     null,
     true,
@@ -32,7 +32,7 @@ function main() {
   }
 }
 
-function doswitch($foo) {
+function doswitch($foo) :mixed{
   echo "--------------------------------\n";
   var_dump($foo);
   switch ($foo) {

@@ -14,6 +14,9 @@
    +----------------------------------------------------------------------+
 */
 #pragma once
+#include "hphp/runtime/base/isame-log.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/configs/eval.h"
 
 namespace HPHP {
 
@@ -149,7 +152,7 @@ inline strhash_t StringData::hash() const {
 inline strhash_t StringData::hashStatic() const {
   assertx(isStatic());
   const strhash_t h = m_hash & STRHASH_MASK;
-  assertx(h);
+  assertx(h >= 0);
   return h;
 }
 
@@ -163,9 +166,21 @@ inline bool StringData::same(const StringData* s) const {
   return wordsame(data(), s->data(), m_len);
 }
 
-inline bool StringData::isame(const StringData* s) const {
+inline bool StringData::tsame(const StringData* s) const {
   assertx(s);
-  if (this == s) return true;
+  if (this == s || same(s)) return true;
+  if (m_len != s->m_len || Cfg::Eval::LogTsameCollisions >= 2) return false;
+  if (!bstrcaseeq(data(), s->data(), m_len)) return false;
+  return Cfg::Eval::LogTsameCollisions != 1 || tsame_log(this, s);
+}
+
+inline bool StringData::fsame(const StringData* s) const {
+  return same(s);
+}
+
+inline bool StringData::same_nocase(const StringData* s) const {
+  assertx(s);
+  if (this == s || same(s)) return true;
   if (m_len != s->m_len) return false;
   return bstrcaseeq(data(), s->data(), m_len);
 }
@@ -189,16 +204,24 @@ struct string_data_same {
   }
 };
 
-struct string_data_eq_same {
-  bool operator()(const StringData* a, const StringData* b) const {
-    return a == b || a->same(b);
+struct string_data_tsame {
+  bool operator()(const StringData *s1, const StringData *s2) const {
+    assertx(s1 && s2);
+    return s1->tsame(s2);
   }
 };
 
-struct string_data_isame {
+struct string_data_fsame {
   bool operator()(const StringData *s1, const StringData *s2) const {
     assertx(s1 && s2);
-    return s1->isame(s2);
+    return s1->fsame(s2);
+  }
+};
+
+struct string_data_same_nocase {
+  bool operator()(const StringData *s1, const StringData *s2) const {
+    assertx(s1 && s2);
+    return s1->same_nocase(s2);
   }
 };
 
@@ -216,11 +239,23 @@ struct string_data_lt {
   }
 };
 
-struct string_data_lti {
+// Compare type names
+struct string_data_lt_type {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    return bstrcasecmp(s1->data(), s1->size(), s2->data(), s2->size()) < 0;
+    return tstrcmp_slice(s1->slice(), s2->slice()) < 0;
   }
 };
+
+struct string_data_hash_tsame {
+  bool equal(const StringData* s1, const StringData* s2) const {
+    return s1->tsame(s2);
+  }
+  size_t hash(const StringData* s) const { return s->hash(); }
+};
+
+// Compare function names
+using string_data_lt_func = string_data_lt;
+using string_data_hash_fsame = string_data_hash;
 
 //////////////////////////////////////////////////////////////////////
 

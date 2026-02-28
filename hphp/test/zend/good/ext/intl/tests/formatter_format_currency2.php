@@ -10,8 +10,8 @@
 
 
 function ut_main()
-{
-    $locales = darray[
+:mixed{
+    $locales = dict[
         'en_UK' => 'GBP',
         'en_US' => 'USD',
         'ru'    => 'RUR',

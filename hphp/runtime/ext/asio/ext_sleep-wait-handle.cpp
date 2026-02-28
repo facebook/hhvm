@@ -55,7 +55,7 @@ Object HHVM_STATIC_METHOD(SleepWaitHandle, create, int64_t usecs) {
 void c_SleepWaitHandle::initialize(int64_t usecs) {
   auto const session = AsioSession::Get();
   setState(STATE_WAITING);
-  setContextIdx(session->getCurrentContextIdx());
+  setContextStateIndex(session->getCurrentContextStateIndex());
   m_waketime =
     AsioSession::TimePoint::clock::now() +
     std::chrono::microseconds(usecs);
@@ -73,9 +73,9 @@ void c_SleepWaitHandle::initialize(int64_t usecs) {
   }
 }
 
-bool c_SleepWaitHandle::cancel(const Object& exception) {
+bool c_SleepWaitHandle::cancelImpl(const Object* exception) {
   if (getState() != STATE_WAITING) {
-    return false;               // already finished
+    return false;
   }
 
   if (isInContext()) {
@@ -83,11 +83,15 @@ bool c_SleepWaitHandle::cancel(const Object& exception) {
   }
 
   auto parentChain = getParentChain();
-  setState(STATE_FAILED);
-  tvWriteObject(exception.get(), &m_resultOrException);
+  if (exception) {
+    setState(STATE_FAILED);
+    tvWriteObject(exception->get(), &m_resultOrException);
+  } else {
+    setState(STATE_SUCCEEDED);
+    tvWriteNull(m_resultOrException);
+  }
   parentChain.unblock();
 
-  // this is technically a lie, since sleep failed
   auto session = AsioSession::Get();
   if (UNLIKELY(session->hasOnSleepSuccess())) {
     session->onSleepSuccess(
@@ -101,8 +105,16 @@ bool c_SleepWaitHandle::cancel(const Object& exception) {
   return true;
 }
 
+bool c_SleepWaitHandle::cancel(const Object& exception) {
+  return cancelImpl(&exception);
+}
+
+bool c_SleepWaitHandle::cancelNoThrow() {
+  return cancelImpl(nullptr);
+}
+
 bool c_SleepWaitHandle::process() {
-  if (getState() == STATE_FAILED) {
+  if (isFinished()) {
     // sleep handle was cancelled, everything is taken care of
     return false;
   }
@@ -135,13 +147,13 @@ String c_SleepWaitHandle::getName() {
   return s_sleep;
 }
 
-void c_SleepWaitHandle::exitContext(context_idx_t ctx_idx) {
-  assertx(AsioSession::Get()->getContext(ctx_idx));
+void c_SleepWaitHandle::exitContext(ContextIndex contextIdx) {
+  assertx(AsioSession::Get()->getContext(contextIdx));
   assertx(getState() == STATE_WAITING);
-  assertx(getContextIdx() == ctx_idx);
+  assertx(getContextIndex() == contextIdx);
 
   // Move us to the parent context.
-  setContextIdx(getContextIdx() - 1);
+  setContextStateIndex(contextIdx.parent().toRegular());
 
   // Re-register if still in a context.
   if (isInContext()) {
@@ -149,28 +161,31 @@ void c_SleepWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 
   // Recursively move all wait handles blocked by us.
-  getParentChain().exitContext(ctx_idx);
+  getParentChain().exitContext(contextIdx);
 }
 
 void c_SleepWaitHandle::registerToContext() {
-  AsioContext *ctx = getContext();
+  AsioContext* ctx = getContext();
   m_ctxVecIndex = ctx->registerTo(ctx->getSleepEvents(), this);
 }
 
 void c_SleepWaitHandle::unregisterFromContext() {
-  AsioContext *ctx = getContext();
+  AsioContext* ctx = getContext();
   ctx->unregisterFrom(ctx->getSleepEvents(), m_ctxVecIndex);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void AsioExtension::initSleepWaitHandle() {
+void AsioExtension::registerNativeSleepWaitHandle() {
 #define SWH_SME(meth) \
   HHVM_STATIC_MALIAS(HH\\SleepWaitHandle, meth, SleepWaitHandle, meth)
   SWH_SME(create);
   SWH_SME(setOnCreateCallback);
   SWH_SME(setOnSuccessCallback);
 #undef SWH_SWE
+
+  Native::registerClassExtraDataHandler(
+    c_SleepWaitHandle::className(), finish_class<c_SleepWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

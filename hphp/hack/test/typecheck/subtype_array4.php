@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,7 +10,7 @@
  */
 
 function get_arr(): darray<string, bool> {
-  return darray[
+  return dict[
     'foo' => true,
     'bar' => false,
   ];

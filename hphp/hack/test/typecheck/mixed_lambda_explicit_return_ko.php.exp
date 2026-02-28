@@ -1,4 +1,4 @@
-File "mixed_lambda_explicit_return_ko.php", line 10, characters 24-25:
+ERROR: File "mixed_lambda_explicit_return_ko.php", line 10, characters 24-25:
 Invalid return type (Typing[4110])
   File "mixed_lambda_explicit_return_ko.php", line 10, characters 16-18:
   Expected `int`

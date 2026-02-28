@@ -1,0 +1,22 @@
+(rule
+ (alias ide_code_actions_add_stubs_for_missing_methods)
+ (deps
+  %{exe:../../../src/hh_single_type_check.exe}
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/ide_code_actions/add_stubs_for_missing_methods/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/ide_code_actions/add_stubs_for_missing_methods/*.php)
+  (glob_files %{project_root}/hack/test/ide_code_actions/add_stubs_for_missing_methods/*.exp))
+ (action
+  (run
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/ide_code_actions/add_stubs_for_missing_methods
+   --program
+   %{exe:../../../src/hh_single_type_check.exe}
+   --flags
+   --ide-code-actions "Add stubs")))
+
+(alias
+ (name runtest)
+ (deps
+  (alias ide_code_actions_add_stubs_for_missing_methods)))

@@ -16,6 +16,7 @@
 #include "hphp/hhbbc/wide-func.h"
 
 #include "hphp/hhbbc/bc.h"
+#include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/interp.h"
 #include "hphp/util/trace.h"
 
@@ -31,11 +32,9 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(hhbbc_mem);
+TRACE_SET_MOD(hhbbc_mem)
 
-using Buffer = CompactVector<char>;
-
-static_assert(std::is_same<LSString, LowStringPtr>::value);
+using Buffer = CompressedBytecode;
 
 constexpr int32_t kNoSrcLoc = -1;
 
@@ -63,10 +62,10 @@ std::string name(const std::type_info& type) {
   std::unique_ptr<char, decltype(&std::free)> result(
     __cxxabiv1::__cxa_demangle(type.name(), nullptr, &length, &status),
     &std::free);
-  return result.get();
+  return result.get() ? result.get() : type.name();
 #else
   return type.name();
-#endif // _GNUG_
+#endif // __GNUG__
 }
 
 BytecodeVec decodeBytecodeVec(const Buffer& buffer, size_t& pos);
@@ -97,12 +96,12 @@ T decode(const Buffer& buffer, size_t& pos) {
     result.unchangedBcs = DECODE_MEMBER(unchangedBcs);
     result.replacedBcs  = decodeBytecodeVec(buffer, pos);
     return result;
-  }
 
-  if constexpr (std::is_same<T, FCallArgs>::value) {
+  } else if constexpr (std::is_same<T, FCallArgs>::value) {
     using FCA = FCallArgsBase;
     auto const base     = decode<FCA>(buffer, pos);
-    auto const context  = decode<LSString>(buffer, pos);
+    auto const nameVec  = decode<NamedArgNameVec>(buffer, pos);
+    auto const context  = decode<SString>(buffer, pos);
     auto const aeTarget = decode<BlockId>(buffer, pos) + NoBlockId;
     auto inout = std::unique_ptr<uint8_t[]>();
     if (base.flags & FCallArgsFlags::EnforceInOut) {
@@ -118,36 +117,35 @@ T decode(const Buffer& buffer, size_t& pos) {
       memmove(readonly.get(), &buffer[pos], bytes);
       pos += bytes;
     }
+    std::unique_ptr<NamedArgNameVec> namePtr = nullptr;
+    if (nameVec.size()) {
+      namePtr = std::make_unique<NamedArgNameVec>(std::move(nameVec));
+    }
     return FCallArgs(static_cast<FCallArgsFlags>(base.flags & FCA::kInternalFlags),
                      base.numArgs, base.numRets, std::move(inout),
-                     std::move(readonly), aeTarget, context);
-  }
+                     std::move(readonly), std::move(namePtr),
+                     aeTarget, context);
 
-  if constexpr (std::is_same<T, IterArgs>::value) {
+  } else if constexpr (std::is_same<T, IterArgs>::value) {
     auto const flags  = DECODE_MEMBER(flags);
     auto const iterId = DECODE_MEMBER(iterId);
-    auto const keyId  = DECODE_MEMBER(keyId) + IterArgs::kNoKey;
-    auto const valId  = DECODE_MEMBER(valId);
-    return T(flags, iterId, keyId, valId);
-  }
+    return T(flags, iterId);
 
-  if constexpr (std::is_same<T, LocalRange>::value) {
+  } else if constexpr (std::is_same<T, LocalRange>::value) {
     auto const first = DECODE_MEMBER(first);
     auto const count = DECODE_MEMBER(count);
     return T{first, count};
-  }
 
-  if constexpr (std::is_same<T, LowStringPtr>::value) {
+  } else if constexpr (std::is_same<T, const StringData*>::value) {
     auto const lo = decode_as_bytes<uint32_t>(buffer, pos);
     if (!(lo & kStringDataFlag)) {
-      return LowStringPtr(reinterpret_cast<const StringData*>(lo));
+      return reinterpret_cast<const StringData*>(lo);
     }
     auto const hi = decode_as_bytes<uint32_t>(buffer, pos);
     auto const both = (uint64_t(hi) << 32) | (uint64_t(lo) & ~kStringDataFlag);
-    return LowStringPtr(reinterpret_cast<const StringData*>(both));
-  }
+    return reinterpret_cast<const StringData*>(both);
 
-  if constexpr (std::is_same<T, MKey>::value) {
+  } else if constexpr (std::is_same<T, MKey>::value) {
     auto const mcode = DECODE_MEMBER(mcode);
     switch (mcode) {
       case MET: case MPT: case MQT: {
@@ -165,46 +163,44 @@ T decode(const Buffer& buffer, size_t& pos) {
       case MW:
         return T();
     }
-  }
+    always_assert(false);
 
-  if constexpr (std::is_same<T, NamedLocal>::value) {
+  } else if constexpr (std::is_same<T, NamedLocal>::value) {
     auto const base = safe_cast<int32_t>(decode<uint32_t>(buffer, pos));
     auto const name = base + kInvalidLocalName;
     auto const id   = DECODE_MEMBER(id) + NoLocalId;
     return T(name, id);
-  }
 
-  if constexpr (std::is_same<T, SSwitchTabEnt>::value) {
+  } else if constexpr (std::is_same<T, SSwitchTabEnt>::value) {
     auto const first = DECODE_MEMBER(first);
     auto const second = DECODE_MEMBER(second);
     return T{first, second};
-  }
 
-  if constexpr (is_compact_vector<T>::value) {
+  } else if constexpr (is_compact_vector<T>::value) {
     auto data = T(decode<uint32_t>(buffer, pos));
     for (auto& item : data) {
       using Item = typename std::remove_reference<decltype(item)>::type;
       item = decode<Item>(buffer, pos);
     }
     return data;
-  }
 
-  if constexpr (std::is_same<T, uint32_t>::value) {
+  } else if constexpr (std::is_same<T, uint32_t>::value) {
     auto const byte = decode_as_bytes<uint8_t>(buffer, pos);
     return byte == k32BitCode ? decode_as_bytes<uint32_t>(buffer, pos) :
            byte == k16BitCode ? decode_as_bytes<uint16_t>(buffer, pos) : byte;
-  }
 
-  if constexpr (std::is_same<T, Op>::value) {
+  } else if constexpr (std::is_same<T, Op>::value) {
     static_assert(sizeof(Op) <= sizeof(uint16_t), "");
     auto const byte = decode_as_bytes<uint8_t>(buffer, pos);
     if (sizeof(Op) == sizeof(uint8_t) || byte < k9BitOpShift) return Op(byte);
     auto const next = decode_as_bytes<uint8_t>(buffer, pos);
     return Op(safe_cast<uint16_t>(next) + k9BitOpShift);
-  }
 
-  if constexpr (std::is_trivially_copyable<T>::value) {
+  } else if constexpr (std::is_trivially_copyable<T>::value) {
     return decode_as_bytes<T>(buffer, pos);
+
+  } else {
+    static_assert(!sizeof(T), "unhandled type in decode<T>");
   }
 }
 
@@ -238,6 +234,13 @@ void encode(Buffer& buffer, const T& data) {
       base.flags = base.flags | FCallArgsFlags::EnforceReadonly;
     }
     encode(buffer, base);
+    auto namedArgNames = data.namedArgNames();
+    if (namedArgNames == nullptr) {
+      CompactVector<SString> emptyVec;
+      encode(buffer, emptyVec);
+    } else {
+      encode(buffer, *namedArgNames);
+    }
     encode(buffer, data.context());
     encode(buffer, data.asyncEagerTarget() - NoBlockId);
     if (data.enforceInOut()) {
@@ -260,16 +263,14 @@ void encode(Buffer& buffer, const T& data) {
   } else if constexpr (std::is_same<T, IterArgs>::value) {
     encode(buffer, data.flags);
     encode(buffer, data.iterId);
-    encode(buffer, data.keyId - IterArgs::kNoKey);
-    encode(buffer, data.valId);
 
   } else if constexpr (std::is_same<T, LocalRange>::value) {
     encode(buffer, data.first);
     encode(buffer, data.count);
 
-  } else if constexpr (std::is_same<T, LowStringPtr>::value) {
+  } else if constexpr (std::is_same<T, const StringData*>::value) {
     static_assert(alignof(StringData) % 2 == 0);
-    auto const raw = uintptr_t(data.get());
+    auto const raw = uintptr_t(data);
     if (raw <= std::numeric_limits<uint32_t>::max()) {
       encode_as_bytes(buffer, safe_cast<uint32_t>(raw));
     } else {
@@ -346,21 +347,35 @@ void encode(Buffer& buffer, const T& data) {
 #define IMM_FIVE(x, y, z, n, m)   IMM_FOUR(x, y, z, n) IMM(m, 5)
 #define IMM_SIX(x, y, z, n, m, o) IMM_FIVE(x, y, z, n, m) IMM(o, 6)
 
+#define USE_NA
+#define USE_ONE(x)                USE(x, 1)
+#define USE_TWO(x, y)             USE_ONE(x) USE(y, 2)
+#define USE_THREE(x, y, z)        USE_TWO(x, y) USE(z, 3)
+#define USE_FOUR(x, y, z, n)      USE_THREE(x, y, z) USE(n, 4)
+#define USE_FIVE(x, y, z, n, m)   USE_FOUR(x, y, z, n) USE(m, 5)
+#define USE_SIX(x, y, z, n, m, o) USE_FIVE(x, y, z, n, m) USE(o, 6)
+
+// Decode immediates into temporaries first (t1, t2, ...), then pass them
+// to the constructor. This ensures deterministic evaluation order, since
+// the order of evaluation in a parameter list is implementation-defined.
+#define IMM(type, n) \
+  auto t##n = decode<decltype(std::declval<T>().IMM_NAME_##type(n))>(buffer, pos);
+#define USE(type, n) std::move(t##n),
+#define O(op, imms, ...)                                             \
+  bc::op decode##op(const Buffer& buffer, size_t& pos) {             \
+    using T = bc::op;                                                \
+    IMM_##imms                                                       \
+    return T { USE_##imms };                                         \
+  }
+  OPCODES
+#undef O
+#undef USE
+#undef IMM
+
 BytecodeVec decodeBytecodeVec(const Buffer& buffer, size_t& pos) {
   FTRACE(3, "\ndecodeBytecodeVec: {} bytes\n", buffer.size());
   Trace::Indent _;
   auto bcs = BytecodeVec{};
-
-#define IMM(type, n) \
-  decode<decltype(std::declval<T>().IMM_NAME_##type(n))>(buffer, pos),
-#define O(op, imms, ...)           \
-    auto const decode_##op = [&] { \
-      using T = bc::op;            \
-      return T { IMM_##imms };     \
-    };
-    OPCODES
-#undef O
-#undef IMM
 
   bcs.resize(decode<uint32_t>(buffer, pos));
   for (auto& inst : bcs) {
@@ -369,25 +384,27 @@ BytecodeVec decodeBytecodeVec(const Buffer& buffer, size_t& pos) {
     ITRACE(4, "at {}: {}:\n", pos, opcodeToName(inst.op));
     Trace::Indent _;
 #define O(op, ...) \
-  case Op::op: new (&inst.op) bc::op(decode_##op()); break;
+  case Op::op: new (&inst.op) bc::op(decode##op(buffer, pos)); break;
     switch (inst.op) { OPCODES }
 #undef O
   }
+
+  bcs.shrink_to_fit();
   return bcs;
 }
+
+#define IMM(type, n) encode(buffer, data.IMM_NAME_##type(n));
+#define O(op, imms, ...)                                             \
+  void encode##op(Buffer& buffer, const bc::op& data) {              \
+    IMM_##imms                                                       \
+  }
+  OPCODES
+#undef O
+#undef IMM
 
 void encodeBytecodeVec(Buffer& buffer, const BytecodeVec& bcs) {
   FTRACE(3, "\nencodeBytecodeVec: {} elements\n", bcs.size());
   Trace::Indent _;
-
-#define IMM(type, n) encode(buffer, data.IMM_NAME_##type(n));
-#define O(op, imms, ...)                               \
-    auto const encode_##op = [&](const bc::op& data) { \
-      IMM_##imms                                       \
-    };
-    OPCODES
-#undef O
-#undef IMM
 
   encode(buffer, safe_cast<uint32_t>(bcs.size()));
   for (auto const& inst : bcs) {
@@ -395,7 +412,7 @@ void encodeBytecodeVec(Buffer& buffer, const BytecodeVec& bcs) {
     encode(buffer, safe_cast<uint32_t>(inst.srcLoc - kNoSrcLoc));
     ITRACE(4, "at {}: {}\n", buffer.size(), opcodeToName(inst.op));
     Trace::Indent _;
-#define O(op, ...) case Op::op: encode_##op(inst.op); break;
+#define O(op, ...) case Op::op: encode##op(buffer, inst.op); break;
     switch (inst.op) { OPCODES }
 #undef O
   }
@@ -409,6 +426,14 @@ void encodeBytecodeVec(Buffer& buffer, const BytecodeVec& bcs) {
 #undef IMM_FIVE
 #undef IMM_SIX
 
+#undef USE_NA
+#undef USE_ONE
+#undef USE_TWO
+#undef USE_THREE
+#undef USE_FOUR
+#undef USE_FIVE
+#undef USE_SIX
+
 //////////////////////////////////////////////////////////////////////
 
 BlockVec decodeBlockVec(const Buffer& buffer, size_t& pos) {
@@ -420,10 +445,11 @@ BlockVec decodeBlockVec(const Buffer& buffer, size_t& pos) {
       decode<ExnNodeId>(buffer, pos) + NoExnNodeId,
       decode<BlockId>(buffer, pos) + NoBlockId,
       decode<BlockId>(buffer, pos) + NoBlockId,
-      decode<uint8_t>(buffer, pos)
+      {decode<uint8_t>(buffer, pos)}
     };
     block.emplace(std::move(tmp));
   }
+  blocks.shrink_to_fit();
   return blocks;
 }
 
@@ -436,6 +462,7 @@ void encodeBlockVec(Buffer& buffer, const BlockVec& blocks) {
     encode(buffer, block->throwExit - NoBlockId);
     encode(buffer, block->initializer);
   }
+  buffer.shrink_to_fit();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -475,71 +502,37 @@ bool checkBlockVecs(const Func& func, const BlockVec& a, const BlockVec& b) {
 
 }
 
-void testCompression(Program& program) {
-  trace_time tracer("test compression");
-  auto total_full_size = size_t{0};
-  auto total_compressed_size = size_t{0};
-  auto temp = BlockVec{};
-  auto buffer = Buffer{};
-
-  auto test_compression_function = [&](Func& func) {
-    auto mf = WideFunc::mut(&func);
-    auto& blocks = mf.blocks();
-    encodeBlockVec(buffer, blocks);
-    std::swap(temp, blocks);
-    auto pos = size_t{0};
-    blocks = decodeBlockVec(buffer, pos);
-    always_assert(pos == buffer.size());
-    always_assert(checkBlockVecs(func, temp, blocks));
-    total_full_size += estimateHeapSize(blocks);
-    total_compressed_size += buffer.size();
-    buffer.clear();
-  };
-
-  for (auto& unit : program.units) {
-    for (auto& c : unit->classes) {
-      for (auto& m : c->methods) {
-        test_compression_function(*m);
-      }
-    }
-    for (auto& f : unit->funcs) {
-      test_compression_function(*f);
-    }
-  }
-
-  TRACE(1, "Overall compression ratio: %.2f\n",
-        1.0 * total_full_size / std::max(total_compressed_size, size_t{1}));
-}
-
 //////////////////////////////////////////////////////////////////////
 
-WideFunc::WideFunc(const Func* func, bool mut)
-    : m_func(const_cast<Func*>(func)) , m_mut(mut) {
-  DEBUG_ONLY auto const cls = m_func ? m_func->cls : nullptr;
-  TRACE(2, "WideFunc::%s(0x%lx): %s%s%s\n", m_mut ? "mut" : "cns",
-        uintptr_t(m_func), cls ? m_func->cls->name->data() : "",
-        cls ? "::" : "", m_func ? m_func->name->data() : "NULL");
-  if (!m_func || !m_func->rawBlocks) return;
-  assertx(!m_func->rawBlocks->empty());
+WideFunc::WideFunc(const Func* func, bool mut, bool create)
+  : m_func(const_cast<Func*>(func))
+  , m_mut(mut)
+{
+  assertx(m_func);
+  FTRACE(2, "WideFunc::{}: {}\n",
+         m_mut ? "mut" : "cns",
+         func_fullname(*m_func));
+  if (mut && create && !m_func->rawBlocks) return;
+  always_assert_flog(
+    m_func->rawBlocks && !m_func->rawBlocks->empty(),
+    "Attempting to decompress empty bytecode for {}",
+    func_fullname(*m_func)
+  );
   auto pos = size_t{0};
   m_blocks = decodeBlockVec(*func->rawBlocks, pos);
   assertx(pos == func->rawBlocks->size());
 }
 
 WideFunc::~WideFunc() {
-  DEBUG_ONLY auto const cls = m_func ? m_func->cls : nullptr;
-  TRACE(2, "~WideFunc::%s(0x%lx): %s%s%s\n", m_mut ? "mut" : "cns",
-        uintptr_t(m_func), cls ? m_func->cls->name->data() : "",
-        cls ? "::" : "", m_func ? m_func->name->data() : "NULL");
+  if (!m_func) return;
+  FTRACE(2, "~WideFunc::{}: {}\n",
+         m_mut ? "mut" : "cns",
+         func_fullname(*m_func));
   if (!m_mut) return;
-  if (m_blocks.empty()) {
-    if (m_func) m_func->rawBlocks.reset();
-    return;
-  }
   auto buffer = Buffer{};
   encodeBlockVec(buffer, m_blocks);
   if (!m_func->rawBlocks || buffer != *m_func->rawBlocks) {
-    TRACE(2, "~WideFunc::mut(0x%lx): updating blocks!\n", uintptr_t(m_func));
+    FTRACE(2, "~WideFunc::mut: updating blocks!\n");
     m_func->rawBlocks.emplace(std::move(buffer));
   }
 }
@@ -548,6 +541,19 @@ void WideFunc::release() {
   m_func = nullptr;
   m_mut = false;
   m_blocks.clear();
+}
+
+BlockVec WideFunc::uncompress(const CompressedBytecode& b) {
+  auto pos = size_t{0};
+  auto d = decodeBlockVec(b, pos);
+  assertx(pos == b.size());
+  return d;
+}
+
+CompressedBytecode WideFunc::compress(const BlockVec& v) {
+  Buffer buffer;
+  encodeBlockVec(buffer, v);
+  return buffer;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -559,6 +565,7 @@ void WideFunc::release() {
 CompressedBlockUpdate::CompressedBlockUpdate(BlockUpdateInfo&& in) {
   php::encode(raw, in);
   in = {};
+  raw.shrink_to_fit();
 }
 
 void CompressedBlockUpdate::expand(BlockUpdateInfo& out) {

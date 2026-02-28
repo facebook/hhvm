@@ -34,7 +34,7 @@ let expand_to_line_boundaries ?ranges source_text range =
     | Some ranges -> ranges
     | None -> get_line_boundaries (SourceText.text source_text)
   in
-  Caml.Array.fold_left
+  Stdlib.Array.fold_left
     (fun (st, ed) (line_start, line_end) ->
       let st =
         if st > line_start && st < line_end then

@@ -1,15 +1,16 @@
 <?hh
 
 class X implements Serializable {
-  public function serialize() {
+  public function serialize() :mixed{
     return 'true';
   }
-  public function unserialize($serialized ) {
+  public function unserialize($serialized ) :mixed{
   }
 }
-function test() {
-  $a = varray[];
-  $a[] = $x = new X;
+function test() :mixed{
+  $a = vec[];
+  $x = new X;
+  $a[] = $x;
   $a[] = $x;
   $a[] = $x;
   apc_store('foo', $a);
@@ -20,6 +21,6 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_1827() {
+function main_1827() :mixed{
 test();
 }

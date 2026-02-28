@@ -30,18 +30,6 @@ using std::vector;
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////////
-// PHP Exceptions and Classes
-HPHP::Class* ImagickException::cls = nullptr;
-HPHP::Class* ImagickDrawException::cls = nullptr;
-HPHP::Class* ImagickPixelException::cls = nullptr;
-HPHP::Class* ImagickPixelIteratorException::cls = nullptr;
-
-HPHP::Class* Imagick::cls = nullptr;
-HPHP::Class* ImagickDraw::cls = nullptr;
-HPHP::Class* ImagickPixel::cls = nullptr;
-HPHP::Class* ImagickPixelIterator::cls = nullptr;
-
-//////////////////////////////////////////////////////////////////////////////
 // IO
 bool isMagickPseudoFormat(const String& path, char mode /* = '*' */) {
   static const vector<pair<string, string>> pseudoFormats = {
@@ -159,7 +147,7 @@ void imagickWriteOp(MagickWand* wand,
 }
 
 ALWAYS_INLINE
-FILE* getFILE(const Resource& res, bool isWrite) {
+FILE* getFILE(const OptResource& res, bool isWrite) {
   auto f = dyn_cast_or_null<File>(res);
   if (f == nullptr || f->isClosed()) {
     IMAGICK_THROW("Invalid stream resource");
@@ -183,7 +171,7 @@ FILE* getFILE(const Resource& res, bool isWrite) {
 }
 
 void imagickReadOp(MagickWand* wand,
-                   const Resource& res,
+                   const OptResource& res,
                    const ImagickHandleOp& op) {
   auto fp = getFILE(res, false);
   auto status = op(wand, fp);
@@ -194,7 +182,7 @@ void imagickReadOp(MagickWand* wand,
 }
 
 void imagickWriteOp(MagickWand* wand,
-                    const Resource& res,
+                    const OptResource& res,
                     const String& format,
                     const ImagickHandleOp& op) {
   auto fp = getFILE(res, true);
@@ -320,16 +308,18 @@ std::vector<PointInfo> toPointInfoArray(const Array& coordinates) {
 //////////////////////////////////////////////////////////////////////////////
 // ImagickExtension
 ImagickExtension::ImagickExtension() :
-  Extension("imagick", "3.2.0b2") {
+  Extension("imagick", "3.2.0b2", NO_ONCALL_YET) {
+}
+
+void ImagickExtension::moduleRegisterNative() {
+  registerNativeImagickConstants();
+  registerNativeImagickClass();
+  registerNativeImagickDrawClass();
+  registerNativeImagickPixelClass();
+  registerNativeImagickPixelIteratorClass();
 }
 
 void ImagickExtension::moduleInit() {
-  loadImagickConstants();
-  loadImagickClass();
-  loadImagickDrawClass();
-  loadImagickPixelClass();
-  loadImagickPixelIteratorClass();
-  loadSystemlib();
   MagickWandGenesis();
 }
 
@@ -338,10 +328,10 @@ void ImagickExtension::moduleShutdown() {
 }
 
 void ImagickExtension::threadInit() {
-  IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(this, IniSetting::Mode::Request,
                    "imagick.locale_fix", "0",
                    &s_ini_setting->m_locale_fix);
-  IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(this, IniSetting::Mode::Request,
                    "imagick.progress_monitor", "0",
                    &s_ini_setting->m_progress_monitor);
 }

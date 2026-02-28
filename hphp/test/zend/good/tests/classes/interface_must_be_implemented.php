@@ -1,7 +1,7 @@
 <?hh
 
 interface if_a {
-    function f_a();
+    function f_a():mixed;
 }
 
 class derived_a implements if_a {

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_iptcembed_stream() {
+function main_iptcembed_stream() :mixed{
 $jpg = base64_encode(file_get_contents(__DIR__."/iptc-data.jpg"));
 
 $s = iptcembed(

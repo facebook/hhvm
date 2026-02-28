@@ -1,6 +1,10 @@
 Parameter: $_
--------------
-string
+---
+function UNSAFE_CAST<Tin, Tout>(
+  Tin $t,
+  optional ?HH\FormatString<nothing> $msg
+)[]: Tout
+---
 `UNSAFE_CAST` allows you to lie to the type checker. **This is almost
 always a bad idea**. You might get an exception, or you might get an
 unexpected value. Even scarier, you might cause an exception in a
@@ -24,5 +28,5 @@ refactoring. Your code will be more reliable, the type checker can
 help you, and future changes will be less scary.
 
 `UNSAFE_CAST` is still better than `HH_FIXME`, because `HH_FIXME`
-applies the entire next line, and `UNSAFE_CAST` applies to a single
+applies to the entire next line, and `UNSAFE_CAST` applies to a single
 expression.

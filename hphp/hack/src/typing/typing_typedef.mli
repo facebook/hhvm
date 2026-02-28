@@ -7,4 +7,5 @@
  *
  *)
 
+(** This is a helper for [Typing_toplevel.typedef_def]. Call that instead. *)
 val typedef_def : Provider_context.t -> Nast.typedef -> Tast.typedef

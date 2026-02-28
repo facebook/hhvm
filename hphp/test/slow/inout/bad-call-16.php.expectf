@@ -1,0 +1,1 @@
+Fatal error: `$_ENV` is no longer accessible as a magic global variable. Use the HH\global_* functions instead. in %s/bad-call-16.php on line 4

@@ -13,7 +13,7 @@
    Arguments  : Nil
    Returns    : set of locale as array
 */
-function list_system_locales() {
+function list_system_locales() :mixed{
   // start the buffering of next command to internal output buffer
   ob_start();
 
@@ -38,7 +38,7 @@ function list_system_locales() {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing setlocale() by passing multiple valid/invalid locales as argument ***\n";
 //set of currency symbol according to above list of locales
-$currency_symbol = darray[
+$currency_symbol = dict[
   "en_US.utf8" => "USD",
   "en_AU.utf8" => "AUD",
   "ko_KR.utf8" => "KRW",

@@ -1,12 +1,12 @@
 <?hh
 
-function f(inout $a) {
+function f(inout $a) :mixed{
 }
  class T {
 }
 
  <<__EntryPoint>>
-function main_1082() {
+function main_1082() :mixed{
 $a = new T();
  $a->b = 10;
  $__b = $a->b;

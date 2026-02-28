@@ -1,26 +1,26 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function nonliteral($d) {
+function nonliteral($d) :mixed{
   list($a, $b) = $d;
   var_dump($a);
   var_dump($b);
 }
 
-function literal() {
+function literal() :mixed{
   list($a, $b) = dict[0 => 'abc', 1 => 'def'];
   var_dump($a);
   var_dump($b);
 }
 
-function literal_throw() {
+function literal_throw() :mixed{
   list($a, $b, $c) = dict[100 => 'abc', 200 => 'def'];
   var_dump($a);
   var_dump($b);
   var_dump($c);
 }
 
-function main() {
+function main() :mixed{
   nonliteral(dict[0 => 0, 1 => 1, 2 => 2]);
   literal();
 
@@ -38,6 +38,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_destructure() {
+function main_destructure() :mixed{
 main();
 }

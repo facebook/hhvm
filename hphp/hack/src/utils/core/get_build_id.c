@@ -16,24 +16,38 @@
 #include <string.h>
 #include <time.h>
 
+// from https://fburl.com/code/0l48h1h9
+// where meanings are given in https://fburl.com/code/obr5oue8
 extern const char* const BuildInfo_kRevision;
 extern const uint64_t BuildInfo_kRevisionCommitTimeUnix;
 extern const char* const BuildInfo_kBuildMode;
+extern const char* const BuildInfo_kPackageName;
 
 /**
  * Export the constants provided by Facebook's build system to ocaml-land, since
  * their FFI only allows you to call functions, not reference variables. Doing
  * it this way makes sense for Facebook internally since our build system has
- * machinery for providing these two constants automatically (and no machinery
+ * machinery for providing these constants automatically (and no machinery
  * for doing codegen in a consistent way to build an ocaml file with them) but
  * is very roundabout for external users who have to have CMake codegen these
- * constants anyways. Sorry about that.
+ * constants anyways. Sorry about that. scripts/gen_build_id.ml may help.
  */
 value hh_get_build_revision(void) {
   CAMLparam0();
   CAMLlocal1(result);
 
   const char* const buf = BuildInfo_kRevision;
+  const size_t len = strlen(buf);
+  result = caml_alloc_initialized_string(len, buf);
+
+  CAMLreturn(result);
+}
+
+value hh_get_build_package_name(void) {
+  CAMLparam0();
+  CAMLlocal1(result);
+
+  const char* const buf = BuildInfo_kPackageName;
   const size_t len = strlen(buf);
   result = caml_alloc_initialized_string(len, buf);
 

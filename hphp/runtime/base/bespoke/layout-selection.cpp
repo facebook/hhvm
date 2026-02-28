@@ -17,18 +17,21 @@
 
 #include "hphp/runtime/base/bespoke/layout-selection.h"
 
+#include <hphp/runtime/vm/jit/prof-data.h>
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/bespoke/key-coloring.h"
 #include "hphp/runtime/base/bespoke/layout.h"
+#include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/union-find.h"
 
 namespace HPHP::bespoke {
 
-TRACE_SET_MOD(bespoke);
+TRACE_SET_MOD(bespoke)
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -60,7 +63,7 @@ struct Decision {
 };
 
 uint64_t load(const std::atomic<uint64_t>& x) {
-  return x.load(std::memory_order_relaxed);
+  return x.load(std::memory_order_acquire);
 }
 
 double probabilityOfEscalation(const LoggingProfile& profile) {
@@ -164,7 +167,7 @@ struct StructAnalysisResult {
 };
 
 double keyCoverageThreshold() {
-  return RO::EvalBespokeStructDictKeyCoverageThreshold / 100;
+  return Cfg::Eval::BespokeStructDictKeyCoverageThreshold / 100;
 }
 
 template <typename T, typename I, typename F>
@@ -182,7 +185,7 @@ void mergeValid(I&& begin, I&& end, UnionFind<T>& uf, F&& elem) {
 // Sort keys in KeyOrder by descending order of frequency.
 KeyOrder sortKeyOrder(const KeyOrder& ko, const KeyFrequencies& keys) {
   if (ko.empty() || !ko.valid()) return ko;
-  auto const frequency = [&](LowStringPtr key) {
+  auto const frequency = [&](PackedStringPtr key) {
     auto const it = keys.find(key.get());
     return it == keys.end() ? 0 : it->second;
   };
@@ -503,7 +506,7 @@ StructLayout::FieldVector collectFieldVector(
 // only ones at which we'll JIT struct access code.
 bool mergeStructsAtSink(const SinkProfile& profile, const StructAnalysis& sa) {
   // 1. We must have sufficient LoggingArray coverage for the given sink.
-  auto const p_cutoff = RO::EvalBespokeArraySinkSpecializationThreshold / 100;
+  auto const p_cutoff = Cfg::Eval::BespokeArraySinkSpecializationThreshold / 100;
   auto const p_sampled = probabilityOfSampled(profile);
   if (p_sampled < p_cutoff) return false;
 
@@ -545,6 +548,8 @@ void initStructAnalysis(const LoggingProfile& profile, StructAnalysis& sa) {
         return true;
       case LocationType::InstanceProperty:
       case LocationType::StaticProperty:
+      case LocationType::TypeConstant:
+      case LocationType::TypeAlias:
       case LocationType::SrcKey:
         auto const vad = profile.data->staticSampledArray;
         if (vad != nullptr && vad->isDictType()) return true;
@@ -574,20 +579,25 @@ void updateStructAnalysis(const SinkProfile& profile, StructAnalysis& sa) {
 }
 
 StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
-  auto const p_cutoff = RO::EvalBespokeArraySourceSpecializationThreshold / 100;
+  auto const p_cutoff = Cfg::Eval::BespokeArraySourceSpecializationThreshold / 100;
   auto groups = std::vector<StructGroup>{};
 
   // Sort groups by weight to preferentially create hot struct layouts.
-  // We also filter out groups that are likely to need escalation here.
+  // We also filter out groups that are likely to need escalation here and
+  // groups that have a type structure as a source.
   sa.union_find.forEachGroup([&](auto& group) {
     double weight = 0;
     double p_escalated = 0;
+    double type_structs = 0;
     for (auto const source : group) {
+      if (source->getLayout().is_type_structure()) {
+        type_structs++;
+      }
       auto const source_weight = source->getProfileWeight();
       weight += source_weight;
       p_escalated += source_weight * probabilityOfEscalation(*source);
     }
-    if (weight > 0 && !(p_escalated / weight > 1 - p_cutoff)) {
+    if (type_structs == 0 && weight > 0 && !(p_escalated / weight > 1 - p_cutoff)) {
       groups.emplace_back(std::move(group), weight);
     }
   });
@@ -623,36 +633,27 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
     LayoutWeightVector(layoutWeights.begin(), layoutWeights.end());
 
   // Find a colorable subset of the selected layouts.
-  auto const [coloringEnd, coloring] = findKeyColoring(layoutVector);
-  if (!coloring) return {};
+  auto coloring = findKeyColoring(layoutVector);
 
-  // Remove groups with missing or discarded StructLayouts.
+  // Remove groups with missing StructLayouts.
   {
-    auto discarded = folly::F14FastSet<const StructLayout*>();
-    std::transform(
-      coloringEnd,
-      layoutVector.cend(),
-      std::inserter(discarded, discarded.end()),
-      [&](auto const& a) { return a.first; }
-    );
     groups.erase(
       std::remove_if(
         groups.begin(),
         groups.end(),
         [&](auto const& a) {
-          return a.layout == nullptr ||
-                 discarded.find(a.layout) != discarded.end();
+          return a.layout == nullptr;
         }
       ), groups.end()
     );
   }
 
   // Apply coloring to strings, and then have each layout create its hash map.
-  applyColoring(*coloring);
+  applyColoring(coloring, layoutVector);
   std::for_each(
-    layoutVector.cbegin(), coloringEnd,
+    layoutVector.cbegin(), layoutVector.cend(),
     [&](auto const& layout) {
-      layout.first->createColoringHashMap();
+      layout.first->createColoringHashMap(coloring.numColoredFields);
     }
   );
 
@@ -684,7 +685,7 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
 ArrayLayout selectSourceLayout(
     LoggingProfile& profile, const StructAnalysisResult& sar) {
   assertx(profile.data);
-  auto const mode = RO::EvalBespokeArraySpecializationMode;
+  auto const mode = Cfg::Eval::BespokeArraySpecializationMode;
   if (mode == 1 || mode == 2) return ArrayLayout::Vanilla();
 
   // 1. Use a struct layout if the union-find algorithm chose one.
@@ -704,7 +705,7 @@ ArrayLayout selectSourceLayout(
 
   // 2. If we aren't emitting monotypes, use a vanilla layout.
 
-  if (!RO::EvalEmitBespokeMonotypes) return ArrayLayout::Vanilla();
+  if (!Cfg::Eval::EmitBespokeMonotypes) return ArrayLayout::Vanilla();
 
   // 3. If the array is a runtime source, use a vanilla layout.
   // TODO(mcolavita): We can eventually support more general runtime sources.
@@ -713,7 +714,7 @@ ArrayLayout selectSourceLayout(
 
   // 4. If we escalate too often, use a vanilla layout.
 
-  auto const p_cutoff = RO::EvalBespokeArraySourceSpecializationThreshold / 100;
+  auto const p_cutoff = Cfg::Eval::BespokeArraySourceSpecializationThreshold / 100;
   auto const p_escalated = probabilityOfEscalation(profile);
   if (p_escalated > 1 - p_cutoff) return ArrayLayout::Vanilla();
 
@@ -741,28 +742,29 @@ ArrayLayout selectSourceLayout(
   return ArrayLayout::Vanilla();
 }
 
-Decision<ArrayLayout> makeSinkDecision(
+std::vector<Decision<ArrayLayout>> makeSinkDecisions(
     const SinkProfile& profile, const StructAnalysisResult& sar) {
   assertx(profile.data);
   using DAL = Decision<ArrayLayout>;
-  auto const mode = RO::EvalBespokeArraySpecializationMode;
-  if (mode == 1) return {ArrayLayout::Vanilla(), 1.0};
-  if (mode == 2) return {ArrayLayout::Top(), 1.0};
+  auto const mode = Cfg::Eval::BespokeArraySpecializationMode;
+  if (mode == 1) return {{ArrayLayout::Vanilla(), 1.0}};
+  if (mode == 2) return {{ArrayLayout::Top(), 1.0}};
 
   auto const it = sar.sinks.find(&profile);
-  if (it != sar.sinks.end()) return it->second;
+  if (it != sar.sinks.end()) return {it->second};
 
   auto const sampled = load(profile.data->sampledCount);
   auto const unsampled = load(profile.data->unsampledCount);
+  auto const type_structures = load(profile.data->typeStructureCount);
   if (!sampled) {
-    return unsampled ? DAL{ArrayLayout::Vanilla(), 1.0}
-                     : DAL{ArrayLayout::Top(), 1.0};
+    return unsampled ? std::vector<DAL>({DAL{ArrayLayout::Vanilla(), 1.0}})
+                     : std::vector<DAL>({DAL{ArrayLayout::Top(), 1.0}});
   }
 
   uint64_t vanilla = 0;
   uint64_t monotype = 0;
   uint64_t is_struct = 0;
-  uint64_t total = 0;
+  uint64_t total = type_structures;
 
   std::unordered_map<const bespoke::Layout*, uint64_t> structs;
 
@@ -780,21 +782,73 @@ Decision<ArrayLayout> makeSinkDecision(
     total += count;
   }
 
-  auto const p_cutoff = RO::EvalBespokeArraySinkSpecializationThreshold / 100;
+  auto const p_cutoff = isIteratorBaseAccess(profile.key.second.op()) ?
+    Cfg::Eval::BespokeArraySinkIteratorSpecializationThreshold / 100 :
+    Cfg::Eval::BespokeArraySinkSpecializationThreshold / 100;
+
+  auto const layoutThreshold = Cfg::Eval::BespokeArraySinkMultiLayoutThreshold;
+
   auto const p_sampled = 1.0 * sampled / (sampled + unsampled);
 
   if (!total) {
     auto const p_vanilla = 1 - p_sampled;
-    if (p_vanilla >= p_cutoff) return {ArrayLayout::Vanilla(), p_vanilla};
-    return {ArrayLayout::Top(), 1.0};
+    if (p_vanilla >= p_cutoff) return {{ArrayLayout::Vanilla(), p_vanilla}};
+    return {{ArrayLayout::Top(), 1.0}};
   }
 
   auto const p_vanilla = p_sampled * vanilla / total + (1 - p_sampled);
   auto const p_monotype = p_sampled * monotype / total;
   auto const p_is_struct = p_sampled * is_struct / total;
+  auto const p_is_type_structures = p_sampled * type_structures / total;
 
-  if (p_vanilla >= p_cutoff) return {ArrayLayout::Vanilla(), p_vanilla};
+  const auto sortedStructs = [&](){
+    std::vector<std::pair<const bespoke::Layout*, double>> structVec;
+    structVec.reserve(structs.size());
 
+    for (auto const& pair : structs) {
+      auto const p_this = p_sampled * pair.second / total;
+      structVec.push_back(std::make_pair(pair.first, p_this));
+    }
+
+    std::sort(
+      structVec.begin(),
+      structVec.end(),
+      [](auto const& p1, auto const& p2) {
+        return p1.second > p2.second;
+      }
+    );
+
+    return structVec;
+  }();
+
+  // Handle vanilla layouts
+  if (p_vanilla >= p_cutoff) {
+
+    // When vanilla + top struct cover all sources, return both
+    if (p_is_struct > 0 &&
+        p_vanilla + p_is_struct >= layoutThreshold &&
+        !isIteratorBaseAccess(profile.key.second.op())) {
+
+      // if single struct, return it
+      if (sortedStructs.size() == 1) {
+        auto const [layout, prob] = sortedStructs[0];
+        return {
+          {ArrayLayout::Vanilla(), p_vanilla},
+          {ArrayLayout(layout), prob}
+        };
+      }
+
+      return {
+        {ArrayLayout::Vanilla(), p_vanilla},
+        {ArrayLayout(TopStructLayout::Index()), p_is_struct}
+      };
+    }
+
+    // Otherwise return just vanilla
+    return {{ArrayLayout::Vanilla(), p_vanilla}};
+  }
+
+  // Handle monotype layouts
   if (p_monotype >= p_cutoff) {
     using AK = ArrayData::ArrayKind;
     auto const vec = load(profile.data->arrCounts[AK::kVecKind / 2]);
@@ -803,61 +857,150 @@ Decision<ArrayLayout> makeSinkDecision(
 
     assertx(vec || dict || keyset);
     if (bool(vec) + bool(dict) + bool(keyset) != 1) {
-      return {ArrayLayout::Top(), 1.0};
+      return {{ArrayLayout::Top(), 1.0}};
     }
 
     auto const p_cutoff_val = 1 + p_cutoff - p_monotype;
     auto const dt_decision = selectValType(profile, p_cutoff_val);
     auto const dt = dt_decision.value;
-    if (dt == kInvalidDataType) return {ArrayLayout::Top(), 1.0};
+    if (dt == kInvalidDataType) return {{ArrayLayout::Top(), 1.0}};
     auto const p_monotype_val = p_monotype + dt_decision.coverage - 1;
 
     if (vec) {
-      return dt == KindOfUninit
-        ? DAL{ArrayLayout(TopMonotypeVecLayout::Index()), p_monotype_val}
-        : DAL{ArrayLayout(MonotypeVecLayout::Index(dt)), p_monotype_val};
+      return dt == KindOfUninit ?
+        std::vector<DAL>({
+          {ArrayLayout(TopMonotypeVecLayout::Index()), p_monotype_val}
+        }) :
+        std::vector<DAL>({
+          {ArrayLayout(MonotypeVecLayout::Index(dt)), p_monotype_val}}
+        );
     }
 
     if (dict) {
       auto const p_cutoff_key = 1 + p_cutoff - p_monotype_val;
       auto const kt_decision = selectKeyType(profile, p_cutoff_key);
       auto const kt = kt_decision.value;
-      if (kt == KeyTypes::Any) return {ArrayLayout::Bespoke(), p_monotype_val};
+      if (kt == KeyTypes::Any) return {{ArrayLayout::Bespoke(), p_monotype_val}};
       auto const p_monotype_key = p_monotype_val + kt_decision.coverage - 1;
-      return dt == KindOfUninit
-        ? DAL{ArrayLayout(TopMonotypeDictLayout::Index(kt)), p_monotype_key}
-        : DAL{ArrayLayout(MonotypeDictLayout::Index(kt, dt)), p_monotype_key};
+      return dt == KindOfUninit ?
+        std::vector<DAL>({
+          {ArrayLayout(TopMonotypeDictLayout::Index(kt)), p_monotype_key}
+        }) :
+        std::vector<DAL>({
+          {ArrayLayout(MonotypeDictLayout::Index(kt, dt)), p_monotype_key}
+        });
     }
   }
 
+  if (p_is_type_structures >= p_cutoff) {
+    return {{ArrayLayout(TypeStructure::GetLayoutIndex()), p_is_type_structures}};
+  }
+
+  auto const selectMultipleLayouts = [&](double p1, double p2){
+    // Do not select multiple layouts for iterator ops
+    if (isIteratorBaseAccess(profile.key.second.op())) return false;
+
+    // Require at least cutoff for multiple layouts
+    if (p1 + p2 < p_cutoff) return false;
+
+    // Require at least 1 of the layouts to be above the min threshold to gate
+    // multiple layouts to only those that have a significant skew.
+    auto const minThreshold =
+      Cfg::Eval::BespokeArraySinkSpecializationMinThreshold / 100;
+    if (p1 < minThreshold && p2 < minThreshold) return false;
+
+    return true;
+  };
+
+  // Handle struct layouts
   if (p_is_struct >= p_cutoff) {
-    for (auto const& pair : structs) {
-      auto const p_this = p_sampled * pair.second / total;
-      if (p_this >= p_cutoff) return {ArrayLayout(pair.first), p_this};
+    auto const& [layout_first, p_first] = sortedStructs[0];
+
+    if (sortedStructs.size() > 1 &&
+        !isIteratorBaseAccess(profile.key.second.op())) {
+      auto const& [layout_second, p_second] = sortedStructs[1];
+
+      if (p_first + p_second >= p_cutoff &&
+          selectMultipleLayouts(p_first, p_second)) {
+        return {
+          {ArrayLayout(layout_first), p_first},
+          {ArrayLayout(layout_second), p_second},
+        };
+      }
     }
-    return {ArrayLayout(TopStructLayout::Index()), p_is_struct};
+
+    if (p_first >= p_cutoff) {
+      return {{ArrayLayout(layout_first), p_first}};
+    }
+
+    // When top struct + vanilla cover all sources, return both
+    if (p_vanilla > 0 &&
+        p_is_struct + p_vanilla >= layoutThreshold &&
+        !isIteratorBaseAccess(profile.key.second.op())) {
+      return {
+        {ArrayLayout(TopStructLayout::Index()), p_is_struct},
+        {ArrayLayout::Vanilla(), p_vanilla}
+      };
+    }
+
+    return {{ArrayLayout(TopStructLayout::Index()), p_is_struct}};
   }
 
-  return {ArrayLayout::Top(), 1.0};
+  // Handle combined vanilla + struct layouts
+  if (selectMultipleLayouts(p_vanilla, p_is_struct)) {
+    auto const structLayout = sortedStructs.size() == 1 ?
+      DAL({ArrayLayout(sortedStructs[0].first), sortedStructs[0].second}) :
+      DAL({ArrayLayout(TopStructLayout::Index()), p_is_struct});
+
+    return p_vanilla > p_is_struct ?
+      std::vector<DAL>({{ArrayLayout::Vanilla(), p_vanilla}, structLayout}) :
+      std::vector<DAL>({structLayout, {ArrayLayout::Vanilla(), p_vanilla}});
+    }
+
+  return {{ArrayLayout::Top(), 1.0}};
 }
 
-SinkLayout selectSinkLayout(
+SinkLayouts selectSinkLayouts(
     const SinkProfile& profile, const StructAnalysisResult& sar) {
-  auto const decision = makeSinkDecision(profile, sar);
-  auto const sideExit = [&]{
-    auto const p_cutoff = RO::EvalBespokeArraySinkSideExitThreshold / 100;
-    if (decision.coverage < p_cutoff) return false;
+  auto const decisions = makeSinkDecisions(profile, sar);
+  assertx(decisions.size() > 0);
+
+  auto const sideExit = [&] {
+    // We do not specialize iterators for bespoke layouts unless we side exit.
+    if (isIteratorBaseAccess(profile.key.second.op())) return true;
+
+    auto const coverage = std::accumulate(
+      decisions.begin(),
+      decisions.end(),
+      0.0,
+      [](double acc, const bespoke::Decision<ArrayLayout>& decision){
+        return acc + decision.coverage;
+      }
+    );
+
+    if (coverage < Cfg::Eval::BespokeArraySinkSideExitThreshold / 100) {
+      return false;
+    }
 
     auto const count = profile.data->sources.size();
-    if (count > RO::EvalBespokeArraySinkSideExitMaxSources) return false;
+    if (count > Cfg::Eval::BespokeArraySinkSideExitMaxSources) return false;
 
-    auto const min_samples = RO::EvalBespokeArraySinkSideExitMinSampleCount;
+    auto const min_samples = Cfg::Eval::BespokeArraySinkSideExitMinSampleCount;
     for (auto const& it : profile.data->sources) {
       if (it.second < min_samples) return false;
     }
+
     return true;
   }();
-  return {decision.value, sideExit};
+
+  SinkLayouts sls;
+  sls.sideExit = sideExit;
+
+  for (auto const& decision : decisions) {
+    sls.layouts.push_back({decision.value, decision.coverage});
+  }
+
+  return sls;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -871,18 +1014,64 @@ ArrayLayout layoutForSource(SrcKey sk) {
   return profile ? profile->getLayout() : ArrayLayout::Vanilla();
 }
 
-SinkLayout layoutForSink(const jit::TransIDSet& ids, SrcKey sk) {
-  auto result = SinkLayout{};
-  for (auto const id : ids) {
-    auto const profile = getSinkProfile(id, sk);
-    if (!profile) continue;
-    auto const sl = profile->getLayout();
-    result.layout = result.layout | sl.layout;
-    result.sideExit &= sl.sideExit;
+// Computes the layouts for a given sink by looking at the layouts for each
+// TransID. If there are <= 2 total layouts then they are returned in frequency
+// order. If there are more than 2 layouts, they will be unioned and returned.
+SinkLayouts layoutsForSink(
+    const jit::TransIDSet& ids, SrcKey sk, ArrayLayout knownLayout) {
+  auto result = SinkLayouts{};
+
+  // Track layout frequencies across the multiple layouts
+  folly::F14FastMap<uint16_t, double> layoutFrequencies;
+
+  for (auto const& id : ids) {
+    auto const transCounter = jit::profData()->transCounter(id);
+    if (auto const profile = getSinkProfile(id, sk)) {
+      auto sls = profile->getLayouts();
+      result.sideExit &= sls.sideExit;
+
+      // Record the frequencies for each layout
+      for (auto const& layout : sls.layouts) {
+        auto const l = layout.layout & knownLayout;
+        if (l == ArrayLayout::Bottom()) continue;
+        layoutFrequencies[l.toUint16()] += layout.coverage * transCounter;
+      }
+    }
   }
-  if (result.layout == ArrayLayout::Bottom()) {
-    return {ArrayLayout::Top(), false};
+
+  // For <= 2 layouts just return them in sorted order
+  if (layoutFrequencies.size() <= 2 && !isIteratorBaseAccess(sk.op())) {
+    std::vector<std::pair<uint16_t, double>>
+      sortedFrequencies(layoutFrequencies.begin(), layoutFrequencies.end());
+    std::sort(
+      sortedFrequencies.begin(),
+      sortedFrequencies.end(),
+      [](auto const& p1, auto const& p2){
+        return p1.second > p2.second;
+      }
+    );
+
+    for (auto const& [layout, _] : sortedFrequencies) {
+      result.layouts.push_back(SinkLayout{ArrayLayout::FromUint16(layout)});
+    }
+  } else {
+    // Otherwise union all of the layouts and return the result
+    SinkLayout sl;
+    for (auto const& [layout, _] : layoutFrequencies) {
+      sl.layout = sl.layout | ArrayLayout::FromUint16(layout);
+    }
+
+    if (sl.layout == ArrayLayout::Bottom()) {
+      return {{{knownLayout, 1.0}}, false};
+    }
+
+    result.layouts = {std::move(sl)};
   }
+
+  if (result.layouts.empty()) {
+    return {{{knownLayout, 1.0}}, false};
+  }
+
   return result;
 }
 
@@ -892,15 +1081,16 @@ void selectBespokeLayouts() {
   if (Layout::HierarchyFinalized()) return;
 
   setLoggingEnabled(false);
+
   auto const sar = []{
-    if (!RO::EvalEmitBespokeStructDicts) return StructAnalysisResult();
+    if (!Cfg::Eval::EmitBespokeStructDicts) return StructAnalysisResult();
     StructAnalysis sa;
     eachSource([&](auto const& x) { initStructAnalysis(x, sa); });
     eachSink([&](auto const& x) { updateStructAnalysis(x, sa); });
     return finishStructAnalysis(sa);
   }();
   eachSource([&](auto& x) { x.setLayout(selectSourceLayout(x, sar)); });
-  eachSink([&](auto& x) { x.setLayout(selectSinkLayout(x, sar)); });
+  eachSink([&](auto& x) { x.setLayouts(selectSinkLayouts(x, sar)); });
   Layout::FinalizeHierarchy();
   startExportProfiles();
 }

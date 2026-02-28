@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 error_reporting(E_ALL);
 
-$filename = __SystemLib\hphp_test_tmppath('with_files.bz');
+$filename = sys_get_temp_dir().'/'.'with_files.bz';
 $str = "This is a test string.\n";
 $bz = bzopen($filename, "w");
 bzwrite($bz, $str);

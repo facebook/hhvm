@@ -1,7 +1,7 @@
 <?hh
 
-function foo() {
-  $x = darray[0 => 1];
+function foo() :mixed{
+  $x = dict[0 => 1];
   for ($i = 0; $i < 2; ++$i) {
     $x[$i] = 'a';
   }
@@ -14,6 +14,6 @@ function foo() {
 
 
 <<__EntryPoint>>
-function main_array_060() {
+function main_array_060() :mixed{
 foo();
 }

@@ -1,0 +1,12 @@
+//// redundant_unsafe_nonnull_cast.php
+<?hh
+
+function redundant_unsafe_casts(?string $str): void {
+  HH\FIXME\UNSAFE_NONNULL_CAST($str); // Not redundant
+  $str as nonnull;
+  $str; // Redundant
+}
+
+
+There were input 1 patches for 1 files.
+Dropped patch count: 0 (0 overlapping, 0 original not found)

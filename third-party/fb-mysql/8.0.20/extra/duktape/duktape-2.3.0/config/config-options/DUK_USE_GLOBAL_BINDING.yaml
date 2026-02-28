@@ -1,0 +1,10 @@
+define: DUK_USE_GLOBAL_BINDING
+introduced: 2.1.0
+default: false
+tags:
+  - ecmascript
+  - experimental
+description: >
+  Provide a 'global' binding (https://github.com/tc39/proposal-global).
+  Disabled by default because it's still a proposal and there may be
+  reasons it won't be widely implemented: https://github.com/tc39/proposal-global/issues/20.

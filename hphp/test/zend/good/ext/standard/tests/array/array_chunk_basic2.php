@@ -8,21 +8,21 @@
 echo "*** Testing array_chunk() : basic functionality ***\n";
 $size = 2;
 
-$input_arrays = varray[
+$input_arrays = vec[
   // array with default keys - numeric values
-  varray[1, 2, 3, 4, 5],
+  vec[1, 2, 3, 4, 5],
 
   // array with default keys - string values
-  varray['value1', "value2", "value3"],
+  vec['value1', "value2", "value3"],
 
   // associative arrays - key as string
-  darray['key1' => 1, "key2" => 2, "key3" => 3],
+  dict['key1' => 1, "key2" => 2, "key3" => 3],
 
   // associative arrays - key as numeric
-  darray[1 => 'one', 2 => "two", 3 => "three"],
+  dict[1 => 'one', 2 => "two", 3 => "three"],
 
   // array containing elements with/without keys
-  darray[1 => 'one', 2 => 'two', 3 => 'three', 4 => 4, "five" => 5]
+  dict[1 => 'one', 2 => 'two', 3 => 'three', 4 => 4, "five" => 5]
 ];
 
 $count = 1;

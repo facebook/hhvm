@@ -1,6 +1,6 @@
 <?hh
 
-function test_standard_calls() {
+function test_standard_calls() :mixed{
   echo '========= ', __FUNCTION__, ' ==========', "\n";
   variadic_only_no_vv('a', 'b', 'c');
   variadic_only('a', 'b', 'c');
@@ -21,7 +21,7 @@ function test_standard_calls() {
   echo "\n\n";
 }
 
-function test_standard_insuffient_calls() {
+function test_standard_insuffient_calls() :mixed{
   echo '========= ', __FUNCTION__, ' ==========', "\n";
   variadic_only_no_vv();
   variadic_only();
@@ -42,11 +42,11 @@ function test_standard_insuffient_calls() {
   echo "\n\n";
 }
 
-function test_single_var_param() {
+function test_single_var_param() :mixed{
   variadic_only_no_vv('a');
 }
 
-function main() {
+function main() :mixed{
   test_single_var_param();
   test_standard_calls();
   test_standard_insuffient_calls();
@@ -54,7 +54,7 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_basic_calls() {
+function main_basic_calls() :mixed{
 error_reporting(-1);
 require_once __DIR__.'/variadic_funcs.inc';
 

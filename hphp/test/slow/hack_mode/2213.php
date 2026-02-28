@@ -3,7 +3,7 @@ function vidx<X>(blarg<X> $list, int $idx):X {
   return $list->d[$idx];
 }
 function pair<X,Y>(X $x, Y $y):(X,Y) {
- return varray[$x, $y];
+ return vec[$x, $y];
  }
 function car<X,Y>((X,?Y) $pair):X {
   return $pair[0];
@@ -24,12 +24,12 @@ class Foo<X> implements Face<X> {
 }
 
 function right_shift_hack(Foo<Foo<Foo<Foo<Foo<Foo<Foo<Foo<Foo<Foo<Foo>,Foo>>,Foo>>>,Foo>>>> $bonk,
-         (function(Foo,Bar):C) $d) {
+         (function(Foo,Bar):C) $d) :mixed{
 }
 
 
 <<__EntryPoint>>
-function main_2213() {
+function main_2213() :mixed{
 $blork = pair('c', '-');
 
 $a = blarg('a','aa','aaa');

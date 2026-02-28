@@ -29,7 +29,6 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -551,7 +550,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, const Variant& data, int s
   bool add_type = false;
 
   /* Special handling of class SoapVar */
-  if (data.isObject() && data.toObject().instanceof(SoapVar::getClass())) {
+  if (data.isObject() && data.toObject().instanceof(SoapVar::classof())) {
     auto dobj = data.toObject().get();
     auto enc_stype = SoapVar::getEncSType(dobj);
     auto enc_ns = SoapVar::getEncNS(dobj);
@@ -593,10 +592,10 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, const Variant& data, int s
       xmlSetNs(node, nsp);
     }
   } else {
-    if (check_class_map && !SOAP_GLOBAL(classmap).empty() &&
+    if (check_class_map && !SOAP_GLOBAL(soap_classmap).empty() &&
         data.isObject()) {
       auto clsname = data.toObject()->getClassName();
-      for (ArrayIter iter(SOAP_GLOBAL(classmap)); iter; ++iter) {
+      for (ArrayIter iter(SOAP_GLOBAL(soap_classmap)); iter; ++iter) {
         if (same(iter.second(), clsname.get())) {
           /* TODO: namespace isn't stored */
           encodePtr enc = nullptr;
@@ -1276,7 +1275,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
     if (name) {
       ret.toObject()->o_set(String(name), any);
     } else {
-      ret.toObject()->setProp(nullptr, s_any.get(), *any.asTypedValue());
+      ret.toObject()->setProp(nullctx, s_any.get(), *any.asTypedValue());
     }
   }
 }
@@ -1397,10 +1396,10 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
   String clsname;
   if (pce) {
     ce = pce;
-  } else if (!SOAP_GLOBAL(classmap).empty() && !etype->type_str.empty()) {
+  } else if (!SOAP_GLOBAL(soap_classmap).empty() && !etype->type_str.empty()) {
     String type_str(etype->type_str);
-    if (SOAP_GLOBAL(classmap).exists(type_str)) {
-      clsname = SOAP_GLOBAL(classmap)[type_str].toString();
+    if (SOAP_GLOBAL(soap_classmap).exists(type_str)) {
+      clsname = SOAP_GLOBAL(soap_classmap)[type_str].toString();
       ce = clsname.data();
     }
   }
@@ -1424,7 +1423,7 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
           return ret;
         }
         ret = create_object(ce, Array());
-        ret.toObject()->setProp(nullptr, s__.get(),
+        ret.toObject()->setProp(nullctx, s__.get(),
                                 *master_to_zval_int(enc, data).asTypedValue());
       } else {
         FIND_XML_NULL(data, ret);
@@ -1470,7 +1469,7 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
         ret = create_object(ce, Array());
         soap_add_xml_ref(ret, data);
         ret.toObject()->setProp(
-          nullptr,
+          nullctx,
           s__.get(),
           *master_to_zval_int(sdlType->encode, data).asTypedValue()
         );
@@ -1485,7 +1484,7 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
     }
     if (sdlType->model) {
       if (redo_any) {
-        ret.toObject()->unsetProp(nullptr, s_any.get());
+        ret.toObject()->unsetProp(nullctx, s_any.get());
         soap_add_xml_ref(ret, data);
       }
       model_to_zval_object(ret, sdlType->model, data, sdl);
@@ -2159,7 +2158,7 @@ xmlNodePtr to_xml_array(encodeType* type, const Variant& data_, int style,
   }
 
   if (data.isObject() &&
-      data.toObject().instanceof(SystemLib::s_HH_IteratorClass)) {
+      data.toObject().instanceof(SystemLib::getHH_IteratorClass())) {
     array_copy = Array::CreateDict();
     for (ArrayIter iter(data.toObject().get()); iter; ++iter) {
       if (!iter.first().isNull() && iter.first().isString()) {
@@ -2686,7 +2685,7 @@ static Variant guess_zval_convert(encodeType* type, xmlNodePtr data) {
   }
   ret = master_to_zval_int(enc, data);
   if (SOAP_GLOBAL(sdl) && type_name && enc->details.sdl_type) {
-    Object obj{SoapVar::getClass()};
+    Object obj{SoapVar::classof()};
     SoapVar::setEncType(obj.get(), enc->details.type);
     SoapVar::setEncValue(obj.get(), ret);
 
@@ -3292,7 +3291,7 @@ static encodePtr get_array_type(xmlNodePtr node, const Variant& array,
   ArrayIter iter(ht);
   for (i = 0;i < count;i++) {
     Variant tmp = iter.second();
-    if (tmp.isObject() && tmp.toObject().instanceof(SoapVar::getClass())) {
+    if (tmp.isObject() && tmp.toObject().instanceof(SoapVar::classof())) {
       auto svobj = tmp.toObject().get();
       cur_type = SoapVar::getEncType(svobj);
       auto enc_stype = SoapVar::getEncSType(svobj);

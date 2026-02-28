@@ -14,12 +14,9 @@
  | license@php.net so we can mail you a copy immediately.               |
  +----------------------------------------------------------------------+
  */
-#include "ext_gettext.h"
-
-#include <stdio.h>
+#include "hphp/runtime/ext/gettext/ext_gettext.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file.h"
 
 #include <libintl.h>
@@ -29,15 +26,10 @@
 #define PHP_GETTEXT_MAX_DOMAIN_LENGTH 1024
 #define PHP_GETTEXT_MAX_MSGID_LENGTH 4096
 
-// This is based on what is defined in
-// hphp/runtime/ext_zend_compat/php-src/main/php_config-*.h
-// And also what I know is present under MSVC.
-#ifndef __APPLE__
 # define HAVE_NGETTEXT 1
 # define HAVE_DNGETTEXT 1
 # define HAVE_DCNGETTEXT 1
 # define HAVE_BIND_TEXTDOMAIN_CODESET 1
-#endif
 
 namespace HPHP {
 
@@ -164,7 +156,7 @@ Variant HHVM_FUNCTION(bind_textdomain_codeset, const String& domain,
 #endif
 
 static GettextExtension s_gettext_extension;
-void GettextExtension::moduleInit() {
+void GettextExtension::moduleRegisterNative() {
   HHVM_FE(textdomain);
   HHVM_FE(gettext);
   HHVM_FALIAS(_, gettext);
@@ -183,7 +175,6 @@ void GettextExtension::moduleInit() {
 #if HAVE_BIND_TEXTDOMAIN_CODESET
   HHVM_FE(bind_textdomain_codeset);
 #endif
-  loadSystemlib();
 }
 
 void GettextExtension::moduleInfo(Array &info) {

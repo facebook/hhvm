@@ -1,75 +1,90 @@
-#![allow(dead_code)]
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-//#![feature(const_fn_trait_bound)]
+use anyhow::Result;
 
-/// Are we JIT, AOT, or compiling code that needs to work with both?
-#[derive(Debug, Clone, Copy)]
-pub enum CompilerMode {
-    Aot,
-    Both,
-    Jit,
-}
-
-impl Default for CompilerMode {
-    fn default() -> Self {
-        // Default to being noncommital.
-        CompilerMode::Both
-    }
-}
-
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct HhvmConfig {
     pub hdf_config: hdf::Value,
     pub ini_config: hdf::Value,
 }
 
 impl HhvmConfig {
-    pub fn get_str<'a>(&'a self, key: &str) -> Option<&'a str> {
+    pub fn get_str<'a>(&'a self, key: &str) -> Result<Option<String>> {
         self.get_helper(
             key,
             /*prepend_hhvm=*/ true,
-            |config, key| config.get_str(key),
+            |config, key| Ok(config.get_str(key)?),
         )
     }
 
-    pub fn get_bool(&self, key: &str) -> Option<bool> {
+    pub fn get_bool(&self, key: &str) -> Result<Option<bool>> {
         self.get_helper(
             key,
             /*prepend_hhvm=*/ true,
-            |config, key| config.get_bool(key).ok().flatten(),
+            |config, key| Ok(config.get_bool(key)?),
         )
     }
 
-    pub fn enumerate<'a>(&'a self, key: &str) -> Vec<&'a str> {
-        let mut result: Vec<&str> = Vec::new();
-        if let Some(value) = self.hdf_config.get(key) {
-            for k in value.keys() {
-                result.push(k);
-            }
-        }
-
-        let ini_name = Self::ini_name(key, /*prepend_hhvm=*/ true);
-        if let Some(value) = self.ini_config.get(&ini_name) {
-            for k in value.keys() {
-                result.push(k);
-            }
-        }
-
-        result
+    pub fn get_i16(&self, key: &str) -> Result<Option<i16>> {
+        self.get_helper(
+            key,
+            /*prepend_hhvm=*/ true,
+            |config, key| Ok(config.get_i16(key)?),
+        )
     }
 
-    fn get_helper<'a, T: 'a, F: Fn(&'a hdf::Value, &str) -> Option<T>>(
+    pub fn get_u16(&self, key: &str) -> Result<Option<u16>> {
+        self.get_helper(
+            key,
+            /*prepend_hhvm=*/ true,
+            |config, key| Ok(config.get_u16(key)?),
+        )
+    }
+
+    pub fn get_i32(&self, key: &str) -> Result<Option<i32>> {
+        self.get_helper(
+            key,
+            /*prepend_hhvm=*/ true,
+            |config, key| Ok(config.get_i32(key)?),
+        )
+    }
+
+    pub fn get_u32(&self, key: &str) -> Result<Option<u32>> {
+        self.get_helper(
+            key,
+            /*prepend_hhvm=*/ true,
+            |config, key| Ok(config.get_u32(key)?),
+        )
+    }
+
+    pub fn get_i64(&self, key: &str) -> Result<Option<i64>> {
+        self.get_helper(
+            key,
+            /*prepend_hhvm=*/ true,
+            |config, key| Ok(config.get_i64(key)?),
+        )
+    }
+
+    pub fn get_u64(&self, key: &str) -> Result<Option<u64>> {
+        self.get_helper(
+            key,
+            /*prepend_hhvm=*/ true,
+            |config, key| Ok(config.get_u64(key)?),
+        )
+    }
+
+    fn get_helper<'a, T: 'a>(
         &'a self,
         key: &str,
         prepend_hhvm: bool,
-        f: F,
-    ) -> Option<T> {
-        if let Some(value) = f(&self.hdf_config, key) {
-            return Some(value);
+        mut f: impl FnMut(&'a hdf::Value, &str) -> Result<Option<T>>,
+    ) -> Result<Option<T>> {
+        match f(&self.hdf_config, key)? {
+            Some(value) => Ok(Some(value)),
+            None => {
+                let ini_name = Self::ini_name(key, prepend_hhvm);
+                f(&self.ini_config, &ini_name)
+            }
         }
-
-        let ini_name = Self::ini_name(key, prepend_hhvm);
-        f(&self.ini_config, &ini_name)
     }
 
     fn ini_name(name: &str, prepend_hhvm: bool) -> String {
@@ -119,15 +134,6 @@ impl HhvmConfig {
     }
 }
 
-impl std::default::Default for HhvmConfig {
-    fn default() -> Self {
-        Self {
-            hdf_config: hdf::Value::new(),
-            ini_config: hdf::Value::new(),
-        }
-    }
-}
-
 #[test]
 fn test_ini_name() {
     assert_eq!(
@@ -139,10 +145,4 @@ fn test_ini_name() {
         "server.ssl_port"
     );
     assert_eq!(HhvmConfig::ini_name("PathDebug", false), "path_debug");
-}
-
-#[derive(Clone, Debug)]
-pub struct ParseConfig {
-    /// -vHack.Lang.AllowUnstableFeatures=1
-    pub allow_unstable_features: bool,
 }

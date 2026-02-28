@@ -5,7 +5,7 @@ class A {
 }
 
 function f(): varray<(function (A): void)> {
-  return varray[
+  return vec[
     ($f) ==> { $f->c(); }
   ];
 }

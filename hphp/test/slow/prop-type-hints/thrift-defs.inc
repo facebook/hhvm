@@ -53,12 +53,14 @@ class DummyStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 class DummyStruct2 {
   const SPEC = vec[];
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class TestStruct1 {
@@ -92,6 +94,7 @@ class TestStruct1 {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class TestStruct2 {
@@ -125,6 +128,7 @@ class TestStruct2 {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class TestStruct3 {
@@ -141,6 +145,7 @@ class TestStruct3 {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 enum ComplexUnionEnum: int {
@@ -168,6 +173,7 @@ class TestStruct4 {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class TestStruct5 {
@@ -189,12 +195,13 @@ class TestStruct5 {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class TestStruct6 {
-  public darray $p1 = darray[];
-  public varray $p2 = varray[];
-  public darray $p3 = darray[];
+  public darray $p1 = dict[];
+  public varray $p2 = vec[];
+  public darray $p3 = dict[];
 
   public dict $p4 = dict[];
   public vec $p5 = vec[];
@@ -258,6 +265,7 @@ class TestStruct6 {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class TestStruct7 {
@@ -269,9 +277,9 @@ class TestStruct7 {
   public Vector $p5 = Vector{};
   public Set $p6 = Set{};
 
-  public darray $p7 = darray[];
-  public varray $p8 = varray[];
-  public darray $p9 = darray[];
+  public darray $p7 = dict[];
+  public varray $p8 = vec[];
+  public darray $p9 = dict[];
 
   const SPEC = vec[
     dict['var' => 'p1',
@@ -327,4 +335,5 @@ class TestStruct7 {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }

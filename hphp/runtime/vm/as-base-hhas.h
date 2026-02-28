@@ -44,17 +44,18 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrProtected,                F|P|T,   "protected");            \
   X(AttrPrivate,                  F|P|T,   "private");              \
   X(AttrInternal,                 F|P|C,   "internal");             \
+  X(AttrInternalSoft,             F|P|C,   "internal_soft");        \
   X(AttrStatic,                   F|P,     "static");               \
   X(AttrEnum,                     C,       "enum");                 \
   X(AttrDeepInit,                 P,       "deep_init");            \
   X(AttrInterface,                C,       "interface");            \
   X(AttrNoExpandTrait,            C,       "no_expand_trait");      \
-  X(AttrAbstract,                 C|F|T,   "abstract");             \
-  X(AttrNoOverride,               C|F|T,   "no_override");          \
+  X(AttrAbstract,                 C|F|T|K, "abstract");             \
+  X(AttrNoOverride,               C|F,     "no_override");          \
+  X(AttrNoOverrideRegular,        C,       "no_override_regular");  \
   X(AttrFinal,                    C|F|T,   "final");                \
   X(AttrSealed,                   C,       "sealed");               \
   X(AttrTrait,                    C|F|P,   "trait");                \
-  X(AttrUnique,                   C|F|M,   "unique");               \
   X(AttrBuiltin,                  C|F,     "builtin");              \
   X(AttrPersistent,               C|F|A|K|M, "persistent");         \
   X(AttrIsConst,                  C|P,     "is_const");             \
@@ -63,6 +64,7 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrReadonlyThis,             F,       "readonly_this");        \
   X(AttrForbidDynamicProps,       C,       "no_dynamic_props");     \
   X(AttrDynamicallyConstructible, C,       "dyn_constructible");    \
+  X(AttrDynamicallyReferenced,    C,       "dyn_referenced");       \
   X(AttrProvenanceSkipFrame,      F,       "prov_skip_frame");      \
   X(AttrIsFoldable,               F,       "foldable");             \
   X(AttrNoInjection,              F,       "no_injection");         \
@@ -73,15 +75,19 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrSystemInitialValue,       P,       "sys_initial_val");      \
   X(AttrNoImplicitNullable,       P,       "no_implicit_null");     \
   X(AttrInitialSatisfiesTC,       P,       "initial_satisfies_tc"); \
+  X(AttrNoMock,                   C,       "no_mock");              \
   X(AttrLateInit,                 P,       "late_init");            \
   X(AttrNoReifiedInit,            C,       "noreifiedinit");        \
   X(AttrIsMethCaller,             F,       "is_meth_caller");       \
-  X(AttrEnumClass,                C,       "enum_class");
+  X(AttrIsClosureClass,           C,       "is_closure_class");     \
+  X(AttrEnumClass,                C,       "enum_class");           \
+  X(AttrNoRecording,              F,       "no_recording");         \
+  X(AttrVariadicParam,            F,       "variadic_param");       \
+  X(AttrSplatParam,               F,       "splat_param");
   /* */
 
   #define HHAS_TYPE_FLAGS                                   \
   X(Nullable,        "nullable");                           \
-  X(ExtendedHint,    "extended_hint");                      \
   X(TypeVar,         "type_var");                           \
   X(Soft,            "soft");                               \
   X(TypeConstant,    "type_constant")                       \
@@ -95,6 +101,10 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(LockWhileUnwinding,   "LockWhileUnwinding");       \
   X(EnforceMutableReturn, "EnforceMutableReturn")      \
   X(EnforceReadonlyThis,  "EnforceReadonlyThis")
+
+  #define HHAS_ITER_ARGS_FLAGS                         \
+  X(BaseConst,            "BaseConst");                \
+  X(WithKeys,             "WithKeys");
 }
 
 }

@@ -1,8 +1,7 @@
 <?hh
 
-
 <<__EntryPoint>>
-function main_72() {
-$modalité = 'extended ASCII';
- var_dump($modalité);
+function main_72() :mixed{
+$modalitâ‚¬ = 'extended ASCII';
+ var_dump($modalitâ‚¬);
 }

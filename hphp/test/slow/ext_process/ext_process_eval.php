@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_ext_process_eval() {
+function main_ext_process_eval() :mixed{
 $pid = pcntl_fork();
 if ($pid == 0) {
   eval('function a() { return 42; }');

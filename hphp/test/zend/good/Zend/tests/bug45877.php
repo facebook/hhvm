@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$keys = varray[PHP_INT_MAX,
+$keys = vec[PHP_INT_MAX,
     (string) PHP_INT_MAX,
     (string) (-PHP_INT_MAX - 1),
     -PHP_INT_MAX - 1,

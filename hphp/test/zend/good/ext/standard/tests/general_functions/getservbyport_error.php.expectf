@@ -1,4 +1,4 @@
 
-Warning: getservbyport() expects exactly 2 parameters, 3 given in %s/getservbyport_error.php on line 5
+Warning: getservbyport() expects exactly 2 positional parameters, 3 given in %s/getservbyport_error.php on line 5
 
-Warning: getservbyport() expects exactly 2 parameters, 1 given in %s/getservbyport_error.php on line 6
+Warning: getservbyport() expects exactly 2 positional parameters, 1 given in %s/getservbyport_error.php on line 6

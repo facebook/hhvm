@@ -1,4 +1,4 @@
-File "this2.php", line 14, characters 12-18:
+ERROR: File "this2.php", line 14, characters 12-18:
 Invalid return type (Typing[4110])
   File "this2.php", line 13, characters 26-29:
   Expected `this`

@@ -1,0 +1,20 @@
+ERROR: File "invariant-delegate.php", line 28, characters 29-40:
+Invalid argument (Typing[4110])
+  File "invariant-delegate.php", line 24, characters 37-42:
+  Expected `IntBox`
+  File "invariant-delegate.php", line 33, characters 13-37:
+  But got `Box with { type T = int }`
+  File "invariant-delegate.php", line 33, characters 13-37:
+  This type argument to `Invariant` must match exactly (it is invariant)
+ERROR: File "invariant-delegate.php", line 37, characters 34-41:
+Invalid argument (Typing[4323])
+  File "invariant-delegate.php", line 12, characters 41-44:
+  `TBox` is a constrained type parameter
+  File "invariant-delegate.php", line 12, characters 49-72:
+  This type constraint is violated
+  File "invariant-delegate.php", line 12, characters 49-72:
+  Expected a class with `{type T = _}`
+  File "invariant-delegate.php", line 36, characters 33-35:
+  But got `Box`
+  File "invariant-delegate.php", line 36, characters 33-35:
+  This type argument to `Invariant` must match exactly (it is invariant)

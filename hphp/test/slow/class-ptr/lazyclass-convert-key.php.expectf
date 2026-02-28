@@ -1,129 +1,122 @@
 ===keyset:===
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 46
+Notice: Implicit Class to string conversion for keyset insertion in %s/test/slow/class-ptr/class-key-convert.inc on line 45
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 47
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 46
 keyset(2) {
   string(3) "Foo"
   string(3) "Bar"
 }
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 49
+Notice: Implicit Class to string conversion for bytecode in %s/test/slow/class-ptr/class-key-convert.inc on line 48
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 50
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 49
 bool(false)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 51
+Notice: Implicit Class to string conversion for bytecode in %s/test/slow/class-ptr/class-key-convert.inc on line 50
 string(3) "Foo"
 ===dict:===
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 10
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 10
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 11
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 11
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 17
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 17
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 18
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 18
 bool(true)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 19
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 19
 int(42)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 20
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 20
 bool(true)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 21
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 21
 int(10)
 ===Set===
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 56
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 55
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 57
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 56
 object(HH\Set) (2) {
   class(Foo)
   string(3) "Bar"
 }
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 59
+Notice: Implicit Class to string conversion for bytecode in %s/test/slow/class-ptr/class-key-convert.inc on line 58
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 60
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 59
 bool(false)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 61
+Notice: Implicit Class to string conversion for bytecode in %s/test/slow/class-ptr/class-key-convert.inc on line 60
 class(Foo)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 62
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 61
 class(Foo)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 63
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 62
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 64
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 63
 bool(true)
 ===Map:===
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 26
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 26
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 27
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 27
 bool(false)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 28
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 28
 int(42)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 29
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 29
 bool(false)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 30
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 30
 int(42)
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 31
+Notice: Implicit Class to string conversion for argument 1 passed to HH\Map::setNative() in %s/test/slow/class-ptr/class-key-convert.inc on line 31
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 32
+Notice: Implicit Class to string conversion for argument 1 passed to HH\Map::get() in %s/test/slow/class-ptr/class-key-convert.inc on line 32
 int(10)
-===vec:===vec(3) {
+===vec:===
+vec(2) {
   class(Foo)
-  class(Fizz)
   class(Baz)
 }
 class(Foo)
-class(Fizz)
 class(Baz)
-===Vector:===object(HH\Vector) (3) {
+===Vector:===
+object(HH\Vector) (2) {
   [0]=>
   class(Baz)
   [1]=>
-  class(Fizz)
-  [2]=>
   class(Foo)
 }
-===dvarray:===vec(2) {
+===dvarray:===
+vec(1) {
   class(Baz)
-  class(Fizz)
 }
-vec(2) {
+vec(1) {
   int(0)
-  int(1)
 }
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 84
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 82
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 85
+Notice: Implicit Class to string conversion for bytecode in %s/test/slow/class-ptr/class-key-convert.inc on line 83
 vec(2) {
   string(3) "Foo"
   string(3) "Baz"
 }
 ===shape===
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 91
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 89
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 92
-
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 94
-dict(3) {
+Notice: Implicit Class to string conversion for bytecode in %s/test/slow/class-ptr/class-key-convert.inc on line 90
+dict(2) {
   ["Foo"]=>
   int(3)
   ["Bar"]=>
   int(2)
-  ["Fizz"]=>
-  int(4)
 }
 
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 96
+Notice: Implicit Class to string conversion for string key conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 93
 int(3)
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/class-key-convert.inc on line 97
+Notice: Implicit Class to string conversion for argument 2 passed to HH\Shapes::idx() in %s/test/slow/class-ptr/class-key-convert.inc on line 94
 int(3)

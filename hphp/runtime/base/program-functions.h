@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/base/request-id.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/optional.h"
@@ -28,30 +29,25 @@ namespace HPHP {
 struct Transport;
 struct Unit;
 
-#if defined(__APPLE__) || defined(_MSC_VER)
-extern const void* __hot_start;
-extern const void* __hot_end;
-#else
-extern "C" {
-void __attribute__((__weak__)) __hot_start();
-void __attribute__((__weak__)) __hot_end();
-}
-#endif
-
 /**
  * Main entry point of the entire program.
  */
 int execute_program(int argc, char **argv);
-void execute_command_line_begin(int argc, char **argv, int xhprof);
-void execute_command_line_end(int xhprof, bool coverage, const char *program);
+void execute_command_line_begin(int argc, char **argv);
+void execute_command_line_end(bool coverage, const char *program,
+                              bool runCleanup = true);
 
 void init_command_line_session(int arc, char** argv);
 void init_command_line_globals(
   int argc, char** argv, char** envp,
-  int xhprof,
   const std::map<std::string, std::string>& serverVariables,
   const std::map<std::string, std::string>& envVariables
 );
+
+/**
+ * Set up REQUEST_TIME_NS field in $_SERVER.
+ */
+void init_server_request_time(Array& server);
 
 /**
  * Setting up environment variables.
@@ -87,16 +83,24 @@ time_t start_time();
 
 struct ExecutionContext;
 
-void hphp_process_init(bool skipModules = false);
+/*
+ * If `initAsWorker` is set, JIT data structure and extensions will not be
+ * initialized as they're expensive to set up and unused by workers.
+ */
+void hphp_process_init(bool initForWorkerProcess = false,
+                       bool skipRDSInit = false);
 void cli_client_init();
+void cli_client_thread_init();
+void cli_client_thread_exit();
 void hphp_session_init(Treadmill::SessionKind session_kind,
-                       Transport* transport = nullptr);
+                       Transport* transport = nullptr,
+                       RequestId id = RequestId(),
+                       RequestId root_req_id = RequestId());
 
 void invoke_prelude_script(
      const char* currentDir,
      const std::string& document,
-     const std::string& prelude,
-     const char* root = nullptr);
+     const std::string& prelude);
 bool hphp_invoke_simple(const std::string& filename, bool warmupOnly);
 bool hphp_invoke(ExecutionContext *context,
                  const std::string &cmd,
@@ -114,26 +118,24 @@ bool hphp_invoke(ExecutionContext *context,
                  bool allowDynCallNoPointer = false);
 void hphp_context_exit();
 
-void hphp_thread_init();
-void hphp_thread_exit();
+void hphp_thread_init(bool skipExtensions = false,
+                      bool skipRDSInit = false);
+void hphp_thread_exit(bool skipExtensions = false);
 
 void init_current_pthread_stack_limits();
 
 void hphp_memory_cleanup();
 /*
- * Tear down various internal state at the very end of a session. If transport
- * is provided, various statistics about resources consumed by the request will
- * be logged to ServiceData.
+ * Tear down various internal state at the very end of a session.
  */
-void hphp_session_exit(Transport* transport = nullptr);
+void hphp_session_exit();
 void hphp_process_exit() noexcept;
 bool is_hphp_session_initialized();
-std::string get_systemlib(std::string* hhas = nullptr,
-                          const std::string &section = "systemlib",
-                          const std::string &filename = "");
+
+std::string get_embedded_section(const std::string& section_name);
 
 // Helper function for stats tracking with exceptions.
-void bump_counter_and_rethrow(bool isPsp);
+void bump_counter_and_rethrow(bool isPsp, ExecutionContext* context);
 
 std::vector<int> get_executable_lines(const Unit*);
 
@@ -165,4 +167,9 @@ struct HphpSessionAndThread {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+}
+
+extern "C" {
+void __attribute__((__weak__)) __hot_start();
+void __attribute__((__weak__)) __hot_end();
 }

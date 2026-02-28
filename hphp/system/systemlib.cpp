@@ -45,8 +45,8 @@ const Slot s_messageIdx{0};
 const Slot s_codeIdx{2};
 
 DEBUG_ONLY bool throwable_has_expected_props() {
-  auto const erCls = s_ErrorClass;
-  auto const exCls = s_ExceptionClass;
+  auto const erCls = getErrorClass();
+  auto const exCls = getExceptionClass();
   if (erCls->lookupDeclProp(s_message.get()) != s_messageIdx ||
       exCls->lookupDeclProp(s_message.get()) != s_messageIdx ||
       erCls->lookupDeclProp(s_code.get()) != s_codeIdx ||
@@ -65,7 +65,10 @@ DEBUG_ONLY bool throwable_has_expected_props() {
 ALWAYS_INLINE
 Object createAndConstruct(Class* cls, const Array& args) {
   Object inst{cls};
-  tvDecRefGen(g_context->invokeFunc(cls->getCtor(), args, inst.get()));
+  // TODO(named_params) this forces all systemlib methods/functions to not
+  // have named parameters.
+  tvDecRefGen(g_context->invokeFunc(cls->getCtor(), args,
+                                    nullptr, inst.get()));
   return inst;
 }
 
@@ -76,8 +79,8 @@ Object createAndConstruct(Class* cls, const Array& args) {
 ALWAYS_INLINE
 Object createAndConstructThrowable(Class* cls, const Variant& message) {
   assertx(throwable_has_expected_props());
-  assertx(cls->getCtor() == s_ErrorClass->getCtor() ||
-          cls->getCtor() == s_ExceptionClass->getCtor());
+  assertx(cls->getCtor() == getErrorClass()->getCtor() ||
+          cls->getCtor() == getExceptionClass()->getCtor());
 
   Object inst{cls};
   if (debug) {
@@ -94,115 +97,105 @@ Object createAndConstructThrowable(Class* cls, const Variant& message) {
 
 }
 
-bool s_inited = false;
 bool s_anyNonPersistentBuiltins = false;
 std::string s_source;
 Unit* s_unit = nullptr;
-Unit* s_hhas_unit = nullptr;
 Func* s_nullFunc = nullptr;
 Func* s_singleArgNullFunc = nullptr;
 Func* s_nullCtor = nullptr;
 
 /////////////////////////////////////////////////////////////////////////////
 
-#define DEFINE_SYSTEMLIB_CLASS(cls)       \
-  Class* s_ ## cls ## Class = nullptr;
+#define DEFINE_SYSTEMLIB_CLASS(cls, prefix, namespace) \
+  Class* s_ ## prefix ## cls ## Class = nullptr;       \
+  const StaticString s_##prefix##cls(#namespace #cls); \
+  Class* get ## prefix ## cls ## Class() {             \
+    return classLoad(s_ ## prefix ## cls.get(), s_ ## prefix ## cls ## Class); \
+  }
 SYSTEMLIB_CLASSES(DEFINE_SYSTEMLIB_CLASS)
 #undef DEFINE_SYSTEMLIB_CLASS
 
-#define DEFINE_SYSTEMLIB_HH_CLASS(cls)       \
-  Class* s_HH_ ## cls ## Class = nullptr;
-SYSTEMLIB_HH_CLASSES(DEFINE_SYSTEMLIB_HH_CLASS)
-#undef DEFINE_SYSTEMLIB_HH_CLASS
-
-Class* s_ThrowableClass;
-Class* s_BaseExceptionClass;
-Class* s_ErrorClass;
-Class* s_ArithmeticErrorClass;
-Class* s_ArgumentCountErrorClass;
-Class* s_AssertionErrorClass;
-Class* s_DivisionByZeroErrorClass;
-Class* s_ParseErrorClass;
-Class* s_TypeErrorClass;
-Class* s_MethCallerHelperClass;
-Class* s_DynMethCallerHelperClass;
-
 Object AllocStdClassObject() {
-  return Object{s_stdclassClass};
+  return Object{getstdClassClass()};
 }
 
 Object AllocPinitSentinel() {
-  return Object{s_pinitSentinelClass};
+  return Object{getpinitSentinelClass()};
 }
 
 Object AllocExceptionObject(const Variant& message) {
-  return createAndConstructThrowable(s_ExceptionClass, message);
+  return createAndConstructThrowable(getExceptionClass(), message);
 }
 
 Object AllocErrorObject(const Variant& message) {
-  return createAndConstructThrowable(s_ErrorClass, message);
+  return createAndConstructThrowable(getErrorClass(), message);
 }
 
 Object AllocArithmeticErrorObject(const Variant& message) {
-  return createAndConstructThrowable(s_ArithmeticErrorClass, message);
+  return createAndConstructThrowable(getArithmeticErrorClass(), message);
 }
 
 Object AllocArgumentCountErrorObject(const Variant& message) {
-  return createAndConstructThrowable(s_ArgumentCountErrorClass, message);
+  return createAndConstructThrowable(getArgumentCountErrorClass(), message);
 }
 
 Object AllocDivisionByZeroErrorObject(const Variant& message) {
-  return createAndConstructThrowable(s_DivisionByZeroErrorClass, message);
+  return createAndConstructThrowable(getDivisionByZeroErrorClass(), message);
 }
 
 Object AllocParseErrorObject(const Variant& message) {
-  return createAndConstructThrowable(s_ParseErrorClass, message);
+  return createAndConstructThrowable(getParseErrorClass(), message);
 }
 
 Object AllocTypeErrorObject(const Variant& message) {
-  return createAndConstructThrowable(s_TypeErrorClass, message);
+  return createAndConstructThrowable(getTypeErrorClass(), message);
 }
 
 Object AllocBadMethodCallExceptionObject(const Variant& message) {
-  return createAndConstructThrowable(s_BadMethodCallExceptionClass, message);
+  return createAndConstructThrowable(getBadMethodCallExceptionClass(), message);
 }
 
 Object AllocInvalidArgumentExceptionObject(const Variant& message) {
-  return createAndConstructThrowable(s_InvalidArgumentExceptionClass, message);
+  return createAndConstructThrowable(getInvalidArgumentExceptionClass(), message);
 }
 
 Object AllocTypeAssertionExceptionObject(const Variant& message) {
-  return createAndConstructThrowable(s_TypeAssertionExceptionClass, message);
+  return createAndConstructThrowable(getTypeAssertionExceptionClass(), message);
 }
 
 Object AllocRuntimeExceptionObject(const Variant& message) {
-  return createAndConstructThrowable(s_RuntimeExceptionClass, message);
+  return createAndConstructThrowable(getRuntimeExceptionClass(), message);
 }
 
 Object AllocOutOfBoundsExceptionObject(const Variant& message) {
-  return createAndConstructThrowable(s_OutOfBoundsExceptionClass, message);
+  return createAndConstructThrowable(getOutOfBoundsExceptionClass(), message);
 }
 
 Object AllocInvalidOperationExceptionObject(const Variant& message) {
-  return createAndConstructThrowable(s_InvalidOperationExceptionClass, message);
+  return createAndConstructThrowable(getInvalidOperationExceptionClass(), message);
+}
+
+Object AllocUnexpectedValueExceptionObject(const Variant& message) {
+  return createAndConstructThrowable(getUnexpectedValueExceptionClass(), message);
 }
 
 Object AllocDOMExceptionObject(const Variant& message) {
-  return createAndConstructThrowable(s_DOMExceptionClass, message);
+  return createAndConstructThrowable(getDOMExceptionClass(), message);
 }
 
 Object AllocDivisionByZeroExceptionObject() {
-  return createAndConstructThrowable(s_DivisionByZeroExceptionClass,
+  return createAndConstructThrowable(getDivisionByZeroExceptionClass(),
                                      Strings::DIVISION_BY_ZERO);
 }
 
 Object AllocInvalidForeachArgumentExceptionObject() {
-  return createAndConstructThrowable(s_InvalidForeachArgumentExceptionClass,
+  return createAndConstructThrowable(getInvalidForeachArgumentExceptionClass(),
                                      Strings::INVALID_ARGUMENT_FOREACH);
 }
 
 Object AllocUndefinedPropertyExceptionObject(const Variant& message) {
-  return createAndConstructThrowable(s_UndefinedPropertyExceptionClass, message);
+  return createAndConstructThrowable(getUndefinedPropertyExceptionClass(),
+                                     message);
 }
 
 Object AllocSoapFaultObject(const Variant& code,
@@ -212,152 +205,172 @@ Object AllocSoapFaultObject(const Variant& code,
                                  const Variant& name /* = uninit_variant */,
                                  const Variant& header /* = uninit_variant */) {
   return createAndConstruct(
-    s_SoapFaultClass,
+    getSoapFaultClass(),
     make_vec_array(code, message, actor, detail, name, header)
   );
 }
 
 Object AllocLazyKVZipIterableObject(const Variant& mp) {
-  return createAndConstruct(s_LazyKVZipIterableClass,
+  return createAndConstruct(getLazyKVZipIterableClass(),
                             make_vec_array(mp));
 }
 
 Object AllocLazyIterableViewObject(const Variant& iterable) {
-  return createAndConstruct(s_LazyIterableViewClass,
+  return createAndConstruct(getLazyIterableViewClass(),
                             make_vec_array(iterable));
 }
 
 Object AllocLazyKeyedIterableViewObject(const Variant& iterable) {
-  return createAndConstruct(s_LazyKeyedIterableViewClass,
+  return createAndConstruct(getLazyKeyedIterableViewClass(),
                             make_vec_array(iterable));
 }
 
 Object AllocUndefinedVariableExceptionObject(const Variant& message) {
-  return createAndConstructThrowable(s_UndefinedVariableExceptionClass, message);
+  return createAndConstructThrowable(getUndefinedVariableExceptionClass(), message);
 }
 
 Object AllocTypecastExceptionObject(const Variant& message) {
-  return createAndConstructThrowable(s_TypecastExceptionClass, message);
+  return createAndConstructThrowable(getTypecastExceptionClass(), message);
 }
 
 Object AllocReadonlyViolationExceptionObject(const Variant& message) {
-  return createAndConstructThrowable(s_ReadonlyViolationExceptionClass, message);
+  return createAndConstructThrowable(getReadonlyViolationExceptionClass(), message);
 }
 
 Object AllocCoeffectViolationExceptionObject(const Variant& message) {
-  return createAndConstructThrowable(s_CoeffectViolationExceptionClass, message);
+  return createAndConstructThrowable(getCoeffectViolationExceptionClass(), message);
 }
 
 Object AllocModuleBoundaryViolationExceptionObject(const Variant& message) {
-  return createAndConstructThrowable(s_ModuleBoundaryViolationExceptionClass, message);
+  return createAndConstructThrowable(getModuleBoundaryViolationExceptionClass(), message);
 }
 
-void throwExceptionObject(const Variant& message) {
+Object AllocDeploymentBoundaryViolationExceptionObject(const Variant& message) {
+  return createAndConstructThrowable(getDeploymentBoundaryViolationExceptionClass(), message);
+}
+
+Object AllocRequestFanoutLimitExceededExceptionObject(const Variant& message) {
+  return createAndConstructThrowable(getRequestFanoutLimitExceededExceptionClass(), message);
+}
+
+[[noreturn]] void throwExceptionObject(const Variant& message) {
   throw_object(AllocExceptionObject(message));
 }
 
-void throwErrorObject(const Variant& message) {
+[[noreturn]] void throwErrorObject(const Variant& message) {
   throw_object(AllocErrorObject(message));
 }
 
-void throwArithmeticErrorObject(const Variant& message) {
+[[noreturn]] void throwArithmeticErrorObject(const Variant& message) {
   throw_object(AllocArithmeticErrorObject(message));
 }
 
-void throwArgumentCountErrorObject(const Variant& message) {
+[[noreturn]] void throwArgumentCountErrorObject(const Variant& message) {
   throw_object(AllocArgumentCountErrorObject(message));
 }
 
-void throwDivisionByZeroErrorObject(const Variant& message) {
+[[noreturn]] void throwDivisionByZeroErrorObject(const Variant& message) {
   throw_object(AllocDivisionByZeroErrorObject(message));
 }
 
-void throwParseErrorObject(const Variant& message) {
+[[noreturn]] void throwParseErrorObject(const Variant& message) {
   throw_object(AllocParseErrorObject(message));
 }
 
-void throwTypeErrorObject(const Variant& message) {
+[[noreturn]] void throwTypeErrorObject(const Variant& message) {
   throw_object(AllocTypeErrorObject(message));
 }
 
-void throwBadMethodCallExceptionObject(const Variant& message) {
+[[noreturn]] void throwBadMethodCallExceptionObject(const Variant& message) {
   throw_object(AllocBadMethodCallExceptionObject(message));
 }
 
-void throwInvalidArgumentExceptionObject(const Variant& message) {
+[[noreturn]] void throwInvalidArgumentExceptionObject(const Variant& message) {
   throw_object(AllocInvalidArgumentExceptionObject(message));
 }
 
-void throwTypeAssertionExceptionObject(const Variant& message) {
+[[noreturn]] void throwTypeAssertionExceptionObject(const Variant& message) {
   throw_object(AllocTypeAssertionExceptionObject(message));
 }
 
-void throwRuntimeExceptionObject(const Variant& message) {
+[[noreturn]] void throwRuntimeExceptionObject(const Variant& message) {
   throw_object(AllocRuntimeExceptionObject(message));
 }
 
-void throwOutOfBoundsExceptionObject(const Variant& message) {
+[[noreturn]] void throwOutOfBoundsExceptionObject(const Variant& message) {
   throw_object(AllocOutOfBoundsExceptionObject(message));
 }
 
-void throwInvalidOperationExceptionObject(const Variant& message) {
+[[noreturn]] void throwInvalidOperationExceptionObject(const Variant& message) {
   throw_object(AllocInvalidOperationExceptionObject(message));
 }
 
-void throwDOMExceptionObject(const Variant& message) {
+[[noreturn]] void throwUnexpectedValueExceptionObject(const Variant& message) {
+  throw_object(AllocUnexpectedValueExceptionObject(message));
+}
+
+[[noreturn]] void throwDOMExceptionObject(const Variant& message) {
   throw_object(AllocDOMExceptionObject(message));
 }
 
-void throwDivisionByZeroExceptionObject() {
+[[noreturn]] void throwDivisionByZeroExceptionObject() {
   throw_object(AllocDivisionByZeroExceptionObject());
 }
 
-void throwSoapFaultObject(const Variant& code,
-                          const Variant& message,
-                          const Variant& actor /* = uninit_variant */,
-                          const Variant& detail /* = uninit_variant */,
-                          const Variant& name /* = uninit_variant */,
-                          const Variant& header /* = uninit_variant */) {
+[[noreturn]] void throwSoapFaultObject(const Variant& code,
+                                       const Variant& message,
+                                       const Variant& actor /* = uninit_variant */,
+                                       const Variant& detail /* = uninit_variant */,
+                                       const Variant& name /* = uninit_variant */,
+                                       const Variant& header /* = uninit_variant */) {
   throw_object(Object{AllocSoapFaultObject(code, message,
                                     actor, detail,
                                     name, header)});
 }
 
-void throwInvalidForeachArgumentExceptionObject() {
+[[noreturn]] void throwInvalidForeachArgumentExceptionObject() {
   throw_object(AllocInvalidForeachArgumentExceptionObject());
 }
 
-void throwUndefinedPropertyExceptionObject(const Variant& message) {
+[[noreturn]] void throwUndefinedPropertyExceptionObject(const Variant& message) {
   throw_object(AllocUndefinedPropertyExceptionObject(message));
 }
 
-void throwUndefinedVariableExceptionObject(const Variant& message) {
+[[noreturn]] void throwUndefinedVariableExceptionObject(const Variant& message) {
   throw_object(AllocUndefinedVariableExceptionObject(message));
 }
 
-void throwTypecastExceptionObject(const Variant& message) {
+[[noreturn]] void throwTypecastExceptionObject(const Variant& message) {
   throw_object(AllocTypecastExceptionObject(message));
 }
 
-void throwReadonlyViolationExceptionObject(const Variant& message) {
+[[noreturn]] void throwReadonlyViolationExceptionObject(const Variant& message) {
   throw_object(AllocReadonlyViolationExceptionObject(message));
 }
 
-void throwCoeffectViolationExceptionObject(const Variant& message) {
+[[noreturn]] void throwCoeffectViolationExceptionObject(const Variant& message) {
   throw_object(AllocCoeffectViolationExceptionObject(message));
 }
 
-void throwModuleBoundaryViolationExceptionObject(const Variant& message) {
+[[noreturn]] void throwModuleBoundaryViolationExceptionObject(const Variant& message) {
   throw_object(AllocModuleBoundaryViolationExceptionObject(message));
+}
+
+[[noreturn]] void throwDeploymentBoundaryViolationExceptionObject(const Variant& message) {
+  throw_object(AllocDeploymentBoundaryViolationExceptionObject(message));
+}
+
+[[noreturn]] void throwRequestFanoutLimitExceededExceptionObject(const Variant& message) {
+  throw_object(AllocRequestFanoutLimitExceededExceptionObject(message));
 }
 
 #define ALLOC_OBJECT_STUB(name)                                         \
   Object Alloc##name##Object() {                                        \
-    return Object{s_##name##Class};                                     \
+    return Object{get##name##Class()};                                  \
   }
 
-ALLOC_OBJECT_STUB(Directory);
-ALLOC_OBJECT_STUB(PDOException);
+ALLOC_OBJECT_STUB(Directory)
+ALLOC_OBJECT_STUB(PDOException)
 
 #undef ALLOC_OBJECT_STUB
 
@@ -382,6 +395,13 @@ void mergePersistentUnits() {
   }
 }
 
+Unit* findPersistentUnit(const StringData* name) {
+  for (auto unit : s_persistent_units) {
+    if (unit->filepath() == name) return unit;
+  }
+  return nullptr;
+}
+
 namespace {
 
 Func* setupNullClsMethod(Func* f, Class* cls, StringData* name) {
@@ -393,19 +413,18 @@ Func* setupNullClsMethod(Func* f, Class* cls, StringData* name) {
   return clone;
 }
 
+StaticString
+  s___86null("__SystemLib\\__86null"),
+  s___86single_arg_null("__SystemLib\\__86single_arg_null");
+
 Func* setup86ctorMethod(Class* cls) {
-  if (!s_nullFunc) {
-    s_nullFunc = Func::lookup(makeStaticString("__SystemLib\\__86null"));
-  }
-  return setupNullClsMethod(s_nullFunc, cls, s_86ctor.get());
+  auto f = funcLoad(s___86null.get(), s_nullFunc);
+  return setupNullClsMethod(f, cls, s_86ctor.get());
 }
 
 Func* setup86ReifiedInitMethod(Class* cls) {
-  if (!s_singleArgNullFunc) {
-    s_singleArgNullFunc =
-      Func::lookup(makeStaticString("__SystemLib\\__86single_arg_null"));
-  }
-  return setupNullClsMethod(s_singleArgNullFunc, cls, s_86reifiedinit.get());
+  auto f = funcLoad(s___86single_arg_null.get(), s_singleArgNullFunc);
+  return setupNullClsMethod(f, cls, s_86reifiedinit.get());
 }
 
 } // namespace
@@ -421,6 +440,27 @@ Func* getNull86reifiedinit(Class* cls) {
   f->setBaseCls(cls);
   f->setGenerated(true);
   return f;
+}
+
+Func* funcLoad(const StringData* name, Func*& cache) {
+  if (UNLIKELY(cache == nullptr)) {
+    cache = Func::load(name);
+    assertx(cache);
+    // This should be here but things are broken right now. Katy will fix it
+    // assertx(cache->isPersistent());
+    assertx(cache->unit()->isSystemLib());
+  }
+  return cache;
+}
+
+Class* classLoad(const StringData* name, Class*& cache) {
+  if (UNLIKELY(cache == nullptr)) {
+    cache = Class::load(name);
+    assertx(cache);
+    assertx(cache->isPersistent());
+    assertx(cache->preClass()->unit()->isSystemLib());
+  }
+  return cache;
 }
 
 /////////////////////////////////////////////////////////////////////////////

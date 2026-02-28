@@ -17,11 +17,8 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/act-rec.h"
-#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/resumable.h"
 
@@ -30,7 +27,6 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
-#include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/fixup.h"
@@ -48,11 +44,12 @@
 
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -149,7 +146,7 @@ void cgRetCtrl(IRLS& env, const IRInstruction* inst) {
   auto const sync_sp = adjustSPForReturn<RetCtrlData>(env, inst);
   auto& v = vmain(env);
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (Cfg::HHIR::GenerateAsserts) {
     auto rip = v.makeReg();
     auto prev_fp = v.makeReg();
     v << load{fp[AROFF(m_savedRip)], rip};

@@ -3,7 +3,7 @@
 
 
 <<__EntryPoint>>
-function main_shuffle() {
+function main_shuffle() :mixed{
 $numbers = range(1, 4);
 srand(5);
 shuffle(inout $numbers);

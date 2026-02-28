@@ -1,6 +1,6 @@
 <?hh
 class Sub implements ArrayAccess {
-    public function offsetSet() {
+    public function offsetSet() :mixed{
     }
 }
 

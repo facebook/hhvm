@@ -100,11 +100,7 @@ public:
     if (recursive) {
       pthread_mutexattr_settype(&m_mutexattr, PTHREAD_MUTEX_RECURSIVE);
     } else {
-#if defined(__APPLE__) || defined(_MSC_VER)
-      pthread_mutexattr_settype(&m_mutexattr, PTHREAD_MUTEX_DEFAULT);
-#else
       pthread_mutexattr_settype(&m_mutexattr, PTHREAD_MUTEX_ADAPTIVE_NP);
-#endif
     }
     pthread_mutex_init(&m_mutex, &m_mutexattr);
 #ifndef NDEBUG
@@ -327,4 +323,3 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

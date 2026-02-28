@@ -1,5 +1,5 @@
 <?hh
-function test(SplDoublyLinkedList $l) {
+function test(SplDoublyLinkedList $l) :mixed{
   $l->push("a");
   $l->push("b");
   $l->push("c");
@@ -19,7 +19,7 @@ function test(SplDoublyLinkedList $l) {
 
 
 <<__EntryPoint>>
-function main_doubly_linked_list_it_mode() {
+function main_doubly_linked_list_it_mode() :mixed{
 echo "FIFO:", PHP_EOL;
 test(new SplDoublyLinkedList());
 

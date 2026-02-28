@@ -1,13 +1,6 @@
 <?hh
 
-function handle_autoload($kind, $name) {
-  print("In handle_autoload($kind, $name)\n");
-  if ($kind === 'class' && $name === 'ITest') {
-    require __DIR__.'/interface-definition.inc';
-  }
-}
-
-function print_cover_maps(dict<string, vec<int>> $map) {
+function print_cover_maps(dict<string, vec<int>> $map) :mixed{
   print("\nPrinting coverage:\n");
   foreach ($map as $path => $lines) {
     sort(inout $lines);
@@ -16,8 +9,7 @@ function print_cover_maps(dict<string, vec<int>> $map) {
 }
 
 <<__EntryPoint>>
-function main() {
-  HH\autoload_set_paths(darray['failure' => handle_autoload<>], __DIR__);
+function main() :mixed{
   HH\enable_per_file_coverage(keyset[
     __DIR__.'/interface-definition.inc',
   ]);

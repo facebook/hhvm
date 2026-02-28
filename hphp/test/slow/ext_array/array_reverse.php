@@ -1,15 +1,15 @@
 <?hh
 
-function a() {
-  $input = varray["php", 4.0, varray["green", "red"]];
+function a() :mixed{
+  $input = vec["php", 4.0, vec["green", "red"]];
   $result = array_reverse($input);
   var_dump($result);
   $result_keyed = array_reverse($input, true);
   var_dump($result_keyed);
 }
 
-function b() {
-  $input = darray["php" => 4.0, 10 => 5.0, "blab" =>"b"];
+function b() :mixed{
+  $input = dict["php" => 4.0, 10 => 5.0, "blab" =>"b"];
   $result = array_reverse($input);
   var_dump($result);
 }
@@ -17,7 +17,7 @@ function b() {
 
 
 <<__EntryPoint>>
-function main_array_reverse() {
+function main_array_reverse() :mixed{
 a();
 b();
 }

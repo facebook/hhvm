@@ -1,0 +1,83 @@
+{
+  "pools": {
+    "A.wildcard": {
+      "servers": [
+        "127.0.0.1:11610",
+        "127.0.0.1:11611",
+        "127.0.0.1:11612",
+        "127.0.0.1:11613",
+        "127.0.0.1:11614",
+        "127.0.0.1:11615",
+        "127.0.0.1:11616",
+        "127.0.0.1:11617"
+      ]
+    }
+  },
+  "routes": [
+    {
+      "aliases": [ "/test/A/" ],
+      "route": {
+        "type": "PoolRoute",
+        "pool": "A.wildcard",
+        "hash": {
+          "hash_func": "WeightedCh3",
+          "weights": [
+            0,
+            1,
+            1.0,
+            0.0,
+            0.5,
+            1.0,
+            0.3,
+            0.5
+          ]
+        }
+      }
+    },
+    {
+      "aliases": [ "/test/B/" ],
+      "route": {
+        "type": "PoolRoute",
+        "pool": "A.wildcard",
+        "hash": {
+          "hash_func": "WeightedCh3",
+          "weights": [
+            0,
+            1,
+            1.0,
+            0.0,
+            0.5,
+            1.0,
+            0.3,
+            0.5,
+            /* not used, longer than servers */
+            0,
+            5,
+            100,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "aliases": [ "/test/C/" ],
+      "route": {
+        "type": "PoolRoute",
+        "pool": "A.wildcard",
+        "hash": {
+          "hash_func": "WeightedCh3",
+          "weights": [
+            0,
+            1,
+            1.0,
+            0.0,
+            0.5,
+            1.0,
+            0.3
+            /* implicit 0.5 */
+          ]
+        }
+      }
+    }
+  ]
+}

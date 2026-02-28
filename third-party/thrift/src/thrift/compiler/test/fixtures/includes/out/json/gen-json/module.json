@@ -1,0 +1,78 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "module",
+  "includes": {
+    "includes" : {
+      "path" : "includes.thrift"
+    },
+    "thrift" : {
+      "path" : "thrift/annotation/thrift.thrift"
+    }
+  },
+  "structs" : {
+    "MyStruct" : {
+      "lineno" : 25,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "MyIncludedField" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "includes.Included",
+          "required" : true,
+          "default_value" : { "MyIntField" : 2, "MyTransitiveField" : { "a" : 2 } },
+          "source_range" : {
+            "begin" : {
+              "line" : 26,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 26,
+              "column" : 67
+            }
+          }
+        },
+        "MyOtherIncludedField" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "includes.Included",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 27,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 27,
+              "column" : 45
+            }
+          }
+        },
+        "MyIncludedInt" : {
+          "type_enum" : "TYPEDEF",
+          "spec_args" : "includes.IncludedInt64",
+          "required" : true,
+          "default_value" : 42,
+          "source_range" : {
+            "begin" : {
+              "line" : 28,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 28,
+              "column" : 71
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 25,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 29,
+          "column" : 2
+        }
+      }
+    }
+  }
+}

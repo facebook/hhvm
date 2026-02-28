@@ -1,0 +1,6 @@
+(7,36)-(7,55) Cannot use unstable feature: `case_type_where_clauses`
+(9,33)-(9,52) Cannot use unstable feature: `case_type_where_clauses`
+(9,62)-(9,84) Cannot use unstable feature: `case_type_where_clauses`
+(11,48)-(11,67) Cannot use unstable feature: `case_type_where_clauses`
+(14,9)-(14,44) Cannot use unstable feature: `case_type_where_clauses`
+(15,12)-(15,35) Cannot use unstable feature: `case_type_where_clauses`

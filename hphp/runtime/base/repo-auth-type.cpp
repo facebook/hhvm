@@ -17,13 +17,8 @@
 
 #include <vector>
 
-#include <folly/Hash.h>
-
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/tv-mutate.h"
-#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/runtime/vm/func-emitter.h"
@@ -300,18 +295,18 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
   auto const base = [&] {
     using T = RepoAuthType::Tag;
 
-    #define O(type, check)                         \
-      case T::Opt##type: if (isNull) return true;  \
-      case T::type:      return check(tv.m_type);  \
+    #define O(type, check)                                         \
+      case T::Opt##type: if (isNull) return true; [[fallthrough]]; \
+      case T::type:      return check(tv.m_type);                  \
 
     #define U(type, check)                                       \
       case T::Uninit##type: return isUninit || check(tv.m_type); \
       O(type, check)                                             \
 
     #define S(type, check, ptr)                                                 \
-      case T::Opt##type:  if (isNull) return true;                              \
+      case T::Opt##type:  if (isNull) return true; [[fallthrough]];             \
       case T::type:       return check(tv.m_type);                              \
-      case T::OptS##type: if (isNull) return true;                              \
+      case T::OptS##type: if (isNull) return true; [[fallthrough]];             \
       case T::S##type:    return check(tv.m_type) && tv.m_data.ptr->isStatic(); \
 
     #define N(type, check)                    \
@@ -332,7 +327,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
 
     #define OU(type, check1, check2)                                    \
       O(type, check1)                                                   \
-      case T::OptUnc##type: if (isNull) return true;                    \
+      case T::OptUnc##type: if (isNull) return true; [[fallthrough]];   \
       case T::Unc##type:    return check1(tv.m_type) && !check2(tv);    \
 
     #define A(type, check, ptr)               \
@@ -379,6 +374,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
       O(Func,          isFuncType)
       O(ClsMeth,       isClsMethType)
       O(LazyCls,       isLazyClassType)
+      O(EnumClassLabel, isEnumClassLabelType)
       O(Num,           isNumType)
       O(VecCompat,     isVecCompatType)
       O(ArrLikeCompat, isArrLikeCompatType)
@@ -503,18 +499,20 @@ void RepoAuthType::serde(SerDe& sd) {
     if (tagHasArrData(t)) {
       m_data.set(t, RepoAuthType::Array::deserialize(sd));
     } else if (tagHasName(t)) {
-      LowStringPtr name;
+      const StringData* name;
       sd(name);
-      m_data.set(t, name.get());
+      always_assert(name);
+      m_data.set(t, name);
     } else {
       m_data.set(t, nullptr);
     }
   } else {
-    sd(tag());
+    auto const t = tag();
+    sd(t);
     if (auto const a = array()) {
       a->serialize(sd);
     } else if (auto const n = name()) {
-      sd(LowStringPtr{n});
+      sd(n);
     }
   }
 }
@@ -562,20 +560,20 @@ RepoAuthType decodeRAT(const Unit* unit, const unsigned char*& pc) {
 RepoAuthType decodeRAT(const UnitEmitter& ue, const unsigned char*& pc) {
   return decodeRATImpl(
     pc,
-    [&] (Id id) { return ue.lookupLitstr(id); },
+    [&] (Id id) { return ue.lookupLitstrId(id); },
     [&] (Id id) { return ue.lookupRATArray(id); }
   );
 }
 
-void encodeRAT(FuncEmitter& fe, RepoAuthType rat) {
+void encodeRAT(FuncEmitter& fe, UnitEmitter& ue, RepoAuthType rat) {
   using T = RepoAuthType::Tag;
   static_assert(sizeof(T) == sizeof(uint8_t));
 
   fe.emitByte((uint8_t)rat.tag());
   if (auto const a = rat.array()) {
-    fe.emitIVA(fe.ue().mergeRATArray(a));
+    fe.emitIVA(ue.mergeRATArray(a));
   } else if (auto const n = rat.name()) {
-    fe.emitIVA(fe.ue().mergeLitstr(n));
+    fe.emitIVA(ue.mergeLitstr(n));
   }
 }
 

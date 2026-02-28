@@ -1,6 +1,6 @@
 <?hh
 function gen($o)
-{
+:AsyncGenerator<mixed,mixed,void>{
     yield 'foo';
     $o->fatalError();
 }

@@ -1,11 +1,11 @@
 <?hh
-function f1($x = tuple(1)) {
+function f1($x = tuple(1)) :mixed{
   var_dump($x);
 }
-function f2($x = tuple (2)) {
+function f2($x = tuple (2)) :mixed{
   var_dump($x);
 }
-function f3() {
+function f3() :mixed{
   $x = tuple(3,4);
   var_dump($x);
 }
@@ -16,7 +16,7 @@ class C {
 
 
 <<__EntryPoint>>
-function main_tuple_2() {
+function main_tuple_2() :mixed{
 f1();
 f2();
 f3();

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_2134() {
+function main_2134() :mixed{
 $c = new UConverter('utf-8', 'latin1');
 var_dump($c->convert("This is an ascii string"));
 var_dump(urlencode($c->convert("Espa\xF1ol")));

@@ -15,7 +15,10 @@
 */
 #include "hphp/runtime/base/typed-value.h"
 
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/vm/coeffects.h"
@@ -28,8 +31,8 @@ namespace HPHP {
 
 // Code should not use the values of these TypedValues, so we set them to
 // unusual values that may (and, indeed, have) caught logic errors.
-const TypedValue immutable_null_base{0xdeadbeef, KindOfNull};
-const TypedValue immutable_uninit_base{0xfacade, KindOfUninit};
+const TypedValue immutable_null_base{{0xdeadbeef}, KindOfNull};
+const TypedValue immutable_uninit_base{{0xfacade}, KindOfUninit};
 
 std::string TypedValue::pretty() const {
   char buf[20];
@@ -37,48 +40,209 @@ std::string TypedValue::pretty() const {
   return Trace::prettyNode(tname(m_type).c_str(), std::string(buf));
 }
 
-StaticCoeffects ConstModifiers::getCoeffects() const {
-  assertx(kind() == ConstModifiers::Kind::Context);
-  return StaticCoeffects::fromValue(rawData >> ConstModifiers::kDataShift);
+StaticCoeffects ConstModifiers::getCoeffects(ConstModifierFlags flags) const {
+  assertx(flags.kind == ConstModifierFlags::Kind::Context);
+  return StaticCoeffects::fromValue(u_coeffectsData);
 }
 
 void ConstModifiers::setCoeffects(StaticCoeffects coeffects) {
-  rawData = (uintptr_t)(coeffects.value() << ConstModifiers::kDataShift)
-              | (rawData & ~ConstModifiers::kMask);
+  u_coeffectsData = coeffects.value();
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void TypedValue::serde(BlobEncoder& encoder) const {
-  if (m_type == KindOfUninit) {
-    encoder(static_cast<uint32_t>(0));
-    return;
+  switch (m_type) {
+    case KindOfUninit:
+      encoder(KindOfUninit);
+      break;
+    case KindOfNull:
+      encoder(KindOfNull);
+      break;
+    case KindOfBoolean:
+      encoder(KindOfBoolean);
+      encoder(m_data.num ? true : false);
+      break;
+    case KindOfInt64:
+      encoder(KindOfInt64);
+      encoder(m_data.num);
+      break;
+    case KindOfDouble:
+      encoder(KindOfDouble);
+      encoder(m_data.dbl);
+      break;
+
+    case KindOfEnumClassLabel:
+      encoder(KindOfEnumClassLabel);
+      encoder(static_cast<const StringData*>(m_data.pstr));
+      break;
+
+    case KindOfPersistentString:
+    case KindOfString: {
+      encoder(KindOfPersistentString);
+      const StringData* s = m_data.pstr->isStatic()
+        ? m_data.pstr : makeStaticString(m_data.pstr);
+      encoder(s);
+      break;
+    }
+
+    case KindOfPersistentVec:
+    case KindOfVec:
+      assertx(m_data.parr);
+      encoder(KindOfPersistentVec);
+      encoder((const ArrayData*)m_data.parr);
+      break;
+
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+      assertx(m_data.parr);
+      encoder(KindOfPersistentKeyset);
+      encoder((const ArrayData*)m_data.parr);
+      break;
+
+    case KindOfPersistentDict:
+    case KindOfDict:
+      assertx(m_data.parr);
+      encoder(KindOfPersistentDict);
+      encoder((const ArrayData*)m_data.parr);
+      break;
+
+    case KindOfLazyClass:
+      encoder(KindOfLazyClass);
+      encoder(m_data.plazyclass.name());
+      break;
+
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRFunc:
+    case KindOfFunc:
+    case KindOfClass:
+    case KindOfClsMeth:
+    case KindOfRClsMeth: {
+      encoder(m_type);
+      auto const s = internal_serialize(tvAsCVarRef(this));
+      assertx(s.get());
+      auto const sz = s.size();
+      assertx(sz > 0);
+      assertx(sz <= std::numeric_limits<uint32_t>::max());
+      encoder(static_cast<uint32_t>(sz));
+      encoder.writeRaw(s.data(), sz);
+      break;
+    }
   }
-  auto const s = internal_serialize(tvAsCVarRef(this));
-  assertx(s.get());
-  auto const sz = s.size();
-  encoder(static_cast<uint32_t>(sz));
-  if (!sz) return;
-  encoder.writeRaw(s.data(), sz);
 }
 
-void TypedValue::serde(BlobDecoder& decoder) {
-  tvWriteUninit(*this);
+void TypedValue::serde(BlobDecoder& decoder,
+                       bool makeStatic) {
+  decoder(m_type);
 
-  uint32_t size;
-  decoder(size);
-  if (size == 0) return;
+  switch (m_type) {
+    case KindOfUninit:
+    case KindOfNull:
+      break;
 
-  auto const data = decoder.data();
-  std::string str{data, data+size};
-  decoder.advance(size);
+    case KindOfBoolean: {
+      bool b;
+      decoder(b);
+      m_data.num = b ? 1 : 0;
+      break;
+    }
+    case KindOfInt64:
+      decoder(m_data.num);
+      break;
+    case KindOfDouble:
+      decoder(m_data.dbl);
+      break;
 
-  tvAsVariant(this) = unserialize_from_buffer(
-    str.data(),
-    str.size(),
-    VariableUnserializer::Type::Internal
-  );
-  tvAsVariant(this).setEvalScalar();
+    case KindOfEnumClassLabel: {
+      const StringData* s;
+      decoder(s); // Ignore makeStatic since ECL requires static string.
+      assertx(s->isStatic());
+      m_data.pstr = const_cast<StringData*>(s);
+      break;
+    }
+
+    case KindOfPersistentString: {
+      const StringData* s;
+      decoder(s, makeStatic);
+      assertx(s);
+      assertx(IMPLIES(makeStatic, s->isStatic()));
+      if (!makeStatic) m_type = KindOfString;
+      m_data.pstr = const_cast<StringData*>(s);
+      break;
+    }
+
+    case KindOfPersistentVec: {
+      const ArrayData* a;
+      decoder(a, makeStatic);
+      assertx(a && a->isVecType());
+      assertx(IMPLIES(makeStatic, a->isStatic()));
+      if (!makeStatic) m_type = KindOfVec;
+      m_data.parr = const_cast<ArrayData*>(a);
+      break;
+    }
+
+    case KindOfPersistentKeyset: {
+      const ArrayData* a;
+      decoder(a, makeStatic);
+      assertx(a && a->isKeysetType());
+      assertx(IMPLIES(makeStatic, a->isStatic()));
+      if (!makeStatic) m_type = KindOfKeyset;
+      m_data.parr = const_cast<ArrayData*>(a);
+      break;
+    }
+
+    case KindOfPersistentDict: {
+      const ArrayData* a;
+      decoder(a, makeStatic);
+      assertx(a && a->isDictType());
+      assertx(IMPLIES(makeStatic, a->isStatic()));
+      if (!makeStatic) m_type = KindOfDict;
+      m_data.parr = const_cast<ArrayData*>(a);
+      break;
+    }
+
+    case KindOfLazyClass: {
+      const StringData* s;
+      decoder(s); // Don't pass makeStatic here. LazyClassData
+                  // requires a static string.
+      assertx(s->isStatic());
+      m_data.plazyclass = LazyClassData::create(s);
+      break;
+    }
+
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRFunc:
+    case KindOfFunc:
+    case KindOfClass:
+    case KindOfClsMeth:
+    case KindOfRClsMeth: {
+      tvWriteUninit(*this);
+
+      uint32_t size;
+      decoder(size);
+      assertx(size > 0);
+
+      auto const data = decoder.data();
+      std::string str{data, data+size};
+      decoder.advance(size);
+
+      tvAsVariant(this) = unserialize_from_buffer(
+        str.data(),
+        str.size(),
+        VariableUnserializer::Type::Internal
+      );
+      if (makeStatic) tvAsVariant(this).setEvalScalar();
+      break;
+    }
+
+    case KindOfString:
+    case KindOfVec:
+    case KindOfKeyset:
+    case KindOfDict:
+      always_assert(false);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

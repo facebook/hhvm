@@ -21,7 +21,7 @@
 
 namespace HPHP {
 
-uint64_t murmur_hash_64A(const void* const key, const size_t len,
+uint64_t murmur_hash_64A(const void* const key, const unsigned long len,
                          const uint32_t seed);
 
 uint64_t murmur_rehash_64A(uint64_t k);
@@ -33,6 +33,3 @@ const int SEED = 4193360111ul;
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-
-

@@ -1,0 +1,5 @@
+[
+  "/bar/caller.php",
+  "/foo/caller.php",
+  "/foo/targets.php"
+]

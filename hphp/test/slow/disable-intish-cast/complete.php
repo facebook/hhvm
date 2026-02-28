@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function test($a, $k) {
+function test($a, $k) :mixed{
   echo "=============== get ================================\n";
   try { var_dump($a[$k]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   echo "=============== isset===============================\n";
@@ -17,7 +17,7 @@ function test($a, $k) {
   return $a;
 }
 
-function test_const_key($a) {
+function test_const_key($a) :mixed{
   echo "=============== get ================================\n";
   try { var_dump($a['2']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   echo "=============== isset===============================\n";
@@ -33,7 +33,7 @@ function test_const_key($a) {
   return $a;
 }
 
-function test_const_key_int($a) {
+function test_const_key_int($a) :mixed{
   echo "=============== get ================================\n";
   try { var_dump($a[2]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   echo "=============== isset===============================\n";
@@ -49,33 +49,33 @@ function test_const_key_int($a) {
   return $a;
 }
 
-function test_casting($a) {
+function test_casting($a) :mixed{
   echo "======================= dict cast ================\n";
   var_dump(dict($a));
   echo "======================= darray cast ================\n";
   var_dump(darray($a));
 }
 
-function run_tests() {
+function run_tests() :mixed{
   $arr = $x ==> darray($x);
 
   echo "\n******* ad-hoc tests ********************************\n";
-  test($arr(varray[]), '10');
-  test($arr(varray[]), 10);
-  test($arr(varray[1, 2, 3, 4]), '2');
-  test(varray[1, 2, 3, 4], 2);
-  test(darray[10 => 'abc'], '10');
-  test(darray[10 => 'abc'], 10);
+  test($arr(vec[]), '10');
+  test($arr(vec[]), 10);
+  test($arr(vec[1, 2, 3, 4]), '2');
+  test(vec[1, 2, 3, 4], 2);
+  test(dict[10 => 'abc'], '10');
+  test(dict[10 => 'abc'], 10);
 
   echo "\n******* constant string tests ***********************\n";
-  test_const_key($arr(varray[]));
-  test_const_key($arr(varray[1, 2, 3, 4]));
-  test_const_key(darray[2 => 'abc']);
+  test_const_key($arr(vec[]));
+  test_const_key($arr(vec[1, 2, 3, 4]));
+  test_const_key(dict[2 => 'abc']);
 
   echo "\n******* constant int tests **************************\n";
-  test_const_key_int($arr(varray[]));
-  test_const_key_int(varray[1, 2, 3, 4]);
-  test_const_key_int(darray[2 => 'abc']);
+  test_const_key_int($arr(vec[]));
+  test_const_key_int(vec[1, 2, 3, 4]);
+  test_const_key_int(dict[2 => 'abc']);
 
   echo "\n******* casting tests *******************************\n";
   test_casting(dict['1' => true, '2' => false]);
@@ -87,6 +87,6 @@ function run_tests() {
 }
 
 <<__EntryPoint>>
-function main_intlike() {
+function main_intlike() :mixed{
 run_tests();
 }

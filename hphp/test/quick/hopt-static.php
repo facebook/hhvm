@@ -3,11 +3,11 @@
 class Foo {
   public static $z = 0;
 
-  public static function setZ($a) {
+  public static function setZ($a) :mixed{
     Foo::$z = $a;
   }
 
-  public static function getZ() {
+  public static function getZ() :mixed{
     return Foo::$z;
   }
 }

@@ -1,6 +1,6 @@
 <?hh
 function toUTF8( $char_code )
-{
+:mixed{
     switch ( (bool)$char_code )
     {
         case false:

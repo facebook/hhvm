@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,4 +10,4 @@
  */
 
 interface X {}
-type A<T as X> = T;
+type A<T> = T;

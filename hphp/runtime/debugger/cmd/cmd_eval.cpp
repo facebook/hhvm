@@ -23,7 +23,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 void CmdEval::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
@@ -66,7 +66,7 @@ void CmdEval::handleReply(DebuggerClient &client) {
     "Notice: Attempted to interpret unknown debugger command as PHP!\n");
   }
 
-  if (!m_output.empty()) client.print(m_output);
+  if (!m_output.empty()) client.output(m_output);
 }
 
 // NB: unlike most other commands, the client expects that more interrupts

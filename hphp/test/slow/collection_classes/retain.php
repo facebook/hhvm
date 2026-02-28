@@ -1,6 +1,6 @@
 <?hh
 
-function print_keyed_iterable($iterable) {
+function print_keyed_iterable($iterable) :mixed{
   echo get_class($iterable) . "[\n";
   foreach ($iterable as $k => $v) {
     echo $k . " => " . $v . "\n";
@@ -8,7 +8,7 @@ function print_keyed_iterable($iterable) {
   echo "]\n";
 }
 
-function retain_map() {
+function retain_map() :mixed{
   echo "******** Map ********\n";
 
   $x = Map {'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4,};
@@ -30,7 +30,7 @@ function retain_map() {
   print_keyed_iterable($y);
 }
 
-function retain_set() {
+function retain_set() :mixed{
   echo "******** Set ********\n";
 
   $x = Set {'a', 'b', 'c', 'd',};
@@ -52,13 +52,13 @@ function retain_set() {
   print_keyed_iterable($y);
 }
 
-function main() {
+function main() :mixed{
   retain_map();
   retain_set();
 }
 
 
 <<__EntryPoint>>
-function main_retain() {
+function main_retain() :mixed{
 main();
 }

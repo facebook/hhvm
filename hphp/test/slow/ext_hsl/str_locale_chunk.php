@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 use namespace HH\Lib\_Private\{_Locale, _Str};
 use namespace HH\Lib\{Str, Vec};

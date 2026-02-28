@@ -19,7 +19,7 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
+#include <limits>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -106,6 +106,16 @@ static inline double php_round_helper(double value, int mode) {
 
 double php_math_round(double value, int places,
                       int mode /* = PHP_ROUND_HALF_UP */) {
+  if (places > std::numeric_limits<double>::max_digits10) {
+    // Our representation of the floating-point number doesn't support such high
+    // precision, so just return the input as is.
+    return value;
+  } else if (places < -std::numeric_limits<double>::max_exponent10 - 1) {
+    // We are asked to round to a precision that is at least 10 times bigger
+    // than the maximum number we can represent, so the rounding leads to 0.
+    return 0.0;
+  }
+
   double tmp_value;
 
   // We need to avoid calculating log(0.0) later, but log(epsilon) is fine.

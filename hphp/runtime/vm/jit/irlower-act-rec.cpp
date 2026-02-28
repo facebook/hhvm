@@ -16,31 +16,14 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
-#include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/tv-mutate.h"
-#include "hphp/runtime/base/tv-variant.h"
-#include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/act-rec.h"
-#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/reified-generics.h"
-#include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
-#include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
@@ -48,47 +31,44 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
-#include "hphp/util/trace.h"
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/hhir.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgInitFrame(IRLS& env, const IRInstruction* inst) {
-  auto const func = inst->extra<InitFrame>()->func;
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const arFlags = srcLoc(env, inst, 1).reg();
-  auto const ctx = srcLoc(env, inst, 2).reg();
+void cgEnterFrame(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const calleeFP = srcLoc(env, inst, 0).reg();
+  auto const callerFP = srcLoc(env, inst, 1).reg();
+  auto const arFlags = srcLoc(env, inst, 2).reg();
   auto const calleeId = srcLoc(env, inst, 3).reg();
   auto& v = vmain(env);
 
-  v << storel{calleeId, fp + AROFF(m_funcId)};
-  v << storel{arFlags, fp + AROFF(m_callOffAndFlags)};
-
-  if (func->cls() || func->isClosureBody()) {
-    v << store{ctx, fp + AROFF(m_thisUnsafe)};
-  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitImmStoreq(v, ActRec::kTrashedThisSlot, fp + AROFF(m_thisUnsafe));
-  }
-}
-
-void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  v << store{rvmfp(), Vreg(rvmsp()) + AROFF(m_sfp)};
-  v << phplogue{rvmsp()};
-  v << copy{rvmsp(), rvmfp()};
+  v << store{callerFP, calleeFP + AROFF(m_sfp)};
+  v << phplogue{calleeFP};
+  v << copy{calleeFP, rvmfp()};
   v << defvmfp{dst};
+
+  v << storel{calleeId, dst + AROFF(m_funcId)};
+  v << storel{arFlags, dst + AROFF(m_callOffAndFlags)};
+  if (Cfg::HHIR::GenerateAsserts) {
+    emitImmStoreq(v, ActRec::kTrashedThisSlot, dst + AROFF(m_thisUnsafe));
+  }
+
+  assertx(v.unit().fpToFrame.count(inst->src(0)) &&
+          v.unit().fpToFrame[inst->src(0)] == 0);
+
+  v.unit().fpToFrame.emplace(inst->dst(), 0);
 }
 
 void cgConvFuncPrologueFlagsToARFlags(IRLS& env, const IRInstruction* inst) {
@@ -102,8 +82,9 @@ void cgConvFuncPrologueFlagsToARFlags(IRLS& env, const IRInstruction* inst) {
   assertx(ActRec::IsInlined == 1);
   assertx(ActRec::AsyncEagerRet == 2);
   assertx(ActRec::CallOffsetStart == 3);
-  assertx(PrologueFlags::Flags::ReservedZero0 == flagsDelta + 0);
-  assertx(PrologueFlags::Flags::ReservedZero1 == flagsDelta + 1);
+  // TODO(named_params) translate prologue flags to actrec flags and add a
+  // check for PrologueFlags::Flags::HasNamedArguments.
+  assertx(PrologueFlags::Flags::ReservedZero == flagsDelta + 1);
   assertx(PrologueFlags::Flags::AsyncEagerReturn == flagsDelta + 2);
   assertx(PrologueFlags::Flags::CallOffsetStart == flagsDelta + 3);
   auto const prologueFlagsLow32 = v.makeReg();
@@ -118,8 +99,9 @@ void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {
   assertx(func->hasReifiedGenerics());
   auto& v = vmain(env);
 
-  auto const info = func->getReifiedGenericsInfo();
-  if (info.m_hasSoftGenerics || info.m_typeParamInfo.size() > 15) {
+  auto const& info = func->getGenericsInfo();
+  if (info.hasSoft() || info.m_typeParamInfo.size() > 15) {
+    // Punt checks to CheckFunReifiedGenericMismatch
     v << copy{v.cns(0), dst};
     return;
   }
@@ -132,7 +114,10 @@ void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {
 
   // Higher order 16 bits contain the tag in a compact tagged pointer
   // Tag contains ((1 << number-of-parameters) | bitmap)
-  auto const bitmapImmed = static_cast<int16_t>(info.m_bitmap);
+  int16_t bitmapImmed = 0;
+  for (auto const& tp : info.m_typeParamInfo) {
+    bitmapImmed = (bitmapImmed << 1) | (tp.m_isReified ? 1 : 0);
+  }
   auto const topBit = 1u << info.m_typeParamInfo.size();
 
   auto const sf = v.makeReg();
@@ -202,7 +187,7 @@ void cgDbgCheckLocalsDecRefd(IRLS& env, const IRInstruction* inst) {
   v << andbi{1 << ActRec::LocalsDecRefd, callOffAndFlags, check, v.makeReg()};
   v << testb{check, check, sf};
   ifThen(v, CC_NZ, sf, [&](Vout& v) {
-    v << trap{TRAP_REASON};
+    v << trap{TRAP_REASON, Fixup::none()};
   });
 }
 
@@ -215,13 +200,15 @@ void cgLdARFunc(IRLS& env, const IRInstruction* inst) {
   if (use_lowptr) {
     auto const fp = srcLoc(env, inst, 0).reg();
     auto const dst = dstLoc(env, inst, 0).reg();
-    v << loadzlq{fp[AROFF(m_funcId)], dst};
+    emitLdPackedPtr<Func>(v, fp[AROFF(m_funcId)], dst);
     return;
   }
   auto const args = argGroup(env, inst).ssa(0);
   auto const target = CallSpec::direct(funcFromActRecHelper);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
+
+IMPL_OPCODE_CALL(LdPublicFunc)
 
 ///////////////////////////////////////////////////////////////////////////////
 

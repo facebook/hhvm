@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   echo "0";
   ob_start();
   echo "1";
@@ -14,6 +14,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_nested() {
+function main_nested() :mixed{
 main();
 }

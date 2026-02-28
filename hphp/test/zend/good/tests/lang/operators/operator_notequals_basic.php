@@ -1,24 +1,24 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$valid_true = varray[1, "1", "true", 1.0, varray[1]];
-$valid_false = varray[0, "", 0.0, varray[], NULL];
+$valid_true = vec[1, "1", "true", 1.0, vec[1]];
+$valid_false = vec[0, "", 0.0, vec[], NULL];
 
 $int1 = 679;
 $int2 = -67835;
-$valid_int1 = varray["6 7 9", "6y79", 678];
-$valid_int2 = varray["- 67835", "-67,835", "-67 835", "-678y35", -76834];
-$invalid_int1 = varray["679", "679abc", " 679", "679  ", 679.0, 6.79E2, "+679", +679];
-$invalid_int2 = varray["-67835", "-67835abc", " -67835", "-67835  ", -67835.000, -6.7835E4];
+$valid_int1 = vec["6 7 9", "6y79", 678];
+$valid_int2 = vec["- 67835", "-67,835", "-67 835", "-678y35", -76834];
+$invalid_int1 = vec["679", "679abc", " 679", "679  ", 679.0, 6.79E2, "+679", +679];
+$invalid_int2 = vec["-67835", "-67835abc", " -67835", "-67835  ", -67835.000, -6.7835E4];
 
 $float1 = 57385.45835;
 $float2 = -67345.76567;
-$valid_float1 = varray["57385. 45835",  "57,385.45835", 57385.45834, 5.738545834e4];
-$valid_float2 = varray["- 67345.76567", "-67,345.76567", -67345.76566, -6.734576566E4];
-$invalid_float1 = varray["57385.45835",  "57385.45835aaa", "  57385.45835", 5.738545835e4];
-$invalid_float2 = varray["-67345.76567", "-67345.76567aaa", "  -67345.76567", -6.734576567E4];
+$valid_float1 = vec["57385. 45835",  "57,385.45835", 57385.45834, 5.738545834e4];
+$valid_float2 = vec["- 67345.76567", "-67,345.76567", -67345.76566, -6.734576566E4];
+$invalid_float1 = vec["57385.45835",  "57385.45835aaa", "  57385.45835", 5.738545835e4];
+$invalid_float2 = vec["-67345.76567", "-67345.76567aaa", "  -67345.76567", -6.734576567E4];
 
 
-$toCompare = varray[
+$toCompare = vec[
   true, $valid_false, $valid_true,
   false, $valid_true, $valid_false,
   $int1, $valid_int1, $invalid_int1,

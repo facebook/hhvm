@@ -1,14 +1,14 @@
 <?hh
 
-function zardoz() {
+function zardoz() :mixed{
   invariant_violation('foobar');
 }
 
-function foobar() {
+function foobar() :mixed{
   zardoz();
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   foobar();
 }

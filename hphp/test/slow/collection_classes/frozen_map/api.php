@@ -3,7 +3,7 @@
 // Test ImmMap's PHP-accessible public methods.
 
 // Helpers
-function show_keyed_iter($iter) {
+function show_keyed_iter($iter) :mixed{
   $vs = Vector {};
 
   foreach ($iter as $k => $v) {
@@ -21,7 +21,7 @@ function show_keyed_iter($iter) {
   echo "]\n";
 }
 
-function show_iter($iter) {
+function show_iter($iter) :mixed{
   $vs = new Vector($iter);
   sort(inout $vs);
 
@@ -31,7 +31,7 @@ function show_iter($iter) {
 }
 /////////////////////////////////////
 
-function main() {
+function main() :mixed{
   $fm = new ImmMap(Vector {1, 2, 3});
   $e = new ImmMap();
 
@@ -117,6 +117,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_api() {
+function main_api() :mixed{
 main();
 }

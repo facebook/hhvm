@@ -14,6 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include <atomic>
+#include <chrono>
+#include <filesystem>
 #include <memory>
 #include <sstream>
 #include <string_view>
@@ -23,31 +26,36 @@
 #include <folly/Synchronized.h>
 #include <folly/Unit.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
-#include <folly/experimental/io/FsUtil.h>
 #include <folly/futures/Future.h>
 #include <folly/futures/FutureSplitter.h>
 #include <folly/logging/xlog.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/request-injection-data.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/watchman.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/facts/exception.h"
 #include "hphp/runtime/ext/facts/fact-extractor.h"
 #include "hphp/runtime/ext/facts/facts-store.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
+#include "hphp/runtime/ext/facts/log-perf.h"
 #include "hphp/runtime/ext/facts/path-and-hash.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/ext/facts/symbol-map.h"
 #include "hphp/runtime/ext/facts/symbol-types.h"
 #include "hphp/runtime/ext/facts/thread-factory.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/configs/autoload.h"
 #include "hphp/util/hash-set.h"
-#include "hphp/util/logger.h"
+#include "hphp/util/optional.h"
+#include "hphp/util/sandbox-events.h"
 #include "hphp/util/sha1.h"
+
+namespace fs = std::filesystem;
 
 namespace HPHP {
 namespace Facts {
@@ -57,55 +65,43 @@ namespace {
  * Return a path relative to `root` with the same canonical location as `p`. If
  * `p` does not exist within `root`, return `std::nullopt`.
  */
-Optional<folly::fs::path> resolvePathRelativeToRoot(
-    const folly::fs::path& path, const folly::fs::path& root) {
-  if (path.is_relative()) {
+Optional<fs::path> resolvePathRelativeToRoot(
+    const fs::path& path,
+    const fs::path& root) {
+  if (path.is_relative())
     return path;
-  }
+  // TODO: for snapshot semantics, this should not access the filesystem.
+  if (!fs::exists(path))
+    return std::nullopt;
+  return fs::relative(path, root);
+}
 
-  if (folly::fs::starts_with(path, root)) {
-    return folly::fs::remove_prefix(path, root);
-  }
-
-  if (!folly::fs::exists(path)) {
+Optional<Path> ensureRelativePath(const String& path, const fs::path& root) {
+  if (path.empty()) {
     return {};
   }
 
-  auto canonicalPath = folly::fs::canonical(path);
-  if (folly::fs::starts_with(canonicalPath, root)) {
-    return folly::fs::remove_prefix(canonicalPath, root);
+  if (path.slice().at(0) != '/') {
+    return Path{*path.get()};
   }
-
-  return std::nullopt;
+  auto resolvedPath =
+      resolvePathRelativeToRoot(fs::path{path.toCppString()}, root);
+  if (!resolvedPath) {
+    return {};
+  }
+  return Path{*resolvedPath};
 }
-
-/**
- * Cancel the request timeout when created, restart the request timeout when
- * destroyed.
- */
-struct TimeoutSuspender {
-  TimeoutSuspender() : m_timeoutSeconds{RID().getTimeout()} {
-    RID().setTimeout(0);
-  }
-  ~TimeoutSuspender() {
-    RID().setTimeout(m_timeoutSeconds);
-  }
-  int m_timeoutSeconds{0};
-
-  TimeoutSuspender(const TimeoutSuspender&) = delete;
-  TimeoutSuspender& operator=(const TimeoutSuspender&) = delete;
-  TimeoutSuspender(TimeoutSuspender&&) = delete;
-  TimeoutSuspender& operator=(TimeoutSuspender&&) = delete;
-};
 
 constexpr std::string_view kKindFilterKey{"kind"};
 constexpr std::string_view kDeriveKindFilterKey{"derive_kind"};
-constexpr std::string_view kAttributeFilterKey{"attributes"};
 constexpr std::string_view kExtendsFilterKey{"extends"};
 constexpr std::string_view kRequiresFilterKey{"require extends"};
-constexpr std::string_view kAttributeNameKey{"name"};
-constexpr std::string_view kAttributeParamsKey{"parameters"};
+constexpr std::string_view kTypeFlagFilterKey{"flags"};
+constexpr std::string_view kTypeFlagFilterValEmpty{"empty"};
+constexpr std::string_view kTypeFlagFilterValAbstract{"abstract"};
+constexpr std::string_view kTypeFlagFilterValFinal{"final"};
 
+// Filter on TypeKind: Class, Enum, Interface, or Trait
 struct KindFilterData {
   bool m_removeClasses = false;
   bool m_removeEnums = false;
@@ -177,88 +173,8 @@ struct KindFilterData {
   }
 };
 
-struct AttributeFilterData {
-
-  /**
-   * Map from 0-indexed argument position to argument value
-   */
-  using ArgMap = hphp_hash_map<size_t, folly::dynamic>;
-
-  hphp_hash_map<Symbol<SymKind::Type>, ArgMap> m_attrs;
-
-  static AttributeFilterData createFromShapes(const ArrayData* attrFilters) {
-    assertx(attrFilters);
-    AttributeFilterData filters;
-    IterateV(attrFilters, [&](TypedValue v) {
-      if (!tvIsArrayLike(v)) {
-        return;
-      }
-      filters.m_attrs.insert(createAttrFilterFromShape(v.m_data.parr));
-    });
-    return filters;
-  }
-
-private:
-  static std::pair<StringPtr, ArgMap>
-  createAttrFilterFromShape(const ArrayData* attrShape) {
-    assertx(attrShape);
-    StringPtr name{nullptr};
-    hphp_hash_map<size_t, folly::dynamic> args;
-    IterateKV(attrShape, [&](TypedValue k, TypedValue v) {
-      if (!tvIsString(k)) {
-        return;
-      }
-      auto const kStr = StringPtr{k.m_data.pstr};
-      if (kStr == kAttributeNameKey) {
-        if (tvIsString(v)) {
-          name = StringPtr{v.m_data.pstr};
-        } else if (tvIsLazyClass(v)) {
-          name = StringPtr{v.m_data.plazyclass.name()};
-        } else if (tvIsClass(v)) {
-          name = StringPtr{v.m_data.pclass->name()};
-        } else {
-          return;
-        }
-      } else if (kStr == kAttributeParamsKey) {
-        if (!tvIsArrayLike(v)) {
-          return;
-        }
-        IterateKV(v.m_data.parr, [&](TypedValue k, TypedValue v) {
-          if (!tvIsInt(k)) {
-            return;
-          }
-          args.insert({tvAssertInt(k), createDynamicFromTv(v)});
-        });
-      }
-    });
-    return {name, std::move(args)};
-  }
-
-  static folly::dynamic createDynamicFromTv(TypedValue v) {
-    folly::dynamic result{nullptr};
-    if (tvIsBool(v)) {
-      result = static_cast<bool>(v.m_data.num);
-    } else if (tvIsInt(v)) {
-      result = v.m_data.num;
-    } else if (tvIsDouble(v)) {
-      result = v.m_data.dbl;
-    } else if (tvIsString(v)) {
-      result = v.m_data.pstr->slice();
-    } else if (tvIsVec(v)) {
-      IterateV(v.m_data.parr, [&result](TypedValue v) {
-        result.push_back(createDynamicFromTv(v));
-      });
-    } else if (tvIsArrayLike(v)) {
-      IterateKV(v.m_data.parr, [&result](TypedValue k, TypedValue v) {
-        result[createDynamicFromTv(k)] = createDynamicFromTv(v);
-      });
-    }
-    return result;
-  }
-};
-
+// Filter on base/derived relationship (extends or requires)
 struct DeriveKindFilterData {
-
   static constexpr DeriveKindFilterData includeEverything() noexcept {
     return {.m_removeExtends = false, .m_removeRequires = false};
   }
@@ -267,8 +183,8 @@ struct DeriveKindFilterData {
     return {.m_removeExtends = true, .m_removeRequires = true};
   }
 
-  static DeriveKindFilterData
-  createFromKeyset(const ArrayData* deriveKindFilter) {
+  static DeriveKindFilterData createFromKeyset(
+      const ArrayData* deriveKindFilter) {
     DeriveKindFilterData filters = DeriveKindFilterData::removeEverything();
     IterateKV(deriveKindFilter, [&](TypedValue k, UNUSED TypedValue v) {
       if (!tvIsString(k)) {
@@ -290,6 +206,8 @@ struct DeriveKindFilterData {
       mask &= ~static_cast<int>(DeriveKind::Extends);
     }
     if (m_removeRequires) {
+      mask &= ~static_cast<int>(DeriveKind::RequireThisAs);
+      mask &= ~static_cast<int>(DeriveKind::RequireClass);
       mask &= ~static_cast<int>(DeriveKind::RequireExtends);
       mask &= ~static_cast<int>(DeriveKind::RequireImplements);
     }
@@ -300,31 +218,84 @@ struct DeriveKindFilterData {
   bool m_removeRequires = false;
 };
 
-struct InheritanceFilterData {
+/**
+ * Passed into FactsAPI queries to filter down to only classes that are
+ * abstract, final, or neither (empty flag).
+ */
+struct TypeFlagFilterData {
+  bool m_removeEmpty;
+  bool m_removeAbstract;
+  bool m_removeFinal;
+
+  static constexpr TypeFlagFilterData includeEverything() noexcept {
+    return {
+        .m_removeEmpty = false,
+        .m_removeAbstract = false,
+        .m_removeFinal = false};
+  }
+
+  static constexpr TypeFlagFilterData removeEverything() noexcept {
+    return {
+        .m_removeEmpty = true, .m_removeAbstract = true, .m_removeFinal = true};
+  }
+
+  /**
+   * We'll use this to check on equality to includeEverything() and
+   * removeEverything()
+   */
+  bool operator==(const TypeFlagFilterData& other) const {
+    return m_removeEmpty == other.m_removeEmpty &&
+        m_removeAbstract == other.m_removeAbstract &&
+        m_removeFinal == other.m_removeFinal;
+  }
+
+  /**
+   * The ArrayData* is how the data comes in from hack.  It corresponds
+   * to the contents of the 'flags' field on the DeriveFilters shape. If that
+   * key isn't provided, this will never be called and so we will include
+   * everything.
+   */
+  static TypeFlagFilterData createFromKeyset(const ArrayData* typeFlagFilter) {
+    TypeFlagFilterData out = TypeFlagFilterData::removeEverything();
+    IterateKV(typeFlagFilter, [&](TypedValue k, UNUSED TypedValue v) {
+      if (!tvIsString(k)) {
+        return;
+      }
+      StringPtr key{k.m_data.pstr};
+      if (key == kTypeFlagFilterValEmpty) {
+        out.m_removeEmpty = false;
+      } else if (key == kTypeFlagFilterValAbstract) {
+        out.m_removeAbstract = false;
+      } else if (key == kTypeFlagFilterValFinal) {
+        out.m_removeFinal = false;
+      } else {
+        HPHP::SystemLib::throwRuntimeExceptionObject(
+            fmt::format("Passed invalid key {}", key->toCppString()));
+      }
+    });
+    return out;
+  }
+};
+
+struct TypeFilterData {
   KindFilterData m_kindFilters;
   DeriveKindFilterData m_deriveKindFilters;
-  AttributeFilterData m_attrFilters;
+  TypeFlagFilterData m_typeFlagFilters;
 
-  static InheritanceFilterData includeEverything() noexcept {
+  static TypeFilterData includeEverything() noexcept {
     return {
         .m_kindFilters = KindFilterData::includeEverything(),
-        .m_deriveKindFilters = DeriveKindFilterData::includeEverything()};
+        .m_deriveKindFilters = DeriveKindFilterData::includeEverything(),
+        .m_typeFlagFilters = TypeFlagFilterData::includeEverything()};
   }
 
-  static InheritanceFilterData removeEverything() noexcept {
-    return {
-        .m_kindFilters = KindFilterData::removeEverything(),
-        .m_deriveKindFilters = DeriveKindFilterData::removeEverything()};
-  }
-
-  static InheritanceFilterData createFromShape(const ArrayData* filters) {
+  static TypeFilterData createFromShape(const ArrayData* filters) {
     if (filters == nullptr) {
-      return InheritanceFilterData::includeEverything();
+      return TypeFilterData::includeEverything();
     }
     // Default to including everything. If a keyset is provided, include only
     // the members of that keyset.
-    InheritanceFilterData inheritanceFilters =
-        InheritanceFilterData::includeEverything();
+    TypeFilterData typeFilters = TypeFilterData::includeEverything();
     IterateKV(filters, [&](TypedValue k, TypedValue v) {
       if (!tvIsString(k)) {
         return;
@@ -333,22 +304,22 @@ struct InheritanceFilterData {
 
       if (key == kKindFilterKey) {
         if (tvIsArrayLike(v)) {
-          inheritanceFilters.m_kindFilters =
+          typeFilters.m_kindFilters =
               KindFilterData::createFromKeyset(v.m_data.parr);
         }
       } else if (key == kDeriveKindFilterKey) {
         if (tvIsArrayLike(v)) {
-          inheritanceFilters.m_deriveKindFilters =
+          typeFilters.m_deriveKindFilters =
               DeriveKindFilterData::createFromKeyset(v.m_data.parr);
         }
-      } else if (key == kAttributeFilterKey) {
+      } else if (key == kTypeFlagFilterKey) {
         if (tvIsArrayLike(v)) {
-          inheritanceFilters.m_attrFilters =
-              AttributeFilterData::createFromShapes(v.m_data.parr);
+          typeFilters.m_typeFlagFilters =
+              TypeFlagFilterData::createFromKeyset(v.m_data.parr);
         }
       }
     });
-    return inheritanceFilters;
+    return typeFilters;
   }
 };
 
@@ -362,9 +333,9 @@ std::string curthread() {
   return s.str();
 }
 
-std::vector<folly::fs::path>
-removeHashes(std::vector<PathAndOptionalHash>&& pathsWithHashes) {
-  std::vector<folly::fs::path> paths;
+std::vector<fs::path> removeHashes(
+    std::vector<PathAndOptionalHash>&& pathsWithHashes) {
+  std::vector<fs::path> paths;
   paths.reserve(pathsWithHashes.size());
   for (auto&& pathAndHash : std::move(pathsWithHashes)) {
     paths.push_back(std::move(pathAndHash.m_path));
@@ -372,19 +343,21 @@ removeHashes(std::vector<PathAndOptionalHash>&& pathsWithHashes) {
   return paths;
 }
 
-std::string json_from_facts(const FileFacts& facts) {
-  auto types = folly::dynamic::array();
-  for (auto const& type : facts.m_types) {
-    types.push_back(type.m_name);
+/**
+ * Produce a lazy class `vec<class<mixed>>` for Facts functions
+ * that return known classes. NOTE: there is a possibility of
+ * conflating some aliases with classes here due to the lack of
+ * distinction on the Type symbol kind, but it should be OK on
+ * functions that inspect class hierarchies.
+ */
+Array makeVecOfLazyClass(const std::vector<Symbol<SymKind::Type>>& vector) {
+  auto ret = VecInit{vector.size()};
+  for (auto const& str : vector) {
+    ret.append(make_tv<KindOfLazyClass>(LazyClassData::create(str.get())));
   }
-  // clang-format off
-  return folly::toJson(folly::dynamic::object
-    ("types", std::move(types))
-    ("functions",
-     folly::dynamic(facts.m_functions.begin(), facts.m_functions.end()))
-    ("constants",
-     folly::dynamic(facts.m_constants.begin(), facts.m_constants.end())));
-  // clang-format on
+  auto arr = ret.toArray();
+  arr.get()->sort(0, true);
+  return arr;
 }
 
 /**
@@ -448,6 +421,33 @@ TypedValue tvFromDynamic(folly::dynamic&& dy) {
   return make_tv<KindOfNull>();
 }
 
+const StaticString s_TypeKindClass(kTypeKindClass);
+const StaticString s_TypeKindEnum(kTypeKindEnum);
+const StaticString s_TypeKindInterface(kTypeKindInterface);
+const StaticString s_TypeKindTrait(kTypeKindTrait);
+const StaticString s_TypeKindTypeAlias(kTypeKindTypeAlias);
+
+/**
+ * Return TypeKind as a string literal suitable for use in TypeDetails
+ */
+StaticString typeKindToString(TypeKind kind) {
+  switch (kind) {
+    case TypeKind::Class:
+      return s_TypeKindClass;
+    case TypeKind::Enum:
+      return s_TypeKindEnum;
+    case TypeKind::Interface:
+      return s_TypeKindInterface;
+    case TypeKind::Trait:
+      return s_TypeKindTrait;
+    case TypeKind::TypeAlias:
+      return s_TypeKindTypeAlias;
+    case TypeKind::Unknown:
+      return empty_string_ref;
+  }
+  not_reached();
+}
+
 /**
  * Convert a C++ folly::dynamic structure into a Hack `vec<dynamic>`.
  */
@@ -461,13 +461,48 @@ Array makeVecOfDynamic(DynamicIterable&& vector) {
 }
 
 /**
- * Create a `dict<string, string>` out of a container of static strings.
+ * Convert (method, attribute) pairs into a Hack `dict<string, vec<string>>`,
+ * grouping attribute names by method name.
  */
-template <typename PairContainer>
-Array makeDictOfStringToString(PairContainer&& vector) {
-  auto ret = DictInit{vector.size()};
-  for (auto&& [k, v] : std::forward<PairContainer>(vector)) {
-    ret.set(StrNR{k.get()}, make_tv<KindOfPersistentString>(v.get()));
+Array makeDictOfStringVecString(
+    const std::vector<
+        std::pair<Symbol<SymKind::Method>, Symbol<SymKind::Type>>>& pairs) {
+  std::map<std::string_view, std::vector<const StringData*>> grouped;
+  std::map<std::string_view, const StringData*> methodKeys;
+  for (auto const& [method, attr] : pairs) {
+    auto sv = method.slice();
+    grouped[sv].push_back(attr.get());
+    methodKeys[sv] = method.get();
+  }
+  auto ret = DictInit{grouped.size()};
+  for (auto const& [sv, attrs] : grouped) {
+    auto attrVec = VecInit{attrs.size()};
+    for (auto const* attr : attrs) {
+      attrVec.append(VarNR{StrNR{attr}}.tv());
+    }
+    ret.set(StrNR{methodKeys[sv]}, attrVec.toArray());
+  }
+  return ret.toArray();
+}
+
+/**
+ * Converts a vector of FileAttrVals (each of which is one path and one
+ * attr val for a particular file attr) into a vector of two-item vectors
+ * each of which will be represented as a hack dynamic.
+ *
+ * If there is no attr arg for this attr, the second value will be null.
+ */
+Array makeVecOfDynamicDynamic(std::vector<FileAttrVal>& vector) {
+  auto ret = VecInit{vector.size()};
+  for (auto&& [path, val] : vector) {
+    auto dynDynTuple = VecInit{2};
+    dynDynTuple.append(tvFromDynamic(*path.get()));
+    if (val) {
+      dynDynTuple.append(tvFromDynamic(std::move(*val)));
+    } else {
+      dynDynTuple.append(tvFromDynamic(folly::dynamic{}));
+    }
+    ret.append(dynDynTuple.toArray());
   }
   return ret.toArray();
 }
@@ -478,31 +513,48 @@ Array makeDictOfStringToString(PairContainer&& vector) {
 struct FactsStoreImpl final
     : public FactsStore,
       public std::enable_shared_from_this<FactsStoreImpl> {
-
+  // when the filesystem can change, set up with a watcher
   FactsStoreImpl(
-      folly::fs::path root,
-      AutoloadDB::Handle dbHandle,
+      fs::path root,
+      AutoloadDB::Opener dbOpener,
       std::shared_ptr<Watcher> watcher,
-      hphp_hash_set<std::string> indexedMethodAttributes)
-      : m_updateExec{1, make_thread_factory("Autoload update")}
-      , m_root{std::move(root)}
-      , m_map{m_root, std::move(dbHandle), std::move(indexedMethodAttributes)}
-      , m_watcher{std::move(watcher)} {
-  }
+      Optional<std::filesystem::path> suppressionFilePath,
+      hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes)
+      : m_updateExec{std::make_unique<folly::CPUThreadPoolExecutor>(
+            1,
+            make_thread_factory("Autoload update"))},
+        m_root{std::move(root)},
+        m_symbolMap{
+            m_root,
+            std::move(dbOpener),
+            std::move(indexedMethodAttributes),
+            Cfg::Autoload::DBEnableBlockingDbWait,
+            Cfg::Autoload::DBUseSymbolMapForGetFilesWithAttributeAndAnyVal,
+            std::chrono::milliseconds(Cfg::Autoload::DBBlockingDbWaitTimeoutMs),
+        },
+        m_watcher{std::move(watcher)},
+        m_suppressionFilePath{std::move(suppressionFilePath)} {}
 
-  FactsStoreImpl(folly::fs::path root, AutoloadDB::Handle dbHandle)
-      : m_updateExec{1, make_thread_factory("Autoload update")}
-      , m_root{std::move(root)}
-      , m_map{m_root, std::move(dbHandle)} {
-  }
+  // when the filesystem is readonly and we have a trusted db
+  FactsStoreImpl(
+      fs::path root,
+      AutoloadDB::Opener dbOpener,
+      hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttributes)
+      : m_root{std::move(root)},
+        m_symbolMap{
+            m_root,
+            std::move(dbOpener),
+            std::move(indexedMethodAttributes),
+            Cfg::Autoload::DBEnableBlockingDbWait,
+            Cfg::Autoload::DBUseSymbolMapForGetFilesWithAttributeAndAnyVal,
+            std::chrono::milliseconds(
+                Cfg::Autoload::DBBlockingDbWaitTimeoutMs)} {}
 
   ~FactsStoreImpl() override {
-    m_closing = true;
     try {
-      m_updateFuture.wlock()->getFuture().wait();
+      close();
     } catch (...) {
-      // folly::Future::wait() might throw a FutureInvalid exception, but we're
-      // shutting down.
+      // Can't throw an exception outside of a destructor
     }
   }
 
@@ -511,19 +563,34 @@ struct FactsStoreImpl final
   FactsStoreImpl& operator=(const FactsStoreImpl&) = delete;
   FactsStoreImpl& operator=(FactsStoreImpl&&) noexcept = delete;
 
-  /**
-   * This AutoloadMap is capable of building itself.
-   */
-  bool isNative() const noexcept override {
-    return true;
+  void close() override {
+    m_closing = true;
+    auto updateFut = m_updateFuture.wlock();
+    try {
+      updateFut->getFuture().wait();
+    } catch (...) {
+      // folly::Future::wait() might throw a FutureInvalid exception, but we're
+      // shutting down.
+    }
+    *updateFut = {};
+    m_updateExec = {};
+  }
+
+  Holder getNativeHolder() noexcept override {
+    return Holder{
+        this, [sptr = shared_from_this()]() mutable { sptr.reset(); }};
   }
 
   /**
    * Return an object representing the last time this store was updated
    */
   Clock getClock() const {
-    auto version = m_map.getClock();
-    return version.isInitial() ? m_map.dbClock() : version;
+    auto clock = m_symbolMap.getClock();
+    return clock.isInitial() ? m_symbolMap.dbClock() : clock;
+  }
+
+  void validate(const std::set<std::string>& types_to_ignore) override {
+    m_symbolMap.validate(types_to_ignore);
   }
 
   /**
@@ -541,21 +608,13 @@ struct FactsStoreImpl final
     if (res.hasException()) {
       res.throwUnlessValue();
     }
-  }
-
-  Array getAllFiles() const override {
-    auto allPaths = m_map.getAllPaths();
-    auto ret = VecInit{allPaths.size()};
-    for (auto&& path : std::move(allPaths)) {
-      folly::fs::path p{path.get()->slice()};
-      assertx(p.is_relative());
-      ret.append(VarNR{String{(m_root / p).native()}}.tv());
+    if (Cfg::Eval::AutoloadEagerSyncUnitCache && m_watcher) {
+      unitCacheSetSync();
     }
-    return ret.toArray();
   }
 
   Variant getTypeName(const String& type) override {
-    auto name = m_map.getTypeName(*type.get());
+    auto name = m_symbolMap.getTypeName(*type.get());
     if (!name) {
       return Variant{Variant::NullInit{}};
     } else {
@@ -564,8 +623,8 @@ struct FactsStoreImpl final
   }
 
   Variant getKind(const String& type) override {
-    auto const* kindStr = makeStaticString(
-        toString(m_map.getKind(Symbol<SymKind::Type>{*type.get()})));
+    auto const kind = m_symbolMap.getKind(Symbol<SymKind::Type>{*type.get()});
+    auto const kindStr = typeKindToString(kind).get();
 
     if (kindStr == nullptr || kindStr->empty()) {
       return Variant{Variant::NullInit{}};
@@ -575,64 +634,186 @@ struct FactsStoreImpl final
   }
 
   bool isTypeAbstract(const String& type) override {
-    return m_map.isTypeAbstract(*type.get());
+    return m_symbolMap.isTypeAbstract(*type.get());
   }
 
   bool isTypeFinal(const String& type) override {
-    return m_map.isTypeFinal(*type.get());
+    return m_symbolMap.isTypeFinal(*type.get());
   }
 
-  Optional<String> getTypeFile(const String& type) override {
+  Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFile(
+      const String& type) override {
+    return getSymbolFile<SymKind::Type>(
+        type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
+          return m.getTypeOrTypeAliasFile(s);
+        });
+  }
+
+  Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFileRelative(
+      const String& type) override {
+    return getSymbolFileRelative<SymKind::Type>(
+        type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
+          return m.getTypeOrTypeAliasFile(s);
+        });
+  }
+
+  Optional<AutoloadMap::FileResult> getTypeFile(const String& type) override {
     return getSymbolFile<SymKind::Type>(
         type,
         [](SymbolMap& m, Symbol<SymKind::Type> s) { return m.getTypeFile(s); });
   }
 
-  Optional<String> getFunctionFile(const String& function) override {
+  Optional<AutoloadMap::FileResult> getTypeFileRelative(
+      const String& type) override {
+    return getSymbolFileRelative<SymKind::Type>(
+        type,
+        [](SymbolMap& m, Symbol<SymKind::Type> s) { return m.getTypeFile(s); });
+  }
+
+  Optional<AutoloadMap::FileResult> getFunctionFile(
+      const String& function) override {
     return getSymbolFile<SymKind::Function>(
         function, [](SymbolMap& m, Symbol<SymKind::Function> s) {
           return m.getFunctionFile(s);
         });
   }
 
-  Optional<String> getConstantFile(const String& constant) override {
+  Optional<AutoloadMap::FileResult> getFunctionFileRelative(
+      const String& function) override {
+    return getSymbolFileRelative<SymKind::Function>(
+        function, [](SymbolMap& m, Symbol<SymKind::Function> s) {
+          return m.getFunctionFile(s);
+        });
+  }
+
+  Optional<AutoloadMap::FileResult> getConstantFile(
+      const String& constant) override {
     return getSymbolFile<SymKind::Constant>(
         constant, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
           return m.getConstantFile(s);
         });
   }
 
-  Optional<String> getTypeAliasFile(const String& typeAlias) override {
+  Optional<AutoloadMap::FileResult> getConstantFileRelative(
+      const String& constant) override {
+    return getSymbolFileRelative<SymKind::Constant>(
+        constant, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
+          return m.getConstantFile(s);
+        });
+  }
+
+  Optional<AutoloadMap::FileResult> getTypeAliasFile(
+      const String& typeAlias) override {
     return getSymbolFile<SymKind::Type>(
         typeAlias, [](SymbolMap& m, Symbol<SymKind::Type> s) {
           return m.getTypeAliasFile(s);
         });
   }
 
-  Optional<folly::fs::path> getTypeFile(std::string_view type) override {
+  Optional<AutoloadMap::FileResult> getTypeAliasFileRelative(
+      const String& typeAlias) override {
+    return getSymbolFileRelative<SymKind::Type>(
+        typeAlias, [](SymbolMap& m, Symbol<SymKind::Type> s) {
+          return m.getTypeAliasFile(s);
+        });
+  }
+
+  Optional<AutoloadMap::FileResult> getModuleFile(
+      const String& module) override {
+    return getSymbolFile<SymKind::Module>(
+        module, [](SymbolMap& m, Symbol<SymKind::Module> s) {
+          return m.getModuleFile(s);
+        });
+  }
+
+  Optional<AutoloadMap::FileResult> getModuleFileRelative(
+      const String& module) override {
+    return getSymbolFileRelative<SymKind::Module>(
+        module, [](SymbolMap& m, Symbol<SymKind::Module> s) {
+          return m.getModuleFile(s);
+        });
+  }
+
+  Optional<fs::path> getTypeOrTypeAliasFile(std::string_view type) override {
+    return getSymbolFile<SymKind::Type>(
+        type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
+          return m.getTypeOrTypeAliasFile(s);
+        });
+  }
+
+  Optional<fs::path> getTypeOrTypeAliasFileRelative(
+      std::string_view type) override {
+    return getSymbolFileRelative<SymKind::Type>(
+        type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
+          return m.getTypeOrTypeAliasFile(s);
+        });
+  }
+
+  Optional<fs::path> getTypeFile(std::string_view type) override {
     return getSymbolFile<SymKind::Type>(
         type,
         [](SymbolMap& m, Symbol<SymKind::Type> s) { return m.getTypeFile(s); });
   }
 
-  Optional<folly::fs::path> getFunctionFile(std::string_view func) override {
+  Optional<fs::path> getTypeFileRelative(std::string_view type) override {
+    return getSymbolFileRelative<SymKind::Type>(
+        type,
+        [](SymbolMap& m, Symbol<SymKind::Type> s) { return m.getTypeFile(s); });
+  }
+
+  Optional<fs::path> getFunctionFile(std::string_view func) override {
     return getSymbolFile<SymKind::Function>(
         func, [](SymbolMap& m, Symbol<SymKind::Function> s) {
           return m.getFunctionFile(s);
         });
   }
 
-  Optional<folly::fs::path> getConstantFile(std::string_view name) override {
+  Optional<fs::path> getFunctionFileRelative(std::string_view func) override {
+    return getSymbolFileRelative<SymKind::Function>(
+        func, [](SymbolMap& m, Symbol<SymKind::Function> s) {
+          return m.getFunctionFile(s);
+        });
+  }
+
+  Optional<fs::path> getConstantFile(std::string_view name) override {
     return getSymbolFile<SymKind::Constant>(
         name, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
           return m.getConstantFile(s);
         });
   }
 
-  Optional<folly::fs::path> getTypeAliasFile(std::string_view name) override {
+  Optional<fs::path> getConstantFileRelative(std::string_view name) override {
+    return getSymbolFileRelative<SymKind::Constant>(
+        name, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
+          return m.getConstantFile(s);
+        });
+  }
+
+  Optional<fs::path> getTypeAliasFile(std::string_view name) override {
     return getSymbolFile<SymKind::Type>(
         name, [](SymbolMap& m, Symbol<SymKind::Type> s) {
           return m.getTypeAliasFile(s);
+        });
+  }
+
+  Optional<fs::path> getTypeAliasFileRelative(std::string_view name) override {
+    return getSymbolFileRelative<SymKind::Type>(
+        name, [](SymbolMap& m, Symbol<SymKind::Type> s) {
+          return m.getTypeAliasFile(s);
+        });
+  }
+
+  Optional<fs::path> getModuleFile(std::string_view name) override {
+    return getSymbolFile<SymKind::Module>(
+        name, [](SymbolMap& m, Symbol<SymKind::Module> s) {
+          return m.getModuleFile(s);
+        });
+  }
+
+  Optional<fs::path> getModuleFileRelative(std::string_view name) override {
+    return getSymbolFileRelative<SymKind::Module>(
+        name, [](SymbolMap& m, Symbol<SymKind::Module> s) {
+          return m.getModuleFile(s);
         });
   }
 
@@ -656,112 +837,210 @@ struct FactsStoreImpl final
         path, [](SymbolMap& m, Path s) { return m.getFileTypeAliases(s); });
   }
 
-  Array
-  getBaseTypes(const String& derivedType, const Variant& filters) override {
-    return getBaseTypes(
+  Array getFileModules(const String& path) override {
+    return getFileSymbols<SymKind::Module>(
+        path, [](SymbolMap& m, Path s) { return m.getFileModules(s); });
+  }
+
+  Array getAllModules() override {
+    auto modules = m_symbolMap.getAllModules();
+    VecInit symbols{modules.size()};
+    for (auto const& module : modules) {
+      symbols.append(make_tv<KindOfPersistentString>(module.get()));
+    }
+    return symbols.toArray();
+  }
+
+  Optional<String> getFileModuleMembership(const String& path) override {
+    auto relativePath = ensureRelativePath(path, m_root);
+    if (!relativePath.has_value()) {
+      return std::nullopt;
+    }
+    auto result = m_symbolMap.getFileModuleMembership(*relativePath);
+    if (result.has_value()) {
+      return StrNR{result->get()};
+    } else {
+      return std::nullopt;
+    }
+  }
+
+  Optional<String> getFilePackageMembership(const String& path) override {
+    auto relativePath = ensureRelativePath(path, m_root);
+    if (!relativePath.has_value()) {
+      return std::nullopt;
+    }
+
+    // Check if there's a package override first - this is actually the only
+    // package information we store in Facts.
+    auto result = m_symbolMap.getFilePackageMembership(*relativePath);
+    if (result.has_value()) {
+      return StrNR{result->get()};
+    }
+
+    // If there's no package override, first make sure the file even exists,
+    // then use the included paths for each package definition to determine
+    // which is the most appropriate match.
+    if (!m_symbolMap.getFileExists(relativePath.value())) {
+      return std::nullopt;
+    }
+
+    auto requestOptions = g_context->getRepoOptionsForRequest();
+    if (!requestOptions) {
+      return std::nullopt;
+    }
+
+    auto const& packageInfo = requestOptions->packageInfo();
+    auto path_string = relativePath.value().slice();
+
+    Optional<String> package;
+    // Facts expects that, within a given package, paths are sorted in reverse
+    // lex ordering such that the longest possible match will always appear
+    // first in the sorted result.
+    for (const auto& [package_name, package_data] : packageInfo.packages()) {
+      for (const auto& include_path : package_data.m_include_paths) {
+        if ((!package.has_value() ||
+             include_path.length() > package->length()) &&
+            path_string.length() >= include_path.length() &&
+            std::equal(
+                include_path.begin(),
+                include_path.end(),
+                path_string.begin())) {
+          package = StrNR{package_name};
+
+          // We can stop searching this package if we found a match, but another
+          // package might have a better/longer match so we can't return early.
+          break;
+        }
+      }
+    }
+    return package;
+  }
+
+  Array getBaseTypes(const String& derivedType, const Variant& filters)
+      override {
+    return filterBaseTypes(
         derivedType,
-        InheritanceFilterData::createFromShape(
+        TypeFilterData::createFromShape(
             filters.isArray() ? filters.getArrayData() : nullptr));
   }
 
-  Array
-  getDerivedTypes(const String& baseType, const Variant& filters) override {
-    return getDerivedTypes(
+  Array getDerivedTypes(const String& baseType, const Variant& filters)
+      override {
+    return filterDerivedTypes(
         baseType,
-        InheritanceFilterData::createFromShape(
+        TypeFilterData::createFromShape(
             filters.isArray() ? filters.getArrayData() : nullptr));
   }
 
   Array getTransitiveDerivedTypes(
-      const String& baseType, const Variant& filters) override {
-    return getTransitiveDerivedTypes(
+      const String& baseType,
+      const Variant& filters,
+      bool includeInterfaceRequireExtends) override {
+    return filterTransitiveDerivedTypes(
         baseType,
-        InheritanceFilterData::createFromShape(
+        includeInterfaceRequireExtends,
+        TypeFilterData::createFromShape(
             filters.isArray() ? filters.getArrayData() : nullptr));
   }
 
   Array getTypesWithAttribute(const String& attr) override {
-    return makeVecOfString(m_map.getTypesWithAttribute(*attr.get()));
+    return makeVecOfLazyClass(m_symbolMap.getTypesWithAttribute(*attr.get()));
   }
 
   Array getTypeAliasesWithAttribute(const String& attr) override {
-    return makeVecOfString(m_map.getTypeAliasesWithAttribute(*attr.get()));
+    return makeVecOfString(
+        m_symbolMap.getTypeAliasesWithAttribute(*attr.get()));
   }
 
   Array getMethodsWithAttribute(const String& attr) override {
-    return makeVecOfStringString(m_map.getMethodsWithAttribute(*attr.get()));
+    if (UNLIKELY(!m_symbolMap.isAttrIndexed(*attr.get()))) {
+      HPHP::SystemLib::throwRuntimeExceptionObject(
+          fmt::format(
+              "Queried attribute {} not found in IndexedMethodAttributes={}",
+              attr.get()->data(),
+              m_symbolMap.debugIndexedAttrs()));
+    }
+    return makeVecOfStringString(
+        m_symbolMap.getMethodsWithAttribute(*attr.get()));
+  }
+
+  Array getTypeMethodAttributes(const String& type) override {
+    return makeDictOfStringVecString(
+        m_symbolMap.getTypeMethodAttributes(*type.get()));
   }
 
   Array getFilesWithAttribute(const String& attr) override {
-    return makeVecOfString(m_map.getFilesWithAttribute(*attr.get()));
+    return makeVecOfString(m_symbolMap.getFilesWithAttribute(*attr.get()));
+  }
+
+  Array getFilesWithAttributeAndAnyValue(
+      const String& attr,
+      const folly::dynamic& value) override {
+    return makeVecOfString(
+        m_symbolMap.getFilesWithAttributeAndAnyValue(*attr.get(), value));
+  }
+  /**
+   * Given a the name of a file attribute, returns an array of two item
+   * arrays of hack dynamics. The first item in each array is  well typed
+   * string but made dynamic so the return vector has a single type.
+   * The second arg has strange behavior.
+   * It is a folly::dynamic in the symbol map, and a string in the db but we use
+   * parseJson on the way out.  So I originally expected values that were
+   * ints in the original file attribute to come back as ints. But they do
+   * come out as strings.  This behavior is the same with getFilesAttrArgs,
+   * so this is not a new bug with this method.  Because of this, we
+   * actually represent the output as a vec<(string, ?string)> in hack.
+   * The second item is nullable because not every attr has values.
+   */
+  Array getFilesAndAttrValsWithAttribute(const String& attr) override {
+    auto toConvert = m_symbolMap.getFilesAndAttrValsWithAttribute(*attr.get());
+    return makeVecOfDynamicDynamic(toConvert);
   }
 
   Array getTypeAttributes(const String& type) override {
-    return makeVecOfString(m_map.getAttributesOfType(*type.get()));
+    return makeVecOfString(m_symbolMap.getAttributesOfType(*type.get()));
   }
 
   Array getTypeAliasAttributes(const String& typeAlias) override {
-    return makeVecOfString(m_map.getAttributesOfTypeAlias(*typeAlias.get()));
+    return makeVecOfString(
+        m_symbolMap.getAttributesOfTypeAlias(*typeAlias.get()));
   }
 
   Array getMethodAttributes(const String& type, const String& method) override {
     return makeVecOfString(
-        m_map.getAttributesOfMethod(*type.get(), *method.get()));
+        m_symbolMap.getAttributesOfMethod(*type.get(), *method.get()));
   }
 
   Array getFileAttributes(const String& file) override {
-    return makeVecOfString(m_map.getAttributesOfFile(Path{*file.get()}));
+    return makeVecOfString(m_symbolMap.getAttributesOfFile(Path{*file.get()}));
   }
 
   Array getTypeAttrArgs(const String& type, const String& attribute) override {
     return makeVecOfDynamic(
-        m_map.getTypeAttributeArgs(*type.get(), *attribute.get()));
+        m_symbolMap.getTypeAttributeArgs(*type.get(), *attribute.get()));
   }
 
-  Array getTypeAliasAttrArgs(
-      const String& typeAlias, const String& attribute) override {
-    return makeVecOfDynamic(
-        m_map.getTypeAliasAttributeArgs(*typeAlias.get(), *attribute.get()));
+  Array getTypeAliasAttrArgs(const String& typeAlias, const String& attribute)
+      override {
+    return makeVecOfDynamic(m_symbolMap.getTypeAliasAttributeArgs(
+        *typeAlias.get(), *attribute.get()));
   }
 
   Array getMethodAttrArgs(
       const String& type,
       const String& method,
       const String& attribute) override {
-    return makeVecOfDynamic(m_map.getMethodAttributeArgs(
+    return makeVecOfDynamic(m_symbolMap.getMethodAttributeArgs(
         *type.get(), *method.get(), *attribute.get()));
   }
 
   Array getFileAttrArgs(const String& file, const String& attribute) override {
     return makeVecOfDynamic(
-        m_map.getFileAttributeArgs(Path{*file.get()}, *attribute.get()));
+        m_symbolMap.getFileAttributeArgs(Path{*file.get()}, *attribute.get()));
   }
 
-  Array getAllTypes() override {
-    return makeDictOfStringToString(m_map.getAllTypes());
-  }
-
-  Array getAllFunctions() override {
-    return makeDictOfStringToString(m_map.getAllFunctions());
-  }
-
-  Array getAllConstants() override {
-    return makeDictOfStringToString(m_map.getAllConstants());
-  }
-
-  Array getAllTypeAliases() override {
-    return makeDictOfStringToString(m_map.getAllTypeAliases());
-  }
-
-  bool canHandleFailure() const override {
-    return false;
-  }
-
-  AutoloadMap::Result handleFailure(
-      KindOf UNUSED kind,
-      const String& UNUSED className,
-      const Variant& UNUSED err) const override {
-    return AutoloadMap::Result::Failure;
+  Optional<std::string> getSha1(const String& path) {
+    return m_symbolMap.getSha1(Path{*path.get()});
   }
 
   /**
@@ -771,17 +1050,24 @@ struct FactsStoreImpl final
     if (!m_watcher) {
       return;
     }
+    auto clock = getClock();
     m_watcher->subscribe(
-        [weakThis = weak_from_this()](Watcher::Results&& results) {
+        clock, [weakThis = weak_from_this()](Watcher::Delta&& delta) {
           XLOGF(
               INFO,
               "Subscription result: {} paths received.",
-              results.m_files.size());
+              delta.m_files.size());
           auto sharedThis = weakThis.lock();
           if (!sharedThis) {
+            rareSboxEvent("facts-store", "subscribe weakThis==null", "");
             return;
           }
-          sharedThis->update();
+          timeSboxEvent(
+              Cfg::Autoload::PerfSampleRate,
+              "facts-store",
+              "subscribe update",
+              "",
+              [&] { sharedThis->update(); });
         });
   }
 
@@ -794,44 +1080,136 @@ struct FactsStoreImpl final
     if (!m_watcher) {
       return {};
     }
-    auto updateFuture = m_updateFuture.wlock();
-    *updateFuture = folly::splitFuture(
-        updateFuture->getFuture()
-            .via(&m_updateExec)
-            .thenTry([this](const folly::Try<folly::Unit>&) {
-              return m_watcher->getChanges(getClock());
-            })
-            .thenTry([this](folly::Try<Watcher::Results>&& results) {
-              if (results.hasValue()) {
-                return update(std::move(results.value()));
-              } else if (results.hasException()) {
-                XLOG(ERR) << "Exception while processing watcher results: "
-                          << results.exception().what();
-              }
-              return folly::makeSemiFuture();
-            }));
-    return updateFuture->getFuture().semi();
+    if (m_closing) {
+      throw UpdateExc{
+          "Attempted to call FactsStoreImpl::update() while shutting down"};
+    }
+    // Check if a suppression sentinel file exists
+    if (m_suppressionFilePath) {
+      auto suppressionFilePath = *m_suppressionFilePath;
+      if (suppressionFilePath.is_relative()) {
+        suppressionFilePath = m_root / std::move(suppressionFilePath);
+      }
+      if (std::filesystem::exists(suppressionFilePath)) {
+        XLOGF(
+            INFO,
+            "Suppression file found at {}, not updating native Facts.",
+            suppressionFilePath.native());
+        rareSboxEvent(
+            "facts-store", "update supressed", suppressionFilePath.native());
+        return {};
+      }
+    }
+    auto updateFuture = [&] {
+      tracing::Block _{"autoload-update-acquire-lock"};
+      return m_updateFuture.wlock();
+    }();
+    auto updateStart = std::chrono::steady_clock::now();
+    // We need at least one Watchman query to start and complete after
+    // `update()` is called. We model our updater and Watchman querier as a
+    // chain of futures, which can be thought of as a queue. If we have
+    // multiple simultaneous updates, then there is already a Watchman query
+    // which hasn't started yet. In that case, we don't need to schedule
+    // another Watchman query. One of the pending queries will start and
+    // finish after this call to update().
+    if (!m_queryingWatchman) {
+      m_queryingWatchman = true;
+      *updateFuture = folly::splitFuture(
+          updateFuture->getFuture()
+              .via(m_updateExec.get())
+              .thenTry([this](const folly::Try<folly::Unit>&) {
+                m_queryingWatchman = false;
+                m_lastWatchmanQueryStart = std::chrono::steady_clock::now();
+                return m_watcher->getChanges(getClock());
+              })
+              .thenTry([this](folly::Try<Watcher::Delta>&& delta) {
+                if (delta.hasException()) {
+                  auto msg = folly::sformat(
+                      "Exception while querying watcher: {}",
+                      delta.exception().what());
+                  XLOG(ERR) << msg;
+                  rareSboxEvent("facts-store", "update watcher exception", msg);
+                  throw UpdateExc{msg};
+                }
+                return updateWithDelta(std::move(delta.value()));
+              }));
+    }
+    return updateFuture->getFuture()
+        .thenTry([this, updateStart](folly::Try<folly::Unit> res) {
+          // Verify that we have kicked off at least one Watchman query between
+          // this call to update() and the future chain's completion. We always
+          // log if this invariant is violated, and we also assert when we're in
+          // debug mode.
+          auto lastWatchmanQueryStart = m_lastWatchmanQueryStart.load();
+          if (UNLIKELY(lastWatchmanQueryStart < updateStart)) {
+            auto currentTime = std::chrono::steady_clock::now();
+            auto msg = folly::sformat(
+                "Stale update. Last Watchman query was {}ms ago, but update was only {}ms ago.",
+                std::chrono::duration_cast<
+                    std::chrono::duration<double, std::milli>>(
+                    currentTime - lastWatchmanQueryStart)
+                    .count(),
+                std::chrono::duration_cast<
+                    std::chrono::duration<double, std::milli>>(
+                    currentTime - updateStart)
+                    .count());
+            XLOG(ERR, msg);
+            rareSboxEvent("facts-store", msg, "");
+          }
+          assertx(updateStart < lastWatchmanQueryStart);
+          auto queryMicros = std::chrono::duration_cast<std::chrono::duration<
+              double,
+              std::chrono::microseconds::period>>(
+                                 lastWatchmanQueryStart - updateStart)
+                                 .count();
+          sampleSboxEvent(
+              Cfg::Autoload::PerfSampleRate,
+              "facts-store",
+              "watchman query",
+              m_root.native(),
+              queryMicros,
+              std::nullopt);
+          XLOGF(
+              DBG0,
+              "update waited {}ms for a Watchman query to return.",
+              queryMicros / 1000);
+          return res;
+        })
+        .semi();
   }
 
-  folly::SemiFuture<folly::Unit> update(Watcher::Results&& results) {
+  folly::SemiFuture<folly::Unit> updateWithDelta(Watcher::Delta&& delta) {
     if (m_closing) {
       throw UpdateExc{"Shutting down"};
     }
 
-    bool isFresh = results.m_fresh;
-    Clock lastClock = *results.m_lastClock;
-    Clock newClock = results.m_newClock;
+    tracing::Block _{"autoload-update-parse-results", [&] {
+                       return tracing::Props{}
+                           .add("fresh", delta.m_fresh)
+                           .add("delta_size", delta.m_files.size());
+                     }};
+    bool isFresh = delta.m_fresh;
+    Clock lastClock = *delta.m_lastClock;
+    Clock newClock = delta.m_newClock;
 
-    auto [alteredPathsAndHashes, deletedPaths] =
-        isFresh ? getFreshDelta(std::move(results))
-                : getIncrementalDelta(std::move(results));
+    auto [alteredPathsAndHashes, deletedPaths] = isFresh
+        ? getFreshDelta(std::move(delta))
+        : getIncrementalDelta(std::move(delta));
+
+    if (Cfg::Eval::AutoloadEagerSyncUnitCache) {
+      unitCacheSyncRepo(this, m_root, alteredPathsAndHashes, deletedPaths);
+    }
 
     // We need to update the DB if Watchman has restarted or if
     // something's changed on the filesystem. Otherwise, there's no
     // need to update the DB.
-    if (LIKELY(!isFresh) && LIKELY(alteredPathsAndHashes.empty()) &&
-        LIKELY(deletedPaths.empty())) {
-      XLOG(INFO) << "Finished: it's a a no-op incremental update.";
+    //
+    // Note that we intentionally still perform a no-op update if the watchman
+    // clock has not been stored in the symbol map yet as queries using the
+    // merge base can be more expensive than clock based queries.
+    if (!isFresh && alteredPathsAndHashes.empty() && deletedPaths.empty() &&
+        !lastClock.m_clock.empty()) {
+      XLOG(INFO) << "Finished: it's a no-op incremental update.";
       return {};
     }
 
@@ -842,10 +1220,9 @@ struct FactsStoreImpl final
         alteredPathsAndHashes.size(),
         deletedPaths.size());
 
-    auto alteredPathFacts =
-        LIKELY(alteredPathsAndHashes.empty())
-            ? std::vector<folly::Try<FileFacts>>{}
-            : facts_from_paths(m_root, alteredPathsAndHashes);
+    auto alteredPathFacts = LIKELY(alteredPathsAndHashes.empty())
+        ? std::vector<folly::Try<FileFacts>>{}
+        : facts_from_paths(m_root, alteredPathsAndHashes);
 
     std::vector<FileFacts> facts;
     facts.reserve(alteredPathFacts.size());
@@ -860,7 +1237,7 @@ struct FactsStoreImpl final
             e.what());
         // Treat a parse error as if we had deleted the path
         deletedPaths.push_back(std::move(alteredPathsAndHashes.at(i).m_path));
-        alteredPathsAndHashes.at(i) = {folly::fs::path{}, {}};
+        alteredPathsAndHashes.at(i) = {fs::path{}, {}};
       }
     }
 
@@ -877,7 +1254,7 @@ struct FactsStoreImpl final
     }
 
     XLOGF(
-        DBG0,
+        INFO,
         "Facts size: {}. Altered paths size: {}",
         facts.size(),
         alteredPathsAndHashes.size());
@@ -887,28 +1264,38 @@ struct FactsStoreImpl final
     // file, but with nonempty facts
     for (auto i = 0; i < alteredPathsAndHashes.size(); ++i) {
       auto const& fileFacts = facts.at(i);
-      auto const& pathAndHash = alteredPathsAndHashes[i];
-      if (pathAndHash.m_hash == kEmptyFileSha1Hash && !fileFacts.isEmpty()) {
+      // We cannot trust pathAndHash.m_hash, the authoritative hash for these
+      // facts is fileFacts.m_sha1hex which was computed from the file contents
+      // that were used to derive these facts.
+      //
+      // If a race occurs between watchman notifying us of changes to disk and
+      // further writes occurring the hash we have from watchman may be stale.
+      // The hash written to memcache and used to key the in memory facts map
+      // will be fileFacts.m_sha1hex.
+      if (as_slice(fileFacts.sha1sum) == kEmptyFileSha1Hash &&
+          !isEmpty(fileFacts)) {
         throw FactsExtractionExc{folly::sformat(
             "{} has a SHA1 hash corresponding to an empty file ('{}'), "
             "but we are attempting to assign it non-empty facts: `{}`",
-            pathAndHash.m_path.native(),
+            alteredPathsAndHashes[i].m_path.native(),
             kEmptyFileSha1Hash,
-            json_from_facts(fileFacts))};
+            as_slice(hackc::facts_debug(fileFacts)))};
       }
     }
 
     XLOGF(
-        DBG0,
+        INFO,
         "SymbolMap.update(since={}, clock={}, "
         "alteredPathsAndHashes.size()={}, deletedPaths.size()={})",
         lastClock,
         newClock,
         alteredPathsAndHashes.size(),
         deletedPaths.size());
-    m_map.update(
+    m_symbolMap.update(
         lastClock,
         newClock,
+        // See comment above for why we no longer trust the hashes from this set
+        // of paths.
         removeHashes(std::move(alteredPathsAndHashes)),
         std::move(deletedPaths),
         std::move(facts));
@@ -922,31 +1309,29 @@ struct FactsStoreImpl final
    * update when Watchman gives us the full state of the world.
    */
 
-  std::tuple<std::vector<PathAndOptionalHash>, std::vector<folly::fs::path>>
-  getFreshDelta(Watcher::Results&& result) const {
-
-    auto allPaths = m_map.getAllPathsWithHashes();
+  std::tuple<std::vector<PathAndOptionalHash>, std::vector<fs::path>>
+  getFreshDelta(Watcher::Delta&& delta) const {
+    auto allPaths = m_symbolMap.getAllPathsWithHashes();
     XLOGF(
         INFO,
         "Received fresh query, checking against our list of {} paths.",
         allPaths.size());
 
     std::vector<PathAndOptionalHash> alteredPaths;
-    std::vector<folly::fs::path> deletedPaths;
-    for (auto& pathData : std::move(result.m_files)) {
+    alteredPaths.reserve(delta.m_files.size());
+    for (auto& pathData : std::move(delta.m_files)) {
       assertx(pathData.m_exists);
 
       auto& path = pathData.m_path;
       auto pathStr = Path{path};
-
-      auto sha1hex = pathData.m_hash;
+      auto sha1hex = pathData.m_watcher_hash;
 
       // Watchman is sending us all the files in the repo, regardless of
       // whether we've seen the same file before. Watchman is also
       // sending us SHA1 hashes, so compare these to determine which
       // files have actually changed.
       bool sha1HexMatches = [&]() {
-        if (!pathData.m_hash.has_value()) {
+        if (!sha1hex.has_value()) {
           return false;
         }
         auto const it = allPaths.find(pathStr);
@@ -971,6 +1356,8 @@ struct FactsStoreImpl final
 
     // All remaining paths are ones which Watchman didn't see. These
     // have been deleted.
+    std::vector<fs::path> deletedPaths;
+    deletedPaths.reserve(allPaths.size());
     for (auto const& [pathStr, _] : allPaths) {
       deletedPaths.emplace_back(std::string{pathStr.slice()});
     }
@@ -982,29 +1369,29 @@ struct FactsStoreImpl final
    * Calculate the paths which have changed since the last Watchman
    * update when Watchman gives us an incremental update.
    */
-  std::tuple<std::vector<PathAndOptionalHash>, std::vector<folly::fs::path>>
-  getIncrementalDelta(Watcher::Results&& result) const {
-
+  std::tuple<std::vector<PathAndOptionalHash>, std::vector<fs::path>>
+  getIncrementalDelta(Watcher::Delta&& delta) const {
     std::vector<PathAndOptionalHash> alteredPaths;
-    std::vector<folly::fs::path> deletedPaths;
-    for (auto& pathData : result.m_files) {
+    std::vector<fs::path> deletedPaths;
+    for (auto& pathData : delta.m_files) {
       if (!pathData.m_exists) {
         deletedPaths.push_back(std::move(pathData.m_path));
       } else {
-        alteredPaths.push_back({std::move(pathData.m_path), pathData.m_hash});
+        alteredPaths.push_back(
+            {std::move(pathData.m_path), std::move(pathData.m_watcher_hash)});
       }
     }
     return {std::move(alteredPaths), std::move(deletedPaths)};
   }
 
-  Array getBaseTypes(
-      const String& derivedType, const InheritanceFilterData& filters) {
-
+  Array filterBaseTypes(
+      const String& derivedType,
+      const TypeFilterData& filters) {
     std::vector<Symbol<SymKind::Type>> baseTypes;
 
     auto addBaseTypes = [&](DeriveKind kind) {
-      auto newBaseTypes =
-          m_map.getBaseTypes(Symbol<SymKind::Type>{*derivedType.get()}, kind);
+      auto newBaseTypes = m_symbolMap.getBaseTypes(
+          Symbol<SymKind::Type>{*derivedType.get()}, kind);
       baseTypes.reserve(baseTypes.size() + newBaseTypes.size());
       std::move(
           std::begin(newBaseTypes),
@@ -1016,22 +1403,25 @@ struct FactsStoreImpl final
       addBaseTypes(DeriveKind::Extends);
     }
     if (!filters.m_deriveKindFilters.m_removeRequires) {
+      addBaseTypes(DeriveKind::RequireThisAs);
+      addBaseTypes(DeriveKind::RequireClass);
       addBaseTypes(DeriveKind::RequireExtends);
       addBaseTypes(DeriveKind::RequireImplements);
     }
 
-    return makeVecOfString(filterTypesByAttribute(
+    return makeVecOfLazyClass(filterByFlags(
         filterByKind(std::move(baseTypes), filters.m_kindFilters),
-        filters.m_attrFilters));
+        filters.m_typeFlagFilters));
   }
 
-  Array getDerivedTypes(
-      const String& baseType, const InheritanceFilterData& filters) {
+  Array filterDerivedTypes(
+      const String& baseType,
+      const TypeFilterData& filters) {
     std::vector<Symbol<SymKind::Type>> derivedTypes;
 
     auto addDerivedTypes = [&](DeriveKind kind) {
-      auto newDerivedTypes =
-          m_map.getDerivedTypes(Symbol<SymKind::Type>{*baseType.get()}, kind);
+      auto newDerivedTypes = m_symbolMap.getDerivedTypes(
+          Symbol<SymKind::Type>{*baseType.get()}, kind);
       derivedTypes.reserve(derivedTypes.size() + newDerivedTypes.size());
       std::move(
           std::begin(newDerivedTypes),
@@ -1043,64 +1433,50 @@ struct FactsStoreImpl final
       addDerivedTypes(DeriveKind::Extends);
     }
     if (!filters.m_deriveKindFilters.m_removeRequires) {
+      addDerivedTypes(DeriveKind::RequireThisAs);
+      addDerivedTypes(DeriveKind::RequireClass);
       addDerivedTypes(DeriveKind::RequireExtends);
       addDerivedTypes(DeriveKind::RequireImplements);
     }
 
-    return makeVecOfString(filterTypesByAttribute(
+    return makeVecOfLazyClass(filterByFlags(
         filterByKind(std::move(derivedTypes), filters.m_kindFilters),
-        filters.m_attrFilters));
+        filters.m_typeFlagFilters));
   }
 
-  Array getTransitiveDerivedTypes(
-      const String& baseType, const InheritanceFilterData& filters) {
-    auto derivedTypeInfo = filterTypesByAttribute(
-        m_map.getTransitiveDerivedTypes(
-            *baseType.get(),
-            filters.m_kindFilters.toMask(),
-            filters.m_deriveKindFilters.toMask()),
-        filters.m_attrFilters,
-        [](auto const& tuple) { return std::get<0>(tuple); });
-    VecInit derivedTypeVec{derivedTypeInfo.size()};
-    for (auto const& [type, path, kind, flags] : derivedTypeInfo) {
-      VecInit derivedTypeTuple{4};
-      derivedTypeTuple.append(make_tv<KindOfPersistentString>(type.get()));
-      derivedTypeTuple.append(make_tv<KindOfPersistentString>(path.get()));
-      derivedTypeTuple.append(
-          make_tv<KindOfPersistentString>(makeStaticString(toString(kind))));
-      derivedTypeTuple.append(
-          (flags & static_cast<TypeFlagMask>(TypeFlag::Abstract)) != 0);
-      derivedTypeVec.append(std::move(derivedTypeTuple).toArray());
-    }
-    return derivedTypeVec.toArray();
+  Array filterTransitiveDerivedTypes(
+      const String& baseType,
+      bool includeInterfaceRequireExtends,
+      const TypeFilterData& filters) {
+    auto derivedTypes = m_symbolMap.getTransitiveDerivedTypes(
+        Symbol<SymKind::Type>{*baseType.get()}, includeInterfaceRequireExtends);
+
+    return makeVecOfLazyClass(filterByFlags(
+        filterByKind(std::move(derivedTypes), filters.m_kindFilters),
+        filters.m_typeFlagFilters));
   }
 
-  folly::CPUThreadPoolExecutor m_updateExec;
+  std::atomic<std::chrono::steady_clock::time_point> m_lastWatchmanQueryStart{
+      std::chrono::steady_clock::now()};
+  std::atomic<bool> m_queryingWatchman{false};
+  std::unique_ptr<folly::CPUThreadPoolExecutor> m_updateExec;
 
   folly::Synchronized<folly::FutureSplitter<folly::Unit>> m_updateFuture{
       folly::splitFuture(folly::makeFuture())};
   std::atomic<bool> m_closing{false};
-  folly::fs::path m_root;
-  SymbolMap m_map;
+  fs::path m_root;
+  SymbolMap m_symbolMap;
   std::shared_ptr<Watcher> m_watcher;
+  Optional<std::filesystem::path> m_suppressionFilePath;
 
   template <SymKind k, typename TLambda>
   Array getFileSymbols(const String& path, TLambda lambda) {
-    if (path.empty()) {
+    auto relativePath = ensureRelativePath(path, m_root);
+    if (!relativePath) {
       return Array::CreateVec();
     }
 
-    auto symbols = [&]() -> std::vector<Symbol<k>> {
-      if (path.slice().at(0) != '/') {
-        return lambda(m_map, Path{*path.get()});
-      }
-      auto resolvedPath =
-          resolvePathRelativeToRoot(folly::fs::path{path.slice()}, m_root);
-      if (!resolvedPath) {
-        return {};
-      }
-      return lambda(m_map, Path{*resolvedPath});
-    }();
+    auto symbols = lambda(m_symbolMap, *relativePath);
     VecInit ret{symbols.size()};
     for (auto s : std::move(symbols)) {
       ret.append(make_tv<KindOfPersistentString>(s.get()));
@@ -1109,23 +1485,46 @@ struct FactsStoreImpl final
   }
 
   template <SymKind K, class T>
-  Optional<String> getSymbolFile(const String& symbol, T lambda) {
+  Optional<AutoloadMap::FileResult> getSymbolFile(
+      const String& symbol,
+      T lambda) {
     auto path = getSymbolFile<K>(std::string_view{symbol.slice()}, lambda);
     if (UNLIKELY(!path)) {
       return {};
     }
-    return String{path->native()};
+    return AutoloadMap::FileResult(String{path->native()});
   }
 
   template <SymKind K, class T>
-  Optional<folly::fs::path> getSymbolFile(std::string_view symbol, T lambda) {
-    const StringData* fileStr = lambda(m_map, Symbol<K>{symbol}).get();
-    if (UNLIKELY(!fileStr)) {
-      return {};
-    }
-    folly::fs::path p{folly::fs::path{fileStr->slice()}};
+  Optional<fs::path> getSymbolFile(std::string_view symbol, T lambda) {
+    const StringData* fileStr = lambda(m_symbolMap, Symbol<K>{symbol}).get();
+    if (UNLIKELY(!fileStr))
+      return std::nullopt;
+    fs::path p{fileStr->toCppString()};
     assertx(p.is_relative());
     return m_root / p;
+  }
+
+  template <SymKind K, class T>
+  Optional<AutoloadMap::FileResult> getSymbolFileRelative(
+      const String& symbol,
+      T lambda) {
+    auto path =
+        getSymbolFileRelative<K>(std::string_view{symbol.slice()}, lambda);
+    if (UNLIKELY(!path)) {
+      return {};
+    }
+    return AutoloadMap::FileResult(String{path->native()});
+  }
+
+  template <SymKind K, class T>
+  Optional<fs::path> getSymbolFileRelative(std::string_view symbol, T lambda) {
+    const StringData* fileStr = lambda(m_symbolMap, Symbol<K>{symbol}).get();
+    if (UNLIKELY(!fileStr))
+      return std::nullopt;
+    fs::path p{fileStr->toCppString()};
+    assertx(p.is_relative());
+    return p;
   }
 
   /**
@@ -1135,7 +1534,8 @@ struct FactsStoreImpl final
    * The Hack type of `kinds` is `keyset<HH\Facts\TypeKind>`.
    */
   std::vector<Symbol<SymKind::Type>> filterByKind(
-      std::vector<Symbol<SymKind::Type>> types, const KindFilterData& kinds) {
+      std::vector<Symbol<SymKind::Type>> types,
+      const KindFilterData& kinds) {
     // Bail out if we aren't filtering on kind
     if (kinds.doesIncludeEverything()) {
       return types;
@@ -1145,7 +1545,7 @@ struct FactsStoreImpl final
             types.begin(),
             types.end(),
             [&](const Symbol<SymKind::Type>& type) {
-              auto kind = m_map.getKind(type);
+              auto kind = m_symbolMap.getKind(type);
               switch (kind) {
                 case Facts::TypeKind::Class:
                   return kinds.m_removeClasses;
@@ -1162,72 +1562,36 @@ struct FactsStoreImpl final
         types.end());
     return types;
   }
-
   /**
-   * Filter the given `types` down to only those with the given attributes.
+   * Filter down to the just the type flags that we want, such as final,
+   * abstract, or empty. This is probably less performant than
+   * if we rolled this logic into filterByKind, but it is easier to follow
+   * this way, as two consecutive filters, rather than one complex one.
    */
-  template <typename T>
-  std::vector<T> filterTypesByAttribute(
-      std::vector<T> types, const AttributeFilterData& filter) {
-    return filterTypesByAttribute(
-        std::move(types), filter, [](T type) -> Symbol<SymKind::Type> {
-          return type;
-        });
-  }
-
-  template <typename T, typename TypeGetFn>
-  std::vector<T> filterTypesByAttribute(
-      std::vector<T> types,
-      const AttributeFilterData& filter,
-      TypeGetFn typeGetFn) {
-    // Bail out if we aren't filtering on attributes
-    if (filter.m_attrs.empty()) {
+  std::vector<Symbol<SymKind::Type>> filterByFlags(
+      std::vector<Symbol<SymKind::Type>> types,
+      const TypeFlagFilterData& flags) {
+    // If returning everything, no need to iterate
+    if (flags == TypeFlagFilterData::includeEverything()) {
       return types;
     }
-
-    // True iff the given attribute satisfies one of our AttributeFilterData
-    // constraints.
-    auto attrMatchesFilter = [&](Symbol<SymKind::Type> type,
-                                 Symbol<SymKind::Type> attr) {
-      // The given attribute isn't one of our constraints.
-      auto it = filter.m_attrs.find(attr);
-      if (it == filter.m_attrs.end()) {
-        return false;
-      }
-
-      // The attribute is one of our constraints, and we don't care about
-      // arguments.
-      auto argFilters = it->second;
-      if (argFilters.empty()) {
-        return true;
-      }
-
-      // Check that each of our argument constraints is satisfied by the
-      // attribute's argument.
-      auto args = m_map.getTypeAttributeArgs(type, attr);
-      for (auto const& [i, argFilter] : argFilters) {
-        if (i >= args.size() || args[i] != argFilter) {
-          return false;
-        }
-      }
-
-      // This attribute satisfies all argument constraints.
-      return true;
-    };
-
     types.erase(
         std::remove_if(
             types.begin(),
             types.end(),
-            [&](const T& typeInfo) {
-              auto const& type = typeGetFn(typeInfo);
-              size_t numAttrMatches = 0;
-              for (auto attr : m_map.getAttributesOfType(type)) {
-                if (attrMatchesFilter(type, attr)) {
-                  ++numAttrMatches;
-                }
+            [&](const Symbol<SymKind::Type>& type) {
+              bool isFinal = m_symbolMap.isTypeFinal(type);
+              bool isAbstract = m_symbolMap.isTypeAbstract(type);
+              if (flags.m_removeEmpty && (!isFinal && !isAbstract)) {
+                return true;
               }
-              return numAttrMatches < filter.m_attrs.size();
+              if (isFinal && flags.m_removeFinal) {
+                return true;
+              }
+              if (isAbstract && flags.m_removeAbstract) {
+                return true;
+              }
+              return false;
             }),
         types.end());
     return types;
@@ -1237,30 +1601,49 @@ struct FactsStoreImpl final
 } // namespace
 
 std::shared_ptr<FactsStore> make_watcher_facts(
-    folly::fs::path root,
-    AutoloadDB::Handle dbHandle,
+    fs::path root,
+    AutoloadDB::Opener dbOpener,
     std::shared_ptr<Watcher> watcher,
     bool shouldSubscribe,
-    std::vector<std::string> indexedMethodAttrsVec) {
-  hphp_hash_set<std::string> indexedMethodAttrs;
+    Optional<std::filesystem::path> suppressionFilePath,
+    const std::vector<std::string>& indexedMethodAttrsVec) {
+  hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttrs;
   indexedMethodAttrs.reserve(indexedMethodAttrsVec.size());
   for (auto& v : indexedMethodAttrsVec) {
-    indexedMethodAttrs.insert(std::move(v));
+    indexedMethodAttrs.insert(Symbol<SymKind::Type>{std::move(v)});
   }
-  auto map = std::make_shared<FactsStoreImpl>(
+  auto inner = std::make_shared<FactsStoreImpl>(
       std::move(root),
-      std::move(dbHandle),
+      std::move(dbOpener),
       std::move(watcher),
+      std::move(suppressionFilePath),
       std::move(indexedMethodAttrs));
   if (shouldSubscribe) {
-    map->subscribe();
+    inner->subscribe();
   }
-  return map;
+  return FactsLogger::wrap(
+      std::move(inner),
+      "ext_facts watcher",
+      Cfg::Autoload::PerfSampleRate,
+      Cfg::Autoload::ErrorSampleRate);
 }
 
-std::shared_ptr<FactsStore>
-make_trusted_facts(folly::fs::path root, AutoloadDB::Handle dbHandle) {
-  return std::make_shared<FactsStoreImpl>(std::move(root), std::move(dbHandle));
+std::shared_ptr<FactsStore> make_trusted_facts(
+    fs::path root,
+    AutoloadDB::Opener dbOpener,
+    const std::vector<std::string>& indexedMethodAttrsVec) {
+  hphp_vector_set<Symbol<SymKind::Type>> indexedMethodAttrs;
+  indexedMethodAttrs.reserve(indexedMethodAttrsVec.size());
+  for (auto& v : indexedMethodAttrsVec) {
+    indexedMethodAttrs.insert(Symbol<SymKind::Type>{std::move(v)});
+  }
+  auto inner = std::make_unique<FactsStoreImpl>(
+      std::move(root), std::move(dbOpener), std::move(indexedMethodAttrs));
+  return FactsLogger::wrap(
+      std::move(inner),
+      "ext_facts trusted",
+      Cfg::Autoload::PerfSampleRate,
+      Cfg::Autoload::ErrorSampleRate);
 }
 
 } // namespace Facts

@@ -3,10 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use instruction_sequence::{instr, InstrSeq};
+use instruction_sequence::InstrSeq;
+use instruction_sequence::instr;
 use oxidized::pos::Pos;
 
-pub fn emit_pos<'a>(pos: &Pos) -> InstrSeq<'a> {
+pub fn emit_pos(pos: &Pos) -> InstrSeq {
     if !pos.is_none() {
         let (line_begin, line_end, col_begin, col_end) = pos.info_pos_extended();
         instr::srcloc(
@@ -20,6 +21,6 @@ pub fn emit_pos<'a>(pos: &Pos) -> InstrSeq<'a> {
     }
 }
 
-pub fn emit_pos_then<'a>(pos: &Pos, instrs: InstrSeq<'a>) -> InstrSeq<'a> {
+pub fn emit_pos_then(pos: &Pos, instrs: InstrSeq) -> InstrSeq {
     InstrSeq::gather(vec![emit_pos(pos), instrs])
 }

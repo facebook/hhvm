@@ -2,6 +2,6 @@
 Notice: Unable to unserialize: [O:15:"ReflectionClass":3:{s:4:"name";s:8:"Collator";s:20:"]. Native data of ReflectionClass should be a class name. in %s on line 3
 bool(false)
 
-Fatal error: Uncaught exception 'ReflectionException' with message 'Class A does not exist' in %s:4
+Fatal error: Uncaught exception 'ReflectionException' with message 'Class DoesNotExist does not exist' in %s:4
 Stack trace:
 %A#%d {main}

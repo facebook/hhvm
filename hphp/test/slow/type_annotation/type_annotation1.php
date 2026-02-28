@@ -9,7 +9,7 @@ class C {
 
 
 <<__EntryPoint>>
-function main_type_annotation1() {
+function main_type_annotation1() :mixed{
 $x = new ReflectionTypeConstant('C', 'T');
 var_dump($x->getAssignedTypeText());
 var_dump($x->getTypeStructure());

@@ -1,9 +1,9 @@
 <?hh
 
-function by_ref(inout $ref) {}
+function by_ref(inout $ref) :mixed{}
 
 function test1() : varray {
-  $array = varray[];
+  $array = vec[];
   by_ref(inout $array);
   return $array;
 }

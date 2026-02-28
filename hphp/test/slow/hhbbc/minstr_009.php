@@ -1,8 +1,8 @@
 <?hh
 
-function asd() { return 'xxxxx'; }
-function bar() { return mt_rand() ? 'a' : 'b'; }
-function foo() {
+function asd() :mixed{ return 'xxxxx'; }
+function bar() :mixed{ return mt_rand() ? 'a' : 'b'; }
+function foo() :mixed{
   $x = asd();
   $x[0] = bar();
   $x[0] = 'a';
@@ -12,6 +12,6 @@ function foo() {
 }
 
 <<__EntryPoint>>
-function main_minstr_009() {
+function main_minstr_009() :mixed{
 foo();
 }

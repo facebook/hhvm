@@ -1,3 +1,1 @@
 extension gd
-function imagettftext
-function imagettfbbox

@@ -2,9 +2,9 @@
 
 
 <<__EntryPoint>>
-function main_1802() {
+function main_1802() :mixed{
 $path = __DIR__."/../../sample_dir/";
-$files = varray[];
+$files = vec[];
  // order changes per machine
 foreach (new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($path,

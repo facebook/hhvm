@@ -17,9 +17,7 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/tv-conversions.h"
 
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
@@ -27,17 +25,17 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -73,6 +71,7 @@ IMPL_OPCODE_CALL(VerifyParamCallable)
 IMPL_OPCODE_CALL(VerifyRetCallable)
 IMPL_OPCODE_CALL(VerifyReifiedLocalType)
 IMPL_OPCODE_CALL(VerifyReifiedReturnType)
+IMPL_OPCODE_CALL(VerifyType)
 
 void cgVerifyParamCls(IRLS& env, const IRInstruction* inst) {
   implVerifyType(env, inst);
@@ -85,7 +84,7 @@ void cgVerifyRetCls(IRLS& env, const IRInstruction* inst) {
 
 static void verifyPropFailImpl(const Class* objCls, TypedValue val, Slot slot,
                                const TypeConstraint* tc) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(tvIsPlausible(val));
   assertx(slot < objCls->numDeclProperties());
   auto const& prop = objCls->declProperties()[slot];
@@ -101,7 +100,7 @@ static void verifyPropFailImpl(const Class* objCls, TypedValue val, Slot slot,
 
 static void verifyStaticPropFailImpl(const Class* objCls, TypedValue val,
                                      Slot slot, const TypeConstraint* tc) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(tvIsPlausible(val));
   assertx(slot < objCls->numStaticProperties());
   auto const& sprop = objCls->staticProperties()[slot];
@@ -120,9 +119,9 @@ static void verifyPropClsImpl(const Class* objCls,
                               ObjectData* val,
                               Slot slot,
                               const TypeConstraint* tc) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(slot < objCls->numDeclProperties());
-  assertx(tc && (tc->isObject() || tc->isUnresolved()));
+  assertx(tc && (tc->isSubObject() || tc->isUnresolved()));
   auto const success = [&]{
     auto const valCls = val->getVMClass();
     if (LIKELY(constraint != nullptr)) return valCls->classof(constraint);
@@ -136,9 +135,9 @@ static void verifyStaticPropClsImpl(const Class* objCls,
                                     ObjectData* val,
                                     Slot slot,
                                     const TypeConstraint* tc) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(slot < objCls->numStaticProperties());
-  assertx(tc && (tc->isObject() || tc->isUnresolved()));
+  assertx(tc && (tc->isSubObject() || tc->isUnresolved()));
   auto const success = [&]{
     auto const valCls = val->getVMClass();
     if (LIKELY(constraint != nullptr)) return valCls->classof(constraint);
@@ -153,28 +152,25 @@ static TypedValue verifyPropImpl(const Class* cls,
                                  Slot slot,
                                  const TypeConstraint* tc,
                                  TypedValue val) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(slot < cls->numDeclProperties());
   assertx(tvIsPlausible(val));
+  assertx(tc->isCheckable());
   auto const& prop = cls->declProperties()[slot];
-  if (tc->isCheckable()) tc->verifyProperty(&val, cls, prop.cls, prop.name);
+  tc->verifyProperty(&val, cls, prop.cls, prop.name);
+  assertx(tvIsPlausible(val));
   return val;
 }
 
 static TypedValue verifyPropAll(const Class* cls, Slot slot, TypedValue val) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(slot < cls->numDeclProperties());
   assertx(tvIsPlausible(val));
   auto const& prop = cls->declProperties()[slot];
-  auto const& tc = prop.typeConstraint;
-  if (tc.isCheckable()) {
-    val = verifyPropImpl(cls, slot, &tc, val);
-  }
-  if (RuntimeOption::EvalEnforceGenericsUB > 0) {
-    for (auto const& ub : prop.ubs) {
-      if (ub.isCheckable()) {
-        val = verifyPropImpl(cls, slot, &ub, val);
-      }
+  for (auto const& tc : prop.typeConstraints.range()) {
+    if (tc.isCheckable()) {
+      val = verifyPropImpl(cls, slot, &tc, val);
+      assertx(tvIsPlausible(val));
     }
   }
   return val;
@@ -185,30 +181,25 @@ static TypedValue verifySPropImpl(const Class* cls,
                                   Slot slot,
                                   const TypeConstraint* tc,
                                   TypedValue val) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(slot < cls->numStaticProperties());
   assertx(tvIsPlausible(val));
+  assertx(tc->isCheckable());
   auto const& prop = cls->staticProperties()[slot];
-  if (tc->isCheckable()) {
-    tc->verifyStaticProperty(&val, cls, prop.cls, prop.name);
-  }
+  tc->verifyStaticProperty(&val, cls, prop.cls, prop.name);
+  assertx(tvIsPlausible(val));
   return val;
 }
 
 static TypedValue verifySPropAll(const Class* cls, Slot slot, TypedValue val) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(slot < cls->numStaticProperties());
   assertx(tvIsPlausible(val));
   auto const& prop = cls->staticProperties()[slot];
-  auto const& tc = prop.typeConstraint;
-  if (tc.isCheckable()) {
-    val = verifySPropImpl(cls, slot, &tc, val);
-  }
-  if (RuntimeOption::EvalEnforceGenericsUB > 0) {
-    for (auto const& ub : prop.ubs) {
-      if (ub.isCheckable()) {
-        val = verifySPropImpl(cls, slot, &ub, val);
-      }
+  for (auto const& tc : prop.typeConstraints.range()) {
+    if (tc.isCheckable()) {
+      val = verifySPropImpl(cls, slot, &tc, val);
+      assertx(tvIsPlausible(val));
     }
   }
   return val;
@@ -255,7 +246,9 @@ void cgVerifyPropCls(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-void cgVerifyProp(IRLS& env, const IRInstruction* inst) {
+namespace {
+
+void implVerifyProp(IRLS& env, const IRInstruction* inst, bool coerce) {
   auto const extra = inst->extra<TypeConstraintData>();
   cgCallHelper(
     vmain(env),
@@ -263,7 +256,7 @@ void cgVerifyProp(IRLS& env, const IRInstruction* inst) {
     inst->src(3)->boolVal()
       ? CallSpec::direct(verifySPropImpl)
       : CallSpec::direct(verifyPropImpl),
-    kVoidDest,
+    coerce ? callDestTV(env, inst) : kVoidDest,
     SyncOptions::Sync,
     argGroup(env, inst)
       .ssa(0)
@@ -273,14 +266,14 @@ void cgVerifyProp(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-void cgVerifyPropAll(IRLS& env, const IRInstruction* inst) {
+void implVerifyPropAll(IRLS& env, const IRInstruction* inst, bool coerce) {
   cgCallHelper(
     vmain(env),
     env,
     inst->src(3)->boolVal()
       ? CallSpec::direct(verifySPropAll)
       : CallSpec::direct(verifyPropAll),
-    kVoidDest,
+    coerce ? callDestTV(env, inst) : kVoidDest,
     SyncOptions::Sync,
     argGroup(env, inst)
       .ssa(0)
@@ -289,47 +282,30 @@ void cgVerifyPropAll(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-void cgVerifyPropCoerce(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<TypeConstraintData>();
+void implVerifyRet(IRLS& env, const IRInstruction* inst, bool coerce) {
+  auto const extra = inst->extra<FuncParamWithTCData>();
   cgCallHelper(
     vmain(env),
     env,
-    inst->src(3)->boolVal()
-      ? CallSpec::direct(verifySPropImpl)
-      : CallSpec::direct(verifyPropImpl),
-    callDestTV(env, inst),
+    CallSpec::direct(VerifyRetType),
+    coerce ? callDestTV(env, inst) : kVoidDest,
     SyncOptions::Sync,
     argGroup(env, inst)
-      .ssa(0)
+      .typedValue(0)
       .ssa(1)
+      .immPtr(extra->func)
+      .imm(extra->paramId)
       .immPtr(extra->tc)
-      .typedValue(2)
   );
 }
 
-void cgVerifyPropCoerceAll(IRLS& env, const IRInstruction* inst) {
-  cgCallHelper(
-    vmain(env),
-    env,
-    inst->src(3)->boolVal()
-      ? CallSpec::direct(verifySPropAll)
-      : CallSpec::direct(verifyPropAll),
-    callDestTV(env, inst),
-    SyncOptions::Sync,
-    argGroup(env, inst)
-      .ssa(0)
-      .ssa(1)
-      .typedValue(2)
-  );
-}
-
-void cgVerifyRetFail(IRLS& env, const IRInstruction* inst) {
+void implVerifyRetFail(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<FuncParamWithTCData>();
   cgCallHelper(
     vmain(env),
     env,
     CallSpec::direct(VerifyRetTypeFail),
-    inst->numDsts() == 0 ? kVoidDest : callDestTV(env, inst),
+    kVoidDest,
     SyncOptions::Sync,
     argGroup(env, inst)
       .typedValue(0)
@@ -340,17 +316,30 @@ void cgVerifyRetFail(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-void cgVerifyRetFailHard(IRLS& env, const IRInstruction* inst) {
-  cgVerifyRetFail(env, inst);
+void implVerifyParam(IRLS& env, const IRInstruction* inst, bool coerce) {
+  auto const extra = inst->extra<FuncParamWithTCData>();
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(VerifyParamType),
+    coerce ? callDestTV(env, inst) : kVoidDest,
+    SyncOptions::Sync,
+    argGroup(env, inst)
+      .typedValue(0)
+      .ssa(1)
+      .immPtr(extra->func)
+      .imm(extra->paramId)
+      .immPtr(extra->tc)
+  );
 }
 
-void cgVerifyParamFail(IRLS& env, const IRInstruction* inst) {
+void implVerifyParamFail(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<FuncParamWithTCData>();
   cgCallHelper(
     vmain(env),
     env,
     CallSpec::direct(VerifyParamTypeFail),
-    inst->numDsts() == 0 ? kVoidDest : callDestTV(env, inst),
+    kVoidDest,
     SyncOptions::Sync,
     argGroup(env, inst)
       .typedValue(0)
@@ -361,20 +350,67 @@ void cgVerifyParamFail(IRLS& env, const IRInstruction* inst) {
   );
 }
 
+}
+
+void cgVerifyProp(IRLS& env, const IRInstruction* inst) {
+  implVerifyProp(env, inst, false);
+}
+
+void cgVerifyPropCoerce(IRLS& env, const IRInstruction* inst) {
+  implVerifyProp(env, inst, true);
+}
+
+void cgVerifyPropAll(IRLS& env, const IRInstruction* inst) {
+  implVerifyPropAll(env, inst, false);
+}
+
+void cgVerifyPropCoerceAll(IRLS& env, const IRInstruction* inst) {
+  implVerifyPropAll(env, inst, true);
+}
+
+void cgVerifyRet(IRLS& env, const IRInstruction* inst) {
+  implVerifyRet(env, inst, false);
+}
+
+void cgVerifyRetCoerce(IRLS& env, const IRInstruction* inst) {
+  implVerifyRet(env, inst, true);
+}
+
+void cgVerifyRetFail(IRLS& env, const IRInstruction* inst) {
+  implVerifyRetFail(env, inst);
+}
+
+void cgVerifyRetFailHard(IRLS& env, const IRInstruction* inst) {
+  implVerifyRetFail(env, inst);
+}
+
+void cgVerifyParam(IRLS& env, const IRInstruction* inst) {
+  implVerifyParam(env, inst, false);
+}
+
+void cgVerifyParamCoerce(IRLS& env, const IRInstruction* inst) {
+  implVerifyParam(env, inst, true);
+}
+
+void cgVerifyParamFail(IRLS& env, const IRInstruction* inst) {
+  implVerifyParamFail(env, inst);
+}
+
 void cgVerifyParamFailHard(IRLS& env, const IRInstruction* inst) {
-  cgVerifyParamFail(env, inst);
+  implVerifyParamFail(env, inst);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgRaiseStrToClassNotice(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<StrToClassData>();
   cgCallHelper(
     vmain(env),
     env,
     CallSpec::direct(raise_str_to_class_notice),
     callDest(env, inst),
     SyncOptions::Sync,
-    argGroup(env, inst).ssa(0)
+    argGroup(env, inst).ssa(0).imm(static_cast<uint8_t>(extra->kind))
   );
 }
 

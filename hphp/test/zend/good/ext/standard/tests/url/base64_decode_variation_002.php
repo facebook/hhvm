@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) :mixed{
     echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
 <<__EntryPoint>> function main(): void {
@@ -20,48 +20,12 @@ $file_handle = fopen(__FILE__, "r");
 
 
 //array of values to iterate over
-$values =  darray [
-       // int data
-    "0" =>  0,
-    "1" =>  1,
-    "12345" =>  12345,
-    "-2345"    =>  -2345,
-
-    // float data
-    "10.5" =>  10.5,
-    "-10.5" => -10.5,
-    "10.1234567e10" =>    10.1234567e10,
-    "10.7654321E-10" => 10.7654321E-10,
-    ".5" => .5,
-
-    // array data
-    "array()" =>   varray[],
-    "array(0)" =>  varray[0],
-    "array(1)" =>  varray[1],
-    "array(1, 2)" => varray[1, 2],
-    "array('color' => 'red', 'item' => 'pen'" => darray['color' => 'red', 'item' => 'pen'],
-
-    // null data
-    "NULL" => NULL,
-    "null" => null,
-
+$values =  dict[
     // boolean data
     "true" => true,
     "false" => false,
     "TRUE" => TRUE,
     "FALSE" => FALSE,
-
-    // empty data
-    "\"\"" => "",
-    "''" => '',
-
-    // object data
-    "stdClass object" => new stdClass(),
-
-
-
-    // resource data
-    "resource" => $file_handle
 ];
 
 // loop through each element of the array for strict argument

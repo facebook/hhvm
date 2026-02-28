@@ -2,42 +2,44 @@
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated =
        (Some "The function single is deprecated: can't write an apostrophe without escaping in single quotes");
-       fe_module = None; fe_internal = false;
+       fe_module = None; fe_package = None; fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([4:10-16]),
         (Tfun
            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [4:10-16]) };
-             ft_ret =
-             { et_enforced = Typing_defs_core.Unenforced;
-               et_type = (Rhint ([4:20-24]), (Tprim Tvoid)) };
+             ft_ret = (Rhint ([4:20-24]), (Tprim Tvoid));
              ft_flags =
-             (make_ft_flags FSync ~return_disposable:false
-               ~returns_readonly:false ~support_dynamic_type:false
-               ~readonly_this:false ~is_memoized:false ~variadic:false);
-             ft_ifc_decl = FDPolicied {PUBLIC} }));
+             { Typing_defs_flags.Fun.return_disposable = false;
+               async = false; generator = false; fun_kind = FSync;
+               is_function_pointer = false; returns_readonly = false;
+               readonly_this = false; support_dynamic_type = false;
+               is_memoized = false; variadic = false };
+             ft_instantiated = true }));
        fe_pos = [4:10-16]; fe_php_std_lib = false;
-       fe_support_dynamic_type = false }));
+       fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+       fe_no_auto_likes = false;
+       fe_package_requirement = Typing_defs.RPNormal }));
   ("\\double",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
         (Some "The function double is deprecated: other escapes like \n and \t available in double quotes");
-        fe_module = None; fe_internal = false;
+        fe_module = None; fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([7:10-16]),
          (Tfun
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [7:10-16]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([7:20-24]), (Tprim Tvoid)) };
+              ft_ret = (Rhint ([7:20-24]), (Tprim Tvoid));
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC} }));
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
+              ft_instantiated = true }));
         fe_pos = [7:10-16]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }))
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false;
+        fe_package_requirement = Typing_defs.RPNormal }))
   ]
-
-They matched!

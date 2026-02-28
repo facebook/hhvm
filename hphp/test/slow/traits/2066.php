@@ -1,7 +1,7 @@
 <?hh
 
 trait T {
-  function fruit() {
+  function fruit() :AsyncGenerator<mixed,mixed,void>{
     yield 'apple';
     yield 'banana';
   }
@@ -14,7 +14,7 @@ class C2 {
  }
 
 <<__EntryPoint>>
-function main_2066() {
+function main_2066() :mixed{
 $o = new C1;
 foreach ($o->fruit() as $fruit) {
   var_dump($fruit);

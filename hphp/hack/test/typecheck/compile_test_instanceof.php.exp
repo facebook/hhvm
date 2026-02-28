@@ -1,1 +1,8 @@
-No errors
+WARN: File "compile_test_instanceof.php", line 27, characters 7-13:
+This `is` check is always `true`. The expression on the left has type `A` which is a subtype of `B`. (Warn[12009])
+WARN: File "compile_test_instanceof.php", line 27, characters 18-24:
+This `is` check is always `true`. The expression on the left has type `A` which is a subtype of `B`. (Warn[12009])
+WARN: File "compile_test_instanceof.php", line 27, characters 29-35:
+This `is` check is always `true`. The expression on the left has type `A` which is a subtype of `I`. (Warn[12009])
+WARN: File "compile_test_instanceof.php", line 28, characters 9-15:
+This `is` check is always `false`. The expression on the left has type `A` which shares no values with `C`. (Warn[12010])

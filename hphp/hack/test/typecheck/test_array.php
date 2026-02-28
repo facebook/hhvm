@@ -10,6 +10,6 @@
  */
 
 function test(): void {
-  $x = darray['foo' => 1];
-  $y = darray[0 => 1];
+  $x = dict['foo' => 1];
+  $y = dict[0 => 1];
 }

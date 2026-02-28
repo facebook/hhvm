@@ -1,12 +1,12 @@
 <?hh
 
 interface I {
-  static function foo();
+  static function foo():mixed;
 }
 
 <<__EntryPoint>>
-function main() {
-  $f = class_meth(I::class, 'foo');
+function main() :mixed{
+  $f = I::foo<>;
   echo "FAIL\n";
   var_dump($f());
 }

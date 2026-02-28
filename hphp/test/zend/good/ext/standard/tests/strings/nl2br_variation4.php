@@ -12,7 +12,7 @@
 echo "*** Testing nl2br() : usage variations ***\n";
 
 //array of html strings
-$strings = varray[
+$strings = vec[
   "<html>Hello<br />world</html>",
   "<html><br /></html>",
   "<html>\nHello\r\nworld\r</html>",

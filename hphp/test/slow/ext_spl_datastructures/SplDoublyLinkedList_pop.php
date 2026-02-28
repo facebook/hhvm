@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_spl_doubly_linked_list_pop() {
+function main_spl_doubly_linked_list_pop() :mixed{
 $dll = new SplDoublyLinkedList();
 
 $dll->push('foo');

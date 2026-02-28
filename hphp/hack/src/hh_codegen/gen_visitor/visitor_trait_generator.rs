@@ -4,11 +4,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{context::Context, gen_helper::*, generator::Generator, syn_helper::*};
-use crate::{common::*, impl_generator};
-use anyhow::{anyhow, Result};
+use anyhow::Result;
+use anyhow::anyhow;
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
+use quote::format_ident;
+use quote::quote;
+
+use super::context::Context;
+use super::gen_helper::*;
+use super::generator::Generator;
+use super::syn_helper::*;
+use crate::common::*;
+use crate::impl_generator;
 
 pub trait VisitorTrait {
     fn filename() -> String;
@@ -17,7 +24,7 @@ pub trait VisitorTrait {
     fn use_node() -> TokenStream;
     fn node_trait_name() -> syn::Ident;
 
-    fn gen(ctx: &Context<'_>) -> Result<TokenStream> {
+    fn r#gen(ctx: &Context<'_>) -> Result<TokenStream> {
         let use_node = Self::use_node();
         let trait_name = Self::trait_name();
         let node_dispatcher_function = Self::gen_node_dispatcher_function(ctx)?;
@@ -31,6 +38,7 @@ pub trait VisitorTrait {
         Ok(quote! {
             #![allow(unused_imports)]
             #![allow(unused_variables)]
+            #![allow(clippy::all)]
 
             #uses
             #use_node

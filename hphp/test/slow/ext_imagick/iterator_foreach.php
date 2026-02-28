@@ -3,7 +3,7 @@
 
 
 <<__EntryPoint>>
-function main_iterator_foreach() {
+function main_iterator_foreach() :mixed{
 $magick = new Imagick(__DIR__.'/facebook.png');
 $iterator = new ImagickPixelIterator($magick);
 

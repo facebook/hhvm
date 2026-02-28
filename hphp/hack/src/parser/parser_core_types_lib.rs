@@ -38,3 +38,5 @@ pub mod token_factory;
 pub mod token_kind;
 pub mod trivia_factory;
 pub mod trivia_kind;
+
+pub use syntax_tree::FileMode;

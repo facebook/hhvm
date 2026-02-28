@@ -1,18 +1,18 @@
 C::foo
-File "class_const.php", line 9, characters 11-13:
-File "class_const.php", line 10, characters 12-14:
-File "class_const.php", line 11, characters 8-10:
-File "class_const.php", line 12, characters 13-15:
-File "class_const.php", line 18, characters 11-13:
-File "class_const.php", line 19, characters 12-14:
-File "class_const.php", line 20, characters 8-10:
-File "class_const.php", line 21, characters 13-15:
-File "class_const.php", line 22, characters 13-15:
-File "class_const.php", line 30, characters 7-9:
-File "class_const.php", line 31, characters 7-9:
-File "class_const.php", line 32, characters 7-9:
-File "class_const.php", line 33, characters 7-9:
-File "class_const.php", line 34, characters 6-8:
-File "class_const.php", line 35, characters 6-8:
-File "class_const.php", line 4, characters 13-15:
+File "class_const.php", line 9, characters 11-13: C::foo
+File "class_const.php", line 10, characters 12-14: C::foo
+File "class_const.php", line 11, characters 8-10: C::foo
+File "class_const.php", line 12, characters 13-15: C::foo
+File "class_const.php", line 18, characters 11-13: D::foo
+File "class_const.php", line 19, characters 12-14: D::foo
+File "class_const.php", line 20, characters 8-10: C::foo
+File "class_const.php", line 21, characters 13-15: D::foo
+File "class_const.php", line 22, characters 13-15: C::foo
+File "class_const.php", line 30, characters 7-9: C::foo
+File "class_const.php", line 31, characters 7-9: D::foo
+File "class_const.php", line 32, characters 7-9: C::foo
+File "class_const.php", line 33, characters 7-9: C::foo
+File "class_const.php", line 34, characters 6-8: C::foo
+File "class_const.php", line 35, characters 6-8: D::foo
+File "class_const.php", line 4, characters 13-15: foo
 16 total results

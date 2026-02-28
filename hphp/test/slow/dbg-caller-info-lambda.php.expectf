@@ -1,0 +1,40 @@
+dict(3) {
+  ["file"]=>
+  string(%i) "%s/dbg-caller-info-lambda.php"
+  ["function"]=>
+  string(4) "main"
+  ["line"]=>
+  int(14)
+}
+dict(3) {
+  ["file"]=>
+  string(%i) "%s/dbg-caller-info-lambda.php"
+  ["function"]=>
+  string(12) "Closure$main"
+  ["line"]=>
+  int(15)
+}
+dict(3) {
+  ["file"]=>
+  string(%i) "%s/dbg-caller-info-lambda.php"
+  ["function"]=>
+  string(14) "Closure$main#2"
+  ["line"]=>
+  int(16)
+}
+dict(3) {
+  ["file"]=>
+  string(%i) "%s/dbg-caller-info-lambda.php"
+  ["function"]=>
+  string(16) "Closure$Foo::bar"
+  ["line"]=>
+  int(8)
+}
+dict(3) {
+  ["file"]=>
+  string(%i) "%s/dbg-caller-info-lambda.php"
+  ["function"]=>
+  string(17) "Closure$Foo::sbar"
+  ["line"]=>
+  int(9)
+}

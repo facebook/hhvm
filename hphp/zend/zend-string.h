@@ -24,6 +24,8 @@
 
 #include <folly/Range.h>
 
+#include "hphp/util/sha1.h"
+
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
@@ -128,7 +130,7 @@ inline char *string_duplicate(const char *s, int len) {
 char *string_rot13(const char *input, int len);
 int   string_crc32(const char *p, int len);
 char *string_crypt(const char *key, const char *salt);
-char *string_sha1(const char *arg, int arg_len, bool raw, int &out_len);
+char *string_sha1(const char *data, size_t data_len, bool raw, int &out_len);
 
 struct Md5Digest {
   Md5Digest(const char* s, int len);
@@ -143,6 +145,19 @@ std::string string_sha1(folly::StringPiece);
  */
 char *string_bin2hex(const char *input, int &len);
 char *string_bin2hex(const char* input, int len, char* output);
+
+//////////////////////////////////////////////////////////////////////
+
+// Incremental hashing of raw binary data.
+struct SHA1Hasher {
+  SHA1Hasher();
+  ~SHA1Hasher();
+  void update(const char*, size_t);
+  SHA1 finish();
+private:
+  struct Impl;
+  std::unique_ptr<Impl> m_impl;
+};
 
 //////////////////////////////////////////////////////////////////////
 }

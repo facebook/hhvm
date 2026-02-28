@@ -6,26 +6,26 @@ class C {}
 //
 // It will have multiple arrays at the given depth (but we should only warn
 // once about blowing the recursion stack for that depth).
-function make_recursive_varray($depth) {
-  $result = varray[
-    varray[
-      varray[varray[new C()], varray[new C()]],
-      varray[varray[new C()], varray[new C()]],
+function make_recursive_varray($depth) :mixed{
+  $result = vec[
+    vec[
+      vec[vec[new C()], vec[new C()]],
+      vec[vec[new C()], vec[new C()]],
     ],
-    varray[
-      varray[varray[new C()], varray[new C()]],
-      varray[varray[new C()], varray[new C()]],
+    vec[
+      vec[vec[new C()], vec[new C()]],
+      vec[vec[new C()], vec[new C()]],
     ],
   ];
 
   for ($i = 0; $i < $depth - 2; $i++) {
-    $result = varray[$result];
+    $result = vec[$result];
   }
   return $result;
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $depth = 512;
   $v = HH\array_mark_legacy(make_recursive_varray($depth), true);
   for ($i = 0; $i < $depth + 2; $i++) {

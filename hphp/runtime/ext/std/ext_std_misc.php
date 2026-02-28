@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 namespace HH {
 
@@ -27,6 +27,9 @@ function server_warmup_status(): string;
 <<__Native>>
 function server_warmup_status_monotonic(): string;
 
+<<__Native>>
+function set_endpoint_name(string $name): void;
+
 /**
  * Returns a description of the context in which the request is executing.
  *
@@ -38,7 +41,7 @@ function server_warmup_status_monotonic(): string;
  * on an unnamed JobQueue within the server.
  */
 <<__Native>>
-function execution_context(): string;
+function execution_context()[read_globals]: string;
 
 <<__Native, __IsFoldable>>
 function array_mark_legacy(mixed $v, bool $recursive = false)[]: mixed;
@@ -59,17 +62,85 @@ function array_unmark_legacy_recursive(mixed $v)[]: mixed {
 <<__Native, __IsFoldable>>
 function is_array_marked_legacy(mixed $v)[]: bool;
 
-
-
-/**
- * This function is a kludge that returns the last argument it receives
+namespace __internal {
+/*
+ * Return the current hhvm runtime executable path
  */
 <<__Native>>
-function sequence(mixed ... $args): mixed;
+function hhvm_binary(): string;
+}
 
 }
 
 namespace {
+
+const float INF = 1e308 + 1e308;
+const float NAN = (1e308 + 1e308) - (1e308 + 1e308);
+const bool ZEND_THREAD_SAFE = true;
+
+const int UPLOAD_ERR_OK =         0;
+const int UPLOAD_ERR_INI_SIZE =   1;
+const int UPLOAD_ERR_FORM_SIZE =  2;
+const int UPLOAD_ERR_PARTIAL =    3;
+const int UPLOAD_ERR_NO_FILE =    4;
+const int UPLOAD_ERR_NO_TMP_DIR = 6;
+const int UPLOAD_ERR_CANT_WRITE = 7;
+const int UPLOAD_ERR_EXTENSION =  8;
+
+const int CREDITS_GROUP =    1 << 0;
+const int CREDITS_GENERAL =  1 << 1;
+const int CREDITS_SAPI =     1 << 2;
+const int CREDITS_MODULES =  1 << 3;
+const int CREDITS_DOCS =     1 << 4;
+const int CREDITS_FULLPAGE = 1 << 5;
+const int CREDITS_QA =       1 << 6;
+const int CREDITS_ALL = 0xFFFFFFFF;
+
+const int PHP_INT_SIZE = 8; // sizeof(int64_t)
+
+// FIXME: These values are hardcoded from their previous IDL values
+// Grab their correct values from the system as appropriate
+const string PHP_EOL = "\n";
+const string PHP_CONFIG_FILE_PATH = "";
+const string PHP_CONFIG_FILE_SCAN_DIR = "";
+const string PHP_DATADIR = "";
+const string PHP_EXTENSION_DIR = "";
+const string PHP_LIBDIR = "";
+const string PHP_LOCALSTATEDIR = "";
+const string PHP_PREFIX = "";
+const string PHP_SHLIB_SUFFIX = "so";
+const string PHP_SYSCONFDIR = "";
+const string PEAR_EXTENSION_DIR = "";
+const string PEAR_INSTALL_DIR = "";
+const string DEFAULT_INCLUDE_PATH = "";
+
+// I'm honestly not sure where these constants came from
+// I've brought them for ward from their IDL definitions
+// with their previous hard-coded values.
+const int CODESET =         14;
+const int RADIXCHAR =    65536;
+const int THOUSEP =      65537;
+const int ALT_DIGITS =  131119;
+const int AM_STR =      131110;
+const int PM_STR =      131111;
+const int D_T_FMT =     131112;
+const int D_FMT =       131113;
+const int ERA =         131116;
+const int ERA_D_FMT =   131118;
+const int ERA_D_T_FMT = 131120;
+const int ERA_T_FMT =   131121;
+const int CRNCYSTR =    262159;
+
+newtype BuiltinPseudoConstantLineNumber as int = int;
+newtype BuiltinPseudoConstantName as string = string;
+newtype BuiltinPseudoConstantClass as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+newtype BuiltinPseudoConstantTrait as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+newtype BuiltinPseudoConstantFile as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+newtype BuiltinPseudoConstantDir as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+newtype BuiltinPseudoConstantFunction as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+newtype BuiltinPseudoConstantMethod as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+newtype BuiltinPseudoConstantNamespace as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
+newtype BuiltinPseudoConstantCompilerFrontend as BuiltinPseudoConstantName = BuiltinPseudoConstantName;
 
 /** Checks whether the client disconnected.
  * @return int - Returns 1 if client disconnected, 0 otherwise.
@@ -94,7 +165,7 @@ function connection_timeout(): int;
  * @return mixed - Returns the value of the constant, or NULL if the constant
  * is not defined.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function constant(string $name): mixed;
 
 /** Checks whether the given constant exists and is defined.  If you want to
@@ -105,7 +176,7 @@ function constant(string $name): mixed;
  * @return bool - Returns TRUE if the named constant given by name has been
  * defined, FALSE otherwise.
  */
-<<__Native, __Pure>>
+<<__Native>>
 function defined(string $name,
                  bool $autoload = true): bool;
 
@@ -154,7 +225,7 @@ function ignore_user_abort(bool $setting = false): int;
  * @return mixed - Returns a binary string containing data.
  */
 <<__Native, __IsFoldable>>
-function pack(string $format, ...$args)[]: mixed;
+function pack(string $format, mixed... $args)[]: mixed;
 
 /** @param int $seconds - Halt time in seconds.
  * @return int - Returns zero on success, or FALSE on errors. If the call was
@@ -236,7 +307,7 @@ function unpack(string $format,
  * minutes).
  */
 <<__Native>>
-function sys_getloadavg(): varray;
+function sys_getloadavg(): vec<float>;
 
 /** Casts a given value to a string.
  * @param mixed $v - The value being casted to a string.
@@ -244,12 +315,6 @@ function sys_getloadavg(): varray;
  */
 <<__Native, __IsFoldable>>
 function hphp_to_string(mixed $v)[]: string;
-
-function __hhas_adata(string $incorrect_hhas_adata) {
-  throw new Exception(
-    "__hhas_adata may only be called with a scalar string argument."
-  );
-}
 
 }
 
@@ -260,7 +325,7 @@ namespace __SystemLib {
  * @param mixed $arg2 - The second operand of max.
  * @return mixed - The max of two operands.
  */
-<<__Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable>>
 function max2(mixed $arg1, mixed $arg2): mixed;
 
 /** min2() returns the min of two operands (optimized FCallBuiltin for min).
@@ -268,7 +333,7 @@ function max2(mixed $arg1, mixed $arg2): mixed;
  * @param mixed $arg2 - The second operand of min.
  * @return mixed - The min of two operands.
  */
-<<__Native, __IsFoldable, __Pure>>
+<<__Native, __IsFoldable>>
 function min2(mixed $arg1, mixed $arg2): mixed;
 
 }

@@ -1,6 +1,22 @@
 =============== positive tests =====================
 Exception: 'func' called dynamically but is not __DynamicallyCallable
 Exception: 'async_func' called dynamically but is not __DynamicallyCallable
+
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 142
+
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 144
+
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 57
+
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 58
+
+Warning: Method B::static_func not marked dynamic in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 59
+
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 67
+
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 68
+
+Warning: Method B::static_async_func not marked dynamic in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 69
 Exception: 'func' called dynamically but is not __DynamicallyCallable
 Exception: 'func' called dynamically but is not __DynamicallyCallable
 Exception: 'func' called dynamically but is not __DynamicallyCallable
@@ -8,28 +24,28 @@ Exception: 'func' called dynamically but is not __DynamicallyCallable
 Exception: 'cmp' called dynamically but is not __DynamicallyCallable
 =============== negative tests =====================
 
-Notice: 'count' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+Notice: 'count' called dynamically without using a function pointer in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 249
 
-Notice: 'count' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+Notice: 'count' called dynamically without using a function pointer in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 250
 
-Notice: 'count' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+Notice: 'count' called dynamically without using a function pointer in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 251
 
-Notice: 'count' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+Notice: 'count' called dynamically without using a function pointer in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 252
 
-Notice: 'count' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+Notice: 'count' called dynamically without using a function pointer in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 253
 
-Notice: 'array_map' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+Notice: 'array_map' called dynamically without using a function pointer in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 280
 
-Notice: 'func2' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+Notice: 'func2' called dynamically without using a function pointer in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 286
 
-Notice: 'async_func2' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+Notice: 'async_func2' called dynamically without using a function pointer in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 287
 
-Notice: 'func2' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+Notice: 'func2' called dynamically without using a function pointer in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 318
 
-Notice: 'func2' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+Notice: 'func2' called dynamically without using a function pointer in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 329
 
-Notice: 'func2' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+Notice: 'func2' called dynamically without using a function pointer in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 339
 
-Notice: 'func2' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+Notice: 'func2' called dynamically without using a function pointer in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 349
 
-Notice: 'cmp2' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line %d
+Notice: 'cmp2' called dynamically without using a function pointer in %s/dynamic-calls/func/forbid-notice-with-attr.php on line 357

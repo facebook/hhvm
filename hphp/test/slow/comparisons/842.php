@@ -1,5 +1,5 @@
 <?hh
-function foo($a, $b) {
+function foo($a, $b) :mixed{
   $s = (string)$a;
   $t = (string)$b;
   var_dump($s === $t);
@@ -7,7 +7,7 @@ function foo($a, $b) {
 
 
 <<__EntryPoint>>
-function main_842() {
+function main_842() :mixed{
 var_dump(HH\Lib\Legacy_FIXME\eq('1.0', '1'));
 var_dump('1.0E2' == '10E1');
 var_dump('1' === '1');

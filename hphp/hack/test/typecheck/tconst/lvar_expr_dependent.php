@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // This file test the expression dependent type associated with local variables
 

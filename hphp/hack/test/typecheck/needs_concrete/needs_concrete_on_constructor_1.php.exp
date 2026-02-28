@@ -1,0 +1,2 @@
+ERROR: File "needs_concrete_on_constructor_1.php", line 5, characters 19-29:
+The `__NeedsConcrete` attribute is not allowed on a constructor. The `__NeedsConcrete` attribute is only meaningful on static methods. (Typing[4507])

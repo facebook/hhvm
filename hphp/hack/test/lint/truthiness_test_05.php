@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test(SimpleXMLElement $x): void {
   if ($x) {

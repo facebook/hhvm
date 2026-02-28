@@ -1,0 +1,1 @@
+Fatal error: Invalid static property access: A::foo in %s on line 8

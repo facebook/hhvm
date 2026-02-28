@@ -8,7 +8,7 @@ class C1 {
 }
 
 function test(): void {
-  $args = varray[1, 2, 3];
+  $args = vec[1, 2, 3];
   // positional args should be typechecked
   new C1('string', ...$args);
 }

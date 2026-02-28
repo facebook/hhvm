@@ -1,0 +1,184 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "module",
+  "constants" : {
+    "fortyTwo" : {
+      "lineno" : 24,
+      "value" : 42,
+      "type_enum" : "I64",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 24,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 24,
+          "column" : 25
+        }
+      }
+    }
+  },
+  "includes": {
+    "thrift" : {
+      "path" : "thrift/annotation/thrift.thrift"
+    }
+  },
+  "enumerations" : {
+    "MyEnum" : {
+      "lineno" : 34,
+      "constants" : {
+        "VALUE1" : 1,
+        "VALUE2" : 2
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 34,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 38,
+          "column" : 2
+        }
+      }
+    }
+  },
+  "typedefs" : {
+    "MyMapTypedef" : {
+      "lineno" : 26,
+      "type_enum" : "MAP",
+      "spec_args" : { "key_type" : { "type_enum" : "I64", "spec_args" : null }, "val_type" : { "type_enum" : "STRING", "spec_args" : null} } ,
+      "source_range" : {
+        "begin" : {
+          "line" : 26,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 26,
+          "column" : 38
+        }
+      }
+    }
+  },
+  "structs" : {
+    "MyAnnot" : {
+      "lineno" : 22,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 22,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 22,
+          "column" : 18
+        }
+      }
+    },
+    "MyStruct" : {
+      "lineno" : 28,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "MyIntField" : {
+          "type_enum" : "I64",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 29,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 29,
+              "column" : 21
+            }
+          }
+        },
+        "MyStringField" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 30,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 31,
+              "column" : 40
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 28,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 32,
+          "column" : 2
+        }
+      }
+    }
+  },
+  "services" : {
+    "MyService" : {
+      "lineno" : 40,
+      "functions" : {
+        "MyService.ping" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 41,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 41,
+              "column" : 15
+            }
+          }
+        },
+        "MyService.pong" : {
+          "return_type" : {
+            "type_enum" : "VOID",
+            "spec_args" : null
+          },
+          "args" : [],
+          "throws" : [],
+          "source_range" : {
+            "begin" : {
+              "line" : 43,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 44,
+              "column" : 28
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 40,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 45,
+          "column" : 2
+        }
+      }
+
+    }
+  }
+}

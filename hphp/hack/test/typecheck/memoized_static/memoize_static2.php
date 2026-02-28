@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 final class FinalC implements IMemoizeParam {
   <<__Memoize>>
   public static function get(): this {

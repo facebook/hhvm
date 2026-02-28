@@ -27,17 +27,12 @@ function entrypoint_curl_multi_getcontent_error3(): void {
           curl_multi_exec($mh, inout $running);
       } while ($running>0);
 
-      $ch1="string";
-
-    $results1 = null;
-      try { $results1=curl_multi_getcontent($ch1); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }  //incorrect parameter type
-          $results2=curl_multi_getcontent($ch2);
+      $results2=curl_multi_getcontent($ch2);
 
       //CLOSE
        //curl_multi_remove_handle($mh,$ch1);
       curl_multi_remove_handle($mh,$ch2);
       curl_multi_close($mh);
 
-      echo $results1;
       echo $results2;
 }

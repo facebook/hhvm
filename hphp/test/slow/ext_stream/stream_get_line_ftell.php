@@ -1,6 +1,6 @@
 <?hh
 
-function test($string, $delim) {
+function test($string, $delim) :mixed{
     $stream = fopen('php://memory', 'r+');
     fwrite($stream, $string);
     rewind($stream);
@@ -17,7 +17,7 @@ function test($string, $delim) {
 }
 
 <<__EntryPoint>>
-function main_stream_get_line_returnvalue() {
+function main_stream_get_line_returnvalue() :mixed{
     test("1\n12\n123", "\n");
     test("1\r\n12\r\n123", "\r\n");
 }

@@ -21,7 +21,7 @@ EOT;
 
 // initialising the string array
 
-$str_array = varray[
+$str_array = vec[
                     // string without any characters that can be backslashed
                     'Hello world',
 

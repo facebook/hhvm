@@ -6,17 +6,19 @@
 
 use naming_special_names_rust::coeffects;
 use naming_special_names_rust::special_idents;
-
-use oxidized::{
-    aast,
-    aast_visitor::{visit, AstParams, Node, Visitor},
-    ast, ast_defs,
-    pos::Pos,
-};
-use parser_core_types::{
-    syntax_error,
-    syntax_error::{Error as ErrorMsg, SyntaxError, SyntaxQuickfix},
-};
+use oxidized::aast;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::Node;
+use oxidized::aast_visitor::Visitor;
+use oxidized::aast_visitor::visit;
+use oxidized::ast;
+use oxidized::ast_defs;
+use oxidized::namespace_env::Mode;
+use oxidized::pos::Pos;
+use parser_core_types::syntax_error;
+use parser_core_types::syntax_error::Error as ErrorMsg;
+use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_error::SyntaxQuickfix;
 
 /// Does this hint look like `Awaitable<Foo>` or `<<__Soft>> Awaitable<Foo>`?
 ///
@@ -37,12 +39,15 @@ fn awaitable_type_args(hint: &ast::Hint) -> Option<&[ast::Hint]> {
     }
 }
 
-fn is_policied_local(ctxs: Option<&ast::Contexts>) -> bool {
+fn is_any_local(ctxs: Option<&ast::Contexts>) -> bool {
     match ctxs {
         Some(c) => {
             for hint in &c.1 {
                 if let aast::Hint_::Happly(ast_defs::Id(_, id), _) = &*hint.1 {
-                    if id.as_str() == coeffects::ZONED_LOCAL {
+                    if id.as_str() == coeffects::ZONED_LOCAL
+                        || id.as_str() == coeffects::LEAK_SAFE_LOCAL
+                        || id.as_str() == coeffects::RX_LOCAL
+                    {
                         return true;
                     }
                 }
@@ -54,11 +59,10 @@ fn is_policied_local(ctxs: Option<&ast::Contexts>) -> bool {
 }
 
 struct Context {
-    in_methodish: bool,
     in_classish: bool,
     in_static_methodish: bool,
-    is_policied_local_fun: bool,
-    is_typechecker: bool,
+    is_any_local_fun: bool,
+    mode: Mode,
 }
 
 struct Checker {
@@ -149,9 +153,8 @@ impl<'ast> Visitor<'ast> for Checker {
         }
         m.recurse(
             &mut Context {
-                in_methodish: true,
                 in_static_methodish: m.static_,
-                is_policied_local_fun: is_policied_local(m.ctxs.as_ref()),
+                is_any_local_fun: is_any_local(m.ctxs.as_ref()),
                 ..*c
             },
             self,
@@ -165,23 +168,32 @@ impl<'ast> Visitor<'ast> for Checker {
 
         f.recurse(
             &mut Context {
-                in_methodish: true,
                 in_static_methodish: c.in_static_methodish,
-                is_policied_local_fun: is_policied_local(f.ctxs.as_ref()),
+                is_any_local_fun: is_any_local(f.ctxs.as_ref()),
                 ..*c
             },
             self,
         )
     }
 
-    fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<(), ()>) -> Result<(), ()> {
-        use aast::{ClassId, ClassId_::*, Expr, Expr_::*, Lid};
+    fn visit_stmt(&mut self, c: &mut Context, p: &aast::Stmt<(), ()>) -> Result<(), ()> {
+        p.recurse(c, self)
+    }
 
-        if let Await(_) = p.2 {
-            if !c.in_methodish {
-                self.add_error(&p.1, syntax_error::toplevel_await_use);
-            }
-        } else if let Some((Expr(_, _, f), _targs, args, _)) = p.2.as_call() {
+    fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<(), ()>) -> Result<(), ()> {
+        use aast::CallExpr;
+        use aast::ClassId;
+        use aast::ClassId_::*;
+        use aast::Expr;
+        use aast::Expr_::*;
+        use aast::Lid;
+
+        if let Some(CallExpr {
+            func: Expr(_, _, f),
+            args,
+            ..
+        }) = p.2.as_call()
+        {
             if let Some((ClassId(_, _, CIexpr(Expr(_, pos, Id(id)))), ..)) = f.as_class_const() {
                 if Self::name_eq_this_and_in_static_method(c, &id.1) {
                     self.add_error(pos, syntax_error::this_in_static);
@@ -192,12 +204,12 @@ impl<'ast> Visitor<'ast> for Checker {
                     || fun_name == "meth_caller")
                     && args.len() == 2
                 {
-                    if let (_, Expr(_, pos, String(classname))) = &args[0] {
+                    if let Expr(_, pos, String(classname)) = &args[0].to_expr_ref() {
                         if classname.contains(&b'$') {
                             self.add_error(pos, syntax_error::dollar_sign_in_meth_caller_argument);
                         }
                     }
-                    if let (_, Expr(_, pos, String(method_name))) = &args[1] {
+                    if let Expr(_, pos, String(method_name)) = &args[1].to_expr_ref() {
                         if method_name.contains(&b'$') {
                             self.add_error(pos, syntax_error::dollar_sign_in_meth_caller_argument);
                         }
@@ -208,16 +220,16 @@ impl<'ast> Visitor<'ast> for Checker {
             if Self::name_eq_this_and_in_static_method(c, name) {
                 self.add_error(pos, syntax_error::this_in_static);
             }
-        } else if let Some((f, ..)) = p.2.as_efun() {
-            match f.ctxs {
-                None if c.is_policied_local_fun && c.is_typechecker => {
-                    self.add_error(&f.span, syntax_error::closure_in_local_context)
+        } else if let Some(efun) = p.2.as_efun() {
+            match efun.fun.ctxs {
+                None if c.is_any_local_fun && matches!(c.mode, Mode::ForTypecheck) => {
+                    self.add_error(&efun.fun.span, syntax_error::closure_in_local_context)
                 }
                 _ => {}
             }
         } else if let Some((f, ..)) = p.2.as_lfun() {
             match f.ctxs {
-                None if c.is_policied_local_fun && c.is_typechecker => {
+                None if c.is_any_local_fun && matches!(c.mode, Mode::ForTypecheck) => {
                     self.add_error(&f.span, syntax_error::closure_in_local_context)
                 }
                 _ => {}
@@ -227,14 +239,13 @@ impl<'ast> Visitor<'ast> for Checker {
     }
 }
 
-pub fn check_program(program: &aast::Program<(), ()>, is_typechecker: bool) -> Vec<SyntaxError> {
+pub fn check_program(program: &aast::Program<(), ()>, mode: Mode) -> Vec<SyntaxError> {
     let mut checker = Checker::new();
     let mut context = Context {
-        in_methodish: false,
         in_classish: false,
         in_static_methodish: false,
-        is_policied_local_fun: false,
-        is_typechecker,
+        is_any_local_fun: false,
+        mode,
     };
     visit(&mut checker, &mut context, program).unwrap();
     checker.errors

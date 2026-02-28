@@ -1,11 +1,11 @@
 <?hh
 
 class a {
-  private static function priv() {
+  private static function priv() :mixed{
     echo "Private in a\n";
   }
 
-  public static function pub() {
+  public static function pub() :mixed{
     a::priv();
   }
 }

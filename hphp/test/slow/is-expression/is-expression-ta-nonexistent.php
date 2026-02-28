@@ -10,6 +10,6 @@ function is_nonexistent(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_ta_nonexistent() {
+function main_is_expression_ta_nonexistent() :mixed{
 is_nonexistent(new stdClass());
 }

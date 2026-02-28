@@ -14,26 +14,13 @@ get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(fbmysqlclient_INCLUDE_DIR fbmysqlclient INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(re2_INCLUDE_DIR re2 INTERFACE_INCLUDE_DIRECTORIES)
 
-SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
-  SQUANGLE_SOURCE_ARGS
-  SOURCE_URL
-  "https://github.com/facebook/squangle/archive/refs/tags/v2022.03.14.00.tar.gz"
-  SOURCE_HASH
-  "SHA256=b74e9f2f481f18d4f7ae41ab801fa7bfa36a76a7bbeda3d468fa6937436ebba1"
-  FILENAME_PREFIX
-  "squangle-"
-)
-
 ExternalProject_Add(
   bundled_squangle
-  ${SQUANGLE_SOURCE_ARGS}
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
+  BUILD_ALWAYS ON
   PATCH_COMMAND
     "${CMAKE_COMMAND}" -E make_directory
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
-    &&
-    "${CMAKE_COMMAND}" -E copy
-    "${CMAKE_SOURCE_DIR}/CMake/FindGlog.cmake"
-    <SOURCE_DIR>/squangle/cmake/FindGlog.cmake
     &&
     "${CMAKE_COMMAND}" -E copy
     "${CMAKE_SOURCE_DIR}/CMake/FindBoost.cmake"
@@ -42,9 +29,6 @@ ExternalProject_Add(
     "${CMAKE_COMMAND}" -E copy
     "${CMAKE_CURRENT_SOURCE_DIR}/squangle-CMakeLists.txt"
     <SOURCE_DIR>/CMakeLists.txt
-    &&
-    "${CMAKE_CURRENT_SOURCE_DIR}/../apply-quilt-patches.sh"
-    "${CMAKE_CURRENT_SOURCE_DIR}/patches"
   CMAKE_ARGS
     "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
     -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/CMake
@@ -53,6 +37,8 @@ ExternalProject_Add(
 
     -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
     -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+    -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+    -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
     -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
 
     -DBoost_NO_SYSTEM_PATHS=ON
@@ -61,7 +47,7 @@ ExternalProject_Add(
     -DBoost_INCLUDE_DIR=${BOOST_INCLUDE_DIR}
     "-DBOOST_LIBRARYDIR=${BOOST_LIBRARY_DIR}"
 
-    "-Dfmt_DIR=${FMT_INSTALL_DIR}/lib/cmake/fmt"
+    "-Dfmt_DIR=${fmt_DIR}"
     "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
 
     "-Dfbmysqlclient_INCLUDE_DIR=${fbmysqlclient_INCLUDE_DIR}"

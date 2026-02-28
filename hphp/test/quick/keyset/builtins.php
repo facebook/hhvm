@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function main($k) {
+function main($k) :mixed{
   echo "Testing: ";
   var_dump($k);
 

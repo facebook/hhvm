@@ -1,0 +1,2 @@
+WARN: File "truthiness_test_class_pointer.php", line 8, characters 7-9:
+Invalid condition: a value of type `class<MyClass>` will always be truthy (Warn[12006])

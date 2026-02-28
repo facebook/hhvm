@@ -3,7 +3,7 @@
 namespace WhateverNamespace;
 
 class WhateverTest {
-  public function filter( $array ) {
+  public function filter( $array ) :mixed{
     $mapFunction = function ( $item ) {
       return "whatever";
     };
@@ -14,9 +14,9 @@ class WhateverTest {
 
 
 <<__EntryPoint>>
-function main_systemlibhhas() {
+function main_systemlibhhas() :mixed{
 $t = new WhateverTest();
-$ret = $t->filter( varray[  "lol", "wow", "doge" ] );
+$ret = $t->filter( vec[  "lol", "wow", "doge" ] );
 
 \var_dump( $ret );
 }

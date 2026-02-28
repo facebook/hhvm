@@ -1,0 +1,3 @@
+--inputs=__DIR__/MyCollection.inc
+--inputs=__DIR__/MyList.inc
+--inputs=__DIR__/interfaces.inc

@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_iterator_iterator_current_return() {
-$I = new IteratorIterator(new ArrayIterator(varray[1,2,3]));
+function main_iterator_iterator_current_return() :mixed{
+$I = new IteratorIterator(new ArrayIterator(vec[1,2,3]));
 $I->rewind();
 var_dump($I->current());
 $I->next();

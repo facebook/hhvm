@@ -1,26 +1,26 @@
 <?hh
 
-function send_to_pagelet($relative_file_path, $locale) {
-  $headers = darray[];
+function send_to_pagelet($relative_file_path, $locale) :mixed{
+  $headers = dict[];
   $task = pagelet_server_task_start(
     "$relative_file_path/?pagelet=true&locale=$locale", $headers, 'dummy'
   );
   if (is_null($task)) {
     echo "Failed to start pagelet task\n";
-    die();
+    exit();
   }
 
   $rc = 0;
   $result = pagelet_server_task_result($task, inout $headers, inout $rc, 2000);
   if ($rc != 200) {
     echo "Failed to finish pagelet task, status = $rc\n";
-    die();
+    exit();
   }
 
   echo trim($result) . "\n";
 }
 
-function escape_non_ascii($str) {
+function escape_non_ascii($str) :mixed{
   $count = -1;
   return preg_replace_callback('/([\x00-\x1F\x7F-\xFF]+)/',
     function ($match) { return urlencode($match[1]); },
@@ -29,20 +29,20 @@ function escape_non_ascii($str) {
 
 
 <<__EntryPoint>>
-function main_setlocale_threaded() {
+function main_setlocale_threaded() :mixed{
 $cwd = getcwd();
 $file_path = __FILE__;
 $relative_file_path = str_replace($cwd, '', $file_path);
 
-$is_pagelet = ((bool)$_GET ?? false) && ($_GET['pagelet'] == 'true');
+$is_pagelet = ((bool)\HH\global_get('_GET') ?? false) && (\HH\global_get('_GET')['pagelet'] == 'true');
 
 if (!$is_pagelet) {
   // And now a good one that will work
   setlocale(LC_TIME, 'fr_FR');
   setlocale(LC_NUMERIC, 'fr_FR');
 } else {
-  if ($_GET['locale'] ?? false) {
-    setlocale(LC_TIME, $_GET['locale']);
+  if (\HH\global_get('_GET')['locale'] ?? false) {
+    setlocale(LC_TIME, \HH\global_get('_GET')['locale']);
   }
 }
 
@@ -58,7 +58,7 @@ echo ($is_pagelet ? "Pagelet: " : "Not pagelet: "),
 if (!$is_pagelet) {
   if (!pagelet_server_is_enabled()) {
     echo "This test needs pagelet server enabled\n";
-    die();
+    exit();
   }
 
   // Send to pagelet multiple times to ensure the previously set locale

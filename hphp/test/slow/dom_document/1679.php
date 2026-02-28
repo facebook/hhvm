@@ -2,10 +2,10 @@
 
 
 <<__EntryPoint>>
-function main_1679() {
+function main_1679() :mixed{
 $dom = new DOMDocument();
 $dom->loadXML('<a><b><c /></b></a>');
-$remove = varray[];
+$remove = vec[];
 foreach ($dom->getElementsByTagName('b') as $data) {
   foreach ($data->childNodes as $element) {
     if ($element is DOMElement) {

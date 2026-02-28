@@ -1,6 +1,6 @@
 <?hh
 
-function get($d, $k) {
+function get($d, $k) :mixed{
   try {
     var_dump($d[$k]);
   } catch (OutOfBoundsException $ex) {
@@ -9,7 +9,7 @@ function get($d, $k) {
   return $d;
 }
 
-function manipulate($arr) {
+function manipulate($arr) :mixed{
   $arr['foo'][] = 12;
   var_dump($arr['foo'][1]);
   try {
@@ -45,6 +45,6 @@ function manipulate($arr) {
     |> get($$, 'foobar')
     |> var_dump($$);
 
-  $arr = darray['foo' => keyset[$foo[1], '2', 3]];
+  $arr = dict['foo' => keyset[$foo[1], '2', 3]];
   manipulate($arr);
 }

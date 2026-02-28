@@ -3,7 +3,7 @@
 
 // method bits
 <<__EntryPoint>>
-function main_reflection_get_modifiers() {
+function main_reflection_get_modifiers() :mixed{
 $public = 256;
 $private = 1024;
 $protected = 512;
@@ -17,7 +17,7 @@ $explicit_abstract = 32;
 $class_final = 64;
 $implicit_public = 4096;
 
-$args = varray[
+$args = vec[
   $public | $static | $final,
   $public | $implicit_abstract,
   $private | $abstract,

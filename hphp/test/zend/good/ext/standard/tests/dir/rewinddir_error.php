@@ -15,7 +15,7 @@ echo "*** Testing rewinddir() : error conditions ***\n";
 //Test rewinddir with one more than the expected number of arguments
 echo "\n-- Testing rewinddir() function with more than expected no. of arguments --\n";
 
-$dir_path = __SystemLib\hphp_test_tmppath('rewinddir_error');
+$dir_path = sys_get_temp_dir().'/'.'rewinddir_error';
 mkdir($dir_path);
 $dir_handle = opendir($dir_path);
 $extra_arg = 10;

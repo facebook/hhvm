@@ -1,30 +1,30 @@
 <?hh
 class C {
-  static $cls = 'C';
+  public static $cls = 'C';
   public function __construct() {
     var_dump(isset($this));
     var_dump(static::$cls);
   }
-  public function foo() {
+  public function foo() :mixed{
     var_dump(isset($this));
     var_dump(static::$cls);
   }
-  public static function bar() {
+  public static function bar() :mixed{
     var_dump(static::$cls);
   }
-  public function yar() {
+  public function yar() :mixed{
     var_dump(isset($this));
     var_dump(static::$cls);
   }
 }
 
 class D extends C {
-  static $cls = 'D';
+  public static $cls = 'D';
   public function __construct() {
     var_dump(isset($this));
     var_dump(static::$cls);
   }
-  public function yar() {
+  public function yar() :mixed{
     var_dump(isset($this));
     var_dump(static::$cls);
     C::yar();

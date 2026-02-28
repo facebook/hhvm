@@ -1,26 +1,26 @@
 <?hh
 
-function foo1() {
+function foo1() :mixed{
   return NAN * NAN;
 }
 
-function foo2() {
+function foo2() :mixed{
   return NAN * 2;
 }
 
-function foo3() {
+function foo3() :mixed{
   return INF * NAN;
 }
 
-function foo4() {
+function foo4() :mixed{
   return 2.0 * INF;
 }
 
-function foo5() {
+function foo5() :mixed{
   return INF * INF;
 }
 
-function foo6($a) {
+function foo6($a) :mixed{
   return $a * 2.0;
 }
 <<__EntryPoint>> function main(): void {

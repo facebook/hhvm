@@ -7,6 +7,7 @@
  *)
 
 type t =
+  | Current_executable
   | Hg
   | For_use_in_testing_only of string
   | Gstack
@@ -17,10 +18,13 @@ type t =
   | Pgrep
   | Ps
   | Pstack
+  | Shell
   | Strobeclient
   | Watchman
+  | Watchman_diag
 
 let to_string = function
+  | Current_executable -> Sys.executable_name
   | Hg -> "hg"
   | For_use_in_testing_only path -> path
   | Gstack -> "gstack"
@@ -31,5 +35,7 @@ let to_string = function
   | Pgrep -> "pgrep"
   | Ps -> "ps"
   | Pstack -> "pstack"
+  | Shell -> "/bin/sh"
   | Strobeclient -> "strobeclient"
   | Watchman -> "watchman"
+  | Watchman_diag -> "watchman-diag"

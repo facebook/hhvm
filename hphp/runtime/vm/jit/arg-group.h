@@ -160,7 +160,7 @@ private:
  *   assertx(args.size() == 3);
  */
 struct ArgGroup {
-  typedef jit::vector<ArgDesc> ArgVec;
+  using ArgVec = jit::vector<ArgDesc>;
 
   explicit ArgGroup(const IRInstruction* inst,
                     const StateVector<SSATmp,Vloc>& locs)
@@ -234,6 +234,7 @@ struct ArgGroup {
   }
 
   ArgGroup& ssa(int i, bool allowFP = true);
+  ArgGroup& fp(int i);
 
   /*
    * Pass tmp as a TypedValue passed by value.

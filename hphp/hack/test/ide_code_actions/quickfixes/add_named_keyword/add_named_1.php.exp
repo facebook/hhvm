@@ -1,0 +1,33 @@
+Code actions available:
+------------------------------------------
+Remove parameter name (CodeActionKind: "quickfix")
+Add `named` keyword (CodeActionKind: "quickfix") SELECTED
+Devmate Quick Fix - Unexpected parameter name. Only `named` parameters can have names. (CodeActionKind: "quickfix")
+Devmate Agent Fix - Unexpected parameter name. Only `named` parameters can have names. (CodeActionKind: "quickfix")
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"named ",
+          "range":{"end":{"character":27,"line":3},"start":{"character":27,"line":3}}
+        }
+      ]
+    }
+  },
+  "kind":"quickfix",
+  "title":"Add `named` keyword"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+<<file: __EnableUnstableFeatures('named_parameters', 'named_parameters_use')>>
+
+function bad((function(int named $positional_param_with_name): void) $f): void {}
+                            // ^ at-caret
+

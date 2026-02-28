@@ -1,0 +1,15 @@
+Defined in `C`
+---
+public function foo(): int
+---
+
+This is a docblock 2
+
+(from J)
+
+---
+
+
+This is a docblock 1
+
+(from I)

@@ -60,6 +60,7 @@ struct ArrayLayout {
   bool logging() const;
   bool monotype() const;
   bool is_struct() const;
+  bool is_type_structure() const;
   bool is_concrete() const;
 
   // The result is non-null iff the layout is a bespoke layout.
@@ -103,6 +104,7 @@ struct ArrayLayout {
   // The array's new layout after a mutating operation.
   ArrayLayout appendType(Type val) const;
   ArrayLayout removeType(Type key) const;
+  ArrayLayout setType(Type val) const;
   ArrayLayout setType(Type key, Type val) const;
 
   // The second element of the pair is true if the key is definitely present.

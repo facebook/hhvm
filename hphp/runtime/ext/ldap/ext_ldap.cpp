@@ -16,7 +16,6 @@
 */
 
 #include "hphp/runtime/ext/ldap/ext_ldap.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -53,108 +52,11 @@ static const StaticString
   s_LDAP_MODIFY_BATCH_VALUES(LDAP_MODIFY_BATCH_VALUES);
 
 static struct LdapExtension final : Extension {
-  LdapExtension() : Extension("ldap", NO_EXTENSION_VERSION_YET) {}
+  LdapExtension() : Extension("ldap", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
   void requestInit() override;
   void requestShutdown() override;
-  void moduleInit() override {
-    HHVM_RC_INT(LDAP_ESCAPE_FILTER, k_LDAP_ESCAPE_FILTER);
-    HHVM_RC_INT(LDAP_ESCAPE_DN, k_LDAP_ESCAPE_DN);
-
-    HHVM_FE(ldap_connect);
-    HHVM_FE(ldap_explode_dn);
-    HHVM_FE(ldap_dn2ufn);
-    HHVM_FE(ldap_err2str);
-    HHVM_FE(ldap_add);
-    HHVM_FE(ldap_mod_add);
-    HHVM_FE(ldap_mod_del);
-    HHVM_FE(ldap_mod_replace);
-    HHVM_FE(ldap_modify);
-    HHVM_FE(ldap_modify_batch);
-    HHVM_FE(ldap_bind);
-    HHVM_FE(ldap_set_rebind_proc);
-    HHVM_FE(ldap_sort);
-    HHVM_FE(ldap_start_tls);
-    HHVM_FE(ldap_unbind);
-    HHVM_FE(ldap_get_option);
-    HHVM_FE(ldap_set_option);
-    HHVM_FE(ldap_close);
-    HHVM_FE(ldap_list);
-    HHVM_FE(ldap_read);
-    HHVM_FE(ldap_search);
-    HHVM_FE(ldap_rename);
-    HHVM_FE(ldap_delete);
-    HHVM_FE(ldap_compare);
-    HHVM_FE(ldap_errno);
-    HHVM_FE(ldap_error);
-    HHVM_FE(ldap_get_dn);
-    HHVM_FE(ldap_count_entries);
-    HHVM_FE(ldap_get_entries);
-    HHVM_FE(ldap_first_entry);
-    HHVM_FE(ldap_next_entry);
-    HHVM_FE(ldap_get_attributes);
-    HHVM_FE(ldap_first_attribute);
-    HHVM_FE(ldap_next_attribute);
-    HHVM_FE(ldap_first_reference);
-    HHVM_FE(ldap_next_reference);
-    HHVM_FE(ldap_parse_reference);
-    HHVM_FE(ldap_parse_result);
-    HHVM_FE(ldap_free_result);
-    HHVM_FE(ldap_get_values_len);
-    HHVM_FE(ldap_get_values);
-    HHVM_FE(ldap_control_paged_result);
-    HHVM_FE(ldap_control_paged_result_response);
-    HHVM_FE(ldap_escape);
-
-    HHVM_RC_INT_SAME(LDAP_DEREF_ALWAYS);
-    HHVM_RC_INT_SAME(LDAP_DEREF_FINDING);
-    HHVM_RC_INT_SAME(LDAP_DEREF_NEVER);
-    HHVM_RC_INT_SAME(LDAP_DEREF_SEARCHING);
-
-    HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_ADD);
-    HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_REMOVE);
-    HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_REMOVE_ALL);
-    HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_REPLACE);
-    HHVM_RC_STR_SAME(LDAP_MODIFY_BATCH_ATTRIB);
-    HHVM_RC_STR_SAME(LDAP_MODIFY_BATCH_MODTYPE);
-    HHVM_RC_STR_SAME(LDAP_MODIFY_BATCH_VALUES);
-
-    HHVM_RC_INT_SAME(LDAP_OPT_DEREF);
-    HHVM_RC_INT_SAME(LDAP_OPT_SIZELIMIT);
-    HHVM_RC_INT_SAME(LDAP_OPT_TIMELIMIT);
-    HHVM_RC_INT_SAME(LDAP_OPT_PROTOCOL_VERSION);
-    HHVM_RC_INT_SAME(LDAP_OPT_ERROR_NUMBER);
-    HHVM_RC_INT_SAME(LDAP_OPT_REFERRALS);
-    HHVM_RC_INT_SAME(LDAP_OPT_ERROR_STRING);
-    HHVM_RC_INT_SAME(LDAP_OPT_SERVER_CONTROLS);
-    HHVM_RC_INT_SAME(LDAP_OPT_CLIENT_CONTROLS);
-
-#ifdef LDAP_OPT_NETWORK_TIMEOUT
-    HHVM_RC_INT_SAME(LDAP_OPT_NETWORK_TIMEOUT);
-#elif defined(LDAP_X_OPT_NETWORK_TIMEOUT)
-    HHVM_RC_INT(LDAP_OPT_NETWORK_TIMEOUT, LDAP_X_OPT_NETWORK_TIMEOUT);
-#endif
-#ifdef LDAP_OPT_TIMEOUT
-    HHVM_RC_INT_SAME(LDAP_OPT_TIMEOUT);
-#endif
-#ifdef LDAP_OPT_RESTART
-    HHVM_RC_INT_SAME(LDAP_OPT_RESTART);
-#endif
-#ifdef LDAP_OPT_HOST_NAME
-    HHVM_RC_INT_SAME(LDAP_OPT_HOST_NAME);
-#endif
-#ifdef LDAP_OPT_MATCHED_DN
-    HHVM_RC_INT_SAME(LDAP_OPT_MATCHED_DN);
-#endif
-#ifdef LDAP_OPT_DEBUG_LEVEL
-    HHVM_RC_INT_SAME(LDAP_OPT_DEBUG_LEVEL);
-#endif
-
-    loadSystemlib();
-    LDAP* link = nullptr;
-    if (ldap_create(&link) == LDAP_SUCCESS) {
-      ldap_unbind(link);
-    }
-  }
+  void moduleInit() override;
+  void moduleRegisterNative() override;
 } s_ldap_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -178,7 +80,7 @@ private:
   void closeImpl(bool forSweep);
 
 public:
-  CLASSNAME_IS("ldap link");
+  CLASSNAME_IS("ldap link")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
@@ -266,7 +168,7 @@ struct LdapResult : SweepableResourceData {
     return data == nullptr;
   }
 
-  CLASSNAME_IS("ldap result");
+  CLASSNAME_IS("ldap result")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof();}
 
@@ -293,7 +195,7 @@ struct LdapResultEntry : SweepableResourceData {
     return data == nullptr || result->isInvalid();
   }
 
-  CLASSNAME_IS("ldap result entry");
+  CLASSNAME_IS("ldap result entry")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
@@ -318,7 +220,7 @@ static req::ptr<LdapLink> get_valid_ldap_link_resource(const T& link) {
   return ld;
 }
 
-static req::ptr<LdapResult> get_valid_ldap_result_resource(const Resource& result) {
+static req::ptr<LdapResult> get_valid_ldap_result_resource(const OptResource& result) {
   auto res = dyn_cast_or_null<LdapResult>(result);
   if (res == nullptr || res->isInvalid()) {
     raise_warning("Not a valid ldap result resource");
@@ -327,7 +229,7 @@ static req::ptr<LdapResult> get_valid_ldap_result_resource(const Resource& resul
   return res;
 }
 
-static req::ptr<LdapResultEntry> get_valid_ldap_result_entry_resource(const Resource& result_entry) {
+static req::ptr<LdapResultEntry> get_valid_ldap_result_entry_resource(const OptResource& result_entry) {
   auto entry = dyn_cast_or_null<LdapResultEntry>(result_entry);
   if (entry == nullptr || entry->isInvalid()) {
     raise_warning("Not a valid ldap result entry resource");
@@ -344,7 +246,7 @@ static int _get_lderrno(LDAP *ldap) {
   return lderr;
 }
 
-static bool php_ldap_do_modify(const Resource& link, const String& dn, const Array& entry,
+static bool php_ldap_do_modify(const OptResource& link, const String& dn, const Array& entry,
                                int oper) {
   bool is_full_add = false; /* flag for full add operation so ldap_mod_add
                                can be put back into oper, gerrit THomson */
@@ -812,42 +714,42 @@ String HHVM_FUNCTION(ldap_err2str,
 }
 
 bool HHVM_FUNCTION(ldap_add,
-                   const Resource& link,
+                   const OptResource& link,
                    const String& dn,
                    const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, PHP_LD_FULL_ADD);
 }
 
 bool HHVM_FUNCTION(ldap_mod_add,
-                   const Resource& link,
+                   const OptResource& link,
                    const String& dn,
                    const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_ADD);
 }
 
 bool HHVM_FUNCTION(ldap_mod_del,
-                   const Resource& link,
+                   const OptResource& link,
                    const String& dn,
                    const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_DELETE);
 }
 
 bool HHVM_FUNCTION(ldap_mod_replace,
-                   const Resource& link,
+                   const OptResource& link,
                    const String& dn,
                    const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_REPLACE);
 }
 
 bool HHVM_FUNCTION(ldap_modify,
-                   const Resource& link,
+                   const OptResource& link,
                    const String& dn,
                    const Array& entry) {
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_REPLACE);
 }
 
 bool HHVM_FUNCTION(ldap_modify_batch,
-                   const Resource& link,
+                   const OptResource& link,
                    const String& dn,
                    const Array& modifs) {
   /*
@@ -1133,7 +1035,7 @@ bool HHVM_FUNCTION(ldap_modify_batch,
 }
 
 bool HHVM_FUNCTION(ldap_bind,
-                   const Resource& link,
+                   const OptResource& link,
                    const Variant& bind_rdn /* = uninit_variant */,
                    const Variant& bind_password /* = uninit_variant */) {
 
@@ -1170,7 +1072,7 @@ bool HHVM_FUNCTION(ldap_bind,
 }
 
 bool HHVM_FUNCTION(ldap_set_rebind_proc,
-                   const Resource& link,
+                   const OptResource& link,
                    const Variant& callback) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
@@ -1206,8 +1108,8 @@ bool HHVM_FUNCTION(ldap_set_rebind_proc,
 }
 
 bool HHVM_FUNCTION(ldap_sort,
-                   const Resource& link,
-                   const Resource& result,
+                   const OptResource& link,
+                   const OptResource& result,
                    const String& sortfilter) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
@@ -1229,7 +1131,7 @@ bool HHVM_FUNCTION(ldap_sort,
 }
 
 bool HHVM_FUNCTION(ldap_start_tls,
-                   const Resource& link) {
+                   const OptResource& link) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1244,7 +1146,7 @@ bool HHVM_FUNCTION(ldap_start_tls,
   return true;
 }
 
-bool HHVM_FUNCTION(ldap_unbind, const Resource& link) {
+bool HHVM_FUNCTION(ldap_unbind, const OptResource& link) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1254,7 +1156,7 @@ bool HHVM_FUNCTION(ldap_unbind, const Resource& link) {
 }
 
 bool HHVM_FUNCTION(ldap_get_option,
-                   const Resource& link,
+                   const OptResource& link,
                    int64_t option,
                    Variant& retval) {
   auto ld = get_valid_ldap_link_resource(link);
@@ -1499,8 +1401,8 @@ bool HHVM_FUNCTION(ldap_set_option,
 }
 
 bool HHVM_FUNCTION(ldap_close,
-                   const Resource& link) {
-  return f_ldap_unbind(link);
+                   const OptResource& link) {
+  return HHVM_FN(ldap_unbind)(link);
 }
 
 Variant HHVM_FUNCTION(ldap_list,
@@ -1543,7 +1445,7 @@ Variant HHVM_FUNCTION(ldap_search,
 }
 
 bool HHVM_FUNCTION(ldap_rename,
-                   const Resource& link,
+                   const OptResource& link,
                    const String& dn,
                    const String& newrdn,
                    const String& newparent,
@@ -1560,7 +1462,7 @@ bool HHVM_FUNCTION(ldap_rename,
 }
 
 bool HHVM_FUNCTION(ldap_delete,
-                   const Resource& link,
+                   const OptResource& link,
                    const String& dn) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
@@ -1576,7 +1478,7 @@ bool HHVM_FUNCTION(ldap_delete,
 }
 
 Variant HHVM_FUNCTION(ldap_compare,
-                      const Resource& link,
+                      const OptResource& link,
                       const String& dn,
                       const String& attribute,
                       const String& value) {
@@ -1596,7 +1498,7 @@ Variant HHVM_FUNCTION(ldap_compare,
 }
 
 Variant HHVM_FUNCTION(ldap_errno,
-                      const Resource& link) {
+                      const OptResource& link) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1606,7 +1508,7 @@ Variant HHVM_FUNCTION(ldap_errno,
 }
 
 Variant HHVM_FUNCTION(ldap_error,
-                     const Resource& link) {
+                     const OptResource& link) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1617,8 +1519,8 @@ Variant HHVM_FUNCTION(ldap_error,
 }
 
 Variant HHVM_FUNCTION(ldap_get_dn,
-                      const Resource& link,
-                      const Resource& result_entry) {
+                      const OptResource& link,
+                      const OptResource& result_entry) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1638,8 +1540,8 @@ Variant HHVM_FUNCTION(ldap_get_dn,
 }
 
 Variant HHVM_FUNCTION(ldap_count_entries,
-                      const Resource& link,
-                      const Resource& result) {
+                      const OptResource& link,
+                      const OptResource& result) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1653,8 +1555,8 @@ Variant HHVM_FUNCTION(ldap_count_entries,
 }
 
 Variant HHVM_FUNCTION(ldap_get_entries,
-                      const Resource& link,
-                      const Resource& result) {
+                      const OptResource& link,
+                      const OptResource& result) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1698,8 +1600,8 @@ Variant HHVM_FUNCTION(ldap_get_entries,
 }
 
 Variant HHVM_FUNCTION(ldap_first_entry,
-                      const Resource& link,
-                      const Resource& result) {
+                      const OptResource& link,
+                      const OptResource& result) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1718,8 +1620,8 @@ Variant HHVM_FUNCTION(ldap_first_entry,
 }
 
 Variant HHVM_FUNCTION(ldap_next_entry,
-                      const Resource& link,
-                      const Resource& result_entry) {
+                      const OptResource& link,
+                      const OptResource& result_entry) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1738,8 +1640,8 @@ Variant HHVM_FUNCTION(ldap_next_entry,
 }
 
 Variant HHVM_FUNCTION(ldap_get_attributes,
-                    const Resource& link,
-                    const Resource& result_entry) {
+                    const OptResource& link,
+                    const OptResource& result_entry) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1755,8 +1657,8 @@ Variant HHVM_FUNCTION(ldap_get_attributes,
 }
 
 Variant HHVM_FUNCTION(ldap_first_attribute,
-                      const Resource& link,
-                      const Resource& result_entry) {
+                      const OptResource& link,
+                      const OptResource& result_entry) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1784,8 +1686,8 @@ Variant HHVM_FUNCTION(ldap_first_attribute,
 }
 
 Variant HHVM_FUNCTION(ldap_next_attribute,
-                      const Resource& link,
-                      const Resource& result_entry) {
+                      const OptResource& link,
+                      const OptResource& result_entry) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1815,8 +1717,8 @@ Variant HHVM_FUNCTION(ldap_next_attribute,
 }
 
 Variant HHVM_FUNCTION(ldap_first_reference,
-                      const Resource& link,
-                      const Resource& result) {
+                      const OptResource& link,
+                      const OptResource& result) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1835,8 +1737,8 @@ Variant HHVM_FUNCTION(ldap_first_reference,
 }
 
 Variant HHVM_FUNCTION(ldap_next_reference,
-                      const Resource& link,
-                      const Resource& result_entry) {
+                      const OptResource& link,
+                      const OptResource& result_entry) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
     return false;
@@ -1855,8 +1757,8 @@ Variant HHVM_FUNCTION(ldap_next_reference,
 }
 
 bool HHVM_FUNCTION(ldap_parse_reference,
-                   const Resource& link,
-                   const Resource& result_entry,
+                   const OptResource& link,
+                   const OptResource& result_entry,
                    Array& referrals) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
@@ -1886,8 +1788,8 @@ bool HHVM_FUNCTION(ldap_parse_reference,
 }
 
 bool HHVM_FUNCTION(ldap_parse_result,
-                   const Resource& link,
-                   const Resource& result,
+                   const OptResource& link,
+                   const OptResource& result,
                    int64_t& errcode,
                    String& matcheddn,
                    String& errmsg,
@@ -1942,7 +1844,7 @@ bool HHVM_FUNCTION(ldap_parse_result,
 }
 
 bool HHVM_FUNCTION(ldap_free_result,
-                   const Resource& result) {
+                   const OptResource& result) {
   auto res = get_valid_ldap_result_resource(result);
   if (!res) {
     return false;
@@ -1952,8 +1854,8 @@ bool HHVM_FUNCTION(ldap_free_result,
 }
 
 Variant HHVM_FUNCTION(ldap_get_values_len,
-                      const Resource& link,
-                      const Resource& result_entry,
+                      const OptResource& link,
+                      const OptResource& result_entry,
                       const String& attribute) {
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
@@ -1985,14 +1887,14 @@ Variant HHVM_FUNCTION(ldap_get_values_len,
 }
 
 Variant HHVM_FUNCTION(ldap_get_values,
-                      const Resource& link,
-                      const Resource& result_entry,
+                      const OptResource& link,
+                      const OptResource& result_entry,
                       const String& attribute) {
-  return f_ldap_get_values_len(link, result_entry, attribute);
+  return HHVM_FN(ldap_get_values_len)(link, result_entry, attribute);
 }
 
 bool HHVM_FUNCTION(ldap_control_paged_result,
-                   const Resource& link,
+                   const OptResource& link,
                    int64_t pagesize,
                    bool iscritical,
                    const String& cookie) {
@@ -2039,8 +1941,8 @@ bool HHVM_FUNCTION(ldap_control_paged_result,
 }
 
 bool HHVM_FUNCTION(ldap_control_paged_result_response,
-                   const Resource& link,
-                   const Resource& result,
+                   const OptResource& link,
+                   const OptResource& result,
                    String& cookie,
                    int64_t& estimated) {
   auto ld = get_valid_ldap_link_resource(link);
@@ -2159,6 +2061,107 @@ String HHVM_FUNCTION(ldap_escape,
 
   result.setSize(r - rdata);
   return result;
+}
+
+void LdapExtension::moduleRegisterNative() {
+  HHVM_RC_INT(LDAP_ESCAPE_FILTER, k_LDAP_ESCAPE_FILTER);
+  HHVM_RC_INT(LDAP_ESCAPE_DN, k_LDAP_ESCAPE_DN);
+
+  HHVM_FE(ldap_connect);
+  HHVM_FE(ldap_explode_dn);
+  HHVM_FE(ldap_dn2ufn);
+  HHVM_FE(ldap_err2str);
+  HHVM_FE(ldap_add);
+  HHVM_FE(ldap_mod_add);
+  HHVM_FE(ldap_mod_del);
+  HHVM_FE(ldap_mod_replace);
+  HHVM_FE(ldap_modify);
+  HHVM_FE(ldap_modify_batch);
+  HHVM_FE(ldap_bind);
+  HHVM_FE(ldap_set_rebind_proc);
+  HHVM_FE(ldap_sort);
+  HHVM_FE(ldap_start_tls);
+  HHVM_FE(ldap_unbind);
+  HHVM_FE(ldap_get_option);
+  HHVM_FE(ldap_set_option);
+  HHVM_FE(ldap_close);
+  HHVM_FE(ldap_list);
+  HHVM_FE(ldap_read);
+  HHVM_FE(ldap_search);
+  HHVM_FE(ldap_rename);
+  HHVM_FE(ldap_delete);
+  HHVM_FE(ldap_compare);
+  HHVM_FE(ldap_errno);
+  HHVM_FE(ldap_error);
+  HHVM_FE(ldap_get_dn);
+  HHVM_FE(ldap_count_entries);
+  HHVM_FE(ldap_get_entries);
+  HHVM_FE(ldap_first_entry);
+  HHVM_FE(ldap_next_entry);
+  HHVM_FE(ldap_get_attributes);
+  HHVM_FE(ldap_first_attribute);
+  HHVM_FE(ldap_next_attribute);
+  HHVM_FE(ldap_first_reference);
+  HHVM_FE(ldap_next_reference);
+  HHVM_FE(ldap_parse_reference);
+  HHVM_FE(ldap_parse_result);
+  HHVM_FE(ldap_free_result);
+  HHVM_FE(ldap_get_values_len);
+  HHVM_FE(ldap_get_values);
+  HHVM_FE(ldap_control_paged_result);
+  HHVM_FE(ldap_control_paged_result_response);
+  HHVM_FE(ldap_escape);
+
+  HHVM_RC_INT_SAME(LDAP_DEREF_ALWAYS);
+  HHVM_RC_INT_SAME(LDAP_DEREF_FINDING);
+  HHVM_RC_INT_SAME(LDAP_DEREF_NEVER);
+  HHVM_RC_INT_SAME(LDAP_DEREF_SEARCHING);
+
+  HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_ADD);
+  HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_REMOVE);
+  HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_REMOVE_ALL);
+  HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_REPLACE);
+  HHVM_RC_STR_SAME(LDAP_MODIFY_BATCH_ATTRIB);
+  HHVM_RC_STR_SAME(LDAP_MODIFY_BATCH_MODTYPE);
+  HHVM_RC_STR_SAME(LDAP_MODIFY_BATCH_VALUES);
+
+  HHVM_RC_INT_SAME(LDAP_OPT_DEREF);
+  HHVM_RC_INT_SAME(LDAP_OPT_SIZELIMIT);
+  HHVM_RC_INT_SAME(LDAP_OPT_TIMELIMIT);
+  HHVM_RC_INT_SAME(LDAP_OPT_PROTOCOL_VERSION);
+  HHVM_RC_INT_SAME(LDAP_OPT_ERROR_NUMBER);
+  HHVM_RC_INT_SAME(LDAP_OPT_REFERRALS);
+  HHVM_RC_INT_SAME(LDAP_OPT_ERROR_STRING);
+  HHVM_RC_INT_SAME(LDAP_OPT_SERVER_CONTROLS);
+  HHVM_RC_INT_SAME(LDAP_OPT_CLIENT_CONTROLS);
+
+#ifdef LDAP_OPT_NETWORK_TIMEOUT
+  HHVM_RC_INT_SAME(LDAP_OPT_NETWORK_TIMEOUT);
+#elif defined(LDAP_X_OPT_NETWORK_TIMEOUT)
+  HHVM_RC_INT(LDAP_OPT_NETWORK_TIMEOUT, LDAP_X_OPT_NETWORK_TIMEOUT);
+#endif
+#ifdef LDAP_OPT_TIMEOUT
+  HHVM_RC_INT_SAME(LDAP_OPT_TIMEOUT);
+#endif
+#ifdef LDAP_OPT_RESTART
+  HHVM_RC_INT_SAME(LDAP_OPT_RESTART);
+#endif
+#ifdef LDAP_OPT_HOST_NAME
+  HHVM_RC_INT_SAME(LDAP_OPT_HOST_NAME);
+#endif
+#ifdef LDAP_OPT_MATCHED_DN
+  HHVM_RC_INT_SAME(LDAP_OPT_MATCHED_DN);
+#endif
+#ifdef LDAP_OPT_DEBUG_LEVEL
+  HHVM_RC_INT_SAME(LDAP_OPT_DEBUG_LEVEL);
+#endif
+}
+
+void LdapExtension::moduleInit() {
+  LDAP* link = nullptr;
+  if (ldap_create(&link) == LDAP_SUCCESS) {
+    ldap_unbind(link);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

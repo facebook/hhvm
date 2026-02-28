@@ -1,14 +1,14 @@
 <?hh
 
 trait TestTrait {
-  public static function test() {
-    $fun = varray['A', 'test'];
+  public static function test() :mixed{
+    $fun = vec['A', 'test'];
     return 'Forwarded '.$fun();
   }
 }
 
 class A {
-  <<__DynamicallyCallable>> public static function test() {
+  <<__DynamicallyCallable>> public static function test() :mixed{
     return "Test A";
   }
 }

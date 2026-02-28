@@ -15,7 +15,7 @@ Hello
 HERE_DOC;
 
 // array of possible valid values for 'val' argument 
-$values = varray [
+$values = vec[
 
   /* 1  */  NULL,
             0,

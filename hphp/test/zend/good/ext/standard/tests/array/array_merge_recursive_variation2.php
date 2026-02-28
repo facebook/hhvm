@@ -12,7 +12,7 @@
 class A
 {
 //  public $var = 10;
-  public function __toString() {
+  public function __toString() :mixed{
     return "object";
   }
 }
@@ -20,7 +20,7 @@ class A
 echo "*** Testing array_merge_recursive() : Passing non array values to \$arr2 argument ***\n";
 
 // initialise the first argument
-$arr1 = varray[1, varray["hello", 'world']];
+$arr1 = vec[1, vec["hello", 'world']];
 
 
 // heredoc string
@@ -32,7 +32,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $arr2 argument
-$arrays = varray [
+$arrays = vec[
 
        // int data
 /*1*/  0,

@@ -14,8 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
+#include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/debugger-request-info.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -82,7 +83,7 @@ bool TerminateThreadsCommand::executeImpl(DebuggerSession* /*session*/,
         dispatchRequest(requestId);
       }
     }
-  } catch (std::out_of_range& e) {
+  } catch (std::out_of_range&) {
   }
 
   // Do not resume target.

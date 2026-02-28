@@ -1,5 +1,7 @@
 *** Testing fgetcsv() : with file pointer pointing to EOF ***
 
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation10.php on line 27
+
 -- Testing fgetcsv() with file opened using r mode --
 int(0)
 bool(false)

@@ -20,12 +20,6 @@ type metadata_out = {
 
 type subprocess_job_status = Subprocess_terminated of Unix.process_status
 
-val win32_worker_main :
-  ('a -> 'b) ->
-  'a * Unix.file_descr option ->
-  request Daemon.in_channel * 'c Daemon.out_channel ->
-  'd
-
 val unix_worker_main :
   ('a -> 'b) ->
   'a * Unix.file_descr option ->

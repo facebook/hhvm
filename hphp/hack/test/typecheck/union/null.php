@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class A {
   public function f(): void {}
@@ -15,6 +15,6 @@ function test(): void {
   }
 
   if ($x !== null) {
-    $x?->f();
+    $x->f();
   }
 }

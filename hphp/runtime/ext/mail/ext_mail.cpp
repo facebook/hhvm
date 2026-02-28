@@ -18,9 +18,10 @@
 #include <sstream>
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/zend-string.h"
+
+#include "hphp/util/configs/mail.h"
 
 namespace HPHP {
 
@@ -111,10 +112,10 @@ static String php_trim(const String& str) {
 bool php_mail(const String& to, const String& subject, const String& message,
               const String& headers, const String& extra_cmd) {
   // assumes we always have sendmail installed
-  always_assert(!RuntimeOption::SendmailPath.empty());
+  always_assert(!Cfg::Mail::SendmailPath.empty());
 
   std::ostringstream os;
-  os << RuntimeOption::SendmailPath;
+  os << Cfg::Mail::SendmailPath;
   if (!extra_cmd.empty()) {
     os << ' ' << extra_cmd.c_str();
   }
@@ -123,7 +124,7 @@ bool php_mail(const String& to, const String& subject, const String& message,
   FILE *sendmail = popen(os.str().c_str(), "w");
   if (sendmail == NULL || EACCES == errno) {
     raise_warning("Unable to execute %s",
-                  RuntimeOption::SendmailPath.c_str());
+                  Cfg::Mail::SendmailPath.c_str());
     return false;
   }
 
@@ -173,9 +174,9 @@ bool HHVM_FUNCTION(mail,
   to2 = php_trim(to2);
   subject2 = php_trim(subject2);
 
-  if (!RuntimeOption::MailForceExtraParameters.empty()) {
+  if (!Cfg::Mail::ForceExtraParameters.empty()) {
     params2 = string_escape_shell_cmd(
-      RuntimeOption::MailForceExtraParameters.c_str());
+      Cfg::Mail::ForceExtraParameters.c_str());
   } else {
     params2 = string_escape_shell_cmd(params2.c_str());
   }
@@ -197,11 +198,10 @@ int64_t HHVM_FUNCTION(ezmlm_hash, const String& addr) {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct MailExtension final : Extension {
-  MailExtension() : Extension("mail") { }
-  void moduleInit() override {
+  MailExtension() : Extension("mail", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
+  void moduleRegisterNative() override {
     HHVM_FE(mail);
     HHVM_FE(ezmlm_hash);
-    loadSystemlib();
   }
 } s_mail_extension;
 

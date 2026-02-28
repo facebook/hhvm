@@ -74,30 +74,44 @@ StringData* convObjToStrHelper(ObjectData* o);
 
 void throwUndefPropException(ObjectData* base, const StringData* name);
 void throwUndefVariable(StringData* nm);
-void VerifyParamTypeSlow(ObjectData* obj,
-                         const Class* constraint,
-                         const Func* func,
-                         int32_t paramId,
-                         const TypeConstraint* expected);
+void VerifyParamTypeCls(ObjectData* obj,
+                        const Class* constraint,
+                        const Func* func,
+                        int32_t paramId,
+                        const TypeConstraint* expected);
 void VerifyParamTypeCallable(TypedValue value,
                              const Func* func,
-                             int32_t paramId);
-TypedValue VerifyParamTypeFail(TypedValue value,
-                               const Class* ctx,
-                               const Func* func,
-                               int paramId,
-                               const TypeConstraint* tc);
-void VerifyRetTypeSlow(ObjectData* obj,
-                       const Class* constraint,
+                             int32_t paramId,
+                             const TypeConstraint* tc);
+TypedValue VerifyParamType(TypedValue value,
+                           const Class* ctx,
+                           const Func* func,
+                           int paramId,
+                           const TypeConstraint* tc);
+void VerifyParamTypeFail(TypedValue value,
+                         const Class* ctx,
+                         const Func* func,
+                         int paramId,
+                         const TypeConstraint* tc);
+void VerifyRetTypeCls(ObjectData* obj,
+                      const Class* constraint,
+                      const Func* func,
+                      int32_t retId,
+                      const TypeConstraint* expected);
+void VerifyRetTypeCallable(TypedValue value,
+                           const Func* func,
+                           int32_t retId,
+                           const TypeConstraint* tc);
+TypedValue VerifyRetType(TypedValue value,
+                         const Class* ctx,
+                         const Func* func,
+                         int32_t retId,
+                         const TypeConstraint* tc);
+void VerifyRetTypeFail(TypedValue value,
+                       const Class* ctx,
                        const Func* func,
                        int32_t retId,
-                       const TypeConstraint* expected);
-void VerifyRetTypeCallable(TypedValue value, const Func* func, int32_t retId);
-TypedValue VerifyRetTypeFail(TypedValue value,
-                             const Class* ctx,
-                             const Func* func,
-                             int32_t retId,
-                             const TypeConstraint* tc);
+                       const TypeConstraint* tc);
 
 void VerifyReifiedLocalTypeImpl(TypedValue value,
                                 ArrayData* ts,
@@ -108,6 +122,11 @@ void VerifyReifiedReturnTypeImpl(TypedValue value,
                                  ArrayData* ts,
                                  const Class* ctx,
                                  const Func* func);
+
+void VerifyTypeImpl(TypedValue value,
+                    ArrayData* ts,
+                    const Class* ctx,
+                    const Func* func);
 
 void raise_error_sd(const StringData* sd);
 
@@ -129,13 +148,13 @@ tv_lval ldGblAddrDefHelper(StringData* name);
 TypedValue* getSPropOrNull(ReadonlyOp op,
                            const Class* cls,
                            const StringData* name,
-                           Class* ctx,
+                           const Func* ctx,
                            bool ignoreLateInit,
                            bool writeMode);
 TypedValue* getSPropOrRaise(ReadonlyOp op,
                             const Class* cls,
                             const StringData* name,
-                            Class* ctx,
+                            const Func* ctx,
                             bool ignoreLateInit,
                             bool writeMode);
 
@@ -143,6 +162,7 @@ void checkFrame(ActRec* fp, TypedValue* sp, bool fullCheck);
 
 void loadArrayFunctionContext(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 
+const Func* loadPublicFunction();
 const Func* loadClassCtor(Class* cls, Func* ctxFunc);
 const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
                                   ObjectData* obj, const Func* ctxFunc);
@@ -168,9 +188,13 @@ ArrayData* resolveTypeStructHelper(
   bool isOrAsOp
 );
 bool isTypeStructHelper(ArrayData*, TypedValue, rds::Handle);
+bool isTypeStructShallowHelper(ArrayData*, TypedValue, rds::Handle);
 void profileIsTypeStructHelper(ArrayData*, IsTypeStructProfile*);
 [[noreturn]] void throwAsTypeStructExceptionHelper(ArrayData*, TypedValue);
+[[noreturn]] void throwAsTypeStructErrorHelper(ArrayData*, TypedValue);
 ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData*);
+
+void profileCoeffectFunParamHelper(TypedValue, CoeffectFunParamProfile*);
 
 /* Reified generics helpers
  * Both functions decref the input array by turning it into a static array
@@ -190,6 +214,11 @@ void raiseCoeffectsCallViolationHelper(const Func*, uint64_t, uint64_t);
 
 [[noreturn]] void throwOOBException(TypedValue base, TypedValue key);
 [[noreturn]] void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key);
+
+bool callViolatesDeploymentBoundaryHelper(const Func*);
+bool callViolatesDeploymentBoundaryHelper(const Class*);
+
+[[noreturn]] void raiseStaticAnalysisError();
 
 namespace MInstrHelpers {
 TypedValue setOpElem(tv_lval base, TypedValue key, TypedValue val, SetOpOp op);

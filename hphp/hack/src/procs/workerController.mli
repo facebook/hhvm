@@ -105,7 +105,7 @@ val make :
   heap_handle:SharedMem.handle ->
   worker list
 
-(* Call in a sub-process (CAREFUL, GLOBALS ARE COPIED) *)
+(** Call in a sub-process (CAREFUL, GLOBALS ARE COPIED) *)
 val call : ?call_id:int -> worker -> ('a -> 'b) -> 'a -> ('a, 'b) handle
 
 (* See MultiThreadedCall.call_id *)

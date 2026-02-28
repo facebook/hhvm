@@ -7,7 +7,7 @@
 // define some classes
 class classWithToString
 {
-    public function __toString() {
+    public function __toString() :mixed{
         return "Class A object";
     }
 }
@@ -18,7 +18,7 @@ class classWithoutToString
 
 //Call back function
 function key_compare_func($key1, $key2)
-{
+:mixed{
     if ($key1 == $key2)
         return 0;
     else
@@ -28,8 +28,8 @@ function key_compare_func($key1, $key2)
 echo "*** Testing array_intersect_ukey() : usage variation ***\n";
 
 //Initialise arguments
-$array1 = darray['blue'  => 1, 'red'  => 2, 'green'  => 3, 'purple' => 4];
-$array3 = darray['green' => 5, 'cyan'   => 8];
+$array1 = dict['blue'  => 1, 'red'  => 2, 'green'  => 3, 'purple' => 4];
+$array3 = dict['green' => 5, 'cyan'   => 8];
 
 
 //resource variable
@@ -41,7 +41,7 @@ hello world
 EOT;
 
 //array of values to iterate over
-$inputs = darray[
+$inputs = dict[
 
       // int data
       'int 0' => 0,

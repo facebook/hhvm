@@ -1,0 +1,25 @@
+Inside ><
+Inside ><
+Inside >entrypoint_traits<
+Inside >entrypoint_traits<
+Inside T3::m4
+===================== static properties =========================
+123
+red
+===================== function statics =========================
+Inside T6::f
+$v = 0
+Inside T6::f
+$v = 1
+-------
+Inside T6::f
+$v = 0
+Inside T6::f
+$v = 1
+Inside T6::f
+$v = 2
+===================== Using a Trait without a Class =========================
+Inside T7
+Inside T7
+Inside T7::g
+===================== examples for spec =========================

@@ -8,28 +8,18 @@
  *)
 
 (* This `.mli` file was generated automatically. It may include extra
-definitions that should not actually be exposed to the caller. If you notice
-that this interface file is a poor interface, please take a few minutes to
-clean it up manually, and then delete this comment once the interface is in
-shape. *)
+   definitions that should not actually be exposed to the caller. If you notice
+   that this interface file is a poor interface, please take a few minutes to
+   clean it up manually, and then delete this comment once the interface is in
+   shape. *)
 
 exception Incorrect_format
-
-val soi : int -> string
-
-val string_of_char : char -> string
 
 val string_before : string -> int -> string
 
 val string_after : string -> int -> string
 
-val string_starts_with : string -> string -> bool
-
-val string_ends_with : string -> string -> bool
-
 val substring_index : string -> string -> int
-
-val is_substring : string -> string -> bool
 
 val lstrip : string -> string -> string
 
@@ -39,25 +29,7 @@ val rpartition : string -> char -> string * string
 
 val truncate : int -> string -> string
 
-val index_not_from_opt : string -> int -> string -> int option
-
 val index_not_opt : string -> string -> int option
-
-val rindex_not_from_opt : string -> int -> string -> int option
-
-val rindex_not_opt : string -> string -> int option
-
-val zero_code : int
-
-val nine_code : int
-
-val is_decimal_digit : char -> bool
-
-val is_lowercase_char : char -> bool
-
-val is_not_lowercase : string -> int -> int -> bool
-
-val fold_left : f:('a -> char -> 'a) -> acc:'a -> string -> 'a
 
 val split : char -> string -> string list
 
@@ -163,4 +135,11 @@ module CharSet : sig
   val to_string : t -> string
 end
 
-val levenshtein_distance : ?upper_bound:int -> string -> string -> int
+(** Extracts a name with [f] then returns the closest candidate
+  * by case-insensitive edit distance.
+  *
+  * If [max_edit_distance] (value <= 10) is provided, only returns a `Some _` if the edit
+  * distance is at most that value.
+  * *)
+val most_similar :
+  ?max_edit_distance:int -> string -> 'a list -> ('a -> string) -> 'a option

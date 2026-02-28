@@ -6,21 +6,20 @@ Errors:
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-14], "\\test");
       fd_fun =
       { f_span = [3:1-15:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((int), (Some ([3:35-38], (Hprim Tint)))); 
-        f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_tparams = []; f_ret = ((~int), (Some ([3:35-38], (Hprim Tint))));
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:15-18], (Hprim Tint)))); 
-           param_is_variadic = false; param_pos = [3:19-21]; param_name = "$i"; 
-           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None };
-          { param_annotation = (string); param_type_hint = ((string), (Some ([3:23-29], (Hprim Tstring)))); 
-            param_is_variadic = false; param_pos = [3:30-32]; param_name = "$s"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+           param_pos = [3:19-21]; param_name = "$i"; param_info = Param_required; 
+           param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+           param_named = None; param_user_attributes = []; param_visibility = None };
+          { param_annotation = (string); param_type_hint = ((string), (Some ([3:23-29], (Happly (([3:23-29], "\\HH\\string"), []))))); 
+            param_pos = [3:30-32]; param_name = "$s"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
@@ -28,38 +27,39 @@ Errors:
           [([4:3-26],
             (Expr
                ((Vector<int>), [4:3-25],
-                (Binop ((Eq None), ((Vector<int>), [4:3-9], (Lvar ([4:3-9], $items))), ((Vector<int>), [4:12-25], (ValCollection (Vector, None, [((int), [4:21-23], (Lvar ([4:21-23], $i)))]))))))));
+                (Assign (((Vector<int>), [4:3-9], (Lvar ([4:3-9], $items))), None,
+                   ((Vector<int>), [4:12-25], (ValCollection (([4:12-18], Vector), None, [((int), [4:21-23], (Lvar ([4:21-23], $i)))]))))))));
             ([5:3-12:5],
              (Expr
-                (((function(): int)), [5:3-12:4],
-                 (Binop ((Eq None), (((function(): int)), [5:3-5], (Lvar ([5:3-5], $f))),
-                    (((function(): int)), [5:8-12:4],
+                (((function(): ~int)), [5:3-12:4],
+                 (Assign ((((function(): ~int)), [5:3-5], (Lvar ([5:3-5], $f))), None,
+                    (((function(): ~int)), [5:8-12:4],
                      (Lfun (
                         { f_span = [5:8-12:4]; f_readonly_this = None; 
-                          f_annotation = (); f_readonly_ret = None; f_ret = ((int), (Some ([5:12-15], (Hprim Tint)))); 
-                          f_name = ([5:8-12:4], ";anonymous"); f_tparams = []; 
-                          f_where_constraints = []; f_params = []; f_ctxs = None; 
-                          f_unsafe_ctxs = None;
+                          f_annotation = (); f_readonly_ret = None; f_tparams = []; 
+                          f_ret = ((~int), (Some ([5:12-15], (Hprim Tint)))); 
+                          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                           f_body =
                           { fb_ast =
                             [([10:5-23],
                               (Expr
-                                 ((int), [10:5-22],
-                                  (Binop ((Eq None), ((int), [10:5-10], (Lvar ([10:5-10], $item))),
-                                     ((int), [10:13-22], (Array_get (((Vector<int>), [10:13-19], (Lvar ([10:13-19], $items))), (Some ((int), [10:20-21], (Int "1")))))))))));
-                              ([11:5-18], (Return (Some ((int), [11:12-17], (Lvar ([11:12-17], $item))))))]
+                                 ((~int), [10:5-22],
+                                  (Assign (((~int), [10:5-10], (Lvar ([10:5-10], $item))), None,
+                                     ((~int), [10:13-22], (Array_get (((~Vector<int>), [10:13-19], (Lvar ([10:13-19], $items))), (Some ((int), [10:20-21], (Int "1")))))))))));
+                              ([11:5-18], (Return (Some ((~int), [11:12-17], (Lvar ([11:12-17], $item))))))]
                             };
                           f_fun_kind = FSync; f_user_attributes = []; 
-                          f_external = false; f_doc_comment = None },
-                        [([10:13-19], $items)])))
+                          f_external = false; f_hidden = false; f_doc_comment = None },
+                        [((Vector<int>), ([10:13-19], $items))])))
                     )))));
             ([13:3-17],
              (Expr
                 ((string), [13:3-16],
-                 (Binop ((Eq None), ((string), [13:3-11], (Array_get (((Vector<int>), [13:3-9], (Lvar ([13:3-9], $items))), None))),
-                    ((string), [13:14-16], (Hole (((string), [13:14-16], (Lvar ([13:14-16], $s))), (string), (int), Typing))))))));
-            ([14:3-15], (Return (Some ((int), [14:10-14], (Call ((((function(): int)), [14:10-12], (Lvar ([14:10-12], $f))), [], [], None))))))]
+                 (Assign (((string), [13:3-11], (Array_get (((Vector<int>), [13:3-9], (Lvar ([13:3-9], $items))), None))), None,
+                    ((string), [13:14-16], (Hole (((string), [13:14-16], (Lvar ([13:14-16], $s))), (string), (~int), Typing))))))));
+            ([14:3-15], (Return (Some ((~int), [14:10-14], (Call { func = (((function(): ~int)), [14:10-12], (Lvar ([14:10-12], $f))); targs = []; args = []; unpacked_arg = None })))))]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
-      fd_internal = false })
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None })

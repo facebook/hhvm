@@ -11,12 +11,12 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing join() : usage variationsi - binary safe ***\n";
 
-$glues = varray[
+$glues = vec[
   ",".chr(0)." ",
   b", "
 ];
 
-$pieces = varray["Red", "Green", "White", 1];
+$pieces = vec["Red", "Green", "White", 1];
 var_dump( join($glues[0], $pieces) );
 var_dump( join($glues[1], $pieces) );
  

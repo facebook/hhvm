@@ -3,6 +3,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
 
 namespace HPHP {
@@ -10,21 +11,17 @@ namespace HPHP {
 
 ArrayIter getArrayIterHelper(const Variant& v, size_t& sz);
 
+struct c_Collection : ObjectData {
+  explicit c_Collection(Class* cls, HeaderKind kind) noexcept :
+    ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind) {}
+};
+
 namespace collections {
+
 /////////////////////////////////////////////////////////////////////////////
 
-extern const StaticString
-  s_HH_Pair, s_HH_Vector, s_HH_ImmVector,
-  s_HH_Map, s_HH_ImmMap, s_HH_Set, s_HH_ImmSet;
 
 #define DECLARE_COLLECTIONS_CLASS_NOCTOR(name)              \
-  static Class* s_cls;                                      \
-                                                            \
-  static Class* classof() {                                 \
-    assertx(s_cls);                                         \
-    return s_cls;                                           \
-  }                                                         \
-                                                            \
   static void instanceDtor(ObjectData* obj, const Class*) { \
     assertx(obj->getVMClass() == c_##name::classof());      \
     auto coll = static_cast<c_##name*>(obj);                \
@@ -70,42 +67,32 @@ inline size_t getSize(const ObjectData* od) {
 /////////////////////////////////////////////////////////////////////////////
 
 struct CollectionsExtension : Extension {
-  CollectionsExtension(): Extension("collections") {}
+  CollectionsExtension(): Extension("collections", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
-  void moduleInit() override {
-    initPair();
-    initVector();
-    initMap();
-    initSet();
+  void moduleRegisterNative() override {
+    registerNativePair();
+    registerNativeVector();
+    registerNativeMap();
+    registerNativeSet();
+  }
+
+  std::vector<std::string> hackFiles() const override {
+    return {
+      "collections-pair.php",
+      "collections-vector.php",
+      "collections-map.php",
+      "collections-set.php",
+    };
   }
 
  private:
-  void initPair();
-  void initVector();
-  void initMap();
-  void initSet();
-
-  template<class T>
-  void finishClass() {
-    auto const cls = const_cast<Class*>(T::classof());
-    assertx(cls);
-    assertx(cls->isCollectionClass());
-    assertx(cls->attrs() & AttrFinal);
-    assertx(!cls->getNativeDataInfo());
-    assertx(!cls->instanceCtor<false>());
-    assertx(!cls->instanceCtor<true>());
-    assertx(!cls->instanceDtor());
-    assertx(!cls->hasMemoSlots());
-    cls->allocExtraData();
-    cls->m_extra.raw()->m_instanceCtor = T::instanceCtor;
-    cls->m_extra.raw()->m_instanceCtorUnlocked = T::instanceCtor;
-    cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
-    cls->m_releaseFunc = T::instanceDtor;
-    cls->initRTAttributes(Class::CallToImpl);
-  }
+  void registerNativePair();
+  void registerNativeVector();
+  void registerNativeMap();
+  void registerNativeSet();
 };
 
-const StaticString s_isset{"isset"};
+extern const StaticString s_isset;
 
 struct CollectionPropHandler: Native::BasePropHandler {
   static Variant issetProp(const Object&, const String&) {
@@ -119,4 +106,25 @@ struct CollectionPropHandler: Native::BasePropHandler {
 };
 
 /////////////////////////////////////////////////////////////////////////////
-}}
+}
+
+template<class T> typename
+  std::enable_if<std::is_base_of<c_Collection, T>::value, void>::type
+finish_class(Class* cls) {
+  assertx(cls);
+  assertx(cls->isCollectionClass());
+  assertx(cls->attrs() & AttrFinal);
+  assertx(!cls->getNativeDataInfo());
+  assertx(!cls->instanceCtor<false>());
+  assertx(!cls->instanceCtor<true>());
+  assertx(!cls->instanceDtor());
+  assertx(!cls->hasMemoSlots());
+  cls->allocExtraData();
+  cls->m_extra.raw()->m_instanceCtor = T::instanceCtor;
+  cls->m_extra.raw()->m_instanceCtorUnlocked = T::instanceCtor;
+  cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
+  cls->m_releaseFunc = T::instanceDtor;
+  cls->initRTAttributes(Class::CallToImpl);
+}
+
+}

@@ -1,7 +1,0 @@
-=== IFC analysis results for parent_construct.php
-File "parent_construct.php", line 26, characters 3-27:
-Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
-  File "parent_construct.php", line 7, characters 16-23:
-  This may be the data source with policy `PRIVATE`
-  File "parent_construct.php", line 15, characters 16-22:
-  This may be the data sink with policy `PUBLIC`

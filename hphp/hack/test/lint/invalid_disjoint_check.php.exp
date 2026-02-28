@@ -19,7 +19,7 @@ This call to 'contains' will always return the same value, because type Foo is d
 File "invalid_disjoint_check.php", line 44, characters 10-25:
 This call to 'contains' will always return the same value, because type Foo is disjoint from type Baz. (Lint[5638])
 File "invalid_disjoint_check.php", line 47, characters 10-25:
-This call to 'contains' will always return the same value, because type Foo is disjoint from type <expr#1> as Bar. (Lint[5638])
+This call to 'contains' will always return the same value, because type Foo is disjoint from type <expr#3> as Bar. (Lint[5638])
 File "invalid_disjoint_check.php", line 50, characters 10-25:
 This call to 'contains' will always return the same value, because type Bar is disjoint from type Foo. (Lint[5638])
 File "invalid_disjoint_check.php", line 98, characters 10-25:

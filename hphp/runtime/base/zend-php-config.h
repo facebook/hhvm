@@ -200,14 +200,8 @@
 /* Whether to build pdo_odbc as dynamic module */
 /* #undef COMPILE_DL_PDO_ODBC */
 
-/* Whether to build pdo_pgsql as dynamic module */
-/* #undef COMPILE_DL_PDO_PGSQL */
-
 /* Whether to build pdo_sqlite as dynamic module */
 /* #undef COMPILE_DL_PDO_SQLITE */
-
-/* Whether to build pgsql as dynamic module */
-/* #undef COMPILE_DL_PGSQL */
 
 /* Whether to build posix as dynamic module */
 /* #undef COMPILE_DL_POSIX */
@@ -1358,26 +1352,11 @@
 /* */
 /* #undef HAVE_PDO_FIREBIRD */
 
-/* Whether to build PostgreSQL for PDO support or not */
-/* #undef HAVE_PDO_PGSQL */
-
 /* */
 /* #undef HAVE_PDO_SQLITELIB */
 
 /* Define to 1 if you have the `perror' function. */
 #define HAVE_PERROR 1
-
-/* Whether to build PostgreSQL support or not */
-/* #undef HAVE_PGSQL */
-
-/* Whether libpq is compiled with --enable-multibyte */
-/* #undef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT */
-
-/* PostgreSQL 7.4 or later */
-/* #undef HAVE_PGTRANSACTIONSTATUS */
-
-/* Whether to have pg_config.h */
-/* #undef HAVE_PG_CONFIG_H */
 
 /* */
 /* #undef HAVE_PHP_SESSION */
@@ -2256,9 +2235,6 @@
 /* #undef USE_COMBINATION_EXPLOSION_CHECK */
 
 /* */
-#define USE_GD_IMGSTRTTF 1
-
-/* */
 /* #undef USE_GD_JISX0208 */
 
 /* */
@@ -2297,23 +2273,6 @@
 
 /* */
 /* #undef ZTS */
-
-#ifdef _MSC_VER
-# undef HAVE_HSTRERROR
-# undef HAVE_SYS_PARAM_H
-# undef HAVE_SYS_POLL_H
-# undef HAVE_SYS_RESOURCE_H
-# undef HAVE_SYS_SELECT_H
-# undef HAVE_SYS_SOCKET_H
-# undef HAVE_SYS_STATFS_H
-# undef HAVE_SYS_STATVFS_H
-# undef HAVE_SYS_TIME_H
-# undef HAVE_SYS_UN_H
-# undef HAVE_SYS_UTSNAME_H
-# undef HAVE_SYS_VFS_H
-# undef HAVE_SYS_WAIT_H
-# undef TIME_WITH_SYS_TIME
-#endif
 
 /* Define to 1 if on AIX 3.
    System headers sometimes define this.
@@ -2436,4 +2395,3 @@ int zend_sprintf(char *buffer, const char *format, ...);
  * End:
  */
 /* #undef PTHREADS */
-

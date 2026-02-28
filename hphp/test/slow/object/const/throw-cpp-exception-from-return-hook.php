@@ -1,8 +1,9 @@
 <?hh
 
-<<__Const>>
 class C {
+  <<__Const>>
   public int $i = 0;
+  <<__Const>>
   public vec $v = vec[1];
 
   public static ?C $c = null;
@@ -19,7 +20,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   fb_setprofile(($case, $fn) ==> {
     if ($case === 'exit' && $fn === 'C::__construct') {
       exit(0);
@@ -45,12 +46,14 @@ function test() {
       echo $e->getMessage() . "\n";
     }
 
+    /* TODO(nzthomas) restore after we support const objects
     try {
       $c->lol = 'whut';
       echo "FAIL: wrote to dynamic property\n";
     } catch (Exception $e) {
       echo $e->getMessage() . "\n";
     }
+    */
 
     echo "-- at the end --\n";
     var_dump($c);

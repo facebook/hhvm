@@ -2,7 +2,7 @@
 
 
 <<__Memoize>>
-function variadicFn($a, ...$args) { return $args; }
+function variadicFn($a, ...$args) :mixed{ return $args; }
 
 <<__EntryPoint>>
 function main(): void {

@@ -1,5 +1,0 @@
-.function foo () {
-  Int 1
-  Await
-  RetC
-}

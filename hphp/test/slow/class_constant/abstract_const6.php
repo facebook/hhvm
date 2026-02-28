@@ -8,6 +8,6 @@ interface I {
 
 
 <<__EntryPoint>>
-function main_abstract_const6() {
+function main_abstract_const6() :mixed{
 var_dump(I::Y); // self::X cannot be resolved
 }

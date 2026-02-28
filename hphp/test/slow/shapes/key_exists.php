@@ -6,7 +6,7 @@ class C {
 
 
 <<__EntryPoint>>
-function main_key_exists() {
+function main_key_exists() :mixed{
 $s = shape(
   'x' => 4
 );

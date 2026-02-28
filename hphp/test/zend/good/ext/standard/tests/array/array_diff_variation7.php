@@ -14,8 +14,8 @@
 echo "*** Testing array_diff() : usage variations ***\n";
 $a = 'a';
 
-$arr1 = varray ["&$a", 'b', 'c'];
-$arr2 = varray [1, 2, 3];
+$arr1 = vec["&$a", 'b', 'c'];
+$arr2 = vec[1, 2, 3];
 echo "-- Basic Comparison --\n";
 var_dump(array_diff($arr1, $arr2));
 var_dump(array_diff($arr2, $arr1));

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class :base extends XHPTest { attribute int a @required; }
 class :derived extends :base {}

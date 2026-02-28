@@ -49,6 +49,12 @@ namespace HPHP {
 struct RequestEventHandler;
 struct EventHook;
 struct Resumable;
+namespace stream_transport {
+struct StreamTransport;
+}
+namespace VSDEBUG {
+struct DebuggerStdoutHook;
+}
 }
 
 namespace HPHP {
@@ -64,7 +70,6 @@ struct VMState {
   ActRec* jitCalledFrame;
   jit::TCA jitReturnAddr;
   Either<ObjectData*, Exception*> exn;
-  bool unwinderSideEnter;
 };
 
 enum class InclOpFlags {
@@ -109,7 +114,7 @@ inline bool any(OBFlags f) { return f != OBFlags::None; }
 inline bool operator!(OBFlags f) { return f == OBFlags::None; }
 
 struct VMParserFrame {
-  LowStringPtr filename;
+  PackedStringPtr filename;
   int lineNumber;
 };
 
@@ -125,6 +130,14 @@ struct ThrowAllErrorsSetter {
 
 private:
   bool m_throwAllErrors;
+};
+
+struct GloballySuppressNonFatals {
+  GloballySuppressNonFatals();
+  ~GloballySuppressNonFatals();
+
+  GloballySuppressNonFatals(GloballySuppressNonFatals&&) = delete;
+  GloballySuppressNonFatals& operator=(GloballySuppressNonFatals&&) = delete;
 };
 
 enum class FileLoadFlags {
@@ -189,6 +202,7 @@ public:
    */
   Transport* getTransport();
   void setTransport(Transport*);
+  std::shared_ptr<stream_transport::StreamTransport> getServerStreamTransport() const;
   void setRequestTrace(rqtrace::Trace*);
   std::string getRequestUrl(size_t szLimit = std::string::npos);
   String getMimeType() const;
@@ -204,7 +218,7 @@ public:
   void write(const char* s, int len);
   void write(const char*);
 
-  void writeStdout(const char* s, int len);
+  void writeStdout(const char* s, int len, bool skipHooks = false);
   size_t getStdoutBytesWritten() const;
 
   /**
@@ -214,10 +228,15 @@ public:
 
   struct StdoutHook {
     virtual void operator()(const char* s, int len) = 0;
-    virtual ~StdoutHook() {};
+    virtual ~StdoutHook() {}
   };
   void addStdoutHook(StdoutHook*);
   bool removeStdoutHook(StdoutHook*);
+  std::size_t numStdoutHooks() const;
+
+  VSDEBUG::DebuggerStdoutHook* debuggerStdoutHook() const;
+  void addDebuggerStdoutHook(VSDEBUG::DebuggerStdoutHook*);
+  void removeDebuggerStdoutHook();
 
   /**
    * Output buffering.
@@ -314,6 +333,9 @@ public:
   int getPageletTasksStarted() const;
   void incrPageletTasksStarted();
 
+  int getXboxTasksStarted() const;
+  void incrXboxTasksStarted();
+
   const VirtualHost* getVirtualHost() const;
   void setVirtualHost(const VirtualHost*);
 
@@ -321,6 +343,8 @@ public:
   void setSandboxId(const String&);
 
   bool hasRequestEventHandlers() const;
+
+  const PackageInfo& getPackageInfo() const;
 
   const RepoOptions& getRepoOptionsForCurrentFrame() const;
   const RepoOptions& getRepoOptionsForFrame(int frame) const;
@@ -331,6 +355,14 @@ public:
   // check to ensure that all files loaded within the request use the same
   // options.
   void onLoadWithOptions(const char* f, const RepoOptions& options);
+
+  // Check if request timed out (e.g., due to overload)
+  void markTimedOut();
+  bool isTimedOut() const;
+
+  // Check if request got killed by the request OOM killer.
+  void markOOMKilled();
+  bool isOOMKilled() const;
 
 private:
   struct OutputBuffer {
@@ -361,15 +393,19 @@ public:
 public:
   ObjectData* createObject(const Class* cls,
                            const Variant& params,
+                           const ArrayData* namedArgNames,
                            bool init);
   ObjectData* createObject(StringData* clsName,
                            const Variant& params,
+                           const ArrayData* namedArgNames,
                            bool init = true);
   ObjectData* initObject(const Class* cls,
                          const Variant& params,
+                         const ArrayData* namedArgNames,
                          ObjectData* o);
   ObjectData* initObject(StringData* clsName,
                          const Variant& params,
+                         const ArrayData* namedArgNames,
                          ObjectData* o);
   ObjectData* createObjectOnly(StringData* clsName);
 
@@ -380,7 +416,7 @@ public:
    * type.  Raises an error if the class has no constant with that
    * name, or if the class is not defined.
    */
-  TypedValue lookupClsCns(const NamedEntity* ne,
+  TypedValue lookupClsCns(const NamedType*,
                     const StringData* cls,
                     const StringData* cns);
   TypedValue lookupClsCns(const StringData* cls,
@@ -462,6 +498,7 @@ public:
 
   TypedValue invokeFunc(const Func* f,
                         const Variant& args_ = init_null_variant,
+                        const ArrayData* namedArgNames = nullptr,
                         ObjectData* this_ = nullptr,
                         Class* class_ = nullptr,
                         RuntimeCoeffects providedCoeffects =
@@ -474,11 +511,13 @@ public:
 
   TypedValue invokeFunc(const CallCtx& ctx,
                         const Variant& args_,
+                        const ArrayData* namedArgNames,
                         RuntimeCoeffects providedCoeffects);
 
   TypedValue invokeFuncFew(const Func* f,
                            ThisOrClass thisOrCls,
                            uint32_t numArgs,
+                           const ArrayData* namedArgNames,
                            const TypedValue* argv,
                            RuntimeCoeffects providedCoeffects,
                            bool dynamic = true,
@@ -490,6 +529,7 @@ public:
 
   TypedValue invokeFuncFew(const CallCtx& ctx,
                            uint32_t numArgs,
+                           const ArrayData* namedArgNames,
                            const TypedValue* argv,
                            RuntimeCoeffects providedCoeffects);
 
@@ -497,6 +537,7 @@ public:
     ObjectData* obj,
     const Func* meth,
     InvokeArgs args,
+    const ArrayData* namedArgNames,
     RuntimeCoeffects providedCoeffects
   );
 
@@ -504,6 +545,7 @@ public:
     ObjectData* obj,
     const Func* meth,
     InvokeArgs args,
+    const ArrayData* namedArgNames,
     RuntimeCoeffects providedCoeffects
   );
 
@@ -519,6 +561,7 @@ public:
 private:
   TypedValue invokeFuncImpl(const Func* f, ObjectData* thiz, Class* cls,
                             uint32_t numArgsInclUnpack,
+                            const ArrayData* namedArgNames,
                             RuntimeCoeffects providedCoeffects,
                             bool hasGenerics,
                             bool dynamic, bool allowDynCallNoPointer);
@@ -544,8 +587,13 @@ private:
   req::list<OutputBuffer> m_buffers; // a stack of output buffers
   bool m_insideOBHandler{false};
   bool m_implicitFlush;
+  bool m_timedOut{false};
+  bool m_killed{false};
   int m_protectedLevel;
 
+  // Debugger stdout hook is treated differently. If it is non-null,
+  // ExecutionContext::write always writes to it.
+  VSDEBUG::DebuggerStdoutHook* m_debuggerStdoutHook = nullptr;
   std::unordered_set<StdoutHook*> m_stdoutHooks;
   size_t m_stdoutBytesWritten;
   String m_rawPostData;
@@ -576,7 +624,8 @@ private:
   req::vector<Variant> m_userExceptionHandlersBackup;
   Variant m_exitCallback;
   String m_sandboxId; // cache the sandbox id for the request
-  int m_pageletTasksStarted;
+  int m_pageletTasksStarted{0};
+  int m_xboxTasksStarted{0};
   const VirtualHost* m_vhost;
 public:
   DebuggerSettings debuggerSettings;
@@ -600,7 +649,10 @@ public:
   req::fast_map<const StringData*, FileInfo, string_data_hash, string_data_same>
     m_evaledFiles;
   req::vector<const StringData*> m_evaledFilesOrder;
+  // Used only by debuggers
+  req::fast_map<const StringData*, const Unit*> m_loadedUnits;
   req::fast_set<Unit*> m_touchedUnits;
+  Array m_visitedFiles;
   int m_lambdaCounter;
   using VMStateVec = req::TinyVector<VMState, 32>;
   VMStateVec m_nestedVMs;
@@ -623,10 +675,25 @@ public:
   Variant m_setprofileCallback;
   Variant m_memThresholdCallback;
   Variant m_timeThresholdCallback;
+  String m_xenonRequestOutputFile;
   uint64_t m_setprofileFlags;
   bool m_executingSetprofileCallback;
   req::fast_set<String,
-                hphp_string_hash, hphp_string_isame> m_setprofileFunctions;
+                hphp_string_hash, hphp_string_fsame> m_setprofileFunctions;
+public:
+  enum class InternalEventHook: uint8_t {
+    Call = 0,
+    Return = 1,
+    Resume = 2,
+    Suspend = 3,
+    Unwind = 4,
+  };
+  using InternalEventHookCallbackType = void(*)(const ActRec*,
+                                                InternalEventHook);
+  InternalEventHookCallbackType m_internalEventHookCallback{nullptr};
+  req::fast_map<String, uint32_t, hphp_string_hash, hphp_string_same>
+      m_internalEventHookNameMap;
+
 public:
   TypedValue m_headerCallback;
   bool m_headerCallbackDone{false}; // used to prevent infinite loops
@@ -641,6 +708,13 @@ public:
   VMParserFrame* m_parserFrame{nullptr};
 
   Optional<struct timespec> m_requestStartForTearing;
+
+  // When logging request tearing we store a fast map of deps to the paths to
+  // units that depend on them and the SHA-1s that they observed.
+  req::fast_map<
+    const StringData*,
+    req::vector<std::pair<std::string, SHA1>>
+  > m_loadedRdepMap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -649,12 +723,8 @@ using GContextType = rds::local::AliasedRDSLocal<ExecutionContext,
       rds::local::Initialize::Explicitly,
       &rds::local::detail::HotRDSLocals::g_context>;
 
-// MSVC doesn't instantiate this, causing an undefined symbol at link time
-// if the template<> is present, but other compilers require it.
 namespace rds::local {
-#ifndef _MSC_VER
 template<>
-#endif
 void GContextType::Base::destroy();
 }
 

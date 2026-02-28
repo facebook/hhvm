@@ -6,7 +6,7 @@ class RemovableDiskException extends DiskException { /*...*/ }
 class FloppyDiskException extends RemovableDiskException { /*...*/ }
 
 function process()
-{
+:mixed{
     throw new DeviceException;
 //  throw new Exception;
 }

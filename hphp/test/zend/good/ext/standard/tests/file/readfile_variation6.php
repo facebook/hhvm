@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 
-function runtest() {
+function runtest() :mixed{
 
    $h = fopen(ZendGoodExtStandardTestsFileReadfileVariation6::$secondFile, "w");
    fwrite($h, "File in include path");

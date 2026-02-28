@@ -1,9 +1,9 @@
 <?hh
-function main() {
+function main() :mixed{
   // This Set will have an initial capacity of 3
   $x = HH\Set {205};
   // This array has 25 elements, but only 3 unique values
-  $y = varray[206, 206, 206, 206, 206, 207, 207, 207, 207, 207, 207, 207, 207,
+  $y = vec[206, 206, 206, 206, 206, 207, 207, 207, 207, 207, 207, 207, 207,
              207, 207, 207, 207, 207, 206, 206, 206, 206, 207, 221, 206];
   // addAll() will speculatively increase capacity to accommodate 25+1 = 26
   // elements. Set always chooses capacities that are 3 times a power of two,
@@ -20,6 +20,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_set_addall_bug() {
+function main_set_addall_bug() :mixed{
 main();
 }

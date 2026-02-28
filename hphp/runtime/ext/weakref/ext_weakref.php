@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * ( excerpt from
  * http://php.net/manual/en/class.weakref.php )
@@ -7,7 +7,7 @@
  * garbage collector from freeing those objects. It also provides a way to turn
  * a weak reference into a strong one.
  */
-<<__NativeData("WeakRefDataHandle")>>
+<<__NativeData>>
 final class WeakRef<T> {
   /**
    * ( excerpt from

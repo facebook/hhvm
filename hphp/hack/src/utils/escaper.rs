@@ -7,9 +7,13 @@
 // Implementation of string escaping logic.
 // See http://php.net/manual/en/language.types.string.php
 
-use std::{borrow::Cow, error::Error, fmt, io::Write};
+use std::borrow::Cow;
+use std::error::Error;
+use std::fmt;
+use std::io::Write;
 
-use bstr::{BStr, BString};
+use bstr::BStr;
+use bstr::BString;
 use bumpalo::Bump;
 
 #[derive(Debug)]
@@ -123,7 +127,7 @@ fn cow_str_to_bytes(s: Cow<'_, str>) -> Cow<'_, [u8]> {
 
 fn cow_bstr_to_bytes(s: Cow<'_, BStr>) -> Cow<'_, [u8]> {
     match s {
-        Cow::Borrowed(s) => s.as_ref().into(),
+        Cow::Borrowed(s) => <&[u8]>::from(s).into(),
         Cow::Owned(s) => <Vec<u8>>::from(s).into(),
     }
 }
@@ -246,6 +250,15 @@ fn unescape_literal(
     s: &str,
     output: &mut impl GrowableBytes,
 ) -> Result<(), InvalidString> {
+    unescape_literal_bytes(literal_kind, s.as_bytes(), output)
+}
+
+/// Helper method for `unescape_literal`
+fn unescape_literal_bytes(
+    literal_kind: LiteralKind,
+    s: &[u8],
+    output: &mut impl GrowableBytes,
+) -> Result<(), InvalidString> {
     struct Scanner<'a> {
         s: &'a [u8],
         i: usize,
@@ -289,7 +302,7 @@ fn unescape_literal(
         }
     }
 
-    let mut s = Scanner::new(s.as_bytes());
+    let mut s = Scanner::new(s);
     while !s.is_empty() {
         let c = s.next()?;
         if c != b'\\' || s.is_empty() {
@@ -340,14 +353,14 @@ fn unescape_literal(
                         output.push(c);
                     } else {
                         let c = parse_numeric_escape(false, hex, 16)?;
-                        output.push(c as u8);
+                        output.push(c);
                     }
                 }
                 c if is_oct(c) => {
                     s.back();
                     let oct = s.take_if(is_oct, 3);
                     let c = parse_numeric_escape(true, oct, 8)?;
-                    output.push(c as u8);
+                    output.push(c);
                 }
                 c => {
                     output.push(b'\\');
@@ -378,6 +391,19 @@ fn unescape_literal_into_arena<'a>(
     Ok(output.into_bump_slice().into())
 }
 
+fn unescape_literal_bytes_into_vec_u8(
+    literal_kind: LiteralKind,
+    s: &[u8],
+) -> Result<Vec<u8>, InvalidString> {
+    let mut output = Vec::with_capacity(s.len());
+    unescape_literal_bytes(literal_kind, s, &mut output)?;
+    Ok(output)
+}
+
+pub fn unescape_literal_bytes_into_vec_bytes(s: &[u8]) -> Result<Vec<u8>, InvalidString> {
+    unescape_literal_bytes_into_vec_u8(LiteralKind::LiteralDoubleQuote, s)
+}
+
 pub fn unescape_double(s: &str) -> Result<BString, InvalidString> {
     unescape_literal_into_string(LiteralKind::LiteralDoubleQuote, s)
 }
@@ -402,6 +428,17 @@ fn unescape_single_or_nowdoc(
     output: &mut impl GrowableBytes,
 ) -> Result<(), InvalidString> {
     let s = s.as_bytes();
+    unescape_bytes_to_gb(is_nowdoc, s, output)
+}
+
+/// Copies `s` into `output`, replacing escape sequences with the characters
+/// they represent. They bytes added to `output` are not guaranteed to be valid UTF-8, unless
+/// `s` is solely valid UTF-8.
+fn unescape_bytes_to_gb(
+    is_nowdoc: bool,
+    s: &[u8],
+    output: &mut impl GrowableBytes,
+) -> Result<(), InvalidString> {
     let len = s.len();
     let mut idx = 0;
     while idx < len {
@@ -450,6 +487,12 @@ fn unescape_single_or_nowdoc_into_arena<'a>(
     // output, only adding and removing valid UTF-8 codepoints.
     let string = unsafe { bumpalo::collections::String::from_utf8_unchecked(output) };
     Ok(string.into_bump_str())
+}
+
+pub fn unescape_bytes(s: &[u8]) -> Result<Vec<u8>, InvalidString> {
+    let mut v8 = Vec::new();
+    unescape_bytes_to_gb(false, s, &mut v8)?;
+    Ok(v8)
 }
 
 pub fn unescape_single(s: &str) -> Result<String, InvalidString> {
@@ -553,9 +596,10 @@ pub fn unquote_slice(content: &[u8]) -> &[u8] {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use bstr::B;
-    use pretty_assertions::assert_eq; // make assert_eq print huge diffs more human-readable
+    use pretty_assertions::assert_eq;
+
+    use super::*; // make assert_eq print huge diffs more human-readable
 
     #[test]
     fn unescape_single_or_nowdoc() {
@@ -700,5 +744,10 @@ mod tests {
 
         assert_eq!(unquote_str("<<<"), "<<<");
         assert_eq!(unquote_str("<<<EOTEOT"), "<<<EOTEOT");
+    }
+    #[test]
+    fn unquote_slice_test() {
+        let s = "abc\"".as_bytes();
+        assert_eq!(unquote_slice(s), s);
     }
 }

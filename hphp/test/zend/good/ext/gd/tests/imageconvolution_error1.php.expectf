@@ -1,2 +1,2 @@
 
-Warning: imageconvolution() expects exactly 4 parameters, 3 given in %s/imageconvolution_error1.php on line 13
+Warning: imageconvolution() expects exactly 4 positional parameters, 3 given in %s/imageconvolution_error1.php on line 13

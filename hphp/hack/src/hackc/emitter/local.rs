@@ -4,13 +4,20 @@
 // LICENSE file in the "hack" directory of this source tree.
 use hhbc::Local;
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct LocalGen {
     pub counter: Counter,
     pub dedicated: Dedicated,
 }
 
 impl LocalGen {
+    pub fn new() -> Self {
+        Self {
+            counter: Counter::new(),
+            dedicated: Dedicated::default(),
+        }
+    }
+
     pub fn get_unnamed(&mut self) -> Local {
         self.counter.next_unnamed(&self.dedicated)
     }
@@ -20,7 +27,7 @@ impl LocalGen {
         self.dedicated
             .temp_map
             .get(s)
-            .expect("Unnamed local never init'ed")
+            .unwrap_or_else(|| panic!("Unnamed local {} never init'ed", s))
     }
 
     pub fn init_unnamed_for_tempname(&mut self, s: &str) -> &Local {
@@ -70,7 +77,7 @@ impl LocalGen {
     pub fn reset(&mut self, next: Local) {
         *self = Self {
             counter: Counter { next },
-            ..Default::default()
+            dedicated: Dedicated::default(),
         }
     }
 }
@@ -111,16 +118,22 @@ pub struct Dedicated {
     pub temp_map: TempMap,
 }
 
-#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Counter {
     pub next: Local,
 }
 
 impl Counter {
+    fn new() -> Self {
+        Self {
+            next: Local::new(0),
+        }
+    }
+
     fn next_unnamed(&mut self, dedicated: &Dedicated) -> Local {
         loop {
             let curr = self.next;
-            self.next.idx += 1;
+            self.next = Local::new(self.next.index() + 1);
 
             // make sure that newly allocated local don't stomp on dedicated locals
             match dedicated.label {

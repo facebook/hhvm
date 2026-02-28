@@ -14,13 +14,13 @@ echo "*** Testing mb_stripos() : basic functionality***\n";
 mb_internal_encoding('UTF-8');
 
 //ascii strings
-$ascii_haystacks = varray[
+$ascii_haystacks = vec[
    b'abc defabc   def',
    b'ABC DEFABC   DEF',
    b'Abc dEFaBC   Def',
 ];
 
-$ascii_needles = varray[
+$ascii_needles = vec[
    // 4 good ones
    b'DE',
    b'de',
@@ -41,7 +41,7 @@ $ascii_needles = varray[
 $greek_lower = base64_decode('zrHOss6zzrTOtc62zrfOuM65zrrOu868zr3Ovs6/z4DPgc+Dz4TPhc+Gz4fPiM+J');
 $greek_upper = base64_decode('zpHOks6TzpTOlc6WzpfOmM6ZzprOm86czp3Ons6fzqDOoc6jzqTOpc6mzqfOqM6p');
 $greek_mixed = base64_decode('zrHOss6TzpTOlc6WzpfOmM65zrrOu868zr3Ovs6fzqDOoc6jzqTOpc+Gz4fPiM+J');
-$greek_haystacks = varray[$greek_lower, $greek_upper, $greek_mixed];
+$greek_haystacks = vec[$greek_lower, $greek_upper, $greek_mixed];
 
 $greek_nlower = base64_decode('zrzOvc6+zr8=');
 $greek_nupper = base64_decode('zpzOnc6ezp8=');
@@ -52,7 +52,7 @@ $greek_blower = base64_decode('zpzOns6f');
 $greek_bupper = base64_decode('zrzOvs6/');
 $greek_bmixed1 = base64_decode('zpzOvs6/');
 $greek_bmixed2 = base64_decode('zrzOvs6f');
-$greek_needles = varray[
+$greek_needles = vec[
    // 4 good ones
    $greek_nlower, $greek_nupper, $greek_nmixed1, $greek_nmixed2,
    

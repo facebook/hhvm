@@ -17,7 +17,7 @@ open Hh_prelude
 open Aast
 open Typing_defs
 module Phase = Typing_phase
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module MakeType = Typing_make_type
 
 let member_type env member_ce =
@@ -25,7 +25,12 @@ let member_type env member_ce =
   if Option.is_none (get_ce_xhp_attr member_ce) then
     default_result
   else
-    match get_node default_result with
+    let (stripped_ty, has_like) =
+      match get_node default_result with
+      | Tlike ty -> (ty, true)
+      | _ -> (default_result, false)
+    in
+    match get_node stripped_ty with
     | Tapply (enum_id, _) ->
       (* XHP attribute type transform is necessary to account for
        * non-first class Enums:
@@ -35,15 +40,19 @@ let member_type env member_ce =
        *)
       let maybe_enum = Typing_env.get_class env (snd enum_id) in
       (match maybe_enum with
-      | None -> default_result
-      | Some tc ->
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        default_result
+      | Decl_entry.Found tc ->
         (match
            Decl_enum.enum_kind
              (Cls.pos tc, Cls.name tc)
              ~is_enum_class:(Ast_defs.is_c_enum_class (Cls.kind tc))
+             ~add_like:false
              (Cls.enum_type tc)
              Option.(
-               Cls.get_typeconst tc Naming_special_names.FB.tInner >>= fun t ->
+               Typing_env.get_typeconst env tc Naming_special_names.FB.tInner
+               >>= fun t ->
                (* TODO(T88552052) This code was taking the default of abstract
                 * type constants as a value *)
                match t.ttc_kind with
@@ -62,18 +71,25 @@ let member_type env member_ce =
               interface = _;
             } ->
           let ty = mk (get_reason default_result, get_node enum_ty) in
-          ty))
+          if has_like then
+            mk (get_reason default_result, Tlike ty)
+          else
+            ty))
     | _ -> default_result
 
 let enum_check_const ty_exp env cc t =
-  let p = fst cc.cc_id in
-  Typing_ops.sub_type
-    p
-    Reason.URenum
-    env
-    t
-    ty_exp
-    Typing_error.Callback.constant_does_not_match_enum_type
+  if Typing_utils.is_tyvar_error env ty_exp || Typing_utils.is_tyvar_error env t
+  then
+    (env, None)
+  else
+    let p = fst cc.cc_id in
+    Typing_ops.sub_type
+      p
+      Reason.URenum
+      env
+      t
+      ty_exp
+      Typing_error.Callback.constant_does_not_match_enum_type
 
 (* Check that the `as` bound or the underlying type of an enum is a subtype of
  * arraykey. For enum class, check that it is a denotable closed type:
@@ -81,29 +97,54 @@ let enum_check_const ty_exp env cc t =
  * like any, or dynamic. The free status of type parameter is caught during
  * naming (Unbound name), so we only check the kind of type that is used.
  *)
-let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
-  let sd env =
-    (* Allow pessimised enum class types when sound dynamic is enabled *)
-    TypecheckerOptions.enable_sound_dynamic (Typing_env.get_tcopt env)
-  in
+let enum_class_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error
+    =
   let ty_arraykey =
-    MakeType.arraykey (Reason.Rimplicit_upper_bound (pos, "arraykey"))
+    MakeType.arraykey (Reason.implicit_upper_bound (pos, "arraykey"))
   in
-  let rec is_valid_base lty =
-    match get_node lty with
+  (* Enforcement of case types for enum/enum classes is wonky.
+   * Forbid for now until we can more thoroughly audit the behavior *)
+  let check_if_case_type env ty =
+    match get_node ty with
+    | Tnewtype (name, _, _) ->
+      (match Typing_env.get_typedef env name with
+      | Decl_entry.Found { td_type_assignment = CaseType _; td_pos; _ } ->
+        Typing_error_utils.add_typing_error ~env
+        @@ Typing_error.(
+             enum
+             @@ Primary.Enum.Enum_type_bad_case_type
+                  {
+                    pos = Pos_or_decl.unsafe_to_raw_pos pos;
+                    ty_name =
+                      lazy
+                        (Typing_print.full_strip_ns ~hide_internals:true env ty);
+                    case_type_decl_pos = td_pos;
+                  })
+      | _ -> ())
+    | _ -> ()
+  in
+  let rec is_valid_base ty =
+    Typing_utils.is_tyvar_error env ty
+    ||
+    match get_node ty with
     | Tprim _
     | Tnonnull ->
       true
     | Toption lty -> is_valid_base lty
-    | Ttuple ltys -> List.for_all ~f:is_valid_base ltys
-    | Tnewtype (_, ltys, lty) -> List.for_all ~f:is_valid_base (lty :: ltys)
+    | Ttuple { t_required; t_optional; t_extra = Tvariadic t_variadic } ->
+      List.for_all ~f:is_valid_base t_required
+      && List.for_all ~f:is_valid_base t_optional
+      && is_nothing t_variadic
+    | Ttuple { t_extra = Tsplat _; _ } -> false
+    | Tnewtype (_, ltys, lty) ->
+      check_if_case_type env ty;
+      List.for_all ~f:is_valid_base (lty :: ltys)
     | Tclass (_, _, ltys) -> List.for_all ~f:is_valid_base ltys
-    | Tunion [ty1; ty2] when is_dynamic ty1 && sd env -> is_valid_base ty2
-    | Tunion [ty1; ty2] when is_dynamic ty2 && sd env -> is_valid_base ty1
-    | Tshape (_, shapemap) ->
+    | Tunion [ty1; ty2] when is_dynamic ty1 -> is_valid_base ty2
+    | Tunion [ty1; ty2] when is_dynamic ty2 -> is_valid_base ty1
+    | Tshape { s_fields = shapemap; _ } ->
       TShapeMap.for_all (fun _name sfty -> is_valid_base sfty.sft_ty) shapemap
     | Tany _
-    | Terr
     | Tdynamic
     | Tfun _
     | Tvar _
@@ -112,27 +153,34 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
     | Tintersection _
     | Tvec_or_dict _
     | Taccess _
-    | Tunapplied_alias _
     | Tdependent _
+    | Tlabel _
     | Tneg _ ->
       false
+    | Tclass_ptr _ -> true
   in
   let (env, ty_err_opt) =
     match ty_interface with
     | Some interface ->
       (if not (is_valid_base interface) then
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error ~env
         @@ Typing_error.(
              enum
              @@ Primary.Enum.Enum_type_bad
                   {
                     pos = Pos_or_decl.unsafe_to_raw_pos pos;
                     is_enum_class = true;
-                    ty_name = lazy (Typing_print.full_strip_ns env interface);
+                    ty_name =
+                      lazy
+                        (Typing_print.full_strip_ns
+                           ~hide_internals:true
+                           env
+                           interface);
                     trail = [];
                   }));
       (env, None)
     | None ->
+      check_if_case_type env ty;
       let callback =
         let open Typing_error in
         Callback.always
@@ -142,7 +190,9 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
                  {
                    pos = Pos_or_decl.unsafe_to_raw_pos pos;
                    is_enum_class = false;
-                   ty_name = lazy (Typing_print.full_strip_ns env ty);
+                   ty_name =
+                     lazy
+                       (Typing_print.full_strip_ns ~hide_internals:true env ty);
                    trail = [];
                  }))
       in
@@ -154,28 +204,45 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
         ty_arraykey
         callback
   in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   env
 
-(* Check an enum declaration of the form
- *    enum E : <ty_exp> as <ty_constraint>
- * or
- *    class E extends Enum<ty_exp>
- * where the absence of <ty_constraint> is assumed to default to arraykey.
- *
- * Check that <ty_exp> is int or string, and that
- *   ty_exp <: ty_constraint <: arraykey
- * Also that each type constant is of type ty_exp.
- *)
-let enum_class_check env tc consts const_types =
+let check_cyclic_constraint env (p, enum_name) constraint_ty =
+  let ((env, _ty_err1, cycles), _) =
+    Phase.localize_no_subst_report_cycles
+      env
+      ~ignore_errors:false
+      constraint_ty
+      ~report_cycle:(p, Type_expansions.Expandable.Enum enum_name)
+  in
+  Type_expansions.report cycles
+  |> Option.iter ~f:(Typing_error_utils.add_typing_error ~env)
+
+(** Check an enum declaration of the form
+
+     enum class E : <ty_exp>
+
+  Also that each type constant is of type `ty_exp`. *)
+let enum_class_check
+    env
+    ~name_pos
+    (tc : Cls.t)
+    (consts : Nast.class_const list)
+    (const_types : locl_ty list) =
   let pos = Cls.pos tc in
-  let enum_info_opt =
+  let add_like =
+    Typing_env.get_support_dynamic_type env
+    && TypecheckerOptions.everything_sdt (Typing_env.get_tcopt env)
+  in
+  let (enum_info_opt : Decl_enum.t option) =
     Decl_enum.enum_kind
       (pos, Cls.name tc)
       ~is_enum_class:(Ast_defs.is_c_enum_class (Cls.kind tc))
+      ~add_like
       (Cls.enum_type tc)
       Option.(
-        Cls.get_typeconst tc Naming_special_names.FB.tInner >>= fun t ->
+        Typing_env.get_typeconst env tc Naming_special_names.FB.tInner
+        >>= fun t ->
         (* TODO(T88552052) This code was taking the default of abstract
          * type constants as a value *)
         match t.ttc_kind with
@@ -197,7 +264,7 @@ let enum_class_check env tc consts const_types =
       let ((env, ty_err1), ty_exp) =
         Phase.localize_no_subst env ~ignore_errors:false ty_exp
       in
-      Option.iter ~f:Errors.add_typing_error ty_err1;
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err1;
       let ((env, ty_err2), ty_interface) =
         match ty_interface with
         | Some dty ->
@@ -207,10 +274,10 @@ let enum_class_check env tc consts const_types =
           (env, Some lty)
         | None -> ((env, None), None)
       in
-      Option.iter ~f:Errors.add_typing_error ty_err2;
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err2;
       (* Check that ty_exp <: arraykey *)
       let env =
-        enum_check_type
+        enum_class_check_type
           env
           pos
           Reason.URenum_underlying
@@ -223,12 +290,13 @@ let enum_class_check env tc consts const_types =
         match ty_constraint with
         | None -> (env, None)
         | Some ty ->
+          check_cyclic_constraint env (name_pos, Cls.name tc) ty;
           let ((env, ty_err1), ty) =
             Phase.localize_no_subst env ~ignore_errors:false ty
           in
-          Option.iter ~f:Errors.add_typing_error ty_err1;
+          Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err1;
           let env =
-            enum_check_type
+            enum_class_check_type
               env
               pos
               Reason.URenum_cstr
@@ -257,5 +325,5 @@ let enum_class_check env tc consts const_types =
       (env, Typing_error.multiple_opt ty_errs)
     | None -> (env, None)
   in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   env

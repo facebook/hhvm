@@ -1,22 +1,22 @@
 <?hh
 
-function rx_local($f) {
+function rx_local($f) :mixed{
   $f();
 }
 
-function pure($f)[] {
+function pure($f)[] :mixed{
   $f();
 };
 
 class C {
-  static function defaults() {
+  static function defaults() :mixed{
     $f = ()[rx] ==> { echo "in lambda\n"; };
     pure($f);
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $f1 = () ==> { echo "in lambda\n"; };
   $f2 = ()[] ==> { echo "in lambda\n"; };
   $f3 = ()[rx] ==> { echo "in lambda\n"; };

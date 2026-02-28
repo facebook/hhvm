@@ -1,4 +1,0 @@
-File "sealed_trait.php", line 5, characters 3-10:
-Class `B` in sealed whitelist for `T`, but does not extend `T` (Typing[4445])
-  File "sealed_trait.php", line 12, characters 7-7:
-  Definition is here

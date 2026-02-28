@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/verifier/check.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
@@ -35,7 +36,6 @@ struct UnitChecker {
  private:
   template<class T> bool checkLiteral(size_t, const T*, const char*);
   bool checkStrings();
-  bool checkArrays();
   bool checkSourceLocs();
   bool checkPreClasses();
   bool checkFuncs();
@@ -45,6 +45,7 @@ struct UnitChecker {
     const PreClassEmitter* preclass
   );
   bool checkClosure(const PreClassEmitter* closure);
+  bool checkNativeData(const PreClassEmitter* closure);
 
  private:
   template<class... Args>
@@ -61,6 +62,8 @@ struct UnitChecker {
  private:
   const UnitEmitter* m_unit;
   ErrorMode m_errmode;
+
+  StringToStringTMap m_createCls;
 };
 
 const StaticString s_invoke("__invoke");
@@ -112,7 +115,7 @@ bool UnitChecker::checkConstructor(
   return ok;
 }
 
-bool UnitChecker::checkClosure(const PreClassEmitter* cls){
+bool UnitChecker::checkClosure(const PreClassEmitter* cls) {
   bool ok = true;
   if (cls->methods().size() != 1 ||
       !cls->hasMethod(s_invoke.get()) ||
@@ -132,6 +135,21 @@ bool UnitChecker::checkClosure(const PreClassEmitter* cls){
   return ok;
 }
 
+bool UnitChecker::checkNativeData(const PreClassEmitter* cls) {
+  if (!Cfg::Eval::VerifySystemLibHasNativeImpl) {
+    return true;
+  }
+
+  auto nativeData = Native::getNativeDataInfo(cls->name());
+  if (!nativeData) {
+    error("Class %s's NativeData is not registered\n",
+          cls->name()->data());
+    return false;
+  }
+
+  return true;
+}
+
 /* Check the following conditions:
    - All constructors/destructors are non-static and not closure bodies
    - Properties/Methods have exactly one access modifier
@@ -141,16 +159,17 @@ bool UnitChecker::checkClosure(const PreClassEmitter* cls){
    - Classish cannot be both final and sealed
 */
 const StaticString s___Sealed("__Sealed");
+const StaticString s___NativeData("__NativeData");
 const StaticString s_Closure("Closure");
 bool UnitChecker::checkPreClasses() {
   bool ok = true;
 
-  for (Id pceId = 0; pceId < m_unit->numPreClasses(); ++pceId) {
-    auto preclass = m_unit->pce(pceId);
+  for (auto const preclass : m_unit->preclasses()) {
     auto classAttrs = preclass->attrs();
+    const auto& userAttrs = preclass->userAttributes();
 
     // Closures don't need constructors
-    if (preclass->parentName()->isame(s_Closure.get())) {
+    if (preclass->parentName()->tsame(s_Closure.get())) {
       ok &= checkClosure(preclass);
     }
 
@@ -177,13 +196,11 @@ bool UnitChecker::checkPreClasses() {
     }
 
     if (classAttrs & AttrSealed) {
-      const auto sealed_attr =
-        preclass->userAttributes().find(s___Sealed.get())->second;
+      const auto sealed_attr = userAttrs.find(s___Sealed.get())->second;
       IterateV(
         sealed_attr.m_data.parr, [this, preclass, &ok](TypedValue tv) -> bool {
           if (!isStringType(tv.m_type) &&
-              (!isLazyClassType(tv.m_type) ||
-               RuntimeOption::EvalEmitClassPointers != 2)) {
+              !isLazyClassType(tv.m_type)) {
             ok = false;
             error("For Class %s, values in sealed whitelist must be strings\n",
                   preclass->name()->data());
@@ -195,6 +212,10 @@ bool UnitChecker::checkPreClasses() {
         ok = false;
         error("Class %s is both final and sealed\n", preclass->name()->data());
       }
+    }
+
+    if (userAttrs.find(s___NativeData.get()) != userAttrs.end()) {
+      ok &= checkNativeData(preclass);
     }
 
     for(auto& prop : preclass->propMap().ordered_range()) {
@@ -267,14 +288,14 @@ bool UnitChecker::checkFuncs() {
   bool ok = true;
 
   auto doCheck = [&] (const FuncEmitter* func) {
-    if (func->isNative) ok &= checkNativeFunc(func, m_errmode);
-    ok &= checkFunc(func, m_errmode);
+    if (func->isNative) ok &= checkNativeFunc(func, m_unit, m_errmode);
+    ok &= checkFunc(func, m_unit, m_createCls, m_errmode);
   };
 
   for (auto& func : m_unit->fevec()) doCheck(func.get());
 
-  for (Id i = 0; i < m_unit->numPreClasses(); i++) {
-    for (auto f : m_unit->pce(i)->methods()) doCheck(f);
+  for (auto const pce : m_unit->preclasses()) {
+    for (auto f : pce->methods()) doCheck(f);
   }
 
   return ok;

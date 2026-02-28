@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   $var = 123;
   $abc = 789;
   $a = function() use ($var) {
@@ -9,13 +9,14 @@ function foo() {
     } catch (UndefinedVariableException $e) {
       var_dump($e->getMessage());
     }
-    $abc = $var = 333;
+    $var = 333;
+    $abc = $var;
   };
   var_dump($a());
   var_dump($abc, $var);
 }
 
 <<__EntryPoint>>
-function main_1921() {
+function main_1921() :mixed{
   foo();
 }

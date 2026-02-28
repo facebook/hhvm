@@ -1,18 +1,18 @@
 <?hh
 
 trait T {
-  public function foo() {
-    $values = varray[1, 2, 3];
+  public function foo() :mixed{
+    $values = vec[1, 2, 3];
     $values = array_map(function($p) {
       return $this->goo($p);
     }
 , $values);
     var_dump($values);
   }
-  public function bar() {
+  public function bar() :mixed{
  return $this;
  }
-  public function goo($p) {
+  public function goo($p) :mixed{
  return $p;
  }
 }
@@ -21,7 +21,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function main_2087() {
+function main_2087() :mixed{
 $obj = new A;
 var_dump($obj->bar());
 $obj->foo();

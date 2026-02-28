@@ -6,9 +6,10 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Core
 
 module type S = sig
-  include Map.S
+  include Stdlib.Map.S
 
   val add : ?combine:('a -> 'a -> 'a) -> key -> 'a -> 'a t -> 'a t
 
@@ -47,8 +48,6 @@ module type S = sig
     combine_ty_errs:('c list -> 'e) ->
     ('a * 'e) * 'd t
 
-  val filter_map : ('a -> 'b option) -> 'a t -> 'b t
-
   val filter_opt : 'a option t -> 'a t
 
   val of_list : (key * 'a) list -> 'a t
@@ -70,4 +69,16 @@ module type S = sig
     Format.formatter ->
     'a t ->
     unit
+
+  val make_hash_fold_t :
+    (Hash.state -> key -> Hash.state) ->
+    (Hash.state -> 'a -> Hash.state) ->
+    Hash.state ->
+    'a t ->
+    Hash.state
+
+  val make_yojson_of_t :
+    (key -> string) -> ('a -> Yojson.Safe.t) -> 'a t -> Yojson.Safe.t
+
+  val find_one_opt : 'a t -> f:(key -> bool) -> 'a option
 end

@@ -24,44 +24,44 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct {
+struct PhpRipeMd128Ctx {
   unsigned int state[4];          /* state (ABCD) */
   unsigned int count[2];          /* number of bits, modulo 2^64 (lsb first) */
   unsigned char buffer[64];       /* input buffer */
-} PHP_RIPEMD128_CTX;
+};
 
-typedef struct {
+struct PhpRipeMd160Ctx {
   unsigned int state[5];          /* state (ABCD) */
   unsigned int count[2];          /* number of bits, modulo 2^64 (lsb first) */
   unsigned char buffer[64];       /* input buffer */
-} PHP_RIPEMD160_CTX;
+};
 
-typedef struct {
+struct PhpRipeMd256Ctx {
   unsigned int state[8];          /* state (ABCD) */
   unsigned int count[2];          /* number of bits, modulo 2^64 (lsb first) */
   unsigned char buffer[64];       /* input buffer */
-} PHP_RIPEMD256_CTX;
+};
 
-typedef struct {
+struct PhpRipeMd320Ctx {
   unsigned int state[10];         /* state (ABCD) */
   unsigned int count[2];          /* number of bits, modulo 2^64 (lsb first) */
   unsigned char buffer[64];       /* input buffer */
-} PHP_RIPEMD320_CTX;
+};
 
 hash_ripemd128::hash_ripemd128()
-  : HashEngine(16, 64, sizeof(PHP_RIPEMD128_CTX)) {
+  : HashEngine(16, 64, sizeof(PhpRipeMd128Ctx)) {
 }
 
 hash_ripemd160::hash_ripemd160()
-  : HashEngine(20, 64, sizeof(PHP_RIPEMD160_CTX)) {
+  : HashEngine(20, 64, sizeof(PhpRipeMd160Ctx)) {
 }
 
 hash_ripemd256::hash_ripemd256()
-  : HashEngine(32, 64, sizeof(PHP_RIPEMD256_CTX)) {
+  : HashEngine(32, 64, sizeof(PhpRipeMd256Ctx)) {
 }
 
 hash_ripemd320::hash_ripemd320()
-  : HashEngine(40, 64, sizeof(PHP_RIPEMD320_CTX)) {
+  : HashEngine(40, 64, sizeof(PhpRipeMd320Ctx)) {
 }
 
 /*
@@ -69,7 +69,7 @@ hash_ripemd320::hash_ripemd320()
  * a new context.
  */
 void hash_ripemd128::hash_init(void *context_) {
-  PHP_RIPEMD128_CTX * context = (PHP_RIPEMD128_CTX*)context_;
+  PhpRipeMd128Ctx * context = (PhpRipeMd128Ctx*)context_;
   context->count[0] = context->count[1] = 0;
   /* Load magic initialization constants.
    */
@@ -84,7 +84,7 @@ void hash_ripemd128::hash_init(void *context_) {
  * writing a new context.
  */
 void hash_ripemd256::hash_init(void *context_) {
-  PHP_RIPEMD256_CTX * context = (PHP_RIPEMD256_CTX*)context_;
+  PhpRipeMd256Ctx * context = (PhpRipeMd256Ctx*)context_;
   context->count[0] = context->count[1] = 0;
   /* Load magic initialization constants.
    */
@@ -103,7 +103,7 @@ void hash_ripemd256::hash_init(void *context_) {
  * writing a new context.
  */
 void hash_ripemd160::hash_init(void *context_) {
-  PHP_RIPEMD160_CTX * context = (PHP_RIPEMD160_CTX*)context_;
+  PhpRipeMd160Ctx * context = (PhpRipeMd160Ctx*)context_;
   context->count[0] = context->count[1] = 0;
   /* Load magic initialization constants.
    */
@@ -119,7 +119,7 @@ void hash_ripemd160::hash_init(void *context_) {
  *  writing a new context.
  */
 void hash_ripemd320::hash_init(void *context_) {
-  PHP_RIPEMD320_CTX * context = (PHP_RIPEMD320_CTX*)context_;
+  PhpRipeMd320Ctx * context = (PhpRipeMd320Ctx*)context_;
   context->count[0] = context->count[1] = 0;
   /* Load magic initialization constants.
    */
@@ -254,7 +254,7 @@ static void RIPEMD128Transform(unsigned int state[4],
  */
 void hash_ripemd128::hash_update(void *context_, const unsigned char *input,
                                  unsigned int inputLen) {
-  PHP_RIPEMD128_CTX * context = (PHP_RIPEMD128_CTX*)context_;
+  PhpRipeMd128Ctx * context = (PhpRipeMd128Ctx*)context_;
   unsigned int i, index, partLen;
 
   /* Compute number of bytes mod 64 */
@@ -354,7 +354,7 @@ static void RIPEMD256Transform(unsigned int state[8],
  */
 void hash_ripemd256::hash_update(void *context_, const unsigned char *input,
                                  unsigned int inputLen) {
-  PHP_RIPEMD256_CTX * context = (PHP_RIPEMD256_CTX*)context_;
+  PhpRipeMd256Ctx * context = (PhpRipeMd256Ctx*)context_;
   unsigned int i, index, partLen;
 
   /* Compute number of bytes mod 64 */
@@ -457,7 +457,7 @@ static void RIPEMD160Transform(unsigned int state[5],
  */
 void hash_ripemd160::hash_update(void *context_, const unsigned char *input,
                                  unsigned int inputLen) {
-  PHP_RIPEMD160_CTX * context = (PHP_RIPEMD160_CTX*)context_;
+  PhpRipeMd160Ctx * context = (PhpRipeMd160Ctx*)context_;
   unsigned int i, index, partLen;
 
   /* Compute number of bytes mod 64 */
@@ -569,7 +569,7 @@ static void RIPEMD320Transform(unsigned int state[10],
  */
 void hash_ripemd320::hash_update(void *context_, const unsigned char *input,
                                  unsigned int inputLen) {
-  PHP_RIPEMD320_CTX * context = (PHP_RIPEMD320_CTX*)context_;
+  PhpRipeMd320Ctx * context = (PhpRipeMd320Ctx*)context_;
   unsigned int i, index, partLen;
 
   /* Compute number of bytes mod 64 */
@@ -632,7 +632,7 @@ static void RIPEMDEncode(unsigned char *output, unsigned int *input,
    writing the message digest and zeroizing the context.
  */
 void hash_ripemd128::hash_final(unsigned char *digest, void *context_) {
-  PHP_RIPEMD128_CTX * context = (PHP_RIPEMD128_CTX*)context_;
+  PhpRipeMd128Ctx * context = (PhpRipeMd128Ctx*)context_;
   unsigned char bits[8];
   unsigned int index, padLen;
 
@@ -668,7 +668,7 @@ void hash_ripemd128::hash_final(unsigned char *digest, void *context_) {
    writing the message digest and zeroizing the context.
  */
 void hash_ripemd256::hash_final(unsigned char *digest, void *context_) {
-  PHP_RIPEMD256_CTX * context = (PHP_RIPEMD256_CTX*)context_;
+  PhpRipeMd256Ctx * context = (PhpRipeMd256Ctx*)context_;
   unsigned char bits[8];
   unsigned int index, padLen;
 
@@ -704,7 +704,7 @@ void hash_ripemd256::hash_final(unsigned char *digest, void *context_) {
    writing the message digest and zeroizing the context.
  */
 void hash_ripemd160::hash_final(unsigned char *digest, void *context_) {
-  PHP_RIPEMD160_CTX * context = (PHP_RIPEMD160_CTX*)context_;
+  PhpRipeMd160Ctx * context = (PhpRipeMd160Ctx*)context_;
   unsigned char bits[8];
   unsigned int index, padLen;
 
@@ -740,7 +740,7 @@ void hash_ripemd160::hash_final(unsigned char *digest, void *context_) {
    writing the message digest and zeroizing the context.
  */
 void hash_ripemd320::hash_final(unsigned char *digest, void *context_) {
-  PHP_RIPEMD320_CTX * context = (PHP_RIPEMD320_CTX*)context_;
+  PhpRipeMd320Ctx * context = (PhpRipeMd320Ctx*)context_;
   unsigned char bits[8];
   unsigned int index, padLen;
 

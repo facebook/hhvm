@@ -6,7 +6,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
 module Make (Ord : Set.OrderedType) = struct
   type elt = Ord.t
 

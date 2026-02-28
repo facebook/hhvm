@@ -2,7 +2,7 @@
 
 // Test materialization *to* ImmSet.
 
-function main() {
+function main() :mixed{
   $ref = new ImmSet(Vector {1, 2, 3});
 
   var_dump((Vector {1, 2, 3})->toImmSet() == $ref);
@@ -16,6 +16,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_materialization() {
+function main_materialization() :mixed{
 main();
 }

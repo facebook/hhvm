@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_273() {
-$a = darray[];
+function main_273() :mixed{
+$a = dict[];
  $a[2] = 'test';
         var_dump($a);
 }

@@ -1,0 +1,467 @@
+   * See also NetBSD changelog:
+	http://cvsweb.netbsd.org/bsdweb.cgi/src/lib/libedit
+
+2019-03-24 Jess Thrysoee
+
+   * version-info: 0:60:0
+
+   * all: sync with upstream source
+
+2018-12-09 Jess Thrysoee
+
+   * version-info: 0:59:0
+
+   * all: sync with upstream source
+
+2018-05-25 Jess Thrysoee
+
+   * version-info: 0:58:0
+
+   * all: sync with upstream source
+
+2017-05-22 Jess Thrysoee
+
+   * version-info: 0:57:0
+
+   * all: sync with upstream source
+
+   * libedit.pc.in: Ncurses should not be a part of public link interface.
+	Patch by Yegor Timoshenko
+
+2017-03-29 Jess Thrysoee
+
+   * version-info: 0:56:0
+
+   * all: sync with upstream source
+
+2016-09-03 Jess Thrysoee
+
+   * version-info: 0:55:0
+
+   * all: sync with upstream source
+
+2016-06-18 Jess Thrysoee
+
+   * version-info: 0:54:0
+
+   * all: sync with upstream source
+
+   * deprecate option --enable-widec.
+	Upstream now always build with unicode (wide-char/UTF-8) support.
+
+2015-03-25 Jess Thrysoee
+
+   * version-info: 0:53:0
+
+   * all: sync with upstream source
+
+2014-10-30 Jess Thrysoee
+
+   * version-info: 0:52:0
+
+   * all: sync with upstream source
+
+   * configura.ac: Fix posix shell portability issue. Patch by Ryo Onodera.
+
+2014-06-20 Jess Thrysoee
+
+   * version-info: 0:51:0
+
+   * all: sync with upstream source
+
+2014-06-18 Jess Thrysoee
+
+   * version-info: 0:50:0
+
+   * all: sync with upstream source - add weak alias patches
+
+2014-06-18 Jess Thrysoee
+
+   * version-info: 0:49:0
+
+   * all: sync with upstream source.
+
+2014-02-13 Jess Thrysoee
+
+   * version-info: 0:48:0
+
+   * all: sync with upstream source.
+
+   * examples/fileman.c: Fix typo. Patch by Kamil Dudka.
+
+   * Makefile.am, configure.ac: Add --enable-examples configure parameter.
+	Make it possible to enable/disable building of the examples programs.
+	Patch by James Le Cuirot.
+
+2013-07-12 Jess Thrysoee
+
+   * version-info: 0:47:0
+
+   * all: sync with upstream source.
+
+   * examples/fileman.c, examples/tc1.c: fix pedantic compiler warnings
+
+2013-07-10 Jess Thrysoee
+
+   * version-info: 0:46:0
+
+   * configure.ac, src/el.c: ~/.editrc was never sourced on Linux.
+	On Linux issetugid is not available. When unable to determine if
+	the current process is tainted, we did not trust the HOME environment
+	variable and therefore could not load ~/.editrc.
+	Now instead use secure_getenv or a issetugid based implementation of secure_getenv.
+	Patch by Paolo Tosco.
+
+2013-06-11 Jess Thrysoee
+
+   * version-info: 0:45:0
+
+   * configure.ac: fix AM_CONDITIONAL regression for strlcpy, strlcat, vis,
+	unvis checks.
+
+2013-06-08 Jess Thrysoee
+
+   * version-info: 0:44:0
+
+   * configure.ac, src/Makefile.am: Prevent 'ranlib: has no symbols' build
+	warnings for systems that has strlcpy, strlcat, vis, unvis.
+
+2013-06-01 Jess Thrysoee
+
+   * version-info: 0:43:0
+
+   * all: sync with upstream source.
+
+2012-12-13 Jess Thrysoee
+
+   * version-info: 0:42:0
+
+   * all: sync with upstream source.
+
+2012-06-01 Jess Thrysoee
+
+   * version-info: 0:41:0
+
+   * all: sync with upstream source.
+
+2012-05-22 Jess Thrysoee
+
+   * version-info: 0:40:0
+
+   * all: sync with upstream source.
+
+2012-03-11 Jess Thrysoee
+
+   * version-info: 0:39:0
+
+   * all: sync with upstream source.
+
+2011-08-02 Jess Thrysoee
+
+   * version-info: 0:38:0
+
+   * all: sync with upstream source.
+
+2011-07-09 Jess Thrysoee
+
+   * version-info: 0:37:0
+
+   * all: sync with upstream source.
+
+2011-02-27 Jess Thrysoee
+
+   * version-info: 0:36:0
+
+   * all: sync with upstream source.
+
+2010-04-24 Jess Thrysoee
+
+   * version-info: 0:35:0
+
+   * all: sync with upstream source.
+	Now with UTF-8 support. To enable this run 'configure --enable-widec'.
+	For now an UTF-32 encoded wchar_t is required.
+	This requirement is met on NetBSD, Solaris and OS X for any UTF-8 locale,
+	and any system that define __STDC_ISO_10646__ (e.g. GNU libc on Linux).
+
+2009-09-23 Jess Thrysoee
+   * version-info: 0:34:0
+
+   * all: apply Apple patches from:
+	http://opensource.apple.com/source/libedit/libedit-11/patches
+
+2009-09-05 Jess Thrysoee
+
+   * version-info: 0:33:0
+
+   * all: Use predefined macro __sun to identify Solaris
+
+   * src/el.c: Ignore comment lines in .editrc
+
+2009-07-23 Jess Thrysoee
+
+   * version-info: 0:32:0
+
+   * all: sync with upstream source.
+
+2009-06-10 Jess Thrysoee
+
+   * version-info: 0:31:0
+
+   * all: sync with upstream source.
+
+2009-05-03 Jess Thrysoee
+
+   * version-info: 0:30:0
+
+   * all: sync with upstream source.
+
+2009-04-05  Jess Thrysoee
+
+   * version-info: 0:29:0
+
+   * all: sync with upstream source.
+
+2009-01-11  Jess Thrysoee
+
+   * version-info: 0:28:0
+
+   * all: sync with upstream source. MAJOR.MINOR version is now 3.0.
+	This is due to NetBSD changing time_t and dev_t to 64 bits. It does
+	not really effect this package.
+
+   * configure.ac: Remove '--enable-debug' configure flag. The autoconf way
+	to control flags is by specifying them when running configure,
+	e.g. 'CFLAGS="-O0 -g" ./configure'
+
+2008-07-12  Jess Thrysoee
+
+   * version-info: 0:27:0
+
+   * configure.ac: Added '--enable-debug' configure flag, to produce debugging
+	information.
+
+   * examples/fileman.c: cast stat struct members, st_nlink and st_size,
+	appropriately (see also 'man 2 stat'). Patch by Alex Elder.
+
+   * all: sync with upstream source. MINOR version is now 11.
+
+2007-08-31  Jess Thrysoee
+
+   * version-info: 0:26:0
+
+   * libedit.pc.in,Makefile.am,configure.ac,patches/extra_dist_list.sh:
+	Added pkg-config support for libedit. Patch by Masatake YAMATO.
+
+2007-08-13  Jess Thrysoee
+
+   * version-info: 0:25:0
+
+   * all: sync with upstream source.
+
+2007-03-02  Jess Thrysoee
+
+   * version-info: 0:24:0
+
+   * all: sync with upstream source.
+
+2006-10-22  Jess Thrysoee
+
+   * version-info: 0:23:0
+
+   * src/shlib_version: Upstream bumped minor version from 9 to 10.
+
+   * all: sync with upstream source. More readline functions.
+
+2006-10-22  Jess Thrysoee
+
+   * version-info: 0:22:0
+
+   * all: sync with upstream source.
+
+2006-08-29  Jess Thrysoee
+
+   * version-info: 0:21:0
+
+   * all: License cleanup. All 4-clause advertising BSD licenses has been
+	changed to the 3-clause version by upstream.
+
+   * src/fgetln.c: use src/tools/compat/fgetln.c instead of
+	othersrc/libexec/tnftpd/libnetbsd/fgetln.c
+
+2006-08-16  Jess Thrysoee
+
+   * version-info: 0:20:0
+
+   * all: sync with upstream source.
+
+2006-06-03  Jess Thrysoee
+
+   * version-info: 0:19:0
+
+   * COPYING: added global license file
+
+   * all: sync with upstream source.
+
+2006-02-13  Jess Thrysoee
+
+   * version-info: 0:18:0
+
+   * src/readline.c: Partial rl_getc_function support, patch by Kjeld Borch
+	Egevang.
+
+   * src/readline.c: Make write_history and read_history returncode readline
+	compatible. Upstream patch.
+
+2006-01-03  Jess Thrysoee
+
+   * version-info: 0:17:0
+
+   * patches/cvs_export.sh: strlcat.c and strlcpy.c was moved to
+	src/common/lib/libc/string in the upstream cvs repository.
+
+   * all: sync with upstream source.
+
+2005-10-22  Jess Thrysoee
+
+   * version-info: 0:16:0
+
+   * patches/*.patch, configure.ac: define SCCSID, undef LIBC_SCCS. Remove
+	fourteen cosmetic patches.
+
+   * all: sync with upstream source.
+
+2005-09-11  Jess Thrysoee
+
+   * version-info: 0:15:0
+
+   * src/Makefile.am: fix typo that meant generated files were distributes,
+	and make generated file targets dependent on the the 'makelist' input
+	files.
+
+   * all: sync with upstream source. This is just a manpage update
+
+2005-08-28  Jess Thrysoee
+
+   * version-info: 0:14:0
+
+   * src/sys.h: include config.h to avoid "redefinition of
+	`u_int32_t'". Patch by Norihiko Murase.
+
+   * src/search.c: explicitly include sys/types.h, because regex.h on
+	FreeBSD needs it and does not include it itself. Patch by Norihiko Murase.
+
+   * acinclude.m4: added EL_GETPW_R_DRAFT test and use AC_TRY_LINK instead
+	of AC_TRY_COMPILE. Suggested by Norihiko Murase.
+
+   * all: sync with upstream source.
+
+2005-08-16  Jess Thrysoee
+
+   * version-info: 0:13:0
+
+   * all: sync with upstream source.
+
+2005-08-05  Jess Thrysoee
+
+   * version-info: 0:12:0
+
+   * all: sync with upstream source.
+
+2005-07-24  Jess Thrysoee
+
+   * version-info: 0:11:0
+
+   * histedit.h, histedit.c, readline.c, editline/readline.h: From
+	upstream; added remove_history().
+
+2005-07-07  Jess Thrysoee
+
+   * version-info: 0:10:0
+
+   * history.c, key.c: From upstream source; Fix memory leaks found by
+	valgrind.
+
+2005-06-28  Jess Thrysoee
+
+   * version-info: 0:9:0
+
+   * src/readline.c: getpwent_r is not POSIX, always use getpwent.
+	Reported by Gerrit P. Haase.
+
+   * src/Makefile.am: Added libtool -no-undefined. This is needed on Cygwin
+	to get a shared editline library. Should not affect other platforms.
+	Suggested by Gerrit P. Haase.
+
+2005-06-15  Jess Thrysoee
+
+   * version-info: 0:8:0
+
+   * all: sync with upstream source.
+
+2005-06-01  Jess Thrysoee
+
+   * version-info: 0:7:0
+
+   * all: sync with upstream source.
+
+   * src/readline.c, src/filecomplete.c: Solaris use POSIX draft versions
+	of getpwent_r, getpwnam_r and getpwuid_r which return 'struct passwd *'.
+	Define HAVE_GETPW_R_POSIX if these functions are (non draft) POSIX
+	compatible. Patch by Julien Torrès.
+
+2005-05-28  Jess Thrysoee
+
+   * version-info: 0:6:0
+
+   * all: sync with upstream source.
+
+2005-03-11  Jess Thrysoee
+
+   * version-info: 0:5:0
+
+   * all: sync with upstream source.
+
+2004-12-07  Jess Thrysoee
+
+   * version-info: 0:4:0
+
+   * src/readline.c: d_namlen (in struct dirent) is not portable, always
+	use strlen. Patch by Scott Rankin.
+
+2004-11-27  Jess Thrysoee
+
+   * version-info: 0:3:0
+
+   * src/history.c: bug #26785 fixed upstream, removed local patch.
+
+2004-11-06  Jess Thrysoee
+
+   * version-info: 0:2:0
+
+   * all: sync with upstream source.
+
+   * doc/Makefile.am: If mdoc2man fails, remove empty file. Patch by
+	Darren Tucker.
+
+2004-10-14  Jess Thrysoee
+
+   * version-info: 0:1:0
+
+   * doc/Makefile.am: 'make install' twice fails. Remove old links before
+	trying to link the man pages. Patch by Rick Richardson.
+
+2004-09-28  Jess Thrysoee
+
+   * version-info: 0:0:0
+
+   * acinclude.m4 configure.ac src/Makefile.am: Adhere to
+	LibTools library interface versions recommendation.
+	http://www.gnu.org/software/libtool/manual.html#SEC32
+
+   * doc/Makefile.am: name all manpage links as el_* (e.g. el_history.3)
+	to avoid conflicts.
+
+2004-09-08  Jess Thrysoee
+
+   * all: Initial package.

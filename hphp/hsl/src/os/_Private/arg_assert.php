@@ -17,6 +17,6 @@ function arg_assert(bool $condition, Str\SprintfFormatString $message, mixed ...
   if ($condition) {
     return;
   }
-  /* HH_IGNORE_ERROR[4027] passing format string */
+  /* HH_FIXME[4027] passing format string */
   throw_errno(OS\Errno::EINVAL, $message, ...$args);
 }

@@ -1,0 +1,89 @@
+<?hh
+  /**
+   * THIS FILE IS @generated; DO NOT EDIT IT
+   * To regenerate this file, run
+   *
+   *   buck run //hphp/hack/test:gen_case_type_tests
+   **/
+
+  <<file: __EnableUnstableFeatures('case_types')>>
+
+  
+  enum MyEnum : string {
+    A = 'A';
+    B = 'B';
+  }
+
+  trait MyTrait {}
+
+  class UsesMyTrait {
+    use MyTrait;
+  }
+
+  abstract class BaseCheck {
+    abstract const type T;
+    abstract const string NAME;
+    abstract protected static function values(): vec<this::T>;
+    abstract protected static function funcParam(this::T $c): void;
+    abstract protected static function funcReturn(mixed $c): this::T;
+    abstract protected static function funcGenericParam<Tx as this::T>(Tx $c): void;
+    abstract protected static function funcGenericReturn<Tx as this::T>(mixed $c): Tx;
+    abstract protected static function propertyCheck(this::T $val): void;
+
+    public static function run(): void {
+      foreach(static::values() as $val) {
+        // Param Checks
+        static::funcParam($val);
+        static::funcGenericParam($val);
+
+        // Return Checks
+        static::funcReturn($val);
+        static::funcGenericReturn($val);
+
+        // Property Checks
+        static::propertyCheck($val);
+      }
+      echo (static::NAME .' Ok' . PHP_EOL);
+    }
+  }
+
+  case type CT0 = MyTrait|MyEnum;
+              type AliasCT0 = CT0;
+
+  
+class CheckAliasCT0<T as AliasCT0> extends BaseCheck {
+  const type T = AliasCT0;
+  const string NAME = 'AliasCT0';
+
+  <<__LateInit>>
+  private AliasCT0 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT0 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT0 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT0>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT0>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT0 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT0> {
+    return vec['B',MyEnum::A];
+  }
+}
+
+  <<__EntryPoint>>
+  function main(): void {
+    CheckAliasCT0::run();
+  }

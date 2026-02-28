@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1930() {
+function main_1930() :mixed{
 $v=5;
 call_user_func(  function() use($v)   {
  echo $v;
@@ -16,6 +16,6 @@ call_user_func($f);
 call_user_func_array(  function() use($v)   {
  echo $v;
  }
-, varray[]);
-call_user_func($f, varray[]);
+, vec[]);
+call_user_func($f, vec[]);
 }

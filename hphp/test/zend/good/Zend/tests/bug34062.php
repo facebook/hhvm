@@ -1,6 +1,6 @@
 <?hh
-function f1() { throw new Exception; }
-function f2() { echo "here\n"; }
+function f1() :mixed{ throw new Exception; }
+function f2() :mixed{ echo "here\n"; }
 <<__EntryPoint>> function main(): void {
 try {
       // Currently it's the minimum required number of zeros

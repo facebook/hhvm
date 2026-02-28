@@ -1,0 +1,9 @@
+type a = unit
+
+type b = unit
+
+type c = unit
+
+type d = x
+
+type e = y * z

@@ -6,10 +6,10 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing file_put_contents() : usage variation ***\n";
-chdir(__SystemLib\hphp_test_tmproot());
+chdir(sys_get_temp_dir());
 $mainDir = "filePutContentsVar7.dir";
 $subDir = "filePutContentsVar7Sub";
-$absMainDir = __SystemLib\hphp_test_tmppath($mainDir);
+$absMainDir = sys_get_temp_dir().'/'.$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
 mkdir($absSubDir);
@@ -20,7 +20,7 @@ mkdir($absSubDir);
 
 // Note invalid dirs in p8 result in (The system cannot find the path specified.)
 // rather than No Such File or Directory in php.net
-$allDirs = varray[
+$allDirs = vec[
   // absolute paths
   "$absSubDir/",
   "$absSubDir/../".$subDir,

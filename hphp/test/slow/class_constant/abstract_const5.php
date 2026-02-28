@@ -9,6 +9,6 @@ interface I {
 
 
 <<__EntryPoint>>
-function main_abstract_const5() {
+function main_abstract_const5() :mixed{
 var_dump(I::X); // no value!
 }

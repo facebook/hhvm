@@ -5,7 +5,7 @@
 <<__EntryPoint>> function main(): void {
 $context = stream_context_create();
 
-$tmpdir = __SystemLib\hphp_test_tmproot();
+$tmpdir = sys_get_temp_dir();
 
 echo "\n*** Testing mkdir() and rmdir() by giving stream context as fourth argument ***\n";
 var_dump( mkdir("$tmpdir/mkdir_variation2/test/", 0777, true, $context) );

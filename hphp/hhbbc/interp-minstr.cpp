@@ -15,7 +15,6 @@
 */
 #include "hphp/hhbbc/interp.h"
 
-#include <vector>
 #include <algorithm>
 #include <string>
 #include <utility>
@@ -102,14 +101,16 @@ OptEffects unionEffects(OptEffects e1, Effects e2) {
 
 bool couldBeThisObj(ISS& env, const Base& b) {
   if (b.loc == BaseLoc::This) return true;
-  auto const thisTy = thisTypeFromContext(env.index, env.ctx);
-  return b.type.couldBe(thisTy ? *thisTy : TObj);
+  if (auto const s = selfCls(env)) {
+    return b.type.couldBe(setctx(toobj(*s)));
+  }
+  return true;
 }
 
 bool mustBeThisObj(ISS& env, const Base& b) {
   if (b.loc == BaseLoc::This) return true;
-  if (auto const ty = thisTypeFromContext(env.index, env.ctx)) {
-    return b.type.subtypeOf(*ty);
+  if (auto const s = selfCls(env)) {
+    return b.type.subtypeOf(setctx(toobj(*s)));
   }
   return false;
 }
@@ -134,8 +135,7 @@ bool isInitialBaseLoc(BaseLoc loc) {
     loc == BaseLoc::Local ||
     loc == BaseLoc::Stack ||
     loc == BaseLoc::StaticProp ||
-    loc == BaseLoc::This ||
-    loc == BaseLoc::Global;
+    loc == BaseLoc::This;
 }
 
 // Base locations that only occur after the start of a minstr sequence.
@@ -282,14 +282,7 @@ void setStaticForBase(ISS& env, Type ty) {
     show(base.locTy), show(nameTy), show(ty)
   );
 
-  env.index.merge_static_type(
-    env.ctx,
-    env.collect.publicSPropMutations,
-    env.collect.props,
-    base.locTy,
-    nameTy,
-    remove_uninit(std::move(ty))
-  );
+  mergeStaticProp(env, base.locTy, nameTy, remove_uninit(std::move(ty)));
 }
 
 // Run backwards through an array chain doing array_set operations
@@ -372,8 +365,7 @@ bool shouldRefineBase(ISS& env) {
 
 void startBase(ISS& env, Base base) {
   auto& oldState = env.collect.mInstrState;
-  assertx(oldState.base.loc == BaseLoc::None);
-  assertx(oldState.arrayChain.empty());
+  assertx(oldState.empty());
   assertx(isInitialBaseLoc(base.loc));
   assertx(!base.type.subtypeOf(TBottom));
 
@@ -387,7 +379,7 @@ void startBase(ISS& env, Base base) {
 // "effect-free" (see updateBaseWithType).
 bool endBase(ISS& env, bool update = true, LocalId keyLoc = NoLocalId) {
   auto& state = env.collect.mInstrState;
-  assertx(state.base.loc != BaseLoc::None);
+  assertx(!state.empty());
 
   FTRACE(5, "    endBase: {}\n", show(*env.ctx.func, state.base));
 
@@ -412,7 +404,7 @@ bool moveBase(ISS& env,
               bool update = true,
               LocalId keyLoc = NoLocalId) {
   auto& state = env.collect.mInstrState;
-  assertx(state.base.loc != BaseLoc::None);
+  assertx(!state.empty());
   assertx(isDimBaseLoc(newBase.loc));
   assertx(!state.base.type.subtypeOf(BBottom));
 
@@ -439,7 +431,7 @@ bool moveBase(ISS& env,
 bool extendArrChain(ISS& env, Type key, Type arr,
                     Type val, LocalId keyLoc = NoLocalId) {
   auto& state = env.collect.mInstrState;
-  assertx(state.base.loc != BaseLoc::None);
+  assertx(!state.empty());
   // NB: The various array operation functions can accept arbitrary
   // types as long as they contain TArrLike.  However we still do not
   // allow putting anything but TArrLike in the chain, since (in
@@ -514,6 +506,7 @@ auto update_discard(Op& op) -> decltype(op.arg1, true) {
 template<typename Op>
 Optional<std::pair<Type,Promotion>> key_type_or_fixup(ISS& env, Op op) {
   if (env.collect.mInstrState.extraPop) {
+    assertx(can_rewind(env));
     auto const mkey = update_mkey(op);
     if (update_discard(op) || mkey) {
       env.collect.mInstrState.extraPop = false;
@@ -661,7 +654,7 @@ std::pair<Type, Effects> elemHelper(ISS& env, MOpMode mode, Type key) {
   }
 
   auto const warnsWithNull =
-    BTrue | BNum | BRes | BFunc | BRFunc | BRClsMeth | BClsMeth;
+    BTrue | BNum | BRes | BFunc | BRFunc | BRClsMeth | BClsMeth | BEnumClassLabel;
   auto const justNull = BNull | BFalse;
   auto const DEBUG_ONLY handled =
     warnsWithNull | justNull | BClsMeth |
@@ -693,7 +686,8 @@ std::pair<Type, Effects> elemHelper(ISS& env, MOpMode mode, Type key) {
       !inOutFail &&
       mode != MOpMode::Warn &&
       key.subtypeOf(BArrKey) &&
-      (!base.couldBe(BCls | BLazyCls) || !RO::EvalRaiseClassConversionWarning);
+      (!base.couldBe(BCls | BLazyCls) ||
+       Cfg::Eval::RaiseClassConversionNoticeSampleRate == 0);
     effects = unionEffects(
       effects,
       isNoThrow ? Effects::None : Effects::Throws
@@ -756,7 +750,7 @@ Effects setOpElemHelper(ISS& env, int32_t nDiscard, const Type& key,
   auto const throws = BNull | BFalse | BStr;
   auto const null =
     BTrue | BNum | BRes | BFunc | BRFunc |
-    BCls | BLazyCls | BClsMeth | BRClsMeth;
+    BCls | BLazyCls | BClsMeth | BRClsMeth | BEnumClassLabel;
   auto const handled = throws | null | BArrLike | BObj;
 
   static_assert(handled == BCell);
@@ -814,6 +808,8 @@ Effects setOpElemHelper(ISS& env, int32_t nDiscard, const Type& key,
         unreachable();
         return;
       }
+      assertx(!toSet.is(BBottom));
+      assertx(!toPush.is(BBottom));
 
       // Write the element back into the array
       auto const set = array_do_set(env, key, toSet);
@@ -875,7 +871,7 @@ Effects setOpNewElemHelper(ISS& env, int32_t nDiscard) {
   auto const alwaysThrow =
     BNull | BFalse | BStr | BArrLike | BObj | BClsMeth;
   auto const null =
-    BTrue | BNum | BRes | BRFunc | BFunc | BRClsMeth | BCls | BLazyCls;
+    BTrue | BNum | BRes | BRFunc | BFunc | BRClsMeth | BCls | BLazyCls| BEnumClassLabel;
   auto const handled = alwaysThrow | null;
 
   static_assert(handled == BCell);
@@ -951,8 +947,8 @@ Effects miProp(ISS& env, MOpMode mode, Type key, ReadonlyOp op) {
   }
 
   if (mustBeThisObj(env, env.collect.mInstrState.base)) {
-    auto const optThisTy = thisTypeFromContext(env.index, env.ctx);
-    auto const thisTy    = optThisTy ? *optThisTy : TObj;
+    auto const optSelfTy = selfCls(env);
+    auto const thisTy    = optSelfTy ? setctx(toobj(*optSelfTy)) : TObj;
     if (name) {
       auto const [ty, effects] = [&] () -> std::pair<Type, Effects> {
         if (update) {
@@ -981,7 +977,7 @@ Effects miProp(ISS& env, MOpMode mode, Type key, ReadonlyOp op) {
           };
         }
         auto const raw =
-          env.index.lookup_public_prop(objcls(thisTy), sval(name));
+          env.index.lookup_public_prop(thisTy, sval(name));
         return { update ? raw : to_cell(raw), Effects::Throws };
       }();
 
@@ -1004,7 +1000,7 @@ Effects miProp(ISS& env, MOpMode mode, Type key, ReadonlyOp op) {
   if (env.collect.mInstrState.base.type.subtypeOf(BObj)) {
     auto const raw =
       env.index.lookup_public_prop(
-        objcls(env.collect.mInstrState.base.type),
+        env.collect.mInstrState.base.type,
         name ? sval(name) : TStr
       );
     auto const ty = update ? raw : to_cell(raw);
@@ -1086,7 +1082,7 @@ Effects miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
     auto const alwaysThrows =
       BCls | BLazyCls | BFunc | BRFunc | BStr | BClsMeth |
       BRClsMeth;
-    auto const movesToUninit = BPrim | BRes;
+    auto const movesToUninit = BPrim | BRes | BEnumClassLabel;
     auto const handled =
       alwaysThrows | movesToUninit | BObj | BArrLike;
 
@@ -1181,7 +1177,7 @@ Effects miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
     auto const alwaysThrows = BNull | BFalse | BStr;
     auto const warnsAndNull =
       BTrue | BNum | BRes | BFunc | BRFunc | BCls | BLazyCls |
-      BClsMeth | BRClsMeth;
+      BClsMeth | BRClsMeth | BEnumClassLabel;
     auto const handled =
       alwaysThrows | warnsAndNull | BObj | BArrLike;
 
@@ -1284,7 +1280,7 @@ Effects miNewElem(ISS& env) {
     BNull | BFalse | BArrLike | BObj | BClsMeth;
   auto const uninit =
     BTrue | BNum | BRes | BRFunc | BFunc |
-    BRClsMeth | BCls | BLazyCls;
+    BRClsMeth | BCls | BLazyCls | BEnumClassLabel;
   auto const handled = alwaysThrows | uninit | BStr;
 
   static_assert(handled == BCell);
@@ -1381,6 +1377,9 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key,
         if (isMaybeThisPropAttr(env, name, AttrLateInit)) {
           return Effects::Throws;
         }
+        if (!isDefinitelyThisPropAttr(env, name, AttrInitialSatisfiesTC)) {
+          return Effects::Throws;
+        }
         if (quiet) return Effects::None;
         auto const elem = thisPropType(env, name);
         assertx(elem.has_value());
@@ -1391,7 +1390,7 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key,
       if (!base.couldBe(BObj)) return TInitNull;
       auto t = to_cell(
         env.index.lookup_public_prop(
-          objcls(base.subtypeOf(BObj) ? base : intersection_of(base, TObj)),
+          base.subtypeOf(BObj) ? base : intersection_of(base, TObj),
           sval(name)
         )
       );
@@ -1477,7 +1476,7 @@ Effects miFinalSetOpProp(ISS& env, int32_t nDiscard,
       }
       return to_cell(
         env.index.lookup_public_prop(
-          objcls(base.subtypeOf(BObj) ? base : intersection_of(base, TObj)),
+          base.subtypeOf(BObj) ? base : intersection_of(base, TObj),
           sval(name)
         )
       );
@@ -1535,7 +1534,7 @@ Effects miFinalIncDecProp(ISS& env, int32_t nDiscard,
       }
       return to_cell(
         env.index.lookup_public_prop(
-          objcls(base.subtypeOf(BObj) ? base : intersection_of(base, TObj)),
+          base.subtypeOf(BObj) ? base : intersection_of(base, TObj),
           sval(name)
         )
       );
@@ -1659,7 +1658,7 @@ Effects miFinalSetElem(ISS& env,
   auto const alwaysThrows = BNull | BFalse;
   auto const pushesNull =
     BTrue | BNum | BRes | BFunc | BRFunc |
-    BCls | BLazyCls | BClsMeth | BRClsMeth;
+    BCls | BLazyCls | BClsMeth | BRClsMeth | BEnumClassLabel;
   auto const handled =
     alwaysThrows | pushesNull | BObj | BStr | BArrLike;
 
@@ -1746,6 +1745,9 @@ Effects miFinalSetOpElem(ISS& env, int32_t nDiscard,
     env, nDiscard, key, keyLoc,
     [&] (const Type& lhsTy) {
       auto const result = typeSetOp(subop, lhsTy, rhsTy);
+      if (result.is(BBottom)) {
+        return std::make_tuple(TBottom, TBottom, Effects::AlwaysThrows);
+      }
       return std::make_tuple(result, result, Effects::Throws);
     }
   );
@@ -1758,6 +1760,9 @@ Effects miFinalIncDecElem(ISS& env, int32_t nDiscard,
     env, nDiscard, key, keyLoc,
     [&] (const Type& before) {
       auto const after = typeIncDec(subop, before);
+      if (after.is(BBottom)) {
+        return std::make_tuple(TBottom, TBottom, Effects::AlwaysThrows);
+      }
       return std::make_tuple(
         after,
         isPre(subop) ? after : before,
@@ -1772,7 +1777,7 @@ Effects miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type& key) {
   auto& base = env.collect.mInstrState.base.type;
   assertx(!base.is(BBottom));
 
-  auto const doesNothing = BNull | BBool | BNum | BRes;
+  auto const doesNothing = BNull | BBool | BNum | BRes | BEnumClassLabel;
   auto const alwaysThrows =
     BFunc | BRFunc | BCls | BLazyCls | BStr | BClsMeth | BRClsMeth;
   auto const handled = doesNothing | alwaysThrows | BArrLike | BObj;
@@ -1845,7 +1850,7 @@ Effects miFinalSetNewElem(ISS& env, int32_t nDiscard) {
 
   auto const pushesNull =
     BTrue | BNum | BRes | BFunc | BRFunc | BCls |
-    BLazyCls | BClsMeth | BRClsMeth;
+    BLazyCls | BClsMeth | BRClsMeth | BEnumClassLabel;
   auto const alwaysThrows = BNull | BStr | BFalse;
   auto const handled = pushesNull | alwaysThrows | BObj | BArrLike;
 
@@ -1956,15 +1961,6 @@ namespace interp_step {
 //////////////////////////////////////////////////////////////////////
 // Base operations
 
-void in(ISS& env, const bc::BaseGC& op) {
-  startBase(env, Base{TInitCell, BaseLoc::Global});
-}
-
-void in(ISS& env, const bc::BaseGL& op) {
-  mayReadLocal(env, op.loc1);
-  startBase(env, Base{TInitCell, BaseLoc::Global});
-}
-
 void in(ISS& env, const bc::BaseSC& op) {
   auto tcls = topC(env, op.arg2);
   auto const tname = topC(env, op.arg1);
@@ -2027,6 +2023,7 @@ void in(ISS& env, const bc::BaseSC& op) {
   // types.
   if (lookup.found == TriBool::Yes &&
       lookup.lateInit == TriBool::No &&
+      lookup.internal == TriBool::No &&
       !lookup.classInitMightRaise &&
       !mightConstThrow &&
       !mightReadOnlyThrow &&
@@ -2038,9 +2035,11 @@ void in(ISS& env, const bc::BaseSC& op) {
     // stack.
     if (op.subop3 == MOpMode::Warn || op.subop3 == MOpMode::None) {
       if (auto const v = tv(lookup.ty)) {
-        reduce(env, gen_constant(*v), bc::BaseC { 0, op.subop3 });
-        env.collect.mInstrState.extraPop = true;
-        return;
+        if (can_rewind(env) && can_constprop(env)) {
+          reduce(env, gen_constant(*v), bc::BaseC { 0, op.subop3 });
+          env.collect.mInstrState.extraPop = true;
+          return;
+        }
       }
     }
 
@@ -2071,9 +2070,11 @@ void in(ISS& env, const bc::BaseL& op) {
     // stack.
     if (op.subop2 == MOpMode::Warn || op.subop2 == MOpMode::None) {
       if (auto const v = tv(ty)) {
-        reduce(env, gen_constant(*v), bc::BaseC { 0, op.subop2 });
-        env.collect.mInstrState.extraPop = true;
-        return;
+        if (can_rewind(env) && can_constprop(env)) {
+          reduce(env, gen_constant(*v), bc::BaseC { 0, op.subop2 });
+          env.collect.mInstrState.extraPop = true;
+          return;
+        }
       }
 
       // Try to find an equivalent local to use instead
@@ -2171,6 +2172,8 @@ void in(ISS& env, const bc::Dim& op) {
   if ((op.subop1 == MOpMode::None || op.subop1 == MOpMode::Warn) &&
       env.collect.mInstrState.effectFree &&
       will_reduce(env) &&
+      can_rewind(env) &&
+      can_constprop(env) &&
       is_scalar(env.collect.mInstrState.base.type)) {
     // Find the base instruction which started the sequence.
     for (int i = 0; ; i++) {
@@ -2180,7 +2183,7 @@ void in(ISS& env, const bc::Dim& op) {
         auto const base = *last;
         rewind(env, i + 1);
         // We'll need to push the constant onto the stack. If the
-        // sequence originally started with a BaseC (or BaseGC)
+        // sequence originally started with a BaseC
         // instruction, we can just pop off the original value and
         // replace it with the constant. This leaves all offsets the
         // same. If not, we push the constant and set extraPop, which
@@ -2189,7 +2192,6 @@ void in(ISS& env, const bc::Dim& op) {
         auto const reuseStack =
           [&] {
             switch (base.op) {
-              case Op::BaseGC: return base.BaseGC.arg1 == 0;
               case Op::BaseC:  return base.BaseC.arg1 == 0;
               default: return false;
             }
@@ -2262,12 +2264,13 @@ void in(ISS& env, const bc::QueryM& op) {
       op.subop2 == QueryMOp::CGet &&
       nDiscard == 1 &&
       op.mkey.mcode == MemberCode::MET &&
-      op.mkey.litstr->isame(s_classname.get())) {
+      op.mkey.litstr == s_classname.get() &&
+      can_rewind(env)) {
     if (auto const last = last_op(env, 0)) {
       if (last->op == Op::BaseC) {
         if (auto const prev = last_op(env, 1)) {
           if (prev->op == Op::FCallFuncD &&
-              prev->FCallFuncD.str2->isame(s_type_structure.get()) &&
+              prev->FCallFuncD.str2 == s_type_structure.get() &&
               prev->FCallFuncD.fca.numArgs() == 2) {
             auto const params = prev->FCallFuncD.fca.numArgs();
             rewind(env, op); // querym
@@ -2301,7 +2304,10 @@ void in(ISS& env, const bc::QueryM& op) {
 
   // If the QueryM produced a constant without any possible
   // side-ffects, we can replace the entire thing with the constant.
-  if (env.collect.mInstrState.effectFree && is_scalar(topC(env))) {
+  if (env.collect.mInstrState.effectFree &&
+      can_rewind(env) &&
+      can_constprop(env) &&
+      is_scalar(topC(env))) {
     for (int i = 0; ; i++) {
       auto const last = last_op(env, i);
       if (!last) break;

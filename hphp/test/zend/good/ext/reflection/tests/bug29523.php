@@ -5,7 +5,7 @@ class TestClass
 }
 
 function optionalTest(TestClass $a, TestClass $b, $c = 3)
-{
+:mixed{
 }
 <<__EntryPoint>> function main(): void {
 $function = new ReflectionFunction('optionalTest');

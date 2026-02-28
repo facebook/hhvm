@@ -29,18 +29,17 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-enum UnwinderResult {
-   UnwindNone        = 0,
+enum class UnwinderResult {
+   None,
    // Unwound an async function and placed the exception inside a failed static
    // wait handle
-   UnwindFSWH        = (1u << 0),
+   FSWH,
    // Unwound until the given fp, i.e. did not reach the end of the vm nesting
-   UnwindReachedGoal = (1u << 1),
+   ReachedGoal,
+   // Unwound until the given fp, but there is a pending C++ exception that
+   // should replace the current Hack exception
+   ReplaceWithPendingException,
 };
-
-constexpr UnwinderResult operator|(UnwinderResult a, UnwinderResult b) {
-   return UnwinderResult((int)a | (int)b);
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -51,10 +50,10 @@ constexpr UnwinderResult operator|(UnwinderResult a, UnwinderResult b) {
 void lockObjectWhileUnwinding(PC pc, Stack& stack);
 
 /*
- * Find a catch exception handler for a given raise location if the handler was
+ * Find an exception handler for a given raise location if the handler was
  * found or kInvalidOffset.
  */
-Offset findCatchHandler(const Func* func, Offset raiseOffset);
+Offset findExceptionHandler(const Func* func, Offset raiseOffset);
 
 /*
  * Unwind the exception.

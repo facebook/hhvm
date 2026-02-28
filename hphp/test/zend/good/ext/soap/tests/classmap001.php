@@ -1,7 +1,7 @@
 <?hh
 
 class test{
-	function dotest(book $book){
+	function dotest(book $book):mixed{
 		$classname=get_class($book);
 		return "Classname: ".$classname;
 	}
@@ -31,9 +31,9 @@ function main_entry(): void {
    </env:Body>
   <env:Header/>
   </env:Envelope>");
-  $options=darray[
+  $options=dict[
   		'actor' =>'http://schema.nothing.com',
-  		'classmap' => darray['book'=>'book', 'wsdltype2'=>'classname2']
+  		'classmap' => dict['book'=>'book', 'wsdltype2'=>'classname2']
   		];
 
   $server = new SoapServer(dirname(__FILE__)."/classmap.wsdl",$options);

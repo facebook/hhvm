@@ -2,12 +2,12 @@
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-18], "\\pair_lit");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((Pair<int, string>), (Some ([3:21-37], (Happly (([3:21-25], "\\HH\\Pair"), [([3:26-29], (Hprim Tint)); ([3:30-36], (Hprim Tstring))])))));
-        f_name = ([3:10-18], "\\pair_lit"); f_tparams = []; f_where_constraints = []; 
+        f_readonly_ret = None; f_tparams = [];
+        f_ret = ((~Pair<int, string>), (Some ([3:21-37], (Happly (([3:21-25], "\\HH\\Pair"), [([3:26-29], (Hprim Tint)); ([3:30-36], (Happly (([3:30-36], "\\HH\\string"), [])))]))))); 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
@@ -17,6 +17,7 @@
                       (Pair (None, ((string), [5:15-20], (Hole (((string), [5:15-20], (String "bad")), (string), (int), Typing))), ((string), [5:22-28], (String "good"))))))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
-      fd_internal = false })
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-18], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None })

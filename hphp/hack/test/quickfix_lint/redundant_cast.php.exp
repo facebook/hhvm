@@ -1,0 +1,13 @@
+//// redundant_cast.php
+<?hh
+
+function redundant_cast(int $i, string $s, float $f, bool $b): void {
+  $b;
+  $f;
+  $s;
+  $i;
+}
+
+
+There were input 4 patches for 1 files.
+Dropped patch count: 0 (0 overlapping, 0 original not found)

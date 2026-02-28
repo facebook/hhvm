@@ -1,4 +1,4 @@
-File "readonly_expected_fun.php", line 11, characters 11-12:
+ERROR: File "readonly_expected_fun.php", line 11, characters 11-12:
 Invalid argument (Typing[4411])
   File "readonly_expected_fun.php", line 7, characters 8-53:
   Function readonly return mismatch
@@ -6,7 +6,7 @@ Invalid argument (Typing[4411])
   This function returns a readonly value
   File "readonly_expected_fun.php", line 2, characters 22-41:
   This function does not return a readonly value
-File "readonly_expected_fun.php", line 12, characters 11-57:
+ERROR: File "readonly_expected_fun.php", line 12, characters 11-57:
 Invalid argument (Typing[4411])
   File "readonly_expected_fun.php", line 12, characters 11-57:
   Function readonly return mismatch

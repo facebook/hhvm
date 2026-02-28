@@ -1,12 +1,12 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; }
 }
-function VERIFY($x) { VS($x, true); }
+function VERIFY($x) :mixed{ VS($x, true); }
 
-function test_bzwrite() {
+function test_bzwrite() :mixed{
 
 
   $str = "HipHop for";
@@ -24,7 +24,7 @@ function test_bzwrite() {
   unlink(ExtBzip2ExtBzip2Php::$tmpfile);
 }
 
-function test_bzerrstr() {
+function test_bzerrstr() :mixed{
 
 
   $f = fopen(ExtBzip2ExtBzip2Php::$tmpfile, "w");
@@ -38,7 +38,7 @@ function test_bzerrstr() {
   VS($ret, "DATA_ERROR_MAGIC");
 }
 
-function test_bzerror() {
+function test_bzerror() :mixed{
 
 
   $f = fopen(ExtBzip2ExtBzip2Php::$tmpfile, "w");
@@ -49,7 +49,7 @@ function test_bzerror() {
   $ret = bzerror($f);
   bzclose($f);
   unlink(ExtBzip2ExtBzip2Php::$tmpfile);
-  VS($ret, darray["errno" => -5,
+  VS($ret, dict["errno" => -5,
                  "errstr" => "DATA_ERROR_MAGIC"]);
 }
 
@@ -59,7 +59,7 @@ abstract final class ExtBzip2ExtBzip2Php {
 <<__EntryPoint>>
 function entrypoint_ext_bzip2(): void {
 
-  ExtBzip2ExtBzip2Php::$tmpfile = tempnam('/tmp', 'hhbztest.tmp');
+  ExtBzip2ExtBzip2Php::$tmpfile = tempnam(sys_get_temp_dir(), 'hhbztest.tmp');
 
   test_bzwrite();
   test_bzerrstr();

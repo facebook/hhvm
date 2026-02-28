@@ -6,21 +6,21 @@ class MyException extends Exception {
     $this->errmsg = $_errmsg;
   }
 
-  function getErrno() {
+  function getErrno() :mixed{
     return $this->errno;
   }
 
-  function getErrmsg() {
+  function getErrmsg() :mixed{
     return $this->errmsg;
   }
 }
 
-function ErrorsToExceptions($errno, $errmsg) {
+function ErrorsToExceptions($errno, $errmsg) :mixed{
   throw new MyException($errno, $errmsg);
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(ErrorsToExceptions<>);
 
   // make sure it isn't catching exceptions that weren't

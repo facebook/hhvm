@@ -1,7 +1,7 @@
 <?hh
 
 function iterate($xml)
-{
+:mixed{
     print_r($xml);
     foreach ($xml->item as $item) {
         echo "This code will crash!";

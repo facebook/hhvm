@@ -48,6 +48,87 @@ let test_exec_checked_failing () : bool Lwt.t =
     String_asserter.assert_equals stderr "" "incorrect stderr";
     Lwt.return true
 
+let test_exec_checked_timeout () : bool Lwt.t =
+  let%lwt process_status =
+    Lwt_utils.exec_checked
+      ~timeout:1.0
+      Exec_command.Shell
+      [| "echo A; sleep 4; echo B" |]
+  in
+  match process_status with
+  | Ok _ -> failwith "command succeeded even though it should have timed out"
+  | Error { Lwt_utils.Process_failure.process_status; stdout; exn; _ } ->
+    Process_status_asserter.assert_equals
+      process_status
+      (Unix.WSIGNALED (-7))
+      "process_status";
+    assert (Option.is_some exn);
+    String_asserter.assert_equals "" stdout "stdout";
+    Lwt.return_true
+
+let test_exec_checked_cancel_before () : bool Lwt.t =
+  let cancel = Lwt.return_unit in
+  let%lwt process_status =
+    Lwt_utils.exec_checked
+      Exec_command.Shell
+      [| "echo A; sleep 4; echo B" |]
+      ~cancel
+  in
+  match process_status with
+  | Ok _ ->
+    failwith "command succeeded even though it should have been cancelled"
+  | Error { Lwt_utils.Process_failure.process_status; stdout; _ } ->
+    Process_status_asserter.assert_equals
+      process_status
+      (Unix.WSIGNALED (-7))
+      "process_status";
+    String_asserter.assert_equals "" stdout "stdout";
+    Lwt.return_true
+
+let test_exec_checked_cancel_during () : bool Lwt.t =
+  let (cancel, cancel_source) = Lwt.wait () in
+  let _ =
+    Lwt.bind (Lwt_unix.sleep 1.0) (fun () ->
+        Lwt.wakeup_later cancel_source ();
+        Lwt.return_unit)
+  in
+  let%lwt process_status =
+    Lwt_utils.exec_checked
+      Exec_command.Shell
+      [| "echo A; sleep 4; echo B" |]
+      ~cancel
+  in
+  match process_status with
+  | Ok _ ->
+    failwith "command succeeded even though it should have been cancelled"
+  | Error { Lwt_utils.Process_failure.process_status; stdout; exn; _ } ->
+    Process_status_asserter.assert_equals
+      process_status
+      (Unix.WSIGNALED (-7))
+      "process_status";
+    String_asserter.assert_equals "A\n" stdout "stdout";
+    assert (Option.is_none exn);
+    Lwt.return_true
+
+let test_exec_checked_cancel_after () : bool Lwt.t =
+  let (cancel, cancel_source) = Lwt.wait () in
+  let _ =
+    Lwt.bind (Lwt_unix.sleep 1.0) (fun () ->
+        Lwt.wakeup_later cancel_source ();
+        Lwt.return_unit)
+  in
+  let%lwt process_status =
+    Lwt_utils.exec_checked
+      Exec_command.Shell
+      [| "echo A; sleep 0.1; echo B" |]
+      ~cancel
+  in
+  match process_status with
+  | Ok { Lwt_utils.Process_success.stdout; _ } ->
+    String_asserter.assert_equals stdout "A\nB\n" "stdout";
+    Lwt.return true
+  | Error _ -> failwith "command failed even though it should have succeeded"
+
 let test_exec_checked_big_payload () : bool Lwt.t =
   (* Try to exceed the pipe buffer size to suss out any deadlocks. *)
   let payload_size = 500000 in
@@ -161,6 +242,13 @@ let () =
        [
          ("test Lwt_utils.exec_checked basic", test_exec_checked_basic);
          ("test Lwt_utils.exec_checked failing", test_exec_checked_failing);
+         ("test Lwt_utils.exec_checked timeout", test_exec_checked_timeout);
+         ( "test Lwt_utils.exec_checked cancel before",
+           test_exec_checked_cancel_before );
+         ( "test Lwt_utils.exec_checked cancel during",
+           test_exec_checked_cancel_during );
+         ( "test Lwt_utils.exec_checked cancel after",
+           test_exec_checked_cancel_after );
          ( "test Lwt_utils.exec_checked big payload",
            test_exec_checked_big_payload );
          ("test Lwt_message_queue.t basic", test_lwt_message_queue_basic);

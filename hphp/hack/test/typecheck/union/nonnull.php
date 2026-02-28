@@ -1,5 +1,5 @@
 //// file1.php
-<?hh // strict
+<?hh
 
 newtype B = int;
 
@@ -8,7 +8,7 @@ newtype C as ?int = int;
 type D = ?int;
 
 //// file2.php
-<?hh // strict
+<?hh
 
 class A {}
 
@@ -43,7 +43,7 @@ function f(
   $x = ($cond ? $nullableInt : $nonnull);
   hh_show($x);
 
-  $x = ($cond ? varray[] : $nonnull);
+  $x = ($cond ? vec[] : $nonnull);
   hh_show($x);
 
   $x = ($cond ? tuple(1, 2) : $nonnull);

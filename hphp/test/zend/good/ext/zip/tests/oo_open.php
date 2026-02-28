@@ -15,7 +15,7 @@ if (!$r) {
 } else {
 	echo "create: ok\n";
 }
-@unlink($dirname . 'nofile');
+unlink($dirname . 'nofile');
 
 $zip = new ZipArchive;
 $zip->open('');

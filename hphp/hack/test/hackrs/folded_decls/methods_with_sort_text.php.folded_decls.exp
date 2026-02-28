@@ -1,0 +1,47 @@
+FoldedClass {
+    name: "\\A",
+    kind: Cclass(
+        Concrete,
+    ),
+    is_final: true,
+    static_methods: {
+        "foo": FoldedElement {
+            flags: ClassEltFlags(
+                0,
+            ),
+            origin: "\\A",
+            visibility: Public,
+            deprecated: None,
+            sealed_allowlist: None,
+            sort_text: None,
+            overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
+        },
+        "bar": FoldedElement {
+            flags: ClassEltFlags(
+                0,
+            ),
+            origin: "\\A",
+            visibility: Public,
+            deprecated: None,
+            sealed_allowlist: None,
+            sort_text: None,
+            overlapping_tparams: None,
+            package_requirement: Some(
+                RPNormal,
+            ),
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: class<this>,
+            origin: "\\A",
+            refs: [],
+        },
+    },
+}

@@ -1,6 +1,6 @@
 <?hh
 
-function test($className) {
+function test($className) :mixed{
 $x = new ReflectionClass($className);
 return $x->newInstance()->loadAll();
  }

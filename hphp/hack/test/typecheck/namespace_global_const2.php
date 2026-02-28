@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 namespace {
   const string MYCONST = 'hi test';

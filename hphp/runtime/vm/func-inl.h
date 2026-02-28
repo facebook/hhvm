@@ -20,6 +20,9 @@
 
 #include "hphp/runtime/vm/unit-util.h"
 
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/sandbox.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // EH table.
@@ -53,11 +56,10 @@ inline Func::ParamInfo::ParamInfo()
 
 template<class SerDe>
 inline void Func::ParamInfo::serde(SerDe& sd) {
-  sd(builtinType)
-    (funcletOff)
+  sd(funcletOff)
     (defaultValue)
     (phpCode)
-    (typeConstraint)
+    (typeConstraints)
     (flags)
     (userAttributes)
     (userType)
@@ -72,28 +74,37 @@ inline bool Func::ParamInfo::hasScalarDefaultValue() const {
   return hasDefaultValue() && defaultValue.m_type != KindOfUninit;
 }
 
+inline bool Func::ParamInfo::hasTrivialDefaultValue() const {
+  return hasScalarDefaultValue()
+    && typeConstraints.alwaysPasses(&defaultValue);
+}
+
 inline bool Func::ParamInfo::isInOut() const {
   return flags & (1 << static_cast<int32_t>(Flags::InOut));
+}
+
+inline bool Func::ParamInfo::isOutOnly() const {
+  return flags & (1 << static_cast<int32_t>(Flags::OutOnly));
 }
 
 inline bool Func::ParamInfo::isReadonly() const {
   return flags & (1 << static_cast<int32_t>(Flags::Readonly));
 }
 
+inline bool Func::ParamInfo::isOptional() const {
+  return flags & (1 << static_cast<int32_t>(Flags::Optional));
+}
+
+inline bool Func::ParamInfo::isNamed() const {
+  return flags & (1 << static_cast<int32_t>(Flags::Named));
+}
+
 inline bool Func::ParamInfo::isVariadic() const {
   return flags & (1 << static_cast<int32_t>(Flags::Variadic));
 }
 
-inline bool Func::ParamInfo::isNativeArg() const {
-  return flags & (1 << static_cast<int32_t>(Flags::NativeArg));
-}
-
-inline bool Func::ParamInfo::isTakenAsVariant() const {
-  return flags & (1 << static_cast<int32_t>(Flags::AsVariant));
-}
-
-inline bool Func::ParamInfo::isTakenAsTypedValue() const {
-  return flags & (1 << static_cast<int32_t>(Flags::AsTypedValue));
+inline bool Func::ParamInfo::isSplat() const {
+  return flags & (1 << static_cast<int32_t>(Flags::Splat));
 }
 
 inline void Func::ParamInfo::setFlag(Func::ParamInfo::Flags flag) {
@@ -139,7 +150,7 @@ inline Unit* Func::unit() const {
 }
 
 inline Class* Func::cls() const {
-  return !isMethCaller() ? m_u.cls() : nullptr;
+  return !isMethCaller() ? clsData().m_impl : nullptr;
 }
 
 inline PreClass* Func::preClass() const {
@@ -147,8 +158,7 @@ inline PreClass* Func::preClass() const {
 }
 
 inline Class* Func::baseCls() const {
-  return !(m_baseCls & kMethCallerBit) ?
-    reinterpret_cast<Class*>(m_baseCls) : nullptr;
+  return !isMethCaller() ? clsData().m_base : nullptr;
 }
 
 inline Class* Func::implCls() const {
@@ -184,9 +194,9 @@ inline size_t Func::stableHash() const {
 
 inline const StringData* Func::fullName() const {
   if (m_fullName == nullptr) return m_name;
-  if (UNLIKELY((intptr_t)m_fullName.get() == kNeedsFullName)) {
+  if (UNLIKELY(uintptr_t(m_fullName.get()) == kNeedsFullName)) {
     m_fullName = makeStaticString(
-      std::string(cls()->name()->data()) + "::" + m_name->data());
+      cls()->name()->toCppString() + "::" + m_name->data());
   }
   return m_fullName;
 }
@@ -203,40 +213,39 @@ inline StrNR Func::fullNameStr() const {
 
 inline void invalidFuncConversion(const char* type) {
   SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
-    "Cannot convert func to {}", type
+    "Cannot convert function to {}", type
   ));
 }
 
-inline NamedEntity* Func::getNamedEntity() {
+inline NamedFunc* Func::getNamedFunc() {
   assertx(!shared()->m_preClass);
-  return *reinterpret_cast<LowPtr<NamedEntity>*>(&m_namedEntity);
+  return const_cast<NamedFunc*>(m_namedFunc.get());
 }
 
-inline const NamedEntity* Func::getNamedEntity() const {
+inline const NamedFunc* Func::getNamedFunc() const {
   assertx(!shared()->m_preClass);
-  return *reinterpret_cast<const LowPtr<const NamedEntity>*>(&m_namedEntity);
+  return m_namedFunc;
 }
 
-inline void Func::setNamedEntity(const NamedEntity* e) {
-  *reinterpret_cast<LowPtr<const NamedEntity>*>(&m_namedEntity) = e;
+inline void Func::setNamedFunc(const NamedFunc* e) {
+  m_namedFunc = e;
 }
 
 inline const StringData* Func::methCallerClsName() const {
   assertx(isMethCaller() && isBuiltin());
-  return m_u.name();
+  return methCallerData().m_clsName;
 }
 
 inline const StringData* Func::methCallerMethName() const {
-  assertx(isMethCaller() && isBuiltin() &&
-          (m_methCallerMethName & kMethCallerBit));
-  return reinterpret_cast<StringData*>(m_methCallerMethName - kMethCallerBit);
+  assertx(isMethCaller() && isBuiltin());
+  return methCallerData().m_methName;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // File info.
 
-inline const StringData* Func::originalFilename() const {
-  return shared()->m_originalFilename;
+inline const StringData* Func::originalUnit() const {
+  return shared()->m_originalUnit;
 }
 
 inline const StringData* Func::filename() const {
@@ -247,7 +256,7 @@ inline const StringData* Func::filename() const {
 
   // Use the original filename if it exists, otherwise grab the filename from
   // the unit
-  const StringData* name = originalFilename();
+  const StringData* name = originalUnit();
   if (!name) {
     assertx(m_unit);
     name = m_unit->filepath();
@@ -349,11 +358,6 @@ inline void Func::setCtiEntry(Offset base, uint32_t size) {
 ///////////////////////////////////////////////////////////////////////////////
 // Return type.
 
-inline MaybeDataType Func::hniReturnType() const {
-  auto const ex = extShared();
-  return ex ? ex->m_hniReturnType : std::nullopt;
-}
-
 inline RepoAuthType Func::repoReturnType() const {
   return shared()->m_repoReturnType;
 }
@@ -366,21 +370,16 @@ inline bool Func::isReturnByValue() const {
   return shared()->m_allFlags.m_returnByValue;
 }
 
-inline const TypeConstraint& Func::returnTypeConstraint() const {
-  return shared()->m_retTypeConstraint;
+inline bool Func::hasUntrustedReturnType() const {
+  return shared()->m_allFlags.m_isUntrustedReturnType;
+}
+
+inline const TypeIntersectionConstraint& Func::returnTypeConstraints() const {
+  return shared()->m_retTypeConstraints;
 }
 
 inline const StringData* Func::returnUserType() const {
-  return shared()->m_retUserType;
-}
-
-inline bool Func::hasReturnWithMultiUBs() const {
-  return shared()->m_allFlags.m_hasReturnWithMultiUBs;
-}
-
-inline const Func::UpperBoundVec& Func::returnUBs() const {
-  assertx(hasReturnWithMultiUBs());
-  return extShared()->m_returnUBs;
+  return shared()->m_retUserType.get(m_unit);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -396,17 +395,42 @@ inline uint32_t Func::numParams() const {
   return (m_paramCounts) >> 1;
 }
 
+inline uint32_t Func::numNamedParams() const {
+  auto const ex = extShared();
+  if (!ex) return 0;
+  return ex->m_namedParamCount;
+}
+
+inline uint32_t Func::numPositionalParams() const {
+  return numNonVariadicParams() - numNamedParams();
+}
+
 inline uint32_t Func::numNonVariadicParams() const {
   assertx(bool(m_attrs & AttrVariadicParam) != bool(m_paramCounts & 1));
   assertx((m_paramCounts >> 1) == params().size());
   return (m_paramCounts - 1) >> 1;
 }
 
-inline uint32_t Func::numRequiredParams() const {
-  for (auto i = numNonVariadicParams(); i > 0; --i) {
-    if (!params()[i - 1].hasDefaultValue()) return i;
+inline uint32_t Func::numRequiredNamedParams() const {
+  auto numNamed = numNamedParams();
+  auto res = 0;
+  for (auto i = 0; i < numNamed; ++i) {
+    if (!params()[i].hasDefaultValue()) ++res;
+  }
+  return res;
+}
+
+inline uint32_t Func::numRequiredPositionalParams() const {
+  auto numNamed = numNamedParams();
+
+  for (auto i = numNonVariadicParams(); i > numNamed; --i) {
+    if (!params()[i - 1].hasDefaultValue()) return i - numNamed;
   }
   return 0;
+}
+
+inline uint32_t Func::numRequiredParams() const {
+  return numRequiredPositionalParams() + numRequiredNamedParams();
 }
 
 inline bool Func::hasVariadicCaptureParam() const {
@@ -417,21 +441,16 @@ inline bool Func::hasVariadicCaptureParam() const {
   return m_attrs & AttrVariadicParam;
 }
 
+inline bool Func::hasSplatParam() const {
+  return m_attrs & AttrSplatParam;
+}
+
 inline uint64_t Func::inOutBits() const {
   return m_inoutBits;
 }
 
 inline bool Func::takesInOutParams() const {
   return m_inoutBits != 0;
-}
-
-inline bool Func::hasParamsWithMultiUBs() const {
-  return shared()->m_allFlags.m_hasParamsWithMultiUBs;
-}
-
-inline const Func::ParamUBMap& Func::paramUBs() const {
-  assertx(hasParamsWithMultiUBs());
-  return extShared()->m_paramUBs;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -486,7 +505,14 @@ inline const StringData* Func::localVarName(Id id) const {
   return id < numNamedLocals() ? shared()->m_localNames[id] : nullptr;
 }
 
-inline LowStringPtr const* Func::localNames() const {
+inline PackedStringPtr const* Func::localNames() const {
+  return shared()->m_localNames.accessList();
+}
+
+/* By construction, named params appear at the end of param lists and
+ * are sorted lexicographically.
+ */
+inline PackedStringPtr const* Func::sortedNamedParamNames() const {
   return shared()->m_localNames.accessList();
 }
 
@@ -527,6 +553,19 @@ inline bool Func::isPublic() const {
   return m_attrs & AttrPublic;
 }
 
+inline bool Func::isInternal() const {
+  return m_attrs & AttrInternal;
+}
+
+inline const StringData* Func::moduleName() const {
+  auto const ex = extShared();
+  if (Cfg::Eval::ModuleLevelTraits && ex) {
+    assertx(!unit()->moduleName() || ex->m_originalModuleName);
+    return ex->m_originalModuleName;
+  }
+  return unit()->moduleName();
+}
+
 inline bool Func::isStatic() const {
   return m_attrs & AttrStatic;
 }
@@ -555,9 +594,19 @@ inline bool Func::isMemoizeWrapperLSB() const {
   return shared()->m_allFlags.m_isMemoizeWrapperLSB;
 }
 
-inline bool Func::isPolicyShardedMemoize() const {
-  return shared()->m_allFlags.m_isPolicyShardedMemoize;
+inline Func::MemoizeICType Func::memoizeICType() const {
+  assertx(isMemoizeWrapper());
+  return shared()->m_allFlags.m_memoizeICType;
 }
+
+inline bool Func::isNoICMemoize() const {
+  return memoizeICType() == MemoizeICType::NoIC;
+}
+
+inline bool Func::isKeyedByImplicitContextMemoize() const {
+  return memoizeICType() == MemoizeICType::KeyedByIC;
+}
+
 
 inline bool Func::isMemoizeImpl() const {
   return isMemoizeImplName(name());
@@ -571,8 +620,7 @@ inline const StringData* Func::memoizeImplName() const {
 inline size_t Func::numKeysForMemoize() const {
   return numParams()
          + (hasReifiedGenerics() ? 1 : 0)
-         + (RO::EvalEnableImplicitContext &&
-            (shared()->m_allFlags.m_isPolicyShardedMemoize) ? 1 : 0);
+         + (isKeyedByImplicitContextMemoize() ? 1 : 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -705,8 +753,8 @@ inline const UserAttributeMap& Func::userAttributes() const {
   return shared()->m_userAttributes;
 }
 
-inline bool Func::isUnique() const {
-  return m_attrs & AttrUnique;
+inline Array Func::userAttributesArray() const {
+  return userAttributes().getArray();
 }
 
 inline bool Func::isPersistent() const {
@@ -804,6 +852,27 @@ inline void Func::setPrologue(int index, unsigned char* tca) {
   m_prologueTable[index] = tca;
 }
 
+inline uint8_t Func::incJitReqCount() const {
+  auto curr = m_jitReqCount.load(std::memory_order_acquire);
+  do {
+    // Saturate
+    if (curr >= std::numeric_limits<uint8_t>::max()) return curr;
+    if (m_jitReqCount.compare_exchange_weak(curr, curr + 1,
+                                            std::memory_order_acq_rel)) {
+      return curr;
+    }
+  } while (true);
+  not_reached();
+}
+
+inline uint8_t Func::readJitReqCount() const {
+  return m_jitReqCount.load(std::memory_order_relaxed);
+}
+
+inline void Func::resetJitReqCount() const {
+  m_jitReqCount.store(0, std::memory_order_release);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
 
@@ -812,6 +881,7 @@ inline bool Func::maybeIntercepted() const {
 }
 
 inline void Func::setMaybeIntercepted() {
+  assertx(isInterceptable());
   atomicFlags().set(Func::Flags::MaybeIntercepted);
 }
 
@@ -823,7 +893,7 @@ inline void Func::setAttrs(Attr attrs) {
 }
 
 inline void Func::setBaseCls(Class* baseCls) {
-  m_baseCls = to_low(baseCls);
+  clsData().m_base = baseCls;
 }
 
 inline void Func::setHasPrivateAncestor(bool b) {

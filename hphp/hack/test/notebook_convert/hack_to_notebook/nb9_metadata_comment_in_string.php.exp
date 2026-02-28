@@ -1,0 +1,4 @@
+ Received input that was not in the expected format.
+Expected a valid Hack file with special comments for notebook cell information.
+Such files should only be created via `hh --notebook-to-hack`. Error:
+expected '{["0123456789' or {t,f,n} at char[0]=a

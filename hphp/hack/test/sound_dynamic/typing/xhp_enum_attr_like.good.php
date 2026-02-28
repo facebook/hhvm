@@ -3,8 +3,8 @@
 class :x {
   attribute ~enum {'hello'} e;
   public function __construct(
-    dict<string, ?supportdynamic> $attributes,
-    vec<?supportdynamic> $children,
+    dict<string, supportdyn<mixed>> $attributes,
+    vec<supportdyn<mixed>> $children,
     private string $file,
     private int $line,
   ) {}

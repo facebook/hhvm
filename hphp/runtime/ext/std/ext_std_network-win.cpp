@@ -26,7 +26,6 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"

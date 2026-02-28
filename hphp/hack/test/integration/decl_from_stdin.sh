@@ -24,7 +24,6 @@ mkdir ".hg"
 touch ".hhconfig"
 cat <<EOF > "hh.conf"
 max_workers = 1
-symbolindex_search_provider = NoIndex
 EOF
 export HH_LOCALCONF_PATH="$TEMPDIR"  # so it uss our hh.conf
 export HH_TEST_MODE=1  # avoid writing a bunch of telemetry

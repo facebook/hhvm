@@ -1,59 +1,66 @@
 Errors:
-  [8:14-11:4] Statement without an `await` in a concurrent block
   [10:5-21] Statement without an `await` in a concurrent block
   [12:10-19] Invalid return type
   [7:34-37] Expected `int`
-  [12:10-19] But got `num` because this is the result of an arithmetic operation with a `num` as the second argument, and no `float`s.
+  [12:10-19] But got `float` because this is the result of an arithmetic operation with a `num` as the second argument, and no `float`s.
   [3:27-41] Here is why I think the argument is a `num`: this is a `num`
   [12:16-19] Typing error
   [12:10-19] Expected `num` because this is used in an arithmetic operation
   [3:27-41] But got `Awaitable<int>`
 [(Fun
     { fd_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:16-23], "\\gen_int");
       fd_fun =
-      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = ();
-        f_readonly_ret = None; f_ret = ((Awaitable<int>), (Some ([3:27-41], (Happly (([3:27-36], "\\HH\\Awaitable"), [([3:37-40], (Hprim Tint))])))));
-        f_name = ([3:16-23], "\\gen_int"); f_tparams = []; f_where_constraints = [];
-        f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-12], (Return (Some ((int), [4:10-11], (Int "1")))))] };
-        f_fun_kind = FAsync; f_user_attributes = []; f_external = false;
-        f_doc_comment = None };
-      fd_internal = false });
+      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((Awaitable<~int>), (Some ([3:27-41], (Happly (([3:27-36], "\\HH\\Awaitable"), [([3:37-40], (Hprim Tint))]))))); 
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-12], (Return (Some ((int), [4:10-11], (Int "1")))))] }; 
+        f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([3:16-23], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None });
   (Fun
      { fd_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None;
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:16-20], "\\test");
        fd_fun =
-       { f_span = [7:1-13:2]; f_readonly_this = None; f_annotation = ();
-         f_readonly_ret = None; f_ret = ((Awaitable<int>), (Some ([7:24-38], (Happly (([7:24-33], "\\HH\\Awaitable"), [([7:34-37], (Hprim Tint))])))));
-         f_name = ([7:16-20], "\\test"); f_tparams = []; f_where_constraints = [];
+       { f_span = [7:1-13:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((Awaitable<~int>), (Some ([7:24-38], (Happly (([7:24-33], "\\HH\\Awaitable"), [([7:34-37], (Hprim Tint))]))))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([8:3-13],
-             (Awaitall ([((Some ([9:17-26], __tmp$1)), ((Awaitable<int>), [9:17-26], (Call ((((function(): Awaitable<int>)), [9:17-24], (Id ([9:17-24], "\\gen_int"))), [], [], None))))],
-                [([10:5-21],
+           [([8:3-11:4],
+             (Concurrent
+                [([9:5-27],
                   (Expr
-                     ((Awaitable<int>), [10:5-20],
-                      (Binop ((Eq None), ((Awaitable<int>), [10:5-8], (Lvar ([10:5-8], $v2))),
-                         ((Awaitable<int>), [10:11-20], (Call ((((function(): Awaitable<int>)), [10:11-18], (Id ([10:11-18], "\\gen_int"))), [], [], None))))))));
-                  ([9:5-27], (Expr ((int), [9:5-26], (Binop ((Eq None), ((int), [9:5-8], (Lvar ([9:5-8], $v1))), ((int), [9:11-26], (Lvar ([9:11-26], __tmp$1))))))))]
-                )));
+                     ((int), [9:5-27],
+                      (Assign (((int), [9:5-8], (Lvar ([9:5-8], $v1))), None,
+                         ((int), [9:11-26],
+                          (Await
+                             ((Awaitable<int>), [9:17-26], (Call { func = (((function(): Awaitable<int>)), [9:17-24], (Id ([9:17-24], "\\gen_int"))); targs = []; args = []; unpacked_arg = None }))))
+                         )))));
+                  ([10:5-21],
+                   (Expr
+                      ((Awaitable<int>), [10:5-21],
+                       (Assign (((Awaitable<int>), [10:5-8], (Lvar ([10:5-8], $v2))), None,
+                          ((Awaitable<int>), [10:11-20], (Call { func = (((function(): Awaitable<int>)), [10:11-18], (Id ([10:11-18], "\\gen_int"))); targs = []; args = []; unpacked_arg = None })))))))
+                  ]));
              ([12:3-20],
               (Return
                  (Some ((num), [12:10-19],
                         (Hole (
                            ((num), [12:10-19],
-                            (Binop (Plus, ((int), [12:10-13], (Lvar ([12:10-13], $v1))),
-                               ((Awaitable<int>), [12:16-19], (Hole (((Awaitable<int>), [12:16-19], (Lvar ([12:16-19], $v2))), (Awaitable<int>), (num), Typing)))))),
-                           (num), (int), Typing))))))
+                            (Binop
+                               { bop = Plus; lhs = ((int), [12:10-13], (Lvar ([12:10-13], $v1)));
+                                 rhs = ((Awaitable<int>), [12:16-19], (Hole (((Awaitable<int>), [12:16-19], (Lvar ([12:16-19], $v2))), (Awaitable<int>), (num), Typing))) })),
+                           (num), (~int), Typing))))))
              ]
            };
-         f_fun_kind = FAsync; f_user_attributes = []; f_external = false;
-         f_doc_comment = None };
-       fd_internal = false })
+         f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([7:16-20], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None })

@@ -19,7 +19,9 @@ use namespace HH\Lib\Str;
 // something in folly in the future.
 function relative_path(string $path, ?string $relative_to = null): string {
   if (
-    Str\starts_with($path, '/') || Str\is_empty($relative_to)
+    Str\starts_with($path, '/') ||
+    $relative_to === null ||
+    Str\is_empty($relative_to)
   ) {
     return $path;
   } else {

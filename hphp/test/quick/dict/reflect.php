@@ -19,7 +19,7 @@ function foobar(dict<int, string> $x, dict<arraykey, Foo> $y): dict<int, int> {
   return dict[];
 }
 
-function dump($x) {
+function dump($x) :mixed{
   var_dump((string)$x->getReturnType());
   foreach ($x->getParameters() as $param) {
     var_dump($param->isArray());
@@ -27,7 +27,7 @@ function dump($x) {
   }
 }
 
-function main() {
+function main() :mixed{
   echo("\nReflectionMethod:\n");
   dump(new ReflectionMethod('Foo::bar'));
 

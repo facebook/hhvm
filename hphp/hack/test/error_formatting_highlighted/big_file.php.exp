@@ -1,4 +1,4 @@
-Typing[4030] Was expecting a return type hint [1]
+error: Typing[4030] Was expecting a return type hint [1]
 
 big_file.php:1008:10
     1006 | */
@@ -7,11 +7,11 @@ big_file.php:1008:10
     1009 |   foo(1);
     1010 | }
 
-Typing[4105] Too many arguments (expected 0 but got 1) [1]
+error: Typing[4105] Too many positional arguments (expected 0 but got 1) [1]
 -> Definition is here [2]
 
 big_file.php:1009:3
-       1 | <?hh // strict
+       1 | <?hh
        2 | 
 [2]    3 | function foo(): void {}
        4 | 
@@ -22,4 +22,4 @@ big_file.php:1009:3
 [1] 1009 |   foo(1);
     1010 | }
 
-2 errors found.
+2 errors found

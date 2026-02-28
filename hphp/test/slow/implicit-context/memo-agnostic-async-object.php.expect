@@ -1,0 +1,9 @@
+in f should be C got C
+in g 1 should be C got C
+in h should be C got C
+in lambda should be D got D
+in g 2 should be C got C
+done with lambda should be D got D
+done with h should be C got C
+done with g should be C got C
+done with f should be C got C

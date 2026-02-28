@@ -1,8 +1,0 @@
-<?hh
-
-/* HH_FIXME[4032] */
-function foo(<<__Soft>> int $x, <<__Soft>> string $y): void {
-  bar($x, $y);
-}
-
-function bar(int $x, string $y): void {}

@@ -16,12 +16,23 @@
 
 #include "hphp/util/maphuge.h"
 
-#include "hphp/util/hugetlb.h"
-
-#include <folly/portability/Unistd.h>
-
-#include <errno.h>
-#include <stdint.h>
+#include "hphp/util/assertions.h"
+#include <stdio.h>
 
 namespace HPHP {
+
+static size_t s_thpPageSize = 0;
+
+size_t readTHPSize() {
+  if (s_thpPageSize) return s_thpPageSize;
+  FILE* fp = fopen("/sys/kernel/mm/transparent_hugepage/hpage_pmd_size", "r");
+  if (fp) {
+    fscanf(fp, "%zu", &s_thpPageSize);
+    fclose(fp);
+    // Page size should be a power of two.
+    always_assert(!(s_thpPageSize & (s_thpPageSize - 1)));
+  }
+  return s_thpPageSize;
+}
+
 }

@@ -1,0 +1,607 @@
+'\" t
+.\"     Title: \fBndb_select_all\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_SELECT_ALL\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_select_all \- print rows from an NDB table
+.SH "SYNOPSIS"
+.HP \w'\fBndb_select_all\ \-c\ \fR\fB\fIconnection_string\fR\fR\fB\ \fR\fB\fItbl_name\fR\fR\fB\ \-d\ \fR\fB\fIdb_name\fR\fR\fB\ [>\ \fR\fB\fIfile_name\fR\fR\fB]\fR\ 'u
+\fBndb_select_all \-c \fR\fB\fIconnection_string\fR\fR\fB \fR\fB\fItbl_name\fR\fR\fB \-d \fR\fB\fIdb_name\fR\fR\fB [> \fR\fB\fIfile_name\fR\fR\fB]\fR
+.SH "DESCRIPTION"
+.PP
+\fBndb_select_all\fR
+prints all rows from an
+NDB
+table to
+stdout\&.
+Usage
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_select_all \-c \fIconnection_string\fR \fItbl_name\fR \-d \fIdb_name\fR [> \fIfile_name\fR]
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The following table includes options that are specific to the NDB Cluster native backup restoration program
+\fBndb_select_all\fR\&. Additional descriptions follow the table\&. For options common to most NDB Cluster programs (including
+\fBndb_select_all\fR), see
+Options Common to NDB Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.269.\ \&Command\-line options for the ndb_select_all program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+\fB--database=dbname\fR,
+.PP
+\fB \fR\fB-d\fR\fB \fR
+T}:T{
+Name of the database in which the table is found
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--parallelism=#\fR,
+.PP
+\fB \fR\fB-p\fR\fB \fR
+T}:T{
+Degree of parallelism
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--lock=#\fR,
+.PP
+\fB \fR\fB-l\fR\fB \fR
+T}:T{
+Lock type
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--order=index\fR,
+.PP
+\fB \fR\fB-o\fR\fB \fR
+T}:T{
+Sort resultset according to index whose name is supplied
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--descending\fR,
+.PP
+\fB \fR\fB-z\fR\fB \fR
+T}:T{
+Sort resultset in descending order (requires order flag)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--header\fR,
+.PP
+\fB \fR\fB-h\fR\fB \fR
+T}:T{
+Print header (set to 0|FALSE to disable headers in output)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--useHexFormat\fR,
+.PP
+\fB \fR\fB-x\fR\fB \fR
+T}:T{
+Output numbers in hexadecimal format
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--delimiter=char\fR,
+.PP
+\fB \fR\fB-D\fR\fB \fR
+T}:T{
+Set a column delimiter
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--disk\fR\fB \fR
+T}:T{
+Print disk references (useful only for Disk Data tables having
+              nonindexed columns)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--rowid\fR\fB \fR
+T}:T{
+Print rowid
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--gci\fR\fB \fR
+T}:T{
+Include GCI in output
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--gci64\fR\fB \fR
+T}:T{
+Include GCI and row epoch in output
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--tupscan\fR,
+.PP
+\fB \fR\fB-t\fR\fB \fR
+T}:T{
+Scan in tup order
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--nodata\fR\fB \fR
+T}:T{
+Do not print table column data
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-database=\fR\fB\fIdbname\fR\fR,
+\fB\-d\fR
+\fIdbname\fR
+.sp
+Name of the database in which the table is found\&. The default value is
+TEST_DB\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fBparallelism=\fR\fB\fI#\fR\fR,
+\fB\-p\fR
+\fI#\fR
+.sp
+Specifies the degree of parallelism\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-lock=\fR\fB\fIlock_type\fR\fR,
+\fB\-l \fR\fB\fIlock_type\fR\fR
+.sp
+Employs a lock when reading the table\&. Possible values for
+\fIlock_type\fR
+are:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+0: Read lock
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+1: Read lock with hold
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+2: Exclusive read lock
+.RE
+.sp
+There is no default value for this option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-order=\fR\fB\fIindex_name\fR\fR,
+\fB\-o \fR\fB\fIindex_name\fR\fR
+.sp
+Orders the output according to the index named
+\fIindex_name\fR\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+This is the name of an index, not of a column; the index must have been explicitly named when created\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-descending\fR,
+\fB\-z\fR
+.sp
+Sorts the output in descending order\&. This option can be used only in conjunction with the
+\fB\-o\fR
+(\fB\-\-order\fR) option\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-header=FALSE\fR
+.sp
+Excludes column headers from the output\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-useHexFormat\fR
+\fB\-x\fR
+.sp
+Causes all numeric values to be displayed in hexadecimal format\&. This does not affect the output of numerals contained in strings or datetime values\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-delimiter=\fR\fB\fIcharacter\fR\fR,
+\fB\-D \fR\fB\fIcharacter\fR\fR
+.sp
+Causes the
+\fIcharacter\fR
+to be used as a column delimiter\&. Only table data columns are separated by this delimiter\&.
+.sp
+The default delimiter is the tab character\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-disk\fR
+.sp
+Adds a disk reference column to the output\&. The column is nonempty only for Disk Data tables having nonindexed columns\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-rowid\fR
+.sp
+Adds a
+ROWID
+column providing information about the fragments in which rows are stored\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-gci\fR
+.sp
+Adds a
+GCI
+column to the output showing the global checkpoint at which each row was last updated\&. See
+Section\ \&22.1, \(lqNDB Cluster Overview\(rq, and
+Section\ \&22.5.6.2, \(lqNDB Cluster Log Events\(rq, for more information about checkpoints\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-gci64\fR
+.sp
+Adds a
+ROW$GCI64
+column to the output showing the global checkpoint at which each row was last updated, as well as the number of the epoch in which this update occurred\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-tupscan\fR,
+\fB\-t\fR
+.sp
+Scan the table in the order of the tuples\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-nodata\fR
+.sp
+Causes any table data to be omitted\&.
+.RE
+Sample Output
+.PP
+Output from a MySQL
+SELECT
+statement:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysql> \fBSELECT * FROM ctest1\&.fish;\fR
++\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-+
+| id | name      |
++\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-+
+|  3 | shark     |
+|  6 | puffer    |
+|  2 | tuna      |
+|  4 | manta ray |
+|  5 | grouper   |
+|  1 | guppy     |
++\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-+
+6 rows in set (0\&.04 sec)
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Output from the equivalent invocation of
+\fBndb_select_all\fR:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fB\&./ndb_select_all \-c localhost fish \-d ctest1\fR
+id      name
+3       [shark]
+6       [puffer]
+2       [tuna]
+4       [manta ray]
+5       [grouper]
+1       [guppy]
+6 rows returned
+NDBT_ProgramExit: 0 \- OK
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+All string values are enclosed by square brackets ([\&.\&.\&.]) in the output of
+\fBndb_select_all\fR\&. For another example, consider the table created and populated as shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+CREATE TABLE dogs (
+    id INT(11) NOT NULL AUTO_INCREMENT,
+    name VARCHAR(25) NOT NULL,
+    breed VARCHAR(50) NOT NULL,
+    PRIMARY KEY pk (id),
+    KEY ix (name)
+)
+TABLESPACE ts STORAGE DISK
+ENGINE=NDBCLUSTER;
+INSERT INTO dogs VALUES
+    (\*(Aq\*(Aq, \*(AqLassie\*(Aq, \*(Aqcollie\*(Aq),
+    (\*(Aq\*(Aq, \*(AqScooby\-Doo\*(Aq, \*(AqGreat Dane\*(Aq),
+    (\*(Aq\*(Aq, \*(AqRin\-Tin\-Tin\*(Aq, \*(AqAlsatian\*(Aq),
+    (\*(Aq\*(Aq, \*(AqRosscoe\*(Aq, \*(AqMutt\*(Aq);
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This demonstrates the use of several additional
+\fBndb_select_all\fR
+options:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fB\&./ndb_select_all \-d ctest1 dogs \-o ix \-z \-\-gci \-\-disk\fR
+GCI     id name          breed        DISK_REF
+834461  2  [Scooby\-Doo]  [Great Dane] [ m_file_no: 0 m_page: 98 m_page_idx: 0 ]
+834878  4  [Rosscoe]     [Mutt]       [ m_file_no: 0 m_page: 98 m_page_idx: 16 ]
+834463  3  [Rin\-Tin\-Tin] [Alsatian]   [ m_file_no: 0 m_page: 34 m_page_idx: 0 ]
+835657  1  [Lassie]      [Collie]     [ m_file_no: 0 m_page: 66 m_page_idx: 0 ]
+4 rows returned
+NDBT_ProgramExit: 0 \- OK
+.fi
+.if n \{\
+.RE
+.\}
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

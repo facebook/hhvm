@@ -1,0 +1,5 @@
+(3,15)-(3,15) A closing angle bracket `>` is expected here.
+(3,15)-(3,16) A type specifier is expected here.
+(3,16)-(3,16) A semicolon `;` is expected here.
+(3,23)-(3,23) An expression cannot start with `=`
+(3,23)-(3,26) Encountered unexpected token `int`.

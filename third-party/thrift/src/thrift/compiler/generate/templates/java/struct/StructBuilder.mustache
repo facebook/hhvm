@@ -1,0 +1,86 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+public static class Builder {
+    {{#struct:fields}}
+    private {{> FieldType}} {{field:javaName}} = {{#field:hasWrapper?}}null{{/field:hasWrapper?}}{{^field:hasWrapper?}}{{> struct/FieldValue}}{{/field:hasWrapper?}};
+    {{#field:hasWrapper?}}
+    private {{> FieldTypeNoWrapper}} _{{field:javaName}} = {{> struct/FieldValueNoWrapper}};
+    {{/field:hasWrapper?}}
+    {{/struct:fields}}
+
+    {{#struct:fields}}
+    {{#field:isSensitive?}}
+    @org.apache.thrift.annotations.Sensitive
+    {{/field:isSensitive?}}
+    {{> ThriftFieldAnnotation}}
+    {{#field:hasWrapper?}}
+    public Builder {{> SetterName}}({{field:wrapperType}} {{field:javaName}}) {
+        this.{{field:javaName}} = {{field:javaName}};
+        return this;
+    }
+    private Builder _{{> SetterName}}({{> FieldTypeNoWrapper}} {{field:javaName}}) {
+        this._{{field:javaName}} = {{field:javaName}};
+        return this;
+    }
+    {{/field:hasWrapper?}}
+    {{^field:hasWrapper?}}
+    public Builder {{> SetterName}}({{> FieldType}} {{field:javaName}}) {
+        this.{{field:javaName}} = {{field:javaName}};
+        return this;
+    }
+    {{/field:hasWrapper?}}
+
+    public {{> FieldType}} {{> GetterName}}() { return {{field:javaName}}; }
+
+    {{/struct:fields}}{{!
+
+    }}public Builder() { }
+    public Builder({{struct:javaCapitalName}} other) {
+        {{#struct:fields}}
+        this.{{field:javaName}} = other.{{field:javaName}};
+        {{/struct:fields}}
+    }
+
+    @ThriftConstructor
+    public {{struct:javaCapitalName}} build() {
+       {{^struct:isBigStruct?}}{{^struct:asBean?}}{{^struct:hasWrapper?}}
+        {{struct:javaCapitalName}} result = new {{struct:javaCapitalName}} (
+            {{#struct:fields}}
+            this.{{field:javaName}}{{^last?}},{{/last?}}
+            {{/struct:fields}}
+        );
+        return result;
+        {{/struct:hasWrapper?}}
+        {{#struct:hasWrapper?}}
+        {{> struct/CreateStruct}}
+        {{/struct:hasWrapper?}}
+        {{/struct:asBean?}}{{!
+
+        }}{{#struct:asBean?}}
+        {{> struct/CreateStruct}}
+        {{/struct:asBean?}}
+        {{/struct:isBigStruct?}}{{!
+
+        }}{{#struct:isBigStruct?}}
+        {{> struct/CreateStruct}}
+        {{/struct:isBigStruct?}}{{!
+
+        }}
+    }
+}
+{{! terminate with newline }}

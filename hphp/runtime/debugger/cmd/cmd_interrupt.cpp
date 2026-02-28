@@ -27,7 +27,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
@@ -150,7 +150,7 @@ void CmdInterrupt::onClient(DebuggerClient &client) {
   switch (m_interrupt) {
     case SessionStarted:
       if (!m_program.empty()) {
-        client.info("Program %s loaded. Type '[r]un' or '[c]ontinue' to go.",
+        client.info("Program %s loaded. Type '[r]un' to go.",
                      m_program.c_str());
         m_bpi->m_file = m_program;
       }

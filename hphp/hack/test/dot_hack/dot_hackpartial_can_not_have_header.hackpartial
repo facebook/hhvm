@@ -1,4 +1,0 @@
-<?hh // partial
-
-function foo(): void {
-}

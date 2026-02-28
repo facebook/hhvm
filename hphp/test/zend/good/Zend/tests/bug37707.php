@@ -1,6 +1,6 @@
 <?hh
 class testme {
-    function __clone() {
+    function __clone() :mixed{
         echo "clonned\n";
     }
 }

@@ -11,32 +11,32 @@ class Small {
   }
 }
 class Big {
-  public $groupAll = varray[];
-  public $group1 = varray[];
-  public $group2 = varray[];
+  public $groupAll = vec[];
+  public $group1 = vec[];
+  public $group2 = vec[];
   public $wacky;
   public $nothing;
-  public $unrelated = varray[];
-  function add() {
+  public $unrelated = vec[];
+  function add() :mixed{
     $s = new Small();
     $this->groupAll[] = $s;
     if ($s->num % 2 == 0) {
-      $this->group1[]=varray[$s->name, $s];
+      $this->group1[]=vec[$s->name, $s];
     }
  else {
-      $this->group2[]=varray[$s->name, $s];
+      $this->group2[]=vec[$s->name, $s];
     }
   }
-  function finish() {
+  function finish() :mixed{
     $x = 10;
-    $this->wacky = varray[$x, $x];
+    $this->wacky = vec[$x, $x];
     $s = new Small();
     $this->unrelated[] = $s;
     $this->unrelated[] = $s;
     $this->unrelated[] = $s;
   }
 }
-function t() {
+function t() :mixed{
   $b = new Big;
   for ($i = 0;
  $i < 10;
@@ -52,6 +52,6 @@ function t() {
 }
 
 <<__EntryPoint>>
-function main_1541() {
+function main_1541() :mixed{
 t();
 }

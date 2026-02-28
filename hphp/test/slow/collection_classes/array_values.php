@@ -1,5 +1,5 @@
 <?hh
-function f($x) {
+function f($x) :mixed{
   var_dump(is_array($x));
   foreach ($x as $k => $_) {
     var_dump($k);
@@ -15,7 +15,7 @@ function f($x) {
   });
   var_dump($x);
 }
-function main() {
+function main() :mixed{
   $vector = Vector {11, 22, 33, '22'};
   $map = Map {'a' => 11, 'b' => 22, 'c' => 33, 'd' => '22'};
   $set = Set {11, 22, 33, '22'};
@@ -33,6 +33,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_array_values() {
+function main_array_values() :mixed{
 main();
 }

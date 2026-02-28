@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/mem-file.h"
+#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include <folly/String.h>
 #include <folly/portability/SysStat.h>
@@ -68,6 +69,10 @@ struct FileStreamWrapper final : Stream::Wrapper {
   bool isNormalFileStream() const override { return true; }
 
   req::ptr<Directory> opendir(const String& path) override;
+
+  String realpath(const String& path) override {
+    return realpathLibc(File::TranslatePath(path).data());
+  }
 
  private:
   int mkdir_recursive(const String& path, int mode);

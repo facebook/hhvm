@@ -1,0 +1,3 @@
+Defined in `C`
+---
+public function f(): void

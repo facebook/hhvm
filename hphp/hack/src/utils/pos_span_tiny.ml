@@ -19,7 +19,7 @@ open Hh_prelude
  * <-------------------><--------------><------------------><---->X
  *  byte offset of line   line number      column number     width
  *)
-type t = int [@@deriving eq, ord]
+type t = int [@@deriving eq, hash, ord]
 
 let start_beginning_of_line_bits = 21
 
@@ -218,8 +218,4 @@ let pp fmt span =
     Format.pp_print_int fmt (end_column span + 1)
   )
 
-let show : t -> string =
- fun p ->
-  let buffer = Buffer.create 255 in
-  pp (Format.formatter_of_buffer buffer) p;
-  Buffer.contents buffer
+let show pos = Format.asprintf "%a" pp pos

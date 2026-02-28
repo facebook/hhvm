@@ -7,7 +7,7 @@
 // declaring class
 class sample
 {
-  public function __toString() {
+  public function __toString() :mixed{
     return "Object";
   }
 }
@@ -25,7 +25,7 @@ $arg2 = 'third argument';
 $file_handle = fopen(__FILE__, 'r');
 
 //array of values to iterate over
-$values = varray[
+$values = vec[
 
       // int data
       0,

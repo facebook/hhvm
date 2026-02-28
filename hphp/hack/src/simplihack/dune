@@ -1,0 +1,20 @@
+(library
+ (name simplihack)
+ (wrapped false)
+ (libraries
+  annotated_ast
+  ast
+  collections
+  decl_provider
+  errors
+  full_fidelity
+  logging
+  pos
+  provider_context
+  tast_env
+  typing_deps
+  typing_error
+  typing_skeleton
+  utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))

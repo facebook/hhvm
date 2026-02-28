@@ -6,16 +6,16 @@ class C {
   readonly function f1(readonly mixed $x1, mixed $x2): readonly mixed {
     return $x1;
   }
-  function f2() {}
+  function f2() :mixed{}
 }
 
 function f1(readonly mixed $x1, mixed $x2): readonly mixed {
   return $x1;
 }
-function f2() {}
+function f2() :mixed{}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump((new ReflectionParameter('C::f1', 'x1'))->isReadonly());
   var_dump((new ReflectionParameter('C::f1', 'x2'))->isReadonly());
 

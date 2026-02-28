@@ -1,0 +1,115 @@
+#!/bin/bash
+
+# Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2.0,
+# as published by the Free Software Foundation.
+#
+# This program is also distributed with certain software (including
+# but not limited to OpenSSL) that is licensed under separate terms,
+# as designated in a particular file or component or in included license
+# documentation.  The authors of MySQL hereby grant you an additional
+# permission to link the program and your derivative works with the
+# separately licensed software that they have included with MySQL.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License, version 2.0, for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+
+. /usr/share/debconf/confmodule
+
+get_root_pass(){
+	while :; do
+		PASSWD=""
+		db_input high mysql-@DEB_PRODUCTNAME@-server/root-pass || true
+		db_go
+
+		db_get mysql-@DEB_PRODUCTNAME@-server/root-pass
+		if [ -z "${RET}" ];
+		then
+			db_fset mysql-@DEB_PRODUCTNAME@-server/root-pass seen true
+			db_fset mysql-@DEB_PRODUCTNAME@-server/re-root-pass seen true
+			break
+		fi
+		PASSWD="${RET}"
+
+		db_input high mysql-@DEB_PRODUCTNAME@-server/re-root-pass || true
+		db_go
+
+		db_get mysql-@DEB_PRODUCTNAME@-server/re-root-pass
+		if [ "${RET}" == "${PASSWD}" ];
+		then
+			PASSWD=""
+			break
+		fi
+
+		db_fset mysql-@DEB_PRODUCTNAME@-server/root-pass-mismatch seen false
+		db_input critical mysql-@DEB_PRODUCTNAME@-server/root-pass-mismatch
+		db_set mysql-@DEB_PRODUCTNAME@-server/root-pass ""
+		db_set mysql-@DEB_PRODUCTNAME@-server/re-root-pass ""
+	done
+}
+if [ "$1" = "configure" ] && [ -z "$2" ];
+then
+
+	set -e
+
+	PKG_LIST=mysql-server-5.5:mysql-server-5.6:mysql-server-5.7:mysql-server-8.0:mysql-community-server:mysql-commercial-server
+	INSTALLED_PKG=none
+	MYSQLDATA=/var/lib/mysql
+
+	IFS_BACKUP=${IFS}
+	IFS=":"
+	for PKG in ${PKG_LIST};
+	do
+		STATUS=$(dpkg -s ${PKG} 2> /dev/null | grep Status: | cut -d' ' -f4)
+		if [ "${STATUS}" = "installed" ];
+		then
+			INSTALLED_PKG=${PKG}
+			break
+		fi
+	done
+	IFS=${IFS_BACKUP}
+
+	if [ "${INSTALLED_PKG}" = "none" ];
+	then
+		if [ -d ${MYSQLDATA} -o -L ${MYSQLDATA} ];
+		then
+			db_input high mysql-@DEB_PRODUCTNAME@-server/data-dir || true
+		else
+			db_fset mysql-@DEB_PRODUCTNAME@-server/data-dir seen true
+		fi
+
+		get_root_pass
+
+	else
+		db_fset mysql-@DEB_PRODUCTNAME@-server/data-dir seen true
+		# If datadir is missing, ask for root password even with existing packages
+		if [ ! -d ${MYSQLDATA} -a ! -L ${MYSQLDATA} ];
+		then
+			get_root_pass
+		else
+			db_fset mysql-@DEB_PRODUCTNAME@-server/root-pass seen true
+			db_fset mysql-@DEB_PRODUCTNAME@-server/re-root-pass seen true
+		fi
+	fi
+
+	set +e
+fi
+# The following should also be shown on upgrades
+if [ "$1" = "configure" ];
+then
+	set -e
+	OVERRIDEFILE="/etc/mysql/mysql.conf.d/default-auth-override.cnf"
+	if [ ! -e "$OVERRIDEFILE" ]; then
+		db_input high mysql-server/default-auth-override || true
+		db_go
+	fi
+	set +e
+fi

@@ -10,7 +10,7 @@ class A
     }
 
     protected function getValue()
-    {
+:mixed    {
         return $this->value;
     }
 }
@@ -18,7 +18,7 @@ class A
 class B extends A
 {
     public function copyValue($obj)
-    {
+:mixed    {
         $this->value = $obj->getValue();
         $this->value = $obj->value; // value defined in common base class
     }

@@ -23,7 +23,7 @@ $heredoc_null_string = <<<EOT
 NULL
 EOT;
 
-$strings = varray[
+$strings = vec[
   "",
   " ",
   '',
@@ -62,7 +62,7 @@ $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
 // other types in a array
-$not_strings = varray [
+$not_strings = vec[
   /* integers */
   0,
   1,
@@ -101,18 +101,18 @@ $not_strings = varray [
   $dfp,
 
   /* arrays */
-  varray[],
-  varray[0],
-  varray[1],
-  varray[NULL],
-  varray[null],
-  varray["string"],
-  varray[true],
-  varray[TRUE],
-  varray[false],
-  varray[FALSE],
-  varray[1,2,3,4],
-  darray[1 => "One", "two" => 2],
+  vec[],
+  vec[0],
+  vec[1],
+  vec[NULL],
+  vec[null],
+  vec["string"],
+  vec[true],
+  vec[TRUE],
+  vec[false],
+  vec[FALSE],
+  vec[1,2,3,4],
+  dict[1 => "One", "two" => 2],
 ];
 /* loop through the $not_strings to see working of
    is_string() on non string types, expected output bool(false) */

@@ -10,8 +10,8 @@ function main_entry(): void {
   }
   $proc = XSLTPrepare::getProc();
   $proc->importStylesheet($phpfuncxsl);
-  var_dump($proc->registerPHPFunctions(varray['strpos', 'ucwords']));
-  var_dump($proc->registerPHPFunctions(varray['strrev', 'array_key_exists']));
-  var_dump($proc->registerPHPFunctions(varray[]));
+  var_dump($proc->registerPHPFunctions(vec['strpos', 'ucwords']));
+  var_dump($proc->registerPHPFunctions(vec['strrev', 'array_key_exists']));
+  var_dump($proc->registerPHPFunctions(vec[]));
   var_dump($proc->transformToXML(XSLTPrepare::getDOM()));
 }

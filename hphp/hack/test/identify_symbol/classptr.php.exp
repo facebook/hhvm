@@ -1,0 +1,10 @@
+name: \C, kind: class, span: line 8, characters 10-10, is_declaration: false
+definition:
+ C
+   kind: class
+   id: type_id::C
+   position: line 3, characters 7-7
+   span: line 3, character 1 - line 5, character 1
+   modifiers: 
+
+

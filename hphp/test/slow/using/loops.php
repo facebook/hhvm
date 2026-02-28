@@ -8,11 +8,11 @@ class Logger implements IDisposable {
     $this->id = self::$nextId++;
     printf("Logger %d constructing\n", $this->id);
   }
-  function __dispose() {
+  function __dispose() :mixed{
     printf("Logger %d disposing\n", $this->id);
   }
 }
-function main() {
+function main() :mixed{
   echo "Entering loop\n";
   $loop = true;
   while (true) {
@@ -48,6 +48,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_loops() {
+function main_loops() :mixed{
 main();
 }

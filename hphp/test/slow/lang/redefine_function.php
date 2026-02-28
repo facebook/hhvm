@@ -4,7 +4,7 @@
 function
 foo
 ()
-{
+:mixed{
 }
-function foo() {
+function foo() :mixed{
 }

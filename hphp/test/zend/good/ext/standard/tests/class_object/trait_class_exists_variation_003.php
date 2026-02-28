@@ -6,7 +6,7 @@
  */
 
 trait caseSensitivityTest {}
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function trait_class_exists_variation_003(): void {
 var_dump(trait_exists('casesensitivitytest'));
 echo "Done";
 }

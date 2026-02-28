@@ -26,4 +26,4 @@ val file_path_relative_to_repo_root : string
 
 val empty : unit -> t
 
-val parse_hhconfig : string -> (string * t, string) Lwt_result.t
+val parse_hhconfig : string -> (t, string) Lwt_result.t

@@ -4,7 +4,7 @@ class MyClass {
   public function __construct() {
     echo "ctor\n";
   }
-  public function method() {
+  public function method() :mixed{
     echo "method\n";
   }
 
@@ -25,6 +25,6 @@ function hinting(): void {
 
 
 <<__EntryPoint>>
-function main_typedef_class() {
+function main_typedef_class() :mixed{
 hinting();
 }

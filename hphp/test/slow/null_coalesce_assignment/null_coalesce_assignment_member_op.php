@@ -16,7 +16,7 @@ function side_effect(): int {
   return 5;
 }
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) {
     echo "FAILED: $y\n";
@@ -24,7 +24,7 @@ function VS($x, $y) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   // Dict
   $b = dict['a' => dict['b' => 1]];
   $b['a']['b'] ??= 17;
@@ -40,7 +40,7 @@ function main() {
   VS($e['e']['a'], 15);
 
   $a = dict['a' => null];
-  $a['a'] ??= darray[];
+  $a['a'] ??= dict[];
   $a['a']['b'] = 10;
 
   // Uninit

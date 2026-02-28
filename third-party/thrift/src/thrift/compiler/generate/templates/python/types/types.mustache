@@ -1,0 +1,318 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+Generated Python classes for Thrift types
+}}
+{{#import "common/common" as m_common}}
+{{#import "common/fields" as m_fields}}
+{{#import "common/functions" as m_functions}}
+{{#import "common/typehints" as typehints}}
+{{#import "common/services" as m_services}}
+{{#import "common/types" as m_types}}
+{{#import "types/service_arg_types" as service_arg_types}}
+{{#partial m_common.auto_generated_py}}
+
+{{#if (not (or python.generate_immutable_types? python.generate_mutable_types?))}}
+import builtins
+
+{{/if (not (or python.generate_immutable_types? python.generate_mutable_types?))}}
+import folly.iobuf as _fbthrift_iobuf
+
+  {{#if python.enable_abstract_types?}}
+from abc import ABCMeta as _fbthrift_ABCMeta
+import {{program.module_path}}.thrift_abstract_types as _fbthrift_abstract_types
+  {{/if python.enable_abstract_types?}}
+  {{#if program.has_streaming_types?}}
+from thrift.python.protocol import RpcKind as _fbthrift__RpcKind
+  {{/if program.has_streaming_types?}}
+  {{#if program.has_sink_functions?}}
+{{> types/sink_imports }}
+  {{/if program.has_sink_functions?}}
+import {{program.base_library_package}}.types as _fbthrift_python_types
+  {{#if python.generate_immutable_types?}}
+import {{program.base_library_package}}.exceptions as _fbthrift_python_exceptions
+  {{/if python.generate_immutable_types?}}
+  {{#if python.generate_mutable_types?}}
+import {{program.base_library_package}}.mutable_types as _fbthrift_python_mutable_types
+import {{program.base_library_package}}.mutable_containers as _fbthrift_python_mutable_containers
+import {{program.base_library_package}}.mutable_exceptions as _fbthrift_python_mutable_exceptions
+import {{program.base_library_package}}.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
+  {{/if python.generate_mutable_types?}}
+
+{{#each program.include_namespaces as |include|}}
+  {{#if include.has_types?}}
+
+import {{include.included_module_path}}.{{#partial m_types.import_path}}
+import {{include.included_module_path}}.{{#partial m_types.import_path}} as {{include.included_module_mangle}}__{{#partial m_types.import_path}}
+  {{/if include.has_types?}}
+{{/each}}
+{{#each program.adapter_modules as |module_path|}}
+import {{module_path}}
+{{/each}}
+{{#partial m_common.import_enums program=program}}
+{{#each program.structured_definitions as |struct|}}
+
+
+class {{#partial m_types.unadapted_name type=struct}}{{!
+}}(metaclass={{#partial m_types.structured_base type=struct}}Meta):
+    {{#if (and struct.allow_inheritance? (has_compiler_option? "auto_migrate"))}}
+    _fbthrift_allow_inheritance_DO_NOT_USE = True
+    {{/if (and struct.allow_inheritance? (has_compiler_option? "auto_migrate"))}}
+    {{#if struct.disable_field_caching?}}
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
+    {{/if struct.disable_field_caching?}}
+    _fbthrift_SPEC = (
+        {{#each struct.fields_ordered_by_id as |field|}}
+        _fbthrift_python_types.FieldInfo(
+            {{field.id}},  # id
+            _fbthrift_python_types.{{field.tablebased_qualifier}}, # qualifier
+            "{{field.name}}",  # name
+            "{{field.py_name}}",  # python name (from @python.Name annotation)
+            {{> fields/typeinfo}},  # typeinfo
+              {{#let default_val = field.default_value}}
+              {{#if (object.notnull? default_val)}}
+            {{#if (not field.type.primitive?)}}lambda: {{/if}}{{#default_val}}{{> types/constant_value }}{{/default_val}},  # default value
+              {{#else}}
+            None,  # default value
+              {{/if (object.notnull? default_val)}}
+            {{#partial m_common.adapter_info node=field}},  # adapter info
+            {{#partial m_types.is_primitive type=field.type}}, # field type is primitive
+            {{field.idl_type}}, # IDL type (see BaseTypeEnum)
+{{#if field.deprecated?}}
+            "{{field.deprecation_message}}",  # deprecation message
+{{/if field.deprecated?}}
+        ),
+        {{/each}}
+    ){{!
+    }}{{#python.enable_abstract_types?}}{{!
+    }}{{#if (or struct.union? struct.exception?)}}{{!
+    }}
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.{{struct.py_name}}
+    {{!
+    }}{{/if (or struct.union? struct.exception?)}}{{!
+    }}{{/python.enable_abstract_types?}}
+
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "{{program.name}}.{{#partial m_types.unadapted_name type=struct}}"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return {{#if (string.empty? struct.uri)}}None{{#else}}"{{struct.uri}}"{{/if}}
+
+{{#if python.generate_immutable_types?}}
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return {{(py_bool (has_compiler_option? "auto_migrate"))}}
+
+{{#if (not (has_compiler_option? "no_metadata"))}}
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__{{#if struct.exception?}}exception{{#else}}struct{{/if}}_{{#partial m_types.unadapted_name type=struct}}()
+{{/if (not (has_compiler_option? "no_metadata"))}}
+    {{!
+      makes reflection work in auto-migrated thrift-py3
+    }}{{#if (has_compiler_option? "auto_migrate")}}
+
+    @staticmethod
+    def __get_reflection__():
+        import importlib
+        types_reflection = importlib.import_module("{{program.module_path}}.types_reflection")
+        return types_reflection.get_reflection__{{struct.py_name}}()
+    {{/if (has_compiler_option? "auto_migrate")}}
+{{/if python.generate_immutable_types?}}
+{{#if python.generate_mutable_types?}}
+{{#if (not (has_compiler_option? "no_metadata"))}}
+    @staticmethod
+    def __get_metadata__():
+        raise NotImplementedError(f"__get_metadata__() is not yet implemented for mutable thrift-python structs: {type(self)}")
+{{/if (not (has_compiler_option? "no_metadata"))}}
+{{/if python.generate_mutable_types?}}
+
+    {{#if (and struct.exception? (object.notnull? struct.message_field))}}
+
+    def __str__(self):
+        field = self.{{struct.message_field.py_name}}
+        if field is None:
+            {{! optional field, stringify }}
+            return str(field)
+        return field
+
+    {{/if (and struct.exception? (object.notnull? struct.message_field))}}
+    {{#if struct.legacy_api?}}
+      {{#if python.generate_mutable_types?}}
+
+    def _to_python(self):
+        from thrift.python import converter
+        import importlib
+        immutable_types = importlib.import_module("{{program.module_path}}.thrift_types")
+        return converter.to_python_struct(immutable_types.{{#partial m_types.unadapted_name type=struct}}, self)
+
+    def _to_mutable_python(self):
+        return self
+      {{/if python.generate_mutable_types?}}
+      {{#if python.generate_immutable_types?}}
+    def _to_python(self):
+        return self
+
+    def _to_mutable_python(self):
+        from thrift.python import mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("{{program.module_path}}.thrift_mutable_types")
+        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.{{#partial m_types.unadapted_name type=struct}}, self)
+      {{/if python.generate_immutable_types?}}
+
+    def _to_py3(self):
+    {{#if (not (has_compiler_option? "auto_migrate"))}}
+        import importlib
+        py3_types = importlib.import_module("{{program.module_path}}.types")
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.{{#partial m_types.unadapted_name type=struct}}, self)
+    {{#else}}
+        return self
+    {{/if (not (has_compiler_option? "auto_migrate"))}}
+
+    def _to_py_deprecated(self):
+    {{#if (or (not (has_compiler_option? "does_not_have_py_deprecated")) (not (has_compiler_option? "does_not_have_py_deprecated_asyncio")))}}
+        import importlib
+        from thrift.util import converter
+        {{#if (not (has_compiler_option? "does_not_have_py_deprecated"))}}
+            {{#if (not (has_compiler_option? "does_not_have_py_deprecated_asyncio"))}}
+        try:
+            py_deprecated_types = importlib.import_module("{{program.py_deprecated_module_path}}.ttypes")
+            return converter.to_py_struct(py_deprecated_types.{{#partial m_types.unadapted_name type=struct}}, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("{{program.py_asyncio_module_path}}.ttypes")
+            return converter.to_py_struct(py_asyncio_types.{{#partial m_types.unadapted_name type=struct}}, self)
+            {{#else}}
+        py_deprecated_types = importlib.import_module("{{program.py_deprecated_module_path}}.ttypes")
+        return converter.to_py_struct(py_deprecated_types.{{#partial m_types.unadapted_name type=struct}}, self)
+            {{/if (not (has_compiler_option? "does_not_have_py_deprecated_asyncio"))}}
+        {{#else}}
+            {{#if (not (has_compiler_option? "does_not_have_py_deprecated_asyncio"))}}
+        py_asyncio_types = importlib.import_module("{{program.py_asyncio_module_path}}.ttypes")
+        return converter.to_py_struct(py_asyncio_types.{{#partial m_types.unadapted_name type=struct}}, self)
+            {{/if (not (has_compiler_option? "does_not_have_py_deprecated_asyncio"))}}
+        {{/if (not (has_compiler_option? "does_not_have_py_deprecated"))}}
+    {{#else}}
+        raise NotImplementedError("to_py_deprecated is not implemented")
+    {{/if (or (not (has_compiler_option? "does_not_have_py_deprecated")) (not (has_compiler_option? "does_not_have_py_deprecated_asyncio")))}}
+    {{/if struct.legacy_api?}}
+    {{#if python.enable_abstract_types?}}{{!
+TODO(T208096866)
+If the class uses the abstract class as a direct baseclass, it results in the error below.
+       TypeError: metaclass conflict: the metaclass of a derived class must be a (non-strict)
+       subclass of the metaclasses of all its bases
+
+Until we resolve the above error, register the class as virtual subclass of the abstract class.
+To workaround the problem that a thrift field named register will cause register to become a property
+on the abstract type and prevent the ability to use it to register a virtual subclass,
+use abc.ABCMeta.register(cls, subclass) to register.
+}}{{#if (not struct.exception?)}}
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.{{#partial m_types.unadapted_name type=struct}}, {{#partial m_types.unadapted_name type=struct}})
+{{/if (not struct.exception?)}}
+    {{/if python.enable_abstract_types?}}
+{{#if struct.has_adapter?}}
+  {{#let adapter = struct.adapter}}
+
+
+{{struct.py_name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial m_types.unadapted_name type=struct}}]{{/if}}
+{{/if struct.has_adapter?}}
+{{#partial m_common.private_alias_prefix}}{{struct.py_name}} = {{struct.py_name}}{{!
+}}{{/each}}
+
+  {{#if python.generate_immutable_types?}}
+{{#if (not (has_compiler_option? "no_metadata"))}}
+# This unfortunately has to be down here to prevent circular imports
+import {{program.module_path}}.thrift_metadata as {{program.module_mangle}}__thrift_metadata
+{{/if (not (has_compiler_option? "no_metadata"))}}
+  {{/if python.generate_immutable_types?}}
+
+{{!
+    The symbol below is only required for AnyRegistry.register_module.
+    Currently, calls to that method only pass thrift_types.
+    register_module in its current form expects _fbthrift_all_enums
+    to be defined in thrift_types. For now define
+    _fbthrift_all_enums here.
+}}
+_fbthrift_all_enums = [
+    {{#each program.enums as |enum|}}
+    {{enum.py_name}},
+    {{/each}}
+]
+{{#if python.generate_immutable_types?}}
+{{#if (not (has_compiler_option? "no_metadata"))}}
+  {{#each program.structured_definitions as |struct|}}
+    {{#let structured_kind = (if struct.exception? "exception" "struct")}}
+
+
+def _fbthrift_metadata__{{structured_kind}}_{{#partial m_types.unadapted_name type=struct}}():
+    return {{program.module_mangle}}__thrift_metadata.gen_metadata_{{structured_kind}}_{{#partial m_types.unadapted_name type=struct}}()
+  {{/each}}
+{{/if (not (has_compiler_option? "no_metadata"))}}
+{{/if python.generate_immutable_types?}}
+
+
+_fbthrift_all_structs = [
+    {{#each program.structured_definitions as |struct|}}
+    {{#partial m_types.unadapted_name type=struct}},
+    {{/each}}
+]
+{{#if program.structs?}}
+  {{#if python.generate_mutable_types?}}
+_fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
+  {{/if python.generate_mutable_types?}}
+  {{#if python.generate_immutable_types?}}
+_fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
+  {{/if python.generate_immutable_types?}}
+{{/if program.structs?}}
+{{> common/constants }}
+{{> common/typedef }}
+{{#if program.services?}}
+  {{#each program.services as |service|}}
+
+    {{#each service.supported_functions as |function|}}
+{{#partial service_arg_types.function_arg_types function=function service=service }}
+    {{/each}}
+
+    {{#each service.interactions as |interaction|}}
+
+      {{#each interaction.supported_functions as |function|}}
+{{#partial service_arg_types.function_arg_types function=function service=interaction }}
+      {{/each}}
+
+    {{/each}}
+  {{/each}}
+
+
+  {{#if python.generate_mutable_types?}}
+_fbthrift_python_mutable_types.fill_specs(
+  {{/if python.generate_mutable_types?}}
+  {{#if python.generate_immutable_types?}}
+_fbthrift_python_types.fill_specs(
+  {{/if python.generate_immutable_types?}}
+  {{#each program.services as |service|}}
+    {{#partial m_services.arg_type_list interface=service}}
+      {{#each service.interactions as |interaction|}}
+    {{#partial m_services.arg_type_list interface=interaction}}
+      {{/each}}
+  {{/each}}
+)
+{{/if program.services?}}

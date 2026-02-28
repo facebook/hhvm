@@ -1,4 +1,4 @@
-    $nonsensical_maplike_array = darray[
+    $nonsensical_maplike_array = dict[
       "A Very Long Key Value For This Map" =>
         "Here's a value of an appropriate length",
     ];

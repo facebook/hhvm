@@ -1,0 +1,2 @@
+ERROR: File "await_in_splice_conditional.php", line 13, characters 15-59:
+Cannot use unstable feature: `allow_conditional_await_syntax` (Parsing[1002])

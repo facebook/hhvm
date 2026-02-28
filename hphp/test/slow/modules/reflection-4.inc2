@@ -1,0 +1,7 @@
+<?hh
+
+module A.B;
+
+class C {
+  function f() {}
+}

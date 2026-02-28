@@ -1,29 +1,33 @@
 <?hh
 
-function test_connect() {
+function test_connect() :mixed{
   AsyncMysqlClient::connect("a", 123, "db", "a", "a", 0, new stdClass, 0, "x");
 }
 
-function test_connect_and_query() {
-   AsyncMysqlClient::connectAndQuery(darray(vec[]), "x",1,"x","y","z", new stdClass, dict[]);
+function test_connect_and_query() :mixed{
+   AsyncMysqlClient::connectAndQuery(vec[], "x",1,"x","y","z", new stdClass, dict[]);
 }
 
-function test_connect_with_opts() {
+function test_connect_with_opts() :mixed{
   AsyncMysqlClient::connectWithOpts("a",1,"a","a","a", new stdClass);
 }
 
-function test_pool_connect_with_opts() {
+function test_pool_connect_with_opts() :mixed{
   $a = new AsyncMysqlConnectionPool(dict(vec[]));
   $a->connectWithOpts("a", 123, "x","y","z", new stdClass, "extra");
 }
 
 <<__EntryPoint>>
 function main(): void {
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
+    throw new Exception($errstr);
+  });
+
   $tests = vec[
-      fun('test_connect'),
-      fun('test_connect_and_query'),
-      fun('test_connect_with_opts'),
-      fun('test_pool_connect_with_opts')
+      test_connect<>,
+      test_connect_and_query<>,
+      test_connect_with_opts<>,
+      test_pool_connect_with_opts<>
   ];
   foreach ($tests as $t) {
     try {

@@ -1,4 +1,4 @@
-File "typing_fail_private_access.php", line 18, characters 12-16:
+ERROR: File "typing_fail_private_access.php", line 18, characters 12-16:
 Typing error (Typing[4053])
   File "typing_fail_private_access.php", line 18, characters 19-19:
   No property `a` in `Bar`

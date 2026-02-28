@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing natcasesort() : usage variation ***\n";
 
-$unsorted_hex_array = varray[0x1AB, 0xFFF, 0xF, 0xFF, 0x2AA, 0xBB, 0x1ab, 0xff, -0xFF, 0, -0x2aa];
+$unsorted_hex_array = vec[0x1AB, 0xFFF, 0xF, 0xFF, 0x2AA, 0xBB, 0x1ab, 0xff, -0xFF, 0, -0x2aa];
 var_dump( natcasesort(inout $unsorted_hex_array) );
 var_dump($unsorted_hex_array);
 

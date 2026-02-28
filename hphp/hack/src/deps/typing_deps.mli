@@ -29,17 +29,24 @@ module Dep : sig
   type _ variant =
     | GConst : string -> 'a variant
         (** Represents a global constant depending on something, or something
-        depending on a global constant. *)
+          depending on a global constant. *)
     | Fun : string -> 'a variant
         (** Represents either a global function depending on something, or
-        something depending on a global function. *)
+          something depending on a global function. *)
     | Type : string -> 'a variant
         (** Represents either a class/typedef/recorddef/trait/interface depending on something,
-        or something depending on one. *)
+          or something depending on one. *)
     | Extends : string -> dependency variant
         (** Represents another class depending on a class via an
-        inheritance-like mechanism (`extends`, `implements`, `use`, `require
-        extends`, `require implements`, etc.) *)
+          inheritance-like mechanism (`extends`, `implements`, `use`, `require
+          extends`, `require implements`, etc.) *)
+    | NotSubtype : string -> dependency variant
+        (** Whenever we use the fact that 'A is not a subtype of X' to conclude that
+          a def F typechecks, we add an edge from `NotSubtype A` to the variant for F.
+          For example, this can happen if we conclude that F typechecks based on
+          concluding that A and X are disjoint and therefore a refinement branch is dead code.
+          Adding a parent to A can invalidate any fact like 'A is not a subtype of X',
+          so these edges will be typically followed when adding parents to types. *)
     | Const : string * string -> dependency variant
         (** Represents something depending on a class constant. *)
     | Constructor : string -> dependency variant
@@ -54,17 +61,47 @@ module Dep : sig
         (** Represents something depending on a class's static method. *)
     | AllMembers : string -> dependency variant
         (** Represents something depending on all members of a class.
-        Particularly useful for switch exhaustiveness-checking. We establish
-        a dependency on all members of an enum in that case. *)
+          Particularly useful for switch exhaustiveness-checking. We establish
+          a dependency on all members of an enum in that case. *)
     | GConstName : string -> 'a variant
         (** Like [GConst], but used only in conservative redecl. May not be
-        necessary anymore. *)
+          necessary anymore. *)
     | Module : string -> 'a variant
         (** Represents a toplevel symbol being defined as a member of
-        this module *)
+          this module *)
+    | Declares : 'a variant
+        (** An edge `Method(c, m) -> Declares` means that class c declares m. *)
+    | File : Relative_path.t -> dependency variant
+        (** Represents a dependency on the contents of a file.
+            This is currently used by the SimpliHack interpreter. The interpreter
+            cares about the body of functions/methods and not just their declaration.
+            Files read during evaluation will be dependencies. *)
+
+  val dependency_of_variant : 'a variant -> dependency variant
+
+  type dep_kind =
+    | KGConst
+    | KFun
+    | KType
+    | KExtends
+    | KConst
+    | KConstructor
+    | KProp
+    | KSProp
+    | KMethod
+    | KSMethod
+    | KAllMembers
+    | KGConstName
+    | KModule
+    | KDeclares
+    | KNotSubtype
+    | KFile
+  [@@deriving enum]
+
+  val dep_kind_of_variant : 'a variant -> dep_kind
 
   module Member : sig
-    type t
+    type t [@@deriving show]
 
     val method_ : string -> t
 
@@ -77,6 +114,8 @@ module Dep : sig
     val constructor : t
 
     val const : string -> t
+
+    val all : t
   end
 
   (** A 63bit hash *)
@@ -86,16 +125,22 @@ module Dep : sig
 
   val make_member_dep_from_type_dep : t -> Member.t -> t
 
+  val compare_variant : 'a variant -> 'a variant -> int
+
   (** A 64bit representation of the 63bit hash. *)
   val to_int64 : t -> int64
 
-  val is_class : t -> bool
+  val to_int : t -> int
 
-  val extends_of_class : t -> t
+  val is_class : t -> bool
 
   val compare : t -> t -> int
 
   val extract_name : 'a variant -> string
+
+  val extract_root_name : ?strip_namespace:bool -> 'a variant -> string
+
+  val extract_member_name : 'a variant -> string option
 
   val to_decl_reference : 'a variant -> Decl_reference.t
 
@@ -108,6 +153,8 @@ module Dep : sig
   val of_hex_string : string -> t
 
   val variant_to_string : 'a variant -> string
+
+  val pp_variant : Format.formatter -> 'a variant -> unit
 end
 
 module DepHashKey : sig
@@ -119,7 +166,7 @@ module DepHashKey : sig
 end
 
 module DepSet : sig
-  type t
+  type t [@@deriving show]
 
   type elt = Dep.t
 
@@ -148,8 +195,14 @@ module DepSet : sig
   val is_empty : t -> bool
 
   val of_list : elt list -> t
+end
 
-  val pp : Format.formatter -> t -> unit
+module DepMap : sig
+  include WrappedMap_sig.S with type key = Dep.t
+
+  val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
+
+  val show : (Format.formatter -> 'a -> unit) -> 'a t -> string
 end
 
 module VisitedSet : sig
@@ -169,58 +222,54 @@ val worker_id : int option ref
 val trace : bool ref
 
 val add_dependency_callback :
-  string ->
+  name:string ->
   (Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit) ->
   unit
 
-(* returns the previous value of the flag *)
+(** Return the previous value of the flag *)
 val allow_dependency_table_reads : Mode.t -> bool -> bool
 
 val add_idep :
   Mode.t -> Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit
 
-val idep_exists :
-  Mode.t -> Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> bool
+val replace : Mode.t -> unit
 
 val dep_edges_make : unit -> dep_edges
 
+(** Depending on [mode], either return discovered edges
+  which are not already in the dep graph
+  or write those edges to disk. *)
 val flush_ideps_batch : Mode.t -> dep_edges
 
 val merge_dep_edges : dep_edges -> dep_edges -> dep_edges
 
+(** Register the provided dep edges in the dep table delta in [typing_deps.rs] *)
 val register_discovered_dep_edges : dep_edges -> unit
 
+(** Depending on mode, flush deps to disk or to in-memory depgraph delta *)
+val flush_deps : Mode.t -> unit
+
+(** Remove edges `dep -> Declares` for each `dep` in provided dep set *)
+val remove_declared_tags : Mode.t -> DepSet.t -> unit
+
 (** Save discovered edges to a binary file.
-  *
-  * - If mode is [InMemoryMode], the dep table delta in [typing.rs] is saved.
-  * - If mode is [SaveToDiskMode], an exception is raised.
-  *
-  * Setting [reset_state_after_saving] will empty the dep table delta in
-  * [typing.rs].
-  *)
+
+  - If mode is [InMemoryMode], the dep table delta in [typing_deps.rs] is saved.
+  - If mode is [SaveToDiskMode], an exception is raised.
+
+  Setting [reset_state_after_saving] will empty the dep table delta in
+  [typing_deps.rs]. *)
 val save_discovered_edges :
   Mode.t -> dest:string -> reset_state_after_saving:bool -> int
-
-(** Load discovered edges from a binary file.
-  *
-  * - If mode is [InMemoryMode], the binary file is assumed to contain 64-bit
-  *   hashes and they will be added to the dep table delta in [typing.rs].
-  *   If we have an existing table attached, we will first filter out edges
-  *   that are already present in the attached table.
-  * - If mode is [SaveToDiskMode], the file is assumed to contain 64-bit
-  *   hashes and they will be added ot the current worker's on-disk
-  *   dependency edge file.
-  *)
-val load_discovered_edges : Mode.t -> string -> int
 
 val get_ideps_from_hash : Mode.t -> Dep.t -> DepSet.t
 
 val get_ideps : Mode.t -> Dep.dependency Dep.variant -> DepSet.t
 
-(* Add to accumulator all extend dependencies of source_class. Visited is used
- * to avoid processing nodes reachable in multiple ways more than once. In other
- * words: use DFS to find all nodes reachable by "extends" edges starting from
- * source class *)
+(** Add to accumulator all extend dependencies of source_class. Visited is used
+  to avoid processing nodes reachable in multiple ways more than once. In other
+  words: use DFS to find all nodes reachable by "extends" edges starting from
+  source class *)
 val get_extend_deps :
   mode:Mode.t ->
   visited:VisitedSet.t ->
@@ -228,15 +277,31 @@ val get_extend_deps :
   acc:DepSet.t ->
   DepSet.t
 
-(* Grow input set by adding all its extend dependencies (including recursive) *)
+(** Grow input set by adding all its extend dependencies (including recursive) *)
 val add_extend_deps : Mode.t -> DepSet.t -> DepSet.t
 
-(* Grow input set by adding all its typing dependencies (direct only) *)
+(** Grow input set by adding all its typing dependencies (direct only) *)
 val add_typing_deps : Mode.t -> DepSet.t -> DepSet.t
 
-(* add_extend_deps and add_typing_deps chained together *)
+(** add_extend_deps and add_typing_deps chained together *)
 val add_all_deps : Mode.t -> DepSet.t -> DepSet.t
+
+(** The fanout of a member `m` in type `A` contains:
+  - the members `m` in descendants of `A` down to the first members `m` which are declared.
+  - the dependents of those members `m` in descendants,
+    but excluding dependents of declared members.
+
+  We also include `A::m` itself in the result.
+  The computed fanout is added to the provided DepSet accumulator. *)
+val get_member_fanout :
+  Mode.t -> class_dep:Dep.t -> Dep.Member.t -> DepSet.t -> DepSet.t
+
+val get_not_subtype_fanout :
+  Mode.t -> descendant_deps:DepSet.t -> DepSet.t -> DepSet.t
 
 module Telemetry : sig
   val depgraph_delta_num_edges : Mode.t -> int option
 end
+
+val dump_current_edge_buffer_in_memory_mode :
+  ?deps_to_symbol_map:'a Dep.variant DepMap.t -> unit -> unit

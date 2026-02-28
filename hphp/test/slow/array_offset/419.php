@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_419() {
-$a = varray[10];
+function main_419() :mixed{
+$a = vec[10];
  $b = $a[0];
  var_dump($b);
 }

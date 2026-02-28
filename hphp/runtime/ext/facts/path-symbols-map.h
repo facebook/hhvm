@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <folly/experimental/io/FsUtil.h>
-
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/lazy-two-way-map.h"
 #include "hphp/runtime/ext/facts/symbol-types.h"
@@ -25,16 +23,16 @@
 namespace HPHP {
 namespace Facts {
 
-template <SymKind k> struct PathToSymbolsMap {
-
+template <SymKind k>
+struct PathToSymbolsMap {
   using PathSymbolMap = LazyTwoWayMap<Path, Symbol<k>>;
 
   using Symbols = typename PathSymbolMap::Values;
   using Paths = typename PathSymbolMap::Keys;
 
-  explicit PathToSymbolsMap(std::shared_ptr<PathVersions> versions)
-      : m_pathSymbolMap{std::move(versions)} {
-  }
+  explicit PathToSymbolsMap(
+      std::shared_ptr<LazyTwoWayMapVersionProvider> versions)
+      : m_pathSymbolMap{std::move(versions)} {}
 
   /**
    * Return information about the locations of a given symbol, or the symbols
@@ -68,7 +66,7 @@ template <SymKind k> struct PathToSymbolsMap {
     m_pathSymbolMap.setValuesForKey(path, std::move(symbols));
   }
 
-private:
+ private:
   PathSymbolMap m_pathSymbolMap;
 };
 

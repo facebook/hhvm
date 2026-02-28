@@ -9,13 +9,13 @@
  *  Return Type : bool - true if element is odd and returns false otherwise
  *  Description : Function takes array as input and checks for its each elements.
 */
-function odd($input) {
+function odd($input) :mixed{
   return ($input % 2 != 0);
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_filter() : error conditions ***\n";
 
-$input = varray[0, 1, 2, 3, 5];
+$input = vec[0, 1, 2, 3, 5];
 
 $extra_arg = 10;
 

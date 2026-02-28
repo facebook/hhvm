@@ -23,28 +23,37 @@
 namespace HPHP {
 
 struct AsioExtension final : Extension {
-  AsioExtension() : Extension("asio", "0.1") {}
+  AsioExtension() : Extension("asio", "0.1", "hphp_hphpi") {}
   void moduleInit() override;
+  void moduleRegisterNative() override;
   void requestInit() override;
+  std::vector<std::string> hackFiles() const override;
 
 private:
-  void initFunctions();
+  void registerNativeFunctions();
 
-  void initWaitHandle();
-  void initResumableWaitHandle();
-  void initAsyncGenerator();
-  void initAwaitAllWaitHandle();
-  void initConditionWaitHandle();
-  void initSleepWaitHandle();
-  void initRescheduleWaitHandle();
-  void initExternalThreadEventWaitHandle();
-  void initStaticWaitHandle();
+  void registerNativeWaitHandle();
+  void registerNativeResumableWaitHandle();
+  void registerNativeAsyncGenerator();
+  void registerNativeAwaitAllWaitHandle();
+  void registerNativeConcurrentWaitHandle();
+  void registerNativeConditionWaitHandle();
+  void registerNativeSleepWaitHandle();
+  void registerNativeRescheduleWaitHandle();
+  void registerNativeExternalThreadEventWaitHandle();
+  void registerNativeStaticWaitHandle();
+  void registerNativeAsyncFunctionWaitHandle();
+  void registerNativeAsyncGeneratorWaitHandle();
+  void registerNativePriorityBridgeWaitHandle();
+
+  void initNativeWaitHandle();
+
   void requestInitSingletons();
 
-  void finishClasses();
 };
 
 Object HHVM_FUNCTION(asio_get_running);
+Variant HHVM_FUNCTION(join, const Object& obj);
 size_t asio_object_size(const ObjectData* obj);
 
 }

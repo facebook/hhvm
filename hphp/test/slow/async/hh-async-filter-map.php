@@ -8,7 +8,7 @@
  */
 
 <<__EntryPoint>>
-function main_hh_async_filter_map() {
+function main_hh_async_filter_map() :mixed{
   $vals = vec[
     NULL,
     true,

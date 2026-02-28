@@ -1,6 +1,6 @@
 <?hh
 
-function show($x) {
+function show($x) :mixed{
   echo $x;
 
   if(true) {

@@ -1,6 +1,6 @@
 <?hh
 
-function printElement($el, $indent='') {
+function printElement($el, $indent='') :mixed{
   if (strlen($indent) > 10) {
     var_dump('Recursed to deep, backing out');
     return;
@@ -15,7 +15,7 @@ function printElement($el, $indent='') {
 }
 
 <<__EntryPoint>>
-function main_1655() {
+function main_1655() :mixed{
 $a = simplexml_load_string('<?xml version="1.0" encoding="utf-8"?><xx><yy><node a="b">hi</node></yy><yy><node a="b">hi</node></yy></xx>');
 printElement($a);
 }

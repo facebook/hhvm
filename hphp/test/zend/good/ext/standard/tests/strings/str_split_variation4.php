@@ -18,7 +18,7 @@ echo "*** Testing str_split() : single quoted strings for 'str' ***\n";
 $split_length = 5;
 
 // different values for 'str'
-$values = varray[
+$values = vec[
   '',  //empty
   ' ',  //space
   '1234', //with only numbers

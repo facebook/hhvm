@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function variadic(mixed ... $x) : void {}
 

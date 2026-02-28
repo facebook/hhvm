@@ -16,17 +16,18 @@
 */
 
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
+
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
 #include <pcre.h>
 
 #include "hphp/runtime/ext/mbstring/ext_mbstring.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/util/configs/pcre.h"
 #include "hphp/util/rds-local.h"
 
 namespace HPHP {
@@ -57,6 +58,11 @@ TypedValue HHVM_FUNCTION(preg_match,
                          int64_t flags /* = 0 */, int64_t offset /* = 0 */) {
   return tvReturn(preg_match(pattern.get(), subject.get(),
                              nullptr, flags, offset));
+}
+
+Variant HHVM_FUNCTION(preg_get_error_message_if_invalid,
+                      const String& pattern) {
+  return preg_get_error_message_if_invalid(pattern);
 }
 
 TypedValue HHVM_FUNCTION(preg_match_with_error, StringArg pattern,
@@ -369,9 +375,9 @@ String HHVM_FUNCTION(sql_regcase, const String& str) {
 extern RDS_LOCAL(PCREglobals, tl_pcre_globals);
 
 struct PcreExtension final : Extension {
-  PcreExtension() : Extension("pcre", NO_EXTENSION_VERSION_YET) {}
+  PcreExtension() : Extension("pcre", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_RC_STR(PCRE_VERSION, pcre_version());
 
     HHVM_RC_INT(PREG_NO_ERROR, PHP_PCRE_NO_ERROR);
@@ -381,6 +387,7 @@ struct PcreExtension final : Extension {
     HHVM_RC_INT(PREG_BAD_UTF8_ERROR, PHP_PCRE_BAD_UTF8_ERROR);
     HHVM_RC_INT(PREG_BAD_UTF8_OFFSET_ERROR, PHP_PCRE_BAD_UTF8_OFFSET_ERROR);
     HHVM_RC_INT(PREG_BAD_REGEX_ERROR, PHP_PCRE_BAD_REGEX_ERROR);
+    HHVM_RC_INT(PREG_JIT_STACKLIMIT_ERROR, PHP_PCRE_JIT_STACKLIMIT_ERROR);
 
     HHVM_RC_INT_SAME(PREG_PATTERN_ORDER);
     HHVM_RC_INT_SAME(PREG_SET_ORDER);
@@ -414,6 +421,7 @@ struct PcreExtension final : Extension {
     HHVM_FE(preg_grep);
     HHVM_FE(preg_grep_with_error);
     HHVM_FE(preg_match);
+    HHVM_FE(preg_get_error_message_if_invalid);
     HHVM_FE(preg_match_with_error);
     HHVM_FE(preg_match_with_matches);
     HHVM_FE(preg_match_with_matches_and_error);
@@ -437,23 +445,26 @@ struct PcreExtension final : Extension {
     HHVM_FE(split);
     HHVM_FE(spliti);
     HHVM_FE(sql_regcase);
+  }
 
-    loadSystemlib();
-
+  void moduleInit() override {
     pcre_config(PCRE_CONFIG_JIT, &s_pcre_has_jit);
-    IniSetting::Bind(this, IniSetting::PHP_INI_ONLY,
+    IniSetting::Bind(this, IniSetting::Mode::Constant,
                      "hhvm.pcre.jit",
-                     &s_pcre_has_jit);
+                     IniSetting::SetAndGet<int>(
+                       [](const int& /*value*/) { return false; },
+                       nullptr,
+                       &s_pcre_has_jit));
   }
 
   void threadInit() override {
-    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+    IniSetting::Bind(this, IniSetting::Mode::Request,
                      "pcre.backtrack_limit",
-                     std::to_string(RuntimeOption::PregBacktraceLimit).c_str(),
-                     &tl_pcre_globals->preg_backtrace_limit);
-    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+                     std::to_string(Cfg::PCRE::BacktrackLimit).c_str(),
+                     &tl_pcre_globals->preg_backtrack_limit);
+    IniSetting::Bind(this, IniSetting::Mode::Request,
                      "pcre.recursion_limit",
-                     std::to_string(RuntimeOption::PregRecursionLimit).c_str(),
+                     std::to_string(Cfg::PCRE::RecursionLimit).c_str(),
                      &tl_pcre_globals->preg_recursion_limit);
   }
 

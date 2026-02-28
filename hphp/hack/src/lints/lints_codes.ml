@@ -45,7 +45,7 @@ module Codes = struct
 
   let is_always_false = 5610
 
-  let invalid_null_check = 5611
+  (* let deprecated_invalid_null_check = 5611 *)
 
   let invalid_switch_case_value_type = 5614
 
@@ -63,7 +63,7 @@ module Codes = struct
 
   (* let deprecated_pocket_universes_reserved_syntax = 5625 *)
 
-  let as_invalid_type = 5626
+  (* let deprecated_as_invalid_type = 5626 *)
 
   let class_overrides_all_trait_methods = 5627
 
@@ -71,13 +71,13 @@ module Codes = struct
 
   let as_always_fails = 5629
 
-  let redundant_nonnull_assertion = 5630
+  (* let deprecated_redundant_nonnull_assertion = 5630 *)
 
   let bool_method_return_hint = 5631
 
   (* let deprecated_missing_via_label_attribute = 5632 *)
 
-  let nullsafe_not_needed = 5633
+  (* let deprecated_nullsafe_not_needed = 5633 *)
 
   let duplicate_property_enum_init = 5634
 
@@ -89,7 +89,37 @@ module Codes = struct
 
   let invalid_disjointness_check = 5638
 
-  let inferred_variance = 5639
+  let inferred_variance = 5639 (* DEPRECATED *)
 
   let switch_nonexhaustive = 5640
+
+  let bad_xhp_enum_attribute_value = 5641
+
+  let unreachable_method_in_trait = 5642
+
+  let comparing_booleans = 5643
+
+  let pointless_booleans_expression = 5644
+
+  let unconditional_recursion = 5645
+
+  let branch_return_same_value = 5646
+
+  let redundant_unsafe_cast = 5647
+
+  let redundant_cast = 5648
+
+  let internal_classname = 5649
+
+  let async_lambda = 5650
+
+  let awaitable_awaitable = 5651
+
+  let cast_non_primitive = 5652
+
+  let class_pointer_to_string = 5653
+
+  (* let deprecated_nullsafe_on_null = 5654 *)
+
+  let package_into_override = 5655
 end

@@ -1,0 +1,2 @@
+ERROR: File "allowed.php", line 6, characters 27-28:
+Variable `$x` is undefined, or not always defined. (Naming[2050])

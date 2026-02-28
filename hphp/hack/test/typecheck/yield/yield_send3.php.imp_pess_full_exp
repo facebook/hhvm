@@ -1,0 +1,16 @@
+File "yield_send3.php", line 7, characters 5-6:
+Invalid argument (Typing[4110])
+  File "yield_send3.php", line 3, characters 13-15:
+  Expected `int`
+  File "yield_send3.php", line 5, characters 39-44:
+  But got `string`
+  File "yield_send3.php", line 5, characters 39-44:
+  This type argument to `Generator` only allows supertypes (it is contravariant)
+File "yield_send3.php", line 12, characters 14-14:
+Invalid argument (Typing[4110])
+  File "yield_send3.php", line 5, characters 39-44:
+  Expected `string`
+  File "classes.hhi", line 26, characters 27-28:
+    via this generic `Ts`
+  File "yield_send3.php", line 12, characters 14-14:
+  But got `int`

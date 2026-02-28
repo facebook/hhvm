@@ -6,8 +6,8 @@
 
 
 function ut_main()
-{
-    $timetype_arr = varray [
+:mixed{
+    $timetype_arr = vec[
         IntlDateFormatter::FULL,
         IntlDateFormatter::LONG,
         IntlDateFormatter::MEDIUM,

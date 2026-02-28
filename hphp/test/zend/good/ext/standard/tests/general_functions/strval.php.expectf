@@ -97,7 +97,7 @@ string(4) "new
 -- Iteration 48 --
 string(5) "new\n"
 -- Iteration 49 --
-string(11) "@#$$%^&&*()"
+string(11) "@#$$%%^&&*()"
 -- Iteration 50 --
 string(8) "        "
 -- Iteration 51 --
@@ -131,7 +131,7 @@ string(0) ""
 
 *** Testing error conditions ***
 
-Warning: strval() expects exactly 1 parameter, 0 given in %s/strval.php on line %d
+Warning: strval() expects exactly 1 positional parameter, 0 given in %s/strval.php on line %d
 
-Warning: strval() expects exactly 1 parameter, 2 given in %s/strval.php on line %d
+Warning: strval() expects exactly 1 positional parameter, 2 given in %s/strval.php on line %d
 Done

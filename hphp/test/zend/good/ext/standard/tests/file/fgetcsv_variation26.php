@@ -12,21 +12,21 @@ echo "*** Testing fgetcsv() : reading the files opened in write only mode ***\n"
    1st element is delimiter, 2nd element is enclosure 
    and 3rd element is csv fields
 */
-$csv_lists = varray [
-  varray[',', '"', '"water",fruit'],
-  varray[',', '"', '"water","fruit"'],
-  varray[' ', '^', '^water^ ^fruit^'],
-  varray[':', '&', '&water&:&fruit&'],
-  varray['=', '=', '=water===fruit='],
-  varray['-', '-', '-water--fruit-air'],
-  varray['-', '-', '-water---fruit---air-'],
-  varray[':', '&', '&""""&:&"&:,:":&,&:,,,,']
+$csv_lists = vec[
+  vec[',', '"', '"water",fruit'],
+  vec[',', '"', '"water","fruit"'],
+  vec[' ', '^', '^water^ ^fruit^'],
+  vec[':', '&', '&water&:&fruit&'],
+  vec['=', '=', '=water===fruit='],
+  vec['-', '-', '-water--fruit-air'],
+  vec['-', '-', '-water---fruit---air-'],
+  vec[':', '&', '&""""&:&"&:,:":&,&:,,,,']
 ];
 
-$filename = __SystemLib\hphp_test_tmppath('fgetcsv_variation26.tmp');
-@unlink($filename);
+$filename = sys_get_temp_dir().'/'.'fgetcsv_variation26.tmp';
+unlink($filename);
 
-$file_modes = varray ["w", "wb", "wt",
+$file_modes = vec["w", "wb", "wt",
                      "a", "ab", "at",
                      "x", "xb", "xt"];
 

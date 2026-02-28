@@ -48,6 +48,8 @@ struct SrcKey {
   struct StableHasher;
   struct TbbHashCompare;
 
+  using Set = hphp_hash_set<SrcKey, SrcKey::Hasher>;
+
   /*
    * Used for SrcKeys corresponding to the prologue which precedes a function
    * entry source location.
@@ -75,8 +77,8 @@ struct SrcKey {
   SrcKey(const Func* f, PC pc, ResumeMode resumeMode);
   SrcKey(FuncId funcId, Offset off, ResumeMode resumeMode);
 
-  SrcKey(const Func* f, Offset off, PrologueTag);
-  SrcKey(const Func* f, Offset off, FuncEntryTag);
+  SrcKey(const Func* f, uint32_t numArgs, PrologueTag);
+  SrcKey(const Func* f, uint32_t numArgs, FuncEntryTag);
 
   SrcKey(SrcKey other, Offset off);
 
@@ -115,10 +117,22 @@ struct SrcKey {
   // Valid only when prologue() || funcEntry().
   Offset entryOffset() const;
 
+  // Number of arguments passed to the prologue or func entry.
+  // Valid only when prologue() || funcEntry().
+  uint32_t numEntryArgs() const;
+
   ResumeMode resumeMode() const;
   bool prologue() const;
   bool funcEntry() const;
   bool hasThis() const;
+
+  // Whether this is a trivial default value initializer func entry, i.e.
+  // the default value is scalar and does not require a runtime type check.
+  bool trivialDVFuncEntry() const;
+
+  // Whether this is a non-trivial func entry, i.e. either it is the main func
+  // entry, or a non-trivial DV func entry.
+  bool nonTrivialFuncEntry() const;
 
   /*
    * Derived accessors.
@@ -128,6 +142,7 @@ struct SrcKey {
   Op op() const;
   PC pc() const;
   int lineNumber() const;
+  const PackageInfo* packageInfo() const;
 
   // Human readable offset of one of the above. Gives a std::string instead of
   // an Offset, as this should be used only for debugging and tracing.
@@ -145,7 +160,7 @@ struct SrcKey {
   /*
    * Get all possible Offsets for the next bytecode.
    */
-  OffsetSet succOffsets() const;
+  Set succSrcKeys() const;
 
   /*
    * Advance the SrcKey to the next instruction.
@@ -196,7 +211,7 @@ private:
     AtomicInt m_atomicInt;
     struct {
       FuncId m_funcID;
-      uint32_t m_offset : kNumOffsetBits;
+      uint32_t m_offsetOrNumArgs : kNumOffsetBits;
       uint32_t m_resumeModeAndTags : kNumModeBits;
     } m_s;
   };
@@ -215,8 +230,6 @@ struct SrcKey::StableHasher {
     return sk.stableHash();
   }
 };
-
-using SrcKeySet = hphp_hash_set<SrcKey,SrcKey::Hasher>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -240,4 +253,3 @@ void sktrace(SrcKey sk, ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
 }
 
 #include "hphp/runtime/vm/srckey-inl.h"
-

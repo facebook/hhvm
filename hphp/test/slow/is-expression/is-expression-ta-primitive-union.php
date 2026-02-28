@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type Tarraykey = arraykey;
 type Tnum = num;
@@ -21,7 +21,7 @@ function is_num(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_ta_primitive_union() {
+function main_is_expression_ta_primitive_union() :mixed{
 is_arraykey(1);
 is_arraykey("one");
 is_arraykey(1.5);

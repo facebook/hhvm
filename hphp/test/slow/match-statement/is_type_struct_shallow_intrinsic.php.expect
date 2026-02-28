@@ -1,0 +1,47 @@
+int(0)
+  is int = 1
+  is bool = 0
+  is string = 0
+  is (int,int) = 0
+  is TupleAlias = 0
+  is shape('x'=>int) = 0
+  is ShapeAlias = 0
+
+bool(false)
+  is int = 0
+  is bool = 1
+  is string = 0
+  is (int,int) = 0
+  is TupleAlias = 0
+  is shape('x'=>int) = 0
+  is ShapeAlias = 0
+
+string(1) "a"
+  is int = 0
+  is bool = 0
+  is string = 1
+  is (int,int) = 0
+  is TupleAlias = 0
+  is shape('x'=>int) = 0
+  is ShapeAlias = 0
+
+vec(0) {
+}
+  is int = 0
+  is bool = 0
+  is string = 0
+  is (int,int) = 1
+  is TupleAlias = 1
+  is shape('x'=>int) = 0
+  is ShapeAlias = 0
+
+dict(0) {
+}
+  is int = 0
+  is bool = 0
+  is string = 0
+  is (int,int) = 0
+  is TupleAlias = 0
+  is shape('x'=>int) = 1
+  is ShapeAlias = 1
+

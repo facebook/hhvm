@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   try {
     // Serializable format
     var_dump(unserialize('C:1:"Y":3:{lol}'));

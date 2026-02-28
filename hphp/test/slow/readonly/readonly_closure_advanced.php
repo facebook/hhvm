@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function takes_mutable(
   (function():void) $f

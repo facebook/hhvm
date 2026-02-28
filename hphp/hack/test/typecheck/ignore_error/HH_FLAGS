@@ -1,2 +1,2 @@
 --allowed-fixme-codes-strict 4063
---disable-hh-ignore-error
+--config disable_hh_ignore_error=2

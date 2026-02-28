@@ -15,10 +15,22 @@ class C1 extends C {
   function goo() {
     return 0;
   }
+
+  function foo() : arraykey {
+    return $a;
+  }
 }
 class C2 extends C1 {
   function goo(): string {
     return '0';
+  }
+
+  function foo() : string {
+    return $a;
+  }
+
+  function bar<T as arraykey as int>() : T{
+    return "foo";
   }
 }
 interface I {
@@ -51,6 +63,10 @@ $rm = $rc->getMethod('goo');
 var_dump($rm->getReturnTypeText());
 $rc = new ReflectionClass('C2');
 $rm = $rc->getMethod('goo');
+var_dump($rm->getReturnTypeText());
+$rm = $rc->getMethod('foo');
+var_dump($rm->getReturnTypeText());
+$rm = $rc->getMethod('bar');
 var_dump($rm->getReturnTypeText());
 $rc = new ReflectionClass('I');
 $rm = $rc->getMethod('m');

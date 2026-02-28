@@ -1,0 +1,38 @@
+File "arithmetic_any.php--file2.php", line 6, characters 3-13:
+  _
+File "arithmetic_any.php--file2.php", line 11, characters 3-13:
+  _
+File "arithmetic_any.php--file2.php", line 16, characters 3-13:
+  _
+File "arithmetic_any.php--file2.php", line 21, characters 3-13:
+  _
+File "arithmetic_any.php--file2.php", line 26, characters 3-13:
+  _
+File "arithmetic_any.php--file2.php", line 31, characters 3-13:
+  _
+File "arithmetic_any.php--file2.php", line 36, characters 3-13:
+  _
+File "arithmetic_any.php--file2.php", line 42, characters 3-13:
+  _
+File "arithmetic_any.php--file2.php", line 47, characters 3-13:
+  _
+File "arithmetic_any.php--file2.php", line 52, characters 3-13:
+  _
+File "arithmetic_any.php--file2.php", line 58, characters 3-13:
+  _
+File "arithmetic_any.php--file2.php", line 63, characters 3-13:
+  _
+File "arithmetic_any.php--file2.php", line 75, characters 35-45:
+  _
+File "arithmetic_any.php--file2.php", line 75, characters 48-58:
+  _
+File "arithmetic_any.php--file2.php", line 75, characters 35-45:[2]
+  dynamic
+File "arithmetic_any.php--file2.php", line 75, characters 48-58:[2]
+  dynamic
+File "arithmetic_any.php--file2.php", line 84, characters 3-13:
+  _
+File "arithmetic_any.php--file2.php", line 89, characters 3-13:
+  float
+File "arithmetic_any.php--file1.php", line 3, characters 12-21:
+Was expecting a return type hint (Typing[4030])

@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/alignment.h"
 #include "hphp/runtime/vm/jit/align-arm.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
@@ -199,7 +200,7 @@ void smashCall(TCA inst, TCA target) {
     // In repo authoritative mode only, the optimization performed at the end of
     // this function may have turned a smashable jmp into a direct one, for
     // which possiblySmashableJmp returns false.
-    assertx(RuntimeOption::RepoAuthoritative);
+    assertx(Cfg::Repo::Authoritative);
     return;
   }
 
@@ -209,9 +210,15 @@ void smashCall(TCA inst, TCA target) {
 
   // If the target can be reached through a direct call, then patch the original
   // call.  Notice that this optimization prevents a debugger guard from being
-  // installed later, so we only perform it in repo authoritative mode.
+  // installed later, so we only perform it in repo authoritative mode.  Also,
+  // once this optimization is performed, the smashable call can't be smashed
+  // again, because possiblySmashableCall() can't detect the code pattern
+  // anymore.  For this reason, we don't perform this optimization when the
+  // target is a stub, since they're just a temporary target that we later want
+  // to replace with a permanent one.
   int64_t offset = target - inst;
-  if (RuntimeOption::RepoAuthoritative && is_int28(offset)) {
+  if (Cfg::Repo::Authoritative && !svcreq::isStub(target) &&
+      is_int28(offset)) {
     CodeBlock cb;
     uint32_t newInst;
     cb.init((TCA)&newInst, kInstructionSize, "smashCall");
@@ -227,7 +234,7 @@ void smashJmp(TCA inst, TCA target) {
     // In repo authoritative mode only, the optimization performed at the end of
     // this function may have turned a smashable jmp into a direct one, for
     // which possiblySmashableJmp returns false.
-    assertx(RuntimeOption::RepoAuthoritative);
+    assertx(Cfg::Repo::Authoritative);
     return;
   }
 
@@ -244,9 +251,15 @@ void smashJmp(TCA inst, TCA target) {
 
   // If the target can be reached through a direct jump, then patch the original
   // jump.  Notice that this optimization prevents a debugger guard from being
-  // installed later, so we only perform it in repo authoritative mode.
+  // installed later, so we only perform it in repo authoritative mode.  Also,
+  // once this optimization is performed, the smashable jump can't be smashed
+  // again, because possiblySmashableJmp() can't detect the code pattern
+  // anymore.  For this reason, we don't perform this optimization when the
+  // target is a stub, since they're just a temporary target that we later want
+  // to replace with a permanent one.
   int64_t offset = target - inst;
-  if (RuntimeOption::RepoAuthoritative && is_int28(offset)) {
+  if (Cfg::Repo::Authoritative && !svcreq::isStub(target) &&
+      is_int28(offset)) {
     CodeBlock cb;
     uint32_t newInst;
     cb.init((TCA)&newInst, kInstructionSize, "smashJmp");
@@ -267,7 +280,7 @@ void smashJcc(TCA inst, TCA target) {
     // In repo authoritative mode only, the optimization performed at the end of
     // this function may have turned a smashable jcc into a direct one, for
     // which possiblySmashableJcc returns false.
-    assertx(RuntimeOption::RepoAuthoritative);
+    assertx(Cfg::Repo::Authoritative);
     return;
   }
 
@@ -278,9 +291,14 @@ void smashJcc(TCA inst, TCA target) {
   // If the target can be reached through a direct branch, then patch the
   // original branch.  Notice that this optimization prevents a debugger guard
   // from being installed later, so we only perform it in repo authoritative
-  // mode.
+  // mode.  Also, once this optimization is performed, the smashable Jcc can't
+  // be smashed again, because possiblySmashableJcc() can't detect the code
+  // pattern anymore.  For this reason, we don't perform this optimization when
+  // the target is a stub, since they're just a temporary target that we later
+  // want to replace with a permanent one.
   int64_t offset = target - inst;
-  if (RuntimeOption::RepoAuthoritative && is_int21(offset)) {
+  if (Cfg::Repo::Authoritative && !svcreq::isStub(target) &&
+      is_int21(offset)) {
     CodeBlock cb;
     uint32_t newInst;
     cb.init((TCA)&newInst, kInstructionSize, "smashJcc");
@@ -289,6 +307,14 @@ void smashJcc(TCA inst, TCA target) {
     a.b(offset >> kInstructionSizeLog2, cond);
     smashInst(inst, newInst);
   }
+}
+
+void smashInterceptJcc(TCA inst) {
+  not_implemented();
+}
+
+void smashInterceptJmp(TCA inst) {
+  not_implemented();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -359,7 +385,7 @@ bool optimizeSmashedJcc(TCA inst) {
 
   // Notice that this optimization prevents a debugger guard from being
   // installed later, so we only perform it in repo authoritative mode.
-  if (!RuntimeOption::RepoAuthoritative) return false;
+  if (!Cfg::Repo::Authoritative) return false;
 
   auto const b = Instruction::Cast(inst);
   auto const target = smashableJccTarget(inst);

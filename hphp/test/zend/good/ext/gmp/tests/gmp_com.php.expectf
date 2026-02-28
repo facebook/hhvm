@@ -13,5 +13,5 @@ string(12) "-98765463338"
 Warning: gmp_com(): Unable to convert variable to GMP - wrong type in %s/gmp_com.php on line 16
 string(1) "0"
 
-Warning: gmp_com() expects exactly 1 parameter, 0 given in %s/gmp_com.php on line 17
+Warning: gmp_com() expects exactly 1 positional parameter, 0 given in %s/gmp_com.php on line 17
 Done

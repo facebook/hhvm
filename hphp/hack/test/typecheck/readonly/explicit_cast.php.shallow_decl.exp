@@ -1,8 +1,0 @@
-File "explicit_cast.php--file2.php", line 7, characters 8-10:
-This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "explicit_cast.php--file1.php", line 6, characters 10-12:
-  The function call is defined here.
-File "explicit_cast.php--file2.php", line 9, characters 12-14:
-This property returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "explicit_cast.php--file1.php", line 4, characters 51-54:
-  The property is defined here.

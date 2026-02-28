@@ -1,0 +1,2 @@
+ERROR: File "polymorphic_lambda_syntax_with_use_bad.php", line 5, characters 43-45:
+Encountered unexpected token `==>`. (Parsing[1002])

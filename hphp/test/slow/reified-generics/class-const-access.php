@@ -9,7 +9,7 @@ class C2 {
 }
 
 class D<reify T1> {
-  public function f<reify T2>() {
+  public function f<reify T2>() :mixed{
     var_dump(T1::A);
     var_dump(T2::A);
   }

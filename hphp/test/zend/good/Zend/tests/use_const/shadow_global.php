@@ -1,7 +1,7 @@
 <?hh
 
 namespace {
-    function test1() {
+    function test1() :mixed{
         var_dump(bar);
     }
 }
@@ -9,7 +9,7 @@ namespace {
 namespace {
     use const foo\bar;
     
-    function test2() {
+    function test2() :mixed{
         var_dump(bar);
         echo "Done\n";
     }
@@ -17,7 +17,7 @@ namespace {
 
 namespace {
     <<__EntryPoint>>
-    function main() {
+    function main() :mixed{
         require 'includes/global_bar.inc';
         require 'includes/foo_bar.inc';
 

@@ -1,2 +1,2 @@
-File "xhp_deep_parse.php", line 15, characters 15-18:
+ERROR: File "xhp_deep_parse.php", line 15, characters 15-18:
 Unbound name: `:x:xy` (an object type) (Naming[2049])

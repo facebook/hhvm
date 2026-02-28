@@ -1,4 +1,4 @@
-File "lateinit4.php", line 5, characters 18-21:
+ERROR: File "lateinit4.php", line 4, characters 30-33:
 A late-initialized property cannot have a default value (Typing[4277])
-File "lateinit4.php", line 7, characters 27-30:
+ERROR: File "lateinit4.php", line 5, characters 39-42:
 A late-initialized property cannot have a default value (Typing[4277])

@@ -1,0 +1,6 @@
+ERROR: File "0_null_coalesce.php", line 3, characters 3-8:
+Typing error (Typing[4110])
+  File "0_null_coalesce.php", line 3, characters 3-8:
+  Expected an array that can be indexed
+  File "0_null_coalesce.php", line 3, characters 3-3:
+  But got `int`

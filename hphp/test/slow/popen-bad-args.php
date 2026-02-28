@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_popen_bad_args() {
+function main_popen_bad_args() :mixed{
 $hurr = 'A';
 $durr = '';
 

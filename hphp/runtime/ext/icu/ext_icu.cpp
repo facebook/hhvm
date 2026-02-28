@@ -19,7 +19,6 @@
 #include <vector>
 #include <string>
 #include <boost/scoped_ptr.hpp>
-#include <unicode/rbbi.h>
 #include <unicode/translit.h>
 #include <unicode/uregex.h>
 #include <unicode/ustring.h>
@@ -36,8 +35,9 @@ namespace HPHP::Intl {
 const int64_t k_UREGEX_OFFSET_CAPTURE   = 1LL<<32;
 
 ///////////////////////////////////////////////////////////////////////////////
-typedef tbb::concurrent_hash_map<const StringData*,const RegexPattern*,
-                                StringDataHashCompare> PatternStringMap;
+using PatternStringMap = tbb::concurrent_hash_map<const StringData*,
+                                                  const RegexPattern*,
+                                                  StringDataHashCompare>;
 
 static PatternStringMap s_patternCacheMap;
 
@@ -151,6 +151,11 @@ static Variant HHVM_FUNCTION(icu_match_with_matches,
 
 struct TransliteratorWrapper {
   void initialize() {
+    if (m_inited) {
+      return;
+    }
+    m_inited = true;
+
     UnicodeString basicID("Any-Latin ; NFKD; [:nonspacing mark:] Remove");
     UnicodeString basicIDAccent("Any-Latin ; NFKC");
     UErrorCode status = U_ZERO_ERROR;
@@ -163,13 +168,15 @@ struct TransliteratorWrapper {
     if (U_FAILURE(status)) {
       raise_warning(std::string(u_errorName(status)));
       //m_tl should be NULL if createInstance fails but better safe than sorry.
-      m_tl = NULL;
-      m_tl_accent = NULL;
+      m_tl = nullptr;
+      m_tl_accent = nullptr;
     }
   }
 
   void transliterate(UnicodeString& u_str) {
     std::lock_guard<std::mutex> lock(m_mutex);
+    initialize();
+
     if (m_tl) {
       m_tl->transliterate(u_str);
     } else {
@@ -179,6 +186,8 @@ struct TransliteratorWrapper {
 
   void transliterate_with_accents(UnicodeString& u_str) {
     std::lock_guard<std::mutex> lock(m_mutex);
+    initialize();
+
     if (m_tl_accent) {
       m_tl_accent->transliterate(u_str);
     } else {
@@ -189,6 +198,7 @@ struct TransliteratorWrapper {
 private:
   Transliterator* m_tl;
   Transliterator* m_tl_accent;
+  bool m_inited = false;
   std::mutex m_mutex;
 };
 
@@ -341,13 +351,7 @@ static Array HHVM_FUNCTION(icu_tokenize, const String& text) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initICU() {
-  // We need this initialization to be done late
-  // so that ICU's dynamic initializers have had
-  // a chance to run, which is important if we've
-  // linked against a static libICU.
-  s_transliterator.initialize();
-
+void IntlExtension::registerNativeICU() {
   HHVM_FE(icu_match);
   HHVM_FE(icu_match_with_matches);
   HHVM_FE(icu_transliterate);
@@ -359,8 +363,6 @@ void IntlExtension::initICU() {
   HHVM_RC_INT_SAME(UREGEX_MULTILINE);
   HHVM_RC_INT_SAME(UREGEX_UWORD);
   HHVM_RC_INT(UREGEX_OFFSET_CAPTURE, k_UREGEX_OFFSET_CAPTURE);
-
-  loadSystemlib("icu");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

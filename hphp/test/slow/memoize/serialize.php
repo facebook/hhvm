@@ -8,7 +8,9 @@ class C1 {
 
   <<__Memoize>>
   public function f(int $x): int {
-    return $x + 1 + (self::$fY++);
+    $__lval_tmp_0 = self::$fY;
+    self::$fY++;
+    return $x + 1 + ($__lval_tmp_0);
   }
 }
 
@@ -18,7 +20,9 @@ class C2 {
   private static $fY = 0;
 
   public function f(int $x): int {
-    return $x + 5 + (self::$fY++);
+    $__lval_tmp_1 = self::$fY;
+    self::$fY++;
+    return $x + 5 + ($__lval_tmp_1);
   }
 }
 
@@ -29,7 +33,9 @@ class C3 {
 
   <<__Memoize>>
   public function f(int $x): int {
-    return $x + 5 + (self::$fY++);
+    $__lval_tmp_2 = self::$fY;
+    self::$fY++;
+    return $x + 5 + ($__lval_tmp_2);
   }
 }
 
@@ -40,7 +46,9 @@ class C4 {
 
   <<__Memoize>>
   public function f($x): int {
-    return (int)$x + 1 + (self::$fY++);
+    $__lval_tmp_3 = self::$fY;
+    self::$fY++;
+   return (int)$x + 1 + ($__lval_tmp_3);
   }
 }
 
@@ -51,7 +59,9 @@ class C5 {
 
   <<__Memoize>>
   public function f(int $x, int $incr = 1): int {
-    return $x + $incr + (self::$fY++);
+    $__lval_tmp_4 = self::$fY;
+    self::$fY++;
+    return $x + $incr + ($__lval_tmp_4);
   }
 }
 
@@ -62,11 +72,13 @@ class C6 {
 
   <<__Memoize>>
   public function f(): int {
-    return (self::$fY++);
+    $__lval_tmp_5 = self::$fY;
+    self::$fY++;
+    return ($__lval_tmp_5);
   }
 }
 
-function test_unserialize($class, $s) {
+function test_unserialize($class, $s) :mixed{
   invariant(strlen($class) === strlen(C1::class),
             'string lengths must match');
 
@@ -75,7 +87,7 @@ function test_unserialize($class, $s) {
 
   // changing the class in the string to simulate deserialization into a
   // PHP with a different implementation of C1
-  $s = strtr($s, darray[ C1::class => $class]);
+  $s = strtr($s, dict[ C1::class => $class]);
   var_dump($s);
 
   $un = unserialize($s);
@@ -88,7 +100,7 @@ function test_unserialize($class, $s) {
 }
 
 
-function main() {
+function main() :mixed{
   echo '== no serialization ==', "\n";
   $inst = new C1();
   var_dump($inst->f(10));
@@ -109,6 +121,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_serialize() {
+function main_serialize() :mixed{
 main();
 }

@@ -1,10 +1,10 @@
-<?hh //strict
+<?hh
 
 /**
  * Rvalue [...] usage should not cause AKempty upgrade
  */
 function test(): void {
-  $a = darray[];
+  $a = dict[];
 
   $a['aaa'];
 

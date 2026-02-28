@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   $cls = 42;
   $cls::foo();
 }

@@ -1,0 +1,17 @@
+{
+  "pools": {
+    "A-foo": {
+      "servers": [ "127.0.0.1:11610" ]
+    }
+  },
+  "routes": [
+    {
+      "aliases": [
+        "/region1/cluster1/",
+        "/region1/cluster2/",
+        "/region2/cluster3/"
+      ],
+      "route": "PoolRoute|A-foo"
+    }
+  ]
+}

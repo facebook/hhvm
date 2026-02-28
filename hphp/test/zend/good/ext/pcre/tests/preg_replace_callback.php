@@ -1,7 +1,7 @@
 <?hh
 
 function parseTagsRecursive($input)
-{
+:mixed{
 
     $regex = '#\[indent]((?:[^[]|\[(?!/?indent])|(?R))+)\[/indent]#';
 

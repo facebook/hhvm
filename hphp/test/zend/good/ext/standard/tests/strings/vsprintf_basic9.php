@@ -16,9 +16,9 @@ $format11 = "%X";
 $format22 = "%X %X";
 $format33 = "%X %X %X";
 
-$arg1 = varray[11];
-$arg2 = varray[11,132];
-$arg3 = varray[11,132,177];
+$arg1 = vec[11];
+$arg2 = vec[11,132];
+$arg3 = vec[11,132,177];
 
 var_dump( vsprintf($format1,$arg1) );
 var_dump( vsprintf($format11,$arg1) );

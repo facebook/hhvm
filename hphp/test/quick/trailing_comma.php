@@ -1,11 +1,11 @@
 <?hh
 
-function id($x,) {return $x;}
+function id($x,) :mixed{return $x;}
 
 function multiline(
   $x,
   $y,
-) { return $x+$y; }
+) :mixed{ return $x+$y; }
 
 <<__EntryPoint>> function main(): void {
 var_dump(id(1,));

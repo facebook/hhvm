@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function haha(): int {
     Derp\Lib\Herp\f();

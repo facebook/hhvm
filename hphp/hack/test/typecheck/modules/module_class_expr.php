@@ -1,16 +1,18 @@
-//// modules.php
+//// module_here.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+new module here {}
 
-module here {}
-module there {}
+//// module_there.php
+<?hh
+new module there {}
+
 //// here.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('here')>>
 
-<<__Internal>>
-class C {
+module here;
+
+internal class C {
   public function bar(mixed $m):void {
     // All not ok
     $x1 = new D();
@@ -30,9 +32,9 @@ class C {
 //// there.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('there')>>
 
-<<__Internal>>
-class D {
+module there;
+
+internal class D {
   public static function foo():void { }
 }

@@ -1,14 +1,14 @@
 <?hh
 
 class C {
-  static vec<int> $x = vec[];
-  static vec<Foo> $y = vec[];
+  public static vec<int> $x = vec[];
+  public static vec<Foo> $y = vec[];
 }
 
 class Foo {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   C::$x[] = 17;
   C::$y[] = new Foo();
 

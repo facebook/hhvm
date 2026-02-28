@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$sockets = varray[];
+$sockets = vec[];
 if (strtolower(substr(PHP_OS, 0, 3)) == 'win') {
     $domain = AF_INET;
 } else {
@@ -9,6 +9,6 @@ socket_create_pair($domain, SOCK_STREAM, 0, inout $sockets);
 
 $write  = null;
 $except = null;
-$time   = varray[];
+$time   = vec[];
 var_dump(socket_select(inout $sockets, inout $write, inout $except, $time));
 }

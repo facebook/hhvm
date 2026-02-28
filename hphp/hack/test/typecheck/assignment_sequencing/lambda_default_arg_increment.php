@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // Lurrrrrrrrrrrr
 function g(): void {

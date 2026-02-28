@@ -1,6 +1,6 @@
 <?hh
 
-function makeNonStatic($n) {
+function makeNonStatic($n) :mixed{
   $s = 'foobar';
   for ($i = 0; $i < $n; $i += 1) {
     $s .= $i;
@@ -9,7 +9,7 @@ function makeNonStatic($n) {
 }
 
 <<__EntryPoint>> function main(): void {
-  $a = darray[];
+  $a = dict[];
   // Insert an object to force $a to become ref-counted in APC.
   $a[makeNonStatic(17)] = makeNonStatic(34);
   $a[makeNonStatic(51)] = makeNonStatic(68);

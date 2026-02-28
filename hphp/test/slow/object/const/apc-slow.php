@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   // make sure class C is non-persistent
   if (!class_exists('C')) {
     include 'apc-slow.inc';

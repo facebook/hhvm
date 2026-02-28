@@ -24,8 +24,16 @@ namespace HPHP {
 
 // Similar ref/iter stability as std::unordered_set, and allocates each
 // instance of T separately, never moving.
+template <class T,
+          class V=std::hash<T>,
+          class W=std::equal_to<T>,
+          class A=std::allocator<T>>
+using hphp_hash_set = folly::F14NodeSet<T,V,W,A>;
+
 template <class T, class V=std::hash<T>, class W=std::equal_to<T>>
-using hphp_hash_set = folly::F14NodeSet<T,V,W>;
+using hphp_vector_set = folly::F14VectorSet<T,V,W>;
+
+using hphp_vector_string_set = hphp_vector_set<std::string, string_hash>;
 
 // Fast sets do not have ref/iter stability on rehash, but allocate space
 // for values in bulk. Will use F14ValueSet or F14VectorSet depending on

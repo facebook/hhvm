@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_register_shutdown_function_exit() {
+function main_register_shutdown_function_exit() :mixed{
 register_shutdown_function(function () {
     var_dump('first');
 });

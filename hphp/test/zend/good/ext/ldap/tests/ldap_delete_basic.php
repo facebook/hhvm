@@ -14,7 +14,7 @@ ldap_add($link, "dc=my-domain,$base", dict[
 
 var_dump(
     ldap_delete($link, "dc=my-domain,$base"),
-    @ldap_search($link, "dc=my-domain,$base", "(o=my-domain)")
+    ldap_search($link, "dc=my-domain,$base", "(o=my-domain)")
 );
 echo "===DONE===\n";
 //--@ldap_delete($link, "dc=my-domain,$base");

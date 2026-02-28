@@ -1,9 +1,9 @@
 <?hh
 
-function ref(inout $x) {
+function ref(inout $x) :mixed{
 }
 
-function foo($r, inout $a, inout $b, $q, inout $c, ...$_) {
+function foo($r, inout $a, inout $b, $q, inout $c, ...$_) :mixed{
   $a = 'FOO:A';
   $b = 'FOO:B';
   $c = 'FOO:C';
@@ -11,21 +11,21 @@ function foo($r, inout $a, inout $b, $q, inout $c, ...$_) {
 }
 
 class Herp {
-  static $derp;
+  public static $derp;
   public $baz;
 }
 
-function launder($x) {
+function launder($x) :mixed{
   echo "launder()\n";
   return $x;
 }
-function get_arr() {
-  $x = darray['alpha' => vec[dict['beta' => new Herp], null, new Herp, null]];
-  $x['alpha'][0]['beta'] = darray['one' => '*BLANK*', 'two' => '*BLANK*'];
+function get_arr() :mixed{
+  $x = dict['alpha' => vec[dict['beta' => new Herp], null, new Herp, null]];
+  $x['alpha'][0]['beta'] = dict['one' => '*BLANK*', 'two' => '*BLANK*'];
   return $x;
 }
 
-function main() {
+function main() :mixed{
   $x = get_arr();
   $i = 1;
   $t = 'alpha';
@@ -86,9 +86,9 @@ function main() {
   );
   var_dump($a, $b, $c);
 
-  $a = varray['yep'];
-  $b = varray['nope'];
-  $c = varray['yep'];
+  $a = vec['yep'];
+  $b = vec['nope'];
+  $c = vec['yep'];
   foo(
     $a,
     inout $a[0],
@@ -155,6 +155,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_side_effects() {
+function main_side_effects() :mixed{
 main();
 }

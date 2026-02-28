@@ -1,0 +1,2724 @@
+'\" t
+.\"     Title: \fBndb_import\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_IMPORT\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_import \- Import CSV data into NDB
+.SH "SYNOPSIS"
+.HP \w'\fBndb_import\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBndb_import \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+\fBndb_import\fR
+imports CSV\-formatted data, such as that produced by
+\fBmysqldump\fR
+\fB\-\-tab\fR, directly into
+NDB
+using the NDB API\&.
+\fBndb_import\fR
+requires a connection to an NDB management server (\fBndb_mgmd\fR) to function; it does not require a connection to a MySQL Server\&.
+Usage
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_import \fIdb_name\fR \fIfile_name\fR \fIoptions\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fBndb_import\fR
+requires two arguments\&.
+\fIdb_name\fR
+is the name of the database where the table into which to import the data is found;
+\fIfile_name\fR
+is the name of the CSV file from which to read the data; this must include the path to this file if it is not in the current directory\&. The name of the file must match that of the table; the file\*(Aqs extension, if any, is not taken into consideration\&. Options supported by
+\fBndb_import\fR
+include those for specifying field separators, escapes, and line terminators, and are described later in this section\&.
+\fBndb_import\fR
+must be able to connect to an NDB Cluster management server; for this reason, there must be an unused
+[api]
+slot in the cluster
+config\&.ini
+file\&.
+.PP
+To duplicate an existing table that uses a different storage engine, such as
+InnoDB, as an
+NDB
+table, use the
+\fBmysql\fR
+client to perform a
+SELECT INTO OUTFILE
+statement to export the existing table to a CSV file, then to execute a
+CREATE TABLE LIKE
+statement to create a new table having the same structure as the existing table, then perform
+ALTER TABLE \&.\&.\&. ENGINE=NDB
+on the new table; after this, from the system shell, invoke
+\fBndb_import\fR
+to load the data into the new
+NDB
+table\&. For example, an existing
+InnoDB
+table named
+myinnodb_table
+in a database named
+myinnodb
+can be exported into an
+NDB
+table named
+myndb_table
+in a database named
+myndb
+as shown here, assuming that you are already logged in as a MySQL user with the appropriate privileges:
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 1.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  1." 4.2
+.\}
+In the
+\fBmysql\fR
+client:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+mysql> \fBUSE myinnodb;\fR
+mysql> \fBSELECT * INTO OUTFILE \*(Aq/tmp/myndb_table\&.csv\*(Aq\fR
+     >  \fBFIELDS TERMINATED BY \*(Aq,\*(Aq OPTIONALLY ENCLOSED BY \*(Aq"\*(Aq ESCAPED BY \*(Aq\e\e\*(Aq\fR
+     >  \fBLINES TERMINATED BY \*(Aq\en\*(Aq\fR
+     >  \fBFROM myinnodbtable;\fR
+mysql> \fBCREATE DATABASE myndb;\fR
+mysql> \fBUSE myndb;\fR
+mysql> \fBCREATE TABLE myndb_table LIKE myinnodb\&.myinnodb_table;\fR
+mysql> \fBALTER TABLE myndb_table ENGINE=NDB;\fR
+mysql> \fBEXIT;\fR
+Bye
+shell>
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Once the target database and table have been created, a running
+\fBmysqld\fR
+is no longer required\&. You can stop it using
+\fBmysqladmin shutdown\fR
+or another method before proceeding, if you wish\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 2.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  2." 4.2
+.\}
+In the system shell:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+# if you are not already in the MySQL bin directory:
+shell> \fBcd \fR\fB\fIpath\-to\-mysql\-bin\-dir\fR\fR
+shell> \fBndb_import myndb /tmp/myndb_table\&.csv \-\-fields\-optionally\-enclosed\-by=\*(Aq"\*(Aq \e\fR
+    \fB\-\-fields\-terminated\-by="," \-\-fields\-escaped\-by=\*(Aq\e\e\*(Aq\fR
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+The output should resemble what is shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+job\-1 import myndb\&.myndb_table from /tmp/myndb_table\&.csv
+job\-1 [running] import myndb\&.myndb_table from /tmp/myndb_table\&.csv
+job\-1 [success] import myndb\&.myndb_table from /tmp/myndb_table\&.csv
+job\-1 imported 19984 rows in 0h0m9s at 2277 rows/s
+jobs summary: defined: 1 run: 1 with success: 1 with failure: 0
+shell>
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.PP
+The following table includes options that are specific to
+\fBndb_import\fR\&. Additional descriptions follow the table\&. For options common to most NDB Cluster programs (including
+\fBndb_import\fR), see
+Options Common to NDB Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.261.\ \&Command\-line options for the ndb_import program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+\fB \fR\fB--abort-on-error\fR\fB \fR
+T}:T{
+Dump core on any fatal error; used for debugging
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--ai-increment=#\fR\fB \fR
+T}:T{
+For table with hidden PK, specify autoincrement increment. See mysqld
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--ai-offset=#\fR\fB \fR
+T}:T{
+For table with hidden PK, specify autoincrement offset. See mysqld
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--ai-prefetch-sz=#\fR\fB \fR
+T}:T{
+For table with hidden PK, specify number of autoincrement values that
+              are prefetched. See mysqld
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--connections=#\fR\fB \fR
+T}:T{
+Number of cluster connections to create
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--continue\fR\fB \fR
+T}:T{
+When job fails, continue to next job
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--db-workers=#\fR\fB \fR
+T}:T{
+Number of threads, per data node, executing database operations
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--errins-type=name\fR\fB \fR
+T}:T{
+Error insert type, for testing purposes; use "list" to obtain all
+              possible values
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--errins-delay=#\fR\fB \fR
+T}:T{
+Error insert delay in milliseconds; random variation is added
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--fields-enclosed-by=char\fR\fB \fR
+T}:T{
+Same as FIELDS ENCLOSED BY option for LOAD DATA statements. For CSV
+              input this is same as using
+              --fields-optionally-enclosed-by
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--fields-escaped-by=name\fR\fB \fR
+T}:T{
+Same as FIELDS ESCAPED BY option for LOAD DATA statements
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--fields-optionally-enclosed-by=char\fR\fB \fR
+T}:T{
+Same as FIELDS OPTIONALLY ENCLOSED BY option for LOAD DATA statements
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--fields-terminated-by=char\fR\fB \fR
+T}:T{
+Same as FIELDS TERMINATED BY option for LOAD DATA statements
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--idlesleep=#\fR\fB \fR
+T}:T{
+Number of milliseconds to sleep waiting for more to do
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--idlespin=#\fR\fB \fR
+T}:T{
+Number of times to re-try before idlesleep
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--ignore-lines=#\fR\fB \fR
+T}:T{
+Ignore first # lines in input file. Used to skip a non-data header
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--input-type=name\fR\fB \fR
+T}:T{
+Input type: random or csv
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--input-workers=#\fR\fB \fR
+T}:T{
+Number of threads processing input. Must be 2 or more if --input-type is
+              csv
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--keep-state\fR\fB \fR
+T}:T{
+State files (except non-empty *.rej files) are normally removed on job
+              completion. Using this option causes all state files to be
+              preserved instead
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--lines-terminated-by=name\fR\fB \fR
+T}:T{
+Same as LINES TERMINATED BY option for LOAD DATA statements
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--max-rows=#\fR\fB \fR
+T}:T{
+Import only this number of input data rows; default is 0, which imports
+              all rows
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--monitor=#\fR\fB \fR
+T}:T{
+Periodically print status of running job if something has changed
+              (status, rejected rows, temporary errors). Value 0
+              disables. Value 1 prints any change seen. Higher values
+              reduce status printing exponentially up to some
+              pre-defined limit
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--no-asynch\fR\fB \fR
+T}:T{
+Run database operations as batches, in single transactions
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--no-hint\fR\fB \fR
+T}:T{
+Do not use distribution key hint to select data node (TC)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--opbatch=#\fR\fB \fR
+T}:T{
+A db execution batch is a set of transactions and operations sent to NDB
+              kernel. This option limits NDB operations (including blob
+              operations) in a db execution batch. Therefore it also
+              limits number of asynch transactions. Value 0 is not valid
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--opbytes=#\fR\fB \fR
+T}:T{
+Limit bytes in execution batch (default 0 = no limit)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--output-type=name\fR\fB \fR
+T}:T{
+Output type: ndb is default, null used for testing
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--output-workers=#\fR\fB \fR
+T}:T{
+Number of threads processing output or relaying database operations
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--pagesize=#\fR\fB \fR
+T}:T{
+Align I/O buffers to given size
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--pagecnt=#\fR\fB \fR
+T}:T{
+Size of I/O buffers as multiple of page size. CSV input worker allocates
+              a double-sized buffer
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--polltimeout=#\fR\fB \fR
+T}:T{
+Timeout per poll for completed asynchonous transactions; polling
+              continues until all polls are completed, or error occurs
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--rejects=#\fR\fB \fR
+T}:T{
+Limit number of rejected rows (rows with permanent error) in data load.
+              Default is 0 which means that any rejected row causes a
+              fatal error. The row exceeding the limit is also added to
+              *.rej
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--resume\fR\fB \fR
+T}:T{
+If job aborted (temporary error, user interrupt), resume with rows not
+              yet processed
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--rowbatch=#\fR\fB \fR
+T}:T{
+Limit rows in row queues (default 0 = no limit); must be 1 or more if
+              --input-type is random
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--rowbytes=#\fR\fB \fR
+T}:T{
+Limit bytes in row queues (0 = no limit)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--state-dir=name\fR\fB \fR
+T}:T{
+Where to write state files; currect directory is default
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--stats\fR\fB \fR
+T}:T{
+Save performance related options and internal statistics in *.sto and
+              *.stt files. These files are kept on successful completion
+              even if --keep-state is not used
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--tempdelay=#\fR\fB \fR
+T}:T{
+Number of milliseconds to sleep between temporary errors
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--temperrors=#\fR\fB \fR
+T}:T{
+Number of times a transaction can fail due to a temporary error, per
+              execution batch; 0 means any temporary error is fatal.
+              Such errors do not cause any rows to be written to .rej
+              file
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--verbose\fR,
+.PP
+\fB \fR\fB-v\fR\fB \fR
+T}:T{
+Enable verbose output
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-abort\-on\-error\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--abort-on-error
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Dump core on any fatal error; used for debugging only\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ai\-increment\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--ai-increment=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+1
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+1
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+For a table with a hidden primary key, specify the autoincrement increment, like the
+auto_increment_increment
+system variable does in the MySQL Server\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ai\-offset\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--ai-offset=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+1
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+1
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+For a table with hidden primary key, specify the autoincrement offset\&. Similar to the
+auto_increment_offset
+system variable\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ai\-prefetch\-sz\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--ai-prefetch-sz=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+1024
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+1
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+For a table with a hidden primary key, specify the number of autoincrement values that are prefetched\&. Behaves like the
+ndb_autoincrement_prefetch_sz
+system variable does in the MySQL Server\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-connections\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--connections=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+1
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+1
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Number of cluster connections to create\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-continue\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--continue
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+When a job fails, continue to the next job\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-db\-workers\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--db-workers=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+4
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+1
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Number of threads, per data node, executing database operations\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-errins\-type\fR=\fIname\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--errins-type=name
+T}
+T{
+\fBType\fR
+T}:T{
+Enumeration
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+[none]
+T}
+T{
+\fBValid Values\fR
+T}:T{
+.PP
+stopjob
+.PP
+stopall
+.PP
+sighup
+.PP
+sigint
+.PP
+list
+T}
+.TE
+.sp 1
+Error insert type; use
+list
+as the
+\fIname\fR
+value to obtain all possible values\&. This option is used for testing purposes only\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-errins\-delay\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--errins-delay=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+1000
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Error insert delay in milliseconds; random variation is added\&. This option is used for testing purposes only\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-fields\-enclosed\-by\fR=\fIchar\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--fields-enclosed-by=char
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+[none]
+T}
+.TE
+.sp 1
+This works in the same way as the
+FIELDS ENCLOSED BY
+option does for the
+LOAD DATA
+statement, specifying a character to be interpeted as quoting field values\&. For CSV input, this is the same as
+\fB\-\-fields\-optionally\-enclosed\-by\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-fields\-escaped\-by\fR=\fIname\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--fields-escaped-by=name
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+\
+T}
+.TE
+.sp 1
+Specify an escape character in the same way as the
+FIELDS ESCAPED BY
+option does for the SQL
+LOAD DATA
+statement\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-fields\-optionally\-enclosed\-by\fR=\fIchar\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--fields-optionally-enclosed-by=char
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+[none]
+T}
+.TE
+.sp 1
+This works in the same way as the
+FIELDS OPTIONALLY ENCLOSED BY
+option does for the
+LOAD DATA
+statement, specifying a character to be interpeted as optionally quoting field values\&. For CSV input, this is the same as
+\fB\-\-fields\-enclosed\-by\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-fields\-terminated\-by\fR=\fIchar\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--fields-terminated-by=char
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+\t
+T}
+.TE
+.sp 1
+This works in the same way as the
+FIELDS TERMINATED BY
+option does for the
+LOAD DATA
+statement, specifying a character to be interpeted as the field separator\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-idlesleep\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--idlesleep=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+1
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+1
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Number of milliseconds to sleep waiting for more work to perform\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-idlespin\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--idlespin=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+0
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Number of times to retry before sleeping\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ignore\-lines\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--ignore-lines=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+0
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Cause ndb_import to ignore the first
+\fI#\fR
+lines of the input file\&. This can be employed to skip a file header that does not contain any data\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-input\-type\fR=\fIname\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--input-type=name
+T}
+T{
+\fBType\fR
+T}:T{
+Enumeration
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+csv
+T}
+T{
+\fBValid Values\fR
+T}:T{
+.PP
+random
+.PP
+csv
+T}
+.TE
+.sp 1
+Set the type of input type\&. The default is
+csv;
+random
+is intended for testing purposes only\&. \&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-input\-workers\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--input-workers=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+4
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+1
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Set the number of threads processing input\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-keep\-state\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--keep-state
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+false
+T}
+.TE
+.sp 1
+By default, ndb_import removes all state files (except non\-empty
+*\&.rej
+files) when it completes a job\&. Specify this option (nor argument is required) to force the program to retain all state files instead\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-lines\-terminated\-by\fR=\fIname\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--lines-terminated-by=name
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+\n
+T}
+.TE
+.sp 1
+This works in the same way as the
+LINES TERMINATED BY
+option does for the
+LOAD DATA
+statement, specifying a character to be interpeted as end\-of\-line\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-log\-level\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--log-level=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+0
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+2
+T}
+.TE
+.sp 1
+Performs internal logging at the given level\&. This option is intended primarily for internal and development use\&.
+.sp
+In debug builds of NDB only, the logging level can be set using this option to a maximum of 4\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-max\-rows\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--max-rows=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+0
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Import only this number of input data rows; the default is 0, which imports all rows\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-monitor\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--monitor=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+2
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Periodically print the status of a running job if something has changed (status, rejected rows, temporary errors)\&. Set to 0 to disable this reporting\&. Setting to 1 prints any change that is seen\&. Higher values reduce the frequency of this status reporting\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-no\-asynch\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--no-asynch
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Run database operations as batches, in single transactions\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-no\-hint\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--no-hint
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Do not use distribution key hinting to select a data node\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-opbatch\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--opbatch=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+256
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+1
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Set a limit on the number of operations (including blob operations), and thus the number of asynchronous transactions, per execution batch\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-opbytes\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--opbytes=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+0
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Set a limit on the number of bytes per execution batch\&. Use 0 for no limit\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-output\-type\fR=\fIname\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--output-type=name
+T}
+T{
+\fBType\fR
+T}:T{
+Enumeration
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+ndb
+T}
+T{
+\fBValid Values\fR
+T}:T{
+null
+T}
+.TE
+.sp 1
+Set the output type\&.
+ndb
+is the default\&.
+null
+is used only for testing\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-output\-workers\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--output-workers=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+2
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+1
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Set the number of threads processing output or relaying database operations\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-pagesize\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--pagesize=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+4096
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+1
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Align I/O buffers to the given size\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-pagecnt\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--pagecnt=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+64
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+1
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Set the size of I/O buffers as multiple of page size\&. The CSV input worker allocates buffer that is doubled in size\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-polltimeout\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--polltimeout=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+1000
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+1
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Set a timeout per poll for completed asynchonous transactions; polling continues until all polls are completed, or until an error occurs\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-rejects\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--rejects=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+0
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Limit the number of rejected rows (rows with permanent errors) in the data load\&. The default is 0, which means that any rejected row causes a fatal error\&. Any rows causing the limit to be exceeded are added to the
+\&.rej
+file\&.
+.sp
+The limit imposed by this option is effective for the duration of the current run\&. A run restarted using
+\fB\-\-resume\fR
+is considered a
+\(lqnew\(rq
+run for this purpose\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-resume\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--resume
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+If a job is aborted (due to a temporary db error or when interrupted by the user), resume with any rows not yet processed\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-rowbatch\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--rowbatch=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+0
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Set a limit on the number of rows per row queue\&. Use 0 for no limit\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-rowbytes\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--rowbytes=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+262144
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Set a limit on the number of bytes per row queue\&. Use 0 for no limit\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-stats\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--stats
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+false
+T}
+.TE
+.sp 1
+Save information about options related to performance and other internal statistics in files named
+*\&.sto
+and
+*\&.stt\&. These files are always kept on successful completion (even if
+\fB\-\-keep\-state\fR
+is not also specified)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB \-\-state\-dir\fR=\fIname\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--state-dir=name
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+.
+T}
+.TE
+.sp 1
+Where to write the state files (\fItbl_name\fR\&.map,
+\fItbl_name\fR\&.rej,
+\fItbl_name\fR\&.res, and
+\fItbl_name\fR\&.stt) produced by a run of the program; the default is the current directory\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-tempdelay\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--tempdelay=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+10
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Number of milliseconds to sleep between temporary errors\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-temperrors\fR=\fI#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--temperrors=#
+T}
+T{
+\fBType\fR
+T}:T{
+Integer
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+0
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+0
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+4294967295
+T}
+.TE
+.sp 1
+Number of times a transaction can fail due to a temporary error, per execution batch\&. The default is 0, which means that any temporary error is fatal\&. Temporary errors do not cause any rows to be added to the
+\&.rej
+file\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-verbose\fR,
+\fB\-v\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--verbose
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+false
+T}
+.TE
+.sp 1
+Enable verbose output\&.
+.RE
+.PP
+As with
+LOAD DATA, options for field and line formatting much match those used to create the CSV file, whether this was done using
+SELECT INTO \&.\&.\&. OUTFILE, or by some other means\&. There is no equivalent to the
+LOAD DATA
+statement
+STARTING WITH
+option\&.
+.PP
+\fBndb_import\fR
+was added in NDB 7\&.6\&.2\&.
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

@@ -8,7 +8,7 @@
 
 echo "*** Testing unlink() on a file which is in use ***\n";
 // temp file name used here
-$filename = __SystemLib\hphp_test_tmppath('unlink_variation2.tmp');
+$filename = sys_get_temp_dir().'/'.'unlink_variation2.tmp';
 
 // create file
 $fp = fopen($filename, "w");

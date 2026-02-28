@@ -21,12 +21,16 @@
 #include "hphp/runtime/server/cli-server.h"
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/repo.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/service-data.h"
 
 #include "folly/Random.h"
 
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
 #include "common/base/BuildInfo.h"
 #include "common/fbwhoami/FbWhoAmI.h"
 #endif
@@ -64,9 +68,9 @@ std::string canonicalizeURL(const std::string& url) {
 // StructuredLogEntry for this request.
 std::tuple<bool, size_t, size_t, size_t> shouldRun(folly::StringPiece url) {
   // We can avoid taking the lock if we know we'll never succeed.
-  if (!RuntimeOption::EvalTracingSampleRate &&
-      !RuntimeOption::EvalTracingFirstRequestsCount &&
-      !RuntimeOption::EvalTracingPerRequestCount) {
+  if (!Cfg::Eval::TracingSampleRate &&
+      !Cfg::Eval::TracingFirstRequestsCount &&
+      !Cfg::Eval::TracingPerRequestCount) {
     return std::make_tuple(false, 0, 0, 0);
   }
 
@@ -82,14 +86,14 @@ std::tuple<bool, size_t, size_t, size_t> shouldRun(folly::StringPiece url) {
   // Take the min of the rates which apply for this request and do a
   // coinflip:
   auto rate = std::numeric_limits<uint32_t>::max();
-  if (RuntimeOption::EvalTracingSampleRate) {
-    rate = std::min(rate, RuntimeOption::EvalTracingSampleRate);
+  if (Cfg::Eval::TracingSampleRate) {
+    rate = std::min(rate, Cfg::Eval::TracingSampleRate);
   }
-  if (counts.first < RuntimeOption::EvalTracingFirstRequestsCount) {
-    rate = std::min(rate, RuntimeOption::EvalTracingFirstRequestsSampleRate);
+  if (counts.first < Cfg::Eval::TracingFirstRequestsCount) {
+    rate = std::min(rate, Cfg::Eval::TracingFirstRequestsSampleRate);
   }
-  if (counts.second < RuntimeOption::EvalTracingPerRequestCount) {
-    rate = std::min(rate, RuntimeOption::EvalTracingPerRequestSampleRate);
+  if (counts.second < Cfg::Eval::TracingPerRequestCount) {
+    rate = std::min(rate, Cfg::Eval::TracingPerRequestSampleRate);
   }
   if (!rate || rate == std::numeric_limits<uint32_t>::max()) {
     return std::make_tuple(false, counts.first, counts.second, 0);
@@ -108,7 +112,7 @@ std::tuple<bool, size_t, size_t, size_t> shouldRun(folly::StringPiece url) {
 void setCommonFields(StructuredLogEntry& entry) {
   static auto const values = [&] {
     hphp_fast_string_map<std::string> v;
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
     v["build_compiler"] = BuildInfo_kCompiler;
     v["build_mode"] = BuildInfo_kBuildMode;
     v["server_type"] = facebook::FbWhoAmI::getServerTypeArch();
@@ -116,11 +120,11 @@ void setCommonFields(StructuredLogEntry& entry) {
 #endif
     v["debug"] = debug ? "true" : "false";
     v["lowptr"] = use_lowptr ? "true" : "false";
-    v["repo_auth"] = RuntimeOption::RepoAuthoritative ? "true" : "false";
-    v["is_server"] = RuntimeOption::ServerExecutionMode() ? "true" : "false";
+    v["repo_auth"] = Cfg::Repo::Authoritative ? "true" : "false";
+    v["is_server"] = Cfg::Server::Mode ? "true" : "false";
     v["is_cli_server"] = is_cli_server_mode() ? "true" : "false";
-    v["use_jit"] = RuntimeOption::EvalJit ? "true" : "false";
-    v["tag_id"] = RuntimeOption::EvalTracingTagId;
+    v["use_jit"] = Cfg::Jit::Enabled ? "true" : "false";
+    v["tag_id"] = Cfg::Eval::TracingTagId;
     return v;
   }();
 
@@ -139,7 +143,8 @@ std::unique_ptr<RequestImplFactory> s_factory;
 // Start a request, returning a new RequestState, or nullptr if we
 // determined we will not trace this request.
 RequestState* startRequestImpl(folly::StringPiece name,
-                               folly::StringPiece url) {
+                               folly::StringPiece url,
+                               folly::StringPiece group) {
   // Request should not be active:
   assertx(tl_active.isNull());
   auto const counts = shouldRun(url);
@@ -157,6 +162,7 @@ RequestState* startRequestImpl(folly::StringPiece name,
   active->m_perURLRequestCount = std::get<2>(counts);
   active->m_sampleRate = std::get<3>(counts);
   active->m_blocks.emplace_back();
+  active->m_requestGroup = group;
   auto& block = active->m_blocks.back();
   block.m_name = name.toString();
   block.m_start = Clock::now();
@@ -299,9 +305,14 @@ void stopRequest() {
     entry.setInt(
       "basis_points_exclusive_us",
       10000 * toUS(kv.second.m_exclusive_total) / toUS(active.m_total));
+    entry.setProcessUuid("hhvm_uuid");
 
     for (auto const& point : kv.second.m_points) {
       entry.setInt(point.first, point.second);
+    }
+
+    if (!active.m_requestGroup.empty()) {
+      entry.setStr("request_group", active.m_requestGroup);
     }
 
     // Add the fields which don't change and send the entry out.
@@ -320,9 +331,9 @@ void setFactory(std::unique_ptr<RequestImplFactory> f) {
 }
 
 static InitFiniNode initTracingTagIdCounter([] {
-  if (RuntimeOption::EvalTracingTagId.empty()) return;
+  if (Cfg::Eval::TracingTagId.empty()) return;
   auto counter = ServiceData::createCounter(
-    folly::sformat("vm.tracing_tag_id.{}", RuntimeOption::EvalTracingTagId)
+    folly::sformat("vm.tracing_tag_id.{}", Cfg::Eval::TracingTagId)
   );
   counter->setValue(1);
 }, InitFiniNode::When::PostRuntimeOptions);

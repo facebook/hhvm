@@ -8,14 +8,15 @@
  *
  */
 
-abstract class RecursiveFilterIterator<Tv> extends FilterIterator<Tv>
+abstract class RecursiveFilterIterator<Tv>
+  extends FilterIterator<Tv>
   implements
-    OuterIterator<Tv>,
-    RecursiveIterator<Tv> {
+    OuterIterator<~Tv>,
+    RecursiveIterator<~Tv> {
 
   // Methods
   public function __construct(RecursiveIterator<Tv> $iterator);
-  public function getChildren();
-  public function hasChildren();
+  public function getChildren(): this;
+  public function hasChildren(): bool;
 
 }

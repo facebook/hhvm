@@ -16,16 +16,14 @@
 #include "hphp/runtime/vm/hh-utils.h"
 
 #include <atomic>
-
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/system/systemlib.h"
+#include "hphp/util/configs/hacklang.h"
 #include "hphp/util/rds-local.h"
 
 namespace HPHP {
@@ -33,25 +31,21 @@ namespace HPHP {
 static std::atomic<bool> s_foundHHConfig(false);
 void checkHHConfig(const Unit* unit) {
 
-  if (RuntimeOption::RepoAuthoritative ||
-      !RuntimeOption::LookForTypechecker ||
+  if (Cfg::Repo::Authoritative ||
+      !Cfg::HackLang::LookForTypechecker ||
       s_foundHHConfig ||
       isDebuggerAttached()) {
     return;
   }
 
   const std::string &s = unit->filepath()->toCppString();
-  boost::filesystem::path p(s);
+  std::filesystem::path p(s);
 
   while (p != "/" && p != "") {
-    p.remove_filename();
+    p = p.parent_path();
     p /= ".hhconfig";
-
-    if (boost::filesystem::exists(p)) {
-      break;
-    }
-
-    p.remove_filename();
+    if (std::filesystem::exists(p)) break;
+    p = p.parent_path();
   }
 
   if (p == "/" || p == "") {
@@ -83,7 +77,7 @@ static RDS_LOCAL_NO_CHECK(bool, tl_doneAutoTypecheck)(true);
  *
  * More subtle is that we need to block auto-typechecking until the VM is fully
  * initalized, and systemlib is fully merged. In most cases, systemlib is
- * persistent, and we could check SystemLib::s_inited. However, if
+ * persistent, and we could check if the unit is part of systemlib. However, if
  * JitEnableRenameFunction is enabled, then systemlib has to actually be merged
  * every request -- and since much of systemlib is written in Hack, that would
  * trigger auto-typecheck. So we overload the meaning of tl_doneAutoTypecheck to
@@ -102,8 +96,8 @@ void autoTypecheckRequestExit() {
 }
 
 void autoTypecheck(const Unit* unit) {
-  if (RuntimeOption::RepoAuthoritative ||
-      !RuntimeOption::AutoTypecheck ||
+  if (Cfg::Repo::Authoritative ||
+      !Cfg::HackLang::AutoTypecheck ||
       *tl_doneAutoTypecheck ||
       isDebuggerAttached()) {
     return;

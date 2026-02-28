@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 // Removing field from shape
 

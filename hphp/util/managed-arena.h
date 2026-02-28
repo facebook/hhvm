@@ -22,7 +22,7 @@
 #include <limits>
 #include <string>
 
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
 
 namespace HPHP { namespace alloc {
 
@@ -66,7 +66,7 @@ struct ManagedArena : public ExtentAllocator {
 
   // For stats reporting
   size_t unusedSize();
-  std::string reportStats();
+  std::string reportStats() const;
 
   template<typename... Args>
   static ManagedArena* CreateAt(void* addr, Args&&... args) {
@@ -94,9 +94,8 @@ using LowArena = RangeArena;
 using HighArena = RangeArena;
 static_assert(alignof(RangeArena) <= 64, "");
 using RangeArenaStorage = std::aligned_storage<sizeof(RangeArena), 64>::type;
-extern RangeArenaStorage g_lowerArena;
 extern RangeArenaStorage g_lowArena;
-extern RangeArenaStorage g_lowColdArena;
+extern RangeArenaStorage g_lowSmallArena;
 extern RangeArenaStorage g_highArena;
 extern RangeArenaStorage g_coldArena;
 
@@ -135,8 +134,8 @@ inline HighArena* highArena() {
 
 using PreMappedArena = alloc::ManagedArena<alloc::RangeFallbackExtentAllocator>;
 
-extern PreMappedArena* g_arena0;
 extern std::vector<PreMappedArena*> g_local_arenas; // keyed by numa node id
+extern std::vector<PreMappedArena*> g_auto_arenas;
 
 }
 
@@ -157,4 +156,4 @@ DefaultArena* next_extra_arena(int node);
 
 }
 
-#endif // USE_JEMALLOC_EXTENT_HOOKS
+#endif // USE_JEMALLOC

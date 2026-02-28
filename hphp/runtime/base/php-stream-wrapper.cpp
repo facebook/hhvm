@@ -39,7 +39,7 @@ req::ptr<File> PhpStreamWrapper::openFD(const char *sFD) {
                   "available via remote unix server execution");
     return nullptr;
   }
-  if (RuntimeOption::ServerExecutionMode()) {
+  if (Cfg::Server::Mode) {
     raise_warning("Direct access to file descriptors "
                   "is only available from command-line");
     return nullptr;

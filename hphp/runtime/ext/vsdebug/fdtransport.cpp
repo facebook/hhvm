@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include <unistd.h>
 #include <fcntl.h>
 
 #include "hphp/runtime/ext/vsdebug/fdtransport.h"

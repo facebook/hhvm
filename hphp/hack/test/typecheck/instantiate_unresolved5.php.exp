@@ -1,2 +1,2 @@
-File "instantiate_unresolved5.php", line 12, characters 10-12:
+ERROR: File "instantiate_unresolved5.php", line 12, characters 10-12:
 Was expecting a return type hint (Typing[4030])

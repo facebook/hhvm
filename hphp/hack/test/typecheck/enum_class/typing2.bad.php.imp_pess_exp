@@ -1,0 +1,14 @@
+ERROR: File "typing2.bad.php", line 39, characters 25-28:
+Invalid argument (Typing[4110])
+  File "typing2.bad.php", line 6, characters 24-29:
+  Expected `string`
+  File "typing2.bad.php", line 15, characters 24-26:
+  But got `int`
+  File "typing2.bad.php", line 15, characters 24-26:
+  This type argument to `Box` must match exactly (it is invariant)
+ERROR: File "typing2.bad.php", line 39, characters 25-28:
+Invalid argument (Typing[4110])
+  File "typing2.bad.php", line 34, characters 52-57:
+  Expected `~Box<_>`
+  File "typing2.bad.php", line 30, characters 4-7:
+  But got `~IBox`

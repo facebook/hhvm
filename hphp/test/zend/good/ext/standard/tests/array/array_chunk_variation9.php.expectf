@@ -5,8 +5,14 @@ dict(2) {
   int(2)
 }
 [0]
+
+Warning: Invalid argument: size: 0 in %s/test/zend/good/ext/standard/tests/array/array_chunk_variation9.php on line 6
 NULL
+
+Warning: Invalid argument: size: 0 in %s/test/zend/good/ext/standard/tests/array/array_chunk_variation9.php on line 7
 NULL
+
+Warning: Invalid argument: size: 0 in %s/test/zend/good/ext/standard/tests/array/array_chunk_variation9.php on line 8
 NULL
 
 [1]

@@ -10,7 +10,7 @@ class C {
 
 class D {
   const type T1 = string;
-  public function f() {
+  public function f() :mixed{
     $e = new E();
     $e->f<C::T2>();
   }
@@ -18,7 +18,7 @@ class D {
 
 class E {
   const type T1 = bool;
-  public function f<reify T>() {
+  public function f<reify T>() :mixed{
     // we want T to be shape('a' => int, 'b' => int)
     // since self/this should be bound from class C
     var_dump(HH\ReifiedGenerics\get_type_structure<T>());

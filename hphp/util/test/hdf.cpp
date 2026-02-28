@@ -28,7 +28,7 @@ TEST(HdfTest, InfiniteRecursionCheck) {
   // This should not crash
   try {
     h.fromString(str);
-  } catch (const HPHP::HdfException& e) {
+  } catch (const HPHP::HdfException& ) {
     // throwing is fine.
   }
 }

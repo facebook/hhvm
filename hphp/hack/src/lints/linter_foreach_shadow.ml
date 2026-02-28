@@ -10,12 +10,28 @@
 open Linting_visitors
 open Aast
 
-let lvar_visitor =
-  object
-    inherit [lid list] Nast.Visitor_DEPRECATED.visitor
+(**
+   Lint on loop or catch variables that shadow local variables.
 
-    method! on_lvar ids id = id :: ids
+   function foo(): void {
+     $x = 99;
+
+     // Lint on this $x:
+     foreach (vec[1, 2] as $x) {
+     }
+
+     // $x is 2 here.
+     $x;
+   }
+ *)
+
+let lvar_visitor =
+  (object
+     inherit [lid list] Nast.Visitor_DEPRECATED.visitor
+
+     method! on_lvar ids id = id :: ids
   end
+  [@alert "-deprecated"])
 
 let expr_lvars = lvar_visitor#on_expr []
 
@@ -48,8 +64,7 @@ module VisitorFunctor (Parent : BodyVisitorModule) : BodyVisitorModule = struct
       method! on_stmt () stmt =
         begin
           match snd stmt with
-          | Expr (_, _, Binop (Ast_defs.Eq _, e, _)) ->
-            this#extend_env (expr_lvars e)
+          | Expr (_, _, Assign (e, _, _)) -> this#extend_env (expr_lvars e)
           | _ -> ()
         end;
         parent#on_stmt () stmt
@@ -69,12 +84,22 @@ module VisitorFunctor (Parent : BodyVisitorModule) : BodyVisitorModule = struct
               match List.find_opt (fun (_, id2) -> id1 = id2) env with
               | None -> ()
               | Some (p2, _) ->
-                Lints_errors.loop_variable_shadows_local_variable p1 id1 p2)
+                Lints_diagnostics.loop_variable_shadows_local_variable p1 id1 p2)
           (as_expr_lvars as_expr);
         parent#on_as_expr () as_expr
 
       method! on_catch () (_, var, block) =
         this#on_block_with_local_vars [var] block
+
+      method! on_expr () ((_, _, e_) as e) =
+        match e_ with
+        | Efun _
+        | Lfun _ ->
+          let old_frames = frames in
+          frames <- [[]];
+          parent#on_expr () e;
+          frames <- old_frames
+        | _ -> parent#on_expr () e
     end
 end
 

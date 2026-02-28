@@ -5,7 +5,7 @@ const MAX_32Bit = 2147483647;
 const MIN_64Bit = -9223372036854775807 - 1;
 const MIN_32Bit = -2147483647 - 1;
 <<__EntryPoint>> function main(): void {
-$binLongStrs = varray[
+$binLongStrs = vec[
    '0'.str_repeat('1',63),
    str_repeat('1',64),
    '0'.str_repeat('1',31),

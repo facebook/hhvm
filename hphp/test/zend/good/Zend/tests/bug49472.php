@@ -12,7 +12,7 @@ class FooBar extends Foo implements ia {
     const x = 1;
     const c = 'Ocean';
 
-    public function show() {
+    public function show() :mixed{
         return ia::c;
     }
 }

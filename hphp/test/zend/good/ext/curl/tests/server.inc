@@ -13,16 +13,16 @@ function curl_cli_server_start() {
 	$doc_root = __DIR__;
 	$router = "responder/get.inc";
 
-	$descriptorspec = darray[
-		0 => STDIN,
-		1 => STDOUT,
-		2 => STDERR,
+	$descriptorspec = dict[
+		0 => HH\stdin(),
+		1 => HH\stdout(),
+		2 => HH\stderr(),
 	];
 
 	if (substr(PHP_OS, 0, 3) == 'WIN') {
 		$cmd = "{$php_executable} -t {$doc_root} -n -S " . PHP_CURL_SERVER_ADDRESS;
         $cmd .= " {$router}";
-		$handle = proc_open(addslashes($cmd), $descriptorspec, $pipes, $doc_root, NULL, darray["bypass_shell" => true,  "suppress_errors" => true]);
+		$handle = proc_open(addslashes($cmd), $descriptorspec, $pipes, $doc_root, NULL, dict["bypass_shell" => true,  "suppress_errors" => true]);
 	} else {
 		$php_executable__str = (string)($php_executable);
 		$cmd = "exec {$php_executable__str} -t {$doc_root} -n -S " . (string)(PHP_CURL_SERVER_ADDRESS);
@@ -38,8 +38,10 @@ function curl_cli_server_start() {
     $i = 0;
     $errno = null;
     $errstr = null;
+    $error = error_reporting();
+    error_reporting(0);
     while (($i++ < 30) &&
-           !($fp = @fsockopen(
+           !($fp = fsockopen(
                PHP_CURL_SERVER_HOSTNAME,
                PHP_CURL_SERVER_PORT,
                inout $errno,
@@ -48,6 +50,7 @@ function curl_cli_server_start() {
           ) {
         usleep(10000);
     }
+    error_reporting($error);
 
     if ($fp) {
         fclose($fp);

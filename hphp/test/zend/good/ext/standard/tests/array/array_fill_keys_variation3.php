@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 
-function _try($fn) {
+function _try($fn) :mixed{
   try {
     return $fn();
   } catch (Exception $e) {
@@ -23,7 +23,7 @@ function main(): void {
   $fp = fopen(__FILE__, "r");
   $bool = false;
   $float = 2.4;
-  $array = varray["one", "two"];
+  $array = vec["one", "two"];
   $nullVal = null;
 
   echo "\n-- Testing array_fill_keys() function with both wrong arguments --\n";

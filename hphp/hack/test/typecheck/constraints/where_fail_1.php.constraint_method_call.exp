@@ -1,0 +1,6 @@
+ERROR: File "where_fail_1.php", line 14, characters 5-30:
+Typing error (Typing[4110])
+  File "where_fail_1.php", line 10, characters 61-67:
+  Expected `Derived`
+  File "where_fail_1.php", line 13, characters 24-27:
+  But got `Base`

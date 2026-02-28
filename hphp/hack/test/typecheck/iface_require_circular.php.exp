@@ -1,4 +1,4 @@
-File "iface_require_circular.php", line 17, characters 7-9:
+ERROR: File "iface_require_circular.php", line 17, characters 7-9:
 This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
   File "iface_require_circular.php", line 17, characters 41-43:
   This requires to extend or implement Super

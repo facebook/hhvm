@@ -1,0 +1,1 @@
+rust: mstch_rust:serde src/mod.thrift

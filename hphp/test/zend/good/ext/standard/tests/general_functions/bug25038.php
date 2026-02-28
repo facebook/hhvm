@@ -1,7 +1,7 @@
 <?hh
 
 function bar($x='no argument')
-{
+:mixed{
     throw new Exception("This is an exception from bar({$x}).");
 }
 <<__EntryPoint>> function main(): void {

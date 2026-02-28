@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_343() {
-$a = darray['a' => 'va'];
- $a[0] = varray[0];
+function main_343() :mixed{
+$a = dict['a' => 'va'];
+ $a[0] = vec[0];
       var_dump($a);
 }

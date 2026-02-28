@@ -1,5 +1,5 @@
 
-Warning: touch() expects at least 1 parameter, 0 given in %s/touch.php on line 7
+Warning: touch() expects at least 1 positional parameter, 0 given in %s/touch.php on line 7
 bool(true)
 int(%d)
 bool(true)

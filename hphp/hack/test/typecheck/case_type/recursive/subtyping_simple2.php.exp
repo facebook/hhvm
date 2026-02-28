@@ -1,0 +1,16 @@
+ERROR: File "subtyping_simple2.php", line 4, characters 11-11:
+Invalid case type declaration. More than one variant of `A` could contain values with the same runtime tag (Typing[4475])
+  File "subtyping_simple2.php", line 4, characters 15-15:
+  This is the type `A`, which includes **ints** because it is a cyclic type
+  File "subtyping_simple2.php", line 4, characters 15-15:
+    via this variant of the case type `A`
+  File "subtyping_simple2.php", line 4, characters 19-21:
+  It overlaps with `int`, which also includes **ints**
+ERROR: File "subtyping_simple2.php", line 11, characters 14-15:
+Invalid argument (Typing[4110])
+  File "subtyping_simple2.php", line 7, characters 21-23:
+  Expected `int`
+  File "subtyping_simple2.php", line 9, characters 14-14:
+  But got `mixed`
+  File "subtyping_simple2.php", line 4, characters 11-11:
+    by the definition of `A` arising from an implicit `as ?nonnull` constraint on this type

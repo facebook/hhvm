@@ -1,7 +1,7 @@
 <?hh
 
 
-function main($o) {
+function main($o) :mixed{
   $o = $o->circle = $o;
   $o->foo();
 }

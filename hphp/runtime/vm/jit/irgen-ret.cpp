@@ -15,15 +15,15 @@
 */
 #include "hphp/runtime/vm/jit/irgen-ret.h"
 
-
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/analysis.h"
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
-
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/irgen-types.h"
+
+#include "hphp/util/configs/hhir.h"
 
 namespace HPHP::jit::irgen {
 
@@ -59,7 +59,7 @@ void freeLocalsAndThis(IRGS& env) {
     // We don't want to specialize on arg types for builtins
     if (curFunc(env)->arFuncPtr()) return false;
 
-    if (localCount > RuntimeOption::EvalHHIRInliningMaxReturnLocals) {
+    if (localCount > Cfg::HHIR::InliningMaxReturnLocals) {
       return false;
     }
     auto numRefCounted = int{0};
@@ -68,7 +68,7 @@ void freeLocalsAndThis(IRGS& env) {
         ++numRefCounted;
       }
     }
-    return numRefCounted <= RuntimeOption::EvalHHIRInliningMaxReturnDecRefs;
+    return numRefCounted <= Cfg::HHIR::InliningMaxReturnDecRefs;
   }();
 
   if (shouldFreeInline) {
@@ -141,8 +141,14 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retVal, bool suspended) {
   // Call stub that will mark this AFWH as finished, unblock parents and
   // possibly take fast path to resume parent. Leave SP pointing to a single
   // uninitialized cell which will be filled by the stub.
-  gen(env, AsyncFuncRet, IRSPRelOffsetData { spAdjust }, sp(env), fp(env),
-      retVal);
+  // Always use the slow path if `FastMethodInterceptNoAsyncOpt` is set.
+  if (LIKELY(!Cfg::Eval::FastMethodInterceptNoAsyncOpt)) {
+    gen(env, AsyncFuncRet, IRSPRelOffsetData { spAdjust }, sp(env), fp(env),
+        retVal);
+  } else {
+    gen(env, AsyncFuncRetSlow, IRSPRelOffsetData { spAdjust }, sp(env), fp(env),
+        retVal);
+  }
 }
 
 void generatorReturn(IRGS& env, SSATmp* retval) {
@@ -229,7 +235,21 @@ IRSPRelOffset offsetToReturnSlot(IRGS& env) {
   return *fpOff + kArRetOff / int32_t{sizeof(TypedValue)};
 }
 
-void emitRetC(IRGS& env) {
+void emitVerifyReturn(IRGS& env, HPHP::VerifyRetKind kind, int32_t ind) {
+  switch(kind) {
+    case HPHP::VerifyRetKind::All:
+      verifyRetType(env, TypeConstraint::ReturnId, ind, false);
+      break;
+    case HPHP::VerifyRetKind::NonNull:
+      verifyRetType(env, TypeConstraint::ReturnId, ind, true);
+      break;
+    case HPHP::VerifyRetKind::None:
+      return;
+  }
+}
+
+void emitRetC(IRGS& env, HPHP::VerifyRetKind kind) {
+  emitVerifyReturn(env, kind, 0);
   if (isInlining(env)) {
     assertx(resumeMode(env) == ResumeMode::None);
     retFromInlined(env);
@@ -238,11 +258,12 @@ void emitRetC(IRGS& env) {
   }
 }
 
-void emitRetM(IRGS& env, uint32_t nvals) {
+void emitRetM(IRGS& env, uint32_t nvals, HPHP::VerifyRetKind kind) {
   assertx(resumeMode(env) == ResumeMode::None);
   assertx(!curFunc(env)->isResumable());
   assertx(nvals > 1);
 
+  emitVerifyReturn(env, kind, nvals - 1);
   if (isInlining(env)) {
     retFromInlined(env);
     return;

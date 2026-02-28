@@ -1,1 +1,2 @@
-No errors
+WARN: File "map_interfaces.php", line 37, characters 8-9:
+Invalid condition: a value of type `B` will always be truthy (Warn[12006])

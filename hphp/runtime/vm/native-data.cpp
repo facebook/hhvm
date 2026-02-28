@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/native-data.h"
 
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -29,7 +28,7 @@
 namespace HPHP::Native {
 //////////////////////////////////////////////////////////////////////////////
 
-typedef std::unordered_map<const StringData*,NativeDataInfo> NativeDataInfoMap;
+using NativeDataInfoMap = std::unordered_map<const StringData*,NativeDataInfo>;
 static NativeDataInfoMap s_nativedatainfo;
 
 namespace {
@@ -52,12 +51,12 @@ size_t ndsize(size_t dataSize, size_t nMemoSlots) {
 
 size_t ndsize(const ObjectData* obj, const NativeDataInfo* ndi) {
   auto cls = obj->getVMClass();
-  if (cls == Generator::getClass()) {
+  if (cls == Generator::classof()) {
     assertx(!cls->hasMemoSlots());
     return Native::data<Generator>(obj)->resumable()->size() -
            sizeof(ObjectData);
   }
-  if (cls == AsyncGenerator::getClass()) {
+  if (cls == AsyncGenerator::classof()) {
     assertx(!cls->hasMemoSlots());
     return Native::data<AsyncGenerator>(obj)->resumable()->size() -
            sizeof(ObjectData);

@@ -17,8 +17,6 @@ open Typing_env_types
 *)
 val is_sub_type : env -> locl_ty -> locl_ty -> bool * Typing_error.t option
 
-val non_null : env -> Pos_or_decl.t -> locl_ty -> env * locl_ty
-
 (* Force solve all remaining unsolved type variables *)
 val solve_all_unsolved_tyvars : env -> env * Typing_error.t option
 
@@ -33,24 +31,31 @@ val expand_type_and_solve :
 val expand_type_and_solve_eq :
   env -> locl_ty -> (env * Typing_error.t option) * locl_ty
 
+(** Expand an already-solved type variable to its solution.
+    If the type variable is not yet solved, but one of its lower bounds is dynamic,
+    i.e. dynamic, t1, ..., tn <: #0 <: u1, ..., um,
+    then solve the type variable to #0 := ~#1 for fresh type variable #1, where
+    t1, ..., tn <: #1 <: u1, ..., um.
+    This is used in the strip_dynamic functions in Typing_dynamic_utils before matching the type on ~t
+  *)
+val expand_type_for_strip_dynamic : env -> locl_ty -> env * locl_ty
+
 val expand_type_and_narrow :
   env ->
   ?default:locl_ty ->
   ?allow_nothing:bool ->
   ?force_solve:bool ->
   description_of_expected:string ->
-  (env -> locl_ty -> (env * Typing_error.t option) * locl_ty option) ->
+  (env -> locl_ty -> env * locl_ty option) ->
   Pos.t ->
   locl_ty ->
   (env * Typing_error.t option) * locl_ty
 
 val solve_to_equal_bound_or_wrt_variance :
-  env -> Reason.t -> int -> env * Typing_error.t option
+  env -> Reason.t -> Tvid.t -> env * Typing_error.t option
 
 val close_tyvars_and_solve : env -> env * Typing_error.t option
 
-val solve_all_unsolved_tyvars_gi : env -> env * Typing_error.t option
+val bind : env -> Tvid.t -> locl_ty -> env * Typing_error.t option
 
-val bind : env -> Ident.t -> locl_ty -> env * Typing_error.t option
-
-val try_bind_to_equal_bound : env -> Ident.t -> env * Typing_error.t option
+val try_bind_to_equal_bound : env -> Tvid.t -> env * Typing_error.t option

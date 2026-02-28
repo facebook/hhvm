@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_unnamed_keys() {
+function main_unnamed_keys() :mixed{
 $dom = new DOMDocument('1.0','UTF-8');
 $dom->loadXML('<div><a/><a/></div>');
 

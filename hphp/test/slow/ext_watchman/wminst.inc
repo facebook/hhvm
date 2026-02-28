@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 // Borrowed and stripped down from Watchman project test infrastructure.
 class WatchmanInstance {
@@ -8,7 +8,7 @@ class WatchmanInstance {
   private $config_file;
   private $repo_root;
   private $run_details = '';
-  const TIMEOUT = 20;
+  const TIMEOUT = 60;
   private function tempfile() {
     $temp = tempnam(sys_get_temp_dir(), 'wat');
     return $temp;
@@ -17,7 +17,7 @@ class WatchmanInstance {
     // Not atomic but PHP doesn't support this. Should be fine.
     $this->repo_root = $tmpdir;
     $this->logfile = $this->tempfile();
-    $this->sockname = $this->tempfile();
+    $this->sockname = tempnam(getenv('HPHP_TEST_SOCKETDIR'), 'wat');
     $this->config_file = $this->tempfile();
     $config_json = '{}';
     file_put_contents($this->config_file, $config_json);
@@ -40,12 +40,12 @@ class WatchmanInstance {
       $this->logfile,
       $this->tempfile(),
     );
-    $pipes = darray[];
+    $pipes = dict[];
     $this->run_details = "Ran command: $cmd, in ".$this->repo_root;
-    $this->proc = proc_open($cmd, darray[
-      0 => varray['file', '/dev/null', 'r'],
-      1 => varray['file', $this->logfile, 'a'],
-      2 => varray['file', $this->logfile, 'a'],
+    $this->proc = proc_open($cmd, dict[
+      0 => vec['file', '/dev/null', 'r'],
+      1 => vec['file', $this->logfile, 'a'],
+      2 => vec['file', $this->logfile, 'a'],
     ], inout $pipes, $this->repo_root);
     if (!$this->proc) {
       throw new Exception("Failed to spawn $cmd");
@@ -72,7 +72,10 @@ class WatchmanInstance {
       }
       $errno = null;
       $errstr = null;
-      $this->sock = @fsockopen('unix://' . $sockname, -1, inout $errno, inout $errstr);
+      $error = error_reporting();
+      error_reporting(0);
+      $this->sock = fsockopen('unix://' . $sockname, -1, inout $errno, inout $errstr);
+      error_reporting($error);
       if ($this->sock) {
         break;
       }
@@ -92,7 +95,7 @@ class WatchmanInstance {
       if (!$st['running']) {
         return $st;
       }
-      usleep(30000);
+      usleep(250000);
     } while (time() <= $deadline);
     return $st;
   }
@@ -103,9 +106,8 @@ class WatchmanInstance {
     proc_terminate($this->proc);
     $st = $this->waitForTerminate(self::TIMEOUT);
     if ($st['running']) {
-      echo "Didn't stop, sending bigger signal\n";
       proc_terminate($this->proc, 9);
-      $st = $this->waitForTerminate(5);
+      $st = $this->waitForTerminate(15);
       $this->proc = null;
     }
   }

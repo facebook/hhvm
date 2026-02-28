@@ -14,7 +14,7 @@ class c {
 const INIT1 = 123;
 const INIT2 = 456;
 <<__EntryPoint>>
-function main_2094() {
+function main_2094() :mixed{
 $obj = new c;
 var_dump($obj->x);
 var_dump($obj->y);

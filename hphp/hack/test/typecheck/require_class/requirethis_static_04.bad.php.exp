@@ -1,0 +1,4 @@
+ERROR: File "requirethis_static_04.bad.php", line 16, characters 6-8:
+Invoking static methods on traits is dangerous and is forbidden on trait T because it has a `require this as C` constraint. (Typing[4486])
+  File "requirethis_static_04.bad.php", line 11, characters 7-7:
+  T is defined here

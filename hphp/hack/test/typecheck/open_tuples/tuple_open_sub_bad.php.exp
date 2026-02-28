@@ -1,0 +1,48 @@
+ERROR: File "tuple_open_sub_bad.php", line 6, characters 26-27:
+Invalid argument (Typing[4110])
+  File "tuple_open_sub_bad.php", line 10, characters 34-41:
+  Expected `arraykey`
+  File "tuple_open_sub_bad.php", line 5, characters 26-30:
+  But got `mixed`
+ERROR: File "tuple_open_sub_bad.php", line 7, characters 20-21:
+Invalid argument (Typing[4110])
+  File "tuple_open_sub_bad.php", line 13, characters 27-41:
+  Expected `(int, mixed...)`
+  File "tuple_open_sub_bad.php", line 5, characters 25-34:
+  But got `(mixed...)`
+ERROR: File "tuple_open_sub_bad.php", line 8, characters 28-29:
+Invalid argument (Typing[4110])
+  File "tuple_open_sub_bad.php", line 16, characters 35-56:
+  Expected `(int, optional string)`
+  File "tuple_open_sub_bad.php", line 5, characters 25-34:
+  But got `(mixed...)`
+ERROR: File "tuple_open_sub_bad.php", line 23, characters 28-29:
+Invalid argument (Typing[4110])
+  File "tuple_open_sub_bad.php", line 16, characters 35-56:
+  Expected `(int, optional string)`
+  File "tuple_open_sub_bad.php", line 21, characters 3-41:
+  But got `(int, optional arraykey, optional bool)`
+ERROR: File "tuple_open_sub_bad.php", line 24, characters 25-26:
+Invalid argument (Typing[4110])
+  File "tuple_open_sub_bad.php", line 18, characters 32-55:
+  Expected `(int, arraykey, bool...)`
+  File "tuple_open_sub_bad.php", line 21, characters 3-41:
+  But got `(int, optional arraykey, optional bool)`
+ERROR: File "tuple_open_sub_bad.php", line 32, characters 26-30:
+Invalid argument (Typing[4110])
+  File "tuple_open_sub_bad.php", line 10, characters 34-41:
+  Expected `arraykey`
+  File "tuple_open_sub_bad.php", line 31, characters 17-21:
+  But got `bool`
+ERROR: File "tuple_open_sub_bad.php", line 33, characters 20-24:
+Invalid argument (Typing[4110])
+  File "tuple_open_sub_bad.php", line 13, characters 28-30:
+  Expected `int`
+  File "tuple_open_sub_bad.php", line 31, characters 17-21:
+  But got `bool`
+ERROR: File "tuple_open_sub_bad.php", line 34, characters 20-24:
+Invalid argument (Typing[4110])
+  File "tuple_open_sub_bad.php", line 13, characters 27-41:
+  Expected `(int, mixed...)`
+  File "tuple_open_sub_bad.php", line 28, characters 11-17:
+  But got `()`

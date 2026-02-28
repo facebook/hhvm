@@ -1,11 +1,11 @@
 <?hh
 
 trait ATrait {
-  public static function get_class_name() {
+  public static function get_class_name() :mixed{
     return __CLASS__;
   }
 
-  public function get_class_name_obj() {
+  public function get_class_name_obj() :mixed{
     return __CLASS__;
   }
 }

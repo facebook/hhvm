@@ -26,30 +26,23 @@
 #include <folly/portability/Unistd.h>
 #include <folly/String.h>
 
-#include <fcntl.h>
 #include <signal.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/plain-file.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/ext/std/ext_std_file.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/xreqsync/ext_xreqsync.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/xbox-server.h"
-#include "hphp/runtime/vm/unit-parser.h"
+#include "hphp/util/configs/server.h"
+#include "hphp/system/systemlib.h"
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/light-process.h"
-#include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/sync-signal.h"
@@ -83,75 +76,11 @@ static char** build_envp(const Array& envs, req::vector<String> &senvs) {
 // pcntl
 
 static struct ProcessExtension final : Extension {
-  ProcessExtension() : Extension("pcntl", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
-    HHVM_FE(pcntl_alarm);
-    HHVM_FE(pcntl_exec);
-    HHVM_FE(pcntl_fork);
-    HHVM_FE(pcntl_getpriority);
-    HHVM_FE(pcntl_setpriority);
-    HHVM_FE(pcntl_signal);
-    HHVM_FE(pcntl_sigprocmask);
-    HHVM_FE(pcntl_wait);
-    HHVM_FE(pcntl_waitpid);
-    HHVM_FE(pcntl_wexitstatus);
-    HHVM_FE(pcntl_signal_dispatch);
-    HHVM_FE(pcntl_wifexited);
-    HHVM_FE(pcntl_wifsignaled);
-    HHVM_FE(pcntl_wifstopped);
-    HHVM_FE(pcntl_wstopsig);
-    HHVM_FE(pcntl_wtermsig);
-
-    HHVM_RC_INT_SAME(SIGABRT);
-    HHVM_RC_INT_SAME(SIGALRM);
-    HHVM_RC_INT_SAME(SIGBUS);
-    HHVM_RC_INT_SAME(SIGCHLD);
-    HHVM_RC_INT_SAME(SIGCONT);
-    HHVM_RC_INT_SAME(SIGFPE);
-    HHVM_RC_INT_SAME(SIGHUP);
-    HHVM_RC_INT_SAME(SIGILL);
-    HHVM_RC_INT_SAME(SIGINT);
-    HHVM_RC_INT_SAME(SIGIO);
-    HHVM_RC_INT_SAME(SIGIOT);
-    HHVM_RC_INT_SAME(SIGKILL);
-    HHVM_RC_INT_SAME(SIGPIPE);
-    HHVM_RC_INT_SAME(SIGPROF);
-    HHVM_RC_INT_SAME(SIGQUIT);
-    HHVM_RC_INT_SAME(SIGSEGV);
-    HHVM_RC_INT_SAME(SIGSTOP);
-    HHVM_RC_INT_SAME(SIGSYS);
-    HHVM_RC_INT_SAME(SIGTERM);
-    HHVM_RC_INT_SAME(SIGTRAP);
-    HHVM_RC_INT_SAME(SIGTSTP);
-    HHVM_RC_INT_SAME(SIGTTIN);
-    HHVM_RC_INT_SAME(SIGTTOU);
-    HHVM_RC_INT_SAME(SIGURG);
-    HHVM_RC_INT_SAME(SIGUSR1);
-    HHVM_RC_INT_SAME(SIGUSR2);
-    HHVM_RC_INT_SAME(SIGVTALRM);
-    HHVM_RC_INT_SAME(SIGWINCH);
-    HHVM_RC_INT_SAME(SIGXCPU);
-    HHVM_RC_INT_SAME(SIGXFSZ);
-    HHVM_RC_INT_SAME(SIG_BLOCK);
-    HHVM_RC_INT_SAME(SIG_UNBLOCK);
-    HHVM_RC_INT_SAME(SIG_SETMASK);
-
-    HHVM_RC_INT(SIG_DFL, (int64_t)SIG_DFL);
-    HHVM_RC_INT(SIG_ERR, (int64_t)SIG_ERR);
-    HHVM_RC_INT(SIG_IGN, (int64_t)SIG_IGN);
-
-    // http://marc.info/?l=php-cvs&m=100289252314474&w=2
-    HHVM_RC_INT(SIGBABY, SIGSYS);
-    HHVM_RC_INT(SIGCLD, SIGCHLD);
-    HHVM_RC_INT(SIGPOLL, SIGIO);
-
-#ifdef __linux__
-    HHVM_RC_INT_SAME(SIGPWR);
-    HHVM_RC_INT_SAME(SIGSTKFLT);
-#endif
-
-    loadSystemlib("process");
+  ProcessExtension() : Extension("pcntl", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  std::vector<std::string> hackFiles() const override {
+    return {"process.php"};
   }
+  void moduleRegisterNative() override;
 } s_process_extension;
 
 int64_t HHVM_FUNCTION(pcntl_alarm,
@@ -164,12 +93,22 @@ namespace {
 static SimpleMutex s_lock;
 
 bool cantPrefork() {
-  if (num_1g_pages() > 0 || RuntimeOption::EvalFileBackedColdArena) {
+  if (auto ff = FactsFactory::getInstance()) {
+    // Allow Facts implementation to block forking.
+    // TODO: If forking is essential even after facts is initialized, then
+    // we should have FactsFactory prefork/postfork hooks so it can properly
+    // manage singletons, threadpools, connection pools, etc.
+    if (!ff->canFork()) return true;
+  }
+  if (num_1g_pages() > 0 || Cfg::Eval::FileBackedColdArena) {
     // We put data on shared pages, which won't work with fork().
     return true;
   }
   s_lock.lock();
   XboxServer::Stop();
+  if (XReqCallbackReaper::get().isRunning()) {
+    XReqCallbackReaper::get().shutdownReaperThread();
+  }
   if (AsyncFuncImpl::count()) {
     XboxServer::Restart();
     s_lock.unlock();
@@ -181,8 +120,10 @@ bool cantPrefork() {
 
 void postfork(pid_t pid) {
   folly::SingletonVault::singleton()->reenableInstances();
-  RepoFile::postfork();
   XboxServer::Restart();
+  if (XReqCallbackReaper::get().isRunning()) {
+    XReqCallbackReaper::get().initReaperThread();
+  }
   if (pid == 0) {
     Logger::ResetPid();
     new (&s_lock) SimpleMutex();
@@ -197,6 +138,11 @@ void HHVM_FUNCTION(pcntl_exec,
                    const String& path,
                    const Array& args /* = null_array */,
                    const Array& envs /* = null_array */) {
+  if (!Cfg::Server::AllowExec) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Process execution is disabled by the Server.AllowExec configuration"
+    );
+  }
   if (cantPrefork()) {
     raise_error("execing is disallowed in multi-threaded mode");
     return;
@@ -235,7 +181,7 @@ int64_t HHVM_FUNCTION(pcntl_fork) {
     raise_error("forking not available via server CLI execution");
     return -1;
   }
-  if (RuntimeOption::ServerExecutionMode()) {
+  if (Cfg::Server::Mode) {
     raise_error("forking is disallowed in server mode");
     return -1;
   }
@@ -346,7 +292,7 @@ static uint32_t g_handlerMask = 0;
 static void sig_handler_cli(int signo) {
   if (g_handlerMask & (1u << signo)) {
     RequestInfo::BroadcastSignal(signo);
-  } else if (!RuntimeOption::ServerExecutionMode()) {
+  } else if (!Cfg::Server::Mode) {
     auto const raise_and_exit = [] (int sig) {
       // Forward to the default handler.
       reset_sync_signals();
@@ -394,9 +340,9 @@ bool HHVM_FUNCTION(pcntl_signal_dispatch) {
       // ExitException and ResourceExceededException.
       try {
         vm_call_user_func(handler, make_vec_array(signum));
-      } catch (const ExitException& e) {
+      } catch (const ExitException& ) {
         throw;
-      } catch (const ResourceExceededException& e) {
+      } catch (const ResourceExceededException& ) {
         throw;
       } catch (const Object& e) {
         std::string what;
@@ -433,7 +379,7 @@ bool HHVM_FUNCTION(pcntl_signal_dispatch) {
         raise_warning("%s threw and unknown exception",
                       handlerName.c_str());
       }
-    } else if (!RuntimeOption::ServerExecutionMode()) {
+    } else if (!Cfg::Server::Mode) {
       switch (signum) {
 #define SIG(S, E) case S: if (E) _Exit(signum + 128); else break;
         SYNC_SIGNALS
@@ -494,7 +440,7 @@ bool HHVM_FUNCTION(pcntl_sigprocmask,
     return invalid_argument();
   }
 
-  if (RuntimeOption::ServerExecutionMode()) {
+  if (Cfg::Server::Mode) {
     // Forbid manipulation of signal masks in server mode.
     raise_warning("pcntl_sigprocmask() not supported in server mode");
     return false;
@@ -585,6 +531,71 @@ int64_t HHVM_FUNCTION(pcntl_wstopsig,
 int64_t HHVM_FUNCTION(pcntl_wtermsig,
                       int64_t status) {
   return WTERMSIG(status);
+}
+
+void ProcessExtension::moduleRegisterNative() {
+  HHVM_FE(pcntl_alarm);
+  HHVM_FE(pcntl_exec);
+  HHVM_FE(pcntl_fork);
+  HHVM_FE(pcntl_getpriority);
+  HHVM_FE(pcntl_setpriority);
+  HHVM_FE(pcntl_signal);
+  HHVM_FE(pcntl_sigprocmask);
+  HHVM_FE(pcntl_wait);
+  HHVM_FE(pcntl_waitpid);
+  HHVM_FE(pcntl_wexitstatus);
+  HHVM_FE(pcntl_signal_dispatch);
+  HHVM_FE(pcntl_wifexited);
+  HHVM_FE(pcntl_wifsignaled);
+  HHVM_FE(pcntl_wifstopped);
+  HHVM_FE(pcntl_wstopsig);
+  HHVM_FE(pcntl_wtermsig);
+
+  HHVM_RC_INT_SAME(SIGABRT);
+  HHVM_RC_INT_SAME(SIGALRM);
+  HHVM_RC_INT_SAME(SIGBUS);
+  HHVM_RC_INT_SAME(SIGCHLD);
+  HHVM_RC_INT_SAME(SIGCONT);
+  HHVM_RC_INT_SAME(SIGFPE);
+  HHVM_RC_INT_SAME(SIGHUP);
+  HHVM_RC_INT_SAME(SIGILL);
+  HHVM_RC_INT_SAME(SIGINT);
+  HHVM_RC_INT_SAME(SIGIO);
+  HHVM_RC_INT_SAME(SIGIOT);
+  HHVM_RC_INT_SAME(SIGKILL);
+  HHVM_RC_INT_SAME(SIGPIPE);
+  HHVM_RC_INT_SAME(SIGPROF);
+  HHVM_RC_INT_SAME(SIGQUIT);
+  HHVM_RC_INT_SAME(SIGSEGV);
+  HHVM_RC_INT_SAME(SIGSTOP);
+  HHVM_RC_INT_SAME(SIGSYS);
+  HHVM_RC_INT_SAME(SIGTERM);
+  HHVM_RC_INT_SAME(SIGTRAP);
+  HHVM_RC_INT_SAME(SIGTSTP);
+  HHVM_RC_INT_SAME(SIGTTIN);
+  HHVM_RC_INT_SAME(SIGTTOU);
+  HHVM_RC_INT_SAME(SIGURG);
+  HHVM_RC_INT_SAME(SIGUSR1);
+  HHVM_RC_INT_SAME(SIGUSR2);
+  HHVM_RC_INT_SAME(SIGVTALRM);
+  HHVM_RC_INT_SAME(SIGWINCH);
+  HHVM_RC_INT_SAME(SIGXCPU);
+  HHVM_RC_INT_SAME(SIGXFSZ);
+  HHVM_RC_INT_SAME(SIG_BLOCK);
+  HHVM_RC_INT_SAME(SIG_UNBLOCK);
+  HHVM_RC_INT_SAME(SIG_SETMASK);
+
+  HHVM_RC_INT(SIG_DFL, (int64_t)SIG_DFL);
+  HHVM_RC_INT(SIG_ERR, (int64_t)SIG_ERR);
+  HHVM_RC_INT(SIG_IGN, (int64_t)SIG_IGN);
+
+  // http://marc.info/?l=php-cvs&m=100289252314474&w=2
+  HHVM_RC_INT(SIGBABY, SIGSYS);
+  HHVM_RC_INT(SIGCLD, SIGCHLD);
+  HHVM_RC_INT(SIGPOLL, SIGIO);
+
+  HHVM_RC_INT_SAME(SIGPWR);
+  HHVM_RC_INT_SAME(SIGSTKFLT);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

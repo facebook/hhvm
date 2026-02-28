@@ -17,7 +17,6 @@
 #include "hphp/runtime/base/preg.h"
 
 #include <atomic>
-#include <fstream>
 #include <mutex>
 #include <pcre.h>
 #include <onigposix.h>
@@ -29,16 +28,9 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/treadmill.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
@@ -47,11 +39,14 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 
-#include "hphp/util/logger.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/pcre.h"
 #include "hphp/util/concurrent-scalable-cache.h"
+#include "hphp/util/logger.h"
 
 #include <folly/FileUtil.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
 /* Only defined in pcre >= 8.32 */
 #ifndef PCRE_STUDY_JIT_COMPILE
@@ -60,7 +55,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(preg);
+TRACE_SET_MOD(preg)
 
 using jit::TCA;
 
@@ -71,8 +66,8 @@ PCREglobals::PCREglobals() {
   jit_stack = pcre_jit_stack_alloc(32768, 524288);
   // Set these to handle uses of pcre prior to PcreExtension::threadInit
   // In particular, for matching tier overrides during RuntimeOption::Load
-  preg_backtrace_limit = RuntimeOption::PregBacktraceLimit;
-  preg_recursion_limit = RuntimeOption::PregRecursionLimit;
+  preg_backtrack_limit = Cfg::PCRE::BacktrackLimit;
+  preg_recursion_limit = Cfg::PCRE::RecursionLimit;
 }
 
 PCREglobals::~PCREglobals() {
@@ -83,8 +78,8 @@ PCREglobals::~PCREglobals() {
 // PCRECache definition
 
 struct PCRECache {
-  typedef std::shared_ptr<const pcre_cache_entry> EntryPtr;
-  typedef std::unique_ptr<LRUCacheKey> TempKeyCache;
+  using EntryPtr = std::shared_ptr<const pcre_cache_entry>;
+  using TempKeyCache = std::unique_ptr<LRUCacheKey>;
 
   enum class CacheKind {
     Static,
@@ -100,13 +95,13 @@ private:
     }
   };
 
-  typedef folly::AtomicHashArray<StringData*, const pcre_cache_entry*,
-          string_data_hash, ahm_string_data_same> StaticCache;
-  typedef ConcurrentLRUCache<LRUCacheKey, EntryPtr,
-          LRUCacheKey::HashCompare> LRUCache;
-  typedef ConcurrentScalableCache<LRUCacheKey, EntryPtr,
-          LRUCacheKey::HashCompare> ScalableCache;
-  typedef StaticCache::value_type StaticCachePair;
+  using StaticCache = folly::AtomicHashArray<StringData*, const pcre_cache_entry*,
+          string_data_hash, ahm_string_data_same>;
+  using LRUCache = ConcurrentLRUCache<LRUCacheKey, EntryPtr,
+          LRUCacheKey::HashCompare>;
+  using ScalableCache = ConcurrentScalableCache<LRUCacheKey, EntryPtr,
+          LRUCacheKey::HashCompare>;
+  using StaticCachePair = StaticCache::value_type;
 
 public:
   struct Accessor {
@@ -139,6 +134,7 @@ public:
       switch (m_kind) {
         case Kind::AccessorKind:
           m_u.accessor.~ConstAccessor();
+          [[fallthrough]];
         case Kind::Empty:
         case Kind::Ptr:
           m_kind = Kind::SmartPtr;
@@ -157,6 +153,7 @@ public:
       switch (m_kind) {
         case Kind::SmartPtr:
           m_u.smart_ptr.~EntryPtr();
+          [[fallthrough]];
         case Kind::Empty:
         case Kind::Ptr:
           m_kind = Kind::AccessorKind;
@@ -244,6 +241,7 @@ private:
 RDS_LOCAL(PCREglobals, tl_pcre_globals);
 
 static PCRECache s_pcreCache;
+static auto pc_counter = ServiceData::createCounter("admin.pcre-cache");
 
 // The last pcre error code is available for the whole thread.
 static RDS_LOCAL(int, rl_last_error_code);
@@ -385,8 +383,7 @@ bool pcre_literal_data::matches(const StringData* subject,
 PCRECache::StaticCache* PCRECache::CreateStatic() {
   StaticCache::Config config;
   config.maxLoadFactor = 0.5;
-  return StaticCache::create(
-      RuntimeOption::EvalPCRETableSize, config).release();
+  return StaticCache::create(Cfg::PCRE::TableSize, config).release();
 }
 
 void PCRECache::DestroyStatic(StaticCache* cache) {
@@ -425,14 +422,14 @@ void PCRECache::reinit(CacheKind kind) {
   switch (kind) {
     case CacheKind::Static:
       m_staticCache = CreateStatic();
-      m_expire = time(nullptr) + RuntimeOption::EvalPCREExpireInterval;
+      m_expire = time(nullptr) + Cfg::PCRE::ExpireInterval;
       break;
     case CacheKind::Lru:
-      m_lruCache.reset(new LRUCache(RuntimeOption::EvalPCRETableSize));
+      m_lruCache.reset(new LRUCache(Cfg::PCRE::TableSize));
       break;
     case CacheKind::Scalable:
       m_scalableCache.reset(
-        new ScalableCache(RuntimeOption::EvalPCRETableSize));
+        new ScalableCache(Cfg::PCRE::TableSize));
       break;
   }
 }
@@ -475,8 +472,8 @@ void PCRECache::clearStatic() {
   std::unique_lock<std::mutex> lock(m_clearMutex, std::try_to_lock);
   if (!lock) return;
 
-  auto newExpire = time(nullptr) + RuntimeOption::EvalPCREExpireInterval;
-  m_expire.store(newExpire, std::memory_order_relaxed);
+  auto newExpire = time(nullptr) + Cfg::PCRE::ExpireInterval;
+  m_expire.store(newExpire, std::memory_order_release);
 
   auto tmpMap = CreateStatic();
   tmpMap = m_staticCache.exchange(tmpMap, std::memory_order_acq_rel);
@@ -576,17 +573,18 @@ size_t PCRECache::size() const {
 
 void pcre_reinit() {
   PCRECache::CacheKind kind;
-  if (RuntimeOption::EvalPCRECacheType == "static") {
+  if (Cfg::PCRE::CacheType == "static") {
     kind = PCRECache::CacheKind::Static;
-  } else if (RuntimeOption::EvalPCRECacheType == "lru") {
+  } else if (Cfg::PCRE::CacheType == "lru") {
     kind = PCRECache::CacheKind::Lru;
-  } else if (RuntimeOption::EvalPCRECacheType == "scalable") {
+  } else if (Cfg::PCRE::CacheType == "scalable") {
     kind = PCRECache::CacheKind::Scalable;
   } else {
     Logger::Warning("Eval.PCRECacheType should be either static, "
                     "lru or scalable");
     kind = PCRECache::CacheKind::Scalable;
   }
+  pc_counter->setValue(0);
   s_pcreCache.reinit(kind);
 }
 
@@ -617,7 +615,7 @@ private:
   void* p;
 };
 
-typedef FreeHelperImpl<true> SmartFreeHelper;
+using SmartFreeHelper = FreeHelperImpl<true>;
 }
 
 static void init_local_extra(pcre_extra* local, pcre_extra* shared) {
@@ -627,14 +625,14 @@ static void init_local_extra(pcre_extra* local, pcre_extra* shared) {
     memset(local, 0, sizeof(pcre_extra));
     local->flags = PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
   }
-  local->match_limit = tl_pcre_globals->preg_backtrace_limit;
+  local->match_limit = tl_pcre_globals->preg_backtrack_limit;
   local->match_limit_recursion = tl_pcre_globals->preg_recursion_limit;
 }
 
 static const char* const*
 get_subpat_names(const pcre_cache_entry* pce) {
   assertx(!pce->literal_data);
-  char **subpat_names = pce->subpat_names.load(std::memory_order_relaxed);
+  char **subpat_names = pce->subpat_names.load(std::memory_order_acquire);
   if (subpat_names) return subpat_names;
 
   /*
@@ -711,9 +709,22 @@ static bool get_pcre_fullinfo(pcre_cache_entry* pce) {
   return true;
 }
 
+static void raise_warning_or_create_error_message(bool warn,
+                                                  StringData*& error_message,
+                                                  const std::string& msg) {
+  if (LIKELY(warn)) {
+    raise_warning(msg);
+  } else {
+    if (error_message) decRefStr(error_message); // decref old StringData
+    error_message = StringData::Make(msg);
+  }
+}
+
 static bool
 pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
-                              StringData* regex) {
+                              StringData* regex,
+                              bool warn,
+                              StringData*& error_message) {
   PCRECache::TempKeyCache tkc;
 
   /* Try to lookup the cached regex entry, and if successful, just pass
@@ -725,7 +736,8 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
   const char *p = regex->data();
   while (isspace((int)*(unsigned char *)p)) p++;
   if (*p == 0) {
-    raise_warning("Empty regular expression");
+    raise_warning_or_create_error_message(warn, error_message,
+                                          "Empty regular expression");
     return false;
   }
 
@@ -733,7 +745,8 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
      or a backslash. */
   char delimiter = *p++;
   if (isalnum((int)*(unsigned char *)&delimiter) || delimiter == '\\') {
-    raise_warning("Delimiter must not be alphanumeric or backslash");
+    raise_warning_or_create_error_message(warn, error_message,
+                                          "Delimiter must not be alphanumeric or backslash");
     return false;
   }
 
@@ -756,8 +769,9 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       pp++;
     }
     if (*pp == 0) {
-      raise_warning("No ending delimiter '%c' found: [%s]", delimiter,
-                      regex->data());
+      std::string msg = folly::sformat("No ending delimiter '{}' found: [{}]",
+                                       delimiter, regex->data());
+      raise_warning_or_create_error_message(warn, error_message, msg);
       return false;
     }
   } else {
@@ -777,8 +791,9 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       pp++;
     }
     if (*pp == 0) {
-      raise_warning("No ending matching delimiter '%c' found: [%s]",
-                      end_delimiter, regex->data());
+      std::string msg = folly::sformat("No ending matching delimiter '{}' found: [{}]",
+                                       end_delimiter, regex->data());
+      raise_warning_or_create_error_message(warn, error_message, msg);
       return false;
     }
   }
@@ -827,7 +842,9 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       break;
 
     default:
-      raise_warning("Unknown modifier '%c': [%s]", pp[-1], regex->data());
+      std::string msg = folly::sformat("Unknown modifier '{}': [{}]",
+                                       pp[-1], regex->data());
+      raise_warning_or_create_error_message(warn, error_message, msg);
       return false;
     }
   }
@@ -835,7 +852,13 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
   /* We've reached a null byte, now check if we're actually at the end of the
      string.  If not this is a bad expression, and a potential security hole. */
   if (regex->size() != (pp - regex->data())) {
-    raise_error("Error: Null byte found in pattern");
+    if (warn) {
+      raise_error("Error: Null byte found in pattern");
+    } else {
+      if (error_message) decRefStr(error_message); // decref old StringData
+      error_message = makeStaticString("Null byte found in pattern");
+      return false;
+    }
   }
 
   /* Store the compiled pattern and extra info in the cache. */
@@ -861,6 +884,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       }
     }
 
+    pc_counter->increment();
     s_pcreCache.insert(accessor, regex, tkc, new_entry);
     return true;
   };
@@ -874,7 +898,9 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
   int erroffset;
   pcre *re = pcre_compile(pattern, coptions, &error, &erroffset, 0);
   if (re == nullptr) {
-    raise_warning("Compilation failed: %s at offset %d", error, erroffset);
+    std::string msg = folly::sformat("Compilation failed: {} at offset {}",
+                                     error, erroffset);
+    raise_warning_or_create_error_message(warn, error_message, msg);
     return false;
   }
 
@@ -892,7 +918,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
           PCRE_EXTRA_MATCH_LIMIT_RECURSION;
         pcre_assign_jit_stack(extra, alloc_jit_stack, nullptr);
       }
-      if (error != nullptr) {
+      if (error != nullptr && warn) {
         try {
           raise_warning("Error while studying pattern");
         } catch (...) {
@@ -900,9 +926,9 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
           throw;
         }
       }
-      if ((!RuntimeOption::EvalJitNoGdb ||
-           RuntimeOption::EvalJitUseVtuneAPI ||
-           RuntimeOption::EvalPerfPidMap) &&
+      if ((!Cfg::Jit::NoGdb ||
+           Cfg::Jit::UseVtuneAPI ||
+           Cfg::Eval::PerfPidMap) &&
           extra &&
           extra->executable_jit != nullptr) {
         size_t size;
@@ -912,14 +938,14 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
         TCA end = start + size;
         std::string name = folly::sformat("HHVM::pcre_jit::{}", pattern);
 
-        if (!RuntimeOption::EvalJitNoGdb && jit::mcgen::initialized()) {
+        if (!Cfg::Jit::NoGdb && jit::mcgen::initialized()) {
           Debug::DebugInfo::Get()->recordStub(Debug::TCRange(start, end, false),
                                               name);
         }
-        if (RuntimeOption::EvalJitUseVtuneAPI) {
+        if (Cfg::Jit::UseVtuneAPI) {
           HPHP::jit::reportHelperToVtune(name.c_str(), start, end);
         }
-        if (RuntimeOption::EvalPerfPidMap && jit::mcgen::initialized()) {
+        if (Cfg::Eval::PerfPidMap && jit::mcgen::initialized()) {
           std::string escaped_name;
           folly::json::escapeString(name, escaped_name,
                                     folly::json::serialization_opts());
@@ -935,6 +961,18 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
   return store_pcre_entry(literal_data, re, extra);
 }
 
+static bool
+pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
+                              StringData* regex) {
+  StringData* error_message = nullptr;
+  SCOPE_EXIT {
+    assertx(!error_message);
+    if (error_message) decRefStr(error_message);
+  };
+  bool result = pcre_get_compiled_regex_cache(accessor, regex, true, error_message);
+  return result;
+}
+
 static int* create_offset_array(const pcre_cache_entry* pce,
                                 int& size_offsets) {
   /* Allocate memory for the offsets array */
@@ -947,7 +985,7 @@ static Array str_offset_pair(const String& str, int offset) {
 }
 
 static inline bool pcre_need_log_error(int pcre_code) {
-  return RuntimeOption::EnablePregErrorLog &&
+  return Cfg::PCRE::ErrorLog &&
          (pcre_code == PCRE_ERROR_MATCHLIMIT ||
           pcre_code == PCRE_ERROR_RECURSIONLIMIT);
 }
@@ -976,7 +1014,7 @@ static void pcre_log_error(const char* func, int line, int pcre_code,
     "limits=(%" PRId64 ", %" PRId64 "), extra=(%d, %d, %d, %d)",
     func, line, pcre_code, errString,
     escapedPattern, escapedSubject, escapedRepl,
-    tl_pcre_globals->preg_backtrace_limit,
+    tl_pcre_globals->preg_backtrack_limit,
     tl_pcre_globals->preg_recursion_limit,
     arg1, arg2, arg3, arg4);
   free((void *)escapedPattern);
@@ -1010,6 +1048,9 @@ void pcre_handle_exec_error(int pcre_code) {
     break;
   case PCRE_ERROR_BADUTF8_OFFSET:
     preg_code = PHP_PCRE_BAD_UTF8_OFFSET_ERROR;
+    break;
+  case PCRE_ERROR_JIT_STACKLIMIT:
+    preg_code = PHP_PCRE_JIT_STACKLIMIT_ERROR;
     break;
   default:
     preg_code = PHP_PCRE_INTERNAL_ERROR;
@@ -1347,6 +1388,25 @@ Variant preg_match_all(StringData* pattern, const StringData* subject,
   return preg_match_impl(pattern, subject, matches, flags, offset, true);
 }
 
+Variant preg_get_error_message_if_invalid(const String& pattern) {
+  PCRECache::Accessor accessor;
+  StringData* error_message = nullptr;
+  bool is_valid;
+  try {
+    is_valid = pcre_get_compiled_regex_cache(accessor, pattern.get(), false, error_message);
+  } catch (...) {
+    if (error_message) decRefStr(error_message);
+    throw;
+  }
+  if (is_valid) {
+    return null_string;
+  }
+  if (!error_message) {
+    error_message = makeStaticString("Failed to process regex for unknown reason");
+  }
+  return Variant { error_message };
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static String preg_do_repl_func(const Variant& function, const String& subject,
@@ -1520,13 +1580,9 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
         /* copy the part of the string before the match */
         result.append(piece, match-piece);
 
-        /* copy replacement and backrefs */
-        int result_len = result.size();
-
         if (callable) {
           /* Copy result from custom function to buffer and clean up. */
           result.append(callable_result.data(), callable_result.size());
-          result_len += callable_result.size();
         } else { /* do regular backreference copying */
           walk = replace;
           walk_last = 0;

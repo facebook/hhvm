@@ -1,15 +1,15 @@
 <?hh
 class A {
-    static $x = "A";
-    function testit() {
+    public static $x = "A";
+    function testit() :mixed{
         $this->v1 = new self;
         $this->v2 = new self;
     }
 }
 
 class B extends A {
-    static $x = "B";
-    function testit() {
+    public static $x = "B";
+    function testit() :mixed{
         parent::testit();
         $this->v3 = new self;
         $this->v4 = new parent;

@@ -1,0 +1,18 @@
+called on C
+called on A
+called on A
+called on A
+
+Notice: String passed to class type-hint in %s/class-ptr/get_parent_class_from_class.php on line 34
+called on A
+
+Notice: String passed to class type-hint in %s/class-ptr/get_parent_class_from_class.php on line 39
+called on A
+
+Notice: String passed to class type-hint in %s/class-ptr/get_parent_class_from_class.php on line 44
+
+Notice: String passed to class type-hint in %s/class-ptr/get_parent_class_from_class.php on line 44
+
+Notice: String passed to class type-hint in %s/class-ptr/get_parent_class_from_class.php on line 44
+
+Notice: String passed to class type-hint in %s/class-ptr/get_parent_class_from_class.php on line 44

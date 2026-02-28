@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :mixed{
   $a = 2;
   switch ($a) {
     case ++$a: var_dump('ok');
@@ -15,7 +15,7 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_1753() {
+function main_1753() :mixed{
 $a = 2;
 switch ($a) {
   case ++$a: var_dump('ok');

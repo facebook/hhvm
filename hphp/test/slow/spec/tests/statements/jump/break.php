@@ -1,7 +1,7 @@
 <?hh
 
 function findValue($table, $v)  // where $table is 2x3 array
-{
+:mixed{
         $valid = true;
         for ($row = 0; $valid && $row <= 1; ++$row)
         {
@@ -23,7 +23,7 @@ function findValue($table, $v)  // where $table is 2x3 array
 // break;  // can't break from the outer-most level
 
 function f($i)
-{
+:mixed{
         echo "$i\n";
         break;  // break is not rejected here until runtime
 }
@@ -31,11 +31,11 @@ function f($i)
 function main_entry(): void {
   error_reporting(-1);
 
-  $table = darray[];
-  $table[0] = varray[34];
+  $table = dict[];
+  $table[0] = vec[34];
   $table[0][] = -3;
   $table[0][] = 345;
-  $table[1] = varray[123];
+  $table[1] = vec[123];
   $table[1][] = 9854;
   $table[1][] = -765;
 

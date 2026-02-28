@@ -3,7 +3,7 @@
 class C {
 }
 
-function foo() {
+function foo() :mixed{
   $x = new C;
   if (!$x) {
     echo "Error\n";

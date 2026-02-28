@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class C {
   const type T = arraykey;
@@ -19,7 +19,7 @@ final class E extends C {
 
 
 <<__EntryPoint>>
-function main_is_expression_tc_self() {
+function main_is_expression_tc_self() :mixed{
 D::isT('foo');
 C::isT('foo');
 E::isT('foo');

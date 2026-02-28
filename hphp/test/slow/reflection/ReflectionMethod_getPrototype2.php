@@ -1,7 +1,7 @@
 <?hh
 // Test prototype of builtin classes
 
-function outputPrototype(ReflectionMethod $rf) {
+function outputPrototype(ReflectionMethod $rf) :mixed{
   try {
     $prototype = $rf->getPrototype();
     print $prototype->getDeclaringClass()->getName() .
@@ -16,8 +16,8 @@ class SimpleXMLElementChild extends SimpleXMLElement {
 }
 
 
-function main() {
-  $tests = varray[
+function main() :mixed{
+  $tests = vec[
     tuple(Generator::class, "next"),
     tuple(Generator::class, "getOrigFuncName"),
     tuple(SimpleXMLElementChild::class, '__construct'),
@@ -33,6 +33,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_reflection_method_get_prototype2() {
+function main_reflection_method_get_prototype2() :mixed{
 main();
 }

@@ -12,7 +12,7 @@ type new_object_checker =
   Pos.t ->
   Typing_env_types.env ->
   Typing_defs.pos_string ->
-  Nast.expr list ->
+  Nast.argument list ->
   Typing_env_types.env
 
 (** Checks a list of user attributes:
@@ -20,7 +20,7 @@ type new_object_checker =
       by checking subtyping of the attribute class with the provided attribute interface
       (e.g. FileAttribute, MethodAttribute, see Naming_special_names for a full list)
     - checks for unbound attribute names
-    - runs the provided function, which checks creating an instance of the attribute class. *)
+    - runs the provided new_object_checker, which checks creating an instance of the attribute class. *)
 val check_def :
   Typing_env_types.env ->
   new_object_checker ->

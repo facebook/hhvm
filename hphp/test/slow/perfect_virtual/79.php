@@ -2,17 +2,17 @@
 
 class A {
  const X=1;
- function foo($a = self::X) {
+ function foo($a = self::X) :mixed{
  var_dump($a);
 }
 }
  class B extends A {
  const X=2;
- function foo($b = self::X) {
+ function foo($b = self::X) :mixed{
  var_dump($b);
 }
 }
- function bar() {
+ function bar() :mixed{
    $obj = new A;
  $obj->foo();
   $obj = new B;
@@ -20,6 +20,6 @@ class A {
 }
 
  <<__EntryPoint>>
-function main_79() {
+function main_79() :mixed{
 bar();
 }

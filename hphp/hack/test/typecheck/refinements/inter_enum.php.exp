@@ -1,1 +1,6 @@
-No errors
+WARN: File "inter_enum.php", line 23, characters 12-15:
+Invalid case: This case will never match.
+A value of type `(E & F)` can never be equal to a value of type `E` (Warn[12007])
+WARN: File "inter_enum.php", line 26, characters 12-15:
+Invalid case: This case will never match.
+A value of type `(E & F)` can never be equal to a value of type `E` (Warn[12007])

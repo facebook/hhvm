@@ -8,9 +8,9 @@
 
 open Hh_prelude
 module Env = Typing_env
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
-let can_access
+let can_access_internal
     ~(env : Typing_env_types.env)
     ~(current : string option)
     ~(target : string option) =
@@ -24,10 +24,26 @@ let can_access
     | None -> `Yes
     | Some self ->
       (match Env.get_class env self with
-      | Some cls
-        when Ast_defs.is_c_trait (Cls.kind cls) && not (Cls.internal cls) ->
+      | Decl_entry.Found cls
+        when Ast_defs.is_c_trait (Cls.kind cls)
+             && (not (Cls.internal cls))
+             && not (Cls.is_module_level_trait cls) ->
         `OutsideViaTrait (Cls.pos cls)
-      | Some _
-      | None ->
+      | Decl_entry.Found _
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
         `Yes))
   | (Some current, Some target) -> `Disjoint (current, target)
+
+let is_class_visible (env : Typing_env_types.env) (cls : Cls.t) =
+  if Cls.internal cls then
+    match
+      can_access_internal
+        ~env
+        ~current:(Env.get_current_module env)
+        ~target:(Cls.get_module cls)
+    with
+    | `Yes -> true
+    | _ -> false
+  else
+    true

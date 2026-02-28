@@ -1,10 +1,10 @@
 <?hh
 
-function plus0($x) {
+function plus0($x) :mixed{
   return HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) + 0;
 }
 
-function minus0($x) {
+function minus0($x) :mixed{
   return HH\Lib\Legacy_FIXME\cast_for_arithmetic($x) - 0;
 }
 <<__EntryPoint>> function main(): void {

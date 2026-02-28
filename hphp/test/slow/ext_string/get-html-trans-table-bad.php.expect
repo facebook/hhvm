@@ -1,0 +1,10 @@
+dict(4) {
+  ["""]=>
+  string(6) "&quot;"
+  ["&"]=>
+  string(5) "&amp;"
+  ["<"]=>
+  string(4) "&lt;"
+  [">"]=>
+  string(4) "&gt;"
+}

@@ -1,8 +1,8 @@
 <?hh
 
 function resolve_to_constant($code)
-{
-    $refl = new ReflectionClass('memcached');
+:mixed{
+    $refl = new ReflectionClass('Memcached');
     $c = $refl->getConstants();
 
     foreach($c as $name => $value) {
@@ -13,7 +13,7 @@ function resolve_to_constant($code)
 }
 
 function status_print($op, $mem, $expected)
-{
+:mixed{
     $code = $mem->getResultcode();
 
     if ($code == $expected) {

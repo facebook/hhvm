@@ -19,7 +19,6 @@
 #include <sstream>
 
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/util/string-vsnprintf.h"
@@ -55,10 +54,10 @@ bool ExtendedLogger::EnabledByDefault = false;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_LOGLEVEL(Error);
-IMPLEMENT_LOGLEVEL(Warning);
-IMPLEMENT_LOGLEVEL(Info);
-IMPLEMENT_LOGLEVEL(Verbose);
+IMPLEMENT_LOGLEVEL(Error)
+IMPLEMENT_LOGLEVEL(Warning)
+IMPLEMENT_LOGLEVEL(Info)
+IMPLEMENT_LOGLEVEL(Verbose)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -70,36 +69,33 @@ void ExtendedLogger::LogImpl(LogLevelType level, const std::string &msg) {
       MaxMessagesPerRequest >= 0) {
     return;
   }
-  for (auto& l : s_loggers) {
-    auto& logger = l.second;
-    if (logger) {
-      // we can only get here if ther's no extended loggers (see assertion)
-      // if this isn't enough of assurance we could check type at runtime,
-      // but probably good enough for now
-      Array bt;
-      bool writeBt = false;
-      auto* stFile = logger->fileForStackTrace();
-      if (stFile) {
-        bt = createBacktrace(BacktraceArgs());
-        writeBt = !bt.empty();
-      }
-      // only escape more (the final new line) if we're writing the backtrace
-      auto growth = logger->log(level, msg, nullptr, true, writeBt);
-      if (writeBt) {
-        // escape the BT too as well as the log
-        auto stacktraceSize = PrintStackTrace(stFile, bt, true);
-        growth.serializedBytes += stacktraceSize;
-        growth.compressedBytes += stacktraceSize;
-        FILE* tf = s_threadData.get()->log;
-        if (tf && tf != stFile) {
-          PrintStackTrace(tf, bt, true);
-        }
-      }
-      s_errorLines->addValue(growth.lines);
-      s_errorSerializedBytes->addValue(growth.serializedBytes);
-      s_errorCompressedBytes->addValue(growth.compressedBytes);
+  Logger::forEachLogger([&](Logger& logger) {
+    // we can only get here if there's no extended loggers (see assertion)
+    // if this isn't enough of assurance we could check type at runtime,
+    // but probably good enough for now
+    Array bt;
+    bool writeBt = false;
+    auto* stFile = logger.fileForStackTrace();
+    if (stFile) {
+      bt = createBacktrace(BacktraceArgs());
+      writeBt = !bt.empty();
     }
-  }
+    // only escape more (the final new line) if we're writing the backtrace
+    auto growth = logger.log(level, msg, nullptr, true, writeBt);
+    if (writeBt) {
+      // escape the BT too as well as the log
+      auto stacktraceSize = PrintStackTrace(stFile, bt, true);
+      growth.serializedBytes += stacktraceSize;
+      growth.compressedBytes += stacktraceSize;
+      FILE* tf = s_threadData.get()->log;
+      if (tf && tf != stFile) {
+        PrintStackTrace(tf, bt, true);
+      }
+    }
+    s_errorLines->addValue(growth.lines);
+    s_errorSerializedBytes->addValue(growth.serializedBytes);
+    s_errorCompressedBytes->addValue(growth.compressedBytes);
+  });
 }
 
 LogGrowth ExtendedLogger::log(LogLevelType level,

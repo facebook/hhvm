@@ -8,27 +8,21 @@
  *)
 
 (* This `.mli` file was generated automatically. It may include extra
-definitions that should not actually be exposed to the caller. If you notice
-that this interface file is a poor interface, please take a few minutes to
-clean it up manually, and then delete this comment once the interface is in
-shape. *)
+   definitions that should not actually be exposed to the caller. If you notice
+   that this interface file is a poor interface, please take a few minutes to
+   clean it up manually, and then delete this comment once the interface is in
+   shape. *)
 
 type t = {
   pos_lnum: int;  (** line number. Starts at 1. *)
   pos_bol: int;
-      (** character number of the beginning of line of this position.
+      (** character offset (from the beginning of file) of the beginning of line of this position.
           The column number is therefore offset - bol.
           Starts at 0. *)
   pos_offset: int;
       (** character offset from the beginning of the file. Starts at 0. *)
 }
-[@@deriving eq]
-
-val pp : Format.formatter -> t -> unit
-
-val show : t -> string
-
-val compare : t -> t -> int
+[@@deriving eq, hash, ord, show]
 
 val dummy : t
 

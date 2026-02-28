@@ -67,6 +67,12 @@ enum class StubType : uint8_t {
  */
 TCA getOrEmitStub(StubType type, SrcKey sk, SBInvOffset spOff);
 
+/*
+ * Check whether the given address corresponds to the start of a previously
+ * emitted stub.
+ */
+bool isStub(TCA addr);
+
 ///////////////////////////////////////////////////////////////////////////////
 // Emitters.
 

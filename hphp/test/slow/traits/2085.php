@@ -1,7 +1,7 @@
 <?hh
 
 trait Too {
-  static function bar() {
+  static function bar() :mixed{
     $abc = 123;
     $a = function (...$args) use ($abc) {
       $n = count($args);
@@ -11,7 +11,7 @@ trait Too {
     return $a;
   }
 
-  static function baz($obj) {
+  static function baz($obj) :mixed{
     $abc = 456;
     $obj(789);
   }
@@ -21,7 +21,7 @@ class Foo {
  }
 
 <<__EntryPoint>>
-function main_2085() {
+function main_2085() :mixed{
 $a = Foo::bar();
 Foo::baz($a);
 }

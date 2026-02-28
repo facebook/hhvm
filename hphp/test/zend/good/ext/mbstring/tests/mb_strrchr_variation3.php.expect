@@ -1,0 +1,14 @@
+*** Testing mb_strrchr() : usage variation ***
+
+--lowercase true--
+string(12) "737472696e67"
+
+--lowercase false--
+string(8) "5f76616c"
+
+--uppercase TRUE--
+string(12) "737472696e67"
+
+--uppercase FALSE--
+string(8) "5f76616c"
+===DONE===

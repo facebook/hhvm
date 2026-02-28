@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$data = varray[
+$data = vec[
     '.23',
     '-42',
     '+42',

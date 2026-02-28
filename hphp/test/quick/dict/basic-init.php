@@ -1,12 +1,12 @@
 <?hh
 
 class ToString {
-  function __toString() {
+  function __toString() :mixed{
     return "foobaz";
   }
 }
 
-function create($a, $b, $c, $d) {
+function create($a, $b, $c, $d) :mixed{
   try {
     var_dump(dict[$a => $b, $c => $d]);
   } catch (Exception $e) {
@@ -24,7 +24,7 @@ function create($a, $b, $c, $d) {
   var_dump(dict['abc' => 10, 'abc' => 10, 'abc' => 10]);
   var_dump(dict[123 => 100, '123' => 200]);
   var_dump(dict[1 => true, 2 => false, 3 => 1.23,
-                4 => null, 5 => varray[], 6 => vec[1, 2, 3],
+                4 => null, 5 => vec[], 6 => vec[1, 2, 3],
                 7 => dict[1 => 'a'], 8 => keyset['a', 'b']]);
   var_dump(dict['abc' => new stdClass]);
 
@@ -43,7 +43,7 @@ function create($a, $b, $c, $d) {
   create(null, 'a', null, 'b');
   create(false, 1, true, 2);
   create(1.23, 'a', 4.56, 'b');
-  create(varray[], 'a', varray[1, 2, 3], 'b');
+  create(vec[], 'a', vec[1, 2, 3], 'b');
   create(vec[2, 1], 100, vec[], 200);
   create(dict['a' => 1], 100, dict[], 200);
   create(keyset[], 'a', keyset['a'], 'b');

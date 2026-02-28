@@ -4,28 +4,28 @@
 
 <<__EntryPoint>>
 function test(): void {
-  require 'expression_tree.inc';
+  require __DIR__.'/../../../hack/test/expr_tree.php';
 
-  print_et(Code`1 === 2`);
-  print_et(Code`1 !== 2`);
-  print_et(Code`1 + 2`);
-  print_et(Code`1 - 2`);
-  print_et(Code`1 * 2`);
-  print_et(Code`1 / 2`);
-  print_et(Code`1 % 2`);
-  print_et(Code`-1`);
-  print_et(Code`1 < 2`);
-  print_et(Code`1 <= 2`);
-  print_et(Code`1 > 2`);
-  print_et(Code`1 >= 2`);
-  print_et(Code`1 & 2`);
-  print_et(Code`1 | 2`);
-  print_et(Code`1 ^ 2`);
-  print_et(Code`1 << 2`);
-  print_et(Code`1 >> 2`);
-  print_et(Code`~1`);
-  print_et(Code`true && false`);
-  print_et(Code`true || false`);
-  print_et(Code`!true`);
-  print_et(Code`"Hello" . "World"`);
+  print_et(ExampleDsl`1 === 2`);
+  print_et(ExampleDsl`1 !== 2`);
+  print_et(ExampleDsl`1 + 2`);
+  print_et(ExampleDsl`1 - 2`);
+  print_et(ExampleDsl`1 * 2`);
+  print_et(ExampleDsl`1 / 2`);
+  print_et(ExampleDsl`1 % 2`);
+  print_et(ExampleDsl`-1`);
+  print_et(ExampleDsl`1 < 2`);
+  print_et(ExampleDsl`1 <= 2`);
+  print_et(ExampleDsl`1 > 2`);
+  print_et(ExampleDsl`1 >= 2`);
+  print_et(ExampleDsl`1 & 2`);
+  print_et(ExampleDsl`1 | 2`);
+  print_et(ExampleDsl`1 ^ 2`);
+  print_et(ExampleDsl`1 << 2`);
+  print_et(ExampleDsl`1 >> 2`);
+  print_et(ExampleDsl`~1`);
+  print_et(ExampleDsl`true && false`);
+  print_et(ExampleDsl`true || false`);
+  print_et(ExampleDsl`!true`);
+  print_et(ExampleDsl`"Hello" . "World"`);
 }

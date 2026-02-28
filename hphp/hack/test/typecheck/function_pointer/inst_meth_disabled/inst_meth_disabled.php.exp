@@ -1,2 +1,0 @@
-File "inst_meth_disabled.php", line 11, characters 3-11:
-`inst_meth()` is disabled; use a lambda `(...) ==> {...}` instead (Parsing[1002])

@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
-TRACE_SET_MOD(vasm);
+TRACE_SET_MOD(vasm)
 
 namespace HPHP { namespace jit {
 

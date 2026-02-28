@@ -17,8 +17,8 @@ let foo_contents = "<?hh
 
 let qux_contents =
   "<?hh
-function h(): string {
-    return 'a';
+function h(): int {
+    return 1;
 }
 
 class Foo {}
@@ -57,7 +57,7 @@ let test () =
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";
   let bar_error =
-    "File \"/bar.php\", line 5, characters 15-16:\n"
+    "ERROR: File \"/bar.php\", line 5, characters 15-16:\n"
     ^ "No class variable `$y` in `Bar` (Typing[4090])\n"
     ^ "  File \"/foo.php\", line 3, characters 23-26:\n"
     ^ "  Did you mean `$x` instead?\n"
@@ -65,17 +65,17 @@ let test () =
     ^ "  Declaration of `Bar` is here\n"
   in
   let qux_error =
-    "File \"/qux.php\", line 6, characters 7-9:\n"
+    "ERROR: File \"/qux.php\", line 6, characters 7-9:\n"
     ^ "Name already bound: `Foo` (Naming[2012])\n"
     ^ "  File \"/foo.php\", line 2, characters 11-13:\n"
     ^ "  Previous definition is here\n"
   in
   (* We should get exactly these two errors *)
-  match Errors.get_error_list env.errorl with
+  match Diagnostics.get_diagnostic_list env.diagnostics with
   | [x; y] ->
-    Test.assertSingleError qux_error [y];
-    Test.assertSingleError bar_error [x]
+    Test.assertSingleDiagnostic qux_error [y];
+    Test.assertSingleDiagnostic bar_error [x]
   | errs ->
     Test.fail
     @@ "Expected exactly two errors, but got:\n"
-    ^ String.concat ~sep:"\n" (Test.error_strings errs)
+    ^ String.concat ~sep:"\n" (Test.diagnostic_strings errs)

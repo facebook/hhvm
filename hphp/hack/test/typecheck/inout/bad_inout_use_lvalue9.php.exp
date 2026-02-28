@@ -1,16 +1,14 @@
-File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
-You cannot use this syntax with `inout`. (Parsing[1002])
-File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
-`inout` arguments may only be local variables or array indexing expressions  (NastCheck[3050])
-File "bad_inout_use_lvalue9.php", line 6, characters 5-23:
+ERROR: File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
+You cannot decorate this argument as `inout` (Parsing[1002])
+ERROR: File "bad_inout_use_lvalue9.php", line 6, characters 5-23:
 Invalid argument (Typing[4110])
   File "bad_inout_use_lvalue9.php", line 3, characters 18-28:
   Expected `vec<int>`
   File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
   But got `(int, int)`
-File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
+ERROR: File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
 Invalid argument to an `inout` parameter (Typing[4110])
   File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
-  Expected `(int, int)`
+  Expected `(nothing, nothing)` resulting from a list destructuring assignment or a splat
   File "bad_inout_use_lvalue9.php", line 3, characters 18-28:
   But got `vec<int>`

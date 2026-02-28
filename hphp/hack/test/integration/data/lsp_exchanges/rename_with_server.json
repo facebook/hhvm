@@ -1,0 +1,60 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 990,
+    "method": "initialize",
+    "params": {
+      "initializationOptions": {
+        "delayUntilDoneInit": true
+      },
+      "processId": null,
+      "rootPath": "${root_path}",
+      "capabilities": {}
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "$test/waitForHhServerReady",
+    "params": {}
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "textDocument/didOpen",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}",
+        "languageId": "hack",
+        "version": 1,
+        "text": "${php_file}"
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "textDocument/rename",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 91,
+        "character": 20
+      },
+      "newName": "multifile_newname"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 1
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 999,
+    "method": "shutdown",
+    "params": {}
+  }
+]

@@ -1,6 +1,6 @@
 <?hh
 class SplMaxHeap2 extends SplMaxHeap{
-    public function count() {
+    public function count() :mixed{
         return -parent::count();
     }
 }

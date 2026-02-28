@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1431() {
+function main_1431() :mixed{
 $a = 1 % 9223372036854775807;
 var_dump($a);
 }

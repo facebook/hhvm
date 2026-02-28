@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 /**
  * Test cases for trailing commas in (sometimes) unexpected places. Try to do

@@ -19,8 +19,6 @@
 #include "hphp/runtime/ext/domdocument/ext_domdocument.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 
-#include "hphp/util/functional.h"
-#include "hphp/util/hash-map.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -639,8 +637,8 @@ Variant HHVM_METHOD(XMLReader, expand,
 
 const StaticString s_XMLReader("XMLReader");
 static struct XMLReaderExtension final : Extension {
-  XMLReaderExtension() : Extension("xmlreader", "0.1") {}
-  void moduleInit() override {
+  XMLReaderExtension() : Extension("xmlreader", "0.1", NO_ONCALL_YET) {}
+  void moduleRegisterNative() override {
     HHVM_RCC_INT(XMLReader, NONE, XML_READER_TYPE_NONE);
     HHVM_RCC_INT(XMLReader, ELEMENT, XML_READER_TYPE_ELEMENT);
     HHVM_RCC_INT(XMLReader, ATTRIBUTE, XML_READER_TYPE_ATTRIBUTE);
@@ -693,8 +691,6 @@ static struct XMLReaderExtension final : Extension {
 
     Native::registerNativeDataInfo<XMLReader>(s_XMLReader.get());
     Native::registerNativePropHandler<XMLReaderPropHandler>(s_XMLReader);
-
-    loadSystemlib();
   }
 } s_xml_reader_extension;
 

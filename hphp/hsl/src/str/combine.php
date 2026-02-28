@@ -24,8 +24,15 @@ function join(
   readonly Traversable<arraykey> $pieces,
   string $glue,
 )[]: string {
-  if ($pieces is Container<_>) {
-    return \implode($glue, $pieces);
+  $out = "";
+  $first = true;
+  foreach ($pieces as $item) {
+    if ($first) {
+      $out = (string)$item;
+      $first = false;
+    } else {
+      $out .= $glue.(string)$item;
+    }
   }
-  return \implode($glue, vec($pieces));
+  return $out;
 }

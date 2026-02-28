@@ -1,10 +1,10 @@
 <?hh
 
-function g<reify T>() {
+function g<reify T>() :mixed{
   echo "done\n";
 }
 
-function f<reify T>() {
+function f<reify T>() :mixed{
   $g = g<T>;
   $g();
 }

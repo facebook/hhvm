@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function testAssign(dynamic $x, dynamic $y): void {
   $x += 5; // $x is now a num

@@ -13,7 +13,7 @@ class C extends P {
   // inherited constructor
 }
 
-function reflect($class_name) {
+function reflect($class_name) :mixed{
   $c = new $class_name('a', 1, 2);
 
   $rc = new ReflectionClass($class_name);
@@ -24,19 +24,19 @@ function reflect($class_name) {
     echo get_class($e), ': ', $e->getMessage(), "\n";
   }
   try {
-    $c2 = $rc->newInstanceArgs(varray['a', 1, 2]);
+    $c2 = $rc->newInstanceArgs(vec['a', 1, 2]);
   } catch (Exception $e) {
     echo get_class($e), ': ', $e->getMessage(), "\n";
   }
 }
 
-function main() {
+function main() :mixed{
   reflect('D');
   reflect('C');
   reflect('P');
 }
 
 <<__EntryPoint>>
-function main_defaultconstructor_exceptions() {
+function main_defaultconstructor_exceptions() :mixed{
 main();
 }

@@ -18,8 +18,15 @@
 #error "class-inl.h should only be included by class.h"
 #endif
 
+#include <folly/Random.h>
+
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/vm/named-entity.h"
+
+#include "hphp/util/configs/repo.h"
+#include "hphp/util/configs/sandbox.h"
+#include "hphp/util/random.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,6 +42,11 @@ inline bool Class::validate() const {
 #endif
   assertx(name()->checkSane());
   return true;
+}
+
+inline const ClassId Class::classId() const {
+  assertx(!m_classId.isInvalid());
+  return m_classId;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -159,10 +171,10 @@ Class::PropInitVec::deepInitBits() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Pre- and post-allocations.
 
-inline LowPtr<Func>* Class::funcVec() const {
-  return reinterpret_cast<LowPtr<Func>*>(
+inline PackedPtr<Func>* Class::funcVec() const {
+  return reinterpret_cast<PackedPtr<Func>*>(
     reinterpret_cast<uintptr_t>(this) -
-    m_funcVecLen * sizeof(LowPtr<Func>)
+    m_funcVecLen * sizeof(PackedPtr<Func>)
   );
 }
 
@@ -178,11 +190,11 @@ inline const void* Class::mallocEnd() const {
          + classVecLen() * sizeof(*classVec());
 }
 
-inline const LowPtr<Class>* Class::classVec() const {
+inline const PackedPtr<Class>* Class::classVec() const {
   return m_classVec;
 }
 
-inline Class::veclen_t Class::classVecLen() const {
+inline Class::classVecLen_t Class::classVecLen() const {
   return m_classVecLen;
 }
 
@@ -206,13 +218,13 @@ inline bool Class::classofNonIFace(const Class* cls) const {
 }
 
 inline bool Class::classof(const Class* cls) const {
-  auto const bit = cls->m_instanceBitsIndex.load(std::memory_order_relaxed);
+  auto const bit = cls->m_instanceBitsIndex.load(std::memory_order_acquire);
   assertx(bit == kNoInstanceBit || kProfileInstanceBit || bit > 0);
   if (bit > 0) {
     return m_instanceBits.test(bit);
-  } else if (bit == kProfileInstanceBit) {
-    InstanceBits::profile(cls->name());
   }
+
+  if (this == cls) return true;
 
   // If `cls' is an interface, we can simply check to see if cls is in
   // this->m_interfaces.  Otherwise, if `this' is not an interface, the
@@ -223,10 +235,9 @@ inline bool Class::classof(const Class* cls) const {
   // non-interfaces, while this->classVec is either empty, or contains
   // interfaces).
   if (UNLIKELY(isInterface(cls))) {
-    if (this == cls) return true;
     auto const slot = cls->preClass()->ifaceVtableSlot();
     if (slot != kInvalidSlot && isConcreteNormalClass(this)) {
-      assertx(RO::RepoAuthoritative);
+      assertx(Cfg::Repo::Authoritative);
       auto const ok = slot < m_vtableVecLen && m_vtableVec[slot].iface == cls;
       assertx(ok == (m_interfaces.lookupDefault(cls->name(), nullptr) == cls));
       return ok;
@@ -235,8 +246,6 @@ inline bool Class::classof(const Class* cls) const {
   }
   return classofNonIFace(cls);
 }
-
-inline bool Class::subtypeOf(const Class* cls) const { return classof(cls); }
 
 inline bool Class::ifaceofDirect(const StringData* name) const {
   return m_interfaces.contains(name);
@@ -278,16 +287,20 @@ inline void Class::initRTAttributes(uint8_t a) {
   m_RTAttrs |= a;
 }
 
-inline bool Class::isUnique() const {
-  return attrs() & AttrUnique;
-}
-
 inline bool Class::isPersistent() const {
   return attrs() & AttrPersistent;
 }
 
+inline bool Class::isInternal() const {
+  return attrs() & AttrInternal;
+}
+
 inline bool Class::isDynamicallyConstructible() const {
   return attrs() & AttrDynamicallyConstructible;
+}
+
+inline bool Class::isDynamicallyReferenced() const {
+  return attrs() & AttrDynamicallyReferenced;
 }
 
 inline Optional<int64_t> Class::dynConstructSampleRate() const {
@@ -359,13 +372,28 @@ inline size_t Class::numMethods() const {
 }
 
 inline Func* Class::getMethod(Slot idx) const {
-  auto funcVec = (LowPtr<Func>*)this;
+  assertx(idx < numMethods());
+  auto funcVec = (PackedPtr<Func>*)this;
   return funcVec[-((int32_t)idx + 1)];
 }
 
 inline void Class::setMethod(Slot idx, Func* func) {
-  auto funcVec = (LowPtr<Func>*)this;
+  assertx(idx < numMethods());
+  auto funcVec = (PackedPtr<Func>*)this;
   funcVec[-((int32_t)idx + 1)] = func;
+}
+
+inline Func* Class::getMethodSafe(Slot idx) const {
+  if (idx >= numMethods()) return nullptr;
+  return getMethod(idx);
+}
+
+inline Func* Class::getIfaceMethodSafe(Slot vtableIdx, Slot methodIdx) const {
+  if (vtableIdx >= m_vtableVecLen) return nullptr;
+  auto const& vtable = m_vtableVec[vtableIdx];
+  if (vtable.iface == nullptr) return nullptr;
+  if (methodIdx >= vtable.iface->numMethods()) return nullptr;
+  return vtable.vtable[methodIdx];
 }
 
 inline Func* Class::lookupMethod(const StringData* methName) const {
@@ -410,11 +438,11 @@ inline Slot Class::lookupReifiedInitProp() const {
 }
 
 inline bool Class::hasReifiedGenerics() const {
-  return m_hasReifiedGenerics;
+  return m_allFlags.m_hasReifiedGenerics;
 }
 
 inline bool Class::hasReifiedParent() const {
-  return m_hasReifiedParent;
+  return m_allFlags.m_hasReifiedParent;
 }
 
 inline RepoAuthType Class::declPropRepoAuthType(Slot index) const {
@@ -425,16 +453,18 @@ inline RepoAuthType Class::staticPropRepoAuthType(Slot index) const {
   return m_staticProperties[index].repoAuthType;
 }
 
-inline const TypeConstraint& Class::declPropTypeConstraint(Slot index) const {
-  return m_declProperties[index].typeConstraint;
+inline const TypeIntersectionConstraint& Class::declPropTypeConstraint(
+  Slot index) const {
+  return m_declProperties[index].typeConstraints;
 }
 
-inline const TypeConstraint& Class::staticPropTypeConstraint(Slot index) const {
-  return m_staticProperties[index].typeConstraint;
+inline const TypeIntersectionConstraint& Class::staticPropTypeConstraint(
+  Slot index) const {
+  return m_staticProperties[index].typeConstraints;
 }
 
 inline bool Class::hasDeepInitProps() const {
-  return m_hasDeepInitProps;
+  return m_allFlags.m_hasDeepInitProps;
 }
 
 inline bool Class::forbidsDynamicProps() const {
@@ -445,15 +475,15 @@ inline bool Class::forbidsDynamicProps() const {
 // Property initialization.
 
 inline bool Class::needInitialization() const {
-  return m_needInitialization;
+  return m_allFlags.m_needInitialization;
 }
 
 inline bool Class::maybeRedefinesPropTypes() const {
-  return m_maybeRedefsPropTy;
+  return m_allFlags.m_maybeRedefsPropTy;
 }
 
 inline bool Class::needsPropInitialValueCheck() const {
-  return m_needsPropInitialCheck;
+  return m_allFlags.m_needsPropInitialCheck;
 }
 
 inline const Class::PropInitVec& Class::declPropInit() const {
@@ -465,7 +495,7 @@ inline const VMFixedVector<const Func*>& Class::pinitVec() const {
 }
 
 inline rds::Handle Class::checkedPropTypeRedefinesHandle() const {
-  assertx(m_maybeRedefsPropTy);
+  assertx(m_allFlags.m_maybeRedefsPropTy);
   m_extra->m_checkedPropTypeRedefs.bind(
     rds::Mode::Normal,
     rds::LinkName{"PropTypeRedefs", name()}
@@ -474,7 +504,7 @@ inline rds::Handle Class::checkedPropTypeRedefinesHandle() const {
 }
 
 inline rds::Handle Class::checkedPropInitialValuesHandle() const {
-  assertx(m_needsPropInitialCheck);
+  assertx(m_allFlags.m_needsPropInitialCheck);
   m_extra->m_checkedPropInitialValues.bind(
     rds::Mode::Normal,
     rds::LinkName{"PropInitialValues", name()}
@@ -511,6 +541,15 @@ Class::sPropLink(Slot index) const {
   return m_sPropCache[index];
 }
 
+inline bool Class::declaredOnThisClass(const SProp& sProp) const {
+  return sProp.cls == this || (sProp.attrs & AttrLSB);
+}
+
+inline bool Class::inherited(const SProp& parentProp) const {
+  return !(parentProp.attrs & AttrPrivate) ||
+    (parentProp.attrs & AttrLSB);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Constants.
 
@@ -527,7 +566,7 @@ inline bool Class::hasConstant(const StringData* clsCnsName) const {
   auto clsCnsInd = m_constants.findIndex(clsCnsName);
   return (clsCnsInd != kInvalidSlot) &&
     !m_constants[clsCnsInd].isAbstract() &&
-    m_constants[clsCnsInd].kind() == ConstModifiers::Kind::Value;
+    m_constants[clsCnsInd].kind() == ConstModifierFlags::Kind::Value;
 }
 
 inline bool Class::hasTypeConstant(const StringData* typeConstName,
@@ -535,7 +574,7 @@ inline bool Class::hasTypeConstant(const StringData* typeConstName,
   auto typeConstInd = m_constants.findIndex(typeConstName);
   return (typeConstInd != kInvalidSlot) &&
     (!m_constants[typeConstInd].isAbstractAndUninit() || includeAbs) &&
-    m_constants[typeConstInd].kind() == ConstModifiers::Kind::Type;
+    m_constants[typeConstInd].kind() == ConstModifierFlags::Kind::Type;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -570,15 +609,6 @@ inline const VMCompactVector<ClassPtr>& Class::usedTraitClasses() const {
   return m_extra->m_usedTraits;
 }
 
-inline const Class::TraitAliasVec& Class::traitAliases() const {
-  return m_extra->m_traitAliases;
-}
-
-inline void Class::addTraitAlias(const PreClass::TraitAliasRule& rule) const {
-  allocExtraData();
-  m_extra.raw()->m_traitAliases.push_back(rule.asNamePair());
-}
-
 inline const Class::RequirementMap& Class::allRequirements() const {
   return m_requirements;
 }
@@ -591,11 +621,31 @@ inline bool Class::checkInstanceBit(unsigned int bit) const {
   return m_instanceBits[bit];
 }
 
+inline void Class::incInstanceCheckCount(uint64_t inc) const {
+  if (inc & 1) ++inc;
+  uint64_t curr = m_instanceCheckCount.load(std::memory_order_acquire);
+  while (true) {
+    if (curr & 1) return;               // no longer used as a counter
+    auto updated = curr + inc;
+    if (m_instanceCheckCount.compare_exchange_weak(
+            curr, updated, std::memory_order_acq_rel)) {
+      return;
+    }
+  }
+}
+
+inline uint64_t Class::getInstanceCheckCount() const {
+  assertx(m_instanceBitsIndex.load() == kProfileInstanceBit);
+  auto res = m_instanceCheckCount.load(std::memory_order_acquire);
+  assertx((res & 1) == 0);
+  return res;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Throwable initialization.
 
 inline bool Class::needsInitThrowable() const {
-  return m_needsInitThrowable;
+  return m_allFlags.m_needsInitThrowable;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -605,10 +655,20 @@ inline rds::Handle Class::classHandle() const {
   return m_cachedClass.handle();
 }
 
-inline void Class::setClassHandle(rds::Link<LowPtr<Class>,
-                                            rds::Mode::NonLocal> link) const {
+inline rds::Link<ClassId, rds::Mode::Normal> Class::classIdLink() const {
+  auto const sym = rds::LinkName{"ClassId", name()};
+  return rds::bind<ClassId, rds::Mode::Normal>(sym);
+}
+
+inline rds::Handle Class::classIdHandle() const {
+  return classIdLink().handle();
+}
+
+inline void Class::setClassHandle(rds::Link<PackedPtr<Class>,
+                                  rds::Mode::NonLocal> link) const {
   assertx(!m_cachedClass.bound());
   m_cachedClass = link;
+
 }
 
 inline Class* Class::getCached() const {
@@ -617,6 +677,8 @@ inline Class* Class::getCached() const {
 
 inline void Class::setCached() {
   m_cachedClass.initWith(this);
+  if (isPersistent()) return;
+  classIdLink().initWith(classId());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -659,24 +721,44 @@ inline std::pair<Slot, bool> Class::memoSlotForFunc(FuncId func) const {
   always_assert(false);
 }
 
+inline FuncId Class::funcForMemoSlot(Slot slot) const {
+  if (!hasMemoSlots()) return FuncId::Invalid;
+  if (slot >= numMemoSlots()) return FuncId::Invalid;
+  Slot parentNextSlot = (m_parent && m_parent->hasMemoSlots())
+                        ? m_parent->numMemoSlots()
+                        : 0;
+  if (slot < parentNextSlot) {
+    return m_parent->funcForMemoSlot(slot);
+  }
+  for (const auto& mapping : m_extra->m_memoMappings) {
+    if (mapping.second.first == slot) {
+      return mapping.first;
+    }
+  }
+
+  return FuncId::Invalid;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
 
-inline MaybeDataType Class::enumBaseTy() const {
-  return m_enumBaseTy;
+inline TypeConstraint Class::enumBaseTy() const {
+  return m_extra->m_enumBaseTy;
 }
 
 inline EnumValues* Class::getEnumValues() const {
-  return m_extra->m_enumValues.load(std::memory_order_relaxed);
+  return m_extra->m_enumValues.load(std::memory_order_acquire);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // ExtraData.
 
 inline void Class::allocExtraData() const {
-  if (!m_extra) {
-    m_extra = new ExtraData();
-  }
+  m_extra.ensureAllocated();
+}
+
+inline bool Class::hasExtraData() const {
+  return static_cast<bool>(m_extra);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -716,13 +798,16 @@ inline bool isAbstract(const Class* cls) {
 }
 
 inline bool classHasPersistentRDS(const Class* cls) {
-  return cls != nullptr &&
+  auto const persistent = cls != nullptr &&
     rds::isPersistentHandle(cls->classHandle());
+  assertx(!cls || persistent == cls->isPersistent());
+  return persistent;
 }
 
-inline const StringData* classToStringHelper(const Class* cls) {
- if (RuntimeOption::EvalRaiseClassConversionWarning) {
-   raise_class_to_string_conversion_warning();
+inline const StringData* classToStringHelper(const Class* cls,
+                                             const char* source) {
+  if (folly::Random::oneIn(Cfg::Eval::RaiseClassConversionNoticeSampleRate, threadLocalRng64())) {
+    raise_class_to_string_conversion_notice(source);
  }
  return cls->name();
 }
@@ -730,63 +815,62 @@ inline const StringData* classToStringHelper(const Class* cls) {
 ///////////////////////////////////////////////////////////////////////////////
 // Lookup.
 
-inline Class* Class::lookup(const NamedEntity* ne) {
-  return ne->getCachedClass();
-}
-
 inline Class* Class::lookup(const StringData* name) {
-  if (name->isSymbol()) {
-    if (auto const result = name->getCachedClass()) return result;
-  }
-  auto const result = lookup(NamedEntity::get(name));
-  if (name->isSymbol() && result && classHasPersistentRDS(result)) {
-    const_cast<StringData*>(name)->setCachedClass(result);
-  }
-  return result;
+  return get(name, false);
 }
 
-inline const Class* Class::lookupUniqueInContext(const NamedEntity* ne,
-                                                 const Class* ctx,
-                                                 const Unit* unit) {
+ /*
+ * Check whether a Class* can be trusted to not change in the given context.
+ * We can use a Class* if:
+ * (1) Its persistent. It will never change.
+ * (2) We are currently jitting a translation that will be invalidated
+ *     whenever the Class* changes.
+ *     For method translations, we need to check that loading class ctx
+ *         will also load cls. see Class::avail()
+ *     For function translations, these are only invalidated when the unit
+ *         they are defined in changes. Therefore, we'd need to ensure that
+ *         all classes loaded as a result of loading cls are contained inside
+ *         the unit.
+ *     As a conservative approximation of this, we are currently just checking
+ *     if ctx is a subtype of cls, but we can certainly do better.
+ */
+
+inline const Class* Class::lookupKnown(const Class* cls, const Class* ctx) {
+  auto const res = lookupKnownMaybe(cls, ctx);
+  switch (res.tag) {
+    case Class::ClassLookupResult::None:
+    case Class::ClassLookupResult::Maybe:
+      return nullptr;
+    case Class::ClassLookupResult::Exact:
+      return res.cls;
+  }
+}
+
+inline Class::ClassLookup Class::lookupKnownMaybe(const Class* cls,
+                                                  const Class* ctx) {
+  auto const tag = [&]() {
+    if (UNLIKELY(cls == nullptr)) return Class::ClassLookupResult::None;
+    if (cls->attrs() & AttrPersistent) return Class::ClassLookupResult::Exact;
+    if (ctx && ctx->classof(cls)) return Class::ClassLookupResult::Exact;
+    if (Cfg::Sandbox::Speculate) return ClassLookupResult::Maybe;
+    return Class::ClassLookupResult::None;
+  }();
+  return Class::ClassLookup { tag, cls };
+}
+
+inline const Class* Class::lookupKnown(const NamedType* ne,
+                                       const Class* ctx) {
   Class* cls = ne->clsList();
-  if (UNLIKELY(cls == nullptr)) return nullptr;
-  if (cls->attrs() & AttrUnique) return cls;
-  if (unit && cls->preClass()->unit() == unit) return cls;
-  if (!ctx) return nullptr;
-  return ctx->getClassDependency(cls->name());
+  return lookupKnown(cls, ctx);
 }
 
-inline const Class* Class::lookupUniqueInContext(const StringData* name,
-                                                 const Class* ctx,
-                                                 const Unit* unit) {
-  return lookupUniqueInContext(NamedEntity::get(name), ctx, unit);
+inline const Class* Class::lookupKnown(const StringData* name,
+                                       const Class* ctx) {
+  return lookupKnown(NamedType::getOrCreate(name), ctx);
 }
 
 inline Class* Class::load(const StringData* name) {
-  if (name->isSymbol()) {
-    if (auto const result = name->getCachedClass()) return result;
-  }
-  auto const orig = name;
-
-  auto const result = [&]() -> Class* {
-    String normStr;
-    auto ne = NamedEntity::get(name, true, &normStr);
-
-    // Try to fetch from cache
-    Class* class_ = ne->getCachedClass();
-    if (LIKELY(class_ != nullptr)) return class_;
-
-    // Normalize the namespace
-    if (normStr) name = normStr.get();
-
-    // Autoload the class
-    return load(ne, name);
-  }();
-
-  if (orig->isSymbol() && result && classHasPersistentRDS(result)) {
-    const_cast<StringData*>(orig)->setCachedClass(result);
-  }
-  return result;
+  return get(name, true);
 }
 
 inline Class* Class::get(const StringData* name, bool tryAutoload) {
@@ -795,10 +879,11 @@ inline Class* Class::get(const StringData* name, bool tryAutoload) {
   }
   auto const orig = name;
   String normStr;
-  auto ne = NamedEntity::get(name, true, &normStr);
-  if (normStr) {
-    name = normStr.get();
-  }
+  auto ne = NamedType::getNoCreate(name, &normStr);
+
+  if (!ne && !tryAutoload) return nullptr;
+  if (normStr) name = normStr.get();
+
   auto const result = get(ne, name, tryAutoload);
   if (orig->isSymbol() && result && classHasPersistentRDS(result)) {
     const_cast<StringData*>(orig)->setCachedClass(result);

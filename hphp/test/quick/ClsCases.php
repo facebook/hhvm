@@ -2,12 +2,12 @@
 
 class MyClass {
   public static $x;
-  public static function foo() {
+  public static function foo() :mixed{
     echo "in static method foo()\n";
   }
 }
 
-function clsFact() {
+function clsFact() :mixed{
   return new MyClass();
 }
 
@@ -19,7 +19,7 @@ $foo = new MyClass();
 $foo::$x = 1;
 
 // ClsH
-$refs = varray[];
+$refs = vec[];
 $refs[] = clsFact();
 $refs[] = 'MyClass';
 $s = 'MyClass';

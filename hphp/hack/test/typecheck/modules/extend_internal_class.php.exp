@@ -1,0 +1,4 @@
+ERROR: File "extend_internal_class.php--test.php", line 8, characters 17-17:
+You cannot use this type in a public declaration. (Typing[4446])
+  File "extend_internal_class.php--test.php", line 6, characters 16-16:
+  It is declared as `internal` here

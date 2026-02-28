@@ -1,0 +1,11 @@
+*** Testing timezone_name_from_abbr() : usage variation -  unexpected values to third argument $isdst***
+
+-- int 0 --
+string(3) "UTC"
+
+-- int 12345 --
+string(3) "UTC"
+
+-- int -12345 --
+string(3) "UTC"
+===DONE===

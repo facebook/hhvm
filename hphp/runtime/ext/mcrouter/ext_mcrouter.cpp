@@ -31,15 +31,11 @@ struct MCRouterResult;
 
 const StaticString
   s_MCRouter("MCRouter"),
-  s_MCRouterException("MCRouterException"),
-  s_MCRouterOptionException("MCRouterOptionException"),
   s_option("option"),
   s_error("error"),
   s_value("value"),
   s_cas("cas"),
   s_flags("flags");
-
-static Class* c_MCRouterException = nullptr;
 
 /**
  * Below are to maintain the compatibility during the migration
@@ -95,35 +91,25 @@ uint64_t getFlagsIfExist(Message& message) {
 }
 }
 
+namespace {
+struct MCRouterException : SystemLib::ClassLoader<"MCRouterException"> {};
+
+struct MCRouterOptionException :
+  SystemLib::ClassLoader<"MCRouterOptionException"> {};
+}
+
 [[noreturn]]
 static void mcr_throwException(const std::string& message,
                                mc_op_t op = mc_op_unknown,
                                carbon::Result result = compatibility::mc_res_unknown,
                                const std::string& key = "") {
-  if (!c_MCRouterException) {
-    c_MCRouterException = Class::lookup(s_MCRouterException.get());
-    assertx(c_MCRouterException);
-  }
-
-  Object obj{c_MCRouterException};
-  tvDecRefGen(
-    g_context->invokeFunc(c_MCRouterException->getCtor(),
-      make_vec_array(message, (int64_t)op, (int64_t)result, key),
-      obj.get())
-  );
-  throw_object(obj);
+  throw_object(MCRouterException::classof(),
+               make_vec_array(message, (int64_t)op, (int64_t)result, key));
 }
-
-static Class* c_MCRouterOptionException = nullptr;
 
 [[noreturn]]
 static void mcr_throwOptionException(
   const std::vector<mc::McrouterOptionError>& errors) {
-  if (!c_MCRouterOptionException) {
-    c_MCRouterOptionException =
-      Class::lookup(s_MCRouterOptionException.get());
-    assertx(c_MCRouterOptionException);
-  }
 
   VecInit errorArray(errors.size());
   for (auto err : errors) {
@@ -135,15 +121,8 @@ static void mcr_throwOptionException(
     errorArray.append(e);
   }
 
-  Object obj{c_MCRouterOptionException};
-  tvDecRefGen(
-    g_context->invokeFunc(
-      c_MCRouterOptionException->getCtor(),
-      make_vec_array(errorArray.toArray()),
-      obj.get()
-    )
-  );
-  throw_object(obj);
+  throw_object(MCRouterOptionException::classof(),
+               make_vec_array(errorArray.toArray()));
 }
 
 namespace {
@@ -332,14 +311,14 @@ struct MCRouterResult : AsioExternalThreadEvent {
 
         case mc_op_gets:
           m_cas = getCasToken(reply);
-          /* fallthrough */
+          [[fallthrough]];
         case mc_op_get:
           m_flags = detail::getFlagsIfExist(reply);
           if (mc::isMissResult(*reply.result_ref())) {
             setResultException(request, reply);
             break;
           }
-          /* fallthrough */
+          [[fallthrough]];
         case mc_op_version:
           // We can only allocate memory in the memory-manager thread so stash
           // the data in a std::string until we get to unserialize(). We use a
@@ -521,9 +500,9 @@ static String HHVM_STATIC_METHOD(MCRouter, getResultName, int64_t res) {
 /////////////////////////////////////////////////////////////////////////////
 
 struct MCRouterExtension : Extension {
-  MCRouterExtension(): Extension("mcrouter", "1.0.0") {}
+  MCRouterExtension(): Extension("mcrouter", "1.0.0", NO_ONCALL_YET) {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_ME(MCRouter, __construct);
 
     HHVM_NAMED_ME(MCRouter, get,  mcr_str<mc::McGetRequest>);
@@ -573,8 +552,6 @@ struct MCRouterExtension : Extension {
           compatibility::carbonResultToString(static_cast<carbon::Result>(i))),
         i);
     }
-
-    loadSystemlib();
   }
 } s_mcrouter_extension;
 

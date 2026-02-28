@@ -3,35 +3,20 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use super::{
-    context::Context, generator::Generator, node_impl_generator::*, node_trait_generator::*,
-    type_params_generator::*, visitor_trait_generator::*,
-};
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
+use std::path::PathBuf;
+
 use anyhow::Result;
-use std::{
-    fs::File,
-    io::Read,
-    path::{Path, PathBuf},
-};
-use structopt::StructOpt;
 
-#[derive(Debug, StructOpt)]
-pub struct Args {
-    /// Rust files containing the types for which codegen will be performed.
-    /// All types reachable from the given root type must be defined in one of
-    /// the files provided as `--input` or `--extern-input`.
-    #[structopt(short, long, parse(from_os_str))]
-    input: Vec<PathBuf>,
-
-    /// The root type of the AST. All types reachable from this type will be
-    /// visited by the generated visitor.
-    #[structopt(short, long)]
-    root: String,
-
-    /// The directory to which generated files will be written.
-    #[structopt(short, long, parse(from_os_str))]
-    output: PathBuf,
-}
+use super::context::Context;
+use super::generator::Generator;
+use super::node_impl_generator::*;
+use super::node_trait_generator::*;
+use super::type_params_generator::*;
+use super::visitor_trait_generator::*;
+pub use crate::common::args::CommonArgs as Args;
 
 pub fn run(args: &Args) -> Result<Vec<(PathBuf, String)>> {
     let inputs = &args.input;
@@ -63,7 +48,7 @@ pub fn run(args: &Args) -> Result<Vec<(PathBuf, String)>> {
     generators
         .into_iter()
         .map(|g| {
-            let code = g.gen(&ctx)?;
+            let code = g.r#gen(&ctx)?;
             let filepath = output_dir.join(g.filename());
             Ok((filepath, format!("{}", code)))
         })

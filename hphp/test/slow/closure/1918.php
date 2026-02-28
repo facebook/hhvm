@@ -2,12 +2,12 @@
 
 
 <<__EntryPoint>>
-function main_1918() {
+function main_1918() :mixed{
 $a = function ($v) {
  return $v > 2;
  }
 ;
  echo (string)$a(4)."
 ";
- echo call_user_func_array($a, varray[4]);
+ echo call_user_func_array($a, vec[4]);
 }

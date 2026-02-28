@@ -30,12 +30,38 @@ type env = {
   hint_context: Name_context.t;
 }
 
-let handle_unbound_name env (pos, name) kind =
+let get_custom_error_config env =
+  let tc_opt = Provider_context.get_tcopt env.ctx in
+  TypecheckerOptions.custom_error_config tc_opt
+
+let handle_unbound_name env custom_err_config (pos, name) kind =
   (* We've already errored in naming if we get *Unknown* class *)
   if String.equal name Naming_special_names.Classes.cUnknown then
     ()
   else begin
-    Errors.add_naming_error @@ Naming_error.Unbound_name { pos; name; kind };
+    let tcopt = Provider_context.get_tcopt env.ctx in
+    let warn =
+      match TypecheckerOptions.repo_stdlib_path tcopt with
+      | None -> false
+      | Some prefix ->
+        let file_path = Relative_path.suffix (Pos.filename pos) in
+        String.is_prefix file_path ~prefix
+    in
+    if warn then
+      Typing_warning_utils.add_
+        tcopt
+        Typing_warning.
+          ( pos,
+            Unbound_name_warning,
+            {
+              Unbound_name_warning.name;
+              kind_str = Naming_error_utils.unbound_name_kind kind;
+            } )
+    else
+      Diagnostics.add_diagnostic
+        (Naming_error_utils.to_user_diagnostic
+           (Naming_error.Unbound_name { pos; name; kind })
+           custom_err_config);
     (* In addition to reporting errors, we also add to the global dependency table *)
     let dep =
       let open Name_context in
@@ -46,54 +72,75 @@ let handle_unbound_name env (pos, name) kind =
       | TraitContext -> Typing_deps.Dep.Type name
       | ClassContext -> Typing_deps.Dep.Type name
       | ModuleNamespace -> Typing_deps.Dep.Module name
+      | PackageNamespace ->
+        failwith "impossible match case" (* TODO (T148526825) *)
     in
     Typing_deps.add_idep (Provider_context.get_deps_mode env.ctx) env.droot dep
   end
 
-let has_canon_name env get_name get_pos (pos, name) =
+let has_canon_name env custom_err_config get_name get_pos (pos, name) =
   match get_name env.ctx name with
   | None -> false
-  | Some suggest_name ->
-    begin
-      match get_pos env.ctx suggest_name with
-      | None -> false
-      | Some suggest_pos ->
-        Errors.add_naming_error
-        @@ Naming_error.Did_you_mean { pos; name; suggest_pos; suggest_name };
-        true
-    end
+  | Some suggest_name -> begin
+    match get_pos env.ctx suggest_name with
+    | None -> false
+    | Some suggest_pos ->
+      Diagnostics.add_diagnostic
+        (Naming_error_utils.to_user_diagnostic
+           (Naming_error.Did_you_mean { pos; name; suggest_pos; suggest_name })
+           custom_err_config);
+      true
+  end
 
-let check_fun_name env ((_, name) as id) =
-  if Naming_special_names.SpecialFunctions.is_special_function name then
+let check_fun_name env custom_err_config ((_, name) as id) =
+  if Naming_special_names.PreNamespacedFunctions.is_pre_namespaced_function name
+  then
     ()
   else if Naming_provider.fun_exists env.ctx name then
     ()
   else if
     has_canon_name
       env
+      custom_err_config
       Naming_provider.get_fun_canon_name
       Naming_global.GEnv.fun_pos
       id
   then
     ()
   else
-    handle_unbound_name env id Name_context.FunctionNamespace
+    handle_unbound_name env custom_err_config id Name_context.FunctionNamespace
 
-let check_const_name env ((_, name) as id) =
+let check_const_name env custom_err_config ((_, name) as id) =
   if Naming_provider.const_exists env.ctx name then
     ()
   else
-    handle_unbound_name env id Name_context.ConstantNamespace
+    handle_unbound_name env custom_err_config id Name_context.ConstantNamespace
 
-let check_module_name env ((_, name) as id) =
+let check_module_name env custom_err_config ((_, name) as id) =
   if Naming_provider.module_exists env.ctx name then
     ()
   else
-    handle_unbound_name env id Name_context.ModuleNamespace
+    handle_unbound_name env custom_err_config id Name_context.ModuleNamespace
+
+let check_module_if_present env custom_err_config id_opt =
+  Option.iter id_opt ~f:(check_module_name env custom_err_config)
+
+let check_package_name env custom_err_config (pos, name) =
+  if
+    Package_info.package_exists (Provider_context.get_package_info env.ctx) name
+  then
+    ()
+  else
+    Diagnostics.add_diagnostic
+      (Naming_error_utils.to_user_diagnostic
+         (Naming_error.Unbound_name
+            { pos; name; kind = Name_context.PackageNamespace })
+         custom_err_config)
 
 let check_type_name
     ?(kind = Name_context.TypeNamespace)
     env
+    custom_err_config
     ((pos, name) as id)
     ~allow_typedef
     ~allow_generics =
@@ -104,55 +151,68 @@ let check_type_name
     | Some reified ->
       (* TODO: These throw typing errors instead of naming errors *)
       if not allow_generics then
-        Errors.add_typing_error
-          Typing_error.(primary @@ Primary.Generics_not_allowed pos);
+        Diagnostics.add_diagnostic
+          Nast_check_error.(to_user_diagnostic @@ Generics_not_allowed pos);
       begin
         match reified with
         | Aast.Erased ->
-          Errors.add_typing_error
-            Typing_error.(
-              primary @@ Primary.Generic_at_runtime { pos; prefix = "Erased" })
+          Diagnostics.add_diagnostic
+            Nast_check_error.(
+              to_user_diagnostic
+              @@ Generic_at_runtime { pos; prefix = "Erased" })
         | Aast.SoftReified ->
-          Errors.add_typing_error
-            Typing_error.(
-              primary
-              @@ Primary.Generic_at_runtime { pos; prefix = "Soft reified" })
+          Diagnostics.add_diagnostic
+            Nast_check_error.(
+              to_user_diagnostic
+              @@ Generic_at_runtime { pos; prefix = "Soft reified" })
         | Aast.Reified -> ()
       end
-    | None ->
-      begin
-        match Naming_provider.get_type_pos_and_kind env.ctx name with
-        | Some (def_pos, Naming_types.TTypedef) when not allow_typedef ->
-          let (decl_pos, _) =
-            Naming_global.GEnv.get_type_full_pos env.ctx (def_pos, name)
-          in
-          Errors.add_naming_error
-          @@ Naming_error.Unexpected_typedef
-               { pos; decl_pos; expected_kind = kind }
-        | Some _ -> ()
-        | None ->
-          if
-            has_canon_name
-              env
-              Naming_provider.get_type_canon_name
-              Naming_global.GEnv.type_pos
-              id
-          then
-            ()
-          else
-            handle_unbound_name env id kind
-      end
+    | None -> begin
+      match Naming_provider.get_type_kind env.ctx name with
+      | Some Naming_types.TTypedef when not allow_typedef ->
+        let def_pos =
+          Naming_provider.get_type_pos env.ctx name |> Option.value_exn
+        in
+        let (decl_pos, _) =
+          Naming_global.GEnv.get_type_full_pos env.ctx (def_pos, name)
+        in
+        Diagnostics.add_diagnostic
+          (Naming_error_utils.to_user_diagnostic
+             (Naming_error.Unexpected_typedef
+                { pos; decl_pos; expected_kind = kind })
+             custom_err_config)
+      | Some _ -> ()
+      | None ->
+        if
+          has_canon_name
+            env
+            custom_err_config
+            Naming_provider.get_type_canon_name
+            Naming_global.GEnv.type_pos
+            id
+        then
+          ()
+        else
+          handle_unbound_name env custom_err_config id kind
+    end
 
 let check_type_hint
     ?(kind = Name_context.TypeNamespace)
     env
+    custom_err_config
     ((_, name) as id)
     ~allow_typedef
     ~allow_generics =
   if String.equal name Naming_special_names.Typehints.wildcard then
     ()
   else
-    check_type_name ~kind env id ~allow_typedef ~allow_generics
+    check_type_name
+      ~kind
+      env
+      custom_err_config
+      id
+      ~allow_typedef
+      ~allow_generics
 
 let extend_type_params init paraml =
   List.fold_right
@@ -163,7 +223,7 @@ let extend_type_params init paraml =
 
 let handler ctx =
   object
-    inherit [env] Stateful_aast_visitor.default_nast_visitor_with_state
+    inherit [env] Stateful_aast_visitor.default_nast_visitor_with_state as super
 
     (* The following are all setting the environments / context correctly *)
     method initial_state =
@@ -185,6 +245,8 @@ let handler ctx =
           type_params = extend_type_params SMap.empty c.Aast.c_tparams;
         }
       in
+      let custom_err_config = get_custom_error_config env in
+      check_module_if_present new_env custom_err_config c.Aast.c_module;
       new_env
 
     method! at_typedef env td =
@@ -195,44 +257,28 @@ let handler ctx =
           type_params = extend_type_params SMap.empty td.Aast.t_tparams;
         }
       in
+      let custom_err_config = get_custom_error_config env in
+      check_module_if_present new_env custom_err_config td.Aast.t_module;
       new_env
 
     method! at_fun_def env fd =
-      let f = fd.Aast.fd_fun in
       let new_env =
         {
           env with
-          droot = Typing_deps.Dep.Fun (snd f.Aast.f_name);
-          type_params = extend_type_params env.type_params f.Aast.f_tparams;
+          droot = Typing_deps.Dep.Fun (snd fd.Aast.fd_name);
+          type_params = extend_type_params env.type_params fd.Aast.fd_tparams;
         }
       in
+      let custom_err_config = get_custom_error_config env in
+      check_module_if_present new_env custom_err_config fd.Aast.fd_module;
       new_env
 
     method! at_gconst env gconst =
       let new_env =
         { env with droot = Typing_deps.Dep.GConst (snd gconst.Aast.cst_name) }
       in
-      new_env
-
-    method! at_file_attribute env attrs =
-      let () =
-        attrs.Aast.fa_user_attributes
-        |> Naming_attributes.find Naming_special_names.UserAttributes.uaModule
-        |> function
-        | None
-        | Some { Aast.ua_name = _; Aast.ua_params = [] } ->
-          ()
-        | Some { Aast.ua_name = _; Aast.ua_params = ((_, p, _) as name) :: _ }
-          ->
-          begin
-            match Nast_eval.static_string name with
-            | Ok name -> check_module_name env (p, name)
-            | Error _ -> () (* TODO(T110227532) *)
-          end
-      in
-      let new_env =
-        { env with droot = Typing_deps.Dep.Fun ""; type_params = SMap.empty }
-      in
+      let custom_err_config = get_custom_error_config env in
+      check_module_if_present new_env custom_err_config gconst.Aast.cst_module;
       new_env
 
     method! at_method_ env m =
@@ -262,26 +308,28 @@ let handler ctx =
     (* Below are the methods where we check for unbound names *)
     method! at_expr env (_, _, e) =
       match e with
-      | Aast.FunctionPointer (Aast.FP_id ((p, name) as id), _)
-      | Aast.Call ((_, _, Aast.Id ((p, name) as id)), _, _, _) ->
-        let () = check_fun_name env id in
+      | Aast.FunctionPointer (Aast.FP_id ((p, name) as id), _, _)
+      | Aast.(Call { func = (_, _, Aast.Id ((p, name) as id)); _ }) ->
+        let custom_err_config = get_custom_error_config env in
+        let () = check_fun_name env custom_err_config id in
         { env with seen_names = SMap.add name p env.seen_names }
       | Aast.Id ((p, name) as id) ->
+        let custom_err_config = get_custom_error_config env in
         let () =
           match SMap.find_opt name env.seen_names with
-          | None -> check_const_name env id
-          | Some pos when not @@ Pos.equal p pos -> check_const_name env id
+          | None -> check_const_name env custom_err_config id
+          | Some pos when not @@ Pos.equal p pos ->
+            check_const_name env custom_err_config id
           | _ -> ()
         in
         env
-      | Aast.Fun_id id ->
-        let () = check_fun_name env id in
-        env
       | Aast.Method_caller (id, _)
       | Aast.Xml (id, _, _) ->
+        let custom_err_config = get_custom_error_config env in
         let () =
           check_type_name
             env
+            custom_err_config
             ~allow_typedef:false
             ~allow_generics:false
             ~kind:Name_context.ClassContext
@@ -291,18 +339,25 @@ let handler ctx =
       | Aast.Class_const ((_, _, Aast.CI _), (_, s)) when String.equal s "class"
         ->
         { env with class_id_allow_typedef = true }
+      | Aast.Nameof _ -> { env with class_id_allow_typedef = true }
       | Aast.Obj_get (_, (_, _, Aast.Id (p, name)), _, _) ->
         { env with seen_names = SMap.add name p env.seen_names }
       | Aast.EnumClassLabel (Some cname, _) ->
         let allow_typedef = (* we might reconsider this ? *) false in
+        let custom_err_config = get_custom_error_config env in
         let () =
           check_type_name
             env
+            custom_err_config
             ~allow_typedef
             ~allow_generics:false
             ~kind:Name_context.ClassContext
             cname
         in
+        env
+      | Aast.Package pkg ->
+        let custom_err_config = get_custom_error_config env in
+        let () = check_package_name env custom_err_config pkg in
         env
       | _ -> env
 
@@ -310,8 +365,10 @@ let handler ctx =
       let () =
         match sfn with
         | Ast_defs.SFclass_const (id, _) ->
+          let custom_err_config = get_custom_error_config env in
           check_type_name
             env
+            custom_err_config
             ~allow_typedef:false
             ~allow_generics:false
             ~kind:Name_context.ClassContext
@@ -320,25 +377,57 @@ let handler ctx =
       in
       env
 
-    method! at_user_attribute env { Aast.ua_name; _ } =
+    method! at_user_attribute env { Aast.ua_name; Aast.ua_params; _ } =
       let () =
         if not @@ Naming_special_names.UserAttributes.is_reserved (snd ua_name)
         then
+          let custom_err_config = get_custom_error_config env in
           check_type_name
             env
+            custom_err_config
             ~allow_typedef:false
             ~allow_generics:false
             ~kind:Name_context.ClassContext
             ua_name
+      in
+      let () =
+        if
+          String.equal
+            (snd ua_name)
+            Naming_special_names.UserAttributes.uaRequirePackage
+        then
+          List.iter
+            ~f:(function
+              | (_, pos, Aast.String pkg_name) ->
+                let custom_err_config = get_custom_error_config env in
+                check_package_name env custom_err_config (pos, pkg_name)
+              | _ -> ())
+            ua_params
+      in
+      let () =
+        if
+          String.equal
+            (snd ua_name)
+            Naming_special_names.UserAttributes.uaPackageOverride
+        then
+          List.iter
+            ~f:(function
+              | (_, pos, Aast.String pkg_name) ->
+                let custom_err_config = get_custom_error_config env in
+                check_package_name env custom_err_config (pos, pkg_name)
+              | _ -> ())
+            ua_params
       in
       env
 
     method! at_class_id env (_, _, ci) =
       match ci with
       | Aast.CI id ->
+        let custom_err_config = get_custom_error_config env in
         let () =
           check_type_name
             env
+            custom_err_config
             ~allow_typedef:env.class_id_allow_typedef
             ~allow_generics:true
             ~kind:Name_context.ClassContext
@@ -348,10 +437,12 @@ let handler ctx =
       | _ -> env
 
     method! at_catch env (id, _, _) =
+      let custom_err_config = get_custom_error_config env in
       let () =
         check_type_name
           env
-          ~allow_typedef:true
+          custom_err_config
+          ~allow_typedef:false
           ~allow_generics:false
           ~kind:Name_context.ClassContext
           id
@@ -360,10 +451,24 @@ let handler ctx =
 
     method! at_hint env h =
       match snd h with
+      | Aast.Hfun Aast_defs.{ hf_tparams; _ } ->
+        let env =
+          let type_params =
+            List.fold_left
+              hf_tparams
+              ~init:env.type_params
+              ~f:(fun acc Aast_defs.{ htp_name = (_, nm); _ } ->
+                SMap.add nm Aast_defs.Erased acc)
+          in
+          { env with type_params }
+        in
+        super#at_hint env h
       | Aast.Happly (id, _) ->
+        let custom_err_config = get_custom_error_config env in
         let () =
           check_type_hint
             env
+            custom_err_config
             ~allow_typedef:env.hint_allow_typedef
             ~allow_generics:false
             ~kind:env.hint_context

@@ -16,9 +16,10 @@
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/stat-cache.h"
-#include "hphp/runtime/ext/vsdebug/debugger.h"
-#include "hphp/runtime/ext/vsdebug/command.h"
+#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/ext/vsdebug/breakpoint.h"
+#include "hphp/runtime/ext/vsdebug/command.h"
+#include "hphp/runtime/ext/vsdebug/debugger.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -112,8 +113,7 @@ bool SetBreakpointsCommand::executeImpl(
     );
   }
 
-  const auto realPath =
-    StatCache::realpath(
+  const auto realPath = realpathLibc(
       File::TranslatePathKeepRelative(String(filePath)).data());
 
   const std::string& path = realPath.empty() && !filePath.empty()
@@ -125,7 +125,7 @@ bool SetBreakpointsCommand::executeImpl(
   // Make a map of line -> breakpoint for all breakpoints in this file before
   // this set breakpoints operation.
   std::unordered_map<int, Breakpoint*> oldBpLines;
-  const auto oldBpIds = bpMgr->getBreakpointIdsForPath(filePath);
+  const auto oldBpIds = bpMgr->getBreakpointIdsForPath(path);
   for (auto it = oldBpIds.begin(); it != oldBpIds.end(); it++) {
     Breakpoint* bp = bpMgr->getBreakpointById(*it);
     std::pair<int, Breakpoint*> pair;
@@ -225,7 +225,7 @@ bool SetBreakpointsCommand::executeImpl(
         bpMgr->removeBreakpoint(bp->m_id);
       }
     }
-  } catch (std::out_of_range &e) {
+  } catch (std::out_of_range &) {
   }
 
   // Completion of this command does not resume the target.
@@ -282,7 +282,14 @@ bool SetExceptionBreakpointsCommand::executeImpl(DebuggerSession* session,
   }
 
   BreakpointManager* bpMgr = session->getBreakpointManager();
+  auto oldMode = bpMgr->getExceptionBreakMode();
   bpMgr->setExceptionBreakMode(mode);
+
+  if (mode != oldMode) {
+    m_debugger->onExceptionBreakpointChanged(
+      mode != ExceptionBreakMode::BreakNone
+    );
+  }
 
   // Completion of this command does not resume the target.
   return false;

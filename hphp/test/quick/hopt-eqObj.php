@@ -2,18 +2,18 @@
 
 class X {}
 
-function foo($x, $y) {
+function foo($x, $y) :mixed{
   return $x == $y;
 }
 
-function baz($r, $s) {
+function baz($r, $s) :mixed{
   switch ($r) {
   case $s: echo 'arg '; break;
   default: echo 'def ';
   }
 }
 
-function bal($r, $s) {
+function bal($r, $s) :mixed{
   if ($r == $s) {
     echo 'arg ';
   } else {

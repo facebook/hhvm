@@ -2,7 +2,7 @@
 
 ///*
 function f1()
-{
+:mixed{
     echo "Inside function " . __FUNCTION__ . "\n";
 }
 //*/

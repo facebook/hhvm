@@ -36,13 +36,11 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-scanf.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/zend-url.h"
-#include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/server/http-protocol.h"
-#include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/util/concurrent-lru-cache.h"
+#include "hphp/util/configs/php7.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/zend/html-table.h"
@@ -199,7 +197,7 @@ String HHVM_FUNCTION(addslashes,
         case '\"':
         case '\'':
           ret.append('\\');
-        /* fall through */
+          [[fallthrough]];
         default:
           ret.append(*src);
       }
@@ -321,7 +319,7 @@ String HHVM_FUNCTION(nl2br,
             ret.append(*src);
             ++src;
           }
-        /* fall through */
+        [[fallthrough]];
         default: ret.append(*src);
       }
     });
@@ -349,7 +347,7 @@ String HHVM_FUNCTION(quotemeta,
         case '(':
         case ')':
           ret.append('\\');
-        /* fall through */
+          [[fallthrough]];
         default:
           ret.append(*src);
       }
@@ -743,8 +741,8 @@ static Variant substr_replace(const Variant& str, const Variant& replacement,
       raise_invalid_argument_warning("start and length as arrays not implemented");
       return str;
     }
-    return string_replace(str.toString(), start.toInt32(), length.toInt32(),
-                          repl);
+    return string_replace(str.toString(), (int)start.toInt64(),
+                          (int)length.toInt64(), repl);
   }
 
   // 'start' and 'length' can be arrays (in which case we step through them in
@@ -755,10 +753,10 @@ static Variant substr_replace(const Variant& str, const Variant& replacement,
   Optional<int> opStart;
   Optional<int> opLength;
   if (!start.isArray()) {
-    opStart = start.toInt32();
+    opStart = (int)start.toInt64();
   }
   if (!length.isArray()) {
-    opLength = length.toInt32();
+    opLength = (int)length.toInt64();
   }
 
   Array startArr = start.toArray();
@@ -776,11 +774,11 @@ static Variant substr_replace(const Variant& str, const Variant& replacement,
       int nStart =
         (opStart.has_value()
          ? opStart.value()
-         : (startIter ? startIter.second().toInt32() : 0));
+         : (startIter ? (int)startIter.second().toInt64() : 0));
       int nLength =
         (opLength.has_value()
          ? opLength.value()
-         : (lengthIter ? lengthIter.second().toInt32() : str.length()));
+         : (lengthIter ? (int)lengthIter.second().toInt64() : str.length()));
       if (startIter) ++startIter;
       if (lengthIter) ++lengthIter;
 
@@ -801,11 +799,11 @@ static Variant substr_replace(const Variant& str, const Variant& replacement,
       int nStart =
         (opStart.has_value()
          ? opStart.value()
-         : (startIter ? startIter.second().toInt32() : 0));
+         : (startIter ? (int)startIter.second().toInt64() : 0));
       int nLength =
         (opLength.has_value()
          ? opLength.value()
-         : (lengthIter ? lengthIter.second().toInt32() : str.length()));
+         : (lengthIter ? (int)lengthIter.second().toInt64() : str.length()));
       if (startIter) ++startIter;
       if (lengthIter) ++lengthIter;
 
@@ -825,7 +823,7 @@ TypedValue HHVM_FUNCTION(substr_replace,
 /*
  * Calculates and adjusts "start" and "length" according to string's length.
  * This function determines how those two parameters are interpreted in
- * f_substr.
+ * substr.
  */
 static bool string_substr_check(int len, int64_t& f, int64_t& l) {
   assertx(len >= 0);
@@ -874,7 +872,7 @@ static bool string_substr_check(int len, int64_t& f, int64_t& l) {
 TypedValue HHVM_FUNCTION(substr, StringArg str, int64_t start, int64_t length) {
   auto const size = str.get()->size();
   if (!string_substr_check(size, start, length)) {
-    if (RuntimeOption::PHP7_Substr && size == start) {
+    if (Cfg::PHP7::Substr && size == start) {
       return make_tv<KindOfPersistentString>(empty_string_ref.get());
     } else {
       return make_tv<KindOfBoolean>(false);
@@ -966,6 +964,7 @@ String HHVM_FUNCTION(chr, const Variant& ascii) {
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       return String::FromChar(0);
   }
 
@@ -1118,9 +1117,9 @@ TypedValue HHVM_FUNCTION(strstr,
     return make_tv<KindOfBoolean>(false);
   }
   if (before_needle) {
-    return tvReturn(haystack.substr(0, ret.toInt32()));
+    return tvReturn(haystack.substr(0, (int)ret.toInt64()));
   } else {
-    return tvReturn(haystack.substr(ret.toInt32()));
+    return tvReturn(haystack.substr((int)ret.toInt64()));
   }
 }
 
@@ -1136,9 +1135,9 @@ TypedValue HHVM_FUNCTION(stristr,
     return make_tv<KindOfBoolean>(false);
   }
   if (before_needle) {
-    return tvReturn(haystack.substr(0, ret.toInt32()));
+    return tvReturn(haystack.substr(0, (int)ret.toInt64()));
   }
-  return tvReturn(haystack.substr(ret.toInt32()));
+  return tvReturn(haystack.substr((int)ret.toInt64()));
 }
 
 template<bool existence_only>
@@ -1263,7 +1262,7 @@ TypedValue HHVM_FUNCTION(strpos,
     }
     pos = haystack.find(n, offset);
   } else {
-    pos = haystack.find(needle.toByte(), offset);
+    pos = haystack.find((char)needle.toInt64(), offset);
   }
   if (pos >= 0) return make_tv<KindOfInt64>(pos);
   return make_tv<KindOfBoolean>(false);
@@ -1281,7 +1280,7 @@ TypedValue HHVM_FUNCTION(stripos,
   if (needle.isString()) {
     pos = haystack.find(needle.toString(), offset, false);
   } else {
-    pos = haystack.find(needle.toByte(), offset, false);
+    pos = haystack.find((char)needle.toInt64(), offset, false);
   }
   if (pos >= 0) return make_tv<KindOfInt64>(pos);
   return make_tv<KindOfBoolean>(false);
@@ -1307,7 +1306,7 @@ static bool is_valid_strrpos_args(
 TypedValue HHVM_FUNCTION(strchr,
                          const String& haystack,
                          const Variant& needle) {
-  return HHVM_FN(strstr)(haystack, needle);
+  return HHVM_FN(strstr)(haystack, needle, false);
 }
 
 TypedValue HHVM_FUNCTION(strrchr,
@@ -1321,7 +1320,7 @@ TypedValue HHVM_FUNCTION(strrchr,
   if (needle.isString() && needle.toString().size() > 0) {
     pos = haystack.rfind(needle.toString().data()[0], false);
   } else {
-    pos = haystack.rfind(needle.toByte(), false);
+    pos = haystack.rfind((char)needle.toInt64(), false);
   }
   if (pos < 0) return make_tv<KindOfBoolean>(false);
   return tvReturn(haystack.substr(pos));
@@ -1338,7 +1337,7 @@ TypedValue HHVM_FUNCTION(strrpos,
   if (needle.isString()) {
     pos = haystack.rfind(needle.toString(), offset);
   } else {
-    pos = haystack.rfind(needle.toByte(), offset);
+    pos = haystack.rfind((char)needle.toInt64(), offset);
   }
   if (pos >= 0) return make_tv<KindOfInt64>(pos);
   return make_tv<KindOfBoolean>(false);
@@ -1355,7 +1354,7 @@ TypedValue HHVM_FUNCTION(strripos,
   if (needle.isString()) {
     pos = haystack.rfind(needle.toString(), offset, false);
   } else {
-    pos = haystack.rfind(needle.toByte(), offset, false);
+    pos = haystack.rfind((char)needle.toInt64(), offset, false);
   }
   if (pos >= 0) return make_tv<KindOfInt64>(pos);
   return make_tv<KindOfBoolean>(false);
@@ -1764,9 +1763,9 @@ String HHVM_FUNCTION(md5,
   return StringUtil::MD5(str, raw_output);
 }
 
-String HHVM_FUNCTION(sha1,
-                     const String& str,
-                     bool raw_output /* = false */) {
+StringRet HHVM_FUNCTION(sha1,
+                        const String& str,
+                        bool raw_output /* = false */) {
   return StringUtil::SHA1(str, raw_output);
 }
 
@@ -1868,7 +1867,7 @@ private:
 uint16_t inline PatAndRepl::hash(int start, int len) const {
   assertx(pat.size() >= start + len);
   return strtr_hash(pat.data() + start, len);
-};
+}
 
 bool WuManberReplacement::initPatterns(const Array& arr) {
   patterns.reserve(arr.size());
@@ -2226,10 +2225,6 @@ Array HHVM_FUNCTION(localeconv) {
 }
 
 Variant HHVM_FUNCTION(nl_langinfo, int64_t item) {
-#ifdef _MSC_VER
-  raise_warning("nl_langinfo is not yet implemented on Windows!");
-  return empty_string();
-#else
   switch(item) {
 #ifdef ABDAY_1
     case ABDAY_1:
@@ -2400,7 +2395,6 @@ Variant HHVM_FUNCTION(nl_langinfo, int64_t item) {
     return false;
   }
   return String(ret);
-#endif
 }
 
 String HHVM_FUNCTION(convert_cyr_string,
@@ -2524,7 +2518,7 @@ Array HHVM_FUNCTION(get_html_translation_table,
         }
       }
     }
-    /* fall thru */
+    [[fallthrough]];
   }
   case k_HTML_SPECIALCHARS:
     const auto& basic_table = get_basic_table(all, doctype);
@@ -2578,13 +2572,19 @@ Variant HHVM_FUNCTION(HH_str_to_numeric,
   return init_null();
 }
 
+String HHVM_FUNCTION(HH_str_bitwise_xor, const String& s1, const String& s2) {
+  return String::attach(strBitXor(s1.get(), s2.get()));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct StringExtension final : Extension {
-  StringExtension() : Extension("string") {}
+  StringExtension() : Extension("string", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
   void moduleInit() override {
     setlocale(LC_CTYPE, "");
+  }
 
+  void moduleRegisterNative() override {
     HHVM_FE(addcslashes);
     HHVM_FE(stripcslashes);
     HHVM_FE(addslashes);
@@ -2676,6 +2676,7 @@ struct StringExtension final : Extension {
     HHVM_FE(metaphone);
     HHVM_FE(HH_str_number_coercible);
     HHVM_FE(HH_str_to_numeric);
+    HHVM_FE(HH_str_bitwise_xor);
 
     HHVM_RC_INT(ENT_COMPAT, k_ENT_HTML_QUOTE_DOUBLE);
     HHVM_RC_INT(ENT_NOQUOTES, k_ENT_HTML_QUOTE_NONE);
@@ -2763,19 +2764,9 @@ struct StringExtension final : Extension {
     HHVM_RC_INT_SAME(MON_12);
 #endif
 
-    // These are ostensibly bools,
-    // but for historical reasons are expressed as ints
-    HHVM_RC_INT(CRYPT_BLOWFISH, 1);
-    HHVM_RC_INT(CRYPT_EXT_DES, 0);
-    HHVM_RC_INT(CRYPT_MD5, 1);
-    HHVM_RC_INT(CRYPT_STD_DES, 1);
-
-    HHVM_RC_INT(CRYPT_SALT_LENGTH, 12);
-
     HHVM_FALIAS(HH\\str_number_coercible, HH_str_number_coercible);
     HHVM_FALIAS(HH\\str_to_numeric, HH_str_to_numeric);
-
-    loadSystemlib();
+    HHVM_FALIAS(HH\\str_bitwise_xor, HH_str_bitwise_xor);
   }
 } s_string_extension;
 

@@ -1,40 +1,40 @@
-File "collection_type_argument.php", line 19, characters 3-16:
+ERROR: File "collection_type_argument.php", line 17, characters 3-16:
 Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 37, characters 51-51:
+  File "hackarray.hhi", line 43, characters 50-50:
   `T` is a constrained type parameter
-  File "hackarray.hhi", line 37, characters 56-63:
+  File "hackarray.hhi", line 43, characters 55-62:
   This type constraint is violated
-  File "hackarray.hhi", line 37, characters 56-63:
+  File "hackarray.hhi", line 43, characters 55-62:
   Expected `arraykey`
-  File "collection_type_argument.php", line 19, characters 10-13:
+  File "collection_type_argument.php", line 17, characters 10-13:
   But got `bool`
-File "collection_type_argument.php", line 23, characters 3-19:
+ERROR: File "collection_type_argument.php", line 21, characters 3-19:
 Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 29, characters 49-50:
+  File "hackarray.hhi", line 33, characters 24-25:
   `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 29, characters 55-62:
+  File "hackarray.hhi", line 33, characters 30-37:
   This type constraint is violated
-  File "hackarray.hhi", line 29, characters 55-62:
+  File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
-  File "collection_type_argument.php", line 23, characters 8-11:
+  File "collection_type_argument.php", line 21, characters 8-11:
   But got `bool`
-File "collection_type_argument.php", line 27, characters 3-21:
+ERROR: File "collection_type_argument.php", line 25, characters 3-19:
 Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 29, characters 49-50:
+  File "hackarray.hhi", line 33, characters 24-25:
   `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 29, characters 55-62:
+  File "hackarray.hhi", line 33, characters 30-37:
   This type constraint is violated
-  File "hackarray.hhi", line 29, characters 55-62:
+  File "hackarray.hhi", line 33, characters 30-37:
   Expected `arraykey`
-  File "collection_type_argument.php", line 27, characters 10-13:
+  File "collection_type_argument.php", line 25, characters 8-11:
   But got `bool`
-File "collection_type_argument.php", line 31, characters 3-19:
+ERROR: File "collection_type_argument.php", line 29, characters 3-19:
 Some type arguments violate their constraints (Typing[4323])
-  File "collections/Map.hhi", line 55, characters 40-41:
+  File "collections/Map.hhi", line 57, characters 19-20:
   `Tk` is a constrained type parameter
-  File "collections/Map.hhi", line 55, characters 46-53:
+  File "collections/Map.hhi", line 57, characters 25-32:
   This type constraint is violated
-  File "collections/Map.hhi", line 55, characters 46-53:
+  File "collections/Map.hhi", line 57, characters 25-32:
   Expected `arraykey`
-  File "collection_type_argument.php", line 31, characters 7-10:
+  File "collection_type_argument.php", line 29, characters 7-10:
   But got `bool`

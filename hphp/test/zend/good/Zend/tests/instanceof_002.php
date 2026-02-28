@@ -15,7 +15,7 @@ class bar extends foo implements IFoo {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(new foo is Base);
   var_dump(new foo is ITest);
   var_dump(new foo is IFoo);

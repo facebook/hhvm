@@ -1,10 +1,10 @@
 <?hh
 
-function foo($a, $b=22, $c=33) {
+function foo($a, $b=22, $c=33) :mixed{
   echo "$a/$b/$c\n";
 }
 
-function main() {
+function main() :mixed{
   foo(1, 2, 3, 4);
   foo(1, 2, 3);
   foo(1, 2);

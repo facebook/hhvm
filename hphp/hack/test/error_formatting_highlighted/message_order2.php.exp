@@ -1,4 +1,4 @@
-Typing[4110] Invalid argument [1]
+error: Typing[4110] Invalid argument [1]
 -> Expected string [2]
 -> But got int [1]
 
@@ -12,7 +12,7 @@ message_order2.php:7:16
     8 |   takes_one_arg(123, 1); // error 4105
     9 | }
 
-Typing[4105] Too many arguments (expected 1 but got 2) [1]
+error: Typing[4105] Too many positional arguments (expected 1 but got 2) [1]
 -> Definition is here [2]
 
 message_order2.php:8:3
@@ -26,4 +26,4 @@ message_order2.php:8:3
 [1] 8 |   takes_one_arg(123, 1); // error 4105
     9 | }
 
-2 errors found.
+2 errors found

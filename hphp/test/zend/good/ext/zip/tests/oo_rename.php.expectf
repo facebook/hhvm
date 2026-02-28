@@ -1,3 +1,4 @@
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/zip/tests/oo_rename.php on line 8
 0 entry1.txt
 1 entry2.txt
 2 dir/entry2.txt

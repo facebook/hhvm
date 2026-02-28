@@ -1,8 +1,7 @@
 #include <stdio.h>
-#include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include "gd.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
 
 /* Code drawn from ppmtogif.c, from the pbmplus package
 **
@@ -28,13 +27,13 @@
 /*
  * a code_int must be able to hold 2**GIFBITS values of type int, and also -1
  */
-typedef int             code_int;
+using code_int = int;
 
 #ifdef SIGNED_COMPARE_SLOW
-typedef unsigned long int count_int;
-typedef unsigned short int count_short;
+using count_int = unsigned long int;
+using count_short = unsigned short int;
 #else /*SIGNED_COMPARE_SLOW*/
-typedef long int          count_int;
+using count_int = long int;
 #endif /*SIGNED_COMPARE_SLOW*/
 
 /* 2.0.28: threadsafe */
@@ -48,7 +47,7 @@ typedef long int          count_int;
 #define hsize HSIZE            /* Apparently invariant, left over from
           compress */
 
-typedef struct {
+struct GifCtx {
   int Width, Height;
   int curx, cury;
   long CountDown;
@@ -83,7 +82,7 @@ typedef struct {
          * Define the storage for the packet accumulator
          */
         char accum[ 256 ];
-} GifCtx;
+};
 
 static int gifPutWord(int w, gdIOCtx *out);
 static int colorstobpp(int colors);
@@ -93,7 +92,7 @@ static void GIFEncode (gdIOCtxPtr fp, int GWidth, int GHeight, int GInterlace, i
 static void compress (int init_bits, gdIOCtx *outfile, gdImagePtr im, GifCtx *ctx);
 static void output (code_int code, GifCtx *ctx);
 static void cl_block (GifCtx *ctx);
-static void cl_hash (register count_int chsize, GifCtx *ctx);
+static void cl_hash (count_int chsize, GifCtx *ctx);
 static void char_init (GifCtx *ctx);
 static void char_out (int c, GifCtx *ctx);
 static void flush_char (GifCtx *ctx);
@@ -422,9 +421,9 @@ GIFEncode(gdIOCtxPtr fp, int GWidth, int GHeight, int GInterlace, int Background
 #define GIFBITS    12
 
 #ifdef NO_UCHAR
- typedef char   char_type;
+  using char_type = char;
 #else /*NO_UCHAR*/
- typedef        unsigned char   char_type;
+  using char_type = unsigned char;
 #endif /*NO_UCHAR*/
 
 /*
@@ -441,7 +440,6 @@ GIFEncode(gdIOCtxPtr fp, int GWidth, int GHeight, int GInterlace, int Background
  *              Joe Orost               (decvax!vax135!petsd!joe)
  *
  */
-#include <ctype.h>
 
 #define ARGVAL() (*++(*argv) || (--argc && *++argv))
 
@@ -490,13 +488,13 @@ output(code_int code, GifCtx *ctx);
 static void
 compress(int init_bits, gdIOCtxPtr outfile, gdImagePtr im, GifCtx *ctx)
 {
-    register long fcode;
-    register code_int i /* = 0 */;
-    register int c;
-    register code_int ent;
-    register code_int disp;
-    register code_int hsize_reg;
-    register int hshift;
+    long fcode;
+    code_int i /* = 0 */;
+    int c;
+    code_int ent;
+    code_int disp;
+    code_int hsize_reg;
+    int hshift;
 
     /*
      * Set up the globals:  g_init_bits - initial number of bits
@@ -685,14 +683,14 @@ cl_block (GifCtx *ctx)             /* table clear for block compress */
 }
 
 static void
-cl_hash(register count_int chsize, GifCtx *ctx)          /* reset code table */
+cl_hash(count_int chsize, GifCtx *ctx)          /* reset code table */
 
 {
 
-        register count_int *htab_p = ctx->htab+chsize;
+        count_int *htab_p = ctx->htab+chsize;
 
-        register long i;
-        register long m1 = -1;
+        long i;
+        long m1 = -1;
 
         i = chsize - 16;
         do {                            /* might use Sys V memset(3) here */
@@ -766,5 +764,3 @@ static int gifPutWord(int w, gdIOCtx *out)
   gdPutC((w >> 8) & 0xFF, out);
   return 0;
 }
-
-

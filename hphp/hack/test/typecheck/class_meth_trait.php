@@ -1,5 +1,5 @@
 //// file1.php
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 trait MyTestTrait {
@@ -7,12 +7,12 @@ trait MyTestTrait {
 }
 
 //// file2.php
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 final class MyTestClass {
   use MyTestTrait;
   public static function derp(): void {
-    class_meth(self::class, 'genTest');
+    self::genTest<>;
   }
 }

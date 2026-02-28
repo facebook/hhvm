@@ -1,0 +1,14 @@
+ERROR: File "expected_type_error.bad.php", line 26, characters 16-22:
+Invalid argument (Typing[4110])
+  File "expected_type_error.bad.php", line 7, characters 22-24:
+  Expected `int`
+  File "expected_type_error.bad.php", line 19, characters 27-32:
+  But got `string`
+  File "expected_type_error.bad.php", line 19, characters 27-32:
+  This type argument to `Box` must match exactly (it is invariant)
+ERROR: File "expected_type_error.bad.php", line 26, characters 16-22:
+Invalid argument (Typing[4110])
+  File "expected_type_error.bad.php", line 14, characters 39-44:
+  Expected `~Box<_>`
+  File "expected_type_error.bad.php", line 19, characters 22-33:
+  But got `~Box<string>`

@@ -2,7 +2,7 @@
 class Foo {
 
   private static $barX;
-  public static function bar() {
+  public static function bar() :mixed{
   }
 }
 <<__EntryPoint>> function main(): void {

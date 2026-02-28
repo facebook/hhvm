@@ -20,9 +20,7 @@ open Hh_prelude
 
 let visitor =
   object
-    inherit Type_mapper.deep_type_mapper
-
-    inherit! Type_mapper.tvar_expanding_type_mapper
+    inherit Type_mapper.tvar_expanding_type_mapper
   end
 
 (*****************************************************************************)
@@ -32,7 +30,7 @@ let visitor =
 let fully_expand env ty = snd (visitor#on_type (Type_mapper.fresh_env env) ty)
 
 let fully_expand_i env ty =
-  Typing_defs.(
+  Typing_defs_constraints.(
     match ty with
     | ConstraintType _ -> ty
     | LoclType ty -> LoclType (fully_expand env ty))

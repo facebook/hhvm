@@ -9,7 +9,7 @@ class MyWaitHandle extends Awaitable {
 
 
 <<__EntryPoint>>
-function main_no_mock() {
+function main_no_mock() :mixed{
 try {
   $wh = new MyWaitHandle;
 } catch (Exception $e) {

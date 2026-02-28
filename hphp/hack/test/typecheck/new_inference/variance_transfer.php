@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Cov<+T> {
   public function get(): ?T {

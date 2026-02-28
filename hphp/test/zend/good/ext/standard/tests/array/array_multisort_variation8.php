@@ -7,7 +7,7 @@
 
 // define some classes
 class classWithToString {
-    public function __toString() {
+    public function __toString() :mixed{
         return "Class A object";
     }
 }
@@ -15,7 +15,7 @@ class classWithToString {
 class classWithoutToString { }
 
 // Define error handler
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) :mixed{
     // We're testing sort order not errors so ignore.
 }
 <<__EntryPoint>> function main(): void {
@@ -23,7 +23,7 @@ echo "*** Testing array_multisort() : usage variation  - test sort order of all 
 
 set_error_handler(test_error_handler<>);
 
-$inputs = darray[
+$inputs = dict[
       'int 0' => 0,
       'float -10.5' => -10.5,
       0 => 'Array',

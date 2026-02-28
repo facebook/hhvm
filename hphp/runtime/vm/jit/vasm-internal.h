@@ -62,17 +62,14 @@ struct Venv {
   Vlabel current{0};
   Vlabel next{0};
 
-  uint32_t pending_frames{0}; // unpushed inlined frames
-  int frame{-1};
-  CodeAddress framestart;
   const IRInstruction* origin;
 
   jit::vector<CodeAddress> addrs;
   jit::vector<CodeAddress> vaddrs;
-  jit::vector<VaddrBind> pending_vaddrs;
   jit::vector<AddrPatch> leas;
   jit::vector<LabelPatch> jmps, jccs;
   jit::vector<LabelPatch> catches;
+  jit::vector<LabelPatch> vveneers;
   jit::vector<LdBindRetAddrPatch> ldbindretaddrs;
   jit::vector<std::pair<TCA,IStack>> stacks;
 };
@@ -129,4 +126,3 @@ void setCallFuncId(Venv& env, TCA callRetAddr);
 }
 
 #include "hphp/runtime/vm/jit/vasm-internal-inl.h"
-

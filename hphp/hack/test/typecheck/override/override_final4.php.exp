@@ -1,4 +1,4 @@
-File "override_final4.php", line 20, characters 26-36:
+ERROR: File "override_final4.php", line 20, characters 26-36:
 Some members in class `ChildClass` are incompatible with those declared in type `ParentClass` (Typing[4070])
   File "override_final4.php", line 17, characters 25-25:
   You cannot override this method

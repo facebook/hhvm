@@ -5,11 +5,11 @@
 
 /* Creating number of unique files by passing a file name as prefix */
 <<__EntryPoint>> function main(): void {
-$file_path = __SystemLib\hphp_test_tmppath('tempnamVar1');
+$file_path = sys_get_temp_dir().'/'.'tempnamVar1';
 mkdir($file_path);
 
 echo "*** Testing tempnam() in creation of unique files ***\n";
-$files = darray[];
+$files = dict[];
 for($i=1; $i<=10; $i++) {
   echo "-- Iteration $i --\n";
   $files[$i] = tempnam("$file_path", "tempnam_variation1.tmp");

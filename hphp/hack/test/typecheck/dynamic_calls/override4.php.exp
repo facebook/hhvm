@@ -1,6 +1,0 @@
-File "override4.php", line 9, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "override4.php", line 5, characters 19-21:
-  This method is `__DynamicallyCallable`.
-  File "override4.php", line 9, characters 19-21:
-  This method is **not**.

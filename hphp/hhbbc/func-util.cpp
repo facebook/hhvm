@@ -41,7 +41,8 @@ bool is_volatile_local(const php::Func* func, LocalId lid) {
 
   return l.name->same(s_reified_generics_var.get()) ||
          l.name->same(s_coeffects_var.get()) ||
-         l.name->same(s_86metadata.get());
+         l.name->same(s_86metadata.get()) ||
+         l.name->same(s_86productAttributionData.get());
 }
 
 SString memoize_impl_name(const php::Func* func) {
@@ -65,14 +66,14 @@ bool check_nargs_in_range(const php::Func* func, uint32_t nArgs) {
 int dyn_call_error_level(const php::Func* func) {
   auto const def = [&] {
     if (!(func->attrs & AttrDynamicallyCallable) ||
-        RuntimeOption::EvalForbidDynamicCallsWithAttr) {
+        Cfg::Eval::ForbidDynamicCallsWithAttr) {
       if (func->cls) {
         if (func->attrs & AttrStatic) {
-          return RuntimeOption::EvalForbidDynamicCallsToClsMeth;
+          return Cfg::Eval::ForbidDynamicCallsToClsMeth;
         }
-        return RuntimeOption::EvalForbidDynamicCallsToInstMeth;
+        return Cfg::Eval::ForbidDynamicCallsToInstMeth;
       }
-      return RuntimeOption::EvalForbidDynamicCallsToFunc;
+      return Cfg::Eval::ForbidDynamicCallsToFunc;
     }
     return 0;
   }();
@@ -189,9 +190,29 @@ BlockId make_block(php::WideFunc& func, const php::Block* srcBlk) {
 }
 
 php::FuncBase::FuncBase(const FuncBase& other) {
-  always_assert(!other.nativeInfo);
+  always_assert(!other.isNative);
+  // If we don't copy this over, we end up with garbage in `isNative`
+  isNative = other.isNative;
   exnNodes = other.exnNodes;
   rawBlocks = other.rawBlocks;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+std::string func_fullname(const php::Func& f) {
+  if (!f.cls) return f.name->toCppString();
+  return folly::sformat("{}::{}", f.cls->name, f.name);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+bool is_86init_func(const php::Func& f) {
+  return
+    f.name == s_86cinit.get() ||
+    f.name == s_86pinit.get() ||
+    f.name == s_86sinit.get() ||
+    f.name == s_86linit.get() ||
+    f.name == s_86reifiedinit.get();
 }
 
 //////////////////////////////////////////////////////////////////////

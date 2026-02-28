@@ -1,7 +1,7 @@
 <?hh
 
-function main() {
-  $arr = varray['a', 'b', 'c'];
+function main() :mixed{
+  $arr = vec['a', 'b', 'c'];
 
   $v = Vector {'a', 'b', 'c'};
   $m = Map {0 => 'a', 1 => 'b', 2 => 'c'};
@@ -27,6 +27,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_implode() {
+function main_implode() :mixed{
 main();
 }

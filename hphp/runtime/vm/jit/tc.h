@@ -131,7 +131,11 @@ struct Translator {
   Optional<TranslationResult> acquireLeaseAndRequisitePaperwork();
   // Check on tc sizes and make sure we are looking to translate more
   // translations of the specified type.
-  TranslationResult::Scope shouldTranslate(bool noSizeLimit = false);
+  TranslationResult::Scope shouldTranslate(bool noThreshold, bool noSizeLimit);
+  // Returns false if the kind is Live and there are retranslateAll or profile
+  // translations are in flight.
+  // Returns true otherwise, including any other TransKind.
+  bool shouldEmitLiveTranslation();
   // Generate and emit machine code into the provided view (if given) otherwise
   // the default view.
   Optional<TranslationResult>
@@ -293,12 +297,14 @@ bool canTranslate();
  * Whether we should emit a translation of kind for sk, ignoring the cap on
  * overall TC size.
  */
-TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind);
+TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind,
+                                                    bool noThreshold = false);
 
 /*
  * Whether we should emit a translation of kind for sk.
  */
-TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind);
+TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind,
+                                         bool noThreshold = false);
 
 /*
  * Whether we are still profiling new functions.
@@ -456,7 +462,7 @@ std::string getTCAddrs();
 bool dumpEnabled();
 
 /*
- * Dump the translation cache to files in RuntimeOption::EvalDumpTCPath
+ * Dump the translation cache to files in Cfg::Eval::DumpTCPath
  * (default: /tmp), returning success.
  */
 bool dump(bool ignoreLease = false);

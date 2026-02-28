@@ -1,7 +1,7 @@
 <?hh
 
 class test {
-    function __toString() {
+    function __toString() :mixed{
         return "this is test object";
     }
 }

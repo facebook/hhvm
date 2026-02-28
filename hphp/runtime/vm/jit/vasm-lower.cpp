@@ -19,13 +19,10 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
-#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
-#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
-#include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include <folly/ScopeGuard.h>
 
@@ -245,7 +242,7 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
 
       if (dests.size() == 2) {
         switch (arch()) {
-          case Arch::X64: // fall through
+          case Arch::X64:
             v << copyargs{
               v.makeTuple({rret(0), rret(1)}),
               v.makeTuple({dests[0], dests[1]})
@@ -356,7 +353,7 @@ void lower(VLS& env, defvmretdata& inst, Vlabel b, size_t i) {
 }
 void lower(VLS& env, defvmrettype& inst, Vlabel b, size_t i) {
   switch (arch()) {
-    case Arch::X64: // fall through
+    case Arch::X64:
       env.unit.blocks[b].code[i] = copy{rret_type(), inst.type};
       break;
     case Arch::ARM:
@@ -372,7 +369,7 @@ void lower(VLS& env, defvmrettype& inst, Vlabel b, size_t i) {
 }
 void lower(VLS& env, syncvmret& inst, Vlabel b, size_t i) {
   switch (arch()) {
-    case Arch::X64: // fall through
+    case Arch::X64:
       env.unit.blocks[b].code[i] = copyargs{
         env.unit.makeTuple({inst.data, inst.type}),
         env.unit.makeTuple({rret_data(), rret_type()})
@@ -393,7 +390,7 @@ void lower(VLS& env, syncvmret& inst, Vlabel b, size_t i) {
 }
 void lower(VLS& env, syncvmrettype& inst, Vlabel b, size_t i) {
   switch (arch()) {
-    case Arch::X64: // fall through
+    case Arch::X64:
       env.unit.blocks[b].code[i] = copy{inst.type, rret_type()};
       break;
     case Arch::ARM:

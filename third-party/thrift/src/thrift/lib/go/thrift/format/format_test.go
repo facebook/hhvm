@@ -1,0 +1,644 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package format
+
+import (
+	"bytes"
+	"io"
+	"math"
+	"sync"
+	"testing"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/stretchr/testify/require"
+)
+
+const PROTOCOL_BINARY_DATA_SIZE = 155
+
+type fieldData struct {
+	name  string
+	typ   types.Type
+	id    int16
+	value any
+}
+
+type structData struct {
+	name   string
+	fields []fieldData
+}
+
+var (
+	data           string // test data for writing
+	protocolBdata  []byte // test data for writing; same as data
+	boolValues     = []bool{false, true, false, false, true}
+	byteValues     = []byte{117, 0, 1, 32, 127, 128, 255}
+	int16Values    = []int16{459, 0, 1, -1, -128, 127, 32767, -32768}
+	int32Values    = []int32{459, 0, 1, -1, -128, 127, 32767, 2147483647, -2147483535}
+	int64Values    = []int64{459, 0, 1, -1, -128, 127, 32767, 2147483647, -2147483535, 34359738481, -35184372088719, -9223372036854775808, 9223372036854775807}
+	doubleValues   = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float64(), NEGATIVE_INFINITY.Float64(), NAN.Float64()}
+	floatValues    = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float32(), NEGATIVE_INFINITY.Float32(), NAN.Float32()}
+	stringValues   = []string{"", "a", "st[uf]f", "st,u:ff with spaces", "stuff\twith\nescape\\characters'...\"lots{of}fun</xml>"}
+	structTestData = structData{
+		name: "test struct",
+		fields: []fieldData{
+			{
+				name:  "field1",
+				typ:   types.BOOL,
+				id:    1,
+				value: true,
+			},
+			{
+				name:  "field2",
+				typ:   types.STRING,
+				id:    2,
+				value: "hi",
+			},
+		},
+	}
+)
+
+func init() {
+	protocolBdata = make([]byte, PROTOCOL_BINARY_DATA_SIZE)
+	for i := 0; i < PROTOCOL_BINARY_DATA_SIZE; i++ {
+		protocolBdata[i] = byte((i + 'a') % 255)
+	}
+	data = string(protocolBdata)
+}
+
+type protocolTest func(t testing.TB, p types.Format)
+type protocolReaderTest func(t testing.TB, p types.Format)
+type protocolWriterTest func(t testing.TB, p types.Format)
+
+// ReadWriteProtocolParallelTest tests that a given protocol is safe to read
+// from and write to in different goroutines. This requires both a protocol
+// and a transport are only using shared state contained either within the set
+// of read funcs or within the  set of write funcs.
+// It also should only be used with an underlying Transport that is capable of
+// blocking reads and writes (socket, stream), since other golang Transport
+// implementations require that the data exists to be read when they are called (like bytes.Buffer)
+func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(types.ReadWriteSizer) types.Format) {
+	transports := []func() types.ReadWriteSizer{}
+	const iterations = 100
+
+	doForAllTransportsParallel := func(read protocolReaderTest, write protocolWriterTest) {
+		for _, tf := range transports {
+			trans := tf()
+			p := newFormat(trans)
+			var wg sync.WaitGroup
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				for i := 0; i < iterations; i++ {
+					write(t, p)
+				}
+			}()
+			for i := 0; i < iterations; i++ {
+				read(t, p)
+			}
+			wg.Wait()
+		}
+	}
+
+	doForAllTransportsParallel(ReadBool, WriteBool)
+	doForAllTransportsParallel(ReadByte, WriteByte)
+	doForAllTransportsParallel(ReadI16, WriteI16)
+	doForAllTransportsParallel(ReadI32, WriteI32)
+	doForAllTransportsParallel(ReadI64, WriteI64)
+	doForAllTransportsParallel(ReadDouble, WriteDouble)
+	doForAllTransportsParallel(ReadFloat, WriteFloat)
+	doForAllTransportsParallel(ReadString, WriteString)
+	doForAllTransportsParallel(ReadBinary, WriteBinary)
+	doForAllTransportsParallel(ReadStruct, WriteStruct)
+
+	// perform set of many sequenced sets of reads and writes
+	doForAllTransportsParallel(func(t testing.TB, p types.Format) {
+		ReadBool(t, p)
+		ReadByte(t, p)
+		ReadI16(t, p)
+		ReadI32(t, p)
+		ReadI64(t, p)
+		ReadDouble(t, p)
+		ReadFloat(t, p)
+		ReadString(t, p)
+		ReadBinary(t, p)
+		ReadStruct(t, p)
+	}, func(t testing.TB, p types.Format) {
+		WriteBool(t, p)
+		WriteByte(t, p)
+		WriteI16(t, p)
+		WriteI32(t, p)
+		WriteI64(t, p)
+		WriteDouble(t, p)
+		WriteFloat(t, p)
+		WriteString(t, p)
+		WriteBinary(t, p)
+		WriteStruct(t, p)
+	})
+}
+
+func ReadWriteProtocolTest(t *testing.T, newFormat func(types.ReadWriteSizer) types.Format) {
+	transports := []func() types.ReadWriteSizer{
+		func() types.ReadWriteSizer { return new(bytes.Buffer) },
+	}
+
+	doForAllTransports := func(protTest protocolTest) {
+		for _, tf := range transports {
+			trans := tf()
+			p := newFormat(trans)
+			protTest(t, p)
+		}
+	}
+
+	doForAllTransports(ReadWriteBool)
+	doForAllTransports(ReadWriteByte)
+	doForAllTransports(ReadWriteI16)
+	doForAllTransports(ReadWriteI32)
+	doForAllTransports(ReadWriteI64)
+	doForAllTransports(ReadWriteDouble)
+	doForAllTransports(ReadWriteFloat)
+	doForAllTransports(ReadWriteString)
+	doForAllTransports(ReadWriteBinary)
+	doForAllTransports(ReadWriteStruct)
+
+	// perform set of many sequenced reads and writes
+	doForAllTransports(func(t testing.TB, p types.Format) {
+		ReadWriteI64(t, p)
+		ReadWriteDouble(t, p)
+		ReadWriteFloat(t, p)
+		ReadWriteBinary(t, p)
+		ReadWriteByte(t, p)
+		ReadWriteStruct(t, p)
+	})
+}
+
+func ReadBool(t testing.TB, p types.Format) {
+	thetype := types.BOOL
+	thelen := len(boolValues)
+	thetype2, thelen2, err := p.ReadListBegin()
+	require.NoError(t, err)
+	_, ok := p.(*simpleJSONFormat)
+	if !ok {
+		require.Equal(t, thetype, thetype2)
+		require.Equal(t, thelen, thelen2)
+	}
+	for _, v := range boolValues {
+		value, err := p.ReadBool()
+		require.NoError(t, err)
+		require.Equal(t, v, value)
+	}
+	err = p.ReadListEnd()
+	require.NoError(t, err)
+}
+
+func WriteBool(t testing.TB, p types.Format) {
+	thetype := types.BOOL
+	thelen := len(boolValues)
+	err := p.WriteListBegin(thetype, thelen)
+	require.NoError(t, err)
+	for _, v := range boolValues {
+		err = p.WriteBool(v)
+		require.NoError(t, err)
+	}
+	err = p.WriteListEnd()
+	require.NoError(t, err)
+	err = p.Flush()
+	require.NoError(t, err)
+}
+
+func ReadWriteBool(t testing.TB, p types.Format) {
+	WriteBool(t, p)
+	ReadBool(t, p)
+}
+
+func WriteByte(t testing.TB, p types.Format) {
+	thetype := types.BYTE
+	thelen := len(byteValues)
+	err := p.WriteListBegin(thetype, thelen)
+	require.NoError(t, err)
+	for _, v := range byteValues {
+		err = p.WriteByte(v)
+		require.NoError(t, err)
+	}
+	err = p.WriteListEnd()
+	require.NoError(t, err)
+	err = p.Flush()
+	require.NoError(t, err)
+}
+
+func ReadByte(t testing.TB, p types.Format) {
+	thetype := types.BYTE
+	thelen := len(byteValues)
+	thetype2, thelen2, err := p.ReadListBegin()
+	require.NoError(t, err)
+	_, ok := p.(*simpleJSONFormat)
+	if !ok {
+		require.Equal(t, thetype, thetype2)
+		require.Equal(t, thelen, thelen2)
+	}
+	for _, v := range byteValues {
+		value, err := p.ReadByte()
+		require.NoError(t, err)
+		require.Equal(t, v, value)
+	}
+	err = p.ReadListEnd()
+	require.NoError(t, err)
+}
+
+func ReadWriteByte(t testing.TB, p types.Format) {
+	WriteByte(t, p)
+	ReadByte(t, p)
+}
+
+func WriteI16(t testing.TB, p types.Format) {
+	thetype := types.I16
+	thelen := len(int16Values)
+	p.WriteListBegin(thetype, thelen)
+	for _, v := range int16Values {
+		p.WriteI16(v)
+	}
+	p.WriteListEnd()
+	p.Flush()
+}
+
+func ReadI16(t testing.TB, p types.Format) {
+	thetype := types.I16
+	thelen := len(int16Values)
+	thetype2, thelen2, err := p.ReadListBegin()
+	require.NoError(t, err)
+	_, ok := p.(*simpleJSONFormat)
+	if !ok {
+		require.Equal(t, thetype, thetype2)
+		require.Equal(t, thelen, thelen2)
+	}
+	for _, v := range int16Values {
+		value, err := p.ReadI16()
+		require.NoError(t, err)
+		require.Equal(t, v, value)
+	}
+	err = p.ReadListEnd()
+	require.NoError(t, err)
+}
+
+func ReadWriteI16(t testing.TB, p types.Format) {
+	WriteI16(t, p)
+	ReadI16(t, p)
+}
+
+func WriteI32(t testing.TB, p types.Format) {
+	thetype := types.I32
+	thelen := len(int32Values)
+	p.WriteListBegin(thetype, thelen)
+	for _, v := range int32Values {
+		p.WriteI32(v)
+	}
+	p.WriteListEnd()
+	p.Flush()
+}
+
+func ReadI32(t testing.TB, p types.Format) {
+	thetype := types.I32
+	thelen := len(int32Values)
+	thetype2, thelen2, err := p.ReadListBegin()
+	require.NoError(t, err)
+	_, ok := p.(*simpleJSONFormat)
+	if !ok {
+		require.Equal(t, thetype, thetype2)
+		require.Equal(t, thelen, thelen2)
+	}
+	for _, v := range int32Values {
+		value, err := p.ReadI32()
+		require.NoError(t, err)
+		require.Equal(t, v, value)
+	}
+	err = p.ReadListEnd()
+	require.NoError(t, err)
+}
+
+func ReadWriteI32(t testing.TB, p types.Format) {
+	WriteI32(t, p)
+	ReadI32(t, p)
+}
+
+func WriteI64(t testing.TB, p types.Format) {
+	thetype := types.I64
+	thelen := len(int64Values)
+	p.WriteListBegin(thetype, thelen)
+	for _, v := range int64Values {
+		p.WriteI64(v)
+	}
+	p.WriteListEnd()
+	p.Flush()
+}
+
+func ReadI64(t testing.TB, p types.Format) {
+	thetype := types.I64
+	thelen := len(int64Values)
+	thetype2, thelen2, err := p.ReadListBegin()
+	require.NoError(t, err)
+	_, ok := p.(*simpleJSONFormat)
+	if !ok {
+		require.Equal(t, thetype, thetype2)
+		require.Equal(t, thelen, thelen2)
+	}
+	for _, v := range int64Values {
+		value, err := p.ReadI64()
+		require.NoError(t, err)
+		require.Equal(t, v, value)
+	}
+	err = p.ReadListEnd()
+	require.NoError(t, err)
+}
+
+func ReadWriteI64(t testing.TB, p types.Format) {
+	WriteI64(t, p)
+	ReadI64(t, p)
+}
+
+func WriteDouble(t testing.TB, p types.Format) {
+	doubleValues = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float64(), NEGATIVE_INFINITY.Float64(), NAN.Float64()}
+	thetype := types.DOUBLE
+	thelen := len(doubleValues)
+	p.WriteListBegin(thetype, thelen)
+	for _, v := range doubleValues {
+		p.WriteDouble(v)
+	}
+	p.WriteListEnd()
+	p.Flush()
+
+}
+
+func ReadDouble(t testing.TB, p types.Format) {
+	doubleValues = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float64(), NEGATIVE_INFINITY.Float64(), NAN.Float64()}
+	thetype := types.DOUBLE
+	thelen := len(doubleValues)
+	thetype2, thelen2, err := p.ReadListBegin()
+	require.NoError(t, err)
+	require.Equal(t, thetype, thetype2)
+	require.Equal(t, thelen, thelen2)
+	for _, v := range doubleValues {
+		value, err := p.ReadDouble()
+		require.NoError(t, err)
+		if math.IsNaN(v) {
+			require.True(t, math.IsNaN(value))
+		} else {
+			require.Equal(t, v, value)
+		}
+	}
+	err = p.ReadListEnd()
+	require.NoError(t, err)
+}
+
+func ReadWriteDouble(t testing.TB, p types.Format) {
+	WriteDouble(t, p)
+	ReadDouble(t, p)
+}
+
+func WriteFloat(t testing.TB, p types.Format) {
+	floatValues = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float32(), NEGATIVE_INFINITY.Float32(), NAN.Float32()}
+
+	thetype := types.FLOAT
+	thelen := len(floatValues)
+	p.WriteListBegin(thetype, thelen)
+	for _, v := range floatValues {
+		p.WriteFloat(v)
+	}
+	p.WriteListEnd()
+	p.Flush()
+
+}
+
+func ReadFloat(t testing.TB, p types.Format) {
+	floatValues = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float32(), NEGATIVE_INFINITY.Float32(), NAN.Float32()}
+
+	thetype := types.FLOAT
+	thelen := len(floatValues)
+
+	thetype2, thelen2, err := p.ReadListBegin()
+	require.NoError(t, err)
+	require.Equal(t, thetype, thetype2)
+	require.Equal(t, thelen, thelen2)
+	for _, v := range floatValues {
+		value, err := p.ReadFloat()
+		require.NoError(t, err)
+		if math.IsNaN(float64(v)) {
+			require.True(t, math.IsNaN(float64(value)))
+		} else {
+			require.Equal(t, v, value)
+		}
+	}
+	err = p.ReadListEnd()
+	require.NoError(t, err)
+}
+
+func ReadWriteFloat(t testing.TB, p types.Format) {
+	WriteFloat(t, p)
+	ReadFloat(t, p)
+}
+
+func WriteString(t testing.TB, p types.Format) {
+	thetype := types.STRING
+	thelen := len(stringValues)
+	p.WriteListBegin(thetype, thelen)
+	for _, v := range stringValues {
+		p.WriteString(v)
+	}
+	p.WriteListEnd()
+	p.Flush()
+}
+
+func ReadString(t testing.TB, p types.Format) {
+	thetype := types.STRING
+	thelen := len(stringValues)
+
+	thetype2, thelen2, err := p.ReadListBegin()
+	require.NoError(t, err)
+	_, ok := p.(*simpleJSONFormat)
+	if !ok {
+		require.Equal(t, thetype, thetype2)
+		require.Equal(t, thelen, thelen2)
+	}
+	for _, v := range stringValues {
+		value, err := p.ReadString()
+		require.NoError(t, err)
+		require.Equal(t, v, value)
+	}
+	err = p.ReadListEnd()
+	require.NoError(t, err)
+}
+
+func ReadWriteString(t testing.TB, p types.Format) {
+	WriteString(t, p)
+	ReadString(t, p)
+}
+
+func WriteBinary(t testing.TB, p types.Format) {
+	v := protocolBdata
+	p.WriteBinary(v)
+	p.Flush()
+}
+
+func ReadBinary(t testing.TB, p types.Format) {
+	v := protocolBdata
+	value, err := p.ReadBinary()
+	require.NoError(t, err)
+	require.Equal(t, len(v), len(value))
+	for i := 0; i < len(v); i++ {
+		require.Equal(t, v[i], value[i])
+	}
+}
+
+func ReadWriteBinary(t testing.TB, p types.Format) {
+	WriteBinary(t, p)
+	ReadBinary(t, p)
+}
+
+func WriteStruct(t testing.TB, p types.Format) {
+	v := structTestData
+	p.WriteStructBegin(v.name)
+	p.WriteFieldBegin(v.fields[0].name, v.fields[0].typ, v.fields[0].id)
+	err := p.WriteBool(v.fields[0].value.(bool))
+	require.NoError(t, err)
+	p.WriteFieldEnd()
+	p.WriteFieldBegin(v.fields[1].name, v.fields[1].typ, v.fields[1].id)
+	err = p.WriteString(v.fields[1].value.(string))
+	require.NoError(t, err)
+	p.WriteFieldEnd()
+	p.WriteStructEnd()
+	err = p.Flush()
+	require.NoError(t, err)
+}
+
+func ReadStruct(t testing.TB, p types.Format) {
+	v := structTestData
+	_, err := p.ReadStructBegin()
+	require.NoError(t, err)
+	_, typeID, id, err := p.ReadFieldBegin()
+	require.NoError(t, err)
+	require.Equal(t, v.fields[0].typ, typeID)
+	require.Equal(t, v.fields[0].id, id)
+
+	val, err := p.ReadBool()
+	require.NoError(t, err)
+	require.Equal(t, v.fields[0].value, val)
+
+	err = p.ReadFieldEnd()
+	require.NoError(t, err)
+
+	_, typeID, id, err = p.ReadFieldBegin()
+	require.NoError(t, err)
+	require.Equal(t, v.fields[1].typ, typeID)
+	require.Equal(t, v.fields[1].id, id)
+
+	strVal, err := p.ReadString()
+	require.NoError(t, err)
+	require.Equal(t, v.fields[1].value, strVal)
+
+	err = p.ReadFieldEnd()
+	require.NoError(t, err)
+
+	err = p.ReadStructEnd()
+	require.NoError(t, err)
+}
+
+func ReadWriteStruct(t testing.TB, p types.Format) {
+	WriteStruct(t, p)
+	ReadStruct(t, p)
+}
+
+func UnmatchedBeginEndProtocolTest(t *testing.T, formatFactory func(io.ReadWriter) types.Format) {
+	// NOTE: not all protocol implementations do strict state check to
+	// return an error on unmatched Begin/End calls.
+	// This test is only meant to make sure that those unmatched Begin/End
+	// calls won't cause panic. There's no real "test" here.
+	trans := new(bytes.Buffer)
+	t.Run("Read", func(t *testing.T) {
+		t.Run("Message", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.ReadMessageEnd()
+			p.ReadMessageEnd()
+		})
+		t.Run("Struct", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.ReadStructEnd()
+			p.ReadStructEnd()
+		})
+		t.Run("Field", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.ReadFieldEnd()
+			p.ReadFieldEnd()
+		})
+		t.Run("Map", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.ReadMapEnd()
+			p.ReadMapEnd()
+		})
+		t.Run("List", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.ReadListEnd()
+			p.ReadListEnd()
+		})
+		t.Run("Set", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.ReadSetEnd()
+			p.ReadSetEnd()
+		})
+	})
+	t.Run("Write", func(t *testing.T) {
+		t.Run("Message", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.WriteMessageEnd()
+			p.WriteMessageEnd()
+		})
+		t.Run("Struct", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.WriteStructEnd()
+			p.WriteStructEnd()
+		})
+		t.Run("Field", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.WriteFieldEnd()
+			p.WriteFieldEnd()
+		})
+		t.Run("Map", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.WriteMapEnd()
+			p.WriteMapEnd()
+		})
+		t.Run("List", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.WriteListEnd()
+			p.WriteListEnd()
+		})
+		t.Run("Set", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.WriteSetEnd()
+			p.WriteSetEnd()
+		})
+	})
+}

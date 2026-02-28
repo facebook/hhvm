@@ -1,0 +1,4 @@
+ERROR: File "type_structure.php", line 6, characters 18-20:
+It is no longer allowed to use a `classname<C>` in this position. Please use a `class<C>` instead. (Typing[4482])
+  File "type_structure.php", line 5, characters 12-23:
+  Definition is here

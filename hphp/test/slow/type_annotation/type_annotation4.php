@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // error: non-existent type constant
 class C {

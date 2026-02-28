@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function single_compare($a, $b) {
+function single_compare($a, $b) :mixed{
   echo "Comparing:\n";
   var_dump($a);
   var_dump($b);
@@ -75,18 +75,18 @@ class ToString {
   function __construct($str) {
     $this->str = $str;
   }
-  function __toString()[] {
+  function __toString()[] :mixed{
     return $this->str;
   }
 }
 
 class Thrower {
-  function __toString()[] {
+  function __toString()[] :mixed{
     throw new Exception("Compare exception");
   }
 }
 
-function compare($a, $b) {
+function compare($a, $b) :mixed{
   single_compare($a, $b);
   single_compare($b, $a);
 }
@@ -114,7 +114,7 @@ function compare($a, $b) {
   compare(vec[], 1.2345);
   compare(vec[], 'abc');
   compare(vec[], new stdClass);
-  compare(vec[], varray[]);
+  compare(vec[], vec[]);
   compare(vec[], dict[]);
   compare(vec[], keyset[]);
 

@@ -2,11 +2,11 @@
 
 
 interface I1 {
-  public function baz();
+  public function baz():mixed;
 }
 
 class Super {
-  protected function foo() {
+  protected function foo() :mixed{
     echo "Super::foo\n";
   }
 }
@@ -16,7 +16,7 @@ trait T1 {
 
   require implements I1;
 
-  public function bar() {
+  public function bar() :mixed{
     return $this->foo();
   }
 }
@@ -24,15 +24,15 @@ trait T1 {
 class C implements I1 {
   use T1;
 
-  public function baz() {}
+  public function baz() :mixed{}
 }
 
-function main() {
+function main() :mixed{
   $c = new C();
   $c->bar();
 }
 
 <<__EntryPoint>>
-function main_require_constraint_basic_error() {
+function main_require_constraint_basic_error() :mixed{
 main();
 }

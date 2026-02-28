@@ -19,7 +19,7 @@ let hhi_name = "g.hhi"
 let file_contents =
   "<?hh // strict
 
-function f(): string {
+function f(): float {
   /* HH_FIXME[4110] */
   return 4;
 }
@@ -28,32 +28,30 @@ function f(): string {
 let hhi_contents = "<?hh
 
 /* HH_FIXME[4110] */
-const string C = 4;
+const float C = 4.0;
 "
 
 let hhconfig_contents = ""
 
 let errors =
   {|
-File "/f.php", line 5, characters 10-10:
+ERROR: File "/f.php", line 5, characters 10-10:
 Invalid return type (Typing[4110])
-  File "/f.php", line 3, characters 15-20:
-  Expected `string`
+  File "/f.php", line 3, characters 15-19:
+  Expected `float`
   File "/f.php", line 5, characters 10-10:
   But got `int`
 
-File "/f.php", line 4, characters 3-21:
+ERROR: File "/f.php", line 4, characters 3-22:
 You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error 4110 (Typing[4110])
 |}
 
 let test () =
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   TestDisk.set hhconfig_filename hhconfig_contents;
-  let hhconfig_path =
-    Relative_path.create Relative_path.Root hhconfig_filename
+  let (config, _) =
+    ServerConfig.load ~silent:false ~from:"" ~cli_config_overrides:[]
   in
-  let options = ServerArgs.default_options ~root in
-  let (config, _) = ServerConfig.load ~silent:false hhconfig_path options in
   let env =
     Test.setup_server
       ~custom_config:config
@@ -61,4 +59,4 @@ let test () =
       ()
   in
   let env = Test.setup_disk env [(file_name, file_contents)] in
-  Test.assert_env_errors env errors
+  Test.assert_env_diagnostics env errors

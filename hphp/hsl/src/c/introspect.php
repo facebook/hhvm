@@ -42,7 +42,7 @@ function any<T>(
  * Returns true if the given Traversable contains the value. Strict equality is
  * used.
  *
- * Time complexity: O(n) (O(1) for keysets)
+ * Time complexity: O(n) (O(1) for keysets and ConstSets)
  * Space complexity: O(1)
  */
 function contains<
@@ -52,7 +52,7 @@ function contains<
   readonly Traversable<T1> $traversable,
   readonly T2 $value,
 )[]: bool {
-  if ($traversable is keyset<_>) {
+  if ($traversable is keyset<_> || $traversable is \ConstSet<_>) {
     return $value is arraykey && contains_key($traversable, $value);
   }
   foreach ($traversable as $v) {

@@ -44,17 +44,11 @@ let print_full_fidelity_error source_text error =
   Printf.printf "%s\n" text
 
 let print_ast_check_errors errors =
-  let error_list = Errors.get_error_list errors in
+  let error_list = Diagnostics.get_diagnostic_list errors in
   List.iter
     (fun e ->
-      let text = Errors.to_string (User_error.to_absolute e) in
-      if
-        Core_kernel.String.is_substring
-          text
-          ~substring:SyntaxError.this_in_static
-        || Core_kernel.String.is_substring
-             text
-             ~substring:SyntaxError.toplevel_await_use
+      let text = Diagnostics.to_string (User_diagnostic.to_absolute e) in
+      if Core.String.is_substring text ~substring:SyntaxError.this_in_static
       then
         Printf.eprintf "%s\n%!" text)
     error_list
@@ -118,19 +112,22 @@ let handle_existing_file args filename =
       if dump_needed || print_errors then (
         let env =
           Full_fidelity_ast.make_env
-            ~codegen:args.codegen
+            ~mode:
+              (if args.codegen then
+                Namespace_env.ForCodegen
+              else
+                Namespace_env.ForTypecheck)
             ~php5_compat_mode:args.php5_compat_mode
             ~elaborate_namespaces:args.elaborate_namespaces
             ~include_line_comments:args.include_line_comments
-            ~keep_errors:(args.keep_errors || print_errors)
             ~quick_mode:args.quick_mode
             ~parser_options:popt
-            ~fail_open:args.fail_open
             file
         in
         try
           let (errors, res) =
-            Errors.do_ (fun () -> Full_fidelity_ast.from_file_with_legacy env)
+            Diagnostics.do_ (fun () ->
+                Full_fidelity_ast.from_file_with_legacy env)
           in
           if print_errors then print_ast_check_errors errors;
           Some res
@@ -139,7 +136,7 @@ let handle_existing_file args filename =
           let err = Base.Exn.to_string e in
           let fn = Relative_path.suffix file in
           (* If we've already found a parsing error, it's okay for lowering to fail *)
-          if not (Errors.currently_has_errors ()) then
+          if not (Diagnostics.currently_has_errors ()) then
             Printf.eprintf
               "Warning, lowering failed for %s\n  - error: %s\n"
               fn

@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-provenance.h"
-#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/string-data.h"
@@ -29,11 +28,8 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
-#include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
-#include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
@@ -47,14 +43,14 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
-#include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 

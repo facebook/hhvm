@@ -1,0 +1,6 @@
+ERROR: File "named_args.php", line 8, characters 14-17:
+Cannot use unstable feature: `named_parameters_use` (Parsing[1002])
+ERROR: File "named_args.php", line 8, characters 16-17:
+Expression trees do not support named parameters. (Parsing[1002])
+ERROR: File "named_args.php", line 5, characters 1-114:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])

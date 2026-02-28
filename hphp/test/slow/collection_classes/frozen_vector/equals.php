@@ -2,7 +2,7 @@
 
 // Test equality of ImmVectors.
 
-function main() {
+function main() :mixed{
   var_dump(ImmVector {} == ImmVector {});
   var_dump(ImmVector {1, 2, 3} == ImmVector {1, 2, 3});
 
@@ -30,6 +30,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_equals() {
+function main_equals() :mixed{
 main();
 }

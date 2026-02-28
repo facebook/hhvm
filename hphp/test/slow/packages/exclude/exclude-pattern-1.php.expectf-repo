@@ -1,0 +1,3 @@
+I'm %s/exclude/basic.inc.php
+
+Fatal error: Call to undefined function access_test() in %s/exclude/exclude-pattern-1.php on line 9

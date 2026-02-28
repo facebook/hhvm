@@ -77,16 +77,6 @@ ThreadLocalManager& ThreadLocalManager::GetManager() {
   return m;
 }
 
-#ifdef __APPLE__
-ThreadLocalManager::ThreadLocalList::ThreadLocalList() {
-  pthread_t self = pthread_self();
-  handler.__routine = ThreadLocalManager::OnThreadExit;
-  handler.__arg = this;
-  handler.__next = self->__cleanup_stack;
-  self->__cleanup_stack = &handler;
-}
-#endif
-
 #endif
 
 #ifdef HAVE_ARCH_PRCTL
@@ -106,12 +96,7 @@ static int visit_phdr(dl_phdr_info* info, size_t, void*) {
 
 std::pair<void*,size_t> getCppTdata() {
   uintptr_t addr;
-#if defined(__x86_64__)
   if (!arch_prctl(ARCH_GET_FS, &addr)) {
-#elif defined(__powerpc64__)
-  __asm__ ("\tmr %0, 13" : "=r" (addr));
-  if (addr) {
-#endif
     // fs points to the end of the threadlocal area.
     size_t size = dl_iterate_phdr(&visit_phdr, nullptr);
     return {(void*)(addr - size), size};

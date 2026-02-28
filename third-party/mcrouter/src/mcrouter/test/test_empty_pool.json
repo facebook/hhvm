@@ -1,0 +1,24 @@
+{
+  "pools": {
+    "A-foo": {
+      "servers": []
+    }
+  },
+  "route": {
+    "type": "AllSyncRoute",
+    "children": [
+      "AllAsyncRoute|Pool|A-foo",
+      "AllFastestRoute|Pool|A-foo",
+      "AllInitialRoute|Pool|A-foo",
+      "AllMajorityRoute|Pool|A-foo",
+      "AllSyncRoute|Pool|A-foo",
+      "FailoverRoute|Pool|A-foo",
+      "HashRoute|Pool|A-foo",
+      "HostIdRoute|Pool|A-foo",
+      "LatestRoute|Pool|A-foo",
+      "MissFailoverRoute|Pool|A-foo",
+      "PoolRoute|A-foo",
+      "RandomRoute|Pool|A-foo"
+    ]
+  }
+}

@@ -17,7 +17,7 @@ let visitor =
 
     method! on_expr env ((_, p, expr_) as e) =
       match expr_ with
-      | Binop (Ast_defs.Eq None, e1, e2) ->
+      | Assign (e1, None, e2) ->
         (* Allow list($foo) = $bar; *)
         self#on_expr { in_lvalue = true } e1;
         self#on_expr env e2
@@ -27,7 +27,8 @@ let visitor =
           super#on_expr env e
         else
           (* Ban list() in rvalue positions, e.g. foo(list($bar)) *)
-          Errors.add_nast_check_error @@ Nast_check_error.List_rvalue p
+          Diagnostics.add_diagnostic
+            Nast_check_error.(to_user_diagnostic @@ List_rvalue p)
       | _ -> super#on_expr { in_lvalue = false } e
 
     method! on_stmt env s =

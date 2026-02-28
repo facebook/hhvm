@@ -11,9 +11,9 @@ $format = "format";
 $format1 = "%e";
 $format2 = "%e %e";
 $format3 = "%e %e %e";
-$arg1 = varray[1000];
-$arg2 = varray[1000,2000];
-$arg3 = varray[1000,2000,3000];
+$arg1 = vec[1000];
+$arg2 = vec[1000,2000];
+$arg3 = vec[1000,2000,3000];
 
 var_dump( vsprintf($format1,$arg1) );
 var_dump( vsprintf($format2,$arg2) );

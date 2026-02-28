@@ -7,7 +7,7 @@
 echo "*** Testing image_type_to_mime_type() : usage variations ***\n";
 
 error_reporting(E_ALL ^ E_NOTICE);
-$values =  varray [
+$values =  vec[
   //Decimal values
   0,
   1,

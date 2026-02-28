@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class X {
   public $foo = 12;
@@ -6,7 +6,7 @@ class X {
 
 
 <<__EntryPoint>>
-function main_dynamic_property2() {
+function main_dynamic_property2() :mixed{
 $x = new X;
 $x->bar = 123;
 $rc = new ReflectionClass('X');

@@ -3,7 +3,7 @@
 class Foo
 {
     function Test()
-    {
+:mixed    {
         echo __METHOD__ . "\n";
     }
 }
@@ -11,7 +11,7 @@ class Foo
 class Bar extends Foo
 {
     function Test()
-    {
+:mixed    {
         echo __METHOD__ . "\n";
     }
 }

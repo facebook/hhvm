@@ -1,11 +1,11 @@
 //// newtype.php
-<?hh // strict
+<?hh
 
 newtype bar = bool;
 const bar truthy_foo = true;
 
 //// def.php
-<?hh // strict
+<?hh
 
 abstract class Enum {
   abstract const type TInner;
@@ -17,7 +17,7 @@ class C1 {
 }
 
 //// use.php
-<?hh // strict
+<?hh
 
 // Should fail because foo isn't an int or a string
 class C2 extends Enum {

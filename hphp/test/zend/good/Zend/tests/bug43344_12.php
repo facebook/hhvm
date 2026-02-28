@@ -1,5 +1,5 @@
 <?hh
-function f($a=varray[namespace\bar]) {
+function f($a=vec[namespace\bar]) :mixed{
     return $a[0];
 }
 <<__EntryPoint>> function main(): void {

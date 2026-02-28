@@ -1,8 +1,0 @@
-File "hh_fixme_bug3.php.pess", line 19, characters 15-16:
-Invalid argument (Typing[4110])
-  File "hh_fixme_bug3.php.pess", line 10, characters 3-8:
-  Expected `~C<[unresolved]>`
-  File "hh_fixme_bug3.php.pess", line 17, characters 17-28:
-  But got `<expr#1> as C<arraykey>`
-  File "hh_fixme_bug3.php.pess", line 19, characters 15-16:
-    where `<expr#1>` is a reference to this expression

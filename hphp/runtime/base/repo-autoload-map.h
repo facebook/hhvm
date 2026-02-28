@@ -16,14 +16,16 @@
 
 #pragma once
 
+#include <filesystem>
 #include <string_view>
 #include <vector>
-#include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
+
+#include "hphp/runtime/vm/repo-file.h"
 
 namespace HPHP {
 
@@ -35,58 +37,61 @@ namespace HPHP {
 
 struct RepoAutoloadMap final : AutoloadMap {
 
-  template <typename Compare>
-  using Map = hphp_fast_map<
-    const StringData*,
-    int64_t,
-    string_data_hash,
-    Compare
-  >;
-
-  using CaseInsensitiveMap = Map<string_data_isame>;
-  using CaseSensitiveMap = Map<string_data_same>;
-
   explicit RepoAutoloadMap(
-      CaseInsensitiveMap types,
-      CaseInsensitiveMap functions,
-      CaseSensitiveMap constants,
-      CaseInsensitiveMap typeAliases);
+    HashMapTypeIndex types,
+    HashMapFuncIndex functions,
+    CaseSensitiveHashMapIndex constants,
+    HashMapTypeIndex typeAliases,
+    CaseSensitiveHashMapIndex modules);
 
-  Optional<String> getTypeFile(const String& typeName) override;
-  Optional<String> getFunctionFile(const String& functionName) override;
-  Optional<String> getConstantFile(const String& constantName) override;
-  Optional<String> getTypeAliasFile(const String& typeAliasName) override;
+  Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFile(const String& typeName) override;
+  Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFileRelative(const String& typeName) override;
+  Optional<AutoloadMap::FileResult> getTypeFile(const String& typeName) override;
+  Optional<AutoloadMap::FileResult> getTypeFileRelative(const String& typeName) override;
+  Optional<AutoloadMap::FileResult> getFunctionFile(const String& functionName) override;
+  Optional<AutoloadMap::FileResult> getFunctionFileRelative(const String& functionName) override;
+  Optional<AutoloadMap::FileResult> getConstantFile(const String& constantName) override;
+  Optional<AutoloadMap::FileResult> getConstantFileRelative(const String& constantName) override;
+  Optional<AutoloadMap::FileResult> getTypeAliasFile(const String& typeAliasName) override;
+  Optional<AutoloadMap::FileResult> getTypeAliasFileRelative(const String& typeAliasName) override;
+  Optional<AutoloadMap::FileResult> getModuleFile(const String& moduleName) override;
+  Optional<AutoloadMap::FileResult> getModuleFileRelative(const String& moduleName) override;
 
-  Optional<folly::fs::path> getTypeFile(std::string_view name) override;
-  Optional<folly::fs::path> getFunctionFile(std::string_view name) override;
-  Optional<folly::fs::path> getConstantFile(std::string_view name) override;
-  Optional<folly::fs::path> getTypeAliasFile(std::string_view name) override;
+  Optional<std::filesystem::path> getTypeOrTypeAliasFile(std::string_view name) override;
+  Optional<std::filesystem::path> getTypeOrTypeAliasFileRelative(std::string_view name) override;
+  Optional<std::filesystem::path> getTypeFile(std::string_view name) override;
+  Optional<std::filesystem::path> getTypeFileRelative(std::string_view name) override;
+  Optional<std::filesystem::path> getFunctionFile(std::string_view name) override;
+  Optional<std::filesystem::path> getFunctionFileRelative(std::string_view name) override;
+  Optional<std::filesystem::path> getConstantFile(std::string_view name) override;
+  Optional<std::filesystem::path> getConstantFileRelative(std::string_view name) override;
+  Optional<std::filesystem::path> getTypeAliasFile(std::string_view name) override;
+  Optional<std::filesystem::path> getTypeAliasFileRelative(std::string_view name) override;
+  Optional<std::filesystem::path> getModuleFile(std::string_view name) override;
+  Optional<std::filesystem::path> getModuleFileRelative(std::string_view name) override;
 
   Array getFileTypes(const String& path) override;
   Array getFileFunctions(const String& path) override;
   Array getFileConstants(const String& path) override;
   Array getFileTypeAliases(const String& path) override;
+  Array getFileModules(const String& path) override;
 
-  bool canHandleFailure() const override {
-    return false;
-  }
+  Optional<std::string> getSha1(const String& path) override;
 
   void ensureUpdated() override {}
 
-  bool isNative() const noexcept override {
-    return true;
+  void validate(const std::set<std::string>&) override {}
+
+  Holder getNativeHolder() noexcept override {
+    return Holder{this, nullptr};
   }
 
-  AutoloadMap::Result handleFailure(KindOf kind, const String& className,
-      const Variant& err) const override;
-
-  Array getAllFiles() const override;
-
 private:
-  CaseInsensitiveMap m_types;
-  CaseInsensitiveMap m_functions;
-  CaseSensitiveMap m_constants;
-  CaseInsensitiveMap m_typeAliases;
+  HashMapTypeIndex m_types;
+  HashMapFuncIndex m_functions;
+  CaseSensitiveHashMapIndex m_constants;
+  HashMapTypeIndex m_typeAliases;
+  CaseSensitiveHashMapIndex m_modules;
 };
 
 } // HPHP

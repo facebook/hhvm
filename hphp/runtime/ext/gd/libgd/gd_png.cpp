@@ -1,14 +1,10 @@
 #include <stdio.h>
-#include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include "gd.h"
-
-/* JCE: Arrange HAVE_LIBPNG so that it can be set in gd.h */
-#ifdef HAVE_GD_PNG
+#include "hphp/runtime/ext/gd/libgd/gd.h"
 
 #include "png.h"    /* includes zlib.h and setjmp.h */
-#include "gdhelpers.h"
+#include "hphp/runtime/ext/gd/libgd/gdhelpers.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -45,10 +41,9 @@ const char * gdPngGetVersionString()
 
 namespace {
 
-typedef struct _jmpbuf_wrapper
-{
+struct jmpbuf_wrapper {
   jmp_buf jmpbuf;
-} jmpbuf_wrapper;
+};
 
 }
 
@@ -295,6 +290,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
     case PNG_COLOR_TYPE_GRAY_ALPHA:
       png_set_gray_to_rgb(png_ptr);
 
+      [[fallthrough]];
       case PNG_COLOR_TYPE_RGB:
       case PNG_COLOR_TYPE_RGB_ALPHA:
         /* gd 2.0: we now support truecolor. See the comment above
@@ -360,9 +356,9 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
       for (h = 0; h < height; h++) {
         int boffset = 0;
         for (w = 0; w < width; w++) {
-          register png_byte r = row_pointers[h][boffset++];
-          register png_byte g = row_pointers[h][boffset++];
-          register png_byte b = row_pointers[h][boffset++];
+          png_byte r = row_pointers[h][boffset++];
+          png_byte g = row_pointers[h][boffset++];
+          png_byte b = row_pointers[h][boffset++];
           im->tpixels[h][w] = gdTrueColor (r, g, b);
         }
       }
@@ -373,16 +369,16 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
       for (h = 0; h < height; h++) {
         int boffset = 0;
         for (w = 0; w < width; w++) {
-          register png_byte r = row_pointers[h][boffset++];
-          register png_byte g = row_pointers[h][boffset++];
-          register png_byte b = row_pointers[h][boffset++];
+          png_byte r = row_pointers[h][boffset++];
+          png_byte g = row_pointers[h][boffset++];
+          png_byte b = row_pointers[h][boffset++];
 
           /* gd has only 7 bits of alpha channel resolution, and
            * 127 is transparent, 0 opaque. A moment of convenience,
            *  a lifetime of compatibility.
            */
 
-          register png_byte a = gdAlphaMax - (row_pointers[h][boffset++] >> 1);
+          png_byte a = gdAlphaMax - (row_pointers[h][boffset++] >> 1);
           im->tpixels[h][w] = gdTrueColorAlpha(r, g, b, a);
         }
       }
@@ -392,7 +388,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
       /* Palette image, or something coerced to be one */
       for (h = 0; h < height; ++h) {
         for (w = 0; w < width; ++w) {
-          register png_byte idx = row_pointers[h][w];
+          png_byte idx = row_pointers[h][w];
           im->pixels[h][w] = idx;
           open[idx] = 0;
         }
@@ -751,5 +747,3 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
  bail:
   png_destroy_write_struct(&png_ptr, &info_ptr);
 }
-
-#endif /* HAVE_LIBPNG */

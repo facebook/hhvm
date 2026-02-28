@@ -1,0 +1,52 @@
+
+:::info[Note]
+This is a point-in-time snapshot of the API documentation from January 2026.
+Going forward, we will not be maintaining a public copy of these references,
+and recommend users to refer to the built-in signature helpers available in
+the Hack LSP instead for complete and up-to-date information.
+:::
+
+json_encode, but populates $error in case of error
+
+
+
+
+``` Hack
+function json_encode_with_error(
+  mixed $value,
+  inout ?(int, string) $error,
+  int $options = 0,
+  int $depth = 512,
+): mixed;
+```
+
+
+
+
+If the function runs normally with no errors, then $error is set to null.
+Otherwise, if an error occurs, $error is set to a tuple of (error code
+constant, description) from the list defined in builtins_json.hhi.
+
+
+
+
+## Parameters
+
+
+
+
++ ` mixed $value `
++ ` inout ?(int, string) $error `
++ ` int $options = 0 `
++ ` int $depth = 512 `
+
+
+
+
+## Returns
+
+
+
+
+* ` mixed `
+<!-- HHAPIDOC -->

@@ -1,0 +1,28 @@
+> lines and columns in ranges are 1-indexed
+received code:
+1 <?hh
+2 
+3 
+4 function    foo():    void {}
+5 function  bar():    void {
+6 
+7 
+8         }
+
+New text at range 3:1-9:1 (1-indexed) is
+'function foo(): void {}
+function bar(): void {
+
+}
+'
+
+Code after applying language server edits:
+'<?hh
+
+function foo(): void {}
+function bar(): void {
+
+}
+'
+
+Matched Hackfmt result

@@ -244,7 +244,7 @@ SSLSocket::SSLSocket(int sockfd, int type, const req::ptr<StreamContext>& ctx,
 SSLSocket::~SSLSocket() { }
 
 void SSLSocket::sweep() {
-  SSLSocket::closeImpl();
+  File::close();
   File::sweep();
   m_data = nullptr;
 }
@@ -344,7 +344,7 @@ bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
       }
       break;
     }
-    /* fall through */
+    [[fallthrough]];
   default:
     /* some other error */
     ecode = ERR_get_error();
@@ -499,7 +499,7 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
     break;
   case CryptoMethod::ClientTLS:
     m_data->m_client = true;
-    smethod = TLSv1_client_method();
+    smethod = TLS_client_method();
     break;
   case CryptoMethod::ServerSSLv23:
     m_data->m_client = false;
@@ -522,27 +522,15 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
     return false;
 #endif
 
-  /* SSLv2 protocol might be disabled in the OpenSSL library */
-#ifndef OPENSSL_NO_SSL2
-  case CryptoMethod::ClientSSLv2:
-    m_data->m_client = true;
-    smethod = SSLv2_client_method();
-    break;
-  case CryptoMethod::ServerSSLv2:
-    m_data->m_client = false;
-    smethod = SSLv2_server_method();
-    break;
-#else
   case CryptoMethod::ClientSSLv2:
   case CryptoMethod::ServerSSLv2:
     raise_warning("OpenSSL library does not support SSL2 protocol");
     return false;
   break;
-#endif
 
   case CryptoMethod::ServerTLS:
     m_data->m_client = false;
-    smethod = TLSv1_server_method();
+    smethod = TLS_server_method();
     break;
   default:
     return false;
@@ -597,6 +585,7 @@ bool SSLSocket::applyVerificationPolicy(X509 *peer) {
       break;
     }
     /* not allowed, so fall through */
+    [[fallthrough]];
   default:
     raise_warning("Could not verify peer: code:%d %s", err,
                   X509_verify_cert_error_string(err));

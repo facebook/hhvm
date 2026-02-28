@@ -160,6 +160,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.NullableTypeSpecifier _
     | Syntax.LikeTypeSpecifier _
     | Syntax.SoftTypeSpecifier _
+    | Syntax.VariablePattern _
     | Syntax.ListItem _ ->
       transform_simple env node
     | Syntax.ReifiedTypeArgument
@@ -172,10 +173,13 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         ]
     | Syntax.QualifiedName { qualified_name_parts } ->
       handle_possible_list env qualified_name_parts
+    | Syntax.ModuleName { module_name_parts } ->
+      handle_possible_list env module_name_parts
     | Syntax.ExpressionStatement _ -> transform_simple_statement env node
     | Syntax.EnumDeclaration
         {
           enum_attribute_spec = attr;
+          enum_modifiers = modifiers;
           enum_keyword = kw;
           enum_name = name;
           enum_colon = colon_kw;
@@ -190,6 +194,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         [
           t env attr;
           when_present attr newline;
+          handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
           t env kw;
           Space;
           t env name;
@@ -253,6 +258,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.AliasDeclaration
         {
           alias_attribute_spec = attr;
+          alias_modifiers = modifiers;
+          alias_module_kw_opt = mkw_opt;
           alias_keyword = kw;
           alias_name = name;
           alias_generic_parameter = generic;
@@ -260,7 +267,29 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           alias_equal = eq_kw;
           alias_type = ty;
           alias_semicolon = semi;
-        }
+        } ->
+      (* TODO: revisit this for long names *)
+      Concat
+        [
+          t env attr;
+          when_present attr newline;
+          handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
+          t env mkw_opt;
+          when_present mkw_opt space;
+          t env kw;
+          Space;
+          t env name;
+          t env generic;
+          Space;
+          handle_possible_list env type_constraint;
+          when_present eq_kw (function () ->
+              Concat
+                [
+                  Space; t env eq_kw; Space; SplitWith Cost.Base; Nest [t env ty];
+                ]);
+          t env semi;
+          Newline;
+        ]
     | Syntax.ContextAliasDeclaration
         {
           ctx_alias_attribute_spec = attr;
@@ -291,6 +320,86 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env semi;
           Newline;
         ]
+    | Syntax.CaseTypeDeclaration
+        {
+          case_type_attribute_spec = attr;
+          case_type_modifiers = modifiers;
+          case_type_case_keyword = case_kw;
+          case_type_type_keyword = type_kw;
+          case_type_name = name;
+          case_type_generic_parameter = generic;
+          case_type_as = as_kw;
+          case_type_bounds = bounds;
+          case_type_equal = eq_kw;
+          case_type_variants = variants;
+          case_type_semicolon = semi;
+        } ->
+      let has_leading_bar =
+        match Syntax.syntax variants with
+        | Syntax.SyntaxList (hd :: _) ->
+          (match Syntax.syntax hd with
+          | Syntax.CaseTypeVariant { case_type_variant_bar = bar; _ }
+            when not @@ Syntax.is_missing bar ->
+            true
+          | _ -> false)
+        | _ -> false
+      in
+      Concat
+        [
+          t env attr;
+          when_present attr newline;
+          handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
+          t env case_kw;
+          Space;
+          t env type_kw;
+          Space;
+          t env name;
+          t env generic;
+          when_present as_kw space;
+          t env as_kw;
+          when_present as_kw space;
+          handle_possible_list env bounds;
+          when_present eq_kw (function () ->
+              Concat
+                [
+                  Space;
+                  t env eq_kw;
+                  (if has_leading_bar then
+                    Newline
+                  else
+                    Space);
+                  WithRule
+                    ( (if has_leading_bar then
+                        Rule.Always
+                      else
+                        Rule.Parental),
+                      Nest
+                        [
+                          handle_possible_list
+                            ~after_each:(function
+                              | false -> space_split ()
+                              | true -> Nothing)
+                            env
+                            variants;
+                        ] );
+                ]);
+          t env semi;
+          Newline;
+        ]
+    | Syntax.CaseTypeVariant
+        {
+          case_type_variant_bar = bar;
+          case_type_variant_type = ty;
+          case_type_variant_where_clause = where;
+        } ->
+      Span
+        [
+          t env bar;
+          when_present bar space;
+          t env ty;
+          when_present where space;
+          t env where;
+        ]
     | Syntax.PropertyDeclaration
         {
           property_attribute_spec = attr;
@@ -314,7 +423,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       else
         WithLazyRule
           ( Rule.Parental,
-            handle_attribute_spec env attr ~always_split:false,
+            handle_attribute_spec env attr,
             Concat [Space; Split; declaration] )
     | Syntax.NamespaceDeclaration
         { namespace_header = header; namespace_body = body } ->
@@ -471,6 +580,80 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           where_constraint_right_type = right;
         } ->
       Concat [t env left; Space; t env op; Space; t env right]
+    | Syntax.TypeRefinement
+        {
+          type_refinement_type = ty;
+          type_refinement_keyword = kw;
+          type_refinement_left_brace = left;
+          type_refinement_members = members;
+          type_refinement_right_brace = right;
+        } ->
+      Concat
+        [
+          t env ty;
+          Space;
+          t env kw;
+          Space;
+          t env left;
+          space_split ();
+          Nest
+            [
+              Span
+                [
+                  handle_possible_list
+                    env
+                    ~before_each:(fun _ ->
+                      Concat
+                        [
+                          (if list_length members > 1 then
+                            Newline
+                          else
+                            Space);
+                          SplitWith Cost.Moderate;
+                        ])
+                    ~after_each:(fun last ->
+                      if last then
+                        if list_length members > 1 then
+                          Newline
+                        else
+                          Space
+                      else
+                        Nothing)
+                    members;
+                ];
+            ];
+          t env right;
+        ]
+    | Syntax.TypeInRefinement
+        {
+          type_in_refinement_keyword = kw;
+          type_in_refinement_name = name;
+          type_in_refinement_type_parameters = type_params;
+          type_in_refinement_constraints = constraints;
+          type_in_refinement_equal = eq;
+          type_in_refinement_type = eq_bound;
+        }
+    | Syntax.CtxInRefinement
+        {
+          ctx_in_refinement_keyword = kw;
+          ctx_in_refinement_name = name;
+          ctx_in_refinement_type_parameters = type_params;
+          ctx_in_refinement_constraints = constraints;
+          ctx_in_refinement_equal = eq;
+          ctx_in_refinement_ctx_list = eq_bound;
+        } ->
+      Span
+        [
+          t env kw;
+          Space;
+          t env name;
+          t env type_params;
+          handle_possible_list env ~before_each:(fun _ -> Space) constraints;
+          when_present eq space;
+          t env eq;
+          when_present eq_bound (fun _ ->
+              Concat [Space; SplitWith Cost.High; Nest [t env eq_bound]]);
+        ]
     | Syntax.Contexts
         {
           contexts_left_bracket = lb;
@@ -528,7 +711,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           classish_extends_list = extends;
           classish_implements_keyword = impl_kw;
           classish_implements_list = impls;
-          classish_where_clause = where;
           classish_body = body;
         } ->
       let after_each_ancestor is_last =
@@ -609,8 +791,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                                     ];
                                 ] );
                         ]);
-                  when_present where space;
-                  t env where;
                 ] );
           t env body;
         ]
@@ -625,64 +805,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Space;
           braced_block_nest env left_b right_b [handle_possible_list env body];
           Newline;
-        ]
-    | Syntax.TraitUsePrecedenceItem
-        {
-          trait_use_precedence_item_name = name;
-          trait_use_precedence_item_keyword = kw;
-          trait_use_precedence_item_removed_names = removed_names;
-        } ->
-      Concat
-        [
-          t env name;
-          Space;
-          t env kw;
-          Space;
-          WithRule
-            ( Rule.Parental,
-              Nest
-                [
-                  handle_possible_list env ~before_each:space_split removed_names;
-                ] );
-        ]
-    | Syntax.TraitUseAliasItem
-        {
-          trait_use_alias_item_aliasing_name = aliasing_name;
-          trait_use_alias_item_keyword = kw;
-          trait_use_alias_item_modifiers = visibility;
-          trait_use_alias_item_aliased_name = aliased_name;
-        } ->
-      Concat
-        [
-          t env aliasing_name;
-          Space;
-          t env kw;
-          Space;
-          t env visibility;
-          Space;
-          t env aliased_name;
-        ]
-    | Syntax.TraitUseConflictResolution
-        {
-          trait_use_conflict_resolution_keyword = kw;
-          trait_use_conflict_resolution_names = elements;
-          trait_use_conflict_resolution_left_brace = lb;
-          trait_use_conflict_resolution_clauses = clauses;
-          trait_use_conflict_resolution_right_brace = rb;
-        } ->
-      Concat
-        [
-          t env kw;
-          WithRule
-            ( Rule.Parental,
-              Nest [handle_possible_list env ~before_each:space_split elements]
-            );
-          Space;
-          t env lb;
-          Newline;
-          Nest [handle_possible_list env ~before_each:newline clauses];
-          Newline;
-          t env rb;
         ]
     | Syntax.TraitUse
         {
@@ -718,6 +840,30 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env kw;
           Space;
           t env kind;
+          Space;
+          (if has_split name then
+            SplitWith Cost.High
+          else
+            Nothing);
+          Nest [name; t env semi];
+          Newline;
+        ]
+    | Syntax.RequireClauseConstraint
+        {
+          require_constraint_keyword = kw;
+          require_constraint_this = this;
+          require_constraint_operator = operator;
+          require_constraint_name = name;
+          require_constraint_semicolon = semi;
+        } ->
+      let name = t env name in
+      Concat
+        [
+          t env kw;
+          Space;
+          t env this;
+          Space;
+          t env operator;
           Space;
           (if has_split name then
             SplitWith Cost.High
@@ -825,45 +971,47 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         {
           parameter_attribute = attr;
           parameter_visibility = visibility;
+          parameter_optional = optional;
           parameter_call_convention = callconv;
+          parameter_named = named;
           parameter_readonly = readonly;
+          parameter_pre_ellipsis = pre_ellipsis;
           parameter_type = param_type;
+          parameter_ellipsis = ellipsis;
           parameter_name = name;
           parameter_default_value = default;
+          parameter_parameter_end = _prend;
         } ->
       Concat
         [
-          handle_attribute_spec env attr ~always_split:false;
+          handle_attribute_spec env attr;
           when_present attr (fun _ -> Concat [Space; SplitWith Cost.Base]);
           t env visibility;
           when_present visibility space;
+          t env optional;
+          when_present optional space;
           t env callconv;
           when_present callconv space;
+          t env named;
+          when_present named space;
           t env readonly;
           when_present readonly space;
+          t env pre_ellipsis;
+          when_present pre_ellipsis space;
           t env param_type;
           (if
            Syntax.is_missing visibility
            && Syntax.is_missing callconv
            && Syntax.is_missing param_type
-          then
-            t env name
-          else
-            Concat [Space; SplitWith Cost.Moderate; Nest [t env name]]);
+          then begin
+            Concat [t env ellipsis; t env name]
+          end else begin
+            Concat
+              [
+                Space; SplitWith Cost.Moderate; Nest [t env ellipsis; t env name];
+              ]
+          end);
           t env default;
-        ]
-    | Syntax.VariadicParameter
-        {
-          variadic_parameter_call_convention = callconv;
-          variadic_parameter_type = type_var;
-          variadic_parameter_ellipsis = ellipsis;
-        } ->
-      Concat
-        [
-          t env callconv;
-          when_present callconv space;
-          t env type_var;
-          t env ellipsis;
         ]
     | Syntax.FileAttributeSpecification
         {
@@ -882,22 +1030,13 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           transform_possible_comma_list env ~allow_trailing:false attrs right_da;
           Newline;
         ]
-    | Syntax.OldAttributeSpecification _
-    | Syntax.AttributeSpecification _ ->
-      handle_attribute_spec env node ~always_split:true
-    | Syntax.Attribute { attribute_at = at; attribute_attribute_name = attr } ->
-      Concat [t env at; t env attr]
+    | Syntax.OldAttributeSpecification _ -> handle_attribute_spec env node
     | Syntax.AttributizedSpecifier
         {
           attributized_specifier_attribute_spec = attr_spec;
           attributized_specifier_type = attr_type;
         } ->
-      Concat
-        [
-          handle_attribute_spec env attr_spec ~always_split:false;
-          Space;
-          t env attr_type;
-        ]
+      Concat [handle_attribute_spec env attr_spec; Space; t env attr_type]
     | Syntax.InclusionExpression
         { inclusion_require = kw; inclusion_filename = expr } ->
       Concat
@@ -1000,7 +1139,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           if_condition = condition;
           if_right_paren = right_p;
           if_statement = if_body;
-          if_elseif_clauses = elseif_clauses;
           if_else_clause = else_clause;
         } ->
       Concat
@@ -1009,24 +1147,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Space;
           transform_condition env left_p condition right_p;
           transform_consequence t env if_body right_p;
-          handle_possible_list env elseif_clauses;
           t env else_clause;
           Newline;
-        ]
-    | Syntax.ElseifClause
-        {
-          elseif_keyword = kw;
-          elseif_left_paren = left_p;
-          elseif_condition = condition;
-          elseif_right_paren = right_p;
-          elseif_statement = body;
-        } ->
-      Concat
-        [
-          t env kw;
-          Space;
-          transform_condition env left_p condition right_p;
-          transform_consequence t env body right_p;
         ]
     | Syntax.ElseClause x ->
       Concat
@@ -1265,6 +1387,51 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.SwitchFallthrough
         { fallthrough_keyword = kw; fallthrough_semicolon = semi } ->
       Concat [t env kw; t env semi]
+    | Syntax.MatchStatement
+        {
+          match_statement_keyword = kw;
+          match_statement_left_paren = left_p;
+          match_statement_expression = expr;
+          match_statement_right_paren = right_p;
+          match_statement_left_brace = left_b;
+          match_statement_arms = arms;
+          match_statement_right_brace = right_b;
+        } ->
+      let arms = Syntax.syntax_node_to_list arms in
+      Concat
+        [
+          t env kw;
+          Space;
+          delimited_nest env left_p right_p [t env expr];
+          Space;
+          braced_block_nest env left_b right_b (List.map arms ~f:(t env));
+          Newline;
+        ]
+    | Syntax.MatchStatementArm
+        {
+          match_statement_arm_pattern = pattern;
+          match_statement_arm_arrow = arrow;
+          match_statement_arm_body = body;
+        } ->
+      Concat
+        [
+          t env pattern;
+          Space;
+          t env arrow;
+          Space;
+          (match Syntax.syntax body with
+          | Syntax.CompoundStatement
+              { compound_left_brace; compound_statements; compound_right_brace }
+            ->
+            handle_compound_statement
+              env
+              ~allow_collapse:true
+              compound_left_brace
+              compound_statements
+              compound_right_brace
+          | _ -> Concat [SplitWith Cost.Base; Nest [t env body]]);
+          Newline;
+        ]
     | Syntax.ReturnStatement
         {
           return_keyword = kw;
@@ -1318,6 +1485,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           anonymous_attribute_spec = attr;
           anonymous_async_keyword = async_kw;
           anonymous_function_keyword = fun_kw;
+          anonymous_type_parameters = tp;
           anonymous_left_paren = lp;
           anonymous_parameters = params;
           anonymous_right_paren = rp;
@@ -1330,11 +1498,12 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       Concat
         [
-          handle_attribute_spec env attr ~always_split:false;
+          handle_attribute_spec env attr;
           when_present attr space;
           t env async_kw;
           when_present async_kw space;
           t env fun_kw;
+          t env tp;
           transform_argish_with_return_type
             env
             lp
@@ -1360,6 +1529,28 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       (* TODO: Revisit *)
       Concat [Space; t env kw; Space; transform_argish env left_p vars right_p]
+    | Syntax.ConstructorPattern
+        {
+          constructor_pattern_constructor = name;
+          constructor_pattern_left_paren = lp;
+          constructor_pattern_members = members;
+          constructor_pattern_right_paren = rp;
+        } ->
+      if
+        Syntax.is_missing lp
+        && Syntax.is_missing members
+        && Syntax.is_missing rp
+      then
+        t env name
+      else
+        transform_container_literal env name lp members rp
+    | Syntax.RefinementPattern
+        {
+          refinement_pattern_variable = var;
+          refinement_pattern_colon = colon;
+          refinement_pattern_specifier = ty;
+        } ->
+      Concat [t env var; t env colon; Space; t env ty]
     | Syntax.LambdaExpression
         {
           lambda_attribute_spec = attr;
@@ -1370,7 +1561,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       Concat
         [
-          handle_attribute_spec env attr ~always_split:false;
+          handle_attribute_spec env attr;
           when_present attr space;
           t env async;
           when_present async space;
@@ -1381,6 +1572,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         ]
     | Syntax.LambdaSignature
         {
+          lambda_function_keyword = fun_kw;
+          lambda_type_parameters = tp;
           lambda_left_paren = lp;
           lambda_parameters = params;
           lambda_right_paren = rp;
@@ -1391,6 +1584,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       Concat
         [
+          t env fun_kw;
+          t env tp;
           t env lp;
           when_present params split;
           transform_fn_decl_args env params rp;
@@ -1535,6 +1730,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           WithRule
             (Rule.Parental, Concat [Nest [t env expr]; Split; t env right_p]);
         ]
+    | Syntax.NameofExpression { nameof_keyword = k; nameof_target = e } ->
+      Concat [t env k; Space; t env e]
     | Syntax.ETSpliceExpression
         {
           et_splice_expression_dollar = dollar;
@@ -1755,7 +1952,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       Concat
         [
-          handle_attribute_spec env attr ~always_split:false;
+          handle_attribute_spec env attr;
           when_present attr space;
           t env async_kw;
           when_present async_kw space;
@@ -2082,18 +2279,16 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           type_reified = reified;
           type_variance = variance;
           type_name = name;
-          type_param_params = params;
           type_constraints = constraints;
         } ->
       Concat
         [
-          handle_attribute_spec env attr ~always_split:false;
+          handle_attribute_spec env attr;
           when_present attr space;
           t env reified;
           when_present reified space;
           t env variance;
           t env name;
-          t env params;
           when_present constraints space;
           handle_possible_list env constraints ~after_each:(fun is_last ->
               if is_last then
@@ -2105,7 +2300,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       Concat [t env kw; Space; t env constraint_type]
     | Syntax.ContextConstraint
         { ctx_constraint_keyword = kw; ctx_constraint_ctx_list = ctx_list } ->
-      Concat [t env kw; Space; t env ctx_list]
+      Concat [Space; t env kw; Space; t env ctx_list]
     | Syntax.DarrayTypeSpecifier
         {
           darray_keyword = kw;
@@ -2136,6 +2331,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           closure_outer_left_paren = outer_left_p;
           closure_readonly_keyword = ro;
           closure_function_keyword = kw;
+          closure_type_parameters = typarams;
           closure_inner_left_paren = inner_left_p;
           closure_parameter_list = param_list;
           closure_inner_right_paren = inner_right_p;
@@ -2151,6 +2347,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env ro;
           when_present ro space;
           t env kw;
+          t env typarams;
           t env inner_left_p;
           when_present param_list split;
           transform_fn_decl_args env param_list inner_right_p;
@@ -2164,18 +2361,54 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         ]
     | Syntax.ClosureParameterTypeSpecifier
         {
+          closure_parameter_optional = optional;
           closure_parameter_call_convention = callconv;
+          closure_parameter_named = named;
           closure_parameter_readonly = readonly;
+          closure_parameter_pre_ellipsis = pre_ellipsis;
           closure_parameter_type = cp_type;
+          closure_parameter_name = cp_name;
+          closure_parameter_ellipsis = ellipsis;
         } ->
       Concat
         [
+          t env optional;
+          when_present optional space;
           t env callconv;
           when_present callconv space;
+          t env named;
+          when_present named space;
           t env readonly;
           when_present readonly space;
+          t env pre_ellipsis;
           t env cp_type;
+          when_present cp_name space;
+          t env cp_name;
+          t env ellipsis;
         ]
+    | Syntax.TupleOrUnionOrIntersectionElementTypeSpecifier
+        {
+          tuple_or_union_or_intersection_element_optional = optional;
+          tuple_or_union_or_intersection_element_pre_ellipsis = pre_ellipsis;
+          tuple_or_union_or_intersection_element_type = cp_type;
+          tuple_or_union_or_intersection_element_ellipsis = ellipsis;
+        } ->
+      Concat
+        [
+          t env optional;
+          when_present optional space;
+          t env pre_ellipsis;
+          t env cp_type;
+          t env ellipsis;
+        ]
+    | Syntax.ClassPtrTypeSpecifier
+        {
+          class_ptr_keyword = kw;
+          class_ptr_left_angle = left_a;
+          class_ptr_type = class_type;
+          class_ptr_trailing_comma = trailing_comma;
+          class_ptr_right_angle = right_a;
+        }
     | Syntax.ClassnameTypeSpecifier
         {
           classname_keyword = kw;
@@ -2344,11 +2577,28 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         {
           prefixed_code_prefix = prefix;
           prefixed_code_left_backtick = left_bt;
-          prefixed_code_expression = expression;
+          prefixed_code_body = body;
           prefixed_code_right_backtick = right_bt;
-        } ->
-      Concat
-        [t env prefix; transform_braced_item env left_bt expression right_bt]
+        } -> begin
+      match Syntax.syntax body with
+      | Syntax.CompoundStatement
+          { compound_left_brace; compound_statements; compound_right_brace } ->
+        Concat
+          [
+            t env prefix;
+            t env left_bt;
+            handle_compound_statement
+              env
+              ~allow_collapse:true
+              ~prepend_space:false
+              compound_left_brace
+              compound_statements
+              compound_right_brace;
+            t env right_bt;
+          ]
+      | _ ->
+        Concat [t env prefix; transform_braced_item env left_bt body right_bt]
+    end
     | Syntax.DecoratedExpression
         {
           decorated_expression_decorator = op;
@@ -2364,6 +2614,13 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           end;
           t env expr;
         ]
+    | Syntax.NamedArgument
+        {
+          named_argument_name = name;
+          named_argument_equal = equal;
+          named_argument_expression = expr;
+        } ->
+      Concat [t env name; t env equal; t env expr]
     | Syntax.ErrorSyntax _ -> raise Hackfmt_error.InvalidSyntax
     | Syntax.EnumClassDeclaration
         {
@@ -2457,7 +2714,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.ModuleDeclaration
         {
           module_declaration_attribute_spec = attr;
-          module_declaration_keyword = keyword;
+          module_declaration_new_keyword = new_kw;
+          module_declaration_module_keyword = mod_kw;
           module_declaration_name = name;
           module_declaration_left_brace = lb;
           module_declaration_right_brace = rb;
@@ -2466,12 +2724,46 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         [
           t env attr;
           when_present attr newline;
-          t env keyword;
+          t env new_kw;
+          Space;
+          t env mod_kw;
           Space;
           t env name;
           Space;
-          t env lb;
-          t env rb;
+          braced_block_nest env lb rb [];
+          Newline;
+        ]
+    | Syntax.ModuleMembershipDeclaration
+        {
+          module_membership_declaration_module_keyword = mod_kw;
+          module_membership_declaration_name = name;
+          module_membership_declaration_semicolon = semicolon;
+        } ->
+      Concat [t env mod_kw; Space; t env name; t env semicolon; Newline]
+    | Syntax.PackageExpression
+        { package_expression_keyword = pkg_kw; package_expression_name = name }
+      ->
+      Concat [t env pkg_kw; Space; t env name]
+    | Syntax.DeclareLocalStatement
+        {
+          declare_local_keyword;
+          declare_local_variable;
+          declare_local_colon;
+          declare_local_type;
+          declare_local_initializer;
+          declare_local_semicolon;
+        } ->
+      Concat
+        [
+          t env declare_local_keyword;
+          Space;
+          t env declare_local_variable;
+          t env declare_local_colon;
+          SplitWith Cost.Base;
+          Space;
+          Nest [t env declare_local_type];
+          t env declare_local_initializer;
+          t env declare_local_semicolon;
           Newline;
         ])
 
@@ -2547,7 +2839,7 @@ and separate_with_space_split is_last =
   else
     space_split ()
 
-and handle_attribute_spec env node ~always_split =
+and handle_attribute_spec env node =
   match Syntax.syntax node with
   | Syntax.OldAttributeSpecification
       {
@@ -2556,16 +2848,6 @@ and handle_attribute_spec env node ~always_split =
         old_attribute_specification_right_double_angle = right_da;
       } ->
     transform_argish env left_da attrs right_da
-  | Syntax.AttributeSpecification { attribute_specification_attributes = attrs }
-    ->
-    handle_possible_list
-      env
-      ~after_each:(fun _ ->
-        if always_split then
-          Newline
-        else
-          Space)
-      attrs
   | Syntax.Missing -> Nothing
   | _ -> failwith "Attribute specification expected"
 
@@ -2605,10 +2887,18 @@ and handle_possible_compound_statement
   | _ -> Concat [Newline; BlockNest [t env node]]
 
 and handle_compound_statement
-    env ?(allow_collapse = false) left_b statements right_b =
+    env
+    ?(allow_collapse = false)
+    ?(prepend_space = true)
+    left_b
+    statements
+    right_b =
   Concat
     [
-      Space;
+      (if prepend_space then
+        Space
+      else
+        Nothing);
       braced_block_nest
         env
         ~allow_collapse
@@ -2866,25 +3156,19 @@ and transform_fn_decl_args env params rightp =
       in
       begin
         match Syntax.syntax last_param with
-        | Syntax.VariadicParameter _
         | Syntax.(
             ParameterDeclaration
               {
-                parameter_name =
-                  {
-                    syntax =
-                      DecoratedExpression
-                        {
-                          decorated_expression_decorator =
-                            {
-                              syntax =
-                                Token { Token.kind = TokenKind.DotDotDot; _ };
-                              _;
-                            };
-                          _;
-                        };
-                    _;
-                  };
+                parameter_ellipsis =
+                  { syntax = Token { Token.kind = TokenKind.DotDotDot; _ }; _ };
+                _;
+              }) ->
+          false
+        | Syntax.(
+            ClosureParameterTypeSpecifier
+              {
+                closure_parameter_ellipsis =
+                  { syntax = Token { Token.kind = TokenKind.DotDotDot; _ }; _ };
                 _;
               }) ->
           false
@@ -3190,7 +3474,13 @@ and transform_container_literal
     left_p
     members
     right_p =
-  let force_newlines = node_has_trailing_newline left_p in
+  let force_newlines =
+    node_has_trailing_newline left_p
+    &&
+    match members.Syntax.syntax with
+    | Syntax.Missing -> false
+    | _ -> true
+  in
   let ty =
     match explicit_type with
     | Some ex_ty -> t env ex_ty
@@ -3367,7 +3657,7 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
                Full_fidelity_operator.precedence penv operator_t
              in
              if op_precedence = precedence then
-               flatten_expression left @ operator :: flatten_expression right
+               flatten_expression left @ (operator :: flatten_expression right)
              else
                [expr]
            | _ -> [expr]
@@ -3463,14 +3753,14 @@ and transform_node_if_ignored node =
   let (leading_before, leading_including_and_after) =
     leading_ignore_comment (Syntax.leading_trivia node)
   in
-  if List.length leading_including_and_after = 0 then
+  if List.is_empty leading_including_and_after then
     None
   else
     let node = replace_leading_trivia node leading_including_and_after in
     let (node, trailing_trivia) = remove_trailing_trivia node in
     let is_fixme =
       match Trivia.kind (List.hd_exn leading_including_and_after) with
-      | TriviaKind.(FixMe | IgnoreError) -> true
+      | TriviaKind.(FixMe | Ignore | IgnoreError) -> true
       | _ -> false
     in
     Some
@@ -3505,11 +3795,10 @@ and ignore_re = Str.regexp_string "hackfmt-ignore"
 and is_ignore_comment trivia =
   match Trivia.kind trivia with
   (* We don't format the node after a comment containing "hackfmt-ignore". *)
-  | TriviaKind.(DelimitedComment | SingleLineComment) ->
-    begin
-      try Str.search_forward ignore_re (Trivia.text trivia) 0 >= 0 with
-      | Caml.Not_found -> false
-    end
+  | TriviaKind.(DelimitedComment | SingleLineComment) -> begin
+    try Str.search_forward ignore_re (Trivia.text trivia) 0 >= 0 with
+    | Stdlib.Not_found -> false
+  end
   | _ -> false
 
 and leading_ignore_comment trivia_list =
@@ -3580,6 +3869,7 @@ and transform_trivia ~is_leading trivia =
       match Trivia.kind triv with
       | TriviaKind.ExtraTokenError
       | TriviaKind.FixMe
+      | TriviaKind.Ignore
       | TriviaKind.IgnoreError
       | TriviaKind.DelimitedComment ->
         let preceded_by_whitespace =
@@ -3630,6 +3920,7 @@ and transform_trivia ~is_leading trivia =
         let should_break =
           match Trivia.kind triv with
           | TriviaKind.FixMe
+          | TriviaKind.Ignore
           | TriviaKind.IgnoreError ->
             false
           | _ -> !currently_leading
@@ -3688,7 +3979,7 @@ and transform_trivia ~is_leading trivia =
     Concat (List.rev !comments)
   )
 
-and _MAX_CONSECUTIVE_BLANK_LINES = 2
+and max_consecutive_blank_lines = 1
 
 and transform_leading_invisibles triv =
   let newlines = ref 0 in
@@ -3701,7 +3992,7 @@ and transform_leading_invisibles triv =
            Concat
              [
                ignored;
-               (if !newlines <= _MAX_CONSECUTIVE_BLANK_LINES then
+               (if !newlines <= max_consecutive_blank_lines then
                  BlankLine
                else
                  Nothing);

@@ -1,3 +1,4 @@
+open Hh_prelude
 open Asserter
 
 let assert_ns_split name assert_left assert_right =
@@ -76,9 +77,9 @@ let assert_throws : 'a 'b. ('b -> 'a) -> 'b -> string -> string -> unit =
       let _ = f arg in
       "[no exception]"
     with
-    | e -> Printexc.to_string e
+    | e -> Stdlib.Printexc.to_string e
   in
-  if not (String_utils.is_substring exp e) then begin
+  if not (String.is_substring ~substring:exp e) then begin
     Printf.eprintf "%s.\nExpected it to throw '%s' but got '%s'\n" message exp e;
     assert false
   end;
@@ -104,7 +105,7 @@ let test_telemetry_test () =
   assert_throws
     (Telemetry_test_utils.int_exn telemetry)
     "e"
-    "Assert_failure"
+    "expected int"
     "int_exn e should throw";
   assert_throws
     (Telemetry_test_utils.int_exn telemetry)
@@ -118,7 +119,7 @@ let test_telemetry_test () =
   assert_throws
     (Telemetry_test_utils.int_exn telemetry)
     "e.b"
-    "Assert_failure"
+    "expected int"
     "int_exn e.b should throw";
   assert_throws
     (Telemetry_test_utils.int_exn telemetry)
@@ -278,23 +279,96 @@ let test_telemetry_diff () =
       3
       "diff4 o.c should be 3";
     Bool_asserter.assert_equals
-      (Telemetry_test_utils.value_exn diff4 "o__prev" = Hh_json.JSON_Null)
+      (match Telemetry_test_utils.value_exn diff4 "o__prev" with
+      | `Null -> true
+      | _ -> false)
       true
-      "diff4 o__prev should be JSON_Null";
+      "diff4 o__prev should be Null";
     assert_throws
       (Telemetry_test_utils.value_exn diff4)
       "o.c__prev"
       "not found"
       "diff4 o.c__prev should throw";
     Bool_asserter.assert_equals
-      (Telemetry_test_utils.value_exn diff4 "p" = Hh_json.JSON_Null)
+      (match Telemetry_test_utils.value_exn diff4 "p" with
+      | `Null -> true
+      | _ -> false)
       true
-      "diff4 p should be JSON_Null";
+      "diff4 p should be Null";
     Int_asserter.assert_equals
       (Telemetry_test_utils.int_exn diff4 "p__prev.d__prev")
       4
       "diff4 p__prev.d__prev should be 4"
   end;
+  true
+
+let test_telemetry_add () =
+  let t =
+    Telemetry.create ()
+    |> Telemetry.int_ ~key:"i" ~value:1
+    |> Telemetry.float_ ~key:"f" ~value:1.0
+    |> Telemetry.string_ ~key:"s" ~value:"a"
+    |> Telemetry.string_list ~key:"sl" ~value:["a"; "b"]
+    |> Telemetry.int_list ~key:"il" ~value:[1; 2]
+    |> Telemetry.bool_ ~key:"b" ~value:true
+    |> Telemetry.json_ ~key:"j1" ~value:(Hh_json.JSON_Number "1.0")
+    |> Telemetry.json_ ~key:"j2" ~value:Hh_json.JSON_Null
+  in
+  let t = t |> Telemetry.object_ ~key:"o" ~value:t in
+  String_asserter.assert_equals
+    {|{"f":1,"i":1,"j1":1.0,"o":{"j1":1.0,"i":1,"f":1}}|}
+    (Telemetry.add t (Telemetry.create ()) |> Telemetry.to_string)
+    "add t blank";
+  String_asserter.assert_equals
+    {|{"f":1,"i":1,"j1":1.0,"o":{"j1":1.0,"i":1,"f":1}}|}
+    (Telemetry.add (Telemetry.create ()) t |> Telemetry.to_string)
+    "add blank t";
+  String_asserter.assert_equals
+    {|{"f":2,"i":2,"j1":2,"o":{"j1":2,"i":2,"f":2}}|}
+    (Telemetry.add t t |> Telemetry.to_string)
+    "add t t";
+  true
+
+let test_telemetry_merge () =
+  let t1 =
+    Telemetry.create ()
+    |> Telemetry.int_ ~key:"i1" ~value:1
+    |> Telemetry.string_ ~key:"s1" ~value:"a"
+  in
+  let t2 =
+    Telemetry.create ()
+    |> Telemetry.int_ ~key:"i2" ~value:2
+    |> Telemetry.object_
+         ~key:"o"
+         ~value:(Telemetry.create () |> Telemetry.int_ ~key:"i" ~value:2)
+  in
+  (* disjoint merge *)
+  let m = Telemetry.merge t1 t2 in
+  String_asserter.assert_equals
+    {|{"i1":1,"s1":"a","i2":2,"o":{"i":2}}|}
+    (m |> Telemetry.to_string)
+    "merge t1 t2";
+  (* overlappingmerge *)
+  String_asserter.assert_equals
+    {|{"i1":1,"s1":"a","i1":1,"s1":"a","i2":2,"o":{"i":2}}|}
+    (Telemetry.merge t1 m |> Telemetry.to_string)
+    "merge m m";
+  true
+
+let test_telemetry_string_list_opt () =
+  let some_val = Some ["hello"; "world"] in
+  let none_val = None in
+  let base = Telemetry.create () in
+  let t1 = base |> Telemetry.string_list_opt ~key:"v" ~value:some_val in
+  let t2 = base |> Telemetry.string_list_opt ~key:"v" ~value:none_val in
+  String_asserter.assert_equals
+    {|{"v":["hello","world"]}|}
+    (t1 |> Telemetry.to_string)
+    "string_list_opt should write list of strings";
+  String_asserter.assert_equals
+    {|{"v":null}|}
+    (t2 |> Telemetry.to_string)
+    "string_list_opt should omit None values";
   true
 
 let () =
@@ -305,4 +379,7 @@ let () =
       ("test strip namespace functions", test_strip_namespace);
       ("test telemetry_test functions", test_telemetry_test);
       ("test telemetry_diff", test_telemetry_diff);
+      ("test telemetry_add", test_telemetry_add);
+      ("test telemetry_merge", test_telemetry_merge);
+      ("test telemetry string list opt", test_telemetry_string_list_opt);
     ]

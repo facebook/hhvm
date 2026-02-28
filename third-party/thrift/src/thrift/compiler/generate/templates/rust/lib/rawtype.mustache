@@ -1,0 +1,39 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+  ====
+  If we ever add a type here which may not have a Send or Sync impl, the
+  unsafe impls in structimpl.mustache need to be revisited.
+  ====
+}}{{#pragma ignore-newlines}}
+{{#if (not (string.empty? type:rust))}}::{{type:rust}}
+{{#else if type:void?}}()
+{{#else if type:bool?}}::std::primitive::bool
+{{#else if type:byte?}}::std::primitive::i8
+{{#else if type:i16?}}::std::primitive::i16
+{{#else if type:i32?}}::std::primitive::i32
+{{#else if type:i64?}}::std::primitive::i64
+{{#else if type:double?}}::std::primitive::f64
+{{#else if type:float?}}::std::primitive::f32
+{{#else if type:string?}}::std::string::String
+{{#else if type:binary?}}::std::vec::Vec<::std::primitive::u8>
+{{#else if type:structured?}}{{type:true_type.package}}{{#if type:true_type.has_adapter?}}::unadapted{{/if}}::{{type:true_type.rust_name}}
+{{#else if type:enum?}}{{type:true_type.package}}::{{type:true_type.rust_name}}
+{{#else if type:list?}}::std::vec::Vec
+{{#else if type:set?}}::std::collections::BTreeSet
+{{#else if type:map?}}::std::collections::BTreeMap
+{{/if (not (string.empty? type:rust))}}
+{{#if type:container?}}{{> lib/type_generics}}{{/if}}

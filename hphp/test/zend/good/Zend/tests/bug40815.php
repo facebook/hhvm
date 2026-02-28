@@ -1,7 +1,7 @@
 <?hh
 
 class ehandle{
-  <<__DynamicallyCallable>> static public function exh ($ex) {
+  <<__DynamicallyCallable>> static public function exh ($ex) :mixed{
     echo 'foo';
   }
 }

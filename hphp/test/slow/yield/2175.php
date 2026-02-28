@@ -1,6 +1,6 @@
 <?hh
 
-function gen() {
+function gen() :AsyncGenerator<mixed,mixed,void>{
   yield 1;
   yield 2;
   try {
@@ -14,7 +14,7 @@ function gen() {
 }
 
 <<__EntryPoint>>
-function main_2175() {
+function main_2175() :mixed{
 foreach (gen() as $x) {
  var_dump($x);
  }

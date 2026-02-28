@@ -1,6 +1,6 @@
 <?hh
 class someClass1 {
-  private function someMethod() {
+  private function someMethod() :mixed{
     //do things
   }
 }

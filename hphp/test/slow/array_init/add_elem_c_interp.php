@@ -2,8 +2,8 @@
 class X {
   public $foo;
 
-  function test() {
-    $a = darray[
+  function test() :mixed{
+    $a = dict[
       'null' => $this->foo,
     ];
     return $a;
@@ -11,7 +11,7 @@ class X {
 }
 
 <<__EntryPoint>>
-function main_add_elem_c_interp() {
+function main_add_elem_c_interp() :mixed{
 ;
 
 $x = new X;

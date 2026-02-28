@@ -19,6 +19,6 @@ class A {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(A::FOO);
 }

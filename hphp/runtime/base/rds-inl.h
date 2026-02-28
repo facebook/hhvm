@@ -15,8 +15,10 @@
 */
 #pragma once
 
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/safe-cast.h"
 
 #include <tbb/concurrent_vector.h>
@@ -42,9 +44,9 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
                     Symbol key, Mode mode, size_t size, size_t align,
                     type_scan::Index tsi, const void* init_val);
 
-extern size_t s_normal_frontier;
+extern std::atomic_size_t s_normal_frontier;
 extern size_t s_local_base;
-extern size_t s_local_frontier;
+extern std::atomic_size_t s_local_frontier;
 constexpr size_t size4g = 1ull << 32;
 #if RDS_FIXED_PERSISTENT_BASE
 constexpr uintptr_t s_persistent_base = 0;
@@ -157,11 +159,11 @@ template<class T, Mode M>
 Link<T,M>& Link<T,M>::operator=(const Link<T,M>& l) {
   if (debug) {
     auto const DEBUG_ONLY old =
-      m_handle.exchange(l.raw(), std::memory_order_relaxed);
+      m_handle.exchange(l.raw(), std::memory_order_acq_rel);
     assertx(raw() != kBeingBound && raw() != kBeingBoundWithWaiters &&
             old != kBeingBound && old != kBeingBoundWithWaiters);
   } else {
-    m_handle.store(l.raw(), std::memory_order_relaxed);
+    m_handle.store(l.raw(), std::memory_order_release);
   }
   return *this;
 }
@@ -172,11 +174,11 @@ typename std::enable_if<in<M>(OM),Link<T,M>>::type&
 Link<T,M>::operator=(const Link<T,OM>& l) {
   if (debug) {
     auto const DEBUG_ONLY old =
-      m_handle.exchange(l.raw(), std::memory_order_relaxed);
+      m_handle.exchange(l.raw(), std::memory_order_acq_rel);
     assertx(raw() != kBeingBound && raw() != kBeingBoundWithWaiters &&
             old != kBeingBound && old != kBeingBoundWithWaiters);
   } else {
-    m_handle.store(l.raw(), std::memory_order_relaxed);
+    m_handle.store(l.raw(), std::memory_order_release);
   }
   return *this;
 }
@@ -338,12 +340,14 @@ Link<T,M> alloc() {
 
 inline bool isNormalHandle(Handle handle) {
   assertx(isValidHandle(handle));
-  return handle < safe_cast<uint32_t>(detail::s_normal_frontier);
+  auto const normalFrontier = detail::s_normal_frontier.load(std::memory_order_acquire);
+  return handle < safe_cast<uint32_t>(normalFrontier);
 }
 
 inline bool isLocalHandle(Handle handle) {
   assertx(isValidHandle(handle));
-  return handle >= safe_cast<uint32_t>(detail::s_local_frontier) &&
+  auto const localFrontier = detail::s_local_frontier.load(std::memory_order_acquire);
+  return handle >= safe_cast<uint32_t>(localFrontier) &&
     handle < safe_cast<uint32_t>(detail::s_local_base);
 }
 
@@ -407,7 +411,7 @@ inline void uninitHandle(Handle handle) {
 ////////////////////////////////////////////////////////////////////////////////
 
 inline bool shouldProfileAccesses() {
-  return isJitSerializing() && RO::EvalReorderRDS && isFullyInitialized() &&
+  return isJitSerializing() && Cfg::Eval::ReorderRDS && isFullyInitialized() &&
     isStandardRequest();
 }
 

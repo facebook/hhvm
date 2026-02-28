@@ -1,4 +1,24 @@
 open Asserter
+open Hh_prelude
+
+let print_error err =
+  match err with
+  | Process_types.Timed_out _ ->
+    Printf.eprintf "Process timed out\n";
+    ()
+  | Process_types.Overflow_stdin ->
+    Printf.eprintf "Unexpected error process input too large\n";
+    ()
+  | Process_types.Abnormal_exit { stdout; stderr; _ } ->
+    Printf.eprintf "Process exited abnormally\n";
+    Printf.eprintf "See stdout: %s\n" stdout;
+    Printf.eprintf "See stderr: %s\n" stderr;
+    ()
+  | Process_types.Poll_exn flags ->
+    Printf.eprintf
+      "`poll` syscall returned error flags %s"
+      (Poll.Flags.to_string flags);
+    ()
 
 let test_echo () =
   let process =
@@ -8,7 +28,9 @@ let test_echo () =
   | Ok { Process_types.stdout; _ } ->
     let () = String_asserter.assert_equals "hello world\n" stdout "" in
     true
-  | _ -> false
+  | Error err ->
+    print_error err;
+    false
 
 let test_echo_in_a_loop () =
   let rec loop acc = function
@@ -37,7 +59,9 @@ let test_process_read_idempotent () =
   | Ok { Process_types.stdout; _ } ->
     String_asserter.assert_equals "hello world\n" stdout "";
     true
-  | _ -> false
+  | Error err ->
+    print_error err;
+    false
 
 let test_env_variable () =
   let process =
@@ -50,14 +74,16 @@ let test_env_variable () =
   | Ok { Process_types.stdout; _ } ->
     let env = String_utils.split_into_lines stdout in
     let name_env =
-      List.filter (fun s -> String_utils.string_starts_with s "NAME=") env
+      List.filter ~f:(fun s -> String.is_prefix s ~prefix:"NAME=") env
     in
     (match name_env with
     | [] -> false
     | n :: _ ->
       let () = String_asserter.assert_equals "NAME=world" n "" in
       true)
-  | _ -> false
+  | Error err ->
+    print_error err;
+    false
 
 let test_process_timeout () =
   let process =
@@ -65,7 +91,10 @@ let test_process_timeout () =
   in
   match Process.read_and_wait_pid ~timeout:1 process with
   | Error (Process_types.Timed_out _) -> true
-  | _ -> false
+  | Ok _ -> false
+  | Error err ->
+    print_error err;
+    false
 
 let test_process_finishes_within_timeout () =
   let process =
@@ -73,13 +102,15 @@ let test_process_finishes_within_timeout () =
   in
   match Process.read_and_wait_pid ~timeout:2 process with
   | Ok _ -> true
-  | _ -> false
+  | Error err ->
+    print_error err;
+    false
 
 let test_future () =
   let future =
     FutureProcess.make
       (Process.exec (Exec_command.For_use_in_testing_only "sleep") ["1"])
-      String.trim
+      String.strip
   in
   let result = Future.get_exn future in
   let () = String_asserter.assert_equals "" result "" in
@@ -89,7 +120,7 @@ let test_future_is_ready () =
   let future =
     FutureProcess.make
       (Process.exec (Exec_command.For_use_in_testing_only "sleep") ["1"])
-      String.trim
+      String.strip
   in
   (* Shouldn't be ready immediately. *)
   if Future.is_ready future then
@@ -111,8 +142,8 @@ let test_future_continue_with () =
           (Exec_command.For_use_in_testing_only "ls")
           [Path.to_string dir_path]
       in
-      let future = FutureProcess.make ls_proc String.trim in
-      let future = Future.continue_with future String.uppercase_ascii in
+      let future = FutureProcess.make ls_proc String.strip in
+      let future = Future.continue_with future String.uppercase in
       String_asserter.assert_equals
         "TEST.TXT"
         (Future.get_exn future)
@@ -128,7 +159,7 @@ let test_future_continue_with_future () =
           (Exec_command.For_use_in_testing_only "ls")
           [Path.to_string dir_path]
       in
-      let future = FutureProcess.make ls_proc String.trim in
+      let future = FutureProcess.make ls_proc String.strip in
       let future =
         Future.continue_with_future future (fun a ->
             let cat_proc =
@@ -136,7 +167,7 @@ let test_future_continue_with_future () =
                 (Exec_command.For_use_in_testing_only "cat")
                 [Path.to_string (Path.concat dir_path a)]
             in
-            FutureProcess.make cat_proc String.trim)
+            FutureProcess.make cat_proc String.strip)
       in
       String_asserter.assert_equals
         "my file contents"
@@ -153,11 +184,11 @@ let test_future_continue_and_map_err_ok () =
           (Exec_command.For_use_in_testing_only "ls")
           [Path.to_string dir_path]
       in
-      let future = FutureProcess.make ls_proc String.trim in
+      let future = FutureProcess.make ls_proc String.strip in
       let future =
         Future.continue_and_map_err future (fun res ->
             match res with
-            | Ok str -> Ok (String.uppercase_ascii str)
+            | Ok str -> Ok (String.uppercase str)
             | Error _ -> Error "should not hit this point")
       in
       match Future.get_exn future with
@@ -175,7 +206,7 @@ let test_future_continue_and_map_err_error () =
       (Exec_command.For_use_in_testing_only "command_that_doesnt_exist")
       []
   in
-  let future = FutureProcess.make fail_proc String.trim in
+  let future = FutureProcess.make fail_proc String.strip in
   let future =
     Future.continue_and_map_err future (fun res ->
         match res with
@@ -206,7 +237,7 @@ let test_future_long_continuation_chain_ok () =
           (Exec_command.For_use_in_testing_only "ls")
           [Path.to_string dir1]
       in
-      let future = FutureProcess.make ls_proc String.trim in
+      let future = FutureProcess.make ls_proc String.strip in
       let future =
         Future.continue_with_future future (fun ls_result ->
             let cat_proc =
@@ -214,7 +245,7 @@ let test_future_long_continuation_chain_ok () =
                 (Exec_command.For_use_in_testing_only "cat")
                 [Path.to_string (Path.concat dir1 ls_result)]
             in
-            FutureProcess.make cat_proc String.trim)
+            FutureProcess.make cat_proc String.strip)
       in
       let future =
         Future.continue_with_future future (fun cat_result ->
@@ -223,7 +254,7 @@ let test_future_long_continuation_chain_ok () =
                 (Exec_command.For_use_in_testing_only "cat")
                 [cat_result]
             in
-            FutureProcess.make cat_proc String.trim)
+            FutureProcess.make cat_proc String.strip)
       in
       String_asserter.assert_equals
         "my file contents"
@@ -246,7 +277,7 @@ let test_future_long_continuation_chain_error () =
           (Exec_command.For_use_in_testing_only "ls")
           [Path.to_string dir1]
       in
-      let future = FutureProcess.make ls_proc String.trim in
+      let future = FutureProcess.make ls_proc String.strip in
       let future =
         Future.continue_with_future future (fun ls_result ->
             let cat_proc =
@@ -254,7 +285,7 @@ let test_future_long_continuation_chain_error () =
                 (Exec_command.For_use_in_testing_only "cat")
                 [Path.to_string (Path.concat dir1 ls_result)]
             in
-            FutureProcess.make cat_proc String.trim)
+            FutureProcess.make cat_proc String.strip)
       in
       let future =
         Future.continue_with_future future (fun cat_result ->
@@ -263,7 +294,7 @@ let test_future_long_continuation_chain_error () =
                 (Exec_command.For_use_in_testing_only "cat")
                 [cat_result]
             in
-            FutureProcess.make cat_proc String.trim)
+            FutureProcess.make cat_proc String.strip)
       in
       let future =
         Future.continue_and_map_err future (fun res ->
@@ -274,8 +305,8 @@ let test_future_long_continuation_chain_error () =
       let future =
         Future.continue_with future (fun res ->
             match res with
-            | Ok s -> Ok (String.uppercase_ascii s)
-            | Error s -> Error (String.uppercase_ascii s))
+            | Ok s -> Ok (String.uppercase s)
+            | Error s -> Error (String.uppercase s))
       in
       match Future.get_exn future with
       | Ok s -> failwith (Printf.sprintf "Expected failure, got Ok '%s'" s)
@@ -334,23 +365,31 @@ let test_chdir () =
   | Ok { Process_types.stdout; _ } ->
     let () = String_asserter.assert_equals "/tmp\n" stdout "" in
     true
-  | Error (Process_types.Timed_out _) ->
-    Printf.eprintf "Process timed out\n";
-    false
-  | Error Process_types.Overflow_stdin ->
-    Printf.eprintf "Unexpected error process input too large\n";
-    false
-  | Error (Process_types.Abnormal_exit { stdout; stderr; _ }) ->
-    Printf.eprintf "Process exited abnormally\n";
-    Printf.eprintf "See stdout: %s\n" stdout;
-    Printf.eprintf "See stderr: %s\n" stderr;
+  | Error err ->
+    (match err with
+    | Process_types.Timed_out _ ->
+      Printf.eprintf "Process timed out\n";
+      ()
+    | Process_types.Overflow_stdin ->
+      Printf.eprintf "Unexpected error process input too large\n";
+      ()
+    | Process_types.Abnormal_exit { stdout; stderr; _ } ->
+      Printf.eprintf "Process exited abnormally\n";
+      Printf.eprintf "See stdout: %s\n" stdout;
+      Printf.eprintf "See stderr: %s\n" stderr;
+      ()
+    | Process_types.Poll_exn flags ->
+      Printf.eprintf
+        "`poll` syscall returned error flags %s"
+        (Poll.Flags.to_string flags);
+      ());
     false
 
 let open_an_fd () = Unix.openfile "/dev/null" [Unix.O_RDONLY] 0o440
 
 let int_of_fd (x : Unix.file_descr) : int = Obj.magic x
 
-let close_fds fds = List.iter Unix.close fds
+let close_fds fds = List.iter ~f:Unix.close fds
 
 (** Asserts the next opened file descriptor is exactly 1 greater
  * than the "last_fd". Repeats this "repeats" times. Accumulates all opened

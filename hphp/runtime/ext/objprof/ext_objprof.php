@@ -1,9 +1,28 @@
-<?hh // partial
+<?hh
 
 namespace HH {
 
 /**
  * Do a memory scan and collect information about allocated objects
+ *
+ * Note the sizes should roughly correspond to the memory allocated, however in
+ * many cases HHVM may use less or more memory.  This inaccuracy is due to the
+ * following reasons:
+ * - Objprof calculates the size of container types (array and objects) by
+ *   summing up the number of contained values and assuming they all occupy 16
+ *   bytes as a naive implementation of a type discriminated value would.  In
+ *   practice HHVM has more dense formats for storing typed values.
+ * - Objprof ignores padding space added to allocations to increase their
+ *   uniformity.
+ *
+ * @param int $flags - Configuration flags (e.g., OBJPROF_FLAGS_DEFAULT)
+ * @param varray<string> $exclude_list - List of class names to exclude from profiling
+ * @param int $max_depth - Maximum recursion depth for object graph traversal.
+ *                         0 (default) means unlimited depth.
+ *                         Positive values limit traversal depth to prevent deep recursion.
+ * @param int $max_visits - Maximum total number of nodes to visit during traversal.
+ *                          0 (default) means unlimited visits.
+ *                          Positive values limit total nodes visited to bound execution time.
  *
  * @return Array - an Array of (object allocation datas) as well as
  *  It is possible for the output of this function to change in the near
@@ -31,17 +50,62 @@ type ObjprofStringStats = shape(
 <<__Native>>
 function objprof_get_data(
   int $flags = \OBJPROF_FLAGS_DEFAULT,
-  varray<string> $exclude_list = varray[],
+  varray<string> $exclude_list = vec[],
+  int $max_depth = 0,
+  int $max_visits = 0, // 0 means unlimited visits
 ): darray<string, ObjprofObjectStats>;
+
+<<__Native>>
+function objprof_get_data_with_graph_stats(
+  int $flags = \OBJPROF_FLAGS_DEFAULT,
+  varray<string> $exclude_list = vec[],
+  int $max_depth = 0,
+  int $max_visits = 0, // 0 means unlimited visits
+): shape(
+  'object_stats' => dict<string, ObjprofObjectStats>,
+  'nodes_visited' => int,
+  'max_depth_seen' => int,
+);
+
+<<__Native>>
+function objprof_get_data_extended(
+  int $flags = \OBJPROF_FLAGS_DEFAULT,
+  varray<string> $exclude_list = vec[],
+  int $max_depth = 0, // 0 means unlimited depth to traversal
+  int $max_visits = 0, // 0 means unlimited visits
+): darray<string, ObjprofObjectStats>;
+
+<<__Native>>
+function objprof_get_data_extended_with_graph_stats(
+  int $flags = \OBJPROF_FLAGS_DEFAULT,
+  varray<string> $exclude_list = vec[],
+  int $max_depth = 0, // 0 means unlimited depth to traversal
+  int $max_visits = 0, // 0 means unlimited visits
+): shape(
+  'object_stats' => dict<string, ObjprofObjectStats>,
+  'nodes_visited' => int,
+  'max_depth_seen' => int,
+);
 
 <<__Native>>
 function objprof_get_paths(
   int $flags = \OBJPROF_FLAGS_DEFAULT,
-  varray<string> $exclude_list = varray[],
+  varray<string> $exclude_list = vec[],
+  int $max_depth = 0, // 0 means unlimited depth to traversal
+  int $max_visits = 0, // 0 means unlimited visits
 ): darray<string, ObjprofObjectStats>;
 
 <<__Native>>
-function objprof_get_strings(int $min_dup): darray<string, ObjprofStringStats>;
+function objprof_get_paths_with_graph_stats(
+  int $flags = \OBJPROF_FLAGS_DEFAULT,
+  varray<string> $exclude_list = vec[],
+  int $max_depth = 0, // 0 means unlimited depth to traversal
+  int $max_visits = 0, // 0 means unlimited visits
+): shape(
+  'object_stats' => dict<string, ObjprofObjectStats>,
+  'nodes_visited' => int,
+  'max_depth_seen' => int,
+);
 
 <<__Native>>
 function thread_memory_stats(): darray<string, int>;

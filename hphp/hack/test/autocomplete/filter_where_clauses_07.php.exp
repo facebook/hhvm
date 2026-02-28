@@ -1,0 +1,8 @@
+toNotBeNull
+  INSERT toNotBeNull()
+  function<Tu>(optional ?Str\SprintfFormatString $msg, mixed $args...)[]: ~Tu
+SORT TEXT: none
+toBeNull
+  INSERT toBeNull()
+  function(optional ?Str\SprintfFormatString $msg, mixed $args...)[]: void
+SORT TEXT: none

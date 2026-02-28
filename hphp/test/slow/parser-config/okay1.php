@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   require "nested2/inner.inc";
 
   var_dump(main<>);

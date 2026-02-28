@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 namespace {
 
@@ -34,7 +34,7 @@ function is_callable_with_name(mixed $callback,
  * @return mixed - Returns the return value of the callback, or FALSE on
  *   error.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function call_user_func_array(mixed $callback,
                               mixed $params): mixed;
 
@@ -49,9 +49,9 @@ function call_user_func_array(mixed $callback,
  * @return mixed - Returns the return value of the callback, or FALSE on
  *   error.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function call_user_func(mixed $callback,
-                        ...$parameters): mixed;
+                        mixed... $parameters): mixed;
 
 /**
  * Return TRUE if the given function has been defined
@@ -75,7 +75,10 @@ function function_exists(string $function_name, bool $autoload = true)[]: bool;
  *   user defined ones using $arr["user"] (see example below).
  */
 <<__Native>>
-function get_defined_functions(): darray;
+function get_defined_functions(): shape(
+  'internal' => vec<string>,
+  'user' => vec<string>,
+);
 
 /**
  * Register a function for execution on shutdown
@@ -86,7 +89,7 @@ function get_defined_functions(): darray;
  *
  * @return void
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function register_shutdown_function(mixed $callback): void;
 
 /**
@@ -94,7 +97,7 @@ function register_shutdown_function(mixed $callback): void;
  *
  * @return void
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function register_postsend_function(mixed $callback): void;
 
 }

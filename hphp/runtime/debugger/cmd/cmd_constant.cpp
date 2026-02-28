@@ -23,7 +23,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 void CmdConstant::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
@@ -38,8 +38,8 @@ void CmdConstant::recvImpl(DebuggerThriftBuffer &thrift) {
 void CmdConstant::help(DebuggerClient &client) {
   client.helpTitle("Constant Command");
   client.helpCmds(
-    "[k]onstant",           "lists all constants",
-    "[k]onstant {text}",    "full-text search constants",
+    "[c]onstant",           "lists all constants",
+    "[c]onstant {text}",    "full-text search constants",
     nullptr
   );
   client.helpBody(

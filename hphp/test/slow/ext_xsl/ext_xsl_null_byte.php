@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_ext_xsl_null_byte() {
+function main_ext_xsl_null_byte() :mixed{
 $file = '/etc/passwd'.chr(0).'asdf';
 
 $doc = new DOMDocument();

@@ -18,16 +18,13 @@
 
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
-#include "hphp/runtime/vm/jit/ir-instruction.h"
-#include "hphp/runtime/vm/jit/ir-opcode.h"
-#include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/prof-data-sb.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
-#include "hphp/runtime/vm/jit/ssa-tmp.h"
-#include "hphp/runtime/vm/jit/translator.h"
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
@@ -36,20 +33,15 @@
 #include <folly/Conv.h>
 #include <folly/Format.h>
 #include <folly/MapUtil.h>
-#include <folly/gen/Base.h>
 
 #include <vector>
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Static member definitions.
-// This section can be safely deleted in C++17.
-constexpr Type::bits_t Type::kBottom;
-constexpr Type::bits_t Type::kTop;
 
 #define IRT(name, ...)       constexpr Type::bits_t Type::k##name;
 #define IRTP(name, ...)
@@ -144,6 +136,9 @@ std::string Type::constValString() const {
       m_clsmethVal->getFunc()->fullName()->data() : "nullptr"
     ).str();
   }
+  if (*this <= TEnumClassLabel) {
+    return folly::format("EnumClassLabel({})", m_strVal->data()).str();
+  }
   if (*this <= TTCA) {
     auto name = getNativeFunctionName(m_tcaVal);
     const char* hphp = "HPHP::";
@@ -234,6 +229,9 @@ std::string Type::toString() const {
     }
     if (*this <= TLazyCls) {
       return folly::sformat("LazyCls={}", m_lclsVal.name()->data());
+    }
+    if (*this <= TEnumClassLabel) {
+      return folly::sformat("EnumClassLabel={}", m_strVal->data());
     }
     return folly::sformat("{}<{}>",
                           dropConstVal().toString(), constValString());
@@ -367,7 +365,9 @@ void Type::serialize(ProfDataSerializer& ser) const {
     if (t <= TCls)       return write_class(ser, t.m_clsVal);
     if (t <= TLazyCls)   return write_lclass(ser, t.m_lclsVal);
     if (t <= TFunc)      return write_func(ser, t.m_funcVal);
-    if (t <= TStaticStr) return write_string(ser, t.m_strVal);
+    if (t <= TStaticStr || t <= TEnumClassLabel) {
+      return write_string(ser, t.m_strVal);
+    }
     if (t < TArrLike) {
       return write_array(ser, t.m_arrVal);
     }
@@ -412,7 +412,7 @@ Type Type::deserialize(ProfDataDeserializer& ser) {
         t.m_funcVal = read_func(ser);
         return t;
       }
-      if (t <= TStaticStr) {
+      if (t <= TStaticStr || t <= TEnumClassLabel) {
         t.m_strVal = read_string(ser);
         return t;
       }
@@ -464,7 +464,9 @@ size_t Type::stableHash() const {
       if (t <= TCls) return t.m_clsVal->stableHash();
       if (t <= TLazyCls) return t.m_lclsVal.name()->hashStatic();
       if (t <= TFunc) return t.m_funcVal->stableHash();
-      if (t <= TStaticStr) return t.m_strVal->hashStatic();
+      if (t <= TStaticStr || t <= TEnumClassLabel) {
+        return t.m_strVal->hashStatic();
+      }
       if (t < TArrLike) {
         return internal_serialize(
           VarNR(const_cast<ArrayData*>(t.m_arrVal))
@@ -498,13 +500,17 @@ size_t Type::stableHash() const {
   );
 }
 
+Type::bits_t Type::rawBits() const {
+  return m_bits;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool Type::checkValid() const {
   // NOTE: Be careful: the TFoo objects aren't all constructed yet in this
   // function, and we can't call operator<=, etc. because they call checkValid.
   auto constexpr kNonNullConstVals = kArrLike | kCls | kLazyCls |
-                                     kFunc | kStr;
+                                     kFunc | kStr | kEnumClassLabel;
   if (m_hasConstVal && ((m_bits & kNonNullConstVals) == m_bits)) {
     assert_flog(m_extra, "Null constant type: {}", m_bits.hexStr());
   }
@@ -554,6 +560,8 @@ Type::bits_t Type::bitsFromDataType(DataType outer) {
     case KindOfLazyClass        : return kLazyCls;
     case KindOfClsMeth          : return kClsMeth;
     case KindOfRClsMeth         : return kRClsMeth;
+
+    case KindOfEnumClassLabel   : return kEnumClassLabel;
   }
   not_reached();
 }
@@ -585,6 +593,7 @@ DataType Type::toDataType() const {
   if (*this <= TClsMeth)     return KindOfClsMeth;
   if (*this <= TRFunc)       return KindOfRFunc;
   if (*this <= TRClsMeth)    return KindOfRClsMeth;
+  if (*this <= TEnumClassLabel) return KindOfEnumClassLabel;
   always_assert_flog(false, "Bad Type {} in Type::toDataType()", *this);
 }
 
@@ -628,6 +637,25 @@ Type Type::modified() const {
   return arrSpec().vanilla() ? Type(t, spec) : t;
 }
 
+Type Type::refine(Type refinement) const {
+  auto original = *this;
+
+  // While ideally we would intersect the source and parameter types in all
+  // cases but when we have a RAT we fallback to a selection heuristic that may
+  // widen the type. If we have two RAT types we need to assume that the type
+  // being asserted is the one we want to keep. Generally when we assert a RAT
+  // it is because HHBBC statically determined that that information would be
+  // valuable when doing its analysis.
+  if (Cfg::Jit::PreferRefinedRATArraySpecializations &&
+      original.arrSpec().type() && refinement.arrSpec().type()) {
+    original = original
+      .unspecialize()
+      .narrowToLayout(original.arrSpec().layout());
+  }
+  return refinement & original;
+}
+
+
 /*
  * Return true if the array satisfies requirement on the ArraySpec.
  * If the kind and RepoAuthType are both set, the array must match both.
@@ -653,7 +681,7 @@ static bool arrayFitsSpec(const ArrayData* arr, ArraySpec spec) {
   switch (type.tag()) {
     case A::Tag::Tuple:
       if (arr->size() != type.size()) return false;
-      // fall through
+      [[fallthrough]];
     case A::Tag::Packed: {
       int64_t k = 0;
       auto const tuple = type.tag() == A::Tag::Tuple;
@@ -828,10 +856,10 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
     assertx(cls);
 
     // We only allow specialization on classes that can't be overridden for
-    // now.  If this changes, then this will need to specialize on sub object
+    // now. If this changes, then this will need to specialize on sub object
     // types instead.
-    if (!(cls->attrs() & AttrNoOverride) ||
-        (!(cls->attrs() & AttrUnique) && (!ctx || !ctx->classof(cls)))) {
+    if (!(cls->attrs() & AttrNoOverrideRegular) ||
+        (!(cls->attrs() & AttrPersistent) && (!ctx || !ctx->classof(cls)))) {
       return TObj;
     }
     return Type::ExactObj(cls);
@@ -889,8 +917,7 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
   #define NAME_SPEC(type, spec)                                         \
     [&] {                                                               \
       assertx(ty.name() != nullptr);                                    \
-      auto const cls =                                                  \
-        Class::lookupUniqueInContext(ty.name(), ctx, nullptr);          \
+      auto const cls = Class::lookupKnown(ty.name(), ctx);              \
       return cls ? Type::spec(cls) : type;                              \
     }()                                                                 \
 
@@ -929,6 +956,7 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     O(Func,            TFunc)
     O(LazyCls,         TLazyCls)
     O(ClsMeth,         TClsMeth)
+    O(EnumClassLabel,  TEnumClassLabel)
     O(ArrKey,          TInt | TStr)
     O(UncArrKey,       TInt | TPersistentStr)
     O(ArrKeyCompat,    TInt | TStr | TCls | TLazyCls)
@@ -969,17 +997,16 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
   #undef O
 }
 
-Type typeFromPropTC(const HPHP::TypeConstraint& tc,
-                    const Class* propCls,
+namespace {
+
+template<class TGetThisType>
+Type typeFromTCImpl(const HPHP::TypeIntersectionConstraint& tcs,
+                    TGetThisType getThisType,
                     const Class* ctx,
-                    bool isSProp) {
-  assertx(tc.validForProp());
-
-  if (!tc.isCheckable() || tc.isSoft()) return TCell;
-
+                    bool useObjectForUnresolved = false) {
   using A = AnnotType;
   auto const atToType = [&](AnnotType at) {
-    assertx(at != A::Object && at != A::Unresolved);
+    assertx(at != A::SubObject && at != A::Unresolved);
     switch (at) {
       case A::Null:       return TNull;
       case A::Bool:       return TBool;
@@ -987,6 +1014,7 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       case A::Float:      return TDbl;
       case A::String:     return TStr;
       case A::Mixed:      return TCell;
+      case A::Object:     return TObj;
       case A::Resource:   return TRes;
       case A::Dict:       return TDict;
       case A::Vec:        return TVec;
@@ -996,30 +1024,38 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       case A::ArrayKey:   return TInt | TStr;
       case A::VecOrDict:  return TVec | TDict;
       case A::ArrayLike:  return TArrLike;
-      case A::Classname:  return TStr | TCls | TLazyCls;
-      case A::This:
-        always_assert(propCls != nullptr);
-        return (isSProp && !tc.couldSeeMockObject())
-          ? Type::ExactObj(propCls)
-          : Type::SubObj(propCls);
+      case A::Classname:
+        if (!Cfg::Eval::ClassPassesClassname) {
+          return TStr;
+        }
+        return TStr | TCls | TLazyCls;
+      case A::Class:
+        if (Cfg::Eval::ClassTypeLevel > 0) {
+          return TCls | TLazyCls;
+        }
+        return TStr | TCls | TLazyCls;
+      case A::ClassOrClassname:
+        return TStr | TCls | TLazyCls;
+      case A::This:       return getThisType();
       case A::Nothing:
-      case A::NoReturn:
+      case A::NoReturn:   return TBottom;
       case A::Callable:
-      case A::Object:
+        return TStr | TVec | TDict | TObj | TFuncLike | TObj | TClsMethLike;
+      case A::SubObject:
       case A::Unresolved:
         break;
     }
     always_assert(false);
   };
 
-  auto base = [&]{
-    if (!tc.isObject() && !tc.isUnresolved()) return atToType(tc.type());
+  auto baseForTC = [&](const TypeConstraint& tc) {
+    if (!tc.isSubObject() && !tc.isUnresolved()) return atToType(tc.type());
 
-    if (tc.isObject()) {
+    if (tc.isSubObject()) {
       // Don't try to be clever with magic interfaces.
       if (interface_supports_non_objects(tc.clsName())) return TInitCell;
 
-      auto const cls = Class::lookupUniqueInContext(tc.clsName(), ctx, nullptr);
+      auto const cls = Class::lookupKnown(tc.clsName(), ctx);
       if (!cls) return TObj;
       assertx(!isEnum(cls));
       return Type::SubObj(cls);
@@ -1028,12 +1064,11 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
     assertx(tc.isUnresolved());
     if (interface_supports_non_objects(tc.typeName())) return TInitCell;
 
-    auto const cls = Class::lookupUniqueInContext(tc.typeName(), ctx, nullptr);
+    auto const cls = Class::lookupKnown(tc.typeName(), ctx);
     if (cls) {
       if (isEnum(cls)) {
         assertx(tc.isUnresolved());
-        if (auto const dt = cls->enumBaseTy()) return Type{*dt};
-        return TInt | TStr;
+        return atToType(cls->enumBaseTy().type());
       }
       return Type::SubObj(cls);
     }
@@ -1041,25 +1076,151 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
     bool persistent = false;
     if (auto const alias = TypeAlias::lookup(tc.typeName(), &persistent)) {
       if (persistent && !alias->invalid) {
-        auto ty = [&]{
-          if (alias->klass) {
-            if (interface_supports_non_objects(alias->klass->name())) {
-              return TInitCell;
+        auto ty = TBottom;
+        for (auto const& sub : eachTypeConstraintInUnion(alias->value)) {
+          auto type = sub.type();
+          auto klass = type == AnnotType::SubObject
+            ? sub.clsNamedType()->getCachedClass() : nullptr;
+          if (klass) {
+            if (interface_supports_non_objects(klass->name())) {
+              ty |= TInitCell;
+            } else {
+              ty |= Type::SubObj(klass);
             }
-            return Type::SubObj(alias->klass);
+          } else {
+            ty |= atToType(type);
           }
-          return atToType(alias->type);
-        }();
-        if (alias->nullable) ty |= TInitNull;
+        }
+        if (alias->value.isNullable()) ty |= TInitNull;
         return ty;
       }
     }
 
+    // If the flag is supplied, we want to return TObj
+    // this should only be set true when the call is made from
+    // a return type deduction function
+    // we are mimicking the behaviour of TypeConstraint::asSystemlibType()
+    if (useObjectForUnresolved) {
+      return TObj;
+    }
+
     // It could be an alias to mixed so we might have refs
     return TCell;
-  }();
-  if (tc.isNullable()) base |= TInitNull;
-  return base;
+  };
+
+  auto type = TCell;
+  for (auto const& tc : tcs.range()) {
+    if (!tc.isCheckable() || tc.isSoft()) continue;
+    auto ty = TBottom;
+    auto nullable = false;
+    if (tc.isUnion()) {
+      for (auto& innerTc : eachTypeConstraintInUnion(tc)) {
+        ty |= baseForTC(innerTc);
+        if (innerTc.isNullable()) nullable = true;
+      }
+    } else {
+      ty |= baseForTC(tc);
+      if (tc.isNullable()) nullable = true;
+    }
+    // Intersect types from each constraint
+    if (nullable) ty |= TInitNull;
+    type &= ty;
+  }
+
+  assertx(!type.arrSpec().vanilla());
+  if (!allowBespokeArrayLikes()) type = type.narrowToVanilla();
+  return type;
+}
+
+} // namespace
+
+Type typeFromPropTC(const HPHP::TypeIntersectionConstraint& tcs,
+                    const Class* propCls,
+                    const Class* ctx,
+                    bool isSProp) {
+  assertx(tcs.validForProp());
+
+  auto const getThisType = [&] {
+    if (!propCls) return TObj;
+    return isSProp && (propCls->attrs() & AttrNoMock)
+      ? Type::ExactObj(propCls)
+      : Type::SubObj(propCls);
+  };
+
+  return typeFromTCImpl(tcs, getThisType, ctx);
+}
+
+
+Type typeFromFuncParam(const Func* func, uint32_t paramId) {
+  assertx(paramId < func->numNonVariadicParams());
+
+  if (func->params()[paramId].isOutOnly()) return TInitCell;
+
+  auto const getThisType = [&] {
+    return func->cls() ? Type::SubObj(func->cls()) : TBottom;
+  };
+
+  auto const& tcs = func->params()[paramId].typeConstraints;
+  return typeFromTCImpl(tcs, getThisType, func->cls());
+}
+
+Type typeFromFuncReturn(const Func* func, bool pessimizeForBuiltin) {
+  auto const getThisType = [&] {
+    return func->cls() ? Type::SubObj(func->cls()) : TBottom;
+  };
+
+  auto const& tcs = func->returnTypeConstraints();
+  auto const rt =
+    typeFromTCImpl(tcs, getThisType, func->cls(), true) & TInitCell;
+
+  if (func->hasUntrustedReturnType()) {
+    assertx(func->isCPPBuiltin());
+    return rt | TInitNull;
+  }
+
+  if (pessimizeForBuiltin) {
+    assertx(func->isCPPBuiltin());
+    if (rt.maybe(TInitNull) && rt > TInitNull) return TInitCell;
+    if (rt == TBottom) return TInitNull;
+  }
+
+  return rt;
+}
+
+Type typeFromFuncOut(const Func* func, uint32_t inOutIdx) {
+  uint32_t paramId = 0;
+  for (; paramId < func->numNonVariadicParams(); paramId++) {
+    if (!func->isInOut(paramId)) continue;
+    if (!inOutIdx) break;
+    inOutIdx--;
+  }
+  assertx(!inOutIdx);
+
+  auto const getThisType = [&] {
+    return func->cls() ? Type::SubObj(func->cls()) : TBottom;
+  };
+
+  auto const& tcs = func->params()[paramId].typeConstraints;
+  return typeFromTCImpl(tcs, getThisType, func->cls(), true) & TInitCell;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Type typeFromSBProfType(const SBProfType& ty) {
+  Type t{ty.m_bits, PtrLocation::Bottom};
+  if (ty.m_spec == SBProfTypeSpec::None) {
+    return t;
+  }
+  auto const cls = Class::load(ty.m_clsName);
+  if (!cls) {
+    throw Exception("Class %s not found", ty.m_clsName->data());
+  }
+  if (ty.m_spec == SBProfTypeSpec::Sub) {
+    t.m_clsSpec = ClassSpec{cls, ClassSpec::SubTag{}};
+  } else {
+    t.m_clsSpec = ClassSpec{cls, ClassSpec::ExactTag{}};
+  }
+  return t;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1088,12 +1249,6 @@ Type relaxType(Type t, DataTypeCategory cat) {
   switch (cat) {
     case DataTypeGeneric:
       return TCell;
-
-    case DataTypeIterBase:
-      if (t <= TUninit) return TUninit;
-      if (t <= TUncountedInit) return TUncountedInit;
-      if (t <= TArrLike) return TArrLike;
-      return t.unspecialize();
 
     case DataTypeCountnessInit:
       if (t <= TUninit) return TUninit;

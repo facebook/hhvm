@@ -17,6 +17,8 @@
 #include "hphp/runtime/vm/type-alias.h"
 
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/vm/frame-restore.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/unit.h"
@@ -25,26 +27,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-
-TypeAlias typeAliasFromClass(const PreTypeAlias* thisType,
-                             Class *klass) {
-  assertx(klass);
-  TypeAlias req(thisType);
-  req.nullable = thisType->nullable;
-  if (isEnum(klass)) {
-    // If the class is an enum, pull out the actual base type.
-    if (auto const enumType = klass->enumBaseTy()) {
-      req.type = enumDataTypeToAnnotType(*enumType);
-      assertx(req.type != AnnotType::Object);
-    } else {
-      req.type = AnnotType::ArrayKey;
-    }
-  } else {
-    req.type = AnnotType::Object;
-    req.klass = klass;
-  }
-  return req;
-}
 
 TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
   /*
@@ -58,68 +40,160 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
    * If the right hand side was a class, we need to autoload and
    * ensure it exists at this point.
    */
-  if (thisType->type != AnnotType::Object &&
-      thisType->type != AnnotType::Unresolved) {
-    return TypeAlias::From(thisType);
-  }
 
   /*
    * If the right hand side is already defined, don't invoke the
    * autoloader at all, this means we have to check for both a type
    * alias and a class before attempting to load them via the
    * autoloader.
-   *
-   * While normal autoloaders are fine, the "failure" entry in the
-   * map passed to `HH\set_autoload_paths` is called for all failed
-   * lookups. The failure function can do anything, including something
-   * like like raising an error or rebuilding the map. We don't want to
-   * send speculative (or worse, repeat) requests to the autoloader, so
-   * do our due diligence here.
    */
+  TypeAlias req(thisType);
 
-  const StringData* typeName = thisType->value;
-  auto targetNE = NamedEntity::get(typeName);
-
-  if (auto klass = Class::lookup(targetNE)) {
-    return typeAliasFromClass(thisType, klass);
+  if (!thisType->value.isUnresolved()) {
+    req.value = thisType->value;
+    return req;
   }
 
-  if (auto targetTd = targetNE->getCachedTypeAlias()) {
-    assertx(thisType->type != AnnotType::Object);
-    return TypeAlias::From(*targetTd, thisType);
-  }
+  TypeConstraintFlags flags =
+    thisType->value.flags() & (TypeConstraintFlags::Nullable
+                               | TypeConstraintFlags::TypeVar
+                               | TypeConstraintFlags::Soft
+                               | TypeConstraintFlags::TypeConstant
+                               | TypeConstraintFlags::UpperBound);
 
-  if (failIsFatal &&
-      AutoloadHandler::s_instance->autoloadNamedType(
-        StrNR(const_cast<StringData*>(typeName))
-      )) {
-    if (auto klass = Class::lookup(targetNE)) {
-      return typeAliasFromClass(thisType, klass);
+  std::vector<TypeConstraint> parts;
+  auto const typeAliasFromClass = [&](Class* klass) {
+    if (isEnum(klass)) {
+      auto enumType = klass->enumBaseTy();
+      assertx(enumType.validForEnumBase());
+
+      enumType.addFlags(flags);
+      parts.emplace_back(std::move(enumType));
+    } else {
+      parts.emplace_back(
+        AnnotType::SubObject, flags, TypeConstraint::ClassConstraint{*klass});
     }
+  };
+
+  auto const from = [&](const TypeAlias& ta) {
+    if (ta.invalid) {
+      req.invalid = true;
+      return;
+    }
+    TypeConstraint value = ta.value;
+    value.addFlags(flags);
+    parts.emplace_back(value);
+  };
+
+  for (auto const& tc : eachTypeConstraintInUnion(thisType->value)) {
+    auto type = tc.type();
+    auto typeName = tc.typeName();
+    if (type != AnnotType::SubObject && type != AnnotType::Unresolved) {
+      parts.emplace_back(type, flags);
+      continue;
+    }
+    auto targetNE = NamedType::getOrCreate(typeName);
+
+    if (auto klass = targetNE->getCachedClass()) {
+      typeAliasFromClass(klass);
+      continue;
+    }
+
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
-      assertx(thisType->type != AnnotType::Object);
-      return TypeAlias::From(*targetTd, thisType);
+      assertx(type != AnnotType::SubObject);
+      from(*targetTd);
+      if (req.invalid) return req;
+      continue;
     }
+
+    if (failIsFatal &&
+        AutoloadHandler::s_instance->autoloadTypeOrTypeAlias(
+          StrNR(const_cast<StringData*>(typeName))
+        )) {
+      if (auto klass = targetNE->getCachedClass()) {
+        typeAliasFromClass(klass);
+        continue;
+      }
+      if (auto targetTd = targetNE->getCachedTypeAlias()) {
+        assertx(type != AnnotType::SubObject);
+        from(*targetTd);
+        if (req.invalid) return req;
+        continue;
+      }
+    }
+    // could not resolve, it is invalid
+    req.invalid = true;
+    return req;
   }
 
-  return TypeAlias::Invalid(thisType);
+  req.value = [&] {
+    try {
+      return TypeConstraint::makeUnion(req.name(), parts);
+    } catch (const FatalErrorException& ex) {
+      raise_error("%s in %s on line %d\n", ex.what(), thisType->unit->origFilepath()->data(), thisType->line0);
+    }
+  }();
+  return req;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}
+} // namespace
 
 bool TypeAlias::compat(const PreTypeAlias& alias) const {
   // FIXME(T116316964): can't compare type of unresolved PreTypeAlias
-  auto const preType = alias.type == AnnotType::Unresolved
-    ? AnnotType::Object : alias.type;
-  return (alias.type == AnnotType::Mixed && type == AnnotType::Mixed) ||
-         (preType == type && alias.nullable == nullable &&
-          Class::lookup(alias.value) == klass);
+
+  if (value.isNullable() != alias.value.isNullable()) return false;
+
+  auto view0 = eachTypeConstraintInUnion(value);
+  auto view1 = eachTypeConstraintInUnion(alias.value);
+  auto it0 = view0.begin();
+  auto it1 = view1.begin();
+
+  while (it0 != view0.end() && it1 != view1.end()) {
+    auto tc0 = *it0++;
+    auto type = tc0.type();
+    auto klass = type == AnnotType::SubObject ?
+      tc0.clsNamedType()->getCachedClass() : nullptr;
+    auto tc1 = *it1++;
+    auto ptype = tc1.type();
+    auto value_2 = tc1.typeName();
+    auto const preType =
+      ptype == AnnotType::Unresolved ? AnnotType::SubObject : ptype;
+    if (ptype == AnnotType::Mixed && type == AnnotType::Mixed) continue;
+    if (preType == type && Class::lookup(value_2) == klass) continue;
+    return false;
+  }
+  return true;
+}
+
+size_t TypeAlias::stableHash() const {
+  return folly::hash::hash_combine(
+    name()->hashStatic(),
+    unit()->sn()
+  );
+}
+
+const Array TypeAlias::resolvedTypeStructure() const {
+  auto const ts = m_preTypeAlias->resolvedTypeStructure;
+  if (ts.isNull() || !ts.get()->isVanilla()) return ts;
+
+  auto newTs = Array(ts.get());
+  bespoke::profileArrLikeTypeAlias(this, &newTs);
+  return newTs;
+}
+
+void TypeAlias::setResolvedTypeStructure(ArrayData* ad) {
+  auto const preTA = const_cast<PreTypeAlias*>(m_preTypeAlias);
+  preTA->resolvedTypeStructure = ad;
 }
 
 const TypeAlias* TypeAlias::lookup(const StringData* name,
                                    bool* persistent) {
-  auto ne = NamedEntity::get(name);
+  auto ne = NamedType::getNoCreate(name);
+  if (!ne) {
+    if (persistent) *persistent = false;
+    return nullptr;
+  }
   auto target = ne->getCachedTypeAlias();
   if (persistent) *persistent = ne->isPersistentTypeAlias();
   return target;
@@ -127,25 +201,26 @@ const TypeAlias* TypeAlias::lookup(const StringData* name,
 
 const TypeAlias* TypeAlias::load(const StringData* name,
                                  bool* persistent) {
-  auto ne = NamedEntity::get(name);
-  auto target = ne->getCachedTypeAlias();
+  auto ne = NamedType::getNoCreate(name);
+  auto target = ne ? ne->getCachedTypeAlias() : nullptr;
   if (!target) {
-    if (AutoloadHandler::s_instance->autoloadNamedType(
+    if (AutoloadHandler::s_instance->autoloadTypeOrTypeAlias(
           StrNR(const_cast<StringData*>(name))
         )) {
-      target = ne->getCachedTypeAlias();
+      if (!ne) ne = NamedType::getNoCreate(name);
+      if (ne) target = ne->getCachedTypeAlias();
     } else {
+      if (persistent) *persistent = false;
       return nullptr;
     }
   }
 
-  if (persistent) *persistent = ne->isPersistentTypeAlias();
+  if (persistent) *persistent = ne ? ne->isPersistentTypeAlias() : false;
   return target;
 }
 
 const TypeAlias* TypeAlias::def(const PreTypeAlias* thisType, bool failIsFatal) {
-  auto nameList = NamedEntity::get(thisType->name);
-  const StringData* typeName = thisType->value;
+  auto nameList = NamedType::getOrCreate(thisType->name);
 
   /*
    * Check if this name already was defined as a type alias, and if so
@@ -165,11 +240,11 @@ const TypeAlias* TypeAlias::def(const PreTypeAlias* thisType, bool failIsFatal) 
       }
       return current;
     }
-    if (!current->compat(*thisType)) {
+    if (current->preTypeAlias() != thisType && !current->compat(*thisType)) {
       if (!failIsFatal) return nullptr;
       raiseIncompatible();
     }
-    assertx(!RO::RepoAuthoritative);
+    assertx(!Cfg::Repo::Authoritative);
     return current;
   }
 
@@ -187,13 +262,21 @@ const TypeAlias* TypeAlias::def(const PreTypeAlias* thisType, bool failIsFatal) 
   if (resolved.invalid) {
     if (!failIsFatal) return nullptr;
     FrameRestore _(thisType);
-    raise_error("Unknown type or class %s", typeName->data());
+    std::vector<folly::StringPiece> names;
+    for (auto const& tc : eachClassTypeConstraintInUnion(thisType->value)) {
+      names.push_back(tc.typeName()->slice());
+    }
+    std::string combined = folly::join("|", names);
+    raise_error("Unknown type or class %s", combined.c_str());
     not_reached();
   }
 
   auto const isPersistent = (thisType->attrs & AttrPersistent);
-  if (isPersistent) {
-    assertx(!resolved.klass || classHasPersistentRDS(resolved.klass));
+  if (debug && isPersistent) {
+    for (DEBUG_ONLY auto const& tc : eachClassTypeConstraintInUnion(resolved.value)) {
+      DEBUG_ONLY auto klass = tc.clsNamedType()->getCachedClass();
+      assertx(classHasPersistentRDS(klass));
+    }
   }
 
   nameList->m_cachedTypeAlias.bind(

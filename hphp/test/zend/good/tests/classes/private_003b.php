@@ -1,21 +1,21 @@
 <?hh
 
 class pass {
-    private function show() {
+    private function show() :mixed{
         echo "Call show()\n";
     }
 
-    protected function good() {
+    protected function good() :mixed{
         $this->show();
     }
 }
 
 class fail extends pass {
-    public function ok() {
+    public function ok() :mixed{
         $this->good();
     }
 
-    public function not_ok() {
+    public function not_ok() :mixed{
         $this->show();
     }
 }

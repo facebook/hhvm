@@ -16,7 +16,7 @@
 // temp file used
 <<__EntryPoint>> function main(): void {
 
-$dir = __SystemLib\hphp_test_tmppath('symlink_link_linkinfo_is_link_variation7');
+$dir = sys_get_temp_dir().'/'.'symlink_link_linkinfo_is_link_variation7';
 $filename = "$dir/symlink_link_linkinfo_is_link_variation7.tmp";
 // link name used
 $linkname = "$dir/symlink_link_linkinfo_is_link_link_variation7.tmp";

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class GetClassTest {
   public static function test(): void {
@@ -12,6 +12,9 @@ class GetClassTest {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
+  set_error_handler(($errno, $errstr, ...$_rest) ==> {
+    throw new Exception($errstr);
+  });
   GetClassTest::test();
 }

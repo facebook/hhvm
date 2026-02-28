@@ -7,7 +7,7 @@
 */
 /* creating directories, symbolic links and files */
 <<__EntryPoint>> function main(): void {
-$file_path = __SystemLib\hphp_test_tmproot();
+$file_path = sys_get_temp_dir();
 mkdir("$file_path/readlink_realpath_basic1/home/test/", 0777, true);
 
 $file_handle1 = fopen("$file_path/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp", "w");
@@ -24,7 +24,7 @@ symlink("$file_path/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp",
 
 
 echo "*** Testing readlink() and realpath(): with valid and invalid path ***\n";
-$linknames = varray [
+$linknames = vec[
   /* linknames resulting in valid paths */
   "$file_path/readlink_realpath_basic1/home/readlink_realpath_basic1_link.tmp",
   "$file_path/readlink_realpath_basic1/home/test/readlink_realpath_basic1_link.tmp",

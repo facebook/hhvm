@@ -44,9 +44,17 @@ Variant applyAdapter(Variant value, Class& adapter, const String& methodName) {
                                 methodName),
                  ERR_INVALID_DATA);
   }
-  return Variant::attach(
-      g_context->invokeFuncFew(method, &adapter, 1, value.asTypedValue(),
-                               RuntimeCoeffects::fixme()));
+  try {
+    return Variant::attach(
+        g_context->invokeFuncFew(method, &adapter, 1, nullptr, value.asTypedValue(),
+                                RuntimeCoeffects::fixme(), false /* dynamic */));
+  } catch (const Object& o) {
+    thrift_error(folly::sformat("adapter method {}::{}() threw an exception: {}",
+                            adapter.nameStr().data(),
+                            methodName, throwable_to_string(o.get())),
+              ERR_UNEXPECTED_EXCEPTION);
+    return {};
+  }
 }
 
 } // namespace

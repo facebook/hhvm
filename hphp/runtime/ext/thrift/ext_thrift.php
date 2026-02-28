@@ -1,53 +1,86 @@
-<?hh // partial
+<?hh
 
 <<__Native>>
-function thrift_protocol_write_binary(object $transportobj,
+function thrift_protocol_write_binary(\HH\object $transportobj,
                                       string $method_name,
                                       int $msgtype,
-                                      object $request_struct,
+                                      \HH\object $request_struct,
                                       int $seqid,
                                       bool $strict_write,
                                       bool $oneway = false): void;
 
-<<__Native>>
-function thrift_protocol_read_binary(object $transportobj,
-                                     string $obj_typename,
-                                     bool $strict_read,
-                                     int $options = 0): object;
 
 <<__Native>>
-function thrift_protocol_read_binary_struct(object $transportobj,
+function thrift_protocol_write_binary_struct(\HH\object $transportobj,
+                                      \HH\object $request_struct): void;
+
+<<__Native>>
+function thrift_protocol_write_binary_struct_to_string(
+  \HH\object $request_struct,
+): string;
+
+<<__Native>>
+function thrift_protocol_read_binary(\HH\object $transportobj,
+                                     string $obj_typename,
+                                     bool $strict_read,
+                                     int $options = 0): \HH\object;
+
+<<__Native>>
+function thrift_protocol_read_binary_struct(\HH\object $transportobj,
                                             string $obj_typename,
                                             int $options = 0): mixed;
+
+
+<<__Native>>
+function thrift_protocol_read_binary_struct_from_string(string $serialized,
+                                                         string $obj_typename,
+                                                         int $options = 0): \HH\object;
 
 <<__Native>>
 function thrift_protocol_set_compact_version(int $version)[leak_safe]: int;
 
 <<__Native>>
-function thrift_protocol_write_compact(object $transportobj,
-                                       string $method_name,
-                                       int $msgtype,
-                                       object $request_struct,
-                                       int $seqid,
-                                       bool $oneway = false): void;
+function thrift_protocol_write_compact2(\HH\object $transportobj,
+                                        string $method_name,
+                                        int $msgtype,
+                                        \HH\object $request_struct,
+                                        int $seqid,
+                                        bool $oneway = false,
+                                        int $version = 2): void;
 
 <<__Native>>
-function thrift_protocol_read_compact(object $transportobj,
+function thrift_protocol_write_compact_struct(\HH\object $transportobj,
+                                        \HH\object $request_struct,
+                                        int $version = 2): void;
+
+<<__Native>>
+function thrift_protocol_write_compact_struct_to_string(\HH\object $transportobj,
+                                                          int $version = 2): string;
+
+<<__Native>>
+function thrift_protocol_read_compact(\HH\object $transportobj,
                                       string $obj_typename,
                                       int $options = 0): mixed;
 
 <<__Native>>
-function thrift_protocol_read_compact_struct(object $transportobj,
+function thrift_protocol_read_compact_struct(\HH\object $transportobj,
                                              string $obj_typename,
-                                             int $options = 0): object;
+                                             int $options = 0,
+                                             int $version = 2): \HH\object;
 
-<<__NativeData("InteractionId")>>
+<<__Native>>
+function thrift_protocol_read_compact_struct_from_string(string $serialized,
+                                                         string $obj_typename,
+                                                         int $options = 0,
+                                                         int $version = 2): \HH\object;
+
+<<__NativeData>>
 class InteractionId {
   private function __construct()[]: void {}
 }
 
-<<__NativeData("RpcOptions")>>
-final class RpcOptions {
+<<__NativeData>>
+final class RpcOptions implements IPureStringishObject {
   public function __construct()[]: void {}
 
   <<__Native>>
@@ -81,13 +114,19 @@ final class RpcOptions {
   public function setInteractionId(InteractionId $interaction_id)[write_props]: RpcOptions;
 
   <<__Native>>
-  public function setFaultToInject(string $key, string $value)[write_props]: RpcOptions;
+  public function setSerializedAuthProofs(string $serializedTokenData)[write_props]: RpcOptions;
 
   <<__Native>>
   public function __toString()[]: string;
 }
 
-<<__NativeData("TClientBufferedStream")>>
+final class ThriftApplicationException extends Exception {
+  public function __construct(?string $message = null)[] {
+    parent::__construct($message);
+  }
+}
+
+<<__NativeData>>
 final class TClientBufferedStream {
   public function __construct(): void {}
 
@@ -95,14 +134,11 @@ final class TClientBufferedStream {
     (function(?string, ?Exception): TStreamResponse) $streamDecode,
   ): HH\AsyncGenerator<null, TStreamResponse, void> {
     while (true) {
-      $timer = WallTimeOperation::begin();
       try {
         list($buffer, $ex_msg) = await $this->genNext();
       } catch (Exception $ex) {
         $streamDecode(null, $ex);
         break;
-      } finally {
-        $timer->end();
       }
 
       if ($buffer === null && $ex_msg === null) {
@@ -115,10 +151,7 @@ final class TClientBufferedStream {
         }
       }
       if ($ex_msg !== null) {
-        $streamDecode(
-          null,
-          new TApplicationException($ex_msg, TApplicationException::UNKNOWN),
-        );
+        $streamDecode(null, new ThriftApplicationException($ex_msg));
         break;
       }
     }
@@ -126,21 +159,22 @@ final class TClientBufferedStream {
 
   <<__Native>>
   public function genNext(): Awaitable<(?vec<string>,?string)>;
+
+  <<__Native>>
+  public function disable16KBBufferingPolicy(): void;
 }
 
-<<__NativeData("TClientSink")>>
+<<__NativeData>>
 final class TClientSink {
   public function __construct(): void {}
 
   public async function genCreditsOrFinalResponseHelper(
-  ): Awaitable<(int, ?string, ?Exception)> {
-    $timer = WallTimeOperation::begin();
-    try {
-      list($credits, $final_response, $exception) =
-        await $this->genCreditsOrFinalResponse();
-    } finally {
-      $timer->end();
-    }
+  ): Awaitable<(?int, ?string, ?Exception)> {
+    list($credits, $final_response, $exception) =
+      HH\FIXME\UNSAFE_CAST<
+        ?(int, ?string, ?string),
+        (?int, ?string, ?string)
+      >(await $this->genCreditsOrFinalResponse());
     if (
       ($credits === null || $credits === 0) &&
       $final_response === null &&
@@ -151,9 +185,7 @@ final class TClientSink {
     return tuple(
       $credits,
       $final_response,
-      $exception !== null
-        ? new TApplicationException($exception, TApplicationException::UNKNOWN)
-        : null,
+      $exception !== null ? new ThriftApplicationException($exception) : null,
     );
   }
 
@@ -169,6 +201,7 @@ final class TClientSink {
       if ($final_response !== null || $exception !== null) {
         break;
       }
+      $credits = HH\FIXME\UNSAFE_CAST<?int, int>($credits);
       if ($credits > 0 && $shouldContinue) {
         try {
           foreach ($payload_generator await as $pld) {

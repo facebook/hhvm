@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   $y = 12;
   $bar = () ==> {
     $baz = () ==> {

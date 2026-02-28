@@ -16,50 +16,42 @@ module SN = Naming_special_names
  * a boolean to track if the shape was optional or not.
  *)
 let shapes_key_exists env shape field_name =
-  let check pos shape_kind fields =
+  let check env pos shape_kind fields =
     match TShapeMap.find_opt field_name fields with
     | None ->
-      begin
-        match shape_kind with
-        | Closed_shape -> `DoesNotExist (pos, `Undefined)
-        | Open_shape -> `Unknown
-      end
+      if is_nothing shape_kind then
+        `DoesNotExist (pos, `Undefined)
+      else
+        `Unknown
     | Some { sft_optional; sft_ty } ->
       if not sft_optional then
         `DoesExist (get_pos sft_ty)
       else
-        let nothing = Typing_make_type.nothing Reason.Rnone in
+        let nothing = Typing_make_type.nothing Reason.none in
         if Tast_env.is_sub_type env sft_ty nothing then
           `DoesNotExist
-            ( get_pos shape,
+            ( pos,
               `Nothing
                 (lazy (Reason.to_string "It is nothing" (get_reason sft_ty))) )
         else
           `Unknown
   in
-  let (_, shape) = Tast_env.expand_type env shape in
-  match get_node shape with
-  | Tshape (shape_kind, fields) ->
-    (check (get_pos shape) shape_kind fields, false)
-  | Toption maybe_shape ->
-    let (_, shape) = Tast_env.expand_type env maybe_shape in
-    (match get_node shape with
-    | Tshape (shape_kind, fields) ->
-      (check (get_pos shape) shape_kind fields, true)
-    | _ -> (`Unknown, true))
-  | Tunion [ty1; ty2] ->
-    (* This implements ad-hoc support for ~shape(...) types; *)
-    (* the general union type case returns (`Unknown, false) *)
-    let (_, ty1) = Tast_env.expand_type env ty1 in
-    let (_, ty2) = Tast_env.expand_type env ty2 in
-    (match (get_node ty1, get_node ty2) with
-    | (Tdynamic, Tshape (shape_kind, fields))
-    | (Tshape (shape_kind, fields), Tdynamic) ->
-      (check (get_pos shape) shape_kind fields, false)
-    | _ -> (`Unknown, false))
-  | _ -> (`Unknown, false)
+  let rec loop env shape was_optional =
+    let shape = Tast_env.strip_dynamic env shape in
+    let (_, shape) = Tast_env.strip_supportdyn env shape in
+    let (env, shape) = Tast_env.expand_type env shape in
+    match get_node shape with
+    | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fields }
+      ->
+      (check env (get_pos shape) shape_kind fields, was_optional)
+    | Toption maybe_shape ->
+      let (env, shape) = Tast_env.expand_type env maybe_shape in
+      loop env shape true
+    | _ -> (`Unknown, was_optional)
+  in
+  loop env shape false
 
-let trivial_shapes_key_exists_check pos1 env (shape, _, _) field_name =
+let trivial_shapes_key_exists_check pos1 env shape field_name =
   let (status, optional) =
     shapes_key_exists env shape (TSFlit_str field_name)
   in
@@ -69,13 +61,17 @@ let trivial_shapes_key_exists_check pos1 env (shape, _, _) field_name =
   if not optional then
     match status with
     | `DoesExist decl_pos ->
-      Errors.add_typing_error
+      let Equal = Tast_env.eq_typing_env in
+      Typing_error_utils.add_typing_error
+        ~env
         Typing_error.(
           shape
           @@ Primary.Shape.Shapes_key_exists_always_true
                { pos = pos1; field_name = snd field_name; decl_pos })
     | `DoesNotExist (decl_pos, reason) ->
-      Errors.add_typing_error
+      let Equal = Tast_env.eq_typing_env in
+      Typing_error_utils.add_typing_error
+        ~env
         Typing_error.(
           shape
           @@ Primary.Shape.Shapes_key_exists_always_false
@@ -83,15 +79,17 @@ let trivial_shapes_key_exists_check pos1 env (shape, _, _) field_name =
     | `Unknown -> ()
 
 let shapes_method_access_with_non_existent_field
-    pos1 env method_name (shape, _, _) field_name =
+    pos1 env method_name shape field_name =
   let (status, optional_shape) =
     shapes_key_exists env shape (TSFlit_str field_name)
   in
   match (status, optional_shape) with
   | (`DoesExist _, false) ->
     Lint.shape_idx_access_required_field pos1 (snd field_name)
-  | (`DoesNotExist (decl_pos, reason), false) ->
-    Errors.add_typing_error
+  | (`DoesNotExist (decl_pos, reason), _) ->
+    let Equal = Tast_env.eq_typing_env in
+    Typing_error_utils.add_typing_error
+      ~env
       Typing_error.(
         shape
         @@ Primary.Shape.Shapes_method_access_with_non_existent_field
@@ -102,29 +100,31 @@ let shapes_method_access_with_non_existent_field
                method_name;
                reason;
              })
-  | (`DoesNotExist _, true) when String.equal method_name SN.Shapes.idx ->
-    (* Shapes::at only supports non optional shapes *)
-    Lint.opt_closed_shape_idx_missing_field (Some method_name) pos1
   | (`DoesExist _, true)
-  | (`DoesNotExist _, true)
   | (`Unknown, _) ->
     ()
 
-let shape_access_with_non_existent_field pos1 env (shape, _, _) field_name =
+let shape_access_with_non_existent_field pos1 env shape field_name =
   let (status, optional) =
     shapes_key_exists env shape (TSFlit_str field_name)
   in
   match (status, optional) with
-  | (`DoesNotExist (decl_pos, reason), false) ->
-    Errors.add_typing_error
+  | (`DoesNotExist (decl_pos, reason), _) ->
+    let Equal = Tast_env.eq_typing_env in
+    Typing_error_utils.add_typing_error
+      ~env
       Typing_error.(
         shape
         @@ Primary.Shape.Shapes_access_with_non_existent_field
              { pos = pos1; field_name = snd field_name; decl_pos; reason })
-  | (`DoesNotExist _, true) -> Lint.opt_closed_shape_idx_missing_field None pos1
   | (`DoesExist _, _)
   | (`Unknown, _) ->
     ()
+
+let dest_args arg1 arg2 =
+  match (Aast_utils.arg_to_expr arg1, Aast_utils.arg_to_expr arg2) with
+  | ((ty, _, _), (_, pos, String field_name)) -> Some (ty, pos, field_name)
+  | _ -> None
 
 let handler =
   object
@@ -135,50 +135,88 @@ let handler =
       | ( _,
           p,
           Call
-            ( (_, _, Class_const ((_, _, CI (_, class_name)), (_, method_name))),
-              _,
-              [(_, shape); (_, (_, pos, String field_name))],
-              None ) )
+            {
+              func =
+                ( _,
+                  _,
+                  Class_const ((_, _, CI (_, class_name)), (_, method_name)) );
+              args = [arg1; arg2];
+              unpacked_arg = None;
+              _;
+            } )
         when String.equal class_name SN.Shapes.cShapes
              && String.equal method_name SN.Shapes.keyExists ->
-        trivial_shapes_key_exists_check
-          p
-          env
-          shape
-          (Pos_or_decl.of_raw_pos pos, field_name)
+        (match dest_args arg1 arg2 with
+        | Some (ty, pos, field_name) ->
+          let (env, tyl) =
+            Tast_env.get_concrete_supertypes env ty ~abstract_enum:false
+          in
+          let field = (Pos_or_decl.of_raw_pos pos, field_name) in
+          let trivial_shapes_key_exists_check ty =
+            trivial_shapes_key_exists_check p env ty field
+          in
+          List.iter tyl ~f:trivial_shapes_key_exists_check
+        | None -> ())
       | ( _,
           _,
           Call
-            ( (_, _, Class_const ((_, _, CI (_, class_name)), (_, method_name))),
-              _,
-              [(_, shape); (_, (_, pos, String field_name)); _],
-              None ) )
+            {
+              func =
+                ( _,
+                  _,
+                  Class_const ((_, _, CI (_, class_name)), (_, method_name)) );
+              args = [arg1; arg2; _];
+              unpacked_arg = None;
+              _;
+            } )
       | ( _,
           _,
           Call
-            ( (_, _, Class_const ((_, _, CI (_, class_name)), (_, method_name))),
-              _,
-              [(_, shape); (_, (_, pos, String field_name))],
-              None ) )
+            {
+              func =
+                ( _,
+                  _,
+                  Class_const ((_, _, CI (_, class_name)), (_, method_name)) );
+              args = [arg1; arg2];
+              unpacked_arg = None;
+              _;
+            } )
         when String.equal class_name SN.Shapes.cShapes
              && (String.equal method_name SN.Shapes.idx
                 || String.equal method_name SN.Shapes.at) ->
-        shapes_method_access_with_non_existent_field
-          pos
-          env
-          method_name
-          shape
-          (Pos_or_decl.of_raw_pos pos, field_name)
-      | ( _,
-          p,
-          Binop
-            ( Ast_defs.QuestionQuestion,
-              (_, _, Array_get (shape, Some (_, pos, String field_name))),
-              _ ) ) ->
-        shape_access_with_non_existent_field
-          p
-          env
-          shape
-          (Pos_or_decl.of_raw_pos pos, field_name)
+        (match dest_args arg1 arg2 with
+        | Some (ty, pos, field_name) ->
+          let (env, tyl) =
+            Tast_env.get_concrete_supertypes env ty ~abstract_enum:false
+          in
+          let field = (Pos_or_decl.of_raw_pos pos, field_name) in
+          let shapes_method_access_with_non_existent_field ty =
+            shapes_method_access_with_non_existent_field
+              pos
+              env
+              method_name
+              ty
+              field
+          in
+          List.iter tyl ~f:shapes_method_access_with_non_existent_field
+        | None -> ())
+      | (_, p, Binop { bop = Ast_defs.QuestionQuestion; lhs = exp; _ }) ->
+        let rec check_nested_accesses = function
+          | (_, _, Array_get (((ty, _, _) as exp), Some indexing_expr)) ->
+            (match indexing_expr with
+            | (_, pos, String field_name) ->
+              let (env, tyl) =
+                Tast_env.get_concrete_supertypes env ty ~abstract_enum:false
+              in
+              let field = (Pos_or_decl.of_raw_pos pos, field_name) in
+              let shape_access_with_non_existent_field ty =
+                shape_access_with_non_existent_field p env ty field
+              in
+              List.iter tyl ~f:shape_access_with_non_existent_field
+            | _ -> ());
+            check_nested_accesses exp
+          | _ -> ()
+        in
+        check_nested_accesses exp
       | _ -> ()
   end

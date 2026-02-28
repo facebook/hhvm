@@ -27,98 +27,109 @@
 #include <signal.h>
 
 #include <folly/portability/SysTime.h>
+#include <folly/Likely.h>
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/rank.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/service-data.h"
 
 namespace HPHP {  namespace Treadmill {
 
-TRACE_SET_MOD(treadmill);
-
-/*
- * We assign local, unique indexes to each thread, with hopes that
- * they are densely packed.
- *
- * The plan here is that each thread starts with s_thisThreadIdx as
- * kInvalidRequestIdx.  And the first time a thread starts using the Treadmill
- * it allocates a new thread id from s_nextThreadIdx with fetch_add.
- */
-std::atomic<int64_t> g_nextThreadIdx{0};
-RDS_LOCAL_NO_CHECK(int64_t, rl_thisRequestIdx){kInvalidRequestIdx};
+TRACE_SET_MOD(treadmill)
 
 namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-const int64_t ONE_SEC_IN_MICROSEC = 1000000;
+/*
+ * We assign local, unique indexes to each thread, with hopes that
+ * they are densely packed.
+ *
+ * The plan here is that each thread starts with rl_thisThreadIdx as
+ * kInvalidRequestIdx.  And the first time a thread starts using the Treadmill
+ * it allocates a new thread id from s_nextThreadIdx with fetch_add.
+ */
+std::atomic<int64_t> g_nextThreadIdx{0};
+constexpr int64_t kInvalidRequestIdx = -1;
+RDS_LOCAL_NO_CHECK(int64_t, rl_thisRequestIdx){kInvalidRequestIdx};
 
 struct TreadmillRequestInfo {
-  GenCount  startTime;
+  Clock::time_point startTime;
   pthread_t pthreadId;
-  int64_t requestId;
+  RequestInfo* requestInfo;
   SessionKind sessionKind;
 };
 
-pthread_mutex_t s_genLock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t s_stateLock = PTHREAD_MUTEX_INITIALIZER;
 std::vector<TreadmillRequestInfo> s_inflightRequests;
-GenCount s_latestCount = 0;
-std::atomic<GenCount> s_oldestRequestInFlight(0);
+
+// Start time of the oldest request in flight. All writes happen under the
+// s_stateLock.
+std::atomic<Clock::time_point> s_oldestRequestInFlight{kNoStartTime};
+
+std::string s_killMessage;
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * The next 2 functions should be used to manage the generation count/time
- * in the treadmill for both the requests and the work items.
- * The pattern is to call getTime() outside of the lock and correctTime()
- * while holding the lock.
- * That pattern guarantees a monotonically increasing counter.
- * The resolution being microseconds should give us all the room we need
- * to accommodate requests and work items at any conceivable rate and
- * correctTime() should give us correct behavior at any granularity of
- * gettimeofday().
- */
-
-/*
- * Return the current time in microseconds.
- * Usually called outside of the lock.
- */
-GenCount getTime() {
-  struct timeval time;
-  gettimeofday(&time, nullptr);
-  return time.tv_sec * ONE_SEC_IN_MICROSEC + time.tv_usec;
-}
-
-/*
- * Return a monotonically increasing time given the last time recorded.
- * This must be called while holding the lock.
- */
-GenCount correctTime(GenCount time) {
-  s_latestCount = time <= s_latestCount ? s_latestCount + 1 : time;
-  return s_latestCount;
-}
-
-struct GenCountGuard {
-  GenCountGuard() {
+struct StateGuard {
+  StateGuard() {
     checkRank(RankTreadmill);
-    pthread_mutex_lock(&s_genLock);
+    pthread_mutex_lock(&s_stateLock);
     pushRank(RankTreadmill);
   }
 
   struct Locked {};
-  GenCountGuard(Locked) { pushRank(RankTreadmill); }
+  explicit StateGuard(Locked) { pushRank(RankTreadmill); }
 
-  ~GenCountGuard() {
+  ~StateGuard() {
     popRank(RankTreadmill);
-    pthread_mutex_unlock(&s_genLock);
+    pthread_mutex_unlock(&s_stateLock);
   }
 };
 
 //////////////////////////////////////////////////////////////////////
+char const* getSessionKindName(SessionKind value) {
+  switch(value) {
+    case SessionKind::None: return "None";
+    case SessionKind::DebuggerClient: return "DebuggerClient";
+    case SessionKind::PreloadRepo: return "PreloadRepo";
+    case SessionKind::Watchman: return "Watchman";
+    case SessionKind::Vsdebug: return "VSDebug";
+    case SessionKind::FactsWorker: return "FactsWorker";
+    case SessionKind::CLIServer: return "CLIServer";
+    case SessionKind::AdminPort: return "AdminRequest";
+    case SessionKind::HttpRequest: return "HttpRequest";
+    case SessionKind::RpcRequest: return "RpcRequest";
+    case SessionKind::TranslateWorker: return "TranslateWorker";
+    case SessionKind::Retranslate: return "Retranslate";
+    case SessionKind::RetranslateAll: return "RetranslateAll";
+    case SessionKind::ProfData: return "ProfData";
+    case SessionKind::UnitTests: return "UnitTests";
+    case SessionKind::CompileRepo: return "CompileRepo";
+    case SessionKind::HHBBC: return "HHBBC";
+    case SessionKind::CompilerEmit: return "CompilerEmit";
+    case SessionKind::CompilerAnalysis: return "CompilerAnalysis";
+    case SessionKind::CLISession: return "CLISession";
+    case SessionKind::UnitReaper: return "UnitReaper";
+  }
+  return "";
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Returns how long (wall time) the oldest request in flight has been running.
+ */
+Clock::duration getOldestRequestAge() {
+  auto const oldestStartTime = getOldestRequestStartTime();
+  return oldestStartTime != kNoStartTime
+    ? Clock::now() - oldestStartTime
+    : Clock::duration::zero();
+}
 
 /*
  * Get the ID of the thread to abort in case the treadmill gets stuck for too
@@ -128,48 +139,90 @@ struct GenCountGuard {
  * bulk of the JITing.  In such cases, we want to abort the oldest JIT worker,
  * to capture its backtrace, instead of the main retranslate-all thread.
  */
-pthread_t getThreadIdToAbort() {
-  int64_t oldestStart = s_oldestRequestInFlight.load(std::memory_order_relaxed);
-  TreadmillRequestInfo* oldest = nullptr;
-  TreadmillRequestInfo* oldestWorker = nullptr;
-  for (auto& req : s_inflightRequests) {
-    if (req.startTime == oldestStart) oldest = &req;
+const TreadmillRequestInfo* getRequestToAbort() {
+  const TreadmillRequestInfo* oldest = nullptr;
+  const TreadmillRequestInfo* oldestWorker = nullptr;
+
+  for (auto const& req : s_inflightRequests) {
+    if (req.startTime == kNoStartTime) continue;
+    auto const timeout = req.requestInfo
+      ? req.requestInfo->m_reqInjectionData.getTimeout()
+      : 0;
+    auto const limit = std::chrono::seconds(std::max(
+      Cfg::Server::MaxRequestAgeFactor * Cfg::Server::RequestTimeoutSeconds,
+      Cfg::Server::MaxRequestAgeFactor * timeout
+    ));
+    if (!limit.count()) continue;
     if (req.sessionKind == SessionKind::TranslateWorker &&
         (oldestWorker == nullptr || req.startTime < oldestWorker->startTime)) {
       oldestWorker = &req;
     }
+    auto const age = Clock::now() - req.startTime;
+    if (age <= limit) continue;
+    oldest = &req;
   }
-  always_assert(oldest != nullptr);
-  if (oldest->sessionKind != SessionKind::RetranslateAll) {
-    return oldest->pthreadId;
-  }
-  if (oldestWorker != nullptr) {
-    return oldestWorker->pthreadId;
-  }
-  return oldest->pthreadId;
+
+  if (!oldest) return nullptr;
+  if (oldest->sessionKind != SessionKind::RetranslateAll) return oldest;
+  if (oldestWorker) return oldestWorker;
+  return oldest;
 }
 
-void checkOldest() {
-  int64_t limit =
-    RuntimeOption::MaxRequestAgeFactor * RuntimeOption::RequestTimeoutSeconds;
-  if (debug || !limit) return;
+void checkOldest(Optional<StateGuard>& guard, bool force) {
+  if (debug && !force) return;
 
-  int64_t ageOldest = getAgeOldestRequest();
-  if (ageOldest > limit) {
-    auto msg = folly::format("Oldest request has been running for {} "
-                             "seconds. Aborting the server.", ageOldest).str();
-    Logger::Error(msg);
-    pthread_t abortTid = getThreadIdToAbort();
-    pthread_kill(abortTid, SIGABRT);
-  }
+  auto const limit =
+    Cfg::Server::MaxRequestAgeFactor *
+      std::chrono::seconds(Cfg::Server::RequestTimeoutSeconds);
+  if (limit.count() == 0) return;
+
+  auto const oldestAge = getOldestRequestAge();
+  if (oldestAge <= limit) return;
+
+  auto const request = getRequestToAbort();
+  if (!request) return;
+
+  auto const msg = folly::sformat(
+    "Oldest request ({}, {}, {}) has been running for {} "
+    "seconds. Aborting the server.",
+    request->requestInfo ? request->requestInfo->m_id.toString() : "none",
+    request->startTime.time_since_epoch().count(),
+    getSessionKindName(request->sessionKind),
+    std::chrono::duration_cast<std::chrono::seconds>(
+      Clock::now() - request->startTime
+    ).count()
+  );
+  Logger::Error(msg);
+  s_killMessage = msg;
+  auto const threadId = request->pthreadId;
+  // Drop the lock since the SIGABRT we're about to send will try to
+  // acquire it.
+  guard.reset();
+  pthread_kill(threadId, SIGABRT);
+  // We're going to die, wait for it and don't bother proceeding.
+  ::pause();
+  always_assert(false);
 }
 
 void refreshStats() {
   static ServiceData::ExportedCounter* s_oldestRequestAgeStat =
     ServiceData::createCounter("treadmill.age");
-  s_oldestRequestAgeStat->setValue(getAgeOldestRequest());
+  auto const oldestAge = getOldestRequestAge();
+  s_oldestRequestAgeStat->setValue(
+    std::chrono::duration_cast<std::chrono::seconds>(oldestAge).count()
+  );
+}
 }
 
+/*
+ * Return the current thread's index.
+ */
+int64_t requestIdx() {
+  if (UNLIKELY(*rl_thisRequestIdx == kInvalidRequestIdx)) {
+    *rl_thisRequestIdx =
+      g_nextThreadIdx.fetch_add(1, std::memory_order_acq_rel);
+  }
+  return *rl_thisRequestIdx;
 }
 
 struct PendingTriggers : std::list<std::unique_ptr<WorkItem>> {
@@ -185,42 +238,54 @@ void enqueueInternal(std::unique_ptr<WorkItem> gt) {
   if (PendingTriggers::s_destroyed) {
     return;
   }
-  GenCount time = getTime();
-  {
-    GenCountGuard g;
-    gt->m_gen = correctTime(time);
-    s_tq.emplace_back(std::move(gt));
-  }
+
+  // Work item enqueue is potentially a high frequency operation. Grab the
+  // current timestamp before obtaining the lock. This might result in
+  // a non-strict order of the list, but that's okay, timestamps will be close
+  // enough and work items will be most likely processed together.
+  auto const now = Clock::now();
+
+  StateGuard g;
+  gt->m_timestamp = now;
+  s_tq.emplace_back(std::move(gt));
 }
 
 void startRequest(SessionKind session_kind) {
   auto const requestIdx = Treadmill::requestIdx();
 
-  GenCount startTime = getTime();
-  {
-    GenCountGuard g;
-    refreshStats();
-    checkOldest();
-    if (requestIdx >= s_inflightRequests.size()) {
-      s_inflightRequests.resize(
-        requestIdx + 1, {kIdleGenCount, 0, 0, SessionKind::None});
-    } else {
-      assertx(s_inflightRequests[requestIdx].startTime == kIdleGenCount);
-    }
-    s_inflightRequests[requestIdx].startTime = correctTime(startTime);
-    s_inflightRequests[requestIdx].pthreadId = Process::GetThreadId();
-    s_inflightRequests[requestIdx].requestId = Logger::GetRequestId();
-    s_inflightRequests[requestIdx].sessionKind = session_kind;
-    FTRACE(1, "requestIdx {} pthreadId {} start @gen {}\n", requestIdx,
-           s_inflightRequests[requestIdx].pthreadId,
-           s_inflightRequests[requestIdx].startTime);
-    if (s_oldestRequestInFlight.load(std::memory_order_relaxed) == 0) {
-      s_oldestRequestInFlight = s_inflightRequests[requestIdx].startTime;
-    }
-    if (!RequestInfo::s_requestInfo.isNull()) {
-      RI().changeGlobalGCStatus(RequestInfo::Idle,
-                                RequestInfo::OnRequestWithNoPendingExecution);
-    }
+  Optional<StateGuard> g;
+  g.emplace();
+
+  refreshStats();
+  checkOldest(g, false);
+  auto const startTime = Clock::now();
+  if (requestIdx >= s_inflightRequests.size()) {
+    s_inflightRequests.resize(
+      requestIdx + 1, {kNoStartTime, 0, 0, SessionKind::None});
+  } else {
+    assertx(s_inflightRequests[requestIdx].startTime == kNoStartTime);
+  }
+  s_inflightRequests[requestIdx].startTime = startTime;
+  s_inflightRequests[requestIdx].pthreadId = Process::GetThreadId();
+  s_inflightRequests[requestIdx].requestInfo =
+    RequestInfo::s_requestInfo.isNull() ? nullptr : &RI();
+  s_inflightRequests[requestIdx].sessionKind = session_kind;
+  FTRACE(1, "requestIdx {} pthreadId {} start @{}\n", requestIdx,
+         s_inflightRequests[requestIdx].pthreadId,
+         startTime.time_since_epoch().count());
+
+  // Set the oldest request in flight if there is none set yet. We obtained
+  // the monotonic timestamp under the state guard, so there can't be a later
+  // one set.
+  auto const oldest = s_oldestRequestInFlight.load(std::memory_order_acquire);
+  assertx(oldest <= startTime);
+  if (oldest == kNoStartTime) {
+    s_oldestRequestInFlight.store(startTime, std::memory_order_release);
+  }
+
+  if (!RequestInfo::s_requestInfo.isNull()) {
+    RI().changeGlobalGCStatus(RequestInfo::Idle,
+                              RequestInfo::OnRequestWithNoPendingExecution);
   }
 }
 
@@ -230,33 +295,37 @@ void finishRequest() {
   FTRACE(1, "tid {} finish\n", requestIdx);
   std::vector<std::unique_ptr<WorkItem>> toFire;
   {
-    GenCountGuard g;
-    assertx(s_inflightRequests[requestIdx].startTime != kIdleGenCount);
-    GenCount finishedRequest = s_inflightRequests[requestIdx].startTime;
-    s_inflightRequests[requestIdx].startTime = kIdleGenCount;
+    StateGuard g;
+    assertx(s_inflightRequests[requestIdx].startTime != kNoStartTime);
+    auto const startTime = s_inflightRequests[requestIdx].startTime;
+    s_inflightRequests[requestIdx].startTime = kNoStartTime;
 
     // After finishing a request, check to see if we've allowed any triggers
     // to fire and update the time of the oldest request in flight.
     // However if the request just finished is not the current oldest we
     // don't need to check anything as there cannot be any WorkItem to run.
-    if (s_oldestRequestInFlight.load(std::memory_order_relaxed) ==
-        finishedRequest) {
-      GenCount limit = s_latestCount + 1;
+    if (s_oldestRequestInFlight.load(std::memory_order_acquire) == startTime) {
+      auto limit = Clock::time_point::max();
       for (auto& val : s_inflightRequests) {
-        if (val.startTime != kIdleGenCount && val.startTime < limit) {
+        if (val.startTime != kNoStartTime && val.startTime < limit) {
           limit = val.startTime;
         }
       }
       // update "oldest in flight" or kill it if there are no running requests
-      s_oldestRequestInFlight = limit == s_latestCount + 1 ? 0 : limit;
+      s_oldestRequestInFlight.store(
+        limit == Clock::time_point::max() ? kNoStartTime : limit,
+        std::memory_order_release
+      );
 
-      // collect WorkItem to run
+      // collect WorkItems to run
       auto it = s_tq.begin();
       auto end = s_tq.end();
       while (it != end) {
-        TRACE(2, "considering delendum %d\n", int((*it)->m_gen));
-        if ((*it)->m_gen >= limit) {
-          TRACE(2, "not unreachable! %d\n", int((*it)->m_gen));
+        TRACE(2, "considering delendum %lld\n",
+              (long long)(*it)->m_timestamp.time_since_epoch().count());
+        if ((*it)->m_timestamp >= limit) {
+          TRACE(2, "not unreachable! %lld\n",
+                (long long)(*it)->m_timestamp.time_since_epoch().count());
           break;
         }
         toFire.emplace_back(std::move(*it));
@@ -296,33 +365,13 @@ void finishRequest() {
   }
 }
 
-int64_t getOldestRequestGenCount() {
-  return s_oldestRequestInFlight.load(std::memory_order_relaxed);
+Clock::time_point getOldestRequestStartTime() {
+  return s_oldestRequestInFlight.load(std::memory_order_acquire);
 }
 
-/*
- * Return the start time of the oldest request in seconds, rounded such that
- * time(nullptr) >= getOldestStartTime() is guaranteed to be true.
- *
- * Subtract s_nextThreadIdx because if n threads start at the same time,
- * one of their start times will be increased by n-1 (and we need to subtract
- * 1 anyway, to deal with exact seconds).
- */
-int64_t getOldestStartTime() {
-  int64_t time = s_oldestRequestInFlight.load(std::memory_order_relaxed);
-  return (time - g_nextThreadIdx)/ ONE_SEC_IN_MICROSEC + 1;
-}
-
-int64_t getAgeOldestRequest() {
-  int64_t start = s_oldestRequestInFlight.load(std::memory_order_relaxed);
-  if (start == 0) return 0; // no request in flight
-  int64_t time = getTime() - start;
-  return time / ONE_SEC_IN_MICROSEC;
-}
-
-int64_t getRequestGenCount() {
+Clock::time_point getRequestStartTime() {
   auto const requestIdx = Treadmill::requestIdx();
-  assertx(requestIdx != -1);
+  assertx(requestIdx != kInvalidRequestIdx);
   return s_inflightRequests[requestIdx].startTime;
 }
 
@@ -335,79 +384,92 @@ void deferredFree(void* p) {
   enqueue([p] { free(p); });
 }
 
-char const* getSessionKindName(SessionKind value) {
-  switch(value) {
-    case SessionKind::None: return "None";
-    case SessionKind::DebuggerClient: return "DebuggerClient";
-    case SessionKind::PreloadRepo: return "PreloadRepo";
-    case SessionKind::Watchman: return "Watchman";
-    case SessionKind::Vsdebug: return "VSDebug";
-    case SessionKind::FactsWorker: return "FactsWorker";
-    case SessionKind::CLIServer: return "CLIServer";
-    case SessionKind::AdminPort: return "AdminRequest";
-    case SessionKind::HttpRequest: return "HttpRequest";
-    case SessionKind::RpcRequest: return "RpcRequest";
-    case SessionKind::TranslateWorker: return "TranslateWorker";
-    case SessionKind::Retranslate: return "Retranslate";
-    case SessionKind::RetranslateAll: return "RetranslateAll";
-    case SessionKind::ProfData: return "ProfData";
-    case SessionKind::UnitTests: return "UnitTests";
-    case SessionKind::CompileRepo: return "CompileRepo";
-    case SessionKind::HHBBC: return "HHBBC";
-    case SessionKind::CompilerEmit: return "CompilerEmit";
-    case SessionKind::CompilerAnalysis: return "CompilerAnalysis";
-    case SessionKind::CLISession: return "CLISession";
-    case SessionKind::UnitReaper: return "UnitReaper";
+void checkForStuckTreadmill() {
+  Optional<StateGuard> g;
+  g.emplace();
+  refreshStats();
+  checkOldest(g, true);
+}
+
+std::string dumpActiveRequestInfo() {
+  std::string out;
+  out += "\nActive Requests:\n";
+  for (auto& req : s_inflightRequests) {
+    if (req.startTime != kNoStartTime) {
+      folly::format(
+        &out,
+        "  {} {} {} (age {}ms){} {}{}\n",
+        req.pthreadId,
+        req.requestInfo ? req.requestInfo->m_id.toString() : "none",
+        req.startTime.time_since_epoch().count(),
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+          Clock::now() - req.startTime
+        ).count(),
+        req.requestInfo
+          ? folly::sformat(
+            " (timeout {}s)",
+            req.requestInfo->m_reqInjectionData.getTimeout()
+          )
+          : "",
+        getSessionKindName(req.sessionKind),
+        req.startTime ==  getOldestRequestStartTime() ? " OLDEST" : ""
+      );
+    }
   }
-  return "";
+
+  return out;
+}
+
+unsigned long long getNumInflightRequests() {
+    return s_inflightRequests.size();
 }
 
 std::string dumpTreadmillInfo(bool forCrash) {
   std::string out;
-  Optional<GenCountGuard> g;
+  Optional<StateGuard> g;
 
   if (!forCrash) {
     g.emplace();
   } else {
-    if (pthread_mutex_trylock(&s_genLock) != 0) {
-      folly::format(
-        &out,
-        "Attempting to dump treadmill without acquiring GenCountGuard: {}\n",
-        folly::errnoStr(errno)
-      );
+    // Make an attempt to grab the lock even if we're dumping for a
+    // crash. Only wait one second and then give up. If we don't grab
+    // the lock, then proceed anyways and hope for the best.
+    struct timespec timeout;
+    clock_gettime(CLOCK_REALTIME, &timeout);
+    ++timeout.tv_sec;
+    if (pthread_mutex_timedlock(&s_stateLock, &timeout) != 0) {
+      out += "Attempting to dump treadmill without acquiring StateGuard\n";
     } else {
-      g.emplace(GenCountGuard::Locked{});
+      g.emplace(StateGuard::Locked{});
     }
   }
 
-  int64_t oldestStart =
-    s_oldestRequestInFlight.load(std::memory_order_relaxed);
-
-  folly::format(
-      &out,
-      "OldestStartTime: {}\n",
-      oldestStart
-  );
-
-  folly::format(
-      &out,
-      "InflightRequestsSize: {}\n",
-      s_inflightRequests.size()
-  );
-
-  for (auto& req : s_inflightRequests) {
-    if (req.startTime != kIdleGenCount) {
-      folly::format(
-          &out,
-          "{} {} {} {}{}\n",
-          req.pthreadId,
-          req.requestId,
-          req.startTime,
-          getSessionKindName(req.sessionKind),
-          req.startTime == oldestStart ? " OLDEST" : ""
-      );
-    }
+  if (!s_killMessage.empty()) {
+    folly::format(&out, "{}\n\n", s_killMessage);
   }
+
+  auto const oldestStart = getOldestRequestStartTime();
+
+  folly::format(
+    &out,
+    "Now: {}\n",
+    Clock::now().time_since_epoch().count()
+  );
+
+  folly::format(
+    &out,
+    "OldestStartTime: {}\n",
+    oldestStart.time_since_epoch().count()
+  );
+
+  folly::format(
+    &out,
+    "InflightRequestsSize: {}\n",
+    s_inflightRequests.size()
+  );
+
+  out += dumpActiveRequestInfo();
+
   return out;
 }
 

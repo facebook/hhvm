@@ -7,7 +7,7 @@ echo "*** Testing mkdir() and rmdir() for different permissions ***\n";
 
 $context = stream_context_create();
 
-$tmpdir = __SystemLib\hphp_test_tmproot();
+$tmpdir = sys_get_temp_dir();
 $counter = 1;
 
 for($mode = 0000; $mode <= 0777; $mode++) {

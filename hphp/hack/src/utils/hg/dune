@@ -4,7 +4,10 @@
  (modules hg hg_sig)
  (libraries exec_command injector_config process process_types future)
  (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
+  (pps
+   lwt_ppx
+   ppx_deriving.std
+   ppx_yojson_conv)))
 
 (executable
  (name hg_runner)

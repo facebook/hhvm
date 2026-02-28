@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   foo(inout $GLOBALS['x']);
 }
 

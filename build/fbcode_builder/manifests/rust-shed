@@ -1,0 +1,35 @@
+[manifest]
+name = rust-shed
+fbsource_path = fbcode/common/rust/shed
+shipit_project = rust-shed
+shipit_fbcode_builder = true
+
+[git]
+repo_url = https://github.com/facebookexperimental/rust-shed.git
+
+[build]
+builder = cargo
+
+[cargo]
+build_doc = true
+workspace_dir =
+
+[shipit.pathmap]
+fbcode/common/rust/shed = shed
+fbcode/common/rust/shed/public_autocargo = shed
+fbcode/common/rust/shed/public_tld = .
+tools/rust/ossconfigs = .
+
+[shipit.strip]
+^fbcode/common/rust/shed/(?!public_autocargo|public_tld).+/Cargo\.toml$
+
+[dependencies]
+fbthrift
+fb303
+
+# We use the system openssl on linux
+[dependencies.not(os=linux)]
+openssl
+
+[dependencies.fbsource=on]
+rust

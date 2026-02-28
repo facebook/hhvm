@@ -9,7 +9,7 @@ class A extends D {
 
 
 <<__EntryPoint>>
-function main_subclassof() {
+function main_subclassof() :mixed{
 $reflection = new \ReflectionClass( '\A' );
 
 var_dump(

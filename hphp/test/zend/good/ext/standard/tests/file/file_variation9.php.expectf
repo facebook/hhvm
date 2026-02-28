@@ -1,4 +1,6 @@
 *** Testing file() : variation ***
+
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/standard/tests/file/file_variation9.php on line 19
 vec(2) {
   string(32) "File ends on a single character
 "

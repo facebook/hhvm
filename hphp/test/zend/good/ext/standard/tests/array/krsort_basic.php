@@ -16,14 +16,14 @@
 echo "*** Testing krsort() : basic functionality ***\n";
 
 // an array containing unsorted string values with indices
-$unsorted_strings =   darray[ "lemon" => "l", "orange" => "o", "banana" => "b" ];
-$unsorted_strings = darray[
+$unsorted_strings =   dict[ "lemon" => "l", "orange" => "o", "banana" => "b" ];
+$unsorted_strings = dict[
     "l" => "lemon", "o" => "orange",
     "O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
     "b" => "banana",
 ];
 // an array containing unsorted numeric values with indices
-$unsorted_numerics =  darray[ 100 => 4, 33 => 3, 555 => 2, 22 => 1 ];
+$unsorted_numerics =  dict[ 100 => 4, 33 => 3, 555 => 2, 22 => 1 ];
 
 echo "\n-- Testing krsort() by supplying string array, 'flag' value is defualt --\n";
 $temp_array = $unsorted_strings;

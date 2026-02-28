@@ -6,7 +6,7 @@ class E extends Exception {
 }
 
 <<__EntryPoint>>
-function main_56() {
+function main_56() :mixed{
 try {
  throw new F();
  }

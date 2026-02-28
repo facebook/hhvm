@@ -2,5 +2,5 @@
 
 class C {
   <<__Memoize>>
-  function f()[this::C] {}
+  function f()[this::C] :mixed{}
 }

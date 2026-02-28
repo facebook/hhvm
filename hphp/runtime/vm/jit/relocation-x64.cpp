@@ -16,21 +16,17 @@
 
 #include "hphp/runtime/vm/jit/relocation.h"
 
-#include "hphp/runtime/base/runtime-option.h"
-
 #include "hphp/runtime/vm/jit/align-x64.h"
-#include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
-#include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/fixup.h"
-#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
+
+#include "hphp/util/configs/jit.h"
 
 namespace HPHP::jit::x64 {
 
 namespace {
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -91,7 +87,7 @@ size_t relocateImpl(RelocationInfo& rel,
       // that starts at byte 0 of the next cache line."
       auto nextSrc = src + di.size();
       auto const nextDest = destBlock.frontier() + di.size();
-      if (RuntimeOption::EvalJitAlignMacroFusionPairs &&
+      if (Cfg::Jit::AlignMacroFusionPairs &&
           codeArea == AreaIndex::Main) {
         while (nextSrc != end) {
           DecodedInstruction next(srcBlock.toDestAddress(nextSrc), nextSrc);
@@ -103,7 +99,7 @@ size_t relocateImpl(RelocationInfo& rel,
               // Offset to 1 past end of cache line.
               size_t offset = ALIGN_OFFSET((~(uint64_t)nextDest) + 2,
                                            x64::cache_line_size());
-              NEW_X64_ASM(a, destBlock);
+              X64Assembler a(destBlock);
               a.emitNop(offset);
               destRange += offset;
               internalRefsNeedUpdating = true;
@@ -156,7 +152,7 @@ size_t relocateImpl(RelocationInfo& rel,
           assertx(success);
         } else {
           if (!preserveAlignment && d2.isBranch()) {
-            if (wideJmps.count(src)) {
+            if (wideJmps.contains(src)) {
               if (d2.size() < kJmpLen) {
                 d2.widenBranch();
                 internalRefsNeedUpdating = true;
@@ -171,12 +167,12 @@ size_t relocateImpl(RelocationInfo& rel,
         }
       }
       if (di.hasImmediate()) {
-        if (fixups.addressImmediates.count(src)) {
+        if (fixups.addressImmediates.contains(src)) {
           if (size_t(di.immediate() - (uint64_t)start) < range) {
             hasInternalRefs = internalRefsNeedUpdating = true;
           }
         } else {
-          if (fixups.addressImmediates.count((TCA)~uintptr_t(src))) {
+          if (fixups.addressImmediates.contains((TCA)~uintptr_t(src))) {
             // Handle weird, encoded offset, used by LdSmashable
             always_assert(di.immediate() == ((uintptr_t(src) << 1) | 1));
             bool DEBUG_ONLY success =
@@ -368,24 +364,6 @@ void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups) {
   }
 }
 
-void findFixups(TCA start, TCA end, CGMeta& meta) {
-  while (start != end) {
-    assertx(start < end);
-    DecodedInstruction di(start);
-    start += di.size();
-
-    if (di.isCall()) {
-      if (auto fixup = FixupMap::findFixup(start)) {
-        meta.fixups.emplace_back(start, *fixup);
-      }
-      if (auto ct = getCatchTrace(start)) {
-        meta.catches.emplace_back(start, *ct);
-      }
-    }
-  }
-}
-
-
 /*
  * Relocate code in the range start, end into dest, and record
  * information about what was done to rel.
@@ -406,7 +384,7 @@ size_t relocate(RelocationInfo& rel,
     try {
       return relocateImpl(rel, destBlock, start, end, srcBlock,
                           fixups, exitAddr, wideJmps, codeArea);
-    } catch (JmpOutOfRange& j) {
+    } catch (JmpOutOfRange&) {
     }
   }
 }

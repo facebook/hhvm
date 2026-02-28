@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class DerivedClassIncremental extends BaseClassIncremental {
   public function bar(): string { return ''; }

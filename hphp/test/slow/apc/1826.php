@@ -1,7 +1,7 @@
 <?hh
 
-function test($x) {
-  apc_store('foo', varray['a'.$x, varray[$x]]);
+function test($x) :mixed{
+  apc_store('foo', vec['a'.$x, vec[$x]]);
   $a = __hhvm_intrinsics\apc_fetch_no_check('foo');
   var_dump($a);
 }
@@ -9,6 +9,6 @@ function test($x) {
 
 // disable array -> "Array" conversion notice
 <<__EntryPoint>>
-function main_1826() {
+function main_1826() :mixed{
 test('foo');
 }

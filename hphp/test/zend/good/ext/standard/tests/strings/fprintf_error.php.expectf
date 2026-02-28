@@ -1,8 +1,8 @@
 *** Testing Error Conditions ***
 
-Warning: fprintf() expects at least 2 parameters, 0 given in %s/fprintf_error.php on line 7
+Warning: fprintf() expects at least 2 positional parameters, 0 given in %s/fprintf_error.php on line 7
 
-Warning: fprintf() expects at least 2 parameters, 1 given in %s/fprintf_error.php on line 10
+Warning: fprintf() expects at least 2 positional parameters, 1 given in %s/fprintf_error.php on line 10
 
-Warning: fprintf() expects at least 2 parameters, 1 given in %s/fprintf_error.php on line 13
+Warning: fprintf() expects at least 2 positional parameters, 1 given in %s/fprintf_error.php on line 13
 Done

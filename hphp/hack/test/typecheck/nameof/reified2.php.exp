@@ -1,0 +1,2 @@
+ERROR: File "reified2.php", line 8, characters 26-27:
+`nameof` cannot be used with a generic type (Parsing[1002])

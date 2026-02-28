@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/base/array-data.h"
 
-#include <vector>
 #include <array>
 #include <tbb/concurrent_unordered_set.h>
 
@@ -23,23 +22,18 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
-#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/server/memory-stats.h"
-#include "hphp/runtime/vm/interp-helpers.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
-#include "hphp/util/exception.h"
-
-#include "hphp/zend/zend-string.h"
+#include "hphp/util/configs/eval.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,9 +53,10 @@ static_assert(
   " Make sure you changed it with good reason and then update this assert.");
 
 size_t hashArrayPortion(const ArrayData* arr) {
-  assertx(arr->isVanilla());
-
   auto hash = folly::hash::hash_128_to_64(arr->kind(), arr->isLegacyArray());
+
+  auto const isBespoke = bespoke::TypeStructure::isBespokeTypeStructure(arr);
+  hash = folly::hash::hash_combine(hash, isBespoke);
 
   IterateKV(
     arr,
@@ -84,6 +79,7 @@ size_t hashArrayPortion(const ArrayData* arr) {
         case KindOfPersistentVec:
         case KindOfPersistentDict:
         case KindOfPersistentKeyset:
+        case KindOfEnumClassLabel:
           hash = folly::hash::hash_combine(hash, v.m_data.num);
           break;
         case KindOfLazyClass:
@@ -128,13 +124,14 @@ size_t hashArrayPortion(const ArrayData* arr) {
 }
 
 bool compareArrayPortion(const ArrayData* ad1, const ArrayData* ad2) {
-  assertx(ad1->isVanilla());
-  assertx(ad2->isVanilla());
-
   if (ad1 == ad2) return true;
   if (ad1->kind() != ad2->kind()) return false;
   if (ad1->size() != ad2->size()) return false;
   if (ad1->isLegacyArray() != ad2->isLegacyArray()) return false;
+
+  auto const isBespoke1 = bespoke::TypeStructure::isBespokeTypeStructure(ad1);
+  auto const isBespoke2 = bespoke::TypeStructure::isBespokeTypeStructure(ad2);
+  if (isBespoke1 != isBespoke2) return false;
 
   auto const check = [] (const TypedValue& tv1, const TypedValue& tv2) {
     if (tv1.m_type != tv2.m_type) {
@@ -195,6 +192,8 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
 
   auto const arr = [&]{
     if (base->isVanilla()) return base;
+    // don't escalate for type structures
+    if (bespoke::TypeStructure::isBespokeTypeStructure(base)) return base;
     *parr = BespokeArray::ToVanilla(base, "ArrayData::GetScalarArray");
     decRefArr(base);
     return *parr;
@@ -218,7 +217,14 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
     }());
   }
 
-  arr->onSetEvalScalar();
+  auto const isBespokeTS = bespoke::TypeStructure::isBespokeTypeStructure(arr);
+
+  if (isBespokeTS) {
+    auto ts = bespoke::TypeStructure::As(arr);
+    bespoke::TypeStructure::OnSetEvalScalar(ts);
+  } else {
+    arr->onSetEvalScalar();
+  }
 
   s_cachedHash.first = arr;
   s_cachedHash.second = hashArrayPortion(arr);
@@ -240,16 +246,22 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
 
   if (auto const a = lookup(arr)) return replace(a);
 
+  ArrayData* ad;
+  if (isBespokeTS) {
+    auto const ts = bespoke::TypeStructure::As(arr);
+    ad = bespoke::TypeStructure::CopyStatic(ts);
+  } else {
+    ad = arr->copyStatic();
+  }
   // We should clear the sampled bit in the new static array regardless of
   // whether the input array was sampled, because specializing the input is
   // not sufficient to specialize this new static array.
-  auto const ad = arr->copyStatic();
   ad->m_aux16 &= ~kSampledArray;
   assertx(ad->isStatic());
 
-  // TODO(T68458896): allocSize rounds up to size class, which we shouldn't do.
-  MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(ad));
-  if (RuntimeOption::EvalEnableReverseDataMap) {
+  // TODO(T68458896): heapSize rounds up to size class, which we shouldn't do.
+  MemoryStats::LogAlloc(AllocKind::StaticArray, ad->heapSize());
+  if (Cfg::Eval::EnableReverseDataMap) {
     data_map::register_start(ad);
   }
 
@@ -363,6 +375,16 @@ const ArrayFunctions g_array_funcs = {
    *   array.
    */
   DISPATCH(PosIsValid)
+
+  /*
+   * ArrayData* SetPosMove(ArrayData*, ssize_t pos, TypedValue v)
+   *
+   *   Set a value in the array at the given position, which must be valid.
+   *   If copy / escalation is necessary, this operation will dec-ref the
+   *   array and return a new one; else, it'll return the original array.
+   *   It does not inc-ref the value.
+   */
+  DISPATCH(SetPosMove)
 
   /*
    * ArrayData* SetIntMove(ArrayData*, int64_t key, TypedValue v)
@@ -800,6 +822,7 @@ std::string describeKeyValue(TypedValue tv) {
   case KindOfLazyClass:
   case KindOfClsMeth:
   case KindOfRClsMeth:
+  case KindOfEnumClassLabel:
     return "<invalid key type>";
   }
   not_reached();
@@ -966,6 +989,209 @@ ArrayData* ArrayData::toKeyset(bool copy) {
   KeysetInit init{size()};
   IterateV(this, [&](auto v) { init.add(v); });
   return init.create();
+}
+
+
+void* ArrayData::AllocStatic(size_t size) {
+  return Cfg::Eval::LowStaticArrays ? low_malloc(size) : uncounted_malloc(size);
+}
+
+void ArrayData::FreeStatic(void* ptr) {
+  Cfg::Eval::LowStaticArrays ? low_free(ptr) : uncounted_free(ptr);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Serialization
+
+__thread UnitEmitter* BlobEncoderHelper<const ArrayData*>::tl_unitEmitter{nullptr};
+__thread Unit* BlobEncoderHelper<const ArrayData*>::tl_unit{nullptr};
+__thread bool BlobEncoderHelper<const ArrayData*>::tl_defer{false};
+
+namespace {
+
+enum class ArrayKind {
+  Null = 0,
+  Vec,
+  Dict,
+  Keyset,
+  BespokeTS,
+  VArray,
+  DArray
+};
+
+}
+
+void BlobEncoderHelper<const ArrayData*>::serde(BlobEncoder& encoder,
+                                                const ArrayData* ad) {
+  assertx(!tl_unit);
+
+  if (auto const ue = tl_unitEmitter; ue && !tl_defer) {
+    if (!ad) {
+      encoder(Id{0});
+      return;
+    }
+    Id id = ue->mergeArray(ad);
+    assertx(id != std::numeric_limits<Id>::max());
+    encoder(id+1);
+    return;
+  }
+
+  auto const oldDefer = tl_defer;
+  tl_defer = false;
+  SCOPE_EXIT {
+    assertx(!tl_defer);
+    tl_defer = oldDefer;
+  };
+
+  using AK = ArrayKind;
+  auto const ak = [&] {
+    if (!ad) return AK::Null;
+    if (ad->isLegacyArray()) {
+      return ad->isVecType() ? AK::VArray : AK::DArray;
+    }
+    if (ad->isDictType()) {
+      return bespoke::TypeStructure::isBespokeTypeStructure(ad)
+        ? AK::BespokeTS
+        : AK::Dict;
+    }
+    if (ad->isVecType()) return AK::Vec;
+    assertx(ad->isKeysetType());
+    return AK::Keyset;
+  }();
+
+  encoder(ak);
+  if (ak == AK::Null) return;
+
+  assertx(ad->size() <= std::numeric_limits<uint32_t>::max());
+  encoder(static_cast<uint32_t>(ad->size()));
+
+  switch (ak) {
+    case AK::Vec:
+    case AK::VArray:
+    case AK::Keyset:
+      IterateV(ad, [&] (TypedValue v) { encoder(v); });
+      break;
+    case AK::Dict:
+    case AK::DArray:
+    case AK::BespokeTS:
+      IterateKV(
+        ad,
+        [&] (TypedValue k, TypedValue v) {
+          assertx(tvIsInt(k) || tvIsString(k));
+          encoder(k)(v);
+        }
+      );
+      break;
+    case AK::Null:
+      not_reached();
+  }
+}
+
+void BlobEncoderHelper<const ArrayData*>::serde(BlobDecoder& decoder,
+                                                const ArrayData*& ad,
+                                                bool makeStatic) {
+  if (auto const ue = tl_unitEmitter; ue && !tl_defer) {
+    Id id;
+    decoder(id);
+    if (!id) {
+      ad = nullptr;
+      return;
+    }
+    if (makeStatic) {
+      ad = ue->lookupArrayId(id-1);
+      assertx(ad->isStatic());
+    } else {
+      ad = ue->lookupArrayIdCopy(id-1).detach();
+    }
+    return;
+  } else if (auto const u = tl_unit; u && !tl_defer) {
+    assertx(makeStatic);
+    Id id;
+    decoder(id);
+    if (!id) {
+      ad = nullptr;
+      return;
+    }
+    ad = u->lookupArrayId(id-1);
+    assertx(ad->isStatic());
+    return;
+  }
+
+  auto const oldDefer = tl_defer;
+  tl_defer = false;
+  SCOPE_EXIT {
+    assertx(!tl_defer);
+    tl_defer = oldDefer;
+  };
+
+  using AK = ArrayKind;
+
+  AK ak;
+  decoder(ak);
+  if (ak == AK::Null) {
+    ad = nullptr;
+    return;
+  }
+
+  uint32_t size;
+  decoder(size);
+
+  switch (ak) {
+    case AK::Vec:
+    case AK::VArray: {
+      VecInit v{size};
+      for (size_t i = 0; i < size; ++i) {
+        TypedValue tv;
+        decoder(tv, makeStatic);
+        v.append(Variant::attach(tv));
+      }
+      if (ak == AK::VArray) v.setLegacyArray(true);
+      auto a = v.toArray();
+      if (makeStatic) a.setEvalScalar();
+      ad = a.detach();
+      break;
+    }
+    case AK::Keyset: {
+      KeysetInit k{size};
+      for (size_t i = 0; i < size; ++i) {
+        TypedValue tv;
+        decoder(tv, makeStatic);
+        k.add(Variant::attach(tv));
+      }
+      auto a = k.toArray();
+      if (makeStatic) a.setEvalScalar();
+      ad = a.detach();
+      break;
+    }
+    case AK::Dict:
+    case AK::DArray:
+    case AK::BespokeTS: {
+      DictInit d{size};
+      for (size_t i = 0; i < size; ++i) {
+        TypedValue k;
+        TypedValue v;
+        decoder(k, makeStatic)(v, makeStatic);
+        if (tvIsString(k)) {
+          d.set(String::attach(k.m_data.pstr), Variant::attach(v));
+        } else {
+          assertx(tvIsInt(k));
+          d.set(k.m_data.num, Variant::attach(v));
+        }
+      }
+      if (ak == AK::DArray) d.setLegacyArray();
+      auto a = d.toArray();
+      if (ak == AK::BespokeTS) {
+        auto const ts =
+          bespoke::TypeStructure::MakeFromVanilla(a.get());
+        if (ts) a = Array::attach(ts);
+      }
+      if (makeStatic) a.setEvalScalar();
+      ad = a.detach();
+      break;
+    }
+    case AK::Null:
+      not_reached();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

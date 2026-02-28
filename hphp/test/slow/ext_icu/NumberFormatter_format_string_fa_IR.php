@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_number_formatter_format_string_fa_ir() {
+function main_number_formatter_format_string_fa_ir() :mixed{
 $formatter = NumberFormatter::create("fa_IR", NumberFormatter::DEFAULT_STYLE);
 $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 2);
 echo $formatter->format(1.23);

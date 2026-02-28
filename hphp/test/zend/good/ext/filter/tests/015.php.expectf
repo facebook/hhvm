@@ -5,7 +5,7 @@ string(27) "http://www.example/img/dir/"
 string(26) "http://www.example/img/dir"
 bool(false)
 bool(false)
-string(18) "file:///tmp/test.c"
+string(%d) "file://%s/temp/test.c"
 string(26) "ftp://ftp.example.com/tmp/"
 bool(false)
 bool(false)

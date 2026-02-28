@@ -1,5 +1,13 @@
-Constructor Foo -> Type Bar
-Constructor M -> Type N
+Const Bar::T -> Type Bar
+Const Bar::TInner -> Type Bar
+Const Foo::T -> Type Foo
+Const Foo::TInner -> Type Foo
+Const M::TInner -> Type M
+Const N::TInner -> Type N
+Constructor Bar -> Type Bar
+Constructor Foo -> Type Bar, Type Foo
+Constructor M -> Type M, Type N
+Constructor N -> Type N
 Extends Foo -> Type Bar
 Extends M -> Type N
 Type Foo -> Type Bar

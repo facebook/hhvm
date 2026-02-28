@@ -3,4 +3,4 @@
 
 <<__EnumClass>> class B {}
 class D extends B {}
-<<__EntryPoint>> function enum_class05() {}
+<<__EntryPoint>> function enum_class05() :mixed{}

@@ -7,23 +7,23 @@ class Cls {
   const INTCNS = 123;
 }
 
-const ARRAY1 = varray[];
-const ARRAY2 = varray[1, 2, 3, 4];
-const ARRAY3 = varray['a', 'b', 'c', 'd'];
-const ARRAY4 = varray[1, varray[false, null], varray[true, 'abc'], 1.23, varray[]];
-const ARRAY5 = varray[vec[], dict[], keyset[]];
-const ARRAY6 = varray[vec[1, 2], dict['abc' => true], keyset['a', 100, 'b']];
+const ARRAY1 = vec[];
+const ARRAY2 = vec[1, 2, 3, 4];
+const ARRAY3 = vec['a', 'b', 'c', 'd'];
+const ARRAY4 = vec[1, vec[false, null], vec[true, 'abc'], 1.23, vec[]];
+const ARRAY5 = vec[vec[], dict[], keyset[]];
+const ARRAY6 = vec[vec[1, 2], dict['abc' => true], keyset['a', 100, 'b']];
 const ARRAY7 = ARRAY1;
-const ARRAY8 = varray[ARRAY2, ARRAY2];
-const ARRAY9 = varray[BOOLCNS ? ARRAY2 : ARRAY3];
-const ARRAY10 = varray[Cls::INTCNS];
+const ARRAY8 = vec[ARRAY2, ARRAY2];
+const ARRAY9 = vec[BOOLCNS ? ARRAY2 : ARRAY3];
+const ARRAY10 = vec[Cls::INTCNS];
 
 const VEC1 = vec[];
 const VEC2 = vec[1, 2, 3, 4];
 const VEC3 = vec['a', 'b', 'c', 'd'];
 const VEC4 = vec[1, vec[false, null], vec[true, 'abc'], 1.23, vec[]];
-const VEC5 = vec[varray[], dict[], keyset[]];
-const VEC6 = vec[varray[1, 2], dict['abc' => true], keyset['a', 100, 'b']];
+const VEC5 = vec[vec[], dict[], keyset[]];
+const VEC6 = vec[vec[1, 2], dict['abc' => true], keyset['a', 100, 'b']];
 const VEC7 = VEC1;
 const VEC8 = vec[VEC2, VEC2];
 const VEC9 = vec[BOOLCNS ? VEC2 : VEC3];
@@ -41,8 +41,8 @@ const DICT7 = dict[0 => 1,
                    3 => 1.23,
                    4 => dict[]];
 const DICT8 = dict['100' => 5, 100 => 'abc', 1 => dict[123 => 'abc', '123' => 10]];
-const DICT9 = dict[100 => varray[], 200 => vec[], 300 => keyset[]];
-const DICT10 = dict[100 => varray[1, 2], 200 => vec['abc'], 300 => keyset['a', 100, 'b']];
+const DICT9 = dict[100 => vec[], 200 => vec[], 300 => keyset[]];
+const DICT10 = dict[100 => vec[1, 2], 200 => vec['abc'], 300 => keyset['a', 100, 'b']];
 const DICT11 = DICT1;
 const DICT12 = dict[123 => DICT2, 456 => DICT2];
 const DICT13 = dict[100 => BOOLCNS ? DICT2 : DICT3];

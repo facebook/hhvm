@@ -10,14 +10,13 @@ external realpath : string -> string option = "hh_realpath"
 
 external is_nfs : string -> bool = "hh_is_nfs"
 
-external is_apple_os : unit -> bool = "hh_sysinfo_is_apple_os"
-
 (** E.g. freopen "file.txt" "a" Unix.stdout will redirect stdout to the file. *)
 external freopen : string -> string -> Unix.file_descr -> unit = "hh_freopen"
 
 (** Option type intead of exception throwing. *)
 val get_env : string -> string option
 
+(** Get the user from the $USER or $USERNAME or $LOGNAME environment variable. *)
 val getenv_user : unit -> string option
 
 val getenv_home : unit -> string option
@@ -31,6 +30,19 @@ val null_path : string
 val temp_dir_name : string
 
 val getenv_path : unit -> string option
+
+(** AVOID
+  * These "_naughty" functions break the abstraction of OCaml's Unix.file_descr
+  * type by using Obj.magic to convert between file descriptors and integers.
+  * Current usage is primarily for passing fd numbers across process boundaries
+  * via command line arguments. *)
+val fd_to_int_naughty : Unix.file_descr -> int
+
+(** AVOID, see {!fd_to_int_naughty} *)
+val int_to_fd_naughty : int -> Unix.file_descr
+
+(** This is a string "fd123:456" which uniquely identifies this file's inode *)
+val show_inode : Unix.file_descr -> string
 
 val open_in_no_fail : string -> in_channel
 
@@ -61,6 +73,8 @@ val string_contains : string -> string -> bool
 
 val exec_read : string -> string option
 
+val exec_try_read : string -> string option
+
 val exec_read_lines : ?reverse:bool -> string -> string list
 
 val collect_paths : (string -> bool) -> string -> string list
@@ -80,6 +94,7 @@ val rm_dir_tree : ?skip_mocking:bool -> string -> unit
 
 val restart : unit -> 'a
 
+(** Try to get the current system username from environment variables or commands such as `logname` *)
 val logname_impl : unit -> string
 
 val logname : unit -> string
@@ -139,10 +154,11 @@ external lutimes : string -> unit = "hh_lutimes"
 
 type touch_mode =
   | Touch_existing of { follow_symlinks: bool }
-  | Touch_existing_or_create_new of {
+      (** Can be used on files and folders. This won't open/close fds, which is important for some callers. *)
+  | Touch_existing_file_or_create_new of {
       mkdir_if_new: bool;
       perm_if_new: Unix.file_perm;
-    }
+    }  (** Only to be used for files, not folders *)
 
 val touch : touch_mode -> string -> unit
 
@@ -150,8 +166,9 @@ val try_touch : touch_mode -> string -> unit
 
 val splitext : string -> string * string
 
-(** Do we want HackEventLogger to work? *)
-val enable_telemetry : unit -> bool
+(* HH_TEST_MODE env var redirects HackEventLogger to a different table and
+ * backs the [deterministic_behavior_for_tests] helper below *)
+val prod_telemetry : unit -> bool
 
 (** This flag controls whether at runtime we pick A/B experiments to test;
 if not, then the output behavior will be solely a function of the inputs
@@ -174,38 +191,22 @@ val set_signal : int -> Sys.signal_behavior -> unit
 
 val signal : int -> Sys.signal_behavior -> unit
 
-external get_total_ram : unit -> int = "hh_sysinfo_totalram"
+(** as reported by sysinfo().uptime. Is 0 if not on linux. *)
+val uptime : unit -> int
 
-external uptime : unit -> int = "hh_sysinfo_uptime"
+(** in bytes, as reported by sysinfo().totalram. Is 0 if not on linux. *)
+val total_ram : int
 
 (** returns the number of processors (which includes hyperthreads),
 as reported by  sysconf(_SC_NPROCESSORS_ONLN) *)
-external nproc : unit -> int = "nproc"
-
-(** linux: returns the number of cores (which doesn't include hyperthreads)
-by parsing the content of /proc/cpuinfo, which you pass as argument.
-If you're on a platform without /proc/cpuinfo, you won't even be able to call this!
-It will throw of /proc/cpuinfo is malformed. *)
-val ncores_linux_only : string -> int
-
-(** in bytes, as reported by sysinifo().totalram *)
-val total_ram : int
-
 val nbr_procs : int
 
 external set_priorities : cpu_priority:int -> io_priority:int -> unit
   = "hh_set_priorities"
 
-external pid_of_handle : int -> int = "pid_of_handle"
-
-external handle_of_pid_for_termination : int -> int
-  = "handle_of_pid_for_termination"
-
 val terminate_process : int -> unit
 
 val lstat : string -> Unix.stats
-
-val normalize_filename_dir_sep : string -> string
 
 val name_of_signal : int -> string
 
@@ -226,8 +227,23 @@ type processor_info = {
 
 external processor_info : unit -> processor_info = "hh_processor_info"
 
+type sysinfo = {
+  uptime: int;
+  totalram: int;
+  freeram: int;
+  sharedram: int;
+  bufferram: int;
+  totalswap: int;
+  freeswap: int;
+  totalhigh: int;
+  freehigh: int;
+}
+
+(** returns None if not on linux. *)
+external sysinfo : unit -> sysinfo option = "hh_sysinfo"
+
 (** Calls Unix.select but ignores EINTR, i.e. retries select with
-    an adjusted timout upon EINTR.
+    an adjusted timeout upon EINTR.
     We implement timers using sigalarm which means selects can be
     interrupted. This is a wrapper around EINTR which continues the select if it
     gets interrupted by a signal *)
@@ -237,6 +253,18 @@ val select_non_intr :
   Unix.file_descr list ->
   float ->
   Unix.file_descr list * Unix.file_descr list * Unix.file_descr list
+
+(** "restart_on_EINTR f x" will do "f x", but if it throws EINTR then it will retry.
+See https://ocaml.github.io/ocamlunix/ocamlunix.html#sec88 for explanation. *)
+val restart_on_EINTR : ('a -> 'b) -> 'a -> 'b
+
+(** Like Unix.write, but ignores EINTR. *)
+val write_non_intr : Unix.file_descr -> bytes -> int -> int -> unit
+
+(** Reads specified number of bytes from the file descriptor through repeated calls to Unix.read.
+Ignores EINTR. If ever a call to Unix.read returns 0 bytes (e.g. end of file),
+then this function will return None. *)
+val read_non_intr : Unix.file_descr -> int -> bytes option
 
 (** Flow uses lwt, which installs a sigchld handler. So the old pattern of
 fork & waitpid will hit an EINTR when the forked process dies and the parent
@@ -275,6 +303,20 @@ module For_test : sig
   val find_oom_in_dmesg_output : int -> string -> string list -> bool
 end
 
+(** [atomically_create_and_init_file file ~rd ~wr perm ~init] will
+(1) create an anomymous FD using [rd], [wr] and [perm],
+(2) call the [init] callback allowing you to write contents or lock that FD,
+(3) attempt to atomically place that FD at the specified filename [file].
+If this third step fails because a file already exists there, the function
+will return None. Otherwise, it will return Some fd. *)
+val atomically_create_and_init_file :
+  string ->
+  rd:bool ->
+  wr:bool ->
+  Unix.file_perm ->
+  init:(Unix.file_descr -> unit) ->
+  Unix.file_descr option
+
 (** This will acquire a reader-lock on the file then read its content.
 Locks in unix are advisory, so this only works if writing is done by
 [protected_write_exn]. If the file doesn't exist, Unix.Unix_error(ENOENT). *)
@@ -284,6 +326,9 @@ val protected_read_exn : string -> string
 then write content. Locks in unix are advisory, so this only works if reading is
 done by [protected_read_exn]. Empty content isn't supported and will fail. *)
 val protected_write_exn : string -> string -> unit
+
+(** This is a primitive API for atomic locks. It is robust against EINTR. *)
+val with_lock : Unix.file_descr -> Unix.lock_command -> f:(unit -> 'a) -> 'a
 
 (** As it says, redirects stdout and stderr to this file, which it will
 open in "w" mode. If redirection fails then stdout+stderr are left unchanged.*)

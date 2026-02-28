@@ -19,14 +19,40 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/jemalloc-util.h"
+#include "hphp/util/ptr.h"
+#include "hphp/util/roar.h"
 
 #include <cinttypes>
 #include <folly/portability/SysMman.h>
 
 namespace HPHP {
 
-HHVM_ATTRIBUTE_WEAK uintptr_t lowArenaMinAddr() {
-  return 1ull << 30;
+uintptr_t lowArenaMinAddr() {
+  const char* str = getenv("HHVM_LOW_ARENA_START");
+  if (str == nullptr) {
+    // 2GB if we are not low-mem constrained.
+    if (use_packedptr || !use_lowptr) return 2ull << 30;
+
+#if defined(INSTRUMENTED_BUILD)
+    // 2GB if instrumented build due to large text size.
+    return 2ull << 30;
+#endif
+
+#if !defined(NDEBUG) || defined(DEBUG)
+    // 2GB if debug build due to larger text size
+    return 2ull << 30;
+#endif
+
+    // 1GB for pure low-mem, steal extra 128MB for roar.
+    if (use_roar) return (1ull << 30) + (128ull << 20); // 1GB + 128MB
+    return 1ull << 30; // 1GB
+  }
+
+  uintptr_t start = 0;
+  if (sscanf(str, "0x%lx", &start) == 1) return start;
+  if (sscanf(str, "%lu", &start) == 1) return start;
+  fprintf(stderr, "Bad environment variable HHVM_LOW_ARENA_START: %s\n", str);
+  abort();
 }
 
 namespace alloc {
@@ -36,7 +62,7 @@ void RangeState::reserve() {
   auto const size = capacity();
   if (size == 0) return;
   auto ret = mmap(base, size, PROT_NONE,
-                  MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE, -1, 0);
+                  MAP_FIXED_NOREPLACE | MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE, -1, 0);
   if (ret != base) {
     char msg[128];
     if (ret == MAP_FAILED) {
@@ -57,18 +83,25 @@ void RangeState::reserve() {
 
 size_t getLowMapped() {
   size_t low_mapped = 0;
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
   // The low range [1G, 4G) is divided into two ranges, and shared by 3
   // arenas.
-  low_mapped += alloc::getRange(alloc::AddrRangeClass::VeryLow).used();
   low_mapped += alloc::getRange(alloc::AddrRangeClass::Low).used();
-#elif USE_JEMALLOC
-  mallctlRead<size_t, true>(
-    folly::sformat("stats.arenas.{}.mapped", low_arena).c_str(),
-    &low_mapped
-  );
+#ifdef USE_PACKEDPTR
+  low_mapped += alloc::getRange(alloc::AddrRangeClass::LowSmall).used();
+#endif
+  low_mapped += alloc::getRange(alloc::AddrRangeClass::LowEmergency).used();
 #endif
   return low_mapped;
+}
+
+size_t getMidMapped() {
+#if USE_JEMALLOC
+  // The mid range [4G, 32G)
+  return alloc::getRange(alloc::AddrRangeClass::Mid).used();
+#else
+  return 0;
+#endif
 }
 
 RangeState::RangeState(uintptr_t lowAddr, uintptr_t highAddr, Reserved)

@@ -56,7 +56,7 @@
    are counted, allowing the caller to allocate enough room */
 static void tokenize(const char *header, php_rfc822_token_t *tokens,
                      int *ntokens, int report_errors) {
-  register const char *p, *q, *start;
+  const char *p, *q, *start;
   int in_bracket = 0;
 
 /* NB: parser assumes that the header has two bytes of NUL terminator */

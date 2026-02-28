@@ -4,7 +4,7 @@ class Ref {
   function __construct(public $value)[] {}
 }
 <<__EntryPoint>>
-function main_g4() {
+function main_g4() :mixed{
 $foo = function ($a1, $a2) {
   $a1 += 10;
   $a2->value += 100;

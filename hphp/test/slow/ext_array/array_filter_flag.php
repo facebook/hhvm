@@ -6,8 +6,8 @@
 // --------------------------------
 
 <<__EntryPoint>>
-function main_array_filter_flag() {
-$a = darray['x' => 10, 'y' => 20];
+function main_array_filter_flag() :mixed{
+$a = dict['x' => 10, 'y' => 20];
 
 array_filter($a, ($v, $k) ==> {
   var_dump($k);

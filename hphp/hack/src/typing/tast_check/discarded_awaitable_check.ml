@@ -31,7 +31,9 @@ let rec enforce_not_awaitable env p ty =
     List.iter tyl ~f:(enforce_not_awaitable env p)
   | Tclass ((_, awaitable), _, _)
     when String.equal awaitable SN.Classes.cAwaitable ->
-    Errors.add_typing_error
+    let Equal = Tast_env.eq_typing_env in
+    Typing_error_utils.add_typing_error
+      ~env
       Typing_error.(
         primary
         @@ Primary.Discarded_awaitable { pos = p; decl_pos = get_pos ety })
@@ -43,7 +45,6 @@ let rec enforce_not_awaitable env p ty =
       enforce_not_awaitable env p ty'
     else
       ()
-  | Terr
   | Tany _
   | Tnonnull
   | Tvec_or_dict _
@@ -58,10 +59,10 @@ let rec enforce_not_awaitable env p ty =
   | Tshape _
   | Tdynamic
   | Taccess _
-  | Tneg _ ->
+  | Tlabel _
+  | Tneg _
+  | Tclass_ptr _ ->
     ()
-  | Tunapplied_alias _ ->
-    Typing_defs.error_Tunapplied_alias_in_illegal_context ()
 
 type ctx = {
   (* Is a supertype of ?Awaitable<t> allowed in a given
@@ -122,23 +123,28 @@ let visitor =
 
     method! on_expr (env, ctx) ((ty, p, e) as te) =
       match e with
+      | Await e -> this#on_expr (env, allow_awaitable) e
       | Unop (Ast_defs.Unot, e)
-      | Binop (Ast_defs.Eqeqeq, e, (_, _, Null))
-      | Binop (Ast_defs.Eqeqeq, (_, _, Null), e)
-      | Binop (Ast_defs.Diff2, e, (_, _, Null))
-      | Binop (Ast_defs.Diff2, (_, _, Null), e) ->
+      | Binop { bop = Ast_defs.Eqeqeq; lhs = e; rhs = (_, _, Null) }
+      | Binop { bop = Ast_defs.Eqeqeq; lhs = (_, _, Null); rhs = e }
+      | Binop { bop = Ast_defs.Diff2; lhs = e; rhs = (_, _, Null) }
+      | Binop { bop = Ast_defs.Diff2; lhs = (_, _, Null); rhs = e } ->
         this#on_expr (env, disallow_due_to_cast_with_explicit_nullcheck) e
-      | Binop (Ast_defs.(Eqeq | Eqeqeq | Diff | Diff2 | Barbar | Ampamp), e1, e2)
-        ->
-        this#on_expr (env, disallow_due_to_cast ctx env) e1;
-        this#on_expr (env, disallow_due_to_cast ctx env) e2
-      | Binop (Ast_defs.QuestionQuestion, e1, e2) ->
+      | Binop
+          {
+            bop = Ast_defs.(Eqeq | Eqeqeq | Diff | Diff2 | Barbar | Ampamp);
+            lhs;
+            rhs;
+          } ->
+        this#on_expr (env, disallow_due_to_cast ctx env) lhs;
+        this#on_expr (env, disallow_due_to_cast ctx env) rhs
+      | Binop { bop = Ast_defs.QuestionQuestion; lhs; rhs } ->
         this#on_expr
           ( env,
             disallow_due_to_cast_with_explicit_nullcheck_and_return_nonnull ctx
           )
-          e1;
-        this#on_expr (env, ctx) e2
+          lhs;
+        this#on_expr (env, ctx) rhs
       | Eif (e1, e2, e3) ->
         this#on_expr (env, disallow_due_to_cast ctx env) e1;
         Option.iter e2 ~f:(this#on_expr (env, ctx));
@@ -150,7 +156,7 @@ let visitor =
       | Is (e, (_, Hprim Tnull)) ->
         this#on_expr (env, disallow_due_to_cast_with_explicit_nullcheck) e
       | Is (e, hint)
-      | As (e, hint, _) ->
+      | As { expr = e; hint; is_nullable = _; enforce_deep = _ } ->
         let hint_ty = Env.hint_to_ty env hint in
         let (env, hint_ty) =
           Env.localize_no_subst env ~ignore_errors:true hint_ty
@@ -178,22 +184,22 @@ let visitor =
 
     method! on_stmt (env, ctx) stmt =
       match snd stmt with
-      | Expr ((_, _, Binop (Ast_defs.Eq _, _, _)) as e) ->
-        this#on_expr (env, allow_awaitable) e
+      | Expr ((_, _, Assign _) as e) -> this#on_expr (env, allow_awaitable) e
       | Expr e -> this#on_expr (env, disallow_awaitable) e
       | If (e, b1, b2) ->
         this#on_expr (env, disallow_due_to_cast ctx env) e;
         this#on_block (env, ctx) b1;
         this#on_block (env, ctx) b2
-      | Do (b, e) ->
+      | Do (b, (_, _, e)) ->
         this#on_block (env, ctx) b;
         this#on_expr (env, disallow_due_to_cast ctx env) e
-      | While (e, b) ->
+      | While ((_, _, e), b) ->
         this#on_expr (env, disallow_due_to_cast ctx env) e;
         this#on_block (env, ctx) b
-      | For (e1, e2, e3, b) ->
+      | For (e1, e2, (_, _, e3), b) ->
         List.iter e1 ~f:(this#on_expr (env, ctx));
-        Option.iter e2 ~f:(this#on_expr (env, disallow_due_to_cast ctx env));
+        Option.iter e2 ~f:(fun (_, _, e) ->
+            this#on_expr (env, disallow_due_to_cast ctx env) e);
         List.iter e3 ~f:(this#on_expr (env, ctx));
         this#on_block (env, ctx) b
       | Switch (e, casel, dfl) ->

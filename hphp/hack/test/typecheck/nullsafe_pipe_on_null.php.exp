@@ -1,0 +1,2 @@
+WARN: File "nullsafe_pipe_on_null.php", line 6, characters 5-18:
+You are using the `|?>` operator but this expression is always null. It's likely you did not intend this value to be always null. (Warn[12032])

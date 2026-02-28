@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/vm/fcall-args-flags.h"
 #include "hphp/runtime/vm/hhbc-shared.h"
+#include "hphp/runtime/vm/iter-args-flags.h"
 #include "hphp/runtime/vm/member-key.h"
 #include "hphp/runtime/vm/opcodes.h"
 #include "hphp/util/compact-vector.h"
@@ -52,51 +53,44 @@ struct LocalRange {
 
 /*
  * Arguments to IterInit / IterNext opcodes.
- * hhas format: <iterId> K:<keyId> V:<valId> (for key-value iters)
- *              <iterId> NK V:<valId>        (for value-only iters)
- * hhbc format: <uint8:flags> <iva:iterId> <iva:(keyId + 1)> <iva:valId>
- *
- * For value-only iters, keyId will be -1 (an invalid local ID); to take
- * advantage of the one-byte encoding for IVA arguments, we add 1 to the key
- * when encoding these args in the hhbc format.
+ * hhas format: <iterId>
+ * hhbc format: <uint8:flags> <iva:iterId>
  *
  * We don't accept flags from hhas because our flags require analyses that we
  * currently only do in HHBBC.
  */
 struct IterArgs {
-  enum Flags : uint8_t {
-    None      = 0,
-    // The base is stored in a local, and that local is unmodified in the loop.
-    BaseConst = (1 << 0),
-  };
+  using Flags = IterArgsFlags;
 
-  static constexpr int32_t kNoKey = -1;
-
-  explicit IterArgs(Flags flags, int32_t iterId, int32_t keyId, int32_t valId)
-    : iterId(iterId), keyId(keyId), valId(valId), flags(flags) {}
-
-  bool hasKey() const {
-    assertx(keyId == kNoKey || keyId >= 0);
-    return keyId != kNoKey;
-  };
+  explicit IterArgs(Flags flags, int32_t iterId)
+    : iterId(iterId), flags(flags) {}
 
   bool operator==(const IterArgs& other) const {
-    return iterId == other.iterId && keyId == other.keyId &&
-           valId == other.valId && flags == other.flags;
+    return iterId == other.iterId && flags == other.flags;
   }
 
   int32_t iterId;
-  int32_t keyId;
-  int32_t valId;
   Flags flags;
+
+  template <typename SerDe> static IterArgs makeForSerde(SerDe& sd) {
+    static_assert(SerDe::deserializing);
+    int32_t iterId;
+    Flags flags;
+    sd(iterId)(flags);
+    return IterArgs{flags, iterId};
+  }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(iterId)(flags);
+  }
 };
 
 // Arguments to FCall opcodes.
 // hhas format: <flags> <numArgs> <numRets> <inoutArgs> <readonlyArgs>
-//              <asyncEagerOffset>
-// hhbc format: <uint8:flags> ?<iva:numArgs> ?<iva:numRets>
+//              <namedArgNames vecid> <asyncEagerOffset>
+// hhbc format: <uint16:flags> ?<iva:numArgs> ?<iva:numRets>
 //              ?<boolvec:inoutArgs> ?<boolvec:readonlyArgs>
-//              ?<ba:asyncEagerOffset>
+//              ?<vecid:argNames> ?<ba:asyncEagerOffset>
 //   flags            = flags (hhas doesn't have HHBC-only flags)
 //   numArgs          = flags >> kFirstNumArgsBit
 //                        ? flags >> kFirstNumArgsBit - 1 : decode_iva()
@@ -106,7 +100,7 @@ struct IterArgs {
 struct FCallArgsBase {
   using Flags = FCallArgsFlags;
   // The first (lowest) bit of numArgs.
-  static constexpr uint16_t kFirstNumArgsBit = 12;
+  static constexpr uint16_t kFirstNumArgsBit = 13;
 
   // Flags that are valid on FCallArgsBase::flags struct (i.e. non-HHBC-only).
   static constexpr Flags kInternalFlags =
@@ -116,7 +110,8 @@ struct FCallArgsBase {
     Flags::SkipRepack |
     Flags::SkipCoeffectsCheck |
     Flags::EnforceMutableReturn |
-    Flags::EnforceReadonlyThis;
+    Flags::EnforceReadonlyThis |
+    Flags::HasNamedArgs;
 
   explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets)
     : numArgs(numArgs)
@@ -142,16 +137,32 @@ struct FCallArgsBase {
   uint32_t numArgs;
   uint32_t numRets;
   Flags flags;
+
+  template <typename SerDe> static FCallArgsBase makeForSerde(SerDe& sd) {
+    static_assert(SerDe::deserializing);
+    uint32_t numArgs;
+    uint32_t numRets;
+    Flags flags;
+    sd(numArgs)(numRets)(flags);
+    return FCallArgsBase{flags, numArgs, numRets};
+  }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    static_assert(!SerDe::deserializing);
+    sd(numArgs)(numRets)(flags);
+  }
 };
 
 struct FCallArgs : FCallArgsBase {
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
                      const uint8_t* inoutArgs, const uint8_t* readonlyArgs,
-                     Offset asyncEagerOffset, const StringData* context)
+                     const Id namedArgNames, Offset asyncEagerOffset,
+                     const StringData* context)
     : FCallArgsBase(flags, numArgs, numRets)
     , asyncEagerOffset(asyncEagerOffset)
     , inoutArgs(inoutArgs)
     , readonlyArgs(readonlyArgs)
+    , namedArgNames(namedArgNames)
     , context(context) {
     assertx(IMPLIES(inoutArgs != nullptr || readonlyArgs != nullptr,
                     numArgs != 0));
@@ -188,11 +199,16 @@ struct FCallArgs : FCallArgsBase {
     assertx(!hasGenerics());
     return FCallArgs(
       static_cast<Flags>(flags | Flags::HasGenerics),
-      numArgs, numRets, inoutArgs, readonlyArgs, asyncEagerOffset, context);
+      numArgs, numRets, inoutArgs, readonlyArgs,
+      namedArgNames, asyncEagerOffset, context);
+  }
+  bool hasNamedArgs() const {
+    return namedArgNames != kInvalidId;
   }
   Offset asyncEagerOffset;
   const uint8_t* inoutArgs;
   const uint8_t* readonlyArgs;
+  Id namedArgNames;
   const StringData* context;
 };
 
@@ -204,7 +220,7 @@ std::string show(const IterArgs&, PrintLocal);
 std::string show(const LocalRange&);
 std::string show(uint32_t numArgs, const uint8_t* boolVecArgs);
 std::string show(const FCallArgsBase&, const uint8_t* inoutArgs,
-                 const uint8_t* readonlyArgs,
+                 const uint8_t* readonlyArgs, Id namedArgNameId,
                  std::string asyncEagerLabel, const StringData* ctx);
 
 /*
@@ -298,21 +314,11 @@ enum InstrFlags {
 };
 
 inline bool isPre(IncDecOp op) {
-  return
-    op == IncDecOp::PreInc || op == IncDecOp::PreIncO ||
-    op == IncDecOp::PreDec || op == IncDecOp::PreDecO;
+  return op == IncDecOp::PreInc || op == IncDecOp::PreDec;
 }
 
 inline bool isInc(IncDecOp op) {
-  return
-    op == IncDecOp::PreInc || op == IncDecOp::PreIncO ||
-    op == IncDecOp::PostInc || op == IncDecOp::PostIncO;
-}
-
-inline bool isIncDecO(IncDecOp op) {
-  return
-    op == IncDecOp::PreIncO || op == IncDecOp::PreDecO ||
-    op == IncDecOp::PostIncO || op == IncDecOp::PostDecO;
+  return op == IncDecOp::PreInc || op == IncDecOp::PostInc;
 }
 
 constexpr uint32_t kMaxConcatN = 4;
@@ -335,8 +341,6 @@ enum class Op : std::conditional<Op_count <= 256, uint8_t, uint16_t>::type {
   OPCODES
 #undef O
 
-// These are comparable by default under MSVC.
-#ifndef _MSC_VER
 inline constexpr bool operator<(Op a, Op b) { return size_t(a) < size_t(b); }
 inline constexpr bool operator>(Op a, Op b) { return size_t(a) > size_t(b); }
 inline constexpr bool operator<=(Op a, Op b) {
@@ -345,7 +349,6 @@ inline constexpr bool operator<=(Op a, Op b) {
 inline constexpr bool operator>=(Op a, Op b) {
   return size_t(a) >= size_t(b);
 }
-#endif
 
 constexpr bool isValidOpcode(Op op) {
   return size_t(op) < Op_count;
@@ -427,7 +430,6 @@ int numImmediates(Op opcode);
 ArgType immType(Op opcode, int idx);
 bool hasImmVector(Op opcode);
 int instrLen(PC opcode);
-int numSuccs(PC opcode);
 
 PC skipCall(PC pc);
 
@@ -443,9 +445,14 @@ ArgUnion getImm(PC opcode, int idx, const Unit* u = nullptr);
 ArgUnion* getImmPtr(PC opcode, int idx);
 
 void staticStreamer(const TypedValue* tv, std::string& out);
+std::string staticStreamer(const TypedValue* tv);
 
-std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f);
+std::string instrToString(PC it, const Func* f);
+std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f,
+                          Either<const Unit*, const UnitEmitter*> u);
+
 void staticArrayStreamer(const ArrayData*, std::string&);
+std::string staticArrayStreamer(const ArrayData* ad);
 
 /*
  * Convert subopcodes or opcodes into strings.
@@ -458,7 +465,6 @@ const char* subopToName(CollectionType);
 const char* subopToName(SetOpOp);
 const char* subopToName(IncDecOp);
 const char* subopToName(BareThisOp);
-const char* subopToName(SilenceOp);
 const char* subopToName(OODeclExistsOp);
 const char* subopToName(ObjMethodOp);
 const char* subopToName(SwitchKind);
@@ -466,8 +472,12 @@ const char* subopToName(MOpMode);
 const char* subopToName(QueryMOp);
 const char* subopToName(SetRangeOp);
 const char* subopToName(TypeStructResolveOp);
+const char* subopToName(VerifyRetKind);
+const char* subopToName(TypeStructEnforceKind);
+const char* subopToName(AsTypeStructExceptionKind);
 const char* subopToName(ContCheckOp);
 const char* subopToName(SpecialClsRef);
+const char* subopToName(ClassGetCMode);
 const char* subopToName(IsLogAsDynamicCallOp);
 const char* subopToName(ReadonlyOp);
 
@@ -487,10 +497,6 @@ template<class SubOpType>
 Optional<SubOpType> nameToSubop(const char*);
 
 using OffsetList = std::vector<Offset>;
-
-// Returns a jump offsets relative to the instruction, or nothing if
-// the instruction cannot jump.
-OffsetList instrJumpOffsets(PC instr);
 
 // returns absolute address of targets, or nothing if instruction
 // cannot jump
@@ -535,18 +541,29 @@ constexpr bool instrIsControlFlow(Op opcode) {
   return (instrFlags(opcode) & CF) != 0;
 }
 
+constexpr bool isAwait(Op opcode) {
+  return
+    opcode == Op::Await ||
+    opcode == Op::AwaitAll ||
+    opcode == Op::AwaitLowPri;
+}
+
 constexpr bool isUnconditionalJmp(Op opcode) {
-  return opcode == Op::Jmp || opcode == Op::JmpNS;
+  return opcode == Op::Jmp;
 }
 
 constexpr bool isConditionalJmp(Op opcode) {
   return opcode == Op::JmpZ || opcode == Op::JmpNZ;
 }
 
+constexpr bool isInterceptableJmp(Op opcode) {
+  return opcode == Op::Enter;
+}
+
 constexpr bool isJmp(Op opcode) {
   return
+    opcode == Op::Enter ||
     opcode == Op::Jmp   ||
-    opcode == Op::JmpNS ||
     opcode == Op::JmpZ  ||
     opcode == Op::JmpNZ;
 }
@@ -555,8 +572,6 @@ constexpr bool isObjectConstructorOp(Op opcode) {
   return
     opcode == Op::NewObj ||
     opcode == Op::NewObjD ||
-    opcode == Op::NewObjR ||
-    opcode == Op::NewObjRD ||
     opcode == Op::NewObjS;
 }
 
@@ -594,6 +609,7 @@ constexpr bool isComparisonOp(Op opcode) {
 constexpr bool isFCallClsMethod(Op opcode) {
   return
     opcode == OpFCallClsMethod ||
+    opcode == OpFCallClsMethodM ||
     opcode == OpFCallClsMethodD ||
     opcode == OpFCallClsMethodS ||
     opcode == OpFCallClsMethodSD;
@@ -635,15 +651,26 @@ constexpr bool isTypeAssert(Op op) {
   return op == OpAssertRATL || op == OpAssertRATStk;
 }
 
-constexpr bool isIteratorOp(Op op) {
-  return op == OpIterInit || op == Op::LIterInit ||
-         op == OpIterNext || op == Op::LIterNext;
+constexpr bool isIteratorControlFlow(Op op) {
+  return op == Op::IterInit || op == Op::IterNext;
+}
+
+constexpr bool isIteratorBaseAccess(Op op) {
+  switch (op) {
+    case Op::IterGetKey:
+    case Op::IterGetValue:
+    case Op::IterSetValue:
+    case Op::IterInit:
+    case Op::IterNext:
+      return true;
+
+    default:
+      return false;
+  }
 }
 
 inline bool isMemberBaseOp(Op op) {
   switch (op) {
-    case Op::BaseGC:
-    case Op::BaseGL:
     case Op::BaseSC:
     case Op::BaseL:
     case Op::BaseC:
@@ -698,10 +725,9 @@ inline MOpMode finalMemberOpMode(Op op) {
 
 // true if the opcode body can set pc=0 to halt the interpreter.
 constexpr bool instrCanHalt(Op op) {
-  return op == OpRetC || op == OpNativeImpl ||
-         op == OpAwait || op == OpAwaitAll || op == OpCreateCont ||
-         op == OpYield || op == OpYieldK || op == OpRetM ||
-         op == OpRetCSuspended;
+  return isAwait(op) || op == OpRetC || op == OpNativeImpl ||
+         op == OpCreateCont || op == OpYield || op == OpYieldK ||
+         op == OpRetM || op == OpRetCSuspended;
 }
 
 int instrNumPops(PC opcode);

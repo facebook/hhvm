@@ -1,6 +1,6 @@
 <?hh
 class A {
-    function foo() {
+    function foo() :mixed{
         var_dump(property_exists('B', 'publicBar'));
         var_dump(property_exists('B', 'protectedBar'));
         var_dump(property_exists('B', 'privateBar'));

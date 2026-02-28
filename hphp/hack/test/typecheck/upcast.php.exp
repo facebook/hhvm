@@ -8,4 +8,5 @@ File "upcast.php", line 18, characters 3-13:
   T super num
 File "upcast.php", line 23, characters 3-13:
   vec<num>
-No errors
+WARN: File "upcast.php", line 27, characters 7-15:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `num`. (Warn[12011])

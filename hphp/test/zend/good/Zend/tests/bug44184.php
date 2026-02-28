@@ -1,7 +1,7 @@
 <?hh
 
-function foo() {
-    $x = varray[1,2,3];
+function foo() :mixed{
+    $x = vec[1,2,3];
     foreach ($x as $a) {
         while (1) {
             throw new Exception();

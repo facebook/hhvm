@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_114() {
+function main_114() :mixed{
 var_dump(1E1);
 var_dump(1E2);
 var_dump(1E3);

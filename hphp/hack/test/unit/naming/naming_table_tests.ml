@@ -54,10 +54,13 @@ let files =
     ("qux.php", {|<?hh
     const int Qux = 5;
   |});
-    ( "corge.php",
+    ("corge.php", {|<?hh
+    new module Corge {}
+  |});
+    ( "corge2.php",
       {|<?hh
-    <<file: __EnableUnstableFeatures('modules')>>
-    module Corge {}
+    // modules are case sensitive, this is a different symbol
+    new module corge {}
   |}
     );
   ]
@@ -73,45 +76,9 @@ let write_and_parse_test_files ctx =
       Disk.mkdir_p (Path.to_string dir);
       Disk.write_file ~file:(Path.to_string fn) ~contents);
   let get_next = MultiWorker.next None (List.map files ~f:fst) in
-  let (file_infos, errors, failed_parsing) =
-    if
-      TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
-    then
-      ( Direct_decl_service.go
-          ctx
-          None
-          ~ide_files:Relative_path.Set.empty
-          ~get_next
-          ~trace:true
-          ~cache_decls:false,
-        Errors.empty,
-        Relative_path.Set.empty )
-    else
-      let po =
-        ParserOptions.with_allow_unstable_features ParserOptions.default true
-      in
-      Parsing_service.go_DEPRECATED
-        ctx
-        None
-        Relative_path.Set.empty
-        ~get_next
-        po
-        ~trace:true
+  let file_infos =
+    Direct_decl_service.(go ctx None ~get_next ~trace:true ~decl_mode:Normal)
   in
-  if not (Errors.is_empty errors) then (
-    Errors.iter_error_list
-      (fun e ->
-        List.iter (User_error.to_list_ e) ~f:(fun (pos, msg) ->
-            eprintf
-              "%s: %s\n"
-              (Pos.string
-                 (Pos.to_absolute @@ Pos_or_decl.unsafe_to_raw_pos pos))
-              msg))
-      errors;
-    failwith "Expected no errors from parsing."
-  );
-  if not (Relative_path.Set.is_empty failed_parsing) then
-    failwith "Expected all files to pass parsing.";
   Naming_table.create file_infos
 
 let run_naming_table_test f =
@@ -135,7 +102,7 @@ let run_naming_table_test f =
           }
       in
       let popt =
-        ParserOptions.with_allow_unstable_features ParserOptions.default true
+        ParserOptions.{ default with allow_unstable_features = true }
       in
       let tcopt = TypecheckerOptions.default in
       let ctx =
@@ -150,9 +117,9 @@ let run_naming_table_test f =
       let db_name = Path.to_string (Path.concat path "naming_table.sqlite") in
       let save_results = Naming_table.save unbacked_naming_table db_name in
       Asserter.Int_asserter.assert_equals
-        10
+        12
         Naming_sqlite.(save_results.files_added + save_results.symbols_added)
-        "Expected to add eight rows (four files and four symbols)";
+        "Expected to add 12 rows (6 files and 6 symbols)";
 
       let ctx_for_sqlite_load =
         Provider_context.empty_for_test ~popt ~tcopt ~deps_mode
@@ -174,7 +141,14 @@ let run_naming_table_test f =
       Db_path_provider.set_naming_db_path
         (Provider_context.get_backend ctx)
         (Some (Naming_sqlite.Db_path db_name));
-      (try f ~ctx ~unbacked_naming_table ~backed_naming_table ~db_name with
+      (try
+         f
+           ~ctx
+           ~unbacked_naming_table
+           ~backed_naming_table
+           ~db_name
+           ~tmp_path:path
+       with
       | e ->
         Printf.eprintf
           "NOTE: backend was local-memory for this exception's test run\n";
@@ -187,7 +161,14 @@ let run_naming_table_test f =
           ~backend:(Provider_backend.get ())
           ~deps_mode
       in
-      (try f ~ctx ~unbacked_naming_table ~backed_naming_table ~db_name with
+      (try
+         f
+           ~ctx
+           ~unbacked_naming_table
+           ~backed_naming_table
+           ~db_name
+           ~tmp_path:path
+       with
       | e ->
         Printf.eprintf
           "NOTE: backend was shared-memory for this exception's test run\n";
@@ -196,7 +177,13 @@ let run_naming_table_test f =
 
 let test_get_pos () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+    (fun
+      ~ctx
+      ~unbacked_naming_table:_
+      ~backed_naming_table:_
+      ~db_name:_
+      ~tmp_path:_
+    ->
       Types_pos_asserter.assert_option_equals
         (Some
            ( FileInfo.File
@@ -232,7 +219,13 @@ let test_get_pos () =
 
 let test_get_canon_name () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+    (fun
+      ~ctx
+      ~unbacked_naming_table:_
+      ~backed_naming_table:_
+      ~db_name:_
+      ~tmp_path:_
+    ->
       (* Since we're parsing but not naming, the canon heap must fall back to the
          files on disk, which is the situation we'd be in when loading from a
          saved state. *)
@@ -255,7 +248,13 @@ let test_get_canon_name () =
 
 let test_remove () =
   run_naming_table_test
-    (fun ~ctx:_ ~unbacked_naming_table ~backed_naming_table ~db_name:_ ->
+    (fun
+      ~ctx:_
+      ~unbacked_naming_table
+      ~backed_naming_table
+      ~db_name:_
+      ~tmp_path:_
+    ->
       let foo_path = Relative_path.from_root ~suffix:"foo.php" in
       assert (
         Naming_table.get_file_info unbacked_naming_table foo_path
@@ -279,7 +278,8 @@ let test_remove () =
 
 let test_get_sqlite_paths () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table ~db_name ->
+    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table ~db_name ~tmp_path:_
+    ->
       let provider_path =
         match
           Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)
@@ -299,23 +299,40 @@ let test_get_sqlite_paths () =
 
 let test_local_changes () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table ~db_name ->
+    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table ~db_name ~tmp_path
+    ->
       let a_name = "CONST_IN_A" in
 
       let a_file = Relative_path.from_root ~suffix:"a.php" in
       let a_pos = FileInfo.File (FileInfo.Const, a_file) in
+      let decl_hash = None in
       let a_file_info =
         FileInfo.
           {
             FileInfo.empty_t with
-            consts = [(a_pos, a_name, None)];
-            hash = Some (Int64.of_int 1234567);
+            ids =
+              {
+                FileInfo.empty_ids with
+                FileInfo.consts =
+                  [
+                    FileInfo.
+                      {
+                        pos = a_pos;
+                        name = a_name;
+                        decl_hash;
+                        sort_text = None;
+                      };
+                  ];
+              };
+            position_free_decl_hash = Some (Int64.of_int 1234567);
           }
       in
       let backed_naming_table =
         Naming_table.update backed_naming_table a_file a_file_info
       in
-      let changes_since_baseline_path = "/tmp/base_plus_changes" in
+      let changes_since_baseline_path =
+        Path.concat tmp_path "base_plus_changes" |> Path.to_string
+      in
       Naming_table.save_changes_since_baseline
         backed_naming_table
         ~destination_path:changes_since_baseline_path;
@@ -339,8 +356,8 @@ let test_local_changes () =
       Asserter.Bool_asserter.assert_equals
         true
         (FileInfo.equal_hash_type
-           a_file_info.FileInfo.hash
-           a_file_info'.FileInfo.hash)
+           a_file_info.FileInfo.position_free_decl_hash
+           a_file_info'.FileInfo.position_free_decl_hash)
         "Expected file info to be found in the naming table";
       let a_pos' =
         Option.value_exn (Naming_provider.get_const_pos ctx a_name)
@@ -352,7 +369,13 @@ let test_local_changes () =
 
 let test_context_changes_consts () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+    (fun
+      ~ctx
+      ~unbacked_naming_table:_
+      ~backed_naming_table:_
+      ~db_name:_
+      ~tmp_path:_
+    ->
       let (ctx, _entry) =
         Provider_context.add_or_overwrite_entry_contents
           ~ctx
@@ -380,7 +403,13 @@ let test_context_changes_consts () =
 
 let test_context_changes_funs () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+    (fun
+      ~ctx
+      ~unbacked_naming_table:_
+      ~backed_naming_table:_
+      ~db_name:_
+      ~tmp_path:_
+    ->
       Asserter.String_asserter.assert_option_equals
         (Some "\\bar")
         (Naming_provider.get_fun_canon_name ctx "\\bar")
@@ -451,7 +480,13 @@ let test_context_changes_funs () =
 
 let test_context_changes_classes () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+    (fun
+      ~ctx
+      ~unbacked_naming_table:_
+      ~backed_naming_table:_
+      ~db_name:_
+      ~tmp_path:_
+    ->
       Asserter.String_asserter.assert_option_equals
         (Some "\\Foo")
         (Naming_provider.get_type_canon_name ctx "\\Foo")
@@ -512,9 +547,49 @@ let test_context_changes_classes () =
         "Old class in context should NOT be accessible by non-canon name \\FoO";
       ())
 
+let test_context_changes_modules () =
+  run_naming_table_test
+    (fun
+      ~ctx
+      ~unbacked_naming_table:_
+      ~backed_naming_table:_
+      ~db_name:_
+      ~tmp_path:_
+    ->
+      Asserter.Relative_path_asserter.assert_option_equals
+        (Some (Relative_path.from_root ~suffix:"corge.php"))
+        (Naming_provider.get_module_path ctx "Corge")
+        "Existing module Corge should be in corge.php";
+      Asserter.Relative_path_asserter.assert_option_equals
+        (Some (Relative_path.from_root ~suffix:"corge2.php"))
+        (Naming_provider.get_module_path ctx "corge")
+        "Existing module corge (lowercase) should be in corge2.php";
+      let (ctx, _entry) =
+        Provider_context.add_or_overwrite_entry_contents
+          ~ctx
+          ~path:(Relative_path.from_root ~suffix:"corge.php")
+          ~contents:{|<?hh
+          |}
+      in
+      Asserter.Relative_path_asserter.assert_option_equals
+        None
+        (Naming_provider.get_module_path ctx "Corge")
+        "module Corge should be deleted";
+      Asserter.Relative_path_asserter.assert_option_equals
+        (Some (Relative_path.from_root ~suffix:"corge2.php"))
+        (Naming_provider.get_module_path ctx "corge")
+        "Existing module corge (lowercase) should be in corge2.php";
+      ())
+
 let test_context_changes_typedefs () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+    (fun
+      ~ctx
+      ~unbacked_naming_table:_
+      ~backed_naming_table:_
+      ~db_name:_
+      ~tmp_path:_
+    ->
       Asserter.String_asserter.assert_option_equals
         (Some "\\Baz")
         (Naming_provider.get_type_canon_name ctx "\\Baz")
@@ -581,7 +656,7 @@ let test_naming_table_hash () =
       let hash = Typing_deps.Dep.to_int64 dep in
       (* "%16x" on a negative integer will produce a hex version as if it were unsigned, e.g. -2 is printed as 7ffffffffffffffe rather than -0000000000000002. *)
       let i_str = Printf.sprintf "0x%016x" i in
-      let hash_str = Caml.Int64.format "0x%016x" hash in
+      let hash_str = Printf.sprintf "0x%016Lx" hash in
       Asserter.String_asserter.assert_equals
         i_str
         hash_str
@@ -600,7 +675,13 @@ let test_naming_table_hash () =
 
 let test_naming_table_query_by_dep_hash () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table ~db_name:_ ->
+    (fun
+      ~ctx
+      ~unbacked_naming_table:_
+      ~backed_naming_table
+      ~db_name:_
+      ~tmp_path:_
+    ->
       let db_path =
         Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)
       in
@@ -718,17 +799,27 @@ let test_naming_table_query_by_dep_hash () =
       let bar_file_info =
         {
           (* Might raise {!Naming_table.File_info_not_found} *)
-          (Naming_table.get_file_info_unsafe
+          (Naming_table.get_file_info_exn
              backed_naming_table
              (Relative_path.from_root ~suffix:"bar.php"))
           with
-          FileInfo.classes =
-            [
-              ( FileInfo.File
-                  (FileInfo.Class, Relative_path.from_root ~suffix:"bar.php"),
-                "\\Baz",
-                None );
-            ];
+          FileInfo.ids =
+            {
+              FileInfo.empty_ids with
+              FileInfo.classes =
+                [
+                  FileInfo.
+                    {
+                      pos =
+                        FileInfo.File
+                          ( FileInfo.Class,
+                            Relative_path.from_root ~suffix:"bar.php" );
+                      name = "\\Baz";
+                      decl_hash = None;
+                      sort_text = None;
+                    };
+                ];
+            };
         }
       in
       let new_naming_table = backed_naming_table in
@@ -772,6 +863,8 @@ let () =
       }
   in
   let (_ : SharedMem.handle) = SharedMem.init config ~num_workers:0 in
+  EventLogger.init_fake ();
+  Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Warn;
   Unit_test.run_all
     [
       ("test_get_pos", test_get_pos);
@@ -783,6 +876,7 @@ let () =
       ("test_context_changes_funs", test_context_changes_funs);
       ("test_context_changes_classes", test_context_changes_classes);
       ("test_context_changes_typedefs", test_context_changes_typedefs);
+      ("test_context_changes_modules", test_context_changes_modules);
       ("test_naming_table_hash", test_naming_table_hash);
       ( "test_naming_table_query_by_dep_hash",
         test_naming_table_query_by_dep_hash );

@@ -1,2 +1,8 @@
-foo literal
-foobar literal
+foo
+  INSERT foo
+  literal
+SORT TEXT: none
+foobar
+  INSERT foobar
+  literal
+SORT TEXT: none

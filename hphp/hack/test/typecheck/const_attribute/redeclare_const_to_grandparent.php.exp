@@ -1,0 +1,4 @@
+ERROR: File "redeclare_const_to_grandparent.php", line 5, characters 40-42:
+This property is `__Const` (Typing[4204])
+  File "redeclare_const_to_grandparent.php", line 3, characters 21-23:
+  This property is not `__Const`

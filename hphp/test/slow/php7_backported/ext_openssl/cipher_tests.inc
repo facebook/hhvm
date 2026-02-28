@@ -2,9 +2,9 @@
 
 abstract final class Php7BackportedExtOpensslCipherTestsInc {
   public static function getPHPOpenSSLCipherTests() {
-		return darray[
-			'aes-128-ccm' => varray[
-				darray[
+		return dict[
+			'aes-128-ccm' => vec[
+				dict[
 					'key' => '8c89a2ebc96c7602707fcf24b32d3833',
 					'iv'  => '078ef822734701f670a55a0fe3',
 					'aad' => '88c2712a9ddf11db8ef8227347015914' .
@@ -15,7 +15,7 @@ abstract final class Php7BackportedExtOpensslCipherTestsInc {
 					'ct'  => '9d59b15f371448c230f4d739052e13ab' .
 								'3b1a7b10',
 				],
-				darray[
+				dict[
 					'key' => 'f71eea4e1f58804b9717230ad0614641',
 					'iv'  => '0dbff943b9f9a66b81eca48989',
 					'aad' => '88425af28430fdabbff943b9f9a6ab1d' .
@@ -27,8 +27,8 @@ abstract final class Php7BackportedExtOpensslCipherTestsInc {
 								'adb6cc86',
 				],
 			],
-			'aes-256-ccm' => varray[
-				darray[
+			'aes-256-ccm' => vec[
+				dict[
 					'key' => '1bde3251d41a8b5ea013c195ae128b21' .
 							'8b3e0306376357077ef1c1c78548b92e',
 					'iv'  => '5b8e40746f6b98e00f1d13ff41',
@@ -41,22 +41,22 @@ abstract final class Php7BackportedExtOpensslCipherTestsInc {
 							'f042382d949b43b7d6bb2b9864786726',
 				],
 			],
-			'aes-128-gcm' => varray[
-				darray[
+			'aes-128-gcm' => vec[
+				dict[
 					'key' => '00000000000000000000000000000000',
 					'iv'  => '000000000000000000000000',
 					'tag' => '58e2fccefa7e3061367f1d57a4e7455a',
 					'pt'  => '',
 					'ct'  => '',
 				],
-				darray[
+				dict[
 					'key' => '00000000000000000000000000000000',
 					'iv'  => '000000000000000000000000',
 					'tag' => 'ab6e47d42cec13bdf53a67b21257bddf',
 					'pt'  => '00000000000000000000000000000000',
 					'ct'  => '0388dace60b6a392f328c2b971b2fe78',
 				],
-				darray[
+				dict[
 					'key' => 'feffe9928665731c6d6a8f9467308308',
 					'iv'  => 'cafebabefacedbaddecaf888',
 					'tag' => '4d5c2af327cd64a62cf35abd2ba6fab4',
@@ -69,7 +69,7 @@ abstract final class Php7BackportedExtOpensslCipherTestsInc {
 							'21d514b25466931c7d8f6a5aac84aa05' .
 							'1ba30b396a0aac973d58e091473f5985',
 				],
-				darray[
+				dict[
 					'key' => 'feffe9928665731c6d6a8f9467308308',
 					'iv'  => 'cafebabefacedbaddecaf888',
 					'aad' => 'feedfacedeadbeeffeedfacedeadbeefabaddad2',
@@ -83,7 +83,7 @@ abstract final class Php7BackportedExtOpensslCipherTestsInc {
 							'21d514b25466931c7d8f6a5aac84aa05' .
 							'1ba30b396a0aac973d58e091',
 				],
-				darray[
+				dict[
 					'key' => 'feffe9928665731c6d6a8f9467308308',
 					'iv'  => 'cafebabefacedbad',
 					'aad' => 'feedfacedeadbeeffeedfacedeadbeefabaddad2',
@@ -97,7 +97,7 @@ abstract final class Php7BackportedExtOpensslCipherTestsInc {
 							'73806900e49f24b22b097544d4896b42' .
 							'4989b5e1ebac0f07c23f4598'
 				],
-				darray[
+				dict[
 					'key' => 'feffe9928665731c6d6a8f9467308308',
 					'iv'  => '9313225df88406e555909c5aff5269aa' .
 							'6a7a9538534f7da1e4c303d2a318a728' .
@@ -115,8 +115,8 @@ abstract final class Php7BackportedExtOpensslCipherTestsInc {
 							'd62875d2aca417034c34aee5',
 				],
 			],
-			'aes-192-gcm' => varray[
-				darray[
+			'aes-192-gcm' => vec[
+				dict[
 					'key' => 'feffe9928665731c6d6a8f9467308308' .
 								'feffe9928665731c',
 					'iv'  => 'cafebabefacedbaddecaf888',
@@ -132,7 +132,7 @@ abstract final class Php7BackportedExtOpensslCipherTestsInc {
 							'7d773d00c144c525ac619d18c84a3f47' .
 							'18e2448b2fe324d9ccda2710',
 				],
-				darray[
+				dict[
 					'key' => 'feffe9928665731c6d6a8f9467308308' .
 								'feffe9928665731c',
 					'iv'  => 'cafebabefacedbad',
@@ -149,8 +149,8 @@ abstract final class Php7BackportedExtOpensslCipherTestsInc {
 							'e93a19a58e8b473fa0f062f7',
 				],
 			],
-			'aes-256-gcm' => varray[
-				darray[
+			'aes-256-gcm' => vec[
+				dict[
 					'key' => '00000000000000000000000000000000' .
 								'00000000000000000000000000000000',
 					'iv'  => '000000000000000000000000',
@@ -158,7 +158,7 @@ abstract final class Php7BackportedExtOpensslCipherTestsInc {
 					'pt'  => '00000000000000000000000000000000',
 					'ct'  => 'cea7403d4d606b6e074ec5d3baf39d18',
 				],
-				darray[
+				dict[
 					'key' => 'feffe9928665731c6d6a8f9467308308' .
 								'feffe9928665731c6d6a8f9467308308',
 					'iv'  => 'cafebabefacedbaddecaf888',
@@ -172,7 +172,7 @@ abstract final class Php7BackportedExtOpensslCipherTestsInc {
 							'8cb08e48590dbb3da7b08b1056828838' .
 							'c5f61e6393ba7a0abcc9f662898015ad',
 				],
-				darray[
+				dict[
 					'key' => 'feffe9928665731c6d6a8f9467308308' .
 								'feffe9928665731c6d6a8f9467308308',
 					'iv'  => 'cafebabefacedbaddecaf888',
@@ -197,10 +197,10 @@ function openssl_get_cipher_tests($method)
 {
 
 
-	$tests = varray[];
+	$tests = vec[];
 
 	foreach (Php7BackportedExtOpensslCipherTestsInc::getPHPOpenSSLCipherTests()[$method] as $instance) {
-		$test = darray[];
+		$test = dict[];
 		foreach ($instance as $field_name => $field_value) {
 			$test[$field_name] = pack("H*", $field_value);
 		}

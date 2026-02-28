@@ -8,7 +8,7 @@ class Z extends Y {
 }
 
 <<__EntryPoint>>
-function main_1547() {
+function main_1547() :mixed{
 $x = new Z;
 $s = serialize($x);
 $x = unserialize($s);

@@ -5,7 +5,7 @@ function c<reify T>(C<T> $x): void {
   echo "ok\n";
 }
 
-function f<reify T1, reify T2>() {
+function f<reify T1, reify T2>() :mixed{
   c<(function(?string):int)>(new C<(function(T1):T2)>);
 }
 

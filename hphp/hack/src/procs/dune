@@ -1,13 +1,19 @@
 (library
  (name procs_bucket)
  (wrapped false)
- (modules bucket)
+ (modules
+  bucket)
  (libraries core_kernel utils_core))
 
 (library
  (name procs_procs)
  (wrapped false)
- (modules mem_profile multiThreadedCall multiWorker worker workerController)
+ (modules
+  mem_profile
+  multiThreadedCall
+  multiWorker
+  worker
+  workerController)
  (libraries
   core_kernel
   heap_shared_mem
@@ -18,10 +24,19 @@
   relative_path
   sys_utils
   utils_exit
-  worker_cancel))
+  worker_cancel
+  worker_utils))
 
 (library
  (name procs_entry_point)
  (wrapped false)
- (modules workerControllerEntryPoint)
+ (modules
+  workerControllerEntryPoint)
  (libraries procs_procs folly_stubs))
+
+(library
+ (name worker_utils)
+ (modules
+  worker_utils)
+ (libraries
+  str))

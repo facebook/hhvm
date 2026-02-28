@@ -17,17 +17,20 @@
 
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/misc.h"
+#include "hphp/hhbbc/type-system.h"
 
 namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-struct Index;
+struct CollectedInfo;
+struct IIndex;
 struct ISS;
-struct Type;
 
 namespace php {
   struct Class;
+  struct Const;
+  struct TypeAlias;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -40,6 +43,10 @@ struct TypeStructureResolution {
              // the type-structure can be statically pre-resolved,
              // this will be a static array.
   bool mightFail; // Whether the resolution can possibly fail
+  bool contextSensitive{false}; // If the resolution involved context
+                                // sensitive information. If so, only
+                                // the declaring class can safely use
+                                // the resolved type.
 
   // If the resolution results in a static array with no possibility
   // of failure, return it.
@@ -55,8 +62,17 @@ struct TypeStructureResolution {
   TypeStructureResolution& operator|=(const TypeStructureResolution& o) {
     type |= o.type;
     mightFail |= o.mightFail;
+    contextSensitive |= o.contextSensitive;
     return *this;
   }
+
+  TypeStructureResolution& operator&=(const TypeStructureResolution& o) {
+    type &= o.type;
+    mightFail &= o.mightFail;
+    contextSensitive &= o.contextSensitive;
+    return *this;
+  }
+
 };
 
 /*
@@ -64,11 +80,30 @@ struct TypeStructureResolution {
  * from a class constant, or from a type-alias.
  */
 TypeStructureResolution resolve_type_structure(const ISS&, SArray);
-TypeStructureResolution resolve_type_structure(const Index&,
+TypeStructureResolution resolve_type_structure(const IIndex&,
                                                const php::Const& cns,
                                                const php::Class& thiz);
-TypeStructureResolution resolve_type_structure(const Index&,
+TypeStructureResolution resolve_type_structure(const IIndex&,
+                                               const CollectedInfo*,
                                                const php::TypeAlias&);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * If the type-structure represents a class or an unresolved type,
+ * retrieve the associated name of the class.
+ */
+SString type_structure_name(SArray);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Fill the given set with any identifiers that this type-structure
+ * might reference. This is best effort and might not include all
+ * actual identifiers. This is fine as this is only used to "prime"
+ * the scheduler.
+ */
+void type_structure_references(SArray, SStringSet&);
 
 //////////////////////////////////////////////////////////////////////
 

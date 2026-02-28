@@ -9,9 +9,9 @@ string(1) "0"
 string(15) "987657876576252"
 string(21) "987658441719689394144"
 
-Warning: gmp_or() expects exactly 2 parameters, 3 given in %s/gmp_or.php on line 15
+Warning: gmp_or() expects exactly 2 positional parameters, 3 given in %s/gmp_or.php on line 15
 
-Warning: gmp_or() expects exactly 2 parameters, 1 given in %s/gmp_or.php on line 16
+Warning: gmp_or() expects exactly 2 positional parameters, 1 given in %s/gmp_or.php on line 16
 
 Warning: gmp_or(): Unable to convert variable to GMP - wrong type in %s/gmp_or.php on line 17
 bool(false)

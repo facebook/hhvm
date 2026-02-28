@@ -85,11 +85,11 @@ let scm_changed_merge_base () =
 }
 |}
   with
-  | Watchman.Changed_merge_base
-      ( "e0ac0069ccf1a833ec944f280a3448f1327fb9ac",
-        files,
-        "c:1635454750:1728625:1:10438520" )
-    when SSet.mem "/path/to/root/a/b.php" files ->
+  | Watchman.Changed_merge_base (rev, files, "c:1635454750:1728625:1:10438520")
+    when Hg.Rev.equal
+           rev
+           (Hg.Rev.of_string "e0ac0069ccf1a833ec944f280a3448f1327fb9ac")
+         && SSet.mem "/path/to/root/a/b.php" files ->
     true
   | r -> unexpected r
 

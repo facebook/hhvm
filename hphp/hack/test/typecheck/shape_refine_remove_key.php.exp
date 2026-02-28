@@ -1,0 +1,6 @@
+ERROR: File "shape_refine_remove_key.php", line 9, characters 5-19:
+You are accessing a field known to not exist (Typing[4321])
+  File "shape_refine_remove_key.php", line 8, characters 8-33:
+  The type of the field `a` in this shape doesn't allow any values
+  File "shape_refine_remove_key.php", line 8, characters 8-33:
+  It is nothing because the field `a` was unset here

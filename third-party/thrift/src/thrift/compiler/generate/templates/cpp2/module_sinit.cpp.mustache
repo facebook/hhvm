@@ -1,0 +1,75 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{> Autogen}}
+
+{{#if (has_compiler_option? "any")}}
+
+{{#program:has_schema?}}{{! avoids circular dependency }}
+#include <thrift/lib/cpp2/gen/module_sinit_cpp.h>
+{{/program:has_schema?}}
+
+namespace {{program:cpp_qualified_namespace}} {
+// Call all static init functions.
+//
+// If this file is always linked (e.g. link_whole), it will force
+// static linking to include the intialization logic.
+
+{{#if (has_compiler_option? "any")}}
+{{#program:structs}}
+{{#struct:any?}}
+void __fbthrift_static_init_{{struct:cpp_underlying_name}}();
+{{/struct:any?}}
+{{/program:structs}}
+{{/if (has_compiler_option? "any")}}
+
+{{#program:has_schema?}}
+namespace {{program:name}}_constants {
+extern ::folly::Range<const ::std::string_view*> {{program:schema_name}}_includes();
+extern ::folly::Range<const ::std::string_view*> {{program:schema_name}}_uris();
+}
+{{/program:has_schema?}}
+
+namespace {
+
+struct StaticInit {
+  StaticInit() {
+    {{#if (has_compiler_option? "any")}}
+    {{#program:structs}}
+    {{#struct:any?}}
+    __fbthrift_static_init_{{struct:cpp_underlying_name}}();
+    {{/struct:any?}}
+    {{/program:structs}}
+    {{/if (has_compiler_option? "any")}}
+
+    {{#program:has_schema?}}
+    ::apache::thrift::BaseSchemaRegistry::get().registerSchema(
+      "{{program:schema_name}}",
+      {{program:name}}_constants::{{program:schema_name}}_includes(),
+      "{{program:autogen_path}}",
+      {{program:definition_key.buffer}},
+      {{program:name}}_constants::{{program:schema_name}}_uris()
+    );
+    {{/program:has_schema?}}
+  }
+};
+
+StaticInit staticInit;
+
+}
+} // namespace {{program:cpp_qualified_namespace}}
+{{/if (has_compiler_option? "any")}}

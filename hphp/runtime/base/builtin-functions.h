@@ -16,12 +16,14 @@
 
 #pragma once
 
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/native.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/portability.h"
-#include "hphp/runtime/base/req-root.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,7 +61,7 @@ void NEVER_INLINE throw_invalid_property_name(const String& name);
 [[noreturn]]
 void NEVER_INLINE throw_call_reified_func_without_generics(const Func* f);
 
-[[noreturn]] void NEVER_INLINE throw_implicit_context_exception(std::string);
+void NEVER_INLINE raise_implicit_context_warning(std::string);
 
 [[noreturn]]
 void throw_exception(const Object& e);
@@ -90,7 +92,7 @@ inline bool is_double(const TypedValue* c) {
 inline bool is_string(const TypedValue* c) {
   if (tvIsString(c)) return true;
   if (tvIsClass(c) || tvIsLazyClass(c)) {
-    if (RuntimeOption::EvalClassIsStringNotices) {
+    if (Cfg::Eval::ClassIsStringNotices) {
       raise_notice("Class used in is_string");
     }
     return true;
@@ -122,12 +124,12 @@ inline bool is_object(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
   if (!tvIsObject(c)) return false;
   auto const cls = val(c).pobj->getVMClass();
-  if (RO::EvalNoticeOnMethCallerHelperIsObject) {
-    if (cls == SystemLib::s_MethCallerHelperClass) {
+  if (Cfg::Eval::NoticeOnMethCallerHelperIsObject) {
+    if (cls == SystemLib::getMethCallerHelperClass()) {
       raise_notice("is_object() called on MethCaller");
     }
   }
-  return cls != SystemLib::s___PHP_Incomplete_ClassClass;
+  return cls != SystemLib::get__PHP_Incomplete_ClassClass();
 }
 
 inline bool is_clsmeth(const TypedValue* c) {
@@ -209,10 +211,10 @@ Variant invoke(const String& function, const Variant& params,
                bool allowDynCallNoPointer = false);
 
 Variant invoke_static_method(const String& s, const String& method,
-                             const Variant& params, bool fatal = true);
+                             const Variant& params, const ArrayData* namedArgNames,
+                             bool fatal = true);
 
-Variant o_invoke_failed(const char *cls, const char *meth,
-                        bool fatal = true);
+void o_invoke_failed(const char *cls, const char *meth, bool fatal = true);
 
 bool is_constructor_name(const char* func);
 [[noreturn]] void throw_instance_method_fatal(const char *name);
@@ -230,6 +232,7 @@ bool is_constructor_name(const char* func);
 [[noreturn]] void throw_rclsmeth_compare_exception();
 [[noreturn]] void throw_rfunc_compare_exception();
 [[noreturn]] void throw_opaque_resource_compare_exception();
+[[noreturn]] void throw_ecl_compare_exception();
 [[noreturn]] void throw_rec_non_rec_compare_exception();
 [[noreturn]] void throw_func_compare_exception();
 [[noreturn]] void throw_param_is_not_container();
@@ -244,10 +247,6 @@ bool is_constructor_name(const char* func);
 [[noreturn]] void throw_late_init_prop(const Class* cls,
                                        const StringData* propName,
                                        bool isSProp);
-[[noreturn]] void throw_parameter_wrong_type(TypedValue tv,
-                                             const Func* callee,
-                                             unsigned int arg_num,
-                                             const StringData* type);
 
 [[noreturn]] void throw_must_be_mutable(const char* className, const char* propName);
 [[noreturn]] void throw_must_be_readonly(const char* className, const char* propName);
@@ -262,8 +261,12 @@ bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op);
 void check_collection_cast_to_array();
 
 Object create_object_only(const String& s);
-Object create_object(const String& s, const Array &params, bool init = true);
-Object init_object(const String& s, const Array &params, ObjectData* o);
+Object create_object(const String& s, const Array &params,
+                     const ArrayData* namedArgNames = nullptr, bool init = true);
+Object create_object(const Class* cls, const Array &params,
+                     const ArrayData* namedArgNames = nullptr, bool init = true);
+Object init_object(const String& s, const Array &params,
+                   const ArrayData* namedArgNames, ObjectData* o);
 
 [[noreturn]] void throw_object(const Object& e);
 #if ((__GNUC__ != 4) || (__GNUC_MINOR__ != 8))
@@ -273,8 +276,15 @@ Object init_object(const String& s, const Array &params, ObjectData* o);
 #endif
 
 [[noreturn]] inline
-void throw_object(const String& s, const Array& params, bool init = true) {
-  throw_object(create_object(s, params, init));
+void throw_object(const String& s, const Array& params,
+                  const ArrayData* namedArgNames = nullptr, bool init = true) {
+  throw_object(create_object(s, params, namedArgNames, init));
+}
+
+[[noreturn]] inline
+void throw_object(const Class* cls, const Array& params,
+                  const ArrayData* namedArgNames = nullptr, bool init = true) {
+  throw_object(create_object(cls, params, namedArgNames, init));
 }
 
 void throw_missing_arguments_nr(const char *fn, int expected, int got)
@@ -301,11 +311,6 @@ void raise_expected_array_or_collection_warning(const char* fn = nullptr);
 void raise_invalid_argument_warning(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
   ATTRIBUTE_PRINTF(1,2) __attribute__((__cold__));
 
-/**
- * Unsetting ClassName::StaticProperty.
- */
-Variant throw_fatal_unset_static_property(const char *s, const char *prop);
-
 // unserializable default value arguments such as TimeStamp::Current()
 // are serialized as "\x01"
 char const kUnserializableString[] = "\x01";
@@ -315,7 +320,7 @@ char const kUnserializableString[] = "\x01";
  * two functions in runtime/base, as there are functions in
  * runtime/base that depend on these two functions.
  */
-String f_serialize(const Variant& value);
+String HHVM_FUNCTION(serialize, const Variant& value);
 String serialize_keep_dvarrays(const Variant& value);
 Variant unserialize_ex(const String& str,
                        VariableUnserializer::Type type,
@@ -350,6 +355,8 @@ Variant require(const String& file, bool once, const char* currentDir,
                 bool raiseNotice);
 
 bool function_exists(const String& function_name);
+
+bool is_generated(const StringData* name);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

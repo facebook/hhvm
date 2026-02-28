@@ -7,31 +7,43 @@
  *
  *)
 
-val class_def :
-  Provider_context.t ->
-  Nast.class_ ->
-  (Tast.class_ * Typing_inference_env.t_global_with_pos list) option
+(** If the input is the winning definition of its symbol,
+returns [Some t] and as a side effect populates errors encountered
+during typechecking. If not the winning definition, returns None
+and emits a "duplicate name" error. (We're not able to check
+a class that isn't the winning declaration, because we use both
+the AST and the folded-decl in the work of checking, and the only
+folded-decl available is that of the winner, so we can't proceed
+if this definition isn't the winner.
 
+If any method within the class took longer than `--config timeout=<secs>`
+to typecheck (default infinite) then it's omitted from the resulting Tast. *)
+val class_def :
+  Provider_context.t -> Nast.class_ -> Tast.class_ Tast_with_dynamic.t option
+
+val typedef_def : Provider_context.t -> Nast.typedef -> Tast.typedef
+
+(** If it takes longer than `--config timeout=<secs>` then produces None.
+Otherwise, it returns either 1 or 2 tasts, depending on whether sound-dynamic is enabled. *)
 val fun_def :
-  Provider_context.t ->
-  Nast.fun_def ->
-  (Tast.fun_def * Typing_inference_env.t_global_with_pos) option
+  Provider_context.t -> Nast.fun_def -> Tast.fun_def Tast_with_dynamic.t option
 
 val gconst_def : Provider_context.t -> Nast.gconst -> Tast.gconst
 
-val nast_to_tast_gienv :
-  do_tast_checks:bool ->
-  Provider_context.t ->
-  Nast.program ->
-  Tast.program * Typing_inference_env.t_global_with_pos list
+val module_def : Provider_context.t -> Nast.module_def -> Tast.module_def
 
 (** Run typing on the given named AST (NAST) to produced a typed AST (TAST).
 
 Set [do_tast_checks] to [false] to skip running TAST checks on the resulting
 TAST. This means that the associated list of errors may be incomplete. This is
 useful for performance in cases where we want the TAST, but don't need a correct
-list of errors. *)
-val nast_to_tast :
-  do_tast_checks:bool -> Provider_context.t -> Nast.program -> Tast.program
+list of errors.
 
-val module_def : Provider_context.t -> Nast.module_def -> Tast.module_def
+It is unfortunate that this routine exists alongside [Typing_check_job.calc_errors_and_tast]
+which does almost exactly the same thing, except it also does [Naming], and
+there are minor differences in treatment of some toplevel nodes. *)
+val nast_to_tast :
+  do_tast_checks:bool ->
+  Provider_context.t ->
+  Nast.program ->
+  Tast.program Tast_with_dynamic.t

@@ -3,7 +3,7 @@
 class ArrayIteratorEx extends ArrayIterator
 {
 	function rewind()
-	{
+:mixed	{
 		echo __METHOD__ . "\n";
 		return parent::rewind();
 	}

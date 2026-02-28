@@ -39,25 +39,20 @@ type t =
   | Class
   | Classname
   | Clone
+  | Concurrent
   | Const
   | Construct
   | Continue
   | Ctx
   | Darray
   | Default
-  | Define
   | Dict
   | Do
   | Double
   | Echo
   | Else
-  | Elseif
   | Empty
-  | Endfor
-  | Endforeach
   | Endif
-  | Endswitch
-  | Endwhile
   | Enum
   | Eval
   | Extends
@@ -68,10 +63,8 @@ type t =
   | Finally
   | For
   | Foreach
-  | From
   | Function
   | Global
-  | Concurrent
   | If
   | Implements
   | Include
@@ -85,16 +78,19 @@ type t =
   | Is
   | Isset
   | Keyset
+  | Lateinit
   | List
+  | Match
   | Mixed
   | Module
+  | Named
+  | Nameof
   | Namespace
   | New
   | Newctx
   | Newtype
   | Noreturn
   | Num
-  | Object
   | Parent
   | Print
   | Private
@@ -105,7 +101,6 @@ type t =
   | Require
   | Require_once
   | Required
-  | Lateinit
   | Resource
   | Return
   | Self
@@ -128,6 +123,7 @@ type t =
   | Varray
   | Vec
   | Void
+  | With
   | Where
   | While
   | Yield
@@ -196,6 +192,7 @@ type t =
   | DotDotDot
   | DollarDollar
   | BarGreaterThan
+  | BarQuestionGreaterThan
   | SlashGreaterThan
   | LessThanSlash
   | LessThanQuestion
@@ -204,6 +201,9 @@ type t =
   | Hash
   | Readonly
   | Internal
+  | Package
+  | Let
+  | Optional
   (* Variable text tokens *)
   | ErrorToken
   | Name
@@ -230,7 +230,7 @@ type t =
   | XHPBody
   | XHPComment
   | Hashbang
-[@@deriving show, eq]
+[@@deriving show, eq, sexp_of]
 
 let from_string keyword ~only_reserved =
   match keyword with
@@ -254,25 +254,20 @@ let from_string keyword ~only_reserved =
   | "class" -> Some Class
   | "classname" when not only_reserved -> Some Classname
   | "clone" -> Some Clone
+  | "concurrent" -> Some Concurrent
   | "const" -> Some Const
   | "__construct" -> Some Construct
   | "continue" -> Some Continue
   | "ctx" -> Some Ctx
   | "darray" when not only_reserved -> Some Darray
   | "default" -> Some Default
-  | "define" when not only_reserved -> Some Define
   | "dict" when not only_reserved -> Some Dict
   | "do" -> Some Do
   | "double" when not only_reserved -> Some Double
   | "echo" -> Some Echo
   | "else" -> Some Else
-  | "elseif" -> Some Elseif
   | "empty" -> Some Empty
-  | "endfor" -> Some Endfor
-  | "endforeach" -> Some Endforeach
   | "endif" -> Some Endif
-  | "endswitch" -> Some Endswitch
-  | "endwhile" -> Some Endwhile
   | "enum" when not only_reserved -> Some Enum
   | "eval" -> Some Eval
   | "extends" -> Some Extends
@@ -283,10 +278,8 @@ let from_string keyword ~only_reserved =
   | "finally" -> Some Finally
   | "for" -> Some For
   | "foreach" -> Some Foreach
-  | "from" when not only_reserved -> Some From
   | "function" -> Some Function
   | "global" -> Some Global
-  | "concurrent" -> Some Concurrent
   | "if" -> Some If
   | "implements" -> Some Implements
   | "include" -> Some Include
@@ -300,16 +293,19 @@ let from_string keyword ~only_reserved =
   | "is" when not only_reserved -> Some Is
   | "isset" -> Some Isset
   | "keyset" when not only_reserved -> Some Keyset
+  | "lateinit" -> Some Lateinit
   | "list" -> Some List
+  | "match" when not only_reserved -> Some Match
   | "mixed" when not only_reserved -> Some Mixed
   | "module" -> Some Module
+  | "named" -> Some Named
+  | "nameof" -> Some Nameof
   | "namespace" -> Some Namespace
   | "new" -> Some New
   | "newctx" when not only_reserved -> Some Newctx
   | "newtype" when not only_reserved -> Some Newtype
   | "noreturn" when not only_reserved -> Some Noreturn
   | "num" when not only_reserved -> Some Num
-  | "object" when not only_reserved -> Some Object
   | "parent" when not only_reserved -> Some Parent
   | "print" -> Some Print
   | "private" -> Some Private
@@ -320,7 +316,6 @@ let from_string keyword ~only_reserved =
   | "require" -> Some Require
   | "require_once" -> Some Require_once
   | "required" -> Some Required
-  | "lateinit" -> Some Lateinit
   | "resource" when not only_reserved -> Some Resource
   | "return" -> Some Return
   | "self" when not only_reserved -> Some Self
@@ -343,6 +338,7 @@ let from_string keyword ~only_reserved =
   | "varray" when not only_reserved -> Some Varray
   | "vec" when not only_reserved -> Some Vec
   | "void" when not only_reserved -> Some Void
+  | "with" when not only_reserved -> Some With
   | "where" when not only_reserved -> Some Where
   | "while" -> Some While
   | "yield" -> Some Yield
@@ -411,6 +407,7 @@ let from_string keyword ~only_reserved =
   | "..." -> Some DotDotDot
   | "$$" -> Some DollarDollar
   | "|>" -> Some BarGreaterThan
+  | "|?>" -> Some BarQuestionGreaterThan
   | "/>" -> Some SlashGreaterThan
   | "</" -> Some LessThanSlash
   | "<?" -> Some LessThanQuestion
@@ -419,6 +416,9 @@ let from_string keyword ~only_reserved =
   | "#" -> Some Hash
   | "readonly" -> Some Readonly
   | "internal" when not only_reserved -> Some Internal
+  | "package" -> Some Package
+  | "let" when not only_reserved -> Some Let
+  | "optional" when not only_reserved -> Some Optional
   | _ -> None
 
 let to_string kind =
@@ -444,25 +444,20 @@ let to_string kind =
   | Class -> "class"
   | Classname -> "classname"
   | Clone -> "clone"
+  | Concurrent -> "concurrent"
   | Const -> "const"
   | Construct -> "__construct"
   | Continue -> "continue"
   | Ctx -> "ctx"
   | Darray -> "darray"
   | Default -> "default"
-  | Define -> "define"
   | Dict -> "dict"
   | Do -> "do"
   | Double -> "double"
   | Echo -> "echo"
   | Else -> "else"
-  | Elseif -> "elseif"
   | Empty -> "empty"
-  | Endfor -> "endfor"
-  | Endforeach -> "endforeach"
   | Endif -> "endif"
-  | Endswitch -> "endswitch"
-  | Endwhile -> "endwhile"
   | Enum -> "enum"
   | Eval -> "eval"
   | Extends -> "extends"
@@ -473,10 +468,8 @@ let to_string kind =
   | Finally -> "finally"
   | For -> "for"
   | Foreach -> "foreach"
-  | From -> "from"
   | Function -> "function"
   | Global -> "global"
-  | Concurrent -> "concurrent"
   | If -> "if"
   | Implements -> "implements"
   | Include -> "include"
@@ -490,16 +483,19 @@ let to_string kind =
   | Is -> "is"
   | Isset -> "isset"
   | Keyset -> "keyset"
+  | Lateinit -> "lateinit"
   | List -> "list"
+  | Match -> "match"
   | Mixed -> "mixed"
   | Module -> "module"
+  | Named -> "named"
+  | Nameof -> "nameof"
   | Namespace -> "namespace"
   | New -> "new"
   | Newctx -> "newctx"
   | Newtype -> "newtype"
   | Noreturn -> "noreturn"
   | Num -> "num"
-  | Object -> "object"
   | Parent -> "parent"
   | Print -> "print"
   | Private -> "private"
@@ -510,7 +506,6 @@ let to_string kind =
   | Require -> "require"
   | Require_once -> "require_once"
   | Required -> "required"
-  | Lateinit -> "lateinit"
   | Resource -> "resource"
   | Return -> "return"
   | Self -> "self"
@@ -533,6 +528,7 @@ let to_string kind =
   | Varray -> "varray"
   | Vec -> "vec"
   | Void -> "void"
+  | With -> "with"
   | Where -> "where"
   | While -> "while"
   | Yield -> "yield"
@@ -601,6 +597,7 @@ let to_string kind =
   | DotDotDot -> "..."
   | DollarDollar -> "$$"
   | BarGreaterThan -> "|>"
+  | BarQuestionGreaterThan -> "|?>"
   | SlashGreaterThan -> "/>"
   | LessThanSlash -> "</"
   | LessThanQuestion -> "<?"
@@ -609,6 +606,9 @@ let to_string kind =
   | Hash -> "#"
   | Readonly -> "readonly"
   | Internal -> "internal"
+  | Package -> "package"
+  | Let -> "let"
+  | Optional -> "optional"
   (* Variable text tokens *)
   | ErrorToken -> "error_token"
   | Name -> "name"

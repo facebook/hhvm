@@ -1,9 +1,9 @@
 <?hh
 class obj {
-    function method() {}
+    function method() :mixed{}
 }
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $o = new stdClass();
   $o->root=new obj();
 

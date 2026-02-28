@@ -3,29 +3,28 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e97c431597bd5c4e61bb5342e5615156>>
+// @generated SignedSource<<4de8e2cacec96128fad623f511942365>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized_regen.sh
+//   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
 
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
-
-#[allow(unused_imports)]
-use crate::*;
-
 pub use typing_defs::*;
 pub use typing_kinding_defs::*;
 
 pub use crate::typing_set as ty_set;
+#[allow(unused_imports)]
+use crate::*;
 
 pub type TparamName = String;
 
 pub type TparamBounds = ty_set::TySet;
 
+#[rust_to_ocaml(attr = "deriving (hash, (show { with_path = false }))")]
 pub type TparamInfo = typing_kinding_defs::Kind;
 
 #[derive(
@@ -42,6 +41,7 @@ pub type TparamInfo = typing_kinding_defs::Kind;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (hash, (show { with_path = false }))")]
 #[repr(C)]
 pub struct TypeParameterEnv {
     /// The position indicates where the type parameter was defined.

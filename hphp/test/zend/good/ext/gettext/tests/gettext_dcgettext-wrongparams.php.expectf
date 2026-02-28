@@ -1,2 +1,2 @@
 
-Warning: dcgettext() expects exactly 3 parameters, 2 given in %s/gettext_dcgettext-wrongparams.php on line 2
+Warning: dcgettext() expects exactly 3 positional parameters, 2 given in %s/gettext_dcgettext-wrongparams.php on line 2

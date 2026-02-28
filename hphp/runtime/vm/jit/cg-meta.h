@@ -52,6 +52,8 @@ struct CGMeta {
 
   void setCallFuncId(TCA callRetAddr, FuncId funcId, TransKind kind);
 
+  void setInterceptJccTCA(TCA jccAddr, FuncId funcId);
+
   /*
    * Code addresses of interest to the code generator.
    *
@@ -66,9 +68,11 @@ struct CGMeta {
    * Pending MCGenerator table entries.
    */
   std::vector<std::pair<TCA,Fixup>> fixups;
+  std::vector<std::pair<TCA,Fixup>> trapFixups;
   std::vector<std::pair<TCA,TCA>> catches;
   std::vector<std::pair<TCA,TransID>> jmpTransIDs;
   std::vector<std::pair<TCA,FuncId>> callFuncIds;
+  std::vector<std::pair<FuncId,TCA>> interceptTCAs;
   std::vector<std::pair<TCA,Reason>> trapReasons;
   std::vector<IFrame> inlineFrames;
   std::vector<std::pair<TCA,IStack>> inlineStacks;
@@ -102,6 +106,11 @@ struct CGMeta {
    * Addresses of veneers.
    */
   std::set<TCA> veneerAddrs;
+
+  /*
+   * Native calls.  Maps addresses in the JIT code cache to the target function being called.
+   */
+  jit::fast_map<TCA, TCA> nativeCalls;
 
   /*
    * All the alignment constraints on each code address.
@@ -247,4 +256,3 @@ private:
   HPHP::IFrame m_ifr;
 };
 }
-

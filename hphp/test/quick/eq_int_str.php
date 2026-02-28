@@ -1,6 +1,6 @@
 <?hh
 
-function ci($x) {
+function ci($x) :mixed{
   print "----------\nx == 0\n";
   var_dump($x);
   var_dump(HH\Lib\Legacy_FIXME\eq($x, 0));
@@ -22,7 +22,7 @@ function ci($x) {
   var_dump(HH\Lib\Legacy_FIXME\eq($x, 90000000000));
 }
 
-function cs($x) {
+function cs($x) :mixed{
   print "----------\nx == ''\n";
   var_dump($x);
   var_dump(HH\Lib\Legacy_FIXME\eq($x, ""));
@@ -64,7 +64,7 @@ function cs($x) {
   var_dump(HH\Lib\Legacy_FIXME\eq($x, "9e10"));
 }
 
-function is($x, $y) {
+function is($x, $y) :mixed{
   print("----------\nx == y\n");
   var_dump($x);
   var_dump($y);
@@ -72,7 +72,7 @@ function is($x, $y) {
 }
 
 <<__EntryPoint>> function cmpr(): void {
-  $s = varray[
+  $s = vec[
     "",
     "123",
     "123q",
@@ -83,7 +83,7 @@ function is($x, $y) {
     "9000000000",
     "9e10",
   ];
-  $i = varray[
+  $i = vec[
     0, 123, -456, 7.8, 90000000000,
   ];
 

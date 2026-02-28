@@ -51,7 +51,7 @@ Object HHVM_STATIC_METHOD(RescheduleWaitHandle, create,
 
 void c_RescheduleWaitHandle::initialize(uint32_t queue, int64_t priority) {
   setState(STATE_SCHEDULED);
-  setContextIdx(AsioSession::Get()->getCurrentContextIdx());
+  setContextStateIndex(AsioSession::Get()->getCurrentContextStateIndex());
   m_queue = queue;
   m_priority = priority;
 
@@ -80,8 +80,8 @@ void c_RescheduleWaitHandle::scheduleInContext() {
   getContext()->schedule(this, m_queue, m_priority);
 }
 
-void c_RescheduleWaitHandle::exitContext(context_idx_t ctx_idx) {
-  assertx(AsioSession::Get()->getContext(ctx_idx));
+void c_RescheduleWaitHandle::exitContext(ContextIndex contextIdx) {
+  assertx(AsioSession::Get()->getContext(contextIdx));
 
   // stop before corrupting unioned data
   if (isFinished()) {
@@ -89,8 +89,8 @@ void c_RescheduleWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 
   // not in a context being exited
-  assertx(getContextIdx() <= ctx_idx);
-  if (getContextIdx() != ctx_idx) {
+  assertx(getContextIndex() <= contextIdx);
+  if (getContextIndex() != contextIdx) {
     return;
   }
 
@@ -98,8 +98,8 @@ void c_RescheduleWaitHandle::exitContext(context_idx_t ctx_idx) {
     raise_fatal_error("Invariant violation: encountered unexpected state");
   }
 
-  // move us to the parent context
-  setContextIdx(getContextIdx() - 1);
+  // Move us to the parent context
+  setContextStateIndex(contextIdx.parent().toRegular());
 
   // reschedule if still in a context
   if (isInContext()) {
@@ -107,13 +107,13 @@ void c_RescheduleWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 
   // recursively move all wait handles blocked by us
-  getParentChain().exitContext(ctx_idx);
+  getParentChain().exitContext(contextIdx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString s_HH_RescheduleWaitHandle("HH\\RescheduleWaitHandle");
-void AsioExtension::initRescheduleWaitHandle() {
+void AsioExtension::registerNativeRescheduleWaitHandle() {
   HHVM_STATIC_MALIAS(HH\\RescheduleWaitHandle, create,
                      RescheduleWaitHandle, create);
 
@@ -121,6 +121,9 @@ void AsioExtension::initRescheduleWaitHandle() {
                AsioContext::QUEUE_DEFAULT);
   HHVM_RCC_INT(HH_RescheduleWaitHandle, QUEUE_NO_PENDING_IO,
                AsioContext::QUEUE_NO_PENDING_IO);
+
+  Native::registerClassExtraDataHandler(
+    c_RescheduleWaitHandle::className(), finish_class<c_RescheduleWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

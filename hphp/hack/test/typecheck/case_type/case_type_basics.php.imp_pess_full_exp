@@ -1,0 +1,42 @@
+File "case_type_basics.php", line 16, characters 14-21:
+Invalid argument (Typing[4110])
+  File "case_type_basics.php", line 8, characters 21-23:
+  Expected `int`
+  File "case_type_basics.php", line 4, characters 25-32:
+  But got `arraykey`
+File "case_type_basics.php", line 21, characters 20-27:
+Invalid argument (Typing[4110])
+  File "case_type_basics.php", line 13, characters 27-38:
+  Expected `CT_No_Bounds`
+  File "case_type_basics.php", line 4, characters 25-32:
+  But got `arraykey`
+File "case_type_basics.php", line 23, characters 14-23:
+Invalid argument (Typing[4110])
+  File "case_type_basics.php", line 8, characters 21-23:
+  Expected `int`
+  File "case_type_basics.php", line 6, characters 11-22:
+  But got `mixed`
+File "case_type_basics.php", line 24, characters 19-28:
+Invalid argument (Typing[4110])
+  File "case_type_basics.php", line 9, characters 26-33:
+  Expected `XHPChild`
+  File "case_type_basics.php", line 6, characters 11-22:
+  But got `mixed`
+File "case_type_basics.php", line 25, characters 13-22:
+Invalid argument (Typing[4110])
+  File "case_type_basics.php", line 10, characters 20-27:
+  Expected `arraykey`
+  File "case_type_basics.php", line 6, characters 11-22:
+  But got `mixed`
+File "case_type_basics.php", line 27, characters 18-27:
+Invalid argument (Typing[4110])
+  File "case_type_basics.php", line 12, characters 25-34:
+  Expected `CT_Bounded`
+  File "case_type_basics.php", line 6, characters 11-22:
+  But got `mixed`
+File "case_type_basics.php", line 27, characters 18-27:
+Invalid argument (Typing[4110])
+  File "case_type_basics.php", line 12, characters 25-34:
+  Expected `CT_Bounded`
+  File "case_type_basics.php", line 6, characters 11-22:
+  But got `nonnull`

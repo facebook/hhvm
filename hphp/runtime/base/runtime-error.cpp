@@ -14,20 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/stack-trace.h"
+#include "hphp/util/configs/errorhandling.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/php7.h"
+#include "hphp/util/random.h"
 #include "hphp/util/string-vsnprintf.h"
-#include "hphp/util/struct-log.h"
 
-#include <folly/AtomicHashMap.h>
+#include <folly/Random.h>
 #include <folly/logging/RateLimiter.h>
 #include <folly/Range.h>
 
@@ -89,7 +88,16 @@ void raise_recoverable_error_without_first_frame(const std::string &msg) {
 }
 
 void raise_typehint_error(const std::string& msg) {
-  if (RuntimeOption::PHP7_EngineExceptions) {
+  if (Cfg::PHP7::EngineExceptions) {
+    VMRegAnchor _;
+    SystemLib::throwTypeErrorObject(msg);
+  }
+  raise_recoverable_error(msg);
+  raise_error("Error handler tried to recover from typehint violation");
+}
+
+void raise_typehint_error_without_first_frame(const std::string& msg) {
+  if (Cfg::PHP7::EngineExceptions) {
     VMRegAnchor _;
     SystemLib::throwTypeErrorObject(msg);
   }
@@ -98,12 +106,24 @@ void raise_typehint_error(const std::string& msg) {
 }
 
 void raise_reified_typehint_error(const std::string& msg, bool warn) {
-  if (!warn) return raise_typehint_error(msg);
+  if (!warn) return raise_typehint_error_without_first_frame(msg);
+  raise_warning_unsampled(msg);
+}
+
+void raise_inline_typehint_error(std::string& givenType, std::string& expectedType, std::string& errorKey) {
+  std::string msg;
+  if (errorKey.empty()) {
+    msg = folly::sformat("Runtime type-check: Expected {}, got {}", expectedType, givenType);
+  } else {
+    msg = folly::sformat("Runtime type-check: Expected {} at {}, got {}",
+      expectedType, errorKey, givenType);
+  }
+  if (Cfg::ErrorHandling::ThrowExceptionOnInlineTypeError) return raise_typehint_error(msg);
   raise_warning_unsampled(msg);
 }
 
 void raise_return_typehint_error(const std::string& msg) {
-  if (RuntimeOption::PHP7_EngineExceptions) {
+  if (Cfg::PHP7::EngineExceptions) {
     VMRegAnchor _;
     SystemLib::throwTypeErrorObject(msg);
   }
@@ -114,17 +134,15 @@ void raise_return_typehint_error(const std::string& msg) {
 
 void raise_property_typehint_error(const std::string& msg,
                                    bool isSoft, bool isUB) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(Cfg::Eval::CheckPropTypeHints > 0);
 
-  if (RuntimeOption::EvalCheckPropTypeHints == 1 ||
-      isSoft ||
-      (isUB && RuntimeOption::EvalEnforceGenericsUB < 2)) {
+  if (Cfg::Eval::CheckPropTypeHints == 1 || isSoft) {
     raise_warning_unsampled(msg);
     return;
   }
 
   raise_recoverable_error(msg);
-  if (RuntimeOption::EvalCheckPropTypeHints >= 3) {
+  if (Cfg::Eval::CheckPropTypeHints >= 3) {
     raise_error("Error handler tried to recover from a property typehint "
                 "violation");
   }
@@ -148,12 +166,22 @@ void raise_convert_object_to_string(const char* cls_name) {
   raise_error("Cannot convert object to string (got instance of %s)", cls_name);
 }
 
-void raise_convert_rfunc_to_type(const char* typeName) {
-  raise_error("Cannot convert reified function to %s", typeName);
+void throw_convert_rfunc_to_type(const char* typeName) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    folly::sformat("Cannot convert reified function to {}", typeName)
+  );
 }
 
-void raise_convert_rcls_meth_to_type(const char* typeName) {
-  raise_error("Cannot convert reified class meth pointer to %s", typeName);
+void throw_convert_rcls_meth_to_type(const char* typeName) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    folly::sformat("Cannot convert reified class method to {}", typeName)
+  );
+}
+
+void throw_convert_ecl_to_type(const char* typeName) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    folly::sformat("Cannot convert enum class label to {}", typeName)
+  );
 }
 
 void raise_use_of_specialized_array() {
@@ -196,12 +224,16 @@ void raise_hackarr_compat_is_operator(const char* source, const char* target) {
   );
 }
 
-void raise_resolve_undefined(const StringData* name, const Class* cls) {
+void raise_resolve_func_undefined(const StringData* name, const Class* cls) {
   raise_func_undefined("Failure to resolve", name, cls);
 }
 
 void raise_call_to_undefined(const StringData* name, const Class* cls) {
   raise_func_undefined("Call to", name, cls);
+}
+
+void raise_resolve_class_undefined(const StringData* name) {
+  raise_error(Strings::FAILED_RESOLVE_CLASS, name->data());
 }
 
 void raise_recoverable_error(const char *fmt, ...) {
@@ -217,8 +249,8 @@ static int64_t g_notice_counter = 0;
 
 static bool notice_freq_check(ErrorMode mode) {
   if (!g_context->getThrowAllErrors() &&
-      (RuntimeOption::NoticeFrequency <= 0 ||
-       g_notice_counter++ % RuntimeOption::NoticeFrequency != 0)) {
+      (Cfg::ErrorHandling::NoticeFrequency <= 0 ||
+       g_notice_counter++ % Cfg::ErrorHandling::NoticeFrequency != 0)) {
     return false;
   }
   return g_context->errorNeedsHandling(
@@ -244,7 +276,7 @@ static void raise_notice_helper(ErrorMode mode, bool skipTop,
       HANDLE_ERROR(true, Never, "\nDeprecated: ", skipTop);
       break;
     default:
-      always_assert(!"Unhandled type of error");
+      always_assert(false && "Unhandled type of error");
   }
 }
 
@@ -275,8 +307,8 @@ static int64_t g_warning_counter = 0;
 
 bool warning_freq_check() {
   if (!g_context->getThrowAllErrors() &&
-      (RuntimeOption::WarningFrequency <= 0 ||
-       g_warning_counter++ % RuntimeOption::WarningFrequency != 0)) {
+      (Cfg::ErrorHandling::WarningFrequency <= 0 ||
+       g_warning_counter++ % Cfg::ErrorHandling::WarningFrequency != 0)) {
     return false;
   }
   return g_context->errorNeedsHandling(
@@ -309,45 +341,6 @@ void raise_warning(const char *fmt, ...) {
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
   raise_warning_helper(false, msg);
-}
-
-static void raise_hack_strict_helper(
-  HackStrictOption option, const char *ini_setting, const std::string& msg) {
-  if (option == HackStrictOption::WARN) {
-    raise_warning_helper(
-      false, std::string("(hhvm.hack.") + ini_setting + "=warn) " + msg);
-  } else if (option == HackStrictOption::ON) {
-    raise_error(std::string("(hhvm.hack.") + ini_setting + "=error) " + msg);
-  }
-}
-
-
-/**
- * For use with the HackStrictOption settings. This will warn, error, or do
- * nothing depending on what the user chose for the option. The second param
- * should be the ini setting name after "hhvm.hack."
- */
-void raise_hack_strict(HackStrictOption option, const char *ini_setting,
-                       const std::string& msg) {
-  if (option == HackStrictOption::WARN ?
-      !warning_freq_check() : (option != HackStrictOption::ON)) {
-    return;
-  }
-  raise_hack_strict_helper(option, ini_setting, msg);
-}
-
-void raise_hack_strict(HackStrictOption option, const char *ini_setting,
-                       const char *fmt, ...) {
-  if (option == HackStrictOption::WARN ?
-      !warning_freq_check() : (option != HackStrictOption::ON)) {
-    return;
-  }
-  std::string msg;
-  va_list ap;
-  va_start(ap, fmt);
-  string_vsnprintf(msg, fmt, ap);
-  va_end(ap);
-  raise_hack_strict_helper(option, ini_setting, msg);
 }
 
 /**
@@ -510,26 +503,38 @@ void raise_message(ErrorMode mode,
   }
 
   if (mode == ErrorMode::WARNING) {
-    if (RuntimeOption::WarningFrequency <= 0 ||
-        (g_warning_counter++) % RuntimeOption::WarningFrequency != 0) {
+    if (Cfg::ErrorHandling::WarningFrequency <= 0 ||
+        (g_warning_counter++) % Cfg::ErrorHandling::WarningFrequency != 0) {
       return;
     }
     HANDLE_ERROR(true, Never, "\nWarning: ", skipTop);
     return;
   }
 
-  if (RuntimeOption::NoticeFrequency <= 0 ||
-      (g_notice_counter++) % RuntimeOption::NoticeFrequency != 0) {
+  if (Cfg::ErrorHandling::NoticeFrequency <= 0 ||
+      (g_notice_counter++) % Cfg::ErrorHandling::NoticeFrequency != 0) {
     return;
   }
 
   raise_notice_helper(mode, skipTop, msg);
 }
 
-void raise_str_to_class_notice(const StringData* name) {
-  if (RuntimeOption::EvalRaiseStrToClsConversionWarning && !name->isStatic()) {
-    raise_notice("Implicit string to Class conversion for classname %s",
-                 name->data());
+void raise_str_to_class_notice(const StringData* name, jit::StrToClassKind kind) {
+  auto const source = [&] {
+    switch (kind) {
+      case jit::StrToClassKind::Expression:
+        return "expression";
+      case jit::StrToClassKind::StaticMethod:
+        return "static method call";
+      case jit::StrToClassKind::TypeStructure:
+        return "type_structure()";
+      case jit::StrToClassKind::DynamicClassMeth:
+        return "dynamic_class_meth()";
+    }
+  }();
+  if (folly::Random::oneIn(Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate, threadLocalRng64())) {
+    raise_notice("Implicit string to Class conversion for classname %s for %s",
+                 name->data(), source);
   }
 }
 
@@ -568,18 +573,18 @@ void raise_clsmeth_compat_type_hint_property_notice(
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void raise_class_to_string_conversion_warning() {
-  if (LIKELY(!RID().getSuppressClassConversionWarnings())) {
-    raise_warning(Strings::CLASS_TO_STRING);
+void raise_class_to_string_conversion_notice(const char* source) {
+  if (LIKELY(!RID().getSuppressClassConversionNotices())) {
+    raise_notice(Strings::CLASS_TO_STRING_IMPLICIT, source);
   }
 }
 
-SuppressClassConversionWarning::SuppressClassConversionWarning()
-  : old(RID().getSuppressClassConversionWarnings()) {
-  RID().setSuppressClassConversionWarnings(true);
+SuppressClassConversionNotice::SuppressClassConversionNotice()
+  : old(RID().getSuppressClassConversionNotices()) {
+  RID().setSuppressClassConversionNotices(true);
 }
-SuppressClassConversionWarning::~SuppressClassConversionWarning() {
-  RID().setSuppressClassConversionWarnings(old);
+SuppressClassConversionNotice::~SuppressClassConversionNotice() {
+  RID().setSuppressClassConversionNotices(old);
 }
 
 void raise_class_to_memokey_conversion_warning() {

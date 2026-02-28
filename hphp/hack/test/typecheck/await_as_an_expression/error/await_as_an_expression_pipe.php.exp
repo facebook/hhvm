@@ -1,0 +1,2 @@
+ERROR: File "await_as_an_expression_pipe.php", line 8, characters 16-24:
+`await` cannot be used as an expression right of a pipe operator, unless unstable feature: `pipe_await` is enabled. (Parsing[1002])

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_181() {
-$a = varray[2, 1];
+function main_181() :mixed{
+$a = vec[2, 1];
                    var_dump($a);
 }

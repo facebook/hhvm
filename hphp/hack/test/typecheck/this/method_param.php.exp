@@ -1,4 +1,8 @@
-File "method_param.php", line 4, characters 27-31:
+ERROR: File "method_param.php", line 4, characters 27-31:
 Cannot re-assign `$this` (Parsing[1002])
-File "method_param.php", line 5, characters 34-38:
+ERROR: File "method_param.php", line 5, characters 34-38:
 Cannot re-assign `$this` (Parsing[1002])
+ERROR: File "method_param.php", line 4, characters 27-31:
+Cannot use `$this` as lexical variable (Naming[2077])
+ERROR: File "method_param.php", line 5, characters 34-38:
+Cannot use `$this` as lexical variable (Naming[2077])

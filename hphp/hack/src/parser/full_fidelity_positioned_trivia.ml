@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Sexplib.Std
 
 (**
  * Positioned trivia
@@ -25,7 +26,7 @@ type t = {
   offset: int;
   width: int;
 }
-[@@deriving show, eq]
+[@@deriving show, eq, sexp_of]
 
 let make_ignore_error source_text offset width =
   { kind = TriviaKind.IgnoreError; source_text; offset; width }
@@ -38,6 +39,9 @@ let make_fallthrough source_text offset width =
 
 let make_fix_me source_text offset width =
   { kind = TriviaKind.FixMe; source_text; offset; width }
+
+let make_ignore source_text offset width =
+  { kind = TriviaKind.Ignore; source_text; offset; width }
 
 let make_whitespace source_text offset width =
   { kind = TriviaKind.WhiteSpace; source_text; offset; width }

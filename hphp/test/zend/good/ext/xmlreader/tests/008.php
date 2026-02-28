@@ -18,14 +18,14 @@ $xmlstring = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 </MOVIE>
 </LIST>';
 
-$file = __SystemLib\hphp_test_tmppath('_008.xml');
+$file = sys_get_temp_dir().'/'.'_008.xml';
 file_put_contents($file, $xmlstring);
 
 
 $reader = new XMLReader();
 $reader->open($file);
-$reader->setParserProperty(XMLREADER::LOADDTD, TRUE);
-$reader->setParserProperty(XMLREADER::VALIDATE, TRUE);
+$reader->setParserProperty(XMLReader::LOADDTD, TRUE);
+$reader->setParserProperty(XMLReader::VALIDATE, TRUE);
 while($reader->read());
 if ($reader->isValid()) {
     echo "file DTD: ok\n";
@@ -53,8 +53,8 @@ $xmlstring = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 $reader = new XMLReader();
 $reader->XML($xmlstring);
 
-$reader->setParserProperty(XMLREADER::LOADDTD, TRUE);
-$reader->setParserProperty(XMLREADER::VALIDATE, TRUE);
+$reader->setParserProperty(XMLReader::LOADDTD, TRUE);
+$reader->setParserProperty(XMLReader::VALIDATE, TRUE);
 while($reader->read());
 if ($reader->isValid()) {
     echo "string DTD: ok\n";

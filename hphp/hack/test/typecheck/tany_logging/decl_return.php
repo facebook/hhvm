@@ -1,14 +1,16 @@
 <?hh
 
-type Tany<T> = T;
-
-class C {
-  /* HH_IGNORE_ERROR[4101] */
-  public static function f(): Tany {}
-
-  /* HH_IGNORE_ERROR[4101] */
-  public function g(): Tany {}
+namespace HH_FIXME {
+  type MISSING_TYPE_IN_HIERARCHY = mixed;
 }
+namespace Test {
+  type Tany = \HH_FIXME\MISSING_TYPE_IN_HIERARCHY;
 
-/* HH_IGNORE_ERROR[4101] */
-function h(): Tany {}
+  class C {
+    public static function f(): Tany {}
+
+    public function g(): Tany {}
+  }
+
+  function h(): Tany {}
+}

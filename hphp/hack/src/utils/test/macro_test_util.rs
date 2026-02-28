@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use proc_macro2::{TokenStream, TokenTree};
-use syn::Error;
+use std::fmt::Display;
 
-type Result<T> = std::result::Result<T, Error>;
+use proc_macro2::TokenStream;
+use proc_macro2::TokenTree;
 
 fn mismatch(ta: Option<TokenTree>, tb: Option<TokenTree>, ax: &TokenStream, bx: &TokenStream) -> ! {
     panic!(
@@ -18,7 +18,7 @@ fn mismatch(ta: Option<TokenTree>, tb: Option<TokenTree>, ax: &TokenStream, bx: 
     );
 }
 
-pub fn assert_pat_eq(a: Result<TokenStream>, b: TokenStream) {
+pub fn assert_pat_eq<E: Display>(a: Result<TokenStream, E>, b: TokenStream) {
     let a = match a {
         Err(err) => {
             panic!("Unexpected error '{}'", err);
@@ -33,17 +33,25 @@ pub fn assert_pat_eq(a: Result<TokenStream>, b: TokenStream) {
         loop {
             let t_a = ia.next();
             let t_b = ib.next();
-            if t_a.is_none() && t_b.is_none() {
-                break;
-            }
-            if t_a.is_none() || t_b.is_none() {
-                mismatch(t_a, t_b, ax, bx);
-            }
-            let t_a = t_a.unwrap();
-            let t_b = t_b.unwrap();
+
+            let (t_a, t_b) = match (t_a, t_b) {
+                (None, None) => break,
+                (None, Some(TokenTree::Punct(t))) if t.as_char() == ',' && ib.next().is_none() => {
+                    // Allow one side to have a trailing comma
+                    break;
+                }
+                (Some(TokenTree::Punct(t)), None) if t.as_char() == ',' && ia.next().is_none() => {
+                    // Allow one side to have a trailing comma
+                    break;
+                }
+                (t_a @ Some(_), t_b @ None) | (t_a @ None, t_b @ Some(_)) => {
+                    mismatch(t_a, t_b, ax, bx);
+                }
+                (Some(a), Some(b)) => (a, b),
+            };
 
             match (&t_a, &t_b) {
-                (TokenTree::Ident(a), TokenTree::Ident(b)) if *a == b.to_string() => {}
+                (TokenTree::Ident(a), TokenTree::Ident(b)) if a == b => {}
                 (TokenTree::Literal(a), TokenTree::Literal(b))
                     if a.to_string() == b.to_string() => {}
                 (TokenTree::Punct(a), TokenTree::Punct(b)) if a.to_string() == b.to_string() => {}
@@ -63,8 +71,7 @@ pub fn assert_pat_eq(a: Result<TokenStream>, b: TokenStream) {
     inner_cmp(a.clone(), b.clone(), &a, &b);
 }
 
-#[allow(dead_code)]
-pub(crate) fn assert_error(a: Result<TokenStream>, b: &str) {
+pub fn assert_error<E: Display>(a: Result<TokenStream, E>, b: &str) {
     match a {
         Ok(a) => panic!("Expected error but got:\n{}", a),
         Err(e) => {

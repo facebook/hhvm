@@ -1,7 +1,7 @@
 <?hh // should fail
 
 interface I {
-  function query(); // HipHop syntax enabled => full check
+  function query():mixed; // HipHop syntax enabled => full check
 }
 
 class C extends PDO implements I {
@@ -9,7 +9,7 @@ class C extends PDO implements I {
 
 
 <<__EntryPoint>>
-function main_02() {
+function main_02() :mixed{
 print(print_r(ini_get_all()));
 
 print("Success\n");

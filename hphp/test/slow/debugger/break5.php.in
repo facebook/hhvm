@@ -1,0 +1,8 @@
+b 12 if bad()
+run
+p DebuggerBreak5::$x
+s
+p DebuggerBreak5::$x
+s
+p DebuggerBreak5::$x
+quit

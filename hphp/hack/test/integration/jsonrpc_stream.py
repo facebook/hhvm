@@ -7,7 +7,7 @@ from queue import Empty, Queue
 from threading import Thread
 from typing import BinaryIO, Optional
 
-from utils import Json
+from hphp.hack.test.integration.utils import Json
 
 
 class JsonRpcStreamReader:

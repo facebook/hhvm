@@ -12,31 +12,17 @@ type load_state_approach =
   (* Load a saved state using Ocaml implementation of saved state loader. *)
   | Load_state_natively
 
-type remote_init = {
-  worker_key: string;
-  nonce: Int64.t;
-  check_id: string;
-}
-
 type init_approach =
   | Full_init
   | Parse_only_init
   | Saved_state_init of load_state_approach
-  | Remote_init of remote_init
   | Write_symbol_info
-
-(* Saves the state that is used by init below and returns the number of
-  edges added to the saved state dependency table. *)
-val save_state :
-  ServerEnv.genv ->
-  ServerEnv.env ->
-  string ->
-  SaveStateServiceTypes.save_state_result option
+  | Write_symbol_info_with_state of load_state_approach
 
 type init_result =
   (* Loaded a saved saved state of this distance. Note: for older load scripts
    * distance is unknown, thus None. *)
-  | Load_state_succeeded of ServerEnv.saved_state_delta option
+  | Load_state_succeeded of ServerEnv.saved_state_revs_info
   (* Loading error *)
   | Load_state_failed of string * Telemetry.t
   (* This option means we didn't even try to load a saved state *)

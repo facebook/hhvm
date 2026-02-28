@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_mb_str() {
+function main_mb_str() :mixed{
 $output = null;
 var_dump(mb_parse_str("first=value&arr[]=foo+bar&arr[]=baz", inout $output));
 mb_parse_str("first=value&arr[]=foo+bar&arr[]=baz", inout $output);

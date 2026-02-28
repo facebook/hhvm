@@ -1,0 +1,13 @@
+{
+  "pools": {
+    "mc": {
+      "protocol": "caret",
+      "servers": [ "localhost:11000" ]
+    },
+    "mcr": {
+      "protocol": "caret",
+      "servers": [ "localhost:11001" ]
+    }
+  },
+  "route": "PoolRoute|mcr"
+}

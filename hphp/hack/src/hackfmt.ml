@@ -8,14 +8,13 @@
  *)
 
 open Hh_prelude
-module SyntaxTree = Full_fidelity_syntax_tree
-module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
+module SyntaxTree =
+  Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 module Logger = HackfmtEventLogger
 module FEnv = Format_env
 open Printf
 open Boundaries
-open Libhackfmt
 open Hackfmt_error
 open Ocaml_overrides
 open FindUtils
@@ -50,7 +49,7 @@ let rec guess_root config start recursion_limit =
   else
     guess_root config (Path.parent start) (recursion_limit - 1)
 
-let get_root_for_diff () =
+let get_www_root_for_diff () =
   eprintf "No root specified, trying to guess one\n";
   let config = ".hhconfig" in
   let start_path = Path.make "." in
@@ -63,7 +62,7 @@ let get_root_for_diff () =
   eprintf "Guessed root: %a\n%!" Path.output root;
   root
 
-let get_root_for_format files =
+let get_www_root_for_format files =
   let cur = Path.make "." in
   let start_path =
     match files with
@@ -77,7 +76,7 @@ let get_root_for_format files =
   | None -> cur
 
 let read_hhconfig path =
-  let (_hash, config) = Config_file.parse_hhconfig path in
+  let config = Config_file.parse_hhconfig path in
   ( FEnv.
       {
         add_trailing_commas =
@@ -110,8 +109,6 @@ let read_hhconfig path =
     Full_fidelity_parser_env.make
       ?enable_xhp_class_modifier:
         (Config_file.Getters.bool_opt "enable_xhp_class_modifier" config)
-      ?allow_new_attribute_syntax:
-        (Config_file.Getters.bool_opt "allow_new_attribute_syntax" config)
       () )
 
 let opt_default opt def =
@@ -125,14 +122,47 @@ module Env = struct
     test: bool;
     mutable mode: string option;
     mutable text_source: text_source;
-    root: string;
+    www_root: string;
+    diff_root: Path.t;
   }
 end
 
-let usage =
-  sprintf "Usage: %s [--range s e] [filename or read from stdin]\n" Sys.argv.(0)
+module Raw_options = struct
+  type normal = {
+    files: string list;
+    filename_for_logging: string option;
+    range: range option;
+    at_char: int option;
+    inplace: bool;
+    diff: bool;
+    diff_dry: bool;
+    diff_root: Path.t;
+    check: bool;
+    config: FEnv.t;
+    www_root: Path.t;
+    (* www root. By default: directory with .hhconfig *)
+    parser_env: Full_fidelity_parser_env.t;
+    debug: bool;
+    test: bool;
+  }
 
-let parse_options () =
+  type t =
+    | Normal of normal
+    | Linttool of {
+        linttool_filenames_or_pathsfile: string list;
+        linttool_severity: string option;
+      }  (** see Linttool.mli documentation *)
+end
+
+let usage =
+  sprintf
+    {|Usage: %s [--range s e] [filename or read from stdin]
+or --linttool [filenames or @filename containing newline-separated paths]|}
+    Sys.argv.(0)
+
+let parse_options () : Raw_options.t =
+  let linttool = ref false in
+  let linttool_severity : string option ref = ref None in
   let files = ref [] in
   let filename_for_logging = ref None in
   let start_char = ref None in
@@ -152,11 +182,20 @@ let parse_options () =
   let cli_indent_with_tabs = ref false in
   let cli_line_width = ref None in
   let cli_root = ref None in
+  let diff_root_arg = ref None in
   let cli_format_generated_code = ref false in
   let cli_version = ref None in
   let rec options =
     ref
       [
+        ( "--linttool",
+          Arg.Unit (fun () -> linttool := true),
+          "For use by an external tool that runs linters (https://fburl.com/wiki/g5m0d3zt)"
+        );
+        ( "--linttool-severity",
+          Arg.String (fun severity -> linttool_severity := Some severity),
+          "For use with --linttool. Makes us emit 'lints' with the given severity (we just give back the same severity that was passed in)"
+        );
         ( "--range",
           Arg.Tuple
             [
@@ -201,14 +240,18 @@ let parse_options () =
           Arg.Int (fun x -> cli_version := Some x),
           " For version-gated formatter features, specify the version to use. "
           ^ "Defaults to latest." );
+        ( "--root",
+          Arg.String (fun x -> cli_root := Some x),
+          "[dir]  Specify a directory " ^ "containing an .hhconfig" );
         ( "--diff",
           Arg.Set diff,
           " Format the changed lines in a diff"
           ^ " (example: hg diff | hackfmt --diff)" );
-        ( "--root",
-          Arg.String (fun x -> cli_root := Some x),
-          "[dir]  Specify a root directory for --diff mode, or a directory "
-          ^ "containing .hhconfig for standard mode" );
+        ( "--diff-root",
+          Arg.String (fun x -> diff_root_arg := Some x),
+          "[dir]  (for use with --diff) Specify a directory paths are relative to in a diffs file."
+          ^ "If not specified, defaults to `hg root`. If no hg root, falls back to WWW root."
+        );
         ( "--diff-dry-run",
           Arg.Set diff_dry,
           " Preview the files that would be overwritten by --diff mode" );
@@ -230,58 +273,93 @@ let parse_options () =
       ]
   in
   Arg.parse_dynamic options (fun file -> files := file :: !files) usage;
-  let range =
-    match (!start_char, !end_char, !start_line, !end_line) with
-    | (Some s, Some e, None, None) -> Some (Byte (s - 1, e - 1))
-    | (None, None, Some s, Some e) -> Some (Line (s, e))
-    | (Some _, Some _, Some _, Some _) ->
-      raise (InvalidCliArg "Cannot use --range with --line-range")
-    | _ -> None
-  in
-  let root =
-    match !cli_root with
-    | Some p -> Path.make p
-    | None ->
-      if !diff then
-        get_root_for_diff ()
-      else
-        get_root_for_format !files
-  in
-  let hhconfig_path = Path.concat root ".hhconfig" |> Path.to_string in
-  let (config, parser_env) =
-    if file_exists hhconfig_path then
-      read_hhconfig hhconfig_path
-    else
-      (FEnv.default, Full_fidelity_parser_env.default)
-  in
-  let config =
-    FEnv.
+  if !linttool then
+    Raw_options.Linttool
       {
-        add_trailing_commas = config.add_trailing_commas;
-        indent_width = opt_default !cli_indent_width config.indent_width;
-        indent_with_tabs = !cli_indent_with_tabs || config.indent_with_tabs;
-        line_width = opt_default !cli_line_width config.line_width;
-        format_generated_code =
-          !cli_format_generated_code || config.format_generated_code;
-        version =
-          (if Option.is_some !cli_version then
-            !cli_version
-          else
-            config.version);
+        linttool_filenames_or_pathsfile = !files;
+        linttool_severity = !linttool_severity;
       }
-  in
-  ( ( !files,
-      !filename_for_logging,
-      range,
-      !at_char,
-      !inplace,
-      !diff,
-      !diff_dry,
-      !check,
-      config ),
-    root,
-    parser_env,
-    (!debug, !test) )
+  else if Option.is_some !linttool_severity then
+    raise (InvalidCliArg "cannot use --linttool-severity without --linttool")
+  else begin
+    let range =
+      match (!start_char, !end_char, !start_line, !end_line) with
+      | (Some s, Some e, None, None) -> Some (Byte (s - 1, e - 1))
+      | (None, None, Some s, Some e) -> Some (Line (s, e))
+      | (Some _, Some _, Some _, Some _) ->
+        raise (InvalidCliArg "Cannot use --range with --line-range")
+      | _ -> None
+    in
+    let www_root =
+      match !cli_root with
+      | Some p -> Path.make p
+      | None ->
+        if !diff then
+          get_www_root_for_diff ()
+        else
+          get_www_root_for_format !files
+    in
+    let diff_root =
+      if !diff then
+        match !diff_root_arg with
+        | Some r -> Path.make r
+        | None -> begin
+          match Future.get @@ Hg.hg_root () with
+          | Ok hg_root -> Path.make hg_root
+          | Error e ->
+            let () =
+              eprintf
+                "Could not find hg root:\n%s\nFalling back to WWW root %s\n"
+                (Future.error_to_string e)
+                (Path.to_string www_root)
+            in
+            www_root
+        end
+      else
+        www_root
+    in
+    let hhconfig_path = Path.concat www_root ".hhconfig" |> Path.to_string in
+    let (config, parser_env) =
+      if file_exists hhconfig_path then
+        read_hhconfig hhconfig_path
+      else
+        (FEnv.default, Full_fidelity_parser_env.default)
+    in
+    let config =
+      FEnv.
+        {
+          add_trailing_commas = config.add_trailing_commas;
+          indent_width = opt_default !cli_indent_width config.indent_width;
+          indent_with_tabs = !cli_indent_with_tabs || config.indent_with_tabs;
+          line_width = opt_default !cli_line_width config.line_width;
+          format_generated_code =
+            !cli_format_generated_code || config.format_generated_code;
+          version =
+            (if Option.is_some !cli_version then
+              !cli_version
+            else
+              config.version);
+        }
+    in
+    Raw_options.(
+      Normal
+        {
+          files = !files;
+          filename_for_logging = !filename_for_logging;
+          range;
+          at_char = !at_char;
+          inplace = !inplace;
+          diff = !diff;
+          diff_dry = !diff_dry;
+          diff_root;
+          check = !check;
+          config;
+          www_root;
+          parser_env;
+          debug = !debug;
+          test = !test;
+        })
+  end
 
 type format_options =
   | Print of {
@@ -329,21 +407,26 @@ type validate_options_input = {
 }
 
 let validate_options
-    env
-    ( files,
-      filename_for_logging,
-      range,
-      at_char,
-      inplace,
-      diff,
-      diff_dry,
-      check,
-      config ) =
+    (env : Env.t)
+    Raw_options.
+      {
+        files;
+        filename_for_logging;
+        range;
+        at_char;
+        inplace;
+        diff;
+        diff_dry;
+        check;
+        config;
+        _;
+      } : format_options =
   let fail msg = raise (InvalidCliArg msg) in
+  let multifile_allowed = inplace || check in
   let filename =
     match files with
     | [filename] -> Some filename
-    | filename :: _ :: _ when inplace || check -> Some filename
+    | filename :: _ :: _ when multifile_allowed -> Some filename
     | [] -> None
     | _ -> fail "More than one file given"
   in
@@ -361,12 +444,31 @@ let validate_options
       if not (file_exists path) then fail ("No such file or directory: " ^ path)
   in
   assert_file_exists filename;
-  assert_file_exists (Some env.Env.root);
+  assert_file_exists (Some env.www_root);
+  let files =
+    if multifile_allowed then
+      List.rev_filter files ~f:(fun path ->
+          is_hack path
+          ||
+          (Printf.eprintf
+             "Unexpected file extension (probably not a Hack file): %s\n"
+             path;
+           false))
+    else (
+      (match text_source with
+      | File path
+      | Stdin (Some path)
+        when not (is_hack path) ->
+        fail ("Unexpected file extension (probably not a Hack file): " ^ path)
+      | _ -> ());
+      files
+    )
+  in
 
   (* Let --diff-dry-run imply --diff *)
   let diff = diff || diff_dry in
   match { diff; inplace; text_source; range; at_char; check } with
-  | _ when env.Env.debug && diff -> fail "Can't format diff in debug mode"
+  | _ when env.debug && diff -> fail "Can't format diff in debug mode"
   | { diff = true; text_source = File _; _ }
   | { diff = true; text_source = Stdin (Some _); _ } ->
     fail "--diff mode expects no files"
@@ -451,17 +553,17 @@ let parse ~parser_env text_source =
   in
   parse_text ~parser_env source_text
 
-let logging_time_taken env logger thunk =
+let logging_time_taken (env : Env.t) logger thunk =
   let start_t = Unix.gettimeofday () in
   let res = thunk () in
   let end_t = Unix.gettimeofday () in
-  if not env.Env.test then
+  if not env.test then
     logger
       ~start_t
       ~end_t
-      ~mode:env.Env.mode
-      ~file:(text_source_to_filename env.Env.text_source)
-      ~root:env.Env.root;
+      ~mode:env.mode
+      ~file:(text_source_to_filename env.text_source)
+      ~root:env.www_root;
   res
 
 (* If the range is a byte range, expand it to line boundaries.
@@ -485,11 +587,11 @@ let format ?config ?range ?ranges env tree =
   match range with
   | None ->
     logging_time_taken env Logger.format_tree_end (fun () ->
-        format_tree ?config tree)
+        Libhackfmt.format_tree ?config tree)
   | Some range ->
     let range = expand_or_convert_range ?ranges source_text range in
     logging_time_taken env Logger.format_range_end (fun () ->
-        let formatted = format_range ?config range tree in
+        let formatted = Libhackfmt.format_range ?config range tree in
         (* This is a bit of a hack to deal with situations where a newline exists
          * in the original source in a location where hackfmt refuses to split,
          * and the range end falls at that newline. It is correct for format_range
@@ -518,7 +620,7 @@ let output ?text_source str =
 let format_diff_intervals ?config env intervals tree =
   try
     logging_time_taken env Logger.format_intervals_end (fun () ->
-        format_intervals ?config intervals tree)
+        Libhackfmt.format_intervals ?config intervals tree)
   with
   | Invalid_argument s -> raise (InvalidDiff s)
 
@@ -537,19 +639,19 @@ let main
     (env : Env.t)
     (options : format_options)
     (parser_env : Full_fidelity_parser_env.t) =
-  env.Env.mode <- Some (mode_string options);
+  env.mode <- Some (mode_string options);
   match options with
   | Print { text_source; range; config } ->
-    env.Env.text_source <- text_source;
-    if env.Env.debug then
+    env.text_source <- text_source;
+    if env.debug then
       debug_print ?range ~config text_source
     else
       text_source |> parse ~parser_env |> format ?range ~config env |> output
   | InPlace { files; config } ->
     List.iter files ~f:(fun filename ->
         let text_source = File filename in
-        env.Env.text_source <- text_source;
-        if env.Env.debug then debug_print ~config text_source;
+        env.text_source <- text_source;
+        if env.debug then debug_print ~config text_source;
         let source_text = read_file filename in
         let source_text_string = SourceText.text source_text in
         try
@@ -563,7 +665,7 @@ let main
   | Check { files; config } ->
     List.iter files ~f:(fun filename ->
         let text_source = File filename in
-        env.Env.text_source <- text_source;
+        env.text_source <- text_source;
         let source_text = read_file filename in
         let source_text_string = SourceText.text source_text in
         try
@@ -575,20 +677,19 @@ let main
         with
         | InvalidSyntax -> eprintf "Parse error in file: %s\n%!" filename)
   | AtChar { text_source; pos; config } ->
-    env.Env.text_source <- text_source;
+    env.text_source <- text_source;
     let tree = parse ~parser_env text_source in
     let (range, formatted) =
       try
         logging_time_taken env Logger.format_at_offset_end (fun () ->
-            format_at_offset ~config tree pos)
+            Libhackfmt.format_at_offset ~config tree pos)
       with
       | Invalid_argument s -> raise (InvalidCliArg s)
     in
-    if env.Env.debug then debug_print text_source ~range:(Byte range) ~config;
+    if env.debug then debug_print text_source ~range:(Byte range) ~config;
     Printf.printf "%d %d\n" (fst range) (snd range);
     output formatted
   | Diff { dry; config } ->
-    let root = Path.make env.Env.root in
     read_stdin ()
     |> Parse_diff.go
     |> List.filter ~f:(fun (rel_path, _intervals) -> is_hack rel_path)
@@ -602,14 +703,14 @@ let main
             * Similarly, InvalidDiff exceptions thrown by format_diff_intervals
             * (caused by out-of-bounds line numbers, etc) will cause us to bail
             * before writing to any files. *)
-           let filename = Path.to_string (Path.concat root rel_path) in
+           let filename = Path.to_string (Path.concat env.diff_root rel_path) in
            if not (file_exists filename) then
              raise (InvalidDiff ("No such file or directory: " ^ rel_path));
 
            (* Store the name of the file we're working with, so if we encounter an
             * exception, this filename will be the one that is logged. *)
            let text_source = File filename in
-           env.Env.text_source <- text_source;
+           env.text_source <- text_source;
            try
              let contents =
                text_source
@@ -626,7 +727,7 @@ let main
              None)
     |> List.iter ~f:(fun (text_source, rel_path, contents) ->
            (* Log this filename in the event of an exception. *)
-           env.Env.text_source <- text_source;
+           env.text_source <- text_source;
            if dry then printf "*** %s\n" rel_path;
            let output_text_source =
              if dry then
@@ -642,48 +743,55 @@ let () =
   Daemon.check_entry_point ();
   Folly.ensure_folly_init ();
 
-  let (options, root, parser_env, (debug, test)) = parse_options () in
-  let env =
-    {
-      Env.debug;
-      test;
-      mode = None;
-      text_source = Stdin None;
-      root = Path.to_string root;
-    }
-  in
-  let start_time = Unix.gettimeofday () in
-  if not env.Env.test then Logger.init start_time;
+  match parse_options () with
+  | Raw_options.(
+      Normal ({ www_root; diff_root; parser_env; debug; test; _ } as options))
+    ->
+    let env =
+      {
+        Env.debug;
+        test;
+        mode = None;
+        text_source = Stdin None;
+        www_root = Path.to_string www_root;
+        diff_root;
+      }
+    in
+    let start_time = Unix.gettimeofday () in
+    if not env.test then Logger.init start_time;
 
-  let (err_msg, exit_code) =
-    try
-      let options = validate_options env options in
-      main env options parser_env;
-      (None, 0)
-    with
-    | exn ->
-      let exit_code = get_exception_exit_value exn in
-      if exit_code = 255 then Printexc.print_backtrace stderr;
-      let err_str = get_error_string_from_exn exn in
-      let err_msg =
-        match exn with
-        | InvalidSyntax -> err_str
-        | InvalidCliArg s
-        | InvalidDiff s ->
-          err_str ^ ": " ^ s
-        | _ -> err_str ^ ": " ^ Exn.to_string exn
-      in
-      (Some err_msg, exit_code)
-  in
-  (if not env.Env.test then
-    let time_taken = Unix.gettimeofday () -. start_time in
-    Logger.exit
-      ~time_taken
-      ~error:err_msg
-      ~exit_code:(Some exit_code)
-      ~mode:env.Env.mode
-      ~file:(text_source_to_filename env.Env.text_source)
-      ~root:env.Env.root);
+    let (err_msg, exit_code) =
+      try
+        let options = validate_options env options in
+        main env options parser_env;
+        (None, 0)
+      with
+      | exn ->
+        let exit_code = get_exception_exit_value exn in
+        if exit_code = 255 then Printexc.print_backtrace stderr;
+        let err_str = get_error_string_from_exn exn in
+        let err_msg =
+          match exn with
+          | InvalidSyntax -> err_str
+          | InvalidCliArg s
+          | InvalidDiff s ->
+            err_str ^ ": " ^ s
+          | _ -> err_str ^ ": " ^ Exn.to_string exn
+        in
+        (Some err_msg, exit_code)
+    in
+    (if not env.test then
+      let time_taken = Unix.gettimeofday () -. start_time in
+      Logger.exit
+        ~time_taken
+        ~error:err_msg
+        ~exit_code:(Some exit_code)
+        ~mode:env.mode
+        ~file:(text_source_to_filename env.text_source)
+        ~root:env.www_root);
 
-  Option.iter err_msg ~f:(eprintf "%s\n");
-  exit exit_code
+    Option.iter err_msg ~f:(eprintf "%s\n");
+    exit exit_code
+  | Raw_options.Linttool
+      { linttool_filenames_or_pathsfile; linttool_severity = severity } ->
+    Linttool.run linttool_filenames_or_pathsfile ~severity

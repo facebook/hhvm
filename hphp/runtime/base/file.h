@@ -34,8 +34,6 @@ namespace HPHP {
 
 struct StreamContext;
 
-extern RDS_LOCAL(int, s_pcloseRet);
-
 // This structure holds the request allocated data members of File.  The
 // purpose of the class is to allow File (and subclasses) to be managed by
 // the request heap while also allowing their underlying OS handles to be
@@ -145,7 +143,8 @@ struct File : SweepableResourceData {
    */
   virtual bool open(const String& filename, const String& mode) = 0;
 
-  virtual bool close() = 0;
+  /* The optional out param is only used by Pipe */
+  virtual bool close(int* unused = nullptr);
   virtual bool isClosed() const { return !m_data || m_data->m_closed; }
 
   /* Use:
@@ -257,7 +256,6 @@ struct File : SweepableResourceData {
   std::shared_ptr<FileData> getData() const { return m_data; }
 
 protected:
-  bool closeImpl();
   void sweep() override;
 
   void setIsLocal(bool isLocal) { m_data->m_isLocal = isLocal; }

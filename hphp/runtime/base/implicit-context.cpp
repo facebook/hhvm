@@ -15,18 +15,40 @@
 */
 
 #include "hphp/runtime/base/implicit-context.h"
+
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/type-object.h"
+
+#include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
 
 rds::Link<ObjectData*, rds::Mode::Normal> ImplicitContext::activeCtx;
 
-Object ImplicitContext::setByValue(Object&& obj) {
-  assertx(RO::EvalEnableImplicitContext);
-  auto const prev = *ImplicitContext::activeCtx;
-  *ImplicitContext::activeCtx = obj.detach();
-  return Object::attach(prev);
+rds::Link<ObjectData*, rds::Mode::Normal> ImplicitContext::emptyCtx;
+
+void ImplicitContext::setActive(Object&& ctx) {
+  assertx(*ImplicitContext::activeCtx);
+  (*ImplicitContext::activeCtx)->decRefCount();
+  *ImplicitContext::activeCtx = ctx.detach();
+}
+
+ImplicitContext::Saver::Saver() {
+  m_context = *ImplicitContext::activeCtx;
+  setActive(Object{*ImplicitContext::emptyCtx});
+}
+
+ImplicitContext::Saver::~Saver() {
+  setActive(Object{m_context});
+}
+
+Variant ImplicitContext::getBlameVectors() {
+  /*
+   * TODO: once confirmed by privacy org that we don't need
+   * any blame mechanism, rip out this function
+  */
+  return init_null_variant;
 }
 
 } // namespace HPHP

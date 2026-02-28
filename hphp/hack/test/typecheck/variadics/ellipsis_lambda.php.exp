@@ -1,2 +1,10 @@
-File "ellipsis_lambda.php", line 4, characters 8-19:
-Variadic function arguments require a name in strict mode, e.g. `...$args`. (Typing[4223])
+ERROR: File "ellipsis_lambda.php", line 4, characters 12-12:
+An expression is expected here. (Parsing[1002])
+ERROR: File "ellipsis_lambda.php", line 4, characters 9-11:
+Unbound name: `...` (a global constant) (Naming[2049])
+ERROR: File "ellipsis_lambda.php", line 4, characters 14-16:
+Unbound name: `==>` (a global constant) (Naming[2049])
+ERROR: File "ellipsis_lambda.php", line 4, characters 9-11:
+Unbound global constant (Typing) (Typing[4106])
+ERROR: File "ellipsis_lambda.php", line 4, characters 14-16:
+Unbound global constant (Typing) (Typing[4106])

@@ -4,17 +4,17 @@ class MyException extends Exception {
     $this->error = $_error;
   }
 
-  function getException() {
+  function getException() :mixed{
     return $this->error;
   }
 }
 
-function ThrowException() {
+function ThrowException() :mixed{
   throw new MyException("'This is an exception!'");
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   try {
   } catch (MyException $exception) {
     print "There shouldn't be an exception: " . $exception->getException();

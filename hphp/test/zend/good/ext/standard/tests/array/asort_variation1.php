@@ -20,7 +20,7 @@ echo "*** Testing asort() : usage variations ***\n";
 $fp = fopen(__FILE__, "r");
 
 //array of values with indices to iterate over
-$unexpected_values = darray [
+$unexpected_values = dict[
 
   // int data
   0 => 0,

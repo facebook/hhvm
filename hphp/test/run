@@ -13,6 +13,11 @@ function get_hhvm_bin {
         "/usr/local/hphpi/bin/hhvm"
     )
 
+    # If HHVM_BIN is set, only consider that
+    if [[ -n "$HHVM_BIN" ]]; then
+        candidates=("${HHVM_BIN}")
+    fi
+
     for binary in "${candidates[@]}"; do
         if [[ ! -d "$binary" && -x "$binary" ]]; then
             echo "$binary"
@@ -50,7 +55,7 @@ function get_cli_config {
 }
 
 if hhvm_cfg="$(get_cli_config)"; then
-  exec "$hhvm_bin" -c "$hhvm_cfg" "$script_dir/run.php" "$@"
+  exec "$hhvm_bin" -c "$hhvm_cfg" -vBCCache.Enabled=false -vEval.EnableLogBridge=false -vEval.PreludePath= "$script_dir/run.php" "$@"
 else
-  exec "$hhvm_bin" "$script_dir/run.php" "$@"
+  exec "$hhvm_bin" -vBCCache.Enabled=false -vEval.EnableLogBridge=false "$script_dir/run.php" "$@"
 fi

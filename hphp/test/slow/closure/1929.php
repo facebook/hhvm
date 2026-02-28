@@ -1,7 +1,7 @@
 <?hh
 
-function h() {
-  return array_filter(varray[1, 2, 3],
+function h() :mixed{
+  return array_filter(vec[1, 2, 3],
                       function($e) {
  return !($e & 1);
  }
@@ -9,7 +9,7 @@ function h() {
 }
 
 <<__EntryPoint>>
-function main_1929() {
+function main_1929() :mixed{
 h();
 var_dump(h());
 }

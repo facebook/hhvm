@@ -31,8 +31,8 @@ let update_after_recheck
     ~(cancelled_files : Relative_path.Set.t)
     ~(rechecked_files : Relative_path.Set.t)
     ~(changed_files : Relative_path.Set.t)
-    ~(recheck_errors : Errors.t)
-    ~(all_errors : Errors.t) : ServerEnv.env * string Future.t option =
+    ~(recheck_errors : Diagnostics.t)
+    ~(all_errors : Diagnostics.t) : ServerEnv.env * string Future.t option =
   ignore
     ( genv,
       snapshot,

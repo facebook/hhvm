@@ -17,14 +17,11 @@
 #include "hphp/runtime/vm/hhbc.h"
 
 #include <type_traits>
-#include <sstream>
 #include <cstring>
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/member-key.h"
@@ -266,7 +263,7 @@ int instrLen(const PC origPC) {
   return pc - origPC;
 }
 
-OffsetList instrJumpOffsets(const PC origPC) {
+OffsetList instrJumpTargets(PC instrs, Offset pos) {
   static const std::array<uint8_t, kMaxHhbcImms> argTypes[] = {
 #define IMM_NA 0
 #define IMM_IVA 0
@@ -329,13 +326,20 @@ OffsetList instrJumpOffsets(const PC origPC) {
 #undef SIX
   };
 
-  auto pc = origPC;
+  auto pc = instrs + pos;
   auto const op = decode_op(pc);
 
   OffsetList targets;
+  if (!instrIsControlFlow(op)) {
+    DEBUG_ONLY constexpr std::array<uint8_t, kMaxHhbcImms>
+      empty = { 0, 0, 0, 0, 0 };
+    assertx(argTypes[size_t(op)] == empty);
+    return targets;
+  }
+
   if (isFCall(op)) {
     auto const offset = decodeFCallArgs(op, pc, nullptr).asyncEagerOffset;
-    if (offset != kInvalidOffset) targets.emplace_back(offset);
+    if (offset != kInvalidOffset) targets.emplace_back(offset + pos);
     return targets;
   }
 
@@ -345,24 +349,23 @@ OffsetList instrJumpOffsets(const PC origPC) {
       case 0:
         break;
       case 1:
-        pc = origPC;
-        targets.emplace_back(getImmPtr(pc, i)->u_BA);
+        targets.emplace_back(getImmPtr(instrs + pos, i)->u_BA + pos);
         break;
       case 2: {
-        pc = origPC;
-        PC vp = getImmPtr(pc, i)->bytes;
-        auto const size = decode_iva(vp);
-        ImmVector iv(vp, size, 0);
-        targets.insert(targets.end(), iv.vec32(), iv.vec32() + iv.size());
-        break;
-      }
-      case 3: {
-        pc = origPC;
-        PC vp = getImmPtr(pc, i)->bytes;
+        PC vp = getImmPtr(instrs + pos, i)->bytes;
         auto const size = decode_iva(vp);
         ImmVector iv(vp, size, 0);
         for (size_t j = 0; j < iv.size(); ++j) {
-          targets.emplace_back(iv.strvec()[j].dest);
+          targets.emplace_back(iv.vec32()[j] + pos);
+        }
+        break;
+      }
+      case 3: {
+        PC vp = getImmPtr(instrs + pos, i)->bytes;
+        auto const size = decode_iva(vp);
+        ImmVector iv(vp, size, 0);
+        for (size_t j = 0; j < iv.size(); ++j) {
+          targets.emplace_back(iv.strvec()[j].dest + pos);
         }
         break;
       }
@@ -372,12 +375,6 @@ OffsetList instrJumpOffsets(const PC origPC) {
   }
 
   return targets;
-}
-
-OffsetList instrJumpTargets(PC instrs, Offset pos) {
-  auto offsets = instrJumpOffsets(instrs + pos);
-  for (auto& o : offsets) o += pos;
-  return offsets;
 }
 
 OffsetSet instrSuccOffsets(PC opc, const Func* func) {
@@ -392,23 +389,11 @@ OffsetSet instrSuccOffsets(PC opc, const Func* func) {
   }
 
   if (op == Op::Await || op == Op::Throw) {
-    auto const target = findCatchHandler(func, opc - bcStart);
+    auto const target = findExceptionHandler(func, opc - bcStart);
     if (target != kInvalidOffset) offsetsSet.emplace(target);
   }
 
   return offsetsSet;
-}
-
-/**
- * Return the number of successor-edges including fall-through paths but not
- * implicit exception paths.
- */
-int numSuccs(const PC origPC) {
-  auto pc = origPC;
-  auto numTargets = instrJumpOffsets(pc).size();
-  pc = origPC;
-  if ((instrFlags(decode_op(pc)) & TF) == 0) ++numTargets;
-  return numTargets;
 }
 
 /**
@@ -611,6 +596,18 @@ void staticArrayStreamer(const ArrayData* ad, std::string& out) {
   out += ")";
 }
 
+std::string staticArrayStreamer(const ArrayData* ad) {
+  std::string out;
+  staticArrayStreamer(ad, out);
+  return out;
+}
+
+std::string staticStreamer(const TypedValue* tv) {
+  std::string out;
+  staticStreamer(tv, out);
+  return out;
+}
+
 void staticStreamer(const TypedValue* tv, std::string& out) {
   switch (tv->m_type) {
     case KindOfUninit:
@@ -633,7 +630,10 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
                                        tv->m_data.pstr->size()));
       return;
     case KindOfLazyClass:
-      out += tv->m_data.plazyclass.name()->data();
+      folly::format(&out, "{}::class", tv->m_data.plazyclass.name());
+      return;
+    case KindOfEnumClassLabel:
+      folly::format(&out, "#{}", tv->m_data.pstr);
       return;
     case KindOfPersistentVec:
     case KindOfVec:
@@ -655,15 +655,10 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
   not_reached();
 }
 
-std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f) {
+std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f, Either<const Unit*, const UnitEmitter*> u) {
   std::string out;
   PC iStart = it;
   Op op = decode_op(it);
-
-  auto u = f.match(
-    [](const Func* f) -> Either<const Unit*, const UnitEmitter*> { return f->unit(); },
-    [](const FuncEmitter* fe) -> Either<const Unit*, const UnitEmitter*> { return &fe->ue(); }
-  );
 
   auto readRATA = [&] {
     if (auto func = f.left()) {
@@ -688,14 +683,14 @@ std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f) {
   auto lookupLitstrId = [u](Id id) {
     return u.match(
       [id](const Unit* u) { return u->lookupLitstrId(id); },
-      [id](const UnitEmitter* ue) { return ue->lookupLitstr(id); }
+      [id](const UnitEmitter* ue) { return ue->lookupLitstrId(id); }
     );
   };
 
   auto lookupArrayId = [u](Id id) {
     return u.match(
       [id](const Unit* u) { return u->lookupArrayId(id); },
-      [id](const UnitEmitter* ue) { return ue->lookupArray(id); }
+      [id](const UnitEmitter* ue) { return ue->lookupArrayId(id); }
     );
   };
 
@@ -799,12 +794,12 @@ std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f) {
 #define H_LAR (out += ' ', out += show(decodeLocalRange(it)))
 #define H_ITA (out += ' ', out += show(decodeIterArgs(it), printLocal))
 #define H_FCA do {                                               \
-  auto const fca = decodeFCallArgs(thisOpcode, it, u);           \
-  auto const aeOffset = fca.asyncEagerOffset != kInvalidOffset   \
-    ? showOffset(fca.asyncEagerOffset)                           \
-    : "-";                                                       \
-  out += ' ';                                                    \
-  out += show(fca, fca.inoutArgs, fca.readonlyArgs, aeOffset, fca.context); \
+  auto const fca = decodeFCallArgs(thisOpcode, it, u); \
+  auto const aeOffset = fca.asyncEagerOffset != kInvalidOffset        \
+    ? showOffset(fca.asyncEagerOffset)                                \
+    : "-";                                                            \
+  out += ' ';                                                         \
+  out += show(fca, fca.inoutArgs, fca.readonlyArgs, fca.namedArgNames, aeOffset, fca.context); \
 } while (false)
 
 #define O(name, imm, push, pop, flags)       \
@@ -848,6 +843,10 @@ OPCODES
     default: assertx(false);
   };
   return out;
+}
+
+std::string instrToString(PC it, const Func* func) {
+  return instrToString(it, func, func->unit());
 }
 
 EXTERNALLY_VISIBLE
@@ -909,12 +908,6 @@ static const char* CollectionType_names[] = {
 #undef COL
 };
 
-static const char* SilenceOp_names[] = {
-#define SILENCE_OP(x) #x,
-  SILENCE_OPS
-#undef SILENCE_OP
-};
-
 static const char* OODeclExistsOp_names[] = {
 #define OO_DECL_EXISTS_OP(x) #x,
   OO_DECL_EXISTS_OPS
@@ -951,6 +944,24 @@ static const char* TypeStructResolveOp_names[] = {
 #undef OP
 };
 
+static const char* VerifyRetKind_names[] = {
+#define OP(x) #x,
+  VERIFY_KIND
+#undef OP
+};
+
+static const char* TypeStructEnforceKind_names[] = {
+#define KIND(x) #x,
+  TYPE_STRUCT_ENFORCE_KINDS
+#undef KIND
+};
+
+static const char* AsTypeStructExceptionKind_names[] = {
+#define KIND(x) #x,
+  AS_TYPE_STRUCT_EXCEPTION_KINDS
+#undef KIND
+};
+
 static const char* MOpMode_names[] = {
 #define MODE(x) #x,
   M_OP_MODES
@@ -973,6 +984,12 @@ static const char* SpecialClsRef_names[] = {
 #define REF(x) #x,
   SPECIAL_CLS_REFS
 #undef REF
+};
+
+static const char* ClassGetCMode_names[] = {
+#define MODE(x) #x,
+  CLASS_GET_C_MODES
+#undef MODE
 };
 
 static const char* ReadonlyOp_names[] = {
@@ -1039,7 +1056,6 @@ X(FatalOp,        static_cast<int>(FatalOp::Runtime))
 X(SetOpOp,        static_cast<int>(SetOpOp::PlusEqual))
 X(IncDecOp,       static_cast<int>(IncDecOp::PreInc))
 X(BareThisOp,     static_cast<int>(BareThisOp::Notice))
-X(SilenceOp,      static_cast<int>(SilenceOp::Start))
 X(CollectionType, static_cast<int>(HeaderKind::Vector))
 X(OODeclExistsOp, static_cast<int>(OODeclExistsOp::Class))
 X(ObjMethodOp,    static_cast<int>(ObjMethodOp::NullThrows))
@@ -1048,9 +1064,16 @@ X(QueryMOp,       static_cast<int>(QueryMOp::CGet))
 X(SetRangeOp,     static_cast<int>(SetRangeOp::Forward))
 X(TypeStructResolveOp,
                   static_cast<int>(TypeStructResolveOp::Resolve))
+X(VerifyRetKind,
+                  static_cast<int>(VerifyRetKind::None))
+X(TypeStructEnforceKind,
+                  static_cast<int>(TypeStructEnforceKind::Deep))
+X(AsTypeStructExceptionKind,
+                  static_cast<int>(AsTypeStructExceptionKind::Error))
 X(MOpMode,        static_cast<int>(MOpMode::None))
 X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))
 X(SpecialClsRef,  static_cast<int>(SpecialClsRef::SelfCls))
+X(ClassGetCMode,  static_cast<int>(ClassGetCMode::Normal))
 X(IsLogAsDynamicCallOp,
                   static_cast<int>(IsLogAsDynamicCallOp::LogAsDynamicCall))
 X(ReadonlyOp,     static_cast<int>(ReadonlyOp::Any))
@@ -1065,12 +1088,6 @@ bool instrIsVMCall(Op opcode) {
   switch (opcode) {
     case OpContEnter:
     case OpContRaise:
-    case OpEval:
-    case OpIncl:
-    case OpInclOnce:
-    case OpReq:
-    case OpReqDoc:
-    case OpReqOnce:
       return true;
 
     default:
@@ -1079,17 +1096,33 @@ bool instrIsVMCall(Op opcode) {
 }
 
 bool instrMayVMCall(Op opcode) {
-  return instrIsVMCall(opcode) || opcode == OpIdx;
+  if (instrIsVMCall(opcode)) return true;
+  switch (opcode) {
+    case OpIterGetKey:
+    case OpIterGetValue:
+      // These instructions might directly call key() and current() methods on
+      // an Iterable from JIT without reentering VM. We might call skipCall() on
+      // these instructions if we are interpreting RetC of these methods. It is
+      // safe to do so (even if these instructions performed an additional work
+      // after the call), since we are going to always return to the JIT, which
+      // doesn't care about the state of VM registers.
+      return true;
+
+    default:
+      return false;
+  }
 }
 
 }
 
 bool instrIsNonCallControlFlow(Op opcode) {
-  if (!instrIsControlFlow(opcode) || instrIsVMCall(opcode)) return false;
+  if (!instrIsControlFlow(opcode) ||
+      instrIsVMCall(opcode) ||
+      isAwait(opcode)) {
+    return false;
+  }
 
   switch (opcode) {
-    case OpAwait:
-    case OpAwaitAll:
     case OpYield:
     case OpYieldK:
       return false;
@@ -1129,16 +1162,16 @@ ImmVector getImmVector(PC opcode) {
 std::string show(const IterArgs& ita, PrintLocal print_local) {
   auto const flags = [&]{
     auto parts = std::vector<std::string>{};
-    if (ita.flags & IterArgs::Flags::BaseConst) parts.push_back("BaseConst");
-    if (parts.empty()) return std::string{};
-    return folly::sformat("<{}> ", folly::join(' ', parts));
+    if (has_flag(ita.flags, IterArgs::Flags::BaseConst)) {
+      parts.push_back("BaseConst");
+    }
+    if (has_flag(ita.flags, IterArgs::Flags::WithKeys)) {
+      parts.push_back("WithKeys");
+    }
+    return folly::sformat("<{}>", folly::join(' ', parts));
   }();
 
-  auto const key = ita.hasKey()
-    ? folly::to<std::string>("K:", print_local(ita.keyId))
-    : folly::to<std::string>("NK");
-  auto const val = "V:" + print_local(ita.valId);
-  return folly::sformat("{}{} {} {}", flags, ita.iterId, key, val);
+  return folly::sformat("{} {}", flags, ita.iterId);
 }
 
 std::string show(const LocalRange& range) {
@@ -1149,7 +1182,7 @@ std::string show(const LocalRange& range) {
 
 std::string show(uint32_t numArgs, const uint8_t* boolVecArgs) {
   if (!boolVecArgs) return "";
-  std::string out = "";
+  std::string out;
   uint8_t tmp = 0;
   for (auto i = 0; i < numArgs; ++i) {
     if (i % 8 == 0) tmp = *(boolVecArgs++);
@@ -1159,7 +1192,7 @@ std::string show(uint32_t numArgs, const uint8_t* boolVecArgs) {
 }
 
 std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgs,
-                 const uint8_t* readonlyArgs,
+                 const uint8_t* readonlyArgs, Id namedArgNamesId,
                  std::string asyncEagerLabel, const StringData* ctx) {
   std::vector<std::string> flags;
   if (fca.hasUnpack()) flags.push_back("Unpack");
@@ -1169,11 +1202,15 @@ std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgs,
   if (fca.skipCoeffectsCheck()) flags.push_back("SkipCoeffectsCheck");
   if (fca.enforceMutableReturn()) flags.push_back("EnforceMutableReturn");
   if (fca.enforceReadonlyThis()) flags.push_back("EnforceReadonlyThis");
+  auto formatId = [&] (Id id) {
+    return id == kInvalidId ? "$" : folly::sformat("@A_{}", id);
+  };
   return folly::sformat(
-    "<{}> {} {} \"{}\" \"{}\" {} \"{}\"",
+    "<{}> {} {} \"{}\" \"{}\" {} {} \"{}\"",
     folly::join(' ', flags), fca.numArgs, fca.numRets,
     show(fca.numArgs, inoutArgs),
     show(fca.numArgs, readonlyArgs),
+    formatId(namedArgNamesId),
     asyncEagerLabel, ctx ? ctx->data() : ""
   );
 }

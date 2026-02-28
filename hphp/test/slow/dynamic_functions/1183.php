@@ -1,12 +1,12 @@
 <?hh
 <<__DynamicallyCallable>>
-function test(inout $a, $b) {
+function test(inout $a, $b) :mixed{
  $a = 'ok';
 }
 
  <<__EntryPoint>>
-function main_1183() {
+function main_1183() :mixed{
  $a = 'test';
- $a(inout $a, 10);
+ HH\dynamic_fun($a)(inout $a, 10);
  print $a;
 }

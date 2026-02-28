@@ -25,7 +25,7 @@ function greaterThanOrEquals<Tv , Tcontext >(
   return new C();
 }
 
-function lessThan< Tv as dynamic , Tcontext >(
+function lessThan< Tv as supportdyn<mixed> , Tcontext >(
     Tv $value,
   ): PredRange<Tv, Tcontext> {
   return new C();

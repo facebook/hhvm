@@ -6,7 +6,7 @@ class A
         echo __METHOD__ . "\n";
     }
     protected function A()
-    {
+:mixed    {
         echo __METHOD__ . "\n";
     }
 }
@@ -18,7 +18,7 @@ class B extends A
         parent::__construct();
     }
     public function A()
-    {
+:mixed    {
         echo __METHOD__ . "\n";
         parent::A();
     }

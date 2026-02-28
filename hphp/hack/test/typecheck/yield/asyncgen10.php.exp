@@ -1,4 +1,4 @@
-File "asyncgen10.php", line 4, characters 3-18:
+ERROR: File "asyncgen10.php", line 4, characters 3-18:
 Invalid `yield` (Typing[4110])
   File "asyncgen10.php", line 3, characters 36-41:
   Expected `string`

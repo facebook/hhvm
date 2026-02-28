@@ -1,0 +1,2 @@
+int(4)
+Accessing internal property Foo::$x in module foo from the default module is not allowed

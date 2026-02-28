@@ -40,8 +40,9 @@ TEST(PredictionOpts, basic) {
   ckt->setNext(end);
   entry->push_back({ptr, ldm, inc, ckt});
 
-  taken->push_back(unit.gen(EndBlock, bcctx, ASSERT_REASON));
-  end->push_back(unit.gen(EndBlock, bcctx, ASSERT_REASON));
+  auto endBlockData =  EndBlockData{IRSPRelOffset{0}, nullptr, ASSERT_REASON.reason};
+  taken->push_back(unit.gen(EndBlock, bcctx, endBlockData));
+  end->push_back(unit.gen(EndBlock, bcctx, endBlockData));
 
   optimizePredictions(unit);
 

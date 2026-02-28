@@ -1,0 +1,11 @@
+FROM mcr.microsoft.com/devcontainers/base:jammy
+
+RUN apt update \
+    && apt upgrade -y \
+    && apt install -y --no-install-recommends \
+        python3-pip \
+        python3-dev \
+        patchelf \
+    && pip3 install --upgrade cython auditwheel \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/*

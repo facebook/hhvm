@@ -1,4 +1,4 @@
-File "akempty_promotion_12.php", line 12, characters 10-12:
+ERROR: File "akempty_promotion_12.php", line 12, characters 10-12:
 Invalid return type (Typing[4110])
   File "akempty_promotion_12.php", line 6, characters 57-62:
   Expected `string`

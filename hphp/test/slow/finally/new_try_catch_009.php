@@ -4,7 +4,7 @@ class A extends Exception {}
 class B extends Exception {}
 class C extends B {}
 
-function blah() {
+function blah() :mixed{
   echo "1\n";
   try {
     echo "2\n";
@@ -33,7 +33,7 @@ function blah() {
       }
       echo "ccc\n";
     } catch (A $ae) {
-      die("ddd\n");
+      exit("ddd\n");
     } finally {
       echo "11\n";
       try {

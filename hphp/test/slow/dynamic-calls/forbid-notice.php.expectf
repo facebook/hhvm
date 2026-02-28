@@ -1,100 +1,100 @@
 =============== positive tests =====================
 
-Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 121
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 121
 
-Notice: 'async_func' called dynamically but is not __DynamicallyCallable in %s on line 122
+Notice: 'async_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 122
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 124
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 124
 
-Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 126
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 126
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 129
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 129
 
-Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 131
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 131
 
-Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 133
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 133
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 134
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 134
 
-Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s on line 135
+Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 135
 
-Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 136
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 136
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 138
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 138
 
-Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 140
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 140
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 143
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/forbid-notice.php on line 143
 
-Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 145
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/forbid-notice.php on line 145
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 57
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/forbid-notice.php on line 57
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 58
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/forbid-notice.php on line 58
 
-Notice: 'B::static_func' called dynamically but is not __DynamicallyCallable in %s on line 59
+Warning: Method B::static_func not marked dynamic in %s/dynamic-calls/forbid-notice.php on line 59
 
-Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 67
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/forbid-notice.php on line 67
 
-Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 68
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/forbid-notice.php on line 68
 
-Notice: 'B::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 69
+Warning: Method B::static_async_func not marked dynamic in %s/dynamic-calls/forbid-notice.php on line 69
 
-Notice: 'A' constructed dynamically in %s on line 151
+Notice: 'A' constructed dynamically in %s/dynamic-calls/forbid-notice.php on line 151
 
-Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 152
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 152
 
-Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s on line 154
+Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 154
 
-Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 156
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 156
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 158
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 158
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 161
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 161
 
-Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 163
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 163
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 164
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 164
 
-Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 167
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 167
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 169
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 169
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 172
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 172
 
-Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 174
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 174
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 175
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 175
 
-Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 177
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 177
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 179
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 179
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 182
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 182
 
-Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 184
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 184
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 185
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 185
 
-Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 187
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 187
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 189
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 189
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 191
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 191
 
-Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 192
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 192
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 193
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 193
 
-Notice: 'cmp' called dynamically but is not __DynamicallyCallable in %s on line 195
+Notice: 'cmp' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 195
 
-Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %s on line 197
+Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 197
 
-Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %s on line 200
+Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 200
 
-Notice: 'A::cmp' called dynamically but is not __DynamicallyCallable in %s on line 202
+Notice: 'A::cmp' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 202
 
-Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %s on line 203
+Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/forbid-notice.php on line 203
 =============== negative tests =====================
 =============== positive tests (exceptions) ========
 Exception: 'func' called dynamically but is not __DynamicallyCallable
@@ -109,14 +109,14 @@ Exception: 'A::async_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
-Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
-Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
-Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
-Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
-Exception: 'B::static_func' called dynamically but is not __DynamicallyCallable
-Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
-Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
-Exception: 'B::static_async_func' called dynamically but is not __DynamicallyCallable
+Exception: Method A::static_func not marked dynamic
+Exception: Method A::static_async_func not marked dynamic
+Exception: Method A::static_func not marked dynamic
+Exception: Method A::static_func not marked dynamic
+Exception: Method B::static_func not marked dynamic
+Exception: Method A::static_async_func not marked dynamic
+Exception: Method A::static_async_func not marked dynamic
+Exception: Method B::static_async_func not marked dynamic
 Exception: 'A' constructed dynamically
 Exception: 'A::func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::async_func' called dynamically but is not __DynamicallyCallable

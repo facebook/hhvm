@@ -13,7 +13,7 @@ function any() {
 }
 
 function arr<T>(varray<T> $x): varray<varray<T>> {
-  return varray[$x];
+  return vec[$x];
 }
 
 function f(): void {

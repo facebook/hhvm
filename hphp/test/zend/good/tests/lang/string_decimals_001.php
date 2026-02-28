@@ -1,5 +1,5 @@
 <?hh
-function test($str) {
+function test($str) :mixed{
   echo "\n--> Testing $str:\n";
   var_dump((int)$str);
   var_dump((float)$str);

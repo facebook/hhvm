@@ -12,9 +12,9 @@ bool(false)
 
 -- Testing hash_file() function with less than expected no. of arguments --
 
-Warning: hash_file() expects at least 2 parameters, 1 given in %s/hash_file_error.php on line 23
+Warning: hash_file() expects at least 2 positional parameters, 1 given in %s/hash_file_error.php on line 23
 
 -- Testing hash_file() function with more than expected no. of arguments --
 
-Warning: hash_file() expects at most 3 parameters, 4 given in %s/hash_file_error.php on line 27
+Warning: hash_file() expects at most 3 positional parameters, 4 given in %s/hash_file_error.php on line 27
 ===DONE===

@@ -122,10 +122,10 @@ async function filter_with_key_async<Tk as arraykey, Tv>(
  * For non-async functions, see `Dict\map()`.
  *
  * Time complexity: O(n * f), where f is the complexity of the synchronous
- * portions of `$async_func`
+ * portions of `$value_func`
  * Space complexity: O(n)
  *
- * The IO operations for each of calls to `$async_func` will happen in
+ * The IO operations for each of calls to `$value_func` will happen in
  * parallel.
  */
 async function map_async<Tk as arraykey, Tv1, Tv2>(
@@ -153,25 +153,32 @@ async function map_async<Tk as arraykey, Tv1, Tv2>(
  * Returns a new dict where each value is the result of calling the given
  * async function on the original key and value.
  *
- * For non-async functions, see `Dict\map()`.
+ * For non-async functions, see `Dict\map_with_key()`.
  *
- * Time complexity: O(n * a), where a is the complexity of each Awaitable
+ * Time complexity: O(n * f), where f is the complexity of the synchronous
+ * portions of `$value_func`
  * Space complexity: O(n)
+ *
+ * The IO operations for each of calls to `$value_func` will happen in
+ * parallel.
  */
 async function map_with_key_async<Tk as arraykey, Tv1, Tv2>(
   KeyedTraversable<Tk, Tv1> $traversable,
-  (function(Tk, Tv1)[_]: Awaitable<Tv2>) $async_func,
-)[ctx $async_func]: Awaitable<dict<Tk, Tv2>> {
-  $awaitables = map_with_key($traversable, $async_func);
-  /* HH_FIXME[4135] Unset local variable to reduce peak memory. */
-  unset($traversable);
+  (function(Tk, Tv1)[_]: Awaitable<Tv2>) $value_func,
+)[ctx $value_func]: Awaitable<dict<Tk, Tv2>> {
+  $dict = cast_clear_legacy_array_mark($traversable);
+  foreach ($dict as $key => $value) {
+    $dict[$key] = $value_func($key, $value);
+  }
 
+  /* HH_FIXME[4110] Okay to pass in Awaitable */
   /* HH_FIXME[4390] Magic Function */
-  await AwaitAllWaitHandle::fromDict($awaitables);
-  foreach ($awaitables as $index => $value) {
+  await AwaitAllWaitHandle::fromDict($dict);
+  foreach ($dict as $key => $value) {
+    /* HH_FIXME[4110] Reuse the existing dict to reduce peak memory. */
     /* HH_FIXME[4390] Magic Function */
-    $awaitables[$index] = \HH\Asio\result($value);
+    $dict[$key] = \HH\Asio\result($value);
   }
   /* HH_FIXME[4110] Reuse the existing dict to reduce peak memory. */
-  return $awaitables;
+  return $dict;
 }

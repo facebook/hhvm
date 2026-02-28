@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $dom = new DOMDocument;
   $string = <<<END
 <a>
@@ -16,6 +16,6 @@ END;
 
 
 <<__EntryPoint>>
-function main_simplexml_import_dom_refcount() {
+function main_simplexml_import_dom_refcount() :mixed{
 main();
 }

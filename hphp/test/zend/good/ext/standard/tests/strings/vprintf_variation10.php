@@ -21,38 +21,38 @@ $formats =
 
 // Arrays of non char values for the format defined in $format. 
 // Each sub array contains non char values which correspond to each format in $format
-$args_array = varray[
+$args_array = vec[
 
   // array of float values
-  varray[65.8, -65.8, +66.8,
+  vec[65.8, -65.8, +66.8,
         93.2, -93.2, 126.8, -126.49,
         35.44, -35.68, 32.99, -32.00,
         -61.51, 61.51, 50.49, -54.50,
         83.33, +84.44, 81.11, 82.22],
 
   // array of int values
-  varray[65, -65, +66,
+  vec[65, -65, +66,
         169, -169, 126, -126,
         35, -35, 32, -32,
         -61, 61, 50, -54,
         83, +84, 81, 82],
 
   // array of strings
-  varray[" ", ' ', 'hello',
+  vec[" ", ' ', 'hello',
         '123hello', "123hello", '-123hello', '+123hello',
         "\12345678hello", "-\12345678hello", '0123456hello', 'h123456ello',
         "1234hello", "hello\0world", "NULL", "true",
         "3", "4", '1', '2'],
 
   // different arrays
-  varray[ varray[0], varray[1, 2], varray[-1, -1],
-         varray["123"], varray['123'], varray['-123'], varray["-123"],
-         varray[true], varray[false], varray[TRUE], varray[FALSE],
-         varray["123hello"], varray["1", "2"], varray['123hello'], darray[12=>"12twelve"],
-         varray["3"], varray["4"], varray["1"], varray["2"] ],
+  vec[ vec[0], vec[1, 2], vec[-1, -1],
+         vec["123"], vec['123'], vec['-123'], vec["-123"],
+         vec[true], vec[false], vec[TRUE], vec[FALSE],
+         vec["123hello"], vec["1", "2"], vec['123hello'], dict[12=>"12twelve"],
+         vec["3"], vec["4"], vec["1"], vec["2"] ],
 
   // array of boolean data
-  varray[ true, TRUE, false,
+  vec[ true, TRUE, false,
          TRUE, 0, FALSE, 1,
          true, false, TRUE, FALSE,
          0, 1, 1, 0,

@@ -45,6 +45,51 @@ type json =
   | JSON_Bool of bool
   | JSON_Null
 
+let rec of_yojson (t : Yojson.Safe.t) : json =
+  match t with
+  | `Assoc kv -> JSON_Object (List.map kv ~f:(fun (k, v) -> (k, of_yojson v)))
+  | `List l
+  | `Tuple l ->
+    JSON_Array (List.map l ~f:of_yojson)
+  | `Variant (k, v) ->
+    JSON_Object
+      [
+        ( k,
+          match v with
+          | None -> JSON_Null
+          | Some j -> of_yojson j );
+      ]
+  | `Bool b -> JSON_Bool b
+  | `Float d -> JSON_Number (Float.to_string d)
+  | `Int i -> JSON_Number (Int.to_string i)
+  | `Intlit i -> JSON_Number i
+  | `Null -> JSON_Null
+  | `String s -> JSON_String s
+
+let rec to_yojson (t : json) : Yojson.Safe.t =
+  match t with
+  | JSON_Null -> `Null
+  | JSON_String s -> `String s
+  | JSON_Number s ->
+    (match Stdlib.int_of_string_opt s with
+    | Some i -> `Int i
+    | None ->
+      (match Float.of_string_opt s with
+      | Some d -> `Float d
+      | None -> `Intlit s))
+  | JSON_Bool b -> `Bool b
+  | JSON_Array l -> `List (List.map l ~f:to_yojson)
+  | JSON_Object l -> `Assoc (List.map l ~f:(fun (k, v) -> (k, to_yojson v)))
+
+let yojson_of_json = to_yojson
+
+let of_opt of_t t =
+  match t with
+  | None -> JSON_Null
+  | Some t -> of_t t
+
+let of_yojson_opt = of_opt of_yojson
+
 let is_digit = function
   | '0' .. '9' -> true
   | _ -> false
@@ -67,7 +112,7 @@ exception Syntax_error of string
 
 (* Ignore whitespace in peek/eat/next/has_more to make code that uses them
    cleaner
- *)
+*)
 
 let has_more env = String.length env.data > env.pos
 
@@ -185,7 +230,8 @@ let js_string env =
         | 't' -> '\t'
         | 'u' ->
           let code = char_code env in
-          Char.chr code
+          (try Char.chr code with
+          | Invalid_argument _ -> syntax_error env "expected unicode")
         | x -> x
       in
       env.pos <- env.pos + 1;
@@ -592,6 +638,9 @@ let opt_ (to_json : 'a -> json) (x : 'a option) : json =
 
 let array_ (f : 'a -> json) (xs : 'a list) : json = JSON_Array (List.map ~f xs)
 
+let string_map (to_json : 'a -> json) (map : 'a SMap.t) : json =
+  JSON_Object (SMap.bindings map |> List.map ~f:(fun (k, v) -> (k, to_json v)))
+
 let get_object_exn = function
   | JSON_Object o -> o
   | _ -> assert false
@@ -616,11 +665,11 @@ let get_bool_exn = function
   | JSON_Bool b -> b
   | _ -> assert false
 
-let opt_string_to_json = function
+let string_opt = function
   | Some x -> JSON_String x
   | None -> JSON_Null
 
-let opt_int_to_json = function
+let int_opt = function
   | Some x -> JSON_Number (string_of_int x)
   | None -> JSON_Null
 
@@ -832,18 +881,17 @@ let json_truncate
         JSON_Array []
       ) else
         JSON_Array (truncate_children values max_array_elt_count ~f)
-    | JSON_String s ->
-      begin
-        match max_string_length with
-        | None -> json
-        | Some max_string_length ->
-          if String.length s <= max_string_length then
-            JSON_String s
-          else (
-            mark_changed ();
-            JSON_String (String.sub s 0 max_string_length ^ "...")
-          )
-      end
+    | JSON_String s -> begin
+      match max_string_length with
+      | None -> json
+      | Some max_string_length ->
+        if String.length s <= max_string_length then
+          JSON_String s
+        else (
+          mark_changed ();
+          JSON_String (String.sub s 0 max_string_length ^ "...")
+        )
+    end
   in
   truncate ~depth:0 json
 

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/debugger-request-info.h"
 #include "hphp/runtime/ext/vsdebug/php_executor.h"
 
 #include "hphp/runtime/base/array-iterator.h"
@@ -24,7 +25,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/tv-variant.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -89,7 +90,7 @@ static bool isArrayObjectType(const std::string className) {
   // HH\Vector and HH\Map are special in that they are objects but their
   // children look like array indicies.
   return className == "HH\\Vector" || className == "HH\\Map";
-};
+}
 
 VariablesCommand::VariablesCommand(
   Debugger* debugger,
@@ -170,7 +171,7 @@ void VariablesCommand::sortVariablesInPlace(folly::dynamic& vars) {
   for (auto it = vars.begin(); it != vars.end(); it++) {
     try {
       it->erase(ucKey);
-    } catch (std::out_of_range &e) {
+    } catch (std::out_of_range &) {
     }
   }
 }
@@ -543,7 +544,7 @@ bool VariablesCommand::isSuperGlobal(const std::string& name) {
     }
     return superGlobals;
   }();
-  return superGlobals.count(name);
+  return superGlobals.contains(name);
 }
 
 int VariablesCommand::addSuperglobalVariables(
@@ -672,25 +673,25 @@ const char* VariablesCommand::getTypeName(const Variant& variable) {
     case KindOfPersistentString:
     case KindOfString:
     case KindOfResource:
+    case KindOfRFunc:
+    case KindOfRClsMeth:
+    case KindOfFunc:
+    case KindOfClass:
+    case KindOfClsMeth:
+    case KindOfLazyClass:
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfEnumClassLabel:
       return getDataTypeString(variable.getType()).data();
 
     case KindOfObject:
       return variable.asCObjRef()->getClassName().c_str();
-
-    default:
-      VSDebugLogger::Log(
-        VSDebugLogger::LogLevelError,
-        "Unknown type %d for variable!",
-        (int)variable.getType()
-      );
-      return "UNKNOWN TYPE";
   }
+  not_reached();
 }
 
 const VariablesCommand::VariableValue VariablesCommand::getVariableValue(
@@ -732,6 +733,7 @@ const VariablesCommand::VariableValue VariablesCommand::getVariableValue(
       if (value.length() > maxDisplayLength) {
         value = value.substr(0, maxDisplayLength) + std::string{"..."};
       }
+      value = std::string("'") + value + "'";
       return VariableValue{value};
     }
 
@@ -751,17 +753,27 @@ const VariablesCommand::VariableValue VariablesCommand::getVariableValue(
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
-      auto const type = getDataTypeString(variable.getType());
+      auto const type_2 = getDataTypeString(variable.getType());
       auto const size = variable.toArray().size();
-      return VariableValue{format("{}[{}]", type.data(), size).str()};
+      return VariableValue{format("{}[{}]", type_2.data(), size).str()};
     }
 
     case KindOfObject:
       return getObjectSummary(session, debugger, requestId, variable.asCObjRef());
 
-    default:
-      return VariableValue{"Unexpected variable type"};
+    case KindOfFunc:
+    case KindOfRFunc:
+    case KindOfClsMeth:
+    case KindOfRClsMeth:
+    case KindOfClass:
+    case KindOfLazyClass:
+    case KindOfEnumClassLabel: {
+      VariableSerializer vs(VariableSerializer::Type::DebuggerDump, 0, 2);
+      std::string s = vs.serialize(variable, true).data();
+      return VariableValue{s};
+    }
   }
+  not_reached();
 }
 
 const VariablesCommand::VariableValue VariablesCommand::getObjectSummary(

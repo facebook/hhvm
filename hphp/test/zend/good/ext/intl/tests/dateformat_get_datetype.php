@@ -6,8 +6,8 @@
 
 
 function ut_main()
-{
-    $datetype_arr = varray [
+:mixed{
+    $datetype_arr = vec[
         IntlDateFormatter::FULL,
         IntlDateFormatter::LONG,
         IntlDateFormatter::MEDIUM,

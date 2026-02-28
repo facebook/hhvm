@@ -5,7 +5,7 @@ try {
   $options->setTotalTimeout(10);
   $options->setQueryTimeout(10);
   $options->setConnectionAttributes(
-    darray[
+    dict[
       'nonsense' => 'foo',
       'welp' => 'bar',
       'lol' => 'wut',
@@ -13,7 +13,7 @@ try {
   );
   HH\Asio\join(
     AsyncMysqlClient::connectAndQuery(
-      Vector{"SELECT id FROM `lolwhut` WHERE id IN (1)"},
+      vec["SELECT id FROM `lolwhut` WHERE id IN (1)"],
       "127.0.0.1",
       80,
       "fakedb",

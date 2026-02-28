@@ -3,7 +3,7 @@
 
 // Create a 55x30 image
 <<__EntryPoint>>
-function main_1779() {
+function main_1779() :mixed{
 $im = imagecreatetruecolor(55, 30);
 $red = imagecolorallocate($im, 255, 0, 0);
 $black = imagecolorallocate($im, 0, 0, 0);

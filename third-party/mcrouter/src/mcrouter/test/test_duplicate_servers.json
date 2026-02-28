@@ -1,0 +1,26 @@
+{
+  "pools": {
+    "A.wildcard": {
+      "servers": [
+        "localhost:12345",
+        "localhost:12345"
+      ]
+    },
+    "B.wildcard": {
+      "servers": [
+        "localhost:12345",
+        "localhost:12345"
+      ]
+    }
+  },
+  "routes": [
+    {
+      "aliases": [ "/a/a/" ],
+      "route": "PoolRoute|A.wildcard"
+    },
+    {
+      "aliases": [ "/b/b/" ],
+      "route": "PoolRoute|B.wildcard"
+    }
+  ]
+}

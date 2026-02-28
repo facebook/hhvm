@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Foo implements HH\TypeAliasAttribute { public function __construct(int... $x) {} }
 class Bar implements HH\TypeAliasAttribute {}

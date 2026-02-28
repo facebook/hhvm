@@ -30,15 +30,9 @@ namespace Facts {
 
 /**
  * Stripped-down interface to HPHP::StringData.
- *
- * In prod code, this wraps HPHP::StringData. In test code, this wraps
- * std::string.
  */
 struct StringPtr {
-
-  explicit StringPtr(const StringData* impl) noexcept : m_impl{impl} {
-  }
-
+  explicit StringPtr(const StringData* impl) noexcept;
   StringPtr() = default;
 
   bool operator==(const StringPtr& o) const noexcept {
@@ -106,7 +100,10 @@ struct StringPtr {
    * Case-insensitive exact string comparison.  (Numeric strings are
    * not treated specially.)
    */
-  bool isame(const StringPtr& s) const noexcept;
+  bool tsame(const StringPtr& s) const noexcept;
+  bool fsame(const StringPtr& s) const noexcept;
+  static bool tsame_slice(std::string_view, std::string_view) noexcept;
+  static bool fsame_slice(std::string_view, std::string_view) noexcept;
 
   const StringData* get() const noexcept {
     return m_impl;
@@ -120,7 +117,7 @@ struct StringPtr {
     return *get();
   }
 
-private:
+ private:
   friend std::ostream& operator<<(std::ostream& os, const StringPtr& s);
   const StringData* m_impl = nullptr;
 };
@@ -133,7 +130,8 @@ std::ostream& operator<<(std::ostream& os, const StringPtr& s);
 } // namespace Facts
 } // namespace HPHP
 
-template <> struct std::hash<HPHP::Facts::StringPtr> {
+template <>
+struct std::hash<HPHP::Facts::StringPtr> {
   std::size_t operator()(const HPHP::Facts::StringPtr& s) const noexcept {
     return s.hash();
   }

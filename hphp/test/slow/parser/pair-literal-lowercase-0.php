@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_pair_literal_lowercase_0() {
+function main_pair_literal_lowercase_0() :mixed{
 pair { 1 };
 }

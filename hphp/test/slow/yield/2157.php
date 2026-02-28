@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  public function foo() {
+  public function foo() :mixed{
     $this->bar(function() {
 yield 1;
  yield 2;
@@ -9,7 +9,7 @@ yield 1;
 }
 );
   }
-  public function bar(Closure $c) {
+  public function bar(Closure $c) :mixed{
     $a = $c();
     foreach ($a as $b) {
       echo $b."\n";
@@ -18,7 +18,7 @@ yield 1;
 }
 
 <<__EntryPoint>>
-function main_2157() {
+function main_2157() :mixed{
 $a = new A();
 $a->foo();
 }

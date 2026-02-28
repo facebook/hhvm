@@ -14,9 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <string>
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
+
+#include <string>
+
 #include "hphp/runtime/ext/vsdebug/logging.h"
+#include "hphp/util/configs/debugger.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -58,7 +61,7 @@ void VSDebugExtension::moduleLoad(const IniSetting::Map& ini, const Hdf hdf) {
     "Eval.Debugger.VSDebugDomainSocketGroup",
     "");
 
-  if (!RuntimeOption::EnableVSDebugger) {
+  if (!Cfg::Debugger::EnableVSDebugger) {
    m_enabled = false;
    return;
   }
@@ -94,7 +97,7 @@ void VSDebugExtension::moduleInit() {
   DebugTransport* transport = nullptr;
   SocketTransportOptions opts{};
 
-  if (RuntimeOption::ServerExecutionMode()) {
+  if (Cfg::Server::Mode) {
     // If HHVM is running in server mode, start up the debugger socket server
     // and listen for debugger clients to connect.
     VSDebugLogger::Log(VSDebugLogger::LogLevelInfo,
@@ -117,18 +120,18 @@ void VSDebugExtension::moduleInit() {
     // If a listen port or domain socket was specified on the command line,
     // use socket transport even in script mode. Otherwise, fall back to
     // using a pipe with our parent process.
-    if (RuntimeOption::VSDebuggerListenPort > 0 ||
-        !RuntimeOption::VSDebuggerDomainSocketPath.empty()) {
+    if (Cfg::Debugger::VSDebuggerListenPort > 0 ||
+        !Cfg::Debugger::VSDebuggerDomainSocketPath.empty()) {
       VSDebugLogger::Log(
         VSDebugLogger::LogLevelInfo,
         "Blocking script startup. Waiting for debugger to attach: %s",
-        RuntimeOption::VSDebuggerDomainSocketPath.empty()
-          ? std::to_string(RuntimeOption::VSDebuggerListenPort).c_str()
-          : RuntimeOption::VSDebuggerDomainSocketPath.c_str()
+        Cfg::Debugger::VSDebuggerDomainSocketPath.empty()
+          ? std::to_string(Cfg::Debugger::VSDebuggerListenPort).c_str()
+          : Cfg::Debugger::VSDebuggerDomainSocketPath.c_str()
       );
 
-      opts.tcpListenPort = RuntimeOption::VSDebuggerListenPort;
-      opts.domainSocketPath = RuntimeOption::VSDebuggerDomainSocketPath;
+      opts.tcpListenPort = Cfg::Debugger::VSDebuggerListenPort;
+      opts.domainSocketPath = Cfg::Debugger::VSDebuggerDomainSocketPath;
       transport = new SocketTransport(s_debugger, opts);
     } else {
       try {
@@ -181,11 +184,11 @@ void VSDebugExtension::requestInit() {
   // If we're in SCRIPT mode and a listen port/path was specified on the command
   // line, we need to block starting the script until the debugger client
   // connects.
-  if (!RuntimeOption::ServerExecutionMode() &&
-      (RuntimeOption::VSDebuggerListenPort > 0 ||
-        !RuntimeOption::VSDebuggerDomainSocketPath.empty())) {
+  if (!Cfg::Server::Mode &&
+      (Cfg::Debugger::VSDebuggerListenPort > 0 ||
+        !Cfg::Debugger::VSDebuggerDomainSocketPath.empty())) {
 
-    if (!RuntimeOption::VSDebuggerNoWait) {
+    if (!Cfg::Debugger::VSDebuggerNoWait) {
       VSDebugLogger::Log(
         VSDebugLogger::LogLevelInfo,
         "Blocking script startup until debugger client connects..."
@@ -224,7 +227,7 @@ void VSDebugExtension::threadShutdown() {
 }
 
 std::string& VSDebugExtension::getUnixSocketPath() {
-  static std::string s_unixSocketPath = "";
+  static std::string s_unixSocketPath;
   return s_unixSocketPath;
 }
 
@@ -236,8 +239,8 @@ std::string VSDebugExtension::getDomainSocketGroup() {
 static VSDebugExtension s_vsdebug_extension;
 
 // Linkage for configuration options.
-std::string VSDebugExtension::s_logFilePath {""};
-std::string VSDebugExtension::s_domainSocketGroup {""};
+std::string VSDebugExtension::s_logFilePath;
+std::string VSDebugExtension::s_domainSocketGroup;
 int VSDebugExtension::s_attachListenPort {-1};
 bool VSDebugExtension::s_launchMode {false};
 Debugger* VSDebugExtension::s_debugger {nullptr};

@@ -1,0 +1,32 @@
+#!/usr/bin/make -f
+include /usr/share/dpkg/pkg-info.mk
+
+%:
+	dh $@ --buildsystem=cmake --parallel
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+	-Wno-dev \
+	-DCMAKE_INSTALL_PREFIX=/opt/hhvm/$(DEB_VERSION_UPSTREAM) \
+	-DMYSQL_UNIX_SOCK_ADDR=/var/run/mysqld/mysqld.sock \
+	-DCMAKE_BUILD_TYPE=RelWithDebInfo
+
+override_dh_auto_build:
+	dh_auto_build -- -j1 hack hack_rust_ffi_bridge_targets hhbc_ast_cbindgen hack_dune
+	dh_auto_build -- -j8
+
+override_dh_strip:
+	dh_strip --dbg-package=hhvm-nightly-dbg
+
+generated=$(patsubst %.in,%,$(wildcard debian/*.in))
+
+$(generated): %: %.in
+	sed 's,__PKGROOT__,/opt/hhvm/$(DEB_VERSION_UPSTREAM),g' $< > $@
+
+override_dh_auto_install: $(generated)
+	dh_auto_install
+
+override_dh_fixperms:
+	dh_fixperms
+	chown www-data:www-data debian/hhvm-nightly/var/log/hhvm
+	chown www-data:www-data debian/hhvm-nightly/var/cache/hhvm

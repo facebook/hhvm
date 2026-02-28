@@ -53,19 +53,25 @@ let interrupt_handler fd acc =
   (try
      while true do
        let (ready, _, _) = Unix.select [fd] [] [] 0.0 in
-       if List.is_empty ready then raise Caml.Not_found;
+       if List.is_empty ready then raise Stdlib.Not_found;
        let read = Unix.read fd exclamation_mark 0 1 in
        assert (read = 1 && String.equal (Bytes.to_string exclamation_mark) "!")
      done
    with
-  | Caml.Not_found -> ());
-  (acc, MultiThreadedCall.Cancel)
+  | Stdlib.Not_found -> ());
+  ( acc,
+    MultiThreadedCall.Cancel
+      {
+        MultiThreadedCall.user_message = "cancel";
+        log_message = "";
+        timestamp = Unix.gettimeofday ();
+      } )
 
 let rec run_until_done fd_in workers (acc, iterations) = function
   | [] -> (acc, iterations)
   | work ->
     Hh_logger.log "Left: %d" (List.length work);
-    let (result, (), unfinished) =
+    let (result, (), unfinished_and_reason) =
       MultiWorker.call_with_interrupt
         (Some workers)
         ~job:do_work
@@ -79,7 +85,11 @@ let rec run_until_done fd_in workers (acc, iterations) = function
             env = ();
           }
     in
-    let unfinished = List.concat unfinished in
+    let unfinished =
+      match unfinished_and_reason with
+      | Some (unfinished, _reason) -> List.concat unfinished
+      | None -> []
+    in
     run_until_done fd_in workers (sum acc result, iterations + 1) unfinished
 
 (* Might raise because of Option.value_exn *)

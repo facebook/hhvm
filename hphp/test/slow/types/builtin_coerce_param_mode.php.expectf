@@ -1,7 +1,7 @@
-Warning: bcscale() expects parameter 1 to be integer, vec given in %s/test/slow/types/builtin_coerce_param_mode.php on line 4
+Warning: Argument 1 passed to bcscale() must be an instance of int, HH\vec given in %s/test/slow/types/builtin_coerce_param_mode.php on line 13
 
-Warning: bcscale() expects parameter 1 to be integer, vec given in %s/test/slow/types/builtin_coerce_param_mode.php on line 6
+Warning: Argument 1 passed to bcscale() must be an instance of int, HH\vec given in %s/test/slow/types/builtin_coerce_param_mode.php on line 19
 
-Warning: sqrt() expects parameter 1 to be double, vec given in %s/test/slow/types/builtin_coerce_param_mode.php on line 9
+Warning: Argument 1 passed to sqrt() must be an instance of float, HH\vec given in %s/test/slow/types/builtin_coerce_param_mode.php on line 26
 
-Warning: sqrt() expects parameter 1 to be double, vec given in %s/test/slow/types/builtin_coerce_param_mode.php on line 11
+Warning: Argument 1 passed to sqrt() must be an instance of float, HH\vec given in %s/test/slow/types/builtin_coerce_param_mode.php on line 32

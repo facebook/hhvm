@@ -1,6 +1,6 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) {
     echo "Failed: $y\n";
@@ -8,11 +8,11 @@ function VS($x, $y) {
     var_dump(debug_backtrace());
   }
 }
-function VERIFY($x) {
+function VERIFY($x) :mixed{
   VS($x != false, true);
 }
 
-function createSqliteTestTable($tmp_sqllite) {
+function createSqliteTestTable($tmp_sqllite) :mixed{
   unlink($tmp_sqllite);
   $db = new SQLite3($tmp_sqllite);
   $db->exec("CREATE TABLE foo (bar STRING)");
@@ -21,7 +21,7 @@ function createSqliteTestTable($tmp_sqllite) {
   VS($db->lasterrorcode(), 0);
 }
 
-function cleanupSqliteTestTable($tmp_sqllite) {
+function cleanupSqliteTestTable($tmp_sqllite) :mixed{
   unlink($tmp_sqllite);
 }
 
@@ -34,8 +34,8 @@ class MyStatement extends PDOStatement {
 //////////////////////////////////////////////////////////////////////
 
 <<__EntryPoint>>
-function main_ext_pdo() {
-  $tmp_sqllite = tempnam('/tmp', 'vmpdotest');
+function main_ext_pdo() :mixed{
+  $tmp_sqllite = tempnam(sys_get_temp_dir(), 'vmpdotest');
 
   ///////////////////////////////////////////////////////////////////////////////
 
@@ -65,9 +65,9 @@ function main_ext_pdo() {
     VERIFY($stmt->execute());
 
     $rs = $stmt->fetch(PDO::FETCH_ASSOC);
-    VS($rs, darray["bar" => "ABC"]);
+    VS($rs, dict["bar" => "ABC"]);
     $rs = $stmt->fetch(PDO::FETCH_ASSOC);
-    VS($rs, darray["bar" => "DEF"]);
+    VS($rs, dict["bar" => "DEF"]);
 
   } catch (Exception $e) {
     VS($e, null);
@@ -126,7 +126,7 @@ function main_ext_pdo() {
 
     //Test setAttribute with ATTR_STATEMENT_CLASS. Set it to our own class
     var_dump(
-      $dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, varray['MyStatement']),
+      $dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, vec['MyStatement']),
     );
     $vstmt = $dbh->query("select * from foo", PDO::FETCH_COLUMN, 0);
     var_dump(get_class($vstmt));
@@ -135,7 +135,7 @@ function main_ext_pdo() {
     //Then reset to PDOStatement. Zend allows the class name to be explicitly set
     //to PDOStatement.
     var_dump(
-      $dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, varray['PDOStatement']),
+      $dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, vec['PDOStatement']),
     );
     $vstmt = $dbh->query("select * from foo", PDO::FETCH_COLUMN, 0);
     var_dump(get_class($vstmt));

@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   $x = str_repeat(MemoryOomDoesNotOomShutdownHandler::$rep, 1024 * 1024 * 20);
 }
 

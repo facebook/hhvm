@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class C {
@@ -18,7 +18,7 @@ function testit(bool $b):void {
   $y = $x->id($x);
   $y->foo();
 
-  $f = inst_meth($x, 'empty');
+  $f = () ==> $x->empty();
   $x = $f();
   $x[] = new C();
   $x[0]->foo();

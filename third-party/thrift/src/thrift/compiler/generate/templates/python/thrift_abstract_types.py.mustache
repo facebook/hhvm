@@ -1,0 +1,120 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+Generated Python classes for abstract thrift-python types.
+}}
+{{#import "common/common" as m_common}}
+{{#import "common/fields" as m_fields}}
+{{#import "common/typehints" as typehints}}
+{{#import "common/types" as m_types}}
+
+
+{{#partial m_common.auto_generated_py}}
+
+import abc as _abc
+import typing as _typing
+{{> fields/define_reserved_property_identifier}}
+import builtins
+
+
+{{#if program.unions?}}
+import enum as _enum
+
+{{/if program.unions?}}
+
+import folly.iobuf as _fbthrift_iobuf
+import {{program.base_library_package}}.abstract_types as _fbthrift_python_abstract_types
+{{#each program.include_namespaces as |include|}}
+  {{#if include.has_types?}}
+import {{include.included_module_path}}.thrift_abstract_types as {{include.included_module_mangle}}__thrift_abstract_types
+  {{/if include.has_types?}}
+{{/each}}
+{{#each program.adapter_type_hint_modules as |module_path|}}
+import {{module_path}}
+{{/each}}
+{{#partial m_common.import_enums program=program}}
+{{#each program.structured_definitions as |struct|}}
+
+class {{#partial m_types.unadapted_name type=struct}}({{!
+        }}{{#if struct.exception?}}_fbthrift_python_abstract_types.AbstractGeneratedError{{#else}}_abc.ABC{{/if}}):
+    {{#each struct.fields_ordered_by_id as |field|}}
+      {{#if (not field.is_invariant_type?)}}
+{{!
+    This (mis-)alignment is necessary to ensure that the abstract method annotation aligns with the def on the next line
+    and produces no output in the cases where it should not exist (currently for exceptions).
+}}
+{{> fields/use_reserved_property_identifier}}
+{{> fields/maybe_abstract_method_annotation}}
+    def {{field.py_name}}(self) -> {{#partial m_fields.field_type_pyi field=field}}: ...
+      {{/if (not field.is_invariant_type?)}}
+    {{/each}}
+    {{#if (and (not struct.union?) (not struct.has_invariant_field?))}}
+{{> fields/maybe_abstract_method_annotation}}
+    def __iter__(self) -> {{#partial m_fields.iter_return_type fields=struct.fields_ordered_by_id}}: ...
+    {{/if (and (not struct.union?) (not struct.has_invariant_field?))}}
+    {{#if struct.legacy_api?}}
+{{> fields/maybe_abstract_method_annotation}}
+    def _to_mutable_python(self) -> "{{program.module_path}}.thrift_mutable_types.{{#partial m_types.unadapted_name type=struct}}": ...  # type: ignore
+{{> fields/maybe_abstract_method_annotation}}
+    def _to_python(self) -> "{{program.module_path}}.thrift_types.{{#partial m_types.unadapted_name type=struct}}": ...  # type: ignore
+{{> fields/maybe_abstract_method_annotation}}
+    def _to_py3(self) -> "{{program.module_path}}.types.{{#partial m_types.unadapted_name type=struct}}": ...  # type: ignore
+{{> fields/maybe_abstract_method_annotation}}
+    def _to_py_deprecated(self) -> "{{program.py_deprecated_module_path}}.ttypes.{{#partial m_types.unadapted_name type=struct}}": ...  # type: ignore
+    {{/if struct.legacy_api?}}
+    {{#if struct.union?}}
+
+    class FbThriftUnionFieldEnum(_enum.Enum):
+        EMPTY = 0
+    {{#each struct.fields_ordered_by_id as |field|}}
+        {{field.py_name}} = {{field.id}}
+    {{/each}}
+
+    {{! For backwards compatibility, set the name to the name
+        used in immutable thrift-python, which is the name
+        of the Union (sigh!)
+    }}FbThriftUnionFieldEnum.__name__ = "{{struct.py_name}}"
+    {{#if (not struct.has_invariant_field?)}}
+{{> fields/use_reserved_property_identifier}}
+{{> fields/maybe_abstract_method_annotation}}
+    def fbthrift_current_value(self) -> {{> types/field_value_pep484_union_type}}: ...
+    {{/if (not struct.has_invariant_field?)}}
+{{> fields/use_reserved_property_identifier}}
+{{> fields/maybe_abstract_method_annotation}}
+    def fbthrift_current_field(self) -> FbThriftUnionFieldEnum: ...
+
+    {{/if struct.union?}}
+    {{#if struct.has_adapter?}}
+      {{#let adapter = struct.adapter}}
+
+{{struct.py_name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial m_types.unadapted_name type=struct}}]{{/if}}
+    {{/if struct.has_adapter?}}
+{{#partial m_common.private_alias_prefix}}{{struct.py_name}} = {{struct.py_name}}{{!
+}}{{/each}}
+{{#if program.typedefs?}}
+
+  {{#each program.typedefs as |typedef|}}
+    {{#if (not typedef.enum?)}}
+      {{#if typedef.has_adapter?}}
+        {{#let adapter = typedef.adapter}}
+{{typedef.py_name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> types/typedef_pep484_type}}]{{/if}}
+      {{#else}}
+{{typedef.py_name}} = {{> types/typedef_pep484_type}}
+      {{/if typedef.has_adapter?}}
+    {{/if (not typedef.enum?)}}
+  {{/each}}
+{{/if program.typedefs?}}

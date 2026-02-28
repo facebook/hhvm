@@ -1,5 +1,5 @@
 <?hh
-function testme() {
+function testme() :mixed{
   $data='a=1&b=2&c=3';
   echo 'parse_data(): ',$data,EOL;
   $output = null;
@@ -18,7 +18,7 @@ function testme() {
 const EOL = "\n";
 
 <<__EntryPoint>>
-function main_parse_str() {
+function main_parse_str() :mixed{
 
 $data='a=1&b=2&c=3';
 echo 'global scope',EOL;

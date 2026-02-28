@@ -1,0 +1,152 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/common" as m_common}}
+{{#import "common/fields" as m_fields}}
+{{#import "common/functions" as m_functions}}
+{{#import "common/typehints" as typehints}}
+{{#import "common/types" as m_types}}
+
+{{#let partial success_result_field_info |type| captures |m_common m_types|}}
+_fbthrift_python_types.FieldInfo(
+    0,  # id
+    _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+    "success",  # name
+    "success", # name
+    {{#if (not type.primitive?)}}lambda: {{/if}}{{#partial m_types.typeinfo type=type}},  # typeinfo
+    None,  # default value
+    {{#partial m_common.adapter_info node=type}},  # adapter info
+    {{#partial m_types.is_primitive type=type}}, # field type is primitive
+),
+{{/let partial}}
+{{#let partial exception_field_info |field index| captures |m_common m_fields m_types|}}
+_fbthrift_python_types.FieldInfo(
+    {{field.id}},  # id
+    _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+    "_ex{{index}}__{{field.name}}",  # name
+    "{{#partial m_fields.exception_field_name field=field index=index}}",  # python name (from @python.Name annotation)
+    {{#if (not field.type.primitive?)}}lambda: {{/if}}{{#partial m_types.typeinfo type=field.type}},  # typeinfo
+    None,  # default value
+    {{#partial m_common.adapter_info node=field}},  # adapter info
+    {{#partial m_types.is_primitive type=field.type}}, # field type is primitive
+    {{field.idl_type}}, # IDL type (see BaseTypeEnum)
+),
+{{/let partial}}
+
+{{! The argument and result types for a function on a thrift service or interaction }}
+{{#let export partial function_arg_types |function service|
+    captures |m_common m_fields m_functions m_types typehints success_result_field_info exception_field_info|}}
+
+
+class {{#partial m_functions.args_type service=service function=function}}(metaclass={{#partial m_types.struct_metaclass}}):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
+    _fbthrift_SPEC = (
+        {{#each function.params.fields as |param|}}
+        _fbthrift_python_types.FieldInfo(
+            {{param.id}},  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "{{param.name}}",  # name
+            "{{param.py_name}}",  # python name (from @python.Name annotation)
+            {{#if (not param.type.primitive?)}}lambda: {{/if}}{{#partial m_types.typeinfo type=param.type}},  # typeinfo
+            None,  # default value
+            {{#partial m_common.adapter_info node=param}},  # adapter info
+            {{#partial m_types.is_primitive type=param.type}}, # field type is primitive
+            {{param.idl_type}}, # IDL type (see BaseTypeEnum)
+        ),
+        {{/each}}
+    )
+  {{#if (not function.oneway?)}}
+
+
+class _fbthrift_{{service.name}}_{{function.name}}_result(metaclass={{#partial m_types.struct_metaclass}}):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
+    _fbthrift_SPEC = (
+        {{#let regular_response_type = function.return_type.true_type}}
+          {{#if (not regular_response_type.void?)}}
+        {{#partial success_result_field_info type=regular_response_type}}
+          {{/if (not regular_response_type.void?)}}
+          {{#each (array.enumerate function.exceptions) as |index field|}}
+        {{#partial exception_field_info field=field index=index}}
+          {{/each}}
+    )
+  {{/if (not function.oneway?)}}
+  {{#if function.stream?}}
+
+
+class _fbthrift_{{service.name}}_{{function.name}}_result_stream_elem(metaclass={{#partial m_types.struct_metaclass}}):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.{{#if function.bidirectional_stream?}}BIDIRECTIONAL_STREAM{{#else}}SINGLE_REQUEST_STREAMING_RESPONSE{{/if}}
+    _fbthrift_SPEC = (
+        {{#partial success_result_field_info type=function.stream.elem_type}}
+          {{#each (array.enumerate function.stream.exceptions) as |index field|}}
+        {{#partial exception_field_info field=field index=index}}
+          {{/each}}
+    )
+  {{/if function.stream?}}
+  {{#if function.sink?}}
+
+
+class _fbthrift_{{service.name}}_{{function.name}}_result_sink_elem(metaclass={{#partial m_types.struct_metaclass}}):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
+    {{#if function.bidirectional_stream?}}
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.BIDIRECTIONAL_STREAM
+    {{#else}}
+    _fbthrift__rpc_kind = _fbthrift__RpcKind.SINK
+    {{/if function.bidirectional_stream?}}
+    _fbthrift_SPEC = (
+        {{#partial success_result_field_info type=function.sink.elem_type}}
+          {{#each (array.enumerate function.sink.exceptions) as |index field|}}
+        {{#partial exception_field_info field=field index=index}}
+          {{/each}}
+    )
+
+    @classmethod
+    async def _fbthrift__sink_elem_handler(
+        cls,
+        sink_agen: _typing_AsyncGenerator[{{#partial typehints.pep484_type type=function.sink.elem_type}}, None],
+        protocol: _fbthrift__Protocol,
+    ) -> _typing_AsyncGenerator[_fbthrift_iobuf, None]:
+        {{#if (array.empty? function.sink.exceptions)}}
+        async for item in sink_agen:
+            yield serialize_iobuf(cls(success=item), protocol)
+        {{#else}}
+        try:
+            async for item in sink_agen:
+                yield serialize_iobuf(cls(success=item), protocol)
+        {{#each (array.enumerate function.sink.exceptions) as |index field|}}
+        except {{#if field.type.need_module_path?}}{{field.type.module_mangle}}.{{/if}}{{!
+                }}{{#if field.type.structured?}}{{#partial m_types.unadapted_name type=field.type}}{{/if}} as e:
+            return_struct = cls({{#partial m_fields.exception_field_name field=field index=index}}=e)
+            buf = serialize_iobuf(return_struct, protocol)
+            exp = _fbthrift__PythonUserException("{{field.type.module_name}}.{{field.type.name}}", str(e), buf)
+            raise exp
+        {{/each}}
+        {{/if (array.empty? function.sink.exceptions)}}
+
+
+    {{#if (not function.bidirectional_stream?)}}
+class _fbthrift_{{service.name}}_{{function.name}}_result_sink_final(metaclass={{#partial m_types.struct_metaclass}}):
+    _fbthrift_disable_field_cache_DO_NOT_USE = True
+    _fbthrift_SPEC = (
+        {{#partial success_result_field_info type=function.sink.final_response_type}}
+          {{#each (array.enumerate function.sink.final_response_exceptions) as |index field|}}
+        {{#partial exception_field_info field=field index=index}}
+          {{/each}}
+    )
+    {{/if (not function.bidirectional_stream?)}}
+  {{/if function.sink?}}
+{{/let partial}}

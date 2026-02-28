@@ -1,5 +1,5 @@
 //// file1.php
-<?hh // strict
+<?hh
 newtype B = int;
 
 newtype A = B;
@@ -7,12 +7,12 @@ newtype A = B;
 newtype Foo = A;
 
 //// file2.php
-<?hh // strict
+<?hh
 
 newtype Bar = string;
 
 //// file3.php
-<?hh // strict
+<?hh
 
 function test(Foo $foo, Bar $bar): void {
   if ($foo === $bar) {

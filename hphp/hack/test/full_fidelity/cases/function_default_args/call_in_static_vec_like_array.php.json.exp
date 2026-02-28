@@ -367,27 +367,27 @@
                       }
                     },
                     "simple_initializer_value":{
-                      "kind":"varray_intrinsic_expression",
-                      "varray_intrinsic_keyword":{
+                      "kind":"vector_intrinsic_expression",
+                      "vector_intrinsic_keyword":{
                         "kind":"token",
                         "token":{
-                          "kind":"varray",
-                          "text":"varray",
+                          "kind":"vec",
+                          "text":"vec",
                           "offset":88,
                           "leading_width":0,
-                          "width":6,
+                          "width":3,
                           "trailing_width":0,
                           "leading":[],
                           "trailing":[],
                           "line_number":9
                         }
                       },
-                      "varray_intrinsic_left_bracket":{
+                      "vector_intrinsic_left_bracket":{
                         "kind":"token",
                         "token":{
                           "kind":"[",
                           "text":"[",
-                          "offset":94,
+                          "offset":91,
                           "leading_width":0,
                           "width":1,
                           "trailing_width":0,
@@ -396,7 +396,7 @@
                           "line_number":9
                         }
                       },
-                      "varray_intrinsic_members":{
+                      "vector_intrinsic_members":{
                         "kind":"list",
                         "elements":[
                           {
@@ -410,7 +410,7 @@
                                   "token":{
                                     "kind":"name",
                                     "text":"C",
-                                    "offset":95,
+                                    "offset":92,
                                     "leading_width":0,
                                     "width":1,
                                     "trailing_width":0,
@@ -424,7 +424,7 @@
                                   "token":{
                                     "kind":"::",
                                     "text":"::",
-                                    "offset":96,
+                                    "offset":93,
                                     "leading_width":0,
                                     "width":2,
                                     "trailing_width":0,
@@ -438,7 +438,7 @@
                                   "token":{
                                     "kind":"name",
                                     "text":"f",
-                                    "offset":98,
+                                    "offset":95,
                                     "leading_width":0,
                                     "width":1,
                                     "trailing_width":0,
@@ -453,7 +453,7 @@
                                 "token":{
                                   "kind":"(",
                                   "text":"(",
-                                  "offset":99,
+                                  "offset":96,
                                   "leading_width":0,
                                   "width":1,
                                   "trailing_width":0,
@@ -467,7 +467,7 @@
                                 "token":{
                                   "kind":")",
                                   "text":")",
-                                  "offset":100,
+                                  "offset":97,
                                   "leading_width":0,
                                   "width":1,
                                   "trailing_width":0,
@@ -480,12 +480,12 @@
                           }
                         ]
                       },
-                      "varray_intrinsic_right_bracket":{
+                      "vector_intrinsic_right_bracket":{
                         "kind":"token",
                         "token":{
                           "kind":"]",
                           "text":"]",
-                          "offset":101,
+                          "offset":98,
                           "leading_width":0,
                           "width":1,
                           "trailing_width":0,
@@ -505,7 +505,7 @@
             "token":{
               "kind":")",
               "text":")",
-              "offset":102,
+              "offset":99,
               "leading_width":0,
               "width":1,
               "trailing_width":0,
@@ -519,12 +519,12 @@
             "token":{
               "kind":":",
               "text":":",
-              "offset":103,
+              "offset":100,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":104,"width":1}],
+              "trailing":[{"kind":"whitespace","text":" ","offset":101,"width":1}],
               "line_number":9
             }
           },
@@ -535,7 +535,7 @@
               "token":{
                 "kind":"void",
                 "text":"void",
-                "offset":105,
+                "offset":102,
                 "leading_width":0,
                 "width":4,
                 "trailing_width":0,
@@ -553,7 +553,7 @@
             "token":{
               "kind":"{",
               "text":"{",
-              "offset":109,
+              "offset":106,
               "leading_width":0,
               "width":1,
               "trailing_width":0,
@@ -567,12 +567,12 @@
             "token":{
               "kind":"}",
               "text":"}",
-              "offset":110,
+              "offset":107,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":111,"width":1}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":108,"width":1}],
               "line_number":9
             }
           }
@@ -585,7 +585,7 @@
           "token":{
             "kind":"end_of_file",
             "text":"",
-            "offset":112,
+            "offset":109,
             "leading_width":0,
             "width":0,
             "trailing_width":0,

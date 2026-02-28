@@ -1,8 +1,0 @@
-(test
- (name diagnostic_pusher_test)
- (modes exe byte_complete)
- (link_flags
-  (:standard
-   (:include ../../../src/dune_config/ld-opts.sexp)))
- (modules diagnostic_pusher_test)
- (libraries test_injector_config diagnostic_pusher ounit2 utils_core))

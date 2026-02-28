@@ -1,6 +1,6 @@
 <?hh
 
-function test($s) {
+function test($s) :mixed{
   $det = new EncodingDetector();
   $det->setText($s);
 
@@ -13,7 +13,7 @@ function test($s) {
   return $s;
 }
 
-function main() {
+function main() :mixed{
   for ($i = 0; $i < 10; $i++) {
     var_dump(test("Hello: $i"));
   }
@@ -21,6 +21,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_detect_crash() {
+function main_detect_crash() :mixed{
 main();
 }

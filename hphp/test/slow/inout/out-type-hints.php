@@ -1,15 +1,16 @@
 <?hh
 
 function foo($x, inout int $y): string {
-  return ($y = $x);
+  $y = $x;
+  return $y;
 }
 
 function bar(inout int $x, inout int $y): int {
-  list($x, $y) = varray[$y, $x];
+  list($x, $y) = vec[$y, $x];
   return $x + $y;
 }
 
-function main() {
+function main() :mixed{
   $a = 'hello';
   $b = 42;
   $c = 58;
@@ -21,7 +22,7 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_out_type_hints() {
+function main_out_type_hints() :mixed{
 set_error_handler(($errno, $errstr, $errfile, $errline) ==> {
   echo "[$errno] $errstr\n";
   throw new Exception();

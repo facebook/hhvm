@@ -1,0 +1,27 @@
+*** Testing mb_split() : usage variations ***
+
+-- Iteration 1 --
+vec(1) {
+  string(0) ""
+}
+
+-- Iteration 2 --
+vec(1) {
+  string(0) ""
+}
+
+-- Iteration 3 --
+vec(1) {
+  string(5) "UTF-8"
+}
+
+-- Iteration 4 --
+vec(1) {
+  string(5) "UTF-8"
+}
+
+-- Iteration 5 --
+vec(1) {
+  string(5) "UTF-8"
+}
+Done

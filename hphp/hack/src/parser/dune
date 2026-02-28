@@ -2,7 +2,6 @@
  api
  cargo
  core
- ffi
  ffi_bridge
  lowerer
  bench
@@ -12,48 +11,79 @@
  rust_parser_errors_ffi)
 
 (library
+ (name positioned_by_ref_parser_ffi)
+ (modules)
+ (wrapped false)
+ (c_library_flags -lpthread)
+ (foreign_archives positioned_by_ref_parser_ffi))
+
+(rule
+ (targets libpositioned_by_ref_parser_ffi.a)
+ (deps
+  (source_tree %{workspace_root}/hack/src))
+ (locks /cargo)
+ (action
+  (run
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
+   positioned_by_ref_parser_ffi
+   positioned_by_ref_parser_ffi)))
+
+(library
+ (name aast_parser_ffi)
+ (modules)
+ (wrapped false)
+ (c_library_flags -lpthread)
+ (foreign_archives aast_parser_ffi))
+
+(rule
+ (targets libaast_parser_ffi.a)
+ (deps
+  (source_tree %{workspace_root}/hack/src))
+ (locks /cargo)
+ (action
+  (run
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
+   aast_parser_ffi
+   aast_parser_ffi)))
+
+(library
  (name rust_parser_ffi)
  (modules)
  (wrapped false)
- (libraries ocamlpool)
  (c_library_flags -lpthread)
  (foreign_archives rust_parser_ffi))
 
 (rule
  (targets librust_parser_ffi.a)
  (deps
-  (source_tree %{workspace_root}/src))
+  (source_tree %{workspace_root}/hack/src))
  (locks /cargo)
  (action
   (run
-   %{workspace_root}/scripts/build_rust_to_ocaml.sh
-   hack_parser_ffi
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
+   rust_parser_ffi
    rust_parser_ffi)))
 
 (library
  (name rust_parser_errors_ffi)
  (modules)
  (wrapped false)
- (libraries ocamlpool)
  (c_library_flags -lpthread)
  (foreign_archives rust_parser_errors_ffi))
 
 (rule
  (targets librust_parser_errors_ffi.a)
  (deps
-  (source_tree %{workspace_root}/src))
+  (source_tree %{workspace_root}/hack/src))
  (locks /cargo)
  (action
   (run
-   %{workspace_root}/scripts/build_rust_to_ocaml.sh
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
    rust_parser_errors_ffi
    rust_parser_errors_ffi)))
 
 (copy_files
  (files smart_constructors/*.ml))
-
-(copy_files
- (files ffi/*.ml))
 
 (library
  (name full_fidelity)
@@ -83,8 +113,6 @@
   full_fidelity_syntax_tree
   full_fidelity_syntax_type
   full_fidelity_trivia_kind
-  full_fidelity_validated_syntax
-  lambda_analyzer
   lexable_trivia_sig
   lexable_token_sig
   lexable_positioned_token_sig
@@ -98,7 +126,6 @@
   ; from smart_constructors
   smartConstructors
   smartConstructorsWrappers
-  verifySmartConstructors
   syntaxSmartConstructors)
  (libraries
   common
@@ -108,11 +135,23 @@
   parser_options
   parser_schema
   parser_schema_def
+  positioned_by_ref_parser_ffi
   relative_path
   rust_parser_errors_ffi
-  rust_parser_ffi)
+  rust_parser_ffi
+  sexplib)
  (preprocess
-  (pps visitors.ppx ppx_deriving.std)))
+  (pps ppx_sexp_conv visitors.ppx ppx_deriving.std)))
+
+(library
+ (name parsing_error)
+ (wrapped false)
+ (modules
+   parsing_error)
+ (libraries
+   error_codes
+   user_error
+   pos_or_decl))
 
 (library
  (name parser)
@@ -133,6 +172,7 @@
   (pps visitors.ppx ppx_deriving.std))
  (libraries
   ast
+  direct_decl_parser
   fixme_provider
   full_fidelity
   heap_shared_mem
@@ -140,7 +180,9 @@
   logging
   namespace_env
   nast
+  aast_parser_ffi
   rust_parser_ffi
+  parsing_error
   typing_ast
   utils_lint
   utils_php_escape))
@@ -152,31 +194,3 @@
  (preprocess
   (pps visitors.ppx ppx_deriving.std))
  (libraries collections core_kernel naming_special_names))
-
-(library
- (name parsing_service)
- (wrapped false)
- (modules parsing_service)
- (preprocess
-  (pps visitors.ppx ppx_deriving.std))
- (libraries
-  ast_provider
-  decl
-  direct_decl_parser
-  heap_shared_mem
-  procs_procs
-  shallow_decl_defs
-  typechecker_options))
-
-(library
- (name ast_and_decl_service)
- (modules ast_and_decl_service)
- (preprocess
-  (pps ppx_deriving.std))
- (libraries
-  annotated_ast
-  decl
-  parser
-  procs_procs
-  rust_decl_ffi
-  utils_core))

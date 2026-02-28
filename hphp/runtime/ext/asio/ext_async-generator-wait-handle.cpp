@@ -17,10 +17,12 @@
 
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-context-enter.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/act-rec-defs.h"
@@ -67,6 +69,8 @@ c_AsyncGeneratorWaitHandle::Create(const ActRec* fp,
   gen->resumable()->setResumeAddr(resumeAddr, suspendOffset);
   gen->attachWaitHandle(req::ptr<c_AsyncGeneratorWaitHandle>(wh));
 
+  assertx(*ImplicitContext::activeCtx);
+  wh.get()->m_implicitContext = *ImplicitContext::activeCtx;
   return wh.detach();
 }
 
@@ -77,7 +81,10 @@ c_AsyncGeneratorWaitHandle::c_AsyncGeneratorWaitHandle(AsyncGenerator* gen,
   , m_generator(gen->toObject())
 {
   setState(STATE_BLOCKED);
-  setContextIdx(child->getContextIdx());
+  setContextStateIndex(std::min(
+    AsioSession::Get()->getCurrentContextStateIndex(),
+    child->getContextStateIndex())
+  );
   m_child = child; // no incref, to avoid leaking parent<-->child cycle
 }
 
@@ -105,7 +112,7 @@ void c_AsyncGeneratorWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
   assertx(!child->isFinished());
 
   // import child into the current context, throw on cross-context cycles
-  asio::enter_context(child, getContextIdx());
+  asio::enter_context_state(child, getContextStateIndex());
 
   // detect cycles
   detectCycle(child);
@@ -125,6 +132,7 @@ void c_AsyncGeneratorWaitHandle::onUnblocked() {
 void c_AsyncGeneratorWaitHandle::await(req::ptr<c_WaitableWaitHandle>&& child) {
   // Prepare child for establishing dependency. May throw.
   prepareChild(child.get());
+  this->m_implicitContext = *ImplicitContext::activeCtx;
 
   // Set up the dependency.
   // No refcnt: incref by ref from child, decref by no longer being executed.
@@ -192,8 +200,8 @@ Resumable* c_AsyncGeneratorWaitHandle::resumable() const {
   return generator->resumable();
 }
 
-void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
-  assertx(AsioSession::Get()->getContext(ctx_idx));
+void c_AsyncGeneratorWaitHandle::exitContext(ContextIndex contextIdx) {
+  assertx(AsioSession::Get()->getContext(contextIdx));
 
   // stop before corrupting unioned data
   if (isFinished()) {
@@ -202,8 +210,8 @@ void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 
   // not in a context being exited
-  assertx(getContextIdx() <= ctx_idx);
-  if (getContextIdx() != ctx_idx) {
+  assertx(getContextIndex() <= contextIdx);
+  if (getContextIndex() != contextIdx) {
     decRefObj(this);
     return;
   }
@@ -218,10 +226,10 @@ void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
 
     case STATE_READY:
       // Recursively move all wait handles blocked by us.
-      getParentChain().exitContext(ctx_idx);
+      getParentChain().exitContext(contextIdx);
 
       // Move us to the parent context.
-      setContextIdx(getContextIdx() - 1);
+      setContextStateIndex(contextIdx.parent().toRegular());
 
       // Reschedule if still in a context.
       if (isInContext()) {
@@ -235,6 +243,12 @@ void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
     default:
       assertx(false);
   }
+}
+
+void AsioExtension::registerNativeAsyncGeneratorWaitHandle() {
+  Native::registerClassExtraDataHandler(
+    c_AsyncGeneratorWaitHandle::className(),
+    finish_class<c_AsyncGeneratorWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

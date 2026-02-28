@@ -8,10 +8,10 @@ class C {
 class D extends C {
   const type T1 = string;
 
-  function f($x) { var_dump($x is this::T); }
+  function f($x) :mixed{ var_dump($x is this::T); }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   (new D())->f(1);
 }

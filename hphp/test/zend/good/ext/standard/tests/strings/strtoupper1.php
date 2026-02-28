@@ -22,17 +22,13 @@ var_dump(strtoupper($str));
 
 echo "\n*** Testing strtoupper() with various strings ***";
 /* strings to pass strtoupper() */
-$strings = varray [
+$strings = vec[
   "",
   "string",
   "stRINg0234",
   "1.233.344StrinG12333",
   "$$$$$$!!!!@@@@@@@ ABCDEF !!!***",
   "ABCD\0abcdABCD",
-  NULL,
-  TRUE,
-  FALSE,
-  varray[]
 ];
 
 $count = 0;

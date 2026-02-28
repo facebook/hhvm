@@ -12,6 +12,6 @@ class B {
 }
 
 <<__EntryPoint>>
-function enum_class08() {
+function enum_class08() :mixed{
     var_dump(B::X);
 }

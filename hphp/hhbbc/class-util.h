@@ -15,13 +15,19 @@
 */
 #pragma once
 
+#include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/attr.h"
+
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
 
-namespace HPHP::HHBBC {
+namespace HPHP {
+
+struct UserAttributeMap;
+
+namespace HHBBC {
 
 namespace res { struct Class; }
-namespace php { struct Class; }
 struct Type;
 
 //////////////////////////////////////////////////////////////////////
@@ -32,9 +38,20 @@ struct Type;
 bool is_collection(res::Class);
 
 /*
+ * Returns whether a php::Class is the base class for all closures.
+ */
+bool is_closure_base(const php::Class&);
+bool is_closure_base(SString);
+
+/*
  * Returns whether a php::Class is a closure.
  */
 bool is_closure(const php::Class&);
+
+/*
+ * Whether the given name is that of a closure.
+ */
+bool is_closure_name(SString);
 
 /*
  * Returns whether a clsName is a class with a magic toBoolean method.
@@ -51,6 +68,12 @@ php::Func* find_method(const php::Class*, SString name);
  * method.  (Not callable directly by php code.)
  */
 bool is_special_method_name(SString name);
+
+/*
+ * Whether a method by this name should get a "name-only" func family
+ * entry.
+ */
+bool has_name_only_func_family(SString);
 
 /*
  * Returns true if a class has the __MockClass user attribute.  This
@@ -78,13 +101,19 @@ bool is_unused_trait(const php::Class& cls);
 bool is_used_trait(const php::Class& cls);
 
 /*
- * Returns true if the property has an initial value which might
- * possibly violate its type-hint. If it returns false, it is
- * guaranteed to not violate the type-hint.
+ * Returns true if the given class is "regular". That is, not an
+ * interface, enum, trait, or abstract class. Those types of classes
+ * cannot be instantiated (but can be interacted with statically).
  */
-bool prop_might_have_bad_initial_value(const Index& index,
-                                       const php::Class& cls,
-                                       const php::Prop& prop);
+inline bool is_regular_class(Attr attrs) {
+  return
+    !(attrs & (AttrInterface | AttrTrait |
+               AttrAbstract | AttrEnum |
+               AttrEnumClass));
+}
+inline bool is_regular_class(const php::Class& c) {
+  return is_regular_class(c.attrs);
+}
 
 Type get_type_of_reified_list(const UserAttributeMap& ua);
 
@@ -102,4 +131,4 @@ Type loosen_this_prop_for_serialization(const php::Class& ctx,
 
 //////////////////////////////////////////////////////////////////////
 
-}
+}}

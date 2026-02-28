@@ -1,20 +1,20 @@
-File "byval_collection_as_property.php", line 9, characters 7-36:
+ERROR: File "byval_collection_as_property.php", line 9, characters 7-36:
 Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-File "byval_collection_as_property.php", line 10, characters 7-40:
+ERROR: File "byval_collection_as_property.php", line 10, characters 7-40:
 Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-File "byval_collection_as_property.php", line 16, characters 3-35:
+ERROR: File "byval_collection_as_property.php", line 16, characters 3-35:
 Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
-File "byval_collection_as_property.php", line 9, characters 7-32:
+ERROR: File "byval_collection_as_property.php", line 9, characters 7-32:
 This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
   File "byval_collection_as_property.php", line 7, characters 39-40:
   The local (enclosing) context provides the capability set {}
-File "byval_collection_as_property.php", line 10, characters 7-36:
+ERROR: File "byval_collection_as_property.php", line 10, characters 7-36:
 This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
   File "byval_collection_as_property.php", line 7, characters 39-40:
   The local (enclosing) context provides the capability set {}
-File "byval_collection_as_property.php", line 16, characters 3-31:
+ERROR: File "byval_collection_as_property.php", line 16, characters 3-31:
 This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
   File "byval_collection_as_property.php", line 15, characters 20-21:

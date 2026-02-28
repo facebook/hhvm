@@ -8,7 +8,7 @@ var_dump( addcslashes("", "burp") );
 var_dump( addcslashes("kaboemkara!", "") );
 var_dump( addcslashes("foobarbaz", 'bar') );
 var_dump( addcslashes('foo[ ]', 'A..z') );
-var_dump( @addcslashes("zoo['.']", 'z..A') );
+var_dump( addcslashes("zoo['.']", 'z..A') );
 var_dump( addcslashes('abcdefghijklmnopqrstuvwxyz', "a\145..\160z") );
 var_dump( addcslashes( '123', '123' ) );
 var_dump( addcslashes( '123', '') );

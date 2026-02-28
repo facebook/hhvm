@@ -1,20 +1,20 @@
 <?hh
 
-function reschedule($priority) {
+function reschedule($priority) :mixed{
   $queue = RescheduleWaitHandle::QUEUE_DEFAULT;
   return RescheduleWaitHandle::create($queue, $priority);
 }
 
-async function foo($x) {
+async function foo($x) :Awaitable<mixed>{
   if ($x == 1) await reschedule(0);
   return 42;
 }
 
-async function baz($x) {
+async function baz($x) :Awaitable<mixed>{
   return await foo($x);
 }
 
-async function bar($x) {
+async function bar($x) :Awaitable<mixed>{
   if ($x & 4) {
     $x &= 3;
     await reschedule(0);
@@ -23,7 +23,7 @@ async function bar($x) {
   return await foo($x);
 }
 
-async function run() {
+async function run() :Awaitable<mixed>{
   for ($i =0; $i < 7; $i++) {
     try {
       $res = await bar($i);
@@ -36,7 +36,7 @@ async function run() {
 
 
 <<__EntryPoint>>
-async function main_eager_return() {
+async function main_eager_return() :Awaitable<mixed>{
   await run();
   fb_setprofile(function($when, $func, $args) {
     if ($when == 'exit' &&

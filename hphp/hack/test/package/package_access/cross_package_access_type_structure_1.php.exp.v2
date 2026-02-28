@@ -1,0 +1,28 @@
+error: Typing[4472] Cannot access class B defined in package pkg2 which may not be available [1]
+-> B is defined in cross_package_access_type_structure_1.php--b.php [2]
+-> B belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_access_type_structure_1.php--a.php:5:18
+    3 | 
+    4 | function test(): void {
+[1] 5 |   type_structure(B::class, 'T');
+    6 | }
+
+cross_package_access_type_structure_1.php--b.php:5:7
+    1 | <?hh
+    2 | // package pkg2
+[3] 3 | <<file: __PackageOverride('pkg2')>>
+    4 | 
+[2] 5 | class B {
+    6 |   const type T = int;
+    7 | }
+
+PACKAGES.toml:3:11
+    1 | [packages]
+    2 | 
+[4] 3 | [packages.pkg1]
+    4 | include_paths=["//"]
+    5 | 
+
+1 error found

@@ -1,0 +1,12 @@
+ERROR: File "subtyping_mutual2.php", line 4, characters 11-11:
+Invalid case type declaration. More than one variant of `A` could contain values with the same runtime tag (Typing[4475])
+  File "subtyping_mutual2.php", line 4, characters 15-15:
+  This is the type `B`, which includes **ints** because it is a cyclic type
+  File "subtyping_mutual2.php", line 6, characters 15-15:
+    via this variant of the case type `B`
+  File "subtyping_mutual2.php", line 4, characters 15-15:
+    via this variant of the case type `A`
+  File "subtyping_mutual2.php", line 4, characters 19-21:
+  It overlaps with `int`, which also includes **ints**
+ERROR: File "subtyping_mutual2.php", line 6, characters 11-11:
+This recursive case type is not supported. `B` should not be at the top-level. (Typing[4485])

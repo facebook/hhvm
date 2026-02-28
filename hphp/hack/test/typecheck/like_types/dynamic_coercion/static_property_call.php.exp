@@ -1,6 +1,0 @@
-File "static_property_call.php", line 11, characters 10-11:
-Invalid argument (Typing[4110])
-File "static_property_call.php", line 4, characters 29-31:
-Expected `int`
-File "static_property_call.php", line 8, characters 21-27:
-But got `dynamic`

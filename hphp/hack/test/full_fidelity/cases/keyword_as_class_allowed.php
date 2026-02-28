@@ -4,10 +4,8 @@ class attribute {}
 class binary {}
 class category {}
 class children {}
-class define {}
 class enum {}
 class fallthrough {}
-class from {}
 class is {}
 class let {}
 class newtype {}
@@ -21,10 +19,8 @@ new attribute();
 new binary();
 new category();
 new children();
-new define();
 new enum();
 new fallthrough();
-new from();
 new is();
 new let();
 new newtype();

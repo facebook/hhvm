@@ -1,0 +1,10 @@
+ERROR: File "string_no_new.php", line 4, characters 7-12:
+`string` is uninstantiable (Typing[4002])
+  File "string.hhi", line 6, characters 15-20:
+  Declaration is here
+ERROR: File "string_no_new.php", line 5, characters 7-12:
+This constructor expects no argument (Typing[4012])
+ERROR: File "string_no_new.php", line 5, characters 7-12:
+`string` is uninstantiable (Typing[4002])
+  File "string.hhi", line 6, characters 15-20:
+  Declaration is here

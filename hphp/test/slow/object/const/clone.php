@@ -1,15 +1,14 @@
 <?hh
 
-<<__Const>>
 class C {
-  public function __construct(public int $i)[] {}
+  public function __construct(<<__Const>> public int $i)[] {}
   public function __clone(): void {
     $this->i++;
   }
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   $c = new C(1);
   var_dump($c);
   $d = clone $c;

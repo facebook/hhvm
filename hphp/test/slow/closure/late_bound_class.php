@@ -1,13 +1,13 @@
 <?hh
 
 class X {
-  static function foo() {
+  static function foo() :mixed{
     var_dump(static::class);
     return function() {
       var_dump(static::class);
     };
   }
-  function bar_nonstatic() {
+  function bar_nonstatic() :mixed{
     var_dump(static::class);
     return function() {
       var_dump(static::class);
@@ -16,7 +16,7 @@ class X {
 }
 class Y extends X {}
 
-function test() {
+function test() :mixed{
   $a = X::foo();
   $a();
   $a = Y::foo();
@@ -32,6 +32,6 @@ function test() {
 
 
 <<__EntryPoint>>
-function main_late_bound_class() {
+function main_late_bound_class() :mixed{
 test();
 }

@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 class P {
   public function __construct(public int $i) { }
@@ -15,7 +15,7 @@ function return_readonly(readonly P $x) : readonly P {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   return_readonly();
   return_mutable_error();
 }

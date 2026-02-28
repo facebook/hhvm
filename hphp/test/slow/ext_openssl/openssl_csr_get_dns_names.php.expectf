@@ -1,0 +1,10 @@
+vec(3) {
+  string(3) "foo"
+  string(3) "bar"
+  string(7) "ASDF132"
+}
+vec(0) {
+}
+
+Warning: cannot get CSR in %s/test/slow/ext_openssl/openssl_csr_get_dns_names.php on line %d
+Could not parse CSR

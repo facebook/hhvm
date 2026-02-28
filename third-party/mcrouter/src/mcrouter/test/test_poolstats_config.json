@@ -1,0 +1,7 @@
+{
+  "stats_enabled_pools" : [
+    "twmemcache.CI.west",
+    "twmemcache.CI.east",
+    "twmemcache.CI.north",
+    "twmemcache.CI.south"]
+}

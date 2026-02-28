@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Perform a regular expression search and replace.
@@ -12,13 +12,13 @@
  * occurred, an empty array is returned when subject is an array or NULL
  * otherwise.
  */
-<<__Native, __Pure>>
+<<__Native>>
 function preg_filter(mixed $pattern,
                      mixed $replacement,
                      mixed $subject,
                      int $limit,
-                     <<__OutOnly("KindOfInt64")>>
-                     inout ?int $count): mixed;
+                     <<__OutOnly>>
+                     inout int $count): mixed;
 
 /**
  * Return array entries that match the pattern
@@ -33,7 +33,7 @@ function preg_filter(mixed $pattern,
  */
 <<__Native>>
 function preg_grep(string $pattern,
-                   varray_or_darray $input,
+                   varray_or_darray<mixed> $input,
                    int $flags = 0)[]: mixed;
 
 /**
@@ -46,7 +46,7 @@ function preg_grep(string $pattern,
 <<__Native>>
 function preg_grep_with_error(
   string $pattern,
-  varray_or_darray $input,
+  varray_or_darray<mixed> $input,
   inout ?int $error,
   int $flags = 0,
 )[]: mixed;
@@ -207,6 +207,14 @@ function preg_match_with_matches_and_error(
 )[]: mixed;
 
 /**
+ * Returns null if the pattern is valid; error message string if not.
+ */
+<<__Native>>
+function preg_get_error_message_if_invalid(
+  string $pattern,
+)[]: ?string;
+
+/**
  * Quote regular expression characters
  *
  * @param string $str - The input string.
@@ -248,14 +256,14 @@ function preg_quote(string $str,
  *   return value is NULL   If matches are found, the new subject will be
  *   returned, otherwise subject will be returned unchanged.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function preg_replace_callback(
   mixed $pattern,
   (function(darray<arraykey, string>)[_]: string) $callback,
   mixed $subject,
   int $limit,
-  <<__OutOnly("KindOfInt64")>>
-  inout ?int $count,
+  <<__OutOnly>>
+  inout int $count,
 )[ctx $callback]: mixed;
 
 /**
@@ -265,14 +273,14 @@ function preg_replace_callback(
  * Otherwise, if an error occurs, $error is set to an error code constant from
  * the list defined in builtins_preg.hhi.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function preg_replace_callback_with_error(
   mixed $pattern,
   (function(darray<arraykey, string>)[_]: string) $callback,
   mixed $subject,
   int $limit,
-  <<__OutOnly("KindOfInt64")>>
-  inout ?int $count,
+  <<__OutOnly>>
+  inout int $count,
   inout ?int $error,
 )[ctx $callback]: mixed;
 
@@ -306,12 +314,12 @@ function preg_replace_callback_with_error(
  *   return value is NULL   If matches are found, the new subject will be
  *   returned, otherwise subject will be returned unchanged.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function preg_replace_callback_array(mixed $patterns_and_callbacks,
                                      mixed $subject,
                                      int $limit,
-                                     <<__OutOnly("KindOfInt64")>>
-                                     inout ?int $count)[defaults]: mixed;
+                                     <<__OutOnly>>
+                                     inout int $count)[defaults]: mixed;
 
 /**
  * preg_replace_callback_array, but populates $error in case of error.
@@ -320,13 +328,13 @@ function preg_replace_callback_array(mixed $patterns_and_callbacks,
  * Otherwise, if an error occurs, $error is set to an error code constant from
  * the list defined in builtins_preg.hhi.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function preg_replace_callback_array_with_error(
   mixed $patterns_and_callbacks,
   mixed $subject,
   int $limit,
-  <<__OutOnly("KindOfInt64")>>
-  inout ?int $count,
+  <<__OutOnly>>
+  inout int $count,
   inout ?int $error,
 )[defaults]: mixed;
 
@@ -406,8 +414,8 @@ function preg_replace_with_count(mixed $pattern,
                                  mixed $replacement,
                                  mixed $subject,
                                  int $limit,
-                                 <<__OutOnly("KindOfInt64")>>
-                                 inout ?int $count)[]: mixed;
+                                 <<__OutOnly>>
+                                 inout int $count)[]: mixed;
 
 /**
  * preg_replace_with_count, but populates $error in case of error.
@@ -422,8 +430,8 @@ function preg_replace_with_count_and_error(
   mixed $replacement,
   mixed $subject,
   int $limit,
-  <<__OutOnly("KindOfInt64")>>
-  inout ?int $count,
+  <<__OutOnly>>
+  inout int $count,
   inout ?int $error,
 )[]: mixed;
 

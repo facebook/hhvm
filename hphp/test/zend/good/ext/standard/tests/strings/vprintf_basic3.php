@@ -16,9 +16,9 @@ $format3 = "%f %f %f";
 $format11 = "%F";
 $format22 = "%F %F";
 $format33 = "%F %F %F";
-$arg1 = varray[11.11];
-$arg2 = varray[11.11,22.22];
-$arg3 = varray[11.11,22.22,33.33];
+$arg1 = vec[11.11];
+$arg2 = vec[11.11,22.22];
+$arg3 = vec[11.11,22.22,33.33];
 
 $result = vprintf($format1,$arg1);
 echo "\n";

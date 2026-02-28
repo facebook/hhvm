@@ -3,7 +3,7 @@
    Description: Find pathnames matching a pattern
 */
 
-function sort_var_dump($results) {
+function sort_var_dump($results) :mixed{
    sort(inout $results);
    var_dump($results);
 }
@@ -11,7 +11,7 @@ function sort_var_dump($results) {
 echo "*** Testing glob() : basic functions ***\n";
 
 // temp dirname used here
-$dirname = __SystemLib\hphp_test_tmppath('glob_basic');
+$dirname = sys_get_temp_dir().'/'.'glob_basic';
 
 // temp dir created
 mkdir($dirname);

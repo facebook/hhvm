@@ -8,7 +8,7 @@
 
 // U+00DF LATIN SMALL LETTER SHARP S
 <<__EntryPoint>>
-function main_utf8_decode_invalid() {
+function main_utf8_decode_invalid() :mixed{
 $ss = "\u{DF}";
 var_dump(urlencode($ss));
 var_dump(urlencode(utf8_decode($ss)));

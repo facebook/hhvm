@@ -7,37 +7,37 @@ class A {
   public $z = 'abc';
 }
 
-function test_iter($a) {
+<<__DynamicallyCallable>> function test_iter($a) :mixed{
   foreach ($a as $p) {
     echo "$p ";
   }
   echo "\n";
 }
 
-function test_obj_prop_array($a) {
+<<__DynamicallyCallable>> function test_obj_prop_array($a) :mixed{
   var_dump(HH\object_prop_array($a));
 }
 
-function run_test($func) {
+function run_test($func) :mixed{
   echo "============= $func ===============\n";
 
   $a = new A();
   try {
-    $func($a);
+    HH\dynamic_fun($func)($a);
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }
 
   $a->y = 700;
   try {
-    $func($a);
+    HH\dynamic_fun($func)($a);
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }
 
   unset($a->y);
   try {
-    $func($a);
+    HH\dynamic_fun($func)($a);
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }

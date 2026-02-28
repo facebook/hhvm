@@ -1,10 +1,10 @@
 <?hh
 
 class test {
-    static function show_static() {
+    static function show_static() :mixed{
         echo "static\n";
     }
-    function show_method() {
+    function show_method() :mixed{
         echo "method\n";
     }
 }

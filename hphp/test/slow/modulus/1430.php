@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1430() {
+function main_1430() :mixed{
 $a = (int)("123.456") % 123;
 var_dump($a);
 $a = (int)("123.456") % 456.123;

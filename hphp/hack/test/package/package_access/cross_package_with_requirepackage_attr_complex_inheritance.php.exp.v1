@@ -1,0 +1,41 @@
+error: NastCheck[3107] Invalid __RequirePackage [1]
+-> This function is defined in package pkg2 by this package override [2]
+-> The required package pkg1 must strictly include (i.e. cannot equal) pkg2 [3]
+
+cross_package_with_requirepackage_attr_complex_inheritance.php--b.php:6:5
+    1 | <?hh
+    2 | // package pkg2
+[2] 3 | <<file: __PackageOverride('pkg2')>>
+    4 | 
+    5 | class B extends A { // ok because pkg2 includes pkg1
+[1] 6 |   <<__RequirePackage("pkg1")>> // package requirements must strictly include the file package
+    7 |   public function foo(): void {}
+    8 | }
+
+PACKAGES.toml:3:11
+    1 | [packages]
+    2 | 
+[3] 3 | [packages.pkg1]
+    4 | include_paths=["//"]
+    5 | 
+
+error: Typing[4341] The method foo is not compatible with the overridden method [1]
+-> Mismatch in __RequirePackage attribute [2]
+-> This method requires package pkg1 [2]
+-> The parent method does not have a __RequirePackage attribute. The override must have a weaker requirement. [3]
+
+cross_package_with_requirepackage_attr_complex_inheritance.php--b.php:7:19
+    4 | 
+    5 | class B extends A { // ok because pkg2 includes pkg1
+[2] 6 |   <<__RequirePackage("pkg1")>> // package requirements must strictly include the file package
+[1] 7 |   public function foo(): void {}
+    8 | }
+
+cross_package_with_requirepackage_attr_complex_inheritance.php--a.php:5:19
+    3 | 
+    4 | class A {
+[3] 5 |   public function foo(): void {}
+    6 | }
+    7 | <<__RequirePackage("pkg2")>>
+
+2 errors found

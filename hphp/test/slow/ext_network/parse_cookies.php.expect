@@ -1,0 +1,30 @@
+dict(1) {
+  ["foo"]=>
+  string(3) "bar"
+}
+dict(1) {
+  ["foo"]=>
+  dict(2) {
+    [0]=>
+    string(3) "bar"
+    [1]=>
+    string(3) "baz"
+  }
+}
+dict(2) {
+  ["foo"]=>
+  string(1) "1"
+  ["bar"]=>
+  string(1) "2"
+}
+dict(0) {
+}
+dict(3) {
+  ["foo"]=>
+  string(1) "1"
+  ["bar"]=>
+  string(1) "2"
+  ["baz"]=>
+  string(1) "3"
+}
+string(19) "foo=1; bar=2; baz=3"

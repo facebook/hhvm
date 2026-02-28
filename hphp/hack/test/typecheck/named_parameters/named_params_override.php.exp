@@ -1,0 +1,48 @@
+ERROR: File "named_params_override.php", line 19, characters 19-21:
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "named_params_override.php", line 19, characters 19-21:
+  Method `foo` has type `(function(bool $z): void)` in `Child3`
+  File "named_params_override.php", line 4, characters 19-21:
+  But it has type `(function(named optional int $x, named int $y, bool $z): void)` in parent `P`
+  File "named_params_override.php", line 19, characters 19-21:
+  Type `(function(bool $z): void)` is not a subtype of `(function(named optional int $x, named int $y, bool $z): void)`
+  File "named_params_override.php", line 19, characters 19-21:
+  Missing required named parameters: y, x
+  File "named_params_override.php", line 4, characters 19-21:
+  Because of this definition
+ERROR: File "named_params_override.php", line 23, characters 19-21:
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "named_params_override.php", line 23, characters 19-21:
+  Method `foo` has type `(function(named int $x, named int $y, bool $z, named int $ww): void)` in `Child4`
+  File "named_params_override.php", line 4, characters 19-21:
+  But it has type `(function(named optional int $x, named int $y, bool $z): void)` in parent `P`
+  File "named_params_override.php", line 23, characters 19-21:
+  Type `(function(named int $x, named int $y, bool $z, named int $ww): void)` is not a subtype of `(function(named optional int $x, named int $y, bool $z): void)`
+  File "named_params_override.php", line 23, characters 19-21:
+  Unexpected named parameter: ww
+  File "named_params_override.php", line 4, characters 19-21:
+  Because of this definition
+ERROR: File "named_params_override.php", line 27, characters 19-21:
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "named_params_override.php", line 27, characters 19-21:
+  Method `foo` has type `(function(named int $x, named int $y, bool $z): void)` in `Child5`
+  File "named_params_override.php", line 4, characters 19-21:
+  But it has type `(function(named optional int $x, named int $y, bool $z): void)` in parent `P`
+  File "named_params_override.php", line 27, characters 19-21:
+  Type `(function(named int $x, named int $y, bool $z): void)` is not a subtype of `(function(named optional int $x, named int $y, bool $z): void)`
+  File "named_params_override.php", line 27, characters 19-21:
+  Named parameter x is required but expected to be optional
+  File "named_params_override.php", line 4, characters 19-21:
+  Because of this definition
+ERROR: File "named_params_override.php", line 31, characters 19-21:
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "named_params_override.php", line 31, characters 19-21:
+  Method `foo` has type `(function(named int $x, named int $y, bool $z, named int $extra): void)` in `Child6`
+  File "named_params_override.php", line 4, characters 19-21:
+  But it has type `(function(named optional int $x, named int $y, bool $z): void)` in parent `P`
+  File "named_params_override.php", line 31, characters 19-21:
+  Type `(function(named int $x, named int $y, bool $z, named int $extra): void)` is not a subtype of `(function(named optional int $x, named int $y, bool $z): void)`
+  File "named_params_override.php", line 31, characters 19-21:
+  Unexpected named parameter: extra
+  File "named_params_override.php", line 4, characters 19-21:
+  Because of this definition

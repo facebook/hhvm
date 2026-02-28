@@ -12,7 +12,7 @@ class C {
 
 
 <<__EntryPoint>>
-function main_type_annotation_alias1() {
+function main_type_annotation_alias1() :mixed{
 var_dump(type_structure(C::class, 'T'));
 var_dump(type_structure(C::class, 'U'));
 var_dump(type_structure(C::class, 'V'));

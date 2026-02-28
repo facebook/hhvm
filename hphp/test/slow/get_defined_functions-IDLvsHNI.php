@@ -7,7 +7,7 @@
 // and Simon shall weep, for there are no more IDLs to convert.
 
 <<__EntryPoint>>
-function main_get_defined_functions_id_lvs_hni() {
+function main_get_defined_functions_id_lvs_hni() :mixed{
 $foundidl = false;
 $foundhni = false;
 

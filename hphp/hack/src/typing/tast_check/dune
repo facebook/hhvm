@@ -1,14 +1,17 @@
+(include_subdirs unqualified)
+
 (library
  (name tast_check)
  (wrapped false)
  (libraries
   ast
-  bad_type_logger
   core_kernel
-  ifc_lib
   nast
-  shape_analysis
+  remove_dead_unsafe_casts
+  simplihack
   tast_env
+  typing_deps
+  typing_pessimisation_deps
   utils_core)
  (preprocess
-  (pps ppx_deriving.std)))
+  (pps ppx_deriving.std ppx_sexp_conv ppx_hash)))

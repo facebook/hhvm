@@ -20,9 +20,9 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/type-alias.h"
 
-#include "hphp/util/portability.h"
-#include "hphp/util/low-ptr.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/portability.h"
+#include "hphp/util/ptr.h"
 
 #include <folly/AtomicHashMap.h>
 
@@ -41,69 +41,56 @@ struct String;
  * StringData* comparison for AtomicHashMap entries, where -1, -2, and -3 are
  * used as magic values. Optimized for comparisons between static strings.
  */
-struct ahm_string_data_isame {
+struct ahm_string_data_tsame {
   bool operator()(const StringData *s1, const StringData *s2) const {
     assertx(int64_t(s2) > 0);  // RHS is never a magic value.
-    return s1 == s2 || (int64_t(s1) > 0 && s1->isame(s2));
+    return s1 == s2 || (int64_t(s1) > 0 && s1->tsame(s2));
+  }
+};
+struct ahm_string_data_fsame {
+  bool operator()(const StringData *s1, const StringData *s2) const {
+    assertx(int64_t(s2) > 0);  // RHS is never a magic value.
+    return s1 == s2 || (int64_t(s1) > 0 && s1->fsame(s2));
   }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * NamedEntity represents a user-defined name that may map to different objects
+ * NamedType represents a user-defined type that may map to different objects
  * in different requests.
  *
- * Classes and functions are in separate namespaces, so we have a target cache
- * offset for resolving each.
- *
- * Classes and typedefs are in the same namespace when we're naming types, but
- * different namespaces at sites that allocate classes.  If a typedef is
- * defined for a given name, we'll cache it in each request at m_cachedTypedef.
+ * Classes and type aliases are in the same namespace when we're naming types,
+ * but different namespaces at sites that allocate classes. If a type alias is
+ * defined for a given name, we cache it in each request at m_cachedTypeAlias.
  * Classes are always cached at m_cachedClass.
  */
-struct NamedEntity {
+struct NamedType {
 
   /////////////////////////////////////////////////////////////////////////////
   // Types.
 
   /*
-   * Global NamedEntity map type.
+   * Global NamedType map type.
    *
    * We hold onto references to elements of this map.  If we use a different
    * map, we must use one that doesnt invalidate references to its elements
    * (unless they are deleted, which never happens here).  Any standard
    * associative container will meet this requirement.
    */
-  typedef folly::AtomicHashMap<const StringData*,
-                               NamedEntity,
+  using Map = folly::AtomicHashMap<const StringData*,
+                               NamedType,
                                string_data_hash,
-                               ahm_string_data_isame,
-                               LowAllocator<char>> Map;
+                               ahm_string_data_tsame,
+                               LowAllocator<char>>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Constructors.
 
-  explicit NamedEntity() {}
+  explicit NamedType() {}
 
-  NamedEntity(NamedEntity&& ne) noexcept;
-
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Func cache.
-
-  /*
-   * Get the rds::Handle that caches this Func*, creating a (non-persistent)
-   * one if it doesn't exist yet.
-   */
-  rds::Handle getFuncHandle(const StringData* name) const;
-
-  /*
-   * Set and get the cached Func*.
-   */
-  void setCachedFunc(Func *f);
-  Func* getCachedFunc() const;
-
+  NamedType(NamedType&& ne) noexcept;
+  NamedType& operator=(NamedType&&) = delete;
 
   /////////////////////////////////////////////////////////////////////////////
   // Class cache.
@@ -166,62 +153,159 @@ struct NamedEntity {
   // Global table.                                                     [static]
 
   /*
-   * Get the NamedEntity for `str' from the global table, or create it if it
+   * Get the NamedType for `str' from the global table, or create it if it
    * doesn't exist and `allowCreate' is true.
    *
    * If `str' needs to be namespace-normalized, we pass the normalized result
    * out through `normalizedStr' if it is provided.
    */
-  static NamedEntity* get(const StringData* str,
-                          bool allowCreate = true,
-                          String* normalizedStr = nullptr) FLATTEN;
+  static NamedType* getNoCreate(const StringData* str,
+                        String* normalizedStr = nullptr) {
+    return get<false>(str, normalizedStr);
+  }
+  static NamedType* getOrCreate(const StringData* str,
+                        String* normalizedStr = nullptr) {
+    return get<true>(str, normalizedStr);
+  }
 
   /*
-   * Visitors that traverse the named entity table
+   * Visitors that traverse the named type table
    */
   template<class Fn> static void foreach_class(Fn fn);
   template<class Fn> static void foreach_cached_class(Fn fn);
-  template<class Fn> static void foreach_cached_func(Fn fn);
   template<class Fn> static void foreach_name(Fn);
-
-  /*
-   * Size of the global NamedEntity table.
-   */
-  static size_t tableSize();
-
-  /*
-   * Various stats about the global NamedEntity table, excluding its size.
-   */
-  static std::vector<std::pair<const char*, int64_t>> tableStats();
 
   template<class T>
   const char* checkSameName();
 
 private:
-  static Map* table();
+  static Map* types();
+
+  template<bool AllowCreate>
+  static NamedType* get(const StringData* str, String* normalizedStr) FLATTEN;
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
 public:
-  mutable rds::Link<LowPtr<Class>, rds::Mode::NonLocal> m_cachedClass;
-  mutable rds::Link<LowPtr<Func>, rds::Mode::NonLocal> m_cachedFunc;
+  mutable rds::Link<PackedPtr<Class>, rds::Mode::NonLocal> m_cachedClass;
   union {
     mutable rds::Link<TypeAlias, rds::Mode::NonLocal> m_cachedTypeAlias{};
     mutable rds::Link<ArrayData*, rds::Mode::NonLocal> m_cachedReifiedGenerics;
   };
 
   template<class T>
-  using ListType = AtomicLowPtr<T, std::memory_order_acquire,
-                                   std::memory_order_release>;
+  using ListType = AtomicPackedPtr<T>;
 private:
   ListType<Class> m_clsList{nullptr};
 };
 
 /*
- * Litstr and NamedEntity pair.
+ * NamedFunc represents a user-defined function that may map to different funcs
+ * in different requests.
  */
-using NamedEntityPair = std::pair<LowStringPtr,LowPtr<const NamedEntity>>;
+struct NamedFunc {
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Types.
+
+  /*
+   * Global NamedFunc map type.
+   *
+   * We hold onto references to elements of this map.  If we use a different
+   * map, we must use one that doesnt invalidate references to its elements
+   * (unless they are deleted, which never happens here).  Any standard
+   * associative container will meet this requirement.
+   */
+  using Map = folly::AtomicHashMap<const StringData*,
+                               NamedFunc,
+                               string_data_hash,
+                               ahm_string_data_fsame,
+                               LowAllocator<char>>;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Constructors & Assignment.
+
+  explicit NamedFunc() {}
+
+  NamedFunc(NamedFunc&& ne) noexcept;
+  NamedFunc& operator=(NamedFunc&&) = delete;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Func cache.
+
+  /*
+   * Get the rds::Handle that caches this Func*, creating a (non-persistent)
+   * one if it doesn't exist yet.
+   */
+  rds::Handle getFuncHandle(const StringData* name) const;
+
+  /*
+   * Set and get the cached Func*.
+   */
+  void setCachedFunc(Func *f);
+  Func* getCachedFunc() const;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Get the last func that was loaded.
+  // This safe to do from JIT when cachedFunc handles are not persistent.
+
+  Func* func() const;
+  void setFunc(Func* func);
+  static void removeFunc(Func*);
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Global table.                                                     [static]
+
+  /*
+   * Get the NamedFunc for `str' from the global table, or create it if it
+   * doesn't exist and `allowCreate' is true.
+   *
+   * If `str' needs to be namespace-normalized, we pass the normalized result
+   * out through `normalizedStr' if it is provided.
+   */
+  static NamedFunc* getNoCreate(const StringData* str,
+                        String* normalizedStr = nullptr) FLATTEN {
+    return get<false>(str, normalizedStr);
+  }
+  static NamedFunc* getOrCreate(const StringData* str,
+                        String* normalizedStr = nullptr) FLATTEN {
+    return get<true>(str, normalizedStr);
+  }
+
+  template<class Fn> static void foreach_cached_func(Fn fn);
+  template<class Fn> static void foreach_name(Fn);
+
+private:
+  template <bool AllowCreate>
+  static NamedFunc* get(const StringData* str, String* normalizedStr) FLATTEN;
+
+private:
+  static Map* funcs();
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Data members.
+
+public:
+  mutable rds::Link<PackedPtr<Func>, rds::Mode::NonLocal> m_cachedFunc;
+
+private:
+  AtomicPackedPtr<Func> m_func;
+};
+
+using NamedTypePair = std::pair<PackedStringPtr,PackedPtr<const NamedType>>;
+using NamedFuncPair = std::pair<PackedStringPtr,PackedPtr<const NamedFunc>>;
+
+/*
+ * Size of the combined NamedType and NamedFunc tables.
+ */
+size_t namedEntityTableSize();
+
+/*
+ * Various stats about the combined NamedType and NamedFunc tables,
+ * excluding their size.
+ */
+std::vector<std::pair<const char*, int64_t>> namedEntityStats();
 
 }
 

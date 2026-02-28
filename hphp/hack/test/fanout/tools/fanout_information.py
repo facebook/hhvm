@@ -6,11 +6,12 @@ from typing import List
 
 import attr
 
-FANOUT_INFORMATION_RE: re.Pattern = re.compile(r"\[fanout_information\]\s+(.*)$")
+# pyre-fixme[24]: Generic type `re.Pattern` expects 1 type parameter.
+FANOUT_INFORMATION_RE: re.Pattern = re.compile(r"\[fanout_tests\]\s+(.*)$")
 
 
 @attr.s(auto_attribs=True)
-class FanoutInformation(object):
+class FanoutInformation:
     tag: str
     hashes: List[str]
 

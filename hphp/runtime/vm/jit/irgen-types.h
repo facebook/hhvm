@@ -16,6 +16,7 @@
 #pragma once
 
 #include "hphp/runtime/vm/containers.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
@@ -24,6 +25,7 @@ struct MysteryBoxConstraint;
 struct RepoAuthType;
 struct StringData;
 struct TypeConstraint;
+struct TypeIntersectionConstraint;
 struct Func;
 
 namespace jit {
@@ -37,15 +39,19 @@ namespace irgen {
 struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
-void verifyPropType(IRGS& env,
-                    SSATmp* cls,
-                    const HPHP::TypeConstraint* tc,
-                    const VMCompactVector<TypeConstraint>* ubs,
-                    Slot slot,
-                    SSATmp* val,
-                    SSATmp* name,
-                    bool isSProp,
-                    SSATmp** coerce = nullptr);
+
+void verifyParamType(IRGS& env, const Func* callee, int32_t id,
+                     BCSPRelOffset offset, SSATmp* prologueCtx);
+
+SSATmp* verifyPropType(IRGS& env,
+                       SSATmp* cls,
+                       const TypeIntersectionConstraint* tcs,
+                       Slot slot,
+                       SSATmp* val,
+                       SSATmp* name,
+                       bool isSProp);
+
+void verifyRetType(IRGS& env, int32_t id, int32_t ind, bool onlyCheckNullability);
 
 void verifyMysteryBoxConstraint(IRGS& env, const MysteryBoxConstraint& c,
                                 SSATmp* val, Block* fail);

@@ -4,6 +4,6 @@
 
 
 <<__EntryPoint>>
-function main_1785() {
+function main_1785() :mixed{
 $png = imagecreatefrompng('test/images/smile.happy.png');
 }

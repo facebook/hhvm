@@ -1,4 +1,4 @@
-File "generic_method_constraint_bad.php", line 16, characters 13-15:
+ERROR: File "generic_method_constraint_bad.php", line 16, characters 13-15:
 Invalid argument (Typing[4323])
   File "generic_method_constraint_bad.php", line 5, characters 25-25:
   `T` is a constrained type parameter
@@ -8,7 +8,7 @@ Invalid argument (Typing[4323])
   Expected `arraykey`
   File "generic_method_constraint_bad.php", line 16, characters 13-15:
   But got `float`
-File "generic_method_constraint_bad.php", line 17, characters 12-15:
+ERROR: File "generic_method_constraint_bad.php", line 17, characters 12-15:
 Invalid argument (Typing[4323])
   File "generic_method_constraint_bad.php", line 6, characters 32-32:
   `T` is a constrained type parameter
@@ -18,7 +18,7 @@ Invalid argument (Typing[4323])
   Expected `arraykey`
   File "generic_method_constraint_bad.php", line 17, characters 12-15:
   But got `bool`
-File "generic_method_constraint_bad.php", line 18, characters 7-17:
+ERROR: File "generic_method_constraint_bad.php", line 18, characters 7-17:
 A `where` type constraint is violated here (Typing[4323])
   File "generic_method_constraint_bad.php", line 9, characters 19-29:
   This is the method with `where` type constraints
@@ -28,7 +28,7 @@ A `where` type constraint is violated here (Typing[4323])
   But got `float`
   File "generic_method_constraint_bad.php", line 9, characters 49-50:
     via this generic `Td`
-File "generic_method_constraint_bad.php", line 19, characters 18-21:
+ERROR: File "generic_method_constraint_bad.php", line 19, characters 18-21:
 Invalid argument (Typing[4110])
   File "generic_method_constraint_bad.php", line 10, characters 62-69:
   Expected `arraykey`

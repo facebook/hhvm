@@ -100,7 +100,7 @@ static Variant doIdnTranslateUTS46(const String& domain, int64_t options,
   SCOPE_EXIT{ uidna_close(idna); };
   String result(255, ReserveString); // 255 == max length possible
   int32_t len;
-  auto capacity = result.capacity() + 1;
+  auto capacity = result.capacity();
   if (toUtf8) {
     len = uidna_nameToUnicodeUTF8(idna, domain.c_str(), domain.size(),
                                   result.mutableData(), capacity,
@@ -156,7 +156,7 @@ static Variant HHVM_FUNCTION(idn_to_utf8, const String& domain,
 
 /////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initMisc() {
+void IntlExtension::registerNativeMisc() {
   HHVM_FE(intl_get_error_code);
   HHVM_FE(intl_get_error_message);
   HHVM_FE(intl_error_name);
@@ -210,20 +210,6 @@ void IntlExtension::initMisc() {
   UHHVM_RC_INT_SAME(IDNA_ERROR_CONTEXTO_DIGITS);
 #endif
 #undef UHHVM_RC_INT_SAME
-
-  /* Constants not found in ICU library */
-  HHVM_RC_INT(IDNA_CONTAINS_ACE_PREFIX, 8);
-  HHVM_RC_INT(IDNA_CONTAINS_MINUS, 4);
-  HHVM_RC_INT(IDNA_CONTAINS_NON_LDH, 3);
-  HHVM_RC_INT(IDNA_ICONV_ERROR, 9);
-  HHVM_RC_INT(IDNA_INVALID_LENGTH, 5);
-  HHVM_RC_INT(IDNA_MALLOC_ERROR, 201);
-  HHVM_RC_INT(IDNA_NO_ACE_PREFIX, 6);
-  HHVM_RC_INT(IDNA_PUNYCODE_ERROR, 2);
-  HHVM_RC_INT(IDNA_ROUNDTRIP_VERIFY_ERROR, 7);
-  HHVM_RC_INT(IDNA_STRINGPREP_ERROR, 1);
-
-  loadSystemlib("icu_misc");
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$filename = __SystemLib\hphp_test_tmppath('_tmp.wbmp');
+$filename = sys_get_temp_dir().'/'.'_tmp.wbmp';
 $fp = fopen($filename,"wb");
 if (!$fp) {
     exit("Failed to create <$filename>");

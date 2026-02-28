@@ -1,13 +1,13 @@
 <?hh
 
-function generateData() {
+function generateData() :mixed{
   return dict[
     "my_data" => Vector{3},
     "my_map" => Map{'foo' => 'bar'}
   ];
 }
 
-function accumulate() {
+function accumulate() :mixed{
   $accum = null;
   for ($i = 0; $i < 3; $i++) {
     $data = generateData();
@@ -25,7 +25,7 @@ function accumulate() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $accum = accumulate();
   var_dump($accum);
 }

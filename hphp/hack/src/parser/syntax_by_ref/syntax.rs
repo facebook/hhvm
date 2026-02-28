@@ -4,20 +4,21 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::iter::{empty, once};
+use std::iter::empty;
+use std::iter::once;
 
-use super::{
-    has_arena::HasArena, syntax_children_iterator::SyntaxChildrenIterator,
-    syntax_variant_generated::SyntaxVariant,
-};
-use crate::{
-    lexable_token::LexableToken,
-    syntax::{SyntaxTypeBase, SyntaxValueType},
-    syntax_kind::SyntaxKind,
-    token_kind::TokenKind,
-};
 use bumpalo::collections::Vec;
-use itertools::Either::{Left, Right};
+use itertools::Either::Left;
+use itertools::Either::Right;
+
+use super::has_arena::HasArena;
+use super::syntax_children_iterator::SyntaxChildrenIterator;
+use super::syntax_variant_generated::SyntaxVariant;
+use crate::lexable_token::LexableToken;
+use crate::syntax::SyntaxTypeBase;
+use crate::syntax::SyntaxValueType;
+use crate::syntax_kind::SyntaxKind;
+use crate::token_kind::TokenKind;
 
 #[derive(Debug, Clone)]
 pub struct Syntax<'a, T, V> {
@@ -185,12 +186,12 @@ impl<'a, T: LexableToken, V> Syntax<'a, T, V> {
         self.is_specific_token(TokenKind::Readonly)
     }
 
-    pub fn is_namespace_empty_body(&self) -> bool {
-        self.kind() == SyntaxKind::NamespaceEmptyBody
+    pub fn is_optional(&self) -> bool {
+        self.is_specific_token(TokenKind::Optional)
     }
 
-    pub fn is_attribute_specification(&self) -> bool {
-        self.kind() == SyntaxKind::AttributeSpecification
+    pub fn is_namespace_empty_body(&self) -> bool {
+        self.kind() == SyntaxKind::NamespaceEmptyBody
     }
 
     pub fn is_old_attribute_specification(&self) -> bool {
@@ -280,7 +281,7 @@ where
             Self::make_missing(offset)
         } else {
             let mut list = Vec::with_capacity_in(arg.len(), ctx.get_arena());
-            list.extend(arg.into_iter());
+            list.extend(arg);
             let list = list.into_bump_slice();
             let nodes = list.iter().map(|x| &x.value);
             let value = V::from_children(SyntaxKind::SyntaxList, offset, nodes);

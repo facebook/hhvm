@@ -1,0 +1,26 @@
+{
+  "pools": {
+    "A": {
+      "servers": [ "127.0.0.1:11111" ],
+      "protocol": "caret"
+    },
+    "B": {
+      "servers": [ "127.0.0.1:22222" ],
+      "protocol": "caret"
+    },
+    "C": {
+      "servers": [ "127.0.0.1:33333" ],
+      "protocol": "caret"
+    }
+  },
+  "route": {
+    "type": "OperationSelectorRoute",
+    "default_policy": "ErrorRoute|A",
+    "operation_policies": {
+      "get": "PoolRoute|A",
+      "set": "PoolRoute|B",
+      "delete": "PoolRoute|C"
+    }
+  }
+}
+

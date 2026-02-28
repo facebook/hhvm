@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_122() {
+function main_122() :mixed{
 print 'test\n';
 }

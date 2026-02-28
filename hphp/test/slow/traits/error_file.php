@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   var_dump(hphp_debug_caller_info());
 }
 

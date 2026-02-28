@@ -1,8 +1,0 @@
-File "non_const_prop_override_static.php", line 9, characters 21-22:
-The property `$p` has the wrong type (Typing[4341])
-  File "non_const_prop_override_static.php", line 9, characters 21-22:
-  Typing error
-  File "non_const_prop_override_static.php", line 9, characters 17-19:
-  Expected `int`
-  File "non_const_prop_override_static.php", line 5, characters 17-24:
-  But got `arraykey`

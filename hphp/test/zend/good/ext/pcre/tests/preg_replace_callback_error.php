@@ -4,9 +4,9 @@
 * Function is implemented in ext/pcre/php_pcre.c
 */
 
-function integer_word($matches) {
+function integer_word($matches) :mixed{
   // Maps from key values (0-9) to corresponding key written in words.
-  $replacement = varray['zero', 'one', 'two', 'three', 'four',
+  $replacement = vec['zero', 'one', 'two', 'three', 'four',
                        'five', 'six', 'seven', 'eight', 'nine'];
   return $replacement[$matches[0]];
 }

@@ -1,6 +1,6 @@
 <?hh
 
-function error_boundary($fn) {
+function error_boundary($fn) :mixed{
   try {
     $fn();
   } catch (Exception $e) {
@@ -12,18 +12,18 @@ class D {
   private $x;
   public $y;
 
-  function unsetall() {
+  function unsetall() :mixed{
     unset($this->x);
     unset($this->y);
   }
 
-  function setprop() {
+  function setprop() :mixed{
     $this->x = 1;
     $this->y = 2;
     var_dump($this);
   }
 
-  function setopprop() {
+  function setopprop() :mixed{
     $this->x ??= 0;
     $this->x += 1;
     $this->y ??= 0;
@@ -31,14 +31,14 @@ class D {
     var_dump($this);
   }
 
-  function incdecprop() {
+  function incdecprop() :mixed{
     error_boundary(() ==> $this->x++);
     error_boundary(() ==> $this->y++);
     var_dump($this);
   }
 }
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $d = new D;
   // unset all properties
   $d->unsetall();

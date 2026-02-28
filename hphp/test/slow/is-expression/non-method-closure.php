@@ -1,6 +1,6 @@
 <?hh
 
-function test($x) {
+function test($x) :mixed{
   $f = $x ==> {
     return $x is FooBarBaz;
   };

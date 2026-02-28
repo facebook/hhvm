@@ -36,8 +36,8 @@ let with_ide_cache f =
     ~f:
       begin
         fun () ->
-        activate ();
-        f ()
+          activate ();
+          f ()
       end
     ~finally:deactivate
 
@@ -45,7 +45,7 @@ module IdeAstCache =
   SharedMem.FreqCache
     (StringKey)
     (struct
-      type t = Parser_return.t * Fixme_provider.fixme_map * Errors.t
+      type t = Parser_return.t * Fixme_provider.FixmeMap.t * Diagnostics.t
 
       let description = "IdeAstCache"
     end)
@@ -89,22 +89,20 @@ let get_ast tcopt path content =
   let digest = get_digest path content in
   match IdeAstCache.get digest with
   | Some (ast, fixmes, errors) ->
-    Errors.merge_into_current errors;
+    Diagnostics.merge_into_current errors;
     Fixme_provider.provide_hh_fixmes path fixmes;
     ast
   | None ->
     let (errors, ast) =
-      Errors.do_ @@ fun () ->
+      Diagnostics.do_ @@ fun () ->
       Full_fidelity_ast.defensive_program
-        ~fail_open:true
-        ~keep_errors:true
         ~include_line_comments:true
         ~quick:false
         tcopt
         path
         content
     in
-    Errors.merge_into_current errors;
+    Diagnostics.merge_into_current errors;
     let fixmes =
       Fixme_provider.get_hh_fixmes path |> Option.value ~default:IMap.empty
     in

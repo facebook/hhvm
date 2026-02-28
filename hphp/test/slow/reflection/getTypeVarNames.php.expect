@@ -1,0 +1,50 @@
+string(16) "Foo::__construct"
+vec(0) {
+}
+string(8) "Foo::bar"
+vec(1) {
+  string(1) "T"
+}
+string(8) "Foo::baz"
+vec(0) {
+}
+string(9) "Foo::buzz"
+vec(1) {
+  string(1) "T"
+}
+string(15) "ReifiedFoo::bar"
+vec(1) {
+  string(1) "T"
+}
+string(15) "ReifiedFoo::baz"
+vec(0) {
+}
+string(15) "ReifiedFoo::bah"
+vec(1) {
+  string(1) "T"
+}
+string(16) "ReifiedFoo::bleh"
+vec(0) {
+}
+string(15) "ReifiedFoo::meh"
+vec(1) {
+  string(1) "T"
+}
+string(15) "ReifiedFoo::bzz"
+vec(3) {
+  string(1) "T"
+  string(1) "V"
+  string(1) "U"
+}
+string(6) "foobar"
+vec(1) {
+  string(1) "T"
+}
+string(3) "Foo"
+vec(1) {
+  string(1) "U"
+}
+string(10) "ReifiedFoo"
+vec(1) {
+  string(1) "U"
+}

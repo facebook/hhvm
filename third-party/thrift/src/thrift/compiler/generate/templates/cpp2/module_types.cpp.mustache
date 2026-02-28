@@ -1,0 +1,298 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/const_value" as const_value}}
+{{> Autogen}}
+#include "{{program:include_prefix}}{{program:name}}_types.tcc"
+#include "{{program:include_prefix}}{{program:name}}_constants.h"
+#include "{{program:include_prefix}}{{program:name}}_data.h"
+
+#include <thrift/lib/cpp2/gen/module_types_cpp.h>
+
+[[maybe_unused]] static constexpr std::string_view kModuleName = "{{program:name}}";
+
+{{> module_types_cpp/declare_enums}}
+{{#if (has_compiler_option? "tablebased")}}
+namespace apache {
+namespace thrift {
+namespace detail {
+FOLLY_PUSH_WARNING
+FOLLY_GNU_DISABLE_WARNING("-Winvalid-offsetof")
+{{#program:split_structs}}
+{{^struct:union?}}
+template<>
+constexpr ptrdiff_t fieldOffset<{{struct:cpp_fullname}}>(std::int16_t fieldIndex) {
+  constexpr ptrdiff_t offsets[] = {
+    {{#struct:fields_in_key_order}}
+    offsetof({{struct:cpp_fullname}}, {{field:cpp_storage_name}}){{!
+    }}{{> common/comma_newline}}{{/struct:fields_in_key_order}}};
+  return offsets[fieldIndex];
+}
+
+template<>
+constexpr ptrdiff_t issetOffset<{{struct:cpp_fullname}}>(std::int16_t fieldIndex) {
+  constexpr ptrdiff_t offsets[] = {
+    {{#struct:fields_in_key_order}}
+    {{#field:has_isset?}}{{!
+    }}offsetof({{struct:cpp_fullname}}, __isset) + isset_bitset<{{struct:isset_fields_size}}>::get_offset() + {{field:isset_index}}{{!
+    }}{{/field:has_isset?}}{{!
+    }}{{^field:has_isset?}}{{!
+    }}0{{/field:has_isset?}}{{> common/comma_newline}}{{/struct:fields_in_key_order}}};
+  return offsets[fieldIndex];
+}
+{{/struct:union?}}
+
+{{#struct:union?}}
+template<>
+constexpr ptrdiff_t unionTypeOffset<{{struct:cpp_fullname}}>() {
+  return offsetof({{struct:cpp_fullname}}, fbthrift_type_);
+}
+{{/struct:union?}}
+{{/program:split_structs}}
+FOLLY_POP_WARNING
+}}} // apache::thrift::detail
+{{/if (has_compiler_option? "tablebased")}}
+{{#program:split_structs}}{{!
+}}
+
+{{> module_types_cpp/frozen}}
+{{#struct:union?}}
+{{> module_types_cpp/declare_union_types}}
+{{/struct:union?}}
+
+namespace {{program:cpp_qualified_namespace}} {
+{{#struct:extra_namespace}}
+namespace {{struct:extra_namespace}} {
+{{/struct:extra_namespace}}
+
+std::string_view {{struct:cpp_underlying_name}}::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<{{struct:cpp_underlying_name}}>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view {{struct:cpp_underlying_name}}::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<{{struct:cpp_underlying_name}}>::name;
+}
+
+{{^struct:union?}}
+{{^struct:cpp_noncopyable}}
+{{^struct:nondefault_copy_ctor_and_assignment?}}
+{{^struct:is_eligible_for_constexpr?}}
+{{struct:cpp_underlying_name}}::{{struct:cpp_underlying_name}}(const {{struct:cpp_underlying_name}}&) = default;
+{{struct:cpp_underlying_name}}& {{struct:cpp_underlying_name}}::operator=(const {{struct:cpp_underlying_name}}&) = default;
+{{/struct:is_eligible_for_constexpr?}}
+{{/struct:nondefault_copy_ctor_and_assignment?}}
+{{#struct:nondefault_copy_ctor_and_assignment?}}
+{{> module_types_cpp/copy_ctor}}
+
+
+{{> module_types_cpp/assign_overload}}
+
+
+{{/struct:nondefault_copy_ctor_and_assignment?}}
+{{/struct:cpp_noncopyable}}
+{{> module_types_cpp/declare_members}}
+
+
+{{^struct:cpp_noncomparable}}
+{{> module_types_cpp/eq_overload}}
+{{#struct:is_struct_orderable?}}
+
+
+{{^struct:cpp_nonorderable?}}
+{{> module_types_cpp/struct_operator_less}}
+{{/struct:cpp_nonorderable?}}
+{{/struct:is_struct_orderable?}}
+{{/struct:cpp_noncomparable}}
+
+
+{{#struct:legacy_api?}}
+{{> module_types_cpp/getters_setters}}
+{{/struct:legacy_api?}}
+
+{{> module_types_cpp/swap}}
+{{/struct:union?}}
+{{#struct:union?}}
+{{> module_types_cpp/union_declare_members}}
+
+{{> module_types_cpp/union_copy_ctor}}
+
+{{^struct:cpp_noncomparable}}
+{{> module_types_cpp/union_eq_overload}}
+{{#struct:is_struct_orderable?}}
+
+
+{{^struct:cpp_nonorderable?}}
+{{> module_types_cpp/union_operator_less}}
+{{/struct:cpp_nonorderable?}}
+{{/struct:is_struct_orderable?}}
+{{/struct:cpp_noncomparable}}
+
+{{> module_types_cpp/union_setters}}
+{{> module_types_cpp/union_swap}}
+{{/struct:union?}}
+
+{{#if (has_compiler_option? "tablebased")}}
+{{#struct:union?}}
+constexpr ::apache::thrift::detail::UnionExtN<{{struct:num_fields}}> {{struct:cpp_underlying_name}}_unionExt = {
+  /* .clear */ ::apache::thrift::detail::clearUnion<{{struct:cpp_fullname}}>,
+  /* .unionTypeOffset */ ::apache::thrift::detail::unionTypeOffset<{{struct:cpp_fullname}}>(),
+  /* .getActiveId */ nullptr,
+  /* .setActiveId */ nullptr,
+  /* .initMember */ {
+  {{#struct:fields_in_key_order}}{{#field:type}}::apache::thrift::detail::placementNewUnionValue<{{field:cpp_storage_type}}>{{> common/comma_newline}}{{!
+}}{{/field:type}}{{/struct:fields_in_key_order}}},
+};
+{{/struct:union?}}
+constexpr ::apache::thrift::detail::StructInfoN<{{struct:num_fields}}> __fbthrift_struct_info_{{struct:cpp_underlying_name}} = {
+  /* .numFields */ {{struct:num_fields}},
+  /* .name */ "{{struct:name}}",{{!
+  }}{{#struct:union?}}
+  /* .unionExt */ &{{struct:name}}_unionExt,{{!
+  }}{{/struct:union?}}{{!
+  }}{{^struct:union?}}
+  /* .unionExt */ nullptr,{{!
+  }}{{/struct:union?}}
+  /* .getIsset */ nullptr,
+  /* .setIsset */ nullptr,
+  /* .getFieldValuesBasePtr */ nullptr,
+  /* .customExt */ nullptr,
+  /* .fieldInfos */ {
+{{#struct:fields_in_key_order}}
+  {
+    /* .id */ {{field:id}},
+    /* .qualifier */ {{field:tablebased_qualifier}},
+    /* .name */ "{{field:name}}",
+    /* .memberOffset */ {{!
+    }}{{#struct:union?}}0{{/struct:union?}}{{!
+    }}{{^struct:union?}}::apache::thrift::detail::fieldOffset<{{struct:cpp_fullname}}>({{field:index}}){{/struct:union?}},{{!
+    }}{{^struct:union?}}
+    /* .issetOffset */ ::apache::thrift::detail::issetOffset<{{struct:cpp_fullname}}>({{field:index}}),{{!
+    }}{{/struct:union?}}{{!
+    }}{{#struct:union?}}
+    /* .issetOffset */ 0,{{!
+    }}{{/struct:union?}}{{#field:type}}
+    /* .typeInfo */ &::apache::thrift::detail::TypeToInfo<{{type:type_class}}, {{field:cpp_storage_type}}>::typeInfo,{{!
+    }}{{/field:type}}
+  }{{> common/comma_newline}}{{!
+  }}{{/struct:fields_in_key_order}}}
+};
+{{/if (has_compiler_option? "tablebased")}}
+{{! Enforce that if this thrift file is generated with extern template instances
+    for simple-json protocol then all its dependencies are too. }}
+{{#struct:fields}}
+{{#field:type}}
+{{#type:transitively_refers_to_struct?}}
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        {{struct:cpp_underlying_name}},
+        {{type:type_class}},
+        {{field:cpp_standard_type}}>,
+    "inconsistent use of json option");
+{{/type:transitively_refers_to_struct?}}
+{{/field:type}}
+{{/struct:fields}}
+
+{{#struct:extra_namespace}}
+} // namespace {{struct:extra_namespace}}
+{{/struct:extra_namespace}}
+} // namespace {{program:cpp_qualified_namespace}}
+{{/program:split_structs}}{{!
+
+}}{{! Validate adapters in typedefs and fields. }}
+
+namespace {{program:cpp_qualified_namespace}} { namespace {
+[[maybe_unused]] FOLLY_ERASE void validateAdapters() {
+{{#program:split_structs}}{{#struct:fields}}
+{{#field:cpp_first_adapter}}{{#field:type}}
+  ::apache::thrift::adapt_detail::validateFieldAdapter<{{!
+      }}{{field:cpp_first_adapter}}, {{field:id}}, {{field:cpp_standard_type}}, {{struct:cpp_fullname}}>();
+{{/field:type}}{{/field:cpp_first_adapter}}
+{{/struct:fields}}{{/program:split_structs}}
+{{#program:typedefs}}{{#typedef:type}}
+{{#type:cpp_adapter}}
+  ::apache::thrift::adapt_detail::validateAdapter<{{type:cpp_adapter}}, {{type:cpp_standard_type}}>();
+{{/type:cpp_adapter}}
+{{/typedef:type}}{{/program:typedefs}}
+}
+}} // namespace {{program:cpp_qualified_namespace}}
+{{#if (has_compiler_option? "tablebased")}}
+
+namespace apache::thrift::detail {
+{{#program:split_enums}}
+const TypeInfo TypeToInfo<
+    type_class::enumeration,
+    ::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}>::typeInfo = {
+    /* .type */ protocol::TType::T_I32,
+    /* .get */ get<int32_t, ::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}>,
+    /* .set */ eraseFuncPtr(set<::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}, int32_t>),
+    /* .typeExt */ nullptr,
+};
+{{/program:split_enums}}
+{{#program:split_structs}}
+const TypeInfo TypeToInfo<
+    type_class::{{#struct:union?}}variant{{/struct:union?}}{{^struct:union?}}structure{{/struct:union?}},
+    {{struct:cpp_fullname}}>::typeInfo = {
+    /* .type */ protocol::TType::T_STRUCT,
+    /* .get */ nullptr,
+    /* .set */ nullptr,
+    /* .typeExt */ &::{{program:cpp_qualified_namespace}}::__fbthrift_struct_info_{{struct:cpp_underlying_name}},
+};
+{{/program:split_structs}}
+} // namespace apache::thrift::detail
+{{/if (has_compiler_option? "tablebased")}}
+namespace apache::thrift::detail::annotation {
+{{#program:split_structs}}
+{{#struct:fields_with_runtime_annotation?}}
+template<> const std::vector<std::any>& field_annotation_values<{{struct:cpp_fullname}}>(FieldId id) {
+  switch (static_cast<int16_t>(id)) {
+  {{#struct:fields}}
+  {{#if field:has_runtime_annotation?}}
+    case {{field:id}}: {
+      static const folly::Indestructible<std::vector<std::any>> ret = [] {
+        std::vector<std::any> values;
+  {{#each field:structured_annotations as |annot|}}
+    {{#if annot.is_runtime_annotation?}}
+        values.emplace_back({{#partial const_value.iterate_const_values value=annot.value root_const=annot}});
+    {{/if annot.is_runtime_annotation?}}
+  {{/each}}
+        return values;
+      }();
+      return *ret;
+    }
+  {{/if field:has_runtime_annotation?}}
+  {{/struct:fields}}
+    default:
+        return ::apache::thrift::detail::annotation::empty_annotations();
+  };
+}
+{{/struct:fields_with_runtime_annotation?}}
+{{#struct:has_runtime_annotation?}}
+template<> const std::vector<std::any>& struct_annotation_values<{{struct:cpp_fullname}}>() {
+  static const folly::Indestructible<std::vector<std::any>> ret = [] {
+    std::vector<std::any> values;
+{{#each struct:structured_annotations as |annot|}}
+  {{#if annot.is_runtime_annotation?}}
+    values.emplace_back({{#partial const_value.iterate_const_values value=annot.value root_const=annot}});
+  {{/if annot.is_runtime_annotation?}}
+{{/each}}
+    return values;
+  }();
+  return *ret;
+}
+{{/struct:has_runtime_annotation?}}
+{{/program:split_structs}}
+}

@@ -1,0 +1,115 @@
+# Copyright (c) 2016, 2020, Oracle and/or its affiliates. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2.0,
+# as published by the Free Software Foundation.
+#
+# This program is also distributed with certain software (including
+# but not limited to OpenSSL) that is licensed under separate terms,
+# as designated in a particular file or component or in included license
+# documentation.  The authors of MySQL hereby grant you an additional
+# permission to link the program and your derivative works with the
+# separately licensed software that they have included with MySQL.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License, version 2.0, for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+
+# binaries
+usr/bin/comp_err
+usr/bin/mysql_client_test
+usr/bin/mysqltest
+usr/bin/mysqltest_safe_process
+usr/bin/mysqlxtest
+# man pages
+usr/share/man/man1/comp_err.1
+# plugins
+usr/lib/mysql/plugin/auth.so
+usr/lib/mysql/plugin/auth_test_plugin.so
+usr/lib/mysql/plugin/component_example_component1.so
+usr/lib/mysql/plugin/component_example_component2.so
+usr/lib/mysql/plugin/component_example_component3.so
+usr/lib/mysql/plugin/component_log_sink_test.so
+usr/lib/mysql/plugin/component_test_string_service.so
+usr/lib/mysql/plugin/component_test_string_service_charset.so
+usr/lib/mysql/plugin/component_test_string_service_long.so
+usr/lib/mysql/plugin/component_pfs_example.so
+usr/lib/mysql/plugin/component_pfs_example_component_population.so
+usr/lib/mysql/plugin/pfs_example_plugin_employee.so
+usr/lib/mysql/plugin/component_test_pfs_notification.so
+usr/lib/mysql/plugin/component_test_pfs_resource_group.so
+usr/lib/mysql/plugin/component_test_udf_registration.so
+usr/lib/mysql/plugin/component_test_host_application_signal.so
+usr/lib/mysql/plugin/component_test_mysql_current_thread_reader.so
+usr/lib/mysql/plugin/component_test_mysql_runtime_error.so
+usr/lib/mysql/plugin/component_udf_reg_3_func.so
+usr/lib/mysql/plugin/component_udf_reg_avg_func.so
+usr/lib/mysql/plugin/component_udf_reg_int_func.so
+usr/lib/mysql/plugin/component_udf_reg_int_same_func.so
+usr/lib/mysql/plugin/component_udf_reg_only_3_func.so
+usr/lib/mysql/plugin/component_udf_reg_real_func.so
+usr/lib/mysql/plugin/component_udf_unreg_3_func.so
+usr/lib/mysql/plugin/component_udf_unreg_int_func.so
+usr/lib/mysql/plugin/component_udf_unreg_real_func.so
+usr/lib/mysql/plugin/component_test_sys_var_service_int.so
+usr/lib/mysql/plugin/component_test_sys_var_service.so
+usr/lib/mysql/plugin/component_test_sys_var_service_same.so
+usr/lib/mysql/plugin/component_test_sys_var_service_str.so
+usr/lib/mysql/plugin/component_test_status_var_service.so
+usr/lib/mysql/plugin/component_test_status_var_service_int.so
+usr/lib/mysql/plugin/component_test_status_var_service_reg_only.so
+usr/lib/mysql/plugin/component_test_status_var_service_str.so
+usr/lib/mysql/plugin/component_test_status_var_service_unreg_only.so
+usr/lib/mysql/plugin/component_test_system_variable_source.so
+usr/lib/mysql/plugin/component_test_backup_lock_service.so
+usr/lib/mysql/plugin/daemon_example.ini
+usr/lib/mysql/plugin/ha_example.so
+usr/lib/mysql/plugin/ha_mock.so
+usr/lib/mysql/plugin/libdaemon_example.so
+usr/lib/mysql/plugin/libtest_framework.so
+usr/lib/mysql/plugin/libtest_services.so
+usr/lib/mysql/plugin/libtest_services_threaded.so
+usr/lib/mysql/plugin/libtest_session_detach.so
+usr/lib/mysql/plugin/libtest_session_attach.so
+usr/lib/mysql/plugin/libtest_session_info.so
+usr/lib/mysql/plugin/libtest_session_in_thd.so
+usr/lib/mysql/plugin/libtest_sql_2_sessions.so
+usr/lib/mysql/plugin/libtest_sql_all_col_types.so
+usr/lib/mysql/plugin/libtest_sql_cmds_1.so
+usr/lib/mysql/plugin/libtest_sql_commit.so
+usr/lib/mysql/plugin/libtest_sql_complex.so
+usr/lib/mysql/plugin/libtest_sql_errors.so
+usr/lib/mysql/plugin/libtest_sql_lock.so
+usr/lib/mysql/plugin/libtest_sql_processlist.so
+usr/lib/mysql/plugin/libtest_sql_replication.so
+usr/lib/mysql/plugin/libtest_sql_shutdown.so
+usr/lib/mysql/plugin/libtest_sql_stmt.so
+usr/lib/mysql/plugin/libtest_sql_sqlmode.so
+usr/lib/mysql/plugin/libtest_sql_stored_procedures_functions.so
+usr/lib/mysql/plugin/libtest_sql_views_triggers.so
+usr/lib/mysql/plugin/libtest_sql_reset_connection.so
+usr/lib/mysql/plugin/libtest_x_sessions_deinit.so
+usr/lib/mysql/plugin/libtest_x_sessions_init.so
+usr/lib/mysql/plugin/qa_auth_client.so
+usr/lib/mysql/plugin/qa_auth_interface.so
+usr/lib/mysql/plugin/qa_auth_server.so
+usr/lib/mysql/plugin/replication_observers_example_plugin.so
+usr/lib/mysql/plugin/rewrite_example.so
+usr/lib/mysql/plugin/test_udf_services.so
+usr/lib/mysql/plugin/udf_example.so
+usr/lib/mysql/plugin/test_security_context.so
+usr/lib/mysql/plugin/test_services_plugin_registry.so
+usr/lib/mysql/plugin/test_services_host_application_signal.so
+usr/lib/mysql/plugin/component_mysqlx_global_reset.so
+usr/lib/mysql/plugin/component_test_audit_api_message.so
+usr/lib/mysql/plugin/component_test_udf_services.so
+# test suite
+usr/lib/mysql-test/*
+# legal
+usr/share/mysql-@MYSQL_BASE_VERSION@/LICENSE usr/share/doc/mysql-@DEB_PRODUCTNAME@-test/
+usr/share/mysql-@MYSQL_BASE_VERSION@/README usr/share/doc/mysql-@DEB_PRODUCTNAME@-test/

@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$doubles = varray[
+$doubles = vec[
         290000000000000000,
         290000000000000,
         29000000000000,

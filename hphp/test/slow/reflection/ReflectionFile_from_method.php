@@ -1,7 +1,7 @@
-<?hh // strict
+<?hh
 
 class ExampleClass {
-  public static function exampleMethod($arg) {
+  public static function exampleMethod($arg) :mixed{
     echo "called exampleMethod\n";
   }
 }

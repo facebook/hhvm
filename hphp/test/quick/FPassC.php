@@ -1,6 +1,6 @@
 <?hh
-function f(inout $a) { $a++; print $a; }
-function g($a) { $a++; print $a; }
+function f(inout $a) :mixed{ $a++; print $a; }
+function g($a) :mixed{ $a++; print $a; }
 <<__EntryPoint>> function main(): void {
 $a = f<>;
 if (0) $a(3);

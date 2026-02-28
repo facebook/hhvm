@@ -33,7 +33,7 @@ struct IRUnit;
 void optimizeRefcounts(IRUnit&);
 void selectiveWeakenDecRefs(IRUnit&);
 void optimizePredictions(IRUnit&);
-void gvn(IRUnit&);
+bool gvn(IRUnit&);
 void optimizeLoads(IRUnit&);
 void optimizeStores(IRUnit&);
 void optimizeVanillaChecks(IRUnit&);

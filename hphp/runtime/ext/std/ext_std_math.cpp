@@ -28,24 +28,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const double k_M_PI       = 3.1415926535898;
-const double k_M_1_PI     = 0.31830988618379;
-const double k_M_2_PI     = 0.63661977236758;
-const double k_M_2_SQRTPI = 1.1283791670955;
-const double k_M_E        = 2.718281828459;
-const double k_M_EULER    = 0.57721566490153;
-const double k_M_LN10     = 2.302585092994;
-const double k_M_LN2      = 0.69314718055995;
-const double k_M_LNPI     = 1.1447298858494;
-const double k_M_LOG10E   = 0.43429448190325;
-const double k_M_LOG2E    = 1.442695040889;
-const double k_M_PI_2     = 1.5707963267949;
-const double k_M_PI_4     = 0.78539816339745;
-const double k_M_SQRT1_2  = 0.70710678118655;
-const double k_M_SQRT2    = 1.4142135623731;
-const double k_M_SQRT3    = 1.7320508075689;
-const double k_M_SQRTPI   = 1.7724538509055;
-
 Variant HHVM_FUNCTION(min, const Variant& value, const Array& args) {
   if (args.empty()) {
     const auto& cell_value = *value.asTypedValue();
@@ -197,9 +179,6 @@ Variant HHVM_FUNCTION(round,
   return dval;
 }
 
-double HHVM_FUNCTION(deg2rad, double number) { return number / 180.0 * k_M_PI;}
-double HHVM_FUNCTION(rad2deg, double number) { return number / k_M_PI * 180.0;}
-
 String HHVM_FUNCTION(decbin, const Variant& number) {
   return string_long_to_base(number.toInt64(), 2);
 }
@@ -252,7 +231,7 @@ Variant HHVM_FUNCTION(pow, const Variant& base, const Variant& exp) {
     // calculate pow(long,long) in O(log exp) operations, bail if overflow
     int64_t l1 = 1;
     while (eint >= 1) {
-      int overflow;
+      long overflow;
       double dval = 0.0;
       if (eint % 2) {
         --eint;
@@ -306,15 +285,6 @@ int64_t HHVM_FUNCTION(getrandmax) { return RAND_MAX;}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Note that MSVC's rand is actually thread-safe to begin with
-// so no changes are actually needed to make it so.
-// For APPLE and MSFT configurations the rand() would be kept as thread local
-// For Linux the RadomBuf structure is beeing moved to RDS
-#ifdef __APPLE__
-static bool s_rand_is_seeded = false;
-#elif defined(_MSC_VER)
-static __thread bool s_rand_is_seeded = false; // For now keep as thread local
-#else
 struct RandomBuf {
   random_data data;
   char        buf[128];
@@ -325,23 +295,14 @@ struct RandomBuf {
 };
 
 RDS_LOCAL(RandomBuf, rl_state);
-#endif
 
 static void randinit(uint32_t seed) {
-#ifdef __APPLE__
-  s_rand_is_seeded = true;
-  srandom(seed);
-#elif defined(_MSC_VER)
-  s_rand_is_seeded = true;
-  srand(seed);
-#else
   if (rl_state->state == RandomBuf::Uninit) {
     initstate_r(seed, rl_state->buf, sizeof rl_state->buf, &rl_state->data);
   } else {
     srandom_r(seed, &rl_state->data);
   }
   rl_state->state = RandomBuf::RequestInit;
-#endif
 }
 
 void HHVM_FUNCTION(srand, const Variant& seed /* = uninit_variant */) {
@@ -350,7 +311,7 @@ void HHVM_FUNCTION(srand, const Variant& seed /* = uninit_variant */) {
     return;
   }
   if (seed.isNumeric(true)) {
-    randinit(seed.toInt32());
+    randinit((int)seed.toInt64());
   } else {
     raise_warning("srand() expects parameter 1 to be long");
   }
@@ -359,24 +320,14 @@ void HHVM_FUNCTION(srand, const Variant& seed /* = uninit_variant */) {
 int64_t HHVM_FUNCTION(rand,
                       int64_t min /* = 0 */,
                       const Variant& max /* = uninit_variant */) {
-#if defined(__APPLE__) || defined(_MSC_VER)
-  if (!s_rand_is_seeded) {
-#else
   if (rl_state->state != RandomBuf::RequestInit) {
-#endif
     randinit(math_generate_seed());
   }
 
   int64_t number;
-#ifdef __APPLE__
-  number = random();
-#elif defined(_MSC_VER)
-  number = rand();
-#else
   int32_t numberIn;
   random_r(&rl_state->data, &numberIn);
   number = numberIn;
-#endif
   int64_t int_max = max.isNull() ? RAND_MAX : max.toInt64();
   if (min != 0 || int_max != RAND_MAX) {
     RAND_RANGE(number, min, int_max, RAND_MAX);
@@ -392,7 +343,7 @@ void HHVM_FUNCTION(mt_srand,
     return math_mt_srand(math_generate_seed());
   }
   if (seed.isNumeric(true)) {
-    math_mt_srand(seed.toInt32());
+    math_mt_srand((int)seed.toInt64());
   } else {
     raise_warning("mt_srand() expects parameter 1 to be long");
   }
@@ -420,36 +371,16 @@ Variant HHVM_FUNCTION(intdiv, int64_t numerator, int64_t divisor) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::requestInitMath() {
-#if !defined(__APPLE__) && !defined(_MSC_VER)
   if (rl_state->state == RandomBuf::RequestInit) {
     rl_state->state = RandomBuf::Uninit;
   }
-#endif
 }
 
-void StandardExtension::initMath() {
+void StandardExtension::registerNativeMath() {
   HHVM_RC_INT_SAME(PHP_ROUND_HALF_UP);
   HHVM_RC_INT_SAME(PHP_ROUND_HALF_DOWN);
   HHVM_RC_INT_SAME(PHP_ROUND_HALF_EVEN);
   HHVM_RC_INT_SAME(PHP_ROUND_HALF_ODD);
-
-  HHVM_RC_DBL(M_PI, k_M_PI);
-  HHVM_RC_DBL(M_1_PI, k_M_1_PI);
-  HHVM_RC_DBL(M_2_PI, k_M_2_PI);
-  HHVM_RC_DBL(M_2_SQRTPI, k_M_2_SQRTPI);
-  HHVM_RC_DBL(M_E, k_M_E);
-  HHVM_RC_DBL(M_EULER, k_M_EULER);
-  HHVM_RC_DBL(M_LN10, k_M_LN10);
-  HHVM_RC_DBL(M_LN2, k_M_LN2);
-  HHVM_RC_DBL(M_LNPI, k_M_LNPI);
-  HHVM_RC_DBL(M_LOG10E, k_M_LOG10E);
-  HHVM_RC_DBL(M_LOG2E, k_M_LOG2E);
-  HHVM_RC_DBL(M_PI_2, k_M_PI_2);
-  HHVM_RC_DBL(M_PI_4, k_M_PI_4);
-  HHVM_RC_DBL(M_SQRT1_2, k_M_SQRT1_2);
-  HHVM_RC_DBL(M_SQRT2, k_M_SQRT2);
-  HHVM_RC_DBL(M_SQRT3, k_M_SQRT3);
-  HHVM_RC_DBL(M_SQRTPI, k_M_SQRTPI);
 
   HHVM_FE(min);
   HHVM_FE(max);
@@ -460,8 +391,6 @@ void StandardExtension::initMath() {
   HHVM_FE(ceil);
   HHVM_FE(floor);
   HHVM_FE(round);
-  HHVM_FE(deg2rad);
-  HHVM_FE(rad2deg);
   HHVM_FE(decbin);
   HHVM_FE(dechex);
   HHVM_FE(decoct);
@@ -499,8 +428,6 @@ void StandardExtension::initMath() {
   HHVM_FE(mt_rand);
   HHVM_FE(lcg_value);
   HHVM_FE(intdiv);
-
-  loadSystemlib("std_math");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

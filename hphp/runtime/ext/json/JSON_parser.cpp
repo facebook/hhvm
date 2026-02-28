@@ -26,17 +26,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// If we have json-c then don't use this library since that one has a more
-// permissive licence
-#ifndef HAVE_JSONC
-
 #include "hphp/runtime/ext/json/JSON_parser.h"
 
 #include <folly/FBVector.h>
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/init-fini-node.h"
@@ -865,7 +860,7 @@ struct json_parser {
     if (UNLIKELY(length >= sb_cap)) {
       // No decoded string in the output can use more bytes than input size.
       const auto new_cap = length + 1;
-      size_t bufSize = length <= RuntimeOption::EvalSimpleJsonMaxLength ?
+      size_t bufSize = length <= Cfg::Eval::SimpleJsonMaxLength ?
         SimpleParser::BufferBytesForLength(length) :
         new_cap * 2;
       if (tl_buffer.raw) {
@@ -899,14 +894,14 @@ struct json_parser {
   }
  private:
   static void* json_malloc(size_t size) {
-    if (RuntimeOption::EvalJsonParserUseLocalArena) {
+    if (Cfg::Eval::JsonParserUseLocalArena) {
       return local_malloc(size);
     } else {
       return malloc(size);
     }
   }
   static void json_free(void* ptr) {
-    if (RuntimeOption::EvalJsonParserUseLocalArena) {
+    if (Cfg::Eval::JsonParserUseLocalArena) {
       return local_free(ptr);
     } else {
       return free(ptr);
@@ -1087,6 +1082,7 @@ static void json_create_zval(Variant &z, UncheckedBuffer &buf, DataType type,
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       z = uninit_null();
       return;
   }
@@ -1142,7 +1138,7 @@ static void object_set(const json_parser* json,
   if (!assoc) {
     // We know it is stdClass, and everything is public (and dynamic).
     if (key.empty()) {
-      var.getObjectData()->setProp(nullptr, s__empty_.get(), *value.asTypedValue());
+      var.getObjectData()->setProp(nullctx, s__empty_.get(), *value.asTypedValue());
     } else {
       var.getObjectData()->o_set(key, value);
     }
@@ -1262,7 +1258,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
                              k_JSON_FB_HACK_ARRAYS |
                              k_JSON_FB_THRIFT_SIMPLE_JSON)) &&
       depth >= SimpleParser::kMaxArrayDepth &&
-      length <= RuntimeOption::EvalSimpleJsonMaxLength &&
+      length <= Cfg::Eval::SimpleJsonMaxLength &&
       SimpleParser::TryParse(p, length, json->tl_buffer.tv, z,
                              get_container_type_from_options(options),
                              options & k_JSON_FB_THRIFT_SIMPLE_JSON)) {
@@ -1549,7 +1545,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             state = 9;
             break;
           }
-          /* fall through if not KindOfString */
+          [[fallthrough]];
         default:
           s_json_parser->error_code = JSON_ERROR_SYNTAX;
           return false;
@@ -1617,6 +1613,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           break;
         }
         /*</fb>*/
+        [[fallthrough]];
 
         /*
           :
@@ -1626,6 +1623,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           state = 28;
           break;
         }
+        [[fallthrough]];
         /*
           syntax error
         */
@@ -1723,5 +1721,3 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   return false;
 }
 }
-
-#endif /* HAVE_JSONC */

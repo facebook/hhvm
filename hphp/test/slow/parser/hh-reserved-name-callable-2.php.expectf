@@ -1,1 +1,1 @@
-Fatal error: Cannot use `Callable` as class name as it is reserved in %s/test/slow/parser/hh-reserved-name-callable-2.php on line 4
+Fatal error: Cannot use `Callable` as a type name as it is reserved in %s/test/slow/parser/hh-reserved-name-callable-2.php on line 4

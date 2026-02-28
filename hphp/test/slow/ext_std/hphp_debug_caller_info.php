@@ -1,19 +1,19 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   return hphp_debug_caller_info();
 }
 
-function bar() {
+function bar() :mixed{
   return foo();
 }
 
 class Baz {
-  public static function smeth() {
+  public static function smeth() :mixed{
     return foo();
   }
 
-  public function imeth() {
+  public function imeth() :mixed{
     return foo();
   }
 }

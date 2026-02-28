@@ -1,0 +1,6 @@
+File "contravariant.php", line 17, characters 7-8:
+Invalid argument (Typing[4110])
+  File "contravariant.php", line 16, characters 16-22:
+  Expected `dynamic`
+  File "contravariant.php", line 5, characters 18-22:
+  But got `mixed`

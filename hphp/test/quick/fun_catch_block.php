@@ -3,13 +3,13 @@
 class FunCatchBlock {
   public static function setMuteUnmuteState($jumbo_shrimp,
                                             $robot_car,
-                                            $is_add) {
+                                            $is_add) :mixed{
     try {
       $tagger = new ControllerObject(
                       $jumbo_shrimp,
                       Thing::SMS_MUTE,
                       $is_add);
-      $tagger->setThreadIds(varray[$robot_car]);
+      $tagger->setThreadIds(vec[$robot_car]);
       prep($tagger);
     } catch (GoodException $e) {
       // Some control flow within a catch block.  A case for the
@@ -26,7 +26,7 @@ class FunCatchBlock {
 }
 
 class FunFunclet {
-  protected async function genPayload() {
+  protected async function genPayload() :Awaitable<mixed>{
     // This will generate a unreachable funclet-protected code.
     switch ($this->getAction()) {
       case 0:

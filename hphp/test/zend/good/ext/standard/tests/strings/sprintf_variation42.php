@@ -11,13 +11,13 @@ $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
 // array of resource types
-$resource_values = varray [
+$resource_values = vec[
   $fp,
   $dfp
 ];
 
 // array of unsigned formats
-$unsigned_formats = varray[
+$unsigned_formats = vec[
   "%u", "%hu", "%lu",
   "%Lu", " %u", "%u ", 
   "\t%u", "\n%u", "%4u",

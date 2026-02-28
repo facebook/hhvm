@@ -2,7 +2,7 @@
 $xml = '<node xmlns:pre="http://foo.com/tr/pre"
               xmlns:post="http://foo.com/tr/post"
               pre:type="bar" type="foo" ><sub /></node>';
-$dom = new DomDocument();
+$dom = new DOMDocument();
 $dom->loadXML($xml);
 echo $dom->firstChild->getAttribute('type')."\n";
 echo $dom->firstChild->getAttribute('pre:type')."\n";

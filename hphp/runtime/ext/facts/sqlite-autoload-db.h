@@ -16,10 +16,8 @@
 
 #pragma once
 
-#include <memory>
 #include <sys/types.h>
-
-#include <folly/experimental/io/FsUtil.h>
+#include <memory>
 
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/sqlite-key.h"
@@ -27,20 +25,8 @@
 namespace HPHP {
 namespace Facts {
 
-class SQLiteAutoloadDB : public AutoloadDB {
-public:
-  /**
-   * Return a SQLiteAutoloadDB that can only be read
-   */
-  static std::unique_ptr<SQLiteAutoloadDB> readOnly(folly::fs::path path);
-
-  /**
-   * Return a SQLiteAutoloadDB that you can write to
-   */
-  static std::unique_ptr<SQLiteAutoloadDB>
-  readWrite(folly::fs::path path, ::gid_t gid, ::mode_t perms);
-
-  static SQLiteAutoloadDB& getThreadLocal(const SQLiteKey& dbData);
+struct SQLiteAutoloadDB : AutoloadDB {
+  static std::shared_ptr<SQLiteAutoloadDB> get(const SQLiteKey&);
 };
 
 } // namespace Facts

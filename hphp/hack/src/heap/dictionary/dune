@@ -1,0 +1,32 @@
+(* -*- tuareg -*- *)
+
+let library_entry name suffix =
+  Printf.sprintf
+"(library
+  (name %s)
+  (wrapped false)
+  (modules)
+  (libraries %s_%s))" name name suffix
+
+let fb_entry name =
+  library_entry name "fb"
+
+let stubs_entry name =
+  library_entry name "stubs"
+
+let entry is_fb name =
+  if is_fb then
+    fb_entry name
+  else
+    stubs_entry name
+
+let () =
+  (* test presence of fb subfolder *)
+  let current_dir = Sys.getcwd () in
+  (* we are in dictionary, locate dictionary/facebook *)
+  let fb_dir = Filename.concat current_dir "facebook" in
+  (* locate src/facebook/dune *)
+  let fb_dune = Filename.concat fb_dir "dune" in
+  let is_fb = Sys.file_exists fb_dune in
+  let dictionary_data = entry is_fb "dictionary_data" in
+  Jbuild_plugin.V1.send dictionary_data

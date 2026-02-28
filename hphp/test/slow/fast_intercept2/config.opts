@@ -1,0 +1,2 @@
+-vEval.JitEnableRenameFunction=1
+-vEval.FastMethodIntercept=1

@@ -1,7 +1,7 @@
 <?hh
 namespace Foo;
 class Bar {
-    function Bar() {
+    function Bar() :mixed{
         echo "ok\n";
     }
 }

@@ -3,7 +3,7 @@ class test {
     public $p1 = 1;
     public $p2 = 2;
     public $p3;
-    public function __clone() {
+    public function __clone() :mixed{
     }
 }
 <<__EntryPoint>> function main(): void {

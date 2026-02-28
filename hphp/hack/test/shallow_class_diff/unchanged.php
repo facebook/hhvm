@@ -1,6 +1,0 @@
-<?hh
-
-class C {
-  public ?int $x;
-  public function f(): void {}
-}

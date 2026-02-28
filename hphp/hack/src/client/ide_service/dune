@@ -1,32 +1,47 @@
 (library
  (name client_ide_service)
  (wrapped false)
- (modules clientIdeDaemon clientIdeIncremental clientIdeService)
+ (modules
+  clientIdeDaemon
+  clientIdeIncremental
+  clientIdeInit
+  clientIdeService)
  (libraries
   client_ide_message
   client_ide_utils
   folly_stubs
   lwt
+  ide_highlight_refs
   lsp
+  package_info
+  rust_batch_index_ffi
   server
   server_autocomplete_services
   server_env
   server_env_build
   server_go_to
-  server_highlight_refs
-  server_search
+  server_rewrite
+  ide_diagnostics
+  ide_search
+  ide_top_level_def_name_at_pos
   state_loader
+  naming_table_builder_ffi_externs
   sys_utils)
  (preprocess
-  (pps lwt_ppx)))
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
  (name client_ide_message)
  (wrapped false)
- (modules clientIdeMessage)
- (libraries lwt_utils server_command_types server_services sys_utils)
+ (modules
+  clientIdeMessage)
+ (libraries
+  file_content
+  lwt_utils
+  server_command_types
+  server_services sys_utils)
  (preprocess
-  (pps lwt_ppx)))
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
  (name client_ide_utils)
@@ -35,3 +50,127 @@
  (libraries client_ide_message)
  (preprocess
   (pps lwt_ppx)))
+
+(rule
+ (targets librust_batch_index_ffi.a)
+ (deps
+  (source_tree %{workspace_root}/hack/src))
+ (locks /cargo)
+ (action
+  (run
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
+   rust_batch_index_ffi
+   rust_batch_index_ffi)))
+
+(library
+ (name rust_batch_index_ffi)
+ (wrapped false)
+ (modules)
+ (foreign_archives rust_batch_index_ffi))
+
+(library
+ (name ide_hover)
+ (wrapped false)
+ (modules ide_hover)
+ (libraries
+  decl_provider
+  derive_type_instantiation
+  naming_special_names
+  pos
+  provider_context
+  server_command_types
+  server_docblock_at
+  server_infer_type
+  server_services
+  symbol
+  tast_provider
+  typing
+  utils_core
+ )
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name ide_highlight_refs)
+ (wrapped false)
+ (modules ide_highlight_refs)
+ (libraries provider_context server_services)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name ide_search)
+ (wrapped false)
+ (modules ide_search)
+ (libraries
+  hh_json
+  logging
+  pos
+  search_core
+  search_utils
+  server_autocomplete_services
+  utils_core))
+
+(library
+ (name ide_diagnostics)
+ (wrapped false)
+ (modules ide_diagnostics)
+ (libraries
+  annotated_ast
+  ast
+  client_ide_message
+  code_actions_services
+  collections
+  decl_provider
+  errors
+  full_fidelity
+  logging
+  lsp
+  pos
+  provider_context
+  simplihack
+  tast_env
+  tast_provider
+  typing_skeleton
+  utils_core))
+
+(library
+ (name ide_top_level_def_name_at_pos)
+ (wrapped false)
+ (modules
+  ide_top_level_def_name_at_pos)
+ (libraries
+  server_symbol_definition))
+
+(library
+ (name ide_diagnostics_cli_lib)
+ (wrapped true)
+ (modules ide_diagnostics_cli_lib)
+ (libraries
+  full_fidelity
+  lsp
+  pos
+  ide_diagnostics
+  utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name ide_format)
+ (wrapped true)
+ (modules ide_format)
+ (libraries
+ hackfmt_error
+ pos
+ relative_path
+ server_command_types
+ server_load_flag
+ symbol
+ exec_command
+ core
+ file_content
+ errors
+ build_options
+ )
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))

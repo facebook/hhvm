@@ -10,7 +10,7 @@ class Foo {
 
 
 <<__EntryPoint>>
-function main_reflection() {
+function main_reflection() :mixed{
 $reflect = new ReflectionClass('Foo');
 var_dump($reflect->getProperties());
 }

@@ -2,6 +2,6 @@
 Warning: Unable to create socket [93]: Protocol not supported in %s/socket_sentto_recvfrom_unix.php on line 2
 bool(false)
 
-Warning: socket_sendto() expects at least 5 parameters, 4 given in %s/socket_sentto_recvfrom_unix.php on line %d
+Warning: socket_sendto() expects at least 5 positional parameters, 4 given in %s/socket_sentto_recvfrom_unix.php on line %d
 bool(false)
 Received Ping!

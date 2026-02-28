@@ -5,10 +5,10 @@
  * Alias to functions:
  */
 
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) :mixed{
     echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function is_subclass_of_variation_002(): void {
 set_error_handler(test_error_handler<>);
 echo "*** Testing is_subclass_of() : usage variations ***\n";
 
@@ -17,46 +17,10 @@ $object = new stdClass();
 
 
 //array of values to iterate over
-$values = varray[
-
-      // int data
-      0,
-      1,
-      12345,
-      -2345,
-
-      // float data
-      10.5,
-      -10.5,
-      10.1234567e10,
-      10.7654321E-10,
-      .5,
-
-
-
-
-
-
-
-
-      // null data
-      NULL,
-      null,
-
-      // boolean data
-      true,
-      false,
-      TRUE,
-      FALSE,
-
+$values = vec[
       // empty data
       "",
       '',
-
-      // object data
-      new stdClass(),
-
-
 ];
 
 // loop through each element of the array for class_name

@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $a = simplexml_load_string("<root />");
   var_dump($a->unknown);
   var_dump((bool) $a->unknown);
@@ -13,6 +13,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_empty_node() {
+function main_empty_node() :mixed{
 main();
 }

@@ -56,6 +56,8 @@ let wrap_unraised ?(frames = 100) exn =
 
 let get_ctor_string { exn; backtrace = _ } = Printexc.to_string exn
 
+let register_printer printer = Printexc.register_printer printer
+
 let get_backtrace_string { exn = _; backtrace } =
   Printexc.raw_backtrace_to_string backtrace
 
@@ -89,6 +91,7 @@ let (stack_re, file_re) =
 
 let clean_stack (stack : string) : string =
   let format_one_line (s : string) : string option =
+    let open Hh_prelude in
     if Str.string_match stack_re s 0 then
       let module_ =
         try Str.matched_group 3 s with
@@ -108,9 +111,9 @@ let clean_stack (stack : string) : string =
         else
           None
       else if
-        String_utils.string_starts_with module_ "Base"
-        || String_utils.string_starts_with module_ "Stdlib"
-        || String_utils.string_starts_with module_ "Lwt"
+        String.is_prefix module_ ~prefix:"Base"
+        || String.is_prefix module_ ~prefix:"Stdlib"
+        || String.is_prefix module_ ~prefix:"Lwt"
       then
         None
       else

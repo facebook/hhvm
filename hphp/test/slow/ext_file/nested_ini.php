@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_nested_ini() {
+function main_nested_ini() :mixed{
 var_dump(parse_ini_string("
 [ a = c ]
 b = c

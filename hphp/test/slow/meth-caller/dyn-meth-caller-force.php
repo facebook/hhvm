@@ -1,9 +1,9 @@
 <?hh
 
-class Foo { private function bar() { echo "bar\n"; } }
+class Foo { private function bar() :mixed{ echo "bar\n"; } }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $c = __hhvm_intrinsics\launder_value('Foo');
   $m = __hhvm_intrinsics\launder_value('bar');
 

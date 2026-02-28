@@ -4,7 +4,7 @@
 function main(): void {
   $values = vec[
     vec[],
-    varray[],
+    vec[],
     42,
     Vector {},
   ] |> __hhvm_intrinsics\launder_value($$);

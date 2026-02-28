@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function good_inc_dec(int $a, num $b): void {
   $a++;

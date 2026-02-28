@@ -1,4 +1,5 @@
 __EnableMethodTraitDiamond
+---
 Allows a trait to be `use`d more than once. This is useful in large class hierarchies, where you can end up using the same trait on via multiple paths, producing 'diamond inheritance'.
 
 This requires methods to unambiguous: each method definition must occur in exactly one trait.

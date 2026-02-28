@@ -1,0 +1,3 @@
+in foo
+in foo
+Accessing internal class C in module B from module A is not allowed

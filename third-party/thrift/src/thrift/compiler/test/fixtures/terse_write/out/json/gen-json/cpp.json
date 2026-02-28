@@ -1,0 +1,708 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "cpp",
+  "includes": {
+    "scope" : {
+      "path" : "thrift/annotation/scope.thrift"
+    },
+    "thrift" : {
+      "path" : "thrift/annotation/thrift.thrift"
+    }
+  },
+  "enumerations" : {
+    "RefType" : {
+      "lineno" : 79,
+      "constants" : {
+        "Unique" : 0,
+        "Shared" : 1,
+        "SharedMutable" : 2
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 79,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 83,
+          "column" : 2
+        }
+      }
+    },
+    "EnumUnderlyingType" : {
+      "lineno" : 277,
+      "constants" : {
+        "I8" : 0,
+        "U8" : 1,
+        "I16" : 2,
+        "U16" : 3,
+        "U32" : 4
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 277,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 288,
+          "column" : 2
+        }
+      }
+    }
+  },
+  "structs" : {
+    "Name" : {
+      "lineno" : 37,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "value" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 39,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 39,
+              "column" : 19
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 37,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 40,
+          "column" : 2
+        }
+      }
+    },
+    "Type" : {
+      "lineno" : 58,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 62,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 62,
+              "column" : 18
+            }
+          }
+        },
+        "template" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 64,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 65,
+              "column" : 22
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 58,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 66,
+          "column" : 2
+        }
+      }
+    },
+    "Ref" : {
+      "lineno" : 75,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "type" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "RefType",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 77,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 77,
+              "column" : 19
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 75,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 78,
+          "column" : 2
+        }
+      }
+    },
+    "Lazy" : {
+      "lineno" : 103,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "ref" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "default_value" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 106,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 106,
+              "column" : 23
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 103,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 107,
+          "column" : 2
+        }
+      }
+    },
+    "DisableLazyChecksum" : {
+      "lineno" : 109,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 109,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 110,
+          "column" : 30
+        }
+      }
+    },
+    "Adapter" : {
+      "lineno" : 129,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 157,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 157,
+              "column" : 18
+            }
+          }
+        },
+        "adaptedType" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 163,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 163,
+              "column" : 25
+            }
+          }
+        },
+        "underlyingName" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 177,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 177,
+              "column" : 28
+            }
+          }
+        },
+        "extraNamespace" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 178,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 178,
+              "column" : 28
+            }
+          }
+        },
+        "moveOnly" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 181,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 181,
+              "column" : 20
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 129,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 182,
+          "column" : 2
+        }
+      }
+    },
+    "PackIsset" : {
+      "lineno" : 189,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "atomic" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "default_value" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 191,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 191,
+              "column" : 25
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 189,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 192,
+          "column" : 2
+        }
+      }
+    },
+    "MinimizePadding" : {
+      "lineno" : 221,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 221,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 223,
+          "column" : 26
+        }
+      }
+    },
+    "ScopedEnumAsUnionType" : {
+      "lineno" : 225,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 225,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 226,
+          "column" : 32
+        }
+      }
+    },
+    "FieldInterceptor" : {
+      "lineno" : 242,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 259,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 259,
+              "column" : 18
+            }
+          }
+        },
+        "noinline" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 265,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 265,
+              "column" : 20
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 242,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 266,
+          "column" : 2
+        }
+      }
+    },
+    "UseOpEncode" : {
+      "lineno" : 268,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 268,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 270,
+          "column" : 22
+        }
+      }
+    },
+    "EnumType" : {
+      "lineno" : 307,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "type" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "EnumUnderlyingType",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 309,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 309,
+              "column" : 30
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 307,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 310,
+          "column" : 2
+        }
+      }
+    },
+    "Frozen2Exclude" : {
+      "lineno" : 315,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 315,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 316,
+          "column" : 25
+        }
+      }
+    },
+    "Frozen2RequiresCompleteContainerParams" : {
+      "lineno" : 322,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 322,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 323,
+          "column" : 49
+        }
+      }
+    },
+    "ProcessInEbThreadUnsafe" : {
+      "lineno" : 336,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 336,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 338,
+          "column" : 34
+        }
+      }
+    },
+    "UseCursorSerialization" : {
+      "lineno" : 346,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 346,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 351,
+          "column" : 33
+        }
+      }
+    },
+    "GenerateDeprecatedHeaderClientMethods" : {
+      "lineno" : 370,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 370,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 372,
+          "column" : 48
+        }
+      }
+    },
+    "AllowLegacyNonOptionalRef" : {
+      "lineno" : 387,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 387,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 388,
+          "column" : 36
+        }
+      }
+    },
+    "DeprecatedTerseWrite" : {
+      "lineno" : 400,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 400,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 401,
+          "column" : 31
+        }
+      }
+    },
+    "AllowLegacyDeprecatedTerseWritesRef" : {
+      "lineno" : 410,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 410,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 411,
+          "column" : 46
+        }
+      }
+    },
+    "EnableCustomTypeOrdering" : {
+      "lineno" : 421,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 421,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 423,
+          "column" : 35
+        }
+      }
+    },
+    "GenerateServiceMethodDecorator" : {
+      "lineno" : 429,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 429,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 430,
+          "column" : 41
+        }
+      }
+    },
+    "NonOrderable" : {
+      "lineno" : 441,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 441,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 442,
+          "column" : 23
+        }
+      }
+    },
+    "DeclareHashSpecialization" : {
+      "lineno" : 449,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 449,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 451,
+          "column" : 36
+        }
+      }
+    },
+    "DeclareEqualToSpecialization" : {
+      "lineno" : 458,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 458,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 460,
+          "column" : 39
+        }
+      }
+    }
+  }
+}

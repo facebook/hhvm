@@ -1,8 +1,9 @@
 <?hh
 
-<<__Const>>
 class C {
+  <<__Const>>
   public int $i = 0;
+  <<__Const>>
   public vec $v = vec[1];
 
   public function __construct() {
@@ -14,7 +15,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   $c = new C();
   echo "-- after constructor completes --\n";
   var_dump($c);
@@ -33,12 +34,14 @@ function test() {
     echo $e->getMessage() . "\n";
   }
 
+  /* TODO(nzthomas) restore after we support const objects
   try {
     $c->lol = 'whut';
     echo "FAIL: wrote to dynamic property\n";
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }
+  */
 
   echo "-- at the end --\n";
   var_dump($c);

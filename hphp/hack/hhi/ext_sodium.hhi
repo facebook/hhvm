@@ -1,6 +1,6 @@
 <?hh
 
-final class SodiumException extends Exception { }
+final class SodiumException extends Exception {}
 
 ///// utilities
 
@@ -43,7 +43,7 @@ function sodium_crypto_generichash(
 <<__PHPStdLib>>
 function sodium_crypto_generichash_init(
   ?string $key = null,
-  ?int $length = null
+  ?int $length = null,
 ): string;
 
 <<__PHPStdLib>>
@@ -109,10 +109,7 @@ function sodium_crypto_pwhash_str(
 ): string;
 
 <<__PHPStdLib>>
-function sodium_crypto_pwhash_str_verify(
-  string $hash,
-  string $password,
-): bool;
+function sodium_crypto_pwhash_str_verify(string $hash, string $password): bool;
 
 <<__PHPStdLib>>
 function sodium_crypto_pwhash_scryptsalsa208sha256_str(
@@ -209,11 +206,7 @@ function sodium_crypto_kx_server_session_keys(
 ///// Unauthenticated asymetric (PSK) encryption (you probably don't want this)
 
 <<__PHPStdLib>>
-function sodium_crypto_stream(
-  int $length,
-  string $nonce,
-  string $key,
-): string;
+function sodium_crypto_stream(int $length, string $nonce, string $key): string;
 
 <<__PHPStdLib>>
 function sodium_crypto_stream_xor(
@@ -239,10 +232,7 @@ function sodium_crypto_box_open(
 ): mixed;
 
 <<__PHPStdLib>>
-function sodium_crypto_box_seal(
-  string $plaintext,
-  string $publickey,
-): string;
+function sodium_crypto_box_seal(string $plaintext, string $publickey): string;
 
 <<__PHPStdLib>>
 function sodium_crypto_box_seal_open(
@@ -278,19 +268,42 @@ function sodium_crypto_sign_ed25519_pk_to_curve25519(string $eddsakey): string;
 <<__PHPStdLib>>
 function sodium_crypto_sign_ed25519_sk_to_curve25519(string $eddsakey): string;
 
+///// Ed25519 primitives.
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ed25519_is_valid_point(string $point): bool;
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ed25519_add(string $point_a, string $point_b): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ed25519_sub(string $point_a, string $point_b): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_scalarmult_ed25519_noclamp(string $scalar, string $point): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ed25519_scalar_reduce(string $scalar): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ed25519_scalar_add(string $scalar_a, string $scalar_b): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ed25519_scalar_mul(string $scalar_a, string $scalar_b): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_scalarmult_ed25519_base(string $scalar): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_scalarmult_ed25519_base_noclamp(string $scalar): string;
+
 ///// Asymetric (public key) signatures
 
 <<__PHPStdLib>>
-function sodium_crypto_sign(
-  string $message,
-  string $secretkey,
-): string;
+function sodium_crypto_sign(string $message, string $secretkey): string;
 
 <<__PHPStdLib>>
-function sodium_crypto_sign_open(
-  string $signed,
-  string $publickey,
-): mixed;
+function sodium_crypto_sign_open(string $signed, string $publickey): mixed;
 
 <<__PHPStdLib>>
 function sodium_crypto_sign_detached(
@@ -406,9 +419,23 @@ function sodium_crypto_secretstream_xchacha20poly1305_pull(
 ): (string, int); /* plaintext, tag */
 
 <<__PHPStdLib>>
-function sodium_crypto_secretstream_xchacha20poly1305_rekey(inout mixed $state): void;
+function sodium_crypto_secretstream_xchacha20poly1305_rekey(
+  inout mixed $state,
+): void;
 
 ///// Ristretto
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ristretto255_add(string $p, string $q): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ristretto255_sub(string $p, string $q): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ristretto255_is_valid_point(string $s): bool;
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ristretto255_random(): string;
 
 <<__PHPStdLib>>
 function sodium_crypto_core_ristretto255_from_hash(string $r): string;
@@ -432,125 +459,129 @@ function sodium_crypto_core_ristretto255_scalar_negate(string $s): string;
 function sodium_crypto_core_ristretto255_scalar_complement(string $s): string;
 
 <<__PHPStdLib>>
-function sodium_crypto_core_ristretto255_scalar_add(string $x, string $y): string;
+function sodium_crypto_core_ristretto255_scalar_add(
+  string $x,
+  string $y,
+): string;
 
 <<__PHPStdLib>>
-function sodium_crypto_core_ristretto255_scalar_sub(string $x, string $y): string;
+function sodium_crypto_core_ristretto255_scalar_sub(
+  string $x,
+  string $y,
+): string;
 
 <<__PHPStdLib>>
-function sodium_crypto_core_ristretto255_scalar_mul(string $x, string $y): string;
+function sodium_crypto_core_ristretto255_scalar_mul(
+  string $x,
+  string $y,
+): string;
 
 ///// Always-defined constants
 
-const string SODIUM_LIBRARY_VERSION = '';
-const int SODIUM_LIBRARY_MAJOR_VERSION = 0;
-const int SODIUM_LIBRARY_MINOR_VERSION = 0;
+const string SODIUM_LIBRARY_VERSION;
+const int SODIUM_LIBRARY_MAJOR_VERSION;
+const int SODIUM_LIBRARY_MINOR_VERSION;
 
-const int SODIUM_CRYPTO_SCALARMULT_BYTES = 0;
-const int SODIUM_CRYPTO_SCALARMULT_SCALARBYTES = 0;
+const int SODIUM_CRYPTO_SCALARMULT_BYTES;
+const int SODIUM_CRYPTO_SCALARMULT_SCALARBYTES;
 
-const int SODIUM_CRYPTO_GENERICHASH_KEYBYTES = 0;
-const int SODIUM_CRYPTO_GENERICHASH_KEYBYTES_MIN = 0;
-const int SODIUM_CRYPTO_GENERICHASH_KEYBYTES_MAX = 0;
+const int SODIUM_CRYPTO_GENERICHASH_KEYBYTES;
+const int SODIUM_CRYPTO_GENERICHASH_KEYBYTES_MIN;
+const int SODIUM_CRYPTO_GENERICHASH_KEYBYTES_MAX;
 
-const int SODIUM_CRYPTO_SHORTHASH_BYTES = 0;
-const int SODIUM_CRYPTO_SHORTHASH_KEYBYTES = 0;
+const int SODIUM_CRYPTO_SHORTHASH_BYTES;
+const int SODIUM_CRYPTO_SHORTHASH_KEYBYTES;
 
-const string SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_STRPREFIX = '';
-const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_SALTBYTES = 0;
-const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_OPSLIMIT_INTERACTIVE
-  = 0;
-const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_MEMLIMIT_INTERACTIVE
-  = 0;
-const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_OPSLIMIT_SENSITIVE
-  = 0;
-const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_MEMLIMIT_SENSITIVE
-  = 0;
+const string SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_STRPREFIX;
+const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_SALTBYTES;
+const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_OPSLIMIT_INTERACTIVE;
+const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_MEMLIMIT_INTERACTIVE;
+const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_OPSLIMIT_SENSITIVE;
+const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_MEMLIMIT_SENSITIVE;
 
-const int SODIUM_CRYPTO_AUTH_BYTES = 0;
-const int SODIUM_CRYPTO_AUTH_KEYBYTES = 0;
+const int SODIUM_CRYPTO_AUTH_BYTES;
+const int SODIUM_CRYPTO_AUTH_KEYBYTES;
 
-const int SODIUM_CRYPTO_SECRETBOX_KEYBYTES = 0;
-const int SODIUM_CRYPTO_SECRETBOX_MACBYTES = 0;
-const int SODIUM_CRYPTO_SECRETBOX_NONCEBYTES = 0;
+const int SODIUM_CRYPTO_SECRETBOX_KEYBYTES;
+const int SODIUM_CRYPTO_SECRETBOX_MACBYTES;
+const int SODIUM_CRYPTO_SECRETBOX_NONCEBYTES;
 
-const int SODIUM_CRYPTO_BOX_SECRETKEYBYTES = 0;
-const int SODIUM_CRYPTO_BOX_PUBLICKEYBYTES = 0;
-const int SODIUM_CRYPTO_BOX_KEYPAIRBYTES = 0;
-const int SODIUM_CRYPTO_BOX_MACBYTES = 0;
-const int SODIUM_CRYPTO_BOX_NONCEBYTES = 0;
-const int SODIUM_CRYPTO_BOX_SEEDBYTES = 0;
+const int SODIUM_CRYPTO_BOX_SECRETKEYBYTES;
+const int SODIUM_CRYPTO_BOX_PUBLICKEYBYTES;
+const int SODIUM_CRYPTO_BOX_KEYPAIRBYTES;
+const int SODIUM_CRYPTO_BOX_MACBYTES;
+const int SODIUM_CRYPTO_BOX_NONCEBYTES;
+const int SODIUM_CRYPTO_BOX_SEEDBYTES;
 
-const int SODIUM_CRYPTO_SIGN_BYTES = 0;
-const int SODIUM_CRYPTO_SIGN_SEEDBYTES = 0;
-const int SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES = 0;
-const int SODIUM_CRYPTO_SIGN_SECRETKEYBYTES = 0;
-const int SODIUM_CRYPTO_SIGN_KEYPAIRBYTES = 0;
+const int SODIUM_CRYPTO_SIGN_BYTES;
+const int SODIUM_CRYPTO_SIGN_SEEDBYTES;
+const int SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES;
+const int SODIUM_CRYPTO_SIGN_SECRETKEYBYTES;
+const int SODIUM_CRYPTO_SIGN_KEYPAIRBYTES;
 
-const int SODIUM_CRYPTO_STREAM_NONCEBYTES = 0;
-const int SODIUM_CRYPTO_STREAM_KEYBYTES = 0;
+const int SODIUM_CRYPTO_STREAM_NONCEBYTES;
+const int SODIUM_CRYPTO_STREAM_KEYBYTES;
 
-const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_KEYBYTES = 0;
-const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_NSECBYTES = 0;
-const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_NPUBBYTES = 0;
-const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_ABYTES = 0;
+const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_KEYBYTES;
+const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_NSECBYTES;
+const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_NPUBBYTES;
+const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_ABYTES;
 
-const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_ABYTES = 0;
-const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES = 0;
-const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_KEYBYTES = 0;
-const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_MESSAGEBYTES_MAX
-   = 0;
-const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_MESSAGE = 0;
-const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_PUSH = 0;
-const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_REKEY = 0;
-const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_FINAL = 0;
+const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_ABYTES;
+const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES;
+const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_KEYBYTES;
+const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_MESSAGEBYTES_MAX;
+const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_MESSAGE;
+const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_PUSH;
+const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_REKEY;
+const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_FINAL;
 
 ///// Conditionally-defined constants (depends on libsodium build options)
 
-const int SODIUM_CRYPTO_PWHASH_SALTBYTES = 0;
-const string SODIUM_CRYPTO_PWHASH_STRPREFIX = '';
-const int SODIUM_CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE = 0;
-const int SODIUM_CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE = 0;
-const int SODIUM_CRYPTO_PWHASH_OPSLIMIT_MODERATE = 0;
-const int SODIUM_CRYPTO_PWHASH_MEMLIMIT_MODERATE = 0;
-const int SODIUM_CRYPTO_PWHASH_OPSLIMIT_SENSITIVE = 0;
-const int SODIUM_CRYPTO_PWHASH_MEMLIMIT_SENSITIVE = 0;
+const int SODIUM_CRYPTO_PWHASH_SALTBYTES;
+const string SODIUM_CRYPTO_PWHASH_STRPREFIX;
+const int SODIUM_CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE;
+const int SODIUM_CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE;
+const int SODIUM_CRYPTO_PWHASH_OPSLIMIT_MODERATE;
+const int SODIUM_CRYPTO_PWHASH_MEMLIMIT_MODERATE;
+const int SODIUM_CRYPTO_PWHASH_OPSLIMIT_SENSITIVE;
+const int SODIUM_CRYPTO_PWHASH_MEMLIMIT_SENSITIVE;
 
-const int SODIUM_CRYPTO_BOX_SEALBYTES = 0;
+const int SODIUM_CRYPTO_BOX_SEALBYTES;
 
-const int SODIUM_CRYPTO_AEAD_AES245GCM_KEYBYTES = 0;
-const int SODIUM_CRYPTO_AEAD_AES245GCM_NSECBYTES = 0;
-const int SODIUM_CRYPTO_AEAD_AES245GCM_NPUBBYTES = 0;
-const int SODIUM_CRYPTO_AEAD_AES245GCM_ABYTES = 0;
+const int SODIUM_CRYPTO_AEAD_AES245GCM_KEYBYTES;
+const int SODIUM_CRYPTO_AEAD_AES245GCM_NSECBYTES;
+const int SODIUM_CRYPTO_AEAD_AES245GCM_NPUBBYTES;
+const int SODIUM_CRYPTO_AEAD_AES245GCM_ABYTES;
 
-const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_KEYBYTES = 0;
-const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_NSECBYTES = 0;
-const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_NPUBBYTES = 0;
-const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_ABYTES = 0;
+const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_KEYBYTES;
+const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_NSECBYTES;
+const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_NPUBBYTES;
+const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_ABYTES;
 
-const int SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_KEYBYTES = 0;
-const int SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_NSECBYTES = 0;
-const int SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_NPUBBYTES = 0;
-const int SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_ABYTES = 0;
+const int SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_KEYBYTES;
+const int SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_NSECBYTES;
+const int SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_NPUBBYTES;
+const int SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_ABYTES;
 
-const int SODIUM_CRYPTO_KDF_BYTES_MIN = 0;
-const int SODIUM_CRYPTO_KDF_BYTES_MAX = 0;
-const int SODIUM_CRYPTO_KDF_BYTES_CONTEXTBYTES = 0;
-const int SODIUM_CRYPTO_KDF_BYTES_KEYBYTES  = 0;
+const int SODIUM_CRYPTO_KDF_BYTES_MIN;
+const int SODIUM_CRYPTO_KDF_BYTES_MAX;
+const int SODIUM_CRYPTO_KDF_BYTES_CONTEXTBYTES;
+const int SODIUM_CRYPTO_KDF_BYTES_KEYBYTES;
 
-const int SODIUM_CRYPTO_CORE_HCHACHA20_INPUTBYTES = 0;
-const int SODIUM_CRYPTO_CORE_HCHACHA20_KEYBYTES = 0;
-const int SODIUM_CRYPTO_CORE_HCHACHA20_OUTPUTBYTES = 0;
-const int SODIUM_CRYPTO_CORE_HCHACHA20_CONSTBYTES = 0;
+const int SODIUM_CRYPTO_CORE_HCHACHA20_INPUTBYTES;
+const int SODIUM_CRYPTO_CORE_HCHACHA20_KEYBYTES;
+const int SODIUM_CRYPTO_CORE_HCHACHA20_OUTPUTBYTES;
+const int SODIUM_CRYPTO_CORE_HCHACHA20_CONSTBYTES;
 
-const int SODIUM_CRYPTO_KX_PUBLICKEYBYTES = 0;
-const int SODIUM_CRYPTO_KX_SESSIONKEYBYTES = 0;
-const int SODIUM_CRYPTO_KX_SECRETKEYBYTES = 0;
-const int SODIUM_CRYPTO_KX_KEYPAIRBYTES = 0;
+const int SODIUM_CRYPTO_KX_PUBLICKEYBYTES;
+const int SODIUM_CRYPTO_KX_SESSIONKEYBYTES;
+const int SODIUM_CRYPTO_KX_SECRETKEYBYTES;
+const int SODIUM_CRYPTO_KX_KEYPAIRBYTES;
 
-const int SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_BYTES = 0;
-const int SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_SCALARBYTES = 0;
-const int SODIUM_CRYPTO_CORE_RISTRETTO255_BYTES = 0;
-const int SODIUM_CRYPTO_CORE_RISTRETTO255_HASHBYTES = 0;
-const int SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES = 0;
-const int SODIUM_CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES = 0;
+const int SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_BYTES;
+const int SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_SCALARBYTES;
+const int SODIUM_CRYPTO_CORE_RISTRETTO255_BYTES;
+const int SODIUM_CRYPTO_CORE_RISTRETTO255_HASHBYTES;
+const int SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES;
+const int SODIUM_CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES;

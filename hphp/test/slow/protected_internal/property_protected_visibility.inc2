@@ -1,0 +1,10 @@
+<?hh
+
+module M1;
+
+class B {
+  public function foobar(): string {
+    // Not OK since foo is protected
+    return (new A())->foo.'bar';
+  }
+}

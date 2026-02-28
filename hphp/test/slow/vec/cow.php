@@ -3,15 +3,16 @@
 function cow(): (vec<int>, vec<int>, vec<int>) {
   $v1 = vec[1,2,3];
   $v1[] = 4; // now it's not static, and it has room for 3 more items
-  $v3 = $v2 = $v1;
+  $v2 = $v1;
+  $v3 = $v2;
   $v1[] = 5;
   $v1[] = 6;
   $v2[] = 7;
   $v2[] = 8;
-  return varray[$v1, $v2, $v3];
+  return vec[$v1, $v2, $v3];
 }
 
-function main() {
+function main() :mixed{
   echo "---- profiling ----\n";
   var_dump(cow());
   cow();
@@ -21,6 +22,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_cow() {
+function main_cow() :mixed{
 main();
 }

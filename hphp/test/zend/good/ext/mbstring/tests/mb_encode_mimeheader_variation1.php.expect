@@ -1,0 +1,17 @@
+*** Testing mb_encode_mimeheader() : usage variations ***
+
+-- Iteration 1 --
+string(0) ""
+
+-- Iteration 2 --
+string(0) ""
+
+-- Iteration 3 --
+string(6) "string"
+
+-- Iteration 4 --
+string(6) "string"
+
+-- Iteration 5 --
+string(11) "hello world"
+Done

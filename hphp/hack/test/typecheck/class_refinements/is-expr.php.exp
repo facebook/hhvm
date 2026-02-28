@@ -1,0 +1,4 @@
+ERROR: File "is-expr.php", line 8, characters 17-44:
+Type refinements cannot appear on the right-hand side of an is-expression. (NastCheck[3101])
+ERROR: File "is-expr.php", line 10, characters 27-51:
+Type refinements cannot appear on the right-hand side of an is-expression. (NastCheck[3101])

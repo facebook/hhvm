@@ -32,13 +32,13 @@
  * to handle character codes other than ASCII on a unified basis.
  */
 
-#include "file.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/file.h"
 
 #ifndef  lint
 FILE_RCSID("@(#)$File: ascmagic.c,v 1.85 2012/08/09 16:33:15 christos Exp $")
 #endif  /* lint */
 
-#include "magic.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/magic.h"
 #include <string.h>
 #include <memory.h>
 #include <ctype.h>

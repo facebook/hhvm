@@ -17,6 +17,7 @@
 #pragma once
 
 #include <atomic>
+#include <cstdint>
 #include <utility>
 #include <vector>
 #include <string>
@@ -32,8 +33,8 @@
 
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-stats.h"
+#include "hphp/runtime/base/request-id.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/vm/treadmill.h"
 
 namespace HPHP {
 
@@ -51,15 +52,15 @@ struct StoreValue {
   StoreValue() = default;
   StoreValue(const StoreValue& o)
     : m_data{o.m_data.load(std::memory_order_acquire)}
-    , expireTime{o.expireTime.load(std::memory_order_relaxed)}
+    , expireTime{o.expireTime.load(std::memory_order_acquire)}
     , dataSize{o.dataSize}
     , kind(o.kind)
-    , bumpTTL{o.bumpTTL.load(std::memory_order_relaxed)}
+    , bumpTTL{o.bumpTTL.load(std::memory_order_acquire)}
     , c_time{o.c_time}
-    , maxExpireTime{o.maxExpireTime.load(std::memory_order_relaxed)}
+    , maxExpireTime{o.maxExpireTime.load(std::memory_order_acquire)}
   {
-    hotIndex.store(o.hotIndex.load(std::memory_order_relaxed),
-                   std::memory_order_relaxed);
+    hotIndex.store(o.hotIndex.load(std::memory_order_acquire),
+                   std::memory_order_release);
   }
 
   APCHandle* data() const {
@@ -76,8 +77,8 @@ struct StoreValue {
     assertx(data()->kind() == kind);
     return kind;
   }
-  Variant toLocal() const {
-    return data()->toLocal();
+  Variant toLocal(bool pure) const {
+    return data()->toLocal(pure);
   }
   void set(APCHandle* v, int64_t expireTTL, int64_t maxTTL, int64_t bumpTTL);
   bool expired() const;
@@ -110,7 +111,7 @@ struct StoreValue {
   mutable std::atomic<HotCacheIdx> hotIndex{kHotCacheUnknown};
   APCKind kind;
   mutable std::atomic<uint16_t> bumpTTL{0};
-  mutable std::atomic<int64_t> expireRequestIdx{Treadmill::kIdleGenCount};
+  mutable std::atomic<RequestId> expireRequestId{RequestId()};
   uint32_t c_time{0}; // Creation time; 0 for primed values
   mutable std::atomic<uint32_t> maxExpireTime{};
 };
@@ -161,6 +162,7 @@ struct EntryInfo {
     , inHotCache(inHotCache)
   {}
 
+  size_t totalSize() const;
   static Type getAPCType(const APCHandle* handle);
 
   std::string key;
@@ -194,7 +196,7 @@ struct ConcurrentTableSharedStore {
    * Retrieve a value from the store.  Returns false if the value wasn't
    * contained in the table (or was expired).
    */
-  bool get(const String& key, Variant& value);
+  bool get(const String& key, Variant& value, bool pure = false);
 
   /*
    * Add a value to the store if no (unexpired) value with this key is already
@@ -205,7 +207,7 @@ struct ConcurrentTableSharedStore {
    * Returns: true if the value was added, including if we've replaced an
    * expired value.
    */
-  bool add(const String& key, const Variant& val, int64_t max_ttl, int64_t bump_ttl);
+  bool add(const String& key, const Variant& val, int64_t max_ttl, int64_t bump_ttl, bool pure = false);
 
   /*
    * Set the value for `key' to `val'.  If there was an existing value, it is
@@ -213,7 +215,7 @@ struct ConcurrentTableSharedStore {
    *
    * The requested ttl is limited by the ApcTTLLimit.
    */
-  void set(const String& key, const Variant& val, int64_t max_ttl, int64_t bump_ttl);
+  void set(const String& key, const Variant& val, int64_t max_ttl, int64_t bump_ttl, bool pure = false);
 
   /*
    * Increment the value for the key `key' by step, iff it is present,
@@ -266,14 +268,23 @@ struct ConcurrentTableSharedStore {
   void purgeDeferred(req::vector<StringData*>&&);
 
   /*
-   * Clear the entire APC table.
-   */
-  bool clear();
-
-  /*
    * Init
    */
   void init();
+
+  /*
+   * Debugging. Return information about the table.
+   *
+   * This is extremely expensive and not recommended for use outside of
+   * development or debugging scenarios.
+   */
+  hphp_fast_string_set debugGetKeys();
+
+  hphp_fast_string_map<HPHP::Optional<std::string>>
+  debugGetEntries(const HPHP::Optional<std::string>& prefix,
+                        HPHP::Optional<uint32_t> count);
+
+  hphp_fast_string_map<EntryInfo> debugGetMetadata();
 
   /*
    * Debugging.  Dump information about the table to an output stream.
@@ -293,11 +304,10 @@ struct ConcurrentTableSharedStore {
    */
   void dumpPrefix(std::ostream& out, const std::string &prefix, uint32_t count);
   /**
-   * Dump all non-primed keys that begin with one of the prefixes. Different
-   * keys are separated by \n in the output stream. Keys containing \r or \n
-   * will not be included.
+   * Dump all non-primed keys that begin with one of the prefixes. Writes keys
+   * to BlobEncoder using lazyCount
    */
-  void dumpKeysWithPrefixes(std::ostream& out,
+  void dumpKeysWithPrefixes(BlobEncoder& sd,
                             const std::vector<std::string>& prefixes);
   /*
    * Dump random key and entry size to output stream
@@ -313,7 +323,7 @@ struct ConcurrentTableSharedStore {
    * Return a list of entries with consideration of memory usage. Roughly one
    * sample every 'bytes' of memory is used.
    */
-  std::vector<EntryInfo> sampleEntriesInfoBySize(uint32_t bytes);
+  std::vector<std::tuple<EntryInfo, uint32_t>> sampleEntriesInfoBySize(uint32_t bytes);
 
   /*
    * Debugging.  Access information about all the entries in this table.
@@ -384,17 +394,20 @@ private:
     }
   };
 
+public:
+  static constexpr size_t NodeSize = sizeof(Map::node);
+
 private:
   bool checkExpire(const String& keyStr, Map::const_accessor& acc);
-  bool eraseImpl(const char*, bool, int64_t, ExpSet::accessor* expAcc);
-  bool storeImpl(const String&, const Variant&, int64_t, int64_t, bool);
-  bool handlePromoteObj(const String&, APCHandle*, const Variant&);
+  bool eraseImpl(const char*, bool, ExpSet::accessor* expAcc);
+  bool storeImpl(const String&, const Variant&, int64_t, int64_t, bool, bool);
+  bool handlePromoteObj(const String&, APCHandle*, const Variant&, bool);
   void dumpKeyAndValue(std::ostream&);
   static EntryInfo makeEntryInfo(const char*, StoreValue*, int64_t curr_time);
 
 private:
   Map m_vars;
-  folly::SharedMutex m_lock;
+  mutable folly::SharedMutex m_lock;
   /*
    * m_expQueue is a queue of keys to be expired. We purge items from
    * it every n (configurable) apc_stores.

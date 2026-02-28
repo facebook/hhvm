@@ -1,5 +1,5 @@
 
-Warning: max() expects at least 1 parameter, 0 given in %s/max.php on line 3
+Warning: max() expects at least 1 positional parameter, 0 given in %s/max.php on line 3
 int(1)
 NULL
 object(stdClass) (0) {

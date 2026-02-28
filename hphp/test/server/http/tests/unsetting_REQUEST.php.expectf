@@ -1,0 +1,23 @@
+Requesting 'test_unsetting_REQUEST.php?Key1=Value1&Key2=Value2'
+string(%d) "dict(2) {
+  ["Key1"]=>
+  string(6) "Value1"
+  ["Key2"]=>
+  string(6) "Value2"
+}
+bool(true)
+dict(2) {
+  ["Key1"]=>
+  string(6) "Value1"
+  ["Key2"]=>
+  string(6) "Value2"
+}"
+Requesting 'test_unsetting_REQUEST.php?Key1=Value1&Key2=Value2'
+string(%d) "dict(2) {
+  ["Key1"]=>
+  string(6) "Value1"
+  ["Key2"]=>
+  string(6) "Value2"
+}
+bool(false)
+NULL"

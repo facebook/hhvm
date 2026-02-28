@@ -1,0 +1,15 @@
+{
+  "pools": {
+    "A-warm": {
+      "servers": [ "127.0.0.1:11610" ]
+    },
+    "A-cold": {
+      "servers": [ "127.0.0.1:11611" ]
+    }
+  },
+  "route": {
+    "type": "WarmUpRoute",
+    "cold": "PoolRoute|A-cold",
+    "warm": "PoolRoute|A-warm"
+  }
+}

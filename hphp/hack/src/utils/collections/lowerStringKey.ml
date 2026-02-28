@@ -6,8 +6,11 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
-type t = string
+type t = string [@@deriving yojson_of]
 
 let compare (x : t) (y : t) =
   String.compare (String.lowercase_ascii x) (String.lowercase_ascii y)
+
+let to_string t = String.lowercase_ascii t

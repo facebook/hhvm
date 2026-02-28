@@ -18,12 +18,13 @@ let check_static_const_prop tenv class_ (pos, id) =
   let scprop = Typing_env.get_static_member false tenv class_ id in
   Option.iter scprop ~f:(fun ce ->
       if get_ce_const ce then
-        Errors.add_typing_error
+        Typing_error_utils.add_typing_error
+          ~env:tenv
           Typing_error.(primary @@ Primary.Mutating_const_property pos))
 
 (* Requires id to be a property *)
 let check_const_prop env tenv class_ (pos, id) cty =
-  let cprop = Typing_env.get_member false tenv class_ id in
+  let cprop = Typing_env.get_prop tenv class_ id in
   Option.iter cprop ~f:(fun ce ->
       if get_ce_const ce then
         if
@@ -32,7 +33,8 @@ let check_const_prop env tenv class_ (pos, id) cty =
             && (* expensive call behind short circuiting && *)
             Tast_env.is_sub_type env (Env.get_self_ty_exn env) cty)
         then
-          Errors.add_typing_error
+          Typing_error_utils.add_typing_error
+            ~env:tenv
             Typing_error.(primary @@ Primary.Mutating_const_property pos))
 
 let check_prop env c pid cty_opt =
@@ -40,28 +42,33 @@ let check_prop env c pid cty_opt =
   (* Check we're in the LHS of an assignment, so we don't get confused
      by $foo->bar(), which is an Obj_get but not a property. *)
   if Typing_defs.(equal_val_kind (Env.get_val_kind env) Lval) then
-    Option.iter class_ ~f:(fun class_ ->
-        match cty_opt with
-        | Some cty ->
-          check_const_prop env (Env.tast_env_as_typing_env env) class_ pid cty
-        | None ->
-          check_static_const_prop (Env.tast_env_as_typing_env env) class_ pid)
+    match class_ with
+    | Decl_entry.Found class_ ->
+      (match cty_opt with
+      | Some cty ->
+        let Equal = Tast_env.eq_typing_env in
+        check_const_prop env env class_ pid cty
+      | None ->
+        let Equal = Tast_env.eq_typing_env in
+        check_static_const_prop env class_ pid)
+    | Decl_entry.DoesNotExist
+    | Decl_entry.NotYetAvailable ->
+      ()
 
 let rec check_expr env ((_, _, e) : Tast.expr) =
   match e with
-  | Class_get ((cty, _, _), CGstring pid, _) ->
+  | Class_get ((cty, _, _), pid, _) ->
     let (env, cty) = Env.expand_type env cty in
     begin
       match get_node cty with
       | Tclass ((_, c), _, _) -> check_prop env c pid None
-      | Tdependent (_, bound) ->
-        begin
-          match get_node bound with
-          | Tclass ((_, c), _, _) -> check_prop env c pid None
-          | _ -> ()
-        end
-      | Tgeneric (name, targs) ->
-        let upper_bounds = Env.get_upper_bounds env name targs in
+      | Tdependent (_, bound) -> begin
+        match get_node bound with
+        | Tclass ((_, c), _, _) -> check_prop env c pid None
+        | _ -> ()
+      end
+      | Tgeneric name ->
+        let upper_bounds = Env.get_upper_bounds env name in
         let check_class bound =
           match get_node bound with
           | Tclass ((_, c), _, _) -> check_prop env c pid None
@@ -86,24 +93,30 @@ let rec check_expr env ((_, _, e) : Tast.expr) =
         | Tclass ((_, c), _, _) ->
           check_prop env c id (Some cty);
           seen
-        | Tnewtype (_, _, bound)
-        | Tdependent (_, bound) ->
+        | Tnewtype (name, tyl, _) ->
+          let (_, bound) =
+            let Equal = Tast_env.eq_typing_env in
+            Typing_utils.get_newtype_super env (get_reason cty) name tyl
+          in
           check_const_cty seen bound
-        | Tgeneric (name, targs) ->
-          let upper_bounds = Env.get_upper_bounds env name targs in
+        | Tdependent (_, bound) -> check_const_cty seen bound
+        | Tgeneric name ->
+          let upper_bounds = Env.get_upper_bounds env name in
           let check_class cty seen = check_const_cty seen cty in
           Typing_set.fold check_class upper_bounds seen
         | _ -> seen
     in
     ignore (check_const_cty Typing_set.empty cty)
-  | Call ((_, _, Id (_, f)), _, el, None)
+  | Call { func = (_, _, Id (_, f)); args; unpacked_arg = None; _ }
     when String.equal f SN.PseudoFunctions.unset ->
     let rec check_unset_exp e =
       match e with
       | (_, _, Array_get (e, Some _)) -> check_unset_exp e
       | _ -> check_expr (Env.set_val_kind env Typing_defs.Lval) e
     in
-    List.iter el ~f:(fun (_, e) -> check_unset_exp e)
+    List.iter args ~f:(fun arg -> check_unset_exp (Aast_utils.arg_to_expr arg))
+  | Unop (Ast_defs.(Uincr | Upincr | Udecr | Updecr), e) ->
+    check_expr (Env.set_val_kind env Typing_defs.Lval) e
   | _ -> ()
 
 let handler =

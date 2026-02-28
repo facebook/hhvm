@@ -1,15 +1,15 @@
 <?hh
 
 class Bar {
-    public static function pub() {
+    public static function pub() :mixed{
         Bar::priv();
     }
-    private static function priv()    {
+    private static function priv()    :mixed{
         echo "Bar::priv()\n";
     }
 }
 class Foo extends Bar {
-    public static function priv()    {
+    public static function priv()    :mixed{
         echo "Foo::priv()\n";
     }
 }

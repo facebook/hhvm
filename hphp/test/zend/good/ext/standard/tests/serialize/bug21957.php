@@ -10,18 +10,18 @@ class test
     }
 
     function __sleep()
-    {
+:mixed    {
         $this->b = 0;
     }
 }
 <<__EntryPoint>> function main(): void {
-$t = darray[];
+$t = dict[];
 $t['one'] = 'ABC';
 $t['two'] = new test();
 
 var_dump($t);
 
-$s =  @serialize($t);
+$s =  serialize($t);
 echo $s . "\n";
 
 var_dump(unserialize($s));

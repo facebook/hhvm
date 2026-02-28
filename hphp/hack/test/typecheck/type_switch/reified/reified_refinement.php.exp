@@ -1,0 +1,4 @@
+File "reified_refinement.php", line 35, characters 5-15:
+  (MyReifiedClass<T> & not MyReifiedClass<string>)
+WARN: File "reified_refinement.php", line 14, characters 7-31:
+This `is` check is always `true`. The expression on the left has type `MyReifiedClass<int>` which is a subtype of `MyReifiedClass<int>`. (Warn[12009])

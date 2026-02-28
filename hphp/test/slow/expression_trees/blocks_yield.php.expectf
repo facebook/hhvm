@@ -1,0 +1,1 @@
+Fatal error: `yield` is not supported in expression trees. in %s/blocks_yield.php on line 12

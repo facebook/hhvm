@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class C {
   const FOO = -1;

@@ -19,7 +19,7 @@ use namespace HH\Lib\{_Private, Math, SecureRandom};
  * For secure random floats, see `SecureRandom\float`.
  */
 function float()[leak_safe]: float {
-  return (float)(namespace\int(0, Math\INT53_MAX - 1) / Math\INT53_MAX);
+  return (float)namespace\int(0, Math\INT53_MAX - 1) / Math\INT53_MAX;
 }
 
 /**

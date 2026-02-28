@@ -1,0 +1,13 @@
+warning: Warn[12003] This is a sketchy null check on an expression of type ?vec<int>.
+It detects nulls, but it will also detect many other falsy values, including false, 0, 0.0, "", "0", empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for null, use $z ?? $default instead of $z ?: $default [1]
+
+funapp_refine.good.php:9:8
+    7 | <<__SupportDynamicType>>
+    8 | function bar(int $y, ?vec<int> $z):void {
+[1] 9 |   $w = $z ?: vec[];
+   10 |   foo($y, $w);
+   11 |   }
+
+1 error found

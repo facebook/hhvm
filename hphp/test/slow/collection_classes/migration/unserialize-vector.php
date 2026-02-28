@@ -3,7 +3,7 @@
 // Test that we can handle unserialization of Vectors with
 // and without namespaces.
 
-function main() {
+function main() :mixed{
   $v = Vector {1, 2, 3};
 
   // unserialize o serialize == id
@@ -38,6 +38,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_unserialize_vector() {
+function main_unserialize_vector() :mixed{
 main();
 }

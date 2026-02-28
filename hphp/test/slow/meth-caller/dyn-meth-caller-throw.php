@@ -1,13 +1,13 @@
 <?hh
 
 class Foo {
-  <<__DynamicallyCallable>> function inst_dyn() { echo __FUNCTION__."\n"; }
-  function inst_meth() { echo __FUNCTION__."\n"; }
-  static function static_meth() { echo __FUNCTION__."\n"; }
+  <<__DynamicallyCallable>> function inst_dyn() :mixed{ echo __FUNCTION__."\n"; }
+  function inst_meth() :mixed{ echo __FUNCTION__."\n"; }
+  static function static_meth() :mixed{ echo __FUNCTION__."\n"; }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   try { $z = HH\dynamic_meth_caller(Foo::class, 'inst_dyn'); } catch (Exception $e) { var_dump($e->getMessage()); }
   try { $a = HH\dynamic_meth_caller(Foo::class, 'inst_meth'); } catch (Exception $e) { var_dump($e->getMessage()); }
   try { $b = HH\dynamic_meth_caller(Foo::class, 'static_meth'); } catch (Exception $e) { var_dump($e->getMessage()); }

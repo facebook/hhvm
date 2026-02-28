@@ -27,13 +27,6 @@ if (LIBDL_INCLUDE_DIRS)
   endif()
 endif()
 
-# google-glog
-find_package(Glog REQUIRED)
-if (LIBGLOG_STATIC)
-  add_definitions("-DGOOGLE_GLOG_DLL_DECL=")
-endif()
-include_directories(${LIBGLOG_INCLUDE_DIR})
-
 # inotify checks
 find_package(Libinotify)
 if (LIBINOTIFY_INCLUDE_DIR)
@@ -62,7 +55,6 @@ if (ENABLE_XED)
   if (LibXed_FOUND)
     include_directories(${LibXed_INCLUDE_DIR})
   endif()
-  add_definitions("-DHAVE_LIBXED")
 else()
   message(STATUS "XED is disabled")
 endif()
@@ -73,17 +65,6 @@ include_directories(${CURL_INCLUDE_DIR})
 if (CURL_STATIC)
   add_definitions("-DCURL_STATICLIB")
 endif()
-
-set(CMAKE_REQUIRED_LIBRARIES "${CURL_LIBRARIES}")
-CHECK_FUNCTION_EXISTS("curl_multi_select" HAVE_CURL_MULTI_SELECT)
-CHECK_FUNCTION_EXISTS("curl_multi_wait" HAVE_CURL_MULTI_WAIT)
-if (HAVE_CURL_MULTI_SELECT)
-  add_definitions("-DHAVE_CURL_MULTI_SELECT")
-endif()
-if (HAVE_CURL_MULTI_WAIT)
-  add_definitions("-DHAVE_CURL_MULTI_WAIT")
-endif()
-set(CMAKE_REQUIRED_LIBRARIES)
 
 # LibXML2 checks
 find_package(LibXml2 REQUIRED)
@@ -183,17 +164,6 @@ endif()
 if (JEMALLOC_ENABLED AND ENABLE_HHPROF)
   add_definitions(-DENABLE_HHPROF=1)
 endif()
-
-# tbb libs
-find_package(TBB REQUIRED)
-if (${TBB_INTERFACE_VERSION} LESS 5005)
-  unset(TBB_FOUND CACHE)
-  unset(TBB_INCLUDE_DIRS CACHE)
-  unset(TBB_LIBRARIES CACHE)
-  message(FATAL_ERROR "TBB is too old, please install at least 3.0(5005), preferably 4.0(6000) or higher")
-endif()
-include_directories(${TBB_INCLUDE_DIRS})
-link_directories(${TBB_LIBRARY_DIRS})
 
 # OpenSSL libs
 find_package(OpenSSL REQUIRED)
@@ -299,14 +269,20 @@ endif()
 
 if (APPLE)
   find_library(KERBEROS_LIB NAMES gssapi_krb5)
+endif()
 
-  # This is required by Homebrew's libc. See
-  # https://github.com/facebook/hhvm/pull/5728#issuecomment-124290712
-  # for more info.
-  find_package(Libpam)
-  if (PAM_INCLUDE_PATH)
-    include_directories(${PAM_INCLUDE_PATH})
-  endif()
+if (LINUX)
+  find_package(systemd REQUIRED)
+  find_package(Bpf REQUIRED)
+  find_package(LibUnwind REQUIRED)
+endif()
+
+# This is required by Homebrew's libc. See
+# https://github.com/facebook/hhvm/pull/5728#issuecomment-124290712
+# for more info.
+find_package(Libpam)
+if (PAM_INCLUDE_PATH)
+  include_directories(${PAM_INCLUDE_PATH})
 endif()
 
 include_directories(${HPHP_HOME}/hphp)
@@ -360,9 +336,10 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
   target_link_libraries(${target} ${VISIBILITY} ${LIBEVENT_LIB})
   target_link_libraries(${target} ${VISIBILITY} ${CURL_LIBRARIES})
-  target_link_libraries(${target} ${VISIBILITY} ${LIBGLOG_LIBRARY})
-  if (LIBJSONC_LIBRARY)
-    target_link_libraries(${target} ${VISIBILITY} ${LIBJSONC_LIBRARY})
+  target_link_libraries(${target} ${VISIBILITY} glog)
+
+  if (LINUX)
+    target_link_libraries(${target} ${VISIBILITY} ${BPF_LIBRARIES} ${SYSTEMD_LIBRARIES})
   endif()
 
   if (LIBINOTIFY_LIBRARY)
@@ -385,10 +362,10 @@ macro(hphp_link target)
   if (APPLE)
     target_link_libraries(${target} ${VISIBILITY} ${LIBINTL_LIBRARIES})
     target_link_libraries(${target} ${VISIBILITY} ${KERBEROS_LIB})
+  endif()
 
-    if (PAM_LIBRARY)
-      target_link_libraries(${target} ${VISIBILITY} ${PAM_LIBRARY})
-    endif()
+  if (PAM_LIBRARY)
+    target_link_libraries(${target} ${VISIBILITY} ${PAM_LIBRARY})
   endif()
 
   if (LIBPTHREAD_LIBRARIES)
@@ -432,21 +409,29 @@ macro(hphp_link target)
     target_link_libraries(${target} ${VISIBILITY} fastlz)
   endif()
 
+  target_link_libraries(${target} ${VISIBILITY} re2)
+
   target_link_libraries(${target} ${VISIBILITY} timelib)
   target_link_libraries(${target} ${VISIBILITY} folly)
   target_link_libraries(${target} ${VISIBILITY} jemalloc)
   target_link_libraries(${target} ${VISIBILITY} wangle)
+  target_link_libraries(${target} ${VISIBILITY} fizz)
   target_link_libraries(${target} ${VISIBILITY} brotli)
   target_link_libraries(${target} ${VISIBILITY} hhbc_ast_header)
   target_link_libraries(${target} ${VISIBILITY} compiler_ffi)
+  target_link_libraries(${target} ${VISIBILITY} package_ffi)
   target_link_libraries(${target} ${VISIBILITY} parser_ffi)
   target_link_libraries(${target} ${VISIBILITY} hhvm_types_ffi)
   target_link_libraries(${target} ${VISIBILITY} hhvm_hhbc_defs_ffi)
 
-  if (NOT MSVC)
-    target_link_libraries(${target} ${VISIBILITY} afdt)
-  endif()
+  target_link_libraries(${target} ${VISIBILITY} tbb)
+
+  target_link_libraries(${target} ${VISIBILITY} afdt)
   target_link_libraries(${target} ${VISIBILITY} mbfl)
+
+  if (LINUX)
+    target_link_libraries(${target} ${VISIBILITY} ${LIBUNWIND_LIBRARIES})
+  endif()
 
   if (EDITLINE_LIBRARIES)
     target_link_libraries(${target} ${VISIBILITY} ${EDITLINE_LIBRARIES})
@@ -454,37 +439,14 @@ macro(hphp_link target)
     target_link_libraries(${target} ${VISIBILITY} ${READLINE_LIBRARY})
   endif()
 
-  if (MSVC)
-    target_link_libraries(${target} ${VISIBILITY} dbghelp.lib dnsapi.lib)
+  find_library(ATOMIC_LIBRARY NAMES atomic libatomic.so.1)
+  if (ATOMIC_LIBRARY STREQUAL "ATOMIC_LIBRARY-NOTFOUND")
+    # -latomic should be available for gcc even when libatomic.so.1 is not
+    # in the library search path
+    target_link_libraries(${target} ${VISIBILITY} atomic)
+  else()
+    target_link_libraries(${target} ${VISIBILITY} ${ATOMIC_LIBRARY})
   endif()
-
-# Check whether atomic operations require -latomic or not
-# See https://github.com/facebook/hhvm/issues/5217
-  include(CheckCXXSourceCompiles)
-  set(OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
-  set(CMAKE_REQUIRED_FLAGS "-std=c++1y")
-  CHECK_CXX_SOURCE_COMPILES("
-#include <atomic>
-#include <iostream>
-#include <stdint.h>
-int main() {
-    struct Test { int64_t val1; int64_t val2; };
-    std::atomic<Test> s;
-    // Do this to stop modern compilers from optimizing away the libatomic
-    // calls in release builds, making this test always pass in release builds,
-    // and incorrectly think that HHVM doesn't need linking against libatomic.
-    bool (std::atomic<Test>::* volatile x)(void) const =
-      &std::atomic<Test>::is_lock_free;
-    std::cout << (s.*x)() << std::endl;
-}
-  " NOT_REQUIRE_ATOMIC_LINKER_FLAG)
-
-  if(NOT "${NOT_REQUIRE_ATOMIC_LINKER_FLAG}")
-      message(STATUS "-latomic is required to link hhvm")
-      find_library(ATOMIC_LIBRARY NAMES atomic libatomic.so.1)
-      target_link_libraries(${target} ${VISIBILITY} ${ATOMIC_LIBRARY})
-  endif()
-  set(CMAKE_REQUIRED_FLAGS ${OLD_CMAKE_REQUIRED_FLAGS})
 
   if (ENABLE_XED)
     if (LibXed_FOUND)

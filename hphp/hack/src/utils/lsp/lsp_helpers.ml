@@ -1,6 +1,6 @@
 (* A few helpful wrappers around LSP *)
 
-module Option = Base.Option
+open Hh_prelude
 open Lsp
 open Lsp_fmt
 
@@ -14,11 +14,11 @@ let url_scheme_regex = Str.regexp "^\\([a-zA-Z][a-zA-Z0-9+.-]+\\):"
 
 (* this requires schemes with 2+ characters, so "c:\path" isn't considered a scheme *)
 
-let lsp_uri_to_path (uri : documentUri) : string =
+let lsp_uri_to_path (uri : DocumentUri.t) : string =
   let uri = string_of_uri uri in
   if Str.string_match url_scheme_regex uri 0 then
     let scheme = Str.matched_group 1 uri in
-    if scheme = "file" then
+    if String.equal scheme "file" then
       File_url.parse uri
     else
       raise
@@ -31,28 +31,53 @@ let lsp_uri_to_path (uri : documentUri) : string =
   else
     uri
 
-let path_to_lsp_uri (path : string) ~(default_path : string) : Lsp.documentUri =
-  if path = "" then
+let path_string_to_lsp_uri (path : string) ~(default_path : string) :
+    Lsp.DocumentUri.t =
+  if String.equal path "" then begin
+    HackEventLogger.invariant_violation_bug "missing path";
+    Hh_logger.log
+      "missing path %s"
+      (Exception.get_current_callstack_string 99 |> Exception.clean_stack);
     File_url.create default_path |> uri_of_string
-  else
+  end else
     File_url.create path |> uri_of_string
+
+let path_to_lsp_uri (path : Relative_path.t) : Lsp.DocumentUri.t =
+  match Relative_path.prefix path with
+  | Relative_path.(Root | Hhi | Tmp) ->
+    let absolute = Relative_path.to_absolute path in
+    path_string_to_lsp_uri absolute ~default_path:absolute
+  | Relative_path.Dummy ->
+    (* This is bad, we're saying something is a file path when it's not.
+       A particular case where we reach here is via `hh_single_type_check --ide-code-actions.
+       This is a symptom of overusing LSP types in internals of our language server.
+       TODO(T168350458): try to make this unreachable or behave more reasonably
+    *)
+    Lsp.DocumentUri.Uri (Relative_path.to_absolute path)
 
 let lsp_textDocumentIdentifier_to_filename
     (identifier : Lsp.TextDocumentIdentifier.t) : string =
   Lsp.TextDocumentIdentifier.(lsp_uri_to_path identifier.uri)
 
-let lsp_position_to_fc (pos : Lsp.position) : File_content.position =
-  {
-    File_content.line = pos.Lsp.line + 1;
-    (* LSP is 0-based; File_content is 1-based. *)
-    column = pos.Lsp.character + 1;
-  }
+let lsp_position_to_fc ({ Lsp.line; character } : Lsp.position) :
+    File_content.Position.t =
+  File_content.Position.from_zero_based line character
 
 let lsp_range_to_fc (range : Lsp.range) : File_content.range =
   {
     File_content.st = lsp_position_to_fc range.Lsp.start;
     ed = lsp_position_to_fc range.Lsp.end_;
   }
+
+let lsp_range_to_pos ~line_to_offset path (range : Lsp.range) : Pos.t =
+  let triple_of_endpoint Lsp.{ line; character } =
+    let bol = line_to_offset line in
+    (line, bol, bol + character)
+  in
+  Pos.make_from_lnum_bol_offset
+    ~pos_file:path
+    ~pos_start:(triple_of_endpoint range.Lsp.start)
+    ~pos_end:(triple_of_endpoint range.Lsp.end_)
 
 let lsp_edit_to_fc (edit : Lsp.DidChange.textDocumentContentChangeEvent) :
     File_content.text_edit =
@@ -65,7 +90,7 @@ let apply_changes
     (text : string)
     (contentChanges : DidChange.textDocumentContentChangeEvent list) :
     (string, string * Exception.t) result =
-  let edits = List.map lsp_edit_to_fc contentChanges in
+  let edits = List.map ~f:lsp_edit_to_fc contentChanges in
   File_content.edit_file text edits
 
 let get_char_from_lsp_position (content : string) (position : Lsp.position) :
@@ -79,6 +104,58 @@ let apply_changes_unsafe
   match apply_changes text contentChanges with
   | Ok r -> r
   | Error (e, _stack) -> failwith e
+
+let sym_occ_kind_to_lsp_sym_info_kind (sym_occ_kind : SymbolOccurrence.kind) :
+    Lsp.SymbolInformation.symbolKind =
+  let open Lsp.SymbolInformation in
+  let open SymbolOccurrence in
+  match sym_occ_kind with
+  | Class _ -> Class
+  | BuiltInType _ -> Class
+  | Function -> Function
+  | Method _ -> Method
+  | LocalVar -> Variable
+  | TypeVar -> TypeParameter
+  | Property _ -> Property
+  | XhpLiteralAttr _ -> Property
+  | ClassConst _ -> TypeParameter
+  | Typeconst _ -> TypeParameter
+  | GConst -> Constant
+  | Attribute _ -> Class
+  | EnumClassLabel _ -> EnumMember
+  | Keyword _ -> Null
+  | PureFunctionContext -> Null
+  | BestEffortArgument _ -> Null
+  | HhFixme -> Null
+  | HhIgnore -> Null
+  | Module -> Module
+
+let hack_pos_to_lsp_range ~(equal : 'a -> 'a -> bool) (pos : 'a Pos.pos) :
+    Lsp.range =
+  (* .hhconfig errors are Positions with a filename, but dummy start/end
+   * positions. Handle that case - and Pos.none - specially, as the LSP
+   * specification requires line and character >= 0, and VSCode silently
+   * drops diagnostics that violate the spec in this way *)
+  if Pos.equal_pos equal pos (Pos.make_from (Pos.filename pos)) then
+    { start = { line = 0; character = 0 }; end_ = { line = 0; character = 0 } }
+  else
+    let (line1, col1, line2, col2) = Pos.destruct_range_one_based pos in
+    {
+      start = { line = line1 - 1; character = col1 - 1 };
+      end_ = { line = line2 - 1; character = col2 - 1 };
+    }
+
+let hack_pos_to_lsp_range_adjusted (p : 'a Pos.pos) : range =
+  let (line_start, line_end, character_start, character_end) =
+    Pos.info_pos_extended p
+  in
+  let (start_position : position) =
+    { line = line_start; character = character_start }
+  in
+  let (end_position : position) =
+    { line = line_end; character = character_end }
+  in
+  { start = start_position; end_ = end_position }
 
 (************************************************************************)
 (* Range calculations                                                   *)
@@ -247,9 +324,9 @@ let update_diagnostics_due_to_change
         let pos =
           File_content.offset_to_position change.DidChange.text offset
         in
-        (* 1-based *)
-        let insert_lines = pos.File_content.line - 1 in
-        let insert_chars_on_final_line = pos.File_content.column - 1 in
+        let (insert_lines, insert_chars_on_final_line) =
+          File_content.Position.line_column_zero_based pos
+        in
         Some { remove_range; insert_lines; insert_chars_on_final_line }
     in
     let apply_replace diagnostic_opt replace_opt =
@@ -341,3 +418,9 @@ let showMessage_warning (writer : Jsonrpc.writer) =
 
 let showMessage_error (writer : Jsonrpc.writer) =
   showMessage writer MessageType.ErrorMessage
+
+let title_of_command_or_action =
+  Lsp.CodeAction.(
+    function
+    | Command Command.{ title; _ } -> title
+    | Action { title; _ } -> title)

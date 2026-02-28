@@ -1,6 +1,0 @@
-File "constraint_undefined_method_lookup_02.php", line 21, characters 14-16:
-No instance method `bar` in `I` (Typing[4053])
-  File "constraint_undefined_method_lookup_02.php", line 20, characters 22-22:
-  This is why I think it is an object of type I
-  File "constraint_undefined_method_lookup_02.php", line 18, characters 11-11:
-  Declaration of `I` is here

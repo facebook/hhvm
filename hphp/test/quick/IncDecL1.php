@@ -1,6 +1,6 @@
 <?hh
 
-function error_boundary($fn) {
+function error_boundary($fn) :mixed{
   try {
     return $fn();
   } catch (Exception $e) {
@@ -9,19 +9,19 @@ function error_boundary($fn) {
   }
 }
 
-function postInc($x) {
+function postInc($x) :mixed{
   return error_boundary(() ==> $x++);
 }
 
-function preInc($x) {
+function preInc($x) :mixed{
   return error_boundary(() ==> ++$x);
 }
 
-function postDec($x) {
+function postDec($x) :mixed{
   return error_boundary(() ==> $x--);
 }
 
-function preDec($x) {
+function preDec($x) :mixed{
   return error_boundary(() ==> --$x);
 }
 <<__EntryPoint>> function main(): void {

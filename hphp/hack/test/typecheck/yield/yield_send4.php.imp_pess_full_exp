@@ -1,0 +1,8 @@
+File "yield_send4.php", line 7, characters 5-6:
+Invalid argument (Typing[4110])
+  File "yield_send4.php", line 3, characters 13-16:
+  Expected `bool`
+  File "yield_send4.php", line 5, characters 39-41:
+  But got `int`
+  File "yield_send4.php", line 5, characters 39-41:
+  This type argument to `Generator` only allows supertypes (it is contravariant)

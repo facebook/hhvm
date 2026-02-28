@@ -1,0 +1,90 @@
+*** Testing date_sun_info() : usage variations ***
+
+-- Iteration 1 --
+dict(9) {
+  ["sunrise"]=>
+  int(16748)
+  ["sunset"]=>
+  int(53182)
+  ["transit"]=>
+  int(34965)
+  ["civil_twilight_begin"]=>
+  int(15145)
+  ["civil_twilight_end"]=>
+  int(54786)
+  ["nautical_twilight_begin"]=>
+  int(13324)
+  ["nautical_twilight_end"]=>
+  int(56607)
+  ["astronomical_twilight_begin"]=>
+  int(11542)
+  ["astronomical_twilight_end"]=>
+  int(58389)
+}
+
+-- Iteration 2 --
+dict(9) {
+  ["sunrise"]=>
+  int(16748)
+  ["sunset"]=>
+  int(53182)
+  ["transit"]=>
+  int(34965)
+  ["civil_twilight_begin"]=>
+  int(15145)
+  ["civil_twilight_end"]=>
+  int(54786)
+  ["nautical_twilight_begin"]=>
+  int(13324)
+  ["nautical_twilight_end"]=>
+  int(56607)
+  ["astronomical_twilight_begin"]=>
+  int(11542)
+  ["astronomical_twilight_end"]=>
+  int(58389)
+}
+
+-- Iteration 3 --
+dict(9) {
+  ["sunrise"]=>
+  int(16748)
+  ["sunset"]=>
+  int(53182)
+  ["transit"]=>
+  int(34965)
+  ["civil_twilight_begin"]=>
+  int(15145)
+  ["civil_twilight_end"]=>
+  int(54786)
+  ["nautical_twilight_begin"]=>
+  int(13324)
+  ["nautical_twilight_end"]=>
+  int(56607)
+  ["astronomical_twilight_begin"]=>
+  int(11542)
+  ["astronomical_twilight_end"]=>
+  int(58389)
+}
+
+-- Iteration 4 --
+dict(9) {
+  ["sunrise"]=>
+  int(-69665)
+  ["sunset"]=>
+  int(-33260)
+  ["transit"]=>
+  int(-51462)
+  ["civil_twilight_begin"]=>
+  int(-71269)
+  ["civil_twilight_end"]=>
+  int(-31655)
+  ["nautical_twilight_begin"]=>
+  int(-73092)
+  ["nautical_twilight_end"]=>
+  int(-29832)
+  ["astronomical_twilight_begin"]=>
+  int(-74874)
+  ["astronomical_twilight_end"]=>
+  int(-28050)
+}
+===Done===

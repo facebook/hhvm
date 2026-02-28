@@ -51,7 +51,7 @@ repo_enable() {
   find "$1" -type f > "$FILE_LIST"
 
   OUT_DIR=`dirname "$HHBC"`
-  hhvm --hphp --target hhbc --output-dir "$OUT_DIR" --input-list "$FILE_LIST" -l3 -v AllVolatile=true
+  hhvm --hphp --output-dir "$OUT_DIR" --input-list "$FILE_LIST" -l3
 
   OUT_DIR_USER=`stat -c "%U" "$OUT_DIR"`
   HHBC_USER=`stat -c "%U" "$HHBC"`

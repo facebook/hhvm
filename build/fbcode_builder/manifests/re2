@@ -1,0 +1,23 @@
+[manifest]
+name = re2
+
+[homebrew]
+re2
+
+[debs]
+libre2-dev
+
+[rpms]
+re2
+re2-devel
+
+[pps]
+re2
+
+[download]
+url = https://github.com/google/re2/archive/2020-11-01.tar.gz
+sha256 = 8903cc66c9d34c72e2bc91722288ebc7e3ec37787ecfef44d204b2d6281954d7
+
+[build]
+builder = cmake
+subdir = re2-2020-11-01

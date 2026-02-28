@@ -1,17 +1,15 @@
 <?hh
 
-<<__Const>>
 class C {
-  public function __construct(public int $i)[] {}
+  public function __construct(<<__Const>> public int $i)[] {}
   public function __wakeup(): void {
     echo "-- in C::__wakeup --\n";
     $this->i++;
   }
 }
 
-<<__Const>>
 class D {
-  public function __construct(public int $i, public C $c)[] {}
+  public function __construct(<<__Const>> public int $i, <<__Const>> public C $c)[] {}
   public function __wakeup(): void {
     echo "-- in D::__wakeup --\n";
     $this->i++;
@@ -24,7 +22,7 @@ class D {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   $d = new D(1, new C(2));
   var_dump($d);
   $d2 = unserialize(serialize($d));

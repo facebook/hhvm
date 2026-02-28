@@ -3,13 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc::hhas_coeffects::HhasCoeffects;
-use ocamlrep::rc::RcOc;
-use oxidized::{
-    ast_defs::{Abstraction, ClassishKind},
-    namespace_env::Env as NamespaceEnv,
-};
-use unique_id_builder::{get_unique_id_for_method, SMap, SSet};
+use std::sync::Arc;
+
+use hhbc::Coeffects;
+use oxidized::ast_defs::Abstraction;
+use oxidized::ast_defs::ClassishKind;
+use oxidized::namespace_env::Env as NamespaceEnv;
+use unique_id_builder::SMap;
+use unique_id_builder::SSet;
+use unique_id_builder::get_unique_id_for_method;
 
 #[derive(Debug, Clone)]
 pub struct ClosureEnclosingClassInfo {
@@ -29,14 +31,14 @@ impl Default for ClosureEnclosingClassInfo {
 }
 
 #[derive(Default, Debug)]
-pub struct GlobalState<'arena> {
+pub struct GlobalState {
     pub explicit_use_set: SSet,
-    pub closure_namespaces: SMap<RcOc<NamespaceEnv>>,
+    pub closure_namespaces: SMap<Arc<NamespaceEnv>>,
     pub closure_enclosing_classes: SMap<ClosureEnclosingClassInfo>,
-    pub lambda_coeffects_of_scope: SMap<HhasCoeffects<'arena>>,
+    pub lambda_coeffects_of_scope: SMap<Coeffects>,
 }
 
-impl<'arena> GlobalState<'arena> {
+impl GlobalState {
     pub fn init() -> Self {
         GlobalState::default()
     }
@@ -45,7 +47,7 @@ impl<'arena> GlobalState<'arena> {
         &self,
         class_name: &str,
         meth_name: &str,
-    ) -> Option<&HhasCoeffects<'arena>> {
+    ) -> Option<&Coeffects> {
         let key = get_unique_id_for_method(class_name, meth_name);
         self.lambda_coeffects_of_scope.get(&key)
     }

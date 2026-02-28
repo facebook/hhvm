@@ -1,0 +1,4 @@
+// Typecheck Helpers
+
+class External {}
+

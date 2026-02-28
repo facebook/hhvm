@@ -1,0 +1,4 @@
+ERROR: File "true_type_enum_return.bad.php", line 15, characters 3-47:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `null` (Typing[4019])
+  File "true_type_enum_return.bad.php", line 15, characters 11-12:
+  The scrutinee has type `?E`.

@@ -1,0 +1,23 @@
+# foo.php starts here
+
+.filepath "foo.php";
+
+
+.module_use "default";
+
+.class {} [enum_class "__EnumClass"("""v:0:{}""")] A (3,5) extends HH\BuiltinEnumClass {
+  .enum_ty <"HH\\mixed" >;
+  .const LA = """i:42;""";
+}
+
+.class {} [enum_class "__EnumClass"("""v:0:{}""")] B (7,9) extends HH\BuiltinEnumClass enum_includes (A) {
+  .enum_ty <"HH\\mixed" >;
+  .const LB = """i:43;""";
+}
+
+.class_refs {
+  A
+  HH\BuiltinEnumClass
+}
+
+# foo.php ends here

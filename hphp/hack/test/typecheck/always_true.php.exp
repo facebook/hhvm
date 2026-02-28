@@ -1,1 +1,3 @@
-No errors
+WARN: File "always_true.php", line 4, characters 7-19:
+Invalid comparison: This expression will always return `true`.
+A value of type `null` can never be equal to a value of type `vec<int>` (Warn[12007])

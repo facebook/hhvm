@@ -5,17 +5,18 @@
 $count = 2000 * 3;
 $pixels = varray(
   array_merge(
-    array_pad(darray[], $count, 0),
-    array_pad(darray[], $count, 255),
-    array_pad(darray[], $count, 0),
-    array_pad(darray[], $count, 255),
-    array_pad(darray[], $count, 0)
+    array_pad(dict[], $count, 0),
+    array_pad(dict[], $count, 255),
+    array_pad(dict[], $count, 0),
+    array_pad(dict[], $count, 255),
+    array_pad(dict[], $count, 0)
   )
 );
 
 /* Width and height. The area is amount of pixels divided
    by three. Three comes from 'RGB', three values per pixel */
-$width = $height = 100;
+$height = 100;
+$width = $height;
 
 /* Create empty image */
 $im = new Imagick();

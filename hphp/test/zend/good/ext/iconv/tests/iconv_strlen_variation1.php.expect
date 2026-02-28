@@ -1,0 +1,20 @@
+*** Testing iconv_strlen() : usage variations ***
+
+--empty string DQ--
+int(0)
+
+--empty string SQ--
+int(0)
+
+--string DQ--
+int(6)
+
+--string SQ--
+int(6)
+
+--mixed case string--
+int(6)
+
+--heredoc--
+int(11)
+===DONE===

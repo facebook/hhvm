@@ -1,7 +1,0 @@
-.adata A_0 = """D:1:{i:1;i:1;}""";
-
-.function ["__EntryPoint"("""y:0:{}""")] main() {
-  Dict @A_0
-  ColFromArray Vector
-  RetC
-}

@@ -1,0 +1,132 @@
+dict(3) {
+  ["kind"]=>
+  int(31)
+  ["union_types"]=>
+  vec(2) {
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+    dict(2) {
+      ["kind"]=>
+      int(20)
+      ["generic_types"]=>
+      vec(1) {
+        dict(3) {
+          ["kind"]=>
+          int(10)
+          ["elem_types"]=>
+          vec(2) {
+            dict(2) {
+              ["kind"]=>
+              int(32)
+              ["case_type"]=>
+              string(1) "C"
+            }
+            dict(2) {
+              ["kind"]=>
+              int(32)
+              ["case_type"]=>
+              string(1) "C"
+            }
+          }
+          ["alias"]=>
+          string(1) "T"
+        }
+      }
+    }
+  }
+  ["case_type"]=>
+  string(1) "C"
+}
+dict(3) {
+  ["kind"]=>
+  int(10)
+  ["elem_types"]=>
+  vec(2) {
+    dict(3) {
+      ["kind"]=>
+      int(31)
+      ["union_types"]=>
+      vec(2) {
+        dict(1) {
+          ["kind"]=>
+          int(1)
+        }
+        dict(2) {
+          ["kind"]=>
+          int(20)
+          ["generic_types"]=>
+          vec(1) {
+            dict(3) {
+              ["kind"]=>
+              int(10)
+              ["elem_types"]=>
+              vec(2) {
+                dict(2) {
+                  ["kind"]=>
+                  int(32)
+                  ["case_type"]=>
+                  string(1) "C"
+                }
+                dict(2) {
+                  ["kind"]=>
+                  int(32)
+                  ["case_type"]=>
+                  string(1) "C"
+                }
+              }
+              ["alias"]=>
+              string(1) "T"
+            }
+          }
+        }
+      }
+      ["case_type"]=>
+      string(1) "C"
+    }
+    dict(3) {
+      ["kind"]=>
+      int(31)
+      ["union_types"]=>
+      vec(2) {
+        dict(1) {
+          ["kind"]=>
+          int(1)
+        }
+        dict(2) {
+          ["kind"]=>
+          int(20)
+          ["generic_types"]=>
+          vec(1) {
+            dict(3) {
+              ["kind"]=>
+              int(10)
+              ["elem_types"]=>
+              vec(2) {
+                dict(2) {
+                  ["kind"]=>
+                  int(32)
+                  ["case_type"]=>
+                  string(1) "C"
+                }
+                dict(2) {
+                  ["kind"]=>
+                  int(32)
+                  ["case_type"]=>
+                  string(1) "C"
+                }
+              }
+              ["alias"]=>
+              string(1) "T"
+            }
+          }
+        }
+      }
+      ["case_type"]=>
+      string(1) "C"
+    }
+  }
+  ["alias"]=>
+  string(1) "T"
+}

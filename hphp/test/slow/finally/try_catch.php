@@ -1,6 +1,6 @@
 <?hh
 
-function thr($doit) {
+function thr($doit) :mixed{
   try {
     var_dump("try");
     if ($doit) {
@@ -14,7 +14,7 @@ function thr($doit) {
 }
 
 <<__EntryPoint>>
-function main_try_catch() {
+function main_try_catch() :mixed{
 thr(true);
 thr(false);
 }

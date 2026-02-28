@@ -1,6 +1,0 @@
-File "case_sensitive_inheritance2.php", line 10, characters 16-16:
-`C` inherited two versions of the method `foo` whose names differ only by case. (Typing[4393])
-  File "case_sensitive_inheritance2.php", line 3, characters 19-21:
-  It inherited `foo` from I1 here.
-  File "case_sensitive_inheritance2.php", line 6, characters 19-21:
-  And `FOO` from I2 here. Please rename these methods to the same casing.

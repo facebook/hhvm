@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_xpath_node() {
+function main_xpath_node() :mixed{
 $xml = simplexml_load_string(<<<EOF
 <root>
   <block name="test" />

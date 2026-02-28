@@ -17,22 +17,18 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/vm/func.h"
 
 #include "hphp/runtime/base/bespoke/logging-array.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 
-#include "hphp/runtime/vm/jit/analysis.h"
-#include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/edge.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/irgen-builtin.h"
 #include "hphp/runtime/vm/jit/irgen-call.h"
-#include "hphp/runtime/vm/jit/ir-instr-table.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -40,7 +36,7 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/functioncredential/ext_functioncredential.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
@@ -129,118 +125,23 @@ void IRInstruction::become(IRUnit& unit, const IRInstruction* other) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-enum MoveKind {
-  Consume,
-  MustMove,
-  MayMove,
-};
-
-template<MoveKind move>
-bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
-  if (!inst->consumesReferences()) {
-    return false;
-  }
-
-  switch (inst->op()) {
-    case ConcatStrStr:
-    case ConcatStrInt:
-    case ConcatStr3:
-    case ConcatStr4:
-      // Call a helper that decrefs the first argument
-      return move == Consume && srcNo == 0;
-
-    case ConstructClosure:
-      return srcNo == 0;
-
-    case StClosureArg:
-    case StContArValue:
-    case StContArKey:
-      return srcNo == 1;
-
-    case ContEnter:
-      return move != MustMove && srcNo == 4;
-
-    case Call:
-      return move != MustMove && srcNo == 3;
-
-    case CallFuncEntry:
-      return move != MustMove && srcNo == 2;
-
-    case EnterTCUnwind:
-      return srcNo == 2;
-
-    case RaiseTooManyArg:
-      // RaiseTooManyArg decrefs the unpack arguments.
-      return move == Consume && srcNo == 0;
-
-    case AFWHBlockOn:
-      // Consume the value being stored, not the thing it's being stored into
-      return srcNo == 1;
-
-    case DictSet:
-    case BespokeSet:
-      // Consumes the reference to its input array, and moves input value
-      return move == Consume && (srcNo == 0 || srcNo == 2);
-
-    case BespokeUnset:
-    case StructDictUnset:
-      // Only consumes the reference to its input array
-      return move == Consume && srcNo == 0;
-
-    case BespokeAppend:
-      // Consumes the reference to its input array, and moves input value (both
-      // parameters).
-      return move == Consume;
-
-    case MapSet:
-    case VectorSet:
-      // Moves input value
-      return move == Consume && srcNo == 2;
-
-    case AddNewElemKeyset:
-    case AddNewElemVec:
-      // Only consumes the reference to its input array
-      return move == Consume && srcNo == 0;
-
-    case CreateAFWH:
-      return srcNo == 4;
-
-    case CreateAGWH:
-      return srcNo == 3;
-
-    case CreateSSWH:
-      return srcNo == 0;
-
-    case InitVecElem:
-    case InitStructElem:
-      return srcNo == 1;
-
-    case InitVecElemLoop:
-      return srcNo > 0;
-
-    case NewPair:
-    case NewColFromArray:
-      return true;
-
-    case VerifyPropCoerce:
-    case VerifyPropCoerceAll:
-      return move != MustMove && srcNo == 2;
-
-    default:
-      return move != MustMove;
-  }
+bool hasSrcFlag(const IRInstruction* inst, int srcNo, IRSrcFlag flag) {
+  const auto& srcFlags = g_opInfo[(uint16_t)inst->op()].srcFlags;
+  // Variadic sources are specified at the end in ir.specification
+  srcNo = std::min(srcNo, (int)srcFlags.size() - 1);
+  return (srcFlags[srcNo] & flag) == flag;
 }
 
 bool IRInstruction::consumesReference(int srcNo) const {
-  return consumesRefImpl<Consume>(this, srcNo);
-}
-
-bool IRInstruction::movesReference(int srcNo) const {
-  return consumesRefImpl<MustMove>(this, srcNo);
+  return hasSrcFlag(this, srcNo, IRSrcFlag::Consume);
 }
 
 bool IRInstruction::mayMoveReference(int srcNo) const {
-  return consumesRefImpl<MayMove>(this, srcNo);
+  return hasSrcFlag(this, srcNo, IRSrcFlag::MayMove);
+}
+
+bool IRInstruction::movesReference(int srcNo) const {
+  return hasSrcFlag(this, srcNo, IRSrcFlag::Move);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -269,6 +170,14 @@ Type thisTypeFromFunc(const Func* func) {
   return func->hasForeignThis() ? TObj : Type::SubObj(func->cls());
 }
 
+Type callCtxType(const Func* func) {
+  assertx(func);
+  assertx(func->isClosureBody() || func->cls());
+  if (func->isClosureBody()) return Type::ExactObj(func->implCls());
+  if (func->isStatic()) return Type::SubCls(func->cls());
+  return thisTypeFromFunc(func);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // outputType().
 
@@ -284,27 +193,30 @@ Type allocObjReturn(const IRInstruction* inst) {
       return Type::ExactObj(inst->extra<NewInstanceRaw>()->cls);
 
     case AllocObj:
-    case AllocObjReified:
-      return inst->src(0)->hasConstVal()
-        ? Type::ExactObj(inst->src(0)->clsVal())
-        : TObj;
+      if (auto spec = inst->src(0)->type().clsSpec()) {
+        auto const cls = spec.cls();
+        return spec.exact() ? Type::ExactObj(cls) : Type::SubObj(cls);
+      }
+      return TObj;
 
     case CreateGen:
-      return Type::ExactObj(Generator::getClass());
+      return Type::ExactObj(Generator::classof());
 
     case CreateAGen:
-      return Type::ExactObj(AsyncGenerator::getClass());
+      return Type::ExactObj(AsyncGenerator::classof());
 
     case CreateAFWH:
+    case CreateAFWHL:
       return Type::ExactObj(c_AsyncFunctionWaitHandle::classof());
 
     case CreateAGWH:
       return Type::ExactObj(c_AsyncGeneratorWaitHandle::classof());
 
-    case CreateAAWH:
-      return Type::ExactObj(c_AwaitAllWaitHandle::classof());
+    case CreateCCWH:
+      return Type::ExactObj(c_ConcurrentWaitHandle::classof());
 
     case CreateSSWH:
+    case CreateFSWH:
       return Type::ExactObj(c_StaticWaitHandle::classof());
 
     case FuncCred:
@@ -395,6 +307,13 @@ Type bespokePosReturn(const IRInstruction* inst, bool isKey) {
   return resultType;
 }
 
+Type iterReturn(const IRInstruction* inst, bool isKey) {
+  assertx(inst->src(0)->type() <= TArrLike);
+  auto const resultType =
+    arrLikePosType(inst->src(0)->type(), TInt, isKey, inst->ctx());
+  return inst->hasTypeParam() ? resultType & inst->typeParam() : resultType;
+}
+
 Type vecElemReturn(const IRInstruction* inst) {
   assertx(inst->is(LdVecElem));
   assertx(inst->src(0)->isA(TVec));
@@ -482,7 +401,7 @@ Type newColReturn(const IRInstruction* inst) {
   assertx(inst->is(NewCol, NewPair, NewColFromArray));
   auto getColClassType = [&](CollectionType ct) -> Type {
     auto name = collections::typeToString(ct);
-    auto cls = Class::lookupUniqueInContext(name, inst->ctx(), nullptr);
+    auto cls = Class::lookupKnown(name, inst->ctx());
     if (cls == nullptr) return TObj;
     return Type::ExactObj(cls);
   };
@@ -497,11 +416,14 @@ Type newColReturn(const IRInstruction* inst) {
 
 Type builtinReturn(const IRInstruction* inst) {
   assertx(inst->is(CallBuiltin));
-  return irgen::builtinReturnType(inst->extra<CallBuiltin>()->callee);
+  // FIXME: this should be callReturnType, but irgen-builtin.cpp uses type
+  // information to determine the ABI and it breaks if the type gets better
+  // return irgen::callReturnType(inst->extra<CallBuiltin>()->callee, false);
+  return typeFromFuncReturn(inst->extra<CallBuiltin>()->callee, true);
 }
 
 Type callReturn(const IRInstruction* inst) {
-  assertx(inst->is(Call, CallFuncEntry));
+  assertx(inst->is(Call, CallFuncEntry, InlineSideExit));
 
   // Async eager return needs to load TVAux.
   //
@@ -512,19 +434,36 @@ Type callReturn(const IRInstruction* inst) {
   // for the return value, erroneously preventing the region from breaking
   // on unknown type.
 
-  if (inst->is(Call)) {
-    auto const extra = inst->extra<Call>();
-    if (extra->asyncEagerReturn) return TInitCell;
-    if (extra->formingRegion) return TInitCell;
-    return inst->src(2)->hasConstVal(TFunc)
-      ? irgen::callReturnType(inst->src(2)->funcVal()) : TInitCell;
-  }
+  switch (inst->op()) {
+    case Call: {
+      auto const extra = inst->extra<Call>();
+      if (extra->asyncEagerReturn) return TInitCell;
+      if (extra->formingRegion) return TInitCell;
+      if (!inst->src(2)->hasConstVal(TFunc)) return TInitCell;
 
-  assertx(inst->is(CallFuncEntry));
-  auto const extra = inst->extra<CallFuncEntry>();
-  if (extra->asyncEagerReturn()) return TInitCell;
-  if (extra->formingRegion) return TInitCell;
-  return irgen::callReturnType(extra->target.func());
+      auto const callee = inst->src(2)->funcVal();
+      return irgen::callReturnType(callee, true /* mayIntercept */);
+    }
+    case CallFuncEntry: {
+      auto const extra = inst->extra<CallFuncEntry>();
+      if (extra->asyncEagerReturn()) return TInitCell;
+      if (extra->formingRegion) return TInitCell;
+
+      // In general, the callee prototype and actual called function may differ in
+      // cases where we call `CallFuncEntry` with an override, so we can't rely
+      // on the type in the compile-time data and must inspect the argument.
+      if (!inst->src(2)->hasConstVal(TFunc)) return TInitCell;
+
+      auto const callee = inst->src(2)->funcVal();
+      return irgen::callReturnType(callee, true /* mayIntercept */);
+    }
+    case InlineSideExit: {
+      auto const extra = inst->extra<InlineSideExit>();
+      return irgen::callReturnType(extra->callee, false /* mayIntercept */);
+    }
+    default:
+      not_reached();
+  }
 }
 
 Type genIterReturn(const IRInstruction* inst) {
@@ -569,6 +508,19 @@ Type structDictReturn(const IRInstruction* inst) {
   return TDict.narrowToLayout(layout);
 }
 
+Type typeStructElemReturn(const IRInstruction* inst) {
+  assertx(inst->is(LdTypeStructureValCns));
+  auto const key = inst->extra<KeyedData>()->key;
+  auto const dt = bespoke::TypeStructure::getFieldPair(key).first;
+  if (dt == KindOfBoolean) return TBool;
+  if (dt == KindOfInt64) return TInt;
+  if (dt == KindOfVec) return TVec|TNullptr;
+  if (dt == KindOfDict) return TDict|TNullptr;
+  if (isStringType(dt)) return TStr|TNullptr;
+  assertx(dt == KindOfUninit);
+  return TNullptr;
+}
+
 Type arrLikeSetReturn(const IRInstruction* inst) {
   assertx(inst->is(BespokeSet, DictSet));
   auto const arr = inst->src(0)->type();
@@ -580,6 +532,18 @@ Type arrLikeSetReturn(const IRInstruction* inst) {
   assertx(key.subtypeOfAny(TInt, TStr));
   auto const base = arr.modified() & TCounted;
   auto const layout = arr.arrSpec().layout().setType(key, val);
+  return base.narrowToLayout(layout);
+}
+
+Type arrLikeSetPosReturn(const IRInstruction* inst) {
+  assertx(inst->is(BespokeSetPos));
+  auto const arr = inst->src(0)->type();
+  auto const val = inst->src(2)->type();
+
+  assertx(arr <= TArrLike);
+  assertx(arr.isKnownDataType());
+  auto const base = arr.modified() & TCounted;
+  auto const layout = arr.arrSpec().layout().setType(val);
   return base.narrowToLayout(layout);
 }
 
@@ -648,10 +612,23 @@ Type typeCnsClsName(const IRInstruction* inst) {
   always_assert(false);
 }
 
-Type verifyParamFailReturn(const IRInstruction* inst) {
-  assertx(inst->is(VerifyParamFail, VerifyRetFail));
-  auto const tc = inst->extra<FuncParamWithTCData>()->tc;
-  auto const srcTy = inst->src(0)->type();
+Type verifyCoerceReturn(const IRInstruction* inst) {
+  auto const [tc, srcTy] = [&]() {
+    if (inst->is(VerifyParamCoerce, VerifyRetCoerce)) {
+      return std::make_tuple(
+        inst->extra<FuncParamWithTCData>()->tc,
+        inst->src(0)->type()
+      );
+    }
+    if (inst->is(VerifyPropCoerce)) {
+      return std::make_tuple(
+        inst->extra<TypeConstraintData>()->tc,
+        inst->src(2)->type()
+      );
+    }
+    always_assert(false);
+  }();
+
   auto dstTy = srcTy;
   if (tc->maybeStringCompatible() &&
       (srcTy.maybe(TCls) || srcTy.maybe(TLazyCls))) {
@@ -685,6 +662,21 @@ Type structDictTypeBoundCheckReturn(const IRInstruction* inst) {
     return layout.getTypeBound(inst->src(2)->type());
   }();
   return inst->src(0)->type() & type;
+}
+
+Type ldClsReturn(const IRInstruction* inst) {
+  assertx(inst->is(LdCls, LdClsCached));
+
+  auto const extra = inst->extra<LdClsFallbackData>();
+  switch (extra->fallback) {
+    case LdClsFallback::Fatal:
+    case LdClsFallback::FatalResolveClass:
+    case LdClsFallback::ThrowClassnameToClassString:
+    case LdClsFallback::ThrowClassnameToClassLazyClass:
+      return TCls;
+    case LdClsFallback::Silent:
+      return TCls | TNullptr;
+  }
 }
 
 // Is this instruction an array cast that always modifies the type of the
@@ -736,7 +728,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define ND              assertx(0 && "outputType requires HasDest or NaryDest");
 #define D(type)         return checkLayoutFlags(type);
 #define DofS(n)         return inst->src(n)->type();
-#define DRefineS(n)     return inst->src(n)->type() & inst->typeParam();
+#define DRefineS(n)     return inst->src(n)->type().refine(inst->typeParam());
 #define DParam(t)       return inst->typeParam();
 #define DEscalateToVanilla return inst->src(0)->type().modified().\
                                narrowToVanilla();
@@ -752,6 +744,8 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DBespokeElemUninit    return bespokeElemReturn(inst, false);
 #define DBespokePosKey        return bespokePosReturn(inst, true);
 #define DBespokePosVal        return bespokePosReturn(inst, false);
+#define DIterKey              return iterReturn(inst, true);
+#define DIterVal              return iterReturn(inst, false);
 #define DVecElem        return vecElemReturn(inst);
 #define DDictElem       return dictElemReturn(inst);
 #define DKeysetElem     return keysetElemReturn(inst);
@@ -763,9 +757,11 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DLoggingArrLike   return loggingArrLikeReturn(inst);
 #define DModified(n)      return inst->src(n)->type().modified();
 #define DArrLikeSet       return arrLikeSetReturn(inst);
+#define DArrLikeSetPos    return arrLikeSetPosReturn(inst);
 #define DArrLikeUnset     return arrLikeUnsetReturn(inst);
 #define DArrLikeAppend    return arrLikeAppendReturn(inst);
 #define DStructDict     return structDictReturn(inst);
+#define DTypeStructElem return typeStructElemReturn(inst);
 #define DCol            return newColReturn(inst);
 #define DMulti          return TBottom;
 #define DSetElem        return setElemReturn(inst);
@@ -777,12 +773,13 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DMemoKey        return memoKeyReturn(inst);
 #define DLvalOfPtr      return ptrToLvalReturn(inst);
 #define DTypeCnsClsName return typeCnsClsName(inst);
-#define DVerifyParamFail return verifyParamFailReturn(inst);
+#define DVerifyCoerce   return verifyCoerceReturn(inst);
 #define DPropLval       return propLval(inst);
 #define DElemLval       return elemLval(inst);
 #define DElemLvalPos    return elemLvalPos(inst);
 #define DCOW            return cowReturn(inst);
 #define DStructTypeBound return structDictTypeBoundCheckReturn(inst);
+#define DLdCls          return ldClsReturn(inst);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -805,6 +802,8 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DBespokeElemUninit
 #undef DBespokePosKey
 #undef DBespokePosVal
+#undef DIterKey
+#undef DIterVal
 #undef DVecElem
 #undef DDictElem
 #undef DKeysetElem
@@ -814,7 +813,13 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DFirstKey
 #undef DLastKey
 #undef DLoggingArrLike
+#undef DModified
+#undef DArrLikeSet
+#undef DArrLikeSetPos
+#undef DArrLikeUnset
+#undef DArrLikeAppend
 #undef DStructDict
+#undef DTypeStructElem
 #undef DCol
 #undef DMulti
 #undef DSetElem
@@ -832,6 +837,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DElemLvalPos
 #undef DCOW
 #undef DStructTypeBound
+#undef DLdCls
 
 }
 
@@ -841,6 +847,7 @@ bool IRInstruction::maySyncVMRegsWithSources() const {
     // Profiling
     case DebugBacktrace:
     case LogArrayReach:
+    case LogGuardFailure:
     case NewLoggingArray:
     case ProfileArrLikeProps:
     case ProfileDictAccess:
@@ -849,21 +856,27 @@ bool IRInstruction::maySyncVMRegsWithSources() const {
 
     // CPGO profiling
     case BespokeEscalateToVanilla:
-    case BespokeGet: {
+    case BespokeGet:
+    case BespokeSetPos: {
       auto const loggingLayout =
         ArrayLayout(bespoke::LoggingArray::GetLayoutIndex());
       auto const loggingArray = TArrLike.narrowToLayout(loggingLayout);
+      // bespoke type structures can be created in HHBBC and bespoke arrays
+      // should not be compared in profiling mode
+      if (src(0)->type().arrSpec().is_type_structure()) return false;
       return src(0)->type().maybe(loggingArray);
     }
 
     // Intended Access
     case InitThrowableFileAndLine:
+    case LdPublicFunc:
       return true;
 
     // Likely fixable
     case EqStr:
     case NeqStr:
     case IsTypeStruct:
+    case IsTypeStructShallow:
     case StructDictUnset:
       return true;
 

@@ -1,0 +1,86 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Included on Cython structs in properties for retrieving child values from
+that struct. Most types can be returned directly and converted to python objects
+by Cython. Complex objects need to be wrapped or decoded appropriately. Structs
+are special because we try to memoize their wrappers on the parent handler
+if they have been previously retrieved.
+
+}}{{#type:iobuf?}}{{!
+}}if self.__fbthrift_cached_{{field:py_name}} is None:
+    self.__fbthrift_cached_{{field:py_name}} = _fbthrift_iobuf.IOBuf.create(ptr_address(deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_ref}}), self)
+return self.__fbthrift_cached_{{field:py_name}}{{!
+}}{{/type:iobuf?}}{{!
+}}{{#type:iobufRef?}}{{!
+}}if self.__fbthrift_cached_{{field:py_name}} is None:
+    if not deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}:
+        return None
+    self.__fbthrift_cached_{{field:py_name}} = _fbthrift_iobuf.IOBuf.create(deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}.get(), self)
+return self.__fbthrift_cached_{{field:py_name}}{{!
+}}{{/type:iobufRef?}}{{!
+}}{{#type:flexibleBinary?}}{{!
+  }}return (<const char*>deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}{{!
+    }}.data())[:deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}{{!
+    }}.size()]{{!
+}}{{/type:flexibleBinary?}}{{!
+}}{{^type:customBinaryType?}}{{!
+}}{{#field:reference?}}{{!
+}}if self.__fbthrift_cached_{{field:py_name}} is None:
+    if not deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}_ref():
+        return None
+    {{! Use an aliasing constructor since the object we're returning is still
+        managed by the top-level object, possible via a unique_ptr }}
+    self.__fbthrift_cached_{{field:py_name}} = {{!
+      }}{{#type:container?}}{{!
+      }}{{#partial types.container_from_cpp type=type:self}}({{!
+        }}deref(deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}_ref())){{!
+      }}{{/type:container?}}{{!
+      }}{{^type:container?}}{{!
+      }}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
+        }}deref(deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}_ref()), self.{{#partial types.cpp_obj}})){{!
+      }}{{/type:container?}}
+return self.__fbthrift_cached_{{field:py_name}}{{!
+}}{{/field:reference?}}{{!
+}}{{^field:reference?}}{{!
+}}{{#type:primitive?}}{{!
+  }}return {{!
+    }}{{#type:bool?}}<pbool> {{/type:bool?}}{{!
+    }}{{#type:string?}}(<bytes>{{/type:string?}}{{!
+    }}deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}{{!
+    }}{{#type:string?}}).decode('UTF-8'){{/type:string?}}{{!
+}}{{/type:primitive?}}{{!
+}}{{^type:primitive?}}{{!
+}}if self.__fbthrift_cached_{{field:py_name}} is None:
+    self.__fbthrift_cached_{{field:py_name}} = {{!
+      }}{{#type:enum}}translate_cpp_enum_to_python({{!
+        }}{{#partial types.python_type type=type:self}}, <int>({{!
+        }}deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}{{!
+      }})){{/type:enum}}{{!
+      }}{{#type:container?}}{{#partial types.container_from_cpp type=type:self}}({{!
+        }}deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_ref}}){{!
+      }}{{/type:container?}}{{!
+      }}{{^type:enum?}}{{^type:container?}}{{!
+        }}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
+      }}deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_ref}}, {{!
+      }}self.{{#partial types.cpp_obj}}{{!
+      }})){{/type:container?}}{{/type:enum?}}
+return self.__fbthrift_cached_{{field:py_name}}{{!
+}}{{/type:primitive?}}{{!
+}}{{/field:reference?}}{{!
+}}{{/type:customBinaryType?}}

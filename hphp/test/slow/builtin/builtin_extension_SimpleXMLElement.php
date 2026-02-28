@@ -4,7 +4,7 @@ class A_SimpleXMLElement extends SimpleXMLElement {
   public $___x;
 }
 
-function basicXML() {
+function basicXML() :mixed{
   return
 '<root>
   <a><a1>a1</a1></a>
@@ -13,17 +13,17 @@ function basicXML() {
 </root>';
 }
 
-function testIteration() {
-  $s = new SimpleXMLElement(basicXMl());
+function testIteration() :mixed{
+  $s = new SimpleXMLElement(basicXML());
   $i = 1;
   foreach ($s as $e) {
     echo 'Of basic XML structure the ';
-    echo ($i++) . "th nodes contents is: $e\n";
+    echo ($i++) . "th nodes contents is: '$e'\n";
   }
 }
 
-function testCanBeWrappedByIteratorIterator() {
-  $i = new IteratorIterator(new SimpleXMLElement(basicXMl()));
+function testCanBeWrappedByIteratorIterator() :mixed{
+  $i = new IteratorIterator(new SimpleXMLElement(basicXML()));
   echo "Basic XML has " . iterator_count($i) . " root children\n";
 }
 

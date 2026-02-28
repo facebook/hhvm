@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface I {}
 class C_isI implements I {}

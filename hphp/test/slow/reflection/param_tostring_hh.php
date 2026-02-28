@@ -8,13 +8,13 @@ class Foo {
   function bar(
     string $str = 'baz',
     int $i = 42,
-  ) {
+  ) :mixed{
   }
 }
 
 
 <<__EntryPoint>>
-function main_param_tostring_hh() {
+function main_param_tostring_hh() :mixed{
 $method = (new ReflectionClass('Foo'))->getMethod('bar');
 
 var_dump(

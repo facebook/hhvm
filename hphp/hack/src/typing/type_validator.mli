@@ -8,7 +8,10 @@
 
 type validity
 
+(* In hint positions, reified types are not resolved *)
 type reification =
+  (* Cases like intrinsics where we're not storing back the generic *)
+  | TypeStructure
   | Resolved
   | Unresolved
 
@@ -16,9 +19,13 @@ type validation_state = {
   env: Typing_env_types.env;
   ety_env: Typing_defs.expand_env;
   validity: validity;
-  like_context: bool;
+  inside_reified_class_generic_position: bool;
   reification: reification;
   expanded_typedefs: SSet.t;
+      (**
+  `Some Klass` if we're traversing a type and have gone through `Klass::TheTy`.
+   *)
+  class_from_taccess_lhs: Folded_class.t option;
 }
 
 type error_emitter = Pos.t -> (Pos_or_decl.t * string) list Lazy.t -> unit
@@ -63,6 +70,7 @@ class virtual type_validator :
       Typing_defs.decl_ty list ->
       Typing_defs.decl_ty ->
       Typing_defs.decl_ty ->
+      Typing_defs.decl_ty ->
       validation_state
 
     method on_taccess :
@@ -73,7 +81,7 @@ class virtual type_validator :
 
     method on_typeconst :
       validation_state ->
-      Decl_provider.Class.t ->
+      Folded_class.t ->
       Typing_defs.typeconst_type ->
       validation_state
 

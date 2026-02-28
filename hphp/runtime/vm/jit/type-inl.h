@@ -88,7 +88,7 @@ namespace TypeNames {
 #undef IRTL
 #undef IRTM
 #undef IRTX
-};
+}
 
 namespace type_detail {
 ///////////////////////////////////////////////////////////////////////////////
@@ -251,8 +251,8 @@ inline bool Type::isSimpleType() const {
   return subtypeOfAny(TBool, TInt, TDbl, TNull);
 }
 
-inline bool Type::isReferenceType() const {
-  return subtypeOfAny(TStr, TArrLike, TObj, TRes);
+inline bool Type::isSingularReferenceType() const {
+  return *this != TBottom && subtypeOfAny(TStr, TVec, TDict, TKeyset, TObj, TRes);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -306,6 +306,7 @@ inline Optional<Type> Type::tryCns(TypedValue tv) {
       case KindOfBoolean:
       case KindOfInt64:
       case KindOfDouble:
+      case KindOfEnumClassLabel:
         return Type(tv.m_type);
 
       case KindOfPersistentString:
@@ -405,6 +406,11 @@ IMPLEMENT_CNS_VAL(TMem,        ptr, const TypedValue*)
 
 #undef IMPLEMENT_CNS_VAL
 
+inline const StringData* Type::eclVal() const {
+  assertx(hasConstVal(TEnumClassLabel));
+  return m_strVal;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Specialized type creation.
 
@@ -445,7 +451,7 @@ inline Type Type::CountedKeyset(const RepoAuthType::Array* rat) {
 }
 
 inline Type Type::SubObj(const Class* cls) {
-  if (cls->attrs() & AttrNoOverride) return ExactObj(cls);
+  if (cls->attrs() & AttrNoOverrideRegular) return ExactObj(cls);
   return Type(TObj, ClassSpec(cls, ClassSpec::SubTag{}));
 }
 

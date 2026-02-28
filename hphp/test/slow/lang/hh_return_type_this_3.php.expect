@@ -1,0 +1,540 @@
+calling f1
+
+calling f2
+Caught exception: Value returned from function f2() must be of type int, null given
+Caught exception: Value returned from function f2() must be of type int, string given
+Caught exception: Value returned from function f2() must be of type int, bool given
+Caught exception: Value returned from function f2() must be of type int, float given
+Caught exception: Value returned from function f2() must be of type int, gd given
+Caught exception: Value returned from function f2() must be of type int, HH\vec given
+Caught exception: Value returned from function f2() must be of type int, Closure given
+Caught exception: Value returned from function f2() must be of type int, Figure given
+Caught exception: Value returned from function f2() must be of type int, Square given
+Caught exception: Value returned from function f2() must be of type int, Fractal given
+Caught exception: Value returned from function f2() must be of type int, xhp_div given
+Caught exception: Value returned from function f2() must be of type int, string given
+Caught exception: Value returned from function f2() must be of type int, HH\vec given
+
+calling f2_soft
+Triggered E_WARNING: Value returned from function f2_soft() must be of type @int, null given
+Triggered E_WARNING: Value returned from function f2_soft() must be of type @int, string given
+Triggered E_WARNING: Value returned from function f2_soft() must be of type @int, bool given
+Triggered E_WARNING: Value returned from function f2_soft() must be of type @int, float given
+Triggered E_WARNING: Value returned from function f2_soft() must be of type @int, gd given
+Triggered E_WARNING: Value returned from function f2_soft() must be of type @int, HH\vec given
+Triggered E_WARNING: Value returned from function f2_soft() must be of type @int, Closure given
+Triggered E_WARNING: Value returned from function f2_soft() must be of type @int, Figure given
+Triggered E_WARNING: Value returned from function f2_soft() must be of type @int, Square given
+Triggered E_WARNING: Value returned from function f2_soft() must be of type @int, Fractal given
+Triggered E_WARNING: Value returned from function f2_soft() must be of type @int, xhp_div given
+Triggered E_WARNING: Value returned from function f2_soft() must be of type @int, string given
+Triggered E_WARNING: Value returned from function f2_soft() must be of type @int, HH\vec given
+
+calling f3
+Caught exception: Value returned from function f3() must be of type string, null given
+Caught exception: Value returned from function f3() must be of type string, int given
+Caught exception: Value returned from function f3() must be of type string, bool given
+Caught exception: Value returned from function f3() must be of type string, float given
+Caught exception: Value returned from function f3() must be of type string, gd given
+Caught exception: Value returned from function f3() must be of type string, HH\vec given
+Caught exception: Value returned from function f3() must be of type string, Closure given
+Caught exception: Value returned from function f3() must be of type string, Figure given
+Caught exception: Value returned from function f3() must be of type string, Square given
+Caught exception: Value returned from function f3() must be of type string, Fractal given
+Caught exception: Value returned from function f3() must be of type string, xhp_div given
+Caught exception: Value returned from function f3() must be of type string, HH\vec given
+
+calling f3_soft
+Triggered E_WARNING: Value returned from function f3_soft() must be of type @string, null given
+Triggered E_WARNING: Value returned from function f3_soft() must be of type @string, int given
+Triggered E_WARNING: Value returned from function f3_soft() must be of type @string, bool given
+Triggered E_WARNING: Value returned from function f3_soft() must be of type @string, float given
+Triggered E_WARNING: Value returned from function f3_soft() must be of type @string, gd given
+Triggered E_WARNING: Value returned from function f3_soft() must be of type @string, HH\vec given
+Triggered E_WARNING: Value returned from function f3_soft() must be of type @string, Closure given
+Triggered E_WARNING: Value returned from function f3_soft() must be of type @string, Figure given
+Triggered E_WARNING: Value returned from function f3_soft() must be of type @string, Square given
+Triggered E_WARNING: Value returned from function f3_soft() must be of type @string, Fractal given
+Triggered E_WARNING: Value returned from function f3_soft() must be of type @string, xhp_div given
+Triggered E_WARNING: Value returned from function f3_soft() must be of type @string, HH\vec given
+
+calling f4
+Caught exception: Value returned from function f4() must be of type bool, null given
+Caught exception: Value returned from function f4() must be of type bool, int given
+Caught exception: Value returned from function f4() must be of type bool, string given
+Caught exception: Value returned from function f4() must be of type bool, float given
+Caught exception: Value returned from function f4() must be of type bool, gd given
+Caught exception: Value returned from function f4() must be of type bool, HH\vec given
+Caught exception: Value returned from function f4() must be of type bool, Closure given
+Caught exception: Value returned from function f4() must be of type bool, Figure given
+Caught exception: Value returned from function f4() must be of type bool, Square given
+Caught exception: Value returned from function f4() must be of type bool, Fractal given
+Caught exception: Value returned from function f4() must be of type bool, xhp_div given
+Caught exception: Value returned from function f4() must be of type bool, string given
+Caught exception: Value returned from function f4() must be of type bool, HH\vec given
+
+calling f4_soft
+Triggered E_WARNING: Value returned from function f4_soft() must be of type @bool, null given
+Triggered E_WARNING: Value returned from function f4_soft() must be of type @bool, int given
+Triggered E_WARNING: Value returned from function f4_soft() must be of type @bool, string given
+Triggered E_WARNING: Value returned from function f4_soft() must be of type @bool, float given
+Triggered E_WARNING: Value returned from function f4_soft() must be of type @bool, gd given
+Triggered E_WARNING: Value returned from function f4_soft() must be of type @bool, HH\vec given
+Triggered E_WARNING: Value returned from function f4_soft() must be of type @bool, Closure given
+Triggered E_WARNING: Value returned from function f4_soft() must be of type @bool, Figure given
+Triggered E_WARNING: Value returned from function f4_soft() must be of type @bool, Square given
+Triggered E_WARNING: Value returned from function f4_soft() must be of type @bool, Fractal given
+Triggered E_WARNING: Value returned from function f4_soft() must be of type @bool, xhp_div given
+Triggered E_WARNING: Value returned from function f4_soft() must be of type @bool, string given
+Triggered E_WARNING: Value returned from function f4_soft() must be of type @bool, HH\vec given
+
+calling f5
+Caught exception: Value returned from function f5() must be of type float, null given
+Caught exception: Value returned from function f5() must be of type float, int given
+Caught exception: Value returned from function f5() must be of type float, string given
+Caught exception: Value returned from function f5() must be of type float, bool given
+Caught exception: Value returned from function f5() must be of type float, gd given
+Caught exception: Value returned from function f5() must be of type float, HH\vec given
+Caught exception: Value returned from function f5() must be of type float, Closure given
+Caught exception: Value returned from function f5() must be of type float, Figure given
+Caught exception: Value returned from function f5() must be of type float, Square given
+Caught exception: Value returned from function f5() must be of type float, Fractal given
+Caught exception: Value returned from function f5() must be of type float, xhp_div given
+Caught exception: Value returned from function f5() must be of type float, string given
+Caught exception: Value returned from function f5() must be of type float, HH\vec given
+
+calling f5_soft
+Triggered E_WARNING: Value returned from function f5_soft() must be of type @float, null given
+Triggered E_WARNING: Value returned from function f5_soft() must be of type @float, int given
+Triggered E_WARNING: Value returned from function f5_soft() must be of type @float, string given
+Triggered E_WARNING: Value returned from function f5_soft() must be of type @float, bool given
+Triggered E_WARNING: Value returned from function f5_soft() must be of type @float, gd given
+Triggered E_WARNING: Value returned from function f5_soft() must be of type @float, HH\vec given
+Triggered E_WARNING: Value returned from function f5_soft() must be of type @float, Closure given
+Triggered E_WARNING: Value returned from function f5_soft() must be of type @float, Figure given
+Triggered E_WARNING: Value returned from function f5_soft() must be of type @float, Square given
+Triggered E_WARNING: Value returned from function f5_soft() must be of type @float, Fractal given
+Triggered E_WARNING: Value returned from function f5_soft() must be of type @float, xhp_div given
+Triggered E_WARNING: Value returned from function f5_soft() must be of type @float, string given
+Triggered E_WARNING: Value returned from function f5_soft() must be of type @float, HH\vec given
+
+calling f6
+Caught exception: Value returned from function f6() must be of type resource, null given
+Caught exception: Value returned from function f6() must be of type resource, int given
+Caught exception: Value returned from function f6() must be of type resource, string given
+Caught exception: Value returned from function f6() must be of type resource, bool given
+Caught exception: Value returned from function f6() must be of type resource, float given
+Caught exception: Value returned from function f6() must be of type resource, HH\vec given
+Caught exception: Value returned from function f6() must be of type resource, Closure given
+Caught exception: Value returned from function f6() must be of type resource, Figure given
+Caught exception: Value returned from function f6() must be of type resource, Square given
+Caught exception: Value returned from function f6() must be of type resource, Fractal given
+Caught exception: Value returned from function f6() must be of type resource, xhp_div given
+Caught exception: Value returned from function f6() must be of type resource, string given
+Caught exception: Value returned from function f6() must be of type resource, HH\vec given
+
+calling f6_soft
+Triggered E_WARNING: Value returned from function f6_soft() must be of type @resource, null given
+Triggered E_WARNING: Value returned from function f6_soft() must be of type @resource, int given
+Triggered E_WARNING: Value returned from function f6_soft() must be of type @resource, string given
+Triggered E_WARNING: Value returned from function f6_soft() must be of type @resource, bool given
+Triggered E_WARNING: Value returned from function f6_soft() must be of type @resource, float given
+Triggered E_WARNING: Value returned from function f6_soft() must be of type @resource, HH\vec given
+Triggered E_WARNING: Value returned from function f6_soft() must be of type @resource, Closure given
+Triggered E_WARNING: Value returned from function f6_soft() must be of type @resource, Figure given
+Triggered E_WARNING: Value returned from function f6_soft() must be of type @resource, Square given
+Triggered E_WARNING: Value returned from function f6_soft() must be of type @resource, Fractal given
+Triggered E_WARNING: Value returned from function f6_soft() must be of type @resource, xhp_div given
+Triggered E_WARNING: Value returned from function f6_soft() must be of type @resource, string given
+Triggered E_WARNING: Value returned from function f6_soft() must be of type @resource, HH\vec given
+
+calling f7
+Caught exception: Value returned from function f7() must be of type HH\varray, null given
+Caught exception: Value returned from function f7() must be of type HH\varray, int given
+Caught exception: Value returned from function f7() must be of type HH\varray, string given
+Caught exception: Value returned from function f7() must be of type HH\varray, bool given
+Caught exception: Value returned from function f7() must be of type HH\varray, float given
+Caught exception: Value returned from function f7() must be of type HH\varray, gd given
+Caught exception: Value returned from function f7() must be of type HH\varray, Closure given
+Caught exception: Value returned from function f7() must be of type HH\varray, Figure given
+Caught exception: Value returned from function f7() must be of type HH\varray, Square given
+Caught exception: Value returned from function f7() must be of type HH\varray, Fractal given
+Caught exception: Value returned from function f7() must be of type HH\varray, xhp_div given
+Caught exception: Value returned from function f7() must be of type HH\varray, string given
+
+calling f7_soft
+Triggered E_WARNING: Value returned from function f7_soft() must be of type @HH\varray, null given
+Triggered E_WARNING: Value returned from function f7_soft() must be of type @HH\varray, int given
+Triggered E_WARNING: Value returned from function f7_soft() must be of type @HH\varray, string given
+Triggered E_WARNING: Value returned from function f7_soft() must be of type @HH\varray, bool given
+Triggered E_WARNING: Value returned from function f7_soft() must be of type @HH\varray, float given
+Triggered E_WARNING: Value returned from function f7_soft() must be of type @HH\varray, gd given
+Triggered E_WARNING: Value returned from function f7_soft() must be of type @HH\varray, Closure given
+Triggered E_WARNING: Value returned from function f7_soft() must be of type @HH\varray, Figure given
+Triggered E_WARNING: Value returned from function f7_soft() must be of type @HH\varray, Square given
+Triggered E_WARNING: Value returned from function f7_soft() must be of type @HH\varray, Fractal given
+Triggered E_WARNING: Value returned from function f7_soft() must be of type @HH\varray, xhp_div given
+Triggered E_WARNING: Value returned from function f7_soft() must be of type @HH\varray, string given
+
+calling f8
+Caught exception: Value returned from function f8() must be of type callable, null given
+Caught exception: Value returned from function f8() must be of type callable, int given
+Caught exception: Value returned from function f8() must be of type callable, string given
+Caught exception: Value returned from function f8() must be of type callable, bool given
+Caught exception: Value returned from function f8() must be of type callable, float given
+Caught exception: Value returned from function f8() must be of type callable, gd given
+Caught exception: Value returned from function f8() must be of type callable, HH\vec given
+Caught exception: Value returned from function f8() must be of type callable, Figure given
+Caught exception: Value returned from function f8() must be of type callable, Square given
+Caught exception: Value returned from function f8() must be of type callable, Fractal given
+Caught exception: Value returned from function f8() must be of type callable, xhp_div given
+
+calling f8_soft
+Triggered E_WARNING: Value returned from function f8_soft() must be of type @callable, null given
+Triggered E_WARNING: Value returned from function f8_soft() must be of type @callable, int given
+Triggered E_WARNING: Value returned from function f8_soft() must be of type @callable, string given
+Triggered E_WARNING: Value returned from function f8_soft() must be of type @callable, bool given
+Triggered E_WARNING: Value returned from function f8_soft() must be of type @callable, float given
+Triggered E_WARNING: Value returned from function f8_soft() must be of type @callable, gd given
+Triggered E_WARNING: Value returned from function f8_soft() must be of type @callable, HH\vec given
+Triggered E_WARNING: Value returned from function f8_soft() must be of type @callable, Figure given
+Triggered E_WARNING: Value returned from function f8_soft() must be of type @callable, Square given
+Triggered E_WARNING: Value returned from function f8_soft() must be of type @callable, Fractal given
+Triggered E_WARNING: Value returned from function f8_soft() must be of type @callable, xhp_div given
+
+calling f9
+Caught exception: Value returned from function f9() must be of type Figure, null given
+Caught exception: Value returned from function f9() must be of type Figure, int given
+Caught exception: Value returned from function f9() must be of type Figure, string given
+Caught exception: Value returned from function f9() must be of type Figure, bool given
+Caught exception: Value returned from function f9() must be of type Figure, float given
+Caught exception: Value returned from function f9() must be of type Figure, gd given
+Caught exception: Value returned from function f9() must be of type Figure, HH\vec given
+Caught exception: Value returned from function f9() must be of type Figure, Closure given
+Caught exception: Value returned from function f9() must be of type Figure, xhp_div given
+Caught exception: Value returned from function f9() must be of type Figure, string given
+Caught exception: Value returned from function f9() must be of type Figure, HH\vec given
+
+calling f9_soft
+Triggered E_WARNING: Value returned from function f9_soft() must be of type @Figure, null given
+Triggered E_WARNING: Value returned from function f9_soft() must be of type @Figure, int given
+Triggered E_WARNING: Value returned from function f9_soft() must be of type @Figure, string given
+Triggered E_WARNING: Value returned from function f9_soft() must be of type @Figure, bool given
+Triggered E_WARNING: Value returned from function f9_soft() must be of type @Figure, float given
+Triggered E_WARNING: Value returned from function f9_soft() must be of type @Figure, gd given
+Triggered E_WARNING: Value returned from function f9_soft() must be of type @Figure, HH\vec given
+Triggered E_WARNING: Value returned from function f9_soft() must be of type @Figure, Closure given
+Triggered E_WARNING: Value returned from function f9_soft() must be of type @Figure, xhp_div given
+Triggered E_WARNING: Value returned from function f9_soft() must be of type @Figure, string given
+Triggered E_WARNING: Value returned from function f9_soft() must be of type @Figure, HH\vec given
+
+calling f10
+Caught exception: Value returned from function f10() must be of type Square, null given
+Caught exception: Value returned from function f10() must be of type Square, int given
+Caught exception: Value returned from function f10() must be of type Square, string given
+Caught exception: Value returned from function f10() must be of type Square, bool given
+Caught exception: Value returned from function f10() must be of type Square, float given
+Caught exception: Value returned from function f10() must be of type Square, gd given
+Caught exception: Value returned from function f10() must be of type Square, HH\vec given
+Caught exception: Value returned from function f10() must be of type Square, Closure given
+Caught exception: Value returned from function f10() must be of type Square, Figure given
+Caught exception: Value returned from function f10() must be of type Square, Fractal given
+Caught exception: Value returned from function f10() must be of type Square, xhp_div given
+Caught exception: Value returned from function f10() must be of type Square, string given
+Caught exception: Value returned from function f10() must be of type Square, HH\vec given
+
+calling f10_soft
+Triggered E_WARNING: Value returned from function f10_soft() must be of type @Square, null given
+Triggered E_WARNING: Value returned from function f10_soft() must be of type @Square, int given
+Triggered E_WARNING: Value returned from function f10_soft() must be of type @Square, string given
+Triggered E_WARNING: Value returned from function f10_soft() must be of type @Square, bool given
+Triggered E_WARNING: Value returned from function f10_soft() must be of type @Square, float given
+Triggered E_WARNING: Value returned from function f10_soft() must be of type @Square, gd given
+Triggered E_WARNING: Value returned from function f10_soft() must be of type @Square, HH\vec given
+Triggered E_WARNING: Value returned from function f10_soft() must be of type @Square, Closure given
+Triggered E_WARNING: Value returned from function f10_soft() must be of type @Square, Figure given
+Triggered E_WARNING: Value returned from function f10_soft() must be of type @Square, Fractal given
+Triggered E_WARNING: Value returned from function f10_soft() must be of type @Square, xhp_div given
+Triggered E_WARNING: Value returned from function f10_soft() must be of type @Square, string given
+Triggered E_WARNING: Value returned from function f10_soft() must be of type @Square, HH\vec given
+
+calling f11
+Caught exception: Value returned from function f11() must be of type xhp_div, null given
+Caught exception: Value returned from function f11() must be of type xhp_div, int given
+Caught exception: Value returned from function f11() must be of type xhp_div, string given
+Caught exception: Value returned from function f11() must be of type xhp_div, bool given
+Caught exception: Value returned from function f11() must be of type xhp_div, float given
+Caught exception: Value returned from function f11() must be of type xhp_div, gd given
+Caught exception: Value returned from function f11() must be of type xhp_div, HH\vec given
+Caught exception: Value returned from function f11() must be of type xhp_div, Closure given
+Caught exception: Value returned from function f11() must be of type xhp_div, Figure given
+Caught exception: Value returned from function f11() must be of type xhp_div, Square given
+Caught exception: Value returned from function f11() must be of type xhp_div, Fractal given
+Caught exception: Value returned from function f11() must be of type xhp_div, string given
+Caught exception: Value returned from function f11() must be of type xhp_div, HH\vec given
+
+calling f11_soft
+Triggered E_WARNING: Value returned from function f11_soft() must be of type @xhp_div, null given
+Triggered E_WARNING: Value returned from function f11_soft() must be of type @xhp_div, int given
+Triggered E_WARNING: Value returned from function f11_soft() must be of type @xhp_div, string given
+Triggered E_WARNING: Value returned from function f11_soft() must be of type @xhp_div, bool given
+Triggered E_WARNING: Value returned from function f11_soft() must be of type @xhp_div, float given
+Triggered E_WARNING: Value returned from function f11_soft() must be of type @xhp_div, gd given
+Triggered E_WARNING: Value returned from function f11_soft() must be of type @xhp_div, HH\vec given
+Triggered E_WARNING: Value returned from function f11_soft() must be of type @xhp_div, Closure given
+Triggered E_WARNING: Value returned from function f11_soft() must be of type @xhp_div, Figure given
+Triggered E_WARNING: Value returned from function f11_soft() must be of type @xhp_div, Square given
+Triggered E_WARNING: Value returned from function f11_soft() must be of type @xhp_div, Fractal given
+Triggered E_WARNING: Value returned from function f11_soft() must be of type @xhp_div, string given
+Triggered E_WARNING: Value returned from function f11_soft() must be of type @xhp_div, HH\vec given
+
+calling f12
+Caught exception: Value returned from function f12() must be of type Fractal, null given
+Caught exception: Value returned from function f12() must be of type Fractal, int given
+Caught exception: Value returned from function f12() must be of type Fractal, string given
+Caught exception: Value returned from function f12() must be of type Fractal, bool given
+Caught exception: Value returned from function f12() must be of type Fractal, float given
+Caught exception: Value returned from function f12() must be of type Fractal, gd given
+Caught exception: Value returned from function f12() must be of type Fractal, HH\vec given
+Caught exception: Value returned from function f12() must be of type Fractal, Closure given
+Caught exception: Value returned from function f12() must be of type Fractal, Figure given
+Caught exception: Value returned from function f12() must be of type Fractal, Square given
+Caught exception: Value returned from function f12() must be of type Fractal, xhp_div given
+Caught exception: Value returned from function f12() must be of type Fractal, string given
+Caught exception: Value returned from function f12() must be of type Fractal, HH\vec given
+
+calling f12_soft
+Triggered E_WARNING: Value returned from function f12_soft() must be of type @Fractal, null given
+Triggered E_WARNING: Value returned from function f12_soft() must be of type @Fractal, int given
+Triggered E_WARNING: Value returned from function f12_soft() must be of type @Fractal, string given
+Triggered E_WARNING: Value returned from function f12_soft() must be of type @Fractal, bool given
+Triggered E_WARNING: Value returned from function f12_soft() must be of type @Fractal, float given
+Triggered E_WARNING: Value returned from function f12_soft() must be of type @Fractal, gd given
+Triggered E_WARNING: Value returned from function f12_soft() must be of type @Fractal, HH\vec given
+Triggered E_WARNING: Value returned from function f12_soft() must be of type @Fractal, Closure given
+Triggered E_WARNING: Value returned from function f12_soft() must be of type @Fractal, Figure given
+Triggered E_WARNING: Value returned from function f12_soft() must be of type @Fractal, Square given
+Triggered E_WARNING: Value returned from function f12_soft() must be of type @Fractal, xhp_div given
+Triggered E_WARNING: Value returned from function f12_soft() must be of type @Fractal, string given
+Triggered E_WARNING: Value returned from function f12_soft() must be of type @Fractal, HH\vec given
+
+calling f13
+Caught exception: Value returned from function f13() must be of type Fractal, null given
+Caught exception: Value returned from function f13() must be of type Fractal, int given
+Caught exception: Value returned from function f13() must be of type Fractal, string given
+Caught exception: Value returned from function f13() must be of type Fractal, bool given
+Caught exception: Value returned from function f13() must be of type Fractal, float given
+Caught exception: Value returned from function f13() must be of type Fractal, gd given
+Caught exception: Value returned from function f13() must be of type Fractal, HH\vec given
+Caught exception: Value returned from function f13() must be of type Fractal, Closure given
+Caught exception: Value returned from function f13() must be of type Fractal, Figure given
+Caught exception: Value returned from function f13() must be of type Fractal, Square given
+Caught exception: Value returned from function f13() must be of type Fractal, xhp_div given
+Caught exception: Value returned from function f13() must be of type Fractal, string given
+Caught exception: Value returned from function f13() must be of type Fractal, HH\vec given
+
+calling f13_soft
+Triggered E_WARNING: Value returned from function f13_soft() must be of type @Fractal, null given
+Triggered E_WARNING: Value returned from function f13_soft() must be of type @Fractal, int given
+Triggered E_WARNING: Value returned from function f13_soft() must be of type @Fractal, string given
+Triggered E_WARNING: Value returned from function f13_soft() must be of type @Fractal, bool given
+Triggered E_WARNING: Value returned from function f13_soft() must be of type @Fractal, float given
+Triggered E_WARNING: Value returned from function f13_soft() must be of type @Fractal, gd given
+Triggered E_WARNING: Value returned from function f13_soft() must be of type @Fractal, HH\vec given
+Triggered E_WARNING: Value returned from function f13_soft() must be of type @Fractal, Closure given
+Triggered E_WARNING: Value returned from function f13_soft() must be of type @Fractal, Figure given
+Triggered E_WARNING: Value returned from function f13_soft() must be of type @Fractal, Square given
+Triggered E_WARNING: Value returned from function f13_soft() must be of type @Fractal, xhp_div given
+Triggered E_WARNING: Value returned from function f13_soft() must be of type @Fractal, string given
+Triggered E_WARNING: Value returned from function f13_soft() must be of type @Fractal, HH\vec given
+
+calling f14
+Caught exception: Value returned from function f14() must be of type my_t, null given
+Caught exception: Value returned from function f14() must be of type my_t, string given
+Caught exception: Value returned from function f14() must be of type my_t, bool given
+Caught exception: Value returned from function f14() must be of type my_t, float given
+Caught exception: Value returned from function f14() must be of type my_t, gd given
+Caught exception: Value returned from function f14() must be of type my_t, HH\vec given
+Caught exception: Value returned from function f14() must be of type my_t, Closure given
+Caught exception: Value returned from function f14() must be of type my_t, Figure given
+Caught exception: Value returned from function f14() must be of type my_t, Square given
+Caught exception: Value returned from function f14() must be of type my_t, Fractal given
+Caught exception: Value returned from function f14() must be of type my_t, xhp_div given
+Caught exception: Value returned from function f14() must be of type my_t, string given
+Caught exception: Value returned from function f14() must be of type my_t, HH\vec given
+
+calling f14_soft
+Triggered E_WARNING: Value returned from function f14_soft() must be of type @my_t, null given
+Triggered E_WARNING: Value returned from function f14_soft() must be of type @my_t, string given
+Triggered E_WARNING: Value returned from function f14_soft() must be of type @my_t, bool given
+Triggered E_WARNING: Value returned from function f14_soft() must be of type @my_t, float given
+Triggered E_WARNING: Value returned from function f14_soft() must be of type @my_t, gd given
+Triggered E_WARNING: Value returned from function f14_soft() must be of type @my_t, HH\vec given
+Triggered E_WARNING: Value returned from function f14_soft() must be of type @my_t, Closure given
+Triggered E_WARNING: Value returned from function f14_soft() must be of type @my_t, Figure given
+Triggered E_WARNING: Value returned from function f14_soft() must be of type @my_t, Square given
+Triggered E_WARNING: Value returned from function f14_soft() must be of type @my_t, Fractal given
+Triggered E_WARNING: Value returned from function f14_soft() must be of type @my_t, xhp_div given
+Triggered E_WARNING: Value returned from function f14_soft() must be of type @my_t, string given
+Triggered E_WARNING: Value returned from function f14_soft() must be of type @my_t, HH\vec given
+
+calling f15
+
+calling f15_soft
+
+calling f16
+
+calling f16_soft
+
+calling f17
+Caught exception: Value returned from function f17() must be of type ?int, string given
+Caught exception: Value returned from function f17() must be of type ?int, bool given
+Caught exception: Value returned from function f17() must be of type ?int, float given
+Caught exception: Value returned from function f17() must be of type ?int, gd given
+Caught exception: Value returned from function f17() must be of type ?int, HH\vec given
+Caught exception: Value returned from function f17() must be of type ?int, Closure given
+Caught exception: Value returned from function f17() must be of type ?int, Figure given
+Caught exception: Value returned from function f17() must be of type ?int, Square given
+Caught exception: Value returned from function f17() must be of type ?int, Fractal given
+Caught exception: Value returned from function f17() must be of type ?int, xhp_div given
+Caught exception: Value returned from function f17() must be of type ?int, string given
+Caught exception: Value returned from function f17() must be of type ?int, HH\vec given
+
+calling f17_soft
+Triggered E_WARNING: Value returned from function f17_soft() must be of type @?int, string given
+Triggered E_WARNING: Value returned from function f17_soft() must be of type @?int, bool given
+Triggered E_WARNING: Value returned from function f17_soft() must be of type @?int, float given
+Triggered E_WARNING: Value returned from function f17_soft() must be of type @?int, gd given
+Triggered E_WARNING: Value returned from function f17_soft() must be of type @?int, HH\vec given
+Triggered E_WARNING: Value returned from function f17_soft() must be of type @?int, Closure given
+Triggered E_WARNING: Value returned from function f17_soft() must be of type @?int, Figure given
+Triggered E_WARNING: Value returned from function f17_soft() must be of type @?int, Square given
+Triggered E_WARNING: Value returned from function f17_soft() must be of type @?int, Fractal given
+Triggered E_WARNING: Value returned from function f17_soft() must be of type @?int, xhp_div given
+Triggered E_WARNING: Value returned from function f17_soft() must be of type @?int, string given
+Triggered E_WARNING: Value returned from function f17_soft() must be of type @?int, HH\vec given
+
+calling f18
+Caught exception: Value returned from function f18() must be of type HH\varray, null given
+Caught exception: Value returned from function f18() must be of type HH\varray, int given
+Caught exception: Value returned from function f18() must be of type HH\varray, string given
+Caught exception: Value returned from function f18() must be of type HH\varray, bool given
+Caught exception: Value returned from function f18() must be of type HH\varray, float given
+Caught exception: Value returned from function f18() must be of type HH\varray, gd given
+Caught exception: Value returned from function f18() must be of type HH\varray, Closure given
+Caught exception: Value returned from function f18() must be of type HH\varray, Figure given
+Caught exception: Value returned from function f18() must be of type HH\varray, Square given
+Caught exception: Value returned from function f18() must be of type HH\varray, Fractal given
+Caught exception: Value returned from function f18() must be of type HH\varray, xhp_div given
+Caught exception: Value returned from function f18() must be of type HH\varray, string given
+
+calling f18_soft
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, null given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, int given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, string given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, bool given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, float given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, gd given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, Closure given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, Figure given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, Square given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, Fractal given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, xhp_div given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, string given
+
+calling f19
+
+calling f19_soft
+
+calling f20
+Caught exception: Value returned from function f20() must be of type callable, null given
+Caught exception: Value returned from function f20() must be of type callable, int given
+Caught exception: Value returned from function f20() must be of type callable, string given
+Caught exception: Value returned from function f20() must be of type callable, bool given
+Caught exception: Value returned from function f20() must be of type callable, float given
+Caught exception: Value returned from function f20() must be of type callable, gd given
+Caught exception: Value returned from function f20() must be of type callable, HH\vec given
+Caught exception: Value returned from function f20() must be of type callable, Figure given
+Caught exception: Value returned from function f20() must be of type callable, Square given
+Caught exception: Value returned from function f20() must be of type callable, Fractal given
+Caught exception: Value returned from function f20() must be of type callable, xhp_div given
+
+calling f20_soft
+Triggered E_WARNING: Value returned from function f20_soft() must be of type @callable, null given
+Triggered E_WARNING: Value returned from function f20_soft() must be of type @callable, int given
+Triggered E_WARNING: Value returned from function f20_soft() must be of type @callable, string given
+Triggered E_WARNING: Value returned from function f20_soft() must be of type @callable, bool given
+Triggered E_WARNING: Value returned from function f20_soft() must be of type @callable, float given
+Triggered E_WARNING: Value returned from function f20_soft() must be of type @callable, gd given
+Triggered E_WARNING: Value returned from function f20_soft() must be of type @callable, HH\vec given
+Triggered E_WARNING: Value returned from function f20_soft() must be of type @callable, Figure given
+Triggered E_WARNING: Value returned from function f20_soft() must be of type @callable, Square given
+Triggered E_WARNING: Value returned from function f20_soft() must be of type @callable, Fractal given
+Triggered E_WARNING: Value returned from function f20_soft() must be of type @callable, xhp_div given
+
+calling f21
+Caught exception: Value returned from function f21() must be of type noreturn, null given
+Caught exception: Value returned from function f21() must be of type noreturn, int given
+Caught exception: Value returned from function f21() must be of type noreturn, string given
+Caught exception: Value returned from function f21() must be of type noreturn, bool given
+Caught exception: Value returned from function f21() must be of type noreturn, float given
+Caught exception: Value returned from function f21() must be of type noreturn, gd given
+Caught exception: Value returned from function f21() must be of type noreturn, HH\vec given
+Caught exception: Value returned from function f21() must be of type noreturn, Closure given
+Caught exception: Value returned from function f21() must be of type noreturn, Figure given
+Caught exception: Value returned from function f21() must be of type noreturn, Square given
+Caught exception: Value returned from function f21() must be of type noreturn, Fractal given
+Caught exception: Value returned from function f21() must be of type noreturn, xhp_div given
+Caught exception: Value returned from function f21() must be of type noreturn, string given
+Caught exception: Value returned from function f21() must be of type noreturn, HH\vec given
+
+calling f21_soft
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, null given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, int given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, string given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, bool given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, float given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, gd given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, HH\vec given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, Closure given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, Figure given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, Square given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, Fractal given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, xhp_div given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, string given
+Triggered E_WARNING: Value returned from function f21_soft() must be of type @noreturn, HH\vec given
+
+calling f21
+
+calling f22
+Caught exception: Value returned from method B::f22() must be of type this, null given
+Caught exception: Value returned from method B::f22() must be of type this, int given
+Caught exception: Value returned from method B::f22() must be of type this, string given
+Caught exception: Value returned from method B::f22() must be of type this, bool given
+Caught exception: Value returned from method B::f22() must be of type this, float given
+Caught exception: Value returned from method B::f22() must be of type this, gd given
+Caught exception: Value returned from method B::f22() must be of type this, HH\vec given
+Caught exception: Value returned from method B::f22() must be of type this, Closure given
+Caught exception: Value returned from method B::f22() must be of type this, Figure given
+Caught exception: Value returned from method B::f22() must be of type this, Square given
+Caught exception: Value returned from method B::f22() must be of type this, Fractal given
+Caught exception: Value returned from method B::f22() must be of type this, xhp_div given
+Caught exception: Value returned from method B::f22() must be of type this, A given
+Caught exception: Value returned from method B::f22() must be of type this, B given
+
+calling f22_soft
+Triggered E_WARNING: Value returned from method B::f22_soft() must be of type @this, null given
+Triggered E_WARNING: Value returned from method B::f22_soft() must be of type @this, int given
+Triggered E_WARNING: Value returned from method B::f22_soft() must be of type @this, string given
+Triggered E_WARNING: Value returned from method B::f22_soft() must be of type @this, bool given
+Triggered E_WARNING: Value returned from method B::f22_soft() must be of type @this, float given
+Triggered E_WARNING: Value returned from method B::f22_soft() must be of type @this, gd given
+Triggered E_WARNING: Value returned from method B::f22_soft() must be of type @this, HH\vec given
+Triggered E_WARNING: Value returned from method B::f22_soft() must be of type @this, Closure given
+Triggered E_WARNING: Value returned from method B::f22_soft() must be of type @this, Figure given
+Triggered E_WARNING: Value returned from method B::f22_soft() must be of type @this, Square given
+Triggered E_WARNING: Value returned from method B::f22_soft() must be of type @this, Fractal given
+Triggered E_WARNING: Value returned from method B::f22_soft() must be of type @this, xhp_div given
+Triggered E_WARNING: Value returned from method B::f22_soft() must be of type @this, A given
+Triggered E_WARNING: Value returned from method B::f22_soft() must be of type @this, B given
+Done

@@ -2,7 +2,7 @@
 
 namespace Q {
 class R {
-  function R(inout $S) {} // not a constructor because of the namespace
+  function R(inout $S) :mixed{} // not a constructor because of the namespace
 }
 }
 
@@ -14,11 +14,11 @@ class Cls {
   const int inout = 12;
 
   function __construct()[] {}
-  function Cls(inout $foo) {} // not a constructor because of __construct
+  function Cls(inout $foo) :mixed{} // not a constructor because of __construct
 }
 
 class Herp {
-  function inout(inout $x) {}
+  function inout(inout $x) :mixed{}
 }
 
 class Derp {
@@ -26,7 +26,7 @@ class Derp {
 }
 
 trait T {
-  function T(inout $x) {}
+  function T(inout $x) :mixed{}
 }
 
 class C {
@@ -34,13 +34,13 @@ class C {
 }
 
 class PrivGGParent {
-  private function foo(inout $x) {}
-  private function bar() {}
+  private function foo(inout $x) :mixed{}
+  private function bar() :mixed{}
 }
 
 trait PrivTrait {
-  private function foo($x) {}
-  private function bar(inout $y) {}
+  private function foo($x) :mixed{}
+  private function bar(inout $y) :mixed{}
 }
 
 class PrivGParent extends PrivGGParent {
@@ -48,20 +48,20 @@ class PrivGParent extends PrivGGParent {
 }
 
 class PrivParent extends PrivGParent {
-  private function foo(inout $x) {}
-  private function bar($y) {}
+  private function foo(inout $x) :mixed{}
+  private function bar($y) :mixed{}
 }
 
 class PrivChild extends PrivParent {
-  private function foo() {}
-  private function bar(inout $y) {}
+  private function foo() :mixed{}
+  private function bar(inout $y) :mixed{}
 }
 
-function foo($x, $y, inout $z, $q) {}
-function bar(inout int $x) {}
-function f<T>(inout vec<T> $v, ...$_) {}
-function g($q, inout dict<string,vec<int>> $r, ...$_) {}
-function h(inout $a, inout $b, $t, inout bool $c, $a = 12) {}
+function foo($x, $y, inout $z, $q) :mixed{}
+function bar(inout int $x) :mixed{}
+function f<T>(inout vec<T> $v, ...$_) :mixed{}
+function g($q, inout dict<string,vec<int>> $r, ...$_) :mixed{}
+function h(inout $a, inout $b, $t, inout bool $c, $a = 12) :mixed{}
 
 function fptr<T as (function(inout int, inout bool, inout float): arraykey)>(
   inout $a,
@@ -69,7 +69,7 @@ function fptr<T as (function(inout int, inout bool, inout float): arraykey)>(
 ): (function(inout float, inout int, float): int) {
 }
 
-function main($a, $b, inout $c, $d, $e) {
+function main($a, $b, inout $c, $d, $e) :mixed{
   if ($c === 3) return;
 
   foo(1, 2, inout $a, 3);

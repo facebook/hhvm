@@ -1,0 +1,319 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+Generated Cpp2 <-> Python converters for Thrift types
+}}
+{{> common/auto_generated_cpp}}
+
+#include <folly/python/import.h>
+#include <thrift/lib/python/capi/iobuf.h>
+#include <thrift/lib/python/types.h>
+
+#include <{{program:include_prefix}}gen-python-capi/{{program:name}}/thrift_types_api.h>
+#include <{{program:include_prefix}}gen-python-capi/{{program:name}}/thrift_types_capi.h>
+
+{{#each program:capi_includes as |header_include|}}
+#include "{{header_include}}"
+{{/each}}
+
+namespace apache::thrift::python::capi {
+namespace {
+{{#program:generate_capi?}}
+bool ensure_module_imported() {
+  static ::folly::python::import_cache_nocapture import((
+      ::import_{{program:capi_module_prefix}}__thrift_types_capi));
+  return import();
+}
+{{#program:structured_definitions}}
+{{> common/tuple_position }}
+{{/program:structured_definitions}}
+{{/program:generate_capi?}}
+} // namespace
+
+{{#program:structured_definitions}}
+{{#struct:marshal_capi?}}
+ExtractorResult<{{struct:cpp_name}}>
+Extractor<{{> common/wrapped_struct }}>::operator()(PyObject* obj) {
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a {{struct:py_name}}");
+      }
+      return extractorError<{{struct:cpp_name}}>(
+          "Marshal error: {{struct:py_name}}");
+  }
+  {{#struct:fields?}}
+  {{! getThriftData increments tuple struct refcnt}}
+  StrongRef fbThriftData({{> common/get_thrift_data }}(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      {{struct:cpp_name}}, {{> common/namespace_tag}}>>{}(*fbThriftData);
+  {{/struct:fields?}}
+  {{^struct:fields?}}
+  return {{struct:cpp_name}}{};
+  {{/struct:fields?}}
+}
+{{/struct:marshal_capi?}}
+{{^struct:marshal_capi?}}
+ExtractorResult<{{struct:cpp_name}}>
+Extractor<{{> common/wrapped_struct }}>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<{{struct:cpp_name}}>(
+      "Module {{program:module_path}} import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__{{program:capi_module_prefix}}__{{struct:py_name}}(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<{{struct:cpp_name}}>(
+        "Thrift serialize error: {{struct:py_name}}");
+  }
+  {{#if (object.notnull? struct:cpp_adapter_name)}}
+  return detail::deserialize_iobuf_to_adapted<
+      {{struct:cpp_name}}, {{struct:cpp_adapter_name}}
+    >(std::move(val));
+  {{#else}}
+  return detail::deserialize_iobuf<{{struct:cpp_name}}>(std::move(val));
+  {{/if (object.notnull? struct:cpp_adapter_name)}}
+}
+{{/struct:marshal_capi?}}
+
+{{#struct:marshal_capi?}}
+ExtractorResult<{{struct:cpp_name}}>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    {{struct:cpp_name}}, {{> common/namespace_tag}}>>::operator()(PyObject* fbThriftData) {
+  {{struct:cpp_name}} cpp;
+{{#struct:fields?}}
+  std::optional<std::string_view> error;
+  {{^struct:union?}}
+  {{#each (array.enumerate struct:fields) as |field_index field|}}
+  Extractor<{{field.marshal_type}}>{}.extractInto(
+      cpp.{{field.cpp_name}}_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__{{struct:py_name}}__tuple_pos[{{field_index}}]),
+      error);
+  {{/each}}
+  {{/struct:union?}}
+  {{#struct:union?}}
+  auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
+  if (type_tag.hasError()) {
+    return folly::makeUnexpected(type_tag.error());
+  }
+  switch (*type_tag) {
+    case 0:
+      break; // union is unset
+  {{#struct:fields}}
+    case {{field:id}}:
+      Extractor<{{> common/union_marshal_type}}>{}.extractInto(
+          cpp.{{field:cpp_name}}_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+  {{/struct:fields}}
+    default:
+      break;
+  }
+  {{/struct:union?}}
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+{{/struct:fields?}}
+{{^struct:fields?}}
+  (void)fbThriftData;
+{{/struct:fields?}}
+  return cpp;
+}
+{{/struct:marshal_capi?}}
+
+{{^struct:marshal_capi?}}
+ExtractorResult<{{struct:cpp_name}}>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    {{struct:cpp_name}}, {{> common/namespace_tag }}>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<{{struct:cpp_name}}>(
+      "Module {{program:module_path}} import error");
+  }
+  auto obj = StrongRef(init__{{program:capi_module_prefix}}__{{struct:py_name}}(fbthrift_data));
+  if (!obj) {
+      return extractorError<{{struct:cpp_name}}>(
+          "Init from fbthrift error: {{struct:py_name}}");
+  }
+  return Extractor<{{> common/wrapped_struct }}>{}(*obj);
+}
+{{/struct:marshal_capi?}}
+
+int Extractor<{{> common/wrapped_struct }}>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module {{program:module_path}} import error");
+  }
+  int result =
+      can_extract__{{program:capi_module_prefix}}__{{struct:py_name}}(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: {{struct:py_name}}");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<{{> common/wrapped_struct }}>::operator()(
+    const {{struct:cpp_name}}& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  {{#struct:marshal_capi?}}
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        {{struct:cpp_name}}, {{> common/namespace_tag }}>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
+  return init__{{program:capi_module_prefix}}__{{struct:py_name}}(*fbthrift_data);
+  {{/struct:marshal_capi?}}
+  {{^struct:marshal_capi?}}
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+  {{#if (object.notnull? struct:cpp_adapter_name)}}
+    serialized = detail::serialize_adapted_to_iobuf<{{struct:cpp_adapter_name}}>(val);
+  {{#else}}
+    serialized = detail::serialize_to_iobuf(val);
+  {{/if (object.notnull? struct:cpp_adapter_name)}}
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__{{program:capi_module_prefix}}__{{struct:py_name}}(std::move(serialized));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+  {{/struct:marshal_capi?}}
+}
+
+{{#struct:marshal_capi?}}
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        {{struct:cpp_name}}, {{> common/namespace_tag }}>>::operator()(
+    [[maybe_unused]] const {{struct:cpp_name}}& val) {
+  {{^struct:union?}}
+  StrongRef fbthrift_data(createStructTuple({{struct:num_fields}}));
+  {{#each (array.enumerate struct:fields) as |field_index field|}}
+  StrongRef _fbthrift__{{field.name}}(
+    Constructor<{{field.marshal_type}}>{}
+    .constructFrom(val.{{field.cpp_name}}_ref()));
+  {{#field.optional?}}
+  if (_fbthrift__{{field.name}}.isNone()) {
+    Py_INCREF(Py_None);
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__{{struct:py_name}}__tuple_pos[{{field_index}}],
+      Py_None);
+  } else
+  {{/field.optional?}}
+  if (!_fbthrift__{{field.name}} ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__{{struct:py_name}}__tuple_pos[{{field_index}}],
+          *_fbthrift__{{field.name}}) == -1) {
+    {{! struct and previous fields auto-decref'd by StrongRef}}
+    return nullptr;
+  }
+  {{/each}}
+  return std::move(fbthrift_data).release();
+  {{/struct:union?}}
+  {{#struct:union?}}
+  int64_t type_key = static_cast<int64_t>(val.getType());
+  StrongRef py_val;
+  switch (type_key) {
+    case 0:
+      Py_INCREF(Py_None);
+      py_val = StrongRef(Py_None);
+      break;
+  {{#struct:fields}}
+    case {{field:id}}:
+      py_val = StrongRef(
+          Constructor<{{> common/union_marshal_type}}>{}
+          .constructFrom(val.{{field:cpp_name}}_ref()));
+      break;
+  {{/struct:fields}}
+    default:
+      break;
+  }
+  if (!py_val) {
+    return nullptr;
+  }
+  return unionTupleFromValue(type_key, *py_val);
+  {{/struct:union?}}
+}
+{{/struct:marshal_capi?}}
+
+{{^struct:marshal_capi?}}
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        {{struct:cpp_name}}, {{> common/namespace_tag }}>>::operator()(
+    const {{struct:cpp_name}}& val) {
+  auto obj = StrongRef(Constructor<{{> common/wrapped_struct }}>{}(val));
+  if (!obj) {
+    return nullptr;
+  }
+  return {{> common/get_thrift_data}}(*obj);
+}
+{{/struct:marshal_capi?}}
+
+{{/program:structured_definitions}}
+{{#program:enums}}
+ExtractorResult<{{program:cpp_namespace}}::{{enum:cpp_name}}>
+Extractor<{{> common/wrapped_enum }}>::operator()(PyObject* obj) {
+  {{! thrift-python enums have int parent class}}
+  long val = PyLong_AsLong(obj);
+  if (val == -1 && PyErr_Occurred()) {
+    return extractorError<{{program:cpp_namespace}}::{{enum:cpp_name}}>(
+        "Error getting python int value: {{enum:name}}");
+  }
+  return static_cast<{{program:cpp_namespace}}::{{enum:cpp_name}}>(val);
+}
+
+int Extractor<{{> common/wrapped_enum }}>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module {{program:module_path}} import error");
+  }
+  int result =
+      can_extract__{{program:capi_module_prefix}}__{{enum:name}}(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: {{enum:name}}");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<{{> common/wrapped_enum }}>::operator()(
+    {{program:cpp_namespace}}::{{enum:cpp_name}} val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  auto ptr = construct__{{program:capi_module_prefix}}__{{enum:name}}(
+      static_cast<int64_t>(val));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+{{/program:enums}}
+} // namespace apache::thrift::python::capi

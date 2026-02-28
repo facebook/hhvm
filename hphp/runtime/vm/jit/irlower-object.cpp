@@ -35,13 +35,13 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -52,7 +52,6 @@ void cgLdObjClass(IRLS& env, const IRInstruction* inst) {
 }
 
 IMPL_OPCODE_CALL(AllocObj)
-IMPL_OPCODE_CALL(AllocObjReified)
 
 namespace {
 
@@ -133,7 +132,7 @@ void cgConstructClosure(IRLS& env, const IRInstruction* inst) {
   // c_Closure is not allowed to use the fast path, as the constructor will
   // throw immediately.  No other closure's constructor is able to throw, so we
   // are able to make some optimizations that would be unsafe if unwinding.
-  if (!RuntimeOption::RepoAuthoritative || cls == c_Closure::classof()) {
+  if (!Cfg::Repo::Authoritative || cls == c_Closure::classof()) {
     auto const args = argGroup(env, inst).immPtr(cls);
     cgCallHelper(vmain(env), env, CallSpec::direct(createClosure),
                  callDest(dst), SyncOptions::None, args);
@@ -169,7 +168,7 @@ void cgConstructClosure(IRLS& env, const IRInstruction* inst) {
 
 IMPL_OPCODE_CALL(Clone)
 
-IMPL_OPCODE_CALL(FuncCred);
+IMPL_OPCODE_CALL(FuncCred)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -278,6 +277,35 @@ void cgLockObj(IRLS& env, const IRInstruction* inst) {
   auto const mask = ~static_cast<int8_t>(ObjectData::IsBeingConstructed);
   v << andbim{mask, obj[HeaderAuxOffset], v.makeReg()};
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgClassHasReifiedGenerics(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const cls = srcLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+
+  v << testbim{(int32_t)Class::reifiedGenericsMask(), cls[Class::allFlagsOff()], sf};
+  v << setcc{CC_NZ, sf, dst};
+}
+
+void cgHasReifiedParent(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const cls = srcLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+
+  v << testbim{(int32_t)Class::reifiedParentMask(), cls[Class::allFlagsOff()], sf};
+  v << setcc{CC_NZ, sf, dst};
+}
+
+
+IMPL_OPCODE_CALL(ReifiedInit)
+
+IMPL_OPCODE_CALL(GetClsRGProp)
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -1,0 +1,8 @@
+ERROR: File "collection_missing_argl1.php", line 3, characters 12-17:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "collections/Vector.hhi", line 48, characters 15-20:
+  Definition is here
+ERROR: File "collection_missing_argl1.php", line 4, characters 8-12:
+You cannot use this `Vector` (Typing[4008])
+  File "collection_missing_argl1.php", line 3, characters 12-17:
+  It is missing its type parameters

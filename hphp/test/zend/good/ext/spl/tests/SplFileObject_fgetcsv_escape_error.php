@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-chdir(__SystemLib\hphp_test_tmproot());
+chdir(sys_get_temp_dir());
 $fp = fopen('SplFileObject__fgetcsv8.csv', 'w+');
 fwrite($fp, '"aaa","b""bb","ccc"');
 fclose($fp);

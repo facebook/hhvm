@@ -1,0 +1,11 @@
+===== Tany =====
+$tany: 4
+$tany: string
+$t: 4 [reified]
+$t: string [reified]
+
+===== Typeconsts::Tany =====
+$t: 4 [reified]
+$t: string [typeconst] [reified]
+Type structure kind: 13
+Assigned type text: Tany

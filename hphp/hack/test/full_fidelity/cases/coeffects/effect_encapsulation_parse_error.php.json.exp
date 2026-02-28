@@ -401,38 +401,43 @@
           }
         },
         "alias_constraint":{
-          "kind":"type_constraint",
-          "constraint_keyword":{
-            "kind":"token",
-            "token":{
-              "kind":"as",
-              "text":"as",
-              "offset":103,
-              "leading_width":0,
-              "width":2,
-              "trailing_width":1,
-              "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":105,"width":1}],
-              "line_number":6
-            }
-          },
-          "constraint_type":{
-            "kind":"error",
-            "error_error":{
-              "kind":"token",
-              "token":{
-                "kind":"[",
-                "text":"[",
-                "offset":106,
-                "leading_width":0,
-                "width":1,
-                "trailing_width":0,
-                "leading":[],
-                "trailing":[],
-                "line_number":6
+          "kind":"list",
+          "elements":[
+            {
+              "kind":"type_constraint",
+              "constraint_keyword":{
+                "kind":"token",
+                "token":{
+                  "kind":"as",
+                  "text":"as",
+                  "offset":103,
+                  "leading_width":0,
+                  "width":2,
+                  "trailing_width":1,
+                  "leading":[],
+                  "trailing":[{"kind":"whitespace","text":" ","offset":105,"width":1}],
+                  "line_number":6
+                }
+              },
+              "constraint_type":{
+                "kind":"error",
+                "error_error":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"[",
+                    "text":"[",
+                    "offset":106,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":0,
+                    "leading":[],
+                    "trailing":[],
+                    "line_number":6
+                  }
+                }
               }
             }
-          }
+          ]
         },
         "alias_type":{
           "kind":"simple_type_specifier",

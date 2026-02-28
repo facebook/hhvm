@@ -1,10 +1,10 @@
-File "using_bad.php", line 16, characters 5-10:
+ERROR: File "using_bad.php", line 16, characters 5-10:
 Disposable objects must only be assigned in a `using` statement (Typing[4179])
-File "using_bad.php", line 20, characters 29-30:
+ERROR: File "using_bad.php", line 20, characters 29-30:
 Local variable already used in `using` statement (Typing[4178])
-File "using_bad.php", line 26, characters 9-10:
+ERROR: File "using_bad.php", line 26, characters 9-10:
 Local variable already used in `using` statement (Typing[4178])
-File "using_bad.php", line 29, characters 10-31:
+ERROR: File "using_bad.php", line 29, characters 10-31:
 This expression is used in a `using` clause so it must have type `\IDisposable` (Typing[4110])
   File "using_bad.php", line 29, characters 10-31:
   No instance method `__dispose` in `AsyncHandle`
@@ -14,7 +14,7 @@ This expression is used in a `using` clause so it must have type `\IDisposable` 
   This is why I think it is an object of type AsyncHandle
   File "using_bad.php", line 8, characters 7-17:
   Declaration of `AsyncHandle` is here
-File "using_bad.php", line 33, characters 15-31:
+ERROR: File "using_bad.php", line 33, characters 15-31:
 This expression is used in a `using` clause with await so it must have type `\IAsyncDisposable` (Typing[4110])
   File "using_bad.php", line 33, characters 15-31:
   No instance method `__disposeAsync` in `Handle`

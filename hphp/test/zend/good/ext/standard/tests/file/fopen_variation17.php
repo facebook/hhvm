@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 
-function runtest() {
+function runtest() :mixed{
 
 
     $extraDir = "extraDir17";
@@ -18,7 +18,7 @@ function runtest() {
     fwrite($h, (string)"This is the test file");
     fclose($h);
 
-    $h = @fopen(ZendGoodExtStandardTestsFileFopenIncludePathInc::dir1().'/'.$tmpfile, "r");
+    $h = fopen(ZendGoodExtStandardTestsFileFopenIncludePathInc::dir1().'/'.$tmpfile, "r");
     if ($h === false) {
        echo "Not created in dir1\n";
     }
@@ -42,7 +42,7 @@ function runtest() {
 }
 <<__EntryPoint>> function main(): void {
 require_once('fopen_include_path.inc');
-$thisTestDir = __SystemLib\hphp_test_tmppath('dir');
+$thisTestDir = sys_get_temp_dir().'/'.'dir';
 
 mkdir($thisTestDir);
 $oldDirPath = getcwd();

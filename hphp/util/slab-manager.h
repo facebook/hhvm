@@ -26,7 +26,7 @@
 
 namespace HPHP {
 
-constexpr unsigned kLgSlabSize = 21;
+constexpr unsigned kLgSlabSize = 20;
 constexpr size_t kSlabSize = 1ull << kLgSlabSize;
 constexpr size_t kSlabAlign = kSlabSize;
 
@@ -63,15 +63,15 @@ struct TaggedSlabPtr {
 using AtomicTaggedSlabPtr = std::atomic<TaggedSlabPtr>;
 
 /*
- * Instrusive singly linked list of slabs using TaggedSlabPtr at the beginning
+ * Intrusive singly linked list of slabs using TaggedSlabPtr at the beginning
  * of each slab.
  */
 struct TaggedSlabList {
   bool empty() const {
-    return !m_head.load(std::memory_order_relaxed);
+    return !m_head.load(std::memory_order_acquire);
   }
   TaggedSlabPtr head() {
-    return m_head.load(std::memory_order_relaxed);
+    return m_head.load(std::memory_order_acquire);
   }
   /*
    * Return the number of bytes held in the tagged slab list.
@@ -80,28 +80,28 @@ struct TaggedSlabList {
    * negative as the operations are executed with a relaxed ordering.
    */
   ssize_t bytes() const {
-    return m_bytes.load(std::memory_order_relaxed);
+    return m_bytes.load(std::memory_order_acquire);
   }
   /*
    * Add a slab to the list. If `local`, assume the list is only accessed in a
    * single thread.
    */
   template<bool local = false> void push_front(void* p, uint16_t tag) {
-    m_bytes.fetch_add(kSlabSize, std::memory_order_relaxed);
+    m_bytes.fetch_add(kSlabSize, std::memory_order_acq_rel);
     ++tag;
     TaggedSlabPtr tagged{p, tag};
     auto ptr = reinterpret_cast<AtomicTaggedSlabPtr*>(p);
     if (local) {
-      auto currHead = m_head.load(std::memory_order_relaxed);
-      ptr->store(currHead, std::memory_order_relaxed);
-      m_head.store(tagged, std::memory_order_relaxed);
+      auto currHead = m_head.load(std::memory_order_acquire);
+      ptr->store(currHead, std::memory_order_release);
+      m_head.store(tagged, std::memory_order_release);
       return;
     }
     auto currHead = m_head.load(std::memory_order_acquire);
     while (true) {
       ptr->store(currHead, std::memory_order_release);
       if (m_head.compare_exchange_weak(currHead, tagged,
-                                       std::memory_order_release)) {
+                                       std::memory_order_acq_rel)) {
         return;
       } // otherwise currHead is updated with latest value of m_head.
     }
@@ -112,8 +112,7 @@ struct TaggedSlabList {
    * unless access happens only in a single thread.
    */
   template<bool local = false> TaggedSlabPtr unsafe_peek() {
-    return m_head.load(local ? std::memory_order_relaxed
-                             : std::memory_order_acquire);
+    return m_head.load(std::memory_order_acquire);
   }
 
   /*
@@ -121,12 +120,12 @@ struct TaggedSlabList {
    * single thread. Return a nullptr when list is empty.
    */
   TaggedSlabPtr try_local_pop() {
-    if (auto const currHead = m_head.load(std::memory_order_relaxed)) {
+    if (auto const currHead = m_head.load(std::memory_order_acquire)) {
       auto const ptr = reinterpret_cast<AtomicTaggedSlabPtr*>(currHead.ptr());
-      auto next = ptr->load(std::memory_order_relaxed);
+      auto next = ptr->load(std::memory_order_acquire);
       assertx(m_head.load(std::memory_order_acquire) == currHead);
-      m_head.store(next, std::memory_order_relaxed);
-      m_bytes.fetch_sub(kSlabSize, std::memory_order_relaxed);
+      m_head.store(next, std::memory_order_release);
+      m_bytes.fetch_sub(kSlabSize, std::memory_order_acq_rel);
       return currHead;
     }
     return nullptr;
@@ -142,8 +141,8 @@ struct TaggedSlabList {
       auto const ptr = reinterpret_cast<AtomicTaggedSlabPtr*>(currHead.ptr());
       auto next = ptr->load(std::memory_order_acquire);
       if (m_head.compare_exchange_weak(currHead, next,
-                                       std::memory_order_release)) {
-        m_bytes.fetch_sub(kSlabSize, std::memory_order_relaxed);
+                                       std::memory_order_acq_rel)) {
+        m_bytes.fetch_sub(kSlabSize, std::memory_order_acq_rel);
         return currHead;
       } // otherwise currHead is updated with latest value of m_head.
     }
@@ -178,7 +177,7 @@ struct SlabManager : TaggedSlabList {
   void merge(TaggedSlabList&& other, void* otherTail) {
     auto const newHead = other.head();
     assertx(newHead);
-    m_bytes.fetch_add(other.bytes(), std::memory_order_relaxed);
+    m_bytes.fetch_add(other.bytes(), std::memory_order_acq_rel);
     // No need to bump the tag here, as it is already bumped when forming the
     // local list.
     auto last = reinterpret_cast<AtomicTaggedSlabPtr*>(otherTail);
@@ -186,7 +185,7 @@ struct SlabManager : TaggedSlabList {
     while (true) {
       last->store(currHead, std::memory_order_release);
       if (m_head.compare_exchange_weak(currHead, newHead,
-                                       std::memory_order_release)) {
+                                       std::memory_order_acq_rel)) {
         return;
       }
     } // otherwise currHead is updated with latest value of m_head.

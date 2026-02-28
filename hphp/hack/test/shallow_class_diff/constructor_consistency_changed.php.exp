@@ -1,4 +1,0 @@
-A: Unchanged
-B: (Minor_change
-      { mro_positions_changed = false;
-        member_diff = {constructor = Changed_inheritance } })

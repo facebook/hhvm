@@ -1,6 +1,6 @@
 <?hh
 
-function f(mixed $x) {
+function f(mixed $x) :mixed{
   try {
     $x as shape('h\'"i' => int, "w\'o\\w" => string);
     echo "\n";
@@ -11,7 +11,7 @@ function f(mixed $x) {
 
 
 <<__EntryPoint>>
-function main_shape_escaped_key_errors() {
+function main_shape_escaped_key_errors() :mixed{
 $arr = vec[
   shape('h\'"i' => 'wow', "w\'o\\w" => "hi"),
   shape('h\'"i' => 1, "w\'o\\w" => 2),

@@ -1,6 +1,0 @@
-File "enforceable_generic_collision.php", line 14, characters 5-6:
-Invalid argument (Typing[4110])
-File "enforceable_generic_collision.php", line 7, characters 12-17:
-Expected `int`
-File "enforceable_generic_collision.php", line 13, characters 3-9:
-But got `dynamic`

@@ -8,13 +8,13 @@
  *)
 
 (* If you make changes to the schema that cause it to serialize / deserialize
-differently, please update this version number *)
-let full_fidelity_schema_version_number = "2022-04-06-0002"
+   differently, please update this version number *)
+let full_fidelity_schema_version_number = "2025-08-11-0002"
 
 (* TODO: Consider basing the version number on an auto-generated
-hash of a file rather than relying on people remembering to update it. *)
+   hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
-and use that standard. *)
+   and use that standard. *)
 
 include Operator_schema_definition
 include Token_schema_definition
@@ -34,16 +34,15 @@ let schema_map =
        aggregates = [Expression; Name];
        fields = [];
      }
-     ::
-     {
-       kind_name = "error";
-       type_name = "error";
-       func_name = "error";
-       description = "error";
-       prefix = "error";
-       aggregates = [];
-       fields = [];
-     }
+     :: {
+          kind_name = "error";
+          type_name = "error";
+          func_name = "error";
+          description = "error";
+          prefix = "error";
+          aggregates = [];
+          fields = [];
+        }
      :: schema
 
 type trivia_node = {
@@ -161,6 +160,7 @@ let trivia_kinds =
       ["DelimitedComment"; "delimited_comment"];
       ["SingleLineComment"; "single_line_comment"];
       ["FixMe"; "fix_me"];
+      ["Ignore"; "ignore"];
       ["IgnoreError"; "ignore_error"];
       ["FallThrough"; "fall_through"];
       ["ExtraTokenError"; "extra_token_error"];
@@ -247,14 +247,13 @@ let format_ocaml src path : string =
   (* Write the string to a temporary file. *)
   let tmp_filename = Filename.temp_file "" (Filename.basename path) in
 
-  let open Core_kernel in
-  let file = Out_channel.create tmp_filename in
+  let file = Core.Out_channel.create tmp_filename in
   Printf.fprintf file "%s" src;
-  Out_channel.close file;
+  Core.Out_channel.close file;
 
   let ocamlformat_path =
     Option.value
-      (Sys.getenv_opt "OCAMLFORMAT_PATH")
+      (Stdlib.Sys.getenv_opt "OCAMLFORMAT_PATH")
       ~default:"../tools/third-party/ocamlformat/ocamlformat"
   in
 
@@ -266,14 +265,14 @@ let format_ocaml src path : string =
 
   (* Read the formatted file, then delete it. *)
   let res =
-    In_channel.with_file tmp_filename ~f:(fun channel ->
-        In_channel.input_all channel)
+    Core.In_channel.with_file tmp_filename ~f:(fun channel ->
+        Core.In_channel.input_all channel)
   in
   Sys.remove tmp_filename;
   res
 
 let generate_formatted_string (template : template_file) : string =
-  let open Core_kernel in
+  let open Core in
   let s = generate_string template in
   let has_suffix s = String.is_suffix template.filename ~suffix:s in
   if has_suffix ".ml" || has_suffix ".mli" then
@@ -282,7 +281,7 @@ let generate_formatted_string (template : template_file) : string =
     s
 
 let generate_file (template : template_file) : unit =
-  let open Core_kernel in
+  let open Core in
   let filename = template.filename in
   let file = Out_channel.create filename in
   let s = generate_formatted_string template in

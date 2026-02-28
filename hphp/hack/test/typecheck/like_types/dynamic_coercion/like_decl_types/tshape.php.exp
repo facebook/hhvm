@@ -1,6 +1,0 @@
-File "tshape.php", line 5, characters 10-11:
-Invalid return type (Typing[4110])
-File "tshape.php", line 4, characters 36-52:
-Expected `shape('a' => int)`
-File "tshape.php", line 4, characters 12-29:
-But got `dynamic`

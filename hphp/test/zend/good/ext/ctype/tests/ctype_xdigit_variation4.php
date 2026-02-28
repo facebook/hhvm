@@ -16,16 +16,16 @@ echo "*** Testing ctype_xdigit() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 // contain hexadecimal digits but do not correspond to 'correct' ints
-$octal_values1 = varray[012, 013, 014, 015];
+$octal_values1 = vec[012, 013, 014, 015];
 
 // correspond to 'correct' integers
-$octal_values2 = varray[061, 062, 063, 064];
+$octal_values2 = vec[061, 062, 063, 064];
 
 // contain hexadecimal digits but do not correspond to 'correct' ints
-$hex_values1 = varray[0x1A, 0x1B, 0x1C, 0x1D];
+$hex_values1 = vec[0x1A, 0x1B, 0x1C, 0x1D];
 
 //correspond to 'correct' integers
-$hex_values2 = varray[0x61, 0x62, 0x63, 0x64];
+$hex_values2 = vec[0x61, 0x62, 0x63, 0x64];
 
 echo "\n-- Octal values --\n";
 echo "'Incorrect' Integers: \n";

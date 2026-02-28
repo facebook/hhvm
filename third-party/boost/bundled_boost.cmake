@@ -1,19 +1,20 @@
-include(ExternalProject)                                                        
+include(ExternalProject)
 include(HPHPFunctions)
 # We usually use SHA512, but given the SHA256 is on the boost.org download
 # page, use that for transparency/ease of confirmation.
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   BOOST_DOWNLOAD_ARGS
   SOURCE_URL
-  "https://boostorg.jfrog.io/artifactory/main/release/1.73.0/source/boost_1_73_0.tar.bz2"
+  "https://archives.boost.io/release/1.83.0/source/boost_1_83_0.tar.gz"
   SOURCE_HASH
-  "SHA256=4eb3b8d442b426dc35346235c8733b5ae35ba431690e38c6a8263dce9fcbb402"
+  "SHA256=c0685b68dd44cc46574cce86c4e17c0f611b15e195be9848dfd0769a0a207628"
 )
 set(
   COMMON_ARGS
   --prefix=<INSTALL_DIR>
   --libdir=<INSTALL_DIR>/lib
 )
+
 set(
   B2_ARGS
   ${COMMON_ARGS}
@@ -22,8 +23,12 @@ set(
   variant=release
   threading=multi
   runtime-link=static
-  cxxflags=-std=gnu++14
+  cxxstd=${CMAKE_CXX_STANDARD}
 )
+
+if (CLANG_FORCE_LIBCPP)
+  list(APPEND B2_ARGS toolset=clang stdlib=libc++)
+endif()
 
 string(REPLACE ";" "," BOOST_COMPONENTS_CSV "${BOOST_COMPONENTS}")
 # We pass --with-libraires to bootstrap.sh, but that does not consistently
@@ -36,12 +41,11 @@ if (APPLE)
   set(BOOST_CXX_FLAGS "-isysroot${CMAKE_OSX_SYSROOT}")
 endif()
 
-ExternalProject_Add(                                                            
+ExternalProject_Add(
   bundled_boost
   ${BOOST_DOWNLOAD_ARGS}
-  PATCH_COMMAND
-    cd tools/build && patch -p1 < "${CMAKE_CURRENT_SOURCE_DIR}/b3a59d265929a213f02a451bb6-macos-coalesce-template.patch"
   CONFIGURE_COMMAND
+    ${CMAKE_COMMAND} -E env
     CXX=${CMAKE_CXX_COMPILER}
     CXXFLAGS=${BOOST_CXX_FLAGS}
     NO_CXX11_CHECK=true # we have c++17 (at least), and the check ignores CXXFLAGS, including `-isysroot` on macos

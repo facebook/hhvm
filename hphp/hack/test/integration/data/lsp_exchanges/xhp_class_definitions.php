@@ -1,4 +1,4 @@
-<?hh  //strict
+<?hh
 
 /** :ab:cd:text docblock */
 final class :ab:cd:text implements XHPChild {

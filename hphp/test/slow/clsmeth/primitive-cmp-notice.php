@@ -1,7 +1,7 @@
 <?hh
 
-class Info { static bool $SawError = false; }
-function handle_error($_errno, $msg, ...) {
+class Info { public static bool $SawError = false; }
+function handle_error($_errno, $msg, ...$_rest) :mixed{
   if (Info::$SawError) return false;
   if (
     !preg_match('/Implicit clsmeth to [^ ]+ conversion/', $msg) &&
@@ -15,36 +15,36 @@ function handle_error($_errno, $msg, ...) {
   return true;
 }
 
-class Foo { static function bar() {} static function baz() {} }
+class Foo { static function bar() :mixed{} static function baz() :mixed{} }
 class StrObj {
   public function __construct(private string $s)[] {}
   public function __toString(): string { return $this->s; }
 }
 class Wrapper { public function __construct(private mixed $w)[] {} }
 
-function bar() {}
+function bar() :mixed{}
 
-function LV($x)  { return __hhvm_intrinsics\launder_value($x); }
-function CLS($c) { return __hhvm_intrinsics\create_class_pointer($c); }
+function LV($x)  :mixed{ return __hhvm_intrinsics\launder_value($x); }
+function CLS($c) :mixed{ return HH\classname_to_class($c); }
 
-function WRAPA($x) { return LV(varray[$x]); }
-function WRAPO($x) { return LV(new Wrapper($x)); }
-function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
+function WRAPA($x) :mixed{ return LV(vec[$x]); }
+function WRAPO($x) :mixed{ return LV(new Wrapper($x)); }
+function WRAPD($x) :mixed{ $r = new stdClass; $r->x = $x; return LV($r); }
 
-<<__NEVER_INLINE>> function print_header($title) {
+<<__NEVER_INLINE>> function print_header($title) :mixed{
   echo "$title\n";
   echo "+------------+------+------+------+------+------+------+------+\n";
   echo "| VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |\n";
   echo "+============+======+======+======+======+======+======+======+";
 }
-<<__NEVER_INLINE>> function begin_row($var, $wrap = null) {
+<<__NEVER_INLINE>> function begin_row($var, $wrap = null) :mixed{
   printf("\n| %-10s |", $wrap !== null ? $wrap."(\$$var)" : "\$$var");
 }
-<<__NEVER_INLINE>> function C(bool $v) {
+<<__NEVER_INLINE>> function C(bool $v) :mixed{
   printf(" %-4s |", ($v ? 'T' : 'F').(Info::$SawError ? '*' : ''));
   Info::$SawError = false;
 }
-<<__NEVER_INLINE>> function Cx($f) {
+<<__NEVER_INLINE>> function Cx($f) :mixed{
   try {
     C($f());
   } catch (InvalidOperationException $e) {
@@ -52,11 +52,11 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
     Info::$SawError = false;
   }
 }
-<<__NEVER_INLINE>> function I(int $v) {
+<<__NEVER_INLINE>> function I(int $v) :mixed{
   printf(" %-2d%s  |", $v, Info::$SawError ? '*' : ' ');
   Info::$SawError = false;
 }
-<<__NEVER_INLINE>> function Ix($f) {
+<<__NEVER_INLINE>> function Ix($f) :mixed{
   try {
     I($f());
   } catch (InvalidOperationException $e) {
@@ -64,12 +64,12 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
     Info::$SawError = false;
   }
 }
-<<__NEVER_INLINE>> function print_footer() {
+<<__NEVER_INLINE>> function print_footer() :mixed{
   echo "\n+------------+------+------+------+------+------+------+------+\n\n";
 }
 
-<<__NEVER_INLINE>> function static_compare() {
-  $cm = class_meth(Foo::class, 'bar');
+<<__NEVER_INLINE>> function static_compare() :mixed{
+  $cm = Foo::bar<>;
   $nv = null;
   $tv = true;
   $bv = false;
@@ -78,17 +78,17 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
   $sv = 'Foo::bar';
   $rv = opendir(getcwd());
   $ov = new StrObj('Foo::bar');
-  $va = varray[Foo::class, 'bar'];
-  $da = darray[0 => Foo::class, 1 => 'bar'];
-  $cp = class_meth(Foo::class, 'bar');
+  $va = vec[Foo::class, 'bar'];
+  $da = dict[0 => Foo::class, 1 => 'bar'];
+  $cp = Foo::bar<>;
   $ep = bar<>;
-  $lp = class_meth(Foo::class, 'baz');
+  $lp = Foo::baz<>;
   $qp = CLS('Foo');
 
-  $xx = varray[$cm]; $nx = varray[$nv]; $tx = varray[$tv]; $bx = varray[$bv];
-  $ix = varray[$iv]; $fx = varray[$fv]; $sx = varray[$sv]; $rx = varray[$rv];
-  $ox = varray[$ov]; $vx = varray[$va]; $dx = varray[$da]; $cx = varray[$cp];
-  $ex = varray[$ep]; $lx = varray[$lp]; $qx = varray[$qp];
+  $xx = vec[$cm]; $nx = vec[$nv]; $tx = vec[$tv]; $bx = vec[$bv];
+  $ix = vec[$iv]; $fx = vec[$fv]; $sx = vec[$sv]; $rx = vec[$rv];
+  $ox = vec[$ov]; $vx = vec[$va]; $dx = vec[$da]; $cx = vec[$cp];
+  $ex = vec[$ep]; $lx = vec[$lp]; $qx = vec[$qp];
 
   $xy = new Wrapper($cm); $ny = new Wrapper($nv); $ty = new Wrapper($tv);
   $by = new Wrapper($bv); $iy = new Wrapper($iv); $fy = new Wrapper($fv);
@@ -436,8 +436,8 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
   print_footer();
 }
 
-<<__NEVER_INLINE>> function dynamic_compare() {
-  $cm = LV(class_meth(Foo::class, 'bar'));
+<<__NEVER_INLINE>> function dynamic_compare() :mixed{
+  $cm = LV(Foo::bar<>);
   $nv = LV(null);
   $tv = LV(true);
   $bv = LV(false);
@@ -446,11 +446,11 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
   $sv = LV('Foo::bar');
   $rv = LV(opendir(getcwd()));
   $ov = LV(new StrObj('Foo::bar'));
-  $va = LV(varray[Foo::class, 'bar']);
-  $da = LV(darray[0 => Foo::class, 1 => 'bar']);
-  $cp = LV(class_meth(Foo::class, 'bar'));
+  $va = LV(vec[Foo::class, 'bar']);
+  $da = LV(dict[0 => Foo::class, 1 => 'bar']);
+  $cp = LV(Foo::bar<>);
   $ep = LV(bar<>);
-  $lp = LV(class_meth(Foo::class, 'baz'));
+  $lp = LV(Foo::baz<>);
   $qp = LV(CLS('Foo'));
 
   $xx = WRAPA($cm); $nx = WRAPA($nv); $tx = WRAPA($tv); $bx = WRAPA($bv);
@@ -800,7 +800,7 @@ function WRAPD($x) { $r = new stdClass; $r->x = $x; return LV($r); }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(handle_error<>);
   static_compare();
   dynamic_compare();

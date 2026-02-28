@@ -178,7 +178,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, bool include,
     wsdl = soap_xmlParseFile(struri);
   }
   if (!wsdl) {
-    xmlErrorPtr xmlErrorPtr = xmlGetLastError();
+    auto xmlErrorPtr = xmlGetLastError();
     if (xmlErrorPtr) {
       throw SoapException("Parsing WSDL: Couldn't load from '%s' : %s",
                           struri, xmlErrorPtr->message);
@@ -916,34 +916,34 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
                 while (childTrav) {
                   if (node_is_equal_ex(
                           childTrav, "fault", wsdl_soap_namespace)) {
-                    auto binding = f->bindingAttributes =
+                    auto binding_2 = f->bindingAttributes =
                          std::make_shared<sdlSoapBindingFunctionFault>();
                     xmlAttrPtr tmp = get_attribute(childTrav->properties, "use");
                     if (tmp && !strncmp((char*)tmp->children->content,
                                         "encoded", sizeof("encoded"))) {
-                      binding->use = SOAP_ENCODED;
+                      binding_2->use = SOAP_ENCODED;
                     } else {
-                      binding->use = SOAP_LITERAL;
+                      binding_2->use = SOAP_LITERAL;
                     }
 
                     tmp = get_attribute(childTrav->properties, "namespace");
                     if (tmp) {
-                      binding->ns = (char*)tmp->children->content;
+                      binding_2->ns = (char*)tmp->children->content;
                     }
 
-                    if (binding->use == SOAP_ENCODED) {
+                    if (binding_2->use == SOAP_ENCODED) {
                       tmp = get_attribute(childTrav->properties,
                           "encodingStyle");
                       if (tmp) {
                         if (strncmp((char*)tmp->children->content,
                                     SOAP_1_1_ENC_NAMESPACE,
                                     sizeof(SOAP_1_1_ENC_NAMESPACE)) == 0) {
-                          binding->encodingStyle = SOAP_ENCODING_1_1;
+                          binding_2->encodingStyle = SOAP_ENCODING_1_1;
                         } else if (strncmp((char*)tmp->children->content,
                                            SOAP_1_2_ENC_NAMESPACE,
                                            sizeof(SOAP_1_2_ENC_NAMESPACE))
                                    == 0) {
-                          binding->encodingStyle = SOAP_ENCODING_1_2;
+                          binding_2->encodingStyle = SOAP_ENCODING_1_2;
                         } else {
                           throw SoapException("Parsing WSDL: Unknown "
                                               "encodingStyle '%s'",
@@ -963,8 +963,8 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
                 }
               }
             }
-            sdlFaultMap::iterator iter = function->faults.find(f->name);
-            if (iter != function->faults.end()) {
+            sdlFaultMap::iterator iter_2 = function->faults.find(f->name);
+            if (iter_2 != function->faults.end()) {
               throw SoapException("Parsing WSDL: <fault> with name '%s' "
                                   "already defined in '%s'", f->name.c_str(),
                                   op_name->children->content);
@@ -978,8 +978,8 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
 
         {
           std::string tmp = toLower(function->functionName);
-          sdlFunctionMap::iterator iter = ctx.sdl->functions.find(tmp);
-          if (iter != ctx.sdl->functions.end()) {
+          sdlFunctionMap::iterator iter_2 = ctx.sdl->functions.find(tmp);
+          if (iter_2 != ctx.sdl->functions.end()) {
             ctx.sdl->functions[folly::to<std::string>
                                (ctx.sdl->functions.size())] = function;
           } else {

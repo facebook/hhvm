@@ -1,9 +1,0 @@
-=== IFC analysis results for early_return.php
-File "early_return.php", line 24, characters 3-22:
-Data with policy `SECRET` appears in context `PUBLIC`. (Typing[4379])
-  File "early_return.php", line 15, characters 17-21:
-  This may be the data source with policy `SECRET`
-  File "early_return.php", line 7, characters 19-23:
-  This may be the data sink with policy `PUBLIC`
-  File "early_return.php", line 21, characters 7-14:
-  Another program point contributing to the illegal flow

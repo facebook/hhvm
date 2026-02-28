@@ -1,0 +1,35 @@
+Program %s/break2.php loaded. Type '[r]un' to go.
+break %s/break2.php:7
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+break foo2()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+break cls2::pubObj()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+break cls2::pubCls()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+break list
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+run
+break2.php loaded
+Program %s/break2.php exited normally.
+@ foo2('test_break6')
+test_break6_suffix
+break list
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+run
+break2.php loaded
+Program %s/break2.php exited normally.
+@ $break6=new cls2()
+@ $break6->pubObj('test_break6')
+pubObj2:test_break6
+run
+break2.php loaded
+Program %s/break2.php exited normally.
+@ cls2::pubCls('test_break6')
+pubCls2:test_break6
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+run
+break2.php loaded
+Program %s/break2.php exited normally.
+quit

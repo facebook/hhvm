@@ -28,6 +28,8 @@ struct CmdMacro : DebuggerCommand {
   void help(DebuggerClient&) override;
   void onClient(DebuggerClient&) override;
 
+  std::string name() const override { return "macro"; }
+
 private:
   void processList(DebuggerClient&);
 };

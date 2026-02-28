@@ -1,0 +1,83 @@
+C1: dict [
+  'kind' => 31,
+  'union_types' => 
+  vec [
+    dict [
+      'kind' => 1,
+    ],
+    dict [
+      'kind' => 14,
+      'fields' => 
+      dict [
+        'foo' => 
+        dict [
+          'kind' => 32,
+          'case_type' => 'C1',
+        ],
+      ],
+    ],
+  ],
+  'case_type' => 'C1',
+]
+-----
+C2: dict [
+  'kind' => 31,
+  'union_types' => 
+  vec [
+    dict [
+      'kind' => 4,
+    ],
+    dict [
+      'kind' => 14,
+      'fields' => 
+      dict [
+        'foo' => 
+        dict [
+          'kind' => 31,
+          'union_types' => 
+          vec [
+            dict [
+              'kind' => 1,
+            ],
+            dict [
+              'kind' => 14,
+              'fields' => 
+              dict [
+                'foo' => 
+                dict [
+                  'kind' => 32,
+                  'case_type' => 'C2',
+                ],
+              ],
+            ],
+          ],
+          'case_type' => 'C3',
+        ],
+      ],
+    ],
+  ],
+  'case_type' => 'C2',
+]
+-----
+C7: dict [
+  'kind' => 31,
+  'union_types' => 
+  vec [
+    dict [
+      'kind' => 4,
+    ],
+    dict [
+      'kind' => 14,
+      'fields' => 
+      dict [
+        'foo' => 
+        dict [
+          'kind' => 32,
+          'case_type' => 'C7',
+          'alias' => 'T3',
+        ],
+      ],
+    ],
+  ],
+  'case_type' => 'C7',
+]

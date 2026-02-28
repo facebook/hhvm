@@ -1,0 +1,32 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{> service_h/service_info_holder}}
+
+
+class {{interaction:name}}If : public apache::thrift::{{#if interaction:serial?}}SerialInteraction{{/if}}{{#if interaction:event_base?}}EventBase{{/if}}Tile, public apache::thrift::ServerInterface {
+ public:
+  std::string_view getGeneratedName() const override { return "{{service:name}}"; }
+
+  typedef {{service:parent_service_qualified_name}}AsyncProcessor ProcessorType;
+  std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
+    std::terminate();
+  }
+  CreateMethodMetadataResult createMethodMetadata() override {
+    std::terminate();
+  }
+{{> service_h/service_interface_functions}}
+};

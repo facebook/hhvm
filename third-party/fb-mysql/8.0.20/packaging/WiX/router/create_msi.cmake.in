@@ -1,0 +1,88 @@
+# Copyright (c) 2010, 2018, Oracle and/or its affiliates. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2.0,
+# as published by the Free Software Foundation.
+#
+# This program is also distributed with certain software (including
+# but not limited to OpenSSL) that is licensed under separate terms,
+# as designated in a particular file or component or in included license
+# documentation.  The authors of MySQL hereby grant you an additional
+# permission to link the program and your derivative works with the
+# separately licensed software that they have included with MySQL.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License, version 2.0, for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+
+SET(CMAKE_BINARY_DIR "@CMAKE_BINARY_DIR@")
+SET(CMAKE_CURRENT_SOURCE_DIR "@CMAKE_CURRENT_SOURCE_DIR@")
+SET(CANDLE_EXECUTABLE "@CANDLE_EXECUTABLE@")
+SET(LIGHT_EXECUTABLE "@LIGHT_EXECUTABLE@")
+SET(CMAKE_COMMAND "@CMAKE_COMMAND@")
+SET(CMAKE_CFG_INTDIR "@CMAKE_CFG_INTDIR@")
+SET(VERSION "@VERSION@")
+SET(MAJOR_VERSION "@MAJOR_VERSION@")
+SET(MINOR_VERSION "@MINOR_VERSION@")
+SET(PATCH_VERSION "@PATCH_VERSION@")
+SET(CMAKE_SIZEOF_VOID_P @CMAKE_SIZEOF_VOID_P@)
+SET(MANUFACTURER "@MANUFACTURER@")
+SET(LICENSE_RTF "@LICENSE_RTF@")
+SET(CPACK_WIX_CONFIG "@CPACK_WIX_CONFIG@")
+SET(CPACK_WIX_INCLUDE "@CPACK_WIX_INCLUDE@")
+SET(CPACK_MSI_SETUP "@CPACK_MSI_SETUP@")
+SET(PRODUCT_NAME "MySQL Router")
+SET(PRODUCT_DESCRIPTION "MySQL Router")
+SET(UPGRADE_ID "9FC37322-7617-4205-B7BD-F72C30EF101A")
+SET(UPGRADE_CODE "9FC37322-7617-4205-B7BD-F72C30EF101A")
+SET(MySQLRouter_BINARY_STAGE_DIR "@MySQLRouter_BINARY_STAGE_DIR@")
+SET(CPACK_ROUTER_RESOURCE_FILE_LICENSE "@CPACK_ROUTER_RESOURCE_FILE_LICENSE@")
+SET(CPACK_ROUTER_RESOURCE_FILE_README "@CPACK_ROUTER_RESOURCE_FILE_README@")
+set(CPACK_ROUTER_PACKAGE_FILE_NAME "@CPACK_ROUTER_PACKAGE_FILE_NAME@")
+
+SET(CPACK_WIX_UI "WixUI_Minimal_Custom")
+INCLUDE(${CPACK_MSI_SETUP})
+
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/mysql_router.wxs.in
+ ${CMAKE_CURRENT_BINARY_DIR}/mysql_router.wxs)
+
+SET(EXTRA_CANDLE_ARGS)
+IF("$ENV{EXTRA_CANDLE_ARGS}")
+  SET(EXTRA_CANDLE_ARGS "$ENV{EXTRA_CANDLE_ARGS}")
+ENDIF()
+
+SET(EXTRA_LIGHT_ARGS)
+IF("$ENV{EXTRA_LIGHT_ARGS}")
+  SET(EXTRA_LIGHT_ARGS "$ENV{EXTRA_LIGHT_ARGS}")
+ENDIF()
+
+FILE(REMOVE mysql_router.wixobj)
+EXECUTE_PROCESS(
+ COMMAND "${CANDLE_EXECUTABLE}" -nologo -v -ext WixUtilExtension  mysql_router.wxs ${EXTRA_CANDLE_ARGS}
+ RESULT_VARIABLE CANDLE_RESULT
+ OUTPUT_VARIABLE CANDLE_OUTPUT
+ ERROR_VARIABLE CANDLE_OUTPUT
+)
+
+IF(CANDLE_RESULT)
+  MESSAGE(FATAL_ERROR "ERROR: can't run ${CANDLE_EXECUTABLE}: ${CANDLE_RESULT} ${CANDLE_OUTPUT}")
+ENDIF()
+
+EXECUTE_PROCESS(
+ COMMAND "${LIGHT_EXECUTABLE}" -ext WixUIExtension -ext WixUtilExtension
+  -v -nologo
+  mysql_router.wixobj  -out  ${CMAKE_BINARY_DIR}/${CPACK_ROUTER_PACKAGE_FILE_NAME}.msi
+  ${EXTRA_LIGHT_ARGS}
+ RESULT_VARIABLE LIGHT_RESULT
+ OUTPUT_VARIABLE LIGHT_OUTPUT
+ ERROR_VARIABLE LIGHT_OUTPUT
+)
+
+IF(LIGHT_RESULT)
+  MESSAGE(FATAL_ERROR "ERROR: can't run ${LIGHT_EXECUTABLE}: ${LIGHT_RESULT} ${LIGHT_OUTPUT}")
+ENDIF()

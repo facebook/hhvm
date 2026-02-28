@@ -1,3 +1,0 @@
-<?hh
-
-function builtin_argument_types(Exception $e, keyset<string> $k): void {}

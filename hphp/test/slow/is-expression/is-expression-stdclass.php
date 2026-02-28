@@ -10,7 +10,7 @@ function g(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_stdClass() {
+function main_is_expression_stdClass() :mixed{
 f(1);
 f(new stdClass());
 f(null);

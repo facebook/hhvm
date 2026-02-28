@@ -1,9 +1,12 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $letexte="<br><br>";
-$ligne_horizontale = $puce = $debut_intertitre = $fin_intertitre = '';
+$fin_intertitre = '';
+$debut_intertitre = $fin_intertitre;
+$puce = $debut_intertitre;
+$ligne_horizontale = $puce;
 
-$cherche1 = varray[
+$cherche1 = vec[
     /* 0 */     "/\n(----+|____+)/S",
     /* 1 */     "/\n-- */S",
     /* 2 */     "/\n- */S",
@@ -20,7 +23,7 @@ $cherche1 = varray[
     /* 13 */    "/<quote>/S",
     /* 14 */    "/<\/quote>/S"
 ];
-$remplace1 = varray[
+$remplace1 = vec[
     /* 0 */     "\n\n$ligne_horizontale\n\n",
     /* 1 */     "\n<br />&mdash;&nbsp;",
     /* 2 */     "\n<br />$puce&nbsp;",

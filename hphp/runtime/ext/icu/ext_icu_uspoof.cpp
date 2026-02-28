@@ -70,7 +70,7 @@ static void HHVM_METHOD(SpoofChecker, setChecks, int64_t checks) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initUSpoof() {
+void IntlExtension::registerNativeUSpoof() {
   HHVM_RCC_INT(SpoofChecker, SINGLE_SCRIPT_CONFUSABLE,
                USPOOF_SINGLE_SCRIPT_CONFUSABLE);
   HHVM_RCC_INT(SpoofChecker, MIXED_SCRIPT_CONFUSABLE,
@@ -88,8 +88,6 @@ void IntlExtension::initUSpoof() {
   HHVM_ME(SpoofChecker, setChecks);
 
   Native::registerNativeDataInfo<SpoofChecker>(s_SpoofChecker.get());
-
-  loadSystemlib("icu_uspoof");
 }
 
 //////////////////////////////////////////////////////////////////////////////

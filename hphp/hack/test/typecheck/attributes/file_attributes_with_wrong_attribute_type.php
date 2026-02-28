@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 <<file: X(3)>>
 

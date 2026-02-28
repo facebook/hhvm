@@ -1,0 +1,282 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Generates a top-level file to be imported in the user's client code.
+
+The generated file is pretty big, but the bulk of the generation is done inside
+the clients/callback partial.
+
+}}
+{{#import "common/types" as types}}
+{{> common/auto_generated_py}}
+{{^program:auto_migrate?}}
+from libc.stdint cimport (
+    int8_t as cint8_t,
+    int16_t as cint16_t,
+    int32_t as cint32_t,
+    int64_t as cint64_t,
+)
+from libcpp.memory cimport shared_ptr, make_shared, unique_ptr
+from libcpp.string cimport string
+from libcpp cimport bool as cbool
+from cpython cimport bool as pbool
+from libcpp.vector cimport vector
+from libcpp.set cimport set as cset
+from libcpp.map cimport map as cmap
+from libcpp.utility cimport move as cmove
+from cython.operator cimport dereference as deref, typeid
+from cpython.ref cimport PyObject
+from thrift.py3.client cimport cRequestChannel_ptr, makeClientWrapper, cClientWrapper
+from thrift.py3.exceptions cimport {{!
+}}{{^program:inplace_migrate?}}{{!
+    }}try_make_shared_exception
+{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{!
+    }}unwrap_exception
+{{/program:inplace_migrate?}}
+from thrift.python.exceptions cimport create_py_exception
+from folly cimport cFollyTry, cFollyUnit, c_unit
+from folly.cast cimport down_cast_ptr
+from libcpp.typeinfo cimport type_info
+import thrift.py3.types
+cimport thrift.py3.types
+from thrift.py3.types cimport (
+    make_unique,
+    deref_const as __deref_const,
+)
+import thrift.py3.client
+cimport thrift.py3.client
+from thrift.python.common cimport (
+    RpcOptions as __RpcOptions,
+    cThriftServiceMetadataResponse as __fbthrift_cThriftServiceMetadataResponse,
+    ServiceMetadata,
+    MetadataBox as __MetadataBox,
+)
+
+from folly.futures cimport bridgeFutureWith
+from folly.executor cimport get_executor
+cimport folly.iobuf as _fbthrift_iobuf
+import folly.iobuf as _fbthrift_iobuf
+from folly.iobuf cimport move as move_iobuf
+cimport cython
+
+import sys
+import types as _py_types
+from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
+
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.cbindings as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_cbindings
+{{#program:inplace_migrate?}}
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
+{{/program:inplace_migrate?}}
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types
+{{#program:has_stream?}}
+from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
+{{/program:has_stream?}}
+{{#program:includeNamespaces}}
+{{#hasTypes?}}
+cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}cbindings as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}cbindings
+{{#program:inplace_migrate?}}
+cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}thrift_converter as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}thrift_converter
+{{/program:inplace_migrate?}}
+import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+{{/hasTypes?}}
+{{#hasServices?}}
+cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}clients as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}clients
+import {{#includeNamespace}}{{value}}.{{/includeNamespace}}clients as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}clients
+{{/hasServices?}}
+{{/program:includeNamespaces}}
+
+cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.services_interface as _fbthrift_services_interface
+
+{{#program:services}}
+from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.clients_wrapper cimport c{{service:name}}AsyncClient, c{{service:name}}ClientWrapper
+  {{#let parent_service_name=service:name}}
+{{#service:supportedInteractions}}
+from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.clients_wrapper cimport c{{parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper
+{{/service:supportedInteractions}}
+{{#service:extends}}
+{{#service:externalProgram?}}
+from {{#each service:program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{service:program.name}}.clients_wrapper cimport c{{service:name}}ClientWrapper
+{{/service:externalProgram?}}
+{{/service:extends}}
+{{/program:services}}
+
+{{> clients/callback}}
+
+{{#program:services}}
+cdef object _{{service:name}}_annotations = _py_types.MappingProxyType({
+{{#each service:unstructured_annotations as |annotation|}}
+    {{> common/annotation}}
+{{/each}}
+})
+
+
+@cython.auto_pickle(False)
+cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
+    }}_{{#each service:program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
+    }}{{service:program.name}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
+  }}{{/service:extends}}{{^service:extends?}}thrift.py3.client.Client{{/service:extends?}}):
+    annotations = _{{service:name}}_annotations
+
+    cdef const type_info* _typeid({{service:name}} self):
+        return &typeid(c{{service:name}}AsyncClient)
+
+    cdef bind_client({{service:name}} self, cRequestChannel_ptr&& channel):
+        self._client = makeClientWrapper[c{{service:name}}AsyncClient, c{{service:name}}ClientWrapper](
+            cmove(channel)
+        )
+
+{{#service:supportedFunctions}}
+    {{! horrific workaround to expose python annotations on thrift py3 service functions}}
+    _fbthrift_annotations_DO_NOT_USE_{{function:name}} = {
+        'return': '{{#function:return_type}}{{!
+        }}{{> types/pep484_type_period_separated}}{{/function:return_type}}',
+        {{#function:args}}'{{field:py_name}}': '{{#field:type}}{{> types/pep484_type_period_separated}}{{/field:type}}', {{/function:args}}
+    }
+
+    @cython.always_allow_keywords(True)
+    def {{function:name}}(
+            {{service:name}} self{{#function:args}},
+            {{#field:type}}{{!
+                }}{{#type:hasCythonType?}}{{^type:integer?}}{{#partial types.cython_python_type type=type:self}} {{/type:integer?}}{{/type:hasCythonType?}}{{!
+                }}{{field:py_name}}{{#type:integer?}} not None{{/type:integer?}}{{^type:number?}} not None{{/type:number?}}{{!
+            }}{{/field:type}}{{/function:args}},
+            *,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        {{#function:args}}
+        {{#field:type}}
+        {{#type:container?}}
+        if not isinstance({{field:py_name}}, {{#partial types.python_type type=field:self.type}}):
+            {{field:py_name}} = {{#partial types.python_type type=field:self.type}}({{field:py_name}})
+        {{/type:container?}}
+        {{#type:integer?}}
+        if not isinstance({{field:py_name}}, int):
+            raise TypeError(f'{{field:py_name}} is not a {int !r}.')
+        else:
+            {{! inject cython int Overflow checks }}
+            {{field:py_name}} = <{{#partial types.cython_python_type type=type:self}}> {{field:py_name}}
+        {{/type:integer?}}
+        {{/field:type}}
+        {{/function:args}}
+        self._check_connect_future()
+        __loop = self._loop
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}](
+            self._executor,
+            down_cast_ptr[c{{service:name}}ClientWrapper, cClientWrapper](self._client.get()).{{function:cpp_name}}(rpc_options._cpp_obj, {{#function:args}}
+                {{#field:type}}{{> clients/cython_python_to_cpp_arg}}{{/field:type}},{{/function:args}}
+            ),
+            {{service:name}}_{{function:name}}_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+{{/service:supportedFunctions}}
+
+  {{#let parent_service_name=service:name}}
+{{#service:supportedInteractions}}
+    def create{{service:name}}(
+            {{parent_service_name}} self
+    ):
+        interaction = {{parent_service_name}}_{{service:name}}()
+        bridgeFutureWith[unique_ptr[cClientWrapper]](
+            interaction._executor,
+            down_cast_ptr[c{{parent_service_name}}ClientWrapper, cClientWrapper](self._client.get()).create{{service:name}}(),
+            thrift.py3.client.interactions_callback,
+            <PyObject *> interaction
+        )
+        return interaction
+
+    async def async_create{{service:name}}(
+            {{parent_service_name}} self
+    ):
+        return self.create{{service:name}}()
+
+{{/service:supportedInteractions}}
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftServiceMetadataResponse response
+        ServiceMetadata[_fbthrift_services_interface.c{{service:cpp_name}}SvIf].gen(response)
+        return __MetadataBox.box(cmove(deref(response.metadata())))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "{{program:name}}.{{service:name}}"
+
+{{#service:supportedInteractions}}
+@cython.auto_pickle(False)
+cdef class {{parent_service_name}}_{{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
+    }}_{{#each service:program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
+    }}{{service:program.name}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
+  }}{{/service:extends}}{{^service:extends?}}thrift.py3.client.Client{{/service:extends?}}):
+
+{{#service:supportedFunctions}}
+    @cython.always_allow_keywords(True)
+    def {{function:name}}(
+            {{parent_service_name}}_{{service:name}} self{{#function:args}},
+            {{#field:type}}{{!
+                }}{{#type:hasCythonType?}}{{^type:integer?}}{{#partial types.cython_python_type type=type:self}} {{/type:integer?}}{{/type:hasCythonType?}}{{!
+                }}{{field:py_name}}{{#type:integer?}} not None{{/type:integer?}}{{^type:number?}} not None{{/type:number?}}{{!
+            }}{{/field:type}}{{/function:args}},
+            *,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        {{#function:args}}
+        {{#field:type}}
+        {{#type:container?}}
+        if not isinstance({{field:py_name}}, {{#partial types.python_type type=field:self.type}}):
+            {{field:py_name}} = {{#partial types.python_type type=field:self.type}}({{field:py_name}})
+        {{/type:container?}}
+        {{#type:integer?}}
+        if not isinstance({{field:py_name}}, int):
+            raise TypeError(f'{{field:py_name}} is not a {int !r}.')
+        else:
+            {{! inject cython int Overflow checks }}
+            {{field:py_name}} = <{{#partial types.cython_python_type type=type:self}}> {{field:py_name}}
+        {{/type:integer?}}
+        {{/field:type}}
+        {{/function:args}}
+        self._check_connect_future()
+        __loop = self._loop
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}](
+            self._executor,
+            down_cast_ptr[c{{parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper, {{!
+            }}cClientWrapper](self._client.get()).{{function:cpp_name}}(rpc_options._cpp_obj, {{#function:args}}
+                {{#field:type}}{{> clients/cython_python_to_cpp_arg}}{{/field:type}},{{/function:args}}
+            ),
+            {{parent_service_name}}_{{service:name}}_{{function:name}}_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+{{/service:supportedFunctions}}
+{{^service:supportedFunctions}}
+    pass
+{{/service:supportedFunctions}}
+{{/service:supportedInteractions}}
+{{/program:services}}
+{{/program:auto_migrate?}}

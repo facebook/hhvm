@@ -11,12 +11,12 @@
  *   mixed $m,
  *   inout mixed $mix,
  *   bool retOrig,
- *   <<__OutOnly("KindOfBoolean")>> inout mixed $out1,
- *   <<__OutOnly("KindOfArray")>> inout mixed $out2,
- *   <<__OutOnly("KindOfObject")>> inout mixed $out3,
+ *   <<__OutOnly("KindOfBoolean")>> inout bool $out1,
+ *   <<__OutOnly("KindOfVec")>> inout vec<mixed> $out2,
+ *   <<__OutOnly("KindOfObject")>> inout stdClass $out3,
  * ): array;
  */
-function go(bool $ret) {
+function go(bool $ret) :mixed{
   $ret__str = (string)($ret);
   echo "ret = $ret__str\n\n";
 
@@ -29,12 +29,12 @@ function go(bool $ret) {
   $m1 = "mixed";
   $m2 = 42;
   $out1 = new stdClass;
-  $out2 = varray[1, 2, new stdClass];
+  $out2 = vec[1, 2, new stdClass];
   $out3 = "beepboop";
   var_dump(
     "one",
     "two",
-    varray[1,2,3],
+    vec[1,2,3],
     $s1,
     $s2,
     $i1,
@@ -89,7 +89,7 @@ function go(bool $ret) {
  *   <<__OutOnly("KindOfObject")>> inout mixed $out3,
  * ): array;
  */
-function go2(bool $ret) {
+function go2(bool $ret) :mixed{
   $ret__str = (string)($ret);
   echo "ret = $ret__str\n\n";
 
@@ -102,12 +102,12 @@ function go2(bool $ret) {
   $m1 = "mixed";
   $m2 = 42;
   $out1 = new stdClass;
-  $out2 = varray[1, 2, new stdClass];
+  $out2 = vec[1, 2, new stdClass];
   $out3 = "beepboop";
   var_dump(
     "one",
     "two",
-    varray[1,2,3],
+    vec[1,2,3],
     $s1,
     $s2,
     $i1,
@@ -147,7 +147,7 @@ function go2(bool $ret) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   go(true);  go(false);  go(true);
   go2(true); go2(false); go2(true);
 }

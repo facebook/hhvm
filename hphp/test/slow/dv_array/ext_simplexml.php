@@ -8,7 +8,7 @@ function takes_and_dumps_darray(darray<arraykey, mixed> $d): void {
 }
 
 <<__EntryPoint>>
-function main_xpath_clone() {
+function main_xpath_clone() :mixed{
   $doc1 = new SimpleXMLElement('<test><a>content</a></test>');
   takes_and_dumps_varray($doc1->xpath("a"));
   takes_and_dumps_darray($doc1->getNamespaces());

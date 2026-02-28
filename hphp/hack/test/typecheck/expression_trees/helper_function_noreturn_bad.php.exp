@@ -1,20 +1,20 @@
-File "helper_function_noreturn_bad.php", line 20, characters 22-31:
+ERROR: File "helper_function_noreturn_bad.php", line 22, characters 22-31:
 Invalid argument (Typing[4110])
-  File "helper_function_noreturn_bad.php", line 19, characters 69-69:
+  File "helper_function_noreturn_bad.php", line 20, characters 47-47:
   Expected `T`
-  File "helper_function_noreturn_bad.php", line 7, characters 67-74:
+  File "helper_function_noreturn_bad.php", line 7, characters 62-69:
   But got `noreturn`
-File "helper_function_noreturn_bad.php", line 20, characters 22-31:
+ERROR: File "helper_function_noreturn_bad.php", line 22, characters 22-31:
 You are using the return value of a `noreturn` function (Typing[4133])
-  File "helper_function_noreturn_bad.php", line 7, characters 67-74:
+  File "helper_function_noreturn_bad.php", line 7, characters 62-69:
   A `noreturn` function always throws or exits.
-File "helper_function_noreturn_bad.php", line 21, characters 22-26:
+ERROR: File "helper_function_noreturn_bad.php", line 23, characters 22-26:
 Invalid argument (Typing[4110])
-  File "helper_function_noreturn_bad.php", line 19, characters 69-69:
+  File "helper_function_noreturn_bad.php", line 20, characters 47-47:
   Expected `T`
-  File "helper_function_noreturn_bad.php", line 14, characters 65-72:
+  File "helper_function_noreturn_bad.php", line 14, characters 60-67:
   But got `noreturn`
-File "helper_function_noreturn_bad.php", line 21, characters 22-26:
+ERROR: File "helper_function_noreturn_bad.php", line 23, characters 22-26:
 You are using the return value of a `noreturn` function (Typing[4133])
-  File "helper_function_noreturn_bad.php", line 14, characters 65-72:
+  File "helper_function_noreturn_bad.php", line 14, characters 60-67:
   A `noreturn` function always throws or exits.

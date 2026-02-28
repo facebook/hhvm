@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function add4(int $x1, int $x2, int $x3, int $x4): int {
   return $x1 + $x2 + $x3 + $x4;
@@ -27,6 +27,6 @@ function show(int $x): int {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   \HH\Asio\join(foo1());
 }

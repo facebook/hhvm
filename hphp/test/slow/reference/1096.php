@@ -1,17 +1,17 @@
 <?hh
 <<__EntryPoint>>
 function main(): void {
-  $a = darray[];
-  $a[0] = varray[$a];
+  $a = dict[];
+  $a[0] = vec[$a];
   var_dump($a);
   try {
-    $b = varray[varray[$b]];
+    $b = vec[vec[$b]];
     var_dump($b);
   } catch (UndefinedVariableException $e) {
     var_dump($e->getMessage());
   }
   try {
-    $c = varray[$c];
+    $c = vec[$c];
     var_dump($c);
   } catch (UndefinedVariableException $e) {
     var_dump($e->getMessage());

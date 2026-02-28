@@ -1,0 +1,51 @@
+[manifest]
+name = python
+
+[homebrew]
+python@3.10
+
+# sapling needs match statements with arrive in python 3.12 in centos 10
+[rpms.not(all(distro=centos_stream,distro_vers=9))]
+python3
+python3-devel
+
+# Centos Stream 9 default python is 3.9, sapling needs 3.10+
+[rpms.all(distro=centos_stream,distro_vers=9)]
+python3.12
+python3.12-devel
+
+# sapling needs match statements with arrive in python 3.10 in ubuntu 22.04
+[debs.not(all(distro=ubuntu,any(distro_vers="18.04",distro_vers="20.04")))]
+python3-all-dev
+
+[pps]
+python3
+
+[download]
+url = https://www.python.org/ftp/python/3.10.19/Python-3.10.19.tgz
+sha256 = a078fb2d7a216071ebbe2e34b5f5355dd6b6e9b0cd1bacc4a41c63990c5a0eec
+
+[build]
+builder = autoconf
+subdir = Python-3.10.19
+
+[autoconf.args]
+--enable-shared
+--with-ensurepip=install
+
+# python's pkg-config libffi detection is broken
+# See https://bugs.python.org/issue34823 for clearest description
+# and pending PR https://github.com/python/cpython/pull/20451
+# The documented workaround requires an environment variable derived from
+# pkg-config to be passed into its configure step
+[autoconf.envcmd.LDFLAGS]
+pkg-config
+--libs-only-L
+libffi
+
+[dependencies]
+libffi
+# eden tests expect the python bz2 support
+bz2
+# eden tests expect the python curses support
+ncurses

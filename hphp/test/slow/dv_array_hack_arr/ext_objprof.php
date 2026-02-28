@@ -11,20 +11,19 @@ class NodeClass {
   public LeafClass $child;
 }
 
-function dump($data) {
+function dump($data) :mixed{
   ksort(inout $data);
   var_dump($data);
 }
 
 
 <<__EntryPoint>>
-function main_ext_objprof() {
+function main_ext_objprof() :mixed{
 $node = new NodeClass();
 $node->child = new LeafClass();
 dump(objprof_get_data());
 dump(objprof_get_paths());
-dump(objprof_get_data(OBJPROF_FLAGS_DEFAULT, varray[LeafClass::class]));
-dump(objprof_get_paths(OBJPROF_FLAGS_DEFAULT, varray[LeafClass::class]));
-dump(objprof_get_strings(0));
+dump(objprof_get_data(OBJPROF_FLAGS_DEFAULT, vec[LeafClass::class]));
+dump(objprof_get_paths(OBJPROF_FLAGS_DEFAULT, vec[LeafClass::class]));
 __hhvm_intrinsics\launder_value($node);
 }

@@ -1,0 +1,6 @@
+File "enum_3.php--use.php", line 5, characters 10-17:
+Invalid return type (Typing[4110])
+  File "enum_3.php--use.php", line 4, characters 15-17:
+  Expected `int`
+  File "enum_3.php--def.php", line 11, characters 9-11:
+  But got `mixed`

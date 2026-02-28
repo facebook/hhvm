@@ -1,0 +1,9 @@
+<?hh
+
+module M1;
+
+class A {
+  protected internal static function foo(): string {
+    return "foo";
+  }
+}

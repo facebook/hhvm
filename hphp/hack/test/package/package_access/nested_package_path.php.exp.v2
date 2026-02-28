@@ -1,0 +1,32 @@
+error: Typing[4472] Cannot access function bar defined in package pkg6 which may not be available [1]
+-> bar is defined in nested_package_path.php--pkg6/bar.php [2]
+-> bar belongs to package pkg6 by this package definition [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+nested_package_path.php--foo.php:4:3
+     2 | 
+     3 | function foo(): void {
+[1]  4 |   bar(); // this should be an error as pkg1 does not include pkg6
+     5 | }
+
+nested_package_path.php--pkg6/bar.php:3:10
+     1 | <?hh
+     2 | 
+[2]  3 | function bar(): void {}
+     4 | 
+     5 | function zot(): void {
+
+PACKAGES.toml:25:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+       :
+    23 | include_paths=["//pkg5/"]
+    24 | 
+[3] 25 | [packages.pkg6]
+    26 | include_paths=["//pkg6/"]
+    27 | includes = ["pkg1"]
+
+1 error found

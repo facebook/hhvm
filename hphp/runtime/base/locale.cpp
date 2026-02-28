@@ -24,24 +24,6 @@
 
 namespace HPHP {
 
-#if defined(_MSC_VER)
-#define FILL_IN_CATEGORY_LOCALE_MAP() \
-      CATEGORY_LOCALE_MAP_ENTRY(LC_CTYPE), \
-      CATEGORY_LOCALE_MAP_ENTRY(LC_NUMERIC), \
-      CATEGORY_LOCALE_MAP_ENTRY(LC_TIME), \
-      CATEGORY_LOCALE_MAP_ENTRY(LC_COLLATE), \
-      CATEGORY_LOCALE_MAP_ENTRY(LC_MONETARY), \
-      CATEGORY_LOCALE_MAP_ENTRY(LC_ALL)
-#elif defined(__APPLE__)
-#define FILL_IN_CATEGORY_LOCALE_MAP() \
-      CATEGORY_LOCALE_MAP_ENTRY(LC_CTYPE), \
-      CATEGORY_LOCALE_MAP_ENTRY(LC_NUMERIC), \
-      CATEGORY_LOCALE_MAP_ENTRY(LC_TIME), \
-      CATEGORY_LOCALE_MAP_ENTRY(LC_COLLATE), \
-      CATEGORY_LOCALE_MAP_ENTRY(LC_MONETARY), \
-      CATEGORY_LOCALE_MAP_ENTRY(LC_MESSAGES), \
-      CATEGORY_LOCALE_MAP_ENTRY(LC_ALL)
-#elif defined(__GLIBC__)
 #define FILL_IN_CATEGORY_LOCALE_MAP()  \
       CATEGORY_LOCALE_MAP_ENTRY(LC_CTYPE), \
       CATEGORY_LOCALE_MAP_ENTRY(LC_NUMERIC), \
@@ -56,9 +38,6 @@ namespace HPHP {
       CATEGORY_LOCALE_MAP_ENTRY(LC_TELEPHONE), \
       CATEGORY_LOCALE_MAP_ENTRY(LC_MEASUREMENT), \
       CATEGORY_LOCALE_MAP_ENTRY(LC_IDENTIFICATION)
-#else
-#error "Unsupported platform"
-#endif
 
 std::shared_ptr<Locale> Locale::getCLocale() {
   static std::shared_ptr<Locale> ret;
@@ -133,22 +112,8 @@ Locale::CodesetKind infer_codeset_kind(locale_t loc) {
     }
     return Locale::CodesetKind::SINGLE_BYTE;
   }
-#if defined(__APPLE__)
-  // If you specify a locale without an encoding, the CODESET is always
-  // null/empty on MacOS. MacOS is UTF-8 first, but uses single-byte for 'C'.
-  //
-  // To distinguish between these, we look at the max number of bytes in a
-  // character
-  if (MB_CUR_MAX_L(loc) <= 1) {
-    return Locale::CodesetKind::SINGLE_BYTE;
-  }
-  return Locale::CodesetKind::UTF8;
-#elif defined(__GLIBC__)
   // UTF-8 is always explicit, so if we don't have one, it's single-byte.
   return Locale::CodesetKind::SINGLE_BYTE;
-#else
-#error Unsupported platform
-#endif
 }
 
 }// namespace

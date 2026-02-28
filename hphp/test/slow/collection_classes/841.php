@@ -1,6 +1,6 @@
 <?hh
 
-function f() {
+function f() :mixed{
   $m = Map {
 1 => 'a', '2' => 'b'}
 ;
@@ -13,15 +13,15 @@ function f() {
   echo "========\n";
   $x = 'array_key_exists';
   $x[0] = 'a';
-  var_dump($x(1, $m));
-  var_dump($x('1', $m));
-  var_dump($x(2, $m));
-  var_dump($x('2', $m));
-  var_dump($x(3, $m));
-  var_dump($x('3', $m));
+  var_dump(HH\dynamic_fun($x)(1, $m));
+  var_dump(HH\dynamic_fun($x)('1', $m));
+  var_dump(HH\dynamic_fun($x)(2, $m));
+  var_dump(HH\dynamic_fun($x)('2', $m));
+  var_dump(HH\dynamic_fun($x)(3, $m));
+  var_dump(HH\dynamic_fun($x)('3', $m));
 }
 
 <<__EntryPoint>>
-function main_841() {
+function main_841() :mixed{
 f();
 }

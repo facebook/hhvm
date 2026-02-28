@@ -1,8 +1,0 @@
-File "unrelated_implements.php", line 16, characters 7-7:
-A `where` type constraint is violated here (Typing[4323])
-  File "unrelated_implements.php", line 16, characters 20-20:
-  This is the class with `where` type constraints
-  File "unrelated_implements.php", line 14, characters 19-22:
-  Expected `this`
-  File "unrelated_implements.php", line 14, characters 30-38:
-  But got `MustFinal`

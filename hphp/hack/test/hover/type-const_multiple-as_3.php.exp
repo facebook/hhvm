@@ -1,0 +1,1 @@
+I::TBoth as (IBase1 & IBase2) (dynamic when called dynamically)

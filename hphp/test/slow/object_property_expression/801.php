@@ -1,10 +1,10 @@
 <?hh
 
 class X {
-  function notref($_) {
+  function notref($_) :mixed{
 
   }
-  function bar() {
+  function bar() :mixed{
     try {
       $this->notref($this->priv);
     } catch (UndefinedPropertyException $e) {
@@ -19,7 +19,7 @@ class Z extends Y {
 }
 
 <<__EntryPoint>>
-function main_801() {
+function main_801() :mixed{
   ;
   $z = new Z;
   $z->bar();

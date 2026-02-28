@@ -15,14 +15,15 @@ let entry =
 let catch_and_classify_exceptions : 'x 'b. ('x -> 'b) -> 'x -> 'b =
  fun f x ->
   try f x with
-  | Decl_class.Decl_heap_elems_bug -> Exit.exit Exit_status.Decl_heap_elems_bug
+  | Decl_class.Decl_heap_elems_bug _ ->
+    Exit.exit Exit_status.Decl_heap_elems_bug
   | File_provider.File_provider_stale ->
     Exit.exit Exit_status.File_provider_stale
   | Decl_defs.Decl_not_found x ->
     Hh_logger.log "Decl_not_found %s" x;
     Exit.exit Exit_status.Decl_not_found
   | Not_found_s _
-  | Caml.Not_found ->
+  | Stdlib.Not_found ->
     Exit.exit Exit_status.Worker_not_found_exception
 
 let make_tmp_dir () =
@@ -42,7 +43,6 @@ let init_state
   Relative_path.(set_path_prefix Root root);
   make_tmp_dir ();
   make_hhi_dir ();
-  Typing_global_inference.set_path ();
   let ctx =
     Provider_context.empty_for_tool
       ~popt
@@ -59,10 +59,15 @@ let init
     ~(popt : ParserOptions.t)
     ~(tcopt : TypecheckerOptions.t)
     ~(deps_mode : Typing_deps_mode.t)
+    ?(gc_control : Gc.control option)
     (t : float) : Provider_context.t * MultiWorker.worker list * float =
   let nbr_procs = Sys_utils.nbr_procs in
   let heap_handle = SharedMem.init ~num_workers:nbr_procs shmem_config in
-  let gc_control = Core_kernel.Gc.get () in
+  let gc_control =
+    match gc_control with
+    | Some c -> c
+    | None -> Core.Gc.get ()
+  in
   let (ctx, state) = init_state ~root ~popt ~tcopt ~deps_mode in
   let workers =
     MultiWorker.make
@@ -85,3 +90,4 @@ let init_with_defaults =
     ~popt:ParserOptions.default
     ~tcopt:TypecheckerOptions.default
     ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+    ?gc_control:None

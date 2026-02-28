@@ -41,8 +41,9 @@ Type bitwise_impl(Type t1, Type t2, Fun op) {
       !(t1.couldBe(BStr) && t2.couldBe(BStr))) {
     return TBottom;
   }
-  if (auto t = eval_const(t1, t2, op))          return *t;
+  // If operands are strings we raise a warning or error if Eval.WarnOnBitwiseOpInvalidType is set
   if (t1.subtypeOf(BStr) && t2.subtypeOf(BStr)) return TStr;
+  if (auto t = eval_const(t1, t2, op))          return *t;
   if (!t1.couldBe(BStr) || !t2.couldBe(BStr))   return TInt;
   return TInitCell;
 }
@@ -67,9 +68,7 @@ Type typeToInt(Type ty) {
 
 template <class CellOp>
 Type typeArithImpl(Type t1, Type t2, CellOp op) {
-  // TODO: this should be TBottom, but HHBBC straight up chokes on stuff like
-  // vec[null + 58] in Type::checkInvariants
-  if (!t1.couldBe(BNum) || !t2.couldBe(BNum)) return TNum;
+  if (!t1.couldBe(BNum) || !t2.couldBe(BNum)) return TBottom;
   if (auto t = eval_const(t1, t2, op)) return *t;
   if (op == tvMod) return TInt;
 
@@ -82,7 +81,7 @@ Type typeArithImpl(Type t1, Type t2, CellOp op) {
   if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt)) {
     // can't switch on pointers, so use template magic
     auto is_any = [](auto first, auto ...t) { return ((first == t) || ...); };
-    return is_any(op, tvSubO, tvMulO, tvAddO, tvDiv, tvPow) ? TNum : TInt;
+    return is_any(op, tvDiv, tvPow) ? TNum : TInt;
   }
   if (t1.subtypeOf(BNum) && t2.subtypeOf(BNum) &&
      (t1.subtypeOf(BDbl) || t2.subtypeOf(BDbl))) return TDbl;
@@ -95,10 +94,6 @@ Type typeMul(Type t1, Type t2) { return typeArithImpl(t1, t2, tvMul); }
 Type typeDiv(Type t1, Type t2) { return typeArithImpl(t1, t2, tvDiv); }
 Type typePow(Type t1, Type t2) { return typeArithImpl(t1, t2, tvPow); }
 Type typeMod(Type t1, Type t2) { return typeArithImpl(t1, t2, tvMod); }
-
-Type typeSubO(Type t1, Type t2) { return typeArithImpl(t1, t2, tvSubO); }
-Type typeMulO(Type t1, Type t2) { return typeArithImpl(t1, t2, tvMulO); }
-Type typeAddO(Type t1, Type t2) { return typeArithImpl(t1, t2, tvAddO); }
 
 Type typeConcat(Type t1, Type t2) {
   auto const tv = eval_const(t1, t2, [&] (auto v1, auto v2) {
@@ -121,48 +116,32 @@ Type typeShr(Type t1, Type t2) { return shift_impl(t1, t2, tvShr); }
 //////////////////////////////////////////////////////////////////////
 
 Type typeIncDec(IncDecOp op, Type t) {
-  auto const overflowToDbl = isIncDecO(op);
-  auto const val = tv(t);
-
-  if (!val) {
-    // Doubles always stay doubles
-    if (t.subtypeOf(BDbl)) return TDbl;
-
-    if (t.subtypeOf(BOptInt)) {
-      // Ints stay ints unless they can overflow to doubles
-      if (t.subtypeOf(BInt)) {
-        return overflowToDbl ? TNum : TInt;
-      }
-      // ++ on null throws, stays null on --. Uninit is folded to init.
-      if (t.subtypeOf(BNull)) return isInc(op) ? TBottom : TInitNull;
-      // Optional integer case. The union of the above two cases.
-      if (isInc(op)) return overflowToDbl ? TNum : TInt;
-      return overflowToDbl ? TOptNum : TOptInt;
-    }
-
-    // No-op on bool, array, resource, object.
-    if (t.subtypeOf(BBool | BArrLike | BRes | BObj)) return t;
-
-    return TInitCell;
+  auto const inc = isInc(op);
+  if (auto const val = tv(t)) {
+    auto resultTy = eval_cell([inc,val] {
+      auto c = *val;
+      inc ? tvInc(&c) : tvDec(&c);
+      return c;
+    });
+    // We may have inferred a TSStr or TSArr with a value here, but at
+    // runtime it will not be static.
+    if (resultTy) return loosen_staticness(*resultTy);
   }
 
-  auto const inc = isInc(op);
+  // Doubles always stay doubles
+  if (t.subtypeOf(BDbl)) return TDbl;
+  if (t.subtypeOf(BOptInt)) {
+    if (t.subtypeOf(BInt)) return TInt;
+    // ++ on null throws, stays null on --. Uninit is folded to init.
+    if (t.subtypeOf(BNull)) return isInc(op) ? TBottom : TInitNull;
+    // Optional integer case. The union of the above two cases.
+    if (isInc(op)) return TInt;
+    return TOptInt;
+  }
 
-  // We can't constprop with this eval_cell, because of the effects
-  // on locals.
-  auto resultTy = eval_cell([inc,overflowToDbl,val] {
-    auto c = *val;
-    if (inc) {
-      (overflowToDbl ? tvIncO : tvInc)(&c);
-    } else {
-      (overflowToDbl ? tvDecO : tvDec)(&c);
-    }
-    return c;
-  });
-
-  // We may have inferred a TSStr or TSArr with a value here, but at
-  // runtime it will not be static.
-  return resultTy ? loosen_staticness(*resultTy) : TInitCell;
+  // No-op on bool, array, resource, object.
+  if (t.subtypeOf(BBool | BArrLike | BRes | BObj)) return t;
+  return TInitCell;
 }
 
 Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {
@@ -203,10 +182,6 @@ Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {
   case SetOpOp::AndEqual:    return typeBitAnd(lhs, rhs);
   case SetOpOp::OrEqual:     return typeBitOr(lhs, rhs);
   case SetOpOp::XorEqual:    return typeBitXor(lhs, rhs);
-
-  case SetOpOp::PlusEqualO:  return typeAddO(lhs, rhs);
-  case SetOpOp::MinusEqualO: return typeSubO(lhs, rhs);
-  case SetOpOp::MulEqualO:   return typeMulO(lhs, rhs);
 
   case SetOpOp::ConcatEqual: return typeConcat(lhs, rhs);
   case SetOpOp::SlEqual:     return typeShl(lhs, rhs);

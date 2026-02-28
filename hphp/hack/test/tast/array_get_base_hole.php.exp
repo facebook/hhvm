@@ -1,0 +1,46 @@
+Errors:
+  [4:3-8] You are trying to access an element of this container but the container could be `null`. 
+  [3:15-20] This is what makes me believe it can be `null`
+  [5:3-8] Typing error
+  [5:3-8] Expected an array that can be indexed
+  [3:25-32] But got `nonnull`
+  [6:3-8] You are trying to access an element of this container but the container could be `null`. 
+  [3:12-13] This is what makes me believe it can be `null`
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-11], "\\f");
+      fd_fun =
+      { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([3:44-48], (Hprim Tvoid))));
+        f_params =
+        [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:15-20], (Happly (([3:15-20], "\\HH\\supportdyn"), [([3:15-20], Hmixed)]))))); 
+           param_pos = [3:21-23]; param_name = "$m"; param_info = Param_required; 
+           param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+           param_named = None; param_user_attributes = []; param_visibility = None };
+          { param_annotation = (nonnull); param_type_hint = ((nonnull), (Some ([3:25-32], (Happly (([3:25-32], "\\HH\\supportdyn"), [([3:25-32], Hnonnull)]))))); 
+            param_pos = [3:33-35]; param_name = "$n"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None };
+          { param_annotation = (T); param_type_hint = ((T), (Some ([3:37-38], (Habstr "T")))); 
+            param_pos = [3:39-41]; param_name = "$t"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([4:3-9], (Expr ((nothing), [4:3-8], (Array_get (((mixed), [4:3-5], (Lvar ([4:3-5], $m))), (Some ((int), [4:6-7], (Int "0"))))))));
+            ([5:3-9], (Expr ((nothing), [5:3-8], (Array_get (((nonnull), [5:3-5], (Lvar ([5:3-5], $n))), (Some ((int), [5:6-7], (Int "0"))))))));
+            ([6:3-9], (Expr ((nothing), [6:3-8], (Array_get (((T), [6:3-5], (Lvar ([6:3-5], $t))), (Some ((int), [6:6-7], (Int "0"))))))))]
+          };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None;
+      fd_tparams =
+      [{ tp_variance = Invariant; tp_name = ([3:12-13], "T"); tp_constraints = [(Constraint_as, ([3:12-13], (Happly (([3:12-13], "\\HH\\supportdyn"), [([3:12-13], Hmixed)]))))]; 
+         tp_reified = Erased; tp_user_attributes = [] }
+        ];
+      fd_where_constraints = []; fd_package = None })

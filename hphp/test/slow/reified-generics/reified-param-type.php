@@ -1,6 +1,6 @@
 <?hh
 
-function f<reify T>(<<__Soft>> T $x) { echo "done\n"; }
+function f<reify T>(<<__Soft>> T $x) :mixed{ echo "done\n"; }
 
 class C<reify T> {}
 <<__EntryPoint>>

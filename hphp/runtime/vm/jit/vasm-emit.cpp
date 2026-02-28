@@ -20,7 +20,6 @@
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/outlined-sequence-selector.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -30,15 +29,16 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tracing.h"
 
 #include "hphp/util/arch.h"
+#include "hphp/util/blob-store.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(vasm);
+TRACE_SET_MOD(vasm)
 
 namespace {
 
@@ -83,7 +83,7 @@ private:
 void bindDataPtrs(Vunit& vunit, DataBlock& data) {
   if (vunit.dataBlocks.empty()) return;
 
-  Timer timer(Timer::vasm_bind_ptrs);
+  Timer timer(Timer::vasm_bind_ptrs, vunit.log_entry);
   FTRACE(1, "{:-^80}\n", "binding VdataPtrs");
 
   DataBlockMap blocks;
@@ -118,11 +118,13 @@ void emit(Vunit& vunit, Vtext& vtext, CGMeta& meta, AsmInfo* ai) {
   }
 }
 
+std::atomic<size_t> s_uploadId;
+
 }
 
 void emitVunit(Vunit& vunit, const IRUnit* unit,
                CodeCache::View code, CGMeta& meta, Annotations* annotations) {
-  Timer _t(Timer::vasm_emit);
+  Timer _t(Timer::vasm_emit, vunit.log_entry);
 
   tracing::Block _{"vasm-emit", [&] { return traceProps(vunit); }};
 
@@ -140,10 +142,10 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
   CodeBlock& cold = code.isLocal() ? code.cold() : coldLocal;
   CodeBlock* frozen = &code.frozen();
 
-  assertx(IMPLIES(RuntimeOption::EvalEnableReusableTC, code.isLocal()));
+  assertx(IMPLIES(Cfg::Eval::EnableReusableTC, code.isLocal()));
   auto const do_relocate =
-    RuntimeOption::EvalJitRelocationSize &&
-    cold_in.canEmit(RuntimeOption::EvalJitRelocationSize * 3) &&
+    Cfg::Jit::RelocationSize &&
+    cold_in.canEmit(Cfg::Jit::RelocationSize * 3) &&
     !code.isLocal();
 
   // If code relocation is supported and enabled, set up temporary code blocks.
@@ -163,11 +165,11 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
     auto off = rand_r(&seed) & (cache_line_size() - code_alignment);
 
     cold.init(cold_in.frontier() +
-              RuntimeOption::EvalJitRelocationSize + off,
-              RuntimeOption::EvalJitRelocationSize - off, "cgRelocCold");
+              Cfg::Jit::RelocationSize + off,
+              Cfg::Jit::RelocationSize - off, "cgRelocCold");
     main.init(cold.frontier() +
-              RuntimeOption::EvalJitRelocationSize + off,
-              RuntimeOption::EvalJitRelocationSize - off, "cgRelocMain");
+              Cfg::Jit::RelocationSize + off,
+              Cfg::Jit::RelocationSize - off, "cgRelocMain");
   } else if (!code.isLocal()) {
     // Use separate code blocks, so that attempts to use code's blocks
     // directly will fail (e.g., by overwriting the same memory being written
@@ -186,8 +188,14 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
   DEBUG_ONLY auto cold_start = cold_in.frontier();
   auto frozen_start = frozen->frontier();
 
+  auto const func = unit ? unit->initSrcKey().func() : nullptr;
+  auto const uploadUnit =
+    func &&
+    !Cfg::Jit::TraceUploadBucket.empty() &&
+    Cfg::Jit::TraceUploadFunctions.count(func->fullName()->toCppString());
+
   Optional<AsmInfo> optAI;
-  if (unit && (RuntimeOption::EvalJitBuildOutliningHashes ||
+  if (unit && (uploadUnit ||
                dumpIREnabled(unit->context().kind))) {
     optAI.emplace(*unit);
   }
@@ -227,8 +235,20 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
     }
     printUnit(kCodeGenLevel, *unit, " after code gen ",
              ai, nullptr, annotations);
-    if (RuntimeOption::EvalJitBuildOutliningHashes) {
-      recordIR(*unit, ai);
+    if (uploadUnit) {
+      BlobStore::Key k;
+      std::ostringstream str;
+      k.name = folly::sformat(
+        "{}:{}:{}",
+        func->fullName()->slice(),
+        unit->initSrcKey().lineNumber(),
+        s_uploadId.fetch_add(1, std::memory_order_relaxed)
+      );
+      k.bucket = Cfg::Jit::TraceUploadBucket;
+      k.dir = Cfg::Jit::TraceUploadPath;
+
+      print(str, *unit, ai, nullptr);
+      BlobStore::put(k, str.str());
     }
   }
 }

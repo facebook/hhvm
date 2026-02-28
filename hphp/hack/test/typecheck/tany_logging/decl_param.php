@@ -1,20 +1,19 @@
 <?hh
 
-type Tany<T> = T;
-
-class C {
-  /* HH_IGNORE_ERROR[4101] */
-  public static function static_method_param(Tany $_, Tany $_): void {}
-
-  /* HH_IGNORE_ERROR[4101] */
-  public function method_param(Tany $_): void {}
+namespace HH_FIXME {
+  type MISSING_TYPE_IN_HIERARCHY = mixed;
 }
+namespace Test {
+  type Tany = \HH_FIXME\MISSING_TYPE_IN_HIERARCHY;
+  class C {
+    public static function static_method_param(Tany $_, Tany $_): void {}
 
-/* HH_IGNORE_ERROR[4101] */
+    public function method_param(Tany $_): void {}
+  }
+
 function fx_param(Tany $_): void {}
 
-/* HH_IGNORE_ERROR[4101] */
 function inout_param(inout Tany $_): void {}
 
-/* HH_IGNORE_ERROR[4101] */
 function variadic_param(Tany ...$_): void {}
+}

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_shared_memory() {
+function main_shared_memory() :mixed{
 $ret = shm_attach(0xDEADBEEF);
 if ($ret === false) { echo "failed\n"; exit(1); }
 shm_remove($ret); // just in case its left over from an earlier run

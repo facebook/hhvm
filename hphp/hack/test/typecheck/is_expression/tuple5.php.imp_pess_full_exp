@@ -1,0 +1,5 @@
+File "tuple5.php", line 9, characters 5-15:
+  (int, D<int>)
+File "tuple5.php", line 9, characters 5-15:[2]
+  (int, D<T#1>)
+No errors

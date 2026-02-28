@@ -1,0 +1,2 @@
+
+Fatal error: "is" and "as" operators cannot be used with a class type in %s/class-ptr/is-type-struct-class-or-classname.php on line 10

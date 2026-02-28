@@ -31,9 +31,9 @@ struct ProfDataDeserializer;
 namespace PropertyProfile {
 
 /*
- * Increment the profile count for cls::prop.
+ * Get the address of the profile counter for cls::prop.
  */
-void incCount(const StringData* cls, const StringData* prop);
+uint32_t* getCounterAddr(const StringData* cls, const StringData* prop);
 
 /*
  * Get the profile count for cls::prop.
@@ -46,5 +46,9 @@ uint32_t getCount(const StringData* cls, const StringData* prop);
 void serialize(jit::ProfDataSerializer&);
 void deserialize(jit::ProfDataDeserializer&);
 
-} }
+/*
+ * Free the memory containing profile data.
+ */
+void clear();
 
+} }

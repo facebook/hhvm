@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class X {
   public ?int $i;

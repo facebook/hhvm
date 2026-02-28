@@ -1,6 +1,0 @@
-File "concrete_override_abstract_bad.php", line 9, characters 38-39:
-The property `$p` has the wrong type (Typing[4341])
-  File "concrete_override_abstract_bad.php", line 5, characters 38-40:
-  Expected `int`
-  File "concrete_override_abstract_bad.php", line 9, characters 29-36:
-  But got `arraykey`

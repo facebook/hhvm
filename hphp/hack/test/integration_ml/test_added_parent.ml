@@ -47,7 +47,7 @@ function test(FooChild $foo_child) : void {
 "
 
 let bar_errors =
-  "File \"/bar.php\", line 7, characters 12-26:
+  "ERROR: File \"/bar.php\", line 7, characters 12-26:
 Invalid argument (Typing[4110])
   File \"/bar.php\", line 3, characters 19-21:
   Expected `int`
@@ -68,14 +68,15 @@ allowed_decl_fixme_codes = 2049,4123,4336
 let test () =
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   TestDisk.set hhconfig_filename hhconfig_contents;
-  let hhconfig_path =
-    Relative_path.create Relative_path.Root hhconfig_filename
-  in
-  let options = ServerArgs.default_options ~root in
   let (custom_config, _) =
-    ServerConfig.load ~silent:false hhconfig_path options
+    ServerConfig.load ~silent:false ~from:"" ~cli_config_overrides:[]
   in
-  let env = Test.setup_server ~custom_config () in
+  let env =
+    Test.setup_server
+      ~custom_config
+      ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
+      ()
+  in
   let env =
     Test.setup_disk
       env
@@ -88,7 +89,7 @@ let test () =
   (* We need to suppress all the errors (see HH_FIXMEs above), otherwise the
    * logic that always rechecks the files with errors kicks in and does the
    * same job as phase2 fanout. We want to test the latter one in this test. *)
-  Test.assert_no_errors env;
+  Test.assert_no_diagnostics env;
 
   (* restore parent, but with a mismatching return type of f() *)
   let (env, _) =
@@ -97,4 +98,6 @@ let test () =
         env
         { default_loop_input with disk_changes = [(foo_name, foo_contents)] })
   in
-  Test.assertSingleError bar_errors (Errors.get_error_list env.ServerEnv.errorl)
+  Test.assertSingleDiagnostic
+    bar_errors
+    (Diagnostics.get_diagnostic_list env.ServerEnv.diagnostics)

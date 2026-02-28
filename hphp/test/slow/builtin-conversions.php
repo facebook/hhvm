@@ -1,10 +1,10 @@
 <?hh
 
-class X { static function y() {} }
-function t() { var_dump(__FUNCTION__); }
+class X { static function y() :mixed{} }
+<<__DynamicallyCallable>> function t() :mixed{ var_dump(__FUNCTION__); }
 
 <<__EntryPoint>>
-function main() {
-  (new ReflectionFunction('t'))->invoke();
-  var_dump(__hhvm_intrinsics\create_class_pointer(__hhvm_intrinsics\create_class_pointer('X')));
+function main() :mixed{
+  HH\dynamic_fun('t')();
+  var_dump(HH\classname_to_class('X'));
 }

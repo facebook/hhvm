@@ -1,0 +1,67 @@
+# Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2.0,
+# as published by the Free Software Foundation.
+#
+# This program is also distributed with certain software (including
+# but not limited to OpenSSL) that is licensed under separate terms,
+# as designated in a particular file or component or in included license
+# documentation.  The authors of MySQL hereby grant you an additional
+# permission to link the program and your derivative works with the
+# separately licensed software that they have included with MySQL.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License, version 2.0, for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+#
+# systemd service file for MySQL forking server
+#
+
+[Unit]
+Description=MySQL Server
+Documentation=man:mysqld(8)
+Documentation=http://dev.mysql.com/doc/refman/en/using-systemd.html
+After=network.target
+After=syslog.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+User=@MYSQLD_USER@
+Group=@MYSQLD_USER@
+
+Type=notify
+
+# Disable service start and stop timeout logic of systemd for mysqld service.
+TimeoutSec=0
+
+# Execute pre and post scripts as root
+PermissionsStartOnly=true
+
+# Needed to create system tables
+ExecStartPre=@bindir@/mysqld_pre_systemd %I
+
+# Start main service
+ExecStart=@libexecdir@/mysqld --defaults-group-suffix=@%I $MYSQLD_OPTS
+
+# Use this to switch malloc implementation
+EnvironmentFile=-/etc/sysconfig/mysql
+
+# Sets open_files_limit
+LimitNOFILE = 10000
+
+Restart=on-failure
+
+RestartPreventExitStatus=1
+
+# Set enviroment variable MYSQLD_PARENT_PID. This is required for restart.
+Environment=MYSQLD_PARENT_PID=1
+
+PrivateTmp=false

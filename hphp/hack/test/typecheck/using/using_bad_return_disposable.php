@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Handle implements IDisposable {
@@ -37,6 +37,6 @@ function testit():void {
   // This should be illegal
   $z = make_handle(true);
   // And this!
-  $f = fun('make_handle');
+  $f = make_handle<>;
   $x = $f(false);
 }

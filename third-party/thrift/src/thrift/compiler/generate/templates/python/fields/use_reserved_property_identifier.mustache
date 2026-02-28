@@ -1,0 +1,66 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+    The indented line below is intentional. Do not indent the partial at the usage-site.
+    See comment below for details of the strangeness here.
+}}
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+{{! NOTE: This comment MUST start on this line to ensure a correct line-break at the usage-site.
+
+    @_fbthrift_builtins.property, really???
+
+    TL;DR
+    To workaround the issue that Pyre does not recognize aliases for the property
+    identifier, use the fully qualified builtins.property, with builtins appropriately
+    aliased to avoid conflict with user symbols.
+
+    Historical Context
+    If any type has a field named property, then the use of the builtin `property` will conflict
+    and fail. For an example of such a field that will cause such a failure,
+    see TestPropertyAsField in fbcode/thrift/lib/python/test/special_cases.thrift.
+
+    To eliminate this issue, use a reserved identifier.
+
+    *   The first iteration of this approach used an identifier named
+        `_fbthrift_property`.
+        Define:
+        _fbthrift_property = property
+
+        Use:
+        @_fbthrift_property
+        def field_name(self) -> field_type: ...
+
+        However, pyre returned `typing.Any` for the property type rather than `field_type`.
+
+    *   The current iteration uses the fully qualified name of `property`,
+        which is builtins.property. Once again, to avoid conflicts with user field
+        named `builtins`, use a reserved identifier as follows.
+
+        Define (in define_reserved_property_identifier.mustache):
+        import builtins as _fbthrift_builtins
+
+        Use:
+        @_fbthrift_builtins.property
+        def field_name(self) -> field_type: ...
+
+    With this approach, Pyre produces the correct result for
+    the revealed type. Pyre, however, reports the error below, which
+    does not affect the revealed type, and continues to work when ignored.
+
+    Module `_fbthrift_builtins` has no attribute `property`.
+}}

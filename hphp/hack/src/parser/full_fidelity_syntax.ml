@@ -59,6 +59,7 @@ module WithToken (Token : TokenType) = struct
       | EndOfFile _ -> SyntaxKind.EndOfFile
       | Script _ -> SyntaxKind.Script
       | QualifiedName _ -> SyntaxKind.QualifiedName
+      | ModuleName _ -> SyntaxKind.ModuleName
       | SimpleTypeSpecifier _ -> SyntaxKind.SimpleTypeSpecifier
       | LiteralExpression _ -> SyntaxKind.LiteralExpression
       | PrefixedStringExpression _ -> SyntaxKind.PrefixedStringExpression
@@ -73,6 +74,8 @@ module WithToken (Token : TokenType) = struct
       | EnumClassEnumerator _ -> SyntaxKind.EnumClassEnumerator
       | AliasDeclaration _ -> SyntaxKind.AliasDeclaration
       | ContextAliasDeclaration _ -> SyntaxKind.ContextAliasDeclaration
+      | CaseTypeDeclaration _ -> SyntaxKind.CaseTypeDeclaration
+      | CaseTypeVariant _ -> SyntaxKind.CaseTypeVariant
       | PropertyDeclaration _ -> SyntaxKind.PropertyDeclaration
       | PropertyDeclarator _ -> SyntaxKind.PropertyDeclarator
       | NamespaceDeclaration _ -> SyntaxKind.NamespaceDeclaration
@@ -92,21 +95,17 @@ module WithToken (Token : TokenType) = struct
       | MethodishTraitResolution _ -> SyntaxKind.MethodishTraitResolution
       | ClassishDeclaration _ -> SyntaxKind.ClassishDeclaration
       | ClassishBody _ -> SyntaxKind.ClassishBody
-      | TraitUsePrecedenceItem _ -> SyntaxKind.TraitUsePrecedenceItem
-      | TraitUseAliasItem _ -> SyntaxKind.TraitUseAliasItem
-      | TraitUseConflictResolution _ -> SyntaxKind.TraitUseConflictResolution
       | TraitUse _ -> SyntaxKind.TraitUse
       | RequireClause _ -> SyntaxKind.RequireClause
+      | RequireClauseConstraint _ -> SyntaxKind.RequireClauseConstraint
       | ConstDeclaration _ -> SyntaxKind.ConstDeclaration
       | ConstantDeclarator _ -> SyntaxKind.ConstantDeclarator
       | TypeConstDeclaration _ -> SyntaxKind.TypeConstDeclaration
       | ContextConstDeclaration _ -> SyntaxKind.ContextConstDeclaration
       | DecoratedExpression _ -> SyntaxKind.DecoratedExpression
+      | NamedArgument _ -> SyntaxKind.NamedArgument
       | ParameterDeclaration _ -> SyntaxKind.ParameterDeclaration
-      | VariadicParameter _ -> SyntaxKind.VariadicParameter
       | OldAttributeSpecification _ -> SyntaxKind.OldAttributeSpecification
-      | AttributeSpecification _ -> SyntaxKind.AttributeSpecification
-      | Attribute _ -> SyntaxKind.Attribute
       | InclusionExpression _ -> SyntaxKind.InclusionExpression
       | InclusionDirective _ -> SyntaxKind.InclusionDirective
       | CompoundStatement _ -> SyntaxKind.CompoundStatement
@@ -114,12 +113,12 @@ module WithToken (Token : TokenType) = struct
       | MarkupSection _ -> SyntaxKind.MarkupSection
       | MarkupSuffix _ -> SyntaxKind.MarkupSuffix
       | UnsetStatement _ -> SyntaxKind.UnsetStatement
+      | DeclareLocalStatement _ -> SyntaxKind.DeclareLocalStatement
       | UsingStatementBlockScoped _ -> SyntaxKind.UsingStatementBlockScoped
       | UsingStatementFunctionScoped _ ->
         SyntaxKind.UsingStatementFunctionScoped
       | WhileStatement _ -> SyntaxKind.WhileStatement
       | IfStatement _ -> SyntaxKind.IfStatement
-      | ElseifClause _ -> SyntaxKind.ElseifClause
       | ElseClause _ -> SyntaxKind.ElseClause
       | TryStatement _ -> SyntaxKind.TryStatement
       | CatchClause _ -> SyntaxKind.CatchClause
@@ -132,6 +131,8 @@ module WithToken (Token : TokenType) = struct
       | SwitchFallthrough _ -> SyntaxKind.SwitchFallthrough
       | CaseLabel _ -> SyntaxKind.CaseLabel
       | DefaultLabel _ -> SyntaxKind.DefaultLabel
+      | MatchStatement _ -> SyntaxKind.MatchStatement
+      | MatchStatementArm _ -> SyntaxKind.MatchStatementArm
       | ReturnStatement _ -> SyntaxKind.ReturnStatement
       | YieldBreakStatement _ -> SyntaxKind.YieldBreakStatement
       | ThrowStatement _ -> SyntaxKind.ThrowStatement
@@ -143,6 +144,9 @@ module WithToken (Token : TokenType) = struct
       | AnonymousClass _ -> SyntaxKind.AnonymousClass
       | AnonymousFunction _ -> SyntaxKind.AnonymousFunction
       | AnonymousFunctionUseClause _ -> SyntaxKind.AnonymousFunctionUseClause
+      | VariablePattern _ -> SyntaxKind.VariablePattern
+      | ConstructorPattern _ -> SyntaxKind.ConstructorPattern
+      | RefinementPattern _ -> SyntaxKind.RefinementPattern
       | LambdaExpression _ -> SyntaxKind.LambdaExpression
       | LambdaSignature _ -> SyntaxKind.LambdaSignature
       | CastExpression _ -> SyntaxKind.CastExpression
@@ -163,6 +167,7 @@ module WithToken (Token : TokenType) = struct
       | ConditionalExpression _ -> SyntaxKind.ConditionalExpression
       | EvalExpression _ -> SyntaxKind.EvalExpression
       | IssetExpression _ -> SyntaxKind.IssetExpression
+      | NameofExpression _ -> SyntaxKind.NameofExpression
       | FunctionCallExpression _ -> SyntaxKind.FunctionCallExpression
       | FunctionPointerExpression _ -> SyntaxKind.FunctionPointerExpression
       | ParenthesizedExpression _ -> SyntaxKind.ParenthesizedExpression
@@ -213,7 +218,13 @@ module WithToken (Token : TokenType) = struct
       | ClosureTypeSpecifier _ -> SyntaxKind.ClosureTypeSpecifier
       | ClosureParameterTypeSpecifier _ ->
         SyntaxKind.ClosureParameterTypeSpecifier
+      | TupleOrUnionOrIntersectionElementTypeSpecifier _ ->
+        SyntaxKind.TupleOrUnionOrIntersectionElementTypeSpecifier
+      | TypeRefinement _ -> SyntaxKind.TypeRefinement
+      | TypeInRefinement _ -> SyntaxKind.TypeInRefinement
+      | CtxInRefinement _ -> SyntaxKind.CtxInRefinement
       | ClassnameTypeSpecifier _ -> SyntaxKind.ClassnameTypeSpecifier
+      | ClassPtrTypeSpecifier _ -> SyntaxKind.ClassPtrTypeSpecifier
       | FieldSpecifier _ -> SyntaxKind.FieldSpecifier
       | FieldInitializer _ -> SyntaxKind.FieldInitializer
       | ShapeTypeSpecifier _ -> SyntaxKind.ShapeTypeSpecifier
@@ -234,6 +245,8 @@ module WithToken (Token : TokenType) = struct
       | ListItem _ -> SyntaxKind.ListItem
       | EnumClassLabelExpression _ -> SyntaxKind.EnumClassLabelExpression
       | ModuleDeclaration _ -> SyntaxKind.ModuleDeclaration
+      | ModuleMembershipDeclaration _ -> SyntaxKind.ModuleMembershipDeclaration
+      | PackageExpression _ -> SyntaxKind.PackageExpression
 
     let kind node = to_kind (syntax node)
 
@@ -254,6 +267,8 @@ module WithToken (Token : TokenType) = struct
     let is_script = has_kind SyntaxKind.Script
 
     let is_qualified_name = has_kind SyntaxKind.QualifiedName
+
+    let is_module_name = has_kind SyntaxKind.ModuleName
 
     let is_simple_type_specifier = has_kind SyntaxKind.SimpleTypeSpecifier
 
@@ -285,6 +300,10 @@ module WithToken (Token : TokenType) = struct
 
     let is_context_alias_declaration =
       has_kind SyntaxKind.ContextAliasDeclaration
+
+    let is_case_type_declaration = has_kind SyntaxKind.CaseTypeDeclaration
+
+    let is_case_type_variant = has_kind SyntaxKind.CaseTypeVariant
 
     let is_property_declaration = has_kind SyntaxKind.PropertyDeclaration
 
@@ -327,17 +346,12 @@ module WithToken (Token : TokenType) = struct
 
     let is_classish_body = has_kind SyntaxKind.ClassishBody
 
-    let is_trait_use_precedence_item =
-      has_kind SyntaxKind.TraitUsePrecedenceItem
-
-    let is_trait_use_alias_item = has_kind SyntaxKind.TraitUseAliasItem
-
-    let is_trait_use_conflict_resolution =
-      has_kind SyntaxKind.TraitUseConflictResolution
-
     let is_trait_use = has_kind SyntaxKind.TraitUse
 
     let is_require_clause = has_kind SyntaxKind.RequireClause
+
+    let is_require_clause_constraint =
+      has_kind SyntaxKind.RequireClauseConstraint
 
     let is_const_declaration = has_kind SyntaxKind.ConstDeclaration
 
@@ -350,16 +364,12 @@ module WithToken (Token : TokenType) = struct
 
     let is_decorated_expression = has_kind SyntaxKind.DecoratedExpression
 
-    let is_parameter_declaration = has_kind SyntaxKind.ParameterDeclaration
+    let is_named_argument = has_kind SyntaxKind.NamedArgument
 
-    let is_variadic_parameter = has_kind SyntaxKind.VariadicParameter
+    let is_parameter_declaration = has_kind SyntaxKind.ParameterDeclaration
 
     let is_old_attribute_specification =
       has_kind SyntaxKind.OldAttributeSpecification
-
-    let is_attribute_specification = has_kind SyntaxKind.AttributeSpecification
-
-    let is_attribute = has_kind SyntaxKind.Attribute
 
     let is_inclusion_expression = has_kind SyntaxKind.InclusionExpression
 
@@ -375,6 +385,8 @@ module WithToken (Token : TokenType) = struct
 
     let is_unset_statement = has_kind SyntaxKind.UnsetStatement
 
+    let is_declare_local_statement = has_kind SyntaxKind.DeclareLocalStatement
+
     let is_using_statement_block_scoped =
       has_kind SyntaxKind.UsingStatementBlockScoped
 
@@ -384,8 +396,6 @@ module WithToken (Token : TokenType) = struct
     let is_while_statement = has_kind SyntaxKind.WhileStatement
 
     let is_if_statement = has_kind SyntaxKind.IfStatement
-
-    let is_elseif_clause = has_kind SyntaxKind.ElseifClause
 
     let is_else_clause = has_kind SyntaxKind.ElseClause
 
@@ -411,6 +421,10 @@ module WithToken (Token : TokenType) = struct
 
     let is_default_label = has_kind SyntaxKind.DefaultLabel
 
+    let is_match_statement = has_kind SyntaxKind.MatchStatement
+
+    let is_match_statement_arm = has_kind SyntaxKind.MatchStatementArm
+
     let is_return_statement = has_kind SyntaxKind.ReturnStatement
 
     let is_yield_break_statement = has_kind SyntaxKind.YieldBreakStatement
@@ -433,6 +447,12 @@ module WithToken (Token : TokenType) = struct
 
     let is_anonymous_function_use_clause =
       has_kind SyntaxKind.AnonymousFunctionUseClause
+
+    let is_variable_pattern = has_kind SyntaxKind.VariablePattern
+
+    let is_constructor_pattern = has_kind SyntaxKind.ConstructorPattern
+
+    let is_refinement_pattern = has_kind SyntaxKind.RefinementPattern
 
     let is_lambda_expression = has_kind SyntaxKind.LambdaExpression
 
@@ -473,6 +493,8 @@ module WithToken (Token : TokenType) = struct
     let is_eval_expression = has_kind SyntaxKind.EvalExpression
 
     let is_isset_expression = has_kind SyntaxKind.IssetExpression
+
+    let is_nameof_expression = has_kind SyntaxKind.NameofExpression
 
     let is_function_call_expression = has_kind SyntaxKind.FunctionCallExpression
 
@@ -585,7 +607,18 @@ module WithToken (Token : TokenType) = struct
     let is_closure_parameter_type_specifier =
       has_kind SyntaxKind.ClosureParameterTypeSpecifier
 
+    let is_tuple_or_union_or_intersection_element_type_specifier =
+      has_kind SyntaxKind.TupleOrUnionOrIntersectionElementTypeSpecifier
+
+    let is_type_refinement = has_kind SyntaxKind.TypeRefinement
+
+    let is_type_in_refinement = has_kind SyntaxKind.TypeInRefinement
+
+    let is_ctx_in_refinement = has_kind SyntaxKind.CtxInRefinement
+
     let is_classname_type_specifier = has_kind SyntaxKind.ClassnameTypeSpecifier
+
+    let is_class_ptr_type_specifier = has_kind SyntaxKind.ClassPtrTypeSpecifier
 
     let is_field_specifier = has_kind SyntaxKind.FieldSpecifier
 
@@ -629,6 +662,11 @@ module WithToken (Token : TokenType) = struct
 
     let is_module_declaration = has_kind SyntaxKind.ModuleDeclaration
 
+    let is_module_membership_declaration =
+      has_kind SyntaxKind.ModuleMembershipDeclaration
+
+    let is_package_expression = has_kind SyntaxKind.PackageExpression
+
     let is_loop_statement node =
       is_for_statement node
       || is_foreach_statement node
@@ -637,13 +675,14 @@ module WithToken (Token : TokenType) = struct
 
     let is_separable_prefix node =
       match syntax node with
-      | Token t ->
+      | Token t -> begin
         TokenKind.(
-          (match Token.kind t with
+          match Token.kind t with
           | PlusPlus
           | MinusMinus ->
             false
-          | _ -> true))
+          | _ -> true)
+      end
       | _ -> true
 
     let is_specific_token kind node =
@@ -653,17 +692,15 @@ module WithToken (Token : TokenType) = struct
 
     let is_namespace_prefix node =
       match syntax node with
-      | QualifiedName e ->
-        begin
-          match List.last (syntax_node_to_list e.qualified_name_parts) with
-          | None -> false
-          | Some p ->
-            begin
-              match syntax p with
-              | ListItem p -> not (is_missing p.list_separator)
-              | _ -> false
-            end
+      | QualifiedName e -> begin
+        match List.last (syntax_node_to_list e.qualified_name_parts) with
+        | None -> false
+        | Some p -> begin
+          match syntax p with
+          | ListItem p -> not (is_missing p.list_separator)
+          | _ -> false
         end
+      end
       | _ -> false
 
     let has_leading_trivia kind token =
@@ -730,6 +767,9 @@ module WithToken (Token : TokenType) = struct
       | QualifiedName { qualified_name_parts } ->
         let acc = f acc qualified_name_parts in
         acc
+      | ModuleName { module_name_parts } ->
+        let acc = f acc module_name_parts in
+        acc
       | SimpleTypeSpecifier { simple_type_specifier } ->
         let acc = f acc simple_type_specifier in
         acc
@@ -745,12 +785,12 @@ module WithToken (Token : TokenType) = struct
           {
             prefixed_code_prefix;
             prefixed_code_left_backtick;
-            prefixed_code_expression;
+            prefixed_code_body;
             prefixed_code_right_backtick;
           } ->
         let acc = f acc prefixed_code_prefix in
         let acc = f acc prefixed_code_left_backtick in
-        let acc = f acc prefixed_code_expression in
+        let acc = f acc prefixed_code_body in
         let acc = f acc prefixed_code_right_backtick in
         acc
       | VariableExpression { variable_expression } ->
@@ -776,6 +816,7 @@ module WithToken (Token : TokenType) = struct
       | EnumDeclaration
           {
             enum_attribute_spec;
+            enum_modifiers;
             enum_keyword;
             enum_name;
             enum_colon;
@@ -787,6 +828,7 @@ module WithToken (Token : TokenType) = struct
             enum_right_brace;
           } ->
         let acc = f acc enum_attribute_spec in
+        let acc = f acc enum_modifiers in
         let acc = f acc enum_keyword in
         let acc = f acc enum_name in
         let acc = f acc enum_colon in
@@ -859,6 +901,8 @@ module WithToken (Token : TokenType) = struct
       | AliasDeclaration
           {
             alias_attribute_spec;
+            alias_modifiers;
+            alias_module_kw_opt;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -868,6 +912,8 @@ module WithToken (Token : TokenType) = struct
             alias_semicolon;
           } ->
         let acc = f acc alias_attribute_spec in
+        let acc = f acc alias_modifiers in
+        let acc = f acc alias_module_kw_opt in
         let acc = f acc alias_keyword in
         let acc = f acc alias_name in
         let acc = f acc alias_generic_parameter in
@@ -895,6 +941,42 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc ctx_alias_equal in
         let acc = f acc ctx_alias_context in
         let acc = f acc ctx_alias_semicolon in
+        acc
+      | CaseTypeDeclaration
+          {
+            case_type_attribute_spec;
+            case_type_modifiers;
+            case_type_case_keyword;
+            case_type_type_keyword;
+            case_type_name;
+            case_type_generic_parameter;
+            case_type_as;
+            case_type_bounds;
+            case_type_equal;
+            case_type_variants;
+            case_type_semicolon;
+          } ->
+        let acc = f acc case_type_attribute_spec in
+        let acc = f acc case_type_modifiers in
+        let acc = f acc case_type_case_keyword in
+        let acc = f acc case_type_type_keyword in
+        let acc = f acc case_type_name in
+        let acc = f acc case_type_generic_parameter in
+        let acc = f acc case_type_as in
+        let acc = f acc case_type_bounds in
+        let acc = f acc case_type_equal in
+        let acc = f acc case_type_variants in
+        let acc = f acc case_type_semicolon in
+        acc
+      | CaseTypeVariant
+          {
+            case_type_variant_bar;
+            case_type_variant_type;
+            case_type_variant_where_clause;
+          } ->
+        let acc = f acc case_type_variant_bar in
+        let acc = f acc case_type_variant_type in
+        let acc = f acc case_type_variant_where_clause in
         acc
       | PropertyDeclaration
           {
@@ -1073,7 +1155,6 @@ module WithToken (Token : TokenType) = struct
             classish_extends_list;
             classish_implements_keyword;
             classish_implements_list;
-            classish_where_clause;
             classish_body;
           } ->
         let acc = f acc classish_attribute in
@@ -1086,7 +1167,6 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc classish_extends_list in
         let acc = f acc classish_implements_keyword in
         let acc = f acc classish_implements_list in
-        let acc = f acc classish_where_clause in
         let acc = f acc classish_body in
         acc
       | ClassishBody
@@ -1099,42 +1179,6 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc classish_body_elements in
         let acc = f acc classish_body_right_brace in
         acc
-      | TraitUsePrecedenceItem
-          {
-            trait_use_precedence_item_name;
-            trait_use_precedence_item_keyword;
-            trait_use_precedence_item_removed_names;
-          } ->
-        let acc = f acc trait_use_precedence_item_name in
-        let acc = f acc trait_use_precedence_item_keyword in
-        let acc = f acc trait_use_precedence_item_removed_names in
-        acc
-      | TraitUseAliasItem
-          {
-            trait_use_alias_item_aliasing_name;
-            trait_use_alias_item_keyword;
-            trait_use_alias_item_modifiers;
-            trait_use_alias_item_aliased_name;
-          } ->
-        let acc = f acc trait_use_alias_item_aliasing_name in
-        let acc = f acc trait_use_alias_item_keyword in
-        let acc = f acc trait_use_alias_item_modifiers in
-        let acc = f acc trait_use_alias_item_aliased_name in
-        acc
-      | TraitUseConflictResolution
-          {
-            trait_use_conflict_resolution_keyword;
-            trait_use_conflict_resolution_names;
-            trait_use_conflict_resolution_left_brace;
-            trait_use_conflict_resolution_clauses;
-            trait_use_conflict_resolution_right_brace;
-          } ->
-        let acc = f acc trait_use_conflict_resolution_keyword in
-        let acc = f acc trait_use_conflict_resolution_names in
-        let acc = f acc trait_use_conflict_resolution_left_brace in
-        let acc = f acc trait_use_conflict_resolution_clauses in
-        let acc = f acc trait_use_conflict_resolution_right_brace in
-        acc
       | TraitUse { trait_use_keyword; trait_use_names; trait_use_semicolon } ->
         let acc = f acc trait_use_keyword in
         let acc = f acc trait_use_names in
@@ -1146,6 +1190,20 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc require_kind in
         let acc = f acc require_name in
         let acc = f acc require_semicolon in
+        acc
+      | RequireClauseConstraint
+          {
+            require_constraint_keyword;
+            require_constraint_this;
+            require_constraint_operator;
+            require_constraint_name;
+            require_constraint_semicolon;
+          } ->
+        let acc = f acc require_constraint_keyword in
+        let acc = f acc require_constraint_this in
+        let acc = f acc require_constraint_operator in
+        let acc = f acc require_constraint_name in
+        let acc = f acc require_constraint_semicolon in
         acc
       | ConstDeclaration
           {
@@ -1219,33 +1277,43 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc decorated_expression_decorator in
         let acc = f acc decorated_expression_expression in
         acc
+      | NamedArgument
+          {
+            named_argument_name;
+            named_argument_equal;
+            named_argument_expression;
+          } ->
+        let acc = f acc named_argument_name in
+        let acc = f acc named_argument_equal in
+        let acc = f acc named_argument_expression in
+        acc
       | ParameterDeclaration
           {
             parameter_attribute;
             parameter_visibility;
+            parameter_optional;
             parameter_call_convention;
+            parameter_named;
             parameter_readonly;
+            parameter_pre_ellipsis;
             parameter_type;
+            parameter_ellipsis;
             parameter_name;
             parameter_default_value;
+            parameter_parameter_end;
           } ->
         let acc = f acc parameter_attribute in
         let acc = f acc parameter_visibility in
+        let acc = f acc parameter_optional in
         let acc = f acc parameter_call_convention in
+        let acc = f acc parameter_named in
         let acc = f acc parameter_readonly in
+        let acc = f acc parameter_pre_ellipsis in
         let acc = f acc parameter_type in
+        let acc = f acc parameter_ellipsis in
         let acc = f acc parameter_name in
         let acc = f acc parameter_default_value in
-        acc
-      | VariadicParameter
-          {
-            variadic_parameter_call_convention;
-            variadic_parameter_type;
-            variadic_parameter_ellipsis;
-          } ->
-        let acc = f acc variadic_parameter_call_convention in
-        let acc = f acc variadic_parameter_type in
-        let acc = f acc variadic_parameter_ellipsis in
+        let acc = f acc parameter_parameter_end in
         acc
       | OldAttributeSpecification
           {
@@ -1256,13 +1324,6 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc old_attribute_specification_left_double_angle in
         let acc = f acc old_attribute_specification_attributes in
         let acc = f acc old_attribute_specification_right_double_angle in
-        acc
-      | AttributeSpecification { attribute_specification_attributes } ->
-        let acc = f acc attribute_specification_attributes in
-        acc
-      | Attribute { attribute_at; attribute_attribute_name } ->
-        let acc = f acc attribute_at in
-        let acc = f acc attribute_attribute_name in
         acc
       | InclusionExpression { inclusion_require; inclusion_filename } ->
         let acc = f acc inclusion_require in
@@ -1304,6 +1365,22 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc unset_variables in
         let acc = f acc unset_right_paren in
         let acc = f acc unset_semicolon in
+        acc
+      | DeclareLocalStatement
+          {
+            declare_local_keyword;
+            declare_local_variable;
+            declare_local_colon;
+            declare_local_type;
+            declare_local_initializer;
+            declare_local_semicolon;
+          } ->
+        let acc = f acc declare_local_keyword in
+        let acc = f acc declare_local_variable in
+        let acc = f acc declare_local_colon in
+        let acc = f acc declare_local_type in
+        let acc = f acc declare_local_initializer in
+        let acc = f acc declare_local_semicolon in
         acc
       | UsingStatementBlockScoped
           {
@@ -1354,7 +1431,6 @@ module WithToken (Token : TokenType) = struct
             if_condition;
             if_right_paren;
             if_statement;
-            if_elseif_clauses;
             if_else_clause;
           } ->
         let acc = f acc if_keyword in
@@ -1362,22 +1438,7 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc if_condition in
         let acc = f acc if_right_paren in
         let acc = f acc if_statement in
-        let acc = f acc if_elseif_clauses in
         let acc = f acc if_else_clause in
-        acc
-      | ElseifClause
-          {
-            elseif_keyword;
-            elseif_left_paren;
-            elseif_condition;
-            elseif_right_paren;
-            elseif_statement;
-          } ->
-        let acc = f acc elseif_keyword in
-        let acc = f acc elseif_left_paren in
-        let acc = f acc elseif_condition in
-        let acc = f acc elseif_right_paren in
-        let acc = f acc elseif_statement in
         acc
       | ElseClause { else_keyword; else_statement } ->
         let acc = f acc else_keyword in
@@ -1520,6 +1581,34 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc default_keyword in
         let acc = f acc default_colon in
         acc
+      | MatchStatement
+          {
+            match_statement_keyword;
+            match_statement_left_paren;
+            match_statement_expression;
+            match_statement_right_paren;
+            match_statement_left_brace;
+            match_statement_arms;
+            match_statement_right_brace;
+          } ->
+        let acc = f acc match_statement_keyword in
+        let acc = f acc match_statement_left_paren in
+        let acc = f acc match_statement_expression in
+        let acc = f acc match_statement_right_paren in
+        let acc = f acc match_statement_left_brace in
+        let acc = f acc match_statement_arms in
+        let acc = f acc match_statement_right_brace in
+        acc
+      | MatchStatementArm
+          {
+            match_statement_arm_pattern;
+            match_statement_arm_arrow;
+            match_statement_arm_body;
+          } ->
+        let acc = f acc match_statement_arm_pattern in
+        let acc = f acc match_statement_arm_arrow in
+        let acc = f acc match_statement_arm_body in
+        acc
       | ReturnStatement { return_keyword; return_expression; return_semicolon }
         ->
         let acc = f acc return_keyword in
@@ -1586,6 +1675,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_attribute_spec;
             anonymous_async_keyword;
             anonymous_function_keyword;
+            anonymous_type_parameters;
             anonymous_left_paren;
             anonymous_parameters;
             anonymous_right_paren;
@@ -1599,6 +1689,7 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc anonymous_attribute_spec in
         let acc = f acc anonymous_async_keyword in
         let acc = f acc anonymous_function_keyword in
+        let acc = f acc anonymous_type_parameters in
         let acc = f acc anonymous_left_paren in
         let acc = f acc anonymous_parameters in
         let acc = f acc anonymous_right_paren in
@@ -1621,6 +1712,31 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc anonymous_use_variables in
         let acc = f acc anonymous_use_right_paren in
         acc
+      | VariablePattern { variable_pattern_variable } ->
+        let acc = f acc variable_pattern_variable in
+        acc
+      | ConstructorPattern
+          {
+            constructor_pattern_constructor;
+            constructor_pattern_left_paren;
+            constructor_pattern_members;
+            constructor_pattern_right_paren;
+          } ->
+        let acc = f acc constructor_pattern_constructor in
+        let acc = f acc constructor_pattern_left_paren in
+        let acc = f acc constructor_pattern_members in
+        let acc = f acc constructor_pattern_right_paren in
+        acc
+      | RefinementPattern
+          {
+            refinement_pattern_variable;
+            refinement_pattern_colon;
+            refinement_pattern_specifier;
+          } ->
+        let acc = f acc refinement_pattern_variable in
+        let acc = f acc refinement_pattern_colon in
+        let acc = f acc refinement_pattern_specifier in
+        acc
       | LambdaExpression
           {
             lambda_attribute_spec;
@@ -1637,6 +1753,8 @@ module WithToken (Token : TokenType) = struct
         acc
       | LambdaSignature
           {
+            lambda_function_keyword;
+            lambda_type_parameters;
             lambda_left_paren;
             lambda_parameters;
             lambda_right_paren;
@@ -1645,6 +1763,8 @@ module WithToken (Token : TokenType) = struct
             lambda_readonly_return;
             lambda_type;
           } ->
+        let acc = f acc lambda_function_keyword in
+        let acc = f acc lambda_type_parameters in
         let acc = f acc lambda_left_paren in
         let acc = f acc lambda_parameters in
         let acc = f acc lambda_right_paren in
@@ -1769,6 +1889,10 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc isset_left_paren in
         let acc = f acc isset_argument_list in
         let acc = f acc isset_right_paren in
+        acc
+      | NameofExpression { nameof_keyword; nameof_target } ->
+        let acc = f acc nameof_keyword in
+        let acc = f acc nameof_target in
         acc
       | FunctionCallExpression
           {
@@ -2173,14 +2297,12 @@ module WithToken (Token : TokenType) = struct
             type_reified;
             type_variance;
             type_name;
-            type_param_params;
             type_constraints;
           } ->
         let acc = f acc type_attribute_spec in
         let acc = f acc type_reified in
         let acc = f acc type_variance in
         let acc = f acc type_name in
-        let acc = f acc type_param_params in
         let acc = f acc type_constraints in
         acc
       | TypeConstraint { constraint_keyword; constraint_type } ->
@@ -2226,6 +2348,7 @@ module WithToken (Token : TokenType) = struct
             closure_outer_left_paren;
             closure_readonly_keyword;
             closure_function_keyword;
+            closure_type_parameters;
             closure_inner_left_paren;
             closure_parameter_list;
             closure_inner_right_paren;
@@ -2238,6 +2361,7 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc closure_outer_left_paren in
         let acc = f acc closure_readonly_keyword in
         let acc = f acc closure_function_keyword in
+        let acc = f acc closure_type_parameters in
         let acc = f acc closure_inner_left_paren in
         let acc = f acc closure_parameter_list in
         let acc = f acc closure_inner_right_paren in
@@ -2249,13 +2373,81 @@ module WithToken (Token : TokenType) = struct
         acc
       | ClosureParameterTypeSpecifier
           {
+            closure_parameter_optional;
             closure_parameter_call_convention;
+            closure_parameter_named;
             closure_parameter_readonly;
+            closure_parameter_pre_ellipsis;
             closure_parameter_type;
+            closure_parameter_name;
+            closure_parameter_ellipsis;
           } ->
+        let acc = f acc closure_parameter_optional in
         let acc = f acc closure_parameter_call_convention in
+        let acc = f acc closure_parameter_named in
         let acc = f acc closure_parameter_readonly in
+        let acc = f acc closure_parameter_pre_ellipsis in
         let acc = f acc closure_parameter_type in
+        let acc = f acc closure_parameter_name in
+        let acc = f acc closure_parameter_ellipsis in
+        acc
+      | TupleOrUnionOrIntersectionElementTypeSpecifier
+          {
+            tuple_or_union_or_intersection_element_optional;
+            tuple_or_union_or_intersection_element_pre_ellipsis;
+            tuple_or_union_or_intersection_element_type;
+            tuple_or_union_or_intersection_element_ellipsis;
+          } ->
+        let acc = f acc tuple_or_union_or_intersection_element_optional in
+        let acc = f acc tuple_or_union_or_intersection_element_pre_ellipsis in
+        let acc = f acc tuple_or_union_or_intersection_element_type in
+        let acc = f acc tuple_or_union_or_intersection_element_ellipsis in
+        acc
+      | TypeRefinement
+          {
+            type_refinement_type;
+            type_refinement_keyword;
+            type_refinement_left_brace;
+            type_refinement_members;
+            type_refinement_right_brace;
+          } ->
+        let acc = f acc type_refinement_type in
+        let acc = f acc type_refinement_keyword in
+        let acc = f acc type_refinement_left_brace in
+        let acc = f acc type_refinement_members in
+        let acc = f acc type_refinement_right_brace in
+        acc
+      | TypeInRefinement
+          {
+            type_in_refinement_keyword;
+            type_in_refinement_name;
+            type_in_refinement_type_parameters;
+            type_in_refinement_constraints;
+            type_in_refinement_equal;
+            type_in_refinement_type;
+          } ->
+        let acc = f acc type_in_refinement_keyword in
+        let acc = f acc type_in_refinement_name in
+        let acc = f acc type_in_refinement_type_parameters in
+        let acc = f acc type_in_refinement_constraints in
+        let acc = f acc type_in_refinement_equal in
+        let acc = f acc type_in_refinement_type in
+        acc
+      | CtxInRefinement
+          {
+            ctx_in_refinement_keyword;
+            ctx_in_refinement_name;
+            ctx_in_refinement_type_parameters;
+            ctx_in_refinement_constraints;
+            ctx_in_refinement_equal;
+            ctx_in_refinement_ctx_list;
+          } ->
+        let acc = f acc ctx_in_refinement_keyword in
+        let acc = f acc ctx_in_refinement_name in
+        let acc = f acc ctx_in_refinement_type_parameters in
+        let acc = f acc ctx_in_refinement_constraints in
+        let acc = f acc ctx_in_refinement_equal in
+        let acc = f acc ctx_in_refinement_ctx_list in
         acc
       | ClassnameTypeSpecifier
           {
@@ -2270,6 +2462,20 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc classname_type in
         let acc = f acc classname_trailing_comma in
         let acc = f acc classname_right_angle in
+        acc
+      | ClassPtrTypeSpecifier
+          {
+            class_ptr_keyword;
+            class_ptr_left_angle;
+            class_ptr_type;
+            class_ptr_trailing_comma;
+            class_ptr_right_angle;
+          } ->
+        let acc = f acc class_ptr_keyword in
+        let acc = f acc class_ptr_left_angle in
+        let acc = f acc class_ptr_type in
+        let acc = f acc class_ptr_trailing_comma in
+        let acc = f acc class_ptr_right_angle in
         acc
       | FieldSpecifier { field_question; field_name; field_arrow; field_type }
         ->
@@ -2415,16 +2621,33 @@ module WithToken (Token : TokenType) = struct
       | ModuleDeclaration
           {
             module_declaration_attribute_spec;
-            module_declaration_keyword;
+            module_declaration_new_keyword;
+            module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
             module_declaration_right_brace;
           } ->
         let acc = f acc module_declaration_attribute_spec in
-        let acc = f acc module_declaration_keyword in
+        let acc = f acc module_declaration_new_keyword in
+        let acc = f acc module_declaration_module_keyword in
         let acc = f acc module_declaration_name in
         let acc = f acc module_declaration_left_brace in
         let acc = f acc module_declaration_right_brace in
+        acc
+      | ModuleMembershipDeclaration
+          {
+            module_membership_declaration_module_keyword;
+            module_membership_declaration_name;
+            module_membership_declaration_semicolon;
+          } ->
+        let acc = f acc module_membership_declaration_module_keyword in
+        let acc = f acc module_membership_declaration_name in
+        let acc = f acc module_membership_declaration_semicolon in
+        acc
+      | PackageExpression
+          { package_expression_keyword; package_expression_name } ->
+        let acc = f acc package_expression_keyword in
+        let acc = f acc package_expression_name in
         acc
 
     (* The order that the children are returned in should match the order
@@ -2437,6 +2660,7 @@ module WithToken (Token : TokenType) = struct
       | EndOfFile { end_of_file_token } -> [end_of_file_token]
       | Script { script_declarations } -> [script_declarations]
       | QualifiedName { qualified_name_parts } -> [qualified_name_parts]
+      | ModuleName { module_name_parts } -> [module_name_parts]
       | SimpleTypeSpecifier { simple_type_specifier } -> [simple_type_specifier]
       | LiteralExpression { literal_expression } -> [literal_expression]
       | PrefixedStringExpression { prefixed_string_name; prefixed_string_str }
@@ -2446,13 +2670,13 @@ module WithToken (Token : TokenType) = struct
           {
             prefixed_code_prefix;
             prefixed_code_left_backtick;
-            prefixed_code_expression;
+            prefixed_code_body;
             prefixed_code_right_backtick;
           } ->
         [
           prefixed_code_prefix;
           prefixed_code_left_backtick;
-          prefixed_code_expression;
+          prefixed_code_body;
           prefixed_code_right_backtick;
         ]
       | VariableExpression { variable_expression } -> [variable_expression]
@@ -2476,6 +2700,7 @@ module WithToken (Token : TokenType) = struct
       | EnumDeclaration
           {
             enum_attribute_spec;
+            enum_modifiers;
             enum_keyword;
             enum_name;
             enum_colon;
@@ -2488,6 +2713,7 @@ module WithToken (Token : TokenType) = struct
           } ->
         [
           enum_attribute_spec;
+          enum_modifiers;
           enum_keyword;
           enum_name;
           enum_colon;
@@ -2560,6 +2786,8 @@ module WithToken (Token : TokenType) = struct
       | AliasDeclaration
           {
             alias_attribute_spec;
+            alias_modifiers;
+            alias_module_kw_opt;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -2570,6 +2798,8 @@ module WithToken (Token : TokenType) = struct
           } ->
         [
           alias_attribute_spec;
+          alias_modifiers;
+          alias_module_kw_opt;
           alias_keyword;
           alias_name;
           alias_generic_parameter;
@@ -2598,6 +2828,44 @@ module WithToken (Token : TokenType) = struct
           ctx_alias_equal;
           ctx_alias_context;
           ctx_alias_semicolon;
+        ]
+      | CaseTypeDeclaration
+          {
+            case_type_attribute_spec;
+            case_type_modifiers;
+            case_type_case_keyword;
+            case_type_type_keyword;
+            case_type_name;
+            case_type_generic_parameter;
+            case_type_as;
+            case_type_bounds;
+            case_type_equal;
+            case_type_variants;
+            case_type_semicolon;
+          } ->
+        [
+          case_type_attribute_spec;
+          case_type_modifiers;
+          case_type_case_keyword;
+          case_type_type_keyword;
+          case_type_name;
+          case_type_generic_parameter;
+          case_type_as;
+          case_type_bounds;
+          case_type_equal;
+          case_type_variants;
+          case_type_semicolon;
+        ]
+      | CaseTypeVariant
+          {
+            case_type_variant_bar;
+            case_type_variant_type;
+            case_type_variant_where_clause;
+          } ->
+        [
+          case_type_variant_bar;
+          case_type_variant_type;
+          case_type_variant_where_clause;
         ]
       | PropertyDeclaration
           {
@@ -2765,7 +3033,6 @@ module WithToken (Token : TokenType) = struct
             classish_extends_list;
             classish_implements_keyword;
             classish_implements_list;
-            classish_where_clause;
             classish_body;
           } ->
         [
@@ -2779,7 +3046,6 @@ module WithToken (Token : TokenType) = struct
           classish_extends_list;
           classish_implements_keyword;
           classish_implements_list;
-          classish_where_clause;
           classish_body;
         ]
       | ClassishBody
@@ -2793,50 +3059,26 @@ module WithToken (Token : TokenType) = struct
           classish_body_elements;
           classish_body_right_brace;
         ]
-      | TraitUsePrecedenceItem
-          {
-            trait_use_precedence_item_name;
-            trait_use_precedence_item_keyword;
-            trait_use_precedence_item_removed_names;
-          } ->
-        [
-          trait_use_precedence_item_name;
-          trait_use_precedence_item_keyword;
-          trait_use_precedence_item_removed_names;
-        ]
-      | TraitUseAliasItem
-          {
-            trait_use_alias_item_aliasing_name;
-            trait_use_alias_item_keyword;
-            trait_use_alias_item_modifiers;
-            trait_use_alias_item_aliased_name;
-          } ->
-        [
-          trait_use_alias_item_aliasing_name;
-          trait_use_alias_item_keyword;
-          trait_use_alias_item_modifiers;
-          trait_use_alias_item_aliased_name;
-        ]
-      | TraitUseConflictResolution
-          {
-            trait_use_conflict_resolution_keyword;
-            trait_use_conflict_resolution_names;
-            trait_use_conflict_resolution_left_brace;
-            trait_use_conflict_resolution_clauses;
-            trait_use_conflict_resolution_right_brace;
-          } ->
-        [
-          trait_use_conflict_resolution_keyword;
-          trait_use_conflict_resolution_names;
-          trait_use_conflict_resolution_left_brace;
-          trait_use_conflict_resolution_clauses;
-          trait_use_conflict_resolution_right_brace;
-        ]
       | TraitUse { trait_use_keyword; trait_use_names; trait_use_semicolon } ->
         [trait_use_keyword; trait_use_names; trait_use_semicolon]
       | RequireClause
           { require_keyword; require_kind; require_name; require_semicolon } ->
         [require_keyword; require_kind; require_name; require_semicolon]
+      | RequireClauseConstraint
+          {
+            require_constraint_keyword;
+            require_constraint_this;
+            require_constraint_operator;
+            require_constraint_name;
+            require_constraint_semicolon;
+          } ->
+        [
+          require_constraint_keyword;
+          require_constraint_this;
+          require_constraint_operator;
+          require_constraint_name;
+          require_constraint_semicolon;
+        ]
       | ConstDeclaration
           {
             const_attribute_spec;
@@ -2908,35 +3150,41 @@ module WithToken (Token : TokenType) = struct
       | DecoratedExpression
           { decorated_expression_decorator; decorated_expression_expression } ->
         [decorated_expression_decorator; decorated_expression_expression]
+      | NamedArgument
+          {
+            named_argument_name;
+            named_argument_equal;
+            named_argument_expression;
+          } ->
+        [named_argument_name; named_argument_equal; named_argument_expression]
       | ParameterDeclaration
           {
             parameter_attribute;
             parameter_visibility;
+            parameter_optional;
             parameter_call_convention;
+            parameter_named;
             parameter_readonly;
+            parameter_pre_ellipsis;
             parameter_type;
+            parameter_ellipsis;
             parameter_name;
             parameter_default_value;
+            parameter_parameter_end;
           } ->
         [
           parameter_attribute;
           parameter_visibility;
+          parameter_optional;
           parameter_call_convention;
+          parameter_named;
           parameter_readonly;
+          parameter_pre_ellipsis;
           parameter_type;
+          parameter_ellipsis;
           parameter_name;
           parameter_default_value;
-        ]
-      | VariadicParameter
-          {
-            variadic_parameter_call_convention;
-            variadic_parameter_type;
-            variadic_parameter_ellipsis;
-          } ->
-        [
-          variadic_parameter_call_convention;
-          variadic_parameter_type;
-          variadic_parameter_ellipsis;
+          parameter_parameter_end;
         ]
       | OldAttributeSpecification
           {
@@ -2949,10 +3197,6 @@ module WithToken (Token : TokenType) = struct
           old_attribute_specification_attributes;
           old_attribute_specification_right_double_angle;
         ]
-      | AttributeSpecification { attribute_specification_attributes } ->
-        [attribute_specification_attributes]
-      | Attribute { attribute_at; attribute_attribute_name } ->
-        [attribute_at; attribute_attribute_name]
       | InclusionExpression { inclusion_require; inclusion_filename } ->
         [inclusion_require; inclusion_filename]
       | InclusionDirective { inclusion_expression; inclusion_semicolon } ->
@@ -2981,6 +3225,23 @@ module WithToken (Token : TokenType) = struct
           unset_variables;
           unset_right_paren;
           unset_semicolon;
+        ]
+      | DeclareLocalStatement
+          {
+            declare_local_keyword;
+            declare_local_variable;
+            declare_local_colon;
+            declare_local_type;
+            declare_local_initializer;
+            declare_local_semicolon;
+          } ->
+        [
+          declare_local_keyword;
+          declare_local_variable;
+          declare_local_colon;
+          declare_local_type;
+          declare_local_initializer;
+          declare_local_semicolon;
         ]
       | UsingStatementBlockScoped
           {
@@ -3034,7 +3295,6 @@ module WithToken (Token : TokenType) = struct
             if_condition;
             if_right_paren;
             if_statement;
-            if_elseif_clauses;
             if_else_clause;
           } ->
         [
@@ -3043,23 +3303,7 @@ module WithToken (Token : TokenType) = struct
           if_condition;
           if_right_paren;
           if_statement;
-          if_elseif_clauses;
           if_else_clause;
-        ]
-      | ElseifClause
-          {
-            elseif_keyword;
-            elseif_left_paren;
-            elseif_condition;
-            elseif_right_paren;
-            elseif_statement;
-          } ->
-        [
-          elseif_keyword;
-          elseif_left_paren;
-          elseif_condition;
-          elseif_right_paren;
-          elseif_statement;
         ]
       | ElseClause { else_keyword; else_statement } ->
         [else_keyword; else_statement]
@@ -3198,6 +3442,36 @@ module WithToken (Token : TokenType) = struct
         [case_keyword; case_expression; case_colon]
       | DefaultLabel { default_keyword; default_colon } ->
         [default_keyword; default_colon]
+      | MatchStatement
+          {
+            match_statement_keyword;
+            match_statement_left_paren;
+            match_statement_expression;
+            match_statement_right_paren;
+            match_statement_left_brace;
+            match_statement_arms;
+            match_statement_right_brace;
+          } ->
+        [
+          match_statement_keyword;
+          match_statement_left_paren;
+          match_statement_expression;
+          match_statement_right_paren;
+          match_statement_left_brace;
+          match_statement_arms;
+          match_statement_right_brace;
+        ]
+      | MatchStatementArm
+          {
+            match_statement_arm_pattern;
+            match_statement_arm_arrow;
+            match_statement_arm_body;
+          } ->
+        [
+          match_statement_arm_pattern;
+          match_statement_arm_arrow;
+          match_statement_arm_body;
+        ]
       | ReturnStatement { return_keyword; return_expression; return_semicolon }
         ->
         [return_keyword; return_expression; return_semicolon]
@@ -3245,6 +3519,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_attribute_spec;
             anonymous_async_keyword;
             anonymous_function_keyword;
+            anonymous_type_parameters;
             anonymous_left_paren;
             anonymous_parameters;
             anonymous_right_paren;
@@ -3259,6 +3534,7 @@ module WithToken (Token : TokenType) = struct
           anonymous_attribute_spec;
           anonymous_async_keyword;
           anonymous_function_keyword;
+          anonymous_type_parameters;
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;
@@ -3282,6 +3558,32 @@ module WithToken (Token : TokenType) = struct
           anonymous_use_variables;
           anonymous_use_right_paren;
         ]
+      | VariablePattern { variable_pattern_variable } ->
+        [variable_pattern_variable]
+      | ConstructorPattern
+          {
+            constructor_pattern_constructor;
+            constructor_pattern_left_paren;
+            constructor_pattern_members;
+            constructor_pattern_right_paren;
+          } ->
+        [
+          constructor_pattern_constructor;
+          constructor_pattern_left_paren;
+          constructor_pattern_members;
+          constructor_pattern_right_paren;
+        ]
+      | RefinementPattern
+          {
+            refinement_pattern_variable;
+            refinement_pattern_colon;
+            refinement_pattern_specifier;
+          } ->
+        [
+          refinement_pattern_variable;
+          refinement_pattern_colon;
+          refinement_pattern_specifier;
+        ]
       | LambdaExpression
           {
             lambda_attribute_spec;
@@ -3299,6 +3601,8 @@ module WithToken (Token : TokenType) = struct
         ]
       | LambdaSignature
           {
+            lambda_function_keyword;
+            lambda_type_parameters;
             lambda_left_paren;
             lambda_parameters;
             lambda_right_paren;
@@ -3308,6 +3612,8 @@ module WithToken (Token : TokenType) = struct
             lambda_type;
           } ->
         [
+          lambda_function_keyword;
+          lambda_type_parameters;
           lambda_left_paren;
           lambda_parameters;
           lambda_right_paren;
@@ -3399,6 +3705,8 @@ module WithToken (Token : TokenType) = struct
         [
           isset_keyword; isset_left_paren; isset_argument_list; isset_right_paren;
         ]
+      | NameofExpression { nameof_keyword; nameof_target } ->
+        [nameof_keyword; nameof_target]
       | FunctionCallExpression
           {
             function_call_receiver;
@@ -3797,7 +4105,6 @@ module WithToken (Token : TokenType) = struct
             type_reified;
             type_variance;
             type_name;
-            type_param_params;
             type_constraints;
           } ->
         [
@@ -3805,7 +4112,6 @@ module WithToken (Token : TokenType) = struct
           type_reified;
           type_variance;
           type_name;
-          type_param_params;
           type_constraints;
         ]
       | TypeConstraint { constraint_keyword; constraint_type } ->
@@ -3849,6 +4155,7 @@ module WithToken (Token : TokenType) = struct
             closure_outer_left_paren;
             closure_readonly_keyword;
             closure_function_keyword;
+            closure_type_parameters;
             closure_inner_left_paren;
             closure_parameter_list;
             closure_inner_right_paren;
@@ -3862,6 +4169,7 @@ module WithToken (Token : TokenType) = struct
           closure_outer_left_paren;
           closure_readonly_keyword;
           closure_function_keyword;
+          closure_type_parameters;
           closure_inner_left_paren;
           closure_parameter_list;
           closure_inner_right_paren;
@@ -3873,14 +4181,86 @@ module WithToken (Token : TokenType) = struct
         ]
       | ClosureParameterTypeSpecifier
           {
+            closure_parameter_optional;
             closure_parameter_call_convention;
+            closure_parameter_named;
             closure_parameter_readonly;
+            closure_parameter_pre_ellipsis;
             closure_parameter_type;
+            closure_parameter_name;
+            closure_parameter_ellipsis;
           } ->
         [
+          closure_parameter_optional;
           closure_parameter_call_convention;
+          closure_parameter_named;
           closure_parameter_readonly;
+          closure_parameter_pre_ellipsis;
           closure_parameter_type;
+          closure_parameter_name;
+          closure_parameter_ellipsis;
+        ]
+      | TupleOrUnionOrIntersectionElementTypeSpecifier
+          {
+            tuple_or_union_or_intersection_element_optional;
+            tuple_or_union_or_intersection_element_pre_ellipsis;
+            tuple_or_union_or_intersection_element_type;
+            tuple_or_union_or_intersection_element_ellipsis;
+          } ->
+        [
+          tuple_or_union_or_intersection_element_optional;
+          tuple_or_union_or_intersection_element_pre_ellipsis;
+          tuple_or_union_or_intersection_element_type;
+          tuple_or_union_or_intersection_element_ellipsis;
+        ]
+      | TypeRefinement
+          {
+            type_refinement_type;
+            type_refinement_keyword;
+            type_refinement_left_brace;
+            type_refinement_members;
+            type_refinement_right_brace;
+          } ->
+        [
+          type_refinement_type;
+          type_refinement_keyword;
+          type_refinement_left_brace;
+          type_refinement_members;
+          type_refinement_right_brace;
+        ]
+      | TypeInRefinement
+          {
+            type_in_refinement_keyword;
+            type_in_refinement_name;
+            type_in_refinement_type_parameters;
+            type_in_refinement_constraints;
+            type_in_refinement_equal;
+            type_in_refinement_type;
+          } ->
+        [
+          type_in_refinement_keyword;
+          type_in_refinement_name;
+          type_in_refinement_type_parameters;
+          type_in_refinement_constraints;
+          type_in_refinement_equal;
+          type_in_refinement_type;
+        ]
+      | CtxInRefinement
+          {
+            ctx_in_refinement_keyword;
+            ctx_in_refinement_name;
+            ctx_in_refinement_type_parameters;
+            ctx_in_refinement_constraints;
+            ctx_in_refinement_equal;
+            ctx_in_refinement_ctx_list;
+          } ->
+        [
+          ctx_in_refinement_keyword;
+          ctx_in_refinement_name;
+          ctx_in_refinement_type_parameters;
+          ctx_in_refinement_constraints;
+          ctx_in_refinement_equal;
+          ctx_in_refinement_ctx_list;
         ]
       | ClassnameTypeSpecifier
           {
@@ -3896,6 +4276,21 @@ module WithToken (Token : TokenType) = struct
           classname_type;
           classname_trailing_comma;
           classname_right_angle;
+        ]
+      | ClassPtrTypeSpecifier
+          {
+            class_ptr_keyword;
+            class_ptr_left_angle;
+            class_ptr_type;
+            class_ptr_trailing_comma;
+            class_ptr_right_angle;
+          } ->
+        [
+          class_ptr_keyword;
+          class_ptr_left_angle;
+          class_ptr_type;
+          class_ptr_trailing_comma;
+          class_ptr_right_angle;
         ]
       | FieldSpecifier { field_question; field_name; field_arrow; field_type }
         ->
@@ -4016,18 +4411,34 @@ module WithToken (Token : TokenType) = struct
       | ModuleDeclaration
           {
             module_declaration_attribute_spec;
-            module_declaration_keyword;
+            module_declaration_new_keyword;
+            module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
             module_declaration_right_brace;
           } ->
         [
           module_declaration_attribute_spec;
-          module_declaration_keyword;
+          module_declaration_new_keyword;
+          module_declaration_module_keyword;
           module_declaration_name;
           module_declaration_left_brace;
           module_declaration_right_brace;
         ]
+      | ModuleMembershipDeclaration
+          {
+            module_membership_declaration_module_keyword;
+            module_membership_declaration_name;
+            module_membership_declaration_semicolon;
+          } ->
+        [
+          module_membership_declaration_module_keyword;
+          module_membership_declaration_name;
+          module_membership_declaration_semicolon;
+        ]
+      | PackageExpression
+          { package_expression_keyword; package_expression_name } ->
+        [package_expression_keyword; package_expression_name]
 
     let children node = children_from_syntax node.syntax
 
@@ -4039,6 +4450,7 @@ module WithToken (Token : TokenType) = struct
       | EndOfFile { end_of_file_token } -> ["end_of_file_token"]
       | Script { script_declarations } -> ["script_declarations"]
       | QualifiedName { qualified_name_parts } -> ["qualified_name_parts"]
+      | ModuleName { module_name_parts } -> ["module_name_parts"]
       | SimpleTypeSpecifier { simple_type_specifier } ->
         ["simple_type_specifier"]
       | LiteralExpression { literal_expression } -> ["literal_expression"]
@@ -4049,13 +4461,13 @@ module WithToken (Token : TokenType) = struct
           {
             prefixed_code_prefix;
             prefixed_code_left_backtick;
-            prefixed_code_expression;
+            prefixed_code_body;
             prefixed_code_right_backtick;
           } ->
         [
           "prefixed_code_prefix";
           "prefixed_code_left_backtick";
-          "prefixed_code_expression";
+          "prefixed_code_body";
           "prefixed_code_right_backtick";
         ]
       | VariableExpression { variable_expression } -> ["variable_expression"]
@@ -4079,6 +4491,7 @@ module WithToken (Token : TokenType) = struct
       | EnumDeclaration
           {
             enum_attribute_spec;
+            enum_modifiers;
             enum_keyword;
             enum_name;
             enum_colon;
@@ -4091,6 +4504,7 @@ module WithToken (Token : TokenType) = struct
           } ->
         [
           "enum_attribute_spec";
+          "enum_modifiers";
           "enum_keyword";
           "enum_name";
           "enum_colon";
@@ -4163,6 +4577,8 @@ module WithToken (Token : TokenType) = struct
       | AliasDeclaration
           {
             alias_attribute_spec;
+            alias_modifiers;
+            alias_module_kw_opt;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -4173,6 +4589,8 @@ module WithToken (Token : TokenType) = struct
           } ->
         [
           "alias_attribute_spec";
+          "alias_modifiers";
+          "alias_module_kw_opt";
           "alias_keyword";
           "alias_name";
           "alias_generic_parameter";
@@ -4201,6 +4619,44 @@ module WithToken (Token : TokenType) = struct
           "ctx_alias_equal";
           "ctx_alias_context";
           "ctx_alias_semicolon";
+        ]
+      | CaseTypeDeclaration
+          {
+            case_type_attribute_spec;
+            case_type_modifiers;
+            case_type_case_keyword;
+            case_type_type_keyword;
+            case_type_name;
+            case_type_generic_parameter;
+            case_type_as;
+            case_type_bounds;
+            case_type_equal;
+            case_type_variants;
+            case_type_semicolon;
+          } ->
+        [
+          "case_type_attribute_spec";
+          "case_type_modifiers";
+          "case_type_case_keyword";
+          "case_type_type_keyword";
+          "case_type_name";
+          "case_type_generic_parameter";
+          "case_type_as";
+          "case_type_bounds";
+          "case_type_equal";
+          "case_type_variants";
+          "case_type_semicolon";
+        ]
+      | CaseTypeVariant
+          {
+            case_type_variant_bar;
+            case_type_variant_type;
+            case_type_variant_where_clause;
+          } ->
+        [
+          "case_type_variant_bar";
+          "case_type_variant_type";
+          "case_type_variant_where_clause";
         ]
       | PropertyDeclaration
           {
@@ -4376,7 +4832,6 @@ module WithToken (Token : TokenType) = struct
             classish_extends_list;
             classish_implements_keyword;
             classish_implements_list;
-            classish_where_clause;
             classish_body;
           } ->
         [
@@ -4390,7 +4845,6 @@ module WithToken (Token : TokenType) = struct
           "classish_extends_list";
           "classish_implements_keyword";
           "classish_implements_list";
-          "classish_where_clause";
           "classish_body";
         ]
       | ClassishBody
@@ -4404,50 +4858,26 @@ module WithToken (Token : TokenType) = struct
           "classish_body_elements";
           "classish_body_right_brace";
         ]
-      | TraitUsePrecedenceItem
-          {
-            trait_use_precedence_item_name;
-            trait_use_precedence_item_keyword;
-            trait_use_precedence_item_removed_names;
-          } ->
-        [
-          "trait_use_precedence_item_name";
-          "trait_use_precedence_item_keyword";
-          "trait_use_precedence_item_removed_names";
-        ]
-      | TraitUseAliasItem
-          {
-            trait_use_alias_item_aliasing_name;
-            trait_use_alias_item_keyword;
-            trait_use_alias_item_modifiers;
-            trait_use_alias_item_aliased_name;
-          } ->
-        [
-          "trait_use_alias_item_aliasing_name";
-          "trait_use_alias_item_keyword";
-          "trait_use_alias_item_modifiers";
-          "trait_use_alias_item_aliased_name";
-        ]
-      | TraitUseConflictResolution
-          {
-            trait_use_conflict_resolution_keyword;
-            trait_use_conflict_resolution_names;
-            trait_use_conflict_resolution_left_brace;
-            trait_use_conflict_resolution_clauses;
-            trait_use_conflict_resolution_right_brace;
-          } ->
-        [
-          "trait_use_conflict_resolution_keyword";
-          "trait_use_conflict_resolution_names";
-          "trait_use_conflict_resolution_left_brace";
-          "trait_use_conflict_resolution_clauses";
-          "trait_use_conflict_resolution_right_brace";
-        ]
       | TraitUse { trait_use_keyword; trait_use_names; trait_use_semicolon } ->
         ["trait_use_keyword"; "trait_use_names"; "trait_use_semicolon"]
       | RequireClause
           { require_keyword; require_kind; require_name; require_semicolon } ->
         ["require_keyword"; "require_kind"; "require_name"; "require_semicolon"]
+      | RequireClauseConstraint
+          {
+            require_constraint_keyword;
+            require_constraint_this;
+            require_constraint_operator;
+            require_constraint_name;
+            require_constraint_semicolon;
+          } ->
+        [
+          "require_constraint_keyword";
+          "require_constraint_this";
+          "require_constraint_operator";
+          "require_constraint_name";
+          "require_constraint_semicolon";
+        ]
       | ConstDeclaration
           {
             const_attribute_spec;
@@ -4519,35 +4949,45 @@ module WithToken (Token : TokenType) = struct
       | DecoratedExpression
           { decorated_expression_decorator; decorated_expression_expression } ->
         ["decorated_expression_decorator"; "decorated_expression_expression"]
+      | NamedArgument
+          {
+            named_argument_name;
+            named_argument_equal;
+            named_argument_expression;
+          } ->
+        [
+          "named_argument_name";
+          "named_argument_equal";
+          "named_argument_expression";
+        ]
       | ParameterDeclaration
           {
             parameter_attribute;
             parameter_visibility;
+            parameter_optional;
             parameter_call_convention;
+            parameter_named;
             parameter_readonly;
+            parameter_pre_ellipsis;
             parameter_type;
+            parameter_ellipsis;
             parameter_name;
             parameter_default_value;
+            parameter_parameter_end;
           } ->
         [
           "parameter_attribute";
           "parameter_visibility";
+          "parameter_optional";
           "parameter_call_convention";
+          "parameter_named";
           "parameter_readonly";
+          "parameter_pre_ellipsis";
           "parameter_type";
+          "parameter_ellipsis";
           "parameter_name";
           "parameter_default_value";
-        ]
-      | VariadicParameter
-          {
-            variadic_parameter_call_convention;
-            variadic_parameter_type;
-            variadic_parameter_ellipsis;
-          } ->
-        [
-          "variadic_parameter_call_convention";
-          "variadic_parameter_type";
-          "variadic_parameter_ellipsis";
+          "parameter_parameter_end";
         ]
       | OldAttributeSpecification
           {
@@ -4560,10 +5000,6 @@ module WithToken (Token : TokenType) = struct
           "old_attribute_specification_attributes";
           "old_attribute_specification_right_double_angle";
         ]
-      | AttributeSpecification { attribute_specification_attributes } ->
-        ["attribute_specification_attributes"]
-      | Attribute { attribute_at; attribute_attribute_name } ->
-        ["attribute_at"; "attribute_attribute_name"]
       | InclusionExpression { inclusion_require; inclusion_filename } ->
         ["inclusion_require"; "inclusion_filename"]
       | InclusionDirective { inclusion_expression; inclusion_semicolon } ->
@@ -4592,6 +5028,23 @@ module WithToken (Token : TokenType) = struct
           "unset_variables";
           "unset_right_paren";
           "unset_semicolon";
+        ]
+      | DeclareLocalStatement
+          {
+            declare_local_keyword;
+            declare_local_variable;
+            declare_local_colon;
+            declare_local_type;
+            declare_local_initializer;
+            declare_local_semicolon;
+          } ->
+        [
+          "declare_local_keyword";
+          "declare_local_variable";
+          "declare_local_colon";
+          "declare_local_type";
+          "declare_local_initializer";
+          "declare_local_semicolon";
         ]
       | UsingStatementBlockScoped
           {
@@ -4645,7 +5098,6 @@ module WithToken (Token : TokenType) = struct
             if_condition;
             if_right_paren;
             if_statement;
-            if_elseif_clauses;
             if_else_clause;
           } ->
         [
@@ -4654,23 +5106,7 @@ module WithToken (Token : TokenType) = struct
           "if_condition";
           "if_right_paren";
           "if_statement";
-          "if_elseif_clauses";
           "if_else_clause";
-        ]
-      | ElseifClause
-          {
-            elseif_keyword;
-            elseif_left_paren;
-            elseif_condition;
-            elseif_right_paren;
-            elseif_statement;
-          } ->
-        [
-          "elseif_keyword";
-          "elseif_left_paren";
-          "elseif_condition";
-          "elseif_right_paren";
-          "elseif_statement";
         ]
       | ElseClause { else_keyword; else_statement } ->
         ["else_keyword"; "else_statement"]
@@ -4809,6 +5245,36 @@ module WithToken (Token : TokenType) = struct
         ["case_keyword"; "case_expression"; "case_colon"]
       | DefaultLabel { default_keyword; default_colon } ->
         ["default_keyword"; "default_colon"]
+      | MatchStatement
+          {
+            match_statement_keyword;
+            match_statement_left_paren;
+            match_statement_expression;
+            match_statement_right_paren;
+            match_statement_left_brace;
+            match_statement_arms;
+            match_statement_right_brace;
+          } ->
+        [
+          "match_statement_keyword";
+          "match_statement_left_paren";
+          "match_statement_expression";
+          "match_statement_right_paren";
+          "match_statement_left_brace";
+          "match_statement_arms";
+          "match_statement_right_brace";
+        ]
+      | MatchStatementArm
+          {
+            match_statement_arm_pattern;
+            match_statement_arm_arrow;
+            match_statement_arm_body;
+          } ->
+        [
+          "match_statement_arm_pattern";
+          "match_statement_arm_arrow";
+          "match_statement_arm_body";
+        ]
       | ReturnStatement { return_keyword; return_expression; return_semicolon }
         ->
         ["return_keyword"; "return_expression"; "return_semicolon"]
@@ -4856,6 +5322,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_attribute_spec;
             anonymous_async_keyword;
             anonymous_function_keyword;
+            anonymous_type_parameters;
             anonymous_left_paren;
             anonymous_parameters;
             anonymous_right_paren;
@@ -4870,6 +5337,7 @@ module WithToken (Token : TokenType) = struct
           "anonymous_attribute_spec";
           "anonymous_async_keyword";
           "anonymous_function_keyword";
+          "anonymous_type_parameters";
           "anonymous_left_paren";
           "anonymous_parameters";
           "anonymous_right_paren";
@@ -4893,6 +5361,32 @@ module WithToken (Token : TokenType) = struct
           "anonymous_use_variables";
           "anonymous_use_right_paren";
         ]
+      | VariablePattern { variable_pattern_variable } ->
+        ["variable_pattern_variable"]
+      | ConstructorPattern
+          {
+            constructor_pattern_constructor;
+            constructor_pattern_left_paren;
+            constructor_pattern_members;
+            constructor_pattern_right_paren;
+          } ->
+        [
+          "constructor_pattern_constructor";
+          "constructor_pattern_left_paren";
+          "constructor_pattern_members";
+          "constructor_pattern_right_paren";
+        ]
+      | RefinementPattern
+          {
+            refinement_pattern_variable;
+            refinement_pattern_colon;
+            refinement_pattern_specifier;
+          } ->
+        [
+          "refinement_pattern_variable";
+          "refinement_pattern_colon";
+          "refinement_pattern_specifier";
+        ]
       | LambdaExpression
           {
             lambda_attribute_spec;
@@ -4910,6 +5404,8 @@ module WithToken (Token : TokenType) = struct
         ]
       | LambdaSignature
           {
+            lambda_function_keyword;
+            lambda_type_parameters;
             lambda_left_paren;
             lambda_parameters;
             lambda_right_paren;
@@ -4919,6 +5415,8 @@ module WithToken (Token : TokenType) = struct
             lambda_type;
           } ->
         [
+          "lambda_function_keyword";
+          "lambda_type_parameters";
           "lambda_left_paren";
           "lambda_parameters";
           "lambda_right_paren";
@@ -5017,6 +5515,8 @@ module WithToken (Token : TokenType) = struct
           "isset_argument_list";
           "isset_right_paren";
         ]
+      | NameofExpression { nameof_keyword; nameof_target } ->
+        ["nameof_keyword"; "nameof_target"]
       | FunctionCallExpression
           {
             function_call_receiver;
@@ -5425,7 +5925,6 @@ module WithToken (Token : TokenType) = struct
             type_reified;
             type_variance;
             type_name;
-            type_param_params;
             type_constraints;
           } ->
         [
@@ -5433,7 +5932,6 @@ module WithToken (Token : TokenType) = struct
           "type_reified";
           "type_variance";
           "type_name";
-          "type_param_params";
           "type_constraints";
         ]
       | TypeConstraint { constraint_keyword; constraint_type } ->
@@ -5477,6 +5975,7 @@ module WithToken (Token : TokenType) = struct
             closure_outer_left_paren;
             closure_readonly_keyword;
             closure_function_keyword;
+            closure_type_parameters;
             closure_inner_left_paren;
             closure_parameter_list;
             closure_inner_right_paren;
@@ -5490,6 +5989,7 @@ module WithToken (Token : TokenType) = struct
           "closure_outer_left_paren";
           "closure_readonly_keyword";
           "closure_function_keyword";
+          "closure_type_parameters";
           "closure_inner_left_paren";
           "closure_parameter_list";
           "closure_inner_right_paren";
@@ -5501,14 +6001,86 @@ module WithToken (Token : TokenType) = struct
         ]
       | ClosureParameterTypeSpecifier
           {
+            closure_parameter_optional;
             closure_parameter_call_convention;
+            closure_parameter_named;
             closure_parameter_readonly;
+            closure_parameter_pre_ellipsis;
             closure_parameter_type;
+            closure_parameter_name;
+            closure_parameter_ellipsis;
           } ->
         [
+          "closure_parameter_optional";
           "closure_parameter_call_convention";
+          "closure_parameter_named";
           "closure_parameter_readonly";
+          "closure_parameter_pre_ellipsis";
           "closure_parameter_type";
+          "closure_parameter_name";
+          "closure_parameter_ellipsis";
+        ]
+      | TupleOrUnionOrIntersectionElementTypeSpecifier
+          {
+            tuple_or_union_or_intersection_element_optional;
+            tuple_or_union_or_intersection_element_pre_ellipsis;
+            tuple_or_union_or_intersection_element_type;
+            tuple_or_union_or_intersection_element_ellipsis;
+          } ->
+        [
+          "tuple_or_union_or_intersection_element_optional";
+          "tuple_or_union_or_intersection_element_pre_ellipsis";
+          "tuple_or_union_or_intersection_element_type";
+          "tuple_or_union_or_intersection_element_ellipsis";
+        ]
+      | TypeRefinement
+          {
+            type_refinement_type;
+            type_refinement_keyword;
+            type_refinement_left_brace;
+            type_refinement_members;
+            type_refinement_right_brace;
+          } ->
+        [
+          "type_refinement_type";
+          "type_refinement_keyword";
+          "type_refinement_left_brace";
+          "type_refinement_members";
+          "type_refinement_right_brace";
+        ]
+      | TypeInRefinement
+          {
+            type_in_refinement_keyword;
+            type_in_refinement_name;
+            type_in_refinement_type_parameters;
+            type_in_refinement_constraints;
+            type_in_refinement_equal;
+            type_in_refinement_type;
+          } ->
+        [
+          "type_in_refinement_keyword";
+          "type_in_refinement_name";
+          "type_in_refinement_type_parameters";
+          "type_in_refinement_constraints";
+          "type_in_refinement_equal";
+          "type_in_refinement_type";
+        ]
+      | CtxInRefinement
+          {
+            ctx_in_refinement_keyword;
+            ctx_in_refinement_name;
+            ctx_in_refinement_type_parameters;
+            ctx_in_refinement_constraints;
+            ctx_in_refinement_equal;
+            ctx_in_refinement_ctx_list;
+          } ->
+        [
+          "ctx_in_refinement_keyword";
+          "ctx_in_refinement_name";
+          "ctx_in_refinement_type_parameters";
+          "ctx_in_refinement_constraints";
+          "ctx_in_refinement_equal";
+          "ctx_in_refinement_ctx_list";
         ]
       | ClassnameTypeSpecifier
           {
@@ -5524,6 +6096,21 @@ module WithToken (Token : TokenType) = struct
           "classname_type";
           "classname_trailing_comma";
           "classname_right_angle";
+        ]
+      | ClassPtrTypeSpecifier
+          {
+            class_ptr_keyword;
+            class_ptr_left_angle;
+            class_ptr_type;
+            class_ptr_trailing_comma;
+            class_ptr_right_angle;
+          } ->
+        [
+          "class_ptr_keyword";
+          "class_ptr_left_angle";
+          "class_ptr_type";
+          "class_ptr_trailing_comma";
+          "class_ptr_right_angle";
         ]
       | FieldSpecifier { field_question; field_name; field_arrow; field_type }
         ->
@@ -5650,18 +6237,34 @@ module WithToken (Token : TokenType) = struct
       | ModuleDeclaration
           {
             module_declaration_attribute_spec;
-            module_declaration_keyword;
+            module_declaration_new_keyword;
+            module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
             module_declaration_right_brace;
           } ->
         [
           "module_declaration_attribute_spec";
-          "module_declaration_keyword";
+          "module_declaration_new_keyword";
+          "module_declaration_module_keyword";
           "module_declaration_name";
           "module_declaration_left_brace";
           "module_declaration_right_brace";
         ]
+      | ModuleMembershipDeclaration
+          {
+            module_membership_declaration_module_keyword;
+            module_membership_declaration_name;
+            module_membership_declaration_semicolon;
+          } ->
+        [
+          "module_membership_declaration_module_keyword";
+          "module_membership_declaration_name";
+          "module_membership_declaration_semicolon";
+        ]
+      | PackageExpression
+          { package_expression_keyword; package_expression_name } ->
+        ["package_expression_keyword"; "package_expression_name"]
 
     let rec to_json_ ?(with_value = false) ?(ignore_missing = false) node =
       let open Hh_json in
@@ -5761,6 +6364,8 @@ module WithToken (Token : TokenType) = struct
         Script { script_declarations }
       | (SyntaxKind.QualifiedName, [qualified_name_parts]) ->
         QualifiedName { qualified_name_parts }
+      | (SyntaxKind.ModuleName, [module_name_parts]) ->
+        ModuleName { module_name_parts }
       | (SyntaxKind.SimpleTypeSpecifier, [simple_type_specifier]) ->
         SimpleTypeSpecifier { simple_type_specifier }
       | (SyntaxKind.LiteralExpression, [literal_expression]) ->
@@ -5772,14 +6377,14 @@ module WithToken (Token : TokenType) = struct
           [
             prefixed_code_prefix;
             prefixed_code_left_backtick;
-            prefixed_code_expression;
+            prefixed_code_body;
             prefixed_code_right_backtick;
           ] ) ->
         PrefixedCodeExpression
           {
             prefixed_code_prefix;
             prefixed_code_left_backtick;
-            prefixed_code_expression;
+            prefixed_code_body;
             prefixed_code_right_backtick;
           }
       | (SyntaxKind.VariableExpression, [variable_expression]) ->
@@ -5805,6 +6410,7 @@ module WithToken (Token : TokenType) = struct
       | ( SyntaxKind.EnumDeclaration,
           [
             enum_attribute_spec;
+            enum_modifiers;
             enum_keyword;
             enum_name;
             enum_colon;
@@ -5818,6 +6424,7 @@ module WithToken (Token : TokenType) = struct
         EnumDeclaration
           {
             enum_attribute_spec;
+            enum_modifiers;
             enum_keyword;
             enum_name;
             enum_colon;
@@ -5894,6 +6501,8 @@ module WithToken (Token : TokenType) = struct
       | ( SyntaxKind.AliasDeclaration,
           [
             alias_attribute_spec;
+            alias_modifiers;
+            alias_module_kw_opt;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -5905,6 +6514,8 @@ module WithToken (Token : TokenType) = struct
         AliasDeclaration
           {
             alias_attribute_spec;
+            alias_modifiers;
+            alias_module_kw_opt;
             alias_keyword;
             alias_name;
             alias_generic_parameter;
@@ -5934,6 +6545,46 @@ module WithToken (Token : TokenType) = struct
             ctx_alias_equal;
             ctx_alias_context;
             ctx_alias_semicolon;
+          }
+      | ( SyntaxKind.CaseTypeDeclaration,
+          [
+            case_type_attribute_spec;
+            case_type_modifiers;
+            case_type_case_keyword;
+            case_type_type_keyword;
+            case_type_name;
+            case_type_generic_parameter;
+            case_type_as;
+            case_type_bounds;
+            case_type_equal;
+            case_type_variants;
+            case_type_semicolon;
+          ] ) ->
+        CaseTypeDeclaration
+          {
+            case_type_attribute_spec;
+            case_type_modifiers;
+            case_type_case_keyword;
+            case_type_type_keyword;
+            case_type_name;
+            case_type_generic_parameter;
+            case_type_as;
+            case_type_bounds;
+            case_type_equal;
+            case_type_variants;
+            case_type_semicolon;
+          }
+      | ( SyntaxKind.CaseTypeVariant,
+          [
+            case_type_variant_bar;
+            case_type_variant_type;
+            case_type_variant_where_clause;
+          ] ) ->
+        CaseTypeVariant
+          {
+            case_type_variant_bar;
+            case_type_variant_type;
+            case_type_variant_where_clause;
           }
       | ( SyntaxKind.PropertyDeclaration,
           [
@@ -6118,7 +6769,6 @@ module WithToken (Token : TokenType) = struct
             classish_extends_list;
             classish_implements_keyword;
             classish_implements_list;
-            classish_where_clause;
             classish_body;
           ] ) ->
         ClassishDeclaration
@@ -6133,7 +6783,6 @@ module WithToken (Token : TokenType) = struct
             classish_extends_list;
             classish_implements_keyword;
             classish_implements_list;
-            classish_where_clause;
             classish_body;
           }
       | ( SyntaxKind.ClassishBody,
@@ -6148,48 +6797,6 @@ module WithToken (Token : TokenType) = struct
             classish_body_elements;
             classish_body_right_brace;
           }
-      | ( SyntaxKind.TraitUsePrecedenceItem,
-          [
-            trait_use_precedence_item_name;
-            trait_use_precedence_item_keyword;
-            trait_use_precedence_item_removed_names;
-          ] ) ->
-        TraitUsePrecedenceItem
-          {
-            trait_use_precedence_item_name;
-            trait_use_precedence_item_keyword;
-            trait_use_precedence_item_removed_names;
-          }
-      | ( SyntaxKind.TraitUseAliasItem,
-          [
-            trait_use_alias_item_aliasing_name;
-            trait_use_alias_item_keyword;
-            trait_use_alias_item_modifiers;
-            trait_use_alias_item_aliased_name;
-          ] ) ->
-        TraitUseAliasItem
-          {
-            trait_use_alias_item_aliasing_name;
-            trait_use_alias_item_keyword;
-            trait_use_alias_item_modifiers;
-            trait_use_alias_item_aliased_name;
-          }
-      | ( SyntaxKind.TraitUseConflictResolution,
-          [
-            trait_use_conflict_resolution_keyword;
-            trait_use_conflict_resolution_names;
-            trait_use_conflict_resolution_left_brace;
-            trait_use_conflict_resolution_clauses;
-            trait_use_conflict_resolution_right_brace;
-          ] ) ->
-        TraitUseConflictResolution
-          {
-            trait_use_conflict_resolution_keyword;
-            trait_use_conflict_resolution_names;
-            trait_use_conflict_resolution_left_brace;
-            trait_use_conflict_resolution_clauses;
-            trait_use_conflict_resolution_right_brace;
-          }
       | ( SyntaxKind.TraitUse,
           [trait_use_keyword; trait_use_names; trait_use_semicolon] ) ->
         TraitUse { trait_use_keyword; trait_use_names; trait_use_semicolon }
@@ -6197,6 +6804,22 @@ module WithToken (Token : TokenType) = struct
           [require_keyword; require_kind; require_name; require_semicolon] ) ->
         RequireClause
           { require_keyword; require_kind; require_name; require_semicolon }
+      | ( SyntaxKind.RequireClauseConstraint,
+          [
+            require_constraint_keyword;
+            require_constraint_this;
+            require_constraint_operator;
+            require_constraint_name;
+            require_constraint_semicolon;
+          ] ) ->
+        RequireClauseConstraint
+          {
+            require_constraint_keyword;
+            require_constraint_this;
+            require_constraint_operator;
+            require_constraint_name;
+            require_constraint_semicolon;
+          }
       | ( SyntaxKind.ConstDeclaration,
           [
             const_attribute_spec;
@@ -6273,37 +6896,44 @@ module WithToken (Token : TokenType) = struct
           [decorated_expression_decorator; decorated_expression_expression] ) ->
         DecoratedExpression
           { decorated_expression_decorator; decorated_expression_expression }
+      | ( SyntaxKind.NamedArgument,
+          [named_argument_name; named_argument_equal; named_argument_expression]
+        ) ->
+        NamedArgument
+          {
+            named_argument_name;
+            named_argument_equal;
+            named_argument_expression;
+          }
       | ( SyntaxKind.ParameterDeclaration,
           [
             parameter_attribute;
             parameter_visibility;
+            parameter_optional;
             parameter_call_convention;
+            parameter_named;
             parameter_readonly;
+            parameter_pre_ellipsis;
             parameter_type;
+            parameter_ellipsis;
             parameter_name;
             parameter_default_value;
+            parameter_parameter_end;
           ] ) ->
         ParameterDeclaration
           {
             parameter_attribute;
             parameter_visibility;
+            parameter_optional;
             parameter_call_convention;
+            parameter_named;
             parameter_readonly;
+            parameter_pre_ellipsis;
             parameter_type;
+            parameter_ellipsis;
             parameter_name;
             parameter_default_value;
-          }
-      | ( SyntaxKind.VariadicParameter,
-          [
-            variadic_parameter_call_convention;
-            variadic_parameter_type;
-            variadic_parameter_ellipsis;
-          ] ) ->
-        VariadicParameter
-          {
-            variadic_parameter_call_convention;
-            variadic_parameter_type;
-            variadic_parameter_ellipsis;
+            parameter_parameter_end;
           }
       | ( SyntaxKind.OldAttributeSpecification,
           [
@@ -6317,11 +6947,6 @@ module WithToken (Token : TokenType) = struct
             old_attribute_specification_attributes;
             old_attribute_specification_right_double_angle;
           }
-      | (SyntaxKind.AttributeSpecification, [attribute_specification_attributes])
-        ->
-        AttributeSpecification { attribute_specification_attributes }
-      | (SyntaxKind.Attribute, [attribute_at; attribute_attribute_name]) ->
-        Attribute { attribute_at; attribute_attribute_name }
       | (SyntaxKind.InclusionExpression, [inclusion_require; inclusion_filename])
         ->
         InclusionExpression { inclusion_require; inclusion_filename }
@@ -6356,6 +6981,24 @@ module WithToken (Token : TokenType) = struct
             unset_variables;
             unset_right_paren;
             unset_semicolon;
+          }
+      | ( SyntaxKind.DeclareLocalStatement,
+          [
+            declare_local_keyword;
+            declare_local_variable;
+            declare_local_colon;
+            declare_local_type;
+            declare_local_initializer;
+            declare_local_semicolon;
+          ] ) ->
+        DeclareLocalStatement
+          {
+            declare_local_keyword;
+            declare_local_variable;
+            declare_local_colon;
+            declare_local_type;
+            declare_local_initializer;
+            declare_local_semicolon;
           }
       | ( SyntaxKind.UsingStatementBlockScoped,
           [
@@ -6412,7 +7055,6 @@ module WithToken (Token : TokenType) = struct
             if_condition;
             if_right_paren;
             if_statement;
-            if_elseif_clauses;
             if_else_clause;
           ] ) ->
         IfStatement
@@ -6422,24 +7064,7 @@ module WithToken (Token : TokenType) = struct
             if_condition;
             if_right_paren;
             if_statement;
-            if_elseif_clauses;
             if_else_clause;
-          }
-      | ( SyntaxKind.ElseifClause,
-          [
-            elseif_keyword;
-            elseif_left_paren;
-            elseif_condition;
-            elseif_right_paren;
-            elseif_statement;
-          ] ) ->
-        ElseifClause
-          {
-            elseif_keyword;
-            elseif_left_paren;
-            elseif_condition;
-            elseif_right_paren;
-            elseif_statement;
           }
       | (SyntaxKind.ElseClause, [else_keyword; else_statement]) ->
         ElseClause { else_keyword; else_statement }
@@ -6586,6 +7211,38 @@ module WithToken (Token : TokenType) = struct
         CaseLabel { case_keyword; case_expression; case_colon }
       | (SyntaxKind.DefaultLabel, [default_keyword; default_colon]) ->
         DefaultLabel { default_keyword; default_colon }
+      | ( SyntaxKind.MatchStatement,
+          [
+            match_statement_keyword;
+            match_statement_left_paren;
+            match_statement_expression;
+            match_statement_right_paren;
+            match_statement_left_brace;
+            match_statement_arms;
+            match_statement_right_brace;
+          ] ) ->
+        MatchStatement
+          {
+            match_statement_keyword;
+            match_statement_left_paren;
+            match_statement_expression;
+            match_statement_right_paren;
+            match_statement_left_brace;
+            match_statement_arms;
+            match_statement_right_brace;
+          }
+      | ( SyntaxKind.MatchStatementArm,
+          [
+            match_statement_arm_pattern;
+            match_statement_arm_arrow;
+            match_statement_arm_body;
+          ] ) ->
+        MatchStatementArm
+          {
+            match_statement_arm_pattern;
+            match_statement_arm_arrow;
+            match_statement_arm_body;
+          }
       | ( SyntaxKind.ReturnStatement,
           [return_keyword; return_expression; return_semicolon] ) ->
         ReturnStatement { return_keyword; return_expression; return_semicolon }
@@ -6639,6 +7296,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_attribute_spec;
             anonymous_async_keyword;
             anonymous_function_keyword;
+            anonymous_type_parameters;
             anonymous_left_paren;
             anonymous_parameters;
             anonymous_right_paren;
@@ -6654,6 +7312,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_attribute_spec;
             anonymous_async_keyword;
             anonymous_function_keyword;
+            anonymous_type_parameters;
             anonymous_left_paren;
             anonymous_parameters;
             anonymous_right_paren;
@@ -6678,6 +7337,34 @@ module WithToken (Token : TokenType) = struct
             anonymous_use_variables;
             anonymous_use_right_paren;
           }
+      | (SyntaxKind.VariablePattern, [variable_pattern_variable]) ->
+        VariablePattern { variable_pattern_variable }
+      | ( SyntaxKind.ConstructorPattern,
+          [
+            constructor_pattern_constructor;
+            constructor_pattern_left_paren;
+            constructor_pattern_members;
+            constructor_pattern_right_paren;
+          ] ) ->
+        ConstructorPattern
+          {
+            constructor_pattern_constructor;
+            constructor_pattern_left_paren;
+            constructor_pattern_members;
+            constructor_pattern_right_paren;
+          }
+      | ( SyntaxKind.RefinementPattern,
+          [
+            refinement_pattern_variable;
+            refinement_pattern_colon;
+            refinement_pattern_specifier;
+          ] ) ->
+        RefinementPattern
+          {
+            refinement_pattern_variable;
+            refinement_pattern_colon;
+            refinement_pattern_specifier;
+          }
       | ( SyntaxKind.LambdaExpression,
           [
             lambda_attribute_spec;
@@ -6696,6 +7383,8 @@ module WithToken (Token : TokenType) = struct
           }
       | ( SyntaxKind.LambdaSignature,
           [
+            lambda_function_keyword;
+            lambda_type_parameters;
             lambda_left_paren;
             lambda_parameters;
             lambda_right_paren;
@@ -6706,6 +7395,8 @@ module WithToken (Token : TokenType) = struct
           ] ) ->
         LambdaSignature
           {
+            lambda_function_keyword;
+            lambda_type_parameters;
             lambda_left_paren;
             lambda_parameters;
             lambda_right_paren;
@@ -6818,6 +7509,8 @@ module WithToken (Token : TokenType) = struct
             isset_argument_list;
             isset_right_paren;
           }
+      | (SyntaxKind.NameofExpression, [nameof_keyword; nameof_target]) ->
+        NameofExpression { nameof_keyword; nameof_target }
       | ( SyntaxKind.FunctionCallExpression,
           [
             function_call_receiver;
@@ -7257,7 +7950,6 @@ module WithToken (Token : TokenType) = struct
             type_reified;
             type_variance;
             type_name;
-            type_param_params;
             type_constraints;
           ] ) ->
         TypeParameter
@@ -7266,7 +7958,6 @@ module WithToken (Token : TokenType) = struct
             type_reified;
             type_variance;
             type_name;
-            type_param_params;
             type_constraints;
           }
       | (SyntaxKind.TypeConstraint, [constraint_keyword; constraint_type]) ->
@@ -7313,6 +8004,7 @@ module WithToken (Token : TokenType) = struct
             closure_outer_left_paren;
             closure_readonly_keyword;
             closure_function_keyword;
+            closure_type_parameters;
             closure_inner_left_paren;
             closure_parameter_list;
             closure_inner_right_paren;
@@ -7327,6 +8019,7 @@ module WithToken (Token : TokenType) = struct
             closure_outer_left_paren;
             closure_readonly_keyword;
             closure_function_keyword;
+            closure_type_parameters;
             closure_inner_left_paren;
             closure_parameter_list;
             closure_inner_right_paren;
@@ -7338,15 +8031,91 @@ module WithToken (Token : TokenType) = struct
           }
       | ( SyntaxKind.ClosureParameterTypeSpecifier,
           [
+            closure_parameter_optional;
             closure_parameter_call_convention;
+            closure_parameter_named;
             closure_parameter_readonly;
+            closure_parameter_pre_ellipsis;
             closure_parameter_type;
+            closure_parameter_name;
+            closure_parameter_ellipsis;
           ] ) ->
         ClosureParameterTypeSpecifier
           {
+            closure_parameter_optional;
             closure_parameter_call_convention;
+            closure_parameter_named;
             closure_parameter_readonly;
+            closure_parameter_pre_ellipsis;
             closure_parameter_type;
+            closure_parameter_name;
+            closure_parameter_ellipsis;
+          }
+      | ( SyntaxKind.TupleOrUnionOrIntersectionElementTypeSpecifier,
+          [
+            tuple_or_union_or_intersection_element_optional;
+            tuple_or_union_or_intersection_element_pre_ellipsis;
+            tuple_or_union_or_intersection_element_type;
+            tuple_or_union_or_intersection_element_ellipsis;
+          ] ) ->
+        TupleOrUnionOrIntersectionElementTypeSpecifier
+          {
+            tuple_or_union_or_intersection_element_optional;
+            tuple_or_union_or_intersection_element_pre_ellipsis;
+            tuple_or_union_or_intersection_element_type;
+            tuple_or_union_or_intersection_element_ellipsis;
+          }
+      | ( SyntaxKind.TypeRefinement,
+          [
+            type_refinement_type;
+            type_refinement_keyword;
+            type_refinement_left_brace;
+            type_refinement_members;
+            type_refinement_right_brace;
+          ] ) ->
+        TypeRefinement
+          {
+            type_refinement_type;
+            type_refinement_keyword;
+            type_refinement_left_brace;
+            type_refinement_members;
+            type_refinement_right_brace;
+          }
+      | ( SyntaxKind.TypeInRefinement,
+          [
+            type_in_refinement_keyword;
+            type_in_refinement_name;
+            type_in_refinement_type_parameters;
+            type_in_refinement_constraints;
+            type_in_refinement_equal;
+            type_in_refinement_type;
+          ] ) ->
+        TypeInRefinement
+          {
+            type_in_refinement_keyword;
+            type_in_refinement_name;
+            type_in_refinement_type_parameters;
+            type_in_refinement_constraints;
+            type_in_refinement_equal;
+            type_in_refinement_type;
+          }
+      | ( SyntaxKind.CtxInRefinement,
+          [
+            ctx_in_refinement_keyword;
+            ctx_in_refinement_name;
+            ctx_in_refinement_type_parameters;
+            ctx_in_refinement_constraints;
+            ctx_in_refinement_equal;
+            ctx_in_refinement_ctx_list;
+          ] ) ->
+        CtxInRefinement
+          {
+            ctx_in_refinement_keyword;
+            ctx_in_refinement_name;
+            ctx_in_refinement_type_parameters;
+            ctx_in_refinement_constraints;
+            ctx_in_refinement_equal;
+            ctx_in_refinement_ctx_list;
           }
       | ( SyntaxKind.ClassnameTypeSpecifier,
           [
@@ -7363,6 +8132,22 @@ module WithToken (Token : TokenType) = struct
             classname_type;
             classname_trailing_comma;
             classname_right_angle;
+          }
+      | ( SyntaxKind.ClassPtrTypeSpecifier,
+          [
+            class_ptr_keyword;
+            class_ptr_left_angle;
+            class_ptr_type;
+            class_ptr_trailing_comma;
+            class_ptr_right_angle;
+          ] ) ->
+        ClassPtrTypeSpecifier
+          {
+            class_ptr_keyword;
+            class_ptr_left_angle;
+            class_ptr_type;
+            class_ptr_trailing_comma;
+            class_ptr_right_angle;
           }
       | ( SyntaxKind.FieldSpecifier,
           [field_question; field_name; field_arrow; field_type] ) ->
@@ -7500,7 +8285,8 @@ module WithToken (Token : TokenType) = struct
       | ( SyntaxKind.ModuleDeclaration,
           [
             module_declaration_attribute_spec;
-            module_declaration_keyword;
+            module_declaration_new_keyword;
+            module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
             module_declaration_right_brace;
@@ -7508,11 +8294,28 @@ module WithToken (Token : TokenType) = struct
         ModuleDeclaration
           {
             module_declaration_attribute_spec;
-            module_declaration_keyword;
+            module_declaration_new_keyword;
+            module_declaration_module_keyword;
             module_declaration_name;
             module_declaration_left_brace;
             module_declaration_right_brace;
           }
+      | ( SyntaxKind.ModuleMembershipDeclaration,
+          [
+            module_membership_declaration_module_keyword;
+            module_membership_declaration_name;
+            module_membership_declaration_semicolon;
+          ] ) ->
+        ModuleMembershipDeclaration
+          {
+            module_membership_declaration_module_keyword;
+            module_membership_declaration_name;
+            module_membership_declaration_semicolon;
+          }
+      | ( SyntaxKind.PackageExpression,
+          [package_expression_keyword; package_expression_name] ) ->
+        PackageExpression
+          { package_expression_keyword; package_expression_name }
       | (SyntaxKind.Missing, []) -> Missing
       | (SyntaxKind.SyntaxList, items) -> SyntaxList items
       | _ ->
@@ -7522,12 +8325,11 @@ module WithToken (Token : TokenType) = struct
       let rec aux acc nodes =
         match nodes with
         | [] -> acc
-        | h :: t ->
-          begin
-            match syntax h with
-            | Token token -> aux (token :: acc) t
-            | _ -> aux (aux acc (children h)) t
-          end
+        | h :: t -> begin
+          match syntax h with
+          | Token token -> aux (token :: acc) t
+          | _ -> aux (aux acc (children h)) t
+        end
       in
       List.rev (aux [] [node])
 
@@ -7581,6 +8383,11 @@ module WithToken (Token : TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
+      let make_module_name module_name_parts =
+        let syntax = ModuleName { module_name_parts } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
       let make_simple_type_specifier simple_type_specifier =
         let syntax = SimpleTypeSpecifier { simple_type_specifier } in
         let value = ValueBuilder.value_from_syntax syntax in
@@ -7602,14 +8409,14 @@ module WithToken (Token : TokenType) = struct
       let make_prefixed_code_expression
           prefixed_code_prefix
           prefixed_code_left_backtick
-          prefixed_code_expression
+          prefixed_code_body
           prefixed_code_right_backtick =
         let syntax =
           PrefixedCodeExpression
             {
               prefixed_code_prefix;
               prefixed_code_left_backtick;
-              prefixed_code_expression;
+              prefixed_code_body;
               prefixed_code_right_backtick;
             }
         in
@@ -7647,6 +8454,7 @@ module WithToken (Token : TokenType) = struct
 
       let make_enum_declaration
           enum_attribute_spec
+          enum_modifiers
           enum_keyword
           enum_name
           enum_colon
@@ -7660,6 +8468,7 @@ module WithToken (Token : TokenType) = struct
           EnumDeclaration
             {
               enum_attribute_spec;
+              enum_modifiers;
               enum_keyword;
               enum_name;
               enum_colon;
@@ -7750,6 +8559,8 @@ module WithToken (Token : TokenType) = struct
 
       let make_alias_declaration
           alias_attribute_spec
+          alias_modifiers
+          alias_module_kw_opt
           alias_keyword
           alias_name
           alias_generic_parameter
@@ -7761,6 +8572,8 @@ module WithToken (Token : TokenType) = struct
           AliasDeclaration
             {
               alias_attribute_spec;
+              alias_modifiers;
+              alias_module_kw_opt;
               alias_keyword;
               alias_name;
               alias_generic_parameter;
@@ -7793,6 +8606,52 @@ module WithToken (Token : TokenType) = struct
               ctx_alias_equal;
               ctx_alias_context;
               ctx_alias_semicolon;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_case_type_declaration
+          case_type_attribute_spec
+          case_type_modifiers
+          case_type_case_keyword
+          case_type_type_keyword
+          case_type_name
+          case_type_generic_parameter
+          case_type_as
+          case_type_bounds
+          case_type_equal
+          case_type_variants
+          case_type_semicolon =
+        let syntax =
+          CaseTypeDeclaration
+            {
+              case_type_attribute_spec;
+              case_type_modifiers;
+              case_type_case_keyword;
+              case_type_type_keyword;
+              case_type_name;
+              case_type_generic_parameter;
+              case_type_as;
+              case_type_bounds;
+              case_type_equal;
+              case_type_variants;
+              case_type_semicolon;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_case_type_variant
+          case_type_variant_bar
+          case_type_variant_type
+          case_type_variant_where_clause =
+        let syntax =
+          CaseTypeVariant
+            {
+              case_type_variant_bar;
+              case_type_variant_type;
+              case_type_variant_where_clause;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in
@@ -8037,7 +8896,6 @@ module WithToken (Token : TokenType) = struct
           classish_extends_list
           classish_implements_keyword
           classish_implements_list
-          classish_where_clause
           classish_body =
         let syntax =
           ClassishDeclaration
@@ -8052,7 +8910,6 @@ module WithToken (Token : TokenType) = struct
               classish_extends_list;
               classish_implements_keyword;
               classish_implements_list;
-              classish_where_clause;
               classish_body;
             }
         in
@@ -8074,57 +8931,6 @@ module WithToken (Token : TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
-      let make_trait_use_precedence_item
-          trait_use_precedence_item_name
-          trait_use_precedence_item_keyword
-          trait_use_precedence_item_removed_names =
-        let syntax =
-          TraitUsePrecedenceItem
-            {
-              trait_use_precedence_item_name;
-              trait_use_precedence_item_keyword;
-              trait_use_precedence_item_removed_names;
-            }
-        in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_trait_use_alias_item
-          trait_use_alias_item_aliasing_name
-          trait_use_alias_item_keyword
-          trait_use_alias_item_modifiers
-          trait_use_alias_item_aliased_name =
-        let syntax =
-          TraitUseAliasItem
-            {
-              trait_use_alias_item_aliasing_name;
-              trait_use_alias_item_keyword;
-              trait_use_alias_item_modifiers;
-              trait_use_alias_item_aliased_name;
-            }
-        in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_trait_use_conflict_resolution
-          trait_use_conflict_resolution_keyword
-          trait_use_conflict_resolution_names
-          trait_use_conflict_resolution_left_brace
-          trait_use_conflict_resolution_clauses
-          trait_use_conflict_resolution_right_brace =
-        let syntax =
-          TraitUseConflictResolution
-            {
-              trait_use_conflict_resolution_keyword;
-              trait_use_conflict_resolution_names;
-              trait_use_conflict_resolution_left_brace;
-              trait_use_conflict_resolution_clauses;
-              trait_use_conflict_resolution_right_brace;
-            }
-        in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
       let make_trait_use trait_use_keyword trait_use_names trait_use_semicolon =
         let syntax =
           TraitUse { trait_use_keyword; trait_use_names; trait_use_semicolon }
@@ -8137,6 +8943,25 @@ module WithToken (Token : TokenType) = struct
         let syntax =
           RequireClause
             { require_keyword; require_kind; require_name; require_semicolon }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_require_clause_constraint
+          require_constraint_keyword
+          require_constraint_this
+          require_constraint_operator
+          require_constraint_name
+          require_constraint_semicolon =
+        let syntax =
+          RequireClauseConstraint
+            {
+              require_constraint_keyword;
+              require_constraint_this;
+              require_constraint_operator;
+              require_constraint_name;
+              require_constraint_semicolon;
+            }
         in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
@@ -8236,39 +9061,47 @@ module WithToken (Token : TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
-      let make_parameter_declaration
-          parameter_attribute
-          parameter_visibility
-          parameter_call_convention
-          parameter_readonly
-          parameter_type
-          parameter_name
-          parameter_default_value =
+      let make_named_argument
+          named_argument_name named_argument_equal named_argument_expression =
         let syntax =
-          ParameterDeclaration
+          NamedArgument
             {
-              parameter_attribute;
-              parameter_visibility;
-              parameter_call_convention;
-              parameter_readonly;
-              parameter_type;
-              parameter_name;
-              parameter_default_value;
+              named_argument_name;
+              named_argument_equal;
+              named_argument_expression;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
-      let make_variadic_parameter
-          variadic_parameter_call_convention
-          variadic_parameter_type
-          variadic_parameter_ellipsis =
+      let make_parameter_declaration
+          parameter_attribute
+          parameter_visibility
+          parameter_optional
+          parameter_call_convention
+          parameter_named
+          parameter_readonly
+          parameter_pre_ellipsis
+          parameter_type
+          parameter_ellipsis
+          parameter_name
+          parameter_default_value
+          parameter_parameter_end =
         let syntax =
-          VariadicParameter
+          ParameterDeclaration
             {
-              variadic_parameter_call_convention;
-              variadic_parameter_type;
-              variadic_parameter_ellipsis;
+              parameter_attribute;
+              parameter_visibility;
+              parameter_optional;
+              parameter_call_convention;
+              parameter_named;
+              parameter_readonly;
+              parameter_pre_ellipsis;
+              parameter_type;
+              parameter_ellipsis;
+              parameter_name;
+              parameter_default_value;
+              parameter_parameter_end;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in
@@ -8286,18 +9119,6 @@ module WithToken (Token : TokenType) = struct
               old_attribute_specification_right_double_angle;
             }
         in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_attribute_specification attribute_specification_attributes =
-        let syntax =
-          AttributeSpecification { attribute_specification_attributes }
-        in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_attribute attribute_at attribute_attribute_name =
-        let syntax = Attribute { attribute_at; attribute_attribute_name } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
@@ -8360,6 +9181,27 @@ module WithToken (Token : TokenType) = struct
               unset_variables;
               unset_right_paren;
               unset_semicolon;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_declare_local_statement
+          declare_local_keyword
+          declare_local_variable
+          declare_local_colon
+          declare_local_type
+          declare_local_initializer
+          declare_local_semicolon =
+        let syntax =
+          DeclareLocalStatement
+            {
+              declare_local_keyword;
+              declare_local_variable;
+              declare_local_colon;
+              declare_local_type;
+              declare_local_initializer;
+              declare_local_semicolon;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in
@@ -8428,7 +9270,6 @@ module WithToken (Token : TokenType) = struct
           if_condition
           if_right_paren
           if_statement
-          if_elseif_clauses
           if_else_clause =
         let syntax =
           IfStatement
@@ -8438,27 +9279,7 @@ module WithToken (Token : TokenType) = struct
               if_condition;
               if_right_paren;
               if_statement;
-              if_elseif_clauses;
               if_else_clause;
-            }
-        in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_elseif_clause
-          elseif_keyword
-          elseif_left_paren
-          elseif_condition
-          elseif_right_paren
-          elseif_statement =
-        let syntax =
-          ElseifClause
-            {
-              elseif_keyword;
-              elseif_left_paren;
-              elseif_condition;
-              elseif_right_paren;
-              elseif_statement;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in
@@ -8646,6 +9467,44 @@ module WithToken (Token : TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
+      let make_match_statement
+          match_statement_keyword
+          match_statement_left_paren
+          match_statement_expression
+          match_statement_right_paren
+          match_statement_left_brace
+          match_statement_arms
+          match_statement_right_brace =
+        let syntax =
+          MatchStatement
+            {
+              match_statement_keyword;
+              match_statement_left_paren;
+              match_statement_expression;
+              match_statement_right_paren;
+              match_statement_left_brace;
+              match_statement_arms;
+              match_statement_right_brace;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_match_statement_arm
+          match_statement_arm_pattern
+          match_statement_arm_arrow
+          match_statement_arm_body =
+        let syntax =
+          MatchStatementArm
+            {
+              match_statement_arm_pattern;
+              match_statement_arm_arrow;
+              match_statement_arm_body;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
       let make_return_statement
           return_keyword return_expression return_semicolon =
         let syntax =
@@ -8737,6 +9596,7 @@ module WithToken (Token : TokenType) = struct
           anonymous_attribute_spec
           anonymous_async_keyword
           anonymous_function_keyword
+          anonymous_type_parameters
           anonymous_left_paren
           anonymous_parameters
           anonymous_right_paren
@@ -8752,6 +9612,7 @@ module WithToken (Token : TokenType) = struct
               anonymous_attribute_spec;
               anonymous_async_keyword;
               anonymous_function_keyword;
+              anonymous_type_parameters;
               anonymous_left_paren;
               anonymous_parameters;
               anonymous_right_paren;
@@ -8783,6 +9644,43 @@ module WithToken (Token : TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
+      let make_variable_pattern variable_pattern_variable =
+        let syntax = VariablePattern { variable_pattern_variable } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_constructor_pattern
+          constructor_pattern_constructor
+          constructor_pattern_left_paren
+          constructor_pattern_members
+          constructor_pattern_right_paren =
+        let syntax =
+          ConstructorPattern
+            {
+              constructor_pattern_constructor;
+              constructor_pattern_left_paren;
+              constructor_pattern_members;
+              constructor_pattern_right_paren;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_refinement_pattern
+          refinement_pattern_variable
+          refinement_pattern_colon
+          refinement_pattern_specifier =
+        let syntax =
+          RefinementPattern
+            {
+              refinement_pattern_variable;
+              refinement_pattern_colon;
+              refinement_pattern_specifier;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
       let make_lambda_expression
           lambda_attribute_spec
           lambda_async
@@ -8803,6 +9701,8 @@ module WithToken (Token : TokenType) = struct
         make syntax value
 
       let make_lambda_signature
+          lambda_function_keyword
+          lambda_type_parameters
           lambda_left_paren
           lambda_parameters
           lambda_right_paren
@@ -8813,6 +9713,8 @@ module WithToken (Token : TokenType) = struct
         let syntax =
           LambdaSignature
             {
+              lambda_function_keyword;
+              lambda_type_parameters;
               lambda_left_paren;
               lambda_parameters;
               lambda_right_paren;
@@ -8988,6 +9890,11 @@ module WithToken (Token : TokenType) = struct
               isset_right_paren;
             }
         in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_nameof_expression nameof_keyword nameof_target =
+        let syntax = NameofExpression { nameof_keyword; nameof_target } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
@@ -9557,7 +10464,6 @@ module WithToken (Token : TokenType) = struct
           type_reified
           type_variance
           type_name
-          type_param_params
           type_constraints =
         let syntax =
           TypeParameter
@@ -9566,7 +10472,6 @@ module WithToken (Token : TokenType) = struct
               type_reified;
               type_variance;
               type_name;
-              type_param_params;
               type_constraints;
             }
         in
@@ -9630,6 +10535,7 @@ module WithToken (Token : TokenType) = struct
           closure_outer_left_paren
           closure_readonly_keyword
           closure_function_keyword
+          closure_type_parameters
           closure_inner_left_paren
           closure_parameter_list
           closure_inner_right_paren
@@ -9644,6 +10550,7 @@ module WithToken (Token : TokenType) = struct
               closure_outer_left_paren;
               closure_readonly_keyword;
               closure_function_keyword;
+              closure_type_parameters;
               closure_inner_left_paren;
               closure_parameter_list;
               closure_inner_right_paren;
@@ -9658,15 +10565,103 @@ module WithToken (Token : TokenType) = struct
         make syntax value
 
       let make_closure_parameter_type_specifier
+          closure_parameter_optional
           closure_parameter_call_convention
+          closure_parameter_named
           closure_parameter_readonly
-          closure_parameter_type =
+          closure_parameter_pre_ellipsis
+          closure_parameter_type
+          closure_parameter_name
+          closure_parameter_ellipsis =
         let syntax =
           ClosureParameterTypeSpecifier
             {
+              closure_parameter_optional;
               closure_parameter_call_convention;
+              closure_parameter_named;
               closure_parameter_readonly;
+              closure_parameter_pre_ellipsis;
               closure_parameter_type;
+              closure_parameter_name;
+              closure_parameter_ellipsis;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_tuple_or_union_or_intersection_element_type_specifier
+          tuple_or_union_or_intersection_element_optional
+          tuple_or_union_or_intersection_element_pre_ellipsis
+          tuple_or_union_or_intersection_element_type
+          tuple_or_union_or_intersection_element_ellipsis =
+        let syntax =
+          TupleOrUnionOrIntersectionElementTypeSpecifier
+            {
+              tuple_or_union_or_intersection_element_optional;
+              tuple_or_union_or_intersection_element_pre_ellipsis;
+              tuple_or_union_or_intersection_element_type;
+              tuple_or_union_or_intersection_element_ellipsis;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_type_refinement
+          type_refinement_type
+          type_refinement_keyword
+          type_refinement_left_brace
+          type_refinement_members
+          type_refinement_right_brace =
+        let syntax =
+          TypeRefinement
+            {
+              type_refinement_type;
+              type_refinement_keyword;
+              type_refinement_left_brace;
+              type_refinement_members;
+              type_refinement_right_brace;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_type_in_refinement
+          type_in_refinement_keyword
+          type_in_refinement_name
+          type_in_refinement_type_parameters
+          type_in_refinement_constraints
+          type_in_refinement_equal
+          type_in_refinement_type =
+        let syntax =
+          TypeInRefinement
+            {
+              type_in_refinement_keyword;
+              type_in_refinement_name;
+              type_in_refinement_type_parameters;
+              type_in_refinement_constraints;
+              type_in_refinement_equal;
+              type_in_refinement_type;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_ctx_in_refinement
+          ctx_in_refinement_keyword
+          ctx_in_refinement_name
+          ctx_in_refinement_type_parameters
+          ctx_in_refinement_constraints
+          ctx_in_refinement_equal
+          ctx_in_refinement_ctx_list =
+        let syntax =
+          CtxInRefinement
+            {
+              ctx_in_refinement_keyword;
+              ctx_in_refinement_name;
+              ctx_in_refinement_type_parameters;
+              ctx_in_refinement_constraints;
+              ctx_in_refinement_equal;
+              ctx_in_refinement_ctx_list;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in
@@ -9686,6 +10681,25 @@ module WithToken (Token : TokenType) = struct
               classname_type;
               classname_trailing_comma;
               classname_right_angle;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_class_ptr_type_specifier
+          class_ptr_keyword
+          class_ptr_left_angle
+          class_ptr_type
+          class_ptr_trailing_comma
+          class_ptr_right_angle =
+        let syntax =
+          ClassPtrTypeSpecifier
+            {
+              class_ptr_keyword;
+              class_ptr_left_angle;
+              class_ptr_type;
+              class_ptr_trailing_comma;
+              class_ptr_right_angle;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in
@@ -9899,7 +10913,8 @@ module WithToken (Token : TokenType) = struct
 
       let make_module_declaration
           module_declaration_attribute_spec
-          module_declaration_keyword
+          module_declaration_new_keyword
+          module_declaration_module_keyword
           module_declaration_name
           module_declaration_left_brace
           module_declaration_right_brace =
@@ -9907,11 +10922,36 @@ module WithToken (Token : TokenType) = struct
           ModuleDeclaration
             {
               module_declaration_attribute_spec;
-              module_declaration_keyword;
+              module_declaration_new_keyword;
+              module_declaration_module_keyword;
               module_declaration_name;
               module_declaration_left_brace;
               module_declaration_right_brace;
             }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_module_membership_declaration
+          module_membership_declaration_module_keyword
+          module_membership_declaration_name
+          module_membership_declaration_semicolon =
+        let syntax =
+          ModuleMembershipDeclaration
+            {
+              module_membership_declaration_module_keyword;
+              module_membership_declaration_name;
+              module_membership_declaration_semicolon;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_package_expression
+          package_expression_keyword package_expression_name =
+        let syntax =
+          PackageExpression
+            { package_expression_keyword; package_expression_name }
         in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
@@ -9980,6 +11020,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_attribute_spec;
             anonymous_async_keyword;
             anonymous_function_keyword;
+            anonymous_type_parameters;
             anonymous_left_paren;
             anonymous_parameters;
             anonymous_right_paren;
@@ -9995,6 +11036,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_attribute_spec;
             anonymous_async_keyword;
             anonymous_function_keyword;
+            anonymous_type_parameters;
             anonymous_left_paren;
             anonymous_parameters;
             anonymous_right_paren;
@@ -10025,6 +11067,8 @@ module WithToken (Token : TokenType) = struct
 
       let from_lambda_signature
           {
+            lambda_function_keyword;
+            lambda_type_parameters;
             lambda_left_paren;
             lambda_parameters;
             lambda_right_paren;
@@ -10035,6 +11079,8 @@ module WithToken (Token : TokenType) = struct
           } =
         LambdaSignature
           {
+            lambda_function_keyword;
+            lambda_type_parameters;
             lambda_left_paren;
             lambda_parameters;
             lambda_right_paren;
@@ -10049,6 +11095,7 @@ module WithToken (Token : TokenType) = struct
             closure_outer_left_paren;
             closure_readonly_keyword;
             closure_function_keyword;
+            closure_type_parameters;
             closure_inner_left_paren;
             closure_parameter_list;
             closure_inner_right_paren;
@@ -10063,6 +11110,7 @@ module WithToken (Token : TokenType) = struct
             closure_outer_left_paren;
             closure_readonly_keyword;
             closure_function_keyword;
+            closure_type_parameters;
             closure_inner_left_paren;
             closure_parameter_list;
             closure_inner_right_paren;
@@ -10147,6 +11195,7 @@ module WithToken (Token : TokenType) = struct
               anonymous_attribute_spec;
               anonymous_async_keyword;
               anonymous_function_keyword;
+              anonymous_type_parameters;
               anonymous_left_paren;
               anonymous_parameters;
               anonymous_right_paren;
@@ -10161,6 +11210,7 @@ module WithToken (Token : TokenType) = struct
             anonymous_attribute_spec;
             anonymous_async_keyword;
             anonymous_function_keyword;
+            anonymous_type_parameters;
             anonymous_left_paren;
             anonymous_parameters;
             anonymous_right_paren;
@@ -10196,6 +11246,8 @@ module WithToken (Token : TokenType) = struct
         match x with
         | LambdaSignature
             {
+              lambda_function_keyword;
+              lambda_type_parameters;
               lambda_left_paren;
               lambda_parameters;
               lambda_right_paren;
@@ -10205,6 +11257,8 @@ module WithToken (Token : TokenType) = struct
               lambda_type;
             } ->
           {
+            lambda_function_keyword;
+            lambda_type_parameters;
             lambda_left_paren;
             lambda_parameters;
             lambda_right_paren;
@@ -10222,6 +11276,7 @@ module WithToken (Token : TokenType) = struct
               closure_outer_left_paren;
               closure_readonly_keyword;
               closure_function_keyword;
+              closure_type_parameters;
               closure_inner_left_paren;
               closure_parameter_list;
               closure_inner_right_paren;
@@ -10235,6 +11290,7 @@ module WithToken (Token : TokenType) = struct
             closure_outer_left_paren;
             closure_readonly_keyword;
             closure_function_keyword;
+            closure_type_parameters;
             closure_inner_left_paren;
             closure_parameter_list;
             closure_inner_right_paren;

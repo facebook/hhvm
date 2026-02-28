@@ -5,7 +5,7 @@ class myHeap extends SplHeap
     public $allow_compare = true;
 
     public function compare($v1, $v2)
-    {
+:mixed    {
         if ($this->allow_compare == true)
         {
             if ($v1 > $v2)

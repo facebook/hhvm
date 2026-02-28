@@ -1,9 +1,9 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function boolstr($b) { return $b ? "TRUE" : "FALSE"; }
+function boolstr($b) :mixed{ return $b ? "TRUE" : "FALSE"; }
 
-function direct_test_dv_arrays($v) {
+function direct_test_dv_arrays($v) :mixed{
   echo "============= direct_test_dv_arrays ================\n";
   echo "value => ";
   var_dump($v);
@@ -13,20 +13,20 @@ function direct_test_dv_arrays($v) {
   echo "gettype => " . gettype($v2) . "\n";
 }
 
-function indirect_test_dv_arrays($v, $tests) {
+function indirect_test_dv_arrays($v, $tests) :mixed{
   echo "============= indirect_test_dv_arrays ==============\n";
   echo "value => ";
   var_dump($v);
   $v2 = __hhvm_intrinsics\launder_value($v);
   foreach ($tests as $c) {
     echo "$c => " . (($c === "gettype")
-                     ? __hhvm_intrinsics\launder_value($c)($v2)
-                     : boolstr(__hhvm_intrinsics\launder_value($c)($v2)))
+                     ? HH\dynamic_fun(__hhvm_intrinsics\launder_value($c))($v2)
+                     : boolstr(HH\dynamic_fun(__hhvm_intrinsics\launder_value($c))($v2)))
                   . "\n";
   }
 }
 
-function direct_test_others($v) {
+function direct_test_others($v) :mixed{
   echo "============= direct_test_others ===================\n";
   echo "value => ";
   var_dump($v);
@@ -45,18 +45,18 @@ function direct_test_others($v) {
   echo "is_scalar => " . boolstr(is_scalar($v2)) . "\n";
 }
 
-function indirect_test_others($v, $tests) {
+function indirect_test_others($v, $tests) :mixed{
   echo "============= indirect_test_others =================\n";
   echo "value => ";
   var_dump($v);
   $v2 = __hhvm_intrinsics\launder_value($v);
   foreach ($tests as $c) {
     $c2 = __hhvm_intrinsics\launder_value($c);
-    echo "$c => " . boolstr($c2($v)) . "\n";
+    echo "$c => " . boolstr(HH\dynamic_fun($c2)($v)) . "\n";
   }
 }
 
-function test1() {
+function test1() :mixed{
   $values = vec[
     null,
     false,
@@ -72,27 +72,27 @@ function test1() {
     dict['abc' => 100, 200 => 'def'],
     keyset[],
     keyset['a', 100, 'b'],
-    varray[],
-    varray[1, 2, 3],
-    darray[],
-    darray[100 => 'abc', 'def' => 200],
-    darray[0 => 'a', 1 => 'b', 2 => 'c'],
-       varray[
+    vec[],
+    vec[1, 2, 3],
+    dict[],
+    dict[100 => 'abc', 'def' => 200],
+    dict[0 => 'a', 1 => 'b', 2 => 'c'],
+       vec[
       __hhvm_intrinsics\launder_value('x'),
       __hhvm_intrinsics\launder_value('y'),
       __hhvm_intrinsics\launder_value('z'),
     ],
-    darray[
+    dict[
       0 => __hhvm_intrinsics\launder_value(123),
       1 => __hhvm_intrinsics\launder_value(456),
       2 => __hhvm_intrinsics\launder_value(789)
     ],
-    darray[
+    dict[
       'x' => __hhvm_intrinsics\launder_value(123),
       'y' => __hhvm_intrinsics\launder_value(456),
       'z' => __hhvm_intrinsics\launder_value(789)
     ],
-    darray[
+    dict[
       __hhvm_intrinsics\launder_value(66) => __hhvm_intrinsics\launder_value(11),
       __hhvm_intrinsics\launder_value(55) => __hhvm_intrinsics\launder_value(22),
       __hhvm_intrinsics\launder_value(44) => __hhvm_intrinsics\launder_value(33)
@@ -109,29 +109,29 @@ function test1() {
   foreach ($values as $v) { indirect_test_dv_arrays($v, $tests); }
 }
 
-function test2() {
+function test2() :mixed{
   $values = vec[
-    varray[],
-    varray[1, 2, 3],
-    darray[],
-    darray[100 => 'abc', 'def' => 200],
-    darray[0 => 'a', 1 => 'b', 2 => 'c'],
-    varray[
+    vec[],
+    vec[1, 2, 3],
+    dict[],
+    dict[100 => 'abc', 'def' => 200],
+    dict[0 => 'a', 1 => 'b', 2 => 'c'],
+    vec[
       __hhvm_intrinsics\launder_value('x'),
       __hhvm_intrinsics\launder_value('y'),
       __hhvm_intrinsics\launder_value('z'),
     ],
-    darray[
+    dict[
       0 => __hhvm_intrinsics\launder_value(123),
       1 => __hhvm_intrinsics\launder_value(456),
       2 => __hhvm_intrinsics\launder_value(789)
     ],
-    darray[
+    dict[
       'x' => __hhvm_intrinsics\launder_value(123),
       'y' => __hhvm_intrinsics\launder_value(456),
       'z' => __hhvm_intrinsics\launder_value(789)
     ],
-    darray[
+    dict[
       __hhvm_intrinsics\launder_value(66) => __hhvm_intrinsics\launder_value(11),
       __hhvm_intrinsics\launder_value(55) => __hhvm_intrinsics\launder_value(22),
       __hhvm_intrinsics\launder_value(44) => __hhvm_intrinsics\launder_value(33)
@@ -157,7 +157,7 @@ function test2() {
   foreach ($values as $v) { indirect_test_others($v, $tests); }
 }
 
-function test3() {
+function test3() :mixed{
   echo "============= constant-folding ===================\n";
   var_dump(is_varray(123));
   var_dump(is_darray(123));
@@ -168,38 +168,38 @@ function test3() {
   var_dump(is_varray(dict[0 => 'a', 1 => 'b']));
   var_dump(is_darray(dict[0 => 'a', 1 => 'b']));
 
-  var_dump(gettype(varray[]));
-  var_dump(HH\is_php_array(varray[]));
-  var_dump(is_vec(varray[]));
-  var_dump(is_dict(varray[]));
-  var_dump(is_varray(varray[]));
-  var_dump(is_darray(varray[]));
+  var_dump(gettype(vec[]));
+  var_dump(HH\is_php_array(vec[]));
+  var_dump(is_vec(vec[]));
+  var_dump(is_dict(vec[]));
+  var_dump(is_varray(vec[]));
+  var_dump(is_darray(vec[]));
 
-  var_dump(gettype(darray[]));
-  var_dump(HH\is_php_array(darray[]));
-  var_dump(is_vec(darray[]));
-  var_dump(is_dict(darray[]));
-  var_dump(is_varray(darray[]));
-  var_dump(is_darray(darray[]));
+  var_dump(gettype(dict[]));
+  var_dump(HH\is_php_array(dict[]));
+  var_dump(is_vec(dict[]));
+  var_dump(is_dict(dict[]));
+  var_dump(is_varray(dict[]));
+  var_dump(is_darray(dict[]));
 
-  var_dump(gettype(varray['a', 'b', 'c']));
-  var_dump(HH\is_php_array(varray['a', 'b', 'c']));
-  var_dump(is_vec(varray['a', 'b', 'c']));
-  var_dump(is_dict(varray['a', 'b', 'c']));
-  var_dump(is_varray(varray['a', 'b', 'c']));
-  var_dump(is_darray(varray['a', 'b', 'c']));
+  var_dump(gettype(vec['a', 'b', 'c']));
+  var_dump(HH\is_php_array(vec['a', 'b', 'c']));
+  var_dump(is_vec(vec['a', 'b', 'c']));
+  var_dump(is_dict(vec['a', 'b', 'c']));
+  var_dump(is_varray(vec['a', 'b', 'c']));
+  var_dump(is_darray(vec['a', 'b', 'c']));
 
-  var_dump(gettype(darray[0 => 'a', 1 => 'b', 2 => 'c']));
-  var_dump(HH\is_php_array(darray[0 => 'a', 1 => 'b', 2 => 'c']));
-  var_dump(is_vec(darray[0 => 'a', 1 => 'b', 2 => 'c']));
-  var_dump(is_dict(darray[0 => 'a', 1 => 'b', 2 => 'c']));
-  var_dump(is_varray(darray[0 => 'a', 1 => 'b', 2 => 'c']));
-  var_dump(is_darray(darray[0 => 'a', 1 => 'b', 2 => 'c']));
+  var_dump(gettype(dict[0 => 'a', 1 => 'b', 2 => 'c']));
+  var_dump(HH\is_php_array(dict[0 => 'a', 1 => 'b', 2 => 'c']));
+  var_dump(is_vec(dict[0 => 'a', 1 => 'b', 2 => 'c']));
+  var_dump(is_dict(dict[0 => 'a', 1 => 'b', 2 => 'c']));
+  var_dump(is_varray(dict[0 => 'a', 1 => 'b', 2 => 'c']));
+  var_dump(is_darray(dict[0 => 'a', 1 => 'b', 2 => 'c']));
 }
 
 
 <<__EntryPoint>>
-function main_is_a() {
+function main_is_a() :mixed{
 test1();
 test2();
 test3();

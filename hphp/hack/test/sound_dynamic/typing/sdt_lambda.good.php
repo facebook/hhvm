@@ -2,7 +2,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 <<file:__EnableUnstableFeatures('upcast_expression')>>
 
-function expectSupportDynamic(supportdynamic $_):void { }
+function expectSupportDynamic(supportdyn<nonnull> $_):void { }
 function expectDynamic(dynamic $_):void { }
 function expectPrecise<T1,T2>((function(T1):T2) $_):void { }
 function expectLike<T1,T2>(~(function(T1):T2) $_):void { }

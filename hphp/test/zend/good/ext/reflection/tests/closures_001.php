@@ -23,13 +23,13 @@ var_dump($rm->getNumberOfRequiredParameters());
 
 echo "---\n";
 
-$rp = new ReflectionParameter(varray[$closure, '__invoke'], 0);
+$rp = new ReflectionParameter(vec[$closure, '__invoke'], 0);
 var_dump($rp->isOptional());
-$rp = new ReflectionParameter(varray[$closure, '__invoke'], 1);
+$rp = new ReflectionParameter(vec[$closure, '__invoke'], 1);
 var_dump($rp->isOptional());
-$rp = new ReflectionParameter(varray[$closure, '__invoke'], 'a');
+$rp = new ReflectionParameter(vec[$closure, '__invoke'], 'a');
 var_dump($rp->isOptional());
-$rp = new ReflectionParameter(varray[$closure, '__invoke'], 'b');
+$rp = new ReflectionParameter(vec[$closure, '__invoke'], 'b');
 var_dump($rp->isOptional());
 
 echo "---\n";

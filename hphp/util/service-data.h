@@ -101,7 +101,7 @@ struct ExportedTimeSeries;
 namespace detail {
 template <class ClassWithPrivateDestructor>
 struct FriendDeleter;
-};
+}
 
 enum class StatsType { AVG, SUM, RATE, COUNT, PCT };
 
@@ -110,6 +110,8 @@ enum class StatsType { AVG, SUM, RATE, COUNT, PCT };
  * already been created.
  */
 ExportedCounter* createCounter(const std::string& name);
+
+ExportedCounter* getCounterIfExists(const std::string& name);
 
 /*
  * Callback-based counters
@@ -134,26 +136,28 @@ ExportedCounter* createCounter(const std::string& name);
  * int64_t> being populated, so one callback can add many counters (callbacks
  * can also remove or modify existing counters, but this is discouraged).
  */
-using CounterFunc = std::function<void(std::map<std::string, int64_t>&)>;
+using CounterMap = std::map<std::string, int64_t>;
+using CounterFunc = std::function<void(CounterMap&)>;
 using CounterHandle = uint32_t;
 
-CounterHandle registerCounterCallback(CounterFunc func);
+CounterHandle registerCounterCallback(CounterFunc func, bool expensive);
 void deregisterCounterCallback(CounterHandle key);
 
-struct CounterCallback {
-  CounterCallback() = default;
+template<bool expensive>
+struct CounterCallbackBase {
+ CounterCallbackBase() = default;
 
-  explicit CounterCallback(CounterFunc func) {
+ explicit CounterCallbackBase(CounterFunc func) {
     init(std::move(func));
   }
 
-  ~CounterCallback() {
+  ~CounterCallbackBase() {
     deinit();
   }
 
   void init(CounterFunc func) {
     assertx(!m_key);
-    m_key = registerCounterCallback(std::move(func));
+    m_key = registerCounterCallback(std::move(func), expensive);
   }
 
   void deinit() {
@@ -167,11 +171,14 @@ private:
   Optional<CounterHandle> m_key;
 };
 
+using CounterCallback = CounterCallbackBase<false>;
+using ExpensiveCounterCallback = CounterCallbackBase<true>;
+
 /*
  * Create a timeseries counter named 'name'. Return an existing one if it
  * has already been created.
  *
- * Timeseries data is implemented as a number of buckets (buckted by time).
+ * Timeseries data is implemented as a number of buckets (bucketed by time).
  * As data point is added and time rolls forward, new bucket is created and
  * the earliest bucket expires.
  *
@@ -206,8 +213,9 @@ ExportedTimeSeries* createTimeSeries(
 /*
  * Create a histogram counter named 'name'. Return an existing one if it has
  * already been created.
+ * The number of buckets is (max - min) / bucketSize
  *
- * 'bucketSize' specifies how many buckets to track for the histogram.
+ * 'bucketSize' specifies the size of each bucket
  * 'min' is the minimal value in the histogram.
  * 'max' is the maximal value in the histogram.
  * 'exportPercentile' specifies at what percentile values we should report the
@@ -224,7 +232,13 @@ ExportedHistogram* createHistogram(
 /*
  * Export all the statistics as simple key, value pairs.
  */
-void exportAll(std::map<std::string, int64_t>& statsMap);
+void exportAll(CounterMap& statsMap);
+
+/*
+ * Export the selected statistics as simple key, value pairs.
+ */
+void exportSelectedCountersByKeys(
+  CounterMap& statsMap, const std::vector<std::string>& keys);
 
 /*
  * Export a specific counter by key name.
@@ -234,15 +248,15 @@ Optional<int64_t> exportCounterByKey(const std::string& key);
 // Interface for a flat counter. All methods are thread safe.
 struct ExportedCounter {
   ExportedCounter() : m_value(0) {}
-  void increment() { m_value.fetch_add(1, std::memory_order_relaxed); }
-  void decrement() { m_value.fetch_sub(1, std::memory_order_relaxed); }
+  void increment() { m_value.fetch_add(1, std::memory_order_acq_rel); }
+  void decrement() { m_value.fetch_sub(1, std::memory_order_acq_rel); }
   void addValue(int64_t value) {
-    m_value.fetch_add(value, std::memory_order_relaxed);
+    m_value.fetch_add(value, std::memory_order_acq_rel);
   }
   void setValue(int64_t value) {
-    m_value.store(value, std::memory_order_relaxed);
+    m_value.store(value, std::memory_order_release);
   }
-  int64_t getValue() const { return m_value.load(std::memory_order_relaxed); }
+  int64_t getValue() const { return m_value.load(std::memory_order_acquire); }
 
  private:
   friend struct detail::FriendDeleter<ExportedCounter>;
@@ -266,8 +280,7 @@ struct ExportedTimeSeries {
 
   Optional<int64_t> getCounter(StatsType type, int seconds);
 
-  void exportAll(const std::string& prefix,
-                 std::map<std::string, int64_t>& statsMap);
+  void exportAll(const std::string& prefix, CounterMap& statsMap);
 
  private:
   friend struct detail::FriendDeleter<ExportedTimeSeries>;
@@ -283,8 +296,7 @@ struct ExportedHistogram {
                     const std::vector<double>& exportPercentiles);
   void addValue(int64_t value);
   void removeValue(int64_t value);
-  void exportAll(const std::string& prefix,
-                 std::map<std::string, int64_t>& statsMap);
+  void exportAll(const std::string& prefix, CounterMap& statsMap);
 
  private:
   friend struct detail::FriendDeleter<ExportedHistogram>;
@@ -294,7 +306,7 @@ struct ExportedHistogram {
   const std::vector<double> m_exportPercentiles;
 };
 
-};  // namespace ServiceData
+}  // namespace ServiceData
 
 ///////////////////////////////////////////////////////////////////////////////
 }

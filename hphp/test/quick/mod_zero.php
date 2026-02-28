@@ -1,10 +1,10 @@
 <?hh
 
-function one() {
+function one() :mixed{
   return 1;
 }
 
-function main() {
+function main() :mixed{
   var_dump(one() % 0);
 }
 

@@ -1,6 +1,6 @@
 <?hh
 
-function errorHandler($errno, $errstr, $errfile, $errline, $vars) {
+function errorHandler($errno, $errstr, $errfile, $errline, $vars) :mixed{
     throw new Exception('Some Exception');
 }
 <<__EntryPoint>> function main(): void {

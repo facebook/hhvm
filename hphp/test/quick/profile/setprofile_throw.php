@@ -1,32 +1,32 @@
 <?hh
 
 
-function throwing_profiler($case, $func) {
+function throwing_profiler($case, $func) :mixed{
   if ($case == 'enter' && ($func == 'bar' || $func == 'baz')) {
     throw new Exception("yeah");
   }
 }
 
-function bar() { echo "bar()\n"; }
-function baz() { echo "baz()\n"; }
+function bar() :mixed{ echo "bar()\n"; }
+function baz() :mixed{ echo "baz()\n"; }
 
-function foo($f) {
+function foo($f) :mixed{
   $f();
 }
 
-function signal_thrower() {
+function signal_thrower() :mixed{
   echo "signal throwing\n";
   throw new Exception("Sig exception");
 }
 
-function func_to_enter() {}
+function func_to_enter() :mixed{}
 
 class DtorObj {
   public function __construct($x) { $this->x = $x; echo "__ctor $x\n"; }
 }
 
 // During function exit
-function func_entry() {
+function func_entry() :mixed{
   $x1 = new DtorObj(1);
   $x2 = new DtorObj(2);
   $x3 = new DtorObj(3);
@@ -52,7 +52,7 @@ function func_entry() {
 }
 
 // During backward branches
-function func_backward() {
+function func_backward() :mixed{
   $x1 = new DtorObj(1);
   $x2 = new DtorObj(2);
   $x3 = new DtorObj(3);
@@ -77,7 +77,7 @@ function func_backward() {
   for ($i = 0; $i < 2; ++$i) {}
 }
 
-function main() {
+function main() :mixed{
 // Test throwing on function entry
   fb_setprofile('throwing_profiler');
   try { foo('bar'); } catch (Exception $x) { echo "Caught\n"; }

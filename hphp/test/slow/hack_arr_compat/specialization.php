@@ -1,9 +1,9 @@
 <?hh
 
-class ClsMethTest { static function fn() {} }
+class ClsMethTest { static function fn() :mixed{} }
 
 // Run a function and print either the result or the error thrown.
-function run($fn) {
+function run($fn) :mixed{
   try {
     print(json_encode($fn())."\n");
   } catch (Exception $e) {
@@ -12,8 +12,8 @@ function run($fn) {
 }
 
 // Display $x in a way that distinguishes arrays, varrays, and darrays.
-function display($x) {
-  if ($x === class_meth(ClsMethTest::class, 'fn')) return 'clsmeth';
+function display($x) :mixed{
+  if ($x === ClsMethTest::fn<>) return 'clsmeth';
   $result = __hhvm_intrinsics\serialize_keep_dvarrays($x)[0];
   $lookup = dict[
     'a'=>'array',
@@ -26,10 +26,10 @@ function display($x) {
 }
 
 // Test that as/is shape/tuple does dvarray checks.
-function test_as_is_shape_tuple() {
+function test_as_is_shape_tuple() :mixed{
   print("\n=====================================\nas/is shape/tuple:\n");
   print("\n");
-  $darray = darray['a' => 17, 'b' => false];
+  $darray = dict['a' => 17, 'b' => false];
   $varray = varray($darray);
   foreach (vec[$varray, $darray] as $input) {
     print(display($input).' as shape: ');
@@ -38,7 +38,7 @@ function test_as_is_shape_tuple() {
     run(() ==> $input is shape('a' => int, 'b' => bool));
   }
   print("\n");
-  $varray = varray['a', false];
+  $varray = vec['a', false];
   $darray = darray($varray);
   foreach (vec[$varray, $darray] as $input) {
     print(display($input).' as tuple: ');
@@ -49,19 +49,19 @@ function test_as_is_shape_tuple() {
 }
 
 // Test that we print specialized types in builtin errors.
-function test_builtin_error_messages() {
+function test_builtin_error_messages() :mixed{
   print("\n=====================================\nBuiltin errors:\n");
   print('Passing boolean to darray: ');
   run(() ==> __hhvm_intrinsics\dummy_darray_builtin(false));
   print('Passing darray to boolean: ');
-  run(() ==> json_decode('[]', darray[]));
+  run(() ==> json_decode('[]', dict[]));
 }
 
 // Test that builtins enforce dvarray-ness of inputs.
-function test_builtin_enforcement() {
+function test_builtin_enforcement() :mixed{
   print("\n=====================================\nBuiltins:\n");
-  $clsmeth = class_meth(ClsMethTest::class, 'fn');
-  foreach (vec[varray[], darray[], $clsmeth] as $input) {
+  $clsmeth = ClsMethTest::fn<>;
+  foreach (vec[vec[], dict[], $clsmeth] as $input) {
     print('Passing '.display($input).' to varray: ');
     run(() ==> __hhvm_intrinsics\dummy_varray_builtin($input));
     print('Passing '.display($input).' to darray: ');
@@ -70,10 +70,10 @@ function test_builtin_enforcement() {
 }
 
 // Test all possible triples of (a1 type, a2 type, comparison operator).
-function test_darray_varray_comparisons() {
+function test_darray_varray_comparisons() :mixed{
   print("\n=====================================\nComparisons:\n");
-  $varray = varray[2, 3, 5];
-  $darray = darray[0 => 2, 1 => 3, 2 => 5];
+  $varray = vec[2, 3, 5];
+  $darray = dict[0 => 2, 1 => 3, 2 => 5];
   $vec = vec[2, 3, 5];
   $dict = dict[0 => 2, 1 => 3, 2 => 5];
   foreach (vec[$varray, $darray, $vec, $dict] as $a1) {
@@ -91,21 +91,21 @@ function test_darray_varray_comparisons() {
 }
 
 // A direct test of the "implicit append" behavior. Note that we also test it
-// in test_varray_ops when $x is varray[2, 3, 5] and we set $x[3] to 'oh no'.
-function test_varray_implicit_append() {
+// in test_varray_ops when $x is vec[2, 3, 5] and we set $x[3] to 'oh no'.
+function test_varray_implicit_append() :mixed{
   print("\n=====================================\nImplicit append:\n");
-  run(() ==> { $x = varray[]; $x[0] = 'implicit append'; return $x; });
+  run(() ==> { $x = vec[]; $x[0] = 'implicit append'; return $x; });
 }
 
 // We use arrays of three different lengths, so that we can test varray ops
 // with "valid index before the last index", "last index", and "OOB index".
 //
 // This test tests varray unset, varray set string, and implicit append.
-function test_varray_ops() {
+function test_varray_ops() :mixed{
   $inputs = vec[
-    varray[2, 3],
-    varray[2, 3, 5],
-    varray[2, 3, 5, 7],
+    vec[2, 3],
+    vec[2, 3, 5],
+    vec[2, 3, 5, 7],
   ];
   foreach ($inputs as $i => $x) {
     print("\n=====================================\nTest $i:\n");
@@ -117,17 +117,8 @@ function test_varray_ops() {
   }
 }
 
-// We're testing many fatal errors here; we do so by keeping a count and
-// running the test multiple times (since a fatal ends the test...)
-function get_count() {
-  $count = __hhvm_intrinsics\apc_fetch_no_check('count');
-  $count = $count ? $count : 0;
-  apc_store('count', $count + 1);
-  return $count;
-}
-
-function takes_varray(varray $x) { return 'varray to varray: OK!'; }
-function takes_darray(darray $x) { return 'darray to darray: OK!'; }
+function takes_varray(varray $x) :mixed{ return 'varray to varray: OK!'; }
+function takes_darray(darray $x) :mixed{ return 'darray to darray: OK!'; }
 function returns_varray($fn): varray { return $fn(); }
 function returns_darray($fn): darray { return $fn(); }
 class C {
@@ -139,35 +130,36 @@ class D extends C {
 }
 
 // Test that regular Hack function typehints are enforced.
-function test_typehint_enforcement(int $count) {
-  if (!$count) print("\n=====================================\nTypehints:\n");
-  $clsmeth = class_meth(ClsMethTest::class, 'fn');
-  foreach (vec[varray[], darray[], $clsmeth] as $input) {
-    if (!($count--)) run(() ==> takes_varray($input));
-    if (!($count--)) run(() ==> takes_darray($input));
+function test_typehint_enforcement() :mixed{
+  print("\n=====================================\nTypehints:\n");
+  $clsmeth = ClsMethTest::fn<>;
+  foreach (vec[vec[], dict[], $clsmeth] as $input) {
+    run(() ==> takes_varray($input));
+    run(() ==> takes_darray($input));
   }
-  foreach (vec[varray[], darray[], $clsmeth] as $input) {
-    if (!($count--)) run(() ==> returns_varray(() ==> $input));
-    if (!($count--)) run(() ==> returns_darray(() ==> $input));
+  foreach (vec[vec[], dict[], $clsmeth] as $input) {
+    run(() ==> returns_varray(() ==> $input));
+    run(() ==> returns_darray(() ==> $input));
   }
   $c = new C();
-  foreach (vec[varray[], darray[], $clsmeth] as $input) {
-    if (!($count--)) run(() ==> $c->v = $input);
-    if (!($count--)) run(() ==> $c->d = $input);
+  foreach (vec[vec[], dict[], $clsmeth] as $input) {
+    run(() ==> $c->v = $input);
+    run(() ==> $c->d = $input);
   }
-  if (!($count--)) $d = new D();
+  run(() ==> new D());
 }
 
 <<__EntryPoint>>
-function main() {
-  $count = get_count();
-  if (!$count) {
-    test_as_is_shape_tuple();
-    test_builtin_error_messages();
-    test_builtin_enforcement();
-    test_darray_varray_comparisons();
-    test_varray_implicit_append();
-    test_varray_ops();
-  }
-  test_typehint_enforcement($count);
+function main() :mixed{
+  set_error_handler(($errno, $errstr, ...$_rest)==> {
+    throw new Exception($errstr);
+  });
+
+  test_as_is_shape_tuple();
+  test_builtin_error_messages();
+  test_builtin_enforcement();
+  test_darray_varray_comparisons();
+  test_varray_implicit_append();
+  test_varray_ops();
+  test_typehint_enforcement();
 }

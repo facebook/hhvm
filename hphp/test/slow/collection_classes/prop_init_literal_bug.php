@@ -4,7 +4,7 @@ class Foo {
 }
 
 <<__EntryPoint>>
-function main_prop_init_literal_bug() {
+function main_prop_init_literal_bug() :mixed{
 $obj = new Foo();
 echo "Done\n";
 }

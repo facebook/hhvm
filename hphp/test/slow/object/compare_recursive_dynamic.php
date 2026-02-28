@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   $recur = new stdClass();
   $recur->recur = $recur;
   $recur2 = new stdClass();
@@ -14,6 +14,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_compare_recursive_dynamic() {
+function main_compare_recursive_dynamic() :mixed{
 main();
 }

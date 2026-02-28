@@ -7,7 +7,7 @@ class Foo {
 }
 
 <<__EntryPoint>>
-function main_1851() {
+function main_1851() :mixed{
 $foo = new Foo;
 $foo->a = function ($x) {
  echo '!' . $x;
@@ -19,7 +19,7 @@ Foo::$b = function ($x) {
  }
 ;
 (Foo::$b)("bar\n");
-Foo::$c = varray[function ($x) {
+Foo::$c = vec[function ($x) {
  echo '.' . $x;
 }]
 ;

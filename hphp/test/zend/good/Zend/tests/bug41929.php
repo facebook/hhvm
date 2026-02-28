@@ -2,7 +2,7 @@
 class C {
   private $priv = "ok";
 
-  function doLoop() {
+  function doLoop() :mixed{
     echo $this->priv,"\n";
     foreach ($this as $k=>$v) {
       echo "$k: $v\n";

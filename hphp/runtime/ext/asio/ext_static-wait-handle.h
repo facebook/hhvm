@@ -32,9 +32,12 @@ namespace HPHP {
  * of the operation is always available and waiting for the wait handle finishes
  * immediately.
  */
-struct c_StaticWaitHandle final : c_Awaitable {
-  WAITHANDLE_CLASSOF(StaticWaitHandle);
-  WAITHANDLE_DTOR(StaticWaitHandle);
+struct c_StaticWaitHandle final :
+    c_Awaitable,
+    SystemLib::ClassLoader<"HH\\StaticWaitHandle"> {
+  using SystemLib::ClassLoader<"HH\\StaticWaitHandle">::classof;
+  using SystemLib::ClassLoader<"HH\\StaticWaitHandle">::className;
+  WAITHANDLE_DTOR(StaticWaitHandle)
 
   explicit c_StaticWaitHandle()
     : c_Awaitable(c_StaticWaitHandle::classof(),

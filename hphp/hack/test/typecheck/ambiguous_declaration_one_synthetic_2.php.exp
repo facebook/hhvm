@@ -1,4 +1,4 @@
-File "ambiguous_declaration_one_synthetic_2.php", line 20, characters 7-8:
+ERROR: File "ambiguous_declaration_one_synthetic_2.php", line 20, characters 7-8:
 Some members in class `B` are incompatible with those declared in type `T1` (Typing[4341])
   File "ambiguous_declaration_one_synthetic_2.php", line 16, characters 19-21:
   The method `foo` is not compatible with the overridden method

@@ -212,6 +212,10 @@ public:
     return m_code;
   }
 
+  void setStreamStatus(StreamStatus stream_status) {
+    m_stream_status = stream_status;
+  }
+
   void swapHelp();
 
   const std::string& getCommand() const {
@@ -431,6 +435,7 @@ private:
   // m_args[i]'s last character is m_line[m_argIdx[i]]
   std::vector<int> m_argIdx;
   std::string m_code;
+  StreamStatus m_stream_status;
 
   std::vector<std::shared_ptr<Macro>> m_macros;
   std::shared_ptr<Macro> m_macroRecording;
@@ -519,4 +524,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
-

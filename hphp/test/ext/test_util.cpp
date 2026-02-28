@@ -27,6 +27,8 @@
     return Count(false);                                                \
   }                                                                     \
 
+using namespace HPHP;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 TestUtil::TestUtil() {
@@ -45,14 +47,14 @@ bool TestUtil::RunTests(const std::string &which) {
 // data types
 
 struct testhash {
-  size_t operator()(const String& s) const {
-    return hash_string_i_unsafe(s.data(), s.size());
+  size_t operator()(const HPHP::String& s) const {
+    return HPHP::hash_string_i_unsafe(s.data(), s.size());
   }
 };
 
 struct testeqstr {
-  bool operator()(const String& s1, const String& s2) const {
-    return string_strcmp(s1.data(), s1.size(), s2.data(), s2.size()) == 0;
+  bool operator()(const HPHP::String& s1, const HPHP::String& s2) const {
+    return HPHP::string_strcmp(s1.data(), s1.size(), s2.data(), s2.size()) == 0;
   }
 };
 
@@ -64,7 +66,7 @@ struct IEq {
 };
 
 bool TestUtil::TestCanonicalize() {
-  VERIFY(FileUtil::canonicalize(String("foo")) == String("foo"));
+  VERIFY(HPHP::FileUtil::canonicalize(HPHP::String("foo")) == HPHP::String("foo"));
   VERIFY(FileUtil::canonicalize(String("/foo")) == String("/foo"));
   VERIFY(FileUtil::canonicalize(String("foo/bar")) == String("foo/bar"));
   VERIFY(FileUtil::canonicalize(String("foo/////bar")) == String("foo/bar"));

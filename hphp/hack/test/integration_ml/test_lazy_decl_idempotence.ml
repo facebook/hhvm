@@ -28,12 +28,16 @@ class Bar {
 
 let expected_errors =
   {|
-File "/foo.php", line 7, characters 9-9:
+ERROR: File "/foo.php", line 7, characters 9-9:
 Please add a type hint (Naming[2035])
 |}
 
 let test () =
-  let env = Test.setup_server () in
+  let env =
+    Test.setup_server
+      ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
+      ()
+  in
   let env =
     Test.setup_disk
       env
@@ -49,84 +53,75 @@ let test () =
     { FileInfo.empty_names with FileInfo.n_classes = SSet.of_list classes }
   in
   let elems = Decl_class_elements.get_for_classes ~old:false classes in
-  Decl_redecl_service.remove_defs ctx ~collect_garbage:false defs elems;
+  Decl_redecl_service.remove_defs ~collect_garbage:false defs ~elems;
   SharedMem.invalidate_local_caches ();
 
   (* Local caches need to be invalidated whenever things are removed from shared
    * memory (to avoid getting cached old versions of declarations) *)
-  let memory_cap = None in
   let check_info =
     {
       Typing_service_types.init_id = "";
       check_reason = "test";
+      log_errors = false;
+      discard_warnings = false;
       recheck_id = Some "";
-      use_max_typechecker_worker_memory_for_decl_deferral = false;
       per_file_profiling = HackEventLogger.PerFileProfilingConfig.default;
       memtrace_dir = None;
     }
   in
-  let delegate_state = Typing_service_delegate.default in
-  let { Typing_check_service.errors; delegate_state; telemetry; _ } =
+  let { Typing_check_service.diagnostics; telemetry; _ } =
     Typing_check_service.go
       ctx
       None
-      delegate_state
       (Telemetry.create ())
       [bar_path]
-      ~memory_cap
+      ~root:None
       ~longlived_workers:false
-      ~hulk_lite:false
-      ~hulk_heavy:false
-      ~remote_execution:None
+      ~hh_distc_config:None
       ~check_info
+      ~warnings_saved_state:None
   in
-  Test.assert_errors errors "";
-  let { Typing_check_service.errors; delegate_state; telemetry; _ } =
+  Test.assert_diagnostics diagnostics "";
+  let { Typing_check_service.diagnostics; telemetry; _ } =
     Typing_check_service.go
       ctx
       None
-      delegate_state
       telemetry
       [bar_path]
-      ~memory_cap
+      ~root:None
       ~longlived_workers:false
-      ~hulk_lite:false
-      ~hulk_heavy:false
-      ~remote_execution:None
+      ~hh_distc_config:None
       ~check_info
+      ~warnings_saved_state:None
   in
-  Test.assert_errors errors "";
+  Test.assert_diagnostics diagnostics "";
 
-  let { Typing_check_service.errors; delegate_state; telemetry; _ } =
+  let { Typing_check_service.diagnostics; telemetry; _ } =
     Typing_check_service.go
       ctx
       None
-      delegate_state
       telemetry
       [foo_path]
-      ~memory_cap
+      ~root:None
       ~longlived_workers:false
-      ~hulk_lite:false
-      ~hulk_heavy:false
-      ~remote_execution:None
+      ~hh_distc_config:None
       ~check_info
+      ~warnings_saved_state:None
   in
-  Test.assert_errors errors expected_errors;
-  let { Typing_check_service.errors; _ } =
+  Test.assert_diagnostics diagnostics expected_errors;
+  let { Typing_check_service.diagnostics; _ } =
     Typing_check_service.go
       ctx
       None
-      delegate_state
       telemetry
       [foo_path]
-      ~memory_cap
+      ~root:None
       ~longlived_workers:false
-      ~hulk_lite:false
-      ~hulk_heavy:false
-      ~remote_execution:None
+      ~hh_distc_config:None
       ~check_info
+      ~warnings_saved_state:None
   in
-  Test.assert_errors errors expected_errors;
+  Test.assert_diagnostics diagnostics expected_errors;
 
   ignore env;
   ()

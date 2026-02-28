@@ -7,10 +7,12 @@
  *)
 
 val expand_ty :
-  ?var_hook:(Ident.t -> unit) ->
+  ?var_hook:(Tvid.t -> unit) ->
   ?pos:Pos.t ->
   Tast_env.env ->
   Typing_defs.locl_ty ->
   Typing_defs.locl_ty
 
 val expand_program : Provider_context.t -> Tast.def list -> Tast.def list
+
+val expand_def : Provider_context.t -> Tast.def -> Tast.def

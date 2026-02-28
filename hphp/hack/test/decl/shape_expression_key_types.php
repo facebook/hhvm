@@ -6,7 +6,7 @@ class C {
   const mixed X = shape(
     0 => 0,
     's' => 's',
-    C::class => C::class,
+    nameof C => C::class,
     C::KEY => C::KEY,
   );
 }

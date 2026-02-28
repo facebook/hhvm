@@ -16,6 +16,6 @@ class D extends C {
 }
 
 <<__EntryPoint>>
-function main_is_expression_ta_nonexistent() {
+function main_is_expression_ta_nonexistent() :mixed{
   (new D)->is_nonexistent(new stdClass());
 }

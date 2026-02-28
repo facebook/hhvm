@@ -1,5 +1,7 @@
 *** Testing fgetcsv() : with negative length value ***
 
+Warning: unlink(%s): No such file or directory in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation25.php on line 30
+
 -- Testing fgetcsv() with file opened using r mode --
 
 Warning: Invalid argument: Length parameter may not be negative in %s/fgetcsv_variation25.php on line 76

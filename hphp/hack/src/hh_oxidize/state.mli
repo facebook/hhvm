@@ -9,9 +9,13 @@
 (** The name of the module currently being converted. *)
 val curr_module_name : unit -> string
 
+(** The mli signature of the module currently being converted, if available. *)
+val curr_mli_signature : unit -> Parsetree.signature option
+
 (** Run the given function in a context where {!curr_module_name} will return
     the given module name. Not re-entrant. *)
-val with_module_name : string -> (unit -> 'a) -> 'a
+val with_module_name :
+  string -> mli_signature:Parsetree.signature option -> (unit -> 'a) -> 'a
 
 (** The name of the type currently being converted. *)
 val self : unit -> string

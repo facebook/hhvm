@@ -1,0 +1,11 @@
+
+Notice: Implicit string to Class conversion for classname C for type_structure() in %s/class-ptr/type-structure-class.php on line 20
+called
+
+Notice: Implicit string to Class conversion for classname C for type_structure() in %s/class-ptr/type-structure-class.php on line 21
+called
+called
+called
+called
+
+Fatal error: when resolving type constant C::TBad, class NoExist not found in %s/class-ptr/type-structure-class.php on line 26

@@ -1,22 +1,26 @@
 <?hh
 
-function test_is_nan($v) {
+function test_is_nan($v) :mixed{
   try { var_dump(is_nan($v)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 
 
 <<__EntryPoint>>
-function main_bad_coercion() {
-$values = varray[
-  0,
-  '0',
-  '0a',
-  ' 0a',
-  ' 0',
-  '00:00:01',
-];
+function main_bad_coercion() :mixed{
+  set_error_handler(($errno, $errstr, ...$_rest) ==> {
+    throw new Exception($errstr);
+});
 
-foreach ($values as $v) {
-  test_is_nan($v);
-}
+  $values = vec[
+    0,
+    '0',
+    '0a',
+    ' 0a',
+    ' 0',
+    '00:00:01',
+  ];
+
+  foreach ($values as $v) {
+    test_is_nan($v);
+  }
 }

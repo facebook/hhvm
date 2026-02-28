@@ -1,0 +1,9 @@
+convert to 'debugger_dump'
+
+<?hh
+
+function foo(): void {
+  if (true) {
+    debugger_dump($foo());
+  }
+}

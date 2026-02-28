@@ -1,7 +1,7 @@
 File "type_structure1.php", line 22, characters 5-44:
   TypeStructure<int>
 File "type_structure1.php", line 23, characters 5-57:
-  classname<C<[unresolved]>>
+  classname<C<_>>
 File "type_structure1.php", line 24, characters 5-57:
   classname<D>
 File "type_structure1.php", line 27, characters 5-30:

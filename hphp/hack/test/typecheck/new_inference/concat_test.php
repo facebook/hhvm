@@ -4,7 +4,7 @@
 function any() /* : Tany */ { return 3; }
 
 ////file2.php
-<?hh// strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
   function testit(num $n, arraykey $ak, bool $b, dynamic $d):void {

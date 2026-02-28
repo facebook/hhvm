@@ -16,20 +16,14 @@
 */
 
 #include "hphp/runtime/ext/generator/ext_generator.h"
-#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/ext/spl/ext_spl.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/base/stats.h"
 
 namespace HPHP {
-
-Class* Generator::s_class = nullptr;
-const StaticString Generator::s_className("Generator");
 
 Generator::Generator()
   : m_index(-1LL)
@@ -83,7 +77,7 @@ ObjectData* Generator::Create(const ActRec* fp, size_t numSlots,
   assertx(fp->func()->isNonAsyncGenerator());
   const size_t frameSz = Resumable::getFrameSize(numSlots);
   const size_t genSz = genSize(sizeof(Generator), frameSz);
-  auto const obj = BaseGenerator::Alloc<Generator>(s_class, genSz);
+  auto const obj = BaseGenerator::Alloc<Generator>(classof(), genSz);
   auto const genData = new (Native::data<Generator>(obj)) Generator();
   genData->resumable()->initialize<false>(fp,
                                           resumeAddr,
@@ -177,17 +171,13 @@ String HHVM_METHOD(Generator, getCalledClass) {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct GeneratorExtension final : Extension {
-  GeneratorExtension() : Extension("generator") {}
+  GeneratorExtension() : Extension("generator", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_ME(Generator, getOrigFuncName);
     HHVM_ME(Generator, getCalledClass);
     Native::registerNativeDataInfo<Generator>(
-      Generator::s_className.get(),
       Native::NDIFlags::NO_SWEEP | Native::NDIFlags::CTOR_THROWS);
-    loadSystemlib("generator");
-    Generator::s_class = Class::lookup(Generator::s_className.get());
-    assertx(Generator::s_class);
   }
 };
 

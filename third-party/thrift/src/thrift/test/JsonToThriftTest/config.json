@@ -1,0 +1,116 @@
+{
+  "vars": {
+    "scheduler_interval": "30",
+    "fbuid": "658211904",
+    "progress_interval": "30",
+    "refiller_interval": "1800"
+  },
+  "whitelist": [
+    {
+      "name": "kernel/tao.spare",
+      "type": "kernel",
+      "contacts": [
+        "florentthoumie", "markdrayton"
+      ],
+      "target_kernel": "2.6.38.4-49_fbk20",
+      "target": "smc(tao.spare, recurse=.*)",
+      "rebooter": "SSHRebooter",
+      "rate": "10/600",
+      "atonce": 10,
+      "watchdogs": [
+        
+      ]
+    }, {
+      "name": "kernel/tao.wcfollow.prn1c05",
+      "type": "kernel",
+      "contacts": [
+        "florentthoumie", "markdrayton"
+      ],
+      "target_kernel": "2.6.38.4-49_fbk20",
+      "target": "smc(tao.wcfollow.prn1c05)",
+      "rebooter": "TaoRebooter",
+      "rate": "1/600",
+      "atonce": 1,
+      "watchdogs": [
+        {
+          "type": "ods",
+          "name": "TAO client seen timeouts",
+          "entity": "obc.www.prn1c05",
+          "key": "tao.errors.timeout",
+          "threshold": 175000.0,
+          "reverse": false
+        }, {
+          "type": "ods",
+          "name": "Cluster webi utilization",
+          "entity": "web.prn1c05.mcc.capacity",
+          "key": "capacity.utilization",
+          "threshold": 80.0,
+          "reverse": false
+        }
+      ]
+    }, {
+      "name": "kernel/memcache.tl2.east",
+      "type": "kernel",
+      "contacts": [
+        "florentthoumie", "markdrayton"
+      ],
+      "target_kernel": "2.6.38.4-49_fbk20",
+      "target": "smc(memcache.tl2.east)",
+      "rebooter": "MemcacheRebooter",
+      "rate": "2/600",
+      "atonce": 2,
+      "watchdogs": [
+        {
+          "type": "ods",
+          "name": "Memcache hit ratio",
+          "entity": "memcache.tl2.east",
+          "key": "mc.curhitratio",
+          "threshold": 60.0,
+          "reverse": true
+        }
+      ]
+    }, {
+      "name": "kernel/memcache.tl2.west",
+      "type": "kernel",
+      "contacts": [
+        "florentthoumie", "markdrayton"
+      ],
+      "target_kernel": "2.6.38.4-49_fbk20",
+      "target": "smc(memcache.tl2.west)",
+      "rebooter": "MemcacheRebooter",
+      "rate": "2/600",
+      "atonce": 2,
+      "watchdogs": [
+        {
+          "type": "ods",
+          "name": "Memcache hit ratio",
+          "entity": "memcache.tl2.west",
+          "key": "mc.curhitratio",
+          "threshold": 60.0,
+          "reverse": true
+        }
+      ]
+    }, {
+      "name": "kernel/memcache.tl2.oregon",
+      "type": "kernel",
+      "contacts": [
+        "florentthoumie", "markdrayton"
+      ],
+      "target_kernel": "2.6.38.4-49_fbk20",
+      "target": "smc(memcache.tl2.oregon)",
+      "rebooter": "MemcacheRebooter",
+      "rate": "2/600",
+      "atonce": 2,
+      "watchdogs": [
+        {
+          "type": "ods",
+          "name": "Memcache hit ratio",
+          "entity": "memcache.tl2.oregon",
+          "key": "mc.curhitratio",
+          "threshold": 60.0,
+          "reverse": true
+        }
+      ]
+    }
+  ]
+}

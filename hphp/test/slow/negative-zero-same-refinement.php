@@ -1,13 +1,13 @@
 <?hh
 
-function positive($a) {
+function positive($a) :mixed{
     if ($a === 0.) {
         echo "it's positive?\n";
         var_dump($a);
     }
 }
 
-function negative($a) {
+function negative($a) :mixed{
     $minuszero = 1 / -\INF;
     if ($a === $minuszero) {
         echo "it's negative?\n";
@@ -16,7 +16,7 @@ function negative($a) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
     $a = 1 / -\INF;
     var_dump($a);
     positive($a);

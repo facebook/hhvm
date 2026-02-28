@@ -1,0 +1,32 @@
+ERROR: File "generic_fun_4.php", line 18, characters 10-22:
+Invalid return type (Typing[4110])
+  File "generic_fun_4.php", line 16, characters 35-37:
+  Expected `int`
+  File "generic_fun_4.php", line 17, characters 11-14:
+  But got `bool`
+  File "generic_fun_4.php", line 12, characters 23-23:
+    via this generic `T`
+ERROR: File "generic_fun_4.php", line 18, characters 10-22:
+Invalid return type (Typing[4110])
+  File "generic_fun_4.php", line 16, characters 60-65:
+  Expected `string`
+  File "generic_fun_4.php", line 17, characters 11-14:
+  But got `bool`
+  File "generic_fun_4.php", line 12, characters 23-23:
+    via this generic `T`
+ERROR: File "generic_fun_4.php", line 18, characters 10-22:
+Invalid return type (Typing[4110])
+  File "generic_fun_4.php", line 17, characters 11-14:
+  Expected `bool`
+  File "generic_fun_4.php", line 12, characters 16-16:
+    via this generic `T`
+  File "generic_fun_4.php", line 16, characters 29-31:
+  But got `int`
+ERROR: File "generic_fun_4.php", line 18, characters 10-22:
+Invalid return type (Typing[4110])
+  File "generic_fun_4.php", line 17, characters 11-14:
+  Expected `bool`
+  File "generic_fun_4.php", line 12, characters 16-16:
+    via this generic `T`
+  File "generic_fun_4.php", line 16, characters 51-56:
+  But got `string`

@@ -9,8 +9,8 @@
 /* If locale is "0", the locale setting is not affected, only the current setting is returned */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing setlocale() : usage variations - setting system locale = 0 ***\n";
-$locale_info_before = varray[];
-$locale_info_after = varray[];
+$locale_info_before = vec[];
+$locale_info_after = vec[];
 
 //initially giving the locale
 setlocale(LC_ALL,"en_US.utf8");

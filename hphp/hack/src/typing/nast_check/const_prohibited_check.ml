@@ -16,7 +16,9 @@ let has_const attrs = Naming_attributes.mem SN.UserAttributes.uaConst attrs
 
 let error_if_const pos attrs =
   if has_const attrs then
-    Errors.experimental_feature pos "The __Const attribute is not supported."
+    Diagnostics.experimental_feature
+      pos
+      "The __Const attribute is not supported."
 
 let handler =
   object

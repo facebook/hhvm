@@ -1,6 +1,4 @@
-hash: =E3=0CClassContext=E8=E3=07=E9=E3=04KEYA, kind: 1
-hash: =E3=0CClassContext=E8=E3=07=E9=E3=04KEYA, kind: 4
-hash: =E3=0CClassContext=E8=E3=07=E9=E3=04KEYA=E3=0DClassContext2=E8=E3=07=
-=E9=E3=04KEYB, kind: 1
-hash: =E3=0CClassContext=E8=E3=07=E9=E3=04KEYA=E3=0DClassContext2=E8=E3=07=
-=E9=E3=04KEYB, kind: 4
+hash: ClassContext, KEYA, kind: 1
+hash: ClassContext, KEYA, kind: 4
+hash: ClassContext2, KEYB, ClassContext, KEYA, kind: 1
+hash: ClassContext2, KEYB, ClassContext, KEYA, kind: 4

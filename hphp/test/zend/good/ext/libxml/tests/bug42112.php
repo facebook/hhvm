@@ -1,6 +1,6 @@
 <?hh
 
-function remove_node($doc) {
+function remove_node($doc) :mixed{
     $node = $doc->getElementById( 'id1' );
     print 'Deleting Node: '.$node->nodeName."\n";
     $node->parentNode->removeChild( $node );

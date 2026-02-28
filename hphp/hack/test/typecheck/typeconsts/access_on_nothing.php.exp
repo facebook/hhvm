@@ -1,0 +1,6 @@
+ERROR: File "access_on_nothing.php", line 8, characters 10-11:
+Invalid return type (Typing[4110])
+  File "access_on_nothing.php", line 7, characters 58-59:
+  Expected `Tm`
+  File "access_on_nothing.php", line 7, characters 47-51:
+  But got `mixed`

@@ -1,5 +1,5 @@
-<?hh // strict
+<?hh
 
 function test(): darray {
-  return darray[];
+  return dict[];
 }

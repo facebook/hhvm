@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_apache_notes() {
+function main_apache_notes() :mixed{
   apache_notes(dict[
     "blarb" => "foo",
     "foo" => "bar",

@@ -26,13 +26,13 @@ module TokenKind = Full_fidelity_token_kind
 module type Syntax_S = sig
   module Token : Lexable_token_sig.LexableToken_S
 
-  type value [@@deriving show, eq]
+  type value [@@deriving show, eq, sexp_of]
 
   type t = {
     syntax: syntax;
     value: value;
   }
-  [@@deriving show, eq]
+  [@@deriving show, eq, sexp_of]
 
   and syntax =
     | Token of Token.t
@@ -41,6 +41,7 @@ module type Syntax_S = sig
     | EndOfFile of { end_of_file_token: t }
     | Script of { script_declarations: t }
     | QualifiedName of { qualified_name_parts: t }
+    | ModuleName of { module_name_parts: t }
     | SimpleTypeSpecifier of { simple_type_specifier: t }
     | LiteralExpression of { literal_expression: t }
     | PrefixedStringExpression of {
@@ -50,7 +51,7 @@ module type Syntax_S = sig
     | PrefixedCodeExpression of {
         prefixed_code_prefix: t;
         prefixed_code_left_backtick: t;
-        prefixed_code_expression: t;
+        prefixed_code_body: t;
         prefixed_code_right_backtick: t;
       }
     | VariableExpression of { variable_expression: t }
@@ -64,6 +65,7 @@ module type Syntax_S = sig
       }
     | EnumDeclaration of {
         enum_attribute_spec: t;
+        enum_modifiers: t;
         enum_keyword: t;
         enum_name: t;
         enum_colon: t;
@@ -108,6 +110,8 @@ module type Syntax_S = sig
       }
     | AliasDeclaration of {
         alias_attribute_spec: t;
+        alias_modifiers: t;
+        alias_module_kw_opt: t;
         alias_keyword: t;
         alias_name: t;
         alias_generic_parameter: t;
@@ -125,6 +129,24 @@ module type Syntax_S = sig
         ctx_alias_equal: t;
         ctx_alias_context: t;
         ctx_alias_semicolon: t;
+      }
+    | CaseTypeDeclaration of {
+        case_type_attribute_spec: t;
+        case_type_modifiers: t;
+        case_type_case_keyword: t;
+        case_type_type_keyword: t;
+        case_type_name: t;
+        case_type_generic_parameter: t;
+        case_type_as: t;
+        case_type_bounds: t;
+        case_type_equal: t;
+        case_type_variants: t;
+        case_type_semicolon: t;
+      }
+    | CaseTypeVariant of {
+        case_type_variant_bar: t;
+        case_type_variant_type: t;
+        case_type_variant_where_clause: t;
       }
     | PropertyDeclaration of {
         property_attribute_spec: t;
@@ -229,31 +251,12 @@ module type Syntax_S = sig
         classish_extends_list: t;
         classish_implements_keyword: t;
         classish_implements_list: t;
-        classish_where_clause: t;
         classish_body: t;
       }
     | ClassishBody of {
         classish_body_left_brace: t;
         classish_body_elements: t;
         classish_body_right_brace: t;
-      }
-    | TraitUsePrecedenceItem of {
-        trait_use_precedence_item_name: t;
-        trait_use_precedence_item_keyword: t;
-        trait_use_precedence_item_removed_names: t;
-      }
-    | TraitUseAliasItem of {
-        trait_use_alias_item_aliasing_name: t;
-        trait_use_alias_item_keyword: t;
-        trait_use_alias_item_modifiers: t;
-        trait_use_alias_item_aliased_name: t;
-      }
-    | TraitUseConflictResolution of {
-        trait_use_conflict_resolution_keyword: t;
-        trait_use_conflict_resolution_names: t;
-        trait_use_conflict_resolution_left_brace: t;
-        trait_use_conflict_resolution_clauses: t;
-        trait_use_conflict_resolution_right_brace: t;
       }
     | TraitUse of {
         trait_use_keyword: t;
@@ -265,6 +268,13 @@ module type Syntax_S = sig
         require_kind: t;
         require_name: t;
         require_semicolon: t;
+      }
+    | RequireClauseConstraint of {
+        require_constraint_keyword: t;
+        require_constraint_this: t;
+        require_constraint_operator: t;
+        require_constraint_name: t;
+        require_constraint_semicolon: t;
       }
     | ConstDeclaration of {
         const_attribute_spec: t;
@@ -305,29 +315,29 @@ module type Syntax_S = sig
         decorated_expression_decorator: t;
         decorated_expression_expression: t;
       }
+    | NamedArgument of {
+        named_argument_name: t;
+        named_argument_equal: t;
+        named_argument_expression: t;
+      }
     | ParameterDeclaration of {
         parameter_attribute: t;
         parameter_visibility: t;
+        parameter_optional: t;
         parameter_call_convention: t;
+        parameter_named: t;
         parameter_readonly: t;
+        parameter_pre_ellipsis: t;
         parameter_type: t;
+        parameter_ellipsis: t;
         parameter_name: t;
         parameter_default_value: t;
-      }
-    | VariadicParameter of {
-        variadic_parameter_call_convention: t;
-        variadic_parameter_type: t;
-        variadic_parameter_ellipsis: t;
+        parameter_parameter_end: t;
       }
     | OldAttributeSpecification of {
         old_attribute_specification_left_double_angle: t;
         old_attribute_specification_attributes: t;
         old_attribute_specification_right_double_angle: t;
-      }
-    | AttributeSpecification of { attribute_specification_attributes: t }
-    | Attribute of {
-        attribute_at: t;
-        attribute_attribute_name: t;
       }
     | InclusionExpression of {
         inclusion_require: t;
@@ -361,6 +371,14 @@ module type Syntax_S = sig
         unset_right_paren: t;
         unset_semicolon: t;
       }
+    | DeclareLocalStatement of {
+        declare_local_keyword: t;
+        declare_local_variable: t;
+        declare_local_colon: t;
+        declare_local_type: t;
+        declare_local_initializer: t;
+        declare_local_semicolon: t;
+      }
     | UsingStatementBlockScoped of {
         using_block_await_keyword: t;
         using_block_using_keyword: t;
@@ -388,15 +406,7 @@ module type Syntax_S = sig
         if_condition: t;
         if_right_paren: t;
         if_statement: t;
-        if_elseif_clauses: t;
         if_else_clause: t;
-      }
-    | ElseifClause of {
-        elseif_keyword: t;
-        elseif_left_paren: t;
-        elseif_condition: t;
-        elseif_right_paren: t;
-        elseif_statement: t;
       }
     | ElseClause of {
         else_keyword: t;
@@ -479,6 +489,20 @@ module type Syntax_S = sig
         default_keyword: t;
         default_colon: t;
       }
+    | MatchStatement of {
+        match_statement_keyword: t;
+        match_statement_left_paren: t;
+        match_statement_expression: t;
+        match_statement_right_paren: t;
+        match_statement_left_brace: t;
+        match_statement_arms: t;
+        match_statement_right_brace: t;
+      }
+    | MatchStatementArm of {
+        match_statement_arm_pattern: t;
+        match_statement_arm_arrow: t;
+        match_statement_arm_body: t;
+      }
     | ReturnStatement of {
         return_keyword: t;
         return_expression: t;
@@ -530,6 +554,7 @@ module type Syntax_S = sig
         anonymous_attribute_spec: t;
         anonymous_async_keyword: t;
         anonymous_function_keyword: t;
+        anonymous_type_parameters: t;
         anonymous_left_paren: t;
         anonymous_parameters: t;
         anonymous_right_paren: t;
@@ -546,6 +571,18 @@ module type Syntax_S = sig
         anonymous_use_variables: t;
         anonymous_use_right_paren: t;
       }
+    | VariablePattern of { variable_pattern_variable: t }
+    | ConstructorPattern of {
+        constructor_pattern_constructor: t;
+        constructor_pattern_left_paren: t;
+        constructor_pattern_members: t;
+        constructor_pattern_right_paren: t;
+      }
+    | RefinementPattern of {
+        refinement_pattern_variable: t;
+        refinement_pattern_colon: t;
+        refinement_pattern_specifier: t;
+      }
     | LambdaExpression of {
         lambda_attribute_spec: t;
         lambda_async: t;
@@ -554,6 +591,8 @@ module type Syntax_S = sig
         lambda_body: t;
       }
     | LambdaSignature of {
+        lambda_function_keyword: t;
+        lambda_type_parameters: t;
         lambda_left_paren: t;
         lambda_parameters: t;
         lambda_right_paren: t;
@@ -643,6 +682,10 @@ module type Syntax_S = sig
         isset_left_paren: t;
         isset_argument_list: t;
         isset_right_paren: t;
+      }
+    | NameofExpression of {
+        nameof_keyword: t;
+        nameof_target: t;
       }
     | FunctionCallExpression of {
         function_call_receiver: t;
@@ -865,7 +908,6 @@ module type Syntax_S = sig
         type_reified: t;
         type_variance: t;
         type_name: t;
-        type_param_params: t;
         type_constraints: t;
       }
     | TypeConstraint of {
@@ -895,6 +937,7 @@ module type Syntax_S = sig
         closure_outer_left_paren: t;
         closure_readonly_keyword: t;
         closure_function_keyword: t;
+        closure_type_parameters: t;
         closure_inner_left_paren: t;
         closure_parameter_list: t;
         closure_inner_right_paren: t;
@@ -905,9 +948,43 @@ module type Syntax_S = sig
         closure_outer_right_paren: t;
       }
     | ClosureParameterTypeSpecifier of {
+        closure_parameter_optional: t;
         closure_parameter_call_convention: t;
+        closure_parameter_named: t;
         closure_parameter_readonly: t;
+        closure_parameter_pre_ellipsis: t;
         closure_parameter_type: t;
+        closure_parameter_name: t;
+        closure_parameter_ellipsis: t;
+      }
+    | TupleOrUnionOrIntersectionElementTypeSpecifier of {
+        tuple_or_union_or_intersection_element_optional: t;
+        tuple_or_union_or_intersection_element_pre_ellipsis: t;
+        tuple_or_union_or_intersection_element_type: t;
+        tuple_or_union_or_intersection_element_ellipsis: t;
+      }
+    | TypeRefinement of {
+        type_refinement_type: t;
+        type_refinement_keyword: t;
+        type_refinement_left_brace: t;
+        type_refinement_members: t;
+        type_refinement_right_brace: t;
+      }
+    | TypeInRefinement of {
+        type_in_refinement_keyword: t;
+        type_in_refinement_name: t;
+        type_in_refinement_type_parameters: t;
+        type_in_refinement_constraints: t;
+        type_in_refinement_equal: t;
+        type_in_refinement_type: t;
+      }
+    | CtxInRefinement of {
+        ctx_in_refinement_keyword: t;
+        ctx_in_refinement_name: t;
+        ctx_in_refinement_type_parameters: t;
+        ctx_in_refinement_constraints: t;
+        ctx_in_refinement_equal: t;
+        ctx_in_refinement_ctx_list: t;
       }
     | ClassnameTypeSpecifier of {
         classname_keyword: t;
@@ -915,6 +992,13 @@ module type Syntax_S = sig
         classname_type: t;
         classname_trailing_comma: t;
         classname_right_angle: t;
+      }
+    | ClassPtrTypeSpecifier of {
+        class_ptr_keyword: t;
+        class_ptr_left_angle: t;
+        class_ptr_type: t;
+        class_ptr_trailing_comma: t;
+        class_ptr_right_angle: t;
       }
     | FieldSpecifier of {
         field_question: t;
@@ -1007,21 +1091,27 @@ module type Syntax_S = sig
       }
     | ModuleDeclaration of {
         module_declaration_attribute_spec: t;
-        module_declaration_keyword: t;
+        module_declaration_new_keyword: t;
+        module_declaration_module_keyword: t;
         module_declaration_name: t;
         module_declaration_left_brace: t;
         module_declaration_right_brace: t;
       }
+    | ModuleMembershipDeclaration of {
+        module_membership_declaration_module_keyword: t;
+        module_membership_declaration_name: t;
+        module_membership_declaration_semicolon: t;
+      }
+    | PackageExpression of {
+        package_expression_keyword: t;
+        package_expression_name: t;
+      }
+  [@@deriving sexp_of]
 
   val rust_parse :
     Full_fidelity_source_text.t ->
     Full_fidelity_parser_env.t ->
     unit * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
-
-  val rust_parse_with_verify_sc :
-    Full_fidelity_source_text.t ->
-    Full_fidelity_parser_env.t ->
-    t list * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
 
   val rust_parser_errors :
     Full_fidelity_source_text.t ->
@@ -1077,6 +1167,8 @@ module type Syntax_S = sig
 
   val make_qualified_name : t -> t
 
+  val make_module_name : t -> t
+
   val make_simple_type_specifier : t -> t
 
   val make_literal_expression : t -> t
@@ -1092,7 +1184,7 @@ module type Syntax_S = sig
   val make_file_attribute_specification : t -> t -> t -> t -> t -> t
 
   val make_enum_declaration :
-    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_enum_use : t -> t -> t -> t
 
@@ -1103,9 +1195,15 @@ module type Syntax_S = sig
 
   val make_enum_class_enumerator : t -> t -> t -> t -> t -> t
 
-  val make_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_alias_declaration :
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_context_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
+
+  val make_case_type_declaration :
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+
+  val make_case_type_variant : t -> t -> t -> t
 
   val make_property_declaration : t -> t -> t -> t -> t -> t
 
@@ -1142,19 +1240,15 @@ module type Syntax_S = sig
   val make_methodish_trait_resolution : t -> t -> t -> t -> t -> t
 
   val make_classish_declaration :
-    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_classish_body : t -> t -> t -> t
-
-  val make_trait_use_precedence_item : t -> t -> t -> t
-
-  val make_trait_use_alias_item : t -> t -> t -> t -> t
-
-  val make_trait_use_conflict_resolution : t -> t -> t -> t -> t -> t
 
   val make_trait_use : t -> t -> t -> t
 
   val make_require_clause : t -> t -> t -> t -> t
+
+  val make_require_clause_constraint : t -> t -> t -> t -> t -> t
 
   val make_const_declaration : t -> t -> t -> t -> t -> t -> t
 
@@ -1168,15 +1262,12 @@ module type Syntax_S = sig
 
   val make_decorated_expression : t -> t -> t
 
-  val make_parameter_declaration : t -> t -> t -> t -> t -> t -> t -> t
+  val make_named_argument : t -> t -> t -> t
 
-  val make_variadic_parameter : t -> t -> t -> t
+  val make_parameter_declaration :
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_old_attribute_specification : t -> t -> t -> t
-
-  val make_attribute_specification : t -> t
-
-  val make_attribute : t -> t -> t
 
   val make_inclusion_expression : t -> t -> t
 
@@ -1192,15 +1283,15 @@ module type Syntax_S = sig
 
   val make_unset_statement : t -> t -> t -> t -> t -> t
 
+  val make_declare_local_statement : t -> t -> t -> t -> t -> t -> t
+
   val make_using_statement_block_scoped : t -> t -> t -> t -> t -> t -> t
 
   val make_using_statement_function_scoped : t -> t -> t -> t -> t
 
   val make_while_statement : t -> t -> t -> t -> t -> t
 
-  val make_if_statement : t -> t -> t -> t -> t -> t -> t -> t
-
-  val make_elseif_clause : t -> t -> t -> t -> t -> t
+  val make_if_statement : t -> t -> t -> t -> t -> t -> t
 
   val make_else_clause : t -> t -> t
 
@@ -1227,6 +1318,10 @@ module type Syntax_S = sig
 
   val make_default_label : t -> t -> t
 
+  val make_match_statement : t -> t -> t -> t -> t -> t -> t -> t
+
+  val make_match_statement_arm : t -> t -> t -> t
+
   val make_return_statement : t -> t -> t -> t
 
   val make_yield_break_statement : t -> t -> t -> t
@@ -1246,13 +1341,19 @@ module type Syntax_S = sig
   val make_anonymous_class : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_anonymous_function :
-    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_anonymous_function_use_clause : t -> t -> t -> t -> t
 
+  val make_variable_pattern : t -> t
+
+  val make_constructor_pattern : t -> t -> t -> t -> t
+
+  val make_refinement_pattern : t -> t -> t -> t
+
   val make_lambda_expression : t -> t -> t -> t -> t -> t
 
-  val make_lambda_signature : t -> t -> t -> t -> t -> t -> t -> t
+  val make_lambda_signature : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_cast_expression : t -> t -> t -> t -> t
 
@@ -1285,6 +1386,8 @@ module type Syntax_S = sig
   val make_eval_expression : t -> t -> t -> t -> t
 
   val make_isset_expression : t -> t -> t -> t -> t
+
+  val make_nameof_expression : t -> t -> t
 
   val make_function_call_expression : t -> t -> t -> t -> t -> t
 
@@ -1364,7 +1467,7 @@ module type Syntax_S = sig
 
   val make_function_ctx_type_specifier : t -> t -> t
 
-  val make_type_parameter : t -> t -> t -> t -> t -> t -> t
+  val make_type_parameter : t -> t -> t -> t -> t -> t
 
   val make_type_constraint : t -> t -> t
 
@@ -1375,11 +1478,23 @@ module type Syntax_S = sig
   val make_dictionary_type_specifier : t -> t -> t -> t -> t
 
   val make_closure_type_specifier :
-    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
-  val make_closure_parameter_type_specifier : t -> t -> t -> t
+  val make_closure_parameter_type_specifier :
+    t -> t -> t -> t -> t -> t -> t -> t -> t
+
+  val make_tuple_or_union_or_intersection_element_type_specifier :
+    t -> t -> t -> t -> t
+
+  val make_type_refinement : t -> t -> t -> t -> t -> t
+
+  val make_type_in_refinement : t -> t -> t -> t -> t -> t -> t
+
+  val make_ctx_in_refinement : t -> t -> t -> t -> t -> t -> t
 
   val make_classname_type_specifier : t -> t -> t -> t -> t -> t
+
+  val make_class_ptr_type_specifier : t -> t -> t -> t -> t -> t
 
   val make_field_specifier : t -> t -> t -> t -> t
 
@@ -1419,7 +1534,11 @@ module type Syntax_S = sig
 
   val make_enum_class_label_expression : t -> t -> t -> t
 
-  val make_module_declaration : t -> t -> t -> t -> t -> t
+  val make_module_declaration : t -> t -> t -> t -> t -> t -> t
+
+  val make_module_membership_declaration : t -> t -> t -> t
+
+  val make_package_expression : t -> t -> t
 
   val position : Relative_path.t -> t -> Pos.t option
 
@@ -1434,6 +1553,8 @@ module type Syntax_S = sig
   val is_script : t -> bool
 
   val is_qualified_name : t -> bool
+
+  val is_module_name : t -> bool
 
   val is_simple_type_specifier : t -> bool
 
@@ -1462,6 +1583,10 @@ module type Syntax_S = sig
   val is_alias_declaration : t -> bool
 
   val is_context_alias_declaration : t -> bool
+
+  val is_case_type_declaration : t -> bool
+
+  val is_case_type_variant : t -> bool
 
   val is_property_declaration : t -> bool
 
@@ -1499,15 +1624,11 @@ module type Syntax_S = sig
 
   val is_classish_body : t -> bool
 
-  val is_trait_use_precedence_item : t -> bool
-
-  val is_trait_use_alias_item : t -> bool
-
-  val is_trait_use_conflict_resolution : t -> bool
-
   val is_trait_use : t -> bool
 
   val is_require_clause : t -> bool
+
+  val is_require_clause_constraint : t -> bool
 
   val is_const_declaration : t -> bool
 
@@ -1519,15 +1640,11 @@ module type Syntax_S = sig
 
   val is_decorated_expression : t -> bool
 
+  val is_named_argument : t -> bool
+
   val is_parameter_declaration : t -> bool
 
-  val is_variadic_parameter : t -> bool
-
   val is_old_attribute_specification : t -> bool
-
-  val is_attribute_specification : t -> bool
-
-  val is_attribute : t -> bool
 
   val is_inclusion_expression : t -> bool
 
@@ -1543,6 +1660,8 @@ module type Syntax_S = sig
 
   val is_unset_statement : t -> bool
 
+  val is_declare_local_statement : t -> bool
+
   val is_using_statement_block_scoped : t -> bool
 
   val is_using_statement_function_scoped : t -> bool
@@ -1550,8 +1669,6 @@ module type Syntax_S = sig
   val is_while_statement : t -> bool
 
   val is_if_statement : t -> bool
-
-  val is_elseif_clause : t -> bool
 
   val is_else_clause : t -> bool
 
@@ -1577,6 +1694,10 @@ module type Syntax_S = sig
 
   val is_default_label : t -> bool
 
+  val is_match_statement : t -> bool
+
+  val is_match_statement_arm : t -> bool
+
   val is_return_statement : t -> bool
 
   val is_yield_break_statement : t -> bool
@@ -1598,6 +1719,12 @@ module type Syntax_S = sig
   val is_anonymous_function : t -> bool
 
   val is_anonymous_function_use_clause : t -> bool
+
+  val is_variable_pattern : t -> bool
+
+  val is_constructor_pattern : t -> bool
+
+  val is_refinement_pattern : t -> bool
 
   val is_lambda_expression : t -> bool
 
@@ -1634,6 +1761,8 @@ module type Syntax_S = sig
   val is_eval_expression : t -> bool
 
   val is_isset_expression : t -> bool
+
+  val is_nameof_expression : t -> bool
 
   val is_function_call_expression : t -> bool
 
@@ -1727,7 +1856,17 @@ module type Syntax_S = sig
 
   val is_closure_parameter_type_specifier : t -> bool
 
+  val is_tuple_or_union_or_intersection_element_type_specifier : t -> bool
+
+  val is_type_refinement : t -> bool
+
+  val is_type_in_refinement : t -> bool
+
+  val is_ctx_in_refinement : t -> bool
+
   val is_classname_type_specifier : t -> bool
+
+  val is_class_ptr_type_specifier : t -> bool
 
   val is_field_specifier : t -> bool
 
@@ -1768,6 +1907,10 @@ module type Syntax_S = sig
   val is_enum_class_label_expression : t -> bool
 
   val is_module_declaration : t -> bool
+
+  val is_module_membership_declaration : t -> bool
+
+  val is_package_expression : t -> bool
 
   val is_specific_token : TokenKind.t -> t -> bool
 

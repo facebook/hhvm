@@ -15,33 +15,22 @@
 */
 
 #include "hphp/runtime/vm/jit/tc.h"
-#include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/treadmill.h"
-
-#include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/vasm-gen.h"
 
 
 #include "hphp/util/arch.h"
-#include "hphp/util/asm-x64.h"
-#include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
 
-#include <algorithm>
 #include <cstdio>
 #include <vector>
 
 namespace HPHP::jit::tc {
 
-TRACE_SET_MOD(mcg);
+TRACE_SET_MOD(mcg)
 
 void relocateTranslation(
   const IRUnit* unit,
@@ -64,7 +53,7 @@ void relocateTranslation(
   if (ai && unit) printUnit(kRelocationLevel, *unit, " before relocation ", ai);
 
   RelocationInfo rel;
-  size_t asm_count{0};
+  DEBUG_ONLY size_t asm_count{0};
 
   asm_count += relocate(rel, main_in,
                         main.base(), main.frontier(), main,

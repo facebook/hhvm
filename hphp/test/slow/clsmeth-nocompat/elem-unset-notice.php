@@ -1,14 +1,14 @@
 <?hh
 
-class Foo { static function bar() {} }
+class Foo { static function bar() :mixed{} }
 class P { function __construct(public mixed $m)[] {} }
 
 function LV(mixed $m): mixed { return __hhvm_intrinsics\launder_value($m); }
 
 function unset_static(): void {
-  $cm = class_meth(Foo::class, 'bar');
-  $am = varray[$cm];
-  $dm = darray[0 => $cm];
+  $cm = Foo::bar<>;
+  $am = vec[$cm];
+  $dm = dict[0 => $cm];
   $om = new P($cm);
 
   unset($cm[1]);
@@ -24,9 +24,9 @@ function unset_static(): void {
 }
 
 function unset_dynamic(): void {
-  $cm = LV(class_meth(Foo::class, 'bar'));
-  $am = LV(varray[$cm]);
-  $dm = LV(darray[0 => $cm]);
+  $cm = LV(Foo::bar<>);
+  $am = LV(vec[$cm]);
+  $dm = LV(dict[0 => $cm]);
   $om = LV(new P($cm));
 
   unset($cm[1]);
@@ -41,8 +41,8 @@ function unset_dynamic(): void {
   var_dump($cm, $am, $dm, $om);
 }
 
-function unset_inner() {
-  $cm = LV(class_meth(Foo::class, 'bar'));
+function unset_inner() :mixed{
+  $cm = LV(Foo::bar<>);
 
   // emptyish
   unset($cm[3][0]);
@@ -55,7 +55,7 @@ function unset_inner() {
   var_dump($cm);
 }
 
-function handle_error($_no, $msg, ...) {
+function handle_error($_no, $msg, ...$_rest) :mixed{
   if ($msg === 'Implicit clsmeth to varray conversion') {
     echo "[NOTICE] $msg\n";
     return true;
@@ -64,7 +64,7 @@ function handle_error($_no, $msg, ...) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler(handle_error<>);
 
   unset_static();  unset_static();

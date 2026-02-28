@@ -6,7 +6,13 @@
  *
  *)
 
-exception Decl_heap_elems_bug
+(** This modules deals with looking up class members of folded classes.
+    Folded classes do not store type information of their members for storage
+    efficiency, since folded class members pertains to multiple folded classes.
+    Therefore we need to lookup type information for those members from inside
+    shallow classes. This is what this module does. *)
+
+exception Decl_heap_elems_bug of string
 
 (** Lookup the type signature of a class property.
 

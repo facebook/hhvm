@@ -31,10 +31,12 @@ struct CmdAuth : DebuggerCommand {
 
   void setSandboxPath(const std::string& sandboxPath) {
     m_sandboxPath = sandboxPath;
-  };
+  }
 
   bool onServer(DebuggerProxy&) override;
   void onClient(DebuggerClient&) override;
+
+  std::string name() const override { return "auth"; }
 
 protected:
   void sendImpl(DebuggerThriftBuffer&) override;
@@ -43,9 +45,8 @@ protected:
 private:
   std::string m_token;
   std::string m_session;
-  std::string m_sandboxPath = "";
+  std::string m_sandboxPath;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

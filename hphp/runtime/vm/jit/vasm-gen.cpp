@@ -23,9 +23,10 @@
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
 #include "hphp/util/arch.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
-TRACE_SET_MOD(vasm);
+TRACE_SET_MOD(vasm)
 
 namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
@@ -178,8 +179,8 @@ Vauto::~Vauto() {
 
 uint64_t areaWeightFactor(AreaIndex area) {
   switch (area) {
-    case AreaIndex::Main:   return RuntimeOption::EvalJitLayoutMainFactor;
-    case AreaIndex::Cold:   return RuntimeOption::EvalJitLayoutColdFactor;
+    case AreaIndex::Main:   return Cfg::Jit::LayoutMainFactor;
+    case AreaIndex::Cold:   return Cfg::Jit::LayoutColdFactor;
     case AreaIndex::Frozen: return 1;
   };
   always_assert(false);

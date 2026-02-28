@@ -7,16 +7,11 @@
  *
  *)
 
-open Typing_defs
-
-type coercion_direction =
-  | CoerceToDynamic
-  | CoerceFromDynamic
-[@@deriving show, eq]
+open Typing_defs_constraints
 
 (* Logical proposition about types *)
 type subtype_prop =
-  | IsSubtype of coercion_direction option * internal_type * internal_type
+  | IsSubtype of bool * internal_type * internal_type
       (** IsSubtype(Some cd, ty1, ty2), if ty1 is a subtype of ty2 while potentially
           coercing to or from dynamic (depending on cd), written ty1 ~> ty2.
           IsSubtype(None, ty1, ty2) if ty1 is a subtype of ty2, written ty1 <: ty2
@@ -24,7 +19,10 @@ type subtype_prop =
   | Conj of subtype_prop list  (** Conjunction. Conj [] means "true" *)
   | Disj of Typing_error.t option * subtype_prop list
       (** Disjunction. Disj f [] means "false".  The error message function f
-   * wraps the error that should be produced in this case. *)
+        wraps the error that should be produced in this case. *)
+[@@deriving show]
+
+val print : (internal_type -> string) -> subtype_prop -> string
 
 val equal_subtype_prop : subtype_prop -> subtype_prop -> bool
 
@@ -44,9 +42,13 @@ val is_valid : subtype_prop -> bool
 
 val is_unsat : subtype_prop -> bool
 
+val get_error_if_unsat : subtype_prop -> Typing_error.t option option
+
 val conj : subtype_prop -> subtype_prop -> subtype_prop
 
 val conj_list : subtype_prop list -> subtype_prop
 
 val disj :
   fail:Typing_error.t option -> subtype_prop -> subtype_prop -> subtype_prop
+
+val force_lazy_values : subtype_prop -> subtype_prop

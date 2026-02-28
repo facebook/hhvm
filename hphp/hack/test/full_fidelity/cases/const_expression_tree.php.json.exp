@@ -323,7 +323,7 @@
                       "line_number":6
                     }
                   },
-                  "prefixed_code_expression":{
+                  "prefixed_code_body":{
                     "kind":"token",
                     "token":{
                       "kind":"name",

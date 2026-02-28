@@ -2,11 +2,11 @@
 
 -- Testing property_exists() function with more than expected no. of arguments --
 
-Warning: property_exists() expects exactly 2 parameters, 3 given in %s/property_exists_error.php on line 16
+Warning: property_exists() expects exactly 2 positional parameters, 3 given in %s/property_exists_error.php on line 16
 
 -- Testing property_exists() function with less than expected no. of arguments --
 
-Warning: property_exists() expects exactly 2 parameters, 1 given in %s/property_exists_error.php on line 20
+Warning: property_exists() expects exactly 2 positional parameters, 1 given in %s/property_exists_error.php on line 20
 
 -- Testing property_exists() function with incorrect arguments --
 

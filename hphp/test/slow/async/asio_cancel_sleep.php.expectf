@@ -1,0 +1,5 @@
+cancel pending: true
+await result is null: true
+cancel finished: false
+
+Catchable fatal error: Argument 1 passed to HH\Asio\cancel_sleep_nothrow() must be an instance of HH\SleepWaitHandle, HH\ConditionWaitHandle given in %s/test/slow/async/asio_cancel_sleep.php on line 24

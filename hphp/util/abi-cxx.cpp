@@ -23,13 +23,8 @@
 #include <mutex>
 #include <string>
 
-#ifdef _MSC_VER
-# include <windows.h>
-# include <dbghelp.h>
-#else
-# include <cxxabi.h>
-# include <execinfo.h>
-#endif
+#include <cxxabi.h>
+#include <execinfo.h>
 
 #include <folly/Demangle.h>
 #include <folly/Format.h>
@@ -38,7 +33,7 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/hash-map.h"
 
-#ifdef FACEBOOK
+#ifdef HHVM_FACEBOOK
 #include <folly/experimental/symbolizer/Symbolizer.h>
 #endif
 
@@ -48,7 +43,7 @@ namespace HPHP {
 
 namespace {
 
-typedef std::lock_guard<std::mutex> G;
+using G = std::lock_guard<std::mutex>;
 std::mutex nameCacheLock;
 hphp_fast_map<void*, std::string, pointer_hash<void>> nameCache;
 
@@ -115,11 +110,11 @@ std::string getNativeFunctionName(void* codeAddr) {
     // we first want to extract the mangled name from it to get this:
     // _ZN4HPHP2VM6Transl17interpOneIterInitEv
     //
-    // and then pass this to abi::__cxa_demangle to get the demanged name:
+    // and then pass this to abi::__cxa_demangle to get the demangled name:
     // HPHP::jit::interpOneIterInit()
     //
     // Sometimes, though, backtrace_symbols can't find the function name
-    // and ends up giving us a blank managled name, like this:
+    // and ends up giving us a blank mangled name, like this:
     // ../path/hhvm/hhvm() [0x17e4d01]
     // or this: [0x7fffca800130]
     //

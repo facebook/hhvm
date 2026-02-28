@@ -32,7 +32,7 @@ struct ElfWriter {
   Elf64_Ehdr *m_ehdr;
   std::vector<unsigned char> m_strtab;
   Dwarf_P_Debug m_dwarfProducer;
-  typedef std::map<const char *, Dwarf_Signed> FileDB;
+  using FileDB = std::map<const char *, Dwarf_Signed>;
   FileDB m_fileDB;
 
   explicit ElfWriter(DwarfChunk* d);

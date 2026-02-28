@@ -4,56 +4,60 @@
        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
        sc_module = None; sc_name = ([3:7-10], "\\xhp"); sc_tparams = [];
-       sc_where_constraints = []; sc_extends = []; sc_uses = [];
-       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-       sc_req_implements = []; sc_req_class = []; sc_implements = [];
-       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
-       sc_props = []; sc_sprops = []; sc_constructor = None;
-       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-       sc_enum_type = None }));
+       sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
+       sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
+       sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
+       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+       sc_typeconsts = []; sc_props = []; sc_sprops = [];
+       sc_constructor = None; sc_static_methods = []; sc_methods = [];
+       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+       sc_package = None }));
   ("\\:foo",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_abstract = false; sc_is_xhp = true; sc_internal = false;
         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
         sc_module = None; sc_name = ([4:7-11], "\\:foo"); sc_tparams = [];
-        sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
-        sc_props = []; sc_sprops = []; sc_constructor = None;
-        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None }));
+        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
+        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
+        sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
+        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+        sc_package = None }));
   ("\\:foo:bar",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_abstract = false; sc_is_xhp = true; sc_internal = false;
         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
         sc_module = None; sc_name = ([5:7-15], "\\:foo:bar");
-        sc_tparams = []; sc_where_constraints = []; sc_extends = [];
-        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None }));
+        sc_tparams = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_constraints = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None; sc_docs_url = None; sc_package = None }));
   ("\\:foo-baz",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_abstract = false; sc_is_xhp = true; sc_internal = false;
         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
         sc_module = None; sc_name = ([6:7-15], "\\:foo-baz");
-        sc_tparams = []; sc_where_constraints = []; sc_extends = [];
-        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None }));
+        sc_tparams = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_constraints = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None; sc_docs_url = None; sc_package = None }));
   ("\\xhp_is_valid_class_name",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_internal = false;
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([7:10-33]),
          (Tfun
@@ -61,26 +65,25 @@
               ft_params =
               [{ fp_pos = [7:38-40]; fp_name = (Some "$x");
                  fp_type =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type =
-                   (Rhint ([7:34-37]), (Tapply (([7:34-37], "\\xhp"), []))) };
+                 (Rhint ([7:34-37]), (Tapply (([7:34-37], "\\xhp"), [])));
                  fp_flags =
-                 (make_fp_flags ~accept_disposable:false ~has_default:false
-                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~readonly:false);
-                  }
+                 { Typing_defs_flags.FunParam.accept_disposable = false;
+                   inout = false; is_optional = false; readonly = false;
+                   ignore_readonly_error = false; splat = false;
+                   named = false };
+                 fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [7:10-33]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([7:43-47]), (Tprim Tvoid)) };
+              ft_ret = (Rhint ([7:43-47]), (Tprim Tvoid));
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC} }));
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
+              ft_instantiated = true }));
         fe_pos = [7:10-33]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }))
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false;
+        fe_package_requirement = Typing_defs.RPNormal }))
   ]
-
-They matched!

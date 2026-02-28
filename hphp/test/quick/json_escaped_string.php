@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$data = varray[
+$data = vec[
   '"foo\nbar"',
   '"baz\u003dbong"',
 ];

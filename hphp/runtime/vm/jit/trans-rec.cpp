@@ -41,6 +41,7 @@ TransRec::TransRec(SrcKey                      _src,
   , funcName(_src.func()->fullName()->data())
   , src(_src)
   , sha1(_src.func()->unit()->sha1())
+  , sn(_src.func()->unit()->sn())
   , aStart(_aStart)
   , acoldStart(_acoldStart)
   , afrozenStart(_afrozenStart)
@@ -58,7 +59,11 @@ TransRec::TransRec(SrcKey                      _src,
   assertx(!region->empty());
   for (auto& block : region->blocks()) {
     auto sk = block->start();
-    blocks.emplace_back(Block { sk.unit()->sha1(), sk, block->last().advanced().offset() });
+    blocks.emplace_back(Block {
+      sk.unit()->sha1(),
+      sk,
+      block->last().advanced().offset()
+    });
   }
 
   auto& firstBlock = *region->blocks().front();
@@ -97,7 +102,7 @@ TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
   static jit::fast_map<std::string, size_t> fileWritten;
   SavedAnnotation saved = {
     folly::sformat("{}/tc_annotations.txt{}",
-                   RuntimeOption::EvalDumpTCPath,
+                   Cfg::Eval::DumpTCPath,
                    compress ? ".gz" : ""),
     0,
     0
@@ -174,18 +179,24 @@ std::string TransRec::print() const {
     &ret,
     "Translation {} {{\n"
     "  src.sha1 = {}\n"
+    "  src.sn = {}\n"
     "  src.funcName = {}\n"
     "  src.key = {}\n"
     "  src.blocks = {}\n",
-    id, sha1, funcName, src.toAtomicInt(),
+    id, sha1, sn, funcName, src.toAtomicInt(),
     blocks.size());
 
   for (auto const& block : blocks) {
     auto sk = block.sk;
     folly::format(
       &ret,
-      "    {} {} {} {}\n",
-      sk.unit()->sha1(), sk.func()->sn(), sk.toAtomicInt(), block.bcPast);
+      "    {} {} {} {} {}\n",
+      sk.unit()->sha1(),
+      sk.unit()->sn(),
+      sk.func()->sn(),
+      sk.toAtomicInt(),
+      block.bcPast
+    );
   }
 
   folly::format( &ret, "  src.guards = {}\n", guards.size());
@@ -233,8 +244,15 @@ std::string TransRec::print() const {
     auto sk = info.sk;
     folly::format(
       &ret,
-      "    {} {} {} {} {} {}\n",
-      sk.unit()->sha1(), sk.func()->sn(), sk.toAtomicInt(), info.aStart, info.acoldStart, info.afrozenStart);
+      "    {} {} {} {} {} {} {}\n",
+      sk.unit()->sha1(),
+      sk.unit()->sn(),
+      sk.func()->sn(),
+      sk.toAtomicInt(),
+      info.aStart,
+      info.acoldStart,
+      info.afrozenStart
+    );
   }
 
   ret += "}\n\n";

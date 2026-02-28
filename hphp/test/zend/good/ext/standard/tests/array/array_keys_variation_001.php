@@ -1,19 +1,19 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 echo "\n*** Testing array_keys() on various arrays ***";
-$arrays = varray[
-  varray[],
-  varray[0],
-  varray[ varray[] ],
-  darray["Hello" => "World"],
-  darray["" => ""],
-  darray[0 => 1, 1 => 2, 2 => 3, "d" => varray[4,6, "d"]],
-  darray["a" => 1, "b" => 2, "c" =>3, "d" => varray[]],
-  darray[0 => 0, 1 => 1, 2 => 2, 3 => 3],
-  darray[0=>3.000, 1=>2, 1=>3, "a"=>3, 3=>5, "5"=>3.000],
-  darray[1 => TRUE, 0 => FALSE, '' => NULL, 2 => "\x000", 3 => "\000"],
-  darray["a" => "abcd", "a" => "", "ab" => -6, "cd" => -0.5 ],
-  darray[0 => varray[], 1=> varray[0], 2 => varray[1], ""=> varray[],""=>"" ]
+$arrays = vec[
+  vec[],
+  vec[0],
+  vec[ vec[] ],
+  dict["Hello" => "World"],
+  dict["" => ""],
+  dict[0 => 1, 1 => 2, 2 => 3, "d" => vec[4,6, "d"]],
+  dict["a" => 1, "b" => 2, "c" =>3, "d" => vec[]],
+  dict[0 => 0, 1 => 1, 2 => 2, 3 => 3],
+  dict[0=>3.000, 1=>2, 1=>3, "a"=>3, 3=>5, "5"=>3.000],
+  dict[1 => TRUE, 0 => FALSE, '' => NULL, 2 => "\x000", 3 => "\000"],
+  dict["a" => "abcd", "a" => "", "ab" => -6, "cd" => -0.5 ],
+  dict[0 => vec[], 1=> vec[0], 2 => vec[1], ""=> vec[],""=>"" ]
 ];
 
 $i = 0;

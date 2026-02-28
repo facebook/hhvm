@@ -10,7 +10,7 @@ function f(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_nonnull() {
+function main_nonnull() :mixed{
 f(1);
 f(false);
 f(1.5);

@@ -203,3 +203,5 @@ let filemtime (file : string) : float =
   match Hashtbl.find_opt mtimes file with
   | None -> 0.0
   | Some mtime -> mtime
+
+let is_real_disk = false

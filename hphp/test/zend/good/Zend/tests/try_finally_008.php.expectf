@@ -1,2 +1,1 @@
-
-Fatal error: Cannot break/continue 1 level in %s/try_finally_008.php on line 7
+Fatal error: `break;` is not allowed as a top-level statement in a `finally` block in %s/try_finally_008.php on line 7

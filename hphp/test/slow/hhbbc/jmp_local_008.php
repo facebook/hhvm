@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   var_dump($x);
   if (is_string($x)) {
     $y = "asd";
@@ -13,6 +13,6 @@ function foo() {
 
 
 <<__EntryPoint>>
-function main_jmp_local_008() {
+function main_jmp_local_008() :mixed{
 foo();
 }

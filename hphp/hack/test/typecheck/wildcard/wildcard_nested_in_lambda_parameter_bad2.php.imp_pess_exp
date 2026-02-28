@@ -1,0 +1,30 @@
+ERROR: File "wildcard_nested_in_lambda_parameter_bad2.php", line 8, characters 13-18:
+Invalid argument (Typing[4110])
+  File "wildcard_nested_in_lambda_parameter_bad2.php", line 4, characters 33-38:
+  Expected `string`
+  File "wildcard_nested_in_lambda_parameter_bad2.php", line 8, characters 17-17:
+  But got `int`
+ERROR: File "wildcard_nested_in_lambda_parameter_bad2.php", line 8, characters 21-26:
+Invalid argument (Typing[4110])
+  File "wildcard_nested_in_lambda_parameter_bad2.php", line 4, characters 41-46:
+  Expected `string`
+  File "wildcard_nested_in_lambda_parameter_bad2.php", line 8, characters 25-25:
+  But got `int`
+ERROR: File "wildcard_nested_in_lambda_parameter_bad2.php", line 14, characters 13-18:
+Invalid argument (Typing[4110])
+  File "wildcard_nested_in_lambda_parameter_bad2.php", line 12, characters 19-20:
+  Expected `~vec<_>` (variadic argument)
+  File "wildcard_nested_in_lambda_parameter_bad2.php", line 14, characters 13-18:
+  But got `vec<int>`
+ERROR: File "wildcard_nested_in_lambda_parameter_bad2.php", line 14, characters 13-18:
+Invalid argument (Typing[4110])
+  File "wildcard_nested_in_lambda_parameter_bad2.php", line 12, characters 24-29:
+  Expected `string`
+  File "wildcard_nested_in_lambda_parameter_bad2.php", line 14, characters 17-17:
+  But got `int`
+ERROR: File "wildcard_nested_in_lambda_parameter_bad2.php", line 33, characters 10-14:
+Invalid return type (Typing[4110])
+  File "wildcard_nested_in_lambda_parameter_bad2.php", line 27, characters 19-24:
+  Expected `string`
+  File "wildcard_nested_in_lambda_parameter_bad2.php", line 20, characters 27-29:
+  But got `int`

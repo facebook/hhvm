@@ -12,8 +12,9 @@ module Types = struct
         [@printer Utils.pp_large_list Relative_path.pp]
     naming_changes: Relative_path.t list;
         [@printer Utils.pp_large_list Relative_path.pp]
-    corresponding_base_revision: string;
+    corresponding_base_revision: Hg.Rev.t;
     deptable_fn: string;
+    compressed_deptable_fn: string option;
     prechecked_changes: Relative_path.t list;
         [@printer Utils.pp_large_list Relative_path.pp]
     naming_table_path: string;
@@ -64,4 +65,6 @@ module type S = sig
   val naming_sqlite_path_for_target_info : saved_state_target_info -> string
 
   val errors_path_for_target_info : saved_state_target_info -> string
+
+  val warnings_path_for_target_info : saved_state_target_info -> string
 end

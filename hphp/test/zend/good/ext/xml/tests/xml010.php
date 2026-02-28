@@ -1,5 +1,5 @@
 <?hh
-function start_elem($parser,$name,$attribs) {
+function start_elem($parser,$name,$attribs) :mixed{
     print "$name ";
 
     foreach($attribs as $key => $value) {
@@ -8,7 +8,7 @@ function start_elem($parser,$name,$attribs) {
     print "\n";
 }
 function end_elem()
-{
+:mixed{
 }
 <<__EntryPoint>> function main(): void {
 $xml = <<<HERE

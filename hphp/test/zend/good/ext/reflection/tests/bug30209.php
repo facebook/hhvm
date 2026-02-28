@@ -5,7 +5,7 @@ class Foo
     private $name = 'testBAR';
 
     public function testBAR()
-    {
+:mixed    {
         try
         {
             $class  = new ReflectionClass($this);

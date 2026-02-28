@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_date_sun_info() {
+function main_date_sun_info() :mixed{
 date_default_timezone_set("America/Los_Angeles");
 
 $sun_info = date_sun_info(strtotime("2006-12-12"), 31.7667, 35.2333);

@@ -7,5 +7,5 @@ class C {
 }
 
 function test(): void {
-  $_ = ($x = varray[C::f()]): void ==> {};
+  $_ = ($x = vec[C::f()]): void ==> {};
 }

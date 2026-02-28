@@ -1,0 +1,2 @@
+WARN: File "nameof_is.php", line 5, characters 5-22:
+This `is` check is always `true`. The expression on the left has type `classname<C>` which is a subtype of `string`. (Warn[12009])

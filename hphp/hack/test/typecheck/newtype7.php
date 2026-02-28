@@ -1,10 +1,10 @@
 //// newtype.php
-<?hh // strict
+<?hh
 
 newtype Foo as int = int;
 
 //// useit.php
-<?hh // strict
+<?hh
 
 function f(Foo $x): ?Foo {
   return $x;

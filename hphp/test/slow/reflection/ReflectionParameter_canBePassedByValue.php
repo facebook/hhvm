@@ -1,6 +1,6 @@
 <?hh
 
-function aux($fun) {
+function aux($fun) :mixed{
   $func = new ReflectionFunction($fun);
   $parameters = $func->getParameters();
   foreach($parameters as $parameter) {
@@ -11,9 +11,9 @@ function aux($fun) {
   }
 }
 
-function ufunc(inout $arg1, $arg2) {}
+function ufunc(inout $arg1, $arg2) :mixed{}
 
 <<__EntryPoint>>
-function main_reflection_parameter_can_be_passed_by_value() {
+function main_reflection_parameter_can_be_passed_by_value() :mixed{
 aux('ufunc');
 }

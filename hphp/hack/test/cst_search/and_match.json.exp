@@ -3,14 +3,14 @@
     {
       "match_name":"foo class name token",
       "kind":"token",
-      "start_offset":22,
-      "end_offset":24
+      "start_offset":12,
+      "end_offset":14
     },
     {
       "match_name":"foo class name token 2",
       "kind":"token",
-      "start_offset":22,
-      "end_offset":24
+      "start_offset":12,
+      "end_offset":14
     }
   ]
 }

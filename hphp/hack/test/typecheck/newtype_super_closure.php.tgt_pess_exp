@@ -1,0 +1,14 @@
+File "newtype_super_closure.php.pess--file2.php", line 12, characters 5-6:
+Invalid argument (Typing[4110])
+  File "newtype_super_closure.php.pess--file2.php", line 10, characters 3-5:
+  Expected `~_` because type parameter `T` of `hof` could not be determined. Please add explicit type parameters to the invocation of `hof`
+  File "newtype_super_closure.php.pess--file2.php", line 4, characters 75-75:
+    via this generic `T`
+  File "newtype_super_closure.php.pess--file2.php", line 9, characters 16-16:
+  But got `X`
+File "newtype_super_closure.php.pess--file2.php", line 12, characters 5-6:
+Typing error (Typing[4110])
+  File "newtype_super_closure.php.pess--file2.php", line 9, characters 16-16:
+  Expected `dynamic`
+  File "newtype_super_closure.php.pess--file2.php", line 9, characters 16-16:
+  Type `X` is not a subtype of `dynamic` under dynamic-aware subtyping

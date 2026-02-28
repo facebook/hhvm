@@ -1,0 +1,1 @@
+Catchable fatal error: Value returned from function B::get() must be of type I3, A given in %s/upper-bound.php on line 20

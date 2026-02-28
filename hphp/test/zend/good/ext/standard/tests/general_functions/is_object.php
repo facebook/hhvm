@@ -10,34 +10,34 @@ class foo {
 
 // abstract class
 abstract class abstractClass {
-  abstract protected function getClassName();
-  public function printClassName () {
+  abstract protected function getClassName():mixed;
+  public function printClassName () :mixed{
     echo $this->getClassName() . "\n";
   }
 }
 
 // implement abstract class
 class concreteClass extends abstractClass {
-  protected function getClassName() {
+  protected function getClassName() :mixed{
     return "concreteClass";
   }
 }
 
 // interface class
 interface IValue {
-   public function setVal($name, $val);
-   public function dumpVal();
+   public function setVal($name, $val):mixed;
+   public function dumpVal():mixed;
 }
 
 // implement the interface
 class Value implements IValue {
-  private $vars = varray[];
+  private $vars = vec[];
 
-  public function setVal($name, $val) {
+  public function setVal($name, $val) :mixed{
     $this->vars[$name] = $val;
   }
 
-  public function dumpVal() {
+  public function dumpVal() :mixed{
     var_dump($vars);
   }
 }
@@ -69,7 +69,7 @@ function main(): void {
   $Value_object = new Value();
   $concreteClass_object = new concreteClass();
 
-  $valid_objects = varray[
+  $valid_objects = vec[
     new stdClass,
     new foo,
     new concreteClass,
@@ -99,7 +99,7 @@ function main(): void {
   $dfp = opendir(dirname(__FILE__));
 
   // other types in a array
-  $not_objects = varray[
+  $not_objects = vec[
     0,
     -1,
     0.1,
@@ -109,8 +109,8 @@ function main(): void {
     0123,
     $fp,  // resource
     $dfp,
-    varray[],
-    varray["string"],
+    vec[],
+    vec["string"],
     "0",
     "1",
     "",

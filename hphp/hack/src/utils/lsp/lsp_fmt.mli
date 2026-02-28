@@ -87,9 +87,12 @@ val print_signatureHelp : Lsp.SignatureHelp.result -> Hh_json.json
 
 val parse_documentRename : Hh_json.json option -> Lsp.Rename.params
 
-val print_documentRename : Lsp.Rename.result -> Hh_json.json
-
 val print_diagnostics : Lsp.PublishDiagnostics.params -> Hh_json.json
+
+val print_codeActionResult :
+  Lsp.CodeAction.result -> Lsp.CodeActionRequest.params -> Hh_json.json
+
+val print_codeActionResolveResult : Lsp.CodeActionResolve.result -> Hh_json.json
 
 val print_logMessage : Lsp.MessageType.t -> string -> Hh_json.json
 
@@ -118,6 +121,22 @@ val parse_completion : Hh_json.json option -> Lsp.Completion.params
 
 val print_completion : Lsp.Completion.result -> Hh_json.json
 
+val parse_callItem : Hh_json.json option -> Lsp.CallHierarchyItem.t
+
+val print_callItem : Lsp.CallHierarchyItem.t -> Hh_json.json
+
+val parse_callHierarchyCalls :
+  Hh_json.json option -> Lsp.CallHierarchyCallsRequestParam.t
+
+val print_PrepareCallHierarchyResult :
+  Lsp.PrepareCallHierarchy.result -> Hh_json.json
+
+val print_CallHierarchyIncomingCallsResult :
+  Lsp.CallHierarchyIncomingCalls.result -> Hh_json.json
+
+val print_CallHierarchyOutgoingCallsResult :
+  Lsp.CallHierarchyOutgoingCalls.result -> Hh_json.json
+
 val parse_willSaveWaitUntil :
   Hh_json.json option -> Lsp.WillSaveWaitUntil.params
 
@@ -135,13 +154,6 @@ val parse_documentHighlight :
   Hh_json.json option -> Lsp.DocumentHighlight.params
 
 val print_documentHighlight : Lsp.DocumentHighlight.result -> Hh_json.json
-
-val parse_typeCoverage : Hh_json.json option -> Lsp.TypeCoverageFB.params
-
-val print_typeCoverage : Lsp.TypeCoverageFB.result -> Hh_json.json
-
-val parse_toggleTypeCoverage :
-  Hh_json.json option -> Lsp.ToggleTypeCoverageFB.params
 
 val parse_documentFormatting :
   Hh_json.json option -> Lsp.DocumentFormatting.params
@@ -205,4 +217,4 @@ val print_lsp_notification : Lsp.lsp_notification -> Hh_json.json
 
 val print_lsp : Lsp.lsp_message -> Hh_json.json
 
-val get_uri_opt : Lsp.lsp_message -> Lsp.documentUri option
+val get_uri_opt : Lsp.lsp_message -> Lsp.DocumentUri.t option

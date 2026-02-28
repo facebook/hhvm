@@ -1,6 +1,6 @@
 <?hh
 
-function dec($x) {
+function dec($x) :mixed{
   return $x - -(1 << 63);
 }
 <<__EntryPoint>> function main(): void {

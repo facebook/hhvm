@@ -10,7 +10,7 @@ for($i=0; $i<256; $i++) echo !ord(chr($i)) == $i;
 
 /* miscelleous input */
 echo "\n*** Testing chr() usage variations ***\n";
-$arr_test = varray[
+$arr_test = vec[
   "true",
   "false",
   true,
@@ -41,9 +41,11 @@ foreach($arr_test as $var){
 echo "\n*** Testing ord() usage variations ***\n";
 $counter=1;
 foreach($arr_test as $var){
-  echo "-- Iteration $counter --\n";
-  try { var_dump( ord($var) );} catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  $counter++;
+  if ($var is string) {
+    echo "-- Iteration $counter --\n";
+    try { var_dump( ord($var) );} catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+    $counter++;
+  }
 }
 
 /* Error conditions */

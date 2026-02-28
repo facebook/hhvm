@@ -1,6 +1,6 @@
 <?hh
 
-function g($func) {
+function g($func) :mixed{
   return $func('x');
 }
 
@@ -9,7 +9,7 @@ class StrRef {
 }
 
 <<__EntryPoint>>
-function main_clone() {
+function main_clone() :mixed{
   $y = 'y';
   $ref = new StrRef('');
   $f = function($x) use ($y, $ref) {

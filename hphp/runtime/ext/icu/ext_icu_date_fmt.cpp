@@ -36,8 +36,6 @@ const StaticString
   s_tm_yday("tm_yday"),
   s_tm_isdst("tm_isdst");
 
-Class* IntlDateFormatter::c_IntlDateFormatter = nullptr;
-
 void IntlDateFormatter::setDateFormatter(const String& locale,
                                          int64_t datetype, int64_t timetype,
                                          const Variant& timezone, const Variant& calendar,
@@ -220,10 +218,10 @@ static String HHVM_METHOD(IntlDateFormatter, format, const Variant& value) {
 }
 
 static String
-HHVM_STATIC_METHOD(IntlDateFormatter, formatObject, const Object& /*object*/,
+HHVM_STATIC_METHOD(IntlDateFormatter, FormatObject, const Object& /*object*/,
                    const Variant& /*format*/, const Variant& /*locale*/) {
   // TODO: Need IntlCalendar implemented first
-  throw_not_implemented("IntlDateFormatter::formatObject");
+  throw_not_implemented("IntlDateFormatter::FormatObject");
 }
 
 static int64_t HHVM_METHOD(IntlDateFormatter, getCalendar) {
@@ -287,7 +285,7 @@ static int64_t HHVM_METHOD(IntlDateFormatter, getTimeType) {
   return data->timeType();
 }
 
-static String HHVM_METHOD(IntlDateFormatter, getTimeZoneId) {
+static String HHVM_METHOD(IntlDateFormatter, getTimezoneId) {
   DATFMT_GET(data, this_, 0);
   icu::UnicodeString id;
   data->datefmtObject()->getTimeZone().getID(id);
@@ -305,7 +303,7 @@ static Object HHVM_METHOD(IntlDateFormatter, getCalendarObject) {
   throw_not_implemented("IntlDateFormatter::getCalendarObject");
 }
 
-static Object HHVM_METHOD(IntlDateFormatter, getTimeZone) {
+static Object HHVM_METHOD(IntlDateFormatter, getTimezone) {
   DATFMT_GET(data, this_, Object());
   const icu::TimeZone& tz = data->datefmtObject()->getTimeZone();
   auto ntz = tz.clone();
@@ -445,7 +443,7 @@ static bool HHVM_METHOD(IntlDateFormatter, setPattern,
   return true;
 }
 
-static bool HHVM_METHOD(IntlDateFormatter, setTimeZone, const Variant& zone) {
+static bool HHVM_METHOD(IntlDateFormatter, setTimezone, const Variant& zone) {
   DATFMT_GET(data, this_, false);
   icu::TimeZone *tz = IntlTimeZone::ParseArg(zone, "datefmt_set_timezone",
                                              data);
@@ -458,7 +456,7 @@ static bool HHVM_METHOD(IntlDateFormatter, setTimeZone, const Variant& zone) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initDateFormatter() {
+void IntlExtension::registerNativeDateFormatter() {
   HHVM_RCC_INT(IntlDateFormatter, FULL, UDAT_FULL);
   HHVM_RCC_INT(IntlDateFormatter, LONG, UDAT_LONG);
   HHVM_RCC_INT(IntlDateFormatter, MEDIUM, UDAT_MEDIUM);
@@ -470,7 +468,7 @@ void IntlExtension::initDateFormatter() {
 
   HHVM_ME(IntlDateFormatter, __construct);
   HHVM_ME(IntlDateFormatter, format);
-  HHVM_STATIC_ME(IntlDateFormatter, formatObject);
+  HHVM_STATIC_ME(IntlDateFormatter, FormatObject);
   HHVM_ME(IntlDateFormatter, getCalendar);
   HHVM_ME(IntlDateFormatter, getDateType);
   HHVM_ME(IntlDateFormatter, getErrorCode);
@@ -478,20 +476,18 @@ void IntlExtension::initDateFormatter() {
   HHVM_ME(IntlDateFormatter, getLocale);
   HHVM_ME(IntlDateFormatter, getPattern);
   HHVM_ME(IntlDateFormatter, getTimeType);
-  HHVM_ME(IntlDateFormatter, getTimeZoneId);
+  HHVM_ME(IntlDateFormatter, getTimezoneId);
   HHVM_ME(IntlDateFormatter, getCalendarObject);
-  HHVM_ME(IntlDateFormatter, getTimeZone);
+  HHVM_ME(IntlDateFormatter, getTimezone);
   HHVM_ME(IntlDateFormatter, isLenient);
   HHVM_ME(IntlDateFormatter, localtime);
   HHVM_ME(IntlDateFormatter, parseWithPosition);
   HHVM_ME(IntlDateFormatter, setCalendar);
   HHVM_ME(IntlDateFormatter, setLenient);
   HHVM_ME(IntlDateFormatter, setPattern);
-  HHVM_ME(IntlDateFormatter, setTimeZone);
+  HHVM_ME(IntlDateFormatter, setTimezone);
 
-  Native::registerNativeDataInfo<IntlDateFormatter>(s_IntlDateFormatter.get());
-
-  loadSystemlib("icu_date_fmt");
+  Native::registerNativeDataInfo<IntlDateFormatter>();
 }
 
 //////////////////////////////////////////////////////////////////////////////

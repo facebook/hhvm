@@ -11,7 +11,7 @@ final class B extends A<FBID> {}
 final class C extends A<int> {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $b = new B();
   $c = new C();
 

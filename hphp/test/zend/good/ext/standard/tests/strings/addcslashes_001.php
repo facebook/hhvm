@@ -3,10 +3,7 @@
 echo "*** Testing addcslashes() for basic operations ***\n";
 /* checking normal operation of addcslashes */
 $string = "goodyear12345NULL\0truefalse\a\v\f\b\n\r\t";
-$charlist = varray [ 
-  NULL,
-  2,
-  varray[5,6,7],
+$charlist = vec[
   "a",
   "\0",
   "\n",
@@ -26,5 +23,5 @@ foreach($charlist as $char) {
   $counter++;
 }
 
-echo "Done\n"; 
+echo "Done\n";
 }

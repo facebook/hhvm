@@ -1,0 +1,323 @@
+dict(29) {
+  [0]=>
+  dict(2) {
+    ["function"]=>
+    string(3) "foo"
+    ["user_attributes"]=>
+    dict(1) {
+      ["FooAttr"]=>
+      vec(0) {
+      }
+    }
+  }
+  [1]=>
+  dict(2) {
+    ["function"]=>
+    string(3) "bar"
+    ["user_attributes"]=>
+    dict(1) {
+      ["FooAttr"]=>
+      vec(0) {
+      }
+    }
+  }
+  [2]=>
+  dict(2) {
+    ["function"]=>
+    string(3) "baz"
+    ["user_attributes"]=>
+    dict(1) {
+      ["FooAttr"]=>
+      vec(1) {
+        string(3) "Bar"
+      }
+    }
+  }
+  [3]=>
+  dict(2) {
+    ["function"]=>
+    string(3) "biz"
+    ["user_attributes"]=>
+    dict(2) {
+      ["BarAttr"]=>
+      vec(1) {
+        string(5) "Alpha"
+      }
+      ["BazAttr"]=>
+      vec(2) {
+        int(12)
+        int(13)
+      }
+    }
+  }
+  [4]=>
+  dict(2) {
+    ["function"]=>
+    string(16) "buz$memoize_impl"
+    ["user_attributes"]=>
+    dict(2) {
+      ["__Memoize"]=>
+      vec(1) {
+        enum class label (#MakeICInaccessible)
+      }
+      ["ABC"]=>
+      vec(2) {
+        string(3) "DEF"
+        int(5)
+      }
+    }
+  }
+  [5]=>
+  dict(2) {
+    ["function"]=>
+    string(3) "buz"
+    ["user_attributes"]=>
+    dict(2) {
+      ["__Memoize"]=>
+      vec(1) {
+        enum class label (#MakeICInaccessible)
+      }
+      ["ABC"]=>
+      vec(2) {
+        string(3) "DEF"
+        int(5)
+      }
+    }
+  }
+  [6]=>
+  dict(2) {
+    ["function"]=>
+    string(1) "f"
+    ["user_attributes"]=>
+    dict(0) {
+    }
+  }
+  [7]=>
+  dict(2) {
+    ["function"]=>
+    string(9) "Closure$g"
+    ["user_attributes"]=>
+    dict(0) {
+    }
+  }
+  [8]=>
+  dict(2) {
+    ["function"]=>
+    string(1) "g"
+    ["user_attributes"]=>
+    dict(0) {
+    }
+  }
+  [9]=>
+  dict(2) {
+    ["function"]=>
+    string(9) "Closure$h"
+    ["user_attributes"]=>
+    dict(2) {
+      ["CAttr1"]=>
+      vec(0) {
+      }
+      ["CAttr2"]=>
+      vec(0) {
+      }
+    }
+  }
+  [10]=>
+  dict(2) {
+    ["function"]=>
+    string(14) "h$memoize_impl"
+    ["user_attributes"]=>
+    dict(2) {
+      ["__Memoize"]=>
+      vec(1) {
+        enum class label (#NotKeyedByICAndLeakIC__DO_NOT_USE)
+      }
+      ["HAttr1"]=>
+      vec(0) {
+      }
+    }
+  }
+  [11]=>
+  dict(2) {
+    ["function"]=>
+    string(1) "h"
+    ["user_attributes"]=>
+    dict(2) {
+      ["__Memoize"]=>
+      vec(1) {
+        enum class label (#NotKeyedByICAndLeakIC__DO_NOT_USE)
+      }
+      ["HAttr1"]=>
+      vec(0) {
+      }
+    }
+  }
+  [12]=>
+  dict(2) {
+    ["function"]=>
+    string(9) "Closure$k"
+    ["user_attributes"]=>
+    dict(1) {
+      ["KAttr1"]=>
+      vec(0) {
+      }
+    }
+  }
+  [13]=>
+  dict(2) {
+    ["function"]=>
+    string(1) "k"
+    ["user_attributes"]=>
+    dict(0) {
+    }
+  }
+  [14]=>
+  dict(2) {
+    ["function"]=>
+    string(16) "am1$memoize_impl"
+    ["user_attributes"]=>
+    dict(2) {
+      ["__Memoize"]=>
+      vec(1) {
+        enum class label (#KeyedByIC)
+      }
+      ["AlphaAttr1"]=>
+      vec(0) {
+      }
+    }
+  }
+  [15]=>
+  dict(2) {
+    ["function"]=>
+    string(3) "am1"
+    ["user_attributes"]=>
+    dict(2) {
+      ["__Memoize"]=>
+      vec(1) {
+        enum class label (#KeyedByIC)
+      }
+      ["AlphaAttr1"]=>
+      vec(0) {
+      }
+    }
+  }
+  [16]=>
+  dict(2) {
+    ["function"]=>
+    string(18) "Closure$Alpha::am2"
+    ["user_attributes"]=>
+    dict(1) {
+      ["AlphaAttr2"]=>
+      vec(0) {
+      }
+    }
+  }
+  [17]=>
+  dict(2) {
+    ["function"]=>
+    string(3) "am2"
+    ["user_attributes"]=>
+    dict(0) {
+    }
+  }
+  [18]=>
+  dict(2) {
+    ["function"]=>
+    string(3) "bm1"
+    ["user_attributes"]=>
+    dict(1) {
+      ["BAttr1"]=>
+      vec(0) {
+      }
+    }
+  }
+  [19]=>
+  dict(2) {
+    ["function"]=>
+    string(17) "Closure$Beta::bm2"
+    ["user_attributes"]=>
+    dict(1) {
+      ["BAttr2"]=>
+      vec(0) {
+      }
+    }
+  }
+  [20]=>
+  dict(2) {
+    ["function"]=>
+    string(3) "bm2"
+    ["user_attributes"]=>
+    dict(0) {
+    }
+  }
+  [21]=>
+  dict(2) {
+    ["function"]=>
+    string(1) "x"
+    ["user_attributes"]=>
+    dict(1) {
+      ["XAttr"]=>
+      vec(0) {
+      }
+    }
+  }
+  [22]=>
+  dict(2) {
+    ["function"]=>
+    string(9) "Closure$y"
+    ["user_attributes"]=>
+    dict(1) {
+      ["YAttr"]=>
+      vec(0) {
+      }
+    }
+  }
+  [23]=>
+  dict(2) {
+    ["function"]=>
+    string(1) "y"
+    ["user_attributes"]=>
+    dict(0) {
+    }
+  }
+  [24]=>
+  dict(2) {
+    ["function"]=>
+    string(1) "z"
+    ["user_attributes"]=>
+    dict(0) {
+    }
+  }
+  [25]=>
+  dict(2) {
+    ["function"]=>
+    string(4) "main"
+    ["user_attributes"]=>
+    dict(1) {
+      ["__EntryPoint"]=>
+      vec(0) {
+      }
+    }
+  }
+  [26]=>
+  dict(2) {
+    ["function"]=>
+    string(43) "Closure$__SystemLib\enter_async_entry_point"
+    ["user_attributes"]=>
+    NULL
+  }
+  [27]=>
+  dict(2) {
+    ["function"]=>
+    string(12) "HH\Asio\join"
+    ["user_attributes"]=>
+    NULL
+  }
+  [28]=>
+  dict(2) {
+    ["function"]=>
+    string(35) "__SystemLib\enter_async_entry_point"
+    ["user_attributes"]=>
+    NULL
+  }
+}

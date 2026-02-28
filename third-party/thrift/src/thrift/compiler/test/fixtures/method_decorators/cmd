@@ -1,0 +1,1 @@
+cpp2: mstch_cpp2:single_file_service src/module.thrift

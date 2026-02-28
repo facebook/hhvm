@@ -1,0 +1,7 @@
+object(Object0) (0) {
+}
+string(70) "Object1::__construct() expects exactly 1 positional parameter, 0 given"
+string(4) "test"
+object(Object1) (0) {
+}
+Done

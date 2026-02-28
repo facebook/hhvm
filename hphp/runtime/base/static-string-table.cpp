@@ -17,15 +17,13 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/perf-warning.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
 
 #include "hphp/runtime/server/memory-stats.h"
 
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 
 #include <folly/AtomicHashMap.h>
 
@@ -35,28 +33,30 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+constexpr int kDefaultInitialStaticStringTableSize = 500000;
+
 StringData** precomputed_chars;
 
 namespace {
 
 // the string key will one of these values:
-//  * a valid LowPtr<StringData>, or
+//  * a valid PackedPtr<StringData>, or
 //  * -1, -2, or -3 AHM magic values.
-// Note that only the magic values have 1s in the low 3 bits
-// since StringData's are at least 8-aligned.
+using StrInternKey = PackedPtr<StringData>::storage_type;
 
-using StrInternKey = LowStringPtr::storage_type;
-
-// Return true if k is one of AHM's magic values. Valid pointers are
-// 8-aligned, so test the low 3 bits.
+// Return true if k is one of AHM's magic values.
+// https://fburl.com/code/axj01lio
+// -1, -2, -3 are used to represent empty/locked/erased keys
+// in AtomicHashArrays/AtomicHashMaps, so make sure we don't
+// use those values.
 bool isMagicKey(StrInternKey k) {
-  return (k & 7) != 0;
+  return k >= (StrInternKey)-3;
 }
 
 const StringData* to_sdata(StrInternKey key) {
   assertx(!isMagicKey(key));
   static_assert(std::is_unsigned<StrInternKey>(), "cast must zero-extend");
-  return reinterpret_cast<const StringData*>(key);
+  return PackedStringPtr::fromRaw(key);
 }
 
 struct strintern_eq {
@@ -162,11 +162,13 @@ StringData** precompute_chars() {
 
 }
 
+ServiceData::ExportedCounter* ss_counter;
+
 StringData* insertStaticString(StringData* sd,
                                void (*deleter)(StringData*)) {
   assertx(sd->isStatic());
   auto pair = s_stringDataMap->insert(
-    safe_cast<StrInternKey>(reinterpret_cast<uintptr_t>(sd)),
+    PackedStringPtr::toRaw(sd),
     rds::Link<TypedValue, rds::Mode::NonLocal>{}
   );
 
@@ -181,11 +183,12 @@ StringData* insertStaticString(StringData* sd,
     auto const allocSize = sd->size() + kStringOverhead
                          + (symbol ? sizeof(SymbolPrefix) : 0);
     MemoryStats::LogAlloc(AllocKind::StaticString, allocSize);
-    if (RuntimeOption::EvalEnableReverseDataMap) {
+    if (Cfg::Eval::EnableReverseDataMap) {
       data_map::register_start(sd);
     }
     static std::atomic<bool> signaled{false};
     checkAHMSubMaps(*s_stringDataMap, "static string table", signaled);
+    ss_counter->increment();
   }
   assertx(to_sdata(pair.first->first) != nullptr);
 
@@ -194,12 +197,13 @@ StringData* insertStaticString(StringData* sd,
 
 void create_string_data_map() {
   always_assert(!s_stringDataMap);
+  ss_counter = ServiceData::createCounter("admin.static-strings");
   StringDataMap::Config config;
   config.growthFactor = 1;
   config.entryCountThreadCacheSize = 10;
   MemoryStats::ResetStaticStringSize();
 
-  s_stringDataMap.emplace(RuntimeOption::EvalInitialStaticStringTableSize,
+  s_stringDataMap.emplace(Cfg::Eval::InitialStaticStringTableSize,
                           config);
   insertStaticString(StringData::MakeEmpty());
   if (!precomputed_chars) {
@@ -325,6 +329,21 @@ std::vector<StringData*> lookupDefinedStaticStrings() {
 }
 
 
+void log_static_strings() {
+  auto const effectiveRate = Cfg::Eval::StaticStringsSampleRate;
+  if (!StructuredLog::coinflip(effectiveRate)) return;
+
+  StructuredLogEntry sample;
+  auto const& list = lookupDefinedStaticStrings();
+  for (auto item : list) {
+    auto const len = std::min<size_t>(item->size(), 255);
+    std::string str(item->data(), len);
+    sample.setStr("string", str.data());
+    sample.setInt("size", item->size());
+    StructuredLog::log("www_static_strings", sample);
+  }
+}
+
 const StaticString s_user("user");
 const StaticString s_Core("Core");
 
@@ -344,9 +363,7 @@ Array lookupDefinedConstants(bool categorize /*= false */) {
     if (type(tv) != KindOfUninit) {
       tbl->set(key, tv, true);
     } else {
-      assertx(val(tv).pcnt);
-      auto callback = reinterpret_cast<Native::ConstantCallback>(val(tv).pcnt);
-      auto cns = callback(key.get());
+      auto cns = Constant::get(key.get());
       assertx(cns.isAllowedAsConstantValue() == Variant::AllowedAsConstantValue::Allowed);
       tbl->set(key, cns, true);
     }
@@ -375,7 +392,7 @@ size_t countStaticStringConstants() {
 }
 
 void refineStaticStringTableSize() {
-  if (RuntimeOption::EvalInitialStaticStringTableSize ==
+  if (Cfg::Eval::InitialStaticStringTableSize ==
       kDefaultInitialStaticStringTableSize ||
       !s_stringDataMap) {
     return;

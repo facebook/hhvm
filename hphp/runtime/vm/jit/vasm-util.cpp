@@ -187,45 +187,42 @@ VIdomVector findDominators(const Vunit& unit,
   jit::vector<size_t> rpoOrder(unit.blocks.size());
   for (size_t i = 0; i < rpo.size(); ++i) rpoOrder[rpo[i]] = i;
 
-  dataflow_worklist<size_t> worklist(rpo.size());
-
   idom[unit.entry] = unit.entry;
-  for (auto const succ : succs(unit.blocks[0])) {
-    worklist.push(rpoOrder[succ]);
-  }
 
-  while (!worklist.empty()) {
-    auto const block = rpo[worklist.pop()];
-    auto const& blockPreds = preds[block];
+  bool changed;
+  do {
+    changed = false;
+    for (size_t i = 1; i < rpo.size(); ++i) {
+      auto const block = rpo[i];
+      auto const& blockPreds = preds[block];
 
-    // Find the first already processed predecessor (there must be at least one
-    // because we shouldn't be on the worklist otherwise).
-    auto predIt = std::find_if(
-      blockPreds.begin(),
-      blockPreds.end(),
-      [&] (Vlabel p) { return idom[p].isValid(); }
-    );
-    assertx(predIt != blockPreds.end());
-    auto p1 = *predIt;
+      // Find the first already processed predecessor (there must be at least
+      // one because we already processed previous blocks in rpo order).
+      auto predIt = std::find_if(
+        blockPreds.begin(),
+        blockPreds.end(),
+        [&] (Vlabel p) { return idom[p].isValid(); }
+      );
+      assertx(predIt != blockPreds.end());
+      auto p1 = *predIt;
 
-    // For all other already processed predecessors
-    for (++predIt; predIt != blockPreds.end(); ++predIt) {
-      auto p2 = *predIt;
-      if (p2 == p1 || !idom[p2].isValid()) continue;
-      do {
-        // Find earliest common predecessor of p1 and p2
-        while (rpoOrder[p1] < rpoOrder[p2]) p2 = idom[p2];
-        while (rpoOrder[p2] < rpoOrder[p1]) p1 = idom[p1];
-      } while (p1 != p2);
-    }
+      // For all other already processed predecessors
+      for (++predIt; predIt != blockPreds.end(); ++predIt) {
+        auto p2 = *predIt;
+        if (p2 == p1 || !idom[p2].isValid()) continue;
+        do {
+          // Find earliest common predecessor of p1 and p2
+          while (rpoOrder[p1] < rpoOrder[p2]) p2 = idom[p2];
+          while (rpoOrder[p2] < rpoOrder[p1]) p1 = idom[p1];
+        } while (p1 != p2);
+      }
 
-    if (!idom[block].isValid() || idom[block] != p1) {
-      idom[block] = p1;
-      for (auto const succ : succs(unit.blocks[block])) {
-        worklist.push(rpoOrder[succ]);
+      if (!idom[block].isValid() || idom[block] != p1) {
+        idom[block] = p1;
+        changed = true;
       }
     }
-  }
+  } while (changed);
 
   idom[unit.entry] = Vlabel{}; // entry has no dominator
   return idom;
@@ -939,7 +936,7 @@ struct FlagsVisitor {
   template<class R> void use(R&) {}
   template<class R, class H> void useHint(R& r, H) { use(r); }
 
-  void use(VregSF& r) { if (m_sf_renames.count(r)) r = RegSF{0}; }
+  void use(VregSF& r) { if (m_sf_renames.contains(r)) r = RegSF{0}; }
   void def(VregSF& r) { use(r); }
 
  private:

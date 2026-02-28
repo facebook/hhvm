@@ -1,0 +1,9 @@
+vec(1) {
+  string(1) "a"
+}
+vec(2) {
+  string(1) "a"
+  int(1)
+}
+
+Catchable fatal error: Typed local assignment: Expected HH\vec<_>, got HH\dict in %s/hphp/test/slow/typed_locals/enforce_vec.php on line 11

@@ -27,7 +27,7 @@
 
 namespace HPHP {
 
-const StaticString s_WeakRefDataHandle("WeakRefDataHandle");
+const StaticString s_WeakRef("WeakRef");
 
 WeakRefDataHandle& WeakRefDataHandle::operator=(
     const WeakRefDataHandle& other) {
@@ -111,18 +111,15 @@ bool HHVM_METHOD(WeakRef, valid) {
 ///////////////////////////////////////////////////////////////////////////////
 // Extension
 struct WeakRefExtension final : Extension {
-  WeakRefExtension() : Extension("weakref") {}
-  void moduleInit() override {
+  WeakRefExtension() : Extension("weakref", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  void moduleRegisterNative() override {
     HHVM_ME(WeakRef, __construct);
     HHVM_ME(WeakRef, acquire);
     HHVM_ME(WeakRef, get);
     HHVM_ME(WeakRef, release);
     HHVM_ME(WeakRef, valid);
 
-    Native::registerNativeDataInfo<WeakRefDataHandle>(
-      s_WeakRefDataHandle.get());
-
-    loadSystemlib("weakref");
+    Native::registerNativeDataInfo<WeakRefDataHandle>(s_WeakRef.get());
   }
 } s_weakref_extension;
 

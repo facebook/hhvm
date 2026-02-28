@@ -1,4 +1,4 @@
-File "early_solve_eq_freshen.php", line 21, characters 23-31:
+ERROR: File "early_solve_eq_freshen.php", line 21, characters 23-31:
 Invalid argument (Typing[4110])
   File "early_solve_eq_freshen.php", line 21, characters 10-20:
   Expected `C<arraykey>`

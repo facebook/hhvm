@@ -10,7 +10,7 @@ function tupleProvider((function ((int, int)...): void) $fn):void {
 
 
 <<__EntryPoint>>
-function main_lambdas_variadic_tuples() {
+function main_lambdas_variadic_tuples() :mixed{
 print "Tuple provider ...\$x\n";
 tupleProvider((...$x) ==> {
   var_dump($x);

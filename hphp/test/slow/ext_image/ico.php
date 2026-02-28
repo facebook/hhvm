@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_ico() {
+function main_ico() :mixed{
 var_dump(IMAGETYPE_ICO);
 var_dump(image_type_to_mime_type(IMAGETYPE_ICO));
 var_dump(image_type_to_extension(IMAGETYPE_ICO));

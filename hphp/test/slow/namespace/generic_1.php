@@ -10,6 +10,6 @@ function f<T>(T $x, bool $b): int {
 
 
 <<__EntryPoint>>
-function main_generic_1() {
+function main_generic_1() :mixed{
 f(1, true);
 }

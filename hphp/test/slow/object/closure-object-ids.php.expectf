@@ -1,16 +1,6 @@
-object(Closure$%S) (1) {
-  ["parameter"]=>
-  dict(1) {
-    ["$x"]=>
-    string(10) "<required>"
-  }
+object(Closure$%S) (0) {
 }
 object(stdClass) (0) {
 }
-object(Closure$%s#2) (1) {
-  ["parameter"]=>
-  dict(1) {
-    ["$x"]=>
-    string(10) "<required>"
-  }
+object(Closure$%s#2) (0) {
 }

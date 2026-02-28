@@ -1,2 +1,2 @@
 os not WIN
-function strftime
+extension date

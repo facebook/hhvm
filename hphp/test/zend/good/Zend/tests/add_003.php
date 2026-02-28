@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$a = varray[1,2,3];
+$a = vec[1,2,3];
 
 $o = new stdClass;
 $o->prop = "value";

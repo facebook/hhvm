@@ -1,0 +1,3 @@
+called f
+
+Fatal error: Type constant DAbs::T is abstract in %s/class-ptr/get-class-from-type-lsb.php on line 9

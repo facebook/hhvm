@@ -1,2 +1,0 @@
-File "variance_on_hk_param.php", line 3, characters 13-14:
-`T2` is a higher-kinded type parameter, standing for a type that has type parameters itself. We don't support variance other than invariant for parameters like `T2`. (Naming[2047])

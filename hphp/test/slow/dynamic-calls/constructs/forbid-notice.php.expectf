@@ -1,6 +1,30 @@
 =============== positive tests =====================
 
-Notice: 'A' constructed dynamically in %s on line 151
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/constructs/forbid-notice.php on line 143
+
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/constructs/forbid-notice.php on line 145
+
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/constructs/forbid-notice.php on line 57
+
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/constructs/forbid-notice.php on line 58
+
+Warning: Method B::static_func not marked dynamic in %s/dynamic-calls/constructs/forbid-notice.php on line 59
+
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/constructs/forbid-notice.php on line 67
+
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/constructs/forbid-notice.php on line 68
+
+Warning: Method B::static_async_func not marked dynamic in %s/dynamic-calls/constructs/forbid-notice.php on line 69
+
+Notice: 'A' constructed dynamically in %s/dynamic-calls/constructs/forbid-notice.php on line 151
 =============== negative tests =====================
 =============== positive tests (exceptions) ========
+Exception: Method A::static_func not marked dynamic
+Exception: Method A::static_async_func not marked dynamic
+Exception: Method A::static_func not marked dynamic
+Exception: Method A::static_func not marked dynamic
+Exception: Method B::static_func not marked dynamic
+Exception: Method A::static_async_func not marked dynamic
+Exception: Method A::static_async_func not marked dynamic
+Exception: Method B::static_async_func not marked dynamic
 Exception: 'A' constructed dynamically

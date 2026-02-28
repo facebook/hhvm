@@ -8,11 +8,11 @@ var_dump(new stdClass is stdClass);
 $b = () ==> new stdClass;
 var_dump($b() is stdClass);
 
-$c = varray[new stdClass];
+$c = vec[new stdClass];
 var_dump($c[0] is stdClass);
 
 try {
-    var_dump(@$inexistent is stdClass);
+    var_dump($inexistent is stdClass);
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }

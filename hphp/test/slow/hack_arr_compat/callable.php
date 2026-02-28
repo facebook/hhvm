@@ -1,12 +1,12 @@
 <?hh
 
-class C { static function f() {} }
+class C { static function f() :mixed{} }
 
-function test(callable $x) { return $x; }
+function test(callable $x) :mixed{ return $x; }
 
 <<__EntryPoint>>
-function main() {
-  $base = varray['C', 'f'];
+function main() :mixed{
+  $base = vec['C', 'f'];
   $callables = vec[
     varray($base),
     darray($base),
@@ -20,10 +20,10 @@ function main() {
   }
 
   // Static version, so that we can test HHBBC, too.
-  $callable = varray['C', 'f'];
+  $callable = vec['C', 'f'];
   var_dump(is_callable($callable));
   var_dump(test($callable));
-  $callable = darray[0 => 'C', 1 => 'f'];
+  $callable = dict[0 => 'C', 1 => 'f'];
   var_dump(is_callable($callable));
   var_dump(test($callable));
   $callable = vec['C', 'f'];

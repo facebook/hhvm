@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 abstract class A {
@@ -7,7 +7,7 @@ abstract class A {
 }
 interface B {}
 
-function geta<T as A, Ta>(T $x): Ta where Ta = T::Ta {
+function geta<T as A with { type Ta = Ta }, Ta>(T $x): Ta {
   return $x->get();
 }
 

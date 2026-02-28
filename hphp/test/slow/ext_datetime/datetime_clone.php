@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_datetime_clone() {
+function main_datetime_clone() :mixed{
 $d1=new DateTimeImmutable('03/08/2015 1:59am GMT-05:00');
 echo $d1->format(DateTime::ISO8601)."\n";
 

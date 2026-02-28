@@ -1,0 +1,2 @@
+--config warnings_default_all=false
+--error-format extended

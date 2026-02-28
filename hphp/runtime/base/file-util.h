@@ -99,6 +99,7 @@ String dirname(const String& path);
  */
 void find(std::vector<std::string> &out,
           const std::string &root, const std::string& path, bool php,
+          bool failHard,
           const hphp_fast_string_set *excludeDirs = nullptr,
           const hphp_fast_string_set *excludeFiles = nullptr);
 

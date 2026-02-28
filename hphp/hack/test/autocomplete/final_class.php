@@ -1,0 +1,3 @@
+<?hh
+
+final AUTO332

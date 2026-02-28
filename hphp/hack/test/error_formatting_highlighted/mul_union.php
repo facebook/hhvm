@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2020-present Facebook. All Rights Reserved.
 
 function badInt(bool $b): int {

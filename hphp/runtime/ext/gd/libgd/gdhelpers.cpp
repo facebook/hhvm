@@ -1,6 +1,4 @@
-#include "gd.h"
-#include "gdhelpers.h"
-#include <stdlib.h>
+#include "hphp/runtime/ext/gd/libgd/gdhelpers.h"
 #include <string.h>
 
 /* TBB: gd_strtok_r is not portable; provide an implementation */

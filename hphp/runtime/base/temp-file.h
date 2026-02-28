@@ -26,7 +26,7 @@ namespace HPHP {
  * from the file system on close.
  */
 struct TempFile : PlainFile {
-  DECLARE_RESOURCE_ALLOCATION(TempFile);
+  DECLARE_RESOURCE_ALLOCATION(TempFile)
 
   explicit TempFile(bool autoDelete = true,
                     const String& wrapper_type = null_string,
@@ -38,7 +38,7 @@ struct TempFile : PlainFile {
 
   // implementing File
   bool open(const String& filename, const String& mode) override;
-  bool close() override;
+  bool close(int* unused = nullptr) final;
 
   Object await(uint16_t /*events*/, double /*timeout*/) override {
     SystemLib::throwExceptionObject(
@@ -53,7 +53,6 @@ private:
   bool m_autoDelete;
   std::string m_rawName;
 
-  bool closeImpl();
   int64_t getLength();
 };
 

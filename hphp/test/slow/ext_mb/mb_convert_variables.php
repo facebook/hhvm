@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_mb_convert_variables() {
+function main_mb_convert_variables() :mixed{
 $str  = "Pr\xC3\x9C"."fung";
 $str1 = "Pr\xC3\x9C"."fung";
 $str2 = "Pr\xC3\x9C"."fung";

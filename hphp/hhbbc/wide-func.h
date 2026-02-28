@@ -22,13 +22,6 @@ namespace HPHP::HHBBC { namespace php {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Run a correctness test of compression: compress and decompress all the
- * Funcs in the given Program. Although we take a mutable ref to the
- * program as input, this operation shouldn't change the program's code.
- */
-void testCompression(Program& program);
-
-/*
  * Only used to implement WideFunc::blockRange. Probably overkill.
  */
 template <typename T>
@@ -62,8 +55,16 @@ struct WideFunc {
   WideFunc& operator=(WideFunc&&) = delete;
   WideFunc& operator=(const WideFunc&) = delete;
 
-  static WideFunc mut(Func* func) { return WideFunc(func, true); }
-  static const WideFunc cns(const Func* func) { return WideFunc(func, false); }
+  static WideFunc mut(Func* func) { return WideFunc(func, true, false); }
+  static WideFunc cns(const Func* func) {
+    return WideFunc(func, false, false);
+  }
+  static WideFunc create(Func& func) {
+    return WideFunc(&func, true, true);
+  }
+
+  static BlockVec uncompress(const CompressedBytecode&);
+  static CompressedBytecode compress(const BlockVec&);
 
   ~WideFunc();
 
@@ -84,7 +85,7 @@ struct WideFunc {
   void release();
 
 private:
-  WideFunc(const Func* func, bool mut);
+  WideFunc(const Func* func, bool mut, bool create);
 
   Func* m_func;
   BlockVec m_blocks;

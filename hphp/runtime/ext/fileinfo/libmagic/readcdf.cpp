@@ -23,7 +23,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "file.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/file.h"
 
 #ifndef lint
 FILE_RCSID("@(#)$File: readcdf.c,v 1.33 2012/06/20 21:52:36 christos Exp $")
@@ -34,8 +34,8 @@ FILE_RCSID("@(#)$File: readcdf.c,v 1.33 2012/06/20 21:52:36 christos Exp $")
 #include <time.h>
 #include <ctype.h>
 
-#include "cdf.h"
-#include "magic.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/cdf.h"
+#include "hphp/runtime/ext/fileinfo/libmagic/magic.h"
 
 #include "hphp/util/bstring.h"
 

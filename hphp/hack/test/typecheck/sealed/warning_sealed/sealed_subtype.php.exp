@@ -1,0 +1,2 @@
+WARN: File "sealed_subtype.php", line 5, characters 3-10:
+Class `B` in sealed allowlist for `I`, but does not implement `I` (Warn[12035])

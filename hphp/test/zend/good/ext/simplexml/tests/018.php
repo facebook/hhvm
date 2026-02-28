@@ -1,6 +1,6 @@
 <?hh 
 
-function traverse_xml($pad,$xml) {
+function traverse_xml($pad,$xml) :mixed{
   foreach($xml->children() as $name => $node) {
     echo $pad."<$name";
     foreach($node->attributes() as $attr => $value) {

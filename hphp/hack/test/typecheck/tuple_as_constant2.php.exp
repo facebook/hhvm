@@ -1,6 +1,8 @@
-File "tuple_as_constant2.php", line 9, characters 37-45:
+ERROR: File "tuple_as_constant2.php", line 9, characters 37-45:
 Expected constant expression for initializer (Parsing[1002])
-File "tuple_as_constant2.php", line 9, characters 48-56:
+ERROR: File "tuple_as_constant2.php", line 9, characters 48-56:
 Expected constant expression for initializer (Parsing[1002])
-File "tuple_as_constant2.php", line 9, characters 37-45:
+ERROR: File "tuple_as_constant2.php", line 9, characters 37-45:
+Illegal constant value (Naming[2023])
+ERROR: File "tuple_as_constant2.php", line 9, characters 48-56:
 Illegal constant value (Naming[2023])

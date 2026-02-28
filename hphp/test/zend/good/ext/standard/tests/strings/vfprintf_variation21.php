@@ -12,7 +12,7 @@
 // declaring a class
 class sample
 {
-  public function __toString() {
+  public function __toString() :mixed{
   return "object";
   }
 }
@@ -28,7 +28,7 @@ $file_handle = fopen(__FILE__, 'r');
 
 
 //array of values to iterate over
-$values = varray[
+$values = vec[
 
           // int data
 /*1*/      0,
@@ -71,7 +71,7 @@ $values = varray[
 ];
 
 /* creating dumping file */
-$data_file = __SystemLib\hphp_test_tmppath('vfprintf_variation21.txt');
+$data_file = sys_get_temp_dir().'/'.'vfprintf_variation21.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

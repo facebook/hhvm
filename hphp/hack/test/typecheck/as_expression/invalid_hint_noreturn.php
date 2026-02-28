@@ -1,6 +1,5 @@
-<?hh // strict
+<?hh
 
 function foo(mixed $x): void {
   $x as noreturn;
-  hh_show($x);
 }

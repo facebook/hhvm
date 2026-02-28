@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_filter_var_invalid_uri() {
-$urls = varray[
+function main_filter_var_invalid_uri() :mixed{
+$urls = vec[
   "http://www.facebook.com/valid",
   "http://www.facebook.com/with space",
   "http://www.facebook.com/with\ttab",

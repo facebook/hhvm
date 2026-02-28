@@ -263,7 +263,7 @@ inline auto deref(const P& p) -> decltype(P().get()) {
 
 struct ResourceData;
 struct ObjectData;
-struct Resource;
+struct OptResource;
 struct Object;
 struct Variant;
 
@@ -271,7 +271,7 @@ struct Variant;
 [[noreturn]] void throw_invalid_object_type(ResourceData* p);
 [[noreturn]] void throw_invalid_object_type(ObjectData* p);
 [[noreturn]] void throw_invalid_object_type(const Variant& p);
-[[noreturn]] void throw_invalid_object_type(const Resource& p);
+[[noreturn]] void throw_invalid_object_type(const OptResource& p);
 [[noreturn]] void throw_invalid_object_type(const Object& p);
 template <typename T>
 [[noreturn]] void throw_invalid_object_type(const req::ptr<T>& p);

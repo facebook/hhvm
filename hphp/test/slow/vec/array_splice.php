@@ -1,6 +1,6 @@
 <?hh
 
-function test_splice($input) {
+function test_splice($input) :mixed{
   var_dump(array_splice(inout $input, 1));
   var_dump($input);
 }

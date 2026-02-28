@@ -5,20 +5,21 @@ class Y {
 class X {
   public $a;
   function __construct() {
-    $this->a = darray['x' => new Y];
+    $this->a = dict['x' => new Y];
   }
-  function bar() {
+  function bar() :mixed{
     var_dump('bar');
     $this->qq = new Y;
-    $this->qq->x = $this->qq->y = 1;
+    $this->qq->y = 1;
+    $this->qq->x = $this->qq->y;
     return $this->qq;
   }
 }
-function foo() {
+function foo() :mixed{
   var_dump('foo');
   return 'foo';
 }
-function test($x, $a, $s) {
+function test($x, $a, $s) :mixed{
   unset($x->bar()->x);
   try {
     unset($x->q->r->s->$foo);
@@ -34,7 +35,7 @@ function test($x, $a, $s) {
 }
 
 <<__EntryPoint>>
-function main_798() {
+function main_798() :mixed{
   $s = false;
-  test(new X, varray[], $s);
+  test(new X, vec[], $s);
 }

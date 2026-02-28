@@ -1,0 +1,107 @@
+#!/bin/sh
+
+# Copyright (c) 2015, 2020, Oracle and/or its affiliates. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2.0,
+# as published by the Free Software Foundation.
+#
+# This program is also distributed with certain software (including
+# but not limited to OpenSSL) that is licensed under separate terms,
+# as designated in a particular file or component or in included license
+# documentation.  The authors of MySQL hereby grant you an additional
+# permission to link the program and your derivative works with the
+# separately licensed software that they have included with MySQL.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License, version 2.0, for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+
+. /usr/share/debconf/confmodule
+
+# Router versions prior to 8.0.20 were using non-persisted directory
+# as a default for data_directory. Here we want to fix the existing
+# configuration if it is affected by this bug.
+fix_datadir_path() {
+  CONFIGFILE=/etc/mysqlrouter/mysqlrouter.conf
+  INVALID_DATA_DIR=/run/mysqlrouter
+  CORRECT_DATA_DIR=/var/lib/mysqlrouter
+  MASTER_KEYRING_FILE=/etc/mysqlrouter/mysqlrouter.key
+
+  if [ ! -f  $CONFIGFILE ]; then
+    return 0
+  fi
+
+  # we don't want the grep not being able to find the pattern to fail the script
+  set +e
+  has_invalid_keyring_path=$(grep "^keyring_path=$INVALID_DATA_DIR/keyring$" $CONFIGFILE)
+  has_invalid_statefile_path=$(grep "^dynamic_state=$INVALID_DATA_DIR/state.json$" $CONFIGFILE)
+  set -e
+
+  if [ -z "$has_invalid_keyring_path" ] && [ -z "$has_invalid_statefile_path" ]; then
+    return 0
+  fi
+
+  # make a copy of the config file before modifying it
+  cp -p $CONFIGFILE $CONFIGFILE.tmp
+
+  # fix the keyring location if needed
+  if [ ! -z "$has_invalid_keyring_path" ]; then
+    sed -i "s|^keyring_path=$INVALID_DATA_DIR/keyring$|keyring_path=$CORRECT_DATA_DIR/keyring|" \
+      $CONFIGFILE.tmp
+
+    # make a copy of the master keyring file before modifying it
+    cp -p $MASTER_KEYRING_FILE $MASTER_KEYRING_FILE.tmp
+    mysqlrouter_keyring master-rename --master-key-file \
+      $MASTER_KEYRING_FILE.tmp $INVALID_DATA_DIR/keyring $CORRECT_DATA_DIR/keyring
+  fi
+
+  # fix the dynamic state file location if needed
+  if [ ! -z "$has_invalid_statefile_path" ]; then
+    sed -i "s|^dynamic_state=$INVALID_DATA_DIR/state.json$|dynamic_state=$CORRECT_DATA_DIR/state.json|" \
+      $CONFIGFILE.tmp
+  fi
+
+  # files modifications went ok, now move them to proper locations and clean up
+  if [ ! -z "$has_invalid_keyring_path" ]; then
+    cp -np $INVALID_DATA_DIR/keyring $CORRECT_DATA_DIR
+    cp -p $MASTER_KEYRING_FILE.tmp $MASTER_KEYRING_FILE
+
+    rm $INVALID_DATA_DIR/keyring $MASTER_KEYRING_FILE.tmp
+  fi
+
+  if [ ! -z "$has_invalid_statefile_path" ]; then
+    cp -np $INVALID_DATA_DIR/state.json $CORRECT_DATA_DIR
+    rm $INVALID_DATA_DIR/state.json
+  fi
+
+  cp -p $CONFIGFILE.tmp $CONFIGFILE
+  rm $CONFIGFILE.tmp
+}
+
+case "$1" in
+  configure)
+    set -e
+    ldconfig
+    if dpkg --compare-versions "$2" le "8.0.20"; then
+      echo "Fixing the data files location (if needed)"
+      fix_datadir_path
+    fi
+    set +e
+    ;;
+
+  abort-remove)
+    ;;
+
+  abort-upgrade|abort-configure)
+    ;;
+esac
+
+#DEBHELPER#
+
+exit 0

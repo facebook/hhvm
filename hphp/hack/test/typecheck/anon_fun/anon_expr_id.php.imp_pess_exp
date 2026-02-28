@@ -1,0 +1,5 @@
+File "anon_expr_id.php", line 11, characters 3-20:
+  ~<expr#2>::T where <expr#2>::T as C::T
+File "anon_expr_id.php", line 13, characters 5-22:
+  ~<expr#2>::T where <expr#2>::T as C::T
+No errors

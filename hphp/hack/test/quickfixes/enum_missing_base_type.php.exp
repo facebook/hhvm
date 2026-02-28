@@ -1,0 +1,7 @@
+Add `arraykey` base type
+
+<?hh
+
+enum X: arraykey {
+  Y = 2;
+}

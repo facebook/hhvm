@@ -5,13 +5,14 @@
 HPHP::s_numaNode
 HPHP::s_readline
 HPHP::tl_heap_id
+HPHP::tl_heap_sanitizer
 HPHP::AsioSession::s_current
 HPHP::ServerStats::s_logger
 HPHP::s_hugeRange
 HPHP::s_stackSize
 HPHP::tl_regState   # okay always clean at context switch.
 HPHP::tl_sweeping
-HPHP::(anonymous namespace)::tl_cliSock
+HPHP::(anonymous namespace)::tl_context
 HPHP::(anonymous namespace)::tl_traceTask
 HPHP::(anonymous namespace)::s_connections
 HPHP::(anonymous namespace)::tl_perf_event
@@ -20,16 +21,15 @@ HPHP::(anonymous namespace)::tl_loaded_units
 HPHP::(anonymous namespace)::tl_env
 HPHP::(anonymous namespace)::tl_rng
 HPHP::(anonymous namespace)::tl_proc
-HPHP::(anonymous namespace)::tl_ucred
 HPHP::ResolverInit::s_res
 HPHP::s_stackLimit
+HPHP::RequestInfo::s_stackLimitWithSlack
 HPHP::MemcachedData::s_persistentMap
 HPHP::s_ini_setting
 HPHP::s_json_parser
 HPHP::StackTraceLog::s_logData
 HPHP::s_date_globals
-HPHP::SourceRootInfo::s_path
-HPHP::SourceRootInfo::s_phproot
+HPHP::SourceRootInfo::tl_info
 HPHP::HardwareCounter::s_counter
 HPHP::tl_libxml_trees
 HPHP::AssertDetailImpl::s_head
@@ -37,9 +37,8 @@ HPHP::high_arena_flags
 HPHP::local_arena
 HPHP::local_arena_flags
 HPHP::local_arena_tcache
-HPHP::tl_static_arena
 HPHP::ImagickExtension::s_ini_setting
-HPHP::RPCRequestHandler::s_accessLogThreadData
+HPHP::XboxRequestHandler::s_accessLogThreadData
 HPHP::HttpRequestHandler::s_accessLogThreadData
 HPHP::AdminRequestHandler::s_accessLogThreadData
 HPHP::s_file_session_data
@@ -103,6 +102,14 @@ HPHP::arrprov::(anonymous namespace)::tl_tag_override
 HPHP::tracing::detail::tl_active
 HPHP::jit::(anonymous namespace)::tl_ownedFunc
 HPHP::jit::tc::tl_is_jitting
+HPHP::BlobEncoderHelper<HPHP::ArrayData const*>::tl_unitEmitter
+HPHP::BlobEncoderHelper<HPHP::ArrayData const*>::tl_unit
+HPHP::BlobEncoderHelper<HPHP::ArrayData const*>::tl_defer
+HPHP::BlobEncoderHelper<HPHP::StringData const*>::tl_unitEmitter
+HPHP::BlobEncoderHelper<HPHP::StringData const*>::tl_unit
+HPHP::BlobEncoderHelper<HPHP::StringData const*>::tl_indexer
+HPHP::extern_worker::g_in_job
+HPHP::ThreadHint::s_threadData
 
 # Native Facts is not request-scoped.
 HPHP::Facts::(anonymous namespace)::t_adb
@@ -112,6 +119,8 @@ HPHP::Facts::(anonymous namespace)::t_savedStates
 # "guard variable for" is a clang-ism, leaving it out is a GCC-ism
 facebook::datatype::MemcacheFetcher<HPHP::Facts::(anonymous namespace)::FactsMemcacheDataType, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::timeToLive() const::gen
 guard variable for facebook::datatype::MemcacheFetcher<HPHP::Facts::(anonymous namespace)::FactsMemcacheDataType, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::timeToLive() const::gen
+facebook::datatype::MemcacheFetcher<HPHP::Decl::(anonymous namespace)::DeclsMemcacheDataType, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::timeToLive() const::gen
+guard variable for facebook::datatype::MemcacheFetcher<HPHP::Decl::(anonymous namespace)::DeclsMemcacheDataType, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::timeToLive() const::gen
 
 # TODO: (T9683397) Un-whitelist these Call Threaded Interpreter TLS vars.
 HPHP::(anonymous namespace)::cc_lookups
@@ -126,3 +135,5 @@ HPHP::jit::(anonymous namespace)::tl_dataStorePtr
 # Probably can be moved to a global (D29176455), thread local instead of RDS as
 # a cherry-pickable leak fix
 HPHP::(anonymous namespace)::c_hsl_locale
+
+HPHP::s_thriftWorker

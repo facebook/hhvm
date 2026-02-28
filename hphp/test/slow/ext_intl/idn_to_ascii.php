@@ -1,11 +1,11 @@
 <?hh
 
 // Php doesn't support \u escapes.
-function u($x) { return json_decode("\"" . $x . "\""); }
+function u($x) :mixed{ return json_decode("\"" . $x . "\""); }
 
 
 <<__EntryPoint>>
-function main_idn_to_ascii() {
+function main_idn_to_ascii() :mixed{
 var_dump(idn_to_ascii("www.m\xc3\xa5nsjonasson.se") ===
     "www.xn--mnsjonasson-x8a.se");
 var_dump(idn_to_ascii("www.facebook.com"));

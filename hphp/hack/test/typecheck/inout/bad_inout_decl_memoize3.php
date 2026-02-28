@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 final class D {
   <<__Memoize>>

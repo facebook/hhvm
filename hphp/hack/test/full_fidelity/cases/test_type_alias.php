@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type T1<T> = T2;
 type T2 = T2;

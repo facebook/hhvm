@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
@@ -27,26 +26,21 @@
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
-#include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
-#include "hphp/runtime/vm/resumable.h"
-#include "hphp/util/arch.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/trace.h"
-
-#include "hphp/vixl/a64/macro-assembler-a64.h"
-#include "hphp/vixl/a64/disasm-a64.h"
 
 namespace HPHP::jit::svcreq {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(servicereq);
+TRACE_SET_MOD(servicereq)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -54,18 +48,19 @@ namespace {
 
 uint64_t toStubKey(StubType type, SrcKey sk, SBInvOffset spOff) {
   auto const t = static_cast<uint8_t>(type);
-  auto const bcOff = sk.funcEntry() ? sk.entryOffset() : sk.offset();
+  auto const bcOffOrNumArgs = sk.funcEntry() ? sk.numEntryArgs() : sk.offset();
   assertx(t < (1 << 2));
-  assertx(0 <= bcOff && bcOff < (1LL << 30));
+  assertx(0 <= bcOffOrNumArgs && bcOffOrNumArgs < (1LL << 30));
   assertx(0 <= spOff.offset && spOff.offset < (1LL << 31));
   return
     (static_cast<uint64_t>(t) << 62) +
     (static_cast<uint64_t>(sk.funcEntry()) << 61) +
-    (static_cast<uint64_t>(bcOff) << 31) +
+    (static_cast<uint64_t>(bcOffOrNumArgs) << 31) +
     (static_cast<uint64_t>(spOff.offset));
 }
 
 folly_concurrent_hash_map_simd<uint64_t, TCA> s_stubMap;
+folly_concurrent_hash_map_simd<TCA, bool>     s_stubSet;
 
 TCA typeToHandler(StubType type) {
   switch (type) {
@@ -98,7 +93,7 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
          typeToName(type), showShort(sk), spOff.offset);
   assertx(!sk.prologue());
 
-  if (s_fullForStub.load(std::memory_order_relaxed)) {
+  if (s_fullForStub.load(std::memory_order_acquire)) {
     FTRACE(4, "  no space for {}, bailing\n", showShort(sk));
     return nullptr;
   }
@@ -107,8 +102,14 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
   tracing::Block _{"svcreq::emitStub"};
 
   auto codeLock = tc::lockCode();
-
-  auto view = tc::code().view(TransKind::Anchor);
+  std::optional<CodeCache::View> viewOpt;
+  try {
+    viewOpt = tc::code().view(TransKind::Anchor);
+  } catch (const DataBlockFull&) {
+    tc::setTcIsFull();
+    return nullptr;
+  }
+  auto view = viewOpt.value();
   TCA mainStart = view.main().frontier();
   TCA coldStart = view.cold().frontier();
   TCA frozenStart = view.frozen().frontier();
@@ -117,14 +118,15 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
     assertx(!sk.funcEntry());
     v << copy{v.cns(sk.offset()), rarg(0)};
     v << copy{v.cns(spOff.offset), rarg(1)};
-    v << jmpi{typeToHandler(type), leave_trace_regs() | arg_regs(2)};
+    v << jmpi{typeToHandler(type), cross_trace_regs() | arg_regs(2)};
   };
 
   auto const emitFuncEntry = [&] (Vout& v) {
     assertx(sk.funcEntry());
     assertx(spOff == SBInvOffset{0});
-    v << copy{v.cns(sk.entryOffset()), rarg(0)};
-    v << jmpi{typeToFuncEntryHandler(type), leave_trace_regs() | arg_regs(1)};
+    v << copy{v.cns(sk.numEntryArgs()), rarg(3)};
+    v << jmpi{typeToFuncEntryHandler(type),
+              func_entry_regs(true /* withCtx */) | rarg(3)};
   };
 
   auto const start = vwrap(
@@ -137,6 +139,7 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
         emitFuncEntry(v);
       }
     },
+    nullptr,
     false, /* relocate */
     true   /* nullOnFull */
   );
@@ -145,7 +148,7 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
   // just get a nullptr address.
   if (!start) {
     FTRACE(4, "  ran out of space while making stub for {}\n", showShort(sk));
-    s_fullForStub.store(true, std::memory_order_relaxed);
+    s_fullForStub.store(true, std::memory_order_release);
     return nullptr;
   }
 
@@ -153,7 +156,7 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
   assertx(view.cold().frontier() != coldStart);
   assertx(view.frozen().frontier() == frozenStart);
 
-  if (RuntimeOption::EvalDumpTCAnchors) {
+  if (Cfg::Eval::DumpTCAnchors) {
     auto metaLock = tc::lockMetadata();
     auto const transID = profData() && transdb::enabled()
       ? profData()->allocTransID() : kInvalidTransID;
@@ -161,7 +164,7 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
                 coldStart, view.cold().frontier() - coldStart, frozenStart, 0);
     transdb::addTranslation(tr);
     FuncOrder::recordTranslation(tr);
-    if (RuntimeOption::EvalJitUseVtuneAPI) {
+    if (Cfg::Jit::UseVtuneAPI) {
       reportTraceletToVtune(sk.unit(), sk.func(), tr);
     }
     tc::recordTranslationSizes(tr);
@@ -188,7 +191,12 @@ TCA getOrEmitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
 
   auto const pair = s_stubMap.insert({key, stub});
   if (!pair.second) return pair.first->second;
+  s_stubSet.insert({stub, true});
   return stub;
+}
+
+bool isStub(TCA addr) {
+  return s_stubSet.find(addr) != s_stubSet.end();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -197,7 +205,7 @@ TCA emit_interp_no_translate_stub(SBInvOffset spOff, SrcKey sk) {
   FTRACE(2, "interp_no_translate_stub @{} {}\n", showShort(sk), spOff.offset);
 
   // No point on trying to emit if we already failed once.
-  if (s_fullForStub.load(std::memory_order_relaxed)) {
+  if (s_fullForStub.load(std::memory_order_acquire)) {
     FTRACE(4, "  no space for {}, bailing\n", showShort(sk));
     return nullptr;
   }
@@ -208,7 +216,15 @@ TCA emit_interp_no_translate_stub(SBInvOffset spOff, SrcKey sk) {
   auto codeLock = tc::lockCode();
   auto metaLock = tc::lockMetadata();
 
-  auto view = tc::code().view();
+  std::optional<CodeCache::View> viewOpt;
+  try {
+    viewOpt = tc::code().view(TransKind::Anchor);
+  } catch (const DataBlockFull&) {
+    tc::setTcIsFull();
+    return nullptr;
+  }
+
+  auto view = viewOpt.value();
   auto& cb = view.frozen();
   auto& data = view.data();
 
@@ -216,6 +232,7 @@ TCA emit_interp_no_translate_stub(SBInvOffset spOff, SrcKey sk) {
     cb,
     data,
     [&] (Vout& v) { emitInterpReqNoTranslate(v, sk, spOff); },
+    nullptr,
     false,
     true /* nullOnFull */
   );
@@ -224,7 +241,7 @@ TCA emit_interp_no_translate_stub(SBInvOffset spOff, SrcKey sk) {
   // just get a nullptr address.
   if (!start) {
     FTRACE(4, "  ran out of space while making stub for {}\n", showShort(sk));
-    s_fullForStub.store(true, std::memory_order_relaxed);
+    s_fullForStub.store(true, std::memory_order_release);
   }
   FTRACE(4, "  emitted stub {} for {}\n", start, showShort(sk));
   return start;

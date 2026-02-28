@@ -8,10 +8,10 @@
  *)
 
 (* This `.mli` file was generated automatically. It may include extra
-definitions that should not actually be exposed to the caller. If you notice
-that this interface file is a poor interface, please take a few minutes to
-clean it up manually, and then delete this comment once the interface is in
-shape. *)
+   definitions that should not actually be exposed to the caller. If you notice
+   that this interface file is a poor interface, please take a few minutes to
+   clean it up manually, and then delete this comment once the interface is in
+   shape. *)
 
 type override_info = {
   class_name: string;
@@ -22,6 +22,7 @@ type override_info = {
 
 type class_id_type =
   | ClassId
+  | ExpressionTreeVisitor
   | Other
 [@@deriving ord, eq]
 
@@ -31,6 +32,13 @@ type receiver_class =
 [@@deriving ord, eq]
 
 type keyword_with_hover_docs =
+  | Class
+  | Interface
+  | Trait
+  | Enum
+  | EnumClass
+  | Type
+  | Newtype
   | FinalOnClass
   | FinalOnMethod
   | AbstractOnClass
@@ -41,6 +49,16 @@ type keyword_with_hover_docs =
   | ReadonlyOnParameter
   | ReadonlyOnReturnType
   | ReadonlyOnExpression
+  | XhpAttribute
+  | XhpChildren
+  | ConstGlobal
+  | ConstOnClass
+  | ConstType
+  | StaticOnMethod
+  | StaticOnProperty
+  | Use
+  | FunctionGlobal
+  | FunctionOnMethod
   | Async
   | AsyncBlock
   | Await
@@ -48,10 +66,14 @@ type keyword_with_hover_docs =
   | Public
   | Protected
   | Private
+  | Internal
+  | ModuleInModuleDeclaration
+  | ModuleInModuleMembershipDeclaration
 [@@deriving ord, eq]
 
 type built_in_type_hint =
   | BIprimitive of Aast_defs.tprim
+  | BIstring
   | BImixed
   | BIdynamic
   | BInothing
@@ -59,6 +81,7 @@ type built_in_type_hint =
   | BIshape
   | BIthis
   | BIoption
+  | BIclass_ptr
 [@@deriving eq]
 
 type receiver =
@@ -96,16 +119,19 @@ type kind =
   | Keyword of keyword_with_hover_docs
   | PureFunctionContext
   | BestEffortArgument of receiver * int
-[@@deriving eq]
+  | HhFixme
+  | HhIgnore
+  | Module
+[@@deriving eq, show]
 
 type 'a t = {
   name: string;
   type_: kind;
-  is_declaration: bool;
-  (* Span of the symbol itself *)
-  pos: 'a Pos.pos;
+  is_declaration: 'a Pos.pos option;
+      (** If this is a declaration, the span of the full declaration, or None otherwise *)
+  pos: 'a Pos.pos;  (** Span of the symbol name itself *)
 }
-[@@deriving ord]
+[@@deriving ord, show]
 
 val to_absolute : Relative_path.t t -> string t
 
@@ -120,3 +146,7 @@ val is_constructor : 'a t -> bool
 val is_class : 'a t -> bool
 
 val is_xhp_literal_attr : 'a t -> bool
+
+val built_in_type_hover : built_in_type_hint -> string
+
+val is_top_level_definition : 'a t -> bool

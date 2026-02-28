@@ -1,10 +1,10 @@
-<?hh // partial
+<?hh
 
 /**
  * Unicode Security and Spoofing Detection
  * http://icu-project.org/apiref/icu4c/uspoof_8h.html
  */
-<<__NativeData("SpoofChecker")>>
+<<__NativeData>>
 class SpoofChecker {
   /**
    * Creates a spoof checker that checks for visually confusing
@@ -30,8 +30,8 @@ class SpoofChecker {
    */
   <<__Native>>
   public function isSuspicious(string $text,
-                               <<__OutOnly("KindOfInt64")>>
-                               inout mixed $issuesFound): bool;
+                               <<__OutOnly>>
+                               inout int $issuesFound): bool;
 
   /**
    * Check the whether two specified UTF-8 strings are visually confusable.
@@ -54,8 +54,8 @@ class SpoofChecker {
    */
   <<__Native>>
   public function areConfusable(string $s1, string $s2,
-                                <<__OutOnly("KindOfInt64")>>
-                                inout mixed $issuesFound): bool;
+                                <<__OutOnly>>
+                                inout int $issuesFound): bool;
 
   /**
    * Limit characters that are acceptable in identifiers being checked to those

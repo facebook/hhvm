@@ -4,14 +4,21 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::fmt;
-use std::hash::{Hash, Hasher};
+use std::hash::Hash;
+use std::hash::Hasher;
 use std::ops::Deref;
-use std::sync::{Arc, Weak};
+use std::sync::Arc;
+use std::sync::Weak;
 
-use dashmap::{mapref::entry::Entry, DashMap};
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-
+use dashmap::DashMap;
+use dashmap::mapref::entry::Entry;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 pub use once_cell::sync::Lazy;
+use serde::Deserialize;
+use serde::Deserializer;
+use serde::Serialize;
+use serde::Serializer;
 
 /// A hash-consed pointer.
 pub struct Hc<T>(Arc<T>);
@@ -25,20 +32,6 @@ impl<T: Consable> Hc<T> {
 
 pub trait Consable: Eq + Hash + Sized + 'static {
     fn conser() -> &'static Conser<Self>;
-}
-
-#[macro_export]
-macro_rules! consable {
-    ( $ty:ty ) => {
-        impl crate::Consable for $ty {
-            #[inline]
-            fn conser() -> &'static crate::Conser<$ty> {
-                static CONSER: crate::Lazy<crate::Conser<$ty>> =
-                    crate::Lazy::new(crate::Conser::new);
-                &CONSER
-            }
-        }
-    };
 }
 
 impl<T> Clone for Hc<T> {
@@ -129,6 +122,18 @@ impl<'de, T: Deserialize<'de> + Consable> Deserialize<'de> for Hc<T> {
     }
 }
 
+impl<T: ToOcamlRep + Consable> ToOcamlRep for Hc<T> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
+        self.0.to_ocamlrep(alloc)
+    }
+}
+
+impl<T: FromOcamlRep + Consable> FromOcamlRep for Hc<T> {
+    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        Ok(Hc::new(T::from_ocamlrep(value)?))
+    }
+}
+
 fn fnv_hash<T: Hash>(value: &T) -> u64 {
     let mut hasher = fnv::FnvHasher::default();
     value.hash(&mut hasher);
@@ -153,6 +158,10 @@ impl<T: Consable> Conser<T> {
         l != self.table.len()
     }
 
+    pub fn clear(&self) {
+        self.table.clear()
+    }
+
     fn mk(&self, x: T) -> Hc<T> {
         let hash = fnv_hash(&x);
         let rc = match self.table.entry(hash) {
@@ -175,5 +184,40 @@ impl<T: Consable> Conser<T> {
             }
         };
         Hc(rc)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn shared_hcs() {
+        use ocamlrep::Arena;
+
+        use super::*;
+
+        impl Consable for (i32, i32) {
+            fn conser() -> &'static Conser<Self> {
+                static CONSER: Lazy<Conser<(i32, i32)>> = Lazy::new(Conser::new);
+                &CONSER
+            }
+        }
+        impl Consable for (Hc<(i32, i32)>, Hc<(i32, i32)>) {
+            fn conser() -> &'static Conser<Self> {
+                static CONSER: Lazy<Conser<(Hc<(i32, i32)>, Hc<(i32, i32)>)>> =
+                    Lazy::new(Conser::new);
+                &CONSER
+            }
+        }
+
+        let inner_tuple = Hc::new((1, 2));
+        let outer_tuple = Hc::new((Hc::clone(&inner_tuple), inner_tuple));
+
+        let arena = Arena::new();
+        let ocaml_tuple = arena.add_root(&outer_tuple);
+        let outer_tuple = ocaml_tuple.as_block().unwrap();
+
+        // The tuple pointer in the first field is physically equal to the tuple
+        // pointer in the second field.
+        assert_eq!(outer_tuple[0].to_bits(), outer_tuple[1].to_bits());
     }
 }

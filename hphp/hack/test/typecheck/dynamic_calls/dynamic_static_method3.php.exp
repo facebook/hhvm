@@ -1,0 +1,2 @@
+ERROR: File "dynamic_static_method3.php", line 8, characters 9-14:
+Dynamic calls to static methods are banned. (Parsing[1002])

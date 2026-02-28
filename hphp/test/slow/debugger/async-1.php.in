@@ -1,0 +1,14 @@
+run
+print function_exists('foo_async')
+print function_exists('bar_async')
+= HH\Asio\join(foo_async())
+= HH\Asio\join(bar_async())
+= await foo_async()
+= await bar_async()
+= await foo_async() + await bar_async()
+concurrent { $x = await foo_async(); $y = await bar_async(); }
+= $x + $y
+= exn1_async()
+= exn2_async()
+= await exn1_async()
+= await exn2_async()

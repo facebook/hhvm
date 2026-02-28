@@ -24,11 +24,11 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/http-protocol.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/network.h"
 #include "hphp/util/rds-local.h"
@@ -92,7 +92,7 @@ String HHVM_FUNCTION(gethostbyname, const String& hostname) {
   memcpy(&in.s_addr, *(result.hostbuf.h_addr_list), sizeof(in.s_addr));
   try {
     return String(folly::IPAddressV4(in).str());
-  } catch (folly::IPAddressFormatException& e) {
+  } catch (folly::IPAddressFormatException& ) {
     return hostname;
   }
 }
@@ -109,7 +109,7 @@ Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
     struct in_addr in = *(struct in_addr *)result.hostbuf.h_addr_list[i];
     try {
       ret.append(String(folly::IPAddressV4(in).str()));
-    } catch (folly::IPAddressFormatException& e) {
+    } catch (folly::IPAddressFormatException& ) {
         // ok to skip
     }
   }
@@ -238,7 +238,7 @@ String HHVM_FUNCTION(long2ip, const String& proper_address) {
   unsigned long ul = strtoul(proper_address.c_str(), nullptr, 0);
   try {
     return folly::IPAddress::fromLongHBO(ul).str();
-  } catch (folly::IPAddressFormatException& e) {
+  } catch (folly::IPAddressFormatException& ) {
     return empty_string();
   }
 }
@@ -409,6 +409,18 @@ int64_t HHVM_FUNCTION(get_http_request_size) {
   }
 }
 
+Array HHVM_FUNCTION(parse_cookies, const String& header_value) {
+  auto ret = Array::CreateDict();
+  // DecodeCookies asserts a nonempty string, avoid fatals by checking length
+  if (header_value.length() != 0) {
+    // strtok_r is destructive, make a copy first
+    StringBuffer sb;
+    sb.append(header_value);
+    HttpProtocol::DecodeCookies(ret, (char*)sb.data());
+  }
+  return ret;
+}
+
 bool HHVM_FUNCTION(setcookie, const String& name,
                               const String& value /* = null_string */,
                               int64_t expire /* = 0 */,
@@ -475,6 +487,7 @@ bool validate_dns_arguments(const String& host, const String& type,
   else if (!strcasecmp("PTR",   stype)) ntype = DNS_T_PTR;
   else if (!strcasecmp("ANY",   stype)) ntype = DNS_T_ANY;
   else if (!strcasecmp("SOA",   stype)) ntype = DNS_T_SOA;
+  else if (!strcasecmp("CAA",   stype)) ntype = DNS_T_CAA;
   else if (!strcasecmp("TXT",   stype)) ntype = DNS_T_TXT;
   else if (!strcasecmp("CNAME", stype)) ntype = DNS_T_CNAME;
   else if (!strcasecmp("AAAA",  stype)) ntype = DNS_T_AAAA;
@@ -489,7 +502,7 @@ bool validate_dns_arguments(const String& host, const String& type,
   return true;
 }
 
-void StandardExtension::initNetwork() {
+void StandardExtension::registerNativeNetwork() {
   HHVM_FE(gethostname);
   HHVM_FE(gethostbyaddr);
   HHVM_FE(gethostbyname);
@@ -515,6 +528,7 @@ void StandardExtension::initNetwork() {
   HHVM_FE(header_register_callback);
   HHVM_FE(header_remove);
   HHVM_FE(get_http_request_size);
+  HHVM_FALIAS(HH\\parse_cookies, parse_cookies);
   HHVM_FE(setcookie);
   HHVM_FE(setrawcookie);
   HHVM_FE(openlog);
@@ -530,6 +544,7 @@ void StandardExtension::initNetwork() {
   HHVM_RC_INT(DNS_AAAA, PHP_DNS_AAAA);
   HHVM_RC_INT(DNS_ALL, PHP_DNS_ALL);
   HHVM_RC_INT(DNS_ANY, PHP_DNS_ANY);
+  HHVM_RC_INT(DNS_CAA, PHP_DNS_CAA);
   HHVM_RC_INT(DNS_CNAME, PHP_DNS_CNAME);
   HHVM_RC_INT(DNS_HINFO, PHP_DNS_HINFO);
   HHVM_RC_INT(DNS_MX, PHP_DNS_MX);
@@ -601,7 +616,6 @@ void StandardExtension::initNetwork() {
   HHVM_RC_INT_SAME(LOG_PERROR);
 #endif
 
-#ifndef _WIN32
   HHVM_RC_INT_SAME(LOG_LOCAL0);
   HHVM_RC_INT_SAME(LOG_LOCAL1);
   HHVM_RC_INT_SAME(LOG_LOCAL2);
@@ -610,9 +624,6 @@ void StandardExtension::initNetwork() {
   HHVM_RC_INT_SAME(LOG_LOCAL5);
   HHVM_RC_INT_SAME(LOG_LOCAL6);
   HHVM_RC_INT_SAME(LOG_LOCAL7);
-#endif
-
-  loadSystemlib("std_network");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

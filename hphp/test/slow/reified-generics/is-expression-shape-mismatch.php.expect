@@ -1,0 +1,19 @@
+Testing string checks:
+bool(true)
+bool(false)
+bool(false)
+
+Testing class checks:
+bool(false)
+bool(false)
+bool(true)
+
+Testing shape on shape (should work):
+bool(true)
+bool(false)
+
+Testing shape on non-shape (should return false, not segfault):
+bool(false)
+bool(false)
+
+All tests passed!

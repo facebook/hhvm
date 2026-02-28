@@ -60,26 +60,23 @@
 #elif defined(__x86_64__) || defined(__alpha__) || defined(__hppa__)
 #define BF_ASM        0
 #define BF_SCALE      1
-#elif defined(__powerpc64__)
-#define BF_ASM        0
-#define BF_SCALE      0
 #else
 #define BF_ASM        0
 #define BF_SCALE      0
 #endif
 
-typedef unsigned int BF_word;
-typedef signed int BF_word_signed;
+using BF_word = unsigned int;
+using BF_word_signed = signed int;
 
 /* Number of Blowfish rounds, this is also hardcoded into a few places */
 #define BF_N        16
 
-typedef BF_word BF_key[BF_N + 2];
+using BF_key = BF_word[BF_N + 2];
 
-typedef struct {
+struct BF_ctx {
   BF_word S[4][0x100];
   BF_key P;
-} BF_ctx;
+};
 
 /*
  * Magic IV for 64 Blowfish encryptions that we do at the end.
@@ -380,7 +377,6 @@ static unsigned char BF_atoi64[0x60] = {
 #define BF_safe_atoi64(dst, src) \
 { \
   tmp = (unsigned char)(src); \
-  if (tmp == '$') break; /* PHP hack */ \
   if ((unsigned int)(tmp -= 0x20) >= 0x60) return -1; \
   tmp = BF_atoi64[tmp]; \
   if (tmp > 63) return -1; \
@@ -393,10 +389,6 @@ static int BF_decode(BF_word *dst, const char *src, int size)
   unsigned char *end = dptr + size;
   const unsigned char *sptr = (const unsigned char *)src;
   unsigned int tmp, c1, c2, c3, c4;
-
-  if (size <= 0) {
-    return -1;
-  }
 
   do {
     BF_safe_atoi64(c1, *sptr++);
@@ -411,9 +403,6 @@ static int BF_decode(BF_word *dst, const char *src, int size)
     BF_safe_atoi64(c4, *sptr++);
     *dptr++ = ((c3 & 0x03) << 6) | c4;
   } while (dptr < end);
-
-  while (dptr < end) /* PHP hack */
-    *dptr++ = 0;
 
   return 0;
 }

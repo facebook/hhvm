@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$values = varray[
+$values = vec[
 'a@b.c',
 'abuse@example.com',
 'test!.!@#$%^&*@example.com',

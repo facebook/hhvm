@@ -2,10 +2,10 @@
 
 // implicitly weak mode code
 
-function to_int(inout int $x) {}
-function to_float(inout float $x) {}
-function to_string(inout string $x) {}
-function to_bool(inout bool $x) {}
+function to_int(inout int $x) :mixed{}
+function to_float(inout float $x) :mixed{}
+function to_string(inout string $x) :mixed{}
+function to_bool(inout bool $x) :mixed{}
 <<__EntryPoint>> function main(): void {
 $x = 1.0;
 var_dump($x);

@@ -21,6 +21,6 @@ let handler =
         let (_, hint) = m.m_ret in
         match hint with
         | Some (_, Hprim Tbool) -> ()
-        | Some (p, _) -> Lints_errors.bad_virtualized_method p
+        | Some (p, _) -> Lints_diagnostics.bad_virtualized_method p
         | None -> ()
   end

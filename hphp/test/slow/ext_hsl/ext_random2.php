@@ -17,7 +17,7 @@
 */
 
 <<__EntryPoint>>
-function main_ext_random2() {
+function main_ext_random2() :mixed{
 var_dump(HH\Lib\_Private\Native\random_int(0, PHP_INT_MAX));
 echo "\n";
 }

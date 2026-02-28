@@ -1,0 +1,117 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+#[derive({{!
+    }}{{#if struct:copy?}}Copy, {{/if struct:copy?}}{{!
+    }}Clone, PartialEq{{!
+    }}{{#if struct:ord?}}, Eq, PartialOrd, Ord, Hash{{/if struct:ord?}}{{!
+    }}{{#if struct:union?}}, Debug{{/if struct:union?}}{{!
+    }}{{#if struct:serde?}}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/if struct:serde?}}{{!
+    }}{{#if program:valuable?}}, ::valuable::Valuable{{/if program:valuable?}}{{!
+    }}{{#if struct:exception?}}{{#if struct:union?}}, ::thiserror::Error{{/if struct:union?}}{{/if struct:exception?}}{{!
+    }}{{#if (not (string.empty? struct:derive))}}, {{struct:derive}}{{/if (not (string.empty? struct:derive))}}{{!
+}})]
+{{#if struct:docs?}}
+#[doc = {{struct:docs}}]
+{{/if struct:docs?}}{{!
+}}{{#if (not struct:union?)}}
+pub struct {{struct:rust_name}} {{> lib/block}}{{!
+}}{{#struct:fields}}{{!
+    }}{{#if struct:serde?}}{{#if field:rename?}}
+    #[serde(rename = "{{field:name}}")]{{!
+    }}{{/if field:rename?}}{{#if (not field:optional?)}}
+    #[serde(default)]{{!
+    }}{{/if (not field:optional?)}}{{!
+    }}{{#if field:optional?}}{{#if struct:serde?}}{{#if program:skip_none_serialization?}}
+    #[serde(skip_serializing_if = "::std::option::Option::is_none")]{{!
+    }}{{/if program:skip_none_serialization?}}{{/if struct:serde?}}{{/if field:optional?}}{{!
+    }}{{/if struct:serde?}}{{#if field:docs?}}
+    #[doc = {{field:docs}}]{{!
+    }}{{/if field:docs?}}{{#if field:deprecated?}}
+    #[deprecated(note = "{{field:deprecation_message}}")]{{!
+    }}{{/if field:deprecated?}}
+    pub {{field:rust_name}}: {{> lib/fieldtype}},{{!
+}}{{/struct:fields}}{{!
+}}{{#if (not struct:exhaustive?)}}
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `@rust.Exhaustive` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]{{!
+    }}{{#if struct:serde?}}
+    #[serde(skip, default = "self::dot_dot::default_for_serde_deserialize")]{{!
+    }}{{/if struct:serde?}}
+    pub _dot_dot_Default_default: {{!
+      }}{{#if struct:has_adapter?}}{{!
+      }}super::dot_dot::OtherFields,{{!
+      }}{{#else}}{{!
+      }}self::dot_dot::OtherFields,{{!
+      }}{{/if struct:has_adapter?}}{{!
+}}{{/if (not struct:exhaustive?)}}
+}
+{{#if struct:exception?}}
+
+impl ::fbthrift::ExceptionInfo for {{struct:rust_name}} {
+    fn exn_value(&self) -> String {
+        format!("{:?}", self)
+    }
+
+    #[inline]
+    fn exn_is_declared(&self) -> bool { true }
+}
+
+impl ::std::error::Error for {{struct:rust_name}} {}
+
+impl ::std::fmt::Display for {{struct:rust_name}} {{> lib/block}}
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        {{#if struct:exception?}}
+        write!(f, {{!
+            }}{{#if struct:has_exception_message?}}{{!
+                }}{{#if struct:is_exception_message_optional?}}{{!
+                    }}"{{struct:rust_name}}: {:?}", self.{{struct:exception_message}}{{!
+                }}{{#else}}{{!
+                    }}"{{struct:rust_name}}: {}", self.{{struct:exception_message}}{{!
+                }}{{/if struct:is_exception_message_optional?}}{{!
+            }}{{#else}}{{!
+                }}"{:?}", self{{!
+            }}{{/if struct:has_exception_message?}}{{!
+        }})
+        {{#else}}
+        write!(f, "{:?}", self)
+        {{/if struct:exception?}}
+    }
+}
+{{/if struct:exception?}}
+{{/if (not struct:union?)}}
+{{#if struct:union?}}
+pub enum {{struct:rust_name}} {{> lib/block}}{{!
+}}{{#struct:fields}}
+    {{#if field:docs?}}
+    #[doc = {{field:docs}}]
+    {{/if field:docs?}}
+    {{#if field:deprecated?}}
+    #[deprecated(note = "{{field:deprecation_message}}")]
+    {{/if field:deprecated?}}
+    {{#if struct:exception?}}
+    #[error("{0:?}")]
+    {{/if struct:exception?}}
+    {{field:rust_name}}({{> lib/fieldtype}}),{{!
+}}{{/struct:fields}}
+    UnknownField(::std::primitive::i32),
+}
+{{/if struct:union?}}

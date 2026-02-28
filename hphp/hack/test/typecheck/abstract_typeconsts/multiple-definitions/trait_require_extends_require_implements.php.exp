@@ -1,0 +1,6 @@
+ERROR: File "trait_require_extends_require_implements.php", line 29, characters 28-39:
+Invalid type hint (Typing[4090])
+  File "trait_require_extends_require_implements.php", line 29, characters 38-39:
+  No type constant `T2` in `UpperBound1`
+  File "trait_require_extends_require_implements.php", line 3, characters 11-21:
+  Declaration of `UpperBound1` is here

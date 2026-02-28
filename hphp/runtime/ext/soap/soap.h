@@ -118,7 +118,7 @@ public:
   int m_soap_version;
   sdl *m_sdl;
   xmlCharEncodingHandlerPtr m_encoding;
-  Array m_classmap; // typename => class name
+  Array m_soap_classmap; // typename => class name
   encodeMap *m_typemap;  // typename => encode
   int m_features;
 
@@ -154,8 +154,7 @@ DECLARE_EXTERN_REQUEST_LOCAL(SoapData, s_soap_data);
 // types used by SoapServer
 
 struct soapFunctions {
-  Array ft;
-  Array ftOriginal;
+  req::vector_set<String, hphp_string_hash, hphp_string_fsame> funcs;
   bool functions_all;
 };
 
@@ -166,7 +165,7 @@ struct soapClass {
 };
 
 struct soapHeader : ResourceData {
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(soapHeader);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(soapHeader)
 
   CLASSNAME_IS("soapHeader")
   const String& o_getClassNameHook() const override {

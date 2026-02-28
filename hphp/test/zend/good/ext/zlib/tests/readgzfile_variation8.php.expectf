@@ -1,8 +1,0 @@
-Warning: readgzfile() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/zlib/tests/readgzfile_variation8.php on line 19
-
-Warning: readgzfile() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/zlib/tests/readgzfile_variation8.php on line 19
-
-Warning: readgzfile() expects parameter 2 to be integer, dict given in %s/test/zend/good/ext/zlib/tests/readgzfile_variation8.php on line 19
-
-Warning: readgzfile() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/zlib/tests/readgzfile_variation8.php on line 19
-===DONE===

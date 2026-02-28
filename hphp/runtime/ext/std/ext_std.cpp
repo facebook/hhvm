@@ -7,7 +7,7 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-void StandardExtension::initStandard() {
+void StandardExtension::registerNativeStandard() {
   // define('HHVM_VERSION_ID', XXYYYZZ);
   HHVM_RC_INT(
     HHVM_VERSION_ID,

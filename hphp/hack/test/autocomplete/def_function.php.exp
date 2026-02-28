@@ -1,0 +1,404 @@
+fb_double_metaphone_with_vowel
+  INSERT fb_double_metaphone_with_vowel
+  function
+SORT TEXT: none
+fb_enable_code_coverage
+  INSERT fb_enable_code_coverage
+  function
+SORT TEXT: none
+fb_fbid_in_oid_range
+  INSERT fb_fbid_in_oid_range
+  function
+SORT TEXT: none
+fb_fbid_in_rid_range
+  INSERT fb_fbid_in_rid_range
+  function
+SORT TEXT: none
+fb_fbid_in_uid_range
+  INSERT fb_fbid_in_uid_range
+  function
+SORT TEXT: none
+fb_fbid_is_valid
+  INSERT fb_fbid_is_valid
+  function
+SORT TEXT: none
+fb_folly_varint_decode
+  INSERT fb_folly_varint_decode
+  function
+SORT TEXT: none
+fb_folly_varint_decode_group
+  INSERT fb_folly_varint_decode_group
+  function
+SORT TEXT: none
+fb_folly_varint_encode
+  INSERT fb_folly_varint_encode
+  function
+SORT TEXT: none
+fb_folly_varint_encode_group
+  INSERT fb_folly_varint_encode_group
+  function
+SORT TEXT: none
+fb_gen_user_func
+  INSERT fb_gen_user_func
+  function
+SORT TEXT: none
+fb_get_allotment_shape_name
+  INSERT fb_get_allotment_shape_name
+  function
+SORT TEXT: none
+fb_get_cert_token
+  INSERT fb_get_cert_token
+  function
+SORT TEXT: none
+fb_get_client_identities
+  INSERT fb_get_client_identities
+  function
+SORT TEXT: none
+fb_get_code_coverage
+  INSERT fb_get_code_coverage
+  function
+SORT TEXT: none
+fb_get_enum_names
+  INSERT fb_get_enum_names
+  function
+SORT TEXT: none
+fb_get_enum_values
+  INSERT fb_get_enum_values
+  function
+SORT TEXT: none
+fb_get_hash_and_shard
+  INSERT fb_get_hash_and_shard
+  function
+SORT TEXT: none
+fb_get_hashout_config
+  INSERT fb_get_hashout_config
+  function
+SORT TEXT: none
+fb_get_last_flush_size
+  INSERT fb_get_last_flush_size
+  function
+SORT TEXT: none
+fb_get_lsst
+  INSERT fb_get_lsst
+  function
+SORT TEXT: none
+fb_get_sandbox_cat
+  INSERT fb_get_sandbox_cat
+  function
+SORT TEXT: none
+fb_get_sandbox_owners
+  INSERT fb_get_sandbox_owners
+  function
+SORT TEXT: none
+fb_id_to_db
+  INSERT fb_id_to_db
+  function
+SORT TEXT: none
+fb_init_scribe_extension
+  INSERT fb_init_scribe_extension
+  function
+SORT TEXT: none
+fb_intercept2
+  INSERT fb_intercept2
+  function
+SORT TEXT: none
+fb_output_compression
+  INSERT fb_output_compression
+  function
+SORT TEXT: none
+fb_proxy_cert_token
+  INSERT fb_proxy_cert_token
+  function
+SORT TEXT: none
+fb_rename_function
+  INSERT fb_rename_function
+  function
+SORT TEXT: none
+fb_scribe_fetch_graphapi_category_meta
+  INSERT fb_scribe_fetch_graphapi_category_meta
+  function
+SORT TEXT: none
+fb_scribe_gen_write_message
+  INSERT fb_scribe_gen_write_message
+  function
+SORT TEXT: none
+fb_scribe_gen_write_structured_message
+  INSERT fb_scribe_gen_write_structured_message
+  function
+SORT TEXT: none
+fb_scribe_is_initialized
+  INSERT fb_scribe_is_initialized
+  function
+SORT TEXT: none
+fb_scribe_offer
+  INSERT fb_scribe_offer
+  function
+SORT TEXT: none
+fb_scribe_offer_message
+  INSERT fb_scribe_offer_message
+  function
+SORT TEXT: none
+fb_serialize
+  INSERT fb_serialize
+  function
+SORT TEXT: none
+fb_set_exit_callback
+  INSERT fb_set_exit_callback
+  function
+SORT TEXT: none
+fb_setprofile
+  INSERT fb_setprofile
+  function
+SORT TEXT: none
+fb_unserialize
+  INSERT fb_unserialize
+  function
+SORT TEXT: none
+fb_utf8_strlen
+  INSERT fb_utf8_strlen
+  function
+SORT TEXT: none
+fb_utf8_substr
+  INSERT fb_utf8_substr
+  function
+SORT TEXT: none
+fb_utf8ize
+  INSERT fb_utf8ize
+  function
+SORT TEXT: none
+fb_verify_cert_token
+  INSERT fb_verify_cert_token
+  function
+SORT TEXT: none
+fclose
+  INSERT fclose
+  function
+SORT TEXT: none
+feof
+  INSERT feof
+  function
+SORT TEXT: none
+fflush
+  INSERT fflush
+  function
+SORT TEXT: none
+fgetc
+  INSERT fgetc
+  function
+SORT TEXT: none
+fgetcsv
+  INSERT fgetcsv
+  function
+SORT TEXT: none
+fgets
+  INSERT fgets
+  function
+SORT TEXT: none
+fgetss
+  INSERT fgetss
+  function
+SORT TEXT: none
+file
+  INSERT file
+  function
+SORT TEXT: none
+file_exists
+  INSERT file_exists
+  function
+SORT TEXT: none
+file_get_contents
+  INSERT file_get_contents
+  function
+SORT TEXT: none
+file_put_contents
+  INSERT file_put_contents
+  function
+SORT TEXT: none
+fileatime
+  INSERT fileatime
+  function
+SORT TEXT: none
+filectime
+  INSERT filectime
+  function
+SORT TEXT: none
+filegroup
+  INSERT filegroup
+  function
+SORT TEXT: none
+fileinode
+  INSERT fileinode
+  function
+SORT TEXT: none
+filemtime
+  INSERT filemtime
+  function
+SORT TEXT: none
+fileowner
+  INSERT fileowner
+  function
+SORT TEXT: none
+fileperms
+  INSERT fileperms
+  function
+SORT TEXT: none
+filesize
+  INSERT filesize
+  function
+SORT TEXT: none
+filetype
+  INSERT filetype
+  function
+SORT TEXT: none
+filter_has_var
+  INSERT filter_has_var
+  function
+SORT TEXT: none
+filter_id
+  INSERT filter_id
+  function
+SORT TEXT: none
+filter_input
+  INSERT filter_input
+  function
+SORT TEXT: none
+filter_input_array
+  INSERT filter_input_array
+  function
+SORT TEXT: none
+filter_list
+  INSERT filter_list
+  function
+SORT TEXT: none
+filter_var
+  INSERT filter_var
+  function
+SORT TEXT: none
+filter_var_array
+  INSERT filter_var_array
+  function
+SORT TEXT: none
+finfo
+  INSERT finfo
+  class
+SORT TEXT: none
+finfo_buffer
+  INSERT finfo_buffer
+  function
+SORT TEXT: none
+finfo_close
+  INSERT finfo_close
+  function
+SORT TEXT: none
+finfo_file
+  INSERT finfo_file
+  function
+SORT TEXT: none
+finfo_open
+  INSERT finfo_open
+  function
+SORT TEXT: none
+finfo_set_flags
+  INSERT finfo_set_flags
+  function
+SORT TEXT: none
+flatbuffer_encode
+  INSERT flatbuffer_encode
+  function
+SORT TEXT: none
+floatval
+  INSERT floatval
+  function
+SORT TEXT: none
+flock
+  INSERT flock
+  function
+SORT TEXT: none
+floor
+  INSERT floor
+  function
+SORT TEXT: none
+flush
+  INSERT flush
+  function
+SORT TEXT: none
+fmod
+  INSERT fmod
+  function
+SORT TEXT: none
+fnmatch
+  INSERT fnmatch
+  function
+SORT TEXT: none
+fopen
+  INSERT fopen
+  function
+SORT TEXT: none
+fpassthru
+  INSERT fpassthru
+  function
+SORT TEXT: none
+fprintf
+  INSERT fprintf
+  function
+SORT TEXT: none
+fputcsv
+  INSERT fputcsv
+  function
+SORT TEXT: none
+fputs
+  INSERT fputs
+  function
+SORT TEXT: none
+fread
+  INSERT fread
+  function
+SORT TEXT: none
+fscanf
+  INSERT fscanf
+  function
+SORT TEXT: none
+fseek
+  INSERT fseek
+  function
+SORT TEXT: none
+fsockopen
+  INSERT fsockopen
+  function
+SORT TEXT: none
+fstat
+  INSERT fstat
+  function
+SORT TEXT: none
+ftell
+  INSERT ftell
+  function
+SORT TEXT: none
+ftok
+  INSERT ftok
+  function
+SORT TEXT: none
+ftruncate
+  INSERT ftruncate
+  function
+SORT TEXT: none
+function_exists
+  INSERT function_exists
+  function
+SORT TEXT: none
+furchash_hphp_ext
+  INSERT furchash_hphp_ext
+  function
+SORT TEXT: none
+furchash_hphp_ext_supported
+  INSERT furchash_hphp_ext_supported
+  function
+SORT TEXT: none
+fwrite
+  INSERT fwrite
+  function
+SORT TEXT: none
+function
+  INSERT function
+  keyword
+SORT TEXT: none

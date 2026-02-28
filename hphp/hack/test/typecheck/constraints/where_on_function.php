@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 
 function foo<T> (T $x) : int where T = int {

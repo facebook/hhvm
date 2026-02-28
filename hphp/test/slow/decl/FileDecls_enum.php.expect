@@ -1,0 +1,24 @@
+dict(3) {
+  ["name"]=>
+  string(1) "A"
+  ["type"]=>
+  string(6) "string"
+  ["value"]=>
+  string(3) ""X""
+}
+dict(3) {
+  ["name"]=>
+  string(1) "B"
+  ["type"]=>
+  string(1) "_"
+  ["value"]=>
+  string(8) "nameof X"
+}
+dict(3) {
+  ["name"]=>
+  string(1) "C"
+  ["type"]=>
+  string(1) "_"
+  ["value"]=>
+  string(8) "X::class"
+}

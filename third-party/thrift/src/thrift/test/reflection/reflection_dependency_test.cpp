@@ -1,0 +1,49 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <thrift/lib/cpp2/Thrift.h>
+#include <thrift/lib/cpp2/reflection/internal/test_helpers.h>
+#include <thrift/test/reflection/gen-cpp2/reflection_types.h>
+
+#include <gtest/gtest.h>
+
+namespace test_cpp2::cpp_reflection {
+
+TEST(ReflectionDeps, RecursiveDependencies) {
+  using namespace apache::thrift;
+  EXPECT_SAME<
+      type_class::structure,
+      type_class_of_thrift_class_or_t<dep_A_struct, type_class::unknown>>();
+
+  using b_type =
+      std::decay_t<decltype(std::declval<dep_A_struct>().b())::value_type>;
+  EXPECT_SAME<
+      type_class::structure,
+      type_class_of_thrift_class_or_t<b_type, type_class::unknown>>();
+
+  using c_type =
+      std::decay_t<decltype(std::declval<dep_A_struct>().c())::value_type>;
+  EXPECT_SAME<
+      type_class::structure,
+      type_class_of_thrift_class_or_t<c_type, type_class::unknown>>();
+
+  using d_type = std::decay_t<decltype(std::declval<c_type>().d())::value_type>;
+  EXPECT_SAME<
+      type_class::structure,
+      type_class_of_thrift_class_or_t<d_type, type_class::unknown>>();
+}
+
+} // namespace test_cpp2::cpp_reflection

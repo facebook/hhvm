@@ -1,12 +1,12 @@
 <?hh <<__EntryPoint>> function main(): void {
-$ar = darray[];
+$ar = dict[];
 for ($count = 0; $count < 10; $count++) {
     $ar[$count]        = "$count";
-    @$ar[$count]['idx'] = "$count";
+    $ar[$count]['idx'] = "$count";
 }
 
 for ($count = 0; $count < 10; $count++) {
-    echo $ar[$count]." -- ".@$ar[$count]['idx']."\n";
+    echo $ar[$count]." -- ".$ar[$count]['idx']."\n";
 }
 $a = "0123456789";
 $a[9] = $a[0];

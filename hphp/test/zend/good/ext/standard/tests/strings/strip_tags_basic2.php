@@ -9,7 +9,7 @@ echo "*** Testing strip_tags() : basic functionality ***\n";
 // Calling strip_tags() with all possible arguments
 $string = "<html><p>hello</p><b>world</b><a href=\"#fragment\">Other text</a></html><?hh echo hello ?>";
 
-$allowed_tags_array=varray[
+$allowed_tags_array=vec[
   "<html>",
   '<html>',
   "<p>",

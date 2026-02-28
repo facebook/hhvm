@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 abstract class C1 {
   abstract const type T as (function(inout num): void);

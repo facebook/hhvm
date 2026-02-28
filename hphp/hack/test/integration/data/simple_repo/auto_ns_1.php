@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 namespace Derp\Lib\Herp;
 

@@ -1,4 +1,0 @@
-File "requireclass_syntax_02.bad.php", line 13, characters 17-17:
-`I` is not a class. It is an interface. (NastCheck[3017])
-File "requireclass_syntax_02.bad.php", line 17, characters 17-18:
-`Tr` is not a class. It is a trait. (NastCheck[3017])

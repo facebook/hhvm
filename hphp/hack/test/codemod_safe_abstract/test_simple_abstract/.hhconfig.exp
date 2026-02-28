@@ -1,0 +1,12 @@
+diff --git a/TestClass.php b/TestClass.php
+--- a/TestClass.php
++++ b/TestClass.php
+@@ -2,7 +2,7 @@
+ 
+ abstract class TestClass {
+   public static abstract function testMethod(): void;
+-
++  <<__NeedsConcrete>>
+   final public static function caller(): void {
+     static::testMethod();
+   }

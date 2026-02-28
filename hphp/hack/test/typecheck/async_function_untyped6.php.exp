@@ -1,6 +1,0 @@
-File "async_function_untyped6.php", line 4, characters 25-25:
-Was expecting a return type hint (Typing[4030])
-File "async_function_untyped6.php", line 12, characters 8-17:
-This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-  File "async_function_untyped6.php", line 4, characters 25-25:
-  This is why I think it is `Awaitable`

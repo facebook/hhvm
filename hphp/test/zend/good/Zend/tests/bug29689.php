@@ -3,7 +3,7 @@ class foo {
   private $foo = 'foo';
   private $foo2 = 'foo2';
 
-  function printFoo() {
+  function printFoo() :mixed{
     echo __CLASS__, ': ', $this->foo, " ", $this->foo2, "\n";
   }
 }
@@ -11,7 +11,7 @@ class foo {
 class bar extends foo {
   protected $foo = 'bar';
 
-  function printFoo() {
+  function printFoo() :mixed{
     parent::printFoo();
     echo __CLASS__, ': ', $this->foo;
     try {
@@ -30,7 +30,7 @@ class baz extends bar {
 }
 
 class bar2 extends foo {
-  function printFoo() {
+  function printFoo() :mixed{
     parent::printFoo();
     echo __CLASS__, ': ', $this->foo, " ", $this->foo2, "\n";
   }

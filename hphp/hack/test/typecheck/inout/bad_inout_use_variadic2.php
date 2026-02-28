@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test(): void {
   $f = (string $x, int ...$ys) ==> {};

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // Make sure we block this trickiness:
 

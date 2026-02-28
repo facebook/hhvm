@@ -28,13 +28,14 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/match.h"
 #include "hphp/util/immed.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -130,7 +131,7 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
   // normal sync settings and sync anyway.
   always_assert(
     sync == SyncOptions::Sync ||
-    RuntimeOption::EvalJitForceVMRegSync ||
+    Cfg::Jit::ForceVMRegSync ||
     RuntimeOption::HHProfEnabled
   );
 
@@ -175,7 +176,7 @@ void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
 
   auto const syncFixup = [&] {
     if (RuntimeOption::HHProfEnabled ||
-        RuntimeOption::EvalJitForceVMRegSync ||
+        Cfg::Jit::ForceVMRegSync ||
         sync != SyncOptions::None) {
       // If we are profiling the heap, we always need to sync because regs need
       // to be correct during allocations no matter what.
@@ -274,8 +275,9 @@ void cgCallNative(Vout& v, IRLS& env, const IRInstruction* inst) {
 Vreg emitHashInt64(IRLS& env, const IRInstruction* inst, Vreg arr) {
   auto& v = vmain(env);
   auto const hash = v.makeReg();
-  if (arch() == Arch::X64) {
-#if defined(USE_HWCRC) && defined(__SSE4_2__)
+  if (arch() == Arch::X64 || arch() == Arch::ARM) {
+#if defined(USE_HWCRC) && (defined(__SSE4_2__) || \
+    (defined(__aarch64__) && defined(__ARM_FEATURE_CRC32)))
     v << crc32q{arr, v.cns(0), hash};
     return hash;
 #endif
@@ -285,7 +287,7 @@ Vreg emitHashInt64(IRLS& env, const IRInstruction* inst, Vreg arr) {
     env,
     CallSpec::direct(hash_int64),
     callDest(hash),
-    SyncOptions::Sync,
+    SyncOptions::None,
     argGroup(env, inst).reg(arr)
   );
   return hash;

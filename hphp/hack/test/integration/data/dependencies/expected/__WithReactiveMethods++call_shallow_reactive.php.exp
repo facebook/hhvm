@@ -1,7 +1,0 @@
-<?hh
-
-class WithReactiveMethods {
-  public function reactive(): void {
-    throw new \Exception();
-  }
-}

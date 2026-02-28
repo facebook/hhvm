@@ -21,7 +21,6 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -36,7 +35,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(hhir_gvn);
+TRACE_SET_MOD(hhir_gvn)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -189,8 +188,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case Shr:
   case Floor:
   case Ceil:
-  case AddIntO:
-  case SubIntO:
   case MulIntO:
   case XorBool:
   case ConvDblToBool:
@@ -201,11 +198,14 @@ bool supportsGVN(const IRInstruction* inst) {
   case ConvDblToInt:
   case ConvFuncPrologueFlagsToARFlags:
   case DblAsBits:
+  case IntAsPtrToElem:
+  case PtrToElemAsInt:
   case GtInt:
   case GteInt:
   case LtInt:
   case LteInt:
   case EqInt:
+  case EqClassId:
   case NeqInt:
   case CmpInt:
   case GtDbl:
@@ -245,6 +245,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case EqCls:
   case EqLazyCls:
   case EqFunc:
+  case EqFuncId:
   case EqStrPtr:
   case InstanceOf:
   case InstanceOfIface:
@@ -278,12 +279,11 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdClsMethod:
   case LdIfaceMethod:
   case LdPropAddr:
-  case LdClsPropAddrOrNull:
-  case LdClsPropAddrOrRaise:
+  case LdPublicFunc:
   case LdObjClass:
   case LdClsName:
-  case LdLazyCls:
   case LdLazyClsName:
+  case LdEnumClassLabelName:
   case Mov:
   case LdContActRec:
   case LdAFWHActRec:
@@ -301,6 +301,8 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdMonotypeDictKey:
   case LdMonotypeDictVal:
   case LdMonotypeVecElem:
+  case LdTypeStructureVal:
+  case LdTypeStructureValCns:
   case Select:
   case StrictlyIntegerConv:
   case LookupSPropSlot:
@@ -315,11 +317,13 @@ bool supportsGVN(const IRInstruction* inst) {
   case DictGetQuiet:
   case DictIdx:
   case DictIsset:
+  case DictIterEnd:
   case KeysetGet:
   case KeysetGetK:
   case KeysetGetQuiet:
   case KeysetIdx:
   case KeysetIsset:
+  case KeysetIterEnd:
   case CheckDictOffset:
   case CheckKeysetOffset:
   case CheckDictKeys:
@@ -331,6 +335,17 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdTVFromRDS:
   case StructDictSlot:
   case StructDictElemAddr:
+  case StructDictSlotInPos:
+  case LdStructDictKey:
+  case LdStructDictVal:
+  case LdClsPropAddrOrNull:
+  case LdClsPropAddrOrRaise:
+  case LdPtrIterKey:
+  case LdPtrIterVal:
+  case GetDictPtrIter:
+  case GetKeysetPtrIter:
+  case BespokeIterGetKey:
+  case BespokeIterGetVal:
     return true;
 
   case EqArrLike:
@@ -338,12 +353,17 @@ bool supportsGVN(const IRInstruction* inst) {
     // Keyset equality comparisons never re-enter or throw
     return inst->src(0)->type() <= TKeyset && inst->src(1)->type() <= TKeyset;
 
-
   case IsTypeStruct:
     // Resources can change type without generating a new SSATmp,
     // so its not safe to GVN
     return !opcodeMayRaise(IsTypeStruct) && !inst->src(1)->type().maybe(TRes);
 
+  case LdFuncCached: {
+    // Do not need to reload a function within a translation except if it
+    // could have been renamed.
+    auto const funcName = inst->extra<FuncNameData>()->name;
+    return !RO::funcIsRenamable(funcName);
+  }
   default:
     return false;
   }
@@ -798,7 +818,7 @@ bool replaceRedundantComputations(
 
 /////////////////////////////////////////////////////////////////////////
 
-void gvn(IRUnit& unit) {
+bool gvn(IRUnit& unit) {
   PassTracer tracer{&unit, Trace::hhir_gvn, "gvn"};
   Timer t(Timer::optimize_gvn, unit.logEntry().get_pointer());
   splitCriticalEdges(unit);
@@ -823,11 +843,7 @@ void gvn(IRUnit& unit) {
   state.globalTable = nullptr;
   // We might have added a new use of a SSATmp past a CheckType or
   // AssertType on it, so refine if necessary.
-  if (changed) {
-    // Restore basic invariants before refining.
-    mandatoryDCE(unit);
-    refineTmps(unit);
-  }
+  return changed;
 }
 
 }

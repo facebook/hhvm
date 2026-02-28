@@ -19,7 +19,7 @@ let add_local_def vars (pos, lid) : vars =
   { vars with bound = Local_id.Map.add lid pos vars.bound }
 
 let add_local_defs vars lvals : vars =
-  List.fold lvals ~init:vars ~f:add_local_def
+  List.fold lvals ~init:vars ~f:(fun acc ((), lval) -> add_local_def acc lval)
 
 let add_param vars param : vars =
   let lid = Local_id.make_unscoped param.Aast.param_name in
@@ -27,23 +27,26 @@ let add_param vars param : vars =
 
 let add_params vars f : vars = List.fold f.Aast.f_params ~init:vars ~f:add_param
 
-let lvalues (e : Nast.expr) : (Pos.t * Local_id.t) list =
+let lvalues (e : Nast.expr) : Nast.capture_lid list =
   let rec aux acc (_, _, e) =
     match e with
     | Aast.List lv -> List.fold_left ~init:acc ~f:aux lv
-    | Aast.Lvar (pos, lid) -> (pos, lid) :: acc
+    | Aast.Lvar (pos, lid) -> ((), (pos, lid)) :: acc
     | _ -> acc
   in
   aux [] e
 
 let add_local_defs_from_lvalue vars e : vars =
-  List.fold (lvalues e) ~init:vars ~f:add_local_def
+  List.fold (lvalues e) ~init:vars ~f:(fun acc ((), lval) ->
+      add_local_def acc lval)
 
 let add_local_ref vars (pos, lid) : vars =
   if Local_id.Map.mem lid vars.bound then
     vars
   else
     { vars with free = Local_id.Map.add lid pos vars.free }
+
+let vars = ref empty
 
 (* Walk this AAST, track free variables, and add them to capture lists in
    lambdas.
@@ -57,9 +60,7 @@ let add_local_ref vars (pos, lid) : vars =
    }
 
    In this example, only $c is free. *)
-let populate_visitor () =
-  let vars = ref empty in
-
+let visitor custom_err_config =
   object
     inherit [_] Aast.endo as super
 
@@ -71,15 +72,9 @@ let populate_visitor () =
       vars := add_local_ref !vars lv;
       super#on_Lvar () e lv
 
-    method! on_Binop () e bop lhs rhs =
-      (match bop with
-      | Ast_defs.Eq None ->
-        (* Introducing a new local variable.
-
-           $x = ... *)
-        vars := add_local_defs_from_lvalue !vars lhs
-      | _ -> ());
-      super#on_Binop () e bop lhs rhs
+    method! on_Assign () e lhs bop rhs =
+      vars := add_local_defs_from_lvalue !vars lhs;
+      super#on_Assign () e lhs bop rhs
 
     method! on_as_expr () ae =
       (* [as] inside a foreach loop introduces a new local variable.
@@ -104,11 +99,7 @@ let populate_visitor () =
            $x = await foo();
            await bar();
          } *)
-      List.iter el ~f:(fun (e, _) ->
-          match e with
-          | Some lv -> vars := add_local_def !vars lv
-          | None -> ());
-
+      List.iter el ~f:(fun (lv, _) -> vars := add_local_def !vars lv);
       super#on_Awaitall () s el block
 
     method! on_catch () (c_name, lv, block) =
@@ -118,16 +109,17 @@ let populate_visitor () =
       vars := add_local_def !vars lv;
       super#on_catch () (c_name, lv, block)
 
-    method! on_Efun () e f idl =
+    method! on_Efun () e efun =
       let outer_vars = !vars in
+      let idl = efun.Aast.ef_use in
 
       (* We want to know about free variables inside the lambda, but
          we don't want its bound variables. *)
-      vars := add_params empty f;
+      vars := add_params empty efun.Aast.ef_fun;
       vars := add_local_defs !vars idl;
-      let f =
-        match super#on_Efun () e f idl with
-        | Aast.Efun (f, _) -> f
+      let efun =
+        match super#on_Efun () e efun with
+        | Aast.Efun efun -> efun
         | _ -> assert false
       in
       vars :=
@@ -140,18 +132,22 @@ let populate_visitor () =
          We just check that they haven't tried to explicitly capture
          $this. *)
       let idl =
-        List.filter idl ~f:(fun (p, lid) ->
+        List.filter idl ~f:(fun (_, (p, lid)) ->
             if
               String.equal
                 (Local_id.to_string lid)
                 Naming_special_names.SpecialIdents.this
             then (
-              Errors.add_naming_error @@ Naming_error.This_as_lexical_variable p;
+              Diagnostics.add_diagnostic
+                Naming_error_utils.(
+                  to_user_diagnostic
+                    (Naming_error.This_as_lexical_variable p)
+                    custom_err_config);
               false
             ) else
               true)
       in
-      Aast.Efun (f, idl)
+      Aast.Efun { efun with Aast.ef_use = idl }
 
     method! on_Lfun () e f _ =
       let outer_vars = !vars in
@@ -165,7 +161,10 @@ let populate_visitor () =
         | _ -> assert false
       in
       let idl =
-        Local_id.Map.fold (fun lid pos acc -> (pos, lid) :: acc) !vars.free []
+        Local_id.Map.fold
+          (fun lid pos acc -> ((), (pos, lid)) :: acc)
+          !vars.free
+          []
       in
       vars :=
         { outer_vars with free = Local_id.Map.union outer_vars.free !vars.free };
@@ -179,8 +178,42 @@ let populate_visitor () =
    ($x) ==> $x + $y; // $y is captured here
 *)
 
-let populate_fun_def (fd : Nast.fun_def) : Nast.fun_def =
-  (populate_visitor ())#on_fun_def () fd
+let elab f elem =
+  vars := empty;
+  let elem = f () elem in
+  vars := empty;
+  elem
 
-let populate_class_ (c : Nast.class_) : Nast.class_ =
-  (populate_visitor ())#on_class_ () c
+let elab_fun_def elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  elab visitor#on_fun_def elem
+
+let elab_typedef elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  elab visitor#on_typedef elem
+
+let elab_stmt elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  elab visitor#on_stmt elem
+
+let elab_module_def elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  elab visitor#on_module_def elem
+
+let elab_gconst elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  elab visitor#on_gconst elem
+
+let elab_class elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  elab visitor#on_class_ elem
+
+let elab_program elem ~custom_err_config =
+  let visitor = visitor custom_err_config in
+  elab visitor#on_program elem
+
+let populate_fun_def (fd : Nast.fun_def) ~custom_err_config : Nast.fun_def =
+  elab_fun_def fd ~custom_err_config
+
+let populate_class_ (c : Nast.class_) ~custom_err_config : Nast.class_ =
+  elab_class c ~custom_err_config

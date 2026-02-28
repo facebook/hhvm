@@ -25,7 +25,7 @@ class DummyProtocol {
   function __construct() {
     $this->t = new DummyTransport();
   }
-  function getTransport() {
+  function getTransport() :mixed{
     return $this->t;
   }
 }
@@ -33,13 +33,13 @@ class DummyProtocol {
 class DummyTransport {
   public $buff = '';
   public $pos = 0;
-  function flush() {
+  function flush() :mixed{
  }
-  function onewayFlush() {}
-  function write($buff) {
+  function onewayFlush() :mixed{}
+  function write($buff) :mixed{
     $this->buff .= $buff;
   }
-  function read($n) {
+  function read($n) :mixed{
     $r = substr($this->buff, $this->pos, $n);
     $this->pos += $n;
     return $r;
@@ -47,13 +47,13 @@ class DummyTransport {
 }
 
 class Settish {
-  const darray<int, darray<string, mixed>> SPEC = darray[
-    1 => darray[
+  const darray<int, darray<string, mixed>> SPEC = dict[
+    1 => dict[
       'var' => 'extraData',
       'type' => TType::SET,
       'etype' => TType::STRING,
       'format' => 'collection',
-      'elem' => darray[
+      'elem' => dict[
           'type' => TType::STRING,
       ],
     ],
@@ -62,9 +62,11 @@ class Settish {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+
+  public function clearTerseFields()[write_props]: void {}
 }
 
-function test() {
+function test() :mixed{
   $p = new DummyProtocol();
   $v1 = new Settish();
   $v1->extraData = Set{"1"};
@@ -75,6 +77,6 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_1556() {
+function main_1556() :mixed{
 test();
 }

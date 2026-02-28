@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_add_child() {
+function main_add_child() :mixed{
 $x = new SimpleXMLElement('<foo/>');
 $x->addChild('foobar');
 var_dump((string)$x->addChild('hello', 'world'));

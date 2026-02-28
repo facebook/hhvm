@@ -1,8 +1,8 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$file = __SystemLib\hphp_test_tmppath('fgetcsv-test.csv');
+$file = sys_get_temp_dir().'/'.'fgetcsv-test.csv';
 
-$data = varray[1, 2, 'foo', 'haha', 1.3, null];
+$data = vec[1, 2, 'foo', 'haha', 1.3, null];
 
 $fp = fopen($file, 'w');
 
@@ -10,5 +10,5 @@ fputcsv($fp, $data);
 
 var_dump($data);
 
-@unlink($file);
+unlink($file);
 }

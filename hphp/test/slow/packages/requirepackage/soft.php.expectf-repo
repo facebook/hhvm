@@ -1,0 +1,15 @@
+f [fromPackages] abstract.php
+f [fromPackages] basic-soft.php
+f [fromPackages] basic.php
+f [fromPackages] interface.php
+f [fromPackages] noactivedeployement.php
+f [fromPackages] soft.php
+f [fromPackages] soft_sampled.php
+f [fromPackages] soft_unsampled.php
+string(9) "in A::bar"
+
+Notice: Package bat SoftRequired but not loaded for b_soft in %s/requirepackage/soft.php on line 18
+string(4) "in b"
+
+Notice: Package bat SoftRequired but not loaded for ASoft:batMemSoft in %s/requirepackage/soft.php on line 11
+string(7) "in bMem"

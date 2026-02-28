@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_bzcompress() {
+function main_bzcompress() :mixed{
 $str = "Holy fuck. Are they actually going to get there?";
 
 $ret = bzcompress($str);

@@ -1,0 +1,8 @@
+*** Testing escapeshellarg() : usage variations ***
+
+-- Iteration 1 --
+string(2) "''"
+
+-- Iteration 2 --
+string(2) "''"
+===Done===

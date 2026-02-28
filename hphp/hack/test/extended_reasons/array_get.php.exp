@@ -1,0 +1,135 @@
+error: Typing[4110] Invalid return type
+
+File array_get.php, line 5, character 10 - line 5, character 11:
+
+ 1 | <?hh
+ 2 | 
+ 3 | function f(dict<int, string> $d): bool {
+ 4 |   $x = $d[1];
+ 5 |   return »$x«;
+ 6 | }
+
+Expected bool
+
+File array_get.php, line 3, character 35 - line 3, character 38:
+
+ 1 | <?hh
+ 2 | 
+ 3 | function f(dict<int, string> $d): »bool« {
+ 4 |   $x = $d[1];
+ 5 |   return $x;
+ 6 | }
+
+But got string
+
+File array_get.php, line 4, character 8 - line 4, character 12:
+
+ 1 | <?hh
+ 2 | 
+ 3 | function f(dict<int, string> $d): bool {
+ 4 |   $x = »$d[1]«;
+ 5 |   return $x;
+ 6 | }
+
+  from this definition
+
+File array_get.php, line 3, character 22 - line 3, character 27:
+
+ 1 | <?hh
+ 2 | 
+ 3 | function f(dict<int, »string«> $d): bool {
+ 4 |   $x = $d[1];
+ 5 |   return $x;
+ 6 | }
+
+Here's why:
+
+
+  Step 1 of 1                                 (here is where the error occurred) 
+
+I started by checking this subtype relationship.
+
+The subtype comes from this hint
+
+File array_get.php, line 3, character 22 - line 3, character 27:
+
+ 1 | <?hh
+ 2 | 
+ 3 | function f(dict<int, »string«> $d): bool {
+ 4 |   $x = $d[1];
+ 5 |   return $x;
+ 6 | }
+
+which is defined here
+
+File string.hhi, line 6, character 15 - line 6, character 20:
+
+ 5 |   <<__SupportDynamicType>>
+ 6 |   final class »string« {
+ 7 |     // All methods are ignored unless ignore_string_methods is set to false in .hhconfig
+ 8 |     <<__ImplementedBy('\HH\String\__primitive_length')>>
+ 9 |     public function length(): int;
+
+and flows into this expression
+
+File array_get.php, line 4, character 8 - line 4, character 12:
+
+ 1 | <?hh
+ 2 | 
+ 3 | function f(dict<int, string> $d): bool {
+ 4 |   $x = »$d[1]«;
+ 5 |   return $x;
+ 6 | }
+
+by the result of this array access
+
+which itself flows into this expression
+
+File array_get.php, line 4, character 3 - line 4, character 4:
+
+ 1 | <?hh
+ 2 | 
+ 3 | function f(dict<int, string> $d): bool {
+ 4 |   »$x« = $d[1];
+ 5 |   return $x;
+ 6 | }
+
+via an assignment
+
+which itself flows into this expression
+
+File array_get.php, line 5, character 10 - line 5, character 11:
+
+ 1 | <?hh
+ 2 | 
+ 3 | function f(dict<int, string> $d): bool {
+ 4 |   $x = $d[1];
+ 5 |   return »$x«;
+ 6 | }
+
+as the type of the local variable
+
+which itself flows into this expression
+
+File array_get.php, line 5, character 3 - line 5, character 12:
+
+ 1 | <?hh
+ 2 | 
+ 3 | function f(dict<int, string> $d): bool {
+ 4 |   $x = $d[1];
+ 5 |   »return $x;«
+ 6 | }
+
+because it is used in a return position
+
+The supertype comes from this hint
+
+File array_get.php, line 3, character 35 - line 3, character 38:
+
+ 1 | <?hh
+ 2 | 
+ 3 | function f(dict<int, string> $d): »bool« {
+ 4 |   $x = $d[1];
+ 5 |   return $x;
+ 6 | }
+

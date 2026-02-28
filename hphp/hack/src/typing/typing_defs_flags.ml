@@ -9,7 +9,7 @@
 
 open Hh_prelude
 
-type flags = int
+type flags = int [@@deriving eq, hash, ord]
 
 type bit_mask = int
 
@@ -24,57 +24,222 @@ let set_bit bit value flags =
   else
     Int.bit_and (Int.bit_not bit) flags
 
-type fun_type_flags = int
+(* NB: Keep the values of these flags in sync with typing_defs_flags.rs. *)
 
-type fun_param_flags = int
+module Fun = struct
+  type t = flags [@@deriving eq, hash, ord]
 
-module ClassElt : sig
-  type t [@@deriving show]
+  type record = {
+    return_disposable: bool;
+    async: bool;
+    generator: bool;
+    fun_kind: Ast_defs.fun_kind;
+    is_function_pointer: bool;
+    returns_readonly: bool;
+    readonly_this: bool;
+    support_dynamic_type: bool;
+    is_memoized: bool;
+    variadic: bool;
+  }
+  [@@deriving show]
 
-  val make :
-    xhp_attr:Xhp_attribute.t option ->
-    abstract:bool ->
-    final:bool ->
-    superfluous_override:bool ->
-    lsb:bool ->
-    synthesized:bool ->
-    const:bool ->
-    lateinit:bool ->
-    dynamicallycallable:bool ->
-    readonly_prop:bool ->
-    support_dynamic_type:bool ->
-    needs_init:bool ->
-    t
+  let return_disposable_mask = 1 lsl 0
 
-  val is_abstract : t -> bool
+  let return_disposable = is_set return_disposable_mask
 
-  val is_final : t -> bool
+  let set_return_disposable = set_bit return_disposable_mask
 
-  val has_superfluous_override : t -> bool
+  let async_mask = 1 lsl 4
 
-  val has_lsb : t -> bool
+  let async = is_set async_mask
 
-  (** Whether a class element comes from a `require extends`. *)
-  val is_synthesized : t -> bool
+  let set_async = set_bit async_mask
 
-  val is_const : t -> bool
+  let generator_mask = 1 lsl 5
 
-  val has_lateinit : t -> bool
+  let generator = is_set generator_mask
 
-  val is_dynamicallycallable : t -> bool
+  let set_generator = set_bit generator_mask
 
-  val supports_dynamic_type : t -> bool
+  let fun_kind_to_flags kind =
+    match kind with
+    | Ast_defs.FSync -> 0
+    | Ast_defs.FAsync -> async_mask
+    | Ast_defs.FGenerator -> generator_mask
+    | Ast_defs.FAsyncGenerator -> Int.bit_or async_mask generator_mask
 
-  val is_readonly_prop : t -> bool
+  let fun_kind t =
+    match (async t, generator t) with
+    | (false, false) -> Ast_defs.FSync
+    | (true, false) -> Ast_defs.FAsync
+    | (false, true) -> Ast_defs.FGenerator
+    | (true, true) -> Ast_defs.FAsyncGenerator
 
-  val needs_init : t -> bool
+  let is_function_pointer_mask = 1 lsl 9
 
-  val get_xhp_attr : t -> Xhp_attribute.t option
+  let is_function_pointer = is_set is_function_pointer_mask
 
-  val set_synthesized : t -> t
+  let set_is_function_pointer = set_bit is_function_pointer_mask
 
-  val reset_superfluous_override : t -> t
-end = struct
+  let returns_readonly_mask = 1 lsl 10
+
+  let returns_readonly = is_set returns_readonly_mask
+
+  let set_returns_readonly = set_bit returns_readonly_mask
+
+  let readonly_this_mask = 1 lsl 11
+
+  let readonly_this = is_set readonly_this_mask
+
+  let set_readonly_this = set_bit readonly_this_mask
+
+  let support_dynamic_type_mask = 1 lsl 12
+
+  let support_dynamic_type = is_set support_dynamic_type_mask
+
+  let set_support_dynamic_type = set_bit support_dynamic_type_mask
+
+  let is_memoized_mask = 1 lsl 13
+
+  let is_memoized = is_set is_memoized_mask
+
+  let set_is_memoized = set_bit is_memoized_mask
+
+  let variadic_mask = 1 lsl 14
+
+  let variadic = is_set variadic_mask
+
+  let set_variadic = set_bit variadic_mask
+
+  let make
+      kind
+      ~return_disposable
+      ~returns_readonly
+      ~readonly_this
+      ~support_dynamic_type
+      ~is_memoized
+      ~variadic =
+    fun_kind_to_flags kind
+    |> set_return_disposable return_disposable
+    |> set_returns_readonly returns_readonly
+    |> set_readonly_this readonly_this
+    |> set_support_dynamic_type support_dynamic_type
+    |> set_is_memoized is_memoized
+    |> set_variadic variadic
+
+  let default = 0
+
+  let as_record t =
+    {
+      return_disposable = return_disposable t;
+      async = async t;
+      generator = generator t;
+      fun_kind = fun_kind t;
+      is_function_pointer = is_function_pointer t;
+      returns_readonly = returns_readonly t;
+      readonly_this = readonly_this t;
+      support_dynamic_type = support_dynamic_type t;
+      is_memoized = is_memoized t;
+      variadic = variadic t;
+    }
+
+  let pp fmt t = pp_record fmt (as_record t)
+
+  let show t = Format.asprintf "%a" pp t
+end
+
+module FunParam = struct
+  type t = flags [@@deriving eq, hash, ord]
+
+  type record = {
+    accept_disposable: bool;
+    inout: bool;
+    is_optional: bool;
+    readonly: bool;
+    ignore_readonly_error: bool;
+    splat: bool;
+    named: bool;
+  }
+  [@@deriving show]
+
+  let accept_disposable_mask = 1 lsl 0
+
+  let inout_mask = 1 lsl 1
+
+  let is_optional_mask = 1 lsl 2
+
+  let readonly_mask = 1 lsl 8
+
+  let ignore_readonly_error_mask = 1 lsl 3
+
+  let splat_mask = 1 lsl 9
+
+  let named_mask = 1 lsl 4
+
+  let accept_disposable = is_set accept_disposable_mask
+
+  let inout = is_set inout_mask
+
+  let is_optional = is_set is_optional_mask
+
+  let readonly = is_set readonly_mask
+
+  let ignore_readonly_error = is_set ignore_readonly_error_mask
+
+  let splat = is_set splat_mask
+
+  let named = is_set named_mask
+
+  let set_accept_disposable = set_bit accept_disposable_mask
+
+  let set_inout = set_bit inout_mask
+
+  let set_is_optional = set_bit is_optional_mask
+
+  let set_readonly = set_bit readonly_mask
+
+  let set_ignore_readonly_error = set_bit ignore_readonly_error_mask
+
+  let set_splat = set_bit splat_mask
+
+  let set_named = set_bit named_mask
+
+  let make
+      ~inout
+      ~accept_disposable
+      ~is_optional
+      ~readonly
+      ~ignore_readonly_error
+      ~splat
+      ~named =
+    0x0
+    |> set_inout inout
+    |> set_accept_disposable accept_disposable
+    |> set_is_optional is_optional
+    |> set_readonly readonly
+    |> set_ignore_readonly_error ignore_readonly_error
+    |> set_splat splat
+    |> set_named named
+
+  let as_record t =
+    {
+      accept_disposable = accept_disposable t;
+      inout = inout t;
+      is_optional = is_optional t;
+      readonly = readonly t;
+      ignore_readonly_error = ignore_readonly_error t;
+      splat = splat t;
+      named = named t;
+    }
+
+  let default = 0
+
+  let pp fmt t = pp_record fmt (as_record t)
+
+  let show t = Format.asprintf "%a" pp t
+end
+
+module ClassElt = struct
   type t = flags
 
   module Field = struct
@@ -94,8 +259,15 @@ end = struct
       | XaHasDefault
       | XaTagRequired
       | XaTagLateinit
-      | ReadonlyProp
+      | ReadonlyPropOrNeedsConcrete
+          (**
+       * for properties: indicates readonly-ness
+       * for methods: indicates presence of <<__NeedsConcrete>> attribute
+      *)
       | NeedsInit
+      | SafeGlobalVariable
+      | NoAutoLikes
+    (* NB: Keep these flags in sync with typing_defs_flags.rs. *)
     [@@deriving enum, show { with_path = false }]
 
     (* [min] is generated by the enum ppx and is unused. This suppresses the warning. *)
@@ -212,9 +384,14 @@ end = struct
 
   let supports_dynamic_type = is_set Field.SupportDynamicType
 
-  let is_readonly_prop = is_set Field.ReadonlyProp
+  let is_readonly_prop_or_needs_concrete =
+    is_set Field.ReadonlyPropOrNeedsConcrete
 
   let needs_init = is_set Field.NeedsInit
+
+  let is_safe_global_variable = is_set Field.SafeGlobalVariable
+
+  let is_no_auto_likes = is_set Field.NoAutoLikes
 
   let get_xhp_attr (flags : t) : Xhp_attribute.t option =
     Field.xhp_attr_fields
@@ -249,9 +426,11 @@ end = struct
       ~const
       ~lateinit
       ~dynamicallycallable
-      ~readonly_prop
+      ~readonly_prop_or_needs_concrete
       ~support_dynamic_type
-      ~needs_init =
+      ~needs_init
+      ~safe_global_variable
+      ~no_auto_likes =
     let flags = 0 in
     let flags = set Field.Abstract abstract flags in
     let flags = set Field.Final final flags in
@@ -262,66 +441,19 @@ end = struct
     let flags = set Field.Lateinit lateinit flags in
     let flags = set Field.Dynamicallycallable dynamicallycallable flags in
     let flags = set_xhp_attr xhp_attr flags in
-    let flags = set Field.ReadonlyProp readonly_prop flags in
+    let flags =
+      set
+        Field.ReadonlyPropOrNeedsConcrete
+        readonly_prop_or_needs_concrete
+        flags
+    in
     let flags = set Field.SupportDynamicType support_dynamic_type flags in
     let flags = set Field.NeedsInit needs_init flags in
+    let flags = set Field.SafeGlobalVariable safe_global_variable flags in
+    let flags = set Field.NoAutoLikes no_auto_likes flags in
     flags
 
   let set_synthesized = set Field.Synthesized true
 
   let reset_superfluous_override = set Field.SuperfluousOverride false
 end
-
-[@@@ocamlformat "disable"]
-
-(* NB: Keep the values of these flags in sync with typing_defs_flags.rs. *)
-
-(* Function type flags *)
-let ft_flags_return_disposable  = 1 lsl 0
-
-let ft_flags_returns_mutable    = 1 lsl 1
-
-let ft_flags_returns_void_to_rx = 1 lsl 2
-
-let ft_flags_async              = 1 lsl 4
-
-let ft_flags_generator          = 1 lsl 5
-
-(* These flags are used for the self type on FunType and the parameter type on FunParam *)
-let mutable_flags_owned         = 1 lsl 6
-
-let mutable_flags_borrowed      = 1 lsl 7
-
-let mutable_flags_maybe         = Int.bit_or mutable_flags_owned mutable_flags_borrowed
-
-let mutable_flags_mask          = Int.bit_or mutable_flags_owned mutable_flags_borrowed
-
-let ft_flags_instantiated_targs = 1 lsl 8
-
-let ft_flags_is_function_pointer = 1 lsl 9
-
-let ft_flags_returns_readonly = 1 lsl 10
-
-let ft_flags_readonly_this = 1 lsl 11
-
-let ft_flags_support_dynamic_type = 1 lsl 12
-
-let ft_flags_is_memoized = 1 lsl 13
-
-let ft_flags_variadic          = 1 lsl 14
-
-(* fun_param flags *)
-let fp_flags_accept_disposable = 1 lsl 0
-
-let fp_flags_inout             = 1 lsl 1
-
-let fp_flags_has_default       = 1 lsl 2
-
-let fp_flags_ifc_external      = 1 lsl 3
-
-let fp_flags_ifc_can_call      = 1 lsl 4
-
-(* let fp_flags_via_label_DEPRECATED         = 1 lsl 5 *)
-
-(* 6 and 7 are taken by mutability parameters above *)
-let fp_flags_readonly          = 1 lsl 8

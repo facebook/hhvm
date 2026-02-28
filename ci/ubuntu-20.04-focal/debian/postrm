@@ -1,0 +1,7 @@
+#!/bin/sh 
+# hphp.postrm, runs ldconfig, removes alternative
+set -e 
+
+if [ "$1" = "remove" ]; then
+  ldconfig
+fi

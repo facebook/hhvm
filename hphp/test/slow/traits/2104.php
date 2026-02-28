@@ -2,7 +2,7 @@
 
 trait T {
    public $x=1;
-   function dump_vars() {
+   function dump_vars() :mixed{
      var_dump(get_class_vars('C'));
    }
 }
@@ -12,7 +12,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function main_2104() {
+function main_2104() :mixed{
 $o = new C;
 $o->dump_vars();
 }

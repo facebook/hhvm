@@ -1,0 +1,47 @@
+Code actions available:
+------------------------------------------
+Extract interface (CodeActionKind: "refactor") SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"\n  implements Placeholder_",
+          "range":{"end":{"character":7,"line":4},"start":{"character":7,"line":4}}
+        },
+        {
+          "newText":"interface Placeholder_ {\n  public function foo(): void;\n}\n\n",
+          "range":{"end":{"character":0,"line":4},"start":{"character":0,"line":4}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract interface"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+trait Tr {}
+
+interface Placeholder_ {
+  public function foo(): void;
+}
+
+class A
+  implements Placeholder_ {
+  use Tr;
+  /*range-start*/
+  public function foo(): void {
+    400 + 8;
+  }
+  public int $x;
+  /*range-end*/
+}
+

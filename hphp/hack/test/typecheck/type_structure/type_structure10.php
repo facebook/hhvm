@@ -1,9 +1,9 @@
-<?hh // strict
+<?hh
 
 class C {
   const type T = int;
 }
 
 function test(): void {
-  hh_show(C::T);
+  $x = C::T;
 }

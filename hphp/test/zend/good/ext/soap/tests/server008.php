@@ -1,15 +1,15 @@
 <?hh
 class Foo {
 
-  function Foo() {
+  function Foo() :mixed{
   }
 
-  function test() {
+  function test() :mixed{
     return $this->str;
   }
 }
 <<__EntryPoint>> function main(): void {
-$server = new soapserver(null,darray['uri'=>"http://testuri.org"]);
+$server = new SoapServer(null,dict['uri'=>"http://testuri.org"]);
 $server->setClass("Foo");
 var_dump($server->getfunctions());
 echo "ok\n";

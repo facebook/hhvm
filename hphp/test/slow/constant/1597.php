@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1597() {
+function main_1597() :mixed{
 var_dump(067);
 var_dump(077);
 var_dump(07);

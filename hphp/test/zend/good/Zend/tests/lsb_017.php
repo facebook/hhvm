@@ -1,6 +1,6 @@
 <?hh
 class A {
-    public static function test($x=null) {
+    public static function test($x=null) :mixed{
         if (!is_null($x)) {
             echo "$x\n";
         }

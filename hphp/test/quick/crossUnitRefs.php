@@ -2,8 +2,8 @@
 
 class A {
   public $foo;
-  public function f() {
-    inOtherUnit($this->foo, varray[]);
+  public function f() :mixed{
+    inOtherUnit($this->foo, vec[]);
   }
 }
 

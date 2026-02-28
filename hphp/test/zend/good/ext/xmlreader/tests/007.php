@@ -3,7 +3,7 @@
 <<__EntryPoint>> function main(): void {
 $xmlstring = '<TEI.2>hello</TEI.2>';
 $relaxngfile = dirname(__FILE__) . '/relaxNG.rng';
-$file = __SystemLib\hphp_test_tmppath('_007.xml');
+$file = sys_get_temp_dir().'/'.'_007.xml';
 file_put_contents($file, $xmlstring);
 
 $reader = new XMLReader();

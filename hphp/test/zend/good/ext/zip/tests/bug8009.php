@@ -1,7 +1,7 @@
 <?hh <<__EntryPoint>> function main(): void {
 $thisdir = dirname(__FILE__);
 $src = $thisdir . "/bug8009.zip";
-$filename = __SystemLib\hphp_test_tmppath('tmp8009.zip');
+$filename = sys_get_temp_dir().'/'.'tmp8009.zip';
 copy($src, $filename);
 
 $zip = new ZipArchive();

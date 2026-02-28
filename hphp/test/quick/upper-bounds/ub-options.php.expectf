@@ -1,1 +1,0 @@
-Catchable fatal error: Argument 1 passed to foo() must be upper-bounded by int, string given in %s/ub-options.php on line 13

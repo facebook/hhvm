@@ -8,7 +8,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing strripos() function: with double quoted strings ***\n";
 $haystack = "Hello,\t\n\0\n  $&!#%()*<=>?@hello123456he \x234 \101 ";
-$needles = varray[
+$needles = vec[
           //regular strings
 /*1*/      "l",
           "L",

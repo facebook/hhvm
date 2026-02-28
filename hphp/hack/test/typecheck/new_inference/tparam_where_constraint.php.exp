@@ -1,4 +1,4 @@
-File "tparam_where_constraint.php", line 10, characters 5-22:
+ERROR: File "tparam_where_constraint.php", line 10, characters 5-22:
 The keys of this `dict` are incompatible (Typing[4110])
   File "tparam_where_constraint.php", line 3, characters 66-68:
   Expected `int`

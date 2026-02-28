@@ -27,23 +27,22 @@
 #include "hphp/runtime/vm/unit.h"
 
 #include <ostream>
-#include <sstream>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 PreClass::PreClass(Unit* unit, int line1, int line2, const StringData* n,
-                   Attr attrs, const StringData* parent, const StringData* docComment,
-                   Id id)
+                   Attr attrs, const StringData* parent,
+                   const StringData* docComment)
   : m_unit(unit)
-  , m_namedEntity(NamedEntity::get(n))
+  , m_namedType(NamedType::getOrCreate(n))
   , m_line1(line1)
   , m_line2(line2)
-  , m_id(id)
   , m_attrs(attrs)
   , m_name(n)
   , m_parent(parent)
   , m_docComment(docComment)
+  , m_typeParamNames()
 {
 }
 
@@ -63,7 +62,7 @@ const StringData* PreClass::manglePropName(const StringData* className,
       return propName;
     }
     case AttrProtected: {
-      std::string mangledName = "";
+      std::string mangledName;
       mangledName.push_back('\0');
       mangledName.push_back('*');
       mangledName.push_back('\0');
@@ -71,7 +70,7 @@ const StringData* PreClass::manglePropName(const StringData* className,
       return makeStaticString(mangledName);
     }
     case AttrPrivate: {
-      std::string mangledName = "";
+      std::string mangledName;
       mangledName.push_back('\0');
       mangledName += className->data();
       mangledName.push_back('\0');
@@ -93,8 +92,13 @@ void PreClass::prettyPrint(std::ostream &out) const {
   if (m_attrs & AttrFinal) { out << "final "; }
   if (m_attrs & AttrInterface) { out << "interface "; }
   out << m_name->data();
-  if (m_attrs & AttrNoOverride){ out << " (nooverride)"; }
-  if (m_attrs & AttrUnique)     out << " (unique)";
+  if (m_attrs & AttrNoOverrideRegular) {
+    if (m_attrs & AttrNoOverride) {
+      out << " (no-override)";
+    } else {
+      out << " (no-override-regular)";
+    }
+  }
   if (m_attrs & AttrPersistent) out << " (persistent)";
   if (m_attrs & AttrIsConst) {
     // AttrIsConst classes will always also have AttrForbidDynamicProps set,
@@ -104,9 +108,8 @@ void PreClass::prettyPrint(std::ostream &out) const {
     out << " (no-dynamic-props)";
   }
   if (m_attrs & AttrDynamicallyConstructible) out << " (dyn_constructible)";
-  if (m_id != -1) {
-    out << " (ID " << m_id << ")";
-  }
+  if (m_attrs & AttrDynamicallyReferenced) out << " (dyn_referenced)";
+  if (m_attrs & AttrNoMock) out << " (no-mock)";
   out << std::endl;
 
   for (Func* const* it = methods(); it != methods() + numMethods(); ++it) {
@@ -168,24 +171,19 @@ PreClass::Prop::Prop(PreClass* preClass,
                      const StringData* name,
                      Attr attrs,
                      const StringData* userType,
-                     const TypeConstraint& typeConstraint,
-                     const CompactVector<TypeConstraint>& ubs,
+                     TypeIntersectionConstraint&& constraints,
                      const StringData* docComment,
                      const TypedValue& val,
                      RepoAuthType repoAuthType,
                      UserAttributeMap userAttributes)
   : m_name(name)
-  , m_mangledName(manglePropName(preClass->name(), name, attrs))
   , m_attrs(attrs)
   , m_userType{userType}
   , m_docComment(docComment)
   , m_val(val)
   , m_repoAuthType{repoAuthType}
-  , m_typeConstraint{typeConstraint}
-  , m_userAttributes(userAttributes) {
-  m_ubs.resize(ubs.size());
-  std::copy(ubs.begin(), ubs.end(), m_ubs.begin());
-}
+  , m_typeConstraints{std::move(constraints)}
+  , m_userAttributes(userAttributes) {}
 
 void PreClass::Prop::prettyPrint(std::ostream& out,
                                  const PreClass* preClass) const {
@@ -194,6 +192,7 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
   if (m_attrs & AttrPublic) { out << "public "; }
   if (m_attrs & AttrProtected) { out << "protected "; }
   if (m_attrs & AttrPrivate) { out << "private "; }
+  if (m_attrs & AttrInternal) { out << "internal "; }
   if (m_attrs & AttrPersistent) { out << "(persistent) "; }
   if (m_attrs & AttrIsConst) { out << "(const) "; }
   if (m_attrs & AttrTrait) { out << "(trait) "; }
@@ -216,18 +215,10 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
   if (m_userType && !m_userType->empty()) {
     out << " (user-type = " << m_userType->data() << ")";
   }
-  if (m_typeConstraint.hasConstraint()) {
-    out << " (tc = " << m_typeConstraint.displayName(nullptr, true) << ")";
-  }
-  if (!m_ubs.empty()) {
-    out << "(ubs = ";
-    for (auto const& ub : m_ubs) {
-      if (ub.hasConstraint()) {
-        out << ub.displayName(nullptr, true);
-        out << " ";
-      }
+  for (auto const& tc : m_typeConstraints.range()) {
+    if (tc.hasConstraint()) {
+      out << " (tc = " << tc.displayName(nullptr, true) << ")";
     }
-    out << ")";
   }
   out << std::endl;
 }
@@ -252,12 +243,12 @@ PreClass::Const::Const(const StringData* name,
 void PreClass::Const::prettyPrint(std::ostream& out,
                                   const PreClass* preClass) const {
   switch (kind()) {
-    case ConstModifiers::Kind::Value:
+    case ConstModifierFlags::Kind::Value:
       break;
-    case ConstModifiers::Kind::Type:
+    case ConstModifierFlags::Kind::Type:
       out << "Type ";
       break;
-    case ConstModifiers::Kind::Context:
+    case ConstModifierFlags::Kind::Context:
       out << "Context ";
       break;
   }
@@ -271,7 +262,7 @@ void PreClass::Const::prettyPrint(std::ostream& out,
     out << std::endl;
     return;
   }
-  if (kind() == ConstModifiers::Kind::Context) {
+  if (kind() == ConstModifierFlags::Kind::Context) {
     out << "Constant ";
     name();
     out << " " << coeffects().toString()
@@ -311,22 +302,8 @@ void PreClass::Const::prettyPrint(std::ostream& out,
 }
 
 StaticCoeffects PreClass::Const::coeffects() const {
-  assertx(kind() == ConstModifiers::Kind::Context);
-  return m_val.constModifiers().getCoeffects();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// PreClass::TraitAliasRule.
-
-PreClass::TraitAliasRule::NamePair
-PreClass::TraitAliasRule::asNamePair() const {
-  auto const tmp = folly::sformat(
-    "{}::{}",
-    traitName()->empty() ? "(null)" : traitName()->data(),
-    origMethodName());
-
-  auto origName = makeStaticString(tmp);
-  return std::make_pair(newMethodName(), origName);
+  assertx(kind() == ConstModifierFlags::Kind::Context);
+  return m_val.constModifiers().getCoeffects(m_val.constModifierFlags());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

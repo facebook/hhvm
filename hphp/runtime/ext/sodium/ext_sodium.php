@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 final class SodiumException extends Exception {
 }
@@ -502,6 +502,18 @@ function sodium_crypto_core_hchacha20(
 ///// Ristretto
 
 <<__Native>>
+function sodium_crypto_core_ristretto255_add(string $p, string $q): string;
+
+<<__Native>>
+function sodium_crypto_core_ristretto255_sub(string $p, string $q): string;
+
+<<__Native>>
+function sodium_crypto_core_ristretto255_is_valid_point(string $s): bool;
+
+<<__Native>>
+function sodium_crypto_core_ristretto255_random(): string;
+
+<<__Native>>
 function sodium_crypto_core_ristretto255_from_hash(string $r): string;
 
 <<__Native>>
@@ -564,3 +576,32 @@ function sodium_crypto_secretstream_xchacha20poly1305_pull(inout mixed $state, s
 // Renew the symmetric key used in the secretstream.
 <<__Native>>
 function sodium_crypto_secretstream_xchacha20poly1305_rekey(inout mixed $state): void;
+
+///// Ed25519 primitives.
+
+<<__Native>>
+function sodium_crypto_core_ed25519_is_valid_point(string $point): bool;
+
+<<__Native>>
+function sodium_crypto_core_ed25519_add(string $point_a, string $point_b): string;
+
+<<__Native>>
+function sodium_crypto_core_ed25519_sub(string $point_a, string $point_b): string;
+
+<<__Native>>
+function sodium_crypto_scalarmult_ed25519_noclamp(string $scalar, string $point): string;
+
+<<__Native>>
+function sodium_crypto_core_ed25519_scalar_reduce(string $scalar): string;
+
+<<__Native>>
+function sodium_crypto_core_ed25519_scalar_add(string $scalar_a, string $scalar_b): string;
+
+<<__Native>>
+function sodium_crypto_core_ed25519_scalar_mul(string $scalar_a, string $scalar_b): string;
+
+<<__Native>>
+function sodium_crypto_scalarmult_ed25519_base(string $scalar): string;
+
+<<__Native>>
+function sodium_crypto_scalarmult_ed25519_base_noclamp(string $scalar): string;

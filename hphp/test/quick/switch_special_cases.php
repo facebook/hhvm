@@ -1,6 +1,6 @@
 <?hh
 
-function doswitch($foo) {
+function doswitch($foo) :mixed{
   echo "--------------------------------\n";
   var_dump($foo);
   switch(HH\Lib\Legacy_FIXME\int_cast_for_switch($foo, -1)) {
@@ -35,9 +35,9 @@ function doswitch($foo) {
 class c {}
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $f = fopen("/dev/null", "w");
-  $things = varray[
+  $things = vec[
     null,
     true,
     false,
@@ -50,8 +50,8 @@ function main() {
     'blar',
     '',
     4,
-    varray[],
-    varray['foo', 'floo'],
+    vec[],
+    vec['foo', 'floo'],
     new stdClass(),
     new c(),
     $f

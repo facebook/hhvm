@@ -13,7 +13,7 @@ open Hh_prelude
 let go (ast : Nast.program) =
   List.iter ast ~f:(function
       | Stmt (_, Expr (_, p, Import ((Include | IncludeOnce), _))) ->
-        Lints_errors.include_use
+        Lints_diagnostics.include_use
           p
           "Prefer `require` and `require_once` to `include` and `include_once`."
       | _ -> ())

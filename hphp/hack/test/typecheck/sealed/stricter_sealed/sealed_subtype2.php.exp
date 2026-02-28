@@ -1,6 +1,0 @@
-File "sealed_subtype2.php", line 3, characters 1-101:
-Values in sealed whitelist must be classname constants. (Parsing[1002])
-File "sealed_subtype2.php", line 6, characters 3-10:
-Class `B` in sealed whitelist for `I`, but does not extend `I` (Typing[4445])
-  File "sealed_subtype2.php", line 11, characters 7-7:
-  Definition is here

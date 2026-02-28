@@ -4,17 +4,17 @@ class A {
   public static $goo = 'foo';
 }
 
-function p() {
+function p() :mixed{
   print A::$goo . "\n";
 }
 
-function a() {
+function a() :mixed{
   $a = A::$goo;
   A::$goo = 'aoo';
   print $a . "\n";
 }
 
-function b() {
+function b() :mixed{
   $zoo = 'A';
   $b = $zoo::$goo;
   $zoo::$goo = 'boo';
@@ -22,7 +22,7 @@ function b() {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   if (__hhvm_intrinsics\launder_value(1)) {
     include 'sp.inc';
   }

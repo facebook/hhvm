@@ -32,6 +32,11 @@ enum class LogChannel {CRONOLOG, THREADLOCAL, REGULAR};
 
 struct AccessLogFileData {
   AccessLogFileData() {}
+  AccessLogFileData(const std::string& baseDir,
+                    const std::string& fil,
+                    const std::string& lnk,
+                    const std::string& fmt,
+                    int mpl);
   AccessLogFileData(const std::string& fil,
                     const std::string& lnk,
                     const std::string& fmt,
@@ -71,6 +76,9 @@ struct AccessLog {
   void init(const std::string &defaultFormat,
             std::map<std::string, AccessLogFileData> &files,
             const std::string &username);
+  void init(const std::string &baseDir, const std::string &format,
+            const std::string &symLink, const std::string &file,
+            const std::string &username);
   void init(const std::string &format, const std::string &symLink,
             const std::string &file, const std::string &username);
   void log(Transport *transport, const VirtualHost *vhost);
@@ -92,7 +100,7 @@ struct LogWriter {
   explicit LogWriter(LogChannel chan)
     : m_channel(chan)
   {}
-  virtual ~LogWriter() {};
+  virtual ~LogWriter() {}
   virtual void init(const std::string& username,
                     AccessLog::GetThreadDataFunc fn) = 0;
   virtual void write(Transport* transport, const VirtualHost* vhost) = 0;

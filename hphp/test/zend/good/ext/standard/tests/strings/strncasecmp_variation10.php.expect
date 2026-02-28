@@ -1,0 +1,6 @@
+*** Testing strncasecmp() function: with unexpected values for 'str1' ***
+-- Iteration 1 --
+int(-1)
+-- Iteration 2 --
+int(-1)
+*** Done ***

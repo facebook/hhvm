@@ -1,8 +1,8 @@
-Warning: str_ireplace() expects exactly 3 parameters, 0 given in %s/test/zend/good/ext/standard/tests/strings/str_ireplace.php on line 3
+Warning: str_ireplace() expects exactly 3 positional parameters, 0 given in %s/test/zend/good/ext/standard/tests/strings/str_ireplace.php on line 3
 
-Warning: str_ireplace() expects exactly 3 parameters, 1 given in %s/test/zend/good/ext/standard/tests/strings/str_ireplace.php on line 4
+Warning: str_ireplace() expects exactly 3 positional parameters, 1 given in %s/test/zend/good/ext/standard/tests/strings/str_ireplace.php on line 4
 
-Warning: str_ireplace() expects exactly 3 parameters, 2 given in %s/test/zend/good/ext/standard/tests/strings/str_ireplace.php on line 5
+Warning: str_ireplace() expects exactly 3 positional parameters, 2 given in %s/test/zend/good/ext/standard/tests/strings/str_ireplace.php on line 5
 string(0) ""
 string(8) "aaaaaaaT"
 string(8) "aaaaaaaT"

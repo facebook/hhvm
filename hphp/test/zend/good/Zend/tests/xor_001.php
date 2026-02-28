@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$a = varray[1,2,3];
-$b = varray[];
+$a = vec[1,2,3];
+$b = vec[];
 
 $c = (int)$a ^ (int)$b;
 var_dump($c);

@@ -24,7 +24,7 @@
 
 namespace HPHP {
 
-typedef unsigned long filter_map[256];
+using filter_map = unsigned long[256];
 
 static String php_filter_encode_html(const String& value,
                                      const unsigned char *chars) {

@@ -1,7 +1,7 @@
 <?hh
 
 trait PropertiesTrait {
-   static $same = true;
+   public static $same = true;
 }
 
 class Properties {

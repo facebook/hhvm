@@ -22,7 +22,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -48,10 +48,6 @@ bool typeFitsConstraint(Type t, GuardConstraint gc) {
   switch (gc.category) {
     case DataTypeGeneric:
       return true;
-
-    case DataTypeIterBase:
-      return (t.isKnownDataType() || !t.maybe(TCounted) || t <= TArrLike) &&
-             (t <= TUninit || !t.maybe(TUninit));
 
     case DataTypeCountnessInit:
       return (t.isKnownDataType() || !t.maybe(TCounted)) &&

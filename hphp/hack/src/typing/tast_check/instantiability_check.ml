@@ -9,17 +9,18 @@
 
 open Hh_prelude
 open Aast
-module ShapeMap = Aast.ShapeMap
 module SN = Naming_special_names
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 
-let validate_classname (pos, hint) =
+(* This TAST check raises an error when an abstract final
+   class or a trait appears outside of classname<_>. *)
+
+let rec validate_classname env (pos, hint) =
   match hint with
   | Aast.Happly _
   | Aast.Hthis
-  | Aast.Hany
-  | Aast.Herr
   | Aast.Hmixed
+  | Aast.Hwildcard
   | Aast.Hnonnull
   | Aast.Habstr _
   | Aast.Haccess _
@@ -28,6 +29,8 @@ let validate_classname (pos, hint) =
   | Aast.Hlike _
   | Aast.Hnothing ->
     ()
+  | Aast.Hrefinement (h, _) -> validate_classname env h
+  | Aast.Hclass_ptr _ (* TODO: future Hclass will be valid *)
   | Aast.Htuple _
   | Aast.Hunion _
   | Aast.Hintersection _
@@ -38,7 +41,9 @@ let validate_classname (pos, hint) =
   | Aast.Hshape _
   | Aast.Hfun_context _
   | Aast.Hvar _ ->
-    Errors.add_typing_error
+    let Equal = Tast_env.eq_typing_env in
+    Typing_error_utils.add_typing_error
+      ~env
       Typing_error.(primary @@ Primary.Invalid_classname pos)
 
 let rec check_hint env (pos, hint) =
@@ -46,7 +51,7 @@ let rec check_hint env (pos, hint) =
   | Aast.Happly ((_, class_id), tal) ->
     begin
       match Tast_env.get_class_or_typedef env class_id with
-      | Some (Tast_env.ClassResult cls)
+      | Decl_entry.Found (Tast_env.ClassResult cls)
         when let kind = Cls.kind cls in
              let tc_name = Cls.name cls in
              (Ast_defs.is_c_trait kind
@@ -56,6 +61,7 @@ let rec check_hint env (pos, hint) =
              && String.( <> ) tc_name SN.Collections.cVec ->
         let tc_pos = Cls.pos cls in
         let tc_name = Cls.name cls in
+        let Equal = Tast_env.eq_typing_env in
         let err =
           Typing_error.(
             primary
@@ -67,29 +73,54 @@ let rec check_hint env (pos, hint) =
                    reason_ty_opt = None;
                  })
         in
-        Errors.add_typing_error err
+        Typing_error_utils.add_typing_error ~env err
       | _ -> ()
     end;
     if String.equal class_id SN.Classes.cClassname then
-      Option.iter (List.hd tal) ~f:validate_classname
+      let Equal = Tast_env.eq_typing_env in
+      Option.iter (List.hd tal) ~f:(validate_classname env)
     else
       List.iter tal ~f:(check_hint env)
+  | Aast.Hrefinement (h, members) ->
+    let check_bounds (lower, upper) =
+      List.iter lower ~f:(check_hint env);
+      List.iter upper ~f:(check_hint env)
+    in
+    let check_member = function
+      | Aast.Rtype (_, ref) ->
+        (match ref with
+        | Aast.TRexact h -> check_hint env h
+        | Aast.TRloose { Aast.tr_lower; tr_upper } ->
+          check_bounds (tr_lower, tr_upper))
+      | Aast.Rctx (_, ref) ->
+        (match ref with
+        | Aast.CRexact h -> check_hint env h
+        | Aast.CRloose { Aast.cr_lower; cr_upper } ->
+          check_bounds (Option.to_list cr_lower, Option.to_list cr_upper))
+    in
+    List.iter members ~f:check_member;
+    check_hint env h
   | Aast.Hshape hm -> check_shape env hm
   | Aast.Haccess (h, ids) -> check_access env h ids
   | Aast.Hvec_or_dict (hopt1, h2) ->
     Option.iter hopt1 ~f:(check_hint env);
     check_hint env h2
+  | Aast.Hclass_ptr (CKenum, h) ->
+    (* similar to Happly case for enumname *)
+    check_hint env h
+  | Aast.Hclass_ptr (CKclass, h) ->
+    let Equal = Tast_env.eq_typing_env in
+    validate_classname env h
   | Aast.Hoption h
   | Aast.Hlike h
   | Aast.Hsoft h ->
     check_hint env h
   | Aast.Habstr _
   | Aast.Hprim _
-  | Aast.Hany
-  | Aast.Herr
   | Aast.Hdynamic
   | Aast.Hnonnull
   | Aast.Hmixed
+  | Aast.Hwildcard
   | Aast.Hthis
   | Aast.Hnothing
   | Aast.Hfun_context _
@@ -99,6 +130,7 @@ let rec check_hint env (pos, hint) =
       Aast.
         {
           hf_is_readonly = _;
+          hf_tparams;
           hf_param_tys = hl;
           hf_param_info = _;
           (* TODO: shouldn't we be checking this hint as well? *)
@@ -108,11 +140,21 @@ let rec check_hint env (pos, hint) =
           hf_is_readonly_return = _;
         } ->
     List.iter hl ~f:(check_hint env);
-    check_hint env h
-  | Aast.Htuple hl
+    check_hint env h;
+    List.iter hf_tparams ~f:(fun Aast_defs.{ htp_constraints; _ } ->
+        List.iter htp_constraints ~f:(fun (_, h) -> check_hint env h))
   | Aast.Hunion hl
   | Aast.Hintersection hl ->
     List.iter hl ~f:(check_hint env)
+  | Aast.Htuple { tup_required; tup_extra } ->
+    List.iter tup_required ~f:(check_hint env);
+    begin
+      match tup_extra with
+      | Aast.Hextra { tup_optional; tup_variadic } ->
+        List.iter tup_optional ~f:(check_hint env);
+        Option.iter tup_variadic ~f:(check_hint env)
+      | Aast.Hsplat h -> check_hint env h
+    end
 
 and check_shape env Aast.{ nsi_allows_unknown_fields = _; nsi_field_map } =
   List.iter ~f:(fun v -> check_hint env v.Aast.sfi_hint) nsi_field_map
@@ -135,8 +177,19 @@ let handler =
     inherit Tast_visitor.handler_base
 
     method! at_typedef env t =
-      check_hint env t.t_kind;
-      Option.iter t.t_constraint ~f:(check_hint env)
+      let hints =
+        match t.t_assignment with
+        | SimpleTypeDef { tvh_vis = _; tvh_hint } -> [tvh_hint]
+        | CaseType (variant, variants) ->
+          List.concat_map (variant :: variants) ~f:(fun v ->
+              v.tctv_hint
+              :: List.concat_map
+                   v.tctv_where_constraints
+                   ~f:(fun (h1, _ck, h2) -> [h1; h2]))
+      in
+      List.iter hints ~f:(check_hint env);
+      Option.iter t.t_as_constraint ~f:(check_hint env);
+      Option.iter t.t_super_constraint ~f:(check_hint env)
 
     method! at_class_ env c =
       let check_class_vars cvar =
@@ -145,8 +198,9 @@ let handler =
       List.iter c.c_vars ~f:check_class_vars;
       check_tparams env c.c_tparams
 
+    method! at_fun_def env fd = check_tparams env fd.fd_tparams
+
     method! at_fun_ env f =
-      check_tparams env f.f_tparams;
       List.iter f.f_params ~f:(check_param env);
       Option.iter (hint_of_type_hint f.f_ret) ~f:(check_hint env)
 
@@ -165,6 +219,6 @@ let handler =
     method! at_expr env (_, _, e) =
       match e with
       | Is (_, h) -> check_hint env h
-      | As (_, h, _) -> check_hint env h
+      | As { hint = h; _ } -> check_hint env h
       | _ -> ()
   end

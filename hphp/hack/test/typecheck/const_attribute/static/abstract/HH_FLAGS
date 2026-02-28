@@ -1,3 +1,3 @@
---const-static-props
---const-attribute
---abstract-static-props
+--config const_static_props=true
+--config const_attribute=true
+--config abstract_static_props=true

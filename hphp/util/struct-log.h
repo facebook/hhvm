@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 #include <folly/futures/Future.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 #include <folly/Range.h>
 
 namespace HPHP {
@@ -40,6 +40,11 @@ struct StructuredLogEntry {
   void setVec(folly::StringPiece key,
               const std::vector<folly::StringPiece>& values);
   void setStackTrace(folly::StringPiece key, const StackTrace& st);
+
+  // Set the given key to a randomly generated UUID stable for this
+  // process lifetime.
+  void setProcessUuid(folly::StringPiece key);
+
   void clear();
 
   bool force_init{false};
@@ -61,7 +66,7 @@ bool coinflip(uint32_t rate);
 void enable(LogFn log, RecordGlobalsFn globals);
 void log(const std::string&, const StructuredLogEntry&);
 void recordRequestGlobals(StructuredLogEntry&);
-};
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

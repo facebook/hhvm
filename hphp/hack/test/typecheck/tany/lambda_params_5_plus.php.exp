@@ -1,0 +1,4 @@
+ERROR: File "lambda_params_5_plus.php", line 16, characters 30-42:
+No type constant `TDoesNotExist` in `WithConcreteTypeconst` (Typing[4090])
+  File "lambda_params_5_plus.php", line 7, characters 13-33:
+  Declaration of `WithConcreteTypeconst` is here

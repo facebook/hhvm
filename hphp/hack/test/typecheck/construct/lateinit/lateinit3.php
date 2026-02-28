@@ -1,14 +1,14 @@
-<?hh // strict
+<?hh
 
 abstract class A {
   <<__LateInit>>
-  protected string $prop1;
+  protected int $prop1;
   <<__LateInit>>
-  protected static string $prop2;
+  protected static int $prop2;
   <<__LateInit>>
-  private string $prop3;
+  private int $prop3;
   <<__LateInit>>
-  private static string $prop4;
+  private static int $prop4;
 }
 
 final class C extends A {

@@ -5,11 +5,11 @@
  * Alias to functions:
  */
 
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function class_exists_basic_001(): void {
 echo "*** Testing class_exists() : basic functionality ***\n";
 
 echo "Calling class_exists() on non-existent class with autoload explicitly enabled:\n";
-var_dump( class_exists('C', true) );
+var_dump( class_exists('ThisClassDoesNotExist', true) );
 echo "\nCalling class_exists() on existing class with autoload explicitly enabled:\n";
 var_dump( class_exists('stdClass', true) );
 

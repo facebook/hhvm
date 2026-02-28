@@ -5,7 +5,7 @@ class foo {
     private $pp2 = 2;
     protected $pp3 = 3;
 
-    function bar() {
+    function bar() :mixed{
         var_dump(property_exists("foo","pp1"));
         var_dump(property_exists("foo","pp2"));
         var_dump(property_exists("foo","pp3"));
@@ -13,7 +13,7 @@ class foo {
 }
 
 class bar extends foo {
-    function test() {
+    function test() :mixed{
         var_dump(property_exists("foo","pp1"));
         var_dump(property_exists("foo","pp2"));
         var_dump(property_exists("foo","pp3"));
@@ -38,7 +38,7 @@ var_dump(property_exists($foo,"pp2"));
 var_dump(property_exists($foo,"pp3"));
 var_dump(property_exists($foo,"nonexistent"));
 var_dump(property_exists($foo,""));
-var_dump(property_exists(varray[],"test"));
+var_dump(property_exists(vec[],"test"));
 var_dump(property_exists(1,"test"));
 var_dump(property_exists(true,"test"));
 

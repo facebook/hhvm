@@ -1,11 +1,11 @@
 <?hh
 
-function f($a) {
- $a = varray[$a];
+function f($a) :mixed{
+ $a = vec[$a];
  var_dump($a);
  }
 
 <<__EntryPoint>>
-function main_258() {
+function main_258() :mixed{
 f(false);
 }

@@ -1,9 +1,9 @@
 <?hh
 
-function DoIt() { return 20; }
+function DoIt() :mixed{ return 20; }
 
 function findValue($table, $v)  // where $table is 2x3 array
-{
+:mixed{
     for ($row = 0; $row <= 1; ++$row)
     {
         for ($colm = 0; $colm <= 2; ++$colm)
@@ -44,11 +44,11 @@ function main_entry(): void {
       continue;   // in this context, equivalent to using a null statement
   }
 
-  $table = darray[];
-  $table[0] = varray[34];
+  $table = dict[];
+  $table[0] = vec[34];
   $table[0][] = -3;
   $table[0][] = 345;
-  $table[1] = varray[123];
+  $table[1] = vec[123];
   $table[1][] = 9854;
   $table[1][] = -765;
 

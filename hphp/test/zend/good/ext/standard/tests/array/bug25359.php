@@ -5,9 +5,9 @@ abstract final class ZendGoodExtStandardTestsArrayBug25359 {
 }
 
 function does_not_work()
-{
-    ZendGoodExtStandardTestsArrayBug25359::$data = varray['first', 'fifth', 'second', 'forth', 'third'];
-    $sort = varray[1, 5, 2, 4, 3];
+:mixed{
+    ZendGoodExtStandardTestsArrayBug25359::$data = vec['first', 'fifth', 'second', 'forth', 'third'];
+    $sort = vec[1, 5, 2, 4, 3];
     $data = ZendGoodExtStandardTestsArrayBug25359::$data;
     array_multisort2(inout $sort, inout $data);
     ZendGoodExtStandardTestsArrayBug25359::$data = $data;

@@ -1,4 +1,4 @@
-File "trait_reuse_multiple_routes.php", line 19, characters 7-10:
+ERROR: File "trait_reuse_multiple_routes.php", line 19, characters 7-10:
 Traits with final methods cannot be reused, and `ReusedTrait` is already used by `MyParent`. (Typing[4186])
   File "trait_reuse_multiple_routes.php", line 8, characters 7-17:
   `XOne` uses `ReusedTrait`

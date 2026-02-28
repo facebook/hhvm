@@ -348,7 +348,9 @@ bool MemOperand::IsPostIndex() const {
 
 // Assembler
 Assembler::Assembler(HPHP::CodeBlock& cb)
-    : cb_(cb), literal_pool_monitor_(0) {
+    : cb_(cb)
+    , next_literal_pool_check_(cb.frontier() + kLiteralPoolCheckInterval)
+    , literal_pool_monitor_(0) {
   // Assert that this is an LP64 system.
   assert(sizeof(int) == sizeof(int32_t));     // NOLINT(runtime/sizeof)
   assert(sizeof(long) == sizeof(int64_t));    // NOLINT(runtime/int)
@@ -835,6 +837,70 @@ void Assembler::DataProcessing3Source(const Register& rd,
 }
 
 
+void Assembler::crc32b(const Register& wd,
+                       const Register& wn,
+                       const Register& wm) {
+  assert(wd.Is32Bits() && wn.Is32Bits() && wm.Is32Bits());
+  Emit(SF(wm) | Rm(wm) | CRC32B | Rn(wn) | Rd(wd));
+}
+
+
+void Assembler::crc32h(const Register& wd,
+                       const Register& wn,
+                       const Register& wm) {
+  assert(wd.Is32Bits() && wn.Is32Bits() && wm.Is32Bits());
+  Emit(SF(wm) | Rm(wm) | CRC32H | Rn(wn) | Rd(wd));
+}
+
+
+void Assembler::crc32w(const Register& wd,
+                       const Register& wn,
+                       const Register& wm) {
+  assert(wd.Is32Bits() && wn.Is32Bits() && wm.Is32Bits());
+  Emit(SF(wm) | Rm(wm) | CRC32W | Rn(wn) | Rd(wd));
+}
+
+
+void Assembler::crc32x(const Register& wd,
+                       const Register& wn,
+                       const Register& xm) {
+  assert(wd.Is32Bits() && wn.Is32Bits() && xm.Is64Bits());
+  Emit(SF(xm) | Rm(xm) | CRC32X | Rn(wn) | Rd(wd));
+}
+
+
+void Assembler::crc32cb(const Register& wd,
+                        const Register& wn,
+                        const Register& wm) {
+  assert(wd.Is32Bits() && wn.Is32Bits() && wm.Is32Bits());
+  Emit(SF(wm) | Rm(wm) | CRC32CB | Rn(wn) | Rd(wd));
+}
+
+
+void Assembler::crc32ch(const Register& wd,
+                        const Register& wn,
+                        const Register& wm) {
+  assert(wd.Is32Bits() && wn.Is32Bits() && wm.Is32Bits());
+  Emit(SF(wm) | Rm(wm) | CRC32CH | Rn(wn) | Rd(wd));
+}
+
+
+void Assembler::crc32cw(const Register& wd,
+                        const Register& wn,
+                        const Register& wm) {
+  assert(wd.Is32Bits() && wn.Is32Bits() && wm.Is32Bits());
+  Emit(SF(wm) | Rm(wm) | CRC32CW | Rn(wn) | Rd(wd));
+}
+
+
+void Assembler::crc32cx(const Register& wd,
+                        const Register& wn,
+                        const Register& xm) {
+  assert(wd.Is32Bits() && wn.Is32Bits() && xm.Is64Bits());
+  Emit(SF(xm) | Rm(xm) | CRC32CX | Rn(wn) | Rd(wd));
+}
+
+
 void Assembler::mul(const Register& rd,
                     const Register& rn,
                     const Register& rm) {
@@ -1141,10 +1207,10 @@ void Assembler::ldr(const FPRegister& ft, double imm) {
 }
 
 
-void Assembler::ldaddal(const Register& rs, const Register& rt, const MemOperand& src) {
+void Assembler::ldadd(const Register& rs, const Register& rt, const MemOperand& src) {
   assert(src.IsImmediateOffset() && (src.offset() == 0));
   // aquire/release semantics
-  uint32_t op = rt.Is64Bits() ? LSELD_ADD_alx : LSELD_ADD_alw;
+  uint32_t op = rt.Is64Bits() ? LSELD_ADD_x : LSELD_ADD_w;
   Emit(op | Rs(rs) | Rt(rt) | RnSP(src.base()));
 }
 
@@ -1204,6 +1270,11 @@ void Assembler::mov(const Register& rd, const Register& rm) {
 
 void Assembler::mvn(const Register& rd, const Operand& operand) {
   orn(rd, AppropriateZeroRegFor(rd), operand);
+}
+
+
+void Assembler::mvn(const VRegister& vd, const VRegister& vn) {
+  Emit(NEON_RBIT_NOT | NEON_16B | Rn(vn) | Rd(vd));
 }
 
 
@@ -1386,6 +1457,14 @@ void Assembler::fcmp(const FPRegister& fn,
   // affect the result of the comparison.
   assert(value == 0.0);
   Emit(FPType(fn) | FCMP_zero | Rn(fn));
+}
+
+
+void Assembler::fcmeq(const VRegister& vd,
+                      const VRegister& vn,
+                      const VRegister& vm) {
+  assert(vn.size() == vm.size() && vd.size() == vn.size());
+  Emit(NEON_FCMEQ | NEON_FP_2D | Rm(vm) | Rn(vn) | Rd(vd));
 }
 
 
@@ -1807,6 +1886,72 @@ void Assembler::DataProcExtendedRegister(const Register& rd,
        dest_reg | RnSP(rn));
 }
 
+Instr Assembler::LoadStoreMemOperand(const MemOperand& addr,
+                                     LSDataSize size,
+                                     LoadStoreScalingOption option) {
+  Instr base = RnSP(addr.base());
+  int64_t offset = addr.offset();
+
+  if (addr.IsImmediateOffset()) {
+    bool prefer_unscaled =
+        (option == PreferUnscaledOffset) || (option == RequireUnscaledOffset);
+    if (prefer_unscaled && IsImmLSUnscaled(offset)) {
+      // Use the unscaled addressing mode.
+      return base | LoadStoreUnscaledOffsetFixed | ImmLS(offset);
+    }
+
+    if ((option != RequireUnscaledOffset) &&
+        IsImmLSScaled(offset, size)) {
+      // Use the scaled addressing mode.
+      return base | LoadStoreUnsignedOffsetFixed |
+             ImmLSUnsigned(offset >> size);
+    }
+
+    if ((option != RequireScaledOffset) && IsImmLSUnscaled(offset)) {
+      // Use the unscaled addressing mode.
+      return base | LoadStoreUnscaledOffsetFixed | ImmLS(offset);
+    }
+  }
+
+  if (addr.IsRegisterOffset()) {
+    Extend ext = addr.extend();
+    Shift shift = addr.shift();
+    unsigned shift_amount = addr.shift_amount();
+
+    // LSL is encoded in the option field as UXTX.
+    if (shift == LSL) {
+      ext = UXTX;
+    }
+
+    // Shifts are encoded in one bit, indicating a left shift by the memory
+    // access size.
+    return base | LoadStoreRegisterOffsetFixed | Rm(addr.regoffset()) |
+           ExtendMode(ext) | ImmShiftLS((shift_amount > 0) ? 1 : 0);
+  }
+
+  if (addr.IsPreIndex() && IsImmLSUnscaled(offset)) {
+    return base | LoadStorePreIndexFixed | ImmLS(offset);
+  }
+
+  if (addr.IsPostIndex() && IsImmLSUnscaled(offset)) {
+    return base | LoadStorePostIndexFixed | ImmLS(offset);
+  }
+
+  return 0;
+}
+
+void Assembler::Prefetch(int op,
+                         const MemOperand& addr,
+                         LoadStoreScalingOption option) {
+  Instr prfop = ImmPrefetchOperation(op);
+  Emit(PRFM | prfop | LoadStoreMemOperand(addr, LSDoubleWord, option));
+}
+
+void Assembler::Prefetch(PrefetchOperation op,
+                         const MemOperand& addr,
+                         LoadStoreScalingOption option) {
+  Prefetch(static_cast<int>(op), addr, option);
+}
 
 bool Assembler::IsImmAddSub(int64_t immediate) {
   return is_uint12(immediate) ||

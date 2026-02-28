@@ -23,7 +23,7 @@
 
 #include "hphp/util/network.h"
 
-#include "mysql.h"
+#include <mysql.h>
 
 #include <memory>
 
@@ -106,7 +106,7 @@ struct PDOMySqlResource : PDOResource {
 };
 
 struct PDOMySqlStatement : PDOStatement {
-  DECLARE_RESOURCE_ALLOCATION(PDOMySqlStatement);
+  DECLARE_RESOURCE_ALLOCATION(PDOMySqlStatement)
 
   PDOMySqlStatement(req::ptr<PDOMySqlResource>&& conn, MYSQL* server);
   ~PDOMySqlStatement() override;
@@ -217,7 +217,7 @@ bool PDOMySqlConnection::create(const Array& options) {
     }
   #endif
 
-  parseDataSource(data_source.data(), data_source.size(), vars, 5);
+  parseDataSource(m_data_source.data(), m_data_source.size(), vars, 5);
 
   dbname = vars[1].optval;
 
@@ -1171,7 +1171,7 @@ bool PDOMySqlStatement::paramHook(PDOBoundParam* param,
             return false;
           }
         }
-        /* fall through */
+        [[fallthrough]];
 
       default:
         ;

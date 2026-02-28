@@ -13,18 +13,18 @@ echo "*** Testing fgetcsv() : with default enclosure and different delimiter ***
 /* the array is with two elements in it. Each element should be read as 
    1st element is delimiter & 2nd element is csv fields 
 */
-$csv_lists = varray [
-  varray[',', 'water,fruit'],
-  varray[' ', 'water fruit'],
-  varray[' ', '"water" "fruit"'],
-  varray['\\', 'water\\"fruit"\\"air"'],
-  varray['\\', '"water"\\"fruit"\\"""'],
+$csv_lists = vec[
+  vec[',', 'water,fruit'],
+  vec[' ', 'water fruit'],
+  vec[' ', '"water" "fruit"'],
+  vec['\\', 'water\\"fruit"\\"air"'],
+  vec['\\', '"water"\\"fruit"\\"""'],
 ];
 
-$filename = __SystemLib\hphp_test_tmppath('/fgetcsv_variation18.tmp');
-@unlink($filename);
+$filename = sys_get_temp_dir().'/'.'/fgetcsv_variation18.tmp';
+unlink($filename);
 
-$file_modes = varray ["r","rb", "rt", "r+", "r+b", "r+t",
+$file_modes = vec["r","rb", "rt", "r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
                      "x+", "x+b", "x+t"]; 

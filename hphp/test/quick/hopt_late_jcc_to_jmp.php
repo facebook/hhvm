@@ -5,7 +5,7 @@ abstract final class HoptLateJccToJmp {
   public static $has_local;
 }
 
-function f() {
+function f() :mixed{
 
   if (0xface != HoptLateJccToJmp::$baseurl) {
     HoptLateJccToJmp::$has_local = true;

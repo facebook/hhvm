@@ -1,4 +1,4 @@
-File "with_tconst_bad2.php", line 13, characters 29-34:
+ERROR: File "with_tconst_bad2.php", line 13, characters 29-34:
 Wrong type hint (Typing[4338])
   File "with_tconst_bad2.php", line 12, characters 19-19:
   Expected `C`
@@ -6,5 +6,5 @@ Wrong type hint (Typing[4338])
     resulting from expanding the type constant `this::Ti`
   File "with_tconst_bad2.php", line 13, characters 38-45:
   But got `stdClass`
-  File "classes.hhi", line 31, characters 13-20:
-    via this generic `this`; implicitly defined constant `::class` is a string that contains the fully qualified name of `stdClass`
+  File "classes.hhi", line 31, characters 15-22:
+    via this generic `this`; implicitly defined constant `::class` is a reference to class `stdClass`

@@ -13,7 +13,7 @@
 echo "*** Testing array_rand() : with invalid values for 'req_num' ***\n";
 
 // initialise associative arrays
-$input = darray[
+$input = dict[
   1 => 'one', 2 => 'float key', 0 => 'decimal key',
   (int)2e2 => 'exp key1', (int)2000e-3 => 'negative exp key',
   0xabc => 2748, 0x12f => '303', 0xff => "255",

@@ -1,4 +1,12 @@
-File "recursive_bounds.php", line 11, characters 10-11:
+ERROR: File "recursive_bounds.php", line 11, characters 10-11:
+Invalid return type (Typing[4110])
+  File "recursive_bounds.php", line 10, characters 26-34:
+  Expected `Contra<T>`
+  File "recursive_bounds.php", line 10, characters 51-51:
+  But got `T as Contra<Contra<T>>`
+  File "recursive_bounds.php", line 10, characters 51-51:
+  This type argument to `Contra` only allows supertypes (it is contravariant)
+ERROR: File "recursive_bounds.php", line 11, characters 10-11:
 Invalid return type (Typing[4110])
   File "recursive_bounds.php", line 10, characters 44-52:
   Expected `Contra<T>`

@@ -23,7 +23,6 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
-#include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
@@ -60,28 +59,8 @@ c_ResumableWaitHandle* GetResumedWaitHandle() {
   return ret;
 }
 
-int64_t HHVM_FUNCTION(asio_get_current_context_idx) {
-  return AsioSession::Get()->getCurrentContextIdx();
-}
-
-Object HHVM_FUNCTION(asio_get_running_in_context, int64_t ctx_idx) {
-  auto session = AsioSession::Get();
-
-  if (ctx_idx <= 0) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      "Expected ctx_idx to be a positive integer");
-  }
-  if (ctx_idx > session->getCurrentContextIdx()) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      "Expected ctx_idx to be less than or equal to the current context index");
-  }
-
-  if (ctx_idx < session->getCurrentContextIdx()) {
-    auto fp = session->getContext(ctx_idx + 1)->getSavedFP();
-    return Object{c_ResumableWaitHandle::getRunning(fp)};
-  } else {
-    return Object{GetResumedWaitHandle()};
-  }
+int64_t HHVM_FUNCTION(asio_get_current_context_depth) {
+  return AsioSession::Get()->getCurrentContextDepth();
 }
 
 }
@@ -130,6 +109,11 @@ bool HHVM_FUNCTION(cancel, const Object& obj, const Object& exception) {
   }
 }
 
+bool HHVM_FUNCTION(cancel_sleep_nothrow, const Object& obj) {
+  assertx(obj->instanceof(c_SleepWaitHandle::classof()));
+  return wait_handle<c_SleepWaitHandle>(obj.get())->cancelNoThrow();
+}
+
 Array HHVM_FUNCTION(backtrace,
                     const Object& obj,
                     int64_t options,
@@ -137,6 +121,7 @@ Array HHVM_FUNCTION(backtrace,
   bool provide_object = options & k_DEBUG_BACKTRACE_PROVIDE_OBJECT;
   bool provide_metadata = options & k_DEBUG_BACKTRACE_PROVIDE_METADATA;
   bool ignore_args = options & k_DEBUG_BACKTRACE_IGNORE_ARGS;
+  bool only_metadata_frames = options & k_DEBUG_BACKTRACE_ONLY_METADATA_FRAMES;
 
   if (!obj->instanceof(c_Awaitable::classof())) {
     SystemLib::throwInvalidArgumentExceptionObject(
@@ -157,6 +142,7 @@ Array HHVM_FUNCTION(backtrace,
                          .withSelf()
                          .withThis(provide_object)
                          .withMetadata(provide_metadata)
+                         .onlyMetadataFrames(only_metadata_frames)
                          .ignoreArgs(ignore_args)
                          .setLimit(limit));
 }
@@ -164,33 +150,41 @@ Array HHVM_FUNCTION(backtrace,
 static AsioExtension s_asio_extension;
 
 void AsioExtension::moduleInit() {
-  initFunctions();
+  initNativeWaitHandle();
+}
 
-  initWaitHandle();
-  initResumableWaitHandle();
-  initAsyncGenerator();
-  initAwaitAllWaitHandle();
-  initConditionWaitHandle();
-  initSleepWaitHandle();
-  initRescheduleWaitHandle();
-  initExternalThreadEventWaitHandle();
-  initStaticWaitHandle();
+void AsioExtension::moduleRegisterNative() {
+  registerNativeFunctions();
 
-  loadSystemlib();
+  registerNativeWaitHandle();
+  registerNativeResumableWaitHandle();
+  registerNativeAsyncGenerator();
+  registerNativeAwaitAllWaitHandle();
+  registerNativeConcurrentWaitHandle();
+  registerNativeConditionWaitHandle();
+  registerNativeSleepWaitHandle();
+  registerNativeRescheduleWaitHandle();
+  registerNativeExternalThreadEventWaitHandle();
+  registerNativeStaticWaitHandle();
+  registerNativeAsyncFunctionWaitHandle();
+  registerNativeAsyncGeneratorWaitHandle();
+  registerNativePriorityBridgeWaitHandle();
+}
 
-  finishClasses();
+std::vector<std::string> AsioExtension::hackFiles() const {
+  return {"async-generator.php", "asio.php"};
 }
 
 void AsioExtension::requestInit() { requestInitSingletons(); }
 
-void AsioExtension::initFunctions() {
+void AsioExtension::registerNativeFunctions() {
   HHVM_FALIAS(
-    HH\\asio_get_current_context_idx,
-    asio_get_current_context_idx);
-  HHVM_FALIAS(HH\\asio_get_running_in_context, asio_get_running_in_context);
+    HH\\asio_get_current_context_depth,
+    asio_get_current_context_depth);
   HHVM_FALIAS(HH\\asio_get_running, asio_get_running);
   HHVM_FALIAS(HH\\Asio\\join, join);
   HHVM_FALIAS(HH\\Asio\\cancel, cancel);
+  HHVM_FALIAS(HH\\Asio\\cancel_sleep_nothrow, cancel_sleep_nothrow);
   HHVM_FALIAS(HH\\Asio\\backtrace, backtrace);
 }
 

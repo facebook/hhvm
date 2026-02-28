@@ -12,15 +12,15 @@ async function gena<Tk as arraykey, Tv>(
   return $awaitables;
 }
 
-async function f() { return 1; }
+async function f() :Awaitable<mixed>{ return 1; }
 
-async function test() {
+async function test() :Awaitable<mixed>{
   $x = vec[f(), f(), f()];
   await gena($x);
 }
 
 <<__EntryPoint>>
-function main_gena() {
+function main_gena() :mixed{
   HH\Asio\join(test());
   echo "DONE\n";
 }

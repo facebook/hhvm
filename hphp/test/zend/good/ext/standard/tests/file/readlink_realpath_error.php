@@ -13,7 +13,7 @@ try { var_dump( readlink() ); } catch (Exception $e) { echo "\n".'Warning: '.$e-
 try { var_dump( readlink(__FILE__, 2) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // args > expected
 
 echo "\n*** Testing readlink() on a non-existent link ***\n";
-var_dump( readlink(__SystemLib\hphp_test_tmppath('readlink_error.tmp')) );
+var_dump( readlink(sys_get_temp_dir().'/'.'readlink_error.tmp')) ;
 
 echo "\n*** Testing readlink() on existing file ***\n";
 var_dump( readlink(__FILE__) );
@@ -26,7 +26,7 @@ try { var_dump( realpath() ); } catch (Exception $e) { echo "\n".'Warning: '.$e-
 try { var_dump( realpath(1, 2) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // args > expected
 
 echo "\n*** Testing realpath() on a non-existent file ***\n";
-var_dump( realpath(__SystemLib\hphp_test_tmppath('realpath_error.tmp')) );
+var_dump( realpath(sys_get_temp_dir().'/'.'realpath_error.tmp')) ;
 
 echo "Done\n";
 }

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,6 +10,6 @@
  */
 
 function foo(): int {
-  $p = class_meth('A', 'f1');
+  $p = A::f1<>;
   return $p('moo');
 }

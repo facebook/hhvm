@@ -1,4 +1,4 @@
-File "default_arg.php--file1.php", line 10, characters 33-41:
+ERROR: File "default_arg.php--file1.php", line 10, characters 33-41:
 Invalid argument (Typing[4411])
   File "default_arg.php--file1.php", line 10, characters 33-41:
   This expression is readonly

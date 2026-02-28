@@ -13,6 +13,19 @@ type key_value_pair = string * Hh_json.json [@@deriving show]
 (** This list is in reverse order (i.e. most recent first) *)
 type t = key_value_pair list [@@deriving show]
 
+let of_json_opt = function
+  | Hh_json.JSON_Object kvs -> Some kvs
+  | _ -> None
+
+let of_yojson_opt (json : Yojson.Safe.t) : t option =
+  match json with
+  | `Assoc kvs ->
+    Some (List.map kvs ~f:(fun (k, v) -> (k, Hh_json.of_yojson v)))
+  | _ -> None
+
+let to_yojson (telemetry : t) : Yojson.Safe.t =
+  `Assoc (List.map telemetry ~f:(fun (k, v) -> (k, Hh_json.to_yojson v)))
+
 (* Ignore - we only use the generated `pp_key_value_pair` in deriving `show` for t *)
 let _ = show_key_value_pair
 
@@ -68,6 +81,17 @@ let string_list
   let value = List.map ~f:(fun s -> Hh_json.JSON_String s) value in
   (key, Hh_json.JSON_Array value) :: telemetry
 
+let string_list_opt
+    ?(truncate_list : int option)
+    ?(truncate_each_string : int option)
+    ~(key : string)
+    ~(value : string list option)
+    (telemetry : t) : t =
+  match value with
+  | None -> (key, Hh_json.JSON_Null) :: telemetry
+  | Some value ->
+    string_list ?truncate_list ?truncate_each_string telemetry ~key ~value
+
 let object_list ~(key : string) ~(value : t list) (telemetry : t) : t =
   let value = List.map ~f:to_json value in
   (key, Hh_json.JSON_Array value) :: telemetry
@@ -99,6 +123,12 @@ let int_list
 let json_ ~(key : string) ~(value : Hh_json.json) (telemetry : t) : t =
   (key, value) :: telemetry
 
+let json ~key ~(value : Yojson.Safe.t) telemetry : t =
+  (key, Hh_json.of_yojson value) :: telemetry
+
+let json_opt ~key ~(value : Yojson.Safe.t option) telemetry : t =
+  (key, Hh_json.of_yojson_opt value) :: telemetry
+
 let object_ ~(key : string) ~(value : t) (telemetry : t) : t =
   (key, Hh_json.JSON_Object (List.rev value)) :: telemetry
 
@@ -107,11 +137,58 @@ let object_opt ~(key : string) ~(value : t option) (telemetry : t) : t =
   | None -> (key, Hh_json.JSON_Null) :: telemetry
   | Some value -> object_ ~key ~value telemetry
 
-let duration ?(key : string = "duration") ~(start_time : float) (telemetry : t)
-    : t =
-  let seconds = Unix.gettimeofday () -. start_time in
+let duration
+    ?(key : string = "duration")
+    ~(start_time : float)
+    ?(end_time : float option)
+    (telemetry : t) : t =
+  let end_time = Option.value end_time ~default:(Unix.gettimeofday ()) in
+  let seconds = end_time -. start_time in
   let ms = int_of_float (1000.0 *. seconds) in
   (key, Hh_json.int_ ms) :: telemetry
+
+let add_duration
+    ?(key : string = "duration")
+    ~(start_time : float)
+    ?(end_time : float option)
+    (telemetry : t) : t =
+  let end_time = Option.value end_time ~default:(Unix.gettimeofday ()) in
+  let seconds = end_time -. start_time in
+  let new_duration_ms = int_of_float (1000.0 *. seconds) in
+
+  let (previous_duration_ms, filtered_telemetry) =
+    List.fold_right
+      telemetry
+      ~init:(0, [])
+      ~f:(fun ((cur_key, cur_value) as cur_entry) (acc_duration, acc_telemtry)
+         ->
+        match cur_value with
+        | Hh_json.JSON_Number cur_value when String.equal cur_key key ->
+          (match Int.of_string_opt cur_value with
+          | Some cur_value -> (cur_value + acc_duration, acc_telemtry)
+          | None -> (acc_duration, cur_entry :: acc_telemtry))
+        | _ -> (acc_duration, cur_entry :: acc_telemtry))
+  in
+  let overall_duration_ms = new_duration_ms + previous_duration_ms in
+
+  (key, Hh_json.int_ overall_duration_ms) :: filtered_telemetry
+
+let with_duration ~(description : string) (telemetry : t) (f : unit -> 'a) :
+    'a * t =
+  let start_time = Unix.gettimeofday () in
+  let res = f () in
+  let end_time = Unix.gettimeofday () in
+  let seconds = end_time -. start_time in
+  let ms = int_of_float (1000.0 *. seconds) in
+  let key =
+    let suffix = "duration_ms" in
+    if String.is_empty description then
+      suffix
+    else
+      Printf.sprintf "%s_%s" description suffix
+  in
+  let telemetry = (key, Hh_json.int_ ms) :: telemetry in
+  (res, telemetry)
 
 let float_ ~(key : string) ~(value : float) (telemetry : t) : t =
   (key, Hh_json.float_ value) :: telemetry
@@ -146,7 +223,7 @@ let exception_ ~(e : Exception.t) (telemetry : t) : t =
 
 let quick_gc_stat () : t =
   let stat = Gc.quick_stat () in
-  let bytes_per_word = Sys.word_size / 8 in
+  let bytes_per_word = Stdlib.Sys.word_size / 8 in
   let bytes_per_wordf = bytes_per_word |> float_of_int in
   let open Gc.Stat in
   create ()
@@ -225,29 +302,27 @@ let diff ~(all : bool) ?(suffix_keys = true) (telemetry : t) ~(prev : t) : t =
     | (JSON_Number val_c, JSON_Number val_p) when String.equal val_c val_p ->
       acc_if all (key, JSON_Number val_c) acc
     | (JSON_Null, JSON_Null) -> acc_if all (key, JSON_Null) acc
-    | (JSON_Number c, JSON_Number p) ->
+    | (JSON_Number c, JSON_Number p) -> begin
       (* JSON_Numbers are strings - maybe ints, maybe floats, maybe we
          can't parse them or they're outside ocaml maximum range *)
-      begin
+      try
+        let (c, p) = (int_of_string c, int_of_string p) in
+        (key ^ diff_suffix, int_ (c - p)) :: acc_if all (key, int_ c) acc
+      with
+      | _ -> begin
         try
-          let (c, p) = (int_of_string c, int_of_string p) in
-          (key ^ diff_suffix, int_ (c - p)) :: acc_if all (key, int_ c) acc
+          let (c, p) = (float_of_string c, float_of_string p) in
+          (key ^ diff_suffix, float_ (c -. p)) :: acc_if all (key, float_ c) acc
         with
-        | _ ->
-          begin
-            try
-              let (c, p) = (float_of_string c, float_of_string p) in
-              (key ^ diff_suffix, float_ (c -. p))
-              :: acc_if all (key, float_ c) acc
-            with
-            | _ ->
-              (key, JSON_Number c) :: (key ^ prev_suffix, JSON_Number p) :: acc
-          end
+        | _ -> (key, JSON_Number c) :: (key ^ prev_suffix, JSON_Number p) :: acc
       end
+    end
     | (_, _) -> (key, val_c) :: (key ^ prev_suffix, val_p) :: acc
   in
 
   diff telemetry ~prev
+
+let merge (telemetry1 : t) (telemetry2 : t) : t = telemetry2 @ telemetry1
 
 let rec add (telemetry1 : t) (telemetry2 : t) : t =
   let telemetry1 = List.sort telemetry1 ~compare in

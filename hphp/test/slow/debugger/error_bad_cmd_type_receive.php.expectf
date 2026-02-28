@@ -1,0 +1,10 @@
+Program %s/error_bad_cmd_type_receive.php loaded. Type '[r]un' to go.
+break error_bad_cmd_type_receive.php:5
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+run
+error_bad_cmd_type_receive.php loaded
+Program %s/error_bad_cmd_type_receive.php exited normally.
+internaltesting badcmdtypereceive
+Executing internal test...
+Unable to communicate with server. Server's down?
+Unable to reconnect to server, exiting.

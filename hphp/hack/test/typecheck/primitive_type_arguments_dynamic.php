@@ -1,3 +1,3 @@
-<?hh // strict
+<?hh
 
 function f(dynamic<T> $_): void {}

@@ -20,7 +20,6 @@
 #include "hphp/runtime/vm/jit/tc-region.h"
 
 #include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -29,12 +28,11 @@
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
-#include "hphp/runtime/vm/jit/relocation.h"
-#include "hphp/runtime/vm/jit/smashable-instr.h"
-#include "hphp/runtime/vm/jit/srcdb.h"
-#include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 
+#include "hphp/util/configs/codecache.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"
@@ -42,9 +40,11 @@
 #include "hphp/util/trace.h"
 
 #include <folly/gen/Base.h>
-#include <folly/json.h>
+#include <folly/json/json.h>
 
-TRACE_SET_MOD(mcg);
+TRACE_SET_MOD(mcg)
+
+extern "C" __attribute__((weak)) uint32_t __roar_api_pending_warmups();
 
 namespace HPHP::jit::tc {
 
@@ -53,13 +53,13 @@ void recordGdbTranslation(SrcKey sk, const CodeBlock& cb,
   assertx(cb.contains(start, end));
   if (start != end) {
     assertOwnsCodeLock();
-    if (!RuntimeOption::EvalJitNoGdb) {
+    if (!Cfg::Jit::NoGdb) {
       Debug::DebugInfo::Get()->recordTracelet(
         Debug::TCRange(start, end, &cb == &code().cold()),
         sk
       );
     }
-    if (RuntimeOption::EvalPerfPidMap) {
+    if (Cfg::Eval::PerfPidMap) {
       Debug::DebugInfo::Get()->recordPerfMap(
         Debug::TCRange(start, end, &cb == &code().cold()),
         sk
@@ -85,7 +85,7 @@ buildCodeSizeCounters() {
       auto counterName = folly::sformat("jit.code.{}.used", name);
       counters[name] = ServiceData::createTimeSeries(
           counterName, stats,
-          {std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds),
+          {std::chrono::seconds(Cfg::Jit::WarmupRateSeconds),
            std::chrono::seconds(0)}
       );
     };
@@ -109,13 +109,32 @@ buildCodeSizeCounters() {
   return counters;
 }
 
-static std::map<std::string, ServiceData::ExportedTimeSeries*> s_counters;
+static std::map<std::string, ServiceData::ExportedTimeSeries*> s_used_counters;
 
 static std::atomic<uint64_t> s_trans_counters[NumTransKinds][kNumAreas];
 
+#define FOREACH_ALLOC_FREE_COUNTER \
+F(allocs) \
+F(frees) \
+F(bytes_free) \
+F(free_blocks)
+
+#define F(name) \
+  static std::map<std::string, ServiceData::ExportedCounter*> s_ ## name ## _counters;
+FOREACH_ALLOC_FREE_COUNTER
+#undef F
+
 static InitFiniNode initCodeSizeCounters([] {
-  s_counters = buildCodeSizeCounters();
+  s_used_counters = buildCodeSizeCounters();
+  CodeCache::forEachName([](const char* name) {
+    #define F(n) s_ ## n ## _counters[name] = \
+      ServiceData::createCounter(folly::sformat("jit.code.{}." #n , name));
+    FOREACH_ALLOC_FREE_COUNTER;
+    #undef F
+  });
 }, InitFiniNode::When::PostRuntimeOptions);
+
+#undef FOREACH_SIZE_COUNTER
 
 static std::atomic<bool> s_warmedUp{false};
 
@@ -167,9 +186,9 @@ void recordTranslationSizes(const TransRec& tr) {
     default:
       return;
   }
-  auto mainCounter   = s_counters.at(folly::sformat("{}.main", kindName));
-  auto coldCounter   = s_counters.at(folly::sformat("{}.cold", kindName));
-  auto frozenCounter = s_counters.at(folly::sformat("{}.frozen", kindName));
+  auto mainCounter   = s_used_counters.at(folly::sformat("{}.main", kindName));
+  auto coldCounter   = s_used_counters.at(folly::sformat("{}.cold", kindName));
+  auto frozenCounter = s_used_counters.at(folly::sformat("{}.frozen", kindName));
   mainCounter->addValue(tr.aLen);
   coldCounter->addValue(tr.acoldLen);
   frozenCounter->addValue(tr.afrozenLen);
@@ -179,41 +198,52 @@ void recordTranslationSizes(const TransRec& tr) {
   auto constexpr iMain   = static_cast<size_t>(AreaIndex::Main);
   auto constexpr iCold   = static_cast<size_t>(AreaIndex::Cold);
   auto constexpr iFrozen = static_cast<size_t>(AreaIndex::Frozen);
-  trans_counter[iMain].fetch_add(tr.aLen, std::memory_order_relaxed);
-  trans_counter[iCold].fetch_add(tr.acoldLen, std::memory_order_relaxed);
-  trans_counter[iFrozen].fetch_add(tr.afrozenLen, std::memory_order_relaxed);
+  trans_counter[iMain].fetch_add(tr.aLen, std::memory_order_acq_rel);
+  trans_counter[iCold].fetch_add(tr.acoldLen, std::memory_order_acq_rel);
+  trans_counter[iFrozen].fetch_add(tr.afrozenLen, std::memory_order_acq_rel);
 }
 
 void updateCodeSizeCounters() {
   assertOwnsCodeLock();
 
-  code().forEachBlock([&] (const char* name, const CodeBlock& a) {
-    auto codeUsed = s_counters.at(name);
+  #define F(c_name, update_fn, block_name, block) \
+    s_ ## c_name ## _counters.at(block_name)->setValue(block.update_fn());
+
+  #define UPDATE_ALLOC_FREE_COUNTERS(...) \
+    F(allocs, numAllocs, __VA_ARGS__) \
+    F(frees, numFrees, __VA_ARGS__) \
+    F(bytes_free, bytesFree,  __VA_ARGS__) \
+    F(free_blocks, blocksFree, __VA_ARGS__)
+
+  code().forEachSection([&] (const char* name, auto const& s) {
+    auto codeUsed = s_used_counters.at(name);
     // Add delta
-    codeUsed->addValue(a.used() - codeUsed->getSum());
+    codeUsed->addValue(s.used() - codeUsed->getSum());
+    UPDATE_ALLOC_FREE_COUNTERS(name, s);
   });
 
   // Manually add code.data.
-  auto codeUsed = s_counters.at("data");
-  codeUsed->addValue(code().data().used() - codeUsed->getSum());
+  auto codeUsed = s_used_counters.at("data");
+  codeUsed->addValue(code().dataSection().used() - codeUsed->getSum());
+  UPDATE_ALLOC_FREE_COUNTERS("data", code().dataSection());
 }
 
 size_t getLiveMainUsage() {
   constexpr auto liveIdx = static_cast<size_t>(TransKind::Live);
   constexpr auto mainIdx = static_cast<size_t>(AreaIndex::Main);
-  return s_trans_counters[liveIdx][mainIdx].load(std::memory_order_relaxed);
+  return s_trans_counters[liveIdx][mainIdx].load(std::memory_order_acquire);
 }
 
 size_t getProfMainUsage() {
   constexpr auto profIdx = static_cast<size_t>(TransKind::Profile);
   constexpr auto mainIdx = static_cast<size_t>(AreaIndex::Main);
-  return s_trans_counters[profIdx][mainIdx].load(std::memory_order_relaxed);
+  return s_trans_counters[profIdx][mainIdx].load(std::memory_order_acquire);
 }
 
 size_t getOptMainUsage() {
   constexpr auto optIdx = static_cast<size_t>(TransKind::Optimize);
   constexpr auto mainIdx = static_cast<size_t>(AreaIndex::Main);
-  return s_trans_counters[optIdx][mainIdx].load(std::memory_order_relaxed);
+  return s_trans_counters[optIdx][mainIdx].load(std::memory_order_acquire);
 }
 
 /*
@@ -221,10 +251,11 @@ size_t getOptMainUsage() {
  * JIT.
  */
 void reportJitMaturity() {
-  auto static jitMaturityCounter = ServiceData::createCounter("jit.maturity");
+  extern ServiceData::ExportedCounter* g_JitMaturityCounter;
+  auto jitMaturityCounter = g_JitMaturityCounter;
   if (!jitMaturityCounter) return;
   auto const before = jitMaturityCounter->getValue();
-  if (before == 100) return;
+  if (before >= g_maxJitMaturity) return;
 
   // Limit jit maturity to 70 before retranslateAll finishes (if enabled). If
   // the JIT running in jumpstart seeer mode, don't consider retranslateAll to
@@ -232,9 +263,11 @@ void reportJitMaturity() {
   constexpr uint64_t kMaxMaturityBeforeRTA = 70;
   auto const beforeRetranslateAll =
     mcgen::retranslateAllPending() || isJitSerializing();
+
   // If retranslateAll is enabled, wait until it finishes before counting in
   // optimized translations.
   const size_t hotSize = beforeRetranslateAll ? 0 : getOptMainUsage();
+  const size_t liveSize = getLiveMainUsage();
   // When we jit from serialized profile data, the profile code won't be
   // present. In order to make jit maturity somewhat comparable between the two
   // cases, we pretend to have some profiling code.
@@ -248,31 +281,38 @@ void reportJitMaturity() {
     getProfMainUsage() + (isJitSerializing() ? ProfData::prevProfSize() : 0),
     hotSize
   );
-  auto const mainSize = code().main().used();
-
-  auto const fullSize = RuntimeOption::EvalJitMatureSize;
   auto const codeSize =
-    std::max(mainSize,
-             static_cast<size_t>(profSize * RO::EvalJitMaturityProfWeight));
+    std::max(hotSize + liveSize,
+             static_cast<size_t>(profSize * Cfg::Jit::MaturityProfWeight));
+  auto const fullSize = Cfg::Jit::MatureSize;
+
+  // If running under ROAR, limit JIT maturity before ROAR finishes its warmup.
+  constexpr uint64_t kMaxMaturityBeforeROARWarmup = 70;
+  auto const beforeROARWarmup = __roar_api_pending_warmups &&
+                                __roar_api_pending_warmups() != 0;
 
   int64_t maturity = before;
-  if (beforeRetranslateAll) {
+  if (beforeROARWarmup) {
+    maturity = std::min(kMaxMaturityBeforeROARWarmup, codeSize * 100 / fullSize);
+  } else if (beforeRetranslateAll) {
     maturity = std::min(kMaxMaturityBeforeRTA, codeSize * 100 / fullSize);
-  } else if (mainSize >= CodeCache::AMaxUsage ||
-             getLiveMainUsage() >= RO::EvalJitMaxLiveMainUsage) {
+  } else if (liveSize >= Cfg::Jit::MaxLiveMainUsage ||
+             tcIsFull()) {
+    maturity = g_maxJitMaturity;
+  } else if (Cfg::Jit::PGOOnly && mcgen::retranslateAllComplete()) {
     maturity = 100;
   } else if (codeSize >= fullSize) {
     maturity = 99;
   } else {
     maturity = std::pow(codeSize / static_cast<double>(fullSize),
-                        RuntimeOption::EvalJitMaturityExponent) * 99;
+                        Cfg::Jit::MaturityExponent) * 99;
   }
 
-  // If EvalJitMatureAfterWarmup is set, we consider the JIT to be mature once
+  // If Cfg::Jit::MatureAfterWarmup is set, we consider the JIT to be mature once
   // warmupStatusString() is empty, which indicates that the JIT is warmed up
   // based on the rate in which JITed code is being produced.
-  if (RuntimeOption::EvalJitMatureAfterWarmup && warmupStatusString().empty()) {
-    maturity = 100;
+  if (Cfg::Jit::MatureAfterWarmup && warmupStatusString().empty()) {
+    maturity = g_maxJitMaturity;
   }
 
   if (maturity > before) {
@@ -381,8 +421,8 @@ static void logFrame(const Vunit& unit, const size_t frame) {
 
   logFunc(func, ent);
 
-  if (!RuntimeOption::EvalJitLogAllInlineRegions.empty()) {
-    ent.setStr("run_key", RuntimeOption::EvalJitLogAllInlineRegions);
+  if (!Cfg::Jit::LogAllInlineRegions.empty()) {
+    ent.setStr("run_key", Cfg::Jit::LogAllInlineRegions);
   }
 
   StructuredLog::log("hhvm_tc_func_sizes", ent);
@@ -400,21 +440,23 @@ void logTranslation(const Translator* trans, const TransRange& range) {
   auto& cols = *trans->unit->logEntry();
   auto kind = show(trans->kind);
   cols.setStr("trans_kind", !debug ? kind : kind + "_debug");
+  cols.setStr("srckey", showShort(trans->sk));
   if (trans->sk.valid()) {
     auto const func = trans->sk.func();
     cols.setStr("func", func->fullName()->data());
     switch (RuntimeOption::EvalJitSerdesMode) {
-    case JitSerdesMode::Off:
-    case JitSerdesMode::Serialize:
-    case JitSerdesMode::SerializeAndExit:
-      break;
-    case JitSerdesMode::Deserialize:
-    case JitSerdesMode::DeserializeOrFail:
-    case JitSerdesMode::DeserializeOrGenerate:
-    case JitSerdesMode::DeserializeAndDelete:
-    case JitSerdesMode::DeserializeAndExit:
-      cols.setInt("func_id", func->getFuncId().toInt());
-      break;
+      case JitSerdesMode::Off:
+      case JitSerdesMode::Serialize:
+      case JitSerdesMode::SerializeAndExit:
+      case JitSerdesMode::DeserializeForPreload:
+        break;
+      case JitSerdesMode::Deserialize:
+      case JitSerdesMode::DeserializeOrFail:
+      case JitSerdesMode::DeserializeOrGenerate:
+      case JitSerdesMode::DeserializeAndDelete:
+      case JitSerdesMode::DeserializeAndExit:
+        cols.setInt("func_id", func->getFuncId().toInt());
+        break;
     }
   }
   if (trans->kind == TransKind::Optimize) {
@@ -422,7 +464,7 @@ void logTranslation(const Translator* trans, const TransRange& range) {
     assertx(regionTrans);
     cols.setInt("opt_index", regionTrans->optIndex);
   }
-  cols.setInt("jit_sample_rate", RuntimeOption::EvalJitSampleRate);
+  cols.setInt("jit_sample_rate", Cfg::Jit::SampleRate);
   // timing info
   cols.setInt("jit_micros", nanos / 1000);
   // hhir stats
@@ -458,7 +500,7 @@ void logTranslation(const Translator* trans, const TransRange& range) {
     cols.setInt("num_vblocks_cold", num_vblocks[(int)AreaIndex::Cold]);
     cols.setInt("num_vblocks_frozen", num_vblocks[(int)AreaIndex::Frozen]);
 
-    if (RuntimeOption::EvalJitLogAllInlineRegions.empty()) {
+    if (Cfg::Jit::LogAllInlineRegions.empty()) {
       logFrames(*trans->vunit);
     }
   }
@@ -471,51 +513,51 @@ void logTranslation(const Translator* trans, const TransRange& range) {
   StructuredLog::log("hhvm_jit", cols);
 }
 
+/*
+ * This function is like a request-agnostic version of server_warmup_status().
+ * Returning an empty string means "warmed up"; otherwise, the string contains
+ * the reason why HHVM isn't warmed-up yet.
+ */
 std::string warmupStatusString() {
-  // This function is like a request-agnostic version of
-  // server_warmup_status().
-  // Three conditions necessary for the jit to qualify as "warmed-up":
-  std::string status_str;
+  if (s_warmedUp.load(std::memory_order_acquire)) return "";
 
-  if (!s_warmedUp.load(std::memory_order_relaxed)) {
-    if (jit::mcgen::retranslateAllPending()) {
-      status_str = "Waiting on retranslateAll().\n";
-    } else {
-      auto checkCodeSize = [&](std::string name, uint32_t maxSize) {
-        assertx(!s_counters.empty());
-        auto series = s_counters.at(name);
-        if (!series) {
-          status_str = "initializing";
-          return;
-        }
-        auto const codeSize = series->getSum();
-        if (codeSize < maxSize / RuntimeOption::EvalJitWarmupMinFillFactor) {
-          folly::format(&status_str,
-                        "Code.{} is still to small to be considered warm. "
-                        "({} of max {})\n",
-                        name, codeSize, maxSize);
-          return;
-        }
-        auto const codeSizeRate = series->getRateByDuration(
-          std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds));
-        if (codeSizeRate > RuntimeOption::EvalJitWarmupMaxCodeGenRate) {
-          folly::format(&status_str,
-                        "Code.{} is still increasing at a rate of {}\n",
-                        name, codeSizeRate);
-        }
-      };
-      checkCodeSize("main", CodeCache::ASize);
-    }
-    if (status_str.empty()) {
-      if (RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) {
-        status_str = "JIT running in SerializeAndExit mode";
-      } else {
-        s_warmedUp.store(true, std::memory_order_relaxed);
-      }
-    }
+  if (jit::mcgen::retranslateAllPending()) {
+    return "Waiting on retranslateAll().\n";
   }
-  // Empty string means "warmed up".
-  return status_str;
+
+  auto checkCodeSize = [&](std::string name, uint32_t maxSize) -> std::string {
+    assertx(!s_used_counters.empty());
+    auto series = s_used_counters.at(name);
+    if (!series) return "initializing";
+    auto const codeSize = series->getSum();
+    if (codeSize < maxSize / Cfg::Jit::WarmupMinFillFactor) {
+      return folly::sformat("Code.{} is still to small to be considered warm. "
+                            "({} of max {})\n", name, codeSize, maxSize);
+    }
+    auto const codeSizeRate = series->getRateByDuration(
+        std::chrono::seconds(Cfg::Jit::WarmupRateSeconds));
+    if (codeSizeRate > Cfg::Jit::WarmupMaxCodeGenRate) {
+      return folly::sformat("Code.{} is still increasing at a rate of {}\n",
+                            name, codeSizeRate);
+    }
+    return "";
+  };
+  std::string status_str = checkCodeSize("main", Cfg::CodeCache::ASize);
+  if (!status_str.empty()) return status_str;
+
+  // If we are running with ROAR, we also should wait for PGO/CSPGO to be
+  // complete before reporting warmed up.
+  if (__roar_api_pending_warmups && __roar_api_pending_warmups() != 0) {
+    return "Waiting on ROAR warmup.\n";
+  }
+
+  if (RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) {
+    return "JIT running in SerializeAndExit mode\n";
+  }
+
+  s_warmedUp.store(true, std::memory_order_release);
+
+  return "";
 }
 
 }

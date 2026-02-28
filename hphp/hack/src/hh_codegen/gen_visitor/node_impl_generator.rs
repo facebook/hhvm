@@ -4,13 +4,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{
-    context::Context, gen_helper::*, generator::Generator, syn_helper::*, visitor_trait_generator,
-};
+use anyhow::Result;
+use anyhow::anyhow;
+use proc_macro2::Ident;
+use proc_macro2::TokenStream;
+use quote::format_ident;
+use quote::quote;
+
+use super::context::Context;
+use super::gen_helper::*;
+use super::generator::Generator;
+use super::syn_helper::*;
+use super::visitor_trait_generator;
 use crate::impl_generator;
-use anyhow::{anyhow, Result};
-use proc_macro2::{Ident, TokenStream};
-use quote::{format_ident, quote};
 
 pub trait NodeImpl {
     fn filename() -> String;
@@ -20,7 +26,7 @@ pub trait NodeImpl {
     fn use_node() -> TokenStream;
     fn use_visitor() -> TokenStream;
 
-    fn gen(ctx: &Context<'_>) -> Result<TokenStream> {
+    fn r#gen(ctx: &Context<'_>) -> Result<TokenStream> {
         let impls = ctx
             .non_alias_types()
             .map(|ty| {
@@ -38,6 +44,7 @@ pub trait NodeImpl {
         Ok(quote! {
             #![allow(unused_imports)]
             #![allow(unused_variables)]
+            #![allow(clippy::all)]
 
             #use_node
             #use_visitor
@@ -82,6 +89,7 @@ pub trait NodeImpl {
         })
     }
 
+    #[allow(dead_code)]
     fn try_simple_ty_param(ctx: &Context<'_>, ty: &syn::Type) -> Option<String> {
         try_simple_type(ty).filter(|t| ctx.is_root_ty_param(t))
     }
@@ -106,7 +114,8 @@ pub trait NodeImpl {
     }
 
     fn gen_recurse_body(ctx: &Context<'_>, ty_name: &str, ty: &syn::Item) -> Result<TokenStream> {
-        use syn::{Item::*, *};
+        use syn::Item::*;
+        use syn::*;
         match ty {
             Struct(ItemStruct { fields, .. }) => Self::gen_recurse_struct_body(ctx, fields),
             Enum(ItemEnum { variants, .. }) => Self::gen_recurse_enum_body(ctx, ty_name, variants),

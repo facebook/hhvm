@@ -1,4 +1,4 @@
-File "list_array2.php", line 14, characters 10-11:
+ERROR: File "list_array2.php", line 14, characters 10-11:
 Invalid return type (Typing[4110])
   File "list_array2.php", line 12, characters 35-37:
   Expected `int`

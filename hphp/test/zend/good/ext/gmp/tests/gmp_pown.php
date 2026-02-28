@@ -17,12 +17,12 @@ var_dump(gmp_strval(gmp_powm($n,$e,$m)));
 var_dump(gmp_powm(5, 11, 0));
 var_dump(gmp_powm(5, "11", gmp_init(0)));
 
-var_dump(gmp_powm(varray[],$e,$m));
-var_dump(gmp_powm($n,varray[],$m));
-var_dump(gmp_powm($n,$e,varray[]));
-var_dump(gmp_powm(varray[],varray[],varray[]));
-try { var_dump(gmp_powm(varray[],varray[])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-try { var_dump(gmp_powm(varray[])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+var_dump(gmp_powm(vec[],$e,$m));
+var_dump(gmp_powm($n,vec[],$m));
+var_dump(gmp_powm($n,$e,vec[]));
+var_dump(gmp_powm(vec[],vec[],vec[]));
+try { var_dump(gmp_powm(vec[],vec[])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_powm(vec[])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(gmp_powm()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 $n = gmp_init("-5");

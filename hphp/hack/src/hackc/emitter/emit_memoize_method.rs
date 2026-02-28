@@ -3,56 +3,77 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ast_scope::{Scope, ScopeItem};
+use ast_scope::Scope;
+use ast_scope::ScopeItem;
 use bitflags::bitflags;
 use emit_method::get_attrs_for_method;
 use emit_pos::emit_pos_then;
-use env::{emitter::Emitter, Env};
-use error::{Error, Result};
-use ffi::{Slice, Str};
-use hhbc::{
-    hhas_attribute::deprecation_info,
-    hhas_body::HhasBody,
-    hhas_coeffects::HhasCoeffects,
-    hhas_method::{HhasMethod, HhasMethodFlags},
-    hhas_param::HhasParam,
-    hhas_pos::HhasSpan,
-    hhas_type::HhasTypeInfo,
-    FCallArgs, FCallArgsFlags, Label, Local, LocalRange, SpecialClsRef, TypedValue, Visibility,
-};
+use env::Env;
+use env::emitter::Emitter;
+use error::Error;
+use error::Result;
+use hhbc::Attr;
+use hhbc::Attribute;
+use hhbc::Body;
+use hhbc::ClassName;
+use hhbc::Coeffects;
+use hhbc::FCallArgs;
+use hhbc::FCallArgsFlags;
+use hhbc::Label;
+use hhbc::Local;
+use hhbc::LocalRange;
+use hhbc::Method;
+use hhbc::MethodFlags;
+use hhbc::Param;
+use hhbc::Span;
+use hhbc::SpecialClsRef;
+use hhbc::StringId;
+use hhbc::TParamInfo;
+use hhbc::TypeInfo;
+use hhbc::TypedValue;
+use hhbc::VerifyRetKind;
+use hhbc::Visibility;
 use hhbc_string_utils::reified;
-use instruction_sequence::{instr, InstrSeq};
-use naming_special_names_rust::{members, user_attributes as ua};
-use options::HhvmFlags;
-use oxidized::{ast as T, pos::Pos};
+use instruction_sequence::InstrSeq;
+use instruction_sequence::instr;
+use naming_special_names_rust::members;
+use naming_special_names_rust::user_attributes;
+use oxidized::ast;
+use oxidized::pos::Pos;
+
+use crate::emit_attribute;
+use crate::emit_body;
+use crate::emit_memoize_helpers;
+use crate::emit_method;
+use crate::emit_param;
 
 /// Precomputed information required for generation of memoized methods
-pub struct MemoizeInfo<'arena> {
+pub struct MemoizeInfo {
     /// True if the enclosing class is a trait
     is_trait: bool,
     /// Enclosing class name
-    class_name: hhbc::ClassName<'arena>,
+    class_name: hhbc::ClassName,
 }
 
-fn is_memoize(method: &T::Method_) -> bool {
+fn is_memoize(method: &ast::Method_) -> bool {
     method
         .user_attributes
         .iter()
-        .any(|a| ua::is_memoized(&a.name.1))
+        .any(|a| user_attributes::is_memoized(&a.name.1))
 }
 
-fn is_memoize_lsb(method: &T::Method_) -> bool {
+fn is_memoize_lsb(method: &ast::Method_) -> bool {
     method
         .user_attributes
         .iter()
-        .any(|a| ua::MEMOIZE_LSB == a.name.1 || ua::POLICY_SHARDED_MEMOIZE_LSB == a.name.1)
+        .any(|a| user_attributes::MEMOIZE_LSB == a.name.1)
 }
 
-pub fn make_info<'arena>(
-    class: &T::Class_,
-    class_name: hhbc::ClassName<'arena>,
-    methods: &[T::Method_],
-) -> Result<MemoizeInfo<'arena>> {
+pub fn make_info(
+    class: &ast::Class_,
+    class_name: hhbc::ClassName,
+    methods: &[ast::Method_],
+) -> Result<MemoizeInfo> {
     for m in methods.iter() {
         // check methods
         if is_memoize(m) {
@@ -68,7 +89,7 @@ pub fn make_info<'arena>(
                     pos,
                     format!(
                         "Abstract method {}::{} cannot be memoized",
-                        class_name.unsafe_as_str(),
+                        class_name.as_str(),
                         &m.name.1,
                     ),
                 ));
@@ -83,13 +104,13 @@ pub fn make_info<'arena>(
     })
 }
 
-pub fn emit_wrapper_methods<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
-    info: &MemoizeInfo<'arena>,
-    class: &'a T::Class_,
-    methods: &'a [T::Method_],
-) -> Result<Vec<HhasMethod<'arena>>> {
+pub fn emit_wrapper_methods<'a>(
+    emitter: &mut Emitter,
+    env: &mut Env<'a>,
+    info: &MemoizeInfo,
+    class: &'a ast::Class_,
+    methods: &'a [ast::Method_],
+) -> Result<Vec<Method>> {
     // Wrapper methods may not have iterators
     emitter.iterator_mut().reset();
 
@@ -105,36 +126,28 @@ pub fn emit_wrapper_methods<'a, 'arena, 'decl>(
 }
 
 // This is cut-and-paste from emit_method, with special casing for wrappers
-fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
-    info: &MemoizeInfo<'arena>,
-    class: &'a T::Class_,
-    method: &'a T::Method_,
-) -> Result<HhasMethod<'arena>> {
-    let alloc = env.arena;
+fn make_memoize_wrapper_method<'a>(
+    emitter: &mut Emitter,
+    env: &mut Env<'a>,
+    info: &MemoizeInfo,
+    class: &'a ast::Class_,
+    method: &'a ast::Method_,
+) -> Result<Method> {
     let ret = if method.name.1 == members::__CONSTRUCT {
         None
     } else {
         method.ret.1.as_ref()
     };
-    let name = hhbc::MethodName::from_ast_name(alloc, &method.name.1);
-    let scope = &Scope {
-        items: vec![
-            ScopeItem::Class(ast_scope::Class::new_ref(class)),
-            ScopeItem::Method(ast_scope::Method::new_ref(method)),
-        ],
-    };
+    let name = hhbc::MethodName::intern(&method.name.1);
+    let mut scope = Scope::default();
+    scope.push_item(ScopeItem::Class(ast_scope::Class::new_ref(class)));
+    scope.push_item(ScopeItem::Method(ast_scope::Method::new_ref(method)));
     let mut attributes = emit_attribute::from_asts(emitter, &method.user_attributes)?;
-    attributes.extend(emit_attribute::add_reified_attribute(
-        alloc,
-        &method.tparams,
-    ));
+    attributes.extend(emit_attribute::add_reified_attribute(&method.tparams));
     let is_async = method.fun_kind.is_fasync();
     // __Memoize is not allowed on lambdas, so we never need to inherit the rx
     // level from the declaring scope when we're in a Memoize wrapper
-    let coeffects = HhasCoeffects::from_ast(
-        alloc,
+    let coeffects = Coeffects::from_ast(
         method.ctxs.as_ref(),
         &method.params,
         &method.tparams,
@@ -144,91 +157,111 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
         .tparams
         .iter()
         .any(|tp| tp.reified.is_reified() || tp.reified.is_soft_reified());
-    let should_emit_implicit_context = emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::ENABLE_IMPLICIT_CONTEXT)
-        && attributes.iter().any(|a| {
-            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(
-                a.name.unsafe_as_str(),
-            )
-        });
     let mut arg_flags = Flags::empty();
     arg_flags.set(Flags::IS_ASYNC, is_async);
     arg_flags.set(Flags::IS_REIFIED, is_reified);
     arg_flags.set(
         Flags::SHOULD_EMIT_IMPLICIT_CONTEXT,
-        should_emit_implicit_context,
+        hhbc::is_keyed_by_ic_memoize(attributes.iter()),
+    );
+    arg_flags.set(
+        Flags::IS_IC_INACCESSIBLE_SPECIAL_CASE,
+        hhbc::is_not_keyed_by_ic_and_leak_ic(attributes.iter()),
     );
     let mut args = Args {
         info,
         method,
-        scope,
-        deprecation_info: deprecation_info(attributes.iter()),
+        scope: &scope,
+        emit_deprecation_info: true,
         params: &method.params,
         ret,
         method_id: &name,
         flags: arg_flags,
     };
-    let body = emit_memoize_wrapper_body(emitter, env, &mut args)?;
-    let mut flags = HhasMethodFlags::empty();
-    flags.set(HhasMethodFlags::IS_ASYNC, is_async);
+    let span = Span::from_pos(&method.span);
+    let mut body = emit_memoize_wrapper_body(emitter, env, &mut args, span, attributes, coeffects)?;
+    let mut flags = MethodFlags::empty();
+    flags.set(MethodFlags::IS_ASYNC, is_async);
 
-    let attrs = get_attrs_for_method(
+    let has_variadic = emit_param::has_variadic(&body.repr.params);
+    let has_splat = emit_param::has_splat(&body.repr.params);
+    body.attrs = get_attrs_for_method(
         emitter,
         method,
-        &attributes,
+        &body.attributes,
         &method.visibility,
         class,
         false,
+        has_variadic,
+        has_splat,
     );
-
-    Ok(HhasMethod {
-        attributes: Slice::fill_iter(alloc, attributes.into_iter()),
+    Ok(Method {
         visibility: Visibility::from(method.visibility),
         name,
         body,
-        span: HhasSpan::from_pos(&method.span),
-        coeffects,
         flags,
-        attrs,
     })
 }
 
-fn emit_memoize_wrapper_body<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
-    args: &mut Args<'_, 'a, 'arena>,
-) -> Result<HhasBody<'arena>> {
-    let alloc = env.arena;
+fn emit_memoize_wrapper_body<'a>(
+    emitter: &mut Emitter,
+    env: &mut Env<'a>,
+    args: &mut Args<'_, 'a>,
+    span: Span,
+    attributes: Vec<Attribute>,
+    coeffects: Coeffects,
+) -> Result<Body> {
     let mut tparams: Vec<&str> = args
         .scope
         .get_tparams()
         .iter()
         .map(|tp| tp.name.1.as_str())
         .collect();
-    let return_type_info = emit_body::emit_return_type_info(
-        alloc,
-        &tparams[..],
-        args.flags.contains(Flags::IS_ASYNC),
-        args.ret,
-    )?;
+    let tparam_info = args
+        .scope
+        .get_fun_tparams()
+        .iter()
+        .map(|tp| TParamInfo {
+            name: ClassName::intern(tp.name.1.as_str()),
+            shadows_class_tparam: false,
+        })
+        .collect::<Vec<_>>();
+    let return_type =
+        emit_body::emit_return_type(&tparams[..], args.flags.contains(Flags::IS_ASYNC), args.ret)?;
     let hhas_params = emit_param::from_asts(emitter, &mut tparams, true, args.scope, args.params)?;
     args.flags.set(Flags::WITH_LSB, is_memoize_lsb(args.method));
     args.flags.set(Flags::IS_STATIC, args.method.static_);
-    emit(emitter, env, hhas_params, return_type_info, args)
+    emit(
+        emitter,
+        env,
+        hhas_params,
+        return_type,
+        span,
+        attributes,
+        coeffects,
+        args,
+        tparam_info,
+    )
 }
 
-fn emit<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
-    hhas_params: Vec<(HhasParam<'arena>, Option<(Label, T::Expr)>)>,
-    return_type_info: HhasTypeInfo<'arena>,
-    args: &Args<'_, 'a, 'arena>,
-) -> Result<HhasBody<'arena>> {
+fn emit<'a>(
+    emitter: &mut Emitter,
+    env: &mut Env<'a>,
+    hhas_params: Vec<(Param, Option<(Label, ast::Expr)>)>,
+    return_type: TypeInfo,
+    span: Span,
+    attributes: Vec<Attribute>,
+    coeffects: Coeffects,
+    args: &Args<'_, 'a>,
+    tparam_info: Vec<TParamInfo>,
+) -> Result<Body> {
     let pos = &args.method.span;
-    let (instrs, decl_vars) = make_memoize_method_code(emitter, env, pos, &hhas_params, args)?;
+    let depr_info = match args.emit_deprecation_info {
+        true => hhbc::deprecation_info(&attributes),
+        false => None,
+    };
+    let (instrs, decl_vars) =
+        make_memoize_method_code(emitter, env, pos, &hhas_params, args, depr_info, &coeffects)?;
     let instrs = emit_pos_then(pos, instrs);
     make_wrapper(
         emitter,
@@ -236,37 +269,52 @@ fn emit<'a, 'arena, 'decl>(
         instrs,
         hhas_params,
         decl_vars,
-        return_type_info,
+        return_type,
+        span,
+        attributes,
+        coeffects,
         args,
+        tparam_info,
     )
 }
 
-fn make_memoize_method_code<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+fn make_memoize_method_code<'a>(
+    emitter: &mut Emitter,
+    env: &mut Env<'a>,
     pos: &Pos,
-    hhas_params: &[(HhasParam<'arena>, Option<(Label, T::Expr)>)],
-    args: &Args<'_, 'a, 'arena>,
-) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
+    hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
+    args: &Args<'_, 'a>,
+    deprecation_info: Option<&[TypedValue]>,
+    coeffects: &Coeffects,
+) -> Result<(InstrSeq, Vec<StringId>)> {
     if args.params.is_empty()
         && !args.flags.contains(Flags::IS_REIFIED)
         && !args.flags.contains(Flags::SHOULD_EMIT_IMPLICIT_CONTEXT)
     {
-        make_memoize_method_no_params_code(emitter, args)
+        make_memoize_method_no_params_code(emitter, args, deprecation_info, coeffects)
     } else {
-        make_memoize_method_with_params_code(emitter, env, pos, hhas_params, args)
+        make_memoize_method_with_params_code(
+            emitter,
+            env,
+            pos,
+            hhas_params,
+            args,
+            deprecation_info,
+            coeffects,
+        )
     }
 }
 
 // method is the already-renamed memoize method that must be wrapped
-fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
+fn make_memoize_method_with_params_code<'a>(
+    emitter: &mut Emitter,
+    env: &mut Env<'a>,
     pos: &Pos,
-    hhas_params: &[(HhasParam<'arena>, Option<(Label, T::Expr)>)],
-    args: &Args<'_, 'a, 'arena>,
-) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
-    let alloc = env.arena;
+    hhas_params: &[(Param, Option<(Label, ast::Expr)>)],
+    args: &Args<'_, 'a>,
+    deprecation_info: Option<&[TypedValue]>,
+    coeffects: &Coeffects,
+) -> Result<(InstrSeq, Vec<StringId>)> {
     let param_count = hhas_params.len();
     let notfound = emitter.label_gen_mut().next_regular();
     let suspended_get = emitter.label_gen_mut().next_regular();
@@ -275,12 +323,15 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
     // so the first unnamed local is parameter count + 1 when there are reified generics.
     let is_reified = args.flags.contains(Flags::IS_REIFIED);
     let add_reified = usize::from(is_reified);
+    // #NotKeyedByICAndLeakIC__DO_NOT_USE won't shard by IC but will access IC
+    let is_not_keyed_by_ic_and_leak_ic =
+        args.flags.contains(Flags::IS_IC_INACCESSIBLE_SPECIAL_CASE);
     let should_emit_implicit_context = args.flags.contains(Flags::SHOULD_EMIT_IMPLICIT_CONTEXT);
     let add_implicit_context = usize::from(should_emit_implicit_context);
     let first_unnamed_idx = param_count + add_reified;
     let generics_local = Local::new(param_count); // only used if is_reified == true.
     let decl_vars = match is_reified {
-        true => vec![reified::GENERICS_LOCAL_NAME.into()],
+        true => vec![hhbc::intern(reified::GENERICS_LOCAL_NAME)],
         false => Vec::new(),
     };
     emitter.init_named_locals(
@@ -289,15 +340,11 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
             .map(|(param, _)| param.name)
             .chain(decl_vars.iter().copied()),
     );
-    let deprecation_body = emit_body::emit_deprecation_info(
-        alloc,
-        args.scope,
-        args.deprecation_info,
-        emitter.systemlib(),
-    )?;
+    let deprecation_body =
+        emit_body::emit_deprecation_info(args.scope, deprecation_info, emitter.systemlib())?;
     let (begin_label, default_value_setters) =
         // Default value setters belong in the wrapper method not in the original method
-        emit_param::emit_param_default_value_setter(emitter, env, pos, hhas_params)?;
+        emit_param::emit_param_default_value_setter(emitter, env, hhas_params, args.params)?;
     let fcall_args = {
         let mut fcall_flags = FCallArgsFlags::default();
         if is_reified {
@@ -312,8 +359,9 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
             fcall_flags,
             1,
             param_count as u32,
-            Slice::empty(),
-            Slice::empty(),
+            vec![],
+            vec![],
+            vec![],
             async_eager_target,
             None,
         )
@@ -322,7 +370,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
         (instr::empty(), instr::empty())
     } else {
         (
-            instr::cgetl(generics_local),
+            instr::c_get_l(generics_local),
             InstrSeq::gather(emit_memoize_helpers::get_memo_key_list(
                 Local::new(param_count + first_unnamed_idx),
                 generics_local,
@@ -334,7 +382,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
     } else {
         // Last unnamed local slot
         let local = Local::new(first_unnamed_idx + param_count + add_reified);
-        emit_memoize_helpers::get_implicit_context_memo_key(alloc, local)
+        emit_memoize_helpers::get_implicit_context_memo_key(local)
     };
     let first_unnamed_local = Local::new(first_unnamed_idx);
     let key_count = (param_count + add_reified + add_implicit_context) as isize;
@@ -342,6 +390,12 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
         start: first_unnamed_local,
         len: key_count.try_into().unwrap(),
     };
+    let ic_stash_local = Local::new((key_count) as usize + first_unnamed_idx);
+    // This fn either has IC unoptimizable static coeffects, or has any dynamic coeffects
+    let has_ic_unoptimizable_coeffects: bool = coeffects.has_ic_unoptimizable_coeffects();
+    let should_make_ic_inaccessible: bool = !is_not_keyed_by_ic_and_leak_ic
+        && !should_emit_implicit_context
+        && has_ic_unoptimizable_coeffects;
     let instrs = InstrSeq::gather(vec![
         begin_label,
         emit_body::emit_method_prolog(emitter, env, pos, hhas_params, args.params, &[])?,
@@ -349,77 +403,85 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
         if args.method.static_ {
             instr::empty()
         } else {
-            instr::checkthis()
+            instr::check_this()
         },
         emit_memoize_helpers::param_code_sets(hhas_params.len(), Local::new(first_unnamed_idx)),
         reified_memokeym,
         ic_memokey,
         if args.flags.contains(Flags::IS_ASYNC) {
             InstrSeq::gather(vec![
-                instr::memoget_eager(notfound, suspended_get, local_range),
-                instr::retc(),
+                instr::memo_get_eager(notfound, suspended_get, local_range),
+                instr::ret_c(VerifyRetKind::None),
                 instr::label(suspended_get),
-                instr::retc_suspended(),
+                instr::ret_c_suspended(),
             ])
         } else {
-            InstrSeq::gather(vec![instr::memoget(notfound, local_range), instr::retc()])
+            InstrSeq::gather(vec![
+                instr::memo_get(notfound, local_range),
+                instr::ret_c(VerifyRetKind::None),
+            ])
         },
         instr::label(notfound),
         if args.method.static_ {
-            instr::nulluninit()
+            instr::null_uninit()
         } else {
             instr::this()
         },
-        instr::nulluninit(),
+        instr::null_uninit(),
         emit_memoize_helpers::param_code_gets(hhas_params.len()),
         reified_get,
-        if args.method.static_ {
-            call_cls_method(alloc, fcall_args, args)
-        } else {
-            let renamed_method_id = hhbc::MethodName::add_suffix(
-                alloc,
-                args.method_id,
-                emit_memoize_helpers::MEMOIZE_SUFFIX,
-            );
-            instr::fcallobjmethodd_nullthrows(fcall_args, renamed_method_id)
-        },
-        instr::memoset(local_range),
+        emit_memoize_helpers::with_possible_ic(
+            emitter.label_gen_mut(),
+            ic_stash_local,
+            InstrSeq::gather(vec![
+                if args.method.static_ {
+                    call_cls_method(fcall_args, args)
+                } else {
+                    let renamed_method_id = hhbc::MethodName::add_suffix(
+                        args.method_id,
+                        emit_memoize_helpers::MEMOIZE_SUFFIX,
+                    );
+                    instr::f_call_obj_method_d(fcall_args, renamed_method_id)
+                },
+                instr::memo_set(local_range),
+            ]),
+            should_make_ic_inaccessible,
+        ),
         if args.flags.contains(Flags::IS_ASYNC) {
             InstrSeq::gather(vec![
-                instr::retc_suspended(),
+                instr::ret_c_suspended(),
                 instr::label(eager_set),
-                instr::memoset_eager(local_range),
-                instr::retc(),
+                instr::memo_set_eager(local_range),
+                emit_memoize_helpers::ic_restore(ic_stash_local, should_make_ic_inaccessible),
+                instr::ret_c(VerifyRetKind::None),
             ])
         } else {
-            instr::retc()
+            instr::ret_c(VerifyRetKind::None)
         },
         default_value_setters,
     ]);
     Ok((instrs, decl_vars))
 }
 
-fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    args: &Args<'_, 'a, 'arena>,
-) -> Result<(InstrSeq<'arena>, Vec<Str<'arena>>)> {
+fn make_memoize_method_no_params_code<'a>(
+    emitter: &mut Emitter,
+    args: &Args<'_, 'a>,
+    deprecation_info: Option<&[TypedValue]>,
+    coeffects: &Coeffects,
+) -> Result<(InstrSeq, Vec<StringId>)> {
     let notfound = emitter.label_gen_mut().next_regular();
     let suspended_get = emitter.label_gen_mut().next_regular();
     let eager_set = emitter.label_gen_mut().next_regular();
-    let alloc = emitter.alloc;
-    let deprecation_body = emit_body::emit_deprecation_info(
-        alloc,
-        args.scope,
-        args.deprecation_info,
-        emitter.systemlib(),
-    )?;
+    let deprecation_body =
+        emit_body::emit_deprecation_info(args.scope, deprecation_info, emitter.systemlib())?;
 
     let fcall_args = FCallArgs::new(
         FCallArgsFlags::default(),
         1,
         0,
-        Slice::empty(),
-        Slice::empty(),
+        vec![],
+        vec![],
+        vec![],
         if args.flags.contains(Flags::IS_ASYNC) {
             Some(eager_set)
         } else {
@@ -427,115 +489,135 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
         },
         None,
     );
+    // #NotKeyedByICAndLeakIC__DO_NOT_USE won't shard by IC but will access IC
+    let is_not_keyed_by_ic_and_leak_ic =
+        args.flags.contains(Flags::IS_IC_INACCESSIBLE_SPECIAL_CASE);
+    let ic_stash_local = Local::new(0);
+    // we are in a no parameter function that sets no zoned IC either, default to what coeffects suggest
+    let should_make_ic_inaccessible: bool =
+        coeffects.has_ic_unoptimizable_coeffects() && !is_not_keyed_by_ic_and_leak_ic;
     let instrs = InstrSeq::gather(vec![
         deprecation_body,
         if args.method.static_ {
             instr::empty()
         } else {
-            instr::checkthis()
+            instr::check_this()
         },
         if args.flags.contains(Flags::IS_ASYNC) {
             InstrSeq::gather(vec![
-                instr::memoget_eager(notfound, suspended_get, LocalRange::default()),
-                instr::retc(),
+                instr::memo_get_eager(notfound, suspended_get, LocalRange::EMPTY),
+                instr::ret_c(VerifyRetKind::None),
                 instr::label(suspended_get),
-                instr::retc_suspended(),
+                instr::ret_c_suspended(),
             ])
         } else {
             InstrSeq::gather(vec![
-                instr::memoget(notfound, LocalRange::default()),
-                instr::retc(),
+                instr::memo_get(notfound, LocalRange::EMPTY),
+                instr::ret_c(VerifyRetKind::None),
             ])
         },
         instr::label(notfound),
         if args.method.static_ {
-            instr::nulluninit()
+            instr::null_uninit()
         } else {
             instr::this()
         },
-        instr::nulluninit(),
-        if args.method.static_ {
-            call_cls_method(alloc, fcall_args, args)
-        } else {
-            let renamed_method_id = hhbc::MethodName::add_suffix(
-                alloc,
-                args.method_id,
-                emit_memoize_helpers::MEMOIZE_SUFFIX,
-            );
-            instr::fcallobjmethodd_nullthrows(fcall_args, renamed_method_id)
-        },
-        instr::memoset(LocalRange::default()),
+        instr::null_uninit(),
+        emit_memoize_helpers::with_possible_ic(
+            emitter.label_gen_mut(),
+            ic_stash_local,
+            InstrSeq::gather(vec![
+                if args.method.static_ {
+                    call_cls_method(fcall_args, args)
+                } else {
+                    let renamed_method_id = hhbc::MethodName::add_suffix(
+                        args.method_id,
+                        emit_memoize_helpers::MEMOIZE_SUFFIX,
+                    );
+                    instr::f_call_obj_method_d(fcall_args, renamed_method_id)
+                },
+                instr::memo_set(LocalRange::EMPTY),
+            ]),
+            should_make_ic_inaccessible,
+        ),
         if args.flags.contains(Flags::IS_ASYNC) {
             InstrSeq::gather(vec![
-                instr::retc_suspended(),
+                instr::ret_c_suspended(),
                 instr::label(eager_set),
-                instr::memoset_eager(LocalRange::default()),
-                instr::retc(),
+                instr::memo_set_eager(LocalRange::EMPTY),
+                emit_memoize_helpers::ic_restore(ic_stash_local, should_make_ic_inaccessible),
+                instr::ret_c(VerifyRetKind::None),
             ])
         } else {
-            instr::retc()
+            instr::ret_c(VerifyRetKind::None)
         },
     ]);
     Ok((instrs, Vec::new()))
 }
 
 // Construct the wrapper function
-fn make_wrapper<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    env: &Env<'a, 'arena>,
-    instrs: InstrSeq<'arena>,
-    params: Vec<(HhasParam<'arena>, Option<(Label, T::Expr)>)>,
-    decl_vars: Vec<Str<'arena>>,
-    return_type_info: HhasTypeInfo<'arena>,
-    args: &Args<'_, 'a, 'arena>,
-) -> Result<HhasBody<'arena>> {
+fn make_wrapper<'a>(
+    emitter: &mut Emitter,
+    env: &Env<'a>,
+    instrs: InstrSeq,
+    params: Vec<(Param, Option<(Label, ast::Expr)>)>,
+    decl_vars: Vec<StringId>,
+    return_type: TypeInfo,
+    span: Span,
+    attributes: Vec<Attribute>,
+    coeffects: Coeffects,
+    args: &Args<'_, 'a>,
+    tparam_info: Vec<TParamInfo>,
+) -> Result<Body> {
     emit_body::make_body(
-        env.arena,
         emitter,
         instrs,
         decl_vars,
         true,
         args.flags.contains(Flags::WITH_LSB),
         vec![], /* upper_bounds */
-        vec![], /* shadowed_tparams */
+        tparam_info,
+        attributes,
+        Attr::AttrNone,
+        coeffects,
         params,
-        Some(return_type_info),
+        Some(return_type),
         None,
         Some(env),
+        span,
     )
 }
 
-fn call_cls_method<'a, 'arena>(
-    alloc: &'arena bumpalo::Bump,
-    fcall_args: FCallArgs<'arena>,
-    args: &Args<'_, 'a, 'arena>,
-) -> InstrSeq<'arena> {
+fn call_cls_method<'a>(fcall_args: FCallArgs, args: &Args<'_, 'a>) -> InstrSeq {
     let method_id =
-        hhbc::MethodName::add_suffix(alloc, args.method_id, emit_memoize_helpers::MEMOIZE_SUFFIX);
+        hhbc::MethodName::add_suffix(args.method_id, emit_memoize_helpers::MEMOIZE_SUFFIX);
     if args.info.is_trait || args.flags.contains(Flags::WITH_LSB) {
-        instr::fcallclsmethodsd(fcall_args, SpecialClsRef::SelfCls, method_id)
+        instr::f_call_cls_method_sd(fcall_args, SpecialClsRef::SelfCls, method_id)
     } else {
-        instr::fcallclsmethodd(fcall_args, method_id, args.info.class_name)
+        instr::f_call_cls_method_d(fcall_args, method_id, args.info.class_name)
     }
 }
 
-struct Args<'r, 'ast, 'arena> {
-    pub info: &'r MemoizeInfo<'arena>,
-    pub method: &'r T::Method_,
-    pub scope: &'r Scope<'ast, 'arena>,
-    pub deprecation_info: Option<&'r [TypedValue<'arena>]>,
-    pub params: &'r [T::FunParam],
-    pub ret: Option<&'r T::Hint>,
-    pub method_id: &'r hhbc::MethodName<'arena>,
+struct Args<'r, 'ast> {
+    pub info: &'r MemoizeInfo,
+    pub method: &'r ast::Method_,
+    pub scope: &'r Scope<'ast>,
+    pub emit_deprecation_info: bool,
+    pub params: &'r [ast::FunParam],
+    pub ret: Option<&'r ast::Hint>,
+    pub method_id: &'r hhbc::MethodName,
     pub flags: Flags,
 }
 
 bitflags! {
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     pub struct Flags: u8 {
         const IS_STATIC = 1 << 1;
         const IS_REIFIED = 1 << 2;
         const WITH_LSB = 1 << 3;
         const IS_ASYNC = 1 << 4;
         const SHOULD_EMIT_IMPLICIT_CONTEXT = 1 << 5;
+        const SHOULD_MAKE_IC_INACCESSIBLE = 1 << 6;
+        const IS_IC_INACCESSIBLE_SPECIAL_CASE = 1 << 7;
     }
 }

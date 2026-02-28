@@ -6,11 +6,11 @@
  */
 
 class Ancestor {
-  function test() {
+  function test() :mixed{
     var_dump(get_class_vars("Tester"));
   }
 
-  static function testStatic() {
+  static function testStatic() :mixed{
     var_dump(get_class_vars("Tester"));
   }
 }
@@ -24,25 +24,25 @@ class Tester extends Ancestor {
   static protected $prots = "protected static var";
   static private $privs = "private static var";
 
-  function test() {
+  function test() :mixed{
     var_dump(get_class_vars("Tester"));
   }
 
-  static function testStatic() {
+  static function testStatic() :mixed{
     var_dump(get_class_vars("Tester"));
   }
 }
 
 class Child extends Tester {
-  function test() {
+  function test() :mixed{
     var_dump(get_class_vars("Tester"));
   }
 
-  static function testStatic() {
+  static function testStatic() :mixed{
     var_dump(get_class_vars("Tester"));
   }
 }
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_class_vars_variation2(): void {
 echo "*** Testing get_class_vars() : testing visibility\n";
 
 echo "\n-- From global context --\n";

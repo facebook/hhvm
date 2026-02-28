@@ -19,15 +19,13 @@
 #include <array>
 #include <folly/MapUtil.h>
 
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
-#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/check.h"
-#include "hphp/runtime/vm/jit/id-set.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
@@ -37,11 +35,10 @@
 #include "hphp/runtime/vm/jit/simple-propagation.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(hhir_dce);
+TRACE_SET_MOD(hhir_dce)
 
 bool canDCE(const IRInstruction& inst) {
   switch (inst.op()) {
@@ -65,6 +62,7 @@ bool canDCE(const IRInstruction& inst) {
   case Ceil:
   case XorBool:
   case Mod:
+  case PseudoRandomInt:
   case ConvDblToBool:
   case ConvIntToBool:
   case ConvStrToBool:
@@ -79,6 +77,8 @@ bool canDCE(const IRInstruction& inst) {
   case ConvDblToStr:
   case ConvIntToStr:
   case DblAsBits:
+  case IntAsPtrToElem:
+  case PtrToElemAsInt:
   case ConvPtrToLval:
   case NewColFromArray:
   case GtInt:
@@ -118,7 +118,9 @@ bool canDCE(const IRInstruction& inst) {
   case EqFunc:
   case EqStrPtr:
   case EqArrayDataPtr:
-  case HasReifiedGenerics:
+  case FuncHasReifiedGenerics:
+  case ClassHasReifiedGenerics:
+  case HasReifiedParent:
   case InstanceOf:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
@@ -146,7 +148,6 @@ bool canDCE(const IRInstruction& inst) {
   case LdMem:
   case LdContField:
   case LdClsInitElem:
-  case LdIterBase:
   case LdIterPos:
   case LdIterEnd:
   case LdFrameThis:
@@ -163,23 +164,21 @@ bool canDCE(const IRInstruction& inst) {
   case LdTVFromRDS:
   case ConvFuncPrologueFlagsToARFlags:
   case DefConst:
-  case DefFuncPrologueCallee:
-  case DefFuncPrologueCtx:
-  case DefFuncPrologueFlags:
-  case DefFuncPrologueNumArgs:
   case Conjure:
   case LdClsInitData:
-  case LookupClsRDS:
   case LdClsMethodCacheCls:
   case LdFuncVecLen:
   case LdClsMethod:
   case LdSubClsCns:
   case LdIfaceMethod:
+  case LdClosureArg:
   case LdPropAddr:
+  case LdPublicFunc:
   case LdObjClass:
+  case LdObjInvoke:
   case LdClsName:
   case LdLazyClsName:
-  case LdLazyCls:
+  case LdEnumClassLabelName:
   case LdFuncCls:
   case LdFuncInOutBits:
   case LdFuncNumParams:
@@ -192,12 +191,14 @@ bool canDCE(const IRInstruction& inst) {
   case LdMonotypeVecElem:
   case LdVecElem:
   case LdVecElemAddr:
+  case LookupCls:
   case NewInstanceRaw:
   case NewLoggingArray:
   case NewDictArray:
   case NewCol:
   case NewPair:
   case NewRFunc:
+  case NewClsMeth:
   case NewRClsMeth:
   case LdRetVal:
   case Mov:
@@ -209,10 +210,12 @@ bool canDCE(const IRInstruction& inst) {
   case AKExistsDict:
   case AKExistsKeyset:
   case LdBindAddr:
+  case LdSwitchDest:
   case LdSSwitchDest:
   case LdClosureCls:
   case LdClosureThis:
   case CreateSSWH:
+  case CreateFSWH:
   case LdContActRec:
   case LdContArValue:
   case LdContArKey:
@@ -247,8 +250,10 @@ bool canDCE(const IRInstruction& inst) {
   case DictFirstKey:
   case DictLast:
   case DictLastKey:
+  case DictIterEnd:
   case KeysetFirst:
   case KeysetLast:
+  case KeysetIterEnd:
   case GetTime:
   case GetTimeNs:
   case Select:
@@ -266,8 +271,10 @@ bool canDCE(const IRInstruction& inst) {
   case AllocStructDict:
   case AllocVec:
   case GetDictPtrIter:
+  case GetKeysetPtrIter:
   case GetVecPtrIter:
   case AdvanceDictPtrIter:
+  case AdvanceKeysetPtrIter:
   case AdvanceVecPtrIter:
   case LdPtrIterKey:
   case LdPtrIterVal:
@@ -280,14 +287,23 @@ bool canDCE(const IRInstruction& inst) {
   case BespokeIterEnd:
   case BespokeIterGetKey:
   case BespokeIterGetVal:
+  case IterGetKeyArr:
+  case IterGetValArr:
   case LoadBCSP:
   case LdResolvedTypeCnsNoCheck:
   case LdResolvedTypeCnsClsName:
+  case LdClsCtxCns:
   case AllocInitROM:
   case VoidPtrAsDataType:
   case CopyArray:
   case StructDictElemAddr:
+  case StructDictSlotInPos:
+  case LdStructDictKey:
+  case LdStructDictVal:
   case LdImplicitContext:
+  case LdImplicitContextMemoKey:
+  case LdMemoAgnosticIC:
+  case CallViolatesModuleBoundary:
     assertx(!inst.isControlFlow());
     return true;
 
@@ -319,7 +335,7 @@ bool canDCE(const IRInstruction& inst) {
   case ConvObjToKeyset:
   case LdOutAddr:
     return !opcodeMayRaise(inst.op()) &&
-      (!inst.consumesReferences() || inst.producesReference());
+      (inst.producesReference() || !inst.consumesReferences());
 
   case DbgTraceCall:
   case AKExistsObj:
@@ -327,11 +343,11 @@ bool canDCE(const IRInstruction& inst) {
   case StStkMeta:
   case StStkRange:
   case StOutValue:
-  case CheckIter:
   case CheckType:
   case CheckNullptr:
   case CheckTypeMem:
   case CheckDictKeys:
+  case CheckPtrIterTombstone:
   case CheckSmashableClass:
   case CheckLoc:
   case CheckStk:
@@ -346,9 +362,7 @@ bool canDCE(const IRInstruction& inst) {
   case CheckNonNull:
   case DivDbl:
   case DivInt:
-  case AddIntO:
   case AddOffset:
-  case SubIntO:
   case MulIntO:
 
   case GtObj:
@@ -359,6 +373,7 @@ bool canDCE(const IRInstruction& inst) {
   case NeqObj:
   case CmpObj:
   case CmpRes:
+  case EqFuncId:
   case GtRes:
   case GteRes:
   case LtRes:
@@ -370,12 +385,13 @@ bool canDCE(const IRInstruction& inst) {
   case CmpArrLike:
   case JmpZero:
   case JmpNZero:
-  case JmpSSwitchDest:
-  case JmpSwitchDest:
+  case JmpExit:
   case ProfileSwitchDest:
   case CheckSurpriseFlags:
-  case CheckSurpriseAndStack:
+  case CheckSurpriseFlagsEnter:
+  case CheckStackOverflow:
   case HandleRequestSurprise:
+  case HandleSurpriseEnter:
   case ReturnHook:
   case SuspendHookAwaitEF:
   case SuspendHookAwaitEG:
@@ -390,7 +406,7 @@ bool canDCE(const IRInstruction& inst) {
   case LdClsCtor:
   case LdCls:
   case LdClsCached:
-  case LdClsCachedSafe:
+  case LookupClsCached:
   case LdCns:
   case LdTypeCns:
   case LdTypeCnsNoThrow:
@@ -403,6 +419,7 @@ bool canDCE(const IRInstruction& inst) {
   case LdResolvedTypeCns:
   case CheckSubClsCns:
   case LdClsCnsVecLen:
+  case EqClassId:
   case LookupClsMethodFCache:
   case LookupClsMethodCache:
   case LookupClsMethod:
@@ -414,16 +431,14 @@ bool canDCE(const IRInstruction& inst) {
   case LdInitPropAddr:
   case LdObjMethodD:
   case LdObjMethodS:
-  case LdObjInvoke:
   case LdFunc:
   case LdFuncCached:
   case LookupFuncCached:
   case AllocObj:
-  case AllocObjReified:
-  case NewClsMeth:
   case FuncCred:
   case InitProps:
   case PropTypeRedefineCheck:
+  case PropTypeValid:
   case InitSProps:
   case InitObjProps:
   case InitObjMemoSlots:
@@ -441,6 +456,8 @@ bool canDCE(const IRInstruction& inst) {
   case NewBespokeStructDict:
   case Clone:
   case InlineCall:
+  case InlineSideExit:
+  case InlineSideExitSyncStack:
   case Call:
   case CallFuncEntry:
   case NativeImpl:
@@ -455,17 +472,15 @@ bool canDCE(const IRInstruction& inst) {
   case GenericRetDecRefs:
   case StClsInitElem:
   case StImplicitContext:
-  case StImplicitContextWH:
   case StMem:
   case StMemMeta:
-  case StIterBase:
-  case StIterType:
   case StIterEnd:
   case StIterPos:
   case StLoc:
   case StLocMeta:
   case StLocRange:
   case StPtrAt:
+  case StPtrIterVal:
   case StVMFP:
   case StVMSP:
   case StVMPC:
@@ -477,6 +492,7 @@ bool canDCE(const IRInstruction& inst) {
   case ReqInterpBBNoTranslate:
   case ReqRetranslate:
   case ReqRetranslateOpt:
+  case RetranslateOptAsync:
   case IncRef:
   case DecRef:
   case DecRefNZ:
@@ -484,19 +500,32 @@ bool canDCE(const IRInstruction& inst) {
   case ReleaseShallow:
   case DecReleaseCheck:
   case DefFP:
-  case DefFuncEntryFP:
   case DefFrameRelSP:
   case DefRegSP:
-  case InitFrame:
+  case DefFuncPrologueCallee:
+  case DefFuncPrologueCtx:
+  case DefFuncPrologueFlags:
+  case DefFuncPrologueNumArgs:
+  case DefFuncEntryFP:
+  case DefFuncEntryPrevFP:
+  case DefFuncEntryArFlags:
+  case DefFuncEntryCalleeId:
+  case DefFuncEntryCtx:
+  case EnterFrame:
   case Count:
-  case VerifyParamCls:
+  case VerifyParam:
   case VerifyParamCallable:
+  case VerifyParamCls:
+  case VerifyParamCoerce:
   case VerifyParamFail:
   case VerifyParamFailHard:
   case VerifyReifiedLocalType:
   case VerifyReifiedReturnType:
+  case VerifyType:
+  case VerifyRet:
   case VerifyRetCallable:
   case VerifyRetCls:
+  case VerifyRetCoerce:
   case VerifyRetFail:
   case VerifyRetFailHard:
   case VerifyProp:
@@ -513,16 +542,23 @@ bool canDCE(const IRInstruction& inst) {
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseWarning:
   case RaiseNotice:
+  case StaticAnalysisError:
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
+  case RaiseMissingDynamicallyReferenced:
   case RaiseCoeffectsCallViolation:
   case RaiseCoeffectsFunParamTypeViolation:
   case RaiseCoeffectsFunParamCoeffectRulesViolation:
   case RaiseStrToClassNotice:
+  case RaiseModuleBoundaryViolation:
+  case RaiseModulePropertyViolation:
+  case ThrowMissingNamedArgument:
+  case ThrowNamedArgumentNameMismatch:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
+  case CheckClsRGSoft:
   case CheckFunReifiedGenericMismatch:
   case CheckInOutMismatch:
   case CheckReadonlyMismatch:
@@ -536,8 +572,9 @@ bool canDCE(const IRInstruction& inst) {
   case StClosureArg:
   case CreateGen:
   case CreateAGen:
-  case CreateAAWH:
+  case CreateCCWH:
   case CreateAFWH:
+  case CreateAFWHL:
   case CreateAGWH:
   case AFWHPrepareChild:
   case StArResumeAddr:
@@ -557,26 +594,20 @@ bool canDCE(const IRInstruction& inst) {
   case IncStat:
   case IncProfCounter:
   case IncCallCounter:
+  case IncStatCounter:
   case DbgAssertRefCount:
   case DbgAssertFunc:
   case DbgCheckLocalsDecRefd:
   case RBTraceEntry:
   case RBTraceMsg:
-  case ZeroErrorLevel:
-  case RestoreErrorLevel:
-  case IterInit:
-  case IterInitK:
-  case LIterInit:
-  case LIterInitK:
-  case IterNext:
-  case IterNextK:
-  case LIterNext:
-  case LIterNextK:
-  case IterFree:
+  case IterExtractBase:
+  case IterInitArr:
+  case IterInitObj:
+  case IterNextArr:
+  case IterNextObj:
   case KillActRec:
   case KillIter:
   case KillLoc:
-  case BaseG:
   case PropX:
   case PropQ:
   case PropDX:
@@ -591,6 +622,7 @@ bool canDCE(const IRInstruction& inst) {
   case CheckMissingKeyInArrLike:
   case CheckArrayCOW:
   case ProfileDictAccess:
+  case ProfileIterInit:
   case CheckDictOffset:
   case ProfileKeysetAccess:
   case CheckKeysetOffset:
@@ -610,6 +642,7 @@ bool canDCE(const IRInstruction& inst) {
   case MapSet:
   case VectorSet:
   case BespokeSet:
+  case BespokeSetPos:
   case BespokeUnset:
   case StructDictUnset:
   case BespokeAppend:
@@ -633,24 +666,25 @@ bool canDCE(const IRInstruction& inst) {
   case ProfileMethod:
   case ProfileSubClsCns:
   case ProfileGlobal:
+  case ProfileCoeffectFunParam:
   case CheckVecBounds:
   case BespokeElem:
   case BespokeEscalateToVanilla:
   case BespokeGetThrow:
+  case LdTypeStructureVal:
+  case LdTypeStructureValCns:
   case LdVectorSize:
   case BeginCatch:
   case EndCatch:
-  case EnterTCUnwind:
+  case StUnwinderExn:
   case UnwindCheckSideExit:
+  case DbgTrap:
   case DbgTrashStk:
   case DbgTrashFrame:
   case DbgTrashMem:
   case EnterPrologue:
   case ExitPrologue:
   case EnterTranslation:
-  case CheckStackOverflow:
-  case CheckSurpriseFlagsEnter:
-  case JmpPlaceholder:
   case ThrowOutOfBounds:
   case ThrowInvalidArrayKey:
   case ThrowInvalidOperation:
@@ -660,7 +694,6 @@ bool canDCE(const IRInstruction& inst) {
   case ThrowLateInitPropError:
   case ThrowMissingArg:
   case ThrowMissingThis:
-  case ThrowParameterWrongType:
   case ThrowInOutMismatch:
   case ThrowReadonlyMismatch:
   case ThrowCannotModifyReadonlyCollection:
@@ -673,15 +706,16 @@ bool canDCE(const IRInstruction& inst) {
   case StMROProp:
   case CheckMROProp:
   case FinishMemberOp:
-  case BeginInlining:
-  case EndInlining:
+  case DefCalleeFP:
+  case LeaveInlineFrame:
+  case EnterInlineFrame:
   case SetOpTV:
   case OutlineSetOp:
-  case ConjureUse:
   case LdClsMethodFCacheFunc:
   case LdClsMethodCacheFunc:
   case LogArrayReach:
   case LogGuardFailure:
+  case LogClsSpeculation:
   case ProfileInstanceCheck:
   case MemoGetStaticValue:
   case MemoGetStaticCache:
@@ -696,6 +730,7 @@ bool canDCE(const IRInstruction& inst) {
   case MemoSetInstanceValue:
   case MemoSetInstanceCache:
   case ThrowAsTypeStructException:
+  case ThrowAsTypeStructError:
   case RecordReifiedGenericsAndGetTSList:
   case ResolveTypeStruct:
   case CheckRDSInitialized:
@@ -718,9 +753,14 @@ bool canDCE(const IRInstruction& inst) {
   case StructDictSlot:
   case StructDictAddNextSlot:
   case StructDictTypeBoundCheck:
+  case LdCoeffectFunParamNaive:
+  case DeserializeLazyProp:
+  case GetClsRGProp:
+  case ReifiedInit:
     return false;
 
   case IsTypeStruct:
+  case IsTypeStructShallow:
   case EqStr:
   case NeqStr:
     return !opcodeMayRaise(inst.op());
@@ -767,14 +807,14 @@ private:
 static_assert(sizeof(DceFlags) == 1, "sizeof(DceFlags) should be 1 byte");
 
 // DCE state indexed by instr->id().
-typedef StateVector<IRInstruction, DceFlags> DceState;
-typedef StateVector<SSATmp, uint32_t> UseCounts;
+using DceState = StateVector<IRInstruction, DceFlags>;
+using UseCounts = StateVector<SSATmp, uint32_t>;
 // Set of live DefLabel operands (keyed by DefLabel and index)
-typedef jit::fast_set<std::pair<IRInstruction*, size_t>> DefLabelLiveness;
+using DefLabelLiveness = jit::fast_set<std::pair<IRInstruction*, size_t>>;
 // Worklist is instruction to process. If the instruction is a
 // DefLabel, the second item is the index of the operand (DefLabel is
 // treated separately for each operand).
-typedef jit::vector<std::pair<IRInstruction*, size_t>> WorkList;
+using WorkList = jit::vector<std::pair<IRInstruction*, size_t>>;
 
 void removeDeadInstructions(IRUnit& unit,
                             const DceState& state,
@@ -789,6 +829,9 @@ void removeDeadInstructions(IRUnit& unit,
           // Don't attempt to remove a Jmp feeding a DefLabel. It will
           // be dealt with below.
           if (inst.is(Jmp) && inst.numSrcs() > 0) return false;
+
+          // DecReleaseCheck will be dealt with below.
+          if (inst.is(DecReleaseCheck)) return false;
 
           ONTRACE(
             4,
@@ -813,7 +856,7 @@ void removeDeadInstructions(IRUnit& unit,
           auto dstIdx = 0;
           auto const numDsts = front.numDsts();
           for (auto i = 0; i < numDsts; ++i) {
-            if (!defLabelLive.count(std::make_pair(&front, i))) {
+            if (!defLabelLive.contains(std::make_pair(&front, i))) {
               FTRACE(1, "Removing dead DefLabel dst {}: {}\n",
                      i, front.toString());
               front.deleteDst(dstIdx);
@@ -840,7 +883,7 @@ void removeDeadInstructions(IRUnit& unit,
             for (auto i = 0; i < numSrcs; ++i) {
               auto& defLabel = block->taken()->front();
               assertx(defLabel.is(DefLabel));
-              if (!defLabelLive.count(std::make_pair(&defLabel, i))) {
+              if (!defLabelLive.contains(std::make_pair(&defLabel, i))) {
                 FTRACE(1, "Removing dead Jmp src {}: {}\n",
                        i, back.toString());
                 back.deleteSrc(srcIdx);
@@ -849,6 +892,11 @@ void removeDeadInstructions(IRUnit& unit,
               }
             }
           }
+        }
+
+        if (back.is(DecReleaseCheck) && state[&back].isDead()) {
+          block->erase(block->backIter());
+          block->push_back(unit.gen(Jmp, bcctx, next));
         }
       }
 
@@ -892,17 +940,53 @@ WorkList initInstructions(const IRUnit& unit, const BlockList& blocks,
   // Mark reachable, essential, instructions live and enqueue them.
   WorkList wl;
   wl.reserve(unit.numInsts());
-  forEachInst(blocks, [&] (IRInstruction* inst) {
-    // Instructions that cannot be removed are automatically live. The
-    // exception is DefLabels and Jmps that feed a DefLabel. There
-    // aren't normally DCEable, but will be dealt with specially.
-    if (!canDCE(*inst) &&
-        !inst->is(DefLabel) &&
-        !(inst->is(Jmp) && inst->numSrcs() > 0)) {
-      state[inst].setLive();
-      wl.push_back(std::make_pair(inst, 0));
+  for (auto const block : blocks) {
+    std::vector<IRInstruction*> enterInlineFrames;
+
+    for (auto& inst : *block) {
+      auto const setLive = [&] (IRInstruction* inst) {
+        state[inst].setLive();
+        wl.push_back(std::make_pair(inst, 0));
+      };
+
+      switch (inst.op()) {
+        case EnterInlineFrame:
+          // Defer decision in case there is a matching LeaveInlineFrame.
+          enterInlineFrames.push_back(&inst);
+          continue;
+        case LeaveInlineFrame:
+          if (enterInlineFrames.empty()) {
+            setLive(&inst);
+          } else {
+            // Kill the empty pair of EnterInlineFrame and LeaveInlineFrame.
+            assertx(enterInlineFrames.back()->src(0) == inst.src(0));
+            enterInlineFrames.pop_back();
+          }
+          continue;
+        case DefLabel:
+          // DefLabel is handled specially.
+          break;
+        case Jmp:
+          // Jmps that feed a DefLabel is handled specially.
+          if (inst.numSrcs() == 0) setLive(&inst);
+          break;
+        default:
+          // All other instructions that cannot be removed are automatically
+          // live.
+          if (!canDCE(inst)) setLive(&inst);
+          break;
+      }
+
+      // All open EnterInlineFrames are non-empty, set them live.
+      while (!enterInlineFrames.empty()) {
+        setLive(enterInlineFrames.back());
+        enterInlineFrames.pop_back();
+      }
     }
-  });
+
+    // Block's last instruction can't be EnterInlineFrame or LeaveInlineFrame.
+    assertx(enterInlineFrames.empty());
+  }
   TRACE(1, "DCE:^^^^^^^^^^^^^^^^^^^^\n");
   return wl;
 }
@@ -920,6 +1004,10 @@ struct TrackedInstr {
   // Stores to the stack in catch traces that can be killed to kill the
   // tracked instruction.
   jit::vector<IRInstruction*> stores;
+
+  // Passthrough instructions that canonicalize to this instr, stored *only*
+  // when this instruction produces reference
+  jit::vector<IRInstruction*> passthroughs;
 };
 
 void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
@@ -935,8 +1023,8 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
     // If the catch block occurs within an inlined frame the outer stack
     // locations (those above the inlined frame) are not dead and cannot be
     // elided as we may not throw through the outer callers.
-    if (block->back().src(0)->inst()->is(BeginInlining)) {
-      auto const extra = block->back().src(0)->inst()->extra<BeginInlining>();
+    if (block->back().src(0)->inst()->is(DefCalleeFP)) {
+      auto const extra = block->back().src(0)->inst()->extra<DefCalleeFP>();
       auto const spOff = extra->spOffset;
       assertx(stackTop <= spOff);
       if (spOff < stackTop + numTrackedSlots) {
@@ -1006,29 +1094,28 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
       continue;
     }
     if (inst->is(IncRef)) {
-      candidateIncRefs[inst->src(0)].push_back(inst);
+      candidateIncRefs[canonical(inst->src(0))].push_back(inst);
       continue;
     }
     if (done) continue;
     auto const effects = canonicalize(memory_effects(*inst));
     done = match<bool>(
       effects,
-      [&] (IrrelevantEffects)    { return false; },
-      [&] (UnknownEffects)       { return true; },
-      [&] (ReturnEffects x)      { return true; },
-      [&] (CallEffects x)        { return true; },
-      [&] (GeneralEffects x)     {
+      [&] (const IrrelevantEffects&)    { return false; },
+      [&] (const UnknownEffects&)       { return true; },
+      [&] (const ReturnEffects&)        { return true; },
+      [&] (const CallEffects&)          { return true; },
+      [&] (const GeneralEffects& x)     {
         return
           process_stack(x.loads) ||
           process_stack(x.inout) ||
           process_stack(x.stores) ||
-          process_stack(x.backtrace) ||
           process_stack(x.kills);
       },
-      [&] (PureLoad x)           { return process_stack(x.src); },
-      [&] (PureStore x)          { return do_store(x.dst, &*inst); },
-      [&] (ExitEffects x)        { return process_stack(x.live); },
-      [&] (PureInlineCall x) {
+      [&] (const PureLoad& x)           { return process_stack(x.src); },
+      [&] (const PureStore& x)          { return do_store(x.dst, &*inst); },
+      [&] (const ExitEffects& x)        { return process_stack(x.live); },
+      [&] (const PureInlineCall& x) {
         return
           process_stack(x.base) ||
           process_stack(x.actrec);
@@ -1038,7 +1125,8 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
 
   for (auto store : candidateStores) {
     auto const src = store->src(1);
-    auto const it = candidateIncRefs.find(src);
+    auto const canonicalSrc = canonical(store->src(1));
+    auto const it = candidateIncRefs.find(canonicalSrc);
     if (it != candidateIncRefs.end()) {
       FTRACE(3, "Erasing {} for {}\n",
              it->second.back()->toString(), store->toString());
@@ -1049,10 +1137,10 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
         candidateIncRefs.erase(it);
       }
     } else if (src->type().maybe(TCounted)) {
-      auto const srcInst = src->inst();
+      auto const srcInst = canonicalSrc->inst();
       if (!srcInst->producesReference() ||
           !canDCE(*srcInst) ||
-          uses[src] != 1) {
+          uses[canonicalSrc] != 1) {
         if (srcInst->producesReference() && canDCE(*srcInst)) {
           rcInsts[srcInst].stores.emplace_back(store);
         }
@@ -1083,10 +1171,7 @@ void optimizeCatchBlocks(const BlockList& blocks,
   FTRACE(1, "OptimizeCatchBlocks:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(1, "OptimizeCatchBlocks:^^^^^^^^^^^^^^^^^^^^\n"); };
   for (auto block : blocks) {
-    if (block->back().is(EndCatch) &&
-        block->back().extra<EndCatch>()->mode !=
-          EndCatchData::CatchMode::SideExit &&
-        block->front().is(BeginCatch)) {
+    if (block->back().is(EndCatch) && block->front().is(BeginCatch)) {
       processCatchBlock(unit, state, block, uses, rcInsts);
     }
   }
@@ -1104,7 +1189,7 @@ void optimizeConcats(jit::vector<IRInstruction*>& concats,
     auto const ins = unit.gen(IncRef, inst->bcctx(), src);
     blk->insert(blk->iteratorTo(inst), ins);
     state[ins].setLive();
-    ++uses[src];
+    ++uses[canonical(src)];
     FTRACE(3, "Adding {}\n", ins->toString());
   };
   auto const decref = [&] (auto inst, auto src) {
@@ -1112,11 +1197,12 @@ void optimizeConcats(jit::vector<IRInstruction*>& concats,
     auto const ins = unit.gen(DecRef, inst->bcctx(), DecRefData{}, src);
     blk->insert(blk->iteratorTo(inst), ins);
     state[ins].setLive();
-    ++uses[src];
+    ++uses[canonical(src)];
     FTRACE(3, "Adding {}\n", ins->toString());
   };
   auto const combine = [&] (auto inst, auto inst_prev,
-                            auto src1, auto src2, auto src3) {
+                            auto src1, auto src2, auto src3,
+                            bool leftConcat) {
     /*
      * ~~ Converting ~~
      * t1 = ConcatStrStr a b (implicit Decref a)
@@ -1158,29 +1244,39 @@ void optimizeConcats(jit::vector<IRInstruction*>& concats,
      * Note that later stages of DCE will kill the extra ConcatStrStr and the
      * refcounting.
      */
-    assertx(inst_prev->is(ConcatStrStr));
-    assertx(inst->is(ConcatStrStr));
-    if (uses[inst_prev->dst()] == 1 + rcInsts[inst_prev].decs.size() +
-                                      rcInsts[inst_prev].stores.size()) {
-      FTRACE(3, "Combining {} into {}",
-             inst_prev->toString(), inst->toString());
-      auto next = inst->next();
-      unit.replace(inst, ConcatStr3, inst->taken(), src1, src2, src3);
-      inst->setNext(next);
-      FTRACE(3, " and got {}\n", inst->toString());
-      state[inst].setLive();
-      --uses[inst_prev->dst()];
-      ++uses[inst_prev->src(0)];
-      ++uses[inst_prev->src(1)];
-      // Incref the first source since the first ConcatStrStr controls
-      // its refcount
-      incref(inst_prev, inst_prev->src(0));
-      incref(inst_prev, inst_prev->src(1));
-      // ConcatStr3 ends the blocks, so insert the decrefs to the next block
-      assertx(inst->next() && !inst->next()->empty());
-      decref(&inst->next()->front(), src2);
-      if (src3 == inst_prev->src(1)) decref(&inst->next()->front(), src3);
-    }
+    assertx(inst_prev->is(ConcatStrStr)); // dst of inst_prev is already canonical
+    assertx(inst->is(ConcatStrStr)); // dst of inst is already canonical
+
+    auto const trackedUses = 1 + rcInsts[inst_prev].decs.size()
+                               + rcInsts[inst_prev].stores.size()
+                               + rcInsts[inst_prev].passthroughs.size();
+
+    if (uses[inst_prev->dst()] != trackedUses) return;
+
+
+    FTRACE(3, "Combining {} into {}",
+            inst_prev->toString(), inst->toString());
+    auto next = inst->next();
+    unit.replace(inst, ConcatStr3, inst->taken(), src1, src2, src3);
+    inst->setNext(next);
+    FTRACE(3, " and got {}\n", inst->toString());
+    state[inst].setLive();
+    --uses[inst_prev->dst()];
+    ++uses[canonical(inst_prev->src(0))];
+    ++uses[canonical(inst_prev->src(1))];
+    // Incref the first source since the first ConcatStrStr controls
+    // its refcount
+    incref(inst_prev, inst_prev->src(0));
+    incref(inst_prev, inst_prev->src(1));
+    // ConcatStr3 ends the blocks, so insert the decrefs to the next block
+    assertx(inst->next() && !inst->next()->empty());
+    decref(&inst->next()->front(), src2);
+    // We might be combining in one of the following ways
+    // 1. ConcatStr3(a, b, c) -> ConcatStrStr(a, b) + {String} (c)
+    // 2. ConcatStr3(a, b, c) -> String (a) + ConcatStrStr(b, c)
+    // leftConcat is case 1, decRef src3 if it is case 2
+    if (!leftConcat) decref(&inst->next()->front(), src3);
+
   };
 
   for (auto& inst : concats) {
@@ -1189,10 +1285,10 @@ void optimizeConcats(jit::vector<IRInstruction*>& concats,
     auto const src2 = inst->src(1);
     if (src1->inst()->is(ConcatStrStr)) {
       combine(inst, src1->inst(),
-              src1->inst()->src(0), src1->inst()->src(1), src2);
+              src1->inst()->src(0), src1->inst()->src(1), src2, true);
     } else if (src2->inst()->is(ConcatStrStr)) {
       combine(inst, src2->inst(),
-              src1, src2->inst()->src(0), src2->inst()->src(1));
+              src1, src2->inst()->src(0), src2->inst()->src(1), false);
     }
   }
 }
@@ -1205,32 +1301,45 @@ void killInstrAdjustRC(
   IRInstruction* inst,
   jit::vector<IRInstruction*>& decs
 ) {
+  auto const insertDecRef = [&] (auto before, auto src) {
+    auto const blk = before->block();
+    auto const ins = unit.gen(DecRef, before->bcctx(), DecRefData{}, src);
+    blk->insert(blk->iteratorTo(before), ins);
+    FTRACE(3, "Inserting {} before {} for {}\n",
+           ins->toString(), before->toString(), inst->toString());
+    state[ins].setLive();
+  };
   auto anyRemaining = false;
-  if (inst->consumesReferences()) {
+  auto srcIx = 0;
+  for (auto src : inst->srcs()) {
     // ConsumesReference inputs that are definitely not moved can
     // simply be decreffed as a replacement for the dead consumesref
     // instruction
-    auto srcIx = 0;
-    for (auto src : inst->srcs()) {
-      auto const ix = srcIx++;
-      if (inst->consumesReference(ix) && src->type().maybe(TCounted)) {
-        if (inst->mayMoveReference(ix)) {
-          anyRemaining = true;
-          continue;
-        }
-        auto const blk = inst->block();
-        auto const ins = unit.gen(DecRef, inst->bcctx(), DecRefData{}, src);
-        blk->insert(blk->iteratorTo(inst), ins);
-        FTRACE(3, "Inserting {} to replace {}\n",
-               ins->toString(), inst->toString());
-        state[ins].setLive();
+    auto const ix = srcIx++;
+    if (inst->consumesReference(ix) && src->type().maybe(TCounted)) {
+      if (inst->mayMoveReference(ix)) {
+        anyRemaining = true;
+        continue;
       }
+      insertDecRef(inst, src);
     }
   }
-  for (auto dec : decs) {
-    auto replaced = dec->src(0) != inst->dst();
+
+    for (auto dec : decs) {
+    auto replaced = canonical(dec->src(0)) != canonical(inst->dst());
     auto srcIx = 0;
-    if (anyRemaining) {
+    if (dec->is(DecReleaseCheck)) {
+      if (inst->is(ConstructClosure) && inst->src(0)->type().maybe(TCounted)) {
+        assertx(!replaced);
+        assertx(anyRemaining);
+        assertx(inst->mayMoveReference(0));
+
+        // While the closure is going to be released via ReleaseShallow it will
+        // still be responsible for releasing the captured context.
+        insertDecRef(dec, inst->src(0));
+      }
+    } else if (anyRemaining) {
+      assertx(dec->is(DecRef));
       // The remaining inputs might be moved, so may need to survive
       // until this instruction is decreffed
       for (auto src : inst->srcs()) {
@@ -1242,12 +1351,7 @@ void killInstrAdjustRC(
             replaced = true;
             state[dec].setLive();
           } else {
-            auto const blk = dec->block();
-            auto const ins = unit.gen(DecRef, dec->bcctx(), DecRefData{}, src);
-            blk->insert(blk->iteratorTo(dec), ins);
-            FTRACE(3, "Inserting {} before {} for {}\n",
-                   ins->toString(), dec->toString(), inst->toString());
-            state[ins].setLive();
+            insertDecRef(dec, src);
           }
         }
       }
@@ -1274,13 +1378,13 @@ void mandatoryDCE(IRUnit& unit) {
 }
 
 void fullDCE(IRUnit& unit) {
-  if (!RuntimeOption::EvalHHIRDeadCodeElim) {
+  if (!Cfg::HHIR::DeadCodeElim) {
     // This portion of DCE cannot be turned off, because it restores IR
     // invariants, and callers of fullDCE are allowed to rely on it for that.
     return mandatoryDCE(unit);
   }
 
-  Timer dceTimer(Timer::optimize_dce);
+  Timer dceTimer(Timer::optimize_dce, unit.logEntry().get_pointer());
 
   // kill unreachable code and remove any traces that are now empty
   auto const blocks = prepareBlocks(unit);
@@ -1314,16 +1418,39 @@ void fullDCE(IRUnit& unit) {
       if (inst->is(ConcatStrStr)) concats.emplace_back(inst);
       auto const src = inst->src(ix);
       IRInstruction* srcInst = src->inst();
+      auto const srcCanonical = canonical(src);
+      auto const srcCanonicalInst = srcCanonical->inst();
+      FTRACE(4, "Processing inst {}; srcCanonical {}; srcCanonicalInst {};\n",
+        inst->toString(), srcCanonical->toString(), srcCanonicalInst->toString()
+      );
       if (srcInst->op() == DefConst) return;
 
-      if (srcInst->producesReference() && canDCE(*srcInst)) {
-        ++uses[src];
-        if (inst->is(DecRef)) {
-          rcInsts[srcInst].decs.emplace_back(inst);
-        }
-        if (inst->is(InitVecElem, InitStructElem, InitStructPositions,
-                     StClosureArg)) {
-          if (ix == 0) rcInsts[srcInst].aux.emplace_back(inst);
+      // Use the Canonical source for accounting
+      if (srcCanonicalInst->producesReference() && canDCE(*srcCanonicalInst)) {
+        ++uses[srcCanonical];
+        switch (inst->op()) {
+          case DecRef:
+          case DecReleaseCheck:
+            rcInsts[srcCanonicalInst].decs.emplace_back(inst);
+            break;
+          case InitVecElem:
+          case InitDictElem:
+          case InitStructElem:
+          case InitStructPositions:
+          case ReleaseShallow:
+          case StClosureArg:
+            if (ix == 0) rcInsts[srcCanonicalInst].aux.emplace_back(inst);
+            break;
+          case ConvPtrToLval:
+            // this is a special case passthrough for canonicalization
+            rcInsts[srcCanonicalInst].passthroughs.emplace_back(inst);
+            break;
+          default:
+            if (inst->isPassthrough()) {
+              // keep track of passthroughs since if this source
+              // instruction is killed later, passthroughs die too
+              rcInsts[srcCanonicalInst].passthroughs.emplace_back(inst);
+            }
         }
       }
 
@@ -1351,7 +1478,7 @@ void fullDCE(IRUnit& unit) {
       // For a DefLabel operand, look "through" each corresponding Jmp
       // and process the source as if we were processing that Jmp.
       assertx(defLabelIdx < inst->numDsts());
-      assertx(defLabelLive.count(std::make_pair(inst, defLabelIdx)));
+      assertx(defLabelLive.contains(std::make_pair(inst, defLabelIdx)));
       inst->block()->forEachPred(
         [&, inst = inst, defLabelIdx = defLabelIdx] (Block* pred) {
           auto& jmp = pred->back();
@@ -1376,10 +1503,14 @@ void fullDCE(IRUnit& unit) {
   for (auto& pair : rcInsts) {
     auto& info = pair.second;
     auto const trackedUses =
-      info.decs.size() + info.aux.size() + info.stores.size();
+      info.decs.size() + info.aux.size() + info.stores.size() + info.passthroughs.size();
+    FTRACE(5, "Instr {}; uses = {} trackedUses = {}\n",
+      pair.first->toString(), uses[pair.first->dst()], trackedUses
+    );
     if (uses[pair.first->dst()] != trackedUses) continue;
     killInstrAdjustRC(state, unit, pair.first, info.decs);
     for (auto inst : info.aux) killInstrAdjustRC(state, unit, inst, info.decs);
+    for (auto inst : info.passthroughs) state[inst].setDead();
     for (auto store : info.stores) store->setSrc(1, unit.cns(TInitNull));
   }
 

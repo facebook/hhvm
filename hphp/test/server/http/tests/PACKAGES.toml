@@ -1,0 +1,9 @@
+[packages]
+
+[packages.default]
+include_path = [ "//" ]
+
+[deployments]
+
+[deployments.my-prod]
+packages = ["default"]

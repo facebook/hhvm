@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $count = __hhvm_intrinsics\apc_fetch_no_check('count');
   if ($count === false) $count = 0;
   if ($count < 4) {

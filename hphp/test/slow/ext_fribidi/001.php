@@ -17,5 +17,5 @@ $b = "\\x" . substr(chunk_split($b, 2, "\\x"), 0, -2);
 $c = bin2hex(fribidi_log2vis($c, FRIBIDI_AUTO, FRIBIDI_CHARSET_CP1255));
 $c = "\\x" . substr(chunk_split($c, 2, "\\x"), 0, -2);
 
-var_dump(varray[$a, $b, $c]);
+var_dump(vec[$a, $b, $c]);
 }

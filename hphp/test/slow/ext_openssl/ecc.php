@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$args = darray[
+$args = dict[
   "curve_name" => "secp384r1",
   "private_key_type" => OPENSSL_KEYTYPE_EC,
 ];
@@ -7,7 +7,7 @@ echo "Testing openssl_pkey_new\n";
 $key1 = openssl_pkey_new($args);
 var_dump($key1);
 
-$argsFailed = darray[
+$argsFailed = dict[
   "curve_name" => "invalid_cuve_name",
   "private_key_type" => OPENSSL_KEYTYPE_EC,
 ];
@@ -30,7 +30,7 @@ $d2 = openssl_pkey_get_details($key2);
 var_dump($d1 === $d2);
 */
 
-$dn = darray[
+$dn = dict[
   "countryName" => "BR",
   "stateOrProvinceName" => "Rio Grande do Sul",
   "localityName" => "Porto Alegre",

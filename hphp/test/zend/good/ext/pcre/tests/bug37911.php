@@ -1,7 +1,7 @@
 <?hh
 
 function callback($match)
-{
+:mixed{
     var_dump($match);
     return $match[1].'/'.strlen($match['name']);
 }

@@ -3,7 +3,7 @@
 trait TestTrait
 {
     public static function testStaticFunction()
-    {
+:mixed    {
         return __CLASS__;
     }
 }

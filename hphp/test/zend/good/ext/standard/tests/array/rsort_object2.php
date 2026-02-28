@@ -38,7 +38,7 @@ class for_string_rsort
     }
 
     // return string value
-    function __toString() {
+    function __toString() :mixed{
         return (string)$this->value;
     }
 
@@ -48,7 +48,7 @@ echo "*** Testing rsort() : object functionality ***\n";
 
 // array of integer objects
 
-$unsorted_int_obj = varray[
+$unsorted_int_obj = vec[
   new for_integer_rsort(11,33,30),
   new for_integer_rsort(66,44,4),
   new for_integer_rsort(-88,-5,5),
@@ -56,7 +56,7 @@ $unsorted_int_obj = varray[
 ];
 
 // array of string objects
-$unsorted_str_obj = varray [
+$unsorted_str_obj = vec[
   new for_string_rsort("axx","AXX","ass"),
   new for_string_rsort("t","eee","abb"),
   new for_string_rsort("w","W", "c"),

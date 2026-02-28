@@ -17,9 +17,6 @@
 #include "hphp/runtime/debugger/cmd/cmd_info.h"
 #include <vector>
 
-#include <folly/dynamic.h>
-#include <folly/json.h>
-
 #include "hphp/runtime/debugger/cmd/cmd_variable.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/string/ext_string.h"
@@ -34,7 +31,7 @@ namespace HPHP::Eval {
 
 using std::string;
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 const StaticString
   s_params("params"),
@@ -239,7 +236,7 @@ void getClassSymbolNames(
   auto& clsConstants =
     liveLists->get(DebuggerClient::AutoCompleteClassConstants);
 
-  NamedEntity::foreach_cached_class([&](Class* c) {
+  NamedType::foreach_cached_class([&](Class* c) {
     if (interface ? !(c->attrs() & AttrInterface) :
         c->attrs() & (AttrInterface | AttrTrait)) {
       return; // continue
@@ -387,8 +384,8 @@ void CmdInfo::PrintHeader(DebuggerClient* client, StringBuffer &sb,
                           const Array& info) {
   if (!info[s_internal].toBoolean()) {
     String file = info[s_file].toString();
-    int line1 = info[s_line1].toInt32();
-    int line2 = info[s_line2].toInt32();
+    auto line1 = (int)info[s_line1].toInt64();
+    auto line2 = (int)info[s_line2].toInt64();
     if (file.empty() && line1 == 0 && line2 == 0) {
       sb.printf("// (source unknown)\n");
     } else if (line1 == 0 && line2 == 0) {

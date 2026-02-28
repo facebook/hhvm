@@ -1,2 +1,2 @@
-File "unsafe_cast_lower_bound2.php", line 4, characters 25-29:
-HH\FIXME\UNSAFE_CAST input type annotation is too loose, please use a more specific type. The typechecker infers `string` as the most specific type. (Lint[5636])
+File "unsafe_cast_lower_bound2.php", line 4, characters 3-39:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH\FIXME\UNSAFE_CAST` call. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5807])

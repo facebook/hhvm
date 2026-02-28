@@ -1,5 +1,5 @@
 <?hh
-function stats($f, $a) {
+function stats($f, $a) :mixed{
     $times = 90000;
     print "$f\n";
     ksort(inout $a);
@@ -7,7 +7,7 @@ function stats($f, $a) {
         print "$k: $v: " . sprintf('%0.3f', $v / $times) . "\n";
 }
 <<__EntryPoint>> function main(): void {
-$a = darray[];
+$a = dict[];
 $times = 90000;
 for ($i = 0; $i < $times; $i++) {
     $p = range(1,4);
@@ -18,7 +18,7 @@ for ($i = 0; $i < $times; $i++) {
 }
 
 stats('shuffle', $a);
-$a = darray[];
+$a = dict[];
 $times = 90000;
 for ($i = 0; $i < $times; $i++) {
     $p = '1234';

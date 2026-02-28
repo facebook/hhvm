@@ -1,16 +1,16 @@
 <?hh
 
 class X {
-  function foo() {
+  function foo() :mixed{
  var_dump(__METHOD__);
  }
   }
-function foo($a) {
+function foo($a) :mixed{
   $x = null;
   if ($a) $x = new X;
   return $x;
 }
-function test($x, $a) {
+function test($x, $a) :mixed{
   $x = foo($a);
   if ($x) {
     $x->foo();
@@ -18,7 +18,7 @@ function test($x, $a) {
 }
 
 <<__EntryPoint>>
-function main_671() {
+function main_671() :mixed{
 test(45, 0);
 test(77, 1);
 }

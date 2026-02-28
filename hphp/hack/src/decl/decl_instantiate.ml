@@ -15,11 +15,10 @@ let make_subst tparams tyl = Subst.make_decl tparams tyl
 
 let get_tparams_in_ty_and_acc acc ty =
   let tparams_visitor =
-    object (this)
+    object
       inherit [SSet.t] Type_visitor.decl_type_visitor
 
-      method! on_tgeneric acc _ s tyl =
-        List.fold_left tyl ~f:this#on_type ~init:(SSet.add s acc)
+      method! on_tgeneric acc _ s = SSet.add s acc
     end
   in
   tparams_visitor#on_type acc ty
@@ -32,23 +31,6 @@ let get_tparams_in_subst subst =
 (*****************************************************************************)
 
 let rec instantiate subst (ty : decl_ty) =
-  let merge_hk_type orig_r orig_var ty args =
-    let (r, ty_) = deref ty in
-    let res_ty_ =
-      match ty_ with
-      | Tapply (n, existing_args) ->
-        (* We could insist on existing_args = [] here unless we want to support partial application. *)
-        Tapply (n, existing_args @ args)
-      | Tgeneric (n, existing_args) ->
-        (* Same here *)
-        Tgeneric (n, existing_args @ args)
-      | _ ->
-        (* We could insist on args = [] here, everything else is a kinding error *)
-        ty_
-    in
-    mk (Reason.Rinstantiate (r, orig_var, orig_r), res_ty_)
-  in
-
   (* PERF: If subst is empty then instantiation is a no-op. We can save a
    * significant amount of CPU by avoiding recursively deconstructing the ty
    * data type.
@@ -57,11 +39,13 @@ let rec instantiate subst (ty : decl_ty) =
     ty
   else
     match deref ty with
-    | (r, Tgeneric (x, args)) ->
-      let args = List.map args ~f:(instantiate subst) in
+    | (r, Tgeneric x) ->
       (match SMap.find_opt x subst with
-      | Some x_ty -> merge_hk_type r x x_ty args
-      | None -> mk (r, Tgeneric (x, args)))
+      | Some found_ty ->
+        let (found_r, found_ty_) = deref found_ty in
+        let new_r = Reason.instantiate ~type_:found_r x ~var:r in
+        mk (new_r, found_ty_)
+      | None -> mk (r, Tgeneric x))
     | (r, ty) ->
       let ty = instantiate_ subst ty in
       mk (r, ty)
@@ -75,16 +59,23 @@ and instantiate_ subst x =
   | Taccess (ty, id) ->
     let ty = instantiate subst ty in
     Taccess (ty, id)
+  | Trefinement (ty, rs) ->
+    let ty = instantiate subst ty in
+    let rs = Class_refinement.map (instantiate subst) rs in
+    Trefinement (ty, rs)
   | Tvec_or_dict (ty1, ty2) ->
     let ty1 = instantiate subst ty1 in
     let ty2 = instantiate subst ty2 in
     Tvec_or_dict (ty1, ty2)
-  | (Tthis | Tvar _ | Tmixed | Tdynamic | Tnonnull | Tany _ | Terr | Tprim _) as
-    x ->
+  | (Tthis | Tmixed | Twildcard | Tdynamic | Tnonnull | Tany _ | Tprim _) as x
+    ->
     x
-  | Ttuple tyl ->
-    let tyl = List.map tyl ~f:(instantiate subst) in
-    Ttuple tyl
+  | Ttuple { t_required; t_optional; t_extra } ->
+    let t_required = List.map t_required ~f:(instantiate subst) in
+    let t_optional = List.map t_optional ~f:(instantiate subst) in
+    let t_extra = instantiate_tuple_extra subst t_extra in
+
+    Ttuple { t_required; t_optional; t_extra }
   | Tunion tyl ->
     let tyl = List.map tyl ~f:(instantiate subst) in
     Tunion tyl
@@ -110,8 +101,7 @@ and instantiate_ subst x =
       List.fold_left
         ~f:
           begin
-            fun subst t ->
-            SMap.remove (snd t.tp_name) subst
+            (fun subst t -> SMap.remove (snd t.tp_name) subst)
           end
         ~init:subst
         tparams
@@ -137,18 +127,18 @@ and instantiate_ subst x =
           if SSet.mem name target_generics then
             (* Fresh only because we don't support nesting of generic function types *)
             let fresh_tp_name = name ^ "#0" in
-            let reason = Typing_reason.Rwitness_from_decl pos in
-            ( SMap.add name (mk (reason, Tgeneric (fresh_tp_name, []))) subst,
+            let reason = Typing_reason.witness_from_decl pos in
+            ( SMap.add name (mk (reason, Tgeneric fresh_tp_name)) subst,
               { tp with tp_name = (pos, fresh_tp_name) } )
           else
             (subst, tp))
     in
     let params =
       List.map ft.ft_params ~f:(fun param ->
-          let ty = instantiate_possibly_enforced_ty subst param.fp_type in
+          let ty = instantiate subst param.fp_type in
           { param with fp_type = ty })
     in
-    let ret = instantiate_possibly_enforced_ty subst ft.ft_ret in
+    let ret = instantiate subst ft.ft_ret in
     let tparams =
       List.map tparams ~f:(fun t ->
           {
@@ -173,12 +163,22 @@ and instantiate_ subst x =
   | Tapply (x, tyl) ->
     let tyl = List.map tyl ~f:(instantiate subst) in
     Tapply (x, tyl)
-  | Tshape (shape_kind, fdm) ->
+  | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } ->
     let fdm = ShapeFieldMap.map (instantiate subst) fdm in
-    Tshape (shape_kind, fdm)
+    (* TODO(shapes) Should this be changing s_origin? *)
+    Tshape
+      {
+        s_origin = Missing_origin;
+        s_unknown_value = shape_kind;
+        (* TODO(shapes) s_unknown_value should likely be instantiated *)
+        s_fields = fdm;
+      }
+  | Tclass_ptr ty -> Tclass_ptr (instantiate subst ty)
 
-and instantiate_possibly_enforced_ty subst et =
-  { et_type = instantiate subst et.et_type; et_enforced = et.et_enforced }
+and instantiate_tuple_extra subst e =
+  match e with
+  | Tsplat t_splat -> Tsplat (instantiate subst t_splat)
+  | Tvariadic t_variadic -> Tvariadic (instantiate subst t_variadic)
 
 let instantiate_ce subst ({ ce_type = x; _ } as ce) =
   { ce with ce_type = lazy (instantiate subst (Lazy.force x)) }

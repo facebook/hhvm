@@ -2,27 +2,33 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
-use env::{emitter::Emitter, Env};
-use error::{Error, Result};
-use hhbc::{hhas_attribute::HhasAttribute, TypedValue};
+use env::Env;
+use env::emitter::Emitter;
+use error::Error;
+use error::Result;
+use hhbc::Attribute;
+use hhbc::TypedValue;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
 use oxidized::ast as a;
 
-pub fn from_asts<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    attrs: &[a::UserAttribute],
-) -> Result<Vec<HhasAttribute<'arena>>> {
-    attrs.iter().map(|attr| from_ast(e, attr)).collect()
+use crate::emit_expression;
+
+pub fn from_asts(e: &mut Emitter, attrs: &[a::UserAttribute]) -> Result<Vec<Attribute>> {
+    attrs
+        .iter()
+        // Filter out __SimpliHack attributes as they may contain expressions not normally
+        // accepted in attributes. These are only needed for type checker and LSP, not runtime.
+        .filter(|attr| !ua::is_simplihack(&attr.name.1))
+        .map(|attr| from_ast(e, attr))
+        .collect()
 }
 
-pub fn from_ast<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    attr: &a::UserAttribute,
-) -> Result<HhasAttribute<'arena>> {
+pub fn from_ast(e: &mut Emitter, attr: &a::UserAttribute) -> Result<Attribute> {
     let arguments = constant_folder::literals_from_exprs(
         &mut attr.params.clone(),
+        // T88847409 likely need to track scope for folding closure param attribute args
+        &ast_scope::Scope::default(),
         e,
     )
     .map_err(|err| {
@@ -37,22 +43,16 @@ pub fn from_ast<'arena, 'decl>(
         // don't do anything to builtin attributes
         &attr.name.1
     } else {
-        hhbc::ClassName::from_ast_name_and_mangle(e.alloc, &attr.name.1).unsafe_as_str()
+        hhbc::ClassName::from_ast_name_and_mangle(&attr.name.1).as_str()
     };
-    Ok(HhasAttribute {
-        name: e.alloc.alloc_str(fully_qualified_id).into(),
-        arguments: e.alloc.alloc_slice_fill_iter(arguments.into_iter()).into(),
-    })
+    Ok(Attribute::new(fully_qualified_id, arguments))
 }
 
 /// Adds an __Reified attribute for functions and classes with reified type
 /// parameters. The arguments to __Reified are number of type parameters
 /// followed by the indicies of these reified type parameters and whether they
 /// are soft reified or not
-pub fn add_reified_attribute<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    tparams: &[a::Tparam],
-) -> Option<HhasAttribute<'arena>> {
+pub fn add_reified_attribute(tparams: &[a::Tparam]) -> Option<Attribute> {
     let reified_data: Vec<(usize, bool, bool)> = tparams
         .iter()
         .enumerate()
@@ -70,33 +70,22 @@ pub fn add_reified_attribute<'arena>(
         return None;
     }
 
-    let name = "__Reified".into();
+    let name = "__Reified";
     let bool2i64 = |b| b as i64;
-    // NOTE(hrust) hopefully faster than .into_iter().flat_map(...).collect()
-    let mut arguments =
-        bumpalo::collections::vec::Vec::with_capacity_in(reified_data.len() * 3 + 1, alloc);
+    let mut arguments = Vec::with_capacity(reified_data.len() * 3 + 1);
     arguments.push(TypedValue::Int(tparams.len() as i64));
     for (i, soft, warn) in reified_data.into_iter() {
         arguments.push(TypedValue::Int(i as i64));
         arguments.push(TypedValue::Int(bool2i64(soft)));
         arguments.push(TypedValue::Int(bool2i64(warn)));
     }
-    Some(HhasAttribute {
-        name,
-        arguments: arguments.into_bump_slice().into(),
-    })
+    Some(Attribute::new(name, arguments))
 }
 
-pub fn add_reified_parent_attribute<'a, 'arena>(
-    env: &Env<'a, 'arena>,
-    extends: &[a::Hint],
-) -> Option<HhasAttribute<'arena>> {
+pub fn add_reified_parent_attribute(env: &Env<'_>, extends: &[a::Hint]) -> Option<Attribute> {
     if let Some((_, hl)) = extends.first().and_then(|h| h.1.as_happly()) {
         if emit_expression::has_non_tparam_generics(env, hl) {
-            return Some(HhasAttribute {
-                name: "__HasReifiedParent".into(),
-                arguments: ffi::Slice::empty(),
-            });
+            return Some(Attribute::new("__HasReifiedParent", vec![]));
         }
     }
     None

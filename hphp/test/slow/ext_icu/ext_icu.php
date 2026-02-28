@@ -1,15 +1,15 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
                    var_dump(debug_backtrace()); }
 }
-function VERIFY($x) { VS($x, true); }
+function VERIFY($x) :mixed{ VS($x, true); }
 
 //////////////////////////////////////////////////////////////////////
 
-function test_icu_match() {
+function test_icu_match() :mixed{
   // Test subject strings.
   $subject = "\xd7\x96\xf0\x90\xa4\x85". " PHP is a scripting language. " .
              "\xef\xba\xb0\xef\xbb\xb3";
@@ -164,7 +164,7 @@ function test_icu_match() {
 }
 
 // Test string lifted from tests/intl/utf8.h
-function test_icu_transliterate() {
+function test_icu_transliterate() :mixed{
   $input_ru = "\xd1\x84\xd0\xb5\xd0\xb9\xd1".
            "\x81\xd0\xb1\xd1\x83\xc5\x93\xd0\xba";
   $output_ru = icu_transliterate($input_ru, false);
@@ -191,7 +191,7 @@ function test_icu_transliterate() {
 }
 
 
-function test_icu_tokenize() {
+function test_icu_tokenize() :mixed{
   $input_eng = "Hello World";
   $output_eng = icu_tokenize($input_eng);
 
@@ -282,7 +282,7 @@ function test_icu_tokenize() {
 
 
 <<__EntryPoint>>
-function main_ext_icu() {
+function main_ext_icu() :mixed{
 test_icu_match();
 test_icu_transliterate();
 test_icu_tokenize();

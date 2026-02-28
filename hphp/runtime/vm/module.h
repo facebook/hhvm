@@ -28,7 +28,9 @@ namespace HPHP {
  * This is the runtime representation of a module.
  */
 struct Module {
-  LowStringPtr name;
+
+  PackedStringPtr name;
+  PackedStringPtr docComment;
   int line0; // start line number on the src file
   int line1; // end line number on the src file
   Attr attrs;
@@ -36,7 +38,8 @@ struct Module {
 
   template<class SerDe>
   void serde(SerDe& sd) {
-    sd(line0)
+    sd(docComment)
+      (line0)
       (line1)
       (attrs)
       (userAttributes)
@@ -52,11 +55,40 @@ struct Module {
   static Module* lookup(const StringData* name);
 
   /*
+   * Look up, or autoload and define, the Module in this request with name `name'.
+   */
+  static Module* load(const StringData* name);
+
+  /*
    * Define module m for this request.
    */
   static void def(Module* m);
+
+  /*
+   * Are module warnings enabled for this func?
+   */
+  static bool warningsEnabled(const Func* f);
+
+  /*
+   * Name of the default module.
+   */
+  static constexpr const char* DEFAULT = "default";
+
+  static bool isDefault(const StringData* name) {
+    return name && name->slice() == DEFAULT;
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}
 
+/*
+ * Will the use of symbol raise a module boundary violation?
+ */
+template <typename Sym, typename Ctx>
+bool will_symbol_raise_module_boundary_violation(
+  const Sym* symbol,
+  const Ctx* context
+);
+
+///////////////////////////////////////////////////////////////////////////////
+}

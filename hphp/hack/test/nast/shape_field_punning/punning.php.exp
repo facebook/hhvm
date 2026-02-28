@@ -1,0 +1,245 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes =
+      [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-54], (String "shape_field_punning"))] }];
+         fa_namespace =
+         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+           ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+           ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+         }
+        ];
+      fd_mode = Mstrict; fd_name = ([4:10-22], "\\test_punning");
+      fd_fun =
+      { f_span = [4:1-8:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([4:26-30], (Hprim Tvoid)))); 
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([5:3-12], (Expr ((), [5:3-11], (Assign (((), [5:3-7], (Lvar ([5:3-7], $foo))), None, ((), [5:10-11], (Int "1")))))));
+            ([6:3-18], (Expr ((), [6:3-17], (Assign (((), [6:3-7], (Lvar ([6:3-7], $bar))), None, ((), [6:10-17], (String "hello")))))));
+            ([7:3-26],
+             (Expr
+                ((), [7:3-25],
+                 (Assign (((), [7:3-5], (Lvar ([7:3-5], $s))), None,
+                    ((), [7:8-25], (Shape [((SFlit_str ([7:14-18], "foo")), ((), [7:14-18], (Lvar ([7:14-18], $foo)))); ((SFlit_str ([7:20-24], "bar")), ((), [7:20-24], (Lvar ([7:20-24], $bar))))]))
+                    )))))
+            ]
+          };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-22], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-54], (String "shape_field_punning"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([10:10-20], "\\test_mixed");
+       fd_fun =
+       { f_span = [10:1-13:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([10:24-28], (Hprim Tvoid)))); 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([11:3-15], (Expr ((), [11:3-14], (Assign (((), [11:3-10], (Lvar ([11:3-10], $field1))), None, ((), [11:13-14], (Int "1")))))));
+             ([12:3-38],
+              (Expr
+                 ((), [12:3-37],
+                  (Assign (((), [12:3-5], (Lvar ([12:3-5], $s))), None,
+                     ((), [12:8-37], (Shape [((SFlit_str ([12:14-21], "field1")), ((), [12:14-21], (Lvar ([12:14-21], $field1)))); ((SFlit_str ([12:23-30], "other")), ((), [12:34-36], (Int "42")))]))
+                     )))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([10:10-20], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-54], (String "shape_field_punning"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([15:10-29], "\\test_trailing_comma");
+       fd_fun =
+       { f_span = [15:1-19:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([15:33-37], (Hprim Tvoid)))); 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([16:3-10], (Expr ((), [16:3-9], (Assign (((), [16:3-5], (Lvar ([16:3-5], $x))), None, ((), [16:8-9], (Int "1")))))));
+             ([17:3-10], (Expr ((), [17:3-9], (Assign (((), [17:3-5], (Lvar ([17:3-5], $y))), None, ((), [17:8-9], (Int "2")))))));
+             ([18:3-23],
+              (Expr
+                 ((), [18:3-22],
+                  (Assign (((), [18:3-5], (Lvar ([18:3-5], $s))), None,
+                     ((), [18:8-22], (Shape [((SFlit_str ([18:14-16], "x")), ((), [18:14-16], (Lvar ([18:14-16], $x)))); ((SFlit_str ([18:18-20], "y")), ((), [18:18-20], (Lvar ([18:18-20], $y))))]))
+                     )))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([15:10-29], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-54], (String "shape_field_punning"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([21:10-27], "\\test_single_field");
+       fd_fun =
+       { f_span = [21:1-24:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([21:31-35], (Hprim Tvoid)))); 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([22:3-25], (Expr ((), [22:3-24], (Assign (((), [22:3-14], (Lvar ([22:3-14], $only_field))), None, ((), [22:17-24], (String "value")))))));
+             ([23:3-27],
+              (Expr
+                 ((), [23:3-26],
+                  (Assign (((), [23:3-5], (Lvar ([23:3-5], $s))), None, ((), [23:8-26], (Shape [((SFlit_str ([23:14-25], "only_field")), ((), [23:14-25], (Lvar ([23:14-25], $only_field))))])))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([21:10-27], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-54], (String "shape_field_punning"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([26:10-29], "\\test_multiple_types");
+       fd_fun =
+       { f_span = [26:1-32:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([26:33-37], (Hprim Tvoid)))); 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([27:3-19], (Expr ((), [27:3-18], (Assign (((), [27:3-13], (Lvar ([27:3-13], $int_field))), None, ((), [27:16-18], (Int "42")))))));
+             ([28:3-27], (Expr ((), [28:3-26], (Assign (((), [28:3-16], (Lvar ([28:3-16], $string_field))), None, ((), [28:19-26], (String "hello")))))));
+             ([29:3-22], (Expr ((), [29:3-21], (Assign (((), [29:3-14], (Lvar ([29:3-14], $bool_field))), None, ((), [29:17-21], True))))));
+             ([30:3-23], (Expr ((), [30:3-22], (Assign (((), [30:3-15], (Lvar ([30:3-15], $float_field))), None, ((), [30:18-22], (Float "3.14")))))));
+             ([31:3-68],
+              (Expr
+                 ((), [31:3-67],
+                  (Assign (((), [31:3-5], (Lvar ([31:3-5], $s))), None,
+                     ((), [31:8-67],
+                      (Shape
+                         [((SFlit_str ([31:14-24], "int_field")), ((), [31:14-24], (Lvar ([31:14-24], $int_field))));
+                           ((SFlit_str ([31:26-39], "string_field")), ((), [31:26-39], (Lvar ([31:26-39], $string_field))));
+                           ((SFlit_str ([31:41-52], "bool_field")), ((), [31:41-52], (Lvar ([31:41-52], $bool_field))));
+                           ((SFlit_str ([31:54-66], "float_field")), ((), [31:54-66], (Lvar ([31:54-66], $float_field))))]))
+                     )))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([26:10-29], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-54], (String "shape_field_punning"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([34:10-28], "\\test_punned_at_end");
+       fd_fun =
+       { f_span = [34:1-37:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([34:32-36], (Hprim Tvoid)))); 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([35:3-20], (Expr ((), [35:3-19], (Assign (((), [35:3-10], (Lvar ([35:3-10], $punned))), None, ((), [35:13-19], (String "last")))))));
+             ([36:3-40],
+              (Expr
+                 ((), [36:3-39],
+                  (Assign (((), [36:3-5], (Lvar ([36:3-5], $s))), None,
+                     ((), [36:8-39],
+                      (Shape [((SFlit_str ([36:14-24], "explicit")), ((), [36:28-29], (Int "1"))); ((SFlit_str ([36:31-38], "punned")), ((), [36:31-38], (Lvar ([36:31-38], $punned))))]))
+                     )))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([34:10-28], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-54], (String "shape_field_punning"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([39:10-31], "\\test_punned_in_middle");
+       fd_fun =
+       { f_span = [39:1-42:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([39:35-39], (Hprim Tvoid)))); 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([40:3-15], (Expr ((), [40:3-14], (Assign (((), [40:3-10], (Lvar ([40:3-10], $middle))), None, ((), [40:13-14], (Int "2")))))));
+             ([41:3-50],
+              (Expr
+                 ((), [41:3-49],
+                  (Assign (((), [41:3-5], (Lvar ([41:3-5], $s))), None,
+                     ((), [41:8-49],
+                      (Shape
+                         [((SFlit_str ([41:14-21], "first")), ((), [41:25-26], (Int "1"))); (
+                           (SFlit_str ([41:28-35], "middle")), ((), [41:28-35], (Lvar ([41:28-35], $middle)))); (
+                           (SFlit_str ([41:37-43], "last")), ((), [41:47-48], (Int "3")))]))
+                     )))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([39:10-31], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None })
+  ]

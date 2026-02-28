@@ -1,7 +1,7 @@
 <?hh
 
 class Super {
-  protected function foo() {
+  protected function foo() :mixed{
     echo "Super::foo\n";
   }
 }
@@ -9,12 +9,12 @@ class Super {
 interface I1 {
   require extends Super;
 
-  public function baz();
+  public function baz():mixed;
 }
 
 trait T1 implements I1 {
 
-  public function bar() {
+  public function bar() :mixed{
     return $this->foo();
   }
 }
@@ -22,15 +22,15 @@ trait T1 implements I1 {
 class C {
   use T1;
 
-  public function baz() {}
+  public function baz() :mixed{}
 }
 
-function main() {
+function main() :mixed{
   $c = new C();
   $c->bar();
 }
 
 <<__EntryPoint>>
-function main_require_constraint_iface_trait_error() {
+function main_require_constraint_iface_trait_error() :mixed{
 main();
 }

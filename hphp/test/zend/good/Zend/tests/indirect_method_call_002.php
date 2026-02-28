@@ -3,10 +3,10 @@
 class foo {
     public $x = 'testing';
 
-    public function bar() {
+    public function bar() :mixed{
         return "foo";
     }
-    public function baz() {
+    public function baz() :mixed{
         return new self;
     }
 }

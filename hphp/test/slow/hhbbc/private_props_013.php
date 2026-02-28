@@ -1,19 +1,19 @@
 <?hh
 
 class A {
-  private $x = varray[];
+  private $x = vec[];
   private $y = "string";
 
-  public function heh(int $i) {
-    $this->x = varray[darray[3 => new stdClass()]];
-    $this->x[0][3]->foo = varray[$i];
+  public function heh(int $i) :mixed{
+    $this->x = vec[dict[3 => new stdClass()]];
+    $this->x[0][3]->foo = vec[$i];
     return $this;
   }
-  public function getY() { return $this->y; }
-  public function getX() { return $this->x; }
+  public function getY() :mixed{ return $this->y; }
+  public function getX() :mixed{ return $this->x; }
 }
 
-function main() {
+function main() :mixed{
   $a = new A;
   var_dump($a->heh(0));
   var_dump($a->getY());
@@ -21,6 +21,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_private_props_013() {
+function main_private_props_013() :mixed{
 main();
 }

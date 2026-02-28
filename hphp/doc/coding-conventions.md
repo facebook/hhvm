@@ -453,8 +453,8 @@ for (auto const& thing : thingVec) {
   with the beginning of the current parenthesis/brace nesting level. For
   example, here are some long expressions, formatted appropriately:
 ```cpp
-if (RuntimeOption::EvalJitRegionSelector != "" &&
-    (RuntimeOption::EvalHHIRRefcountOpts ||
+if (Cfg::Jit::RegionSelector != "" &&
+    (Cfg::HHIR::RefcountOpts ||
      RuntimeOption::EvalHHITExtraOptPass) &&
     Func::numLoadedFuncs() < 600) {
   // ...

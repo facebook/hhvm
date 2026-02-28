@@ -1,7 +1,7 @@
 <?hh
 
-function k3() {
-  $arr = varray[0,1,2,3,4];
+function k3() :mixed{
+  $arr = vec[0,1,2,3,4];
   $b = true;
   foreach ($arr as $v) {
     if ($b) {
@@ -13,6 +13,6 @@ function k3() {
 }
 
 <<__EntryPoint>>
-function main_497() {
+function main_497() :mixed{
 k3();
 }

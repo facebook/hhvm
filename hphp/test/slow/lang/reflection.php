@@ -5,12 +5,12 @@ const SOME_CONSTANT = "some string";
 //===============================================================================
 // ReflectionFunction.
 
-class State { static $staticX = 4; }
+class State { public static $staticX = 4; }
 
 /**
  * This is f's doc comment.
  */
-function f($a, inout $b, $c=null, $d=varray[1, 2, SOME_CONSTANT]) {
+function f($a, inout $b, $c=null, $d=vec[1, 2, SOME_CONSTANT]) :mixed{
   print "In f()\n";
   State::$staticX++;
   $x = State::$staticX;
@@ -33,7 +33,7 @@ function f($a, inout $b, $c=null, $d=varray[1, 2, SOME_CONSTANT]) {
 /**
  * This is g's doc comment.
  */
-function g($a=null, $b=varray[1, 2, 3], $c=SOME_CONSTANT) {
+<<__DynamicallyCallable>> function g($a=null, $b=vec[1, 2, 3], $c=SOME_CONSTANT) :mixed{
   print "In g($a, $b, $c)\n";
 }
 
@@ -41,22 +41,22 @@ function g($a=null, $b=varray[1, 2, 3], $c=SOME_CONSTANT) {
 // ReflectionClass.
 
 interface H {
-  public function methH();
+  public function methH():mixed;
 }
 interface I {
-  public function methI();
+  public function methI():mixed;
 }
 interface J {
-  public function methJ();
+  public function methJ():mixed;
 }
 interface K extends I, J {
-  public function methK();
+  public function methK():mixed;
 }
 interface L {}
 
 class A implements H {
-  public function methH() {}
-  protected function methA() {}
+  public function methH() :mixed{}
+  protected function methA() :mixed{}
 }
 /**
  * This is B's doc comment.
@@ -64,19 +64,19 @@ class A implements H {
 class B extends A implements I, K {
   const C0 = "B::C0";
   const C1 = "B::C1";
-  static $s0 = 42;
-  static $s1 = "hello";
-  static $s2;
+  public static $s0 = 42;
+  public static $s1 = "hello";
+  public static $s2;
   private $p0 = 1;
   protected $p1 = 2;
   public $p2 = 3;
   public $p3;
-  static public function smethB0() {}
-  static private function smethB1() {}
-  public function methI() {}
-  public function methJ() {}
-  public function methK() {}
-  private function methB() {}
+  static public function smethB0() :mixed{}
+  static private function smethB1() :mixed{}
+  public function methI() :mixed{}
+  public function methJ() :mixed{}
+  public function methK() :mixed{}
+  private function methB() :mixed{}
 }
 class C {}
 
@@ -133,13 +133,6 @@ function entrypoint_reflection(): void {
 
   print "--- export(\"f\") ---\n";
   var_dump(ReflectionFunction::export('f', true));
-  print "\n";
-
-  $rg = new ReflectionFunction("g");
-
-  print "--- invoke(\"g\") ---\n";
-  var_dump($rg->invoke("a", "b"));
-  var_dump($rg->invoke("a", "b"));
   print "\n";
 
   print "--- export(\"g\") ---\n";
@@ -336,7 +329,7 @@ function entrypoint_reflection(): void {
 
   print "--- get_declared_classes() ---\n";
   $a = array_flip(get_declared_classes());
-  $classes = varray["A", "B", "C"];
+  $classes = vec["A", "B", "C"];
   foreach ($classes as $c) {
     if (isset($a[$c])) {
       print "Found class $c\n";
@@ -347,7 +340,7 @@ function entrypoint_reflection(): void {
 
   print "--- get_declared_interfaces() ---\n";
   $a = array_flip(get_declared_interfaces());
-  $interfaces = varray["H", "I", "J", "K", "L"];
+  $interfaces = vec["H", "I", "J", "K", "L"];
   foreach ($interfaces as $i) {
     if (isset($a[$i])) {
       print "Found interface $i\n";

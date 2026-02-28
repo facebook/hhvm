@@ -4,21 +4,21 @@
  * Source code: ext/standard/http.c
 */
 <<__EntryPoint>> function main(): void {
-$mDimensional = darray[
+$mDimensional = dict[
   0 => 20,
   5 => 13,
-  "9" => darray[
+  "9" => dict[
     1 => "val1",
     3 => "val2",
     "string" => "string"
   ],
   "name" => "homepage",
   "page" => 10,
-  "sort" => darray[
+  "sort" => dict[
     0 => "desc",
-    "admin" => darray[
+    "admin" => dict[
       0 => "admin1",
-      "admin2" => darray[
+      "admin2" => dict[
         "who" => "admin2",
         2 => "test"
       ]

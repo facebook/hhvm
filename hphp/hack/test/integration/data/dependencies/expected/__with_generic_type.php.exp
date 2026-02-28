@@ -1,8 +1,0 @@
-<?hh
-
-class GenericBase<Tfirst, Tsecond> {}
-
-type GenericType<T> = \GenericBase<T, int>;
-
-function with_generic_type<T>(GenericType<T> $arg): void {
-}

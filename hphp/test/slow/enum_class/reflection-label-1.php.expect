@@ -1,0 +1,11 @@
+dict(2) {
+  ["__Memoize"]=>
+  vec(1) {
+    enum class label (#KeyedByIC)
+  }
+  ["MyAttr"]=>
+  vec(2) {
+    string(1) "a"
+    string(1) "b"
+  }
+}

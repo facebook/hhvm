@@ -1,0 +1,21 @@
+calling fun('foo1')(1): OK
+calling fun('foo1')("foo"): OK
+calling fun('foo1')(true): Argument 1 passed to foo1() must be an instance of C1, bool given
+calling fun('foo1')(1.1): Argument 1 passed to foo1() must be an instance of C1, float given
+calling fun('foo1')(A): Argument 1 passed to foo1() must be an instance of C1, A given
+calling fun('foo1')(B): Argument 1 passed to foo1() must be an instance of C1, B given
+calling fun('foo1')(C): Argument 1 passed to foo1() must be an instance of C1, C given
+calling fun('foo2')(1): Argument 1 passed to foo2() must be an instance of C2, int given
+calling fun('foo2')("foo"): Argument 1 passed to foo2() must be an instance of C2, string given
+calling fun('foo2')(true): OK
+calling fun('foo2')(1.1): Argument 1 passed to foo2() must be an instance of C2, float given
+calling fun('foo2')(A): OK
+calling fun('foo2')(B): Argument 1 passed to foo2() must be an instance of C2, B given
+calling fun('foo2')(C): Argument 1 passed to foo2() must be an instance of C2, C given
+calling fun('foo3')(1): Argument 1 passed to foo3() must be an instance of C3, int given
+calling fun('foo3')("foo"): Argument 1 passed to foo3() must be an instance of C3, string given
+calling fun('foo3')(true): OK
+calling fun('foo3')(1.1): Argument 1 passed to foo3() must be an instance of C3, float given
+calling fun('foo3')(A): OK
+calling fun('foo3')(B): OK
+calling fun('foo3')(C): Argument 1 passed to foo3() must be an instance of C3, C given

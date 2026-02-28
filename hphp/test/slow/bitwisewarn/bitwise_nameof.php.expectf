@@ -1,0 +1,4 @@
+string(1) "C"
+
+Warning: Deprecated operand type (string) for bitwise operation in %s
+string(1) "A"

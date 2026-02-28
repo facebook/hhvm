@@ -17,7 +17,6 @@
 #pragma once
 
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/runtime/vm/jit/bc-marker.h"
@@ -130,8 +129,8 @@ struct TargetProfile {
                 const BCMarker& marker,
                 const StringData* name,
                 size_t extraSize = 0)
-    : TargetProfile(context.kind == TransKind::Profile ? context.transIDs
-                                                       : marker.profTransIDs(),
+    : TargetProfile(isProfiling(context.kind)
+                      ? context.transIDs : marker.profTransIDs(),
                     context.kind,
                     marker.sk(),
                     name,
@@ -179,7 +178,7 @@ struct TargetProfile {
       }
     }
 
-    if (RuntimeOption::EvalDumpTargetProfiles) {
+    if (Cfg::Eval::DumpTargetProfiles) {
       for (auto const& key : m_keys) {
         detail::addTargetProfileInfo(key, detail::call_tostring(out, size));
       }
@@ -199,10 +198,10 @@ struct TargetProfile {
    * attached for some reason.).
    */
   bool profiling() const {
-    return m_kind == TransKind::Profile;
+    return isProfiling(m_kind);
   }
   bool optimizing() const {
-    if (m_kind != TransKind::Optimize) return false;
+    if (!isOptimized(m_kind)) return false;
     for (auto const& link : m_links) {
       if (link.bound()) return true;
     }
@@ -256,20 +255,20 @@ private:
 
     switch (kind) {
     case TransKind::Profile:
+    case TransKind::ProfPrologue:
       return rds::bind<T, rds::Mode::Local>(rdsKey, extraSize);
 
     case TransKind::Optimize:
+    case TransKind::OptPrologue:
       if (isValidTransID(profTransID)) {
         return rds::attach<T, rds::Mode::Local>(rdsKey);
       }
+      [[fallthrough]];
 
-      // fallthrough
     case TransKind::Anchor:
     case TransKind::Interp:
     case TransKind::Live:
     case TransKind::LivePrologue:
-    case TransKind::ProfPrologue:
-    case TransKind::OptPrologue:
     case TransKind::Invalid:
       return rds::Link<T, rds::Mode::Local>{};
     }
@@ -328,4 +327,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-

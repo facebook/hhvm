@@ -16,14 +16,11 @@
 #include "hphp/runtime/base/code-coverage.h"
 
 #include <fstream>
-#include <vector>
 
-#include <folly/String.h>
-
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/vm/bytecode.h"
 
 #include "hphp/util/logger.h"
 
@@ -33,13 +30,9 @@ namespace HPHP {
 /*
  * The function below will be called by the interpreter on each
  * evaluated expression when running hhvm with:
- *   $ hhvm -v Eval.RecordCodeCoverage=1 <phpfile>
+ *   $ hhvm -v Eval.EnableCodeCoverage=1 <phpfile>
  *
- * The (line0, line1) pair is supposed to represent the start and end
- * of an evaluated expression. One should normally increment the line
- * usage counters for all the lines between line0 and line1 but certain
- * constructs like including a file, eval-ing a string, or even
- * executing a for loop do not have a good value for line1.
+ * The line is the 1-indexed line number of the evaluated expression.
  *
  * Indeed on this toy cover.php file:
  *
@@ -58,60 +51,59 @@ namespace HPHP {
  *
  * and with this command:
  *
- *  $ hhvm -v Eval.RecordCodeCoverage=1 \
+ *  $ hhvm -v Eval.EnableCodeCoverage=1 \
  *         -v Eval.CodeCoverageOutputFile=/tmp/cov.log \
  *         -f cover.php
  *
  * one get this output (with appropriate printf in this file):
  *
- *   /home/pad/cover.php, (1, 12)
- *   /home/pad/cover.php, (3, 3)
+ *   /home/pad/cover.php, (1)
+ *   /home/pad/cover.php, (3)
  *   here
- *   /home/pad/cover.php, (4, 6)
- *   /home/pad/cover.php, (4, 4)
- *   /home/pad/cover.php, (5, 5)
+ *   /home/pad/cover.php, (4)
+ *   /home/pad/cover.php, (4)
+ *   /home/pad/cover.php, (5)
  *   here 0
- *   /home/pad/cover.php, (4, 4)
- *   /home/pad/cover.php, (4, 4)
- *   /home/pad/cover.php, (5, 5)
+ *   /home/pad/cover.php, (4)
+ *   /home/pad/cover.php, (4)
+ *   /home/pad/cover.php, (5)
  *   here 1
- *   /home/pad/cover.php, (4, 4)
- *   /home/pad/cover.php, (4, 4)
- *   /home/pad/cover.php, (8, 10)
- *   /home/pad/cover.php, (8, 9)
- *   /home/pad/cover.php, (8, 10)
- *   6/home/pad/cover.php, (12, 12)
- *   /home/pad/cover.php, (12, 12)
- *   /home/pad/cover.php, (1, 2)
- *   /home/pad/cover.php, (1, 2)
+ *   /home/pad/cover.php, (4)
+ *   /home/pad/cover.php, (4)
+ *   /home/pad/cover.php, (8)
+ *   /home/pad/cover.php, (8)
+ *   /home/pad/cover.php, (8)
+ *   6/home/pad/cover.php, (12)
+ *   /home/pad/cover.php, (12)
+ *   /home/pad/cover.php, (1)
+ *   /home/pad/cover.php, (1)
  *
- * So right now it is just simpler to ignore line1.
  */
-void CodeCoverage::Record(const char *filename, int line0, int line1) {
+void CodeCoverage::Record(const char *filename, int line) {
   assertx(m_hits.has_value());
-  if (!filename || !*filename || line0 <= 0 || line1 <= 0 || line0 > line1) {
+  if (!filename || !*filename || line <= 0 ) {
     return;
   }
-  Logger::Verbose("%s, (%d, %d)\n", filename, line0, line1);
+  Logger::Verbose("%s, %d\n", filename, line);
 
   auto iter = m_hits->find(filename);
   if (iter == m_hits->end()) {
     auto& lines = (*m_hits)[filename];
-    lines.resize(line1 + 1);
-    for (int i = line0; i <= line0 /* should be line1 one day */; i++) {
-      lines[i] = 1;
-    }
+    lines.resize(line + 1);
+    lines.set(line);
   } else {
     auto& lines = iter->second;
-    if ((int)lines.size() < line1 + 1) {
-      lines.resize(line1 + 1);
+    if ((int)lines.size() < line + 1) {
+      lines.resize(line + 1);
     }
-    for (int i = line0; i <= line0 /* should be line1 one day */; i++) {
-      ++lines[i];
-    }
+    lines.set(line);
   }
 }
 
+/*
+ * Frequency reported is binary ie. either 0 or 1. This is not
+ * changed to Array to make return type backwards compatible.
+ */
 Array CodeCoverage::Report(bool report_frequency /* = false*/,
                            bool sys /* = true */) {
   assertx(m_hits.has_value());
@@ -123,15 +115,13 @@ Array CodeCoverage::Report(bool report_frequency /* = false*/,
     const auto& lines = iter.second;
 
     if (report_frequency) {
-      auto const count = std::count_if(lines.begin(), lines.end(),
-                                       [](int i) { return i != 0; });
+      auto count = lines.count();
       ret.set(String(iter.first), Variant((int64_t)count));
     } else {
       auto tmp = Array::CreateDict();
-      for (int i = 1; i < (int)lines.size(); i++) {
-        if (lines[i]) {
-          tmp.set(i, Variant((int64_t)lines[i]));
-        }
+      auto const end = req::dynamic_bitset::npos;
+      for (int i = lines.find_first(); i != end; i = lines.find_next(i)) {
+        tmp.set(i, Variant((int64_t)1));
       }
       ret.set(String(iter.first), Variant(tmp));
     }
@@ -152,7 +142,13 @@ void CodeCoverage::Report(const std::string &filename) {
   for (CodeCoverageMap::const_iterator iter = m_hits->begin();
        iter != m_hits->end();) {
     f << "\"" << iter->first << "\": [";
-    f << folly::join(",", iter->second);
+    const auto& lines = iter->second;
+    for (int i = 0; i != lines.size(); ) {
+      f << (lines.test(i)? 1: 0);
+      if (++i != lines.size()) {
+        f << ",";
+      }
+    }
     f << "]";
     if (++iter != m_hits->end()) {
       f << ",";
@@ -175,9 +171,236 @@ void CodeCoverage::onSessionInit() {
 }
 
 void CodeCoverage::onSessionExit() {
-  if (shouldDump) Report(RuntimeOption::CodeCoverageOutputFile);
+  if (shouldDump) Report(Cfg::Eval::CodeCoverageOutputFile);
   shouldDump = false;
   m_hits.reset();
+}
+
+bool CodeCoverage::isCoverable(Op op) {
+  switch (op) {
+    case Op::Nop:
+    case Op::PopC:
+    case Op::PopU:
+    case Op::PopU2:
+    case Op::Dup:
+    case Op::CGetCUNop:
+    case Op::Null:
+    case Op::True:
+    case Op::False:
+    case Op::NullUninit:
+    case Op::Int:
+    case Op::Double:
+    case Op::String:
+    case Op::Vec:
+    case Op::Dict:
+    case Op::Keyset:
+    case Op::LazyClass:
+    case Op::EnumClassLabel:
+    case Op::NewDictArray:
+    case Op::NewStructDict:
+    case Op::NewVec:
+    case Op::NewKeysetArray:
+    case Op::AddElemC:
+    case Op::AddNewElemC:
+    case Op::NewCol:
+    case Op::NewPair:
+    case Op::ColFromArray:
+    case Op::CnsE:
+    case Op::ClsCns:
+    case Op::ClsCnsL:
+    case Op::ClsCnsD:
+    case Op::File:
+    case Op::Dir:
+    case Op::Method:
+    case Op::FuncCred:
+    case Op::ClassName:
+    case Op::EnumClassLabelName:
+    case Op::Concat:
+    case Op::ConcatN:
+    case Op::Add:
+    case Op::Sub:
+    case Op::Mul:
+    case Op::Div:
+    case Op::Mod:
+    case Op::Pow:
+    case Op::Not:
+    case Op::Same:
+    case Op::NSame:
+    case Op::Eq:
+    case Op::Neq:
+    case Op::Lt:
+    case Op::Lte:
+    case Op::Gt:
+    case Op::Gte:
+    case Op::Cmp:
+    case Op::BitAnd:
+    case Op::BitOr:
+    case Op::BitXor:
+    case Op::BitNot:
+    case Op::Shl:
+    case Op::Shr:
+    case Op::CastBool:
+    case Op::CastInt:
+    case Op::CastDouble:
+    case Op::CastString:
+    case Op::CastVec:
+    case Op::CastDict:
+    case Op::CastKeyset:
+    case Op::InstanceOf:
+    case Op::InstanceOfD:
+    case Op::Select:
+    case Op::DblAsBits:
+    case Op::IsLateBoundCls:
+    case Op::IsTypeStructC:
+    case Op::CombineAndResolveTypeStruct:
+    case Op::Clone:
+    case Op::Enter:
+    case Op::CGetL:
+    case Op::CGetQuietL:
+    case Op::CGetL2:
+    case Op::CUGetL:
+    case Op::PushL:
+    case Op::CGetG:
+    case Op::CGetS:
+    case Op::ClassGetC:
+    case Op::ClassGetTS:
+    case Op::ClassGetTSWithGenerics:
+    case Op::IssetL:
+    case Op::IsUnsetL:
+    case Op::IssetG:
+    case Op::IssetS:
+    case Op::IsTypeC:
+    case Op::IsTypeL:
+    case Op::InitProp:
+    case Op::NewObj:
+    case Op::NewObjD:
+    case Op::NewObjS:
+    case Op::LockObj:
+    case Op::BaseC:
+    case Op::BaseL:
+    case Op::BaseH:
+    case Op::BaseSC:
+    case Op::ResolveFunc:
+    case Op::ResolveMethCaller:
+    case Op::ResolveRFunc:
+    case Op::ResolveClsMethod:
+    case Op::ResolveClsMethodD:
+    case Op::ResolveClsMethodS:
+    case Op::ResolveRClsMethod:
+    case Op::ResolveRClsMethodD:
+    case Op::ResolveRClsMethodS:
+    case Op::ResolveClass:
+    case Op::IterBase:
+    case Op::IterGetKey:
+    case Op::IterGetValue:
+    case Op::IterSetValue:
+    case Op::IterInit:
+    case Op::IterNext:
+    case Op::IterFree:
+    case Op::This:
+    case Op::BareThis:
+    case Op::CheckThis:
+    case Op::ChainFaults:
+    case Op::OODeclExists:
+    case Op::SelfCls:
+    case Op::ParentCls:
+    case Op::LateBoundCls:
+    case Op::RecordReifiedGeneric:
+    case Op::ClassHasReifiedGenerics:
+    case Op::GetClsRGProp:
+    case Op::HasReifiedParent:
+    case Op::ReifiedInit:
+    case Op::CreateCl:
+    case Op::CreateCont:
+    case Op::ContEnter:
+    case Op::ContValid:
+    case Op::ContKey:
+    case Op::ContCurrent:
+    case Op::ContGetReturn:
+    case Op::GetMemoAgnosticImplicitContext:
+    case Op::Idx:
+    case Op::ArrayIdx:
+    case Op::ArrayMarkLegacy:
+    case Op::ArrayUnmarkLegacy:
+    case Op::Dim:
+    case Op::QueryM:
+    case Op::MemoGet:
+    case Op::MemoGetEager:
+    case Op::MemoSet:
+    case Op::MemoSetEager:
+    case Op::GetMemoKeyL:
+    case Op::AKExists:
+    case Op::AssertRATL:
+    case Op::AssertRATStk:
+      return !Cfg::Eval::EnableCodeCoveragePerBytecode;
+
+    case Op::PopL:
+    case Op::ThrowAsTypeStructException:
+    case Op::Print:
+    case Op::Exit:
+    case Op::Fatal:
+    case Op::StaticAnalysisError:
+    case Op::Jmp:
+    case Op::JmpZ:
+    case Op::JmpNZ:
+    case Op::Switch:
+    case Op::SSwitch:
+    case Op::RetC:
+    case Op::RetCSuspended:
+    case Op::RetM:
+    case Op::Throw:
+    case Op::PopG:
+    case Op::SetL:
+    case Op::SetS:
+    case Op::SetOpL:
+    case Op::SetOpS:
+    case Op::IncDecL:
+    case Op::IncDecS:
+    case Op::UnsetL:
+    case Op::UnsetG:
+    case Op::FCallFunc:
+    case Op::FCallFuncD:
+    case Op::FCallObjMethod:
+    case Op::FCallObjMethodD:
+    case Op::FCallClsMethod:
+    case Op::FCallClsMethodM:
+    case Op::FCallClsMethodD:
+    case Op::FCallClsMethodS:
+    case Op::FCallClsMethodSD:
+    case Op::FCallCtor:
+    case Op::Incl:
+    case Op::InclOnce:
+    case Op::Req:
+    case Op::ReqOnce:
+    case Op::ReqDoc:
+    case Op::Eval:
+    case Op::VerifyOutType:
+    case Op::VerifyParamType:
+    case Op::VerifyParamTypeTS:
+    case Op::VerifyRetTypeTS:
+    case Op::VerifyTypeTS:
+    case Op::CheckClsReifiedGenericMismatch:
+    case Op::CheckClsRGSoft:
+    case Op::NativeImpl:
+    case Op::ContRaise:
+    case Op::Yield:
+    case Op::YieldK:
+    case Op::ContCheck:
+    case Op::WHResult:
+    case Op::SetImplicitContextByValue:
+    case Op::Await:
+    case Op::AwaitAll:
+    case Op::AwaitLowPri:
+    case Op::CheckProp:
+    case Op::ThrowNonExhaustiveSwitch:
+    case Op::RaiseClassStringConversionNotice:
+    case Op::SetM:
+    case Op::SetRangeM:
+    case Op::IncDecM:
+    case Op::SetOpM:
+    case Op::UnsetM:
+      return true;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

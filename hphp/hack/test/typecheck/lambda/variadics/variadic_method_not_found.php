@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class D {
   public function __construct(private string $item) {}

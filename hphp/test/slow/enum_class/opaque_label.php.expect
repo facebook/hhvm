@@ -1,6 +1,6 @@
 WRAPPED
-resource(4) of type (OpaqueValue)
-Resource id #4
+enum class label (#A)
+EnumClassLabel
 
 UNWRAPPED
 string(1) "A"

@@ -5,21 +5,21 @@ class NonExistProp {
   public function __construct() {
  $x = "str";
  }
-  public function unsetIt() {
+  public function unsetIt() :mixed{
     unset($this->x);
   }
-  public function getX() {
+  public function getX() :mixed{
     return $this->x;
   }
 }
 
 // TODO: this will need a hopt to enable throw
-function thrower() {
+function thrower() :mixed{
   //var_dump(debug_backtrace());
   throw new Exception("Yo");
 }
 
-function test7() {
+function test7() :mixed{
   set_error_handler(thrower<>);
   try {
     $obj = new NonExistProp();
@@ -34,6 +34,6 @@ function test7() {
 
 
 <<__EntryPoint>>
-function main_unset() {
+function main_unset() :mixed{
 test7();
 }

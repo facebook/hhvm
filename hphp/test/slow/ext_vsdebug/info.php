@@ -1,16 +1,16 @@
 <?hh
 
-function getInfo($sym) {
-  $command = darray[
+function getInfo($sym) :mixed{
+  $command = dict[
     "command" => "info",
     "type" => "request",
-    "arguments" => darray[
+    "arguments" => dict[
       "object" => $sym,
       "threadId" => 1,
     ]];
 
   $seq = sendVsCommand($command);
-  $response = darray[
+  $response = dict[
     "type" => "response",
     "command" => "info",
     "success" => true,
@@ -26,22 +26,22 @@ function getInfo($sym) {
 require(__DIR__ . '/common.inc');
 $path = __FILE__ . ".test";
 
-$breakpoints = varray[
-   darray[
+$breakpoints = vec[
+   dict[
      "path" => __FILE__ . ".test",
-     "breakpoints" => varray[
-       darray["line" => 7, "calibratedLine" => 7, "condition" => ""],
-       darray["line" => 12, "calibratedLine" => 12, "condition" => ""],
+     "breakpoints" => vec[
+       dict["line" => 7, "calibratedLine" => 7, "condition" => ""],
+       dict["line" => 12, "calibratedLine" => 12, "condition" => ""],
      ]]
    ];
 
 $testProcess = vsDebugLaunch($path, true, $breakpoints);
 
 // Skip breakpoint resolution messages.
-skipMessages(count($breakpoints[0]{'breakpoints'}));
+skipMessages(count($breakpoints[0]['breakpoints']));
 
 // Verify we hit breakpoint 1.
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0]);
 
 // Expect info for a class named "A"
 getInfo('A');
@@ -55,7 +55,7 @@ getInfo('');
 resumeTarget();
 
 // Verify we hit breakpoint 2.
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[1]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][1]);
 
 // Expect info about the current stop location of thread 1.
 getInfo('');

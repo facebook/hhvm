@@ -1,10 +1,42 @@
 (library
  (name global_options)
  (wrapped false)
- (modules globalOptions)
- (libraries collections utils_find)
+ (modules
+  globalOptions)
+ (libraries
+  collections
+  custom_error_types
+  package_info
+  parser_options
+  saved_state_rollouts
+  utils_find)
  (preprocess
   (pps ppx_deriving.std)))
+
+(library
+  (name saved_state_rollouts)
+  (wrapped false)
+  (modules
+   saved_state_rollouts)
+  (libraries
+   saved_state_rollouts_rust
+   utils_core)
+  (preprocess
+    (pps ppx_deriving.std)))
+
+(library
+ (name saved_state_rollouts_rust)
+ (modules)
+ (wrapped false)
+ (foreign_archives options_ffi))
+
+(rule
+ (targets liboptions_ffi.a)
+ (deps
+  (source_tree %{workspace_root}/hack/src))
+ (locks /cargo)
+ (action
+  (run %{workspace_root}/hack/scripts/invoke_cargo.sh options_ffi options_ffi)))
 
 (executable
  (name discover)
@@ -14,32 +46,32 @@
   (pps ppx_deriving.std)))
 
 (rule
- (targets buildOptions.generated.ml)
+ (targets build_options.generated.ml)
  (action
   (run ./discover.exe)))
 
 (rule
- (target buildOptions.fb.ml)
+ (target build_options.fb.ml)
  (action
-  (copy# facebook/buildOptions.ml buildOptions.fb.ml)))
+  (copy# facebook/build_options.ml build_options.fb.ml)))
 
 (library
  (name build_options)
  (wrapped false)
- (modules buildOptions)
+ (modules build_options)
  (libraries
   (select
-   buildOptions.ml
+   build_options.ml
    from
-   (facebook -> buildOptions.fb.ml)
-   (-> buildOptions.generated.ml)))
+   (facebook -> build_options.fb.ml)
+   (-> build_options.generated.ml)))
  (preprocess
   (pps ppx_deriving.std)))
 
 (library
  (name glean_options)
  (wrapped false)
- (modules gleanOptions)
+ (modules glean_options)
  (libraries global_options)
  (preprocess
   (pps ppx_deriving.std)))
@@ -47,15 +79,25 @@
 (library
  (name parser_options)
  (wrapped false)
- (modules parserOptions)
- (libraries global_options)
+ (modules parserOptions experimental_features)
+ (libraries collections package_info utils_core)
+ (foreign_archives options_ffi)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
+ (name decl_fold_options)
+ (wrapped false)
+ (modules decl_fold_options)
+ (libraries
+   global_options)
  (preprocess
   (pps ppx_deriving.std)))
 
 (library
  (name decl_parser_options)
  (wrapped false)
- (modules declParserOptions)
+ (modules decl_parser_options)
  (libraries global_options parser_options)
  (preprocess
   (pps ppx_deriving.std)))
@@ -63,7 +105,7 @@
 (library
  (name symbol_write_options)
  (wrapped false)
- (modules symbolWriteOptions)
+ (modules symbol_write_options)
  (libraries global_options)
  (preprocess
   (pps ppx_deriving.std)))
@@ -72,6 +114,15 @@
  (name typechecker_options)
  (wrapped false)
  (modules typecheckerOptions)
+ (libraries
+  global_options)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
+ (name hh_config)
+ (wrapped false)
+ (modules hh_config)
  (libraries global_options)
  (preprocess
   (pps ppx_deriving.std)))

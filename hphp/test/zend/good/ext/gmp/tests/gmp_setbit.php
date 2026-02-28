@@ -30,9 +30,6 @@ $b = "";
 gmp_setbit(inout $b, 23);
 try { gmp_setbit(inout $b); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { gmp_setbit(inout $b, 23,1,1); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-try { gmp_setbit(inout $b,varray[]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-$a = varray[];
-try { gmp_setbit(inout $a,varray[]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 }

@@ -1,0 +1,2 @@
+ERROR: File "hash_mismatches.php", line 4, characters 16-25:
+The prompt has changed (digest: b15fa40e3b80f36c757c32444a1ff655, expected: faceb00c). Please re-run the AI Code Action. (Typing[4493])

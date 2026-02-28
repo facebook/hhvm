@@ -6,7 +6,7 @@ let rec mkdtemp ~skip_mocking ~retries =
   else
     let tmp_dir = Sys_utils.temp_dir_name in
     let tmp_dir = Path.make tmp_dir in
-    let name = Random_id.(short_string_with_alphabet alphanumeric_alphabet) in
+    let name = Random_id.short_string () in
     let tmp_dir = Path.concat tmp_dir name in
     try
       let () = Sys_utils.mkdir_p (Path.to_string tmp_dir) ~skip_mocking in

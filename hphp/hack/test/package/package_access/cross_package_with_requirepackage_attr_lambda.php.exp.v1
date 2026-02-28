@@ -1,0 +1,188 @@
+error: Typing[4472] Cannot access function pkg2_call defined in package pkg2 which may not be available [1]
+-> pkg2_call is defined in cross_package_with_requirepackage_attr_lambda.php--b.php [2]
+-> pkg2_call belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_with_requirepackage_attr_lambda.php--a.php:56:7
+    54 |     // Lambda calling pkg2 without package loaded — error
+    55 |     $f = () ==> {
+[1] 56 |       pkg2_call(); // error
+    57 |     };
+    58 | 
+
+cross_package_with_requirepackage_attr_lambda.php--b.php:4:10
+     1 | <?hh
+[3]  2 | <<file: __PackageOverride('pkg2')>>
+     3 | 
+[2]  4 | function pkg2_call(): void {}
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot reference this __RequirePackage function [1]
+-> This function is marked with __RequirePackage("pkg2") [2]
+-> the current file belongs to package pkg1 [3]
+
+cross_package_with_requirepackage_attr_lambda.php--a.php:61:16
+    10 | 
+    11 | class Receiver {
+[2] 12 |   <<__RequirePackage("pkg2")>>
+    13 |   public function invokedInPkg2((function(): void) $fn): void {
+    14 |     $fn();
+       :
+    59 |     // Even passing to a method with __RequirePackage doesn't help;
+    60 |     $receiver = new Receiver();
+[1] 61 |     $receiver->invokedInPkg2(() ==> {
+    62 |       pkg2_call(); // error
+    63 |     });
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[3]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot access function pkg2_call defined in package pkg2 which may not be available [1]
+-> pkg2_call is defined in cross_package_with_requirepackage_attr_lambda.php--b.php [2]
+-> pkg2_call belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_with_requirepackage_attr_lambda.php--a.php:62:7
+    60 |     $receiver = new Receiver();
+    61 |     $receiver->invokedInPkg2(() ==> {
+[1] 62 |       pkg2_call(); // error
+    63 |     });
+    64 | 
+
+cross_package_with_requirepackage_attr_lambda.php--b.php:4:10
+     1 | <?hh
+[3]  2 | <<file: __PackageOverride('pkg2')>>
+     3 | 
+[2]  4 | function pkg2_call(): void {}
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot reference this __RequirePackage function [1]
+-> This function is marked with __RequirePackage("pkg3") [2]
+-> the current file belongs to package pkg1 [3]
+-> package pkg2 is assumed to be deployed here [4]
+-> pkg2 includes pkg1 via its definition [5]
+
+cross_package_with_requirepackage_attr_lambda.php--a.php:86:16
+    15 |   }
+    16 | 
+[2] 17 |   <<__RequirePackage('pkg3')>>
+    18 |   public function invokedInPkg3((function(): void) $fn): void {
+    19 |     $fn();
+       :
+    79 |   }
+    80 | 
+[4] 81 |   <<__RequirePackage('pkg2')>>
+    82 |   public function handleMixedPackages2(): void {
+    83 |     $receiver = new Receiver();
+    84 | 
+    85 |     // A package 2 should not be able to call anything package 3
+[1] 86 |     $receiver->invokedInPkg3(() ==> {
+    87 |       pkg3_call(); // error
+    88 |     });
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[3]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+       :
+     9 |     "//cross_package_basic_foo.php",
+    10 | ]
+[5] 11 | includes = ["pkg1"]
+    12 | soft_includes=["pkg2_soft"]
+    13 | 
+
+error: Typing[4472] Cannot access function pkg3_call defined in package pkg3 which may not be available [1]
+-> pkg3_call is defined in cross_package_with_requirepackage_attr_lambda.php--c.php [2]
+-> pkg3_call belongs to package pkg3 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+-> package pkg2 is assumed to be deployed here [5]
+-> pkg2 includes pkg1 via its definition [6]
+
+cross_package_with_requirepackage_attr_lambda.php--a.php:87:7
+    79 |   }
+    80 | 
+[5] 81 |   <<__RequirePackage('pkg2')>>
+    82 |   public function handleMixedPackages2(): void {
+    83 |     $receiver = new Receiver();
+    84 | 
+    85 |     // A package 2 should not be able to call anything package 3
+    86 |     $receiver->invokedInPkg3(() ==> {
+[1] 87 |       pkg3_call(); // error
+    88 |     });
+    89 | 
+
+cross_package_with_requirepackage_attr_lambda.php--c.php:3:10
+     1 | <?hh
+[3]  2 | <<file: __PackageOverride('pkg3')>>
+[2]  3 | function pkg3_call(): void {}
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+       :
+     9 |     "//cross_package_basic_foo.php",
+    10 | ]
+[6] 11 | includes = ["pkg1"]
+    12 | soft_includes=["pkg2_soft"]
+    13 | 
+
+error: Typing[4472] Cannot access function pkg3_call defined in package pkg3 which may not be available [1]
+-> pkg3_call is defined in cross_package_with_requirepackage_attr_lambda.php--c.php [2]
+-> pkg3_call belongs to package pkg3 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+-> package pkg2 is assumed to be deployed here [5]
+-> pkg2 includes pkg1 via its definition [6]
+
+cross_package_with_requirepackage_attr_lambda.php--a.php:92:7
+    79 |   }
+    80 | 
+[5] 81 |   <<__RequirePackage('pkg2')>>
+    82 |   public function handleMixedPackages2(): void {
+    83 |     $receiver = new Receiver();
+       :
+    90 |     // should reject pkg3 calls in a lambda
+    91 |     $receiver->invokedInPkg2(() ==> {
+[1] 92 |       pkg3_call(); // error
+    93 |     });
+    94 |   }
+
+cross_package_with_requirepackage_attr_lambda.php--c.php:3:10
+     1 | <?hh
+[3]  2 | <<file: __PackageOverride('pkg3')>>
+[2]  3 | function pkg3_call(): void {}
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+       :
+     9 |     "//cross_package_basic_foo.php",
+    10 | ]
+[6] 11 | includes = ["pkg1"]
+    12 | soft_includes=["pkg2_soft"]
+    13 | 
+
+6 errors found

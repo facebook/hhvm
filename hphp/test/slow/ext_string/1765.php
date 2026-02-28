@@ -2,9 +2,9 @@
 
 
 <<__EntryPoint>>
-function main_1765() {
-var_dump(str_replace(varray[65], varray['a'], 'axAX'));
-var_dump(str_ireplace(varray[65], varray['a'], 'axAX'));
+function main_1765() :mixed{
+var_dump(str_replace(vec[65], vec['a'], 'axAX'));
+var_dump(str_ireplace(vec[65], vec['a'], 'axAX'));
 echo "**************************\n";
 var_dump(strpos('aA', 65));
 var_dump(strpos('aA', 'A'));

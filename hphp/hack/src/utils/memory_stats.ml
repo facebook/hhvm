@@ -16,7 +16,7 @@ let read_status pid_str =
   let colon = Str.regexp_string ":" in
   let to_pairs line =
     match Str.split colon line with
-    | [k; v] -> Some (Caml.String.trim k, Caml.String.trim v)
+    | [k; v] -> Some (Stdlib.String.trim k, Stdlib.String.trim v)
     | _ -> None
   in
   lines (Printf.sprintf "/proc/%s/status" pid_str)

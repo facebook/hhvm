@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class FA implements HH\FunctionAttribute {
@@ -14,12 +14,12 @@ class PA implements HH\ParameterAttribute {
 }
 
 <<FA>>
-function f(<<PA>> int $i) {}
+function f(<<PA>> int $i) :mixed{}
 
 <<FA(42)>>
-function g() {}
+function g() :mixed{}
 
-function reflect () {
+function reflect () :mixed{
   $rf = new ReflectionFunction("f");
   var_dump($rf->getAttributeClass(FA::class)->i); // 4
   $rg = new ReflectionFunction("g");
@@ -31,6 +31,6 @@ function reflect () {
 
 
 <<__EntryPoint>>
-function main_empty_attribute_default_arg_vs_missing() {
+function main_empty_attribute_default_arg_vs_missing() :mixed{
 echo reflect();
 }

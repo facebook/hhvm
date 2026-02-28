@@ -34,7 +34,7 @@ void throw_invalid_object_type(ObjectData* p) {
   throw_invalid_object_type(p->getClassName().c_str());
 }
 
-void throw_invalid_object_type(const Resource& p) {
+void throw_invalid_object_type(const OptResource& p) {
   throw_invalid_object_type(deref<ResourceData>(p));
 }
 

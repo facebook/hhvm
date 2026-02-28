@@ -8,25 +8,27 @@
 
 open Hh_prelude
 
-let tcopt_with_shallow =
-  GlobalOptions.{ default with tco_shallow_class_decl = true }
-
-let errors_to_string (errors : Errors.t) : string list =
-  let error_to_string (error : Errors.error) : string =
-    let error = User_error.to_absolute_for_test error in
-    let code = User_error.get_code error in
+let errors_to_string (errors : Diagnostics.t) : string list =
+  let error_to_string (error : Diagnostics.diagnostic) : string =
+    let error = User_diagnostic.to_absolute_for_test error in
+    let code = User_diagnostic.get_code error in
     let message =
-      error |> User_error.to_list |> List.map ~f:snd |> String.concat ~sep:"; "
+      error
+      |> User_diagnostic.to_list
+      |> List.map ~f:snd
+      |> String.concat ~sep:"; "
     in
     Printf.sprintf "[%d] %s" code message
   in
-  errors |> Errors.get_sorted_error_list |> List.map ~f:error_to_string
+  errors
+  |> Diagnostics.get_sorted_diagnostic_list
+  |> List.map ~f:error_to_string
 
 let test_unsaved_symbol_change ~(sqlite : bool) () =
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
 
   let { Common_setup.ctx; foo_path; foo_contents; _ } =
-    Common_setup.setup ~sqlite tcopt_with_shallow ~xhp_as:`Namespaces
+    Common_setup.setup ~sqlite GlobalOptions.default ~xhp_as:`Namespaces
   in
 
   (* Compute tast as-is *)
@@ -36,23 +38,26 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
       ~path:foo_path
       ~contents:foo_contents
   in
-  let { Tast_provider.Compute_tast_and_errors.telemetry; errors; _ } =
-    Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
+  let { Tast_provider.Compute_tast_and_errors.telemetry; diagnostics; _ } =
+    Tast_provider.compute_tast_and_errors_unquarantined
+      ~ctx
+      ~entry
+      ~error_filter:Tast_provider.ErrorFilter.default
   in
   Asserter.Int_asserter.assert_equals
     1
-    (Telemetry_test_utils.int_exn telemetry "get_ast.count")
+    (Telemetry_test_utils.int_exn telemetry "Ast_provider_get.count")
     "unsaved: compute_tast(class Foo) should have this many calls to get_ast";
   Asserter.Int_asserter.assert_equals
     1
-    (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
+    (Telemetry_test_utils.int_exn telemetry "Disk_cat.count")
     "unsaved: compute_tast(class Foo) should have this many calls to disk_cat";
   Asserter.String_asserter.assert_list_equals
     [
       "[2006] Could not find `foo`.; Did you mean `~~F~~oo` instead (which only differs by case)?";
       "[4110] Invalid return type; Expected `int`; But got `string`";
     ]
-    (errors_to_string errors)
+    (errors_to_string diagnostics)
     "unsaved: compute_tast(class Foo) should have these errors";
 
   (* Make an unsaved change which affects a symbol definition that's used *)
@@ -65,16 +70,19 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
       ~path:foo_path
       ~contents:foo_contents1
   in
-  let { Tast_provider.Compute_tast_and_errors.telemetry; errors; _ } =
-    Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
+  let { Tast_provider.Compute_tast_and_errors.telemetry; diagnostics; _ } =
+    Tast_provider.compute_tast_and_errors_unquarantined
+      ~ctx
+      ~entry
+      ~error_filter:Tast_provider.ErrorFilter.default
   in
   Asserter.Int_asserter.assert_equals
     0
-    (Telemetry_test_utils.int_exn telemetry "get_ast.count")
+    (Telemetry_test_utils.int_exn telemetry "Ast_provider_get.count")
     "unsaved: compute_tast(class Foo1) should have this many calls to get_ast";
   Asserter.Int_asserter.assert_equals
     0
-    (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
+    (Telemetry_test_utils.int_exn telemetry "Disk_cat.count")
     "unsaved: compute_tast(class Foo1) should have this many calls to disk_cat";
   Asserter.String_asserter.assert_list_equals
     [
@@ -82,7 +90,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
       "[2049] Unbound name: `foo`";
       "[4110] Invalid return type; Expected `int`; But got `string`";
     ]
-    (errors_to_string errors)
+    (errors_to_string diagnostics)
     "unsaved: compute_tast(class Foo1) should have these errors";
 
   (* go back to original unsaved content *)
@@ -92,23 +100,26 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
       ~path:foo_path
       ~contents:foo_contents
   in
-  let { Tast_provider.Compute_tast_and_errors.telemetry; errors; _ } =
-    Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
+  let { Tast_provider.Compute_tast_and_errors.telemetry; diagnostics; _ } =
+    Tast_provider.compute_tast_and_errors_unquarantined
+      ~ctx
+      ~entry
+      ~error_filter:Tast_provider.ErrorFilter.default
   in
   Asserter.Int_asserter.assert_equals
     1
-    (Telemetry_test_utils.int_exn telemetry "get_ast.count")
+    (Telemetry_test_utils.int_exn telemetry "Ast_provider_get.count")
     "unsaved: compute_tast(class Foo again) should have this many calls to get_ast";
   Asserter.Int_asserter.assert_equals
     0
-    (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
+    (Telemetry_test_utils.int_exn telemetry "Disk_cat.count")
     "unsaved: compute_tast(class Foo again) should have this many calls to disk_cat";
   Asserter.String_asserter.assert_list_equals
     [
       "[2006] Could not find `foo`.; Did you mean `~~F~~oo` instead (which only differs by case)?";
       "[4110] Invalid return type; Expected `int`; But got `string`";
     ]
-    (errors_to_string errors)
+    (errors_to_string diagnostics)
     "unsaved: compute_tast(class Foo again) should have these errors";
 
   true
@@ -160,7 +171,7 @@ let test_canon_names_internal
 let test_canon_names_in_entries () =
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
   let { Common_setup.ctx; foo_path; foo_contents; _ } =
-    Common_setup.setup tcopt_with_shallow ~sqlite:false ~xhp_as:`Namespaces
+    Common_setup.setup GlobalOptions.default ~sqlite:false ~xhp_as:`Namespaces
   in
 
   test_canon_names_internal
@@ -218,7 +229,7 @@ let test_canon_names_in_entries () =
 let test_dupe_setup ~(sqlite : bool) =
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
   let setup =
-    Common_setup.setup ~sqlite tcopt_with_shallow ~xhp_as:`Namespaces
+    Common_setup.setup ~sqlite GlobalOptions.default ~xhp_as:`Namespaces
   in
   let sienv = SearchUtils.quiet_si_env in
   let ctx = setup.Common_setup.ctx in
@@ -234,15 +245,18 @@ let test_dupe_setup ~(sqlite : bool) =
       "class fOo"
       setup.Common_setup.foo_contents
   in
+  let contents =
+    Str.global_replace (Str.regexp "new module foo") "new module Foo" contents
+  in
   Disk.write_file
     ~file:(Relative_path.to_absolute setup.Common_setup.nonexistent_path)
     ~contents;
   let dupe =
-    ClientIdeIncremental.update_naming_tables_for_changed_file
+    ClientIdeIncremental.update_naming_tables_and_si
       ~ctx
       ~naming_table:setup.Common_setup.naming_table
       ~sienv
-      ~path:setup.Common_setup.nonexistent_path
+      ~changes:(Relative_path.Set.singleton setup.Common_setup.nonexistent_path)
   in
 
   (* The symbols should still be defined, despite duplicates *)
@@ -250,6 +264,14 @@ let test_dupe_setup ~(sqlite : bool) =
     (Some setup.Common_setup.foo_path)
     (Naming_provider.get_fun_path ctx "\\f1")
     "dupe: expected f1 to be in original location";
+  Asserter.Relative_path_asserter.assert_option_equals
+    (Some setup.Common_setup.foo_path)
+    (Naming_provider.get_module_path ctx "foo")
+    "dupe: expected module foo to be in original location";
+  Asserter.Relative_path_asserter.assert_option_equals
+    (Some setup.Common_setup.nonexistent_path)
+    (Naming_provider.get_module_path ctx "Foo")
+    "dupe: expected module Foo to be in the new location";
   Asserter.String_asserter.assert_option_equals
     (Some "\\f1")
     (Naming_provider.get_fun_canon_name ctx "\\F1")
@@ -258,7 +280,6 @@ let test_dupe_setup ~(sqlite : bool) =
     (Some "\\Foo")
     (Naming_provider.get_type_canon_name ctx "\\foo")
     "dupe: expected this canonical spelling of 'foo'";
-
   (setup, ctx, dupe)
 
 let test_dupe_then_delete_dupe ~(sqlite : bool) () =
@@ -267,12 +288,12 @@ let test_dupe_then_delete_dupe ~(sqlite : bool) () =
   (* Now we'll delete 'nonexistent.php'. *)
   Sys_utils.rm_dir_tree
     (Relative_path.to_absolute setup.Common_setup.nonexistent_path);
-  let (_unduped : ClientIdeIncremental.changed_file_results) =
-    ClientIdeIncremental.update_naming_tables_for_changed_file
+  let (_unduped : ClientIdeIncremental.update_result) =
+    ClientIdeIncremental.update_naming_tables_and_si
       ~ctx
       ~naming_table:dupe.ClientIdeIncremental.naming_table
       ~sienv:dupe.ClientIdeIncremental.sienv
-      ~path:setup.Common_setup.nonexistent_path
+      ~changes:(Relative_path.Set.singleton setup.Common_setup.nonexistent_path)
   in
 
   Asserter.Relative_path_asserter.assert_option_equals
@@ -287,7 +308,14 @@ let test_dupe_then_delete_dupe ~(sqlite : bool) () =
     (Some "\\Foo")
     (Naming_provider.get_type_canon_name ctx "\\foo")
     "unduped: expected this canonical spelling for 'foo'";
-
+  Asserter.Relative_path_asserter.assert_option_equals
+    (Some setup.Common_setup.foo_path)
+    (Naming_provider.get_module_path ctx "foo")
+    "dupe: expected module foo to be in original location";
+  Asserter.Relative_path_asserter.assert_option_equals
+    None
+    (Naming_provider.get_module_path ctx "Foo")
+    "dupe: expected module Foo to be deleted";
   true
 
 let test_dupe_then_delete_original ~(sqlite : bool) () =
@@ -295,12 +323,12 @@ let test_dupe_then_delete_original ~(sqlite : bool) () =
 
   (* Now we'll delete the original 'foo.php'. *)
   Sys_utils.rm_dir_tree (Relative_path.to_absolute setup.Common_setup.foo_path);
-  let (_unduped : ClientIdeIncremental.changed_file_results) =
-    ClientIdeIncremental.update_naming_tables_for_changed_file
+  let (_unduped : ClientIdeIncremental.update_result) =
+    ClientIdeIncremental.update_naming_tables_and_si
       ~ctx
       ~naming_table:dupe.ClientIdeIncremental.naming_table
       ~sienv:dupe.ClientIdeIncremental.sienv
-      ~path:setup.Common_setup.foo_path
+      ~changes:(Relative_path.Set.singleton setup.Common_setup.foo_path)
   in
 
   Asserter.Relative_path_asserter.assert_option_equals
@@ -315,12 +343,20 @@ let test_dupe_then_delete_original ~(sqlite : bool) () =
     (Some "\\fOo")
     (Naming_provider.get_type_canon_name ctx "\\foo")
     "unduped: expected this canonical spelling of 'foo'";
+  Asserter.Relative_path_asserter.assert_option_equals
+    None
+    (Naming_provider.get_module_path ctx "foo")
+    "dupe: expected module foo to be deleted";
+  Asserter.Relative_path_asserter.assert_option_equals
+    (Some setup.Common_setup.nonexistent_path)
+    (Naming_provider.get_module_path ctx "Foo")
+    "dupe: expected module Foo to be in duplicated location";
   true
 
 let test_xhp_name_mangling ~(sqlite : bool) () =
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
   let setup =
-    Common_setup.setup ~sqlite tcopt_with_shallow ~xhp_as:`MangledSymbols
+    Common_setup.setup ~sqlite GlobalOptions.default ~xhp_as:`MangledSymbols
   in
   let sienv = SearchUtils.quiet_si_env in
   let ctx = setup.Common_setup.ctx in
@@ -333,21 +369,26 @@ let test_xhp_name_mangling ~(sqlite : bool) () =
   Disk.write_file
     ~file:(Relative_path.to_absolute setup.Common_setup.nonexistent_path)
     ~contents;
-  let { ClientIdeIncremental.new_file_info; _ } =
-    ClientIdeIncremental.update_naming_tables_for_changed_file
+  let { ClientIdeIncremental.changes; _ } =
+    ClientIdeIncremental.update_naming_tables_and_si
       ~ctx
       ~naming_table:setup.Common_setup.naming_table
       ~sienv
-      ~path:setup.Common_setup.nonexistent_path
+      ~changes:(Relative_path.Set.singleton setup.Common_setup.nonexistent_path)
+  in
+  let new_ids =
+    match changes with
+    | [{ FileInfo.new_ids; _ }] -> new_ids
+    | _ -> failwith "expected one change"
   in
 
   Asserter.String_asserter.assert_option_equals
     (Some "\\:my:xhp:cls")
     Option.(
-      new_file_info
+      new_ids
       >>| (fun info -> info.FileInfo.classes)
-      >>= List.find ~f:(fun (_, name, _) -> String.equal name "\\:my:xhp:cls")
-      >>| fun (_, n, _) -> n)
+      >>= List.find ~f:(fun id -> String.equal id.FileInfo.name "\\:my:xhp:cls")
+      >>| fun id -> id.FileInfo.name)
     "xhp_name_mangling: expected new file info to contain `\\:my:xhp:cls`";
   true
 

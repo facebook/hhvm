@@ -1,9 +1,9 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class base {
   protected static function __xhpAttributeDeclaration()[]: darray {
-    return darray[];
+    return dict[];
   }
 }
 
@@ -17,6 +17,6 @@ class :foo extends base {
 }
 
 <<__EntryPoint>>
-function main_rquired_attr() {
+function main_rquired_attr() :mixed{
   :foo::attr_decl();
 }

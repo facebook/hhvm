@@ -48,6 +48,8 @@ struct FieldSpec {
   }
   Class* adapter{};
   bool isWrapped{}; // true if the field has field_wrapper annotation
+  bool isTerse{}; // true if the field is marked as terse
+  bool isTypeWrapped{}; // true if a field has wrapped type
   bool noTypeCheck{}; // If this field doesn't need type checking
                       // (conservatively).
   static FieldSpec compile(const Array& fieldSpec, bool topLevel);
@@ -60,14 +62,17 @@ private:
 struct StructSpec {
   FixedVector<FieldSpec> fields;
   const Func* withDefaultValuesFunc;
+  Optional<const Func*> clearTerseFieldsFunc;
+  bool isStrictUnion{false};
 
-  Object newObject(Class* cls) const;
+  Object newObject(Class& cls) const;
+  void clearTerseFields(const Class& cls, const Object& obj) const;
 };
 
 // Provides safe access to specifications.
 struct SpecHolder {
   // The returned reference is valid at least while this SpecHolder is alive.
-  const StructSpec& getSpec(const Class* cls);
+  const StructSpec& getSpec(const Class& cls);
 
 private:
   // Non-static spec, or empty if source spec is static.

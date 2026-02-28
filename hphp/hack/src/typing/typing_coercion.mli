@@ -8,18 +8,25 @@
 
 val coerce_type :
   ?coerce_for_op:bool ->
-  ?coerce:Typing_logic.coercion_direction option ->
+  ?is_dynamic_aware:bool ->
+  ?ignore_readonly:bool ->
   Pos.t ->
   Typing_defs.Reason.ureason ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
-  Typing_defs.locl_ty Typing_defs.possibly_enforced_ty ->
+  Typing_defs.locl_ty ->
+  Typing_defs.enforcement ->
   Typing_error.Callback.t ->
   Typing_env_types.env * Typing_error.t option
 
-val try_coerce :
-  ?coerce:Typing_logic.coercion_direction option ->
+val coerce_type_like_strip :
+  Pos.t ->
+  Typing_defs.Reason.ureason ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
-  Typing_defs.locl_ty Typing_defs.possibly_enforced_ty ->
-  Typing_env_types.env option
+  Typing_defs.locl_ty ->
+  Typing_error.Callback.t ->
+  Typing_env_types.env
+  * (Typing_defs.locl_ty * Typing_defs.locl_ty) option
+  * bool
+  * Typing_defs.locl_ty

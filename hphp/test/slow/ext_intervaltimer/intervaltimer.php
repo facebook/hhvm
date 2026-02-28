@@ -1,13 +1,13 @@
 <?hh
 
-function busy() { sleep(0); }
+function busy() :mixed{ sleep(0); }
 
 class Ref {
   public function __construct(public int $cnt)[] {}
 }
 
 <<__EntryPoint>>
-function main_intervaltimer() {
+function main_intervaltimer() :mixed{
 $x1 = new Ref(0);
 $t1 = new IntervalTimer(
   0.1, 0.1,

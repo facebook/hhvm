@@ -3,7 +3,7 @@
 
 // Create two temporary files.
 <<__EntryPoint>>
-function main_stream_copy_to_stream_seek() {
+function main_stream_copy_to_stream_seek() :mixed{
 $file1 = tmpfile();
 $file2 = tmpfile();
 fwrite($file1, 'input');

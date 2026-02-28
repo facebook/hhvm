@@ -32,7 +32,7 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
-TRACE_SET_MOD(vasm_graph_color);
+TRACE_SET_MOD(vasm_graph_color)
 
 namespace HPHP::jit {
 
@@ -131,7 +131,7 @@ enum RegClass {
 struct None {};
 struct SpillSlot { size_t slot; };
 struct SpillSlotWide { size_t slot; };
-using Color = boost::variant<None, PhysReg, SpillSlot, SpillSlotWide>;
+using Color = std::variant<None, PhysReg, SpillSlot, SpillSlotWide>;
 
 // Rematerialization info for a particular Vreg
 struct RematInfo {
@@ -677,27 +677,27 @@ void set_reg_class_bits(State& state, Vreg r, RegClass cls) {
   }
 }
 
-// Wrappers around boost::get<>. Will assert if you try to retrieve a value from
+// Wrappers around std::get<>. Will assert if you try to retrieve a value from
 // the color that isn't present (so check before calling).
-bool is_color_none(Color c) { return boost::get<None>(&c); }
-bool is_color_reg(Color c) { return boost::get<PhysReg>(&c); }
-bool is_color_spill_slot(Color c) { return boost::get<SpillSlot>(&c); }
-bool is_color_spill_slot_wide(Color c) { return boost::get<SpillSlotWide>(&c); }
+bool is_color_none(Color c) { return std::get_if<None>(&c); }
+bool is_color_reg(Color c) { return std::get_if<PhysReg>(&c); }
+bool is_color_spill_slot(Color c) { return std::get_if<SpillSlot>(&c); }
+bool is_color_spill_slot_wide(Color c) { return std::get_if<SpillSlotWide>(&c); }
 
 PhysReg color_reg(Color c) {
-  auto const r = boost::get<PhysReg>(&c);
+  auto const r = std::get_if<PhysReg>(&c);
   assertx(r);
   return *r;
 }
 
 SpillSlot color_spill_slot(Color c) {
-  auto const s = boost::get<SpillSlot>(&c);
+  auto const s = std::get_if<SpillSlot>(&c);
   assertx(s);
   return *s;
 }
 
 SpillSlotWide color_spill_slot_wide(Color c) {
-  auto const s = boost::get<SpillSlotWide>(&c);
+  auto const s = std::get_if<SpillSlotWide>(&c);
   assertx(s);
   return *s;
 }
@@ -1117,12 +1117,12 @@ const LoopInfo& loop_info(const State& state, Vlabel loop) {
   auto const it = state.loopInfo.find(loop);
   assertx(it != state.loopInfo.end());
   return it->second;
-};
+}
 LoopInfo& loop_info(State& state, Vlabel loop) {
   auto const it = state.loopInfo.find(loop);
   assertx(it != state.loopInfo.end());
   return it->second;
-};
+}
 
 // A block is a loop header if we have loop info for it (since loops are keyed
 // by their header).
@@ -1554,14 +1554,14 @@ compute_place_constants_block_info(State& state) {
         invalidate_cached_operands(inst);
       } else {
         for (auto const r : uses_set_cached(state, inst)) {
-          if (unit.regToConst.count(r)) uses.add(r);
+          if (unit.regToConst.contains(r)) uses.add(r);
         }
       }
 
       // A constant should never have a definition (before we place them).
       if (debug) {
         for (auto const r : defs_set_cached(state, inst)) {
-          always_assert(!unit.regToConst.count(r));
+          always_assert(!unit.regToConst.contains(r));
         }
       }
     }
@@ -1756,7 +1756,7 @@ size_t find_first_invalid_block_index(const Vblock& block) {
   auto i = block.code.size();
   while (i > 0 && !valid(block.code[i-1].op)) --i;
   return i;
-};
+}
 
 // Look for any blocks where all the successors of the block define
 // the same constant at the front. Hoist those definitions up into the
@@ -2111,6 +2111,58 @@ std::pair<VregSet, BlockSet> place_constants(State& state) {
 
 //////////////////////////////////////////////////////////////////////
 
+// Make every phijmp operand unique so phi lowering and penalty biasing
+// can reason about each edge independently.
+void split_phijmp_duplicates(State& state) {
+  auto& unit = state.unit;
+
+  for (auto const b : state.rpo) {
+    auto& block = unit.blocks[b];
+    if (block.code.empty()) continue;
+    auto& inst = block.code.back();
+    if (inst.op != Vinstr::phijmp) continue;
+
+    auto& uses = unit.tuples[inst.phijmp_.uses];
+    if (uses.size() < 2) continue;
+
+    VregList copySrcs;
+    VregList copyDsts;
+    jit::fast_set<Vreg> seen;
+
+    for (size_t i = 0; i < uses.size(); ++i) {
+      auto const src = uses[i];
+      if (seen.insert(src).second) continue;
+
+      auto const tmp = unit.makeReg();
+      uses[i] = tmp;
+      copySrcs.emplace_back(src);
+      copyDsts.emplace_back(tmp);
+
+      if (!src.isPhys() && src < state.regInfo.size()) {
+        auto const& infoPtr = state.regInfo[src];
+        if (infoPtr) reg_info_create(state, tmp) = *infoPtr;
+      }
+    }
+
+    if (copySrcs.empty()) continue;
+    invalidate_cached_operands(inst);
+    vmodify(
+      unit, b, block.code.size() - 1,
+      [&] (Vout& v) {
+        if (copySrcs.size() == 1) {
+          v << copy{copySrcs[0], copyDsts[0]};
+        } else {
+          v << copyargs{
+            unit.makeTuple(std::move(copySrcs)),
+            unit.makeTuple(std::move(copyDsts))
+          };
+        }
+        return 0;
+      }
+    );
+  }
+}
+
 void prepare_unit(State& state) {
   // Constant materialization requires knowing where any loops are.
   find_loops(state);
@@ -2132,6 +2184,8 @@ void prepare_unit(State& state) {
     if (!map.second.isPhys()) continue;
     reg_info_create(state, map.first);
   }
+
+  split_phijmp_duplicates(state);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2744,6 +2798,17 @@ void infer_register_classes(State& state) {
  * recursion.
  */
 
+// Is this instruction a (simple) memory read?
+bool is_mem_read(const Vinstr& inst) {
+  // We're looking for instructions which read from memory and nothing
+  // else.
+  return
+    !isPure(inst) &&
+    !isCall(inst) &&
+    touchesMemory(inst.op) &&
+    !writesMemory(inst.op);
+}
+
 // Comparators for instruction source types
 namespace detail {
 
@@ -2766,6 +2831,7 @@ bool src_cmp(const Vunit& unit, VcallArgsId a1, VcallArgsId a2) {
 bool compare_remat_insts(const Vunit& unit,
                          const Vinstr& inst1,
                          const Vinstr& inst2) {
+  if (&inst1 == &inst2) return true;
   if (inst1.op != inst2.op) return false;
 
   switch (inst1.op) {
@@ -2795,6 +2861,25 @@ bool compare_remat_insts(const Vunit& unit,
 #undef U
 #undef I
 #undef O
+  }
+
+  // Special case: If these instructions (which now know are
+  // identical) represent a memory read, they must have an identical
+  // origin, or at least the same PureLoad memory effects. It's
+  // possible for two vasm instructions to be identical, but represent
+  // different memory effects. Once we canonicalize to a single
+  // defining instruction, we'll lose one of the memory effects or the
+  // other, and we won't be able to calculate potential write
+  // conflicts properly. So, if this is a memory read, extend the
+  // notion of equality to their memory effects as well.
+  if (inst1.origin != inst2.origin && is_mem_read(inst1)) {
+    if (!inst1.origin || !inst2.origin) return false;
+    auto const effects1 = memory_effects(*inst1.origin);
+    auto const effects2 = memory_effects(*inst2.origin);
+    auto const load1 = std::get_if<PureLoad>(&effects1);
+    auto const load2 = std::get_if<PureLoad>(&effects2);
+    if (!load1 || !load2) return false;
+    if (load1->src != load2->src) return false;
   }
 
   return true;
@@ -3094,17 +3179,6 @@ RematLookup find_defining_inst_for_remat(State& state,
   }
 }
 
-// Is this instruction a (simple) memory read?
-bool is_mem_read(const Vinstr& inst) {
-  // We're looking for instructions which read from memory and nothing
-  // else.
-  return
-    !isPure(inst) &&
-    !isCall(inst) &&
-    touchesMemory(inst.op) &&
-    !writesMemory(inst.op);
-}
-
 // Similar to find_defining_inst_for_remat, but first checks if a
 // cached entry for the Vreg exists. If not, it will call
 // find_defining_inst_for_remat to obtain one, then cache it and
@@ -3167,7 +3241,7 @@ RematLookup find_defining_inst_for_remat_cached(State& state,
       // read from a single (abstract) location. Anything more
       // complicated is beyond our abilities to track safely.
       auto const effects = memory_effects(*result.inst.origin);
-      auto const load = boost::get<PureLoad>(&effects);
+      auto const load = std::get_if<PureLoad>(&effects);
       if (!load || !load->src.isSingleLocation()) return false;
     }
     // Can't rematerialization instructions which define any physical
@@ -3197,10 +3271,13 @@ RematInfo find_defining_inst_for_remat_enter(State& state,
     find_defining_inst_for_remat_cached(state, r, b, instIdx, recursives);
 
   // Remove any ephemeral entries in the cache from mutually recursive
-  // definitions. They're not safe to keep across lookups. We want to
-  // store them during a single lookup to avoid exponential path
-  // behavior.
+  // definitions. They're not safe to keep across lookups, because their
+  // results are incomplete. We still want to store them during a single
+  // lookup to avoid exponential path behavior. The final result for `r`
+  // is complete though, so keep it. This avoids quadratic lookup behavior
+  // for large cycles.
   for (auto const recur : recursives) {
+    if (recur == r) continue;
     assertx(!recur.isPhys());
     auto& info = reg_info(state, recur);
     assertx(info.cachedRemat);
@@ -3769,10 +3846,10 @@ AliasClass mem_writes_for_inst(const Vinstr& inst) {
     [] (const PureStore& a)       { return a.dst; },
     [] (const PureInlineCall& a)  { return a.base; },
     [] (const CallEffects& e)     {
-      return e.kills | e.actrec | e.outputs | AHeapAny | ARdsAny;
+      return e.kills | e.uninits | e.actrec | e.outputs | AHeapAny | ARdsAny;
     },
     [] (const ReturnEffects& e)   { return e.kills; },
-    [] (const ExitEffects& e)     { return e.kills; },
+    [] (const ExitEffects& e)     { return e.kills | e.uninits; },
     [] (const IrrelevantEffects&) { return AEmpty; },
     [] (const UnknownEffects&)    { return AUnknown; }
   );
@@ -4181,7 +4258,7 @@ bool mem_read_available_recurse(State& state,
           assertx(inst.origin);
           if (debug) {
             auto const DEBUG_ONLY effects = memory_effects(*inst.origin);
-            auto const DEBUG_ONLY otherLoad = boost::get<PureLoad>(&effects);
+            auto const DEBUG_ONLY otherLoad = std::get_if<PureLoad>(&effects);
             always_assert(otherLoad && otherLoad->src.isSingleLocation());
             always_assert(load.maybe(otherLoad->src));
           }
@@ -4209,7 +4286,7 @@ bool mem_read_available(State& state,
   assertx(is_mem_read(instr));
   assertx(instr.origin);
   auto const effects = memory_effects(*instr.origin);
-  auto const pureLoad = boost::get<PureLoad>(&effects);
+  auto const pureLoad = std::get_if<PureLoad>(&effects);
   assertx(pureLoad && pureLoad->src.isSingleLocation());
 
   return mem_read_available_recurse(
@@ -4246,7 +4323,7 @@ Vinstr reload_with_remat(State& state,
   // If the rematerialization instruction is a reload, we'll just
   // return it, so no further checks are needed. Otherwise we can
   // cache an instruction which may be situationally usable, so we
-  // need to do these checks everytime (if the instruction is never
+  // need to do these checks every time (if the instruction is never
   // useful, we should have a reload stored here already).
   if (remat.instr.op == Vinstr::reload) return reload{src, dst};
 
@@ -9719,10 +9796,7 @@ struct FreeRegs {
   // chooses the color, and does not mark it as taken or modify any
   // other internal state. If the Vreg represents a spill, it will be
   // chosen from the pre-computed spill colors. Otherwise, a physical
-  // register is chosen to try to maximize satisfied hints. A physical
-  // register which is part of `physUses' will not be selected (doing
-  // so would not be valid, as this represents the physical registers
-  // used by this instruction, which must remain as they are).
+  // register is chosen to try to maximize satisfied hints.
   //
   // For the register case, the heuristic may decide to migrate a
   // (already taken) physical register to a different (free) physical
@@ -9747,7 +9821,7 @@ struct FreeRegs {
   };
 
   template <typename W>
-  Coloring choose(Vreg r, RegSet physUses, W&& moveWeight) const {
+  Coloring choose(Vreg r, W&& moveWeight) const {
     // Find best physical register for a Vreg, choosing from the set
     // of registers in "mask".
     auto const findBest = [&] (RegSet mask) -> Coloring {
@@ -9874,7 +9948,7 @@ struct FreeRegs {
                 info.penaltyIdx < state->penalties.size());
         auto const& penalties = state->penalties[info.penaltyIdx];
         return buildPhysWeights(
-          r, mask - physUses, [&] (PhysReg r) { return penalties[r]; }
+          r, mask, [&] (PhysReg r) { return penalties[r]; }
         );
       }();
 
@@ -9907,7 +9981,7 @@ struct FreeRegs {
         // Build a candidate list to move the Vreg to. We only support
         // moving to a free physical register.
         auto const moveWeights = buildPhysWeights(
-          assignedTo, (mask & regs) - physUses,
+          assignedTo, (mask & regs),
           [&] (PhysReg r) { return movePenalties[r]; }
         );
 
@@ -10363,7 +10437,6 @@ size_t color_inst(State& state,
     // will move a Vreg if it resides in the destination.
     auto const coloring = free.choose(
       r,
-      uses.physRegs(),
       [&] (Vreg from, Vreg to) -> int64_t {
         // Move weight calculation. This matches the logic below for
         // determining whether a copy is actually needed.
@@ -10844,8 +10917,7 @@ size_t color_block_initialize(
     // Choose a physical register for this Vreg. "Moving" here is
     // free, because it just results in a change to a previous
     // assignment.
-    auto const coloring =
-      free.choose(r, RegSet{}, [] (Vreg, Vreg) { return 0; });
+    auto const coloring = free.choose(r, [] (Vreg, Vreg) { return 0; });
     assert_found_color(r, coloring.color);
 
     auto const selected = color_reg(coloring.color);
@@ -10868,8 +10940,7 @@ size_t color_block_initialize(
       if (!is_colorable(info.regClass)) continue;
       assertx(is_color_none(info.color));
 
-      auto const coloring =
-        free.choose(defs[i], RegSet{}, [] (Vreg, Vreg) { return 0; });
+      auto const coloring = free.choose(defs[i], [] (Vreg, Vreg) { return 0; });
       assert_found_color(defs[i], coloring.color);
       info.color = coloring.color;
 

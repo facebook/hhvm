@@ -1,9 +1,9 @@
 <?hh
-class mystring { function __toString() { return "hello, world"; } }
+class mystring { function __toString() :mixed{ return "hello, world"; } }
 <<__EntryPoint>> function main(): void {
 /* Make a string's first character uppercase */
 echo "#### Basic and Various operations ####\n";
-$str_array = varray[
+$str_array = vec[
   "testing ucfirst.",
   "1.testing ucfirst",
   "hELLO wORLD",
@@ -14,19 +14,11 @@ $str_array = varray[
   "abcd",     // double quoted string
   'xyz',      // single quoted string
   "-3",
-  -3,
   '-3.344',
-  -3.344,
-  NULL,
   "NULL",
   "0",
-  0,
-  TRUE,       // bool type
   "TRUE",
   "1",
-  1,
-  1.234444,
-  FALSE,
   "FALSE",
   " ",
   "     ",
@@ -44,10 +36,6 @@ foreach ($str_array as $string) {
 
 echo "\n#### Testing Miscelleneous inputs ####\n";
 
-echo "--- Testing arrays ---";
-$str_arr = varray["hello", "?world", "!$%**()%**[][[[&@#~!", varray[]];
-try { var_dump( ucfirst($str_arr) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
 echo "\n--- Testing objects ---\n";
 // we get "Catchable fatal error: saying Object of class could not be converted
 // to string" by default when an object is passed instead of string:
@@ -59,7 +47,7 @@ var_dump(ucfirst("$obj_string"));
 
 
 echo "\n--- Testing Resources ---\n";
-$filename1 = __SystemLib\hphp_test_tmppath("dummy-ucfirst.txt");
+$filename1 = sys_get_temp_dir().'/'."dummy-ucfirst.txt";
 $file1 = fopen($filename1, "w");                // creating new file
 
 /* getting resource type for file handle */

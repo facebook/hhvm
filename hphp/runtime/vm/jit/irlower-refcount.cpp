@@ -17,14 +17,10 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/vanilla-dict.h"
-#include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -49,15 +45,18 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
+#include "hphp/runtime/ext/core/ext_core_closure.h"
+
 #include "hphp/util/asm-x64.h"
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/configs/hhir.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
 #include <folly/Format.h>
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -117,7 +116,7 @@ void incrementProfile(Vout& v, const TargetProfile<IncRefProfile>& profile,
 
 inline bool useAddrForCountedCheck() {
   return addr_encodes_persistency &&
-    RuntimeOption::EvalJitPGOUseAddrCountedCheck;
+    Cfg::Jit::PGOUseAddrCountedCheck;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -149,18 +148,18 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
 
   // We profile generic IncRefs to see which ones are unlikely to see
   // refcounted values.
-  if (RuntimeOption::EvalHHIROutlineGenericIncDecRef && profile.optimizing()) {
+  if (Cfg::HHIR::OutlineGenericIncDecRef && profile.optimizing()) {
     auto const data = profile.data();
     if (data.total > 0) {
       if (data.percent(data.refcounted) <
-          RuntimeOption::EvalJitPGOUnlikelyIncRefCountedPercent
+          Cfg::Jit::PGOUnlikelyIncRefCountedPercent
           && !(ty <= TCell && ty.isKnownDataType())) {
         unlikelyCounted = true;
         FTRACE(3, "irlower-inc-dec: Emitting cold counted check for {}, {}\n",
                data, *inst);
       }
       if (data.percent(data.incremented) <
-          RuntimeOption::EvalJitPGOUnlikelyIncRefIncrementPercent) {
+          Cfg::Jit::PGOUnlikelyIncRefIncrementPercent) {
         unlikelyIncrement = true;
         FTRACE(3, "irlower-inc-dec: Emitting cold IncRef for {}, {}\n",
                data, *inst);
@@ -214,7 +213,7 @@ namespace {
  */
 float decRefDestroyedPercent(Vout& v, IRLS& /*env*/,
                              const IRInstruction* /*inst*/,
-                             const SharedProfile<DecRefProfile>& profile) {
+                             const TargetProfile<DecRefProfile>& profile) {
   if (!profile.optimizing()) return 0.0;
 
   auto const data = profile.data();
@@ -256,28 +255,25 @@ CallSpec makeDtorCall(Vout& v, Type ty, Vloc loc, ArgGroup& args) {
 }
 
 namespace {
-static void UpdateProfile(DecRefProfileEntry* entry, TypedValue tv) {
-  entry->update([&](auto& profile) { profile.update(tv); });
-}
-static void UpdateProfileAndDecRef(DecRefProfileEntry* entry, TypedValue tv) {
-  UpdateProfile(entry, tv);
+static void ProfileAndDecRef(DecRefProfile* profile, TypedValue tv) {
+  profile->update(tv);
   tvDecRefGen(tv);
 }
 }
 
 void implDecRefProf(Vout& v, IRLS& env, const IRInstruction* inst,
-                    const SharedProfile<DecRefProfile>& profile,
+                    const TargetProfile<DecRefProfile>& profile,
                     bool profileOnly = false) {
   assertx(profile.profiling());
   auto const& type = inst->src(0)->type();
   if (!type.maybe(TCounted)) return;
 
   auto const args = argGroup(env, inst)
-    .immPtr(profile.entry())
+    .addr(rvmtl(), safe_cast<int32_t>(profile.handle()))
     .typedValue(0);
   auto const target = profileOnly
-    ? CallSpec::direct(&UpdateProfile)
-    : CallSpec::direct(&UpdateProfileAndDecRef);
+    ? CallSpec::method(&DecRefProfile::update)
+    : CallSpec::direct(&ProfileAndDecRef);
   cgCallHelper(v, env, target, kVoidDest, SyncOptions::None, args);
 }
 
@@ -369,7 +365,7 @@ void emitDecRefOptPersist(Vout& v, Vout& vcold, Vreg data,
  */
 template<class Destroy>
 void emitDecRefOpt(Vout& v, Vout& vcold, Vreg base,
-                   const SharedProfile<DecRefProfile>& profile,
+                   const TargetProfile<DecRefProfile>& profile,
                    Destroy destroy) {
   const auto data = profile.data();
   const auto persistPct = data.percent(data.persistent());
@@ -377,13 +373,13 @@ void emitDecRefOpt(Vout& v, Vout& vcold, Vreg base,
   const auto survivePct = data.percent(data.survived());
 
   const bool persistUnlikely = persistPct <
-    RuntimeOption::EvalJitPGOUnlikelyDecRefPersistPercent;
+    Cfg::Jit::PGOUnlikelyDecRefPersistPercent;
 
   const bool destroyUnlikely = destroyPct <
-    RuntimeOption::EvalJitPGOUnlikelyDecRefReleasePercent;
+    Cfg::Jit::PGOUnlikelyDecRefReleasePercent;
 
   const bool surviveUnlikely = survivePct <
-    RuntimeOption::EvalJitPGOUnlikelyDecRefSurvivePercent;
+    Cfg::Jit::PGOUnlikelyDecRefSurvivePercent;
 
   // Case 1: optimize for destruction
   if (destroyPct >= persistPct && destroyPct >= survivePct) {
@@ -406,7 +402,7 @@ void emitDecRefOpt(Vout& v, Vout& vcold, Vreg base,
 
 void implDecRef(Vout& v, IRLS& env,
                 const IRInstruction* inst, Type ty,
-                const SharedProfile<DecRefProfile>& profile) {
+                const TargetProfile<DecRefProfile>& profile) {
   auto const base = srcLoc(env, inst, 0).reg(0);
 
   auto const destroy = [&] (Vout& v) {
@@ -418,7 +414,7 @@ void implDecRef(Vout& v, IRLS& env,
   if (!ty.maybe(TPersistent)) {
     auto const destroyedPct = decRefDestroyedPercent(v, env, inst, profile);
     auto const unlikelyReleasePct =
-      RuntimeOption::EvalJitPGOUnlikelyDecRefReleasePercent;
+      Cfg::Jit::PGOUnlikelyDecRefReleasePercent;
     auto const unlikelyDestroy = destroyedPct < unlikelyReleasePct;
 
     auto const sf = emitDecRef(v, base, TRAP_REASON);
@@ -534,11 +530,11 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
         profile.data());
   }
 
-  if (RuntimeOption::EvalHHIROutlineGenericIncDecRef &&
+  if (Cfg::HHIR::OutlineGenericIncDecRef &&
       profile.optimizing() && !ty.isKnownDataType()) {
     auto const data = profile.data();
     auto const unlikelyCountedPct =
-      RuntimeOption::EvalJitPGOUnlikelyDecRefCountedPercent;
+      Cfg::Jit::PGOUnlikelyDecRefCountedPercent;
     if (data.percent(data.refcounted) < unlikelyCountedPct) {
       // This DecRef rarely saw a refcounted type during profiling, so call the
       // stub in cold, keeping only the type check in main.
@@ -573,7 +569,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
     auto const data = profile.data();
     auto const unlikelyDecrement = data.total > 0 &&
       data.percent(data.survived() + data.destroyed()) <
-      RuntimeOption::EvalJitPGOUnlikelyDecRefDecrementPercent;
+      Cfg::Jit::PGOUnlikelyDecRefDecrementPercent;
     // If it's actually counted, we need to touch the cache line anyway.
     if (unlikelyDecrement) {
       auto sf = v.makeReg();
@@ -596,9 +592,17 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
 void cgReleaseShallow(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const base = srcLoc(env, inst, 0).reg(0);
+  auto const ty = inst->src(0)->type();
   auto args = argGroup(env, inst).reg(base);
-  auto const dtor = CallSpec::method(&ArrayData::releaseShallow);
-  cgCallHelper(v, env, dtor, kVoidDest, SyncOptions::None, args);
+
+  if (ty <= TArrLike) {
+    auto const dtor = CallSpec::method(&ArrayData::releaseShallow);
+    cgCallHelper(v, env, dtor, kVoidDest, SyncOptions::None, args);
+  } else {
+    assertx(ty.clsSpec().cls()->classof(c_Closure::classof()));
+    auto const dtor = CallSpec::direct(&c_Closure::releaseShallow);
+    cgCallHelper(v, env, dtor, kVoidDest, SyncOptions::None, args);
+  }
 }
 
 template<class Then, class Else>
@@ -683,18 +687,18 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
 
   auto unlikelyCounted = false;
   auto unlikelyDecrement = false;
-  if (RuntimeOption::EvalHHIROutlineGenericIncDecRef && profile.optimizing()) {
+  if (Cfg::HHIR::OutlineGenericIncDecRef && profile.optimizing()) {
     auto const data = profile.data();
     if (data.total > 0) {
       if (data.percent(data.refcounted) <
-          RuntimeOption::EvalJitPGOUnlikelyDecRefCountedPercent
+          Cfg::Jit::PGOUnlikelyDecRefCountedPercent
           && !(ty <= TCell && ty.isKnownDataType())) {
         unlikelyCounted = true;
         FTRACE(3, "irlower-inc-dec: Emitting cold counted check for {}, {}\n",
                data, *inst);
       }
       if (data.percent(data.decremented) <
-          RuntimeOption::EvalJitPGOUnlikelyDecRefDecrementPercent) {
+          Cfg::Jit::PGOUnlikelyDecRefDecrementPercent) {
         unlikelyDecrement = true;
         FTRACE(3, "irlower-inc-dec: Emitting cold DecRef for {}, {}\n",
                data, *inst);

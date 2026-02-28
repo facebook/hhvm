@@ -17,14 +17,13 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
 
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/runtime-option.h"
-
+#include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/build-info.h"
 
@@ -60,6 +59,11 @@ bool dumpTCCode(folly::StringPiece filename) {
     }
   };
 
+  if (Cfg::Jit::DynamicTCSections) {
+    writeBlock(code().all(), aFile);
+    return result;
+  }
+
   writeBlock(code().main(), aFile);
   writeBlock(code().cold(), acoldFile);
   writeBlock(code().frozen(), afrozenFile);
@@ -67,10 +71,15 @@ bool dumpTCCode(folly::StringPiece filename) {
 }
 
 bool dumpTCData() {
-  auto const dataPath = RuntimeOption::EvalDumpTCPath + "/tc_data.txt.gz";
+  auto const dataPath = Cfg::Eval::DumpTCPath + "/tc_data.txt.gz";
   gzFile tcDataFile = gzopen(dataPath.c_str(), "w");
   if (!tcDataFile) return false;
   SCOPE_EXIT { gzclose(tcDataFile); };
+
+  auto const& main = Cfg::Jit::DynamicTCSections ? code().all() : code().main();
+  auto const& cold = Cfg::Jit::DynamicTCSections ? code().all() : code().cold();
+  auto const& frozen =
+    Cfg::Jit::DynamicTCSections ? code().all() : code().frozen();
 
   if (!gzprintf(tcDataFile,
                 "repo_schema      = %s\n"
@@ -81,14 +90,18 @@ bool dumpTCData() {
                 "afrozen.base     = %p\n"
                 "afrozen.frontier = %p\n\n",
                 repoSchemaId().begin(),
-                code().main().base(),   code().main().frontier(),
-                code().cold().base(),   code().cold().frontier(),
-                code().frozen().base(), code().frozen().frontier())) {
+                main.base(),   main.frontier(),
+                cold.base(),   cold.frontier(),
+                frozen.base(), frozen.frontier())) {
     return false;
   }
 
   if (!gzprintf(tcDataFile, "total_translations = %zu\n\n",
                 transdb::getNumTranslations())) {
+    return false;
+  }
+
+  if (!gzprintf(tcDataFile, "block_map = %s\n\n", code().blockMap().data())) {
     return false;
   }
 
@@ -118,38 +131,52 @@ bool dumpTCData() {
 }
 
 bool dumpEnabled() {
-  return RuntimeOption::EvalDumpTC ||
-         RuntimeOption::EvalDumpIR ||
-         RuntimeOption::EvalDumpRegion ||
-         RuntimeOption::EvalDumpInlDecision ||
-         RuntimeOption::EvalDumpCallTargets ||
-         RuntimeOption::EvalDumpLayoutCFG ||
-         RuntimeOption::EvalDumpVBC;
+  return Cfg::Eval::DumpTC ||
+         Cfg::Eval::DumpIR ||
+         Cfg::Eval::DumpRegion ||
+         Cfg::Eval::DumpInlDecision ||
+         Cfg::Eval::DumpCallTargets ||
+         Cfg::Eval::DumpLayoutCFG ||
+         Cfg::Eval::DumpVBC;
 }
 
 bool dump(bool ignoreLease /* = false */) {
   if (!mcgen::initialized()) return false;
 
-  std::unique_lock<SimpleMutex> codeLock;
-  std::unique_lock<SimpleMutex> metaLock;
-  if (!ignoreLease) {
-    codeLock = lockCode();
-    metaLock = lockMetadata();
+  {
+    std::unique_lock<SimpleMutex> codeLock;
+    std::unique_lock<SimpleMutex> metaLock;
+    if (!ignoreLease) {
+      codeLock = lockCode();
+      metaLock = lockMetadata();
+    }
+    if (!dumpTCData()) return false;
+    if (!dumpTCCode(Cfg::Eval::DumpTCPath + "/tc_dump")) return false;
   }
-  return dumpTCData() &&
-    dumpTCCode(RuntimeOption::EvalDumpTCPath + "/tc_dump");
+
+  if (!Cfg::Repo::Authoritative) {
+    dump_compiled_units(Cfg::Eval::DumpTCPath + "/hhvm.hhbc");
+  }
+
+  return true;
 }
 
 std::vector<UsageInfo> getUsageInfo() {
   std::vector<UsageInfo> tcUsageInfo;
 
-  code().forEachBlock([&] (const char* name, const CodeBlock& a) {
+  code().forEachSection([&] (const char* name, auto const& s) {
     tcUsageInfo.emplace_back(UsageInfo{
       std::string("code.") + name,
-      a.used(),
-      a.capacity(),
+      s.used(),
+      s.capacity(),
       true
     });
+  });
+  tcUsageInfo.emplace_back(UsageInfo{
+    "code.bytecode",
+    code().bytecode().used(),
+    code().bytecode().capacity(),
+    true
   });
   tcUsageInfo.emplace_back(UsageInfo{
     "data",
@@ -160,19 +187,19 @@ std::vector<UsageInfo> getUsageInfo() {
   tcUsageInfo.emplace_back(UsageInfo{
     "RDS",
     rds::usedBytes(),
-    RuntimeOption::EvalRDSSize * 3 / 4,
+    Cfg::Eval::RDSSize * 3 / 4,
     false
   });
   tcUsageInfo.emplace_back(UsageInfo{
     "RDSLocal",
     rds::usedLocalBytes(),
-    RuntimeOption::EvalRDSSize * 3 / 4,
+    Cfg::Eval::RDSSize * 3 / 4,
     false
   });
   tcUsageInfo.emplace_back(UsageInfo{
     "persistentRDS",
     rds::usedPersistentBytes(),
-    RuntimeOption::EvalRDSSize / 4,
+    Cfg::Eval::RDSSize / 4,
     false
   });
   return tcUsageInfo;
@@ -207,23 +234,26 @@ std::string getTCSpace() {
 std::string getTCAddrs() {
   std::string addrs;
 
-  code().forEachBlock([&] (const char* name, const CodeBlock& a) {
-    addrs += folly::format("{}: {}\n", name, a.base()).str();
+  code().forEachSection([&] (const char* name, auto const& s) {
+    auto const addr = Cfg::Jit::DynamicTCSections
+      ? code().base()
+      : s.block().base();
+    addrs += folly::format("{}: {}\n", name, addr).str();
   });
   return addrs;
 }
 
 std::vector<TCMemInfo> getTCMemoryUsage() {
   std::vector<TCMemInfo> ret;
-  code().forEachBlock(
-    [&](const char* name, const CodeBlock& a) {
+  code().forEachSection(
+    [&](const char* name, auto const& s) {
       ret.emplace_back(TCMemInfo{
         name,
-        a.used(),
-        a.numAllocs(),
-        a.numFrees(),
-        a.bytesFree(),
-        a.blocksFree()
+        s.used(),
+        s.numAllocs(),
+        s.numFrees(),
+        s.bytesFree(),
+        s.blocksFree()
       });
     }
   );

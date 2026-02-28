@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * shm_attach() returns an id that can be used to access the System V shared

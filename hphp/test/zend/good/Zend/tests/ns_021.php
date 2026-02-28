@@ -2,12 +2,12 @@
 namespace test;
 
 class Test {
-    static function foo() {
+    static function foo() :mixed{
         echo __CLASS__,"::",__FUNCTION__,"\n";
     }
 }
 
-function foo() {
+function foo() :mixed{
     echo __FUNCTION__,"\n";
 }
 <<__EntryPoint>> function main(): void {

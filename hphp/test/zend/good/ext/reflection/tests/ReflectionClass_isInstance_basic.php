@@ -7,9 +7,9 @@ class C implements I {}
 
 class X {}
 <<__EntryPoint>> function main(): void {
-$classes = varray["A", "B", "C", "I", "X"];
+$classes = vec["A", "B", "C", "I", "X"];
 
-$instances = darray[    "myA" => new A,
+$instances = dict[    "myA" => new A,
                     "myB" => new B,
                     "myC" => new C,
                     "myX" => new X ];

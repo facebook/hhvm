@@ -1,6 +1,6 @@
 <?hh
 
-function pt($f) {
+function pt($f) :mixed{
   $trace = implode(
     ', ',
     array_map($x ==> $x['function'].':'.($x['line'] ?? '???'), debug_backtrace())
@@ -9,23 +9,23 @@ function pt($f) {
 }
 
 <<__ALWAYS_INLINE>>
-function red() {
+function red() :mixed{
   pt(__FUNCTION__);
 }
 
 <<__ALWAYS_INLINE>>
-function green() {
+function green() :mixed{
   pt(__FUNCTION__);
   red();
 }
 
 <<__ALWAYS_INLINE>>
-function blue() {
+function blue() :mixed{
   pt(__FUNCTION__);
   green();
 }
 
-function main() {
+function main() :mixed{
   blue();
 }
 <<__EntryPoint>> function main_entry(): void {

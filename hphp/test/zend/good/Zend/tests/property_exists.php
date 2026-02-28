@@ -1,7 +1,7 @@
 <?hh
 
 class aParent {
-    public static function staticTest() {
+    public static function staticTest() :mixed{
         $a = new A;
         var_dump(property_exists($a, "prot"));
         var_dump(property_exists($a, "prot2"));
@@ -12,7 +12,7 @@ class aParent {
         var_dump(property_exists("A", "prot3"));
         print "------------------\n";
     }
-    public function nonstaticTest() {
+    public function nonstaticTest() :mixed{
         $a = new A;
         var_dump(property_exists($a, "prot"));
         var_dump(property_exists($a, "prot2"));

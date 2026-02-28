@@ -8,12 +8,12 @@ class ImagickTest extends Imagick {
   /* Override width property */
   public $width = 112233;
 
-    public function setTestValue($value) {
+    public function setTestValue($value) :mixed{
         $this->test = $value;
         return $this;
     }
 
-    public function getTestValue() {
+    public function getTestValue() :mixed{
         return $this->test;
     }
 }

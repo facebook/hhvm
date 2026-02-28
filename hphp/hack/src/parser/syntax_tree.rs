@@ -3,19 +3,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use oxidized::file_info::Mode;
-
-use crate::{
-    lexable_token::LexableToken, source_text::SourceText, syntax_by_ref::syntax::Syntax,
-    syntax_error::SyntaxError, syntax_trait::SyntaxTrait,
-};
 use std::borrow::Borrow;
+
+use crate::lexable_token::LexableToken;
+use crate::source_text::SourceText;
+use crate::syntax_by_ref::syntax::Syntax;
+use crate::syntax_error::SyntaxError;
+use crate::syntax_trait::SyntaxTrait;
 
 pub struct SyntaxTree<'a, Syntax, State> {
     text: &'a SourceText<'a>,
     root: Syntax,
     errors: Vec<SyntaxError>,
-    mode: Option<Mode>,
+    mode: Option<FileMode>,
     state: State,
 }
 
@@ -24,7 +24,7 @@ where
     T: LexableToken,
     Syntax<'arena, T, V>: SyntaxTrait,
 {
-    pub fn errors<'r>(&'r self) -> Vec<&SyntaxError>
+    pub fn errors<'r>(&'r self) -> Vec<&'r SyntaxError>
     where
         State: Clone,
         'r: 'arena,
@@ -79,7 +79,7 @@ where
         'r: 'arena,
     {
         for c in node.iter_children() {
-            let width = node.full_width();
+            let width = c.full_width();
             if position < width {
                 Self::parentage_(c, position, acc);
                 break;
@@ -99,7 +99,7 @@ where
         text: &'a SourceText<'a>,
         root: Syntax,
         errors: Vec<SyntaxError>,
-        mode: Option<Mode>,
+        mode: Option<FileMode>,
         state: State,
     ) -> Self {
         Self {
@@ -117,40 +117,44 @@ where
         ptr: usize,
         text: &'a SourceText<'a>,
     ) -> Result<&'a Self, String> {
-        let raw_tree = ptr as *mut SyntaxTree<'_, Syntax, State>;
-        let tree = match raw_tree.as_mut() {
-            Some(t) => t,
-            None => return Err("null raw tree pointer".into()),
-        };
-        // The tree already contains source text, but this source text contains a pointer
-        // into OCaml heap, which might have been invalidated by GC in the meantime.
-        // Replacing the source text with a current one prevents it. This will still end
-        // horribly if the tree starts storing some other pointers into source text,
-        // but it's not the case at the moment.
-        tree.replace_text_unsafe(text);
-        Ok(tree)
+        unsafe {
+            let raw_tree = ptr as *mut SyntaxTree<'_, Syntax, State>;
+            let tree = match raw_tree.as_mut() {
+                Some(t) => t,
+                None => return Err("null raw tree pointer".into()),
+            };
+            // The tree already contains source text, but this source text contains a pointer
+            // into OCaml heap, which might have been invalidated by GC in the meantime.
+            // Replacing the source text with a current one prevents it. This will still end
+            // horribly if the tree starts storing some other pointers into source text,
+            // but it's not the case at the moment.
+            tree.replace_text_unsafe(text);
+            Ok(tree)
+        }
     }
 
     // Convert a foreign pointer to boxed `SyntaxTree`. This function can be used when foreign
     // caller moves a `SyntaxTree` to Rust, when `Box` goes out of scope the SyntaxTree will
     // be dropped.
     pub unsafe fn ffi_pointer_into_boxed(ptr: usize, text: &'a SourceText<'a>) -> Box<Self> {
-        let tree_pointer = ptr as *mut Self;
-        let mut tree = Box::from_raw(tree_pointer);
-        // The tree already contains source text, but this source text contains a pointer
-        // into OCaml heap, which might have been invalidated by GC in the meantime.
-        // Replacing the source text with a current one prevents it.
-        // This will still end horribly if the tree starts storing some
-        // other pointers into source text, but it's not the case at the moment.
-        tree.replace_text_unsafe(text);
-        tree
+        unsafe {
+            let tree_pointer = ptr as *mut Self;
+            let mut tree = Box::from_raw(tree_pointer);
+            // The tree already contains source text, but this source text contains a pointer
+            // into OCaml heap, which might have been invalidated by GC in the meantime.
+            // Replacing the source text with a current one prevents it.
+            // This will still end horribly if the tree starts storing some
+            // other pointers into source text, but it's not the case at the moment.
+            tree.replace_text_unsafe(text);
+            tree
+        }
     }
 
     pub fn create(
         text: &'a SourceText<'a>,
         root: Syntax,
         mut errors: Vec<SyntaxError>,
-        mode: Option<Mode>,
+        mode: Option<FileMode>,
         state: State,
     ) -> Self {
         Self::process_errors(&mut errors);
@@ -187,7 +191,7 @@ where
         &self.errors
     }
 
-    pub fn mode(&self) -> Option<Mode> {
+    pub fn mode(&self) -> Option<FileMode> {
         self.mode
     }
 
@@ -196,11 +200,11 @@ where
     }
 
     pub fn is_strict(&self) -> bool {
-        self.mode == Some(Mode::Mstrict)
+        self.mode == Some(FileMode::Strict)
     }
 
     pub fn is_hhi(&self) -> bool {
-        self.mode == Some(Mode::Mhhi)
+        self.mode == Some(FileMode::Hhi)
     }
 
     // "unsafe" because it can break the invariant that text is consistent with other syntax
@@ -227,6 +231,15 @@ impl<'a, Syntax, State> AsRef<SyntaxTree<'a, Syntax, State>> for SyntaxTree<'a, 
     fn as_ref(&self) -> &Self {
         self
     }
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[repr(u8)]
+pub enum FileMode {
+    /// just declare signatures, don't check anything
+    Hhi,
+    /// check everything!
+    Strict,
 }
 
 #[cfg(test)]

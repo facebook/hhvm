@@ -7,7 +7,7 @@ class A {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo "-------- Dict ---------------------------------------------------"."\n";
   $d = dict[];
   try {

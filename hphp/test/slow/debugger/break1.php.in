@@ -1,0 +1,17 @@
+break break1.php:6
+@ foo('test_break1')
+break list
+break clear all
+break break1.php:7
+break break1.php:3
+break break1.php:77
+break list
+@ foo('test_break1')
+variable
+break start
+break end
+break psp
+break list
+break clear all
+run
+quit

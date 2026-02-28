@@ -4,7 +4,7 @@
  * Source code: ext/standard/image.c
  */
 <<__EntryPoint>> function main(): void {
-$imagetype_filenames = darray[
+$imagetype_filenames = dict[
       // GIF file
       "GIF image file" => "200x100.gif",
 
@@ -33,6 +33,10 @@ $imagetype_filenames = darray[
       "IFF image file" => "test4pix.iff",
 
       "WEBP image file" => "200x100.webp",
+
+      "AVIF image file" => "200x100.avif",
+
+      "HEIC image file" => "200x100.heic",
 ];
 
 echo "*** Testing getimagesize() : basic functionality ***\n";

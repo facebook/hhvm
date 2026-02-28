@@ -1,0 +1,15 @@
+<?hh
+
+module M1;
+
+class A {
+  protected internal function foo(): string {
+    echo "in foo\n";
+    return "foo";
+  }
+
+  protected internal static function static_foo(): string {
+    echo "in static foo\n";
+    return "foo";
+  }
+}

@@ -4,7 +4,7 @@
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions:
  */
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function method_exists_error_001(): void {
 echo "*** Testing method_exists() : error conditions ***\n";
 
 

@@ -1,0 +1,16 @@
+File "this_ret_bad2.php", line 35, characters 3-46:
+  ~Foo<<expr#1> as Bar>
+File "this_ret_bad2.php", line 41, characters 16-34:
+Invalid argument (Typing[4110])
+  File "this_ret_bad2.php", line 19, characters 38-41:
+  Expected `<expr#1> as Bar`
+  File "this_ret_bad2.php", line 41, characters 16-19:
+    where `<expr#1>` is a reference to this expression
+  File "this_ret_bad2.php", line 25, characters 27-29:
+  But got `Bar`
+  File "this_ret_bad2.php", line 25, characters 27-29:
+  This type argument to `Foo` must match exactly (it is invariant)
+  File "this_ret_bad2.php", line 33, characters 15-17:
+  Since `Bar` is not final
+  File "this_ret_bad2.php", line 25, characters 27-29:
+  this might not be a `Bar`

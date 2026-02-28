@@ -22,6 +22,7 @@
 #include "hphp/util/rds-local.h"
 
 #include "hphp/runtime/base/code-coverage.h"
+#include "hphp/runtime/base/request-id.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/surprise-flags.h"
 
@@ -82,15 +83,16 @@ struct RequestInfo {
    * recursion exception.
    */
   static constexpr int StackSlack = 1024 * 1024;
+  static thread_local uintptr_t s_stackLimitWithSlack;
 
   /*
    * Since this is often used as a static global, we want to do anything that
    * might try to access RequestInfo::s_requestInfo here instead of in the
    * constructor.
    */
-  void init();
+  void threadInit();
 
-  void onSessionInit();
+  void onSessionInit(RequestId id, RequestId root_req_id = RequestId());
   void onSessionExit();
 
   /*
@@ -104,6 +106,13 @@ struct RequestInfo {
    * Setting the pending exception.
    */
   void setPendingException(Exception*);
+
+  void setRootRequestId(RequestId root_req_id) {
+    m_root_req_id = root_req_id;
+  }
+  RequestId getRootRequestId() {
+    return m_root_req_id;
+  }
 
   static bool valid(RequestInfo*);
 
@@ -119,10 +128,16 @@ struct RequestInfo {
 
   ////////////////////////////////////////////////////////////////////
 
-  RequestInjectionData m_reqInjectionData;
+  /* Unique request ID */
+  RequestId m_id;
 
-  /* This pointer is set by ProfilerFactory. */
-  Profiler* m_profiler{nullptr};
+  /* 
+   * Request ID of the original hhvmwork request ID 
+   * from which the current request was recursively triggered 
+   */
+  RequestId m_root_req_id;
+
+  RequestInjectionData m_reqInjectionData;
 
   CodeCoverage m_coverage;
 
@@ -133,6 +148,9 @@ struct RequestInfo {
   Exception* m_pendingException{nullptr};
 
   Executing m_executing{Idling};
+
+  /* Higher numbers would reduce the chance of getting OOM killed. */
+  uint32_t m_OOMMultiplier{1};
 
 private:
   std::atomic<GlobalGCStatus> m_globalGCStatus{Idle};
@@ -165,7 +183,7 @@ inline void* stack_top_ptr() {
 NEVER_INLINE void* stack_top_ptr_conservative();
 
 inline bool stack_in_bounds() {
-  return uintptr_t(stack_top_ptr()) >= s_stackLimit + RequestInfo::StackSlack;
+  return uintptr_t(stack_top_ptr()) >= RequestInfo::s_stackLimitWithSlack;
 }
 
 /*
@@ -197,12 +215,32 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh = nullptr,
  * unserialization or JSON decoding.
  */
 inline void check_non_safepoint_surprise() {
-  if (UNLIKELY(getSurpriseFlag(NonSafepointFlags))) {
+  if (UNLIKELY(stackLimitAndSurprise().getFlag(NonSafepointFlags))) {
     handle_request_surprise(nullptr, NonSafepointFlags);
   }
 }
 
 //////////////////////////////////////////////////////////////////////
 
-}
+/**
+ * Cancel the request timeout when created, restart the request timeout when
+ * destroyed.
+ */
+struct TimeoutSuspender {
+  TimeoutSuspender() : m_timeoutSeconds{RID().getTimeout()} {
+    RID().setTimeout(0);
+  }
+  ~TimeoutSuspender() {
+    RID().setTimeout(m_timeoutSeconds);
+  }
 
+  TimeoutSuspender(const TimeoutSuspender&) = delete;
+  TimeoutSuspender& operator=(const TimeoutSuspender&) = delete;
+  TimeoutSuspender(TimeoutSuspender&&) = delete;
+  TimeoutSuspender& operator=(TimeoutSuspender&&) = delete;
+
+private:
+  int m_timeoutSeconds{0};
+};
+
+}

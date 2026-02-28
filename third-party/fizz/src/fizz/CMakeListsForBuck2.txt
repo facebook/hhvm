@@ -1,0 +1,95 @@
+#  Copyright (c) 2018, Facebook, Inc.
+#  All rights reserved.
+
+cmake_minimum_required(VERSION 3.5)
+
+if (NOT DEFINED PACKAGE_VERSION)
+  set(PACKAGE_VERSION "1.0.0")
+endif()
+
+project("fizz" VERSION ${PACKAGE_VERSION} LANGUAGES CXX C)
+
+if (NOT DEFINED CPACK_GENERATOR)
+  set(CPACK_GENERATOR "RPM")
+endif()
+include(CPack)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_MODULE_PATH
+  "${CMAKE_CURRENT_SOURCE_DIR}/fizz/cmake"
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
+  # for in-fbsource builds
+  "${CMAKE_CURRENT_SOURCE_DIR}/../opensource/fbcode_builder/CMake"
+  # For shipit-transformed builds
+  "${CMAKE_CURRENT_SOURCE_DIR}/build/fbcode_builder/CMake"
+  ${CMAKE_MODULE_PATH})
+
+include(FBBuildOptions)
+fb_activate_static_library_option()
+
+# When installing Folly & Fizz in a non-default prefix, this will let
+# projects linking against libfizz.so to find libfolly.so automatically.
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(INCLUDE_INSTALL_DIR include CACHE STRING
+    "The subdirectory where header files should be installed")
+set(LIB_INSTALL_DIR lib CACHE STRING
+    "The subdirectory where libraries should be installed")
+set(BIN_INSTALL_DIR bin CACHE STRING
+    "The subdirectory where binaries should be installed")
+set(CMAKE_INSTALL_DIR lib/cmake/fizz CACHE STRING
+    "The subdirectory where CMake package config files should be installed")
+
+find_package(fmt CONFIG REQUIRED)
+
+find_package(OpenSSL REQUIRED)
+find_package(Glog REQUIRED)
+find_package(DoubleConversion REQUIRED)
+find_package(Threads REQUIRED)
+find_package(Zstd REQUIRED)
+
+include(CheckAtomic)
+
+find_package(Sodium REQUIRED)
+
+SET(FIZZ_SHINY_DEPENDENCIES "")
+SET(FIZZ_LINK_LIBRARIES "")
+SET(FIZZ_INCLUDE_DIRECTORIES "")
+
+find_package(gflags CONFIG QUIET)
+if (gflags_FOUND)
+  message(STATUS "Found gflags from package config")
+  if (TARGET gflags-shared)
+    list(APPEND FIZZ_SHINY_DEPENDENCIES gflags-shared)
+  elseif (TARGET gflags)
+    list(APPEND FIZZ_SHINY_DEPENDENCIES gflags)
+  else()
+    message(FATAL_ERROR "Unable to determine the target name for the GFlags package.")
+  endif()
+  list(APPEND CMAKE_REQUIRED_LIBRARIES ${GFLAGS_LIBRARIES})
+  list(APPEND CMAKE_REQUIRED_INCLUDES ${GFLAGS_INCLUDE_DIR})
+else()
+  find_package(Gflags REQUIRED MODULE)
+  list(APPEND FIZZ_LINK_LIBRARIES ${LIBGFLAGS_LIBRARY})
+  list(APPEND FIZZ_INCLUDE_DIRECTORIES ${LIBGFLAGS_INCLUDE_DIR})
+  list(APPEND CMAKE_REQUIRED_LIBRARIES ${LIBGFLAGS_LIBRARY})
+  list(APPEND CMAKE_REQUIRED_INCLUDES ${LIBGFLAGS_INCLUDE_DIR})
+endif()
+
+find_package(ZLIB REQUIRED)
+
+find_package(liboqs CONFIG)
+if (liboqs_FOUND)
+  set(FIZZ_HAVE_OQS TRUE)
+endif()
+
+# Fizz build time options
+include(FizzOptions)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/fizz/fizz-config.h.in ${CMAKE_CURRENT_BINARY_DIR}/fizz/fizz-config.h)

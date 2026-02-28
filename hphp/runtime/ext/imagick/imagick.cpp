@@ -2271,7 +2271,7 @@ static bool HHVM_METHOD(Imagick, pingImageBlob, const String& image) {
   return true;
 }
 
-static bool HHVM_METHOD(Imagick, pingImageFile, const Resource& filehandle,
+static bool HHVM_METHOD(Imagick, pingImageFile, const OptResource& filehandle,
                         const String& /*fileName*/) {
   auto wand = getMagickWandResource(Object{this_});
   imagickReadOp(wand->getWand(), filehandle, MagickPingImageFile);
@@ -2492,7 +2492,7 @@ static bool HHVM_METHOD(Imagick, readImageBlob,
 }
 
 static bool HHVM_METHOD(Imagick, readImageFile,
-    const Resource& filehandle, const String& fileName) {
+    const OptResource& filehandle, const String& fileName) {
   auto wand = getMagickWandResource(Object{this_});
   imagickReadOp(wand->getWand(), filehandle, MagickReadImageFile);
   if (!fileName.empty()) {
@@ -3746,7 +3746,7 @@ static bool HHVM_METHOD(Imagick, writeImage, const String& filename) {
 }
 
 static bool HHVM_METHOD(Imagick, writeImageFile,
-    const Resource& filehandle, const String& format) {
+    const OptResource& filehandle, const String& format) {
   auto wand = getMagickWandResource(Object{this_});
   imagickWriteOp(wand->getWand(), filehandle, format, MagickWriteImageFile);
   return true;
@@ -3763,7 +3763,7 @@ static bool HHVM_METHOD(Imagick, writeImages,
 }
 
 static bool HHVM_METHOD(Imagick, writeImagesFile,
-    const Resource& filehandle, const String& format) {
+    const OptResource& filehandle, const String& format) {
   auto wand = getMagickWandResource(Object{this_});
   imagickWriteOp(wand->getWand(), filehandle, format, MagickWriteImagesFile);
   return true;
@@ -3818,7 +3818,7 @@ struct ImagickPropHandler : Native::MapPropHandler<ImagickPropHandler> {
 
 #undef IMAGICK_THROW
 
-void ImagickExtension::loadImagickClass() {
+void ImagickExtension::registerNativeImagickClass() {
   HHVM_ME(Imagick, adaptiveBlurImage);
   HHVM_ME(Imagick, adaptiveResizeImage);
   HHVM_ME(Imagick, adaptiveSharpenImage);

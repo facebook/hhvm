@@ -1,6 +1,0 @@
-File "expr_method.php", line 11, characters 6-7:
-Invalid argument (Typing[4110])
-File "expr_method.php", line 5, characters 48-50:
-Expected `int`
-File "expr_method.php", line 8, characters 21-27:
-But got `dynamic`

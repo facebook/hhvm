@@ -1,0 +1,21 @@
+calling fun('foo1')(1): OK
+calling fun('foo1')("foo"): OK
+calling fun('foo1')(true): Value returned from function foo1() must be of type C1, bool given
+calling fun('foo1')(1.1): Value returned from function foo1() must be of type C1, float given
+calling fun('foo1')(A): Value returned from function foo1() must be of type C1, A given
+calling fun('foo1')(B): Value returned from function foo1() must be of type C1, B given
+calling fun('foo1')(C): Value returned from function foo1() must be of type C1, C given
+calling fun('foo2')(1): Value returned from function foo2() must be of type C2, int given
+calling fun('foo2')("foo"): Value returned from function foo2() must be of type C2, string given
+calling fun('foo2')(true): OK
+calling fun('foo2')(1.1): Value returned from function foo2() must be of type C2, float given
+calling fun('foo2')(A): OK
+calling fun('foo2')(B): Value returned from function foo2() must be of type C2, B given
+calling fun('foo2')(C): Value returned from function foo2() must be of type C2, C given
+calling fun('foo3')(1): Value returned from function foo3() must be of type C3, int given
+calling fun('foo3')("foo"): Value returned from function foo3() must be of type C3, string given
+calling fun('foo3')(true): OK
+calling fun('foo3')(1.1): Value returned from function foo3() must be of type C3, float given
+calling fun('foo3')(A): OK
+calling fun('foo3')(B): OK
+calling fun('foo3')(C): Value returned from function foo3() must be of type C3, C given

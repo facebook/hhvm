@@ -1,0 +1,54 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Definitions for constant values. These are included from the types.pyx file
+and define Python objects that can be imported from the end-user's Python
+file.
+
+}}{{#value:bool?}}{{!
+  }}{{#value:nonzero?}}True{{/value:nonzero?}}{{!
+  }}{{^value:nonzero?}}False{{/value:nonzero?}}{{!
+}}{{/value:bool?}}{{!
+}}{{#value:integer?}}{{!
+    }}{{#if value:type.bool?}}{{!
+      }}{{#if value:nonzero?}}True{{#else}}False{{/if}}{{!
+    }}{{#else}}{{!
+    }}{{value:integer_value}}{{#if value:type.floating_point?}}.0{{/if}}{{!
+    }}{{/if value:type.bool?}}{{!
+}}{{/value:integer?}}{{!
+}}{{#value:double?}}{{value:double_value}}{{/value:double?}}{{!
+}}{{#value:structured?}}{{!
+    }}{{#value:type.true_type}}{{!
+    }}{{#partial types.cython_python_type type=value:type.true_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr({{!
+        }}{{> types/current_module_cbindings}}.{{#partial types.c_binding node=constant:self}}())){{!
+    }}{{/value:type.true_type}}{{!
+}}{{/value:structured?}}{{!
+}}{{#value:string?}}{{!
+    }}{{#if value:type.binary?}}b"{{value:string_value}}"{{#else}}"{{value:unicode_value}}"{{/if}}{{!
+}}{{/value:string?}}{{!
+}}{{#if (or value:map? value:list?)}}{{!
+    }}{{#partial types.container_from_cpp type=value:type.true_type}}({{!
+    }}{{> types/current_module_cbindings}}.{{#partial types.c_binding node=constant:self}}()){{!
+}}{{/if (or value:map? value:list?)}}{{!
+}}{{#value:enum?}}{{!
+    }}{{^value:enum_value?}}__BadEnum({{/value:enum_value?}}{{!
+    }}{{#value:type.true_type}}{{#type:need_module_path?}}{{type:modulePath}}.{{!
+    }}{{/type:need_module_path?}}{{/value:type.true_type}}{{!
+    }}{{value:enum_name}}{{#value:enum_value?}}.{{value:py3_enum_value_name}}{{/value:enum_value?}}{{!
+    }}{{^value:enum_value?}}, {{value:integer_value}}){{/value:enum_value?}}{{!
+}}{{/value:enum?}}

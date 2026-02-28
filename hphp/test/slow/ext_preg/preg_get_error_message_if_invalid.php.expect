@@ -1,0 +1,5 @@
+'/ok/' valid NULL
+'/o' invalid No ending delimiter '/' found: [/o]
+'' invalid Empty regular expression
+'aa' invalid Delimiter must not be alphanumeric or backslash
+'//' . "\0" . 'has null byte' invalid Null byte found in pattern

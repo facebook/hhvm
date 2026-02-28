@@ -2,9 +2,9 @@
 
 -- Testing hebrevc() function with no arguments --
 
-Warning: hebrevc() expects at least 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/strings/hebrevc_error.php on line 11
+Warning: hebrevc() expects at least 1 positional parameter, 0 given in %s/test/zend/good/ext/standard/tests/strings/hebrevc_error.php on line 11
 
 -- Testing hebrevc() function with more than expected no. of arguments --
 
-Warning: hebrevc() expects at most 2 parameters, 3 given in %s/test/zend/good/ext/standard/tests/strings/hebrevc_error.php on line 15
+Warning: hebrevc() expects at most 2 positional parameters, 3 given in %s/test/zend/good/ext/standard/tests/strings/hebrevc_error.php on line 15
 ===DONE===

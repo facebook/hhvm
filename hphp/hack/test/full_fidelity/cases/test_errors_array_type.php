@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f (int $a) : Vector<array> {} // error
 function f (array $a) : int {} // error

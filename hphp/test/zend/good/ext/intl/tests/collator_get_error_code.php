@@ -8,12 +8,12 @@
  * Check if error code equals to expected one.
  */
 function check_rc( $rc, $expected )
-{
+:mixed{
     return ( $rc === $expected ? "ok" : "failed" ) . "\n";
 }
 
 function ut_main()
-{
+:mixed{
     $res = '';
     $coll = ut_coll_create( 'ru_RU' );
 

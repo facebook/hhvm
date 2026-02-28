@@ -1,12 +1,12 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   $x = new stdClass();
   $x->foo = "heh";
   return $x;
 }
 
-function bar() {
+function bar() :mixed{
   var_dump(foo());
 }
 
@@ -14,6 +14,6 @@ function bar() {
 
 
 <<__EntryPoint>>
-function main_minstr_002() {
+function main_minstr_002() :mixed{
 bar();
 }

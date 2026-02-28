@@ -1,0 +1,7 @@
+<?hh
+
+module MLT_C;
+
+class C {
+  use T1;
+}

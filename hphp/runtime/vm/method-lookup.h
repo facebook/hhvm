@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/util/either.h"
+#include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
 
@@ -41,28 +42,20 @@ enum class LookupResult {
 enum class MethodLookupErrorOptions {
   None                       = 0,
   RaiseOnNotFound            = (1u << 0),
+  NoErrorOnModule            = (1u << 1),
 };
 
-struct MethodLookupCallContext {
-  MethodLookupCallContext(const Class*, const Func*);
-  MethodLookupCallContext(const Class*, const StringData*);
-
-  const Class* cls() const;
-  const StringData* moduleName() const;
-private:
-  Either<const Class*, const StringData*> m_data;
-};
 
 const Func* lookupMethodCtx(const Class* cls,
                             const StringData* methodName,
-                            const MethodLookupCallContext& callCtx,
+                            const MemberLookupContext& callCtx,
                             CallType lookupType,
                             MethodLookupErrorOptions raise);
 
 LookupResult lookupObjMethod(const Func*& f,
                              const Class* cls,
                              const StringData* methodName,
-                             const MethodLookupCallContext& callCtx,
+                             const MemberLookupContext& callCtx,
                              MethodLookupErrorOptions raise);
 
 /*
@@ -100,14 +93,14 @@ struct ImmutableObjMethodLookup {
 ImmutableObjMethodLookup
 lookupImmutableObjMethod(const Class* cls,
                          const StringData* name,
-                         const MethodLookupCallContext& callCtx,
+                         const MemberLookupContext& callCtx,
                          bool exactClass);
 
 LookupResult lookupClsMethod(const Func*& f,
                              const Class* cls,
                              const StringData* methodName,
                              ObjectData* this_,
-                             const MethodLookupCallContext& callCtx,
+                             const MemberLookupContext& callCtx,
                              MethodLookupErrorOptions raise);
 
 /*
@@ -130,12 +123,12 @@ LookupResult lookupClsMethod(const Func*& f,
  */
 const Func* lookupImmutableClsMethod(const Class* cls,
                                      const StringData* name,
-                                     const MethodLookupCallContext& callCtx,
+                                     const MemberLookupContext& callCtx,
                                      bool exactClass);
 
 LookupResult lookupCtorMethod(const Func*& f,
                               const Class* cls,
-                              const MethodLookupCallContext& callCtx,
+                              const MemberLookupContext& callCtx,
                               MethodLookupErrorOptions raise);
 
 /*
@@ -147,26 +140,5 @@ LookupResult lookupCtorMethod(const Func*& f,
  * ctx, or otherwise guaranteed by guards).
  */
 const Func* lookupImmutableCtor(const Class* cls,
-                                const MethodLookupCallContext& callCtx);
-
-/*
- * Find a function which always uniquely maps to the given name in the context
- * of the given unit. A function so returned can be used directly in the TC as
- * it will not change.
- *
- * This generally includes persistent functions, but can also include
- * non-persistent functions in certain situations. Note that even if the
- * function is immutable, the unit it is defined in may need loading. In that
- * case, the function is safe to use, but you have to emit code to ensure the
- * unit is loaded first.
- */
-struct ImmutableFuncLookup {
-  const Func* func;
-  // Does any use of this function require a check to ensure its unit is loaded?
-  bool needsUnitLoad;
-};
-
-ImmutableFuncLookup lookupImmutableFunc(const Unit* unit,
-                                        const StringData* name);
-
+                                const MemberLookupContext& callCtx);
 }

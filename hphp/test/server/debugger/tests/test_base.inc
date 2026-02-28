@@ -2,7 +2,7 @@
 
 function init() {
   require __DIR__ . '/../../util/server_tests.inc';
-  ServerUtilServerTests::$LOG_ROOT = '/tmp/hphpd';
+  ServerUtilServerTests::$LOG_ROOT = ServerUtilServerTests::working_dir() . '/hphpd';
 }
 
 function startDebuggerClient($debugPort, $input_path, inout $pipes) {
@@ -11,7 +11,7 @@ function startDebuggerClient($debugPort, $input_path, inout $pipes) {
 
 
   $home = hphp_home().'/hphp/test/server/debugger';
-  $hhvm = PHP_BINARY;
+  $hhvm = HH\__internal\hhvm_binary();
   $host = ' -h localhost';
   $port = ' --debug-port '.$debugPort;
   $user = ' --user debugger';
@@ -24,13 +24,13 @@ function startDebuggerClient($debugPort, $input_path, inout $pipes) {
     $config . $logFileConfig . $repoConfig . $debugConfig .
     ' <'.$home.$input_path;
 
-  $descriptorspec = darray[
-     0 => varray["pipe", "r"],
-     1 => varray["pipe", "w"],
-     2 => varray["pipe", "w"],
+  $descriptorspec = dict[
+     0 => vec["pipe", "r"],
+     1 => vec["pipe", "w"],
+     2 => vec["pipe", "w"],
   ];
 
-  $env = $_ENV;
+  $env = \HH\global_get('_ENV');
   $env["TERM"] = "dumb";
 
   tlog('Starting debugger client with command: '.$cmd);
@@ -49,7 +49,8 @@ function runTest($testName, $testController) {
 
     $serverPort = $adminPort = $debugPort = null;
     $serverProc = startServer(inout $serverPort, inout $adminPort, inout $debugPort,
-                              __DIR__.'/..', __DIR__.'/../debugger');
+                              __DIR__.'/..', __DIR__.'/../debugger',
+                              '-vHack.Lang.OptimizeLocalLifetimes=0');
     $pipes = null;
     startDebuggerClient($debugPort, "/debugger/$testName.in", inout $pipes);
     $clientProcessId = getClientProcessId($pipes[1]);
@@ -65,10 +66,11 @@ function runTest($testName, $testController) {
     echo stream_get_contents($pipes[2]);
     stopServer($adminPort, $serverProc);
   } catch (Exception $e) {
-    error_log("Caught exception, test failed, pid=$pid");
+    error_log("Caught exception, test failed, pid=$pid, exn=\n".(string)$e);
     killChildren(posix_getpid());
     if ($serverProc) proc_close($serverProc);
     error_log('test failed');
+    exit(-1);
   }
 }
 

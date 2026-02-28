@@ -7,7 +7,7 @@
  *
  *)
 
-type t
+type t [@@deriving sexp_of]
 
 val make : Full_fidelity_parser_env.t -> Full_fidelity_source_text.t -> t
 

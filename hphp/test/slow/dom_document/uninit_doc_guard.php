@@ -12,7 +12,7 @@ class MyOtherDoc extends DOMDocument {
 
 
 <<__EntryPoint>>
-function main_uninit_doc_guard() {
+function main_uninit_doc_guard() :mixed{
 $doc = new MyDoc('1', "");
 $doc->normalizeDocument(); // warning
 var_dump($doc->recover);

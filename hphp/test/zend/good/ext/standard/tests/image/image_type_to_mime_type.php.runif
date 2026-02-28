@@ -1,14 +1,1 @@
-function image_type_to_mime_type
-const IMAGETYPE_GIF
-const IMAGETYPE_JPEG
-const IMAGETYPE_PNG
-const IMAGETYPE_SWF
-const IMAGETYPE_PSD
-const IMAGETYPE_BMP
-const IMAGETYPE_TIFF_II
-const IMAGETYPE_TIFF_MM
-const IMAGETYPE_JPC
-#const IMAGETYPE_JP2
-#const IMAGETYPE_JPX
-#const IMAGETYPE_JB2
-const IMAGETYPE_IFF
+extension gd

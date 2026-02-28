@@ -13,65 +13,52 @@ open Typing_defs
 
 type locl_ty = Typing_defs.locl_ty
 
-[@@@warning "-32"]
-
-let show_local_id_set_t _ = "<local_id_set_t>"
-
-let pp_local_id_set_t _ _ = Printf.printf "%s\n" "<local_id_set_t>"
-
 type local_id_set_t = Local_id.Set.t
-
-let show_local_env _ = "<local_env>"
-
-let pp_local_env _ _ = Printf.printf "%s\n" "<local_env>"
 
 type local_env = {
   per_cont_env: Typing_per_cont_env.t;
   local_using_vars: local_id_set_t;
 }
 
-let show_env _ = "<env>"
-
-let pp_env _ _ = Printf.printf "%s\n" "<env>"
-
-let show_genv _ = "<genv>"
-
-let pp_genv _ _ = Printf.printf "%s\n" "<genv>"
-
-let show_tfun _ = "<tfun>"
-
-let pp_tfun _ _ = Printf.printf "%s\n" "<tfun>"
-
-[@@@warning "+32"]
+type expr_tree_env = {
+  dsl: Aast.class_name;
+  outer_locals: Typing_local_types.t;
+}
 
 (** See the .mli file for the documentation of fields. *)
 type env = {
+  expression_id_provider: Expression_id.provider;
+  tvar_id_provider: Tvid.provider;
   fresh_typarams: SSet.t;
   lenv: local_env;
   genv: genv;
   decl_env: Decl_env.env;
   in_loop: bool;
   in_try: bool;
-  in_expr_tree: bool;
-  inside_constructor: bool;
-  in_support_dynamic_type_method_check: bool;
+  in_lambda: bool;
+  in_expr_tree: expr_tree_env option;
+  in_macro_splice: Typing_local_types.t option;
+  checked: Tast.check_status;
   tracing_info: Decl_counters.tracing_info option;
   tpenv: Type_parameter_env.t;
   log_levels: int SMap.t;
   inference_env: Typing_inference_env.t;
+  rank: int;
+  check_rank: bool;
   allow_wildcards: bool;
   big_envs: (Pos.t * env) list ref;
   fun_tast_info: Tast.fun_tast_info option;
+  emit_string_coercion_error: bool;
 }
 
 (** See the .mli file for the documentation of fields. *)
 and genv = {
   tcopt: TypecheckerOptions.t;
   callable_pos: Pos.t;
+  function_pos: Pos.t;
   readonly: bool;
   return: Typing_env_return_info.t;
-  params: (locl_ty * Pos.t * param_mode) Local_id.Map.t;
-  condition_types: decl_ty SMap.t;
+  params: (locl_ty * Pos.t * locl_ty option) Local_id.Map.t;
   parent: (string * decl_ty) option;
   self: (string * locl_ty) option;
   static: bool;
@@ -79,9 +66,13 @@ and genv = {
   val_kind: Typing_defs.val_kind;
   fun_is_ctor: bool;
   file: Relative_path.t;
-  this_module: Ast_defs.id option;
+  current_module: Ast_defs.id option;
+  current_package: Aast_defs.package_membership option;
+  soft_package_requirement: Ast_defs.id option;
   this_internal: bool;
   this_support_dynamic_type: bool;
+  no_auto_likes: bool;
+  needs_concrete: bool;
 }
 
 let initial_local tpenv =
@@ -93,35 +84,33 @@ let initial_local tpenv =
 
 let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
   {
+    expression_id_provider = Expression_id.make_provider ();
+    tvar_id_provider = Tvid.make_provider ();
     fresh_typarams = SSet.empty;
     lenv = initial_local Type_parameter_env.empty;
     in_loop = false;
     in_try = false;
-    in_expr_tree = false;
-    inside_constructor = false;
-    in_support_dynamic_type_method_check = false;
-    decl_env = { Decl_env.mode; droot; ctx };
+    in_lambda = false;
+    in_expr_tree = None;
+    in_macro_splice = None;
+    checked = Tast.COnce;
+    decl_env = { Decl_env.mode; droot; droot_member = None; ctx };
     tracing_info =
       Option.map origin ~f:(fun origin -> { Decl_counters.origin; file });
     genv =
       {
         tcopt = Provider_context.get_tcopt ctx;
         callable_pos = Pos.none;
+        function_pos = Pos.none;
         readonly = false;
         return =
           {
             (* Actually should get set straight away anyway *)
-            Typing_env_return_info.return_type =
-              {
-                et_type = mk (Reason.Rnone, Tunion []);
-                et_enforced = Unenforced;
-              };
+            Typing_env_return_info.return_type = mk (Reason.none, Tunion []);
             return_disposable = false;
-            return_explicit = false;
-            return_dynamically_callable = false;
+            return_ignore_readonly = false;
           };
         params = Local_id.Map.empty;
-        condition_types = SMap.empty;
         self = None;
         static = false;
         val_kind = Other;
@@ -129,16 +118,23 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
         fun_kind = Ast_defs.FSync;
         fun_is_ctor = false;
         file;
-        this_module = None;
+        current_module = None;
+        current_package = None;
+        soft_package_requirement = None;
         this_internal = false;
         this_support_dynamic_type = false;
+        no_auto_likes = false;
+        needs_concrete = false;
       };
     tpenv = Type_parameter_env.empty;
     log_levels = TypecheckerOptions.log_levels (Provider_context.get_tcopt ctx);
     inference_env = Typing_inference_env.empty_inference_env;
+    rank = 0;
+    check_rank = false;
     allow_wildcards = false;
     big_envs = ref [];
     fun_tast_info = None;
+    emit_string_coercion_error = true;
   }
 
 let get_log_level env key =
@@ -159,22 +155,22 @@ let get_pos_and_kind_of_generic env name =
   | Some r -> Some r
   | None -> Type_parameter_env.get_with_pos name env.tpenv
 
-let get_lower_bounds env name tyargs =
+let get_lower_bounds env name =
   let tpenv = get_tpenv env in
-  let local = Type_parameter_env.get_lower_bounds tpenv name tyargs in
-  let global = Type_parameter_env.get_lower_bounds env.tpenv name tyargs in
+  let local = Type_parameter_env.get_lower_bounds tpenv name in
+  let global = Type_parameter_env.get_lower_bounds env.tpenv name in
   Typing_set.union local global
 
-let get_upper_bounds env name tyargs =
+let get_upper_bounds env name =
   let tpenv = get_tpenv env in
-  let local = Type_parameter_env.get_upper_bounds tpenv name tyargs in
-  let global = Type_parameter_env.get_upper_bounds env.tpenv name tyargs in
+  let local = Type_parameter_env.get_upper_bounds tpenv name in
+  let global = Type_parameter_env.get_upper_bounds env.tpenv name in
   Typing_set.union local global
 
 (* Get bounds that are both an upper and lower of a given generic *)
-let get_equal_bounds env name tyargs =
-  let lower = get_lower_bounds env name tyargs in
-  let upper = get_upper_bounds env name tyargs in
+let get_equal_bounds env name =
+  let lower = get_lower_bounds env name in
+  let upper = get_upper_bounds env name in
   Typing_set.inter lower upper
 
 let get_tparams_in_ty_and_acc env acc ty =
@@ -182,16 +178,9 @@ let get_tparams_in_ty_and_acc env acc ty =
     object (this)
       inherit [SSet.t] Type_visitor.locl_type_visitor
 
-      method! on_tgeneric acc _ s _ =
-        (* as for tnewtype: not traversing args, although they may contain Tgenerics *)
+      method! on_tgeneric acc _ s =
+        (* Not traversing args, although they may contain Tgenerics (higher kinds only) *)
         SSet.add s acc
-
-      (* Perserving behavior but this seems incorrect to me since a newtype may
-       * contain type arguments with generics
-       *)
-      method! on_tdependent acc _ _ _ = acc
-
-      method! on_tnewtype acc _ _ _ _ = acc
 
       method! on_tvar acc r ix =
         let (_env, ty) =
@@ -203,3 +192,11 @@ let get_tparams_in_ty_and_acc env acc ty =
     end
   in
   (tparams_visitor env)#on_type acc ty
+
+let get_rank { rank; _ } = rank
+
+let increment_rank env = { env with rank = env.rank + 1; check_rank = true }
+
+let decrement_rank env = { env with rank = env.rank - 1 }
+
+let should_check_rank { check_rank; _ } = check_rank

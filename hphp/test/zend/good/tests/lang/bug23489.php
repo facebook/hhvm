@@ -2,13 +2,13 @@
 class Test {
   function __construct() {
     ob_start(
-      varray[
+      vec[
         $this, 'transform'
       ]
     );
   }
 
-  <<__DynamicallyCallable>> function transform($buffer) {
+  <<__DynamicallyCallable>> function transform($buffer) :mixed{
     return 'success';
   }
 }

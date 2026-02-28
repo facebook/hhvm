@@ -2,7 +2,7 @@
 
 // Extend a class with NativeData
 class C<reify T> extends SimpleXMLElement {
-  function f() {
+  function f() :mixed{
     var_dump(HH\ReifiedGenerics\get_type_structure<T>());
   }
 }

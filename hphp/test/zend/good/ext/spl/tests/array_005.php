@@ -12,12 +12,12 @@ class Student
     }
 
     public function __toString()
-    {
+:mixed    {
         return $this->id . ', ' . $this->name;
     }
 
     public function getID()
-    {
+:mixed    {
         return $this->id;
     }
 }
@@ -28,18 +28,18 @@ class StudentList implements IteratorAggregate
 
     public function __construct()
     {
-        $this->students = varray[];
+        $this->students = vec[];
     }
 
     public function add(Student $student)
-    {
+:mixed    {
         if (!$this->contains($student)) {
             $this->students[] = $student;
         }
     }
 
     public function contains(Student $student)
-    {
+:mixed    {
         foreach ($this->students as $s)
         {
             if ($s->getID() == $student->getID()) {
@@ -49,7 +49,7 @@ class StudentList implements IteratorAggregate
         return false;
     }
 
-    public function getIterator() {
+    public function getIterator() :mixed{
         return new ArrayIterator($this->students);
     }
 }

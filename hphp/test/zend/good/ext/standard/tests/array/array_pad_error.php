@@ -12,7 +12,7 @@ try { var_dump( array_pad() ); } catch (Exception $e) { echo "\n".'Warning: '.$e
 
 //Test array_pad with one more than the expected number of arguments
 echo "\n-- Testing array_pad() function with more than expected no. of arguments --\n";
-$input = varray[1, 2];
+$input = vec[1, 2];
 $pad_size = 10;
 $pad_value = 1;
 $extra_arg = 10;
@@ -20,7 +20,7 @@ try { var_dump( array_pad($input, $pad_size, $pad_value, $extra_arg) ); } catch 
 
 // Testing array_pad with less than the expected number of arguments
 echo "\n-- Testing array_pad() function with less than expected no. of arguments --\n";
-$input = varray[1, 2];
+$input = vec[1, 2];
 $pad_size = 10;
 try { var_dump( array_pad($input, $pad_size) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( array_pad($input) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

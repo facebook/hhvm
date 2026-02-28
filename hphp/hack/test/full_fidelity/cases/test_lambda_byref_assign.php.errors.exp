@@ -1,9 +1,6 @@
 (3,7)-(3,7) An expression is expected here.
 (3,10)-(3,10) A semicolon `;` is expected here.
-(3,10)-(3,22) Use of the `{}` subscript operator is deprecated;  use `[]` instead.
 (3,14)-(3,14) An expression is expected here.
-(3,22)-(3,22) A right brace `}` is expected here.
-(3,36)-(3,36) An expression is expected here.
 (4,7)-(4,7) An expression is expected here.
 (5,7)-(5,7) An expression is expected here.
 (5,7)-(5,9) Encountered unexpected token `$x`.
@@ -12,6 +9,7 @@
 (8,7)-(8,7) An expression is expected here.
 (9,7)-(9,7) An expression is expected here.
 (10,7)-(10,7) An expression is expected here.
+(10,7)-(10,14) Splicing can only occur inside expression tree literals (between backticks)
 (11,7)-(11,7) An expression is expected here.
 (12,7)-(12,7) An expression is expected here.
 (13,7)-(13,7) An expression is expected here.

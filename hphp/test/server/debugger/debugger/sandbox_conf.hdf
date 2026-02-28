@@ -1,4 +1,3 @@
 default.path = .
-default.accesslog = /tmp/hphpd_test_sandbox_access.log
 default.ServerVars {
 }

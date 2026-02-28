@@ -1,1 +1,1 @@
-Fatal error: This function can only be memoized using __PolicyShardedMemoize or __PolicyShardedMemoizeLSB because it has zoned context in %s on line 3
+Fatal error: This function can only be memoized using __Memoize(#KeyedByIC) or __MemoizeLSB(#KeyedByIC) because it has zoned context in %s on line 3

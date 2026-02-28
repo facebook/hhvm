@@ -18,7 +18,6 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 namespace {
@@ -105,9 +104,9 @@ namespace {
   }
 
   struct RegexExtension final : Extension {
-    RegexExtension() : Extension("hsl_regex", "0.1") {}
+    RegexExtension() : Extension("hsl_regex", "0.1", NO_ONCALL_YET) {}
 
-    void moduleInit() override {
+    void moduleRegisterNative() override {
       HHVM_FALIAS(
         HH\\Lib\\_Private\\_Regex\\match,
         HH_regex_match
@@ -116,7 +115,6 @@ namespace {
         HH\\Lib\\_Private\\_Regex\\replace,
         HH_regex_replace
       );
-      loadSystemlib();
     }
   } s_regex_extension;
 

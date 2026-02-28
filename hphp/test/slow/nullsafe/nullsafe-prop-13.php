@@ -1,8 +1,8 @@
-<?hh // strict
+<?hh
 
-function byRef(inout $x) {}
+function byRef(inout $x) :mixed{}
 
-function test() {
+function test() :mixed{
   $x = null;
   byRef(inout $x?->y); // error
 }

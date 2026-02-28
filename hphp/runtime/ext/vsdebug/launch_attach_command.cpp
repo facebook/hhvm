@@ -17,6 +17,8 @@
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 
+#include "hphp/util/configs/jit.h"
+
 namespace HPHP {
 namespace VSDEBUG {
 
@@ -66,6 +68,11 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
 
   bool disableStdoutRedirection =
     tryGetBool(args, "disableStdoutRedirection", false);
+
+  bool disableJit =
+    tryGetBool(args, "disableJit", Cfg::Jit::DisabledByVSDebug);
+
+  bool warnOnFileChange = tryGetBool(args, "warnOnFileChange", true);
 
   const auto& logFilePath =
     tryGetString(args, "logFilePath", emptyString);
@@ -125,6 +132,8 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
   options.disablePostDummyEvalHelper = disablePostDummyEvalHelper;
   options.maxReturnedStringLength = maxReturnedStringLength;
   options.disableStdoutRedirection = disableStdoutRedirection;
+  options.disableJit = disableJit;
+  options.warnOnFileChange = warnOnFileChange;
   m_debugger->setDebuggerOptions(options);
 
   // Send the InitializedEvent to indicate to the front-end that we are up

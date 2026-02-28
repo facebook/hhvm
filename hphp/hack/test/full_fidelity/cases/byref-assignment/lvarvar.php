@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f(): void {
   $y = &$$s + 1;

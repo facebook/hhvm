@@ -16,11 +16,6 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/tv-comparisons.h"
-#include "hphp/runtime/base/tv-mutate.h"
-#include "hphp/runtime/base/tv-variant.h"
-
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
@@ -41,11 +36,12 @@
 #include "hphp/runtime/vm/resumable.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -55,7 +51,7 @@ namespace {
 
 void maybe_syncsp(Vout& v, const BCMarker& marker, Vreg sp, IRSPRelOffset off) {
   if (marker.resumeMode() == ResumeMode::None) {
-    if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    if (Cfg::HHIR::GenerateAsserts) {
       v << syncvmsp{v.cns(0x42)};
     }
     return;
@@ -65,15 +61,30 @@ void maybe_syncsp(Vout& v, const BCMarker& marker, Vreg sp, IRSPRelOffset off) {
   v << syncvmsp{sync_sp};
 }
 
-RegSet cross_trace_args(const BCMarker& marker) {
+RegSet cross_trace_args(const BCMarker& marker, SrcKey target) {
+  if (target.valid() && target.funcEntry()) {
+    auto const func = target.func();
+    auto const withCtx =
+      func->isClosureBody() || func->cls() ||
+      Cfg::HHIR::GenerateAsserts;
+    return func_entry_regs(withCtx);
+  }
+
   return marker.resumeMode() != ResumeMode::None
     ? cross_trace_regs_resumed() : cross_trace_regs();
 }
 
-void popFrameToFuncEntryRegs(Vout& v) {
+void popFrameToFuncEntryRegs(Vout& v, const Func* func) {
   v << unrecordbasenativesp{};
+  if (func->isClosureBody() || func->cls()) {
+    v << load{Vreg(rvmfp()) + AROFF(m_thisUnsafe), r_func_entry_ctx()};
+  } else if (Cfg::HHIR::GenerateAsserts) {
+    v << copy{v.cns(ActRec::kTrashedThisSlot), r_func_entry_ctx()};
+  }
+  v << loadl{Vreg(rvmfp()) + AROFF(m_callOffAndFlags), r_func_entry_ar_flags()};
+  v << loadl{Vreg(rvmfp()) + AROFF(m_funcId), r_func_entry_callee_id()};
   v << copy{rvmfp(), rvmsp()};
-  v << pushm{Vreg(rvmsp()) + AROFF(m_savedRip)};
+  v << restoreripm{Vreg(rvmfp()) + AROFF(m_savedRip)};
   v << load{Vreg(rvmsp()) + AROFF(m_sfp), rvmfp()};
 }
 
@@ -245,10 +256,10 @@ void cgAssertNonNull(IRLS& env, const IRInstruction* inst) {
   auto src = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (Cfg::HHIR::GenerateAsserts) {
     auto const sf = v.makeReg();
     v << testq{src, src, sf};
-    ifThen(v, CC_Z, sf, [&](Vout& v) { v << trap{TRAP_REASON}; });
+    ifThen(v, CC_Z, sf, [&](Vout& v) { v << trap{TRAP_REASON, Fixup::none()}; });
   }
   v << copy{src, dst};
 }
@@ -308,13 +319,12 @@ void cgProfileSwitchDest(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-void cgJmpSwitchDest(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<JmpSwitchDest>();
+void cgLdSwitchDest(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<LdSwitchDest>();
   auto const idx = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
   auto const marker = inst->marker();
   auto& v = vmain(env);
-
-  maybe_syncsp(v, marker, srcLoc(env, inst, 1).reg(), extra->spOffBCFromIRSP);
 
   auto const table = v.allocData<TCA>(extra->cases);
   for (int i = 0; i < extra->cases; i++) {
@@ -323,7 +333,7 @@ void cgJmpSwitchDest(IRLS& env, const IRInstruction* inst) {
 
   auto const t = v.makeReg();
   v << lead{table, t};
-  v << jmpm{t[idx * 8], cross_trace_args(marker)};
+  v << load{t[idx * 8], dst};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -381,31 +391,48 @@ void cgLdSSwitchDest(IRLS& env, const IRInstruction* inst) {
 }
 
 
-void cgJmpSSwitchDest(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<JmpSSwitchDest>();
+void cgJmpExit(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<JmpExit>();
   auto const marker = inst->marker();
   auto& v = vmain(env);
 
   maybe_syncsp(v, marker, srcLoc(env, inst, 1).reg(), extra->offset);
-  v << jmpr{srcLoc(env, inst, 0).reg(), cross_trace_args(marker)};
+  v << jmpr{srcLoc(env, inst, 0).reg(), cross_trace_args(marker, SrcKey{})};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgReqBindJmp(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<ReqBindJmp>();
+  auto const target = extra->target;
   auto& v = vmain(env);
 
-  if (extra->target.funcEntry()) {
-    if (!inst->marker().prologue()) popFrameToFuncEntryRegs(v);
+  if (target.funcEntry()) {
+    if (extra->popFrame) {
+      assertx(inst->numSrcs() == 2);
+      popFrameToFuncEntryRegs(v, target.func());
+    } else {
+      assertx(inst->numSrcs() == 5);
+      auto const arFlags = srcLoc(env, inst, 2).reg();
+      auto const calleeId = srcLoc(env, inst, 3).reg();
+      auto const ctx = srcLoc(env, inst, 4).reg();
+      v << copy{arFlags, r_func_entry_ar_flags()};
+      v << copy{calleeId, r_func_entry_callee_id()};
+      if (target.func()->isClosureBody() || target.func()->cls()) {
+        v << copy{ctx, r_func_entry_ctx()};
+      } else if (Cfg::HHIR::GenerateAsserts) {
+        v << copy{v.cns(ActRec::kTrashedThisSlot), r_func_entry_ctx()};
+      }
+    }
   } else {
+    assertx(inst->numSrcs() == 2);
     maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->irSPOff);
   }
 
   v << bindjmp{
-    extra->target,
+    target,
     extra->invSPOff,
-    cross_trace_args(inst->marker())
+    cross_trace_args(inst->marker(), target)
   };
 }
 
@@ -415,7 +442,7 @@ void cgReqRetranslate(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   if (destSK.funcEntry()) {
-    popFrameToFuncEntryRegs(v);
+    popFrameToFuncEntryRegs(v, destSK.func());
   } else {
     maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->offset);
   }
@@ -423,7 +450,7 @@ void cgReqRetranslate(IRLS& env, const IRInstruction* inst) {
   v << fallback{
     destSK,
     inst->marker().bcSPOff(),
-    cross_trace_args(inst->marker())
+    cross_trace_args(inst->marker(), destSK)
   };
 }
 
@@ -431,10 +458,12 @@ void cgReqRetranslateOpt(IRLS& env, const IRInstruction* inst) {
   assertx(inst->marker().sk().funcEntry());
   assertx(inst->marker().bcSPOff() == SBInvOffset{0});
   auto& v = vmain(env);
-  v << copy{v.cns(inst->marker().sk().entryOffset()), rarg(0)};
+  v << copy{v.cns(inst->marker().sk().numEntryArgs()), rarg(0)};
+  // This jmp is not smashable, so the ABI does not need to be compatible with
+  // TC targets. This allows the stub to accept pushed frame.
   v << jmpi{
     tc::ustubs().handleRetranslateOpt,
-    leave_trace_regs() | arg_regs(1)
+    vm_regs_no_sp() | rarg(0)
   };
 }
 
@@ -443,7 +472,8 @@ void cgReqInterpBBNoTranslate(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   if (extra->target.funcEntry()) {
-    popFrameToFuncEntryRegs(v);
+    assertx(extra->popFrame);
+    popFrameToFuncEntryRegs(v, extra->target.func());
   } else {
     maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->irSPOff);
   }

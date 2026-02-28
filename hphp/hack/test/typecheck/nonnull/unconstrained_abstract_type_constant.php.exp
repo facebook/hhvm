@@ -1,4 +1,16 @@
-File "unconstrained_abstract_type_constant.php", line 7, characters 12-13:
+ERROR: File "unconstrained_abstract_type_constant.php", line 7, characters 12-13:
+Invalid return type (Typing[4110])
+  File "unconstrained_abstract_type_constant.php", line 6, characters 34-40:
+  Expected `nonnull`
+  File "unconstrained_abstract_type_constant.php", line 6, characters 21-27:
+  But got `C::T super this::T`
+ERROR: File "unconstrained_abstract_type_constant.php", line 7, characters 12-13:
+Invalid return type (Typing[4110])
+  File "unconstrained_abstract_type_constant.php", line 6, characters 34-40:
+  Expected `nonnull`
+  File "unconstrained_abstract_type_constant.php", line 6, characters 21-27:
+  But got `mixed`
+ERROR: File "unconstrained_abstract_type_constant.php", line 7, characters 12-13:
 Invalid return type (Typing[4110])
   File "unconstrained_abstract_type_constant.php", line 6, characters 34-40:
   Expected `nonnull`

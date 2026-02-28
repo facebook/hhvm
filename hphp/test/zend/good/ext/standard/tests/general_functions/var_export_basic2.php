@@ -8,7 +8,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing var_export() with valid boolean values ***\n";
 // different valid  boolean vlaues
-$valid_bool = darray[
+$valid_bool = dict[
             "1" => 1,
             "TRUE" => TRUE,
             "true" => true,

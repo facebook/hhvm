@@ -1,5 +1,5 @@
 <?hh
-function encode_decode($json) {
+function encode_decode($json) :mixed{
     $struct = json_decode($json);
     $pretty = json_encode($struct, JSON_PRETTY_PRINT);
     echo "$pretty\n";

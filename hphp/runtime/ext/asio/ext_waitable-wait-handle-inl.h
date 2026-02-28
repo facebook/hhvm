@@ -43,23 +43,29 @@ inline c_WaitableWaitHandle::~c_WaitableWaitHandle() {
   }
 }
 
-inline context_idx_t c_WaitableWaitHandle::getContextIdx() const {
+inline ContextIndex c_WaitableWaitHandle::getContextIndex() const {
   assertx(!isFinished());
-  return m_contextIdx;
+  return m_ctxStateIdx.contextIndex();
 }
 
-inline void c_WaitableWaitHandle::setContextIdx(context_idx_t ctx_idx) {
+inline ContextStateIndex c_WaitableWaitHandle::getContextStateIndex() const {
   assertx(!isFinished());
-  m_contextIdx = ctx_idx;
+  return m_ctxStateIdx;
+}
+
+inline void
+c_WaitableWaitHandle::setContextStateIndex(ContextStateIndex ctxStateIdx) {
+  assertx(!isFinished());
+  m_ctxStateIdx = ctxStateIdx;
 }
 
 inline bool c_WaitableWaitHandle::isInContext() const {
-  return getContextIdx();
+  return getContextIndex().value;
 }
 
 inline AsioContext* c_WaitableWaitHandle::getContext() const {
   assertx(isInContext());
-  return AsioSession::Get()->getContext(getContextIdx());
+  return AsioSession::Get()->getContext(getContextIndex());
 }
 
 inline AsioBlockableChain& c_WaitableWaitHandle::getParentChain() {

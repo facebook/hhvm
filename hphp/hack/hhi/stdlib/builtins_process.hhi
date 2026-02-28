@@ -8,101 +8,143 @@
  *
  */
 
-const int WNOHANG   = 0b001;
-const int WUNTRACED = 0b010;
+const int WNOHANG;
+const int WUNTRACED;
 
 <<__PHPStdLib>>
-function pcntl_alarm(int $seconds);
+function pcntl_alarm(int $seconds): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_exec(string $path, $args = null, $envs = null);
+function pcntl_exec(
+  string $path,
+  HH\FIXME\MISSING_PARAM_TYPE $args = null,
+  HH\FIXME\MISSING_PARAM_TYPE $envs = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_fork();
+function pcntl_fork(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_getpriority(int $pid = 0, int $process_identifier = 0);
+function pcntl_getpriority(
+  int $pid = 0,
+  int $process_identifier = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_setpriority(int $priority, int $pid = 0, int $process_identifier = 0);
+function pcntl_setpriority(
+  int $priority,
+  int $pid = 0,
+  int $process_identifier = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_signal(int $signo, $handler, bool $restart_syscalls = true);
+function pcntl_signal(
+  int $signo,
+  HH\FIXME\MISSING_PARAM_TYPE $handler,
+  bool $restart_syscalls = true,
+): HH\FIXME\MISSING_RETURN_TYPE;
 
 <<__PHPStdLib>>
-function pcntl_wait(inout $status, int $options = 0);
+function pcntl_wait(
+  inout ?int $status,
+  int $options = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_waitpid(int $pid, inout $status, int $options = 0);
+function pcntl_waitpid(
+  int $pid,
+  inout ?int $status,
+  int $options = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_wexitstatus(int $status);
+function pcntl_wexitstatus(int $status): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_wifexited(int $status);
+function pcntl_wifexited(int $status): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_wifsignaled(int $status);
+function pcntl_wifsignaled(int $status): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_wifstopped(int $status);
+function pcntl_wifstopped(int $status): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_wstopsig(int $status);
+function pcntl_wstopsig(int $status): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_wtermsig(int $status);
+function pcntl_wtermsig(int $status): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_signal_dispatch();
+function pcntl_signal_dispatch(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function shell_exec(string $cmd);
+function shell_exec(string $cmd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function exec(string $command, inout $output, inout $return_var);
+function exec(
+  string $command,
+  inout dynamic $output,
+  inout HH\FIXME\MISSING_PARAM_TYPE $return_var,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function passthru(string $command, inout $return_var);
+function passthru(
+  string $command,
+  inout HH\FIXME\MISSING_PARAM_TYPE $return_var,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function system(string $command, inout $return_var);
+function system(
+  string $command,
+  inout HH\FIXME\MISSING_PARAM_TYPE $return_var,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function proc_open(string $cmd, darray<int, mixed> $descriptorspec, inout $pipes, $cwd = null, $env = null, $other_options = null);
+function proc_open(
+  string $cmd,
+  darray<int, mixed> $descriptorspec,
+  inout ?vec_or_dict<resource> $pipes,
+  HH\FIXME\MISSING_PARAM_TYPE $cwd = null,
+  HH\FIXME\MISSING_PARAM_TYPE $env = null,
+  HH\FIXME\MISSING_PARAM_TYPE $other_options = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function proc_terminate(resource $process, int $signal = 0);
+function proc_terminate(
+  resource $process,
+  int $signal = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function proc_close(resource $process);
+function proc_close(resource $process): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function proc_get_status(resource $process);
+function proc_get_status(resource $process): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function proc_nice(int $increment);
+function proc_nice(int $increment): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function escapeshellarg(string $arg)[];
+function escapeshellarg(string $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function escapeshellcmd(string $command);
+function escapeshellcmd(string $command): HH\FIXME\MISSING_RETURN_TYPE;
 
-const int SIGABRT = 6;
-const int SIGALRM = 14;
-const int SIGBABY = 31;
-const int SIGBUS = 7;
-const int SIGCHLD = 17;
-const int SIGCLD = 17;
-const int SIGCONT = 18;
-const int SIGFPE = 8;
-const int SIGHUP = 1;
-const int SIGILL = 4;
-const int SIGINT = 2;
-const int SIGIO = 29;
-const int SIGIOT = 6;
-const int SIGKILL = 9;
-const int SIGPIPE = 13;
-const int SIGPOLL = 29;
-const int SIGPROF = 27;
-const int SIGPWR = 30;
-const int SIGQUIT = 3;
-const int SIGSEGV = 11;
-const int SIGSTKFLT = 16;
-const int SIGSTOP = 19;
-const int SIGSYS = 31;
-const int SIGTERM = 15;
-const int SIGTRAP = 5;
-const int SIGTSTP = 20;
-const int SIGTTIN = 21;
-const int SIGTTOU = 22;
-const int SIGURG = 23;
-const int SIGUSR1 = 10;
-const int SIGUSR2 = 12;
-const int SIGVTALRM = 26;
-const int SIGWINCH = 28;
-const int SIGXCPU = 24;
-const int SIGXFSZ = 25;
-const int SIG_DFL = 0;
-const int SIG_ERR = -1;
-const int SIG_IGN = 1;
-const int SIG_BLOCK = 0;
-const int SIG_UNBLOCK = 1;
-const int SIG_SETMASK = 2;
+const int SIGABRT;
+const int SIGALRM;
+const int SIGBABY;
+const int SIGBUS;
+const int SIGCHLD;
+const int SIGCLD;
+const int SIGCONT;
+const int SIGFPE;
+const int SIGHUP;
+const int SIGILL;
+const int SIGINT;
+const int SIGIO;
+const int SIGIOT;
+const int SIGKILL;
+const int SIGPIPE;
+const int SIGPOLL;
+const int SIGPROF;
+const int SIGPWR;
+const int SIGQUIT;
+const int SIGSEGV;
+const int SIGSTKFLT;
+const int SIGSTOP;
+const int SIGSYS;
+const int SIGTERM;
+const int SIGTRAP;
+const int SIGTSTP;
+const int SIGTTIN;
+const int SIGTTOU;
+const int SIGURG;
+const int SIGUSR1;
+const int SIGUSR2;
+const int SIGVTALRM;
+const int SIGWINCH;
+const int SIGXCPU;
+const int SIGXFSZ;
+const int SIG_DFL;
+const int SIG_ERR;
+const int SIG_IGN;
+const int SIG_BLOCK;
+const int SIG_UNBLOCK;
+const int SIG_SETMASK;

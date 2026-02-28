@@ -1,6 +1,6 @@
-File "typedef_string_concat2.php", line 8, characters 19-19:
+ERROR: File "typedef_string_concat2.php", line 8, characters 19-19:
 Was expecting a return type hint (Typing[4030])
-File "typedef_string_concat2.php", line 13, characters 12-15:
+ERROR: File "typedef_string_concat2.php", line 13, characters 12-15:
 No instance method `blah` in `C` (Typing[4053])
   File "typedef_string_concat2.php", line 8, characters 19-19:
   Did you mean `f` instead?

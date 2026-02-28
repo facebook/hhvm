@@ -18,30 +18,13 @@
 #include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/std/ext_std_network-internal.h"
 
-#include <arpa/inet.h>
 #include <arpa/nameser.h>
-#include <netdb.h>
 #include <netinet/in.h>
 #include <resolv.h>
-#include <sys/socket.h>
 
-#include <folly/IPAddress.h>
 #include <folly/ScopeGuard.h>
 
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/ext/sockets/ext_sockets.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/util/lock.h"
-#include "hphp/util/network.h"
-
-#if defined(__APPLE__)
-# include <arpa/nameser_compat.h>
-#include <vector>
-#endif
 
 
 namespace HPHP {
@@ -118,10 +101,10 @@ bool HHVM_FUNCTION(checkdnsrr, const String& host,
   return (i >= 0);
 }
 
-typedef union {
+union querybuf {
   HEADER qb1;
   u_char qb2[65536];
-} querybuf;
+};
 
 const StaticString
   s_host("host"),
@@ -152,12 +135,15 @@ const StaticString
   s_replacement("replacement"),
   s_class("class"),
   s_ttl("ttl"),
+  s_tag("tag"),
+  s_value("value"),
   s_A("A"),
   s_MX("MX"),
   s_CNAME("CNAME"),
   s_NS("NS"),
   s_PTR("PTR"),
   s_HINFO("HINFO"),
+  s_CAA("CAA"),
   s_TXT("TXT"),
   s_SOA("SOA"),
   s_AAAA("AAAA"),
@@ -224,17 +210,17 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
     subarray.set(s_type, s_MX);
     GETSHORT(n, cp);
     subarray.set(s_pri, n);
-    /* no break; */
+    [[fallthrough]];
   case DNS_T_CNAME:
     if (type == DNS_T_CNAME) {
       subarray.set(s_type, s_CNAME);
     }
-    /* no break; */
+    [[fallthrough]];
   case DNS_T_NS:
     if (type == DNS_T_NS) {
       subarray.set(s_type, s_NS);
     }
-    /* no break; */
+    [[fallthrough]];
   case DNS_T_PTR:
     if (type == DNS_T_PTR) {
       subarray.set(s_type, s_PTR);
@@ -260,6 +246,27 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
     cp++;
     CHECKCP(n);
     subarray.set(s_os, String((const char *)cp, n, CopyString));
+    cp += n;
+    break;
+  case DNS_T_CAA:
+    /* See RFC 8659 for values https://datatracker.ietf.org/doc/html/rfc8659 */
+    subarray.set(s_type, s_CAA);
+    CHECKCP(1);
+    n = *cp & 0xFF;
+    subarray.set(s_flags, n);
+    cp++;
+    CHECKCP(1);
+    n = *cp & 0xFF;
+    cp++;
+    CHECKCP(n);
+    subarray.set(s_tag, String((const char *)cp, n, CopyString));
+    cp += n;
+		if ( (size_t) dlen < ((size_t)n) + 2 ) {
+			return NULL;
+	  }
+    n = dlen - n - 2;
+    CHECKCP(n);
+    subarray.set(s_value, String((const char *)cp, n, CopyString));
     cp += n;
     break;
   case DNS_T_TXT: {
@@ -527,6 +534,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int64_t type,
     case 9:  type_to_fetch = type & PHP_DNS_SRV   ? DNS_T_SRV   : 0; break;
     case 10: type_to_fetch = type & PHP_DNS_NAPTR ? DNS_T_NAPTR : 0; break;
     case 11: type_to_fetch = type & PHP_DNS_A6    ? DNS_T_A6    : 0; break;
+    case 12: type_to_fetch = type & PHP_DNS_CAA   ? DNS_T_CAA   : 0; break;
     case PHP_DNS_NUM_TYPES:
       store_results = false;
       continue;

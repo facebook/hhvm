@@ -1,0 +1,4 @@
+toBeNull
+  INSERT toBeNull()
+  function(optional ?Str\SprintfFormatString $msg, mixed $args...)[]: void
+SORT TEXT: none

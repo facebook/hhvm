@@ -1,5 +1,5 @@
 
-Warning: bzopen() expects exactly 2 parameters, 0 given in %s/001.php on line 3
+Warning: bzopen() expects exactly 2 positional parameters, 0 given in %s/001.php on line 3
 
 Warning: '' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s/001.php on line 4
 bool(false)

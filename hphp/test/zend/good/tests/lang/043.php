@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  static function foo() { return 'foo'; }
+  static function foo() :mixed{ return 'foo'; }
 }
 
 <<__EntryPoint>>

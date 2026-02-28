@@ -19,8 +19,6 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 
-#include "hphp/runtime/vm/hhbc-codec.h"
-
 namespace HPHP::jit::irgen {
 
 namespace {
@@ -29,12 +27,12 @@ namespace {
 
 bool branchesToItself(SrcKey sk) {
   if (sk.funcEntry()) return false;
-  auto const pc = sk.pc();
-  auto const op = peek_op(pc);
+  auto const op = sk.op();
   if (!instrIsControlFlow(op)) return false;
   if (isSwitch(op)) return false;
-  auto const offsets = instrJumpOffsets(pc);
-  return std::find(offsets.begin(), offsets.end(), 0) != offsets.end();
+  auto const offset = sk.offset();
+  auto const offsets = instrJumpTargets(sk.func()->entry(), offset);
+  return std::find(offsets.begin(), offsets.end(), offset) != offsets.end();
 }
 
 /*
@@ -51,6 +49,11 @@ bool branchesToItself(SrcKey sk) {
  * In all other cases, a ReqBindJmp is generated.
  */
 void exitRequest(IRGS& env, SrcKey target) {
+  if (isInlining(env)) {
+    sideExitFromInlined(env, target);
+    return;
+  }
+
   auto const irSP = spOffBCFromIRSP(env);
   auto const invSP = spOffBCFromStackBase(env);
   if (env.firstBcInst && target == curSrcKey(env)) {
@@ -63,10 +66,14 @@ void exitRequest(IRGS& env, SrcKey target) {
     );
     return;
   }
+  // FIXME: the following assert fails, because prepareInstruction() adds
+  // illegal CheckTypes in the middle of translation exiting to the initial
+  // SrcKey, which may be a func entry
+  // assertx(!target.funcEntry());
   gen(
     env,
     ReqBindJmp,
-    ReqBindJmpData { target, invSP, irSP },
+    ReqBindJmpData { target, invSP, irSP, target.funcEntry() },
     sp(env),
     fp(env)
   );
@@ -86,7 +93,6 @@ Block* implMakeExit(IRGS& env, SrcKey targetSk) {
 
   auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
-  spillInlinedFrames(env);
   exitRequest(env, targetSk);
   return exit;
 }
@@ -108,8 +114,11 @@ Block* makeExitSlow(IRGS& env) {
   auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
   interpOne(env);
-  // If it changes the PC, InterpOneCF will get us to the new location.
-  if (!opcodeChangesPC(curSrcKey(env).op())) {
+  // There are two reasons we might already be in an unreachable state:
+  // - interpreting control flow using InterpOneCF, which will get us
+  //   to the new location
+  // - forced side exit due to incompatibility of interpOne with inlining
+  if (!env.irb->inUnreachableState()) {
     gen(env, Jmp, makeExit(env, nextSrcKey(env)));
   }
   return exit;
@@ -118,7 +127,6 @@ Block* makeExitSlow(IRGS& env) {
 Block* makeExitSurprise(IRGS& env, SrcKey targetSk) {
   auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
-  spillInlinedFrames(env);
   gen(env, HandleRequestSurprise);
   exitRequest(env, targetSk);
   return exit;
@@ -128,7 +136,6 @@ Block* makeExitOpt(IRGS& env) {
   always_assert(!isInlining(env));
   auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
-  spillInlinedFrames(env);
   auto const data = IRSPRelOffsetData{spOffBCFromIRSP(env)};
   gen(env, ReqRetranslateOpt, data, sp(env), fp(env));
   return exit;

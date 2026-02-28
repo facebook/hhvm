@@ -23,14 +23,14 @@ class A {
 class B extends A { }
 class C extends B { }
 
-function run(?string $cls, ?string $func = null) {
+function run(?string $cls, ?string $func = null) :mixed{
   if ($cls !== null) {
     $ok = HH\clear_lsb_memoization($cls, $func) ? "T" : "F";
   } else {
     $ok = "-";
   }
   A::$sideEffects = vec[];
-  $values = varray[
+  $values = vec[
     A::foo1(),
     B::foo1(),
     C::foo1(),
@@ -46,7 +46,7 @@ function run(?string $cls, ?string $func = null) {
   A::$runCount++;
 }
 
-function main() {
+function main() :mixed{
   run(null);
 
   run("A", "foo1");
@@ -64,6 +64,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_reset_lsb() {
+function main_reset_lsb() :mixed{
 main();
 }

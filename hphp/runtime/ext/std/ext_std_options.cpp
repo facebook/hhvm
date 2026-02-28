@@ -16,16 +16,14 @@
 */
 #include "hphp/runtime/ext/std/ext_std_options.h"
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <pwd.h>
 #include <stdio.h>
+#include <time.h>
 #include <algorithm>
 #include <vector>
 
-#ifndef _WIN32
 #include <sys/utsname.h>
-#endif
 
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
@@ -38,21 +36,23 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/php-globals.h"
-#include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-array-like.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/extension-registry.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/server/cli-server.h"
+#include "hphp/runtime/server/pagelet-server.h"
+#include "hphp/runtime/server/xbox-server.h"
+#include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/util/process.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/user-info.h"
@@ -63,10 +63,16 @@ namespace HPHP {
 // Linux: /tmp
 // MacOS: /var/tmp
 const StaticString s_DEFAULT_TEMP_DIR(P_tmpdir);
-
-///////////////////////////////////////////////////////////////////////////////
-
-void StandardExtension::requestInitOptions() {}
+const StaticString s_used_bytes("used_bytes");
+const StaticString s_used_local_bytes("used_local_bytes");
+const StaticString s_used_persistent_bytes("used_persistent_bytes");
+const StaticString s_used("used");
+const StaticString s_capacity("capacity");
+const StaticString s_global("global");
+const StaticString s_pagelet_workers("pagelet_workers");
+const StaticString s_xbox_workers("xbox_workers");
+const StaticString s_http_workers("http_workers");
+const StaticString s_cli_workers("cli_workers");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -132,7 +138,7 @@ static void HHVM_FUNCTION(restore_include_path) {
 }
 
 static String HHVM_FUNCTION(set_include_path, const Variant& new_include_path) {
-  String s = f_get_include_path();
+  String s = HHVM_FN(get_include_path)();
   IniSetting::SetUser("include_path", new_include_path.toString());
   return s;
 }
@@ -143,6 +149,18 @@ static Array HHVM_FUNCTION(get_included_files) {
     vai.append(Variant{const_cast<StringData*>(file)});
   }
   return vai.toArray();
+}
+
+static void HHVM_FUNCTION(record_visited_files) {
+  if (g_context->m_visitedFiles.isNull()) {
+    g_context->m_visitedFiles = ArrayData::CreateKeyset();
+  }
+}
+
+static Array HHVM_FUNCTION(get_visited_files) {
+  return g_context->m_visitedFiles.isNull()
+     ? empty_keyset()
+     : g_context->m_visitedFiles;
 }
 
 static Variant HHVM_FUNCTION(getenv, const String& varname) {
@@ -629,15 +647,11 @@ static Array HHVM_FUNCTION(getrusage, int64_t who /* = 0 */) {
 
 static bool HHVM_FUNCTION(clock_getres,
                           int64_t clk_id, int64_t& sec, int64_t& nsec) {
-#if defined(__APPLE__)
-  throw_not_supported(__func__, "feature not supported on OSX");
-#else
   struct timespec ts;
   int ret = clock_getres(clk_id, &ts);
   sec = ts.tv_sec;
   nsec = ts.tv_nsec;
   return ret == 0;
-#endif
 }
 
 static bool HHVM_FUNCTION(clock_gettime,
@@ -684,7 +698,7 @@ Variant HHVM_FUNCTION(ini_get, const String& varname) {
   return value;
 }
 
-static Array HHVM_FUNCTION(ini_get_all,
+static ArrayRet HHVM_FUNCTION(ini_get_all,
                            const String& extension, bool detailed) {
   return IniSetting::GetAll(extension, detailed);
 }
@@ -695,7 +709,7 @@ static void HHVM_FUNCTION(ini_restore, const String& varname) {
 
 Variant HHVM_FUNCTION(ini_set,
                       const String& varname, const Variant& newvalue) {
-  auto oldvalue = f_ini_get(varname);
+  auto oldvalue = HHVM_FN(ini_get)(varname);
   auto ret = IniSetting::SetUser(varname, newvalue);
   if (!ret) {
     return false;
@@ -756,18 +770,21 @@ static bool HHVM_FUNCTION(hphp_memory_stop_interval) {
   return tl_heap->stopStatsInterval();
 }
 
+static bool HHVM_FUNCTION(set_oom_multiplier, int64_t m) {
+  if (m <= 1) return false;
+  auto& info = RI();
+  if (info.m_OOMMultiplier >= m) return false;
+  // TODO(T25950158): understand what is a reasonable threshold.
+  if (m > 100) m = 100;
+  info.m_OOMMultiplier = m;
+  return true;
+}
+
 const StaticString s_srv("srv"), s_cli("cli");
 
 String HHVM_FUNCTION(php_sapi_name) {
-  return RuntimeOption::ServerExecutionMode() && !is_cli_server_mode()
-    ? s_srv : s_cli;
+  return is_any_cli_mode() ? s_cli : s_srv;
 }
-
-#ifdef _WIN32
-const char* php_get_edition_name(DWORD majVer, DWORD minVer);
-Optional<String> php_get_windows_name();
-String php_get_windows_cpu();
-#endif
 
 const StaticString
   s_s("s"),
@@ -777,59 +794,6 @@ const StaticString
   s_m("m");
 
 Variant HHVM_FUNCTION(php_uname, const String& mode /*="" */) {
-#ifdef _WIN32
-  if (mode == s_s) {
-    return s_Windows_NT;
-  } else if (mode == s_r) {
-    DWORD dwVersion = GetVersion();
-    DWORD dwMajorVersion = (DWORD)(LOBYTE(LOWORD(dwVersion)));
-    DWORD dwMinorVersion = (DWORD)(HIBYTE(LOWORD(dwVersion)));
-    return folly::sformat("{}.{}", dwMajorVersion, dwMinorVersion);
-  } else if (mode == s_n) {
-    DWORD dwSize = MAX_COMPUTERNAME_LENGTH + 1;
-    char ComputerName[MAX_COMPUTERNAME_LENGTH + 1];
-
-    GetComputerName(ComputerName, &dwSize);
-    return String(ComputerName, dwSize, CopyString);
-  } else if (mode == s_v) {
-    DWORD dwVersion = GetVersion();
-    auto dwBuild = (DWORD)(HIWORD(dwVersion));
-    auto winVer = php_get_windows_name();
-    if (!winVer.hasValue()) {
-      return folly::sformat("build {}", dwBuild);
-    }
-    return folly::sformat("build {} ({})", dwBuild, winVer.value());
-  } else if (mode == s_m) {
-    return php_get_windows_cpu();
-  } else {
-    auto winVer = php_get_windows_name();
-
-    DWORD dwSize = MAX_COMPUTERNAME_LENGTH + 1;
-    char ComputerName[MAX_COMPUTERNAME_LENGTH + 1];
-    GetComputerName(ComputerName, &dwSize);
-
-    DWORD dwVersion = GetVersion();
-    DWORD dwMajorVersion = (DWORD)(LOBYTE(LOWORD(dwVersion)));
-    DWORD dwMinorVersion = (DWORD)(HIBYTE(LOWORD(dwVersion)));
-    DWORD dwBuild = (DWORD)(HIWORD(dwVersion));
-
-    if (dwMajorVersion == 6 && dwMinorVersion == 2 && winVer.hasValue()) {
-      if (strncmp(winVer.value().c_str(), "Windows 8.1", 11) == 0 ||
-          strncmp(winVer.value().c_str(), "Windows Server 2012 R2", 22) == 0) {
-        dwMinorVersion = 3;
-      }
-    }
-
-    return folly::sformat("Windows NT {} {}.{} build {} ({}) {}",
-      ComputerName,
-      dwMajorVersion,
-      dwMinorVersion,
-      dwBuild,
-      winVer.hasValue() ? winVer.value().c_str() : "unknown",
-      php_get_windows_cpu()
-    );
-  }
-#else
   struct utsname buf;
   if (uname((struct utsname *)&buf) == -1) {
     return init_null();
@@ -852,7 +816,6 @@ Variant HHVM_FUNCTION(php_uname, const String& mode /*="" */) {
              buf.machine);
     return String(tmp_uname, CopyString);
   }
-#endif
 }
 
 static Variant HHVM_FUNCTION(phpversion, const String& extension /*="" */) {
@@ -885,7 +848,7 @@ static bool HHVM_FUNCTION(putenv, const String& setting) {
 static void HHVM_FUNCTION(set_time_limit, int64_t seconds) {
   RequestInfo *info = RequestInfo::s_requestInfo.getNoCheck();
   RequestInjectionData &data = info->m_reqInjectionData;
-  if (RuntimeOption::TimeoutsUseWallTime) {
+  if (Cfg::Eval::TimeoutsUseWallTime) {
     data.setTimeout(seconds);
   } else {
     data.setCPUTimeout(seconds);
@@ -907,15 +870,9 @@ static void HHVM_FUNCTION(set_pre_timeout_handler,
 }
 
 String HHVM_FUNCTION(sys_get_temp_dir) {
-#ifdef WIN32
-  char buf[PATH_MAX];
-  auto len = GetTempPathA(PATH_MAX, buf);
-  return String(buf, len, CopyString);
-#else
   char *env = getenv("TMPDIR");
   if (env && *env) return String(env, CopyString);
   return s_DEFAULT_TEMP_DIR;
-#endif
 }
 
 
@@ -1118,9 +1075,50 @@ Variant HHVM_FUNCTION(version_compare,
   return init_null();
 }
 
+Array HHVM_FUNCTION(rds_bytes) {
+  DictInit info(3);
+
+  info.set(s_used_bytes, static_cast<int64_t>(rds::usedBytes()));
+  info.set(s_used_local_bytes, static_cast<int64_t>(rds::usedLocalBytes()));
+  info.set(s_used_persistent_bytes, static_cast<int64_t>(rds::usedPersistentBytes()));
+  return info.toArray();
+}
+
+Array HHVM_FUNCTION(tc_usage) {
+  auto dict = Array::CreateDict();
+  auto usage = jit::tc::getUsageInfo();
+  for (auto& info: usage) {
+    DictInit shape(3);
+    shape.set(s_used, info.used);
+    shape.set(s_capacity, info.capacity);
+    shape.set(s_global, info.global);
+    dict.set(String(info.name), shape.toArray());
+  }
+
+  return dict;
+}
+
+Array HHVM_FUNCTION(get_active_worker_counts) {
+  DictInit result(4);
+  
+  result.set(s_pagelet_workers, PageletServer::GetActiveWorker());
+  result.set(s_xbox_workers, XboxServer::GetActiveWorkers());
+  
+  auto httpServer = HttpServer::Server;
+  if (httpServer && httpServer->getPageServer()) {
+    result.set(s_http_workers, httpServer->getPageServer()->getActiveWorker());
+  } else {
+    result.set(s_http_workers, 0);
+  }
+  
+  result.set(s_cli_workers, cli_server_active_workers());
+  
+  return result.toArray();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
-void StandardExtension::initOptions() {
+void StandardExtension::registerNativeOptions() {
   HHVM_FE(extension_loaded);
   HHVM_FE(get_loaded_extensions);
   HHVM_FE(get_extension_funcs);
@@ -1130,6 +1128,8 @@ void StandardExtension::initOptions() {
   HHVM_FE(restore_include_path);
   HHVM_FE(set_include_path);
   HHVM_FE(get_included_files);
+  HHVM_FE(record_visited_files);
+  HHVM_FE(get_visited_files);
   HHVM_FE(getenv);
   HHVM_FE(getlastmod);
   HHVM_FE(getmygid);
@@ -1159,6 +1159,7 @@ void StandardExtension::initOptions() {
   HHVM_FE(hphp_memory_get_interval_peak_usage);
   HHVM_FE(hphp_memory_start_interval);
   HHVM_FE(hphp_memory_stop_interval);
+  HHVM_FE(set_oom_multiplier);
   HHVM_FE(php_sapi_name);
   HHVM_FE(php_uname);
   HHVM_FE(phpversion);
@@ -1167,17 +1168,22 @@ void StandardExtension::initOptions() {
   HHVM_FE(set_pre_timeout_handler);
   HHVM_FE(sys_get_temp_dir);
   HHVM_FE(version_compare);
+  HHVM_FE(tc_usage);
+  HHVM_FE(get_active_worker_counts);
+  HHVM_NAMED_FE_STR("rds_bytes", HHVM_FN(rds_bytes), nativeFuncs());
 
-  HHVM_RC_INT(INFO_GENERAL, 1 << 0);
-  HHVM_RC_INT(INFO_CREDITS, 1 << 0);
-  HHVM_RC_INT(INFO_CONFIGURATION, 1 << 0);
-  HHVM_RC_INT(INFO_MODULES, 1 << 0);
-  HHVM_RC_INT(INFO_ENVIRONMENT, 1 << 0);
-  HHVM_RC_INT(INFO_VARIABLES, 1 << 0);
-  HHVM_RC_INT(INFO_LICENSE, 1 << 0);
-  HHVM_RC_INT(INFO_ALL, 0x7FFFFFFF);
-
-  loadSystemlib("std_options");
+#ifdef CLOCK_REALTIME
+  HHVM_RC_INT_SAME(CLOCK_REALTIME);
+#endif
+#ifdef CLOCK_MONOTONIC
+  HHVM_RC_INT_SAME(CLOCK_MONOTONIC);
+#endif
+#ifdef CLOCK_PROCESS_CPUTIME_ID
+  HHVM_RC_INT_SAME(CLOCK_PROCESS_CPUTIME_ID);
+#endif
+#ifdef CLOCK_THREAD_CPUTIME_ID
+  HHVM_RC_INT_SAME(CLOCK_THREAD_CPUTIME_ID);
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

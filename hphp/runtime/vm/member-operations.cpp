@@ -91,22 +91,6 @@ TypedValue incDecBodySlow(IncDecOp op, tv_lval fr) {
     tvDec(fr);
     return tmp;
   }
-  case IncDecOp::PreIncO:
-    tvIncO(fr);
-    return dup();
-  case IncDecOp::PostIncO: {
-    auto const tmp = dup();
-    tvIncO(fr);
-    return tmp;
-  }
-  case IncDecOp::PreDecO:
-    tvDecO(fr);
-    return dup();
-  case IncDecOp::PostDecO: {
-    auto const tmp = dup();
-    tvDecO(fr);
-    return tmp;
-  }
   }
   not_reached();
 }
@@ -300,10 +284,10 @@ void SetRange(
   if (base_str->cowCheck()) {
     auto const old_str = base_str;
     base_str = StringData::Make(old_str, CopyStringMode{});
-    FOLLY_SDT(hhvm, hhvm_cow_setrange, base_str->size(), size*count);
+    USDT(hhvm, hhvm_cow_setrange, base_str->size(), size*count);
     decRefStr(old_str);
   } else {
-    FOLLY_SDT(hhvm, hhvm_mut_setrange, base_str->size(), size*count);
+    USDT(hhvm, hhvm_mut_setrange, base_str->size(), size*count);
   }
 
   auto range_check = [&](size_t data_len) {

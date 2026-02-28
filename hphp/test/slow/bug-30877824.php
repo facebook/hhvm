@@ -1,7 +1,8 @@
 <?hh
 
 class C {
-  function g() {
+  <<__NEVER_INLINE>>
+  function g() :mixed{
     $ex = new Exception();
     $bt = $ex->getTrace();
     foreach ($bt as $k => $_) {
@@ -15,7 +16,7 @@ class C {
     var_dump($bt);
   }
   <<__NEVER_INLINE>>
-  function f() {
+  function f() :mixed{
     $this->g();
   }
 }

@@ -1,0 +1,53 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{#struct:fields?}}{{#struct:fields}}{{#field:type}}{{#field:has_deprecated_accessors?}}
+{{#if field:optional?}}
+
+const {{field:cpp_storage_type}}* {{struct:cpp_underlying_name}}::get_{{field:cpp_name}}() const& {
+  return {{field:cpp_name}}_ref().has_value() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
+}
+
+{{field:cpp_storage_type}}* {{struct:cpp_underlying_name}}::get_{{field:cpp_name}}() & {
+  return {{field:cpp_name}}_ref().has_value() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
+}
+{{#else}}
+{{#if type:resolves_to_fixed_size?}}
+
+{{field:cpp_storage_type}} {{struct:cpp_underlying_name}}::get_{{field:cpp_name}}() const {
+  return {{field:cpp_storage_name}};
+}
+{{#else}}
+{{#if type:resolves_to_container_or_struct?}}
+
+const {{field:cpp_storage_type}}& {{struct:cpp_underlying_name}}::get_{{field:cpp_name}}() const& {
+  return {{field:cpp_storage_name}};
+}
+
+{{field:cpp_storage_type}} {{struct:cpp_underlying_name}}::get_{{field:cpp_name}}() && {
+  return static_cast<{{field:cpp_storage_type}}&&>({{field:cpp_storage_name}});
+}
+{{/if type:resolves_to_container_or_struct?}}
+{{/if type:resolves_to_fixed_size?}}
+{{/if field:optional?}}
+{{#if type:resolves_to_fixed_size?}}
+
+{{field:cpp_storage_type}}& {{struct:cpp_underlying_name}}::set_{{field:cpp_name}}({{field:cpp_storage_type}} {{field:cpp_name}}_) {
+  {{field:cpp_name}}_ref() = {{field:cpp_name}}_;
+  return {{field:cpp_storage_name}};
+}
+{{/if type:resolves_to_fixed_size?}}
+{{/field:has_deprecated_accessors?}}{{/field:type}}{{/struct:fields}}{{/struct:fields?}}

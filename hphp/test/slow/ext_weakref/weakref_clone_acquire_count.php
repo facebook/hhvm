@@ -2,7 +2,7 @@
 
 // Source php weakref extension
 <<__EntryPoint>>
-function main_weakref_clone_acquire_count() {
+function main_weakref_clone_acquire_count() :mixed{
 $o = new stdClass;
 $wr1 = new WeakRef($o);
 $wr1->acquire();

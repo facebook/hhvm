@@ -1,0 +1,20 @@
+ERROR: File "box+ctx_exact.php", line 13, characters 16-45:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+ERROR: File "box+ctx_exact.php", line 24, characters 7-9:
+This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
+  File "box+ctx_exact.php", line 23, characters 37-38:
+  From this declaration, the context of this function body provides the capability set {}
+  File "box+ctx_exact.php", line 10, characters 31-31:
+  But the function being called requires the capability <expr#2>::C
+ERROR: File "box+ctx_exact.php", line 55, characters 15-17:
+This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
+  File "box+ctx_exact.php", line 51, characters 2-3:
+  From this declaration, the context of this function body provides the capability set {}
+  File "box+ctx_exact.php", line 10, characters 31-31:
+  But the function being called requires the capability <expr#5>::C
+ERROR: File "box+ctx_exact.php", line 56, characters 20-22:
+This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
+  File "box+ctx_exact.php", line 51, characters 2-3:
+  From this declaration, the context of this function body provides the capability set {}
+  File "box+ctx_exact.php", line 10, characters 31-31:
+  But the function being called requires the capability <expr#2>::C

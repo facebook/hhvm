@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the "hack" directory of this source tree.
 
+# pyre-unsafe
+
 import argparse
 import difflib
 import itertools
@@ -130,8 +132,9 @@ def report_summary(exp_file: Iterator[AnyStr], act_file: Iterator[AnyStr]):
         act[fn] = content
     exp_keys = set(exp.keys())
     act_keys = set(act.keys())
-    # pyre-fixme[6]: Expected `Iterable[Variable[_LT (bound to _SupportsLessThan)]]`
-    #  for 1st param but got `Set[Optional[str]]`.
+    # pyre-fixme[6]: For 1st argument expected
+    #  `pyre_extensions.PyreReadOnly[Iterable[SupportsRichComparisonT]]` but got
+    #  `Set[Optional[str]]`.
     all_keys = sorted(exp_keys.union(act_keys))
 
     for k in all_keys:
@@ -176,6 +179,7 @@ def main(args: List[str]) -> int:
             if None in (exp, act):
                 exit_code |= 1 << 1
                 source, filename = (
+                    # pyre-fixme[16]: `Optional` has no attribute `__getitem__`.
                     ("expected", act[0]) if exp is None else ("actual", exp[0])
                 )
                 log.error(f"missing filename in {source} HHAS: {filename}")
@@ -183,7 +187,11 @@ def main(args: List[str]) -> int:
                     break
                 continue
 
+            # pyre-fixme[23]: Unable to unpack `Optional[Tuple[Optional[str],
+            #  Sequence[str]]]` into 2 values.
             exp_filename, exp_lines = exp
+            # pyre-fixme[23]: Unable to unpack `Optional[Tuple[Optional[str],
+            #  Sequence[str]]]` into 2 values.
             act_filename, act_lines = act
             if exp_filename != act_filename:
                 exit_code |= 1 << 2
@@ -204,6 +212,10 @@ def main(args: List[str]) -> int:
                 continue
 
             exit_code |= 1 << 3
+            # pyre-fixme[6]: For 1st argument expected `Tuple[Optional[str],
+            #  Sequence[str]]` but got `Optional[Tuple[Optional[str], Sequence[str]]]`.
+            # pyre-fixme[6]: For 2nd argument expected `Tuple[Optional[str],
+            #  Sequence[str]]` but got `Optional[Tuple[Optional[str], Sequence[str]]]`.
             diff_handler(exp, act)
 
             if not compare_all:
@@ -227,8 +239,12 @@ def main(args: List[str]) -> int:
     return exit_code
 
 
-if __name__ == "__main__":
+def invoke_main() -> None:
     logging.basicConfig(format="%(levelname)s: %(message)s")
     log.setLevel(logging.WARN)
 
     sys.exit(main(sys.argv))
+
+
+if __name__ == "__main__":
+    invoke_main()

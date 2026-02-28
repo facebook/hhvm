@@ -1,9 +1,9 @@
 <?hh
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   echo "hello world";
 }
 <<__EntryPoint>>
-function lmao() {
+function lmao() :mixed{
   echo "2ez4rtz";
 }

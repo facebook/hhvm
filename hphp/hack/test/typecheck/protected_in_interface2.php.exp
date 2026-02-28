@@ -1,0 +1,4 @@
+ERROR: File "protected_in_interface2.php", line 12, characters 17-19:
+You cannot invoke a protected method on an interface (Typing[4112])
+  File "protected_in_interface2.php", line 5, characters 22-24:
+  This member is protected

@@ -16,11 +16,14 @@
 
 #pragma once
 
+#include "hphp/runtime/base/request-id.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/server-task-event.h"
 #include "hphp/runtime/server/transport.h"
+#include "hphp/util/configs/xbox.h"
 #include "hphp/util/synchronizable.h"
 
 namespace HPHP {
@@ -28,7 +31,6 @@ namespace HPHP {
 
 struct Array;
 struct XboxServerInfo;
-struct RPCRequestHandler;
 struct XboxTransport;
 
 struct XboxServer {
@@ -44,10 +46,10 @@ public:
   /**
    * Local tasklet for parallel processing.
    */
-  static Resource TaskStart(const String& msg, const String& reqInitDoc = "",
-      ServerTaskEvent<XboxServer, XboxTransport> *event = nullptr);
-  static bool TaskStatus(const Resource& task);
-  static int TaskResult(const Resource& task, int timeout_ms, Variant *ret);
+  static OptResource TaskStart(const String& msg, const String& reqInitDoc = "",
+      ServerTaskEvent<XboxServer, XboxTransport> *event = nullptr, RequestId m_root_req_id = RequestId());
+  static bool TaskStatus(const OptResource& task);
+  static int TaskResult(const OptResource& task, int timeout_ms, Variant *ret);
   static int TaskResult(XboxTransport* const job, int timeout_ms, Variant *ret);
 
   static int GetActiveWorkers();
@@ -64,24 +66,20 @@ struct XboxServerInfo : SatelliteServerInfo {
   }
 
   void reload() {
-    m_threadCount = RuntimeOption::XboxServerThreadCount;
-    m_maxRequest  = RuntimeOption::XboxServerInfoMaxRequest;
-    m_maxDuration = RuntimeOption::XboxServerInfoDuration;
-    m_reqInitFunc = RuntimeOption::XboxServerInfoReqInitFunc;
-    m_reqInitDoc  = RuntimeOption::XboxServerInfoReqInitDoc;
-    m_alwaysReset = RuntimeOption::XboxServerInfoAlwaysReset;
+    m_threadCount = Cfg::Xbox::ServerInfoThreadCount;
+    m_reqInitFunc = Cfg::Xbox::ServerInfoRequestInitFunction;
+    m_reqInitDoc  = Cfg::Xbox::ServerInfoRequestInitDocument;
   }
-
-  void setMaxDuration(int duration) { m_maxDuration = duration; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_xbox("xbox");
+extern const StaticString s_xbox;
 
 struct XboxTransport final : Transport, Synchronizable {
   explicit XboxTransport(
     const folly::StringPiece message,
+    const RequestId root_req_id,
     const folly::StringPiece reqInitDoc = "");
 
   timespec getStartTimer() const { return m_queueTime; }
@@ -150,6 +148,11 @@ struct XboxTransport final : Transport, Synchronizable {
     }
   }
 
+  void setCliContext(CLIContext&& ctx) {
+    m_cli.emplace(std::move(ctx));
+  }
+  Optional<CLIContext> detachCliContext() { return std::move(m_cli); }
+
 private:
   std::atomic<int> m_refCount;
 
@@ -160,6 +163,8 @@ private:
   int m_code;
   std::string m_host;
   std::string m_reqInitDoc;
+
+  Optional<CLIContext> m_cli;
 
   // points to an event with an attached waithandle from a different request
   ServerTaskEvent<XboxServer, XboxTransport> *m_event;

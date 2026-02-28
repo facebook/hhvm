@@ -10,10 +10,10 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing fileperms() & chmod() : usage variations ***\n";
 
-$file_name = __SystemLib\hphp_test_tmppath('006_variation1.tmp');
+$file_name = sys_get_temp_dir().'/'.'006_variation1.tmp';
 $file_handle = fopen($file_name, "w");
 fclose($file_handle);
-$dir_name = __SystemLib\hphp_test_tmppath('006_variation1');
+$dir_name = sys_get_temp_dir().'/'.'006_variation1';
 mkdir($dir_name);
 
 $count = 1;

@@ -1,5 +1,5 @@
 *** Point.php
-<?hh // strict
+<?hh
 
 class Point
 {

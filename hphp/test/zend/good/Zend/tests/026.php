@@ -1,7 +1,7 @@
 <?hh
 
 class foo {
-    public function a() {
+    public function a() :mixed{
     }
 }
 <<__EntryPoint>> function main(): void {

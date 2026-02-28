@@ -478,7 +478,7 @@ static Variant HHVM_FUNCTION(grapheme_substr, const String& str,
 /////////////////////////////////////////////////////////////////////////////
 // Extension
 
-void IntlExtension::initGrapheme() {
+void IntlExtension::registerNativeGrapheme() {
   HHVM_RC_INT(GRAPHEME_EXTR_COUNT, GraphemeExtractType::COUNT);
   HHVM_RC_INT(GRAPHEME_EXTR_MAXBYTES, GraphemeExtractType::MAXBYTES);
   HHVM_RC_INT(GRAPHEME_EXTR_MAXCHARS, GraphemeExtractType::MAXCHARS);
@@ -492,8 +492,6 @@ void IntlExtension::initGrapheme() {
   HHVM_FE(grapheme_strrpos);
   HHVM_FE(grapheme_strstr);
   HHVM_FE(grapheme_substr);
-
-  loadSystemlib("icu_grapheme");
 }
 
 /////////////////////////////////////////////////////////////////////////////

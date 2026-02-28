@@ -1,0 +1,8 @@
+*** Testing mb_decode_mimeheader() : usage variation ***
+
+--empty string DQ--
+string(0) ""
+
+--empty string SQ--
+string(0) ""
+===DONE===

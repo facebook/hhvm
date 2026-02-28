@@ -35,70 +35,25 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 
-#if defined(__APPLE__)
-/* OS X defines msgbuf, but it is defined with extra fields and some weird
- * types. It turns out that the actual msgsnd() and msgrcv() calls work fine
- * with the same structure that other OSes use. This is weird, but this is also
- * what PHP does, so *shrug*. */
-typedef struct {
-    long mtype;
-    char mtext[1];
-} hhvm_msgbuf;
-#else
-typedef msgbuf hhvm_msgbuf;
-#endif
+using hhvm_msgbuf = msgbuf;
 
 using HPHP::ScopedMem;
 
 namespace HPHP {
 
 static struct SysvmsgExtension final : Extension {
-  SysvmsgExtension() : Extension("sysvmsg", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
-    HHVM_RC_INT(MSG_IPC_NOWAIT, k_MSG_IPC_NOWAIT);
-    HHVM_RC_INT(MSG_EAGAIN,     EAGAIN);
-    HHVM_RC_INT(MSG_ENOMSG,     ENOMSG);
-    HHVM_RC_INT(MSG_NOERROR,    k_MSG_NOERROR);
-    HHVM_RC_INT(MSG_EXCEPT,     k_MSG_EXCEPT);
-
-    HHVM_FE(ftok);
-    HHVM_FE(msg_get_queue);
-    HHVM_FE(msg_queue_exists);
-    HHVM_FE(msg_send);
-    HHVM_FE(msg_receive);
-    HHVM_FE(msg_remove_queue);
-    HHVM_FE(msg_set_queue);
-    HHVM_FE(msg_stat_queue);
-
-    loadSystemlib();
-  }
+  SysvmsgExtension() : Extension("sysvmsg", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  void moduleRegisterNative() override;
 } s_sysvmsg_extension;
 
 static struct SysvsemExtension final : Extension {
-  SysvsemExtension() : Extension("sysvsem", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
-    HHVM_FE(sem_acquire);
-    HHVM_FE(sem_get);
-    HHVM_FE(sem_release);
-    HHVM_FE(sem_remove);
-
-    loadSystemlib();
-  }
+  SysvsemExtension() : Extension("sysvsem", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  void moduleRegisterNative() override;
 } s_sysvsem_extension;
 
 static struct SysvshmExtension final : Extension {
-  SysvshmExtension() : Extension("sysvshm", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
-    HHVM_FE(shm_attach);
-    HHVM_FE(shm_detach);
-    HHVM_FE(shm_remove);
-    HHVM_FE(shm_get_var);
-    HHVM_FE(shm_has_var);
-    HHVM_FE(shm_put_var);
-    HHVM_FE(shm_remove_var);
-
-    loadSystemlib();
-  }
+  SysvshmExtension() : Extension("sysvshm", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  void moduleRegisterNative() override;
 } s_sysvshm_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -127,7 +82,7 @@ struct MessageQueue : ResourceData {
   int64_t key;
   int id;
 
-  CLASSNAME_IS("MessageQueue");
+  CLASSNAME_IS("MessageQueue")
   const String& o_getClassNameHook() const override {
     return classnameof();
   }
@@ -157,7 +112,7 @@ bool HHVM_FUNCTION(msg_queue_exists,
 }
 
 bool HHVM_FUNCTION(msg_remove_queue,
-                   const Resource& queue) {
+                   const OptResource& queue) {
   auto q = cast<MessageQueue>(queue);
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -180,7 +135,7 @@ const StaticString
   s_msg_lrpid("msg_lrpid");
 
 bool HHVM_FUNCTION(msg_set_queue,
-                   const Resource& queue,
+                   const OptResource& queue,
                    const Array& data) {
   auto q = cast<MessageQueue>(queue);
   if (!q) {
@@ -207,7 +162,7 @@ bool HHVM_FUNCTION(msg_set_queue,
 }
 
 Array HHVM_FUNCTION(msg_stat_queue,
-                    const Resource& queue) {
+                    const OptResource& queue) {
   auto q = cast<MessageQueue>(queue);
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -234,7 +189,7 @@ Array HHVM_FUNCTION(msg_stat_queue,
 }
 
 bool HHVM_FUNCTION(msg_send,
-                   const Resource& queue,
+                   const OptResource& queue,
                    int64_t msgtype,
                    const Variant& message,
                    bool serialize,
@@ -271,7 +226,7 @@ bool HHVM_FUNCTION(msg_send,
 }
 
 bool HHVM_FUNCTION(msg_receive,
-                   const Resource& queue,
+                   const OptResource& queue,
                    int64_t desiredmsgtype,
                    int64_t& msgtype,
                    int64_t maxsize,
@@ -292,9 +247,7 @@ bool HHVM_FUNCTION(msg_receive,
 
   int64_t realflags = 0;
   if (flags != 0) {
-#if !defined(__APPLE__) && !defined(__FreeBSD__)
     if (flags & k_MSG_EXCEPT) realflags |= MSG_EXCEPT;
-#endif
     if (flags & k_MSG_NOERROR) realflags |= MSG_NOERROR;
     if (flags & k_MSG_IPC_NOWAIT) realflags |= IPC_NOWAIT;
   }
@@ -387,7 +340,7 @@ struct Semaphore : SweepableResourceData {
   int count;        // Acquire count for auto-release.
   int auto_release; // flag that says to auto-release.
 
-  CLASSNAME_IS("Semaphore");
+  CLASSNAME_IS("Semaphore")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
@@ -433,7 +386,7 @@ struct Semaphore : SweepableResourceData {
      * them.  Semaphores are one such resource.  The fork manpage reads: "The
      * child does not inherit semaphore adjustments from its parent"
      */
-    if (pid != f_posix_getpid()) {
+    if (pid != HHVM_FN(posix_getpid)()) {
       return;
     }
 
@@ -455,19 +408,19 @@ struct Semaphore : SweepableResourceData {
 
     semop(semid, sop, opcount);
   }
-  DECLARE_RESOURCE_ALLOCATION(Semaphore);
+  DECLARE_RESOURCE_ALLOCATION(Semaphore)
 };
 
 IMPLEMENT_RESOURCE_ALLOCATION(Semaphore)
 
 bool HHVM_FUNCTION(sem_acquire,
-                   const Resource& sem_identifier,
+                   const OptResource& sem_identifier,
                    bool nowait /* = false */) {
   return cast<Semaphore>(sem_identifier)->op(true, nowait);
 }
 
 bool HHVM_FUNCTION(sem_release,
-                   const Resource& sem_identifier) {
+                   const OptResource& sem_identifier) {
   return cast<Semaphore>(sem_identifier)->op(false);
 }
 
@@ -557,10 +510,10 @@ Variant HHVM_FUNCTION(sem_get,
   auto sem_ptr = req::make<Semaphore>();
   sem_ptr->key   = key;
   sem_ptr->semid = semid;
-  sem_ptr->pid = f_posix_getpid();
+  sem_ptr->pid = HHVM_FN(posix_getpid)();
   sem_ptr->count = 0;
   sem_ptr->auto_release = auto_release;
-  return Resource(sem_ptr);
+  return OptResource(sem_ptr);
 }
 
 /**
@@ -568,7 +521,7 @@ Variant HHVM_FUNCTION(sem_get,
  * Fri Mar 16 00:50:13 EST 2001
  */
 bool HHVM_FUNCTION(sem_remove,
-                   const Resource& sem_identifier) {
+                   const OptResource& sem_identifier) {
   auto sem_ptr = cast<Semaphore>(sem_identifier);
 
   union semun un;
@@ -597,20 +550,20 @@ bool HHVM_FUNCTION(sem_remove,
 ///////////////////////////////////////////////////////////////////////////////
 // shared memory
 
-typedef struct {
+struct sysvshm_chunk {
   long key;
   long length;
   long next;
   char mem;
-} sysvshm_chunk;
+};
 
-typedef struct {
+struct sysvshm_chunk_head {
   char magic[8];
   long start;
   long end;
   long free;
   long total;
-} sysvshm_chunk_head;
+};
 
 struct sysvshm_shm {
   key_t key;               /* Key set by user */
@@ -873,6 +826,40 @@ bool HHVM_FUNCTION(shm_remove_var,
   }
   remove_shm_data(shm_list_ptr->ptr, shm_varpos);
   return true;
+}
+
+void SysvmsgExtension::moduleRegisterNative() {
+  HHVM_RC_INT(MSG_IPC_NOWAIT, k_MSG_IPC_NOWAIT);
+  HHVM_RC_INT(MSG_EAGAIN,     EAGAIN);
+  HHVM_RC_INT(MSG_ENOMSG,     ENOMSG);
+  HHVM_RC_INT(MSG_NOERROR,    k_MSG_NOERROR);
+  HHVM_RC_INT(MSG_EXCEPT,     k_MSG_EXCEPT);
+
+  HHVM_FE(ftok);
+  HHVM_FE(msg_get_queue);
+  HHVM_FE(msg_queue_exists);
+  HHVM_FE(msg_send);
+  HHVM_FE(msg_receive);
+  HHVM_FE(msg_remove_queue);
+  HHVM_FE(msg_set_queue);
+  HHVM_FE(msg_stat_queue);
+}
+
+void SysvsemExtension::moduleRegisterNative() {
+  HHVM_FE(sem_acquire);
+  HHVM_FE(sem_get);
+  HHVM_FE(sem_release);
+  HHVM_FE(sem_remove);
+}
+
+void SysvshmExtension::moduleRegisterNative() {
+  HHVM_FE(shm_attach);
+  HHVM_FE(shm_detach);
+  HHVM_FE(shm_remove);
+  HHVM_FE(shm_get_var);
+  HHVM_FE(shm_has_var);
+  HHVM_FE(shm_put_var);
+  HHVM_FE(shm_remove_var);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

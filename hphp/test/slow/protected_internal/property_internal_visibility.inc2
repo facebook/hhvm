@@ -1,0 +1,9 @@
+<?hh
+
+module M1;
+
+class A {
+  protected internal int $foo = 42;
+
+  protected internal static int $static_foo = 42;
+}

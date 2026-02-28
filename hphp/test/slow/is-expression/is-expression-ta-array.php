@@ -30,7 +30,7 @@ function is_tkeyset(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_ta_array() {
+function main_is_expression_ta_array() :mixed{
 is_tvec(vec['foo']);
 is_tvec(vec[1]);
 is_tvec(dict[]);

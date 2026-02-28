@@ -1,2 +1,2 @@
 
-Warning: imageinterlace() expects at least 1 parameter, 0 given in %s/imageinterlace_error1.php on line 6
+Warning: imageinterlace() expects at least 1 positional parameter, 0 given in %s/imageinterlace_error1.php on line 6

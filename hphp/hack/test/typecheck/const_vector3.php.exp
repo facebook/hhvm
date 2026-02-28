@@ -1,4 +1,4 @@
-File "const_vector3.php", line 13, characters 3-14:
+ERROR: File "const_vector3.php", line 13, characters 3-14:
 an object of type ConstVector<string> does not allow array append (Typing[4006])
-File "const_vector3.php", line 12, characters 14-32:
-Definition is here
+  File "const_vector3.php", line 12, characters 14-32:
+  Definition is here

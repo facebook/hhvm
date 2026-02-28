@@ -6,7 +6,7 @@ class A {
 
 class B extends A {}
 
-<<__EntryPoint>> function test() {
+<<__EntryPoint>> function test() :mixed{
   $a = new B();
   $a->x = 1;
   $b = new B();

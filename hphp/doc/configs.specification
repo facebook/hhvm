@@ -1,0 +1,2190 @@
+These are the options that exists for HHVM
+
+If you add a new section you need to update generate_configs in
+hphp/runtime/base/configs/TARGETS
+
+The format can be found in hphp/tools/configs/generate_configs.rs
+
+# Repo
+
+  A lot of configs default value depends on Repo.Authoritative so load
+  Repo first
+
+- bool Repo.Authoritative = Repo.Authoritative, UNKNOWN, staticdefault(false)
+
+  Need to use staticdefault because we sometimes changes the value between static
+  init and config load
+
+- std::string Repo.Local.Path = "", UNKNOWN, postprocess
+- std::string Repo.Central.Path = "", UNKNOWN, postprocess
+- int32_t Repo.Central.FileMode = 0, UNKNOWN
+- std::string Repo.Central.FileUser = "", UNKNOWN
+- std::string Repo.Central.FileGroup = "", UNKNOWN
+- bool Repo.AllowFallbackPath = true, UNKNOWN
+- std::string Repo.Journal = "delete", UNKNOWN
+- bool Repo.Commit = true, UNKNOWN
+- uint32_t Repo.BusyTimeoutMS = 15000, UNKNOWN
+
+- std::string Repo.Path = Repo.Path, UNKNOWN, postprocess|staticdefault("")
+- bool Repo.LitstrLazyLoad = true, UNKNOWN
+- bool Repo.DebugInfo = Repo.DebugInfo, UNKNOWN, unitcacheflag|compileroption(Repo.DebugInfo)|staticdefault(true)
+
+# Server
+
+  A lot of configs uses Server.Mode but not Repo so put this second
+
+- bool Server.Mode = false, UNKNOWN, nobind
+- int Server.ThreadJobMaxQueuingMilliSeconds = -1, UNKNOWN
+- bool Server.ThreadDropStack = false, UNKNOWN
+- bool Server.HttpSafeMode = false, UNKNOWN
+- bool Server.FixPathInfo = false, UNKNOWN
+- bool Server.AddVaryEncoding = true, UNKNOWN
+- bool Server.LogSettingsOnStartup = false, UNKNOWN
+- bool Server.LogReorderProps = false, UNKNOWN
+- bool Server.WarmupConcurrently = false, UNKNOWN
+- bool Server.DedupeWarmupRequests = false, UNKNOWN
+- int Server.WarmupThreadCount = 1, UNKNOWN
+- int Server.ExtendedWarmup.ThreadCount = 1, UNKNOWN
+- int Server.ExtendedWarmup.DelaySeconds = 60, UNKNOWN
+- int Server.ExtendedWarmup.Repeat = 1, UNKNOWN
+- std::vector<std::string> Server.WarmupRequests = {}, UNKNOWN
+- std::vector<std::string> Server.ExtendedWarmup.Requests = {}, UNKNOWN
+- std::string Server.CleanupRequest = "", UNKNOWN
+- int Server.InternalWarmupThreads = 0, UNKNOWN
+- boost::container::flat_set<std::string> Server.HighPriorityEndPoints = {}, UNKNOWN
+- bool Server.ExitOnBindFail = false, UNKNOWN
+- bool Server.LogBootStats = true, UNKNOWN
+- std::string Server.Host = "", UNKNOWN
+- int Server.Port = 80, UNKNOWN
+- int Server.PortFd = -1, UNKNOWN, nobind
+- std::string Server.DefaultServerNameSuffix = "", UNKNOWN
+- bool Server.AlwaysDecodePostDataDefault = true, UNKNOWN
+- bool Server.SetChunkedTransferEncoding = true, UNKNOWN
+- std::string Server.Type = "proxygen", UNKNOWN
+- std::string Server.IP = "", UNKNOWN
+- std::string Server.FileSocket = "", UNKNOWN
+- int Server.SchedPolicy = -1, UNKNOWN
+- int Server.SchedPriority = 0, UNKNOWN
+- int Server.Backlog = 128, UNKNOWN
+- int Server.ConnectionLimit = 0, UNKNOWN
+- int Server.ThreadCount, UNKNOWN
+- int Server.QueueCount = Server.ThreadCount, UNKNOWN
+- int Server.IOThreadCount = 1, UNKNOWN
+- int Server.HighQueueingThreshold = 60, UNKNOWN, nobind
+- int Server.HugeThreadCount = 0, UNKNOWN
+
+- int Server.RequestFanoutLimit = INT_MAX, yichenzhou
+
+  Maximum number of concurrent total xbox threads (including those spawn recursively)
+  each hhvmworker requests are allowed to spin up.
+
+- bool Server.TrackRequestFanout = true, yichenzhou
+
+  Enable request-fanout-limit class that maintains a map of root hhvmworker request id
+  to the number of xbox threads it has spawned.This is for rollout purposes, and only
+  enables instantiation of the class WITHOUT actual logging or enforcement.
+
+- bool Server.EnableRequestFanoutLogging = true, yichenzhou
+
+  Enable logging the number of xbox threads spawned by each hhvmworker request.
+
+- int Server.RequestFanoutLoggingSampleRate = 0, yichenzhou
+
+  Sample rate for logging the number of children threads spawn each root request.
+
+- bool Server.EnforceRequestFanout = false, yichenzhou
+
+  Enable enforcing the max number of xbox threads spawned by each hhvmworker request.
+  An Hack exception will be thrown if the limit is exceeded.
+
+- int Server.RequestFanoutEnforcementLoggingSampleRate = 0, yichenzhou
+
+  Sample rate for logging the number of children threads spawn each root request.
+
+- std::string Server.SecondaryType = "", UNKNOWN
+- int Server.SecondaryPort = 0, UNKNOWN
+
+  Number of worker threads with stack partially on huge pages
+
+- int Server.HugeStackSizeKb = 384, UNKNOWN
+- uint32_t Server.LoopSampleRate = 0, UNKNOWN
+- int Server.WarmupThrottleRequestCount = 0, UNKNOWN
+- int Server.WarmupThrottleThreadCount, UNKNOWN
+- int Server.ThreadDropCacheTimeoutSeconds = 0, UNKNOWN
+- int Server.RequestTimeoutSeconds = 0, UNKNOWN
+- int64_t Server.MaxRequestAgeFactor = 0, UNKNOWN
+- int Server.PspTimeoutSeconds = 0, UNKNOWN
+- int Server.PspCpuTimeoutSeconds = 0, UNKNOWN
+- int64_t Server.RequestHugeMaxBytes = 24LL << 20, UNKNOWN
+
+  Approximate upper bound for thread heap that is backed by huge pages.
+  This doesn't include the first slab colocated with thread stack, if any.
+
+- int Server.GracefulShutdownWait = 0, UNKNOWN
+- bool Server.HarshShutdown = true, UNKNOWN
+- bool Server.KillOnTimeout = true, UNKNOWN
+- bool Server.EvilShutdown = true, UNKNOWN
+- int Server.PreShutdownWait = 0, UNKNOWN
+- int Server.ShutdownListenWait = 0, UNKNOWN
+- int Server.ShutdownEOMWait = 0, UNKNOWN
+- int Server.PrepareToStopTimeout = 240, UNKNOWN
+- int Server.PartialPostStatusCode = -1, UNKNOWN
+- bool Server.StopOld = false, UNKNOWN
+
+  If `StopOld` is set, we try to stop the old server running
+  on the local host earlier when we initialize, and we do not start
+  serving requests until we are confident that the system can give
+  the new server `RSSNeededMb` resident memory, or till `StopOldWait`
+  seconds passes after an effort to stop the old server is made.
+
+- int Server.StopOldWait = 30, UNKNOWN
+- int64_t Server.RSSNeededMb = 4096, UNKNOWN
+- int64_t Server.CriticalFreeMb = 512, UNKNOWN
+- int Server.CacheFreeFactor = 50, UNKNOWN, postprocess
+- bool Server.Five0ThreeOnShutdownAbort = false, UNKNOWN, lookuppath(Server.503OnShutdownAbort)
+- int Server.Five0ThreeRetryAfterSeconds = -1, UNKNOWN, lookuppath(Server.503RetryAfterSeconds)
+- std::vector<std::string> Server.SSLNextProtocols = {}, UNKNOWN
+- bool Server.EnableH2C = false, UNKNOWN
+- bool Server.EnableKeepAlive = true, UNKNOWN
+- bool Server.ExposeHPHP = true, UNKNOWN
+- bool Server.ExposeXFBServer = false, UNKNOWN
+- bool Server.ExposeXFBDebug = false, UNKNOWN
+- bool Server.ExposeLoadhint = false, UNKNOWN
+- std::string Server.XFBDebugSSLKey = "", UNKNOWN
+- int Server.ConnectionTimeoutSeconds = -1, UNKNOWN
+- bool Server.EnableOutputBuffering = false, UNKNOWN
+- std::string Server.OutputHandler = "", UNKNOWN
+- bool Server.ImplicitFlush = false, UNKNOWN
+- bool Server.EnableEarlyFlush = true, UNKNOWN
+- bool Server.ForceChunkedEncoding = false, UNKNOWN
+- int64_t Server.MaxPostSize = 100, UNKNOWN, postprocess
+- bool Server.AlwaysPopulateRawPostData = false, UNKNOWN
+- bool Server.ExpiresActive = true, UNKNOWN
+- int Server.ExpiresDefault = 2592000, UNKNOWN, postprocess
+- std::string Server.DefaultCharsetName = "", UNKNOWN
+- int64_t Server.RequestBodyReadLimit = -1, UNKNOWN
+
+  If a request has a body over this limit, switch to on-demand reading.
+  -1 for no limit.
+
+- bool Server.AllowNonBlockingPosts = true, UNKNOWN
+
+  Allow POST requests containing NonBlockingPost header to start execution
+  without waiting for the entire POST body.
+
+- bool Server.EnableSSL = false, UNKNOWN
+- int Server.SSLPort = 443, UNKNOWN
+- int Server.SSLPortFd = -1, UNKNOWN, nobind
+- std::string Server.SSLCertificateFile = "", UNKNOWN
+- std::string Server.SSLCertificateKeyFile = "", UNKNOWN
+- std::string Server.SSLCertificateDir = "", UNKNOWN
+- std::string Server.SSLTicketSeedFile = "", UNKNOWN
+- bool Server.TLSDisableTLS1_2 = false, UNKNOWN
+- std::string Server.TLSClientCipherSpec = "", UNKNOWN
+- int Server.SSLClientAuthLevel = 0, UNKNOWN, postprocess
+
+  Level of TLS client auth. Valid values are
+  0 => disabled (default)
+  1 => optional (verify if client presents a cert)
+  2 => required (client must present a valid cert)
+
+- std::string Server.SSLClientCAFile = "", UNKNOWN, postprocess
+
+  CA file to verify client cert against.
+
+- std::string Server.ClientAuthAclIdentity = "", UNKNOWN
+
+  Which ACL identity to check the client against.
+
+- std::string Server.ClientAuthAclAction = "", UNKNOWN
+
+  Which ACL action to check the client against.
+
+- bool Server.ClientAuthFailClose = false, UNKNOWN
+
+  If true, terminate connection immediately if a client fails ACL,
+  otherwise log it and let in.
+
+- uint32_t Server.ClientAuthLogSampleBase = 100, UNKNOWN, postprocess
+
+  On average, sample X connections per ClientAuthLogSampleBase connections,
+  where X is ClientAuthSuccessLogSampleRatio for client auth successes, and
+  ClientAuthFailureLogSampleRatio for client auth failures. Set X to 0 to
+  disable sampling.
+  For example, if ClientAuthLogSampleBase = 100,
+  ClientAuthSuccessLogSampleRatio = 0, and
+  ClientAuthFailureLogSampleRatio = 50, then no (0/100) client auth successes
+  and half (50/100) of client auth failures will be logged.
+
+- uint32_t Server.ClientAuthSuccessLogSampleRatio = 0, UNKNOWN, postprocess
+
+  See ClientAuthLogSampleBase
+
+- uint32_t Server.ClientAuthFailureLogSampleRatio = 0, UNKNOWN, postprocess
+
+  See ClientAuthLogSampleBase
+
+- std::string Server.FileCache = "", UNKNOWN
+- std::string Server.DefaultDocument = "index.php", UNKNOWN
+- std::string Server.GlobalDocument = "", UNKNOWN
+- std::string Server.ErrorDocument404 = "", UNKNOWN, postprocess
+- bool Server.ForbiddenAs404 = false, UNKNOWN
+- std::string Server.ErrorDocument500 = "", UNKNOWN, postprocess
+- std::string Server.FatalErrorMessage = "", UNKNOWN
+- bool Server.EnableStaticContentFromDisk = true, UNKNOWN
+- bool Server.Utf8izeReplace = true, UNKNOWN
+- std::string Server.RequestInitFunction = "", UNKNOWN
+- std::string Server.RequestInitDocument = "", UNKNOWN
+- bool Server.ThreadJobLIFO = false, UNKNOWN
+- int Server.ThreadJobLIFOSwitchThreshold, UNKNOWN
+- std::vector<std::string> Server.IncludeSearchPaths = {}, UNKNOWN
+- std::string Server.FontPath = "", UNKNOWN
+- std::string Server.SourceRoot, UNKNOWN
+- bool Server.SafeFileAccess = false, UNKNOWN
+- std::vector<std::string> Server.AllowedDirectories = {}, UNKNOWN
+- bool Server.UnserializationWhitelistCheck = false, UNKNOWN
+- bool Server.UnserializationWhitelistCheckWarningOnly = true, UNKNOWN
+- int64_t Server.UnserializationBigMapThreshold = 1 << 16, UNKNOWN
+- std::set<std::string> Server.AllowedFiles = {}, UNKNOWN
+- std::set<std::string> Server.ForbiddenFileExtensions = {}, UNKNOWN
+- bool Server.LockCodeMemory = false, UNKNOWN
+- int Server.MaxArrayChain = INT_MAX, UNKNOWN, postprocess
+- bool Server.WarnOnCollectionToArray = false, UNKNOWN
+- bool Server.UseDirectCopy = false, UNKNOWN
+- bool Server.AlwaysUseRelativePath = false, UNKNOWN
+- bool Server.ApplySecondaryQueuePenalty = false, UNKNOWN
+
+  Loadhint queue penalty
+
+- bool Server.Forking.Enabled = true, UNKNOWN
+- bool Server.Forking.LogForkAttempts = false, UNKNOWN
+- std::string Server.LightProcessFilePrefix = "./lightprocess", UNKNOWN
+
+  The file name that is used by LightProcess to bind the socket
+  is the following prefix followed by the pid of the hphp process.
+
+- int Server.LightProcessCount = 0, UNKNOWN
+- bool Server.LightProcessStrictUser = false, UNKNOWN
+- bool Server.ForceServerNameToHeader = false, UNKNOWN
+- bool Server.PathDebug = false, UNKNOWN
+- std::string Server.User = "", UNKNOWN
+
+  Run server under this user account
+
+- bool Server.AllowRunAsRoot = false, UNKNOWN
+
+  Allow running hhvm as root
+
+- bool Server.AllowExec = true, UNKNOWN
+
+  Allow process execution APIs like proc_open, system, exec, etc.
+
+- int64_t Server.RequestMemoryMaxBytes = 16LL << 30, UNKNOWN, staticdefault(INT64_MAX)
+- bool Server.RequestMemoryMaxBytesSet = false, UNKNOWN
+- int64_t Server.LowestMaxPostSize = INT64_MAX, UNKNOWN, nobind
+- int64_t Server.Upload.MaxFileSize = 100, UNKNOWN, postprocess|lookuppath(Server.Upload.UploadMaxFileSize)
+- std::string Server.Upload.TmpDir = "/tmp", UNKNOWN, lookuppath(Server.Upload.UploadsTmpDir)
+- bool Server.Upload.EnableFileUploads = true, UNKNOWN
+- int64_t Server.Upload.MaxFileUploads = 20, UNKNOWN
+- bool Server.Upload.EnableUploadProgress = false, UNKNOWN
+- int Server.Upload.Rfc1867Freq = 256 * 1024, UNKNOWN, postprocess
+- std::string Server.Upload.Rfc1867Prefix = "vupload_", UNKNOWN
+- std::string Server.Upload.Rfc1867Name = "video_ptoken", UNKNOWN
+- int64_t Server.ImageMemoryMaxBytes = 0, UNKNOWN, postprocess
+- int Server.BrotliCompressionEnabled = -1, UNKNOWN
+- int Server.BrotliChunkedCompressionEnabled = -1, UNKNOWN
+- int Server.BrotliCompressionLgWindowSize = 20, UNKNOWN
+
+  Base 2 logarithm of the sliding window size. Range is 10-24.
+
+- int Server.BrotliCompressionMode = 0, UNKNOWN
+- int Server.BrotliCompressionQuality = 6, UNKNOWN
+- bool Server.BrotliUseLocalArena = false, UNKNOWN
+- int Server.ZstdCompressionEnabled = -1, UNKNOWN
+- int Server.ZstdCompressionLevel = 3, UNKNOWN
+- int Server.ZstdWindowLog = 0, UNKNOWN, nobind
+
+  For some reason you can't set this in hdf. I think that is just a mistake but
+  for now I'm keeping the behavior
+
+- int Server.ZstdTargetBlockSize = 0, UNKNOWN, nobind
+
+  For some reason you can't set this in hdf. I think that is just a mistake but
+  for now I'm keeping the behavior
+
+- int Server.ZstdChecksumRate = 0, UNKNOWN
+- bool Server.ZstdUseLocalArena = false, UNKNOWN
+- int Server.GzipCompressionLevel = 3, UNKNOWN
+- int Server.GzipMaxCompressionLevel = 9, UNKNOWN
+- bool Server.GzipUseLocalArena = false, UNKNOWN
+
+  Enable additional for config.hdf overwrite inputs to scuba:hhvm_config_hdf_logs (eg. machine, cpu, tier, tag etc)
+
+- bool Server.LogTierOverwriteInputs = false, ffledgling
+
+  Enable publishing thread hints to scx when the thread hint path is set.
+
+- std::string Server.ScxThreadHintPath = "", jtwarren
+- uint16_t Server.ScxThreadHintFirstFlush = 1024, jtwarren
+- uint16_t Server.ScxThreadHintIdle = 1024, jtwarren
+- uint16_t Server.ScxThreadHintProcessing = 1024, jtwarren
+- uint16_t Server.ScxThreadHintPostProcessing = 1024, jtwarren
+
+# Autoload
+
+- std::string Autoload.DB.Path = "", UNKNOWN
+- bool Autoload.EnableExternFactExtractor = true, UNKNOWN
+- std::string Autoload.UpdateSuppressionPath = "", UNKNOWN
+
+  If this option is nonempty, Facts will check if a file exists at the
+  given path. If such a file does exist, Facts will not update.
+
+- bool Autoload.DB.CanCreate = true, UNKNOWN
+
+  If true, and if a Facts DB doesn't already exist, native Facts will
+  attempt to load the repo from scratch and create the DB. If the repo is
+  very large, this may not be practical. Setting up the DB could grind the
+  system to a halt, and you may have some other system to download a DB
+  from saved state. You may rather prefer that requests fail until the
+  saved state DB has been set up. Setting `AutoloadDBCanCreate=false`
+  will prevent us from creating the DB if none exists, causing requests
+  to fail in the meantime.
+
+- std::string Autoload.DB.Perms = "0644", UNKNOWN
+- std::string Autoload.DB.Group = "", UNKNOWN
+- std::string Autoload.Logging = "hphp.runtime.ext.facts:=CRITICAL:slog;slog=hhvm", UNKNOWN
+- uint32_t Autoload.DB.BlockingDbWaitTimeoutMs = 5000, UNKNOWN
+- bool Autoload.DB.EnableBlockingDbWait = true, UNKNOWN
+- bool Autoload.DB.UseSymbolMapForGetFilesWithAttributeAndAnyVal = true, UNKNOWN
+- bool Autoload.AllowLoggingPropagation = false, UNKNOWN
+- bool Autoload.RethrowExceptions = true, UNKNOWN
+- uint32_t Autoload.PerfSampleRate = 0, UNKNOWN
+- uint32_t Autoload.ErrorSampleRate = 1, UNKNOWN
+
+  Sample rate for Autoload & Facts API latency logging
+
+- std::string Autoload.Query = "", UNKNOWN, repooptionsflag(Autoload)|lookuppath(Query)
+- bool Autoload.UseEden = false, UNKNOWN, repooptionsflag(Autoload)|lookuppath(UseEden)
+- std::vector<std::string> Autoload.IncludePaths = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(IncludePaths)
+- std::vector<std::string> Autoload.ExcludePaths = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(ExcludePaths)
+- std::vector<std::string> Autoload.FileExtensions = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(FileExtensions)
+
+  Eden does not support the same query syntax as Watchman, so we need to migrate to using
+  a few vectors of strings.  For backwards compatibility, we'll generate a watchman query
+  using these strings.  If both forms of configuration are specified, IncludePaths,
+  ExcludePaths, and FileExtensions will be used instead of Query.
+
+- std::string Autoload.TrustedDBPath = "", UNKNOWN, repooptionsflag(Autoload)|lookuppath(TrustedDBPath)
+- std::vector<std::string> Autoload.IndexedMethodAttributes = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(IndexedMethodAttributes)
+- std::vector<std::string> Autoload.RepoBuildSearchDirs = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(RepoBuildSearchDirs)
+
+# CodeCache (Eval.Jit)
+
+- uint32_t CodeCache.ASize = 60 << 20, UNKNOWN
+- uint32_t CodeCache.AColdSize = 24 << 20, UNKNOWN
+- uint32_t CodeCache.AFrozenSize = 40 << 20, UNKNOWN
+- uint32_t CodeCache.ABytecodeSize = 0, UNKNOWN
+- uint32_t CodeCache.AMaxUsage = 0, UNKNOWN, nobind
+- uint32_t CodeCache.AColdMaxUsage = 0, UNKNOWN, nobind
+- uint32_t CodeCache.AFrozenMaxUsage = 0, UNKNOWN, nobind
+- uint32_t CodeCache.GlobalDataSize, UNKNOWN
+- bool CodeCache.MapTCHuge, UNKNOWN, lookuppath(Eval.MapTCHuge)
+- uint32_t CodeCache.TCNumHugeHotMB = 64, UNKNOWN, lookuppath(Eval.TCNumHugeHotMB)
+- uint32_t CodeCache.TCNumHugeMainMB = 16, UNKNOWN, lookuppath(Eval.TCNumHugeMainMB)
+- uint32_t CodeCache.TCNumHugeColdMB = 4, UNKNOWN, lookuppath(Eval.TCNumHugeColdMB)
+- uint32_t CodeCache.AutoTCShift = 1, UNKNOWN
+
+# Configerator
+
+- uint32_t Configerator.ExposureBloomFilterSize = 10000000, UNKNOWN
+- double Configerator.ExposureBloomFilterFalsePositiveRate = 0.0000001, UNKNOWN
+
+# Debug
+
+- bool Debug.NativeStackTrace = false, UNKNOWN
+- bool Debug.ServerErrorMessage = false, UNKNOWN
+- bool Debug.RecordInput = false, UNKNOWN
+- bool Debug.ClearInputOnSuccess = true, UNKNOWN
+- std::string Debug.ProfilerOutputDir = "/tmp", UNKNOWN
+- std::string Debug.CoreDumpEmail = "", UNKNOWN
+- bool Debug.CoreDumpReport = true, UNKNOWN
+- std::string Debug.CoreDumpReportDirectory, UNKNOWN
+- std::string Debug.StackTraceFilename, UNKNOWN, nobind
+- int Debug.StackTraceTimeout = 0, UNKNOWN
+- std::string Debug.RemoteTraceOutputDir = "/tmp", UNKNOWN
+
+# Debugger (Eval.Debugger.)
+
+- bool Debugger.EnableHphpd = false, UNKNOWN, lookuppath(Eval.Debugger.EnableDebugger)
+- bool Debugger.EnableVSDebugger = Debugger.EnableVSDebugger, UNKNOWN, lookuppath(Eval.Debugger.VSDebugEnable)
+
+  Yes the default value is itself. That is because between the static initiation and the
+  Config::Bind call https://fburl.com/code/f7wryx1z sets it to a different value sometimes.
+
+- int Debugger.VSDebuggerListenPort = -1, UNKNOWN, nobind
+- std::string Debugger.VSDebuggerDomainSocketPath = "", UNKNOWN, nobind
+- bool Debugger.VSDebuggerNoWait = false, UNKNOWN, nobind
+- bool Debugger.EnableColor = true, UNKNOWN, lookuppath(Eval.Debugger.EnableDebuggerColor)
+- bool Debugger.EnablePrompt = true, UNKNOWN, lookuppath(Eval.Debugger.EnableDebuggerPrompt)
+- bool Debugger.EnableServer = false, UNKNOWN, lookuppath(Eval.Debugger.EnableDebuggerServer)
+- bool Debugger.EnableUsageLog = false, UNKNOWN, lookuppath(Eval.Debugger.EnableDebuggerUsageLog)
+- std::string Debugger.ServerIP = "", UNKNOWN, lookuppath(Eval.Debugger.IP)
+- int Debugger.ServerPort = 8089, UNKNOWN, lookuppath(Eval.Debugger.Port)
+- bool Debugger.DisableIPv6 = false, UNKNOWN
+- std::string Debugger.DefaultSandboxPath = "", UNKNOWN
+- std::string Debugger.StartupDocument = "", UNKNOWN
+- int Debugger.SignalTimeout = 1, UNKNOWN
+- std::string Debugger.Auth.TokenScriptBin = "", UNKNOWN
+- std::string Debugger.Auth.SessionAuthScriptBin = "", UNKNOWN
+- bool Debugger.LogBreakpointHitTime = false, UNKNOWN
+- bool Debugger.LogEvaluationCommands = false, UNKNOWN
+
+# ErrorHandling
+
+- int ErrorHandling.UpgradeLevel = 0, UNKNOWN
+
+  Bitmask of errors to upgrade to E_USER_ERROR
+
+- int ErrorHandling.MaxSerializedStringSize = 64 * 1024 * 1024, UNKNOWN
+- bool ErrorHandling.CallUserHandlerOnFatals = false, UNKNOWN
+- bool ErrorHandling.ThrowExceptionOnBadMethodCall = true, UNKNOWN
+- bool ErrorHandling.ThrowExceptionOnInlineTypeError = false, UNKNOWN
+- bool ErrorHandling.LogNativeStackOnOOM = false, UNKNOWN
+- int64_t ErrorHandling.NoticeFrequency = 1, UNKNOWN
+- int64_t ErrorHandling.WarningFrequency = 1, UNKNOWN
+- bool ErrorHandling.VerboseCLIServerLogs = false, paulbiss
+
+  When set print error log messages for each CLI-server request on start and
+  finish. Otherwise logs are only generated for commands which exit with a
+  non-zero return code.
+
+# Eval
+
+- bool Eval.EnableXHP = true, UNKNOWN, unitcacheflag|compileroption(EnableXHP)
+
+- bool Eval.TimeoutsUseWallTime = true, UNKNOWN
+
+- bool Eval.RecordCodeCoverage = false, UNKNOWN
+
+- bool Eval.CheckSymLink = true, UNKNOWN, postprocess
+
+- bool Eval.TrustAutoloaderPath = false, UNKNOWN
+
+- bool Eval.KeepProfData, UNKNOWN
+
+- int Eval.ProfDataTTLHours = 24, UNKNOWN
+
+- std::string Eval.ProfDataTag = "", UNKNOWN
+
+- bool Eval.DisableSmallAllocator, UNKNOWN
+
+- std::string Eval.CodeCoverageOutputFile = "", UNKNOWN
+
+- bool Eval.EnableArgsInBacktraces, UNKNOWN, globaldata
+
+- bool Eval.AuthoritativeMode = false, UNKNOWN, postprocess
+
+- bool Eval.DisableEval = false, andywli
+
+  Option to disable PHP\eval(). Will throw an exception if eval() is called and this option is set to true.
+
+- int Eval.CheckCLIClientCommands = 1, UNKNOWN
+
+- int32_t Eval.CheckPropTypeHints = 3, UNKNOWN, globaldata|compileroption(CheckPropTypeHints)
+
+  CheckPropTypeHints:
+  0 - No checks or enforcement of property type hints.
+  1 - Raises E_WARNING if a property type hint fails.
+  2 - Raises E_RECOVERABLE_ERROR if regular property type hint fails, raises
+      E_WARNING if soft property type hint fails. If a regular property type
+      hint fails, it's possible for execution to resume normally if the user
+      error handler doesn't throw and returns something other than boolean
+      false.
+  3 - Same as 2, except if a regular property type hint fails the runtime will
+      not allow execution to resume normally; if the user error handler
+      returns something other than boolean false, the runtime will throw a
+      fatal error.
+
+- bool Eval.EmitClsMethPointers = true, UNKNOWN, globaldata|unitcacheflag|hackc(hhbc)
+- uint32_t Eval.RaiseClassConversionNoticeSampleRate = 0, UNKNOWN, globaldata
+
+  Whether implicit class conversions can raise a notice.
+
+- uint32_t Eval.DynamicallyReferencedNoticeSampleRate = 0, UNKNOWN, globaldata
+
+  Whether classname_to_class raises notice if <<__DynamicallyReferenced>>
+  is missing on a class definition.
+
+- uint32_t Eval.RaiseStrToClsConversionNoticeSampleRate = 0, UNKNOWN
+
+  Whether operations like $c::foo() raise a notice when $c is a string
+
+- uint32_t Eval.CheckedUnsafeCastSampleRate = 0, UNKNOWN
+
+  Raise notice if a UNSAFE_CAST argument has type that doesn't match the target type
+  (Currently, this controls all uses of the VerifyTypeTS bytecode)
+
+- uint32_t Eval.ClassStringHintNoticesSampleRate = 0, UNKNOWN, globaldata
+
+  Raise a notice if a Class type is passed to function that expects a
+  string
+
+- uint32_t Eval.ClassTypeLevel = 0, vmladenov, globaldata
+
+  The level at which we enforce the class<C> type.
+  0 = string, lazy class, and class is admitted, optional notice on string
+  1 = lazy class and class are admitted
+  TODO: T199611023 add more levels
+
+- bool Eval.ClassPassesClassname = true, UNKNOWN, globaldata|unitcacheflag
+
+  When this options is on, classname type-hints accepts classes
+
+- bool Eval.ClassIsStringNotices = false, UNKNOWN, globaldata
+
+  Raise a notice if a Class type is passed to is_string
+
+- uint32_t Eval.ClassnameNoticesSampleRate = 0, UNKNOWN
+
+  Raise notice if a Class type is passed to a classname type-hint
+
+- uint32_t Eval.ClassNoticesSampleRate = 0, UNKNOWN
+
+  Raise notice if a string type is passed to a class type-hint
+
+- bool Eval.TreatCaseTypesAsMixed = false, UNKNOWN, globaldata|unitcacheflag
+
+  Treats caseType int | bool as mixed
+
+- bool Eval.CheckedUnsafeCast = false, UNKNOWN, globaldata|unitcacheflag|compileroption(CheckedUnsafeCast)
+
+  Is VerifyTypeTS bytecode enabled?
+
+- bool Eval.DiamondTraitMethods = false, UNKNOWN, globaldata|unitcacheflag
+
+  Enable a method defined in a trait to be imported multiple times
+  along trait use paths
+
+- bool Eval.EmitBespokeTypeStructures = false, UNKNOWN, globaldata
+
+  Whether bespoke type structures should be used
+
+- bool Eval.ModuleLevelTraits = false, UNKNOWN, globaldata|unitcacheflag
+
+  Enable the "Module level traits" semantics: methods defined in a trait
+  that belongs to module A, are considered as belonging to module A
+  even if the trait is used by a class that lives in module B.
+
+- bool Eval.TraitConstantInterfaceBehavior = false, UNKNOWN, globaldata|unitcacheflag
+
+  Constants from traits behave like constants from interfaces (error on conflict)
+
+- std::string Eval.ActiveDeployment = "", UNKNOWN, globaldata|compileroption(ActiveDeployment)
+
+  Sets the active deployment, which selects the set of packages loaded in the repo.
+  Value is only read in repo authoritative or cli mode.
+
+- std::string Eval.PackagesTomlFileName, fzn, globaldata|compileroption(PackagesTomlFileName)
+
+  Name of the packages TOML file to load.  Defaults to "PACKAGES.toml".
+
+- bool Eval.EnableIntrinsicsExtension = Eval.EnableIntrinsicsExtension, UNKNOWN, globaldata|unitcacheflag|hackc(hhbc, false)
+
+  Should the extension containing HHVM intrinsics be enabled?
+  This is used by HackC to turn on / off magic decl driven bytecode functions like
+  `HH\embed_type_decl`
+
+- uint32_t Eval.LogTsameCollisions = 0, UNKNOWN, globaldata
+
+  0 = No notices, 1 = Log case collisions, 2 = Reject case insensitive
+
+- bool Eval.BuildMayNoticeOnMethCallerHelperIsObject = false, UNKNOWN, globaldata
+
+  When Eval.NoticeOnMethCallerHelperIsObject is set calling is_object
+  on instance of MethCallerHelper will raise notices.
+  In Repo.Authoritative mode, Eval.NoticeOnMethCallerHelperIsObject
+  can only be set if the repo was built with the option
+  Eval.BuildMayNoticeOnMethCallerHelperIsObject set to true.
+
+- int32_t Eval.ForbidDynamicCallsToFunc = 3, UNKNOWN, globaldata(onlyhhbbc)|compileroption(ForbidDynamicCallsToFunc)|unitcacheflag
+
+  Control dynamic calls to functions and dynamic constructs of
+  classes which haven't opted into being called that way.
+  0 - Do nothing
+  1 - Warn if target is not annotated
+  2 - Throw exception if target is not annotated; warn if dynamic
+      callsite is using a raw string or array (depending on
+      ForbidDynamicCallsWithAttr setting)
+  3 - Throw exception
+
+- int32_t Eval.ForbidDynamicCallsToClsMeth = 0, UNKNOWN, globaldata(onlyhhbbc)|compileroption(ForbidDynamicCallsToClsMeth)|unitcacheflag
+
+  See Eval.ForbidDynamicCallsToFunc
+
+- int32_t Eval.ForbidDynamicCallsToInstMeth = 0, UNKNOWN, globaldata(onlyhhbbc)|compileroption(ForbidDynamicCallsToInstMeth)|unitcacheflag
+
+  See Eval.ForbidDynamicCallsToFunc
+
+- int32_t Eval.ForbidDynamicConstructs = 0, UNKNOWN, globaldata(onlyhhbbc)|compileroption(ForbidDynamicConstructs)|unitcacheflag
+
+  See Eval.ForbidDynamicCallsToFunc
+
+- bool Eval.ForbidDynamicCallsWithAttr = true, UNKNOWN, globaldata|compileroption(ForbidDynamicCallsWithAttr)|unitcacheflag
+
+  Keep logging dynamic calls according to Eval.ForbidDynamic... above even if
+  __DynamicallyCallable attribute is present at declaration.
+
+- uint32_t Eval.InitialStaticStringTableSize = Eval.InitialStaticStringTableSize, UNKNOWN, globaldata(noload)|staticdefault(500000)
+
+- uint32_t Eval.InitialTypeTableSize = Eval.InitialTypeTableSize, UNKNOWN, globaldata(noload)|staticdefault(30000)|lookuppath(Eval.InitialNamedEntityTableSize)
+
+- uint32_t Eval.InitialFuncTableSize = Eval.InitialFuncTableSize, UNKNOWN, globaldata(noload)|staticdefault(3000)
+
+- uint32_t Eval.StaticStringsSampleRate = 0, UNKNOWN
+
+  Enables StructuredLog for static strings
+
+- bool Eval.HackArrCompatSerializeNotices = false, UNKNOWN, globaldata(onlyhhbbc)|compileroption(HackArrCompatSerializeNotices)|unitcacheflag
+
+- bool Eval.LogKnownMethodsAsDynamicCalls = true, UNKNOWN, globaldata(onlyhhbbc)|compileroption(LogKnownMethodsAsDynamicCalls)|unitcacheflag
+
+  If set to true calls to class methods of form $cls::meth() will not be
+  logged as dynamic calls, which means behavior for such calls would be
+  as if ForbidDynamicCallsToClsMeth was set to 0.
+
+- bool Eval.IsVecNotices = false, UNKNOWN, globaldata(onlyhhbbc)
+
+  Raise a notice if a ClsMeth type is passed to is_vec/is_array.
+  hhbbc IsTypeX optimization may be disabled.
+
+- bool Eval.NoticeOnBuiltinDynamicCalls = false, UNKNOWN, globaldata(onlyhhbbc)|compileroption(NoticeOnBuiltinDynamicCalls)|unitcacheflag
+
+  Should the runtime emit notices whenever a builtin is called dynamically?
+
+- hphp_fast_string_set Eval.RenamableFunctions = {}, UNKNOWN, globaldata
+
+- std::set<std::string> Eval.NonInterceptableFunctions = {}, UNKNOWN, globaldata
+
+- std::set<std::string> Eval.InterceptableBuiltins = {}, UNKNOWN, globaldata
+
+- bool Eval.LogExternCompilerPerf = false, UNKNOWN, hackc(hhbc)
+
+  Whether to log extern compiler performance
+
+- bool Eval.FoldLazyClassKeys = true, UNKNOWN, unitcacheflag|hackc(hhbc)
+
+- bool Eval.EmitNativeEnumClassLabels = true, UNKNOWN, unitcacheflag|hackc(hhbc)
+
+- bool Eval.LockFreeFuncDef = true, paulbiss
+
+  Remove locking from Func::def()
+
+- int Eval.AsyncJitLogStatsRate = 0, paulbiss
+
+  Log stats about the async JIT to hhvm_async_jit_stats using StructuredLog
+
+- int Eval.HandleResumeStatsRate = 0, paulbiss
+
+  Log stats about calls to handleResume to hhvm_resume_locations using
+  StructuredLog
+
+- bool Eval.SynchronizeClassLoading = false, voork
+
+  Synchronize class loading between threads
+
+- uint32_t Eval.ServiceRouterJumpstartWarmup = 0, nikunjm
+
+  Maximum number of ServiceRouter tiers to store in the jumpstart profile.
+  Tiers are recorded during profiling and warmed up when the profile is loaded.
+
+- uint64_t Eval.VMStackElms, UNKNOWN
+
+  Maximum number of elements on the VM execution stack.
+
+- int Eval.StackCheckLeafPadding = 100, UNKNOWN
+
+- bool Eval.EnableAsyncJIT = false, UNKNOWN
+- bool Eval.EnableAsyncJITLive = false, arnabde
+- bool Eval.EnableAsyncJITProfile = false, UNKNOWN
+- int Eval.AsyncJitWorkerThreads = 4, UNKNOWN
+
+- bool Eval.AsyncJitDeferContext = true, paulbiss
+
+  Defer computing the context for the translation in the async JIT until we're
+  certain we will be enqueuing a translation request.
+
+- bool Eval.EnableSBProfSerialize = false, arnabde
+- bool Eval.EnableSBProfDeserialize = false, arnabde
+
+- uint32_t Eval.VMInitialGlobalTableSize = 512, UNKNOWN
+
+  Initial space reserved for the global variable environment (in
+  number of global variables).
+
+- bool Eval.RecordSubprocessTimes = false, UNKNOWN
+
+- bool Eval.AllowHhas = false, UNKNOWN, unitcacheflag
+
+- bool Eval.GenerateDocComments = true, UNKNOWN, unitcacheflag|compileroption(GenerateDocComments)
+
+- bool Eval.DisassemblerDocComments = true, UNKNOWN
+
+- bool Eval.DisassemblerPropDocComments = true, UNKNOWN
+
+- bool Eval.LoadFilepathFromUnitCache = false, UNKNOWN, unitcacheflag
+
+- bool Eval.WarnOnSkipFrameLookup = true, UNKNOWN
+
+- uint32_t Eval.EnableCodeCoverage = 0, UNKNOWN
+
+  0 - Code coverage cannot be enabled through request param
+  1 - Code coverage can be enabled through request param
+  2 - Code coverage enabled
+
+- uint32_t Eval.EnablePerFileCoverage = 0, UNKNOWN
+
+  0 - Per-file coverage cannot be enabled through request param
+  1 - Per-file coverage can be enabled through request param
+  2 - Per-file coverage enabled
+
+- bool Eval.EnableFuncCoverage = false, UNKNOWN
+
+- bool Eval.EnableCodeCoveragePerBytecode = true, emil
+
+- uint64_t Eval.FactsWorkers, UNKNOWN
+
+  The number of worker threads to spawn for facts extraction.
+
+- bool Eval.FactsExcludeModuleMembership = false, UNKNOWN
+
+  Whether to force the old Facts SQLite DB format.
+
+- bool Eval.HackCompilerInheritConfig = true, UNKNOWN
+
+  Whether the HackC compiler should inherit the compiler config of the
+  HHVM process that launches it.
+
+- bool Eval.EnableDecl = false, UNKNOWN, unitcacheflag
+
+  enable decl-directed bytecode compilation
+
+- uint32_t Eval.LogDeclDeps = 0, UNKNOWN
+
+- uint32_t Eval.LogDeclErrors = 0, UNKNOWN
+
+- bool Eval.LogAllDeclTearing = false, UNKNOWN
+
+- std::string Eval.EmbeddedDataExtractPath = "/var/run/hhvm_%{type}_%{buildid}", UNKNOWN, postprocess
+
+  When using embedded data, extract it to the ExtractPath or the
+  ExtractFallback.
+
+- std::string Eval.EmbeddedDataFallbackPath = "/tmp/hhvm_%{type}_%{buildid}_XXXXXX", UNKNOWN, postprocess
+
+  See Eval.EmbeddedDataExtractPath
+
+- bool Eval.EmbeddedDataTrustExtract = true, UNKNOWN
+
+  Whether to trust existing versions of extracted embedded data.
+
+- bool Eval.LogThreadCreateBacktraces = false, UNKNOWN
+
+- bool Eval.FailJitPrologs = false, UNKNOWN
+
+- bool Eval.UseHHBBC, UNKNOWN, compileroption(UseHHBBC)
+
+- uint32_t Eval.HHBBCMinUnitsToLog = 1000, UNKNOWN
+
+  Threshold number of units to log to hhvm_whole_program table.
+  systemlib has around 200 units, so use a larger default to avoid
+  logging for unit tests.
+
+- bool Eval.CachePerRepoOptionsPath = true, UNKNOWN
+
+- bool Eval.LogHackcMemStats = false, UNKNOWN
+
+- uint32_t Eval.TsameCollisionSampleRate = 1, UNKNOWN
+
+- uint32_t Eval.WarnOnTooManyArguments = 0, emil
+
+  0 -> no warning, 1 -> warning, 2 -> exception
+
+- uint32_t Eval.GetClassBadArgument = 0, emil
+
+  0 -> no warning, 1 -> warning, 2 -> exception
+
+- uint32_t Eval.WarnOnIncDecInvalidType = 0, UNKNOWN
+
+  0 - No restrictions on types that can be incremented or decremented
+  1 - Warn when incrementing or decrementing non numeric types
+  2 - Throw when incrementing or decrementing non numeric types
+
+- uint32_t Eval.WarnOnBitwiseOpInvalidType = 0, UNKNOWN
+
+  0 - Bitwise operations are supported on strings
+  1 - Warn when using bitwise operations on strings
+  2 - Throw when using bitwise operations on strings
+
+- uint32_t Eval.WarnOnImplicitCoercionOfEnumValue = 0, UNKNOWN
+
+  This flag exists to control behaviour when implicit coercion is
+  taking place on an enum value.
+  0 - No warning
+  1 - Warning
+  2 - Do not do implicit coercion
+
+- bool Eval.EnableLogBridge = true, UNKNOWN
+
+- bool Eval.MoreAccurateMemStats = true, UNKNOWN
+
+- bool Eval.MemInfoCheckCgroup2 = true, UNKNOWN
+
+- bool Eval.SpinOnCrash = false, UNKNOWN
+
+- uint32_t Eval.DumpRingBufferOnCrash = 0, UNKNOWN
+
+- bool Eval.PerfPidMap = true, UNKNOWN
+
+- bool Eval.PerfPidMapIncludeFilePath = true, UNKNOWN
+
+- bool Eval.PerfJitDump = false, UNKNOWN
+
+- std::string Eval.PerfJitDumpDir = "/tmp", UNKNOWN
+
+- bool Eval.PerfDataMap = false, UNKNOWN
+
+- bool Eval.KeepPerfPidMap = false, UNKNOWN
+
+- uint32_t Eval.ThreadTCMainBufferSize = 6 << 20, UNKNOWN
+
+- uint32_t Eval.ThreadTCColdBufferSize = 6 << 20, UNKNOWN
+
+- uint32_t Eval.ThreadTCFrozenBufferSize = 4 << 20, UNKNOWN
+
+- uint32_t Eval.ThreadTCDataBufferSize = 256 << 10, UNKNOWN
+
+- uint32_t Eval.RDSSize = Eval.RDSSize, UNKNOWN, staticdefault(64 << 20)
+
+  The value is used before we load the config so we have to use staticdefault
+
+- uint32_t Eval.HHBCArenaChunkSize = 10 << 20, UNKNOWN
+
+- bool Eval.ProfileBC = false, UNKNOWN
+
+- bool Eval.ProfileHeapAcrossRequests = false, UNKNOWN
+
+- bool Eval.ProfileHWEnable = true, UNKNOWN
+
+- std::string Eval.ProfileHWEvents = "", UNKNOWN
+
+- bool Eval.ProfileHWExcludeKernel = true, UNKNOWN
+
+- bool Eval.ProfileHWFastReads = false, UNKNOWN
+
+- bool Eval.ProfileHWStructLog = false, UNKNOWN
+
+- int32_t Eval.ProfileHWExportInterval = 30, UNKNOWN
+
+- bool Eval.ReorderRDS = true, UNKNOWN
+
+- double Eval.RDSReorderThreshold = 0.0005, UNKNOWN
+
+- uint32_t Eval.ProfileGlobalsLimit = 200, UNKNOWN
+
+- double Eval.ProfileGlobalsSlowExitThreshold = 0.98, UNKNOWN
+
+- uint32_t Eval.GdbSyncChunks = 128, UNKNOWN
+
+- bool Eval.TraceCommandLineRequest = true, UNKNOWN
+
+- bool Eval.EmitDebuggerIntrCheck = true, UNKNOWN
+
+- bool Eval.LogArrayAccessProfile = false, UNKNOWN
+
+  Log the profile used to optimize array-like gets and sets.
+
+- bool Eval.LogClsSpeculation = false, UNKNOWN
+
+- double Eval.CoeffectFunParamProfileThreshold = 0.10, UNKNOWN
+
+- bool Eval.AssemblerFoldDefaultValues = true, UNKNOWN, unitcacheflag
+
+- uint64_t Eval.AssemblerMaxScalarSize = 2147483648, UNKNOWN, unitcacheflag
+
+  2GB
+
+- uint64_t Eval.FuncCountHint = 10000, UNKNOWN
+
+- uint64_t Eval.PGOFuncCountHint = 1000, UNKNOWN
+
+- bool Eval.RegionRelaxGuards = true, UNKNOWN
+
+- bool Eval.WorkloadAwareMaturity = true, UNKNOWN
+
+- int32_t Eval.DumpBytecode = 0, UNKNOWN
+
+  DumpBytecode =1 dumps user php, =2 dumps systemlib & user php
+
+- int32_t Eval.DumpHhas = 0, UNKNOWN
+
+  DumpHhas =1 dumps user php, =2 dumps systemlib & user php
+
+- std::string Eval.LiveTranslateFunction = "", paulbiss
+
+  The function to translate when running in live translate mode
+
+- int32_t Eval.LiveTranslateOffset = 0, paulbiss
+
+  The bytecode offset within Eval.LiveTranslateFunction to translate when
+  running in live translate mode.
+
+- std::vector<std::string> Eval.LiveTranslateGuards = {}, paulbiss
+
+  Guards to apply to the translation when running in live translate mode. Each
+  guard should have the form {location}|{type}, where {location} can be L{n},
+  S{n}, or MBR for locals, BCSPOffsets or MBR respectively, and {type} is the
+  DataType to apply to the location.
+
+- std::string Eval.DumpHhasToFile = "", UNKNOWN
+
+- bool Eval.DumpTC = false, UNKNOWN
+
+- std::string Eval.DumpTCPath = "/tmp", UNKNOWN
+
+- bool Eval.DumpTCAnchors = false, UNKNOWN
+
+- uint32_t Eval.DumpIR = 0, UNKNOWN
+
+- uint32_t Eval.DumpIRJson = 0, UNKNOWN
+
+- bool Eval.DumpTCAnnotationsForAllTrans, UNKNOWN
+
+- uint32_t Eval.DumpInlDecision = 0, UNKNOWN
+
+  0=none ; 1=refuses ; 2=refuses+accepts
+
+- uint32_t Eval.DumpRegion = 0, UNKNOWN
+
+- bool Eval.DumpCallTargets = false, UNKNOWN
+
+- bool Eval.DumpLayoutCFG = false, UNKNOWN
+
+- bool Eval.DumpHHIRInLoops = false, UNKNOWN
+
+- bool Eval.DumpVBC = false, UNKNOWN
+
+- bool Eval.DumpArrAccProf = false, UNKNOWN
+
+- bool Eval.DumpCoeffectFunParamProf = false, UNKNOWN
+
+- bool Eval.DumpAst = false, UNKNOWN
+
+- bool Eval.DumpTargetProfiles = false, UNKNOWN
+
+- bool Eval.DumpJitProfileStats = false, UNKNOWN
+
+- bool Eval.DumpJitEnableRenameFunctionStats = false, UNKNOWN
+
+- bool Eval.MapTgtCacheHuge = false, UNKNOWN
+
+- bool Eval.NewTHPHotText = false, UNKNOWN
+
+- bool Eval.FileBackedColdArena, UNKNOWN
+
+- std::string Eval.ColdArenaFileDir = "/tmp", UNKNOWN
+
+- uint32_t Eval.MaxHotTextHugePages, UNKNOWN
+
+- uint32_t Eval.MaxLowMemHugePages, UNKNOWN
+
+- uint32_t Eval.MaxHighArenaHugePages = 0, UNKNOWN
+
+- uint32_t Eval.Num1GPagesForReqHeap = 0, UNKNOWN
+
+- uint32_t Eval.Num2MPagesForReqHeap = 0, UNKNOWN
+
+- uint32_t Eval.NumReservedSlabs = 0, UNKNOWN
+
+- uint32_t Eval.NumReservedMBForSlabs = 0, UNKNOWN
+
+- uint32_t Eval.Num1GPagesForA0 = 0, UNKNOWN
+
+- uint32_t Eval.Num2MPagesForA0 = 0, UNKNOWN
+
+- bool Eval.BigAllocUseLocalArena = true, UNKNOWN
+
+- bool Eval.JsonParserUseLocalArena = true, UNKNOWN
+
+- bool Eval.XmlParserUseLocalArena = true, UNKNOWN
+
+- bool Eval.LowStaticArrays, UNKNOWN
+
+- bool Eval.RecycleAProf = true, UNKNOWN
+
+- int64_t Eval.HeapPurgeWindowSize = 5 * 1000000, UNKNOWN
+
+- uint64_t Eval.HeapPurgeThreshold = 128 * 1024 * 1024, UNKNOWN
+
+- bool Eval.Verify, UNKNOWN
+
+- bool Eval.VerifyOnly = false, UNKNOWN
+
+- bool Eval.FatalOnVerifyError, UNKNOWN
+
+- bool Eval.AbortBuildOnVerifyError = true, UNKNOWN, globaldata|unitcacheflag|compileroption(AbortBuildOnVerifyError)
+
+- bool Eval.AbortBuildOnCompilerError = true, UNKNOWN, unitcacheflag
+
+- bool Eval.VerifySystemLibHasNativeImpl = true, UNKNOWN
+
+- uint32_t Eval.StaticContentsLogRate = 100, UNKNOWN
+
+- uint32_t Eval.LogUnitLoadRate = 0, UNKNOWN
+
+- uint32_t Eval.MaxDeferredErrors = 50, UNKNOWN
+
+- uint32_t Eval.SerDesSampleRate = 0, UNKNOWN
+
+- int32_t Eval.SimpleJsonMaxLength = 2 << 20, UNKNOWN
+
+- uint32_t Eval.TraceServerRequestRate = 0, UNKNOWN
+
+- uint32_t Eval.TracingSampleRate = 0, UNKNOWN
+
+  Base tracing sample rate for all requests
+
+- uint32_t Eval.TracingPerRequestCount = 0, UNKNOWN
+
+  Tracing sample rate for first N requests
+
+- uint32_t Eval.TracingPerRequestSampleRate = 0, UNKNOWN
+
+- uint32_t Eval.TracingFirstRequestsCount = 0, UNKNOWN
+
+  Tracing sample rate for first N requests per URL
+
+- uint32_t Eval.TracingFirstRequestsSampleRate = 0, UNKNOWN
+
+- std::string Eval.ArtilleryTracePolicy = "", UNKNOWN
+
+  Empty string disables any Artillery tracing
+
+- std::string Eval.TracingTagId = "", UNKNOWN
+
+  Opaque tag to add to each trace. Useful for aggregation
+
+- bool Eval.EnableCompactBacktrace = true, UNKNOWN
+
+- bool Eval.EnableCallBuiltin = true, UNKNOWN, unitcacheflag
+
+- bool Eval.EnableNuca = true, UNKNOWN
+
+- bool Eval.EnableNuma, UNKNOWN, postprocess
+
+- bool Eval.EnableReusableTC, UNKNOWN
+
+- bool Eval.LogServerRestartStats = false, UNKNOWN
+
+- uint32_t Eval.ReusableTCPadding = 128, UNKNOWN, postprocess
+
+  Extra bytes added to each area (Hot/Cold/Frozen) of a translation.
+  If we don't end up using a reusable TC, we'll drop the padding.
+
+- int64_t Eval.StressUnitCacheFreq = 0, UNKNOWN
+
+- int64_t Eval.PerfWarningSampleRate = 1, UNKNOWN
+
+  Perf warning sampling rates. The SelectHotCFG warning is noisy.
+
+- int64_t Eval.SelectHotCFGSampleRate = 100, UNKNOWN
+
+- int64_t Eval.FunctionCallSampleRate = 0, UNKNOWN
+
+- double Eval.InitialLoadFactor = 1.0, UNKNOWN
+
+- int32_t Eval.BespokeArrayLikeMode = 2, UNKNOWN
+
+  Controls emitting checks for bespoke arrays and using logging
+  arrays at runtime.
+  0 - Disable bespokes. We assume that all array-likes have their
+  standard (aka "vanilla") layouts.
+  1 - Test bespokes. We emit checks for vanilla layouts and produce
+  logging arrays based on the request ID. If rid % 2 == 1, then
+  a logging array is generated.
+  2 - Production bespokes. We emit checks as in (1), and produce
+  logging arrays based on per creation site sampling with the
+  sample rate specified by EmitLoggingArraySampleRate. If the
+  sample rate is 0, logging arrays are never constructed.
+  Logging arrays are only created before RTA has begun.
+
+- uint64_t Eval.BespokeEscalationSampleRate = 0, UNKNOWN
+
+- uint64_t Eval.EmitLoggingArraySampleRate = 17, UNKNOWN
+
+- std::string Eval.ExportLoggingArrayDataPath = "", UNKNOWN
+
+- bool Eval.EmitBespokeStructDicts = true, UNKNOWN
+
+  Should we use structs?
+  If so, how many layouts and how big can they get?
+
+- uint16_t Eval.BespokeMaxNumStructLayouts = 1 << 14, UNKNOWN
+
+- uint16_t Eval.BespokeStructDictMaxNumKeys = 2048, UNKNOWN
+
+  Do not use! Use StructLayout::maxNumKeys instead
+
+- double Eval.BespokeStructDictKeyCoverageThreshold = 95.0, UNKNOWN
+
+- uint8_t Eval.BespokeStructDictMinKeys = 128, UNKNOWN
+
+- double Eval.BespokeStructDictMaxSizeRatio = 2.0, UNKNOWN
+
+- uint64_t Eval.BespokeMaxTrackedKeys = 2048, UNKNOWN
+
+  What is the maximum number of keys to track in key order
+  profiles?
+
+- bool Eval.EmitAPCBespokeArrays = true, UNKNOWN
+
+- bool Eval.EmitBespokeMonotypes = false, UNKNOWN
+
+  Should we use monotypes?
+
+- int64_t Eval.ObjProfMaxNesting = 2000, UNKNOWN
+
+- int32_t Eval.BespokeArraySpecializationMode = 0, UNKNOWN
+
+  Choice of layout selection algorithms:
+  0 - Default layout selection algorithm based on profiling.
+  May use a mix of vanilla and bespoke array-likes.
+  1 - Specialize all sources and sinks on vanilla layouts.
+  2 - Specialize sources on vanilla, but sinks on top.
+
+- double Eval.BespokeArraySourceSpecializationThreshold = 95.0, UNKNOWN
+
+  We will use specialized layouts for a given array if they cover
+  the given percent of operations logged during profiling.
+  We can generate code for a bespoke sink in three ways:
+  1. We can do "top codegen" that handles any array layout.
+  2. We can specialize layouts and fall back to top codegen.
+  3. We can specialize layouts and side-exit on guard failure.
+  We use a couple heuristics to choose between these options. If we
+  see one layout that covers `SideExitThreshold` percent cases, and
+  we saw at most `SideExitMaxSources` sources reach this sink, with
+  at least `SideExitMinSampleCount` samples each, we'll side-exit.
+  Else, if multiple layouts cover SpecializationThreshold and at at
+  least one of them covers SpecializationMinThreshold we will
+  specialize to both layouts and fall back to top codegen. If one
+  layout covers `SpecializationThreshold` percent, we will
+  specialize and fall back to top codegen. Otherwise, we'll do top
+  codegen.
+
+- double Eval.BespokeArraySinkSpecializationThreshold = 95.0, UNKNOWN
+
+- double Eval.BespokeArraySinkIteratorSpecializationThreshold = 92.0, UNKNOWN
+
+- double Eval.BespokeArraySinkSpecializationMinThreshold = 85.0, UNKNOWN
+
+- double Eval.BespokeArraySinkMultiLayoutThreshold = 0.999, UNKNOWN
+
+- double Eval.BespokeArraySinkSideExitThreshold = 95.0, UNKNOWN
+
+- uint64_t Eval.BespokeArraySinkSideExitMaxSources = 64, UNKNOWN
+
+- uint64_t Eval.BespokeArraySinkSideExitMinSampleCount = 4, UNKNOWN
+
+- bool Eval.HackArrDVArrVarExport = false, UNKNOWN
+
+  When this flag is on, var_export outputs d/varrays.
+
+- bool Eval.DictDArrayAppendNotices = true, UNKNOWN
+
+  Raise a notice when the result of appending to a dict or darray
+  is affected by removing keys from that array-like.
+
+- bool Eval.IsExprEnableUnresolvedWarning = false, UNKNOWN
+
+  Warn if is expression are used with type aliases that cannot be
+  resolved
+
+- bool Eval.ClassMemoNotices = false, UNKNOWN
+
+  Raise a notice if a Class type is used as a memo key
+
+- bool Eval.VecHintNotices = false, UNKNOWN
+
+  Raise a notice if a ClsMeth type is passed to a function that
+  expects a vec/varray
+
+- bool Eval.NoticeOnCreateDynamicProp = false, UNKNOWN
+
+  Switches on miscellaneous junk.
+
+- bool Eval.NoticeOnReadDynamicProp = false, UNKNOWN
+
+- bool Eval.NoticeOnImplicitInvokeToString = false, UNKNOWN
+
+- bool Eval.FatalOnConvertObjectToString = false, UNKNOWN
+
+- bool Eval.ClassAsStringVarDump = true, UNKNOWN
+
+  When this flag is on, var_dump for classes and lazy classes outputs
+  string(...).
+
+- bool Eval.ClassAsStringVarExport = false, UNKNOWN
+
+  When this flag is on, var_export for classes and lazy classes outputs
+  a string.
+
+- bool Eval.ClassAsStringPrintR = false, UNKNOWN
+
+  When this flag is on, gettype for classes and lazy classes outputs
+  string.
+
+- bool Eval.ClassAsStringGetType = true, UNKNOWN
+
+  When this flag is on, print_r for classes and lazy classes outputs
+  a string.
+
+- bool Eval.NoticeOnMethCallerHelperUse = false, UNKNOWN
+
+  trigger E_USER_WARNING error when getClassName()/getMethodName()
+  is used on __SystemLib\MethCallerHelper
+
+- int32_t Eval.ForbidMethCallerAPCSerialize = 0, UNKNOWN
+
+  Control dynamic calls to functions and dynamic constructs of
+  classes which haven't opted into being called that way.
+  0 - Do nothing
+  1 - Warn if meth_caller is apc serialized
+  2 - Throw exception if meth_caller is apc serialized
+
+- int32_t Eval.ForbidMethCallerHelperSerialize = 0, UNKNOWN
+
+- bool Eval.NoticeOnMethCallerHelperIsObject = false, UNKNOWN
+
+- bool Eval.NoticeOnCollectionToBool = false, UNKNOWN
+
+- bool Eval.NoticeOnSimpleXMLBehavior = false, UNKNOWN
+
+- int32_t Eval.ForbidUnserializeIncompleteClass = 0, UNKNOWN
+
+  Don't allow unserializing to __PHP_Incomplete_Class
+  0 - Nothing
+  1 - Warn
+  2 - Throw exception
+
+- uint32_t Eval.DeploymentViolationWarningSampleRate = 1, UNKNOWN
+
+- uint32_t Eval.EnforceModules = 0, UNKNOWN
+
+  Enforce top level and method level internal keyword
+   0 - Nothing
+   1 - Warn
+   2 - Throw exception
+
+- int32_t Eval.FixDefaultArgReflection = 2, UNKNOWN
+
+  Controls behavior on reflection to default value expressions
+  that throw during evaluation
+  0 - Nothing
+  1 - Warn and retain current behavior
+  2 - Return null for parameter value
+
+- int32_t Eval.ServerOOMAdj = 0, UNKNOWN
+
+- std::string Eval.PreludePath = "", UNKNOWN
+
+- uint32_t Eval.NonSharedInstanceMemoCaches = 10, UNKNOWN
+
+- bool Eval.UseGraphColor = true, UNKNOWN
+
+- std::vector<std::string> Eval.IniGetHide = {}, UNKNOWN
+
+- std::string Eval.UseRemoteUnixServer = "no", UNKNOWN
+
+- std::string Eval.UnixServerPath = "", UNKNOWN
+
+- uint32_t Eval.UnixServerWorkers, UNKNOWN
+
+- bool Eval.UnixServerFailWhenBusy = false, UNKNOWN
+
+- std::vector<std::string> Eval.UnixServerAllowedUsers = {}, UNKNOWN
+
+- std::vector<std::string> Eval.UnixServerAllowedGroups = {}, UNKNOWN
+
+- bool Eval.UnixServerRunPSPInBackground = true, UNKNOWN
+
+- bool Eval.UnixServerProxyXbox = true, UNKNOWN
+
+- bool Eval.UnixServerAssumeRepoReadable = true, UNKNOWN
+
+- bool Eval.UnixServerAssumeRepoRealpath = true, UNKNOWN
+
+- bool Eval.UnixServerNotifySystemd = false, UNKNOWN
+
+  When set will notify systemd that hhvm is READY after unix server startup is
+  complete.
+
+- bool Eval.TrashFillOnRequestExit = false, UNKNOWN
+
+- bool Eval.EnableReverseDataMap = true, UNKNOWN
+
+  Whether to maintain the address-to-VM-object mapping.
+
+- uint32_t Eval.PerfMemEventRequestFreq = 0, UNKNOWN
+
+  Turn on perf-mem-event sampling roughly every this many requests.
+  To maintain the same overall sampling rate, the ratio between the
+  request and sample frequencies should be kept constant.
+
+- uint32_t Eval.PerfMemEventSampleFreq = 80, UNKNOWN
+
+  Sample this many memory instructions per second.  This should be
+  kept low to avoid the risk of collecting a sample while we're
+  processing a previous sample.
+
+- uint32_t Eval.ProfBranchSampleFreq = 0, UNKNOWN
+
+  Sampling frequency for TC branch profiling.
+
+- uint64_t Eval.RecordFirstUnits = 0, UNKNOWN
+
+  Record the first N units loaded via StructuredLog::log()
+
+- bool Eval.CheckUnitSHA1 = true, UNKNOWN
+
+  More aggressively reuse already compiled units based on SHA1
+
+- bool Eval.ReuseUnitsByHash = false, UNKNOWN
+
+- bool Eval.UseEdenFS = true, UNKNOWN
+
+- std::string Eval.UnitCacheBreaker = "", UNKNOWN, unitcacheflag
+
+  Arbitrary string to force different unit-cache hashes
+
+- uint64_t Eval.DynamicFunLevel = 1, UNKNOWN
+
+  When dynamic_fun is called on a function not marked as
+  __DynamicallyCallable:
+  0 - do nothing
+  1 - raise a warning
+  2 - throw
+
+- uint64_t Eval.DynamicClsMethLevel = 1, UNKNOWN
+
+  When dynamic_class_meth is called on a method not marked as
+  __DynamicallyCallable:
+  0 - do nothing
+  1 - raise a warning
+  2 - throw
+
+- uint64_t Eval.DynamicMethCallerLevel = 1, UNKNOWN
+
+  When dynamic_meth_caller is called on a static method or
+  a method not marked as __DynamicallyCallable:
+  0 - do nothing
+  1 - raise a warning
+  2 - throw
+
+- bool Eval.APCSerializeFuncs = true, UNKNOWN
+
+- bool Eval.APCSerializeClsMeth = true, UNKNOWN
+
+- bool Eval.LogOnIsArrayFunction = false, UNKNOWN
+
+- uint32_t Eval.UnitPrefetcherMaxThreads = 0, UNKNOWN
+
+- bool Eval.UnitPrefetcherSpeculative = false, UNKNOWN
+
+- uint32_t Eval.UnitPrefetcherMinThreads = 0, UNKNOWN
+
+- uint32_t Eval.UnitPrefetcherIdleThreadTimeoutSecs = 60, UNKNOWN
+
+- uint32_t Eval.IdleUnitTimeoutSecs = 0, UNKNOWN
+
+  Delete any Unit not used in last N seconds
+
+- uint32_t Eval.IdleUnitMinThreshold = 0, UNKNOWN
+
+  Don't reap total Units below threshold
+
+- int32_t Eval.NoticeOnCoerceForStrConcat = 0, UNKNOWN
+
+  0 nothing, 1 notice, 2 error
+
+- int32_t Eval.NoticeOnCoerceForStrConcat2 = 0, UNKNOWN
+
+  0 nothing, 1 notice, 2 error
+
+- std::string Eval.TaoMigrationOverride = "", UNKNOWN
+
+- std::string Eval.SRRouteMigrationOverride = "", UNKNOWN
+
+- int32_t Eval.SampleRequestTearing = 0, UNKNOWN
+
+- int32_t Eval.RequestTearingSkewMicros = 1500, UNKNOWN
+
+- bool Eval.SampleRequestTearingForce = true, UNKNOWN
+
+- bool Eval.EnableAbstractContextConstants = true, UNKNOWN, unitcacheflag
+
+- uint32_t Eval.MaxCaseTypeVariants = 48, UNKNOWN
+
+  The maximum number of resolved variants allowed in a single case
+  type. This value is determined after flattening.
+
+- uint32_t Eval.LogSlowWatchmanQueriesMsec = 500, UNKNOWN
+
+- uint32_t Eval.LogSlowWatchmanQueriesRate = 1, UNKNOWN
+
+- uint32_t Eval.StartOptionLogRate = 0, UNKNOWN
+
+- std::string Eval.StartOptionLogCache = "/tmp/hhvm-options-%{user}-%{hash}", UNKNOWN
+
+- uint64_t Eval.StartOptionLogWindow = 86400, UNKNOWN
+
+- uint64_t Eval.CoeffectViolationWarningMax = UINT64_MAX, UNKNOWN
+
+- hphp_fast_string_set Eval.StartOptionLogOptions = {}, UNKNOWN
+
+- hphp_fast_string_set Eval.StartOptionLogExcludeOptions = {}, UNKNOWN
+
+- bool Eval.DumpStacktraceToErrorLogOnCrash = true, UNKNOWN
+
+- bool Eval.IncludeReopOptionsInFactsCacheBreaker = false, UNKNOWN
+
+- bool Eval.AutoloadEagerSyncUnitCache = true, UNKNOWN
+
+- bool Eval.AutoloadEagerReloadUnitCache = true, UNKNOWN
+
+- bool Eval.AutoloadInitEarly = false, UNKNOWN
+
+- bool Eval.SetHeadersInServerSuperGlobal = true, UNKNOWN
+
+  Whether we should dump the request headers into $_SERVER
+
+- bool Eval.DisableParsedCookies = false, UNKNOWN
+
+  Whether we should stop parsing cookies out of the headers and
+  setting it into a few super globals - including fully removing
+  the existance of the $_COOKIE superglobal
+
+- bool Eval.DisableRequestSuperglobal = false, UNKNOWN
+
+  Whether to remove the existence of the REQUEST superglobal
+
+- bool Eval.FastMethodIntercept = false, fzn, postprocess
+
+  Enables the non-surprise flag based implementation of
+  fb_intercept2
+
+- bool Eval.FastMethodInterceptNoAsyncOpt = false, fzn, postprocess
+
+  Unconditionally disable the async scheduler optimization when
+  FastMethodIntercept is set.
+
+- bool Eval.LogHttpServerSignalSource = true, UNKNOWN
+
+- bool Eval.CrashOnStaticAnalysisError, UNKNOWN
+
+- bool Eval.ReplaceTrivialBuiltins = true, UNKNOWN
+
+- bool Eval.ReflectionMissConstantFromIncludedEnumsNotice = false, fzn
+
+  Whether ReflectionClass::getConstants raises notice if it misses constants from
+  enums/enum classes included via enum inclusion
+
+- bool Eval.EnableLowPriorityAwaitables = true, jtwarren
+
+  Whether or not to support low priority awaitables in the runtime. If disabled,
+  will turn AwaitLowPri instructions into noops.
+
+- int32_t Eval.CustomSrcKeyFilter = 1, rburks
+
+  Which version of the concurrent storage to use
+  for filtering SrcKeys in the async JIT
+  0 default (ConcurrentHashMap with 8 shard bits)
+  1 ConcurrentHashMap with 9 shard bits
+  2 ConcurrentHashMap with 10 shard bits
+  3 AtomicHashMap
+  4 tbb:concurrent_hash_map with const accessor
+
+- uint32_t Eval.AtomicSrcKeyFilterSize = 120000, rburks
+
+  Size hint to initialize the atomic SrcKey filter with for the async JIT
+
+- bool Eval.CheckValueBeforeEnqueue = true, rburks
+
+  Attempt to get whether or not a function has been enqueued for async JIT before attempting to write
+
+- bool Eval.UseTopologicalMerge = true, paulbiss
+
+  Use a topological sort of dependencies when loading units
+
+# Hack.Lang
+
+- bool Hack.Lang.DisableLvalAsAnExpression = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
+- bool Hack.Lang.ConstDefaultFuncArgs = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
+- bool Hack.Lang.ConstStaticProps = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
+- bool Hack.Lang.AbstractStaticProps = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
+- bool Hack.Lang.DisallowFuncPtrsInConstants = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
+- bool Hack.Lang.AllowUnstableFeatures = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
+- bool Hack.Lang.EnableXHPClassModifier = true, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
+- bool Hack.Lang.DisableXHPElementMangling = true, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
+- bool Hack.Lang.EnableClassPointerHint = true, vmladenov, repooptionsflag(Parser)|hackc(parser)
+
+  Killswitch for the class<T> type. When false, lowerer and direct decl parser
+  erase it to classname<T>.
+
+- bool Hack.Lang.DisallowNonAnnotatedMemoize = false, maxt, repooptionsflag(Parser)|hackc(parser)
+
+  Disallow non annotated <<__Memoize>>. Will throw for such.
+
+- bool Hack.Lang.TreatNonAnnotatedMemoizeAsKBIC = false, maxt, repooptionsflag(Parser)|hackc(parser)
+
+  Treat non annotated <<__Memoize>> as KeyedByIC.
+
+- bool Hack.Lang.UseObrDecls = false, sowens, repooptionsflag(Parser)
+
+  Use oxidized by ref for ext_decl decling instead of oxidized
+
+- bool Hack.Lang.StressShallowDeclDeps = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)
+- bool Hack.Lang.StressFoldedDeclDeps = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)
+- bool Hack.Lang.OptimizeReifiedParamChecks = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)
+
+  Emit specialized bytecodes when we an infer a typehint does not contain a
+  reified generic bytecode, powered by decl directed bytecode
+
+- std::map<std::string,std::string> Hack.Lang.AliasedNamespaces = {}, UNKNOWN, repooptionsflag(Parser)|lookuppath(AliasedNamespaces)
+
+- bool Hack.Lang.OptimizeParamLifetimes = false, paulbiss, repooptionsflag(Parser)|hackc(hhbc)
+- bool Hack.Lang.OptimizeLocalLifetimes = false, paulbiss, repooptionsflag(Parser)|hackc(hhbc)
+
+  When set the frontend compiler will attempt to shorten the live ranges of
+  parameter and non-parameter named locals when these flags are set. This may
+  allow for better copy-on-write behavior of certain value types but will also
+  mean that values that are no longer needed by the program may not be visible
+  to the debugger anymore.
+
+- bool Hack.Lang.OptimizeLocalIterators = false, paulbiss, repooptionsflag(Parser)|hackc(hhbc)
+
+  When set the frontend will attempt to emit Iter bytecodes over an existing
+  local rather than an unnamed one, if during the course of the loop the local
+  is either not modified, or is only modified at the $key location.
+
+- bool Hack.Lang.OptimizeIsTypeChecks = false, paulbiss, repooptionsflag(Parser)|hackc(hhbc)
+
+  Controls whether hackc will attempt to emit IsTypeC instructions in place of
+  IsTypeStructC for primitive types that are trivially checkable.
+
+- bool Hack.Lang.LookForTypechecker = false, UNKNOWN
+- bool Hack.Lang.AutoTypecheck = Hack.Lang.LookForTypechecker, UNKNOWN
+
+  If you turn off LookForTypechecker, you probably want to turn this off
+  too -- basically, make the two look like the same option to external
+  users, unless you really explicitly want to set them differently for
+  some reason.
+
+- uint64_t Hack.Lang.Phpism.DisableCallUserFunc = 0, UNKNOWN
+
+  Disables PHP's call_user_func function.
+  Valid values are 0 => enabled (default), 1 => warning, 2 => error.
+
+- uint64_t Hack.Lang.Phpism.DisableCallUserFuncArray = 0, UNKNOWN
+
+  Disables PHP's call_user_func_array function.
+  Valid values are 0 => enabled (default), 1 => warning, 2 => error.
+
+- uint64_t Hack.Lang.Phpism.DisableConstant = 0, UNKNOWN
+
+  Disables PHP's constant function
+  Valid values are 0 => enabled (default), 1 => warning, 2 => error
+
+- std::map<std::string,std::string> Hack.Lang.ExperimentalFeatures = {}, paulbiss, repooptionsflag(Parser)
+- bool Hack.Lang.UseLegacyExperimentalFeatureConfig = true, paulbiss, repooptionsflag(Parser)
+- bool Hack.Lang.ConsiderUnspecifiedExperimentalFeaturesReleased = false, paulbiss, repooptionsflag(Parser)
+
+- bool Hack.Lang.EmitCheckedUnsafeCast = true, akenn, repooptionsflag(Parser)|hackc(hhbc)
+
+  Control HackC emitting of VerifyTypeTS for UNSAFE_CAST
+
+# GC (Eval.)
+
+- bool GC.Enabled, UNKNOWN, lookuppath(Eval.EnableGC)
+
+  Default value of the per-request MemoryManager::m_gc_enabled
+  flag. This flag can be dynamically set/cleared by PHP via
+  ini_set("zend.enable_gc"). In turn, m_gc_enabled enables automatic background
+  garbage collection. If not enabled, gc_collect_cycles() won't run.
+
+- bool GC.Eager, UNKNOWN, lookuppath(Eval.EagerGC)
+
+  If set, trigger collection after every allocation, in debug
+  builds. Has no effect in opt builds or when m_gc_enabled == false.
+
+- bool GC.FilterPoints = true, UNKNOWN, lookuppath(Eval.FilterGCPoints)
+
+  If true, use a bloom filter to only do an eager
+  collection once per unique VMPC. This makes eager mode fast enough to be
+  usable for unit tests, and almost tolerable for large integration tests.
+
+- bool GC.Quarantine, UNKNOWN
+
+  If true, objects swept by GC will be trash filled and
+  leaked, never reallocated.
+
+- bool GC.SanitizeReqHeap = false, UNKNOWN
+
+- bool GC.HeapAllocSampleNativeStack = false, UNKNOWN
+
+- bool GC.LogKilledRequests = true, UNKNOWN
+
+- uint32_t GC.SampleRate = 0, UNKNOWN, lookuppath(Eval.GCSampleRate)
+
+  per *request* sample rate to enable GC logging.
+  If coinflip is true, every GC for the current request will be logged.
+  Note this is not the per-collection sample rate: we do one coinflip per
+  request.
+
+- uint32_t GC.HeapAllocSampleRequests = 0, UNKNOWN
+
+- uint32_t GC.HeapAllocSampleBytes = 256 * 1024, UNKNOWN
+
+- uint32_t GC.SlabAllocAlign = GC.SlabAllocAlign, UNKNOWN, postprocess|staticdefault(64)
+
+  The value is used before we load the config so we have to use staticdefault
+
+- uint32_t GC.MemTrackStart = 3500, UNKNOWN
+
+- uint32_t GC.MemTrackEnd = 3700, UNKNOWN
+
+- int64_t GC.MinTrigger = 64LL << 20, UNKNOWN, lookuppath(Eval.GCMinTrigger)
+
+  Minimum heap growth, in bytes since the last collection,
+  before triggering the next collection. See MemoryManager::updateNextGc().
+
+- double GC.TriggerPct = 0.5, UNKNOWN, lookuppath(Eval.GCTriggerPct)
+
+  Minimum heap growth, as a percent of remaining heap
+  space, before triggering the next collection. see updateNextGC().
+
+- bool GC.TwoPhase = false, UNKNOWN, lookuppath(Eval.TwoPhaseGC)
+
+  EXPERIMENTAL: perform tracing in two phases, the second of which
+  must only encounter exactly-scanned pointers, to enable object copying.
+
+# HHIR (Eval.HHIR)
+
+- bool HHIR.Simplification = true, UNKNOWN
+- bool HHIR.GenOpts = true, UNKNOWN
+- bool HHIR.RefcountOpts = true, UNKNOWN
+- bool HHIR.EnableGenTimeInlining = true, UNKNOWN
+- bool HHIR.EnableInliningPass = false, UNKNOWN
+- uint32_t HHIR.InliningCostFactorMain = 100, UNKNOWN
+- uint32_t HHIR.InliningCostFactorCold = 32, UNKNOWN
+- uint32_t HHIR.InliningCostFactorFrozen = 10, UNKNOWN
+- uint32_t HHIR.InliningVasmCostLimit = 150000, UNKNOWN
+- uint32_t HHIR.InliningMaxVasmCostLimit = 25000, UNKNOWN
+- uint32_t HHIR.AlwaysInlineVasmCostLimit = 5000, UNKNOWN
+- uint32_t HHIR.InliningMaxDepth = 8, UNKNOWN
+- double HHIR.InliningVasmCallerExp = .5, UNKNOWN
+- double HHIR.InliningVasmCalleeExp = .5, UNKNOWN
+- double HHIR.InliningDepthExp = 1.5, UNKNOWN
+- double HHIR.InliningVasmCallsiteExp = 0.0, UNKNOWN
+
+  The higher the number of callsites, the lower the VASM cost limit
+  we allow for inlining.
+  Discount functions with high callsite counts using this formula:
+  (1 / numCallsites) ^ InliningVasmCallsiteExp.
+
+- double HHIR.InliningVasmMinCallsiteFactor = 1.0, UNKNOWN
+
+  Represents the lowest factor we multiply for calculating
+  the VASM cost limit. This is to prevent functions with high
+  number of callsites to be discounted too much.
+
+- uint32_t HHIR.InliningMaxReturnDecRefs = 24, UNKNOWN
+- uint32_t HHIR.InliningMaxReturnLocals = 40, UNKNOWN
+- uint32_t HHIR.InliningMaxInitObjProps = 12, UNKNOWN
+- bool HHIR.InliningIgnoreHints, UNKNOWN
+- bool HHIR.InliningUseStackedCost = false, UNKNOWN
+- bool HHIR.InliningUseLayoutBlocks = false, UNKNOWN
+- bool HHIR.InliningAssertMemoryEffects = true, UNKNOWN
+- bool HHIR.AlwaysInterpIgnoreHint, UNKNOWN
+- bool HHIR.GenerateAsserts = false, UNKNOWN
+- bool HHIR.DeadCodeElim = true, UNKNOWN
+- bool HHIR.GlobalValueNumbering = true, UNKNOWN
+- bool HHIR.PredictionOpts = true, UNKNOWN
+- bool HHIR.OptimizeCheckTypes = true, UNKNOWN
+- bool HHIR.MemoryOpts = true, UNKNOWN
+- uint32_t HHIR.LoadElimMaxIters = 10, UNKNOWN
+- bool HHIR.LoadEnableTeardownOpts = true, UNKNOWN
+- uint32_t HHIR.LoadStackTeardownMaxDecrefs = 0, UNKNOWN
+- uint32_t HHIR.LoadThrowMaxDecrefs = 0, UNKNOWN
+- bool HHIR.StorePRE = true, UNKNOWN
+- bool HHIR.SinkDefs = true, UNKNOWN
+- bool HHIR.LowerBespokesPostIRGen = true, UNKNOWN
+- bool HHIR.OutlineGenericIncDecRef = true, UNKNOWN
+- uint32_t HHIR.MaxInlineInitPackedElements = 8, UNKNOWN
+
+  How many elements to inline for packed array inits
+
+- uint32_t HHIR.MaxInlineInitMixedElements = 4, UNKNOWN
+
+  How many elements to inline for mixed array inits
+
+- uint32_t HHIR.MaxInlineInitStructElements = 8, UNKNOWN
+
+  How many elements to inline for struct array inits
+
+- double HHIR.OffsetArrayProfileThreshold = 0.85, UNKNOWN
+- double HHIR.COWArrayProfileThreshold = 0.85, UNKNOWN
+- double HHIR.SmallArrayProfileThreshold = 0.8, UNKNOWN
+- double HHIR.MissingArrayProfileThreshold = 0.8, UNKNOWN
+- double HHIR.ExitArrayProfileThreshold = 0.98, UNKNOWN
+- double HHIR.OffsetExitArrayProfileThreshold = 0.98, UNKNOWN
+- double HHIR.IsTypeStructProfileThreshold = 0.95, UNKNOWN
+- uint32_t HHIR.TypeProfileMinSamples = 10, UNKNOWN
+- bool HHIR.EnablePreColoring = true, UNKNOWN
+- bool HHIR.EnableCoalescing = true, UNKNOWN
+- bool HHIR.AllocSIMDRegs = true, UNKNOWN
+- uint32_t HHIR.SpecializedDestructorThreshold = 80, UNKNOWN
+
+# Http
+
+- int Http.DefaultTimeout = 30, UNKNOWN
+
+  seconds
+
+- int Http.SlowQueryThreshold = 5000, UNKNOWN
+
+  milliseconds
+
+# Jit (Eval.Jit)
+
+- bool Jit.Enabled = true, UNKNOWN, lookuppath(Eval.Jit)
+- bool Jit.EvaledCode = true, UNKNOWN
+- std::string Jit.SerdesFile = "", UNKNOWN, postprocess
+- bool Jit.RequireWriteLease = false, UNKNOWN
+- uint64_t Jit.RelocationSize = 1 << 20, UNKNOWN
+- uint64_t Jit.MatureSize = 125 << 20, UNKNOWN
+- bool Jit.MatureAfterWarmup = false, UNKNOWN
+- double Jit.MaturityExponent = 1.0, UNKNOWN
+- double Jit.MaturityProfWeight = 1.0, UNKNOWN
+- bool Jit.Timer, UNKNOWN
+- int Jit.Threads = 4, UNKNOWN
+- int Jit.WorkerThreads, UNKNOWN
+- int Jit.WorkerThreadsForSerdes = 0, UNKNOWN
+- int Jit.MaxUnitLoaderThreads = 16, UNKNOWN
+- int Jit.WorkerArenas, UNKNOWN
+- bool Jit.ParallelDeserialize = true, UNKNOWN
+- int Jit.LdimmqSpan = 8, UNKNOWN
+- int Jit.PrintOptimizedIR = 0, UNKNOWN
+- int Jit.Concurrently = 1, UNKNOWN
+- bool Jit.PGORacyProfiling = false, UNKNOWN
+- bool Jit.AlwaysInterpOne = false, UNKNOWN
+- uint32_t Jit.NopInterval = 0, UNKNOWN
+- uint32_t Jit.MaxTranslations = 10, UNKNOWN
+- uint32_t Jit.MaxProfileTranslations = 30, UNKNOWN
+- uint32_t Jit.TraceletLiveLocsLimit = 2000, UNKNOWN
+- uint32_t Jit.TraceletEagerGuardsLimit = 0, UNKNOWN
+- uint32_t Jit.TraceletGuardsLimit = 5, UNKNOWN
+- uint64_t Jit.GlobalTranslationLimit = -1, UNKNOWN
+- int64_t Jit.MaxRequestTranslationTime = -1, UNKNOWN
+- uint32_t Jit.MaxRegionInstrs = 3000, UNKNOWN
+- uint32_t Jit.MaxLiveRegionInstrs = 50, UNKNOWN
+- uint32_t Jit.MaxAwaitAllUnroll = 8, UNKNOWN
+- bool Jit.ProfileWarmupRequests = false, UNKNOWN
+- uint32_t Jit.ProfileBCSize, UNKNOWN
+- bool Jit.EnableProfileBCSizeMultiplier = false, UNKNOWN
+- double Jit.ProfileBCSizeMultiplier = 1.3, UNKNOWN
+- uint32_t Jit.ResetProfCountersRequest, UNKNOWN
+- uint32_t Jit.RetranslateAllRequest, UNKNOWN
+- uint32_t Jit.RetranslateAllSeconds, UNKNOWN
+- bool Jit.RerunRetranslateAll = false, UNKNOWN
+- bool Jit.BuildOutliningHashes = false, UNKNOWN
+- bool Jit.PGOLayoutSplitHotCold = true, UNKNOWN
+- bool Jit.PGOLayoutResplitFrozen = true, UNKNOWN
+- bool Jit.PGOVasmBlockCounters = true, UNKNOWN
+- bool Jit.PGOVasmBlockCountersOptPrologue = true, UNKNOWN
+- uint32_t Jit.PGOVasmBlockCountersMaxOpMismatches = 12, UNKNOWN
+- uint32_t Jit.PGOVasmBlockCountersMinEntryValue, UNKNOWN
+- double Jit.PGOVasmBlockCountersHotWeightMultiplier = 0, UNKNOWN
+- bool Jit.LayoutSeparateZeroWeightBlocks = false, UNKNOWN
+- bool Jit.LayoutPrologueSplitHotCold = true, UNKNOWN
+- bool Jit.LayoutLiveSplitHotCold, UNKNOWN
+- bool Jit.LayoutProfileSplitHotCold, UNKNOWN
+- bool Jit.LayoutSplitFrozen = true, UNKNOWN
+- uint64_t Jit.LayoutMinHotThreshold = 0, UNKNOWN
+- uint64_t Jit.LayoutMinColdThreshold = 0, UNKNOWN
+- double Jit.LayoutHotThreshold = 0.01, UNKNOWN
+- double Jit.LayoutColdThreshold = 0.0005, UNKNOWN
+- int32_t Jit.LayoutMainFactor = 1000, UNKNOWN
+- int32_t Jit.LayoutColdFactor = 5, UNKNOWN
+- bool Jit.LayoutExtTSP = true, UNKNOWN
+- bool Jit.LayoutExtTSPForPrologues = false, UNKNOWN
+- double Jit.LayoutExtTSPMaxMergeDensityRatio = 25, UNKNOWN
+- double Jit.LayoutMaxMergeRatio = 1000000, UNKNOWN
+- bool Jit.LayoutPruneCatchArcs = true, UNKNOWN
+- bool Jit.KeepDbgFiles = false, UNKNOWN
+- uint32_t Jit.EnableRenameFunction = 0, UNKNOWN, globaldata|compileroption(JitEnableRenameFunction)|unitcacheflag
+- bool Jit.TrapUnalignedStackCalls = false, UNKNOWN
+
+  This controls function renaming.
+  0 - Renaming not allowed
+  1 - All functions can be renamed
+  2 - Functions in RenamableFunctions config list can be renamed
+
+- bool Jit.BuiltinsInterceptableByDefault = true, UNKNOWN, compileroption(JitBuiltinsInterceptableByDefault)|unitcacheflag
+- uint32_t Jit.InterceptFunctionLogRate = 1000, UNKNOWN
+- bool Jit.UseVtuneAPI = false, UNKNOWN
+- bool Jit.DisabledByHphpd = false, UNKNOWN
+- bool Jit.DisabledByVSDebug = true, UNKNOWN
+- uint32_t Jit.WarmupStatusBytes = ((25 << 10) + 1), UNKNOWN
+- uint32_t Jit.WarmupMaxCodeGenRate = 20000, UNKNOWN
+- uint32_t Jit.WarmupRateSeconds = 64, UNKNOWN
+- uint32_t Jit.WarmupMinFillFactor = 10, UNKNOWN
+- uint32_t Jit.WriteLeaseExpiration = 1500, UNKNOWN
+
+  In seconds
+
+- int Jit.RetargetJumps = 1, UNKNOWN
+- bool Jit.ForceVMRegSync = false, UNKNOWN
+- bool Jit.StressEagerVMRegSync = false, UNKNOWN
+
+  Sync VM reg state for all native calls.
+
+- std::string Jit.RegionSelector = "tracelet", UNKNOWN
+- bool Jit.NoGdb = true, UNKNOWN
+- bool Jit.PGO, UNKNOWN
+- std::string Jit.PGORegionSelector = "hotcfg", UNKNOWN
+- uint64_t Jit.PGOThreshold, UNKNOWN
+- bool Jit.PGOOnly = false, UNKNOWN
+- bool Jit.PGOUsePostConditions = true, UNKNOWN
+- bool Jit.PGOUseAddrCountedCheck = false, UNKNOWN, postprocess
+- uint32_t Jit.PGOUnlikelyIncRefCountedPercent = 2, UNKNOWN
+- uint32_t Jit.PGOUnlikelyIncRefIncrementPercent = 5, UNKNOWN
+- uint32_t Jit.PGOUnlikelyDecRefReleasePercent = 5, UNKNOWN
+- uint32_t Jit.PGOUnlikelyDecRefCountedPercent = 2, UNKNOWN
+- uint32_t Jit.PGOUnlikelyDecRefPersistPercent = 5, UNKNOWN
+- uint32_t Jit.PGOUnlikelyDecRefSurvivePercent = 5, UNKNOWN
+- uint32_t Jit.PGOUnlikelyDecRefDecrementPercent = 5, UNKNOWN
+- double Jit.PGODecRefNZReleasePercentCOW, UNKNOWN
+- double Jit.PGODecRefNZReleasePercent, UNKNOWN
+- double Jit.PGODecRefNopDecPercentCOW, UNKNOWN
+- double Jit.PGODecRefNopDecPercent, UNKNOWN
+- bool Jit.PGOArrayGetStress = false, UNKNOWN
+- double Jit.PGOMinBlockCountPercent = 0.23, UNKNOWN
+
+  Mininum weight of a tracelet to include it in HotCFG as a percentage
+  of the weight of the first tracelet in the region. [0,100]
+
+- double Jit.PGOMinArcProbability = 0.0, UNKNOWN
+
+  Minimum probability of an arc to include it in HotCFG. [0,1]
+
+- uint32_t Jit.PGORelaxPercent = 100, UNKNOWN
+- uint32_t Jit.PGOCalledFuncCheckNumSpeculations = 6, UNKNOWN
+- double Jit.PGOCalledFuncCheckThreshold = 0.1, UNKNOWN
+- double Jit.PGOCalledFuncExitThreshold = 0.001, UNKNOWN
+- bool Jit.PGODumpCallGraph = false, UNKNOWN
+- bool Jit.PGOOptCodeCallGraph = true, UNKNOWN
+- bool Jit.PGOHFSortPlus = false, UNKNOWN
+- uint8_t Jit.LiveThreshold, UNKNOWN
+- uint8_t Jit.ProfileThreshold, UNKNOWN
+- uint32_t Jit.FuncLiveTranslationByteLimit = -1, UNKNOWN
+
+  Max total number of live translation bytes to JIT into the TC for a function
+
+- uint32_t Jit.MaxLiveMainUsage = 150994944, UNKNOWN
+- uint32_t Jit.SampleRate = 0, UNKNOWN
+- bool Jit.AlignMacroFusionPairs, UNKNOWN
+- bool Jit.AlignUniqueStubs = true, UNKNOWN
+- bool Jit.SerdesModeForceOff = false, UNKNOWN
+- bool Jit.DesUnitPreload = false, UNKNOWN
+- std::set<std::string> Jit.SerdesDebugFunctions = {}, UNKNOWN
+- std::set<std::string> Jit.FuncBlockList = {}, UNKNOWN
+- uint32_t Jit.SerializeOptProfSeconds, UNKNOWN
+- uint32_t Jit.SerializeOptProfRequests = 0, UNKNOWN
+- bool Jit.SerializeOptProfRestart = true, UNKNOWN
+- bool Jit.ArmLse, UNKNOWN
+- std::string Jit.LogAllInlineRegions = "", UNKNOWN
+
+  Log the sizes and metadata for all translations in the TC broken
+  down by function and inclusive/exclusive size for inlined regions.
+  When set to "" TC size data will be sampled on a per function basis
+  as determined by JitSampleRate. When set to a non-empty string all
+  translations will be logged, and run_key column will be logged with
+  the value of this option.
+
+- std::string Jit.SerializeDebugLocation = "/tmp/debugprof.jit", paulbiss
+
+  If jit profiles are disabled write serialized JIT data to disk for use in the
+  event of a crash. While crashing HHVM will map this file into memory so that
+  it may be retrieved from the core.
+
+- bool Jit.ProfileGuardTypes = false, UNKNOWN
+- uint32_t Jit.FilterLease = 1, UNKNOWN
+
+- std::string Jit.TraceUploadBucket = "hhvm_jit_trace", paulbiss
+
+  Blob store bucket to upload IR traces to.
+
+- std::string Jit.TraceUploadPath = "", paulbiss
+
+  Blob store directory to upload IR traces to.
+
+- std::set<std::string> Jit.TraceUploadFunctions = {}, paulbiss
+
+  Functions to upload traces from to the blob store.
+
+- bool Jit.PreferRefinedRATArraySpecializations = true, paulbiss
+
+  When refining a type and selecting between two possible RATArray
+  specializaitons, always select the version from the refinement.
+
+- bool Jit.CollectTranslationStats = false, sinancepel
+
+  If true, the JIT will emit counters for each prologue and func entry
+  to keep counters even after profiing, and log these call stats via
+  StructuredLog during process shutdown.
+
+- uint32_t Jit.ReportTranslationStatsMinCallCount = 5000, sinancepel
+
+  The minimum call count for the JIT to report call stats. Has no effect
+  unless Jit.CollectTranslationStats is true; computes call counts during
+  HHVM shutdown.
+
+- uint32_t Jit.TranslationStatsSampleRate = 1, sinancepel
+
+  On average, log every 1 / Jit.TranslationStatsSampleRate counters. Has
+  no effect unless Jit.CollectTranslationStats is set.
+
+- bool Jit.DynamicTCSections, paulbiss
+
+  Dynamically allocate TC blocks
+
+# Mail
+
+- std::string Mail.SendmailPath = "/usr/lib/sendmail -t -i", UNKNOWN
+- std::string Mail.ForceExtraParameters = "", UNKNOWN
+
+# PCRE (Eval.PCRE)
+
+- uint32_t PCRE.TableSize = PCRE.TableSize, UNKNOWN, staticdefault(96 * 1024)
+
+  Need to be staticdefault because it is used in the init of a static
+  variable. It will then be reinited after we read the config
+
+- uint64_t PCRE.ExpireInterval = PCRE.ExpireInterval, UNKNOWN, staticdefault(2 * 60 * 60)
+
+  Need to be staticdefault because it is used in the init of a static
+  variable. It will then be reinited after we read the config
+
+- std::string PCRE.CacheType = PCRE.CacheType, UNKNOWN, staticdefault("static")
+
+  Need to be staticdefault because it is used in the init of a static
+  variable. It will then be reinited after we read the config
+
+- int64_t PCRE.BacktraceLimit = 1000000, UNKNOWN, private|lookuppath(Preg.BacktraceLimit)
+
+  TODO: T58241504 delete this default once config is migrated.
+  This one is just a misspelled version of Preg.BacktrackLimit
+
+- int64_t PCRE.BacktrackLimit = PCRE.BacktraceLimit, UNKNOWN, staticdefault(1000000)|lookuppath(Preg.BacktrackLimit)
+
+  It has to use static default because we read the value before configs has loaded.
+  See BacktraceLimit for why it is the default value
+
+- int64_t PCRE.RecursionLimit = PCRE.RecursionLimit, UNKNOWN, staticdefault(100000)|lookuppath(Preg.RecursionLimit)
+
+  It has to use static default because we read the value before configs has loaded
+
+- bool PCRE.ErrorLog = PCRE.ErrorLog, UNKNOWN, staticdefault(true)|lookuppath(Preg.ErrorLog)
+
+# PageletServer
+
+- int PageletServer.ThreadCount = 0, UNKNOWN
+- int PageletServer.HugeThreadCount = 0, UNKNOWN
+- int PageletServer.ThreadDropCacheTimeoutSeconds = 0, UNKNOWN
+- int PageletServer.QueueLimit = 0, UNKNOWN
+- bool PageletServer.ThreadDropStack = false, UNKNOWN
+- uint64_t PageletServer.HeaderCheck = 0, UNKNOWN, lookuppath(Eval.PageletServerHeaderCheck)
+
+  When starting a pagelet server the specified headers are passed as
+  a dictionary that can contain both "key => value" fields and
+  "#index => 'key: value'" fields from which key value pairs are
+  parsed. The latter form is deprecated and this option controls
+  errors and warnings for its use.
+  0 - do nothing
+  1 - raise a warning if a header is set via the deprecated "key: value"
+      format
+  2 - throw if any header is set using the deprecated "key: value"
+      format
+
+- uint64_t PageletServer.HeaderCollide = 0, UNKNOWN, lookuppath(Eval.PageletServerHeaderCollide)
+
+  Similar to the above option this setting controls the behavior of
+  hhvm when collisions occur in the pagelet header fields.
+  0 - do nothing, favor last mentioned field in insertion order
+  1 - raise a warning, preserve existing ordering
+  2 - raise a warning, prefer the "key => value" field
+  3 - throw an exception
+
+# PHP7
+
+- bool PHP7.all, UNKNOWN, private
+- bool PHP7.NoHexNumerics = PHP7.all, UNKNOWN, globaldata|unitcacheflag
+
+  Indicates whether hex strings (e.g. "0x20") can be used for numeric
+  operations, e.g. ("0x20" + 1)
+
+- bool PHP7.Builtins = PHP7.all, UNKNOWN, globaldata|unitcacheflag
+
+  Indicates whether the repo was compiled with PHP7 builtins enabled.
+
+- bool PHP7.EngineExceptions = PHP7.all, UNKNOWN
+- bool PHP7.Substr = PHP7.all, UNKNOWN, globaldata|unitcacheflag
+
+  Indicates whether the repo was compiled with PHP7 substr behavior which
+  returns an empty string if the stringi length is equal to start characters
+  long, instead of PHP5's false.
+
+- bool PHP7.DisallowUnsafeCurlUploads = PHP7.all, UNKNOWN
+
+- bool PHP7.UVS = PHP7.all, UNKNOWN, repooptionsflag(Parser, false)|hackc(hhbc, false)
+- bool PHP7.LTRAssign = PHP7.all, UNKNOWN, repooptionsflag(Parser, false)|hackc(hhbc, false)
+
+# Proxy
+
+  Options related to reverse proxying. Origin and Percentage
+  may be mutated by background threads and should only be read or written
+  using the helper functions defined with HttpRequestHandler.
+
+- std::string Proxy.Origin = "", UNKNOWN
+- int Proxy.Percentage = 0, UNKNOWN
+- int Proxy.Retry = 3, UNKNOWN
+- std::set<std::string> Proxy.ServeURLs = {}, UNKNOWN
+- bool Proxy.UseServeURLs = false, UNKNOWN, lookuppath(Proxy.ServeURLs)
+
+  Loads from ServeURLs and check if config is non-empty
+
+- std::set<std::string> Proxy.ProxyURLs = {}, UNKNOWN
+- bool Proxy.UseProxyURLs = false, UNKNOWN, lookuppath(Proxy.ProxyURLs)
+
+  Loads from ProxyURLs and check if config is non-empty
+
+- std::vector<std::string> Proxy.ProxyPatterns = {}, UNKNOWN
+
+# Sandbox
+
+- bool Sandbox.Mode = false, UNKNOWN, lookuppath(Sandbox.SandboxMode)
+- bool Sandbox.Speculate = false, UNKNOWN, lookuppath(Sandbox.SandboxSpeculate)
+- std::string Sandbox.Pattern = "", UNKNOWN, postprocess
+- std::string Sandbox.Home = "", UNKNOWN
+- std::string Sandbox.Fallback = "", UNKNOWN
+- std::string Sandbox.ConfFile = "", UNKNOWN
+- std::map<std::string,std::string> Sandbox.ServerVariables = {}, UNKNOWN
+- bool Sandbox.FromCommonRoot = false, UNKNOWN
+- std::string Sandbox.DirectoriesRoot = "", UNKNOWN
+- std::string Sandbox.LogsRoot = "", UNKNOWN
+- std::string Sandbox.DefaultUserFile = "", UNKNOWN
+- std::string Sandbox.HostAlias = "", UNKNOWN
+
+# SetProfile
+
+- bool SetProfile.NullThisObject = true, UNKNOWN
+
+# SimpleXML
+
+- bool SimpleXML.EmptyNamespaceMatchesAll = false, UNKNOWN
+
+# Stats
+
+- bool Stats.Enable = false, UNKNOWN
+- bool Stats.APC = false, UNKNOWN
+- bool Stats.Web = false, UNKNOWN
+- bool Stats.Memory = false, UNKNOWN
+- bool Stats.SQL = false, UNKNOWN
+- bool Stats.SQLTable = false, UNKNOWN
+- bool Stats.NetworkIO = false, UNKNOWN
+- std::string Stats.XSL = "", UNKNOWN
+- std::string Stats.XSLProxy = "", UNKNOWN
+- uint32_t Stats.SlotDuration = 10 * 60, UNKNOWN, postprocess
+- uint32_t Stats.MaxSlot = Stats.MaxSlot, UNKNOWN, postprocess|staticdefault(12 * 6)
+
+  12 hours. Read before config is loaded so has to use staticdefault
+
+- std::vector<std::string> Stats.TrackedKeys = {}, UNKNOWN
+- int32_t Stats.ProfilerTraceBuffer = 2000000, UNKNOWN
+- double Stats.ProfilerTraceExpansion = 1.2, UNKNOWN
+- int32_t Stats.ProfilerMaxTraceBuffer = 0, UNKNOWN
+- bool Stats.TrackPerUnitMemory = false, UNKNOWN
+
+# Strobelight
+
+- bool Strobelight.Enabled = false, UNKNOWN
+
+# Watchman
+
+- std::string Watchman.Socket.Default = "", UNKNOWN, lookuppath(watchman.socket.default)
+- std::string Watchman.Socket.Root = "", UNKNOWN, lookuppath(watchman.socket.root)
+
+# Xbox
+
+- int Xbox.ServerInfo.ThreadCount = 10, UNKNOWN
+- int Xbox.ServerInfo.MaxQueueLength = INT_MAX, UNKNOWN, postprocess
+- int Xbox.ServerInfo.MaxJobQueuingMs = -1, UNKNOWN
+
+  Maximum duration in ms an xbox thread may sit in the queue.
+
+- std::string Xbox.ServerInfo.RequestInitFunction = "", UNKNOWN
+- std::string Xbox.ServerInfo.RequestInitDocument = "", UNKNOWN
+- bool Xbox.ServerInfo.LogInfo = false, UNKNOWN
+- std::string Xbox.ProcessMessageFunc = "xbox_process_message", UNKNOWN
+
+  Thread Names can be a max of 15 chars (accounting for null)
+  ThreadGroupSuffix can be safely 1 char or max 5 chars if you are not using NUMA
+
+- std::string Xbox.ServerInfo.ThreadGroupSuffix = "", UNKNOWN
+
+# Xenon
+
+- double Xenon.PeriodSeconds = 0.0, UNKNOWN, lookuppath(Xenon.Period)
+- uint32_t Xenon.RequestFreq = 1, UNKNOWN
+- bool Xenon.ForceAlwaysOn = false, UNKNOWN
+- bool Xenon.TrackActiveWorkers = false, UNKNOWN
+
+# Log
+
+- std::string Log.File = "", UNKNOWN
+- std::string Log.FileSymLink = "", UNKNOWN, lookuppath(Log.SymLink)
+- uint16_t Log.FilePeriodMultiplier = 0, UNKNOWN, lookuppath(Log.PeriodMultiplier)
+- bool Log.AlwaysLogUnhandledExceptions = true, UNKNOWN
+- int Log.HeaderMangle = 0, UNKNOWN
+- bool Log.NoSilencer = false, UNKNOWN
+- int Log.ForceErrorReportingLevel = 0, UNKNOWN
+- std::string Log.AccessLogDefaultFormat = "%h %l %u %t \"%r\" %>s %b", UNKNOWN
+- std::string Log.BaseDirectory = "", UNKNOWN
+
+  Base directory for all logfiles
+
+- std::string Log.AdminLog.Format = "%h %t %s %U", UNKNOWN
+- std::string Log.AdminLog.File = "", UNKNOWN
+- std::string Log.AdminLog.SymLink = "", UNKNOWN
+
+# AdminServer
+
+  Has to be after Server because we depend on values from Server
+
+- std::string AdminServer.IP = Server.IP, UNKNOWN
+- int AdminServer.Port = 0, UNKNOWN
+- int AdminServer.ThreadCount = 1, UNKNOWN
+- bool AdminServer.StatsNeedPassword = true, UNKNOWN
+- std::string AdminServer.Password = "", UNKNOWN, nobind
+- std::set<std::string> AdminServer.Passwords = {}, UNKNOWN, nobind
+- std::set<std::string> AdminServer.HashedPasswords = {}, UNKNOWN, nobind
+- std::string AdminServer.DumpPath = "/tmp/hhvm_admin_dump", UNKNOWN

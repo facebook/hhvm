@@ -17,13 +17,14 @@
 #include "hphp/runtime/server/server-stats.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/http-server.h"
+#include "hphp/runtime/server/thread-hint.h"
 #include "hphp/runtime/server/writer.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/configs/stats.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/process.h"
 #include "hphp/util/text-util.h"
@@ -58,11 +59,11 @@ void ServerStats::Merge(TimeSlot& dest, const TimeSlot& src,
   Merge(dest.m_values, src.m_values, wanted);
 }
 
-ServerStats::KeyMap ServerStats::CompileKeys(const std::string& keys) {
+ServerStats::KeyMap ServerStats::CompileKeys(
+  const std::vector<std::string>& rules) {
+
   KeyMap res;
-  if (keys.empty()) return res;
-  std::vector<std::string> rules;
-  folly::split(',', keys.c_str(), rules, true);
+  if (rules.empty()) return res;
   for (auto const& rule : rules) {
     assertx(!rule.empty());
     auto len = rule.length();
@@ -87,31 +88,36 @@ ServerStats::KeyMap ServerStats::CompileKeys(const std::string& keys) {
 
 Mutex ServerStats::s_lock;
 std::vector<ServerStats*> ServerStats::s_loggers;
-bool ServerStats::s_profile_network = false;
 THREAD_LOCAL_NO_CHECK(ServerStats, ServerStats::s_logger);
 
 void ServerStats::LogPage(const std::string& url, int code) {
-  if (RuntimeOption::EnableWebStats && RuntimeOption::EnableStats) {
+  if (Cfg::Stats::Web && Cfg::Stats::Enable) {
     ServerStats::s_logger->logPage(url, code);
   }
 }
 
 void ServerStats::Log(const std::string& name, int64_t value) {
-  if (RuntimeOption::EnableWebStats && RuntimeOption::EnableStats) {
+  if (Cfg::Stats::Web && Cfg::Stats::Enable) {
     ServerStats::s_logger->log(name, value);
   }
 }
 
 void ServerStats::LogBytes(int64_t bytes) {
-  if (RuntimeOption::EnableWebStats && RuntimeOption::EnableStats) {
+  if (Cfg::Stats::Web && Cfg::Stats::Enable) {
     ServerStats::s_logger->logBytes(bytes);
   }
 }
 
 void ServerStats::StartRequest(const char* url, const char* clientIP,
                                const char* vhost) {
-  if (RuntimeOption::EnableWebStats && RuntimeOption::EnableStats) {
+  if (Cfg::Stats::Web && Cfg::Stats::Enable) {
     ServerStats::s_logger->startRequest(url, clientIP, vhost);
+  }
+}
+
+void ServerStats::SetEndpoint(const char* endpoint) {
+  if (Cfg::Stats::Web && Cfg::Stats::Enable) {
+    ServerStats::s_logger->setEndpoint(endpoint);
   }
 }
 
@@ -161,7 +167,7 @@ void ServerStats::Clear() {
 std::string ServerStats::GetKeys() {
   // special keys that don't come from slots
   std::set<std::string> allKeys {
-    "hit", "load", "idle", "queued"
+    "hit", "load", "load-pct", "idle", "queued"
   };
 
   VisitAllSlots(
@@ -183,83 +189,26 @@ std::string ServerStats::GetKeys() {
   return out;
 }
 
-std::string ServerStats::Report(const std::string& keys,
-                                const std::string& prefix) {
-  auto const wantedKeys = CompileKeys(keys);
-  auto const beginTime = static_cast<uint64_t>(time(nullptr));
-  auto const SlotDuration = RuntimeOption::StatsSlotDuration;
-  auto const now = beginTime / SlotDuration;
+hphp_fast_string_map<int64_t> ServerStats::Report(
+  const std::vector<std::string>& keys, const std::string& prefix) {
 
-  TimeSlot ts{};
-  // Aggregate every TimeSlot with in the range [now + 2 - MaxSlot, now], The
-  // slot (now + 1 - MaxSlot) actually contains valid data, but it is at risk of
-  // being cleared if time advances to the next slot (now + 1) while we are
-  // collecting here. So exclude those. Hopefully the following aggregation
-  // process takes less than StatsSlotDuration seconds.
-  VisitAllSlots(
-    [&wantedKeys, now, &ts] (TimeSlot& slot) {
-      if (slot.m_time <= now + 1u - RuntimeOption::StatsMaxSlot) {
-        // We are not going to need the old data in future.
-        slot.clear();
-        return;
-      }
-      if (slot.m_time > now) return;
-      Merge(ts, slot, wantedKeys);
-    }
-  );
+  auto report = ReportImpl(CompileKeys(keys));
+  if (prefix.empty()) return report;
 
-  // Total amount of time over which the stats were written.  We try to estimate
-  // the time between starting and ending time of the collection process by
-  // taking some averages.
-  uint32_t sec = SlotDuration * (RuntimeOption::StatsMaxSlot - 2u);
-  auto const endTime = static_cast<uint64_t>(time(nullptr));
-  if (endTime / RuntimeOption::StatsSlotDuration != now) {
-    sec += (beginTime % SlotDuration + SlotDuration + 1) / 2;
-  } else {
-    sec += ((beginTime + endTime + 1) % (2 * SlotDuration)) / 2;
+  hphp_fast_string_map<int64_t> result(report.size());
+  for (auto& val: report) {
+    result.emplace(prefix + "." + val.first, std::move(val.second));
   }
-
-  auto& values = ts.m_values;
-
-  // Derive keys with suffix /hit or /sec
-  for (auto const& iter : wantedKeys) {
-    auto const& key = iter.first;
-    auto const udf = iter.second;
-    auto viter = values.find(key);
-    if (viter == values.end()) continue;
-    if ((udf & UDF_HIT) && ts.m_hits) {
-      values[key + "/hit"] = viter->second * PRECISION / ts.m_hits;
-    }
-    if ((udf & UDF_SEC) && sec) {
-      values[key + "/sec"] = viter->second * PRECISION / sec;
-    }
-  }
-
-  auto const wantAll = wantedKeys.empty();
-  // write special keys
-  if (wantAll || wantedKeys.find("hit") != wantedKeys.end()) {
-    values["hit"] = ts.m_hits;
-    // hit/sec is probably more meaningful than hit itself.
-    if (sec) values["hit/sec"] = ts.m_hits * PRECISION / sec;
-  }
-  if (auto const server = HttpServer::Server->getPageServer()) {
-    auto const load = server->getActiveWorker();
-    if (wantAll || wantedKeys.find("load") != wantedKeys.end()) {
-      values["load"] = load;
-    }
-    if (wantAll || wantedKeys.find("idle") != wantedKeys.end()) {
-      values["idle"] = server->getMaxThreadCount() - load;
-    }
-    if (wantAll || wantedKeys.find("queued") != wantedKeys.end()) {
-      values["queued"] = server->getQueuedJobs();
-    }
-  }
-
-  return Report(ts, prefix);
+  return result;
 }
 
-std::string ServerStats::Report(const TimeSlot& s,
-                                const std::string& prefix) {
+std::string ServerStats::ReportString(const std::string& keys,
+                                      const std::string& prefix) {
+  std::vector<std::string> rules;
+  folly::split(',', keys.c_str(), rules, true);
+
+  auto const result = ReportImpl(CompileKeys(rules));
+
   std::ostringstream out;
   out << "{";
   std::string key = prefix;
@@ -269,8 +218,8 @@ std::string ServerStats::Report(const TimeSlot& s,
 
   // Sort keys in alphabetical order before printing to the string.
   std::vector<std::pair<std::string, int64_t>> kvpVec;
-  kvpVec.reserve(s.m_values.size());
-  for (auto const& kvpair : s.m_values) {
+  kvpVec.reserve(result.size());
+  for (auto const& kvpair : result) {
     kvpVec.push_back(kvpair);
   }
   std::sort(kvpVec.begin(), kvpVec.end());
@@ -288,6 +237,84 @@ std::string ServerStats::Report(const TimeSlot& s,
   out << "}\n";
 
   return out.str();
+}
+
+ServerStats::CounterMap ServerStats::ReportImpl(const KeyMap& wantedKeys) {
+
+  auto const beginTime = static_cast<uint64_t>(time(nullptr));
+  auto const SlotDuration = Cfg::Stats::SlotDuration;
+  auto const now = beginTime / SlotDuration;
+
+  TimeSlot ts{};
+  // Aggregate every TimeSlot with in the range [now + 2 - MaxSlot, now], The
+  // slot (now + 1 - MaxSlot) actually contains valid data, but it is at risk of
+  // being cleared if time advances to the next slot (now + 1) while we are
+  // collecting here. So exclude those. Hopefully the following aggregation
+  // process takes less than StatsSlotDuration seconds.
+  VisitAllSlots(
+    [&wantedKeys, now, &ts] (TimeSlot& slot) {
+      if (slot.m_time <= now + 1u - Cfg::Stats::MaxSlot) {
+        // We are not going to need the old data in future.
+        slot.clear();
+        return;
+      }
+      if (slot.m_time > now) return;
+      Merge(ts, slot, wantedKeys);
+    }
+  );
+
+  // Total amount of time over which the stats were written.  We try to estimate
+  // the time between starting and ending time of the collection process by
+  // taking some averages.
+  uint32_t sec = SlotDuration * (Cfg::Stats::MaxSlot - 2u);
+  auto const endTime = static_cast<uint64_t>(time(nullptr));
+  if (endTime / Cfg::Stats::SlotDuration != now) {
+    sec += (beginTime % SlotDuration + SlotDuration + 1) / 2;
+  } else {
+    sec += ((beginTime + endTime + 1) % (2 * SlotDuration)) / 2;
+  }
+
+  auto& values = ts.m_values;
+
+  // Derive keys with suffix /hit or /sec
+  for (auto const& iter : wantedKeys) {
+    auto const& key = iter.first;
+    auto const udf = iter.second;
+    auto viter = values.find(key);
+    if (viter == values.end()) continue;
+    auto const value = viter->second;
+    if ((udf & UDF_HIT) && ts.m_hits) {
+      values[key + "/hit"] = value * PRECISION / ts.m_hits;
+    }
+    if ((udf & UDF_SEC) && sec) {
+      values[key + "/sec"] = value * PRECISION / sec;
+    }
+  }
+
+  auto const wantAll = wantedKeys.empty();
+  // write special keys
+  if (wantAll || wantedKeys.find("hit") != wantedKeys.end()) {
+    values["hit"] = ts.m_hits;
+    // hit/sec is probably more meaningful than hit itself.
+    if (sec) values["hit/sec"] = ts.m_hits * PRECISION / sec;
+  }
+  if (auto const server = HttpServer::Server->getPageServer()) {
+    auto const load = server->getActiveWorker();
+    if (wantAll || wantedKeys.find("load") != wantedKeys.end()) {
+      values["load"] = load;
+    }
+    if (wantAll || wantedKeys.find("load-pct") != wantedKeys.end()) {
+      values["load-pct"] = load * 100 / server->getMaxThreadCount();
+    }
+    if (wantAll || wantedKeys.find("idle") != wantedKeys.end()) {
+      values["idle"] = server->getMaxThreadCount() - load;
+    }
+    if (wantAll || wantedKeys.find("queued") != wantedKeys.end()) {
+      values["queued"] = server->getQueuedJobs();
+    }
+  }
+
+  return ts.m_values;
 }
 
 static std::string format_duration(timeval& duration) {
@@ -316,47 +343,26 @@ static std::string format_duration(timeval& duration) {
   return ret;
 }
 
-std::string ServerStats::ReportStatus(Writer::Format format) {
-  std::ostringstream out;
-  std::unique_ptr<Writer> w;
-  switch (format) {
-    case Writer::Format::XML:
-      w.reset(new XMLWriter(out));
-      break;
-    case Writer::Format::JSON:
-      w.reset(new JSONWriter(out));
-      break;
-    case Writer::Format::HTML:
-      w.reset(new HTMLWriter(out));
-      break;
-    default:
-      return "";
-  }
+ServerStatusReport ServerStats::ReportStatus() {
+  ServerStatusReport status{};
 
-  w->writeFileHeader();
-  w->beginObject("status");
+  status.process.id = (int64_t)getpid();
+  status.process.build = RuntimeOption::BuildId;
+  status.process.compiler = compilerId().begin();
 
-  w->beginObject("process");
-  w->writeEntry("id", (int64_t)getpid());
-  w->writeEntry("build", RuntimeOption::BuildId);
-  w->writeEntry("compiler", compilerId().begin());
-
-#ifndef NDEBUG
-  w->writeEntry("debug", "yes");
+#ifdef NDEBUG
+  status.process.debug = false;
+#else
+  status.process.debug = true;
 #endif
 
-  timeval up;
   time_t now = time(nullptr);
-  up.tv_sec = now - HttpServer::StartTime;
-  up.tv_usec = 0;
-  w->writeEntry("now", req::make<DateTime>(now)->
-                       toString(DateTime::DateFormatCookie).data());
-  w->writeEntry("start", req::make<DateTime>(HttpServer::StartTime)->
-                         toString(DateTime::DateFormatCookie).data());
-  w->writeEntry("up", format_duration(up));
-  w->endObject("process");
+  status.process.now = (int64_t)now;
 
-  w->beginList("threads");
+  // Match behavior of HHVM_FN(server_uptime) and return -1 if the server has
+  // not started yet.
+  status.process.start = HttpServer::StartTime == 0 ? -1  : HttpServer::StartTime;
+  status.process.up = HttpServer::StartTime == 0 ? -1 : (now - HttpServer::StartTime);
 
   Lock lock(s_lock, false);
   timeval current;
@@ -374,38 +380,144 @@ std::string ServerStats::ReportStatus(Writer::Format format) {
       memset(&duration, 0, sizeof(duration));
     }
 
-    w->beginObject("thread");
-    w->writeEntry("id", (int64_t)ts.m_threadId);
-    w->writeEntry("tid", (int64_t)ts.m_threadPid);
-    w->writeEntry("req", ts.m_requestCount);
-    w->writeEntry("bytes", ts.m_writeBytes);
-    w->writeEntry("mode", ThreadModeString(ts.m_mode));
+    ServerStatusThreadReport thread{};
+    thread.id = (int64_t)ts.m_threadId;
+    thread.tid = (int64_t)ts.m_threadPid;
+    thread.req = ts.m_requestCount;
+    thread.bytes = ts.m_writeBytes;
+    thread.mode = ThreadModeString(ts.m_mode);
 
     if (ts.m_requestCount && (ts.m_mode != ThreadMode::Idling)) {
-      w->writeEntry("vhost", ts.m_vhost);
-      w->writeEntry("url", ts.m_url);
-      w->writeEntry("client", ts.m_clientIP);
-      w->writeEntry("start", req::make<DateTime>(ts.m_start.tv_sec)->
-                    toString(DateTime::DateFormatCookie).data());
-      w->writeEntry("duration", format_duration(duration));
+      ServerStatusRequestReport request{};
+      request.vhost = ts.m_vhost;
+      request.url = ts.m_url;
+      request.endpoint = ts.m_endpoint;
+      request.client = ts.m_clientIP;
+      request.start = ts.m_start.tv_sec;
+      request.duration_ms = (duration.tv_sec * 1000) + (duration.tv_usec / 1000);
 
       auto const stats = ts.m_mm->getStatsCopy();
-      w->beginObject("memory");
-      w->writeEntry("current usage", stats.usage());
-      w->writeEntry("current alloc", stats.capacity());
-      w->writeEntry("peak usage", stats.peakUsage);
-      w->writeEntry("peak alloc", stats.peakCap);
-      w->writeEntry("limit", ts.m_mm->getMemoryLimit());
-      w->writeEntry("current mm usage", stats.mmUsage());
-      w->endObject("memory");
+      ServerStatusRequestMemoryReport memory{};
+
+      memory.currentUsage = stats.usage();
+      memory.currentAlloc = stats.capacity();
+      memory.peakUsage = stats.peakUsage;
+      memory.peakAlloc = stats.peakCap;
+      memory.limit = ts.m_mm->getMemoryLimit();
+      memory.currentMmUsage = stats.mmUsage();
+
+      request.memory = std::move(memory);
 
       // Only in the event that we are currently in the process of an io, will
       // we output the iostatus, and ioInProcessDuationMicros
       if (ts.m_ioInProcess) {
-        timespec now;
-        Timer::GetMonotonicTime(now);
-        w->writeEntry("iostatus", std::string(ts.m_ioName) + " " + ts.m_ioAddr);
-        w->writeEntry("ioduration", gettime_diff_us(ts.m_ioStart, now));
+        timespec now_ts;
+        Timer::GetMonotonicTime(now_ts);
+        ServerStatusRequestIOReport io;
+
+        io.status = std::string(ts.m_ioName) + " " + ts.m_ioAddr;
+        io.duration = gettime_diff_us(ts.m_ioStart, now_ts);
+
+        request.io = std::move(io);
+      }
+      thread.request = std::move(request);
+    }
+    status.threads.emplace_back(thread);
+  }
+
+  return status;
+}
+
+std::string ServerStats::ReportStatus(Writer::Format format) {
+  std::ostringstream out;
+  std::unique_ptr<Writer> w;
+  switch (format) {
+    case Writer::Format::XML:
+      w.reset(new XMLWriter(out));
+      break;
+    case Writer::Format::JSON:
+      w.reset(new JSONWriter(out));
+      break;
+    case Writer::Format::HTML:
+      w.reset(new HTMLWriter(out));
+      break;
+    default:
+      return "";
+  }
+
+  ServerStatusReport status = ReportStatus();
+
+  w->writeFileHeader();
+  w->beginObject("status");
+
+  w->beginObject("process");
+  w->writeEntry("id", status.process.id);
+  w->writeEntry("build", status.process.build);
+  w->writeEntry("compiler", status.process.compiler);
+
+  if (status.process.debug) {
+    w->writeEntry("debug", "yes");
+  }
+
+  timeval up;
+  up.tv_sec = status.process.up;
+  up.tv_usec = 0;
+  w->writeEntry("now", req::make<DateTime>(status.process.now)->
+                       toString(DateTime::DateFormatCookie).data());
+  if (status.process.up == -1) {
+    w->writeEntry("start", "server not started");
+  } else {
+    w->writeEntry("start", req::make<DateTime>(status.process.start)->
+                          toString(DateTime::DateFormatCookie).data());
+  }
+
+  // TODO(jtwarren): Deprecate this field (up) once we confirm there are no
+  // usages and replace with "uptime" which is more deterministic and more
+  // easily parsed.
+  w->writeEntry("up", format_duration(up));
+  w->writeEntry("uptime", status.process.up);
+
+  w->endObject("process");
+
+  w->beginList("threads");
+
+  for (ServerStatusThreadReport thread : status.threads) {
+    w->beginObject("thread");
+    w->writeEntry("id", thread.id);
+    w->writeEntry("tid", thread.tid);
+    w->writeEntry("req", thread.req);
+    w->writeEntry("bytes", thread.bytes);
+    w->writeEntry("mode", thread.mode);
+
+    if (thread.request.has_value()) {
+      ServerStatusRequestReport request = thread.request.value();
+      w->writeEntry("vhost", request.vhost);
+      w->writeEntry("url", request.url);
+      w->writeEntry("endpoint", request.endpoint);
+      w->writeEntry("client", request.client);
+      w->writeEntry("start", req::make<DateTime>(request.start)->
+                    toString(DateTime::DateFormatCookie).data());
+      int64_t duration_ms = request.duration_ms;
+      timeval duration;
+      duration.tv_sec = duration_ms / 1000;
+      duration.tv_usec = (duration_ms % 1000) * 1000;
+      w->writeEntry("duration", format_duration(duration));
+
+      w->beginObject("memory");
+      w->writeEntry("current usage", request.memory.currentUsage);
+      w->writeEntry("current alloc", request.memory.currentAlloc);
+      w->writeEntry("peak usage", request.memory.peakUsage);
+      w->writeEntry("peak alloc", request.memory.peakAlloc);
+      w->writeEntry("limit", request.memory.limit);
+      w->writeEntry("current mm usage", request.memory.currentMmUsage);
+      w->endObject("memory");
+
+      // Only in the event that we are currently in the process of an io, will
+      // we output the iostatus, and ioInProcessDuationMicros
+      if (request.io.has_value()) {
+        ServerStatusRequestIOReport io = request.io.value();
+        w->writeEntry("iostatus", io.status);
+        w->writeEntry("ioduration", io.duration);
       }
     }
     w->endObject("thread");
@@ -417,43 +529,11 @@ std::string ServerStats::ReportStatus(Writer::Format format) {
   return out.str();
 }
 
-void ServerStats::StartNetworkProfile() {
-  s_profile_network = true;
-
-  // It is necessary to clear leftovers, as EndNetworkProfile() can race with
-  // threads writing their status.
-  Lock lock(s_lock, false);
-  for (unsigned int i = 0; i < s_loggers.size(); i++) {
-    auto ss = s_loggers[i];
-    Lock loggerLock(ss->m_lock, false);
-    ss->m_ioProfiles.clear();
-  }
-}
 
 const StaticString
   s_ct("ct"),
   s_wt("wt");
 
-Array ServerStats::EndNetworkProfile() {
-  s_profile_network = false;
-  Lock lock(s_lock, false);
-
-  Array ret = Array::CreateDict();
-  for (unsigned int i = 0; i < s_loggers.size(); i++) {
-    auto ss = s_loggers[i];
-    Lock loggerLock(ss->m_lock, false);
-
-    IOStatusMap& status = ss->m_ioProfiles;
-    for (auto const& iter : status) {
-      ret.set(String(iter.first),
-              make_dict_array(
-                s_ct, iter.second.count,
-                s_wt, iter.second.wall_time));
-    }
-    status.clear();
-  }
-  return ret;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -464,11 +544,11 @@ ServerStats::ThreadStatus::ThreadStatus() {
 }
 
 ServerStats::ServerStats() {
-  assertx(RuntimeOption::StatsMaxSlot >= 2);
-  if (RuntimeOption::StatsMaxSlot < 2) {
-    RuntimeOption::StatsMaxSlot = 2;
+  assertx(Cfg::Stats::MaxSlot >= 2);
+  if (Cfg::Stats::MaxSlot < 2) {
+    Cfg::Stats::MaxSlot = 2;
   }
-  m_slots.resize(RuntimeOption::StatsMaxSlot);
+  m_slots.resize(Cfg::Stats::MaxSlot);
   Lock lock(s_lock, false);
   s_loggers.push_back(this);
 }
@@ -516,7 +596,7 @@ void ServerStats::logPage(const std::string& /*url*/, int /*code*/) {
   gettimeofday(&m_threadStatus.m_done, 0);
   Lock lock(m_lock, false);
   auto const now = curr();
-  auto const slot = now % RuntimeOption::StatsMaxSlot;
+  auto const slot = now % Cfg::Stats::MaxSlot;
   auto& ts = m_slots[slot];
   if (ts.m_time != now) {
     ts.clear();
@@ -551,9 +631,15 @@ void ServerStats::startRequest(const char* url, const char* clientIP,
   m_threadStatus.m_ioStatuses.clear();
 
   safe_copy(m_threadStatus.m_url, url, sizeof(m_threadStatus.m_url));
+  safe_copy(m_threadStatus.m_endpoint, "", sizeof(m_threadStatus.m_endpoint));
   safe_copy(m_threadStatus.m_clientIP, clientIP,
             sizeof(m_threadStatus.m_clientIP));
   safe_copy(m_threadStatus.m_vhost, vhost, sizeof(m_threadStatus.m_vhost));
+}
+
+void ServerStats::setEndpoint(const char* endpoint) {
+  safe_copy(m_threadStatus.m_endpoint, endpoint,
+            sizeof(m_threadStatus.m_endpoint));
 }
 
 void ServerStats::setThreadIOStatus(const char* name, const char* addr,
@@ -581,7 +667,7 @@ void ServerStats::setThreadIOStatus(const char* name, const char* addr,
   if (!starting || usWallTime >= 0) {
     m_threadStatus.m_ioInProcess = false;
 
-    if (RuntimeOption::EnableNetworkIOStatus || s_profile_network) {
+    if (Cfg::Stats::NetworkIO) {
       int64_t wt = usWallTime;
       if (wt < 0) {
         timespec now;
@@ -592,7 +678,7 @@ void ServerStats::setThreadIOStatus(const char* name, const char* addr,
       const char* ioName = m_threadStatus.m_ioName;
       const char* ioAddr = m_threadStatus.m_ioAddr;
 
-      if (RuntimeOption::EnableNetworkIOStatus) {
+      if (Cfg::Stats::NetworkIO) {
         std::string key = ioName;
         if (*ioAddr) {
           key += ' '; key += ioAddr;
@@ -602,25 +688,6 @@ void ServerStats::setThreadIOStatus(const char* name, const char* addr,
         io.wall_time += wt;
       }
 
-      if (s_profile_network) {
-        const char* key0 = "main()";
-        const char* key1 = m_threadStatus.m_url;
-        std::string key2 = m_threadStatus.m_url; key2 += "==>"; key2 += ioName;
-        const char* key3 = ioName;
-        std::string key4 = ioName;
-        if (*ioAddr) {
-          key4 += "==>"; key4 += ioAddr;
-        }
-
-        Lock lock(m_lock, false);
-        { IOStatus& io = m_ioProfiles[key0]; ++io.count; io.wall_time += wt;}
-        { IOStatus& io = m_ioProfiles[key1]; ++io.count; io.wall_time += wt;}
-        { IOStatus& io = m_ioProfiles[key2]; ++io.count; io.wall_time += wt;}
-        { IOStatus& io = m_ioProfiles[key3]; ++io.count; io.wall_time += wt;}
-        if (*ioAddr) {
-          IOStatus& io = m_ioProfiles[key4]; ++io.count; io.wall_time += wt;
-        }
-      }
     }
   }
 }
@@ -642,7 +709,7 @@ Array ServerStats::getThreadIOStatuses() {
 ServerStatsHelper::ServerStatsHelper(const char* section,
                                      uint32_t track /* = false */)
   : m_section(section), m_instStart(0), m_track(track) {
-  if (RuntimeOption::EnableWebStats && RuntimeOption::EnableStats) {
+  if (Cfg::Stats::Web && Cfg::Stats::Enable) {
     Timer::GetMonotonicTime(m_wallStart);
 #ifdef CLOCK_THREAD_CPUTIME_ID
     gettime(CLOCK_THREAD_CPUTIME_ID, &m_cpuStart);
@@ -654,7 +721,7 @@ ServerStatsHelper::ServerStatsHelper(const char* section,
 }
 
 ServerStatsHelper::~ServerStatsHelper() {
-  if (RuntimeOption::EnableWebStats && RuntimeOption::EnableStats) {
+  if (Cfg::Stats::Web && Cfg::Stats::Enable) {
     timespec wallEnd;
     Timer::GetMonotonicTime(wallEnd);
 #ifdef CLOCK_THREAD_CPUTIME_ID
@@ -690,6 +757,7 @@ void ServerStatsHelper::logTime(const std::string& prefix,
 
 void ServerStatsHelper::logTime(const std::string& prefix,
                                 const int64_t& start, const int64_t& end) {
+  assert(start >= 0 && end >= 0 && end >= start);
   ServerStats::Log(prefix + m_section, end - start);
 }
 
@@ -700,7 +768,7 @@ IOStatusHelper::IOStatusHelper(const char* name,
                                int port /* = 0 */)
   : m_exeProfiler(RequestInfo::NetworkIO) {
   assertx(name && *name);
-  if (RuntimeOption::EnableWebStats || ServerStats::s_profile_network) {
+  if (Cfg::Stats::Web) {
     std::string msg;
     if (address) {
       msg = address;
@@ -714,7 +782,7 @@ IOStatusHelper::IOStatusHelper(const char* name,
 }
 
 IOStatusHelper::~IOStatusHelper() {
-  if (RuntimeOption::EnableWebStats || ServerStats::s_profile_network) {
+  if (Cfg::Stats::Web) {
     ServerStats::SetThreadIOStatus(nullptr, nullptr);
   }
 }
@@ -746,4 +814,16 @@ void server_stats_log_mutex(const std::string& stack, int64_t elapsed_us) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-};
+
+namespace {
+ServiceData::ExpensiveCounterCallback s_counters(
+  [](std::map<std::string, int64_t>& counters) {
+    const auto stats =
+      ServerStats::Report(Cfg::Stats::TrackedKeys, "admin.server_stats");
+    counters.insert(begin(stats), end(stats));
+  }
+);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+}

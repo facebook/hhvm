@@ -5,31 +5,40 @@ Errors:
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-13], "\\foo");
       fd_fun =
       { f_span = [2:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None;
+        f_readonly_ret = None; f_tparams = [];
         f_ret =
-        ((Pure<(function(int): void)>),
+        ((~Pure<(function(int): ~void)>),
          (Some ([4:18-47],
                 (Happly (([4:18-22], "\\Pure"),
                    [([4:23-46],
-                     (Hfun
-                        { hf_is_readonly = None; hf_param_tys = [([4:34-37], (Hprim Tint))]; 
-                          hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
-                          hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([4:41-45], (Hprim Tvoid)); 
-                          hf_is_readonly_return = None }))
+                     (Happly (([4:23-46], "\\HH\\supportdyn"),
+                        [([4:23-46],
+                          (Hfun
+                             { hf_is_readonly = None; hf_tparams = []; 
+                               hf_param_tys = [([4:34-37], (Hprim Tint))];
+                               hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None; hfparam_named = None })];
+                               hf_variadic_ty = None; hf_ctxs = None; 
+                               hf_return_ty = ([4:41-45], (Hlike ([4:41-45], (Hprim Tvoid)))); 
+                               hf_is_readonly_return = None }))
+                          ]
+                        )))
                      ]
                    )))));
-        f_name = ([4:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([5:3-25],
-            (Throw ((Exception), [5:9-24], (New (((Exception), [5:13-22], (CI ([5:13-22], "\\Exception"))), [], [], None, ((function(string $message=_, int $code=_, ?Exception $previous=_): void)))))))
+            (Throw
+               ((exact Exception), [5:9-24],
+                (New (((exact Exception), [5:13-22], (CI ([5:13-22], "\\Exception"))), 
+                   [], [], None, ((function(optional string $message, optional int $code, optional ?Exception $previous)[]: void)))))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([2:3-7], "__Rx"); ua_params = [] }]; 
-        f_external = false; f_doc_comment = None };
-      fd_internal = false })
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-13], "__SupportDynamicType"); ua_params = [] }; { ua_name = ([2:3-7], "__Rx"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None })

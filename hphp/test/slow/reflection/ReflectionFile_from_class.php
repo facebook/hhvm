@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class ExampleClass {}
 <<__EntryPoint>> function main(): void {

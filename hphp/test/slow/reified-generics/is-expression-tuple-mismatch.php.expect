@@ -1,0 +1,12 @@
+Testing tuple on tuple (should work):
+bool(true)
+bool(false)
+
+Testing non-tuple types (should work):
+bool(true)
+bool(true)
+
+Testing tuple on non-tuple (should return false, not segfault):
+bool(false)
+
+All tests passed!

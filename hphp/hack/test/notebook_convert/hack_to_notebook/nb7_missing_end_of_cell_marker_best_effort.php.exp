@@ -1,0 +1,42 @@
+{
+  "cells":[
+    {
+      "cell_type":"code",
+      "execution_count":null,
+      "metadata":{"collapsed":true,"output":{"id":1247934846418027,"loadingStatus":"loaded"}},
+      "outputs":[],
+      "source":[
+        "$m = new MyClass();\n",
+        "echo \"hi1\";\n",
+        "class MyClass {\n",
+        "  public function hello(): void {\n",
+        "    echo \"hello\";\n",
+        "  }\n",
+        "}\n",
+        "async function notebook_main(): Awaitable<void> {"
+      ]
+    },
+    {
+      "cell_type":"markdown",
+      "execution_count":null,
+      "metadata":{},
+      "outputs":[],
+      "source":["/*@non_hack:\n","# Check it out\n","I am a *markdown* **cell**\n","*/"]
+    },
+    {
+      "cell_type":"code",
+      "execution_count":null,
+      "metadata":{},
+      "outputs":[],
+      "source":["echo \"hi2\";\n","$m->hello();"]
+    }
+  ],
+  "metadata":{
+    "kernelspec":{"display_name":"hack","language":"hack","name":"bento_kernel_hack"},
+    "orig_nbformat":4
+  },
+  "nbformat":4
+}
+Warning: found bad metadata when converting Hack to a notebook: got start-of-cell metadata before the previous cell ended.
+Warning: found bad metadata when converting Hack to a notebook: got start-of-cell metadata before the previous cell ended.
+Warning: found bad metadata when converting Hack to a notebook: got start-of-cell metadata before the previous cell ended.

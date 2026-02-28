@@ -4,5 +4,11 @@ int(-3)
 int(-2)
 int(122)
 int(-1257)
+int(9223372036854775807)
+int(9223372036854775807)
+int(-1)
+int(9223372036854775807)
+int(-9223372036854773761)
+int(9223372036854775807)
 
 Fatal error: Unsupported operand type for ~ in %s on line 6

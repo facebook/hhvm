@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class C {}
 trait Tr {}

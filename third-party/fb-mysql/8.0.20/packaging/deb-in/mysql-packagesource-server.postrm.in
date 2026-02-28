@@ -1,0 +1,176 @@
+#!/bin/bash
+
+# Copyright (c) 2015, 2019, Oracle and/or its affiliates. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2.0,
+# as published by the Free Software Foundation.
+#
+# This program is also distributed with certain software (including
+# but not limited to OpenSSL) that is licensed under separate terms,
+# as designated in a particular file or component or in included license
+# documentation.  The authors of MySQL hereby grant you an additional
+# permission to link the program and your derivative works with the
+# separately licensed software that they have included with MySQL.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License, version 2.0, for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+
+if [ "$1" = purge ] && [ -e /usr/share/debconf/confmodule ];
+then
+. /usr/share/debconf/confmodule
+fi
+
+place_upstart_job_back () {
+	if [ -e "/var/lib/mysql/.mysql.conf.backup" ];
+	then
+		mv /var/lib/mysql/.mysql.conf.backup /etc/init/mysql.conf
+	fi
+}
+
+get_pcount () {
+	PSCOUNT=$(ps -ef | grep "/usr/sbin/mysqld" | wc -l)
+	echo "${PSCOUNT}"
+}
+
+server_stop () {
+	PSCOUNT=$(get_pcount)
+	COUNT=0
+	while :; do
+		COUNT=$(( COUNT+1 ))
+		echo -n .
+		if [ "${PSCOUNT}" -eq 1 ];
+		then
+			echo
+			break
+		fi
+		if [ "${COUNT}" -gt 15 ];
+		then
+			echo
+			return 1
+		fi
+		PSCOUNT=$(get_pcount)
+		sleep 1
+	done
+	return 0
+}
+
+case "$1" in
+	remove)
+
+	set -e
+
+	place_upstart_job_back
+	update-alternatives --remove my.cnf "/etc/mysql/mysql.cnf"
+
+	set +e
+
+	;;
+
+	purge)
+
+	set -e
+
+	place_upstart_job_back
+
+	MYSQLDATA=/var/lib/mysql
+	MYSQLFILES=/var/lib/mysql-files
+	MYSQLKEYRING=/var/lib/mysql-keyring
+	MYSQLLOG=/var/log/mysql
+
+	server_stop
+
+	db_input high mysql-@DEB_PRODUCTNAME@-server/remove-data-dir || true
+	db_go
+	db_get mysql-@DEB_PRODUCTNAME@-server/remove-data-dir && RMDATADIR=${RET}
+	if [ "${RMDATADIR}" = "true" ];
+	then
+
+		if [ -d ${MYSQLLOG} ] || [ -L ${MYSQLLOG} ];
+		then
+			rm -rf ${MYSQLLOG}
+		fi
+
+		if [ -d ${MYSQLDATA} ] || [ -L ${MYSQLDATA} ];
+		then
+			rm -rf ${MYSQLDATA}
+		fi
+
+		if [ -d ${MYSQLFILES} ] || [ -L ${MYSQLFILES} ];
+		then
+			rm -rf ${MYSQLFILES}
+		fi
+
+		if [ -d ${MYSQLKEYRING} ] || [ -L ${MYSQLKEYRING} ];
+		then
+			rm -rf ${MYSQLKEYRING}
+		fi
+
+		OVERRIDEFILE="/etc/mysql/mysql.conf.d/default-auth-override.cnf"
+		if [ -e ${OVERRIDEFILE} ];
+		then
+			rm ${OVERRIDEFILE}
+		fi
+
+		if getent passwd mysql >/dev/null;
+		then
+			userdel mysql
+		fi
+	fi
+
+	set +e
+	;;
+
+	abort-install)
+
+	set -e
+
+	place_upstart_job_back
+
+	if [ -x "/etc/init.d/mysql" ];
+	then
+		invoke-rc.d mysql start || exit $?
+	else
+
+		if [ -d ${MYSQLLOG} ] || [ -L ${MYSQLLOG} ];
+		then
+			rm -rf ${MYSQLLOG}
+		fi
+
+		if [ -d ${MYSQLDATA} ] || [ -L ${MYSQLDATA} ];
+		then
+			rm -rf ${MYSQLDATA}
+		fi
+
+		if [ -d ${MYSQLFILES} ] || [ -L ${MYSQLFILES} ];
+		then
+			rm -rf ${MYSQLFILES}
+		fi
+
+		if getent passwd mysql >/dev/null;
+		then
+			userdel mysql
+		fi
+	fi
+
+	set +e
+	;;
+
+	upgrade|abort-upgrade)
+
+	;;
+
+	*)
+	exit 1
+	;;
+esac
+
+#DEBHELPER#
+
+exit 0

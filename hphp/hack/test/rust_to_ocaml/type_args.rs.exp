@@ -1,0 +1,5 @@
+type maybe_a = a option
+
+type my_result = (b, c) result
+
+type bar = (d, e, f) Foo.bar

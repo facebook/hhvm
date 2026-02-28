@@ -7,13 +7,13 @@
 */
 
 function trace($text, $pdc)
-{
+:mixed{
     echo "$text: ";
     var_dump($pdc);
 }
 
 function ComputeResult()
-{
+:mixed{
     echo "Inside ComputeResult\n";
     trace("__FUNCTION__", __FUNCTION__);
     trace("__METHOD__", __METHOD__);
@@ -36,7 +36,7 @@ class Date
     }
 
     public function setDay($day)
-    {
+:mixed    {
         echo "Inside " . __METHOD__ . "\n";
         trace("__FUNCTION__", __FUNCTION__);
         trace("__LINE__", __LINE__);
@@ -48,13 +48,13 @@ class Date
 // public vs. private doesn't matter
 
     private function priv1()
-    {
+:mixed    {
         echo "Inside " . __METHOD__ . "\n";
         trace("__FUNCTION__", __FUNCTION__);
     }
 
     static public function spf1()
-    {
+:mixed    {
         echo "Inside " . __METHOD__ . "\n";
         trace("__FUNCTION__", __FUNCTION__);
     }
@@ -64,7 +64,7 @@ class Date
 class DatePlus extends Date
 {
     public function xx()
-    {
+:mixed    {
         trace("__CLASS__", __CLASS__);
         echo "Inside " . __METHOD__ . "\n";
         trace("__FUNCTION__", __FUNCTION__);

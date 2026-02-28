@@ -19,8 +19,8 @@ trait TestTrait {
   abstract public function __construct();
 }
 
-function main() {
-  $classes = varray[
+function main() :mixed{
+  $classes = vec[
     'TestClassImplementingInterface', // false
     'TestInterface', // false
     'TestConcreteClass', // true
@@ -28,7 +28,7 @@ function main() {
     'TestTrait' // true
   ];
 
-  $out = darray[];
+  $out = dict[];
   foreach ($classes as $class) {
     $rc = (new ReflectionClass($class));
     $out[$class] = $rc->getMethod('__construct')->isConstructor();
@@ -40,6 +40,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_is_constructor() {
+function main_is_constructor() :mixed{
 main();
 }

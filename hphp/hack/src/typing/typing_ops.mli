@@ -12,8 +12,8 @@ val sub_type_i :
   Pos.t ->
   Typing_reason.ureason ->
   Typing_env_types.env ->
-  Typing_defs.internal_type ->
-  Typing_defs.internal_type ->
+  Typing_defs_constraints.internal_type ->
+  Typing_defs_constraints.internal_type ->
   Typing_error.Callback.t ->
   Typing_env_types.env * Typing_error.t option
 
@@ -24,6 +24,17 @@ val sub_type :
   Typing_defs.locl_ty ->
   Typing_defs.locl_ty ->
   Typing_error.Callback.t ->
+  Typing_env_types.env * Typing_error.t option
+
+(** Assert a type is a sub-type of another.
+    If assertion fails, add error prefix to sub-typing error. *)
+val sub_type_w_err_prefix :
+  ?is_coeffect:bool ->
+  Pos.t ->
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_defs.locl_ty ->
+  Typing_error.Primary.t ->
   Typing_env_types.env * Typing_error.t option
 
 val sub_type_decl :

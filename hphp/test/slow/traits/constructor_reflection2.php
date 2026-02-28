@@ -1,7 +1,7 @@
 <?hh
 
 trait B {
-  public function B() {
+  public function B() :mixed{
     var_dump('B');
   }
 }
@@ -9,8 +9,8 @@ class A {
   use B;
 }
 
-function main() {
-  foreach (varray['A', 'B'] as $class) {
+function main() :mixed{
+  foreach (vec['A', 'B'] as $class) {
     $rc = new ReflectionClass($class);
     foreach ($rc->getMethods() as $method) {
       var_dump($method->isConstructor());
@@ -24,6 +24,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_constructor_reflection2() {
+function main_constructor_reflection2() :mixed{
 main();
 }

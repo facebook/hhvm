@@ -8,17 +8,26 @@
 
 module Compute_tast : sig
   type t = {
-    tast: Tast.program;
+    tast: Tast.program Tast_with_dynamic.t;
     telemetry: Telemetry.t;
   }
 end
 
 module Compute_tast_and_errors : sig
   type t = {
-    tast: Tast.program;
-    errors: Errors.t;
+    tast: Tast.program Tast_with_dynamic.t;
+    diagnostics: Diagnostics.t;
     telemetry: Telemetry.t;
   }
+end
+
+module ErrorFilter : sig
+  type t = {
+    error_filter: Filter_diagnostics.Filter.t;
+    warnings_saved_state: Warnings_saved_state.t option;
+  }
+
+  val default : t
 end
 
 (** Computes TAST and error-list (other than "name already
@@ -29,6 +38,7 @@ is inappropriate for IDE scenarios. *)
 val compute_tast_and_errors_unquarantined :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
+  error_filter:ErrorFilter.t ->
   Compute_tast_and_errors.t
 
 (** Same as [compute_tast_and_errors_unquarantined], but skips computing the
@@ -45,6 +55,7 @@ appropriate for IDE scenarios. *)
 val compute_tast_and_errors_quarantined :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
+  error_filter:ErrorFilter.t ->
   Compute_tast_and_errors.t
 
 (** Same as [compute_tast_and_errors_quarantined], but skips computing the full

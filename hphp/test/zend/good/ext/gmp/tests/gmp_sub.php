@@ -4,7 +4,7 @@ try { var_dump(gmp_sub()); } catch (Exception $e) { echo "\n".'Warning: '.$e->ge
 try { var_dump(gmp_sub("")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(gmp_sub("", ""));
 try { var_dump(gmp_sub("", "", "")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-var_dump(gmp_sub(varray[], varray[]));
+var_dump(gmp_sub(vec[], vec[]));
 
 var_dump($g = gmp_sub(10000, 10001));
 var_dump(gmp_strval($g));

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Creates a timer that will send a SIGALRM signal to the process after the
@@ -33,7 +33,11 @@ function pcntl_alarm(int $seconds): int;
  *
  */
 <<__Native>>
-function pcntl_exec(string $path, varray $args = varray[], darray $envs = darray[]): void;
+function pcntl_exec(
+  string $path,
+  varray<string> $args = vec[],
+  darray<string, string> $envs = dict[],
+): void;
 
 /**
  * The pcntl_fork() function creates a child process that differs from the
@@ -105,7 +109,7 @@ function pcntl_setpriority(int $priority,
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function pcntl_signal(int $signo,
                       mixed $handler,
                       bool $restart_syscalls = true): bool;
@@ -128,9 +132,9 @@ function pcntl_signal(int $signo,
 <<__Native>>
 function pcntl_sigprocmask(
   int $how,
-  varray $set,
-  <<__OutOnly("varray")>>
-  inout mixed $oldset
+  varray<int> $set,
+  <<__OutOnly>>
+  inout vec<int> $oldset
 ): bool;
 
 /**
@@ -163,8 +167,8 @@ function pcntl_sigprocmask(
  */
 <<__Native>>
 function pcntl_wait(
-  <<__OutOnly("KindOfInt64")>>
-  inout mixed $status,
+  <<__OutOnly>>
+  inout int $status,
   int $options = 0
 ): int;
 
@@ -200,8 +204,8 @@ function pcntl_wait(
  */
 <<__Native>>
 function pcntl_waitpid(int $pid,
-                       <<__OutOnly("KindOfInt64")>>
-                       inout mixed $status,
+                       <<__OutOnly>>
+                       inout int $status,
                        int $options = 0): int;
 
 /**
@@ -293,5 +297,5 @@ function pcntl_wtermsig(int $status): int;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function pcntl_signal_dispatch(): bool;

@@ -2,7 +2,7 @@
 
 // gmp_abs
 <<__EntryPoint>>
-function main_most_in_one() {
+function main_most_in_one() :mixed{
 $abs1 = gmp_abs("274982683358");
 $abs2 = gmp_abs("-274982683358");
 echo gmp_strval($abs1) . "\n";

@@ -1,3 +1,0 @@
-=== IFC analysis results for late_static_binding.php
-File "late_static_binding.php", line 12, characters 5-23:
-Unable to analyze information flow for late static binding. This might be unsafe. (Typing[4385])

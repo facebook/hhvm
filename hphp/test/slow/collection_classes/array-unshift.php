@@ -1,10 +1,10 @@
 <?hh
-function main() {
-  $x1 = varray[];
+function main() :mixed{
+  $x1 = vec[];
   var_dump(array_unshift(inout $x1, 1));
   var_dump(array_unshift(inout $x1, 'b', 'c'));
   var_dump($x1);
-  $x2 = varray['d'];
+  $x2 = vec['d'];
   var_dump(array_unshift(inout $x2, 'e', 'f', 2, 'f'));
   var_dump($x2);
   $x3 = Vector {};
@@ -29,6 +29,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_array_unshift() {
+function main_array_unshift() :mixed{
 main();
 }

@@ -36,6 +36,10 @@ struct SrcPos {
 
   LineNumber line;
   ColNumber col;
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(line)(col);
+  }
 };
 
 struct SrcLoc {
@@ -59,6 +63,10 @@ struct SrcLoc {
 
   SrcPos start;
   SrcPos past;
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(start)(past);
+  }
 };
 
 std::string show(SrcLoc);
@@ -68,4 +76,3 @@ std::string show(SrcLoc);
 //////////////////////////////////////////////////////////////////////
 
 }
-

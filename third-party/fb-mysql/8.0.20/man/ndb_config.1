@@ -1,0 +1,1655 @@
+'\" t
+.\"     Title: \fBndb_config\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_CONFIG\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_config \- extract NDB Cluster configuration information
+.SH "SYNOPSIS"
+.HP \w'\fBndb_config\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBndb_config \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+This tool extracts current configuration information for data nodes, SQL nodes, and API nodes from one of a number of sources: an NDB Cluster management node, or its
+config\&.ini
+or
+my\&.cnf
+file\&. By default, the management node is the source for the configuration data; to override the default, execute ndb_config with the
+\fB\-\-config\-file\fR
+or
+\fB\-\-mycnf\fR
+option\&. It is also possible to use a data node as the source by specifying its node ID with
+\fB\-\-config_from_node=\fR\fB\fInode_id\fR\fR\&.
+.PP
+\fBndb_config\fR
+can also provide an offline dump of all configuration parameters which can be used, along with their default, maximum, and minimum values and other information\&. The dump can be produced in either text or XML format; for more information, see the discussion of the
+\fB\-\-configinfo\fR
+and
+\fB\-\-xml\fR
+options later in this section)\&.
+.PP
+You can filter the results by section (DB,
+SYSTEM, or
+CONNECTIONS) using one of the options
+\fB\-\-nodes\fR,
+\fB\-\-system\fR, or
+\fB\-\-connections\fR\&.
+.PP
+The following table includes options that are specific to
+\fBndb_config\fR\&. Additional descriptions follow the table\&. For options common to most NDB Cluster programs (including
+\fBndb_config\fR), see
+Options Common to NDB Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.255.\ \&Command\-line options for the ndb_config program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l
+l l l.
+T{
+.PP
+\fB \fR\fB--config-file=file_name\fR\fB \fR
+T}:T{
+Set the path to config.ini file
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--config-from-node=#\fR\fB \fR
+T}:T{
+Obtain configuration data from the node having this ID (must be a data
+              node)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--configinfo\fR\fB \fR
+T}:T{
+Dumps information about all NDB configuration parameters in text format
+              with default, maximum, and minimum values. Use with --xml
+              to obtain XML output
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--connections\fR\fB \fR
+T}:T{
+Print connections information ([tcp], [tcp default], [sci], [sci
+              default], [shm], or [shm default] sections of cluster
+              configuration file) only. Cannot be used with --system or
+              --nodes
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--diff-default\fR\fB \fR
+T}:T{
+Print only configuration parameters that have non-default values
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--fields=string\fR,
+.PP
+\fB \fR\fB-f\fR\fB \fR
+T}:T{
+Field separator
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--host=name\fR\fB \fR
+T}:T{
+Specify host
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--mycnf\fR\fB \fR
+T}:T{
+Read configuration data from my.cnf file
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--nodeid\fR\fB \fR
+T}:T{
+Get configuration of node with this ID
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--nodes\fR\fB \fR
+T}:T{
+Print node information ([ndbd] or [ndbd default] section of cluster
+              configuration file) only. Cannot be used with --system or
+              --connections
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB-c\fR\fB \fR
+T}:T{
+Short form for --ndb-connectstring
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--query=string\fR,
+.PP
+\fB \fR\fB-q\fR\fB \fR
+T}:T{
+One or more query options (attributes)
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--query-all\fR,
+.PP
+\fB \fR\fB-a\fR\fB \fR
+T}:T{
+Dumps all parameters and values to a single comma-delimited string
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB--rows=string\fR,
+.PP
+\fB \fR\fB-r\fR\fB \fR
+T}:T{
+Row separator
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--system\fR\fB \fR
+T}:T{
+Print SYSTEM section information only (see ndb_config --configinfo
+              output). Cannot be used with --nodes or --connections
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--type=name\fR\fB \fR
+T}:T{
+Specify node type
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+T{
+.PP
+\fB \fR\fB--configinfo --xml\fR\fB \fR
+T}:T{
+Use --xml with --configinfo to obtain a dump of all NDB configuration
+              parameters in XML format with default, maximum, and
+              minimum values
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-configinfo\fR
+.sp
+The
+\fB\-\-configinfo\fR
+option causes
+\fBndb_config\fR
+to dump a list of each NDB Cluster configuration parameter supported by the NDB Cluster distribution of which
+\fBndb_config\fR
+is a part, including the following information:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A brief description of each parameter\*(Aqs purpose, effects, and usage
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The section of the
+config\&.ini
+file where the parameter may be used
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The parameter\*(Aqs data type or unit of measurement
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Where applicable, the parameter\*(Aqs default, minimum, and maximum values
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+NDB Cluster release version and build information
+.RE
+.sp
+By default, this output is in text format\&. Part of this output is shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_config \-\-configinfo\fR
+****** SYSTEM ******
+Name (String)
+Name of system (NDB Cluster)
+MANDATORY
+PrimaryMGMNode (Non\-negative Integer)
+Node id of Primary ndb_mgmd(MGM) node
+Default: 0 (Min: 0, Max: 4294967039)
+ConfigGenerationNumber (Non\-negative Integer)
+Configuration generation number
+Default: 0 (Min: 0, Max: 4294967039)
+****** DB ******
+MaxNoOfSubscriptions (Non\-negative Integer)
+Max no of subscriptions (default 0 == MaxNoOfTables)
+Default: 0 (Min: 0, Max: 4294967039)
+MaxNoOfSubscribers (Non\-negative Integer)
+Max no of subscribers (default 0 == 2 * MaxNoOfTables)
+Default: 0 (Min: 0, Max: 4294967039)
+\&...
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Use this option together with the
+\fB\-\-xml\fR
+option to obtain output in XML format\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-config\-file=\fR\fB\fIpath\-to\-file\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--config-file=file_name
+T}
+T{
+\fBType\fR
+T}:T{
+File name
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Gives the path to the management server\*(Aqs configuration file (config\&.ini)\&. This may be a relative or absolute path\&. If the management node resides on a different host from the one on which
+\fBndb_config\fR
+is invoked, then an absolute path must be used\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-config_from_node=#\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--config-from-node=#
+T}
+T{
+\fBType\fR
+T}:T{
+Numeric
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+none
+T}
+T{
+\fBMinimum Value\fR
+T}:T{
+1
+T}
+T{
+\fBMaximum Value\fR
+T}:T{
+48
+T}
+.TE
+.sp 1
+Obtain the cluster\*(Aqs configuration data from the data node that has this ID\&.
+.sp
+If the node having this ID is not a data node,
+\fBndb_config\fR
+fails with an error\&. (To obtain configuration data from the management node instead, simply omit this option\&.)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-connections\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--connections
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Tells
+\fBndb_config\fR
+to print
+CONNECTIONS
+information only\(emthat is, information about parameters found in the
+[tcp],
+[tcp default],
+[shm], or
+[shm default]
+sections of the cluster configuration file (see
+Section\ \&22.3.3.10, \(lqNDB Cluster TCP/IP Connections\(rq, and
+Section\ \&22.3.3.12, \(lqNDB Cluster Shared-Memory Connections\(rq, for more information)\&.
+.sp
+This option is mutually exclusive with
+\fB\-\-nodes\fR
+and
+\fB\-\-system\fR; only one of these 3 options can be used\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-diff\-default\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--diff-default
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Print only configuration parameters that have non\-default values\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-fields=\fR\fB\fIdelimiter\fR\fR,
+\fB\-f\fR
+\fIdelimiter\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--fields=string
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Specifies a
+\fIdelimiter\fR
+string used to separate the fields in the result\&. The default is
+,
+(the comma character)\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+If the
+\fIdelimiter\fR
+contains spaces or escapes (such as
+\en
+for the linefeed character), then it must be quoted\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-host=\fR\fB\fIhostname\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--host=name
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Specifies the host name of the node for which configuration information is to be obtained\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+While the hostname
+localhost
+usually resolves to the IP address
+127\&.0\&.0\&.1, this may not necessarily be true for all operating platforms and configurations\&. This means that it is possible, when
+localhost
+is used in
+config\&.ini, for
+\fBndb_config \fR\fB\fB\-\-host=localhost\fR\fR
+to fail if
+\fBndb_config\fR
+is run on a different host where
+localhost
+resolves to a different address (for example, on some versions of SUSE Linux, this is
+127\&.0\&.0\&.2)\&. In general, for best results, you should use numeric IP addresses for all NDB Cluster configuration values relating to hosts, or verify that all NDB Cluster hosts handle
+localhost
+in the same fashion\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-mycnf\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--mycnf
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Read configuration data from the
+my\&.cnf
+file\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-ndb\-connectstring=\fR\fB\fIconnection_string\fR\fR,
+\fB\-c \fR\fB\fIconnection_string\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+.PP
+--ndb-connectstring=connectstring
+.PP
+--connect-string=connectstring
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+localhost:1186
+T}
+.TE
+.sp 1
+Specifies the connection string to use in connecting to the management server\&. The format for the connection string is the same as described in
+Section\ \&22.3.3.3, \(lqNDB Cluster Connection Strings\(rq, and defaults to
+localhost:1186\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-nodeid=\fR\fB\fInode_id\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--ndb-nodeid=#
+T}
+T{
+\fBType\fR
+T}:T{
+Numeric
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+0
+T}
+.TE
+.sp 1
+Specify the node ID of the node for which configuration information is to be obtained\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-nodes\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--nodes
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Tells
+\fBndb_config\fR
+to print information relating only to parameters defined in an
+[ndbd]
+or
+[ndbd default]
+section of the cluster configuration file (see
+Section\ \&22.3.3.6, \(lqDefining NDB Cluster Data Nodes\(rq)\&.
+.sp
+This option is mutually exclusive with
+\fB\-\-connections\fR
+and
+\fB\-\-system\fR; only one of these 3 options can be used\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-query=\fR\fB\fIquery\-options\fR\fR,
+\fB\-q\fR
+\fIquery\-options\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--query=string
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+This is a comma\-delimited list of
+\fIquery options\fR\(emthat is, a list of one or more node attributes to be returned\&. These include
+nodeid
+(node ID), type (node type\(emthat is,
+ndbd,
+mysqld, or
+ndb_mgmd), and any configuration parameters whose values are to be obtained\&.
+.sp
+For example,
+\fB\-\-query=nodeid,type,datamemory,datadir\fR
+returns the node ID, node type,
+DataMemory, and
+DataDir
+for each node\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+If a given parameter is not applicable to a certain type of node, than an empty string is returned for the corresponding value\&. See the examples later in this section for more information\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-query\-all\fR,
+\fB\-a\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--query-all
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Returns a comma\-delimited list of all query options (node attributes; note that this list is a single string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-rows=\fR\fB\fIseparator\fR\fR,
+\fB\-r\fR
+\fIseparator\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--rows=string
+T}
+T{
+\fBType\fR
+T}:T{
+String
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+T}
+.TE
+.sp 1
+Specifies a
+\fIseparator\fR
+string used to separate the rows in the result\&. The default is a space character\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+If the
+\fIseparator\fR
+contains spaces or escapes (such as
+\en
+for the linefeed character), then it must be quoted\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-system\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--system
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+FALSE
+T}
+.TE
+.sp 1
+Tells
+\fBndb_config\fR
+to print
+SYSTEM
+information only\&. This consists of system variables that cannot be changed at run time; thus, there is no corresponding section of the cluster configuration file for them\&. They can be seen (prefixed with
+****** SYSTEM ******) in the output of
+\fBndb_config\fR
+\fB\-\-configinfo\fR\&.
+.sp
+This option is mutually exclusive with
+\fB\-\-nodes\fR
+and
+\fB\-\-connections\fR; only one of these 3 options can be used\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-type=\fR\fB\fInode_type\fR\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--type=name
+T}
+T{
+\fBType\fR
+T}:T{
+Enumeration
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+[none]
+T}
+T{
+\fBValid Values\fR
+T}:T{
+.PP
+ndbd
+.PP
+mysqld
+.PP
+ndb_mgmd
+T}
+.TE
+.sp 1
+Filters results so that only configuration values applying to nodes of the specified
+\fInode_type\fR
+(ndbd,
+mysqld, or
+ndb_mgmd) are returned\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-usage\fR,
+\fB\-\-help\fR, or
+\fB\-?\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+.PP
+--help
+.PP
+--usage
+T}
+.TE
+.sp 1
+Causes
+\fBndb_config\fR
+to print a list of available options, and then exit\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-version\fR,
+\fB\-V\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--version
+T}
+.TE
+.sp 1
+Causes
+\fBndb_config\fR
+to print a version information string, and then exit\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fB\-\-configinfo\fR
+\fB\-\-xml\fR
+.TS
+allbox tab(:);
+lB lB.
+T{
+Property
+T}:T{
+Value
+T}
+.T&
+l l
+l l
+l l.
+T{
+\fBCommand-Line Format\fR
+T}:T{
+--configinfo --xml
+T}
+T{
+\fBType\fR
+T}:T{
+Boolean
+T}
+T{
+\fBDefault Value\fR
+T}:T{
+false
+T}
+.TE
+.sp 1
+Cause
+\fBndb_config\fR
+\fB\-\-configinfo\fR
+to provide output as XML by adding this option\&. A portion of such output is shown in this example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fBndb_config \-\-configinfo \-\-xml\fR
+<configvariables protocolversion="1" ndbversionstring="5\&.7\&.29\-ndb\-7\&.5\&.17"
+                    ndbversion="460032" ndbversionmajor="7" ndbversionminor="5"
+                    ndbversionbuild="0">
+  <section name="SYSTEM">
+    <param name="Name" comment="Name of system (NDB Cluster)" type="string"
+              mandatory="true"/>
+    <param name="PrimaryMGMNode" comment="Node id of Primary ndb_mgmd(MGM) node"
+              type="unsigned" default="0" min="0" max="4294967039"/>
+    <param name="ConfigGenerationNumber" comment="Configuration generation number"
+              type="unsigned" default="0" min="0" max="4294967039"/>
+  </section>
+  <section name="MYSQLD" primarykeys="NodeId">
+    <param name="wan" comment="Use WAN TCP setting as default" type="bool"
+              default="false"/>
+    <param name="HostName" comment="Name of computer for this node"
+              type="string" default=""/>
+    <param name="Id" comment="NodeId" type="unsigned" mandatory="true"
+              min="1" max="255" deprecated="true"/>
+    <param name="NodeId" comment="Number identifying application node (mysqld(API))"
+              type="unsigned" mandatory="true" min="1" max="255"/>
+    <param name="ExecuteOnComputer" comment="HostName" type="string"
+              deprecated="true"/>
+    \&...
+  </section>
+  \&...
+</configvariables>
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+Normally, the XML output produced by
+\fBndb_config\fR
+\fB\-\-configinfo\fR
+\fB\-\-xml\fR
+is formatted using one line per element; we have added extra whitespace in the previous example, as well as the next one, for reasons of legibility\&. This should not make any difference to applications using this output, since most XML processors either ignore nonessential whitespace as a matter of course, or can be instructed to do so\&.
+.sp .5v
+.RE
+The XML output also indicates when changing a given parameter requires that data nodes be restarted using the
+\fB\-\-initial\fR
+option\&. This is shown by the presence of an
+initial="true"
+attribute in the corresponding
+<param>
+element\&. In addition, the restart type (system
+or
+node) is also shown; if a given parameter requires a system restart, this is indicated by the presence of a
+restart="system"
+attribute in the corresponding
+<param>
+element\&. For example, changing the value set for the
+Diskless
+parameter requires a system initial restart, as shown here (with the
+restart
+and
+initial
+attributes highlighted for visibility):
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+<param name="Diskless" comment="Run wo/ disk" type="bool" default="false"
+          \fIrestart="system" initial="true"\fR/>
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Currently, no
+initial
+attribute is included in the XML output for
+<param>
+elements corresponding to parameters which do not require initial restarts; in other words,
+initial="false"
+is the default, and the value
+false
+should be assumed if the attribute is not present\&. Similarly, the default restart type is
+node
+(that is, an online or
+\(lqrolling\(rq
+restart of the cluster), but the
+restart
+attribute is included only if the restart type is
+system
+(meaning that all cluster nodes must be shut down at the same time, then restarted)\&.
+.sp
+Deprecated parameters are indicated in the XML output by the
+deprecated
+attribute, as shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+<param name="NoOfDiskPagesToDiskAfterRestartACC" comment="DiskCheckpointSpeed"
+       type="unsigned" default="20" min="1" max="4294967039" \fIdeprecated="true"\fR/>
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+In such cases, the
+comment
+refers to one or more parameters that supersede the deprecated parameter\&. Similarly to
+initial, the
+deprecated
+attribute is indicated only when the parameter is deprecated, with
+deprecated="true", and does not appear at all for parameters which are not deprecated\&. (Bug #21127135)
+.sp
+Beginning with NDB 7\&.5\&.0, parameters that are required are indicated with
+mandatory="true", as shown here:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+<param name="NodeId"
+          comment="Number identifying application node (mysqld(API))"
+          type="unsigned" \fImandatory="true"\fR min="1" max="255"/>
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+In much the same way that the
+initial
+or
+deprecated
+attribute is displayed only for a parameter that requires an intial restart or that is deprecated, the
+mandatory
+attribute is included only if the given parameter is actually required\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBImportant\fR
+.ps -1
+.br
+The
+\fB\-\-xml\fR
+option can be used only with the
+\fB\-\-configinfo\fR
+option\&. Using
+\fB\-\-xml\fR
+without
+\fB\-\-configinfo\fR
+fails with an error\&.
+.sp .5v
+.RE
+Unlike the options used with this program to obtain current configuration data,
+\fB\-\-configinfo\fR
+and
+\fB\-\-xml\fR
+use information obtained from the NDB Cluster sources when
+\fBndb_config\fR
+was compiled\&. For this reason, no connection to a running NDB Cluster or access to a
+config\&.ini
+or
+my\&.cnf
+file is required for these two options\&.
+.RE
+.PP
+Combining other
+\fBndb_config\fR
+options (such as
+\fB\-\-query\fR
+or
+\fB\-\-type\fR) with
+\fB\-\-configinfo\fR
+(with or without the
+\fB\-\-xml\fR
+option is not supported\&. Currently, if you attempt to do so, the usual result is that all other options besides
+\fB\-\-configinfo\fR
+or
+\fB\-\-xml\fR
+are simply ignored\&.
+\fIHowever, this behavior is not guaranteed and is subject to change at any time\fR\&. In addition, since
+\fBndb_config\fR, when used with the
+\fB\-\-configinfo\fR
+option, does not access the NDB Cluster or read any files, trying to specify additional options such as
+\fB\-\-ndb\-connectstring\fR
+or
+\fB\-\-config\-file\fR
+with
+\fB\-\-configinfo\fR
+serves no purpose\&.
+Examples
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 1.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  1." 4.2
+.\}
+To obtain the node ID and type of each node in the cluster:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fB\&./ndb_config \-\-query=nodeid,type \-\-fields=\*(Aq:\*(Aq \-\-rows=\*(Aq\en\*(Aq\fR
+1:ndbd
+2:ndbd
+3:ndbd
+4:ndbd
+5:ndb_mgmd
+6:mysqld
+7:mysqld
+8:mysqld
+9:mysqld
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+In this example, we used the
+\fB\-\-fields\fR
+options to separate the ID and type of each node with a colon character (:), and the
+\fB\-\-rows\fR
+options to place the values for each node on a new line in the output\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 2.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  2." 4.2
+.\}
+To produce a connection string that can be used by data, SQL, and API nodes to connect to the management server:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fB\&./ndb_config \-\-config\-file=usr/local/mysql/cluster\-data/config\&.ini \e
+\-\-query=hostname,portnumber \-\-fields=: \-\-rows=, \-\-type=ndb_mgmd\fR
+198\&.51\&.100\&.179:1186
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 3.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  3." 4.2
+.\}
+This invocation of
+\fBndb_config\fR
+checks only data nodes (using the
+\fB\-\-type\fR
+option), and shows the values for each node\*(Aqs ID and host name, as well as the values set for its
+DataMemory
+and
+DataDir
+parameters:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fB\&./ndb_config \-\-type=ndbd \-\-query=nodeid,host,datamemory,datadir \-f \*(Aq : \*(Aq \-r \*(Aq\en\*(Aq\fR
+1 : 198\&.51\&.100\&.193 : 83886080 : /usr/local/mysql/cluster\-data
+2 : 198\&.51\&.100\&.112 : 83886080 : /usr/local/mysql/cluster\-data
+3 : 198\&.51\&.100\&.176 : 83886080 : /usr/local/mysql/cluster\-data
+4 : 198\&.51\&.100\&.119 : 83886080 : /usr/local/mysql/cluster\-data
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+In this example, we used the short options
+\fB\-f\fR
+and
+\fB\-r\fR
+for setting the field delimiter and row separator, respectively, as well as the short option
+\fB\-q\fR
+to pass a list of parameters to be obtained\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 4.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  4." 4.2
+.\}
+To exclude results from any host except one in particular, use the
+\fB\-\-host\fR
+option:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> \fB\&./ndb_config \-\-host=198\&.51\&.100\&.176 \-f : \-r \*(Aq\en\*(Aq \-q id,type\fR
+3:ndbd
+5:ndb_mgmd
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+In this example, we also used the short form
+\fB\-q\fR
+to determine the attributes to be queried\&.
+.sp
+Similarly, you can limit results to a node with a specific ID using the
+\fB\-\-nodeid\fR
+option\&.
+.RE
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

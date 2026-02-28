@@ -1,0 +1,258 @@
+#!/bin/sh
+#
+# mysqld	This shell script takes care of starting and stopping
+#		the MySQL subsystem (mysqld).
+#
+# chkconfig: 345 64 36
+# description:	MySQL database server.
+# processname: mysqld
+# config: /etc/my.cnf
+# pidfile: /var/run/mysqld/mysqld.pid
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+
+exec="/usr/bin/mysqld_safe"
+prog="mysqld"
+
+# Set timeouts here so they can be overridden from /etc/sysconfig/mysqld
+STARTTIMEOUT=120
+STOPTIMEOUT=600
+
+# Set in /etc/sysconfig/mysqld, will be passed to mysqld_safe
+MYSQLD_OPTS=
+
+[ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
+
+lockfile=/var/lock/subsys/$prog
+
+# Support for extra options passed to mysqld
+command=$1 && shift
+extra_opts="$@"
+
+# Extract value of a MySQL option from config files
+# Usage: get_mysql_option OPTION DEFAULT SECTION1 SECTION2 SECTIONN
+# Result is returned in $result
+# We use my_print_defaults which prints all options from multiple files,
+# with the more specific ones later; hence take the last match.
+get_mysql_option () {
+    option=$1
+    default=$2
+    shift 2
+    result=$(/usr/bin/my_print_defaults "$@" | sed -n "s/^--${option}=//p" | tail -n 1)
+    if [ -z "$result" ]; then
+	# not found, use default
+	result="${default}"
+    fi
+}
+
+get_mysql_option datadir "/var/lib/mysql" mysqld
+datadir="$result"
+get_mysql_option socket "$datadir/mysql.sock" mysqld
+socketfile="$result"
+get_mysql_option log-error "/var/log/mysqld.log" mysqld mysqld_safe
+errlogfile="$result"
+get_mysql_option pid-file "/var/run/mysqld/mysqld.pid" mysqld mysqld_safe
+mypidfile="$result"
+
+case $socketfile in
+    /*) adminsocket="$socketfile" ;;
+     *) adminsocket="$datadir/$socketfile" ;;
+esac
+
+install_validate_password_sql_file () {
+    local initfile
+    initfile="$(mktemp /var/lib/mysql-files/install-validate-password-plugin.XXXXXX.sql)"
+    chmod a+r "$initfile"
+    echo "SET @@SESSION.SQL_LOG_BIN=0;" > "$initfile"
+    echo "INSERT INTO mysql.component (component_id, component_group_id, component_urn) VALUES (1, 1, 'file://component_validate_password');" >> "$initfile"
+    echo "$initfile"
+}
+
+fix_mysql_upgrade_info () {
+    if [ -d  "$datadir" ]  && [ -O "$datadir/mysql_upgrade_info" ]; then
+       chown --reference="$datadir" "$datadir/mysql_upgrade_info"
+       if [ -x /usr/bin/chcon ]; then
+	   /usr/bin/chcon --reference="$datadir" "$datadir/mysql_upgrade_info"
+       fi
+    fi
+}
+
+start(){
+    [ -x $exec ] || exit 5
+    # check to see if it's already running
+    RESPONSE=$(/usr/bin/mysqladmin --no-defaults --enable-cleartext-plugin --socket="$adminsocket" --user=UNKNOWN_MYSQL_USER ping 2>&1)
+    if [ $? = 0 ]; then
+	# already running, do nothing
+	action $"Starting $prog: " /bin/true
+	ret=0
+    elif echo "$RESPONSE" | grep -q "Access denied for user"
+    then
+	# already running, do nothing
+	action $"Starting $prog: " /bin/true
+	ret=0
+    else
+	# prepare for start
+	if [ ! -e "$errlogfile" -a ! -h "$errlogfile" -a "x$(dirname "$errlogfile")" = "x/var/log" ]; then
+	    install /dev/null -m0640 -omysql -gmysql "$errlogfile"
+	fi
+	[ -x /sbin/restorecon ] && /sbin/restorecon "$errlogfile"
+
+	# mysql_upgrade_info file should be owned by mysql user since MySQL 8.0.16
+	fix_mysql_upgrade_info
+
+	if [ ! -d "$datadir/mysql" ] ; then
+	    # First, make sure $datadir is there with correct permissions
+	    if [ ! -d "$datadir" -a ! -h "$datadir" -a "x$(dirname "$datadir")" = "x/var/lib" ]; then
+		install -d -m0751 -omysql -gmysql "$datadir" || exit 1
+	    fi
+	    if [ ! -h "$datadir" -a "x$(dirname "$datadir")" = "x/var/lib" ]; then
+		chown mysql:mysql "$datadir"
+		chmod 0751 "$datadir"
+	    fi
+	    if [ -x /sbin/restorecon ]; then
+		/sbin/restorecon "$datadir"
+		for dir in /var/lib/mysql-files /var/lib/mysql-keyring ; do
+		    if [ -x /usr/sbin/semanage -a -d /var/lib/mysql -a -d $dir ] ; then
+			/usr/sbin/semanage fcontext -a -e /var/lib/mysql $dir >/dev/null 2>&1
+			/sbin/restorecon -r $dir
+		    fi
+		done
+	    fi
+	    # Now create the database
+	    initfile="$(install_validate_password_sql_file)"
+	    action $"Initializing MySQL database: " /usr/sbin/mysqld --initialize --datadir="$datadir" --user=mysql --init-file="$initfile"
+	    ret=$?
+	    rm -f "$initfile"
+	    [ $ret -ne 0 ] && return $ret
+	    # Generate certs if needed
+	    if [ -x /usr/bin/mysql_ssl_rsa_setup -a ! -e "${datadir}/server-key.pem" ] ; then
+		/usr/bin/mysql_ssl_rsa_setup --datadir="$datadir" --uid=mysql >/dev/null 2>&1
+	    fi
+	fi
+	if [ ! -h "$datadir" -a "x$(dirname "$datadir")" = "x/var/lib" ]; then
+	    chown mysql:mysql "$datadir"
+	    chmod 0751 "$datadir"
+	fi
+	# Pass all the options determined above, to ensure consistent behavior.
+	# In many cases mysqld_safe would arrive at the same conclusions anyway
+	# but we need to be sure.  (An exception is that we don't force the
+	# log-error setting, since this script doesn't really depend on that,
+	# and some users might prefer to configure logging to syslog.)
+	# Note: set --basedir to prevent probes that might trigger SELinux
+	# alarms, per bug #547485
+	$exec $MYSQLD_OPTS --datadir="$datadir" --socket="$socketfile" \
+		--pid-file="$mypidfile" \
+		--basedir=/usr --user=mysql $extra_opts >/dev/null &
+	safe_pid=$!
+	# Spin for a maximum of N seconds waiting for the server to come up;
+	# exit the loop immediately if mysqld_safe process disappears.
+	# Rather than assuming we know a valid username, accept an "access
+	# denied" response as meaning the server is functioning.
+	ret=0
+	TIMEOUT="$STARTTIMEOUT"
+	while [ $TIMEOUT -gt 0 ]; do
+	    RESPONSE=$(/usr/bin/mysqladmin --no-defaults --enable-cleartext-plugin --socket="$adminsocket" --user=UNKNOWN_MYSQL_USER ping 2>&1) && break
+	    echo "$RESPONSE" | grep -q "Access denied for user" && break
+	    if ! /bin/kill -0 $safe_pid 2>/dev/null; then
+		echo "MySQL Daemon failed to start."
+		ret=1
+		break
+	    fi
+	    sleep 1
+	    let TIMEOUT=${TIMEOUT}-1
+	done
+	if [ $TIMEOUT -eq 0 ]; then
+	    echo "Timeout error occurred trying to start MySQL Daemon."
+	    ret=1
+	fi
+	if [ $ret -eq 0 ]; then
+	    action $"Starting $prog: " /bin/true
+	    touch $lockfile
+	else
+	    action $"Starting $prog: " /bin/false
+	fi
+    fi
+    return $ret
+}
+
+stop(){
+	if [ ! -f "$mypidfile" ]; then
+	    # not running; per LSB standards this is "ok"
+	    action $"Stopping $prog: " /bin/true
+	    return 0
+	fi
+	MYSQLPID=$(cat "$mypidfile")
+	if [ -n "$MYSQLPID" ]; then
+	    /bin/su - mysql -s /bin/bash -c "/bin/kill $MYSQLPID" >/dev/null 2>&1
+	    ret=$?
+	    if [ $ret -eq 0 ]; then
+		TIMEOUT="$STOPTIMEOUT"
+		while [ $TIMEOUT -gt 0 ]; do
+		    /bin/kill -0 "$MYSQLPID" >/dev/null 2>&1 || break
+		    sleep 1
+		    let TIMEOUT=${TIMEOUT}-1
+		done
+		if [ $TIMEOUT -eq 0 ]; then
+		    echo "Timeout error occurred trying to stop MySQL Daemon."
+		    ret=1
+		    action $"Stopping $prog: " /bin/false
+		else
+		    rm -f $lockfile
+		    rm -f "$socketfile"
+		    action $"Stopping $prog: " /bin/true
+		fi
+	    else
+		action $"Stopping $prog: " /bin/false
+	    fi
+	else
+	    # failed to read pidfile, probably insufficient permissions
+	    action $"Stopping $prog: " /bin/false
+	    ret=4
+	fi
+	return $ret
+}
+
+restart(){
+    stop
+    start
+}
+
+condrestart(){
+    [ -e $lockfile ] && restart || :
+}
+
+
+# See how we were called.
+case "$command" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  status)
+    status -p "$mypidfile" $prog
+    ;;
+  restart)
+    restart
+    ;;
+  condrestart|try-restart)
+    condrestart
+    ;;
+  reload)
+    exit 3
+    ;;
+  force-reload)
+    restart
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+    exit 2
+esac
+
+exit $?

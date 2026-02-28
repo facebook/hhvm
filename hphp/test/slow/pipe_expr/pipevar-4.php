@@ -1,10 +1,10 @@
-<?hh // decl
+<?hh
 
 class Wrapper {
   public function __construct(public darray $val) { var_dump("Make wrapper"); }
 }
 
-function beep($x) {
+function beep($x) :mixed{
   if ($x is Wrapper) {
     var_dump("beep: <Wrapper>");
   } else if (is_array($x)) {
@@ -14,19 +14,19 @@ function beep($x) {
   }
   return $x;
 }
-function wrap($x) {
+function wrap($x) :mixed{
   return new Wrapper($x);
 }
-function unwrap($y) {
+function unwrap($y) :mixed{
   return $y->val;
 }
 
-function main($bar) {
+function main($bar) :mixed{
   $foo = "Hello!";
-  $out = varray[1, 2, 3]
+  $out = vec[1, 2, 3]
     |> array_map($x ==> $x + beep(1), $$)
     |> array_merge(
-      varray[50, 60, 70]
+      vec[50, 60, 70]
         |> array_map($x ==> $x * beep(2), $$)
         |> array_filter($$, $x ==> $x != beep(100)),
       $$)
@@ -44,6 +44,6 @@ function main($bar) {
 
 
 <<__EntryPoint>>
-function main_pipevar_4() {
+function main_pipevar_4() :mixed{
 main("Goodbye");
 }

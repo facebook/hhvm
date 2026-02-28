@@ -1,2 +1,0 @@
-File "variance_unsupported.php", line 3, characters 16-17:
-`T3` is a generic parameter of another (higher-kinded) generic parameter. We don't support variance other than invariant for parameters like `T3`. (Naming[2047])

@@ -1,5 +1,4 @@
 Autoload {
-  Query = {"expression": ["allof", ["type", "f"], ["suffix", ["anyof", "inc", "php"]]]}
   IndexedMethodAttributes {
     * = NoArgMethodAttr
     * = TwoArgMethodAttr

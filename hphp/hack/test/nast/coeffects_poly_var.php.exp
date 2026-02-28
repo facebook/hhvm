@@ -2,48 +2,28 @@
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-14], "\\poly");
       fd_fun =
       { f_span = [3:1-8:69]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([8:62-66], (Hprim Tvoid)))); 
-        f_name = ([3:10-14], "\\poly");
-        f_tparams =
-        [{ tp_variance = Invariant; tp_name = ([3:15-24], "Texplicit"); 
-           tp_parameters = []; tp_constraints = [(Constraint_as, ([3:28-29], (Happly (([3:28-29], "\\D"), []))))]; 
-           tp_reified = Erased; tp_user_attributes = [] };
-          { tp_variance = Invariant; tp_name = ([4:5-12], "T/$change"); 
-            tp_parameters = []; tp_constraints = [(Constraint_as, ([4:3-4], (Happly (([4:3-4], "\\C"), []))))]; 
-            tp_reified = Erased; tp_user_attributes = [] };
-          { tp_variance = Invariant; tp_name = ([8:3-15], "T/[$change::Co1]"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
-          { tp_variance = Invariant; tp_name = ([5:6-14], "T/$nchange"); 
-            tp_parameters = []; tp_constraints = [(Constraint_as, ([5:4-5], (Happly (([5:4-5], "\\C"), []))))]; 
-            tp_reified = Erased; tp_user_attributes = [] };
-          { tp_variance = Invariant; tp_name = ([8:17-30], "T/[$nchange::Co2]"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
-          { tp_variance = Invariant; tp_name = ([8:32-44], "T/[$remain::Co3]"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
-          { tp_variance = Invariant; tp_name = ([8:46-59], "T/[$nremain::Co4]"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-        f_where_constraints =
-        [(([8:3-15], (Habstr ("T/[$change::Co1]", []))), Constraint_eq, ([8:3-15], (Haccess (([4:5-12], (Habstr ("T/$change", []))), [([8:12-15], "Co1")]))));
-          (([8:17-30], (Habstr ("T/[$nchange::Co2]", []))), Constraint_eq, ([8:17-30], (Haccess (([5:6-14], (Habstr ("T/$nchange", []))), [([8:27-30], "Co2")]))));
-          (([8:32-44], (Habstr ("T/[$remain::Co3]", []))), Constraint_eq, ([8:32-44], (Haccess (([6:3-12], (Habstr ("Texplicit", []))), [([8:41-44], "Co3")]))));
-          (([8:46-59], (Habstr ("T/[$nremain::Co4]", []))), Constraint_eq, ([8:46-59], (Haccess (([7:4-13], (Habstr ("Texplicit", []))), [([8:56-59], "Co4")]))))];
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([8:62-66], (Hprim Tvoid))));
         f_params =
-        [{ param_annotation = (); param_type_hint = ((), (Some ([4:5-12], (Habstr ("T/$change", []))))); 
-           param_is_variadic = false; param_pos = [4:5-12]; param_name = "$change"; 
-           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None };
-          { param_annotation = (); param_type_hint = ((), (Some ([5:3-5], (Hoption ([5:6-14], (Habstr ("T/$nchange", []))))))); 
-            param_is_variadic = false; param_pos = [5:6-14]; param_name = "$nchange"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None };
-          { param_annotation = (); param_type_hint = ((), (Some ([6:3-12], (Habstr ("Texplicit", []))))); 
-            param_is_variadic = false; param_pos = [6:13-20]; param_name = "$remain"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None };
-          { param_annotation = (); param_type_hint = ((), (Some ([7:3-13], (Hoption ([7:4-13], (Habstr ("Texplicit", []))))))); 
-            param_is_variadic = false; param_pos = [7:14-22]; param_name = "$nremain"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+        [{ param_annotation = (); param_type_hint = ((), (Some ([4:5-12], (Habstr "T/$change")))); 
+           param_pos = [4:5-12]; param_name = "$change"; param_info = Param_required; 
+           param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+           param_named = None; param_user_attributes = []; param_visibility = None };
+          { param_annotation = (); param_type_hint = ((), (Some ([5:3-5], (Hoption ([5:6-14], (Habstr "T/$nchange")))))); 
+            param_pos = [5:6-14]; param_name = "$nchange"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None };
+          { param_annotation = (); param_type_hint = ((), (Some ([6:3-12], (Habstr "Texplicit")))); 
+            param_pos = [6:13-20]; param_name = "$remain"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None };
+          { param_annotation = (); param_type_hint = ((), (Some ([7:3-13], (Hoption ([7:4-13], (Habstr "Texplicit")))))); 
+            param_pos = [7:14-22]; param_name = "$nremain"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs =
         (Some ([8:2-60],
@@ -58,6 +38,36 @@
                  [8:32-44], (Haccess (([8:32-39], (Hvar "$remain")), [([8:41-44], "Co3")]))); (
                  [8:46-59], (Haccess (([8:46-54], (Hvar "$nremain")), [([8:56-59], "Co4")])))]));
         f_body = { fb_ast = [([Pos.none], Noop)] }; f_fun_kind = FSync; 
-        f_user_attributes = []; f_external = false; f_doc_comment = None };
-      fd_internal = false })
+        f_user_attributes = [{ ua_name = ([3:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None;
+      fd_tparams =
+      [{ tp_variance = Invariant; tp_name = ([3:15-24], "Texplicit");
+         tp_constraints = [(Constraint_as, ([3:15-24], (Happly (([3:15-24], "\\HH\\supportdyn"), [([3:15-24], Hmixed)])))); (Constraint_as, ([3:28-29], (Happly (([3:28-29], "\\D"), []))))];
+         tp_reified = Erased; tp_user_attributes = [] };
+        { tp_variance = Invariant; tp_name = ([4:5-12], "T/$change");
+          tp_constraints = [(Constraint_as, ([4:5-12], (Happly (([4:5-12], "\\HH\\supportdyn"), [([4:5-12], Hmixed)])))); (Constraint_as, ([4:3-4], (Happly (([4:3-4], "\\C"), []))))];
+          tp_reified = Erased; tp_user_attributes = [] };
+        { tp_variance = Invariant; tp_name = ([8:3-15], "T/[$change::Co1]"); 
+          tp_constraints = [(Constraint_as, ([8:3-15], (Happly (([8:3-15], "\\HH\\supportdyn"), [([8:3-15], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] };
+        { tp_variance = Invariant; tp_name = ([5:6-14], "T/$nchange");
+          tp_constraints = [(Constraint_as, ([5:6-14], (Happly (([5:6-14], "\\HH\\supportdyn"), [([5:6-14], Hmixed)])))); (Constraint_as, ([5:4-5], (Happly (([5:4-5], "\\C"), []))))];
+          tp_reified = Erased; tp_user_attributes = [] };
+        { tp_variance = Invariant; tp_name = ([8:17-30], "T/[$nchange::Co2]"); 
+          tp_constraints = [(Constraint_as, ([8:17-30], (Happly (([8:17-30], "\\HH\\supportdyn"), [([8:17-30], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] };
+        { tp_variance = Invariant; tp_name = ([8:32-44], "T/[$remain::Co3]"); 
+          tp_constraints = [(Constraint_as, ([8:32-44], (Happly (([8:32-44], "\\HH\\supportdyn"), [([8:32-44], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] };
+        { tp_variance = Invariant; tp_name = ([8:46-59], "T/[$nremain::Co4]"); 
+          tp_constraints = [(Constraint_as, ([8:46-59], (Happly (([8:46-59], "\\HH\\supportdyn"), [([8:46-59], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+        ];
+      fd_where_constraints =
+      [(([8:3-15], (Habstr "T/[$change::Co1]")), Constraint_eq, ([8:3-15], (Haccess (([4:5-12], (Habstr "T/$change")), [([8:12-15], "Co1")]))));
+        (([8:17-30], (Habstr "T/[$nchange::Co2]")), Constraint_eq, ([8:17-30], (Haccess (([5:6-14], (Habstr "T/$nchange")), [([8:27-30], "Co2")]))));
+        (([8:32-44], (Habstr "T/[$remain::Co3]")), Constraint_eq, ([8:32-44], (Haccess (([6:3-12], (Habstr "Texplicit")), [([8:41-44], "Co3")]))));
+        (([8:46-59], (Habstr "T/[$nremain::Co4]")), Constraint_eq, ([8:46-59], (Haccess (([7:4-13], (Habstr "Texplicit")), [([8:56-59], "Co4")]))))];
+      fd_package = None })
   ]

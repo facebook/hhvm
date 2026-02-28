@@ -5,60 +5,60 @@ namespace {
 }
 
 namespace N1 {
-  trait T1 { public function ignoreme1() {} }
+  trait T1 { public function ignoreme1() :mixed{} }
 
-  interface I1 { public function ignoreme2(); }
-  interface I2 { public function ignoreme3(); }
-  interface I3 extends I1, I2 { public function ignoreme4(); }
+  interface I1 { public function ignoreme2():mixed; }
+  interface I2 { public function ignoreme3():mixed; }
+  interface I3 extends I1, I2 { public function ignoreme4():mixed; }
 
-  class C1 { public function ignoreme5() {} }
+  class C1 { public function ignoreme5() :mixed{} }
 
-  abstract class C2 { public function ignoreme6() {} }
+  abstract class C2 { public function ignoreme6() :mixed{} }
   abstract final class C3 extends C2 {
-    public static function yes_officer_this_method_here1() {}
+    public static function yes_officer_this_method_here1() :mixed{}
   }
 
   class Something {}
   interface IDontcare {}
   interface IReallyDont {}
   class C4 extends Something implements IDontcare, IReallyDont {
-    public function yes_officer_this_method_here2() {}
+    public function yes_officer_this_method_here2() :mixed{}
   }
 
   class C5 extends \SomethingElse {
-    public function yes_officer_this_method_here3() {}
+    public function yes_officer_this_method_here3() :mixed{}
   }
 }
 
 namespace N2\N3 {
   class CompletelyDifferent {}
   class C6 extends CompletelyDifferent {
-    public function yes_officer_this_method_here4() {}
+    public function yes_officer_this_method_here4() :mixed{}
   }
 }
 
 namespace {
-  trait T2 { public function ignoreme7() {} }
+  trait T2 { public function ignoreme7() :mixed{} }
 
-  interface I4 { public function ignoreme8(); }
-  interface I5 { public function ignoreme9(); }
-  interface I6 extends I4, I5 { public function ignoreme10(); }
+  interface I4 { public function ignoreme8():mixed; }
+  interface I5 { public function ignoreme9():mixed; }
+  interface I6 extends I4, I5 { public function ignoreme10():mixed; }
 
-  class C7 { public function ignoreme11() {} }
-  abstract class C8 { public function ignoreme12() {} }
+  class C7 { public function ignoreme11() :mixed{} }
+  abstract class C8 { public function ignoreme12() :mixed{} }
   abstract final class C9 extends C8 {
-    public static function yes_officer_this_method_here5() {}
+    public static function yes_officer_this_method_here5() :mixed{}
   }
 
   class AnotherThing {}
   interface IDontcare {}
   interface IReallyDont {}
   class C10 extends AnotherThing implements IDontcare, IReallyDont {
-    public function yes_officer_this_method_here6() {}
+    public function yes_officer_this_method_here6() :mixed{}
   }
 
   <<__EntryPoint>>
-  function main() {
+  function main() :mixed{
     $program = file_get_contents(__FILE__);
     $json = HH\ffp_parse_string($program);
     $results = HH\ExperimentalParserUtils\find_test_methods($json);

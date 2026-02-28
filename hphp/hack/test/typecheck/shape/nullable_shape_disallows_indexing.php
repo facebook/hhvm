@@ -1,5 +1,5 @@
-<?hh //strict
+<?hh
 
 function foo(bool $b): void {
-  $bar = ($b ? darray['a' => 5] : null)['a'];
+  $bar = ($b ? dict['a' => 5] : null)['a'];
 }

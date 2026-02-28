@@ -33,9 +33,9 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-ret.h"
-#include "hphp/runtime/vm/jit/irgen-types.h"
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
 
+#include "hphp/util/configs/hhir.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irgen {
@@ -44,7 +44,7 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 // Returns true and fills "locals" with types of the function's locals if this
 // op is an Await in "tail position" (whose results are immediately returned).
@@ -64,10 +64,13 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
   } else if (func->lookupVarId(s_86metadata.get()) != kInvalidId) {
     FTRACE(2, "  Function has metadata: {}\n", s_86metadata.get()->data());
     return false;
+  } else if (func->lookupVarId(s_86productAttributionData.get()) != kInvalidId) {
+    FTRACE(2, "  Function has metadata: {}\n", s_86productAttributionData.get()->data());
+    return false;
   }
-  auto const offset = findCatchHandler(func, bcOff(env));
+  auto const offset = findExceptionHandler(func, bcOff(env));
   if (offset != kInvalidOffset) {
-    FTRACE(2, "  Found catch block at offset: {}\n", offset);
+    FTRACE(2, "  Found exception handler at offset: {}\n", offset);
     return false;
   }
 
@@ -84,7 +87,7 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
   for (auto i = 256; i-- > 0;) {
     FTRACE(2, "  {}\n", instrToString(sk.pc(), func));
     switch (sk.op()) {
-      case Op::RetC:         return resultLocal == kInvalidId;
+      case Op::RetC:         return (uint8_t)getImm(sk.pc(), 0).u_OA == (uint8_t)VerifyRetKind::None &&  resultLocal == kInvalidId;
       case Op::AssertRATStk: break;
       case Op::AssertRATL: {
         auto const type = typeFromRAT(getImm(sk.pc(), 1, unit).u_RATA, cls);
@@ -103,7 +106,7 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
         resultLocal = kInvalidId;
         break;
       }
-      case Op::Jmp: case Op::JmpNS: {
+      case Op::Jmp: {
         sk = SrcKey(sk, sk.offset() + getImm(sk.pc(), 0).u_BA);
         continue;
       }
@@ -118,12 +121,12 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
 
 void doTailAwaitDecRefs(IRGS& env, const std::vector<Type>& locals) {
   auto const shouldFreeInline = [&]{
-    if (locals.size() > RO::EvalHHIRInliningMaxReturnLocals) return false;
+    if (locals.size() > Cfg::HHIR::InliningMaxReturnLocals) return false;
     auto numRefCounted = 0;
     for (auto i = 0; i < locals.size(); i++) {
       if (locals[i].maybe(TCounted)) numRefCounted++;
     }
-    return numRefCounted <= RO::EvalHHIRInliningMaxReturnDecRefs;
+    return numRefCounted <= Cfg::HHIR::InliningMaxReturnDecRefs;
   }();
 
   if (shouldFreeInline) {
@@ -158,13 +161,18 @@ void suspendHook(IRGS& env, Hook hook) {
   );
 }
 
+template <bool lowPri>
 void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
                 Offset resumeOffset) {
   assertx(curFunc(env)->isAsync());
   assertx(resumeMode(env) != ResumeMode::Async);
   // FIXME(T88328140): ifThenElse() emits unreachable code with bad state
   // assertx(spOffBCFromStackBase(env) == spOffEmpty(env));
-  assertx(child->type() <= TObj);
+  if constexpr (lowPri) {
+    assertx(!child);
+  } else {
+    assertx(child && child->type() <= TObj);
+  }
 
   // Bind address at which the execution should resume after awaiting.
   auto const func = curFunc(env);
@@ -180,9 +188,20 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
     // copying local variables and iterators. We don't support tracing when
     // we do the tail-call optimization, so we push the suspend hook here.
     auto const createNewAFWH = [&]{
-      auto const wh = gen(env, CreateAFWH, fp(env),
-                          cns(env, func->numSlotsInFrame()),
-                          resumeAddr(), suspendOff, child);
+      if (isInlining(env)) gen(env, StFrameFunc, FuncData { func }, fp(env));
+      auto const wh = lowPri ?
+        gen(env, CreateAFWHL, fp(env), cns(env, func->numSlotsInFrame()),
+            resumeAddr(), suspendOff) :
+        gen(env, CreateAFWH, fp(env), cns(env, func->numSlotsInFrame()),
+            resumeAddr(), suspendOff, child);
+      // Constructing a waithandle teleports locals and iterators to the heap,
+      // kill them here to improve alias analysis.
+      for (uint32_t i = 0; i < func->numLocals(); ++i) {
+        gen(env, KillLoc, LocalId{i}, fp(env));
+      }
+      for (uint32_t i = 0; i < func->numIterators(); ++i) {
+        gen(env, KillIter, IterId{i}, fp(env));
+      }
       suspendHook(env, [&] {
         auto const asyncAR = gen(env, LdAFWHActRec, wh);
         gen(env, SuspendHookAwaitEF, fp(env), asyncAR, wh);
@@ -193,14 +212,13 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
     // We don't need to create the new AFWH if we can do a tail-call check.
     auto const waitHandle = [&]{
       std::vector<Type> locals;
-      if (RO::EnableArgsInBacktraces) return createNewAFWH();
+      if (Cfg::Eval::EnableArgsInBacktraces) return createNewAFWH();
       if (!isTailAwait(env, locals)) return createNewAFWH();
 
       // We can run out of tailFrameIds and fail to make this optimization.
       auto const tailFrameId = getAsyncFrameId(curSrcKey(env));
       if (tailFrameId == kInvalidAsyncFrameId) return createNewAFWH();
       auto const type = Type::ExactObj(c_AsyncFunctionWaitHandle::classof());
-
       return cond(env,
         [&](Block* taken) {
           gen(env, CheckSurpriseFlags, taken, anyStackRegister(env));
@@ -213,8 +231,6 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
         [&]{ return createNewAFWH(); }
       );
     }();
-
-    if (RO::EvalEnableImplicitContext) gen(env, StImplicitContextWH, waitHandle);
 
     if (isInlining(env)) {
       suspendFromInlined(env, waitHandle);
@@ -236,8 +252,6 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
     suspendHook(env, [&] {
       gen(env, SuspendHookAwaitEG, fp(env), waitHandle);
     });
-
-    if (RO::EvalEnableImplicitContext) gen(env, StImplicitContextWH, waitHandle);
 
     // Return control to the caller (AG::next()).
     auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
@@ -409,15 +423,18 @@ Type awaitedTypeFromSSATmp(const SSATmp* awaitable) {
   if (inst->is(Call)) {
     return (inst->src(2)->hasConstVal(TFunc) &&
             !inst->extra<Call>()->asyncEagerReturn)
-      ? awaitedCallReturnType(inst->src(2)->funcVal()) : TInitCell;
+      ? awaitedCallReturnType(inst->src(2)->funcVal(), true /* mayIntercept */)
+      : TInitCell;
   }
   if (inst->is(CallFuncEntry)) {
     auto const extra = inst->extra<CallFuncEntry>();
-    return !extra->asyncEagerReturn()
-      ? awaitedCallReturnType(extra->target.func()) : TInitCell;
+    return (inst->src(2)->hasConstVal(TFunc) &&
+            !extra->asyncEagerReturn())
+      ? awaitedCallReturnType(inst->src(2)->funcVal(), true /* mayIntercept */)
+      : TInitCell;
   }
-  if (inst->is(CreateAFWH)) {
-    return awaitedCallReturnType(inst->func());
+  if (inst->is(CreateAFWH) || inst->is(CreateAFWHL)) {
+    return awaitedCallReturnType(inst->func(), false /* mayIntercept */);
   }
   if (inst->is(DefLabel)) {
     auto ty = TBottom;
@@ -447,7 +464,7 @@ bool likelySuspended(const SSATmp* awaitable) {
       inst->extra<CallFuncEntry>()->asyncEagerReturn()) {
     return true;
   }
-  if (inst->is(CreateAFWH)) return true;
+  if (inst->is(CreateAFWH) || inst->is(CreateAFWHL)) return true;
   if (inst->is(DefLabel)) {
     auto likely = true;
     auto const dsts = inst->dsts();
@@ -468,42 +485,20 @@ void implAwaitSucceeded(IRGS& env, SSATmp* child) {
   auto const res = gen(env, LdWHResult, awaitedTy, child);
   popC(env);
   gen(env, IncRef, res);
-  decRef(env, child, DecRefProfileId::Default);
+  decRef(env, child);
   push(env, res);
 }
 
 void implAwaitFailed(IRGS& env, SSATmp* child, Block* exit) {
-  auto const stackEmpty = spOffBCFromStackBase(env) == spOffEmpty(env) + 1;
-  if (!stackEmpty) {
-    assertx(exit);
-    assertx(curSrcKey(env).op() == Op::WHResult);
-    gen(env, Jmp, exit);
-    return;
-  }
-
-  auto const offset = findCatchHandler(curFunc(env), bcOff(env));
-  auto const exception = gen(env, LdWHResult, TObj, child);
+  auto const ty = Type::SubObj(SystemLib::getThrowableClass());
+  auto const exc = gen(env, LdWHResult, ty, child);
   popC(env);
-  gen(env, IncRef, exception);
-  decRef(env, child, DecRefProfileId::Default);
-  if (offset != kInvalidOffset) {
-    push(env, exception);
-    jmpImpl(env, offset);
-  } else {
-    // There are no more catch blocks in this function, we are at the top
-    // level throw
-    hint(env, Block::Hint::Unlikely);
-    spillInlinedFrames(env);
-    auto const spOff = spOffBCFromIRSP(env);
-    auto const bcSP = gen(env, LoadBCSP, IRSPRelOffsetData { spOff }, sp(env));
-    gen(env, StVMFP, fp(env));
-    gen(env, StVMSP, bcSP);
-    gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
-    genStVMReturnAddr(env);
-    gen(env, StVMRegState, cns(env, eagerlyCleanState()));
-    auto const etcData = EnterTCUnwindData { spOff, true };
-    gen(env, EnterTCUnwind, etcData, exception);
-  }
+  gen(env, IncRef, exc);
+  decRef(env, child);
+  updateMarker(env);
+
+  auto constexpr mode = EndCatchData::CatchMode::UnwindOnly;
+  emitHandleException(env, mode, exc, std::nullopt, true /* sideEntry */);
 }
 
 template<class T>
@@ -594,7 +589,7 @@ void emitAwait(IRGS& env) {
     if (resumeMode(env) == ResumeMode::Async) {
       implAwaitR(env, child, bcOff(env), nextBcOff(env));
     } else {
-      implAwaitE(env, child, bcOff(env), nextBcOff(env));
+      implAwaitE<false>(env, child, bcOff(env), nextBcOff(env));
     }
   });
 }
@@ -611,7 +606,7 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
   auto const exitSlow = makeExitSlow(env);
 
   auto const cnt = [&] {
-    if (locals.count > RuntimeOption::EvalJitMaxAwaitAllUnroll) {
+    if (locals.count > Cfg::Jit::MaxAwaitAllUnroll) {
       return gen(
         env,
         CountWHNotDone,
@@ -657,8 +652,8 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
 
       auto const wh = gen(
         env,
-        CreateAAWH,
-        CreateAAWHData { locals.first, locals.count },
+        CreateCCWH,
+        CreateCCWHData { locals.first, locals.count },
         fp(env),
         cnt
       );
@@ -669,7 +664,7 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
         [&] (Block* taken) {
           gen(env, JmpNZero, taken, state);
         },
-        [&] { // Extremely unlikely: profiling hook finished the AAWH.
+        [&] { // Extremely unlikely: profiling hook finished the CCWH.
           hint(env, Block::Hint::Unused);
           push(env, cns(env, TInitNull));
         },
@@ -677,12 +672,25 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
           if (resumeMode(env) == ResumeMode::Async) {
             implAwaitR(env, wh, suspendOffset, resumeOffset);
           } else {
-            implAwaitE(env, wh, suspendOffset, resumeOffset);
+            implAwaitE<false>(env, wh, suspendOffset, resumeOffset);
           }
         }
       );
     }
   );
+}
+
+void emitAwaitLowPri(IRGS& env) {
+  assertx(resumeMode(env) == ResumeMode::None);
+  assertx(curFunc(env)->isAsyncFunction());
+  assertx(spOffBCFromStackBase(env) == spOffEmpty(env));
+
+  if (!Cfg::Eval::EnableLowPriorityAwaitables) {
+    push(env, cns(env, TInitNull));
+    return;
+  }
+
+  implAwaitE<true>(env, nullptr, bcOff(env), nextBcOff(env));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -729,11 +737,11 @@ void emitCreateCont(IRGS& env) {
 
 void emitContEnter(IRGS& env) {
   assertx(curClass(env));
-  assertx(curClass(env)->classof(AsyncGenerator::getClass()) ||
-          curClass(env)->classof(Generator::getClass()));
+  assertx(curClass(env)->classof(AsyncGenerator::classof()) ||
+          curClass(env)->classof(Generator::classof()));
 
   auto const callBCOffset = bcOff(env);
-  auto const isAsync = curClass(env)->classof(AsyncGenerator::getClass());
+  auto const isAsync = curClass(env)->classof(AsyncGenerator::classof());
   // Load generator's FP and resume address.
   auto const genObj = ldThis(env);
   auto const genFp  = gen(env, LdContActRec, IsAsyncData(isAsync), genObj);
@@ -778,22 +786,22 @@ void emitYieldK(IRGS& env) {
 
 void emitContCheck(IRGS& env, ContCheckOp subop) {
   assertx(curClass(env));
-  assertx(curClass(env)->classof(AsyncGenerator::getClass()) ||
-          curClass(env)->classof(Generator::getClass()));
+  assertx(curClass(env)->classof(AsyncGenerator::classof()) ||
+          curClass(env)->classof(Generator::classof()));
   auto const cont = ldThis(env);
   auto const checkStarted = subop == ContCheckOp::CheckStarted;
   gen(env, ContCheckNext,
-    IsAsyncData(curClass(env)->classof(AsyncGenerator::getClass())),
+    IsAsyncData(curClass(env)->classof(AsyncGenerator::classof())),
     makeExitSlow(env), cont, cns(env, checkStarted));
 }
 
 void emitContValid(IRGS& env) {
   assertx(curClass(env));
-  assertx(curClass(env)->classof(AsyncGenerator::getClass()) ||
-          curClass(env)->classof(Generator::getClass()));
+  assertx(curClass(env)->classof(AsyncGenerator::classof()) ||
+          curClass(env)->classof(Generator::classof()));
   auto const cont = ldThis(env);
   push(env, gen(env, ContValid,
-    IsAsyncData(curClass(env)->classof(AsyncGenerator::getClass())), cont));
+    IsAsyncData(curClass(env)->classof(AsyncGenerator::classof())), cont));
 }
 
 void emitContKey(IRGS& env) { PUNT(ContKey); }

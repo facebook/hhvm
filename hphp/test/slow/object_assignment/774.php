@@ -4,7 +4,7 @@ class foo {
   public function __construct() {
     $this->val = 1;
   }
-  function bar() {
+  function bar() :mixed{
     echo $this->val;
     $ref2 = $this;
     $ref2->val = 3;
@@ -19,7 +19,7 @@ class foo {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $x = new foo();
   $x->bar();
   $ref5 = $x;

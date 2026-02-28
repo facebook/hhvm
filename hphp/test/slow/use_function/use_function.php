@@ -1,27 +1,27 @@
 <?hh
 
 namespace foo {
-  function bar() {
+  function bar() :mixed{
     return __FUNCTION__;
   }
 
-  function baz() {
+  function baz() :mixed{
     return __FUNCTION__;
   }
 }
 
 namespace fizz {
-  function baz() {
+  function baz() :mixed{
     return __FUNCTION__;
   }
 }
 
 namespace baz {
-  function bar() {
+  function bar() :mixed{
     return __FUNCTION__;
   }
 
-  function baz() {
+  function baz() :mixed{
     return __FUNCTION__;
   }
 }

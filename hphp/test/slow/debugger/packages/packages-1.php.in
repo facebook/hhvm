@@ -1,0 +1,4 @@
+run
+print package_exists('foo')
+print package_exists('bar')
+print package_exists('nope')

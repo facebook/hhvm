@@ -15,6 +15,11 @@ namespace HH\Lib\Keyset;
  * optional comparator function isn't provided, the values will be sorted in
  * ascending order.
  *
+ * When specified, a comparator should exhibit the same behavior as the `<=>`
+ * operator: a negative value when the left operand compares less than the
+ * right operand, 0 when the operands compare equal, and a positive value when
+ * the left operand compares greater than the right operand.
+ *
  * Time complexity: O((n log n) * c), where c is the complexity of the
  * comparator function (which is O(1) if not explicitly provided)
  * Space complexity: O(n)

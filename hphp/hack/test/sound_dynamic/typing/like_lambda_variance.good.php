@@ -1,6 +1,6 @@
 <?hh
 
-function my_reduce<Tv as dynamic, Ta as dynamic>(
+function my_reduce<Tv as supportdyn<mixed>, Ta as supportdyn<mixed>>(
   ~Traversable<Tv> $traversable,
   ~(function(Ta, Tv): Ta) $accumulator,
   ~Ta $initial,

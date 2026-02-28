@@ -1,6 +1,6 @@
 <?hh
 
-function get($d, $k) {
+function get($d, $k) :mixed{
   try {
     var_dump($d[$k]);
   } catch (InvalidArgumentException $ex) {
@@ -9,7 +9,7 @@ function get($d, $k) {
   return $d;
 }
 
-function add($d, $v) {
+function add($d, $v) :mixed{
   try {
     $d[] = $v;
   } catch (InvalidArgumentException $ex) {
@@ -18,12 +18,12 @@ function add($d, $v) {
   return $d;
 }
 
-function run(inout $ref, inout $badref) {
+function run(inout $ref, inout $badref) :mixed{
   $dyn = 42;
   add(keyset[$dyn], 1)
     |> add($$, "1")
     |> add($$, null)
-    |> add($$, darray[])
+    |> add($$, dict[])
     |> add($$, new stdClass)
     |> add($$, 1.2)
     |> add($$, $ref)
@@ -32,7 +32,7 @@ function run(inout $ref, inout $badref) {
     |> get($$, 1)
     |> get($$, "1")
     |> get($$, null)
-    |> get($$, darray[])
+    |> get($$, dict[])
     |> get($$, new stdClass)
     |> get($$, 1.2)
     |> get($$, $ref)
@@ -42,8 +42,8 @@ function run(inout $ref, inout $badref) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $foo = 12;
-  $bar = darray[];
+  $bar = dict[];
   run(inout $foo, inout $bar);
 }

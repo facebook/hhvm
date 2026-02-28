@@ -1,5 +1,5 @@
 <?hh
-function f($a, $b, $c) {
+function f($a, $b, $c) :mixed{
   $x = $a + $b;
   $y = $a - $b;
   if ($x <= 0 && $x >= 0) $x = 1;

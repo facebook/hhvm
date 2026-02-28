@@ -29,7 +29,7 @@ $heredoc_empty_string = <<<EOT
 EOT;
 
 // defining array of string formats
-$formats = varray[
+$formats = vec[
   "%s",
   "%+s %-s %S",
   "%ls %Ls, %4s %-4s",
@@ -41,19 +41,19 @@ $formats = varray[
 
 // Arrays of string values for the format defined in $format.
 // Each sub array contains string values which correspond to each format string in $format
-$args_array = varray[
-  varray[" "],
-  varray["hello\0world", "hello\0", "\0hello"],
-  varray["@#$%&*", "@#$%&*", "\x55F", "\001"],
-  varray["sunday", 'monday', "tuesday", 'wednesday'],
-  varray[$heredoc_string, "abcdef", $heredoc_numeric_string, $heredoc_empty_string],
-  varray["one", "two", 'three', 'four'],
-  varray["three", 'four', 'one', "two"]
+$args_array = vec[
+  vec[" "],
+  vec["hello\0world", "hello\0", "\0hello"],
+  vec["@#$%&*", "@#$%&*", "\x55F", "\001"],
+  vec["sunday", 'monday', "tuesday", 'wednesday'],
+  vec[$heredoc_string, "abcdef", $heredoc_numeric_string, $heredoc_empty_string],
+  vec["one", "two", 'three', 'four'],
+  vec["three", 'four', 'one', "two"]
 
 ];
 
 /* creating dumping file */
-$data_file = __SystemLib\hphp_test_tmppath('vfprintf_variation7.txt');
+$data_file = sys_get_temp_dir().'/'.'vfprintf_variation7.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

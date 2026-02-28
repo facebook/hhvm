@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,7 +10,7 @@
  */
 
 function get_arr(): varray<int> {
-  return varray[1, 2, 3];
+  return vec[1, 2, 3];
 }
 
 function use_arr(varray<bool> $arr): void {}

@@ -12,9 +12,9 @@
 module Hg_actual = struct
   include Hg_sig.Types
 
-  let rev_string rev =
+  let rev_string rev : string =
     match rev with
-    | Hg_rev hash -> hash
+    | Hg_rev hash -> Rev.to_string hash
     | Global_rev rev -> Printf.sprintf "r%d" rev
 
   let exec_hg args =
@@ -42,10 +42,9 @@ module Hg_actual = struct
     in
     FutureProcess.make process ignore
 
-  (** Returns the closest global ancestor in master to the given rev.
-   *
-   * hg log -r 'ancestor(master,rev)' -T '{globalrev}\n'
-   *)
+  (** The globalrev of a given revision. If that revision is not public,
+  the globalrev of `parents(roots(draft() & ::<rev>))`, and if there are merge conflicts,
+  the globalrev of the mergebase. *)
   let get_closest_global_ancestor rev repo : global_rev Future.t =
     let global_rev_query rev =
       exec_hg ["log"; "-r"; rev; "-T"; "{globalrev}\n"; "--cwd"; repo]
@@ -59,6 +58,8 @@ module Hg_actual = struct
     (* Otherwise, we want the closest public commit. It returns empty set when
      * we are on a public commit, hence the need to still do q1 too *)
     let (q2 : global_rev Future.t) =
+      (* `draft() & ::<rev>` are all non-landed commits that are prior or equal to rev,
+         `roots()` selects the oldest of those, and `parents` its parent. *)
       global_rev_process (Printf.sprintf "parents(roots(draft() & ::%s))" rev)
     in
     (* q2 can also fail in case of merge conflicts, in which case let's fall back to
@@ -66,7 +67,6 @@ module Hg_actual = struct
     let (q3 : global_rev Future.t) =
       global_rev_process (Printf.sprintf "ancestor(master,%s)" rev)
     in
-    (* let open Core_kernel in *)
     let take_first
         (r1 : (global_rev, Future.error) result)
         (r2 : (global_rev, Future.error) result) :
@@ -154,21 +154,37 @@ module Hg_actual = struct
       in
       Future.merge primary_mergebase p2_mergebase max_global_rev
 
+  let hg_status_common_options repo =
+    [
+      "--cwd";
+      repo;
+      (* We need this "-I" because the "repo" (as defined by the path of .hhconfig)
+         might be within a wider hg repo. *)
+      "-I";
+      repo;
+      (* This is so that file paths are relative to .hhconfig `repo` rather than hg repo root *)
+      "--no-root-relative";
+    ]
+
   (** Returns the files changed since the given global_rev
    *
-   * hg status -n --rev r<global_rev> --cwd <repo> *)
+   * hg status -n --rev r<global_rev> --cwd <repo> -I <repo> --no-root-relative *)
   let files_changed_since_rev rev repo =
     let process =
-      exec_hg ["status"; "-n"; "--rev"; rev_string rev; "--cwd"; repo]
+      exec_hg
+        (["status"; "-n"; "--rev"; rev_string rev]
+        @ hg_status_common_options repo)
     in
     FutureProcess.make process Sys_utils.split_lines
 
   (** Returns the files changed in rev
    *
-   * hg status --change <rev> --cwd <repo> *)
+   * hg status --change <rev> --cwd <repo> -I <repo> --no-root-relative*)
   let files_changed_in_rev rev repo =
     let process =
-      exec_hg ["status"; "-n"; "--change"; rev_string rev; "--cwd"; repo]
+      exec_hg
+        (["status"; "-n"; "--change"; rev_string rev]
+        @ hg_status_common_options repo)
     in
     FutureProcess.make process Sys_utils.split_lines
 
@@ -178,7 +194,7 @@ module Hg_actual = struct
    * i.e. If we start at "start" revision, what files need be changed to get us
    * to "finish" revision.
    *
-   * hg status -n --rev start --rev end --cwd repo
+   * hg status -n --rev <start> --rev <end> --cwd <repo> -I <repo> --no-root-relative
    *)
   let files_changed_since_rev_to_rev ~start ~finish repo =
     if String.equal (rev_string start) (rev_string finish) then
@@ -190,18 +206,21 @@ module Hg_actual = struct
     else
       let process =
         exec_hg
-          [
-            "status";
-            "-n";
-            "--rev";
-            rev_string start;
-            "--rev";
-            rev_string finish;
-            "--cwd";
-            repo;
-          ]
+          ([
+             "status";
+             "-n";
+             "--rev";
+             rev_string start;
+             "--rev";
+             rev_string finish;
+           ]
+          @ hg_status_common_options repo)
       in
       FutureProcess.make process Sys_utils.split_lines
+
+  let hg_root () =
+    let process = exec_hg ["root"] in
+    FutureProcess.make process String.trim
 
   (** hg update --rev r<global_rev> --cwd <repo> *)
   let update_to_rev rev repo =
@@ -253,7 +272,8 @@ module Hg_mock = struct
 
     let current_working_copy_base_rev = ref @@ Future.of_value 0
 
-    let current_mergebase_hg_rev = ref @@ Future.of_value ""
+    let current_mergebase_hg_rev : Rev.t Future.t ref =
+      ref @@ Future.of_value ""
 
     let get_hg_revision_time _ _ = Future.of_value 123
 
@@ -295,7 +315,8 @@ module Hg_mock = struct
       Hashtbl.reset files_changed_since_rev_to_rev
   end
 
-  let current_mergebase_hg_rev _ = !Mocking.current_mergebase_hg_rev
+  let current_mergebase_hg_rev _ : Rev.t Future.t =
+    !Mocking.current_mergebase_hg_rev
 
   let current_working_copy_hg_rev _ = !Mocking.current_working_copy_hg_rev
 
@@ -318,6 +339,8 @@ module Hg_mock = struct
 
   let get_old_version_of_files ~rev:_ ~files:_ ~out:_ ~repo:_ =
     Future.of_value ()
+
+  let hg_root () : string Future.t = Future.of_value ""
 end
 
 include

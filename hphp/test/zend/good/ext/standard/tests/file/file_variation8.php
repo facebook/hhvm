@@ -6,17 +6,17 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing file() : variation ***\n";
-chdir(__SystemLib\hphp_test_tmproot());
+chdir(sys_get_temp_dir());
 $mainDir = "fileVar8.dir";
 $subDir = "fileVar8Sub";
-$absMainDir = __SystemLib\hphp_test_tmppath($mainDir);
+$absMainDir = sys_get_temp_dir().'/'.$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
 mkdir($absSubDir);
 
 
 
-$allDirs = varray[
+$allDirs = vec[
   // absolute paths
   "$absSubDir/",
   "$absSubDir/../".$subDir,

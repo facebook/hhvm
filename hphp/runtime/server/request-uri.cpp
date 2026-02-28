@@ -15,13 +15,12 @@
 */
 #include "hphp/runtime/server/request-uri.h"
 
-#include <sys/types.h>
 #include <sys/stat.h>
 
 #include <folly/portability/Unistd.h>
 
 #include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/static-content-cache.h"
@@ -43,10 +42,10 @@ RequestURI::RequestURI(const VirtualHost *vhost, Transport *transport,
 {
   if (!process(vhost, transport, sourceRoot, pathTranslation,
                transport->getServerObject()) ||
-      (m_forbidden && RuntimeOption::ForbiddenAs404)) {
+      (m_forbidden && Cfg::Server::ForbiddenAs404)) {
     m_forbidden = false; // put down forbidden flag since we are redirecting
-    if (!RuntimeOption::ErrorDocument404.empty()) {
-      String redirectURL(RuntimeOption::ErrorDocument404);
+    if (!Cfg::Server::ErrorDocument404.empty()) {
+      String redirectURL(Cfg::Server::ErrorDocument404);
       if (!m_queryString.empty()) {
         if (redirectURL.find('?') == -1) {
           redirectURL += "?";
@@ -108,7 +107,7 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
     return true;
   }
 
-  if (!RuntimeOption::GlobalDocument.empty()) {
+  if (!Cfg::Server::GlobalDocument.empty()) {
     // GlobalDocument option in use - never resolveURL and 404 if GlobalDocument
     // does not exist. Still check for rewrites.
 
@@ -118,7 +117,7 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
       return true;
     }
 
-    m_resolvedURL = String(RuntimeOption::GlobalDocument);
+    m_resolvedURL = String(Cfg::Server::GlobalDocument);
     if (virtualFileExists(vhost, sourceRoot, pathTranslation,
                           m_resolvedURL)) {
       m_globalDoc = true;
@@ -309,7 +308,7 @@ bool RequestURI::resolveURL(const VirtualHost *vhost,
           m_resolvedURL.charAt(m_resolvedURL.length() - 1) != '/') {
         m_resolvedURL += "/";
       }
-      m_resolvedURL += String(RuntimeOption::DefaultDocument);
+      m_resolvedURL += String(Cfg::Server::DefaultDocument);
       m_origPathInfo.reset();
       if (virtualFileExists(vhost, sourceRoot, pathTranslation,
                             m_resolvedURL)) {
@@ -354,7 +353,7 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
     m_path = fullname;
     m_absolutePath = String(sourceRoot) + m_path;
     processExt();
-    if (RuntimeOption::PathDebug) {
+    if (Cfg::Server::PathDebug) {
       m_triedURLs.push_back(m_absolutePath.toCppString());
     }
 
@@ -363,12 +362,12 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
       return true;
     }
 
-    if (RuntimeOption::AllowedFiles.find(fullname.c_str()) !=
-      RuntimeOption::AllowedFiles.end()) {
+    if (Cfg::Server::AllowedFiles.find(fullname.c_str()) !=
+      Cfg::Server::AllowedFiles.end()) {
       return true;
     }
-    if (RuntimeOption::RepoAuthoritative &&
-      !RuntimeOption::EnableStaticContentFromDisk) {
+    if (Cfg::Repo::Authoritative &&
+      !Cfg::Server::EnableStaticContentFromDisk) {
       return false;
     }
     struct stat st;
@@ -426,12 +425,12 @@ bool RequestURI::virtualFolderExists(const VirtualHost *vhost,
 
 void RequestURI::processExt() {
   m_ext = parseExt(m_path);
-  if (RuntimeOption::ForbiddenFileExtensions.empty()) {
+  if (Cfg::Server::ForbiddenFileExtensions.empty()) {
     return;
   }
   if (m_ext &&
-      RuntimeOption::ForbiddenFileExtensions.find(m_ext) !=
-      RuntimeOption::ForbiddenFileExtensions.end()) {
+      Cfg::Server::ForbiddenFileExtensions.find(m_ext) !=
+      Cfg::Server::ForbiddenFileExtensions.end()) {
     m_forbidden = true;
   }
 }
@@ -481,7 +480,7 @@ void RequestURI::clear() {
 
 const std::string RequestURI::getDefault404() {
   std::string ret = "404 File Not Found";
-  if (RuntimeOption::PathDebug) {
+  if (Cfg::Server::PathDebug) {
     ret += "<br/>Paths examined:<ul>";
     for (auto& url : m_triedURLs) {
       ret += "<li>" + url + "</li>";

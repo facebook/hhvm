@@ -181,46 +181,36 @@ pub fn escaped_bytes(s: &[u8]) -> Cow<'_, [u8]> {
         s.into()
     } else {
         let mut es: Vec<u8> = Vec::with_capacity(n);
-        n = 0;
         for i in s {
             match i {
                 b'"' | b'\\' => {
                     es.push(b'\\');
-                    n += 1;
                     es.push(*i);
                 }
                 b'\n' => {
                     es.push(b'\\');
-                    n += 1;
                     es.push(b'n');
                 }
                 b'\t' => {
                     es.push(b'\\');
-                    n += 1;
                     es.push(b't');
                 }
                 b'\r' => {
                     es.push(b'\\');
-                    n += 1;
                     es.push(b'r');
                 }
                 8 => {
                     es.push(b'\\');
-                    n += 1;
                     es.push(b'b');
                 }
                 x @ b' '..=b'~' => es.push(*x),
                 _ => {
                     es.push(b'\\');
-                    n += 1;
                     es.push(48 + i / 100);
-                    n += 1;
                     es.push(48 + (i / 10) % 10);
-                    n += 1;
                     es.push(48 + i % 10);
                 }
             }
-            n += 1;
         }
         es.into()
     }
@@ -228,8 +218,9 @@ pub fn escaped_bytes(s: &[u8]) -> Cow<'_, [u8]> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     fn parse_digit_tests() {

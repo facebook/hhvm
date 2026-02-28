@@ -1,4 +1,0 @@
-File "nullsafe3.php", line 3, characters 10-10:
-nullsafe3.php only declares `f`, it should be named f.php instead. (Lint[5564])
-File "nullsafe3.php", line 4, characters 8-15:
-You are using the `?->` operator but this object cannot be null. You can use the `->` operator instead. (Lint[5633])

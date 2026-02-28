@@ -17,7 +17,7 @@
 ///
 /// ```
 /// impl<T> OpcodeDisplay for PrintMe<T> {
-///     fn print_opcode(&self, w: &mut Self::Write) -> Result<(), Self::Error> {
+///     fn print_opcode(&self, w: &mut Self::Write, &mut AdataState) -> Result<(), Self::Error> {
 ///         match self.0 {
 ///             PrintMe::Jmp(target1) => {
 ///                 write!(w, "Jmp ")?;
@@ -30,7 +30,6 @@
 ///
 /// See print_opcode_derive::tests::test_basic() for a more detailed example
 /// output.
-///
 #[proc_macro_derive(PrintOpcode, attributes(print_opcode))]
 pub fn print_opcode_macro(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     match print_opcode_impl::build_print_opcode(input.into(), hhbc_gen::opcode_data()) {

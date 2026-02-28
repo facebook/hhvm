@@ -7,10 +7,10 @@
 * Testing how preg_replace reacts to being passed the wrong type of regex argument
 */
 echo "*** Testing preg_replace() : error conditions***\n";
-$regex_array = varray['abcdef', //Regex without delimiter
+$regex_array = vec['abcdef', //Regex without delimiter
 '/[a-zA-Z]', //Regex without closing delimiter
 '[a-zA-Z]/', //Regex without opening delimiter
-'/[a-zA-Z]/F', varray['[a-z]', //Array of Regexes
+'/[a-zA-Z]/F', vec['[a-z]', //Array of Regexes
 '[A-Z]', '[0-9]'], '/[a-zA-Z]/', //Regex string
 ];
 $replace = 1;

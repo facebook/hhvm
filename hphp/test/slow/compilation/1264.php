@@ -8,7 +8,7 @@ class A {
 }
 
  <<__EntryPoint>>
-function main_1264() {
+function main_1264() :mixed{
 $a = 1;
  $a = new A();
  $a->prop++;

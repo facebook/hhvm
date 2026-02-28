@@ -13,7 +13,7 @@ module Printexc = Stdlib.Printexc
 (** Callstack is simply a typed way to indicate that a string is a callstack *)
 type callstack = Callstack of string [@@deriving show]
 
-let () = Random.self_init ()
+let () = Random.self_init ~allow_in_tests:true ()
 
 module Map = struct end
 
@@ -112,7 +112,7 @@ let try_with_stack (f : unit -> 'a) : ('a, Exception.t) result =
 
 let set_of_list l = List.fold_right l ~f:SSet.add ~init:SSet.empty
 
-(* \A\B\C -> A\B\C *)
+(** \A\B\C -> A\B\C *)
 let strip_ns s = String.chop_prefix_if_exists s ~prefix:"\\"
 
 let strip_xhp_ns s = String.chop_prefix_if_exists s ~prefix:":"
@@ -121,12 +121,12 @@ let strip_both_ns s = s |> strip_ns |> strip_xhp_ns
 
 (* \HH\C -> C
  * \HH\Lib\C -> C
- * \A\B\C -> \A\B\C
+ * \A\B\C -> A\B\C
  *)
 let strip_hh_lib_ns s =
   s
-  |> String.chop_prefix_if_exists ~prefix:"\\HH\\Lib"
-  |> String.chop_prefix_if_exists ~prefix:"\\HH"
+  |> String.chop_prefix_if_exists ~prefix:"\\HH\\Lib\\"
+  |> String.chop_prefix_if_exists ~prefix:"\\HH\\"
   |> strip_ns
 
 (* A\B\C -> \A\B\C *)

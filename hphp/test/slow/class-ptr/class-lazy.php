@@ -3,21 +3,21 @@
 class Foo {}
 class Bar {
   const FOO = Foo::class;
-  public static function sm() {
+  public static function sm() :mixed{
     var_dump("sm");
   }
   public static int $sp = 10;
-  public function m() {
+  public function m() :mixed{
     var_dump("m");
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $c = Bar::class;
   var_dump($c);
   var_dump(is_scalar($c));
-  var_dump(HH\class_get_class_name($c));
+  var_dump(HH\class_to_classname($c));
   $v = vec[Bar::class, Fizz::class]; // Fizz is not a class
   var_dump($v);
   var_dump($c::FOO);

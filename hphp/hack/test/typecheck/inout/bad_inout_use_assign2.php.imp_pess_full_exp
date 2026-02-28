@@ -1,0 +1,6 @@
+File "bad_inout_use_assign2.php", line 4, characters 11-12:
+Invalid assignment to an `inout` parameter (Typing[4337])
+  File "bad_inout_use_assign2.php", line 3, characters 18-23:
+  Expected `string`
+  File "bad_inout_use_assign2.php", line 7, characters 18-25:
+  But got `arraykey`

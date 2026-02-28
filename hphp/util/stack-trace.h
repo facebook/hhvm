@@ -26,9 +26,7 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/portability.h"
 
-#ifndef _MSC_VER
 #include <dlfcn.h>
-#endif
 
 namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
@@ -66,11 +64,11 @@ struct StackTraceBase {
   static constexpr unsigned kMaxFrame = 175;
 
   static bool Enabled;
-  static const char* const* FunctionBlacklist;
-  static unsigned FunctionBlacklistCount;
+  static const char* const* FunctionIgnorelist;
+  static unsigned FunctionIgnorelistCount;
 
  protected:
-  StackTraceBase();
+  StackTraceBase() = default;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -161,13 +159,13 @@ struct StackTraceNoHeap : StackTraceBase {
    * Construct the curent stacktrace if `trace' is true, else an empty
    * stacktrace.
    */
-  explicit StackTraceNoHeap(bool trace = true);
+  explicit StackTraceNoHeap(bool trace = true, bool fallback = false);
 
   /*
    * Log process/thread information, plus any extra logging that was queued.
    */
-  void log(const char* errorType, int fd, const char* buildId,
-           int debuggerCount) const;
+  static void log(const char* errorType, int fd, const char* buildId,
+                  int debuggerCount);
 
   /*
    * Log the C++ stack trace
@@ -194,4 +192,3 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 }
-

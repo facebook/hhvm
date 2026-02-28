@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/base/program-functions.h"
 
+#include <atomic>
+
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/backtrace.h"
@@ -37,70 +39,75 @@
 #include "hphp/runtime/base/perf-mem-event.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/request-id.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/thread-safe-setlocale.h"
 #include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/verify-types.h"
 #include "hphp/runtime/debugger/debugger.h"
-#include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
-#include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/extension-registry.h"
-#include "hphp/runtime/ext/json/ext_json.h"
-#include "hphp/runtime/ext/server/ext_server.h"
-#include "hphp/runtime/ext/std/ext_std_file.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/strobelight/ext_strobelight.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
-#include "hphp/runtime/ext/xhprof/ext_xhprof.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/http-server.h"
-#include "hphp/runtime/server/log-writer.h"
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/replay-transport.h"
-#include "hphp/runtime/server/rpc-request-handler.h"
+#include "hphp/runtime/server/xbox-request-handler.h"
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/server/warmup-request-handler.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/jit/code-cache.h"
+#include "hphp/runtime/vm/jit/mcgen-async.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/translation-stats.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
+#include "hphp/runtime/vm/source-location.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/unit-parser.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/arch.h"
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/capability.h"
-#include "hphp/util/compatibility.h"
+#include "hphp/util/configs/adminserver.h"
+#include "hphp/util/configs/debug.h"
+#include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/errorhandling.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/log.h"
+#include "hphp/util/configs/server.h"
+#include "hphp/util/configs/xenon.h"
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/hardware-counter.h"
+#include "hphp/util/hugetlb.h"
 #include "hphp/util/kernel-version.h"
-#ifndef _MSC_VER
 #include "hphp/util/light-process.h"
-#endif
 #include "hphp/util/managed-arena.h"
 #include "hphp/util/maphuge.h"
 #include "hphp/util/perf-event.h"
+#include "hphp/util/portability.h"
 #include "hphp/util/process-exec.h"
 #include "hphp/util/process.h"
 #include "hphp/util/rds-local.h"
@@ -115,7 +122,12 @@
 #include "hphp/zend/zend-string.h"
 #include "hphp/zend/zend-strtod.h"
 
+#ifdef HHVM_FACEBOOK
+#include "roarjit/Init.h"
+#endif
+
 #include <folly/CPortability.h>
+#include <folly/json/json.h>
 #include <folly/Portability.h>
 #include <folly/Random.h>
 #include <folly/Range.h>
@@ -128,15 +140,14 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <boost/filesystem.hpp>
 
-#ifndef FACEBOOK
+#ifndef HHVM_FACEBOOK
 // Needed on libevent2
 #include <event2/thread.h>
 #endif
 
 #include <oniguruma.h>
-// Onigurama defines UChar to unsigned char, but ICU4C defines it to signed
+// Oniguruma defines UChar to unsigned char, but ICU4C defines it to signed
 // 16-bit int. This is supposed to be resolved by ONIG_ESCAPE_UCHAR_COLLISION,
 // however this isn't fully supported in 6.8.0 or 6.8.1.
 //
@@ -146,21 +157,16 @@
 // https://github.com/kkos/oniguruma/commit/e79406479b6be4a56e40ede6c1a87b51fba073a2
 #undef UChar
 #include <signal.h>
-#include <libxml/parser.h>
 
 #include <chrono>
 #include <exception>
+#include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
-
-#ifdef _MSC_VER
-#include <windows.h>
-#include <winuser.h>
-#endif
 
 using namespace boost::program_options;
 using std::cout;
@@ -187,8 +193,63 @@ void pcre_reinit();
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
+enum class ExecutionMode {
+  RUN,
+  DEBUG,
+  NOTEBOOK,
+  EVAL,
+  TRANSLATE,
+  SERVER,
+  REPLAY,
+  DAEMON,
+  DUMPHHAS,
+  VERIFY,
+  VSDEBUG,
+  GETOPTION,
+  DUMPCOVERAGE,
+  LIVE_TRANSLATE
+};
+
+void validate(boost::any& v, const std::vector<std::string>& values, ExecutionMode*, int) {
+    // Make sure no previous assignment to 'v' was made.
+    validators::check_first_occurrence(v);
+    const std::string& s = validators::get_single_string(values);
+
+    if (s == "run") {
+        v = boost::any(ExecutionMode::RUN);
+    } else if (s == "debug" || s == "d") {
+        v = boost::any(ExecutionMode::DEBUG);
+    } else if (s == "notebook") {
+        v = boost::any(ExecutionMode::NOTEBOOK);
+    } else if (s == "eval") {
+        v = boost::any(ExecutionMode::EVAL);
+    } else if (s == "translate" || s == "t") {
+        v = boost::any(ExecutionMode::TRANSLATE);
+    } else if (s == "server" || s == "s") {
+        v = boost::any(ExecutionMode::SERVER);
+    } else if (s == "replay") {
+        v = boost::any(ExecutionMode::REPLAY);
+    } else if (s == "daemon") {
+        v = boost::any(ExecutionMode::DAEMON);
+    } else if (s == "dumphhas") {
+        v = boost::any(ExecutionMode::DUMPHHAS);
+    } else if (s == "verify") {
+        v = boost::any(ExecutionMode::VERIFY);
+    } else if (s == "vsdebug") {
+        v = boost::any(ExecutionMode::VSDEBUG);
+    } else if (s == "getoption") {
+        v = boost::any(ExecutionMode::GETOPTION);
+    } else if (s == "dumpcoverage") {
+        v = boost::any(ExecutionMode::DUMPCOVERAGE);
+    } else if (s == "live") {
+        v = boost::any(ExecutionMode::LIVE_TRANSLATE);
+    } else {
+        throw validation_error(validation_error::invalid_option_value);
+    }
+}
+
 struct ProgramOptions {
-  std::string mode;
+  ExecutionMode mode;
   std::vector<std::string> config;
   std::vector<std::string> confStrings;
   std::vector<std::string> iniStrings;
@@ -205,7 +266,6 @@ struct ProgramOptions {
   std::vector<std::string> args;
   std::string buildId;
   std::string instanceId;
-  int xhprofFlags;
   std::string show;
   std::string parse;
   int vsDebugPort;
@@ -234,9 +294,8 @@ const StaticString
   s_HHVM("HHVM"),
   s_HHVM_JIT("HHVM_JIT"),
   s_HHVM_ARCH("HHVM_ARCH"),
-  s_REQUEST_START_TIME("REQUEST_START_TIME"),
-  s_REQUEST_TIME("REQUEST_TIME"),
-  s_REQUEST_TIME_FLOAT("REQUEST_TIME_FLOAT"),
+  s_REQUEST_TIME_NS("REQUEST_TIME_NS"),
+  s_REQUEST_TIME_MONOTONIC_NS("REQUEST_TIME_MONOTONIC_NS"),
   s_DOCUMENT_ROOT("DOCUMENT_ROOT"),
   s_SCRIPT_FILENAME("SCRIPT_FILENAME"),
   s_SCRIPT_NAME("SCRIPT_NAME"),
@@ -412,10 +471,10 @@ static void handle_exception_append_bt(std::string& errorMsg,
   }
 }
 
-void bump_counter_and_rethrow(bool isPsp) {
+void bump_counter_and_rethrow(bool isPsp, ExecutionContext* context) {
   try {
     throw;
-  } catch (const RequestTimeoutException& e) {
+  } catch (const RequestTimeoutException&) {
     if (isPsp) {
       static auto requestTimeoutPSPCounter = ServiceData::createTimeSeries(
         "requests_timed_out_psp", {ServiceData::StatsType::COUNT});
@@ -427,8 +486,9 @@ void bump_counter_and_rethrow(bool isPsp) {
       requestTimeoutCounter->addValue(1);
       ServerStats::Log("request.timed_out.non_psp", 1);
     }
+    context->markTimedOut();
     throw;
-  } catch (const RequestCPUTimeoutException& e) {
+  } catch (const RequestCPUTimeoutException&) {
     if (isPsp) {
       static auto requestCPUTimeoutPSPCounter = ServiceData::createTimeSeries(
         "requests_cpu_timed_out_psp", {ServiceData::StatsType::COUNT});
@@ -440,8 +500,9 @@ void bump_counter_and_rethrow(bool isPsp) {
       requestCPUTimeoutCounter->addValue(1);
       ServerStats::Log("request.cpu_timed_out.non_psp", 1);
     }
+    context->markTimedOut();
     throw;
-  } catch (const RequestMemoryExceededException& e) {
+  } catch (const RequestMemoryExceededException&) {
     if (isPsp) {
       static auto requestMemoryExceededPSPCounter =
         ServiceData::createTimeSeries(
@@ -467,15 +528,14 @@ void bump_counter_and_rethrow(bool isPsp) {
       requestHostOOMCounter->addValue(1);
       ServerStats::Log("request.oom_killed.non_psp", 1);
     }
-    if (RuntimeOption::EvalLogKilledRequests && StructuredLog::enabled()) {
+    if (Cfg::GC::LogKilledRequests && StructuredLog::enabled()) {
       StructuredLogEntry entry;
       entry.setInt("mem_used", e.m_usedBytes);
       entry.setInt("is_psp", static_cast<int>(isPsp));
-      if (g_context) {
-        entry.setStr("url", g_context->getRequestUrl());
-      }
+      entry.setStr("url", context->getRequestUrl());
       StructuredLog::log("hhvm_oom_killed", entry);
     }
+    context->markOOMKilled();
     throw;
   }
 }
@@ -487,16 +547,14 @@ static void handle_exception_helper(bool& ret,
                                     bool& error,
                                     bool richErrorMsg) {
   // Clear oom/timeout while handling exception and restore them afterwards.
-  auto& flags = stackLimitAndSurprise();
-  auto const origFlags = flags.fetch_and(~ResourceFlags) & ResourceFlags;
-
-  SCOPE_EXIT {
-    flags.fetch_or(origFlags);
-  };
+  StackLimitAndSurpriseFlags::FlagSaver saver(
+    stackLimitAndSurprise(),
+    ResourceFlags
+  );
 
   try {
-    bump_counter_and_rethrow(false /* isPsp */);
-  } catch (const Eval::DebuggerException& e) {
+    bump_counter_and_rethrow(false /* isPsp */, context);
+  } catch (const Eval::DebuggerException&) {
     throw;
   } catch (const ExitException& e) {
     if (where == ContextOfException::ReqInit) {
@@ -613,7 +671,7 @@ static void handle_resource_exceeded_exception() {
   } catch (RequestCPUTimeoutException&) {
     RID().triggerTimeout(TimeoutCPUTime);
   } catch (RequestMemoryExceededException&) {
-    setSurpriseFlag(MemExceededFlag);
+    stackLimitAndSurprise().setFlag(MemExceededFlag);
     RID().setRequestOOMFlag();
   } catch (...) {}
 }
@@ -660,6 +718,13 @@ void handle_destructor_exception(const char* situation) {
   }
 }
 
+void init_server_request_time(Array& server) {
+  auto const nowRealtimeNs = gettime_ns(CLOCK_REALTIME);
+  auto const nowMonotonicNs = gettime_ns(CLOCK_MONOTONIC);
+  server.set(s_REQUEST_TIME_NS, nowRealtimeNs);
+  server.set(s_REQUEST_TIME_MONOTONIC_NS, nowMonotonicNs);
+}
+
 static RDS_LOCAL(rqtrace::Trace, tl_cmdTrace);
 
 void init_command_line_session(int argc, char** argv) {
@@ -674,7 +739,7 @@ void init_command_line_session(int argc, char** argv) {
   hphp_session_init(Treadmill::SessionKind::CLISession);
   auto const context = g_context.getNoCheck();
   context->obSetImplicitFlush(true);
-  if (RuntimeOption::EvalTraceCommandLineRequest) {
+  if (Cfg::Eval::TraceCommandLineRequest) {
     tl_cmdTrace.destroy();
     context->setRequestTrace(tl_cmdTrace.getCheck());
   }
@@ -683,19 +748,16 @@ void init_command_line_session(int argc, char** argv) {
 void
 init_command_line_globals(
   int argc, char** argv, char** envp,
-  int xhprof,
   const std::map<std::string, std::string>& serverVariables,
   const std::map<std::string, std::string>& envVariables
 ) {
-  auto& variablesOrder = RID().getVariablesOrder();
-
-  if (variablesOrder.find('e') != std::string::npos ||
-      variablesOrder.find('E') != std::string::npos) {
+  // Env
+  {
     auto envArr = Array::CreateDict();
     process_env_variables(envArr, envp, envVariables);
     envArr.set(s_HPHP, 1);
     envArr.set(s_HHVM, 1);
-    if (RuntimeOption::EvalJit) {
+    if (Cfg::Jit::Enabled) {
       envArr.set(s_HHVM_JIT, 1);
     }
     switch (arch()) {
@@ -711,27 +773,15 @@ init_command_line_globals(
 
   process_cmd_arguments(argc, argv);
 
-  if (variablesOrder.find('s') != std::string::npos ||
-      variablesOrder.find('S') != std::string::npos) {
+  // Server
+  {
     auto serverArr = Array::CreateDict();
     process_env_variables(serverArr, envp, envVariables);
-    time_t now;
-    struct timeval tp = {0};
-    double now_double;
-    if (!gettimeofday(&tp, nullptr)) {
-      now_double = (double)(tp.tv_sec + tp.tv_usec / 1000000.00);
-      now = tp.tv_sec;
-    } else {
-      now = time(nullptr);
-      now_double = (double)now;
-    }
     String file = empty_string();
     if (argc > 0) {
       file = String::attach(StringData::Make(argv[0], CopyString));
     }
-    serverArr.set(s_REQUEST_START_TIME, now);
-    serverArr.set(s_REQUEST_TIME, now);
-    serverArr.set(s_REQUEST_TIME_FLOAT, now_double);
+    init_server_request_time(serverArr);
     serverArr.set(s_DOCUMENT_ROOT, empty_string_tv());
     serverArr.set(s_SCRIPT_FILENAME, file);
     serverArr.set(s_SCRIPT_NAME, file);
@@ -740,8 +790,7 @@ init_command_line_globals(
     serverArr.set(s_argc, php_global(s_argc));
     serverArr.set(s_PWD, g_context->getCwd());
     char hostname[1024];
-    if (RuntimeOption::ServerExecutionMode() &&
-        !is_cli_server_mode() &&
+    if (!is_any_cli_mode() &&
         !gethostname(hostname, sizeof(hostname))) {
       // gethostname may not null-terminate
       hostname[sizeof(hostname) - 1] = '\0';
@@ -755,15 +804,11 @@ init_command_line_globals(
     php_global_set(s__SERVER, std::move(serverArr));
   }
 
-  if (xhprof) {
-    HHVM_FN(xhprof_enable)(xhprof, null_array);
+  if (Cfg::Server::RequestTimeoutSeconds) {
+    RID().setTimeout(Cfg::Server::RequestTimeoutSeconds);
   }
 
-  if (RuntimeOption::RequestTimeoutSeconds) {
-    RID().setTimeout(RuntimeOption::RequestTimeoutSeconds);
-  }
-
-  if (RuntimeOption::XenonForceAlwaysOn) {
+  if (Cfg::Xenon::ForceAlwaysOn) {
     Xenon::getInstance().surpriseAll();
   }
 
@@ -771,40 +816,29 @@ init_command_line_globals(
   DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestInitHook());
 }
 
-void execute_command_line_begin(int argc, char **argv, int xhprof) {
+void execute_command_line_begin(int argc, char **argv) {
   init_command_line_session(argc, argv);
-  init_command_line_globals(argc, argv, environ, xhprof,
+  init_command_line_globals(argc, argv, environ,
                             RuntimeOption::ServerVariables,
                             RuntimeOption::EnvVariables);
 }
 
-void execute_command_line_end(int xhprof, bool coverage, const char *program) {
-  if (xhprof) {
-    Variant profileData = HHVM_FN(xhprof_disable)();
-    if (!profileData.isNull()) {
-      HHVM_FN(var_dump)(Variant::attach(
-        HHVM_FN(json_encode)(HHVM_FN(xhprof_disable)())
-      ));
-    }
-  }
+void execute_command_line_end(bool coverage, const char *program,
+                              bool runCleanup) {
   auto& ti = RI();
   if (coverage && ti.m_reqInjectionData.getCoverage() &&
-      !RuntimeOption::CodeCoverageOutputFile.empty()) {
+      !Cfg::Eval::CodeCoverageOutputFile.empty()) {
     ti.m_coverage.dumpOnExit();
   }
   g_context->onShutdownPostSend(); // runs more php
   Eval::Debugger::InterruptPSPEnded(program);
-  hphp_context_exit();
-  hphp_session_exit();
+  if (runCleanup) {
+    hphp_context_exit();
+    hphp_session_exit();
+  }
 }
 
-#if defined(__APPLE__) || defined(_MSC_VER)
-const void* __hot_start = nullptr;
-const void* __hot_end = nullptr;
-#define AT_END_OF_TEXT
-#else
-#define AT_END_OF_TEXT    __attribute__((__section__(".stub")))
-#endif
+#define AT_END_OF_TEXT    __attribute__((__section__(".never_hugify")))
 
 #define ALIGN_HUGE_PAGE   __attribute__((__aligned__(2 * 1024 * 1024)))
 
@@ -828,75 +862,137 @@ hugifyMemcpy(uint64_t* dst, uint64_t* src, size_t sz) {
   }
 }
 
-static void
+static bool
 NEVER_INLINE AT_END_OF_TEXT ALIGN_HUGE_PAGE OPTIMIZE_2
 EXTERNALLY_VISIBLE
 hugifyText(char* from, char* to) {
 #if !FOLLY_SANITIZE && defined MADV_HUGEPAGE
   if (from > to || (to - from) < sizeof(uint64_t)) {
-    // This shouldn't happen if HHVM is behaving correctly (I think),
-    // but if it does then there is nothing to do and we should bail
-    // out early because the call to wordcpy() below can't handle
-    // zero size or negative sizes.
-    return;
+    return false;
   }
   size_t sz = to - from;
 
-#ifdef FACEBOOK
-  if (RuntimeOption::EvalNewTHPHotText) {
-    auto const hasKernelSupport = [] () -> bool {
-      KernelVersion version;
-      if (version.m_major < 5) return false;
-      if (version.m_major > 5) return true;
-      if (version.m_minor > 2) return true;
-      if ((version.m_minor == 2) && (version.m_fbk >= 5)) return true;
+#ifdef __x86_64__
+  auto const hasKernelSupport = [] () -> bool {
+    KernelVersion version;
+    if (version.m_major < 5) return false;
+    if (version.m_major > 5) return true;
+    if (version.m_minor > 2) return true;
       return false;
-    };
-    if (hasKernelSupport()) {
-      // The new way doesn't work if the region is locked. Note that this means
-      // Server.LockCodeMemory won't be applied to the region--there is no
-      // guarantee that the region would stay in memory, especially if the
-      // kernel fails to find huge pages for us.
-      munlock(from, sz);
-      madvise(from, sz, MADV_HUGEPAGE);
-      return;
-    }
+  };
+  if (Cfg::Eval::NewTHPHotText && hasKernelSupport()) {
+    // The new way doesn't work if the region is locked. Note that this means
+    // Server.LockCodeMemory won't be applied to the region--there is no
+    // guarantee that the region would stay in memory, especially if the kernel
+    // fails to find huge pages for us.
+    munlock(from, sz);
+    madvise(from, sz, MADV_HUGEPAGE);
+    Logger::FInfo("Mapped text section onto THP pagecache from {} to {}.",
+                  (uint64_t*)from, (uint64_t*)to);
+    return true;
   }
 #endif
 
-  void* mem = malloc(sz);
-  memcpy(mem, from, sz);
-
-  // This maps out a portion of our executable
-  // We need to be very careful about what we do
-  // until we replace the original code
-  mmap(from, sz,
-       PROT_READ | PROT_WRITE | PROT_EXEC,
-       MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
-       -1, 0);
-  // This is in glibc, which isn't a problem, except for
-  // the trampoline code in .plt, which we dealt with
-  // in the linker script
-  madvise(from, sz, MADV_HUGEPAGE);
-  // Don't use memcpy because its probably one of the
-  // functions thats been mapped out.
-  // Needs the attribute((optimize("2")) to prevent
-  // g++ from turning this back into memcpy(!)
-  hugifyMemcpy((uint64_t*)from, (uint64_t*)mem, sz);
-  mprotect(from, sz, PROT_READ | PROT_EXEC);
-  free(mem);
-  mlock(from, to - from);
-  Debug::DebugInfo::setPidMapOverlay(from, to);
-  std::stringstream ss;
-  ss << "Mapped text section onto huge pages from " <<
-      std::hex << (uint64_t*)from << " to " << (uint64_t*)to;
-  Logger::Info(ss.str());
+  // We will try to get the hot text in [from, to) on 2M hugetlb pages in 3
+  // steps.
+  // Step 1: get some 2M hugetlb pages, but don't overwrite the hot text yet.
+  // Step 2: copy content of hot text to the hugetlb pages.
+  // Step 3: use `mremap()` to replace [from, to) with the hugetlb pages that
+  // already contain the original content.
+  //
+  // This approach has the advantage that the hot range always contains the
+  // right sequences of instructions (except when the kernel is doing mremap,
+  // which isn't visible in user space as we only have a single thread running
+  // here), so we don't have to worry about problems such as unavailability of
+  // memcpy.
+  HugePageInfo info = get_huge2m_info();
+  if (info.free_hugepages * size2m < sz) {
+    Logger::Warning("Insufficient hugetlb reservation for hot text.");
+    return false;
+  }
+  auto tempPages = mmap(nullptr,
+                        sz + size2m,   // extra size for alignment
+                        PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+  if (tempPages == MAP_FAILED) {
+    perror("Failed to create temporary mapping");
+    return false;
+  }
+  // An extra copy of the hot text, just in case the kernel messes things up
+  // when manipulating the mappings.
+  auto backup = static_cast<char*>(malloc(sz));
+  memcpy(backup, from, sz);
+  SCOPE_EXIT {
+    munmap(tempPages, sz);
+    free(backup);
+    Debug::DebugInfo::setPidMapOverlay(from, to);
+  };
+  auto aligned = static_cast<char*>(ru<size2m>(tempPages));
+  auto const requestedPages = sz / size2m;
+  // Now map some hugetlb pages starting at `aligned`.
+  auto const actualPages = remap_interleaved_2m_pages(aligned, requestedPages);
+  if (actualPages < requestedPages) {
+    Logger::Warning("Insufficient hugetlb reservation for hot text.");
+    return false;
+  }
+  memcpy(aligned, from, sz);
+  mprotect(aligned, sz, PROT_READ | PROT_EXEC);
+  // We might have done mlock() when obtaining hugetlb pages, so unlock before
+  // moving the mapping.
+  munlock(aligned, sz);
+  // Replace the original mapping one page at a time using mremap(), which has
+  // the limitation of only handling one mapping at a time.
+  for (size_t offset = 0; offset < sz; offset += size2m) {
+    if (MAP_FAILED == mremap(aligned + offset, size2m, size2m,
+                             MREMAP_MAYMOVE | MREMAP_FIXED,
+                             from + offset)) {
+      perror("mremap() failed");
+      // I don't know why mremap() would fail here. If it does fail, the kernel
+      // should not change existing mapping. However, we don't want to rely on
+      // the kernel doing the right thing. Check and restore the pages from
+      // backup if needed.
+      bool needsRestoration = false;
+      unsigned char status[size2m / size4k];
+      if (mincore(from + offset, size2m, status) == -1) {
+        // The range now contains unmapped memory, overwrite the mapping and
+        // restore from backup.
+        needsRestoration = true;
+      } else {
+        needsRestoration = memcmp(from + offset, backup + offset, size2m);
+      }
+      if (needsRestoration) {
+        void* restored = mmap(from + offset, size2m,
+                              PROT_READ | PROT_WRITE,
+                              MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
+                              -1, 0);
+        if (restored != from + offset) {
+          // Either MAP_FAILED, or maybe MAP_FIXED doesn't work. At this point,
+          // there is not much we can do. The process will likely crash soon.
+          perror("mmap() failed when recovering hot text mapping");
+          return false;
+        }
+        hugifyMemcpy((uint64_t*)(from + offset), (uint64_t*)(backup + offset), size2m);
+        mprotect(from + offset, size2m, PROT_READ | PROT_EXEC);
+      }
+      if (offset > size2m) {
+        Logger::FWarning("Mapped text section onto hugetlb pages from {} to {},"
+                         "which is smaller than the intended size of {} bytes",
+                         (uint64_t*)from, (uint64_t*)(from + offset - size2m),
+                         sz);
+      } else {
+        Logger::FWarning("Unable to get any page on hugetlb pages");
+      }
+      return false;
+    }
+  }
+  Logger::FInfo("Mapped text section onto hugetlb pages from {} to {}",
+                (uint64_t*)from, (uint64_t*)to);
+  return true;
 #endif
+  return false;
 }
 
 static void pagein_self(void) {
-#if defined(USE_JEMALLOC) && (JEMALLOC_VERSION_MAJOR >= 5)
-  // jemalloc 5 has background threads, which handle purging asynchronously.
+#if defined(USE_JEMALLOC)
   bool background_threads = false;
   if (mallctlRead<bool, true>("background_thread", &background_threads)) {
     background_threads = false;
@@ -939,36 +1035,33 @@ static void pagein_self(void) {
     }
   }
 
-#ifdef __linux__
-  if (RO::ServerSchedPolicy >= 0 && RO::ServerSchedPolicy <= SCHED_BATCH) {
+  if (Cfg::Server::SchedPolicy >= 0 && Cfg::Server::SchedPolicy <= SCHED_BATCH) {
     sched_param param{};
-    if (RO::ServerSchedPolicy == SCHED_RR) {
+    if (Cfg::Server::SchedPolicy == SCHED_RR) {
       param.sched_priority =
-        std::max(0, sched_get_priority_min(RO::ServerSchedPolicy));
+        std::max(0, sched_get_priority_min(Cfg::Server::SchedPolicy));
     }
-    auto const ret = sched_setscheduler(0, RO::ServerSchedPolicy, &param);
+    auto const ret = sched_setscheduler(0, Cfg::Server::SchedPolicy, &param);
     if (ret) {
       Logger::Error("failed to adjust scheduling priority: " +
                     folly::errnoStr(errno));
     } else {
       Logger::Info("successfully adjusted scheduling priority to %d",
-                   RO::ServerSchedPolicy);
+                   Cfg::Server::SchedPolicy);
     }
   }
-  if (RO::ServerSchedPriority) {
-    auto const ret = setpriority(PRIO_PROCESS, 0, RO::ServerSchedPriority);
+  if (Cfg::Server::SchedPriority) {
+    auto const ret = setpriority(PRIO_PROCESS, 0, Cfg::Server::SchedPriority);
     if (ret) {
-      Logger::FError("failed to setpriority to {}: {}", RO::ServerSchedPriority,
+      Logger::FError("failed to setpriority to {}: {}", Cfg::Server::SchedPriority,
                      folly::errnoStr(errno));
     }
   }
-#endif
 
   auto mapped_huge = false;
-#ifdef __linux__
   auto const try_map_huge =
     hugePagesSupported() &&
-    RuntimeOption::EvalMaxHotTextHugePages > 0 &&
+    Cfg::Eval::MaxHotTextHugePages > 0 &&
     (char*)__hot_start != nullptr && (char*)__hot_end != nullptr &&
     nThreads <= 1;
 
@@ -977,32 +1070,32 @@ static void pagein_self(void) {
       Logger::Warning("Failed to hugify the .text section");
     }
   };
-#else
-  // MacOS doesn't have transparent huge pages.  It uses mmap() with
-  // VM_FLAGS_SUPERPAGE_SIZE_2MB, which we don't do here, so don't bother.
-  auto constexpr try_map_huge = false;
-#endif
 
-  char mapname[PATH_MAX];
-  // pad due to the spaces between the inode number and the mapname
-  auto const bufsz =
-    sizeof(unsigned long) * 4 + sizeof(mapname) + sizeof(char) * 11 + 100;
-  auto buf = static_cast<char*>(malloc(bufsz));
   if (auto fp = fopen("/proc/self/maps", "r")) {
+    SCOPE_EXIT {
+      fclose(fp);
+    };
     while (!feof(fp)) {
-      if (fgets(buf, bufsz, fp) == 0)
+      char line[PATH_MAX + 256];
+      if (fgets(line, sizeof(line), fp) == 0)
         break;
       unsigned long begin, end, inode, pgoff;
+      char mapname[PATH_MAX];
       char perm[5];
       char dev[11];
-      int r = sscanf(buf, "%lx-%lx %4s %lx %10s %ld %s",
+      int r = sscanf(line, "%lx-%lx %4s %lx %10s %ld %s",
                      &begin, &end, perm, &pgoff, dev, &inode, mapname);
 
-      // page in read-only segments that correspond to a file on disk
+      // Look for private, read/executable segments that correspond to a file on
+      // disk.
       if (r != 7 ||
-          perm[0] != 'r' ||
-          perm[1] != '-' ||
+          memcmp(perm, "r-xp", 4) ||
           access(mapname, F_OK) != 0) {
+        continue;
+      }
+      // Do it for the main binary only.
+      if (Process::Argv[0] &&
+          strcmp(basename(mapname), basename(Process::Argv[0]))) {
         continue;
       }
 
@@ -1010,92 +1103,66 @@ static void pagein_self(void) {
       auto endPtr = (char*)end;
       auto hotStart = (char*)__hot_start;
       auto hotEnd = (char*)__hot_end;
-      const size_t hugePageBytes = 2L * 1024 * 1024;
 
-      if (mlock(beginPtr, end - begin) == 0) {
-        if (try_map_huge && beginPtr <= hotStart && hotEnd <= endPtr) {
-          char* from = hotStart - ((intptr_t)hotStart & (hugePageBytes - 1));
-          char* to = hotEnd + (hugePageBytes - 1);
-          to -= (intptr_t)to & (hugePageBytes - 1);
-          const size_t maxHugeHotTextBytes =
-            RuntimeOption::EvalMaxHotTextHugePages * hugePageBytes;
-          if (to - from >  maxHugeHotTextBytes) {
-            to = from + maxHugeHotTextBytes;
-          }
-          // Check that hugifyText() does not start in hot text.
-          if (to <= (void*)hugifyText || from > (void*)hugifyText) {
-            mapped_huge = true;
-            hugifyText(from, to);
-          }
+      if (try_map_huge && beginPtr <= hotStart && hotEnd <= endPtr) {
+        char* from = rd<size2m>(hotStart);
+        if (from < beginPtr) from += size2m;
+        char* to = ru<size2m>(hotEnd);
+        if (to > endPtr) to -= size2m;
+        if (to <= from) continue;
+        const size_t maxHugeHotTextBytes =
+          Cfg::Eval::MaxHotTextHugePages * size2m;
+        if (to - from >  maxHugeHotTextBytes) {
+          to = from + maxHugeHotTextBytes;
         }
-        if (!RuntimeOption::LockCodeMemory) {
-          munlock(beginPtr, end - begin);
+        // Check that hugifyText() does not start in hot text.
+        if (to <= (void*)hugifyText || from > (void*)hugifyText) {
+          mapped_huge |= hugifyText(from, to);
         }
       }
+      if (Cfg::Server::LockCodeMemory) {
+        mlock(beginPtr, end - begin);
+      }
     }
-    fclose(fp);
   }
-  free(buf);
 }
 
 /* Sets RuntimeOption::ExecutionMode according to commandline options prior to
- * config load.  Returns false upon unrecognized mode.
+ * config load.
  */
-static bool set_execution_mode(folly::StringPiece mode) {
-  if (mode == "daemon" || mode == "server" || mode == "replay") {
-    RuntimeOption::ServerMode = true;
-    Logger::Escape = true;
-    return true;
-  } else if (mode == "run" || mode == "debug" || mode == "translate" ||
-             mode == "dumphhas" || mode == "verify" || mode == "vsdebug" ||
-             mode == "getoption" || mode == "eval" || mode == "dumpcoverage") {
-    // We don't run PHP in "translate" mode, so just treat it like cli mode.
-    RuntimeOption::ServerMode = false;
-    Logger::Escape = false;
-    return true;
-  }
-  // Invalid mode.
-  return false;
+static void set_execution_mode(ExecutionMode mode) {
+    switch (mode) {
+        case ExecutionMode::DAEMON:
+        case ExecutionMode::SERVER:
+        case ExecutionMode::REPLAY:
+            Cfg::Server::Mode = true;
+            Logger::Escape = true;
+            return;
+        case ExecutionMode::RUN:
+        case ExecutionMode::DEBUG:
+        case ExecutionMode::NOTEBOOK:
+        case ExecutionMode::TRANSLATE:
+        case ExecutionMode::DUMPHHAS:
+        case ExecutionMode::VERIFY:
+        case ExecutionMode::VSDEBUG:
+        case ExecutionMode::GETOPTION:
+        case ExecutionMode::EVAL:
+        case ExecutionMode::DUMPCOVERAGE:
+        case ExecutionMode::LIVE_TRANSLATE:
+        // We don't run PHP in "translate" mode, so just treat it like cli mode.
+            Cfg::Server::Mode = false;
+            Logger::Escape = false;
+            return;
+    }
 }
 
 static void init_repo_file() {
-  if (!RO::RepoAuthoritative) return;
-  assertx(!RO::RepoPath.empty());
-  RepoFile::init(RO::RepoPath);
+  if (!Cfg::Repo::Authoritative) return;
+  assertx(!Cfg::Repo::Path.empty());
+  RepoFile::init(Cfg::Repo::Path);
 }
 
-/* Reads a file into the OS page cache, with rate limiting. */
-static bool readahead_rate(const char* path, int64_t mbPerSec) {
-  int ret = open(path, O_RDONLY);
-  if (ret < 0) return false;
-  const int fd = ret;
-  SCOPE_EXIT { close(fd); };
-
-  constexpr size_t kReadaheadBytes = 1 << 20;
-  std::unique_ptr<char[]> buf(new char[kReadaheadBytes]);
-  int64_t total = 0;
-  auto startTime = std::chrono::steady_clock::now();
-  do {
-    ret = read(fd, buf.get(), kReadaheadBytes);
-    if (ret > 0) {
-      total += ret;
-      // Unit math: bytes / (MB / seconds) = microseconds
-      auto endTime = startTime + std::chrono::microseconds(total / mbPerSec);
-      auto sleepT = endTime - std::chrono::steady_clock::now();
-      // Don't sleep too frequently.
-      if (sleepT >= std::chrono::seconds(1)) {
-        Logger::Info(folly::sformat(
-          "readahead sleeping {}ms after total {}b",
-          std::chrono::duration_cast<std::chrono::milliseconds>(sleepT).count(),
-          total));
-        /* sleep override */ std::this_thread::sleep_for(sleepT);
-      }
-    }
-  } while (ret > 0);
-  return ret == 0;
-}
-
-static int start_server(const std::string &username, int xhprof) {
+static int start_server(const std::string &username) {
   if (!registrationComplete) {
     folly::SingletonVault::singleton()->registrationComplete();
     registrationComplete = true;
@@ -1104,8 +1171,8 @@ static int start_server(const std::string &username, int xhprof) {
   HttpServer::CheckMemAndWait();
   InitFiniNode::ServerPreInit();
 
-  if (!RuntimeOption::EvalUnixServerPath.empty()) {
-    init_cli_server(RuntimeOption::EvalUnixServerPath.c_str());
+  if (!Cfg::Eval::UnixServerPath.empty()) {
+    init_cli_server(Cfg::Eval::UnixServerPath.c_str());
   }
 
   // Before we start the webserver, make sure the entire
@@ -1113,7 +1180,12 @@ static int start_server(const std::string &username, int xhprof) {
   pagein_self();
   BootStats::mark("pagein_self");
 
-  set_execution_mode("server");
+  set_execution_mode(ExecutionMode::SERVER);
+
+  // Initialize ROAR logging
+#ifdef __roar__
+  facebook::roar::initROARLogging();
+#endif
 
 #if !defined(SKIP_USER_CHANGE)
   if (!username.empty()) {
@@ -1122,14 +1194,14 @@ static int start_server(const std::string &username, int xhprof) {
         Cronolog::changeOwner(username, el.second.symLink);
       }
     }
-    if (!Capability::ChangeUnixUser(username, RuntimeOption::AllowRunAsRoot)) {
-      _exit(1);
+    if (!Capability::ChangeUnixUser(username, Cfg::Server::AllowRunAsRoot)) {
+      _exit(HPHP_EXIT_FAILURE);
     }
     LightProcess::ChangeUser(username);
-  } else if (getuid() == 0 && !RuntimeOption::AllowRunAsRoot) {
+  } else if (getuid() == 0 && !Cfg::Server::AllowRunAsRoot) {
     Logger::Error("hhvm not allowed to run as root unless "
                   "-vServer.AllowRunAsRoot=1 is used.");
-    _exit(1);
+    _exit(HPHP_EXIT_FAILURE);
   }
   Capability::SetDumpable();
 #endif
@@ -1150,23 +1222,23 @@ static int start_server(const std::string &username, int xhprof) {
     (RuntimeOption::AccessLogDefaultFormat, RuntimeOption::AccessLogs,
      username);
   AdminRequestHandler::GetAccessLog().init
-    (RuntimeOption::AdminLogFormat, RuntimeOption::AdminLogSymLink,
-     RuntimeOption::AdminLogFile,
+    (Cfg::Log::AdminLogFormat, Cfg::Log::BaseDirectory, Cfg::Log::AdminLogSymLink,
+     Cfg::Log::AdminLogFile,
      username);
-  RPCRequestHandler::GetAccessLog().init
+  XboxRequestHandler::GetAccessLog().init
     (RuntimeOption::AccessLogDefaultFormat, RuntimeOption::RPCLogs,
      username);
   SCOPE_EXIT {
     Logger::FlushAll();
     HttpRequestHandler::GetAccessLog().fini();
     AdminRequestHandler::GetAccessLog().fini();
-    RPCRequestHandler::GetAccessLog().fini();
+    XboxRequestHandler::GetAccessLog().fini();
   };
 
-  if (RuntimeOption::ServerInternalWarmupThreads > 0) {
+  if (Cfg::Server::InternalWarmupThreads > 0) {
     HttpServer::CheckMemAndWait();
     InitFiniNode::WarmupConcurrentStart(
-      RuntimeOption::ServerInternalWarmupThreads);
+      Cfg::Server::InternalWarmupThreads);
   }
 
   HttpServer::CheckMemAndWait();
@@ -1174,60 +1246,15 @@ static int start_server(const std::string &username, int xhprof) {
   // initialize the process
   HttpServer::Server = std::make_shared<HttpServer>();
 
-  if (xhprof) {
-    HHVM_FN(xhprof_enable)(xhprof, uninit_null().toArray());
+  // Run the admin server before warmup requests. This allows us to get
+  // data from fbagent/dynologd during warmup, which is helpful for debugging.
+  // We cannot do this if hotswap is enabled, because it might result in
+  // killing ourself instead of the old server!
+  if (!Cfg::Server::StopOld) {
+    HttpServer::Server->runAdminServerOrExitProcess();
   }
 
-  std::unique_ptr<std::thread> readaheadThread;
-
-  if (RO::RepoAuthoritative &&
-      RO::RepoLocalReadaheadRate > 0 &&
-      !RO::RepoPath.empty()) {
-    HttpServer::CheckMemAndWait();
-    readaheadThread = std::make_unique<std::thread>([&] {
-        assertx(RuntimeOption::ServerExecutionMode());
-        BootStats::Block timer("Readahead Repo", true);
-        auto path = RuntimeOption::RepoPath.c_str();
-        Logger::Info("readahead %s", path);
-#ifdef __linux__
-        // glibc doesn't have a wrapper for ioprio_set(), so we need to use
-        // syscall().  The constants here are consistent with the kernel source.
-        // See http://lxr.free-electrons.com/source/include/linux/ioprio.h
-        auto constexpr IOPRIO_CLASS_SHIFT = 13;
-        enum {
-          IOPRIO_CLASS_NONE,
-          IOPRIO_CLASS_RT,
-          IOPRIO_CLASS_BE,
-          IOPRIO_CLASS_IDLE,
-        };
-        // Set to lowest IO priority.
-        constexpr int ioprio = (IOPRIO_CLASS_IDLE << IOPRIO_CLASS_SHIFT);
-
-        // ioprio_set() is available starting kernel 2.6.13
-        KernelVersion version;
-        if (version.m_major > 2 ||
-            (version.m_major == 2 &&
-             (version.m_minor > 6 ||
-              (version.m_minor == 6 && version.m_release >= 13)))) {
-          syscall(SYS_ioprio_set,
-                  1 /* IOPRIO_WHO_PROCESS, in fact, it is this thread */,
-                  0 /* current thread */,
-                  ioprio);
-        }
-#endif
-        const auto mbPerSec = RuntimeOption::RepoLocalReadaheadRate;
-        if (!readahead_rate(path, mbPerSec)) {
-          Logger::Error("readahead failed: %s", strerror(errno));
-        }
-      });
-    if (!RuntimeOption::RepoLocalReadaheadConcurrent) {
-      // TODO(10152762): Run this concurrently with non-disk warmup.
-      readaheadThread->join();
-      readaheadThread.reset();
-    }
-  }
-
-  if (RuntimeOption::ServerInternalWarmupThreads > 0) {
+  if (Cfg::Server::InternalWarmupThreads > 0) {
     BootStats::Block timer("concurrentWaitForEnd", true);
     InitFiniNode::WarmupConcurrentWaitForEnd();
   }
@@ -1236,28 +1263,26 @@ static int start_server(const std::string &username, int xhprof) {
   // real connections
   {
     Logger::Info("Warming up");
-    if (!RuntimeOption::EvalJitProfileWarmupRequests) profileWarmupStart();
+    if (!Cfg::Jit::ProfileWarmupRequests) profileWarmupStart();
     SCOPE_EXIT { profileWarmupEnd(); };
-    InternalWarmupRequestPlayer(RuntimeOption::ServerWarmupThreadCount,
-                                RuntimeOption::ServerDedupeWarmupRequests)
-      .runAfterDelay(RuntimeOption::ServerWarmupRequests);
+    InternalWarmupRequestPlayer(Cfg::Server::WarmupThreadCount,
+                                Cfg::Server::DedupeWarmupRequests)
+      .runAfterDelay(Cfg::Server::WarmupRequests);
+
+    ExtensionRegistry::cleanupWarmupData();
   }
   BootStats::mark("warmup");
 
-  if (RuntimeOption::StopOldServer) HttpServer::StopOldServer();
+  if (Cfg::Server::StopOld) HttpServer::StopOldServer();
 
-  if (RuntimeOption::EvalEnableNuma) {
+  if (Cfg::Eval::EnableNuma) {
     purge_all();
     enable_numa();
     BootStats::mark("enable_numa");
   }
   HttpServer::CheckMemAndWait(true); // Final wait
-  if (readaheadThread.get()) {
-    readaheadThread->join();
-    readaheadThread.reset();
-  }
 
-  if (!RuntimeOption::EvalUnixServerPath.empty()) {
+  if (!Cfg::Eval::UnixServerPath.empty()) {
     start_cli_server();
   }
 
@@ -1268,20 +1293,23 @@ static int start_server(const std::string &username, int xhprof) {
   }
 
 #ifdef USE_JEMALLOC
-  // Eventually, we are going to remove options Eval.Num1GPagesForSlabs and
-  // Eval.Num2MPagesForSlabs, and use the ForReqHeap spec together with
-  // Eval.NumReservedSlabs. For now, we keep the old options working.
   auto const reqHeapSpec = PageSpec{
-    std::max(RuntimeOption::EvalNum1GPagesForReqHeap,
-             RuntimeOption::EvalNum1GPagesForSlabs),
-    std::max(RuntimeOption::EvalNum2MPagesForReqHeap,
-             RuntimeOption::EvalNum2MPagesForSlabs)
+    Cfg::Eval::Num1GPagesForReqHeap,
+    Cfg::Eval::Num2MPagesForReqHeap
   };
-  auto const nSlabs =
-    std::max(RuntimeOption::EvalNumReservedSlabs,
-             RuntimeOption::EvalNum2MPagesForSlabs +
-             512 * RuntimeOption::EvalNum1GPagesForSlabs);
+  unsigned nSlabs = Cfg::Eval::NumReservedMBForSlabs * (1ull << 20) / kSlabSize;
+  if (nSlabs == 0) {
+    // We are in the process of migrating from Eval.NumReservedSlabs to
+    // Eval.NumReservedMBForSlabs. Currently, when NumReservedMBForSlabs is set,
+    // we ignore NumReservedSlabs; otherwise, we adjust NumReservedSlabs, which
+    // is needed because the option assumes 2M slab size.
+    nSlabs = Cfg::Eval::NumReservedSlabs * (2ull << 20) / kSlabSize;
+  }
   setup_local_arenas(reqHeapSpec, nSlabs);
+
+  if (Cfg::Repo::Authoritative) {
+    setup_swappable_readonly_arena(Cfg::Eval::HHBCArenaChunkSize);
+  }
 #endif
 
   HttpServer::Server->runOrExitProcess();
@@ -1291,8 +1319,9 @@ static int start_server(const std::string &username, int xhprof) {
 }
 
 static void logSettings() {
-  if (RuntimeOption::ServerLogSettingsOnStartup) {
-    Logger::Info("Settings: %s\n", IniSetting::GetAllAsJSON().c_str());
+  if (Cfg::Server::LogSettingsOnStartup) {
+    Logger::Info("Settings: %s\n",
+                 folly::toJson(IniSetting::GetAllAsDynamic()).c_str());
   }
 }
 
@@ -1338,7 +1367,7 @@ static void prepare_args(int &argc,
 
 static int execute_program_impl(int argc, char **argv);
 int execute_program(int argc, char **argv) {
-  int ret_code = -1;
+  int ret_code = HPHP_EXIT_FAILURE;
   try {
     try {
       ret_code = execute_program_impl(argc, argv);
@@ -1352,8 +1381,8 @@ int execute_program(int argc, char **argv) {
       Logger::Error("Uncaught exception: (unknown)");
       throw;
     }
-    if (tempFile.length() && boost::filesystem::exists(tempFile)) {
-      boost::filesystem::remove(tempFile);
+    if (tempFile.length() && std::filesystem::exists(tempFile)) {
+      std::filesystem::remove(tempFile);
     }
   } catch (...) {
     if (HttpServer::Server ||
@@ -1362,7 +1391,7 @@ int execute_program(int argc, char **argv) {
       // safe to destroy the globals, or run atexit handlers.
       // abort() so it shows up as a crash, and we can diagnose/fix the
       // exception
-      abort();
+      always_assert(false);
     }
   }
 
@@ -1480,32 +1509,58 @@ static void set_stack_size() {
   if (getrlimit(RLIMIT_STACK, &rlim) != 0) return;
 
   if (rlim.rlim_cur < kStackSizeMinimum || rlim.rlim_cur == RLIM_INFINITY) {
-#ifdef _WIN32
-    Logger::Error("stack limit too small, use peflags -x to increase %zd\n",
-                  kStackSizeMinimum);
-#else
     rlim.rlim_cur = kStackSizeMinimum;
     if (setrlimit(RLIMIT_STACK, &rlim)) {
       Logger::Error("failed to set stack limit to %zd\n", kStackSizeMinimum);
     }
-#endif
   }
 }
 
 std::vector<int> get_executable_lines(const Unit* compiled) {
-  std::vector<int> lines;
+  hphp_fast_set<int> lines_set;
 
   compiled->forEachFunc([&](const Func* func) {
+    if(func->isGenerated() || func->isAbstract()) {
+      // Both generated and abstract methods have some underlying code
+      // generated by the compiler. Considering this generated code as
+      // "executable lines" is confusing (interface methods and classes'
+      // closing curly braces show as executable)
+      return false;
+    }
+
+    auto start = func->entry();
+    auto pc = start;
+
+    // Do not include default value initialization in generated lines
+    auto endOff = [&]() {
+      for (auto const& param : func->params()) {
+        if (param.funcletOff != kInvalidOffset) {
+          return param.funcletOff;
+        }
+      }
+      return func->bclen();
+    }();
+    auto end = pc + endOff;
+
     auto const lineTable = func->getOrLoadLineTableCopy();
-    lines.reserve(lines.size() + lineTable.size());
-    for (auto& ent : lineTable) lines.push_back(ent.val());
+    while (pc < end) {
+      auto op = peek_op(pc);
+      if (CodeCoverage::isCoverable(op)) {
+        auto line = SourceLocation::getLineInfo(lineTable, pc - start).second;
+        if (line > 0) {
+          lines_set.insert(line);
+        }
+      }
+
+      pc += instrLen(pc);
+    }
+
     return false;
   });
 
-  std::sort(lines.begin(), lines.end());
-  auto const last = std::unique(lines.begin(), lines.end());
-  lines.erase(last, lines.end());
-  return lines;
+  std::vector<int> lines_vector(lines_set.begin(), lines_set.end());
+  std::sort(lines_vector.begin(), lines_vector.end());
+  return lines_vector;
 }
 
 static int execute_program_impl(int argc, char** argv) {
@@ -1523,8 +1578,10 @@ static int execute_program_impl(int argc, char** argv) {
     ("php", "emulate the standard php command line")
     ("compiler-id", "display the git hash for the compiler")
     ("repo-schema", "display the repository schema id")
-    ("mode,m", value<std::string>(&po.mode)->default_value("run"),
-     "run | debug (d) | vsdebug | server (s) | daemon | replay | "
+    ("repo-option-hash", "print the repo-options hash for the specified file "
+     "and exit")
+    ("mode,m", value<ExecutionMode>(&po.mode)->default_value(ExecutionMode::RUN, "run"),
+     "run | debug (d) | notebook | vsdebug | server (s) | daemon | replay | "
      "translate (t) | verify | getoption | eval")
     ("interactive,a", "Shortcut for --mode debug") // -a is from PHP5
     ("config,c", value<std::vector<std::string>>(&po.config)->composing(),
@@ -1569,6 +1626,8 @@ static int execute_program_impl(int argc, char** argv) {
     ("show,w", value<std::string>(&po.show),
      "output specified file and do nothing else")
     ("check-repo", "attempt to load repo and then exit")
+    ("verify-resolutions", "check that resolved type constraints and constants "
+                           "in an hhbc file match a source repo on disk")
     ("temp-file",
      "file specified is temporary and removed after execution")
     ("count", value<int>(&po.count)->default_value(1),
@@ -1584,8 +1643,6 @@ static int execute_program_impl(int argc, char** argv) {
      "unique identifier of compiled server code")
     ("instance-id", value<std::string>(&po.instanceId),
      "unique identifier of server instance")
-    ("xhprof-flags", value<int>(&po.xhprofFlags)->default_value(0),
-     "Set XHProf flags")
     ("vsDebugPort", value<int>(&po.vsDebugPort)->default_value(-1),
       "Debugger TCP port to listen on for the VS Code debugger extension")
     ("vsDebugDomainSocketPath",
@@ -1645,18 +1702,12 @@ static int execute_program_impl(int argc, char** argv) {
       // Process the options
       store(opts, vm);
       notify(vm);
-      if (vm.count("interactive") /* or -a */) po.mode = "debug";
-      else if (po.mode.empty()) po.mode = "run";
-      else if (po.mode == "d") po.mode = "debug";
-      else if (po.mode == "s") po.mode = "server";
-      else if (po.mode == "t") po.mode = "translate";
-
-      if (!set_execution_mode(po.mode)) {
-        Logger::Error("Error in command line: invalid mode: %s",
-                      po.mode.c_str());
-        cout << desc << "\n";
-        return -1;
+      if (vm.contains("interactive") /* or -a */) {
+        po.mode = ExecutionMode::DEBUG;
       }
+
+      set_execution_mode(po.mode);
+
       if (po.config.empty() && !vm.count("no-config")
           && ::getenv("HHVM_NO_DEFAULT_CONFIGS") == nullptr) {
         auto file_callback = [&po] (const char *filename) {
@@ -1681,36 +1732,46 @@ static int execute_program_impl(int argc, char** argv) {
     } catch (const error &e) {
       Logger::Error("Error in command line: %s", e.what());
       cout << desc << "\n";
-      return -1;
+      return HPHP_EXIT_FAILURE;
     } catch (...) {
       Logger::Error("Error in command line.");
       cout << desc << "\n";
-      return -1;
+      return HPHP_EXIT_FAILURE;
     }
   } catch (const error &e) {
     Logger::Error("Error in command line: %s", e.what());
     cout << desc << "\n";
-    return -1;
+    return HPHP_EXIT_FAILURE;
   } catch (...) {
     Logger::Error("Error in command line parsing.");
     cout << desc << "\n";
-    return -1;
+    return HPHP_EXIT_FAILURE;
   }
+
+#ifdef ENABLE_SYSTEM_LOCALE_ARCHIVE
+  // Use system locales as the default LOCALE_ARCHIVE for nix patched glibc
+  if (::getenv("LOCALE_ARCHIVE") == nullptr) {
+    ::setenv("LOCALE_ARCHIVE", "/usr/lib/locale/locale-archive", true);
+  }
+#endif
+
   // reuse -h for help command if possible
-  if (vm.count("help") || (vm.count("debug-host") && po.mode != "debug")) {
+  if (vm.count("help") || (vm.count("debug-host") && (po.mode != ExecutionMode::DEBUG && po.mode != ExecutionMode::NOTEBOOK))) {
     cout << desc << "\n";
     return 0;
   }
-  if (vm.count("version")) {
+  if (vm.contains("version")) {
     cout << "HipHop VM";
     cout << " " << HHVM_VERSION;
     cout << " (" << (debug ? "dbg" : "rel") << ")";
-    cout << " (" << (use_lowptr ? "lowptr" : "non-lowptr") << ")\n";
+    cout << " (" << (use_packedptr ? "packedptr" : use_lowptr ? "lowptr" : "non-lowptr") << ")\n";
     cout << "Compiler: " << compilerId() << "\n";
     cout << "Repo schema: " << repoSchemaId() << "\n";
     return 0;
   }
-  if (vm.count("modules")) {
+  if (vm.contains("modules")) {
+    rds::local::init();
+    SCOPE_EXIT { rds::local::fini(); };
     tl_heap.getCheck();
     Array exts = ExtensionRegistry::getLoaded();
     cout << "[PHP Modules]" << "\n";
@@ -1719,26 +1780,26 @@ static int execute_program_impl(int argc, char** argv) {
     }
     return 0;
   }
-  if (vm.count("compiler-id")) {
+  if (vm.contains("compiler-id")) {
     cout << compilerId() << "\n";
     return 0;
   }
 
-  if (vm.count("repo-schema")) {
+  if (vm.contains("repo-schema")) {
     cout << repoSchemaId() << "\n";
     return 0;
   }
 
   if (!po.show.empty()) {
-    hphp_thread_init();
+    hphp_thread_init(true);
     g_context.getCheck();
-    SCOPE_EXIT { hphp_thread_exit(); };
+    SCOPE_EXIT { hphp_thread_exit(true); };
 
     auto f = req::make<PlainFile>();
     f->open(po.show, "r");
     if (!f->valid()) {
       Logger::Error("Unable to open file %s", po.show.c_str());
-      return 1;
+      return HPHP_EXIT_FAILURE;
     }
     f->print();
     f->close();
@@ -1748,18 +1809,20 @@ static int execute_program_impl(int argc, char** argv) {
   po.isTempFile = vm.count("temp-file");
 
   // forget the source for systemlib.php unless we are debugging
-  if (po.mode != "debug" && po.mode != "vsdebug") SystemLib::s_source = "";
-  if (po.mode == "vsdebug") {
-    RuntimeOption::EnableVSDebugger = true;
-    RuntimeOption::VSDebuggerListenPort = po.vsDebugPort;
-    RuntimeOption::VSDebuggerDomainSocketPath = po.vsDebugDomainSocket;
-    RuntimeOption::VSDebuggerNoWait = po.vsDebugNoWait;
+  if (po.mode != ExecutionMode::DEBUG && po.mode != ExecutionMode::VSDEBUG && po.mode != ExecutionMode::NOTEBOOK) {
+    SystemLib::s_source = "";
+  }
+  if (po.mode == ExecutionMode::VSDEBUG) {
+    Cfg::Debugger::EnableVSDebugger = true;
+    Cfg::Debugger::VSDebuggerListenPort = po.vsDebugPort;
+    Cfg::Debugger::VSDebuggerDomainSocketPath = po.vsDebugDomainSocket;
+    Cfg::Debugger::VSDebuggerNoWait = po.vsDebugNoWait;
   }
 
   // we need to to initialize these very early
   pcre_init();
   // this is needed for libevent2 to be thread-safe, which backs Hack ASIO.
-  #ifndef FACEBOOK
+  #ifndef HHVM_FACEBOOK
   // FB uses a custom libevent 1
   evthread_use_pthreads();
   #endif
@@ -1767,7 +1830,7 @@ static int execute_program_impl(int argc, char** argv) {
   rds::local::init();
   SCOPE_EXIT { rds::local::fini(); };
   tl_heap.getCheck();
-  if (RuntimeOption::ServerExecutionMode()) {
+  if (Cfg::Server::Mode) {
     // Create the hardware counter before reading options,
     // so that the main thread never has inherit set in server
     // mode
@@ -1782,7 +1845,7 @@ static int execute_program_impl(int argc, char** argv) {
     s_config_files = po.config;
     // Start with .hdf and .ini files
     for (auto& filename : s_config_files) {
-      if (boost::filesystem::exists(filename)) {
+      if (std::filesystem::exists(filename)) {
         Config::ParseConfigFile(filename, ini, config);
       } else {
         Logger::Warning(
@@ -1807,14 +1870,6 @@ static int execute_program_impl(int argc, char** argv) {
       &messages,
       scriptFilePath
     );
-    if (RuntimeOption::WhitelistExec ||
-        RuntimeOption::WhitelistExecWarningOnly ||
-        !RuntimeOption::AllowedExecCmds.empty()) {
-      fprintf(stderr, "Configurations Server.WhitelistExec, "
-             "Server.WhitelistExecWarningOnly, Server.AllowedExecCmds "
-             "are not supported.\n");
-      return 1;
-    }
     std::vector<std::string> badnodes;
     config.lint(badnodes);
     for (const auto& badnode : badnodes) {
@@ -1823,16 +1878,16 @@ static int execute_program_impl(int argc, char** argv) {
       messages.push_back(msg);
     }
 
-    if (po.mode == "getoption") {
+    if (po.mode == ExecutionMode::GETOPTION) {
       if (po.args.size() < 1) {
         fprintf(stderr, "Must specify an option to load\n");
-        return 1;
+        return HPHP_EXIT_FAILURE;
       }
       Variant value;
       bool ret = IniSetting::Get(po.args[0], value);
       if (!ret) {
         fprintf(stderr, "No such option: %s\n", po.args[0].data());
-        return 1;
+        return HPHP_EXIT_FAILURE;
       }
       if (!value.isString()) {
         VariableSerializer vs{VariableSerializer::Type::JSON};
@@ -1841,25 +1896,45 @@ static int execute_program_impl(int argc, char** argv) {
       printf("%s\n", value.toString().data());
       return 0;
     }
+    if (vm.contains("repo-option-hash")) {
+      rds::local::init();
+      SCOPE_EXIT { rds::local::fini(); };
+
+      if (scriptFilePath.empty()) {
+        std::cerr << "Must specify of file with --repo-option-hash\n";
+        return HPHP_EXIT_FAILURE;
+      }
+      if (access(scriptFilePath.data(), F_OK) != 0) {
+        std::cerr << "Cannot access file " << scriptFilePath << "\n";
+        return HPHP_EXIT_FAILURE;
+      }
+      auto const& opts = RepoOptions::forFile(scriptFilePath);
+      cout << opts.path().string() << ": "
+           << opts.flags().cacheKeySha1().toString() << "\n";
+      return 0;
+    }
   }
 
   std::vector<int> inherited_fds;
   RuntimeOption::BuildId = po.buildId;
   RuntimeOption::InstanceId = po.instanceId;
 
-  // Do this as early as possible to avoid creating temp files and spawing
+  // Do this as early as possible to avoid creating temp files and spawning
   // light processes. Correct compilation still requires loading all of the
   // ini/hdf/cli options.
-  if (po.mode == "dumphhas" || po.mode == "verify" ||
-      po.mode == "dumpcoverage") {
+  if (po.mode == ExecutionMode::DUMPHHAS ||
+      po.mode == ExecutionMode::VERIFY ||
+      po.mode == ExecutionMode::DUMPCOVERAGE) {
     if (po.file.empty() && po.args.empty()) {
       std::cerr << "Nothing to do. Pass a hack file to compile.\n";
-      return 1;
+      return HPHP_EXIT_FAILURE;
     }
 
     auto const file = [] (std::string file) -> std::string {
       if (!FileUtil::isAbsolutePath(file)) {
-        return SourceRootInfo::GetCurrentSourceRoot() + std::move(file);
+        return (
+          SourceRootInfo::GetCurrentSourceRoot() / std::move(file)
+        ).native();
       }
       return file;
     }(po.file.empty() ? po.args[0] : po.file);
@@ -1867,7 +1942,7 @@ static int execute_program_impl(int argc, char** argv) {
     std::fstream fs(file, std::ios::in);
     if (!fs) {
       std::cerr << "Unable to open \"" << file << "\"\n";
-      return 1;
+      return HPHP_EXIT_FAILURE;
     }
     std::stringstream contents;
     contents << fs.rdbuf();
@@ -1882,33 +1957,37 @@ static int execute_program_impl(int argc, char** argv) {
       registrationComplete = true;
     }
 
-    compilers_start();
     hphp_thread_init();
     g_context.getCheck();
     SCOPE_EXIT { hphp_thread_exit(); };
 
-    if (po.mode == "dumphhas")  RuntimeOption::EvalDumpHhas = true;
-    else if (po.mode != "dumpcoverage") RuntimeOption::EvalVerifyOnly = true;
-    SystemLib::s_inited = true;
+    if (po.mode == ExecutionMode::DUMPHHAS) {
+      Cfg::Eval::DumpHhas = true;
+    } else if (po.mode != ExecutionMode::DUMPCOVERAGE) {
+      Cfg::Eval::VerifyOnly = true;
+    }
 
-    // Ensure write to SystemLib::s_inited is visible by other threads.
-    std::atomic_thread_fence(std::memory_order_release);
-
-    LazyUnitContentsLoader loader{sha1, str, RepoOptions::defaults().flags()};
+    auto const& defaults = RepoOptions::defaults();
+    LazyUnitContentsLoader loader{
+      sha1,
+      str,
+      defaults.flags(),
+      defaults.dir()
+    };
     auto compiled =
-      compile_file(loader, file.c_str(), Native::s_noNativeFuncs, nullptr);
+      compile_file(loader, CodeSource::User, file.c_str(), nullptr, nullptr, nullptr);
 
-    if (po.mode == "verify") {
+    if (po.mode == ExecutionMode::VERIFY) {
       return 0;
     }
 
     // This will dump the hhas for file as EvalDumpHhas was set
     if (!compiled) {
       std::cerr << "Unable to compile \"" << file << "\"\n";
-      return 1;
+      return HPHP_EXIT_FAILURE;
     }
 
-    if (po.mode == "dumpcoverage") {
+    if (po.mode ==  ExecutionMode::DUMPCOVERAGE) {
       std::cout << "[" << folly::join(", ", get_executable_lines(compiled))
                 << "]" << std::endl;
       return 0;
@@ -1918,21 +1997,21 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
   if (po.port != -1) {
-    RuntimeOption::ServerPort = po.port;
+    Cfg::Server::Port = po.port;
   }
   if (po.portfd != -1) {
-    RuntimeOption::ServerPortFd = po.portfd;
+    Cfg::Server::PortFd = po.portfd;
     inherited_fds.push_back(po.portfd);
   }
   if (po.sslportfd != -1) {
-    RuntimeOption::SSLPortFd = po.sslportfd;
+    Cfg::Server::SSLPortFd = po.sslportfd;
     inherited_fds.push_back(po.sslportfd);
   }
   if (po.admin_port != -1) {
-    RuntimeOption::AdminServerPort = po.admin_port;
+    Cfg::AdminServer::Port = po.admin_port;
   }
   if (po.noSafeAccessCheck) {
-    RuntimeOption::SafeFileAccess = false;
+    Cfg::Server::SafeFileAccess = false;
   }
   IniSetting::s_system_settings_are_set = true;
   if (debug) tl_heap->checkHeap("resetRuntimeOptions");
@@ -1941,56 +2020,47 @@ static int execute_program_impl(int argc, char** argv) {
   // From this point on there is no tl_heap until hphp_process_init is called.
 
   auto opened_logs = open_server_log_files();
-  if (po.mode == "daemon") {
+  if (po.mode == ExecutionMode::DAEMON) {
     if (!opened_logs) {
       Logger::Error("Log file not specified under daemon mode.\n\n");
     }
     proc::daemonize();
   }
 
-  if (RuntimeOption::ServerExecutionMode()) {
+  if (Cfg::Server::Mode) {
     for (auto const& m : messages) {
       Logger::Info(m);
     }
   }
 
-#ifndef _MSC_VER
   // Defer the initialization of light processes until the log file handle is
   // created, so that light processes can log to the right place. If we ever
   // lose a light process, stop the server instead of proceeding in an
   // uncertain state. Don't start them in DumpHhas mode because
   // it _Exit()s after loading the first non-systemlib unit.
-  if (!RuntimeOption::EvalDumpHhas) {
+  if (!Cfg::Eval::DumpHhas) {
     LightProcess::SetLostChildHandler([](pid_t /*child*/) {
       if (!HttpServer::Server) return;
       if (!HttpServer::Server->isStopped()) {
+        Logger::Error(
+          "Received SIGCHLD for light process, shutting down server"
+        );
         HttpServer::Server->stopOnSignal(SIGCHLD);
       }
     });
-    LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
-                             RuntimeOption::LightProcessCount,
-                             RuntimeOption::EvalRecordSubprocessTimes,
+    LightProcess::Initialize(Cfg::Server::LightProcessFilePrefix,
+                             Cfg::Server::LightProcessCount,
+                             Cfg::Eval::RecordSubprocessTimes,
                              inherited_fds);
   }
-#endif
-#if USE_JEMALLOC_EXTENT_HOOKS
-  if (RuntimeOption::EvalEnableArenaMetadata1GPage) {
-    // Set up extent hook so that we can place jemalloc metadata on 1G pages.
-    // This needs to be done after initializing LightProcess (which forks),
-    // because the child process does malloc which won't work with jemalloc
-    // metadata on 1G huge pages.
-    setup_jemalloc_metadata_extent_hook(
-      RuntimeOption::EvalEnableArenaMetadata1GPage,
-      RuntimeOption::EvalEnableNumaArenaMetadata1GPage,
-      RuntimeOption::EvalArenaMetadataReservedSize
-    );
-  } else if (RuntimeOption::ServerExecutionMode()) {
+
+#if USE_JEMALLOC
+  if (Cfg::Server::Mode) {
     purge_all();
-    setup_arena0({RuntimeOption::EvalNum1GPagesForA0,
-                  RuntimeOption::EvalNum2MPagesForA0});
+    setup_auto_arenas({Cfg::Eval::Num1GPagesForA0, Cfg::Eval::Num2MPagesForA0});
   }
-  if (RuntimeOption::EvalFileBackedColdArena) {
-    set_cold_file_dir(RuntimeOption::EvalColdArenaFileDir.c_str());
+  if (Cfg::Eval::FileBackedColdArena) {
+    set_cold_file_dir(Cfg::Eval::ColdArenaFileDir.c_str());
     enable_high_cold_file();
   }
 #endif
@@ -2016,14 +2086,14 @@ static int execute_program_impl(int argc, char** argv) {
   try {
     type_scan::init(
       addTypeToEmbeddedPath(
-        RuntimeOption::EvalEmbeddedDataExtractPath,
+        Cfg::Eval::EmbeddedDataExtractPath,
         "type_scanners"
       ),
       addTypeToEmbeddedPath(
-        RuntimeOption::EvalEmbeddedDataFallbackPath,
+        Cfg::Eval::EmbeddedDataFallbackPath,
         "type_scanners"
       ),
-      RuntimeOption::EvalEmbeddedDataTrustExtract
+      Cfg::Eval::EmbeddedDataTrustExtract
     );
   } catch (const type_scan::InitException& exn) {
     Logger::Error("Unable to initialize GC type-scanners: %s", exn.what());
@@ -2034,26 +2104,39 @@ static int execute_program_impl(int argc, char** argv) {
   // It's okay if this fails.
   init_member_reflection(
     addTypeToEmbeddedPath(
-      RuntimeOption::EvalEmbeddedDataExtractPath,
+      Cfg::Eval::EmbeddedDataExtractPath,
       "member_reflection"
     ),
     addTypeToEmbeddedPath(
-      RuntimeOption::EvalEmbeddedDataFallbackPath,
+      Cfg::Eval::EmbeddedDataFallbackPath,
       "member_reflection"
     ),
-    RuntimeOption::EvalEmbeddedDataTrustExtract
+    Cfg::Eval::EmbeddedDataTrustExtract
   );
 
   if (!ShmCounters::initialize(true, Logger::Error)) {
     exit(HPHP_EXIT_FAILURE);
   }
 
-  if (vm.count("check-repo")) {
+  if (vm.contains("check-repo")) {
     hphp_thread_init();
-    always_assert(RO::RepoAuthoritative);
+    always_assert(Cfg::Repo::Authoritative);
     init_repo_file();
     RepoFile::loadGlobalTables();
     RepoFile::globalData().load();
+    return 0;
+  }
+
+  if (vm.contains("verify-resolutions")) {
+    if (po.args.size() < 2) {
+      fprintf(stderr,
+              "Usage: %s --verify-resolutions [hhbc-repo] [src-root]\n",
+              argv[0]);
+      exit(HPHP_EXIT_FAILURE);
+    }
+    std::vector<std::string> paths;
+    for (size_t i = 2; i < po.args.size(); ++i) paths.emplace_back(po.args[i]);
+    compare_resolved_types(po.args[0], po.args[1], paths);
     return 0;
   }
 
@@ -2068,7 +2151,7 @@ static int execute_program_impl(int argc, char** argv) {
       const auto& name = el.first;
       Logger::SetTheLogger(name, nullptr);
     }
-    Logger::SetTheLogger(Logger::DEFAULT, new Logger());
+    Logger::SetTheLogger(Logger::DEFAULT, std::make_unique<Logger>());
 
     if (po.isTempFile) {
       tempFile = po.lint;
@@ -2079,20 +2162,14 @@ static int execute_program_impl(int argc, char** argv) {
       registrationComplete = true;
     }
 
-    compilers_start();
     hphp_thread_init();
     g_context.getCheck();
     SCOPE_EXIT { hphp_thread_exit(); };
 
-    SystemLib::s_inited = true;
-
-    // Ensure write to SystemLib::s_inited is visible by other threads.
-    std::atomic_thread_fence(std::memory_order_release);
-
     try {
       auto const file = [&] {
         if (!FileUtil::isAbsolutePath(po.lint)) {
-          return SourceRootInfo::GetCurrentSourceRoot() + po.lint;
+          return (SourceRootInfo::GetCurrentSourceRoot() / po.lint).native();
         }
         return po.lint;
       }();
@@ -2112,36 +2189,97 @@ static int execute_program_impl(int argc, char** argv) {
       // if we're just going to lint (and they might be expensive).
       g_unit_emitter_cache_hook = nullptr;
 
-      LazyUnitContentsLoader loader{sha1, str, repoOptions.flags()};
+      LazyUnitContentsLoader loader{
+        sha1,
+        str,
+        repoOptions.flags(),
+        repoOptions.dir()
+      };
       auto const unit =
-        compile_file(loader, file.c_str(), Native::s_noNativeFuncs, nullptr);
+        compile_file(loader, CodeSource::User, file.c_str(), nullptr, nullptr, nullptr);
       if (!unit) {
         std::cerr << "Unable to compile \"" << file << "\"\n";
-        return 1;
+        return HPHP_EXIT_FAILURE;
       }
       if (auto const info = unit->getFatalInfo()) {
         raise_parse_error(unit->filepath(), info->m_fatalMsg.c_str(),
                           info->m_fatalLoc);
       }
     } catch (const FatalErrorException& e) {
-      RuntimeOption::CallUserHandlerOnFatals = false;
-      RuntimeOption::AlwaysLogUnhandledExceptions = false;
+      Cfg::ErrorHandling::CallUserHandlerOnFatals = false;
+      Cfg::Log::AlwaysLogUnhandledExceptions = false;
       g_context->onFatalError(e);
-      return 1;
+      return HPHP_EXIT_FAILURE;
     }
     Logger::Info("No syntax errors detected in %s", po.lint.c_str());
     return 0;
   }
 
-  if (argc <= 1 || po.mode == "run" || po.mode == "debug" ||
-      po.mode == "vsdebug" || po.mode == "eval") {
+  if (po.mode == ExecutionMode::LIVE_TRANSLATE) {
+    Cfg::Jit::Enabled = true;
+    Cfg::Jit::PGO = false;
+
+    init_repo_file();
+    hphp_process_init();
+    SCOPE_EXIT { hphp_process_exit(); };
+
+    hphp_session_init(Treadmill::SessionKind::CLISession);
+    SCOPE_EXIT {
+      hphp_context_exit();
+      hphp_session_exit();
+    };
+
+    auto const fname = Cfg::Eval::LiveTranslateFunction;
+
+    auto const f = [&] () -> Func* {
+      std::vector<std::string> parts;
+      folly::split("::", fname, parts);
+      if (parts.size() != 2) return Func::load(makeStaticString(fname));
+
+      auto const c = Class::load(makeStaticString(parts[0]));
+      if (!c) return nullptr;
+      return c->lookupMethod(makeStaticString(parts[1]));
+    }();
+
+    if (!f) {
+      std::cerr << "Unable to load function: "
+                << Cfg::Eval::LiveTranslateFunction
+                << std::endl;
+      return -1;
+    }
+
+    auto const off = Cfg::Eval::LiveTranslateOffset;
+    if (off >= f->bclen()) {
+      std::cerr << "Bytecode offset past function end: " << off << std::endl;
+      return -1;
+    }
+
+
+    auto msg = jit::mcgen::debug_translate_live(
+      SrcKey{f, off, ResumeMode::None},
+      Cfg::Eval::LiveTranslateGuards
+    );
+    if (!msg.empty()) {
+      std::cerr << msg << std::endl;
+      return -1;
+    }
+
+    return 0;
+  }
+
+  if (argc <= 1 ||
+    po.mode == ExecutionMode::RUN ||
+    po.mode == ExecutionMode::DEBUG ||
+    po.mode == ExecutionMode::NOTEBOOK ||
+    po.mode == ExecutionMode::VSDEBUG ||
+    po.mode == ExecutionMode::EVAL) {
     set_stack_size();
 
     if (po.isTempFile) {
       tempFile = po.file;
     }
 
-    set_execution_mode("run");
+    set_execution_mode(ExecutionMode::RUN);
     /* recreate the hardware counters for the main thread now that we know
      * whether to include subprocess times */
     HardwareCounter::s_counter.destroy();
@@ -2153,20 +2291,20 @@ static int execute_program_impl(int argc, char** argv) {
 
     std::string const cliFile = !po.file.empty() ? po.file :
                                  new_argv[0] ? new_argv[0] : "";
-    if (po.mode != "debug" && po.mode != "eval" && cliFile.empty()) {
+    if (po.mode != ExecutionMode::DEBUG && po.mode != ExecutionMode::NOTEBOOK && po.mode != ExecutionMode::EVAL && cliFile.empty()) {
       std::cerr << "Nothing to do. Either pass a hack file to run, or "
         "use -m server\n";
-      return 1;
+      return HPHP_EXIT_FAILURE;
     }
 
-    if (po.mode == "eval" && po.args.empty()) {
+    if (po.mode == ExecutionMode::EVAL && po.args.empty()) {
       std::cerr << "Nothing to do. Pass a command to run with mode eval\n";
-      return 1;
+      return HPHP_EXIT_FAILURE;
     }
 
-    if (RuntimeOption::EvalUseRemoteUnixServer != "no" &&
-        !RuntimeOption::EvalUnixServerPath.empty() &&
-        (!po.file.empty() || !po.args.empty()) && po.mode != "eval") {
+    if (Cfg::Eval::UseRemoteUnixServer != "no" &&
+        !Cfg::Eval::UnixServerPath.empty() &&
+        (!po.file.empty() || !po.args.empty()) && po.mode != ExecutionMode::EVAL) {
       // CLI server clients use a wacky delayed initialization scheme for
       // RDS, and therefore requires RDS_LOCALS be outside RDS.
       rds::local::init();
@@ -2177,11 +2315,13 @@ static int execute_program_impl(int argc, char** argv) {
       }
       args.insert(args.end(), po.args.begin(), po.args.end());
       run_command_on_cli_server(
-        RuntimeOption::EvalUnixServerPath.c_str(), args, po.count
+        Cfg::Eval::UnixServerPath.c_str(), args, po.count
       );
-      if (RuntimeOption::EvalUseRemoteUnixServer == "only") {
-        Logger::Error("Failed to connect to unix server.");
-        exit(255);
+      if (Cfg::Eval::UseRemoteUnixServer == "only") {
+        Logger::Error("Failed to connect to unix server, make sure HHVM is "
+                      "running and the \"%s\" socket exists.",
+                      Cfg::Eval::UnixServerPath.c_str());
+        exit(HPHP_EXIT_FAILURE);
       }
     }
 
@@ -2197,16 +2337,17 @@ static int execute_program_impl(int argc, char** argv) {
       file = new_argv[0];
     }
 
-    if (po.mode == "debug") {
+    if (po.mode == ExecutionMode::DEBUG || po.mode == ExecutionMode::NOTEBOOK) {
       StackTraceNoHeap::AddExtraLogging("IsDebugger", "True");
-      RuntimeOption::EnableHphpdDebugger = true;
+      Cfg::Debugger::EnableHphpd = true;
+      po.debugger_options.isNotebook = po.mode == ExecutionMode::NOTEBOOK;
       po.debugger_options.fileName = file;
       po.debugger_options.user = po.user;
       Eval::DebuggerProxyPtr localProxy =
         Eval::Debugger::StartClient(po.debugger_options);
       if (!localProxy) {
         Logger::Error("Failed to start debugger client\n\n");
-        return 1;
+        return HPHP_EXIT_FAILURE;
       }
       Eval::Debugger::RegisterSandbox(localProxy->getDummyInfo());
       std::shared_ptr<std::vector<std::string>> client_args;
@@ -2215,7 +2356,7 @@ static int execute_program_impl(int argc, char** argv) {
       while (true) {
         try {
           assertx(po.debugger_options.fileName == file);
-          execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
+          execute_command_line_begin(new_argc, new_argv);
           // Set the proxy for this thread to be the localProxy we just
           // created. If we're script debugging, this will be the proxy that
           // does all of our work. If we're remote debugging, this proxy will
@@ -2229,9 +2370,9 @@ static int execute_program_impl(int argc, char** argv) {
           }
           Eval::Debugger::DebuggerSession(po.debugger_options, restart);
           restart = false;
-          execute_command_line_end(po.xhprofFlags, true, file.c_str());
+          execute_command_line_end(true, file.c_str());
         } catch (const Eval::DebuggerRestartException& e) {
-          execute_command_line_end(0, false, nullptr);
+          execute_command_line_end(false, nullptr);
 
           if (!e.m_args->empty()) {
             file = e.m_args->at(0);
@@ -2241,13 +2382,14 @@ static int execute_program_impl(int argc, char** argv) {
             prepare_args(new_argc, new_argv, *client_args, nullptr);
           }
           restart = true;
-        } catch (const Eval::DebuggerClientExitException& e) {
-          execute_command_line_end(0, false, nullptr);
+        } catch (const Eval::DebuggerClientExitException&) {
+          execute_command_line_end(false, nullptr);
           break; // end user quitting debugger
         }
       }
 
     } else {
+
       tracing::Request _{
         "cli-request",
         file,
@@ -2257,9 +2399,9 @@ static int execute_program_impl(int argc, char** argv) {
       ret = 0;
 
       for (int i = 0; i < po.count; i++) {
-        execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
-        ret = 255;
-        if (po.mode == "eval") {
+        execute_command_line_begin(new_argc, new_argv);
+        ret = 1;
+        if (po.mode == ExecutionMode::EVAL) {
           String code{"<?hh " + file};
           auto const r = g_context->evalPHPDebugger(code.get(), 0);
           if (!r.failed) ret = 0;
@@ -2271,7 +2413,17 @@ static int execute_program_impl(int argc, char** argv) {
           jit::mcgen::joinWorkerThreads();
           jit::tc::dump();
         }
-        execute_command_line_end(po.xhprofFlags, true, file.c_str());
+        execute_command_line_end(true, file.c_str());
+
+        if (i < po.count-1) {
+          // If we're running an unit test with multiple runs, provide
+          // a separator between the runs.
+          if (auto const sep = getenv("HHVM_MULTI_COUNT_SEP")) {
+            fflush(stderr);
+            printf("%s", sep);
+            fflush(stdout);
+          }
+        }
       }
     }
 
@@ -2280,40 +2432,42 @@ static int execute_program_impl(int argc, char** argv) {
     return ret;
   }
 
-  if (po.mode == "daemon" || po.mode == "server") {
-    if (!po.user.empty()) RuntimeOption::ServerUser = po.user;
-    return start_server(RuntimeOption::ServerUser, po.xhprofFlags);
+  if (po.mode == ExecutionMode::DAEMON || po.mode == ExecutionMode::SERVER) {
+    if (!po.user.empty()) Cfg::Server::User = po.user;
+    return start_server(Cfg::Server::User);
   }
 
-  if (po.mode == "replay" && !po.args.empty()) {
-    RuntimeOption::RecordInput = false;
-    set_execution_mode("server");
-    HttpServer server; // so we initialize runtime properly
-    HttpRequestHandler handler(0);
-    for (int i = 0; i < po.count; i++) {
-      for (unsigned int j = 0; j < po.args.size(); j++) {
-        ReplayTransport rt;
-        rt.replayInput(po.args[j].c_str());
-        handler.run(&rt);
-        printf("%s\n", rt.getResponse().c_str());
+  if (po.mode == ExecutionMode::REPLAY && !po.args.empty()) {
+      Cfg::Debug::RecordInput = false;
+      set_execution_mode(ExecutionMode::SERVER);
+
+      HttpServer server; // so we initialize runtime properly
+      HttpRequestHandler handler(0);
+
+      for (int i = 0; i < po.count; i++) {
+          for (unsigned int j = 0; j < po.args.size(); j++) {
+              ReplayTransport rt;
+              rt.replayInput(po.args[j].c_str());
+              handler.run(&rt);
+              printf("%s\n", rt.getResponse().c_str());
+          }
       }
-    }
-    return 0;
+      return 0;
   }
 
-  if (po.mode == "translate" && !po.args.empty()) {
-    printf("%s", translate_stack(po.args[0].c_str()).c_str());
-    return 0;
+  if (po.mode == ExecutionMode::TRANSLATE && !po.args.empty()) {
+      printf("%s", translate_stack(po.args[0].c_str()).c_str());
+      return 0;
   }
 
   cout << desc << "\n";
-  return -1;
+  return HPHP_EXIT_FAILURE;
 }
 
 String canonicalize_path(const String& p, const char* root, int rootLen) {
   String path = FileUtil::canonicalize(p);
   if (path.charAt(0) == '/') {
-    auto const& sourceRoot = RuntimeOption::SourceRoot;
+    auto const& sourceRoot = Cfg::Server::SourceRoot;
     int len = sourceRoot.size();
     if (len && strncmp(path.data(), sourceRoot.c_str(), len) == 0) {
       return path.substr(len);
@@ -2325,47 +2479,28 @@ String canonicalize_path(const String& p, const char* root, int rootLen) {
   return path;
 }
 
-static std::string systemlib_split(const std::string& slib, std::string* hhas) {
-  auto pos = slib.find("\n<?hhas\n");
-  if (pos != std::string::npos) {
-    if (hhas) *hhas = slib.substr(pos + 8);
-    return slib.substr(0, pos);
+namespace {
+  std::string get_section_name(const std::string& path) {
+    std::string section("ext.");
+    return section + HHVM_FN(md5)(std::string(path), false).substr(0, 12).data();
   }
-  return slib;
 }
 
-// Retrieve a systemlib (or mini systemlib) from the
-// current executable or another ELF object file.
-//
-// Additionally, when retrieving the main systemlib
-// from the current executable, honor the
-// HHVM_SYSTEMLIB environment variable as an override.
-std::string get_systemlib(std::string* hhas,
-                          const std::string &section /*= "systemlib" */,
-                          const std::string &filename /*= "" */) {
-  if (filename.empty() && section == "systemlib") {
-    if (auto const file = getenv("HHVM_SYSTEMLIB")) {
-      std::ifstream ifs(file);
-      if (ifs.good()) {
-        return systemlib_split(std::string(
-                                 std::istreambuf_iterator<char>(ifs),
-                                 std::istreambuf_iterator<char>()), hhas);
-      }
-    }
-  }
+// Retrieve a embed section of the HHVM binary
+std::string get_embedded_section(const std::string& path) {
+  auto section_name = get_section_name(path);
 
   embedded_data desc;
-  if (!get_embedded_data(section.c_str(), &desc, filename)) return "";
-
-  auto const data = read_embedded_data(desc);
-  return systemlib_split(data, hhas);
+  if (!get_embedded_data(section_name.c_str(), &desc)) return "";
+  return read_embedded_data(desc);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // C++ ffi
 
-#ifndef _MSC_VER
 namespace {
+
+DEBUG_ONLY std::atomic<bool> s_process_exited = false;
 
 void on_timeout(int sig, siginfo_t* info, void* /*context*/) {
   if (sig == SIGVTALRM && info && info->si_code == SI_TIMER) {
@@ -2377,7 +2512,6 @@ void on_timeout(int sig, siginfo_t* info, void* /*context*/) {
 }
 
 }
-#endif
 
 /*
  * Update constants to their real values and sync some runtime options
@@ -2409,16 +2543,17 @@ static void update_constants_and_options() {
   }
   if (IniSetting::GetSystem("memory_limit", sys)) {
     RID().setMemoryLimit(sys.toString().toCppString());
-    RuntimeOption::RequestMemoryMaxBytes = RID().getMemoryLimitNumeric();
+    Cfg::Server::RequestMemoryMaxBytes = RID().getMemoryLimitNumeric();
   }
 }
 
-void hphp_thread_init() {
+void hphp_thread_init(bool skipExtensions /* = false */,
+                      bool skipRDSInit /* = false */) {
   init_current_pthread_stack_limits();
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
   arenas_thread_init();
 #endif
-  rds::threadInit();
+  if (!skipRDSInit) rds::threadInit();
   ServerStats::GetLogger();
   zend_get_bigint_data();
   zend_rand_init();
@@ -2426,10 +2561,10 @@ void hphp_thread_init() {
   tl_heap.getCheck()->init();
 
   assertx(RequestInfo::s_requestInfo.isNull());
-  RequestInfo::s_requestInfo.getCheck()->init();
+  RequestInfo::s_requestInfo.getCheck()->threadInit();
 
   HardwareCounter::s_counter.getCheck();
-  ExtensionRegistry::threadInit();
+  if (!skipExtensions) ExtensionRegistry::threadInit();
   InitFiniNode::ThreadInit();
 
   // Ensure that there's no request-allocated memory. This call must happen at
@@ -2438,12 +2573,15 @@ void hphp_thread_init() {
   hphp_memory_cleanup();
 }
 
-void hphp_thread_exit() {
+void hphp_thread_exit(bool skipExtensions /* = false */) {
+  // All threads should have already exited before process exit
+  assertx(!s_process_exited);
+
   InitFiniNode::ThreadFini();
-  ExtensionRegistry::threadShutdown();
+  if (!skipExtensions) ExtensionRegistry::threadShutdown();
   if (!g_context.isNull()) g_context.destroy();
   rds::threadExit();
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
   arenas_thread_exit();
 #endif
 }
@@ -2458,14 +2596,30 @@ void cli_client_init() {
   zend_rand_init();
   get_server_note();
   assertx(RequestInfo::s_requestInfo.isNull());
-  RequestInfo::s_requestInfo.getCheck()->init();
+  RequestInfo::s_requestInfo.getCheck()->threadInit();
   HardwareCounter::s_counter.getCheck();
   InitFiniNode::ThreadInit();
   hphp_memory_cleanup();
   g_context.getCheck();
+  if (!registrationComplete) {
+    folly::SingletonVault::singleton()->registrationComplete();
+    registrationComplete = true;
+  }
   AsioSession::Init();
   Socket::clearLastError();
-  RI().onSessionInit();
+  RI().onSessionInit(RequestId::allocate());
+  tl_heap->resetExternalStats();
+  g_thread_safe_locale_handler->reset();
+  Treadmill::startRequest(Treadmill::SessionKind::CLIServer);
+  *s_sessionInitialized = true;
+}
+
+void cli_client_thread_init() {
+  if (*s_sessionInitialized) return;
+  g_context.getCheck();
+  AsioSession::Init();
+  Socket::clearLastError();
+  RI().onSessionInit(RequestId::allocate());
   tl_heap->resetExternalStats();
   g_thread_safe_locale_handler->reset();
   Treadmill::startRequest(Treadmill::SessionKind::CLIServer);
@@ -2475,25 +2629,26 @@ void cli_client_init() {
 void init_current_pthread_stack_limits() {
   pthread_attr_t attr;
 // Linux+GNU extension
-#if defined(_GNU_SOURCE) && defined(__linux__)
+#if defined(_GNU_SOURCE)
   if (pthread_getattr_np(pthread_self(), &attr) != 0 ) {
     Logger::Error("pthread_getattr_np failed before checking stack limits");
-    _exit(1);
+    _exit(HPHP_EXIT_FAILURE);
   }
 #else
   if (pthread_attr_init(&attr) != 0 ) {
     Logger::Error("pthread_attr_init failed before checking stack limits");
-    _exit(1);
+    _exit(HPHP_EXIT_FAILURE);
   }
 #endif
   init_stack_limits(&attr);
   if (pthread_attr_destroy(&attr) != 0 ) {
     Logger::Error("pthread_attr_destroy failed after checking stack limits");
-    _exit(1);
+    _exit(HPHP_EXIT_FAILURE);
   }
 }
 
-void hphp_process_init(bool skipModules) {
+void hphp_process_init(bool initForWorkerProcess /* = false */,
+                       bool skipRDSInit /* = false */) {
   init_current_pthread_stack_limits();
   BootStats::mark("pthread_init");
 
@@ -2506,22 +2661,17 @@ void hphp_process_init(bool skipModules) {
   timezone_init();
   BootStats::mark("timezone_init");
 
-  // start any external compilers
-  compilers_start();
-  BootStats::mark("compilers_start");
+  if (!skipRDSInit) rds::processInit();
 
-  rds::processInit();
+  hphp_thread_init(/* skipExtensions= */ initForWorkerProcess, skipRDSInit);
 
-  hphp_thread_init();
-
-#ifndef _MSC_VER
   struct sigaction action = {};
   action.sa_sigaction = on_timeout;
   action.sa_flags = SA_SIGINFO | SA_NODEFER | SA_RESTART;
   sigaction(SIGVTALRM, &action, nullptr);
-#endif
-  // start takes milliseconds, Period is a double in seconds
-  Xenon::getInstance().start(1000 * RuntimeOption::XenonPeriodSeconds);
+
+  // initialize Xenon profiler
+  Xenon::getInstance().start();
   BootStats::mark("xenon");
 
   // set up strobelight signal handling
@@ -2548,23 +2698,34 @@ void hphp_process_init(bool skipModules) {
   InitFiniNode::ProcessPreInit();
   // TODO(9795696): Race in thread map may trigger spurious logging at
   // thread exit, so for now, only spawn threads if we're a server.
-  const uint32_t maxWorkers = RuntimeOption::ServerExecutionMode() ? 3 : 0;
+  const uint32_t maxWorkers = Cfg::Server::Mode ? 3 : 0;
   InitFiniNode::ProcessInitConcurrentStart(maxWorkers);
   SCOPE_EXIT {
     InitFiniNode::ProcessInitConcurrentWaitForEnd();
     BootStats::mark("extra_process_init_concurrent_wait");
   };
 
-  // Allocate this even if EvalEnableImplicitContext is false. The
-  // correct setting might come from RepoGlobalData, and that isn't
-  // loaded until we call g_vmProcessInit. This needs to run prior to
-  // emitting unique stubs (in jit::mcgen::processInit), so we cannot
-  // move it after the RepoGlobalData load.
   ImplicitContext::activeCtx
     .bind(rds::Mode::Normal, rds::LinkID{"ImplicitContext::activeCtx"});
+  ImplicitContext::emptyCtx
+    .bind(rds::Mode::Normal, rds::LinkID{"ImplicitContext::emptyCtx"});
 
-  jit::mcgen::processInit();
-  jit::processInitProfData();
+  if (Cfg::Debugger::EnableVSDebugger && Cfg::Eval::EmitDebuggerIntrCheck) {
+    DebuggerHook::s_exceptionBreakpointIntr
+      .bind(rds::Mode::Normal, rds::LinkID{"ExceptionBreakpointIntr"});
+  }
+
+  if (!initForWorkerProcess) {
+    jit::mcgen::processInit();
+    jit::processInitProfData();
+    jit::processInitTransStats();
+  }
+  if (Cfg::Eval::EnableDecl) {
+    if (!initForWorkerProcess) {
+      ExtensionRegistry::moduleDeclInit();
+    }
+    BootStats::mark("s_builtin_symbols_populated");
+  }
   g_vmProcessInit();
   BootStats::mark("g_vmProcessInit");
 
@@ -2574,7 +2735,7 @@ void hphp_process_init(bool skipModules) {
   BootStats::mark("XboxServer::Restart");
   Stream::RegisterCoreWrappers();
   BootStats::mark("Stream::RegisterCoreWrappers");
-  if (!skipModules) {
+  if (!initForWorkerProcess) {
     ExtensionRegistry::moduleInit();
     BootStats::mark("ExtensionRegistry::moduleInit");
   }
@@ -2584,7 +2745,7 @@ void hphp_process_init(bool skipModules) {
       "DeploymentId", RuntimeOption::DeploymentId);
   }
 
-  if (!skipModules) {
+  if (!initForWorkerProcess) {
     // Now that constants have been bound we can update options using constants
     // in ini files (e.g., E_ALL) and sync some other options
     update_constants_and_options();
@@ -2593,23 +2754,24 @@ void hphp_process_init(bool skipModules) {
   InitFiniNode::ProcessInit();
   BootStats::mark("extra_process_init");
 
-  if (RuntimeOption::RepoAuthoritative &&
-      !RuntimeOption::EvalJitSerdesFile.empty() &&
-      jit::mcgen::retranslateAllEnabled()) {
+  StaticContentCache::load();
+
+  if (Cfg::Repo::Authoritative &&
+      !Cfg::Jit::SerdesFile.empty()) {
     auto const mode = RuntimeOption::EvalJitSerdesMode;
-    auto const numWorkers = RuntimeOption::EvalJitWorkerThreadsForSerdes ?
-        RuntimeOption::EvalJitWorkerThreadsForSerdes : Process::GetCPUCount();
+    auto const numWorkers = Cfg::Jit::WorkerThreadsForSerdes ?
+        Cfg::Jit::WorkerThreadsForSerdes : Process::GetCPUCount();
 
     auto const deserialize = [&] (auto const& f) {
-#if USE_JEMALLOC_EXTENT_HOOKS
+#if USE_JEMALLOC
       auto const numArenas =
-        std::min(RO::EvalJitWorkerArenas,
-                 std::max(RO::EvalJitWorkerThreads, numWorkers));
+        std::min(Cfg::Jit::WorkerArenas,
+                 std::max(Cfg::Jit::WorkerThreads, numWorkers));
       setup_extra_arenas(numArenas);
 #endif
       return f(
-        RO::EvalJitSerdesFile,
-        RO::EvalJitParallelDeserialize ? numWorkers : 1,
+        Cfg::Jit::SerdesFile,
+        Cfg::Jit::ParallelDeserialize ? numWorkers : 1,
         false
       );
     };
@@ -2619,8 +2781,8 @@ void hphp_process_init(bool skipModules) {
       BootStats::set("prof_data_source_host",
                      jit::ProfData::buildHost()->toCppString());
       BootStats::set("prof_data_timestamp", jit::ProfData::buildTime());
-      RO::EvalJitProfileRequests = 0;
-      RO::EvalJitWorkerThreads = numWorkers;
+      Cfg::Jit::ProfileBCSize = 0;
+      Cfg::Jit::WorkerThreads = numWorkers;
       // Run retranslateAll asynchronously, without waiting for it to finish
       // here.
       jit::mcgen::checkRetranslateAll(true, skipSerialize);
@@ -2629,53 +2791,54 @@ void hphp_process_init(bool skipModules) {
     auto const tryPartialDeserialize = [&] {
       if (!isJitSerializing()) return;
       if (!jit::serializeOptProfEnabled()) return;
-      if (!RO::EvalJitSerializeOptProfRestart) return;
+      if (!Cfg::Jit::SerializeOptProfRestart) return;
 
-      if (RO::ServerExecutionMode()) {
+      if (Cfg::Server::Mode) {
         Logger::FInfo("Attempting to deserialize partial profile-data file: {}",
-                      RO::EvalJitSerdesFile);
+                      Cfg::Jit::SerdesFile);
       }
 
       auto const success = deserialize(jit::tryDeserializePartialProfData);
       if (success) {
-        if (RO::ServerExecutionMode()) {
+        if (Cfg::Server::Mode) {
           Logger::FInfo("Successfully deserialized partial profile-data file. "
                         "Loaded {} units with {} workers",
                         numLoadedUnits(), numWorkers);
         }
         rta("jit::tryDeserializePartialProfData", true);
-      } else if (RO::ServerExecutionMode()) {
+      } else if (Cfg::Server::Mode) {
         Logger::FInfo("Failed deserializing partial profile-data file. "
                       "Proceeding normally");
       }
     };
 
     if (isJitDeserializing()) {
-      if (RuntimeOption::ServerExecutionMode()) {
+      if (Cfg::Server::Mode) {
         Logger::FInfo("JitDeserializeFrom: {}",
-                      RuntimeOption::EvalJitSerdesFile);
+                      Cfg::Jit::SerdesFile);
       }
 
       auto const errMsg = deserialize(jit::deserializeProfData);
 
       if (mode == JitSerdesMode::DeserializeAndDelete) {
         // Delete the serialized profile data when we finish reading
-        if (RuntimeOption::ServerExecutionMode()) {
+        if (Cfg::Server::Mode) {
           Logger::FInfo("Deleting serialized profile-data file: {}",
-                        RuntimeOption::EvalJitSerdesFile);
+                        Cfg::Jit::SerdesFile);
         }
-        unlink(RuntimeOption::EvalJitSerdesFile.c_str());
+        unlink(Cfg::Jit::SerdesFile.c_str());
       }
 
       if (errMsg.empty()) {
-        if (RuntimeOption::ServerExecutionMode()) {
+        if (Cfg::Server::Mode) {
           Logger::FInfo("JitDeserialize: Loaded {} Units with {} workers",
                         numLoadedUnits(), numWorkers);
         }
-        rta("jit::deserializeProfData", false);
-
+        if (mode != JitSerdesMode::DeserializeForPreload) {
+          rta("jit::deserializeProfData", false);
+        }
         if (mode == JitSerdesMode::DeserializeAndExit) {
-          if (RuntimeOption::ServerExecutionMode()) {
+          if (Cfg::Server::Mode) {
             Logger::Info("JitDeserialize finished; exiting");
           }
           if (jit::tc::dumpEnabled()) {
@@ -2690,7 +2853,7 @@ void hphp_process_init(bool skipModules) {
             mode == JitSerdesMode::DeserializeAndExit) {
           Logger::Error(errMsg);
           hphp_process_exit();
-          exit(1);
+          exit(HPHP_EXIT_FAILURE);
         }
         if (mode == JitSerdesMode::DeserializeOrGenerate) {
           Logger::Info(errMsg +
@@ -2725,7 +2888,7 @@ static void handle_exception(bool& ret, ExecutionContext* context,
          where == ContextOfException::ReqInit);
   try {
     handle_exception_helper(ret, context, errorMsg, where, error, richErrorMsg);
-  } catch (const ExitException& e) {
+  } catch (const ExitException&) {
     // Got an ExitException during exception handling, handle
     // similarly to the case below but don't call obEndAll().
   } catch (...) {
@@ -2748,35 +2911,42 @@ static void handle_invoke_exception(bool &ret, ExecutionContext *context,
                    richErrorMsg);
 }
 
+const std::string s_phpRootVar("${SOURCE_ROOT}/");
+
 void invoke_prelude_script(
   const char* currentDir,
   const std::string& document,
-  const std::string& prelude,
-  const char* root
+  const std::string& prelude
 ) {
-  // If $SOURCE_ROOT is found in prelude path
-  // Execute the script from PHP root folder
-  // or from current folder
-  static const std::string s_phpRootVar("${SOURCE_ROOT}");
-  std::string preludeScript(prelude);
-  auto posPhpRoot = preludeScript.find(s_phpRootVar);
-  if (std::string::npos != posPhpRoot){
-    preludeScript.replace(posPhpRoot, s_phpRootVar.length(),
-      root ? root : SourceRootInfo::GetCurrentSourceRoot().c_str());
-  }
-  FileUtil::runRelative(
-    preludeScript,
-    String(document, CopyString),
-    currentDir,
-    [currentDir] (const String& f) {
-      auto const w = Stream::getWrapperFromURI(f, nullptr, false);
-      if (w->access(f, R_OK) == 0) {
-        include_impl_invoke(f, true, currentDir, true);
-        return true;
-      }
-      return false;
+  const auto run_file = [currentDir] (const String& f) {
+    auto const w = Stream::getWrapperFromURI(f, nullptr, false);
+    if (w->access(f, R_OK) == 0) {
+      include_impl_invoke(f, true, currentDir, true);
+      return true;
     }
-  );
+    return false;
+  };
+
+  if (UNLIKELY(!prelude.starts_with(s_phpRootVar))) {
+    if(!FileUtil::runRelative(
+      prelude,
+      String(document, CopyString),
+      currentDir,
+      run_file
+    )) {
+      Logger::Error("Failed to read prelude file at %s.", prelude.data());
+    };
+    return;
+  }
+
+  const auto repo_path = RepoOptions::forFile(document.c_str()).dir();
+  const auto path = repo_path / prelude.substr(s_phpRootVar.length());
+  if (!run_file(String(path.native()))) {
+    Logger::Error(
+      "Failed to read prelude file at %s. "
+      "Ensure that %s is relative to the folder containing .hhvmconfig.hdf",
+      path.c_str(), s_phpRootVar.data());
+  }
 }
 
 static bool hphp_warmup(ExecutionContext *context,
@@ -2824,20 +2994,21 @@ static bool hphp_warmup(ExecutionContext *context,
 }
 
 void hphp_session_init(Treadmill::SessionKind session_kind,
-                       Transport* transport) {
+                       Transport* transport,
+                       RequestId id,
+                       RequestId root_req_id) {
+  if (id.unallocated()) id = RequestId::allocate();
   assertx(!*s_sessionInitialized);
+  MemoryManager::requestInit();
   g_context.getCheck();
   AsioSession::Init();
   Socket::clearLastError();
-  RI().onSessionInit();
+  RI().onSessionInit(id, root_req_id);
   tl_heap->resetExternalStats();
+  unitCacheClearSync();
 
   g_thread_safe_locale_handler->reset();
   Treadmill::startRequest(session_kind);
-
-  // Ordering is sensitive; StatCache::requestInit produces work that
-  // must be done in ExecutionContext::requestInit.
-  StatCache::requestInit();
 
   // Allow request event handlers to be created now that a new request has
   // started.
@@ -2854,12 +3025,12 @@ void hphp_session_init(Treadmill::SessionKind session_kind,
     EventHook::Enable();
   }
 
-  auto const pme_freq = RuntimeOption::EvalPerfMemEventRequestFreq;
+  auto const pme_freq = Cfg::Eval::PerfMemEventRequestFreq;
   if (pme_freq > 0 && folly::Random::rand32(pme_freq) == 0) {
     // Enable memory access sampling for this request.
     perf_event_enable(
-      RuntimeOption::EvalPerfMemEventSampleFreq,
-      [] (PerfEvent) { setSurpriseFlag(PendingPerfEventFlag); }
+      Cfg::Eval::PerfMemEventSampleFreq,
+      [] (PerfEvent) { stackLimitAndSurprise().setFlag(PendingPerfEventFlag); }
     );
   }
 }
@@ -2872,7 +3043,7 @@ bool hphp_invoke_simple(const std::string& filename, bool warmupOnly) {
                      true /* once */,
                      warmupOnly,
                      false /* richErrorMsg */,
-                     RuntimeOption::EvalPreludePath);
+                     Cfg::Eval::PreludePath);
 }
 
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
@@ -2884,15 +3055,14 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool allowDynCallNoPointer /* = false */) {
   tracing::Block _{"invoke", [&] { return tracing::Props{}.add("cmd", cmd); }};
 
-  bool isServer =
-    RuntimeOption::ServerExecutionMode() && !is_cli_server_mode();
+  bool isServer = !is_any_cli_mode();
   error = false;
 
   // Make sure we have the right current working directory within the repo
   // based on what server.source_root was set to (current process directory
   // being the default)
-  if (RuntimeOption::RepoAuthoritative) {
-    context->setCwd(RuntimeOption::SourceRoot);
+  if (Cfg::Repo::Authoritative) {
+    context->setCwd(Cfg::Server::SourceRoot);
   }
 
   String oldCwd;
@@ -2912,22 +3082,12 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   if (!warmupOnly) {
     try {
       ServerStatsHelper ssh("invoke");
-      if (!RuntimeOption::AutoPrependFile.empty() &&
-          RuntimeOption::AutoPrependFile.compare("none") ) {
-        require(RuntimeOption::AutoPrependFile, false,
-                context->getCwd().data(), true);
-      }
       if (func) {
         auto const ret = invoke(cmd, funcParams, allowDynCallNoPointer);
         if (funcRet) *funcRet = ret;
       } else {
         if (isServer) hphp_chdir_file(cmd);
         include_impl_invoke(cmd.c_str(), once, "", true);
-      }
-      if (!RuntimeOption::AutoAppendFile.empty() &&
-          RuntimeOption::AutoAppendFile.compare("none")) {
-        require(RuntimeOption::AutoAppendFile, false,
-                context->getCwd().data(), true);
       }
     } catch (...) {
       handle_invoke_exception(ret, context, errorMsg, error, richErrorMsg);
@@ -2947,6 +3107,12 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
 void hphp_context_exit() {
   // Run shutdown handlers. This may cause user code to run.
   g_thread_safe_locale_handler->reset();
+
+  // Reset the surprise flag checks of all the translations of all the
+  // functions intercepted by the current request.  Must be performed
+  // before shutting down the context as the list of intercepted functions
+  // of the request is stored in the RDS.
+  reset_all_intercepted_functions();
 
   auto const context = g_context.getNoCheck();
   context->onRequestShutdown();
@@ -2971,10 +3137,14 @@ void hphp_context_exit() {
 }
 
 void hphp_memory_cleanup() {
+  MemoryManager::requestShutdown();
   auto& mm = *tl_heap;
   // sweep functions are allowed to access g_context,
   // so we can't destroy it yet
   mm.sweep();
+
+  // Freeing hazard pointers can enqueue APCHandles into g_context.
+  APCTypedValue::FreeHazardPointers();
 
   // We should never have any registered RequestEventHandlers. If we do
   // something after onRequestShutdown registered a RequestEventHandler.
@@ -2992,11 +3162,21 @@ void hphp_memory_cleanup() {
   weakref_cleanup();
   mm.resetAllocator();
   mm.resetCouldOOM();
-
-  APCTypedValue::FreeHazardPointers();
 }
 
-void hphp_session_exit(Transport* transport) {
+void cli_client_thread_exit() {
+  assertx(*s_sessionInitialized);
+
+  g_thread_safe_locale_handler->reset();
+  Treadmill::finishRequest();
+  RI().onSessionExit();
+  hphp_memory_cleanup();
+  assertx(tl_heap->empty());
+
+  *s_sessionInitialized = false;
+}
+
+void hphp_session_exit() {
   assertx(*s_sessionInitialized);
   // Server note and INI have to live long enough for the access log to fire.
   // RequestLocal is too early.
@@ -3008,7 +3188,7 @@ void hphp_session_exit(Transport* transport) {
   jit::mcgen::checkSerializeOptProf();
   jit::tc::requestExit();
 
-  if (RO::EvalIdleUnitTimeoutSecs > 0 && !RO::RepoAuthoritative) {
+  if (Cfg::Eval::IdleUnitTimeoutSecs > 0 && !Cfg::Repo::Authoritative) {
     // Update the timestamp of any Unit we touched in this request. We
     // defer this until the end of the request to prevent Units from
     // being considered "expired" while a request is still using it.
@@ -3030,36 +3210,11 @@ void hphp_session_exit(Transport* transport) {
   perf_event_consume(record_perf_mem_event);
   perf_event_disable();
 
-  // Get some memory-related counters before tearing down the MemoryManager.
-  auto entry = transport ? transport->getStructuredLogEntry() : nullptr;
-  if (entry) tl_heap->recordStats(*entry);
-
-  {
-    ServerStatsHelper ssh("rollback");
-    hphp_memory_cleanup();
-  }
-
+  hphp_memory_cleanup();
   assertx(tl_heap->empty());
 
   *s_sessionInitialized = false;
   s_extra_request_nanoseconds = 0;
-
-  if (transport) {
-    HardwareCounter::UpdateServiceData(transport->getCpuTime(),
-                                       transport->getWallTime(),
-                                       entry,
-                                       true /*psp*/);
-    if (entry) {
-      entry->setInt("response_code", transport->getResponseCode());
-      entry->setInt("uptime", f_server_uptime());
-      entry->setInt("rss", ProcStatus::adjustedRssKb());
-      if (use_lowptr) {
-        entry->setInt("low_mem", alloc::getLowMapped());
-      }
-      StructuredLog::log("hhvm_request_perf", *entry);
-      transport->resetStructuredLogEntry();
-    }
-  }
 }
 
 void hphp_process_exit() noexcept {
@@ -3067,6 +3222,7 @@ void hphp_process_exit() noexcept {
   // an earlier step fails, and don't propagate exceptions ouf of this function
 #define LOG_AND_IGNORE(voidexpr) try { voidexpr; } catch (...) { \
     Logger::Error("got exception in cleanup step: " #voidexpr); }
+  LOG_AND_IGNORE(jit::logGlobalTransStats())
   LOG_AND_IGNORE(teardown_cli_server())
   LOG_AND_IGNORE(Xenon::getInstance().stop())
   LOG_AND_IGNORE(jit::mcgen::joinWorkerThreads())
@@ -3077,20 +3233,23 @@ void hphp_process_exit() noexcept {
   // Debugger::Stop() needs an execution context
   LOG_AND_IGNORE(g_context.getCheck())
   LOG_AND_IGNORE(Eval::Debugger::Stop())
+  LOG_AND_IGNORE(jit::mcgen::joinAsyncTranslationWorkerThreads())
   LOG_AND_IGNORE(g_context.destroy())
   LOG_AND_IGNORE(shutdownUnitPrefetcher());
   LOG_AND_IGNORE(shutdownUnitReaper());
   LOG_AND_IGNORE(Strobelight::shutdown())
   LOG_AND_IGNORE(ExtensionRegistry::moduleShutdown())
-#ifndef _MSC_VER
   LOG_AND_IGNORE(LightProcess::Close())
-#endif
   LOG_AND_IGNORE(InitFiniNode::ProcessFini())
   LOG_AND_IGNORE(folly::SingletonVault::singleton()->destroyInstances())
   LOG_AND_IGNORE(embedded_data_cleanup())
   LOG_AND_IGNORE(Debug::destroyDebugInfo())
   LOG_AND_IGNORE(clearUnitCacheForExit())
 #undef LOG_AND_IGNORE
+
+#ifndef NDEBUG
+  s_process_exited = true;
+#endif
 }
 
 bool is_hphp_session_initialized() {
@@ -3156,8 +3315,8 @@ static struct SetThreadInitFini {
   SetThreadInitFini() {
     AsyncFuncImpl::SetThreadInitFunc(
       [] (void*) {
-#if defined(_GNU_SOURCE) && defined(__linux__)
-        if (RuntimeOption::EvalPerfDataMap) {
+#if defined(_GNU_SOURCE)
+        if (Cfg::Eval::PerfDataMap) {
           pthread_t threadId = pthread_self();
           pthread_attr_t attr;
           pthread_getattr_np(threadId, &attr);

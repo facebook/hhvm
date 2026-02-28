@@ -4,37 +4,36 @@ Errors:
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-22], "\\takes_string");
       fd_fun =
       { f_span = [3:1-42]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:35-39], (Hprim Tvoid)))); 
-        f_name = ([3:10-22], "\\takes_string"); f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([3:35-39], (Hprim Tvoid))));
         f_params =
-        [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:23-29], (Hprim Tstring)))); 
-           param_is_variadic = false; param_pos = [3:30-32]; param_name = "$s"; 
-           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None }
+        [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:23-29], (Happly (([3:23-29], "\\HH\\string"), []))))); 
+           param_pos = [3:30-32]; param_name = "$s"; param_info = Param_required; 
+           param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+           param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
-      fd_internal = false });
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-22], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([5:10-11], "\\f");
        fd_fun =
        { f_span = [5:1-9:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([5:30-34], (Hprim Tvoid)))); 
-         f_name = ([5:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([5:30-34], (Hprim Tvoid))));
          f_params =
-         [{ param_annotation = (vec<string>); param_type_hint = ((vec<string>), (Some ([5:12-18], (Hprim Tstring)))); 
-            param_is_variadic = true; param_pos = [5:22-27]; param_name = "$args"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-            param_user_attributes = []; param_visibility = None }
+         [{ param_annotation = (vec<string>); param_type_hint = ((vec<string>), (Some ([5:12-18], (Happly (([5:12-18], "\\HH\\string"), []))))); 
+            param_pos = [5:22-27]; param_name = "$args"; param_info = Param_variadic; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_named = None; param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
@@ -42,43 +41,76 @@ Errors:
            [([6:3-8:4],
              (Foreach (((vec<string>), [6:12-17], (Lvar ([6:12-17], $args))), (
                 As_v ((string), [6:21-25], (Lvar ([6:21-25], $arg)))),
-                [([6:3-8:4], (AssertEnv (Join, {$#capability $#local_capability $args})));
-                  ([7:5-24],
-                   (Expr
-                      ((void), [7:5-23], (Call ((((function(string $s): void)), [7:5-17], (Id ([7:5-17], "\\takes_string"))), [], [(Pnormal, ((string), [7:18-22], (Lvar ([7:18-22], $arg))))], None)))))
+                [([7:5-24],
+                  (Expr
+                     ((void), [7:5-23],
+                      (Call
+                         { func = (((function(string $s): void)), [7:5-17], (Id ([7:5-17], "\\takes_string"))); 
+                           targs = []; args = [(Anormal ((string), [7:18-22], (Lvar ([7:18-22], $arg))))]; 
+                           unpacked_arg = None }))))
                   ]
                 )))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
-       fd_internal = false });
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Class
      { c_span = [11:1-13:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([11:7-9], "\\C1"); c_tparams = []; c_extends = []; c_uses = []; 
-       c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-       c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = []; 
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
        c_consts = []; c_typeconsts = []; c_vars = [];
        c_methods =
        [{ m_span = [12:3-42]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([12:19-23], "meth"); m_tparams = []; m_where_constraints = [];
           m_params =
-          [{ param_annotation = (vec<_>); param_type_hint = ((vec<_>), None); 
-             param_is_variadic = true; param_pos = [12:27-32]; param_name = "$args"; 
-             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-             param_user_attributes = []; param_visibility = None }
+          [{ param_annotation = (mixed); param_type_hint = ((mixed), None); 
+             param_pos = [12:27-32]; param_name = "$args"; param_info = Param_variadic; 
+             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+             param_named = None; param_user_attributes = []; param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((void), (Some ([12:35-39], (Hprim Tvoid)))); m_external = false; 
-          m_doc_comment = None }
+          m_hidden = false; m_doc_comment = None }
          ];
-       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-       c_doc_comment = None; c_emit_id = None; c_internal = false })
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = [{ ua_name = ([11:7-9], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None; c_package = None });
+  (Class
+     { c_span = [11:1-13:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([11:7-9], "\\C1"); c_tparams = []; c_extends = []; c_uses = []; 
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
+       c_consts = []; c_typeconsts = []; c_vars = [];
+       c_methods =
+       [{ m_span = [12:3-42]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([12:19-23], "meth"); m_tparams = []; m_where_constraints = [];
+          m_params =
+          [{ param_annotation = (vec<dynamic>); param_type_hint = ((vec<dynamic>), None); 
+             param_pos = [12:27-32]; param_name = "$args"; param_info = Param_variadic; 
+             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+             param_named = None; param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((dynamic), (Some ([12:35-39], (Hprim Tvoid)))); m_external = false; 
+          m_hidden = false; m_doc_comment = None }
+         ];
+       c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = [{ ua_name = ([11:7-9], "__SupportDynamicType"); ua_params = [] }]; 
+       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+       c_emit_id = None; c_internal = false; c_module = None; c_package = None })

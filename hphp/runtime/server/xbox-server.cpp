@@ -16,12 +16,14 @@
 
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/server/rpc-request-handler.h"
+#include "hphp/runtime/base/request-fanout-limit-wrapper.h"
+#include "hphp/runtime/ext/server/ext_server.h"
+#include "hphp/runtime/server/xbox-request-handler.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
 #include "hphp/runtime/server/server-task-event.h"
+#include "hphp/util/configs/server.h"
+#include "hphp/util/configs/xbox.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -31,15 +33,21 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString s_xbox("xbox");
+
+///////////////////////////////////////////////////////////////////////////////
+
 using std::string;
 
 XboxTransport::XboxTransport(const folly::StringPiece message,
+                             RequestId root_req_id,
                              const folly::StringPiece reqInitDoc /* = "" */)
     : m_refCount(0), m_done(false), m_code(0), m_event(nullptr) {
   Timer::GetMonotonicTime(m_queueTime);
 
   m_message.append(message.data(), message.size());
   m_reqInitDoc.append(reqInitDoc.data(), reqInitDoc.size());
+  setRootRequestId(root_req_id);
   disableCompression(); // so we don't have to decompress during sendImpl()
 }
 
@@ -47,7 +55,7 @@ const char *XboxTransport::getUrl() {
   if (!m_reqInitDoc.empty()) {
     return "xbox_process_call_message";
   }
-  return RuntimeOption::XboxProcessMessageFunc.c_str();
+  return Cfg::Xbox::ProcessMessageFunc.c_str();
 }
 
 std::string XboxTransport::getHeader(const char *name) {
@@ -106,15 +114,6 @@ String XboxTransport::getResults(int &code, int timeout_ms /* = 0 */) {
 
 static THREAD_LOCAL(std::shared_ptr<XboxServerInfo>, s_xbox_server_info);
 static THREAD_LOCAL(std::string, s_xbox_prev_req_init_doc);
-
-struct XboxRequestHandler : RPCRequestHandler {
-  XboxRequestHandler() : RPCRequestHandler(
-    (*s_xbox_server_info)->getTimeoutSeconds().count(), Info) {}
-  static bool Info;
-};
-
-bool XboxRequestHandler::Info = false;
-
 static THREAD_LOCAL(XboxRequestHandler, s_xbox_request_handler);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -122,6 +121,14 @@ static THREAD_LOCAL(XboxRequestHandler, s_xbox_request_handler);
 struct XboxWorker
   : JobQueueWorker<XboxTransport*,Server*,true,false,JobQueueDropVMStack>
 {
+  void abortJob(XboxTransport *job) override {
+    Logger::Warning("Job dropped by JobQueueDispatcher because of timeout in xbox.");
+    auto const handler = createRequestHandler();
+    handler->abortRequest(job);
+    destroyRequestHandler();
+    job->decRefCount();
+  }
+
   void doJob(XboxTransport *job) override {
     try {
       // If this job or the previous job that ran on this thread have
@@ -130,7 +137,12 @@ struct XboxWorker
       *s_xbox_prev_req_init_doc = reqInitDoc;
 
       job->onRequestStart(job->getStartTimer());
-      createRequestHandler()->run(job);
+
+      auto const handler = createRequestHandler();
+      if (auto ctx = job->detachCliContext()) {
+        handler->setCliContext(std::move(ctx).value());
+      }
+      handler->run(job);
       destroyRequestHandler();
       job->decRefCount();
     } catch (...) {
@@ -142,10 +154,9 @@ private:
     if (!*s_xbox_server_info) {
       *s_xbox_server_info = std::make_shared<XboxServerInfo>();
     }
-    if (RuntimeOption::XboxServerLogInfo) XboxRequestHandler::Info = true;
+
+    s_xbox_request_handler->setLogInfo(Cfg::Xbox::ServerInfoLogInfo);
     s_xbox_request_handler->setServerInfo(*s_xbox_server_info);
-    s_xbox_request_handler->setReturnEncodeType(
-      RPCRequestHandler::ReturnEncodeType::Internal);
     return s_xbox_request_handler.get();
   }
 
@@ -164,23 +175,49 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static JobQueueDispatcher<XboxWorker> *s_dispatcher;
 static Mutex s_dispatchMutex;
+static JobQueueDispatcher<XboxWorker> *s_dispatcher;
+static ServiceData::CounterCallback* s_counters;
 
 void XboxServer::Restart() {
   Stop();
 
-  if (RuntimeOption::XboxServerThreadCount > 0) {
+  if (Cfg::Xbox::ServerInfoThreadCount > 0) {
     {
       Lock l(s_dispatchMutex);
       s_dispatcher = new JobQueueDispatcher<XboxWorker>
-        (RuntimeOption::XboxServerThreadCount,
-         RuntimeOption::XboxServerThreadCount,
-         RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
-         RuntimeOption::ServerThreadDropStack,
-         nullptr);
+        (Cfg::Xbox::ServerInfoThreadCount,
+         Cfg::Xbox::ServerInfoThreadCount,
+         Cfg::Server::ThreadDropCacheTimeoutSeconds,
+         Cfg::Server::ThreadDropStack,
+         nullptr,
+         INT_MAX,
+         Cfg::Xbox::ServerInfoMaxJobQueuingMs,
+         1,    // numPriorities default
+         0,    // hugeCount default
+         -1,   // initThreadCount default
+         0,    // hugeStackKb default
+         0,    // extraKb default
+         Cfg::Xbox::ServerInfoThreadGroupSuffix
+        );
+      s_counters = new ServiceData::CounterCallback(
+          [](std::map<std::string, int64_t>& counters) {
+            // For the entire duration when the counters are registered, we make
+            // sure `s_dispatcher` is initialized and won't be stopped. See
+            // `XboxServer::Stop()` where we deregister the counters before
+            // destroying `s_counters`.
+            assertx(s_dispatcher);
+            auto const& stats = s_dispatcher->getDispatcherStats();
+            counters["xbox_inflight_requests"] = stats.activeThreads;
+            counters["xbox_queued_requests"] = stats.queuedJobCount;
+          }
+      );
+      if (Cfg::Server::TrackRequestFanout) {
+        requestFanoutLimitInit(Cfg::Server::RequestFanoutLimit, Cfg::Server::ThreadCount);
+      }
+
     }
-    if (RuntimeOption::XboxServerLogInfo) {
+    if (Cfg::Xbox::ServerInfoLogInfo) {
       Logger::Info("xbox server started");
     }
     s_dispatcher->start();
@@ -190,12 +227,19 @@ void XboxServer::Restart() {
 void XboxServer::Stop() {
   if (!s_dispatcher) return;
 
-  Lock l(s_dispatchMutex);
-  if (!s_dispatcher) return;
+  delete s_counters;
+  s_counters = nullptr;
+  JobQueueDispatcher<XboxWorker>* dispatcher = nullptr;
+  {
+    Lock l(s_dispatchMutex);
+    if (!s_dispatcher) return;
 
-  s_dispatcher->stop();
-  delete s_dispatcher;
-  s_dispatcher = nullptr;
+    dispatcher = s_dispatcher;
+    s_dispatcher = nullptr;
+  }
+
+  dispatcher->stop();
+  delete dispatcher;
 }
 
 bool XboxServer::Enabled() {
@@ -220,9 +264,12 @@ static bool isLocalHost(const String& host) {
 struct XboxTask : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(XboxTask)
 
-  XboxTask(const String& message, const String& reqInitDoc = "") {
-    m_job = new XboxTransport(message.toCppString(), reqInitDoc.toCppString());
+  XboxTask(const String& message, const String& reqInitDoc = "", const RequestId root_req_id = RequestId()) {
+    m_job = new XboxTransport(message.toCppString(), root_req_id, reqInitDoc.toCppString());
     m_job->incRefCount();
+    if (cli_supports_clone()) {
+      m_job->setCliContext(cli_clone_context());
+    }
   }
 
   XboxTask(const XboxTask&) = delete;
@@ -234,7 +281,7 @@ struct XboxTask : SweepableResourceData {
 
   XboxTransport *getJob() { return m_job;}
 
-  CLASSNAME_IS("XboxTask");
+  CLASSNAME_IS("XboxTask")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
@@ -245,9 +292,11 @@ IMPLEMENT_RESOURCE_ALLOCATION(XboxTask)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Resource XboxServer::TaskStart(const String& msg,
-                               const String& reqInitDoc /* = "" */,
-  ServerTaskEvent<XboxServer, XboxTransport> *event /* = nullptr */) {
+OptResource XboxServer::TaskStart(
+  const String& msg,
+  const String& reqInitDoc /* = "" */,
+  ServerTaskEvent<XboxServer, XboxTransport> *event /* = nullptr */,
+  RequestId root_req_id /* = RequestId() */) {
   static auto xboxOverflowCounter =
     ServiceData::createTimeSeries("xbox_overflow",
                                   { ServiceData::StatsType::COUNT });
@@ -258,10 +307,10 @@ Resource XboxServer::TaskStart(const String& msg,
     Lock l(s_dispatchMutex);
     if (s_dispatcher &&
         (s_dispatcher->getActiveWorker() <
-         RuntimeOption::XboxServerThreadCount ||
+         Cfg::Xbox::ServerInfoThreadCount ||
          s_dispatcher->getQueuedJobs() <
-         RuntimeOption::XboxServerMaxQueueLength)) {
-      auto task = req::make<XboxTask>(msg, reqInitDoc);
+         Cfg::Xbox::ServerInfoMaxQueueLength)) {
+      auto task = req::make<XboxTask>(msg, reqInitDoc, root_req_id);
       XboxTransport *job = task->getJob();
       job->incRefCount(); // paired with worker's decRefCount()
       xboxQueuedCounter->addValue(1);
@@ -276,32 +325,43 @@ Resource XboxServer::TaskStart(const String& msg,
         event->setJob(job);
       }
 
+      // If server_uptime() is -1, it means we are not yet running in server mode
+      // and are serving warmup requests. Excempt warmup requests from fanout enforcement.
+      if (Cfg::Server::TrackRequestFanout && HHVM_FN(server_uptime)() >= 0) {
+        requestFanoutLimitIncrement(root_req_id);
+      }
+
       assertx(s_dispatcher);
       s_dispatcher->enqueue(job);
+      g_context->incrXboxTasksStarted();
 
-      return Resource(std::move(task));
+      return OptResource(std::move(task));
     }
   }
 
-  auto hasXbox = RuntimeOption::XboxServerThreadCount > 0;
-  const char* errMsg =
-    (hasXbox ?
-     "Cannot create new Xbox task because the Xbox queue has "
-     "reached maximum capacity" :
-     "Cannot create new Xbox task because the Xbox is not enabled");
+  auto hasXbox = Cfg::Xbox::ServerInfoThreadCount > 0;
+  const char* errMsg;
+  if (hasXbox && !s_dispatcher) {
+    errMsg = "Cannot create Xbox task because Xbox server is shut down";
+  } else if (hasXbox) {
+    errMsg = "Cannot create new Xbox task because the Xbox queue has "
+     "reached maximum capacity";
+  } else {
+     errMsg = "Cannot create new Xbox task because the Xbox is not enabled";
+  }
   if (hasXbox) {
     xboxOverflowCounter->addValue(1);
   }
 
   throw_exception(SystemLib::AllocExceptionObject(errMsg));
-  return Resource();
+  return OptResource();
 }
 
-bool XboxServer::TaskStatus(const Resource& task) {
+bool XboxServer::TaskStatus(const OptResource& task) {
   return cast<XboxTask>(task)->getJob()->isDone();
 }
 
-int XboxServer::TaskResult(const Resource& task, int timeout_ms, Variant *ret) {
+int XboxServer::TaskResult(const OptResource& task, int timeout_ms, Variant *ret) {
   return TaskResult(cast<XboxTask>(task)->getJob(), timeout_ms, ret);
 }
 
@@ -320,10 +380,12 @@ int XboxServer::TaskResult(XboxTransport *job, int timeout_ms, Variant *ret) {
 }
 
 int XboxServer::GetActiveWorkers() {
+  Lock l(s_dispatchMutex);
   return s_dispatcher ? s_dispatcher->getActiveWorker() : 0;
 }
 
 int XboxServer::GetQueuedJobs() {
+  Lock l(s_dispatchMutex);
   return s_dispatcher ? s_dispatcher->getQueuedJobs() : 0;
 }
 

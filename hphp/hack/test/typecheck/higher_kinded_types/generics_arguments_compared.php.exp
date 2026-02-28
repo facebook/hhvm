@@ -1,8 +1,0 @@
-File "generics_arguments_compared.php", line 5, characters 10-11:
-Invalid return type (Typing[4110])
-  File "generics_arguments_compared.php", line 4, characters 37-42:
-  Expected `string`
-  File "generics_arguments_compared.php", line 4, characters 37-42:
-  This type argument to `T` must match exactly (it is invariant)
-  File "generics_arguments_compared.php", line 4, characters 24-26:
-  But got `int`

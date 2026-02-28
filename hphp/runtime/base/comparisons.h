@@ -29,38 +29,40 @@ namespace HPHP {
 #define DELETE_WITH_LHS_VARIANT(name, rhs) \
 bool name(const Variant&, rhs) = delete;
 
-DELETE_WITH_LHS_VARIANT(same, int);
+DELETE_WITH_LHS_VARIANT(same, int)
 DELETE_WITH_LHS_VARIANT(same, const char*)
 DELETE_WITH_LHS_VARIANT(same, const String&)
 DELETE_WITH_LHS_VARIANT(same, const Array&)
 DELETE_WITH_LHS_VARIANT(same, const Object&)
 DELETE_WITH_LHS_VARIANT(same, const ObjectData*)
-DELETE_WITH_LHS_VARIANT(same, const Resource&)
+DELETE_WITH_LHS_VARIANT(same, const OptResource&)
 
 DELETE_WITH_LHS_VARIANT(equal, int)
 DELETE_WITH_LHS_VARIANT(equal, const String&)
 DELETE_WITH_LHS_VARIANT(equal, const char*)
 DELETE_WITH_LHS_VARIANT(equal, const Array&)
 DELETE_WITH_LHS_VARIANT(equal, const Object&)
-DELETE_WITH_LHS_VARIANT(equal, const Resource&)
+DELETE_WITH_LHS_VARIANT(equal, const OptResource&)
 
 DELETE_WITH_LHS_VARIANT(less, bool)
 DELETE_WITH_LHS_VARIANT(less, int)
 DELETE_WITH_LHS_VARIANT(less, const StringData*)
+DELETE_WITH_LHS_VARIANT(less, const ECLString&)
 DELETE_WITH_LHS_VARIANT(less, const String&)
 DELETE_WITH_LHS_VARIANT(less, const char*)
 DELETE_WITH_LHS_VARIANT(less, const Array&)
 DELETE_WITH_LHS_VARIANT(less, const Object&)
-DELETE_WITH_LHS_VARIANT(less, const Resource&)
+DELETE_WITH_LHS_VARIANT(less, const OptResource&)
 
 DELETE_WITH_LHS_VARIANT(more, bool)
 DELETE_WITH_LHS_VARIANT(more, int)
 DELETE_WITH_LHS_VARIANT(more, const StringData*)
+DELETE_WITH_LHS_VARIANT(more, const ECLString&)
 DELETE_WITH_LHS_VARIANT(more, const String&)
 DELETE_WITH_LHS_VARIANT(more, const char*)
 DELETE_WITH_LHS_VARIANT(more, const Array&)
 DELETE_WITH_LHS_VARIANT(more, const Object&)
-DELETE_WITH_LHS_VARIANT(more, const Resource&)
+DELETE_WITH_LHS_VARIANT(more, const OptResource&)
 
 #undef DELETE_WITH_LHS_VARIANT
 
@@ -133,11 +135,11 @@ std::enable_if_t< \
   Ret \
 > name(T, U) = delete;
 
-DELETE_IF_NOT_LHS_VARIANT(same);
-DELETE_IF_NOT_LHS_VARIANT(equal);
-DELETE_IF_NOT_LHS_VARIANT(less);
-DELETE_IF_NOT_LHS_VARIANT(more);
-DELETE_IF_NOT_LHS_VARIANT(compare);
+DELETE_IF_NOT_LHS_VARIANT(same)
+DELETE_IF_NOT_LHS_VARIANT(equal)
+DELETE_IF_NOT_LHS_VARIANT(less)
+DELETE_IF_NOT_LHS_VARIANT(more)
+DELETE_IF_NOT_LHS_VARIANT(compare)
 
 #undef DELETE_IF_NOT_LHS_VARIANT
 
@@ -330,6 +332,39 @@ inline int64_t compare(const ResourceHdr* v1, const ResourceHdr* v2) {
   auto id1 = v1->data()->o_toInt64();
   auto id2 = v2->data()->o_toInt64();
   return (id1 < id2) ? -1 : ((id1 > id2) ? 1 : 0);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// ECLString
+
+bool same(const ECLString& v1, const ECLString& v2) = delete;
+
+inline bool equal(const ECLString& v1, const ECLString& v2) {
+  return v1.val == v2.val;
+}
+
+inline bool nequal(const ECLString& v1, const ECLString& v2) {
+  return v1.val != v2.val;
+}
+
+inline bool less(const ECLString&, const ECLString&) {
+  throw_ecl_compare_exception();
+}
+
+inline bool lessEqual(const ECLString&, const ECLString&) {
+  throw_ecl_compare_exception();
+}
+
+inline bool more(const ECLString&, const ECLString&) {
+  throw_ecl_compare_exception();
+}
+
+inline bool moreEqual(const ECLString&, const ECLString&) {
+  throw_ecl_compare_exception();
+}
+
+inline int64_t compare(const ECLString&, const ECLString&) {
+  throw_ecl_compare_exception();
 }
 
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_149() {
+function main_149() :mixed{
 $a = 'test';
  $b = 'zzz';
  $a |= $b;

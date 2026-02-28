@@ -1,33 +1,33 @@
 <?hh
 
-function a() {
-    return varray[1,varray[5]];
+function a() :mixed{
+    return vec[1,vec[5]];
 }
 
-function b() {
-    return varray[];
+function b() :mixed{
+    return vec[];
 }
 
 class foo {
     public $y = 1;
 
-    public function test() {
-        return varray[varray[varray['foobar']]];
+    public function test() :mixed{
+        return vec[vec[vec['foobar']]];
     }
 }
 
-function c() {
-    return varray[new foo];
+function c() :mixed{
+    return vec[new foo];
 }
 
-function d() {
+function d() :mixed{
     $obj = new foo;
     return $obj->test();
 }
 
-function e() {
+function e() :mixed{
     $y = 'bar';
-    $x = darray['a' => 'foo', 'b' => $y];
+    $x = dict['a' => 'foo', 'b' => $y];
     return $x;
 }
 

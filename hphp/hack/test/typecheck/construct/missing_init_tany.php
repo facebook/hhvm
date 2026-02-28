@@ -1,21 +1,16 @@
 <?hh
 
-type Generic<T> = T;
-
-/* HH_FIXME[4101] */
-type Tany = Generic;
-
-type TnullableInt = ?int;
-
-/* Prove that null <: Tany */
-function f(): Tany {
-  return null;
+namespace HH_FIXME {
+  type MISSING_TYPE_IN_HIERARCHY = mixed;
 }
 
-class C {
-  public ?int $x; // no error for nullable uninitialized prop
-  public TnullableInt $y;
-  public Tany $z;
-  public dynamic $d;
-  public ~int $li; // error here
+namespace Test {
+  type TnullableInt = ?int;
+  class C {
+    public ?int $x; // no error for nullable uninitialized prop
+    public TnullableInt $y;
+    public \HH_FIXME\MISSING_TYPE_IN_HIERARCHY $z;
+    public dynamic $d;
+    public ~int $li; // error here
+  }
 }

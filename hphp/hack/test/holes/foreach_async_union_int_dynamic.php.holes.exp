@@ -2,28 +2,27 @@
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:16-47], "\\foreach_async_union_int_dynamic");
       fd_fun =
       { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((Awaitable<void>), (Some ([3:68-83], (Happly (([3:68-77], "\\HH\\Awaitable"), [([3:78-82], (Hprim Tvoid))])))));
-        f_name = ([3:16-47], "\\foreach_async_union_int_dynamic"); f_tparams = []; 
-        f_where_constraints = [];
+        f_readonly_ret = None; f_tparams = []; f_ret = ((Awaitable<~void>), (Some ([3:68-83], (Happly (([3:68-77], "\\HH\\Awaitable"), [([3:78-82], (Hprim Tvoid))])))));
         f_params =
-        [{ param_annotation = ((dynamic | int)); param_type_hint = (((dynamic | int)), (Some ([3:48-61], (Hunion [([3:49-52], (Hprim Tint)); ([3:53-60], Hdynamic)])))); 
-           param_is_variadic = false; param_pos = [3:62-65]; param_name = "$xs"; 
-           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None }
+        [{ param_annotation = (~int); param_type_hint = ((~int), (Some ([3:48-61], (Hunion [([3:49-52], (Hprim Tint)); ([3:53-60], Hdynamic)])))); 
+           param_pos = [3:62-65]; param_name = "$xs"; param_info = Param_required; 
+           param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+           param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([5:3-6:4],
-            (Foreach ((((dynamic | int)), [5:12-15], (Hole ((((dynamic | int)), [5:12-15], (Lvar ([5:12-15], $xs))), ((dynamic | int)), ((dynamic | AsyncIterator<dynamic>)), Typing))),
-               (Await_as_v ([5:16-21], ((dynamic), [5:25-27], (Lvar ([5:25-27], $x))))), 
-               [([5:3-6:4], (AssertEnv (Join, {$#capability $#local_capability $xs})))])))
+            (Foreach (((~int), [5:12-15], (Hole (((~int), [5:12-15], (Lvar ([5:12-15], $xs))), (~int), (AsyncIterator<nothing>), Typing))),
+               (Await_as_v ([5:16-21], ((nothing), [5:25-27], (Lvar ([5:25-27], $x))))), 
+               [])))
             ]
           };
-        f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
-      fd_internal = false })
+        f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([3:16-47], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None })

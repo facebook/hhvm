@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /*
  *  Copyright (c) 2004-present, Facebook, Inc.
  *  All rights reserved.
@@ -32,5 +32,12 @@ abstract final class HackLibTestTraversables {
     KeyedTraversable<Tk, Tv> $ary,
   ): \HH\KeyedIterator<Tk, Tv> {
     return new HackLibTestForwardOnlyIterator(dict($ary));
+  }
+
+  // For testing functions that accept Generators
+  public static function getGenerator<T>(Traversable<T> $ary): \Generator<int, T, void> {
+    foreach ($ary as $v) {
+      yield $v;
+    }
   }
 }

@@ -2,11 +2,11 @@
 <<__EntryPoint>> function main(): void {
 if( substr(PHP_OS, 0, 3) == 'WIN') {
   if (!setlocale(LC_ALL, 'C')) {
-    die('skip need "C" locale (this windows is broken)');
+    exit('skip need "C" locale (this windows is broken)');
   }
 } else {
   if (!setlocale(LC_ALL, 'en_US.UTF-8', 'en')) {
-    die('skip need "en_US.UTF-8" locale');
+    exit('skip need "en_US.UTF-8" locale');
   }
 }
 }

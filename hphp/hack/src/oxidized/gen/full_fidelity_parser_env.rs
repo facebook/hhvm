@@ -3,14 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3e4b11e174fc101d207bd37cd3b3c18b>>
+// @generated SignedSource<<d74946f3085544311d340f46b1792f70>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized_regen.sh
+//   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
 
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -31,6 +31,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (show, sexp_of)")]
 #[repr(C)]
 pub struct FullFidelityParserEnv {
     pub hhvm_compat_mode: bool,
@@ -40,14 +41,10 @@ pub struct FullFidelityParserEnv {
     pub mode: Option<file_info::Mode>,
     pub rust: bool,
     pub disable_legacy_soft_typehints: bool,
-    pub allow_new_attribute_syntax: bool,
-    pub disable_legacy_attribute_syntax: bool,
     pub leak_rust_tree: bool,
     pub enable_xhp_class_modifier: bool,
     pub disable_xhp_element_mangling: bool,
     pub disable_xhp_children_declarations: bool,
-    pub disallow_fun_and_cls_meth_pseudo_funcs: bool,
-    pub disallow_inst_meth: bool,
     pub interpret_soft_types_as_like_types: bool,
     pub is_systemlib: bool,
 }

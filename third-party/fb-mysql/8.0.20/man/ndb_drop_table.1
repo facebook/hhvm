@@ -1,0 +1,121 @@
+'\" t
+.\"     Title: \fBndb_drop_table\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/06/2020
+.\"    Manual: MySQL Database System
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBNDB_DROP_TABLE\FR" "1" "03/06/2020" "MySQL 8\&.0" "MySQL Database System"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ndb_drop_table \- drop an NDB table
+.SH "SYNOPSIS"
+.HP \w'\fBndb_drop_table\ \fR\fB\fIoptions\fR\fR\ 'u
+\fBndb_drop_table \fR\fB\fIoptions\fR\fR
+.SH "DESCRIPTION"
+.PP
+\fBndb_drop_table\fR
+drops the specified
+NDB
+table\&. (If you try to use this on a table created with a storage engine other than
+NDB, the attempt fails with the error
+723: No such table exists\&.) This operation is extremely fast; in some cases, it can be an order of magnitude faster than using a MySQL
+DROP TABLE
+statement on an
+NDB
+table\&.
+Usage
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ndb_drop_table \-c \fIconnection_string\fR \fItbl_name\fR \-d \fIdb_name\fR
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The following table includes options that are specific to
+\fBndb_drop_table\fR\&. Additional descriptions follow the table\&. For options common to most NDB Cluster programs (including
+\fBndb_drop_table\fR), see
+Options Common to NDB Cluster Programs(1)\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.B Table\ \&22.259.\ \&Command\-line options for the ndb_drop_table program
+.TS
+allbox tab(:);
+lB lB lB.
+T{
+Format
+T}:T{
+Description
+T}:T{
+Added, Deprecated, or Removed
+T}
+.T&
+l l l.
+T{
+.PP
+\fB--database=dbname\fR,
+.PP
+\fB-d\fR
+T}:T{
+Name of the database in which the table is found
+T}:T{
+.PP
+(Supported in all MySQL 8.0 based releases)
+T}
+.TE
+.sp 1
+.PP
+Prior to NDB 8\&.0\&.17, an
+NDB
+table dropped using this utility persisted in the MySQL data dictionary but could not be dropped using
+DROP TABLE
+in the
+\fBmysql\fR
+client\&. In NDB 8\&.0\&.17 and later, such
+\(lqorphan\(rq
+tables can be dropped using
+DROP TABLE\&. (Bug #29125206, Bug #93672)
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 1997, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH "SEE ALSO"
+For more information, please refer to the MySQL Reference Manual,
+which may already be installed locally and which is also available
+online at http://dev.mysql.com/doc/.
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

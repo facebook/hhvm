@@ -1,10 +1,10 @@
 <?hh
 
-function rx()[rx] {}
-function write_props()[write_props] {}
+function rx()[rx] :mixed{}
+function write_props()[write_props] :mixed{}
 
 <<__EntryPoint>>
-function main()[] {
+function main()[] :mixed{
   rx();
   write_props();
 }

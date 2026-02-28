@@ -1,5 +1,5 @@
 <?hh
-class C { function f() {} }
+class C { function f() :mixed{} }
 <<__EntryPoint>>
 function entrypoint_ReflectionMethod_getDocComment_error(): void {
   $rc = new ReflectionMethod('C::f');

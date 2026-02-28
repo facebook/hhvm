@@ -3,8 +3,8 @@
 
 // Characters we know not to be numbers.
 <<__EntryPoint>>
-function main_html_entity_decode_numeric() {
-$characters = varray[' ', '#', 'a', '$', '_'];
+function main_html_entity_decode_numeric() :mixed{
+$characters = vec[' ', '#', 'a', '$', '_'];
 
 // Numbers (hex and dec) we know to be valid HTML entities.
 foreach (range(165, 170) as $n) {

@@ -2,7 +2,7 @@
 
 class Ref { public function __construct(public $val) {} }
 
-function replace_variables($text, $params) {
+function replace_variables($text, $params) :mixed{
   $text = new Ref($text);
   $params = new Ref($params);
   $count = -1;
@@ -20,8 +20,8 @@ function replace_variables($text, $params) {
   return $text->val;
 }
 <<__EntryPoint>> function main(): void {
-echo replace_variables('a=?', varray['0']) . "\n";
-echo replace_variables('a=?, b=?', varray['0', '1']) . "\n";
-echo replace_variables('a=?, b=?, c=?', varray['0', '1', '2']) . "\n";
+echo replace_variables('a=?', vec['0']) . "\n";
+echo replace_variables('a=?, b=?', vec['0', '1']) . "\n";
+echo replace_variables('a=?, b=?, c=?', vec['0', '1', '2']) . "\n";
 echo "Done\n";
 }

@@ -1,0 +1,20 @@
+type a = x
+
+type b = {
+  bb_x: x;
+  bb_y: y;
+}
+
+type c =
+  | C_foo
+  | Bar of {
+      bar_x: x;
+      bar_y: y;
+    }
+  | CBaz
+
+type a_alias = a
+
+type b_alias = b
+
+type c_alias = c

@@ -1,7 +1,7 @@
 <?hh
 namespace test\ns1;
 
-const INI_ALL = 0;
+const INI_CONFIG = 0;
 <<__EntryPoint>> function main(): void {
-\var_dump(\INI_ALL);
+\var_dump(\INI_CONFIG);
 }

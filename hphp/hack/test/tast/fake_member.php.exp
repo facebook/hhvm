@@ -1,16 +1,20 @@
+Errors:
+  [7:9-19] This is a sketchy null check on an expression of type ?int.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is nonnull` instead
 [(Class
     { c_span = [3:1-11:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-8], "\\C"); c_tparams = []; c_extends = []; c_uses = []; 
-      c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-      c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = []; 
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
       c_consts = []; c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
          cv_visibility = Private; cv_type = ((?int), (Some ([4:11-15], (Hoption ([4:12-15], (Hprim Tint)))))); 
          cv_id = ([4:16-20], "foo"); cv_expr = (Some ((null), [4:23-27], Null)); 
-         cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
-         cv_is_static = false; cv_span = [4:16-27] }
+         cv_user_attributes = []; cv_doc_comment = None; cv_is_static = false; 
+         cv_span = [4:16-27] }
         ];
       c_methods =
       [{ m_span = [6:3-10:4]; m_annotation = (); m_final = false; m_abstract = false; 
@@ -20,20 +24,20 @@
          m_body =
          { fb_ast =
            [([7:5-9:6],
-             (If (((?int), [7:9-19], (Obj_get (((this), [7:9-14], This), ((?int), [7:16-19], (Id ([7:16-19], "foo"))), OG_nullthrows, Is_prop))),
-                [([7:5-9:6], (AssertEnv (Refinement, {$this->foo})));
-                  ([8:7-18], (Expr ((int), [8:7-17], (Obj_get (((this), [8:7-12], This), ((int), [8:14-17], (Id ([8:14-17], "foo"))), OG_nullthrows, Is_prop)))))],
-                [([7:5-9:6], (AssertEnv (Refinement, {$this->foo}))); ([Pos.none], Noop)])))
+             (If (((?int), [7:9-19], (Obj_get (((this), [7:9-14], This), ((?int), [7:16-19], (Id ([7:16-19], "foo"))), Regular, Is_prop))),
+                [([8:7-18], (Expr ((int), [8:7-17], (Obj_get (((this), [8:7-12], This), ((int), [8:14-17], (Id ([8:14-17], "foo"))), Regular, Is_prop)))))], 
+                [([Pos.none], Noop)])))
              ]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([6:26-30], (Hprim Tvoid)))); m_external = false; 
-         m_doc_comment = None }
+         m_hidden = false; m_doc_comment = None }
         ];
-      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-      c_doc_comment = None; c_emit_id = None; c_internal = false })
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = [{ ua_name = ([3:7-8], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None; c_package = None })

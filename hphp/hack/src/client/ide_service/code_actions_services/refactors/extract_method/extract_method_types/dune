@@ -1,0 +1,11 @@
+(include_subdirs no)
+
+(library
+ (name extract_method_types)
+ (libraries
+  code_action_types
+  lsp
+  provider_context
+  parser
+  tast_env
+  utils_core))

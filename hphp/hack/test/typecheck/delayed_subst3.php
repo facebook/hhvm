@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 abstract class Base<T> {
   public function test(T $data): void {}

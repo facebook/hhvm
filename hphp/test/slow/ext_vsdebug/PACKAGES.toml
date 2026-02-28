@@ -1,0 +1,12 @@
+[packages]
+
+[packages.foo]
+uses = ["a"]
+
+[packages.bar]
+uses = ["b"]
+
+[deployments]
+
+[deployments.my-prod]
+packages = ["foo"]

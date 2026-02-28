@@ -7,11 +7,11 @@ class C {
 
 class D<reify T>{}
 
-function f(D<C::A> $x) {
+function f(D<C::A> $x) :mixed{
   var_dump($x);
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   $d = new D<int>();
   f($d);
 }

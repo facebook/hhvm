@@ -16,12 +16,14 @@
 
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/debugger-request-info.h"
 #include "hphp/runtime/ext/vsdebug/php_executor.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
+#include "hphp/util/configs/debugger.h"
+#include "hphp/util/timer.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -65,8 +67,7 @@ EvaluatePHPExecutor::EvaluatePHPExecutor(
 
 void EvaluatePHPExecutor::callPHPCode()
 {
-  std::unique_ptr<Unit> unit(compile_debugger_string(m_expr.c_str(),
-                              m_expr.size(),
+  std::unique_ptr<Unit> unit(compile_debugger_string(m_expr,
                               g_context->getRepoOptionsForFrame(m_frameDepth)));
   if (!unit) {
     // The compiler will already have printed more detailed error messages
@@ -80,6 +81,7 @@ void EvaluatePHPExecutor::callPHPCode()
     SilentEvaluationContext silentContext(m_debugger, m_ri);
     m_result = g_context->evalPHPDebugger(rawUnit, m_frameDepth);
   } else {
+    DebuggerEvaluationContext debuggerContext(m_debugger);
     m_result = g_context->evalPHPDebugger(rawUnit, m_frameDepth);
     if (!m_result.error.empty()) {
       m_debugger->sendUserMessage(
@@ -113,7 +115,10 @@ FrameObject* EvaluateCommand::getFrameObject(DebuggerSession* session) {
     return m_frameObj;
   }
 
-  m_frameObj = session->getFrameObject(m_frameId);
+  auto currFrameId = (m_frameId < 0 && m_debugger->isPaused()) ?
+    session->getCurrFrameId() : m_frameId;
+
+  m_frameObj = session->getFrameObject(currFrameId);
   return m_frameObj;
 }
 
@@ -127,6 +132,32 @@ request_id_t EvaluateCommand::targetThreadId(DebuggerSession* session) {
   return frame->m_requestId;
 }
 
+void EvaluateCommand::logToScuba(const std::string& code,
+                                 bool success,
+                                 const std::string& error,
+                                 const std::string& clientUser,
+                                 const std::string& clientId,
+                                 uint32_t sessionId,
+                                 int64_t before,
+                                 int64_t after,
+                                 bool bpHit) {
+  StructuredLogEntry ent;
+  ent.setStr("code", code);
+  ent.setInt("num_chars", code.size());
+  auto num_lines = std::count(code.begin(), code.end(), '\n');
+  num_lines += (!code.empty() && code.back() != '\n');
+  ent.setInt("num_lines", num_lines);
+  ent.setInt("success", success);
+  ent.setStr("error", error);
+  ent.setStr("client_user", clientUser);
+  ent.setStr("client_id", clientId);
+  ent.setInt("session_id", sessionId);
+  ent.setInt("start_time", before);
+  ent.setInt("end_time", after);
+  ent.setInt("bp_hit", bpHit);
+  StructuredLog::log("hphp_debugger_repl_logs", ent);
+}
+
 static const StaticString s_varName("_");
 
 bool EvaluateCommand::executeImpl(
@@ -137,15 +168,19 @@ bool EvaluateCommand::executeImpl(
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
   const auto threadId = targetThreadId(session);
 
-  auto const evalExpression = prepareEvalExpression(
-    tryGetString(args, "expression", "")
-  );
+  if (m_frameId < 0 && threadId != m_debugger->getCurrentThreadId()) {
+    throw DebuggerCommandException("Evaluate command running in wrong context");
+  }
+
+  auto const rawExpression = tryGetString(args, "expression", "");
+  auto const evalExpression = prepareEvalExpression(rawExpression);
 
   FrameObject* frameObj = getFrameObject(session);
   int frameDepth = frameObj == nullptr ? 0 : frameObj->m_frameDepth;
 
   const std::string evalContext = tryGetString(args, "context", "");
   bool evalSilent = evalContext == "watch" || evalContext == "hover";
+  bool debuggerNotebook = evalContext == "repl-debugger-notebook";
 
   auto executor = EvaluatePHPExecutor{
     m_debugger,
@@ -156,8 +191,29 @@ bool EvaluateCommand::executeImpl(
     evalSilent
   };
 
+  auto isDummy = m_debugger->isDummyRequest();
+  DebuggerRequestInfo *dummyRI = nullptr;
+  if (isDummy) {
+    dummyRI = m_debugger->getRequestInfo();
+    m_debugger->checkForFileChanges(dummyRI);
+    dummyRI->m_firstBpHit = false;
+  }
+  auto before = gettime_ns(CLOCK_REALTIME);
   executor.execute();
+  auto after = gettime_ns(CLOCK_REALTIME);
+
   auto result = executor.m_result;
+
+  if (isDummy &&
+      Cfg::Debugger::LogEvaluationCommands &&
+      StructuredLog::enabled()) {
+    logToScuba(rawExpression, !result.failed, result.error,
+               session->getClientUser(),
+               debuggerNotebook ? "debugger-notebook" :
+                                  session->getClientId(),
+               session->getSessionId(),
+               before, after, dummyRI->m_firstBpHit);
+  }
 
   if (result.failed) {
     if (!evalSilent) {
@@ -220,7 +276,7 @@ bool EvaluateCommand::executeImpl(
         2
       );
       body["serialized"] = vs.serialize(result.result, true).get()->data();
-    } catch (const StringBufferLimitException& e) {
+    } catch (const StringBufferLimitException& ) {
       body["serialized"] = "Serialization limit exceeded";
     } catch (...) {
       assertx(false);
@@ -249,7 +305,7 @@ bool EvaluateCommand::executeImpl(
   try {
     const auto& presentationHint = serializedResult["presentationHint"];
     body["presentationHint"] = presentationHint;
-  } catch (std::out_of_range &e) {
+  } catch (std::out_of_range &) {
   }
 
   return false;

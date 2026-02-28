@@ -1,4 +1,4 @@
-File "new_static2.php", line 19, characters 9-11:
+ERROR: File "new_static2.php", line 19, characters 9-11:
 No instance method `xxx` in `A` (Typing[4053])
   File "new_static2.php", line 15, characters 19-21:
   Did you mean `foo` instead?
@@ -6,9 +6,35 @@ No instance method `xxx` in `A` (Typing[4053])
   This is why I think it is an object of type A
   File "new_static2.php", line 13, characters 16-16:
   Declaration of `A` is here
-File "new_static2.php", line 23, characters 12-23:
+ERROR: File "new_static2.php", line 23, characters 12-23:
+Invalid return type (Typing[4110])
+  File "new_static2.php", line 13, characters 18-18:
+  Expected `T`
+  File "new_static2.php", line 22, characters 35-37:
+  But got `int`
+  File "new_static2.php", line 22, characters 35-37:
+  This type argument to `A` must match exactly (it is invariant)
+ERROR: File "new_static2.php", line 23, characters 12-23:
 Invalid return type (Typing[4110])
   File "new_static2.php", line 22, characters 33-38:
   Expected `A<int>`
   File "new_static2.php", line 23, characters 16-21:
   But got `this as A<T>`
+ERROR: File "new_static2.php", line 23, characters 12-23:
+Invalid return type (Typing[4110])
+  File "new_static2.php", line 22, characters 35-37:
+  Expected `int`
+  File "new_static2.php", line 13, characters 18-18:
+  But got `T`
+  File "new_static2.php", line 13, characters 18-18:
+  This type argument to `A` must match exactly (it is invariant)
+ERROR: File "new_static2.php", line 23, characters 12-23:
+Invalid return type (Typing[4110])
+  File "new_static2.php", line 22, characters 35-37:
+  Expected `int`
+  File "new_static2.php", line 13, characters 18-18:
+  But got `mixed`
+  File "new_static2.php", line 13, characters 18-18:
+  This type argument to `A` must match exactly (it is invariant)
+  File "new_static2.php", line 13, characters 18-18:
+    by the definition of `T` arising from an implicit `as mixed` constraint on this type

@@ -10,7 +10,7 @@
 open Hh_prelude
 open Common
 open Typing_defs
-module Cls = Decl_provider.Class
+open Typing_defs_constraints
 module Env = Typing_env
 module ITySet = Internal_type_set
 module Reason = Typing_reason
@@ -47,7 +47,7 @@ module TySet = Typing_set
 
 type rigid_tvar =
   | Rtv_tparam of string
-  | Rtv_dependent of Ident.t
+  | Rtv_dependent of Expression_id.t
 
 (********************************************************************)
 (* Eliminating rigid type variables *)
@@ -104,7 +104,7 @@ type remove_map = rigid_tvar -> elim_info option
 
 type refresh_env = {
   env: Typing_env_types.env;  (** the underlying typing env *)
-  tvars: Typing_error.Reasons_callback.t IMap.t;
+  tvars: Typing_error.Reasons_callback.t Tvid.Map.t;
       (** an accumulator used to remember all the type variabes
           that appeared when refreshing a type; the map is used as a
           set, and error callbacks are merely used for reporting *)
@@ -122,11 +122,14 @@ type refresh_env = {
           should eliminate bogus Tgenerics of the form A::T where T is
           an abstract const type in A
           TODO(T91765587): kill bogus type access generics *)
+  eliminating: SSet.t;
+      (** set of generic names currently being eliminated; used to
+          detect cycles in self-referential type constant bounds *)
 }
 
 (* refresh_ functions will return [Elim ...] when they eliminated a rigid
    type variable from their result. [Unchanged] is returned when nothing
-   has changed in the data to refresh.  *)
+   has changed in the data to refresh. *)
 type changed =
   | Elim of Pos_or_decl.t * string
   | Unchanged
@@ -161,7 +164,7 @@ let is_bogus_taccess tp =
 let rec eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v =
   let r =
     let (what, wpos) = renv.scope_kind in
-    Reason.Rrigid_tvar_escape (wpos, what, name, get_reason ty_orig)
+    Reason.rigid_tvar_escape (wpos, what, name, get_reason ty_orig)
   in
   match v with
   | Ast_defs.Contravariant ->
@@ -191,7 +194,8 @@ let rec eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v =
     let snd_err =
       Typing_error.Secondary.Rigid_tvar_escape { pos = rtv_pos; name }
     in
-    Errors.add_typing_error
+    Typing_error_utils.add_typing_error
+      ~env:renv.env
       Typing_error.(
         apply_reasons
           ~on_error:(Reasons_callback.retain_code renv.on_error)
@@ -204,33 +208,41 @@ and refresh_type renv v ty_orig =
   with_default ~default:ty_orig
   @@
   match deref ty with
-  | ( _,
-      ( Tany _ | Terr | Tnonnull | Tdynamic | Tprim _ | Tunapplied_alias _
-      | Tneg _ ) ) ->
+  | (_, (Tany _ | Tnonnull | Tdynamic | Tprim _ | Tneg _ | Tlabel _)) ->
     (renv, ty_orig, Unchanged)
   | (r, Toption ty1) ->
     let (renv, ty1, changed) = refresh_type renv v ty1 in
     (renv, mk (r, Toption ty1), changed)
   | (r, Tfun ft) ->
-    let enforced_ty (renv, changed) v ({ et_type; et_enforced = _ } as et) =
-      let (renv, et_type, changed') = refresh_type renv v et_type in
-      ((renv, changed || changed'), { et with et_type })
-    in
     let param_v = Ast_defs.swap_variance v in
     let ft_param
-        renvch ({ fp_type; fp_pos = _; fp_name = _; fp_flags = _ } as fp) =
-      let (renvch, fp_type) = enforced_ty renvch param_v fp_type in
-      (renvch, { fp with fp_type })
+        (renv, changed)
+        ({ fp_type; fp_pos = _; fp_name = _; fp_flags = _; fp_def_value = _ } as
+        fp) =
+      let (renv, fp_type, changed') = refresh_type renv param_v fp_type in
+      ((renv, changed || changed'), { fp with fp_type })
     in
-    let (renvch, ft_params) =
+    let ((renv, changed), ft_params) =
       List.map_env (renv, Unchanged) ft.ft_params ~f:ft_param
     in
-    let ((renv, changed), ft_ret) = enforced_ty renvch v ft.ft_ret in
-    (renv, mk (r, Tfun { ft with ft_params; ft_ret }), changed)
-  | (r, Ttuple l) ->
-    let (renv, l, changed) = refresh_types renv v l in
-    (renv, mk (r, Ttuple l), changed)
-  | (r, Tshape (sk, sm)) ->
+    let (renv, ft_ret, changed') = refresh_type renv v ft.ft_ret in
+    (renv, mk (r, Tfun { ft with ft_params; ft_ret }), changed || changed')
+  | (r, Ttuple { t_required; t_optional; t_extra }) ->
+    let (renv, t_required, changed) = refresh_types renv v t_required in
+    let (renv, t_optional, changed1) = refresh_types renv v t_optional in
+    let (renv, t_extra, changed2) =
+      match t_extra with
+      | Tvariadic t_variadic ->
+        let (renv, t_variadic, changed) = refresh_type renv v t_variadic in
+        (renv, Tvariadic t_variadic, changed)
+      | Tsplat t_splat ->
+        let (renv, t_splat, changed) = refresh_type renv v t_splat in
+        (renv, Tsplat t_splat, changed)
+    in
+    ( renv,
+      mk (r, Ttuple { t_required; t_optional; t_extra }),
+      changed || changed1 || changed2 )
+  | (r, Tshape { s_origin = _; s_unknown_value = sk; s_fields = sm }) ->
     let (renv, sm, ch) =
       TShapeMap.fold
         (fun sfn { sft_optional; sft_ty } (renv, sm, ch) ->
@@ -240,40 +252,60 @@ and refresh_type renv v ty_orig =
         sm
         (renv, TShapeMap.empty, Unchanged)
     in
-    (renv, mk (r, Tshape (sk, sm)), ch)
+    ( renv,
+      mk
+        ( r,
+          Tshape
+            {
+              s_origin = Missing_origin;
+              s_unknown_value = sk;
+              (* TODO(shapes) refresh_type s_unknown_value *)
+              s_fields = sm;
+            } ),
+      ch )
   | (_, Tvar v) ->
-    let renv = { renv with tvars = IMap.add v renv.on_error renv.tvars } in
+    let renv = { renv with tvars = Tvid.Map.add v renv.on_error renv.tvars } in
     (renv, ty_orig, Unchanged)
-  | (r, Tgeneric (name, _ (* TODO(T70068435) assumes no args *))) ->
+  | (r, Tgeneric name) -> begin
     (* look if the Tgeneric has to go away and kill it using its
        bounds if the variance of the current occurrence permits it *)
-    begin
-      match renv.remove (Rtv_tparam name) with
-      | None -> (renv, ty_orig, Unchanged)
-      | Some _ when is_bogus_taccess name && not renv.elim_bogus_taccess ->
-        (renv, ty_orig, Unchanged)
-      | Some { pos; lower_bounds = lbs; upper_bounds = ubs } ->
-        let rtv_pos =
-          if Pos_or_decl.(equal pos none) then
-            Reason.to_pos r
-          else
-            pos
-        in
-        eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v
-    end
-  | (r, Tdependent ((DTexpr id as dt), ty1)) ->
-    begin
-      match renv.remove (Rtv_dependent id) with
-      | None ->
-        let (renv, ty1, ch1) = refresh_type renv v ty1 in
-        (renv, mk (r, Tdependent (dt, ty1)), ch1)
-      | Some _ ->
-        let lbs = TySet.empty in
-        let ubs = TySet.singleton ty1 in
-        let rtv_pos = Reason.to_pos r in
-        let name = DependentKind.to_string dt in
-        eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v
-    end
+    match renv.remove (Rtv_tparam name) with
+    | None -> (renv, ty_orig, Unchanged)
+    | Some _ when SSet.mem name renv.eliminating -> (renv, ty_orig, Unchanged)
+    | Some _ when is_bogus_taccess name && not renv.elim_bogus_taccess ->
+      (renv, ty_orig, Unchanged)
+    | Some { pos; lower_bounds = lbs; upper_bounds = ubs } ->
+      let rtv_pos =
+        if Pos_or_decl.(equal pos none) then
+          Reason.to_pos r
+        else
+          pos
+      in
+      (* Keep a copy of the set of type parameters we are eliminating so
+         we can pop the current name after it's been eliminated *)
+      let eliminating = renv.eliminating in
+      let renv = { renv with eliminating = SSet.add name renv.eliminating } in
+      let (renv, ty, ch) = eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v in
+      ({ renv with eliminating }, ty, ch)
+  end
+  | (r, Tdependent ((DTexpr id as dt), ty1)) -> begin
+    let name = DependentKind.to_string dt in
+    match renv.remove (Rtv_dependent id) with
+    | None ->
+      let (renv, ty1, ch1) = refresh_type renv v ty1 in
+      (renv, mk (r, Tdependent (dt, ty1)), ch1)
+    | Some _ when SSet.mem name renv.eliminating -> (renv, ty_orig, Unchanged)
+    | Some _ ->
+      let lbs = TySet.empty in
+      let ubs = TySet.singleton ty1 in
+      let rtv_pos = Reason.to_pos r in
+      (* Keep a copy of the set of type parameters we are eliminating so
+         we can pop the current name after it's been eliminated *)
+      let eliminating = renv.eliminating in
+      let renv = { renv with eliminating = SSet.add name renv.eliminating } in
+      let (renv, ty, ch) = eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v in
+      ({ renv with eliminating }, ty, ch)
+  end
   | (r, Tunion l) ->
     let (renv, l, changed) = refresh_types renv v l in
     begin
@@ -302,22 +334,16 @@ and refresh_type renv v ty_orig =
     let (renv, ty1, ch1) = refresh_type renv Ast_defs.Invariant ty1 in
     (renv, mk (r, Taccess (ty1, id)), ch1)
   | (r, Tnewtype (name, l, bnd)) ->
-    let vl =
-      match Env.get_typedef env name with
-      | Some { td_tparams; _ } ->
-        List.map td_tparams ~f:(fun t -> t.tp_variance)
-      | None -> List.map l ~f:(fun _ -> Ast_defs.Invariant)
-    in
-    let (renv, l, ch) = refresh_types_w_variance renv v vl l in
+    let tparams = Env.get_class_or_typedef_tparams env name in
+    let (renv, l, ch) = refresh_types_w_variance renv v tparams l in
     (renv, mk (r, Tnewtype (name, l, bnd)), ch)
   | (r, Tclass ((p, cid), e, l)) ->
-    let vl =
-      match Env.get_class env cid with
-      | None -> List.map l ~f:(fun _ -> Ast_defs.Invariant)
-      | Some cls -> List.map (Cls.tparams cls) ~f:(fun t -> t.tp_variance)
-    in
-    let (renv, l, ch) = refresh_types_w_variance renv v vl l in
+    let tparams = Env.get_class_or_typedef_tparams env cid in
+    let (renv, l, ch) = refresh_types_w_variance renv v tparams l in
     (renv, mk (r, Tclass ((p, cid), e, l)), ch)
+  | (r, Tclass_ptr ty1) ->
+    let (renv, ty1, changed) = refresh_type renv v ty1 in
+    (renv, mk (r, Tclass_ptr ty1), changed)
 
 and refresh_types renv v l =
   let rec go renv changed tl acc =
@@ -329,53 +355,89 @@ and refresh_types renv v l =
   in
   with_default ~default:l (go renv Unchanged l [])
 
-and refresh_types_w_variance renv v vl tl =
-  let rec go renv changed vl tl acc =
-    match (vl, tl) with
-    | ([], _)
-    | (_, []) ->
-      (renv, List.rev acc, changed)
-    | (var :: vl, ty :: tl) ->
+and refresh_types_w_variance renv v tpl tl =
+  let rec go renv changed tpl tl acc =
+    match (tpl, tl) with
+    | (_, []) -> (renv, List.rev acc, changed)
+    | ([], ty :: tl) ->
+      let (renv, ty, changed') = refresh_type renv Ast_defs.Invariant ty in
+      go renv (changed || changed') [] tl (ty :: acc)
+    | (tp :: tpl, ty :: tl) ->
       let v =
-        match var with
+        match tp.tp_variance with
         | Ast_defs.Invariant -> Ast_defs.Invariant
         | Ast_defs.Covariant -> v
         | Ast_defs.Contravariant -> Ast_defs.swap_variance v
       in
       let (renv, ty, changed') = refresh_type renv v ty in
-      go renv (changed || changed') vl tl (ty :: acc)
+      go renv (changed || changed') tpl tl (ty :: acc)
   in
-  with_default ~default:tl (go renv Unchanged vl tl [])
+  with_default ~default:tl (go renv Unchanged tpl tl [])
 
-let rec refresh_ctype renv v cty_orig =
+let refresh_type_opt renv v tyo =
+  match tyo with
+  | None -> (renv, None, Unchanged)
+  | Some ty ->
+    let (renv, ty, ch) = refresh_type renv v ty in
+    (renv, Some ty, ch)
+
+let refresh_ctype renv v cty_orig =
   let inv = Ast_defs.Invariant in
   with_default ~default:cty_orig
   @@
   match deref_constraint_type cty_orig with
   | (r, Thas_member hm) ->
-    let { hm_type; hm_name = _; hm_class_id = _; hm_explicit_targs = _ } = hm in
+    let { hm_type; hm_name = _; hm_class_id = _; hm_method = _ } = hm in
     let (renv, hm_type, changed) = refresh_type renv inv hm_type in
     (renv, mk_constraint_type (r, Thas_member { hm with hm_type }), changed)
+  | (r, Thas_type_member htm) ->
+    let { htm_id; htm_lower; htm_upper } = htm in
+    let v' = Ast_defs.swap_variance v in
+    let (renv, htm_upper, ch1) = refresh_type renv v htm_upper in
+    let (renv, htm_lower, ch2) = refresh_type renv v' htm_lower in
+    let htm = { htm_id; htm_lower; htm_upper } in
+    (renv, mk_constraint_type (r, Thas_type_member htm), ch1 || ch2)
+  | (r, Tcan_index ci) ->
+    let (renv, ci_val, ch1) = refresh_type renv inv ci.ci_val in
+    let (renv, ci_key, ch2) = refresh_type renv inv ci.ci_key in
+    ( renv,
+      mk_constraint_type (r, Tcan_index { ci with ci_val; ci_key }),
+      ch1 || ch2 )
+  | (r, Tcan_index_assign cia) ->
+    let (renv, cia_key, ch1) = refresh_type renv inv cia.cia_key in
+    let (renv, cia_write, ch2) = refresh_type renv inv cia.cia_write in
+    let (renv, cia_val, ch3) = refresh_type renv inv cia.cia_val in
+    ( renv,
+      mk_constraint_type
+        (r, Tcan_index_assign { cia with cia_key; cia_write; cia_val }),
+      ch1 || ch2 || ch3 )
+  | (r, Tcan_traverse ct) ->
+    let (renv, ct_val, ch1) = refresh_type renv inv ct.ct_val in
+    let (renv, ct_key, ch2) =
+      match ct.ct_key with
+      | None -> (renv, None, Unchanged)
+      | Some ct_key ->
+        let (renv, ct_key, ch2) = refresh_type renv inv ct_key in
+        (renv, Some ct_key, ch2)
+    in
+    ( renv,
+      mk_constraint_type (r, Tcan_traverse { ct with ct_val; ct_key }),
+      ch1 || ch2 )
   | (r, Tdestructure { d_required; d_optional; d_variadic; d_kind }) ->
     let (renv, d_required, ch1) = refresh_types renv inv d_required in
     let (renv, d_optional, ch2) = refresh_types renv inv d_optional in
-    let (renv, d_variadic, ch3) =
-      match d_variadic with
-      | Some ty ->
-        let (renv, ty, ch) = refresh_type renv inv ty in
-        (renv, Some ty, ch)
-      | None -> (renv, None, Unchanged)
-    in
+    let (renv, d_variadic, ch3) = refresh_type_opt renv inv d_variadic in
     let des = { d_required; d_optional; d_variadic; d_kind } in
     (renv, mk_constraint_type (r, Tdestructure des), ch1 || ch2 || ch3)
-  | (r, TCunion (lty, cty)) ->
-    let (renv, lty, ch1) = refresh_type renv v lty in
-    let (renv, cty, ch2) = refresh_ctype renv v cty in
-    (renv, mk_constraint_type (r, TCunion (lty, cty)), ch1 || ch2)
-  | (r, TCintersection (lty, cty)) ->
-    let (renv, lty, ch1) = refresh_type renv v lty in
-    let (renv, cty, ch2) = refresh_ctype renv v cty in
-    (renv, mk_constraint_type (r, TCintersection (lty, cty)), ch1 || ch2)
+  | (r, Ttype_switch { predicate; ty_true; ty_false }) ->
+    let (renv, ty_true, ch1) = refresh_type renv v ty_true in
+    let (renv, ty_false, ch2) = refresh_type renv v ty_false in
+    ( renv,
+      mk_constraint_type (r, Ttype_switch { predicate; ty_true; ty_false }),
+      ch1 || ch2 )
+  | (r, Thas_const { name; ty }) ->
+    let (renv, ty, changed) = refresh_type renv inv ty in
+    (renv, mk_constraint_type (r, Thas_const { name; ty }), changed)
 
 let refresh_bounds renv v tys =
   ITySet.fold
@@ -452,18 +514,20 @@ let refresh_tvar tv (on_error : Typing_error.Reasons_callback.t) renv =
       let (env, ty_errs) = List.fold ~init:(env, []) ~f:add_bound add in
       ({ renv with env }, Typing_error.multiple_opt ty_errs)
   in
-  Option.(iter ~f:Errors.add_typing_error @@ merge e1 e2 ~f:Typing_error.both);
+  Option.(
+    iter ~f:(Typing_error_utils.add_typing_error ~env:renv.env)
+    @@ merge e1 e2 ~f:Typing_error.both);
   renv
 
 let rec refresh_tvars seen renv =
-  if IMap.is_empty renv.tvars then
+  if Tvid.Map.is_empty renv.tvars then
     renv.env
   else
     let tvars = renv.tvars in
-    let renv = { renv with tvars = IMap.empty } in
-    let renv = IMap.fold refresh_tvar tvars renv in
-    let seen = IMap.fold (fun v _ -> ISet.add v) tvars seen in
-    let tvars = ISet.fold IMap.remove seen renv.tvars in
+    let renv = { renv with tvars = Tvid.Map.empty } in
+    let renv = Tvid.Map.fold refresh_tvar tvars renv in
+    let seen = Tvid.Map.fold (fun v _ -> Tvid.Set.add v) tvars seen in
+    let tvars = Tvid.Set.fold Tvid.Map.remove seen renv.tvars in
     let renv = { renv with tvars } in
     refresh_tvars seen renv
 
@@ -477,18 +541,29 @@ let refresh_locals renv =
      per local in the fold below *)
   let on_error = renv.on_error in
   Local_id.Map.fold
-    (fun local (lty, pos, _expr_id) renv ->
-      let on_error =
-        let pos = Pos_or_decl.of_raw_pos pos in
-        let name = Markdown_lite.md_codify (Local_id.to_string local) in
-        let reason = lazy (pos, "in the type of local " ^ name) in
-        Typing_error.Reasons_callback.append_reason on_error ~reason
-      in
-      let renv = { renv with on_error } in
-      let (renv, lty, changed) = refresh_type renv Ast_defs.Covariant lty in
-      match changed with
-      | Elim _ -> { renv with env = Env.set_local renv.env local lty pos }
-      | Unchanged -> renv)
+    (fun local
+         Typing_local_types.
+           { ty = lty; defined; bound_ty; pos; eid = _; macro_splice_vars = _ }
+         renv ->
+      if defined then
+        let on_error =
+          let pos = Pos_or_decl.of_raw_pos pos in
+          let name = Markdown_lite.md_codify (Local_id.to_string local) in
+          let reason = lazy (pos, "in the type of local " ^ name) in
+          Typing_error.Reasons_callback.append_reason on_error ~reason
+        in
+        let renv = { renv with on_error } in
+        let (renv, lty, changed) = refresh_type renv Ast_defs.Covariant lty in
+        match changed with
+        | Elim _ ->
+          {
+            renv with
+            env =
+              Env.set_local ~is_defined:true ~bound_ty renv.env local lty pos;
+          }
+        | Unchanged -> renv
+      else
+        renv)
     locals
     renv
 
@@ -509,11 +584,12 @@ let refresh_env_and_type ~remove:(types, remove) ~pos env ty =
     let renv =
       {
         env;
-        tvars = IMap.empty;
+        tvars = Tvid.Map.empty;
         remove;
         on_error;
         scope_kind = (what, pos);
         elim_bogus_taccess = false;
+        eliminating = SSet.empty;
       }
     in
     let renv = refresh_locals renv in
@@ -525,7 +601,7 @@ let refresh_env_and_type ~remove:(types, remove) ~pos env ty =
     in
     let renv = { renv with on_error } in
     let (renv, ty, _) = refresh_type renv Ast_defs.Covariant ty in
-    (refresh_tvars ISet.empty renv, ty)
+    (refresh_tvars Tvid.Set.empty renv, ty)
   )
 
 (********************************************************************)
@@ -534,7 +610,7 @@ let refresh_env_and_type ~remove:(types, remove) ~pos env ty =
 
 type snapshot = {
   tpmap: (Pos_or_decl.t * Typing_kinding_defs.kind) SMap.t;
-  nextid: int;
+  nextid: Expression_id.t;
       (* nextid is used to detect if an expression-dependent type is fresh
          or not; we snapshot it at some time and all ids larger than the
          snapshot were allocated after the snapshot time *)
@@ -545,32 +621,29 @@ type escaping_rigid_tvars = string list * remove_map
 let snapshot_env env =
   let gtp = Type_parameter_env.get_tparams (Env.get_global_tpenv env) in
   let ltp = Type_parameter_env.get_tparams (Env.get_tpenv env) in
-  { tpmap = SMap.union gtp ltp; nextid = Ident.tmp () }
+  { tpmap = SMap.union gtp ltp; nextid = Env.make_expression_id env }
 
-let escaping_from_snapshot snap env =
+let escaping_from_snapshot snap env quants :
+    string list * (rigid_tvar -> elim_info option) =
   let is_global tp =
     (* Oh, that's nice... *)
     String.length tp > 6 && String.(sub ~pos:0 ~len:6 tp = "this::")
   in
-  let eidmap =
-    let inverse_map m = IMap.fold (fun k v -> IMap.add v k) m IMap.empty in
-    inverse_map (Reason.get_expr_display_id_map ())
-  in
   let { nextid; _ } = snap in
   let is_old_dep_expr tp =
     (* but it gets better! *)
-    let rec atoi s i acc =
-      if Char.(s.[i] = '>') then
-        acc
-      else
-        atoi s (i + 1) ((10 * acc) + Char.(to_int s.[i] - to_int '0'))
+    let extract_id tp_name =
+      let rec atoi s i acc =
+        if Char.(s.[i] = '>') then
+          acc
+        else
+          atoi s (i + 1) ((10 * acc) + Char.(to_int s.[i] - to_int '0'))
+      in
+      Expression_id.dodgy_from_int @@ atoi tp_name 6 0
     in
     String.length tp > 6
     && String.(sub ~pos:0 ~len:6 tp = "<expr#")
-    &&
-    match IMap.find_opt (atoi tp 6 0) eidmap with
-    | Some id -> id < nextid
-    | None -> false
+    && Expression_id.compare (extract_id tp) nextid < 0
   in
   let tpmap =
     Type_parameter_env.get_tparams (Env.get_global_tpenv env)
@@ -579,9 +652,12 @@ let escaping_from_snapshot snap env =
            SMap.union
              (Type_parameter_env.get_tparams c.Typing_per_cont_env.tpenv))
          (Typing_lenv.get_all_locals env)
-    |> SMap.fold (fun x _ -> SMap.remove x) snap.tpmap
+    |> SMap.fold (fun key _ acc -> SMap.remove key acc) snap.tpmap
     |> SMap.filter (fun tp _ ->
            (not (is_global tp)) && not (is_old_dep_expr tp))
+  in
+  let tpmap =
+    List.fold_left quants ~init:tpmap ~f:(fun acc nm -> SMap.remove nm acc)
   in
   ( SMap.keys tpmap,
     function
@@ -600,7 +676,7 @@ let escaping_from_snapshot snap env =
           lower_bounds = TySet.empty;
         }
       in
-      if id > nextid then
+      if Expression_id.compare id nextid > 0 then
         Some empty_info
       else
         None )

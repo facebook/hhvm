@@ -320,6 +320,7 @@
       {
         "kind":"enum_declaration",
         "enum_attribute_spec":{"kind":"missing"},
+        "enum_modifiers":{"kind":"missing"},
         "enum_keyword":{
           "kind":"token",
           "token":{
@@ -535,8 +536,11 @@
                   "kind":"parameter_declaration",
                   "parameter_attribute":{"kind":"missing"},
                   "parameter_visibility":{"kind":"missing"},
+                  "parameter_optional":{"kind":"missing"},
                   "parameter_call_convention":{"kind":"missing"},
+                  "parameter_named":{"kind":"missing"},
                   "parameter_readonly":{"kind":"missing"},
+                  "parameter_pre_ellipsis":{"kind":"missing"},
                   "parameter_type":{
                     "kind":"generic_type_specifier",
                     "generic_class_type":{
@@ -719,6 +723,7 @@
                       }
                     }
                   },
+                  "parameter_ellipsis":{"kind":"missing"},
                   "parameter_name":{
                     "kind":"token",
                     "token":{
@@ -733,7 +738,8 @@
                       "line_number":12
                     }
                   },
-                  "parameter_default_value":{"kind":"missing"}
+                  "parameter_default_value":{"kind":"missing"},
+                  "parameter_parameter_end":{"kind":"missing"}
                 },
                 "list_separator":{"kind":"missing"}
               }

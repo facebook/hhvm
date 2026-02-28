@@ -15,22 +15,22 @@ echo "*** Testing fputcsv() : with different delimiter and enclosure ***\n";
    1st element is delimiter, 2nd element is enclosure 
    and 3rd element is csv fields
 */
-$csv_lists = varray [
-  varray[',', '"', varray['water,fruit'] ],
-  varray[',', '"', varray['"water","fruit'] ],
-  varray[',', '"', varray['"water","fruit"'] ],
-  varray[' ', '^', varray['^water^ ^fruit^']],
-  varray[':', '&', varray['&water&:&fruit&']],
-  varray['=', '=', varray['=water===fruit=']],
-  varray['-', '-', varray['-water--fruit-air']],
-  varray['-', '-', varray['-water---fruit---air-']],
-  varray[':', '&', varray['&""""&:&"&:,:":&,&:,,,,']]
+$csv_lists = vec[
+  vec[',', '"', vec['water,fruit'] ],
+  vec[',', '"', vec['"water","fruit'] ],
+  vec[',', '"', vec['"water","fruit"'] ],
+  vec[' ', '^', vec['^water^ ^fruit^']],
+  vec[':', '&', vec['&water&:&fruit&']],
+  vec['=', '=', vec['=water===fruit=']],
+  vec['-', '-', vec['-water--fruit-air']],
+  vec['-', '-', vec['-water---fruit---air-']],
+  vec[':', '&', vec['&""""&:&"&:,:":&,&:,,,,']]
 
 ];
 
-$filename = __SystemLib\hphp_test_tmppath('fputcsv_variation6.tmp');
+$filename = sys_get_temp_dir().'/'.'fputcsv_variation6.tmp';
 
-$file_modes = varray ["r+", "r+b", "r+t",
+$file_modes = vec["r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
                      "x+", "x+b", "x+t"]; 

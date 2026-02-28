@@ -16,12 +16,10 @@
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/heap-scan.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/heap-graph.h"
-#include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/base/weakref-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/alloc.h"
-#include "hphp/util/cycles.h"
+#include "hphp/util/configs/gc.h"
 #include "hphp/util/ptr-map.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/struct-log.h"
@@ -30,17 +28,15 @@
 #include "hphp/util/type-scan.h"
 
 #include <algorithm>
-#include <boost/dynamic_bitset.hpp>
 #include <folly/portability/Unistd.h>
 #include <folly/Range.h>
-#include <iterator>
 #include <vector>
 
 namespace HPHP {
-TRACE_SET_MOD(gc);
+TRACE_SET_MOD(gc)
 
 RDS_LOCAL_NO_CHECK(RequestLocalGCData, rl_gcdata);
-IMPLEMENT_RDS_LOCAL_HOTVALUE(bool, t_eager_gc);
+IMPLEMENT_RDS_LOCAL_HOTVALUE(bool, t_eager_gc)
 
 namespace {
 
@@ -177,6 +173,7 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
     case HeaderKind::ImmSet:
     case HeaderKind::WaitHandle:
     case HeaderKind::AwaitAllWH:
+    case HeaderKind::ConcurrentWH:
       // Object kinds. None of these have native-data, because if they
       // do, the mapped header should be for the NativeData prefix.
       break;
@@ -247,19 +244,19 @@ void Collector::exactEnqueue(const void* p) {
   }
 }
 
-// mark ambigous pointers in the range [start,start+len). If the start or
+// mark ambiguous pointers in the range [start,start+len). If the start or
 // end is a partial word, don't scan that word.
 void FOLLY_DISABLE_ADDRESS_SANITIZER
 Collector::conservativeScan(const void* start, size_t len) {
-  constexpr uintptr_t M{7}; // word size - 1
-  auto s = (char**)((uintptr_t(start) + M) & ~M); // round up
-  auto e = (char**)((uintptr_t(start) + len) & ~M); // round down
-  cscanned_ += uintptr_t(e) - uintptr_t(s);
-  for (; s < e; s++) {
+  if (len < sizeof(uintptr_t)) return;
+  cscanned_ += len - sizeof(uintptr_t) + 1;
+  auto s = (char*)start;
+  auto const e = s + len - sizeof(uintptr_t);
+  for (; s <= e; ++s) {
     checkedEnqueue(
       // Mask off the upper 16-bits to handle things like
       // DiscriminatedPtr which stores things up there.
-      (void*)(uintptr_t(*s) & (-1ULL >> 16))
+      (void*)(*(uintptr_t*)s & (-1ULL >> 16))
     );
   }
 }
@@ -344,7 +341,7 @@ void Collector::collect() {
   return;
 #endif
   init();
-  if (type_scan::hasNonConservative() && RuntimeOption::EvalTwoPhaseGC) {
+  if (type_scan::hasNonConservative() && Cfg::GC::TwoPhase) {
     traceConservative();
     traceExact();
   } else {
@@ -461,9 +458,9 @@ NEVER_INLINE void Collector::sweep() {
   auto const t0 = cpu_ns();
   auto const usage0 = mm.currentUsage();
   MemoryManager::FreelistArray quarantine;
-  if (RuntimeOption::EvalQuarantine) quarantine = mm.beginQuarantine();
+  if (Cfg::GC::Quarantine) quarantine = mm.beginQuarantine();
   SCOPE_EXIT {
-    if (RuntimeOption::EvalQuarantine) mm.endQuarantine(std::move(quarantine));
+    if (Cfg::GC::Quarantine) mm.endQuarantine(std::move(quarantine));
     freed_bytes_ = usage0 - mm.currentUsage();
     sweep_ns_ = cpu_ns() - t0;
     assertx(freed_bytes_ >= 0);
@@ -476,9 +473,9 @@ NEVER_INLINE void Collector::sweep() {
     if (type == KindOfObject) {
       auto h = find(wr_data->pointee.m_data.pobj);
       if (!marked(h)) {
-        // Its important we invalidate the pointer stored in the weakref, and
+        // It's important we invalidate the pointer stored in the weakref, and
         // not the start of the allocation.  In the case of objects with
-        // native datas, the start of allocation may not be the start of the
+        // native data, the start of allocation may not be the start of the
         // ObjectData*.
         WeakRefData::invalidateWeakRef(uintptr_t(wr_data->pointee.m_data.pobj));
         mm.reinitFree();
@@ -614,7 +611,7 @@ void logCollection(const char* phase, const Collector& collector) {
 
 void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
   VMRegAnchor _;
-  if (t_eager_gc && RuntimeOption::EvalFilterGCPoints) {
+  if (t_eager_gc && Cfg::GC::FilterPoints) {
     t_eager_gc = false;
     auto const pc = vmpc();
     if (rl_gcdata->t_surprise_filter.test(pc)) return;
@@ -626,7 +623,7 @@ void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
   }
   if (rl_gcdata->t_gc_num == 0) {
     rl_gcdata->t_enable_samples =
-      StructuredLog::coinflip(RuntimeOption::EvalGCSampleRate);
+      StructuredLog::coinflip(Cfg::GC::SampleRate);
   }
   rl_gcdata->t_pre_stats =
     tl_heap->getStatsCopy(); // don't check or trigger OOM
@@ -654,22 +651,22 @@ void MemoryManager::resetGC() {
 }
 
 void MemoryManager::resetEagerGC() {
-  if (RuntimeOption::EvalEagerGC && RuntimeOption::EvalFilterGCPoints) {
+  if (Cfg::GC::Eager && Cfg::GC::FilterPoints) {
     rl_gcdata->t_surprise_filter.clear();
   }
 }
 
 void MemoryManager::requestEagerGC() {
-  if (RuntimeOption::EvalEagerGC && rds::header()) {
+  if (Cfg::GC::Eager && rds::header()) {
     t_eager_gc = true;
-    setSurpriseFlag(PendingGCFlag);
+    stackLimitAndSurprise().setFlag(PendingGCFlag);
   }
 }
 
 void MemoryManager::checkGC() {
   if (m_stats.mmUsage() > m_nextGC) {
     assertx(rds::header());
-    setSurpriseFlag(PendingGCFlag);
+    stackLimitAndSurprise().setFlag(PendingGCFlag);
     if (rl_gcdata->t_trigger_allocated == -1) {
       rl_gcdata->t_trigger_allocated = m_stats.mmAllocated();
     }
@@ -699,8 +696,8 @@ void MemoryManager::updateNextGc() {
     stats.auxUsage() - stats.mmUsage();
 
   int64_t delta = clearance > std::numeric_limits<int64_t>::max() ?
-    0 : clearance * RuntimeOption::EvalGCTriggerPct;
-  delta = std::max(delta, RuntimeOption::EvalGCMinTrigger);
+    0 : clearance * Cfg::GC::TriggerPct;
+  delta = std::max(delta, Cfg::GC::MinTrigger);
   m_nextGC = stats.mmUsage() + delta;
   updateMMDebt();
 }

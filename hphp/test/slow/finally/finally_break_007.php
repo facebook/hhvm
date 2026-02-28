@@ -1,9 +1,9 @@
 <?hh
 
-function blah() {
-  $xs = varray[11, 22, 33, 44, 55];
-  $ys = varray['a', 'b', 'c', 'd', 'e', 'f'];
-  $zs = varray['x', 'y', 'z'];
+function blah() :mixed{
+  $xs = vec[11, 22, 33, 44, 55];
+  $ys = vec['a', 'b', 'c', 'd', 'e', 'f'];
+  $zs = vec['x', 'y', 'z'];
 
   try {
     echo "begin try\n";
@@ -71,6 +71,6 @@ function blah() {
 
 
 <<__EntryPoint>>
-function main_finally_break_007() {
+function main_finally_break_007() :mixed{
 blah();
 }

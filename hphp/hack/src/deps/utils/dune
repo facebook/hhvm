@@ -1,0 +1,8 @@
+(library
+  (name dep_hash_to_symbol)
+  (modules dep_hash_to_symbol)
+  (libraries
+    annotated_ast
+    core
+    nast
+    typing_deps))

@@ -1,7 +1,7 @@
 <?hh
 // #1909 fwrite() failure behavior when used on a stream_socket_pair
 // with one end closed.
-function handler($errno, $errstr, $errfile, $errline) {
+function handler($errno, $errstr, $errfile, $errline) :mixed{
     var_dump($errno);
     var_dump($errstr);
     var_dump($errfile);

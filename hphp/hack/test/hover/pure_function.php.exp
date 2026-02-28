@@ -1,3 +1,4 @@
 pure function
+---
 This function has an empty context list, so it has no capabilities.
 It may only read properties, access constants, or call other pure functions.

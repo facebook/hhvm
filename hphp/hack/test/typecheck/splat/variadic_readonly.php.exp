@@ -1,0 +1,4 @@
+ERROR: File "variadic_readonly.php", line 3, characters 28-45:
+Variadic parameters cannot be marked readonly (Parsing[1002])
+ERROR: File "variadic_readonly.php", line 3, characters 58-79:
+Variadic parameters cannot be marked readonly (Parsing[1002])

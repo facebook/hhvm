@@ -1,6 +1,6 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) {
     echo "Failed: $y\n";
@@ -8,7 +8,7 @@ function VS($x, $y) {
     var_dump(debug_backtrace());
   }
 }
-function VERIFY($x) {
+function VERIFY($x) :mixed{
   VS($x != false, true);
 }
 
@@ -16,7 +16,7 @@ function VERIFY($x) {
 //////////////////////////////////////////////////////////////////////
 
 <<__EntryPoint>>
-function main_ext_variable() {
+function main_ext_variable() :mixed{
   $valid_res = imagecreate(10, 10);
   $invalid_res = imagecreate(10, 10);
   imagedestroy($invalid_res);
@@ -52,7 +52,7 @@ function main_ext_variable() {
   VERIFY(!is_scalar(null));
   VERIFY(is_scalar(123));
   VERIFY(is_scalar("test"));
-  VERIFY(!is_scalar(varray[123]));
+  VERIFY(!is_scalar(vec[123]));
   VERIFY(!is_scalar(new stdClass));
   VERIFY(!is_scalar($valid_res));
   VERIFY(!is_scalar($invalid_res));
@@ -60,7 +60,7 @@ function main_ext_variable() {
   VERIFY(!is_array(null));
   VERIFY(!is_array(123));
   VERIFY(!is_array("test"));
-  VERIFY(is_array(varray[123]));
+  VERIFY(is_array(vec[123]));
   VERIFY(!is_array(new stdClass));
   VERIFY(!is_array($valid_res));
   VERIFY(!is_array($invalid_res));
@@ -68,7 +68,7 @@ function main_ext_variable() {
   VERIFY(!is_object(null));
   VERIFY(!is_object(123));
   VERIFY(!is_object("test"));
-  VERIFY(!is_object(varray[123]));
+  VERIFY(!is_object(vec[123]));
   VERIFY(is_object(new stdClass));
   VERIFY(!is_object($valid_res));
   VERIFY(!is_object($invalid_res));
@@ -76,7 +76,7 @@ function main_ext_variable() {
   VERIFY(!is_resource(null));
   VERIFY(!is_resource(123));
   VERIFY(!is_resource("test"));
-  VERIFY(!is_resource(varray[123]));
+  VERIFY(!is_resource(vec[123]));
   VERIFY(!is_resource(new stdClass));
   VERIFY(is_resource($valid_res));
   VERIFY(!is_resource($invalid_res));
@@ -85,7 +85,7 @@ function main_ext_variable() {
   VS(gettype(0), "integer");
   VS(gettype("test"), "string");
   VS(gettype("hi"), "string");
-  VS(gettype(varray[]), "vec");
+  VS(gettype(vec[]), "vec");
   VS(gettype(new stdClass), "object");
   VS(gettype($valid_res), "resource");
   VS(gettype($invalid_res), "unknown type");
@@ -103,23 +103,11 @@ function main_ext_variable() {
 
   VS(strval(123), "123");
 
-  VS(boolval(0), false);
-  VS(boolval(42), true);
-  VS(boolval(0.0), false);
-  VS(boolval(4.2), true);
-  VS(boolval(""), false);
-  VS(boolval("string"), true);
-  VS(boolval("0"), false);
-  VS(boolval("1"), true);
-  VS(boolval(varray[1, 2]), true);
-  VS(boolval(varray[]), false);
-  VS(boolval(new stdClass), true);
-
   $obj = new stdClass;
   $obj->name = "value";
   VS(serialize($obj), "O:8:\"stdClass\":1:{s:4:\"name\";s:5:\"value\";}");
 
-  $v = darray["a" => "apple", "b" => 2, "c" => varray[1, "y", 3]];
+  $v = dict["a" => "apple", "b" => 2, "c" => vec[1, "y", 3]];
   VS(
     serialize($v),
     "D:3:{s:1:\"a\";s:5:\"apple\";s:1:\"b\";i:2;s:1:\"c\";v:3:{i:1;s:1:\"y\";i:3;}}",
@@ -127,6 +115,11 @@ function main_ext_variable() {
 
   {
     $v = unserialize("O:8:\"stdClass\":1:{s:4:\"name\";s:5:\"value\";}");
+    VERIFY(is_object($v));
+    VS($v->name, "value");
+  }
+  {
+    $v = unserialize_slice("prefixO:8:\"stdClass\":1:{s:4:\"name\";s:5:\"value\";}suffix", 6, 48);
     VERIFY(is_object($v));
     VS($v->name, "value");
   }
@@ -140,7 +133,7 @@ function main_ext_variable() {
     }
   }
   {
-    $v1 = darray["a" => "apple", "b" => 2, "c" => darray(varray[1, "y", 3])];
+    $v1 = dict["a" => "apple", "b" => 2, "c" => darray(vec[1, "y", 3])];
     $v2 = unserialize(
       "a:3:{s:1:\"a\";s:5:\"apple\";s:1:\"b\";i:2;s:1:\"c\";a:3:{i:0;i:1;i:1;s:1:\"y\";i:2;i:3;}}",
     );

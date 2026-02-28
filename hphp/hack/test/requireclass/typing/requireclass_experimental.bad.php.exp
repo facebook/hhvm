@@ -1,2 +1,0 @@
-File "requireclass_experimental.bad.php", line 5, characters 3-18:
-Cannot use unstable feature: `require_class` (Parsing[1002])

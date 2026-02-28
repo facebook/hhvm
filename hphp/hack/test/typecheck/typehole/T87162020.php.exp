@@ -1,1 +1,4 @@
-No errors
+WARN: File "T87162020.php", line 18, characters 12-14:
+Static method call on a trait: `MyTrait::bar` (Warn[12020])
+  File "T87162020.php", line 8, characters 7-13:
+  `MyTrait` is defined here

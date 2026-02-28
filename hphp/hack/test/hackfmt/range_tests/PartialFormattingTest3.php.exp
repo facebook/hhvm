@@ -1,4 +1,4 @@
        *
        * MultilineComment1-2
        */
-      $errors = varray[];
+      $errors = vec[];

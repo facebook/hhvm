@@ -1,6 +1,6 @@
 <?hh
 
-function main(int $x) {
+function main(int $x) :mixed{
   if (!$x) {
     echo $x;
   }
@@ -8,6 +8,6 @@ function main(int $x) {
 
 
 <<__EntryPoint>>
-function main_jmp_local_002() {
+function main_jmp_local_002() :mixed{
 main(0);
 }

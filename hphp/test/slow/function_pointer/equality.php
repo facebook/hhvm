@@ -4,7 +4,7 @@ function foo<reify T>(): void {}
 
 function bar<reify T>(): void {}
 
-function wrap($fun) {
+function wrap($fun) :mixed{
   try {
     $fun();
   } catch (Exception $e) {
@@ -12,7 +12,7 @@ function wrap($fun) {
   }
 }
 
-function comp($x, $y) {
+function comp($x, $y) :mixed{
   wrap(() ==> var_dump(HH\Lib\Legacy_FIXME\eq($x, $y)));
   wrap(() ==> var_dump($x === $y));
   wrap(() ==> var_dump(HH\Lib\Legacy_FIXME\neq($x, $y)));

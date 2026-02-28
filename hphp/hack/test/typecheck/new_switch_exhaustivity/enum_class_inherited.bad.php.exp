@@ -1,0 +1,16 @@
+ERROR: File "enum_class_inherited.bad.php", line 14, characters 3-81:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `#StringE`, `#StringF` (Typing[4019])
+  File "enum_class_inherited.bad.php", line 14, characters 11-12:
+  The scrutinee has type `HH\EnumClass\Label<F, mixed>`.
+ERROR: File "enum_class_inherited.bad.php", line 23, characters 3-81:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `#StringE`, `#StringF` (Typing[4019])
+  File "enum_class_inherited.bad.php", line 23, characters 11-12:
+  The scrutinee has type `HH\EnumClass\Label<F, mixed>`.
+ERROR: File "enum_class_inherited.bad.php", line 32, characters 3-53:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `#StringE` (Typing[4019])
+  File "enum_class_inherited.bad.php", line 32, characters 11-12:
+  The scrutinee has type `HH\EnumClass\Label<F, string>`.
+ERROR: File "enum_class_inherited.bad.php", line 39, characters 3-52:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `#StringE` (Typing[4019])
+  File "enum_class_inherited.bad.php", line 39, characters 11-12:
+  The scrutinee has type `HH\EnumClass\Label<F, string>`.

@@ -2,6 +2,6 @@
 <<__EntryPoint>> function main(): void {
 $b = 'b';
 
-$a = varray[$b];
+$a = vec[$b];
 var_dump(array_values($a));
 }

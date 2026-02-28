@@ -1,34 +1,34 @@
-<?hh // partial
+<?hh
 
 namespace HH {
 
 /** A wait handle representing asynchronous operation
  */
 <<__Sealed(StaticWaitHandle::class, WaitableWaitHandle::class)>>
-abstract class Awaitable {
+abstract class Awaitable<+T> {
 
   private function __construct() {
     throw new \InvalidOperationException(
-      \get_class($this) . "s cannot be constructed directly"
+      nameof static . "s cannot be constructed directly"
     );
   }
 
   /** Set callback for when the scheduler enters I/O wait
    * @param mixed $callback - A Closure to be called when I/O wait is entered
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnIOWaitEnterCallback(mixed $callback): void;
 
   /** Set callback for when the scheduler exits I/O wait
    * @param mixed $callback - A Closure to be called when I/O wait is exited
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnIOWaitExitCallback(mixed $callback): void;
 
   /** Set callback for when \HH\Asio\join() is called
    * @param mixed $callback - A Closure to be called on \HH\Asio\join()
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnJoinCallback(mixed $callback): void;
 
   /** Check if this wait handle finished (succeeded or failed)
@@ -36,7 +36,7 @@ abstract class Awaitable {
    *
    * DEPRECATED: use HH\Asio\has_finished()
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public function isFinished()[]: bool;
 
   /** Check if this wait handle succeeded
@@ -66,119 +66,110 @@ abstract class Awaitable {
 
 /** A wait handle that is always finished
  */
-final class StaticWaitHandle extends Awaitable {}
+final class StaticWaitHandle<T> extends Awaitable<T> {}
 
 /** A wait handle that can be waited upon
  */
 <<__Sealed(
   AwaitAllWaitHandle::class,
+  ConcurrentWaitHandle::class,
   ConditionWaitHandle::class,
   ExternalThreadEventWaitHandle::class,
+  PriorityBridgeWaitHandle::class,
   RescheduleWaitHandle::class,
   ResumableWaitHandle::class,
   SleepWaitHandle::class
 )>>
-abstract class WaitableWaitHandle extends Awaitable {
+abstract class WaitableWaitHandle<+T> extends Awaitable<T> {
 }
 
 /** A wait handle that can resume execution of PHP code
  */
 <<__Sealed(AsyncFunctionWaitHandle::class, AsyncGeneratorWaitHandle::class)>>
-abstract class ResumableWaitHandle extends WaitableWaitHandle {
+abstract class ResumableWaitHandle<+T> extends WaitableWaitHandle<T> {
 
   /** Set callback to be called when a ResumableWaitHandle is created
    * @param mixed $callback - A Closure to be called when a ResumableWaitHandle
    * is created
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnCreateCallback(mixed $callback): void;
 
   /** Set callback to be called when an async function blockingly awaits
    * @param mixed $callback - A Closure to be called when an async function
    * blockingly await
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnAwaitCallback(mixed $callback): void;
 
   /** Set callback to be called when a ResumableWaitHandle finishes successfully
    * @param mixed $callback - A Closure to be called when a ResumableWaitHandle
    * finishes
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnSuccessCallback(mixed $callback): void;
 
   /** Set callback to be called when a ResumableWaitHandle fails
    * @param mixed $callback - A Closure to be called when a ResumableWaitHandle
    * fails
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnFailCallback(mixed $callback): void;
 }
 
 /** A wait handle representing asynchronous execution of async function
  */
-final class AsyncFunctionWaitHandle extends ResumableWaitHandle {}
+final class AsyncFunctionWaitHandle<+T> extends ResumableWaitHandle<T> {}
 
 /** A wait handle representing asynchronous execution of async generator
  */
-final class AsyncGeneratorWaitHandle extends ResumableWaitHandle {}
+final class AsyncGeneratorWaitHandle<+Tk, +Tv> extends ResumableWaitHandle<?(Tk, Tv)> {}
 
 /** A wait handle that waits for a list of other wait handles
  */
-final class AwaitAllWaitHandle extends WaitableWaitHandle {
+final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
 
   /** Create a wait handle that waits for a given vec of dependencies
    * @param array $dependencies - A vec of dependencies to wait for
    * @return object - A WaitHandle that will wait for a given vec of
    * dependencies
    */
-  <<__Native>>
-  public static function fromVec(vec $dependencies)[]: Awaitable;
+  <<__Native("NoRecording")>>
+  public static function fromVec(
+    vec<Awaitable<mixed>> $dependencies,
+  )[]: Awaitable<void>;
 
   /** Create a wait handle that waits for a given dict of dependencies
    * @param array $dependencies - A dict of dependencies to wait for
    * @return object - A WaitHandle that will wait for a given dict of
    * dependencies
    */
-  <<__Native>>
-  public static function fromDict(dict $dependencies)[]: Awaitable;
-
-  /** Create a wait handle that waits for a given Map of dependencies
-   * @param mixed $dependencies - A Map of dependencies to wait for
-   * @return object - A WaitHandle that will wait for a given Map of
-   * dependencies
-   */
-  <<__Native>>
-  public static function fromMap(mixed $dependencies)[]: Awaitable;
-
-  /** Create a wait handle that waits for a given Vector of dependencies
-   * @param mixed $dependencies - A Vector of dependencies to wait for
-   * @return object - A WaitHandle that will wait for a given Vector of
-   * dependencies
-   */
-  <<__Native>>
-  public static function fromVector(mixed $dependencies)[]: Awaitable;
-
-  /** Create a wait handle that can, generically, wait for a given Container<_>
-   * of dependencies.
-   *
-   * This should only be used if accepting a generic Container
-   * _and_ it's required to reuse the same container for performance reasons.
-   * otherwise prefer to use `fromVec` or `fromDict`
-   */
-  <<__Native>>
-  public static function fromContainer(mixed $dependencies)[]: Awaitable;
+  <<__Native("NoRecording")>>
+  public static function fromDict(
+    dict<arraykey, Awaitable<mixed>> $dependencies
+  )[]: Awaitable<void>;
 
   /** Set callback for when a AwaitAllWaitHandle is created
    * @param mixed $callback - A Closure to be called on creation
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
+  public static function setOnCreateCallback(mixed $callback): void;
+}
+
+/** A wait handle that waits for a list of other wait handles
+ */
+final class ConcurrentWaitHandle extends WaitableWaitHandle<void> {
+
+  /** Set callback for when a ConcurrentWaitHandle is created
+   * @param mixed $callback - A Closure to be called on creation
+   */
+  <<__Native("NoRecording")>>
   public static function setOnCreateCallback(mixed $callback): void;
 }
 
 /** A wait handle representing a condition variable waiting for a notification
  */
-final class ConditionWaitHandle extends WaitableWaitHandle {
+final class ConditionWaitHandle<T> extends WaitableWaitHandle<T> {
 
   /** Create a wait handle that waits for a notification
    * @param mixed $child - A WaitHandle representing job responsible for
@@ -186,12 +177,12 @@ final class ConditionWaitHandle extends WaitableWaitHandle {
    * @return object - A WaitHandle that will wait for a notification
    */
   <<__Native>>
-  public static function create(mixed $child): \HH\ConditionWaitHandle;
+  public static function create(mixed $child): \HH\ConditionWaitHandle<T>;
 
   /** Set callback for when a ConditionWaitHandle is created
    * @param mixed $callback - A Closure to be called on creation
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   public static function setOnCreateCallback(mixed $callback): void;
 
   /** Notify the condition variable and mark the ConditionWaitHandle as succeeded
@@ -207,10 +198,30 @@ final class ConditionWaitHandle extends WaitableWaitHandle {
   public function fail(\Exception $exception)[]: void;
 }
 
+/** A wait handle that supports lower priority children
+ */
+final class PriorityBridgeWaitHandle<T> extends WaitableWaitHandle<T> {
+
+  /** Create a wait handle with an arbitrary priority child, used to bridge
+   * between low-pri lower priority children and the current context.
+   * @param Awaitable<T> $child - an awaitable which may be in a lower priority
+   * context
+   */
+  <<__Native("NoRecording")>>
+  public static function create(Awaitable<T> $child)[]: \HH\PriorityBridgeWaitHandle<T>;
+
+
+  /** Bring the child into the context of the PBWH, and then maintain the
+   * monotonicity between the PBWH and the child (i.e. child priority >= PBWH).
+   */
+  <<__Native>>
+  public function prioritize()[]: void;
+}
+
 /** A wait handle that succeeds with null once desired scheduling priority is
  * eligible for execution
  */
-final class RescheduleWaitHandle extends WaitableWaitHandle {
+final class RescheduleWaitHandle extends WaitableWaitHandle<void> {
 
   /** Create a wait handle that succeeds once desired scheduling priority is
    * eligible for execution
@@ -221,16 +232,16 @@ final class RescheduleWaitHandle extends WaitableWaitHandle {
    * @return object - A RescheduleWaitHandle that succeeds once desired
    * scheduling priority is eligible for execution
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   public static function create(
     int $queue,
     int $priority,
-  ): \HH\RescheduleWaitHandle;
+  )[]: \HH\RescheduleWaitHandle;
 }
 
 /** A wait handle that succeeds with null after the desired timeout expires
  */
-final class SleepWaitHandle extends WaitableWaitHandle {
+final class SleepWaitHandle extends WaitableWaitHandle<void> {
 
   /** Create a wait handle that succeeds after the desired timeout expires
    * @param int $usecs - Non-negative number of microseconds to sleep for
@@ -244,26 +255,26 @@ final class SleepWaitHandle extends WaitableWaitHandle {
    * @param mixed $callback - A Closure to be called when a SleepWaitHandle is
    * created
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnCreateCallback(mixed $callback): void;
 
   /** Set callback to be called when a SleepWaitHandle finishes successfully
    * @param mixed $callback - A Closure to be called when a SleepWaitHandle
    * finishes
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   final public static function setOnSuccessCallback(mixed $callback): void;
 }
 
 /** A wait handle that synchronizes against C++ operation in external thread
  */
-final class ExternalThreadEventWaitHandle extends WaitableWaitHandle {
+final class ExternalThreadEventWaitHandle extends WaitableWaitHandle<void> {
 
   /** Set callback to be called when an ExternalThreadEventWaitHandle is created
    * @param mixed $callback - A Closure to be called when an
    * ExternalThreadEventWaitHandle is created
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   public static function setOnCreateCallback(mixed $callback): void;
 
   /** Set callback to be called when an ExternalThreadEventWaitHandle finishes
@@ -271,34 +282,28 @@ final class ExternalThreadEventWaitHandle extends WaitableWaitHandle {
    * @param mixed $callback - A Closure to be called when an
    * ExternalThreadEventWaitHandle finishes
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   public static function setOnSuccessCallback(mixed $callback): void;
 
   /** Set callback to be called when an ExternalThreadEventWaitHandle fails
    * @param mixed $callback - A Closure to be called when an
    * ExternalThreadEventWaitHandle fails
    */
-  <<__Native>>
+  <<__Native("NoRecording")>>
   public static function setOnFailCallback(mixed $callback): void;
 }
 
 /**
- * Get index of the current scheduler context, or 0 if there is none.
+ * Get the depth of the current scheduler context, 0 if there is none.
  */
 <<__Native>>
-function asio_get_current_context_idx(): int;
-
-/**
- * Get currently running wait handle in a context specified by its index.
- */
-<<__Native>>
-function asio_get_running_in_context(int $ctx_idx): ResumableWaitHandle;
+function asio_get_current_context_depth(): int;
 
 /**
  * Get currently running wait handle, or null if there is none.
  */
 <<__Native>>
-function asio_get_running(): ResumableWaitHandle;
+function asio_get_running(): ResumableWaitHandle<mixed>;
 
 } // namespace
 
@@ -313,8 +318,8 @@ async function void()[]: Awaitable<void> {}
  * Launches a new instance of scheduler to drive asynchronous execution
  * until the provided Awaitable is finished.
  */
-<<__Native("NoFCallBuiltin")>>
-function join<T>(Awaitable<T> $awaitable)[]: mixed;
+<<__Native("NoFCallBuiltin", "NoRecording")>>
+function join<T>(Awaitable<T> $awaitable)[]: T;
 
 /**
  * Get result of an already finished Awaitable.
@@ -351,29 +356,46 @@ function name<T>(Awaitable<T> $awaitable)[]: string {
 <<__Native>>
 function cancel<T>(Awaitable<T> $awaitable, \Exception $exception): bool;
 
+
+/**
+ * Cancels a sleep wait handle, if it's still pending. Returns true if the wait-
+ * handle was cancelled (i.e. called before it finished), false otherwise.
+ *
+ * Unlike cancel(), this will not raise an exception, but will instead return
+ * immediately from the sleep.
+ *
+ * Throw InvalidArgumentException, if Awaitable is not a sleep wait handle.
+ */
+<<__Native>>
+function cancel_sleep_nothrow<T>(SleepWaitHandle $wh): bool;
+
 /**
  * Generates a backtrace for $awaitable.
- * Following conditions must be met to produce non-empty backtrace:
+ * Following conditions must be met to produce non-null backtrace:
  * - $awaitable has not finished yet (i.e. has_finished($awaitable) === false)
  * - $awaitable is part of valid scheduler context
- *     (i.e. $awaitable->getContextIdx() > 0)
- * If either condition is not met, backtrace() returns empty array.
+ *     (i.e. $awaitable->getContextStateIndex() > 0)
+ * If either condition is not met, backtrace() returns null.
  *
  * @param $awaitable - Awaitable, to take backtrace from.
  * @param int $options - bitmask of the following options:
  *   DEBUG_BACKTRACE_PROVIDE_OBJECT
  *   DEBUG_BACKTRACE_PROVIDE_METADATA
+ *   DEBUG_BACKTRACE_ONLY_METADATA_FRAMES
  *   DEBUG_BACKTRACE_IGNORE_ARGS
  * @param int $limit - the maximum number of stack frames returned.
  *   By default (limit=0) it returns all stack frames.
  *
- * @return array - Returns an array of associative arrays.
+ * @return ?array - Returns an array of associative arrays, or null.
  *   See debug_backtrace() for detailed format description.
  */
 <<__Native>>
-function backtrace<T>(Awaitable<T> $awaitable,
-                      int $options = \DEBUG_BACKTRACE_PROVIDE_OBJECT,
-                      int $limit = 0): varray<darray>;
+function backtrace<T>(
+  Awaitable<T> $awaitable,
+  int $options = \DEBUG_BACKTRACE_PROVIDE_OBJECT,
+  int $limit = 0,
+): /*?*/vec<dict<string, mixed>>;
+// TODO(T120344399): This ought to return a real backtrace type
 
 
 } // namespace

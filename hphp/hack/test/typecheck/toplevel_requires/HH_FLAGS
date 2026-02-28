@@ -1,1 +1,1 @@
---allow-toplevel-requires
+--config disallow_toplevel_requires=false

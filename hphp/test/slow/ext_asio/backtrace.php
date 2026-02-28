@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class CatWrapper {
@@ -6,9 +6,9 @@ class CatWrapper {
   private darray $pipes;
 
   public function __construct() {
-    $descriptorspec = darray[
-      0 => varray["pipe", "r"],
-      1 => varray["pipe", "w"],
+    $descriptorspec = dict[
+      0 => vec["pipe", "r"],
+      1 => vec["pipe", "w"],
     ];
     $__pipes = $this->pipes;
     $this->proc = proc_open("cat", $descriptorspec, inout $__pipes);
@@ -36,7 +36,7 @@ class CatWrapper {
   }
 }
 
-function reschedule($priority = 0) {
+function reschedule($priority = 0) :mixed{
   $queue = RescheduleWaitHandle::QUEUE_DEFAULT;
   return RescheduleWaitHandle::create($queue, $priority);
 }
@@ -109,16 +109,11 @@ async function testBacktrace(): Awaitable<void> {
   var_dump(!($bt ?? false));
 
   // try backtracing something, that is not a wait handle
-  try {
-    $bt = HH\Asio\backtrace($cat);
-    var_dump(false);
-  } catch (InvalidArgumentException $e) {
-    var_dump(true);
-  }
+  $bt = HH\Asio\backtrace($cat);
 }
 
 
 <<__EntryPoint>>
-function main_backtrace() {
+function main_backtrace() :mixed{
 HH\Asio\join(testBacktrace());
 }

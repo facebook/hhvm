@@ -2,7 +2,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $x = shape('a' => 123);
   if ($x is Shape) echo "Shape\n";
   if ($x is Tuple) echo "Tuple\n";

@@ -1,1 +1,14 @@
-No errors
+ERROR: File "trait_const_conflict.php", line 11, characters 7-7:
+Constant FOO is defined concretely in multiple ancestors (Typing[4374])
+  File "trait_const_conflict.php", line 4, characters 9-11:
+  One conflicting definition is here
+  File "trait_const_conflict.php", line 8, characters 9-11:
+  Another conflicting definition is here
+ERROR: File "trait_const_conflict.php", line 12, characters 7-7:
+Some members in class `A` are incompatible with those declared in type `T` (Typing[4374])
+  File "trait_const_conflict.php", line 8, characters 9-11:
+  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
+  File "trait_const_conflict.php", line 4, characters 9-11:
+  `FOO` inherited from `T`
+  File "trait_const_conflict.php", line 8, characters 9-11:
+  conflicts with constant `FOO` inherited from `T1`.

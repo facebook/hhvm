@@ -14,6 +14,8 @@ type t = Config_file_ffi_externs.config
 
 let file_path_relative_to_repo_root = ".hhconfig"
 
+let pkgs_config_path_relative_to_repo_root = ref "PACKAGES.toml"
+
 let empty = Config_file_ffi_externs.empty
 
 let is_empty = Config_file_ffi_externs.is_empty
@@ -21,12 +23,123 @@ let is_empty = Config_file_ffi_externs.is_empty
 let print_to_stderr (config : t) : unit =
   Config_file_ffi_externs.print_to_stderr config
 
-let apply_overrides ~(from : string option) ~(config : t) ~(overrides : t) : t =
+module type Getters_S = sig
+  val string_opt : string -> t -> string option
+
+  val string_ : string -> default:string -> t -> string
+
+  val int_ : string -> default:int -> t -> int
+
+  val int_opt_result : string -> t -> (int, string) result option
+
+  val int_opt : string -> t -> int option
+
+  val float_ : string -> default:float -> t -> float
+
+  val float_opt : string -> t -> float option
+
+  val bool_ : string -> default:bool -> t -> bool
+
+  val bool_opt : string -> t -> bool option
+
+  val string_list_opt : string -> t -> string list option
+
+  val string_list : string -> default:string list -> t -> string list
+
+  val int_list_opt : string -> t -> int list option
+
+  val all_or_some_ints_opt : string -> t -> int GlobalOptions.all_or_some option
+
+  val all_or_some_ints :
+    string ->
+    default:int GlobalOptions.all_or_some ->
+    t ->
+    int GlobalOptions.all_or_some
+
+  val bool_if_min_version :
+    string ->
+    default:bool ->
+    current_version:Config_file_version.version ->
+    t ->
+    bool
+end
+
+module Getters : Getters_S = struct
+  let ok_or_invalid_arg = function
+    | Ok x -> x
+    | Error e -> invalid_arg e
+
+  let string_opt key config = Config_file_ffi_externs.get_string_opt config key
+
+  (* Does not immediately raise if key is not an int *)
+  let int_opt_result key config = Config_file_ffi_externs.get_int_opt config key
+
+  let int_opt key config =
+    Config_file_ffi_externs.get_int_opt config key
+    |> Option.map ~f:ok_or_invalid_arg
+
+  let float_opt key config =
+    Config_file_ffi_externs.get_float_opt config key
+    |> Option.map ~f:ok_or_invalid_arg
+
+  let bool_opt key config =
+    Config_file_ffi_externs.get_bool_opt config key
+    |> Option.map ~f:ok_or_invalid_arg
+
+  let all_or_some_ints_opt key config =
+    Config_file_ffi_externs.get_all_or_some_ints_opt config key
+    |> Option.map ~f:ok_or_invalid_arg
+
+  let string_list_opt key config =
+    Config_file_ffi_externs.get_string_list_opt config key
+
+  let int_list_opt key config : int list option =
+    try string_list_opt key config >>| List.map ~f:Int.of_string with
+    | Failure _ -> None
+
+  let string_ key ~default config =
+    Option.value (string_opt key config) ~default
+
+  let int_ key ~default config = Option.value (int_opt key config) ~default
+
+  let float_ key ~default config = Option.value (float_opt key config) ~default
+
+  let bool_ key ~default config = Option.value (bool_opt key config) ~default
+
+  let all_or_some_ints key ~default config =
+    Option.value (all_or_some_ints_opt key config) ~default
+
+  let string_list key ~default config =
+    Option.value (string_list_opt key config) ~default
+
+  let bool_if_min_version key ~default ~current_version config : bool =
+    let version_value = string_ key ~default:(string_of_bool default) config in
+    match version_value with
+    | "true" -> true
+    | "false" -> false
+    | version_value ->
+      let version_value =
+        Config_file_version.parse_version (Some version_value)
+      in
+      if Config_file_version.compare_versions current_version version_value >= 0
+      then
+        true
+      else
+        false
+end
+
+let get_pkgconfig_path () = !pkgs_config_path_relative_to_repo_root
+
+let set_pkgconfig_path (fn : string) =
+  pkgs_config_path_relative_to_repo_root := fn
+
+let apply_overrides ~(config : t) ~(overrides : t) ~(log_reason : string option)
+    : t =
   if is_empty overrides then
     config
   else
     let config = Config_file_ffi_externs.apply_overrides config overrides in
-    Option.iter from ~f:(fun from ->
+    Option.iter log_reason ~f:(fun from ->
         Printf.eprintf "*** Overrides from %s:\n%!" from;
         print_to_stderr overrides;
         Printf.eprintf "\n%!");
@@ -40,10 +153,20 @@ let apply_overrides ~(from : string option) ~(config : t) ~(overrides : t) : t =
 let parse_contents (contents : string) : t =
   Config_file_ffi_externs.parse_contents contents
 
+let hash
+    (parsed : t) ~(hhconfig_contents : string) ~(pkgconfig_contents : string) :
+    string =
+  match Getters.string_opt "override_hhconfig_hash" parsed with
+  | Some hash -> hash
+  | None ->
+    let contents = hhconfig_contents ^ pkgconfig_contents in
+    Sha1.digest contents
+
+(* Non-lwt implementation of parse *)
 let parse (fn : string) : string * t =
   let contents = Sys_utils.cat fn in
   let parsed = parse_contents contents in
-  let hash = Sha1.digest contents in
+  let hash = hash parsed ~hhconfig_contents:contents ~pkgconfig_contents:"" in
   (hash, parsed)
 
 let parse_local_config (fn : string) : t =
@@ -64,88 +187,3 @@ let to_json t =
 let of_list = Config_file_ffi_externs.of_list
 
 let keys = Config_file_ffi_externs.keys
-
-module type Getters_S = sig
-  val string_opt : string -> t -> string option
-
-  val string_ : string -> default:string -> t -> string
-
-  val int_ : string -> default:int -> t -> int
-
-  val int_opt : string -> t -> int option
-
-  val float_ : string -> default:float -> t -> float
-
-  val float_opt : string -> t -> float option
-
-  val bool_ : string -> default:bool -> t -> bool
-
-  val bool_opt : string -> t -> bool option
-
-  val string_list_opt : string -> t -> string list option
-
-  val string_list : string -> default:string list -> t -> string list
-
-  val int_list_opt : string -> t -> int list option
-
-  val bool_if_min_version :
-    string ->
-    default:bool ->
-    current_version:Config_file_version.version ->
-    t ->
-    bool
-end
-
-module Getters : Getters_S = struct
-  let ok_or_invalid_arg = function
-    | Ok x -> x
-    | Error e -> invalid_arg e
-
-  let string_opt key config = Config_file_ffi_externs.get_string_opt config key
-
-  let int_opt key config =
-    Config_file_ffi_externs.get_int_opt config key
-    |> Option.map ~f:ok_or_invalid_arg
-
-  let float_opt key config =
-    Config_file_ffi_externs.get_float_opt config key
-    |> Option.map ~f:ok_or_invalid_arg
-
-  let bool_opt key config =
-    Config_file_ffi_externs.get_bool_opt config key
-    |> Option.map ~f:ok_or_invalid_arg
-
-  let string_list_opt key config =
-    Config_file_ffi_externs.get_string_list_opt config key
-
-  let int_list_opt key config : int list option =
-    try string_list_opt key config >>| List.map ~f:Int.of_string with
-    | Failure _ -> None
-
-  let string_ key ~default config =
-    Option.value (string_opt key config) ~default
-
-  let int_ key ~default config = Option.value (int_opt key config) ~default
-
-  let float_ key ~default config = Option.value (float_opt key config) ~default
-
-  let bool_ key ~default config = Option.value (bool_opt key config) ~default
-
-  let string_list key ~default config =
-    Option.value (string_list_opt key config) ~default
-
-  let bool_if_min_version key ~default ~current_version config : bool =
-    let version_value = string_ key ~default:(string_of_bool default) config in
-    match version_value with
-    | "true" -> true
-    | "false" -> false
-    | version_value ->
-      let version_value =
-        Config_file_version.parse_version (Some version_value)
-      in
-      if Config_file_version.compare_versions current_version version_value >= 0
-      then
-        true
-      else
-        false
-end

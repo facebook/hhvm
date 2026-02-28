@@ -3,29 +3,33 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 
-use structopt::StructOpt;
+use clap::Parser;
 
-#[derive(Debug, StructOpt)]
-#[structopt(no_version)] // don't consult CARGO_PKG_VERSION (buck doesn't set it)
+#[derive(Debug, Parser)]
 struct Options {
     /// The directory containing HHI files.
-    #[structopt(long, parse(from_os_str))]
+    #[clap(long)]
     hhi_dir: PathBuf,
 
     /// The directory containing this stamp is the directory to search for HHIs
     /// generated from the HSL. These will be placed in the final hhi directory
     /// under a subdirectory named "hsl_generated".
-    #[structopt(long, parse(from_os_str))]
+    #[clap(long)]
     hsl_stamp: PathBuf,
 }
 
 fn main() {
-    let opts = Options::from_args();
-    let hsl_dir = opts.hsl_stamp.parent().unwrap();
+    // This is the entrypoint when used from buck.
+    let opts = Options::parse();
     let out_dir = std::env::var("OUT").unwrap(); // $OUT implicitly provided by buck
+    run(opts, &out_dir)
+}
+
+fn run(opts: Options, out_dir: &str) {
+    let hsl_dir = opts.hsl_stamp.parent().unwrap();
 
     let mut hhi_contents = vec![];
 
@@ -36,13 +40,14 @@ fn main() {
     );
 
     let out_filename = PathBuf::from(out_dir).join("lib.rs");
-    write_hhi_contents_file(&out_filename, &hhi_contents).unwrap();
+    gen_hhi_contents_lib::write_hhi_contents_file(&out_filename, &hhi_contents).unwrap();
 }
 
 fn get_hhis_in_dir(root: &Path) -> impl Iterator<Item = (PathBuf, String)> + '_ {
     walkdir::WalkDir::new(root)
+        .sort_by_file_name()
         .into_iter()
-        .filter_map(|e| e.ok())
+        .map(|e| e.unwrap())
         .filter(|e| e.file_type().is_file())
         .filter(|e| e.path().extension().and_then(|s| s.to_str()) == Some("hhi"))
         .map(move |e| {
@@ -50,22 +55,4 @@ fn get_hhis_in_dir(root: &Path) -> impl Iterator<Item = (PathBuf, String)> + '_ 
             let relative_path = e.path().strip_prefix(root).unwrap().to_owned();
             (relative_path, contents)
         })
-}
-
-fn write_hhi_contents_file(
-    out_filename: &Path,
-    hhi_contents: &[(PathBuf, String)],
-) -> std::io::Result<()> {
-    let mut out_file = std::fs::File::create(&out_filename)?;
-    writeln!(out_file, "pub const HHI_CONTENTS: &[(&str, &str)] = &[")?;
-    for (path, contents) in hhi_contents {
-        writeln!(
-            out_file,
-            "    (\"{}\", r###\"{}\"###),",
-            path.display(),
-            contents
-        )?;
-    }
-    writeln!(out_file, "];")?;
-    Ok(())
 }

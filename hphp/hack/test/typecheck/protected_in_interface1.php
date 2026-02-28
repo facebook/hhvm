@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface I {
   protected function f(): int;

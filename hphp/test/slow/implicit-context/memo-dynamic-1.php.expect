@@ -1,0 +1,20 @@
+  Before: C
+vec(0) {
+}
+
+memo_normal passed
+  After: C
+------------------------
+  Before: C
+string(18) "ClassContext, KEYC"
+
+memo_keyed passed
+  After: C
+------------------------
+  Before: C
+vec(0) {
+}
+
+memo_ic_inaccessible passed
+  After: C
+------------------------

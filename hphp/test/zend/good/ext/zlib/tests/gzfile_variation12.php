@@ -4,7 +4,7 @@
 $filename = dirname(__FILE__)."/004.txt.gz";
 
 
-$variation = darray [
+$variation = dict[
     'int 0' => 0,
     'int 1' => 1,
     'int 12345' => 12345,

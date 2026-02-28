@@ -2,7 +2,7 @@
 
 // Test that COW makes materializing an ImmSet an O(1) operation.
 
-function main() {
+function main() :mixed{
   $s = Set {};
   for ($i = 0; $i < 1000000; $i++) $s[] = $i + 42;
   for ($i = 0; $i < 10000; $i++) $s->toImmSet();
@@ -12,6 +12,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_cow_large() {
+function main_cow_large() :mixed{
 main();
 }

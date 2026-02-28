@@ -1,11 +1,11 @@
 <?hh
 
 trait T {
-    final function foo() {}
+    final function foo() :mixed{}
 }
 
 trait X {
-    abstract function foo() ;
+    abstract function foo() :mixed;
 }
 
 interface I1 {}
@@ -23,7 +23,7 @@ class C extends B {}
 
 
 <<__EntryPoint>>
-function main_abstract_final_override() {
+function main_abstract_final_override() :mixed{
   if (isset($g)) {
     include 'abstract-final-override.inc';
   }

@@ -9,12 +9,12 @@ class A {
     $this->c = $arg;
   }
 
-  public function getA() {
+  public function getA() :mixed{
     return $this->a;
   }
 }
 <<__EntryPoint>> function main(): void {
-$a = new A('hi', 3, darray[]);
+$a = new A('hi', 3, dict[]);
 foreach ($a as $k => $v) {
   var_dump($k, $v);
 }

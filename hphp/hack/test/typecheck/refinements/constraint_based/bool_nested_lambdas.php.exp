@@ -1,0 +1,2 @@
+WARN: File "bool_nested_lambdas.php", line 6, characters 11-20:
+This `is` check is always `false`. The expression on the left has type `string` which shares no values with `bool`. (Warn[12010])

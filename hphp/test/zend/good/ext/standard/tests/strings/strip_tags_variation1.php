@@ -10,7 +10,7 @@
 
 //get a class
 class classA{
-  public function __toString(){
+  public function __toString():mixed{
     return "Class A object";
   }
 }
@@ -21,48 +21,10 @@ echo "*** Testing strip_tags() : usage variations ***\n";
 $fp = fopen(__FILE__, "r");
 
 //array of values to iterate over
-$values = varray[
-
-          // int data
-/*1*/     0,
-          1,
-          12345,
-          -2345,
-
-          // float data
-/*5*/      10.5,
-          -10.5,
-          10.1234567e10,
-          10.7654321E-10,
-          .5,
-
-          // array data
-/*10*/    varray[],
-          varray[0],
-          varray[1],
-          varray[1, 2],
-          darray['color' => 'red', 'item' => 'pen'],
-
-          // null data
-/*15*/    NULL,
-          null,
-
-          // boolean data
-/*17*/    true,
-          false,
-          TRUE,
-          FALSE,
-
+$values = vec[
           // empty data
 /*21*/    "",
           '',
-
-          // object data
-/*23*/    new classA(),
-
-          // resource variable
-/*24*/    $fp
-
 ];
 
 // loop through each element of the array for allowable_tags

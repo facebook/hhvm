@@ -21,7 +21,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 void CmdHelp::HelpAll(DebuggerClient &client) {
   client.helpCmds(
@@ -32,26 +32,18 @@ void CmdHelp::HelpAll(DebuggerClient &client) {
     "[q]uit",       "quits debugger",
 
     "Program Flow Control", "",
-    "[b]reak",      "sets/clears/displays breakpoints",
-    "[e]xception",  "catches/clears exceptions",
     "[r]un",        "starts over a program",
     "<Ctrl-C>",     "breaks program execution",
-    "[c]ontinue *", "continues program execution",
-    "[s]tep     *", "steps into a function call or an expression",
-    "[n]ext     *", "steps over a function call or a line",
-    "[o]ut      *", "steps out a function call",
 
     "Display Commands", "",
     "[p]rint",      "prints a variable's value",
     "[w]here",      "displays stacktrace",
-    "[u]p",         "goes up by frame(s)",
-    "[d]own",       "goes down by frame(s)",
-    "[f]rame",      "goes to a frame",
     "[v]ariable",   "lists all local variables",
     "[g]lobal",     "lists all global variables",
-    "[k]onstant",   "lists all constants",
+    "[c]onstant",   "lists all constants",
 
     "Evaluation Commands", "",
+    "[k]ode",       "Enter a multi-line code fragment for evaluation",
     "@",            "evaluates one line of PHP code",
     "=",            "prints right-hand-side's value, assigns to $_",
     "${name}=",     "assigns a value to left-hand-side",
@@ -126,25 +118,15 @@ void CmdHelp::HelpStarted(DebuggerClient &client) {
     "\n"
     "  hhvm myscript.php\n"
     "\n"
-    "Simply add \"-m debug\" to run the script in debugger,\n\n"
+    "Simply add \"-m debug\" to run the script in the commandline,\n\n"
     "\n"
     "  hhvm -m debug myscript.php\n"
     "\n"
-    "Once started, set breakpoints like this,\n"
-    "\n"
-    "  hphpd> break myscript.php:10\n"
-    "  hphpd> break foo()\n"
-    "\n"
-    "Then let it run, until it hits the breakpoints,\n"
+    "Then let it run\n"
     "\n"
     "  hphpd> run\n"
     "\n"
-    "The debugger will highlight current statement or expression that is "
-    "just about to evaluate. Sometimes a statement is highlighted first, then "
-    "sub-expressions inside the statement are highlighted one after another "
-    "while repeating step commands.\n"
-    "\n"
-    "At any breakpoints, examine variables or evaluate expressions,\n"
+    "Examine variables or evaluate expressions,\n"
     "\n"
     "  hphpd> variable\n"
     "  hphpd> print $a\n"
@@ -161,10 +143,6 @@ void CmdHelp::HelpStarted(DebuggerClient &client) {
     "  hphpd> <?hh\n"
     "   ..... $a = 10;\n"
     "   ..... ?>\n"
-    "\n"
-    "Then let it continue, until it hits more breakpoints,\n"
-    "\n"
-    "  hphpd> continue\n"
     "\n"
     "Finally, quit debugger,\n"
     "\n"
@@ -189,29 +167,23 @@ void CmdHelp::HelpStarted(DebuggerClient &client) {
     "  mymachine> machine list\n"
     "  mymachine> machine attach 2\n"
     "\n"
-    "In remote debugging mode, a breakpoint can be specific about an URL,\n"
-    "\n"
-    "  mymachine> break myscript.php:10@index.php\n"
-    "  mymachine> break foo()@index.php\n"
-    "\n"
-    "You may connect to more than one machine and breakpoints will be "
-    "shared by all of them."
+    "You may connect to more than one machine."
   );
 
   client.helpBody(
     "4. Understanding dummy sandbox\n"
     "\n"
-    "When a web request hits a breakpoint, debugger will run in a "
+    "When Ctrl-C is hit while a web request is running, debugger will run in a "
     "\"Web Request\" thread. Use \"thread\" command to display this "
     "information,\n"
     "\n"
     "  mymachine> thread\n"
     "\n"
     "What will debugger use when there is no web request thread that's "
-    "active, but we need to set a breakpoint? We created so-called "
-    "\"dummy sandbox\", purely for taking debugger commands when there is "
+    "active? We created so-called "
+    "\"dummy sandbox\", purely for taking command-line commands when there is "
     "no active web request. When there is no active request, hit Ctrl-C to "
-    "break debugger, and use \"thread\" to display dummy sandbox thread's "
+    "break execution, and use \"thread\" to display dummy sandbox thread's "
     "information.\n"
     "\n"
     "  Ctrl-C\n"

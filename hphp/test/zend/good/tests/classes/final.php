@@ -1,13 +1,13 @@
 <?hh
 
 class first {
-    function show() {
+    function show() :mixed{
         echo "Call to function first::show()\n";
     }
 }
 
 class second extends first {
-    final function show() {
+    final function show() :mixed{
         echo "Call to function second::show()\n";
     }
 }

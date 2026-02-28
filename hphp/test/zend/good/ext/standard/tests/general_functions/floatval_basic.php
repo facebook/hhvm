@@ -5,7 +5,7 @@
 
 // different valid  float values
 <<__EntryPoint>> function main(): void {
-$valid_floats = darray[
+$valid_floats = dict[
        "0.0"  => 0.0,
        "1.0"  => 1.0,
        "-1.0" => -1.0,

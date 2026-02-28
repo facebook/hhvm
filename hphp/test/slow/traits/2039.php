@@ -1,10 +1,10 @@
 <?hh
 
 trait foo {
-    public function serialize() {
+    public function serialize() :mixed{
         return 'foobar';
     }
-    public function unserialize($x) {
+    public function unserialize($x) :mixed{
         var_dump($x);
     }
 }

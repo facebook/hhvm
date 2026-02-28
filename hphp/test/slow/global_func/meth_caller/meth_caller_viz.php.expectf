@@ -2,12 +2,8 @@ string(11) "Q\X\C::f(2)"
 string(9) "Q\B::f(2)"
 string(9) "Q\B::f(2)"
 string(7) "A::f(2)"
-string(9) "Q\B::g(2)"
+string(11) "Q\X\C::g(2)"
 string(9) "Q\B::g(2)"
 string(9) "Q\B::g(2)"
 
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'meth_caller(): method A::g cannot be called from this context' in %s/meth_caller_viz.php:24
-Stack trace:
-#0 %s/meth_caller_viz.php(39): Q\B->doit()
-#1 (): main()
-#2 {main}
+Fatal error: Call to private method A::g() from context '__SystemLib\MethCallerHelper' in %s/meth_caller_viz.php on line 24

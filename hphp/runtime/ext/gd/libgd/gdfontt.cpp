@@ -11,7 +11,7 @@
  */
 
 
-#include "gdfontt.h"
+#include "hphp/runtime/ext/gd/libgd/gdfontt.h"
 
 static const char gdFontTinyData[] =
 {

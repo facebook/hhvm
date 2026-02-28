@@ -10,7 +10,7 @@ echo "*** Testing var_export() with valid null values ***\n";
 // different valid  null vlaues
 $null_var = NULL;
 
-$valid_nulls = darray[
+$valid_nulls = dict[
                 "NULL" =>  NULL,
                 "null" => null,
                 "null_var" => $null_var,

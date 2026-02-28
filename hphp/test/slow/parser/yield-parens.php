@@ -1,6 +1,6 @@
 <?hh
 
-function f() {
+function f() :AsyncGenerator<mixed,mixed,void>{
   $a = (yield 1);
   $b = yield 2;
   list($c, $d) = (yield 3);
@@ -9,6 +9,6 @@ function f() {
 
 
 <<__EntryPoint>>
-function main_yield_parens() {
+function main_yield_parens() :mixed{
 echo "OK\n";
 }

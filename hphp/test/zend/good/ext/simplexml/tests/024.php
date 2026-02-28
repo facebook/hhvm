@@ -1,7 +1,7 @@
 <?hh
 
 function test($xpath)
-{
+:mixed{
 
 
 	echo "===$xpath===\n";

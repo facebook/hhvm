@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function bar() {
+<<__EntryPoint>> function bar() :mixed{
 	try {
 		echo "1\n";
 		try {

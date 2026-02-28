@@ -3,17 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fba4ff8e20c18583d1028ecdcfe87868>>
+// @generated SignedSource<<e8f3018ac482cee215fbdf70aca4ce8e>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized_regen.sh
+//   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
 
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -37,11 +37,14 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
 #[repr(C)]
 pub enum Parsing {
     FixmeFormat = 1001,
     ParsingError = 1002,
     XhpParsingError = 1007,
+    HhIgnoreComment = 1008,
+    PackageConfigError = 1009,
 }
 impl TrivialDrop for Parsing {}
 arena_deserializer::impl_deserialize_in_arena!(Parsing);
@@ -63,10 +66,10 @@ arena_deserializer::impl_deserialize_in_arena!(Parsing);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
 #[repr(C)]
 pub enum Naming {
     AddATypehint = 2001,
-    AssertArity = 2003,
     PrimitiveInvalidAlias = 2004,
     DidYouMeanNaming = 2006,
     DisallowedXhpType = 2008,
@@ -78,13 +81,9 @@ pub enum Naming {
     IllegalClass = 2021,
     IllegalClassMeth = 2022,
     IllegalConstant = 2023,
-    IllegalFun = 2024,
-    IllegalInstMeth = 2025,
     IllegalMethCaller = 2026,
-    IllegalMethFun = 2027,
     InvalidReqExtends = 2029,
     InvalidReqImplements = 2030,
-    LowercaseThis = 2032,
     MethodNameAlreadyBound = 2033,
     MissingArrow = 2034,
     MissingTypehint = 2035,
@@ -93,6 +92,7 @@ pub enum Naming {
     NamingTooManyArguments = 2038,
     PrimitiveToplevel = 2039,
     ShadowedTypeParam = 2041,
+    #[rust_to_ocaml(name = "StartWith_T")]
     StartWithT = 2042,
     ThisMustBeReturn = 2043,
     ThisNoArgument = 2044,
@@ -104,9 +104,7 @@ pub enum Naming {
     UnexpectedArrow = 2051,
     UnexpectedTypedef = 2052,
     UsingInternalClass = 2053,
-    VoidCast = 2054,
     ObjectCast = 2055,
-    UnsetCast = 2056,
     IllegalTrait = 2058,
     DynamicNewInStrictMode = 2060,
     InvalidTypeAccessRoot = 2061,
@@ -122,14 +120,9 @@ pub enum Naming {
     ThisAsLexicalVariable = 2077,
     DynamicClassNameInStrictMode = 2078,
     XhpOptionalRequiredAttr = 2079,
-    XhpRequiredWithDefault = 2080,
-    ArrayTypehintsDisallowed = 2082,
     WildcardHintDisallowed = 2084,
     MethodNeedsVisibility = 2086,
     NonstaticPropertyWithLSB = 2094,
-    UnsupportedTraitUseAs = 2102,
-    UnsupportedInsteadOf = 2103,
-    InvalidTraitUseAsVisibility = 2104,
     InvalidFunPointer = 2105,
     IllegalUseOfDynamicallyCallable = 2106,
     ClassMethNonFinalSelf = 2111,
@@ -140,6 +133,17 @@ pub enum Naming {
     InvalidWildcardContext = 2117,
     ExplicitConsistentConstructor = 2118,
     InvalidReqClass = 2119,
+    ModuleDeclarationOutsideAllowedFiles = 2120,
+    DynamicMethodAccess = 2121,
+    InvalidBuiltinType = 2123,
+    InvalidMemoizeLabel = 2124,
+    DynamicHintDisallowed = 2125,
+    IllegalTypedLocal = 2126,
+    InternalModuleLevelTrait = 2127,
+    ToplevelStatement = 2128,
+    InvalidTypeAccessInWhere = 2129,
+    AttributeOutsideAllowedFiles = 2130,
+    HhiAttributeRestriction = 2131,
 }
 impl TrivialDrop for Naming {}
 arena_deserializer::impl_deserialize_in_arena!(Naming);
@@ -161,6 +165,7 @@ arena_deserializer::impl_deserialize_in_arena!(Naming);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
 #[repr(C)]
 pub enum NastCheck {
     AbstractBody = 3001,
@@ -175,9 +180,7 @@ pub enum NastCheck {
     Magic = 3011,
     NoConstructParent = 3012,
     NonInterface = 3013,
-    NotAbstractWithoutBody = 3014,
     NotInitialized = 3015,
-    NotPublicInterface = 3016,
     RequiresNonClass = 3017,
     ReturnInFinally = 3018,
     ReturnInGen = 3019,
@@ -196,13 +199,10 @@ pub enum NastCheck {
     InoutParamsSpecial = 3043,
     InoutParamsMemoize = 3045,
     ReadingFromAppend = 3047,
-    InoutArgumentBadExpr = 3050,
     IllegalDestructor = 3056,
     RequiresFinalClass = 3072,
     InterfaceUsesTrait = 3073,
     NonstaticMethodInAbstractFinalClass = 3074,
-    SwitchNonTerminalDefault = 3081,
-    SwitchMultipleDefault = 3082,
     RepeatedRecordFieldName = 3083,
     PhpLambdaDisallowed = 3084,
     EntryPointArguments = 3085,
@@ -217,8 +217,15 @@ pub enum NastCheck {
     InternalProtectedOrPrivate = 3095,
     InoutInTransformedPsuedofunction = 3096,
     PrivateAndFinal = 3097,
-    InternalOutsideModule = 3098,
     InternalMemberInsidePublicTrait = 3099,
+    AttributeConflictingMemoize = 3100,
+    RefinementInTypeStruct = 3101,
+    #[rust_to_ocaml(name = "Soft_internal_without_internal")]
+    SoftInternalWithoutInternal = 3102,
+    CloneReturnType = 3104,
+    NamedInTransformedPseudofunction = 3106,
+    RequirePackageStrictInclusion = 3107,
+    ClassSealedWithTrait = 3108,
 }
 impl TrivialDrop for NastCheck {}
 arena_deserializer::impl_deserialize_in_arena!(NastCheck);
@@ -240,6 +247,7 @@ arena_deserializer::impl_deserialize_in_arena!(NastCheck);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
 #[repr(C)]
 pub enum Typing {
     InternalError = 0,
@@ -271,7 +279,6 @@ pub enum Typing {
     ExtendFinal = 4035,
     FieldKinds = 4036,
     FormatString = 4038,
-    FunArityMismatch = 4039,
     FunTooFewArgs = 4040,
     FunTooManyArgs = 4041,
     FunUnexpectedNonvariadic = 4042,
@@ -296,7 +303,6 @@ pub enum Typing {
     NullMemberRead = 4064,
     OptionReturnOnlyTypehint = 4066,
     ObjectString = 4067,
-    OptionMixed = 4068,
     OverrideFinal = 4070,
     OverridePerTrait = 4071,
     AbstractCall = 4073,
@@ -304,11 +310,6 @@ pub enum Typing {
     ParentOutsideClass = 4075,
     ParentUndefined = 4076,
     PreviousDefault = 4077,
-    PrivateClassMeth = 4078,
-    PrivateInstMeth = 4079,
-    PrivateOverride = 4080,
-    ProtectedClassMeth = 4081,
-    ProtectedInstMeth = 4082,
     ReadBeforeWrite = 4083,
     ReturnInVoid = 4084,
     ShapeFieldClassMismatch = 4085,
@@ -324,7 +325,6 @@ pub enum Typing {
     UnboundGlobal = 4106,
     UnboundNameTyping = 4107,
     UndefinedField = 4108,
-    UndefinedParent = 4109,
     UnifyError = 4110,
     UnsatisfiedReq = 4111,
     Visibility = 4112,
@@ -335,7 +335,6 @@ pub enum Typing {
     VoidUsage = 4119,
     DeclaredCovariant = 4120,
     DeclaredContravariant = 4121,
-    StrictMembersNotKnown = 4123,
     ErasedGenericAtRuntime = 4124,
     AttributeTooManyArguments = 4126,
     AttributeParamType = 4127,
@@ -349,7 +348,6 @@ pub enum Typing {
     InvalidShapeFieldNameEmpty = 4136,
     ShapeFieldsUnknown = 4138,
     InvalidShapeRemoveKey = 4139,
-    ShapeFieldUnset = 4141,
     AbstractConcreteOverride = 4142,
     LocalVariableModifedAndUsed = 4143,
     LocalVariableModifedTwice = 4144,
@@ -366,9 +364,7 @@ pub enum Typing {
     EqIncompatibleTypes = 4157,
     ContravariantThis = 4158,
     RequiredFieldIsOptional = 4163,
-    FinalProperty = 4164,
     ArrayGetWithOptionalField = 4165,
-    UnknownFieldDisallowedInShape = 4166,
     NullableCast = 4167,
     DuplicateUsingVar = 4178,
     IllegalDisposable = 4179,
@@ -396,11 +392,7 @@ pub enum Typing {
     InoutArgumentBadType = 4208,
     EnumTypeTypedefNonnull = 4219,
     AmbiguousLambda = 4222,
-    EllipsisStrictMode = 4223,
-    OutputInWrongContext = 4226,
-    StaticPropertyInWrongContext = 4228,
     WrongExpressionKindAttribute = 4231,
-    DeclOverrideMissingHint = 4236,
     ExtendSealed = 4238,
     ComparisonInvalidTypes = 4240,
     ShapesKeyExistsAlwaysTrue = 4249,
@@ -411,21 +403,15 @@ pub enum Typing {
     RePrefixedNonString = 4274,
     BadRegexPattern = 4275,
     LateInitWithDefault = 4277,
-    OverrideMemoizeLSB = 4278,
     ClassVarTypeGenericParam = 4279,
-    InvalidSwitchCaseValueType = 4280,
     StringCast = 4281,
     BadLateInitOverride = 4282,
     OverrideLSB = 4284,
     MultipleConcreteDefs = 4285,
-    InvalidMoveUse = 4287,
-    InvalidMoveTarget = 4288,
     UnexpectedTy = 4291,
     UnserializableType = 4292,
-    OptionNull = 4295,
     UnknownObjectMember = 4296,
     UnknownType = 4297,
-    InvalidArrayKeyRead = 4298,
     RedeclaringMissingMethod = 4301,
     InvalidEnforceableTypeArgument = 4302,
     RequireArgsReify = 4303,
@@ -469,12 +455,10 @@ pub enum Typing {
     ClassGetReified = 4346,
     RequireGenericExplicit = 4347,
     ClassConstantTypeMismatch = 4348,
-    RecordInitValueDoesNotMatchHint = 4351,
     AbstractTconstNotAllowed = 4352,
     InvalidDestructure = 4357,
     StaticMethWithClassReifiedGeneric = 4358,
     SplatArrayRequired = 4359,
-    SplatArrayVariadic = 4360,
     ExceptionOccurred = 4361,
     InvalidReifiedFunctionPointer = 4362,
     BadFunctionPointerConstruction = 4363,
@@ -487,16 +471,8 @@ pub enum Typing {
     ConcreteConstInterfaceOverride = 4374,
     MethCallerTrait = 4375,
     DuplicateInterface = 4377,
-    TypeParameterNameAlreadyUsedNonShadow = 4378,
-    IllegalInformationFlow = 4379,
-    ContextImplicitPolicyLeakage = 4380,
     ReifiedFunctionReference = 4381,
-    ClassMethAbstractCall = 4382,
     KindMismatch = 4383,
-    UnboundNameTypeConstantAccess = 4384,
-    UnknownInformationFlow = 4385,
-    CallsiteCIPPMismatch = 4386,
-    NonpureFunctionCall = 4387,
     IncompatibleEnumInclusion = 4388,
     RedeclaringClassishConstant = 4389,
     CallCoeffects = 4390,
@@ -505,17 +481,12 @@ pub enum Typing {
     InheritedMethodCaseDiffers = 4393,
     EnumClassLabelUnknown = 4394,
     EnumClassLabelAsExpression = 4396,
-    IFCInternalError = 4398,
-    IFCExternalContravariant = 4399,
-    IFCPolicyMismatch = 4400,
     OpCoeffects = 4401,
     ImplementsDynamic = 4402,
     SubtypeCoeffects = 4403,
     ImmutableLocal = 4404,
-    EnumClassesReservedSyntax = 4405,
     NonsenseMemberSelection = 4406,
     ConsiderMethCaller = 4407,
-    EnumSupertypingReservedSyntax = 4408,
     ReadonlyValueModified = 4409,
     ReadonlyMismatch = 4411,
     ExplicitReadonlyCast = 4412,
@@ -549,7 +520,6 @@ pub enum Typing {
     RigidTVarEscape = 4442,
     StrictEqValueIncompatibleTypes = 4443,
     ModuleError = 4444,
-    SealedNotSubtype = 4445,
     ModuleHintError = 4446,
     MemoizeObjectWithoutGlobals = 4447,
     ExpressionTreeNonPublicProperty = 4448,
@@ -560,13 +530,47 @@ pub enum Typing {
     HHExpectFailure = 4453,
     CallLvalue = 4454,
     UnsafeCastAwait = 4455,
-    HigherKindedTypesUnsupportedFeature = 4456,
     ThisFinal = 4457,
-    ExactClassFinal = 4458,
     DiamondTraitProperty = 4462,
     ConstructNotInstanceMethod = 4463,
     InvalidMethCallerReadonlyReturn = 4464,
     AbstractMemberInConcreteClass = 4465,
+    TraitNotUsed = 4466,
+    OverrideAsync = 4467,
+    InexactTConstAccess = 4468,
+    UnsupportedRefinement = 4469,
+    InvalidClassRefinement = 4470,
+    InvalidRefinedConstKind = 4471,
+    InvalidCrossPackage = 4472,
+    InvalidCrossPackageSoft = 4473,
+    AttributeNoAutoDynamic = 4474,
+    IllegalCaseTypeVariants = 4475,
+    StaticCallOnTraitRequireClass = 4476,
+    WrongUseKind = 4477,
+    MatchNotExhaustive = 4478,
+    MatchOnUnsupportedType = 4479,
+    MultipleInstantiationInheritence = 4480,
+    InternalMethCaller = 4481,
+    ClassPointerToString = 4482,
+    InvalidXhpAttributeValue = 4483,
+    OptionalParameterNotSupported = 4484,
+    InvalidRecursiveType = 4485,
+    StaticCallOnTraitRequireThisAs = 4486,
+    StringToClassPointer = 4488,
+    SwitchNeedsDefault = 4489,
+    SimpliHackRunPrompt = 4493,
+    SimpliHackEvalError = 4495,
+    ProtectedInternalMethCaller = 4496,
+    StaticPropOnTrait = 4497,
+    RecursiveCaseType = 4498,
+    MissingNamedArgs = 4499,
+    UnexpectedNamedArgs = 4500,
+    DuplicateNamedArgs = 4501,
+    OverrideSealed = 4503,
+    ExpectBoolForCondition = 4504,
+    NeedsConcreteInFinalClass = 4505,
+    NeedsConcreteOnInstanceMethod = 4506,
+    NeedsConcreteOnConstructor = 4507,
 }
 impl TrivialDrop for Typing {}
 arena_deserializer::impl_deserialize_in_arena!(Typing);
@@ -588,13 +592,43 @@ arena_deserializer::impl_deserialize_in_arena!(Typing);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (enum, ord, (show { with_path = false }))")]
 #[repr(C)]
-pub enum Init {
-    ForwardCompatibilityNotCurrent = 8001,
-    ForwardCompatibilityBelowMinimum = 8002,
+pub enum Warning {
+    SketchyEquality = 12001,
+    SketchyNullCheck = 12003,
+    NonDisjointCheck = 12004,
+    CastNonPrimitive = 12005,
+    TruthinessTest = 12006,
+    EqualityCheck = 12007,
+    DuplicateProperties = 12008,
+    IsIsAlwaysTrue = 12009,
+    IsIsAlwaysFalse = 12010,
+    AsAlwaysSucceeds = 12011,
+    AsAlwaysFails = 12012,
+    ClassPointerToString = 12013,
+    NoDisjointUnion = 12017,
+    SafeAbstractConstAccess = 12018,
+    SwitchRedundancy = 12019,
+    StaticCallOnTrait = 12020,
+    StaticPropertyOverride = 12021,
+    StringToClassPointer = 12022,
+    NullCoalesceAlways = 12023,
+    CallNeedsConcrete = 12024,
+    AbstractAccessViaStatic = 12025,
+    UninstantiableClassViaStatic = 12026,
+    NeedsConcreteOverride = 12027,
+    ExpectBoolForCondition = 12028,
+    RedundantNullsafeMemberSelect = 12029,
+    NullsafeMemberSelectOnNull = 12030,
+    RedundantNullsafePipe = 12031,
+    NullsafePipeOnNull = 12032,
+    UnboundNameWarning = 12033,
+    SetOrKeysetArrayGet = 12034,
+    SealedNotSubtype = 12035,
 }
-impl TrivialDrop for Init {}
-arena_deserializer::impl_deserialize_in_arena!(Init);
+impl TrivialDrop for Warning {}
+arena_deserializer::impl_deserialize_in_arena!(Warning);
 
 #[derive(
     Clone,
@@ -613,10 +647,13 @@ arena_deserializer::impl_deserialize_in_arena!(Init);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
 #[repr(C)]
-pub enum GlobalWriteCheck {
-    GlobalVariableWrite = 11001,
-    GlobalVariableInFunctionCall = 11002,
+pub enum GlobalAccessCheck {
+    DefiniteGlobalWrite = 11001,
+    PossibleGlobalWriteViaReference = 11002,
+    PossibleGlobalWriteViaFunctionCall = 11003,
+    DefiniteGlobalRead = 11004,
 }
-impl TrivialDrop for GlobalWriteCheck {}
-arena_deserializer::impl_deserialize_in_arena!(GlobalWriteCheck);
+impl TrivialDrop for GlobalAccessCheck {}
+arena_deserializer::impl_deserialize_in_arena!(GlobalAccessCheck);

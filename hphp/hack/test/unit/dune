@@ -13,7 +13,7 @@
   errors
   naming_global
   naming_table
-  parsing_service
+  package_info
   provider_context
   tast_provider))
 
@@ -31,13 +31,46 @@
   decl_counters
   default_injector_config
   deferred_decl
-  parsing_service
   provider_utils
   server_monitor
   telemetry_test_utils
   typing_check
-  typing_service_api
   unit_test))
+
+(executable
+ (name server_progress_unit_tests)
+ (modules
+  server_progress_unit_tests)
+ (link_flags
+  (:standard
+   (:include ../../src/dune_config/ld-opts.sexp)))
+ (modes exe byte_complete)
+ (libraries
+  client
+  server_notifier_types
+  server_progress_lwt
+  server_progress_test_helpers
+  default_injector_config
+  unit_test
+  unit_test_common_setup)
+ (preprocess
+  (pps
+   lwt_ppx
+   ppx_deriving.std)))
+
+(library
+ (name server_progress_test_helpers)
+ (modules
+  server_progress_test_helpers)
+ (libraries
+  asserter
+  lwt_utils
+  server_progress
+  server_progress_lwt
+  utils_core)
+ (preprocess
+  (pps
+   lwt_ppx)))
 
 (rule
  (alias server_tests)

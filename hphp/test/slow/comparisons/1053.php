@@ -2,11 +2,11 @@
 
 class C {
 }
-function foo($p) {
+function foo($p) :mixed{
   if ($p) {
     $obj = new C;
   } else {
-    $a = varray[1];
+    $a = vec[1];
   }
   try {
     var_dump($obj == $a);
@@ -16,6 +16,6 @@ function foo($p) {
 }
 
 <<__EntryPoint>>
-function main_1053() {
+function main_1053() :mixed{
   foo(false);
 }

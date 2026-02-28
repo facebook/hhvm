@@ -1,0 +1,11 @@
+<?hh
+
+<<file: __EnableUnstableFeatures('case_types')>>
+<<file: __EnableUnstableFeatures('like_type_hints')>>
+
+function takes(TYPE#1 $_): void {}
+
+<<__EntryPoint>>
+function main(): void {
+  takes(expr#1);
+}

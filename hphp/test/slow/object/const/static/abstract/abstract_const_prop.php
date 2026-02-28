@@ -1,9 +1,9 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class A {
-  <<__Const>> abstract static int $p;
-  <<__Const>> abstract int $l;
+  <<__Const>> abstract public static int $p;
+  <<__Const>> abstract public int $l;
 }
 
 <<__EntryPoint>>

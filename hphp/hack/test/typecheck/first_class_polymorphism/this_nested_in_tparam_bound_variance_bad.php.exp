@@ -1,0 +1,40 @@
+ERROR: File "this_nested_in_tparam_bound_variance_bad.php", line 41, characters 43-52:
+Invalid argument (Typing[4323])
+  File "this_nested_in_tparam_bound_variance_bad.php", line 9, characters 33-33:
+  `T` is a constrained type parameter
+  File "this_nested_in_tparam_bound_variance_bad.php", line 9, characters 38-47:
+  This type constraint is violated
+  File "this_nested_in_tparam_bound_variance_bad.php", line 41, characters 8-23:
+  Expected `ConcBase_Nested3`
+  File "this_nested_in_tparam_bound_variance_bad.php", line 9, characters 43-46:
+    via this generic `this`
+  File "this_nested_in_tparam_bound_variance_bad.php", line 17, characters 27-29:
+  But got `int`
+ERROR: File "this_nested_in_tparam_bound_variance_bad.php", line 42, characters 60-69:
+Invalid argument (Typing[4110])
+  File "this_nested_in_tparam_bound_variance_bad.php", line 28, characters 10-21:
+  Expected `Base_Nested3`
+  File "this_nested_in_tparam_bound_variance_bad.php", line 17, characters 27-29:
+  But got `int`
+ERROR: File "this_nested_in_tparam_bound_variance_bad.php", line 46, characters 47-60:
+Invalid argument (Typing[4323])
+  File "this_nested_in_tparam_bound_variance_bad.php", line 11, characters 37-37:
+  `T` is a constrained type parameter
+  File "this_nested_in_tparam_bound_variance_bad.php", line 11, characters 42-55:
+  This type constraint is violated
+  File "this_nested_in_tparam_bound_variance_bad.php", line 20, characters 35-37:
+  Expected `int`
+  File "this_nested_in_tparam_bound_variance_bad.php", line 46, characters 8-23:
+  But got `ConcBase_Nested3`
+  File "this_nested_in_tparam_bound_variance_bad.php", line 11, characters 51-54:
+    via this generic `this`
+  File "this_nested_in_tparam_bound_variance_bad.php", line 46, characters 8-23:
+  This type argument to `Contrav3` only allows supertypes (it is contravariant)
+ERROR: File "this_nested_in_tparam_bound_variance_bad.php", line 47, characters 64-77:
+Invalid argument (Typing[4110])
+  File "this_nested_in_tparam_bound_variance_bad.php", line 20, characters 35-37:
+  Expected `int`
+  File "this_nested_in_tparam_bound_variance_bad.php", line 47, characters 44-59:
+  But got `ConcBase_Nested3`
+  File "this_nested_in_tparam_bound_variance_bad.php", line 47, characters 44-59:
+  This type argument to `Contrav3` only allows supertypes (it is contravariant)

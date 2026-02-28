@@ -4,11 +4,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    lexable_token::LexableToken, positioned_token::PositionedToken, source_text::SourceText,
-    syntax::*, syntax_kind::SyntaxKind, syntax_trait::SyntaxTrait, token_kind::TokenKind,
-};
-use ocamlrep::rc::RcOc;
+use std::sync::Arc;
+
+use crate::lexable_token::LexableToken;
+use crate::positioned_token::PositionedToken;
+use crate::source_text::SourceText;
+use crate::syntax::*;
+use crate::syntax_kind::SyntaxKind;
+use crate::syntax_trait::SyntaxTrait;
+use crate::token_kind::TokenKind;
 
 #[derive(Debug, Clone)]
 pub struct Span {
@@ -95,12 +99,12 @@ impl PositionedValue {
             | (TokenSpan(_), TokenSpan(_)) => {
                 let l = first.leading_token().unwrap();
                 let r = last.trailing_token().unwrap();
-                if RcOc::ptr_eq(l, r) {
-                    TokenValue(RcOc::clone(l))
+                if Arc::ptr_eq(l, r) {
+                    TokenValue(Arc::clone(l))
                 } else {
                     TokenSpan(Box::new(Span {
-                        left: RcOc::clone(l),
-                        right: RcOc::clone(r),
+                        left: Arc::clone(l),
+                        right: Arc::clone(r),
                     }))
                 }
             }
@@ -247,5 +251,42 @@ impl SyntaxTrait for PositionedSyntax {
 
     fn extract_text<'a>(&self, source_text: &'a SourceText<'_>) -> Option<&'a str> {
         Some(self.text(source_text))
+    }
+}
+
+impl PositionedSyntax {
+    /// Invariant: every token in the tree must have a valid offset&width,
+    /// leading trivia offset&width, and trailing trivia offset&width (meaning,
+    /// they point to an empty or valid non-empty slice of `source_text`), with
+    /// one exception: fixed-width tokens (tokens where `TokenKind::fixed_width`
+    /// returns `Some`) need not point to a valid offset&width (but their
+    /// leading and trailing trivia offset&width should be empty or valid slices
+    /// of `source_text`), since their text will be that returned by
+    /// `TokenKind::to_string`. Undefined (but valid) slices of `source_text`
+    /// will be used for invalid offsets/widths.
+    pub fn text_from_edited_tree(&self, source_text: &SourceText<'_>) -> std::io::Result<Vec<u8>> {
+        let mut text = vec![];
+        self.write_text_from_edited_tree(source_text, &mut text)?;
+        Ok(text)
+    }
+
+    /// Invariant: Same requirements as `text_from_edited_tree`.
+    pub fn write_text_from_edited_tree(
+        &self,
+        source_text: &SourceText<'_>,
+        w: &mut impl std::io::Write,
+    ) -> std::io::Result<()> {
+        self.try_iter_pre(|node| {
+            if let Some(token) = node.get_token() {
+                if token.kind().fixed_width().is_some() {
+                    w.write_all(token.leading_text(source_text))?;
+                    w.write_all(token.kind().to_string().as_bytes())?;
+                    w.write_all(token.trailing_text(source_text))?;
+                } else {
+                    w.write_all(source_text.sub(token.offset(), token.full_width()))?;
+                }
+            }
+            Ok(())
+        })
     }
 }

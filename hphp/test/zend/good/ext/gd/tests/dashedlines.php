@@ -5,7 +5,7 @@ imagefill($im, 0,0, 0xffffff);
 $r  = 0xff0000;
 $b = 0x0000ff;
 
-$style = varray[$r, $b];
+$style = vec[$r, $b];
 imagesetstyle($im, $style);
 
 // Horizontal line
@@ -26,7 +26,7 @@ imagedestroy($im);
 $im = imagecreatetruecolor(6,6);
 imagefill($im, 0,0, 0xffffff);
 
-$style = varray[$r, $b];
+$style = vec[$r, $b];
 imagesetstyle($im, $style);
 
 
@@ -47,7 +47,7 @@ imagedestroy($im);
 $im = imagecreatetruecolor(6,6);
 imagefill($im, 0,0, 0xffffff);
 
-$style = varray[$r, $b];
+$style = vec[$r, $b];
 imagesetstyle($im, $style);
 
 imageline($im, 0,0, 5,5, IMG_COLOR_STYLED);

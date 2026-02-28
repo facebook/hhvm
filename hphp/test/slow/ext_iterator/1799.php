@@ -2,9 +2,9 @@
 
 
 <<__EntryPoint>>
-function main_1799() {
+function main_1799() :mixed{
 $dir = new DirectoryIterator(__DIR__.'/../../sample_dir');
-$files = varray[];
+$files = vec[];
  // order changes per machine
 while($dir->valid()) {
   if(!$dir->isDot()) {

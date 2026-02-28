@@ -1,6 +1,6 @@
 <?hh
 <<__DynamicallyCallable>>
-function test($a) {
+function test($a) :mixed{
   try {
     return $a++;
   } catch (Exception $e) {
@@ -9,10 +9,10 @@ function test($a) {
   }
 }
 <<__DynamicallyCallable>>
-function foo() {
+function foo() :mixed{
   return \HH\global_get('x');
 }
 <<__EntryPoint>>
-function main_1104() {
+function main_1104() :mixed{
 var_dump(test(foo()));
 }

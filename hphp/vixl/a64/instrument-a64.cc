@@ -415,22 +415,22 @@ void Instrument::InstrumentLoadStore(Instruction* instr) {
   static Counter* store_fp_counter = GetCounter("Store FP");
 
   switch (instr->Mask(LoadStoreOpMask)) {
-    case STRB_w:    // Fall through.
-    case STRH_w:    // Fall through.
-    case STR_w:     // Fall through.
+    case STRB_w:    [[fallthrough]];
+    case STRH_w:    [[fallthrough]];
+    case STR_w:     [[fallthrough]];
     case STR_x:     store_int_counter->Increment(); break;
-    case STR_s:     // Fall through.
+    case STR_s:     [[fallthrough]];
     case STR_d:     store_fp_counter->Increment(); break;
-    case LDRB_w:    // Fall through.
-    case LDRH_w:    // Fall through.
-    case LDR_w:     // Fall through.
-    case LDR_x:     // Fall through.
-    case LDRSB_x:   // Fall through.
-    case LDRSH_x:   // Fall through.
-    case LDRSW_x:   // Fall through.
-    case LDRSB_w:   // Fall through.
+    case LDRB_w:    [[fallthrough]];
+    case LDRH_w:    [[fallthrough]];
+    case LDR_w:     [[fallthrough]];
+    case LDR_x:     [[fallthrough]];
+    case LDRSB_x:   [[fallthrough]];
+    case LDRSH_x:   [[fallthrough]];
+    case LDRSW_x:   [[fallthrough]];
+    case LDRSB_w:   [[fallthrough]];
     case LDRSH_w:   load_int_counter->Increment(); break;
-    case LDR_s:     // Fall through.
+    case LDR_s:     [[fallthrough]];
     case LDR_d:     load_fp_counter->Increment(); break;
   }
 }

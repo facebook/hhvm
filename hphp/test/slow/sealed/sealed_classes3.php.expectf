@@ -1,1 +1,1 @@
-Fatal error: Class SomeOtherOtherClass may not inherit from sealed interface (SomeSealedInterface) without being in the whitelist in %s/sealed_classes3.php on line 8
+Fatal error: Class SealedClass3\SomeOtherOtherClass may not inherit from sealed interface (SealedClass3\SomeSealedInterface) without being in the whitelist in %s/sealed_classes3.php on line %d

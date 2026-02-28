@@ -7,7 +7,7 @@ function f<reify T>(T $x): C<T> {
   return new C<int>();
 }
 
-function wrap($fun) {
+function wrap($fun) :mixed{
   try {
     $fun();
   } catch (Throwable $e) {

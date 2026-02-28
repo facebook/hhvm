@@ -1,4 +1,4 @@
-File "const_in_interface_overridden3_bad.php", line 11, characters 20-21:
+ERROR: File "const_in_interface_overridden3_bad.php", line 11, characters 20-21:
 Some members in class `C` are incompatible with those declared in type `I2` (Typing[4374])
   File "const_in_interface_overridden3_bad.php", line 12, characters 12-21:
   Non-abstract constants defined in an interface cannot be overridden when implementing or extending that interface.

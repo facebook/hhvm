@@ -17,7 +17,7 @@ $n = gmp_init(-5);
 var_dump(gmp_perfect_square($n));
 
 try { var_dump(gmp_perfect_square()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-var_dump(gmp_perfect_square(varray[]));
+var_dump(gmp_perfect_square(vec[]));
 
 echo "Done\n";
 }

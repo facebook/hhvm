@@ -1,0 +1,8 @@
+{
+  "pools": {
+    "A.wildcard": {
+      "servers": [ "127.0.0.1:11615" ]
+    }
+  },
+  "route": "PoolRoute|A.pho"
+}

@@ -1,3 +1,4 @@
 <?hh
 
-module Baz {
+
+new module Baz {

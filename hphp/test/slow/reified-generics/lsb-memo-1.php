@@ -2,11 +2,11 @@
 
 class A {
   <<__MemoizeLSB>>
-  static function lsb<reify T>() { echo "in lsb\n"; return 1; }
+  static function lsb<reify T>() :mixed{ echo "in lsb\n"; return 1; }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   A::lsb<int>();
   A::lsb<string>();
 }

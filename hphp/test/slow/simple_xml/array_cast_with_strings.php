@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_array_cast_with_strings() {
+function main_array_cast_with_strings() :mixed{
 $node = simplexml_load_string(<<<EOF
 <config>
 <hello>world</hello>
@@ -17,6 +17,6 @@ EOF
 $node->addChild('test', 'best');
 $nodes = darray($node);
 var_dump($nodes);
-$arr = darray[(string)$nodes['hello'] => 1];
+$arr = dict[(string)$nodes['hello'] => 1];
 var_dump($arr);
 }

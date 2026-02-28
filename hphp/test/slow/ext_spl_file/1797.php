@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1797() {
+function main_1797() :mixed{
 $info = new SplFileInfo('does-not-exist-will-fail-on-getLinkTarget');
 //readlink('does-not-throw-but-warns');
 try{

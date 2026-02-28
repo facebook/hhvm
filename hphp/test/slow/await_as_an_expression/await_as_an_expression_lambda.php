@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function id<T>(T $x): T { return $x; }
 
@@ -10,6 +10,6 @@ async function foo1(): Awaitable<void> {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   \HH\Asio\join(foo1());
 }

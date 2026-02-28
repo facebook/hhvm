@@ -15,13 +15,9 @@
 #include <caml/fail.h>
 #undef CAML_NAME_SPACE
 
-#ifdef _WIN32
-#include <windows.h>
-#else
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <unistd.h>
-#endif
 
 /*****************************************************************************/
 /* Sets CPU and IO priorities. */
@@ -40,21 +36,13 @@ value hh_set_priorities(value cpu_prio_val, value io_prio_val) {
   int io_prio = Long_val(io_prio_val);
 
   // No need to check the return value, if we failed then whatever.
-  #ifdef __linux__
   syscall(
     SYS_ioprio_set,
     IOPRIO_WHO_PROCESS,
     getpid(),
     IOPRIO_PRIO_VALUE(IOPRIO_CLASS_BE, io_prio)
   );
-  #endif
-
-  #ifdef _WIN32
-  SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS);
-  // One might also try: PROCESS_MODE_BACKGROUND_BEGIN
-  #else
   int dummy = nice(cpu_prio);
   (void)dummy; // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=25509
-  #endif
   CAMLreturn(Val_unit);
 }

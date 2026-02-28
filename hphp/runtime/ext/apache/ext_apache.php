@@ -1,6 +1,9 @@
-<?hh // partial
+<?hh
 
 namespace {
+
+const int APACHE_MAP = 200;
+
 /**
  * Get and set apache request notes
  *
@@ -27,15 +30,6 @@ function apache_note(string $note_name,
 function apache_notes(dict<string, string> $notes): void;
 
 /**
- * Fetch all HTTP request headers
- *
- * @return array - An associative array of all the HTTP headers in the
- *   current request.
- */
-<<__Native>>
-function apache_request_headers(): darray<string, string>;
-
-/**
  * Fetch all HTTP response headers
  *
  * @return array - An array of all Apache response headers on success.
@@ -58,15 +52,6 @@ function apache_setenv(string $variable,
                        string $value,
                        bool $walk_to_top = false): bool;
 
-/**
- * Fetch all HTTP request headers
- *
- * @return array - An associative array of all the HTTP headers in the
- *   current request.
- */
-<<__Native>>
-function getallheaders()[read_globals]: darray<string, string>;
-
 <<__Native>>
 function apache_get_config(): darray<string, mixed>;
 
@@ -81,7 +66,7 @@ namespace HH {
  *   specified headers, but arrays where a header was specified more than once.
  */
 <<__Native>>
-function get_headers_secure(): darray<string, varray<string>>;
+function get_headers_secure()[read_globals]: darray<string, varray<string>>;
 
 /**
  * Fetch all HTTP request names in the order they were received from proxygen

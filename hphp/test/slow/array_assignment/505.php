@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_505() {
-$a = varray[1, 'hello', 3.5];
+function main_505() :mixed{
+$a = vec[1, 'hello', 3.5];
 $b = $a;
 $b[] = 'world';
 var_dump($a);

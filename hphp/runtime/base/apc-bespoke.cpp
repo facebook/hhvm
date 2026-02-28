@@ -33,7 +33,7 @@ namespace HPHP {
 
 namespace {
 
-TRACE_SET_MOD(bespoke);
+TRACE_SET_MOD(bespoke)
 
 using namespace bespoke;
 using jit::ArrayLayout;
@@ -230,6 +230,8 @@ ArrayData* implAPCBespoke(APCBespokeEnv& env, ArrayData* ain,
                     : profile->logEvent(ArrayOp::APCInitInt, val(k).num, v);
     });
     auto const lad = LoggingArray::MakeUncounted(vad, profile, hasApcTv);
+    profile->logEntryTypes(lad->entryTypes, lad->entryTypes);
+    profile->logKeyOrders(lad->keyOrder);
     env.logging.push_back(lad->profile->data.get());
     return lad;
   }
@@ -342,7 +344,7 @@ APCBespoke initAPCBespoke(ArrayData* ad) {
     DecRefUncountedArray(ad);
     return result;
   }();
-  if (!RO::EvalEmitAPCBespokeArrays) return { ad, nullptr };
+  if (!Cfg::Eval::EmitAPCBespokeArrays) return { ad, nullptr };
 
   // Check if we need to do logging for this array. We'll need to do so if it
   // supports bespoke layouts, *or if any of its recursive subarrays does*.
@@ -404,7 +406,7 @@ ArrayData* readAPCBespoke(const APCTypedValue* tv) {
   // Before layout selection, use sample counts to choose whether to log.
   // TODO(kshaunak): Should we also gate on g_emitLoggingArrays here?
   auto const count = data->count++;
-  if (count % RO::EvalEmitLoggingArraySampleRate != 1) {
+  if (count % Cfg::Eval::EmitLoggingArraySampleRate != 1) {
     for (auto i = 0; i < data->num_logging_arrays; i++) {
       data->logging[i]->sampleCount++;
     }

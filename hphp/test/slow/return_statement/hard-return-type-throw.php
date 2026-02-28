@@ -1,13 +1,13 @@
 <?hh
 
-function error_handler() {
+function error_handler() :mixed{
   throw new Exception('nooo');
 }
 
 class Media {}
 
 function crash(): string {
-  $medias = varray[new Media];
+  $medias = vec[new Media];
   foreach ($medias as $media) {
     echo "about to return\n";
     return $media;

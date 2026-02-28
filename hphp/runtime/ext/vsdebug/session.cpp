@@ -17,6 +17,8 @@
 #include "hphp/runtime/ext/vsdebug/session.h"
 
 #include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/debugger-request-info.h"
+#include "hphp/runtime/ext/extension-registry.h"
 
 #include "hphp/runtime/vm/treadmill.h"
 
@@ -25,6 +27,7 @@
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/program-functions.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/process.h"
 
 namespace HPHP {
@@ -36,8 +39,8 @@ DebuggerSession::DebuggerSession(Debugger* debugger) :
   m_debugger(debugger),
   m_breakpointMgr(new BreakpointManager(debugger)),
   m_dummyThread(this, &DebuggerSession::runDummy),
-  m_dummyStartupDoc("") {
-
+  
+  m_sessionId(folly::Random::rand32()) {
   assertx(m_debugger != nullptr);
 }
 
@@ -110,7 +113,7 @@ void DebuggerSession::invokeDummyStartupDocument() {
                          true,
                          false,
                          true,
-                         RuntimeOption::EvalPreludePath);
+                         Cfg::Eval::PreludePath);
 
   if (!ret || error) {
     if (errorMsg == "") {
@@ -161,19 +164,16 @@ void DebuggerSession::runDummy() {
   // it be listed in any user-visible thread list.
   m_debugger->setDummyThreadId((int64_t)Process::GetThreadId());
 
-  // While the main thread is starting up and preparing the system lib,
-  // the code emitter tags all newly compiled functions as "built in".
-  // If we pull in the startup document while this is happening, all functions
-  // in the startup doc get erroneously tagged as builtin, which breaks
-  // our stack traces later if any breakpoint is hit in a routine pulled in
-  // by the startup document (especially true of dummy evals with bps in them).
+  // While the main thread is starting up and preparing the system lib and
+  // extensions we want to make sure that finished before we pull in the startup
+  // document and execute that.
   //
   // Unfortunately there is no signal when this is complete, so we're going to
   // have to poll here. Wait for a maximum time and then proceed anyway.
   int pollCount = 0;
   constexpr int pollTimePerIterUs = 100 * 1000;
   constexpr int pollMaxTimeUs = 3 * 1000 * 1000;
-  while (!SystemLib::s_inited &&
+  while (!ExtensionRegistry::modulesInitialised() &&
          pollCount * pollTimePerIterUs < pollMaxTimeUs) {
 
     pollCount++;
@@ -187,20 +187,20 @@ void DebuggerSession::runDummy() {
 
   VSDebugLogger::Log(
     VSDebugLogger::LogLevelInfo,
-    "Polled %d times waiting for SystemLib::s_inited to be true. "
-      "(SystemLib::s_inited = %s)",
+    "Polled %d times waiting for ExtensionRegistry::modulesInitialised() to be "
+      "true. (ExtensionRegistry::modulesInitialised() = %s)",
     pollCount,
-    SystemLib::s_inited ? "TRUE" : "FALSE"
+    ExtensionRegistry::modulesInitialised() ? "TRUE" : "FALSE"
   );
 
   bool hookAttached = false;
   hphp_session_init(Treadmill::SessionKind::Vsdebug);
-  init_command_line_globals(0, nullptr, environ, 0,
+  init_command_line_globals(0, nullptr, environ,
                             RuntimeOption::ServerVariables,
                             RuntimeOption::EnvVariables);
   SCOPE_EXIT {
     g_context->onShutdownPostSend();
-    g_context->removeStdoutHook(m_debugger->getStdoutHook());
+    g_context->removeDebuggerStdoutHook();
     Logger::SetThreadHook(nullptr);
 
     if (hookAttached) {
@@ -241,23 +241,23 @@ void DebuggerSession::runDummy() {
 
   // Redirect the dummy's stdout and stderr and enable implicit flushing
   // so output is sent to the client right away, instead of being buffered.
-  g_context->addStdoutHook(m_debugger->getStdoutHook());
+  g_context->addDebuggerStdoutHook(m_debugger->getStdoutHook());
   Logger::SetThreadHook(m_debugger->getStderrHook());
   g_context->obSetImplicitFlush(true);
 
   // Setup sandbox variables for dummy request context.
   if (!m_sandboxUser.empty()) {
-    SourceRootInfo sourceRootInfo(m_sandboxUser, m_sandboxName);
+    SourceRootInfo::WithRoot sri(m_sandboxUser, m_sandboxName);
     auto server = php_global_exchange(s__SERVER, init_null());
     forceToDict(server);
     Array arr = server.asArrRef();
     server.unset();
     php_global_set(
       s__SERVER,
-      sourceRootInfo.setServerVariables(std::move(arr))
+      SourceRootInfo::SetServerVariables(std::move(arr))
     );
 
-    g_context->setSandboxId(sourceRootInfo.getSandboxInfo().id());
+    g_context->setSandboxId(SourceRootInfo::GetSandboxInfo().id());
   }
 
   if (!m_dummyStartupDoc.empty()) {
@@ -276,6 +276,10 @@ void DebuggerSession::runDummy() {
 
   folly::dynamic event = folly::dynamic::object;
   m_debugger->sendEventMessage(event, "readyForEvaluations", true);
+
+  if (m_debugger->getDebuggerOptions().warnOnFileChange) {
+    m_debugger->initWatchmanClient();
+  }
 
   m_dummyRequestInfo->m_commandQueue.processCommands();
 }
@@ -304,7 +308,8 @@ unsigned int DebuggerSession::generateFrameId(
   return objectId;
 }
 
-FrameObject* DebuggerSession::getFrameObject(unsigned int objectId) {
+FrameObject* DebuggerSession::getFrameObject(int objectId) {
+  if (objectId < 0) return nullptr;
   auto object = getServerObject(objectId);
   if (object != nullptr) {
     if (object->objectType() != ServerObjectType::Frame) {
@@ -336,7 +341,6 @@ unsigned int DebuggerSession::generateScopeId(
   }
 
   ScopeObject* scope = new ScopeObject(objectId, requestId, depth, scopeType);
-  assertx(requestId == m_debugger->getCurrentThreadId());
   registerRequestObject(objectId, scope);
   return objectId;
 }
@@ -380,6 +384,8 @@ unsigned int DebuggerSession::generateOrReuseVariableId(
   // IDs are stable for variants that contain objects or arrays, based on the
   // address of the object to which they point.
   DebuggerRequestInfo* ri = m_debugger->getRequestInfo();
+  if (!ri) throw DebuggerCommandException("Client disconnected");
+
   const auto options = m_debugger->getDebuggerOptions();
 
   void* key = nullptr;

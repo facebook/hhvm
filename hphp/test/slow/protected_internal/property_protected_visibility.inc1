@@ -1,0 +1,7 @@
+<?hh
+
+module M1;
+
+class A {
+  protected internal int $foo = 42;
+}

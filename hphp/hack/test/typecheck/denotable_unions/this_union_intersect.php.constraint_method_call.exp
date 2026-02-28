@@ -1,0 +1,48 @@
+ERROR: File "this_union_intersect.php", line 92, characters 7-11:
+No instance method `imeth` in `M` (Typing[4053])
+  File "this_union_intersect.php", line 20, characters 19-23:
+  Did you mean `mmeth` instead?
+  File "this_union_intersect.php", line 17, characters 25-25:
+  This is why I think it is an object of type M
+  File "this_union_intersect.php", line 19, characters 11-11:
+  Declaration of `M` is here
+ERROR: File "this_union_intersect.php", line 128, characters 10-11:
+Invalid return type (Typing[4110])
+  File "this_union_intersect.php", line 126, characters 45-46:
+  Expected `JB`
+  File "this_union_intersect.php", line 119, characters 25-32:
+  But got `<expr#2>::TP where <expr#2>::TP as IA::TP, <expr#2>::TP as IC::TP`
+  File "this_union_intersect.php", line 127, characters 8-9:
+    where `<expr#2>` is a reference to this expression
+ERROR: File "this_union_intersect.php", line 128, characters 10-11:
+Invalid return type (Typing[4110])
+  File "this_union_intersect.php", line 126, characters 45-46:
+  Expected `JB`
+  File "this_union_intersect.php", line 119, characters 25-32:
+  But got `IA::TP where \IA::TP super <expr#2>::TP, \IA::TP as JA`
+  File "this_union_intersect.php", line 127, characters 8-9:
+    where `<expr#2>` is a reference to this expression
+ERROR: File "this_union_intersect.php", line 128, characters 10-11:
+Invalid return type (Typing[4110])
+  File "this_union_intersect.php", line 126, characters 45-46:
+  Expected `JB`
+  File "this_union_intersect.php", line 119, characters 25-32:
+  But got `IC::TP where \IC::TP super <expr#2>::TP, \IC::TP as JC`
+  File "this_union_intersect.php", line 127, characters 8-9:
+    where `<expr#2>` is a reference to this expression
+ERROR: File "this_union_intersect.php", line 128, characters 10-11:
+Invalid return type (Typing[4110])
+  File "this_union_intersect.php", line 126, characters 45-46:
+  Expected `JB`
+  File "this_union_intersect.php", line 119, characters 25-32:
+  But got `JA`
+  File "this_union_intersect.php", line 127, characters 8-9:
+    where `<expr#2>` is a reference to this expression
+ERROR: File "this_union_intersect.php", line 128, characters 10-11:
+Invalid return type (Typing[4110])
+  File "this_union_intersect.php", line 126, characters 45-46:
+  Expected `JB`
+  File "this_union_intersect.php", line 119, characters 25-32:
+  But got `JC`
+  File "this_union_intersect.php", line 127, characters 8-9:
+    where `<expr#2>` is a reference to this expression

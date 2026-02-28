@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/memory-usage-stats.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/server/server-note.h"
+#include "hphp/util/configs/gc.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -40,17 +41,17 @@ void MemoryManager::checkSampling(size_t bytes) {
   auto const usage = m_stats.mmUsage();
   MemoryManager::MaskAlloc mask(*this);
   s_samples->addAllocSample(usage, bytes);
-  if (RuntimeOption::EvalHeapAllocSampleNativeStack) {
+  if (Cfg::GC::HeapAllocSampleNativeStack) {
     // Get native stacktrace here.
     StackTrace st(StackTrace::Force{});
     s_samples->back().nativeStack = st;
   }
-  assertx(RuntimeOption::EvalHeapAllocSampleBytes > 0);
+  assertx(Cfg::GC::HeapAllocSampleBytes > 0);
   do {
-    m_nextSample += RuntimeOption::EvalHeapAllocSampleBytes;
+    m_nextSample += Cfg::GC::HeapAllocSampleBytes;
   } while (m_nextSample < allocated);
   // Gather PHP stack later.
-  setSurpriseFlag(SurpriseFlag::HeapSamplingFlag);
+  stackLimitAndSurprise().setFlag(SurpriseFlag::HeapSamplingFlag);
 }
 
 void AllocSamples::addStack(bool skipTop) {
@@ -94,7 +95,7 @@ void AllocSamples::logSamples() {
       }
       entry.setVec("php_stack", stack);
     }
-    if (RuntimeOption::EvalHeapAllocSampleNativeStack) {
+    if (Cfg::GC::HeapAllocSampleNativeStack) {
       entry.setStackTrace("native_stack", sample.nativeStack);
     }
     StructuredLog::log("hhvm_xenon_heap_profiler", entry);
@@ -104,7 +105,7 @@ void AllocSamples::logSamples() {
 
 void gather_alloc_stack(bool skipTop) {
   s_samples->addStack(skipTop);
-  clearSurpriseFlag(HeapSamplingFlag);
+  stackLimitAndSurprise().clearFlag(HeapSamplingFlag);
 }
 
 void reset_alloc_sampling() {

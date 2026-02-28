@@ -1,0 +1,29 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+    class FbThriftUnionFieldEnum(enum.Enum):
+        EMPTY: {{#partial m_types.unadapted_name type=struct}}.FbThriftUnionFieldEnum = ...
+    {{#each struct.fields_ordered_by_id as |field|}}
+        {{field.py_name}}: {{#partial m_types.unadapted_name type=struct}}.FbThriftUnionFieldEnum = ...
+    {{/each}}
+
+    fbthrift_current_value: _typing.Final[{{> types/field_value_pep484_union_type}}]
+{{! DO_BEFORE(satishvk, 20250331) Why don't immutable types cause inconsistent override errors? }}
+{{#if python.generate_mutable_types?}}
+    # pyre-ignore[15]: `fbthrift_current_field` overrides attribute defined in `_fbthrift_python_abstract_types.{{#partial m_types.unadapted_name type=struct}}` inconsistently. Type `{{#partial m_types.unadapted_name type=struct}}.FbThriftUnionFieldEnum` is not a subtype of the overridden attribute `_fbthrift_python_abstract_types.{{#partial m_types.unadapted_name type=struct}}.FbThriftUnionFieldEnum`
+{{/if python.generate_mutable_types?}}
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]

@@ -1,0 +1,2 @@
+--config everything_sdt=false
+--extra-builtin ../hhi/extraBuiltins.hhi

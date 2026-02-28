@@ -23,9 +23,7 @@
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-#ifndef VIXL_A64_SIMULATOR_A64_H_
-#define VIXL_A64_SIMULATOR_A64_H_
+#pragma once
 
 #include <iosfwd>
 #include <stack>
@@ -268,7 +266,7 @@ class Simulator : public DecoderVisitor {
   inline int64_t xname() { return xreg(N); }                  \
   inline void set_##wname(int32_t val) { set_wreg(N, val); }  \
   inline void set_##xname(int64_t val) { set_xreg(N, val); }
-  REG_ALIAS_ACCESSORS(30, wlr, lr);
+  REG_ALIAS_ACCESSORS(30, wlr, lr)
   #undef REG_ALIAS_ACCESSORS
 
   // The stack is a special case in aarch64.
@@ -437,7 +435,7 @@ class Simulator : public DecoderVisitor {
         return !Z() && (N() == V());
       case le:
         return !(!Z() && (N() == V()));
-      case nv:  // Fall through.
+      case nv:  [[fallthrough]];
       case al:
         return true;
       default:
@@ -510,6 +508,13 @@ class Simulator : public DecoderVisitor {
   uint64_t FPToUInt64(double value, FPRounding rmode);
   double FPMax(double a, double b);
   double FPMin(double a, double b);
+
+  static const uint32_t CRC32_POLY = 0x04C11DB7;
+  static const uint32_t CRC32C_POLY = 0x1EDC6F41;
+  uint32_t Poly32Mod2(unsigned n, uint64_t data, uint32_t poly);
+  template <typename T>
+  uint32_t Crc32Checksum(uint32_t acc, T val, uint32_t poly);
+  uint32_t Crc32Checksum(uint32_t acc, uint64_t val, uint32_t poly);
 
   // Pseudo Printf instruction
   void DoPrintf(Instruction* instr);
@@ -603,5 +608,3 @@ class Simulator : public DecoderVisitor {
   bool disasm_trace_;
 };
 }  // namespace vixl
-
-#endif  // VIXL_A64_SIMULATOR_A64_H_

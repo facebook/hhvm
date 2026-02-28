@@ -9,7 +9,6 @@
 
 open Hh_prelude
 open Typing_defs
-open Typing_env_types
 
 (*
 * These are the main coercion functions. Roughly, coercion should be used over
@@ -36,82 +35,183 @@ open Typing_env_types
 * sub_type, it suffices to do nothing.
 *
 *
-* The experimental sound dynamic (--enable-sound-dynamic-type) works
-* differently because dynamic is part of the sub-typing relation.
-*
 *)
+
+module Log = struct
+  let should_log_coerce_type env =
+    Typing_log.should_log env ~category:"typing" ~level:2
+
+  let log_coerce_type env p ~ty_have ~ty_expect =
+    Typing_log.log_function
+      (Pos_or_decl.of_raw_pos p)
+      ~function_name:"Typing_coercion.coerce_type"
+      ~arguments:
+        [
+          ("ty_expect", Typing_print.debug env ty_expect);
+          ("ty_have", Typing_print.debug env ty_have);
+        ]
+      ~result:(fun (_env, err_opt) ->
+        Some
+          (match err_opt with
+          | None -> "ok"
+          | Some _ -> "error"))
+end
 
 (* does coercion, including subtyping *)
 let coerce_type_impl
     ~coerce_for_op
-    ~coerce
+    ~is_dynamic_aware
+    ~ignore_readonly
     env
     ty_have
     ty_expect
+    ty_expect_enforced
     (on_error : Typing_error.Reasons_callback.t option) =
-  let is_expected_enforced = equal_enforcement ty_expect.et_enforced Enforced in
-  if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-    if coerce_for_op && is_expected_enforced then
-      (* If the coercion is for a built-in operation, then we want to allow it to apply to
-         dynamic *)
-      let tunion =
-        Typing_make_type.locl_like
-          (Reason.Rdynamic_coercion (get_reason ty_expect.et_type))
-          ty_expect.et_type
-      in
-      Typing_utils.sub_type ~coerce:None env ty_have tunion on_error
-    else
-      Typing_utils.sub_type ~coerce env ty_have ty_expect.et_type on_error
-  else
-    let complex_coercion =
-      TypecheckerOptions.complex_coercion (Typing_env.get_tcopt env)
+  let is_expected_enforced = equal_enforcement ty_expect_enforced Enforced in
+  if coerce_for_op && is_expected_enforced then
+    (* If the coercion is for a built-in operation, then we want to allow it to apply to
+       dynamic *)
+    let tunion =
+      Typing_make_type.locl_like
+        (Reason.dynamic_coercion (get_reason ty_expect))
+        ty_expect
     in
-    let (env, ety_expect) = Typing_env.expand_type env ty_expect.et_type in
-    let (env, ety_have) = Typing_env.expand_type env ty_have in
-    match (get_node ety_have, get_node ety_expect) with
-    | (_, Tdynamic) -> (env, None)
-    | (Tdynamic, _) when is_expected_enforced -> (env, None)
-    | _ when is_expected_enforced ->
-      Typing_utils.sub_type_with_dynamic_as_bottom
+    Typing_utils.sub_type
+      ~is_dynamic_aware:false
+      ~ignore_readonly
+      env
+      ty_have
+      tunion
+      on_error
+  else
+    let (env, ety_expect) = Typing_env.expand_type env ty_expect in
+    match get_node ety_expect with
+    | Tdynamic ->
+      Typing_utils.sub_type
+        ~is_dynamic_aware:true
+        ~ignore_readonly
         env
         ty_have
-        ty_expect.et_type
+        ty_expect
         on_error
-    | _ when Typing_utils.is_dynamic env ety_expect && complex_coercion ->
-      Typing_utils.sub_type_with_dynamic_as_bottom
+    | _ ->
+      Typing_utils.sub_type
+        ~is_dynamic_aware
+        ~ignore_readonly
         env
         ty_have
-        ty_expect.et_type
+        ty_expect
         on_error
-    | _ -> Typing_utils.sub_type env ty_have ty_expect.et_type on_error
 
 let coerce_type
-    ?(coerce_for_op = false)
-    ?(coerce = None)
+    ~coerce_for_op
+    ~is_dynamic_aware
+    ~ignore_readonly
     p
     ur
     env
     ty_have
     ty_expect
+    ty_expect_enforced
     (on_error : Typing_error.Callback.t) =
-  coerce_type_impl ~coerce_for_op ~coerce env ty_have ty_expect
+  coerce_type_impl
+    ~coerce_for_op
+    ~is_dynamic_aware
+    ~ignore_readonly
+    env
+    ty_have
+    ty_expect
+    ty_expect_enforced
   @@ Some
        (Typing_error.Reasons_callback.with_claim
           on_error
           ~claim:(lazy (p, Reason.string_of_ureason ur)))
 
-(* does coercion if possible, returning Some env with resultant coercion constraints
- * otherwise suppresses errors from attempted coercion and returns None *)
-let try_coerce ?(coerce = None) env ty_have ty_expect =
-  let pos =
-    get_pos ty_have
-    |> Typing_env.fill_in_pos_filename_if_in_current_decl env
-    |> Option.value ~default:Pos.none
+let coerce_type
+    ?(coerce_for_op = false)
+    ?(is_dynamic_aware = false)
+    ?(ignore_readonly = false)
+    p
+    ur
+    env
+    ty_have
+    ty_expect
+    ty_expect_enforced
+    (on_error : Typing_error.Callback.t) =
+  if Log.should_log_coerce_type env then
+    Log.log_coerce_type env p ~ty_have ~ty_expect @@ fun () ->
+    coerce_type
+      ~coerce_for_op
+      ~is_dynamic_aware
+      ~ignore_readonly
+      p
+      ur
+      env
+      ty_have
+      ty_expect
+      ty_expect_enforced
+      on_error
+  else
+    coerce_type
+      ~coerce_for_op
+      ~is_dynamic_aware
+      ~ignore_readonly
+      p
+      ur
+      env
+      ty_have
+      ty_expect
+      ty_expect_enforced
+      on_error
+
+let coerce_type_like_strip
+    p ur env ty_have ty_expect (on_error : Typing_error.Callback.t) =
+  let (env1, ty_err_opt) =
+    coerce_type_impl
+      ~coerce_for_op:false
+      ~is_dynamic_aware:false
+      ~ignore_readonly:false
+      env
+      ty_have
+      ty_expect
+      Unenforced
+    @@ Some
+         (Typing_error.Reasons_callback.with_claim
+            on_error
+            ~claim:(lazy (p, Reason.string_of_ureason ur)))
   in
-  let res =
-    coerce_type_impl ~coerce ~coerce_for_op:false env ty_have ty_expect
-    @@ Some (Typing_error.Reasons_callback.unify_error_at pos)
-  in
-  match res with
-  | (env, None) -> Some env
-  | _ -> None
+  match ty_err_opt with
+  | None -> (env1, None, false, ty_have)
+  | Some _ ->
+    let (env2, fresh_ty) = Typing_env.fresh_type env p in
+    let (env2, like_ty) =
+      Typing_utils.union
+        env2
+        fresh_ty
+        (Typing_make_type.dynamic (get_reason fresh_ty))
+    in
+    let cb = Typing_error.Reasons_callback.unify_error_at p in
+    let (env2, impossible_error) =
+      Typing_utils.sub_type env2 fresh_ty ty_expect (Some cb)
+    in
+    (* Enforce the invariant - this call should never give us an error *)
+    if Option.is_some impossible_error then
+      Diagnostics.internal_error p "Subtype of fresh type variable";
+    let (env2, ty_err_opt_like) =
+      coerce_type
+        p
+        Reason.URnone
+        env2
+        ty_have
+        like_ty
+        Unenforced
+        Typing_error.Callback.unify_error
+    in
+    (match ty_err_opt_like with
+    | None -> (env2, None, true, fresh_ty)
+    | Some _ ->
+      Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env:env1);
+      let ty_mismatch =
+        Option.map ty_err_opt ~f:Fn.(const (ty_have, ty_expect))
+      in
+      (env1, ty_mismatch, false, ty_have))

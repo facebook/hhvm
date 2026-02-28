@@ -12,7 +12,7 @@ echo "*** Testing array_rand() : array with default keys ***\n";
 
 
 // Initialise the 'input' and 'num_req' variables
-$input = varray[10, 20, 30, 40, 50, 60, 70];
+$input = vec[10, 20, 30, 40, 50, 60, 70];
 $num_req = 6;
 
 // Calling array_rand() with optional argument

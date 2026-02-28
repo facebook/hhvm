@@ -1,0 +1,8 @@
+*** Testing is_a() : usage variations ***
+
+Arg value  
+bool(false)
+
+Arg value  
+bool(false)
+Done

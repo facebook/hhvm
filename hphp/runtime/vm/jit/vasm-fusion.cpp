@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
-TRACE_SET_MOD(vasm);
+TRACE_SET_MOD(vasm)
 
 namespace HPHP::jit {
 
@@ -85,6 +85,7 @@ bool sets_flags(const Vunit& unit, const Vinstr& inst) {
   case Vinstr::callphpr:
   case Vinstr::callphps:
   case Vinstr::contenter:
+  case Vinstr::inlinesideexit:
     return true;
   default:
     break;

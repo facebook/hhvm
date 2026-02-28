@@ -1,1 +1,2 @@
-No errors
+WARN: File "cast_and_as.php", line 7, characters 10-25:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])

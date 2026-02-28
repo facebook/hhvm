@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Base {}
@@ -8,7 +8,7 @@ class MyClass {
 
 function my_array_map<Tm>((function(Tm): void) $f, varray<Tm> $a): void {}
 function render(): void {
-  $f = class_meth(MyClass::class, 'element');
+  $f = MyClass::element<>;
   $f(new Base());
-  my_array_map($f, varray[]);
+  my_array_map($f, vec[]);
 }

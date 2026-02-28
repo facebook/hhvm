@@ -1,0 +1,4 @@
+formatted.php
+malformed.php
+needs-formatting.php
+noformat.php

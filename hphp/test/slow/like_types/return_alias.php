@@ -1,6 +1,7 @@
 <?hh
+<<file:__EnableUnstableFeatures('like_type_hints')>>
 
-function f(mixed $x): MyAlias {
+function f(mixed $x): <<__Soft>> MyAlias {
   return $x;
 }
 

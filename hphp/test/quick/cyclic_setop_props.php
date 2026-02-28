@@ -4,12 +4,12 @@ class x {
   public $x0;
   public $y1;
 
-  public function __toString() {
+  public function __toString() :mixed{
     return "it's ";
   }
 }
 
-function cyclic_prop_declared_setop_props() {
+function cyclic_prop_declared_setop_props() :mixed{
   $a = new x;
   $a->x0 = new x;
   $a->x0->y1 = $a->x0;
@@ -17,7 +17,7 @@ function cyclic_prop_declared_setop_props() {
   var_dump($a->x0->y1 .= "ok");
 }
 
-function cyclic_prop_nondeclared_setop_props() {
+function cyclic_prop_nondeclared_setop_props() :mixed{
   $a = new x;
   $a->q0 = new x;
   $a->q0->r0 = 'a';

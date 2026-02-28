@@ -1,0 +1,1 @@
+Catchable fatal error: Property 'A::p' declared as type B, null assigned in %s/bad-initial-value.php on line %d

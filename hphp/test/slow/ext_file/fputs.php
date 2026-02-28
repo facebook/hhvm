@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_fputs() {
-$tempfile = tempnam('/tmp', 'vmextfiletest');
+function main_fputs() :mixed{
+$tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
 fputs($f, "testing fputs\n");

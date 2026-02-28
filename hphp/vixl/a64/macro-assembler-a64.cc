@@ -114,11 +114,11 @@ void MacroAssembler::LogicalMacro(const Register& rd,
         case AND:
           Mov(rd, 0);
           return;
-        case ORR:  // Fall through.
+        case ORR:  [[fallthrough]];
         case EOR:
           Mov(rd, rn);
           return;
-        case ANDS:  // Fall through.
+        case ANDS:  [[fallthrough]];
         case BICS:
           break;
         default:
@@ -136,7 +136,7 @@ void MacroAssembler::LogicalMacro(const Register& rd,
         case EOR:
           Mvn(rd, rn);
           return;
-        case ANDS:  // Fall through.
+        case ANDS:  [[fallthrough]];
         case BICS:
           break;
         default:
@@ -558,6 +558,17 @@ void MacroAssembler::LoadStoreMacro(const CPURegister& rt,
   } else {
     // Encodable in one load/store instruction.
     LoadStore(rt, addr, op);
+  }
+}
+
+
+void MacroAssembler::Prfm(PrefetchOperation op, const MemOperand& addr) {
+  if (addr.IsImmediateOffset() && !IsImmLSScaled(addr.offset(), LSDoubleWord) &&
+      !IsImmLSUnscaled(addr.offset())) {
+    not_reached();
+  } else {
+    // Simple register-offsets are encodable in one instruction.
+    Prefetch(op, addr);
   }
 }
 

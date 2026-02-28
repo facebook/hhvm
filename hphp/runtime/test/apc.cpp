@@ -75,18 +75,6 @@ TEST(APC, SetOverwrite) {
               make_tv<KindOfPersistentString>(s_value2.get())));
 }
 
-TEST(APC, Clear) {
-  auto store = new_store();
-
-  EXPECT_EQ(store->add(s_key, Variant(s_value1), 1500, 0), true);
-  EXPECT_EQ(store->add(s_key2, Variant(s_value2), 1500, 0), true);
-  EXPECT_EQ(store->exists(s_key), true);
-  EXPECT_EQ(store->exists(s_key2), true);
-  store->clear();
-  EXPECT_EQ(store->exists(s_key), false);
-  EXPECT_EQ(store->exists(s_key2), false);
-}
-
 TEST(APC, IncCas) {
   auto store = new_store();
   bool found = false;

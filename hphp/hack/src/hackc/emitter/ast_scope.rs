@@ -4,53 +4,66 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 pub mod ast_scope_item;
-pub use crate::ast_scope_item::{Class, Fun, Lambda, Method, ScopeItem};
-
-use hhbc::hhas_coeffects::HhasCoeffects;
-use oxidized::{
-    ast,
-    ast_defs::{FunKind, Id},
-    pos::Pos,
-};
 use std::borrow::Cow;
 
+use hhbc::Coeffects;
+use oxidized::ast;
+use oxidized::ast_defs::FunKind;
+use oxidized::ast_defs::Id;
+use oxidized::pos::Pos;
+
+pub use crate::ast_scope_item::Class;
+pub use crate::ast_scope_item::Fun;
+pub use crate::ast_scope_item::Lambda;
+pub use crate::ast_scope_item::Method;
+pub use crate::ast_scope_item::ScopeItem;
+
 #[derive(Clone, Default, Debug, Eq, PartialEq)]
-pub struct Scope<'a, 'arena> {
-    pub items: Vec<ScopeItem<'a, 'arena>>,
+pub struct Scope<'a> {
+    items: Vec<ScopeItem<'a>>,
+    class_cache: Option<Class<'a>>,
 }
 
-impl<'a, 'arena> Scope<'a, 'arena> {
-    pub fn toplevel() -> Self {
-        Scope { items: vec![] }
+impl<'a> Scope<'a> {
+    pub fn with_item(item: ScopeItem<'a>) -> Self {
+        let mut scope = Self::default();
+        scope.push_item(item);
+        scope
     }
 
-    pub fn push_item(&mut self, s: ScopeItem<'a, 'arena>) {
+    pub fn push_item(&mut self, s: ScopeItem<'a>) {
+        if let ScopeItem::Class(cd) = &s {
+            self.class_cache = Some(cd.clone());
+        }
         self.items.push(s)
     }
 
-    pub fn iter(&self) -> impl ExactSizeIterator<Item = &ScopeItem<'a, 'arena>> {
+    pub fn pop_item(&mut self) -> Option<ScopeItem<'a>> {
+        let s = self.items.pop();
+        if let Some(ScopeItem::Class(_)) = &s {
+            self.class_cache = None;
+        }
+        s
+    }
+
+    pub fn items(&self) -> &[ScopeItem<'a>] {
+        &self.items
+    }
+
+    pub fn iter(&self) -> impl ExactSizeIterator<Item = &ScopeItem<'a>> {
         self.items.iter().rev()
     }
 
-    pub fn iter_subscopes(&self) -> impl Iterator<Item = &[ScopeItem<'a, 'arena>]> {
+    pub fn iter_subscopes(&self) -> impl Iterator<Item = &[ScopeItem<'a>]> {
         (0..self.items.len()).rev().map(move |i| &self.items[..i])
     }
 
-    pub fn get_subscope_class<'b>(sub_scope: &'b [ScopeItem<'b, 'b>]) -> Option<&'b Class<'_>> {
-        for scope_item in sub_scope.iter().rev() {
-            if let ScopeItem::Class(cd) = scope_item {
-                return Some(cd);
-            }
-        }
-        None
-    }
-
-    pub fn top(&self) -> Option<&ScopeItem<'a, 'arena>> {
+    pub fn top(&self) -> Option<&ScopeItem<'a>> {
         self.items.last()
     }
 
     pub fn get_class(&self) -> Option<&Class<'_>> {
-        Self::get_subscope_class(&self.items[..])
+        self.class_cache.as_ref()
     }
 
     pub fn get_span(&self) -> Option<&Pos> {
@@ -61,7 +74,7 @@ impl<'a, 'arena> Scope<'a, 'arena> {
         if let Some(pos) = self.get_span() {
             Cow::Borrowed(pos)
         } else {
-            Cow::Owned(Pos::make_none())
+            Cow::Owned(Pos::NONE)
         }
     }
 
@@ -173,18 +186,17 @@ impl<'a, 'arena> Scope<'a, 'arena> {
     }
 
     pub fn is_in_lambda(&self) -> bool {
-        self.items.last().map_or(false, &ScopeItem::is_in_lambda)
+        self.items.last().is_some_and(ScopeItem::is_in_lambda)
     }
 
-    pub fn coeffects_of_scope(&self, alloc: &'arena bumpalo::Bump) -> HhasCoeffects<'arena> {
+    pub fn coeffects_of_scope(&self) -> Coeffects {
         for scope_item in self.iter() {
             match scope_item {
                 ScopeItem::Class(_) => {
-                    return HhasCoeffects::default();
+                    return Coeffects::default();
                 }
                 ScopeItem::Method(m) => {
-                    return HhasCoeffects::from_ast(
-                        alloc,
+                    return Coeffects::from_ast(
                         m.get_ctxs(),
                         m.get_params(),
                         m.get_tparams(),
@@ -192,8 +204,7 @@ impl<'a, 'arena> Scope<'a, 'arena> {
                     );
                 }
                 ScopeItem::Function(f) => {
-                    return HhasCoeffects::from_ast(
-                        alloc,
+                    return Coeffects::from_ast(
                         f.get_ctxs(),
                         f.get_params(),
                         f.get_tparams(),
@@ -208,7 +219,7 @@ impl<'a, 'arena> Scope<'a, 'arena> {
                 ScopeItem::Lambda(_) => {}
             }
         }
-        HhasCoeffects::default()
+        Coeffects::default()
     }
 
     pub fn has_function_attribute(&self, attr_name: impl AsRef<str>) -> bool {

@@ -1,8 +1,0 @@
-File "constraint_implements_interface_02.php", line 14, characters 7-9:
-A `where` type constraint is violated here (Typing[4323])
-  File "constraint_implements_interface_02.php", line 14, characters 22-22:
-  This is the class with `where` type constraints
-  File "constraint_implements_interface_02.php", line 17, characters 19-22:
-  Expected `Test`
-  File "constraint_implements_interface_02.php", line 17, characters 30-33:
-  But got `this as Bad`

@@ -1,0 +1,4 @@
+ Received input that was not in the expected format.
+Expected a valid Hack file with special comments for notebook cell information.
+Such files should only be created via `hh --notebook-to-hack`. Error:
+Invalid notebook number: 1234. Expected the notebook number to match regexp /^N[0-9]+$/

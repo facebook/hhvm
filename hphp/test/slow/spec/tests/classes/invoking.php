@@ -4,7 +4,7 @@ class C
 {
 ///*
     public function __invoke($p)
-    {
+:mixed    {
         echo "Inside " . __METHOD__ . " with arg $p\n";
 
         return "xxx";

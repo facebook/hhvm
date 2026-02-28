@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_shift() : usage variations ***\n";
 
-$stack = darray ['one' => 'un', 'two' => 'deux'];
+$stack = dict['one' => 'un', 'two' => 'deux'];
 
 echo "\n-- Call array_shift() --\n";
 var_dump($result = array_shift(inout $stack));

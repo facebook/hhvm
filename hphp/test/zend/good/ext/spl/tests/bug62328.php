@@ -3,7 +3,7 @@
 class SplFileInfo62328 extends SplFileInfo
 {
     public function __toString()
-    {
+:mixed    {
         return '__toString';
     }
 }

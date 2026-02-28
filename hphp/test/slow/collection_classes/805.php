@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_805() {
-$collections = darray[
+function main_805() :mixed{
+$collections = dict[
   'Vector' => new Vector(),
   'Map' => new Map(),
   'Set' => new Set(),

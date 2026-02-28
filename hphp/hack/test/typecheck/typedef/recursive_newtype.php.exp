@@ -1,0 +1,16 @@
+ERROR: File "recursive_newtype.php--f1.php", line 3, characters 6-7:
+Cyclic type definition (Typing[4014])
+  File "recursive_newtype.php--f2.php", line 3, characters 11-12:
+  Cyclic use is here
+ERROR: File "recursive_newtype.php--f1.php", line 5, characters 9-10:
+Cyclic type definition (Typing[4014])
+  File "recursive_newtype.php--f2.php", line 5, characters 14-15:
+  Cyclic use is here
+ERROR: File "recursive_newtype.php--f2.php", line 3, characters 6-7:
+Cyclic type definition (Typing[4014])
+  File "recursive_newtype.php--f1.php", line 3, characters 12-13:
+  Cyclic use is here
+ERROR: File "recursive_newtype.php--f2.php", line 5, characters 9-10:
+Cyclic type definition (Typing[4014])
+  File "recursive_newtype.php--f1.php", line 5, characters 15-16:
+  Cyclic use is here

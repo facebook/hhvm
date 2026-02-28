@@ -2,10 +2,11 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::{
-    fmt::Debug,
-    io::{self, Result, Write},
-};
+use std::fmt::Debug;
+use std::io;
+use std::io::Result;
+use std::io::Write;
+
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -31,7 +32,7 @@ impl Error {
 }
 
 pub(crate) fn into_error(e: io::Error) -> Error {
-    if e.kind() == io::ErrorKind::Other && e.get_ref().map_or(false, |e| e.is::<Error>()) {
+    if e.kind() == io::ErrorKind::Other && e.get_ref().is_some_and(|e| e.is::<Error>()) {
         let err: Error = *e.into_inner().unwrap().downcast::<Error>().unwrap();
         return err;
     }
@@ -40,7 +41,7 @@ pub(crate) fn into_error(e: io::Error) -> Error {
 
 impl From<Error> for std::io::Error {
     fn from(e: Error) -> Self {
-        io::Error::new(io::ErrorKind::Other, e)
+        io::Error::other(e)
     }
 }
 

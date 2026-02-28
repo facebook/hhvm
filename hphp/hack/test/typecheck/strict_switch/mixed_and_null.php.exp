@@ -1,0 +1,4 @@
+ERROR: File "mixed_and_null.php", line 16, characters 3-48:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "mixed_and_null.php", line 16, characters 11-12:
+  The scrutinee has type `mixed` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.

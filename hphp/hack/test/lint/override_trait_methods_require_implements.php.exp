@@ -1,0 +1,4 @@
+File "override_trait_methods_require_implements.php", line 10, characters 39-43:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])
+File "override_trait_methods_require_implements.php", line 13, characters 7-13:
+Unused trait: `MyClass` is overriding all the methods in `MyTrait` (Lint[5627])

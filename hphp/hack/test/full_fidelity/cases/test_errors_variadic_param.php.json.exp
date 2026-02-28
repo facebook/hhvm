@@ -90,35 +90,32 @@
                 "kind":"list_item",
                 "list_item":{
                   "kind":"parameter_declaration",
+                  "parameter_ellipsis":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"...",
+                      "text":"...",
+                      "offset":17,
+                      "leading_width":0,
+                      "width":3,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":2
+                    }
+                  },
                   "parameter_name":{
-                    "kind":"decorated_expression",
-                    "decorated_expression_decorator":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"...",
-                        "text":"...",
-                        "offset":17,
-                        "leading_width":0,
-                        "width":3,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":2
-                      }
-                    },
-                    "decorated_expression_expression":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"variable",
-                        "text":"$a",
-                        "offset":20,
-                        "leading_width":0,
-                        "width":2,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":2
-                      }
+                    "kind":"token",
+                    "token":{
+                      "kind":"variable",
+                      "text":"$a",
+                      "offset":20,
+                      "leading_width":0,
+                      "width":2,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":2
                     }
                   }
                 }
@@ -260,35 +257,32 @@
                 "kind":"list_item",
                 "list_item":{
                   "kind":"parameter_declaration",
+                  "parameter_ellipsis":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"...",
+                      "text":"...",
+                      "offset":57,
+                      "leading_width":0,
+                      "width":3,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":3
+                    }
+                  },
                   "parameter_name":{
-                    "kind":"decorated_expression",
-                    "decorated_expression_decorator":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"...",
-                        "text":"...",
-                        "offset":57,
-                        "leading_width":0,
-                        "width":3,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":3
-                      }
-                    },
-                    "decorated_expression_expression":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"variable",
-                        "text":"$a",
-                        "offset":60,
-                        "leading_width":0,
-                        "width":2,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":3
-                      }
+                    "kind":"token",
+                    "token":{
+                      "kind":"variable",
+                      "text":"$a",
+                      "offset":60,
+                      "leading_width":0,
+                      "width":2,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":3
                     }
                   }
                 },
@@ -498,35 +492,32 @@
                 "kind":"list_item",
                 "list_item":{
                   "kind":"parameter_declaration",
+                  "parameter_ellipsis":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"...",
+                      "text":"...",
+                      "offset":102,
+                      "leading_width":0,
+                      "width":3,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":4
+                    }
+                  },
                   "parameter_name":{
-                    "kind":"decorated_expression",
-                    "decorated_expression_decorator":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"...",
-                        "text":"...",
-                        "offset":102,
-                        "leading_width":0,
-                        "width":3,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":4
-                      }
-                    },
-                    "decorated_expression_expression":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"variable",
-                        "text":"$b",
-                        "offset":105,
-                        "leading_width":0,
-                        "width":2,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":4
-                      }
+                    "kind":"token",
+                    "token":{
+                      "kind":"variable",
+                      "text":"$b",
+                      "offset":105,
+                      "leading_width":0,
+                      "width":2,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":4
                     }
                   }
                 }
@@ -702,35 +693,32 @@
                 "kind":"list_item",
                 "list_item":{
                   "kind":"parameter_declaration",
+                  "parameter_ellipsis":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"...",
+                      "text":"...",
+                      "offset":146,
+                      "leading_width":0,
+                      "width":3,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":5
+                    }
+                  },
                   "parameter_name":{
-                    "kind":"decorated_expression",
-                    "decorated_expression_decorator":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"...",
-                        "text":"...",
-                        "offset":146,
-                        "leading_width":0,
-                        "width":3,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":5
-                      }
-                    },
-                    "decorated_expression_expression":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"variable",
-                        "text":"$b",
-                        "offset":149,
-                        "leading_width":0,
-                        "width":2,
-                        "trailing_width":0,
-                        "leading":[],
-                        "trailing":[],
-                        "line_number":5
-                      }
+                    "kind":"token",
+                    "token":{
+                      "kind":"variable",
+                      "text":"$b",
+                      "offset":149,
+                      "leading_width":0,
+                      "width":2,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":5
                     }
                   }
                 },

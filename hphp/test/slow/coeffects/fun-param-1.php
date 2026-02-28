@@ -2,19 +2,19 @@
 
 class A { const ctx C = [rx]; }
 
-function defaults() { echo "in defaults\n"; }
-function rx()[rx]   { echo "in rx\n"; }
-function pure()[]   { echo "in pure\n"; }
+function defaults() :mixed{ echo "in defaults\n"; }
+function rx()[rx]   :mixed{ echo "in rx\n"; }
+function pure()[]   :mixed{ echo "in pure\n"; }
 
-function defaults_r<reify T>() { echo "in defaults\n"; }
+function defaults_r<reify T>() :mixed{ echo "in defaults\n"; }
 
-function foo((function()[_]: void) $x)[ctx $x] {
+function foo((function()[_]: void) $x)[ctx $x] :mixed{
   defaults();
   rx();
   pure();
 }
 
-function bar(A $x)[$x::C] {
+function bar(A $x)[$x::C] :mixed{
   foo(() ==> {});
   foo(()[defaults] ==> {});
   foo(()[rx] ==> {});
@@ -29,6 +29,6 @@ function bar(A $x)[$x::C] {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   bar(new A);
 }

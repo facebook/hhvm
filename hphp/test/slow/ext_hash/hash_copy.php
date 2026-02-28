@@ -3,7 +3,7 @@
 
 
 <<__EntryPoint>>
-function main_hash_copy() {
+function main_hash_copy() :mixed{
 $c = hash_init("crc32");
 hash_update($c, "Hello");
 $d = hash_copy($c);

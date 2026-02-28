@@ -15,31 +15,17 @@
 */
 
 #include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/debug/gdb-jit.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 
-#include "hphp/runtime/base/execution-context.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/current-executable.h"
-#include "hphp/util/portability.h"
+#include "hphp/util/roar.h"
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
-#ifndef _MSC_VER
-#include <cxxabi.h>
-#endif
 
-#if defined USE_FOLLY_SYMBOLIZER
-
-#include <folly/experimental/symbolizer/Symbolizer.h>
-
-#elif defined HAVE_LIBBFD
-
-#include <bfd.h>
-
-#endif
+#include <folly/debugging/symbolizer/Symbolizer.h>
 
 #include <folly/portability/Unistd.h>
 #include <folly/Demangle.h>
@@ -70,14 +56,19 @@ DebugInfo* DebugInfo::Get() {
 
 DebugInfo::DebugInfo() {
   m_perfMapName = folly::sformat("/tmp/perf-{}.map", getpid());
-  if (RuntimeOption::EvalPerfPidMap) {
-    m_perfMap = fopen(m_perfMapName.c_str(), "w");
+  if (Cfg::Eval::PerfPidMap) {
+    m_perfMapEnabled = true;
+    // When running with ROAR, ROAR owns the pid-map file, and HHVM writes to it
+    // indirectly through ROAR.
+    if (!use_roar) {
+      m_perfMap = fopen(m_perfMapName.c_str(), "w");
+    }
   }
-  if (RuntimeOption::EvalPerfJitDump) {
+  if (Cfg::Eval::PerfJitDump) {
     initPerfJitDump();
   }
   m_dataMapName = folly::sformat("/tmp/perf-data-{}.map", getpid());
-  if (RuntimeOption::EvalPerfDataMap) {
+  if (Cfg::Eval::PerfDataMap) {
     m_dataMap = fopen(m_dataMapName.c_str(), "w");
   }
   generatePidMapOverlay();
@@ -86,28 +77,28 @@ DebugInfo::DebugInfo() {
 DebugInfo::~DebugInfo() {
   if (m_perfMap) {
     fclose(m_perfMap);
-    if (!RuntimeOption::EvalKeepPerfPidMap) {
+    if (!Cfg::Eval::KeepPerfPidMap) {
       unlink(m_perfMapName.c_str());
     }
   }
 
   if (m_perfJitDump) {
     closePerfJitDump();
-    if (!RuntimeOption::EvalKeepPerfPidMap) {
+    if (!Cfg::Eval::KeepPerfPidMap) {
       unlink(m_perfJitDumpName.c_str());
     }
   }
 
   if (m_dataMap) {
     fclose(m_dataMap);
-    if (!RuntimeOption::EvalKeepPerfPidMap) {
+    if (!Cfg::Eval::KeepPerfPidMap) {
       unlink(m_dataMapName.c_str());
     }
   }
 }
 
 void DebugInfo::generatePidMapOverlay() {
-  if (!m_perfMap || !pidMapOverlayStart) return;
+  if (!m_perfMapEnabled || !pidMapOverlayStart) return;
 
   struct SymInfo {
     const char* name;
@@ -115,8 +106,6 @@ void DebugInfo::generatePidMapOverlay() {
     size_t size;
   };
   std::vector<SymInfo> sorted;
-
-#if defined USE_FOLLY_SYMBOLIZER
 
   auto self = current_executable_path();
   using folly::symbolizer::ElfFile;
@@ -142,51 +131,6 @@ void DebugInfo::generatePidMapOverlay() {
     return false;
   });
 
-#elif defined HAVE_LIBBFD
-
-  auto self = current_executable_path();
-  bfd* abfd = bfd_openr(self.c_str(), nullptr);
-#ifdef BFD_DECOMPRESS
-  abfd->flags |= BFD_DECOMPRESS;
-#endif
-  SCOPE_EXIT { bfd_close(abfd); };
-  char **match = nullptr;
-  if (bfd_check_format(abfd, bfd_archive) ||
-      !bfd_check_format_matches(abfd, bfd_object, &match)) {
-    return;
-  }
-
-  long storage_needed = bfd_get_symtab_upper_bound (abfd);
-
-  if (storage_needed <= 0) return;
-
-  auto symbol_table = (asymbol**)malloc(storage_needed);
-
-  SCOPE_EXIT { free(symbol_table); free(match); };
-
-  long number_of_symbols = bfd_canonicalize_symtab(abfd, symbol_table);
-
-  for (long i = 0; i < number_of_symbols; i++) {
-    auto sym = symbol_table[i];
-    if (sym->flags &
-        (BSF_INDIRECT |
-         BSF_SECTION_SYM |
-         BSF_FILE |
-         BSF_DEBUGGING_RELOC |
-         BSF_OBJECT)) {
-      continue;
-    }
-    auto sec = sym->section;
-    if (!(sec->flags & (SEC_ALLOC|SEC_LOAD|SEC_CODE))) continue;
-    auto addr = sec->vma + sym->value;
-    if (addr < uintptr_t(pidMapOverlayStart) ||
-        addr >= uintptr_t(pidMapOverlayEnd)) {
-      continue;
-    }
-    sorted.push_back(SymInfo{sym->name, addr, 0});
-  }
-#endif // HAVE_LIBBFD
-
   std::sort(
     sorted.begin(), sorted.end(),
     [](const SymInfo& a, const SymInfo& b) {
@@ -209,8 +153,7 @@ void DebugInfo::generatePidMapOverlay() {
       size = uintptr_t(pidMapOverlayEnd) - sym.addr;
     }
     if (!size) continue;
-    fprintf(m_perfMap, "%lx %x %s\n",
-            long(sym.addr), size, demangled.c_str());
+    writeToPidMap(uint64_t(sym.addr), size, demangled.c_str());
   }
 
   return;
@@ -224,18 +167,27 @@ void DebugInfo::recordStub(TCRange range, const std::string& name) {
   }
 }
 
+extern "C" __attribute__((weak))
+int __roar_api_write_pid_map(uint64_t address, uint64_t size, const char* name);
+
+void DebugInfo::writeToPidMap(uint64_t start, uint64_t size, const char* name) {
+  if (use_roar) {
+    __roar_api_write_pid_map(start, size, name);
+  } else {
+    fprintf(m_perfMap, "%lx %lx %s\n", start, size, name);
+    fflush(m_perfMap);
+  }
+}
+
 void DebugInfo::recordPerfMap(TCRange range, SrcKey sk, std::string name) {
-  if (!m_perfMap) return;
-  if (RuntimeOption::EvalProfileBC) return;
+  if (!m_perfMapEnabled) return;
+  if (Cfg::Eval::ProfileBC) return;
   if (name.empty()) {
     name = lookupFunction(sk.func(), sk.prologue(),
-                          RuntimeOption::EvalPerfPidMapIncludeFilePath);
+                          Cfg::Eval::PerfPidMapIncludeFilePath);
   }
-  fprintf(m_perfMap, "%lx %x %s\n",
-    reinterpret_cast<uintptr_t>(range.begin()),
-    range.size(),
-    name.c_str());
-  fflush(m_perfMap);
+  auto const start = reinterpret_cast<uintptr_t>(range.begin());
+  writeToPidMap(start, range.size(), name.c_str());
 
   //Dump the object code into the specified file
   if (m_perfJitDump) {
@@ -260,17 +212,16 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
   };
 
 
-  if (RuntimeOption::EvalProfileBC) {
-    if (!m_perfMap) return;
+  if (Cfg::Eval::ProfileBC) {
+    if (!m_perfMapEnabled) return;
     const char* name;
     if (op < Op_count) {
       name = opcodeName[op];
     } else {
       name = highOpcodeName[op - OpHighStart];
     }
-    fprintf(m_perfMap, "%lx %x %s\n",
-            uintptr_t(range.begin()), range.size(), name);
-    fflush(m_perfMap);
+    auto const start = reinterpret_cast<uintptr_t>(range.begin());
+    writeToPidMap(start, range.size(), name);
   }
 }
 

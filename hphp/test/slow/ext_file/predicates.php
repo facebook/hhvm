@@ -2,11 +2,11 @@
 
 
 <<__EntryPoint>>
-function main_predicates() {
-$tempfile = tempnam('/tmp', 'vmextfiletest');
+function main_predicates() :mixed{
+$tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 var_dump(is_file($tempfile));
 var_dump(is_dir($tempfile));
-var_dump(is_dir('/tmp'));
+var_dump(is_dir(sys_get_temp_dir()));
 var_dump(is_link($tempfile));
 var_dump(is_executable($tempfile));
 chmod($tempfile, 0777);
@@ -34,9 +34,9 @@ var_dump(is_executable($tempfile));
 
 // in order to create a file outside the source tree but have a relative
 // path to it, we need to chdir into the temporary directory
-$tempfile = __SystemLib\hphp_test_tmppath('vmextfiletest');
+$tempfile = sys_get_temp_dir().'/'.'vmextfiletest';
 touch($tempfile);
-chdir(__SystemLib\hphp_test_tmproot());
+chdir(sys_get_temp_dir());
 $relativetempfile = './vmextfiletest';
 var_dump(is_file($relativetempfile));
 var_dump(is_dir($relativetempfile));

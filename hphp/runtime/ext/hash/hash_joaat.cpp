@@ -21,26 +21,25 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-  struct phpJoaatCtx {
+  struct PhpJooatCtx {
     unsigned int state;
   };
 
-  using PHP_JOAAT_CTX = phpJoaatCtx;
 } // anon namespace
 
 
 hash_joaat::hash_joaat() :
-  HashEngine(4, 4, sizeof(PHP_JOAAT_CTX)) {
+  HashEngine(4, 4, sizeof(PhpJooatCtx)) {
 }
 
 void hash_joaat::hash_init(void *context) {
-  unsigned int &state = ((PHP_JOAAT_CTX *)context)->state;
+  unsigned int &state = ((PhpJooatCtx *)context)->state;
   state = 0;
 }
 
 void hash_joaat::hash_update(void *context, const unsigned char *buf,
                                unsigned int count) {
-  unsigned int &state = ((PHP_JOAAT_CTX *)context)->state;
+  unsigned int &state = ((PhpJooatCtx *)context)->state;
   for (unsigned int i = 0; i < count; i++) {
       state += buf[i];
       state += (state << 10);
@@ -53,7 +52,7 @@ void hash_joaat::hash_update(void *context, const unsigned char *buf,
 }
 
 void hash_joaat::hash_final(unsigned char *digest, void *context_) {
-  PHP_JOAAT_CTX *context = (PHP_JOAAT_CTX*)context_;
+  PhpJooatCtx *context = (PhpJooatCtx*)context_;
 #ifdef WORDS_BIGENDIAN
   memcpy(digest, &context->state, 4);
 #else

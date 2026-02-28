@@ -2,7 +2,7 @@
 
 class C<reify T> {}
 
-function f<reify T>(T $a) {
+function f<reify T>(T $a) :mixed{
   return $a;
 }
 <<__EntryPoint>> function main(): void {

@@ -1,6 +1,6 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
     var_dump((new ReflectionClass('A'))->isAbstract());
 }

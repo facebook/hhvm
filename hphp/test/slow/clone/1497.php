@@ -3,14 +3,14 @@
 class A {
   public $foo = 0;
   private $foopriv = 2;
-  function __clone() {
+  function __clone() :mixed{
     echo "clone
 ";
   }
 }
 
 <<__EntryPoint>>
-function main_1497() {
+function main_1497() :mixed{
 $a1 = new A;
 $a1->foo = 'foo';
 $a1->dyn = 'dyn';

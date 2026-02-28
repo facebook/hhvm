@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_803() {
+function main_803() :mixed{
 echo '=== Vector ===', "\n";
 $v = Vector {};
 $v[] = 123;

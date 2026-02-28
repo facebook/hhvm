@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function testMath(dynamic $x): void {
   $y = $x + 5; // $y : num

@@ -16,29 +16,16 @@
 
 #include "hphp/runtime/vm/jit/unique-stubs-arm.h"
 
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/align-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/code-gen-tls.h"
-#include "hphp/runtime/vm/jit/smashable-instr-arm.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
-#include "hphp/runtime/vm/jit/unwind-itanium.h"
-
-#include "hphp/vixl/a64/macro-assembler-a64.h"
-#include "hphp/vixl/a64/simulator-a64.h"
-
-#include <folly/ScopeGuard.h>
-
-#include <iostream>
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(ustubs);
+TRACE_SET_MOD(ustubs)
 
 ///////////////////////////////////////////////////////////////////////////////
 

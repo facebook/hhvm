@@ -1,6 +1,6 @@
 <?hh
 
-function dump_property($rp) {
+function dump_property($rp) :mixed{
   var_dump($rp);
   // dynamic props should always be public (true, false, false)
   var_dump($rp->isPublic(), $rp->isProtected(), $rp->isPrivate());
@@ -13,7 +13,7 @@ function dump_property($rp) {
 
 
 <<__EntryPoint>>
-function main_dynamic_property() {
+function main_dynamic_property() :mixed{
 $a = new stdClass;
 $a->a = 'a';
 dump_property((new ReflectionObject($a))->getProperty('a'));

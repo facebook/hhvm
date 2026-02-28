@@ -8,7 +8,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing var_export() with valid strings ***\n";
 // different valid  string
-$valid_strings = darray[
+$valid_strings = dict[
             "\"\"" => "",
             "\" \"" => " ",
             "''" => '',

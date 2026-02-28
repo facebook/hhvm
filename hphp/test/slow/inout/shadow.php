@@ -1,24 +1,24 @@
 <?hh
 
-function wrap($x) {
+function wrap($x) :mixed{
   return ', '.$x.'!';
 }
 
-function io(inout $x, $y) {
+function io(inout $x, $y) :mixed{
   $x = 'hello';
   return $y;
 }
 
-function main() {
-  $f = varray[1, 'world', 3];
+function main() :mixed{
+  $f = vec[1, 'world', 3];
   $ret = io(inout $f, wrap($f[1]));
   echo $f.$ret."\n";
 
-  $f = varray[null, 'x', varray[1, 'world', 3]];
+  $f = vec[null, 'x', vec[1, 'world', 3]];
   $ret = io(inout $f, wrap($f[2][1]));
   echo $f.$ret."\n";
 
-  $f = varray[null, 'x', varray[1, 'orl', 3]];
+  $f = vec[null, 'x', vec[1, 'orl', 3]];
   $ret = io(inout $f, wrap('w'.$f[2][1].'d'));
   echo $f.$ret."\n";
 
@@ -37,6 +37,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_shadow() {
+function main_shadow() :mixed{
 main();
 }

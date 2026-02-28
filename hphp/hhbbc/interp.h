@@ -39,10 +39,6 @@ namespace res { struct Func; }
 
 //////////////////////////////////////////////////////////////////////
 
-constexpr auto kReadOnlyConstant = kInvalidDataType;
-
-//////////////////////////////////////////////////////////////////////
-
 struct BlockUpdateInfo {
   BlockId fallthrough{NoBlockId};
   uint32_t unchangedBcs{0};
@@ -67,6 +63,11 @@ struct RunFlags {
    */
   LocalId retParam{NoLocalId};
   BlockUpdateInfo updateInfo;
+
+  /*
+   * See FuncAnalysisResult for details.
+   */
+  std::bitset<64> usedParams;
 
   bool noThrow{true};
 };
@@ -142,6 +143,11 @@ struct StepFlags {
   std::bitset<kMaxTrackedLocals> mayReadLocalSet;
 
   /*
+   * See FuncAnalysisResult for details.
+   */
+  std::bitset<64> usedParams;
+
+  /*
    * If this is not none, the interpreter executed a return on this
    * step, with this type.
    */
@@ -162,7 +168,7 @@ struct StepFlags {
  * instruction, or for a whole block).
  */
 struct Interp {
-  const Index& index;
+  const IIndex& index;
   AnalysisContext ctx;
   CollectedInfo& collect;
   const BlockId bid;
@@ -189,9 +195,13 @@ StepFlags step(Interp&, const Bytecode& op);
  *
  * If the PropagateFn is called with a nullptr State, it means that
  * the given block should be re-processed.
+ *
+ * If the block needs to be reprocessed, RollbackFn will be called to
+ * "roll-back" any states propagated to other blocks.
  */
 using PropagateFn = std::function<void (BlockId, const State*)>;
-RunFlags run(Interp&, const State& in, PropagateFn);
+using RollbackFn = std::function<void()>;
+RunFlags run(Interp&, const State& in, const PropagateFn&, const RollbackFn&);
 
 /*
  * Dispatch a bytecode to the default interpreter.
@@ -208,13 +218,15 @@ void default_dispatch(ISS&, const Bytecode&);
  */
 bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca);
 
-bool handle_function_exists(ISS& env, const Type& name);
+/*
+ * Static list of all builtins which can be potentially optimized
+ * specially.
+ */
+const std::vector<SString>& special_builtins();
 
 Optional<Type>
 const_fold(ISS& env, uint32_t nArgs, uint32_t numExtraInputs,
            const php::Func& phpFunc, bool variadicsPacked);
-
-Optional<Type> thisType(const Index& index, Context ctx);
 
 /*
  * Extracts name from the type either by using a reified name specialization or

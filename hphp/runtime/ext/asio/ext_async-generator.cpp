@@ -18,22 +18,16 @@
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
-#include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
-#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
-
-Class* AsyncGenerator::s_class = nullptr;
-const StaticString AsyncGenerator::s_className("HH\\AsyncGenerator");
 
 AsyncGenerator::~AsyncGenerator() {
   if (LIKELY(getState() == State::Done)) {
@@ -56,7 +50,7 @@ AsyncGenerator::Create(const ActRec* fp, size_t numSlots,
   assertx(fp->func()->isAsyncGenerator());
   const size_t frameSz = Resumable::getFrameSize(numSlots);
   const size_t genSz = genSize(sizeof(AsyncGenerator), frameSz);
-  auto const obj = BaseGenerator::Alloc<AsyncGenerator>(s_class, genSz);
+  auto const obj = BaseGenerator::Alloc<AsyncGenerator>(classof(), genSz);
   auto const genData = new (Native::data<AsyncGenerator>(obj)) AsyncGenerator();
   genData->resumable()->initialize<false>(fp,
                                           resumeAddr,
@@ -131,16 +125,11 @@ void AsyncGenerator::failCpp() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 
-void AsioExtension::initAsyncGenerator() {
+void AsioExtension::registerNativeAsyncGenerator() {
   Native::registerNativeDataInfo<AsyncGenerator>(
-    AsyncGenerator::s_className.get(),
     Native::NDIFlags::NO_SWEEP | Native::NDIFlags::NO_COPY |
       Native::NDIFlags::CTOR_THROWS
   );
-  loadSystemlib("async-generator");
-  AsyncGenerator::s_class =
-    Class::lookup(AsyncGenerator::s_className.get());
-  assertx(AsyncGenerator::s_class);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

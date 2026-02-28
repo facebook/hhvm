@@ -1,8 +1,8 @@
 C::foo
-File "property.php", line 9, characters 12-14:
-File "property.php", line 15, characters 12-14:
-File "property.php", line 23, characters 7-9:
-File "property.php", line 24, characters 7-9:
-File "property.php", line 25, characters 7-9:
-File "property.php", line 26, characters 7-9:
+File "property.php", line 9, characters 12-14: C::foo
+File "property.php", line 15, characters 12-14: D::foo
+File "property.php", line 23, characters 7-9: C::foo
+File "property.php", line 24, characters 7-9: D::foo
+File "property.php", line 25, characters 7-9: C::foo
+File "property.php", line 26, characters 7-9: C::foo
 6 total results

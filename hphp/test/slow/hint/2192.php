@@ -1,12 +1,12 @@
 <?hh
-function decide() {
+function decide() :mixed{
 
   return mt_rand(0, 0);
 }
 
 
 <<__EntryPoint>>
-function main_2192() {
+function main_2192() :mixed{
 
 if (decide()) {
   include '2192-1.inc';

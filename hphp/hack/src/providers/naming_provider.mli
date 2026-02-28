@@ -20,7 +20,7 @@ val get_const_pos : Provider_context.t -> string -> FileInfo.pos option
 
 (** Resolve the given name+FileInfo.pos (which might only have filename) into
 an actual position, by parsing the AST if necessary *)
-val get_const_full_pos :
+val get_const_full_pos_by_parsing_file :
   Provider_context.t -> FileInfo.pos * string -> Pos.t option
 
 (** Record that a global constant with the given name was declared at the
@@ -45,7 +45,7 @@ val get_fun_pos : Provider_context.t -> string -> FileInfo.pos option
 
 (** Resolve the given name+FileInfo.pos (which might only have filename) into
 an actual position, by parsing the AST if necessary *)
-val get_fun_full_pos :
+val get_fun_full_pos_by_parsing_file :
   Provider_context.t -> FileInfo.pos * string -> Pos.t option
 
 (** Look up the canonical name for the given global function.
@@ -85,7 +85,7 @@ val get_type_pos : Provider_context.t -> string -> FileInfo.pos option
 
 (** Resolve the given name+FileInfo.pos (which might only have filename) into
 an actual position, by parsing the AST if necessary *)
-val get_type_full_pos :
+val get_type_full_pos_by_parsing_file :
   Provider_context.t -> FileInfo.pos * string -> Pos.t option
 
 (** Look up the file path declaring the given type in the reverse naming
@@ -146,8 +146,8 @@ val add_typedef : Provider_backend.t -> string -> FileInfo.pos -> unit
 val update :
   backend:Provider_backend.t ->
   path:Relative_path.t ->
-  old_file_info:FileInfo.t option ->
-  new_file_info:FileInfo.t option ->
+  old_ids:FileInfo.ids option ->
+  new_ids:FileInfo.ids option ->
   unit
 
 val local_changes_push_sharedmem_stack : unit -> unit
@@ -161,7 +161,7 @@ val get_files :
   Provider_context.t -> Typing_deps.DepSet.t -> Relative_path.Set.t
 
 (** Resolve the given name & FileInfo.pos into an actual position*)
-val get_module_full_pos :
+val get_module_full_pos_by_parsing_file :
   Provider_context.t -> FileInfo.pos * string -> Pos.t option
 
 val get_module_pos : Provider_context.t -> string -> FileInfo.pos option
@@ -173,3 +173,8 @@ val module_exists : Provider_context.t -> string -> bool
 val add_module : Provider_backend.t -> string -> FileInfo.pos -> unit
 
 val remove_module_batch : Provider_backend.t -> string list -> unit
+
+val rust_backend_ctx_proxy :
+  Provider_context.t -> Rust_provider_backend.ctx_proxy option
+
+val get_entry_contents : Provider_context.t -> Relative_path.t -> string option

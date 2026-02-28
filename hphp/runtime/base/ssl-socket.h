@@ -62,7 +62,7 @@ struct SSLSocket final : Socket {
             const char *address = nullptr, int port = 0,
             bool nonblocking = true);
   virtual ~SSLSocket();
-  DECLARE_RESOURCE_ALLOCATION(SSLSocket);
+  DECLARE_RESOURCE_ALLOCATION(SSLSocket)
 
   // will setup and enable crypto
   bool onConnect();

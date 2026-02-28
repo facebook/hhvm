@@ -1,0 +1,3 @@
+<?hh
+
+type TestReflectionTypeAlias = int;

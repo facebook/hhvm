@@ -1,11 +1,11 @@
 <?hh
 
-function gen1() {
+function gen1() :AsyncGenerator<mixed,mixed,void>{
     return 42;
     yield 24;
 }
 
-function gen2() {
+function gen2() :AsyncGenerator<mixed,mixed,void>{
     yield 24;
     return 42;
 }
@@ -18,26 +18,26 @@ function gen2() {
 
 // Return types for generators specify the return of the function,
 // not of the generator return value, so this code is okay
-function gen4() {
+function gen4() :AsyncGenerator<mixed,mixed,void>{
     yield 24;
     return 42;
 }
 
 // Has no explicit return, but implicitly return NULL at the end
-function gen5() {
+function gen5() :AsyncGenerator<mixed,mixed,void>{
     yield 24;
 }
 
 // Explicit value-less return also results in a NULL generator
 // return value and there is no interference with type hints
-function gen6() {
+function gen6() :AsyncGenerator<mixed,mixed,void>{
     return;
     yield 24;
 }
 
 
 <<__EntryPoint>>
-function main_get_return() {
+function main_get_return() :mixed{
   $gen = gen1();
   $gen->next();
   var_dump($gen->getReturn());

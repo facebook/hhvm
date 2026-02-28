@@ -1,8 +1,2 @@
-File "tuple_as_lvalue.php", line 15, characters 3-15:
-You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
-File "tuple_as_lvalue.php", line 15, characters 3-20:
-Invalid assignment (Typing[4110])
-  File "tuple_as_lvalue.php", line 13, characters 8-11:
-  Expected `null`
-  File "tuple_as_lvalue.php", line 12, characters 15-17:
-  But got `int`
+ERROR: File "tuple_as_lvalue.php", line 15, characters 3-15:
+Cannot use unstable feature: `shape_destructure` (Parsing[1002])

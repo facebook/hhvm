@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Ctv<-T> {
   public function __construct(T $x) {}

@@ -1,5 +1,5 @@
 <?hh
 
 class C {
-  function __unset() {}
+  function __unset() :mixed{}
 }

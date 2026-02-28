@@ -1,8 +1,9 @@
 <?hh
 
-<<__Const>>
 class C {
+  <<__Const>>
   public Vector<int> $cv = Vector{0};
+  <<__Const>>
   public vec<Vector<int>> $cvv = vec[Vector{1}];
 
   public function __construct() {
@@ -15,7 +16,7 @@ class C {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   $c = new C();
   echo "-- after constructor completes --\n";
   var_dump($c);

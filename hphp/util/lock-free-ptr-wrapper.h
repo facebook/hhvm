@@ -20,7 +20,7 @@
 #include <type_traits>
 
 #include "hphp/util/assertions.h"
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/optional.h"
 #include "hphp/util/smalllocks.h"
 
 namespace HPHP {
@@ -105,40 +105,69 @@ struct LockFreePtrWrapper {
     return copyImpl<T>();
   }
 
+  // RAI wrapper to encapsulate lifetime of locked region
+  struct ScopedLock {
+    ScopedLock(ScopedLock&& o) : self{o.self} { o.self = nullptr; }
+    ScopedLock(const ScopedLock&) = delete;
+    ScopedLock& operator=(const ScopedLock&) = delete;
+    ScopedLock& operator=(ScopedLock&&) = delete;
+
+    ~ScopedLock() { if (self) self->unlock(); }
+
+    /*
+     * Update the wrapped value, release the lock, and return the old
+     * value. The old value will typically need to be destroyed via a
+     * treadmill-like mechanism, because other threads may have read
+     * the old value just prior to the update (and still be using it).
+     */
+    T update(T&& v) {
+      assertx(self);
+      SCOPE_EXIT { self = nullptr; };
+      return self->update_and_unlock(std::move(v));
+    }
+
+    /*
+     * Manually release the lock early.
+     */
+    void release() {
+      assertx(self);
+      SCOPE_EXIT { self = nullptr; };
+      self->unlock();
+    }
+  private:
+    explicit ScopedLock(LockFreePtrWrapper<T>& self) : self{&self} {}
+    LockFreePtrWrapper<T>* self;
+    friend struct LockFreePtrWrapper;
+  };
+
   /*
    * Get an exclusive lock on the wrapped value. Other threads can
    * still read its current value via get() or copy(). After calling
-   * this, you must unlock it either with update_and_unlock (if you
-   * want to change the value), or unlock (if you don't).
+   * this, you must unlock it either by letting the ScopedLock go out
+   * of scope (if you don't want to change the value), or by calling
+   * update() on the ScopedLock (if you do).
    */
-  void lock_for_update();
+  ScopedLock lock_for_update();
 
   /*
-   * Like lock_for_update(), but returns false if it fails to acquire
-   * the lock rather than blocking. Returns true on success.
+   * Like lock_for_update(), but returns std::nullopt if it fails to acquire
+   * the lock rather than blocking.
    */
-  bool try_lock_for_update();
-
-  /*
-   * Unlock it.
-   */
-  void unlock();
-  /*
-   * Update the wrapped value, and return the old value. The old value
-   * will typically need to be destroyed via a treadmill-like
-   * mechanism, because other threads may have read the old value just
-   * prior to the update (and still be using it).
-   */
-  T update_and_unlock(T&& v);
+  Optional<ScopedLock> try_lock_for_update();
 
  protected:
   // Constructor that accepts raw bits, for use in the unsafe version.
   LockFreePtrWrapper(raw_type rawBits) : bits(rawBits) {
     assertx(notLocked());
   }
-  raw_type raw() const { return bits.load(std::memory_order_relaxed); }
+
+  void unlock();
+
+  T update_and_unlock(T&& v);
+
+  raw_type raw() const { return bits.load(std::memory_order_acquire); }
   const bool notLocked() {
-    return !(low_bits.load(std::memory_order_relaxed) & ~kPtrMask);
+    return !(low_bits.load(std::memory_order_acquire) & ~kPtrMask);
   }
 
   template<typename U>
@@ -149,24 +178,15 @@ struct LockFreePtrWrapper {
   }
 
   template<typename U>
-  typename std::enable_if<std::is_same<T,U>::value && is_lowptr_v<U>,
-                          typename lowptr_traits<U>::pointer>::type
-  getImpl() const {
-    auto p = unlocked();
-    return reinterpret_cast<T*>(&p)->get();
-  }
-
-  template<typename U>
   typename std::enable_if<std::is_same<T,U>::value &&
-                          !std::is_pointer<U>::value &&
-                          !is_lowptr_v<U>, Holder>::type
+                          !std::is_pointer<U>::value, Holder>::type
   getImpl() const {
     return Holder { unlocked() };
   }
 
   template<typename U>
   typename std::enable_if<std::is_same<T,U>::value &&
-                          (std::is_pointer<U>::value || is_lowptr_v<U>),
+                          std::is_pointer<U>::value,
                           T>::type
   copyImpl() const {
     return get();
@@ -174,8 +194,7 @@ struct LockFreePtrWrapper {
 
   template<typename U>
   typename std::enable_if<std::is_same<T,U>::value &&
-                          !std::is_pointer<U>::value &&
-                          !is_lowptr_v<U>, T>::type
+                          !std::is_pointer<U>::value, T>::type
   copyImpl() const {
     // We need to force a copy, rather than a move from get().val. If you
     // change this, make sure you know what you're doing.
@@ -184,7 +203,7 @@ struct LockFreePtrWrapper {
   }
 
   raw_type unlock_helper(raw_type rep) {
-    auto const c = bits.exchange(rep, std::memory_order_release);
+    auto const c = bits.exchange(rep, std::memory_order_acq_rel);
     if (c & kLockWithWaitersBit) {
       futex_wake(&low_bits, 1);
     } else {
@@ -207,6 +226,8 @@ struct LockFreePtrWrapper {
   static constexpr raw_type kPtrMask = static_cast<raw_type>(-4);
   static constexpr raw_type kLockNoWaitersBit = 1;
   static constexpr raw_type kLockWithWaitersBit = 2;
+
+  friend struct ScopedLock;
 };
 
 /*
@@ -228,7 +249,7 @@ struct UnsafeLockFreePtrWrapper : LockFreePtrWrapper<T> {
     : LockFreePtrWrapper<T>(o.raw()) {}
   auto const& operator=(const UnsafeLockFreePtrWrapper& o) {
     assertx(notLocked());
-    LockFreePtrWrapper<T>::bits.store(o.raw(), std::memory_order_relaxed);
+    LockFreePtrWrapper<T>::bits.store(o.raw(), std::memory_order_release);
     assertx(notLocked());
     return *this;
   }
@@ -241,26 +262,33 @@ static_assert(std::is_copy_constructible<UnsafeLockFreePtrWrapper<int*>>::
 //////////////////////////////////////////////////////////////////////
 
 template<class T>
-void LockFreePtrWrapper<T>::lock_for_update() {
+typename LockFreePtrWrapper<T>::ScopedLock
+LockFreePtrWrapper<T>::lock_for_update() {
   auto lockBit = kLockNoWaitersBit;
   while (true) {
     auto c = raw() & kPtrMask;
     // writing is expected to be unusual, so start by assuming the low
     // two bits are clear, and attempt to set the appropriate low bit.
-    if (bits.compare_exchange_weak(c, c + lockBit, std::memory_order_relaxed)) {
-      return;
+    if (bits.compare_exchange_weak(c, c + lockBit, std::memory_order_acq_rel)) {
+      return ScopedLock{*this};
     }
     // We didn't get the lock, so someone else had it. c holds the
     // value we found there.
     if (c & kLockNoWaitersBit) {
       auto const desired = (c & kPtrMask) + kLockWithWaitersBit;
-      if (!bits.compare_exchange_weak(c, desired, std::memory_order_relaxed)) {
-        // We failed, so someone else got in before us. start over.
+      if (bits.compare_exchange_weak(c, desired, std::memory_order_acq_rel)) {
+        // compare_exchange_weak only updates c when it fails, so set it
+        // to the value we actually wrote to memory.
+        c = desired;
+        // fallthrough
+      } else if (!(c & kLockWithWaitersBit)) {
+        // If we failed, and kLockWithWaitersBit is not set, then the value
+        // we read must be in the unlocked state. Try again.
         continue;
-      }
-      // compare_exchange_weak only upates c when it fails, so set it
-      // to the value we actually wrote to memory.
-      c = desired;
+      } 
+      // fallthrough
+      // We failed, and kLockWithWaitersBit is set. 
+      // We'll wait for it to be unlocked.
     }
     assertx(!(c & kLockNoWaitersBit));
     if (c & kLockWithWaitersBit) {
@@ -274,13 +302,16 @@ void LockFreePtrWrapper<T>::lock_for_update() {
 }
 
 template<typename T>
-bool LockFreePtrWrapper<T>::try_lock_for_update() {
+Optional<typename LockFreePtrWrapper<T>::ScopedLock>
+LockFreePtrWrapper<T>::try_lock_for_update() {
   auto c = raw() & kPtrMask;
-  return bits.compare_exchange_weak(
+  auto const success = bits.compare_exchange_weak(
     c,
     c + kLockNoWaitersBit,
-    std::memory_order_relaxed
+    std::memory_order_acq_rel
   );
+  if (!success) return std::nullopt;
+  return ScopedLock{*this};
 }
 
 template<class T>
@@ -298,4 +329,3 @@ T LockFreePtrWrapper<T>::update_and_unlock(T&& v) {
 
 //////////////////////////////////////////////////////////////////////
 }
-

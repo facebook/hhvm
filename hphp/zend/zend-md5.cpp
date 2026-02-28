@@ -18,7 +18,6 @@
 #include "hphp/zend/zend-md5.h"
 
 #include "hphp/zend/zend-string.h"
-#include <cinttypes>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

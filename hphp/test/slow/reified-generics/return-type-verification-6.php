@@ -19,7 +19,7 @@ class D {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   (new D)->foo();
   D::foo_self();
   D::foo_static();

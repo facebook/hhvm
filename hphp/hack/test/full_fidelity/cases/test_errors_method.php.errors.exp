@@ -1,5 +1,5 @@
 (3,7)-(3,8) Class `E` contains an abstract method and must therefore be declared `abstract`
-(4,10)-(4,17) Methods cannot have multiple visibility modifiers
+(4,10)-(4,17) Methods cannot have multiple visibility modifiers except for `protected internal`.
 (5,3)-(5,35) Redeclared method `E::f`
 (5,9)-(5,14) Methods cannot have duplicate modifiers
 (6,3)-(6,45) Redeclared method `E::f`
@@ -20,7 +20,10 @@
 (16,36)-(16,39) A constructor cannot have a non-`void` type annotation.
 (17,3)-(17,40) Redeclared method `E::__construct`
 (18,3)-(18,33) Redeclared method `E::f`
+(18,25)-(18,25) A variable name is expected here.
 (19,3)-(19,34) Redeclared method `E::f`
+(19,25)-(19,25) A variable name is expected here.
 (19,25)-(19,26) A variadic parameter `...` may not be followed by a comma.
 (20,3)-(20,41) Redeclared method `E::f`
 (20,22)-(20,25) A variadic parameter `...` may only appear at the end of a parameter list.
+(20,25)-(20,25) A variable name is expected here.

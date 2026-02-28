@@ -1,0 +1,4 @@
+ERROR: File "idx_abstract_shape.php", line 7, characters 21-23:
+You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
+  File "idx_abstract_shape.php", line 4, characters 29-60:
+  The field `c` is not defined in this shape

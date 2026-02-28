@@ -3,15 +3,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::cmp::{Ord, Ordering, PartialOrd};
-use std::hash::{Hash, Hasher};
-
-use serde::{Deserialize, Serialize};
+use std::cmp::Ordering;
+use std::fmt::Debug;
+use std::hash::Hash;
+use std::hash::Hasher;
 
 use arena_deserializer::impl_deserialize_in_arena;
-use arena_trait::{Arena, TrivialDrop};
-use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
-use ocamlrep_derive::ToOcamlRep;
+use arena_trait::Arena;
+use arena_trait::TrivialDrop;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 
 /// The maximum height difference (or balance factor) that is allowed
 /// in the implementation of the AVL tree.
@@ -30,7 +33,7 @@ const MAX_DELTA: usize = 2;
 /// Since the whole Map is just a 1 word pointer, it implements the
 /// `Copy` trait.
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(bound(
     deserialize = "K: 'de + arena_deserializer::DeserializeInArena<'de>, V: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
@@ -42,6 +45,12 @@ pub struct Map<'a, K, V>(
 impl_deserialize_in_arena!(Map<'arena, K, V>);
 
 impl<'a, K, V> TrivialDrop for Map<'a, K, V> {}
+
+impl<'a, K: Debug, V: Debug> Debug for Map<'a, K, V> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_map().entries(self.iter()).finish()
+    }
+}
 
 /// The derived implementations of Copy and Clone require that K and V be
 /// Copy/Clone. We have no such requirement, since Map is just a pointer, so we
@@ -92,10 +101,7 @@ impl<K, V> Default for Map<'_, K, V> {
 }
 
 impl<K: ToOcamlRep, V: ToOcamlRep> ToOcamlRep for Map<'_, K, V> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         match self.0 {
             None => alloc.add(&()),
             Some(val) => alloc.add(val),
@@ -112,7 +118,7 @@ where
         value: ocamlrep::Value<'_>,
         alloc: &'a bumpalo::Bump,
     ) -> Result<Self, ocamlrep::FromError> {
-        if value.is_immediate() {
+        if value.is_int() {
             let _ = ocamlrep::from::expect_nullary_variant(value, 0)?;
             Ok(Map(None))
         } else {
@@ -123,7 +129,7 @@ where
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, ToOcamlRep)]
+#[derive(Deserialize, Serialize, ToOcamlRep)]
 #[serde(bound(
     deserialize = "K: 'de + arena_deserializer::DeserializeInArena<'de>, V: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
@@ -172,7 +178,7 @@ macro_rules! map {
 }
 
 impl<'a, K, V> Map<'a, K, V> {
-    pub fn keys(&self) -> impl Iterator<Item = &'a K> {
+    pub fn keys(&self) -> impl Iterator<Item = &'a K> + use<'a, K, V> {
         self.iter().map(|(k, _v)| k)
     }
 }
@@ -265,7 +271,7 @@ impl<'a, K: TrivialDrop + Clone + Ord, V: TrivialDrop + Clone> Map<'a, K, V> {
                 let node = Node(Self::empty(), x, data, Self::empty(), 1);
                 Map(Some(arena.alloc(node)))
             }
-            Map(Some(Node(ref l, v, d, r, h))) => match x.cmp(v) {
+            Map(Some(Node(l, v, d, r, h))) => match x.cmp(v) {
                 Ordering::Equal => {
                     let node = Node(*l, x, data, *r, *h);
                     Map(Some(arena.alloc(node)))
@@ -541,8 +547,9 @@ impl<'a, K, V> Iterator for MapIter<'a, K, V> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use bumpalo::Bump;
+
+    use super::*;
 
     #[test]
     fn test_is_empty() {
@@ -571,11 +578,15 @@ mod tests {
 
 #[cfg(test)]
 mod tests_arbitrary {
-    use super::*;
+    use std::collections::BTreeMap;
+    use std::collections::BTreeSet;
+    use std::collections::HashMap;
+    use std::hash::Hash;
+
     use bumpalo::Bump;
     use quickcheck::*;
-    use std::collections::{BTreeMap, BTreeSet, HashMap};
-    use std::hash::Hash;
+
+    use super::*;
 
     quickcheck! {
         fn prop_mem_find(xs: Vec<(u32, u32)>, ys: Vec<u32>) -> bool {
@@ -710,8 +721,9 @@ mod tests_arbitrary {
 
 #[cfg(test)]
 mod tests_iter {
-    use super::*;
     use bumpalo::Bump;
+
+    use super::*;
 
     #[test]
     fn test_iter_manual() {

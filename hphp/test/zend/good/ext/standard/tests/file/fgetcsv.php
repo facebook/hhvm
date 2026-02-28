@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$list = varray[
+$list = vec[
     'aaa,bbb',
     'aaa,"bbb"',
     '"aaa","bbb"',
@@ -22,8 +22,8 @@ $list = varray[
     'aaa"\\"a","bbb"'
 ];
 
-$file = __SystemLib\hphp_test_tmppath('fgetcsv.csv');
-@unlink($file);
+$file = sys_get_temp_dir().'/'.'fgetcsv.csv';
+unlink($file);
 foreach ($list as $v) {
     $fp = fopen($file, "w");
     fwrite($fp, $v . "\n");
@@ -31,5 +31,5 @@ foreach ($list as $v) {
 
     var_dump(fgetcsv(fopen($file, "r"), 1024));
 }
-@unlink($file);
+unlink($file);
 }

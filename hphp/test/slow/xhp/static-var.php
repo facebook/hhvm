@@ -7,7 +7,7 @@ class :fb:thing {
 }
 
 <<__EntryPoint>>
-function main_class_name() {
+function main_class_name() :mixed{
   var_dump(:fb:thing::$x);
   :fb:thing::$x = :fb:thing::$x + 1;
   ++:fb:thing::$x;

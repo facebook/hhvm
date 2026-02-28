@@ -4,14 +4,16 @@
        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
        sc_module = None; sc_name = ([3:7-16], "\\TestClass");
-       sc_tparams = []; sc_where_constraints = []; sc_extends = [];
-       sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
+       sc_tparams = []; sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
+       sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
+       sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
        sc_implements = []; sc_support_dynamic_type = false;
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([4:16-19], "KEY");
-          scc_type = (Rhint ([4:9-15]), (Tprim Tstring)); scc_refs = [] }
+          scc_type =
+          (Rhint ([4:9-15]), (Tapply (([4:9-15], "\\HH\\string"), [])));
+          scc_refs = []; scc_value = None }
          ];
        sc_typeconsts =
        [{ Shallow_decl_defs.stc_name = ([6:14-24], "TClassType");
@@ -19,19 +21,19 @@
           (Typing_defs.TCConcrete
              { Typing_defs.tc_type =
                (Rhint ([6:27-8:4]),
-                (Tshape (Typing_defs_core.Closed_shape,
-                   { (Typing_defs_core.TSFclass_const (
-                        ([7:5-9], "\\TestClass"), ([7:11-14], "KEY"))) ->
-                     { sft_optional = false;
-                       sft_ty = (Rhint ([7:18-21]), (Tprim Tint)) } }
-                   )))
+                (Tshape
+                   { s_origin = Typing_defs_core.Missing_origin;
+                     s_fields =
+                     { (Typing_defs_core.TSFclass_const (
+                          ([7:5-9], "\\TestClass"), ([7:11-14], "KEY"))) ->
+                       { sft_optional = false;
+                         sft_ty = (Rhint ([7:18-21]), (Tprim Tint)) } };
+                     s_unknown_value = (Rhint ([Pos.none]), (Tunion [])) }))
                });
           stc_enforceable = ([Pos.none], false); stc_reifiable = None;
           stc_is_ctx = false }
          ];
        sc_props = []; sc_sprops = []; sc_constructor = None;
        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-       sc_enum_type = None }))
+       sc_enum_type = None; sc_docs_url = None; sc_package = None }))
   ]
-
-They matched!

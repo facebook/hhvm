@@ -15,7 +15,7 @@
 */
 #pragma once
 
-#include "translator.h"
+#include "hphp/runtime/vm/jit/translator.h"
 
 namespace HPHP::jit {
 
@@ -27,4 +27,3 @@ void reportHelperToVtune(const char *name,
                          void *start,
                          void *end);
 }
-

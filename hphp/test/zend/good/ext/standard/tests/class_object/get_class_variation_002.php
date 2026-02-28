@@ -6,7 +6,7 @@
  */
 
 class caseSensitivityTest {}
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_class_variation_002(): void {
 var_dump(get_class(new casesensitivitytest));
 echo "Done";
 }

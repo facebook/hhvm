@@ -20,8 +20,6 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/std/ext_std_math.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 
 #define NON_FREE
@@ -51,7 +49,7 @@ struct MCrypt : SweepableResourceData {
     }
   }
 
-  CLASSNAME_IS("mcrypt");
+  CLASSNAME_IS("mcrypt")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
@@ -64,11 +62,11 @@ public:
 
 IMPLEMENT_RESOURCE_ALLOCATION(MCrypt)
 
-typedef enum {
+enum iv_source {
   RANDOM = 0,
   URANDOM,
   RAND
-} iv_source;
+};
 
 struct mcrypt_data {
   std::string algorithms_dir;
@@ -190,7 +188,7 @@ static Variant php_mcrypt_do_crypt(const String& cipher, const String& key,
   return s;
 }
 
-static req::ptr<MCrypt> get_valid_mcrypt_resource(const Resource& td) {
+static req::ptr<MCrypt> get_valid_mcrypt_resource(const OptResource& td) {
   auto pm = dyn_cast_or_null<MCrypt>(td);
 
   if (pm == nullptr || pm->isInvalid()) {
@@ -201,7 +199,7 @@ static req::ptr<MCrypt> get_valid_mcrypt_resource(const Resource& td) {
   return pm;
 }
 
-static Variant mcrypt_generic(const Resource& td, const String& data,
+static Variant mcrypt_generic(const OptResource& td, const String& data,
                               bool dencrypt) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
@@ -264,7 +262,7 @@ Variant HHVM_FUNCTION(mcrypt_module_open, const String& algorithm,
   return Variant(req::make<MCrypt>(td));
 }
 
-bool HHVM_FUNCTION(mcrypt_module_close, const Resource& td) {
+bool HHVM_FUNCTION(mcrypt_module_close, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -426,7 +424,7 @@ Variant HHVM_FUNCTION(mcrypt_cbc, const String& cipher, const String& key,
                                   const Variant& viv /* = null_string */) {
   raise_deprecated("Function mcrypt_cbc() is deprecated");
   String iv = viv.toString();
-  return php_mcrypt_do_crypt(cipher, key, data, "cbc", iv, mode.toInt32(),
+  return php_mcrypt_do_crypt(cipher, key, data, "cbc", iv, (int)mode.toInt64(),
                              "mcrypt_cbc");
 }
 
@@ -435,7 +433,7 @@ Variant HHVM_FUNCTION(mcrypt_cfb, const String& cipher, const String& key,
                                   const Variant& viv /* = null_string */) {
   raise_deprecated("Function mcrypt_cfb() is deprecated");
   String iv = viv.toString();
-  return php_mcrypt_do_crypt(cipher, key, data, "cfb", iv, mode.toInt32(),
+  return php_mcrypt_do_crypt(cipher, key, data, "cfb", iv, (int)mode.toInt64(),
                              "mcrypt_cfb");
 }
 
@@ -444,7 +442,7 @@ Variant HHVM_FUNCTION(mcrypt_ecb, const String& cipher, const String& key,
                                   const Variant& viv /* = null_string */) {
   raise_deprecated("Function mcrypt_ecb() is deprecated");
   String iv = viv.toString();
-  return php_mcrypt_do_crypt(cipher, key, data, "ecb", iv, mode.toInt32(),
+  return php_mcrypt_do_crypt(cipher, key, data, "ecb", iv, (int)mode.toInt64(),
                              "mcrypt_ecb");
 }
 
@@ -453,7 +451,7 @@ Variant HHVM_FUNCTION(mcrypt_ofb, const String& cipher, const String& key,
                                   const Variant& viv /* = null_string */) {
   raise_deprecated("Function mcrypt_ofb() is deprecated");
   String iv = viv.toString();
-  return php_mcrypt_do_crypt(cipher, key, data, "ofb", iv, mode.toInt32(),
+  return php_mcrypt_do_crypt(cipher, key, data, "ofb", iv, (int)mode.toInt64(),
                              "mcrypt_ofb");
 }
 
@@ -528,7 +526,7 @@ Variant HHVM_FUNCTION(mcrypt_get_key_size, const String& cipher,
   return ret;
 }
 
-Variant HHVM_FUNCTION(mcrypt_enc_get_algorithms_name, const Resource& td) {
+Variant HHVM_FUNCTION(mcrypt_enc_get_algorithms_name, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -540,7 +538,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_get_algorithms_name, const Resource& td) {
   return ret;
 }
 
-Variant HHVM_FUNCTION(mcrypt_enc_get_block_size, const Resource& td) {
+Variant HHVM_FUNCTION(mcrypt_enc_get_block_size, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -549,7 +547,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_get_block_size, const Resource& td) {
   return mcrypt_enc_get_block_size(pm->m_td);
 }
 
-Variant HHVM_FUNCTION(mcrypt_enc_get_iv_size, const Resource& td) {
+Variant HHVM_FUNCTION(mcrypt_enc_get_iv_size, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -558,7 +556,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_get_iv_size, const Resource& td) {
   return mcrypt_enc_get_iv_size(pm->m_td);
 }
 
-Variant HHVM_FUNCTION(mcrypt_enc_get_key_size, const Resource& td) {
+Variant HHVM_FUNCTION(mcrypt_enc_get_key_size, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -567,7 +565,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_get_key_size, const Resource& td) {
   return mcrypt_enc_get_key_size(pm->m_td);
 }
 
-Variant HHVM_FUNCTION(mcrypt_enc_get_modes_name, const Resource& td) {
+Variant HHVM_FUNCTION(mcrypt_enc_get_modes_name, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -579,7 +577,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_get_modes_name, const Resource& td) {
   return ret;
 }
 
-Variant HHVM_FUNCTION(mcrypt_enc_get_supported_key_sizes, const Resource& td) {
+Variant HHVM_FUNCTION(mcrypt_enc_get_supported_key_sizes, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -597,7 +595,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_get_supported_key_sizes, const Resource& td) {
   return ret;
 }
 
-bool HHVM_FUNCTION(mcrypt_enc_is_block_algorithm_mode, const Resource& td) {
+bool HHVM_FUNCTION(mcrypt_enc_is_block_algorithm_mode, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -606,7 +604,7 @@ bool HHVM_FUNCTION(mcrypt_enc_is_block_algorithm_mode, const Resource& td) {
   return mcrypt_enc_is_block_algorithm_mode(pm->m_td) == 1;
 }
 
-bool HHVM_FUNCTION(mcrypt_enc_is_block_algorithm, const Resource& td) {
+bool HHVM_FUNCTION(mcrypt_enc_is_block_algorithm, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -615,7 +613,7 @@ bool HHVM_FUNCTION(mcrypt_enc_is_block_algorithm, const Resource& td) {
   return mcrypt_enc_is_block_algorithm(pm->m_td) == 1;
 }
 
-bool HHVM_FUNCTION(mcrypt_enc_is_block_mode, const Resource& td) {
+bool HHVM_FUNCTION(mcrypt_enc_is_block_mode, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -624,7 +622,7 @@ bool HHVM_FUNCTION(mcrypt_enc_is_block_mode, const Resource& td) {
   return mcrypt_enc_is_block_mode(pm->m_td) == 1;
 }
 
-Variant HHVM_FUNCTION(mcrypt_enc_self_test, const Resource& td) {
+Variant HHVM_FUNCTION(mcrypt_enc_self_test, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -633,7 +631,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_self_test, const Resource& td) {
   return mcrypt_enc_self_test(pm->m_td);
 }
 
-Variant HHVM_FUNCTION(mcrypt_generic_init, const Resource& td,
+Variant HHVM_FUNCTION(mcrypt_generic_init, const OptResource& td,
                                            const String& key,
                                            const String& iv) {
   auto pm = get_valid_mcrypt_resource(td);
@@ -698,16 +696,16 @@ Variant HHVM_FUNCTION(mcrypt_generic_init, const Resource& td,
   return result;
 }
 
-Variant HHVM_FUNCTION(mcrypt_generic, const Resource& td, const String& data) {
+Variant HHVM_FUNCTION(mcrypt_generic, const OptResource& td, const String& data) {
   return mcrypt_generic(td, data, false);
 }
 
-Variant HHVM_FUNCTION(mdecrypt_generic, const Resource& td,
+Variant HHVM_FUNCTION(mdecrypt_generic, const OptResource& td,
                                         const String& data) {
   return mcrypt_generic(td, data, true);
 }
 
-bool HHVM_FUNCTION(mcrypt_generic_deinit, const Resource& td) {
+bool HHVM_FUNCTION(mcrypt_generic_deinit, const OptResource& td) {
   auto pm = get_valid_mcrypt_resource(td);
   if (!pm) {
     return false;
@@ -721,56 +719,18 @@ bool HHVM_FUNCTION(mcrypt_generic_deinit, const Resource& td) {
   return true;
 }
 
-bool HHVM_FUNCTION(mcrypt_generic_end, const Resource& td) {
+bool HHVM_FUNCTION(mcrypt_generic_end, const OptResource& td) {
   return HHVM_FUNCTION(mcrypt_generic_deinit, td);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 struct McryptExtension final : Extension {
-  McryptExtension() : Extension("mcrypt") {}
-  void moduleInit() override {
-    HHVM_RC_STR(MCRYPT_3DES, "tripledes");
-    HHVM_RC_STR(MCRYPT_ARCFOUR, "arcfour");
-    HHVM_RC_STR(MCRYPT_ARCFOUR_IV, "arcfour-iv");
-    HHVM_RC_STR(MCRYPT_BLOWFISH, "blowfish");
-    HHVM_RC_STR(MCRYPT_BLOWFISH_COMPAT, "blowfish-compat");
-    HHVM_RC_STR(MCRYPT_CAST_128, "cast-128");
-    HHVM_RC_STR(MCRYPT_CAST_256, "cast-256");
-    HHVM_RC_STR(MCRYPT_CRYPT, "crypt");
-    HHVM_RC_INT(MCRYPT_DECRYPT, 1);
-    HHVM_RC_STR(MCRYPT_DES, "des");
+  McryptExtension() : Extension("mcrypt", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  void moduleRegisterNative() override {
     HHVM_RC_INT(MCRYPT_DEV_RANDOM, RANDOM);
     HHVM_RC_INT(MCRYPT_DEV_URANDOM, URANDOM);
-    HHVM_RC_INT(MCRYPT_ENCRYPT, 0);
-    HHVM_RC_STR(MCRYPT_ENIGNA, "crypt");
-    HHVM_RC_STR(MCRYPT_GOST, "gost");
-    HHVM_RC_STR(MCRYPT_IDEA, "idea");
-    HHVM_RC_STR(MCRYPT_LOKI97, "loki97");
-    HHVM_RC_STR(MCRYPT_MARS, "mars");
-    HHVM_RC_STR(MCRYPT_MODE_CBC, "cbc");
-    HHVM_RC_STR(MCRYPT_MODE_CFB, "cfb");
-    HHVM_RC_STR(MCRYPT_MODE_ECB, "ecb");
-    HHVM_RC_STR(MCRYPT_MODE_NOFB, "nofb");
-    HHVM_RC_STR(MCRYPT_MODE_OFB, "ofb");
-    HHVM_RC_STR(MCRYPT_MODE_STREAM, "stream");
-    HHVM_RC_STR(MCRYPT_PANAMA, "panama");
     HHVM_RC_INT(MCRYPT_RAND, RAND);
-    HHVM_RC_STR(MCRYPT_RC2, "rc2");
-    HHVM_RC_STR(MCRYPT_RC6, "rc6");
-    HHVM_RC_STR(MCRYPT_RIJNDAEL_128, "rijndael-128");
-    HHVM_RC_STR(MCRYPT_RIJNDAEL_192, "rijndael-192");
-    HHVM_RC_STR(MCRYPT_RIJNDAEL_256, "rijndael-256");
-    HHVM_RC_STR(MCRYPT_SAFER128, "safer-sk128");
-    HHVM_RC_STR(MCRYPT_SAFER64, "safer-sk64");
-    HHVM_RC_STR(MCRYPT_SAFERPLUS, "saferplus");
-    HHVM_RC_STR(MCRYPT_SERPENT, "serpent");
-    HHVM_RC_STR(MCRYPT_SKIPJACK, "skipjack");
-    HHVM_RC_STR(MCRYPT_THREEWAY, "threeway");
-    HHVM_RC_STR(MCRYPT_TRIPLEDES, "tripledes");
-    HHVM_RC_STR(MCRYPT_TWOFISH, "twofish");
-    HHVM_RC_STR(MCRYPT_WAKE, "wake");
-    HHVM_RC_STR(MCRYPT_XTEA, "xtea");
 
     HHVM_FE(mcrypt_module_open);
     HHVM_FE(mcrypt_module_close);
@@ -809,8 +769,6 @@ struct McryptExtension final : Extension {
     HHVM_FE(mdecrypt_generic);
     HHVM_FE(mcrypt_generic_deinit);
     HHVM_FE(mcrypt_generic_end);
-
-    loadSystemlib();
   }
 } s_mcrypt_extension;
 

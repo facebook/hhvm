@@ -19,10 +19,9 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/utf8-decode.h"
@@ -34,14 +33,15 @@
 #include "hphp/runtime/base/zend-string.h"
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
+#include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/ext/json/JSON_parser.h"
 #include "hphp/runtime/ext/json/ext_json.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
 
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
-#include "hphp/util/exception.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/rds-local.h"
 
 #include <cmath>
@@ -85,7 +85,7 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
   , m_keepDVArrays{type != Type::Serialize}
   , m_maxCount(maxRecur)
 {
-  if (type == Type::DebuggerSerialize) {
+  if (type == Type::DebuggerSerialize && g_context) {
     m_maxLevelDebugger = g_context->debuggerSettings.printLevel;
   }
 }
@@ -96,6 +96,9 @@ VariableSerializer::getKind(const ArrayData* arr) const {
     return VariableSerializer::ArrayKind::PHP;
   } else if (UNLIKELY(m_forceHackArrays)) {
     if (arr->isDictType()) {
+      if (bespoke::TypeStructure::isBespokeTypeStructure(arr)) {
+        return VariableSerializer::ArrayKind::BespokeTypeStructure;
+      }
       return VariableSerializer::ArrayKind::Dict;
     } else if (arr->isVecType()) {
       return VariableSerializer::ArrayKind::Vec;
@@ -144,7 +147,12 @@ VariableSerializer::getKind(const ArrayData* arr) const {
     return VariableSerializer::ArrayKind::PHP;
   }
 
-  if (arr->isDictType()) return VariableSerializer::ArrayKind::Dict;
+  if (arr->isDictType()) {
+    if (bespoke::TypeStructure::isBespokeTypeStructure(arr)) {
+      return VariableSerializer::ArrayKind::BespokeTypeStructure;
+    }
+    return VariableSerializer::ArrayKind::Dict;
+  }
   if (arr->isVecType())  return VariableSerializer::ArrayKind::Vec;
   assertx(arr->isKeysetType());
   return VariableSerializer::ArrayKind::Keyset;
@@ -192,7 +200,14 @@ String VariableSerializer::serialize(const_variant_ref v, bool ret,
   StringBuffer buf;
   m_buf = &buf;
   if (ret) {
-    buf.setOutputLimit(serializationSizeLimit->value);
+    if (m_ignoreStringSizeLimit) {
+      auto limit = std::min<int64_t>(
+        StringData::MaxSize,
+        tl_heap->getMemoryLimit() - tl_heap->getStats().usage());
+      buf.setOutputLimit(safe_cast<uint32_t>(limit));
+    } else {
+      buf.setOutputLimit(serializationSizeLimit->value);
+    }
   } else {
     buf.setOutputLimit(StringData::MaxSize);
   }
@@ -311,8 +326,8 @@ void VariableSerializer::write(int64_t v) {
 }
 
 void VariableSerializer::write(double v) {
-  auto const precision = 14;
   auto const serde_precision = 17;
+  auto const precision = m_fullFloatPrecision ? serde_precision : 14;
 
   switch (m_type) {
   case Type::JSON:
@@ -654,13 +669,14 @@ void VariableSerializer::write(const String& v) {
 const StaticString
   s_invalidMethCallerAPC("Cannot store meth_caller in APC"),
   s_invalidMethCallerSerde("Cannot serialize meth_caller"),
+  s_disallowedCollectionSerde("Cannot serialize collection due to options"),
   s_disallowedObjectSerde("Cannot serialize object due to options");
 
 void VariableSerializer::write(const Object& v) {
   if (!v.isNull() && m_type == Type::JSON) {
-    if (RO::EvalForbidMethCallerHelperSerialize &&
-        v.get()->getVMClass() == SystemLib::s_MethCallerHelperClass) {
-      if (RO::EvalForbidMethCallerHelperSerialize == 1) {
+    if (Cfg::Eval::ForbidMethCallerHelperSerialize &&
+        v.get()->getVMClass() == SystemLib::getMethCallerHelperClass()) {
+      if (Cfg::Eval::ForbidMethCallerHelperSerialize == 1) {
         raise_warning("Serializing MethCallerHelper");
       } else {
         SystemLib::throwInvalidOperationExceptionObject(
@@ -672,7 +688,7 @@ void VariableSerializer::write(const Object& v) {
     // m_disallowObjects not relevent in JSON path bc it's only
     //setable via serialize_with_options
 
-    if (v.instanceof(s_JsonSerializable)) {
+    if (!m_skipJsonSerializable && v.instanceof(s_JsonSerializable)) {
       assertx(!v->isCollection());
       auto const providedCoeffects =
         m_pure ? RuntimeCoeffects::pure() : RuntimeCoeffects::defaults();
@@ -791,7 +807,7 @@ void VariableSerializer::writeOverflow(tv_rval tv) {
       m_buf->append("s:12:\"...(omitted)\";", 20);
       break;
     }
-    // fall through
+    [[fallthrough]];
   case Type::Serialize:
   case Type::Internal:
   case Type::APCSerialize:
@@ -859,6 +875,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     } else {
       switch (kind) {
       case ArrayKind::Dict:
+      case ArrayKind::BespokeTypeStructure:
         m_buf->append("Dict\n");
         break;
       case ArrayKind::Vec:
@@ -902,6 +919,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     } else {
       switch (kind) {
       case ArrayKind::Dict:
+      case ArrayKind::BespokeTypeStructure:
         m_buf->append("dict [\n");
         break;
       case ArrayKind::Vec:
@@ -914,13 +932,13 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         m_buf->append("array (\n");
         break;
       case ArrayKind::VArray: {
-        auto const dvarray = RO::EvalHackArrDVArrVarExport ||
+        auto const dvarray = Cfg::Eval::HackArrDVArrVarExport ||
                              m_type == Type::PHPOutput;
         m_buf->append(dvarray ? "varray [\n" : "array (\n");
         break;
       }
       case ArrayKind::DArray: {
-        auto const dvarray = RO::EvalHackArrDVArrVarExport ||
+        auto const dvarray = Cfg::Eval::HackArrDVArrVarExport ||
                              m_type == Type::PHPOutput;
         m_buf->append(dvarray ? "darray [\n" : "array (\n");
         break;
@@ -950,6 +968,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       auto const header = [&]() {
         switch (kind) {
           case ArrayKind::Dict:
+          case ArrayKind::BespokeTypeStructure:
             return "dict";
           case ArrayKind::Vec:
             return "vec";
@@ -1029,6 +1048,9 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       case ArrayKind::DArray:
         m_buf->append("Y:");
         break;
+      case ArrayKind::BespokeTypeStructure:
+        m_buf->append(m_type == Type::Internal ? "T:" : "D:");
+        break;
       }
       m_buf->append(size);
       m_buf->append(":{");
@@ -1046,7 +1068,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     }
 
     if (info.is_vector || kind == ArrayKind::Keyset) {
-      if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices) &&
+      if (UNLIKELY(Cfg::Eval::HackArrCompatSerializeNotices) &&
           kind == ArrayKind::DArray) {
         if (size == 0 && m_edWarn && !m_hasEDWarned) {
           raise_hackarr_compat_notice("JSON encoding empty darray");
@@ -1058,7 +1080,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       }
       m_buf->append('[');
     } else {
-      if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices) &&
+      if (UNLIKELY(Cfg::Eval::HackArrCompatSerializeNotices) &&
           kind == ArrayKind::DArray && m_ddWarn && !m_hasDDWarned) {
         raise_hackarr_compat_notice("JSON encoding dict-like darray");
         m_hasDDWarned = true;
@@ -1146,7 +1168,7 @@ void VariableSerializer::writeArrayKey(
     indent();
     if (kind == AK::Vec || kind == AK::Keyset) return;
     if ((kind == AK::VArray || kind == AK::MarkedVArray) &&
-        (RO::EvalHackArrDVArrVarExport || m_type == Type::PHPOutput)) {
+        (Cfg::Eval::HackArrDVArrVarExport || m_type == Type::PHPOutput)) {
       return;
     }
     write(key, true);
@@ -1181,6 +1203,7 @@ void VariableSerializer::writeArrayKey(
       write(StrNR(keyCell->m_data.pstr).asString());
       return;
     }
+    [[fallthrough]];
 
   case Type::Serialize:
   case Type::Internal:
@@ -1271,7 +1294,7 @@ void VariableSerializer::writeArrayValue(
     m_keyPrinted = [&]{
       if (kind == ArrayKind::Vec || kind == ArrayKind::Keyset) return false;
       if ((kind == ArrayKind::VArray || kind == ArrayKind::MarkedVArray) &&
-          (RO::EvalHackArrDVArrVarExport || m_type == Type::PHPOutput)) {
+          (Cfg::Eval::HackArrDVArrVarExport || m_type == Type::PHPOutput)) {
         return false;
       }
       return true;
@@ -1342,6 +1365,7 @@ void VariableSerializer::writeArrayFooter(
       case ArrayKind::Dict:
       case ArrayKind::Vec:
       case ArrayKind::Keyset:
+      case ArrayKind::BespokeTypeStructure:
         m_buf->append(']');
         break;
       case ArrayKind::PHP:
@@ -1349,7 +1373,7 @@ void VariableSerializer::writeArrayFooter(
         break;
       case ArrayKind::VArray:
       case ArrayKind::DArray: {
-        auto const dvarrays = RO::EvalHackArrDVArrVarExport ||
+        auto const dvarrays = Cfg::Eval::HackArrDVArrVarExport ||
                               m_type == Type::PHPOutput;
         m_buf->append(dvarrays ? ']' : ')');
         break;
@@ -1434,7 +1458,7 @@ bool VariableSerializer::incNestedLevel(tv_rval tv) {
     if (m_maxLevelDebugger > 0 && ++m_levelDebugger > m_maxLevelDebugger) {
       return true;
     }
-    // fall through
+    [[fallthrough]];
   case Type::Serialize:
   case Type::Internal:
   case Type::APCSerialize:
@@ -1551,15 +1575,22 @@ void VariableSerializer::serializeFunc(const Func* func) {
           VarNR{s_invalidMethCallerAPC.get()}
         );
       }
+      [[fallthrough]];
     case Type::Serialize:
-    case Type::Internal:
-    case Type::DebuggerSerialize:
       if (func->isMethCaller()) {
         SystemLib::throwInvalidOperationExceptionObject(
           VarNR{s_invalidMethCallerSerde.get()}
         );
       }
       invalidFuncConversion("string");
+      break;
+    case Type::Internal:
+    case Type::DebuggerSerialize:
+      m_buf->append("f:");
+      m_buf->append(name->size());
+      m_buf->append(":\"");
+      m_buf->append(name->data(), name->size());
+      m_buf->append("\";");
       break;
   }
 }
@@ -1568,7 +1599,7 @@ void VariableSerializer::serializeClass(const Class* cls) {
   switch (getType()) {
     case Type::VarExport:
     case Type::PHPOutput:
-      if (RuntimeOption::EvalClassAsStringVarExport) {
+      if (Cfg::Eval::ClassAsStringVarExport) {
         write(StrNR(cls->name()));
       } else {
         m_buf->append(cls->name());
@@ -1576,11 +1607,11 @@ void VariableSerializer::serializeClass(const Class* cls) {
       }
       break;
     case Type::VarDump:
-      if (RuntimeOption::EvalClassAsStringVarDump) {
+      if (Cfg::Eval::ClassAsStringVarDump) {
         write(StrNR(cls->name()));
         break;
       }
-      // fall-through
+      [[fallthrough]];
     case Type::DebugDump:
       indent();
       m_buf->append("class(");
@@ -1588,19 +1619,41 @@ void VariableSerializer::serializeClass(const Class* cls) {
       m_buf->append(")\n");
       break;
     case Type::PrintR:
+      if (Cfg::Eval::ClassAsStringPrintR) {
+        write(StrNR(cls->name()));
+        break;
+      }
+      [[fallthrough]];
     case Type::DebuggerDump:
       m_buf->append("class(");
       m_buf->append(cls->name());
       m_buf->append(')');
       break;
     case Type::JSON:
-      write(StrNR(classToStringHelper(cls)));
+      write(StrNR(classToStringHelper(cls, "serialization")));
       break;
     case Type::Serialize:
+      if (!m_keepClasses) {
+        write(StrNR(classToStringHelper(cls, "serialization")));
+        break;
+      }
+      [[fallthrough]];
     case Type::Internal:
-    case Type::APCSerialize:
+    case Type::APCSerialize: {
+      auto cname = cls->name();
+      m_buf->append("l:");
+      m_buf->append(cname->size());
+      m_buf->append(":\"");
+      m_buf->append(cname->data(), cname->size());
+      m_buf->append("\";");
+      break;
+    }
     case Type::DebuggerSerialize:
-      write(StrNR(classToStringHelper(cls)));
+      m_buf->append("c:");
+      m_buf->append(cls->name()->size());
+      m_buf->append(":\"");
+      m_buf->append(cls->name()->data(), cls->name()->size());
+      m_buf->append("\";");
       break;
   }
 }
@@ -1609,7 +1662,7 @@ void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
   switch (getType()) {
     case Type::VarExport:
     case Type::PHPOutput:
-      if (RuntimeOption::EvalClassAsStringVarExport) {
+      if (Cfg::Eval::ClassAsStringVarExport) {
         write(StrNR(lcls.name()));
       } else {
         m_buf->append(lcls.name());
@@ -1617,11 +1670,11 @@ void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
       }
       break;
     case Type::VarDump:
-      if (RuntimeOption::EvalClassAsStringVarDump) {
+      if (Cfg::Eval::ClassAsStringVarDump) {
         write(StrNR(lcls.name()));
         break;
       }
-      // fall-through
+      [[fallthrough]];
     case Type::DebugDump:
       indent();
       m_buf->append("class(");
@@ -1629,16 +1682,26 @@ void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
       m_buf->append(")\n");
       break;
     case Type::PrintR:
+      if (Cfg::Eval::ClassAsStringPrintR) {
+        write(StrNR(lcls.name()));
+        break;
+      }
+      [[fallthrough]];
     case Type::DebuggerDump:
       m_buf->append("class(");
       m_buf->append(lcls.name());
       m_buf->append(')');
       break;
     case Type::JSON:
-    case Type::Serialize:
     case Type::DebuggerSerialize:
-      write(StrNR(lazyClassToStringHelper(lcls)));
+      write(StrNR(lazyClassToStringHelper(lcls, "serialization")));
       break;
+    case Type::Serialize:
+      if (!m_keepClasses) {
+        write(StrNR(lazyClassToStringHelper(lcls, "serialization")));
+        break;
+      }
+      [[fallthrough]];
     case Type::Internal:
     case Type::APCSerialize: {
       auto cname = lcls.name();
@@ -1649,6 +1712,38 @@ void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
       m_buf->append("\";");
       break;
     }
+  }
+}
+
+void VariableSerializer::serializeEnumClassLabel(const StringData* label) {
+  switch (getType()) {
+    case Type::VarExport:
+    case Type::PHPOutput:
+    case Type::DebuggerDump:
+    case Type::PrintR:
+        m_buf->append("enum class label (#");
+        m_buf->append(label->data());
+        m_buf->append(")");
+      break;
+    case Type::VarDump:
+    case Type::DebugDump:
+        indent();
+        m_buf->append("enum class label (#");
+        m_buf->append(label->data());
+        m_buf->append(")\n");
+      break;
+    case Type::JSON:
+      write(StrNR(label));
+      break;
+    case Type::Serialize:
+    case Type::DebuggerSerialize:
+    case Type::Internal:
+    case Type::APCSerialize:
+      m_buf->append("e:");
+      m_buf->append(label->size());
+      m_buf->append(":\"");
+      m_buf->append(label->data(), label->size());
+      m_buf->append("\";");
   }
 }
 
@@ -1713,12 +1808,23 @@ void VariableSerializer::serializeClsMeth(
     }
 
     case Type::Serialize:
-    case Type::Internal:
-    case Type::APCSerialize:
-    case Type::DebuggerSerialize: {
+    case Type::APCSerialize: {
       SystemLib::throwInvalidOperationExceptionObject(
         "Unable to serialize class meth pointer"
       );
+    }
+    case Type::Internal:
+    case Type::DebuggerSerialize: {
+      m_buf->append("m:");
+      m_buf->append(clsName->size());
+      m_buf->append(":\"");
+      m_buf->append(clsName->data(), clsName->size());
+      m_buf->append("\":");
+      m_buf->append(funcName->size());
+      m_buf->append(":\"");
+      m_buf->append(funcName->data(), funcName->size());
+      m_buf->append("\";");
+      break;
     }
   }
 }
@@ -1858,6 +1964,11 @@ void VariableSerializer::serializeVariant(tv_rval tv,
       assertx(!isArrayKey);
       serializeLazyClass(val(tv).plazyclass);
       return;
+
+    case KindOfEnumClassLabel:
+      assertx(!isArrayKey);
+      serializeEnumClassLabel(val(tv).pstr);
+      return;
   }
   not_reached();
 }
@@ -1892,26 +2003,63 @@ void VariableSerializer::serializeString(const String& str) {
   }
 }
 
+void sortTvPairs(req::vector<std::pair<TypedValue, TypedValue>>& elems) {
+  using KVPair = std::pair<TypedValue, TypedValue>;
+  sort(elems.begin(), elems.end(), [](const KVPair& a, const KVPair& b) {
+    if (tvIsString(a.first)) {
+      // Integers come before strings
+      if (!tvIsString(b.first)) {
+        assertx(tvIsInt(b.first));
+        return false;
+      }
+      return strcmp(val(a.first).pstr->data(), val(b.first).pstr->data()) < 0;
+    } else {
+      assertx(tvIsInt(a.first));
+      if (!tvIsInt(b.first)) {
+        assertx(tvIsString(b.first));
+        return true;
+      }
+      return val(a.first).num < val(b.first).num;
+    }
+  });
+}
+
 void VariableSerializer::serializeArrayImpl(const ArrayData* arr,
                                             bool isVectorData) {
   using AK = VariableSerializer::ArrayKind;
   AK kind = getKind(arr);
   writeArrayHeader(arr->size(), isVectorData, kind);
 
-  IterateKV(
-    arr,
-    [&](TypedValue k, TypedValue v) {
+  if (UNLIKELY(m_sortArrayKeys)) {
+    using KVPair = std::pair<TypedValue, TypedValue>;
+    req::vector<KVPair> elems;
+    IterateKV(
+      arr,
+      [&elems](TypedValue k, TypedValue v) {
+        elems.push_back(std::make_pair(k, v));
+      }
+    );
+    sortTvPairs(elems);
+    for (const auto& [k, v]: elems) {
       writeArrayKey(VarNR(k), kind);
       writeArrayValue(VarNR(v), kind);
     }
-  );
+  } else {
+    IterateKV(
+      arr,
+      [&](TypedValue k, TypedValue v) {
+        writeArrayKey(VarNR(k), kind);
+        writeArrayValue(VarNR(v), kind);
+      }
+    );
+  }
 
   writeArrayFooter(kind);
 }
 
 void VariableSerializer::serializeArray(const ArrayData* arr,
                                         bool skipNestCheck /* = false */) {
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices)) {
+  if (UNLIKELY(Cfg::Eval::HackArrCompatSerializeNotices)) {
     if (UNLIKELY(m_hackWarn && !m_hasHackWarned)) {
       raise_hack_arr_compat_serialize_notice(arr);
       m_hasHackWarned = true;
@@ -1962,17 +2110,41 @@ void VariableSerializer::serializeObjProps(Array& arr) {
   decRefArr(dict);
 }
 
+void VariableSerializer::writeCollectionKVSorted(ObjectData* obj) {
+  using AK = VariableSerializer::ArrayKind;
+  using KVPair = std::pair<TypedValue, TypedValue>;
+  req::vector<KVPair> elems;
+  for (ArrayIter iter(obj); iter; ++iter) {
+    elems.push_back(std::make_pair(iter.nvFirst(), iter.secondVal()));
+  }
+  sortTvPairs(elems);
+  for (const auto& [k, v]: elems) {
+    writeCollectionKey(VarNR(k), AK::PHP);
+    writeArrayValue(VarNR(v), AK::PHP);
+  }
+}
+
 void VariableSerializer::serializeCollection(ObjectData* obj) {
   using AK = VariableSerializer::ArrayKind;
   int64_t sz = collections::getSize(obj);
   auto type = obj->collectionType();
 
+  if (m_disallowCollections) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      VarNR{s_disallowedCollectionSerde.get()}
+    );
+  }
+
   if (isMapCollection(type)) {
     pushObjectInfo(obj->getClassName(),'K');
     writeArrayHeader(sz, false, AK::PHP);
-    for (ArrayIter iter(obj); iter; ++iter) {
-      writeCollectionKey(iter.first(), AK::PHP);
-      writeArrayValue(iter.second(), AK::PHP);
+    if (UNLIKELY(m_sortArrayKeys)) {
+      writeCollectionKVSorted(obj);
+    } else {
+      for (ArrayIter iter(obj); iter; ++iter) {
+        writeCollectionKey(iter.first(), AK::PHP);
+        writeArrayValue(iter.second(), AK::PHP);
+      }
     }
     writeArrayFooter(AK::PHP);
 
@@ -2012,9 +2184,13 @@ void VariableSerializer::serializeCollection(ObjectData* obj) {
           writeArrayValue(iter.second(), AK::PHP);
         }
       } else {
-        for (ArrayIter iter(obj); iter; ++iter) {
-          writeCollectionKey(iter.first(), AK::PHP);
-          writeArrayValue(iter.second(), AK::PHP);
+        if (UNLIKELY(m_sortArrayKeys)) {
+          writeCollectionKVSorted(obj);
+        } else {
+          for (ArrayIter iter(obj); iter; ++iter) {
+              writeCollectionKey(iter.first(), AK::PHP);
+              writeArrayValue(iter.second(), AK::PHP);
+          }
         }
       }
     }
@@ -2059,7 +2235,7 @@ Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
   if (!debuginfo) {
     // When ArrayIterator is cast to an array, it returns its array object,
     // however when it's being var_dump'd or print_r'd, it shows its properties
-    if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayIteratorClass))) {
+    if (UNLIKELY(obj->instanceof(SystemLib::getArrayIteratorClass()))) {
       auto ret = Array::CreateDict();
       obj->o_getArray(ret, false, true);
       return ret;
@@ -2105,11 +2281,11 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
     return;
   }
 
-  if (RO::EvalForbidMethCallerHelperSerialize &&
+  if (Cfg::Eval::ForbidMethCallerHelperSerialize &&
       (type == Type::Serialize || type == Type::Internal ||
        type == Type::DebuggerSerialize || type == Type::JSON) &&
-      obj->getVMClass() == SystemLib::s_MethCallerHelperClass) {
-    if (RO::EvalForbidMethCallerHelperSerialize == 1) {
+      obj->getVMClass() == SystemLib::getMethCallerHelperClass()) {
+    if (Cfg::Eval::ForbidMethCallerHelperSerialize == 1) {
       raise_warning("Serializing MethCallerHelper");
     } else {
       SystemLib::throwInvalidOperationExceptionObject(
@@ -2127,7 +2303,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
   if (LIKELY(type == VariableSerializer::Type::Serialize ||
              type == VariableSerializer::Type::Internal ||
              type == VariableSerializer::Type::APCSerialize)) {
-    if (obj->instanceof(SystemLib::s_SerializableClass)) {
+    if (obj->instanceof(SystemLib::getSerializableClass())) {
       assertx(!obj->isCollection());
       ret =
         const_cast<ObjectData*>(obj)->o_invoke_few_args(s_serialize, RuntimeCoeffects::fixme(), 0);
@@ -2155,15 +2331,15 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
       return;
     }
     if (type == VariableSerializer::Type::APCSerialize) {
-      if (cls == SystemLib::s_MethCallerHelperClass) {
-        if (RO::EvalForbidMethCallerAPCSerialize == 1) {
+      if (cls == SystemLib::getMethCallerHelperClass()) {
+        if (Cfg::Eval::ForbidMethCallerAPCSerialize == 1) {
           raise_warning("Storing meth_caller in APC");
-        } else if (RO::EvalForbidMethCallerAPCSerialize > 1) {
+        } else if (Cfg::Eval::ForbidMethCallerAPCSerialize > 1) {
           SystemLib::throwInvalidOperationExceptionObject(
             VarNR{s_invalidMethCallerAPC.get()}
           );
         }
-      } else if (cls == SystemLib::s_DynMethCallerHelperClass) {
+      } else if (cls == SystemLib::getDynMethCallerHelperClass()) {
         SystemLib::throwInvalidOperationExceptionObject(
           VarNR{s_invalidMethCallerAPC.get()}
         );
@@ -2225,7 +2401,9 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
           }
         }
 
-        auto const lookup = obj_cls->getDeclPropSlot(ctx, memberName.get());
+        // TODO(T126821336): Populate with module name
+        auto const propCtx = MemberLookupContext(ctx, (StringData*)nullptr);
+        auto const lookup = obj_cls->getDeclPropSlot(propCtx, memberName.get());
         auto const slot = lookup.slot;
 
         if (slot != kInvalidSlot && lookup.accessible) {
@@ -2284,18 +2462,17 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
       Array properties = getSerializeProps(obj);
       if (type == VariableSerializer::Type::DebuggerSerialize) {
         try {
-          CoeffectsAutoGuard _;
           auto val = const_cast<ObjectData*>(obj)->invokeToDebugDisplay(
-            RuntimeCoeffects::automatic());
+            m_pure ? RuntimeCoeffects::pure() : RuntimeCoeffects::defaults());
           if (val.isInitialized()) {
             properties.set(s_PHP_DebugDisplay, *val.asTypedValue());
           }
         } catch (const Object &e) {
-          assertx(e->instanceof(SystemLib::s_ErrorClass) ||
-                  e->instanceof(SystemLib::s_ExceptionClass));
+          assertx(e->instanceof(SystemLib::getErrorClass()) ||
+                  e->instanceof(SystemLib::getExceptionClass()));
           assertx(
-            SystemLib::s_ErrorClass->lookupDeclProp(s_message.get()) == 0 &&
-            SystemLib::s_ExceptionClass->lookupDeclProp(s_message.get()) == 0
+            SystemLib::getErrorClass()->lookupDeclProp(s_message.get()) == 0 &&
+            SystemLib::getExceptionClass()->lookupDeclProp(s_message.get()) == 0
           );
           auto const message_rval = e->propRvalAtOffset(Slot{0});
           if (isStringType(message_rval.type())) {
@@ -2324,15 +2501,14 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
         }
 
         // If we have a DebugDisplay prop saved, use it.
-        auto const debugDisp = obj->getProp(nullptr, s_PHP_DebugDisplay.get());
+        auto const debugDisp = obj->getProp(nullctx, s_PHP_DebugDisplay.get());
         if (debugDisp) {
           serializeVariant(debugDisp, false, false, true);
           return;
         }
         // Otherwise compute it if we have a __toDebugDisplay method.
-        CoeffectsAutoGuard _;
         auto val = const_cast<ObjectData*>(obj)->invokeToDebugDisplay(
-          RuntimeCoeffects::automatic());
+          m_pure ? RuntimeCoeffects::pure() : RuntimeCoeffects::defaults());
         if (val.isInitialized()) {
           serializeVariant(val.asTypedValue(), false, false, true);
           return;
@@ -2342,10 +2518,9 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
           (type == VariableSerializer::Type::Serialize ||
            type == VariableSerializer::Type::Internal ||
            type == VariableSerializer::Type::APCSerialize ||
-           type == VariableSerializer::Type::DebuggerSerialize ||
            type == VariableSerializer::Type::DebuggerDump)) {
         auto const cname = obj->getProp(
-          nullptr,
+          nullctx,
           s_PHP_Incomplete_Class_Name.get()
         );
         if (cname && isStringType(cname.type())) {

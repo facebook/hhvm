@@ -1,5 +1,5 @@
 <?hh
 
 class C {
-  function __get() {}
+  function __get() :mixed{}
 }

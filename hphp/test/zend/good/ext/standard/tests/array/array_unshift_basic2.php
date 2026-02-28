@@ -11,7 +11,7 @@
 echo "*** Testing array_unshift() : basic functionality with associative array ***\n";
 
 // Initialise the array
-$array = darray['f' => "first", "s" => 'second', 1 => "one", 2 => 'two'];
+$array = dict['f' => "first", "s" => 'second', 1 => "one", 2 => 'two'];
 
 // Calling array_unshift() with default argument
 $temp_array = $array;

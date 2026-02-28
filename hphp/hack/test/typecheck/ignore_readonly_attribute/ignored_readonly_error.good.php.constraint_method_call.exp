@@ -1,0 +1,12 @@
+ERROR: File "ignored_readonly_error.good.php", line 30, characters 9-164:
+Invalid argument (Typing[4411])
+  File "", line 0, characters 0-0:
+  Function readonly mismatch
+  File "", line 0, characters 0-0:
+  This function is not marked readonly
+  File "ignored_readonly_error.good.php", line 12, characters 19-24:
+  This function is marked readonly
+ERROR: File "ignored_readonly_error.good.php", line 32, characters 20-28:
+Was expecting a function value but type is unknown (Typing[4297])
+  File "ignored_readonly_error.good.php", line 30, characters 10-18:
+  It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter

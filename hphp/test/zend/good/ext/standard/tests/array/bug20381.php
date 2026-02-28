@@ -1,17 +1,17 @@
 <?hh <<__EntryPoint>> function main(): void {
-$a = darray[
+$a = dict[
     'a1' => 1,
-    'a2' => varray[ 1, 2, 3 ],
-    'a3' => darray[
-        'a' => varray[ 10, 20, 30 ],
+    'a2' => vec[ 1, 2, 3 ],
+    'a3' => dict[
+        'a' => vec[ 10, 20, 30 ],
         'b' => 'b'
         ]
     ];
-$b = darray[ 'a1' => 2,
-    'a2' => varray[ 3, 4, 5 ],
-    'a3' => darray[
+$b = dict[ 'a1' => 2,
+    'a2' => vec[ 3, 4, 5 ],
+    'a3' => dict[
         'c' => 'cc',
-        'a' => varray[ 10, 40 ]
+        'a' => vec[ 10, 40 ]
         ]
     ];
 

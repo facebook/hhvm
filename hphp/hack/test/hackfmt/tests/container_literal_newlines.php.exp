@@ -1,19 +1,19 @@
-<?hh // strict
-$foo = varray['should_stay_on_same_line'];
-$foo = varray[
+<?hh
+$foo = vec['should_stay_on_same_line'];
+$foo = vec[
   'should_remain_on_new_line',
 ];
-$foo = varray['should_stay_on_same_line'];
-$foo = varray[
+$foo = vec['should_stay_on_same_line'];
+$foo = vec[
   'should_remain_on_new_line',
 ];
 
-$foo = darray['should_stay' => 'on_same_line'];
-$foo = darray[
+$foo = dict['should_stay' => 'on_same_line'];
+$foo = dict[
   'should_remain' => 'on_new_line',
 ];
-$foo = darray['should_stay' => 'on_same_line'];
-$foo = darray[
+$foo = dict['should_stay' => 'on_same_line'];
+$foo = dict[
   'should_remain' => 'on_new_line',
 ];
 

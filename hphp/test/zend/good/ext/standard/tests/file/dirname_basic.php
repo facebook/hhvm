@@ -9,7 +9,7 @@ echo "*** Testing dirname() : basic functionality ***\n";
 
 
 // Initialise all required variables
-$paths = varray[
+$paths = vec[
   '',
   ' ',
   'c:',

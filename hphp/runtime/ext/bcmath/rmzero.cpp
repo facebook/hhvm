@@ -29,14 +29,7 @@
 
 *************************************************************************/
 
-#include "config.h"
-#include <stdio.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include "bcmath.h"
-#include "private.h"
+#include "hphp/runtime/ext/bcmath/bcmath.h"
 
 /* For many things, we may have leading zeros in a number NUM.
    _bc_rm_leading_zeros just moves the data "value" pointer to the

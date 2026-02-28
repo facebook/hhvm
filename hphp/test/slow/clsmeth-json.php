@@ -1,9 +1,9 @@
 <?hh
 
-class X { static function Y() {} }
+class X { static function Y() :mixed{} }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $c = X::Y<>;
   $d = __hhvm_intrinsics\launder_value($c);
 

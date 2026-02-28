@@ -12,7 +12,7 @@
 class A extends Exception {}
 
 function f(?int $x): int {
-  if (is_null($x)) {
+  if ($x is null) {
     throw (new A());
   }
 

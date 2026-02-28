@@ -1,0 +1,221 @@
+'\" t
+.\"     Title: \fBmysqlrouter_keyring\fR
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 03/05/2020
+.\"    Manual: MySQL Router
+.\"    Source: MySQL 8.0
+.\"  Language: English
+.\"
+.TH "\FBMYSQLROUTER_KEYRING\FR" "1" "03/05/2020" "MySQL 8\&.0" "MySQL Router"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+mysqlrouter_keyring \- MySQL Router Keyring Tool
+.SH "SYNOPSIS"
+.HP \w'\fBmysqlrouter_keyring\ [\fR\fB\fIoptions\fR\fR\fB]\fR\ 'u
+\fBmysqlrouter_keyring [\fR\fB\fIoptions\fR\fR\fB]\fR
+.SH "DESCRIPTION"
+.PP
+The
+\fBmysqlrouter_keyring\fR
+utility is a a command line application to manage MySQL Router key rings\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+This feature was added in MySQL Router 8\&.0\&.18\&.
+.sp .5v
+.RE
+.PP
+Usage information:
+.PP
+Generic commands
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\-\-help: usage information\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\-\-version: the tool\*(Aqs version\&.
+.RE
+.PP
+Keyring commands; all commands also accept \-\-master\-key\-reader and \-\-master\-key\-writer instead of \-\-master\-key\-file\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\-\-init: Initialize keyring with a master\-key\-file\&.
+.sp
+Creates a keyring and master\-key\-file if they doo not exist; and adds keyring to master\-key\-file if it does not yet exist there\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\-\-list: List usernames stored in the keyring; or list properties of a user stored in the keyring\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\-\-get: Get property of user from the keyring\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\-\-export: Export keyring as JSON\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\-\-set: Set property in the keyring\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\-delete\-: Delete user from the keyring\&.
+.RE
+.PP
+Master\-key commands
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\-\-master\-key\-list: List keyring\-ids from master\-key\-file\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\-\-master\-key\-delete: Delete master\-ley from "keyring" from master\-key\-file\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\-\-master\-key\-rename: Rename keyring\-id in a master\-key\-file\&.
+.RE
+.PP
+Examples:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+shell> mysqlrouter_keyring init \-\-master\-key\-file=mysqlrouter\&.key data/keyring
+shell> mysqlrouter_keyring list \-\-master\-key\-file=mysqlrouter\&.key data/keyring
+shell> mysqlrouter_keyring list \-\-master\-key\-file=mysqlrouter\&.key data/keyring user   
+shell> mysqlrouter_keyring get \-\-master\-key\-file=mysqlrouter\&.key data/keyring someuser key
+shell> mysqlrouter_keyring export \-\-master\-key\-file=mysqlrouter\&.key data/keyring
+shell> mysqlrouter_keyring set \-\-master\-key\-file=mysqlrouter\&.key data/keyring user key value
+shell> mysqlrouter_keyring delete \-\-master\-key\-file=mysqlrouter\&.key data/keyring user
+shell> mysqlrouter_keyring delete \-\-master\-key\-file=mysqlrouter\&.key data/keyring user key
+shell> mysqlrouter_keyring master\-key\-list \-\-master\-key\-file=mysqlrouter\&.key
+shell> mysqlrouter_keyring master\-key\-delete \-\-master\-key\-file=mysqlrouter\&.key data/keyring 
+shell> mysqlrouter_keyring master\-key\-rename \-\-master\-key\-file=mysqlrouter\&.key data/keyring other/data/keyring
+.fi
+.if n \{\
+.RE
+.\}
+.SH "COPYRIGHT"
+.br
+.PP
+Copyright \(co 2006, 2020, Oracle and/or its affiliates. All rights reserved.
+.PP
+This documentation is free software; you can redistribute it and/or modify it only under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.
+.PP
+This documentation is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with the program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA or see http://www.gnu.org/licenses/.
+.sp
+.SH AUTHOR
+Oracle Corporation (http://dev.mysql.com/).

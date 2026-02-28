@@ -1,2 +1,2 @@
 
-Warning: imagerectangle() expects exactly 6 parameters, 5 given in %s/imagerectangle_error8.php on line 6
+Warning: imagerectangle() expects exactly 6 positional parameters, 5 given in %s/imagerectangle_error8.php on line 6

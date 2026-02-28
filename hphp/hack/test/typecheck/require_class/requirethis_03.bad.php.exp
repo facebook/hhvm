@@ -1,0 +1,6 @@
+ERROR: File "requirethis_03.bad.php", line 9, characters 7-7:
+This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
+  File "requirethis_03.bad.php", line 10, characters 7-7:
+  This requires to extend or implement C
+  File "requirethis_03.bad.php", line 14, characters 19-19:
+  Required here

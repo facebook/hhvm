@@ -14,7 +14,7 @@
 */
 
 <<__EntryPoint>> function main(): void {
-$outputfile = __SystemLib\hphp_test_tmppath('fread_fwrite_basic.php.tmp');
+$outputfile = sys_get_temp_dir().'/'.'fread_fwrite_basic.php.tmp';
 
 echo "--- testing rw moving about the file ---\n";
 $h = fopen($outputfile, 'wb+');

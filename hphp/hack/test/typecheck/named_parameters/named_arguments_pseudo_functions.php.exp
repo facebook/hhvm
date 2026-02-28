@@ -1,0 +1,16 @@
+ERROR: File "named_arguments_pseudo_functions.php", line 6, characters 3-16:
+Unexpected named argument for `invariant` (NastCheck[3106])
+ERROR: File "named_arguments_pseudo_functions.php", line 11, characters 3-39:
+Unexpected named argument: format (Typing[4500])
+  File "printf.hhi", line 123, characters 12-30:
+  Definition is here
+ERROR: File "named_arguments_pseudo_functions.php", line 11, characters 32-38:
+Invalid argument (Typing[4110])
+  File "printf.hhi", line 124, characters 5-42:
+  Expected `HH\TypedFormatString<PlainSprintf, _>`
+  File "named_arguments_pseudo_functions.php", line 11, characters 32-38:
+  But got `string`
+ERROR: File "named_arguments_pseudo_functions.php", line 16, characters 3-18:
+Unexpected named argument: status (Typing[4500])
+  File "stdlib/builtins_exit.hhi", line 13, characters 10-13:
+  Definition is here

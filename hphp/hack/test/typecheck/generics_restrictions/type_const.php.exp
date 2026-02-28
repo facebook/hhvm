@@ -1,12 +1,16 @@
-File "type_const.php", line 10, characters 44-51:
+ERROR: File "type_const.php", line 10, characters 44-44:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "type_const.php", line 13, characters 55-55:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "type_const.php", line 10, characters 44-51:
 Illegal usage of a covariant type parameter (Typing[4120])
-File "type_const.php", line 8, characters 18-18:
-This is where the parameter was declared as covariant `+`
-File "type_const.php", line 10, characters 44-51:
-`where _ = _` constraints are invariant on the left and right
-File "type_const.php", line 13, characters 55-62:
+  File "type_const.php", line 8, characters 18-18:
+  This is where the parameter was declared as covariant `+`
+  File "type_const.php", line 10, characters 44-51:
+  `where _ = _` constraints are invariant on the left and right
+ERROR: File "type_const.php", line 13, characters 55-62:
 Illegal usage of a covariant type parameter (Typing[4120])
-File "type_const.php", line 8, characters 18-18:
-This is where the parameter was declared as covariant `+`
-File "type_const.php", line 13, characters 55-62:
-`where _ = _` constraints are invariant on the left and right
+  File "type_const.php", line 8, characters 18-18:
+  This is where the parameter was declared as covariant `+`
+  File "type_const.php", line 13, characters 55-62:
+  `where _ = _` constraints are invariant on the left and right

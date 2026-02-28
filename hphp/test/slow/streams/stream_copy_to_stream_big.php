@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_stream_copy_to_stream_big() {
+function main_stream_copy_to_stream_big() :mixed{
 $input = fopen('php://memory','r+');
 
 $str = 'Hello, World!';

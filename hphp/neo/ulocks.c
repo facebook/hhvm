@@ -9,17 +9,14 @@
  *
  */
 
-#include "cs_config.h"
-
 #include <string.h>
 
-#include "neo_misc.h"
 #include "neo_err.h"
 #include "ulocks.h"
 
 #ifdef HAVE_PTHREADS
 
-NEOERR *mLock(pthread_mutex_t *mutex) 
+NEOERR *mLock(pthread_mutex_t *mutex)
 {
   int err;
 
@@ -29,7 +26,7 @@ NEOERR *mLock(pthread_mutex_t *mutex)
   return STATUS_OK;
 }
 
-NEOERR *mUnlock(pthread_mutex_t *mutex) 
+NEOERR *mUnlock(pthread_mutex_t *mutex)
 {
   int err;
 

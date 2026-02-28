@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_datetime_timezone_offset() {
+function main_datetime_timezone_offset() :mixed{
 date_default_timezone_set('America/Los_Angeles');
 $a = new \DateTime('2013-01-28');
 $b = clone $a;

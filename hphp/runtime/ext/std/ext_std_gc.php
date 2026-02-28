@@ -1,4 +1,6 @@
-<?hh // partial
+<?hh
+
+namespace {
 
 /* Returns status of the circular reference collector.
  */
@@ -18,7 +20,7 @@ function gc_disable(): void;
 /* Forces collection of any existing garbage cycles.
  */
 <<__Native>>
-function gc_collect_cycles(): int;
+function gc_collect_cycles()[leak_safe]: int;
 
 /* Reclaims memory used by the memory manager using flush_thread_caches().
  */
@@ -29,3 +31,12 @@ function gc_mem_caches(): int;
  */
 <<__Native>>
 function gc_check_heap(): void;
+
+}
+
+namespace HH {
+
+<<__Native>>
+function gc_is_conservative(): bool;
+
+}

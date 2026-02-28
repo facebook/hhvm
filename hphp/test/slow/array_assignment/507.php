@@ -2,9 +2,9 @@
 
 
 <<__EntryPoint>>
-function main_507() {
-$a = darray['a' => '1', 2 => 2, 'c' => '3'];
+function main_507() :mixed{
+$a = dict['a' => '1', 2 => 2, 'c' => '3'];
 var_dump($a);
-$a = darray['a' => '1', 2 => 2, 'c' => '3',           'd' => darray['a' => '1', 2 => 2, 'c' => '3']];
+$a = dict['a' => '1', 2 => 2, 'c' => '3',           'd' => dict['a' => '1', 2 => 2, 'c' => '3']];
 var_dump($a);
 }

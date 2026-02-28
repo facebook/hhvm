@@ -1,0 +1,16 @@
+{
+  "type_counter": {
+    "class_get_receiver.php": {
+      "num_like_types": 7,
+      "num_captured_like_types": 0,
+      "num_non_like_types": 14,
+      "num_mixed": 0,
+      "num_supportdyn_of_mixed": 0,
+      "num_dynamic": 0,
+      "num_dynamic_obj": 0,
+      "num_like_obj": 0,
+      "num_non_like_obj": 0,
+      "num_tany": 0
+    }
+  }
+}

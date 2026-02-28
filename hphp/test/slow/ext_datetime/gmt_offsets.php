@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_gmt_offsets() {
-$tzs = varray[
+function main_gmt_offsets() :mixed{
+$tzs = vec[
   'GMT+0',
   'GMT-1',
   'GMT+1',

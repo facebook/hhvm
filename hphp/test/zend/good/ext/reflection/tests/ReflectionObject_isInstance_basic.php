@@ -3,9 +3,9 @@ class A {}
 class B extends A {}
 class X {}
 <<__EntryPoint>> function main(): void {
-$classes = varray["A", "B", "X"];
+$classes = vec["A", "B", "X"];
 
-$instances = darray[    "myA" => new A,
+$instances = dict[    "myA" => new A,
                     "myB" => new B,
                     "myX" => new X ];
 

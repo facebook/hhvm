@@ -1,0 +1,98 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{! Defines a Go type. }}
+{{#let export partial go_type |type|}}
+  {{#pragma ignore-newlines}}
+{{#if type.typedef?}}{{type.go_qualified_name}}
+{{#else if type.string?}}string
+{{#else if type.binary?}}[]byte
+{{#else if type.bool?}}bool
+{{#else if type.byte?}}int8
+{{#else if type.i16?}}int16
+{{#else if type.i32?}}int32
+{{#else if type.i64?}}int64
+{{#else if type.double?}}float64
+{{#else if type.float?}}float32
+{{#else if type.enum?}}{{type.true_type.go_qualified_name}}
+{{#else if type.structured?}}{{type.true_type.go_qualified_name}}
+  {{#else if type.map?}}
+    {{#let map = type.true_type}}
+map[
+{{#if (not map.key_type.go_comparable?)}}*{{/if}}{{#partial go_type type=map.key_type}}
+]
+{{#if map.val_type.structured?}}*{{/if}}{{#partial go_type type=map.val_type}}
+  {{#else if type.container?}}
+    {{! Non map container - i.e. list or set }}
+    {{#let elem_type = type.true_type.elem_type}}
+[]{{#if elem_type.structured?}}*{{/if}}{{#partial go_type type=elem_type}}
+  {{/if type.typedef?}}
+{{/let partial}}
+
+{{! Defines a Go zero-value representation for a given Thrift type.
+
+  The following templates have complete type parity:
+    * const/value.mustache
+    * common/natural_default_value.mustache
+    * common/type.mustache (go_zero_value partial)
+}}
+{{#let export partial go_zero_value |type|}}
+  {{#pragma ignore-newlines}}
+{{#if type.typedef?}}{{#partial go_zero_value type=type.true_type}}
+{{#else if type.string?}}""
+{{#else if type.binary?}}nil
+{{#else if type.bool?}}false
+{{#else if type.byte?}}0
+{{#else if type.any_int?}}0
+{{#else if type.floating_point?}}0.0
+{{#else if type.enum?}}0
+{{#else if (or type.container? type.structured?)}}nil
+{{/if type.typedef?}}
+{{/let partial}}
+
+{{! Defines a Thrift natural default value for a given type.
+
+  Natural default values are values assigned to Thrift fields/variables
+  by default in the abscence of explicit user-provided default values.
+  Natural default values are based on Thrift specification.
+
+  All type values are rendered as "concrete" values, except for structs - which
+  are rendered as struct pointers. Callers are responsible for dereferencing
+  appropriately if needed.
+
+  The following templates have complete type parity:
+    * const/value.mustache
+    * common/natural_default_value.mustache
+    * common/type.mustache (go_zero_value partial)
+}}
+{{#let export partial natural_default_value |type| captures |go_type| }}
+  {{#pragma ignore-newlines}}
+{{#if (and type.typedef? type.defined_kind?)}}{{type.go_qualified_new_func}}()
+{{#else if type.typedef?}}{{#partial natural_default_value type=type.resolved}}
+{{#else if type.string?}}""
+{{#else if type.binary?}}[]byte("")
+{{#else if type.bool?}}false
+{{#else if type.byte?}}0
+{{#else if type.any_int?}}0
+{{#else if type.floating_point?}}0.0
+{{#else if type.enum?}}0
+{{#else if (or type.list? type.set?)}}make({{#partial go_type type=type}}, 0)
+{{#else if type.map?}}make({{#partial go_type type=type}})
+{{#else if type.structured?}}{{type.true_type.go_qualified_new_func}}()
+{{/if (and type.typedef? type.defined_kind?)}}
+{{/let partial}}

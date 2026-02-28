@@ -1,1 +1,5 @@
-No errors
+WARN: File "integrate_null3.php", line 21, characters 10-11:
+This is a sketchy null check on an expression of type ?int.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is null` instead (Warn[12003])

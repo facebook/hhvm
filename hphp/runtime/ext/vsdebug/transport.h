@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include <folly/dynamic.h>
-#include <folly/json.h>
+#include <folly/json/dynamic.h>
+#include <folly/json/json.h>
 #include <list>
 #include <condition_variable>
 #include <mutex>

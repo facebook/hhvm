@@ -47,6 +47,13 @@ let go editable =
                (Syntax.make_missing SourceText.empty 0)
                (* but always a semicolon, even if not abstract *)
                (Syntax.make_token (Token.create TokenKind.Semicolon ";" [] [])))
+        | Syntax.ConstantDeclarator c ->
+          (* remove constant values *)
+          Rewriter.Replace
+            (Syntax.make_constant_declarator
+               c.constant_declarator_name
+               (* no value *)
+               (Syntax.make_missing SourceText.empty 0))
         | _ -> Rewriter.Keep)
       editable
   in

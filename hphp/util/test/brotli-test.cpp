@@ -18,7 +18,6 @@
 #include "hphp/util/alloc.h"
 #include <brotli/decode.h>
 #include <brotli/encode.h>
-#include <folly/ScopeGuard.h>
 #include <folly/Range.h>
 
 #include <gtest/gtest.h>

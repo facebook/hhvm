@@ -1,0 +1,29 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+`__init__()` and `__call__()` arguments and their types
+}}{{#python.generate_immutable_types?}}{{!
+        }},
+        {{field.py_name}}: _typing.Optional[{{#partial m_fields.aliased_or_adapted_type_pyi type=field.type adapter=field.adapter}}]=...{{!
+        }}{{/python.generate_immutable_types?}}{{!
+        }}{{#python.generate_mutable_types?}}{{!
+        }},
+        {{field.py_name}}: _typing.Optional[{{!
+        }}{{#partial m_fields.aliased_or_adapted_type_pyi type=field.type adapter=field.adapter}}{{!
+        }}{{#partial m_types.add_wrapper_if_container field=field}}{{!
+        }}]=...{{!
+        }}{{/python.generate_mutable_types?}}

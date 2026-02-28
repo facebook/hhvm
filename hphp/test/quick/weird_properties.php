@@ -4,7 +4,7 @@
 <<__EntryPoint>>
 function foo(): void {
   $k = new stdClass;
-  $k->paths = varray[new stdClass, new stdClass];
+  $k->paths = vec[new stdClass, new stdClass];
   foreach ($k->paths as $path) {
     try {
       echo $path->{0}."\n";

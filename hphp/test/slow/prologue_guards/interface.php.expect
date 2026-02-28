@@ -1,0 +1,2 @@
+string(32) "123 on consistent implementation"
+string(82) "Argument 1 passed to CInconsistent::foo() must be an instance of string, int given"

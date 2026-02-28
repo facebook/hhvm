@@ -15,13 +15,17 @@
 */
 #include "hphp/hhbbc/class-util.h"
 
-#include "hphp/hhbbc/context.h"
+#include "hphp/hhbbc/analyze.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"
+
 #include "hphp/runtime/vm/preclass-emitter.h"
+
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace HPHP::HHBBC {
 
@@ -33,7 +37,11 @@ const StaticString
   s_SimpleXMLElement("SimpleXMLElement"),
   s_Closure("Closure"),
   s_MockClass("__MockClass"),
-  s_NoFlatten("__NoFlatten");
+  s_NoFlatten("__NoFlatten"),
+  s_invoke("__invoke"),
+  s_debugInfo("__debugInfo"),
+  s_construct("__construct");
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -41,7 +49,7 @@ const StaticString
 bool has_magic_bool_conversion(SString clsName) {
   return
     collections::isTypeName(clsName) ||
-    clsName->isame(s_SimpleXMLElement.get());
+    clsName->tsame(s_SimpleXMLElement.get());
 }
 
 bool is_collection(res::Class cls) {
@@ -51,7 +59,7 @@ bool is_collection(res::Class cls) {
 
 php::Func* find_method(const php::Class* cls, SString name) {
   for (auto& m : cls->methods) {
-    if (m->name->isame(name)) {
+    if (m->name == name) {
       return m.get();
     }
   }
@@ -63,17 +71,37 @@ bool is_special_method_name(SString name) {
   return p && p[0] == '8' && p[1] == '6';
 }
 
+bool has_name_only_func_family(SString name) {
+  return
+    name != s_construct.get() &&
+    name != s_invoke.get() &&
+    name != s_debugInfo.get() &&
+    !is_special_method_name(name);
+}
+
 bool is_mock_class(const php::Class* cls) {
-  return cls->userAttributes.count(s_MockClass.get());
+  return cls->userAttributes.contains(s_MockClass.get());
 }
 
 bool is_noflatten_trait(const php::Class* cls) {
   assertx(cls->attrs & AttrTrait);
-  return cls->userAttributes.count(s_NoFlatten.get());
+  return cls->userAttributes.contains(s_NoFlatten.get());
+}
+
+bool is_closure_base(SString name) {
+  return name->tsame(s_Closure.get());
+}
+
+bool is_closure_base(const php::Class& c) {
+  return c.name->tsame(s_Closure.get());
 }
 
 bool is_closure(const php::Class& c) {
-  return c.parentName && c.parentName->isame(s_Closure.get());
+  return c.parentName && c.parentName->tsame(s_Closure.get());
+}
+
+bool is_closure_name(SString name) {
+  return boost::starts_with(name->slice(), "Closure$");
 }
 
 bool is_unused_trait(const php::Class& c) {
@@ -86,31 +114,6 @@ bool is_used_trait(const php::Class& c) {
     (c.attrs & (AttrTrait | AttrNoOverride)) == AttrTrait;
 }
 
-bool prop_might_have_bad_initial_value(const Index& index,
-                                       const php::Class& cls,
-                                       const php::Prop& prop) {
-  assertx(!is_used_trait(cls));
-
-  if (is_closure(cls)) return false;
-  if (prop.attrs & (AttrSystemInitialValue | AttrLateInit)) return false;
-
-  auto const initial = from_cell(prop.val);
-  if (initial.subtypeOf(BUninit)) return true;
-
-  auto const ctx = Context{ cls.unit, nullptr, &cls };
-  if (!index.satisfies_constraint(ctx, initial, prop.typeConstraint)) {
-    return true;
-  }
-
-  return std::any_of(
-    prop.ubs.begin(), prop.ubs.end(),
-    [&] (TypeConstraint ub) {
-      applyFlagsToUB(ub, prop.typeConstraint);
-      return !index.satisfies_constraint(ctx, initial, ub);
-    }
-  );
-}
-
 //////////////////////////////////////////////////////////////////////
 
 Type get_type_of_reified_list(const UserAttributeMap& ua) {
@@ -118,20 +121,14 @@ Type get_type_of_reified_list(const UserAttributeMap& ua) {
   assertx(it != ua.end());
   auto const tv = it->second;
   assertx(tvIsVec(&tv));
-  auto const info = extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
-  auto const numGenerics = info.m_typeParamInfo.size();
+  auto const numGenerics = extractSizeFromReifiedAttribute(tv.m_data.parr);
   assertx(numGenerics > 0);
 
   auto t = vec(std::vector<Type>(numGenerics, TDict));
 
   // If the type params are all soft, the reified list is allowed to
   // be empty.
-  auto const allSoft = [&] {
-    for (auto const& tp : info.m_typeParamInfo) {
-      if (!tp.m_isSoft) return false;
-    }
-    return true;
-  }();
+  auto const allSoft = areAllGenericsSoft(tv.m_data.parr);
   if (allSoft) t |= TVecE;
   return t;
 }
@@ -143,18 +140,12 @@ TypedValue get_default_value_of_reified_list(const UserAttributeMap& ua) {
   assertx(it != ua.end());
   auto const tv = it->second;
   assertx(tvIsVec(&tv));
-  auto const info = extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
-  auto const numGenerics = info.m_typeParamInfo.size();
+  auto const numGenerics = extractSizeFromReifiedAttribute(tv.m_data.parr);
   assertx(numGenerics > 0);
 
   // Empty vec is allowed for the "all soft" case, so use that if it
   // applies.
-  auto const allSoft = [&] {
-    for (auto const& tp : info.m_typeParamInfo) {
-      if (!tp.m_isSoft) return false;
-    }
-    return true;
-  }();
+  auto const allSoft = areAllGenericsSoft(tv.m_data.parr);
   if (allSoft) return make_tv<KindOfPersistentVec>(staticEmptyVec());
 
   // Otherwise make a vec of the appropriate size filled with empty
@@ -173,7 +164,7 @@ Type loosen_this_prop_for_serialization(const php::Class& ctx,
                                         Type type) {
   // The 86reified_prop has special enforcement for serialization, so
   // we don't have to pessimize it as much.
-  if (name->isame(s_86reified_prop.get())) {
+  if (name == s_86reified_prop.get()) {
     return union_of(
       std::move(type),
       get_type_of_reified_list(ctx.userAttributes)
@@ -190,7 +181,14 @@ namespace php {
 
 ClassBase::ClassBase(const ClassBase& other) {
   for (auto& m : other.methods) {
-    methods.push_back(std::make_unique<php::Func>(*m));
+    if (!m) {
+      methods.emplace_back();
+    } else {
+      methods.emplace_back(std::make_unique<php::Func>(*m));
+    }
+  }
+  for (auto& c : other.closures) {
+    closures.emplace_back(std::make_unique<php::Class>(*c));
   }
 }
 

@@ -5,8 +5,6 @@ namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 // class EncodingDetector
 
-const StaticString s_EncodingDetector("EncodingDetector");
-
 #define FETCH_DET(dest, src) \
   auto dest = EncodingDetector::Get(src); \
   if (!dest) { \
@@ -72,7 +70,8 @@ static Object HHVM_METHOD(EncodingDetector, detect) {
     data->throwException("Could not detect encoding, error %d (%s)",
                          error, u_errorName(error));
   }
-  return EncodingMatch::newInstance(match, detector);
+  return EncodingMatch::newInstance(
+    match, detector, data->text(), data->declaredEncoding());
 }
 
 static Array HHVM_METHOD(EncodingDetector, detectAll) {
@@ -87,16 +86,14 @@ static Array HHVM_METHOD(EncodingDetector, detectAll) {
   }
   VecInit ret{(uint32_t)count};
   for (int i = 0; i < count; ++i) {
-    ret.append(EncodingMatch::newInstance(matches[i], detector));
+    ret.append(EncodingMatch::newInstance(
+      matches[i], detector, data->text(), data->declaredEncoding()));
   }
   return ret.toArray();
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // class EncodingMatch
-
-const StaticString s_EncodingMatch("EncodingMatch");
-Class* EncodingMatch::c_EncodingMatch = nullptr;
 
 #define FETCH_MATCH(dest, src) \
   auto dest = EncodingMatch::Get(src); \
@@ -177,7 +174,7 @@ static String HHVM_METHOD(EncodingMatch, getUTF8) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initUcsDet() {
+void IntlExtension::registerNativeUcsDet() {
 
   HHVM_ME(EncodingDetector, setText);
   HHVM_ME(EncodingDetector, setDeclaredEncoding);
@@ -190,13 +187,8 @@ void IntlExtension::initUcsDet() {
   HHVM_ME(EncodingMatch, getLanguage);
   HHVM_ME(EncodingMatch, getUTF8);
 
-  Native::registerNativeDataInfo<EncodingDetector>(
-      s_EncodingDetector.get(),
-      Native::NDIFlags::NO_SWEEP
-  );
-  Native::registerNativeDataInfo<EncodingMatch>(s_EncodingMatch.get());
-
-  loadSystemlib("icu_ucsdet");
+  Native::registerNativeDataInfo<EncodingDetector>(Native::NDIFlags::NO_SWEEP);
+  Native::registerNativeDataInfo<EncodingMatch>();
 }
 
 //////////////////////////////////////////////////////////////////////////////

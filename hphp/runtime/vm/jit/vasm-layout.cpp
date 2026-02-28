@@ -17,18 +17,17 @@
 #include "hphp/runtime/vm/jit/vasm-layout.h"
 
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
-#include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
-#include <boost/dynamic_bitset.hpp>
 #include <folly/MapUtil.h>
 
 #include <algorithm>
@@ -60,7 +59,7 @@ namespace HPHP::jit {
 
 namespace layout {
 
-TRACE_SET_MOD(layout);
+TRACE_SET_MOD(layout)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -84,10 +83,13 @@ jit::vector<Vlabel> rpoLayout(Vunit& unit) {
 
   if (unit.context) {
     auto const kind = unit.context->kind;
-    if ((isPrologue(kind)  && !RO::EvalJitLayoutPrologueSplitHotCold) ||
-        (isProfiling(kind) && !RO::EvalJitLayoutProfileSplitHotCold)) {
+    if ((isPrologue(kind)  && !Cfg::Jit::LayoutPrologueSplitHotCold) ||
+        (isProfiling(kind) && !Cfg::Jit::LayoutProfileSplitHotCold)  ||
+        (isLive(kind)      && !Cfg::Jit::LayoutLiveSplitHotCold)) {
       for (auto b : labels) {
-        if (unit.blocks[b].area_idx == AreaIndex::Cold) {
+        if (unit.blocks[b].area_idx == AreaIndex::Cold ||
+            (unit.blocks[b].area_idx == AreaIndex::Frozen &&
+             !Cfg::Jit::LayoutSplitFrozen)) {
           unit.blocks[b].area_idx = AreaIndex::Main;
         }
       }
@@ -171,7 +173,7 @@ void Scale::computeArcWeights() {
   for (auto b : m_blocks) {
     auto succSet = succs(m_unit.blocks[b]);
     for (auto s : succSet) {
-      if (RuntimeOption::EvalJitLayoutPruneCatchArcs &&
+      if (Cfg::Jit::LayoutPruneCatchArcs &&
           is_catch(m_unit.blocks[s])) {
         continue;
       }
@@ -291,16 +293,24 @@ Clusterizer::Clusterizer(Vunit& unit, const Scale& scale)
     , m_blocks(sortBlocks(unit)) {
   initClusters();
   auto const isProlog = unit.context && isPrologue(unit.context->kind);
-  if ((RO::EvalJitLayoutExtTSP && !isProlog) ||
-      (RO::EvalJitLayoutExtTSPForPrologues && isProlog)) {
+  if ((Cfg::Jit::LayoutExtTSP && !isProlog) ||
+      (Cfg::Jit::LayoutExtTSPForPrologues && isProlog)) {
     clusterizeExtTSP();
   } else {
     clusterizeGreedy();
   }
   sortClusters();
-  if (RuntimeOption::EvalJitPGOLayoutSplitHotCold) {
+  if (Cfg::Jit::PGOLayoutSplitHotCold) {
     splitHotColdClusters();
+  } else {
+    for (auto b : m_blocks) {
+      if (unit.blocks[b].area_idx != AreaIndex::Frozen ||
+          Cfg::Jit::PGOLayoutResplitFrozen) {
+        unit.blocks[b].area_idx = AreaIndex::Main;
+      }
+    }
   }
+
   FTRACE(1, "{}", toString());
 }
 
@@ -322,7 +332,7 @@ std::string Clusterizer::toString() const {
     for (auto b : m_clusters[cid]) {
       out << folly::sformat("{}, ", b);
     }
-    out << "\n";;
+    out << "\n";
   }
   return out.str();
 }
@@ -380,10 +390,10 @@ void Clusterizer::clusterizeGreedy() {
     auto const dstWgt = m_unit.blocks[dst].weight;
     const double ratio = (1.0 + std::max(srcWgt, dstWgt)) /
                          (1.0 + std::min(srcWgt, dstWgt));
-    if (ratio > RO::EvalJitLayoutMaxMergeRatio) continue;
+    if (ratio > Cfg::Jit::LayoutMaxMergeRatio) continue;
 
     // Don't merge zero and non-zero weight blocks that go in different areas.
-    if (RO::EvalJitLayoutSeparateZeroWeightBlocks) {
+    if (Cfg::Jit::LayoutSeparateZeroWeightBlocks) {
       auto const srcZero = m_unit.blocks[src].weight == 0;
       auto const dstZero = m_unit.blocks[dst].weight == 0;
       if (srcZero != dstZero) continue;
@@ -401,8 +411,8 @@ void Clusterizer::clusterizeGreedy() {
 using SuccInfos = jit::hash_map<uint32_t, int64_t>; // cluster id => weight
 
 struct DFSSortClusters {
-  DFSSortClusters(const jit::vector<SuccInfos>&& succInfos, const Vunit& unit)
-    : m_clusterSuccs(succInfos)
+  DFSSortClusters(jit::vector<SuccInfos>&& succInfos, const Vunit& unit)
+    : m_clusterSuccs(std::move(succInfos))
     , m_visited(unit.blocks.size()) { }
 
   jit::vector<Vlabel> sort(uint32_t initialCid);
@@ -506,7 +516,7 @@ void Clusterizer::splitHotColdClusters() {
   if (m_unit.context && m_unit.context->region) {
     if (auto const hotWeight = m_unit.context->region->getHotWeight()) {
       auto const multiplier =
-        RO::EvalJitPGOVasmBlockCountersHotWeightMultiplier;
+        Cfg::Jit::PGOVasmBlockCountersHotWeightMultiplier;
       baseWgt = std::max(entryAvgWgt, uint64_t(multiplier * (*hotWeight)));
       FTRACE(3, "baseWgt:{} = max(entryAvgWgt:{}, multiplier:{} * hotWeight:{})\n",
              baseWgt, entryAvgWgt, multiplier, *hotWeight);
@@ -515,13 +525,13 @@ void Clusterizer::splitHotColdClusters() {
 
   // An alternative way to penalize cold translations is to have an absolute
   // weight threshold in addition to a entry-relative one.
-  uint64_t hotThreshold  = baseWgt * RO::EvalJitLayoutHotThreshold;
-  uint64_t coldThreshold = baseWgt * RO::EvalJitLayoutColdThreshold;
-  if (RO::EvalJitLayoutMinHotThreshold) {
-    hotThreshold = std::max(hotThreshold, RO::EvalJitLayoutMinHotThreshold);
+  uint64_t hotThreshold  = baseWgt * Cfg::Jit::LayoutHotThreshold;
+  uint64_t coldThreshold = baseWgt * Cfg::Jit::LayoutColdThreshold;
+  if (Cfg::Jit::LayoutMinHotThreshold) {
+    hotThreshold = std::max(hotThreshold, Cfg::Jit::LayoutMinHotThreshold);
   }
-  if (RO::EvalJitLayoutMinColdThreshold) {
-    coldThreshold = std::max(coldThreshold, RO::EvalJitLayoutMinColdThreshold);
+  if (Cfg::Jit::LayoutMinColdThreshold) {
+    coldThreshold = std::max(coldThreshold, Cfg::Jit::LayoutMinColdThreshold);
   }
 
   // Finally, for correctness, we can't allow any cluster to be in a hotter
@@ -543,9 +553,9 @@ void Clusterizer::splitHotColdClusters() {
   }
 
   // Also, for correctness, if we're padding the TC, put the entry in main.
-  if (RO::EvalReusableTCPadding && entryAvgWgt < hotThreshold) {
+  if (Cfg::Eval::ReusableTCPadding && entryAvgWgt < hotThreshold) {
     FTRACE(3, "TC includes {} padding bytes => put entry in main\n",
-           RO::EvalReusableTCPadding);
+           Cfg::Eval::ReusableTCPadding);
     hotThreshold  = std::min(hotThreshold, entryAvgWgt);
     coldThreshold = std::min(coldThreshold, entryAvgWgt);
   }
@@ -562,7 +572,12 @@ void Clusterizer::splitHotColdClusters() {
     FTRACE(3, "  -> C{}: {} (avg wgt = {}): ",
            cid, area_names[unsigned(area)], clusterAvgWgt[cid]);
     for (auto b : m_clusters[cid]) {
-      m_unit.blocks[b].area_idx = area;
+      // If JitPGOLayoutResplitFrozen is false, don't change the area of blocks
+      // initially assigned to frozen.
+      if (m_unit.blocks[b].area_idx != AreaIndex::Frozen ||
+          Cfg::Jit::PGOLayoutResplitFrozen) {
+        m_unit.blocks[b].area_idx = area;
+      }
       FTRACE(3, "{}, ", b);
     }
     FTRACE(3, "\n");
@@ -605,16 +620,8 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit) {
   // If we're padding TC entries, we require that entries are in Main.
   assertx(!labels.empty());
   assertx(labels[0] == unit.entry);
-  assertx(!RuntimeOption::EvalReusableTCPadding ||
+  assertx(!Cfg::Eval::ReusableTCPadding ||
           unit.blocks[unit.entry].area_idx == AreaIndex::Main);
-
-  if (!RuntimeOption::EvalJitPGOLayoutSplitHotCold) {
-    for (auto b : labels) {
-      if (unit.blocks[b].area_idx == AreaIndex::Cold) {
-        unit.blocks[b].area_idx = AreaIndex::Main;
-      }
-    }
-  }
 
   if (Trace::moduleEnabled(Trace::layout, 1)) {
     FTRACE(1, "pgoLayout: final block list: ");
@@ -624,7 +631,7 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit) {
     FTRACE(1, "\n");
   }
 
-  if (RuntimeOption::EvalDumpLayoutCFG) {
+  if (Cfg::Eval::DumpLayoutCFG) {
     unit.annotations.emplace_back("LayoutCFG", Scale(unit, labels).toString());
   }
 
@@ -636,10 +643,10 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit) {
 ///////////////////////////////////////////////////////////////////////////////
 
 jit::vector<Vlabel> layoutBlocks(Vunit& unit) {
-  Timer timer(Timer::vasm_layout);
+  Timer timer(Timer::vasm_layout, unit.log_entry);
   auto const optimizePrologue = unit.context &&
     unit.context->kind == TransKind::OptPrologue &&
-    RuntimeOption::EvalJitPGOVasmBlockCountersOptPrologue;
+    Cfg::Jit::PGOVasmBlockCountersOptPrologue;
 
   return unit.context &&
     (unit.context->kind == TransKind::Optimize || optimizePrologue)

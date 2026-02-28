@@ -1,10 +1,10 @@
 <?hh
 
-function test() {
+function test() :mixed{
   (new X)->foo();
 }
 
-function setup() {
+function setup() :mixed{
   $res = null;
   $i = apc_inc('foo', 1, inout $res);
   var_dump($i);
@@ -18,7 +18,7 @@ function setup() {
   }
   $text .= "class Y { const C = $i; }\n";
 
-  $file = __SystemLib\hphp_test_tmppath("$i.inc");
+  $file = sys_get_temp_dir().'/'."$i.inc";
   file_put_contents($file, "<?hh $text");
   include $file;
   unlink($file);
@@ -27,7 +27,7 @@ function setup() {
 
 
 <<__EntryPoint>>
-function main_func_guards() {
+function main_func_guards() :mixed{
 apc_add('foo', 0);
 
 setup();

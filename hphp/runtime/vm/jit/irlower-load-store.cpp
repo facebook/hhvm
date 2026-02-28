@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/memory-manager.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
@@ -34,14 +33,14 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
-#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -75,7 +74,13 @@ void cgKillLoc(IRLS& env, const IRInstruction* inst) {
 void cgLdLoc(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const off = localOffset(inst->extra<LdLoc>()->locId);
-  loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), fp[off]);
+
+  // For ARM, if we need to load the type, then request 'aux' too -- even though
+  // the value is unneeded, it allows for the type and the value to be merged
+  // into a single loadpair.
+  const bool loadAux = arch() == Arch::ARM && inst->dst()->type().needsReg();
+
+  loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), fp[off], loadAux);
 }
 
 void cgLdLocForeign(IRLS& env, const IRInstruction* inst) {
@@ -104,7 +109,14 @@ void cgLdLocAddr(IRLS& env, const IRInstruction* inst) {
 void cgStLoc(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const off = localOffset(inst->extra<StLoc>()->locId);
-  storeTV(vmain(env), fp[off], srcLoc(env, inst, 1), inst->src(1));
+
+  // For ARM, we request the `aux' field to be stored too.  That's unused, but
+  // having a wider store for the type allows it to be merged with the store of
+  // the value into a single storepair instruction.
+  const bool storeAux = arch() == Arch::ARM;
+
+  storeTV(vmain(env), fp[off], srcLoc(env, inst, 1), inst->src(1),
+          TBottom, storeAux);
 }
 
 void cgStLocMeta(IRLS&, const IRInstruction*) {}
@@ -155,7 +167,13 @@ void cgDbgTrashFrame(IRLS& env, const IRInstruction* inst) {
 void cgLdStk(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const off = cellsToBytes(inst->extra<LdStk>()->offset.offset);
-  loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), sp[off]);
+
+  // For ARM, if we need to load the type, then request 'aux' too -- even though
+  // the value is unneeded, it allows for the type and the value to be merged
+  // into a single loadpair.
+  const bool loadAux = arch() == Arch::ARM && inst->dst()->type().needsReg();
+
+  loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), sp[off], loadAux);
 }
 
 void cgLdStkAddr(IRLS& env, const IRInstruction* inst) {
@@ -172,7 +190,13 @@ void cgStStk(IRLS& env, const IRInstruction* inst) {
     ? inst->typeParam()
     : inst->src(1)->type();
 
-  storeTV(vmain(env), sp[off], srcLoc(env, inst, 1), inst->src(1), type);
+  // For ARM, we request the `aux' field to be stored too.  That's unused, but
+  // having a wider store for the type allows it to be merged with the store of
+  // the value into a single storepair instruction.
+  const bool storeAux = arch() == Arch::ARM;
+
+  storeTV(vmain(env), sp[off], srcLoc(env, inst, 1), inst->src(1), type,
+          storeAux);
 }
 
 void cgStStkMeta(IRLS&, const IRInstruction*) {}
@@ -262,61 +286,42 @@ void cgStMem(IRLS& env, const IRInstruction* inst) {
 void cgStMemMeta(IRLS&, const IRInstruction*) {}
 
 void cgLdImplicitContext(IRLS& env, const IRInstruction* inst) {
-  assertx(RO::EvalEnableImplicitContext);
   auto& v = vmain(env);
   markRDSAccess(v, ImplicitContext::activeCtx.handle());
 
   auto const dst = dstLoc(env, inst, 0);
-  auto const sf = v.makeReg();
+  v << load{rvmtl()[ImplicitContext::activeCtx.handle()], dst.reg(0)};
+}
+
+void cgLdImplicitContextMemoKey(IRLS& env, const IRInstruction* inst) {
+  auto const obj = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
   v << load{
-    rvmtl()[ImplicitContext::activeCtx.handle()],
-    dst.reg(0) /* data */
+    obj[Native::dataOffset<ImplicitContext>() + ImplicitContext::memoKeyOffset()],
+    dst
   };
-  v << testb{dst.reg(0), dst.reg(0), sf};
-  v << cmovb{
-    CC_Z,
-    sf,
-    v.cns(TObj.toDataType()),
-    v.cns(TInitNull.toDataType()),
-    dst.reg(1) /* type */
+}
+
+void cgLdMemoAgnosticIC(IRLS& env, const IRInstruction* inst) {
+  auto const obj = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << load{
+    obj[Native::dataOffset<ImplicitContext>() + ImplicitContext::memoAgnosticOffset()],
+    dst
   };
 }
 
 void cgStImplicitContext(IRLS& env, const IRInstruction* inst) {
-  assertx(RO::EvalEnableImplicitContext);
   auto& v = vmain(env);
-  auto const src = inst->src(0);
+  assertx(inst->src(0)->isA(TObj));
+
   auto const data = srcLoc(env, inst, 0).reg(0);
-  auto const type = srcLoc(env, inst, 0).reg(1);
   markRDSAccess(v, ImplicitContext::activeCtx.handle());
 
-  if (src->isA(TInitNull)) {
-    v << store{v.cns(nullptr), rvmtl()[ImplicitContext::activeCtx.handle()]};
-  } else if (src->isA(TObj)) {
-    v << store{data, rvmtl()[ImplicitContext::activeCtx.handle()]};
-  } else {
-    assertx(src->isA(TObj|TInitNull));
-    emitTypeTest(v, env, TInitNull, data, type, v.makeReg(),
-      [&] (ConditionCode cc, Vreg sf) {
-        auto const result = v.makeReg();
-        v << cmovq{cc, sf, v.cns(nullptr), data, result};
-        v << store{result, rvmtl()[ImplicitContext::activeCtx.handle()]};
-      }
-    );
-  }
-}
-
-void cgStImplicitContextWH(IRLS& env, const IRInstruction* inst) {
-  assertx(RO::EvalEnableImplicitContext);
-  auto& v = vmain(env);
-  auto const wh = srcLoc(env, inst, 0).reg();
-  markRDSAccess(v, ImplicitContext::activeCtx.handle());
-  auto const ctx = v.makeReg();
-  v << load{
-    rvmtl()[ImplicitContext::activeCtx.handle()],
-    ctx
-  };
-  v << store{ctx, wh[c_ResumableWaitHandle::implicitContextOff()]};
+  v << store{data, rvmtl()[ImplicitContext::activeCtx.handle()]};
 }
 
 void cgDbgTrashMem(IRLS& env, const IRInstruction* inst) {
@@ -411,6 +416,39 @@ void cgProfileGlobal(IRLS& env, const IRInstruction* inst) {
 IMPL_OPCODE_CALL(LdGblAddrDef)
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void cgDeserializeLazyProp(IRLS& env, const IRInstruction* inst) {
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto const val = Immed(static_cast<int8_t>(kInvalidDataType));
+  auto const index = inst->extra<DeserializeLazyProp>()->index;
+  auto const offset = ObjectProps::offsetOf(index).shift(sizeof(ObjectData));
+
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+  v << cmpbim{val, src[offset.typeOffset()], sf};
+
+  ifThen(v, CC_Z, sf, [&](Vout& v) {
+    auto const type = v.makeReg();
+    auto const data = v.makeReg();
+    v << lea{src[offset.typeOffset()], type};
+    v << lea{src[offset.dataOffset()], data};
+    auto const args = argGroup(env, inst).reg(type).reg(data);
+    cgCallHelper(v, env, CallSpec::direct(ObjectData::deserializeLazyProp),
+                 kVoidDest, SyncOptions::None, args);
+  });
+}
+
+void cgLdClosureArg(IRLS& env, const IRInstruction* inst) {
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto const offs = ObjectProps::offsetOf(inst->extra<LdClosureArg>()->index)
+    .shift(sizeof(ObjectData));
+  loadTV(vmain(env), 
+         inst->dst()->type(), 
+         dstLoc(env, inst, 0), 
+         src[offs.typeOffset()], 
+         src[offs.dataOffset()]);
+}
+
 
 void cgLdPropAddr(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
@@ -585,7 +623,7 @@ void cgLdTVAux(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   v << shrqi{32, type, dst, v.makeReg()};
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (Cfg::HHIR::GenerateAsserts) {
     auto const extra = inst->extra<LdTVAux>();
     auto const mask = -extra->valid - 1;
 
@@ -593,7 +631,7 @@ void cgLdTVAux(IRLS& env, const IRInstruction* inst) {
       auto const sf = v.makeReg();
       v << testqi{mask, dst, sf};
       ifThen(v, CC_NZ, sf, [](Vout& v) {
-        v << trap{TRAP_REASON};
+        v << trap{TRAP_REASON, Fixup::none()};
       });
     }
   }

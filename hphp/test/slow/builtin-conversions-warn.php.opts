@@ -1,3 +1,3 @@
 -vEval.VecHintNotices=1
--vEval.ClassStringHintNotices=1
+-vEval.ClassStringHintNoticesSampleRate=1
 -vEval.ClassAsStringVarDump=false

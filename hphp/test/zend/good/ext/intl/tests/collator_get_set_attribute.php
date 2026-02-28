@@ -9,13 +9,13 @@
  * Return current normalication mode.
  */
 function check_val( $coll )
-{
+:mixed{
     $val = ut_coll_get_attribute( $coll, Collator::NORMALIZATION_MODE );
     return sprintf( "%s\n", ( $val == Collator::OFF ? "off" : "on" ) );
 }
 
 function ut_main()
-{
+:mixed{
     $res = '';
     $coll = ut_coll_create( 'en_US' );
 

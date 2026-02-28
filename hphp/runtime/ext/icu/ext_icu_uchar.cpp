@@ -1,8 +1,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/icu/icu.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include <unicode/uchar.h>
 
@@ -100,7 +98,7 @@ static UBool enumCharType_callback(CallCtx* ctx,
   args[1].m_data.num = limit;
   args[2].m_data.num = type;
   tvDecRefGen(
-    g_context->invokeFuncFew(*ctx, 3, args, RuntimeCoeffects::fixme())
+    g_context->invokeFuncFew(*ctx, 3, nullptr, args, RuntimeCoeffects::fixme())
   );
   return true;
 }
@@ -167,7 +165,7 @@ static UBool enumCharNames_callback(CallCtx *ctx,
   tvCopy(*charName.asTypedValue(), args[2]);
 
   tvDecRefGen(
-    g_context->invokeFuncFew(*ctx, 3, args, RuntimeCoeffects::fixme())
+    g_context->invokeFuncFew(*ctx, 3, nullptr, args, RuntimeCoeffects::fixme())
   );
   return true;
 }
@@ -346,7 +344,7 @@ Variant uchar_method(const Class* /*self_*/, const Variant& arg) {
 
 const StaticString s_IntlChar("IntlChar");
 
-void IntlExtension::initUChar() {
+void IntlExtension::registerNativeUChar() {
   HHVM_RCC_STR(IntlChar, UNICODE_VERSION, U_UNICODE_VERSION);
 
   HHVM_RCC_INT(IntlChar, CODEPOINT_MIN, UCHAR_MIN_VALUE);
@@ -454,7 +452,6 @@ void IntlExtension::initUChar() {
   ICS_ME(getCombiningClass);
   ICS_ME(charDigitValue);
 #undef ICS_ME
-  loadSystemlib("icu_uchar");
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,3 @@
+<?hh
+
+type MyStrType = string;

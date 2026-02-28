@@ -1,0 +1,10 @@
+ERROR: File "mock_return2.php", line 36, characters 34-43:
+A `where` type constraint is violated here (Typing[4323])
+  File "mock_return2.php", line 12, characters 19-28:
+  This is the method with `where` type constraints
+  File "mock_return2.php", line 27, characters 56-67:
+  Expected a first-class polymorphic function type.
+  File "mock_return2.php", line 27, characters 30-31:
+  A higher rank generic `T1#2` will escape its scope where `T1#2` corresponds to the rank-2 type parameter `T1` in the polymorphic function
+  File "mock_return2.php", line 36, characters 34-43:
+  Please make this type explicit

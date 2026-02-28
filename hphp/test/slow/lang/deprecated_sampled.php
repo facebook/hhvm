@@ -1,12 +1,12 @@
 <?hh
 
 <<__Deprecated('', 2)>>
-function f() {}
+function f() :mixed{}
 
 class Errors { public static int $errors = 0; }
 
 <<__EntryPoint>>
-function main_deprecated_sampled() {
+function main_deprecated_sampled() :mixed{
 $errors = 0;
 set_error_handler(function () {
   Errors::$errors++;

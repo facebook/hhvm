@@ -10,8 +10,7 @@
 (** Check member access, both static and instance.
  *   [obj_pos] is position of the object expression i.e. expr in expr->m
  *   [is_method] is true if this is a method invocation rather than property access
- *   [inst_meth] is true if this is an inst_meth expression
- *   [nullsafe] is Some r for null-safe calls such as expr?->m
+ *   [nullsafe] is Some p for null-safe calls such as expr?->m
  *   [parent_ty] is the type of the parent, in the case of a parent call (class_id = CIparent)
  *   [explicit_targs]  is a list of explicit type argument expressions, if present
  *   [member_id] is positioned identifier for the member i.e. m in expr->m
@@ -20,9 +19,8 @@
 val obj_get :
   obj_pos:Ast_defs.pos ->
   is_method:bool ->
-  inst_meth:bool ->
   meth_caller:bool ->
-  nullsafe:Typing_reason.t option ->
+  nullsafe:Pos.t option ->
   coerce_from_ty:
     (Ast_defs.pos * Typing_reason.ureason * Typing_defs.locl_ty) option ->
   explicit_targs:Nast.targ list ->
@@ -41,9 +39,8 @@ val obj_get :
 val obj_get_with_mismatches :
   obj_pos:Ast_defs.pos ->
   is_method:bool ->
-  inst_meth:bool ->
   meth_caller:bool ->
-  nullsafe:Typing_reason.t option ->
+  nullsafe:Pos.t option ->
   coerce_from_ty:
     (Ast_defs.pos * Typing_reason.ureason * Typing_defs.locl_ty) option ->
   explicit_targs:Nast.targ list ->
@@ -63,7 +60,7 @@ val smember_not_found :
   is_const:bool ->
   is_method:bool ->
   is_function_pointer:bool ->
-  Decl_provider.Class.t ->
+  Folded_class.t ->
   string ->
   Typing_error.Callback.t ->
   Typing_error.t

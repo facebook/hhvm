@@ -1,0 +1,238 @@
+jobs:
+- job:
+  timeoutInMinutes: 240
+  displayName: Bionic
+  pool:
+    vmImage: 'ubuntu-18.04'
+
+  variables:
+    UBUNTU_CODE_NAME: bionic
+    BOOST_VERSION: boost_1_70_0
+    BOOST_DIR: $(Pipeline.Workspace)/boost
+    CCACHE_DIR: $(Pipeline.Workspace)/ccache
+    CCACHE_COMPRESS: 1
+    CCACHE_COMPRESSLEVEL: 9
+    CCACHE_CPP2: 1
+    CCACHE_MAXSIZE: 4G
+    SanitizerType: NoSan
+
+  strategy:
+    matrix:
+      Clang-11 ASan:
+        Compiler: clang
+        CompilerVer: 11
+        BuildType: Debug
+        SanitizerType: ASan
+
+      Clang-11 Debug:
+        Compiler: clang
+        CompilerVer: 11
+        BuildType: Debug
+
+      Clang-11 Release:
+        Compiler: clang
+        CompilerVer: 11
+        BuildType: RelWithDebInfo
+
+      Clang-9 Debug:
+        Compiler: clang
+        CompilerVer: 9
+        BuildType: Debug
+
+      Clang-9 Release:
+        Compiler: clang
+        CompilerVer: 9
+        BuildType: RelWithDebInfo
+
+      Clang-7 Debug:
+        Compiler: clang
+        CompilerVer: 7
+        BuildType: Debug
+
+      Clang-7 Release:
+        Compiler: clang
+        CompilerVer: 7
+        BuildType: RelWithDebInfo
+
+      Clang-5 Debug:
+        Compiler: clang
+        CompilerVer: 5.0
+        BuildType: Debug
+
+      Clang-5 Release:
+        Compiler: clang
+        CompilerVer: 5.0
+        BuildType: RelWithDebInfo
+
+      GCC-10 ASan:
+        Compiler: gcc
+        CompilerVer: 10
+        BuildType: Debug
+        SanitizerType: ASan
+
+      GCC-10 Debug:
+        Compiler: gcc
+        CompilerVer: 10
+        BuildType: Debug
+
+      GCC-10 Release:
+        Compiler: gcc
+        CompilerVer: 10
+        BuildType: RelWithDebInfo
+
+      GCC-9 Debug:
+        Compiler: gcc
+        CompilerVer: 9
+        BuildType: Debug
+
+      GCC-9 Release:
+        Compiler: gcc
+        CompilerVer: 9
+        BuildType: RelWithDebInfo
+
+      GCC-7 Debug:
+        Compiler: gcc
+        CompilerVer: 7
+        BuildType: Debug
+
+      GCC-7 Release:
+        Compiler: gcc
+        CompilerVer: 7
+        BuildType: RelWithDebInfo
+
+      GCC-5 Debug:
+        Compiler: gcc
+        CompilerVer: 5
+        BuildType: Debug
+
+      GCC-5 Release:
+        Compiler: gcc
+        CompilerVer: 5
+        BuildType: RelWithDebInfo
+
+  steps:
+  - checkout: self
+    submodules: true
+  - script: |
+      uname -r
+      df -Th
+      CC=$(Compiler)-$(CompilerVer)
+      if [[ "$(Compiler)" == "clang" ]]; then
+        CXX=clang++-$(CompilerVer)
+      else
+        CXX=g++-$(CompilerVer)
+      fi
+
+      echo CC=$CC CXX=$CXX BuildType=$(BuildType) Ubuntu=$UBUNTU_CODE_NAME
+      echo --- Configure required LLVM and Ubuntu Toolchain repositories
+      if [[ "$CC" == clang* ]]; then
+         PACKAGES="llvm-$(CompilerVer)-dev"
+         curl -sSL "http://apt.llvm.org/llvm-snapshot.gpg.key" | sudo -E apt-key add -
+         echo "deb http://apt.llvm.org/$UBUNTU_CODE_NAME/ llvm-toolchain-$UBUNTU_CODE_NAME-$(CompilerVer) main" | sudo tee -a /etc/apt/sources.list > /dev/null
+      fi
+
+      echo --- Update list of packages and download dependencies
+      sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test"
+      sudo -E apt-get -yq update >> ~/apt-get-update.log 2>&1
+      sudo -E apt-get -yq --no-install-suggests --no-install-recommends install $CXX $PACKAGES cmake cmake-curses-gui ccache bison libncurses5-dev libaio-dev libmecab-dev libnuma-dev libssl-dev libreadline-dev || exit 1
+      sudo -E apt-get -yq --no-install-suggests --no-install-recommends install libedit-dev liblz4-dev libzstd-dev libre2-dev libicu-dev libevent-dev libprotoc-dev protobuf-compiler || exit 1
+
+      UPDATE_TIME=$SECONDS
+      echo --- Packages updated in $UPDATE_TIME seconds.
+
+      $CC -v
+      $CXX -v
+      ccache --version
+      ccache --print-config
+      ccache --zero-stats
+      df -Th
+
+      COMPILER_VER=$(CompilerVer)
+      echo '##vso[task.setvariable variable=CompilerMajorVer]'${COMPILER_VER%.*}
+      echo '##vso[task.setvariable variable=CC]'$CC
+      echo '##vso[task.setvariable variable=CXX]'$CXX
+      echo '##vso[task.setvariable variable=UPDATE_TIME]'$UPDATE_TIME
+      echo '##vso[task.prependpath]/usr/lib/ccache'
+
+    displayName: '*** Install Build Dependencies'
+
+  - task: Cache@2
+    continueOnError: true
+    inputs:
+      key: ccache | $(Agent.OS)-$(Compiler)-$(CompilerMajorVer)-$(BuildType)-$(SanitizerType) | $(Build.SourceVersion)
+      restoreKeys: ccache | $(Agent.OS)-$(Compiler)-$(CompilerMajorVer)-$(BuildType)-$(SanitizerType)
+      path: $(CCACHE_DIR)
+    displayName: '*** Download/upload ccached files'
+
+  - task: Cache@2
+    continueOnError: true
+    inputs:
+      key: $(BOOST_VERSION)
+      restoreKeys: $(BOOST_VERSION)
+      path: $(BOOST_DIR)
+    displayName: '*** Download/upload $(BOOST_VERSION) libraries'
+
+  - script: |
+      echo --- Set cmake parameters
+      COMPILE_OPT+=(
+        -DCMAKE_C_FLAGS_DEBUG=-g1
+        -DCMAKE_CXX_FLAGS_DEBUG=-g1
+        '-DCMAKE_C_FLAGS_RELWITHDEBINFO=-O2 -g1 -DNDEBUG'
+        '-DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-O2 -g1 -DNDEBUG'
+      )
+
+      if [ "$CC" == "clang-5.0" ]; then
+        COMPILE_OPT+=(
+          '-DCMAKE_C_FLAGS=-isystem /usr/include/c++/9 -isystem /usr/include'
+          '-DCMAKE_CXX_FLAGS=-isystem /usr/include/c++/9 -isystem /usr/include'
+        )
+      fi
+
+      if [[ "$(SanitizerType)" == "ASan" ]]; then
+        SANITIZER_DEFINES="-DWITH_ASAN=ON -DWITH_ASAN_SCOPE=ON"
+      fi
+
+      CMAKE_OPT="
+        -DCMAKE_BUILD_TYPE=$(BuildType)
+        -DBUILD_CONFIG=mysql_release
+        -DFEATURE_SET=community
+        -DENABLE_DOWNLOADS=1
+        -DDOWNLOAD_BOOST=1
+        -DWITH_BOOST=$(BOOST_DIR)
+        -DMYSQL_MAINTAINER_MODE=ON
+        -DWITH_SYSTEM_LIBS=ON
+        -DWITH_LZ4=bundled
+        -DWITH_ZSTD=bundled
+        -DWITH_MECAB=system
+        -DWITH_NUMA=ON
+        $SANITIZER_DEFINES
+        -DCMAKE_C_COMPILER_LAUNCHER=/usr/bin/ccache
+        -DCMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/ccache
+      "
+
+      echo --- CMAKE_OPT=\"$CMAKE_OPT\"
+      echo --- COMPILE_OPT=\"${COMPILE_OPT[@]}\"
+      mkdir bin; cd bin
+      CC=$CC CXX=$CXX cmake .. $CMAKE_OPT "${COMPILE_OPT[@]}" || exit 1
+      rm -f $(BOOST_DIR)/$(BOOST_VERSION).tar.gz
+
+      CMAKE_TIME=$SECONDS
+      echo --- CMake took $CMAKE_TIME seconds. Packages updated in $UPDATE_TIME seconds.
+
+      echo '##vso[task.setvariable variable=CMAKE_TIME]'$CMAKE_TIME
+
+    displayName: '*** CC=$(Compiler)-$(CompilerVer) cmake .. -DCMAKE_BUILD_TYPE=$(BuildType)'
+
+  - script: |
+      df -Th
+      cd bin
+      make -j2 || exit 1
+      ccache --show-stats
+
+      BUILD_TIME=$SECONDS
+      echo --- Total time $(($BUILD_TIME + $UPDATE_TIME + $CMAKE_TIME)) seconds. Build time $BUILD_TIME seconds. CMake took $CMAKE_TIME seconds. Packages updated in $UPDATE_TIME seconds.
+      df -Th
+      rm -rf *
+      df -Th
+
+    displayName: '*** Compile'

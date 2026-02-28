@@ -153,7 +153,7 @@ function main(): void {
   }
 
   print("--- No TypeError for verifying ForkAndExecveOptions\n");
-  shape() as \HH\Lib\_Private\_OS\ForkAndExecVeOptions;
+  shape() as \HH\Lib\_Private\_OS\ForkAndExecveOptions;
 
   print("--- No TypeError for passing ForkAndExecveOptions\n");
   $f = (\HH\Lib\_Private\_OS\ForkAndExecveOptions $_options) ==> 42;

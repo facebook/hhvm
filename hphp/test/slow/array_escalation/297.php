@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_297() {
-$a = varray['test'];
+function main_297() :mixed{
+$a = vec['test'];
  $a[0] = 'test';
         var_dump($a);
 }

@@ -37,11 +37,13 @@ namespace {
  */
 constexpr size_t kJmpTargetAlign = 16;
 
+template <size_t SmashableAlignTo>
 struct AlignImpl {
+
   static DECLARE_ALIGN_TABLE(s_table);
 
   static void pad(CodeBlock& cb, AlignContext context, size_t bytes) {
-    NEW_X64_ASM(a, cb);
+    X64Assembler a(cb);
 
     switch (context) {
       case AlignContext::Live:
@@ -62,25 +64,74 @@ struct AlignImpl {
   }
 };
 
-DEFINE_ALIGN_TABLE(AlignImpl::s_table);
+// On AMD writes that crosses the 32 byte boundary are not atomic.
+using AlignAMDImpl = AlignImpl<32>;
+using AlignDefaultImpl = AlignImpl<cache_line_size()>;
 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool is_aligned(TCA frontier, Alignment alignment) {
-  return jit::is_aligned<AlignImpl>(frontier, alignment);
+using IsAlignedFn = bool(*)(TCA, Alignment);
+
+template <typename A>
+bool is_aligned_impl(TCA frontier, Alignment alignment) {
+  return jit::is_aligned<A>(frontier, alignment);
 }
 
-void align(CodeBlock& cb, CGMeta* meta,
+IsAlignedFn resolve_is_aligned() {
+  if (folly::CpuId().vendor_amd()) return is_aligned_impl<AlignAMDImpl>;
+  return is_aligned_impl<AlignDefaultImpl>;
+}
+
+static const IsAlignedFn s_is_aligned = resolve_is_aligned();
+
+bool is_aligned(TCA frontier, Alignment alignment) {
+  return s_is_aligned(frontier, alignment);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+using AlignFn = void(*)(CodeBlock&, CGMeta*, Alignment, AlignContext);
+
+template <typename AlignImpl>
+void align_impl(CodeBlock& cb, CGMeta* meta,
            Alignment alignment, AlignContext context) {
   return jit::align<AlignImpl>(cb, meta, alignment, context);
 }
 
-const AlignInfo& alignment_info(Alignment alignment) {
+AlignFn resolve_align() {
+  if (folly::CpuId().vendor_amd()) return align_impl<AlignAMDImpl>;
+  return align_impl<AlignDefaultImpl>;
+}
+
+static const AlignFn s_align = resolve_align();
+
+void align(CodeBlock& cb, CGMeta* meta,
+           Alignment alignment, AlignContext context) {
+  return s_align(cb, meta, alignment, context);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+using AlignmentInfoFn = const AlignInfo&(*)(Alignment);
+
+template <typename AlignImpl>
+const AlignInfo& alignment_info_impl(Alignment alignment) {
   auto const idx = static_cast<uint32_t>(alignment);
 
   return AlignImpl::s_table[idx];
+}
+
+AlignmentInfoFn resolve_alignment_info() {
+  if (folly::CpuId().vendor_amd()) return alignment_info_impl<AlignAMDImpl>;
+  return alignment_info_impl<AlignDefaultImpl>;
+}
+
+static const AlignmentInfoFn s_alignment_info = resolve_alignment_info();
+
+const AlignInfo& alignment_info(Alignment alignment) {
+  return s_alignment_info(alignment);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

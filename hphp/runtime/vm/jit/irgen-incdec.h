@@ -19,6 +19,8 @@
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
+#include "hphp/util/configs/eval.h"
+
 namespace HPHP::jit::irgen {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -30,7 +32,7 @@ namespace HPHP::jit::irgen {
 inline SSATmp* incDec(IRGS& env, IncDecOp op, SSATmp* src) {
   // Old behavior handles non int/double types.  New behavior warns/fatals for
   // non int/double types.
-  if (RuntimeOption::EvalWarnOnIncDecInvalidType == 0) {
+  if (Cfg::Eval::WarnOnIncDecInvalidType == 0) {
     if (src->isA(TNull)) {
       if (isInc(op)) PUNT(Inc-Null);
       return src;
@@ -47,16 +49,12 @@ inline SSATmp* incDec(IRGS& env, IncDecOp op, SSATmp* src) {
   Opcode opc;
   if (src->isA(TDbl)) {
     opc = isInc(op) ? AddDbl : SubDbl;
-  } else if (!isIncDecO(op)) {
-    opc = isInc(op) ? AddInt : SubInt;
   } else {
-    opc = isInc(op) ? AddIntO : SubIntO;
+    opc = isInc(op) ? AddInt : SubInt;
   }
 
   auto const one = src->isA(TInt) ? cns(env, 1) : cns(env, 1.0);
-  auto const result = opc == AddIntO || opc == SubIntO
-    ? gen(env, opc, makeExitSlow(env), src, one)
-    : gen(env, opc, src, one);
+  auto const result = gen(env, opc, src, one);
 
   return result;
 }

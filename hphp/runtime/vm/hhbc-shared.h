@@ -76,12 +76,25 @@ enum class SpecialClsRef : uint8_t {
 #undef REF
 };
 
+#define CLASS_GET_C_MODES                                           \
+  MODE(Normal) /* Result of compiling expressions like $c::foo() */ \
+  MODE(ExplicitConversion) /* Result of HH\classname_to_class() */  \
+  /* Undocumented, unsafe flavor of HH\classname_to_class() for     \
+     sandboxes that skips <<__DynamicallyReferenced>> check */      \
+  MODE(UnsafeBackdoor)
+
+enum class ClassGetCMode : uint8_t {
+#define MODE(op) op,
+  CLASS_GET_C_MODES
+#undef MODE
+};
+
 #define M_OP_MODES                                 \
   MODE(None)                                       \
   MODE(Warn)                                       \
   MODE(Define)                                     \
   MODE(Unset)                                      \
-  /* InOut mode restricts allowed bases to the
+  /* InOut mode restricts allowed bases to the     \
      array like types. */                          \
   MODE(InOut)
 
@@ -112,6 +125,37 @@ enum class TypeStructResolveOp : uint8_t {
 #define OP(name) name,
   TYPE_STRUCT_RESOLVE_OPS
 #undef OP
+};
+
+#define VERIFY_KIND \
+  OP(None) \
+  OP(All) \
+  OP(NonNull)
+
+enum class VerifyRetKind : uint8_t {
+#define OP(name) name,
+  VERIFY_KIND
+#undef OP
+};
+
+#define TYPE_STRUCT_ENFORCE_KINDS \
+  KIND(Deep)                      \
+  KIND(Shallow)
+
+enum class TypeStructEnforceKind : uint8_t {
+#define KIND(name) name,
+  TYPE_STRUCT_ENFORCE_KINDS
+#undef KIND
+};
+
+#define AS_TYPE_STRUCT_EXCEPTION_KINDS \
+  KIND(Error)                           \
+  KIND(Typehint)
+
+enum class AsTypeStructExceptionKind : uint8_t {
+#define KIND(name) name,
+  AS_TYPE_STRUCT_EXCEPTION_KINDS
+#undef KIND
 };
 
 #define IS_LOG_AS_DYNAMIC_CALL_OPS                  \
@@ -177,16 +221,6 @@ enum class ObjMethodOp : uint8_t {
 #undef OBJMETHOD_OP
 };
 
-#define SILENCE_OPS \
-  SILENCE_OP(Start) \
-  SILENCE_OP(End)
-
-enum class SilenceOp : uint8_t {
-#define SILENCE_OP(x) x,
-  SILENCE_OPS
-#undef SILENCE_OP
-};
-
 
 #define BARETHIS_OPS    \
   BARETHIS_OP(Notice)   \
@@ -204,11 +238,6 @@ enum class BareThisOp : uint8_t {
   INCDEC_OP(PostInc)  \
   INCDEC_OP(PreDec)   \
   INCDEC_OP(PostDec)  \
-                      \
-  INCDEC_OP(PreIncO)  \
-  INCDEC_OP(PostIncO) \
-  INCDEC_OP(PreDecO)  \
-  INCDEC_OP(PostDecO) \
 
 enum class IncDecOp : uint8_t {
 #define INCDEC_OP(incDecOp) incDecOp,
@@ -232,9 +261,6 @@ enum class IncDecOp : uint8_t {
   SETOP_OP(XorEqual,    OpBitXor) \
   SETOP_OP(SlEqual,     OpShl) \
   SETOP_OP(SrEqual,     OpShr)  \
-  SETOP_OP(PlusEqualO,  OpAddO) \
-  SETOP_OP(MinusEqualO, OpSubO) \
-  SETOP_OP(MulEqualO,   OpMulO) \
 
 enum class SetOpOp : uint8_t {
 #define SETOP_OP(setOpOp, bcOp) setOpOp,

@@ -1,9 +1,9 @@
 <?hh
 
-function make($a, $b, $c, $d) {
+function make($a, $b, $c, $d) :mixed{
   return vec[$a, $b, $c, $d];
 }
-function make_big($a, $b, $c, $d, $e, $f, $g, $h, $i, $j) {
+function make_big($a, $b, $c, $d, $e, $f, $g, $h, $i, $j) :mixed{
   return vec[$a, $b, $c, $d, $e, $f, $g, $h, $i, $j];
 }
 

@@ -1,7 +1,7 @@
 <?hh
 
 // Test constructing a ImmMap in different ways.
-function show_keyed_iter($iter) {
+function show_keyed_iter($iter) :mixed{
   $vs = Vector {};
 
   foreach ($iter as $k => $v) {
@@ -19,7 +19,7 @@ function show_keyed_iter($iter) {
   echo "...\n";
 }
 
-function main() {
+function main() :mixed{
   echo "Vector\n";
   show_keyed_iter(new ImmMap(Vector {1, 2, 3}));
   echo "ImmVector\n";
@@ -29,13 +29,13 @@ function main() {
   echo "ImmMap\n";
   show_keyed_iter(new ImmMap(new ImmMap(Map {0 => 1, 10 => 2, 40 => 3})));
   echo "array\n";
-  show_keyed_iter(new ImmMap(varray[1, 2, 3]));
+  show_keyed_iter(new ImmMap(vec[1, 2, 3]));
 
   // We can't construct a Map or ImmMap from a Set.
 }
 
 
 <<__EntryPoint>>
-function main_constructors() {
+function main_constructors() :mixed{
 main();
 }

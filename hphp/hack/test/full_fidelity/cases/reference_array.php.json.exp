@@ -207,27 +207,27 @@
               {
                 "kind":"expression_statement",
                 "expression_statement_expression":{
-                  "kind":"darray_intrinsic_expression",
-                  "darray_intrinsic_keyword":{
+                  "kind":"dictionary_intrinsic_expression",
+                  "dictionary_intrinsic_keyword":{
                     "kind":"token",
                     "token":{
-                      "kind":"darray",
-                      "text":"darray",
+                      "kind":"dict",
+                      "text":"dict",
                       "offset":38,
                       "leading_width":0,
-                      "width":6,
+                      "width":4,
                       "trailing_width":0,
                       "leading":[],
                       "trailing":[],
                       "line_number":4
                     }
                   },
-                  "darray_intrinsic_left_bracket":{
+                  "dictionary_intrinsic_left_bracket":{
                     "kind":"token",
                     "token":{
                       "kind":"[",
                       "text":"[",
-                      "offset":44,
+                      "offset":42,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":0,
@@ -236,12 +236,12 @@
                       "line_number":4
                     }
                   },
-                  "darray_intrinsic_right_bracket":{
+                  "dictionary_intrinsic_right_bracket":{
                     "kind":"token",
                     "token":{
                       "kind":"]",
                       "text":"]",
-                      "offset":45,
+                      "offset":43,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":0,
@@ -256,12 +256,12 @@
                   "token":{
                     "kind":";",
                     "text":";",
-                    "offset":46,
+                    "offset":44,
                     "leading_width":1,
                     "width":1,
                     "trailing_width":1,
-                    "leading":[{"kind":"extra_token_error","text":")","offset":46,"width":1}],
-                    "trailing":[{"kind":"end_of_line","text":"\n","offset":48,"width":1}],
+                    "leading":[{"kind":"extra_token_error","text":")","offset":44,"width":1}],
+                    "trailing":[{"kind":"end_of_line","text":"\n","offset":46,"width":1}],
                     "line_number":4
                   }
                 }
@@ -273,12 +273,12 @@
             "token":{
               "kind":"}",
               "text":"}",
-              "offset":49,
+              "offset":47,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":50,"width":1}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":48,"width":1}],
               "line_number":5
             }
           }
@@ -293,12 +293,12 @@
             "token":{
               "kind":"function",
               "text":"function",
-              "offset":51,
+              "offset":49,
               "leading_width":1,
               "width":8,
               "trailing_width":1,
-              "leading":[{"kind":"end_of_line","text":"\n","offset":51,"width":1}],
-              "trailing":[{"kind":"whitespace","text":" ","offset":60,"width":1}],
+              "leading":[{"kind":"end_of_line","text":"\n","offset":49,"width":1}],
+              "trailing":[{"kind":"whitespace","text":" ","offset":58,"width":1}],
               "line_number":7
             }
           },
@@ -307,7 +307,7 @@
             "token":{
               "kind":"name",
               "text":"bar",
-              "offset":61,
+              "offset":59,
               "leading_width":0,
               "width":3,
               "trailing_width":0,
@@ -321,7 +321,7 @@
             "token":{
               "kind":"(",
               "text":"(",
-              "offset":64,
+              "offset":62,
               "leading_width":0,
               "width":1,
               "trailing_width":0,
@@ -344,7 +344,7 @@
                       "token":{
                         "kind":"&",
                         "text":"&",
-                        "offset":65,
+                        "offset":63,
                         "leading_width":0,
                         "width":1,
                         "trailing_width":0,
@@ -359,7 +359,7 @@
                     "token":{
                       "kind":"variable",
                       "text":"$x",
-                      "offset":66,
+                      "offset":64,
                       "leading_width":0,
                       "width":2,
                       "trailing_width":0,
@@ -377,12 +377,12 @@
             "token":{
               "kind":")",
               "text":")",
-              "offset":68,
+              "offset":66,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":69,"width":1}],
+              "trailing":[{"kind":"whitespace","text":" ","offset":67,"width":1}],
               "line_number":7
             }
           },
@@ -391,12 +391,12 @@
             "token":{
               "kind":":",
               "text":":",
-              "offset":70,
+              "offset":68,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":71,"width":1}],
+              "trailing":[{"kind":"whitespace","text":" ","offset":69,"width":1}],
               "line_number":7
             }
           },
@@ -407,12 +407,12 @@
               "token":{
                 "kind":"void",
                 "text":"void",
-                "offset":72,
+                "offset":70,
                 "leading_width":0,
                 "width":4,
                 "trailing_width":1,
                 "leading":[],
-                "trailing":[{"kind":"whitespace","text":" ","offset":76,"width":1}],
+                "trailing":[{"kind":"whitespace","text":" ","offset":74,"width":1}],
                 "line_number":7
               }
             }
@@ -425,12 +425,12 @@
             "token":{
               "kind":"{",
               "text":"{",
-              "offset":77,
+              "offset":75,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":78,"width":1}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":76,"width":1}],
               "line_number":7
             }
           },
@@ -439,12 +439,12 @@
             "token":{
               "kind":"}",
               "text":"}",
-              "offset":79,
+              "offset":77,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":80,"width":1}],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":78,"width":1}],
               "line_number":8
             }
           }
@@ -457,7 +457,7 @@
           "token":{
             "kind":"end_of_file",
             "text":"",
-            "offset":81,
+            "offset":79,
             "leading_width":0,
             "width":0,
             "trailing_width":0,

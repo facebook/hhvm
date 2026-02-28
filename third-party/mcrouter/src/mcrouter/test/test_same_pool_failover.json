@@ -1,0 +1,45 @@
+{
+  "macros": {
+    "hashWithSalt": {
+      "type": "macroDef",
+      "params": [ "pool-name", "salt" ],
+      "result": {
+        "type": "HashRoute",
+        "name": "salted-pool-%pool-name%-%salt%",
+        "salt": "%salt%",
+        "children": "Pool|%pool-name%"
+      }
+    },
+    "reliablePool": {
+      "type": "macroDef",
+      "params": [ "pool-name", "initial-salt" ],
+      "result": {
+        "type": "OperationSelectorRoute",
+        "operation_policies": {
+          "delete": "AllSyncRoute|Pool|%pool-name%",
+          "get": {
+            "type": "FailoverWithExptimeRoute",
+            "name": "reliable-hash-pool-%pool-name%",
+            "normal": "@hashWithSalt(%pool-name%,%initial-salt%)",
+            "failover": {
+              "type": "transform",
+              "itemTransform": "@hashWithSalt(%pool-name%,salt%item%)",
+              "dictionary": ["0", "1", "2", "3", "4"]
+            }
+          },
+          "set": "reliable-hash-pool-%pool-name%"
+        },
+        "default": "@hashWithSalt(%pool-name%,%initial-salt%)"
+      }
+    }
+  },
+  "pools": {
+    "A.wildcard": {
+      "servers": [
+        "localhost:12345",
+        "localhost:12345"
+      ]
+    }
+  },
+  "route": "@reliablePool(A.wildcard,)"
+}

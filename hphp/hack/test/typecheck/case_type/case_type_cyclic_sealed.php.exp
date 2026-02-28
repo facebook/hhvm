@@ -1,0 +1,2 @@
+WARN: File "case_type_cyclic_sealed.php", line 7, characters 12-20:
+Interface `I1` in sealed allowlist for `I2`, but does not extend `I2` (Warn[12035])

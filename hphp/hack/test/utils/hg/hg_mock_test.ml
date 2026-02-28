@@ -1,6 +1,6 @@
 let base_rev = 789
 
-let hg_rev = "abcdefg123"
+let hg_rev = Hg.Rev.of_string "abcdefg123"
 
 let fake_repo_path = "some/fake/dir"
 

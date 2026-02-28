@@ -1,6 +1,6 @@
 <?hh
 
-function runtest() {
+function runtest() :mixed{
 
    file_put_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation5::$filename, (string)"File written in working directory", FILE_USE_INCLUDE_PATH);
    if(file_exists(ZendGoodExtStandardTestsFileFilePutContentsVariation5::$scriptLocFile)) {
@@ -19,7 +19,7 @@ abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation5 {
 }
 
 <<__EntryPoint>> function main(): void {
-$thisTestDir = __SystemLib\hphp_test_tmppath('directory');
+$thisTestDir = sys_get_temp_dir().'/'.'directory';
 mkdir($thisTestDir);
 $oldDirPath = getcwd();
 chdir($thisTestDir);

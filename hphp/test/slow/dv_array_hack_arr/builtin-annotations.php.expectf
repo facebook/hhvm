@@ -41,9 +41,9 @@ dict(3) {
 }
 ====================================================
 
-Warning: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, dict given in %s/builtin-annotations.php on line 37
+Warning: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, HH\dict given in %s/builtin-annotations.php on line 37
 ====================================================
 
-Warning: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be dict, vec given in %s/builtin-annotations.php on line 40
+Warning: Argument 1 passed to __hhvm_intrinsics\dummy_darray_builtin() must be an instance of HH\darray, HH\vec given in %s/builtin-annotations.php on line 40
 ====================================================
 ====================================================

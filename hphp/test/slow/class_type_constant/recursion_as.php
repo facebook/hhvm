@@ -5,6 +5,6 @@ class A {
   const type C = self::B;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main() :mixed{
   var_dump(null as A::B);
 }

@@ -10,55 +10,55 @@
 
 echo "*** Testing is_dir() with dir and links to dir ***\n";
 echo "-- With dir --\n";
-$dirname = __SystemLib\hphp_test_tmppath('is_dir_variation2');
+$dirname = sys_get_temp_dir().'/'.'is_dir_variation2';
 mkdir($dirname);
 var_dump( is_dir($dirname) );
 clearstatcache();
 
-echo "-- With symlink --\n"; 
+echo "-- With symlink --\n";
 symlink(
-  __SystemLib\hphp_test_tmppath('is_dir_variation2'),
-  __SystemLib\hphp_test_tmppath('is_dir_variation2_symlink')
+  sys_get_temp_dir().'/'.'is_dir_variation2',
+  sys_get_temp_dir().'/'.'is_dir_variation2_symlink'
 );
-var_dump( is_dir(__SystemLib\hphp_test_tmppath('is_dir_variation2_symlink')) );  //is_dir() resolves symlinks
+var_dump( is_dir(sys_get_temp_dir().'/'.'is_dir_variation2_symlink') );  //is_dir( resolves symlinks
 clearstatcache();
 
 echo "-- With hardlink --";
 link(
-  __SystemLib\hphp_test_tmppath('is_dir_variation2'),
-  __SystemLib\hphp_test_tmppath('is_dir_variation2_link')
+  sys_get_temp_dir().'/'.'is_dir_variation2',
+  sys_get_temp_dir().'/'.'is_dir_variation2_link'
 ); //Not permitted to create hard-link to a dir
-var_dump( is_dir(__SystemLib\hphp_test_tmppath('is_dir_variation2_link')) ); 
+var_dump( is_dir(sys_get_temp_dir().'/'.'is_dir_variation2_link')) ;
 clearstatcache();
 
 echo "\n*** Testing is_dir() with file and links to a file ***\n";
 echo "-- With file --\n";
-$filename = __SystemLib\hphp_test_tmppath('is_dir_variation2.tmp');
+$filename = sys_get_temp_dir().'/'.'is_dir_variation2.tmp';
 fclose( fopen($filename, "w") );
 var_dump( is_dir($filename) );
 clearstatcache();
 
-echo "-- With symlink --\n"; 
+echo "-- With symlink --\n";
 symlink(
-  __SystemLib\hphp_test_tmppath('is_dir_variation2.tmp'),
-  __SystemLib\hphp_test_tmppath('is_dir_variation2_symlink.tmp')
+  sys_get_temp_dir().'/'.'is_dir_variation2.tmp',
+  sys_get_temp_dir().'/'.'is_dir_variation2_symlink.tmp'
 );
-var_dump( is_dir(__SystemLib\hphp_test_tmppath('is_dir_variation2_symlink.tmp')) );
+var_dump( is_dir(sys_get_temp_dir().'/'.'is_dir_variation2_symlink.tmp')) ;
 clearstatcache();
 
 echo "-- With hardlink --\n";
 link(
-  __SystemLib\hphp_test_tmppath('is_dir_variation2.tmp'),
-  __SystemLib\hphp_test_tmppath('is_dir_variation2_link.tmp')
+  sys_get_temp_dir().'/'.'is_dir_variation2.tmp',
+  sys_get_temp_dir().'/'.'is_dir_variation2_link.tmp'
 );
-var_dump( is_dir(__SystemLib\hphp_test_tmppath('is_dir_variation2_link.tmp')) );
+var_dump( is_dir(sys_get_temp_dir().'/'.'is_dir_variation2_link.tmp')) ;
 clearstatcache();
 
 echo "\n*** Done ***";
 
-unlink(__SystemLib\hphp_test_tmppath('is_dir_variation2_symlink'));
-unlink(__SystemLib\hphp_test_tmppath('is_dir_variation2_symlink.tmp'));
-unlink(__SystemLib\hphp_test_tmppath('is_dir_variation2_link.tmp'));
-unlink(__SystemLib\hphp_test_tmppath('is_dir_variation2.tmp'));
-rmdir(__SystemLib\hphp_test_tmppath('is_dir_variation2'));
+unlink(sys_get_temp_dir().'/'.'is_dir_variation2_symlink');
+unlink(sys_get_temp_dir().'/'.'is_dir_variation2_symlink.tmp');
+unlink(sys_get_temp_dir().'/'.'is_dir_variation2_link.tmp');
+unlink(sys_get_temp_dir().'/'.'is_dir_variation2.tmp');
+rmdir(sys_get_temp_dir().'/'.'is_dir_variation2');
 }

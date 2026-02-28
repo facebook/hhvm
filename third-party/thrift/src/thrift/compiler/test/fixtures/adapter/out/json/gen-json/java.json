@@ -1,0 +1,227 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "java",
+  "includes": {
+    "scope" : {
+      "path" : "thrift/annotation/scope.thrift"
+    }
+  },
+  "structs" : {
+    "Mutable" : {
+      "lineno" : 30,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 30,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 32,
+          "column" : 18
+        }
+      }
+    },
+    "Annotation" : {
+      "lineno" : 35,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "java_annotation" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 41,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 41,
+              "column" : 29
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 35,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 42,
+          "column" : 2
+        }
+      }
+    },
+    "BinaryString" : {
+      "lineno" : 44,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 44,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 45,
+          "column" : 23
+        }
+      }
+    },
+    "Adapter" : {
+      "lineno" : 52,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "adapterClassName" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 57,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 57,
+              "column" : 30
+            }
+          }
+        },
+        "typeClassName" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 60,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 60,
+              "column" : 27
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 52,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 61,
+          "column" : 2
+        }
+      }
+    },
+    "Wrapper" : {
+      "lineno" : 63,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "wrapperClassName" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 66,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 66,
+              "column" : 30
+            }
+          }
+        },
+        "typeClassName" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 69,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 69,
+              "column" : 27
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 63,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 70,
+          "column" : 2
+        }
+      }
+    },
+    "Recursive" : {
+      "lineno" : 72,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 72,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 73,
+          "column" : 20
+        }
+      }
+    },
+    "FieldUseUnmangledName" : {
+      "lineno" : 80,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 80,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 81,
+          "column" : 32
+        }
+      }
+    },
+    "UseIntrinsicDefault" : {
+      "lineno" : 87,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 87,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 88,
+          "column" : 30
+        }
+      }
+    }
+  }
+}

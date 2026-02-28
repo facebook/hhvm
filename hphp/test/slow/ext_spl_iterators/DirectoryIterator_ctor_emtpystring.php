@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_directory_iterator_ctor_emtpystring() {
+function main_directory_iterator_ctor_emtpystring() :mixed{
 try {
   new DirectoryIterator("");
 } catch (RuntimeException $e) {

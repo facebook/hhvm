@@ -1,0 +1,4 @@
+ERROR: File "sealed_class_with_trait.php", line 5, characters 12-25:
+Traits cannot appear in sealed allowlists (NastCheck[3108])
+  File "sealed_class_with_trait.php", line 5, characters 12-25:
+  `MyTrait` is a trait

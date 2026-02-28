@@ -1,0 +1,32 @@
+ERROR: File "accessloose.php", line 13, characters 57-58:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "accessloose.php", line 17, characters 57-58:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "accessloose.php", line 43, characters 18-20:
+Invalid argument (Typing[4110])
+  File "accessloose.php", line 17, characters 32-38:
+  Expected `dynamic`
+  File "accessloose.php", line 37, characters 15-45:
+  But got `Ref<Box with { type T as int }>`
+ERROR: File "accessloose.php", line 43, characters 18-20:
+Invalid argument (Typing[4110])
+  File "accessloose.php", line 17, characters 32-38:
+  Expected `~Ref<_>`
+  File "accessloose.php", line 37, characters 15-45:
+  But got `<expr#2> as Ref<Box with { type T as int }>`
+  File "accessloose.php", line 43, characters 18-20:
+    where `<expr#2>` is a reference to this expression
+ERROR: File "accessloose.php", line 43, characters 18-20:
+Invalid argument (Typing[4468])
+  File "accessloose.php", line 17, characters 61-61:
+  Type member `T` cannot be accessed
+  File "accessloose.php", line 37, characters 19-44:
+    on a loose refinement
+ERROR: File "accessloose.php", line 50, characters 10-16:
+A `where` type constraint is violated here (Typing[4323])
+  File "accessloose.php", line 17, characters 10-16:
+  This is the method with `where` type constraints
+  File "accessloose.php", line 17, characters 61-61:
+  Type member `T` cannot be accessed
+  File "accessloose.php", line 50, characters 18-43:
+    on a loose refinement

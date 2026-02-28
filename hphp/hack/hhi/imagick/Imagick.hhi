@@ -8,453 +8,452 @@
  *
  */
 
-class Imagick
-  implements Countable, Iterator<Imagick>, Traversable<Imagick> {
+class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
 
   // Constants
-  const int COMPOSITE_MODULUSSUBTRACT = 52;
-  const int COMPOSITE_DARKENINTENSITY = 66;
-  const int COMPOSITE_LIGHTENINTENSITY = 67;
-  const int IMGTYPE_COLORSEPARATIONMATTE = 9;
-  const int IMGTYPE_PALETTEBILEVELMATTE = 11;
-  const int RESOLUTION_PIXELSPERINCH = 1;
-  const int RESOLUTION_PIXELSPERCENTIMETER = 2;
-  const int COMPRESSION_LOSSLESSJPEG = 10;
-  const int NOISE_MULTIPLICATIVEGAUSSIAN = 3;
-  const int METRIC_MEANABSOLUTEERROR = 2;
-  const int METRIC_PEAKABSOLUTEERROR = 5;
-  const int METRIC_PEAKSIGNALTONOISERATIO = 6;
-  const int METRIC_ROOTMEANSQUAREDERROR = 7;
-  const int EVALUATE_MULTIPLICATIVENOISE = 21;
-  const int VIRTUALPIXELMETHOD_UNDEFINED = 0;
-  const int VIRTUALPIXELMETHOD_BACKGROUND = 1;
-  const int VIRTUALPIXELMETHOD_CONSTANT = 2;
-  const int VIRTUALPIXELMETHOD_MIRROR = 5;
-  const int VIRTUALPIXELMETHOD_TRANSPARENT = 8;
-  const int VIRTUALPIXELMETHOD_BLACK = 10;
-  const int VIRTUALPIXELMETHOD_WHITE = 12;
-  const int VIRTUALPIXELMETHOD_HORIZONTALTILE = 13;
-  const int VIRTUALPIXELMETHOD_VERTICALTILE = 14;
-  const int VIRTUALPIXELMETHOD_HORIZONTALTILEEDGE = 15;
-  const int VIRTUALPIXELMETHOD_VERTICALTILEEDGE = 16;
-  const int VIRTUALPIXELMETHOD_CHECKERTILE = 17;
-  const int RENDERINGINTENT_UNDEFINED = 0;
-  const int RENDERINGINTENT_SATURATION = 1;
-  const int RENDERINGINTENT_PERCEPTUAL = 2;
-  const int RENDERINGINTENT_ABSOLUTE = 3;
-  const int RENDERINGINTENT_RELATIVE = 4;
-  const int PATHUNITS_USERSPACEONUSE = 2;
-  const int PATHUNITS_OBJECTBOUNDINGBOX = 3;
-  const int LAYERMETHOD_COMPARECLEAR = 3;
-  const int LAYERMETHOD_COMPAREOVERLAY = 4;
-  const int LAYERMETHOD_OPTIMIZEPLUS = 8;
-  const int LAYERMETHOD_OPTIMIZETRANS = 9;
-  const int LAYERMETHOD_OPTIMIZEIMAGE = 7;
-  const int DISTORTION_AFFINEPROJECTION = 2;
-  const int DISTORTION_PERSPECTIVEPROJECTION = 5;
-  const int DISTORTION_SCALEROTATETRANSLATE = 3;
-  const int DISTORTION_BARRELINVERSE = 15;
-  const int DISTORTION_BILINEARFORWARD = 6;
-  const int DISTORTION_BILINEARREVERSE = 7;
-  const int DISTORTION_CYLINDER2PLANE = 12;
-  const int DISTORTION_PLANE2CYLINDER = 13;
-  const int ALPHACHANNEL_TRANSPARENT = 10;
-  const int SPARSECOLORMETHOD_UNDEFINED = 0;
-  const int SPARSECOLORMETHOD_BARYCENTRIC = 1;
-  const int SPARSECOLORMETHOD_BILINEAR = 7;
-  const int SPARSECOLORMETHOD_POLYNOMIAL = 8;
-  const int SPARSECOLORMETHOD_SPEPARDS = 16;
-  const int SPARSECOLORMETHOD_VORONOI = 18;
-  const int INTERPOLATE_NEARESTNEIGHBOR = 7;
-  const int DITHERMETHOD_FLOYDSTEINBERG = 3;
-  const int COLOR_BLACK = 0;
-  const int COLOR_BLUE = 1;
-  const int COLOR_CYAN = 2;
-  const int COLOR_GREEN = 3;
-  const int COLOR_RED = 4;
-  const int COLOR_YELLOW = 5;
-  const int COLOR_MAGENTA = 6;
-  const int COLOR_OPACITY = 7;
-  const int COLOR_ALPHA = 8;
-  const int COLOR_FUZZ = 9;
-  const int DISPOSE_UNRECOGNIZED = 0;
-  const int DISPOSE_UNDEFINED = 0;
-  const int DISPOSE_NONE = 1;
-  const int DISPOSE_BACKGROUND = 2;
-  const int DISPOSE_PREVIOUS = 3;
-  const int COMPOSITE_DEFAULT = 40;
-  const int COMPOSITE_UNDEFINED = 0;
-  const int COMPOSITE_NO = 1;
-  const int COMPOSITE_ADD = 2;
-  const int COMPOSITE_ATOP = 3;
-  const int COMPOSITE_BLEND = 4;
-  const int COMPOSITE_BUMPMAP = 5;
-  const int COMPOSITE_CLEAR = 7;
-  const int COMPOSITE_COLORBURN = 8;
-  const int COMPOSITE_COLORDODGE = 9;
-  const int COMPOSITE_COLORIZE = 10;
-  const int COMPOSITE_COPYBLACK = 11;
-  const int COMPOSITE_COPYBLUE = 12;
-  const int COMPOSITE_COPY = 13;
-  const int COMPOSITE_COPYCYAN = 14;
-  const int COMPOSITE_COPYGREEN = 15;
-  const int COMPOSITE_COPYMAGENTA = 16;
-  const int COMPOSITE_COPYOPACITY = 17;
-  const int COMPOSITE_COPYRED = 18;
-  const int COMPOSITE_COPYYELLOW = 19;
-  const int COMPOSITE_DARKEN = 20;
-  const int COMPOSITE_DSTATOP = 21;
-  const int COMPOSITE_DST = 22;
-  const int COMPOSITE_DSTIN = 23;
-  const int COMPOSITE_DSTOUT = 24;
-  const int COMPOSITE_DSTOVER = 25;
-  const int COMPOSITE_DIFFERENCE = 26;
-  const int COMPOSITE_DISPLACE = 27;
-  const int COMPOSITE_DISSOLVE = 28;
-  const int COMPOSITE_EXCLUSION = 29;
-  const int COMPOSITE_HARDLIGHT = 30;
-  const int COMPOSITE_HUE = 31;
-  const int COMPOSITE_IN = 32;
-  const int COMPOSITE_LIGHTEN = 33;
-  const int COMPOSITE_LUMINIZE = 35;
-  const int COMPOSITE_MINUS = 36;
-  const int COMPOSITE_MODULATE = 37;
-  const int COMPOSITE_MULTIPLY = 38;
-  const int COMPOSITE_OUT = 39;
-  const int COMPOSITE_OVER = 40;
-  const int COMPOSITE_OVERLAY = 41;
-  const int COMPOSITE_PLUS = 42;
-  const int COMPOSITE_REPLACE = 43;
-  const int COMPOSITE_SATURATE = 44;
-  const int COMPOSITE_SCREEN = 45;
-  const int COMPOSITE_SOFTLIGHT = 46;
-  const int COMPOSITE_SRCATOP = 47;
-  const int COMPOSITE_SRC = 48;
-  const int COMPOSITE_SRCIN = 49;
-  const int COMPOSITE_SRCOUT = 50;
-  const int COMPOSITE_SRCOVER = 51;
-  const int COMPOSITE_SUBTRACT = 52;
-  const int COMPOSITE_THRESHOLD = 53;
-  const int COMPOSITE_XOR = 54;
-  const int COMPOSITE_CHANGEMASK = 6;
-  const int COMPOSITE_LINEARLIGHT = 34;
-  const int COMPOSITE_DIVIDE = 55;
-  const int COMPOSITE_DISTORT = 56;
-  const int COMPOSITE_BLUR = 57;
-  const int COMPOSITE_PEGTOPLIGHT = 58;
-  const int COMPOSITE_VIVIDLIGHT = 59;
-  const int COMPOSITE_PINLIGHT = 60;
-  const int COMPOSITE_LINEARDODGE = 61;
-  const int COMPOSITE_LINEARBURN = 62;
-  const int COMPOSITE_MATHEMATICS = 63;
-  const int COMPOSITE_MODULUSADD = 2;
-  const int COMPOSITE_MINUSDST = 36;
-  const int COMPOSITE_DIVIDEDST = 55;
-  const int COMPOSITE_DIVIDESRC = 64;
-  const int COMPOSITE_MINUSSRC = 65;
-  const int MONTAGEMODE_FRAME = 1;
-  const int MONTAGEMODE_UNFRAME = 2;
-  const int MONTAGEMODE_CONCATENATE = 3;
-  const int STYLE_NORMAL = 1;
-  const int STYLE_ITALIC = 2;
-  const int STYLE_OBLIQUE = 3;
-  const int STYLE_ANY = 4;
-  const int FILTER_UNDEFINED = 0;
-  const int FILTER_POINT = 1;
-  const int FILTER_BOX = 2;
-  const int FILTER_TRIANGLE = 3;
-  const int FILTER_HERMITE = 4;
-  const int FILTER_HANNING = 5;
-  const int FILTER_HAMMING = 6;
-  const int FILTER_BLACKMAN = 7;
-  const int FILTER_GAUSSIAN = 8;
-  const int FILTER_QUADRATIC = 9;
-  const int FILTER_CUBIC = 10;
-  const int FILTER_CATROM = 11;
-  const int FILTER_MITCHELL = 12;
-  const int FILTER_LANCZOS = 22;
-  const int FILTER_BESSEL = 13;
-  const int FILTER_SINC = 14;
-  const int FILTER_KAISER = 16;
-  const int FILTER_WELSH = 17;
-  const int FILTER_PARZEN = 18;
-  const int FILTER_LAGRANGE = 21;
-  const int FILTER_SENTINEL = 27;
-  const int FILTER_BOHMAN = 19;
-  const int FILTER_BARTLETT = 20;
-  const int FILTER_JINC = 13;
-  const int FILTER_SINCFAST = 15;
-  const int FILTER_ROBIDOUX = 26;
-  const int FILTER_LANCZOSSHARP = 23;
-  const int FILTER_LANCZOS2 = 24;
-  const int FILTER_LANCZOS2SHARP = 25;
-  const int IMGTYPE_UNDEFINED = 0;
-  const int IMGTYPE_BILEVEL = 1;
-  const int IMGTYPE_GRAYSCALE = 2;
-  const int IMGTYPE_GRAYSCALEMATTE = 3;
-  const int IMGTYPE_PALETTEMATTE = 5;
-  const int IMGTYPE_TRUECOLOR = 6;
-  const int IMGTYPE_TRUECOLORMATTE = 7;
-  const int IMGTYPE_COLORSEPARATION = 8;
-  const int IMGTYPE_OPTIMIZE = 10;
-  const int IMGTYPE_PALETTE = 4;
-  const int RESOLUTION_UNDEFINED = 0;
-  const int COMPRESSION_UNDEFINED = 0;
-  const int COMPRESSION_NO = 1;
-  const int COMPRESSION_BZIP = 2;
-  const int COMPRESSION_FAX = 6;
-  const int COMPRESSION_GROUP4 = 7;
-  const int COMPRESSION_JPEG = 8;
-  const int COMPRESSION_JPEG2000 = 9;
-  const int COMPRESSION_LZW = 11;
-  const int COMPRESSION_RLE = 12;
-  const int COMPRESSION_ZIP = 13;
-  const int COMPRESSION_DXT1 = 3;
-  const int COMPRESSION_DXT3 = 4;
-  const int COMPRESSION_DXT5 = 5;
-  const int COMPRESSION_ZIPS = 14;
-  const int COMPRESSION_PIZ = 15;
-  const int COMPRESSION_PXR24 = 16;
-  const int COMPRESSION_B44 = 17;
-  const int COMPRESSION_B44A = 18;
-  const int COMPRESSION_LZMA = 19;
-  const int COMPRESSION_JBIG1 = 20;
-  const int COMPRESSION_JBIG2 = 21;
-  const int PAINT_POINT = 1;
-  const int PAINT_REPLACE = 2;
-  const int PAINT_FLOODFILL = 3;
-  const int PAINT_FILLTOBORDER = 4;
-  const int PAINT_RESET = 5;
-  const int GRAVITY_NORTHWEST = 1;
-  const int GRAVITY_NORTH = 2;
-  const int GRAVITY_NORTHEAST = 3;
-  const int GRAVITY_WEST = 4;
-  const int GRAVITY_CENTER = 5;
-  const int GRAVITY_EAST = 6;
-  const int GRAVITY_SOUTHWEST = 7;
-  const int GRAVITY_SOUTH = 8;
-  const int GRAVITY_SOUTHEAST = 9;
-  const int STRETCH_NORMAL = 1;
-  const int STRETCH_ULTRACONDENSED = 2;
-  const int STRETCH_CONDENSED = 4;
-  const int STRETCH_SEMICONDENSED = 5;
-  const int STRETCH_SEMIEXPANDED = 6;
-  const int STRETCH_EXPANDED = 7;
-  const int STRETCH_EXTRAEXPANDED = 8;
-  const int STRETCH_ULTRAEXPANDED = 9;
-  const int STRETCH_ANY = 10;
-  const int ALIGN_UNDEFINED = 0;
-  const int ALIGN_LEFT = 1;
-  const int ALIGN_CENTER = 2;
-  const int ALIGN_RIGHT = 3;
-  const int DECORATION_NO = 1;
-  const int DECORATION_UNDERLINE = 2;
-  const int DECORATION_OVERLINE = 3;
-  const int DECORATION_LINETROUGH = 4;
-  const int NOISE_UNIFORM = 1;
-  const int NOISE_GAUSSIAN = 2;
-  const int NOISE_IMPULSE = 4;
-  const int NOISE_LAPLACIAN = 5;
-  const int NOISE_POISSON = 6;
-  const int NOISE_RANDOM = 7;
-  const int CHANNEL_UNDEFINED = 0;
-  const int CHANNEL_RED = 1;
-  const int CHANNEL_GRAY = 1;
-  const int CHANNEL_CYAN = 1;
-  const int CHANNEL_GREEN = 2;
-  const int CHANNEL_MAGENTA = 2;
-  const int CHANNEL_BLUE = 4;
-  const int CHANNEL_YELLOW = 4;
-  const int CHANNEL_ALPHA = 8;
-  const int CHANNEL_OPACITY = 8;
-  const int CHANNEL_MATTE = 8;
-  const int CHANNEL_BLACK = 32;
-  const int CHANNEL_INDEX = 32;
-  const int CHANNEL_ALL = -1;
-  const int CHANNEL_DEFAULT = -9;
-  const int CHANNEL_TRUEALPHA = 64;
-  const int CHANNEL_RGBS = 128;
-  const int CHANNEL_SYNC = 256;
-  const int CHANNEL_COMPOSITES = 47;
-  const int METRIC_UNDEFINED = 0;
-  const int METRIC_MEANSQUAREERROR = 4;
-  const int PIXEL_CHAR = 1;
-  const int PIXEL_DOUBLE = 2;
-  const int PIXEL_FLOAT = 3;
-  const int PIXEL_INTEGER = 4;
-  const int PIXEL_LONG = 5;
-  const int PIXEL_QUANTUM = 6;
-  const int PIXEL_SHORT = 7;
-  const int EVALUATE_UNDEFINED = 0;
-  const int EVALUATE_ADD = 1;
-  const int EVALUATE_AND = 2;
-  const int EVALUATE_DIVIDE = 3;
-  const int EVALUATE_LEFTSHIFT = 4;
-  const int EVALUATE_MAX = 5;
-  const int EVALUATE_MIN = 6;
-  const int EVALUATE_MULTIPLY = 7;
-  const int EVALUATE_OR = 8;
-  const int EVALUATE_RIGHTSHIFT = 9;
-  const int EVALUATE_SET = 10;
-  const int EVALUATE_SUBTRACT = 11;
-  const int EVALUATE_XOR = 12;
-  const int EVALUATE_POW = 13;
-  const int EVALUATE_LOG = 14;
-  const int EVALUATE_THRESHOLD = 15;
-  const int EVALUATE_THRESHOLDBLACK = 16;
-  const int EVALUATE_THRESHOLDWHITE = 17;
-  const int EVALUATE_GAUSSIANNOISE = 18;
-  const int EVALUATE_IMPULSENOISE = 19;
-  const int EVALUATE_LAPLACIANNOISE = 20;
-  const int EVALUATE_POISSONNOISE = 22;
-  const int EVALUATE_UNIFORMNOISE = 23;
-  const int EVALUATE_COSINE = 24;
-  const int EVALUATE_SINE = 25;
-  const int EVALUATE_ADDMODULUS = 26;
-  const int EVALUATE_MEAN = 27;
-  const int EVALUATE_ABS = 28;
-  const int EVALUATE_EXPONENTIAL = 29;
-  const int EVALUATE_MEDIAN = 30;
-  const int COLORSPACE_UNDEFINED = 0;
-  const int COLORSPACE_RGB = 1;
-  const int COLORSPACE_GRAY = 2;
-  const int COLORSPACE_TRANSPARENT = 3;
-  const int COLORSPACE_OHTA = 4;
-  const int COLORSPACE_LAB = 5;
-  const int COLORSPACE_XYZ = 6;
-  const int COLORSPACE_YCBCR = 7;
-  const int COLORSPACE_YCC = 8;
-  const int COLORSPACE_YIQ = 9;
-  const int COLORSPACE_YPBPR = 10;
-  const int COLORSPACE_YUV = 11;
-  const int COLORSPACE_CMYK = 12;
-  const int COLORSPACE_SRGB = 13;
-  const int COLORSPACE_HSB = 14;
-  const int COLORSPACE_HSL = 15;
-  const int COLORSPACE_HWB = 16;
-  const int COLORSPACE_REC601LUMA = 17;
-  const int COLORSPACE_REC709LUMA = 19;
-  const int COLORSPACE_LOG = 21;
-  const int COLORSPACE_CMY = 22;
-  const int VIRTUALPIXELMETHOD_EDGE = 4;
-  const int VIRTUALPIXELMETHOD_TILE = 7;
-  const int VIRTUALPIXELMETHOD_MASK = 9;
-  const int VIRTUALPIXELMETHOD_GRAY = 11;
-  const int PREVIEW_UNDEFINED = 0;
-  const int PREVIEW_ROTATE = 1;
-  const int PREVIEW_SHEAR = 2;
-  const int PREVIEW_ROLL = 3;
-  const int PREVIEW_HUE = 4;
-  const int PREVIEW_SATURATION = 5;
-  const int PREVIEW_BRIGHTNESS = 6;
-  const int PREVIEW_GAMMA = 7;
-  const int PREVIEW_SPIFF = 8;
-  const int PREVIEW_DULL = 9;
-  const int PREVIEW_GRAYSCALE = 10;
-  const int PREVIEW_QUANTIZE = 11;
-  const int PREVIEW_DESPECKLE = 12;
-  const int PREVIEW_REDUCENOISE = 13;
-  const int PREVIEW_ADDNOISE = 14;
-  const int PREVIEW_SHARPEN = 15;
-  const int PREVIEW_BLUR = 16;
-  const int PREVIEW_THRESHOLD = 17;
-  const int PREVIEW_EDGEDETECT = 18;
-  const int PREVIEW_SPREAD = 19;
-  const int PREVIEW_SOLARIZE = 20;
-  const int PREVIEW_SHADE = 21;
-  const int PREVIEW_RAISE = 22;
-  const int PREVIEW_SEGMENT = 23;
-  const int PREVIEW_SWIRL = 24;
-  const int PREVIEW_IMPLODE = 25;
-  const int PREVIEW_WAVE = 26;
-  const int PREVIEW_OILPAINT = 27;
-  const int PREVIEW_CHARCOALDRAWING = 28;
-  const int PREVIEW_JPEG = 29;
-  const int INTERLACE_UNDEFINED = 0;
-  const int INTERLACE_NO = 1;
-  const int INTERLACE_LINE = 2;
-  const int INTERLACE_PLANE = 3;
-  const int INTERLACE_PARTITION = 4;
-  const int INTERLACE_GIF = 5;
-  const int INTERLACE_JPEG = 6;
-  const int INTERLACE_PNG = 7;
-  const int FILLRULE_UNDEFINED = 0;
-  const int FILLRULE_EVENODD = 1;
-  const int FILLRULE_NONZERO = 2;
-  const int PATHUNITS_UNDEFINED = 0;
-  const int PATHUNITS_USERSPACE = 1;
-  const int LINECAP_UNDEFINED = 0;
-  const int LINECAP_BUTT = 1;
-  const int LINECAP_ROUND = 2;
-  const int LINECAP_SQUARE = 3;
-  const int LINEJOIN_UNDEFINED = 0;
-  const int LINEJOIN_MITER = 1;
-  const int LINEJOIN_ROUND = 2;
-  const int LINEJOIN_BEVEL = 3;
-  const int RESOURCETYPE_UNDEFINED = 0;
-  const int RESOURCETYPE_AREA = 1;
-  const int RESOURCETYPE_DISK = 2;
-  const int RESOURCETYPE_FILE = 3;
-  const int RESOURCETYPE_MAP = 4;
-  const int RESOURCETYPE_MEMORY = 5;
-  const int LAYERMETHOD_UNDEFINED = 0;
-  const int LAYERMETHOD_COALESCE = 1;
-  const int LAYERMETHOD_COMPAREANY = 2;
-  const int LAYERMETHOD_DISPOSE = 5;
-  const int LAYERMETHOD_OPTIMIZE = 6;
-  const int LAYERMETHOD_COMPOSITE = 12;
-  const int LAYERMETHOD_REMOVEDUPS = 10;
-  const int LAYERMETHOD_REMOVEZERO = 11;
-  const int LAYERMETHOD_MERGE = 13;
-  const int LAYERMETHOD_FLATTEN = 14;
-  const int LAYERMETHOD_MOSAIC = 15;
-  const int LAYERMETHOD_TRIMBOUNDS = 16;
-  const int ORIENTATION_UNDEFINED = 0;
-  const int ORIENTATION_TOPLEFT = 1;
-  const int ORIENTATION_TOPRIGHT = 2;
-  const int ORIENTATION_BOTTOMRIGHT = 3;
-  const int ORIENTATION_BOTTOMLEFT = 4;
-  const int ORIENTATION_LEFTTOP = 5;
-  const int ORIENTATION_RIGHTTOP = 6;
-  const int ORIENTATION_RIGHTBOTTOM = 7;
-  const int ORIENTATION_LEFTBOTTOM = 8;
-  const int DISTORTION_UNDEFINED = 0;
-  const int DISTORTION_AFFINE = 1;
-  const int DISTORTION_ARC = 9;
-  const int DISTORTION_BILINEAR = 6;
-  const int DISTORTION_PERSPECTIVE = 4;
-  const int DISTORTION_POLYNOMIAL = 8;
-  const int DISTORTION_POLAR = 10;
-  const int DISTORTION_DEPOLAR = 11;
-  const int DISTORTION_BARREL = 14;
-  const int DISTORTION_SHEPARDS = 16;
-  const int DISTORTION_SENTINEL = 18;
-  const int DISTORTION_RESIZE = 17;
-  const int ALPHACHANNEL_ACTIVATE = 1;
-  const int ALPHACHANNEL_DEACTIVATE = 4;
-  const int ALPHACHANNEL_RESET = 7;
-  const int ALPHACHANNEL_SET = 8;
-  const int ALPHACHANNEL_UNDEFINED = 0;
-  const int ALPHACHANNEL_COPY = 3;
-  const int ALPHACHANNEL_EXTRACT = 5;
-  const int ALPHACHANNEL_OPAQUE = 6;
-  const int ALPHACHANNEL_SHAPE = 9;
-  const int FUNCTION_UNDEFINED = 0;
-  const int FUNCTION_POLYNOMIAL = 1;
-  const int FUNCTION_SINUSOID = 2;
-  const int FUNCTION_ARCSIN = 3;
-  const int FUNCTION_ARCTAN = 4;
-  const int INTERPOLATE_UNDEFINED = 0;
-  const int INTERPOLATE_AVERAGE = 1;
-  const int INTERPOLATE_BICUBIC = 2;
-  const int INTERPOLATE_BILINEAR = 3;
-  const int INTERPOLATE_FILTER = 4;
-  const int INTERPOLATE_INTEGER = 5;
-  const int INTERPOLATE_MESH = 6;
-  const int INTERPOLATE_SPLINE = 8;
-  const int DITHERMETHOD_UNDEFINED = 0;
-  const int DITHERMETHOD_NO = 1;
-  const int DITHERMETHOD_RIEMERSMA = 2;
+  const int COMPOSITE_MODULUSSUBTRACT;
+  const int COMPOSITE_DARKENINTENSITY;
+  const int COMPOSITE_LIGHTENINTENSITY;
+  const int IMGTYPE_COLORSEPARATIONMATTE;
+  const int IMGTYPE_PALETTEBILEVELMATTE;
+  const int RESOLUTION_PIXELSPERINCH;
+  const int RESOLUTION_PIXELSPERCENTIMETER;
+  const int COMPRESSION_LOSSLESSJPEG;
+  const int NOISE_MULTIPLICATIVEGAUSSIAN;
+  const int METRIC_MEANABSOLUTEERROR;
+  const int METRIC_PEAKABSOLUTEERROR;
+  const int METRIC_PEAKSIGNALTONOISERATIO;
+  const int METRIC_ROOTMEANSQUAREDERROR;
+  const int EVALUATE_MULTIPLICATIVENOISE;
+  const int VIRTUALPIXELMETHOD_UNDEFINED;
+  const int VIRTUALPIXELMETHOD_BACKGROUND;
+  const int VIRTUALPIXELMETHOD_CONSTANT;
+  const int VIRTUALPIXELMETHOD_MIRROR;
+  const int VIRTUALPIXELMETHOD_TRANSPARENT;
+  const int VIRTUALPIXELMETHOD_BLACK;
+  const int VIRTUALPIXELMETHOD_WHITE;
+  const int VIRTUALPIXELMETHOD_HORIZONTALTILE;
+  const int VIRTUALPIXELMETHOD_VERTICALTILE;
+  const int VIRTUALPIXELMETHOD_HORIZONTALTILEEDGE;
+  const int VIRTUALPIXELMETHOD_VERTICALTILEEDGE;
+  const int VIRTUALPIXELMETHOD_CHECKERTILE;
+  const int RENDERINGINTENT_UNDEFINED;
+  const int RENDERINGINTENT_SATURATION;
+  const int RENDERINGINTENT_PERCEPTUAL;
+  const int RENDERINGINTENT_ABSOLUTE;
+  const int RENDERINGINTENT_RELATIVE;
+  const int PATHUNITS_USERSPACEONUSE;
+  const int PATHUNITS_OBJECTBOUNDINGBOX;
+  const int LAYERMETHOD_COMPARECLEAR;
+  const int LAYERMETHOD_COMPAREOVERLAY;
+  const int LAYERMETHOD_OPTIMIZEPLUS;
+  const int LAYERMETHOD_OPTIMIZETRANS;
+  const int LAYERMETHOD_OPTIMIZEIMAGE;
+  const int DISTORTION_AFFINEPROJECTION;
+  const int DISTORTION_PERSPECTIVEPROJECTION;
+  const int DISTORTION_SCALEROTATETRANSLATE;
+  const int DISTORTION_BARRELINVERSE;
+  const int DISTORTION_BILINEARFORWARD;
+  const int DISTORTION_BILINEARREVERSE;
+  const int DISTORTION_CYLINDER2PLANE;
+  const int DISTORTION_PLANE2CYLINDER;
+  const int ALPHACHANNEL_TRANSPARENT;
+  const int SPARSECOLORMETHOD_UNDEFINED;
+  const int SPARSECOLORMETHOD_BARYCENTRIC;
+  const int SPARSECOLORMETHOD_BILINEAR;
+  const int SPARSECOLORMETHOD_POLYNOMIAL;
+  const int SPARSECOLORMETHOD_SPEPARDS;
+  const int SPARSECOLORMETHOD_VORONOI;
+  const int INTERPOLATE_NEARESTNEIGHBOR;
+  const int DITHERMETHOD_FLOYDSTEINBERG;
+  const int COLOR_BLACK;
+  const int COLOR_BLUE;
+  const int COLOR_CYAN;
+  const int COLOR_GREEN;
+  const int COLOR_RED;
+  const int COLOR_YELLOW;
+  const int COLOR_MAGENTA;
+  const int COLOR_OPACITY;
+  const int COLOR_ALPHA;
+  const int COLOR_FUZZ;
+  const int DISPOSE_UNRECOGNIZED;
+  const int DISPOSE_UNDEFINED;
+  const int DISPOSE_NONE;
+  const int DISPOSE_BACKGROUND;
+  const int DISPOSE_PREVIOUS;
+  const int COMPOSITE_DEFAULT;
+  const int COMPOSITE_UNDEFINED;
+  const int COMPOSITE_NO;
+  const int COMPOSITE_ADD;
+  const int COMPOSITE_ATOP;
+  const int COMPOSITE_BLEND;
+  const int COMPOSITE_BUMPMAP;
+  const int COMPOSITE_CLEAR;
+  const int COMPOSITE_COLORBURN;
+  const int COMPOSITE_COLORDODGE;
+  const int COMPOSITE_COLORIZE;
+  const int COMPOSITE_COPYBLACK;
+  const int COMPOSITE_COPYBLUE;
+  const int COMPOSITE_COPY;
+  const int COMPOSITE_COPYCYAN;
+  const int COMPOSITE_COPYGREEN;
+  const int COMPOSITE_COPYMAGENTA;
+  const int COMPOSITE_COPYOPACITY;
+  const int COMPOSITE_COPYRED;
+  const int COMPOSITE_COPYYELLOW;
+  const int COMPOSITE_DARKEN;
+  const int COMPOSITE_DSTATOP;
+  const int COMPOSITE_DST;
+  const int COMPOSITE_DSTIN;
+  const int COMPOSITE_DSTOUT;
+  const int COMPOSITE_DSTOVER;
+  const int COMPOSITE_DIFFERENCE;
+  const int COMPOSITE_DISPLACE;
+  const int COMPOSITE_DISSOLVE;
+  const int COMPOSITE_EXCLUSION;
+  const int COMPOSITE_HARDLIGHT;
+  const int COMPOSITE_HUE;
+  const int COMPOSITE_IN;
+  const int COMPOSITE_LIGHTEN;
+  const int COMPOSITE_LUMINIZE;
+  const int COMPOSITE_MINUS;
+  const int COMPOSITE_MODULATE;
+  const int COMPOSITE_MULTIPLY;
+  const int COMPOSITE_OUT;
+  const int COMPOSITE_OVER;
+  const int COMPOSITE_OVERLAY;
+  const int COMPOSITE_PLUS;
+  const int COMPOSITE_REPLACE;
+  const int COMPOSITE_SATURATE;
+  const int COMPOSITE_SCREEN;
+  const int COMPOSITE_SOFTLIGHT;
+  const int COMPOSITE_SRCATOP;
+  const int COMPOSITE_SRC;
+  const int COMPOSITE_SRCIN;
+  const int COMPOSITE_SRCOUT;
+  const int COMPOSITE_SRCOVER;
+  const int COMPOSITE_SUBTRACT;
+  const int COMPOSITE_THRESHOLD;
+  const int COMPOSITE_XOR;
+  const int COMPOSITE_CHANGEMASK;
+  const int COMPOSITE_LINEARLIGHT;
+  const int COMPOSITE_DIVIDE;
+  const int COMPOSITE_DISTORT;
+  const int COMPOSITE_BLUR;
+  const int COMPOSITE_PEGTOPLIGHT;
+  const int COMPOSITE_VIVIDLIGHT;
+  const int COMPOSITE_PINLIGHT;
+  const int COMPOSITE_LINEARDODGE;
+  const int COMPOSITE_LINEARBURN;
+  const int COMPOSITE_MATHEMATICS;
+  const int COMPOSITE_MODULUSADD;
+  const int COMPOSITE_MINUSDST;
+  const int COMPOSITE_DIVIDEDST;
+  const int COMPOSITE_DIVIDESRC;
+  const int COMPOSITE_MINUSSRC;
+  const int MONTAGEMODE_FRAME;
+  const int MONTAGEMODE_UNFRAME;
+  const int MONTAGEMODE_CONCATENATE;
+  const int STYLE_NORMAL;
+  const int STYLE_ITALIC;
+  const int STYLE_OBLIQUE;
+  const int STYLE_ANY;
+  const int FILTER_UNDEFINED;
+  const int FILTER_POINT;
+  const int FILTER_BOX;
+  const int FILTER_TRIANGLE;
+  const int FILTER_HERMITE;
+  const int FILTER_HANNING;
+  const int FILTER_HAMMING;
+  const int FILTER_BLACKMAN;
+  const int FILTER_GAUSSIAN;
+  const int FILTER_QUADRATIC;
+  const int FILTER_CUBIC;
+  const int FILTER_CATROM;
+  const int FILTER_MITCHELL;
+  const int FILTER_LANCZOS;
+  const int FILTER_BESSEL;
+  const int FILTER_SINC;
+  const int FILTER_KAISER;
+  const int FILTER_WELSH;
+  const int FILTER_PARZEN;
+  const int FILTER_LAGRANGE;
+  const int FILTER_SENTINEL;
+  const int FILTER_BOHMAN;
+  const int FILTER_BARTLETT;
+  const int FILTER_JINC;
+  const int FILTER_SINCFAST;
+  const int FILTER_ROBIDOUX;
+  const int FILTER_LANCZOSSHARP;
+  const int FILTER_LANCZOS2;
+  const int FILTER_LANCZOS2SHARP;
+  const int IMGTYPE_UNDEFINED;
+  const int IMGTYPE_BILEVEL;
+  const int IMGTYPE_GRAYSCALE;
+  const int IMGTYPE_GRAYSCALEMATTE;
+  const int IMGTYPE_PALETTEMATTE;
+  const int IMGTYPE_TRUECOLOR;
+  const int IMGTYPE_TRUECOLORMATTE;
+  const int IMGTYPE_COLORSEPARATION;
+  const int IMGTYPE_OPTIMIZE;
+  const int IMGTYPE_PALETTE;
+  const int RESOLUTION_UNDEFINED;
+  const int COMPRESSION_UNDEFINED;
+  const int COMPRESSION_NO;
+  const int COMPRESSION_BZIP;
+  const int COMPRESSION_FAX;
+  const int COMPRESSION_GROUP4;
+  const int COMPRESSION_JPEG;
+  const int COMPRESSION_JPEG2000;
+  const int COMPRESSION_LZW;
+  const int COMPRESSION_RLE;
+  const int COMPRESSION_ZIP;
+  const int COMPRESSION_DXT1;
+  const int COMPRESSION_DXT3;
+  const int COMPRESSION_DXT5;
+  const int COMPRESSION_ZIPS;
+  const int COMPRESSION_PIZ;
+  const int COMPRESSION_PXR24;
+  const int COMPRESSION_B44;
+  const int COMPRESSION_B44A;
+  const int COMPRESSION_LZMA;
+  const int COMPRESSION_JBIG1;
+  const int COMPRESSION_JBIG2;
+  const int PAINT_POINT;
+  const int PAINT_REPLACE;
+  const int PAINT_FLOODFILL;
+  const int PAINT_FILLTOBORDER;
+  const int PAINT_RESET;
+  const int GRAVITY_NORTHWEST;
+  const int GRAVITY_NORTH;
+  const int GRAVITY_NORTHEAST;
+  const int GRAVITY_WEST;
+  const int GRAVITY_CENTER;
+  const int GRAVITY_EAST;
+  const int GRAVITY_SOUTHWEST;
+  const int GRAVITY_SOUTH;
+  const int GRAVITY_SOUTHEAST;
+  const int STRETCH_NORMAL;
+  const int STRETCH_ULTRACONDENSED;
+  const int STRETCH_CONDENSED;
+  const int STRETCH_SEMICONDENSED;
+  const int STRETCH_SEMIEXPANDED;
+  const int STRETCH_EXPANDED;
+  const int STRETCH_EXTRAEXPANDED;
+  const int STRETCH_ULTRAEXPANDED;
+  const int STRETCH_ANY;
+  const int ALIGN_UNDEFINED;
+  const int ALIGN_LEFT;
+  const int ALIGN_CENTER;
+  const int ALIGN_RIGHT;
+  const int DECORATION_NO;
+  const int DECORATION_UNDERLINE;
+  const int DECORATION_OVERLINE;
+  const int DECORATION_LINETROUGH;
+  const int NOISE_UNIFORM;
+  const int NOISE_GAUSSIAN;
+  const int NOISE_IMPULSE;
+  const int NOISE_LAPLACIAN;
+  const int NOISE_POISSON;
+  const int NOISE_RANDOM;
+  const int CHANNEL_UNDEFINED;
+  const int CHANNEL_RED;
+  const int CHANNEL_GRAY;
+  const int CHANNEL_CYAN;
+  const int CHANNEL_GREEN;
+  const int CHANNEL_MAGENTA;
+  const int CHANNEL_BLUE;
+  const int CHANNEL_YELLOW;
+  const int CHANNEL_ALPHA;
+  const int CHANNEL_OPACITY;
+  const int CHANNEL_MATTE;
+  const int CHANNEL_BLACK;
+  const int CHANNEL_INDEX;
+  const int CHANNEL_ALL;
+  const int CHANNEL_DEFAULT;
+  const int CHANNEL_TRUEALPHA;
+  const int CHANNEL_RGBS;
+  const int CHANNEL_SYNC;
+  const int CHANNEL_COMPOSITES;
+  const int METRIC_UNDEFINED;
+  const int METRIC_MEANSQUAREERROR;
+  const int PIXEL_CHAR;
+  const int PIXEL_DOUBLE;
+  const int PIXEL_FLOAT;
+  const int PIXEL_INTEGER;
+  const int PIXEL_LONG;
+  const int PIXEL_QUANTUM;
+  const int PIXEL_SHORT;
+  const int EVALUATE_UNDEFINED;
+  const int EVALUATE_ADD;
+  const int EVALUATE_AND;
+  const int EVALUATE_DIVIDE;
+  const int EVALUATE_LEFTSHIFT;
+  const int EVALUATE_MAX;
+  const int EVALUATE_MIN;
+  const int EVALUATE_MULTIPLY;
+  const int EVALUATE_OR;
+  const int EVALUATE_RIGHTSHIFT;
+  const int EVALUATE_SET;
+  const int EVALUATE_SUBTRACT;
+  const int EVALUATE_XOR;
+  const int EVALUATE_POW;
+  const int EVALUATE_LOG;
+  const int EVALUATE_THRESHOLD;
+  const int EVALUATE_THRESHOLDBLACK;
+  const int EVALUATE_THRESHOLDWHITE;
+  const int EVALUATE_GAUSSIANNOISE;
+  const int EVALUATE_IMPULSENOISE;
+  const int EVALUATE_LAPLACIANNOISE;
+  const int EVALUATE_POISSONNOISE;
+  const int EVALUATE_UNIFORMNOISE;
+  const int EVALUATE_COSINE;
+  const int EVALUATE_SINE;
+  const int EVALUATE_ADDMODULUS;
+  const int EVALUATE_MEAN;
+  const int EVALUATE_ABS;
+  const int EVALUATE_EXPONENTIAL;
+  const int EVALUATE_MEDIAN;
+  const int COLORSPACE_UNDEFINED;
+  const int COLORSPACE_RGB;
+  const int COLORSPACE_GRAY;
+  const int COLORSPACE_TRANSPARENT;
+  const int COLORSPACE_OHTA;
+  const int COLORSPACE_LAB;
+  const int COLORSPACE_XYZ;
+  const int COLORSPACE_YCBCR;
+  const int COLORSPACE_YCC;
+  const int COLORSPACE_YIQ;
+  const int COLORSPACE_YPBPR;
+  const int COLORSPACE_YUV;
+  const int COLORSPACE_CMYK;
+  const int COLORSPACE_SRGB;
+  const int COLORSPACE_HSB;
+  const int COLORSPACE_HSL;
+  const int COLORSPACE_HWB;
+  const int COLORSPACE_REC601LUMA;
+  const int COLORSPACE_REC709LUMA;
+  const int COLORSPACE_LOG;
+  const int COLORSPACE_CMY;
+  const int VIRTUALPIXELMETHOD_EDGE;
+  const int VIRTUALPIXELMETHOD_TILE;
+  const int VIRTUALPIXELMETHOD_MASK;
+  const int VIRTUALPIXELMETHOD_GRAY;
+  const int PREVIEW_UNDEFINED;
+  const int PREVIEW_ROTATE;
+  const int PREVIEW_SHEAR;
+  const int PREVIEW_ROLL;
+  const int PREVIEW_HUE;
+  const int PREVIEW_SATURATION;
+  const int PREVIEW_BRIGHTNESS;
+  const int PREVIEW_GAMMA;
+  const int PREVIEW_SPIFF;
+  const int PREVIEW_DULL;
+  const int PREVIEW_GRAYSCALE;
+  const int PREVIEW_QUANTIZE;
+  const int PREVIEW_DESPECKLE;
+  const int PREVIEW_REDUCENOISE;
+  const int PREVIEW_ADDNOISE;
+  const int PREVIEW_SHARPEN;
+  const int PREVIEW_BLUR;
+  const int PREVIEW_THRESHOLD;
+  const int PREVIEW_EDGEDETECT;
+  const int PREVIEW_SPREAD;
+  const int PREVIEW_SOLARIZE;
+  const int PREVIEW_SHADE;
+  const int PREVIEW_RAISE;
+  const int PREVIEW_SEGMENT;
+  const int PREVIEW_SWIRL;
+  const int PREVIEW_IMPLODE;
+  const int PREVIEW_WAVE;
+  const int PREVIEW_OILPAINT;
+  const int PREVIEW_CHARCOALDRAWING;
+  const int PREVIEW_JPEG;
+  const int INTERLACE_UNDEFINED;
+  const int INTERLACE_NO;
+  const int INTERLACE_LINE;
+  const int INTERLACE_PLANE;
+  const int INTERLACE_PARTITION;
+  const int INTERLACE_GIF;
+  const int INTERLACE_JPEG;
+  const int INTERLACE_PNG;
+  const int FILLRULE_UNDEFINED;
+  const int FILLRULE_EVENODD;
+  const int FILLRULE_NONZERO;
+  const int PATHUNITS_UNDEFINED;
+  const int PATHUNITS_USERSPACE;
+  const int LINECAP_UNDEFINED;
+  const int LINECAP_BUTT;
+  const int LINECAP_ROUND;
+  const int LINECAP_SQUARE;
+  const int LINEJOIN_UNDEFINED;
+  const int LINEJOIN_MITER;
+  const int LINEJOIN_ROUND;
+  const int LINEJOIN_BEVEL;
+  const int RESOURCETYPE_UNDEFINED;
+  const int RESOURCETYPE_AREA;
+  const int RESOURCETYPE_DISK;
+  const int RESOURCETYPE_FILE;
+  const int RESOURCETYPE_MAP;
+  const int RESOURCETYPE_MEMORY;
+  const int LAYERMETHOD_UNDEFINED;
+  const int LAYERMETHOD_COALESCE;
+  const int LAYERMETHOD_COMPAREANY;
+  const int LAYERMETHOD_DISPOSE;
+  const int LAYERMETHOD_OPTIMIZE;
+  const int LAYERMETHOD_COMPOSITE;
+  const int LAYERMETHOD_REMOVEDUPS;
+  const int LAYERMETHOD_REMOVEZERO;
+  const int LAYERMETHOD_MERGE;
+  const int LAYERMETHOD_FLATTEN;
+  const int LAYERMETHOD_MOSAIC;
+  const int LAYERMETHOD_TRIMBOUNDS;
+  const int ORIENTATION_UNDEFINED;
+  const int ORIENTATION_TOPLEFT;
+  const int ORIENTATION_TOPRIGHT;
+  const int ORIENTATION_BOTTOMRIGHT;
+  const int ORIENTATION_BOTTOMLEFT;
+  const int ORIENTATION_LEFTTOP;
+  const int ORIENTATION_RIGHTTOP;
+  const int ORIENTATION_RIGHTBOTTOM;
+  const int ORIENTATION_LEFTBOTTOM;
+  const int DISTORTION_UNDEFINED;
+  const int DISTORTION_AFFINE;
+  const int DISTORTION_ARC;
+  const int DISTORTION_BILINEAR;
+  const int DISTORTION_PERSPECTIVE;
+  const int DISTORTION_POLYNOMIAL;
+  const int DISTORTION_POLAR;
+  const int DISTORTION_DEPOLAR;
+  const int DISTORTION_BARREL;
+  const int DISTORTION_SHEPARDS;
+  const int DISTORTION_SENTINEL;
+  const int DISTORTION_RESIZE;
+  const int ALPHACHANNEL_ACTIVATE;
+  const int ALPHACHANNEL_DEACTIVATE;
+  const int ALPHACHANNEL_RESET;
+  const int ALPHACHANNEL_SET;
+  const int ALPHACHANNEL_UNDEFINED;
+  const int ALPHACHANNEL_COPY;
+  const int ALPHACHANNEL_EXTRACT;
+  const int ALPHACHANNEL_OPAQUE;
+  const int ALPHACHANNEL_SHAPE;
+  const int FUNCTION_UNDEFINED;
+  const int FUNCTION_POLYNOMIAL;
+  const int FUNCTION_SINUSOID;
+  const int FUNCTION_ARCSIN;
+  const int FUNCTION_ARCTAN;
+  const int INTERPOLATE_UNDEFINED;
+  const int INTERPOLATE_AVERAGE;
+  const int INTERPOLATE_BICUBIC;
+  const int INTERPOLATE_BILINEAR;
+  const int INTERPOLATE_FILTER;
+  const int INTERPOLATE_INTEGER;
+  const int INTERPOLATE_MESH;
+  const int INTERPOLATE_SPLINE;
+  const int DITHERMETHOD_UNDEFINED;
+  const int DITHERMETHOD_NO;
+  const int DITHERMETHOD_RIEMERSMA;
 
   // Methods
   public function count(): int;
@@ -497,13 +496,19 @@ class Imagick
   ): bool;
   public function appendImages(bool $stack = false): Imagick;
   public function averageImages(): Imagick;
-  public function blackThresholdImage($threshold): bool;
+  public function blackThresholdImage(
+    HH\FIXME\MISSING_PARAM_TYPE $threshold,
+  ): bool;
   public function blurImage(
     float $radius,
     float $sigma,
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
-  public function borderImage($bordercolor, int $width, int $height): bool;
+  public function borderImage(
+    HH\FIXME\MISSING_PARAM_TYPE $bordercolor,
+    int $width,
+    int $height,
+  ): bool;
   public function charcoalImage(float $radius, float $sigma): bool;
   public function chopImage(int $width, int $height, int $x, int $y): bool;
   public function clear(): bool;
@@ -516,22 +521,25 @@ class Imagick
   ): bool;
   public function coalesceImages(): Imagick;
   public function colorFloodfillImage(
-    $fill,
+    HH\FIXME\MISSING_PARAM_TYPE $fill,
     float $fuzz,
-    $bordercolor,
+    HH\FIXME\MISSING_PARAM_TYPE $bordercolor,
     int $x,
     int $y,
   ): bool;
-  public function colorizeImage($colorize, $opacity): bool;
+  public function colorizeImage(
+    HH\FIXME\MISSING_PARAM_TYPE $colorize,
+    HH\FIXME\MISSING_PARAM_TYPE $opacity,
+  ): bool;
   public function combineImages(int $channelType): Imagick;
   public function commentImage(string $comment): bool;
   public function compareImageChannels(
     Imagick $image,
     int $channelType,
     int $metricType,
-  ): varray;
+  ): varray<mixed>;
   public function compareImageLayers(int $method): Imagick;
-  public function compareImages(Imagick $compare, int $metric): varray;
+  public function compareImages(Imagick $compare, int $metric): varray<mixed>;
   public function compositeImage(
     Imagick $composite_object,
     int $composite,
@@ -539,7 +547,7 @@ class Imagick
     int $y,
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
-  public function __construct($files = null);
+  public function __construct(HH\FIXME\MISSING_PARAM_TYPE $files = null);
   public function contrastImage(bool $sharpen): bool;
   public function contrastStretchImage(
     float $black_point,
@@ -547,7 +555,7 @@ class Imagick
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
   public function convolveImage(
-    varray $kernel,
+    varray<mixed> $kernel,
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
   public function cropImage(int $width, int $height, int $x, int $y): bool;
@@ -564,7 +572,7 @@ class Imagick
   public function displayImages(string $servername): bool;
   public function distortImage(
     int $method,
-    varray $arguments,
+    varray<mixed> $arguments,
     bool $bestfit,
   ): bool;
   public function drawImage(ImagickDraw $draw): bool;
@@ -585,14 +593,14 @@ class Imagick
     int $height,
     string $map,
     int $storage,
-  ): varray;
+  ): varray<int>;
   public function extentImage(int $width, int $height, int $x, int $y): bool;
   public function flattenImages(): Imagick;
   public function flipImage(): bool;
   public function floodFillPaintImage(
-    $fill,
+    HH\FIXME\MISSING_PARAM_TYPE $fill,
     float $fuzz,
-    $target,
+    HH\FIXME\MISSING_PARAM_TYPE $target,
     int $x,
     int $y,
     bool $invert,
@@ -600,7 +608,7 @@ class Imagick
   ): bool;
   public function flopImage(): bool;
   public function frameImage(
-    $matte_color,
+    HH\FIXME\MISSING_PARAM_TYPE $matte_color,
     int $width,
     int $height,
     int $inner_bevel,
@@ -608,7 +616,7 @@ class Imagick
   ): bool;
   public function functionImage(
     int $function,
-    varray $arguments,
+    varray<mixed> $arguments,
     int $channel = \Imagick::CHANNEL_DEFAULT,
   ): bool;
   public function fxImage(
@@ -638,7 +646,7 @@ class Imagick
   public function getImageArtifact(string $artifact): string;
   public function getImageBackgroundColor(): ImagickPixel;
   public function getImageBlob(): string;
-  public function getImageBluePrimary(): darray;
+  public function getImageBluePrimary(): darray<arraykey, mixed>;
   public function getImageBorderColor(): ImagickPixel;
   public function getImageChannelDepth(int $channel): int;
   public function getImageChannelDistortion(
@@ -651,13 +659,13 @@ class Imagick
     int $metric,
     int $channel = \Imagick::CHANNEL_DEFAULT,
   ): float;
-  public function getImageChannelExtrema(int $channel): darray;
+  public function getImageChannelExtrema(int $channel): darray<arraykey, mixed>;
   public function getImageChannelKurtosis(
     int $channel = \Imagick::CHANNEL_DEFAULT,
-  ): darray;
-  public function getImageChannelMean(int $channel): darray;
-  public function getImageChannelRange(int $channel): darray;
-  public function getImageChannelStatistics(): darray;
+  ): darray<arraykey, mixed>;
+  public function getImageChannelMean(int $channel): darray<arraykey, mixed>;
+  public function getImageChannelRange(int $channel): darray<arraykey, mixed>;
+  public function getImageChannelStatistics(): darray<arraykey, mixed>;
   public function getImageClipMask(): Imagick;
   public function getImageColormapColor(int $index): ImagickPixel;
   public function getImageColors(): int;
@@ -673,15 +681,15 @@ class Imagick
     int $metric,
   ): float;
   */
-  public function getImageExtrema(): darray;
+  public function getImageExtrema(): darray<arraykey, mixed>;
   public function getImageFilename(): string;
   public function getImageFormat(): string;
   public function getImageGamma(): float;
-  public function getImageGeometry(): darray;
+  public function getImageGeometry(): darray<string, int>;
   public function getImageGravity(): int;
-  public function getImageGreenPrimary(): darray;
+  public function getImageGreenPrimary(): darray<arraykey, mixed>;
   public function getImageHeight(): int;
-  public function getImageHistogram(): varray;
+  public function getImageHistogram(): varray<ImagickPixel>;
   public function getImageIndex(): int;
   public function getImageInterlaceScheme(): int;
   public function getImageInterpolateMethod(): int;
@@ -691,19 +699,19 @@ class Imagick
   public function getImageMatteColor(): ImagickPixel;
   public function getImageMimeType(): string;
   public function getImageOrientation(): int;
-  public function getImagePage(): darray;
+  public function getImagePage(): darray<arraykey, mixed>;
   public function getImagePixelColor(int $x, int $y): ImagickPixel;
   public function getImageProfile(string $name): string;
   public function getImageProfiles(
     string $pattern = "*",
     bool $with_values = true,
-  ): varray_or_darray;
+  ): varray_or_darray<arraykey, mixed>;
   public function getImageProperties(
     string $pattern = "*",
     bool $with_values = true,
-  ): varray_or_darray;
+  ): varray_or_darray<arraykey, mixed>;
   public function getImageProperty(string $name): string;
-  public function getImageRedPrimary(): darray;
+  public function getImageRedPrimary(): darray<arraykey, mixed>;
   public function getImageRegion(
     int $width,
     int $height,
@@ -711,7 +719,7 @@ class Imagick
     int $y,
   ): Imagick;
   public function getImageRenderingIntent(): int;
-  public function getImageResolution(): darray;
+  public function getImageResolution(): darray<string, float>;
   public function getImagesBlob(): string;
   public function getImageScene(): int;
   public function getImageSignature(): string;
@@ -721,14 +729,14 @@ class Imagick
   public function getImageType(): int;
   public function getImageUnits(): int;
   public function getImageVirtualPixelMethod(): int;
-  public function getImageWhitePoint(): darray;
+  public function getImageWhitePoint(): darray<arraykey, mixed>;
   public function getImageWidth(): int;
   public function getInterlaceScheme(): int;
   public function getIteratorIndex(): int;
   public function getNumberImages(): int;
   public function getOption(string $key): string;
   public static function getPackageName(): string;
-  public function getPage(): darray;
+  public function getPage(): darray<arraykey, mixed>;
   public function getPixelIterator(): ImagickPixelIterator;
   public function getPixelRegionIterator(
     int $x,
@@ -737,22 +745,22 @@ class Imagick
     int $rows,
   ): ImagickPixelIterator;
   public function getPointSize(): float;
-  public static function getQuantumDepth(): darray;
-  public static function getQuantumRange(): darray;
+  public static function getQuantumDepth(): darray<arraykey, mixed>;
+  public static function getQuantumRange(): darray<arraykey, mixed>;
   public static function getReleaseDate(): string;
   public static function getResource(int $type): int;
   public static function getResourceLimit(int $type): int;
-  public function getSamplingFactors(): varray;
-  public function getSize(): darray;
+  public function getSamplingFactors(): varray<mixed>;
+  public function getSize(): darray<arraykey, mixed>;
   public function getSizeOffset(): int;
-  public static function getVersion(): darray;
+  public static function getVersion(): darray<arraykey, mixed>;
   public function haldClutImage(
     Imagick $clut,
     int $channel = \Imagick::CHANNEL_DEFAULT,
   ): bool;
   public function hasNextImage(): bool;
   public function hasPreviousImage(): bool;
-  public function identifyImage(bool $appendRawOutput = false): darray;
+  public function identifyImage(bool $appendRawOutput = false): darray<arraykey, mixed>;
   public function implodeImage(float $radius): bool;
   public function importImagePixels(
     int $x,
@@ -761,7 +769,7 @@ class Imagick
     int $height,
     string $map,
     int $storage,
-    varray $pixels,
+    varray<mixed> $pixels,
   ): bool;
   public function labelImage(string $label): bool;
   public function levelImage(
@@ -785,7 +793,7 @@ class Imagick
   public function matteFloodfillImage(
     float $alpha,
     float $fuzz,
-    $bordercolor,
+    HH\FIXME\MISSING_PARAM_TYPE $bordercolor,
     int $x,
     int $y,
   ): bool;
@@ -819,7 +827,7 @@ class Imagick
   public function newImage(
     int $cols,
     int $rows,
-    $background,
+    HH\FIXME\MISSING_PARAM_TYPE $background,
     string $format = "",
   ): bool;
   public function newPseudoImage(
@@ -831,8 +839,8 @@ class Imagick
   public function normalizeImage(int $channel = \Imagick::CHANNEL_ALL): bool;
   public function oilPaintImage(float $radius): bool;
   public function opaquePaintImage(
-    $target,
-    $fill,
+    HH\FIXME\MISSING_PARAM_TYPE $target,
+    HH\FIXME\MISSING_PARAM_TYPE $fill,
     float $fuzz,
     bool $invert,
     int $channel = \Imagick::CHANNEL_DEFAULT,
@@ -843,21 +851,21 @@ class Imagick
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
   public function paintFloodfillImage(
-    $fill,
+    HH\FIXME\MISSING_PARAM_TYPE $fill,
     float $fuzz,
-    $bordercolor,
+    HH\FIXME\MISSING_PARAM_TYPE $bordercolor,
     int $x,
     int $y,
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
   public function paintOpaqueImage(
-    $target,
-    $fill,
+    HH\FIXME\MISSING_PARAM_TYPE $target,
+    HH\FIXME\MISSING_PARAM_TYPE $fill,
     float $fuzz,
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
   public function paintTransparentImage(
-    $target,
+    HH\FIXME\MISSING_PARAM_TYPE $target,
     float $alpha,
     float $fuzz,
   ): bool;
@@ -886,10 +894,10 @@ class Imagick
   public function queryFontMetrics(
     ImagickDraw $properties,
     string $text,
-    $multiline = null,
-  ): darray;
-  public static function queryFonts(string $pattern = "*"): varray;
-  public static function queryFormats(string $pattern = "*"): varray;
+    HH\FIXME\MISSING_PARAM_TYPE $multiline = null,
+  ): darray<arraykey, mixed>;
+  public static function queryFonts(string $pattern = "*"): varray<mixed>;
+  public static function queryFormats(string $pattern = "*"): varray<mixed>;
   public function radialBlurImage(
     float $angle,
     int $channel = \Imagick::CHANNEL_ALL,
@@ -912,8 +920,8 @@ class Imagick
     resource $filehandle,
     string $fileName = "",
   ): bool;
-  public function readImages(varray $files): bool;
-  public function recolorImage(varray $matrix): bool;
+  public function readImages(varray<mixed> $files): bool;
+  public function recolorImage(varray<mixed> $matrix): bool;
   public function reduceNoiseImage(float $radius): bool;
   public function remapImage(Imagick $replacement, int $dither): bool;
   public function removeImage(): bool;
@@ -933,7 +941,10 @@ class Imagick
     bool $bestfit = false,
   ): bool;
   public function rollImage(int $x, int $y): bool;
-  public function rotateImage($background, float $degrees): bool;
+  public function rotateImage(
+    HH\FIXME\MISSING_PARAM_TYPE $background,
+    float $degrees,
+  ): bool;
   public function roundCorners(
     float $x_rounding,
     float $y_rounding,
@@ -949,11 +960,7 @@ class Imagick
     float $size_correction = -6.0,
   ): bool;
   public function sampleImage(int $columns, int $rows): bool;
-  public function scaleImage(
-    int $cols,
-    int $rows,
-    bool $bestfit = false,
-  ): bool;
+  public function scaleImage(int $cols, int $rows, bool $bestfit = false): bool;
   public function segmentImage(
     int $COLORSPACE,
     float $cluster_threshold,
@@ -962,7 +969,9 @@ class Imagick
   ): bool;
   public function separateImageChannel(int $channel): bool;
   public function sepiaToneImage(float $threshold): bool;
-  public function setBackgroundColor($background): bool;
+  public function setBackgroundColor(
+    HH\FIXME\MISSING_PARAM_TYPE $background,
+  ): bool;
   public function setColorspace(int $COLORSPACE): bool;
   public function setCompression(int $compression): bool;
   public function setCompressionQuality(int $quality): bool;
@@ -974,13 +983,20 @@ class Imagick
   public function setImage(Imagick $replace): bool;
   public function setImageAlphaChannel(int $mode): bool;
   public function setImageArtifact(string $artifact, string $value): bool;
-  public function setImageBackgroundColor($background): bool;
+  public function setImageBackgroundColor(
+    HH\FIXME\MISSING_PARAM_TYPE $background,
+  ): bool;
   public function setImageBias(float $bias): bool;
   public function setImageBluePrimary(float $x, float $y): bool;
-  public function setImageBorderColor($border): bool;
+  public function setImageBorderColor(
+    HH\FIXME\MISSING_PARAM_TYPE $border,
+  ): bool;
   public function setImageChannelDepth(int $channel, int $depth): bool;
   public function setImageClipMask(Imagick $clip_mask): bool;
-  public function setImageColormapColor(int $index, $color): bool;
+  public function setImageColormapColor(
+    int $index,
+    HH\FIXME\MISSING_PARAM_TYPE $color,
+  ): bool;
   public function setImageColorspace(int $colorspace): bool;
   public function setImageCompose(int $compose): bool;
   public function setImageCompression(int $compression): bool;
@@ -999,7 +1015,7 @@ class Imagick
   public function setImageInterpolateMethod(int $method): bool;
   public function setImageIterations(int $iterations): bool;
   public function setImageMatte(bool $matte): bool;
-  public function setImageMatteColor($matte): bool;
+  public function setImageMatteColor(HH\FIXME\MISSING_PARAM_TYPE $matte): bool;
   public function setImageOpacity(float $opacity): bool;
   public function setImageOrientation(int $orientation): bool;
   public function setImagePage(int $width, int $height, int $x, int $y): bool;
@@ -1023,12 +1039,9 @@ class Imagick
   public function setOption(string $key, string $value): bool;
   public function setPage(int $width, int $height, int $x, int $y): bool;
   public function setPointSize(float $point_size): bool;
-  public function setResolution(
-    float $x_resolution,
-    float $y_resolution,
-  ): bool;
+  public function setResolution(float $x_resolution, float $y_resolution): bool;
   public static function setResourceLimit(int $type, int $limit): bool;
-  public function setSamplingFactors(varray $factors): bool;
+  public function setSamplingFactors(varray<mixed> $factors): bool;
   public function setSize(int $columns, int $rows): bool;
   public function setSizeOffset(int $columns, int $rows, int $offset): bool;
   public function setType(int $image_type): bool;
@@ -1050,7 +1063,7 @@ class Imagick
   ): bool;
   public function shaveImage(int $columns, int $rows): bool;
   public function shearImage(
-    $background,
+    HH\FIXME\MISSING_PARAM_TYPE $background,
     float $x_shear,
     float $y_shear,
   ): bool;
@@ -1060,15 +1073,11 @@ class Imagick
     float $beta,
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
-  public function sketchImage(
-    float $radius,
-    float $sigma,
-    float $angle,
-  ): bool;
+  public function sketchImage(float $radius, float $sigma, float $angle): bool;
   public function solarizeImage(int $threshold): bool;
   public function sparseColorImage(
     int $SPARSE_METHOD,
-    varray $arguments,
+    varray<mixed> $arguments,
     int $channel = \Imagick::CHANNEL_DEFAULT,
   ): bool;
   public function spliceImage(int $width, int $height, int $x, int $y): bool;
@@ -1088,10 +1097,13 @@ class Imagick
     bool $bestfit = false,
     bool $fill = false,
   ): bool;
-  public function tintImage($tint, $opacity): bool;
+  public function tintImage(
+    HH\FIXME\MISSING_PARAM_TYPE $tint,
+    HH\FIXME\MISSING_PARAM_TYPE $opacity,
+  ): bool;
   public function transformImage(string $crop, string $geometry): Imagick;
   public function transparentPaintImage(
-    $target,
+    HH\FIXME\MISSING_PARAM_TYPE $target,
     float $alpha,
     float $fuzz,
     bool $invert,
@@ -1115,7 +1127,9 @@ class Imagick
     int $y,
   ): bool;
   public function waveImage(float $amplitude, float $length): bool;
-  public function whiteThresholdImage($threshold): bool;
+  public function whiteThresholdImage(
+    HH\FIXME\MISSING_PARAM_TYPE $threshold,
+  ): bool;
   public function writeImage(string $filename = ""): bool;
   public function writeImageFile(
     resource $filehandle,

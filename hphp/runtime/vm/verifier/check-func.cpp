@@ -20,25 +20,22 @@
 #include "hphp/runtime/vm/verifier/util.h"
 #include "hphp/runtime/vm/verifier/pretty.h"
 
-#include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
-#include "hphp/runtime/base/vanilla-dict.h"
 
-#include "hphp/runtime/vm/coeffects.h"
+#include "hphp/runtime/ext/extension.h"
+
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 
 #include <folly/Range.h>
-
-#include <boost/dynamic_bitset.hpp>
 
 #include <cstdio>
 #include <iomanip>
 #include <iostream>
 #include <limits>
 #include <list>
+#include <stdatomic.h>
 #include <stdexcept>
 #include <type_traits>
 
@@ -54,7 +51,6 @@ struct State {
   int stklen{0};       // length of evaluation stack.
   bool mbr_live{false};    // liveness of member base register
   Optional<MOpMode> mbr_mode; // mode of member base register
-  boost::dynamic_bitset<> silences; // set of silenced local variables
   bool guaranteedThis; // whether $this is guaranteed to be non-null
   // immediately following BaseL or BaseH in a minstr sequence, when the base
   // was known to be Rx mutable
@@ -73,7 +69,10 @@ struct BlockInfo {
 };
 
 struct FuncChecker {
-  FuncChecker(const FuncEmitter* func, ErrorMode mode);
+  FuncChecker(const FuncEmitter* func,
+              const UnitEmitter* unit,
+              ErrorMode mode,
+              StringToStringTMap& createCls);
   ~FuncChecker();
   bool checkOffsets();
   bool checkFlow();
@@ -136,7 +135,7 @@ struct FuncChecker {
   int numIters() const { return m_func->numIterators(); }
   int numLocals() const { return m_func->numLocals(); }
   int numParams() const { return m_func->params.size(); }
-  const UnitEmitter* unit() const { return &m_func->ue(); }
+  const UnitEmitter* unit() const { return m_unit; }
 
  private:
   template<class... Args>
@@ -159,27 +158,42 @@ struct FuncChecker {
   Arena m_arena;
   BlockInfo* m_info; // one per block
   const FuncEmitter* const m_func;
+  const UnitEmitter* const m_unit;
   Graph* m_graph;
   Bits m_instrs;
   ErrorMode m_errmode;
   FlavorDesc* m_tmp_sig;
   Id m_last_rpo_id; // rpo_id of the last block visited
+  StringToStringTMap& m_createCls;
 };
 
 const StaticString s_invoke("__invoke");
 
-bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
+bool checkNativeFunc(const FuncEmitter* func, const UnitEmitter* unit, ErrorMode mode) {
+  if (!Cfg::Eval::VerifySystemLibHasNativeImpl) {
+    return true;
+  }
+
   auto const funcname = func->name;
   auto const pc = func->pce();
   auto const clsname = pc ? pc->name() : nullptr;
-  auto const& info = Native::getNativeFunction(func->ue().m_nativeFuncs,
+  always_assert(unit->m_extension);
+  auto const& info = Native::getNativeFunction(unit->m_extension->nativeFuncs(),
                                                funcname, clsname,
                                                func->attrs & AttrStatic);
 
-  if (!info.ptr) return true;
+  if (!info.ptr) {
+    verify_error(unit, func, mode == kThrow,
+      "<<__Native>> function %s%s%s is missing native impl.\n",
+      clsname ? clsname->data() : "",
+      clsname ? "::" : "",
+      funcname->data()
+    );
+    return false;
+  }
 
   if (func->isAsync) {
-    verify_error(&func->ue(), func, mode == kThrow,
+    verify_error(unit, func, mode == kThrow,
       "<<__Native>> function %s%s%s is declared async; <<__Native>> functions "
       "can return Awaitable<T>, but can not be declared async.\n",
       clsname ? clsname->data() : "",
@@ -189,14 +203,13 @@ bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
     return false;
   }
 
-  auto const& tc = func->retTypeConstraint;
-  auto const message = Native::checkTypeFunc(info.sig, tc, func);
+  auto const message = Native::checkTypeFunc(info.sig, func);
 
   if (message) {
     auto const tstr = info.sig.toString(clsname ? clsname->data() : nullptr,
                                         funcname->data());
 
-    verify_error(&func->ue(), func, mode == kThrow,
+    verify_error(unit, func, mode == kThrow,
       "<<__Native>> function %s%s%s does not match C++ function "
       "signature (%s): %s\n",
       clsname ? clsname->data() : "",
@@ -211,14 +224,17 @@ bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
   return true;
 }
 
-bool checkFunc(const FuncEmitter* func, ErrorMode mode) {
+bool checkFunc(const FuncEmitter* func,
+               const UnitEmitter* unit,
+               StringToStringTMap& createCls,
+               ErrorMode mode) {
   if (mode == kVerbose) {
-    pretty_print(func, std::cout);
+    pretty_print(func, unit, std::cout);
     if (!func->pce()) {
       printf("  FuncId %d\n", func->id());
     }
   }
-  FuncChecker v(func, mode);
+  FuncChecker v{func, unit, mode, createCls};
   return v.checkInfo() &&
          v.checkDef() &&
          v.checkOffsets() &&
@@ -234,9 +250,9 @@ bool isInitialized(const State& state) {
 // assumes that this edge may get taken.
 //
 // This list should include instructions that are emitted for gotos or for iter
-// or local scope cleanup blocks. "IterFree", "LIterFree", "UnsetL", "Jmp", and
-// "Silence" are all used in these blocks. The "Ret*" ops are used for returns
-// inside loop bodies, as well. If HHBBC determines that a block is unreachable,
+// or local scope cleanup blocks. "IterFree", "UnsetL", and "Jmp"
+// are all used in these blocks. The "Ret*" ops are used for returns inside
+// loop bodies, as well. If HHBBC determines that a block is unreachable,
 // it will replace its contents with "String ...; Fatal", which we also include.
 //
 // Some of the ops here require justification:
@@ -253,28 +269,32 @@ bool mayTakeExnEdges(Op op) {
   switch (op) {
     case Op::AssertRATL:
     case Op::AssertRATStk:
+    case Op::Enter:
     case Op::Jmp:
-    case Op::JmpNS:
     case Op::Fatal:
     case Op::IterFree:
-    case Op::LIterFree:
     case Op::RetC:
     case Op::RetCSuspended:
     case Op::RetM:
-    case Op::Silence:
     case Op::String:
     case Op::UnsetL:
+    case Op::StaticAnalysisError:
       return false;
     default:
       return true;
   }
 }
 
-FuncChecker::FuncChecker(const FuncEmitter* f, ErrorMode mode)
+FuncChecker::FuncChecker(const FuncEmitter* f,
+                         const UnitEmitter* unit,
+                         ErrorMode mode,
+                         StringToStringTMap& createCls)
 : m_func(f)
+, m_unit(unit)
 , m_graph(0)
 , m_instrs(m_arena, f->bcPos() + 1)
 , m_errmode(mode)
+, m_createCls(createCls)
 {}
 
 FuncChecker::~FuncChecker() {
@@ -383,7 +403,7 @@ bool FuncChecker::checkOffsets() {
  */
 bool FuncChecker::checkPrimaryBody(Offset base, Offset past) {
   bool ok = true;
-  typedef std::list<PC> BranchList;
+  using BranchList = std::list<PC>;
   BranchList branches;
   PC bc = m_func->bc();
   // Find instruction boundaries and branch instructions.
@@ -422,7 +442,7 @@ bool FuncChecker::checkPrimaryBody(Offset base, Offset past) {
       }
       if ((instrFlags(op) & TF) == 0) {
         error("Last instruction in primary body is not terminal %d:%s\n",
-              offset(pc), instrToString(pc, m_func).c_str());
+              offset(pc), instrToString(pc, m_func, m_unit).c_str());
         ok = false;
       }
     }
@@ -433,8 +453,8 @@ bool FuncChecker::checkPrimaryBody(Offset base, Offset past) {
     auto const targets = instrJumpTargets(bc, offset(branch));
     for (auto const& target : targets) {
       ok &= checkOffset("branch target", target, "primary body", base, past);
-      if (peek_op(branch) == Op::JmpNS && target == offset(branch)) {
-        error("JmpNS may not have zero offset in %s\n", "primary body");
+      if (peek_op(branch) == Op::Enter && target == offset(branch)) {
+        error("Enter may not have zero offset in %s\n", "primary body");
         ok = false;
       }
     }
@@ -684,8 +704,6 @@ bool FuncChecker::checkImmITA(PC& pc, PC const instr) {
     error("invalid iterator variable id %d at %d\n", ita.iterId, offset(instr));
     ok = false;
   }
-  ok &= checkLocal(pc, ita.valId);
-  if (ita.hasKey()) ok &= checkLocal(pc, ita.keyId);
   return ok;
 }
 
@@ -694,6 +712,36 @@ bool FuncChecker::checkImmFCA(PC& pc, PC const instr) {
   if (fca.numRets == 0) {
     ferror("FCall at {} must return at least one value\n", offset(instr));
     return false;
+  }
+  bool hasNamedArgNames = fca.namedArgNames != -1;
+  TypedValue prevName;
+  if (hasNamedArgNames) {
+    if (!checkArray(pc, fca.namedArgNames)) {
+      ferror("FCall at {} has invalid named arg names array id {}\n",
+             offset(instr),
+             fca.namedArgNames);
+     return false;
+    }
+    auto names = m_unit->lookupArrayId(fca.namedArgNames);
+    for (int64_t i = 0; i < names->size(); ++i) {
+      auto curName = names->get(i);
+      if (!tvIsString(curName)) {
+        ferror("FCall at {} has non-string {}'th named arg name\n", offset(instr), i);
+        return false;
+      }
+      if (i > 0) {
+        auto curStr = curName.m_data.pstr;
+        auto prevStr = prevName.m_data.pstr;
+        if (curStr->compare(prevStr) <= 0) {
+          ferror("FCall at {} expected {} to be lexicographically greater than {}\n",
+                 offset(instr),
+                 curStr->toCppString(),
+                 prevStr->toCppString());
+          return false;
+        }
+      }
+      prevName = curName;
+    }
   }
   return true;
 }
@@ -824,6 +872,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     }
     return m_tmp_sig;
   case Op::FCallClsMethod:
+  case Op::FCallClsMethodM:
   case Op::FCallClsMethodD:
   case Op::FCallClsMethodS:
   case Op::FCallClsMethodSD:
@@ -1047,7 +1096,7 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
   bool ok = true;
   auto op = peek_op(pc);
   auto const id = getIterId(pc);
-  if (op == Op::IterInit || op == Op::LIterInit) {
+  if (op == Op::IterInit) {
     if (cur->iters[id]) {
       error("IterInit* <%d> trying to double-initialize\n", id);
       ok = false;
@@ -1057,7 +1106,7 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
       error("Cannot access un-initialized iter %d\n", id);
       ok = false;
     }
-    if (op == Op::IterFree || op == Op::LIterFree) {
+    if (op == Op::IterFree) {
       cur->iters[id] = false;
     }
   }
@@ -1094,11 +1143,7 @@ std::set<int> localIds(Op op, PC pc) {
 #define VSA(n)
 #define KA(n)
 #define LAR(n)
-#define ITA(n) do {                             \
-    auto const ita = getImm(pc, n).u_ITA;       \
-    result.insert(ita.valId);                   \
-    if (ita.hasKey()) result.insert(ita.keyId); \
-  } while (false);
+#define ITA(n)
 #define FCA(n)
 #define O(name, imm, in, out, flags) case Op::name: imm; break;
     OPCODES
@@ -1137,17 +1182,6 @@ std::set<int> localIds(Op op, PC pc) {
 
 bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
   switch (op) {
-    case Op::BreakTraceHint:
-      if (cur->mbr_live) {
-        // Special case for unreachable code. hhbbc generates
-        // BreakTraceHint; String; Fatal
-        auto const str = pc + instrLen(pc);
-        if (peek_op(str) != Op::String) break;
-        auto const fatal = str + instrLen(str);
-        if (peek_op(fatal) != Op::Fatal) break;
-        cur->mbr_live = false;
-      }
-      break;
     case Op::InitProp:
     case Op::CheckProp: {
         auto fname = m_func->name->toCppString();
@@ -1157,7 +1191,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
           ferror("{} cannot appear in {} function\n", opcodeToName(op), fname);
           return false;
         }
-        auto const prop = m_func->ue().lookupLitstrCopy(getImm(pc, 0).u_SA);
+        auto const prop = m_unit->lookupLitstrIdCopy(getImm(pc, 0).u_SA);
         if (!m_func->pce() || !m_func->pce()->hasProp(prop.get())){
              ferror("{} references non-existent property {}\n",
                     opcodeToName(op), prop);
@@ -1174,6 +1208,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       auto new_pc = pc;
       decode_op(new_pc);
       if (decode_oa<BareThisOp>(new_pc) != BareThisOp::NeverNull) break;
+      [[fallthrough]];
     }
     case Op::BaseH: {
       // In HHBBC we can track the $this across loads into locals and pushes
@@ -1181,7 +1216,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       // we may end up knowing that $this is never null. The verifier doesn't
       // currently support this type of sophisticated tracking and it's doubtful
       // there would be much value in adding it.
-      if (!RuntimeOption::RepoAuthoritative && !cur->guaranteedThis) {
+      if (!Cfg::Repo::Authoritative && !cur->guaranteedThis) {
         ferror("{} required that $this be guaranteed to be non-null\n",
         opcodeToName(op));
         return false;
@@ -1189,16 +1224,27 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       break;
     }
     case Op::CreateCl: {
-      auto const id = getImm(pc, 1).u_IVA;
-      if (id >= unit()->numPreClasses()) {
-        ferror("CreateCl must reference a closure defined in the same "
-               "unit\n");
+      auto const name = m_unit->lookupLitstrIdCopy(getImm(pc, 1).u_SA);
+      auto const preCls = [&] () -> const PreClassEmitter* {
+        for (auto const pce : unit()->preclasses()) {
+          if (pce->name()->tsame(name.get())) return pce;
+        }
+        return nullptr;
+      }();
+      if (!preCls) {
+        ferror("CreateCl references non-existent class {}\n", name);
         return false;
       }
-      auto const preCls = unit()->pce(id);
-      if (preCls->parentName()->toCppString() != std::string("Closure")) {
-        ferror("CreateCl references non-closure class {} ({})\n",
-               preCls->name(), id);
+      if (!preCls->parentName() ||
+          preCls->parentName()->toCppString() != "Closure") {
+        ferror("CreateCl references non-closure class {}\n", preCls->name());
+        return false;
+      }
+      auto const [existing, emplaced] =
+        m_createCls.emplace(preCls->name(), m_func->name);
+      if (!emplaced && !existing->second->fsame(m_func->name)) {
+        ferror("Closure {} referenced in multiple funcs {} and {}\n",
+               preCls->name(), existing->second, m_func->name);
         return false;
       }
       auto const numBound = getImm(pc, 0).u_IVA;
@@ -1225,7 +1271,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
                 #name, #name); \
         return false; \
       } \
-      auto const dt = unit()->lookupArrayCopy(id)->toDataType(); \
+      auto const dt = unit()->lookupArrayIdCopy(id)->toDataType(); \
       if (dt != KindOf##name) { \
         ferror("{} references array data that is a {}\n", #name, dt); \
         return false; \
@@ -1282,8 +1328,8 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
         return false;
       }
       if (op == Op::AssertRATL) break;
+      [[fallthrough]];
     }
-    case Op::BaseGC:
     case Op::BaseC: {
       auto const stackIdx = getImm(pc, 0).u_IVA;
       if (stackIdx >= cur->stklen) {
@@ -1328,14 +1374,13 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       }
       break;
     }
-
     case Op::AwaitAll: {
       auto const& range = getImm(pc, 0).u_LAR;
       if (range.count == 0) {
         ferror("{} must have a non-empty local range\n", opcodeToName(op));
         return false;
       }
-      // Fall-through
+      [[fallthrough]];
     }
     case Op::Await: {
       if (!m_func->isAsync) {
@@ -1348,29 +1393,27 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       }
       break;
     }
-    case Op::Silence: {
-      auto new_pc = pc;
-      decode_op(new_pc);
-      auto const local = decode_iva(new_pc);
-      if (m_func->localNameMap()[local]) {
-        ferror("Cannot store error reporting value in named local\n");
+    case Op::AwaitLowPri: {
+      if (!m_func->isAsync) {
+        ferror("{} may only appear in an async function\n", opcodeToName(op));
         return false;
       }
-
-      auto const silence = decode_oa<SilenceOp>(new_pc);
-      if (local + 1 > cur->silences.size()) cur->silences.resize(local + 1);
-      if (silence == SilenceOp::End && !cur->silences[local]) {
-        ferror("Silence ended on local variable {} with no start\n", local);
+      if (m_func->isGenerator) {
+        ferror("{} may not appear in a generator\n", opcodeToName(op));
         return false;
       }
-
-      cur->silences[local] = silence == SilenceOp::Start ? 1 : 0;
+      if (cur->stklen != instrNumPops(pc)) {
+        ferror("{} may not be used with non-empty stack\n", opcodeToName(op));
+        return false;
+      }
       break;
     }
     case Op::Fatal:
-      // fatals don't do exception handling, and the silence state is reset
-      // by the runtime.
-      cur->silences.clear();
+      // fatals don't do exception handling
+      break;
+
+    case Op::StaticAnalysisError:
+      cur->mbr_live = false;
       break;
 
     case Op::NewVec:
@@ -1409,7 +1452,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
             ferror("Generics passed to {} don't exist\n", opcodeToName(op));
             return false;
           }
-          auto const arr = unit()->lookupArrayCopy(id);
+          auto const arr = unit()->lookupArrayIdCopy(id);
           if (doesTypeStructureContainTUnresolved(arr.get())) {
             ferror("Generics passed to {} contain unresolved generics. "
                    "Call CombineAndResolveTypeStruct to resolve them\n",
@@ -1438,20 +1481,8 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       }
       break;
     }
-
     default:
       break;
-  }
-
-  if (op != Op::Silence && !isTypeAssert(op)) {
-    for (auto const local : localIds(op, pc)) {
-      if (cur->silences.size() > local && cur->silences[local]) {
-        ferror("{} at PC {} affected a local variable ({}) which was reserved "
-               "for storing the error reporting level\n",
-               opcodeToName(op), offset(pc), local);
-        return false;
-      }
-    }
   }
 
   return true;
@@ -1499,13 +1530,13 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
 
   if (isMemberBaseOp(op)) {
     cur->mbr_live = true;
-    if (op == Op::BaseGC || op == Op::BaseGL || op == Op::BaseL)  {
+    if (op == Op::BaseL)  {
       auto new_pc = pc;
       decode_op(new_pc);
       if (op == Op::BaseL) decode_iva(new_pc);
       decode_iva(new_pc);
       cur->mbr_mode = decode_oa<MOpMode>(new_pc);
-      if (op == Op::BaseL) decode_oa<ReadonlyOp>(new_pc);
+      decode_oa<ReadonlyOp>(new_pc);
     }
   } else if (isMemberFinalOp(op)) {
     cur->mbr_live = false;
@@ -1648,7 +1679,6 @@ void FuncChecker::initState(State* s) {
   s->stklen = 0;
   s->mbr_live = false;
   s->mbr_mode.reset();
-  s->silences.clear();
   s->guaranteedThis = m_func->pce() && !(m_func->attrs & AttrStatic);
   s->mbrMustContainMutableLocalOrThis = false;
   s->afterDim = false;
@@ -1664,7 +1694,6 @@ void FuncChecker::copyState(State* to, const State* from) {
   to->stklen = from->stklen;
   to->mbr_live = from->mbr_live;
   to->mbr_mode = from->mbr_mode;
-  to->silences = from->silences;
   to->guaranteedThis = from->guaranteedThis;
   to->mbrMustContainMutableLocalOrThis = from->mbrMustContainMutableLocalOrThis;
   to->afterDim = from->afterDim;
@@ -1703,7 +1732,7 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     if (m_errmode == kVerbose) {
       std::cout << "  " << std::setw(5) << offset(pc) << ":" <<
                    stateToString(cur) << " " <<
-                   instrToString(pc, m_func) << std::endl;
+                   instrToString(pc, m_func, m_unit) << std::endl;
     }
     auto const op = peek_op(pc);
     if (mayTakeExnEdges(op)) ok &= checkExnEdge(cur, op, b);
@@ -1751,15 +1780,14 @@ bool FuncChecker::checkFlow() {
 
 bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
   bool ok = true;
-  int succs = numSuccBlocks(b);
 
-  if (isIter(b->last) && succs == 2) {
+  if (isIter(b->last) && b->succ_count == 2) {
     // IterInit* and IterNext*, Both implicitly free their iterator variable
     // on the loop-exit path.  Compute the iterator state on the "taken" path;
     // the fall-through path has the opposite state.
     auto const id = getIterId(b->last);
     auto const last_op = peek_op(b->last);
-    bool taken_state = last_op == OpIterNext || last_op == OpLIterNext;
+    bool taken_state = last_op == OpIterNext;
     bool save = cur->iters[id];
     cur->iters[id] = taken_state;
     if (m_errmode == kVerbose) {
@@ -1774,11 +1802,11 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     }
     ok &= checkEdge(b, *cur, b->succs[0]);
     cur->iters[id] = save;
-  } else if (peek_op(b->last) == OpMemoGet && numSuccBlocks(b) == 2) {
+  } else if (peek_op(b->last) == OpMemoGet && b->succ_count == 2) {
     ok &= checkEdge(b, *cur, b->succs[0]);
     --cur->stklen;
     ok &= checkEdge(b, *cur, b->succs[1]);
-  } else if (peek_op(b->last) == OpMemoGetEager && numSuccBlocks(b) == 3) {
+  } else if (peek_op(b->last) == OpMemoGetEager && b->succ_count == 3) {
     ok &= checkEdge(b, *cur, b->succs[0]);
     --cur->stklen;
     ok &= checkEdge(b, *cur, b->succs[1]);
@@ -1794,13 +1822,18 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     }
   }
 
-  for (int i = 0; i < succs; i++) {
-    auto const t = b->succs[i];
-    if (t && offset(t->start) == 0) {
+  if (peek_op(b->last) == OpEnter) {
+    assertx(b->succ_count == 1);
+    auto const t = b->succs[0];
+    if (offset(t->start) != 0) {
+      error("Enter target offset %d must point to the entry block\n",
+            offset(t->start));
+      ok = false;
+    } else {
       boost::dynamic_bitset<> visited(m_graph->block_count);
       if (Block::reachable(t, b, visited)) {
-        error("%s: Control flow cycles from the entry-block "
-              "to itself are not allowed\n", opcodeToName(peek_op(b->last)));
+        error("DV initializer at B%d can't be reachable from the entry block\n",
+              b->id);
         ok = false;
       }
     }
@@ -1810,12 +1843,6 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     // MBR must not be live across control flow edges.
     error("Member base register live at end of B%d\n", b->id);
     ok = false;
-  }
-
-  if (succs == 0 && cur->silences.find_first() != cur->silences.npos &&
-      !b->exn) {
-    error("Error reporting was silenced at end of terminal block B%d\n", b->id);
-    return false;
   }
 
   return ok;
@@ -1849,21 +1876,6 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
   if (!isInitialized(state)) {
     copyState(&state, &cur);
     return b == nullptr || maybe_revisit();
-  }
-
-  // Check that silence states match. An empty bitset is equivalent to a bitset
-  // of 0s; since most funcs don't use Silence ops, we can avoid allocations.
-  if (cur.silences.size() != state.silences.size()) {
-    state.silences.resize(cur.silences.size());
-  }
-  if (cur.silences != state.silences) {
-    std::string current, target;
-    boost::to_string(cur.silences, current);
-    boost::to_string(state.silences, target);
-    error("Silencer state mismatch on edge B%d->B%d: B%d had state %s, "
-          "B%d had state %s\n", b->id, t->id, b->id, current.c_str(),
-          t->id, target.c_str());
-    return false;
   }
 
   // Check that the stacks agree on depth and flavor.

@@ -7,19 +7,19 @@ class C {
   const type SH = shape('a' => int, 'b' => string);
   const type TU = (int, string);
 
-  public function d_(): darray<string, bool> { return darray[]; }
-  public function v_(): varray<int> { return varray[]; }
-  public function dv(): varray_or_darray<float> { return varray[]; }
+  public function d_(): darray<string, bool> { return dict[]; }
+  public function v_(): varray<int> { return vec[]; }
+  public function dv(): varray_or_darray<float> { return vec[]; }
   public function sh(): shape(?'a' => int, ?'b' => string) { return shape(); }
   public function tu(): (int, string) { return tuple(17, 'x'); }
 }
 
-function show($x) {
+function show($x) :mixed{
   print(json_encode($x, JSON_FB_FORCE_HACK_ARRAYS)."\n");
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   print("type_structure:\n");
   show(type_structure(C::class, 'D_'));
   show(type_structure(C::class, 'V_'));

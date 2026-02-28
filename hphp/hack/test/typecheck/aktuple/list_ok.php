@@ -1,9 +1,9 @@
-<?hh //strict
+<?hh
 
 /* Tuple-like arrays can be used with list(...) statement - usage with no
  * errors. */
 function test(): void {
-  $a = varray[4, 'aaa'];
+  $a = vec[4, 'aaa'];
   list($int, $string) = $a;
 
   take_string($string);

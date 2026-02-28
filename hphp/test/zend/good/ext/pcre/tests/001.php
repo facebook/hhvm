@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-foreach (varray['2006-05-13', '06-12-12', 'data: "12-Aug-87"'] as $s) {
+foreach (vec['2006-05-13', '06-12-12', 'data: "12-Aug-87"'] as $s) {
     $m = null;
     var_dump(preg_match_with_matches(
       '~

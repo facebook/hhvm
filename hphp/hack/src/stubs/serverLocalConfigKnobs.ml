@@ -6,4 +6,4 @@
  *
  *)
 
-let apply_justknobs_overrides ~silent:_ config = config
+let apply_justknobs_overrides ~silent:_ config ~from:_ = config

@@ -1,8 +1,0 @@
-File "variadic_param_callee.bad.php", line 4, characters 10-10:
-Function  `f` is not dynamically callable. (Typing[4402])
-  File "variadic_param_callee.bad.php", line 5, characters 8-10:
-  Invalid argument
-  File "variadic_param_callee.bad.php", line 9, characters 19-21:
-  Expected `int` (variadic argument)
-  File "variadic_param_callee.bad.php", line 4, characters 21-23:
-  But got `dynamic` because method must be callable in a dynamic context

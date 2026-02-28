@@ -1,7 +1,7 @@
 <?hh
 
 class test {
-    function foo() {
+    function foo() :mixed{
         return "blah";
     }
 }

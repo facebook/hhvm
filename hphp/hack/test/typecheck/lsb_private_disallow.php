@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class A {
   <<__LSB>> private static int $x = 0;

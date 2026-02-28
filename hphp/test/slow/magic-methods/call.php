@@ -1,5 +1,5 @@
 <?hh
 
 class C {
-  function __call() {}
+  function __call() :mixed{}
 }

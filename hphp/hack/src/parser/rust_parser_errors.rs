@@ -3,34 +3,38 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use itertools::Itertools;
+use std::borrow::Cow;
 use std::collections::BTreeMap;
-use std::{matches, str::FromStr};
+use std::matches;
+use std::str::FromStr;
 
-use strum::IntoEnumIterator;
-use strum_macros::{Display, EnumIter, EnumString, IntoStaticStr};
-
-use hash::{HashMap, HashSet};
-use naming_special_names_rust as sn;
-use oxidized::parser_options::ParserOptions;
-use parser_core_types::{
-    indexed_source_text::IndexedSourceText,
-    lexable_token::LexableToken,
-    syntax_by_ref::{
-        positioned_syntax::PositionedSyntax,
-        positioned_token::PositionedToken,
-        positioned_value::PositionedValue,
-        syntax::Syntax,
-        syntax_variant_generated::{ListItemChildren, SyntaxVariant, SyntaxVariant::*},
-    },
-    syntax_error::{self as errors, Error, ErrorType, LvalRoot, SyntaxError, SyntaxQuickfix},
-    syntax_trait::SyntaxTrait,
-    syntax_tree::SyntaxTree,
-    token_kind::TokenKind,
-};
-use stack_limit::StackLimit;
-
+use hash::HashMap;
+use hash::HashSet;
 use hh_autoimport_rust as hh_autoimport;
+use itertools::Itertools;
+use naming_special_names_rust as sn;
+use oxidized::experimental_features::FeatureName;
+use oxidized::namespace_env::Mode;
+use oxidized::parser_options::ParserOptions;
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::syntax_by_ref::positioned_syntax::PositionedSyntax;
+use parser_core_types::syntax_by_ref::positioned_token::PositionedToken;
+use parser_core_types::syntax_by_ref::positioned_value::PositionedValue;
+use parser_core_types::syntax_by_ref::syntax::Syntax;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::ListItemChildren;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant;
+use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant::*;
+use parser_core_types::syntax_error::Error;
+use parser_core_types::syntax_error::ErrorType;
+use parser_core_types::syntax_error::LvalRoot;
+use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_error::SyntaxQuickfix;
+use parser_core_types::syntax_error::{self as errors};
+use parser_core_types::syntax_trait::SyntaxTrait;
+use parser_core_types::syntax_tree::SyntaxTree;
+use parser_core_types::token_kind::TokenKind;
+use strum::IntoEnumIterator;
 
 #[derive(Clone, PartialEq, Debug)]
 struct Location {
@@ -61,62 +65,6 @@ enum BinopAllowsAwaitInPositions {
     BinopAllowAwaitNone,
 }
 
-#[allow(dead_code)] // Deprecated is currently unused
-#[derive(Eq, PartialEq)]
-enum FeatureStatus {
-    Unstable,
-    Preview,
-    Migration,
-    Deprecated,
-    // TODO: add other modes like "Advanced" or "Deprecated" if necessary.
-    // Those are just variants of "Preview" for the runtime's sake, though,
-    // and likely only need to be distinguished in the lint rule rather than here
-}
-
-#[derive(Clone, Copy, Eq, Display, Hash, PartialEq)]
-#[derive(EnumIter, EnumString, IntoStaticStr)]
-#[strum(serialize_all = "snake_case")]
-enum UnstableFeatures {
-    // TODO: rename this from unstable to something else
-    UnionIntersectionTypeHints,
-    ClassLevelWhere,
-    ExpressionTrees,
-    EnumClassLabel,
-    Ifc,
-    Readonly,
-    Modules,
-    ClassConstDefault,
-    TypeConstMultipleBounds,
-    ContextAliasDeclaration,
-    ContextAliasDeclarationShort,
-    MethodTraitDiamond,
-    UpcastExpression,
-    RequireClass,
-}
-impl UnstableFeatures {
-    // Preview features are allowed to run in prod. This function decides
-    // whether the feature is considered Unstable or Preview.
-    fn get_feature_status(&self) -> FeatureStatus {
-        use FeatureStatus::*;
-        match self {
-            UnstableFeatures::UnionIntersectionTypeHints => Unstable,
-            UnstableFeatures::ClassLevelWhere => Unstable,
-            UnstableFeatures::ExpressionTrees => Unstable,
-            UnstableFeatures::EnumClassLabel => Preview,
-            UnstableFeatures::Ifc => Unstable,
-            UnstableFeatures::Readonly => Preview,
-            UnstableFeatures::Modules => Unstable,
-            UnstableFeatures::ContextAliasDeclaration => Unstable,
-            UnstableFeatures::ContextAliasDeclarationShort => Preview,
-            UnstableFeatures::TypeConstMultipleBounds => Unstable,
-            UnstableFeatures::ClassConstDefault => Migration,
-            UnstableFeatures::MethodTraitDiamond => Preview,
-            UnstableFeatures::UpcastExpression => Unstable,
-            UnstableFeatures::RequireClass => Unstable,
-        }
-    }
-}
-
 use BinopAllowsAwaitInPositions::*;
 use NameKind::*;
 
@@ -135,34 +83,49 @@ enum NamespaceType {
     Unbracketed(Location),
 }
 
+#[derive(Clone, Debug)]
+enum PipeVariableState {
+    Unavailable,
+    Captured,
+    Available,
+}
+
 use NamespaceType::*;
 
 // TODO: is there a more Rust idiomatic way to write this?
 #[derive(Clone, Debug)]
 enum Strmap<X> {
-    YesCase(HashMap<String, X>),
-    NoCase(HashMap<String, X>),
+    ConstCase(HashMap<String, X>),
+
+    /// Attribute names are type names, but for historical reasons we didn't
+    /// treat them as case-insensitive like normal type names. Since we are
+    /// migrating everything to case-sensitive, treat attributes specially.
+    AttrCase(HashMap<String, X>),
+
+    FuncCase(HashMap<String, X>),
+    TypeCase(HashMap<String, X>),
+    NsCase(HashMap<String, X>),
 }
 
 impl<X> Strmap<X> {
     fn mem(&self, k: &str) -> bool {
         match &self {
-            NoCase(m) => m.contains_key(&k.to_ascii_lowercase()),
-            YesCase(m) => m.contains_key(k),
+            TypeCase(m) | NsCase(m) => m.contains_key(&k.to_ascii_lowercase()),
+            FuncCase(m) | ConstCase(m) | AttrCase(m) => m.contains_key(k),
         }
     }
 
     fn add(&mut self, k: &str, v: X) {
         match self {
-            NoCase(m) => m.insert(k.to_ascii_lowercase(), v),
-            YesCase(m) => m.insert(k.to_string(), v),
+            TypeCase(m) | NsCase(m) => m.insert(k.to_ascii_lowercase(), v),
+            FuncCase(m) | ConstCase(m) | AttrCase(m) => m.insert(k.to_string(), v),
         };
     }
 
     fn get(&self, k: &str) -> Option<&X> {
         match &self {
-            NoCase(m) => m.get(&k.to_ascii_lowercase()),
-            YesCase(m) => m.get(k),
+            TypeCase(m) | NsCase(m) => m.get(&k.to_ascii_lowercase()),
+            FuncCase(m) | ConstCase(m) | AttrCase(m) => m.get(k),
         }
     }
 
@@ -171,8 +134,11 @@ impl<X> Strmap<X> {
         F: Fn(&X) -> bool,
     {
         match self {
-            NoCase(m) => NoCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
-            YesCase(m) => YesCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
+            FuncCase(m) => FuncCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
+            TypeCase(m) => TypeCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
+            NsCase(m) => NsCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
+            ConstCase(m) => ConstCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
+            AttrCase(m) => AttrCase(m.into_iter().filter(|(_, x)| f(x)).collect()),
         }
     }
 }
@@ -180,26 +146,26 @@ impl<X> Strmap<X> {
 use crate::Strmap::*;
 
 fn empty_trait_require_clauses() -> Strmap<TokenKind> {
-    NoCase(HashMap::default())
+    TypeCase(HashMap::default())
 }
 
 #[derive(Clone, Debug)]
 struct UsedNames {
-    classes: Strmap<FirstUseOrDef>,    // NoCase
-    namespaces: Strmap<FirstUseOrDef>, // NoCase
-    functions: Strmap<FirstUseOrDef>,  // NoCase
-    constants: Strmap<FirstUseOrDef>,  // YesCase
-    attributes: Strmap<FirstUseOrDef>, // YesCase
+    classes: Strmap<FirstUseOrDef>,    // TypeCase
+    namespaces: Strmap<FirstUseOrDef>, // NsCase
+    functions: Strmap<FirstUseOrDef>,  // FuncCase
+    constants: Strmap<FirstUseOrDef>,  // ConstCase
+    attributes: Strmap<FirstUseOrDef>, // AttrCase
 }
 
 impl UsedNames {
     fn empty() -> Self {
         Self {
-            classes: NoCase(HashMap::default()),
-            namespaces: NoCase(HashMap::default()),
-            functions: NoCase(HashMap::default()),
-            constants: YesCase(HashMap::default()),
-            attributes: YesCase(HashMap::default()),
+            classes: TypeCase(HashMap::default()),
+            namespaces: NsCase(HashMap::default()),
+            functions: FuncCase(HashMap::default()),
+            constants: ConstCase(HashMap::default()),
+            attributes: AttrCase(HashMap::default()),
         }
     }
 }
@@ -213,8 +179,9 @@ struct Context<'a> {
     pub active_callable: Option<S<'a>>,
     pub active_callable_attr_spec: Option<S<'a>>,
     pub active_const: Option<S<'a>>,
-    pub active_unstable_features: HashSet<UnstableFeatures>,
-    pub active_expression_tree: bool,
+    pub active_enum_class: Option<S<'a>>,
+    pub pipe_variable_state: PipeVariableState,
+    active_experimental_features: HashSet<FeatureName>,
 }
 
 struct Env<'a, State> {
@@ -224,9 +191,8 @@ struct Env<'a, State> {
     context: Context<'a>,
     hhvm_compat_mode: bool,
     hhi_mode: bool,
-    codegen: bool,
+    mode: Mode,
     systemlib: bool,
-    stack_limit: Option<&'a StackLimit>,
 }
 
 impl<'a, State> Env<'a, State> {
@@ -235,7 +201,7 @@ impl<'a, State> Env<'a, State> {
     }
 
     fn is_typechecker(&self) -> bool {
-        !self.codegen
+        matches!(self.mode, Mode::ForTypecheck)
     }
 
     fn is_hhi_mode(&self) -> bool {
@@ -273,19 +239,28 @@ fn make_first_use_or_def(
         global: !is_method && namespace_name == GLOBAL_NAMESPACE_NAME,
     }
 }
+
+#[derive(Default, Debug, Clone)]
+struct ParserErrorsContext {
+    is_in_concurrent_block: bool,
+    active_expression_tree: bool,
+    expression_tree_depth: i32,
+}
+
 struct ParserErrors<'a, State> {
     env: Env<'a, State>,
     errors: Vec<SyntaxError>,
     parents: Vec<S<'a>>,
 
     trait_require_clauses: Strmap<TokenKind>,
-    is_in_concurrent_block: bool,
     names: UsedNames,
     // Named (not anonymous) namespaces that the current expression is enclosed within.
     nested_namespaces: Vec<S<'a>>,
     namespace_type: NamespaceType,
     namespace_name: String,
     uses_readonly: bool,
+    in_module: bool,
+    context: ParserErrorsContext,
 }
 
 fn strip_ns(name: &str) -> &str {
@@ -293,10 +268,6 @@ fn strip_ns(name: &str) -> &str {
         Some('\\') => &name[1..],
         _ => name,
     }
-}
-
-fn strip_hh_ns(name: &str) -> &str {
-    name.trim_start_matches("\\HH\\")
 }
 
 // test a node is a syntaxlist and that the list contains an element
@@ -331,10 +302,24 @@ fn get_modifiers_of_declaration<'a>(node: S<'a>) -> Option<S<'a>> {
         ConstDeclaration(x) => Some(&x.modifiers),
         TypeConstDeclaration(x) => Some(&x.modifiers),
         ClassishDeclaration(x) => Some(&x.modifiers),
-        TraitUseAliasItem(x) => Some(&x.modifiers),
         EnumClassDeclaration(x) => Some(&x.modifiers),
         EnumClassEnumerator(x) => Some(&x.modifiers),
+        EnumDeclaration(x) => Some(&x.modifiers),
+        AliasDeclaration(x) => Some(&x.modifiers),
+        CaseTypeDeclaration(x) => Some(&x.modifiers),
         _ => None,
+    }
+}
+
+fn declaration_is_toplevel<'a>(node: S<'a>) -> bool {
+    match &node.children {
+        FunctionDeclaration(_)
+        | ClassishDeclaration(_)
+        | EnumClassDeclaration(_)
+        | EnumDeclaration(_)
+        | CaseTypeDeclaration(_)
+        | AliasDeclaration(_) => true,
+        _ => false,
     }
 }
 
@@ -408,8 +393,11 @@ fn syntax_to_list<'a>(
     include_separators: bool,
     node: S<'a>,
 ) -> impl DoubleEndedIterator<Item = S<'a>> {
-    use itertools::Either::{Left, Right};
-    use std::iter::{empty, once};
+    use std::iter::empty;
+    use std::iter::once;
+
+    use itertools::Either::Left;
+    use itertools::Either::Right;
     let on_list_item =
         move |x: &'a ListItemChildren<'_, PositionedToken<'_>, PositionedValue<'_>>| {
             if include_separators {
@@ -420,14 +408,10 @@ fn syntax_to_list<'a>(
         };
     match &node.children {
         Missing => Left(Left(empty())),
-        SyntaxList(s) => Left(Right(
-            s.iter()
-                .map(move |x| match &x.children {
-                    ListItem(x) => Left(on_list_item(x)),
-                    _ => Right(once(x)),
-                })
-                .flatten(),
-        )),
+        SyntaxList(s) => Left(Right(s.iter().flat_map(move |x| match &x.children {
+            ListItem(x) => Left(on_list_item(x)),
+            _ => Right(once(x)),
+        }))),
         ListItem(x) => Right(Left(on_list_item(x))),
         _ => Right(Right(once(node))),
     }
@@ -447,14 +431,14 @@ where
 {
     let mut iter = syntax_to_list_no_separators(node);
     iter.next_back();
-    iter.find(|x| assert_fun(*x))
+    iter.find(|x| assert_fun(x))
 }
 
 fn attr_spec_to_node_list<'a>(node: S<'a>) -> impl DoubleEndedIterator<Item = S<'a>> {
-    use itertools::Either::{Left, Right};
+    use itertools::Either::Left;
+    use itertools::Either::Right;
     let f = |attrs| Left(syntax_to_list_no_separators(attrs));
     match &node.children {
-        AttributeSpecification(x) => f(&x.attributes),
         OldAttributeSpecification(x) => f(&x.attributes),
         FileAttributeSpecification(x) => f(&x.attributes),
         _ => Right(std::iter::empty()),
@@ -463,10 +447,9 @@ fn attr_spec_to_node_list<'a>(node: S<'a>) -> impl DoubleEndedIterator<Item = S<
 
 fn attr_constructor_call<'a>(
     node: S<'a>,
-) -> &'a SyntaxVariant<'_, PositionedToken<'a>, PositionedValue<'a>> {
+) -> &'a SyntaxVariant<'a, PositionedToken<'a>, PositionedValue<'a>> {
     match &node.children {
         ConstructorCall(_) => &node.children,
-        Attribute(x) => &x.attribute_name.children,
         _ => &Missing,
     }
 }
@@ -491,35 +474,60 @@ where
     }
 }
 
-fn is_variadic_expression(node: S<'_>) -> bool {
+fn is_splat_expression(node: S<'_>) -> bool {
     is_decorated_expression(node, |x| x.is_ellipsis())
-        || test_decorated_expression_child(node, &is_variadic_expression)
-}
-
-fn is_double_variadic(node: S<'_>) -> bool {
-    is_decorated_expression(node, |x| x.is_ellipsis())
-        && test_decorated_expression_child(node, &is_variadic_expression)
-}
-
-fn is_variadic_parameter_variable(node: S<'_>) -> bool {
-    // TODO: This shouldn't be a decorated *expression* because we are not
-    // expecting an expression at all. We're expecting a declaration.
-    is_variadic_expression(node)
+        || test_decorated_expression_child(node, is_splat_expression)
 }
 
 fn is_variadic_parameter_declaration(node: S<'_>) -> bool {
     match &node.children {
-        VariadicParameter(_) => true,
-        ParameterDeclaration(x) => is_variadic_parameter_variable(&x.name),
+        ParameterDeclaration(x) => x.ellipsis.is_ellipsis(),
+        ClosureParameterTypeSpecifier(x) => x.ellipsis.is_ellipsis(),
+        _ => false,
+    }
+}
+fn is_readonly_parameter_declaration(node: S<'_>) -> bool {
+    match &node.children {
+        ParameterDeclaration(x) => x.readonly.is_readonly(),
+        ClosureParameterTypeSpecifier(x) => x.readonly.is_readonly(),
+        _ => false,
+    }
+}
+fn is_optional_parameter_declaration(node: S<'_>) -> bool {
+    match &node.children {
+        ParameterDeclaration(x) => x.optional.is_optional(),
+        ClosureParameterTypeSpecifier(x) => x.optional.is_optional(),
+        _ => false,
+    }
+}
+fn is_splat_parameter_declaration(node: S<'_>) -> bool {
+    match &node.children {
+        ParameterDeclaration(x) => x.pre_ellipsis.is_ellipsis(),
+        ClosureParameterTypeSpecifier(x) => x.pre_ellipsis.is_ellipsis(),
         _ => false,
     }
 }
 fn misplaced_variadic_param<'a>(param: S<'a>) -> Option<S<'a>> {
-    assert_last_in_list(&is_variadic_parameter_declaration, param)
+    assert_last_in_list(is_variadic_parameter_declaration, param)
 }
-fn misplaced_variadic_arg<'a>(args: S<'a>) -> Option<S<'a>> {
-    assert_last_in_list(&is_variadic_expression, args)
+fn misplaced_splat_param<'a>(param: S<'a>) -> Option<S<'a>> {
+    assert_last_in_list(is_splat_parameter_declaration, param)
 }
+
+fn is_named_argument(node: S<'_>) -> bool {
+    match &node.children {
+        NamedArgument(_) => true,
+        _ => false,
+    }
+}
+
+fn misplaced_splat_arg<'a>(args: S<'a>) -> Option<S<'a>> {
+    syntax_to_list_no_separators(args)
+        .skip_while(|x| !is_splat_expression(x))
+        .skip(1)
+        .find(|x| !is_named_argument(x) && !is_splat_expression(x))
+}
+
 // If a list ends with a variadic parameter followed by a comma, return it
 fn ends_with_variadic_comma<'a>(params: S<'a>) -> Option<S<'a>> {
     let mut iter = syntax_to_list_with_separators(params).rev();
@@ -534,6 +542,11 @@ fn ends_with_variadic_comma<'a>(params: S<'a>) -> Option<S<'a>> {
 // Extract variadic parameter from a parameter list
 fn variadic_param<'a>(params: S<'a>) -> Option<S<'a>> {
     syntax_to_list_with_separators(params).find(|&x| is_variadic_parameter_declaration(x))
+}
+
+// Extract splat parameter from a parameter list
+fn splat_param<'a>(params: S<'a>) -> Option<S<'a>> {
+    syntax_to_list_with_separators(params).find(|&x| is_splat_parameter_declaration(x))
 }
 
 fn is_parameter_with_default_value(param: S<'_>) -> bool {
@@ -555,14 +568,6 @@ fn list_first_duplicate_token<'a>(node: S<'a>) -> Option<S<'a>> {
         }
     }
     None
-}
-
-fn is_empty_list_or_missing(node: S<'_>) -> bool {
-    match &node.children {
-        SyntaxList(x) if x.is_empty() => true,
-        Missing => true,
-        _ => false,
-    }
 }
 
 fn token_kind(node: S<'_>) -> Option<TokenKind> {
@@ -680,13 +685,15 @@ fn make_error_from_node_with_quickfix(
     node: S<'_>,
     error: errors::Error,
     quickfix_title: &str,
+    quickfix_start: usize,
+    quickfix_end: usize,
     new_text: &str,
 ) -> SyntaxError {
     let s = start_offset(node);
     let e = end_offset(node);
     let quickfixes = vec![SyntaxQuickfix {
         title: quickfix_title.into(),
-        edits: vec![(s, e, new_text.into())],
+        edits: vec![(quickfix_start, quickfix_end, new_text.into())],
     }];
     SyntaxError::make_with_child_and_type(None, s, e, ErrorType::ParseError, error, quickfixes)
 }
@@ -720,10 +727,16 @@ fn is_invalid_xhp_attr_enum_item(node: S<'_>) -> bool {
     }
 }
 
-fn cant_be_classish_name(name: &str) -> bool {
+fn cant_be_reserved_type_name(name: &str) -> bool {
+    // Keep in sync with test/reserved
     match name.to_ascii_lowercase().as_ref() {
-        "callable" | "classname" | "darray" | "false" | "null" | "parent" | "self" | "this"
-        | "true" | "varray" => true,
+        // reserved_global_name
+        "callable" | "parent" | "self" => true,
+        // reserved_hh_name
+        "arraykey" | "bool" | "dynamic" | "float" | "int" | "mixed" | "nonnull" | "noreturn"
+        | "nothing" | "null" | "num" | "resource" | "this" | "void" | "_" => true,
+        // misc
+        "darray" | "false" | "static" | "true" | "varray" => true,
         _ => false,
     }
 }
@@ -735,7 +748,7 @@ where
     F: Fn(S<'a>) -> bool,
 {
     get_modifiers_of_declaration(declaration_node).and_then(|modifiers_list| {
-        syntax_to_list_no_separators(modifiers_list).find(|x: &S<'a>| modifier(*x))
+        syntax_to_list_no_separators(modifiers_list).find(|x: &S<'a>| modifier(x))
     })
 }
 
@@ -753,7 +766,6 @@ fn parameter_callconv<'a>(param: S<'a>) -> Option<S<'a>> {
     (match &param.children {
         ParameterDeclaration(x) => Some(&x.call_convention),
         ClosureParameterTypeSpecifier(x) => Some(&x.call_convention),
-        VariadicParameter(x) => Some(&x.call_convention),
         _ => None,
     })
     .filter(|node| !node.is_missing())
@@ -794,7 +806,6 @@ fn extract_callconv_node<'a>(node: S<'a>) -> Option<S<'a>> {
     match &node.children {
         ParameterDeclaration(x) => Some(&x.call_convention),
         ClosureParameterTypeSpecifier(x) => Some(&x.call_convention),
-        VariadicParameter(x) => Some(&x.call_convention),
         _ => None,
     }
 }
@@ -820,18 +831,33 @@ fn variadic_param_with_default_value<'a>(params: S<'a>) -> Option<S<'a>> {
     variadic_param(params).filter(|x| is_parameter_with_default_value(x))
 }
 
+fn splat_param_with_default_value<'a>(params: S<'a>) -> Option<S<'a>> {
+    splat_param(params).filter(|x| is_parameter_with_default_value(x))
+}
+
 // If a variadic parameter is marked inout, return it
 fn variadic_param_with_callconv<'a>(params: S<'a>) -> Option<S<'a>> {
     variadic_param(params).filter(|x| is_parameter_with_callconv(x))
 }
 
+fn splat_param_with_callconv<'a>(params: S<'a>) -> Option<S<'a>> {
+    splat_param(params).filter(|x| is_parameter_with_callconv(x))
+}
+
+fn splat_param_with_variadic<'a>(params: S<'a>) -> Option<S<'a>> {
+    splat_param(params).filter(|x| is_variadic_parameter_declaration(x))
+}
+
 fn variadic_param_with_readonly<'a>(params: S<'a>) -> Option<S<'a>> {
-    variadic_param(params).filter(|x| match &x.children {
-        ParameterDeclaration(x) => x.readonly.is_readonly(),
-        // A VariadicParameter cannot parse readonly, only decorated ... expressions can
-        // so it would parse error anyways
-        _ => false,
-    })
+    variadic_param(params).filter(|x| is_readonly_parameter_declaration(x))
+}
+
+fn splat_param_with_readonly<'a>(params: S<'a>) -> Option<S<'a>> {
+    splat_param(params).filter(|x| is_readonly_parameter_declaration(x))
+}
+
+fn splat_param_with_optional<'a>(params: S<'a>) -> Option<S<'a>> {
+    splat_param(params).filter(|x| is_optional_parameter_declaration(x))
 }
 
 // If an inout parameter has a default, return the default
@@ -847,9 +873,7 @@ fn param_with_callconv_has_default<'a>(node: S<'a>) -> Option<S<'a>> {
 }
 
 fn does_unop_create_write(token_kind: Option<TokenKind>) -> bool {
-    token_kind.map_or(false, |x| {
-        matches!(x, TokenKind::PlusPlus | TokenKind::MinusMinus)
-    })
+    token_kind.is_some_and(|x| matches!(x, TokenKind::PlusPlus | TokenKind::MinusMinus))
 }
 
 fn does_decorator_create_write(token_kind: Option<TokenKind>) -> bool {
@@ -999,15 +1023,15 @@ fn is_foreach_in_for(for_initializer: S<'_>) -> bool {
     }
 }
 
-fn is_good_scope_resolution_qualifier(node: S<'_>) -> bool {
+fn is_good_scope_resolution_qualifier(node: S<'_>, static_allowed: bool) -> bool {
     match &node.children {
         QualifiedName(_) => true,
         Token(token) => match token.kind() {
+            TokenKind::Static => static_allowed,
             TokenKind::XHPClassName
             | TokenKind::Name
             | TokenKind::SelfToken
-            | TokenKind::Parent
-            | TokenKind::Static => true,
+            | TokenKind::Parent => true,
             _ => false,
         },
         _ => false,
@@ -1015,7 +1039,7 @@ fn is_good_scope_resolution_qualifier(node: S<'_>) -> bool {
 }
 
 fn does_binop_create_write_on_left(token_kind: Option<TokenKind>) -> bool {
-    token_kind.map_or(false, |x| match x {
+    token_kind.is_some_and(|x| match x {
         TokenKind::Equal
         | TokenKind::BarEqual
         | TokenKind::PlusEqual
@@ -1039,9 +1063,11 @@ fn get_positions_binop_allows_await(t: S<'_>) -> BinopAllowsAwaitInPositions {
     match token_kind(t) {
         None => BinopAllowAwaitNone,
         Some(t) => match t {
-            BarBar | AmpersandAmpersand | QuestionColon | QuestionQuestion | BarGreaterThan => {
-                BinopAllowAwaitLeft
-            }
+            BarBar
+            | AmpersandAmpersand
+            | QuestionColon
+            | QuestionQuestion
+            | BarQuestionGreaterThan => BinopAllowAwaitLeft,
             Equal
             | BarEqual
             | PlusEqual
@@ -1075,7 +1101,8 @@ fn get_positions_binop_allows_await(t: S<'_>) -> BinopAllowsAwaitInPositions {
             | Bar
             | LessThanLessThan
             | GreaterThanGreaterThan
-            | Carat => BinopAllowAwaitBoth,
+            | Carat
+            | BarGreaterThan => BinopAllowAwaitBoth,
             _ => BinopAllowAwaitNone,
         },
     }
@@ -1083,8 +1110,8 @@ fn get_positions_binop_allows_await(t: S<'_>) -> BinopAllowsAwaitInPositions {
 
 fn unop_allows_await(t: S<'_>) -> bool {
     use TokenKind::*;
-    token_kind(t).map_or(false, |t| match t {
-        Exclamation | Tilde | Plus | Minus | At | Clone | Print | Readonly => true,
+    token_kind(t).is_some_and(|t| match t {
+        Exclamation | Tilde | Plus | Minus | At | Clone | Print | Readonly | DotDotDot => true,
         _ => false,
     })
 }
@@ -1133,6 +1160,14 @@ fn is_invalid_group_use_prefix(prefix: S<'_>) -> bool {
     !prefix.is_namespace_prefix()
 }
 
+/// Do these two nodes represent `parent` and `class` respectively
+fn is_parent_class_access<'a>(lhs: S<'a>, rhs: S<'a>) -> bool {
+    match (&lhs.children, &rhs.children) {
+        (Token(tl), Token(tr)) => tl.kind() == TokenKind::Parent && tr.kind() == TokenKind::Class,
+        _ => false,
+    }
+}
+
 // TODO: why do we need :'a everywhere?
 impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn new(env: Env<'a, State>) -> Self {
@@ -1144,9 +1179,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             trait_require_clauses: empty_trait_require_clauses(),
             namespace_name: GLOBAL_NAMESPACE_NAME.to_string(),
             namespace_type: Unspecified,
-            is_in_concurrent_block: false,
             nested_namespaces: vec![],
             uses_readonly: false,
+            in_module: false,
+            context: ParserErrorsContext {
+                is_in_concurrent_block: false,
+                active_expression_tree: false,
+                expression_tree_depth: 0,
+            },
         }
     }
 
@@ -1155,7 +1195,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             .expect("<text_extraction_failure>")
     }
 
-    fn enable_unstable_feature(&mut self, node: S<'a>, arg: S<'a>) {
+    fn enable_experimental_feature(&mut self, node: S<'a>, arg: S<'a>) {
         let error_invalid_argument = |self_: &mut Self, message| {
             self_.errors.push(make_error_from_node(
                 arg,
@@ -1165,36 +1205,61 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
         match &arg.children {
             LiteralExpression(x) => {
-                let text = self.text(&x.expression);
-                match UnstableFeatures::from_str(escaper::unquote_str(text)) {
-                    Ok(feature) => {
-                        if !self.env.parser_options.po_allow_unstable_features
-                            && !self.env.is_hhi_mode()
-                            && feature.get_feature_status() == FeatureStatus::Unstable
-                        {
-                            self.errors.push(make_error_from_node(
-                                node,
-                                errors::cannot_enable_unstable_feature(
-                                    format!(
-                                        "{} is unstable and unstable features are disabled",
-                                        text
-                                    )
-                                    .as_str(),
-                                ),
-                            ))
-                        } else {
-                            self.env.context.active_unstable_features.insert(feature);
-                        }
-                    }
-                    Err(_) => error_invalid_argument(
-                        self,
-                        format!(
-                            "there is no feature named {}.\nAvailable features are:\n\t{}",
+                let text = escaper::unquote_str(self.text(&x.expression));
+                let consider_all_possible_features = matches!(self.env.mode, Mode::ForCodegen)
+                    || self.env.is_hhi_mode()
+                    || self
+                        .env
+                        .parser_options
+                        .consider_unspecified_experimental_features_released
+                    || self
+                        .env
+                        .parser_options
+                        .use_legacy_experimental_feature_config;
+                match FeatureName::from_str(text) {
+                    Ok(feature)
+                        if consider_all_possible_features
+                            || self
+                                .env
+                                .parser_options
+                                .experimental_features
+                                .contains_key(text) =>
+                    {
+                        // We will enable a feature if
+                        // - we are in hhvm,
+                        // - we are enabling an experimental feature that is specified in the configuration,
+                        // - we are going to consider all experimental features as OngoingRelease status,
+                        // - we are in an .hhi file, or
+                        // - we are using the legacy hardcoded approach to experimental feature config,
+                        // Otherwise, we are in the typechecker, and the feature wasn't specified in the config, and we
+                        // want to signal an error for attempting to enable an invalid experimental feature.
+                        feature.enable(
+                            &self.env.parser_options,
+                            self.env.is_hhi_mode(),
+                            &mut self.env.context.active_experimental_features,
                             text,
-                            UnstableFeatures::iter().join("\n\t")
+                            &mut |err| self.errors.push(make_error_from_node(node, err)),
                         )
-                        .as_str(),
-                    ),
+                    }
+                    _ => {
+                        let valid_features = if consider_all_possible_features {
+                            FeatureName::iter().join("\n\t")
+                        } else {
+                            self.env
+                                .parser_options
+                                .experimental_features
+                                .keys()
+                                .join("\n\t")
+                        };
+                        error_invalid_argument(
+                            self,
+                            format!(
+                                "there is no feature named {}.\nAvailable features are:\n\t{}",
+                                text, valid_features,
+                            )
+                            .as_str(),
+                        )
+                    }
                 }
             }
             _ => error_invalid_argument(self, "this is not a literal string expression"),
@@ -1205,29 +1270,27 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.uses_readonly = true;
     }
 
-    fn check_can_use_feature(&mut self, node: S<'a>, feature: &UnstableFeatures) {
-        let parser_options = &self.env.parser_options;
-        let enabled = match feature {
-            UnstableFeatures::UnionIntersectionTypeHints => {
-                parser_options.tco_union_intersection_type_hints
-            }
-            UnstableFeatures::ClassLevelWhere => parser_options.po_enable_class_level_where_clauses,
-            UnstableFeatures::Ifc => {
-                let file_path = format!("/{}", self.env.text.source_text().file_path().path_str());
-                parser_options
-                    .tco_ifc_enabled
-                    .iter()
-                    .any(|prefix| file_path.find(prefix) == Some(0))
-            }
-
-            _ => false,
-        } || self.env.context.active_unstable_features.contains(feature);
-        if !enabled {
-            self.errors.push(make_error_from_node(
+    fn check_can_use_feature_errors(
+        &self,
+        errors: &mut Vec<SyntaxError>,
+        node: S<'a>,
+        feature: &FeatureName,
+    ) {
+        if !feature.can_use(
+            &self.env.parser_options,
+            &self.env.context.active_experimental_features,
+        ) {
+            errors.push(make_error_from_node(
                 node,
                 errors::cannot_use_feature(feature.into()),
             ))
         }
+    }
+
+    fn check_can_use_feature(&mut self, node: S<'a>, feature: &FeatureName) {
+        let mut errors = std::mem::take(&mut self.errors);
+        self.check_can_use_feature_errors(&mut errors, node, feature);
+        self.errors = errors;
     }
 
     fn attr_name(&self, node: S<'a>) -> Option<&'a str> {
@@ -1238,7 +1301,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
-    fn attr_args(&self, node: S<'a>) -> Option<impl DoubleEndedIterator<Item = S<'a>>> {
+    fn attr_args(
+        &self,
+        node: S<'a>,
+    ) -> Option<impl DoubleEndedIterator<Item = S<'a>> + use<'a, State>> {
         if let ConstructorCall(x) = attr_constructor_call(node) {
             Some(syntax_to_list_no_separators(&x.argument_list))
         } else {
@@ -1248,9 +1314,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
     fn attribute_specification_contains(&self, node: S<'a>, name: &str) -> bool {
         match &node.children {
-            AttributeSpecification(_)
-            | OldAttributeSpecification(_)
-            | FileAttributeSpecification(_) => {
+            OldAttributeSpecification(_) | FileAttributeSpecification(_) => {
                 attr_spec_to_node_list(node).any(|node| self.attr_name(node) == Some(name))
             }
             _ => false,
@@ -1326,7 +1390,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn is_clone(&self, label: S<'_>) -> bool {
-        self.text(label).eq_ignore_ascii_case(sn::members::__CLONE)
+        self.text(label) == sn::members::__CLONE
     }
 
     fn class_constructor_has_static(&self, node: S<'_>) -> bool {
@@ -1364,7 +1428,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     self.env
                         .context
                         .active_classish
-                        .map_or(false, |parent_classish| match &parent_classish.children {
+                        .is_some_and(|parent_classish| match &parent_classish.children {
                             ClassishDeclaration(cd) => {
                                 let kind = token_kind(&cd.keyword);
                                 kind == Some(TokenKind::Interface) || kind == Some(TokenKind::Trait)
@@ -1382,10 +1446,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn async_magic_method(&self, node: S<'_>) -> bool {
         match &node.children {
             FunctionDeclarationHeader(node) => {
-                let name = self.text(&node.name).to_ascii_lowercase();
+                // Method names are case sensitive.
+                let name = self.text(&node.name);
                 match name {
-                    _ if name.eq_ignore_ascii_case(sn::members::__DISPOSE_ASYNC) => false,
-                    _ if sn::members::AS_LOWERCASE_SET.contains(&name) => {
+                    sn::members::__DISPOSE_ASYNC => false,
+                    _ if sn::members::AS_SET.contains(&name) => {
                         list_contains_predicate(|x| x.is_async(), &node.modifiers)
                     }
                     _ => false,
@@ -1431,7 +1496,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     // Don't allow a promoted parameter in a constructor if the class
     // already has a property with the same name. Return the clashing name found.
     fn class_constructor_param_promotion_clash(&self, node: S<'a>) -> Option<&str> {
-        use itertools::Either::{Left, Right};
+        use itertools::Either::Left;
+        use itertools::Either::Right;
         let class_elts = |node: Option<S<'a>>| match node.map(|x| &x.children) {
             Some(ClassishDeclaration(cd)) => match &cd.body.children {
                 ClassishBody(cb) => Left(syntax_to_list_no_separators(&cb.elements)),
@@ -1462,8 +1528,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         match &node.children {
             FunctionDeclarationHeader(node) if node.name.is_construct() => {
                 let class_var_names: Vec<_> = class_elts(self.env.context.active_classish)
-                    .map(prop_names)
-                    .flatten()
+                    .flat_map(prop_names)
                     .collect();
                 let params = syntax_to_list_no_separators(&node.parameter_list);
                 let mut promoted_param_names = promoted_params(params).filter_map(param_name);
@@ -1497,13 +1562,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
     fn unsupported_magic_method_errors(&mut self, node: S<'a>) {
         if let FunctionDeclarationHeader(x) = &node.children {
-            let name = self.text(&x.name).to_ascii_lowercase();
-            let unsupported = sn::members::UNSUPPORTED_MAP.get(&name);
-
-            if let Some(unsupported) = unsupported {
+            let name = self.text(&x.name);
+            if sn::members::UNSUPPORTED_SET.contains(&name) {
                 self.errors.push(make_error_from_node(
                     node,
-                    errors::unsupported_magic_method(unsupported),
+                    errors::unsupported_magic_method(name),
                 ));
             }
         }
@@ -1547,13 +1610,26 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         F: Fn(TokenKind) -> bool,
     {
         if let Some(modifiers) = get_modifiers_of_declaration(node) {
+            let toplevel = declaration_is_toplevel(node);
             for modifier in syntax_to_list_no_separators(modifiers) {
                 if let Some(kind) = token_kind(modifier) {
                     if kind == TokenKind::Readonly {
                         self.mark_uses_readonly()
                     }
                     if kind == TokenKind::Internal {
-                        self.check_can_use_feature(modifier, &UnstableFeatures::Modules)
+                        if !self.in_module {
+                            self.errors.push(make_error_from_node(
+                                modifier,
+                                errors::internal_outside_of_module,
+                            ))
+                        }
+                    } else if kind == TokenKind::Public && toplevel {
+                        if !self.in_module {
+                            self.errors.push(make_error_from_node(
+                                modifier,
+                                errors::public_toplevel_outside_of_module,
+                            ))
+                        }
                     }
                     if !ok(kind) {
                         self.errors.push(make_error_from_node(
@@ -1575,9 +1651,13 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             if let SyntaxList(modifiers) = &modifiers.children {
                 let modifiers: Vec<S<'a>> = modifiers
                     .iter()
-                    .filter(|x: &S<'a>| is_visibility(*x))
+                    .filter(|x: &S<'a>| is_visibility(x))
                     .collect();
-                if modifiers.len() > 1 {
+                // it is illegal to have multiple visibility modifiers except protected internal or internal protected combinations
+                let is_protected_internal = modifiers.len() == 2
+                    && ((modifiers[0].is_protected() && modifiers[1].is_internal())
+                        || (modifiers[0].is_internal() && modifiers[1].is_protected()));
+                if modifiers.len() > 1 && !is_protected_internal {
                     self.errors.push(make_error_from_node(
                         modifiers.last().unwrap(),
                         errors::multiple_visibility_modifiers_for_declaration(decl_name),
@@ -1661,7 +1741,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.env
             .context
             .active_callable
-            .map_or(false, |node| match &node.children {
+            .is_some_and(|node| match &node.children {
                 AnonymousFunction(_) | LambdaExpression(_) | AwaitableCreationExpression(_) => true,
                 _ => false,
             })
@@ -1761,7 +1841,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
     fn has_inout_params(&self) -> bool {
         self.get_params_for_enclosing_callable()
-            .map_or(false, |function_parameter_list| {
+            .is_some_and(|function_parameter_list| {
                 syntax_to_list_no_separators(function_parameter_list)
                     .any(is_parameter_with_callconv)
             })
@@ -1777,7 +1857,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.env
             .context
             .active_callable
-            .map_or(false, |node| match &node.children {
+            .is_some_and(|node| match &node.children {
                 FunctionDeclaration(x) => from_header(&x.declaration_header),
                 MethodishDeclaration(x) => from_header(&x.function_decl_header),
                 AnonymousFunction(x) => !x.async_keyword.is_missing(),
@@ -1826,15 +1906,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             Some(p_const_declaration) if is_concrete_const(p_const_declaration) => true,
             _ => false,
         };
-        is_concrete && init.is_missing()
+        is_concrete && !self.env.is_hhi_mode() && init.is_missing()
     }
 
     fn methodish_memoize_lsb_on_non_static(&mut self, node: S<'a>) {
-        if (self.methodish_contains_attribute(node, sn::user_attributes::MEMOIZE_LSB)
-            || self.methodish_contains_attribute(
-                node,
-                sn::user_attributes::POLICY_SHARDED_MEMOIZE_LSB,
-            ))
+        if self.methodish_contains_attribute(node, sn::user_attributes::MEMOIZE_LSB)
             && !has_modifier_static(node)
         {
             self.errors.push(make_error_from_node(
@@ -1880,39 +1956,126 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             && self.methodish_contains_attribute(node, sn::user_attributes::MEMOIZE)
     }
 
-    fn is_ifc_attribute(&self, name: &str) -> bool {
-        name == sn::user_attributes::POLICIED
-            || name == sn::user_attributes::INFERFLOWS
-            || name == sn::user_attributes::EXTERNAL
+    fn is_a_literal_expression_of_kind(val: S<'_>, opts: Vec<TokenKind>) -> bool {
+        if let LiteralExpression(x) = &val.children
+            && let Some(t) = token_kind(&x.expression)
+            && opts.contains(&t)
+        {
+            true
+        } else {
+            false
+        }
     }
 
-    fn is_module_attribute(&self, name: &str) -> bool {
-        name == sn::user_attributes::MODULE || name == sn::user_attributes::INTERNAL
+    fn check_require_package_arg_is_single_string_literal(&mut self, node: S<'a>) {
+        let Some(args) = self.attr_args(node) else {
+            // I'm not actually convinced this means 0, but just to be safe
+            self.errors.push(make_error_from_node(
+                node,
+                errors::require_package_wrong_arity(0),
+            ));
+            return;
+        };
+
+        match args.exactly_one() {
+            Err(arg_list) => self.errors.push(make_error_from_node(
+                node,
+                errors::require_package_wrong_arity(arg_list.count()),
+            )),
+            Ok(arg) => {
+                if !Self::is_a_literal_expression_of_kind(
+                    arg,
+                    vec![
+                        TokenKind::SingleQuotedStringLiteral,
+                        TokenKind::DoubleQuotedStringLiteral,
+                    ],
+                ) {
+                    self.errors.push(make_error_from_node(
+                        arg,
+                        errors::invalid_require_package_str_argument(),
+                    ))
+                }
+            }
+        }
     }
 
-    fn check_attr_enabled(&mut self, attrs: S<'a>) {
+    fn check_soft_require_package_args(&mut self, node: S<'a>) {
+        let Some((mut args, first_arg)) = self.attr_args(node).and_then(|mut args| {
+            let first = args.next()?;
+            Some((args, first))
+        }) else {
+            self.errors.push(make_error_from_node(
+                node,
+                errors::soft_require_package_wrong_arity(0),
+            ));
+            return;
+        };
+
+        if !Self::is_a_literal_expression_of_kind(
+            first_arg,
+            vec![
+                TokenKind::SingleQuotedStringLiteral,
+                TokenKind::DoubleQuotedStringLiteral,
+            ],
+        ) {
+            self.errors.push(make_error_from_node(
+                first_arg,
+                errors::invalid_require_package_str_argument(),
+            ))
+        }
+
+        let Some(second_arg) = args.next() else {
+            // only 1 arg is fine
+            return;
+        };
+
+        if !Self::is_a_literal_expression_of_kind(second_arg, vec![TokenKind::DecimalLiteral]) {
+            self.errors.push(make_error_from_node(
+                second_arg,
+                errors::invalid_soft_require_package_int_argument(),
+            ));
+            return;
+        }
+
+        let remaining_args = args.count();
+        if remaining_args > 0 {
+            // only 1 arg is fine
+            self.errors.push(make_error_from_node(
+                node,
+                errors::soft_require_package_wrong_arity(remaining_args + 2),
+            ));
+        };
+    }
+
+    fn check_attrs(&mut self, attrs: S<'a>) {
         for node in attr_spec_to_node_list(attrs) {
-            match self.attr_name(node) {
-                Some(n) => {
-                    if self.is_ifc_attribute(n) {
-                        self.check_can_use_feature(node, &UnstableFeatures::Ifc)
-                    }
-                    if (sn::user_attributes::ignore_readonly_local_errors(n)
+            if let Some(n) = self.attr_name(node) {
+                if sn::user_attributes::is_simplihack(n) {
+                    self.check_can_use_feature(node, &FeatureName::SimpliHack)
+                }
+                if (sn::user_attributes::ignore_readonly_local_errors(n)
                         || sn::user_attributes::ignore_coeffect_local_errors(n)
                         || sn::user_attributes::is_native(n))
                         && !self.env.is_systemlib()
                         // The typechecker has its own implementation of this that
                         // allows its own testing and better error messaging.
-                        // see --tco_enable_systemlib_annotations
+                        // see --tco_is_systemlib
                         && !self.env.is_typechecker()
-                    {
-                        self.errors.push(make_error_from_node(
-                            node,
-                            errors::invalid_attribute_reserved,
-                        ));
-                    }
+                {
+                    self.errors.push(make_error_from_node(
+                        node,
+                        errors::invalid_attribute_reserved,
+                    ));
                 }
-                None => {}
+                if sn::user_attributes::is_require_package(n) {
+                    self.check_require_package_arg_is_single_string_literal(node);
+                }
+                if sn::user_attributes::is_soft_require_package(n) {
+                    self.check_soft_require_package_args(node);
+                }
+                if sn::user_attributes::is_no_disjoint_union(n) {
+                    self.check_can_use_feature(node, &FeatureName::NoDisjointUnion);
+                }
             }
         }
     }
@@ -1924,10 +2087,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         ) {
             // a function, not a method
             if self.function_declaration_contains_attribute(node, sn::user_attributes::MEMOIZE_LSB)
-                || self.function_declaration_contains_attribute(
-                    node,
-                    sn::user_attributes::POLICY_SHARDED_MEMOIZE_LSB,
-                )
             {
                 self.errors.push(make_error_from_node(
                     node,
@@ -1994,6 +2153,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     &x.type_parameter_list,
                 );
 
+                self.check_type_parameters_attributes(&x.type_parameter_list);
+
                 if let Some(clashing_name) = self.class_constructor_param_promotion_clash(node) {
                     let class_name = self.active_classish_name().unwrap_or("");
                     let error_msg = errors::error2025(class_name, clashing_name);
@@ -2019,9 +2180,12 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             FunctionDeclaration(fd) => {
                 let function_attrs = &fd.attribute_spec;
                 let body = &fd.body;
-                self.check_attr_enabled(function_attrs);
+                self.check_attrs(function_attrs);
+
                 self.invalid_modifier_errors("Top-level functions", node, |kind| {
-                    kind == TokenKind::Async || kind == TokenKind::Internal
+                    kind == TokenKind::Async
+                        || kind == TokenKind::Internal
+                        || kind == TokenKind::Public
                 });
                 self.produce_error(
                     |self_, x| self_.function_declaration_external_not_native(x),
@@ -2038,7 +2202,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     .extract_function_name(&md.function_decl_header)
                     .unwrap_or("");
                 let method_attrs = &md.attribute;
-                self.check_attr_enabled(method_attrs);
+                self.check_attrs(method_attrs);
                 self.produce_error(
                     |self_, x| self_.methodish_contains_memoize(x),
                     node,
@@ -2081,7 +2245,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         || kind == TokenKind::Async
                         || kind == TokenKind::Readonly
                 });
-
                 if self.is_inside_interface() {
                     self.invalid_modifier_errors("Interface methods", node, |kind| {
                         kind != TokenKind::Final && kind != TokenKind::Abstract
@@ -2116,10 +2279,15 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 let async_annotation = extract_keyword(|x| x.is_async(), node).unwrap_or(node);
 
                 if self.is_interface_and_async_method(node) {
+                    let quickfix_start = start_offset(async_annotation);
+                    let quickfix_end = end_offset(async_annotation);
+
                     self.errors.push(make_error_from_node_with_quickfix(
                         async_annotation,
                         errors::error2046("a method in an interface"),
                         "Remove `async`",
+                        quickfix_start,
+                        quickfix_end,
                         "",
                     ))
                 }
@@ -2138,9 +2306,24 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         || errors::async_not_last,
                         modifiers,
                     );
+                };
+
+                if self.attr_spec_contains_sealed(method_attrs) {
+                    self.check_can_use_feature(node, &FeatureName::SealedMethods);
                 }
             }
             _ => {}
+        }
+    }
+
+    fn check_type_parameters_attributes(&mut self, x: S<'a>) {
+        if let TypeParameters(x) = &x.children {
+            syntax_to_list_no_separators(&x.parameters).for_each(|x| {
+                if let TypeParameter(x) = &x.children {
+                    let tparam_attributes = &x.attribute_spec;
+                    self.check_attrs(tparam_attributes);
+                }
+            })
         }
     }
 
@@ -2149,31 +2332,43 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             false
         } else {
             self.first_parent_function_name()
-                .map_or(false, |s| s.eq_ignore_ascii_case(sn::members::__CONSTRUCT))
+                .is_some_and(|s| s == sn::members::__CONSTRUCT)
         }
     }
 
     fn params_errors(&mut self, params: S<'a>) {
-        self.produce_error_from_check(&ends_with_variadic_comma, params, || errors::error2022);
-        self.produce_error_from_check(&misplaced_variadic_param, params, || errors::error2021);
+        self.produce_error_from_check(ends_with_variadic_comma, params, || errors::error2022);
+        self.produce_error_from_check(misplaced_variadic_param, params, || errors::error2021);
+        self.produce_error_from_check(misplaced_splat_param, params, || errors::error2081);
 
-        self.produce_error_from_check(&variadic_param_with_default_value, params, || {
+        self.produce_error_from_check(variadic_param_with_default_value, params, || {
             errors::error2065
         });
 
-        self.produce_error_from_check(&variadic_param_with_callconv, params, || errors::error2073);
-        self.produce_error_from_check(&variadic_param_with_readonly, params, || {
+        self.produce_error_from_check(splat_param_with_default_value, params, || errors::error2082);
+
+        self.produce_error_from_check(variadic_param_with_callconv, params, || errors::error2073);
+        self.produce_error_from_check(splat_param_with_callconv, params, || errors::error2083);
+        self.produce_error_from_check(splat_param_with_variadic, params, || errors::error2079);
+        self.produce_error_from_check(splat_param_with_optional, params, || errors::error2080);
+        self.produce_error_from_check(variadic_param_with_readonly, params, || {
             errors::variadic_readonly_param
+        });
+        self.produce_error_from_check(splat_param_with_readonly, params, || {
+            errors::splat_readonly_param
         });
     }
 
-    fn decoration_errors(&mut self, node: S<'a>) {
-        self.produce_error(
-            |_, x| is_double_variadic(x),
-            node,
-            || errors::double_variadic,
-            node,
-        );
+    fn named_argument_errors(&mut self, node: S<'a>) {
+        if !FeatureName::NamedParametersUse.can_use(
+            &self.env.parser_options,
+            &self.env.context.active_experimental_features,
+        ) {
+            self.errors.push(make_error_from_node(
+                node,
+                errors::cannot_use_feature("named_parameters_use"),
+            ));
+        }
     }
 
     fn check_parameter_this(&mut self, node: S<'a>) {
@@ -2204,15 +2399,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
-    fn check_parameter_ifc(&mut self, node: S<'a>) {
-        if let ParameterDeclaration(x) = &node.children {
-            let attr = &x.attribute;
-            if self.attribute_specification_contains(attr, sn::user_attributes::EXTERNAL) {
-                self.check_can_use_feature(attr, &UnstableFeatures::Ifc);
-            }
-        }
-    }
-
     fn check_parameter_readonly(&mut self, node: S<'a>) {
         if let ParameterDeclaration(x) = &node.children {
             if x.readonly.is_readonly() {
@@ -2222,7 +2408,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn lval_errors(&mut self, syntax_node: S<'a>) {
-        if self.env.parser_options.po_disable_lval_as_an_expression {
+        if self.env.parser_options.disable_lval_as_an_expression {
             if let LvalTypeNonFinal = node_lval_type(syntax_node, &self.parents) {
                 self.errors.push(make_error_from_node(
                     syntax_node,
@@ -2236,7 +2422,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         let param_errors = |self_: &mut Self, params| {
             for x in syntax_to_list_no_separators(params) {
                 self_.check_parameter_this(x);
-                self_.check_parameter_ifc(x);
                 self_.check_parameter_readonly(x);
             }
             self_.params_errors(params)
@@ -2244,12 +2429,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         match &node.children {
             ParameterDeclaration(p) => {
                 let callconv_text = self.text(extract_callconv_node(node).unwrap_or(node));
-                self.produce_error_from_check(&param_with_callconv_has_default, node, || {
+                self.produce_error_from_check(param_with_callconv_has_default, node, || {
                     errors::error2074(callconv_text)
                 });
 
                 self.check_type_hint(&p.type_);
-                self.check_parameter_ifc(node);
                 self.check_parameter_readonly(node);
 
                 if let Some(inout_modifier) = parameter_callconv(node) {
@@ -2270,8 +2454,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         .first_parent_function_attributes_contains(sn::user_attributes::MEMOIZE);
                     let in_memoize_lsb = self.first_parent_function_attributes_contains(
                         sn::user_attributes::MEMOIZE_LSB,
-                    ) || self.first_parent_function_attributes_contains(
-                        sn::user_attributes::POLICY_SHARDED_MEMOIZE_LSB,
                     );
 
                     if (in_memoize || in_memoize_lsb) && !self.is_immediately_in_lambda() {
@@ -2291,12 +2473,12 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     param_errors(self, &x.parameters)
                 }
             }
-            DecoratedExpression(_) => self.decoration_errors(node),
             _ => {}
         }
     }
 
-    // Only check the functions; invalid attributes on methods (like <<__EntryPoint>>) are caught elsewhere
+    // Only check the functions; invalid attributes on methods (like <<__EntryPoint>>)
+    // are caught elsewhere
     fn multiple_entrypoint_attribute_errors(&mut self, node: S<'a>) {
         match &node.children {
             FunctionDeclaration(f)
@@ -2307,7 +2489,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             {
                 // Get the location of the <<...>> annotation
                 let location = match &f.attribute_spec.children {
-                    AttributeSpecification(x) => make_location_of_node(&x.attributes),
                     OldAttributeSpecification(x) => make_location_of_node(&x.attributes),
                     _ => panic!("Expected attribute specification node"),
                 };
@@ -2505,7 +2686,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         .push(make_error_from_node(node, errors::invalid_shape_field_name))
                 }
             }
-            ScopeResolutionExpression(_) => {}
+            NameofExpression(_) | ScopeResolutionExpression(_) => {}
             QualifiedName(_) => {
                 if self.env.is_typechecker() {
                     self.errors
@@ -2525,21 +2706,23 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn invalid_shape_field_check(&mut self, node: S<'a>) {
-        if let FieldInitializer(x) = &node.children {
-            self.invalid_shape_initializer_name(&x.name)
-        } else {
-            self.errors
-                .push(make_error_from_node(node, errors::invalid_shape_field_name))
+        match &node.children {
+            FieldInitializer(x) => self.invalid_shape_initializer_name(&x.name),
+            VariableExpression(_) => {
+                // Shape field punning: $foo becomes 'foo' => $foo
+                // Check if the feature is enabled
+                self.check_can_use_feature(node, &FeatureName::ShapeFieldPunning);
+            }
+            _ => self
+                .errors
+                .push(make_error_from_node(node, errors::invalid_shape_field_name)),
         }
     }
 
     fn is_in_unyieldable_magic_method(&self) -> bool {
-        self.first_parent_function_name().map_or(false, |s| {
-            let s = s.to_ascii_lowercase();
-            match s {
-                _ if s == sn::members::__INVOKE => false,
-                _ => sn::members::AS_LOWERCASE_SET.contains(&s),
-            }
+        self.first_parent_function_name().is_some_and(|s| match s {
+            sn::members::__INVOKE => false,
+            _ => sn::members::AS_SET.contains(&s),
         })
     }
 
@@ -2547,74 +2730,44 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         match &node.children {
             VariableExpression(x) => {
                 // TODO(T75820862): Allow $GLOBALS to be used as a variable name
-                if self.text(&x.expression) == sn::superglobals::GLOBALS {
+                let name = self.text(&x.expression);
+                if name == sn::superglobals::GLOBALS {
                     self.errors
                         .push(make_error_from_node(node, errors::globals_disallowed))
-                } else if self.text(&x.expression) == sn::special_idents::THIS && !self.has_this() {
+                } else if sn::superglobals::is_superglobal(name) {
+                    self.errors.push(make_error_from_node(
+                        node,
+                        errors::superglobal_disallowed(name),
+                    ))
+                } else if name == sn::special_idents::THIS && !self.has_this() {
+                    if self.env.context.active_enum_class.is_some() {
+                        self.errors.push(make_error_from_node(
+                            node,
+                            errors::enum_class_references_this,
+                        ))
+                    }
                     // If we are in the special top level debugger function, lets not check for $this since
                     // it will be properly lifted in closure convert
                     if self
                         .first_parent_function_name()
-                        .map_or(true, |s| s == "include")
+                        .is_none_or(|s| s == "include")
                     {
-                        return {};
+                        return;
                     }
                     self.errors
                         .push(make_error_from_node(node, errors::invalid_this))
                 }
             }
-            _ => {}
-        }
-    }
-
-    fn function_call_argument_errors(&mut self, in_constructor_call: bool, node: S<'a>) {
-        if let Some(e) = match &node.children {
-            DecoratedExpression(x) => {
-                if let Token(token) = &x.decorator.children {
-                    if token.kind() == TokenKind::Inout {
-                        let expression = &x.expression;
-                        match &expression.children {
-                            _ if in_constructor_call => Some(errors::inout_param_in_construct),
-                            VariableExpression(x)
-                                if sn::superglobals::is_any_global(self.text(&x.expression))
-                                    || self.text(&x.expression) == sn::special_idents::THIS =>
-                            {
-                                Some(errors::fun_arg_invalid_arg)
-                            }
-                            PipeVariableExpression(_) => Some(errors::fun_arg_invalid_arg),
-                            BinaryExpression(_) => Some(errors::fun_arg_inout_set),
-                            QualifiedName(_) => Some(errors::fun_arg_inout_const),
-                            Token(_) if expression.is_name() => Some(errors::fun_arg_inout_const),
-                            // TODO: Maybe be more descriptive in error messages
-                            ScopeResolutionExpression(_)
-                            | FunctionCallExpression(_)
-                            | MemberSelectionExpression(_)
-                            | SafeMemberSelectionExpression(_) => Some(errors::fun_arg_invalid_arg),
-                            SubscriptExpression(x) => match &x.receiver.children {
-                                MemberSelectionExpression(_) | ScopeResolutionExpression(_) => {
-                                    Some(errors::fun_arg_invalid_arg)
-                                }
-                                _ => {
-                                    let text = self.text(&x.receiver);
-                                    if sn::superglobals::is_any_global(text) {
-                                        Some(errors::fun_arg_inout_containers)
-                                    } else {
-                                        None
-                                    }
-                                }
-                            },
-                            _ => None,
-                        }
-                    } else {
-                        None
-                    }
-                } else {
-                    None
+            PipeVariableExpression(_) => match self.env.context.pipe_variable_state {
+                PipeVariableState::Unavailable => self
+                    .errors
+                    .push(make_error_from_node(node, errors::invalid_pipe_variable)),
+                PipeVariableState::Captured => {
+                    self.check_can_use_feature(node, &FeatureName::CapturePipeVariables)
                 }
-            }
-            _ => None,
-        } {
-            self.errors.push(make_error_from_node(node, e))
+                PipeVariableState::Available => {}
+            },
+            _ => {}
         }
     }
 
@@ -2658,7 +2811,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
     fn no_memoize_attribute_on_lambda(&mut self, node: S<'a>) {
         match &node.children {
-            OldAttributeSpecification(_) | AttributeSpecification(_) => {
+            OldAttributeSpecification(_) => {
                 for node in attr_spec_to_node_list(node) {
                     match self.attr_name(node) {
                         Some(n) if sn::user_attributes::is_memoized(n) => self
@@ -2698,8 +2851,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
             ScopeResolutionExpression(x) => {
                 if let Token(name) = &x.name.children {
-                    if is_good_scope_resolution_qualifier(&x.qualifier)
-                        && name.kind() == TokenKind::Variable
+                    if is_good_scope_resolution_qualifier(
+                        &x.qualifier,
+                        /* allow static */ true,
+                    ) && name.kind() == TokenKind::Variable
                     {
                         // OK
                     } else if name.kind() == TokenKind::Variable {
@@ -2731,7 +2886,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn class_type_designator_errors(&mut self, node: S<'a>) {
-        if !is_good_scope_resolution_qualifier(node) {
+        if !is_good_scope_resolution_qualifier(node, /* allow static */ true) {
             match &node.children {
                 ParenthesizedExpression(_) => {}
                 _ => self.new_variable_errors(node),
@@ -2739,7 +2894,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
-    fn rec_walk_impl<F, X>(&self, parents: &mut Vec<S<'a>>, f: &F, node: S<'a>, mut acc: X) -> X
+    fn rec_walk_impl<F, X>(parents: &mut Vec<S<'a>>, f: &F, node: S<'a>, mut acc: X) -> X
     where
         F: Fn(S<'a>, &Vec<S<'a>>, X) -> (bool, X),
     {
@@ -2748,7 +2903,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         if continue_walk {
             parents.push(node);
             for child in node.iter_children() {
-                acc = self.rec_walk_impl(parents, f, child, acc);
+                acc = Self::rec_walk_impl(parents, f, child, acc);
             }
             parents.pop();
         }
@@ -2759,7 +2914,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     where
         F: Fn(S<'a>, &Vec<S<'a>>, X) -> (bool, X),
     {
-        self.rec_walk_impl(&mut vec![], &f, node, acc)
+        Self::rec_walk_impl(&mut vec![], &f, node, acc)
     }
 
     fn find_invalid_lval_usage(&self, node: S<'a>) -> Vec<SyntaxError> {
@@ -2786,18 +2941,46 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn await_as_an_expression_errors(&mut self, await_node: S<'a>) {
         let mut prev = None;
         let mut node = await_node;
+
+        // true if we are in an expression tree, false if we are in a splice or not in an expression tree at all
+        // Start at false because actual await expressions are forbidden in expression trees
+        let mut in_expr_tree = false;
         for n in self.parents.iter().rev() {
             if let Some(prev) = prev {
                 node = prev;
             }
             prev = Some(n);
             match &n.children {
-                // statements that root for the concurrently executed await expressions
+                ETSpliceExpression(_) => {
+                    let mut errors = std::mem::take(&mut self.errors);
+                    self.check_can_use_feature_errors(
+                        &mut errors,
+                        node,
+                        &FeatureName::AwaitInSplice,
+                    );
+                    self.errors = errors;
+                    // if we were in a splice, the parent must be in an expression tree, because splices can only occur in expression trees
+                    in_expr_tree = true;
+                    continue;
+                }
+                PrefixedCodeExpression(_) => {
+                    // if we were in an expression tree, the parent must not be, since expression trees can't directly nest
+                    in_expr_tree = false;
+                    continue;
+                }
+                _ if in_expr_tree => {
+                    // if we are in an expression tree, than nothing affects the execution of an await nested in a splice
+                    // so we ignore, even if it's a lambda, expressionStatement, etc. that would usually break us out of
+                    // the check
+                    continue;
+                }
+                // statements that root for the concurrently executed await expressions, as long as they aren't in an expression tree
                 ExpressionStatement(_)
                 | ReturnStatement(_)
                 | UnsetStatement(_)
                 | EchoStatement(_)
-                | ThrowStatement(_) => break,
+                | ThrowStatement(_)
+                | DeclareLocalStatement(_) => break,
                 IfStatement(x) if std::ptr::eq(node, &x.condition) => break,
                 ForStatement(x) if std::ptr::eq(node, &x.initializer) => break,
                 SwitchStatement(x) if std::ptr::eq(node, &x.expression) => break,
@@ -2811,13 +2994,18 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     break;
                 }
                 LambdaExpression(x) if std::ptr::eq(node, &x.body) => break,
-                // Dependent awaits are not allowed currently
                 PrefixUnaryExpression(x) if token_kind(&x.operator) == Some(TokenKind::Await) => {
-                    self.errors.push(make_error_from_node(
-                        await_node,
-                        errors::invalid_await_position_dependent,
-                    ));
-                    break;
+                    let (feature, enabled) = self.is_pipe_await_enabled();
+                    if !enabled {
+                        self.errors.push(make_error_from_node(
+                            await_node,
+                            Cow::Owned(format!(
+                            "`await` cannot be used as an expression inside another await expression, unless unstable feature: `{}` is enabled. Pull the inner `await` out into its own statement.",
+                            feature)
+                        )));
+                        break;
+                    }
+                    continue;
                 }
                 // Unary based expressions have their own custom fanout
                 PrefixUnaryExpression(x) if unop_allows_await(&x.operator) => {
@@ -2834,11 +3022,17 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     if std::ptr::eq(node, &x.right_operand)
                         && token_kind(&x.operator) == Some(TokenKind::BarGreaterThan) =>
                 {
-                    self.errors.push(make_error_from_node(
-                        await_node,
-                        errors::invalid_await_position_pipe,
-                    ));
-                    break;
+                    let (feature, enabled) = self.is_pipe_await_enabled();
+                    if !enabled {
+                        self.errors.push(make_error_from_node(
+                            node,
+                            Cow::Owned(format!(
+                                "`await` cannot be used as an expression right of a pipe operator, unless unstable feature: `{}` is enabled.",
+                                feature
+                            )),
+                        ))
+                    }
+                    continue;
                 }
                 // left or right operand of binary expressions are considered legal locations
                 // if operator is not short-circuiting and containing expression
@@ -2872,6 +3066,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     continue;
                 }
 
+                ParameterDeclaration(_) => {
+                    self.errors.push(make_error_from_node(
+                            await_node,
+                            errors::invalid_await_param_default,
+                    ));
+                    break;
+                }
+
                 // These are nodes where any position is valid
                 CastExpression(_)
                 | MemberSelectionExpression(_)
@@ -2898,6 +3100,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 | SimpleInitializer(_)
                 | SubscriptExpression(_)
                 | EmbeddedSubscriptExpression(_)
+                | EmbeddedMemberSelectionExpression(_)
                 | YieldExpression(_)
                 | XHPExpression(_)
                 | XHPOpen(_)
@@ -2905,11 +3108,57 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 | XHPSpreadAttribute(_)
                 | SyntaxList(_)
                 | ListItem(_) => continue,
+
+                // Unconditional await locations that were erroneously banned
+                // as conditional
+                PrefixUnaryExpression(_) // inc, dec
+                | PostfixUnaryExpression(_) // inc, dec
+                | DecoratedExpression(_) // ... and inout
+                | LiteralExpression(_) // "{$foo(await bar())}"
+                | PrefixedStringExpression(_) // r"{$foo(await bar())}"
+                | MatchStatement(_) // match (await $x)
+                | EvalExpression(_) // eval(await $x)
+                | ListExpression(_) // list($a[await $b], ...) = ...
+                | InclusionExpression(_) => { // include await $x
+                    if !FeatureName::AllowConditionalAwaitSyntax.can_use(
+                        &self.env.parser_options,
+                        &self.env.context.active_experimental_features,
+                    ) {
+                        self.check_can_use_feature(node, &FeatureName::AllowConditionalAwaitSyntax);
+                        break;
+                    }
+                    continue;
+                }
+
+                // Statements with conditional subexpressions that permit
+                // awaits
+                WhileStatement(_) // while (await $x)
+                | DoStatement(_) // do { ... } while (await $x)
+                | ForStatement(_) => { // for (; await x(); $y += await z())
+                    self.check_can_use_feature(node, &FeatureName::AllowConditionalAwaitSyntax);
+                    break;
+                }
+
+                // Conditional expressions that can contain awaits
+                BinaryExpression(_) // ||, &&, and ??
+                | ConditionalExpression(_) // a ? b : c, a ?: b
+                | FunctionCallExpression(_) // a?->b()
+                | SafeMemberSelectionExpression(_) => { // a?->b
+                    if !FeatureName::AllowConditionalAwaitSyntax.can_use(
+                        &self.env.parser_options,
+                        &self.env.context.active_experimental_features,
+                    ) {
+                        self.check_can_use_feature(node, &FeatureName::AllowConditionalAwaitSyntax);
+                        break;
+                    }
+                    continue;
+                }
+
                 // otherwise report error and bail out
                 _ => {
                     self.errors.push(make_error_from_node(
-                        await_node,
-                        errors::invalid_await_position,
+                            await_node,
+                            errors::invalid_await_position,
                     ));
                     break;
                 }
@@ -2950,6 +3199,15 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
+    fn is_pipe_await_enabled(&self) -> (FeatureName, bool) {
+        let feature = FeatureName::PipeAwait;
+        let enabled = feature.can_use(
+            &self.env.parser_options,
+            &self.env.context.active_experimental_features,
+        );
+        (feature, enabled)
+    }
+
     fn node_has_await_child(&mut self, node: S<'a>) -> bool {
         self.rec_walk(
             |node, _parents, acc| {
@@ -2980,9 +3238,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn expression_errors(&mut self, node: S<'a>) {
-        if let Some(sl) = self.env.stack_limit.as_ref() {
-            sl.panic_if_exceeded();
-        }
         let check_is_as_expression = |self_: &mut Self, hint: S<'a>| {
             let n = match &node.children {
                 IsExpression(_) => "is",
@@ -3019,15 +3274,23 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             // Refer: https://github.com/php/php-langspec/blob/master/spec/10-expressions.md#instanceof-operator*)
             ConstructorCall(ctr_call) => {
                 for p in syntax_to_list_no_separators(&ctr_call.argument_list) {
-                    self.function_call_argument_errors(true, p);
+                    if let DecoratedExpression(e) = &p.children {
+                        if let Token(t) = &e.decorator.children {
+                            if t.kind() == TokenKind::Inout {
+                                self.errors.push(make_error_from_node(
+                                    p,
+                                    errors::inout_param_in_construct,
+                                ));
+                            }
+                        }
+                    }
                 }
                 self.class_type_designator_errors(&ctr_call.type_);
                 if self.env.is_typechecker() {
                     // attr or list item -> syntax list -> attribute
                     match self.parents.iter().rev().nth(2) {
                         Some(a)
-                            if a.is_attribute_specification()
-                                || a.is_old_attribute_specification()
+                            if a.is_old_attribute_specification()
                                 || a.is_file_attribute_specification() => {}
                         _ => {
                             if ctr_call.left_paren.is_missing() || ctr_call.right_paren.is_missing()
@@ -3061,68 +3324,24 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 }
             }
 
-            SubscriptExpression(x)
-                if self.env.is_typechecker() && x.left_bracket.is_left_brace() =>
-            {
-                self.errors
-                    .push(make_error_from_node(node, errors::error2020))
-            }
-
             FunctionCallExpression(x) => {
                 let arg_list = &x.argument_list;
-                if let Some(h) = misplaced_variadic_arg(arg_list) {
+                if let Some(h) = misplaced_splat_arg(arg_list) {
                     self.errors.push(make_error_from_node(h, errors::error2033))
-                }
-
-                for p in syntax_to_list_no_separators(arg_list) {
-                    self.function_call_argument_errors(false, p)
                 }
 
                 let recv = &x.receiver;
 
                 self.function_call_on_xhp_name_errors(recv);
 
-                let fun_and_clsmeth_disabled = self
-                    .env
-                    .parser_options
-                    .po_disallow_fun_and_cls_meth_pseudo_funcs;
-
                 if strip_ns(self.text(recv)) == strip_ns(sn::readonly::AS_MUT) {
                     self.mark_uses_readonly()
-                }
-
-                if self.text(recv) == strip_hh_ns(sn::autoimported_functions::FUN_)
-                    && fun_and_clsmeth_disabled
-                {
-                    let mut arg_node_list = syntax_to_list_no_separators(arg_list);
-                    match arg_node_list.next() {
-                        Some(name) if arg_node_list.count() == 0 => self.errors.push(
-                            make_error_from_node(recv, errors::fun_disabled(self.text(name))),
-                        ),
-                        _ => self.errors.push(make_error_from_node(
-                            recv,
-                            errors::fun_requires_const_string,
-                        )),
-                    }
-                }
-
-                if self.text(recv) == strip_hh_ns(sn::autoimported_functions::CLASS_METH)
-                    && fun_and_clsmeth_disabled
-                {
-                    self.errors
-                        .push(make_error_from_node(recv, errors::class_meth_disabled))
-                }
-
-                if self.text(recv) == strip_hh_ns(sn::autoimported_functions::INST_METH)
-                    && self.env.parser_options.po_disallow_inst_meth
-                {
-                    self.errors
-                        .push(make_error_from_node(recv, errors::inst_meth_disabled))
                 }
             }
 
             ETSpliceExpression(_) => {
-                if !self.env.context.active_expression_tree {
+                if !self.context.active_expression_tree && self.context.expression_tree_depth == 0 {
+                    // If the depth is greater than 0, then the error in et_splice_expr will be used
                     self.errors
                         .push(make_error_from_node(node, errors::splice_outside_et))
                 }
@@ -3145,16 +3364,15 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
 
             ListExpression(_) => {
-                if self
-                    .parents
-                    .last()
-                    .map_or(false, |e| e.is_return_statement())
-                {
+                if self.parents.last().is_some_and(|e| e.is_return_statement()) {
                     self.errors
                         .push(make_error_from_node(node, errors::list_must_be_lvar))
                 }
             }
             ShapeExpression(x) => {
+                if self.context.active_expression_tree {
+                    self.check_can_use_feature(node, &FeatureName::ExpressionTreeShapeCreation)
+                }
                 for f in syntax_to_list_no_separators(&x.fields).rev() {
                     self.invalid_shape_field_check(f)
                 }
@@ -3254,17 +3472,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 }
             }
 
-            // TODO(T21285960): Remove this bug-port, stemming from T22184312
-            LambdaExpression(x)
-                if self.env.is_hhvm_compat()
-                    && !x.async_.is_missing()
-                    && x.async_.trailing_width() == 0
-                    && x.signature.leading_width() == 0 =>
-            {
-                self.errors
-                    .push(make_error_from_node(node, errors::error1057("==>")))
-            }
-            // End of bug-port
             IsExpression(x) => check_is_as_expression(self, &x.right_operand),
             AsExpression(x) => check_is_as_expression(self, &x.right_operand),
 
@@ -3297,8 +3504,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
 
             CollectionLiteralExpression(x) => {
+                #[allow(dead_code)] // field `0` is never read
                 enum Status {
                     ValidClass(String),
+                    ValidClassEt(String),
                     InvalidClass,
                     InvalidBraceKind,
                 }
@@ -3319,6 +3528,13 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 let use_key_value_initializers = |lc_name: &str| {
                     lc_name.eq_ignore_ascii_case("map") || lc_name.eq_ignore_ascii_case("immmap")
                 };
+                let use_vector_initializers = |lc_name: &str| {
+                    lc_name.eq_ignore_ascii_case("pair")
+                        || lc_name.eq_ignore_ascii_case("vector")
+                        || lc_name.eq_ignore_ascii_case("set")
+                        || lc_name.eq_ignore_ascii_case("immvector")
+                        || lc_name.eq_ignore_ascii_case("immset")
+                };
                 let is_qualified_std_collection = |l, r| {
                     token_kind(l) == Some(TokenKind::Name)
                         && token_kind(r) == Some(TokenKind::Name)
@@ -3331,7 +3547,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         match self.text(n).to_ascii_lowercase().as_ref() {
                             "dict" | "vec" | "keyset" => InvalidBraceKind,
                             n => {
-                                if is_standard_collection(n) {
+                                if self.context.active_expression_tree {
+                                    ValidClassEt(n.to_string())
+                                } else if is_standard_collection(n) {
                                     ValidClass(n.to_string())
                                 } else {
                                     InvalidClass
@@ -3392,22 +3610,23 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 let num_initializers = initializer_list().count();
                 match &status {
                     ValidClass(name)
-                        if use_key_value_initializers(name)
+                        if use_vector_initializers(name)
+                            && initializer_list().any(is_key_value) =>
+                    {
+                        self.errors.push(make_error_from_node(
+                            node,
+                            errors::invalid_key_value_initializer(self.text(n)),
+                        ));
+                    }
+
+                    ValidClass(name)
+                        if (use_key_value_initializers(name)
+                            || self.context.active_expression_tree)
                             && initializer_list().any(|i| !is_key_value(i)) =>
                     {
                         self.errors.push(make_error_from_node(
                             node,
                             errors::invalid_value_initializer(self.text(n)),
-                        ));
-                    }
-
-                    ValidClass(name)
-                        if !use_key_value_initializers(name)
-                            && initializer_list().any(|i| is_key_value(i)) =>
-                    {
-                        self.errors.push(make_error_from_node(
-                            node,
-                            errors::invalid_key_value_initializer(self.text(n)),
                         ));
                     }
 
@@ -3425,6 +3644,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     }
 
                     ValidClass(_) => {}
+                    ValidClassEt(_) => {}
                     InvalidBraceKind => self.errors.push(make_error_from_node(
                         node,
                         errors::invalid_brace_kind_in_collection_initializer,
@@ -3440,6 +3660,15 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
             PrefixUnaryExpression(x) if token_kind(&x.operator) == Some(TokenKind::Readonly) => {
                 self.mark_uses_readonly()
+            }
+            DarrayIntrinsicExpression(_) | VarrayIntrinsicExpression(_)
+                if self.env.is_typechecker() =>
+            {
+                self.errors
+                    .push(make_error_from_node(node, errors::varray_darray_banned))
+            }
+            SafeMemberSelectionExpression(_) if self.context.active_expression_tree => {
+                self.check_can_use_feature(node, &FeatureName::ExpressionTreeNullsafeObjGet);
             }
 
             // Other kinds of expressions currently produce no expr errors.
@@ -3525,7 +3754,18 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
-    fn check_type_name(&mut self, name: S<'a>, name_text: &str, location: Location) {
+    fn check_alias_name(&mut self, name: S<'a>, name_text: &str, location: Location) {
+        self.produce_error(
+            |_, x| cant_be_reserved_type_name(x),
+            name_text,
+            || errors::reserved_keyword_as_type_name(name_text),
+            name,
+        );
+        self.check_use_type_name(name, name_text, location);
+    }
+
+    /// This reports "name already in use" relating to namespace use statements.
+    fn check_use_type_name(&mut self, name: S<'a>, name_text: &str, location: Location) {
         match self.names.classes.get(name_text) {
             Some(FirstUseOrDef {
                 location,
@@ -3679,7 +3919,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     where
         I: Iterator<Item = S<'a>>,
     {
-        let mut iter = elts.filter(|x| matches!(&(*x).children, XHPCategoryDeclaration(_)));
+        let mut iter = elts.filter(|x| matches!(&x.children, XHPCategoryDeclaration(_)));
         iter.next();
         if let Some(node) = iter.last() {
             self.errors.push(make_error_from_node(
@@ -3695,7 +3935,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     where
         I: Iterator<Item = S<'a>>,
     {
-        let mut iter = elts.filter(|x| matches!(&(*x).children, XHPChildrenDeclaration(_)));
+        let mut iter = elts.filter(|x| matches!(&x.children, XHPChildrenDeclaration(_)));
         iter.next();
         if let Some(node) = iter.last() {
             self.errors.push(make_error_from_node(
@@ -3724,9 +3964,19 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn enum_class_errors(&mut self, node: S<'a>) {
-        if let EnumClassDeclaration(_) = &node.children {
-            // only allow abstract as modifier + detect modifier duplication
-            self.invalid_modifier_errors("Enum classes", node, |kind| kind == TokenKind::Abstract);
+        if let EnumClassDeclaration(c) = &node.children {
+            let name = self.text(&c.name);
+            self.produce_error(
+                |_, x| cant_be_reserved_type_name(x),
+                name,
+                || errors::reserved_keyword_as_type_name(name),
+                &c.name,
+            );
+            self.invalid_modifier_errors("Enum classes", node, |kind| {
+                kind == TokenKind::Abstract
+                    || kind == TokenKind::Internal
+                    || kind == TokenKind::Public
+            });
         }
     }
 
@@ -3785,7 +4035,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             let classish_sealed_arg_not_classname = |self_: &mut Self| {
                 attr_spec_to_node_list(&cd.attribute).any(|node| {
                     self_.attr_name(node) == Some(sn::user_attributes::SEALED)
-                        && self_.attr_args(node).map_or(false, |mut args| {
+                        && self_.attr_args(node).is_some_and(|mut args| {
                             args.any(|arg_node| match &arg_node.children {
                                 ScopeResolutionExpression(x) => self_.text(&x.name) != "class",
                                 _ => true,
@@ -3804,12 +4054,12 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                                 match &arg.children {
                                     ScopeResolutionExpression(x) => {
                                         let txt = self.text(&x.qualifier);
-                                        let excludes = vec![
+                                        let excludes = [
                                             sn::classes::SELF,
                                             sn::classes::PARENT,
                                             sn::classes::STATIC,
                                         ];
-                                        if excludes.iter().any(|&e| txt == e) {
+                                        if excludes.contains(&txt) {
                                             self.errors.push(make_error_from_node(
                                                 &x.qualifier,
                                                 errors::sealed_qualifier_invalid,
@@ -3825,7 +4075,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 }
             }
 
-            self.check_attr_enabled(&cd.attribute);
+            self.check_attrs(&cd.attribute);
 
             let classish_is_sealed = self.attr_spec_contains_sealed(&cd.attribute);
 
@@ -3849,12 +4099,12 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 || errors::error2037,
                 &cd.extends_list,
             );
-
             self.invalid_modifier_errors("Classes, interfaces, and traits", node, |kind| {
                 kind == TokenKind::Abstract
                     || kind == TokenKind::Final
                     || kind == TokenKind::XHP
                     || kind == TokenKind::Internal
+                    || kind == TokenKind::Public
             });
 
             self.produce_error(
@@ -3880,9 +4130,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
             let classish_name = self.text(&cd.name);
             self.produce_error(
-                |_, x| cant_be_classish_name(x),
+                |_, x| cant_be_reserved_type_name(x),
                 classish_name,
-                || errors::reserved_keyword_as_class_name(classish_name),
+                || errors::reserved_keyword_as_type_name(classish_name),
                 &cd.name,
             );
             if is_token_kind(&cd.keyword, TokenKind::Interface)
@@ -3891,14 +4141,24 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.errors
                     .push(make_error_from_node(node, errors::interface_implements))
             };
-            if self.attr_spec_contains_const(&cd.attribute)
-                && (is_token_kind(&cd.keyword, TokenKind::Interface)
-                    || is_token_kind(&cd.keyword, TokenKind::Trait))
-            {
-                self.errors.push(make_error_from_node(
-                    node,
-                    errors::no_const_interfaces_traits_enums,
-                ))
+            if self.attr_spec_contains_const(&cd.attribute) {
+                if is_token_kind(&cd.keyword, TokenKind::Class)
+                    && list_contains_predicate(|x| x.is_abstract(), &cd.modifiers)
+                    && list_contains_predicate(|x| x.is_final(), &cd.modifiers)
+                {
+                    self.errors.push(make_error_from_node(
+                        node,
+                        errors::no_const_abstract_final_class,
+                    ))
+                } else if is_token_kind(&cd.keyword, TokenKind::Class)
+                    || is_token_kind(&cd.keyword, TokenKind::Interface)
+                    || is_token_kind(&cd.keyword, TokenKind::Trait)
+                {
+                    self.errors.push(make_error_from_node(
+                        node,
+                        errors::no_const_interfaces_traits_enums_classes,
+                    ))
+                }
             }
 
             if self.attr_spec_contains_const(&cd.attribute)
@@ -3985,7 +4245,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             match token_kind(&cd.keyword) {
                 Some(TokenKind::Class) | Some(TokenKind::Trait) if !cd.name.is_missing() => {
                     let location = make_location_of_node(&cd.name);
-                    self.check_type_name(&cd.name, name, location)
+                    self.check_use_type_name(&cd.name, name, location)
                 }
                 _ => {}
             }
@@ -4005,9 +4265,71 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         if self.env.is_typechecker() {
             // HackC & HHVM don't see bounds, so it's pointless to ban (then unban later)
             if let TypeConstDeclaration(tc) = node.children {
-                let count = tc.type_constraints.iter_children().count();
-                if count > 1 {
-                    self.check_can_use_feature(node, &UnstableFeatures::TypeConstMultipleBounds);
+                let (super_count, as_count) = tc.type_constraints.iter_children().fold(
+                    (0, 0),
+                    |(super_count, as_count), node| {
+                        if let TypeConstraint(c) = &node.children {
+                            match token_kind(&c.keyword) {
+                                Some(TokenKind::As) => return (super_count, as_count + 1),
+                                Some(TokenKind::Super) => return (super_count + 1, as_count),
+                                _ => (),
+                            }
+                        }
+                        (super_count, as_count)
+                    },
+                );
+                if super_count != 0 {
+                    self.check_can_use_feature(node, &FeatureName::TypeConstSuperBound);
+                }
+                if super_count > 1 || as_count > 1 {
+                    self.check_can_use_feature(node, &FeatureName::TypeConstMultipleBounds);
+                }
+            }
+        }
+    }
+
+    fn type_refinement_errors(&mut self, node: S<'a>) {
+        #[derive(Eq, PartialEq, Hash)]
+        enum MemberKind {
+            Type,
+            Ctx,
+        }
+        fn member_id<'a>(member: S<'a>) -> Option<(MemberKind, S<'a>)> {
+            match &member.children {
+                TypeInRefinement(m) => Some((MemberKind::Type, &m.name)),
+                CtxInRefinement(m) => Some((MemberKind::Ctx, &m.name)),
+                _ => None,
+            }
+        }
+        fn member_bounded<'a>(member: S<'a>) -> bool {
+            let nonempty_constraints = |cs| syntax_to_list_no_separators(cs).next().is_some();
+            match &member.children {
+                TypeInRefinement(m) => !m.type_.is_missing() ^ nonempty_constraints(&m.constraints),
+                CtxInRefinement(m) => {
+                    !m.ctx_list.is_missing() ^ nonempty_constraints(&m.constraints)
+                }
+                _ => false, /* unreachable */
+            }
+        }
+        if let TypeRefinement(r) = &node.children {
+            // TODO(type-refinements): err when type_parameters is non-empty.
+            // Alternatively, we can just avoid parsing them in the first time.
+            let mut seen_members = HashSet::default();
+            for member in syntax_to_list_no_separators(&r.members) {
+                if let Some((kind, node)) = member_id(member) {
+                    let name = self.text(node);
+                    if !seen_members.insert((kind, name)) {
+                        self.errors.push(make_error_from_node(
+                            member,
+                            errors::duplicate_refinement_member_of(name),
+                        ))
+                    }
+                }
+                if !member_bounded(member) {
+                    self.errors.push(make_error_from_node(
+                        member,
+                        errors::unbounded_refinement_member_of(self.text(&r.type_)),
+                    ));
                 }
             }
         }
@@ -4016,10 +4338,33 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn alias_errors(&mut self, node: S<'a>) {
         if let AliasDeclaration(ad) = &node.children {
             let attrs = &ad.attribute_spec;
-            self.check_attr_enabled(attrs);
+            self.check_attrs(attrs);
+            // Module newtype errors
+            if !ad.module_kw_opt.is_missing() {
+                if !self.in_module {
+                    self.errors.push(make_error_from_node(
+                        &ad.module_kw_opt,
+                        errors::module_newtype_outside_of_module,
+                    ));
+                }
+            }
+            self.invalid_modifier_errors("Type aliases", node, |kind| {
+                kind == TokenKind::Internal || kind == TokenKind::Public
+            });
             if token_kind(&ad.keyword) == Some(TokenKind::Type) && !ad.constraint.is_missing() {
                 self.errors
                     .push(make_error_from_node(&ad.keyword, errors::error2034))
+            }
+
+            if token_kind(&ad.keyword) == Some(TokenKind::Newtype) {
+                for n in ad.constraint.syntax_node_to_list_skip_separator() {
+                    if let TypeConstraint(c) = &n.children {
+                        if let Some(TokenKind::Super) = token_kind(&c.keyword) {
+                            self.check_can_use_feature(n, &FeatureName::NewtypeSuperBounds);
+                            break;
+                        }
+                    };
+                }
             }
             if !ad.name.is_missing() {
                 let name = self.text(&ad.name);
@@ -4033,17 +4378,17 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     }
                 }
 
-                self.check_type_name(&ad.name, name, location)
+                self.check_alias_name(&ad.name, name, location)
             }
         } else if let ContextAliasDeclaration(cad) = &node.children {
             if cad.equal.is_missing() {
                 // short newctx X as []; syntax
-                self.check_can_use_feature(node, &UnstableFeatures::ContextAliasDeclarationShort);
+                self.check_can_use_feature(node, &FeatureName::ContextAliasDeclarationShort);
             } else {
-                self.check_can_use_feature(node, &UnstableFeatures::ContextAliasDeclaration);
+                self.check_can_use_feature(node, &FeatureName::ContextAliasDeclaration);
             }
             let attrs = &cad.attribute_spec;
-            self.check_attr_enabled(attrs);
+            self.check_attrs(attrs);
             if token_kind(&cad.keyword) == Some(TokenKind::Type) && !cad.as_constraint.is_missing()
             {
                 self.errors
@@ -4061,7 +4406,39 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     }
                 }
 
-                self.check_type_name(&cad.name, name, location)
+                self.check_alias_name(&cad.name, name, location)
+            }
+        } else if let CaseTypeDeclaration(ctd) = &node.children {
+            self.check_can_use_feature(node, &FeatureName::CaseTypes);
+
+            let attrs = &ctd.attribute_spec;
+            self.check_attrs(attrs);
+
+            self.invalid_modifier_errors("Case types", node, |kind| {
+                kind == TokenKind::Internal || kind == TokenKind::Public
+            });
+
+            if !ctd.name.is_missing() {
+                let name = self.text(&ctd.name);
+                let location = make_location_of_node(&ctd.name);
+
+                self.check_alias_name(&ctd.name, name, location)
+            }
+        }
+    }
+
+    fn case_type_variant_errors(&mut self, node: S<'a>) {
+        if let CaseTypeVariant(ctv) = &node.children {
+            if let TypeConstant(_) = &ctv.type_.children {
+                if self.env.is_typechecker() {
+                    self.errors.push(make_error_from_node(
+                        &ctv.type_,
+                        errors::type_alias_to_type_constant,
+                    ))
+                }
+            }
+            if !ctv.where_clause.is_missing() {
+                self.check_can_use_feature(&ctv.where_clause, &FeatureName::CaseTypeWhereClauses);
             }
         }
     }
@@ -4243,15 +4620,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
-    fn is_global_in_const_decl(&self, init: S<'a>) -> bool {
-        if let SimpleInitializer(x) = &init.children {
-            if let VariableExpression(x) = &x.value.children {
-                return sn::superglobals::is_any_global(self.text(&x.expression));
-            }
-        }
-        false
-    }
-
     fn namespace_use_declaration_errors(&mut self, node: S<'a>) {
         match &node.children {
             NamespaceUseDeclaration(x) => {
@@ -4285,7 +4653,26 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         )
     }
 
-    fn check_constant_expression(&mut self, node: S<'a>) {
+    fn check_constant_expression_ban_static(&mut self, node: S<'a>) {
+        self.check_constant_expression(node, false)
+    }
+
+    fn check_constant_expression_allow_static(&mut self, node: S<'a>) {
+        self.check_constant_expression(node, true)
+    }
+
+    /// Checks whether this expression is valid in a constant position, such as a property initializer.
+    /// For example:
+    ///
+    /// ```
+    /// vec[vec["foo"]] // allowed
+    /// UNSAFE_CAST<?int, int>(NULLABLE_CONST) // allowed
+    /// foo() // not allowed
+    /// ```
+    ///
+    /// When `static_allowed` is true, late static bound accesses like `static::class` and
+    /// `static::FOO` are considered constant.
+    fn check_constant_expression(&mut self, node: S<'a>, static_allowed: bool) {
         // __FUNCTION_CREDENTIAL__ emits an object,
         // so it cannot be used in a constant expression
         let not_function_credential = |self_: &Self, token: &PositionedToken<'a>| {
@@ -4296,14 +4683,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
         let is_whitelisted_function = |self_: &Self, receiver_token| {
             let text = self_.text(receiver_token);
-
-            (!self_.env.parser_options.po_disallow_func_ptrs_in_constants
-                && (text == strip_hh_ns(sn::autoimported_functions::FUN_)
-                    || text == strip_hh_ns(sn::autoimported_functions::CLASS_METH)))
-                || (text == sn::std_lib_functions::ARRAY_MARK_LEGACY)
+            (text == sn::std_lib_functions::ARRAY_MARK_LEGACY)
                 || (text == strip_ns(sn::std_lib_functions::ARRAY_MARK_LEGACY))
                 || (text == sn::std_lib_functions::ARRAY_UNMARK_LEGACY)
                 || (text == strip_ns(sn::std_lib_functions::ARRAY_UNMARK_LEGACY))
+                || (text == sn::pseudo_functions::UNSAFE_CAST)
+                || (text == strip_ns(sn::pseudo_functions::UNSAFE_CAST))
+                || (text == sn::pseudo_functions::UNSAFE_NONNULL_CAST)
+                || (text == strip_ns(sn::pseudo_functions::UNSAFE_NONNULL_CAST))
         };
 
         let is_namey = |self_: &Self, token: &PositionedToken<'a>| -> bool {
@@ -4319,9 +4706,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     | Protected | Public | Global | Instanceof | Insteadof | Interface
                     | Namespace | New | Try | Use | Var | List | Clone | Include | Include_once
                     | Throw | Tuple | Print | Echo | Require | Require_once | Return | Else
-                    | Elseif | Default | Break | Continue | Switch | Yield | Function | If
-                    | Finally | For | Foreach | Case | Do | While | As | Catch | Empty | Using
-                    | Class | NullLiteral | Super | Where => true,
+                    | Default | Break | Continue | Switch | Yield | Function | If | Finally
+                    | For | Foreach | Case | Do | While | As | Catch | Empty | Using | Class
+                    | NullLiteral | Super | Where => true,
                     _ => false,
                 }
             }
@@ -4339,14 +4726,15 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             if let Token(token) = &x.children {
                 if is_namey(self_, token) {
                     return syntax_to_list_no_separators(initializer)
-                        .for_each(|x| self_.check_constant_expression(x));
+                        .for_each(|x| self_.check_constant_expression(x, static_allowed));
                 }
             };
             default(self_)
         };
 
         let check_collection_members = |self_: &mut Self, x| {
-            syntax_to_list_no_separators(x).for_each(|x| self_.check_constant_expression(x))
+            syntax_to_list_no_separators(x)
+                .for_each(|x| self_.check_constant_expression(x, static_allowed))
         };
         match &node.children {
             Missing | QualifiedName(_) | LiteralExpression(_) => {}
@@ -4360,7 +4748,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     use TokenKind::*;
                     match token.kind() {
                         Exclamation | Plus | Minus | Tilde => {
-                            self.check_constant_expression(&x.operand)
+                            self.check_constant_expression(&x.operand, static_allowed)
                         }
                         _ => default(self),
                     }
@@ -4368,6 +4756,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     default(self)
                 }
             }
+            UpcastExpression(x) => self.check_constant_expression(&x.left_operand, static_allowed),
             BinaryExpression(x) => {
                 if let Token(token) = &x.operator.children {
                     use TokenKind::*;
@@ -4396,8 +4785,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         | LessThanEqual
                         | LessThanEqualGreaterThan
                         | QuestionColon => {
-                            self.check_constant_expression(&x.left_operand);
-                            self.check_constant_expression(&x.right_operand);
+                            self.check_constant_expression(&x.left_operand, static_allowed);
+                            self.check_constant_expression(&x.right_operand, static_allowed);
                         }
                         _ => default(self),
                     }
@@ -4406,9 +4795,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 }
             }
             ConditionalExpression(x) => {
-                self.check_constant_expression(&x.test);
-                self.check_constant_expression(&x.consequence);
-                self.check_constant_expression(&x.alternative);
+                self.check_constant_expression(&x.test, static_allowed);
+                self.check_constant_expression(&x.consequence, static_allowed);
+                self.check_constant_expression(&x.alternative, static_allowed);
             }
             SimpleInitializer(x) => {
                 if let LiteralExpression(y) = &x.value.children {
@@ -4418,13 +4807,15 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                             errors::invalid_constant_initializer,
                         ))
                     }
-                    self.check_constant_expression(&x.value)
+                    self.check_constant_expression(&x.value, static_allowed)
                 } else {
-                    self.check_constant_expression(&x.value)
+                    self.check_constant_expression(&x.value, static_allowed)
                 }
             }
 
-            ParenthesizedExpression(x) => self.check_constant_expression(&x.expression),
+            ParenthesizedExpression(x) => {
+                self.check_constant_expression(&x.expression, static_allowed)
+            }
             CollectionLiteralExpression(x) => {
                 if let SimpleTypeSpecifier(y) = &x.name.children {
                     check_type_specifier(self, &y.specifier, &x.initializers)
@@ -4443,23 +4834,32 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             DictionaryIntrinsicExpression(x) => check_collection_members(self, &x.members),
             ShapeExpression(x) => check_collection_members(self, &x.fields),
             ElementInitializer(x) => {
-                self.check_constant_expression(&x.key);
-                self.check_constant_expression(&x.value);
+                self.check_constant_expression(&x.key, static_allowed);
+                self.check_constant_expression(&x.value, static_allowed);
             }
             FieldInitializer(x) => {
-                self.check_constant_expression(&x.name);
-                self.check_constant_expression(&x.value);
+                self.check_constant_expression(&x.name, static_allowed);
+                self.check_constant_expression(&x.value, static_allowed);
             }
+            // Allow `ClassName::foo` in a constant, but don't allow `parent::class` and
+            // only allow `static::foo` when `static_allowed` is set.
             ScopeResolutionExpression(x)
-                if is_good_scope_resolution_qualifier(&x.qualifier)
-                    && is_good_scope_resolution_name(&x.name) => {}
-            AsExpression(x) => match &x.right_operand.children {
-                LikeTypeSpecifier(_) => self.check_constant_expression(&x.left_operand),
-                GenericTypeSpecifier(y)
-                    if self.text(&y.class_type) == sn::fb::INCORRECT_TYPE
-                        || self.text(&y.class_type) == strip_ns(sn::fb::INCORRECT_TYPE) =>
-                {
-                    self.check_constant_expression(&x.left_operand)
+                if is_good_scope_resolution_qualifier(&x.qualifier, static_allowed)
+                    && is_good_scope_resolution_name(&x.name)
+                    && !is_parent_class_access(&x.qualifier, &x.name) => {}
+            NameofExpression(x) => match x.target.children {
+                // Match behavior for ScopeResolution expression when rhs is ::class
+                QualifiedName(_) => {}
+                Token(t) => {
+                    // The parser does a weird clone fork to separate a name-token of "parent" vs.
+                    // a token kind of parent when the following token is a :: for scope resolution
+                    // I want to leave nameof flexible to have arbitrary expressions, so these are
+                    // always name tokens.
+                    let txt = self.token_text(&t);
+                    if txt == sn::classes::PARENT || (!static_allowed && txt == sn::classes::STATIC)
+                    {
+                        default(self)
+                    }
                 }
                 _ => default(self),
             },
@@ -4467,7 +4867,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 let mut check_receiver_and_arguments = |receiver| {
                     if is_whitelisted_function(self, receiver) {
                         for node in syntax_to_list_no_separators(&x.argument_list) {
-                            self.check_constant_expression(node)
+                            self.check_constant_expression(node, static_allowed)
                         }
                     } else {
                         default(self)
@@ -4484,41 +4884,28 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
             FunctionPointerExpression(_) => {
                 // Bans the equivalent of inst_meth as well as class_meth and fun
-                if self.env.parser_options.po_disallow_func_ptrs_in_constants {
+                if self.env.parser_options.disallow_func_ptrs_in_constants {
                     default(self)
                 }
             }
             ObjectCreationExpression(_) => {
                 // We allow "enum class" constants to be initialized via new.
-                if !(self.env.parser_options.po_enable_enum_classes && self.is_in_enum_class()) {
+                if !self.is_in_enum_class() {
                     default(self);
                 }
+            }
+            PrefixedStringExpression(x) => {
+                // Allow prefixed strings (e.g., re'/foo/') in constant expressions
+                self.check_constant_expression(&x.str, static_allowed)
             }
             _ => default(self),
         }
     }
 
-    fn check_static_in_initializer(&mut self, initializer: S<'a>) -> bool {
-        if let SimpleInitializer(x) = &initializer.children {
-            if let ScopeResolutionExpression(x) = &x.value.children {
-                if let Token(t) = &x.qualifier.children {
-                    match t.kind() {
-                        TokenKind::Static => return true,
-                        TokenKind::Parent => {
-                            return self.text(&x.name).eq_ignore_ascii_case("class");
-                        }
-                        _ => return false,
-                    }
-                }
-            }
-        };
-        false
-    }
-
     fn const_decl_errors(&mut self, node: S<'a>) {
         if let ConstantDeclarator(cd) = &node.children {
             if self.constant_abstract_with_initializer(&cd.initializer) {
-                self.check_can_use_feature(node, &UnstableFeatures::ClassConstDefault);
+                self.check_can_use_feature(node, &FeatureName::ClassConstDefault);
             }
 
             self.produce_error(
@@ -4528,20 +4915,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 &cd.initializer,
             );
 
-            self.produce_error(
-                |self_, x| self_.is_global_in_const_decl(x),
-                &cd.initializer,
-                || errors::global_in_const_decl,
-                &cd.initializer,
-            );
-            self.check_constant_expression(&cd.initializer);
-
-            self.produce_error(
-                |self_, x| self_.check_static_in_initializer(x),
-                &cd.initializer,
-                || errors::parent_static_const_decl,
-                &cd.initializer,
-            );
+            self.check_constant_expression_ban_static(&cd.initializer);
 
             if !cd.name.is_missing() {
                 let constant_name = self.text(&cd.name);
@@ -4592,7 +4966,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         if let PropertyDeclaration(x) = &node.children {
             let property_modifiers = &x.modifiers;
 
-            let abstract_static_props = self.env.parser_options.po_abstract_static_props;
+            let abstract_static_props = self.env.parser_options.abstract_static_props;
             self.invalid_modifier_errors("Properties", node, |kind| {
                 if kind == TokenKind::Abstract {
                     return abstract_static_props;
@@ -4606,13 +4980,13 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             });
 
             self.produce_error(
-                |_, x| is_empty_list_or_missing(x),
+                |_, x| !syntax_to_list_no_separators(x).any(is_visibility),
                 property_modifiers,
                 || errors::property_requires_visibility,
                 node,
             );
 
-            if self.env.parser_options.po_abstract_static_props {
+            if self.env.parser_options.abstract_static_props {
                 self.produce_error(
                     |_, n| has_modifier_abstract(n) && !has_modifier_static(n),
                     node,
@@ -4659,8 +5033,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             })
         };
         if let PropertyDeclaration(x) = &node.children {
-            if self.env.parser_options.tco_const_static_props && has_modifier_static(node) {
-                if self.env.parser_options.po_abstract_static_props && has_modifier_abstract(node) {
+            if self.env.parser_options.const_static_props && has_modifier_static(node) {
+                if self.env.parser_options.abstract_static_props && has_modifier_abstract(node) {
                     check_decls(
                         self,
                         &|n| !n.is_missing(),
@@ -4677,15 +5051,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 }
             }
         }
-    }
-
-    fn trait_use_alias_item_modifier_errors(&mut self, node: S<'a>) {
-        self.invalid_modifier_errors("Trait use aliases", node, |kind| {
-            kind == TokenKind::Final
-                || kind == TokenKind::Private
-                || kind == TokenKind::Protected
-                || kind == TokenKind::Public
-        });
     }
 
     fn mixed_namespace_errors(&mut self, node: S<'a>) {
@@ -4755,7 +5120,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         for decl in syntax_to_list_no_separators(syntax_list) {
                             match &decl.children {
                                 MarkupSection(_) => {}
-                                NamespaceUseDeclaration(_) | FileAttributeSpecification(_) => {}
+                                NamespaceUseDeclaration(_)
+                                | FileAttributeSpecification(_)
+                                | ModuleMembershipDeclaration(_) => {}
                                 NamespaceDeclaration(_) => {
                                     is_first_decl = true;
                                     break;
@@ -4770,6 +5137,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                                     MarkupSection(_) => false,
                                     NamespaceDeclaration(_)
                                     | FileAttributeSpecification(_)
+                                    | ModuleMembershipDeclaration(_)
                                     | EndOfFile(_)
                                     | NamespaceUseDeclaration(_) => false,
                                     _ => true,
@@ -4799,30 +5167,57 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.errors
                     .push(make_error_from_node(node, errors::enum_elem_name_is_class))
             }
-            self.check_constant_expression(&x.value)
+            self.check_constant_expression_ban_static(&x.value);
         }
     }
 
     fn enum_decl_errors(&mut self, node: S<'a>) {
         if let EnumDeclaration(x) = &node.children {
             let attrs = &x.attribute_spec;
-            self.check_attr_enabled(attrs);
+            self.check_attrs(attrs);
             if self.attr_spec_contains_const(attrs) {
                 self.errors.push(make_error_from_node(
                     node,
-                    errors::no_const_interfaces_traits_enums,
+                    errors::no_const_interfaces_traits_enums_classes,
                 ))
             }
-
+            self.invalid_modifier_errors("Enums", node, |kind| {
+                kind == TokenKind::Internal || kind == TokenKind::Public
+            });
             if !x.name.is_missing() {
                 let name = self.text(&x.name);
                 let location = make_location_of_node(&x.name);
-                self.check_type_name(&x.name, name, location)
+                self.check_use_type_name(&x.name, name, location);
+                self.produce_error(
+                    |_, x| cant_be_reserved_type_name(x),
+                    name,
+                    || errors::reserved_keyword_as_type_name(name),
+                    &x.name,
+                );
+
+                if x.base.is_missing() {
+                    // Create a zero width region to insert the new text.
+                    let quickfix_start = end_offset(&x.name);
+                    let quickfix_end = end_offset(&x.name);
+
+                    self.errors.push(make_error_from_node_with_quickfix(
+                        &x.name,
+                        errors::enum_missing_base_type,
+                        "Add `arraykey` base type",
+                        quickfix_start,
+                        quickfix_end,
+                        ": arraykey",
+                    ))
+                }
             }
         }
     }
 
-    fn check_lvalue(&mut self, loperand: S<'a>, lval_root: LvalRoot) {
+    /// Checks whether `loperand` is valid syntax to appear in the context represented by
+    /// `lval_root`. This is meant to span any context in which we're mutating some value. See
+    /// `LvalRoot` for an accounting of the different lvalue contexts in Hack.
+    /// Notably, this includes `inout` expressions, which are lvalues by way of being assignment.
+    fn check_lvalue_and_inout(&mut self, loperand: S<'a>, lval_root: LvalRoot, c: NestingContext) {
         let append_errors =
             |self_: &mut Self, node, error| self_.errors.push(make_error_from_node(node, error));
 
@@ -4840,18 +5235,61 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         };
 
         match &loperand.children {
+            // There's some syntax that is never allowed as part of an `inout` expression, so we
+            // match against it specially.
+            // - `list( ... )` is nonsensical as the argument to an `inout` function; `inout`
+            //   expressions must be both valid lvalues *and* rvalues: `list( ... )` is only valid
+            //   as an lvalue.
+            // - class member access (static or instance) is disallowed to avoid unexpected behavior
+            //   around ref-counting and dangling references to class members.
+            // - `shape(...)` to keep things simple
+            MemberSelectionExpression(_)
+            | ListExpression(_)
+            | ScopeResolutionExpression(_)
+            | ShapeExpression(_)
+            | TupleExpression(_)
+                if lval_root == LvalRoot::Inout =>
+            {
+                err(self, errors::fun_arg_invalid_arg)
+            }
+            ListExpression(_) if matches!(c, NestingContext::ShapeTuple) => {
+                err(self, errors::fun_arg_list_in_shape)
+            }
+            ShapeExpression(_) | TupleExpression(_) if matches!(c, NestingContext::List) => {
+                err(self, errors::fun_arg_shape_in_list)
+            }
             ListExpression(x) => syntax_to_list_no_separators(&x.members)
-                .for_each(|n| self.check_lvalue(n, lval_root)),
+                .for_each(|n| self.check_lvalue_and_inout(n, lval_root, NestingContext::List)),
+            TupleExpression(x) => {
+                self.check_can_use_feature(loperand, &FeatureName::ShapeDestructure);
+                syntax_to_list_no_separators(&x.items).for_each(|n| {
+                    self.check_lvalue_and_inout(n, lval_root, NestingContext::ShapeTuple)
+                })
+            }
+            ShapeExpression(x) => {
+                self.check_can_use_feature(loperand, &FeatureName::ShapeDestructure);
+                for field in syntax_to_list_no_separators(&x.fields) {
+                    if let FieldInitializer(x) = field.children {
+                        self.check_lvalue_and_inout(&x.value, lval_root, NestingContext::ShapeTuple)
+                    }
+                }
+            }
             SafeMemberSelectionExpression(_) => {
                 err(self, errors::not_allowed_in_write("`?->` operator"))
             }
             MemberSelectionExpression(x) => {
                 if token_kind(&x.name) == Some(TokenKind::XHPClassName) {
-                    err(self, errors::not_allowed_in_write("`->:` operator"))
+                    err(self, errors::not_allowed_in_write("`->:` operator"));
                 }
             }
             CatchClause(x) => check_variable(self, self.text(&x.variable)),
-            VariableExpression(x) => check_variable(self, self.text(&x.expression)),
+            VariableExpression(x) => {
+                let txt = self.text(&x.expression);
+                check_variable(self, txt);
+                if lval_root == LvalRoot::Inout && sn::superglobals::is_any_global(txt) {
+                    err(self, errors::fun_arg_invalid_arg);
+                }
+            }
             DecoratedExpression(x) => match token_kind(&x.decorator) {
                 Some(TokenKind::Clone) => err(self, errors::not_allowed_in_write("`clone`")),
                 Some(TokenKind::Await) => err(self, errors::not_allowed_in_write("`await`")),
@@ -4861,11 +5299,19 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 Some(TokenKind::BarGreaterThan) => {
                     err(self, errors::not_allowed_in_write("`|>` operator"))
                 }
+                Some(TokenKind::BarQuestionGreaterThan) => {
+                    err(self, errors::not_allowed_in_write("`|?>` operator"))
+                }
                 Some(TokenKind::Inout) => err(self, errors::not_allowed_in_write("`inout`")),
                 _ => {}
             },
-            ParenthesizedExpression(x) => self.check_lvalue(&x.expression, lval_root),
-            SubscriptExpression(x) => self.check_lvalue(&x.receiver, lval_root),
+            ParenthesizedExpression(x) => self.check_lvalue_and_inout(&x.expression, lval_root, c),
+            SubscriptExpression(x) => {
+                self.check_lvalue_and_inout(&x.receiver, lval_root, c);
+                if lval_root == LvalRoot::Inout && x.index.is_missing() {
+                    err(self, errors::fun_arg_invalid_arg);
+                }
+            }
             PrefixUnaryExpression(x) => check_unary_expression(self, &x.operator),
             PostfixUnaryExpression(x) => check_unary_expression(self, &x.operator),
             // Potentially un-intuitive; `missing` is perfectly valid in LHS positions, for example:
@@ -4884,8 +5330,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 if Some(TokenKind::Variable) == token_kind(&e.name) {
                     return;
                 }
-                // Foo::{$bar} = ...;
-                // OK, as this is static member assignment to whatever prop name is in `$bar`
+                // Foo::{_} = ...;
+                // OK, as this is some form of static member assignment.
                 if let BracedExpression(_) = e.name.children {
                     return;
                 }
@@ -4899,7 +5345,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn assignment_errors(&mut self, node: S<'a>) {
         let check_unary_expression = |self_: &mut Self, op, loperand: S<'a>| {
             if does_unop_create_write(token_kind(op)) {
-                self_.check_lvalue(loperand, LvalRoot::IncrementOrDecrement);
+                self_.check_lvalue_and_inout(
+                    loperand,
+                    LvalRoot::IncrementOrDecrement,
+                    NestingContext::None,
+                );
             }
         };
         match &node.children {
@@ -4908,21 +5358,25 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             DecoratedExpression(x) => {
                 let loperand = &x.expression;
                 if does_decorator_create_write(token_kind(&x.decorator)) {
-                    self.check_lvalue(loperand, LvalRoot::Inout)
+                    self.check_lvalue_and_inout(loperand, LvalRoot::Inout, NestingContext::None)
                 }
             }
             BinaryExpression(x) => {
                 let loperand = &x.left_operand;
                 if does_binop_create_write_on_left(token_kind(&x.operator)) {
-                    self.check_lvalue(loperand, LvalRoot::Assignment);
+                    self.check_lvalue_and_inout(
+                        loperand,
+                        LvalRoot::Assignment,
+                        NestingContext::None,
+                    );
                 }
             }
             ForeachStatement(x) => {
-                self.check_lvalue(&x.value, LvalRoot::Foreach);
-                self.check_lvalue(&x.key, LvalRoot::Foreach);
+                self.check_lvalue_and_inout(&x.value, LvalRoot::Foreach, NestingContext::None);
+                self.check_lvalue_and_inout(&x.key, LvalRoot::Foreach, NestingContext::None);
             }
             CatchClause(_) => {
-                self.check_lvalue(node, LvalRoot::CatchClause);
+                self.check_lvalue_and_inout(node, LvalRoot::CatchClause, NestingContext::None);
             }
             _ => {}
         }
@@ -4965,42 +5419,38 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
     fn disabled_legacy_soft_typehint_errors(&mut self, node: S<'a>) {
         if let SoftTypeSpecifier(_) = node.children {
-            if self.env.parser_options.po_disable_legacy_soft_typehints {
+            if self.env.parser_options.disable_legacy_soft_typehints {
                 self.errors
                     .push(make_error_from_node(node, errors::no_legacy_soft_typehints))
             }
         }
     }
 
-    fn disabled_legacy_attribute_syntax_errors(&mut self, node: S<'a>) {
-        match node.children {
-            OldAttributeSpecification(_)
-                if self.env.parser_options.po_disable_legacy_attribute_syntax =>
-            {
-                self.errors.push(make_error_from_node(
-                    node,
-                    errors::no_legacy_attribute_syntax,
-                ))
-            }
-            _ => {}
-        }
-    }
-
     fn param_default_decl_errors(&mut self, node: S<'a>) {
         if let ParameterDeclaration(x) = &node.children {
-            if self.env.parser_options.po_const_default_lambda_args {
+            if !x.named.is_missing() {
+                self.check_can_use_feature(node, &FeatureName::NamedParameters);
+            }
+            if self.env.parser_options.const_default_lambda_args {
                 match self.env.context.active_callable {
                     Some(node) => match node.children {
                         AnonymousFunction(_) | LambdaExpression(_) => {
-                            self.check_constant_expression(&x.default_value);
+                            self.check_constant_expression_ban_static(&x.default_value);
                         }
                         _ => {}
                     },
                     _ => {}
                 }
             }
-            if self.env.parser_options.po_const_default_func_args {
-                self.check_constant_expression(&x.default_value)
+            if self.env.parser_options.const_default_func_args {
+                self.check_constant_expression(
+                    &x.default_value,
+                    // `static` in constant
+                    !self
+                        .env
+                        .parser_options
+                        .disallow_static_constants_in_default_func_args,
+                )
             }
         }
     }
@@ -5008,7 +5458,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn concurrent_statement_errors(&mut self, node: S<'a>) {
         if let ConcurrentStatement(x) = &node.children {
             // issue error if concurrent blocks are nested
-            if self.is_in_concurrent_block {
+            if self.context.is_in_concurrent_block {
                 self.errors
                     .push(make_error_from_node(node, errors::nested_concurrent_blocks))
             };
@@ -5023,6 +5473,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 for n in statement_list() {
                     if let ExpressionStatement(x) = &n.children {
                         if !self.node_has_await_child(&x.expression) {
+                            self.errors.push(make_error_from_node(
+                                n,
+                                errors::statement_without_await_in_concurrent_block,
+                            ))
+                        }
+                    } else if let DeclareLocalStatement(x) = &n.children {
+                        if !self.node_has_await_child(&x.initializer) && !x.initializer.is_missing()
+                        {
                             self.errors.push(make_error_from_node(
                                 n,
                                 errors::statement_without_await_in_concurrent_block,
@@ -5094,11 +5552,22 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn folder(&mut self, node: S<'a>) {
-        if let Some(sl) = self.env.stack_limit.as_ref() {
-            sl.panic_if_exceeded();
-        }
         let mut prev_context = None;
         let mut pushed_nested_namespace = false;
+
+        match self.parents.last() {
+            Some(Syntax {
+                children: BinaryExpression(x),
+                ..
+            }) if std::ptr::eq(node, &x.right_operand)
+                && (token_kind(&x.operator) == Some(TokenKind::BarGreaterThan)
+                    || token_kind(&x.operator) == Some(TokenKind::BarQuestionGreaterThan)) =>
+            {
+                prev_context = Some(self.env.context.clone());
+                self.env.context.pipe_variable_state = PipeVariableState::Available;
+            }
+            _ => {}
+        };
 
         match &node.children {
             ConstDeclaration(_) => {
@@ -5129,8 +5598,18 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 prev_context = Some(self.env.context.clone());
                 self.env.context.active_classish = Some(node)
             }
+            TypeRefinement(_) => {
+                self.type_refinement_errors(node);
+            }
             FileAttributeSpecification(_) => self.file_attribute_spec(node),
-            ModuleDeclaration(_) => self.check_can_use_feature(node, &UnstableFeatures::Modules),
+            ModuleDeclaration(_) => {}
+            ModuleMembershipDeclaration(_) => {
+                self.in_module = true;
+            }
+            EnumClassDeclaration(_) => {
+                prev_context = Some(self.env.context.clone());
+                self.env.context.active_enum_class = Some(node);
+            }
             _ => {}
         };
 
@@ -5173,6 +5652,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             | PipeVariableExpression(_)
             | ConditionalExpression(_)
             | CollectionLiteralExpression(_)
+            | ETSpliceExpression(_)
             | VariableExpression(_) => {
                 self.check_disallowed_variables(node);
                 self.dynamic_method_call_errors(node);
@@ -5180,11 +5660,19 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.assignment_errors(node);
             }
 
+            NamedArgument(_) => {
+                self.named_argument_errors(node);
+            }
+
             ParameterDeclaration(_) => self.param_default_decl_errors(node),
             RequireClause(_) => self.require_errors(node),
-            ClassishDeclaration(_) => {
+            RequireClauseConstraint(_) => {
+                self.check_can_use_feature(node, &FeatureName::RequireConstraint)
+            }
+            ClassishDeclaration(children) => {
                 self.classish_errors(node);
                 self.class_reified_param_errors(node);
+                self.check_type_parameters_attributes(&children.type_parameters);
             }
 
             EnumClassDeclaration(_) => {
@@ -5200,7 +5688,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.type_const_bounds_errors(node);
             }
 
-            AliasDeclaration(_) | ContextAliasDeclaration(_) => self.alias_errors(node),
+            AliasDeclaration(_) | ContextAliasDeclaration(_) | CaseTypeDeclaration(_) => {
+                self.alias_errors(node)
+            }
+            CaseTypeVariant(_) => self.case_type_variant_errors(node),
             ConstantDeclarator(_) => self.const_decl_errors(node),
             NamespaceBody(_) | NamespaceEmptyBody(_) | NamespaceDeclaration(_) => {
                 self.mixed_namespace_errors(node)
@@ -5215,39 +5706,64 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.class_property_const_errors(node);
                 self.class_property_declarator_errors(node);
             }
-            TraitUseAliasItem(_) => self.trait_use_alias_item_modifier_errors(node),
             EnumDeclaration(_) => self.enum_decl_errors(node),
             Enumerator(_) => self.enumerator_errors(node),
+            BinaryExpression(x)
+                if self.context.active_expression_tree
+                    && token_kind(&x.operator) == Some(TokenKind::QuestionQuestion) =>
+            {
+                self.check_can_use_feature(node, &FeatureName::ExpressionTreeCoalesceOperator);
+                self.assignment_errors(node);
+            }
             PostfixUnaryExpression(_)
             | BinaryExpression(_)
             | ForeachStatement(_)
             | CatchClause(_) => self.assignment_errors(node),
             XHPEnumType(_) | XHPExpression(_) => self.xhp_errors(node),
-            PropertyDeclarator(x) => {
-                let init = &x.initializer;
-
-                self.produce_error(
-                    |self_, x| self_.check_static_in_initializer(x),
-                    init,
-                    || errors::parent_static_prop_decl,
-                    init,
-                );
-                self.check_constant_expression(init)
+            PropertyDeclarator(x) => self.check_constant_expression_ban_static(&x.initializer),
+            XHPClassAttribute(x) => {
+                // TODO(hgoldstein) I suspect that this is a bug: why would we
+                // allow `static::_` in XHP properties but not in normal class
+                // properties ...
+                self.check_constant_expression_allow_static(&x.initializer);
             }
-            XHPClassAttribute(x) => self.check_constant_expression(&x.initializer),
-            OldAttributeSpecification(_) => self.disabled_legacy_attribute_syntax_errors(node),
             SoftTypeSpecifier(_) => self.disabled_legacy_soft_typehint_errors(node),
             QualifiedName(_) => self.check_qualified_name(node),
             UnsetStatement(x) => {
                 for expr in syntax_to_list_no_separators(&x.variables) {
-                    self.check_lvalue(expr, LvalRoot::Unset);
+                    self.check_lvalue_and_inout(expr, LvalRoot::Unset, NestingContext::None);
                 }
+            }
+            DeclareLocalStatement(x) => {
+                if self.text(&x.variable) == sn::special_idents::THIS {
+                    self.errors.push(make_error_from_node(
+                        node,
+                        Cow::Owned("You cannot declare $this as a typed local.".to_string()),
+                    ));
+                }
+            }
+            ClassPtrTypeSpecifier(_) => {
+                self.check_can_use_feature(node, &FeatureName::ClassType);
+            }
+            Token(t)
+                if t.kind() == TokenKind::Name
+                    && self.env.parser_options.enable_intrinsics_extension
+                    && self.token_text(t) == "__EXPERIMENTAL_TEST_FEATURE_STATUS__" =>
+            {
+                self.check_can_use_feature(node, &FeatureName::TestFeature);
             }
             _ => {}
         }
         self.lval_errors(node);
 
         match &node.children {
+            LambdaSignature(c) if !c.type_parameters.is_missing() => {
+                self.check_can_use_feature(node, &FeatureName::PolymorphicLambda)
+            }
+            AnonymousFunction(children) if !children.type_parameters.is_missing() => {
+                self.check_can_use_feature(node, &FeatureName::PolymorphicLambda);
+                self.lambda(node)
+            }
             // todo: lambda
             LambdaExpression(_) | AwaitableCreationExpression(_) | AnonymousFunction(_) => {
                 self.lambda(node)
@@ -5256,33 +5772,32 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             NamespaceBody(x) => self.namespace_body(node, &x.left_brace, &x.right_brace),
             NamespaceEmptyBody(x) => self.namespace_empty_body(node, &x.semicolon),
             ClassishDeclaration(_) | AnonymousClass(_) => self.classes(node),
-            PrefixedCodeExpression(_) => self.prefixed_code_expr(node, &mut prev_context),
+            PrefixedCodeExpression(x) => {
+                self.prefixed_code_expr(node, &x.prefix, &mut prev_context)
+            }
             ETSpliceExpression(_) => self.et_splice_expr(node),
             _ => self.fold_child_nodes(node),
         }
 
         match &node.children {
+            ClosureTypeSpecifier(c) if !c.type_parameters.is_missing() => {
+                self.check_can_use_feature(node, &FeatureName::PolymorphicFunctionHints)
+            }
             UnionTypeSpecifier(_) | IntersectionTypeSpecifier(_) => {
-                self.check_can_use_feature(node, &UnstableFeatures::UnionIntersectionTypeHints)
+                self.check_can_use_feature(node, &FeatureName::UnionIntersectionTypeHints)
             }
-            ClassishDeclaration(x) => match &x.where_clause.children {
-                WhereClause(_) => {
-                    self.check_can_use_feature(&x.where_clause, &UnstableFeatures::ClassLevelWhere)
-                }
-                _ => {}
-            },
-            UpcastExpression(_) => {
-                if !self.env.parser_options.tco_enable_sound_dynamic {
-                    self.check_can_use_feature(node, &UnstableFeatures::UpcastExpression)
-                }
+            LikeTypeSpecifier(_) if !self.env.hhi_mode => {
+                self.check_can_use_feature(node, &FeatureName::LikeTypeHints)
             }
+            DeclareLocalStatement(_) => {
+                self.check_can_use_feature(node, &FeatureName::TypedLocalVariables)
+            }
+            UpcastExpression(_) => self.check_can_use_feature(node, &FeatureName::UpcastExpression),
             OldAttributeSpecification(x) => {
                 self.old_attr_spec(node, &x.attributes);
             }
-            RequireClause(c) => {
-                if c.kind.is_class() {
-                    self.check_can_use_feature(node, &UnstableFeatures::RequireClass)
-                }
+            MatchStatement(_) => {
+                self.check_can_use_feature(node, &FeatureName::MatchStatements);
             }
             _ => {}
         }
@@ -5307,23 +5822,23 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                             errors::invalid_use_of_enable_unstable_feature(
                                 format!(
                                     "you didn't select a feature. Available features are:\n\t{}",
-                                    UnstableFeatures::iter().join("\n\t")
+                                    FeatureName::iter().join("\n\t")
                                 )
                                 .as_str(),
                             ),
                         ))
                         } else {
-                            args.for_each(|arg| self.enable_unstable_feature(node, arg))
+                            args.for_each(|arg| self.enable_experimental_feature(node, arg))
                         }
                     }
                 }
-                Some(name) if self.is_module_attribute(name) => {
-                    self.check_can_use_feature(node, &UnstableFeatures::Modules);
+                Some(sn::user_attributes::PACKAGE_OVERRIDE) => {
                     if let Some(args) = self.attr_args(node) {
-                        let arity = args.count();
-                        if arity != 1 {
+                        let mut count = 0;
+                        args.for_each(|_| count += 1);
+                        if count != 1 {
                             self.errors
-                                .push(make_error_from_node(node, errors::module_attr_arity(arity)));
+                                .push(make_error_from_node(node, errors::invalid_package_override))
                         }
                     }
                 }
@@ -5350,27 +5865,46 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         // preserve context when entering lambdas (and anonymous functions)
         self.env.context.active_callable = Some(node);
         self.env.context.active_callable_attr_spec = Some(s);
+
+        // ExpressionTrees don't support pipe expressions but if a pipe-variable
+        // is captured by an expression tree it can always be used in any lambdas
+        // therein regardless of whether pipe variable capture is enabled.
+        if !self.context.active_expression_tree {
+            self.env.context.pipe_variable_state = match self.env.context.pipe_variable_state {
+                PipeVariableState::Available | PipeVariableState::Captured => {
+                    PipeVariableState::Captured
+                }
+                PipeVariableState::Unavailable => PipeVariableState::Unavailable,
+            };
+        };
+    }
+
+    fn reset_parser_error_context_for_lambda(&mut self) -> ParserErrorsContext {
+        if self.context.active_expression_tree {
+            self.context.clone()
+        } else {
+            std::mem::take(&mut self.context)
+        }
     }
 
     fn lambda(&mut self, node: S<'a>) {
-        let prev_is_in_concurrent_block = self.is_in_concurrent_block;
-        // reset is_in_concurrent_block for functions
-        self.is_in_concurrent_block = false;
+        // reset the context to default for functions, and restore it at the end
+        let prev_context = self.reset_parser_error_context_for_lambda();
         // analyze the body of lambda block
         self.fold_child_nodes(node);
         // adjust is_in_concurrent_block in final result
-        self.is_in_concurrent_block = prev_is_in_concurrent_block;
+        self.context = prev_context;
     }
 
     fn concurrent_stmt(&mut self, node: S<'a>) {
         self.concurrent_statement_errors(node);
         // adjust is_in_concurrent_block in accumulator to dive into the
-        let prev_is_in_concurrent_block = self.is_in_concurrent_block;
-        self.is_in_concurrent_block = true;
+        let prev_is_in_concurrent_block = self.context.is_in_concurrent_block;
+        self.context.is_in_concurrent_block = true;
         // analyze the body of concurrent block
         self.fold_child_nodes(node);
         // adjust is_in_concurrent_block in final result
-        self.is_in_concurrent_block = prev_is_in_concurrent_block;
+        self.context.is_in_concurrent_block = prev_is_in_concurrent_block;
     }
 
     fn namespace_body(&mut self, node: S<'a>, left_brace: S<'a>, right_brace: S<'a>) {
@@ -5407,8 +5941,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         // Reset the const declarations
         // Reset the function declarations
 
-        let constants = std::mem::replace(&mut self.names.constants, YesCase(HashMap::default()));
-        let functions = std::mem::replace(&mut self.names.functions, NoCase(HashMap::default()));
+        let constants = std::mem::replace(&mut self.names.constants, ConstCase(HashMap::default()));
+        let functions = std::mem::replace(&mut self.names.functions, FuncCase(HashMap::default()));
         let trait_require_clauses = std::mem::replace(
             &mut self.trait_require_clauses,
             empty_trait_require_clauses(),
@@ -5421,24 +5955,49 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.names.constants = constants;
     }
 
-    fn prefixed_code_expr(&mut self, node: S<'a>, prev_context: &mut Option<Context<'a>>) {
+    fn prefixed_code_expr(
+        &mut self,
+        node: S<'a>,
+        prefix: S<'a>,
+        prev_context: &mut Option<Context<'a>>,
+    ) {
+        if self.context.expression_tree_depth == 0 && prefix.is_missing() {
+            self.errors
+                .push(make_error_from_node(node, errors::expression_tree_name))
+        } else if self.context.expression_tree_depth != 0
+            && prefix.is_missing()
+            && !self.context.active_expression_tree
+        {
+            self.errors
+                .push(make_error_from_node(prefix, errors::expression_tree_name))
+        }
+
         *prev_context = Some(self.env.context.clone());
-        self.env.context.active_expression_tree = true;
-        self.fold_child_nodes(node)
+        self.context.active_expression_tree = true;
+        self.context.expression_tree_depth += 1;
+        self.fold_child_nodes(node);
+        self.context.active_expression_tree = false;
+        self.context.expression_tree_depth -= 1;
     }
 
     fn et_splice_expr(&mut self, node: S<'a>) {
-        let previous_state = self.env.context.active_expression_tree;
-        self.env.context.active_expression_tree = false;
+        if self.context.expression_tree_depth > 0 && !self.context.active_expression_tree {
+            self.errors.push(make_error_from_node(
+                node,
+                "Splice syntax `${...}` cannot be nested.".into(),
+            ))
+        }
+        let previous_state = self.context.active_expression_tree;
+        self.context.active_expression_tree = false;
         self.fold_child_nodes(node);
-        self.env.context.active_expression_tree = previous_state;
+        self.context.active_expression_tree = previous_state;
     }
 
     fn old_attr_spec(&mut self, node: S<'a>, attributes: S<'a>) {
         let attributes = self.text(attributes).split(',');
         attributes.for_each(|attr| match attr.trim() {
-            sn::user_attributes::ENABLE_METHOD_TRAIT_DIAMOND => {
-                self.check_can_use_feature(node, &UnstableFeatures::MethodTraitDiamond)
+            sn::user_attributes::SIMPLIHACK => {
+                self.check_can_use_feature(node, &FeatureName::SimpliHack)
             }
             _ => {}
         });
@@ -5452,20 +6011,26 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn fold_child_nodes(&mut self, node: S<'a>) {
-        self.parents.push(node);
-        for c in node.iter_children() {
-            self.folder(c)
-        }
-        assert_eq!(
-            self.parents.pop().map(|x| x as *const _),
-            Some(node as *const _)
-        );
+        stack_limit::maybe_grow(|| {
+            self.parents.push(node);
+            for c in node.iter_children() {
+                self.folder(c);
+            }
+            assert_eq!(
+                self.parents.pop().map(|x| x as *const _),
+                Some(node as *const _)
+            );
+        })
     }
 
-    fn parse_errors_impl(mut self) -> (Vec<SyntaxError>, bool) {
+    fn parse_errors_impl(mut self) -> (Vec<SyntaxError>, bool, HashSet<FeatureName>) {
         self.fold_child_nodes(self.env.syntax_tree.root());
         self.errors.reverse();
-        (self.errors, self.uses_readonly)
+        (
+            self.errors,
+            self.uses_readonly,
+            self.env.context.active_experimental_features,
+        )
     }
 
     fn parse_errors(
@@ -5474,10 +6039,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         parser_options: ParserOptions,
         hhvm_compat_mode: bool,
         hhi_mode: bool,
-        codegen: bool,
+        mode: Mode,
         systemlib: bool,
-        stack_limit: Option<&'a StackLimit>,
-    ) -> (Vec<SyntaxError>, bool) {
+        default_experimental_features: HashSet<FeatureName>,
+    ) -> (Vec<SyntaxError>, bool, HashSet<FeatureName>) {
         let env = Env {
             parser_options,
             syntax_tree: tree,
@@ -5488,17 +6053,23 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 active_callable: None,
                 active_callable_attr_spec: None,
                 active_const: None,
-                active_unstable_features: HashSet::default(),
-                active_expression_tree: false,
+                active_enum_class: None,
+                pipe_variable_state: PipeVariableState::Unavailable,
+                active_experimental_features: default_experimental_features,
             },
             hhvm_compat_mode,
             hhi_mode,
-            codegen,
+            mode,
             systemlib,
-            stack_limit,
         };
         Self::new(env).parse_errors_impl()
     }
+}
+
+enum NestingContext {
+    None,
+    List,
+    ShapeTuple,
 }
 
 pub fn parse_errors<'a, State: Clone>(
@@ -5506,19 +6077,19 @@ pub fn parse_errors<'a, State: Clone>(
     parser_options: ParserOptions,
     hhvm_compat_mode: bool,
     hhi_mode: bool,
-    codegen: bool,
+    ns_mode: Mode,
     systemlib: bool,
-    stack_limit: Option<&'a StackLimit>,
-) -> (Vec<SyntaxError>, bool) {
+    default_experimental_features: HashSet<FeatureName>,
+) -> (Vec<SyntaxError>, bool, HashSet<FeatureName>) {
     <ParserErrors<'a, State>>::parse_errors(
         tree,
         IndexedSourceText::new(tree.text().clone()),
         parser_options,
         hhvm_compat_mode,
         hhi_mode,
-        codegen,
+        ns_mode,
         systemlib,
-        stack_limit,
+        default_experimental_features,
     )
 }
 
@@ -5528,18 +6099,18 @@ pub fn parse_errors_with_text<'a, State: Clone>(
     parser_options: ParserOptions,
     hhvm_compat_mode: bool,
     hhi_mode: bool,
-    codegen: bool,
+    ns_mode: Mode,
     systemlib: bool,
-    stack_limit: Option<&'a StackLimit>,
-) -> (Vec<SyntaxError>, bool) {
+    default_experimental_features: HashSet<FeatureName>,
+) -> (Vec<SyntaxError>, bool, HashSet<FeatureName>) {
     <ParserErrors<'a, State>>::parse_errors(
         tree,
         text,
         parser_options,
         hhvm_compat_mode,
         hhi_mode,
-        codegen,
+        ns_mode,
         systemlib,
-        stack_limit,
+        default_experimental_features,
     )
 }

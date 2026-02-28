@@ -23,7 +23,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(bespoke);
+TRACE_SET_MOD(bespoke)
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -81,7 +81,7 @@ RuntimeStruct* RuntimeStruct::registerRuntimeStruct(
   }
 
   {
-    folly::SharedMutex::ReadHolder lock{s_mapLock};
+    std::shared_lock lock{s_mapLock};
     auto it = s_runtimeStrMap.find(stableIdentifier.get());
     if (it != s_runtimeStrMap.end()) {
       auto const runtimeStruct = it->second;
@@ -112,7 +112,7 @@ RuntimeStruct* RuntimeStruct::registerRuntimeStruct(
     if (idx >= fieldsLength) fieldsLength = idx + 1;
   }
 
-  folly::SharedMutex::WriteHolder lock{s_mapLock};
+  std::unique_lock lock{s_mapLock};
   auto const pair = s_runtimeStrMap.emplace(stableIdentifier.get(), nullptr);
   if (!pair.second) return pair.first->second;
 
@@ -166,7 +166,7 @@ RuntimeStruct* RuntimeStruct::allocate(size_t fieldsLength) {
   return rs;
 }
 
-LowStringPtr RuntimeStruct::getKey(size_t idx) const {
+PackedStringPtr RuntimeStruct::getKey(size_t idx) const {
   assertx(idx < m_fields.size());
   return m_fields[idx];
 }
@@ -206,7 +206,7 @@ RuntimeStruct* RuntimeStruct::findById(const StringData* stableIdentifier) {
   assertx(allowBespokeArrayLikes());
   assertx(stableIdentifier->isStatic());
 
-  folly::SharedMutex::ReadHolder lock{s_mapLock};
+  std::shared_lock lock{s_mapLock};
   auto const runtimeStruct = s_runtimeStrMap[stableIdentifier];
   assertx(runtimeStruct);
   return runtimeStruct;
@@ -215,7 +215,7 @@ RuntimeStruct* RuntimeStruct::findById(const StringData* stableIdentifier) {
 void RuntimeStruct::eachRuntimeStruct(std::function<void(RuntimeStruct*)> fn) {
   assertx(allowBespokeArrayLikes());
 
-  folly::SharedMutex::ReadHolder lock{s_mapLock};
+  std::shared_lock lock{s_mapLock};
   for (auto& it : s_runtimeStrMap) fn(it.second);
 }
 

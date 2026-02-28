@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface ABD {}
 interface BCD {}

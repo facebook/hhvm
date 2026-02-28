@@ -1,11 +1,11 @@
 <?hh
-function dump($x) {
+function dump($x) :mixed{
   var_dump(is_array($x));
   var_dump($x);
 }
-function main() {
-  $array1 = varray[11, 22, 33, '22'];
-  $array2 = varray['a', 'b', 'c', 'd'];
+function main() :mixed{
+  $array1 = vec[11, 22, 33, '22'];
+  $array2 = vec['a', 'b', 'c', 'd'];
   $vector1 = Vector {11, 22, 33, '22'};
   $vector2 = Vector {'a', 'b', 'c', 'd'};
   $map1 = Map {0 => 11, 1 => 22, 2 => 33, 3 => '22'};
@@ -57,7 +57,7 @@ function main() {
 
   echo "\n\n========\n\n\n";
 
-  $array = varray['a', 1];
+  $array = vec['a', 1];
   $pair = Pair {'b', 2};
   dump(array_combine($array, $array));
   dump(array_combine($array, $pair));
@@ -67,6 +67,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_array_combine() {
+function main_array_combine() :mixed{
 main();
 }

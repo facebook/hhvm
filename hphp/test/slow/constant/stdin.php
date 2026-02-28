@@ -1,11 +1,11 @@
 <?hh
 class A {
-  public static function b() {
-    return \STDIN;
+  public static function b() :mixed{
+    return \HH\stdin();
   }
 }
 
 <<__EntryPoint>>
-function main_stdin() {
-var_dump(A::b());
+function main_stdin() :mixed{
+  var_dump(A::b());
 }

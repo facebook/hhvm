@@ -1,11 +1,11 @@
 <?hh
 
-<<__NEVER_INLINE>> function P(bool $v) { print $v ? 'Y' : 'N'; }
+<<__NEVER_INLINE>> function P(bool $v) :mixed{ print $v ? 'Y' : 'N'; }
 
 <<__EntryPoint>>
-function main_1026() {
+function main_1026() :mixed{
 $i = 0;
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(HH\Lib\Legacy_FIXME\lte('', true)); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -20,7 +20,7 @@ $i = 0;
  print "\t";
  print "'' <= true	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(HH\Lib\Legacy_FIXME\lte('', false)); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -35,7 +35,7 @@ $i = 0;
  print "\t";
  print "'' <= false	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(HH\Lib\Legacy_FIXME\lte('', 1)); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -50,7 +50,7 @@ $i = 0;
  print "\t";
  print "'' <= 1	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(HH\Lib\Legacy_FIXME\lte('', 0)); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -65,7 +65,7 @@ $i = 0;
  print "\t";
  print "'' <= 0	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(HH\Lib\Legacy_FIXME\lte('', -1)); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -80,7 +80,7 @@ $i = 0;
  print "\t";
  print "'' <= -1	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(''<='1'); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -95,7 +95,7 @@ $i = 0;
  print "\t";
  print "'' <= '1'	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(''<='0'); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -110,7 +110,7 @@ $i = 0;
  print "\t";
  print "'' <= '0'	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(''<='-1'); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -125,7 +125,7 @@ $i = 0;
  print "\t";
  print "'' <= '-1'	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(HH\Lib\Legacy_FIXME\lte('', null)); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -140,172 +140,172 @@ $i = 0;
  print "\t";
  print "'' <= null	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
- try { P(''<=darray[]); } catch (Throwable $_) { print 'E'; }
+ try { P(''<=dict[]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = '';
- try { P($a <=darray[]); } catch (Throwable $_) { print 'E'; }
+ try { P($a <=dict[]); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = darray[];
+ $b = dict[];
  try { P(''<=$b); } catch (Throwable $_) { print 'E'; }
  try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'' <= array()	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
- try { P(''<=varray[1]); } catch (Throwable $_) { print 'E'; }
+ try { P(''<=vec[1]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = '';
- try { P($a <=varray[1]); } catch (Throwable $_) { print 'E'; }
+ try { P($a <=vec[1]); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = varray[1];
+ $b = vec[1];
  try { P(''<=$b); } catch (Throwable $_) { print 'E'; }
  try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'' <= array(1)	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
- try { P(''<=varray[2]); } catch (Throwable $_) { print 'E'; }
+ try { P(''<=vec[2]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = '';
- try { P($a <=varray[2]); } catch (Throwable $_) { print 'E'; }
+ try { P($a <=vec[2]); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = varray[2];
+ $b = vec[2];
  try { P(''<=$b); } catch (Throwable $_) { print 'E'; }
  try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'' <= array(2)	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
- try { P(''<=varray['1']); } catch (Throwable $_) { print 'E'; }
+ try { P(''<=vec['1']); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = '';
- try { P($a <=varray['1']); } catch (Throwable $_) { print 'E'; }
+ try { P($a <=vec['1']); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = varray['1'];
+ $b = vec['1'];
  try { P(''<=$b); } catch (Throwable $_) { print 'E'; }
  try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'' <= array('1')	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
- try { P(''<=darray['0' => '1']); } catch (Throwable $_) { print 'E'; }
+ try { P(''<=dict['0' => '1']); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = '';
- try { P($a <=darray['0' => '1']); } catch (Throwable $_) { print 'E'; }
+ try { P($a <=dict['0' => '1']); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = darray['0' => '1'];
+ $b = dict['0' => '1'];
  try { P(''<=$b); } catch (Throwable $_) { print 'E'; }
  try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'' <= array('0' => '1')	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
- try { P(''<=varray['a']); } catch (Throwable $_) { print 'E'; }
+ try { P(''<=vec['a']); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = '';
- try { P($a <=varray['a']); } catch (Throwable $_) { print 'E'; }
+ try { P($a <=vec['a']); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = varray['a'];
+ $b = vec['a'];
  try { P(''<=$b); } catch (Throwable $_) { print 'E'; }
  try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'' <= array('a')	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
- try { P(''<=darray['a' => 1]); } catch (Throwable $_) { print 'E'; }
+ try { P(''<=dict['a' => 1]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = '';
- try { P($a <=darray['a' => 1]); } catch (Throwable $_) { print 'E'; }
+ try { P($a <=dict['a' => 1]); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = darray['a' => 1];
+ $b = dict['a' => 1];
  try { P(''<=$b); } catch (Throwable $_) { print 'E'; }
  try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'' <= array('a' => 1)	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
- try { P(''<=darray['b' => 1]); } catch (Throwable $_) { print 'E'; }
+ try { P(''<=dict['b' => 1]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = '';
- try { P($a <=darray['b' => 1]); } catch (Throwable $_) { print 'E'; }
+ try { P($a <=dict['b' => 1]); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = darray['b' => 1];
+ $b = dict['b' => 1];
  try { P(''<=$b); } catch (Throwable $_) { print 'E'; }
  try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'' <= array('b' => 1)	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
- try { P(''<=darray['a' => 1, 'b' => 2]); } catch (Throwable $_) { print 'E'; }
+ try { P(''<=dict['a' => 1, 'b' => 2]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = '';
- try { P($a <=darray['a' => 1, 'b' => 2]); } catch (Throwable $_) { print 'E'; }
+ try { P($a <=dict['a' => 1, 'b' => 2]); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = darray['a' => 1, 'b' => 2];
+ $b = dict['a' => 1, 'b' => 2];
  try { P(''<=$b); } catch (Throwable $_) { print 'E'; }
  try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'' <= array('a' => 1, 'b' => 2)	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
- try { P(''<=varray[darray['a' => 1]]); } catch (Throwable $_) { print 'E'; }
+ try { P(''<=vec[dict['a' => 1]]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = '';
- try { P($a <=varray[darray['a' => 1]]); } catch (Throwable $_) { print 'E'; }
+ try { P($a <=vec[dict['a' => 1]]); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = varray[darray['a' => 1]];
+ $b = vec[dict['a' => 1]];
  try { P(''<=$b); } catch (Throwable $_) { print 'E'; }
  try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'' <= array(array('a' => 1))	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
- try { P(''<=varray[darray['b' => 1]]); } catch (Throwable $_) { print 'E'; }
+ try { P(''<=vec[dict['b' => 1]]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = '';
- try { P($a <=varray[darray['b' => 1]]); } catch (Throwable $_) { print 'E'; }
+ try { P($a <=vec[dict['b' => 1]]); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = varray[darray['b' => 1]];
+ $b = vec[dict['b' => 1]];
  try { P(''<=$b); } catch (Throwable $_) { print 'E'; }
  try { P($a <=$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'' <= array(array('b' => 1))	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(''<='php'); } catch (Throwable $_) { print 'E'; }
  $a = 1;
@@ -320,7 +320,7 @@ $i = 0;
  print "\t";
  print "'' <= 'php'	";
  print "\n";
- print ++$i;
+ ++$i; print $i;
  print "\t";
  try { P(''<=''); } catch (Throwable $_) { print 'E'; }
  $a = 1;

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 namespace {
 
@@ -29,9 +29,9 @@ namespace {
  *   array  If inside a function, this lists the functions arguments. If
  *   inside an included file, this lists the included file name(s).
  */
-<<__Native("NoInjection")>>
+<<__Native("NoInjection", "NoRecording"), __EagerVMSync>>
 function debug_backtrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT,
-                         int $limit = 0): varray<darray>;
+                         int $limit = 0): vec<dict<string, mixed>>;
 
 /**
  * Prints a backtrace
@@ -47,7 +47,7 @@ function debug_backtrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT,
  *
  * @return void -
  */
-<<__Native("NoInjection")>>
+<<__Native("NoInjection"), __EagerVMSync>>
 function debug_print_backtrace(int $options = 0,
                                int $limit = 0): void;
 
@@ -105,7 +105,7 @@ function error_log(string $message,
  * @return int - Returns the old error_reporting level or the current
  *   level if no level parameter is given.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function error_reporting(?int $level = null)[leak_safe]: int;
 
 /**
@@ -113,7 +113,7 @@ function error_reporting(?int $level = null)[leak_safe]: int;
  *
  * @return bool - This function always returns TRUE.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function restore_error_handler(): bool;
 
 /**
@@ -122,7 +122,7 @@ function restore_error_handler(): bool;
  *
  * @return bool - This function always returns TRUE.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function restore_exception_handler(): bool;
 
 /**
@@ -141,9 +141,13 @@ function restore_exception_handler(): bool;
  *   fifth parameter is optional, errcontext, which is an array that points
  *   to the active symbol table at the point the error occurred. In other
  *   words, errcontext will contain an array of every variable that existed
- *   in the scope the error was triggered in. User error handler must not
- *   modify error context.       If the function returns FALSE then the
- *   normal error handler continues.
+ *   in the scope the error was triggered in.
+ *   Sixth parameter is backtrace.
+ *   Seventh parameter is blame associated with the current implicit context.
+ *   First part of it is blame from soft make ic inaccessible; while, the
+ *   second part is blame from soft ic runWith.
+ *   User error handler must not modify error context.
+ *   If the function returns FALSE then the normal error handler continues.
  * @param int $error_types - Can be used to mask the triggering of the
  *   error_handler function just like the error_reporting ini setting
  *   controls which errors are shown. Without this mask set the
@@ -157,7 +161,7 @@ function restore_exception_handler(): bool;
  *   function will return an indexed array with the class and the method
  *   name.
  */
-<<__Native>>
+<<__Native("NoRecording")>>
 function set_error_handler(mixed $error_handler,
                            int $error_types = E_ALL): mixed;
 
@@ -177,8 +181,8 @@ function set_error_handler(mixed $error_handler,
  *   exception handler, or NULL on error. If no previous handler was
  *   defined, NULL is also returned.
  */
-<<__Native>>
-function set_exception_handler(mixed $exception_handler): ?callable;
+<<__Native("NoRecording")>>
+function set_exception_handler(mixed $exception_handler): ?dynamic;
 
 /**
  * Generates a user-level error/warning/notice message
@@ -245,15 +249,39 @@ function hphp_clear_unflushed(): void;
  *    indicate the filename, function, line number and class name (if in class
  *    context) of the callsite that invoked the current function or method.
  */
-<<__Native, __Pure>>
-function hphp_debug_caller_info(): darray<string, mixed>;
+<<__Native, __EagerVMSync>>
+function hphp_debug_caller_info()[leak_safe]: darray<string, mixed>;
+
+/**
+ * Retrieves the full function name of the caller that invoked the current
+ * function or method.
+ *
+ * @return array - Returns either 'function' or 'class::method' of the callsite
+ *     that invoked the current function or method.
+ */
+<<__Native, __EagerVMSync>>
+function hphp_debug_caller_identifier()[leak_safe]: string;
 
 <<__Native("NoInjection")>>
-function hphp_debug_backtrace_hash(int $options = 0): int;
+function hphp_debug_backtrace_hash(int $options = 0)[leak_safe]: int;
 
 } // root namespace
 
 namespace HH {
+
+  // Type aliases for stack traces and frames
+  type StackTrace = vec<StackFrame>;
+  type StackFrame = shape(
+    ?'file' => string,
+    ?'line' => int,
+    ?'function' => string,
+    ?'args' => vec<mixed>,
+    ?'class' => string,
+    ?'object' => mixed,
+    ?'type' => string,
+    ?'metadata' => mixed,
+    ...
+  );
 
   /*
    * Retrieve errors generated while inside the error handler. Since the error
@@ -277,24 +305,12 @@ namespace HH {
    *                       tp the error handler)
    * - "error-backtrace" : Backtrace where error occurred (sixth parameter
    *                       to the error handler)
+   * - "error-implicit-context-blame : Blame associated with the current
+   *                                   implicit context
    *
    * If there were more errors than could be queued, the last entry will have an
    * additional field called "overflow" set to true.
    */
   <<__Native>>
-  function deferred_errors(): vec;
-}
-
-namespace __SystemLib {
-
-  /*
-   * Systemlib internal function to extract a trace from a compact trace
-   * resource. Exceptions encoded traces using a compact resource format and
-   * lazily construct them on first use.
-   *
-   * @param resource $trace - the compact backtrace to extract
-   * @return array - the backtrace extracted from $trace
-   */
-  <<__Native>>
-  function extract_trace(resource $trace): \HH\varray;
+  function deferred_errors(): vec<dict<string, mixed>>;
 }

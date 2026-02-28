@@ -2,18 +2,18 @@
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 
 if (!$socket) {
-        die('Unable to create AF_INET socket [socket]');
+        exit('Unable to create AF_INET socket [socket]');
 }
 // wrong params
-$retval_1 = socket_set_option( $socket, SOL_SOCKET, SO_LINGER, varray[]);
+$retval_1 = socket_set_option( $socket, SOL_SOCKET, SO_LINGER, vec[]);
 
 // set/get comparison
-$options = darray["l_onoff" => 1, "l_linger" => 1];
+$options = dict["l_onoff" => 1, "l_linger" => 1];
 $retval_2 = socket_set_option( $socket, SOL_SOCKET, SO_LINGER, $options);
 $retval_3 = socket_get_option( $socket, SOL_SOCKET, SO_LINGER);
 
 //l_linger not given
-$options_2 = darray["l_onoff" => 1];
+$options_2 = dict["l_onoff" => 1];
 var_dump(socket_set_option( $socket, SOL_SOCKET, SO_LINGER, $options_2));
 
 var_dump($retval_2);

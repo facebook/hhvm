@@ -11,7 +11,7 @@
 
 
 // temp dir name used here
-$dirname = __SystemLib\hphp_test_tmppath('unlink_variation1');
+$dirname = sys_get_temp_dir().'/'.'unlink_variation1';
 // temp filename used here
 $filename = "$dirname/unlink_variation1.tmp";
 

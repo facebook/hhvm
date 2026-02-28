@@ -1,0 +1,38 @@
+ERROR: File "80-case-types-03.hack", line 4, characters 11-14:
+Invalid case type declaration. More than one variant of `Bad1` could contain values with the same runtime tag (Typing[4475])
+  File "80-case-types-03.hack", line 4, characters 18-25:
+  This is the type `vec<int>`, which includes **vecs**
+  File "80-case-types-03.hack", line 4, characters 29-47:
+  It overlaps with `Traversable<string>`, which also includes **vecs** because `Traversable` is a special interface that includes non-object values
+ERROR: File "80-case-types-03.hack", line 9, characters 11-14:
+Invalid case type declaration. More than one variant of `Bad2` could contain values with the same runtime tag (Typing[4475])
+  File "80-case-types-03.hack", line 9, characters 18-19:
+  This is the type `I1`, which includes **instances of the interface I1**
+  File "80-case-types-03.hack", line 9, characters 23-24:
+  It may overlap with `I2`, which includes **instances of the interface I2**
+  File "80-case-types-03.hack", line 9, characters 11-14:
+  Because it is possible for values to be both **instances of the interface I1** and **instances of the interface I2**, `I1` and `I2` cannot be in the same case type
+ERROR: File "80-case-types-03.hack", line 12, characters 11-14:
+Invalid case type declaration. More than one variant of `Bad3` could contain values with the same runtime tag (Typing[4475])
+  File "80-case-types-03.hack", line 12, characters 18-25:
+  This is the type `vec<int>`, which includes **vecs**
+  File "80-case-types-03.hack", line 12, characters 29-38:
+  It may overlap with `(int, int)`, which includes **tuples** because tuples are vecs at runtime
+  File "80-case-types-03.hack", line 12, characters 11-14:
+  Because it is possible for values to be both **vecs** and **tuples**, `vec<int>` and `(int, int)` cannot be in the same case type
+ERROR: File "80-case-types-03.hack", line 15, characters 11-14:
+Invalid case type declaration. More than one variant of `Bad4` could contain values with the same runtime tag (Typing[4475])
+  File "80-case-types-03.hack", line 15, characters 18-34:
+  This is the type `shape('x' => int)`, which includes **shapes** because shapes are dicts at runtime
+  File "80-case-types-03.hack", line 15, characters 38-57:
+  It may overlap with `shape('y' => string)`, which includes **shapes** because shapes are dicts at runtime
+  File "80-case-types-03.hack", line 15, characters 11-14:
+  Because it is possible for values to be both **shapes** and **shapes**, `shape('x' => int)` and `shape('y' => string)` cannot be in the same case type
+ERROR: File "80-case-types-03.hack", line 20, characters 11-14:
+Invalid case type declaration. More than one variant of `Bad5` could contain values with the same runtime tag (Typing[4475])
+  File "80-case-types-03.hack", line 20, characters 18-18:
+  This is the type `C`, which includes **instances of the class C**
+  File "80-case-types-03.hack", line 20, characters 22-22:
+  It overlaps with `E`, which includes **instances of the class E**
+  File "80-case-types-03.hack", line 20, characters 11-14:
+  Because **instances of the class C** contains **instances of the class E**, `C` and `E` cannot be in the same case type

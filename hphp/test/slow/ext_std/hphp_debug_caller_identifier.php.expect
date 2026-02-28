@@ -1,0 +1,4 @@
+string(3) "bar"
+string(10) "Baz::smeth"
+string(10) "Baz::imeth"
+string(12) "Closure$main"

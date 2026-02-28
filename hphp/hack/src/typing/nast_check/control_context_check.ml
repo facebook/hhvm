@@ -25,5 +25,8 @@ let handler =
         | (Return _, _) when env.is_finally -> Some (Return_in_finally p)
         | _ -> None
       in
-      Option.iter Errors.add_nast_check_error err_opt
+      Option.iter
+        (fun err ->
+          Diagnostics.add_diagnostic Nast_check_error.(to_user_diagnostic err))
+        err_opt
   end

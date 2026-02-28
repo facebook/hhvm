@@ -1,5 +1,5 @@
 <?hh
 
 function test(): varray_or_darray<int> {
-  return darray["a" => 0];
+  return dict["a" => 0];
 }

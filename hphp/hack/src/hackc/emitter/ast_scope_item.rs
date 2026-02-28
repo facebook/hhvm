@@ -3,28 +3,30 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc::hhas_coeffects::HhasCoeffects;
-use oxidized::{ast, file_info, pos::Pos};
-
 use std::rc::Rc;
 
+use hhbc::Coeffects;
+use oxidized::ast;
+use oxidized::file_info;
+use oxidized::pos::Pos;
+
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Lambda<'arena> {
+pub struct Lambda {
     pub is_long: bool,
     pub is_async: bool,
-    pub coeffects: HhasCoeffects<'arena>,
+    pub coeffects: Coeffects,
     pub pos: Pos,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum ScopeItem<'a, 'arena> {
+pub enum ScopeItem<'a> {
     Class(Class<'a>),
     Function(Fun<'a>),
     Method(Method<'a>),
-    Lambda(Lambda<'arena>),
+    Lambda(Lambda),
 }
 
-impl<'a, 'arena> ScopeItem<'a, 'arena> {
+impl<'a> ScopeItem<'a> {
     pub fn get_span(&self) -> &Pos {
         match self {
             ScopeItem::Class(cd) => cd.get_span(),
@@ -132,12 +134,12 @@ impl<'a> Fun<'a> {
 
     pub fn get_tparams(&self) -> &[ast::Tparam] {
         match self {
-            Self::Borrowed(x) => &x.fun.tparams,
+            Self::Borrowed(x) => &x.tparams,
             Self::Counted(x) => &x.tparams,
         }
     }
 
-    pub(in crate) fn get_user_attributes(&self) -> &[ast::UserAttribute] {
+    pub(crate) fn get_user_attributes(&self) -> &[ast::UserAttribute] {
         match self {
             Self::Borrowed(x) => &x.fun.user_attributes,
             Self::Counted(x) => &x.user_attributes,
@@ -167,7 +169,7 @@ impl<'a> Fun<'a> {
 
     pub fn get_name(&self) -> &ast::Id {
         match self {
-            Self::Borrowed(x) => &x.fun.name,
+            Self::Borrowed(x) => &x.name,
             Self::Counted(x) => &x.name,
         }
     }
@@ -220,7 +222,7 @@ impl<'a> Method<'a> {
         }
     }
 
-    pub(in crate) fn get_user_attributes(&self) -> &[ast::UserAttribute] {
+    pub(crate) fn get_user_attributes(&self) -> &[ast::UserAttribute] {
         match self {
             Self::Borrowed(x) => &x.user_attributes,
             Self::Counted(x) => &x.user_attributes,
@@ -308,10 +310,10 @@ impl Fun_ {
     fn new(fd: &ast::FunDef) -> Self {
         let f = &fd.fun;
         Self {
-            name: f.name.clone(),
+            name: fd.name.clone(),
             span: f.span.clone(),
-            tparams: f.tparams.clone(),
-            user_attributes: f.user_attributes.clone(),
+            tparams: fd.tparams.clone(),
+            user_attributes: f.user_attributes.clone().into(),
             mode: fd.mode,
             fun_kind: f.fun_kind,
             ctxs: f.ctxs.clone(),
@@ -339,7 +341,7 @@ impl Method_ {
             span: m.span.clone(),
             tparams: m.tparams.clone(),
             static_: m.static_,
-            user_attributes: m.user_attributes.clone(),
+            user_attributes: m.user_attributes.clone().into(),
             fun_kind: m.fun_kind,
             ctxs: m.ctxs.clone(),
             params: m.params.clone(),

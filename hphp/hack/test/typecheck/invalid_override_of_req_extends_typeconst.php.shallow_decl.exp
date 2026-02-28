@@ -1,8 +1,0 @@
-File "invalid_override_of_req_extends_typeconst.php", line 18, characters 21-21:
-Some members in class `J` are incompatible with those declared in type `I` (Typing[4340])
-  File "invalid_override_of_req_extends_typeconst.php", line 4, characters 14-14:
-  Unable to satisfy constraint on this type constant
-  File "invalid_override_of_req_extends_typeconst.php", line 9, characters 28-30:
-  Expected `num`
-  File "invalid_override_of_req_extends_typeconst.php", line 4, characters 18-24:
-  But got `nonnull`

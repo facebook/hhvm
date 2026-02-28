@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f(inout Vector<int> $v): void {
   $v = Vector {};

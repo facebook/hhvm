@@ -17,17 +17,13 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
-#include "hphp/runtime/vm/jit/abi-arm.h"
-#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/tc.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 
-#include "hphp/util/data-block.h"
+#include "hphp/util/configs/jit.h"
 
-TRACE_SET_MOD(fixup);
+TRACE_SET_MOD(fixup)
 
 namespace HPHP {
 
@@ -48,9 +44,9 @@ bool isVMFrame(const ActRec* ar, bool may_be_non_runtime) {
 
 namespace jit {
 
-ActRec* findVMFrameForDebug() {
+ActRec* findVMFrameForDebug(uintptr_t start) {
   DECLARE_FRAME_POINTER(framePtr);
-  auto rbp = (ActRec*) framePtr;
+  auto rbp = start != 0 ? (ActRec*)start : framePtr;
 
   while (!isVMFrame(rbp, true)) {
     auto const nextRbp = rbp->m_sfp;
@@ -66,6 +62,8 @@ std::string Fixup::show() const {
   if (isIndirect()) {
     return folly::sformat("indirect ripOff={} extraSpOff={}",
                           ripOffset(), spOffset().offset);
+  } else if (isAsioStub()) {
+    return folly::sformat("asio stub spOff={}", spOffset().offset);
   } else {
     return folly::sformat("direct pcOff={} spOff={}",
                           pcOffset(), spOffset().offset);
@@ -92,6 +90,8 @@ struct FixupHash {
 };
 
 TreadHashMap<uint32_t,Fixup,FixupHash> s_fixups{kInitCapac};
+static ServiceData::ExportedCounter* s_fixupmap_counter =
+  ServiceData::createCounter("admin.fixup_map_size");
 
 void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,
                     SBInvOffset extraSpOffset, VMRegs* outRegs) {
@@ -99,8 +99,15 @@ void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,
   const Func* f = ar->func();
   assertx(f);
   TRACE(3, "regsFromActRec: tca %p -> %s\n", tca, fixup.show().c_str());
-  outRegs->pc = f->entry() + fixup.pcOffset();
-  outRegs->fp = ar;
+  if (fixup.isAsioStub()) {
+    auto const prevAR = g_context->getOuterVMFrame(ar);
+    auto const prevFunc = prevAR->func();
+    outRegs->pc = prevFunc->at(ar->callOffset());
+    outRegs->fp = prevAR;
+  } else {
+    outRegs->pc = f->entry() + fixup.pcOffset();
+    outRegs->fp = ar;
+  }
   outRegs->retAddr = tca;
 
   auto const stackBase = Stack::anyFrameStackBase(ar);
@@ -146,6 +153,7 @@ void recordFixup(CTCA tca, const Fixup& fixup) {
     *pos = fixup;
   } else {
     s_fixups.insert(offset, fixup);
+    s_fixupmap_counter->increment();
   }
 }
 
@@ -174,7 +182,7 @@ bool processFixupForVMFrame(VMFrame frame) {
 }
 
 bool fixupWork(ActRec* nextRbp, bool soft) {
-  assertx(RuntimeOption::EvalJit);
+  assertx(Cfg::Jit::Enabled);
 
   TRACE(1, "fixup(begin):\n");
 
@@ -223,7 +231,7 @@ void syncVMRegsWork(bool soft) {
 static std::atomic<int32_t> s_nextFakeAddress{-1};
 
 int32_t getNextFakeReturnAddress() {
-  return s_nextFakeAddress.fetch_sub(1, std::memory_order_relaxed);
+  return s_nextFakeAddress.fetch_sub(1, std::memory_order_acq_rel);
 }
 
 }}

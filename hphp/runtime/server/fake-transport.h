@@ -69,7 +69,7 @@ struct FakeTransport final : Transport {
   /**
    * Get request header(s).
    */
-  std::string getHeader(const char* /*name*/) override { return ""; };
+  std::string getHeader(const char* /*name*/) override { return ""; }
   const HeaderMap& getHeaders() override {
     LOG(FATAL) << "FakeTransport::getHeaders";
   }
@@ -78,7 +78,7 @@ struct FakeTransport final : Transport {
    */
   void addHeaderImpl(const char* /*name*/, const char* /*value*/) override {
     LOG(FATAL) << "FakeTransport::addHeaderImpl";
-  };
+  }
   void removeHeaderImpl(const char* /*name*/) override {
     LOG(FATAL) << "FakeTransport::removeHeaderImpl";
   }
@@ -97,7 +97,7 @@ struct FakeTransport final : Transport {
   void sendImpl(const void* /*data*/, int /*size*/, int /*code*/,
                 bool /*chunked*/, bool /*eom*/) override {
     LOG(FATAL) << "FakeTransport::sendImpl";
-  };
+  }
 
 };
 

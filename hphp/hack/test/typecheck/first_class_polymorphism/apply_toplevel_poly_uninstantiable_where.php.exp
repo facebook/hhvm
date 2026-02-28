@@ -1,0 +1,16 @@
+ERROR: File "apply_toplevel_poly_uninstantiable_where.php", line 9, characters 8-12:
+Typing error (Typing[4110])
+  File "apply_toplevel_poly_uninstantiable_where.php", line 5, characters 11-13:
+  Expected `int`
+  File "apply_toplevel_poly_uninstantiable_where.php", line 5, characters 3-6:
+  But got `bool`
+ERROR: File "apply_toplevel_poly_uninstantiable_where.php", line 10, characters 6-6:
+Invalid argument (Typing[4323])
+  File "apply_toplevel_poly_uninstantiable_where.php", line 3, characters 27-28:
+  `T2` is a constrained type parameter
+  File "apply_toplevel_poly_uninstantiable_where.php", line 3, characters 33-38:
+  This type constraint is violated
+  File "apply_toplevel_poly_uninstantiable_where.php", line 3, characters 33-38:
+  Expected `string`
+  File "apply_toplevel_poly_uninstantiable_where.php", line 10, characters 6-6:
+  But got `int`

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // error: non-existent class
 <<__EntryPoint>> function main(): void {

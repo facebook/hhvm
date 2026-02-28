@@ -17,7 +17,7 @@ var_dump(gmp_div_qr(1123123,123, GMP_ROUND_MINUSINF));
 $fp = fopen(__FILE__, 'r');
 
 var_dump(gmp_div_qr($fp, $fp));
-var_dump(gmp_div_qr(varray[], varray[]));
+var_dump(gmp_div_qr(vec[], vec[]));
 
 echo "Done\n";
 }

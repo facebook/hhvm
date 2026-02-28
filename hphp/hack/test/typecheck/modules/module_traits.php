@@ -1,24 +1,23 @@
-//// modules.php
+//// module_A.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
+new module A {}
+//// module_B.php
+<?hh
+new module B {}
 
-module A {}
-module B {}
 //// A.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Internal>>
-trait T1 {}
+module A;
+
+internal trait T1 {}
 
 trait T2 {
-  // Error: cannot have __Internal members in public traits
-  <<__Internal>>
-  public int $x = 0;
-  // Error: cannot have __Internal members in public traits
-  <<__Internal>>
-  public function lol(): void {}
+  // Error: cannot have internal traits
+  internal int $x = 0;
+  // Error: cannot have internal traits
+  internal function lol(): void {}
 }
 
 // Using an internal trait
@@ -26,10 +25,9 @@ trait T2 {
 class A {
   use T1; // ok
 }
-// Leaking internal types in public trait
+// Leaking internal trait
 
-<<__Internal>>
-class D {}
+internal class D {}
 
 trait T3 {
   public function f(D $d): void {} // can't use D here
@@ -38,7 +36,8 @@ trait T3 {
 //// B.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('B')>>
+
+module B;
 
 class B {
   use T1; // error

@@ -4,16 +4,22 @@
  (modules process_types)
  (preprocess
   (pps ppx_deriving.std))
- (libraries core_kernel utils_core sys_utils))
+ (libraries
+  core_kernel
+  poll
+  utils_core
+  sys_utils))
 
 (library
  (name process)
  (wrapped false)
- (modules process)
+ (modules
+  process)
  (preprocess
   (pps ppx_deriving.std))
  (libraries
   exec_command
+  poll
   process_types
   utils_core
   utils_ocaml_overrides
@@ -25,5 +31,7 @@
  (wrapped false)
  (modules future future_sig futureProcess)
  (preprocess
-  (pps ppx_deriving.std))
+  (pps
+   ppx_deriving.std
+   ppx_yojson_conv))
  (libraries process process_types promise))

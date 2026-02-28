@@ -12,15 +12,15 @@ open Hh_prelude
 
 (* This check enforces 3 properties related to return statements and functions' return types:
 
-Property 1: A function annotated with return type void must not contain a return statement with
-  a value.
+   Property 1: A function annotated with return type void must not contain a return statement with
+     a value.
 
-Property 2: A function containing a return statement without a value (or returning implicitly)
-  can only be annotated with a return type if that return type is void (or
-  <Awaitable<void>, for async functions).
+   Property 2: A function containing a return statement without a value (or returning implicitly)
+     can only be annotated with a return type if that return type is void (or
+     <Awaitable<void>, for async functions).
 
-Property 3: A function must not mix return statements with and without a value, even if such a function
-  could be given a sufficiently general type.
+   Property 3: A function must not mix return statements with and without a value, even if such a function
+     could be given a sufficiently general type.
 *)
 
 type state = {
@@ -49,7 +49,7 @@ let initial_dummy_state =
     active = false;
   }
 
-let validate_state fun_kind env s =
+let validate_state fun_span fun_kind env s =
   (* FIXME: Move as two functions to Ast_defs? *)
   let (is_generator, is_async) =
     let open Ast_defs in
@@ -65,23 +65,16 @@ let validate_state fun_kind env s =
         |> Tast_env.localize_no_subst env ~ignore_errors:true
         |> snd)
   in
-  let annotated_with_ret_any =
-    Option.value_map ret_type_hint_locl_opt ~default:false ~f:Typing_defs.is_any
-  in
   let is_bad_supertype sub sup =
     let sup =
-      if TypecheckerOptions.enable_sound_dynamic (Tast_env.get_tcopt env) then
-        Typing_defs.(
-          map_ty sup ~f:(function
-              | Tclass (cid, ex, [ty])
-                when String.equal
-                       (snd cid)
-                       Naming_special_names.Classes.cAwaitable ->
-                let tenv = Tast_env.tast_env_as_typing_env env in
-                Tclass (cid, ex, [Typing_utils.strip_dynamic tenv ty])
-              | x -> x))
-      else
-        sup
+      Typing_defs.(
+        map_ty sup ~f:(function
+            | Tclass (cid, ex, [ty])
+              when String.equal
+                     (snd cid)
+                     Naming_special_names.Classes.cAwaitable ->
+              Tclass (cid, ex, [Tast_env.strip_dynamic env ty])
+            | x -> x))
     in
 
     (* returns false if sup is TAny, which implements the special behavior for
@@ -91,8 +84,8 @@ let validate_state fun_kind env s =
   let check_ret_type ret_type_hint_locl =
     (* Fixme: Should we use more precise logic to determine the expected
        return type hint by factoring it into a function in Typing_return? *)
-    let void = Typing_make_type.void Typing_reason.Rnone in
-    let aw_void = Typing_make_type.awaitable Typing_reason.Rnone void in
+    let void = Typing_make_type.void Typing_reason.none in
+    let aw_void = Typing_make_type.awaitable Typing_reason.none void in
     let is_void_super_ty = is_bad_supertype void ret_type_hint_locl in
     let is_awaitable_void_super_ty =
       is_bad_supertype aw_void ret_type_hint_locl
@@ -100,17 +93,19 @@ let validate_state fun_kind env s =
     if is_void_super_ty || is_awaitable_void_super_ty then
       let hint_loc =
         match s.return_type with
-        | None -> None
-        | Some (hint_loc, _) -> Some hint_loc
+        | None -> fun_span
+        | Some (hint_loc, _) -> hint_loc
       in
       ( false,
         lazy
-          (Errors.add_typing_error
+          (let Equal = Tast_env.eq_typing_env in
+           Typing_error_utils.add_typing_error
+             ~env
              Typing_error.(
                wellformedness
                @@ Primary.Wellformedness
                   .Non_void_annotation_on_return_void_function
-                    { is_async; pos = s.fun_def_pos; hint_pos = hint_loc })) )
+                    { is_async; hint_pos = hint_loc })) )
     else
       (true, lazy ())
   in
@@ -144,17 +139,14 @@ let validate_state fun_kind env s =
        An async lambda without a return type annotation can combine returning with and
        without a value if we can otherwise type the lambda with an sufficiently general type like
        Awaitable<mixed> *)
-    match
-      ( s.prev_no_value_return,
-        s.prev_value_return,
-        is_async,
-        annotated_with_ret_any )
-    with
-    | (Some without_value_pos_opt, Some with_value_pos, false, false) ->
+    match (s.prev_no_value_return, s.prev_value_return, is_async) with
+    | (Some without_value_pos_opt, Some with_value_pos, false) ->
       let fun_pos = s.fun_def_pos in
       ( false,
         lazy
-          (Errors.add_typing_error
+          (let Equal = Tast_env.eq_typing_env in
+           Typing_error_utils.add_typing_error
+             ~env
              Typing_error.(
                wellformedness
                @@ Primary.Wellformedness.Returns_with_and_without_value
@@ -178,7 +170,13 @@ let visitor =
     val state = ref initial_dummy_state
 
     method traverse_fun_body
-        new_return_type new_fun_pos fun_kind has_implicit_return env traversal =
+        fun_span
+        new_return_type
+        new_fun_pos
+        fun_kind
+        has_implicit_return
+        env
+        traversal =
       let initial_no_value_return =
         if has_implicit_return then
           (* There is an implicit return but we don't know where *)
@@ -205,7 +203,7 @@ let visitor =
         in
         state := new_state;
         traversal ();
-        validate_state fun_kind env !state
+        validate_state fun_span fun_kind env !state
 
     method reset = state := initial_dummy_state
 
@@ -215,13 +213,25 @@ let visitor =
       else
         state := { !state with prev_no_value_return = Some (Some return_pos) }
 
+    method! on_expr_ env expr_ =
+      match expr_ with
+      | Aast.Invalid _ -> ()
+      | _ -> super#on_expr_ env expr_
+
     method! on_fun_ env fun_ =
       let decl_env = Tast_env.get_decl_env env in
       let has_impl_ret = Tast_env.fun_has_implicit_return env in
-      if not FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi) then
+      if
+        not
+          (FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi)
+          ||
+          let Equal = Tast_env.eq_typing_env in
+          Typing_native.is_native_fun ~env fun_)
+      then
         this#traverse_fun_body
+          fun_.f_span
           (hint_of_type_hint fun_.f_ret)
-          (fst fun_.f_name)
+          fun_.f_span
           fun_.f_fun_kind
           has_impl_ret
           env
@@ -233,9 +243,13 @@ let visitor =
       if
         not
           (method_.m_abstract
-          || FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi))
+          || FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi)
+          ||
+          let Equal = Tast_env.eq_typing_env in
+          Typing_native.is_native_meth ~env method_)
       then
         this#traverse_fun_body
+          method_.m_span
           (hint_of_type_hint method_.m_ret)
           (fst method_.m_name)
           method_.m_fun_kind
@@ -253,7 +267,9 @@ let visitor =
           match !state.return_type with
           | Some (pos2, Hprim Tvoid) ->
             (* Property 1 *)
-            Errors.add_typing_error
+            let Equal = Tast_env.eq_typing_env in
+            Typing_error_utils.add_typing_error
+              ~env
               Typing_error.(
                 primary
                 @@ Primary.Return_in_void { pos = return_pos; decl_pos = pos2 })
@@ -262,6 +278,11 @@ let visitor =
       | (return_pos, Return None) ->
         this#update_seen_return_stmts false return_pos
       | _ -> ()
+
+    method! on_expr env e =
+      match e with
+      | (_, _, Aast.Invalid _) -> ()
+      | _ -> super#on_expr env e
   end
 
 let handler =

@@ -1,5 +1,5 @@
 
-Warning: gzcompress() expects at least 1 parameter, 0 given in %s/005.php on line 3
+Warning: gzcompress() expects at least 1 positional parameter, 0 given in %s/005.php on line 3
 
 Warning: compression level (1000) must be within -1..9 in %s/005.php on line 4
 bool(false)
@@ -9,7 +9,7 @@ string(%d) "%a"
 string(%d) "%a"
 string(%d) "%a"
 
-Warning: gzuncompress() expects at least 1 parameter, 0 given in %s/005.php on line 17
+Warning: gzuncompress() expects at least 1 positional parameter, 0 given in %s/005.php on line 17
 
 Warning: data error in %s/005.php on line 18
 bool(false)

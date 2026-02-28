@@ -7,22 +7,17 @@
  */
 
 void assert_master() {}
-void ocamlpool_enter(void) {}
-void ocamlpool_leave(void) {}
-void ocamlpool_cursor(void) {}
-void ocamlpool_limit(void) {}
-void ocamlpool_reserve_block(void) {}
-void ocamlpool_color(void) {}
-void ocamlpool_bound(void) {}
+void caml_add_to_heap(void) {}
 void caml_alloc(void) {}
+void caml_alloc_for_heap(void) {}
 void caml_alloc_small(void) {}
 void caml_alloc_tuple(void) {}
+void caml_allocation_color(void) {}
 void caml_array_length(void) {}
 void caml_initialize(void) {}
 void caml_is_double_array(void) {}
 void caml_local_roots(void) {}
 void caml_modify(void) {}
-void ocamlpool_reserve_string(void) {}
 void caml_alloc_string(void) {}
 void caml_copy_double(void) {}
 void caml_copy_int32(void) {}
@@ -61,4 +56,14 @@ void caml_output_value_to_malloc() {}
 
 
 
-int ocamlpool_generation = 0;
+void* Caml_state = 0;
+unsigned long caml_allocated_words = 0;
+void* caml_state = 0;
+struct global_heap_state {
+  int MARKED, UNMARKED, GARBAGE;
+};
+struct global_heap_state caml_global_heap_state = {
+  0 ,
+  1,
+  2,
+};

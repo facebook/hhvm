@@ -1,7 +1,7 @@
-<?hh // decl
+<?hh
 
 class Foo {
-  static function bar(int $x, inout bool $y, inout string $z) {
+  static function bar(int $x, inout bool $y, inout string $z) :mixed{
     var_dump('inside bar');
     $y = false;
     $z = 'hello-world';
@@ -9,22 +9,22 @@ class Foo {
   }
 }
 
-function meep(inout $f, $g, inout $r) {
+function meep(inout $f, $g, inout $r) :mixed{
   var_dump('inside meep');
   $f = 'apple';
   $r = 'orange';
   return $g;
 }
 
-function io_intercept($name, $obj_or_cls, inout $args) {
+<<__DynamicallyCallable>> function io_intercept($name, $obj_or_cls, inout $args) :mixed{
   var_dump($name);
   var_dump($args);
   return shape();
 }
 
-function main() {
-  fb_intercept2('meep', 'io_intercept');
-  fb_intercept2('Foo::bar', 'io_intercept');
+function main() :mixed{
+  fb_intercept2('meep', HH\dynamic_fun('io_intercept'));
+  fb_intercept2('Foo::bar', HH\dynamic_fun('io_intercept'));
   $a = 1; $b = true; $c = 'c';
   Foo::bar($a, inout $b, inout $c);
 
@@ -34,6 +34,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_fb_intercept_wrapper() {
+function main_fb_intercept_wrapper() :mixed{
 main();
 }

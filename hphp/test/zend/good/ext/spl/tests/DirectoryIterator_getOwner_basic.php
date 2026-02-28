@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$dirname = __SystemLib\hphp_test_tmppath('DirectoryIterator_getOwner_basic');
+$dirname = sys_get_temp_dir().'/'.'DirectoryIterator_getOwner_basic';
 mkdir($dirname);
 $dir = new DirectoryIterator($dirname);
 $expected = fileowner($dirname);

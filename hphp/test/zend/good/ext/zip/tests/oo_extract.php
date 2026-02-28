@@ -3,7 +3,7 @@
 function main_entry(): void {
   include dirname(__FILE__) . '/utils.inc';
   $file = dirname(__FILE__) . '/test_with_comment.zip';
-  $dirname = __SystemLib\hphp_test_tmproot() . '/';
+  $dirname = sys_get_temp_dir() . '/';
   $zip = new ZipArchive;
   if ($zip->open($file) !== TRUE) {
   	echo "open failed.\n";
@@ -47,7 +47,7 @@ function main_entry(): void {
   }
 
   /* extract two files */
-  $zip->extractTo($dirname . '__oo_extract_tmp', varray['bar','foo']);
+  $zip->extractTo($dirname . '__oo_extract_tmp', vec['bar','foo']);
   if (!file_exists($dirname . '__oo_extract_tmp/bar')) {
   	echo "failed. extract  bar file\n";
   } else {

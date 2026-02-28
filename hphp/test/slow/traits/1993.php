@@ -1,7 +1,7 @@
 <?hh
 
-function get_declared_user_traits() {
-  $ret = varray[];
+function get_declared_user_traits() :mixed{
+  $ret = vec[];
   foreach (get_declared_traits() as $v) {
     // exclude system traits
     $rc = new ReflectionClass($v);
@@ -14,7 +14,7 @@ function get_declared_user_traits() {
 class this_is_a_class {
  }
 interface this_is_an_interface {
-  public function this_is_an_interface_method();
+  public function this_is_an_interface_method():mixed;
 }
 trait this_is_a_trait {
  }

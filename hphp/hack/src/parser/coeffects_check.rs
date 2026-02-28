@@ -6,22 +6,27 @@
 
 use bitflags::bitflags;
 use core_utils_rust as utils;
-use naming_special_names_rust::{
-    coeffects, coeffects::Ctx, members, special_idents, user_attributes,
-};
-use oxidized::{
-    aast,
-    aast::Hint_,
-    aast_defs,
-    aast_defs::Hint,
-    aast_visitor::{visit, AstParams, Node, Visitor},
-    ast, ast_defs, local_id,
-    pos::Pos,
-};
-use parser_core_types::{
-    syntax_error,
-    syntax_error::{Error as ErrorMsg, SyntaxError},
-};
+use naming_special_names_rust::coeffects;
+use naming_special_names_rust::coeffects::Ctx;
+use naming_special_names_rust::members;
+use naming_special_names_rust::special_idents;
+use naming_special_names_rust::user_attributes;
+use oxidized::aast;
+use oxidized::aast::Hint_;
+use oxidized::aast_defs;
+use oxidized::aast_defs::Hint;
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::Node;
+use oxidized::aast_visitor::Visitor;
+use oxidized::aast_visitor::visit;
+use oxidized::ast;
+use oxidized::ast_defs;
+use oxidized::local_id;
+use oxidized::namespace_env::Mode;
+use oxidized::pos::Pos;
+use parser_core_types::syntax_error;
+use parser_core_types::syntax_error::Error as ErrorMsg;
+use parser_core_types::syntax_error::SyntaxError;
 
 fn hints_contain_capability(hints: &[aast_defs::Hint], capability: Ctx) -> bool {
     for hint in hints {
@@ -157,8 +162,19 @@ fn has_ignore_coeffect_local_errors_attr(attrs: &[aast::UserAttribute<(), ()>]) 
 }
 
 bitflags! {
+    #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     pub struct ContextFlags: u16 {
-        const IN_METHODISH = 1 << 0;
+        /// Hack, very roughly, has three contexts in which you can see an
+        /// expression:
+        /// - Expression Trees
+        /// - Initializer positions
+        /// - Everything else
+        /// There are other rules that handle expr trees and initializer
+        /// positions, so we really care about all the other contexts. This is
+        /// mostly inside function bodies, but also includes the right-hand-side
+        /// of an enum class initializer, which can contain function calls and
+        /// other complex expressions.
+        const IN_COMPLEX_EXPRESSION_CONTEXT = 1 << 0;
         const IS_TYPECHECKER = 1 << 1;
         const IS_CONSTRUCTOR_OR_CLONE = 1 << 2;
         const IGNORE_COEFFECT_LOCAL_ERRORS = 1 << 3;
@@ -183,7 +199,7 @@ impl Context {
 
     fn from_context(&self) -> Self {
         let mut c = Context::new();
-        c.set_in_methodish(self.in_methodish());
+        c.set_in_complex_expression_context(self.in_complex_expression_context());
         c.set_is_constructor_or_clone(self.is_constructor_or_clone());
         c.set_ignore_coeffect_local_errors(self.ignore_coeffect_local_errors());
         c.set_is_typechecker(self.is_typechecker());
@@ -193,8 +209,9 @@ impl Context {
         c
     }
 
-    fn in_methodish(&self) -> bool {
-        self.bitflags.contains(ContextFlags::IN_METHODISH)
+    fn in_complex_expression_context(&self) -> bool {
+        self.bitflags
+            .contains(ContextFlags::IN_COMPLEX_EXPRESSION_CONTEXT)
     }
 
     fn is_constructor_or_clone(&self) -> bool {
@@ -231,8 +248,11 @@ impl Context {
         self.bitflags.contains(ContextFlags::HAS_ACCESS_GLOBALS)
     }
 
-    fn set_in_methodish(&mut self, in_methodish: bool) {
-        self.bitflags.set(ContextFlags::IN_METHODISH, in_methodish);
+    fn set_in_complex_expression_context(&mut self, in_complex_expression_context: bool) {
+        self.bitflags.set(
+            ContextFlags::IN_COMPLEX_EXPRESSION_CONTEXT,
+            in_complex_expression_context,
+        );
     }
 
     fn set_is_constructor_or_clone(&mut self, is_constructor_or_clone: bool) {
@@ -295,7 +315,7 @@ impl Checker {
     }
 
     fn do_write_props_check(&mut self, e: &aast::Expr<(), ()>) {
-        if let Some((ast_defs::Bop::Eq(_), lhs, _)) = e.2.as_binop() {
+        if let Some((lhs, _, _)) = e.2.as_assign() {
             self.check_is_obj_property_write_expr(e, lhs, true /* ignore_this_writes */);
         }
         if let Some((unop, expr)) = e.2.as_unop() {
@@ -309,7 +329,7 @@ impl Checker {
         if c.is_constructor_or_clone() {
             return;
         }
-        if let Some((ast_defs::Bop::Eq(_), lhs, _)) = e.2.as_binop() {
+        if let Some((lhs, _, _)) = e.2.as_assign() {
             self.check_is_obj_property_write_expr(e, lhs, false /* ignore_this_writes */);
         }
         if let Some((unop, expr)) = e.2.as_unop() {
@@ -355,9 +375,24 @@ impl<'ast> Visitor<'ast> for Checker {
         self
     }
 
+    fn visit_class_(&mut self, c: &mut Context, cls: &aast::Class_<(), ()>) -> Result<(), ()> {
+        let mut new_context = Context::from_context(c);
+        if cls.enum_.is_some() {
+            // If we're in an enum class, we need to ensure that the following
+            // is illegal:
+            //
+            //   enum class Foo: _ {
+            //     _ BAR = Baz::$bing;
+            //   }
+            //
+            new_context.set_in_complex_expression_context(true);
+        }
+        cls.recurse(&mut new_context, self)
+    }
+
     fn visit_method_(&mut self, c: &mut Context, m: &aast::Method_<(), ()>) -> Result<(), ()> {
         let mut new_context = Context::from_context(c);
-        new_context.set_in_methodish(true);
+        new_context.set_in_complex_expression_context(true);
         new_context.set_is_constructor_or_clone(is_constructor_or_clone(&m.name));
         new_context.set_ignore_coeffect_local_errors(has_ignore_coeffect_local_errors_attr(
             &m.user_attributes,
@@ -375,7 +410,7 @@ impl<'ast> Visitor<'ast> for Checker {
         let mut new_context = Context::from_context(c);
         let ctxs = d.fun.ctxs.as_ref();
         new_context.set_has_defaults(has_defaults(ctxs));
-        new_context.set_is_constructor_or_clone(is_constructor_or_clone(&d.fun.name));
+        new_context.set_is_constructor_or_clone(is_constructor_or_clone(&d.name));
         new_context.set_has_write_props(has_capability(ctxs, Ctx::WriteProps));
         new_context.set_has_write_this_props(has_capability(ctxs, Ctx::WriteThisProps));
         new_context.set_has_read_globals(has_capability(ctxs, Ctx::ReadGlobals));
@@ -385,7 +420,7 @@ impl<'ast> Visitor<'ast> for Checker {
 
     fn visit_fun_(&mut self, c: &mut Context, f: &aast::Fun_<(), ()>) -> Result<(), ()> {
         let mut new_context = Context::from_context(c);
-        new_context.set_in_methodish(true);
+        new_context.set_in_complex_expression_context(true);
         new_context.set_ignore_coeffect_local_errors(has_ignore_coeffect_local_errors_attr(
             &f.user_attributes,
         ));
@@ -415,7 +450,10 @@ impl<'ast> Visitor<'ast> for Checker {
     }
 
     fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<(), ()>) -> Result<(), ()> {
-        if c.in_methodish() && !c.ignore_coeffect_local_errors() && !c.has_defaults() {
+        if c.in_complex_expression_context()
+            && !c.ignore_coeffect_local_errors()
+            && !c.has_defaults()
+        {
             if !c.has_write_props() {
                 self.do_write_props_check(p);
                 if !c.has_write_this_props() {
@@ -424,54 +462,67 @@ impl<'ast> Visitor<'ast> for Checker {
             }
             if !c.has_access_globals() {
                 // Do access globals check e.g. C::$x = 5;
-                if let Some((ast_defs::Bop::Eq(_), lhs, rhs)) = p.2.as_binop() {
+                if let Some((lhs, _, rhs)) = p.2.as_assign() {
                     if let Some((_, _, ast_defs::PropOrMethod::IsProp)) = lhs.2.as_class_get() {
                         self.add_error(&lhs.1, syntax_error::access_globals_without_capability);
-                        // TODO(T109525099): Turn on runtime enforcement for enclosing
-                        // statics in readonly expressions
                         // Skipping one level of recursion when read_globals are present
                         // ensures the left hand side global is not subject to read_global
                         // enforcement, thus duplicating the error message.
-                        if c.has_read_globals() && c.is_typechecker() {
+                        if c.has_read_globals() {
                             return rhs.recurse(c, self);
                         }
                     }
                 }
-                // TODO(T109525099): Turn on runtime enforcement for enclosing statics in readonly
-                // expressions
-                if c.is_typechecker() {
-                    // Skipping one level of recursion for a readonly expression when
-                    // read_globals are present ensures globals enclosed in read_globals
-                    // are not subject to enforcement.
-                    if let Some(e) = p.2.as_readonly_expr() {
-                        if c.has_read_globals() {
-                            // Do not subject the readonly static itself to read_globals check,
-                            // only its potential children
-                            return e.recurse(c, self);
-                        }
+                // Skipping one level of recursion for a readonly expression when
+                // read_globals are present ensures globals enclosed in read_globals
+                // are not subject to enforcement.
+                if let Some(e) = p.2.as_readonly_expr() {
+                    if c.has_read_globals() {
+                        // Do not subject the readonly static itself to read_globals check,
+                        // only its potential children
+                        return e.recurse(c, self);
                     }
                 }
                 if let Some((_, _, ast_defs::PropOrMethod::IsProp)) = p.2.as_class_get() {
                     if !c.has_read_globals() {
                         self.add_error(&p.1, syntax_error::read_globals_without_capability)
                     } else {
-                        // TODO(T109525099): Turn on runtime enforcement for enclosing
-                        // statics in readonly expressions
-                        if c.is_typechecker() {
-                            self.add_error(&p.1, syntax_error::read_globals_without_readonly)
-                        }
+                        self.add_error(&p.1, syntax_error::read_globals_without_readonly)
                     }
                 }
             }
         }
         p.recurse(c, self)
     }
+
+    fn visit_def(
+        &mut self,
+        c: &mut <Self::Params as oxidized::aast_visitor::Params>::Context,
+        p: &'ast aast::Def<
+            <Self::Params as oxidized::aast_visitor::Params>::Ex,
+            <Self::Params as oxidized::aast_visitor::Params>::En,
+        >,
+    ) -> Result<(), <Self::Params as oxidized::aast_visitor::Params>::Error> {
+        if let aast::Def::Stmt(_) = p {
+            // We parse top-level statements as if they are in a function with `defaults` capabilities.
+            // This is because notebooks allow top-level statements and we don't want spurious coeffects
+            // errors in notebooks.
+            let orig_has_defaults = c.has_defaults();
+            let c = &mut Context::from_context(c);
+            c.set_has_defaults(true);
+            let res = p.recurse(c, self);
+            c.set_has_defaults(orig_has_defaults);
+            res
+        } else {
+            p.recurse(c, self)
+        }
+    }
 }
 
-pub fn check_program(program: &aast::Program<(), ()>, is_typechecker: bool) -> Vec<SyntaxError> {
+pub fn check_program(program: &aast::Program<(), ()>, mode: Mode) -> Vec<SyntaxError> {
     let mut checker = Checker::new();
     let mut context = Context::new();
-    context.set_is_typechecker(is_typechecker);
+    context.set_is_typechecker(matches!(mode, Mode::ForTypecheck));
     visit(&mut checker, &mut context, program).unwrap();
     checker.errors
 }

@@ -17,8 +17,12 @@ val fresh_env : 'env -> 'env
 
 class type ['env] type_mapper_type =
   object
+    method on_type : 'env -> Typing_defs.locl_ty -> 'env * Typing_defs.locl_ty
+
+    method on_reason : 'env -> Typing_reason.t -> 'env * Typing_reason.t
+
     method on_tvar :
-      'env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty
+      'env -> Typing_reason.t -> Tvid.t -> 'env * Typing_defs.locl_ty
 
     method on_tnonnull : 'env -> Typing_reason.t -> 'env * Typing_defs.locl_ty
 
@@ -26,15 +30,13 @@ class type ['env] type_mapper_type =
 
     method on_tany : 'env -> Typing_reason.t -> 'env * Typing_defs.locl_ty
 
-    method on_terr : 'env -> Typing_reason.t -> 'env * Typing_defs.locl_ty
-
     method on_tprim :
       'env -> Typing_reason.t -> Aast.tprim -> 'env * Typing_defs.locl_ty
 
     method on_ttuple :
       'env ->
       Typing_reason.t ->
-      Typing_defs.locl_ty list ->
+      Typing_defs.locl_phase Typing_defs.tuple_type ->
       'env * Typing_defs.locl_ty
 
     method on_tunion :
@@ -62,13 +64,6 @@ class type ['env] type_mapper_type =
       'env * Typing_defs.locl_ty
 
     method on_tgeneric :
-      'env ->
-      Typing_reason.t ->
-      string ->
-      Typing_defs.locl_ty list ->
-      'env * Typing_defs.locl_ty
-
-    method on_tunapplied_alias :
       'env -> Typing_reason.t -> string -> 'env * Typing_defs.locl_ty
 
     method on_tnewtype :
@@ -97,9 +92,7 @@ class type ['env] type_mapper_type =
     method on_tshape :
       'env ->
       Typing_reason.t ->
-      Typing_defs.shape_kind ->
-      Typing_defs.locl_phase Typing_defs.shape_field_type
-      Typing_defs.TShapeMap.t ->
+      Typing_defs.locl_phase Typing_defs.shape_type ->
       'env * Typing_defs.locl_ty
 
     method on_tvec_or_dict :
@@ -119,10 +112,17 @@ class type ['env] type_mapper_type =
     method on_neg_type :
       'env ->
       Typing_reason.t ->
-      Typing_defs.neg_type ->
+      Typing_defs.type_predicate ->
       'env * Typing_defs.locl_ty
 
-    method on_type : 'env -> Typing_defs.locl_ty -> 'env * Typing_defs.locl_ty
+    method on_tlabel :
+      'env -> Typing_reason.t -> string -> 'env * Typing_defs.locl_ty
+
+    method on_tclass_ptr :
+      'env ->
+      Typing_reason.t ->
+      Typing_defs.locl_ty ->
+      'env * Typing_defs.locl_ty
 
     method on_locl_ty_list :
       'env -> Typing_defs.locl_ty list -> 'env * Typing_defs.locl_ty list
@@ -131,72 +131,6 @@ class type ['env] type_mapper_type =
 (* Base type mapper implementation that doesn't recursively go into the
  * types. *)
 class ['env] shallow_type_mapper : ['env] type_mapper_type
-
-(* Mixin class - adding it to shallow type mapper creates a mapper that
- * traverses the type by going inside Tunion *)
-class virtual ['env] tunion_type_mapper :
-  object
-    method on_tunion :
-      'env ->
-      Typing_reason.t ->
-      Typing_defs.locl_ty list ->
-      'env * Typing_defs.locl_ty
-
-    method virtual on_locl_ty_list :
-      'env -> Typing_defs.locl_ty list -> 'env * Typing_defs.locl_ty list
-  end
-
-class virtual ['env] tinter_type_mapper :
-  object
-    method on_tintersection :
-      'env ->
-      Typing_reason.t ->
-      Typing_defs.locl_ty list ->
-      'env * Typing_defs.locl_ty
-
-    method virtual on_locl_ty_list :
-      'env -> Typing_defs.locl_ty list -> 'env * Typing_defs.locl_ty list
-  end
-
-(* Mixin that expands type variables. *)
-class virtual ['env] tvar_expanding_type_mapper :
-  object
-    method on_tvar :
-      'env * ('env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty) ->
-      Typing_reason.t ->
-      int ->
-      ('env * ('env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty))
-      * Typing_defs.locl_ty
-
-    method virtual on_type :
-      'env * ('env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty) ->
-      Typing_defs.locl_ty ->
-      ('env * ('env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty))
-      * Typing_defs.locl_ty
-  end
-
-(* Mixin that maps across the type inside the typevar, and then changes
- * its value to the result. *)
-class virtual ['env] tvar_substituting_type_mapper :
-  object
-    method on_tvar :
-      'env
-      * ('env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty)
-      * ('env -> int -> Typing_defs.locl_ty -> 'env) ->
-      Typing_reason.t ->
-      int ->
-      'env * Typing_defs.locl_ty
-
-    method virtual on_type :
-      'env
-      * ('env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty)
-      * ('env -> int -> Typing_defs.locl_ty -> 'env) ->
-      Typing_defs.locl_ty ->
-      ('env
-      * ('env -> Typing_reason.t -> int -> 'env * Typing_defs.locl_ty)
-      * ('env -> int -> Typing_defs.locl_ty -> 'env))
-      * Typing_defs.locl_ty
-  end
 
 (* Implementation of type_mapper that recursively visits everything in the
  * type.
@@ -207,39 +141,66 @@ class ['env] deep_type_mapper : ['env] type_mapper_type
 class type ['env] constraint_type_mapper_type =
   object
     method on_constraint_type :
-      'env -> Typing_defs.constraint_type -> 'env * Typing_defs.constraint_type
+      'env ->
+      Typing_defs_constraints.constraint_type ->
+      'env * Typing_defs_constraints.constraint_type
 
     method on_constraint_type_ :
       'env ->
       Typing_reason.t ->
-      Typing_defs.constraint_type_ ->
-      'env * Typing_defs.constraint_type
+      Typing_defs_constraints.constraint_type_ ->
+      'env * Typing_defs_constraints.constraint_type
 
     method on_Thas_member :
       'env ->
       Typing_reason.t ->
-      Typing_defs.has_member ->
-      'env * Typing_defs.constraint_type
+      Typing_defs_constraints.has_member ->
+      'env * Typing_defs_constraints.constraint_type
+
+    method on_Thas_type_member :
+      'env ->
+      Typing_reason.t ->
+      Typing_defs_constraints.has_type_member ->
+      'env * Typing_defs_constraints.constraint_type
+
+    method on_Tcan_index :
+      'env ->
+      Typing_reason.t ->
+      Typing_defs_constraints.can_index ->
+      'env * Typing_defs_constraints.constraint_type
+
+    method on_Tcan_index_assign :
+      'env ->
+      Typing_reason.t ->
+      Typing_defs_constraints.can_index_assign ->
+      'env * Typing_defs_constraints.constraint_type
+
+    method on_Tcan_traverse :
+      'env ->
+      Typing_reason.t ->
+      Typing_defs_constraints.can_traverse ->
+      'env * Typing_defs_constraints.constraint_type
 
     method on_Tdestructure :
       'env ->
       Typing_reason.t ->
-      Typing_defs.destructure ->
-      'env * Typing_defs.constraint_type
+      Typing_defs_constraints.destructure ->
+      'env * Typing_defs_constraints.constraint_type
 
-    method on_TCunion :
+    method on_Ttype_switch :
       'env ->
       Typing_reason.t ->
+      Typing_defs.type_predicate ->
       Typing_defs.locl_ty ->
-      Typing_defs.constraint_type ->
-      'env * Typing_defs.constraint_type
+      Typing_defs.locl_ty ->
+      'env * Typing_defs_constraints.constraint_type
 
-    method on_TCintersection :
+    method on_Thas_const :
       'env ->
       Typing_reason.t ->
+      string ->
       Typing_defs.locl_ty ->
-      Typing_defs.constraint_type ->
-      'env * Typing_defs.constraint_type
+      'env * Typing_defs_constraints.constraint_type
   end
 
 class type ['env] locl_constraint_type_mapper_type =
@@ -256,13 +217,19 @@ class type ['env] internal_type_mapper_type =
     inherit ['env] locl_constraint_type_mapper_type
 
     method on_internal_type :
-      'env -> Typing_defs.internal_type -> 'env * Typing_defs.internal_type
+      'env ->
+      Typing_defs_constraints.internal_type ->
+      'env * Typing_defs_constraints.internal_type
 
     method on_LoclType :
-      'env -> Typing_defs.locl_ty -> 'env * Typing_defs.internal_type
+      'env ->
+      Typing_defs.locl_ty ->
+      'env * Typing_defs_constraints.internal_type
 
     method on_ConstraintType :
-      'env -> Typing_defs.constraint_type -> 'env * Typing_defs.internal_type
+      'env ->
+      Typing_defs_constraints.constraint_type ->
+      'env * Typing_defs_constraints.internal_type
   end
 
 class ['env] internal_type_mapper : ['env] internal_type_mapper_type

@@ -1,10 +1,10 @@
 <?hh
 
-function foo($e) {
+function foo($e) :mixed{
     var_dump(__FUNCTION__."(): ".get_class($e)." thrown!");
 }
 
-function foo1($e) {
+function foo1($e) :mixed{
     var_dump(__FUNCTION__."(): ".get_class($e)." thrown!");
 }
 

@@ -1,10 +1,10 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-  $a = darray[];
+  $a = dict[];
   $x = array_shift(inout $a);
   var_dump($x);
   unset($a, $x);
-  $a = darray[];
+  $a = dict[];
   $x = array_pop(inout $a);
   var_dump($x);
   unset($a, $x);

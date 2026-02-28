@@ -79,17 +79,14 @@ struct Vunit;
   O(ldimml, I(s), Un, D(d))\
   O(ldimmq, I(s), Un, D(d))\
   O(ldundefq, Inone, Un, D(d))\
-  O(movqs, I(s) I(addr), Un, D(d))\
   O(load, Inone, U(s), D(d))\
   O(store, Inone, U(s) UW(d), Dn)\
   O(mcprep, Inone, Un, D(d))\
   O(phidef, Inone, Un, D(defs))\
   O(phijmp, Inone, U(uses), Dn)\
   O(conjure, Inone, Un, D(c))\
-  O(conjureuse, Inone, U(c), Dn)\
   O(inlinestart, Inone, Un, Dn)\
   O(inlineend, Inone, Un, Dn)\
-  O(pushframe, Inone, Un, Dn)\
   O(recordstack, Inone, Un, Dn)\
   O(recordbasenativesp, Inone, Un, Dn)\
   O(unrecordbasenativesp, Inone, Un, Dn)\
@@ -129,12 +126,16 @@ struct Vunit;
   O(syncvmret, Inone, U(data) U(type), Dn)\
   O(syncvmrettype, Inone, U(type), Dn)\
   O(phplogue, Inone, U(fp), Dn)\
+  O(restoreripm, Inone, U(s), Dn)\
+  O(restorerips, Inone, Un, Dn)\
+  O(saverips, Inone, Un, Dn)\
   O(phpret, Inone, U(fp) U(args), Dn)\
   O(callphp, I(target), U(args), Dn)\
   O(callphpfe, I(target), U(args), Dn)\
   O(callphpr, Inone, U(target) U(args), Dn)\
   O(callphps, I(target), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
+  O(inlinesideexit, Inone, U(args), Dn)\
   /* vm entry intrinsics */\
   O(resumetc, Inone, U(target) U(args), Dn)\
   O(inittc, Inone, Un, Dn)\
@@ -172,7 +173,7 @@ struct Vunit;
   O(andq, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))     \
   O(andqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(andqi64, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
-  O(btrq, I(s0), UH(s1,d), DH(d,s1) D(sf))\
+  O(btrq, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))    \
   O(decl, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(declm, I(fl), UM(m), D(sf))\
   O(decq, I(fl), UH(s,d), DH(d,s) D(sf))\
@@ -190,7 +191,7 @@ struct Vunit;
   O(srem, Inone, U(s0) U(s1), D(d))\
   O(neg, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(notb, Inone, UH(s,d), DH(d,s))\
-  O(not, Inone, UH(s,d), DH(d,s))\
+  O(not_, Inone, UH(s,d), DH(d,s))\
   O(orbi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(orbim, I(s0) I(fl), UM(m), D(sf))\
   O(orwim, I(s0) I(fl), UM(m), D(sf))\
@@ -266,7 +267,6 @@ struct Vunit;
   /* load effective address */\
   O(lea, Inone, U(s), D(d))\
   O(leap, I(s), Un, D(d))\
-  O(leav, I(s), Un, D(d))\
   O(lead, I(s), Un, D(d))\
   /* copies */\
   O(movb, Inone, UH(s,d), DH(d,s))\
@@ -316,8 +316,8 @@ struct Vunit;
   /* branches */\
   O(jcc, I(cc), U(sf), Dn)\
   O(jcci, I(cc) I(taken), U(sf), Dn)\
+  O(interceptjcc, I(cc), U(sf), Dn)\
   O(jmp, Inone, Un, Dn)\
-  O(jmps, I(jmp_addr) I(taken_addr), Un, Dn)\
   O(jmpr, Inone, U(target) U(args), Dn)\
   O(jmpm, Inone, U(target) U(args), Dn)\
   O(jmpi, I(target), U(args), Dn)\
@@ -343,6 +343,8 @@ struct Vunit;
   O(mulsd, Inone, U(s0) UH(s1,d), DH(d,s1))        \
   O(roundsd, I(dir), U(s), D(d))\
   O(sqrtsd, Inone, U(s), D(d))\
+  /* crc32, used for hashing */\
+  O(crc32q, Inone, UA(s0) UH(s1,d), DH(d,s1))\
   /* Generic instructions. */\
   O(prefetch, Inone, UM(m), Dn)\
   /* x64 instructions */\
@@ -351,7 +353,6 @@ struct Vunit;
   O(sarq, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(shlq, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(shrq, I(fl), UH(s,d), DH(d,s) D(sf))\
-  O(crc32q, Inone, UA(s0) UH(s1,d), DH(d,s1))\
   /* arm instructions */\
   O(csincb, I(cc), U(sf) U(f) U(t), D(d))\
   O(csincw, I(cc), U(sf) U(f) U(t), D(d))\
@@ -361,6 +362,12 @@ struct Vunit;
   O(mrs, I(s), Un, D(r))\
   O(msr, I(s), U(r), Dn)\
   O(ubfmli, I(mr) I(ms), U(s), D(d))\
+  O(ubfmliq, I(mr) I(ms), U(s), D(d))\
+  O(sbfizq, I(shift) I(width), U(s), D(d))\
+  O(loadpair, Inone, U(s), D(d0) D(d1))\
+  O(loadpairl, Inone, U(s), D(d0) D(d1))\
+  O(storepair, Inone, U(s0) U(s1) UW(d), Dn)\
+  O(storepairl, Inone, U(s0) U(s1) UW(d), Dn)\
   /* */
 
 /*
@@ -534,11 +541,6 @@ struct ldimmq { Immed64 s; Vreg d; };
 struct ldundefq { Vreg d; };
 
 /*
- * Load a smashable immediate value without mutating status flags.
- */
-struct movqs { Immed64 s; Vreg64 d; Vaddr addr; };
-
-/*
  * Memory operand load and store.
  */
 struct load { Vptr64 s; Vreg d; };
@@ -564,7 +566,6 @@ struct phijmp { Vlabel target; Vtuple uses; };
  * They should not be used in any translations that will eventually be emitted.
  */
 struct conjure { Vreg c; };
-struct conjureuse { Vreg c; };
 
 /*
  * This pseudo instruction marks the end of raw manipulation of the native
@@ -606,18 +607,12 @@ struct ssaalias { Vreg s; Vreg d; };
  * whose Vcost was computed to be cost. Id is a post computed index into a table
  * of frames stored on Vunit.
  */
-struct inlinestart { const Func* func; int cost; int id; };
+struct inlinestart {};
 
 /*
  * Marks a return target or exit from the current inlined frame.
  */
 struct inlineend {};
-
-/*
- * Indicate that an inline frame has been added or removed to/from the rbp
- * chain for record keeping.
- */
-struct pushframe {};
 
 /*
  * Record the current inline stack as though it were materialized for a call at
@@ -653,10 +648,11 @@ struct vinvoke { CallSpec call; VcallArgsId args; Vtuple d; Vlabel targets[2];
  * If `watch' is set, *watch will be set to the address immediately following
  * the call instruction---useful for various unwinder hijinks.
  */
-struct call  { CodeAddress target; RegSet args; TCA* watch; };
+struct call  { CodeAddress target; RegSet args; TCA* watch;
+               bool stackUnaligned=false; };
 struct callm { Vptr target; RegSet args; };
-struct callr { Vreg64 target; RegSet args; };
-struct calls { CodeAddress target; RegSet args; };
+struct callr { Vreg64 target; RegSet args; bool stackUnaligned=false; };
+struct calls { CodeAddress target; RegSet args; TCA* watch; };
 
 /*
  * Native function return.
@@ -855,6 +851,21 @@ struct syncvmrettype { Vreg type; };
 struct phplogue { Vreg fp; };
 
 /*
+ * Restore the value stored at `s` into the CPU's expected location
+ * for the return address prior to a function return.
+ */
+struct restoreripm { Vptr s; };
+
+/*
+ * Save and restore the return address to the native stack. These are no-ops on
+ * architectures where the return address is automatically saved on the stack by
+ * call instructions, such as Intel x86.
+ */
+struct restorerips {};
+
+struct saverips {};
+
+/*
  * Load fp[m_sfp] into rvmfp() and return to m_savedRip on `fp'.
  *
  * If `noframe' is set, rvmfp() is not changed.
@@ -889,15 +900,23 @@ struct callphpfe { SrcKey target; RegSet args; };
  */
 struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
 
+/*
+ * Side exit from an inlined frame.
+ *
+ * A simple call to inlineSideExit stub with callphp-like register effects.
+ */
+struct inlinesideexit { RegSet args; };
+
 ///////////////////////////////////////////////////////////////////////////////
 // VM entry ABI.
 
 /*
  * Resume execution in the middle of a TC function.
  *
- * This must set up the native stack in the same way as a phplogue{} would,
- * before transferring control to `target'.  Before resumetc{} is executed,
- * the native stack will always be set up like this:
+ * This must set up the native stack in the same way as a phplogue{}
+ * would, before transferring control to `target'.  In architectures where
+ * calls push the return address on the stack, the native stack will
+ * always be set up like this before resumetc{} is executed:
  *
  *    +-----------------------+   <- 16-byte alignment
  *    |   <8 bytes of junk>   |
@@ -906,7 +925,8 @@ struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
  * i.e., the native stack pointer will be misaligned coming in (but must, of
  * course, be aliged once phplogue{} finishes executing).  Using a native call
  * in the implementation (and likewise, using native returns for leavetc{}) is
- * recommended, in order to take advantage of return branch predictions.
+ * recommended, in order to take advantage of return branch predictions.  This
+ * is not required though.
  *
  * `exittc' is the address to resume execution at after returning from the TC.
  */
@@ -919,11 +939,13 @@ struct resumetc { Vreg64 target; TCA exittc; RegSet args; };
 struct inittc {};
 
 /*
- * Pop the address of enterTCExit off the stack, and return to it.
+ * Transfer control to enterTCExit stub.  Whether this is implemented via
+ * a return or a jump instruction is up to the target, but leavetc and
+ * resumetc must agree on the approach.
  *
  * Used to relinquish control to the async scheduler from an async function.
  */
-struct leavetc { RegSet args; };
+struct leavetc { RegSet args; TCA exittc; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // Exception intrinsics.
@@ -965,7 +987,7 @@ struct unwind { Vlabel targets[2]; };
  * Nop and trap.
  */
 struct nop {};
-struct trap { Reason reason; };
+struct trap { Reason reason; Fixup fix; };
 #define TRAP_REASON Reason{__FILE__, __LINE__}
 
 /*
@@ -1025,7 +1047,7 @@ struct srem { Vreg64 s0, s1, d; };
 struct neg { Vreg64 s, d; VregSF sf; Vflags fl; };
 // not: ~s => d
 struct notb { Vreg8 s, d; };
-struct not { Vreg64 s, d; };
+struct not_ { Vreg64 s, d; };
 // or: s0 | {s1|m} => {d|m}, sf
 struct orbi { Immed s0; Vreg8 s1, d; VregSF sf; Vflags fl; };
 struct orbim { Immed s0; Vptr8 m; VregSF sf; Vflags fl; };
@@ -1119,8 +1141,6 @@ struct setcc { ConditionCode cc; VregSF sf; Vreg8 d; };
  */
 struct lea { Vptr s; Vreg64 d; };
 struct leap { RIPRelativeRef s; Vreg64 d; };
-// rip-relative lea of a Vaddr
-struct leav { Vaddr s; Vreg64 d; };
 struct lead { VdataPtr<void> s; Vreg64 d; };
 
 /*
@@ -1190,11 +1210,8 @@ struct storesd { VregDbl s; Vptr64 m; };
  */
 struct jcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; StringTag tag; };
 struct jcci { ConditionCode cc; VregSF sf; TCA taken; };
+struct interceptjcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; };
 struct jmp { Vlabel target; };
-// jmps{} is a smashable jump to target[0].  It admits a second target which
-// represents an in-Vunit smash target.  All possible such targets need to be
-// accounted for here so that vasm optimizations are aware of control flow.
-struct jmps { Vlabel targets[2]; Vaddr jmp_addr; Vaddr taken_addr; };
 struct jmpr { Vreg64 target; RegSet args; };
 struct jmpm { Vptr target; RegSet args; };
 struct jmpi { TCA target; RegSet args; };
@@ -1240,6 +1257,11 @@ struct sqrtsd { VregDbl s, d; };
 struct prefetch { Vptr64 m; Vflags fl; };
 
 /*
+ * crc32 intrinsics, used for hashing
+ */
+struct crc32q { Vreg64 s0, s1; Vreg64 d; };
+
+/*
  * x64 intrinsics.
  */
 struct cqo {};
@@ -1247,7 +1269,6 @@ struct idiv { Vreg64 s; VregSF sf; Vflags fl; };
 struct sarq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
 struct shlq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
 struct shrq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
-struct crc32q { Vreg64 s0, s1; Vreg64 d; };
 
 /*
  * arm intrinsics.
@@ -1261,6 +1282,12 @@ struct fcvtzs { VregDbl s; Vreg64 d;};
 struct mrs { Immed s; Vreg64 r; };
 struct msr { Vreg64 r; Immed s; };
 struct ubfmli { Immed mr, ms; Vreg32 s, d; };
+struct ubfmliq { Immed mr, ms; Vreg64 s, d; };
+struct sbfizq { Immed shift, width; Vreg64 s, d; };
+struct loadpair { Vptr128 s; Vreg64 d0, d1; };
+struct loadpairl { Vptr64 s; Vreg32 d0, d1; };
+struct storepair { Vreg64 s0, s1; Vptr128 d; };
+struct storepairl { Vreg32 s0, s1; Vptr64 d; };
 
 ///////////////////////////////////////////////////////////////////////////////
 

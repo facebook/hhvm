@@ -1,0 +1,6 @@
+ERROR: File "nullsafe-call-7.php", line 9, characters 10-19:
+Invalid return type (Typing[4110])
+  File "nullsafe-call-7.php", line 8, characters 29-35:
+  Expected `nonnull`
+  File "nullsafe-call-7.php", line 5, characters 30-34:
+  But got `mixed`

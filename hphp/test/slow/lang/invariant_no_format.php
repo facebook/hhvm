@@ -2,7 +2,7 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   try {
     invariant();
   } catch (Exception $e) {

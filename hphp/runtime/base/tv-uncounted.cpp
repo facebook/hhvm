@@ -22,9 +22,6 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/vanilla-dict.h"
-#include "hphp/runtime/base/vanilla-keyset.h"
-#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/func.h"
 
 namespace HPHP {
@@ -60,7 +57,7 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
 
   switch (type) {
     case KindOfFunc:
-      if (RO::EvalAPCSerializeFuncs) {
+      if (Cfg::Eval::APCSerializeFuncs) {
         assertx(data.pfunc->isPersistent());
         break;
       }
@@ -74,7 +71,7 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
 
     case KindOfString:
       type = KindOfPersistentString;
-      // Intentional fall-through.
+      [[fallthrough]];
     case KindOfPersistentString:
       data.pstr = MakeUncountedString(data.pstr, env);
       break;
@@ -83,7 +80,7 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
     case KindOfDict:
     case KindOfKeyset:
       type = dt_with_persistence(type);
-      // Intentional fall-through.
+      [[fallthrough]];
     case KindOfPersistentVec:
     case KindOfPersistentDict:
     case KindOfPersistentKeyset:
@@ -91,7 +88,7 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
       break;
 
     case KindOfClsMeth: {
-      if (RO::EvalAPCSerializeClsMeth) {
+      if (Cfg::Eval::APCSerializeClsMeth) {
         assertx(data.pclsmeth->getCls()->isPersistent());
         break;
       }
@@ -110,6 +107,7 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
+    case KindOfEnumClassLabel:
       break;
 
     // DataWalker excludes these cases when it analyzes a value.
@@ -137,10 +135,11 @@ ArrayData* MakeUncountedArray(
     }
   }
 
-  HeapObject** seenArr = nullptr;
-  if (env.seen && in->hasMultipleRefs()) {
-    seenArr = &(*env.seen)[in];
-    if (auto const arr = static_cast<ArrayData*>(*seenArr)) {
+  ArrayData** seenArr = nullptr;
+  if (env.seenArrays && in->hasMultipleRefs()) {
+    seenArr = &(*env.seenArrays)[in];
+    auto arr = *seenArr;
+    if (arr) {
       arr->uncountedIncRef();
       return arr;
     }
@@ -149,26 +148,29 @@ ArrayData* MakeUncountedArray(
   auto const result = in->makeUncounted(env, hasApcTv);
   // NOTE: We may have mutated env.seen in makeUncounted, so we must redo
   // the hash table lookup here. We only use seenArr to test for presence.
-  if (seenArr) (*env.seen)[in] = result;
+  if (seenArr) (*env.seenArrays)[in] = result;
   return result;
 }
 
 StringData* MakeUncountedString(StringData* in, const MakeUncountedEnv& env) {
   if (in->persistentIncRef()) return in;
   if (in->empty()) return staticEmptyString();
-  if (auto const st = lookupStaticString(in)) return st;
 
-  HeapObject** seenStr = nullptr;
-  if (env.seen && in->hasMultipleRefs()) {
-    seenStr = &(*env.seen)[in];
-    if (auto const st = static_cast<StringData*>(*seenStr)) {
-      st->uncountedIncRef();
+  if (env.seenStrings) {
+    auto it = env.seenStrings->find(in);
+    if (it != env.seenStrings->end()) {
+      auto st = *it;
+      st->persistentIncRef();
       return st;
     }
   }
 
-  auto const st = StringData::MakeUncounted(in->slice());
-  if (seenStr) *seenStr = st;
+  auto st = lookupStaticString(in);
+  if (!st) {
+    st = StringData::MakeUncounted(in->slice());
+  }
+
+  if (env.seenStrings) env.seenStrings->insert(st);
   return st;
 }
 

@@ -6,9 +6,9 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing file() : variation ***\n";
-$testfile = __SystemLib\hphp_test_tmppath('fileVar9.txt');
+$testfile = sys_get_temp_dir().'/'.'fileVar9.txt';
 
-$contents = varray[
+$contents = vec[
    "File ends on a single character\na",
    "File ends on a new line\n",
    "File ends on multiple newlines\n\n\n\n",
@@ -16,7 +16,7 @@ $contents = varray[
    "File has\r\nmultiple crlfs\n\r\n"
    ];
 
-@unlink($testfile);
+unlink($testfile);
 foreach ($contents as $content) {
     $h = fopen($testfile, "w");
     fwrite($h, $content);

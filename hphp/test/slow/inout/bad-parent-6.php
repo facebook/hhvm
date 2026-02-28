@@ -1,11 +1,11 @@
 <?hh
 
 class P {
-  function foo() {}
+  function foo() :mixed{}
 }
 
 class C extends P {
-  function foo(inout $x) {}
+  function foo(inout $x) :mixed{}
 }
 
 <<__EntryPoint>>

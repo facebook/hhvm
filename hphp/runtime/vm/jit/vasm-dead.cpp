@@ -25,12 +25,11 @@
 #include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
-#include <boost/dynamic_bitset.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 
 #include <algorithm>
 
-TRACE_SET_MOD(vasm);
+TRACE_SET_MOD(vasm)
 
 namespace HPHP::jit {
 
@@ -51,7 +50,7 @@ namespace HPHP::jit {
 // or not a useful block executes, and useless branches can be forwarded to
 // the nearest useful post-dominator.
 void removeDeadCode(Vunit& unit) {
-  Timer timer(Timer::vasm_dce);
+  Timer timer(Timer::vasm_dce, unit.log_entry);
 
   assertx(check(unit));
 

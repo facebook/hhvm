@@ -1,9 +1,9 @@
 <?hh
 
 class Foo {
-  private $blah = varray[1,2,3];
+  private $blah = vec[1,2,3];
 
-  public function closure_private_prop_access() {
+  public function closure_private_prop_access() :mixed{
     $cl = $x ==> $this->blah = $x;
     $cl("asd");
     var_dump(is_string($this->blah));
@@ -11,10 +11,10 @@ class Foo {
 }
 
 class Bar {
-  private $heh = varray[1,2,3];
+  private $heh = vec[1,2,3];
 
-  public function closure_private_prop_access2() {
-    $cl = () ==> $this->heh = varray[1,2,3];
+  public function closure_private_prop_access2() :mixed{
+    $cl = () ==> $this->heh = vec[1,2,3];
     $cl();
     var_dump(is_array($this->heh));
   }
@@ -22,7 +22,7 @@ class Bar {
 
 
 <<__EntryPoint>>
-function main_private_props_007() {
+function main_private_props_007() :mixed{
 (new Foo())->closure_private_prop_access();
 (new Bar())->closure_private_prop_access2();
 }

@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_null_path() {
+function main_null_path() :mixed{
 error_reporting(-1);
 
 $path1 = '/etc/passwd' . chr(0) . '/foo/bar.jpg';

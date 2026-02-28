@@ -1,6 +1,6 @@
 <?hh
 
-function callback_stress(
+<<__DynamicallyCallable>> function callback_stress(
   string $path,
   string $query,
   string $name,
@@ -17,7 +17,7 @@ function callback_stress(
 }
 
 
-function callback_files(
+<<__DynamicallyCallable>> function callback_files(
   string $path,
   string $query,
   string $name,
@@ -41,7 +41,7 @@ function callback_files(
   }
 }
 
-function callback_sync(
+<<__DynamicallyCallable>> function callback_sync(
   string $path,
   string $query,
   string $name,
@@ -51,7 +51,7 @@ function callback_sync(
   sleep(3);
 }
 
-function callback_unsubscribe(
+<<__DynamicallyCallable>> function callback_unsubscribe(
   string $path,
   string $query,
   string $name,
@@ -61,7 +61,7 @@ function callback_unsubscribe(
   sleep(1);
 }
 
-function callback_broken(
+<<__DynamicallyCallable>> function callback_broken(
   string $path,
   string $query,
   string $name,
@@ -77,7 +77,7 @@ function callback_broken(
   }
 }
 
-function callback_exception(
+<<__DynamicallyCallable>> function callback_exception(
   string $path,
   string $query,
   string $name,
@@ -87,7 +87,7 @@ function callback_exception(
   throw new Exception("expected exception");
 }
 
-function callback_checksub(string $sub_name): void {
+<<__DynamicallyCallable>> function callback_checksub(string $sub_name): void {
   // Having these async print statements can be problematic when checking test
   // output so don't include them by default.
   // print("Checking sub: $sub_name\n");

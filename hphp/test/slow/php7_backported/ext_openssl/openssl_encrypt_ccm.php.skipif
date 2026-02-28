@@ -1,9 +1,9 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 if (!extension_loaded("openssl"))
-    die("skip");
+    exit("skip");
 if (!in_array('aes-128-ccm', openssl_get_cipher_methods()))
-  die("skip: aes-128-ccm not available");
+  exit("skip: aes-128-ccm not available");
 if (!in_array('aes-256-ccm', openssl_get_cipher_methods()))
-    die("skip: aes-256-ccm not available");
+    exit("skip: aes-256-ccm not available");
 }

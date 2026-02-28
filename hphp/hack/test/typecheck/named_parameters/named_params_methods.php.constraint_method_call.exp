@@ -1,0 +1,20 @@
+ERROR: File "named_params_methods.php", line 20, characters 3-40:
+Typing error (Typing[4041])
+  File "named_params_methods.php", line 7, characters 19-42:
+  Unexpected named parameter: c
+  File "named_params_methods.php", line 20, characters 3-40:
+  Because of this definition
+ERROR: File "named_params_methods.php", line 23, characters 3-52:
+Missing required named argument: b (Typing[4499])
+  File "named_params_methods.php", line 9, characters 26-56:
+  Definition is here
+ERROR: File "named_params_methods.php", line 26, characters 3-50:
+Typing error (Typing[4040])
+  File "named_params_methods.php", line 7, characters 19-42:
+  Missing required named parameter: d
+  File "named_params_methods.php", line 26, characters 3-50:
+  Because of this definition
+ERROR: File "named_params_methods.php", line 29, characters 3-62:
+Unexpected named argument: d (Typing[4500])
+  File "named_params_methods.php", line 9, characters 26-56:
+  Definition is here

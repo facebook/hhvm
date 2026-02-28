@@ -17,7 +17,6 @@
 
 #include <folly/Hash.h>
 
-#include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/wide-func.h"
@@ -31,6 +30,7 @@ namespace HPHP::HHBBC {
 struct CollectedInfo;
 struct ContextHash;
 struct FuncAnalysis;
+struct IIndex;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -40,28 +40,13 @@ struct FuncAnalysis;
  * need a "context", to allow recording dependencies.
  */
 struct Context {
-  const php::Unit* unit;
+  SString unit;
   const php::Func* func;
   const php::Class* cls;
+  const Context* dep{nullptr};
 
-  using Hash = ContextHash;
+  const Context& forDep() const { return dep ? *dep : *this; }
 };
-
-struct ContextHash {
-  size_t operator()(const Context& c) const {
-    return pointer_hash<void>{}(c.func ? (void*)c.func :
-                                c.cls ? (void*)c.cls : (void*)c.unit);
-  }
-};
-
-inline bool operator==(Context a, Context b) {
-  return a.unit == b.unit && a.func == b.func && a.cls == b.cls;
-}
-
-inline bool operator<(Context a, Context b) {
-  return std::make_tuple(a.unit, a.func, a.cls) <
-         std::make_tuple(b.unit, b.func, b.cls);
-}
 
 /*
  * Context for a call to a function.  This is the function itself,
@@ -76,8 +61,8 @@ struct CallContext {
 
 inline bool operator==(const CallContext& a, const CallContext& b) {
   return a.callee == b.callee &&
-         equivalently_refined(a.args, b.args) &&
-         equivalently_refined(a.context, b.context);
+         equal(a.args, b.args) &&
+         equal(a.context, b.context);
 }
 
 struct CallContextHasher {
@@ -110,11 +95,12 @@ struct CallContextHashCompare {
  * must ensure that the provided WideFunc lives longer than the context.
  */
 struct AnalysisContext {
-  const php::Unit* unit;
+  SString unit;
   const php::WideFunc& func;
   const php::Class* cls;
+  const Context* dep{nullptr};
 
-  operator Context() const { return { unit, func, cls }; }
+  operator Context() const { return { unit, func, cls, dep }; }
 };
 
 /*
@@ -123,12 +109,12 @@ struct AnalysisContext {
  * The WideFunc in this struct will always match the func in ainfo.ctx.
  */
 struct VisitContext {
-  const Index& index;
+  const IIndex& index;
   const FuncAnalysis& ainfo;
   CollectedInfo& collect;
   php::WideFunc& func;
 
-  VisitContext(const Index& index, const FuncAnalysis& ainfo,
+  VisitContext(const IIndex& index, const FuncAnalysis& ainfo,
                CollectedInfo& collect, php::WideFunc& func);
 };
 

@@ -1,7 +1,7 @@
 <?hh
 
 // parent and child processes share the same handler here
-function handler($signo) {
+function handler($signo) :mixed{
 
   if ($signo == SIGUSR2) {
     if (SignalChangeHandlerAfterForkPhp::$child == 0) {
@@ -27,7 +27,7 @@ function handler($signo) {
   }
 }
 
-function newhandler($signo) {
+function newhandler($signo) :mixed{
 
   echo "parent: new handler invoked\n";
   $status = null;
@@ -35,13 +35,13 @@ function newhandler($signo) {
   exit(0);
 }
 
-function waitForSignal($nsec) {
+function waitForSignal($nsec) :mixed{
   for ($i = 0; $i < $nsec; ++$i) {
     sleep(1);
   }
 }
 
-function main() {
+function main() :mixed{
   pcntl_signal(SIGUSR1, handler<>);
   pcntl_signal(SIGUSR2, handler<>);
 

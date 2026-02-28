@@ -6,7 +6,7 @@ bool(false)
 dict(0) {
 }
 
-Warning: array_chunk() expects at least 2 parameters, 1 given in %s/test/slow/ext_array/1767.php on line 9
+Warning: array_chunk() expects at least 2 positional parameters, 1 given in %s/test/slow/ext_array/1767.php on line 9
 
-Warning: array_chunk() expects at least 2 parameters, 1 given in %s/test/slow/ext_array/1767.php on line 10
+Warning: array_chunk() expects at least 2 positional parameters, 1 given in %s/test/slow/ext_array/1767.php on line 10
 bool(true)

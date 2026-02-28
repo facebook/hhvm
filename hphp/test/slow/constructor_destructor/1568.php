@@ -12,7 +12,7 @@ class child_c extends parent_c {
 }
 
 <<__EntryPoint>>
-function main_1568() {
+function main_1568() :mixed{
 $v = new child_c;
 unset($v);
 }

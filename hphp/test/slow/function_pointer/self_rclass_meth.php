@@ -1,7 +1,7 @@
 <?hh
 
 class TestBase {
-  public static function foo<reify T1, reify T2>() {
+  public static function foo<reify T1, reify T2>() :mixed{
     var_dump(HH\ReifiedGenerics\get_type_structure<T1>());
     var_dump(HH\ReifiedGenerics\get_type_structure<T2>());
   }

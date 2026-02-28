@@ -1,13 +1,13 @@
 <?hh
 
-function cmp($x, $y) {
+function cmp($x, $y) :mixed{
   if ($x < $y) return 1;
   if ($x > $y) return -1;
   return 0;
 }
 
 <<__EntryPoint>>
-function main_814() {
+function main_814() :mixed{
 $v = new Vector;
 $v[] = 'c';
 $v[] = 'a';

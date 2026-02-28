@@ -1,0 +1,157 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          mysqlrouter
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start / Stop MySQL Router
+# Description:       This service script facilitates startup and shutdown of
+#                    MySQL Router.
+### END INIT INFO
+
+# Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2.0,
+# as published by the Free Software Foundation.
+#
+# This program is also distributed with certain software (including
+# but not limited to OpenSSL) that is licensed under separate terms,
+# as designated in a particular file or component or in included license
+# documentation.  The authors of MySQL hereby grant you an additional
+# permission to link the program and your derivative works with the
+# separately licensed software that they have included with MySQL.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License, version 2.0, for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+
+#
+# Maintainer: MySQL Release Engineering <mysql-build@oss.oracle.com>
+#
+
+. /lib/lsb/init-functions
+
+DESC="Start / Stop MySQL Router"
+DAEMON=/usr/bin/mysqlrouter
+DAEMON_OPTIONS="-c /etc/mysqlrouter/mysqlrouter.conf"
+NAME="MySQL Router"
+RUNTIMEDIR=/var/run/mysqlrouter/
+PID=${RUNTIMEDIR}/mysqlrouter.pid
+STOP_RETRY=3
+LOGDIR=/var/log/mysqlrouter
+LOGFILE=${LOGDIR}/mysqlrouter.log
+DATADIR=/var/lib/mysqlrouter
+
+do_start() {
+
+  local retval=0
+  log_daemon_msg "Starting MySQL Router"
+
+  if [ ! -x $DAEMON ]; then
+    log_end_msg 1
+    return 0
+  fi
+
+  if [ ! -d ${RUNTIMEDIR} -a ! -L ${RUNTIMEDIR} ];
+  then
+    install -d -m 0750 -o mysqlrouter -g adm ${RUNTIMEDIR}
+  fi
+
+  if [ ! -d ${DATADIR} -a ! -L ${DATADIR} ];
+  then
+    install -d -m 0750 -o mysqlrouter -g adm ${DATADIR}
+  fi
+
+  if [ ! -d ${LOGDIR} -a ! -L ${LOGDIR} ];
+  then
+    install -d -m 0750 -o mysqlrouter -g adm ${LOGDIR}
+    install /dev/null -m 0640 -o mysqlrouter -g adm ${LOGFILE}
+  fi
+
+  [ -x /lib/init/apparmor-profile-load ] && /lib/init/apparmor-profile-load usr.bin.mysqlrouter
+
+  start-stop-daemon --start \
+    --pidfile $PID \
+    --startas $DAEMON \
+    --oknodo \
+    --make-pidfile \
+    --background \
+    --chuid mysqlrouter \
+    -- $DAEMON_OPTIONS 2>/dev/null
+  retval=$?
+
+  case $retval in
+    0) log_end_msg 0 ;;
+    1)
+      log_warning_msg "already running"
+      log_end_msg 0
+      ;;
+    2) log_end_msg 1 ;;  # failure
+  esac
+
+  return $retval
+}
+
+do_stop() {
+  local retval
+
+  log_daemon_msg "Stopping $NAME"
+
+  if [ ! -x $DAEMON ]; then
+    log_end_msg 1
+    return 0
+  fi
+
+  start-stop-daemon --stop \
+    --pidfile $PID \
+    --startas $DAEMON \
+    --quiet \
+    --retry=$STOP_RETRY
+  retval=$?
+
+  case $retval in
+    0)
+      log_end_msg 0
+      ;;
+    1)
+      log_warning_msg "not running"
+      log_end_msg 255
+      ;;
+    *) log_end_msg 1 ;;
+  esac
+
+  return $retval
+}
+
+do_status() {
+  status_of_proc -p $PID $DAEMON "$NAME"
+}
+
+case "$1" in
+  start)
+    do_start
+    ;;
+  status)
+    do_status
+    ;;
+  restart|force-reload)
+    do_stop
+    sleep 1
+    do_start
+    ;;
+  stop)
+    do_stop
+    sleep 1
+    ;;
+  *)
+    >2& echo "Usage: /etc/init.d/mysqlrouter {start|stop|status|restart|force-reload}"
+    exit 3
+esac

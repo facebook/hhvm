@@ -1,10 +1,10 @@
 <?hh
 
-function baz<reify T1, reify T2>() {
+function baz<reify T1, reify T2>() :mixed{
   return 42;
 }
 
-function foo<reify T>() {
+function foo<reify T>() :mixed{
   $func = baz<T, int>;
   gc_collect_cycles();
   gc_collect_cycles();
@@ -12,6 +12,6 @@ function foo<reify T>() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(foo<string>());
 }

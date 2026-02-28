@@ -1,0 +1,17 @@
+(rule
+ (alias ide_code_actions_quickfixes_remove_parameter_name)
+ (deps
+  %{exe:../../../../src/hh_single_type_check.exe}
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/ide_code_actions/quickfixes/remove_parameter_name/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/ide_code_actions/quickfixes/remove_parameter_name/*.php)
+  (glob_files %{project_root}/hack/test/ide_code_actions/quickfixes/remove_parameter_name/*.exp))
+ (action
+  (run
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/ide_code_actions/quickfixes/remove_parameter_name
+   --program
+   %{exe:../../../../src/hh_single_type_check.exe}
+   --flags
+   --ide-code-actions "Remove parameter name")))

@@ -1,8 +1,0 @@
-Warning: fstat() expects parameter 1 to be resource, string given in %s/fstat_variation3.php on line 12
-
-Warning: fstat() expects parameter 1 to be resource, string given in %s/fstat_variation3.php on line 12
-
-Warning: fstat() expects parameter 1 to be resource, null given in %s/fstat_variation3.php on line 12
-
-Warning: fstat() expects parameter 1 to be resource, null given in %s/fstat_variation3.php on line 12
-===DONE===

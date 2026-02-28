@@ -29,7 +29,7 @@ trait StrictIterable<+Tv> implements Iterable<Tv> {
 
   public function filter((function(Tv)[_]: bool) $fn)[ctx $fn]: Iterable<Tv>;
 
-  public function zip<Tu>(Traversable<Tu> $traversable): Iterable<Pair<Tv,Tu>>;
+  public function zip<Tu>(Traversable<Tu> $traversable): Iterable<Pair<Tv, Tu>>;
 
   public function take(int $n): Iterable<Tv>;
 
@@ -41,7 +41,9 @@ trait StrictIterable<+Tv> implements Iterable<Tv> {
 
   public function slice(int $start, int $len): Iterable<Tv>;
 
-  public function concat<Tu super Tv>(Traversable<Tu> $traversable): Iterable<Tu>;
+  public function concat<Tu super Tv>(
+    Traversable<Tu> $traversable,
+  ): Iterable<Tu>;
 
   public function firstValue(): ?Tv;
 
@@ -49,8 +51,7 @@ trait StrictIterable<+Tv> implements Iterable<Tv> {
 
 }
 
-
-trait StrictKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
+trait StrictKeyedIterable<Tk, +Tv> implements KeyedIterable<Tk, Tv> {
   public function toValuesArray(): varray<Tv>;
 
   public function toKeysArray(): varray<Tk>;
@@ -61,39 +62,49 @@ trait StrictKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
 
   public function toImmSet(): ImmSet<Tv> where Tv as arraykey;
 
-  public function lazy(): KeyedIterable<Tk,Tv>;
+  public function lazy(): KeyedIterable<Tk, Tv>;
 
   public function values(): Iterable<Tv>;
 
   public function keys(): Iterable<Tk>;
 
-  public function map<Tu>((function(Tv)[_]: Tu) $fn)[ctx $fn]: KeyedIterable<Tk,Tu>;
+  public function map<Tu>(
+    (function(Tv)[_]: Tu) $fn,
+  )[ctx $fn]: KeyedIterable<Tk, Tu>;
 
   public function mapWithKey<Tu>(
-    (function(Tk,Tv)[_]: Tu) $fn
-  )[ctx $fn]: KeyedIterable<Tk,Tu>;
+    (function(Tk, Tv)[_]: Tu) $fn,
+  )[ctx $fn]: KeyedIterable<Tk, Tu>;
 
-  public function filter((function(Tv)[_]: bool) $fn)[ctx $fn]: KeyedIterable<Tk,Tv>;
+  public function filter(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: KeyedIterable<Tk, Tv>;
 
   public function filterWithKey(
-    (function(Tk,Tv)[_]: bool) $fn
-  )[ctx $fn]: KeyedIterable<Tk,Tv>;
+    (function(Tk, Tv)[_]: bool) $fn,
+  )[ctx $fn]: KeyedIterable<Tk, Tv>;
 
   public function zip<Tu>(
-    Traversable<Tu> $traversable
-  ): KeyedIterable<Tk,Pair<Tv,Tu>>;
+    Traversable<Tu> $traversable,
+  ): KeyedIterable<Tk, Pair<Tv, Tu>>;
 
   public function take(int $n): KeyedIterable<Tk, Tv>;
 
-  public function takeWhile((function(Tv)[_]: bool) $fn)[ctx $fn]: KeyedIterable<Tk, Tv>;
+  public function takeWhile(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: KeyedIterable<Tk, Tv>;
 
   public function skip(int $n): KeyedIterable<Tk, Tv>;
 
-  public function skipWhile((function(Tv)[_]: bool) $fn)[ctx $fn]: KeyedIterable<Tk, Tv>;
+  public function skipWhile(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: KeyedIterable<Tk, Tv>;
 
   public function slice(int $start, int $len): KeyedIterable<Tk, Tv>;
 
-  public function concat<Tu super Tv>(Traversable<Tu> $traversable): Iterable<Tu>;
+  public function concat<Tu super Tv>(
+    Traversable<Tu> $traversable,
+  ): Iterable<Tu>;
 
   public function firstValue(): ?Tv;
 
@@ -104,7 +115,6 @@ trait StrictKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
   public function lastKey(): ?Tk;
 
 }
-
 
 trait LazyIterable<+Tv> implements Iterable<Tv> {
   public function toValuesArray(): varray<Tv>;
@@ -121,7 +131,9 @@ trait LazyIterable<+Tv> implements Iterable<Tv> {
 
   public function filter((function(Tv)[_]: bool) $fn)[ctx $fn]: Iterable<Tv>;
 
-  public function zip<Tu>(Traversable<Tu> $traversable)[]: Iterable<Pair<Tv,Tu>>;
+  public function zip<Tu>(
+    Traversable<Tu> $traversable,
+  )[]: Iterable<Pair<Tv, Tu>>;
 
   public function take(int $n): Iterable<Tv>;
 
@@ -133,7 +145,9 @@ trait LazyIterable<+Tv> implements Iterable<Tv> {
 
   public function slice(int $start, int $len): Iterable<Tv>;
 
-  public function concat<Tu super Tv>(Traversable<Tu> $traversable): Iterable<Tu>;
+  public function concat<Tu super Tv>(
+    Traversable<Tu> $traversable,
+  ): Iterable<Tu>;
 
   public function firstValue(): ?Tv;
 
@@ -141,8 +155,7 @@ trait LazyIterable<+Tv> implements Iterable<Tv> {
 
 }
 
-
-trait LazyKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
+trait LazyKeyedIterable<Tk, +Tv> implements KeyedIterable<Tk, Tv> {
   public function toValuesArray(): varray<Tv>;
 
   public function toKeysArray(): varray<Tk>;
@@ -153,39 +166,49 @@ trait LazyKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
 
   public function toImmSet(): ImmSet<Tv> where Tv as arraykey;
 
-  public function lazy(): KeyedIterable<Tk,Tv>;
+  public function lazy(): KeyedIterable<Tk, Tv>;
 
   public function values(): Iterable<Tv>;
 
   public function keys(): Iterable<Tk>;
 
-  public function map<Tu>((function(Tv)[_]: Tu) $fn)[ctx $fn]: KeyedIterable<Tk,Tu>;
+  public function map<Tu>(
+    (function(Tv)[_]: Tu) $fn,
+  )[ctx $fn]: KeyedIterable<Tk, Tu>;
 
   public function mapWithKey<Tu>(
-    (function(Tk,Tv)[_]: Tu) $fn
-  )[ctx $fn]: KeyedIterable<Tk,Tu>;
+    (function(Tk, Tv)[_]: Tu) $fn,
+  )[ctx $fn]: KeyedIterable<Tk, Tu>;
 
-  public function filter((function(Tv)[_]: bool) $fn)[ctx $fn]: KeyedIterable<Tk,Tv>;
+  public function filter(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: KeyedIterable<Tk, Tv>;
 
   public function filterWithKey(
-    (function(Tk,Tv)[_]: bool) $fn
-  )[ctx $fn]: KeyedIterable<Tk,Tv>;
+    (function(Tk, Tv)[_]: bool) $fn,
+  )[ctx $fn]: KeyedIterable<Tk, Tv>;
 
   public function zip<Tu>(
-    Traversable<Tu> $traversable
-  ): KeyedIterable<Tk,Pair<Tv,Tu>>;
+    Traversable<Tu> $traversable,
+  ): KeyedIterable<Tk, Pair<Tv, Tu>>;
 
   public function take(int $n): KeyedIterable<Tk, Tv>;
 
-  public function takeWhile((function(Tv)[_]: bool) $fn)[ctx $fn]: KeyedIterable<Tk, Tv>;
+  public function takeWhile(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: KeyedIterable<Tk, Tv>;
 
   public function skip(int $n): KeyedIterable<Tk, Tv>;
 
-  public function skipWhile((function(Tv)[_]: bool) $fn)[ctx $fn]: KeyedIterable<Tk, Tv>;
+  public function skipWhile(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: KeyedIterable<Tk, Tv>;
 
   public function slice(int $start, int $len): KeyedIterable<Tk, Tv>;
 
-  public function concat<Tu super Tv>(Traversable<Tu> $traversable): Iterable<Tu>;
+  public function concat<Tu super Tv>(
+    Traversable<Tu> $traversable,
+  ): Iterable<Tu>;
 
   public function firstValue(): ?Tv;
 

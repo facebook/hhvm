@@ -1,4 +1,4 @@
-Parsing[1002] Local variables cannot have type annotations in Hack. [1]
+error: Parsing[1002] Local variables cannot have type annotations in Hack. [1]
 
 message_order.php:4:7
     2 | 
@@ -6,7 +6,7 @@ message_order.php:4:7
 [1] 4 |   int $x = 1;
     5 | }
 
-Naming[2049] Unbound name: int (a global constant) [1]
+error: Naming[2049] Unbound name: int (a global constant) [1]
 
 message_order.php:4:3
     2 | 
@@ -14,7 +14,7 @@ message_order.php:4:3
 [1] 4 |   int $x = 1;
     5 | }
 
-Typing[4106] Unbound global constant (Typing) [1]
+error: Typing[4106] Unbound global constant (Typing) [1]
 
 message_order.php:4:3
     2 | 
@@ -22,4 +22,4 @@ message_order.php:4:3
 [1] 4 |   int $x = 1;
     5 | }
 
-3 errors found.
+3 errors found

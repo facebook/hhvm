@@ -1,0 +1,10 @@
+ERROR: File "memoized_no_such_class.php", line 3, characters 13-23:
+Unbound name: `NoSuchClass` (an object type) (Naming[2049])
+ERROR: File "memoized_no_such_class.php", line 3, characters 13-23:
+`__Memoize` can only be used with items from MemoizeOption. (Naming[2124])
+ERROR: File "memoized_no_such_class.php", line 3, characters 13-33:
+This label is not a valid reference to a member of the given enum class (Typing[4110])
+  File "memoized_no_such_class.php", line 3, characters 24-33:
+  Expected a class with a constant `KeyedByIC`
+  File "memoized_no_such_class.php", line 3, characters 13-23:
+  But got `NoSuchClass`

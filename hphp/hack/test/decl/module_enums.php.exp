@@ -1,84 +1,83 @@
-File root|module_enums.php--modules.php
-[("X", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [4:8-9] }));
-  ("Y", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [5:8-9] }))]
+File root|module_enums.php--module_X.php
+[("X", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [2:12-13] }))]
+
+File root|module_enums.php--module_Y.php
+[("Y", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [2:12-13] }))]
 
 File root|module_enums.php--X.php
 [("\\X",
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-       sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+       sc_abstract = false; sc_is_xhp = false; sc_internal = true;
        sc_has_xhp_keyword = false; sc_kind = Cenum;
-       sc_module = (Some ([2:54-57], "X")); sc_name = ([5:6-7], "\\X");
-       sc_tparams = []; sc_where_constraints = [];
+       sc_module = (Some ([3:8-9], "X")); sc_name = ([5:15-16], "\\X");
+       sc_tparams = [];
        sc_extends =
-       [(Rhint ([5:6-7]),
-         (Tapply (([5:6-7], "\\HH\\BuiltinEnum"),
-            [(Rhint ([5:6-7]), (Tapply (([5:6-7], "\\X"), [])))])))
+       [(Rhint ([5:15-16]),
+         (Tapply (([5:15-16], "\\HH\\BuiltinEnum"),
+            [(Rhint ([5:15-16]), (Tapply (([5:15-16], "\\X"), [])))])))
          ];
        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_implements = []; sc_support_dynamic_type = false;
+       sc_xhp_marked_empty = false; sc_req_extends = [];
+       sc_req_implements = []; sc_req_constraints = []; sc_implements = [];
+       sc_support_dynamic_type = false;
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([6:3-4], "A");
           scc_type = (Rwitness_from_decl ([6:7-8]), (Tprim Tint));
-          scc_refs = [] };
+          scc_refs = []; scc_value = None };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([7:3-4], "B");
            scc_type = (Rwitness_from_decl ([7:7-8]), (Tprim Tint));
-           scc_refs = [] };
+           scc_refs = []; scc_value = None };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([8:3-4], "C");
            scc_type = (Rwitness_from_decl ([8:7-8]), (Tprim Tint));
-           scc_refs = [] }
+           scc_refs = []; scc_value = None }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-       sc_user_attributes =
-       [{ Typing_defs_core.ua_name = ([4:18-28], "__Internal");
-          ua_classname_params = [] };
-         { Typing_defs_core.ua_name = ([4:3-11], "__Module");
-           ua_classname_params = [] }
-         ];
+       sc_user_attributes = [];
        sc_enum_type =
-       (Some { Typing_defs.te_base = (Rhint ([5:9-12]), (Tprim Tint));
-               te_constraint = None; te_includes = [] })
-       }));
+       (Some { Typing_defs.te_base = (Rhint ([5:18-21]), (Tprim Tint));
+               te_constraint = None; te_includes = [] });
+       sc_docs_url = None; sc_package = None }));
   ("\\f1",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
-        fe_module = (Some ([2:54-57], "X")); fe_internal = true;
+      { Typing_defs.fe_deprecated = None; fe_module = (Some ([3:8-9], "X"));
+        fe_package = None; fe_internal = true;
         fe_type =
-        (Rwitness_from_decl ([12:10-12]),
+        (Rwitness_from_decl ([12:19-21]),
          (Tfun
             { ft_tparams = []; ft_where_constraints = [];
               ft_params =
-              [{ fp_pos = [12:15-17]; fp_name = (Some "$x");
+              [{ fp_pos = [12:24-26]; fp_name = (Some "$x");
                  fp_type =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type =
-                   (Rhint ([12:13-14]), (Tapply (([12:13-14], "\\X"), []))) };
+                 (Rhint ([12:22-23]), (Tapply (([12:22-23], "\\X"), [])));
                  fp_flags =
-                 (make_fp_flags ~accept_disposable:false ~has_default:false
-                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~readonly:false);
-                  }
+                 { Typing_defs_flags.FunParam.accept_disposable = false;
+                   inout = false; is_optional = false; readonly = false;
+                   ignore_readonly_error = false; splat = false;
+                   named = false };
+                 fp_def_value = None }
                 ];
-              ft_implicit_params = { capability = (CapDefaults [12:10-12]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([12:20-24]), (Tprim Tvoid)) };
+              ft_implicit_params = { capability = (CapDefaults [12:19-21]) };
+              ft_ret = (Rhint ([12:29-33]), (Tprim Tvoid));
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [12:10-12]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }));
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
+              ft_instantiated = true }));
+        fe_pos = [12:19-21]; fe_php_std_lib = false;
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false;
+        fe_package_requirement = Typing_defs.RPNormal }));
   ("\\f2",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
-        fe_module = (Some ([2:54-57], "X")); fe_internal = false;
+      { Typing_defs.fe_deprecated = None; fe_module = (Some ([3:8-9], "X"));
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([15:10-12]),
          (Tfun
@@ -86,123 +85,131 @@ File root|module_enums.php--X.php
               ft_params =
               [{ fp_pos = [15:15-17]; fp_name = (Some "$x");
                  fp_type =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type =
-                   (Rhint ([15:13-14]), (Tapply (([15:13-14], "\\X"), []))) };
+                 (Rhint ([15:13-14]), (Tapply (([15:13-14], "\\X"), [])));
                  fp_flags =
-                 (make_fp_flags ~accept_disposable:false ~has_default:false
-                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~readonly:false);
-                  }
+                 { Typing_defs_flags.FunParam.accept_disposable = false;
+                   inout = false; is_optional = false; readonly = false;
+                   ignore_readonly_error = false; splat = false;
+                   named = false };
+                 fp_def_value = None }
                 ];
               ft_implicit_params = { capability = (CapDefaults [15:10-12]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([15:20-24]), (Tprim Tvoid)) };
+              ft_ret = (Rhint ([15:20-24]), (Tprim Tvoid));
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC} }));
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
+              ft_instantiated = true }));
         fe_pos = [15:10-12]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }));
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false;
+        fe_package_requirement = Typing_defs.RPNormal }));
   ("\\f5",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
-        fe_module = (Some ([2:54-57], "X")); fe_internal = true;
+      { Typing_defs.fe_deprecated = None; fe_module = (Some ([3:8-9], "X"));
+        fe_package = None; fe_internal = true;
         fe_type =
-        (Rwitness_from_decl ([18:10-12]),
+        (Rwitness_from_decl ([18:19-21]),
          (Tfun
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
-              ft_implicit_params = { capability = (CapDefaults [18:10-12]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([18:16-20]), (Tprim Tvoid)) };
+              ft_implicit_params = { capability = (CapDefaults [18:19-21]) };
+              ft_ret = (Rhint ([18:25-29]), (Tprim Tvoid));
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [18:10-12]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }));
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
+              ft_instantiated = true }));
+        fe_pos = [18:19-21]; fe_php_std_lib = false;
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false;
+        fe_package_requirement = Typing_defs.RPNormal }));
   ("\\f6",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
-        fe_module = (Some ([2:54-57], "X")); fe_internal = false;
+      { Typing_defs.fe_deprecated = None; fe_module = (Some ([3:8-9], "X"));
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([23:10-12]),
          (Tfun
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [23:10-12]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([23:16-20]), (Tprim Tvoid)) };
+              ft_ret = (Rhint ([23:16-20]), (Tprim Tvoid));
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC} }));
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
+              ft_instantiated = true }));
         fe_pos = [23:10-12]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }))
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false;
+        fe_package_requirement = Typing_defs.RPNormal }))
   ]
 
 File root|module_enums.php--Y.php
 [("\\f3",
   (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None; fe_module = (Some ([2:54-57], "Y"));
-       fe_internal = false;
+     { Typing_defs.fe_deprecated = None; fe_module = (Some ([3:8-9], "Y"));
+       fe_package = None; fe_internal = false;
        fe_type =
-       (Rwitness_from_decl ([5:10-12]),
+       (Rwitness_from_decl ([6:10-12]),
         (Tfun
            { ft_tparams = []; ft_where_constraints = [];
              ft_params =
-             [{ fp_pos = [5:15-17]; fp_name = (Some "$x");
+             [{ fp_pos = [6:15-17]; fp_name = (Some "$x");
                 fp_type =
-                { et_enforced = Typing_defs_core.Unenforced;
-                  et_type =
-                  (Rhint ([5:13-14]), (Tapply (([5:13-14], "\\X"), []))) };
+                (Rhint ([6:13-14]), (Tapply (([6:13-14], "\\X"), [])));
                 fp_flags =
-                (make_fp_flags ~accept_disposable:false ~has_default:false
-                  ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                  ~ifc_can_call:false ~readonly:false);
-                 }
+                { Typing_defs_flags.FunParam.accept_disposable = false;
+                  inout = false; is_optional = false; readonly = false;
+                  ignore_readonly_error = false; splat = false; named = false
+                  };
+                fp_def_value = None }
                ];
-             ft_implicit_params = { capability = (CapDefaults [5:10-12]) };
-             ft_ret =
-             { et_enforced = Typing_defs_core.Unenforced;
-               et_type = (Rhint ([5:20-24]), (Tprim Tvoid)) };
+             ft_implicit_params = { capability = (CapDefaults [6:10-12]) };
+             ft_ret = (Rhint ([6:20-24]), (Tprim Tvoid));
              ft_flags =
-             (make_ft_flags FSync ~return_disposable:false
-               ~returns_readonly:false ~support_dynamic_type:false
-               ~readonly_this:false ~is_memoized:false ~variadic:false);
-             ft_ifc_decl = FDPolicied {PUBLIC} }));
-       fe_pos = [5:10-12]; fe_php_std_lib = false;
-       fe_support_dynamic_type = false }));
+             { Typing_defs_flags.Fun.return_disposable = false;
+               async = false; generator = false; fun_kind = FSync;
+               is_function_pointer = false; returns_readonly = false;
+               readonly_this = false; support_dynamic_type = false;
+               is_memoized = false; variadic = false };
+             ft_instantiated = true }));
+       fe_pos = [6:10-12]; fe_php_std_lib = false;
+       fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+       fe_no_auto_likes = false;
+       fe_package_requirement = Typing_defs.RPNormal }));
   ("\\f7",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None;
-        fe_module = (Some ([2:54-57], "Y")); fe_internal = false;
+      { Typing_defs.fe_deprecated = None; fe_module = (Some ([3:8-9], "Y"));
+        fe_package = None; fe_internal = false;
         fe_type =
-        (Rwitness_from_decl ([9:10-12]),
+        (Rwitness_from_decl ([10:10-12]),
          (Tfun
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
-              ft_implicit_params = { capability = (CapDefaults [9:10-12]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([9:16-20]), (Tprim Tvoid)) };
+              ft_implicit_params = { capability = (CapDefaults [10:10-12]) };
+              ft_ret = (Rhint ([10:16-20]), (Tprim Tvoid));
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [9:10-12]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }))
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
+              ft_instantiated = true }));
+        fe_pos = [10:10-12]; fe_php_std_lib = false;
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false;
+        fe_package_requirement = Typing_defs.RPNormal }))
   ]
 
 File root|module_enums.php--no-module.php
 [("\\f4",
   (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None; fe_module = None;
+     { Typing_defs.fe_deprecated = None; fe_module = None; fe_package = None;
        fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([3:10-12]),
@@ -211,45 +218,46 @@ File root|module_enums.php--no-module.php
              ft_params =
              [{ fp_pos = [3:15-17]; fp_name = (Some "$x");
                 fp_type =
-                { et_enforced = Typing_defs_core.Unenforced;
-                  et_type =
-                  (Rhint ([3:13-14]), (Tapply (([3:13-14], "\\X"), []))) };
+                (Rhint ([3:13-14]), (Tapply (([3:13-14], "\\X"), [])));
                 fp_flags =
-                (make_fp_flags ~accept_disposable:false ~has_default:false
-                  ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                  ~ifc_can_call:false ~readonly:false);
-                 }
+                { Typing_defs_flags.FunParam.accept_disposable = false;
+                  inout = false; is_optional = false; readonly = false;
+                  ignore_readonly_error = false; splat = false; named = false
+                  };
+                fp_def_value = None }
                ];
              ft_implicit_params = { capability = (CapDefaults [3:10-12]) };
-             ft_ret =
-             { et_enforced = Typing_defs_core.Unenforced;
-               et_type = (Rhint ([3:20-24]), (Tprim Tvoid)) };
+             ft_ret = (Rhint ([3:20-24]), (Tprim Tvoid));
              ft_flags =
-             (make_ft_flags FSync ~return_disposable:false
-               ~returns_readonly:false ~support_dynamic_type:false
-               ~readonly_this:false ~is_memoized:false ~variadic:false);
-             ft_ifc_decl = FDPolicied {PUBLIC} }));
+             { Typing_defs_flags.Fun.return_disposable = false;
+               async = false; generator = false; fun_kind = FSync;
+               is_function_pointer = false; returns_readonly = false;
+               readonly_this = false; support_dynamic_type = false;
+               is_memoized = false; variadic = false };
+             ft_instantiated = true }));
        fe_pos = [3:10-12]; fe_php_std_lib = false;
-       fe_support_dynamic_type = false }));
+       fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+       fe_no_auto_likes = false;
+       fe_package_requirement = Typing_defs.RPNormal }));
   ("\\f8",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_internal = false;
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([5:10-12]),
          (Tfun
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [5:10-12]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([5:16-20]), (Tprim Tvoid)) };
+              ft_ret = (Rhint ([5:16-20]), (Tprim Tvoid));
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC} }));
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
+              ft_instantiated = true }));
         fe_pos = [5:10-12]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }))
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false;
+        fe_package_requirement = Typing_defs.RPNormal }))
   ]
-
-They matched!

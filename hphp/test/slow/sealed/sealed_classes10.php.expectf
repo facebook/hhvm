@@ -1,1 +1,1 @@
-Fatal error: Class SomeTrait2 may not inherit from sealed interface (SomeInterface) without being in the whitelist in %s/sealed_classes10.php on line 6
+Fatal error: Class SealedClass10\SomeTrait2 may not inherit from sealed interface (SealedClass10\SomeInterface) without being in the whitelist in %s/sealed_classes10.php on line %d

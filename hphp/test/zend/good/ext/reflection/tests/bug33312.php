@@ -1,6 +1,6 @@
 <?hh
 class Foo {
-    public function bar(Foo $foo, $bar = 'bar') {
+    public function bar(Foo $foo, $bar = 'bar') :mixed{
     }
 }
 <<__EntryPoint>> function main(): void {

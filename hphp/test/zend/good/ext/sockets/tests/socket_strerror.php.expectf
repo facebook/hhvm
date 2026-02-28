@@ -1,5 +1,5 @@
 
-Warning: socket_strerror() expects exactly 1 parameter, 0 given in %s/socket_strerror.php on line 2
+Warning: socket_strerror() expects exactly 1 positional parameter, 0 given in %s/socket_strerror.php on line 2
 string(7) "Success"
 string(23) "Operation not permitted"
 string(25) "No such file or directory"

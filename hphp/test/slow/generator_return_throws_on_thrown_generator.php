@@ -1,5 +1,5 @@
 <?hh
-function foo() {
+function foo() :AsyncGenerator<mixed,mixed,void>{
     throw new Exception;
     yield 1;
     yield 2;

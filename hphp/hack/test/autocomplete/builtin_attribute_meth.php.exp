@@ -1,0 +1,70 @@
+__Deprecated
+  INSERT __Deprecated
+  built-in attribute
+SORT TEXT: none
+  Mark a function/method as deprecated.  The type checker will show an error at call sites, and a runtime notice is raised if this function/method is called.
+  
+  The optional second argument specifies a sampling rate for raising notices at runtime. If the sampling rate is 100, a notice is only raised every 1/100 calls. If omitted, the default sampling rate is 1 (i.e. all calls raise notices). To disable runtime notices, use a sampling rate of 0.
+__DynamicallyCallable
+  INSERT __DynamicallyCallable
+  built-in attribute
+SORT TEXT: none
+  Allows this function/method to be called dynamically, based on a string of its name.  HHVM will warn or error (depending on settings) on dynamic calls to functions without this attribute.
+  
+  See also `HH\dynamic_fun()` and `HH\dynamic_class_meth()`.
+__ImplementedBy
+  INSERT __ImplementedBy
+  built-in attribute
+SORT TEXT: none
+  Specifies that this method is implemented by a specific top-level function. Only valid in .hhi files.
+__Memoize
+  INSERT __Memoize
+  built-in attribute
+SORT TEXT: none
+  Cache the return values from this function/method. Calls with the same arguments will return the cached value.
+  
+  Caching is per-request and shared between subclasses (see also `__MemoizeLSB`).
+__MemoizeLSB
+  INSERT __MemoizeLSB
+  built-in attribute
+SORT TEXT: none
+  Cache the return values from this method. Calls with the same arguments will return the cached value.
+  
+  Caching is per-request and has Late Static Binding, so subclasses do not share the cache.
+__Overlapping
+  INSERT __Overlapping
+  built-in attribute
+SORT TEXT: none
+  Requires these type parameters to have some overlap with each other.
+  
+  This prevents Hack inferring completely unrelated types. For example, this allows the typechecker to warn on `C\contains(vec[1], "foo")`.
+__Override
+  INSERT __Override
+  built-in attribute
+SORT TEXT: none
+  Ensures there's a parent method being overridden.
+__RequirePackage
+  INSERT __RequirePackage
+  built-in attribute
+SORT TEXT: none
+  This function will only execute if the target package is loaded in the current deployment (invariant_violation otherwise). Hack will enforce this constraint on callers by raising an error unless the caller has this package.
+__ReturnDisposable
+  INSERT __ReturnDisposable
+  built-in attribute
+SORT TEXT: none
+  Allows a function/method to return a value that implements `IDisposable` or `IAsyncDisposable`. The function must return a fresh disposable value by either instantiating a class or  returning a value from another method/function marked `__ReturnDisposable`.
+__Sealed
+  INSERT __Sealed
+  built-in attribute
+SORT TEXT: none
+  Only the named classes can extend this class or interface, or override this method. Child classes may still be extended unless they are marked `final`.
+__SoftRequirePackage
+  INSERT __SoftRequirePackage
+  built-in attribute
+SORT TEXT: none
+  Migration attribute for `__RequirePackage`. Raises a notice with optional sample rate if the target package is not loaded. Does not allow this function to call other functions from the target package.
+__StrictSwitch
+  INSERT __StrictSwitch
+  built-in attribute
+SORT TEXT: none
+  Enables strict switch checking for all switches in function or method.

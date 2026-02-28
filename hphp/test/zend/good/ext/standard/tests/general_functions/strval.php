@@ -6,7 +6,7 @@
 // non_scalar values, objects, arrays, resources and boolean
 class foo
 {
-  function __toString() {
+  function __toString() :mixed{
     return "Object";
   }
 }
@@ -30,7 +30,7 @@ NULL
 EOD;
 
 // different valid  scalar vlaues
-$scalars = varray[
+$scalars = vec[
   /* integers */
   0,
   1,
@@ -112,7 +112,7 @@ $fp = fopen(__FILE__, "r");
 $dfp = opendir( dirname(__FILE__) );
 
 
-$not_scalars = varray [
+$not_scalars = vec[
   new foo, //object
   $fp,  // resource
   $dfp,

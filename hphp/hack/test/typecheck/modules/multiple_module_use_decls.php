@@ -1,21 +1,22 @@
-//// modules.php
+//// module_A.php
 <?hh
-<<file:__EnableUnstableFeatures('modules')>>
-
-module A {}
-module B {}
+new module A {}
+//// module_B.php
+<?hh
+new module B {}
 
 //// A1.php
 <?hh
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules'), __Module('A'), __Module('B')>>
 
-<<__Internal>>
-function f(): void {}
+module A;
+module B; // TODO, error here
+
+internal function f(): void {}
 
 
 //// A2.php
 <?hh
-<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
+
+module A;
 
 function g(): void { f(); }

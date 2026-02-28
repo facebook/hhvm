@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/reverse-data-map.h"
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/vm/class.h"
@@ -43,7 +42,8 @@ namespace {
   X(ArrayData)\
   X(Class)\
   X(Func)\
-  X(NamedEntity)\
+  X(NamedType)\
+  X(NamedFunc)\
   X(StringData)\
   X(Unit)\
   /* */
@@ -51,10 +51,11 @@ namespace {
 enum class Kind : uint8_t {
   Class = 1,
   Func = 2,
-  NamedEntity = 3,
-  StringData = 4,
-  Unit = 5,
-  ArrayData = 6,
+  NamedType = 3,
+  NamedFunc = 4,
+  StringData = 5,
+  Unit = 6,
+  ArrayData = 7,
 };
 
 constexpr size_t kChunkSize = 1 << 21;
@@ -119,7 +120,7 @@ void deregister(Kind /*kind*/, const void* meta) {
 bool contains(const ArrayData* arr, const void* addr) {
   auto const start = reinterpret_cast<const char*>(arr);
   if (addr < start) return false;
-  size_t heapSize = allocSize(arr);
+  size_t heapSize = arr->heapSize();
   return addr < start + heapSize;
 }
 
@@ -131,7 +132,11 @@ bool contains(const Func* func, const void* addr) {
   return func <= addr && addr < func->mallocEnd();
 }
 
-bool contains(const NamedEntity* ne, const void* addr) {
+bool contains(const NamedType* ne, const void* addr) {
+  return ne <= addr && addr < ne + 1;
+}
+
+bool contains(const NamedFunc* ne, const void* addr) {
   return ne <= addr && addr < ne + 1;
 }
 

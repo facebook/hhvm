@@ -14,11 +14,10 @@ type t = {
    * type is determined by context or is a type variable that may get resolved
    * when checking the body of the lambda.
    *)
-  return_type: Typing_defs.locl_possibly_enforced_ty;
+  return_type: Typing_defs.locl_ty;
   (* Does the function or function type have the <<__ReturnDisposable>> attribute? *)
   return_disposable: bool;
-  (* Was there an explicit return type hint? *)
-  return_explicit: bool;
-  (* Must the function be dynamically callable? *)
-  return_dynamically_callable: bool;
+  (* Should we ignore readonly errors when checking return types?
+   * This is set when the parameter has <<__IgnoreReadonlyError>> attribute. *)
+  return_ignore_readonly: bool;
 }

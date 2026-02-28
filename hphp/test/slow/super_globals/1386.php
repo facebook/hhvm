@@ -1,11 +1,11 @@
 <?hh
 
 class X {
-  static function test() {
+  static function test() :mixed{
     var_dump(__FUNCTION__);
     var_dump(__CLASS__);
     var_dump(__METHOD__);
-    return varray[\HH\global_get(__FUNCTION__),                 \HH\global_get(__CLASS__),                 \HH\global_get(__METHOD__)];
+    return vec[\HH\global_get(__FUNCTION__),                 \HH\global_get(__CLASS__),                 \HH\global_get(__METHOD__)];
   }
 }
 <<__EntryPoint>>

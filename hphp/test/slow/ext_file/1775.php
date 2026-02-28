@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1775() {
+function main_1775() :mixed{
 error_reporting(0);
 $tempfile = tempnam(sys_get_temp_dir(), 'lock');
 $fp = fopen($tempfile, 'w');

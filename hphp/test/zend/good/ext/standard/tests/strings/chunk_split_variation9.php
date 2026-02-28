@@ -17,7 +17,7 @@ $str = "This is to test chunk_split() with various ending string";
 $chunklen = 6;
 
 //different values for 'ending' argument
-$values = varray [
+$values = vec[
   "",  //empty
   " ",  //space
   "a",  //Single char

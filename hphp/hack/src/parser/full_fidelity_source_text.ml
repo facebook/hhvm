@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Sexplib.Std
 
 (**
  * This is an abstraction over source files used by the full-fidelity lexer.
@@ -42,7 +43,7 @@ type t = {
   text: string; [@opaque]
   offset_map: OffsetMap.t;
 }
-[@@deriving show, eq]
+[@@deriving show, eq, sexp_of]
 
 type pos = t * int
 
@@ -103,11 +104,9 @@ let line_text (source_text : t) (line_number : int) : string =
   with
   | _ -> ""
 
-(* Take a zero-based offset, produce a one-based (line, char) pair. *)
 let offset_to_position source_text offset =
   OffsetMap.offset_to_position source_text.offset_map offset
 
-(* Take a one-based (line, char) pair, produce a zero-based offset *)
 let position_to_offset source_text position =
   OffsetMap.position_to_offset source_text.offset_map position
 
@@ -119,3 +118,15 @@ let relative_pos pos_file source_text start_offset end_offset =
   let pos_start = offset_to_lnum_bol_offset start_offset in
   let pos_end = offset_to_lnum_bol_offset end_offset in
   Pos.make_from_lnum_bol_offset ~pos_file ~pos_start ~pos_end
+
+let sub_of_pos ?length source_text pos =
+  let offset =
+    let (first_line, first_col) = Pos.line_column pos in
+    position_to_offset source_text (first_line, first_col + 1)
+  in
+  let length =
+    match length with
+    | Some n -> n
+    | None -> Pos.length pos
+  in
+  sub source_text offset length

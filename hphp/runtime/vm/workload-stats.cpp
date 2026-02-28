@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/workload-stats.h"
 
 #include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/server/server-stats.h"
 
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/service-data.h"
@@ -162,10 +163,13 @@ void RequestWorkloadStats::requestShutdown() {
 
   s_interpNanos->addValue(interp);
   s_requestNanos->addValue(php);
+  ServerStats::Log("nanos_interp", interp);
+  ServerStats::Log("nanos_php", php);
 
   if (php > 0) {
     auto const value = interp * 10000 / php;
     s_interpVMRatio->addValue(value);
+    ServerStats::Log("interp_vm_ratio", value);
 
     {
       std::unique_lock<std::mutex> guard(s_mutex);

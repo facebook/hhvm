@@ -1,12 +1,12 @@
 <?hh
 
-/* Compile only: verify no c++ compilation errors */function f($x) {
+/* Compile only: verify no c++ compilation errors */function f($x) :mixed{
   return function () use ($x) {
     return $x;
   }
 ;
 }
-function g($x) {
+function g($x) :mixed{
   $c = f($x);
   return $c();
 }

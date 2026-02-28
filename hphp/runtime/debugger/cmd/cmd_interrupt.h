@@ -65,6 +65,8 @@ struct CmdInterrupt : DebuggerCommand {
     return m_site;
   }
 
+  std::string name() const override { return "interrupt"; }
+
 protected:
   void sendImpl(DebuggerThriftBuffer&) override;
   void recvImpl(DebuggerThriftBuffer&) override;

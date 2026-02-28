@@ -1,0 +1,17 @@
+*** Testing iconv_strrpos() : usage variations ***
+
+-- Iteration 1 --
+bool(false)
+
+-- Iteration 2 --
+bool(false)
+
+-- Iteration 3 --
+int(7)
+
+-- Iteration 4 --
+int(7)
+
+-- Iteration 5 --
+int(7)
+Done

@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function serialize_test($a) {
+function serialize_test($a) :mixed{
   var_dump(
     __hhvm_intrinsics\serialize_keep_dvarrays(
       __hhvm_intrinsics\launder_value($a)
@@ -11,7 +11,7 @@ function serialize_test($a) {
   echo "====================================================\n";
 }
 
-function unserialize_test($s) {
+function unserialize_test($s) :mixed{
   echo "unserialize_test(\"".$s."\")\n";
   $a = unserialize(__hhvm_intrinsics\launder_value($s));
   var_dump($a);
@@ -20,7 +20,7 @@ function unserialize_test($s) {
   echo "----------------------------------------------------\n";
   $a = unserialize(
     __hhvm_intrinsics\launder_value($s),
-    darray['force_darrays' => true]
+    dict['force_darrays' => true]
   );
   var_dump($a);
   var_dump(is_varray($a));
@@ -28,7 +28,7 @@ function unserialize_test($s) {
   echo "====================================================\n";
 }
 
-function round_trip($a) {
+function round_trip($a) :mixed{
   $a2 = __hhvm_intrinsics\launder_value($a);
   $a3 = unserialize(
     __hhvm_intrinsics\serialize_keep_dvarrays($a2)
@@ -52,34 +52,34 @@ function round_trip($a) {
   }
 }
 
-function serialize_tests() {
-  serialize_test(varray[]);
-  serialize_test(darray[100 => 200, 200 => 300, 300 => 400]);
-  serialize_test(darray[0 => 'a', 1 => 'b', 2 => 'c']);
-  serialize_test(darray['abc' => 100, 'def' => 200, 'ghi' => 300]);
-  serialize_test(darray[
-    1 => darray[2 => 3],
-    4 => darray[5 => 6],
+function serialize_tests() :mixed{
+  serialize_test(vec[]);
+  serialize_test(dict[100 => 200, 200 => 300, 300 => 400]);
+  serialize_test(dict[0 => 'a', 1 => 'b', 2 => 'c']);
+  serialize_test(dict['abc' => 100, 'def' => 200, 'ghi' => 300]);
+  serialize_test(dict[
+    1 => dict[2 => 3],
+    4 => dict[5 => 6],
   ]);
 
-  serialize_test(varray[]);
-  serialize_test(varray[123, 456, 789]);
-  serialize_test(varray['abc', 'def', 'ghi']);
-  serialize_test(varray[varray[1, 2, 3], varray[4, 5, 6]]);
-  serialize_test(varray[varray[1, 2, 3], varray[4, 5, 6]]);
+  serialize_test(vec[]);
+  serialize_test(vec[123, 456, 789]);
+  serialize_test(vec['abc', 'def', 'ghi']);
+  serialize_test(vec[vec[1, 2, 3], vec[4, 5, 6]]);
+  serialize_test(vec[vec[1, 2, 3], vec[4, 5, 6]]);
 
-  serialize_test(darray[]);
-  serialize_test(darray[100 => 200, 200 => 300, 300 => 400]);
-  serialize_test(darray[0 => 'a', 1 => 'b', 2 => 'c']);
-  serialize_test(darray['abc' => 100, 'def' => 200, 'ghi' => 300]);
-  serialize_test(darray[1 => darray[2 => 3], 4 => darray[5 => 6]]);
-  serialize_test(darray[1 => darray[2 => 3], 4 => darray[5 => 6]]);
+  serialize_test(dict[]);
+  serialize_test(dict[100 => 200, 200 => 300, 300 => 400]);
+  serialize_test(dict[0 => 'a', 1 => 'b', 2 => 'c']);
+  serialize_test(dict['abc' => 100, 'def' => 200, 'ghi' => 300]);
+  serialize_test(dict[1 => dict[2 => 3], 4 => dict[5 => 6]]);
+  serialize_test(dict[1 => dict[2 => 3], 4 => dict[5 => 6]]);
 
-  serialize_test(varray[darray[0 => 'a'], darray[1 => 'b'], darray[2 => 'c']]);
-  serialize_test(darray[0 => varray[1, 2, 3], 1 => varray[4, 5, 6]]);
+  serialize_test(vec[dict[0 => 'a'], dict[1 => 'b'], dict[2 => 'c']]);
+  serialize_test(dict[0 => vec[1, 2, 3], 1 => vec[4, 5, 6]]);
 }
 
-function unserialize_tests() {
+function unserialize_tests() :mixed{
   unserialize_test('a:0:{}');
   unserialize_test('a:3:{i:100;i:123;i:200;i:456;i:300;i:789;}');
   unserialize_test('a:3:{i:100;s:3:"abc";i:200;s:3:"def";i:300;s:3:"ghi";}');
@@ -104,25 +104,25 @@ function unserialize_tests() {
   unserialize_test('Y:2:{i:0;y:3:{i:1;i:2;i:3;}i:1;y:3:{i:4;i:5;i:6;}}');
 }
 
-function round_trip_tests() {
-  round_trip(varray[]);
-  round_trip(varray[123, 456, 789]);
-  round_trip(varray['abc', 'def', 'ghi']);
-  round_trip(varray[varray[1, 2, 3], varray[4, 5, 6]]);
+function round_trip_tests() :mixed{
+  round_trip(vec[]);
+  round_trip(vec[123, 456, 789]);
+  round_trip(vec['abc', 'def', 'ghi']);
+  round_trip(vec[vec[1, 2, 3], vec[4, 5, 6]]);
 
-  round_trip(darray[]);
-  round_trip(darray[100 => 200, 200 => 300, 300 => 400]);
-  round_trip(darray[0 => 'a', 1 => 'b', 2 => 'c']);
-  round_trip(darray['abc' => 100, 'def' => 200, 'ghi' => 300]);
-  round_trip(darray[1 => darray[2 => 3], 4 => darray[5 => 6]]);
+  round_trip(dict[]);
+  round_trip(dict[100 => 200, 200 => 300, 300 => 400]);
+  round_trip(dict[0 => 'a', 1 => 'b', 2 => 'c']);
+  round_trip(dict['abc' => 100, 'def' => 200, 'ghi' => 300]);
+  round_trip(dict[1 => dict[2 => 3], 4 => dict[5 => 6]]);
 
-  round_trip(varray[darray[0 => 'a'], darray[1 => 'b'], darray[2 => 'c']]);
-  round_trip(darray[0 => varray[1, 2, 3], 1 => varray[4, 5, 6]]);
+  round_trip(vec[dict[0 => 'a'], dict[1 => 'b'], dict[2 => 'c']]);
+  round_trip(dict[0 => vec[1, 2, 3], 1 => vec[4, 5, 6]]);
 }
 
 
 <<__EntryPoint>>
-function main_serialize() {
+function main_serialize() :mixed{
 serialize_tests();
 unserialize_tests();
 round_trip_tests();

@@ -1,1 +1,4 @@
-No errors
+ERROR: File "generic_upperbound.php", line 12, characters 27-28:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "generic_upperbound.php", line 20, characters 53-54:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])

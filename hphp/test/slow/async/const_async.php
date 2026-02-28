@@ -2,7 +2,7 @@
 
 class F {
   const async = 'async';
-  static async function foo () {
+  static async function foo () :Awaitable<mixed>{
     return self::async;
   }
 }
@@ -11,7 +11,7 @@ class F {
 
 
 <<__EntryPoint>>
-function main_const_async() {
+function main_const_async() :mixed{
 $async = new F;
 var_dump(F::async);
 var_dump($async::async);

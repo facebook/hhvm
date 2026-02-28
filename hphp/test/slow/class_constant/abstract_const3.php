@@ -12,7 +12,7 @@ class C implements I {
 
 
 <<__EntryPoint>>
-function main_abstract_const3() {
+function main_abstract_const3() :mixed{
 var_dump(C::X);
 var_dump(C::Y);
 }

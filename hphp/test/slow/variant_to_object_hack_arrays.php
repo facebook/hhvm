@@ -6,7 +6,7 @@
 // recipies below are using that. The extensions themselves are not to blame.
 
 <<__EntryPoint>>
-function main_variant_to_object_hack_arrays() {
+function main_variant_to_object_hack_arrays() :mixed{
 $hackArrays = vec[
   vec[],
   dict[],
@@ -15,7 +15,7 @@ $hackArrays = vec[
 
 echo "---- using DateTime::diff\n";
 foreach ($hackArrays as $hackArray) {
-  @var_dump((new DateTime())->diff($hackArray));
+  var_dump((new DateTime())->diff($hackArray));
 }
 
 echo "---- using DOMXPath::__construct\n";

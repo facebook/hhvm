@@ -1,2 +1,2 @@
---check-xhp-attribute
+--config check_xhp_attribute=true
 --extra-builtin ../../../hhi/XHPTest.hhi

@@ -1,5 +1,0 @@
-=== IFC analysis results for basic.php
-File "basic.php", line 6, characters 3-66:
-Unable to analyze information flow for statement (Do). This might be unsafe. (Typing[4385])
-File "basic.php", line 12, characters 3-12:
-Unable to analyze information flow for local $x missing from env. This might be unsafe. (Typing[4385])

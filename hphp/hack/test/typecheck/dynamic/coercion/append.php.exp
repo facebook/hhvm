@@ -1,6 +1,0 @@
-File "append.php", line 6, characters 10-11:
-Invalid return type (Typing[4110])
-  File "append.php", line 3, characters 42-48:
-  Expected `dynamic`
-  File "append.php", line 4, characters 10-10:
-  But got `int`

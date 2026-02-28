@@ -1,15 +1,15 @@
 <?hh
 
-function getTestArray() {
-  return varray['opera', '12', '16'];
+function getTestArray() :mixed{
+  return vec['opera', '12', '16'];
 }
 
-function stringFunc() {
+function stringFunc() :mixed{
   $results = getTestArray();
   var_dump($results);
   if (!$results) return null;
 
-  $groups = varray[];
+  $groups = vec[];
   $prefix = 'foo.browser';
 
   if ($results[0]) {
@@ -27,12 +27,12 @@ function stringFunc() {
   return $groups;
 }
 
-function intFunc() {
+function intFunc() :mixed{
   $results = getTestArray();
   var_dump($results);
   if (!$results) return null;
 
-  $groups = varray[];
+  $groups = vec[];
   $prefix = 1;
 
   if ($results[0]) {
@@ -52,7 +52,7 @@ function intFunc() {
 
 
 <<__EntryPoint>>
-function main_not_dead_stores() {
+function main_not_dead_stores() :mixed{
 var_dump(stringFunc());
 var_dump(intFunc());
 }

@@ -16,11 +16,13 @@
 
 #pragma once
 
-#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs"
+#include "hphp/hack/src/hackc/ffi_bridge/decl_provider.h"
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/vm/decl-dep.h"
 #include "hphp/util/hash-map.h"
 
+#include <filesystem>
 #include <map>
 #include <memory>
 #include <string_view>
@@ -30,53 +32,72 @@ namespace HPHP {
 
 struct RepoOptionsFlags;
 
-// This must be kept in sync with `enum ExternalDeclProviderResult` in
-// 'hhbc/decl_provider/external.rs' so they both are layout compatible.
-struct DeclProviderResult {
-    enum class Tag {
-      Missing,
-      Decls,
-      Bytes,
-    };
-    struct DeclProviderDecls_Body {
-      Decls const* _0;
-    };
-    struct DeclProviderBytes_Body {
-      Bytes const* _0;
-    };
-    Tag tag;
-    union {
-      DeclProviderDecls_Body decl_provider_decls_result;
-      DeclProviderBytes_Body decl_provider_bytes_result;
-    };
-};
-
-struct HhvmDeclProvider {
-  HhvmDeclProvider(int32_t flags, std::string const& aliased_namespaces,
-                   AutoloadMap*);
+struct HhvmDeclProvider: hackc::DeclProvider {
+  HhvmDeclProvider(hackc::DeclParserConfig, AutoloadMap*,
+                   const std::filesystem::path&);
+  virtual ~HhvmDeclProvider() override = default;
   HhvmDeclProvider(HhvmDeclProvider const&) = delete;
   HhvmDeclProvider& operator=(HhvmDeclProvider const&) = delete;
 
   // Factory to create the provider. Constructor is only public
   // for use by std::unique_ptr within create().
-  static std::unique_ptr<HhvmDeclProvider> create(const RepoOptionsFlags&);
+  static std::unique_ptr<HhvmDeclProvider> create(
+    AutoloadMap*,
+    const RepoOptionsFlags&,
+    const std::filesystem::path&
+  );
 
   // Callback invoked by hackc's ExternalDeclProvider.
-  DeclProviderResult getDecl(HPHP::AutoloadMap::KindOf kind, std::string_view symbol);
+  hackc::ExternalDeclProviderResult
+  getType(std::string_view symbol, uint64_t depth) noexcept override;
+  hackc::ExternalDeclProviderResult
+  getFunc(std::string_view symbol) noexcept override;
+  hackc::ExternalDeclProviderResult
+  getConst(std::string_view symbol) noexcept override;
+  hackc::ExternalDeclProviderResult
+  getModule(std::string_view symbol) noexcept override;
+
+  // Get a list of observed dependencies from the decl provider, which may
+  // optionally be indexed by the depth of the dependency
+  std::vector<DeclDep> getFlatDeps() const;
+  std::vector<std::vector<DeclLoc>> getLocsByDepth() const;
+
+  const std::filesystem::path& repoRoot() const { return m_repo; }
+  AutoloadMap* map() const { return m_map; }
+
+  // Was there a decl we were unable to resolve?
+  bool sawMissing() const { return m_sawMissing; }
 
  private:
-  rust::Box<DeclParserOptions> m_opts;
+  hackc::ExternalDeclProviderResult getDecls(
+      std::string_view symbol,
+      uint64_t depth,
+      AutoloadMap::KindOf
+  ) noexcept;
 
-  // Map from filename to DeclResult containing the cached results of calling
-  // hackc_direct_decl_parse().
-  hphp_hash_map<std::string, DeclResult> m_cache;
+  struct DepInfo {
+    // Source filename
+    std::string file;
+
+    // Minimum number of indirect references traversed to this file.
+    uint64_t depth;
+
+    // Source text hash of this file.
+    SHA1 hash;
+  };
+
+  bool m_sawMissing{false};
+
+  hackc::DeclParserConfig m_config;
+
+  // Map from filename to DeclsHolder containing the cached results of calling
+  // hackc::parse_decls().
+  hphp_hash_map<std::string, rust::Box<hackc::DeclsHolder>> m_cache;
+
+  // Record of dependencies collected from queries to the decl provider
+  hphp_hash_map<DeclSym, DepInfo> m_deps;
 
   AutoloadMap* m_map;
+  std::filesystem::path m_repo;
 };
-
-extern "C" {
-  DeclProviderResult hhvm_decl_provider_get_decl(
-      void* provider, int kind, char const* symbol, size_t len
-  );
-}
 }

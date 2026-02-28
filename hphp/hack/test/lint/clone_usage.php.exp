@@ -1,4 +1,4 @@
 File "clone_usage.php", line 3, characters 7-20:
-clone_usage.php only declares `CloneUsageTest`, it should be named CloneUsageTest.php instead. (Lint[5564])
+CloneUsageTest is the only class declared in clone_usage.php, so that file should be named CloneUsageTest.php instead. (Lint[5564])
 File "clone_usage.php", line 7, characters 16-17:
 Objects created with `clone` will have references to shared deep objects. Prefer to implement your own explicit copy method to ensure the semantics you want. See http://php.net/manual/en/language.oop5.cloning.php (Lint[5562])

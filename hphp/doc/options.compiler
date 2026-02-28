@@ -20,14 +20,6 @@ dynamically even without a literal string. When turned off, some dynamic
 function calls may fail, if compiler is not able to tell that function may be
 invoked dynamically. Recommend to turn on this switch.
 
-= AllVolatile
-
-Default is false. When turned on, order-dependent function or class declaration
-vs. existence testing can work. When turned off, some function_exists(),
-class_exists(), get_defined_functions() or get_declared_classes() may return
-different results than PHP does. Most programs don't have dependencies on their
-behaviors, so this is recommended to leave as off.
-
 = EnableEval
 
 Default is 0, eval() will throw a fatal error. When 1, eval() is supported in
@@ -36,7 +28,7 @@ supported as an interpreter mode.
 
 = IncludeRoots
 
-Only needed when --input-list is not used, and --parse-on-demand is turned on.
+Only needed when --input-list is not used.
 In this case, compiler needs to understand every single include. Currently it
 only understands these formats (compiler/analysis/dependency_graph.cpp),
 
@@ -57,30 +49,9 @@ resolve file paths at compilation time. It will look like this,
     }
   }
 
-= AutoloadRoots
-
-Only needed when --input-list is not used, and --parse-on-demand is turned on.
-In this case, compiler needs to understand all autoloads to find a class file.
-It will look like this,
-
-  AutoloadRoots {
-    * {
-      root = $GLOBALS['THRIFT_AUTOLOAD']
-      path = lib/thrift/packages
-    }
-  }
-
-With the above configuration, whenever a class name is added to the array,
-
-  $GLOBALS['THRIFT_AUTOLOAD'][] = 'myclass';
-
-It will be searched against the specified path. Please note that, this is
-not a good way to work around the problem. --include-list is recommended to
-specify all class files explicitly. Then this option isn't needed.
-
 = IncludeSearchPaths
 
-Only needed when --input-list is not used, and --parse-on-demand is turned on.
+Only needed when --input-list is not used.
 Specifies more paths to search for include files. For example,
 
   IncludeSearchPaths {

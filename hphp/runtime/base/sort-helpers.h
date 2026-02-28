@@ -24,10 +24,9 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-dict.h"
-#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/sort-flags.h"
 
+#include "hphp/util/conv-10.h"
 #include "hphp/util/safesort.h"
 
 namespace HPHP {
@@ -90,7 +89,7 @@ template<typename E> struct AssocValAccessor {
 
 template <typename AccessorT, int sort_flags, bool ascending>
 struct IntElmCompare {
-  typedef typename AccessorT::ElmT ElmT;
+  using ElmT = typename AccessorT::ElmT;
   AccessorT acc;
   bool operator()(ElmT left, ElmT right) const {
     int64_t iLeft = acc.getInt(left);
@@ -156,7 +155,7 @@ struct IntElmCompare {
 
 template <typename AccessorT, int sort_flags, bool ascending>
 struct StrElmCompare {
-  typedef typename AccessorT::ElmT ElmT;
+  using ElmT = typename AccessorT::ElmT;
   AccessorT acc;
   bool operator()(ElmT left, ElmT right) const {
     StringData* sdLeft = acc.getStr(left);
@@ -205,7 +204,7 @@ struct StrElmCompare {
 
 template <typename AccessorT, int sort_flags, bool ascending>
 struct ElmCompare {
-  typedef typename AccessorT::ElmT ElmT;
+  using ElmT = typename AccessorT::ElmT;
   AccessorT acc;
   bool operator()(ElmT left, ElmT right) const {
     // Fast paths
@@ -320,7 +319,7 @@ struct ElmCompare {
 
 template <typename AccessorT>
 struct ElmUCompare {
-  typedef typename AccessorT::ElmT ElmT;
+  using ElmT = typename AccessorT::ElmT;
   AccessorT acc;
   const CallCtx* ctx;
 
@@ -332,7 +331,8 @@ struct ElmUCompare {
       *acc.getValue(right).asTypedValue()
     };
     auto ret = Variant::attach(
-      g_context->invokeFuncFew(*ctx, 2, args, RuntimeCoeffects::fixme())
+      g_context->invokeFuncFew(*ctx, 2, /* namedArgNames=*/ nullptr,
+                               args, RuntimeCoeffects::fixme())
     );
     if (ctx->func->takesInOutParams()) {
       assertx(ret.isArray());

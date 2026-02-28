@@ -29,14 +29,7 @@
 
 *************************************************************************/
 
-#include "config.h"
-#include <stdio.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include "bcmath.h"
-#include "private.h"
+#include "hphp/runtime/ext/bcmath/bcmath.h"
 
 /* Convert a number NUM to a long.  The function returns only the integer
    part of the number.  For numbers that are too large to represent as

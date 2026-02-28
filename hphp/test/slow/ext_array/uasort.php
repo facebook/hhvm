@@ -1,13 +1,13 @@
 <?hh
 
-function reverse_strcasecmp($s1,$s2) {
+function reverse_strcasecmp($s1,$s2) :mixed{
   return strcasecmp($s2,$s1);
 }
 
 
 <<__EntryPoint>>
-function main_uasort() {
-$fruits = darray[
+function main_uasort() :mixed{
+$fruits = dict[
   "d" => "lemon",
   "a" => "orange",
   "b" => "banana",
@@ -16,7 +16,7 @@ $fruits = darray[
 uasort(inout $fruits, reverse_strcasecmp<>);
 var_dump($fruits);
 
-$fruits = darray[
+$fruits = dict[
   "d" => "lemon",
   "a" => "orange",
   "b" => "banana",

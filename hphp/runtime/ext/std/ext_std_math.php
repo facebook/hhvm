@@ -1,4 +1,22 @@
-<?hh // partial
+<?hh
+
+const float M_PI       = 3.1415926535898;
+const float M_PI_2     = 1.5707963267949;
+const float M_PI_4     = 0.78539816339745;
+const float M_1_PI     = 0.31830988618379;
+const float M_2_PI     = 0.63661977236758;
+const float M_2_SQRTPI = 1.1283791670955;
+const float M_E        = 2.718281828459;
+const float M_EULER    = 0.57721566490153;
+const float M_LN10     = 2.302585092994;
+const float M_LN2      = 0.69314718055995;
+const float M_LNPI     = 1.1447298858494;
+const float M_LOG10E   = 0.43429448190325;
+const float M_LOG2E    = 1.442695040889;
+const float M_SQRT1_2  = 0.70710678118655;
+const float M_SQRT2    = 1.4142135623731;
+const float M_SQRT3    = 1.7320508075689;
+const float M_SQRTPI   = 1.7724538509055;
 
 /**
  * @return float - The value of pi as float.
@@ -26,7 +44,7 @@ function pi()[]: float {
  *
  */
 <<__IsFoldable, __Native>>
-function min(mixed $value1, ...$argv)[]: mixed;
+function min(mixed $value1, mixed ...$argv)[]: mixed;
 
 /**
  * If the first and only parameter is an array, max() returns the highest
@@ -49,7 +67,7 @@ function min(mixed $value1, ...$argv)[]: mixed;
  *
  */
 <<__IsFoldable, __Native>>
-function max(mixed $value1, ...$argv)[]: mixed;
+function max(mixed $value1, mixed...$argv)[]: mixed;
 
 /**
  * Returns the absolute value of number.
@@ -148,8 +166,10 @@ function round(mixed $val,
  * @return float - The radian equivalent of number
  *
  */
-<<__IsFoldable, __Native>>
-function deg2rad(float $number)[]: float;
+<<__IsFoldable>>
+function deg2rad(float $number)[]: float {
+  return $number / 180.0 * M_PI;
+}
 
 /**
  * This function converts number from radian to degrees.
@@ -159,8 +179,11 @@ function deg2rad(float $number)[]: float;
  * @return float - The equivalent of number in degrees
  *
  */
-<<__IsFoldable, __Native>>
-function rad2deg(float $number)[]: float;
+<<__IsFoldable>>
+function rad2deg(float $number)[]: float {
+  return $number / M_PI * 180.0;
+}
+
 
 /**
  * Returns a string containing a binary representation of the given number
@@ -266,8 +289,8 @@ function base_convert(mixed $number, int $frombase, int $tobase)[]: mixed;
  * Returns base raised to the power of exp. Warning  In PHP 4.0.6 and earlier
  *   pow() always returned a float, and did not issue warnings.
  *
- * @param mixed $base - The base to use
- * @param mixed $exp - The exponent
+ * @param num $base - The base to use
+ * @param num $exp - The exponent
  *
  * @return mixed - base raised to the power of exp. If the result can be
  *   represented as integer it will be returned as type integer, else it will be
@@ -276,7 +299,7 @@ function base_convert(mixed $number, int $frombase, int $tobase)[]: mixed;
  *
  */
 <<__IsFoldable, __Native>>
-function pow(mixed $base, mixed $exp)[]: mixed;
+function pow(num $base, num $exp)[]: mixed;
 
 /**
  * Returns e raised to the power of arg.  'e' is the base of the natural
@@ -553,7 +576,7 @@ function getrandmax()[]: int;
  * @param mixed $seed - Optional seed value
  *
  */
-<<__Native, __NonRx('Randomness')>>
+<<__Native>>
 function srand(mixed $seed = null): void;
 
 /**
@@ -564,7 +587,7 @@ function srand(mixed $seed = null): void;
  *   getrandmax(), inclusive).
  *
  */
-<<__Native, __NonRx('Randomness')>>
+<<__Native>>
 function rand(int $min = 0, ?int $max = null): int;
 
 /**
@@ -582,7 +605,7 @@ function mt_getrandmax()[]: int;
  * @param mixed $seed - An optional seed value
  *
  */
-<<__Native, __NonRx('Randomness')>>
+<<__Native>>
 function mt_srand(mixed $seed = null): void;
 
 /**
@@ -594,7 +617,7 @@ function mt_srand(mixed $seed = null): void;
  *   mt_getrandmax(), inclusive)
  *
  */
-<<__Native, __NonRx('Randomness')>>
+<<__Native>>
 function mt_rand(int $min = 0, ?int $max = null)[leak_safe]: int;
 
 /**
@@ -605,7 +628,7 @@ function mt_rand(int $min = 0, ?int $max = null)[leak_safe]: int;
  * @return float - A pseudo random float value in the range of (0, 1)
  *
  */
-<<__Native, __NonRx('Randomness')>>
+<<__Native>>
 function lcg_value(): float;
 
 /**

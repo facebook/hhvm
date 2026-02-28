@@ -1,4 +1,4 @@
-File "parent_3.bad.php", line 13, characters 7-9:
+ERROR: File "parent_3.bad.php", line 13, characters 7-9:
 Method  `foo` in class `Bar` is not dynamically callable. (Typing[4402])
   File "parent_3.bad.php", line 7, characters 19-21:
   Method `foo` is defined in the super class `Foo` and is not overridden

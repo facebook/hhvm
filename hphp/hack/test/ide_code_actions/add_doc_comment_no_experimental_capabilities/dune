@@ -1,0 +1,22 @@
+(rule
+ (alias ide_code_actions_add_doc_comment_no_experimental_capabilities)
+ (deps
+  %{exe:../../../src/hh_single_type_check.exe}
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/ide_code_actions/add_doc_comment_no_experimental_capabilities/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/ide_code_actions/add_doc_comment_no_experimental_capabilities/*.php)
+  (glob_files %{project_root}/hack/test/ide_code_actions/add_doc_comment_no_experimental_capabilities/*.exp))
+ (action
+  (run
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/ide_code_actions/add_doc_comment_no_experimental_capabilities
+   --program
+   %{exe:../../../src/hh_single_type_check.exe}
+   --flags
+   --ide-code-actions-no-experimental-capabilities "Add doc comment")))
+
+(alias
+ (name runtest)
+ (deps
+  (alias ide_code_actions_add_doc_comment_no_experimental_capabilities)))

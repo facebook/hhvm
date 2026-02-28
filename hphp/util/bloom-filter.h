@@ -33,7 +33,7 @@ template<size_t NBITS> struct BloomFilter {
   }
   bool test(T x) const {
     auto h = hash_int64(intptr_t(x));
-    return bits_.test(h1(h)) & bits_.test(h2(h));
+    return bits_.test(h1(h)) && bits_.test(h2(h));
   }
   void clear() {
     bits_.reset();

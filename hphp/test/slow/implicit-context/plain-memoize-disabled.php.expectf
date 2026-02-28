@@ -1,0 +1,2 @@
+
+Fatal error: `__Memoize` without a label (e.g. `#KeyedByIC`) is disabled with DisallowNonAnnotatedMemoize. in %s/hphp/test/slow/implicit-context/plain-memoize-disabled.php on line 3

@@ -1,5 +1,5 @@
 <?hh
-function decode($json) {
+function decode($json) :mixed{
     $x = json_decode($json);
     var_dump($x);
     $x = json_decode($json, false, 512, JSON_BIGINT_AS_STRING);

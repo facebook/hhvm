@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_random() {
+function main_random() :mixed{
 var_dump(strlen(random_bytes(7)));
 var_dump(random_int(1, 10));
 

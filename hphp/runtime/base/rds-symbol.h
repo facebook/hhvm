@@ -18,9 +18,9 @@
 
 #include "hphp/runtime/base/types.h"
 
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include <string>
 #include <type_traits>
@@ -37,6 +37,7 @@ struct ArrayAccessProfile;
 struct ArrayIterProfile;
 struct CallTargetProfile;
 struct ClsCnsProfile;
+struct CoeffectFunParamProfile;
 struct COWProfile;
 struct DecRefProfile;
 struct IncRefProfile;
@@ -60,23 +61,30 @@ namespace rds {
  * Symbols for rds::Link's.
  */
 struct LinkID { const char* type; };
-struct LinkName { const char* type; LowStringPtr name; };
+struct LinkName { const char* type; PackedStringPtr name; };
 
 /*
  * Class constant values are TypedValue's stored in RDS.
  */
-struct ClsConstant { LowStringPtr clsName;
-                     LowStringPtr cnsName; };
+struct ClsConstant { PackedStringPtr clsName;
+                     PackedStringPtr cnsName; };
 
 /*
  * StaticMethod{F,}Cache allocations.
  *
  * These are used to cache static method dispatch targets in a given class
- * context.  The `name' field here is a string that encodes the target class,
- * property, and source context.
+ * context.
  */
-struct StaticMethod  { LowStringPtr name; };
-struct StaticMethodF { LowStringPtr name; };
+struct StaticMethod  {
+  PackedStringPtr clsName;
+  PackedStringPtr methName;
+  PackedStringPtr ctxName;
+};
+struct StaticMethodF {
+  PackedStringPtr clsName;
+  PackedStringPtr methName;
+  PackedStringPtr ctxName;
+};
 
 /*
  * Profiling translations may store various kinds of junk under symbols that
@@ -93,6 +101,7 @@ struct StaticMethodF { LowStringPtr name; };
   PR(COWProfile)          \
   PR(DecRefProfile)       \
   PR(IsTypeStructProfile) \
+  PR(CoeffectFunParamProfile) \
   PR(IncRefProfile)       \
   PR(MethProfile)         \
   PR(SwitchProfile)       \
@@ -129,24 +138,24 @@ struct Profile {
   ProfileKind kind;
   TransID transId;
   Offset bcOff;
-  LowStringPtr name;
+  PackedStringPtr name;
 };
 
 /*
  * Static class properties in Mode::Local.
  */
-struct SPropCache { LowPtr<const Class> cls; Slot slot; };
+struct SPropCache { PackedPtr<const Class> cls; Slot slot; };
 
 struct StaticMemoValue { FuncId funcId; };
 struct StaticMemoCache { FuncId funcId; };
 
 struct LSBMemoValue {
-  LowPtr<const Class> cls;
+  PackedPtr<const Class> cls;
   FuncId funcId;
 };
 
 struct LSBMemoCache {
-  LowPtr<const Class> cls;
+  PackedPtr<const Class> cls;
   FuncId funcId;
 };
 
@@ -156,16 +165,16 @@ struct TSCache {
 
 struct ConstMemoCache {
   FuncId funcId;
-  LowPtr<const Class> cls;
+  PackedPtr<const Class> cls;
   const ArrayData* paramVals;
   bool asyncEager;
 };
 
 struct ModuleCache {
-  LowStringPtr name;
+  PackedStringPtr name;
 };
 
-using Symbol = boost::variant<
+using Symbol = std::variant<
   LinkName,
   LinkID,
   ClsConstant,

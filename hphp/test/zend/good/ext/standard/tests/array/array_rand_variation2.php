@@ -12,7 +12,7 @@
 //define a class
 class test {
   public $t = 10;
-  function __toString() {
+  function __toString() :mixed{
     return "3object";
   }
 }
@@ -22,46 +22,16 @@ function main(): void {
   echo "*** Testing array_rand() : unexpected values for 'num_req' parameter ***\n";
 
   // Initialise function arguments
-  $input = varray[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+  $input = vec[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
 
   //array of values to iterate over
-  $values = varray[
+  $values = vec[
           // int data
   /*1*/   0,
           1,
           12345,
           -2345,
-
-          // float data
-  /*5*/   10.5,
-          -10.5,
-          12.3456789000e10,
-          12.3456789000E-10,
-          .5,
-
-          // null data
-  /*10*/  NULL,
-          null,
-
-          // boolean data
-  /*12*/  true,
-          false,
-          TRUE,
-          FALSE,
-
-          // empty data
-  /*16*/  "",
-          '',
-
-          // string data
-  /*18*/  "string",
-          'string',
-
-          // object data
-  /*20*/  new test(),
-
-
   ];
 
   // loop through each element of the array for different values for 'num_req' argument

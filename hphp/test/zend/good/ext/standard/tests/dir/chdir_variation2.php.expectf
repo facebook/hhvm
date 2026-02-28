@@ -8,7 +8,7 @@ string(%d) "%slevel2_one"
 -- $directory = 'level2_one/level2_two': --
 bool(true)
 bool(true)
-string(%d) "%slevel2_one%elevel2_two"
+string(%d) "%slevel2_one/level2_two"
 
 -- $directory = '..': --
 bool(true)
@@ -17,7 +17,7 @@ string(%d) "%slevel2_one"
 -- $directory = 'level2_two', '.': --
 bool(true)
 bool(true)
-string(%d) "%slevel2_one%elevel2_two"
+string(%d) "%slevel2_one/level2_two"
 
 -- $directory = '../': --
 bool(true)
@@ -26,7 +26,7 @@ string(%d) "%slevel2_one"
 -- $directory = './': --
 bool(true)
 bool(true)
-string(%d) "%slevel2_one%elevel2_two"
+string(%d) "%slevel2_one/level2_two"
 
 -- $directory = '../../'level2_one': --
 bool(true)

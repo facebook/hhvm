@@ -1,5 +1,5 @@
 <?hh
-function ReflectionParameterTest($test, $test2 = null) {
+function ReflectionParameterTest($test, $test2 = null) :mixed{
     echo $test;
 }
 <<__EntryPoint>> function main(): void {

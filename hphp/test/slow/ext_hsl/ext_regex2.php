@@ -8,7 +8,7 @@ function main(): void {
     $pat .= sprintf("(?"."<a%04x>b%04x)?", $i, $i);
   }
 
-  $matches = darray[];
+  $matches = dict[];
   $flags = PREG_FB__PRIVATE__HSL_IMPL;
   preg_match_with_matches("/$pat/", "", inout $matches, $flags);
   $last = null;

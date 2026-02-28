@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function dv(): dict<string, vec<int>> {
   return dict['foo' => vec[2, 4, 6]];

@@ -4,9 +4,9 @@
 echo "GIF to PNG conversion: ";
 echo imagepng(
   imagecreatefromgif(__DIR__ . '/conv_test.gif'),
-  __SystemLib\hphp_test_tmppath('test_gif.png')
+  sys_get_temp_dir().'/'.'test_gif.png'
 ) ? 'ok' : 'failed';
 echo "\n";
 
-unlink(__SystemLib\hphp_test_tmppath('test_gif.png'));
+unlink(sys_get_temp_dir().'/'.'test_gif.png');
 }

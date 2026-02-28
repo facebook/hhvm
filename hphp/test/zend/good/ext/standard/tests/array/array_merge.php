@@ -4,26 +4,26 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "\n*** Testing array_merge() basic functionality ***";
-$begin_array = varray[
-  varray[],
-  darray[ 1 => "string"],
-  darray[ "" => "string"],
-  darray[ -2 => 12],
-  darray[ "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL,    "d" => -2.344],
-  darray[ 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,1 => -2.344],
-  darray[ 0 => NULL, 1 => "Hi", "string" => "hello",
-          2 => darray["" => "World", "-2.34" => "a", "0" => "b"]]
+$begin_array = vec[
+  vec[],
+  dict[ 1 => "string"],
+  dict[ "" => "string"],
+  dict[ -2 => 12],
+  dict[ "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL,    "d" => -2.344],
+  dict[ 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,1 => -2.344],
+  dict[ 0 => NULL, 1 => "Hi", "string" => "hello",
+          2 => dict["" => "World", "-2.34" => "a", "0" => "b"]]
 ];
 
-$end_array   = varray[
-  varray[],
-  darray[ 1 => "string"],
-  darray[ "" => "string"],
-  darray[ -2 => 12],
-  darray[ "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344],
-  darray[ 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL, 1=> -2.344],
-  darray[ 0 => NULL, 1 => "Hi", "string" => "hello",
-          2 => darray["" => "World", "-2.34" => "a", "0" => "b"]]
+$end_array   = vec[
+  vec[],
+  dict[ 1 => "string"],
+  dict[ "" => "string"],
+  dict[ -2 => 12],
+  dict[ "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344],
+  dict[ 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL, 1=> -2.344],
+  dict[ 0 => NULL, 1 => "Hi", "string" => "hello",
+          2 => dict["" => "World", "-2.34" => "a", "0" => "b"]]
 ];
 
 /* loop through to merge two arrays */
@@ -51,15 +51,15 @@ var_dump( array_merge( $end_array[0],
 
 var_dump( array_merge( $end_array[0],
                        $end_array[5],
-                       varray["array on fly"],
-                       darray["nullarray" => varray[]]
+                       vec["array on fly"],
+                       dict["nullarray" => vec[]]
                      )
         );
 
 
 echo "\n*** Testing single array argument ***\n";
 /* Empty array */
-var_dump(array_merge(varray[]));
+var_dump(array_merge(vec[]));
 
 /* associative array with string keys, which will not be re-indexed */
 var_dump(array_merge($begin_array[4]));

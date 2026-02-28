@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1633() {
+function main_1633() :mixed{
 $x = new SimpleXMLElement('<foo/>');
  $x->addAttribute('attr', 'one');
  $x->offsetSet('attr', 'two');

@@ -12,7 +12,7 @@ class SerDe {
   private $x = 42;
   private $y = 3.14;
   private $z = false;
-  public function foo() {
+  public function foo() :mixed{
     $xx = $this->x + 1;
     $yy = $this->y + 1.0;
     $zz = !$this->z;
@@ -20,7 +20,7 @@ class SerDe {
   }
 }
 
-function main() {
+function main() :mixed{
   $x = new SerDe;
   $str = serialize($x);
   $str = preg_replace('/i:42/', 'i:0', $str);
@@ -32,6 +32,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_private_props_003() {
+function main_private_props_003() :mixed{
 main();
 }

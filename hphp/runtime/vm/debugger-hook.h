@@ -26,6 +26,10 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/unit.h"  // OffsetRangeVec
 
+#include "hphp/runtime/ext/vsdebug/break_mode.h"
+
+#include "hphp/util/configs/jit.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 // This is a set of functions which are primarily called from the VM to notify
 // the debugger about various events. Some of the implementations also interact
@@ -47,11 +51,13 @@ inline bool isDebuggerAttached(RequestInfo* ti = nullptr) {
   return ti->m_reqInjectionData.getDebuggerAttached();
 }
 
-inline bool requestHasBreakpoints(RequestInjectionData& rid) {
-  return !rid.m_breakPointFilter.isNull() ||
-         !rid.m_lineBreakPointFilter.isNull() ||
-         !rid.m_callBreakPointFilter.isNull() ||
-         !rid.m_retBreakPointFilter.isNull();
+inline bool disableJitAtAttach(RequestInjectionData& rid) {
+  return Cfg::Jit::DisabledByVSDebug &&
+    !rid.m_breakPointFilter.isNull();
+}
+
+inline bool disableJitForDebuggerCli() {
+  return Cfg::Jit::DisabledByVSDebug && is_any_cli_mode();
 }
 
 // Executes the passed code only if there is a debugger attached to the current
@@ -66,6 +72,10 @@ inline bool requestHasBreakpoints(RequestInjectionData& rid) {
 // out of JIT code. Second, that phpDebuggerOpcodeHook will continue to allow
 // debugger interrupts for every opcode executed (modulo filters.)
 #define DEBUGGER_FORCE_INTR (RID().getDebuggerForceIntr())
+
+// Initialize a RDS handle indicating function f needs to run in the interpreter
+// so that the debugger hooks are run.
+void markFunctionWithDebuggerIntr(const Func* f);
 
 enum class StackDepthDisposition {
   Equal,        // Same.
@@ -118,8 +128,8 @@ struct DebuggerHook {
 
       s_numAttached++;
       ti->m_reqInjectionData.setDebuggerAttached(true);
-      if (requestHasBreakpoints(ti->m_reqInjectionData) ||
-          !RuntimeOption::ServerExecutionMode() || is_cli_server_mode()) {
+      if (disableJitAtAttach(ti->m_reqInjectionData) ||
+          disableJitForDebuggerCli()) {
         ti->m_reqInjectionData.setJittingDisabled(true);
         rl_typeProfileLocals->forceInterpret = true;
         ti->m_reqInjectionData.updateJit();
@@ -207,6 +217,7 @@ struct DebuggerHook {
   static Mutex s_lock;
   static int s_numAttached;
   static DebuggerHook* s_activeHook;
+  static rds::Link<bool, rds::Mode::Normal> s_exceptionBreakpointIntr;
 };
 
 // Returns the current hook.
@@ -227,8 +238,8 @@ inline bool isDebuggerAttachedProcess() {
 // execution indefinitely within one of these hooks.
 void phpDebuggerOpcodeHook(const unsigned char* pc);
 void phpDebuggerRequestInitHook();
-void phpDebuggerFuncEntryHook(const ActRec* ar);
-void phpDebuggerFuncExitHook(const ActRec* ar);
+void phpDebuggerFuncEntryHook(const ActRec* ar, bool isResume);
+void phpDebuggerFuncExitHook(const ActRec* ar, bool isSuspend);
 void phpDebuggerExceptionThrownHook(ObjectData* exception);
 void phpDebuggerExceptionHandlerHook() noexcept;
 void phpDebuggerErrorHook(const ExtendedException& ee,
@@ -270,6 +281,8 @@ void phpAddBreakPointFuncExit(const Func* f);
 // Returns false if the line is invalid
 bool phpAddBreakPointLine(const Unit* u, int line);
 
+void phpSetExceptionBreakpoint(VSDEBUG::ExceptionBreakMode mode);
+
 // Breakpoint removal functions.
 // FIXME Note that internally there is a global PCFilter for all breakpoints.
 // This is checked against every opcode to determine if we should break. While
@@ -297,4 +310,3 @@ PCFilter* getFlowFilter();
 String getCurrentFilePath(int* pLine);
 
 }
-

@@ -1,0 +1,24 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "included_enum",
+  "enumerations" : {
+    "IncludedEnum" : {
+      "lineno" : 19,
+      "constants" : {
+        "FIRST" : 1,
+        "SECOND" : 2,
+        "THIRD" : 3
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 19,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 23,
+          "column" : 2
+        }
+      }
+    }
+  }
+}

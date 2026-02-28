@@ -9,7 +9,7 @@ class E {
 }
 
 <<__EntryPoint>>
-function main_instantiable() {
+function main_instantiable() :mixed{
 var_dump((new ReflectionClass('A'))->isInstantiable());
 var_dump((new ReflectionClass('B'))->isInstantiable());
 var_dump((new ReflectionClass('C'))->isInstantiable());

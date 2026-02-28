@@ -1,2 +1,2 @@
-function proc_nice
+extension standard
 euid not root

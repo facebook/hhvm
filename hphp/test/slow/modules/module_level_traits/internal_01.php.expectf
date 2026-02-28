@@ -1,0 +1,3 @@
+Fatal error: Uncaught exception 'ModuleBoundaryViolationException' with message 'Accessing internal method C::foo in module MLT_A from the default module is not allowed' in %s/internal_01.php:11
+Stack trace:
+%A

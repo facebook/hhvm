@@ -23,10 +23,11 @@
 #include <memory>
 #include <string>
 
-#include "hphp/runtime/server/takeover-agent.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/health-monitor-types.h"
+#include "hphp/util/job-queue.h"
 #include "hphp/util/lock.h"
 
 /**
@@ -84,6 +85,7 @@ using ServerFactoryPtr = std::shared_ptr<ServerFactory>;
  * requests.
  */
 struct RequestHandler {
+  explicit RequestHandler() {}
   explicit RequestHandler(int timeout) : m_timeout(timeout) {}
   virtual ~RequestHandler() {}
 
@@ -91,7 +93,7 @@ struct RequestHandler {
    * Called before and after request-handling work.
    */
   virtual void setupRequest(Transport* /*transport*/) {}
-  virtual void teardownRequest(Transport* /*transport*/) noexcept {}
+  virtual void teardownRequest(Transport* /*transport*/) = 0;
 
   /**
    * Sub-class handles a request by implementing this function.
@@ -118,6 +120,8 @@ struct RequestHandler {
    * Write an entry to the handler's access log.
    */
   virtual void logToAccessLog(Transport* /*transport*/) {}
+
+  virtual void setCliContext(CLIContext&& ctx) {}
 
   int getDefaultTimeout() const { return m_timeout; }
 
@@ -201,14 +205,6 @@ public:
   }
 
   /**
-   * Add or remove a TakeoverListener to this server.
-   *
-   * This is a no-op for servers that do not support socket takeover.
-   */
-  virtual void addTakeoverListener(TakeoverListener* /*listener*/) {}
-  virtual void removeTakeoverListener(TakeoverListener* /*listener*/) {}
-
-  /**
    * Add additional worker threads
    */
   virtual void saturateWorkers() = 0;
@@ -266,6 +262,11 @@ public:
   virtual size_t getMaxThreadCount() = 0;
 
   /**
+   * Set the max threads that can be used for handling requests.
+   */
+  virtual void setMaxThreadCount(size_t count) = 0;
+
+  /**
    * How many threads are actively working on handling requests.
    */
   virtual int getActiveWorker() = 0;
@@ -303,12 +304,7 @@ public:
    */
   virtual bool enableSSL(int port) = 0;
 
-  /**
-   * To enable SSL in addition to plaintext of the current server.
-   */
-  virtual bool enableSSLWithPlainText() {
-    return false;
-  }
+  virtual DispatcherStats getDispatcherStats() = 0;
 
 protected:
   std::string m_address;
@@ -328,14 +324,12 @@ struct ServerOptions {
                 uint16_t port,
                 int maxThreads,
                 int initThreads = -1,
-                int maxQueue = -1,
-                bool legacyBehavior = true)
+                int maxQueue = -1)
     : m_address(address),
       m_port(port),
       m_maxThreads(maxThreads),
       m_initThreads(initThreads),
-      m_maxQueue(maxQueue == -1 ? maxThreads : maxQueue),
-      m_legacyBehavior(legacyBehavior) {
+      m_maxQueue(maxQueue == -1 ? maxThreads : maxQueue) {
     assertx(m_maxThreads >= 0);
     if (m_initThreads < 0 || m_initThreads > m_maxThreads) {
       m_initThreads = m_maxThreads;
@@ -347,10 +341,8 @@ struct ServerOptions {
   int m_maxThreads;
   int m_initThreads;
   int m_maxQueue;
-  bool m_legacyBehavior;
   int m_serverFD{-1};
   int m_sslFD{-1};
-  std::string m_takeoverFilename;
   bool m_useFileSocket{false};
   int m_hugeThreads{0};
   unsigned m_hugeStackKb{0};
@@ -443,4 +435,3 @@ struct InvalidHeaderException : ServerException {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

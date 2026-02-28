@@ -2,7 +2,7 @@
 // Copyright 2004-2015 Facebook. All Rights Reserved.
 
 function foo($val, $a, $b, $c, $d, $e, $f, $g, $h, $i, $j, $k, $l, $m, $n, $o,
-             $p, $q) {
+             $p, $q) :mixed{
   $a = $b;
   $b = $c;
   $c = $d;

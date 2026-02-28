@@ -46,6 +46,8 @@ struct CmdInfo : DebuggerCommand {
 
   static String FindSubSymbol(const Array& symbols, const std::string &symbol);
 
+  std::string name() const override { return "info"; }
+
 protected:
   void sendImpl(DebuggerThriftBuffer&) override;
   void recvImpl(DebuggerThriftBuffer&) override;

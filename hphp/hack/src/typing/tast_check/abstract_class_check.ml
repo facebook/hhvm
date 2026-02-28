@@ -9,39 +9,43 @@
 
 open Aast
 open Hh_prelude
-module Env = Tast_env
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module SN = Naming_special_names
 
 let check_expr env (_, pos, e) =
   match e with
   | Class_const ((_, _, CIparent), (_, construct))
     when String.equal construct SN.Members.__construct ->
-    let tenv = Env.tast_env_as_typing_env env in
-    (match Typing_env.get_parent_class tenv with
-    | Some parent_class
-      when Ast_defs.is_c_abstract (Cls.kind parent_class)
-           && Option.is_none (fst (Cls.construct parent_class)) ->
-      Errors.add_typing_error
-        Typing_error.(
-          primary
-          @@ Primary.Parent_abstract_call
-               { meth_name = construct; pos; decl_pos = Cls.pos parent_class })
+    (match Tast_env.get_parent_class env with
+    | Decl_entry.Found parent_class
+      when Ast_defs.is_c_abstract (Cls.kind parent_class) ->
+      let Equal = Tast_env.eq_typing_env in
+      let (parent_construct, _) = Tast_env.get_construct env parent_class in
+      (match parent_construct with
+      | None ->
+        Typing_error_utils.add_typing_error
+          ~env
+          Typing_error.(
+            primary
+            @@ Primary.Parent_abstract_call
+                 { meth_name = construct; pos; decl_pos = Cls.pos parent_class })
+      | Some _ -> ())
     | _ -> ())
   | _ -> ()
 
 let check_method_body m =
   let named_body = m.m_body in
   if m.m_abstract && not (List.is_empty named_body.fb_ast) then
-    Errors.add_nast_check_error
-    @@ Nast_check_error.Abstract_with_body (fst m.m_name)
+    Diagnostics.add_diagnostic
+      Nast_check_error.(to_user_diagnostic @@ Abstract_with_body (fst m.m_name))
 
 let check_class _ c =
   if Ast_defs.is_c_abstract c.c_kind && c.c_final then (
     let err m =
-      Errors.add_nast_check_error
-      @@ Nast_check_error.Nonstatic_method_in_abstract_final_class
-           (fst m.m_name)
+      Diagnostics.add_diagnostic
+        Nast_check_error.(
+          to_user_diagnostic
+          @@ Nonstatic_method_in_abstract_final_class (fst m.m_name))
     in
     let (c_constructor, _, c_methods) = split_methods c.c_methods in
     List.iter c_methods ~f:err;
@@ -51,9 +55,10 @@ let check_class _ c =
     c_instance_vars
     |> List.filter ~f:(fun var -> Option.is_none var.cv_xhp_attr)
     |> List.iter ~f:(fun var ->
-           Errors.add_nast_check_error
-           @@ Nast_check_error.Instance_property_in_abstract_final_class
-                (fst var.cv_id))
+           Diagnostics.add_diagnostic
+             Nast_check_error.(
+               to_user_diagnostic
+               @@ Instance_property_in_abstract_final_class (fst var.cv_id)))
   )
 
 let handler =

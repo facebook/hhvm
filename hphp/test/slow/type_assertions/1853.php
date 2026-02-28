@@ -1,9 +1,9 @@
 <?hh
 
-function g(inout $x) {
+function g(inout $x) :mixed{
  var_dump($x);
 }
-function f($x) {
+function f($x) :mixed{
   if (is_array($x)) {
 
     var_dump($x);
@@ -18,8 +18,8 @@ function f($x) {
 }
 
 <<__EntryPoint>>
-function main_1853() {
-f(varray[]);
-f(varray[0, 1]);
-f(varray[darray[1 => 1]]);
+function main_1853() :mixed{
+f(vec[]);
+f(vec[0, 1]);
+f(vec[dict[1 => 1]]);
 }

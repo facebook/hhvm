@@ -7,20 +7,13 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions ***\n";
 
-$file = __SystemLib\hphp_test_tmppath('flock.tmp');
+$file = sys_get_temp_dir().'/'.'flock.tmp';
 $fp = fopen($file, "w");
 
 /* array of operatons */
-$operations = varray[
+$operations = vec[
   0,
   LOCK_NB,
-  FALSE,
-  NULL,
-  varray[1,2,3],
-  varray[],
-  "string",
-  "",
-  "\0"
 ];
 
 $i = 0;
@@ -39,7 +32,6 @@ $wouldblock = false;
 var_dump(flock($fp, LOCK_SH|LOCK_NB, inout $wouldblock));
 
 $var = false;
-try { var_dump(flock("", "", inout $var)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* No.of args leass than expected */
 try { var_dump(flock()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

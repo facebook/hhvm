@@ -3,7 +3,7 @@
 class C { public function __construct(public $x)[] {} }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $x = dict[
     json_decode('"foo"') => new C(17),
     json_decode('"bar"') => new C(34),

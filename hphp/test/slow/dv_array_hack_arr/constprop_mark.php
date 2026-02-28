@@ -1,8 +1,8 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
-  $a = varray[0];
+function main() :mixed{
+  $a = vec[0];
   $a = HH\array_mark_legacy($a);
   $a[0] += 10;
   var_dump($a);

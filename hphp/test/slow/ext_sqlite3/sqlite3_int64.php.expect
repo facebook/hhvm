@@ -1,0 +1,36 @@
+testing query() and SQLite3Result
+Passed: row matched
+Passed: row matched
+Passed: row matched
+Passed: row matched
+Passed: row matched
+testing bind with name
+bool(true)
+bool(true)
+Passed: row matched
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+Passed: row matched
+bool(true)
+bool(true)
+testing bind with number
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+Passed: row matched
+Passed: row matched
+Passed: row matched
+Passed: row matched
+bool(true)
+bool(true)
+testing UDF
+bool(true)
+Passed: row matched
+Passed: row matched
+Passed: row matched
+Passed: row matched
+Passed: row matched

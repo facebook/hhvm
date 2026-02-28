@@ -1,9 +1,9 @@
 <?hh
 
-function modalité($a) {
+function modalitâ‚¬($a) :mixed{
  var_dump($a);
 }
  <<__EntryPoint>>
-function main_74() {
-modalité(123);
+function main_74() :mixed{
+modalitâ‚¬(123);
 }

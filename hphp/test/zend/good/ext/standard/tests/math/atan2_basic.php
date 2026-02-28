@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$valuesy = varray[23,
+$valuesy = vec[23,
                 -23,
                 2.345e1,
                 -2.345e1,
@@ -12,7 +12,7 @@ $valuesy = varray[23,
                 true,
                 false];
 
-$valuesx = varray[23,
+$valuesx = vec[23,
                 -23,
                 2.345e1,
                 -2.345e1,

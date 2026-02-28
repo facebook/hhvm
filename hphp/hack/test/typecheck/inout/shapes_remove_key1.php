@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test(): void {
   $s = shape('x' => 4, 'y' => 'aaa');

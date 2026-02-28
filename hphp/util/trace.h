@@ -40,7 +40,7 @@
  * In a source file, select the compilation unit's module by calling the
  * TRACE_SET_MOD macro. E.g.,
  *
- *   TRACE_SET_MOD(mcg);
+ *   TRACE_SET_MOD(mcg)
  *
  *   ...
  *   TRACE(0, "See this for any trace-enabled build: %d\n", foo);
@@ -93,6 +93,7 @@ namespace Trace {
       TM(traceAsync)  /* Meta: lazy writes to disk */ \
       TM(apc)           \
       TM(asmx64)        \
+      TM(async_jit)     \
       TM(atomicvector)  \
       TM(bcinterp)      \
       TM(bespoke)       \
@@ -104,6 +105,7 @@ namespace Trace {
       TM(debugger)      \
       TM(debuggerflow)  \
       TM(debuginfo)     \
+      TM(decl)         \
       TM(decreftype)    \
       TM(disas)         \
       TM(dispatchBB)    \
@@ -114,6 +116,7 @@ namespace Trace {
       TM(fixup)         \
       TM(fr)            \
       TM(funcorder)     \
+      TM(gallium)       \
       TM(gc)            \
       TM(hackc_translate) \
       TM(heapgraph)     \
@@ -124,6 +127,7 @@ namespace Trace {
       TM(hhbbc_cfg)     \
       TM(hhbbc_dce)     \
       TM(hhbbc_dump)    \
+      TM(hhbbc_dump_trace) \
       TM(hhbbc_parse)   \
       TM(hhbbc_emit)    \
       TM(hhbbc_iface)   \
@@ -155,11 +159,13 @@ namespace Trace {
       TM(hhir_unreachable) \
       TM(hhir_vanilla)  \
       TM(hhprof)        \
+      TM(inline_stitching) \
       TM(inlining)      \
       TM(instancebits)  \
       TM(intercept)     \
       TM(interpOne)     \
       TM(irlower)       \
+      TM(isame)         \
       TM(jittime)       \
       TM(layout)        \
       TM(libxml)        \
@@ -169,6 +175,7 @@ namespace Trace {
       TM(minstr)        \
       TM(mm)            \
       TM(objprof)       \
+      TM(packages)      \
       TM(perf_mem_event) \
       TM(pgo)           \
       TM(preg)          \
@@ -178,11 +185,13 @@ namespace Trace {
       TM(prof_branch)   \
       TM(prof_array)    \
       TM(prof_prop)     \
+      TM(prof_sb)       \
       TM(rat)           \
       TM(refcount)      \
       TM(regalloc)      \
       TM(region)        \
       TM(repo_autoload) \
+      TM(repo_file)     \
       TM(reusetc)       \
       TM(ringbuffer)    \
       TM(runtime)       \
@@ -196,6 +205,8 @@ namespace Trace {
       TM(taint)         \
       TM(targetcache)   \
       TM(tcspace)       \
+      TM(thread_tune)   \
+      TM(thread_sched)  \
       TM(trans)         \
       TM(treadmill)     \
       TM(txdeps)        \
@@ -209,12 +220,13 @@ namespace Trace {
       TM(vasm_copy)     \
       TM(vasm_graph_color) \
       TM(vasm_phi)      \
+      TM(vfs)           \
       TM(watchman)      \
       TM(xenon)         \
       TM(xls)           \
       TM(xls_stats)     \
+      TM(xreqsync)      \
       TM(clisrv)        \
-      TM(factparse)     \
       TM(bccache)       \
       TM(idx)           \
       /* Stress categories, to exercise rare paths */ \
@@ -519,10 +531,10 @@ template<typename Val>
 class FormatValue<Val,
                    std::enable_if_t<
                      std::is_invocable_v<HPHP::invoke_toString, Val const> &&
-                     // This is here because MSVC decides that StringPiece matches
-                     // both this overload as well as the FormatValue overload for
-                     // string-y types in folly itself.
-                     !std::is_same<Val, StringPiece>::value
+                     // This is here because StringPiece and its subclasses
+                     // match both this overload as well as the FormatValue
+                     // overload for string-y types in folly itself.
+                     !std::is_convertible<Val, StringPiece>::value
                    >> {
  public:
   explicit FormatValue(const Val& val) : m_val(val) {}

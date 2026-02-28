@@ -20,6 +20,7 @@ namespace jit {
 struct OpInfo {
   const char* name;
   uint64_t flags;
+  std::vector<IRSrcFlag> srcFlags;
 };
 extern OpInfo g_opInfo[];
 

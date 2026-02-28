@@ -1,0 +1,22 @@
+(rule
+ (alias autoclose)
+ (deps
+  %{exe:../../src/hh_single_complete.exe}
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/autoclose/*.php)
+  (glob_files %{project_root}/hack/test/autoclose/*.exp))
+ (action
+  (run
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/autoclose
+   --program
+   %{exe:../../src/hh_single_complete.exe}
+   --flags
+   --xhp-close)))
+
+
+(alias
+ (name runtest)
+ (deps
+  (alias autoclose)))

@@ -1,13 +1,13 @@
 <?hh
 
 trait Hello {
-   public function sayHello() {
+   public function sayHello() :mixed{
      echo 'Hello ';
    }
 }
 
 trait World {
-   public function sayWorld() {
+   public function sayWorld() :mixed{
      echo 'World!';
    }
 }

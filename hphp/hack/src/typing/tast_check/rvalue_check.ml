@@ -18,10 +18,13 @@ let check_valid_rvalue pos env ty =
     match tyl with
     | [] -> env
     | ty :: tyl ->
+      let (_, ty) = Tast_env.strip_supportdyn env ty in
       let (env, ety) = Env.expand_type env ty in
       (match deref ety with
       | (r, Tprim Tnoreturn) ->
-        Errors.add_typing_error
+        let Equal = Tast_env.eq_typing_env in
+        Typing_error_utils.add_typing_error
+          ~env
           Typing_error.(
             wellformedness
             @@ Primary.Wellformedness.Noreturn_usage
@@ -35,7 +38,9 @@ let check_valid_rvalue pos env ty =
                  });
         env
       | (r, Tprim Tvoid) ->
-        Errors.add_typing_error
+        let Equal = Tast_env.eq_typing_env in
+        Typing_error_utils.add_typing_error
+          ~env
           Typing_error.(
             wellformedness
             @@ Primary.Wellformedness.Void_usage
@@ -73,14 +78,14 @@ let visitor =
 
     method! on_expr env ((ty, p, e) as te) =
       match e with
-      | Binop (Ast_defs.Eq None, e1, e2) ->
-        this#allow_non_returning (fun () -> this#on_expr env e1);
-        this#disallow_non_returning (fun () -> this#on_expr env e2)
+      | Assign (lhs, None, rhs) ->
+        this#allow_non_returning (fun () -> this#on_expr env lhs);
+        this#disallow_non_returning (fun () -> this#on_expr env rhs)
       | Eif (e1, e2, e3) ->
         this#disallow_non_returning (fun () -> this#on_expr env e1);
         Option.iter e2 ~f:(this#on_expr env);
         this#on_expr env e3
-      | Pipe (_, e1, e2) ->
+      | Pipe (_, e1, e2, _) ->
         this#disallow_non_returning (fun () -> this#on_expr env e1);
         this#on_expr env e2
       | List el -> List.iter el ~f:(this#on_expr env)
@@ -88,18 +93,9 @@ let visitor =
         (* ReadonlyExprs can be immediately surrounding a void thing,
            but the thing inside the expression should be checked for void *)
         this#disallow_non_returning (fun () -> super#on_expr env r)
-      | ExpressionTree
-          {
-            et_hint;
-            et_splices;
-            et_function_pointers;
-            et_virtualized_expr;
-            et_runtime_expr;
-            et_dollardollar_pos = _;
-          } ->
-        this#on_hint env et_hint;
-        this#on_block env et_splices;
-        this#on_block env et_function_pointers;
+      | ExpressionTree { et_class; et_runtime_expr; et_free_vars = _ } ->
+        this#on_id env et_class;
+
         (* Allow calls to void functions at the top level:
 
              Code`void_func()`
@@ -108,8 +104,6 @@ let visitor =
 
              Code`() ==> { $x = void_func(); }`
         *)
-        super#on_expr env et_virtualized_expr;
-
         this#on_expr env et_runtime_expr
       | _ ->
         if not !non_returning_allowed then check_valid_rvalue p env ty;
@@ -121,10 +115,10 @@ let visitor =
       | Return (Some (_, _, Hole (e, _, _, _)))
       | Return (Some e) ->
         this#allow_non_returning (fun () -> this#on_expr env e)
-      | For (e1, e2, e3, b) ->
+      | For (e1, e2, (_, _, e3), b) ->
         this#allow_non_returning (fun () -> List.iter ~f:(this#on_expr env) e1);
         this#disallow_non_returning (fun () ->
-            Option.iter ~f:(this#on_expr env) e2);
+            Option.iter ~f:(fun (_, _, e) -> this#on_expr env e) e2);
         this#allow_non_returning (fun () -> List.iter ~f:(this#on_expr env) e3);
         this#on_block env b
       | Foreach (e1, e2, b) ->

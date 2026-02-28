@@ -89,7 +89,7 @@ void HHVM_METHOD(ConditionWaitHandle, succeed, const Variant& result) {
 }
 
 void HHVM_METHOD(ConditionWaitHandle, fail, const Object& exception) {
-  if (!exception->instanceof(SystemLib::s_ThrowableClass)) {
+  if (!exception->instanceof(SystemLib::getThrowableClass())) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Expected exception to be an instance of Throwable");
   }
@@ -110,7 +110,10 @@ void c_ConditionWaitHandle::initialize(c_WaitableWaitHandle* child) {
   assertx(!child->isFinished());
 
   setState(STATE_BLOCKED);
-  setContextIdx(child->getContextIdx());
+  setContextStateIndex(std::min(
+    AsioSession::Get()->getCurrentContextStateIndex(),
+    child->getContextStateIndex())
+  );
   m_child = child;
   m_child->incRefCount();
   m_child->getParentChain()
@@ -154,13 +157,16 @@ c_WaitableWaitHandle* c_ConditionWaitHandle::getChild() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void AsioExtension::initConditionWaitHandle() {
+void AsioExtension::registerNativeConditionWaitHandle() {
   HHVM_STATIC_MALIAS(HH\\ConditionWaitHandle, create,
                      ConditionWaitHandle, create);
   HHVM_STATIC_MALIAS(HH\\ConditionWaitHandle, setOnCreateCallback,
                      ConditionWaitHandle, setOnCreateCallback);
   HHVM_MALIAS(HH\\ConditionWaitHandle, succeed, ConditionWaitHandle, succeed);
   HHVM_MALIAS(HH\\ConditionWaitHandle, fail, ConditionWaitHandle, fail);
+
+  Native::registerClassExtraDataHandler(
+    c_ConditionWaitHandle::className(), finish_class<c_ConditionWaitHandle>);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

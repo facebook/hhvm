@@ -14,21 +14,21 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing asort() : usage variations ***\n";
 
-$various_arrays = varray [
+$various_arrays = vec[
   // group of escape sequences
-  darray ["\a" => "\a", "\cx" => "\cx", "\e" => "\e",
+  dict["\a" => "\a", "\cx" => "\cx", "\e" => "\e",
         "\f" => "\f", "\n" =>"\n", "\r" => "\r", "\t" => "\t", "\xhh" => "\xhh",
         "\ddd" => "\ddd", "\v" => "\v"
         ],
 
   // array contains combination of capital/small letters
-  darray ['l' => "lemoN", 'O' => "Orange", 'b' => "banana", 'a' => "apple", 'Te' => "Test",
+  dict['l' => "lemoN", 'O' => "Orange", 'b' => "banana", 'a' => "apple", 'Te' => "Test",
         'T' => "TTTT", 't' => "ttt", 'w' => "ww", 'x' => "x", 'X' => "X", 'o' => "oraNGe",
         'B' => "BANANA"
         ]
 ];
 
-$flags = darray["SORT_REGULAR" => SORT_REGULAR, "SORT_STRING" => SORT_STRING];
+$flags = dict["SORT_REGULAR" => SORT_REGULAR, "SORT_STRING" => SORT_STRING];
 
 $count = 1;
 echo "\n-- Testing asort() by supplying various string arrays --\n";

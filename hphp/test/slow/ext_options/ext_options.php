@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_ext_options() {
+function main_ext_options() :mixed{
 var_dump(dl(""));
 
 var_dump(extension_loaded("bcmath"));
@@ -15,7 +15,7 @@ $x = get_loaded_extensions();
 var_dump(!($x ?? false));
 
 var_dump(get_included_files()[0] === __FILE__);
-var_dump(varray[]);
+var_dump(vec[]);
 
 $sec = null;
 $nsec = null;
@@ -51,5 +51,5 @@ var_dump(!version_compare("1.3.0.dev", "1.1.2", "<"));
 
 $arr = get_defined_constants(true);
 var_dump(count($arr["user"]) === 2);
-var_dump(HH\Lib\C\any($arr["Core"], $elt ==> HH\Lib\Legacy_FIXME\eq($elt, 'PHP_BINARY')));
+var_dump(HH\Lib\C\any($arr["Core"], $elt ==> HH\Lib\Legacy_FIXME\eq($elt, 'PHP_OS')));
 }

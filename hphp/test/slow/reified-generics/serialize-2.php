@@ -10,7 +10,7 @@ class C<reify T> extends D<(T, T)> {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $c = new C<int>();
   echo (string)($c is C<int>) . "\n";
   $s = serialize($c);

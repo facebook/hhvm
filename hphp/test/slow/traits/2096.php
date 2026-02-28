@@ -9,7 +9,7 @@ class c {
 
 const INIT1 = 123;
 <<__EntryPoint>>
-function main_2096() {
+function main_2096() :mixed{
 var_dump(c::$x++);
 var_dump(t1::$x++);
 var_dump(c::$x++);

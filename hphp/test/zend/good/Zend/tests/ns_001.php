@@ -7,11 +7,11 @@ class Foo {
     echo __CLASS__,"\n";
   }
 
-  function bar() {
+  function bar() :mixed{
     echo __CLASS__,"\n";
   }
 
-  static function baz() {
+  static function baz() :mixed{
     echo __CLASS__,"\n";
   }
 }

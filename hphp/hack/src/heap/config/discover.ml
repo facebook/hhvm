@@ -4,10 +4,10 @@ https://jbuilder.readthedocs.io/en/latest/configurator.html *)
 module C = Configurator.V1
 
 (* cmake should have prepared some information for us in the env:
-  HACK_EXTRA_INCLUDE_PATHS
-  HACK_EXTRA_LIB_PATHS
-  HACK_EXTRA_NATIVE_LIBRARIES
-  HACK_EXTRA_LINK_OPTS
+   HACK_EXTRA_INCLUDE_PATHS
+   HACK_EXTRA_LIB_PATHS
+   HACK_EXTRA_NATIVE_LIBRARIES
+   HACK_EXTRA_LINK_OPTS
 *)
 let query_env s =
   match Sys.getenv s with
@@ -26,6 +26,7 @@ let abs =
       s
 
 let process_env () =
+  let warn_opts = ["-Wno-discarded-qualifiers"; "-Wno-implicit-int"] in
   let includes =
     query_env "HACK_EXTRA_INCLUDE_PATHS" |> List.map (fun s -> "-I" ^ abs s)
   in
@@ -36,7 +37,7 @@ let process_env () =
     query_env "HACK_EXTRA_NATIVE_LIBRARIES" |> List.map (fun s -> "-l" ^ s)
   in
   let opaque_opts = query_env "HACK_EXTRA_LINK_OPTS" in
-  (includes, dirs @ names @ opaque_opts)
+  (warn_opts @ includes, dirs @ names @ opaque_opts)
 
 let () =
   C.main ~name:"heap" (fun (_ : C.t) ->

@@ -7,12 +7,31 @@
  *
  *)
 
-type 'a job_result = 'a * Relative_path.t list
+type 'a job_result =
+  'a * (Relative_path.t list * MultiThreadedCall.cancel_reason) option
+
+(* distc_config specifies if hh_distc is enabled and its thresholds
+ * - hh_distc is disabled (eg. config set to None) in dev testing and non-fb workflows
+ * - if hh_distc is enabled, jobs with fanout >= fanout_threshold are sent to distc
+ *   - if enable_fanout_aware_distc is enabled, then
+ *     - if fanout_threshold <= fanout < fanout_full_init_threshold, then
+ *       fanout aware distc is performed;
+ *     - if fanout_full_init_threshold <= fanout, then full init is performed;
+ *   - if enable_fanout_aware_distc is not set, then full init is performed.
+ *)
+type distc_config_options = {
+  enable_fanout_aware_distc: bool;
+  fanout_threshold: int;
+  fanout_full_init_threshold: int;
+}
+
+type distc_config = distc_config_options option
 
 type seconds_since_epoch = float
 
 type process_file_results = {
-  file_errors: Errors.t;
+  file_diagnostics: Diagnostics.t;
+  file_map_reduce_data: Map_reduce.t;
   deferred_decls: Deferred_decl.deferment list;
 }
 
@@ -25,42 +44,37 @@ val process_file :
   process_file_results
 
 type result = {
-  errors: Errors.t;
-  delegate_state: Typing_service_delegate.state;
+  diagnostics: Diagnostics.t;
+  warnings_saved_state: Warnings_saved_state.t option;
   telemetry: Telemetry.t;
-  diagnostic_pusher: Diagnostic_pusher.t option * seconds_since_epoch option;
+  time_first_error: seconds_since_epoch option;
 }
 
 val go :
   Provider_context.t ->
   MultiWorker.worker list option ->
-  Typing_service_delegate.state ->
   Telemetry.t ->
   Relative_path.t list ->
-  memory_cap:int option ->
+  root:Path.t option ->
   longlived_workers:bool ->
-  hulk_lite:bool ->
-  hulk_heavy:bool ->
-  remote_execution:ReEnv.t option ->
+  hh_distc_config:distc_config ->
   check_info:Typing_service_types.check_info ->
+  warnings_saved_state:Warnings_saved_state.t option ->
   result
 
 (** The last element returned, a list of paths, are the files which have not been
     processed fully or at all due to interrupts. *)
 val go_with_interrupt :
-  ?diagnostic_pusher:Diagnostic_pusher.t ->
   Provider_context.t ->
   MultiWorker.worker list option ->
-  Typing_service_delegate.state ->
   Telemetry.t ->
   Relative_path.t list ->
+  root:Path.t option ->
   interrupt:'env MultiWorker.interrupt_config ->
-  memory_cap:int option ->
   longlived_workers:bool ->
-  hulk_lite:bool ->
-  hulk_heavy:bool ->
-  remote_execution:ReEnv.t option ->
+  hh_distc_config:distc_config ->
   check_info:Typing_service_types.check_info ->
+  warnings_saved_state:Warnings_saved_state.t option ->
   ('env * result) job_result
 
 module TestMocking : sig

@@ -54,6 +54,25 @@ SSATmp* canonical(SSATmp* value) {
 
 //////////////////////////////////////////////////////////////////////
 
+Block* ultimateDst(Block* blk) {
+  if (blk == nullptr) return nullptr;
+
+  auto constexpr kMaxSteps = 10;
+
+  for (auto i = 0; i < kMaxSteps; ++i) {
+    if (blk->empty()) return blk;
+    auto jmp = blk->begin();
+    if (!jmp->is(Jmp) || jmp->numSrcs() != 0 || jmp->taken() == nullptr) {
+      return blk;
+    }
+    blk = jmp->taken();
+  }
+
+  return blk;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 Block* findDefiningBlock(const SSATmp* t, const IdomVector& idoms) {
   assertx(!t->inst()->is(DefConst));
   auto const srcInst = t->inst();
@@ -128,17 +147,16 @@ SSATmp* least_common_ancestor(SSATmp* s1, SSATmp* s2) {
 
 const Func* funcFromFP(const SSATmp* fp) {
   auto const inst = canonical(fp)->inst();
-  if (inst->is(DefFP)) return inst->marker().func();
-  if (inst->is(DefFuncEntryFP)) return inst->extra<DefFuncEntryFP>()->func;
-  if (inst->is(BeginInlining)) return inst->extra<BeginInlining>()->func;
-  always_assert(false);
+  if (inst->is(DefCalleeFP)) return inst->extra<DefCalleeFP>()->func;
+  always_assert(inst->is(DefFP, DefFuncEntryFP, EnterFrame));
+  return inst->marker().func();
 }
 
 uint32_t frameDepthIndex(const SSATmp* fp) {
   always_assert(fp->isA(TFramePtr));
   fp = canonical(fp);
-  if (fp->inst()->is(BeginInlining)) {
-    auto const extra = fp->inst()->extra<BeginInlining>();
+  if (fp->inst()->is(DefCalleeFP)) {
+    auto const extra = fp->inst()->extra<DefCalleeFP>();
     return extra->depth;
   }
   return 0;
@@ -147,16 +165,9 @@ uint32_t frameDepthIndex(const SSATmp* fp) {
 Optional<IRSPRelOffset> offsetOfFrame(const SSATmp *fp) {
   assertx(fp->isA(TFramePtr));
   auto const inst = canonical(fp)->inst();
-  if (inst->is(BeginInlining)) return inst->extra<BeginInlining>()->spOffset;
-  auto const resumed = inst->marker().sk().resumeMode() != ResumeMode::None;
-  if (inst->is(DefFP)) {
-    if (resumed) return std::nullopt;
-    return inst->extra<DefFP>()->offset;
-  }
-  if (inst->is(DefFuncEntryFP)) {
-    if (resumed) return std::nullopt;
-    return IRSPRelOffset { 0 };
-  }
+  if (inst->is(DefCalleeFP)) return inst->extra<DefCalleeFP>()->spOffset;
+  if (inst->is(DefFP)) return inst->extra<DefFP>()->offset;
+  if (inst->is(EnterFrame)) return IRSPRelOffset { 0 };
   always_assert(false);
 }
 
@@ -174,7 +185,7 @@ EveryDefiningInstVisitor::next() {
   auto const inst = canonT->inst();
 
   if (!inst->is(DefLabel)) return {inst, t};
-  if (m_visited.count(inst)) return next();
+  if (m_visited.contains(inst)) return next();
   m_visited.emplace(inst);
 
   auto const dsts = inst->dsts();

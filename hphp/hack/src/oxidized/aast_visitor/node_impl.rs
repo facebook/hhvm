@@ -3,13 +3,16 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use super::{
-    node::Node, node_mut::NodeMut, type_params::Params, visitor::Visitor, visitor_mut::VisitorMut,
-};
-use crate::pos::Pos;
-use itertools::Either;
-use ocamlrep::rc::RcOc;
 use std::collections::BTreeMap;
+use std::sync::Arc;
+
+use itertools::Either;
+
+use super::node::Node;
+use super::node_mut::NodeMut;
+use super::type_params::Params;
+use super::visitor::Visitor;
+use super::visitor_mut::VisitorMut;
 
 macro_rules! leaf_node {
     ($ty:ty) => {
@@ -219,7 +222,7 @@ where
     }
 }
 
-impl<P: Params, T> Node<P> for RcOc<T>
+impl<P: Params, T> Node<P> for Arc<T>
 where
     T: Node<P>,
 {
@@ -232,7 +235,7 @@ where
     }
 }
 
-impl<P: Params, T> NodeMut<P> for RcOc<T>
+impl<P: Params, T> NodeMut<P> for Arc<T>
 where
     T: NodeMut<P>,
 {
@@ -241,7 +244,7 @@ where
         c: &mut P::Context,
         v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
-        Ok(if let Some(x) = RcOc::get_mut(self) {
+        Ok(if let Some(x) = Arc::get_mut(self) {
             x.accept(c, v)?;
         })
     }
@@ -400,34 +403,5 @@ where
         self.1.accept(c, v)?;
         self.2.accept(c, v)?;
         self.3.accept(c, v)
-    }
-}
-
-impl<P: Params> Node<P> for crate::LocalIdMap<(Pos, P::Ex)> {
-    fn recurse<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        Ok(for (key, value) in self.0.iter() {
-            key.accept(c, v)?;
-            v.visit_ex(c, &value.1)?;
-        })
-    }
-}
-
-/// `NodeMut` implementation doesn't visit keys,
-/// mutating key requires re-constructing the underlaying map.
-/// There will be extra perf cost even keys are not mutated.
-/// Overriding its parent visit method can mutate keys economically.
-impl<P: Params> NodeMut<P> for crate::LocalIdMap<(Pos, P::Ex)> {
-    fn recurse<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        Ok(for value in self.0.values_mut() {
-            v.visit_ex(c, &mut value.1)?
-        })
     }
 }

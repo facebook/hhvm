@@ -1,6 +1,14 @@
-File "refinement.php", line 21, characters 18-19:
+WARN: File "refinement.php", line 17, characters 7-25:
+This `is` check is always `false`. The expression on the left has type `C<int>` which shares no values with `AnyArray<Tk#1, Tv#1>`. (Warn[12010])
+ERROR: File "refinement.php", line 18, characters 11-12:
+Invalid return type (Typing[4110])
+  File "refinement.php", line 8, characters 46-70:
+  Expected `AnyArray<arraykey, mixed>`
+  File "refinement.php", line 17, characters 13-25:
+  But got `dynamic` from this `is` expression test
+ERROR: File "refinement.php", line 21, characters 18-19:
 Invalid argument (Typing[4110])
   File "refinement.php", line 6, characters 24-29:
   Expected `D<int>`
   File "refinement.php", line 20, characters 13-16:
-  But got `(dynamic & <expr#1> as D<T#1>)` from this `is` expression test
+  But got `dynamic` from this `is` expression test

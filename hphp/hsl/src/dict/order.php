@@ -52,6 +52,11 @@ function shuffle<Tk as arraykey, Tv>(
  * optional comparator function isn't provided, the values will be sorted in
  * ascending order.
  *
+ * When specified, a comparator should exhibit the same behavior as the `<=>`
+ * operator: a negative value when the left operand compares less than the
+ * right operand, 0 when the operands compare equal, and a positive value when
+ * the left operand compares greater than the right operand.
+ *
  * - To sort by some computable property of each value, see `Dict\sort_by()`.
  * - To sort by the keys of the KeyedTraversable, see `Dict\sort_by_key()`.
  *
@@ -77,6 +82,11 @@ function sort<Tk as arraykey, Tv>(
  * KeyedTraversable, which is computed by the given function. If the optional
  * comparator function isn't provided, the values will be sorted in ascending
  * order of scalar key.
+ *
+ * When specified, a comparator should exhibit the same behavior as the `<=>`
+ * operator: a negative value when the left operand compares less than the
+ * right operand, 0 when the operands compare equal, and a positive value when
+ * the left operand compares greater than the right operand.
  *
  * - To sort by the values of the KeyedTraversable, see `Dict\sort()`.
  * - To sort by the keys of the KeyedTraversable, see `Dict\sort_by_key()`.
@@ -105,6 +115,11 @@ function sort_by<Tk as arraykey, Tv, Ts>(
  * Returns a new dict sorted by the keys of the given KeyedTraversable. If the
  * optional comparator function isn't provided, the keys will be sorted in
  * ascending order.
+ *
+ * When specified, a comparator should exhibit the same behavior as the `<=>`
+ * operator: a negative value when the left operand compares less than the
+ * right operand, 0 when the operands compare equal, and a positive value when
+ * the left operand compares greater than the right operand.
  *
  * - To sort by the values of the KeyedTraversable, see `Dict\sort()`.
  * - To sort by some computable property of each value, see `Dict\sort_by()`.

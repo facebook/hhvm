@@ -1,0 +1,18 @@
+ERROR: File "named_params_traits.php", line 48, characters 3-38:
+Typing error (Typing[4041])
+  File "named_params_traits.php", line 5, characters 19-30:
+  Unexpected named parameter: label
+  File "named_params_traits.php", line 48, characters 3-38:
+  Because of this definition
+ERROR: File "named_params_traits.php", line 51, characters 3-50:
+Typing error (Typing[4040])
+  File "named_params_traits.php", line 5, characters 19-30:
+  Missing required named parameter: unknown
+  File "named_params_traits.php", line 51, characters 3-50:
+  Because of this definition
+ERROR: File "named_params_traits.php", line 54, characters 3-26:
+Typing error (Typing[4041])
+  File "named_params_traits.php", line 22, characters 19-33:
+  Unexpected named parameter: name
+  File "named_params_traits.php", line 54, characters 3-26:
+  Because of this definition

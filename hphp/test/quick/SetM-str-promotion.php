@@ -1,18 +1,18 @@
 <?hh
 
-function elemNoPromo() {
+function elemNoPromo() :mixed{
   $ret = " ";
   $ret[0] = 'A';
   return $ret;
 }
 
-function propNoPromo() {
+function propNoPromo() :mixed{
   $ret = " ";
   $ret->prop = 'A';
   return $ret;
 }
 
-function propPromo() {
+function propPromo() :mixed{
   $ret = "";
   try {
     $ret->prop = 'A';

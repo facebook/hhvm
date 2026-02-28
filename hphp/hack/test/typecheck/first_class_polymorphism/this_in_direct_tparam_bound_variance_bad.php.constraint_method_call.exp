@@ -1,0 +1,82 @@
+ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 70, characters 3-62:
+Typing error (Typing[4323])
+  File "this_in_direct_tparam_bound_variance_bad.php", line 8, characters 37-37:
+  `T` is a constrained type parameter
+  File "this_in_direct_tparam_bound_variance_bad.php", line 70, characters 8-23:
+  This type constraint is violated
+  File "this_in_direct_tparam_bound_variance_bad.php", line 70, characters 8-23:
+  Expected `ConcBase_Direct3`
+  File "this_in_direct_tparam_bound_variance_bad.php", line 70, characters 51-59:
+  But got `Unrelated`
+ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 73, characters 5-19:
+Invalid argument (Typing[4110])
+  File "this_in_direct_tparam_bound_variance_bad.php", line 21, characters 5-16:
+  Expected `Base_Direct3`
+  File "this_in_direct_tparam_bound_variance_bad.php", line 73, characters 9-17:
+  But got `Unrelated`
+ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 77, characters 3-58:
+Typing error (Typing[4323])
+  File "this_in_direct_tparam_bound_variance_bad.php", line 10, characters 33-33:
+  `T` is a constrained type parameter
+  File "this_in_direct_tparam_bound_variance_bad.php", line 77, characters 8-23:
+  This type constraint is violated
+  File "this_in_direct_tparam_bound_variance_bad.php", line 77, characters 8-23:
+  Expected `ConcBase_Direct3`
+  File "this_in_direct_tparam_bound_variance_bad.php", line 77, characters 47-55:
+  But got `Unrelated`
+ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 80, characters 5-19:
+Invalid argument (Typing[4323])
+  File "this_in_direct_tparam_bound_variance_bad.php", line 25, characters 45-45:
+  `T` is a constrained type parameter
+  File "this_in_direct_tparam_bound_variance_bad.php", line 25, characters 50-61:
+  This type constraint is violated
+  File "this_in_direct_tparam_bound_variance_bad.php", line 25, characters 50-61:
+  Expected `Base_Direct3`
+  File "this_in_direct_tparam_bound_variance_bad.php", line 80, characters 9-17:
+  But got `Unrelated`
+ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 85, characters 3-72:
+Typing error (Typing[4323])
+  File "this_in_direct_tparam_bound_variance_bad.php", line 38, characters 37-37:
+  `T` is a constrained type parameter
+  File "this_in_direct_tparam_bound_variance_bad.php", line 85, characters 8-30:
+  This type constraint is violated
+  File "this_in_direct_tparam_bound_variance_bad.php", line 85, characters 8-30:
+  Expected `ConcBase_Direct3_WithTC`
+  File "this_in_direct_tparam_bound_variance_bad.php", line 85, characters 58-66:
+  But got `Unrelated`
+ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 88, characters 5-19:
+Invalid argument (Typing[4110])
+  File "this_in_direct_tparam_bound_variance_bad.php", line 52, characters 5-52:
+  Expected `Base_Direct3_WithTC`
+  File "this_in_direct_tparam_bound_variance_bad.php", line 88, characters 9-17:
+  But got `Unrelated`
+ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 88, characters 5-19:
+Invalid argument (Typing[4110])
+  File "this_in_direct_tparam_bound_variance_bad.php", line 52, characters 5-52:
+  Expected a class with `{type TBase = _}`
+  File "this_in_direct_tparam_bound_variance_bad.php", line 88, characters 9-17:
+  But got `Unrelated`
+  File "this_in_direct_tparam_bound_variance_bad.php", line 88, characters 9-17:
+  Class `Unrelated` has no constant `TBase`
+ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 92, characters 3-68:
+Typing error (Typing[4323])
+  File "this_in_direct_tparam_bound_variance_bad.php", line 40, characters 33-33:
+  `T` is a constrained type parameter
+  File "this_in_direct_tparam_bound_variance_bad.php", line 92, characters 8-30:
+  This type constraint is violated
+  File "this_in_direct_tparam_bound_variance_bad.php", line 92, characters 8-30:
+  Expected `ConcBase_Direct3_WithTC`
+  File "this_in_direct_tparam_bound_variance_bad.php", line 92, characters 54-62:
+  But got `Unrelated`
+ERROR: File "this_in_direct_tparam_bound_variance_bad.php", line 95, characters 5-19:
+Invalid argument (Typing[4323])
+  File "this_in_direct_tparam_bound_variance_bad.php", line 58, characters 5-5:
+  `T` is a constrained type parameter
+  File "this_in_direct_tparam_bound_variance_bad.php", line 58, characters 10-57:
+  This type constraint is violated
+  File "this_in_direct_tparam_bound_variance_bad.php", line 58, characters 10-57:
+  Expected a class with `{type TBase = _}`
+  File "this_in_direct_tparam_bound_variance_bad.php", line 95, characters 9-17:
+  But got `Unrelated`
+  File "this_in_direct_tparam_bound_variance_bad.php", line 95, characters 9-17:
+  Class `Unrelated` has no constant `TBase`

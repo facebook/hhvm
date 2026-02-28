@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /*
  *  Copyright (c) 2004-present, Facebook, Inc.
  *  All rights reserved.
@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 final class VecAsyncTest extends HackTest {
 
   public static function provideTestFromAsync(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Vector {
           async {return 'the';},
@@ -33,7 +33,7 @@ final class VecAsyncTest extends HackTest {
         vec[1, 2],
       ),
       tuple(
-        HackLibTestTraversables::getIterator(varray[
+        HackLibTestTraversables::getIterator(vec[
           async {return 'the';},
           async {return 'quick';},
           async {return 'brown';},
@@ -54,9 +54,9 @@ final class VecAsyncTest extends HackTest {
   }
 
   public static function provideTestFilterAsync(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
-        darray[
+        dict[
           2 => 'two',
           4 => 'four',
           6 => 'six',
@@ -84,7 +84,7 @@ final class VecAsyncTest extends HackTest {
   }
 
   public static function provideTestMapAsync(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Vector {'the', 'quick', 'brown', 'fox'},
         async ($word) ==> Str\reverse($word),
@@ -92,7 +92,7 @@ final class VecAsyncTest extends HackTest {
       ),
       tuple(
         HackLibTestTraversables::getIterator(
-          varray['the', 'quick', 'brown', 'fox'],
+          vec['the', 'quick', 'brown', 'fox'],
         ),
         async ($word) ==> Str\reverse($word),
         vec['eht', 'kciuq', 'nworb', 'xof'],
@@ -115,8 +115,50 @@ final class VecAsyncTest extends HackTest {
     expect($actual)->toEqual($expected);
   }
 
+  public static function provideTestMapWithKeyAsync(): vec<mixed> {
+    return vec[
+      tuple(vec[], async ($a, $b) ==> null, vec[]),
+      tuple(
+        vec[1, 2, 3],
+        async ($k, $v) ==> (string)$k.$v,
+        vec['01', '12', '23'],
+      ),
+      tuple(
+        Vector {'the', 'quick', 'brown', 'fox'},
+        async ($k, $v) ==> (string)$k.$v,
+        vec[
+          '0the',
+          '1quick',
+          '2brown',
+          '3fox',
+        ],
+      ),
+      tuple(
+        HackLibTestTraversables::getKeyedIterator(Vec\range(1, 5)),
+        async ($k, $v) ==> $k * $v,
+        vec[
+          0,
+          2,
+          6,
+          12,
+          20,
+        ],
+      ),
+    ];
+  }
+
+  <<DataProvider('provideTestMapWithKeyAsync')>>
+  public async function testMapWithKeyAsync<Tk as arraykey, Tv1, Tv2>(
+    KeyedTraversable<Tk, Tv1> $traversable,
+    (function(Tk, Tv1): Awaitable<Tv2>) $value_func,
+    vec<Tv2> $expected,
+  ): Awaitable<void> {
+    $result = await Vec\map_with_key_async($traversable, $value_func);
+    expect($result)->toEqual($expected);
+  }
+
   public static function provideTestPartitionAsync(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(
         Vec\range(1, 10),
         async $n ==> $n % 2 === 0,

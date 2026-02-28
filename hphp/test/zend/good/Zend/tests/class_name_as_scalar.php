@@ -7,7 +7,7 @@ namespace Foo\Bar {
         const B = Two::class;
     }
     class Two extends One {
-        public static function run() {
+        public static function run() :mixed{
             \var_dump(self::class); // self compile time lookup
             \var_dump(static::class); // runtime lookup
             \var_dump(parent::class); // runtime lookup
@@ -21,11 +21,11 @@ namespace Foo\Bar {
             $two = Baz::class,
             $three = One::A,
             $four = self::B
-        ) {
+        ) :mixed{
             \var_dump($one, $two, $three, $four);
         }
     }
-    function test() {
+    function test() :mixed{
         echo "In NS\n";
         \var_dump(Moo::class); // resolve in namespace
     }

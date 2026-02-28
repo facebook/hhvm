@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 function with_and(?int $x, ?int $s): void {
   if (($y = $x) && ($z = $y) && ($u = $s)) {

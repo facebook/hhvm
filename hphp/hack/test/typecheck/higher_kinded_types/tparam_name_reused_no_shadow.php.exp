@@ -1,2 +1,0 @@
-File "tparam_name_reused_no_shadow.php", line 3, characters 24-25:
-The name `TR` was already used for another generic parameter. Please use a different name to avoid confusion. (Typing[4378])

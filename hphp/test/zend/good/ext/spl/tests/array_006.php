@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 echo "==Normal==\n";
 
-$arr = darray[0=>0, 1=>1, 2=>2];
+$arr = dict[0=>0, 1=>1, 2=>2];
 $obj = new ArrayIterator($arr);
 
 foreach($obj as $ak=>$av) {

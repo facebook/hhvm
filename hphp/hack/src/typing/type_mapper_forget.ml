@@ -8,11 +8,12 @@
 
 open Hh_prelude
 open Typing_defs
+open Typing_defs_constraints
 module Map = Type_mapper_generic
 
 type env = {
   (* the tyvar to be removed *)
-  tyvar: int;
+  tyvar: Tvid.t;
   (* why did we need to forget this type? *)
   forget_reason: Reason.t option;
 }
@@ -33,7 +34,7 @@ class type forget_tyvar_mapper_type =
       env -> internal_type -> internal_type option
   end
 
-(** Type mapper which forgets a type variable, i.e. removes all occurences of a type variable *)
+(** Type mapper which forgets a type variable, i.e. removes all occurrences of a type variable *)
 class forget_tyvar_mapper : forget_tyvar_mapper_type =
   object (this)
     inherit [env] Map.deep_type_mapper
@@ -57,8 +58,8 @@ class forget_tyvar_mapper : forget_tyvar_mapper_type =
       this#result_opt env ity
 
     method! on_tvar env r var =
-      if Int.equal var env.tyvar then
-        ({ env with forget_reason = Some r }, mk (r, Terr))
+      if Tvid.equal var env.tyvar then
+        ({ env with forget_reason = Some r }, mk (r, Tunion []))
       else
         (env, mk (r, Tvar var))
 

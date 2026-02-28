@@ -1,11 +1,11 @@
 <?hh
 
 abstract final class C {
-  static darray<string, mixed> $cache = darray[];
+  public static darray<string, mixed> $cache = dict[];
 }
 
 <<__NEVER_INLINE>>
-function getchar($name) {
+function getchar($name) :mixed{
   $cached = idx(C::$cache, $name);
   if ($cached !== null) return $cached;
   // This line will raise a notice. In the error handler, we may update
@@ -16,7 +16,7 @@ function getchar($name) {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   set_error_handler((...$args) ==> {
     for ($i = 0; $i < 17; $i++) {
       C::$cache[$i] = $i;

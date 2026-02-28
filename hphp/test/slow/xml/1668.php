@@ -1,9 +1,9 @@
 <?hh
 
-function parse_callback(...$args) {
+function parse_callback(...$args) :mixed{
   var_dump($args);
 }
-function main() {
+function main() :mixed{
   $p = xml_parser_create();
   xml_set_element_handler($p, parse_callback<>, parse_callback<>);
   xml_set_element_handler($p, false, parse_callback<>);
@@ -16,6 +16,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_1668() {
+function main_1668() :mixed{
 main();
 }

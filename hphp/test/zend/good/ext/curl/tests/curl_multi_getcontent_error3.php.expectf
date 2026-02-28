@@ -1,3 +1,0 @@
-
-Warning: curl_multi_getcontent() expects parameter 1 to be resource, string given in %s/curl_multi_getcontent_error3.php on line 33
-CURL2

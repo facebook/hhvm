@@ -15,12 +15,12 @@ open Hh_prelude
 open Typing_defs
 
 module Ty_ = struct
-  type t = locl_ty [@@deriving show]
+  type t = locl_ty [@@deriving hash, show]
 
   let compare r1 r2 = Typing_defs.compare_locl_ty r1 r2
 end
 
-include Caml.Set.Make (Ty_)
+include Stdlib.Set.Make (Ty_)
 
 let pp fmt t =
   Format.fprintf fmt "@[<hv 2>{";
@@ -35,3 +35,13 @@ let pp fmt t =
   Format.fprintf fmt "@,}@]"
 
 let show = Format.asprintf "%a" pp
+
+let hash_fold_t state x =
+  hash_fold_list
+    Ty_.hash_fold_t
+    state
+    (elements x |> List.sort ~compare:Ty_.compare)
+
+let hash = Hash.of_fold hash_fold_t
+
+let force_lazy_values t = map Type_force_lazy_values.locl_ty t

@@ -5,7 +5,7 @@ newtype MyOpaqueType = (function (string, Set<int>): void);
 
 
 <<__EntryPoint>>
-function main_reflection_type_alias8() {
+function main_reflection_type_alias8() :mixed{
 $x = new ReflectionTypeAlias('MyType');
 var_dump($x->getFileName());
 

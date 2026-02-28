@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 async function foo1(): Awaitable<void> {
   $x = (await genx()) + (await geny());
@@ -13,6 +13,6 @@ function geny(): int {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   \HH\Asio\join(foo1());
 }

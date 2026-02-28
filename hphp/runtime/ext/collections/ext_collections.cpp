@@ -1,10 +1,5 @@
 #include "hphp/runtime/ext/collections/ext_collections.h"
-#include "hphp/runtime/ext/collections/ext_collections-map.h"
-#include "hphp/runtime/ext/collections/ext_collections-set.h"
-#include "hphp/runtime/ext/collections/ext_collections-pair.h"
-#include "hphp/runtime/ext/collections/ext_collections-vector.h"
-#include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/array-iterator.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
@@ -33,6 +28,10 @@ ArrayIter getArrayIterHelper(const Variant& v, size_t& sz) {
 }
 
 namespace collections {
+/////////////////////////////////////////////////////////////////////////////
+
+const StaticString s_isset{"isset"};
+
 /////////////////////////////////////////////////////////////////////////////
 
 template<bool oob>

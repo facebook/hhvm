@@ -48,8 +48,6 @@ struct Vblock {
     , weight(w) {}
 
   AreaIndex area_idx;
-  int frame{-1};
-  int pending_frames{-1};
   uint64_t weight;
   jit::vector<Vinstr> code;
 };
@@ -170,10 +168,13 @@ struct Vframe {
     size_t exclusive{0};
   };
 
-  static constexpr int Root = 0;  // Frame defined by DefFP or DefFuncEntryFP
-  static constexpr int Top = -1;  // Parent of root frame
+  // Frame defined by DefFP, DefFuncEntryFP or Enterfunc
+  static constexpr int Root = 0;
 
-  LowPtr<const Func> func;
+  // Parent of root frame
+  static constexpr int Top = -1;
+
+  PackedPtr<const Func> func;
   int32_t callOff{-1};
   SBInvOffset sbToRootSbOff{-1};
   int parent;
@@ -260,10 +261,9 @@ struct Vunit {
    */
   bool needsRegAlloc() const;
   /*
-   * Return true iff this Vunit needs to have frames computed for
-   * its blocks before being emitted.
+   * Allocate a new VFrame for a DefCalleeFP instruction.
    */
-  bool needsFramesComputed() const;
+  void allocFrame(const IRInstruction* inst);
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -274,6 +274,7 @@ struct Vunit {
   jit::vector<Vblock> blocks;
   jit::hash_map<Vconst,Vreg,Vconst::Hash> constToReg;
   jit::hash_map<size_t,Vconst> regToConst;
+  jit::hash_map<const SSATmp*,int> fpToFrame;
   jit::vector<VregList> tuples;
   jit::vector<VcallArgs> vcallArgs;
   jit::vector<VdataBlock> dataBlocks;
@@ -284,6 +285,7 @@ struct Vunit {
   Optional<TransContext> context;
   StructuredLogEntry* log_entry{nullptr};
   Annotations annotations;
+  const char* name{nullptr}; // used for unique stubs
 };
 
 inline tracing::Props traceProps(const Vunit& v) {
@@ -293,4 +295,3 @@ inline tracing::Props traceProps(const Vunit& v) {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

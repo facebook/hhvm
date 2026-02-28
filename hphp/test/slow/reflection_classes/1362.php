@@ -4,9 +4,9 @@ class A {
  private $a;
  protected $b;
  public $c;
- static $d;
+ public static $d;
  }
-function f($a) {
+function f($a) :mixed{
  asort(inout $a);
  foreach ($a as $v) {
  var_dump($v->getName());
@@ -14,7 +14,7 @@ function f($a) {
  }
 
 <<__EntryPoint>>
-function main_1362() {
+function main_1362() :mixed{
 $r = new ReflectionClass('A');
 $a = $r->getProperties();
  f($a);

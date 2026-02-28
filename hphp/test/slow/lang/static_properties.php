@@ -4,14 +4,14 @@ class A {
   const CD = "A::CD";
   const CE = B::CE;
   const CF = C::CG;
-  static $a = "A::a";
+  public static $a = "A::a";
   static protected $b = "A::b";
   static private $c = "A::c";
-  static $d = A::CD;
+  public static $d = A::CD;
   static protected $e = A::CE;
   static private $f = A::CF;
 
-  function aFunc() {
+  function aFunc() :mixed{
     print "In A::aFunc():\n";
     print "  A::a: " . A::$a . "\n";
     print "  A::b: " . A::$b . "\n";
@@ -44,9 +44,9 @@ class B extends A {
   const CE = "B::CE";
   static protected $b = "B::b";
   static private $c = "B::c";
-  static $d = B::CD;
+  public static $d = B::CD;
   static protected $g = "B::g";
-  function bFunc() {
+  function bFunc() :mixed{
     print "In B::bFunc():\n";
     print "  A::a: " . A::$a . "\n";
     print "  A::b: " . A::$b . "\n";
@@ -77,9 +77,9 @@ class B extends A {
 class C extends B {
   const CG = "C::CG";
   static protected $b = "C::b";
-  static $h = "C::h";
+  public static $h = "C::h";
   public $i = C::CG;
-  function cFunc() {
+  function cFunc() :mixed{
     print "In C::cFunc():\n";
     print "  A::a: " . A::$a . "\n";
     print "  A::b: " . A::$b . "\n";
@@ -107,7 +107,7 @@ class C extends B {
   }
 }
 
-function main() {
+function main() :mixed{
   $a = new A;
   $a->aFunc();
 
@@ -137,7 +137,7 @@ function main() {
   print "C::\$h: ".C::$h--."\n";
   print "C::\$h: ".--C::$h."\n";
 
-  C::$h = varray[0, 1, 2];
+  C::$h = vec[0, 1, 2];
   $y = C::$h[1];
   print "\$y: $y\n";
   C::$h[2] = 42;
@@ -149,7 +149,7 @@ function main() {
 }
 
 class D {
-  static function main() {
+  static function main() :mixed{
     $a = new A;
     $a->aFunc();
 
@@ -179,7 +179,7 @@ class D {
     print "C::\$h: ".C::$h--."\n";
     print "C::\$h: ".--C::$h."\n";
 
-    C::$h = varray[0, 1, 2];
+    C::$h = vec[0, 1, 2];
     $y = C::$h[1];
     print "\$y: $y\n";
     C::$h[2] = 42;
@@ -193,7 +193,7 @@ class D {
 
 // disable array -> "Array" conversion notice
 <<__EntryPoint>>
-function main_static_properties() {
+function main_static_properties() :mixed{
 error_reporting(error_reporting() & ~E_NOTICE);
 
 print "Test begin\n";

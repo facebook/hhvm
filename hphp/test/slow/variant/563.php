@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_563() {
+function main_563() :mixed{
 $a = 't';
  $a = 1;
  print 2 + $a;

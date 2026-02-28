@@ -1,18 +1,18 @@
 <?hh
 
 class X {
-  static function g() {
+  static function g() :mixed{
 }
 }
-function g($a,$b) {
+function g($a,$b) :mixed{
 }
-function f() {
+function f() :mixed{
  return 3;
  }
 
 <<__EntryPoint>>
-function main_1294() {
+function main_1294() :mixed{
 ;
-@X::g();
-@g(f(),f());
+X::g();
+g(f(),f());
 }

@@ -6,15 +6,15 @@ class A {}
 class C extends A implements I1 {}
 class D extends A implements I1 {}
 
-function h(I1 $x) {
+function h(I1 $x) :mixed{
   return $x;
 }
 
-function cc() {
+function cc() :mixed{
   return h(new C);
 }
 
-function g() {
+function g() :mixed{
   if (__hhvm_intrinsics\launder_value(0))
     $c = h(cc());
   else
@@ -25,6 +25,6 @@ function g() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(g());
 }

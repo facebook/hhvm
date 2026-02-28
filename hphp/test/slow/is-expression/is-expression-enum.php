@@ -10,7 +10,7 @@ enum Bar: string {
   B = '2';
 }
 
-function is_foo(mixed $x) {
+function is_foo(mixed $x) :mixed{
   if ($x is Foo) {
     echo "Foo\n";
   } else {
@@ -18,7 +18,7 @@ function is_foo(mixed $x) {
   }
 }
 
-function is_bar(mixed $x) {
+function is_bar(mixed $x) :mixed{
   if ($x is Bar) {
     echo "Bar\n";
   } else {

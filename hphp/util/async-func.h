@@ -109,7 +109,8 @@ struct AsyncFuncImpl {
    * additional thread-local space collocated with the stack can be specified.
    */
   AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func,
-                int numaNode, unsigned hugeStackKb, unsigned tlExtraKb);
+                int numaNode, unsigned hugeStackKb, unsigned tlExtraKb,
+                const std::string& threadGroupSuffix = "");
   ~AsyncFuncImpl();
 
   /**
@@ -190,6 +191,7 @@ private:
   MemBlock m_hugePages{nullptr, 0};
   pthread_attr_t m_attr;
   pthread_t m_threadId{0};
+  std::string m_threadGroupSuffix;
   // exception was thrown and thread was terminated
   Exception* m_exception{nullptr};
   bool m_stopped{false};
@@ -211,8 +213,10 @@ private:
 template<class T>
 struct AsyncFunc : AsyncFuncImpl {
   AsyncFunc(T *obj, void (T::*member_func)(),
-            int numaNode = -1, unsigned hugeStackKb = 0, unsigned tlExtraKb = 0)
-    : AsyncFuncImpl((void*)this, run_, numaNode, hugeStackKb, tlExtraKb)
+            int numaNode = -1, unsigned hugeStackKb = 0, unsigned tlExtraKb = 0,
+            const std::string& threadGroupSuffix = "")
+    : AsyncFuncImpl((void*)this, run_, numaNode, hugeStackKb, tlExtraKb,
+                    threadGroupSuffix)
     , m_obj(obj)
     , m_memberFunc(member_func) {}
 
@@ -228,4 +232,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

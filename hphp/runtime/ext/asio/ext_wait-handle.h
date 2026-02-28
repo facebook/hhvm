@@ -25,15 +25,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class Awaitable
 
-void HHVM_STATIC_METHOD(Awaitable, setOnIoWaitEnterCallback,
-                        const Variant& callback);
-void HHVM_STATIC_METHOD(Awaitable, setOnIoWaitExitCallback,
-                        const Variant& callback);
-void HHVM_STATIC_METHOD(Awaitable, setOnJoinCallback,
-                        const Variant& callback);
-bool HHVM_METHOD(Awaitable, isFinished);
-bool HHVM_METHOD(Awaitable, isSucceeded);
-bool HHVM_METHOD(Awaitable, isFailed);
 String HHVM_METHOD(Awaitable, getName);
 
 /**
@@ -47,9 +38,13 @@ String HHVM_METHOD(Awaitable, getName);
  *   ResumableWaitHandle           - wait handle that can resume PHP execution
  *    AsyncFunctionWaitHandle      - async function-based async execution
  *    AsyncGeneratorWaitHandle     - async generator-based async execution
- *   AwaitAllWaitHandle            - wait handle representing a collection of
- *                                     WHs, does not propagate results
+ *   AwaitAllWaitHandle            - wait handle that finishes when all provided
+ *                                     wait handles finish, returns null
+ *   ConcurrentWaitHandle          - wait handle that finishes when all wait
+ *                                     handles in the concurrent block finish
  *   ConditionWaitHandle           - wait handle implementing condition variable
+ *   PriorityBridgeWaitHandle      - wait handle holding an (optionally) low
+                                       priority child
  *   RescheduleWaitHandle          - wait handle that reschedules execution
  *   SleepWaitHandle               - wait handle that finishes after a timeout
  *   ExternalThreadEventWaitHandle - thread-powered asynchronous execution
@@ -63,16 +58,12 @@ String HHVM_METHOD(Awaitable, getName);
 struct c_AsyncFunctionWaitHandle;
 struct c_AsyncGeneratorWaitHandle;
 struct c_AwaitAllWaitHandle;
+struct c_ConcurrentWaitHandle;
 struct c_ConditionWaitHandle;
 struct c_RescheduleWaitHandle;
 struct c_SleepWaitHandle;
 struct c_ExternalThreadEventWaitHandle;
-
-#define WAITHANDLE_CLASSOF(cn) \
-  static Class* classof() { \
-    static Class* cls = Class::lookup(makeStaticString("HH\\" #cn)); \
-    return cls; \
-  }
+struct c_PriorityBridgeWaitHandle;
 
 #define WAITHANDLE_DTOR(cn) \
   static void instanceDtor(ObjectData* obj, const Class*) { \
@@ -88,19 +79,20 @@ T* wait_handle(const ObjectData* obj) {
   return static_cast<T*>(const_cast<ObjectData*>(obj));
 }
 
-struct c_Awaitable : ObjectData {
-  WAITHANDLE_CLASSOF(Awaitable);
-  WAITHANDLE_DTOR(Awaitable);
+struct c_Awaitable : ObjectData, SystemLib::ClassLoader<"HH\\Awaitable"> {
+  WAITHANDLE_DTOR(Awaitable)
 
   enum class Kind : uint8_t {
     Static,
     AsyncFunction,
     AsyncGenerator,
     AwaitAll,
+    Concurrent,
     Condition,
     Reschedule,
     Sleep,
     ExternalThreadEvent,
+    PriorityBridge,
   };
 
   explicit c_Awaitable(Class* cls, HeaderKind kind,
@@ -164,11 +156,13 @@ struct c_Awaitable : ObjectData {
   c_AsyncFunctionWaitHandle* asAsyncFunction();
   c_AsyncGeneratorWaitHandle* asAsyncGenerator();
   c_AwaitAllWaitHandle* asAwaitAll();
+  c_ConcurrentWaitHandle* asConcurrent();
   c_ConditionWaitHandle* asCondition();
   c_RescheduleWaitHandle* asReschedule();
   c_ResumableWaitHandle* asResumable();
   c_SleepWaitHandle* asSleep();
   c_ExternalThreadEventWaitHandle* asExternalThreadEvent();
+  c_PriorityBridgeWaitHandle* asPriorityBridge();
 
   // The code in the TC will depend on the values of these constants.
   // See emitAwait().
@@ -178,15 +172,15 @@ struct c_Awaitable : ObjectData {
   void scan(type_scan::Scanner&) const;
 
  private: // layout, ignoring ObjectData fields.
-  // 0                         8           9           10       12
-  // [parentChain             ][contextIdx][kind_state][tyindex][ctxVecIndex]
+  // 0                         8            9           10       12
+  // [parentChain             ][ctxStateIdx][kind_state][tyindex][ctxVecIndex]
   // [resultOrException.m_data][m_type]                         [aux]
   static void checkLayout() {
     constexpr auto data = offsetof(c_Awaitable, m_resultOrException);
     constexpr auto type = data + offsetof(TypedValue, m_type);
     constexpr auto aux  = data + offsetof(TypedValue, m_aux);
     static_assert(offsetof(c_Awaitable, m_parentChain) == data, "");
-    static_assert(offsetof(c_Awaitable, m_contextIdx) == type, "");
+    static_assert(offsetof(c_Awaitable, m_ctxStateIdx) == type, "");
     static_assert(offsetof(c_Awaitable, m_kind_state) < aux, "");
     static_assert(offsetof(c_Awaitable, m_ctxVecIndex) == aux, "");
   }
@@ -202,7 +196,7 @@ struct c_Awaitable : ObjectData {
       AsioBlockableChain m_parentChain;
 
       // WaitableWaitHandle: !STATE_SUCCEEDED && !STATE_FAILED
-      context_idx_t m_contextIdx;
+      ContextStateIndex m_ctxStateIdx;
 
       // valid in any WaitHandle state. doesn't overlap TypedValue fields.
       uint8_t m_kind_state;
@@ -210,11 +204,9 @@ struct c_Awaitable : ObjectData {
       // type index of concrete waithandle for gc-scanning
       type_scan::Index m_tyindex;
 
-      union {
-        // ExternalThreadEventWaitHandle: STATE_WAITING
-        // SleepWaitHandle: STATE_WAITING
-        uint32_t m_ctxVecIndex;
-      };
+      // ExternalThreadEventWaitHandle: STATE_WAITING
+      // SleepWaitHandle: STATE_WAITING
+      uint32_t m_ctxVecIndex;
     };
   };
 
@@ -225,11 +217,56 @@ struct c_Awaitable : ObjectData {
       scanner.scan(m_parentChain);
     }
   }
+
+  friend struct c_PriorityBridgeWaitHandle;
 };
 
 template<class T>
 T* wait_handle(TypedValue cell) {
   return wait_handle<T>(c_Awaitable::fromTVAssert(cell));
+}
+
+ObjectData* asioInstanceCtor(Class*);
+
+// Asio's memory layout relies on the following invariants:
+//   * Inextensible: private final (do-nothing) constructor in base class
+//   * No declared properties
+// This guarantees that there will be no overlap between internal asio state
+// and declared property slots, and that instance methods can only be called
+// on the official, systemlib base classes.
+template<class T> typename
+  std::enable_if<std::is_base_of<c_Awaitable, T>::value, void>::type
+finish_class(Class* cls) {
+  assertx(cls);
+  assertx(cls->numDeclProperties() == 0);
+  assertx(cls->numStaticProperties() == 0);
+  assertx(!cls->hasMemoSlots());
+
+  DEBUG_ONLY auto const ctor = cls->getCtor();
+  assertx(ctor->attrs() & AttrPrivate);
+
+  cls->allocExtraData();
+  assertx(!cls->getNativeDataInfo());
+
+  if (cls->name()->same(c_Awaitable::className().get())) {
+    assertx(!cls->instanceCtor<false>());
+    assertx(!cls->instanceCtor<true>());
+    assertx(!cls->instanceDtor());
+  } else {
+    DEBUG_ONLY auto const wh = c_Awaitable::classof();
+    assertx(wh);
+    assertx(cls->classofNonIFace(wh));
+    assertx(ctor == wh->getCtor());
+
+    assertx(cls->parent()->instanceCtor<false>() == cls->instanceCtor<false>());
+    assertx(cls->parent()->instanceCtor<true>() == cls->instanceCtor<true>());
+    assertx(cls->parent()->instanceDtor() == cls->instanceDtor());
+  }
+
+  cls->m_extra.raw()->m_instanceCtor = asioInstanceCtor;
+  cls->m_extra.raw()->m_instanceCtorUnlocked = asioInstanceCtor;
+  cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
+  cls->m_releaseFunc = T::instanceDtor;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

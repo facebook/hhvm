@@ -1,0 +1,26 @@
+{
+  "pools": {
+    "A.wildcard": {
+      "servers": [
+        "127.0.0.1:11610",
+        "127.0.0.1:11611",
+        "127.0.0.1:11612",
+        "127.0.0.1:11613",
+        "127.0.0.1:11614",
+        "127.0.0.1:11615",
+        "127.0.0.1:11616",
+        "127.0.0.1:11617"
+      ],
+      "protocol": "caret"
+    }
+  },
+  "route": {
+    "type": "PoolRoute",
+    "pool": "A.wildcard",
+    "hash": {
+      "hash_func": "LoadBalancer",
+      "load_ttl_ms": 100,
+      "default_server_load_percent": 50
+    }
+  }
+}

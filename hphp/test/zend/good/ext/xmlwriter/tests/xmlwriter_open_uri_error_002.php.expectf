@@ -1,2 +1,2 @@
 
-Warning: xmlwriter_open_uri() expects exactly 1 parameter, 0 given in %s/xmlwriter_open_uri_error_002.php on line 2
+Warning: xmlwriter_open_uri() expects exactly 1 positional parameter, 0 given in %s/xmlwriter_open_uri_error_002.php on line 2

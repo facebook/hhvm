@@ -1,0 +1,11 @@
+bool(true)
+bool(false)
+
+Notice: Class passed to classname type-hint in %s/class-ptr/enum-classname.php on line 10
+bool(true)
+
+Notice: Class passed to classname type-hint in %s/class-ptr/enum-classname.php on line 11
+bool(false)
+
+Notice: Class passed to classname type-hint in %s/class-ptr/enum-classname.php on line 13
+bool(true)

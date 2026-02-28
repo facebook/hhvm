@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$classes = darray[
+$classes = dict[
 	'DirectoryIterator' => 0,
 	'FilesystemIterator' => 1,
 	'RecursiveDirectoryIterator' => 1,
@@ -15,7 +15,7 @@ foreach ($classes as $class => $flags) {
 	if ($flags)
 	{
 		var_dump($obj->getFlags());
-		$flags = darray[
+		$flags = dict[
 			FilesystemIterator::CURRENT_AS_FILEINFO => 0,
 			FilesystemIterator::CURRENT_AS_SELF     => 0,
 			FilesystemIterator::CURRENT_AS_PATHNAME => 1,

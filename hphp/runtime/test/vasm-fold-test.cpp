@@ -233,7 +233,7 @@ TEST(Vasm, FoldImms) {
     "B0 main (1)\n"
     "movl %133(42l) => %128\n"
     "xorqi -1, %128 => %129, %131\n"
-    "not %128 => %130\n"
+    "not_ %128 => %130\n"
     "movl %131 => %135\n"
     "ret {}\n",
     genTestCode<xorq>(0, -1) // xorq -1,r
@@ -242,7 +242,7 @@ TEST(Vasm, FoldImms) {
     "B0 main (1)\n"
     "movl %133(42l) => %128\n"
     "xorqi -1, %128 => %129, %131\n"
-    "not %128 => %130\n"
+    "not_ %128 => %130\n"
     "movl %131 => %135\n"
     "ret {}\n",
     genTestCode<xorq>(1, -1) // xorq r,-1

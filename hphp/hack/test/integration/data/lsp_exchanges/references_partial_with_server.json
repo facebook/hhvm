@@ -1,0 +1,68 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+      "initializationOptions": {
+        "delayUntilDoneInit": true
+      },
+      "processId": null,
+      "rootPath": "${root_path}",
+      "capabilities": {}
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "$test/waitForHhServerReady",
+    "params": {}
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "textDocument/didOpen",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}",
+        "languageId": "hack",
+        "version": 1,
+        "text": "${php_file}"
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 12,
+    "method": "textDocument/references",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 19,
+        "character": 27
+      },
+      "context": {
+        "includeDeclaration": true
+      },
+      "partialResultToken": "prt123"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "$test/waitForResponse",
+    "params": {
+      "id": 12
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 999,
+    "method": "shutdown",
+    "params": {}
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "exit",
+    "params": {}
+  }
+]

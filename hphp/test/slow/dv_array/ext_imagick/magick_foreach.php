@@ -1,12 +1,12 @@
 <?hh
-function test($magick) {
+function test($magick) :mixed{
   print count($magick)."\n";
   foreach ($magick as $k => $v) {
     printf("[%s] %sx%s.%s\n", $k, $v->width, $v->height, $v->format);
   }
 }
 <<__EntryPoint>> function main(): void {
-$img = varray[
+$img = vec[
   'magick:logo',
   __DIR__.'/facebook.png',
   __DIR__.'/draw_example.png',

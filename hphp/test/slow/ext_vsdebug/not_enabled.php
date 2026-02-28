@@ -7,10 +7,10 @@ require(__DIR__ . '/common.inc');
  * VSDebug extension is not listening and the script executes without waiting
  * for the debugger.
  */
-$descriptorspec = darray[
-   0 => varray["pipe", "r"], // stdin
-   1 => varray["pipe", "w"], // stdout
-   2 => varray["pipe", "w"]  // stderr
+$descriptorspec = dict[
+   0 => vec["pipe", "r"], // stdin
+   1 => vec["pipe", "w"], // stdout
+   2 => vec["pipe", "w"]  // stderr
 ];
 
 $cmd = getHhvmPath() . " " . __DIR__ . "/not_enabled.php.test";

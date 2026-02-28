@@ -1,13 +1,13 @@
 <?hh
 class A {
-  public function b() {
+  public function b() :mixed{
     return function() {
       return function() {
         return $this->c();
       };
     };
   }
-  private function c() {
+  private function c() :mixed{
     return 91;
   }
 }

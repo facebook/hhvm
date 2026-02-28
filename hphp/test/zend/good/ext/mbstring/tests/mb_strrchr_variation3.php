@@ -1,7 +1,7 @@
 <?hh
 
 // Define error handler
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) :mixed{
 	if (error_reporting() != 0) {
 		// report non-silenced errors
 		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
@@ -11,7 +11,7 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 // define some classes
 class classWithToString
 {
-	public function __toString() {
+	public function __toString() :mixed{
 		return b"Class A object";
 	}
 }
@@ -41,63 +41,17 @@ function entrypoint_mb_strrchr_variation3(): void {
 hello world
 EOT;
 
-  // get a resource variable
-  $fp = fopen(__FILE__, "r");
-
   // add arrays
-  $index_array = varray [1, 2, 3];
-  $assoc_array = darray ['one' => 1, 'two' => 2];
+  $index_array = vec[1, 2, 3];
+  $assoc_array = dict['one' => 1, 'two' => 2];
 
   //array of values to iterate over
-  $inputs = darray[
-
-        // int data
-        'int 0' => 0,
-        'int 1' => 1,
-        'int 12345' => 12345,
-        'int -12345' => -2345,
-
-        // float data
-        'float 10.5' => 10.5,
-        'float -10.5' => -10.5,
-        'float 12.3456789000e10' => 12.3456789000e10,
-        'float -12.3456789000e10' => -12.3456789000e10,
-        'float .5' => .5,
-
-        // array data
-        'empty array' => varray[],
-        'int indexed array' => $index_array,
-        'associative array' => $assoc_array,
-        'nested arrays' => varray['foo', $index_array, $assoc_array],
-
-        // null data
-        'uppercase NULL' => NULL,
-        'lowercase null' => null,
-
+  $inputs = dict[
         // boolean data
         'lowercase true' => true,
         'lowercase false' =>false,
         'uppercase TRUE' =>TRUE,
         'uppercase FALSE' =>FALSE,
-
-        // empty data
-        'empty string DQ' => "",
-        'empty string SQ' => '',
-
-        // string data
-        'string DQ' => "string",
-        'string SQ' => 'string',
-        'mixed case string' => "sTrInG",
-        'heredoc' => $heredoc,
-
-        // object data
-        'instance of classWithToString' => new classWithToString(),
-        'instance of classWithoutToString' => new classWithoutToString(),
-
-
-
-        // resource variable
-        'resource' => $fp
   ];
 
   // loop through each element of the array for part
@@ -113,8 +67,6 @@ EOT;
            var_dump(bin2hex($res));
         }
   }
-
-  fclose($fp);
 
   echo "===DONE===\n";
 }

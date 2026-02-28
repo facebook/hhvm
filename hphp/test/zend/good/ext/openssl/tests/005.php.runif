@@ -1,2 +1,2 @@
 extension openssl
-function utf8_decode
+extension xml

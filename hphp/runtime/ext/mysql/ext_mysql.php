@@ -1,4 +1,9 @@
-<?hh // partial
+<?hh
+
+const int MYSQL_CLIENT_COMPRESS = 32;
+const int MYSQL_CLIENT_IGNORE_SPACE = 256;
+const int MYSQL_CLIENT_INTERACTIVE = 1024;
+const int MYSQL_CLIENT_SSL = 2048;
 
 /**
  * Get number of affected rows in previous MySQL operation
@@ -84,7 +89,7 @@ function mysql_connect(string $server = "",
                        int $client_flags = 0,
                        int $connect_timeout_ms = -1,
                        int $query_timeout_ms = -1,
-                       darray<string, string> $conn_attrs = darray[]): mixed;
+                       darray<string, string> $conn_attrs = dict[]): mixed;
 
 <<__Native("NoFCallBuiltin")>>
 function mysql_connect_with_db(string $server = "",
@@ -95,7 +100,7 @@ function mysql_connect_with_db(string $server = "",
                                int $client_flags = 0,
                                int $connect_timeout_ms = -1,
                                int $query_timeout_ms = -1,
-                               darray<string, string> $conn_attrs = darray[]): mixed;
+                               darray<string, string> $conn_attrs = dict[]): mixed;
 
 <<__Native("NoFCallBuiltin")>>
 function mysql_connect_with_ssl(string $server,
@@ -106,7 +111,7 @@ function mysql_connect_with_ssl(string $server,
                                int $connect_timeout_ms = -1,
                                int $query_timeout_ms = -1,
                                ?MySSLContextProvider $ssl_context = null,
-                               darray<string, string> $conn_attrs = darray[]): mixed;
+                               darray<string, string> $conn_attrs = dict[]): mixed;
 
 /**
  * Create a MySQL database
@@ -230,7 +235,7 @@ function mysql_error(?resource $link_identifier = NULL): mixed;
  * @return string - Returns the escaped string.
  */
 <<__Native>>
-function mysql_escape_string(string $unescaped_string): string;
+function mysql_escape_string(string $unescaped_string)[]: string;
 
 /**
  * Fetch a result row as an associative array, a numeric array, or both
@@ -683,7 +688,7 @@ function mysql_pconnect(string $server = '',
                         int $client_flags = 0,
                         int $connect_timeout_ms = -1,
                         int $query_timeout_ms = -1,
-                        darray<string, string> $conn_attrs = darray[]): mixed;
+                        darray<string, string> $conn_attrs = dict[]): mixed;
 
 <<__Native>>
 function mysql_pconnect_with_db(string $server = '',
@@ -693,7 +698,7 @@ function mysql_pconnect_with_db(string $server = '',
                                 int $client_flags = 0,
                                 int $connect_timeout_ms = -1,
                                 int $query_timeout_ms = -1,
-                                darray<string, string> $conn_attrs = darray[]): mixed;
+                                darray<string, string> $conn_attrs = dict[]): mixed;
 
 /**
  * Ping a server connection or reconnect if there is no connection

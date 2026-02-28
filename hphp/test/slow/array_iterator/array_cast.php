@@ -1,8 +1,8 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
-  $x = new ArrayIterator(darray['a' => 'b']);
+function main() :mixed{
+  $x = new ArrayIterator(dict['a' => 'b']);
   $x->p = 'q';
   var_dump(darray($x));
 }

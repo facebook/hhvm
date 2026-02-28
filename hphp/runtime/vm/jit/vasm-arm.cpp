@@ -75,6 +75,7 @@
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-block-counters.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-internal.h"
 #include "hphp/runtime/vm/jit/vasm-lower.h"
@@ -84,9 +85,12 @@
 #include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
+
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
-TRACE_SET_MOD(vasm);
+TRACE_SET_MOD(vasm)
 
 namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
@@ -213,12 +217,14 @@ struct Vgen {
     , jmps(env.jmps)
     , jccs(env.jccs)
     , catches(env.catches)
+    , vveneers(env.vveneers)
   {}
   ~Vgen() {
     env.cb->sync(base);
   }
 
   static void emitVeneers(Venv& env);
+  static void processVveneers(Venv& env);
   static void handleLiterals(Venv& env);
   static void retargetBinds(Venv& env);
   static void patch(Venv& env);
@@ -255,7 +261,10 @@ struct Vgen {
 
   // native function abi
   void emit(const call& i);
-  void emit(const callr& i) { a->Blr(X(i.target)); }
+  void emit(const callr& i) {
+    if (!i.stackUnaligned) trap_unaligned_stack();
+    a->Blr(X(i.target));
+  }
   void emit(const calls& i);
   void emit(const ret& /*i*/) { a->Ret(); }
 
@@ -272,12 +281,14 @@ struct Vgen {
     emit(callr{i.target, i.args});
     setCallFuncId(env, a->frontier());
   }
+  void emit(const inlinesideexit& i) {
+    emit(call{tc::ustubs().inlineSideExit, i.args});
+  }
   void emit(const contenter& i);
   void emit(const phpret& i);
 
   // vm entry abi
   void emit(const inittc& /*i*/) {}
-  void emit(const leavetc& i);
 
   // exceptions
   void emit(const landingpad& /*i*/) {}
@@ -301,6 +312,18 @@ struct Vgen {
   void emit(const andq& i) { a->And(X(i.d), X(i.s1), X(i.s0), UF(i.fl)); }
   void emit(const andqi& i) { a->And(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const andqi64& i) { a->And(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
+  void emit(const btrq& i) {
+    // NB: We can't directly store the result to i.d because, in case i.s1 is
+    // dead after the btrq, the register allocator may allocated both i.d and
+    // i.s1 to the same physical register, thus breaking the comparison
+    // (subtraction) that is done below.
+    a->Bic(rVixlScratch0, X(i.s1), 1 << i.s0.q());
+
+    // Subtract the original value from the result to set the carry bit based on
+    // whether they differ.
+    a->Sub(vixl::xzr, rVixlScratch0, X(i.s1), UF(i.fl));
+    a->Mov(X(i.d), rVixlScratch0);
+  }
   void emit(const cmovb& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovw& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovl& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
@@ -309,9 +332,9 @@ struct Vgen {
   // extend their arguments--these instructions are lowered to cmp{lq}[i] if
   // the comparison is not narrow or not equality/inequality
   void emit(const cmpb& i) { a->Cmp(W(i.s1), W(i.s0)); }
-  void emit(const cmpbi& i) { a->Cmp(W(i.s1), static_cast<uint8_t>(i.s0.b())); }
+  void emit(const cmpbi& i) { a->Cmp(W(i.s1), i.s0.ub()); }
   void emit(const cmpw& i) { a->Cmp(W(i.s1), W(i.s0)); }
-  void emit(const cmpwi& i) { a->Cmp(W(i.s1), static_cast<uint16_t>(i.s0.w())); }
+  void emit(const cmpwi& i) { a->Cmp(W(i.s1), i.s0.uw()); }
   void emit(const cmpl& i) { a->Cmp(W(i.s1), W(i.s0)); }
   void emit(const cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
   void emit(const cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
@@ -326,6 +349,7 @@ struct Vgen {
   void emit(const decl& i) { a->Sub(W(i.d), W(i.s), 1, UF(i.fl)); }
   void emit(const decq& i) { a->Sub(X(i.d), X(i.s), 1, UF(i.fl)); }
   void emit(const decqmlock& i);
+  void emit(const decqmlocknosf& i);
   void emit(const divint& i) { a->Sdiv(X(i.d), X(i.s0), X(i.s1)); }
   void emit(const divsd& i) { a->Fdiv(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const imul& i);
@@ -340,7 +364,6 @@ struct Vgen {
   void emit(const ldbindretaddr& i);
   void emit(const lea& i);
   void emit(const leap& i);
-  void emit(const leav& i);
   void emit(const lead& i);
   void emit(const loadb& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadl& i) { a->Ldr(W(i.d), M(i.s)); }
@@ -363,7 +386,6 @@ struct Vgen {
   void emit(const movswl& i) { a->Sxth(W(i.d), W(i.s)); }
   void emit(const movtqb& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(const movtqw& i) { a->Uxth(W(i.d), W(i.s)); }
-  void emit(const movtql& i) { a->Uxtw(W(i.d), W(i.s)); }
   void emit(const movzbq& i) { a->Uxtb(X(i.d), W(i.s).X()); }
   void emit(const movzwq& i) { a->Uxth(X(i.d), W(i.s).X()); }
   void emit(const movzlq& i) { a->Uxtw(X(i.d), W(i.s).X()); }
@@ -371,7 +393,7 @@ struct Vgen {
   void emit(const neg& i) { a->Neg(X(i.d), X(i.s), UF(i.fl)); }
   void emit(const nop& /*i*/) { a->Nop(); }
   void emit(const notb& i) { a->Mvn(W(i.d), W(i.s)); }
-  void emit(const not& i) { a->Mvn(X(i.d), X(i.s)); }
+  void emit(const not_& i) { a->Mvn(X(i.d), X(i.s)); }
   void emit(const orbi& i);
   void emit(const orq& i);
   void emit(const orwi& i);
@@ -420,13 +442,20 @@ struct Vgen {
   void emit(const xorl& i);
   void emit(const xorq& i);
   void emit(const xorqi& i);
+  void emit(const crc32q& i) { a->Crc32cx(W(i.d), W(i.s1), X(i.s0)); }
 
   // arm intrinsics
-  void emit(const prefetch& /*i*/) { /* ignored */ }
+  void emit(const prefetch& i) { a->Prfm(PLDL1KEEP, M(i.m)); }
   void emit(const fcvtzs& i) { a->Fcvtzs(X(i.d), D(i.s)); }
   void emit(const mrs& i) { a->Mrs(X(i.r), vixl::SystemRegister(i.s.l())); }
   void emit(const msr& i) { a->Msr(vixl::SystemRegister(i.s.l()), X(i.r)); }
   void emit(const ubfmli& i) { a->ubfm(W(i.d), W(i.s), i.mr.w(), i.ms.w()); }
+  void emit(const ubfmliq& i) { a->ubfm(X(i.d), X(i.s), i.mr.l(), i.ms.l()); }
+  void emit(const sbfizq& i) { a->Sbfiz(X(i.d), X(i.s), i.shift.l(), i.width.l()); }
+  void emit(const storepair& i) { a->Stp(X(i.s0), X(i.s1), M(i.d)); }
+  void emit(const storepairl& i) { a->Stp(W(i.s0), W(i.s1), M(i.d)); }
+  void emit(const loadpair& i) { a->Ldp(X(i.d0), X(i.d1), M(i.s)); }
+  void emit(const loadpairl& i) { a->Ldp(W(i.d0), W(i.d1), M(i.s)); }
 
   void emit_nop() { a->Nop(); }
 
@@ -439,6 +468,8 @@ private:
     env.meta.addressImmediates.insert(env.cb->frontier());
   }
 
+  void trap_unaligned_stack();
+
 private:
   Venv& env;
   vixl::MacroAssembler assem;
@@ -450,9 +481,23 @@ private:
   jit::vector<Venv::LabelPatch>& jmps;
   jit::vector<Venv::LabelPatch>& jccs;
   jit::vector<Venv::LabelPatch>& catches;
+  jit::vector<Venv::LabelPatch>& vveneers;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void Vgen::trap_unaligned_stack() {
+  if (!Cfg::Jit::TrapUnalignedStackCalls) return;
+
+  // We can't test rsp directly, so copy it to rVixlScratch0.
+  a->Mov(rVixlScratch0, X(arm::rsp()));
+  a->Tst(rVixlScratch0, 0xf); // should be 0 => 16-byte aligned
+  vixl::Label Call;
+  a->B(&Call, C(jit::CC_Z));
+  env.meta.trapReasons.emplace_back(a->frontier(), "unaligned native call");
+  a->Brk(1);
+  a->bind(&Call);
+}
 
 static CodeBlock* getBlock(Venv& env, CodeAddress a) {
   for (auto const& area : env.text.areas()) {
@@ -593,6 +638,13 @@ void Vgen::handleLiterals(Venv& env) {
     auto const patchAddressActual =
       Instruction::Cast(env.text.toDestAddress(pl.patchAddress));
     assertx(patchAddressActual->IsLoadLiteral());
+
+    // Assert that the PC-relative offset fits in LDR's imm19 immediate.
+    auto const imm = static_cast<int64_t>(literalAddress - pl.patchAddress);
+    always_assert_flog(is_int21(imm),
+                       "handleLiterals(): literalAddress ({}) is too far from LDR ({})\n",
+                       literalAddress, pl.patchAddress);
+
     patchAddressActual->SetImmPCOffsetTarget(
       Instruction::Cast(literalAddress),
       Instruction::Cast(pl.patchAddress));
@@ -621,6 +673,14 @@ void Vgen::handleLiterals(Venv& env) {
 void Vgen::retargetBinds(Venv& env) {
 }
 
+void Vgen::processVveneers(Venv& env) {
+  for (auto& vv : env.vveneers) {
+    FTRACE(3, "processVveneers: source: {}  target: {} ({})\n",
+           vv.instr, env.addrs[vv.target], vv.target);
+    addVeneer(env.meta, vv.instr, env.addrs[vv.target]);
+  }
+}
+
 void Vgen::patch(Venv& env) {
   // Patch the 32 bit target of the LDR
   auto patch = [&env](TCA instr, TCA target) {
@@ -640,7 +700,7 @@ void Vgen::patch(Venv& env) {
     auto addr = env.text.toDestAddress(p.instr);
     auto const target = env.addrs[p.target];
     assertx(target);
-    if (env.meta.smashableLocations.count(p.instr)) {
+    if (env.meta.smashableLocations.contains(p.instr)) {
       assertx(possiblySmashableJmp(addr));
       // Update `addr' to point to the veneer.
       addr = TCA(vixl::Instruction::Cast(addr)->ImmPCOffsetTarget());
@@ -652,7 +712,7 @@ void Vgen::patch(Venv& env) {
     auto addr = env.text.toDestAddress(p.instr);
     auto const target = env.addrs[p.target];
     assertx(target);
-    if (env.meta.smashableLocations.count(p.instr)) {
+    if (env.meta.smashableLocations.contains(p.instr)) {
       assertx(possiblySmashableJcc(addr));
       // Update `addr' to point to the veneer.
       addr = TCA(vixl::Instruction::Cast(addr)->ImmPCOffsetTarget());
@@ -665,8 +725,16 @@ void Vgen::patch(Venv& env) {
     patch(addr, target);
   }
   for (auto const& p : env.leas) {
-    (void)p;
-    not_implemented();
+    auto addr = env.text.toDestAddress(p.instr);
+    auto const target = env.vaddrs[p.target];
+
+    // Get the address the LDR loads.
+    auto const ldr = Instruction::Cast(addr);
+    assertx(ldr->Mask(LoadLiteralMask) == LDR_w_lit);
+    auto literalAddr = ldr->LiteralAddress();
+
+    // Patch it to target
+    patchTarget32(literalAddr, target);
   }
 }
 
@@ -692,9 +760,11 @@ void Vgen::emit(const copy2& i) {
   assertx(d0 != d1);
   if (d0 == s1) {
     if (d1 == s0) {
-      a->Eor(X(d0), X(d0), X(s0));
-      a->Eor(X(s0), X(d0), X(s0));
-      a->Eor(X(d0), X(d0), X(s0));
+      a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);
+      a->Mov(rVixlScratch0, X(d0));
+      a->Mov(X(d0), X(s0));
+      a->Mov(X(s0), rVixlScratch0);
+      a->SetScratchRegisters(rVixlScratch0, rVixlScratch1);
     } else {
       // could do this in a simplify pass
       if (s1 != d1) a->Mov(X(s1), X(d1)); // save s1 first; d1 != s0
@@ -788,6 +858,7 @@ void Vgen::emit(const mcprep& i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const call& i) {
+  if (!i.stackUnaligned) trap_unaligned_stack();
   recordAddressImmediate();
   a->Mov(rAsm, i.target);
   a->Blr(rAsm);
@@ -798,7 +869,12 @@ void Vgen::emit(const call& i) {
 }
 
 void Vgen::emit(const calls& i) {
+  trap_unaligned_stack();
   emitSmashableCall(*env.cb, env.meta, i.target);
+  if (i.watch) {
+    *i.watch = a->frontier();
+    env.meta.watchpoints.push_back(i.watch);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -841,15 +917,6 @@ void Vgen::emit(const contenter& i) {
   recordAddressImmediate();
   a->Bl(&stub);
   emit(unwind{{i.targets[0], i.targets[1]}});
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void Vgen::emit(const leavetc& /*i*/) {
-  // The LR was preserved on the stack by resumetc. Pop it while preserving
-  // SP alignment and return.
-  a->Ldp(rAsm, X(rlr()), MemOperand(sp, 16, PostIndex));
-  a->Ret();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -939,9 +1006,9 @@ void Vgen::emit(const decqmlock& i) {
   auto adr = M(i.m);
   /* Use VIXL's macroassembler scratch regs. */
   a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);
-  if (RuntimeOption::EvalJitArmLse) {
+  if (Cfg::Jit::ArmLse) {
     a->Mov(rVixlScratch0, -1);
-    a->ldaddal(rVixlScratch0, rVixlScratch0, adr);
+    a->ldadd(rVixlScratch0, rVixlScratch0, adr);
     a->Sub(rAsm, rVixlScratch0, 1, SetFlags);
   } else {
     vixl::Label again;
@@ -956,26 +1023,61 @@ void Vgen::emit(const decqmlock& i) {
   a->SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 }
 
+void Vgen::emit(const decqmlocknosf& i) {
+  auto adr = M(i.m);
+  /* Use VIXL's macroassembler scratch regs. */
+  a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);
+  if (Cfg::Jit::ArmLse) {
+    a->Mov(rVixlScratch0, -1);
+    a->ldadd(rVixlScratch0, rVixlScratch0, adr);
+    a->Sub(rAsm, rVixlScratch0, 1, LeaveFlags);
+  } else {
+    vixl::Label again;
+    a->bind(&again);
+    a->ldxr(rAsm, adr);
+    a->Sub(rAsm, rAsm, 1, LeaveFlags);
+    a->stxr(rVixlScratch0, rAsm, adr);
+    recordAddressImmediate();
+    a->Cbnz(rVixlScratch0, &again);
+  }
+  /* Restore VIXL's scratch regs. */
+  a->SetScratchRegisters(rVixlScratch0, rVixlScratch1);
+}
+
 void Vgen::emit(const jcc& i) {
   if (i.targets[1] != i.targets[0]) {
     if (next == i.targets[1]) {
       return emit(jcc{ccNegate(i.cc), i.sf, {i.targets[1], i.targets[0]}});
     }
     auto taken = i.targets[1];
-    jccs.push_back({a->frontier(), taken});
-    vixl::Label skip, data;
 
-    // Emit a "far JCC" sequence for easy patching later.  Static relocation
-    // might be able to simplify this later (see optimizeFarJcc()).
-    recordAddressImmediate();
-    a->B(&skip, vixl::InvertCondition(C(i.cc)));
-    recordAddressImmediate();
-    poolLiteral(*env.cb, env.meta, (uint64_t)makeTarget32(a->frontier()),
-                32, false);
-    a->bind(&data);  // This will be remmaped during the handleLiterals phase.
-    a->Ldr(rAsm_w, &data);
-    a->Br(rAsm);
-    a->bind(&skip);
+    // If the taken block is in a different code area than the jcc, we emit a
+    // veneer and jump through it to the taken block.  This avoids having to
+    // flip the branch and penalizing the fall-through path.  Otherwise, we flip
+    // the branch and emit a "far JCC" sequence that should be optimized later
+    // during relocation's optimizeFarJcc, which will flip the branch back.
+    if (env.unit.blocks[env.current].area_idx != env.unit.blocks[taken].area_idx) {
+      auto source = a->frontier();
+      vveneers.push_back({source, taken});
+      vixl::Label veneer_addr;
+      a->bind(&veneer_addr);
+      a->b(&veneer_addr, arm::convertCC(i.cc)); // NB: this will be patched later.
+    } else {
+      jccs.push_back({a->frontier(), taken});
+      vixl::Label skip, data;
+
+      // Emit a "far JCC" sequence for easy patching later.  Static relocation
+      // might be able to simplify this later (see optimizeFarJcc()).
+      recordAddressImmediate();
+      a->B(&skip, vixl::InvertCondition(C(i.cc)));
+      recordAddressImmediate();
+      poolLiteral(*env.cb, env.meta, (uint64_t)makeTarget32(a->frontier()),
+                  32, false);
+      a->bind(&data);  // This will be remmaped during the handleLiterals phase.
+      a->Ldr(rAsm_w, &data);
+      a->Br(rAsm);
+      a->bind(&skip);
+    }
   }
   emit(jmp{i.targets[0]});
 }
@@ -1006,21 +1108,13 @@ void Vgen::emit(const jmp& i) {
 void Vgen::emit(const jmpi& i) {
   vixl::Label data;
 
-  // If target can be addressed by pc relative offset (signed 26 bits), emit
-  // PC relative jump. Else, emit target address into code and load from there.
-  auto diff = (i.target - a->frontier()) >> vixl::kInstructionSizeLog2;
-  if (vixl::is_int26(diff)) {
-    recordAddressImmediate();
-    a->b(diff);
-  } else {
-    // Cannot use simple a->Mov() since such a sequence cannot be
-    // adjusted while live following a relocation.
-    recordAddressImmediate();
-    poolLiteral(*env.cb, env.meta, (uint64_t)i.target, 32, false);
-    a->bind(&data); // This will be remapped during the handleLiterals phase.
-    a->Ldr(rAsm_w, &data);
-    a->Br(rAsm);
-  }
+  // Cannot use simple a->Mov() since such a sequence cannot be
+  // adjusted while live following a relocation.
+  recordAddressImmediate();
+  poolLiteral(*env.cb, env.meta, (uint64_t)i.target, 32, false);
+  a->bind(&data); // This will be remapped during the handleLiterals phase.
+  a->Ldr(rAsm_w, &data);
+  a->Br(rAsm);
 }
 
 void Vgen::emit(const ldbindretaddr& i) {
@@ -1038,12 +1132,6 @@ void Vgen::emit(const lea& i) {
   } else {
     a->Add(X(i.d), X(p.base), p.disp);
   }
-}
-
-void Vgen::emit(const leav& i) {
-  auto const addr = a->frontier();
-  emit(leap{reg::rip[(intptr_t)addr], i.d});
-  env.leas.push_back({addr, i.s});
 }
 
 void Vgen::emit(const leap& i) {
@@ -1100,18 +1188,18 @@ void Vgen::emit(const vasm_opc& i) {                  \
   }                                                   \
 }
 
-Y(orbi, Orr, W, i.s0.ub(), wzr);
-Y(orwi, Orr, W, i.s0.uw(), xzr);
-Y(orli, Orr, W, i.s0.l(), xzr);
-Y(orqi, Orr, X, i.s0.q(), xzr);
-Y(orq, Orr, X, X(i.s0), xzr);
-Y(xorb, Eor, W, W(i.s0), wzr);
-Y(xorbi, Eor, W, i.s0.ub(), wzr);
-Y(xorw, Eor, W, W(i.s0), wzr);
-Y(xorwi, Eor, W, i.s0.uw(), wzr);
-Y(xorl, Eor, W, W(i.s0), wzr);
-Y(xorq, Eor, X, X(i.s0), xzr);
-Y(xorqi, Eor, X, i.s0.q(), xzr);
+Y(orbi, Orr, W, i.s0.ub(), wzr)
+Y(orwi, Orr, W, i.s0.uw(), xzr)
+Y(orli, Orr, W, i.s0.l(), xzr)
+Y(orqi, Orr, X, i.s0.q(), xzr)
+Y(orq, Orr, X, X(i.s0), xzr)
+Y(xorb, Eor, W, W(i.s0), wzr)
+Y(xorbi, Eor, W, i.s0.ub(), wzr)
+Y(xorw, Eor, W, W(i.s0), wzr)
+Y(xorwi, Eor, W, i.s0.uw(), wzr)
+Y(xorl, Eor, W, W(i.s0), wzr)
+Y(xorq, Eor, X, X(i.s0), xzr)
+Y(xorqi, Eor, X, i.s0.q(), xzr)
 
 #undef Y
 
@@ -1160,7 +1248,13 @@ void Vgen::emit(const srem& i) {
 
 void Vgen::emit(const trap& i) {
   env.meta.trapReasons.emplace_back(a->frontier(), i.reason);
-  a->Brk(1);
+  if (i.fix.isValid()) {
+    env.meta.trapFixups.emplace_back(a->frontier(), i.fix);
+    env.record_inline_stack(a->frontier());
+  }
+  // UDF #1 — permanently undefined instruction that raises SIGILL, matching
+  // x86_64's ud2 behavior. TODO: switch to a->udf(1) once vixl is updated.
+  a->dc32(1);
 }
 
 void Vgen::emit(const unpcklpd& i) {
@@ -1173,29 +1267,17 @@ void Vgen::emit(const unpcklpd& i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const cmpsd& i) {
-  /*
-   * cmpsd doesn't update SD, so read the flags into a temp.
-   * Use one of the macroassembler scratch regs .
-   */
-  a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);
-  a->Mrs(rVixlScratch0, NZCV);
-
-  a->Fcmp(D(i.s0), D(i.s1));
+  a->fcmeq(D(i.d), D(i.s0), D(i.s1));
   switch (i.pred) {
   case ComparisonPred::eq_ord:
-    a->Csetm(rAsm, C(jit::CC_E));
+    // Do nothing
     break;
   case ComparisonPred::ne_unord:
-    a->Csetm(rAsm, C(jit::CC_NE));
+    a->mvn(D(i.d), D(i.d));
     break;
   default:
     always_assert(false);
   }
-  a->Fmov(D(i.d), rAsm);
-
-  /* Copy the flags back to the system register. */
-  a->Msr(NZCV, rVixlScratch0);
-  a->SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 }
 
 
@@ -1397,10 +1479,62 @@ void lower(const VLS& /*env*/, Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 
+enum ImmediateStyle : uint16_t {
+  kUnscaledSignedImmediate9 = 0,
+  kXPositiveImmediate12,
+  kWPositiveImmediate12,
+  kHPositiveImmediate12,
+  kBPositiveImmediate12,
+  kLegacyStyle = kUnscaledSignedImmediate9,
+};
+
+static const struct {
+  const int16_t immMin;
+  const int16_t immMax;
+  const uint8_t immStep;
+  const bool assertOnOutOfRange;
+} ImmediateCharacteristics[] = {
+  // kUnscaledSignedImmediate9
+  {
+    .immMin = -256,
+    .immMax = 255,
+    .immStep = 1,
+    .assertOnOutOfRange = false,
+  },
+  // kXPositiveImmediate12
+  {
+    .immMin = 0,
+    .immMax = 32760,
+    .immStep = 8,
+    .assertOnOutOfRange = false,
+  },
+  // kWPositiveImmediate12
+  {
+    .immMin = 0,
+    .immMax = 16380,
+    .immStep = 4,
+    .assertOnOutOfRange = false,
+  },
+  // kHPositiveImmediate12
+  {
+    .immMin = 0,
+    .immMax = 8190,
+    .immStep = 2,
+    .assertOnOutOfRange = false,
+  },
+  // kBPositiveImmediate12
+  {
+    .immMin = 0,
+    .immMax = 4095,
+    .immStep = 1,
+    .assertOnOutOfRange = false,
+  },
+};
+
 /*
  * TODO: Using load size (ldr[bh]?), apply scaled address if 'disp' is unsigned
  */
-void lowerVptr(Vptr& p, Vout& v) {
+void lowerVptr(Vptr& p, Vout& v, ImmediateStyle is = kLegacyStyle, ImmediateStyle alt = kLegacyStyle) {
   enum {
     BASE = 1,
     INDEX = 2,
@@ -1412,8 +1546,16 @@ void lowerVptr(Vptr& p, Vout& v) {
                   (((p.disp != 0)     & 0x1) << 2));
   switch (mode) {
     case BASE:
+      // ldr/str allow [base], nothing to lower.
+      break;
+
     case BASE | INDEX:
-      // ldr/str allow [base] and [base, index], nothing to lower.
+      if (p.scale != 1 && p.scale != uint8_t(p.width)) {
+        auto t = v.makeReg();
+        v << shlqi{Log2(p.scale), p.index, t, v.makeReg()};
+        p.index = t;
+        p.scale = 1;
+      }
       break;
 
     case INDEX:
@@ -1430,9 +1572,19 @@ void lowerVptr(Vptr& p, Vout& v) {
       break;
 
     case BASE | DISP: {
-      // ldr/str allow [base, #imm], where #imm is [-256 .. 255].
-      if (p.disp >= -256 && p.disp <= 255)
+      // if the immediate value can be directly encoded we have nothing to do
+      if (p.disp >= ImmediateCharacteristics[is].immMin &&
+          p.disp <= ImmediateCharacteristics[is].immMax &&
+          (p.disp % ImmediateCharacteristics[is].immStep) == 0)
         break;
+      if (is != alt &&
+          p.disp >= ImmediateCharacteristics[alt].immMin &&
+          p.disp <= ImmediateCharacteristics[alt].immMax &&
+          (p.disp % ImmediateCharacteristics[alt].immStep) == 0)
+        break;
+      if (ImmediateCharacteristics[is].assertOnOutOfRange) {
+        always_assert(false && "Immediate value out of range");
+      }
 
       // #imm is out of range, convert to [base, index]
       auto index = v.makeReg();
@@ -1493,6 +1645,74 @@ void lowerVptr(Vptr& p, Vout& v) {
   }
 }
 
+#define Y(vasm_opc, m, n)                                   \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
+    if (i.n.isGP())                                         \
+      lowerVptr(i.m, v, kXPositiveImmediate12,              \
+          kUnscaledSignedImmediate9);                       \
+    else                                                    \
+      lowerVptr(i.m, v, kUnscaledSignedImmediate9,          \
+          kUnscaledSignedImmediate9);                       \
+    v << i;                                                 \
+  });                                                       \
+}
+
+Y(load, s, d)
+Y(store, d, s)
+
+#undef Y
+
+#define Y(vasm_opc, m)                                      \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
+    lowerVptr(i.m, v, kWPositiveImmediate12,                \
+        kUnscaledSignedImmediate9);                         \
+    v << i;                                                 \
+  });                                                       \
+}
+
+Y(loadl, s)
+Y(loadtql, s)
+Y(loadzlq, s)
+Y(storel, m)
+
+#undef Y
+
+#define Y(vasm_opc, m)                                      \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
+    lowerVptr(i.m, v, kBPositiveImmediate12,                \
+        kUnscaledSignedImmediate9);                         \
+    v << i;                                                 \
+  });                                                       \
+}
+
+Y(loadb, s)
+Y(loadtqb, s)
+Y(loadzbl, s)
+Y(loadzbq, s)
+Y(storeb, m)
+Y(loadsbq, s)
+Y(loadsbl, s)
+
+#undef Y
+
+#define Y(vasm_opc, m)                                      \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
+    lowerVptr(i.m, v, kHPositiveImmediate12,                \
+        kUnscaledSignedImmediate9);                         \
+    v << i;                                                 \
+  });                                                       \
+}
+
+Y(loadw, s)
+Y(loadzwq, s)
+Y(storew, m)
+
+#undef Y
+
 #define Y(vasm_opc, m)                                      \
 void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
   lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
@@ -1502,24 +1722,12 @@ void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
 }
 
 Y(decqmlock, m)
+Y(decqmlocknosf, m)
 Y(lea, s)
-Y(load, s)
-Y(loadb, s)
-Y(loadl, s)
 Y(loadsd, s)
-Y(loadtqb, s)
-Y(loadtql, s)
 Y(loadups, s)
-Y(loadw, s)
-Y(loadzbl, s)
-Y(loadzbq, s)
-Y(loadzlq, s)
-Y(store, d)
-Y(storeb, m)
-Y(storel, m)
 Y(storesd, m)
 Y(storeups, m)
-Y(storew, m)
 
 #undef Y
 
@@ -1640,29 +1848,38 @@ Y(incwm, incw, loadw, storew, m)
 
 void lower(const VLS& e, cvttsd2siq& i, Vlabel b, size_t idx) {
   lower_impl(e.unit, b, idx, [&] (Vout& v) {
-    // Clear FPSR IOC flag.
-    auto const tmp1 = v.makeReg();
-    auto const tmp2 = v.makeReg();
-    v << mrs{FPSR, tmp1};
-    v << andqi{~0x01, tmp1, tmp2, v.makeReg()};
-    v << msr{tmp2, FPSR};
+    // Move i.s to a GP register verbatim.
+    auto const dbl_bits = v.makeReg();
+    v << copy{i.s, dbl_bits};
 
-    // Load error value.
-    auto const err = v.makeReg();
-    v << ldimmq{0x8000000000000000, err};
+    // Extract the exponent of the double value.
+    auto const dbl_exp = v.makeReg();
+    v << ubfmliq(52, 52 + 11 - 1, dbl_bits, dbl_exp);
+
+    // Compare against 0x43e, which is 63 if unbiased (0x43e - 1023 = 63).
+    auto const sf = v.makeReg();
+    v << cmpqi(0x43e, dbl_exp, sf);
 
     // Do ARM64's double to signed int64 conversion.
     auto const res = v.makeReg();
     v << fcvtzs{i.s, res};
 
-    // Check if there was a conversion error.
-    auto const fpsr = v.makeReg();
-    auto const sf = v.makeReg();
-    v << mrs{FPSR, fpsr};
-    v << testqi{1, fpsr, sf};
+    // Load error value (-2^63)
+    auto const err = v.cns(0x8000000000000000L);
 
     // Move converted value or error.
-    v << cmovq{CC_NZ, sf, res, err, i.d};
+    // If exp < 63, the double value is finite and within the range of
+    // -2^63 and 2^63 - 1, so fcvtzs always succeeds and the value is
+    // chosen as the result.
+    // Otherwise, below are all the cases:
+    // 1. If dbl is positive, then dbl is >= 2^63, or dbl is an infinity
+    //    or NaN. Converting those values to int64 certainly fails and
+    //    we choose the error value.
+    // 2. If dbl is negative, then dbl is <= -2^63, or dbl is an infinity
+    //    or NaN. If dbl is -2^63, the converted integer value is still
+    //    -2^63, so the error value is actually correct. The other cases
+    //    will lead to conversion failure, which will pick the error value.
+    v << cmovq{CC_AE, sf, res, err, i.d};
   });
 }
 
@@ -1686,6 +1903,29 @@ void lower(const VLS& e, jmpm& i, Vlabel b, size_t z) {
 
     v << load{i.target, scratch};
     v << jmpr{scratch, i.args};
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void lower(const VLS& e, restoreripm& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
+    lowerVptr(i.s, v);
+    v << load{i.s, rlr()};
+  });
+}
+
+void lower(const VLS& e, saverips& /*i*/, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
+    // Push LR twice to keep stack aligned.
+    v << pushp{rlr(), rlr()};
+  });
+}
+
+void lower(const VLS& e, restorerips& /*i*/, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
+    // Pop LR and the stack alignment padding.
+    v << popp{PhysReg(rAsm), rlr()};
   });
 }
 
@@ -1770,10 +2010,15 @@ void lower(const VLS& e, phplogue& i, Vlabel b, size_t z) {
 
 void lower(const VLS& e, resumetc& i, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
-    // Call the translation target.
-    v << callr{i.target, i.args};
+    // Jump to the translation target.
+    v << jmpr{i.target, i.args};
+  });
+}
 
-    // After returning to the translation, jump directly to the exit.
+  ///////////////////////////////////////////////////////////////////////////////
+
+void lower(const VLS& e, leavetc& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     v << jmpi{i.exittc};
   });
 }
@@ -1839,6 +2084,12 @@ void lower(const VLS& e, movzbl& i, Vlabel b, size_t z) {
 
 void lower(const VLS& e, movzwl& i, Vlabel b, size_t z) {
   lower_movz(e, i, b, z);
+}
+
+void lower(const VLS& e, movtql& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
+    v << copy{i.s, i.d};
+  });
 }
 
 void lower(const VLS& e, movtdb& i, Vlabel b, size_t z) {
@@ -1926,12 +2177,12 @@ void lowerForARM(Vunit& unit) {
 }
 
 void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
-  Timer timer(Timer::vasm_optimize);
+  Timer timer(Timer::vasm_optimize, unit.log_entry);
 
   removeTrivialNops(unit);
   optimizePhis(unit);
   fuseBranches(unit);
-  optimizeJmps(unit, false);
+  optimizeJmps(unit, false, true);
 
   assertx(checkWidths(unit));
 
@@ -1955,7 +2206,9 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
     if (regalloc) {
       splitCriticalEdges(unit);
 
-      if (RuntimeOption::EvalUseGraphColor &&
+      VasmBlockCounters::profileGuidedUpdate(unit);
+
+      if (Cfg::Eval::UseGraphColor &&
           unit.context &&
           (unit.context->kind == TransKind::Optimize ||
            unit.context->kind == TransKind::OptPrologue)) {
@@ -1963,11 +2216,13 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
       } else {
         allocateRegistersWithXLS(unit, abi);
       }
+
+      postRASimplify(unit);
     }
   }
 
   optimizeExits(unit);
-  optimizeJmps(unit, true);
+  optimizeJmps(unit, true, false);
 }
 
 void emitARM(Vunit& unit, Vtext& text, CGMeta& fixups,

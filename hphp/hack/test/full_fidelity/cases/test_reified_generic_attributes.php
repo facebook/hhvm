@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f<<<__Attr>> reify T>() {}
 function g< <<__Attr>> reify U>() {}

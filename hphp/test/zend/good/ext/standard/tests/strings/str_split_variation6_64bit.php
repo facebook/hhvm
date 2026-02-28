@@ -16,7 +16,7 @@ echo "*** Testing str_split() : different intger values for 'split_length' ***\n
 $str = 'This is a string with 123 & escape char \t';
 
 //different values for 'split_length'
-$values = varray [
+$values = vec[
   0,
   1,
   -123,  //negative integer

@@ -37,8 +37,9 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/configs/php7.h"
 
-#include <folly/tracing/StaticTracepoint.h>
+#include <usdt/usdt.h>
 
 namespace HPHP {
 
@@ -56,7 +57,7 @@ struct InvalidSetMException : std::runtime_error {
 
   ~InvalidSetMException() noexcept override {}
 
-  const TypedValue& tv() const { return m_tv; };
+  const TypedValue& tv() const { return m_tv; }
 
  private:
   /* m_tv will contain a TypedValue with a reference destined for the
@@ -79,9 +80,9 @@ enum class KeyType {
 
 /* KeyTypeTraits maps from KeyType to the C++ type holding they key. */
 template<KeyType> struct KeyTypeTraits;
-template<> struct KeyTypeTraits<KeyType::Any> { typedef TypedValue type; };
-template<> struct KeyTypeTraits<KeyType::Int> { typedef int64_t type; };
-template<> struct KeyTypeTraits<KeyType::Str> { typedef StringData* type; };
+template<> struct KeyTypeTraits<KeyType::Any> { using type = TypedValue; };
+template<> struct KeyTypeTraits<KeyType::Int> { using type = int64_t; };
+template<> struct KeyTypeTraits<KeyType::Str> { using type = StringData*; };
 
 /* key_type is the type used in the signatures of functions taking a member
  * key. */
@@ -100,14 +101,6 @@ inline TypedValue initScratchKey(int64_t key) {
 inline TypedValue initScratchKey(StringData* key) {
   return make_tv<KindOfString>(key);
 }
-
-/* keyAsValue transforms a key into a value suitable for indexing into an
- * Array. */
-inline const Variant& keyAsValue(TypedValue& key) {
-  return tvAsCVarRef(&key);
-}
-inline int64_t keyAsValue(int64_t key)           { return key; }
-inline StrNR keyAsValue(StringData* key)         { return StrNR(key); }
 
 /* prepareKey is used by operations that need to cast their key to a
  * string. For generic keys, the returned value must be decreffed after use. */
@@ -160,7 +153,7 @@ inline void raiseFalseyPromotion(tv_rval base) {
 
 [[noreturn]]
 inline void raiseEmptyObject() {
-  if (RuntimeOption::PHP7_EngineExceptions) {
+  if (Cfg::PHP7::EngineExceptions) {
     SystemLib::throwErrorObject(Strings::SET_PROP_NON_OBJECT);
   } else {
     SystemLib::throwExceptionObject(Strings::SET_PROP_NON_OBJECT);
@@ -429,6 +422,7 @@ template<MOpMode mode, KeyType keyType>
 NEVER_INLINE TypedValue ElemSlow(TypedValue base, key_type<keyType> key) {
   assertx(tvIsPlausible(base));
 
+  auto const op = "index";
   switch (base.type()) {
     case KindOfUninit:
     case KindOfNull:
@@ -441,14 +435,15 @@ NEVER_INLINE TypedValue ElemSlow(TypedValue base, key_type<keyType> key) {
     case KindOfRFunc:
     case KindOfRClsMeth:
     case KindOfFunc:
+    case KindOfEnumClassLabel:
       return ElemScalar();
     case KindOfClass:
       return ElemString<mode, keyType>(
-        classToStringHelper(val(base).pclass), key
+        classToStringHelper(val(base).pclass, op), key
       );
     case KindOfLazyClass:
       return ElemString<mode, keyType>(
-        lazyClassToStringHelper(val(base).plazyclass), key
+        lazyClassToStringHelper(val(base).plazyclass, op), key
       );
     case KindOfPersistentString:
     case KindOfString:
@@ -743,6 +738,7 @@ tv_lval ElemD(tv_lval base, key_type<keyType> key) {
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return ElemDScalar();
     case KindOfPersistentString:
     case KindOfString:
@@ -963,6 +959,7 @@ tv_lval ElemU(tv_lval base, key_type<keyType> key) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
+    case KindOfEnumClassLabel:
       // Unset on scalar base never modifies the base, but the const_cast is
       // necessary to placate the type system.
       return const_cast<TypedValue*>(&immutable_uninit_base);
@@ -1062,6 +1059,7 @@ inline tv_lval NewElem(tv_lval base) {
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return NewElemInvalid();
     case KindOfPersistentString:
     case KindOfString:
@@ -1180,7 +1178,7 @@ inline StringData* SetElemString(tv_lval base, key_type<keyType> key,
   if (x < baseLen && !oldp->cowCheck()) {
     // Modify base in place.  This is safe because the LHS owns the
     // only reference.
-    FOLLY_SDT(hhvm, hhvm_mut_modifychar, baseLen, x);
+    USDT(hhvm, hhvm_mut_modifychar, baseLen, x);
     auto const newp = oldp->modifyChar(x, y);
     if (UNLIKELY(newp != oldp)) {
       // only way we can get here is due to a private (count==1) apc string.
@@ -1190,7 +1188,7 @@ inline StringData* SetElemString(tv_lval base, key_type<keyType> key,
     }
     // NB: if x < capacity, we could have appended in-place here.
   } else {
-    FOLLY_SDT(hhvm, hhvm_cow_modifychar, baseLen, x);
+    USDT(hhvm, hhvm_cow_modifychar, baseLen, x);
     StringData* sd = StringData::Make(slen);
     char* s = sd->mutableData();
     memcpy(s, oldp->data(), baseLen);
@@ -1356,6 +1354,7 @@ StringData* SetElemSlow(tv_lval base, key_type<keyType> key,
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       SetElemScalar<setResult>(value);
       return nullptr;
     case KindOfPersistentString:
@@ -1532,6 +1531,7 @@ inline void SetNewElem(tv_lval base, TypedValue* value) {
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return SetNewElemScalar<setResult>(value);
     case KindOfPersistentString:
     case KindOfString:
@@ -1637,6 +1637,7 @@ inline TypedValue SetOpElem(SetOpOp op, tv_lval base,
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return SetOpElemScalar();
 
     case KindOfPersistentString:
@@ -1704,6 +1705,7 @@ inline TypedValue SetOpNewElem(SetOpOp op, tv_lval base, TypedValue* rhs) {
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return SetOpNewElemScalar();
 
     case KindOfPersistentString:
@@ -1801,6 +1803,7 @@ inline TypedValue IncDecElem(IncDecOp op, tv_lval base, TypedValue key) {
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return IncDecElemScalar();
 
     case KindOfPersistentString:
@@ -1873,6 +1876,7 @@ inline TypedValue IncDecNewElem(IncDecOp op, tv_lval base) {
     case KindOfRClsMeth:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return IncDecNewElemScalar();
 
     case KindOfPersistentString:
@@ -2044,6 +2048,7 @@ void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
+    case KindOfEnumClassLabel:
       return; // Do nothing.
 
     case KindOfRFunc:
@@ -2208,6 +2213,7 @@ template <KeyType keyType>
 NEVER_INLINE bool IssetElemSlow(TypedValue base, key_type<keyType> key) {
   assertx(tvIsPlausible(base));
 
+  auto const op = "isset";
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
@@ -2218,16 +2224,17 @@ NEVER_INLINE bool IssetElemSlow(TypedValue base, key_type<keyType> key) {
     case KindOfRFunc:
     case KindOfRClsMeth:
     case KindOfFunc:
+    case KindOfEnumClassLabel:
       return false;
 
     case KindOfClass:
       return IssetElemString<keyType>(
-        classToStringHelper(val(base).pclass), key
+        classToStringHelper(val(base).pclass, op), key
       );
 
     case KindOfLazyClass:
       return IssetElemString<keyType>(
-        lazyClassToStringHelper(val(base).plazyclass), key
+        lazyClassToStringHelper(val(base).plazyclass, op), key
       );
 
     case KindOfPersistentString:
@@ -2290,7 +2297,7 @@ tv_lval propPreStdclass(TypedValue& tvRef) {
 
 template<MOpMode mode>
 inline tv_lval nullSafeProp(TypedValue& tvRef,
-                            Class* ctx,
+                            MemberLookupContext& ctx,
                             TypedValue base,
                             StringData* key,
                             ReadonlyOp op) {
@@ -2317,6 +2324,7 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       return propPreNull<mode>(tvRef);
     case KindOfObject:
       return val(base).pobj->prop(&tvRef, ctx, key, op);
@@ -2330,7 +2338,7 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
  * Returns a pointer to a number of possible places.
  */
 template<MOpMode mode, KeyType keyType = KeyType::Any>
-inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
+inline tv_lval PropObj(TypedValue& tvRef, const MemberLookupContext& ctx,
                        ObjectData* instance, key_type<keyType> key,
                        ReadonlyOp op) {
   auto keySD = prepareKey(key);
@@ -2351,7 +2359,7 @@ inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
 }
 
 template<MOpMode mode, KeyType keyType = KeyType::Any>
-inline tv_lval Prop(TypedValue& tvRef, const Class* ctx,
+inline tv_lval Prop(TypedValue& tvRef, const MemberLookupContext& ctx,
                     TypedValue base, key_type<keyType> key, ReadonlyOp op) {
   if (LIKELY(type(base) == KindOfObject)) {
     return PropObj<mode,keyType>(tvRef, ctx, val(base).pobj, key, op);
@@ -2373,6 +2381,7 @@ inline tv_lval Prop(TypedValue& tvRef, const Class* ctx,
     case KindOfFunc:
     case KindOfClass:
     case KindOfLazyClass:
+    case KindOfEnumClassLabel:
       return propPreNull<mode>(tvRef);
 
     case KindOfPersistentString:
@@ -2397,7 +2406,7 @@ inline tv_lval Prop(TypedValue& tvRef, const Class* ctx,
 }
 
 template <KeyType kt>
-inline bool IssetPropObj(Class* ctx, ObjectData* instance, key_type<kt> key) {
+inline bool IssetPropObj(MemberLookupContext& ctx, ObjectData* instance, key_type<kt> key) {
   auto keySD = prepareKey(key);
   SCOPE_EXIT { releaseKey<kt>(keySD); };
 
@@ -2405,7 +2414,7 @@ inline bool IssetPropObj(Class* ctx, ObjectData* instance, key_type<kt> key) {
 }
 
 template <KeyType kt = KeyType::Any>
-bool IssetProp(Class* ctx, TypedValue base, key_type<kt> key) {
+bool IssetProp(MemberLookupContext& ctx, TypedValue base, key_type<kt> key) {
   if (LIKELY(type(base) == KindOfObject)) {
     return IssetPropObj<kt>(ctx, val(base).pobj, key);
   }
@@ -2419,7 +2428,7 @@ inline void SetPropNull() {
 }
 
 template <KeyType keyType>
-inline void SetPropObj(Class* ctx, ObjectData* instance, key_type<keyType> key,
+inline void SetPropObj(MemberLookupContext& ctx, ObjectData* instance, key_type<keyType> key,
                        TypedValue val, ReadonlyOp op) {
   StringData* keySD = prepareKey(key);
   SCOPE_EXIT { releaseKey<keyType>(keySD); };
@@ -2430,7 +2439,7 @@ inline void SetPropObj(Class* ctx, ObjectData* instance, key_type<keyType> key,
 
 // $base->$key = $val
 template <KeyType keyType = KeyType::Any>
-inline void SetProp(Class* ctx, TypedValue base, key_type<keyType> key,
+inline void SetProp(MemberLookupContext& ctx, TypedValue base, key_type<keyType> key,
                     TypedValue val, ReadonlyOp op) {
   switch (type(base)) {
     case KindOfUninit:
@@ -2456,6 +2465,7 @@ inline void SetProp(Class* ctx, TypedValue base, key_type<keyType> key,
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       return SetPropNull();
 
     case KindOfPersistentString:
@@ -2475,7 +2485,7 @@ inline tv_lval SetOpPropNull(TypedValue& tvRef) {
   return &tvRef;
 }
 
-inline tv_lval SetOpPropObj(TypedValue& tvRef, Class* ctx,
+inline tv_lval SetOpPropObj(TypedValue& tvRef, MemberLookupContext& ctx,
                             SetOpOp op, ObjectData* instance,
                             TypedValue key, TypedValue* rhs) {
   StringData* keySD = prepareKey(key);
@@ -2485,7 +2495,7 @@ inline tv_lval SetOpPropObj(TypedValue& tvRef, Class* ctx,
 
 // $base->$key <op>= $rhs
 inline tv_lval SetOpProp(TypedValue& tvRef,
-                         Class* ctx, SetOpOp op,
+                         MemberLookupContext& ctx, SetOpOp op,
                          TypedValue base, TypedValue key,
                          TypedValue* rhs) {
   switch (type(base)) {
@@ -2514,6 +2524,7 @@ inline tv_lval SetOpProp(TypedValue& tvRef,
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       return SetOpPropNull(tvRef);
 
     case KindOfPersistentString:
@@ -2533,7 +2544,7 @@ inline TypedValue IncDecPropNull() {
   return make_tv<KindOfNull>();
 }
 
-inline TypedValue IncDecPropObj(Class* ctx,
+inline TypedValue IncDecPropObj(MemberLookupContext& ctx,
                           IncDecOp op,
                           ObjectData* base,
                           TypedValue key) {
@@ -2543,7 +2554,7 @@ inline TypedValue IncDecPropObj(Class* ctx,
 }
 
 inline TypedValue IncDecProp(
-  Class* ctx,
+  MemberLookupContext& ctx,
   IncDecOp op,
   TypedValue base,
   TypedValue key
@@ -2574,6 +2585,7 @@ inline TypedValue IncDecProp(
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       return IncDecPropNull();
 
     case KindOfPersistentString:
@@ -2588,7 +2600,7 @@ inline TypedValue IncDecProp(
   unknownBaseType(type(base));
 }
 
-inline void UnsetPropObj(Class* ctx, ObjectData* instance, TypedValue key) {
+inline void UnsetPropObj(MemberLookupContext& ctx, ObjectData* instance, TypedValue key) {
   // Prepare key.
   auto keySD = prepareKey(key);
   SCOPE_EXIT { decRefStr(keySD); };
@@ -2596,7 +2608,7 @@ inline void UnsetPropObj(Class* ctx, ObjectData* instance, TypedValue key) {
   instance->unsetProp(ctx, keySD);
 }
 
-inline void UnsetProp(Class* ctx, TypedValue base, TypedValue key) {
+inline void UnsetProp(MemberLookupContext& ctx, TypedValue base, TypedValue key) {
   // Validate base.
   if (LIKELY(type(base) == KindOfObject)) {
     UnsetPropObj(ctx, val(base).pobj, key);

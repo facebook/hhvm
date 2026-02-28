@@ -14,12 +14,12 @@ class A {
 }
 
 function foo(): int {
-  $p = class_meth('A', 'f1');
+  $p = A::f1<>;
   return $p('moo');
 }
 
 function bar(): int {
-  $p = class_meth(A::class, 'f1');
+  $p = A::f1<>;
   return $p('moo');
 }
 

@@ -5,8 +5,8 @@
  * is treated as a file path, not a URI with a scheme of
  * /tmp/foo/http - if it is, an unknown stream type warning will be raised.
  */
-function main() {
-  $root = tempnam('/tmp', 'hhvmtest');
+function main() :mixed{
+  $root = tempnam(sys_get_temp_dir(), 'hhvmtest');
   unlink($root);
   mkdir($root);
   $fnam = $root.'/http://example.com';
@@ -22,6 +22,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_file_path_contains_uri() {
+function main_file_path_contains_uri() :mixed{
 main();
 }

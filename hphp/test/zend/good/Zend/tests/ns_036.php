@@ -4,16 +4,16 @@ use A as B;
 class RegexIterator {
     const GET_MATCH = 2;
 }
-function f1($x = RegexIterator::GET_MATCH) {
+function f1($x = RegexIterator::GET_MATCH) :mixed{
     \var_dump($x);
 }
-function f2($x = \RegexIterator::GET_MATCH) {
+function f2($x = \RegexIterator::GET_MATCH) :mixed{
     \var_dump($x);
 }
-function f3($x = \A\RegexIterator::GET_MATCH) {
+function f3($x = \A\RegexIterator::GET_MATCH) :mixed{
     \var_dump($x);
 }
-function f4($x = B\RegexIterator::GET_MATCH) {
+function f4($x = B\RegexIterator::GET_MATCH) :mixed{
     \var_dump($x);
 }
 <<__EntryPoint>> function main(): void {

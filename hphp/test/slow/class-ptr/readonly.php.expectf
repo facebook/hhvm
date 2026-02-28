@@ -1,0 +1,5 @@
+
+Notice: Class C was loaded from a string, but it is missing the __DynamicallyReferenced attribute in %s/class-ptr/readonly.php on line 4
+
+Notice: Class passed to classname type-hint in %s/class-ptr/readonly.php on line 16
+Done

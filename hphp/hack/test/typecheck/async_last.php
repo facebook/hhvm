@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Foo {
   // these will be fine

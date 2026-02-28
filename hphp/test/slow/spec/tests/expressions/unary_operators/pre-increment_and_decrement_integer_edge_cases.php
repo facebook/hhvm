@@ -1,7 +1,7 @@
 <?hh
 
 function incdec($x)
-{
+:mixed{
     echo "--- start incdec ---\n";
     $y = $x;
 
@@ -30,7 +30,7 @@ function incdec($x)
 }
 
 function incdecrev($x)
-{
+:mixed{
     echo "--- start incdecrev ---\n";
     $y = $x;
 

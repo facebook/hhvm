@@ -10,7 +10,7 @@
  */
 
 class X {
-  public varray<int> $v = darray[];
+  public varray<int> $v = dict[];
 
   public function set(int $x): void {
     $this->v[0] = $x;

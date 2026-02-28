@@ -1,11 +1,11 @@
 <?hh
 
 class Foo {
-  public static function sm() {
+  public static function sm() :mixed{
     var_dump(static::class);
     var_dump(self::class);
   }
-  public function m() {
+  public function m() :mixed{
     var_dump(static::class);
     var_dump(self::class);
   }
@@ -13,12 +13,12 @@ class Foo {
 
 
 class Bar extends Foo {
-  public static function sm() {
+  public static function sm() :mixed{
     var_dump(static::class);
     var_dump(self::class);
     var_dump(parent::class);
   }
-  public function m() {
+  public function m() :mixed{
     var_dump(static::class);
     var_dump(self::class);
     var_dump(parent::class);
@@ -26,7 +26,7 @@ class Bar extends Foo {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $c = Foo::class;
   $c::sm();
   $o = new $c;

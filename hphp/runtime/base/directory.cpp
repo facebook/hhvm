@@ -22,9 +22,6 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/server/static-content-cache.h"
 
-#include <sys/types.h>
-#include <tuple>
-
 namespace HPHP {
 
 IMPLEMENT_RESOURCE_ALLOCATION(PlainDirectory)
@@ -131,7 +128,7 @@ String ArrayDirectory::path() {
 
 CachedDirectory::CachedDirectory(const String& path) {
   assertx(File::IsVirtualDirectory(path));
-  m_files = StaticContentCache::TheFileCache->readDirectory(path.c_str());
+  m_files = StaticContentCache::TheFileCache->listDirectory(path.toCppString());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

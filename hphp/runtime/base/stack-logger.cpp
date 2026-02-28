@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/base/stack-logger.h"
 
-#ifndef FACEBOOK
+#ifndef HHVM_FACEBOOK
 
 // folly::symbolizer isn't supported on all the platforms that HHVM is, so we
 // deliberately exclude it in our CMake setup, which makes this feature FB-only

@@ -1,9 +1,9 @@
 <?hh
 
-function runstuff() {
+function runstuff() :mixed{
   throw new Exception;
 }
-function main() {
+function main() :mixed{
     try {
       $start_time = 1;
       runstuff();
@@ -16,6 +16,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_67() {
+function main_67() :mixed{
 main();
 }

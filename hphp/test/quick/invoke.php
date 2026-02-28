@@ -1,21 +1,21 @@
 <?hh
 
 class Normal {
-  public function __invoke() {
+  public function __invoke() :mixed{
     echo "This is Normal\n";
     var_dump($this);
   }
 }
 
 class Weird2 {
-  private function __invoke() {
+  private function __invoke() :mixed{
     echo "This is Weird2\n";
     var_dump($this);
   }
 }
 
 class Weird3 {
-  private function __invoke() {
+  private function __invoke() :mixed{
     echo "This is Weird3\n";
     var_dump($this);
   }
@@ -23,7 +23,7 @@ class Weird3 {
 
 class InvokeFailure {}
 
-function invoke_it($x) { $x(); }
+function invoke_it($x) :mixed{ $x(); }
 
 <<__EntryPoint>> function main(): void {
   invoke_it(new Normal);

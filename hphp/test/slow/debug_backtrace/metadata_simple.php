@@ -1,10 +1,10 @@
 <?hh
 
-function bar($options) {
+function bar($options) :mixed{
   var_dump(debug_backtrace($options));
 }
 
-function foo($options) {
+function foo($options) :mixed{
   HH\set_frame_metadata('I am foo');
   bar($options);
 }

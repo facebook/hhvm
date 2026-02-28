@@ -3,7 +3,7 @@
 
 // create image
 <<__EntryPoint>>
-function main_1783() {
+function main_1783() :mixed{
 $image = imagecreatetruecolor(100, 100);
 // allocate some solors
 $white    = imagecolorallocate($image, 0xFF, 0xFF, 0xFF);

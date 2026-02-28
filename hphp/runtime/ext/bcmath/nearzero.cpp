@@ -29,14 +29,7 @@
 
 *************************************************************************/
 
-#include "config.h"
-#include <stdio.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include "bcmath.h"
-#include "private.h"
+#include "hphp/runtime/ext/bcmath/bcmath.h"
 
 /* In some places we need to check if the number NUM is almost zero.
    Specifically, all but the last digit is 0 and the last digit is 1.

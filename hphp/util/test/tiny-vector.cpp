@@ -210,4 +210,16 @@ TEST(TinyVector, Convertible) {
   }
 }
 
+TEST(TinyVector, Large) {
+  TinyVector<int> v;
+  for (size_t i = 0; i < 100000; ++i) v.emplace_back(i);
+
+  ASSERT_EQ(v.size(), 100000);
+  for (size_t i = 0; i < 100000; ++i) EXPECT_EQ(v[i], i);
+
+  TinyVector<int> v2;
+  v2.resize(100000);
+  EXPECT_EQ(v2.size(), 100000);
+}
+
 }

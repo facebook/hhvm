@@ -17,9 +17,11 @@
 #pragma once
 
 #include "hphp/runtime/base/locale.h"
-#include "hphp/util/locale-portability.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/thread-local.h"
+
+#include <locale.h>
+#include <langinfo.h>
 
 namespace HPHP {
 
@@ -38,10 +40,9 @@ private:
   void generate_LC_ALL_String();
 
   std::string m_lc_all;
-  std::shared_ptr<Locale> m_locale;  
+  std::shared_ptr<Locale> m_locale;
 };
 
 extern RDS_LOCAL(ThreadSafeLocaleHandler, g_thread_safe_locale_handler);
 
 }
-

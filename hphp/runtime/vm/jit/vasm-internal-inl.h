@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/data-block.h"
 
 #include <folly/Random.h>
@@ -111,16 +112,6 @@ bool emit(Venv& env, const bindaddr& i);
 bool emit(Venv& env, const ldbindaddr& i);
 bool emit(Venv& env, const fallback& i);
 bool emit(Venv& env, const fallbackcc& i);
-bool emit(Venv& env, const movqs& i);
-bool emit(Venv& env, const jmps& i);
-
-inline bool emit(Venv& env, const pushframe&) {
-  if (env.frame == -1) return true; // unreachable block
-  assertx(env.pending_frames > 0);
-
-  --env.pending_frames;
-  return true;
-}
 
 inline bool emit(Venv& env, const recordbasenativesp& i) {
   return true;
@@ -135,10 +126,24 @@ inline bool emit(Venv& env, const recordstack& i) {
   return true;
 }
 
-inline void record_frame(Venv& env) {
+inline bool emit(Venv&, const inlinestart&) {
+  return true;
+}
+
+inline bool emit(Venv&, const inlineend&) {
+  return true;
+}
+
+inline void record_frame(Venv& env, TCA start) {
+  if (!env.origin ||
+      !env.origin->marker().valid() ||
+      !env.origin->marker().fp()) return;
+
   auto const& block = env.unit.blocks[env.current];
-  auto const frame = env.frame;
-  auto const start = env.framestart;
+  auto const frameIt = env.unit.fpToFrame.find(env.origin->marker().fp());
+  assertx(frameIt != env.unit.fpToFrame.end());
+
+  auto const frame = frameIt->second;
   auto& frames = env.unit.frames;
   auto const size = env.cb->frontier() - start;
   // It's possible that (a) this block is empty, and (b) cb is full, so the
@@ -149,30 +154,9 @@ inline void record_frame(Venv& env) {
   always_assert((int64_t)size >= 0);
   auto const area = static_cast<uint8_t>(block.area_idx);
   frames[frame].sections[area].exclusive += size;
-  for (auto f = block.frame; f != Vframe::Top; f = frames[f].parent) {
+  for (auto f = frame; f != Vframe::Top; f = frames[f].parent) {
     frames[f].sections[area].inclusive += size;
   }
-  env.framestart = env.cb->frontier();
-}
-
-inline bool emit(Venv& env, const inlinestart& i) {
-  if (env.frame == -1) return true; // unreachable block
-
-  ++env.pending_frames;
-  always_assert(0 <= i.id && i.id < env.unit.frames.size());
-  record_frame(env);
-  env.frame = i.id;
-  return true;
-}
-inline bool emit(Venv& env, const inlineend&) {
-  if (env.frame == -1) return true; // unreachable block
-  assertx(env.pending_frames > 0);
-
-  --env.pending_frames;
-  record_frame(env);
-  env.frame = env.unit.frames[env.frame].parent;
-  always_assert(0 <= env.frame && env.frame < env.unit.frames.size());
-  return true;
 }
 
 template<class Vemit>
@@ -241,8 +225,6 @@ void emitLdBindRetAddrStubs(Venv& env) {
   }
 }
 
-void computeFrames(Vunit& unit);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -258,29 +240,16 @@ inline Venv::Venv(Vunit& unit, Vtext& text, CGMeta& meta)
 }
 
 inline void Venv::record_inline_stack(TCA addr) {
-  // Do not record stack if we are not inlining or the code is unreachable.
-  if (frame <= 0) return;
-
-  // Do not record stack if all frames are already published.
-  if (pending_frames == 0) return;
-
-  assertx(pending_frames > 0);
-  auto pubFrame = frame;
-  for (auto i = pending_frames; i > 0; --i) {
-    assertx(pubFrame != Vframe::Root);
-    pubFrame = unit.frames[pubFrame].parent;
-  }
-
-  pubFrame = pubFrame != Vframe::Root
-    ? pubFrame - 1 : kRootIFrameID;
+  // Do not record stack if we are not inlining
+  if (!origin || !origin->marker().valid() ||
+      !origin->marker().fp()->inst()->is(DefCalleeFP)) return;
 
   auto const sk = origin->marker().sk();
   auto const callOff = sk.funcEntry() ? sk.entryOffset() : sk.offset();
+  auto const it = unit.fpToFrame.find(origin->marker().fp());
+  assertx(it != unit.fpToFrame.end());
 
-  assertx(frame != pubFrame);
-  assertx(origin->marker().fp()->inst()->is(BeginInlining));
-  stacks.emplace_back(
-    addr, IStack{frame - 1, pubFrame, callOff});
+  stacks.emplace_back(addr, IStack{it->second - 1, callOff});
 }
 
 template<class Vemit>
@@ -290,7 +259,6 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
 
   // Lower inlinestart and inlineend instructions to jmps, and annotate blocks
   // with inlined function parents
-  if (unit.needsFramesComputed()) computeFrames(unit);
 
   Venv env { unit, text, fixups };
   env.addrs.resize(unit.blocks.size());
@@ -307,7 +275,7 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
   // We don't want to put nops in Vunits representing stubs, and those Vunits
   // don't have a context set.
   auto const nop_interval =
-    unit.context ? RuntimeOption::EvalJitNopInterval : uint32_t{0};
+    unit.context ? Cfg::Jit::NopInterval : uint32_t{0};
   auto nop_counter = uint32_t{0};
 
   for (int i = 0, n = labels.size(); i < n; ++i) {
@@ -318,9 +286,6 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
 
     env.cb = &text.area(block.area_idx).code;
     env.addrs[b] = env.cb->frontier();
-    env.framestart = env.cb->frontier();
-    env.frame = block.frame;
-    env.pending_frames = std::max<int32_t>(block.pending_frames, 0);
 
     { // Compute the next block we will emit into the current area.
       auto const cur_start = area_start(labels[i]);
@@ -343,6 +308,7 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
 
       check_nop_interval<Vemit>(env, inst, nop_counter, nop_interval);
 
+      auto const start = env.cb->frontier();
       switch (inst.op) {
 #define O(name, imms, uses, defs)               \
         case Vinstr::name:                      \
@@ -352,23 +318,19 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
         VASM_OPCODES
 #undef O
       }
+      record_frame(env, start);
     }
 
-    if (block.frame != -1) record_frame(env);
     irmu.register_block_end();
   }
 
   emitLdBindRetAddrStubs<Vemit>(env);
 
+  Vemit::processVveneers(env);
+
   Vemit::emitVeneers(env);
 
   Vemit::handleLiterals(env);
-
-  // Bind any Vaddrs that correspond to Vlabels.
-  for (auto const& p : env.pending_vaddrs) {
-    assertx(env.addrs[p.target]);
-    env.vaddrs[p.vaddr] = env.addrs[p.target];
-  }
 
   // Retarget smashable binds.
   Vemit::retargetBinds(env);

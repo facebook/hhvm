@@ -3,14 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use bstr::{BStr, BString, ByteSlice};
-use env::emitter::Emitter;
-use oxidized::relative_path::RelativePath;
-use std::collections::BTreeMap;
-use std::{
-    fmt,
-    io::{Result, Write},
-};
+use std::fmt;
+use std::io::Result;
+use std::io::Write;
+
+use relative_path::RelativePath;
 
 /// Indent is an abstraction of indentation. Configurable indentation
 /// and perf tweaking will be easier.
@@ -43,33 +40,14 @@ impl fmt::Display for Indent {
 #[derive(Clone)]
 pub struct Context<'a> {
     pub(crate) path: Option<&'a RelativePath>,
-
     indent: Indent,
-
-    pub(crate) include_roots: &'a BTreeMap<BString, BString>,
-    pub(crate) include_search_paths: &'a [BString],
-    pub(crate) doc_root: &'a BStr,
-    pub(crate) array_provenance: bool,
 }
 
 impl<'a> Context<'a> {
-    pub fn new<'arena, 'decl>(
-        emitter: &'a Emitter<'arena, 'decl>,
-        path: Option<&'a RelativePath>,
-    ) -> Self {
-        let include_roots = emitter.options().hhvm.include_roots.get();
-        let include_search_paths = emitter.options().server.include_search_paths.get();
-        let doc_root = emitter.options().doc_root.get();
-        let array_provenance = emitter.options().array_provenance();
-
+    pub fn new(path: Option<&'a RelativePath>) -> Self {
         Self {
             path,
             indent: Indent::new(),
-
-            include_roots,
-            include_search_paths,
-            doc_root: doc_root.as_bstr(),
-            array_provenance,
         }
     }
 
@@ -97,7 +75,7 @@ impl<'a> Context<'a> {
         f(&ctx, w)
     }
 
-    /// Printing instruction list requies manually control indentation,
+    /// Printing instruction list requires manually control indentation,
     /// where indent_inc/indent_dec are called
     pub(crate) fn indent_inc(&mut self) {
         self.indent.inc();

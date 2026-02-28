@@ -38,7 +38,7 @@ struct IRUnit;
  * using information from this module must be conservative about locations that
  * aren't assigned an id.  (E.g. via calls to may_alias in AliasAnalysis.)
  */
-constexpr uint32_t kMaxTrackedALocs = 256;
+constexpr uint32_t kMaxTrackedALocs = 512;
 using ALocBits = std::bitset<kMaxTrackedALocs>;
 
 //////////////////////////////////////////////////////////////////////
@@ -97,6 +97,7 @@ struct AliasAnalysis {
    * Several larger sets of locations, we have a set of all the ids assigned to
    * properties, elemIs, frame locals, etc.  This is used by may_alias below.
    */
+  ALocBits all_closureArg;
   ALocBits all_props;
   ALocBits all_elemIs;
   ALocBits all_elemSs;
@@ -179,4 +180,3 @@ std::string show(ALocBits);
 //////////////////////////////////////////////////////////////////////
 
 }
-

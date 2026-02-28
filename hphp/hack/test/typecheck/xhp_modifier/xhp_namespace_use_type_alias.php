@@ -1,13 +1,14 @@
 //// xhp_namespace_use_type_alias_def.php
-<?hh // strict
+<?hh
 
 namespace foo;
 
 xhp class bar extends \XHPTest {}
 
 class Regular {}
+
 //// xhp_namespace_use_type_alias_usage.php
-<?hh // strict
+<?hh
 
 namespace somethingelse;
 

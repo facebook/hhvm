@@ -1,13 +1,13 @@
 <?hh
 
-function test1() {
+function test1() :mixed{
   $a = new XMLReader();
   $a->expand(new stdClass);
 }
 
 <<__EntryPoint>>
 function main(): void {
-  $tests = vec[fun('test1')];
+  $tests = vec[test1<>];
   foreach ($tests as $t) {
     try {
       $t();

@@ -14,7 +14,7 @@ class fooViaBarImpl extends barImpl implements foo {}
 class fooExtended extends fooImpl {}
 
 
-function s_var_dump($arr) {
+function s_var_dump($arr) :mixed{
    krsort(inout $arr);
    var_dump($arr);
 }

@@ -7,7 +7,7 @@ File "list_assign_union.php", line 14, characters 3-13:
 File "list_assign_union.php", line 15, characters 3-13:
   (float | string)
 File "list_assign_union.php", line 21, characters 3-13:
-  (dynamic | float)
+  ~float
 File "list_assign_union.php", line 22, characters 3-13:
-  (dynamic | bool)
+  ~bool
 No errors

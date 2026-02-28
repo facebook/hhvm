@@ -16,49 +16,20 @@
 */
 #include "hphp/runtime/ext/server/ext_server.h"
 
-#include <folly/Conv.h>
-
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/pagelet-server.h"
-#include "hphp/runtime/server/rpc-request-handler.h"
-#include "hphp/runtime/server/satellite-server.h"
+#include "hphp/runtime/server/xbox-request-handler.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/util/boot-stats.h"
 
 namespace HPHP {
 
 static struct ServerExtension final : Extension {
-  ServerExtension() : Extension("server", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
-    HHVM_RC_INT_SAME(PAGELET_NOT_READY);
-    HHVM_RC_INT_SAME(PAGELET_READY);
-    HHVM_RC_INT_SAME(PAGELET_DONE);
-
-    HHVM_FE(hphp_thread_type);
-    HHVM_FE(pagelet_server_is_enabled);
-    HHVM_FE(pagelet_server_task_start);
-    HHVM_FE(pagelet_server_task_status);
-    HHVM_FE(pagelet_server_task_result);
-    HHVM_FE(pagelet_server_tasks_started);
-    HHVM_FE(pagelet_server_flush);
-    HHVM_FE(pagelet_server_is_done);
-    HHVM_FE(xbox_task_start);
-    HHVM_FE(xbox_task_status);
-    HHVM_FE(xbox_task_result);
-    HHVM_FE(xbox_process_call_message);
-    HHVM_FALIAS(HH\\server_is_stopping, server_is_stopping);
-    HHVM_FALIAS(HH\\server_is_prepared_to_stop, server_is_prepared_to_stop);
-    HHVM_FALIAS(HH\\server_health_level, server_health_level);
-    HHVM_FALIAS(HH\\server_uptime, server_uptime);
-    HHVM_FALIAS(HH\\server_process_start_time, server_process_start_time);
-
-    loadSystemlib();
-  }
+  ServerExtension() : Extension("server", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  void moduleRegisterNative() override;
 } s_server_extension;
 
 int64_t HHVM_FUNCTION(hphp_thread_type) {
@@ -75,7 +46,7 @@ bool HHVM_FUNCTION(pagelet_server_is_enabled) {
 
 const StaticString s_Host("Host");
 
-Resource HHVM_FUNCTION(pagelet_server_task_start,
+OptResource HHVM_FUNCTION(pagelet_server_task_start,
                        const String& url,
                        const Array& headers /* = null_array */,
                        const String& post_data /* = null_string */,
@@ -93,7 +64,7 @@ Resource HHVM_FUNCTION(pagelet_server_task_start,
 
   if (transport) {
     remote_host = transport->getRemoteHost();
-    if (!headers.exists(s_Host) && RuntimeOption::SandboxMode) {
+    if (!headers.exists(s_Host) && Cfg::Sandbox::Mode) {
       Array tmp = headers;
       tmp.set(s_Host, transport->getHeader("Host"));
       return PageletServer::TaskStart(url, tmp, remote_host,
@@ -105,12 +76,12 @@ Resource HHVM_FUNCTION(pagelet_server_task_start,
 }
 
 int64_t HHVM_FUNCTION(pagelet_server_task_status,
-                      const Resource& task) {
+                      const OptResource& task) {
   return PageletServer::TaskStatus(task);
 }
 
 String HHVM_FUNCTION(pagelet_server_task_result,
-                     const Resource& task,
+                     const OptResource& task,
                      Array& headers,
                      int64_t& code,
                      int64_t timeout_ms /* = 0 */) {
@@ -153,18 +124,18 @@ bool HHVM_FUNCTION(pagelet_server_is_done) {
 ///////////////////////////////////////////////////////////////////////////////
 // xbox
 
-Resource HHVM_FUNCTION(xbox_task_start,
+OptResource HHVM_FUNCTION(xbox_task_start,
                        const String& message) {
   return XboxServer::TaskStart(message);
 }
 
 bool HHVM_FUNCTION(xbox_task_status,
-                   const Resource& task) {
+                   const OptResource& task) {
   return XboxServer::TaskStatus(task);
 }
 
 int64_t HHVM_FUNCTION(xbox_task_result,
-                      const Resource& task,
+                      const OptResource& task,
                       int64_t timeout_ms,
                       Variant& ret) {
   auto result = XboxServer::TaskResult(task, timeout_ms, &ret);
@@ -199,6 +170,10 @@ Variant HHVM_FUNCTION(xbox_process_call_message,
                            false, true);
 }
 
+int64_t HHVM_FUNCTION(xbox_tasks_started) {
+  return g_context->getXboxTasksStarted();
+}
+
 bool HHVM_FUNCTION(server_is_stopping) {
   if (HttpServer::Server) {
     if (auto const server = HttpServer::Server->getPageServer()) {
@@ -210,10 +185,11 @@ bool HHVM_FUNCTION(server_is_stopping) {
 }
 
 bool HHVM_FUNCTION(server_is_prepared_to_stop) {
+  if (isJitSerializing()) return true;
   auto const now = time(nullptr);
   auto const lastPrepareTime = HttpServer::GetPrepareToStopTime();
   if (lastPrepareTime == 0) return false;
-  return (lastPrepareTime + RuntimeOption::ServerPrepareToStopTimeout) >= now;
+  return (lastPrepareTime + Cfg::Server::PrepareToStopTimeout) >= now;
 }
 
 int64_t HHVM_FUNCTION(server_health_level) {
@@ -239,6 +215,31 @@ int64_t HHVM_FUNCTION(server_uptime) {
 int64_t HHVM_FUNCTION(server_process_start_time) {
   // Returns 0 when not running in server mode.
   return BootStats::startTimestamp();
+}
+
+void ServerExtension::moduleRegisterNative() {
+  HHVM_RC_INT_SAME(PAGELET_NOT_READY);
+  HHVM_RC_INT_SAME(PAGELET_READY);
+  HHVM_RC_INT_SAME(PAGELET_DONE);
+
+  HHVM_FE(hphp_thread_type);
+  HHVM_FE(pagelet_server_is_enabled);
+  HHVM_FE(pagelet_server_task_start);
+  HHVM_FE(pagelet_server_task_status);
+  HHVM_FE(pagelet_server_task_result);
+  HHVM_FE(pagelet_server_tasks_started);
+  HHVM_FE(pagelet_server_flush);
+  HHVM_FE(pagelet_server_is_done);
+  HHVM_FE(xbox_task_start);
+  HHVM_FE(xbox_task_status);
+  HHVM_FE(xbox_task_result);
+  HHVM_FE(xbox_process_call_message);
+  HHVM_FE(xbox_tasks_started);
+  HHVM_FALIAS(HH\\server_is_stopping, server_is_stopping);
+  HHVM_FALIAS(HH\\server_is_prepared_to_stop, server_is_prepared_to_stop);
+  HHVM_FALIAS(HH\\server_health_level, server_health_level);
+  HHVM_FALIAS(HH\\server_uptime, server_uptime);
+  HHVM_FALIAS(HH\\server_process_start_time, server_process_start_time);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

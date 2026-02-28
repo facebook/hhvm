@@ -1,0 +1,8 @@
+*** Testing is_subclass_of() : usage variations ***
+
+Arg value 
+bool(false)
+
+Arg value 
+bool(false)
+Done

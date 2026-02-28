@@ -75,11 +75,11 @@ int64_t VirtualHost::getMaxPostSize() const {
   if (m_runtimeOption.maxPostSize != -1) {
     return m_runtimeOption.maxPostSize;
   }
-  return RuntimeOption::MaxPostSize;
+  return Cfg::Server::MaxPostSize;
 }
 
 int64_t VirtualHost::GetLowestMaxPostSize() {
-  auto lowest = RuntimeOption::MaxPostSize;
+  auto lowest = Cfg::Server::MaxPostSize;
   for (auto vhost : RuntimeOption::VirtualHosts) {
     auto max = vhost->getMaxPostSize();
     lowest = std::min(lowest, max);
@@ -99,7 +99,7 @@ int64_t VirtualHost::GetUploadMaxFileSize() {
   if (vh->m_runtimeOption.uploadMaxFileSize != -1) {
     return vh->m_runtimeOption.uploadMaxFileSize;
   }
-  return RuntimeOption::UploadMaxFileSize;
+  return Cfg::Server::UploadMaxFileSize;
 }
 
 void VirtualHost::UpdateSerializationSizeLimit() {
@@ -114,7 +114,7 @@ void VirtualHost::UpdateSerializationSizeLimit() {
 bool VirtualHost::alwaysDecodePostData(const String& origPath) const {
   if (!m_alwaysDecodePostData) return false;
   if (m_decodePostDataBlackList.empty()) return true;
-  return !m_decodePostDataBlackList.count(origPath.toCppString());
+  return !m_decodePostDataBlackList.contains(origPath.toCppString());
 }
 
 const std::vector<std::string> &VirtualHost::GetAllowedDirectories() {
@@ -123,7 +123,7 @@ const std::vector<std::string> &VirtualHost::GetAllowedDirectories() {
   if (!vh->m_runtimeOption.allowedDirectories.empty()) {
     return vh->m_runtimeOption.allowedDirectories;
   }
-  return RuntimeOption::AllowedDirectories;
+  return Cfg::Server::AllowedDirectories;
 }
 
 void VirtualHost::SortAllowedDirectories(std::vector<std::string>& dirs) {
@@ -185,7 +185,7 @@ void VirtualHost::initRuntimeOption(const IniSetting::Map& ini, const Hdf& vh) {
   m_runtimeOption.uploadMaxFileSize = uploadMaxFileSize;
   m_runtimeOption.serializationSizeLimit = serializationSizeLimit;
 
-  m_documentRoot = RuntimeOption::SourceRoot + m_pathTranslation;
+  m_documentRoot = Cfg::Server::SourceRoot + m_pathTranslation;
   if (m_documentRoot.length() > 1 &&
       m_documentRoot.back() == '/') {
     m_documentRoot.pop_back();
@@ -253,7 +253,7 @@ void VirtualHost::init(const IniSetting::Map& ini, const Hdf& vh,
     ini,
     vh,
     "AlwaysDecodePostData",
-    RuntimeOption::AlwaysDecodePostDataDefault,
+    Cfg::Server::AlwaysDecodePostDataDefault,
     false);
 
   m_decodePostDataBlackList =
@@ -475,7 +475,7 @@ std::string VirtualHost::serverName(const std::string &host) const {
     return m_serverName;
   }
 
-  if (!RuntimeOption::DefaultServerNameSuffix.empty()) {
+  if (!Cfg::Server::DefaultServerNameSuffix.empty()) {
     if (m_pattern) {
       Variant matches;
       Variant ret = preg_match(m_pattern,
@@ -489,15 +489,15 @@ std::string VirtualHost::serverName(const std::string &host) const {
         }
         if (!prefix.empty()) {
           return std::string(prefix.data()) +
-            RuntimeOption::DefaultServerNameSuffix;
+            Cfg::Server::DefaultServerNameSuffix;
         }
       }
     } else if (!m_prefix.empty()) {
-      return m_prefix + RuntimeOption::DefaultServerNameSuffix;
+      return m_prefix + Cfg::Server::DefaultServerNameSuffix;
     }
   }
 
-  return RuntimeOption::Host;
+  return Cfg::Server::Host;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,30 +1,28 @@
+Errors:
+  [6:3-12] Array access on type `keyset<nothing>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead.
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-32], "\\array_get_index_keyset");
       fd_fun =
       { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:46-50], (Hprim Tvoid)))); 
-        f_name = ([3:10-32], "\\array_get_index_keyset"); f_tparams = []; 
-        f_where_constraints = [];
+        f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([3:46-50], (Hprim Tvoid))));
         f_params =
-        [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:33-38], Hmixed))); 
-           param_is_variadic = false; param_pos = [3:39-43]; param_name = "$idx"; 
-           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-           param_user_attributes = []; param_visibility = None }
+        [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:33-38], (Happly (([3:33-38], "\\HH\\supportdyn"), [([3:33-38], Hmixed)]))))); 
+           param_pos = [3:39-43]; param_name = "$idx"; param_info = Param_required; 
+           param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+           param_named = None; param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([4:3-18], (Expr ((keyset<nothing>), [4:3-17], (Binop ((Eq None), ((keyset<nothing>), [4:3-6], (Lvar ([4:3-6], $xs))), ((keyset<nothing>), [4:9-17], (ValCollection (Keyset, None, []))))))));
-            ([6:3-13],
-             (Expr
-                ((nothing), [6:3-12],
-                 (Array_get (((keyset<nothing>), [6:3-6], (Lvar ([6:3-6], $xs))), (Some ((mixed), [6:7-11], (Hole (((mixed), [6:7-11], (Lvar ([6:7-11], $idx))), (mixed), (arraykey), Typing)))))))))
-            ]
+          [([4:3-18],
+            (Expr ((keyset<nothing>), [4:3-17], (Assign (((keyset<nothing>), [4:3-6], (Lvar ([4:3-6], $xs))), None, ((keyset<nothing>), [4:9-17], (ValCollection (([4:9-15], Keyset), None, []))))))));
+            ([6:3-13], (Expr ((nothing), [6:3-12], (Array_get (((keyset<nothing>), [6:3-6], (Lvar ([6:3-6], $xs))), (Some ((mixed), [6:7-11], (Lvar ([6:7-11], $idx)))))))))]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
-      fd_internal = false })
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-32], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None })

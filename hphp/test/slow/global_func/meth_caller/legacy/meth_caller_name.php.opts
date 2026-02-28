@@ -1,4 +1,3 @@
--vEval.EmitMethCallerFuncPointers=0
 
 -vEval.NoticeOnMethCallerHelperUse=1
 -vEval.CoeffectEnforcementLevels.zoned=0

@@ -3,11 +3,11 @@ class Pwa {
     public $var;
 
     function __construct(){
-        $this->var = darray[];
+        $this->var = dict[];
     }
 
-    function test (){
-        $cont = darray[];
+    function test ():mixed{
+        $cont = dict[];
         $cont["mykey"] = "myvalue";
 
         foreach ($cont as $this->var['key'] => $this->var['value'])

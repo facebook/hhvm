@@ -1,11 +1,11 @@
 <?hh
 
 // Php doesn't support \u escapes.
-function u($x) { return json_decode("\"" . $x . "\""); }
+function u($x) :mixed{ return json_decode("\"" . $x . "\""); }
 
 
 <<__EntryPoint>>
-function main_idn_uts46_errors() {
+function main_idn_uts46_errors() :mixed{
 echo "bad variant:", "\n";
 var_dump(idn_to_ascii("foo.com", 0, INTL_IDNA_VARIANT_UTS46 + 10));
 

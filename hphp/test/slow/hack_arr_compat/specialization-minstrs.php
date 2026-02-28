@@ -1,6 +1,6 @@
 <?hh
 
-function run($fn) {
+function run($fn) :mixed{
   try {
     print(json_encode($fn())."\n");
   } catch (Exception $e) {
@@ -9,7 +9,7 @@ function run($fn) {
 }
 
 function set0($x): varray<int> {
-  $result = varray[];
+  $result = vec[];
   for ($i = 0; $i < $x; $i++) {
     $result[] = $i * $i;
   }
@@ -18,7 +18,7 @@ function set0($x): varray<int> {
 }
 
 function set1($x): varray<int> {
-  $result = varray[];
+  $result = vec[];
   for ($i = 0; $i < $x; $i++) {
     $result[] = $i * $i;
   }
@@ -27,7 +27,7 @@ function set1($x): varray<int> {
 }
 
 function setNew($x): varray<int> {
-  $result = varray[];
+  $result = vec[];
   for ($i = 0; $i < $x; $i++) {
     $result[] = $i * $i;
   }
@@ -36,7 +36,7 @@ function setNew($x): varray<int> {
 }
 
 function setInt($x, int $y): varray<int> {
-  $result = varray[];
+  $result = vec[];
   for ($i = 0; $i < $x; $i++) {
     $result[] = $i * $i;
   }
@@ -45,7 +45,7 @@ function setInt($x, int $y): varray<int> {
 }
 
 function setStr($x, string $y): varray<int> {
-  $result = varray[];
+  $result = vec[];
   for ($i = 0; $i < $x; $i++) {
     $result[] = $i * $i;
   }
@@ -54,7 +54,7 @@ function setStr($x, string $y): varray<int> {
 }
 
 function setCell($x, $y): varray<int> {
-  $result = varray[];
+  $result = vec[];
   for ($i = 0; $i < $x; $i++) {
     $result[] = $i * $i;
   }
@@ -63,19 +63,19 @@ function setCell($x, $y): varray<int> {
 }
 
 function set0Tuple($x): varray<int> {
-  $result = varray[0, 1, $x];
+  $result = vec[0, 1, $x];
   $result[0] = 17;
   return $result;
 }
 
 function set3Tuple($x): varray<int> {
-  $result = varray[0, 1, $x];
+  $result = vec[0, 1, $x];
   $result[3] = 17;
   return $result;
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   run(() ==> set0(3));
   run(() ==> set1(3));
   run(() ==> setNew(3));

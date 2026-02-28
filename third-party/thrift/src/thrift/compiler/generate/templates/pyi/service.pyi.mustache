@@ -1,0 +1,150 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Generates external type annotations for legacy Thrift files.
+
+}}
+{{#import "common" as common}}
+{{#partial common.auto_generated_header}}
+import typing as __T
+{{#if (has_compiler_option? "asyncio")}}
+import asyncio
+{{/if (has_compiler_option? "asyncio")}}
+
+from thrift import Thrift
+from thrift.protocol.TProtocol import TProtocolBase
+
+{{#service:program.importModules}}
+import {{.}}
+{{/service:program.importModules}}
+from {{service:program.pyNamespace}}ttypes import *
+{{#service:extends}}
+import {{service:program.pyNamespace}}{{service:name}}
+{{/service:extends}}
+
+
+class Iface{{!
+    }}{{#service:extends}}({{!
+        }}{{service:program.pyNamespace}}{{service:name}}.Iface{{!
+    }}){{/service:extends}}:{{^service:functions}} ...{{/service:functions}}  # {{service:name}}
+    {{#if (has_compiler_option? "asyncio")}}
+    # These have to be Awaitable because handler methods don't return Futures
+    # Clients do return Futures but lsp requires us to say they are both Awaitable
+    # You can cast the result of a Client if you need Future
+    {{/if (has_compiler_option? "asyncio")}}
+    {{#service:functions}}
+    {{#function:isSupported?}}
+    def {{function:name}}(self{{#each function:params.fields as |param|}}, {{!
+    }}{{param.py_name}}: {{#partial common.type_name type=param.type}}{{!
+    }}{{/each}}) -> {{!
+    }}{{#if (has_compiler_option? "asyncio")}}__T.Awaitable[{{/if}}{{!
+    }}{{#partial common.type_name type=function:return_type}}{{!
+    }}{{#if (has_compiler_option? "asyncio")}}]{{/if}}{{!
+    }}: ...
+    {{/function:isSupported?}}
+    {{/service:functions}}
+
+class Client(Iface, __T.ContextManager[Client]):  # {{service:name}}
+    {{#if (has_compiler_option? "asyncio")}}{{!
+    }}def __init__(self, oprot: __T.Optional[TProtocolBase], loop: __T.Optional[asyncio.AbstractEventLoop] = None, cpp_transport: __T.Optional[__T.TypeVar("SyncClient")] = None) -> None: ...{{!
+    }}{{#else}}{{!
+    }}def __init__(self, iprot: __T.Optional[TProtocolBase], oprot: __T.Optional[TProtocolBase] = None, cpp_transport: __T.Optional[__T.TypeVar("SyncClient")] = None) -> None: ...{{!
+    }}{{/if (has_compiler_option? "asyncio")}}
+    def set_persistent_header(self, key: str, value: str) -> None: ...
+    def get_persistent_headers(self) -> __T.Mapping[str, str]: ...
+    def clear_persistent_headers(self) -> None: ...
+    def set_onetime_header(self, key: str, value: str) -> None: ...
+    def get_last_response_headers(self) -> __T.Mapping[str, str]: ...
+    def set_max_frame_size(self, size: int) -> None: ...
+    {{#service:functions}}
+    {{#function:isSupported?}}
+    def send_{{function:name}}(self{{#each function:params.fields as |param|}}, {{!
+    }}{{param.py_name}}: {{#partial common.optional_field_type field=param}} = ...{{!
+    }}{{/each}}) -> None: ...
+    def recv_{{function:name}}(self{{#if (has_compiler_option? "asyncio")}}, iprot: TProtocolBase, mtype: int, rseqid: int{{/if}}) -> {{!
+    }}{{#if (has_compiler_option? "asyncio")}}None{{!
+    }}{{#else}}{{!
+    }}{{#partial common.type_name type=function:return_type}}{{!
+    }}{{/if (has_compiler_option? "asyncio")}}{{!
+    }}: ...
+    {{/function:isSupported?}}
+    {{/service:functions}}
+
+class Processor(Iface, Thrift.TProcessor):  # {{service:name}}
+    def __init__(self, handler: Iface) -> None:
+        self._handler: Iface
+        self._onewayMethods: __T.Sequence[__T.Callable]
+        self._processMap: __T.Dict[str, __T.Callable]
+
+    {{#service:functions}}
+    {{#function:isSupported?}}
+    def process_{{function:name}}(self, {{!
+      }}seqid: int, {{!
+      }}iprot: TProtocolBase, {{!
+      }}oprot: TProtocolBase, {{!
+      }}server_ctx: __T.Any = ...{{!
+    }}) -> {{#if (has_compiler_option? "asyncio")}}asyncio.Future{{#else}}None{{/if}}: ...
+    {{/function:isSupported?}}
+    {{/service:functions}}
+    def process_main(self, {{!
+      }}iprot: TProtocolBase, {{!
+      }}oprot: TProtocolBase, {{!
+      }}server_ctx: __T.Any = ...{{!
+    }}) -> {{#if (has_compiler_option? "asyncio")}}asyncio.Future{{#else}}__T.Optional[bool]{{/if}}: ...
+    def onewayMethods(self) -> __T.Tuple[__T.Callable]: ...
+{{#service:functions}}
+{{#function:isSupported?}}
+
+class {{function:name}}_args:
+    thrift_spec: __T.Tuple[__T.Optional[__T.Tuple[int, int, str, __T.Any, __T.Optional[int], int]]]
+    thrift_field_annotations: __T.Dict[int, __T.Dict[str, str]]
+    thrift_struct_annotations: __T.Dict[str, str]
+
+    def __init__(
+        self{{#each function:params.fields as |param|}},
+        {{param.py_name}}: {{#partial common.optional_field_type field=param}} = ...{{/each}}
+    ) -> None:
+        {{#each function:params.fields as |param|}}
+        self.{{param.py_name}}: {{#partial common.optional_field_type field=param}}
+          {{#else}}
+        ...
+        {{/each}}
+
+    def isUnion(self) -> bool: ...
+    def checkRequired(self) -> None: ...
+    def read(self, iprot: TProtocolBase) -> None: ...
+    def write(self, oprot: TProtocolBase) -> None: ...
+    def __eq__(self, other: __T.Any) -> bool: ...
+    def __ne__(self, other: __T.Any) -> bool: ...
+
+class {{function:name}}_result:
+    thrift_spec: __T.Tuple[__T.Optional[__T.Tuple[int, int, str, __T.Any, __T.Optional[int], int]]]
+    thrift_field_annotations: __T.Dict[int, __T.Dict[str, str]]
+    thrift_struct_annotations: __T.Dict[str, str]
+
+    def __init__(self, success: {{#partial common.type_name type=function:return_type}} = ...) -> None:
+        self.success: {{#partial common.type_name type=function:return_type}}
+
+    def isUnion(self) -> bool: ...
+    def checkRequired(self) -> None: ...
+    def read(self, iprot: TProtocolBase) -> None: ...
+    def write(self, oprot: TProtocolBase) -> None: ...
+    def __eq__(self, other: __T.Any) -> bool: ...
+    def __ne__(self, other: __T.Any) -> bool: ...
+{{/function:isSupported?}}
+{{/service:functions}}

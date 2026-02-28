@@ -32,7 +32,7 @@
 
 #include <utility>
 
-TRACE_SET_MOD(vasm);
+TRACE_SET_MOD(vasm)
 
 namespace HPHP::jit {
 
@@ -729,15 +729,28 @@ bool simplify(Env& env, const lea& vlea, Vlabel b, size_t i) {
       }
     }
   }
-  if (found_second &&
-      deltaFits((int64_t)(vlea.s.disp) + (int64_t)(disp2), sz::dword)) {
-     (void) simplify_impl(env, b, i,
-         lea { vlea.s+disp2, (xinst).lea_.d });
-     // update uses and delete the inst
-     (void) simplify_impl(env, b, x, [&] (Vout& v) { return 1; });
-     return true;
+
+  if (!found_second) return false;
+
+  const auto newDisp = (int64_t)(vlea.s.disp) + (int64_t)(disp2);
+
+  if (!deltaFits(newDisp, sz::dword)) return false;
+
+  // On ARM, we're careful lowering Vptrs upfront, and we need to make sure we
+  // don't recreate Vptrs that can't be emitted.  See lowerVptr() for validity
+  // conditions.
+  if (arch() == Arch::ARM) {
+    // We can't have both a disp and an index.
+    if (newDisp != 0 && vlea.s.index.isValid()) return false;
+
+    // Furthermore, if we have a base, the disp has to be within [-256..255].
+    if (vlea.s.base.isValid() && (newDisp < -256 || newDisp > 255)) return false;
   }
-  return false;
+
+  simplify_impl(env, b, i, lea { vlea.s + disp2, xinst.lea_.d });
+  // update uses and delete the inst
+  simplify_impl(env, b, x, [&] (Vout& v) { return 1; });
+  return true;
 }
 
 // remove compares with unused results. This overlaps with removeDeadCode,
@@ -1476,12 +1489,28 @@ bool simplify(Env& env, const cmovq& inst, Vlabel b, size_t i) {
 
 /*
  * Simplify load followed by truncation:
+ *  load{s, tmp}; jmpr{tmp, args} -> jmpm{s, args}
  *  load{s, tmp}; movtqb{tmp, d} -> loadtqb{s, d}
  *  load{s, tmp}; movtql{tmp, d} -> loadtql{s, d}
  *  loadzbq{s, tmp}; movtqb{tmp, d} -> loadb{s, d}
  *  loadzwq{s, tmp}; movtqw{tmp, d} -> loadw{s, d}
  *  loadzlq{s, tmp}; movtql{tmp, d} -> loadl{s, d}
  */
+bool simplify_load_jmpr(Env& env, const load& load, Vlabel b, size_t i) {
+  if (arch() == Arch::ARM) return false;
+  if (env.use_counts[load.d] != 1) return false;
+  auto const& code = env.unit.blocks[b].code;
+  if (i + 1 >= code.size()) return false;
+
+  return if_inst<Vinstr::jmpr>(env, b, i + 1, [&] (const jmpr& jmpr) {
+    if (load.d != jmpr.target) return false;
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      v << jmpm{load.s, jmpr.args};
+      return 2;
+    });
+  });
+}
+
 template<Vinstr::Opcode mov_op, typename loadt, typename load_in>
 bool simplify_load_truncate(Env& env, const load_in& load, Vlabel b, size_t i) {
   if (env.use_counts[load.d] != 1) return false;
@@ -1499,6 +1528,7 @@ bool simplify_load_truncate(Env& env, const load_in& load, Vlabel b, size_t i) {
 
 bool simplify(Env& env, const load& load, Vlabel b, size_t i) {
   return
+    simplify_load_jmpr(env, load, b, i) ||
     simplify_load_truncate<Vinstr::movtqb, loadtqb>(env, load, b, i) ||
     simplify_load_truncate<Vinstr::movtql, loadtql>(env, load, b, i);
 }
@@ -1534,7 +1564,7 @@ bool simplify(Env& env, const movzlq& inst, Vlabel b, size_t i) {
 }
 
 struct regWidth {
-  explicit regWidth(Vreg r) { givenReg = r; };
+  explicit regWidth(Vreg r) { givenReg = r; }
   template<class T> void imm (T) {}
   template<class T> void def (T) {}
   template<class T> void use (T) {}
@@ -1748,6 +1778,13 @@ bool simplify(Env& env, Vlabel b, size_t i) {
   not_reached();
 }
 
+/*
+ * Perform architecture-specific peephole simplification.
+ */
+bool simplify_arch(Env& env, Vlabel b, size_t i) {
+  return ARCH_SWITCH_CALL(simplify, env, b, i);
+}
+
 bool psimplify(Env& env, Vlabel b, size_t i) {
   assertx(i <= env.unit.blocks[b].code.size());
   auto& inst = env.unit.blocks[b].code[i];
@@ -1766,13 +1803,33 @@ bool psimplify(Env& env, Vlabel b, size_t i) {
 /*
  * Perform architecture-specific peephole simplification.
  */
-bool simplify_arch(Env& env, Vlabel b, size_t i) {
-  return ARCH_SWITCH_CALL(simplify, env, b, i);
+bool psimplify_arch(Env& env, Vlabel b, size_t i) {
+  return ARCH_SWITCH_CALL(psimplify, env, b, i);
+}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void Env::init(const jit::vector<Vlabel>& labels) {
+  use_counts.resize(unit.next_vr);
+  def_insts.resize(unit.next_vr, Vinstr::nop);
+  consts.resize(unit.next_vr);
+
+  for (auto const b : labels) {
+    assertx(!unit.blocks[b].code.empty());
+
+    for (auto const& inst : unit.blocks[b].code) {
+      visitDefs(unit, inst, [&] (Vreg r) { def_insts[r] = inst.op; });
+      visitUses(unit, inst, [&] (Vreg r) { ++use_counts[r]; });
+    }
+  };
+  for (auto const& p : unit.regToConst) {
+    consts[p.first] = p.second;
+  }
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Peephole simplification pass for a Vunit.
@@ -1780,26 +1837,8 @@ bool simplify_arch(Env& env, Vlabel b, size_t i) {
 void simplify(Vunit& unit) {
   assertx(check(unit));
   auto& blocks = unit.blocks;
-
-  Env env { unit };
-  env.use_counts.resize(unit.next_vr);
-  env.def_insts.resize(unit.next_vr, Vinstr::nop);
-  env.consts.resize(unit.next_vr);
-
   auto const labels = sortBlocks(unit);
-
-  // Set up Env, only visiting reachable blocks.
-  for (auto const b : labels) {
-    assertx(!blocks[b].code.empty());
-
-    for (auto const& inst : blocks[b].code) {
-      visitDefs(unit, inst, [&] (Vreg r) { env.def_insts[r] = inst.op; });
-      visitUses(unit, inst, [&] (Vreg r) { ++env.use_counts[r]; });
-    }
-  };
-  for (auto const& p : env.unit.regToConst) {
-    env.consts[p.first] = p.second;
-  }
+  Env env(unit, labels);
 
   // The simplify() implementations may allocate scratch blocks and modify
   // instruction streams, so we cannot use standard iterators here.
@@ -1823,16 +1862,15 @@ void simplify(Vunit& unit) {
 void postRASimplify(Vunit& unit) {
   assertx(check(unit));
   auto& blocks = unit.blocks;
-
-  Env env { unit };
   auto const labels = sortBlocks(unit);
+  Env env(unit, labels);
 
   // The simplify() implementations may allocate scratch blocks and modify
   // instruction streams, so we cannot use standard iterators here.
   for (auto const b : labels) {
     for (size_t i = 0; i < blocks[b].code.size(); ++i) {
       // Simplify at this index until no changes are made.
-      while (psimplify(env, b, i)) {
+      while (psimplify(env, b, i) || psimplify_arch(env, b, i)) {
         // Stop if we simplified away the tail of the block.
         if (i >= blocks[b].code.size()) break;
       }

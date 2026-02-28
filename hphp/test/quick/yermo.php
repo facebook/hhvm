@@ -3,11 +3,13 @@
 class blah {
 
   private static $breakerX = 0;
-  private function breaker() {
-    return self::$breakerX++ == 0 ? varray[] : null;
+  private function breaker() :mixed{
+    $__lval_tmp_0 = self::$breakerX;
+    self::$breakerX++;
+    return $__lval_tmp_0== 0 ? vec[] : null;
   }
 
-  public function foo() {
+  public function foo() :mixed{
     $x = 0;
     $y = 0;
 

@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   var_dump(0 ** 0);
   var_dump(0 ** 1);
   var_dump(1 ** 0);
@@ -14,6 +14,8 @@ function main() {
 
   var_dump(10 ** 10);
 
+  var_dump(0.0 ** 0);
+  var_dump(1.2 ** 1);
   var_dump(0.0 ** 0.1);
   var_dump(0.2 ** 1.3);
   var_dump(1.4 ** 0.5);
@@ -44,6 +46,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_power() {
+function main_power() :mixed{
 main();
 }

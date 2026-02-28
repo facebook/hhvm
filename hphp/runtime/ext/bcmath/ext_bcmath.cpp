@@ -245,7 +245,7 @@ static Variant HHVM_FUNCTION(bcsqrt, const String& operand,
   bc_init_num(&result);
   SCOPE_EXIT { bc_free_num(&result); };
   php_str2num(&result, (char*)operand.data());
-  Variant ret;
+  Variant ret{Variant::NullInit{}};
   if (bc_sqrt(&result, scale) != 0) {
     if (result->n_scale > scale) {
       result->n_scale = scale;
@@ -260,8 +260,8 @@ static Variant HHVM_FUNCTION(bcsqrt, const String& operand,
 ///////////////////////////////////////////////////////////////////////////////
 
 struct bcmathExtension final : Extension {
-  bcmathExtension() : Extension("bcmath", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
+  bcmathExtension() : Extension("bcmath", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  void moduleRegisterNative() override {
     HHVM_FE(bcscale);
     HHVM_FE(bcadd);
     HHVM_FE(bcsub);
@@ -272,11 +272,10 @@ struct bcmathExtension final : Extension {
     HHVM_FE(bcpow);
     HHVM_FE(bcpowmod);
     HHVM_FE(bcsqrt);
-    loadSystemlib();
   }
 
   void threadInit() override {
-    IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
+    IniSetting::Bind(this, IniSetting::Mode::Request,
                      "bcmath.scale", "0",
                      s_initial_precision.get());
   }
@@ -314,7 +313,7 @@ void bc_free(void* ptr) {
   HPHP::req::free(ptr);
 }
 
-void bc_rt_warn (char *format ,...)
+void bc_rt_warn (const char *format ,...)
 {
   std::string msg;
   va_list ap;
@@ -324,7 +323,7 @@ void bc_rt_warn (char *format ,...)
   HPHP::raise_warning("bc math warning: %s", msg.c_str());
 }
 
-void bc_rt_error (char *format ,...)
+void bc_rt_error (const char *format ,...)
 {
   std::string msg;
   va_list ap;

@@ -4,11 +4,11 @@ $memc = new Memcached();
 $memc->addServer('localhost', 11211);
 $version = $memc->getVersion();
 if ($version["localhost:11211"] == "255.255.255") {
-  die("skip No Memcached running");
+  exit("skip No Memcached running");
 } else {
   foreach($version as $v) {
     if (!version_compare($v, '1.3.0', '>=')) {
-      die("skip Need memcached 1.3.0 for CAS");
+      exit("skip Need memcached 1.3.0 for CAS");
     }
   }
 }

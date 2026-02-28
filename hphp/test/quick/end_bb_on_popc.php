@@ -1,6 +1,6 @@
 <?hh
 abstract class Base {
-  public static function foo() {
+  public static function foo() :mixed{
     $a = 2;
     static::$x;
   }

@@ -49,14 +49,12 @@ namespace HPHP {
 #define GMP_MIN_BASE -36
 
 // GMP class strings
-const StaticString s_GMP_GMP("GMP");
-const StaticString s_GMP_num("num");
-const StaticString s_GMPData("GMPData");
+extern const StaticString s_GMP_num;
 
 // Array indexes for division functions
-const StaticString s_GMP_s("s");
-const StaticString s_GMP_t("t");
-const StaticString s_GMP_g("g");
+extern const StaticString s_GMP_s;
+extern const StaticString s_GMP_t;
+extern const StaticString s_GMP_g;
 
 // Error strings
 const char* const cs_GMP_INVALID_TYPE =
@@ -87,13 +85,19 @@ const char* const cs_GMP_INVALID_STARTING_INDEX_IS_NEGATIVE =
   "%s(): Starting index must be greater than or equal to zero";
 const char* const cs_GMP_ERROR_EVEN_ROOT_NEGATIVE_NUMBER =
   "%s(): Can't take even root of negative number";
+const char* const cs_GMP_INVALID_EXPONENT_TOO_LARGE =
+  "%s(): Exponent cannot be larger than or equal to 2^32";
 
 ///////////////////////////////////////////////////////////////////////////////
 // classes
 
-struct GMPData {
+struct GMPData : SystemLib::ClassLoader<"GMP"> {
   ~GMPData() { close(); }
   GMPData&       operator=(const GMPData& source);
+
+  static Object allocObject() {
+    return Object{ classof() };
+  }
 
   void           close();
   void           setGMPMpz(const mpz_t data);
@@ -102,32 +106,6 @@ struct GMPData {
 private:
   bool           m_isInit{false};
   mpz_t          m_gmpMpz;
-};
-
-
-struct GMP {
-private:
-  static void initClass() {
-    cls = Class::lookup(s_GMP_GMP.get());
-  }
-
-public:
-  static Object allocObject() {
-    if (UNLIKELY(cls == nullptr)) {
-      initClass();
-    }
-    return Object{cls};
-  }
-
-  static Object allocObject(const Variant& arg) {
-    Object ret = allocObject();
-    tvDecRefGen(
-      g_context->invokeFunc(cls->getCtor(), make_vec_array(arg), ret.get())
-    );
-    return ret;
-  }
-
-  static HPHP::Class* cls;
 };
 
 } /* namespace HPHP */

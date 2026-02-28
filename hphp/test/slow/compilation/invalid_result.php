@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+function test() :AsyncGenerator<mixed,mixed,void>{
   list($a, $b) = yield wait_forva(result(1), result(2));
 }
 

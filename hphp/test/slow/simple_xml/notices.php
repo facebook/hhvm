@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $config = simplexml_load_string('<config><prepare /></config>');
   $config2 = simplexml_load_string('<config><prepare2 /></config>');
 

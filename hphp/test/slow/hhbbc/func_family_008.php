@@ -1,13 +1,13 @@
 <?hh
 
 class Base {
-  function concrete_override() { return "base_or"; }
+  function concrete_override() :mixed{ return "base_or"; }
 }
 
 abstract class Derived extends Base {
-  abstract function abs();
+  abstract function abs():mixed;
 
-  function concrete_override() {
+  function concrete_override() :mixed{
     $x = parent::concrete_override();
     $x .= "_derived";
     return $x;
@@ -15,10 +15,10 @@ abstract class Derived extends Base {
 }
 
 class MoreDerived extends Derived {
-  function abs() {}
+  function abs() :mixed{}
 }
 
-function main(Base $b) {
+function main(Base $b) :mixed{
   $x = $b->concrete_override();
   var_dump($x);
 }
@@ -26,7 +26,7 @@ function main(Base $b) {
 
 
 <<__EntryPoint>>
-function main_func_family_008() {
+function main_func_family_008() :mixed{
 main(new Base);
 main(new MoreDerived);
 }

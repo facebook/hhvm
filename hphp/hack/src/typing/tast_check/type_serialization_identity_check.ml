@@ -11,26 +11,31 @@ open Typing_defs
 
 (* Replace unserialized information from the type with dummy information.
 
-For example, we don't currently serialize the arity of function types, so update
-the input type to set it to a default arity value. *)
+   For example, we don't currently serialize the arity of function types, so update
+   the input type to set it to a default arity value. *)
 let rec strip_ty ty =
   let (reason, ty) = deref ty in
   let strip_tyl tyl = List.map tyl ~f:strip_ty in
-  let strip_possibly_enforced_ty et =
-    { et with et_type = strip_ty et.et_type }
-  in
   let ty =
     match ty with
     | Tany _
     | Tnonnull
-    | Tdynamic
-    | Terr ->
+    | Tdynamic ->
       ty
     | Tprim _ -> ty
     | Tvar _ -> ty
-    | Tgeneric (name, args) -> Tgeneric (name, strip_tyl args)
+    | Tgeneric _ -> ty
     | Tvec_or_dict (ty1, ty2) -> Tvec_or_dict (strip_ty ty1, strip_ty ty2)
-    | Ttuple tyl -> Ttuple (strip_tyl tyl)
+    | Ttuple { t_required; t_optional; t_extra } ->
+      Ttuple
+        {
+          t_required = strip_tyl t_required;
+          t_optional = strip_tyl t_optional;
+          t_extra =
+            (match t_extra with
+            | Tvariadic t_variadic -> Tvariadic (strip_ty t_variadic)
+            | Tsplat t_splat -> Tsplat (strip_ty t_splat));
+        }
     | Toption ty -> Toption (strip_ty ty)
     | Tnewtype (name, tparams, ty) ->
       Tnewtype (name, strip_tyl tparams, strip_ty ty)
@@ -40,20 +45,22 @@ let rec strip_ty ty =
     | Tclass (sid, exact, tyl) -> Tclass (sid, exact, strip_tyl tyl)
     | Tfun { ft_params; ft_implicit_params = { capability }; ft_ret; _ } ->
       let strip_param ({ fp_type; _ } as fp) =
-        let fp_type = strip_possibly_enforced_ty fp_type in
+        let fp_type = strip_ty fp_type in
         {
           fp_type;
           fp_flags =
             Typing_defs.make_fp_flags
               ~mode:(get_fp_mode fp)
               ~accept_disposable:false
-              ~has_default:false
-              ~ifc_external:false
-              ~ifc_can_call:false
-              ~readonly:false;
+              ~is_optional:false
+              ~readonly:false
+              ~ignore_readonly_error:false
+              ~splat:false
+              ~named:false;
           (* Dummy values: these aren't currently serialized. *)
           fp_pos = Pos_or_decl.none;
           fp_name = None;
+          fp_def_value = None;
         }
       in
       let ft_params = List.map ft_params ~f:strip_param in
@@ -65,7 +72,7 @@ let rec strip_ty ty =
             | CapDefaults p -> CapDefaults p);
         }
       in
-      let ft_ret = strip_possibly_enforced_ty ft_ret in
+      let ft_ret = strip_ty ft_ret in
       Tfun
         {
           ft_params;
@@ -74,20 +81,29 @@ let rec strip_ty ty =
           (* Dummy values: these aren't currently serialized. *)
           ft_tparams = [];
           ft_where_constraints = [];
-          ft_flags = 0;
-          ft_ifc_decl = default_ifc_fun_decl;
+          ft_flags = Typing_defs_flags.Fun.default;
+          ft_instantiated = true;
         }
-    | Tshape (shape_kind, shape_fields) ->
+    | Tshape
+        { s_origin = _; s_unknown_value = shape_kind; s_fields = shape_fields }
+      ->
       let strip_field { sft_optional; sft_ty } =
         let sft_ty = strip_ty sft_ty in
         { sft_optional; sft_ty }
       in
       let shape_fields = TShapeMap.map strip_field shape_fields in
-      Tshape (shape_kind, shape_fields)
+      Tshape
+        {
+          s_origin = Missing_origin;
+          s_unknown_value = shape_kind;
+          (* TODO(shapes) strip_ty s_unknown_value *)
+          s_fields = shape_fields;
+        }
     | Taccess _ -> ty
-    | Tunapplied_alias _ ->
-      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-    | Tneg _ -> ty
+    | Tlabel _
+    | Tneg _ ->
+      ty
+    | Tclass_ptr ty -> Tclass_ptr (strip_ty ty)
   in
   mk (reason, ty)
 
@@ -115,8 +131,10 @@ let handler =
         | Ok deserialized_ty ->
           let ty = strip_ty ty in
           let deserialized_ty = strip_ty deserialized_ty in
+          let Equal = Tast_env.eq_typing_env in
           if not (ty_equal ty deserialized_ty) then
-            Errors.add_typing_error
+            Typing_error_utils.add_typing_error
+              ~env
               Typing_error.(
                 primary
                 @@ Primary.Unserializable_type
@@ -133,7 +151,9 @@ let handler =
                      })
         | Error (Not_supported _) -> ()
         | Error (Wrong_phase message) ->
-          Errors.add_typing_error
+          let Equal = Tast_env.eq_typing_env in
+          Typing_error_utils.add_typing_error
+            ~env
             Typing_error.(
               primary
               @@ Primary.Unserializable_type
@@ -147,7 +167,9 @@ let handler =
                          (Tast_env.ty_to_json env ty |> Hh_json.json_to_string);
                    })
         | Error (Deserialization_error message) ->
-          Errors.add_typing_error
+          let Equal = Tast_env.eq_typing_env in
+          Typing_error_utils.add_typing_error
+            ~env
             Typing_error.(
               primary
               @@ Primary.Unserializable_type
@@ -162,7 +184,9 @@ let handler =
                    })
       with
       | e ->
-        Errors.add_typing_error
+        let Equal = Tast_env.eq_typing_env in
+        Typing_error_utils.add_typing_error
+          ~env
           Typing_error.(
             primary
             @@ Primary.Unserializable_type

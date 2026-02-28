@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 final class Bar implements IAsyncDisposable {
   public async function __disposeAsync(): Awaitable<void> {}

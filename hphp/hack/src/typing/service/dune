@@ -1,35 +1,118 @@
 (library
+ (name tast_hashes)
+ (wrapped false)
+ (modules tast_hashes)
+ (libraries
+  collections
+  provider_context
+  relative_path
+  tast_env
+  typing_ast)
+ (preprocess (pps ppx_yojson_conv)))
+
+(library
+ (name tast_collector)
+ (wrapped false)
+ (modules
+  tast_collector)
+ (libraries
+  core
+  relative_path
+  provider_context
+  tast_env
+  typing_ast)
+ (preprocess (pps ppx_deriving.std ppx_yojson_conv)))
+
+(library
+ (name type_counter)
+ (wrapped false)
+ (modules type_counter)
+ (libraries
+  collections
+  provider_context
+  relative_path
+  typing_ast
+  tast_env)
+ (preprocess (pps ppx_deriving.std ppx_yojson_conv)))
+
+(library
+ (name reason_collector)
+ (wrapped false)
+ (modules reason_collector)
+ (libraries
+  collections
+  provider_context
+  relative_path
+  typing_ast
+  tast_env)
+ (preprocess (pps ppx_deriving.std ppx_yojson_conv)))
+
+(library
+ (name refinement_counter)
+ (wrapped false)
+ (modules refinement_counter)
+ (libraries
+  collections
+  provider_context
+  relative_path
+  typing_ast
+  tast_env)
+ (preprocess (pps ppx_deriving.std ppx_yojson_conv)))
+
+(library
+ (name truthiness_collector)
+ (wrapped false)
+ (modules truthiness_collector)
+ (libraries
+  collections
+  provider_context
+  relative_path
+  typing_ast
+  tast_env)
+ (preprocess (pps ppx_deriving.std ppx_yojson_conv)))
+
+(library
+ (name map_reduce_ffi)
+ (wrapped false)
+ (modules
+   map_reduce_ffi)
+ (libraries
+  reason_collector
+  refinement_counter
+  truthiness_collector
+  tast_collector
+  tast_hashes
+  type_counter)
+ (preprocess (pps ppx_yojson_conv)))
+
+(library
+ (name map_reduce)
+ (wrapped false)
+ (modules
+   map_reduce)
+ (libraries
+  provider_context
+  collections
+  map_reduce_ffi
+  relative_path
+  tast_collector
+  tast_hashes
+  typing_ast)
+ (preprocess (pps ppx_deriving.std)))
+
+(library
  (name typing_service_types)
  (wrapped false)
- (modules typing_service_types)
+ (modules
+  typing_service_types)
  (libraries
   biglist
   core_kernel
   errors
   hg
+  map_reduce
   relative_path
   typechecker_options
   typing_deps)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
- (name typing_service_api)
- (wrapped false)
- (modules typing_service_delegate_sig)
- (libraries
-  artifact_store
-  biglist
-  core_kernel
-  errors
-  hg
-  job_runner
-  relative_path
-  typechecker_options
-  typing_service_delegate_types
-  typing_deps
-  process
-  process_types
-  typing_service_types)
  (preprocess
   (pps ppx_deriving.std)))

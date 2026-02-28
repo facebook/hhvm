@@ -7,8 +7,10 @@
  *
  *)
 
+open Hh_prelude
+
 module S = struct
-  type t = int * string [@@deriving ord, eq]
+  type t = int * string [@@deriving ord, hash, eq, show]
 
   let compare = compare
 end
@@ -23,8 +25,12 @@ let next () =
 
 let to_string x = snd x
 
-let pp : Format.formatter -> int * string -> unit =
- (fun fmt x -> Format.pp_print_string fmt (to_string x))
+let pp fmt x =
+  let (i, name) = x in
+  if Int.equal i 0 then
+    Format.pp_print_string fmt name
+  else
+    S.pp fmt x
 
 let to_int x = fst x
 
@@ -46,5 +52,14 @@ let tmp () =
   let res = next () in
   (res, "__tmp" ^ string_of_int res)
 
-module Set = Set.Make (S)
-module Map = WrappedMap.Make (S)
+module Set = Stdlib.Set.Make (S)
+
+module Map = struct
+  include WrappedMap.Make (S)
+
+  let pp pp_data = make_pp (fun fmt id -> Format.fprintf fmt "%a" pp id) pp_data
+
+  let show pp_data x = Format.asprintf "%a" (pp pp_data) x
+
+  let hash_fold_t x = make_hash_fold_t S.hash_fold_t x
+end

@@ -8,37 +8,30 @@
  *)
 
 type env = {
-  codegen: bool;
+  mode: Namespace_env.mode;
   php5_compat_mode: bool;
   elaborate_namespaces: bool;
   include_line_comments: bool;
-  keep_errors: bool;
   quick_mode: bool;
-  (* Show errors even in quick mode. Does not override keep_errors. Hotfix
-   * until we can properly set up saved states to surface parse errors during
+  (* Show errors even in quick mode.
+   * Hotfix until we can properly set up saved states to surface parse errors during
    * typechecking properly. *)
   show_all_errors: bool;
-  fail_open: bool;
   is_systemlib: bool;
+  for_debugger_eval: bool;
   parser_options: ParserOptions.t;
+  scour_comments: bool;
 }
 
-type 'aast result_ = {
+type result = {
   file_mode: FileInfo.mode;
   scoured_comments: Scoured_comments.t;
-  aast: ('aast, string) Stdlib.result;
-  lowpri_errors: (Pos.t * string) list;
+  aast: (unit, unit) Aast.program;
+  lowerer_parsing_errors: (Pos.t * string) list;
   syntax_errors: Full_fidelity_syntax_error.t list;
-  errors: Errors.error list;
+  errors: Diagnostics.diagnostic list;
   lint_errors: Pos.t Lints_core.t list;
-  parse_peak: int;
-  lower_peak: int;
-  arena_bytes: int;
 }
-
-type result = (unit, unit) Aast.program result_
-
-type tast_result = Tast.program result_
 
 type error =
   | NotAHackFile

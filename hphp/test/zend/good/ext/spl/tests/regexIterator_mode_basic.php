@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$array = varray['foo', 'bar', 'baz'];
+$array = vec['foo', 'bar', 'baz'];
 $iterator = new ArrayIterator($array);
 $regexIterator = new RegexIterator($iterator, "/f/");
 

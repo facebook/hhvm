@@ -1,7 +1,5 @@
 /* $Id$ */
-
-#ifndef incl_CRYPT_FREESEC_H
-#define incl_CRYPT_FREESEC_H
+#pragma once
 
 #include <stdint.h>
 typedef unsigned char u_char;
@@ -27,5 +25,3 @@ void _crypt_extended_init(void);
 
 char *_crypt_extended_r(const char *key, const char *setting,
   struct php_crypt_extended_data *data);
-
-#endif

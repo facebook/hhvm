@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_array_values() {
-$array = darray["size" => "XL", "color" =>"gold"];
+function main_array_values() :mixed{
+$array = dict["size" => "XL", "color" =>"gold"];
 var_dump(array_values($array));
 }

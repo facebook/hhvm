@@ -8,7 +8,7 @@
 /* Testing with unexpected argument types */
 
 class classA {
-  public function __toString() { return "Class A object"; }
+  public function __toString() :mixed{ return "Class A object"; }
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_fill_keys() : parameter variations ***\n";
@@ -16,7 +16,7 @@ echo "*** Testing array_fill_keys() : parameter variations ***\n";
 $fp = fopen(__FILE__, "r");
 $bool = false;
 $float = 2.4;
-$array = varray["one"];
+$array = vec["one"];
 $nullVal = null;
 
 $obj = new classA();

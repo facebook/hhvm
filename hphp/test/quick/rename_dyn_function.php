@@ -1,18 +1,18 @@
 <?hh
 
-function a() {
+<<__DynamicallyCallable>> function a() :mixed{
   echo "Hello from a\n";
 }
 
-function b() {
+<<__DynamicallyCallable>> function b() :mixed{
   echo "I am b\n";
 }
 
-function callfns($name, $name2) {
+function callfns($name, $name2) :mixed{
   echo "Calling $name\n";
-  $name();
+  HH\dynamic_fun($name)();
   echo "Calling $name2\n";
-  $name2();
+  HH\dynamic_fun($name2)();
 }
 <<__EntryPoint>> function main(): void {
 callfns('a', 'b');

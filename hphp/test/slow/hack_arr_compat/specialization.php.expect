@@ -1,0 +1,207 @@
+=====================================
+as/is shape/tuple:
+
+vec as shape: Expected shape('a' => int, 'b' => bool), got HH\vec
+vec is shape: false
+dict as shape: {"a":17,"b":false}
+dict is shape: true
+
+vec as tuple: ["a",false]
+vec is tuple: true
+dict as tuple: Expected (string, bool), got HH\dict
+dict is tuple: false
+
+=====================================
+Builtin errors:
+Passing boolean to darray: Argument 1 passed to __hhvm_intrinsics\dummy_darray_builtin() must be an instance of HH\darray, bool given
+Passing darray to boolean: Argument 2 passed to json_decode() must be an instance of bool, HH\dict given
+
+=====================================
+Builtins:
+Passing vec to varray: []
+Passing vec to darray: Argument 1 passed to __hhvm_intrinsics\dummy_darray_builtin() must be an instance of HH\darray, HH\vec given
+Passing dict to varray: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, HH\dict given
+Passing dict to darray: {}
+Passing clsmeth to varray: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be an instance of HH\varray, clsmeth given
+Passing clsmeth to darray: Argument 1 passed to __hhvm_intrinsics\dummy_darray_builtin() must be an instance of HH\darray, clsmeth given
+
+=====================================
+Comparisons:
+  Comparing vec and vec:
+    === true
+    !== false
+    <   false
+    >   false
+    <=  true
+    >=  true
+    <=> 0
+  Comparing vec and dict:
+    === false
+    !== true
+    <   Cannot compare HH\vec and HH\dict using a relational operator
+    >   Cannot compare HH\vec and HH\dict using a relational operator
+    <=  Cannot compare HH\vec and HH\dict using a relational operator
+    >=  Cannot compare HH\vec and HH\dict using a relational operator
+    <=> Cannot compare HH\vec and HH\dict using a relational operator
+  Comparing vec and vec:
+    === true
+    !== false
+    <   false
+    >   false
+    <=  true
+    >=  true
+    <=> 0
+  Comparing vec and dict:
+    === false
+    !== true
+    <   Cannot compare HH\vec and HH\dict using a relational operator
+    >   Cannot compare HH\vec and HH\dict using a relational operator
+    <=  Cannot compare HH\vec and HH\dict using a relational operator
+    >=  Cannot compare HH\vec and HH\dict using a relational operator
+    <=> Cannot compare HH\vec and HH\dict using a relational operator
+  Comparing dict and vec:
+    === false
+    !== true
+    <   Cannot compare HH\dict and HH\vec using a relational operator
+    >   Cannot compare HH\dict and HH\vec using a relational operator
+    <=  Cannot compare HH\dict and HH\vec using a relational operator
+    >=  Cannot compare HH\dict and HH\vec using a relational operator
+    <=> Cannot compare HH\dict and HH\vec using a relational operator
+  Comparing dict and dict:
+    === true
+    !== false
+    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+  Comparing dict and vec:
+    === false
+    !== true
+    <   Cannot compare HH\dict and HH\vec using a relational operator
+    >   Cannot compare HH\dict and HH\vec using a relational operator
+    <=  Cannot compare HH\dict and HH\vec using a relational operator
+    >=  Cannot compare HH\dict and HH\vec using a relational operator
+    <=> Cannot compare HH\dict and HH\vec using a relational operator
+  Comparing dict and dict:
+    === true
+    !== false
+    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+  Comparing vec and vec:
+    === true
+    !== false
+    <   false
+    >   false
+    <=  true
+    >=  true
+    <=> 0
+  Comparing vec and dict:
+    === false
+    !== true
+    <   Cannot compare HH\vec and HH\dict using a relational operator
+    >   Cannot compare HH\vec and HH\dict using a relational operator
+    <=  Cannot compare HH\vec and HH\dict using a relational operator
+    >=  Cannot compare HH\vec and HH\dict using a relational operator
+    <=> Cannot compare HH\vec and HH\dict using a relational operator
+  Comparing vec and vec:
+    === true
+    !== false
+    <   false
+    >   false
+    <=  true
+    >=  true
+    <=> 0
+  Comparing vec and dict:
+    === false
+    !== true
+    <   Cannot compare HH\vec and HH\dict using a relational operator
+    >   Cannot compare HH\vec and HH\dict using a relational operator
+    <=  Cannot compare HH\vec and HH\dict using a relational operator
+    >=  Cannot compare HH\vec and HH\dict using a relational operator
+    <=> Cannot compare HH\vec and HH\dict using a relational operator
+  Comparing dict and vec:
+    === false
+    !== true
+    <   Cannot compare HH\dict and HH\vec using a relational operator
+    >   Cannot compare HH\dict and HH\vec using a relational operator
+    <=  Cannot compare HH\dict and HH\vec using a relational operator
+    >=  Cannot compare HH\dict and HH\vec using a relational operator
+    <=> Cannot compare HH\dict and HH\vec using a relational operator
+  Comparing dict and dict:
+    === true
+    !== false
+    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+  Comparing dict and vec:
+    === false
+    !== true
+    <   Cannot compare HH\dict and HH\vec using a relational operator
+    >   Cannot compare HH\dict and HH\vec using a relational operator
+    <=  Cannot compare HH\dict and HH\vec using a relational operator
+    >=  Cannot compare HH\dict and HH\vec using a relational operator
+    <=> Cannot compare HH\dict and HH\vec using a relational operator
+  Comparing dict and dict:
+    === true
+    !== false
+    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+
+=====================================
+Implicit append:
+Out of bounds vec access: invalid index 0
+
+=====================================
+Test 0:
+[2,3]
+[2,3]
+[2,3,"appended"]
+Out of bounds vec access: invalid index 3
+Invalid vec key: expected a key of type int, string given
+
+=====================================
+Test 1:
+[2,3,5]
+[2,3]
+[2,3,"appended"]
+Out of bounds vec access: invalid index 3
+Invalid vec key: expected a key of type int, string given
+
+=====================================
+Test 2:
+[2,3,5,7]
+Vecs do not support unsetting non-end elements
+Vecs do not support unsetting non-end elements
+[2,3,5,"oh no"]
+Invalid vec key: expected a key of type int, string given
+
+=====================================
+Typehints:
+"varray to varray: OK!"
+Argument 1 passed to takes_darray() must be an instance of HH\darray, HH\vec given
+Argument 1 passed to takes_varray() must be an instance of HH\varray, HH\dict given
+"darray to darray: OK!"
+Argument 1 passed to takes_varray() must be an instance of HH\varray, clsmeth given
+Argument 1 passed to takes_darray() must be an instance of HH\darray, clsmeth given
+[]
+Value returned from function returns_darray() must be of type HH\darray, HH\vec given
+Value returned from function returns_varray() must be of type HH\varray, HH\dict given
+{}
+Value returned from function returns_varray() must be of type HH\varray, clsmeth given
+Value returned from function returns_darray() must be of type HH\darray, clsmeth given
+[]
+Property 'C::d' declared as type ?HH\darray, HH\vec assigned
+Property 'C::v' declared as type ?HH\varray, HH\dict assigned
+{}
+Property 'C::v' declared as type ?HH\varray, clsmeth assigned
+Property 'C::d' declared as type ?HH\darray, clsmeth assigned
+D::d must have a type of ?HH\darray as defined in C

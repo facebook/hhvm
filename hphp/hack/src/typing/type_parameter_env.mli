@@ -13,7 +13,9 @@ type tparam_bounds = Typing_set.t
 
 type tparam_info = Typing_kinding_defs.kind
 
-type t
+type t [@@deriving hash]
+
+val bindings : t -> (tparam_name * tparam_info) list
 
 val empty : t
 
@@ -43,14 +45,9 @@ val merge_env :
     'env * (Pos_or_decl.t * tparam_info) option) ->
   'env * t
 
-val get_lower_bounds :
-  t -> tparam_name -> Typing_defs.locl_ty list -> tparam_bounds
+val get_lower_bounds : t -> tparam_name -> tparam_bounds
 
-val get_upper_bounds :
-  t -> tparam_name -> Typing_defs.locl_ty list -> tparam_bounds
-
-(** value > 0, indicates higher-kinded type parameter *)
-val get_arity : t -> tparam_name -> int
+val get_upper_bounds : t -> tparam_name -> tparam_bounds
 
 val get_reified : t -> tparam_name -> Aast.reify_kind
 
@@ -64,7 +61,11 @@ val get_tparam_names : t -> tparam_name list
 
 val get_tparams : t -> (Pos_or_decl.t * tparam_info) SMap.t
 
+val get_rank : t -> tparam_name -> int
+
 val is_consistent : t -> bool
+
+val map : (Typing_defs.locl_ty -> Typing_defs.locl_ty) -> t -> t
 
 (** When we detect that the set of constraints on the type parameters cannot be
     satisfied, we can mark the env as inconsistent using this. *)
@@ -110,8 +111,14 @@ val add_lower_bound :
     Existing type parameters with the same name will be overridden. *)
 val add_generic_parameters : t -> Typing_defs.decl_tparam list -> t
 
+(** Add type parameters to environment with their bounds.
+    Existing type parameters with the same name will be overridden. *)
+val add_generic_parameters_with_bounds : t -> Typing_defs.locl_tparam list -> t
+
+val unbind_generic_parameters : t -> _ Typing_defs.tparam list -> t
+
 val remove : t -> tparam_name -> t
 
-val get_parameter_names : tparam_info -> tparam_name list
-
 val pp : Format.formatter -> t -> unit
+
+val force_lazy_values : t -> t

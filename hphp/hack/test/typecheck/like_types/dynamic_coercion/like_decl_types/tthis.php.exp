@@ -1,6 +1,0 @@
-File "tthis.php", line 6, characters 12-13:
-Invalid return type (Typing[4110])
-  File "tthis.php", line 5, characters 32-35:
-  Expected `this`
-  File "tthis.php", line 5, characters 21-25:
-  But got `dynamic`

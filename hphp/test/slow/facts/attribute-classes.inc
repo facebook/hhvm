@@ -2,6 +2,12 @@
 
 interface IBaseForAttributeFiltering {}
 
+new module someModule {};
+
+function outOfClassFunction(): void {}
+
+type AnAlias = someModule;
+
 class BaseClassForAttributeFiltering implements IBaseForAttributeFiltering {}
 
 class NoArgAttr implements HH\ClassAttribute {}
@@ -23,11 +29,15 @@ class DontIndexThisMethodAttr implements HH\MethodAttribute {
 
 class NoArgFileAttr implements HH\FileAttribute {}
 
+class OneArgFileAttr implements HH\FileAttribute {
+  public function __construct(dynamic $arg0)[] {}
+}
+
 class TwoArgFileAttr implements HH\FileAttribute {
   public function __construct(dynamic $arg0, dynamic $arg1)[] {}
 }
 
-<<file: NoArgFileAttr, TwoArgFileAttr("Hello", "There")>>
+<<file: NoArgFileAttr, OneArgFileAttr(7), TwoArgFileAttr("Hello", "There")>>
 
 <<TwoArgAttr("apple", "banana")>>
 class AppleThenBanana extends BaseClassForAttributeFiltering {}

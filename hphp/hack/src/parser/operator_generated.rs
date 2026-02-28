@@ -17,7 +17,7 @@
  *
  */
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep::{FromOcamlRep, ToOcamlRep};
 
 #[derive(FromOcamlRep, ToOcamlRep)]
 pub enum Operator {
@@ -94,4 +94,6 @@ pub enum Operator {
     AwaitOperator,
     ReadonlyOperator,
     EnumClassLabelOperator,
+    PackageOperator,
+    NameofOperator,
 }

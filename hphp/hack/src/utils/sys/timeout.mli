@@ -39,42 +39,9 @@ type t
 val with_timeout :
   timeout:int -> on_timeout:(timings -> 'a) -> do_:(t -> 'a) -> 'a
 
-val check_timeout : t -> unit
+type pid = int
 
-type in_channel
-
-val open_in : string -> in_channel
-
-val close_in : in_channel -> unit
-
-val close_in_noerr : in_channel -> unit
-
-val in_channel_of_descr : Unix.file_descr -> in_channel
-
-val descr_of_in_channel : in_channel -> Unix.file_descr
-
-(** Selects ready file descriptor. Based on Unix.select in Unix.
-    [timeout] is only there to achieve a similar effect as Unix interval
-    timers on Windows, but is ignored on Unix. On Windows,
-    [select ~timeout read write exn select_timeout] runs with a timeout
-    that is the minimum of [timeout and select_timeout].*)
-val select :
-  ?timeout:t ->
-  Unix.file_descr list ->
-  Unix.file_descr list ->
-  Unix.file_descr list ->
-  float ->
-  Unix.file_descr list * Unix.file_descr list * Unix.file_descr list
-
-val input : ?timeout:t -> in_channel -> Bytes.t -> int -> int -> int
-
-val really_input : ?timeout:t -> in_channel -> Bytes.t -> int -> int -> unit
-
-val input_char : ?timeout:t -> in_channel -> char
-
-val input_line : ?timeout:t -> in_channel -> string
-
-val input_value : ?timeout:t -> in_channel -> 'a
+type in_channel = Stdlib.in_channel * int
 
 val open_process : Exec_command.t -> string array -> in_channel * out_channel
 
@@ -85,21 +52,10 @@ val close_process_in : in_channel -> Unix.process_status
 val read_process :
   timeout:int ->
   on_timeout:(timings -> 'a) ->
-  reader:(t -> in_channel -> out_channel -> 'a) ->
+  reader:(t -> in_channel -> Stdlib.out_channel -> 'a) ->
   Exec_command.t ->
   string array ->
   'a
-
-val open_connection : ?timeout:t -> Unix.sockaddr -> in_channel * out_channel
-
-val read_connection :
-  timeout:int ->
-  on_timeout:(timings -> 'a) ->
-  reader:(t -> in_channel -> out_channel -> 'a) ->
-  Unix.sockaddr ->
-  'a
-
-val shutdown_connection : in_channel -> unit
 
 (* Some silly people like to catch all exceptions. This means they need to explicitly detect and
  * reraise the timeout exn. *)

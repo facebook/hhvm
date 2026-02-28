@@ -26,7 +26,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debuggerflow);
+TRACE_SET_MOD(debuggerflow)
 
 CmdFlowControl::~CmdFlowControl() {
   // Remove any location filter that may have been setup.
@@ -167,7 +167,7 @@ void CmdFlowControl::setupStepOuts() {
       // We only execute this for opcodes which invoke more PHP, and that does
       // not include switches. Thus, we'll have at most two destinations.
       auto const reentrantOp = peek_op(callPC);
-      assertx(!isSwitch(reentrantOp) && numSuccs(callPC) <= 2);
+      assertx(!isSwitch(reentrantOp));
       // Set an internal breakpoint after the instruction if it can fall thru.
       if (instrAllowsFallThru(reentrantOp)) {
         Offset nextOffset = callOffset + instrLen(callPC);

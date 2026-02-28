@@ -10,7 +10,7 @@ function is_noreturn($x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_noreturn() {
+function main_is_expression_noreturn() :mixed{
 is_noreturn(null);
 is_noreturn(-1);
 is_noreturn(false);

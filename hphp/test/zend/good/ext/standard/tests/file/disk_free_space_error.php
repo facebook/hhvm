@@ -15,16 +15,16 @@ try { var_dump( disk_free_space( "junk", "extra argument") ); } catch (Exception
 try { var_dump( diskfreespace( "junk", "extra argument") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
-var_dump( disk_free_space( __SystemLib\hphp_test_tmppath('dir1') )); // Invalid directory
-var_dump( diskfreespace( __SystemLib\hphp_test_tmppath('dir1') ));
+var_dump( disk_free_space( sys_get_temp_dir().'/'.'dir1') ); // Invalid directory
+var_dump( diskfreespace( sys_get_temp_dir().'/'.'dir1') );
 
-$fh = fopen( __SystemLib\hphp_test_tmppath('disk_free_space.tmp'), "w" );
+$fh = fopen( sys_get_temp_dir().'/'.'disk_free_space.tmp', "w") ;
 fwrite( $fh, (string)" Garbage data for the temporary file" );
-var_dump( disk_free_space( __SystemLib\hphp_test_tmppath('disk_free_space.tmp') )); // file input instead of directory
-var_dump( diskfreespace( __SystemLib\hphp_test_tmppath('disk_free_space.tmp') ));
+var_dump( disk_free_space( sys_get_temp_dir().'/'.'disk_free_space.tmp') ); // file input instead of directory
+var_dump( diskfreespace( sys_get_temp_dir().'/'.'disk_free_space.tmp') );
 fclose($fh);
 
 echo"\n-- Done --";
 
-unlink(__SystemLib\hphp_test_tmppath('disk_free_space.tmp'));
+unlink(sys_get_temp_dir().'/'.'disk_free_space.tmp');
 }

@@ -1,0 +1,20 @@
+----------------------------------------------------------
+vec[] === vec[]
+vec[] !== vec[$c]
+vec[] === HH\array_mark_legacy(vec[])
+vec[] !== HH\array_mark_legacy(vec[$c])
+----------------------------------------------------------
+vec[$c] !== vec[]
+vec[$c] === vec[$c]
+vec[$c] !== HH\array_mark_legacy(vec[])
+vec[$c] === HH\array_mark_legacy(vec[$c])
+----------------------------------------------------------
+HH\array_mark_legacy(vec[]) === vec[]
+HH\array_mark_legacy(vec[]) !== vec[$c]
+HH\array_mark_legacy(vec[]) === HH\array_mark_legacy(vec[])
+HH\array_mark_legacy(vec[]) !== HH\array_mark_legacy(vec[$c])
+----------------------------------------------------------
+HH\array_mark_legacy(vec[$c]) !== vec[]
+HH\array_mark_legacy(vec[$c]) === vec[$c]
+HH\array_mark_legacy(vec[$c]) !== HH\array_mark_legacy(vec[])
+HH\array_mark_legacy(vec[$c]) === HH\array_mark_legacy(vec[$c])

@@ -1,0 +1,8 @@
+convert to 'debugger_dump'
+
+<?hh
+
+function foo(): void {
+  foo();
+  debugger_dump($x + 20 + 30);
+}

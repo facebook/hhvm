@@ -17,7 +17,6 @@
 #include <folly/Conv.h>
 
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/server/http-protocol.h"

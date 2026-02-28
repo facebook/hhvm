@@ -29,14 +29,10 @@
 
 *************************************************************************/
 
-#include "config.h"
+#include "hphp/runtime/ext/bcmath/config.h"
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include "bcmath.h"
-#include "private.h"
+#include "hphp/runtime/ext/bcmath/bcmath.h"
 
 #include <folly/ScopeGuard.h>
 
@@ -44,10 +40,10 @@
    using the rules of POSIX bc for output. */
 
 /* This structure is used for saving digits in the conversion process. */
-typedef struct stk_rec {
+struct stk_rec {
 	long  digit;
 	struct stk_rec *next;
-} stk_rec;
+};
 
 /* The reference string for digits. */
 static char ref_str[] = "0123456789ABCDEF";

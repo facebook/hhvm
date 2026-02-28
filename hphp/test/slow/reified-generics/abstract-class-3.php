@@ -10,7 +10,7 @@ class C<reify Tc super int as num> extends A<Tc> {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $c =  new C<int>();
   $c->g();
   echo "done\n";

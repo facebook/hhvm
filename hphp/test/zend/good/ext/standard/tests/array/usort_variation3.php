@@ -9,7 +9,7 @@
  */
 
 function cmp_function($value1, $value2)
-{
+:mixed{
   if($value1 == $value2) {
     return 0;
   }
@@ -36,7 +36,7 @@ multiline heredoc with 123
 and speci@! ch@r..\ncheck\talso
 EOT3;
 
-$array_arg = darray[
+$array_arg = dict[
   // numeric keys
   -2 => 9,
   8 => 8,

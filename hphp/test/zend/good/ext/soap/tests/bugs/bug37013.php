@@ -12,19 +12,19 @@ class ThingWithParent {
 
 
 class MultiRefTest {
-  public function getThingWithParent() {
+  public function getThingWithParent() :mixed{
     $p = new ThingWithParent(1, null);
     $p2 = new ThingWithParent(2, $p);
     $p3 = new ThingWithParent(3, $p);
 
-    $p->children = varray[$p2, $p3];
+    $p->children = vec[$p2, $p3];
 
     return $p2;
   }
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   $request = <<<REQUEST
 <?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope
 xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"

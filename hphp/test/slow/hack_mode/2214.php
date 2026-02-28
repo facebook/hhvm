@@ -1,5 +1,5 @@
 <?hh
-function f() {
+function f() :mixed{
   $x = new Foo<Bar>();
   $x = new Foo<Blah<Bar>>();
   $y = new Foo<AnyArray,int>();
@@ -35,6 +35,6 @@ function f() {
 }
 
 <<__EntryPoint>>
-function main_2214() {
+function main_2214() :mixed{
 echo "Done\n";
 }

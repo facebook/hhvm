@@ -1,9 +1,9 @@
 <?hh
 
 class A {
-  public function f() {}
-  public static function rclsmeth<reify T>() {}
-  public static function rclsmeth2<reify T, Ti>() {}
+  public function f() :mixed{}
+  public static function rclsmeth<reify T>() :mixed{}
+  public static function rclsmeth2<reify T, Ti>() :mixed{}
 }
 
 <<__EntryPoint>>

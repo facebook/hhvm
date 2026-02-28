@@ -17,7 +17,7 @@ class C extends A {
 }
 
 <<__EntryPoint>>
-function main_645() {
+function main_645() :mixed{
 $obj = new A(1);
  var_dump($obj->a);
 $obj = new B(1);

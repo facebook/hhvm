@@ -7,8 +7,10 @@ from typing import Dict, List
 
 import attr
 
+# pyre-fixme[24]: Generic type `re.Pattern` expects 1 type parameter.
 MULTIFILE_SPLITTER: re.Pattern = re.compile(r"^////\s*(.*?)\s*$")
 
+# pyre-fixme[24]: Generic type `re.Pattern` expects 1 type parameter.
 FILENAME_MATCHER: re.Pattern = re.compile(r"^(base|changed)-(.+?)\s*$")
 
 
@@ -62,7 +64,7 @@ def parse_multifile_contents(filename: str) -> Dict[str, str]:
 
 
 @attr.s(auto_attribs=True)
-class FanoutTest(object):
+class FanoutTest:
     """Represents a fanout test scenario.
 
     We make use of the multifile format, e.g.:

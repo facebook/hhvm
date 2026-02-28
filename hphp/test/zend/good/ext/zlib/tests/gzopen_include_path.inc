@@ -39,6 +39,6 @@ function teardown_relative_path() {
 
 abstract final class ZendGoodExtZlibTestsGzopenIncludePathInc {
   public static function reldirs() {
-		return varray["dir1", "dir2", "dir3"];
+		return vec["dir1", "dir2", "dir3"];
 	}
 }

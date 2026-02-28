@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_to_array() {
+function main_to_array() :mixed{
 $s = shape(
   'x' => 4
 );

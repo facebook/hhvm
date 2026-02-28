@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_null_index() {
+function main_null_index() :mixed{
 echo "=== indexing into a boolean ===\n";
 $t = false[2]; //  QueryM 1 CGet EI:2, return ElemEmptyish
 

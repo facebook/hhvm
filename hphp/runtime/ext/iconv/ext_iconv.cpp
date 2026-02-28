@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/util/rds-local.h"
@@ -59,12 +58,12 @@ static char _generic_superset_name[] = "UCS-4LE";
 #define PHP_ICONV_MIME_DECODE_STRICT            (1<<0)
 #define PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR (1<<1)
 
-typedef enum _php_iconv_enc_scheme_t {
+enum php_iconv_enc_scheme_t {
   PHP_ICONV_ENC_SCHEME_BASE64,
   PHP_ICONV_ENC_SCHEME_QPRINT
-} php_iconv_enc_scheme_t;
+};
 
-typedef enum _php_iconv_err_t {
+enum php_iconv_err_t {
   PHP_ICONV_ERR_SUCCESS           = 0,
   PHP_ICONV_ERR_CONVERTER         = 1,
   PHP_ICONV_ERR_WRONG_CHARSET     = 2,
@@ -74,7 +73,7 @@ typedef enum _php_iconv_err_t {
   PHP_ICONV_ERR_UNKNOWN           = 6,
   PHP_ICONV_ERR_MALFORMED         = 7,
   PHP_ICONV_ERR_ALLOC             = 8
-} php_iconv_err_t;
+};
 
 static void _php_iconv_show_error(const char *func, php_iconv_err_t &err,
                                   const char *out_charset,
@@ -1135,6 +1134,7 @@ static php_iconv_err_t _php_iconv_mime_decode(StringBuffer &retval,
       } else {
         break;
       }
+      [[fallthrough]];
 
     case 9: /* choice point, seeing what to do next.*/
       switch (*p1) {
@@ -1159,7 +1159,7 @@ static php_iconv_err_t _php_iconv_mime_decode(StringBuffer &retval,
             break;
           }
         }
-        /* break is omitted intentionally */
+        [[fallthrough]];
 
       case '\r': case '\n': case ' ': case '\t': {
         String decoded;
@@ -1313,7 +1313,7 @@ static php_iconv_err_t _php_iconv_mime_decode(StringBuffer &retval,
           scan_stat = 1;
           break;
         }
-        /* break is omitted intentionally */
+        [[fallthrough]];
 
       default:
         _php_iconv_appendc(retval, *p1, cd_pl);
@@ -1967,13 +1967,13 @@ HHVM_FUNCTION(ob_iconv_handler, const String& contents, int64_t /*status*/) {
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef _LIBICONV_VERSION
-const char* iconv_impl() { return "libiconv"; };
+const char* iconv_impl() { return "libiconv"; }
 std::string iconv_version() {
   return folly::sformat("{}.{}",
                         _LIBICONV_VERSION >> 8, _LIBICONV_VERSION & 255);
 }
 #else
-const char* iconv_impl() { return "glibc"; };
+const char* iconv_impl() { return "glibc"; }
 #ifdef __GLIBC__
 std::string iconv_version() {
   return folly::sformat("{}.{}",
@@ -1985,12 +1985,10 @@ const char* iconv_version() { return "2.5"; }
 #endif
 
 struct iconvExtension final : Extension {
-  iconvExtension() : Extension("iconv") {}
+  iconvExtension() : Extension("iconv", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     HHVM_RC_STR(ICONV_IMPL, iconv_impl());
-    HHVM_RC_INT(ICONV_MIME_DECODE_CONTINUE_ON_ERROR, 2);
-    HHVM_RC_INT(ICONV_MIME_DECODE_STRICT, 1);
     HHVM_RC_STR(ICONV_VERSION, iconv_version());
 
     HHVM_FE(iconv_get_encoding);
@@ -2004,8 +2002,6 @@ struct iconvExtension final : Extension {
     HHVM_FE(iconv_substr);
     HHVM_FE(iconv);
     HHVM_FE(ob_iconv_handler);
-
-    loadSystemlib();
   }
 
 } s_iconv_extension;

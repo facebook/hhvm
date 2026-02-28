@@ -1,0 +1,68 @@
+(** Type A *)
+type a = x
+
+(** Type B
+ * is int
+ *)
+type b = x
+
+(** Type C has a fenced code block:
+ *
+ * ```
+ * function f(): int {
+ *   return 0;
+ * }
+ * ```
+ *
+ * And an unfenced code block:
+ *
+ *     function g(): int {
+ *       return 0;
+ *     }
+ *
+ * It should stay indented.
+ *)
+type c = x
+
+(** Type D has a multiline delimited comment:
+
+```
+function f(): int {
+  return 0;
+}
+```
+
+And an indented code block:
+
+    ```
+    function g(): int {
+      return 0;
+    }
+    ```
+*)
+type d = x
+
+(** Records can have comments on the fields. *)
+type record = {
+  foo: x;  (** The comments come after the field declaration in OCaml. *)
+  bar: x;  (** bar comment *)
+}
+
+(** Variant types can have comments on each variant. *)
+type variant =
+  | Foo
+      (** Again, the comments come after the variant declaration.
+       * Multiline comments are understood. *)
+  | Bar
+      (** Bar has a multiline delimited comment, even though it's
+    unusual in Rust source. *)
+  | Baz of {
+      a: x;
+      b: x;
+    }  (** Baz comment *)
+  | Qux of {
+      q_a: x;
+      q_b: x;
+    }
+      (** Qux is a struct-like variant with a long comment spanning
+       * multiple lines. *)

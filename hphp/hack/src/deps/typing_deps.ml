@@ -13,6 +13,7 @@ module Hashtbl = Stdlib.Hashtbl
 module Mode = Typing_deps_mode
 open Typing_deps_mode
 open Utils
+open FileInfo
 
 let worker_id : int option ref = ref None
 
@@ -30,6 +31,7 @@ module Dep = struct
     | Fun : string -> 'a variant
     | Type : string -> 'a variant
     | Extends : string -> dependency variant
+    | NotSubtype : string -> dependency variant
     | Const : string * string -> dependency variant
     | Constructor : string -> dependency variant
     | Prop : string * string -> dependency variant
@@ -39,6 +41,26 @@ module Dep = struct
     | AllMembers : string -> dependency variant
     | GConstName : string -> 'a variant
     | Module : string -> 'a variant
+    | Declares : 'a variant
+    | File : Relative_path.t -> dependency variant
+
+  let dependency_of_variant : type a. a variant -> dependency variant = function
+    | GConst s -> GConst s
+    | GConstName s -> GConstName s
+    | Type s -> Type s
+    | Fun s -> Fun s
+    | Module m -> Module m
+    | Const (cls, s) -> Const (cls, s)
+    | Prop (cls, s) -> Prop (cls, s)
+    | SProp (cls, s) -> SProp (cls, s)
+    | Method (cls, s) -> Method (cls, s)
+    | SMethod (cls, s) -> SMethod (cls, s)
+    | Constructor s -> Constructor s
+    | AllMembers s -> AllMembers s
+    | Extends s -> Extends s
+    | NotSubtype s -> NotSubtype s
+    | Declares -> Declares
+    | File path -> File path
 
   (** NOTE: keep in sync with `typing_deps_hash.rs`. *)
   type dep_kind =
@@ -55,9 +77,10 @@ module Dep = struct
     | KAllMembers [@value 11]
     | KGConstName [@value 12]
     | KModule [@value 13]
+    | KDeclares [@value 14]
+    | KNotSubtype [@value 15]
+    | KFile [@value 16]
   [@@deriving enum]
-
-  let _ = (min_dep_kind, max_dep_kind, dep_kind_of_enum)
 
   module Member = struct
     type t =
@@ -67,6 +90,8 @@ module Dep = struct
       | SProp of string
       | Constructor
       | Const of string
+      | All
+    [@@deriving show]
 
     let method_ name = Method name
 
@@ -79,6 +104,19 @@ module Dep = struct
     let constructor = Constructor
 
     let const name = Const name
+
+    let all = All
+
+    let to_dep_kind_and_name (member : t) : dep_kind * string =
+      let default_name = "" in
+      match member with
+      | Const name -> (KConst, name)
+      | Constructor -> (KConstructor, default_name)
+      | Prop name -> (KProp, name)
+      | SProp name -> (KSProp, name)
+      | Method name -> (KMethod, name)
+      | SMethod name -> (KSMethod, name)
+      | All -> (KAllMembers, default_name)
   end
 
   external hash1 : int -> string -> int = "hash1_ocaml" [@@noalloc]
@@ -111,27 +149,94 @@ module Dep = struct
        will show it as a positive integer. *)
     b
 
-  let make_member_dep_from_type_dep : t -> Member.t -> t =
-   fun type_hash -> function
-    | Member.Const name -> hash2 (dep_kind_to_enum KConst) type_hash name
-    | Member.Constructor -> type_hash
-    | Member.Prop name -> hash2 (dep_kind_to_enum KProp) type_hash name
-    | Member.SProp name -> hash2 (dep_kind_to_enum KSProp) type_hash name
-    | Member.Method name -> hash2 (dep_kind_to_enum KMethod) type_hash name
-    | Member.SMethod name -> hash2 (dep_kind_to_enum KSMethod) type_hash name
+  let to_int hash = hash
+
+  let ordinal_variant (type a) : a variant -> int = function
+    | GConst _ -> 0
+    | Fun _ -> 1
+    | Type _ -> 2
+    | Extends _ -> 3
+    | NotSubtype _ -> 15
+    | Const _ -> 5
+    | Constructor _ -> 6
+    | Prop _ -> 7
+    | SProp _ -> 8
+    | Method _ -> 9
+    | SMethod _ -> 10
+    | AllMembers _ -> 11
+    | GConstName _ -> 12
+    | Module _ -> 13
+    | Declares -> 14
+    | File _ -> 16
+
+  let compare_variant (type a) (v1 : a variant) (v2 : a variant) : int =
+    match (v1, v2) with
+    | (GConst x1, GConst x2)
+    | (Fun x1, Fun x2)
+    | (Type x1, Type x2)
+    | (Extends x1, Extends x2)
+    | (NotSubtype x1, NotSubtype x2)
+    | (Constructor x1, Constructor x2)
+    | (AllMembers x1, AllMembers x2)
+    | (GConstName x1, GConstName x2) ->
+      String.compare x1 x2
+    | (Prop (c1, m1), Prop (c2, m2))
+    | (SProp (c1, m1), SProp (c2, m2))
+    | (Method (c1, m1), Method (c2, m2))
+    | (SMethod (c1, m1), SMethod (c2, m2))
+    | (Const (c1, m1), Const (c2, m2)) ->
+      let res = String.compare c1 c2 in
+      if Int.( <> ) res 0 then
+        res
+      else
+        String.compare m1 m2
+    | (File p1, File p2) -> Relative_path.compare p1 p2
+    | (Declares, Declares) -> 0
+    | ( _,
+        ( GConst _ | Fun _ | Type _ | Extends _ | NotSubtype _ | Const _
+        | Constructor _ | Prop _ | SProp _ | Method _ | SMethod _ | AllMembers _
+        | GConstName _ | Module _ | Declares | File _ ) ) ->
+      ordinal_variant v1 - ordinal_variant v2
+
+  let dep_kind_of_variant : type a. a variant -> dep_kind = function
+    | GConst _ -> KGConst
+    | GConstName _ -> KGConstName
+    | Const _ -> KConst
+    | Type _ -> KType
+    | Fun _ -> KFun
+    | Prop _ -> KProp
+    | SProp _ -> KSProp
+    | Method _ -> KMethod
+    | SMethod _ -> KSMethod
+    | Constructor _ -> KConstructor
+    | AllMembers _ -> KAllMembers
+    | Extends _ -> KExtends
+    | NotSubtype _ -> KNotSubtype
+    | Module _ -> KModule
+    | Declares -> KDeclares
+    | File _ -> KFile
+
+  let make_member_dep_from_type_dep (type_dep : t) (member : Member.t) : t =
+    let (dep_kind, member_name) = Member.to_dep_kind_and_name member in
+    hash2 (dep_kind_to_enum dep_kind) type_dep member_name
+
+  (** Return the 'NotSubtype' dep for a class from its 'Type' dep  *)
+  let not_subtype_of_class class_dep =
+    hash2 (dep_kind_to_enum KNotSubtype) class_dep ""
 
   (* Keep in sync with the tags for `DepType` in `typing_deps_hash.rs`. *)
   let rec make : type a. a variant -> t = function
     (* Deps on defs *)
     | GConst name1 -> hash1 (dep_kind_to_enum KGConst) name1
     | Fun name1 -> hash1 (dep_kind_to_enum KFun) name1
-    | Type name1 -> hash1 (dep_kind_to_enum KType) name1
-    | Extends name1 -> hash1 (dep_kind_to_enum KExtends) name1
-    | AllMembers name1 -> hash1 (dep_kind_to_enum KAllMembers) name1
     | GConstName name1 -> hash1 (dep_kind_to_enum KGConstName) name1
     | Module mname -> hash1 (dep_kind_to_enum KModule) mname
+    | Type name1 -> hash1 (dep_kind_to_enum KType) name1
+    | Extends name1 -> hash1 (dep_kind_to_enum KExtends) name1
+    | NotSubtype name1 -> not_subtype_of_class (make (Type name1))
     (* Deps on members *)
-    | Constructor name1 -> hash1 (dep_kind_to_enum KConstructor) name1
+    | Constructor name1 ->
+      make_member_dep_from_type_dep (make (Type name1)) Member.Constructor
     | Const (name1, name2) ->
       make_member_dep_from_type_dep (make (Type name1)) (Member.Const name2)
     | Prop (name1, name2) ->
@@ -142,49 +247,107 @@ module Dep = struct
       make_member_dep_from_type_dep (make (Type name1)) (Member.Method name2)
     | SMethod (name1, name2) ->
       make_member_dep_from_type_dep (make (Type name1)) (Member.SMethod name2)
+    | AllMembers name1 ->
+      make_member_dep_from_type_dep (make (Type name1)) Member.All
+    | Declares -> hash1 (dep_kind_to_enum KDeclares) ""
+    | File path ->
+      hash1 (dep_kind_to_enum KFile) @@ Relative_path.storage_to_string path
 
   let is_class x = x land 1 = 1
-
-  let extends_of_class x = x lxor 1
 
   let compare = Int.compare
 
   let extract_name : type a. a variant -> string = function
-    | GConst s -> Utils.strip_ns s
-    | GConstName s -> Utils.strip_ns s
-    | Const (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
-    | Type s -> Utils.strip_ns s
-    | Fun s -> Utils.strip_ns s
-    | Prop (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
-    | SProp (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
-    | Method (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
-    | SMethod (cls, s) -> spf "%s::%s" (Utils.strip_ns cls) s
-    | Constructor s -> Utils.strip_ns s
-    | AllMembers s -> Utils.strip_ns s
-    | Extends s -> Utils.strip_ns s
+    | Const (cls, s)
+    | Prop (cls, s)
+    | SProp (cls, s)
+    | Method (cls, s)
+    | SMethod (cls, s) ->
+      spf "%s::%s" (Utils.strip_ns cls) s
+    | GConst s
+    | GConstName s
+    | Type s
+    | Fun s
+    | Constructor s
+    | AllMembers s
+    | Extends s
+    | NotSubtype s ->
+      Utils.strip_ns s
     | Module m -> m
+    | Declares -> "__declares__"
+    | File path -> Relative_path.storage_to_string path
+
+  let extract_root_name : type a. ?strip_namespace:bool -> a variant -> string =
+   fun ?(strip_namespace = true) variant ->
+    match variant with
+    | GConst s
+    | GConstName s
+    | Constructor s
+    | AllMembers s
+    | Extends s
+    | NotSubtype s
+    | Module s
+    | Type s
+    | Fun s
+    | Prop (s, _)
+    | SProp (s, _)
+    | Method (s, _)
+    | SMethod (s, _)
+    | Const (s, _) ->
+      if strip_namespace then
+        Utils.strip_ns s
+      else
+        s
+    | Declares -> "__declares__"
+    | File p -> Relative_path.storage_to_string p
+
+  let extract_member_name : type a. a variant -> string option = function
+    | GConst _
+    | GConstName _
+    | Constructor _
+    | AllMembers _
+    | Extends _
+    | NotSubtype _
+    | Module _
+    | Type _
+    | Fun _
+    | File _
+    | Declares ->
+      None
+    | Const (_cls, s)
+    | Prop (_cls, s)
+    | SProp (_cls, s)
+    | Method (_cls, s)
+    | SMethod (_cls, s) ->
+      Some s
 
   let to_decl_reference : type a. a variant -> Decl_reference.t = function
-    | Type s -> Decl_reference.Type s
-    | Const (s, _) -> Decl_reference.Type s
-    | Extends s -> Decl_reference.Type s
-    | AllMembers s -> Decl_reference.Type s
-    | Constructor s -> Decl_reference.Type s
-    | Prop (s, _) -> Decl_reference.Type s
-    | SProp (s, _) -> Decl_reference.Type s
-    | Method (s, _) -> Decl_reference.Type s
-    | SMethod (s, _) -> Decl_reference.Type s
+    | Type s
+    | Const (s, _)
+    | Extends s
+    | NotSubtype s
+    | AllMembers s
+    | Constructor s
+    | Prop (s, _)
+    | SProp (s, _)
+    | Method (s, _)
+    | SMethod (s, _) ->
+      Decl_reference.Type s
     | GConst s
     | GConstName s ->
       Decl_reference.GlobalConstant s
     | Fun s -> Decl_reference.Function s
     | Module m -> Decl_reference.Module m
+    | Declares -> failwith "No Decl_reference.t for Declares Dep.variant"
+    | File _ -> failwith "No Decl_reference.t for File Dep.variant"
 
   let to_debug_string = string_of_int
 
   let of_debug_string = int_of_string
 
   let to_hex_string = Printf.sprintf "0x%016x"
+
+  let pp fmt dep = Format.fprintf fmt "%s" (to_hex_string dep)
 
   let of_hex_string = int_of_string
 
@@ -204,9 +367,25 @@ module Dep = struct
       | Constructor _ -> "Constructor"
       | AllMembers _ -> "AllMembers"
       | Extends _ -> "Extends"
+      | NotSubtype _ -> "NotSubtype"
       | Module _ -> "Module"
+      | Declares -> "Declares"
+      | File _ -> "File"
     in
-    prefix ^ " " ^ extract_name dep
+    match dep with
+    | Declares -> prefix
+    | _ -> prefix ^ " " ^ extract_name dep
+
+  let pp_variant fmt variant =
+    Format.fprintf fmt "%s" (variant_to_string variant)
+end
+
+module DepMap = struct
+  include WrappedMap.Make (Dep)
+
+  let pp pp_data = make_pp Dep.pp pp_data
+
+  let show pp_data x = Format.asprintf "%a" (pp pp_data) x
 end
 
 (***********************************************)
@@ -217,10 +396,10 @@ end
 let trace = ref true
 
 (** List of callbacks, called when discovering dependency edges *)
-let dependency_callbacks = Caml.Hashtbl.create 0
+let dependency_callbacks = Stdlib.Hashtbl.create 0
 
-let add_dependency_callback cb_name cb =
-  Caml.Hashtbl.replace dependency_callbacks cb_name cb
+let add_dependency_callback ~name cb =
+  Stdlib.Hashtbl.replace dependency_callbacks name cb
 
 (** Set of dependencies used for the custom system
 
@@ -267,6 +446,8 @@ module DepSet = struct
         let str = Printf.sprintf "%x; " x in
         pp_print_string fmt str);
     pp_print_string fmt "}"
+
+  let show s = Format.asprintf "%a" pp s
 end
 
 module DepHashKey = struct
@@ -285,23 +466,42 @@ module VisitedSet = struct
   let make () : t = hh_visited_set_make ()
 end
 
+type dep_edge = {
+  idependent: Dep.t;  (** The node depending on the dependency *)
+  idependency: Dep.t;  (** The node the dependent depends upon *)
+}
+
+module DepEdgeSet = Stdlib.Set.Make (struct
+  type t = dep_edge
+
+  let compare x y =
+    let d1 = Int.compare x.idependent y.idependent in
+    if d1 = 0 then
+      Int.compare x.idependency y.idependency
+    else
+      d1
+end)
+
 (** Graph management in the new system with custom file format. *)
 module CustomGraph = struct
+  (* from deps_rust_ffi.rs *)
   external hh_custom_dep_graph_register_custom_types : unit -> unit
     = "hh_custom_dep_graph_register_custom_types"
-
-  external assert_master : unit -> unit = "assert_master"
 
   let allow_reads_ref = ref false
 
   let allow_dependency_table_reads flag =
-    assert_master ();
+    assert (not (Worker_utils.is_worker_process ()));
     let prev = !allow_reads_ref in
     allow_reads_ref := flag;
     prev
 
-  external hh_custom_dep_graph_has_edge : Mode.t -> Dep.t -> Dep.t -> bool
-    = "hh_custom_dep_graph_has_edge"
+  external hh_custom_dep_graph_replace : Mode.t -> unit
+    = "hh_custom_dep_graph_replace"
+    [@@noalloc]
+
+  external depgraph_has_edge : Mode.t -> Dep.t -> Dep.t -> bool
+    = "hh_depgraph_has_edge"
     [@@noalloc]
 
   external get_ideps_from_hash : Mode.t -> Dep.t -> DepSet.t
@@ -317,8 +517,19 @@ module CustomGraph = struct
     Mode.t -> VisitedSet.t -> Dep.t -> DepSet.t -> DepSet.t
     = "hh_custom_dep_graph_get_extend_deps"
 
+  external get_member_fanout :
+    Mode.t -> Dep.t -> Dep.dep_kind -> string -> DepSet.t -> DepSet.t
+    = "hh_get_member_fanout"
+
+  external get_not_subtype_fanout : Mode.t -> DepSet.t -> DepSet.t -> DepSet.t
+    = "hh_get_not_subtype_fanout"
+
   external register_discovered_dep_edge : Dep.t -> Dep.t -> unit
     = "hh_custom_dep_graph_register_discovered_dep_edge"
+    [@@noalloc]
+
+  external remove_edge : Dep.t -> Dep.t -> unit
+    = "hh_custom_dep_graph_remove_edge"
     [@@noalloc]
 
   external dep_graph_delta_num_edges : unit -> int
@@ -327,38 +538,22 @@ module CustomGraph = struct
 
   external save_delta : string -> bool -> int = "hh_custom_dep_graph_save_delta"
 
-  external load_delta : Mode.t -> string -> int
-    = "hh_custom_dep_graph_load_delta"
-
   let add_all_deps mode x = x |> add_extend_deps mode |> add_typing_deps mode
 
-  type dep_edge = {
-    idependent: Dep.t;
-    idependency: Dep.t;
-  }
+  (** A batch of discovered dependency edges, of which some might
+    already be in the dependency graph! *)
+  let discovered_deps_batch : (dep_edge, unit) Hashtbl.t =
+    (* There isn't really any reason why I choose Hashtbl over Set here. *)
+    Hashtbl.create 1000
 
-  module DepEdgeSet = Caml.Set.Make (struct
-    type t = dep_edge
+  (** A batch of dependency edges that are not yet in the dependency graph. *)
+  let filtered_deps_batch : DepEdgeSet.t ref =
+    (* We use a Set, because a Hashtbl is way too expensive to serialize/
+       deserialize in OCaml. *)
+    ref DepEdgeSet.empty
 
-    let compare x y =
-      let d1 = Int.compare x.idependent y.idependent in
-      if d1 = 0 then
-        Int.compare x.idependency y.idependency
-      else
-        d1
-  end)
-
-  (* A batch of discovered dependency edges, of which some might
-   * already be in the dependency graph!
-   *
-   * There isn't really any reason why I choose Hashtbl over Set here. *)
-  let discovered_deps_batch : (dep_edge, unit) Hashtbl.t = Hashtbl.create 1000
-
-  (* A batch of dependency edges that are not yet in the dependency graph.
-   * We use a Set, because a Hashtbl is way too expensive to serialize/
-   * deserialize in OCaml. *)
-  let filtered_deps_batch : DepEdgeSet.t ref = ref DepEdgeSet.empty
-
+  (** Filter out the discovered dep edges which are already in the dep graph.
+    Get [!filtered_deps_batch] to obtain the result. *)
   let filter_discovered_deps_batch mode =
     (* Empty discovered_deps_bach by checking for each edge whether it's already
      * in the dependency graph. If it is not, add it to the filtered deps batch. *)
@@ -367,10 +562,10 @@ module CustomGraph = struct
       Hashtbl.fold
         begin
           fun ({ idependent; idependency } as edge) () s ->
-          if not (hh_custom_dep_graph_has_edge mode idependent idependency) then
-            DepEdgeSet.add edge s
-          else
-            s
+            if not (depgraph_has_edge mode idependent idependency) then
+              DepEdgeSet.add edge s
+            else
+              s
         end
         discovered_deps_batch
         s
@@ -380,11 +575,20 @@ module CustomGraph = struct
 
   let register_discovered_dep_edges : DepEdgeSet.t -> unit =
    fun s ->
-    assert_master ();
+    assert (not (Worker_utils.is_worker_process ()));
     DepEdgeSet.iter
       begin
         fun { idependent; idependency } ->
-        register_discovered_dep_edge idependent idependency
+          register_discovered_dep_edge idependent idependency
+      end
+      s
+
+  let remove_edges : DepEdgeSet.t -> unit =
+   fun s ->
+    assert (not (Worker_utils.is_worker_process ()));
+    DepEdgeSet.iter
+      begin
+        (fun { idependent; idependency } -> remove_edge idependent idependency)
       end
       s
 
@@ -394,7 +598,9 @@ module CustomGraph = struct
     if idependent = idependency then
       ()
     else (
-      Caml.Hashtbl.iter (fun _ f -> f dependent dependency) dependency_callbacks;
+      Stdlib.Hashtbl.iter
+        (fun _ f -> f dependent dependency)
+        dependency_callbacks;
       if !trace then begin
         Hashtbl.replace discovered_deps_batch { idependent; idependency } ();
         if Hashtbl.length discovered_deps_batch >= 1000 then
@@ -402,13 +608,33 @@ module CustomGraph = struct
       end
     )
 
-  let idep_exists mode dependent dependency =
-    let idependent = Dep.make dependent in
-    let idependency = Dep.make dependency in
-    hh_custom_dep_graph_has_edge mode idependent idependency
+  let dump_current_edge_buffer ?deps_to_symbol_map () =
+    let hash_to_string dep =
+      match deps_to_symbol_map with
+      | None -> Dep.to_hex_string dep
+      | Some map ->
+        (match DepMap.find_opt dep map with
+        | None -> Dep.to_hex_string dep
+        | Some symbol -> Dep.variant_to_string symbol)
+    in
+    Hashtbl.iter
+      (fun { idependent; idependency } () ->
+        Printf.printf
+          "%s -> %s\n"
+          (hash_to_string idependency)
+          (hash_to_string idependent))
+      discovered_deps_batch
 end
 
-module SaveHumanReadableDepMap = struct
+module SaveHumanReadableDepMap : sig
+  (** Add a dep to the current set of human readable deps. *)
+  val add : Typing_deps_mode.t -> 'a Dep.variant * int -> unit
+
+  (** Take the current set of human readable deps and writes them to disk.
+    Reset the set of human readable deps to be empty.
+    If [flush], flush the channel after the write. *)
+  val export_to_disk : ?flush:bool -> Typing_deps_mode.t -> unit
+end = struct
   let should_save mode =
     match mode with
     | SaveToDiskMode { human_readable_dep_map_dir = Some _; _ } -> true
@@ -445,11 +671,10 @@ module SaveHumanReadableDepMap = struct
       handle
     | Some h -> h
 
-  (* For each process, keep a set of the seen (hashcode, dependency name)s to reduce logging duplicates.
-   * Use the name as well as the hashcode in case of hashcode conflicts.
-   *)
   let set_max_size = 20000
 
+  (** The set of the seen (hashcode, dependency name)s, per worker.
+    Use the name as well as the hashcode in case of hashcode conflicts. *)
   let seen_set_ref : (int * string, unit) Hashtbl.t option ref = ref None
 
   let seen_set () =
@@ -460,9 +685,9 @@ module SaveHumanReadableDepMap = struct
       tbl
     | Some tbl -> tbl
 
-  (* Takes the current set of human readable deps and writes them to disk
-   * Resets the set of human readable deps to be empty
-   * ~flush flushes the channel after the write *)
+  (** Take the current set of human readable deps and writes them to disk.
+    Reset the set of human readable deps to be empty.
+    If [flush], flush the channel after the write. *)
   let export_to_disk ?(flush = false) mode =
     if should_save mode then
       let ss = seen_set () in
@@ -476,7 +701,7 @@ module SaveHumanReadableDepMap = struct
       let () = Hashtbl.reset ss in
       if flush then Out_channel.flush out_channel
 
-  (* Adds a dep to the current set of human readable deps *)
+  (** Add a dep to the current set of human readable deps. *)
   let add mode (dep, hash) =
     if should_save mode then
       let ss = seen_set () in
@@ -488,12 +713,14 @@ module SaveHumanReadableDepMap = struct
         if Hashtbl.length ss >= set_max_size then export_to_disk mode
 end
 
-module SaveCustomGraph = struct
-  external hh_save_custom_dep_graph_save_delta : string -> string -> int
-    = "hh_save_custom_dep_graph_save_delta"
+module SaveCustomGraph : sig
+  val add_idep :
+    Mode.t -> Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit
 
-  let discovered_deps_batch : (CustomGraph.dep_edge, unit) Hashtbl.t =
-    Hashtbl.create 1000
+  (** Write to disk the dep edges which are not already in the depgraph. *)
+  val filter_discovered_deps_batch : flush:bool -> Mode.t -> unit
+end = struct
+  let discovered_deps_batch : (dep_edge, unit) Hashtbl.t = Hashtbl.create 1000
 
   let destination_file_handle_ref : Out_channel.t option ref = ref None
 
@@ -517,26 +744,28 @@ module SaveCustomGraph = struct
       destination_file_handle_ref := Some handle;
       handle
 
+  (** Write to disk the dep edges which are not already in the depgraph. *)
   let filter_discovered_deps_batch ~flush mode =
     let handle = destination_file_handle mode in
     Hashtbl.iter
       begin
-        fun CustomGraph.{ idependent; idependency } () ->
-        if
-          not
-            (CustomGraph.hh_custom_dep_graph_has_edge
-               mode
-               idependent
-               idependency)
-        then begin
-          (* To be kept in sync with typing_deps.rs::hh_custom_dep_graph_save_delta! *)
-          (* output_binary_int outputs the lower 4-bytes only, regardless
-           * of architecture. It outputs in big-endian format.*)
-          Out_channel.output_binary_int handle (idependent lsr 32);
-          Out_channel.output_binary_int handle idependent;
-          Out_channel.output_binary_int handle (idependency lsr 32);
-          Out_channel.output_binary_int handle idependency
-        end
+        fun { idependent; idependency } () ->
+          if not (CustomGraph.depgraph_has_edge mode idependent idependency)
+          then begin
+            (* To be kept in sync with typing_deps.rs::hh_custom_dep_graph_save_delta! *)
+
+            (* Write dependency. *)
+            for i = 0 to 6 do
+              Out_channel.output_byte handle (idependency lsr (i * 8))
+            done;
+            (* Set a tag bit to indicate this is a dependency *)
+            Out_channel.output_byte handle ((idependency lsr 56) + 128);
+
+            (* Write dependent. *)
+            for i = 0 to 7 do
+              Out_channel.output_byte handle (idependent lsr (i * 8))
+            done
+          end
       end
       discovered_deps_batch;
     if flush then Out_channel.flush handle;
@@ -548,37 +777,28 @@ module SaveCustomGraph = struct
     if idependent = idependency then
       ()
     else (
-      Caml.Hashtbl.iter (fun _ f -> f dependent dependency) dependency_callbacks;
+      Stdlib.Hashtbl.iter
+        (fun _ f -> f dependent dependency)
+        dependency_callbacks;
       if !trace then begin
-        Hashtbl.replace
-          discovered_deps_batch
-          CustomGraph.{ idependent; idependency }
-          ();
+        Hashtbl.replace discovered_deps_batch { idependent; idependency } ();
         if Hashtbl.length discovered_deps_batch >= 1000 then
           filter_discovered_deps_batch ~flush:false mode
       end;
       let () = SaveHumanReadableDepMap.add mode (dependent, idependent) in
       SaveHumanReadableDepMap.add mode (dependency, idependency)
     )
-
-  let save_delta mode ~source =
-    let dest = destination_filepath mode in
-    hh_save_custom_dep_graph_save_delta source dest
 end
 
-(** Registeres Rust custom types with the OCaml runtime, supporting deserialization *)
+(** Registers Rust custom types with the OCaml runtime, supporting deserialization *)
 let () = CustomGraph.hh_custom_dep_graph_register_custom_types ()
 
 let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
   let {
-    FileInfo.funs;
-    classes;
-    typedefs;
-    consts;
-    modules;
+    FileInfo.ids = { FileInfo.funs; classes; typedefs; consts; modules };
     comments = _;
     file_mode = _;
-    hash = _;
+    position_free_decl_hash = _;
   } =
     file_info
   in
@@ -587,8 +807,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       consts
       ~f:
         begin
-          fun acc (_, const_id, _) ->
-          Dep.make (Dep.GConst const_id) :: acc
+          (fun acc (id : FileInfo.id) -> Dep.make (Dep.GConst id.name) :: acc)
         end
       ~init:[]
   in
@@ -597,8 +816,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       funs
       ~f:
         begin
-          fun acc (_, fun_id, _) ->
-          Dep.make (Dep.Fun fun_id) :: acc
+          (fun acc (id : FileInfo.id) -> Dep.make (Dep.Fun id.name) :: acc)
         end
       ~init:defs
   in
@@ -607,8 +825,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       classes
       ~f:
         begin
-          fun acc (_, class_id, _) ->
-          Dep.make (Dep.Type class_id) :: acc
+          (fun acc (id : FileInfo.id) -> Dep.make (Dep.Type id.name) :: acc)
         end
       ~init:defs
   in
@@ -617,8 +834,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       typedefs
       ~f:
         begin
-          fun acc (_, type_id, _) ->
-          Dep.make (Dep.Type type_id) :: acc
+          (fun acc (id : FileInfo.id) -> Dep.make (Dep.Type id.name) :: acc)
         end
       ~init:defs
   in
@@ -627,8 +843,7 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
       modules
       ~f:
         begin
-          fun acc (_, type_id, _) ->
-          Dep.make (Dep.Module type_id) :: acc
+          (fun acc (id : FileInfo.id) -> Dep.make (Dep.Module id.name) :: acc)
         end
       ~init:defs
   in
@@ -641,9 +856,7 @@ module Telemetry = struct
     | SaveToDiskMode _ -> None
 end
 
-type dep_edge = CustomGraph.dep_edge
-
-type dep_edges = CustomGraph.DepEdgeSet.t option
+type dep_edges = DepEdgeSet.t option
 
 (** As part of few optimizations (prechecked files, interruptible typechecking), we
     allow the dependency table to get out of date (in order to be able to prioritize
@@ -664,20 +877,23 @@ let add_idep mode dependent dependency =
   | InMemoryMode _ -> CustomGraph.add_idep mode dependent dependency
   | SaveToDiskMode _ -> SaveCustomGraph.add_idep mode dependent dependency
 
-let idep_exists mode dependent dependency =
+let replace mode =
   match mode with
-  | InMemoryMode _ -> CustomGraph.idep_exists mode dependent dependency
-  | _ -> false
+  | InMemoryMode _ -> CustomGraph.hh_custom_dep_graph_replace mode
+  | _ -> ()
 
-let dep_edges_make () : dep_edges = Some CustomGraph.DepEdgeSet.empty
+let dep_edges_make () : dep_edges = Some DepEdgeSet.empty
 
+(** Depending on [mode], either return discovered edges
+  which are not already in the dep graph
+  or write those edges to disk. *)
 let flush_ideps_batch mode : dep_edges =
   match mode with
   | InMemoryMode _ ->
     (* Make sure we don't miss any dependencies! *)
     CustomGraph.filter_discovered_deps_batch mode;
     let old_batch = !CustomGraph.filtered_deps_batch in
-    CustomGraph.filtered_deps_batch := CustomGraph.DepEdgeSet.empty;
+    CustomGraph.filtered_deps_batch := DepEdgeSet.empty;
     Some old_batch
   | SaveToDiskMode _ ->
     SaveCustomGraph.filter_discovered_deps_batch ~flush:true mode;
@@ -686,23 +902,35 @@ let flush_ideps_batch mode : dep_edges =
 
 let merge_dep_edges (x : dep_edges) (y : dep_edges) : dep_edges =
   match (x, y) with
-  | (Some x, Some y) -> Some (CustomGraph.DepEdgeSet.union x y)
+  | (Some x, Some y) -> Some (DepEdgeSet.union x y)
   | _ -> None
 
+(** Register the provided dep edges in the dep table delta in [typing_deps.rs] *)
 let register_discovered_dep_edges : dep_edges -> unit = function
   | None -> ()
   | Some batch -> CustomGraph.register_discovered_dep_edges batch
+
+let flush_deps mode = flush_ideps_batch mode |> register_discovered_dep_edges
+
+let remove_edges mode edges =
+  match mode with
+  | InMemoryMode _
+  | SaveToDiskMode _ ->
+    CustomGraph.remove_edges edges
+
+let remove_declared_tags mode deps =
+  let edges =
+    DepSet.fold deps ~init:DepEdgeSet.empty ~f:(fun dep edges_acc ->
+        let edge = { idependency = dep; idependent = Dep.make Dep.Declares } in
+        DepEdgeSet.add edge edges_acc)
+  in
+  remove_edges mode edges
 
 let save_discovered_edges mode ~dest ~reset_state_after_saving =
   match mode with
   | InMemoryMode _ -> CustomGraph.save_delta dest reset_state_after_saving
   | SaveToDiskMode _ ->
     failwith "save_discovered_edges not supported for SaveToDiskMode"
-
-let load_discovered_edges mode source =
-  match mode with
-  | InMemoryMode _ -> CustomGraph.load_delta mode source
-  | SaveToDiskMode _ -> SaveCustomGraph.save_delta mode ~source
 
 let get_ideps_from_hash mode hash =
   match mode with
@@ -713,11 +941,25 @@ let get_ideps_from_hash mode hash =
 let get_ideps mode dependency = get_ideps_from_hash mode (Dep.make dependency)
 
 let get_extend_deps ~mode ~visited ~source_class ~acc =
-  match (visited, acc) with
-  | (visited, acc) -> CustomGraph.get_extend_deps mode visited source_class acc
+  CustomGraph.get_extend_deps mode visited source_class acc
 
 let add_extend_deps mode acc = CustomGraph.add_extend_deps mode acc
 
 let add_typing_deps mode acc = CustomGraph.add_typing_deps mode acc
 
 let add_all_deps mode acc = CustomGraph.add_all_deps mode acc
+
+let get_member_fanout mode ~class_dep member fanout_acc =
+  let (member_dep_kind, member_name) = Dep.Member.to_dep_kind_and_name member in
+  CustomGraph.get_member_fanout
+    mode
+    class_dep
+    member_dep_kind
+    member_name
+    fanout_acc
+
+let get_not_subtype_fanout mode ~descendant_deps fanout_acc =
+  CustomGraph.get_not_subtype_fanout mode descendant_deps fanout_acc
+
+let dump_current_edge_buffer_in_memory_mode =
+  CustomGraph.dump_current_edge_buffer

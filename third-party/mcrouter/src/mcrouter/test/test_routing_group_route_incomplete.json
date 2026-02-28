@@ -1,0 +1,20 @@
+{
+  "pools": {
+    "A": {
+      "servers": ["127.0.0.1:11111"],
+      "protocol": "caret"
+    },
+    "B": {
+      "servers": ["127.0.0.1:22222"],
+      "protocol": "caret"
+    }
+  },
+  "route": {
+    "type": "RoutingGroupRoute",
+    "default_policy": "PoolRoute|A",
+    "routing_group_policies": {
+      "get_like": "PoolRoute|B",
+      "update_like": "PoolRoute|B"
+    }
+  }
+}

@@ -1,0 +1,1 @@
+Fatal error: fb_rename_function must be explicitly enabled for test1 (when Eval.JitEnableRenameFunction=2 by adding it to option Eval.RenamableFunctions) in %s/hphp/test/quick/rename_function_disable.php on line %d

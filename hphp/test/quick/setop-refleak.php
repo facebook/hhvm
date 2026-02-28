@@ -5,7 +5,7 @@ class Dtor {
 
 class Foo { public $bug; }
 
-function main() {
+function main() :mixed{
   $x = new Foo;
   $x->bug = new Dtor;
   try {
@@ -15,7 +15,7 @@ function main() {
   }
   var_dump($x);
 }
-<<__EntryPoint>> function main_entry() {
+<<__EntryPoint>> function main_entry() :mixed{
 main();
 echo "done\n";
 }

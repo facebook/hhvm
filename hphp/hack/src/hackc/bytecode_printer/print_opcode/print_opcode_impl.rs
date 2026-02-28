@@ -3,14 +3,25 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_gen::{ImmType, InstrFlags, OpcodeData};
-use proc_macro2::{Ident, Span, TokenStream};
-use quote::{quote, ToTokens};
-use std::collections::HashSet;
-use syn::{
-    spanned::Spanned, DeriveInput, Error, Lit, LitByteStr, LitStr, Meta, MetaList, MetaNameValue,
-    NestedMeta, Result,
-};
+use hash::HashSet;
+use hhbc_gen::ImmType;
+use hhbc_gen::OpcodeData;
+use proc_macro2::Ident;
+use proc_macro2::Span;
+use proc_macro2::TokenStream;
+use quote::ToTokens;
+use quote::quote;
+use syn::DeriveInput;
+use syn::Error;
+use syn::Lit;
+use syn::LitByteStr;
+use syn::LitStr;
+use syn::Meta;
+use syn::MetaList;
+use syn::MetaNameValue;
+use syn::NestedMeta;
+use syn::Result;
+use syn::spanned::Spanned;
 
 // ----------------------------------------------------------------------------
 
@@ -34,7 +45,6 @@ pub fn build_print_opcode(input: TokenStream, opcodes: &[OpcodeData]) -> Result<
             LitByteStr::new(name.as_bytes(), Span::call_site())
         };
 
-        let is_struct = opcode.flags.contains(InstrFlags::AS_STRUCT);
         let is_override = attributes.overrides.contains(opcode.name);
 
         let parameters: Vec<Ident> = opcode
@@ -45,15 +55,14 @@ pub fn build_print_opcode(input: TokenStream, opcodes: &[OpcodeData]) -> Result<
 
         let input_parameters = if parameters.is_empty() {
             TokenStream::new()
-        } else if is_struct {
-            quote!( {#(#parameters),*} )
         } else {
             quote!( (#(#parameters),*) )
         };
 
         if is_override {
             let override_call = {
-                use convert_case::{Case, Casing};
+                use convert_case::Case;
+                use convert_case::Casing;
                 let name = opcode.name.to_case(Case::Snake);
                 Ident::new(&format!("print_{}", name), Span::call_site())
             };
@@ -96,7 +105,8 @@ pub fn build_print_opcode(input: TokenStream, opcodes: &[OpcodeData]) -> Result<
         impl #impl_generics #struct_name #ty_generics #where_clause {
             #vis fn print_opcode(
                 &self,
-                w: &mut <Self as PrintOpcodeTypes>::Write
+                w: &mut <Self as PrintOpcodeTypes>::Write,
+                adata: &AdataState,
             ) -> std::result::Result<(), <Self as PrintOpcodeTypes>::Error> {
                 match self.get_opcode() {
                     #(#body)*
@@ -192,10 +202,11 @@ impl Attributes {
     }
 }
 
+#[allow(clippy::todo)]
 fn convert_immediate(name: &str, imm: &ImmType) -> TokenStream {
     let name = Ident::new(name, Span::call_site());
     match imm {
-        ImmType::AA => quote!(print_adata_id(w, #name)?;),
+        ImmType::AA => quote!(print::print_adata_id(w, #name, adata)?;),
         ImmType::ARR(_sub_ty) => {
             let msg = format!("unsupported '{}'", name);
             quote!(todo!(#msg);)
@@ -203,8 +214,9 @@ fn convert_immediate(name: &str, imm: &ImmType) -> TokenStream {
         ImmType::BA => quote!(self.print_label(w, #name)?;),
         ImmType::BA2 => quote!(self.print_label2(w, #name)?;),
         ImmType::BLA => quote!(self.print_branch_labels(w, #name.as_ref())?;),
-        ImmType::DA => quote!(print_double(w, *#name)?;),
-        ImmType::FCA => quote!(self.print_fcall_args(w, #name)?;),
+        ImmType::DA => quote!(print_float(w, *#name)?;),
+        ImmType::DUMMY => TokenStream::new(),
+        ImmType::FCA => quote!(self.print_fcall_args(w, #name, adata)?;),
         ImmType::I64A => quote!(write!(w, "{}", #name)?;),
         ImmType::IA => quote!(print_iterator_id(w, #name)?;),
         ImmType::ILA => quote!(self.print_local(w, #name)?;),
@@ -215,16 +227,17 @@ fn convert_immediate(name: &str, imm: &ImmType) -> TokenStream {
         ImmType::LAR => quote!(print_local_range(w, #name)?;),
         ImmType::NA => panic!("NA is not expected"),
         ImmType::NLA => quote!(self.print_local(w, #name)?;),
-        ImmType::OA(ty) | ImmType::OAL(ty) => {
-            use convert_case::{Case, Casing};
+        ImmType::OA(ty) => {
+            use convert_case::Case;
+            use convert_case::Casing;
             let handler = Ident::new(
                 &format!("print_{}", ty.to_case(Case::Snake)),
                 Span::call_site(),
             );
             quote!(#handler(w, #name)?;)
         }
-        ImmType::RATA => quote!(print_str(w, #name)?;),
-        ImmType::SA => quote!(print_quoted_str(w, #name)?;),
+        ImmType::RATA => quote!(print_string_id(w, #name)?;),
+        ImmType::SA => quote!(print_quoted_bytes_id(w, #name)?;),
         ImmType::SLA => quote!(print_switch_labels(w, #name)?;),
         ImmType::VSA => quote!(print_shape_fields(w, #name)?;),
     }
@@ -237,6 +250,7 @@ fn convert_call_arg(name: &str, imm: &ImmType) -> TokenStream {
         | ImmType::BA
         | ImmType::BA2
         | ImmType::DA
+        | ImmType::DUMMY
         | ImmType::FCA
         | ImmType::I64A
         | ImmType::IA
@@ -252,7 +266,7 @@ fn convert_call_arg(name: &str, imm: &ImmType) -> TokenStream {
         | ImmType::SLA
         | ImmType::VSA => name.to_token_stream(),
 
-        ImmType::ARR(_) | ImmType::BLA | ImmType::OA(_) | ImmType::OAL(_) => {
+        ImmType::ARR(_) | ImmType::BLA | ImmType::OA(_) => {
             quote!(#name.as_ref())
         }
 
@@ -267,10 +281,11 @@ pub trait PrintOpcodeTypes {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use hhbc_gen as _;
     use macro_test_util::assert_pat_eq;
     use quote::quote;
+
+    use super::*;
 
     #[test]
     fn test_basic() {
@@ -287,7 +302,8 @@ mod tests {
                 impl<T> PrintMe<T> {
                     fn print_opcode(
                         &self,
-                        w: &mut <Self as PrintOpcodeTypes>::Write
+                        w: &mut <Self as PrintOpcodeTypes>::Write,
+                        adata: &AdataState,
                     ) -> std::result::Result<(), <Self as PrintOpcodeTypes>::Error>
                     {
                         match self.get_opcode() {
@@ -296,33 +312,25 @@ mod tests {
                             }
                             Opcode::TestOneImm(str1) => {
                                 w.write_all(b"TestOneImm ")?;
-                                print_quoted_str(w, str1)?;
+                                print_quoted_bytes_id(w, str1)?;
                             }
                             Opcode::TestTwoImm(str1, str2) => {
                                 w.write_all(b"TestTwoImm ")?;
-                                print_quoted_str(w, str1)?;
+                                print_quoted_bytes_id(w, str1)?;
                                 w.write_all(b" ")?;
-                                print_quoted_str(w, str2)?;
+                                print_quoted_bytes_id(w, str2)?;
                             }
                             Opcode::TestThreeImm(str1, str2, str3) => {
                                 w.write_all(b"TestThreeImm ")?;
-                                print_quoted_str(w, str1)?;
+                                print_quoted_bytes_id(w, str1)?;
                                 w.write_all(b" ")?;
-                                print_quoted_str(w, str2)?;
+                                print_quoted_bytes_id(w, str2)?;
                                 w.write_all(b" ")?;
-                                print_quoted_str(w, str3)?;
+                                print_quoted_bytes_id(w, str3)?;
                             }
-                            // -------------------------------------------
-                            Opcode::TestAsStruct { str1, str2 } => {
-                                w.write_all(b"TestAsStruct ")?;
-                                print_quoted_str(w, str1)?;
-                                w.write_all(b" ")?;
-                                print_quoted_str(w, str2)?;
-                            }
-                            // -------------------------------------------
                             Opcode::TestAA(arr1) => {
                                 w.write_all(b"TestAA ")?;
-                                print_adata_id(w, arr1)?;
+                                print::print_adata_id(w, arr1, adata)?;
                             }
                             Opcode::TestARR(arr1) => {
                                 w.write_all(b"TestARR ")?;
@@ -342,11 +350,11 @@ mod tests {
                             }
                             Opcode::TestDA(dbl1) => {
                                 w.write_all(b"TestDA ")?;
-                                print_double(w, *dbl1)?;
+                                print_float(w, *dbl1)?;
                             }
                             Opcode::TestFCA(fca) => {
                                 w.write_all(b"TestFCA ")?;
-                                self.print_fcall_args(w, fca)?;
+                                self.print_fcall_args(w, fca, adata)?;
                             }
                             Opcode::TestI64A(arg1) => {
                                 w.write_all(b"TestI64A ")?;
@@ -388,17 +396,13 @@ mod tests {
                                 w.write_all(b"TestOA ")?;
                                 print_oa_sub_type(w, subop1)?;
                             }
-                            Opcode::TestOAL(subop1) => {
-                                w.write_all(b"TestOAL ")?;
-                                print_oa_sub_type(w, subop1)?;
-                            }
                             Opcode::TestRATA(rat) => {
                                 w.write_all(b"TestRATA ")?;
-                                print_str(w, rat)?;
+                                print_string_id(w, rat)?;
                             }
                             Opcode::TestSA(str1) => {
                                 w.write_all(b"TestSA ")?;
-                                print_quoted_str(w, str1)?;
+                                print_quoted_bytes_id(w, str1)?;
                             }
                             Opcode::TestSLA(targets) => {
                                 w.write_all(b"TestSLA ")?;

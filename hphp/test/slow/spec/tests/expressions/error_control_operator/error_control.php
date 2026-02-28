@@ -6,7 +6,7 @@
    +-------------------------------------------------------------+
 */
 
-function f() {
+function f() :mixed{
     // During
     var_dump(error_reporting());
     $ret = $y;

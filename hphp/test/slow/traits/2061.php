@@ -2,34 +2,34 @@
 
 trait T {
   private $x = 'init from T';
-  function useT() {
+  function useT() :mixed{
  $this->x = 'set from trait';
  }
  }
 class A {
-  function useA() {
+  function useA() :mixed{
  $this->x = 'set from A';
  }
 }
 class B extends A {
   use T;
-  function useB() {
+  function useB() :mixed{
  $this->x = 'set from B';
  }
 }
 class C extends B {
-  function useC() {
+  function useC() :mixed{
  $this->x = 'set from C';
  }
 }
 class D extends C {
-  function useD() {
+  function useD() :mixed{
  $this->x = 'set from D';
  }
 }
 
 <<__EntryPoint>>
-function main_2061() {
+function main_2061() :mixed{
 $x = new D();
  echo serialize($x), "\n";
 $x = new D();

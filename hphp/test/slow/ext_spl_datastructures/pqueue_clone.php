@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_pqueue_clone() {
+function main_pqueue_clone() :mixed{
 $queue = new SplPriorityQueue();
 $queue->insert('first', 1);
 $queue->insert('second', 2);

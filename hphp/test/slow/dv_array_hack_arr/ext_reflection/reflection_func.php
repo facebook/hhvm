@@ -1,6 +1,6 @@
 <?hh
 
-<<A(1, 2), B>>
+<<A(1, 2), B, __DynamicallyCallable>>
 function foo($a, $b = null, $c = null): void {
   var_dump($a);
 }
@@ -19,14 +19,14 @@ class Baz extends Foo {
 
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $foo_fn = new ReflectionFunction('foo');
   var_dump($foo_fn->getAttributes());
   var_dump($foo_fn->getParameters());
   var_dump($foo_fn->getReturnType());
-  $foo_fn->invoke(varray[1]);
+  try { $foo_fn->invoke(vec[1]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   $a_meth = new ReflectionMethod(Baz::class, 'a');
   var_dump($a_meth->getAttributes());
   var_dump($a_meth->getParameters());
-  $a_meth->invokeArgs(new Baz(), varray[2]);
+  $a_meth->invokeArgs(new Baz(), vec[2]);
 }

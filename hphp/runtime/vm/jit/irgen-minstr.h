@@ -32,6 +32,8 @@
 #include "hphp/runtime/vm/jit/type-array-elem.h"
 #include "hphp/runtime/vm/jit/type-profile.h"
 
+#include "hphp/util/configs/hhir.h"
+
 namespace HPHP::jit::irgen {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,6 +67,13 @@ void annotArrayAccessProfile(IRGS& env,
  * is initialized and branch to taken if it is uninit.
  */
 SSATmp* ldPropAddr(IRGS& env, SSATmp* obj, Block* taken,
+                   const Class* cls, Slot slot, const Type& type);
+
+/*
+ * Load a pointer to the argument at the given physical index of some closure.
+ * The caller must know that the argument exists on the closure.
+ */
+SSATmp* ldClosureArg(IRGS& env, SSATmp* obj,
                    const Class* cls, Slot slot, const Type& type);
 
 /*
@@ -148,7 +157,7 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
   if (profile.profiling()) {
     auto const op = is_dict ? ProfileDictAccess : ProfileKeysetAccess;
     auto const data =
-      ArrayAccessProfileData { profile.handle(), nullptr };
+      RDSHandlePairData { profile.handle(), rds::kUninitHandle };
     gen(env, op, data, arr, key);
   }
   if (!profile.optimizing()) return generic(key, SizeHintData{});
@@ -250,7 +259,7 @@ SSATmp* profiledArraySet(IRGS& env, SSATmp* mbase, SSATmp* arr, SSATmp* key,
     );
     auto const op = is_dict ? ProfileDictAccess : ProfileKeysetAccess;
     auto const data =
-      ArrayAccessProfileData { profile.handle(), decRefProf.entry() };
+      RDSHandlePairData { profile.handle(), decRefProf.handle() };
     gen(env, op, data, arr, key);
   }
   if (!profile.optimizing()) return generic(key, SizeHintData{});
@@ -344,14 +353,14 @@ SSATmp* profiledType(IRGS& env, SSATmp* tmp, Finish finish) {
 
   if (!prof.optimizing()) return tmp;
 
-  auto const reducedType = prof.data().type;
+  auto const data = prof.data();
 
-  if (reducedType == TBottom) {
-    // We got no samples
+  if (data.count < Cfg::HHIR::TypeProfileMinSamples) {
+    // Not enough samples.
     return tmp;
   }
 
-  Type typeToCheck = relaxToGuardable(reducedType);
+  Type typeToCheck = relaxToGuardable(data.type);
 
   // Avoid the guard if it is going to always succeed or fail.
   if (tmp->type() <= typeToCheck || !tmp->type().maybe(typeToCheck)) return tmp;

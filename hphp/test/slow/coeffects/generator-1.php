@@ -1,16 +1,16 @@
 <?hh
 
-function f()[rx] {
+function f()[rx] :AsyncGenerator<mixed,mixed,void>{
   yield 1;
   yield 2;
 }
 
-function pure($gen)[]{
+function pure($gen)[]:mixed{
   echo (string)($gen->next()) . "\n";
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $gen = f();
   $gen->next();
   var_dump($gen->current());

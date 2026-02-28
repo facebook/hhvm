@@ -45,9 +45,6 @@ struct GzipCompressor {
    */
   StringHolder compress(const char *data, int &len, bool trailer);
 
- public:
-  static bool s_useLocalArena;
-
  private:
   int m_encoding;
   bool m_header;
@@ -58,4 +55,3 @@ struct GzipCompressor {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

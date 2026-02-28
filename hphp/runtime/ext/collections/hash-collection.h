@@ -14,15 +14,15 @@ ALWAYS_INLINE VanillaDict* CreateDictAsMixed() {
 }
 
 // Common base class for BaseMap/BaseSet collections
-struct HashCollection : ObjectData {
+struct HashCollection : c_Collection {
   explicit HashCollection(Class* cls, HeaderKind kind)
-    : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
+    : c_Collection(cls, kind)
     , m_unusedAndSize(0)
   {
     setArrayData(CreateDictAsMixed());
   }
   explicit HashCollection(Class* cls, HeaderKind kind, ArrayData* arr)
-    : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
+    : c_Collection(cls, kind)
     , m_unusedAndSize(arr->m_size)
   {
     setArrayData(VanillaDict::as(arr));
@@ -64,13 +64,9 @@ struct HashCollection : ObjectData {
       always_assert(false);
     }
 
-    if (UNLIKELY(ad->size() < m_size)) warnOnStrIntDup();
     assertx(m_size);
     return ad != arrayData() ? Array::attach(ad) : Array{ad};
   }
-
-  Array toVArray();
-  Array toDArray();
 
   Array toKeysArray();
   Array toValuesArray();
@@ -622,12 +618,6 @@ struct HashCollection : ObjectData {
   [[noreturn]] void throwTooLarge();
   [[noreturn]] void throwReserveTooLarge();
   int32_t* warnUnbalanced(size_t n, int32_t* ei) const;
-
-  /**
-   * Raises a warning if the set contains an int and a string with the same
-   * numeric value: e.g. Set {'123', 123}. It's a no-op otherwise.
-   */
-  void warnOnStrIntDup() const;
 
   void scan(type_scan::Scanner& scanner) const {
     scanner.scan(m_arr);

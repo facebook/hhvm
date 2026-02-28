@@ -1,10 +1,10 @@
 <?hh
 
 namespace foo\bar {
-    function baz() {
+    function baz() :mixed{
         return 'foo.bar.baz';
     }
-    function qux() {
+    function qux() :mixed{
         return baz();
     }
 }

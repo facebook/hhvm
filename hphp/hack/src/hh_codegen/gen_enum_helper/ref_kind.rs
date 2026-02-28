@@ -5,7 +5,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use proc_macro2::TokenStream;
-use quote::{quote, ToTokens};
+use quote::ToTokens;
+use quote::quote;
 use syn::*;
 
 pub enum RefKind {

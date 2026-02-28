@@ -1,0 +1,36 @@
+
+=============================
+Testing: vec[]
+bool(false)
+bool(true)
+bool(false)
+
+=============================
+Testing: vec[new C()]
+bool(false)
+bool(true)
+bool(false)
+
+=============================
+Testing: dict[]
+bool(false)
+bool(true)
+bool(false)
+
+=============================
+Testing: dict[17 => new C()]
+bool(false)
+bool(true)
+bool(false)
+
+=============================
+Testing: static marked varray
+bool(true)
+bool(false)
+bool(false)
+
+=============================
+Testing: static marked darray
+bool(true)
+bool(false)
+bool(false)

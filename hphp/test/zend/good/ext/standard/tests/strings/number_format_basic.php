@@ -7,18 +7,10 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing number_format() : basic functionality ***\n";
 
-$values = varray[1234.5678,
+$values = vec[1234.5678,
                 -1234.5678,
                 1234.6578e4,
-                -1234.56789e4,
-                0x1234CDEF,
-                02777777777,
-                "123456789",
-                "123.456789",
-                "12.3456789e1",
-                null,
-                true,
-                false];
+                -1234.56789e4];
 
 echo "\n-- number_format tests.....default --\n";
 for ($i = 0; $i < count($values); $i++) {

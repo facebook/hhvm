@@ -7,33 +7,41 @@
  *
  *)
 
-module Cache_kind : sig
-  type t =
-    | LRU
-    | LFU
-end
+(** Used by the Pessimised_shared_memory backend to decl-pessimise definitions
+  not already found in the decl heap on-the-fly. *)
+type pessimisation_info = {
+  pessimise_shallow_class:
+    Relative_path.t ->
+    name:string ->
+    Shallow_decl_defs.shallow_class ->
+    Shallow_decl_defs.shallow_class;
+  pessimise_fun:
+    Relative_path.t -> name:string -> Typing_defs.fun_elt -> Typing_defs.fun_elt;
+  pessimise_gconst:
+    Relative_path.t ->
+    name:string ->
+    Typing_defs.const_decl ->
+    Typing_defs.const_decl;
+  pessimise_typedef:
+    Relative_path.t ->
+    name:string ->
+    Typing_defs.typedef_type ->
+    Typing_defs.typedef_type;
+  allow_ast_caching: bool;
+      (** The [AST_provider] must not use any caches (neither for ASTs or
+        files) if this is unset *)
+  store_pessimised_result: bool;
+      (** Indicates whether or not decl-based pessimiation results (as
+        determined by the functions above) should immediately be stored
+        in the corresponding heaps. *)
+}
 
-module Cache (Entry : Cache_sig.Entry) : sig
-  module type Cache_intf =
-    Cache_sig.Cache_intf
-      with type 'a key := 'a Entry.key
-       and type 'a value := 'a Entry.value
-
-  module type Instance = sig
-    module Cache : Cache_intf
-
-    val this : Cache.t
-  end
-
-  include Cache_intf with type t = (module Instance)
-
-  val make : Cache_kind.t -> max_size:int -> t
-end
+module Cache (Entry : Lfu_cache.Entry) : module type of Lfu_cache.Cache (Entry)
 
 module Decl_cache_entry : sig
   type _ t =
     | Fun_decl : string -> Typing_defs.fun_elt t
-    | Class_decl : string -> Obj.t t
+    | Class_decl : string -> Typing_class_types.class_t t
     | Typedef_decl : string -> Typing_defs.typedef_type t
     | Gconst_decl : string -> Typing_defs.const_decl t
     | Module_decl : string -> Typing_defs.module_def_type t
@@ -42,7 +50,9 @@ module Decl_cache_entry : sig
 
   type 'a value = 'a
 
-  val get_size : key:'a key -> value:'a value -> int
+  val compare : 'a key -> 'b key -> int
+
+  val hash : 'a key -> int
 
   val key_to_log_string : 'a key -> string
 end
@@ -56,41 +66,50 @@ module Shallow_decl_cache_entry : sig
 
   type 'a value = 'a
 
-  val get_size : key:'a key -> value:'a value -> int
+  val compare : 'a key -> 'b key -> int
+
+  val hash : 'a key -> int
 
   val key_to_log_string : 'a key -> string
 end
 
 module Shallow_decl_cache : module type of Cache (Shallow_decl_cache_entry)
 
-module Linearization_cache_entry : sig
-  type _ t = Linearization : string -> Decl_defs.lin t
+module Folded_class_cache_entry : sig
+  type _ t = Folded_class_decl : string -> Decl_defs.decl_class_type t
 
   type 'a key = 'a t
 
   type 'a value = 'a
 
-  val get_size : key:'a key -> value:'a value -> int
+  val compare : 'a key -> 'b key -> int
+
+  val hash : 'a key -> int
 
   val key_to_log_string : 'a key -> string
 end
 
-module Linearization_cache : module type of Cache (Linearization_cache_entry)
+module Folded_class_cache : module type of Cache (Folded_class_cache_entry)
 
-(** A `fixme_map` associates:
+module FixmeMap : sig
+  (** A map associating:
     line number guarded by HH_FIXME =>
-    error_node_number =>
+    error code =>
     position of HH_FIXME comment *)
-type fixme_map = Pos.t IMap.t IMap.t [@@deriving show]
+  type t = Pos.t IMap.t IMap.t [@@deriving show]
+
+  val fold : t -> init:'acc -> f:('acc -> int -> int -> Pos.t -> 'acc) -> 'acc
+end
 
 module Fixme_store : sig
+  (** a mutable store *)
   type t
 
-  val empty : t
+  val empty : unit -> t
 
-  val get : t -> Relative_path.t -> fixme_map option
+  val get : t -> Relative_path.t -> FixmeMap.t option
 
-  val add : t -> Relative_path.t -> fixme_map -> unit
+  val add : t -> Relative_path.t -> FixmeMap.t -> unit
 
   val remove : t -> Relative_path.t -> unit
 
@@ -112,6 +131,7 @@ module Fixmes : sig
     hh_fixmes: Fixme_store.t;
     decl_hh_fixmes: Fixme_store.t;
     disallowed_fixmes: Fixme_store.t;
+    ignores: Fixme_store.t;
   }
 
   val get_telemetry : key:string -> t -> Telemetry.t -> Telemetry.t
@@ -150,9 +170,23 @@ module Reverse_naming_table_delta : sig
 end
 
 type local_memory = {
-  decl_cache: (module Decl_cache.Instance);
-  shallow_decl_cache: (module Shallow_decl_cache.Instance);
-  linearization_cache: (module Linearization_cache.Instance);
+  shallow_decl_cache: Shallow_decl_cache.t;
+      (** A cache for shallow classes.
+        This corresponds to Shallow_class_heap.Classes used when we use the shared memory backend.
+        See comment in Provider_utils.mli for invariant. *)
+  folded_class_cache: Folded_class_cache.t;
+      (** A cache for folded classes.
+        This corresponds to Decl_heap.Classes used when we use the shared memory backend.
+        See comment in Provider_utils.mli for invariant. *)
+  decl_cache: Decl_cache.t;
+      (** This contains top-level decls: functions, classish types, type aliases, global constants, etc.
+        The classes in this cache correspond to Decl_provider.Cache used when we use the shared memory backend.
+        The other top-level definitions correspond to Decl_heap.Typedefs/GConsts/Modules/etc.
+        See comment in Provider_utils.mli for invariant. *)
+  decls_reflect_this_file:
+    (Relative_path.t * FileInfo.t * FileInfo.pfh_hash) option ref;
+      (** This relates to the invariant for the contents of [shallow_decl_cache],
+      [folded_class_cache] and [decl_cache]. See comment in Provider_utils.mli. *)
   reverse_naming_table_delta: Reverse_naming_table_delta.t;
       (** A map from symbol-name to pos. (1) It's used as a slowly updated
           authoritative place to look for symbols that have changed on disk since
@@ -174,15 +208,15 @@ type local_memory = {
           an arbitrary one of them. *)
   fixmes: Fixmes.t;
   naming_db_path_ref: Naming_sqlite.db_path option ref;
+  dep_table: (Typing_deps.Dep.t, string) Hashtbl.t;
 }
 
 type t =
   | Shared_memory  (** Used by hh_server and hh_single_type_check *)
+  | Pessimised_shared_memory of pessimisation_info
   | Local_memory of local_memory  (** Used by serverless IDE *)
-  | Decl_service of {
-      decl: Decl_service_client.t;
-      fixmes: Fixmes.t;
-    }  (** Used by the hh_server rearchitecture (hh_decl/hh_worker) *)
+  | Rust_provider_backend of Rust_provider_backend.t
+      (** For the Rust port of Provider_backend and decl-folding logic (rupro/hackrs) *)
   | Analysis
 
 val t_to_string : t -> string
@@ -191,20 +225,39 @@ val set_analysis_backend : unit -> unit
 
 val set_shared_memory_backend : unit -> unit
 
+val set_pessimised_shared_memory_backend : pessimisation_info -> unit
+
+val set_rust_backend : Rust_provider_backend.t -> unit
+
 val set_local_memory_backend_with_defaults_for_test : unit -> unit
 
-(** TODO(ljw): for now, max_num_shallow_decls accepts a special value "-1"
-which reflects the status quo ante, a max size of 140mb in bytes rather than
-a max number. This will be removed shortly. *)
+(** Numbers for decls, folded_decls and shallow_decls... Imagine this codebase:
+class A {}  class B : A {}  class C : B {}  typedef D = C    function f():void {}
+
+* When it needs the decl for function f, it obtains the decl from the direct-decl-parser
+  and stores it in [max_num_decls]. Likewise gconsts, modules, typedefs.
+* When it needs the decl for class C, that decl consists of a pair (folded-decl-of-C, lazy-members)
+  and is also stored in [max_num_decls].
+* When it needs the folded class decl for C, which is stored in [max_num_folded_decls], it computes
+  this from the shallow decl of C (stored in [max_num_shallow_class_decls]) plus the folded class decl
+  for ancestor B (again stored in [max_num_folded_decls]).
+
+Thus, "new C()" will fetch the decl for class C, needed [C] in the decls cache, [A,B,C] in the
+folded class decls cache, and [A,B,C] in the shallow class decls cache. *)
 val set_local_memory_backend :
   max_num_decls:int ->
-  max_num_shallow_decls:int ->
-  max_num_linearizations:int ->
-  cache_kind:Cache_kind.t ->
+  max_num_folded_class_decls:int ->
+  max_num_shallow_class_decls:int ->
   unit
 
-val set_decl_service_backend : Decl_service_client.t -> unit
+val get_local_memory_telemetry : local_memory -> Telemetry.t
 
 val get : unit -> t
 
 val supports_eviction : t -> bool
+
+val get_pessimised_shared_memory_backend_info : t -> pessimisation_info option
+
+val is_pessimised_shared_memory_backend : t -> bool
+
+val noop_pessimisation_info : pessimisation_info

@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+function main() :mixed{
   ob_start(function($str) {
     bar();
     return $str.'!!!';
@@ -15,6 +15,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_handler_fatal() {
+function main_handler_fatal() :mixed{
 main();
 }

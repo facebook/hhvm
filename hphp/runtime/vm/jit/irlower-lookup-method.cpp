@@ -16,24 +16,15 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
-#include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/typed-value.h"
 
-#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/interp-helpers.h"
 #include "hphp/runtime/vm/method-lookup.h"
 
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
-#include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -41,7 +32,6 @@
 #include "hphp/runtime/vm/jit/meth-profile.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -52,7 +42,7 @@
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -109,7 +99,8 @@ void cgLdObjMethodD(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst)
     .ssa(0 /* cls */)
     .ssa(1 /* methodName */)
-    .immPtr(inst->extra<OptClassData>()->cls);
+    .immPtr(inst->extra<OptClassAndFuncData>()->cls)
+    .immPtr(inst->extra<OptClassAndFuncData>()->func); // callerFunc
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
@@ -122,7 +113,7 @@ void cgLdObjMethodS(IRLS& env, const IRInstruction* inst) {
   // Allocate the request-local one-way method cache for this lookup.
   auto const handle =
     rds::alloc<Entry, rds::Mode::Normal, sizeof(Entry)>().handle();
-  if (RuntimeOption::EvalPerfDataMap) {
+  if (Cfg::Eval::PerfDataMap) {
     rds::recordRds(handle, sizeof(TypedValue), "MethodCache",
                    inst->marker().func()->fullName()->slice());
   }
@@ -130,8 +121,9 @@ void cgLdObjMethodS(IRLS& env, const IRInstruction* inst) {
   auto const target = CallSpec::direct(MethodCache::handleStaticCall);
   auto const args = argGroup(env, inst)
     .ssa(0 /* cls */)
-    .immPtr(inst->extra<FuncNameData>()->name)
-    .immPtr(inst->extra<FuncNameData>()->context)
+    .immPtr(inst->extra<FuncNameCtxData>()->name)
+    .immPtr(inst->extra<FuncNameCtxData>()->context)
+    .immPtr(inst->extra<FuncNameCtxData>()->func) // callerFunc
     .imm(safe_cast<int32_t>(handle))
     .ssa(1 /* smashable */);
 
@@ -150,7 +142,8 @@ void cgProfileMethod(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst)
     .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
     .ssa(0)
-    .ssa(1);
+    .ssa(1)
+    .immPtr(inst->marker().func());
 
   cgCallHelper(vmain(env), env, CallSpec::method(&MethProfile::reportMeth),
                kVoidDest, SyncOptions::None, args);
@@ -160,8 +153,10 @@ void cgProfileMethod(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
-const char* ctxName(const Class* ctx) {
-  return ctx ? ctx->name()->data() : ":anonymous:";
+StaticString s_anonymous(":anonymous:");
+
+const StringData* ctxName(const Class* ctx) {
+  return ctx ? ctx->name() : s_anonymous.get();
 }
 
 }
@@ -182,19 +177,21 @@ void cgLookupClsMethodCache(IRLS& env, const IRInstruction* inst) {
   if (false) { // typecheck
     const UNUSED Func* f = StaticMethodCache::lookup(
       ch,
-      extra->namedEntity,
+      extra->namedType,
       extra->clsName,
       extra->methodName,
-      extra->context
+      extra->context,
+      extra->callerFunc
     );
   }
 
   auto const args = argGroup(env, inst)
     .imm(ch)
-    .immPtr(extra->namedEntity)
+    .immPtr(extra->namedType)
     .immPtr(extra->clsName)
     .immPtr(extra->methodName)
-    .immPtr(extra->context);
+    .immPtr(extra->context)
+    .immPtr(extra->callerFunc);
 
   // May raise an error if the class is undefined.
   cgCallHelper(v, env, CallSpec::direct(StaticMethodCache::lookup),
@@ -215,8 +212,7 @@ void cgLdClsMethodCacheFunc(IRLS& env, const IRInstruction* inst) {
   auto const sf = checkRDSHandleInitialized(v, ch);
   fwdJcc(v, env, CC_NE, sf, inst->taken());
   markRDSAccess(v, ch);
-  emitLdLowPtr(v, rvmtl()[ch + offsetof(StaticMethodCache, m_func)],
-               dst, sizeof(LowPtr<const Func>));
+  emitLdPackedPtr<const Func>(v, rvmtl()[ch + offsetof(StaticMethodCache, m_func)], dst);
 }
 
 void cgLdClsMethodCacheCls(IRLS& env, const IRInstruction* inst) {
@@ -235,8 +231,7 @@ void cgLdClsMethodCacheCls(IRLS& env, const IRInstruction* inst) {
 
   // The StaticMethodCache here is guaranteed to already be initialized in RDS
   // by the pre-conditions of this instruction.
-  emitLdLowPtr(v, rvmtl()[ch + offsetof(StaticMethodCache, m_cls)],
-               dst, sizeof(LowPtr<const Class>));
+  emitLdPackedPtr<const Class>(v, rvmtl()[ch + offsetof(StaticMethodCache, m_cls)], dst);
 }
 
 void cgLookupClsMethodFCache(IRLS& env, const IRInstruction* inst) {
@@ -253,14 +248,15 @@ void cgLookupClsMethodFCache(IRLS& env, const IRInstruction* inst) {
   assertx(rds::isNormalHandle(ch));
 
   const Func* (*lookup)(rds::Handle, const Class*,
-                        const StringData*, const Class*) =
+                        const StringData*, const Class*, const Func*) =
     StaticMethodFCache::lookup;
 
   auto const args = argGroup(env, inst)
    .imm(ch)
    .immPtr(cls)
    .immPtr(extra->methodName)
-   .immPtr(extra->context);
+   .immPtr(extra->context)
+   .immPtr(extra->callerFunc);
 
   cgCallHelper(v, env, CallSpec::direct(lookup),
                callDest(dst), SyncOptions::Sync, args);
@@ -281,8 +277,7 @@ void cgLdClsMethodFCacheFunc(IRLS& env, const IRInstruction* inst) {
   auto const sf = checkRDSHandleInitialized(v, ch);
   fwdJcc(v, env, CC_NE, sf, inst->taken());
   markRDSAccess(v, ch);
-  emitLdLowPtr(v, rvmtl()[ch + offsetof(StaticMethodFCache, m_func)],
-               dst, sizeof(LowPtr<const Func>));
+  emitLdPackedPtr<const Func>(v, rvmtl()[ch + offsetof(StaticMethodFCache, m_func)], dst);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

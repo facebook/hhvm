@@ -1,2 +1,0 @@
-File "requireclass_generic_01.bad.php", line 7, characters 17-22:
-Require class cannot be used with a generic class (Parsing[1002])

@@ -4,7 +4,7 @@
  * Function is implemented in ext/standard/string.c
  */
 
-function check_basename( $path_arrays ) {
+function check_basename( $path_arrays ) :mixed{
   $loop_counter = 1;
   foreach ($path_arrays as $path) {
     echo "\n--Iteration $loop_counter--\n"; $loop_counter++;
@@ -19,110 +19,105 @@ function check_basename( $path_arrays ) {
 }
 
 <<__EntryPoint>> function main(): void {
-$file_paths = varray [
+$file_paths = vec[
   /* simple paths */
-  varray["bar"],
-  varray["/foo/bar"],
-  varray["foo/bar"],
-  varray["/bar"],
+  vec["bar"],
+  vec["/foo/bar"],
+  vec["foo/bar"],
+  vec["/bar"],
   /* simple paths with trailing slashes */
-  varray["bar/"],
-  varray["/bar/"],
-  varray["/foo/bar/"],
-  varray["foo/bar/"],
-  varray["/bar/"],
+  vec["bar/"],
+  vec["/bar/"],
+  vec["/foo/bar/"],
+  vec["foo/bar/"],
+  vec["/bar/"],
   /* paths with suffix removal */
-  varray["bar.gz", ".gz"],
-  varray["bar.gz", "bar.gz"],
-  varray["/foo/bar.gz", ".gz"],
-  varray["foo/bar.gz", ".gz"],
-  varray["/bar.gz", ".gz"],
+  vec["bar.gz", ".gz"],
+  vec["bar.gz", "bar.gz"],
+  vec["/foo/bar.gz", ".gz"],
+  vec["foo/bar.gz", ".gz"],
+  vec["/bar.gz", ".gz"],
   /* paths with suffix and trailing slashes with suffix removal*/
-  varray["bar.gz/", ".gz"],
-  varray["/bar.gz/", ".gz"],
-  varray["/foo/bar.gz/", ".gz"],
-  varray["foo/bar.gz/", ".gz"],
-  varray["/bar.gz/", ".gz"],
+  vec["bar.gz/", ".gz"],
+  vec["/bar.gz/", ".gz"],
+  vec["/foo/bar.gz/", ".gz"],
+  vec["foo/bar.gz/", ".gz"],
+  vec["/bar.gz/", ".gz"],
   /* paths with basename only suffix, with suffix removal*/
-  varray["/.gz", ".gz"],
-  varray[".gz", ".gz"],
-  varray["/foo/.gz", ".gz"],
+  vec["/.gz", ".gz"],
+  vec[".gz", ".gz"],
+  vec["/foo/.gz", ".gz"],
 
   /* paths with basename only suffix & trailing slashes, with suffix removal*/
-  varray[".gz/", ".gz"],
-  varray["/foo/.gz/", ".gz"],
-  varray["foo/.gz/", ".gz"],
+  vec[".gz/", ".gz"],
+  vec["/foo/.gz/", ".gz"],
+  vec["foo/.gz/", ".gz"],
 
   /* paths with binary value to check if the function is binary safe*/
-  varray["foo".chr(0)."bar"],
-  varray["/foo".chr(0)."bar"],
-  varray["/foo".chr(0)."bar/"],
-  varray["foo".chr(0)."bar/"],
-  varray["foo".chr(0)."bar/test"],
-  varray["/foo".chr(0)."bar/bar.gz", ".gz"],
-  varray["/foo".chr(0)."bar/bar.gz"]
+  vec["foo".chr(0)."bar"],
+  vec["/foo".chr(0)."bar"],
+  vec["/foo".chr(0)."bar/"],
+  vec["foo".chr(0)."bar/"],
+  vec["foo".chr(0)."bar/test"],
+  vec["/foo".chr(0)."bar/bar.gz", ".gz"],
+  vec["/foo".chr(0)."bar/bar.gz"]
 ];
 
-$file_path_variations = varray [
+$file_path_variations = vec[
   /* paths with shortcut home dir char, with suffix variation */
-  varray["~/home/user/bar"],
-  varray["~/home/user/bar", ""],
-  varray["~/home/user/bar", NULL],
-  varray["~/home/user/bar", ' '],
-  varray["~/home/user/bar.tar", ".tar"],
-  varray["~/home/user/bar.tar", "~"],
-  varray["~/home/user/bar.tar/", "~"],
-  varray["~/home/user/bar.tar/", ""],
-  varray["~/home/user/bar.tar", NULL],
-  varray["~/home/user/bar.tar", ''],
-  varray["~/home/user/bar.tar", " "],
+  vec["~/home/user/bar"],
+  vec["~/home/user/bar", ""],
+  vec["~/home/user/bar", ' '],
+  vec["~/home/user/bar.tar", ".tar"],
+  vec["~/home/user/bar.tar", "~"],
+  vec["~/home/user/bar.tar/", "~"],
+  vec["~/home/user/bar.tar/", ""],
+  vec["~/home/user/bar.tar", ''],
+  vec["~/home/user/bar.tar", " "],
 
   /* paths with hostname:dir notation, with suffix variation */
-  varray["hostname:/home/usr/bar.tar"],
-  varray["hostname:/home/user/bar.tar", "home"],
-  varray["hostname:/home/user/tbar.gz", "bar.gz"],
-  varray["hostname:/home/user/tbar.gz", "/bar.gz"],
-  varray["hostname:/home/user/tbar.gz", "/bar.gz/"],
-  varray["hostname:/home/user/tbar.gz/", "/bar.gz/"],
-  varray["hostname:/home/user/tbar.gz/", "/bar.gz/"],
-  varray["hostname:/home/user/My Pics.gz/", "/bar.gz/"],
-  varray["hostname:/home/user/My Pics.gz/", "Pics.gz/"],
-  varray["hostname:/home/user/My Pics.gz/", "Pics.gz"],
-  varray["hostname:/home/user/My Pics.gz/", ".gz"],
-  varray["hostname:/home/user/My Pics.gz/"],
-  varray["hostname:/home/user/My Pics.gz/", NULL],
-  varray["hostname:/home/user/My Pics.gz/", ' '],
-  varray["hostname:/home/user/My Pics.gz/", ''],
-  varray["hostname:/home/user/My Pics.gz/", "My Pics.gz"],
+  vec["hostname:/home/usr/bar.tar"],
+  vec["hostname:/home/user/bar.tar", "home"],
+  vec["hostname:/home/user/tbar.gz", "bar.gz"],
+  vec["hostname:/home/user/tbar.gz", "/bar.gz"],
+  vec["hostname:/home/user/tbar.gz", "/bar.gz/"],
+  vec["hostname:/home/user/tbar.gz/", "/bar.gz/"],
+  vec["hostname:/home/user/tbar.gz/", "/bar.gz/"],
+  vec["hostname:/home/user/My Pics.gz/", "/bar.gz/"],
+  vec["hostname:/home/user/My Pics.gz/", "Pics.gz/"],
+  vec["hostname:/home/user/My Pics.gz/", "Pics.gz"],
+  vec["hostname:/home/user/My Pics.gz/", ".gz"],
+  vec["hostname:/home/user/My Pics.gz/"],
+  vec["hostname:/home/user/My Pics.gz/", ' '],
+  vec["hostname:/home/user/My Pics.gz/", ''],
+  vec["hostname:/home/user/My Pics.gz/", "My Pics.gz"],
 
   /* paths with numeirc strings */
-  varray["10.5"],
-  varray["10.5", ".5"],
-  varray["10.5", "10.5"],
-  varray["10"],
-  varray["105", "5"],
-  varray["/10.5"],
-  varray["10.5/"],
-  varray["10/10.gz"],
-  varray["0"],
-  varray['0'],
+  vec["10.5"],
+  vec["10.5", ".5"],
+  vec["10.5", "10.5"],
+  vec["10"],
+  vec["105", "5"],
+  vec["/10.5"],
+  vec["10.5/"],
+  vec["10/10.gz"],
+  vec["0"],
+  vec['0'],
 
   /* paths and suffix given as same */
-  varray["bar.gz", "bar.gz"],
-  varray["/bar.gz", "/bar.gz"],
-  varray["/bar.gz/", "/bar.gz/"],
-  varray[" ", " "],
-  varray[' ', ' '],
-  varray[NULL, NULL],
+  vec["bar.gz", "bar.gz"],
+  vec["/bar.gz", "/bar.gz"],
+  vec["/bar.gz/", "/bar.gz/"],
+  vec[" ", " "],
+  vec[' ', ' '],
 
   /* path with spaces */
-  varray[" "],
-  varray[' '],
+  vec[" "],
+  vec[' '],
 
   /* empty paths */
-  varray[""],
-  varray[''],
-  varray[NULL]
+  vec[""],
+  vec[''],
 ];
 
 echo "*** Testing basic operations ***\n";
@@ -136,17 +131,7 @@ echo "\n*** Testing error conditions ***\n";
 try { var_dump( basename() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // more than expected no. of arguments
-try { var_dump( basename("/var/tmp/bar.gz", ".gz", ".gz") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
-// passing invalid type arguments
-$object = new stdClass;
-try { var_dump( basename( varray["string/bar"] ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-try { var_dump( basename( varray["string/bar"], "bar" ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-try { var_dump( basename( "bar", varray["string/bar"] ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-try { var_dump( basename( $object, "bar" ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-try { var_dump( basename( $object ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-try { var_dump( basename( $object, $object ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-try { var_dump( basename( "bar", $object ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( basename(sys_get_temp_dir()."/bar.gz", ".gz", ".gz") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
 }

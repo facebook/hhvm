@@ -4,7 +4,7 @@ abstract final class HehStatics {
   public static $x = 0;
 }
 
-function heh() {
+function heh() :mixed{
   $x = HehStatics::$x;
   echo "ok $x\n";
   if (HehStatics::$x++ == 0) {
@@ -12,7 +12,7 @@ function heh() {
   }
 }
 
-function foo() {
+function foo() :mixed{
   try {
     $x++;
   } catch (Exception $y) {
@@ -28,7 +28,7 @@ function foo() {
 
 
 <<__EntryPoint>>
-function main_exceptions_001() {
+function main_exceptions_001() :mixed{
   error_reporting(-1);
   set_error_handler(heh<>);
 

@@ -2,8 +2,8 @@
 trait T { public $z; }
 class A { use T; }
 class B { use T; }
-function main() {
-  foreach (varray[varray[1,1], varray[1,2], varray[2,1]] as list($x, $y)) {
+function main() :mixed{
+  foreach (vec[vec[1,1], vec[1,2], vec[2,1]] as list($x, $y)) {
     $a = new A;
     $a->z = $x;
     $b = new B;
@@ -25,6 +25,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_object_compare_bug() {
+function main_object_compare_bug() :mixed{
 main();
 }

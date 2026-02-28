@@ -1,6 +1,6 @@
 <?hh
 
-async function g($i, $s)[zoned] {
+async function g($i, $s)[zoned] :Awaitable<mixed>{
   if ($i > 1) return;
   echo "in g should be {$s} got ";
   echo ClassContext::getContext()->name() . "\n";
@@ -22,7 +22,7 @@ async function g($i, $s)[zoned] {
   echo ClassContext::getContext()->name() . "\n";
 }
 
-async function f()[zoned] {
+async function f()[zoned] :Awaitable<mixed>{
   echo "in f should be C got ";
   echo ClassContext::getContext()->name() . "\n";
   concurrent {
@@ -43,7 +43,7 @@ async function f()[zoned] {
 }
 
 <<__EntryPoint>>
-async function main() {
+async function main() :Awaitable<mixed>{
   include 'async-implicit.inc';
 
   await ClassContext::genStart(new C, f<>);

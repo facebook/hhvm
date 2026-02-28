@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
@@ -31,7 +30,6 @@
 
 #include <folly/FileUtil.h>
 
-using std::set;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,7 +43,7 @@ struct Rfc1867Data final : RequestEventHandler {
   int (*rfc1867Callback)(apc_rfc1867_data *rfc1867ApcData,
                          unsigned int event, void *event_data, void **extra);
   void requestInit() override {
-    if (RuntimeOption::EnableUploadProgress) {
+    if (Cfg::Server::UploadEnableUploadProgress) {
       rfc1867Callback = apc_rfc1867_progress;
     } else {
       rfc1867Callback = nullptr;
@@ -243,7 +241,7 @@ static uint32_t read_post(multipart_buffer *self, char *buf,
     size_t extra_byte_read = 0;
     const void *extra = self->transport->getMorePostData(extra_byte_read);
     if (extra_byte_read == 0) break;
-    if (RuntimeOption::AlwaysPopulateRawPostData) {
+    if (Cfg::Server::AlwaysPopulateRawPostData) {
       // Possible overflow in buffer_append if post_size + extra_byte_read >=
       // MAX INT
       self->post_data = (const char *)buffer_append(
@@ -634,9 +632,9 @@ static char *php_ap_memstr(char *haystack, int haystacklen, char *needle,
 
 
 /* read until a boundary condition */
-static int multipart_buffer_read(multipart_buffer *self, char *buf,
-                                 int bytes, int *end) {
-  int len, max;
+static size_t multipart_buffer_read(multipart_buffer *self, char *buf,
+                                    size_t bytes, int *end) {
+  size_t len, max;
   char *bound;
 
   /* fill buffer if needed */
@@ -688,11 +686,14 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf,
 static char *multipart_buffer_read_body(multipart_buffer *self,
                                         unsigned int *len) {
   char buf[FILLUNIT], *out=nullptr;
-  int total_bytes=0, read_bytes=0;
+  size_t total_bytes=0, read_bytes=0;
 
   while((read_bytes = multipart_buffer_read(self, buf, sizeof(buf), nullptr))) {
+    // Check for overflow
+    always_assert((total_bytes + read_bytes + 1) > total_bytes);
     out = (char *)realloc(out, total_bytes + read_bytes + 1);
     memcpy(out + total_bytes, buf, read_bytes);
+    // Already checked above that this can't overflow.
     total_bytes += read_bytes;
   }
 
@@ -723,7 +724,7 @@ void rfc1867PostHandler(Transport* transport,
   int fd=-1;
   void *event_extra_data = nullptr;
   unsigned int llen = 0;
-  int upload_count = RuntimeOption::MaxFileUploads;
+  int upload_count = Cfg::Server::UploadMaxFileUploads;
 
   /* Initialize the buffer */
   if (!(mbuff = multipart_buffer_new(transport,
@@ -842,7 +843,7 @@ void rfc1867PostHandler(Transport* transport,
       }
 
       /* If file_uploads=off, skip the file part */
-      if (!RuntimeOption::EnableFileUploads) {
+      if (!Cfg::Server::UploadEnableFileUploads) {
         skip_upload = 1;
       } else if (upload_count <= 0) {
         Logger::Warning(
@@ -893,7 +894,7 @@ void rfc1867PostHandler(Transport* transport,
 
         // open a temporary file
         snprintf(path, sizeof(path), "%s/XXXXXX",
-                 RuntimeOption::UploadTmpDir.c_str());
+                 Cfg::Server::UploadTmpDir.c_str());
         fd = mkstemp(path);
         upload_count--;
         if (fd == -1) {

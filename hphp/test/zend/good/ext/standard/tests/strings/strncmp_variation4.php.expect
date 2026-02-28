@@ -1,0 +1,6 @@
+*** Testing strncmp() function: by supplying all types for 'str1' and 'str2' ***
+-- Iteration 1 --
+int(0)
+-- Iteration 2 --
+int(0)
+*** Done ***

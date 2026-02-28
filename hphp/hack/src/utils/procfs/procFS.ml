@@ -5,7 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  *)
 
-open Core_kernel
+open Core
+module Sys = Stdlib.Sys
 open Result.Monad_infix
 
 let spf = Printf.sprintf
@@ -69,14 +70,12 @@ let parse_status raw_status_contents =
 let parse_cgroup raw_cgroup_contents =
   match String.split raw_cgroup_contents ~on:'\n' with
   | [] -> Error "Expected at least one cgroup in /proc/<PID>/cgroup file"
-  | first_line :: _ ->
-    begin
-      match String.split first_line ~on:':' with
-      | [_id; _controllers; cgroup] -> Ok cgroup
-      | _ ->
-        Error
-          "First line of  /proc/<PID>/cgroup file was not correctly formatted"
-    end
+  | first_line :: _ -> begin
+    match String.split first_line ~on:':' with
+    | [_id; _controllers; cgroup] -> Ok cgroup
+    | _ ->
+      Error "First line of  /proc/<PID>/cgroup file was not correctly formatted"
+  end
 
 let asset_procfs_supported =
   let memoized_result = ref None in
@@ -85,7 +84,7 @@ let asset_procfs_supported =
     | Some supported -> supported
     | None ->
       let supported =
-        if Sys.unix && Sys.file_exists "/proc" then
+        if Sys.file_exists "/proc" then
           Ok ()
         else
           Error "Proc filesystem not supported"

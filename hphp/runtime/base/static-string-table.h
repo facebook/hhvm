@@ -59,7 +59,7 @@ extern StringData** precomputed_chars;
 
 inline bool is_static_string(const StringData* s) {
   if (!use_lowptr) return s->isStatic();
-  return (uint64_t)s < ((1ull << 32) - 1);
+  return is_low_mem(reinterpret_cast<void*>(const_cast<StringData*>(s)));
 }
 
 /*
@@ -162,6 +162,8 @@ void create_string_data_map();
  * still be in a single-threaded environment.
  */
 void refineStaticStringTableSize();
+
+void log_static_strings();
 
 //////////////////////////////////////////////////////////////////////
 

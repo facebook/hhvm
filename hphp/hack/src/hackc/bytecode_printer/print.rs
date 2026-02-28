@@ -3,51 +3,82 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    coeffects,
-    context::Context,
-    write::{
-        self, angle, braces, concat, concat_by, concat_str, concat_str_by, fmt_separated,
-        fmt_separated_with, newline, option, option_or, paren, quotes, square, triple_quotes,
-        wrap_by, Error,
-    },
-};
-use ffi::{Maybe, Maybe::*, Pair, Quadruple, Slice, Str, Triple};
+use std::borrow::Cow;
+use std::io;
+use std::io::Result;
+use std::io::Write;
+use std::write;
+
+use bstr::ByteSlice;
+use ffi::Maybe;
+use ffi::Maybe::*;
+use ffi::Vector;
 use hash::HashSet;
-use hhbc::{
-    hackc_unit::HackCUnit,
-    hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX},
-    hhas_attribute::HhasAttribute,
-    hhas_body::{HhasBody, HhasBodyEnv},
-    hhas_class::{HhasClass, TraitReqKind},
-    hhas_coeffects::{HhasCoeffects, HhasCtxConstant},
-    hhas_constant::HhasConstant,
-    hhas_function::HhasFunction,
-    hhas_method::{HhasMethod, HhasMethodFlags},
-    hhas_module::HhasModule,
-    hhas_param::HhasParam,
-    hhas_pos::{HhasPos, HhasSpan},
-    hhas_property::HhasProperty,
-    hhas_symbol_refs::{HhasSymbolRefs, IncludePath},
-    hhas_type::HhasTypeInfo,
-    hhas_type_const::HhasTypeConstant,
-    hhas_typedef::HhasTypedef,
-    ClassName, ConstName, FCallArgs, FatalOp, FunctionName, Instruct, Label, Pseudo, TypedValue,
-};
+use hhbc::AdataState;
+use hhbc::Attribute;
+use hhbc::Body;
+use hhbc::Class;
+use hhbc::ClassName;
+use hhbc::Coeffects;
+use hhbc::ConstName;
+use hhbc::Constant;
+use hhbc::CtxConstant;
+use hhbc::DefaultValue;
+use hhbc::DictEntry;
+use hhbc::FCallArgs;
+use hhbc::Fatal;
+use hhbc::FatalOp;
+use hhbc::Function;
+use hhbc::FunctionName;
+use hhbc::IncludePath;
+use hhbc::Instruct;
+use hhbc::Label;
+use hhbc::Method;
+use hhbc::MethodFlags;
+use hhbc::Module;
+use hhbc::ModuleName;
+use hhbc::Param;
+use hhbc::ParamEntry;
+use hhbc::Property;
+use hhbc::Pseudo;
+use hhbc::Requirement;
+use hhbc::Span;
+use hhbc::SrcLoc;
+use hhbc::StringId;
+use hhbc::SymbolRefs;
+use hhbc::TParamInfo;
+use hhbc::TraitReqKind;
+use hhbc::TypeConstant;
+use hhbc::TypeInfo;
+use hhbc::TypedValue;
+use hhbc::Typedef;
+use hhbc::Unit;
+use hhbc::UpperBound;
 use hhbc_string_utils::float;
 use hhvm_types_ffi::ffi::*;
 use itertools::Itertools;
-use ocaml_helper::escaped_bytes;
-use oxidized::ast_defs;
-use std::{
-    borrow::Cow,
-    ffi::OsStr,
-    io::{self, Result, Write},
-    os::unix::ffi::OsStrExt,
-    path::Path,
-    write,
-};
 use write_bytes::write_bytes;
+
+use crate::coeffects;
+use crate::context::Context;
+use crate::write;
+use crate::write::Error;
+use crate::write::angle;
+use crate::write::braces;
+use crate::write::concat;
+use crate::write::concat_by;
+use crate::write::concat_str;
+use crate::write::concat_str_by;
+use crate::write::fmt_separated;
+use crate::write::fmt_separated_with;
+use crate::write::newline;
+use crate::write::option;
+use crate::write::option_or;
+use crate::write::paren;
+use crate::write::quotes;
+use crate::write::square;
+use crate::write::triple_quotes;
+use crate::write::wrap_by;
 
 macro_rules! write_if {
     ($pred:expr, $($rest:tt)*) => {
@@ -55,14 +86,10 @@ macro_rules! write_if {
     };
 }
 
-pub struct ExprEnv<'arena, 'e> {
-    pub codegen_env: Option<&'e HhasBodyEnv<'arena>>,
-}
-
-fn print_unit(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Result<()> {
+fn print_unit(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit) -> Result<()> {
     match ctx.path {
         Some(p) => {
-            let abs = p.to_absolute();
+            let abs = p.path(); // consider: should we also show prefix?
             let p = escaper::escape(
                 abs.to_str()
                     .ok_or_else(|| <io::Error as From<Error>>::from(Error::InvalidUTF8))?,
@@ -106,15 +133,20 @@ fn get_fatal_op(f: &FatalOp) -> &str {
     }
 }
 
-fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Result<()> {
-    if let Just(Triple(fop, p, msg)) = &prog.fatal {
+fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit) -> Result<()> {
+    if let Just(Fatal {
+        op,
+        loc:
+            SrcLoc {
+                line_begin,
+                line_end,
+                col_begin,
+                col_end,
+            },
+        message,
+    }) = &prog.fatal
+    {
         newline(w)?;
-        let HhasPos {
-            line_begin,
-            line_end,
-            col_begin,
-            col_end,
-        } = p;
         write_bytes!(
             w,
             ".fatal {}:{},{}:{} {} \"{}\";",
@@ -122,105 +154,93 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Re
             col_begin,
             line_end,
             col_end,
-            get_fatal_op(fop),
-            escaper::escape_bstr(msg.as_bstr()),
+            get_fatal_op(op),
+            escaper::escape_bstr(message.as_bstr()),
         )?;
+    }
+
+    let mut adata = AdataState::default();
+    for body in prog.functions.iter().map(|f| &f.body).chain(
+        prog.classes
+            .iter()
+            .flat_map(|c| c.methods.iter().map(|m| &m.body)),
+    ) {
+        for instr in &body.repr.instrs {
+            use hhbc::Opcode;
+            match instr {
+                Instruct::Opcode(Opcode::Vec(a) | Opcode::Dict(a) | Opcode::Keyset(a)) => {
+                    adata.intern_value(a.clone());
+                }
+                Instruct::Opcode(
+                    Opcode::FCallClsMethod(args, _, _)
+                    | Opcode::FCallClsMethodD(args, _, _)
+                    | Opcode::FCallClsMethodM(args, _, _, _)
+                    | Opcode::FCallClsMethodS(args, _, _)
+                    | Opcode::FCallClsMethodSD(args, _, _, _)
+                    | Opcode::FCallCtor(args, _)
+                    | Opcode::FCallFunc(args)
+                    | Opcode::FCallFuncD(args, _)
+                    | Opcode::FCallObjMethod(args, _, _)
+                    | Opcode::FCallObjMethodD(args, _, _, _),
+                ) if !args.named_arg_names.is_empty() => {
+                    let name_tv = named_arg_typed_values(&args.named_arg_names);
+                    adata.intern_value(name_tv);
+                }
+                _ => {}
+            }
+        }
     }
 
     newline(w)?;
     print_module_use(w, &prog.module_use)?;
-    concat(w, &prog.adata, |w, a| print_adata_region(ctx, w, a))?;
-    concat(w, &prog.functions, |w, f| print_fun_def(ctx, w, f))?;
-    concat(w, &prog.classes, |w, cd| print_class_def(ctx, w, cd))?;
-    concat(w, &prog.modules, |w, cd| print_module_def(ctx, w, cd))?;
-    concat(w, &prog.constants, |w, c| print_constant(ctx, w, c))?;
-    concat(w, &prog.typedefs, |w, td| print_typedef(ctx, w, td))?;
+    concat(w, adata.clone().finish(), |w, i, a| {
+        print_adata_region(ctx, w, i, a)
+    })?;
+    concat(w, &prog.functions, |w, _, f| {
+        print_fun_def(ctx, w, f, &adata)
+    })?;
+    concat(w, &prog.classes, |w, _, cd| {
+        print_class_def(ctx, w, cd, &adata)
+    })?;
+    concat(w, &prog.modules, |w, _, cd| print_module_def(ctx, w, cd))?;
+    concat(w, &prog.constants, |w, _, c| print_constant(ctx, w, c))?;
+    concat(w, &prog.typedefs, |w, _, td| print_typedef(ctx, w, td))?;
     print_file_attributes(ctx, w, prog.file_attributes.as_ref())?;
-    print_include_region(ctx, w, &prog.symbol_refs.includes)?;
+    print_include_region(w, &prog.symbol_refs.includes)?;
     print_symbol_ref_regions(ctx, w, &prog.symbol_refs)?;
     Ok(())
 }
 
-fn print_include_region(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    includes: &Slice<'_, IncludePath<'_>>,
-) -> Result<()> {
-    fn print_path(w: &mut dyn Write, p: &Path) -> Result<()> {
-        option(w, p.to_str(), |w, p: &str| write!(w, "\n  {}", p))
-    }
-    fn print_if_exists(w: &mut dyn Write, p: &Path) -> Result<()> {
-        if p.exists() { print_path(w, p) } else { Ok(()) }
-    }
-    fn print_include(ctx: &Context<'_>, w: &mut dyn Write, inc: IncludePath<'_>) -> Result<()> {
-        let include_roots = ctx.include_roots;
-        let alloc = bumpalo::Bump::new();
-        match inc.into_doc_root_relative(&alloc, include_roots) {
-            IncludePath::Absolute(p) => print_if_exists(w, Path::new(OsStr::from_bytes(&p))),
-            IncludePath::SearchPathRelative(p) => {
-                let path_from_cur_dirname = ctx
-                    .path
-                    .and_then(|p| p.path().parent())
-                    .unwrap_or_else(|| Path::new(""))
-                    .join(OsStr::from_bytes(&p));
-                if path_from_cur_dirname.exists() {
-                    print_path(w, &path_from_cur_dirname)
-                } else {
-                    let search_paths = ctx.include_search_paths;
-                    for prefix in search_paths.iter() {
-                        let path = Path::new(OsStr::from_bytes(prefix)).join(OsStr::from_bytes(&p));
-                        if path.exists() {
-                            return print_path(w, &path);
-                        }
-                    }
-                    Ok(())
-                }
-            }
-            IncludePath::IncludeRootRelative(v, p) => {
-                if !p.is_empty() {
-                    include_roots.get(v.as_bstr()).iter().try_for_each(|ir| {
-                        let doc_root = ctx.doc_root;
-                        let resolved = Path::new(OsStr::from_bytes(doc_root))
-                            .join(OsStr::from_bytes(ir))
-                            .join(OsStr::from_bytes(&p));
-                        print_if_exists(w, &resolved)
-                    })?
-                }
-                Ok(())
-            }
-            IncludePath::DocRootRelative(p) => {
-                let doc_root = ctx.doc_root;
-                let resolved = Path::new(OsStr::from_bytes(doc_root)).join(OsStr::from_bytes(&p));
-                print_if_exists(w, &resolved)
-            }
-        }
+fn print_include_region(w: &mut dyn Write, includes: &[IncludePath]) -> Result<()> {
+    fn print_include(w: &mut dyn Write, inc: &IncludePath) -> Result<()> {
+        let (s1, s2) = inc.extract_str();
+        write_bytes!(w, "\n  {}{}", s1, s2)?;
+        Ok(())
     }
     if !includes.is_empty() {
         w.write_all(b"\n.includes {")?;
         for inc in includes.as_ref().iter() {
-            // TODO(hrust): avoid clone. Rethink onwership of inc in
-            // hhas_symbol_refs_rust::IncludePath::into_doc_root_relative
-            print_include(ctx, w, inc.clone())?;
+            print_include(w, inc)?;
         }
         w.write_all(b"\n}\n")?;
     }
     Ok(())
 }
 
-fn print_symbol_ref_regions<'arena>(
+fn print_symbol_ref_regions(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    symbol_refs: &HhasSymbolRefs<'arena>,
+    symbol_refs: &SymbolRefs,
 ) -> Result<()> {
-    fn print_region<'a, T: 'a, F>(
+    fn print_region<'a, T, F>(
         ctx: &Context<'_>,
         w: &mut dyn Write,
         name: &str,
-        refs: impl IntoIterator<Item = &'a T>,
+        refs: impl IntoIterator<Item = T>,
         f: F,
     ) -> Result<()>
     where
-        F: Fn(&'a T) -> &'a [u8],
+        F: Fn(T) -> &'a [u8],
     {
         let mut iter = refs.into_iter();
         if let Some(first) = iter.next() {
@@ -263,26 +283,35 @@ fn print_symbol_ref_regions<'arena>(
     )
 }
 
-fn print_adata_region(ctx: &Context<'_>, w: &mut dyn Write, adata: &HhasAdata<'_>) -> Result<()> {
-    write_bytes!(w, ".adata {} = ", adata.id)?;
-    triple_quotes(w, |w| print_adata(ctx, w, &adata.value))?;
+fn print_adata_region(
+    ctx: &Context<'_>,
+    w: &mut dyn Write,
+    id: usize,
+    value: &TypedValue,
+) -> Result<()> {
+    write_bytes!(w, ".adata A_{} = ", id)?;
+    triple_quotes(w, |w| print_adata(ctx, w, value))?;
     w.write_all(b";")?;
     ctx.newline(w)
 }
 
-fn print_typedef(ctx: &Context<'_>, w: &mut dyn Write, td: &HhasTypedef<'_>) -> Result<()> {
+fn print_typedef(ctx: &Context<'_>, w: &mut dyn Write, td: &Typedef) -> Result<()> {
     newline(w)?;
-    w.write_all(b".alias ")?;
+    w.write_all(if td.case_type {
+        b".case_type "
+    } else {
+        b".alias "
+    })?;
     print_special_and_user_attrs(
         ctx,
         w,
         td.attributes.as_ref(),
         &AttrContext::Alias,
-        &td.attrs,
+        td.attrs,
     )?;
     w.write_all(td.name.as_bstr())?;
     w.write_all(b" = ")?;
-    print_typedef_info(w, &td.type_info)?;
+    print_typedef_info_union(w, td.type_info_union.as_ref())?;
     w.write_all(b" ")?;
     print_span(w, &td.span)?;
     w.write_all(b" ")?;
@@ -307,22 +336,28 @@ where
     })
 }
 
-fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &HhasFunction<'_>) -> Result<()> {
+fn print_fun_def(
+    ctx: &Context<'_>,
+    w: &mut dyn Write,
+    fun_def: &Function,
+    adata: &AdataState,
+) -> Result<()> {
     let body = &fun_def.body;
     newline(w)?;
     w.write_all(b".function ")?;
+    print_tparam_info(w, &body.tparam_info)?;
     print_upper_bounds_(w, &body.upper_bounds)?;
     w.write_all(b" ")?;
     print_special_and_user_attrs(
         ctx,
         w,
-        fun_def.attributes.as_ref(),
+        body.attributes.as_ref(),
         &AttrContext::Func,
-        &fun_def.attrs,
+        body.attrs,
     )?;
-    print_span(w, &fun_def.span)?;
+    print_span(w, &body.span)?;
     w.write_all(b" ")?;
-    option(w, body.return_type_info.as_ref(), |w, ti| {
+    option(w, body.return_type.as_ref(), |w, ti| {
         print_type_info(w, ti)?;
         w.write_all(b" ")
     })?;
@@ -342,7 +377,7 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &HhasFunction<'_
     w.write_all(b" ")?;
     braces(w, |w| {
         ctx.block(w, |c, w| {
-            print_body(c, w, body, &fun_def.coeffects, &dv_labels)
+            print_body(c, w, body, &body.coeffects, &dv_labels, adata)
         })?;
         newline(w)
     })?;
@@ -350,30 +385,28 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &HhasFunction<'_
     newline(w)
 }
 
-fn print_requirement(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    r: &Pair<ClassName<'_>, TraitReqKind>,
-) -> Result<()> {
+fn print_requirement(ctx: &Context<'_>, w: &mut dyn Write, r: &Requirement) -> Result<()> {
     ctx.newline(w)?;
     w.write_all(b".require ")?;
-    match r {
-        Pair(name, TraitReqKind::MustExtend) => {
-            write_bytes!(w, "extends <{}>;", name)
+    match r.kind {
+        TraitReqKind::MustExtend => {
+            write_bytes!(w, "extends <{}>;", r.name)
         }
-        Pair(name, TraitReqKind::MustImplement) => {
-            write_bytes!(w, "implements <{}>;", name)
+        TraitReqKind::MustImplement => {
+            write_bytes!(w, "implements <{}>;", r.name)
+        }
+        TraitReqKind::MustBeClass => {
+            write_bytes!(w, "class <{}>;", r.name)
+        }
+        TraitReqKind::MustBeAs => {
+            write_bytes!(w, "this as <{}>;", r.name)
         }
     }
 }
 
-fn print_type_constant(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    c: &HhasTypeConstant<'_>,
-) -> Result<()> {
+fn print_type_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &TypeConstant) -> Result<()> {
     ctx.newline(w)?;
-    write_bytes!(w, ".const {} isType", c.name)?;
+    write_bytes!(w, ".const {} isType", c.name.as_str())?;
     if c.is_abstract {
         w.write_all(b" isAbstract")?;
     }
@@ -384,25 +417,33 @@ fn print_type_constant(
     w.write_all(b";")
 }
 
-fn print_ctx_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasCtxConstant<'_>) -> Result<()> {
+fn print_ctx_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &CtxConstant) -> Result<()> {
     ctx.newline(w)?;
-    write_bytes!(w, ".ctx {}", c.name)?;
+    write_bytes!(w, ".ctx {}", c.name.as_str())?;
     if c.is_abstract {
         w.write_all(b" isAbstract")?;
     }
     let recognized = c.recognized.as_ref();
     if !recognized.is_empty() {
-        write_bytes!(w, " {}", fmt_separated(" ", recognized))?;
+        write_bytes!(
+            w,
+            " {}",
+            fmt_separated(" ", recognized.iter().map(|s| s.as_str()))
+        )?;
     }
     let unrecognized = c.unrecognized.as_ref();
     if !unrecognized.is_empty() {
-        write_bytes!(w, " {}", fmt_separated(" ", unrecognized))?;
+        write_bytes!(
+            w,
+            " {}",
+            fmt_separated(" ", unrecognized.iter().map(|s| s.as_str()))
+        )?;
     }
     w.write_all(b";")?;
     Ok(())
 }
 
-fn print_property_doc_comment(w: &mut dyn Write, p: &HhasProperty<'_>) -> Result<()> {
+fn print_property_doc_comment(w: &mut dyn Write, p: &Property) -> Result<()> {
     if let Just(s) = p.doc_comment.as_ref() {
         write_bytes!(w, r#""""{}""""#, escaper::escape_bstr(s.as_bstr()))?;
         w.write_all(b" ")?;
@@ -410,12 +451,12 @@ fn print_property_doc_comment(w: &mut dyn Write, p: &HhasProperty<'_>) -> Result
     Ok(())
 }
 
-fn print_property_type_info(w: &mut dyn Write, p: &HhasProperty<'_>) -> Result<()> {
+fn print_property_type_info(w: &mut dyn Write, p: &Property) -> Result<()> {
     print_type_info(w, &p.type_info)?;
     w.write_all(b" ")
 }
 
-fn print_property(ctx: &Context<'_>, w: &mut dyn Write, property: &HhasProperty<'_>) -> Result<()> {
+fn print_property(ctx: &Context<'_>, w: &mut dyn Write, property: &Property) -> Result<()> {
     newline(w)?;
     w.write_all(b"  .property ")?;
     print_special_and_user_attrs(
@@ -423,7 +464,7 @@ fn print_property(ctx: &Context<'_>, w: &mut dyn Write, property: &HhasProperty<
         w,
         property.attributes.as_ref(),
         &AttrContext::Prop,
-        &property.flags,
+        property.flags,
     )?;
     print_property_doc_comment(w, property)?;
     print_property_type_info(w, property)?;
@@ -441,13 +482,11 @@ fn print_property(ctx: &Context<'_>, w: &mut dyn Write, property: &HhasProperty<
     }
 }
 
-fn print_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasConstant<'_>) -> Result<()> {
+fn print_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &Constant) -> Result<()> {
     ctx.newline(w)?;
     w.write_all(b".const ")?;
+    print_special_and_user_attrs(ctx, w, &[], &AttrContext::Constant, c.attrs)?;
     w.write_all(c.name.as_bstr())?;
-    if c.is_abstract {
-        w.write_all(b" isAbstract")?;
-    }
     match c.value.as_ref() {
         Just(TypedValue::Uninit) => w.write_all(b" = uninit")?,
         Just(value) => {
@@ -459,7 +498,7 @@ fn print_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasConstant<'_>) ->
     w.write_all(b";")
 }
 
-fn print_enum_ty(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasClass<'_>) -> Result<()> {
+fn print_enum_ty(ctx: &Context<'_>, w: &mut dyn Write, c: &Class) -> Result<()> {
     if let Just(et) = c.enum_type.as_ref() {
         ctx.newline(w)?;
         w.write_all(b".enum_ty ")?;
@@ -469,10 +508,10 @@ fn print_enum_ty(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasClass<'_>) -> Res
     Ok(())
 }
 
-fn print_doc_comment<'arena>(
+fn print_doc_comment(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    doc_comment: Maybe<&Str<'arena>>,
+    doc_comment: Maybe<&Vector<u8>>,
 ) -> Result<()> {
     if let Just(cmt) = doc_comment {
         ctx.newline(w)?;
@@ -481,177 +520,116 @@ fn print_doc_comment<'arena>(
     Ok(())
 }
 
-fn print_use_precedence<'arena>(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    Triple(id1, id2, ids): &Triple<
-        ClassName<'arena>,
-        ClassName<'arena>,
-        Slice<'arena, ClassName<'arena>>,
-    >,
-) -> Result<()> {
-    ctx.newline(w)?;
-    write_bytes!(
-        w,
-        "{}::{} insteadof {};",
-        id1,
-        id2,
-        fmt_separated(" ", ids.as_ref().iter().unique())
-    )
-}
-
-fn print_use_alias<'arena>(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    Quadruple(ido1, id, ido2, attr): &Quadruple<
-        Maybe<ClassName<'arena>>,
-        ClassName<'arena>,
-        Maybe<ClassName<'arena>>,
-        Attr,
-    >,
-) -> Result<()> {
-    ctx.newline(w)?;
-    let id = id.unsafe_as_str();
-    option_or(
-        w,
-        ido1.as_ref(),
-        |w, i: &ClassName<'arena>| write_bytes!(w, "{}::{}", i, id),
-        id,
-    )?;
-    w.write_all(b" as ")?;
-    if !attr.is_empty() {
-        square(w, |w| {
-            write!(
-                w,
-                "{}",
-                attrs_to_string_ffi(AttrContext::TraitImport, *attr)
-            )
-        })?;
-    }
-    write_if!(!attr.is_empty() && ido2.is_just(), w, " ")?;
-    option(w, ido2.as_ref(), |w, i: &ClassName<'arena>| {
-        w.write_all(i.as_bstr())
-    })?;
-    w.write_all(b";")
-}
-
-fn print_uses<'arena>(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasClass<'arena>) -> Result<()> {
+fn print_uses(w: &mut dyn Write, c: &Class) -> Result<()> {
     if c.uses.is_empty() {
         Ok(())
     } else {
         newline(w)?;
         write_bytes!(w, "  .use {}", fmt_separated(" ", c.uses.iter()))?;
-
-        if c.use_aliases.is_empty() && c.use_precedences.is_empty() {
-            w.write_all(b";")
-        } else {
-            w.write_all(b" {")?;
-            ctx.block(w, |ctx, w| {
-                let precs: &[Triple<
-                    ClassName<'arena>,
-                    ClassName<'arena>,
-                    Slice<'arena, ClassName<'arena>>,
-                >] = c.use_precedences.as_ref();
-                for x in precs {
-                    print_use_precedence(ctx, w, x)?;
-                }
-                let aliases: &[Quadruple<
-                    Maybe<ClassName<'arena>>,
-                    ClassName<'arena>,
-                    Maybe<ClassName<'arena>>,
-                    Attr,
-                >] = c.use_aliases.as_ref();
-                for x in aliases {
-                    print_use_alias(ctx, w, x)?;
-                }
-                Ok(())
-            })?;
-            newline(w)?;
-            w.write_all(b"  }")
-        }
+        w.write_all(b";")
     }
 }
 
-fn print_implements(w: &mut dyn Write, implements: &[ClassName<'_>]) -> Result<()> {
+fn print_implements(w: &mut dyn Write, implements: &[ClassName]) -> Result<()> {
     if implements.is_empty() {
         return Ok(());
     }
     write_bytes!(w, " implements ({})", fmt_separated(" ", implements))
 }
 
-fn print_enum_includes(w: &mut dyn Write, enum_includes: &[ClassName<'_>]) -> Result<()> {
+fn print_enum_includes(w: &mut dyn Write, enum_includes: &[ClassName]) -> Result<()> {
     if enum_includes.is_empty() {
         return Ok(());
     }
     write_bytes!(w, " enum_includes ({})", fmt_separated(" ", enum_includes))
 }
 
-fn print_shadowed_tparams<'arena>(
-    w: &mut dyn Write,
-    shadowed_tparams: impl AsRef<[Str<'arena>]>,
-) -> Result<()> {
-    write_bytes!(w, "{{{}}}", fmt_separated(", ", shadowed_tparams.as_ref()))
+fn print_tparam_info(w: &mut dyn Write, tparam_info: &[TParamInfo]) -> Result<()> {
+    if tparam_info.is_empty() {
+        return Ok(());
+    }
+    write_bytes!(
+        w,
+        "<{}> ",
+        fmt_separated(
+            ",",
+            tparam_info
+                .iter()
+                .map(|t| { format!("[{} {}]", t.name.as_str(), t.shadows_class_tparam) })
+        )
+    )
 }
 
 fn print_method_def(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    method_def: &HhasMethod<'_>,
+    method_def: &Method,
+    adata: &AdataState,
 ) -> Result<()> {
     let body = &method_def.body;
     newline(w)?;
     w.write_all(b"  .method ")?;
-    print_shadowed_tparams(w, &body.shadowed_tparams)?;
+    print_tparam_info(w, &body.tparam_info)?;
     print_upper_bounds_(w, &body.upper_bounds)?;
     w.write_all(b" ")?;
     print_special_and_user_attrs(
         ctx,
         w,
-        method_def.attributes.as_ref(),
+        body.attributes.as_ref(),
         &AttrContext::Func,
-        &method_def.attrs,
+        body.attrs,
     )?;
-    print_span(w, &method_def.span)?;
+    print_span(w, &body.span)?;
     w.write_all(b" ")?;
-    option(w, body.return_type_info.as_ref(), |w, t| {
+    option(w, body.return_type.as_ref(), |w, t| {
         print_type_info(w, t)?;
         w.write_all(b" ")
     })?;
     w.write_all(method_def.name.as_bstr())?;
-    let dv_labels = find_dv_labels(&body.params);
-    print_params(ctx, w, &body.params, &dv_labels)?;
-    if method_def.flags.contains(HhasMethodFlags::IS_GENERATOR) {
+    let dv_labels = find_dv_labels(&body.repr.params);
+    print_params(ctx, w, &body.repr.params, &dv_labels)?;
+    if method_def.flags.contains(MethodFlags::IS_GENERATOR) {
         w.write_all(b" isGenerator")?;
     }
-    if method_def.flags.contains(HhasMethodFlags::IS_ASYNC) {
+    if method_def.flags.contains(MethodFlags::IS_ASYNC) {
         w.write_all(b" isAsync")?;
     }
-    if method_def
-        .flags
-        .contains(HhasMethodFlags::IS_PAIR_GENERATOR)
-    {
+    if method_def.flags.contains(MethodFlags::IS_PAIR_GENERATOR) {
         w.write_all(b" isPairGenerator")?;
     }
-    if method_def.flags.contains(HhasMethodFlags::IS_CLOSURE_BODY) {
+    if method_def.flags.contains(MethodFlags::IS_CLOSURE_BODY) {
         w.write_all(b" isClosureBody")?;
     }
     w.write_all(b" ")?;
     braces(w, |w| {
         ctx.block(w, |c, w| {
-            print_body(c, w, body, &method_def.coeffects, &dv_labels)
+            print_body(c, w, body, &body.coeffects, &dv_labels, adata)
         })?;
         newline(w)?;
         w.write_all(b"  ")
     })
 }
 
-fn print_class_def<'arena>(
+fn print_tparams(w: &mut dyn Write, tparams: &[ClassName]) -> Result<()> {
+    if tparams.is_empty() {
+        return Ok(());
+    }
+    write_bytes!(
+        w,
+        "<{}> ",
+        fmt_separated(",", tparams.iter().map(|s| s.as_str()))
+    )
+}
+
+fn print_class_def(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    class_def: &HhasClass<'arena>,
+    class_def: &Class,
+    adata: &AdataState,
 ) -> Result<()> {
     newline(w)?;
     w.write_all(b".class ")?;
+    print_tparams(w, class_def.tparams.as_ref())?;
     print_upper_bounds(w, class_def.upper_bounds.as_ref())?;
     w.write_all(b" ")?;
     print_special_and_user_attrs(
@@ -659,7 +637,7 @@ fn print_class_def<'arena>(
         w,
         class_def.attributes.as_ref(),
         &AttrContext::Class,
-        &class_def.flags,
+        class_def.flags,
     )?;
     w.write_all(class_def.name.as_bstr())?;
     w.write_all(b" ")?;
@@ -669,7 +647,7 @@ fn print_class_def<'arena>(
         class_def
             .base
             .as_ref()
-            .map(|x: &ClassName<'arena>| x.unsafe_as_str())
+            .map(|x: &ClassName| x.as_str())
             .into(),
     )?;
     print_implements(w, class_def.implements.as_ref())?;
@@ -677,7 +655,7 @@ fn print_class_def<'arena>(
     w.write_all(b" {")?;
     ctx.block(w, |c, w| {
         print_doc_comment(c, w, class_def.doc_comment.as_ref())?;
-        print_uses(c, w, class_def)?;
+        print_uses(w, class_def)?;
         print_enum_ty(c, w, class_def)?;
         for x in class_def.requirements.as_ref() {
             print_requirement(c, w, x)?;
@@ -695,7 +673,7 @@ fn print_class_def<'arena>(
             print_property(c, w, x)?;
         }
         for m in class_def.methods.as_ref() {
-            print_method_def(c, w, m)?;
+            print_method_def(c, w, m, adata)?;
         }
         Ok(())
     })?;
@@ -704,11 +682,7 @@ fn print_class_def<'arena>(
     newline(w)
 }
 
-fn print_module_def<'arena>(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    module_def: &HhasModule<'arena>,
-) -> Result<()> {
+fn print_module_def(ctx: &Context<'_>, w: &mut dyn Write, module_def: &Module) -> Result<()> {
     newline(w)?;
     w.write_all(b".module ")?;
     print_special_and_user_attrs(
@@ -716,47 +690,22 @@ fn print_module_def<'arena>(
         w,
         module_def.attributes.as_ref(),
         &AttrContext::Module,
-        &Attr::AttrNone,
+        Attr::AttrNone,
     )?;
     w.write_all(module_def.name.as_bstr())?;
     w.write_all(b" ")?;
     print_span(w, &module_def.span)?;
     w.write_all(b" {")?;
+    print_doc_comment(ctx, w, module_def.doc_comment.as_ref())?;
     newline(w)?;
     w.write_all(b"}")?;
     newline(w)
-}
-
-fn print_pos_as_prov_tag(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    loc: Option<&ast_defs::Pos>,
-) -> Result<()> {
-    match loc {
-        Some(l) if ctx.array_provenance => {
-            let (line, ..) = l.info_pos();
-            let filename = l.filename().to_absolute();
-            let filename = match filename.to_str().unwrap() {
-                "" => "(unknown hackc filename)",
-                x => x,
-            };
-            write!(
-                w,
-                r#"p:i:{};s:{}:\"{}\";"#,
-                line,
-                filename.len(),
-                escaper::escape(filename)
-            )
-        }
-        _ => Ok(()),
-    }
 }
 
 fn print_adata_mapped_argument<F, V>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     col_type: &str,
-    loc: Option<&ast_defs::Pos>,
     values: &[V],
     f: F,
 ) -> Result<()>
@@ -764,7 +713,6 @@ where
     F: Fn(&Context<'_>, &mut dyn Write, &V) -> Result<()>,
 {
     write!(w, "{}:{}:{{", col_type, values.len(),)?;
-    print_pos_as_prov_tag(ctx, w, loc)?;
     for v in values {
         f(ctx, w, v)?
     }
@@ -775,26 +723,24 @@ fn print_adata_collection_argument(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     col_type: &str,
-    loc: Option<&ast_defs::Pos>,
-    values: &[TypedValue<'_>],
+    values: &[TypedValue],
 ) -> Result<()> {
-    print_adata_mapped_argument(ctx, w, col_type, loc, values, &print_adata)
+    print_adata_mapped_argument(ctx, w, col_type, values, print_adata)
 }
 
 fn print_adata_dict_collection_argument(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     col_type: &str,
-    loc: Option<&ast_defs::Pos>,
-    pairs: &[Pair<TypedValue<'_>, TypedValue<'_>>],
+    pairs: &[DictEntry],
 ) -> Result<()> {
-    print_adata_mapped_argument(ctx, w, col_type, loc, pairs, |ctx, w, Pair(v1, v2)| {
-        print_adata(ctx, w, v1)?;
-        print_adata(ctx, w, v2)
+    print_adata_mapped_argument(ctx, w, col_type, pairs, |ctx, w, e| {
+        print_adata(ctx, w, &e.key)?;
+        print_adata(ctx, w, &e.value)
     })
 }
 
-fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue<'_>) -> Result<()> {
+fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue) -> Result<()> {
     match tv {
         TypedValue::Uninit => w.write_all(b"uninit"),
         TypedValue::Null => w.write_all(b"N;"),
@@ -803,64 +749,57 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue<'_>) -> Res
                 w,
                 r#"s:{}:\"{}\";"#,
                 s.len(),
-                escaper::escape_bstr(s.as_bstr())
+                escaper::escape_bstr(s.as_bytes().as_bstr())
+            )
+        }
+        TypedValue::EnumClassLabel(s) => {
+            write_bytes!(
+                w,
+                r#"e:{}:\"{}\";"#,
+                s.len(),
+                escaper::escape_bstr(s.as_bytes().as_bstr())
             )
         }
         TypedValue::LazyClass(s) => {
             write_bytes!(
                 w,
                 r#"l:{}:\"{}\";"#,
-                s.len(),
-                escaper::escape_bstr(s.as_bstr())
+                s.as_str().len(),
+                escaper::escape_bstr(s.as_bytes().as_bstr())
             )
         }
-        TypedValue::Double(f) => {
+        TypedValue::Float(f) => {
             write!(w, "d:{};", float::to_string(f.to_f64()))
         }
         TypedValue::Int(i) => write!(w, "i:{};", i),
         // TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why?
         TypedValue::Bool(false) => w.write_all(b"b:0;"),
         TypedValue::Bool(true) => w.write_all(b"b:1;"),
-        TypedValue::Vec(values) => {
-            print_adata_collection_argument(ctx, w, VEC_PREFIX, None, values.as_ref())
+        TypedValue::Vec(values) => print_adata_collection_argument(ctx, w, "v", values.as_ref()),
+        TypedValue::Dict(entries) => {
+            print_adata_dict_collection_argument(ctx, w, "D", entries.as_ref())
         }
-        TypedValue::Dict(pairs) => {
-            print_adata_dict_collection_argument(ctx, w, DICT_PREFIX, None, pairs.as_ref())
-        }
-        TypedValue::Keyset(values) => {
-            print_adata_collection_argument(ctx, w, KEYSET_PREFIX, None, values.as_ref())
-        }
-        TypedValue::HhasAdata(s) => w.write_all(&escaped_bytes(s.as_ref())),
+        TypedValue::Keyset(values) => print_adata_collection_argument(ctx, w, "k", values.as_ref()),
     }
 }
 
-fn print_attribute(ctx: &Context<'_>, w: &mut dyn Write, a: &HhasAttribute<'_>) -> Result<()> {
-    let unescaped = a.name.as_bstr();
-    let escaped = if a.name.starts_with(b"__") {
+fn print_attribute(ctx: &Context<'_>, w: &mut dyn Write, a: &Attribute) -> Result<()> {
+    let unescaped = a.name.as_str().as_bytes().as_bstr();
+    let escaped = if a.name.as_str().starts_with("__") {
         Cow::Borrowed(unescaped)
     } else {
         escaper::escape_bstr(unescaped)
     };
-    write_bytes!(
-        w,
-        "\"{}\"(\"\"\"{}:{}:{{",
-        escaped,
-        VEC_PREFIX,
-        a.arguments.len()
-    )?;
-    concat(w, &a.arguments, |w, arg| print_adata(ctx, w, arg))?;
+    write_bytes!(w, "\"{}\"(\"\"\"v:{}:{{", escaped, a.arguments.len())?;
+    concat(w, &a.arguments, |w, _, arg| print_adata(ctx, w, arg))?;
     w.write_all(b"}\"\"\")")
 }
 
-fn print_attributes<'a>(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    al: &[HhasAttribute<'a>],
-) -> Result<()> {
+fn print_attributes(ctx: &Context<'_>, w: &mut dyn Write, al: &[Attribute]) -> Result<()> {
     // Adjust for underscore coming before alphabet
     let al = al
         .iter()
-        .sorted_by_key(|a| (!a.name.starts_with(b"__"), a.name));
+        .sorted_by_key(|a| (!a.name.as_str().starts_with("__"), a.name));
     write_bytes!(
         w,
         "{}",
@@ -868,11 +807,7 @@ fn print_attributes<'a>(
     )
 }
 
-fn print_file_attributes(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    al: &[HhasAttribute<'_>],
-) -> Result<()> {
+fn print_file_attributes(ctx: &Context<'_>, w: &mut dyn Write, al: &[Attribute]) -> Result<()> {
     if al.is_empty() {
         return Ok(());
     }
@@ -883,10 +818,10 @@ fn print_file_attributes(
     newline(w)
 }
 
-fn print_module_use(w: &mut dyn Write, m_opt: &Maybe<Str<'_>>) -> Result<()> {
+fn print_module_use(w: &mut dyn Write, m_opt: &Maybe<ModuleName>) -> Result<()> {
     if let Just(m) = m_opt {
         newline(w)?;
-        write_bytes!(w, ".module_use \"{}\";", m)?;
+        write_bytes!(w, ".module_use \"{}\";", m.as_bstr())?;
         newline(w)?;
     }
     Ok(())
@@ -895,16 +830,17 @@ fn print_module_use(w: &mut dyn Write, m_opt: &Maybe<Str<'_>>) -> Result<()> {
 fn is_bareword_char(c: &u8) -> bool {
     match *c {
         b'_' | b'.' | b'$' | b'\\' => true,
-        c => (b'0'..=b'9').contains(&c) || (b'a'..=b'z').contains(&c) || (b'A'..=b'Z').contains(&c),
+        c => c.is_ascii_alphanumeric(),
     }
 }
 
 fn print_body(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    body: &HhasBody<'_>,
-    coeffects: &HhasCoeffects<'_>,
+    body: &Body,
+    coeffects: &Coeffects,
     dv_labels: &HashSet<Label>,
+    adata: &AdataState,
 ) -> Result<()> {
     print_doc_comment(ctx, w, body.doc_comment.as_ref())?;
     if body.is_memoize_wrapper {
@@ -919,10 +855,11 @@ fn print_body(
         ctx.newline(w)?;
         write!(w, ".numiters {};", body.num_iters)?;
     }
-    if !body.decl_vars.is_empty() {
+    if !body.repr.decl_vars.is_empty() {
         ctx.newline(w)?;
         w.write_all(b".declvars ")?;
-        concat_by(w, " ", &body.decl_vars, |w, var| {
+        concat_by(w, " ", &body.repr.decl_vars, |w, _, var| {
+            let var = var.as_str().as_bytes();
             if var.iter().all(is_bareword_char) {
                 w.write_all(var)
             } else {
@@ -932,58 +869,60 @@ fn print_body(
         w.write_all(b";")?;
     }
     coeffects::coeffects_to_hhas(ctx, w, coeffects)?;
-    let local_names: Vec<Str<'_>> = body
+    let local_names: Vec<_> = body
+        .repr
         .params
         .iter()
-        .map(|param| param.name)
-        .chain(body.decl_vars.iter().copied())
+        .map(|e| e.param.name)
+        .chain(body.repr.decl_vars.iter().copied())
         .collect();
-    print_instructions(ctx, w, &body.body_instrs, dv_labels, &local_names)
+    print_instructions(ctx, w, &body.repr.instrs, dv_labels, &local_names, adata)
 }
 
-fn print_instructions<'a, 'b>(
+fn print_instructions(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    instrs: &'b [Instruct<'a>],
-    dv_labels: &'b HashSet<Label>,
-    local_names: &'b [Str<'a>],
+    instrs: &[Instruct],
+    dv_labels: &HashSet<Label>,
+    local_names: &[StringId],
+    adata: &AdataState,
 ) -> Result<()> {
     let mut ctx = ctx.clone();
     for instr in instrs {
         match instr {
-            Instruct::Pseudo(Pseudo::Continue(_) | Pseudo::Break(_)) => {
-                return Err(Error::fail("Cannot break/continue 1 level").into());
-            }
-            Instruct::Pseudo(Pseudo::Comment(_)) => {
-                // indentation = 0
-                newline(w)?;
-                print_instr(w, instr, dv_labels, local_names)?;
+            Instruct::Pseudo(Pseudo::Continue | Pseudo::Break) => {
+                return Err(Error::fail("Cannot break/continue").into());
             }
             Instruct::Pseudo(Pseudo::Label(_)) => ctx.unblock(w, |c, w| {
                 c.newline(w)?;
-                print_instr(w, instr, dv_labels, local_names)
+                print_instr(w, instr, dv_labels, local_names, adata)
             })?,
             Instruct::Pseudo(Pseudo::TryCatchBegin) => {
                 ctx.newline(w)?;
-                print_instr(w, instr, dv_labels, local_names)?;
+                print_instr(w, instr, dv_labels, local_names, adata)?;
                 ctx.indent_inc();
             }
             Instruct::Pseudo(Pseudo::TryCatchMiddle) => ctx.unblock(w, |c, w| {
                 c.newline(w)?;
-                print_instr(w, instr, dv_labels, local_names)
+                print_instr(w, instr, dv_labels, local_names, adata)
             })?,
             Instruct::Pseudo(Pseudo::TryCatchEnd) => {
                 ctx.indent_dec();
                 ctx.newline(w)?;
-                print_instr(w, instr, dv_labels, local_names)?;
+                print_instr(w, instr, dv_labels, local_names, adata)?;
             }
             _ => {
                 ctx.newline(w)?;
-                print_instr(w, instr, dv_labels, local_names)?;
+                print_instr(w, instr, dv_labels, local_names, adata)?;
             }
         }
     }
     Ok(())
+}
+
+pub(crate) fn print_adata_id(w: &mut dyn Write, v: &TypedValue, adata: &AdataState) -> Result<()> {
+    let id = adata.index_of(v).unwrap();
+    write!(w, "@{}", id)
 }
 
 pub(crate) fn print_fcall_args(
@@ -994,10 +933,12 @@ pub(crate) fn print_fcall_args(
         num_rets,
         inouts,
         readonly,
+        named_arg_names,
         async_eager_target,
         context,
-    }: &FCallArgs<'_>,
+    }: &FCallArgs,
     dv_labels: &HashSet<Label>,
+    adata: &AdataState,
 ) -> Result<()> {
     angle(w, |w| {
         let flags = hhvm_hhbc_defs_ffi::ffi::fcall_flags_to_string_ffi(*flags);
@@ -1009,29 +950,35 @@ pub(crate) fn print_fcall_args(
     print_int(w, num_rets)?;
     w.write_all(b" ")?;
     quotes(w, |w| {
-        concat_by(w, "", inouts, |w, i| {
+        concat_by(w, "", inouts, |w, _, i| {
             w.write_all(if *i { b"1" } else { b"0" })
         })
     })?;
     w.write_all(b" ")?;
     quotes(w, |w| {
-        concat_by(w, "", readonly, |w, i| {
+        concat_by(w, "", readonly, |w, _, i| {
             w.write_all(if *i { b"1" } else { b"0" })
         })
     })?;
     w.write_all(b" ")?;
+    if named_arg_names.is_empty() {
+        w.write_all(b"$ ")?;
+    } else {
+        let name_tvs = named_arg_typed_values(named_arg_names);
+        print_adata_id(w, &name_tvs, adata)?;
+        w.write_all(b" ")?;
+    }
     if args.has_async_eager_target() {
         print_label(w, async_eager_target, dv_labels)?;
     } else {
         w.write_all(b"-")?;
     }
     w.write_all(b" ")?;
-    quotes(w, |w| w.write_all(context))
+    quotes(w, |w| w.write_all(context.as_str().as_bytes()))
 }
 
-fn print_pseudo(w: &mut dyn Write, instr: &Pseudo<'_>, dv_labels: &HashSet<Label>) -> Result<()> {
+fn print_pseudo(w: &mut dyn Write, instr: &Pseudo, dv_labels: &HashSet<Label>) -> Result<()> {
     match instr {
-        Pseudo::TypedValue(_) => Err(Error::fail("print_lit_const: TypedValue").into()),
         Pseudo::Label(l) => {
             print_label(w, l, dv_labels)?;
             w.write_all(b":")
@@ -1039,25 +986,26 @@ fn print_pseudo(w: &mut dyn Write, instr: &Pseudo<'_>, dv_labels: &HashSet<Label
         Pseudo::TryCatchBegin => w.write_all(b".try {"),
         Pseudo::TryCatchMiddle => w.write_all(b"} .catch {"),
         Pseudo::TryCatchEnd => w.write_all(b"}"),
-        Pseudo::Comment(s) => write_bytes!(w, "# {}", s),
         Pseudo::SrcLoc(p) => write!(
             w,
             ".srcloc {}:{},{}:{};",
             p.line_begin, p.col_begin, p.line_end, p.col_end
         ),
-        Pseudo::Break(_) | Pseudo::Continue(_) => Err(Error::fail("invalid instruction").into()),
+        Pseudo::Break | Pseudo::Continue => Err(Error::fail("invalid instruction").into()),
     }
 }
 
-fn print_instr<'a, 'b>(
+fn print_instr(
     w: &mut dyn Write,
-    instr: &'b Instruct<'a>,
-    dv_labels: &'b HashSet<Label>,
-    local_names: &'b [Str<'a>],
+    instr: &Instruct,
+    dv_labels: &HashSet<Label>,
+    local_names: &[StringId],
+    adata: &AdataState,
 ) -> Result<()> {
     match instr {
         Instruct::Opcode(opcode) => {
-            crate::print_opcode::PrintOpcode::new(opcode, dv_labels, local_names).print_opcode(w)
+            crate::print_opcode::PrintOpcode::new(opcode, dv_labels, local_names)
+                .print_opcode(w, adata)
         }
         Instruct::Pseudo(pseudo) => print_pseudo(w, pseudo, dv_labels),
     }
@@ -1065,61 +1013,63 @@ fn print_instr<'a, 'b>(
 
 /// Build a set containing the labels for param default-value initializers
 /// so they can be formatted as `DV123` instead of `L123`.
-fn find_dv_labels(params: &[HhasParam<'_>]) -> HashSet<Label> {
+fn find_dv_labels(params: &[ParamEntry]) -> HashSet<Label> {
     params
         .iter()
-        .filter_map(|param| match &param.default_value {
-            Just(Pair(label, _)) => Some(*label),
+        .filter_map(|e| match &e.dv {
+            Just(dv) => Some(dv.label),
             _ => None,
         })
         .collect()
 }
 
-fn print_params<'arena>(
+fn print_params(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    params: &[HhasParam<'arena>],
+    params: &[ParamEntry],
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     paren(w, |w| {
-        concat_by(w, ", ", params, |w, i| print_param(ctx, w, i, dv_labels))
+        concat_by(w, ", ", params, |w, _, i| print_param(ctx, w, i, dv_labels))
     })
 }
 
-fn print_param<'arena>(
+fn print_param(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    param: &HhasParam<'arena>,
+    ParamEntry { param, dv }: &ParamEntry,
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     print_param_user_attributes(ctx, w, param)?;
     write_if!(param.is_inout, w, "inout ")?;
     write_if!(param.is_readonly, w, "readonly ")?;
+    write_if!(param.is_optional, w, "optional ")?;
+    write_if!(param.is_named, w, "named ")?;
+    write_if!(param.is_splat, w, "splat ")?;
     write_if!(param.is_variadic, w, "...")?;
     option(w, param.type_info.as_ref(), |w, ty| {
         print_type_info(w, ty)?;
         w.write_all(b" ")
     })?;
-    w.write_all(&param.name)?;
-    option(
-        w,
-        param
-            .default_value
-            .map(|Pair(label, php_code)| (label, php_code))
-            .as_ref(),
-        |w, &(label, php_code)| print_param_default_value(w, label, php_code, dv_labels),
-    )
+    w.write_all(param.name.as_str().as_bytes())?;
+    option(w, dv.as_ref(), |w, dv: &DefaultValue| {
+        print_param_default_value(w, dv.label, &dv.expr, dv_labels)
+    })
 }
 
-fn print_param_default_value<'arena>(
+fn print_param_default_value(
     w: &mut dyn Write,
     label: Label,
-    php_code: Str<'arena>,
+    php_code: &[u8],
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     w.write_all(b" = ")?;
     print_label(w, &label, dv_labels)?;
-    paren(w, |w| triple_quotes(w, |w| w.write_all(&php_code)))
+    paren(w, |w| {
+        triple_quotes(w, |w| {
+            w.write_all(&escaper::escape_bstr(php_code.as_bstr()))
+        })
+    })
 }
 
 pub(crate) fn print_label(
@@ -1128,18 +1078,14 @@ pub(crate) fn print_label(
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     let prefix = if dv_labels.contains(label) { "DV" } else { "L" };
-    write!(w, "{}{}", prefix, label)
+    write!(w, "{}{}", prefix, label.0)
 }
 
 pub(crate) fn print_int<T: std::fmt::Display>(w: &mut dyn Write, i: T) -> Result<()> {
     write!(w, "{}", i)
 }
 
-fn print_param_user_attributes(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    param: &HhasParam<'_>,
-) -> Result<()> {
+fn print_param_user_attributes(ctx: &Context<'_>, w: &mut dyn Write, param: &Param) -> Result<()> {
     match param.user_attributes.as_ref()[..] {
         [] => Ok(()),
         _ => square(w, |w| print_attributes(ctx, w, &param.user_attributes)),
@@ -1148,10 +1094,10 @@ fn print_param_user_attributes(
 
 fn print_span(
     w: &mut dyn Write,
-    &HhasSpan {
+    &Span {
         line_begin,
         line_end,
-    }: &HhasSpan,
+    }: &Span,
 ) -> Result<()> {
     write!(w, "({},{})", line_begin, line_end)
 }
@@ -1159,13 +1105,13 @@ fn print_span(
 fn print_special_and_user_attrs(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    users: &[HhasAttribute<'_>],
+    users: &[Attribute],
     attr_ctx: &AttrContext,
-    attrs: &Attr,
+    attrs: Attr,
 ) -> Result<()> {
     if !users.is_empty() || !attrs.is_empty() {
         square(w, |w| {
-            write!(w, "{}", attrs_to_string_ffi(*attr_ctx, *attrs))?;
+            write!(w, "{}", attrs_to_string_ffi(*attr_ctx, attrs))?;
             if !users.is_empty() {
                 w.write_all(b" ")?;
             }
@@ -1176,41 +1122,33 @@ fn print_special_and_user_attrs(
     Ok(())
 }
 
-fn print_upper_bounds<'arena>(
-    w: &mut dyn Write,
-    ubs: impl AsRef<[Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>]>,
-) -> Result<()> {
-    braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound))
-}
-
-fn print_upper_bound<'arena>(
-    w: &mut dyn Write,
-    Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'_>>>,
-) -> Result<()> {
-    paren(w, |w| {
-        write_bytes!(w, "{} as ", id)?;
-        concat_by(w, ", ", &tys, print_type_info)
+fn print_upper_bounds(w: &mut dyn Write, ubs: impl AsRef<[UpperBound]>) -> Result<()> {
+    braces(w, |w| {
+        concat_by(w, ", ", ubs, |w, _, ub| print_upper_bound(w, ub))
     })
 }
 
-fn print_upper_bounds_<'arena>(
-    w: &mut dyn Write,
-    ubs: impl AsRef<[Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>]>,
-) -> Result<()> {
-    braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound_))
-}
-
-fn print_upper_bound_<'arena>(
-    w: &mut dyn Write,
-    Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>,
-) -> Result<()> {
+fn print_upper_bound(w: &mut dyn Write, ub: &UpperBound) -> Result<()> {
     paren(w, |w| {
-        write_bytes!(w, "{} as ", id)?;
-        concat_by(w, ", ", &tys, print_type_info)
+        write!(w, "{} as ", ub.name)?;
+        concat_by(w, ", ", &ub.bounds, |w, _, t| print_type_info(w, t))
     })
 }
 
-fn print_type_info(w: &mut dyn Write, ti: &HhasTypeInfo<'_>) -> Result<()> {
+fn print_upper_bounds_(w: &mut dyn Write, ubs: impl AsRef<[UpperBound]>) -> Result<()> {
+    braces(w, |w| {
+        concat_by(w, ", ", ubs, |w, _, ub| print_upper_bound_(w, ub))
+    })
+}
+
+fn print_upper_bound_(w: &mut dyn Write, ub: &UpperBound) -> Result<()> {
+    paren(w, |w| {
+        write!(w, "{} as ", ub.name)?;
+        concat_by(w, ", ", &ub.bounds, |w, _, t| print_type_info(w, t))
+    })
+}
+
+fn print_type_info(w: &mut dyn Write, ti: &TypeInfo) -> Result<()> {
     print_type_info_(w, false, ti)
 }
 
@@ -1218,47 +1156,51 @@ fn print_type_flags(w: &mut dyn Write, flag: TypeConstraintFlags) -> Result<()> 
     write!(w, "{}", type_flags_to_string_ffi(flag))
 }
 
-fn print_type_info_(w: &mut dyn Write, is_enum: bool, ti: &HhasTypeInfo<'_>) -> Result<()> {
+fn print_type_info_(w: &mut dyn Write, is_enum: bool, ti: &TypeInfo) -> Result<()> {
     let print_quote_str = |w: &mut dyn Write, opt: Option<&str>| {
         option_or(
             w,
             opt,
-            |w, s: &str| quotes(w, |w| w.write_all(escaper::escape(s).as_bytes())),
+            |w, s: &str| quotes(w, |w| w.write_all(escaper::escape(s).as_ref().as_bytes())),
             "N",
         )
     };
     angle(w, |w| {
-        print_quote_str(w, ti.user_type.map(|n| n.unsafe_as_str()).into())?;
+        print_quote_str(w, ti.user_type.map(|s| s.as_str()).into())?;
         w.write_all(b" ")?;
         if !is_enum {
-            print_quote_str(w, ti.type_constraint.name.map(|n| n.unsafe_as_str()).into())?;
+            print_quote_str(w, ti.type_constraint.name.map(|n| n.as_str()).into())?;
             w.write_all(b" ")?;
         }
         print_type_flags(w, ti.type_constraint.flags)
     })
 }
 
-fn print_typedef_info(w: &mut dyn Write, ti: &HhasTypeInfo<'_>) -> Result<()> {
+// T125888411: User type not printed
+// T126391106: also -- no name and "" as a name both print as "", which is ambiguous for the assembler
+fn print_typedef_info(w: &mut dyn Write, ti: &TypeInfo) -> Result<()> {
     angle(w, |w| {
         write_bytes!(
             w,
             r#""{}""#,
-            escaper::escape_bstr(
+            escaper::escape(
                 ti.type_constraint
                     .name
                     .as_ref()
-                    .unwrap_or(&Default::default())
-                    .as_bstr()
+                    .unwrap_or(&StringId::EMPTY)
+                    .as_str()
             )
         )?;
         let flags = ti.type_constraint.flags & TypeConstraintFlags::Nullable;
         if !flags.is_empty() {
-            wrap_by(w, " ", |w| {
-                print_type_flags(w, ti.type_constraint.flags & TypeConstraintFlags::Nullable)
-            })?;
+            wrap_by(w, " ", |w| print_type_flags(w, flags))?;
         }
         Ok(())
     })
+}
+
+fn print_typedef_info_union(w: &mut dyn Write, tis: &[TypeInfo]) -> Result<()> {
+    concat_by(w, ",", tis, |w, _, td| print_typedef_info(w, td))
 }
 
 fn print_extends(w: &mut dyn Write, base: Option<&str>) -> Result<()> {
@@ -1268,10 +1210,21 @@ fn print_extends(w: &mut dyn Write, base: Option<&str>) -> Result<()> {
     }
 }
 
+fn named_arg_typed_values(named_arg_names: &Vector<StringId>) -> TypedValue {
+    // We should never be breaking down empty named args - the caller is responsible for handling it.
+    debug_assert!(!named_arg_names.is_empty());
+    TypedValue::vec(
+        named_arg_names
+            .into_iter()
+            .map(|name| TypedValue::String(name.as_bytes()))
+            .collect(),
+    )
+}
+
 pub fn external_print_unit(
     ctx: &Context<'_>,
     w: &mut dyn std::io::Write,
-    prog: &HackCUnit<'_>,
+    prog: &Unit,
 ) -> std::result::Result<(), Error> {
     print_unit(ctx, w, prog).map_err(write::into_error)?;
     w.flush().map_err(write::into_error)?;

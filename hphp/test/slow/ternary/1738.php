@@ -1,11 +1,13 @@
 <?hh
 
-function f($x, $y) {
-  return $x[0][$y++] ?: false;
+function f($x, $y) :mixed{
+  $__lval_tmp_0 = $y;
+  $y++;
+  return $x[0][$__lval_tmp_0] ?: false;
 }
 
 <<__EntryPoint>>
-function main_1738() {
-var_dump(f(varray[varray[0, 1, 2]], 0));
-var_dump(f(varray[varray[0, 1, 2]], 1));
+function main_1738() :mixed{
+var_dump(f(vec[vec[0, 1, 2]], 0));
+var_dump(f(vec[vec[0, 1, 2]], 1));
 }

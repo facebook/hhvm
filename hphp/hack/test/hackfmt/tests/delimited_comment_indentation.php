@@ -1,7 +1,7 @@
 <?hh
 
 abstract final class ErrorDescriptions {
-  private static array $descriptions = darray[
+  private static array $descriptions = dict[
     ErrorCode::FATAL => 'Fatal',
     /**
      * Foo Errors
@@ -12,7 +12,7 @@ abstract final class ErrorDescriptions {
 }
 
 abstract final class ErrorDescriptions {
-  private static array $descriptions = darray[
+  private static array $descriptions = dict[
     ErrorCode::FATAL => 'Fatal',
 /**
  * Foo Errors
@@ -23,7 +23,7 @@ abstract final class ErrorDescriptions {
 }
 
 abstract final class ErrorDescriptions {
-  private static array $descriptions = darray[
+  private static array $descriptions = dict[
     ErrorCode::FATAL => 'Fatal',
     /**
  * Foo Errors
@@ -34,7 +34,7 @@ abstract final class ErrorDescriptions {
 }
 
 abstract final class ErrorDescriptions {
-  private static array $descriptions = darray[
+  private static array $descriptions = dict[
     ErrorCode::FATAL => 'Fatal',
 /*
     ErrorCode::DISABLED => 'disabled',
@@ -48,7 +48,7 @@ abstract final class ErrorDescriptions {
 }
 
 abstract final class ErrorDescriptions {
-  private static array $descriptions = darray[
+  private static array $descriptions = dict[
     ErrorCode::FATAL => 'Fatal',
 /*
     ErrorCode::DISABLED => 'disabled',
@@ -61,7 +61,7 @@ abstract final class ErrorDescriptions {
 }
 
 abstract final class ErrorDescriptions {
-  private static array $descriptions = darray[
+  private static array $descriptions = dict[
     ErrorCode::FATAL => 'Fatal',
 /*
     ErrorCode::DISABLED => 'disabled',
@@ -74,7 +74,7 @@ abstract final class ErrorDescriptions {
 }
 
 abstract final class ErrorDescriptions {
-  private static array $descriptions = darray[
+  private static array $descriptions = dict[
     ErrorCode::FATAL => 'Fatal',
     /*
           ErrorCode::DISABLED => 'disabled',
@@ -87,7 +87,7 @@ abstract final class ErrorDescriptions {
 }
 
 abstract final class ErrorDescriptions {
-  private static array $descriptions = darray[
+  private static array $descriptions = dict[
     ErrorCode::FATAL => 'Fatal',
     /*
           ErrorCode::DISABLED => 'disabled',
@@ -100,7 +100,7 @@ abstract final class ErrorDescriptions {
 }
 
 abstract final class ErrorDescriptions {
-  private static array $descriptions = darray[
+  private static array $descriptions = dict[
     ErrorCode::FATAL => 'Fatal', /**
      * Foo Errors
      */
@@ -110,7 +110,7 @@ abstract final class ErrorDescriptions {
 }
 
 abstract final class ErrorDescriptions {
-  private static array $descriptions = darray[
+  private static array $descriptions = dict[
     ErrorCode::FATAL => 'Fatal', /**
     * Foo Errors
     */
@@ -120,7 +120,7 @@ abstract final class ErrorDescriptions {
 }
 
 abstract final class ErrorDescriptions {
-  private static array $descriptions = darray[
+  private static array $descriptions = dict[
     ErrorCode::FATAL => 'Fatal', /**
  * Foo Errors
  */
@@ -131,7 +131,7 @@ abstract final class ErrorDescriptions {
 
 abstract final class ErrorDescriptions {
   private static array
-    $descriptions = darray[
+    $descriptions = dict[
       ErrorCode::FATAL => 'Fatal', /*
       ErrorCode::DISABLED => 'disabled', */
       /**
@@ -144,7 +144,7 @@ abstract final class ErrorDescriptions {
 
 abstract final class ErrorDescriptions {
   private static array
-    $descriptions = darray[
+    $descriptions = dict[
       ErrorCode::FATAL => 'Fatal', /*
       ErrorCode::DISABLED => 'disabled',
   */ /**
@@ -156,7 +156,7 @@ abstract final class ErrorDescriptions {
 }
 
 abstract final class ErrorDescriptions {
-  private static array $descriptions = darray[
+  private static array $descriptions = dict[
     ErrorCode::FATAL => 'Fatal', /*
     ErrorCode::DISABLED => 'disabled',
     */ /**
@@ -168,7 +168,7 @@ abstract final class ErrorDescriptions {
 }
 
 abstract final class ErrorDescriptions {
-  private static array $descriptions = darray[
+  private static array $descriptions = dict[
     ErrorCode::FATAL => 'Fatal', /*
     ErrorCode::DISABLED => 'disabled',
     */ /**

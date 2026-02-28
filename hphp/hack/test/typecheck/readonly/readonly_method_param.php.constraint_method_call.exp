@@ -1,0 +1,8 @@
+ERROR: File "readonly_method_param.php", line 16, characters 3-18:
+Typing error (Typing[4411])
+  File "readonly_method_param.php", line 16, characters 16-17:
+  Mismatched parameter readonlyness
+  File "readonly_method_param.php", line 4, characters 38-39:
+  This parameter is mutable
+  File "readonly_method_param.php", line 16, characters 16-17:
+  But this parameter is readonly

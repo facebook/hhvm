@@ -16,26 +16,12 @@
 */
 
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
-#include "hphp/runtime/base/types.h"
 
 namespace HPHP::thrift {
 
 ///////////////////////////////////////////////////////////////////////////////
 
 const int64_t k_THRIFT_MARK_LEGACY_ARRAYS = 1LL << 0;
-
-const StaticString s_InteractionId("InteractionId");
-
-Class* InteractionId::PhpClass() {
-  Class* c_InteractionId = Class::lookup(s_InteractionId.get());
-  assert(c_InteractionId);
-  return c_InteractionId;
-}
-
-Class* RpcOptions::c_RpcOptions = nullptr;
-Class* TClientBufferedStream::c_TClientBufferedStream = nullptr;
-Class* TClientSink::c_TClientSink = nullptr;
-
 
 Object HHVM_METHOD(
     TClientSink,
@@ -49,7 +35,7 @@ Object HHVM_METHOD(
   // Make sure event is abandoned, in case of an error
   auto guard = folly::makeGuard([=] { event->abandon(); });
 
-  class ReadyCallback : public apache::thrift::detail::ClientSinkConsumer {
+  class ReadyCallback : public apache::thrift::detail::QueueConsumer {
    public:
     explicit ReadyCallback(
         HPHP::thrift::TClientSink* sink,
@@ -134,25 +120,30 @@ void HHVM_METHOD(
   apache::thrift::PayloadExceptionMetadata exceptionMetadata;
   apache::thrift::PayloadExceptionMetadataBase exceptionMetadataBase;
   if (ex_msg.isNull()) {
-    exceptionMetadata.declaredException_ref() = apache::thrift::PayloadDeclaredExceptionMetadata();
+    exceptionMetadata.declaredException() = apache::thrift::PayloadDeclaredExceptionMetadata();
   } else if (ex_msg.isString()) {
-    exceptionMetadataBase.what_utf8_ref() = ex_msg.toString().c_str();
+    exceptionMetadataBase.what_utf8() = ex_msg.toString().c_str();
     apache::thrift::PayloadAppUnknownExceptionMetdata aue;
-    aue.errorClassification_ref().ensure().blame_ref() =
+    aue.errorClassification().ensure().blame() =
         apache::thrift::ErrorBlame::CLIENT;
-    exceptionMetadata.appUnknownException_ref() = std::move(aue);
+    exceptionMetadata.appUnknownException() = std::move(aue);
   }
 
-  exceptionMetadataBase.metadata_ref() = std::move(exceptionMetadata);
+  exceptionMetadataBase.metadata() = std::move(exceptionMetadata);
   apache::thrift::StreamPayloadMetadata streamPayloadMetadata;
   apache::thrift::PayloadMetadata payloadMetadata;
-  payloadMetadata.exceptionMetadata_ref() = std::move(exceptionMetadataBase);
-  streamPayloadMetadata.payloadMetadata_ref() = std::move(payloadMetadata);
+  payloadMetadata.exceptionMetadata() = std::move(exceptionMetadataBase);
+  streamPayloadMetadata.payloadMetadata() = std::move(payloadMetadata);
   data->sinkBridge_->push(folly::Try<apache::thrift::StreamPayload>(
             folly::make_exception_wrapper<apache::thrift::detail::EncodedStreamError>(
           apache::thrift::StreamPayload(
               std::move(buf), std::move(streamPayloadMetadata)))));
   data->endSink();
+}
+
+void HHVM_METHOD(TClientBufferedStream, disable16KBBufferingPolicy) {
+  auto data = TClientBufferedStream::GetDataOrThrowException(this_);
+  data->use16KBBufferingPolicy_ = false;
 }
 
 Object HHVM_METHOD(TClientBufferedStream, genNext) {
@@ -178,7 +169,7 @@ Object HHVM_METHOD(TClientBufferedStream, genNext) {
     return Object{event->getWaitHandle()};
   }
 
-  class ReadyCallback : public apache::thrift::detail::ClientStreamConsumer {
+  class ReadyCallback : public apache::thrift::detail::QueueConsumer {
    public:
     explicit ReadyCallback(
         HPHP::thrift::TClientBufferedStream* stream,
@@ -290,10 +281,10 @@ Object HHVM_METHOD(RpcOptions, setInteractionId, const Object& interaction_id) {
   return Object(this_);
 }
 
-Object HHVM_METHOD(RpcOptions, setFaultToInject, const String& key, const String& value) {
+Object HHVM_METHOD(RpcOptions, setSerializedAuthProofs, const String& payload) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
-  data->rpcOptions.setFaultToInject(std::string(key.c_str(), key.size()),
-    std::string(value.c_str(), value.size()));
+  data->rpcOptions.setSerializedAuthProofs(
+      apache::thrift::SerializedAuthProofs(folly::IOBuf::copyBuffer(payload.data(), payload.size())));
   return Object(this_);
 }
 
@@ -321,19 +312,6 @@ String HHVM_METHOD(RpcOptions, __toString) {
     }
     result += "\"" + it.first + "\": \"" + it.second + "\"";
   }
-  result += "}; ";
-  result += "faultsToInject: {";
-  first = true;
-  if (const auto& faultsToInject = data->rpcOptions.getFaultsToInject()) {
-    for (const auto& it : *faultsToInject) {
-      if (!first) {
-        result += ", ";
-      } else {
-        first = false;
-      }
-      result += "\"" + it.first + "\": \"" + it.second + "\"";
-    }
-  }
   result += "}";
   result += ")\n";
   return result;
@@ -342,19 +320,25 @@ String HHVM_METHOD(RpcOptions, __toString) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static struct ThriftExtension final : Extension {
-  ThriftExtension() : Extension("thrift_protocol", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
+  ThriftExtension() : Extension("thrift_protocol", "1.0", "thrift_hack") {}
+  void moduleRegisterNative() override {
     HHVM_RC_INT(THRIFT_MARK_LEGACY_ARRAYS, k_THRIFT_MARK_LEGACY_ARRAYS);
 
     HHVM_FE(thrift_protocol_write_binary);
+    HHVM_FE(thrift_protocol_write_binary_struct);
+    HHVM_FE(thrift_protocol_write_binary_struct_to_string);
     HHVM_FE(thrift_protocol_read_binary);
     HHVM_FE(thrift_protocol_read_binary_struct);
+    HHVM_FE(thrift_protocol_read_binary_struct_from_string);
     HHVM_FE(thrift_protocol_set_compact_version);
-    HHVM_FE(thrift_protocol_write_compact);
+    HHVM_FE(thrift_protocol_write_compact2);
+    HHVM_FE(thrift_protocol_write_compact_struct);
+    HHVM_FE(thrift_protocol_write_compact_struct_to_string);
     HHVM_FE(thrift_protocol_read_compact);
     HHVM_FE(thrift_protocol_read_compact_struct);
+    HHVM_FE(thrift_protocol_read_compact_struct_from_string);
 
-    Native::registerNativeDataInfo<RpcOptions>(s_RpcOptions.get());
+    Native::registerNativeDataInfo<RpcOptions>();
     HHVM_ME(RpcOptions, setChunkBufferSize);
     HHVM_ME(RpcOptions, setRoutingKey);
     HHVM_ME(RpcOptions, setShardId);
@@ -365,22 +349,24 @@ static struct ThriftExtension final : Extension {
     HHVM_ME(RpcOptions, setProcessingTimeout);
     HHVM_ME(RpcOptions, setChunkTimeout);
     HHVM_ME(RpcOptions, setInteractionId);
-    HHVM_ME(RpcOptions, setFaultToInject);
+    HHVM_ME(RpcOptions, setSerializedAuthProofs);
     HHVM_ME(RpcOptions, __toString);
 
-    Native::registerNativeDataInfo<InteractionId>(s_InteractionId.get());
+    Native::registerNativeDataInfo<InteractionId>();
 
     Native::registerNativeDataInfo<TClientBufferedStream>(
-      s_TClientBufferedStream.get(), Native::NDIFlags::NO_COPY);
+      Native::NDIFlags::NO_COPY);
     HHVM_ME(TClientBufferedStream, genNext);
+    HHVM_ME(TClientBufferedStream, disable16KBBufferingPolicy);
 
-    Native::registerNativeDataInfo<TClientSink>(
-      s_TClientSink.get(), Native::NDIFlags::NO_COPY);
+    Native::registerNativeDataInfo<TClientSink>(Native::NDIFlags::NO_COPY);
     HHVM_ME(TClientSink, sendPayloadOrSinkComplete);
     HHVM_ME(TClientSink, genCreditsOrFinalResponse);
     HHVM_ME(TClientSink, sendClientException);
+  }
 
-    loadSystemlib("thrift");
+  std::vector<std::string> hackFiles() const override {
+    return {"thrift.php"};
   }
 } s_thrift_extension;
 

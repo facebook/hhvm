@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$arr = varray[new stdClass];
+$arr = vec[new stdClass];
 
 $arr[0]->a = clone $arr[0];
 var_dump($arr);

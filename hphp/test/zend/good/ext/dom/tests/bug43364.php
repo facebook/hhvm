@@ -1,6 +1,6 @@
 <?hh
 function loopElements($nodes)
-{
+:mixed{
     $count = 0;
     foreach($nodes as $node) {
         if($node is DOMElement) {
@@ -25,11 +25,11 @@ $xml = <<<DOC
 </root>
 DOC;
 
-$doc = new DomDocument();
+$doc = new DOMDocument();
 $doc->loadXML($xml);
 $doc->xinclude();
 
-$count = loopElements(varray[$doc->documentElement]);
+$count = loopElements(vec[$doc->documentElement]);
 
 var_dump($count);
 }

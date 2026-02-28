@@ -498,7 +498,7 @@ static bool HHVM_METHOD(MessageFormatter, setPattern, const String& value) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void IntlExtension::initMessageFormatter() {
+void IntlExtension::registerNativeMessageFormatter() {
   HHVM_ME(MessageFormatter, __construct);
   HHVM_ME(MessageFormatter, format);
   HHVM_ME(MessageFormatter, getErrorCode);
@@ -509,8 +509,6 @@ void IntlExtension::initMessageFormatter() {
   HHVM_ME(MessageFormatter, setPattern);
 
   Native::registerNativeDataInfo<MessageFormatter>(s_MessageFormatter.get());
-
-  loadSystemlib("icu_msg_fmt");
 }
 
 //////////////////////////////////////////////////////////////////////////////

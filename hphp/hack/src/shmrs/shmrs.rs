@@ -9,6 +9,8 @@
 pub mod chashmap;
 pub mod error;
 pub mod filealloc;
+pub mod hash_builder;
 pub mod hashmap;
+pub mod segment;
 pub mod shardalloc;
 pub mod sync;

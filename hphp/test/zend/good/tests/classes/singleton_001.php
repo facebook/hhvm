@@ -3,7 +3,7 @@
 class Counter {
     private $counter = 0;
 
-    function increment_and_print() {
+    function increment_and_print() :mixed{
         echo ++$this->counter;
         echo "\n";
     }
@@ -13,7 +13,7 @@ class Counter {
 class SingletonCounter {
     private static $m_instance = NULL;
 
-    static function Instance() {
+    static function Instance() :mixed{
         if (self::$m_instance == NULL) {
             self::$m_instance = new Counter();
         }

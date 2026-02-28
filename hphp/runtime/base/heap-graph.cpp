@@ -14,32 +14,29 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/heap-graph.h"
+
 #include "hphp/runtime/base/heap-algorithms.h"
-#include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/heap-scan.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/base/tv-mutate.h"
-#include "hphp/runtime/base/tv-variant.h"
-#include "hphp/runtime/ext/weakref/weakref-data-handle.h"
-#include "hphp/util/alloc.h"
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/rds-symbol.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/vm/class.h"
 #include "hphp/util/ptr-map.h"
+#include "hphp/util/match.h"
 
 #include <vector>
-#include <folly/Range.h>
 
 namespace HPHP {
 
 template<class Fn> void FOLLY_DISABLE_ADDRESS_SANITIZER
 conservativeScan(const void* start, size_t len, Fn fn) {
-  const uintptr_t M{7}; // word size - 1
-  auto s = (const void**)((uintptr_t(start) + M) & ~M); // round up
-  auto e = (const void**)((uintptr_t(start) + len) & ~M); // round down
-  for (; s < e; s++) {
+  auto s = (char*)start;
+  auto const e = s + len - sizeof(uintptr_t);
+  for (; s <= e; ++s) {
     // Mask off the upper 16-bits to handle things like
     // DiscriminatedPtr which stores things up there.
-    fn(s, (const void*)(uintptr_t(*s) & (-1ULL >> 16)));
+    fn((const void**)s, (const void*)(*(uintptr_t*)s & (-1ULL >> 16)));
   }
 }
 
@@ -61,16 +58,18 @@ size_t addPtr(HeapGraph& g, int from, int to, HeapGraph::PtrKind kind,
 /*
  * Add a single root node, using the type scanner to find edges out of it.
  */
+template<typename NodeArg>
 void addRootNode(HeapGraph& g, const PtrMap<const HeapObject*>& blocks,
                  type_scan::Scanner& scanner,
-                 const void* h, size_t size, type_scan::Index ty) {
+                 const void* h, size_t size, type_scan::Index ty,
+                 NodeArg&& nodeArg) {
   auto from = g.nodes.size();
-  g.nodes.push_back(HeapGraph::Node{nullptr, size, true, ty, -1, -1});
+  g.nodes.push_back(std::forward<NodeArg>(nodeArg));
   g.root_nodes.push_back(from);
   scanner.scanByIndex(ty, h, size);
   scanner.finish(
-    [&](const void* p, std::size_t size) {
-      conservativeScan(p, size, [&](const void** addr, const void* ptr) {
+    [&](const void* p, std::size_t sz) {
+      conservativeScan(p, sz, [&](const void** addr, const void* ptr) {
         if (auto r = blocks.region(ptr)) {
           auto to = blocks.index(r);
           auto offset = uintptr_t(addr) - uintptr_t(h);
@@ -151,7 +150,7 @@ HeapGraph makeHeapGraph(bool include_free) {
         ty = type_scan::kIndexUnknown;
         break;
     }
-    g.nodes.push_back(HeapGraph::Node{h, size, false, ty, -1, -1});
+    g.nodes.push_back(HeapGraph::Node{h, size, ty});
   });
 
   // find root nodes
@@ -161,12 +160,69 @@ HeapGraph makeHeapGraph(bool include_free) {
     // returning, since at least one will be the C++ stack, and some
     // nodes will only exist for the duration of the call to this lambda,
     // for example EphemeralPtrWrapper<T>.
-    addRootNode(g, blocks, scanner, h, size, tyindex);
+
+    // Check if this is an RDS location and extract metadata if so
+    auto ptr = reinterpret_cast<uintptr_t>(h);
+    auto base = reinterpret_cast<uintptr_t>(rds::tl_base);
+    if (rds::tl_base && ptr >= base) {
+      auto handle = static_cast<rds::Handle>(ptr - base);
+      if (rds::isValidHandle(handle) &&
+          (rds::isNormalHandle(handle) || rds::isLocalHandle(handle))) {
+        auto sym = rds::reverseLinkExact(handle);
+        if (sym.has_value()) {
+          bool handled = false;
+          match(
+            sym.value(),
+            [&](const rds::StaticMemoCache& memo_cache) {
+              addRootNode(g, blocks, scanner, h, size, tyindex,
+                HeapGraph::Node{HeapGraph::Node::MemoTag{},
+                                memo_cache.funcId, size, tyindex});
+              handled = true;
+            },
+            [&](const rds::LSBMemoCache& lsb_cache) {
+              addRootNode(g, blocks, scanner, h, size, tyindex,
+                HeapGraph::Node{HeapGraph::Node::MemoTag{},
+                                lsb_cache.funcId, size, tyindex});
+              handled = true;
+            },
+            [&](const rds::StaticMemoValue& memo_value) {
+              addRootNode(g, blocks, scanner, h, size, tyindex,
+                HeapGraph::Node{HeapGraph::Node::MemoTag{},
+                                memo_value.funcId, size, tyindex});
+              handled = true;
+            },
+            [&](const rds::LSBMemoValue& lsb_value) {
+              addRootNode(g, blocks, scanner, h, size, tyindex,
+                HeapGraph::Node{HeapGraph::Node::MemoTag{},
+                                lsb_value.funcId, size, tyindex});
+              handled = true;
+            },
+            [&](const rds::SPropCache& sprop) {
+              // Construct "ClassName::PropertyName" as a static string
+              auto name = makeStaticString(
+                sprop.cls->name()->toCppString() + "::" +
+                sprop.cls->staticProperties()[sprop.slot].name->toCppString());
+              addRootNode(g, blocks, scanner, h, size, tyindex,
+                HeapGraph::Node{HeapGraph::Node::SPropTag{}, name, size, tyindex});
+              handled = true;
+            },
+            [&](auto const&) {
+              // other RDS symbol types
+            }
+          );
+          if (handled) return;
+        }
+      }
+    }
+
+    // Generic root node (no special metadata)
+    addRootNode(g, blocks, scanner, h, size, tyindex,
+      HeapGraph::Node{HeapGraph::Node::OtherRootTag{}, size, tyindex});
   });
 
   // find heap->heap pointers
   for (size_t i = 0, n = g.nodes.size(); i < n; i++) {
-    if (g.nodes[i].is_root) continue;
+    if (g.nodes[i].is_root()) continue;
     auto h = g.nodes[i].h;
     scanHeapObject(h, scanner);
     auto from = blocks.index(h);

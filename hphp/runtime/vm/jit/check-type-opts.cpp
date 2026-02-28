@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
-#include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
@@ -29,7 +28,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(hhir_checkTypes);
+TRACE_SET_MOD(hhir_checkTypes)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -299,7 +298,7 @@ void rewriteUses(IRUnit& unit,
       // perform the rewrites here because the targets are not
       // available. We need to create a DefLabel. If we already have,
       // stop (nothing more to do).
-      if (phis.count(block)) continue;
+      if (phis.contains(block)) continue;
 
       // All of SSATmps in the rewrite map will be inputs to the
       // DefLabel. We want these to be in consistent order, so sort
@@ -363,7 +362,7 @@ void rewriteUses(IRUnit& unit,
     // visited.
     block->forEachSucc(
       [&] (Block* succ) {
-        if (visited.count(succ)) return;
+        if (visited.contains(succ)) return;
         visited.emplace(succ);
         worklist.push(succ);
       }

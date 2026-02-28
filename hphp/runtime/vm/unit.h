@@ -24,14 +24,17 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/containers.h"
+#include "hphp/runtime/vm/decl-dep.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/source-location.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-alias.h"
 
+#include "hphp/util/check-size.h"
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/functional.h"
@@ -69,17 +72,6 @@ enum class UnitOrigin {
   File = 0,
   Eval = 1
 };
-
-enum MergeTypes : uint8_t {
-  None        = 0,
-  Function    = 1 << 0,
-  NotFunction = 1 << 1,
-  Everything  = 3,
-};
-
-constexpr MergeTypes operator&(MergeTypes a, MergeTypes b) { return MergeTypes((int)a & (int)b); }
-constexpr MergeTypes operator^(MergeTypes a, MergeTypes b) { return MergeTypes((int)a ^ (int)b); }
-constexpr MergeTypes operator~(MergeTypes a) { return MergeTypes((int)MergeTypes::Everything - (int)a); }
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -154,9 +146,10 @@ private:
    * invoke its pseudomain only if necessary.
    */
   enum MergeState : uint8_t {
-    Unmerged      = 0,
-    InitialMerged = 1,
-    Merged        = 2,
+    Unmerged                 = 0,
+    InitialMerged            = 1,
+    NeedsNonPersistentMerged = 2,
+    Merged                   = 3,
   };
 
 public:
@@ -181,6 +174,8 @@ public:
   void* operator new(size_t sz);
   void operator delete(void* p, size_t sz);
 
+  void destroy();
+
   /////////////////////////////////////////////////////////////////////////////
   // Basic accessors.                                                   [const]
 
@@ -203,6 +198,13 @@ public:
    * Was this unit created in response to an internal compiler error?
    */
   bool isICE() const;
+
+  /*
+   * Was this unit soft deployed in the current package?
+   * Only available in repo mode
+   * Invariant: Cfg::Repo::Authoritative
+   */
+  bool isSoftDeployedRepoOnly() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // File paths.
@@ -244,13 +246,13 @@ public:
   /*
    * Bind the given filepath as the Unit's pre-request filepath. The
    * Unit should not have an already bound filepath and
-   * EvalReuseUnitsByHash should be set.
+   * Cfg::Eval::ReuseUnitsByHash should be set.
    */
   void bindPerRequestFilepath(const StringData*);
 
   /*
    * Mark this Unit as having per-request filepaths. This allocates a
-   * new rds handle to store the path. EvalReuseUnitsByHash must be
+   * new rds handle to store the path. Cfg::Eval::ReuseUnitsByHash must be
    * set.
    */
   void makeFilepathPerRequest();
@@ -278,6 +280,14 @@ public:
    */
   bool hasCacheRef() const;
 
+  /*
+   * When Eval.EnableDecl is set we may have multiple versions of the same unit
+   * cached under a particular SHA-1 because of differing versions of
+   * dependencies in different repos.
+   */
+  Unit* nextCachedByHash() const;
+  void setNextCachedByHash(Unit* u);
+
   /////////////////////////////////////////////////////////////////////////////
   // Idle unit reaping
 
@@ -286,7 +296,7 @@ public:
   /*
    * Mark that this Unit has been touched by the given request.
    */
-  void setLastTouchRequest(int64_t request);
+  void setLastTouchRequest(Treadmill::Clock::time_point requestStartTime);
 
   /*
    * Mark that this Unit has been touched at the given timestamp.
@@ -297,7 +307,8 @@ public:
    * Get the newest request which has touched this Unit, and the
    * latest timestamp of the touch.
    */
-  std::pair<int64_t, TouchClock::time_point> getLastTouch() const;
+  std::pair<Treadmill::Clock::time_point, TouchClock::time_point>
+    getLastTouch() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Code locations.                                                    [const]
@@ -312,7 +323,7 @@ public:
   /*
    * Enable or disable the coverage map for this unit.
    *
-   * Pre: !RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage
+   * Pre: !Cfg::Repo::Authoritative && Cfg::Eval::EnablePerFileCoverage
    */
   void enableCoverage();
   void disableCoverage();
@@ -339,12 +350,12 @@ public:
    * Return an RDS handle that when initialized indicates that coverage is
    * enabled for this unit.
    *
-   * Pre: !RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage
+   * Pre: !Cfg::Repo::Authoritative && Cfg::Eval::EnablePerFileCoverage
    */
   rds::Handle coverageDataHandle() const;
 
   /////////////////////////////////////////////////////////////////////////////
-  // Litstrs and NamedEntitys.                                          [const]
+  // Litstrs and NamedTypes/Funcs.                                      [const]
 
   /*
    * Size of the Unit's litstr table.
@@ -356,8 +367,9 @@ public:
    */
   StringData* lookupLitstrId(Id id) const;
 
-  const NamedEntity* lookupNamedEntityId(Id id) const;
-  NamedEntityPair lookupNamedEntityPairId(Id id) const;
+  const NamedType* lookupNamedTypeId(Id id) const;
+  NamedTypePair lookupNamedTypePairId(Id id) const;
+  NamedFuncPair lookupNamedFuncPairId(Id id) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Arrays.                                                            [const]
@@ -383,7 +395,8 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // PreClasses.
 
-  PreClass* lookupPreClassId(Id id) const;
+  PreClass* lookupPreClass(const StringData*) const;
+
   folly::Range<PreClassPtr*> preclasses();
   folly::Range<const PreClassPtr*> preclasses() const;
 
@@ -442,6 +455,8 @@ public:
    * Merge the Unit if it is not already merged.
    */
   void merge();
+  bool preMerge();
+  void finalMerge();
 
   /*
    * Is this Unit empty---i.e., does it define nothing and have no
@@ -491,6 +506,20 @@ public:
   void logTearing(int64_t nsecs);
 
   /*
+   * Log information about decls observed during compilation and any potential
+   * tearing that may be occurring.
+   *
+   * For a given unit `U' we say that:
+   *   - rdep tearing has occurred if we previously loaded decls from different
+   *     version of U in the same request. We have `torn' a reverse-dependency
+   *     of U.
+   *   - dep tearing has occurred if for a dependency `D' of U, we had
+   *     previously loaded bytecode from a different version of `D' in the same
+   *     request.
+   */
+  void logDeclInfo() const;
+
+  /*
    * Get parse/runtime failure information if this unit is created as
    * a result of one.
    */
@@ -513,12 +542,25 @@ public:
   // Total number of currently allocated Units
   static size_t liveUnitCount() { return s_liveUnits; }
 
+  static constexpr ptrdiff_t moduleNameOff() {
+    return offsetof(Unit, m_moduleName);
+  }
+
+  static constexpr ptrdiff_t isSoftDeployedRepoOnlyOff() {
+    return offsetof(Unit, m_softDeployedRepoOnly);
+  }
+
+  const std::vector<DeclDep>& deps() const { return m_deps; }
+
+  const Extension* extension() const { return m_extension; }
+
   /////////////////////////////////////////////////////////////////////////////
   // Internal methods.
 
 private:
   void initialMerge();
-  void mergeImpl(MergeTypes mergeTypes);
+  template<bool mergeOnlyNonPersistentFuncs, bool skipClassesAndAliases = false>
+  void mergeImpl();
   UnitExtended* getExtended();
   const UnitExtended* getExtended() const;
 
@@ -528,13 +570,18 @@ private:
   // These are organized in reverse order of frequency of use.  Do not re-order
   // without checking perf!
 private:
-  LowStringPtr m_origFilepath{nullptr};
+  PackedStringPtr m_origFilepath{nullptr};
 
   /*
    * m_mergeState is read without a lock, but only written to under
    * unitInitLock (see unit.cpp).
    */
   std::atomic<uint8_t> m_mergeState{MergeState::Unmerged};
+
+  /* was this unit soft deployed (only set in repo mode)
+   * can't be a bitfield because we need to get its offset in irlower-call
+   */
+  bool m_softDeployedRepoOnly{false};
   bool m_interpretOnly : 1;
   bool m_extended : 1;
   bool m_ICE : 1; // was this unit the result of an internal compiler error
@@ -549,11 +596,16 @@ private:
   mutable VMCompactVector<UnsafeLockFreePtrWrapper<ArrayOrToken>> m_arrays;
   mutable VMCompactVector<UnsafeLockFreePtrWrapper<RATArrayOrToken>> m_rats;
 
-  Id m_entryPointId{kInvalidId};
-
   /*
    * The remaining fields are cold, and arbitrarily ordered.
    */
+
+  hphp_fast_map<
+    const StringData*,
+    PreClassPtr,
+    string_data_hash,
+    string_data_tsame
+  > m_nameToPreClass; // Lookup PreClass by name
 
   int64_t m_sn{-1};             // Note: could be 32-bit
   SHA1 m_sha1;
@@ -561,13 +613,23 @@ private:
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;
   std::unique_ptr<FatalInfo> m_fatalInfo{nullptr};
-  const StringData* m_moduleName{nullptr};
+  PackedStringPtr m_moduleName{makeStaticString(Module::DEFAULT)};
+  std::vector<DeclDep> m_deps;
 
   rds::Link<req::dynamic_bitset, rds::Mode::Normal> m_coverage;
 
+  Id m_entryPointId{kInvalidId};
+
   static std::atomic<size_t> s_createdUnits;
   static std::atomic<size_t> s_liveUnits;
+
+  /*
+   * Extension this unit is part of. Can be used to get the native func impl
+   */
+  const Extension* m_extension{nullptr};
 };
+
+static_assert(CheckSize<Unit, use_lowptr ? 224 : 232>(), "");
 
 struct UnitExtended : Unit {
   friend struct Unit;
@@ -582,12 +644,16 @@ struct UnitExtended : Unit {
   std::atomic<int64_t> m_cacheRefCount{0};
 
   // Used by Eval.ReuseUnitsByHash:
-  rds::Link<LowStringPtr, rds::Mode::Normal> m_perRequestFilepath;
+  rds::Link<PackedStringPtr, rds::Mode::Normal> m_perRequestFilepath;
 
   // Used by Eval.IdleUnitTimeoutSecs:
-  std::atomic<int64_t> m_lastTouchRequest{0};
-  std::atomic<TouchClock::time_point> m_lastTouchTime{TouchClock::time_point{}};
+  std::atomic<Treadmill::Clock::time_point> m_lastTouchRequestStartTime{};
+  std::atomic<TouchClock::time_point> m_lastTouchTime{};
+
+  std::atomic<Unit*> m_nextCachedByHash{nullptr};
 };
+
+static_assert(CheckSize<UnitExtended, use_lowptr ? 280 : 288>(), "");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

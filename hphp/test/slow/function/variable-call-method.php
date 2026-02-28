@@ -1,19 +1,19 @@
 <?hh
 
-function g() {
+function g() :mixed{
   $f = 'IntlChar::ord';
   var_dump($f(' '));
 
-  $f = varray['IntlChar', 'ord'];
+  $f = vec['IntlChar', 'ord'];
   var_dump($f('='));
 
   $o = new UConverter('utf-8', 'latin1');
-  $f = varray[$o, 'convert'];
+  $f = vec[$o, 'convert'];
   var_dump($f('foo'));
 }
 
 
 <<__EntryPoint>>
-function main_variable_call_method() {
+function main_variable_call_method() :mixed{
 g();
 }

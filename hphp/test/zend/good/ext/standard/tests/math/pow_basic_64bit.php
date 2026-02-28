@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$bases = varray[23,
+$bases = vec[23,
                 -23,
                 23.1,
                 -23.1,
@@ -13,7 +13,7 @@ $bases = varray[23,
                 PHP_INT_MAX,
                 -PHP_INT_MAX - 1];
 
-$exponents = varray[0,
+$exponents = vec[0,
                1,
                -1,
                2,

@@ -12,6 +12,6 @@
 class C {}
 
 function f(): void {
-  $a = darray['foo' => 'C'];
+  $a = dict['foo' => 'C'];
   new $a['foo']();
 }

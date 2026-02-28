@@ -1,4 +1,4 @@
 vec(2) {
-  string(5) "upper"
   string(4) "main"
+  string(5) "UpPer"
 }

@@ -17,171 +17,40 @@
 #include "hphp/runtime/base/request-injection-data.h"
 
 #include <atomic>
-#include <cinttypes>
-#include <string>
 #include <limits>
+#include <string>
+#include <thread>
 
 #include <signal.h>
 
-#include <boost/filesystem.hpp>
 #include <folly/Random.h>
 #include <folly/portability/SysTime.h>
 
-#include "hphp/util/logger.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
+#include "hphp/util/logger.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
 void RequestTimer::onTimeout() {
-  m_reqInjectionData->onTimeout(this);
-}
-
-#if defined(__APPLE__)
-
-RequestTimer::RequestTimer(RequestInjectionData* data)
-    : m_reqInjectionData(data)
-{
-  // Unlike the canonical Linux implementation, this does not distinguish
-  // between whether we wanted real seconds or CPU seconds -- you always get
-  // real seconds. There isn't a nice way to get CPU seconds on OS X that I've
-  // found, outside of setitimer, which has its own configurability issues. So
-  // we just always give real seconds, which is "close enough".
-
-  m_timerGroup = dispatch_group_create();
-}
-
-RequestTimer::~RequestTimer() {
-  cancelTimerSource();
-  dispatch_release(m_timerGroup);
-}
-
-void RequestTimer::cancelTimerSource() {
-  if (m_timerSource) {
-    dispatch_source_cancel(m_timerSource);
-    dispatch_group_wait(m_timerGroup, DISPATCH_TIME_FOREVER);
-
-    // At this point it is safe to free memory, the source or even ourselves (if
-    // this is part of the destructor). See the way we set up the timer group
-    // and cancellation handler in setTimeout() below.
-
-    dispatch_release(m_timerSource);
-    m_timerSource = nullptr;
+  if (m_timerActive.exchange(false, std::memory_order_acq_rel)) {
+    m_reqInjectionData->onTimeout(this);
   }
 }
-
-void RequestTimer::setTimeout(int seconds) {
-  m_timeoutSeconds = seconds > 0 ? seconds : 0;
-
-  cancelTimerSource();
-
-  if (!m_timeoutSeconds) {
-    return;
-  }
-
-  dispatch_queue_t q =
-    dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-  m_timerSource = dispatch_source_create(
-    DISPATCH_SOURCE_TYPE_TIMER, 0, DISPATCH_TIMER_STRICT, q);
-
-  dispatch_time_t t =
-    dispatch_time(DISPATCH_TIME_NOW, m_timeoutSeconds * NSEC_PER_SEC);
-  dispatch_source_set_timer(m_timerSource, t, DISPATCH_TIME_FOREVER, 0);
-
-  // Use the timer group as a semaphore. When the source is cancelled,
-  // libdispatch will make sure all pending event handlers have finished before
-  // invoking the cancel handler. This means that if we cancel the source and
-  // then wait on the timer group, when we are done waiting, we know the source
-  // is completely done and it's safe to free memory (e.g., in the destructor).
-  // See cancelTimerSource() above.
-  dispatch_group_enter(m_timerGroup);
-  dispatch_source_set_event_handler(m_timerSource, ^{
-    onTimeout();
-
-    // Cancelling ourselves isn't needed for correctness, but we can go ahead
-    // and do it now instead of waiting on it later, so why not. (Also,
-    // getRemainingTime does use this opportunistically, but it's best effort.)
-    dispatch_source_cancel(m_timerSource);
-  });
-  dispatch_source_set_cancel_handler(m_timerSource, ^{
-    dispatch_group_leave(m_timerGroup);
-  });
-
-  dispatch_resume(m_timerSource);
-}
-
-int RequestTimer::getRemainingTime() const {
-  // Unfortunately, not a good way to detect this. The best we can say is if the
-  // timer exists and fired and cancelled itself, we can clip to 0, otherwise
-  // just return the full timeout seconds. In principle, we could use the
-  // interval configuration of the timer to count down one second at a time,
-  // but that doesn't seem worth it.
-  if (m_timerSource && dispatch_source_testcancel(m_timerSource)) {
-    return 0;
-  }
-
-  return m_timeoutSeconds;
-}
-
-#elif defined(_MSC_VER)
-
-RequestTimer::RequestTimer(RequestInjectionData* data)
-    : m_reqInjectionData(data)
-{}
-
-RequestTimer::~RequestTimer() {
-  if (m_tce) {
-    m_tce->set();
-    m_tce = nullptr;
-  }
-}
-
-void RequestTimer::setTimeout(int seconds) {
-  m_timeoutSeconds = seconds > 0 ? seconds : 0;
-
-  if (m_tce) {
-    m_tce->set();
-    m_tce = nullptr;
-  }
-
-  if (m_timeoutSeconds) {
-    auto call = new concurrency::call<int>([this](int) {
-      this->onTimeout();
-      m_tce->set();
-      m_tce = nullptr;
-    });
-
-    auto timer = new concurrency::timer<int>(m_timeoutSeconds * 1000,
-                                             0, call, false);
-
-    concurrency::task<void> event_set(*m_tce);
-    event_set.then([call, timer]() {
-      timer->pause();
-      delete call;
-      delete timer;
-    });
-
-    timer->start();
-  }
-}
-
-int RequestTimer::getRemainingTime() const {
-  return m_timeoutSeconds;
-}
-
-#else
 
 RequestTimer::RequestTimer(RequestInjectionData* data, clockid_t clockType)
     : m_reqInjectionData(data)
@@ -213,7 +82,7 @@ void RequestTimer::setTimeout(int seconds) {
     sev.sigev_signo = SIGVTALRM;
     sev.sigev_value.sival_ptr = this;
     if (timer_create(m_clockType, &sev, &m_timerId)) {
-      raise_error("Failed to set timeout: %s", folly::errnoStr(errno).c_str());
+      raise_error("Failed to create timer: %s", folly::errnoStr(errno).c_str());
     }
     m_hasTimer = true;
   }
@@ -228,23 +97,32 @@ void RequestTimer::setTimeout(int seconds) {
    */
   itimerspec ts = {};
   itimerspec old;
-  timer_settime(m_timerId, 0, &ts, &old);
+  if (timer_settime(m_timerId, 0, &ts, &old)) {
+    raise_error("Failed to set timeout: %s", folly::errnoStr(errno).c_str());
+  }
   if (!old.it_value.tv_sec && !old.it_value.tv_nsec) {
     // the timer has gone off...
     if (m_timerActive.load(std::memory_order_acquire)) {
-      // but m_timerActive is still set, so we haven't processed
-      // the signal yet.
-      // spin until its done.
-      while (m_timerActive.load(std::memory_order_relaxed)) {
+      // but m_timerActive is still set, so we haven't processed the signal yet.
+      std::this_thread::yield();
+      if (m_timerActive.load(std::memory_order_acquire)) {
+        // We are unlikely to reach here, but when we do, either the system is
+        // too overloaded to deliver the signal on time, or the signal has been
+        // lost (e.g., maybe when multiple signals arrive simultaneously). Wait
+        // a short while and proceed. Avoid spinning indefinitely.
+        /* sleep override */ usleep(10);
       }
     }
   }
   if (m_timeoutSeconds) {
-    m_timerActive.store(true, std::memory_order_relaxed);
+    m_timerActive.store(true, std::memory_order_release);
     ts.it_value.tv_sec = m_timeoutSeconds;
-    timer_settime(m_timerId, 0, &ts, nullptr);
+    if (timer_settime(m_timerId, 0, &ts, nullptr)) {
+      m_timerActive.store(false, std::memory_order_release);
+      raise_error("Failed to set timeout: %s", folly::errnoStr(errno).c_str());
+    }
   } else {
-    m_timerActive.store(false, std::memory_order_relaxed);
+    m_timerActive.store(false, std::memory_order_release);
   }
 }
 
@@ -258,7 +136,6 @@ int RequestTimer::getRemainingTime() const {
   }
   return m_timeoutSeconds;
 }
-#endif
 
 //////////////////////////////////////////////////////////////////////
 
@@ -266,8 +143,8 @@ bool RequestInjectionData::setAllowedDirectories(const std::string& value) {
   // Backwards compat with ;
   // but moving forward should use PATH_SEPARATOR
   std::vector<std::string> boom;
-  if (value.find(";") != std::string::npos) {
-    folly::split(";", value, boom, true);
+  if (value.find(';') != std::string::npos) {
+    folly::split(';', value, boom, true);
     m_open_basedir_separator = ";";
   } else {
     m_open_basedir_separator =
@@ -316,52 +193,40 @@ void RequestInjectionData::threadInit() {
       },
       [this] { return getCPUTimeout(); }
     );
-    auto setAndGet = RuntimeOption::TimeoutsUseWallTime
+    auto setAndGet = Cfg::Eval::TimeoutsUseWallTime
       ? setAndGetWall : setAndGetCPU;
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+    IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                      "max_execution_time", setAndGet);
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+    IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                      "maximum_execution_time", setAndGet);
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+    IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                      "hhvm.max_wall_time", setAndGetWall);
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+    IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                      "hhvm.max_cpu_time", setAndGetCPU);
   }
 
   // Resource Limits
-  std::string mem_def = std::to_string(RuntimeOption::RequestMemoryMaxBytes);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "memory_limit",
+  std::string mem_def = std::to_string(Cfg::Server::RequestMemoryMaxBytes);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request, "memory_limit",
                    mem_def.c_str(),
                    IniSetting::SetAndGet<std::string>(
                      [this](const std::string& value) {
                        setMemoryLimit(value);
                        return true;
                      },
-                     nullptr
-                   ), &m_maxMemory);
+                     nullptr,
+                     &m_maxMemory));
 
   // Data Handling
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "arg_separator.output", "&",
-                   &m_argSeparatorOutput);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "arg_separator.input", "&",
-                   &m_argSeparatorInput);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "variables_order", "EGPCS",
-                   &m_variablesOrder);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "request_order", "",
-                   &m_requestOrder);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "default_charset", RuntimeOption::DefaultCharsetName.c_str(),
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
+                   "default_charset", Cfg::Server::DefaultCharsetName.c_str(),
                    &m_defaultCharset);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "default_mimetype", "text/html",
                    &m_defaultMimeType);
 
   // Paths and Directories
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "include_path", getDefaultIncludePath().c_str(),
                    IniSetting::SetAndGet<std::string>(
                      [this](const std::string& value) {
@@ -405,7 +270,7 @@ void RequestInjectionData::threadInit() {
                    ));
 
   // Paths and Directories
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "open_basedir",
                    IniSetting::SetAndGet<std::string>(
                      [this](const std::string& value) {
@@ -427,26 +292,26 @@ void RequestInjectionData::threadInit() {
                    ));
 
   // Errors and Logging Configuration Options
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "error_reporting",
                    std::to_string(RuntimeOption::RuntimeErrorReportingLevel)
                     .c_str(),
                    &m_errorReportingLevel);
   IniSetting::Bind(
     IniSetting::CORE,
-    IniSetting::PHP_INI_ALL,
+    IniSetting::Mode::Request,
     "html_errors",
     IniSetting::SetAndGet<bool>(
       [&] (const bool& on) {
         m_htmlErrors = on;
         return true;
       },
-      [&] () { return m_htmlErrors; }
-    ),
-    &m_htmlErrors
+      [&] () { return m_htmlErrors; },
+      &m_htmlErrors
+    )
   );
 
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "log_errors",
                    IniSetting::SetAndGet<bool>(
                      [this](const bool& on) {
@@ -461,10 +326,10 @@ void RequestInjectionData::threadInit() {
                        }
                        return true;
                      },
-                     nullptr
-                   ),
-                   &m_logErrors);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                     nullptr,
+                     &m_logErrors
+                   ));
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "error_log",
                    IniSetting::SetAndGet<std::string>(
                      [this](const std::string& value) {
@@ -473,13 +338,14 @@ void RequestInjectionData::threadInit() {
                        }
                        return true;
                      },
-                     nullptr
-                   ), &m_errorLog);
+                     nullptr,
+                     &m_errorLog
+                   ));
 
   // Filesystem and Streams Configuration Options
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "user_agent", "", &m_userAgent);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "default_socket_timeout",
                    std::to_string(RuntimeOption::SocketDefaultTimeout).c_str(),
                    &m_socketDefaultTimeout);
@@ -489,53 +355,62 @@ void RequestInjectionData::threadInit() {
   // represents the output buffer size. Also need to add a
   // zlib.output_handler ini setting as well.
   // http://php.net/zlib.configuration.php
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
-                   "zlib.output_compression", &m_gzipCompression);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
+                   "zlib.output_compression", &m_gzipCompressionEnabled);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "zlib.output_compression_level", &m_gzipCompressionLevel);
 
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "brotli.chunked_compression", &m_brotliChunkedEnabled);
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "brotli.compression", &m_brotliEnabled);
   IniSetting::Bind(
       IniSetting::CORE,
-      IniSetting::PHP_INI_ALL,
+      IniSetting::Mode::Request,
       "brotli.compression_quality",
-      std::to_string(RuntimeOption::BrotliCompressionQuality).c_str(),
+      std::to_string(Cfg::Server::BrotliCompressionQuality).c_str(),
       &m_brotliQuality);
   IniSetting::Bind(
       IniSetting::CORE,
-      IniSetting::PHP_INI_ALL,
+      IniSetting::Mode::Request,
       "brotli.compression_lgwin",
-      std::to_string(RuntimeOption::BrotliCompressionLgWindowSize).c_str(),
+      std::to_string(Cfg::Server::BrotliCompressionLgWindowSize).c_str(),
       &m_brotliLgWindowSize);
 
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+  IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                    "zstd.compression", &m_zstdEnabled);
   IniSetting::Bind(
       IniSetting::CORE,
-      IniSetting::PHP_INI_ALL,
+      IniSetting::Mode::Request,
       "zstd.compression_level",
-      std::to_string(RuntimeOption::ZstdCompressionLevel).c_str(),
+      std::to_string(Cfg::Server::ZstdCompressionLevel).c_str(),
       &m_zstdLevel);
   IniSetting::Bind(
       IniSetting::CORE,
-      IniSetting::PHP_INI_ALL,
+      IniSetting::Mode::Request,
       "zstd.checksum_rate",
-      std::to_string(RuntimeOption::ZstdChecksumRate).c_str(),
+      std::to_string(Cfg::Server::ZstdChecksumRate).c_str(),
       &m_zstdChecksumRate);
   IniSetting::Bind(
       IniSetting::CORE,
-      IniSetting::PHP_INI_ALL,
+      IniSetting::Mode::Request,
       "zstd.window_log",
-      std::to_string(RuntimeOption::ZstdWindowLog).c_str(),
+      std::to_string(Cfg::Server::ZstdWindowLog).c_str(),
       &m_zstdWindowLog);
+  IniSetting::Bind(
+      IniSetting::CORE,
+      IniSetting::Mode::Request,
+      "zstd.target_block_size",
+      std::to_string(Cfg::Server::ZstdTargetBlockSize).c_str(),
+      &m_zstdTargetBlockSize);
+
+  // TODO(20427335): Get rid of this illogical onSessionInit() call.
+  onSessionInit();
 }
 
 std::string RequestInjectionData::getDefaultIncludePath() {
   std::string result;
-  folly::join(":", RuntimeOption::IncludeSearchPaths, result);
+  folly::join(":", Cfg::Server::IncludeSearchPaths, result);
   return result;
 }
 
@@ -549,16 +424,16 @@ void RequestInjectionData::onSessionInit() {
   }();
 
   rds::requestInit();
-  m_sflagsAndStkPtr = &rds::header()->stackLimitAndSurprise;
+  m_stackLimitAndSurprise = &rds::header()->stackLimitAndSurprise;
   m_allowedDirectoriesInfo.reset();
   m_open_basedir_separator = s_PATH_SEPARATOR.toCppString();
-  m_safeFileAccess = RuntimeOption::SafeFileAccess;
+  m_safeFileAccess = Cfg::Server::SafeFileAccess;
   if (open_basedir_val) {
     setAllowedDirectories(*open_basedir_val);
   }
-  m_logFunctionCalls = RuntimeOption::EvalFunctionCallSampleRate > 0 &&
+  m_logFunctionCalls = Cfg::Eval::FunctionCallSampleRate > 0 &&
     folly::Random::rand32(
-      RuntimeOption::EvalFunctionCallSampleRate
+      Cfg::Eval::FunctionCallSampleRate
     ) == 0;
   reset();
 }
@@ -566,19 +441,10 @@ void RequestInjectionData::onSessionInit() {
 void RequestInjectionData::onTimeout(RequestTimer* timer) {
   if (timer == &m_timer) {
     triggerTimeout(TimeoutTime);
-#if !defined(__APPLE__) && !defined(_MSC_VER)
-    m_timer.m_timerActive.store(false, std::memory_order_relaxed);
-#endif
   } else if (timer == &m_cpuTimer) {
     triggerTimeout(TimeoutCPUTime);
-#if !defined(__APPLE__) && !defined(_MSC_VER)
-    m_cpuTimer.m_timerActive.store(false, std::memory_order_relaxed);
-#endif
   } else if (timer == &m_userTimeoutTimer) {
     triggerTimeout(TimeoutSoft);
-#if !defined(__APPLE__) && !defined(_MSC_VER)
-    m_userTimeoutTimer.m_timerActive.store(false, std::memory_order_relaxed);
-#endif
   } else {
     always_assert(false && "Unknown timer fired");
   }
@@ -594,9 +460,7 @@ void RequestInjectionData::setCPUTimeout(int seconds) {
 
 void RequestInjectionData::setUserTimeout(int seconds) {
   if (seconds == 0) {
-    #if !defined(__APPLE__) && !defined(_MSC_VER)
-      m_userTimeoutTimer.m_timerActive.store(false, std::memory_order_relaxed);
-    #endif
+    m_userTimeoutTimer.m_timerActive.store(false, std::memory_order_release);
   }
 
   m_userTimeoutTimer.setTimeout(seconds);
@@ -618,7 +482,7 @@ void RequestInjectionData::invokeUserTimeoutCallback(c_WaitableWaitHandle* wh) {
 
 void RequestInjectionData::triggerTimeout(TimeoutKindFlag kind) {
   // Add the flags. The surprise handling queries those in a certain order
-  m_timeoutFlags.fetch_or(kind);
+  m_timeoutFlags.fetch_or(kind, std::memory_order_acq_rel);
   setFlag(TimedOutFlag);
 }
 
@@ -699,25 +563,22 @@ void RequestInjectionData::resetUserTimeoutTimer(int seconds /* = 0 */) {
 }
 
 void RequestInjectionData::reset() {
-  m_sflagsAndStkPtr->fetch_and(kSurpriseFlagStackMask);
-  m_timeoutFlags.fetch_and(TimeoutNone);
-  m_hostOutOfMemory.store(false, std::memory_order_relaxed);
+  m_stackLimitAndSurprise->clearFlags();
+  m_timeoutFlags.fetch_and(TimeoutNone, std::memory_order_acq_rel);
+  m_hostOutOfMemory.store(false, std::memory_order_release);
   m_OOMAbort = false;
-  m_coverage = RuntimeOption::RecordCodeCoverage;
+  m_coverage = Cfg::Eval::RecordCodeCoverage;
   m_jittingDisabled = false;
   m_debuggerAttached = false;
-  m_hasDebuggerAttachedAtInit = false;
+  m_vsdebugDisablesJit = false;
   m_debuggerIntr = false;
   m_debuggerStepIn = false;
   m_debuggerStepOut = StepOutState::None;
   m_debuggerNext = false;
+  m_wasInterruptedByDebugger = false;
   m_suppressClassConversionWarnings = false;
 
-  m_breakPointFilter.clear();
-  m_flowFilter.clear();
-  m_lineBreakPointFilter.clear();
-  m_callBreakPointFilter.clear();
-  m_retBreakPointFilter.clear();
+  clearPCFilters();
   while (!m_activeLineBreaks.empty()) {
     m_activeLineBreaks.pop();
   }
@@ -726,21 +587,24 @@ void RequestInjectionData::reset() {
 }
 
 void RequestInjectionData::updateJit() {
-  m_jit = RuntimeOption::EvalJit &&
-    !(RuntimeOption::EvalJitDisabledByHphpd && m_debuggerAttached) &&
+  m_jit = Cfg::Jit::Enabled &&
+    !(Cfg::Jit::DisabledByHphpd && m_debuggerAttached) &&
     !m_coverage &&
     (rl_typeProfileLocals.isNull() || !isForcedToInterpret()) &&
-    !(RuntimeOption::EvalJitDisabledByVSDebug && m_hasDebuggerAttachedAtInit);
+    !m_vsdebugDisablesJit &&
+    !m_jitFolding;
 }
 
 void RequestInjectionData::clearFlag(SurpriseFlag flag) {
-  assertx(flag >= 1ull << 48);
-  m_sflagsAndStkPtr->fetch_and(~flag);
+  if (m_stackLimitAndSurprise != nullptr) {
+    m_stackLimitAndSurprise->clearFlag(flag);
+  }
 }
 
 void RequestInjectionData::setFlag(SurpriseFlag flag) {
-  assertx(flag >= 1ull << 48);
-  m_sflagsAndStkPtr->fetch_or(flag);
+  if (m_stackLimitAndSurprise != nullptr) {
+    m_stackLimitAndSurprise->setFlag(flag);
+  }
 }
 
 void RequestInjectionData::sendSignal(int signum) {
@@ -751,13 +615,13 @@ void RequestInjectionData::sendSignal(int signum) {
   const unsigned index = signum / 64;
   const unsigned offset = signum % 64;
   const uint64_t mask = 1ull << offset;
-  m_signalMask[index].fetch_or(mask, std::memory_order_release);
+  m_signalMask[index].fetch_or(mask, std::memory_order_acq_rel);
   setFlag(SignaledFlag);
 }
 
 int RequestInjectionData::getAndClearNextPendingSignal() {
   // We cannot look at the surprise flag because it may have already been
-  // cleared in handle_request_surprise().
+  // cleared in handle_request_surprise() before dispatching signals.
   for (unsigned i = 0; i < m_signalMask.size(); ++i) {
     auto& chunk = m_signalMask[i];
     if (auto value = chunk.load(std::memory_order_acquire)) {
@@ -765,7 +629,7 @@ int RequestInjectionData::getAndClearNextPendingSignal() {
       assertx(index);
       --index;             // folly::findFirstSet() returns 1-64 instead of 0-63
       // Clear the bit.
-      chunk.fetch_and(~(1ull << index), std::memory_order_relaxed);
+      chunk.fetch_and(~(1ull << index), std::memory_order_acq_rel);
       return i * 64 + index;
     }
   }
@@ -786,6 +650,14 @@ void RequestInjectionData::setMemoryLimit(folly::StringPiece limit) {
   }
   tl_heap->setMemoryLimit(newInt);
   m_maxMemoryNumeric = newInt;
+}
+
+bool RequestInjectionData::wasInterruptedByDebugger() const {
+  return m_wasInterruptedByDebugger;
+}
+
+void RequestInjectionData::setWasInterruptedByDebugger() {
+  m_wasInterruptedByDebugger = true;
 }
 
 }

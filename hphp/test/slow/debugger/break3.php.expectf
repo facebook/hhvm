@@ -1,0 +1,105 @@
+Program %s/break3.php loaded. Type '[r]un' to go.
+break \TestNs\foo()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+@ \TestNs\foo('test_break1')
+Hit fatal : Call to undefined function TestNs\foo()
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+variable
+$__debugger$this = 1
+$__debugger_exn$output = 1
+$__debugger$return_val = 1
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+break TestNs\cls::pubObj()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+@ $break8=new \TestNs\cls()
+Hit fatal : Failure to resolve undefined class TestNs\cls
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+@ $break8->pubObj('test_break2')
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: break8' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+variable
+$__debugger$this = 1
+$__debugger_exn$output = 1
+$__debugger$return_val = 1
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+break \TestNs\break8->pubObj()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+break TestNs\cls::break8->pubObj()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+break \TestNs\cls::pubCls()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+@ \TestNs\cls::pubCls('test_break3')
+Hit fatal : Class undefined: TestNs\cls
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+variable
+$__debugger$this = 1
+$__debugger_exn$output = 1
+$__debugger$return_val = 1
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+break \TestNs\Nested\foo()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+@ \TestNs\Nested\foo('test_break4')
+Hit fatal : Call to undefined function TestNs\Nested\foo()
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+variable
+$__debugger$this = 1
+$__debugger_exn$output = 1
+$__debugger$return_val = 1
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+break TestNs\Nested\cls::pubObj()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+@ $break8=new \TestNs\Nested\cls()
+Hit fatal : Failure to resolve undefined class TestNs\Nested\cls
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+@ $break8->pubObj('test_break5')
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: break8' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+variable
+$__debugger$this = 1
+$__debugger_exn$output = 1
+$__debugger$return_val = 1
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+break \TestNs\Nested\cls::pubCls()
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+@ \TestNs\Nested\cls::pubCls('test_break6')
+Hit fatal : Class undefined: TestNs\Nested\cls
+    #0 at [:1]
+    #1 include(), called at [:1]
+    #2 include(), called at [:0]
+
+variable
+$__debugger$this = 1
+$__debugger_exn$output = 1
+$__debugger$return_val = 1
+break clear all
+Breakpoints are no longer supported on hphpd. Please use the VSCode Debugger instead: https://www.internalfb.com/wiki/VSCode_Debugger/
+run
+break3.php loaded
+Program %s/break3.php exited normally.
+quit

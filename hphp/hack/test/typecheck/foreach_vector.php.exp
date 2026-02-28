@@ -1,18 +1,16 @@
-File "foreach_vector.php", line 21, characters 10-13:
-Typing error (Typing[4110])
+ERROR: File "foreach_vector.php", line 21, characters 10-13:
+Typing error (Typing[4429])
   File "foreach_vector.php", line 21, characters 10-17:
   Expected `num` because this is used in an arithmetic operation
   File "foreach_vector.php", line 18, characters 19-21:
   But got `Foo`
-  File "collections/Vector.hhi", line 46, characters 71-72:
+  File "collections/Vector.hhi", line 48, characters 52-53:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 552, characters 70-71:
+  File "collections/interfaces.hhi", line 575, characters 25-26:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 295, characters 56-57:
+  File "collections/interfaces.hhi", line 305, characters 27-28:
     via this generic `Tv`
-  File "interfaces.hhi", line 110, characters 66-67:
+  File "interfaces.hhi", line 115, characters 23-24:
     via this generic `Tv`
-  File "interfaces.hhi", line 92, characters 53-54:
-    via this generic `Tv`
-  File "rx/interfaces.hhi", line 26, characters 52-53:
+  File "interfaces.hhi", line 92, characters 66-67:
     via this generic `Tv`

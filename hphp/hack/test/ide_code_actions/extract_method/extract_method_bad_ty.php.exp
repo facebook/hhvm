@@ -1,0 +1,46 @@
+Code actions available:
+------------------------------------------
+Extract into variable (CodeActionKind: "refactor")
+slog variable (CodeActionKind: "refactor")
+Extract into method (CodeActionKind: "refactor") SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"  private function ${0:method0}(nothing $z): nothing {\n    $x = $z->meth($z);\n    return $x;\n  }\n\n",
+          "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
+        },
+        {
+          "newText":"$x = $this->${0:method0}($z);",
+          "range":{"end":{"character":22,"line":6},"start":{"character":4,"line":6}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into method"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+class Klass {
+  private function ${0:method0}(nothing $z): nothing {
+    $x = $z->meth($z);
+    return $x;
+  }
+
+  public function foo(): void {
+    $z = nonexistent();
+    /*range-start*/
+    $x = $this->${0:method0}($z);/*range-end*/
+    $x + 2;
+  }
+}
+

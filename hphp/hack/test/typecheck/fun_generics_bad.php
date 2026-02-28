@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function cannot_be_nullable(int $val): int {
@@ -14,16 +14,15 @@ function special_array_map<T1, T2>(
 
 <<__EntryPoint>>
 function demo(): bool {
-  $array = darray[];
+  $array = dict[];
 
   for ($k = 0; $k < 10; $k++) {
     $array[$k] = null;
   }
 
-  $fun1 = fun('cannot_be_nullable');
+  $fun1 = cannot_be_nullable<>;
 
   $val1 = special_array_map($fun1, $array);
 
   return (bool)$val1;
 }
-

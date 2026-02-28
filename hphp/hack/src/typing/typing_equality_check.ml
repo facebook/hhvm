@@ -23,31 +23,41 @@ let trivial_result_str bop =
   | Ast_defs.Diff2 -> true
   | _ -> assert false
 
-let trivial_comparison_error env p bop ty1 ty2 trail1 trail2 =
-  let result = trivial_result_str bop
-  and tys1 = lazy (Typing_print.error env ty1)
-  and tys2 = lazy (Typing_print.error env ty2) in
-  Errors.add_typing_error
-    Typing_error.(
-      primary
-      @@ Primary.Trivial_strict_eq
-           {
-             pos = p;
-             result;
-             left =
-               Lazy.map tys1 ~f:(fun tys1 ->
-                   Reason.to_string ("This is " ^ tys1) (get_reason ty1));
-             right =
-               Lazy.map tys2 ~f:(fun tys2 ->
-                   Reason.to_string ("This is " ^ tys2) (get_reason ty2));
-             left_trail = trail1;
-             right_trail = trail2;
-           })
+let trivial_comparison_error
+    env pos bop ty1 ty2 left_trail right_trail ~as_warning =
+  let result = trivial_result_str bop in
+  let describe_type ty =
+    let ty_string = lazy (Typing_print.error env ty) in
+    Lazy.map ty_string ~f:(fun ty_string ->
+        Reason.to_string ("This is " ^ ty_string) (get_reason ty))
+  in
+  let left = describe_type ty1 in
+  let right = describe_type ty2 in
+  if as_warning then
+    Typing_warning_utils.add
+      env
+      ( pos,
+        Typing_warning.Sketchy_equality,
+        {
+          Typing_warning.Sketchy_equality.result;
+          left;
+          right;
+          left_trail;
+          right_trail;
+        } )
+  else
+    Typing_error_utils.add_typing_error
+      ~env
+      Typing_error.(
+        primary
+        @@ Primary.Trivial_strict_eq
+             { pos; result; left; right; left_trail; right_trail })
 
 let eq_incompatible_types env p ty1 ty2 =
   let tys1 = lazy (Typing_print.error env ty1)
   and tys2 = lazy (Typing_print.error env ty2) in
-  Errors.add_typing_error
+  Typing_error_utils.add_typing_error
+    ~env
     Typing_error.(
       primary
       @@ Primary.Eq_incompatible_types
@@ -61,25 +71,31 @@ let eq_incompatible_types env p ty1 ty2 =
                    Reason.to_string ("This is " ^ tys2) (get_reason ty2));
            })
 
-let is_arraykey t =
-  match get_node t with
-  | Tprim N.Tarraykey -> true
+let bad_compare_to_enum ty enum_bound =
+  match (get_node enum_bound, ty) with
+  | (Tprim N.Tint, Tprim (N.Tint | N.Tarraykey | N.Tnum)) -> false
+  | (Tprim N.Tint, Tprim _) -> true
+  | (Tprim N.Tint, Tclass ((_, id), _, _))
+    when String.equal Naming_special_names.Classes.cString id ->
+    true
+  | (Tclass ((_, id1), _, _), Tclass ((_, id2), _, _))
+    when String.equal Naming_special_names.Classes.cString id1
+         && String.equal Naming_special_names.Classes.cString id2 ->
+    false
+  | (Tclass ((_, id), _, _), Tprim N.Tarraykey)
+    when String.equal Naming_special_names.Classes.cString id ->
+    false
+  | (Tclass ((_, id), _, _), Tprim _)
+    when String.equal Naming_special_names.Classes.cString id ->
+    true
+  | (Tprim N.Tarraykey, Tprim (N.Tarraykey | N.Tint | N.Tnum)) -> false
+  | (Tprim N.Tarraykey, Tclass ((_, id), _, _))
+    when String.equal Naming_special_names.Classes.cString id ->
+    false
+  | (Tprim N.Tarraykey, Tprim _) -> true
   | _ -> false
 
-let bad_compare_prim_to_enum ty enum_bound =
-  match get_node enum_bound with
-  | Tprim enum_bound ->
-    (match (enum_bound, ty) with
-    | (N.Tint, (N.Tint | N.Tarraykey | N.Tnum)) -> false
-    | (N.Tint, _) -> true
-    | (N.Tstring, (N.Tstring | N.Tarraykey)) -> false
-    | (N.Tstring, _) -> true
-    | (N.Tarraykey, (N.Tarraykey | N.Tint | N.Tstring | N.Tnum)) -> false
-    | (N.Tarraykey, _) -> true
-    | _ -> false)
-  | _ -> false
-
-let rec assert_nontrivial p bop env ty1 ty2 =
+let rec assert_nontrivial p bop env ty1 ty2 ~as_warning =
   let ety_env = empty_expand_env in
   let (_, ty1) = Env.expand_type env ty1 in
   let (_, ety1, trail1) = TDef.force_expand_typedef ~ety_env env ty1 in
@@ -88,29 +104,41 @@ let rec assert_nontrivial p bop env ty1 ty2 =
   match (get_node ty1, get_node ty2) with
   (* Disallow `===` on distinct abstract enum types. *)
   (* Future: consider putting this in typed lint not type checking *)
-  | (Tnewtype (e1, _, bound1), Tnewtype (e2, _, bound2))
-    when Env.is_enum env e1
-         && Env.is_enum env e2
-         && is_arraykey bound1
-         && is_arraykey bound2 ->
-    if String.equal e1 e2 then
-      ()
-    else
-      eq_incompatible_types env p ety1 ety2
+  | (Tnewtype (e1, tyargs1, _), Tnewtype (e2, tyargs2, _))
+    when Env.is_enum env e1 && Env.is_enum env e2 ->
+    let (env, bound1) =
+      Typing_utils.get_newtype_super env (get_reason ty1) e1 tyargs1
+    in
+    let (env, bound2) =
+      Typing_utils.get_newtype_super env (get_reason ty2) e2 tyargs2
+    in
+    if is_arraykey bound1 && is_arraykey bound2 && not (String.equal e1 e2) then
+      if String.equal e1 e2 then
+        ()
+      else
+        eq_incompatible_types env p ety1 ety2
   | _ ->
     (match (deref ety1, deref ety2) with
+    | ((_, Tprim N.Tnum), (_, Tprim N.Tarraykey))
+    | ((_, Tprim N.Tarraykey), (_, Tprim N.Tnum)) ->
+      ()
     | ((_, Tprim N.Tnum), (_, Tprim (N.Tint | N.Tfloat)))
     | ((_, Tprim (N.Tint | N.Tfloat)), (_, Tprim N.Tnum)) ->
       ()
-    | ((_, Tprim N.Tarraykey), (_, Tprim (N.Tint | N.Tstring)))
-    | ((_, Tprim (N.Tint | N.Tstring)), (_, Tprim N.Tarraykey)) ->
+    | ((_, Tprim N.Tarraykey), (_, Tprim N.Tint))
+    | ((_, Tprim N.Tint), (_, Tprim N.Tarraykey)) ->
+      ()
+    | ((_, Tprim N.Tarraykey), (_, Tclass ((_, id), _, _)))
+    | ((_, Tclass ((_, id), _, _)), (_, Tprim N.Tarraykey))
+      when String.equal Naming_special_names.Classes.cString id ->
       ()
     | ((_, Tprim N.Tnull), _)
     | (_, (_, Tprim N.Tnull)) ->
       ()
     | ((r, Tprim N.Tnoreturn), _)
     | (_, (r, Tprim N.Tnoreturn)) ->
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
+        ~env
         Typing_error.(
           wellformedness
           @@ Primary.Wellformedness.Noreturn_usage
@@ -122,30 +150,42 @@ let rec assert_nontrivial p bop env ty1 ty2 =
     | ((r, Tprim N.Tvoid), _)
     | (_, (r, Tprim N.Tvoid)) ->
       (* Ideally we shouldn't hit this case, but well... *)
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
+        ~env
         Typing_error.(
           wellformedness
           @@ Primary.Wellformedness.Void_usage
                { pos = p; reason = lazy (Reason.to_string "This is `void`" r) })
-    | ((_, Tprim a), (_, Tnewtype (e, _, bound)))
-      when Env.is_enum env e && bad_compare_prim_to_enum a bound ->
-      trivial_comparison_error env p bop ty1 bound trail1 trail2
-    | ((_, Tnewtype (e, _, bound)), (_, Tprim a))
-      when Env.is_enum env e && bad_compare_prim_to_enum a bound ->
-      trivial_comparison_error env p bop bound ty2 trail1 trail2
+    | ((_, a), (_, Tnewtype (e, _, bound)))
+      when Env.is_enum env e && bad_compare_to_enum a bound ->
+      trivial_comparison_error env p bop ty1 bound trail1 trail2 ~as_warning
+    | ((_, Tnewtype (e, _, bound)), (_, a))
+      when Env.is_enum env e && bad_compare_to_enum a bound ->
+      trivial_comparison_error env p bop bound ty2 trail1 trail2 ~as_warning
     | ((_, Tprim a), (_, Tprim b)) when not (Aast.equal_tprim a b) ->
-      trivial_comparison_error env p bop ty1 ty2 trail1 trail2
-    | ((_, Toption ty1), (_, Tprim _)) -> assert_nontrivial p bop env ty1 ty2
-    | ((_, Tprim _), (_, Toption ty2)) -> assert_nontrivial p bop env ty1 ty2
+      trivial_comparison_error env p bop ty1 ty2 trail1 trail2 ~as_warning
+    | ((_, Toption ty1), (_, Tprim _)) ->
+      assert_nontrivial p bop env ty1 ty2 ~as_warning
+    | ((_, Tprim _), (_, Toption ty2)) ->
+      assert_nontrivial p bop env ty1 ty2 ~as_warning
+    | ((_, Toption ty1), (_, Toption ty2)) ->
+      assert_nontrivial p bop env ty1 ty2 ~as_warning:true
+    | ((_, Tclass ((_, id), _, _)), (_, Tprim _))
+    | ((_, Tprim _), (_, Tclass ((_, id), _, _)))
+      when String.equal Naming_special_names.Classes.cString id ->
+      trivial_comparison_error env p bop ty1 ty2 trail1 trail2 ~as_warning
+    | ((_, Toption ty1), (_, Tclass ((_, id), _, _)))
+      when String.equal Naming_special_names.Classes.cString id ->
+      assert_nontrivial p bop env ty1 ty2 ~as_warning
+    | ((_, Tclass ((_, id), _, _)), (_, Toption ty2))
+      when String.equal Naming_special_names.Classes.cString id ->
+      assert_nontrivial p bop env ty1 ty2 ~as_warning
     | ( ( _,
-          ( Terr | Tany _ | Tnonnull | Tvec_or_dict _ | Tprim _ | Toption _
-          | Tdynamic | Tvar _ | Tfun _ | Tgeneric _ | Tnewtype _ | Tdependent _
-          | Tclass _ | Ttuple _ | Tunion _ | Tintersection _ | Tshape _
-          | Taccess _ | Tunapplied_alias _ | Tneg _ ) ),
+          ( Tany _ | Tnonnull | Tvec_or_dict _ | Tprim _ | Toption _ | Tdynamic
+          | Tvar _ | Tfun _ | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _
+          | Ttuple _ | Tunion _ | Tintersection _ | Tshape _ | Taccess _
+          | Tneg _ | Tlabel _ | Tclass_ptr _ ) ),
         _ ) ->
       ())
 
-let assert_nullable _p _bop env ty =
-  let (_, ty) = Env.expand_type env ty in
-  match deref ty with
-  | (_, _) -> ()
+let assert_nontrivial = assert_nontrivial ~as_warning:false

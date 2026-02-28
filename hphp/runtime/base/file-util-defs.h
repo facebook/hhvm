@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/server/cli-server.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/logger.h"
 
 #include <string>
@@ -34,7 +35,7 @@ namespace HPHP { namespace FileUtil {
 
 template <typename F>
 void find(const std::string &root, const std::string& path,
-          bool php, const F& callback) {
+          bool php, bool failHard, const F& callback) {
   auto spath = path.empty() || !isDirSeparator(path[0]) ?
     path : path.substr(1);
 
@@ -51,6 +52,11 @@ void find(const std::string &root, const std::string& path,
 
   DIR *dir = opendir(fullPath.c_str());
   if (dir == nullptr) {
+    if (failHard) {
+      throw std::runtime_error(
+        "FileUtil::find(): unable to open directory " + fullPath
+      );
+    }
     Logger::Error("FileUtil::find(): unable to open directory %s",
                   fullPath.c_str());
     return;
@@ -67,12 +73,15 @@ void find(const std::string &root, const std::string& path,
     auto fe = fullPath + ename;
     struct stat se;
     if (stat(fe.c_str(), &se)) {
+      if (failHard) {
+        throw std::runtime_error("FileUtil::find(): unable to stat " + fe);
+      }
       Logger::Error("FileUtil::find(): unable to stat %s", fe.c_str());
       continue;
     }
 
     if ((se.st_mode & S_IFMT) == S_IFDIR) {
-      find(root, spath + ename, php, callback);
+      find(root, spath + ename, php, failHard, callback);
       continue;
     }
 
@@ -112,7 +121,9 @@ bool runRelative(std::string suffix, String cmd,
     cmd,
     currentDir,
     [] (const String& f, void*) {
-      if (!is_cli_server_mode()) return access(f.data(), R_OK) == 0;
+      if (!is_cli_server_mode()) {
+        return access(f.data(), R_OK) == 0;
+      }
       auto const w = Stream::getWrapperFromURI(f, nullptr, false);
       return w->access(f, R_OK) == 0;
     },
@@ -120,7 +131,7 @@ bool runRelative(std::string suffix, String cmd,
   );
   if (cwd.isNull()) return false;
   do {
-    cwd = f_dirname(cwd);
+    cwd = HHVM_FN(dirname)(cwd);
     auto const f = String::attach(
       StringData::Make(cwd.data(), suffix.data())
     );

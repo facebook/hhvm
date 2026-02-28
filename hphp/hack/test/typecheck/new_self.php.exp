@@ -1,8 +1,8 @@
-File "new_self.php", line 17, characters 14-17:
+ERROR: File "new_self.php", line 17, characters 14-17:
 `A` is uninstantiable (Typing[4002])
   File "new_self.php", line 12, characters 16-16:
   Declaration is here
-File "new_self.php", line 18, characters 9-11:
+ERROR: File "new_self.php", line 18, characters 9-11:
 No instance method `xxx` in `A` (Typing[4053])
   File "new_self.php", line 14, characters 19-21:
   Did you mean `foo` instead?

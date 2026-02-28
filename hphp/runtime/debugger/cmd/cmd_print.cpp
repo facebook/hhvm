@@ -24,7 +24,7 @@
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 const char* formats[] = {
   "r", "v", "x", "hex", "oct", "dec", "unsigned", "time", nullptr

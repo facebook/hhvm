@@ -12,12 +12,12 @@
 function meh(): void {
   if ($v === null) {
     $outputRow[$key] = new sps_DBResultField(
-      darray[
+      dict[
         'isNull' => true,
       ]);
   } else if ($v is int) {
     $outputRow[$key] = new sps_DBResultField(
-      darray[
+      dict[
         'isNull' => false,
         0 => 'intValue' = 'foo',
       ]);

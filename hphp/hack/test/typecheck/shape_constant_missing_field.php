@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 type FooShape = shape(
   'foo' => int,

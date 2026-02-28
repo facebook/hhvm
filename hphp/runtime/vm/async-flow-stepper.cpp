@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/async-flow-stepper.h"
 
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -26,7 +25,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(debuggerflow);
+TRACE_SET_MOD(debuggerflow)
 
 namespace {
 c_WaitableWaitHandle *objToWaitableWaitHandle(const Object& o) {
@@ -37,26 +36,22 @@ c_WaitableWaitHandle *objToWaitableWaitHandle(const Object& o) {
 
 bool AsyncFlowStepper::isActRecOnAsyncStack(const ActRec* target) {
   auto currentWaitHandle = HHVM_FN(asio_get_running)();
-  if (currentWaitHandle.isNull()) {
-    return false;
-  }
-  auto const depStack =
-    objToWaitableWaitHandle(currentWaitHandle)->getDependencyStack();
-  if (depStack.empty()) {
-    return false;
-  }
-  ArrayIter iter(depStack);
-  ++iter; // Skip the top frame.
-  for (; iter; ++iter) {
-    auto const tv = iter.secondVal();
-    if (isNullType(type(tv))) {
-      return false;
-    }
-    auto const wh = objToWaitableWaitHandle(asCObjRef(&tv));
+  if (currentWaitHandle.isNull()) return false;
+
+  hphp_hash_set<c_WaitableWaitHandle*> visited;
+  auto wh = objToWaitableWaitHandle(currentWaitHandle);
+
+  // Skip the current wait handle
+  wh = wh->getParentChain().firstInContext(wh->getContextStateIndex());
+
+  while (wh != nullptr && !visited.contains(wh)) {
+    visited.insert(wh);
+
     if (wh->getKind() == c_Awaitable::Kind::AsyncFunction &&
-      target == wh->asAsyncFunction()->actRec()) {
+        wh->asAsyncFunction()->actRec() == target) {
       return true;
     }
+    wh = wh->getParentChain().firstInContext(wh->getContextStateIndex());
   }
   return false;
 }

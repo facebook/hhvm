@@ -1,11 +1,11 @@
 <?hh
 function my_error_handler($errno, $errmsg, $filename, $linenum, $vars)
-{
+:mixed{
 	echo "$errno: $errmsg\n";
 }
 
 function do_single_test($header)
-{
+:mixed{
 
 
 	$result = iconv_mime_decode($header, ZendGoodExtIconvTestsIconvMimeDecode::$mode, "UTF-8");
@@ -17,7 +17,7 @@ function do_single_test($header)
 }
 
 function do_regression_test()
-{
+:mixed{
 	do_single_test(<<< HERE
 Subject: =?ISO-8859-1?Q?Pr=FCfung?=
 	=?ISO-8859-1*de_DE?Q?Pr=FCfung?=\t

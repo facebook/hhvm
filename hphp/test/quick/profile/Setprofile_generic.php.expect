@@ -74,8 +74,11 @@ vec(3) {
   string(13) "fb_setprofile"
   dict(1) {
     ["args"]=>
-    vec(1) {
+    vec(3) {
       NULL
+      int(3)
+      vec(0) {
+      }
     }
   }
 }

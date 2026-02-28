@@ -4,7 +4,7 @@
  (modules lints_core)
  (preprocess
   (pps ppx_deriving.std))
- (libraries errors pos))
+ (libraries typing_ast user_error pos))
 
 (library
  (name linting_main)
@@ -30,10 +30,14 @@
 (library
  (name lints_errors)
  (wrapped false)
- (modules lints_errors)
+ (modules lints_diagnostics)
  (preprocess
   (pps ppx_deriving.std))
- (libraries lints_core lints_codes utils_core))
+ (libraries
+  lints_core
+  lints_codes
+  typing_error
+  utils_core))
 
 (library
  (name linting_visitors)
@@ -43,7 +47,7 @@
   (pps ppx_deriving.std))
  (libraries
   annotated_ast
-  errors
+  annotated_ast_utils
   naming
   nast
   typechecker_options
@@ -64,7 +68,7 @@
    lints_core
    linting_main
    lints_codes
-   lints_errors
+   lints_diagnostics
    linting_visitors))
  (libraries
   decl

@@ -1,0 +1,12 @@
+*** Testing date_sunset() : usage variation ***
+
+-- Testing date_sunset() function by passing int 123456789000 value to time --
+string(5) "%|{19:49|19:28}"
+float(%|{19.830%d|19.830%d|19.480%d})
+int(%|{-1097212211|123456853728})
+
+-- Testing date_sunset() function by passing int -123456789000 value to time --
+string(5) "%|{19:03|18:12|18:48}"
+float(%|{19.056%d|18.213%d|18.80%d})
+int(%|{1097345002|-2147410031|-123456723092|-123456723090})
+===DONE===

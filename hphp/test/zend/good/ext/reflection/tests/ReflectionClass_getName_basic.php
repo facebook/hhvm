@@ -1,6 +1,6 @@
 <?hh
 class TrickClass {
-    function __toString() {
+    function __toString() :mixed{
         //Return the name of another class
         return "Exception";
     }

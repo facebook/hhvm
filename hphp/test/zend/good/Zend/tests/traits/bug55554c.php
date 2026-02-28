@@ -9,7 +9,7 @@ trait TC1 {
     public function __construct() {
         echo "TC1 executed\n";
     }
-    public function ReportCollision() {
+    public function ReportCollision() :mixed{
         echo "TC1 executed\n";
     }
 }
@@ -18,7 +18,7 @@ trait TC2 {
     public function __construct() {
         echo "TC2 executed\n";
     }
-    public function ReportCollision() {
+    public function ReportCollision() :mixed{
         echo "TC1 executed\n";
     }
 }
@@ -29,7 +29,7 @@ class ReportCollision {
     public function __construct() {
         echo "New constructor executed\n";
     }
-    public function ReportCollision() {
+    public function ReportCollision() :mixed{
         echo "Legacy constructor executed\n";
     }
 }

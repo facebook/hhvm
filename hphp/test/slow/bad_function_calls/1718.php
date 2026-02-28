@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1718() {
+function main_1718() :mixed{
 call_user_func(null, 'test');
 echo "test\n";
 }

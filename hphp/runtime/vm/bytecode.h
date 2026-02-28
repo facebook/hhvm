@@ -74,9 +74,6 @@ void setopBody(tv_lval lhs, SetOpOp op, TypedValue* rhs) {
   case SetOpOp::XorEqual:       tvBitXorEq(lhs, *rhs); return;
   case SetOpOp::SlEqual:        tvShlEq(lhs, *rhs); return;
   case SetOpOp::SrEqual:        tvShrEq(lhs, *rhs); return;
-  case SetOpOp::PlusEqualO:     tvAddEqO(lhs, *rhs); return;
-  case SetOpOp::MinusEqualO:    tvSubEqO(lhs, *rhs); return;
-  case SetOpOp::MulEqualO:      tvMulEqO(lhs, *rhs); return;
   }
   not_reached();
 }
@@ -147,7 +144,7 @@ constexpr int kStackCheckReenterPadding = 9;
 
 ALWAYS_INLINE
 int stackCheckPadding() {
-  return RO::EvalStackCheckLeafPadding + kStackCheckReenterPadding;
+  return Cfg::Eval::StackCheckLeafPadding + kStackCheckReenterPadding;
 }
 
 // Interpreter evaluation stack.
@@ -373,6 +370,14 @@ public:
     assertx(m_top != m_elms);
     m_top--;
     *m_top = make_tv<KindOfLazyClass>(l);
+  }
+
+  ALWAYS_INLINE
+  void pushEnumClassLabel(const StringData* s) {
+    assertx(s->isStatic()); // No need to call s->incRefCount().
+    assertx(m_top != m_elms);
+    m_top--;
+    *m_top = make_tv<KindOfEnumClassLabel>(s);
   }
 
   ALWAYS_INLINE
@@ -629,6 +634,8 @@ public:
 
 //////////////////////////////////////////////////////////////////////
 
+void flush_evaluation_stack();
+
 /*
  * Visit all the slots on a live eval stack, stopping when we reach
  * the supplied activation record.
@@ -661,6 +668,7 @@ using InterpOneFunc = jit::JitResumeAddr (*) (ActRec*, TypedValue*, Offset);
 extern InterpOneFunc interpOneEntryPoints[];
 
 void doFCall(PrologueFlags prologueFlags, const Func* func,
+             const ArrayData* namedArgNames,
              uint32_t numArgsInclUnpack, void* ctx, jit::TCA retAddr);
 bool funcEntry();
 jit::JitResumeAddr dispatchBB();
@@ -677,6 +685,7 @@ Array getDefinedVariables(const ActRec*);
 void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack);
 void enterVMAtCurPC();
 uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
+                           uint32_t numNamedArgs,
                            bool checkInOutAnnot);
 
 ///////////////////////////////////////////////////////////////////////////////

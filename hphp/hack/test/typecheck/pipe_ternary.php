@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // This test cases checks for a previous bug that
 // $$ loses its typing information in a ternary

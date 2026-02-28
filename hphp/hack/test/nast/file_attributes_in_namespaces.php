@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 namespace MyNamespace;
 
@@ -7,3 +7,5 @@ namespace MyNamespace;
 class MyFileAttribute implements \HH\FileAttribute { }
 
 class MyClass { }
+
+new module my.module {}

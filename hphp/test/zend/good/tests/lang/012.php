@@ -1,5 +1,5 @@
 <?hh
-function F () {
+function F () :mixed{
     if(1) {
         return("Hello");
     }

@@ -1,7 +1,7 @@
 <?hh
 
-function gen() {
-    yield varray[] => 1;
+function gen() :AsyncGenerator<mixed,mixed,void>{
+    yield vec[] => 1;
 }
 <<__EntryPoint>> function main(): void {
 $gen = gen();

@@ -265,7 +265,7 @@
                       "line_number":6
                     }
                   },
-                  "prefixed_code_expression":{
+                  "prefixed_code_body":{
                     "kind":"et_splice_expression",
                     "et_splice_expression_dollar":{
                       "kind":"token",

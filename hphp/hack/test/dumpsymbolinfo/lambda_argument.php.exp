@@ -15,7 +15,7 @@
     },
     {
       "pos":{"filename":"lambda_argument.php","line":3,"char_start":58,"char_end":59},
-      "type":"(function(Tv1): Tv2)",
+      "type":"(function(Tv1): ~Tv2)",
       "ident":0
     },
     {
@@ -30,7 +30,7 @@
     },
     {
       "pos":{"filename":"lambda_argument.php","line":9,"char_start":5,"char_end":6},
-      "type":"vec<int>",
+      "type":"~vec<int>",
       "ident":0
     },
     {

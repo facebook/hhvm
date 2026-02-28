@@ -1,0 +1,38 @@
+string(1) "j"
+int(42)
+bool(false)
+object(stdClass) (0) {
+}
+NULL
+string(11) "not_reached"
+NULL
+int(5)
+
+int(2)
+string(1) "f"
+NULL
+string(1) "f"
+string(1) "a"
+string(1) "d"
+NULL
+string(1) "d"
+
+string(1) "e"
+string(3) "abc"
+string(1) "e"
+NULL
+string(1) "h"
+string(1) "e"
+string(1) "e"
+NULL
+NULL
+NULL
+string(3) "abc"
+
+NULL
+string(3) "wtf"
+
+string(70) "Invalid dict key: expected a key of type int or string, stdClass given"
+string(59) "Invalid vec key: expected a key of type int, stdClass given"
+string(58) "HH\idx() expects at least 2 positional parameters, 1 given"
+string(58) "HH\idx() expects at least 2 positional parameters, 0 given"

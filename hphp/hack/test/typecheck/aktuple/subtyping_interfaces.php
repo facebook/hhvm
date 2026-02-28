@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /**
  * Tuple-like arrays are subtypes of all the special interfaces that arrays are
@@ -6,7 +6,7 @@
  */
 
 function test(): void {
-  $a = varray['aaa', 4];
+  $a = vec['aaa', 4];
 
   take_traversable($a);
   take_container($a);

@@ -109,6 +109,16 @@ struct stringHashCompare {
   }
 };
 
+struct stringiHashCompare {
+  bool equal(const std::string& s1, const std::string& s2) const {
+    return s1.size() == s2.size() &&
+      strncasecmp(s1.data(), s2.data(), s1.size()) == 0;
+  }
+  size_t hash(const std::string& s) const {
+    return hash_string_i_unsafe(s.c_str(), s.size());
+  }
+};
+
 template <typename T, typename U, typename THash, typename UHash>
 struct pairHashCompare {
   THash thash;
@@ -129,20 +139,25 @@ struct pairHashCompare {
   }
 };
 
-struct int64_hash {
-  size_t operator() (const int64_t v) const {
-    return hash_int64(v);
-  }
-  size_t hash(const int64_t v) const {
-    return operator()(v);
-  }
-  bool equal(const int64_t lhs, const int64_t rhs) const {
-    return lhs == rhs;
+template<typename T>
+struct int_hash {
+  using folly_is_avalanching = std::true_type;
+
+  static_assert(std::is_integral<T>::value);
+  size_t operator() (T v) const {
+    return hash_int64(static_cast<uint64_t>(v));
   }
 };
 
+using int64_hash = int_hash<int64_t>;
+using uint64_hash = int_hash<uint64_t>;
+using int32_hash = int_hash<int32_t>;
+using uint32_hash = int_hash<uint32_t>;
+
 template<typename T>
 struct pointer_hash {
+  using folly_is_avalanching = std::true_type;
+
   size_t operator() (const T *const p) const {
     return hash_int64(intptr_t(p));
   }
@@ -156,7 +171,28 @@ struct pointer_hash {
 };
 
 template<typename T>
+struct pointer_pair_hash {
+  using folly_is_avalanching = std::true_type;
+
+  size_t operator() (const std::pair<const T* const, const T* const>& p) const {
+    return hash_int64_pair(
+      intptr_t(p.first),
+      intptr_t(p.second)
+    );
+  }
+  size_t hash(const std::pair<const T* const, const T* const>& p) const {
+    return operator()(p);
+  }
+  bool equal(const std::pair<const T* const, const T* const>& lhs,
+             const std::pair<const T* const, const T* const>& rhs) const {
+    return lhs == rhs;
+  }
+};
+
+template<typename T>
 struct smart_pointer_hash {
+  using folly_is_avalanching = std::true_type;
+
   size_t operator() (const T &p) const {
     return (size_t)hash_int64(intptr_t(p.get()));
   }
@@ -206,4 +242,3 @@ struct string_lessi {
 //////////////////////////////////////////////////////////////////////
 
 }
-

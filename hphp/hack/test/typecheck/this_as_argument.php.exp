@@ -1,4 +1,4 @@
-File "this_as_argument.php", line 20, characters 18-19:
+ERROR: File "this_as_argument.php", line 20, characters 18-19:
 Invalid argument (Typing[4110])
   File "this_as_argument.php", line 7, characters 36-39:
   Expected exactly the type `C`

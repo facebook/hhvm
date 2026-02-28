@@ -19,20 +19,21 @@ class await_visitor =
       (new loop_visitor)#on_block () block
 
     (* Skip lambdas created inside for loops *)
-    method! on_efun () f _ = this#on_elfun f
+    method! on_efun () efun = this#on_elfun efun.ef_fun
 
     method! on_lfun () f _ = this#on_elfun f
 
     method! on_stmt () stmt =
       begin
         match snd stmt with
-        | Expr (_, p, Binop (Ast_defs.Eq _, _, (_, _, Await _)))
+        | Expr (_, p, Assign (_, _, (_, _, Await _)))
         | Expr (_, p, Await _) ->
-          Lints_errors.await_in_loop p
+          Lints_diagnostics.await_in_loop p
         | _ -> ()
       end;
       parent#on_stmt () stmt
   end
+  [@alert "-deprecated"]
 
 and loop_visitor =
   object
@@ -48,6 +49,7 @@ and loop_visitor =
         (new await_visitor)#on_block () block
       | _ -> parent#on_stmt () stmt
   end
+  [@alert "-deprecated"]
 
 module VisitorFunctor (Parent : BodyVisitorModule) : BodyVisitorModule = struct
   class visitor env =

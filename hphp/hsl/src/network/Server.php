@@ -23,11 +23,9 @@ interface Server<TSock as Socket> {
    */
   abstract const type TAddress;
 
-  /** Retrieve the next pending connection as a disposable.
+  /** Retrieve the next pending connection.
    *
    * Will wait for new connections if none are pending.
-   *
-   * @see `nextConnectionNDAsync()` for non-disposables.
    */
   public function nextConnectionAsync(): Awaitable<TSock>;
 

@@ -1,0 +1,12 @@
+ERROR: File "function_apply_nothing.php", line 12, characters 43-45:
+No instance method `foo` in `string` (Typing[4053])
+  File "function_apply_nothing.php", line 14, characters 19-21:
+  This is why I think it is an object of type HH\string
+  File "string.hhi", line 6, characters 15-20:
+  Declaration of `string` is here
+ERROR: File "function_apply_nothing.php", line 14, characters 19-21:
+Invalid argument (Typing[4110])
+  File "function_apply_nothing.php", line 5, characters 51-54:
+  Expected `bool`
+  File "function_apply_nothing.php", line 12, characters 51-55:
+  But got `string`

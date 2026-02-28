@@ -1,6 +1,6 @@
 <?hh
 class X {
-  static function test(this $s) {
+  static function test(this $s) :mixed{
     var_dump($s);
   }
 }

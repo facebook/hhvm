@@ -1,0 +1,14 @@
+{
+  "pools": {
+    /* We need this port for the test case to ignore */
+    "mc": {
+      "protocol": "caret",
+      "servers": [ "localhost:11002" ]
+    },
+    "mcr": {
+      "protocol": "caret",
+      "servers": [ "localhost:11003" ]
+    }
+  },
+  "route": "PoolRoute|mcr"
+}

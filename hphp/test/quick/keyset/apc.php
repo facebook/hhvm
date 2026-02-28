@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function get_count() {
+function get_count() :mixed{
   $count = __hhvm_intrinsics\apc_fetch_no_check("count");
   if (!$count) {
     $count = 0;
@@ -11,14 +11,14 @@ function get_count() {
   return $count;
 }
 
-function read() {
+function read() :mixed{
   var_dump(__hhvm_intrinsics\apc_fetch_no_check("val1"));
   var_dump(__hhvm_intrinsics\apc_fetch_no_check("val2"));
   var_dump(__hhvm_intrinsics\apc_fetch_no_check("val3"));
   var_dump(__hhvm_intrinsics\apc_fetch_no_check("val4"));
 }
 
-function write($count) {
+function write($count) :mixed{
   apc_store("val1", keyset[]);
   apc_store("val2", keyset[1, 2, 3]);
   apc_store("val3", keyset["a", "b", "C", "D"]);

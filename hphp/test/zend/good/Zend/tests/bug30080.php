@@ -7,6 +7,6 @@ class foo {
 }
 
 <<__EntryPoint>>
-function main() {
-  new foo(varray[new stdClass]);
+function main() :mixed{
+  new foo(vec[new stdClass]);
 }

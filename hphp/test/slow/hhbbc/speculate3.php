@@ -1,12 +1,12 @@
 <?hh
 
 abstract class Y {
-  abstract public function g();
+  abstract public function g():mixed;
 }
 
 class Z extends Y {
-  public async function x() { return false; }
-  public function g() { return $this->x(); }
+  public async function x() :Awaitable<mixed>{ return false; }
+  public function g() :mixed{ return $this->x(); }
 }
 
 class X {
@@ -19,7 +19,7 @@ class X {
 }
 
 <<__EntryPoint>>
-async function main() {
+async function main() :Awaitable<mixed>{
   $y = new Z();
   for ($i = 0; $i < 10; $i++) {
     await X::f($y);

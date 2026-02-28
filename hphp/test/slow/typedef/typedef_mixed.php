@@ -2,13 +2,13 @@
 
 type Foo = mixed;
 
-function foo(Foo $x) {
+function foo(Foo $x) :mixed{
   echo $x;
   echo "\n";
 }
 
 
 <<__EntryPoint>>
-function main_typedef_mixed() {
+function main_typedef_mixed() :mixed{
 foo(12);
 }

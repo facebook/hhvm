@@ -1,32 +1,32 @@
 <?hh
-function foo() {
+function foo() :mixed{
     B::throwException();
 }
 class C {
-    public static function bla() {
+    public static function bla() :mixed{
         B::throwException();
     }
-    public static function getException() {
+    public static function getException() :mixed{
         return new Exception();
 
     }
 }
 class A {
 
-    public static function throwException_after() {
+    public static function throwException_after() :mixed{
         C::bla();
     }
-    public static function throwException() {
+    public static function throwException() :mixed{
         throw C::getException();
     }
-    public static function test() {
+    public static function test() :mixed{
         static::who();
     }
-    public static function who() {
+    public static function who() :mixed{
         echo "A\n";
     }
 
-    public static function mycatch() {
+    public static function mycatch() :mixed{
         try {
             static::who();
             B::throwException_after();
@@ -42,7 +42,7 @@ class A {
         }
     }
 
-    public static function simpleCatch() {
+    public static function simpleCatch() :mixed{
         try {
             static::who();
             throw new Exception();
@@ -53,7 +53,7 @@ class A {
 }
 
 class B extends A {
-    public static function who() {
+    public static function who() :mixed{
         echo "B\n";
     }
 

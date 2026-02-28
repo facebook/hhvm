@@ -1,0 +1,20 @@
+*** Testing timezone_name_from_abbr() : usage variation -  unexpected values to first argument $abbr***
+
+-- empty string DQ --
+string(13) "Europe/London"
+
+-- empty string SQ --
+string(13) "Europe/London"
+
+-- string DQ --
+string(13) "Europe/London"
+
+-- string SQ --
+string(13) "Europe/London"
+
+-- mixed case string --
+string(13) "Europe/London"
+
+-- heredoc --
+string(13) "Europe/London"
+===DONE===

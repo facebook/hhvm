@@ -27,17 +27,16 @@ function diff_by_key<Tk1 as arraykey, Tk2 as arraykey, Tv>(
   KeyedTraversable<Tk2, mixed> $second,
   KeyedContainer<Tk2, mixed> ...$rest
 )[]: dict<Tk1, Tv> {
+  /* HH_IGNORE[12006] suppress sketchy null check */
   if (!$first) {
     return dict[];
   }
+  /* HH_IGNORE[12006] suppress sketchy null check */
   if (!$second && !$rest) {
     return cast_clear_legacy_array_mark($first);
   }
   $union = merge($second, ...$rest);
-  return filter_keys(
-    $first,
-    $key ==> !C\contains_key($union, $key),
-  );
+  return filter_keys($first, $key ==> !C\contains_key($union, $key));
 }
 
 /**
@@ -97,7 +96,7 @@ function filter<Tk as arraykey, Tv>(
  *
  * To use an async predicate, see `Dict\filter_with_key_async()`.
  *
- * Time complexity: O(n * p), where p is the complexity of `$value_predicate`
+ * Time complexity: O(n * p), where p is the complexity of `$predicate`
  * (which is O(1) if not provided explicitly)
  * Space complexity: O(n)
  */
@@ -118,7 +117,7 @@ function filter_with_key<Tk as arraykey, Tv>(
  * Returns a new dict containing only the keys for which the given predicate
  * returns `true`. The default predicate is casting the key to boolean.
  *
- * Time complexity: O(n * p), where p is the complexity of `$value_predicate`
+ * Time complexity: O(n * p), where p is the complexity of `$key_predicate`
  * (which is O(1) if not provided explicitly)
  * Space complexity: O(n)
  */
@@ -240,14 +239,6 @@ function unique_by<Tk as arraykey, Tv, Ts as arraykey>(
   // We first convert the container to dict[scalar_key => original_key] to
   // remove duplicates, then back to dict[original_key => original_value].
   return $container
-    |> pull_with_key(
-      $$,
-      ($k, $_) ==> $k,
-      ($_, $v) ==> $scalar_func($v),
-    )
-    |> pull(
-      $$,
-      $orig_key ==> $container[$orig_key],
-      $x ==> $x,
-    );
+    |> pull_with_key($$, ($k, $_) ==> $k, ($_, $v) ==> $scalar_func($v))
+    |> pull($$, $orig_key ==> $container[$orig_key], $x ==> $x);
 }

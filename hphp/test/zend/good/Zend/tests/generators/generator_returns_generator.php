@@ -1,6 +1,6 @@
 <?hh
 
-function gen() {
+function gen() :AsyncGenerator<mixed,mixed,void>{
     // execution is suspended here, so the following never gets run:
     echo "Foo";
     // trigger a generator

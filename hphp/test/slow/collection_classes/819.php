@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_819() {
+function main_819() :mixed{
 $v1 = Vector {
 5}
 ;

@@ -1,8 +1,8 @@
 <?hh
 
 <<__EntryPoint>>
-function main_subclass() {
-$exec_class = varray['Exception', 'RuntimeException', 'InvalidArgumentException',
+function main_subclass() :mixed{
+$exec_class = vec['Exception', 'RuntimeException', 'InvalidArgumentException',
                'BadMethodCallException', 'OutOfBoundsException',
                'DOMException', 'PDOException'];
 

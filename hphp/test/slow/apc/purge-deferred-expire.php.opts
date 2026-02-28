@@ -1,2 +1,1 @@
 -vServer.APC.ExpireOnSets=false
--vServer.APC.DeferredExpiration=true

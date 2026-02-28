@@ -1,10 +1,14 @@
-File "generic_tc_invalid1.php", line 28, characters 10-11:
+ERROR: File "generic_tc_invalid1.php", line 16, characters 70-71:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "generic_tc_invalid1.php", line 28, characters 10-11:
 Invalid return type (Typing[4110])
-File "generic_tc_invalid1.php", line 22, characters 19-24:
-Expected `string`
-File "generic_tc_invalid1.php", line 9, characters 18-20:
-But got `int`
-File "generic_tc_invalid1.php", line 16, characters 74-74:
-  resulting from accessing the type constant 'T'
-File "generic_tc_invalid1.php", line 23, characters 12-17:
-  on an object of exactly the class IntBox
+  File "generic_tc_invalid1.php", line 22, characters 19-24:
+  Expected `string`
+  File "generic_tc_invalid1.php", line 9, characters 18-20:
+  But got `int`
+  File "generic_tc_invalid1.php", line 16, characters 74-74:
+    resulting from accessing the type constant 'T'
+  File "generic_tc_invalid1.php", line 23, characters 12-17:
+    on an object of exactly the class IntBox
+  File "generic_tc_invalid1.php", line 16, characters 55-56:
+    via this generic `T2`

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function main(mixed $x): void {
   if ($x is bool) {

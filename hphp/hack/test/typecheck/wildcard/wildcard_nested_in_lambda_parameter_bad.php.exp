@@ -1,0 +1,12 @@
+ERROR: File "wildcard_nested_in_lambda_parameter_bad.php", line 11, characters 11-11:
+Invalid reified hint (Typing[4305])
+  File "wildcard_nested_in_lambda_parameter_bad.php", line 11, characters 11-11:
+  This is a wildcard, it cannot be used as a reified type argument
+  File "wildcard_nested_in_lambda_parameter_bad.php", line 3, characters 15-15:
+  `T` is reified
+ERROR: File "wildcard_nested_in_lambda_parameter_bad.php", line 16, characters 11-11:
+Invalid reified hint (Typing[4305])
+  File "wildcard_nested_in_lambda_parameter_bad.php", line 16, characters 11-11:
+  This is a wildcard, it cannot be used as a reified type argument
+  File "wildcard_nested_in_lambda_parameter_bad.php", line 3, characters 15-15:
+  `T` is reified

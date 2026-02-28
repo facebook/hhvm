@@ -20,14 +20,16 @@
 #include <utility>
 
 #include "hphp/util/copy-ptr.h"
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 
 #include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/string-data.h"
+
+#include "hphp/runtime/vm/type-constraint.h"
 
 #include "hphp/hhbbc/type-system-bits.h"
 
 #include "hphp/hhbbc/array-like-map.h"
-#include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/misc.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -168,19 +170,29 @@
 
 //////////////////////////////////////////////////////////////////////
 
-namespace HPHP::HHBBC {
+namespace HPHP {
 
+//////////////////////////////////////////////////////////////////////
+
+namespace HHBBC {
+
+struct Context;
+struct IIndex;
 struct Type;
+
+namespace res { struct Class; }
+namespace php { struct Class; }
 
 #define DATATAGS                                                \
   DT(Str, SString, sval)                                        \
   DT(Int, int64_t, ival)                                        \
   DT(Dbl, double, dval)                                         \
   DT(ArrLikeVal, SArray, aval)                                  \
-  DT(Obj, DObj, dobj)                                           \
-  DT(WaitHandle, DWaitHandle, dwh)                              \
+  DT(Obj, DCls, dobj)                                           \
+  DT(WaitHandle, copy_ptr<DWaitHandle>, dwh)                    \
   DT(Cls, DCls, dcls)                                           \
   DT(LazyCls, SString, lazyclsval)                              \
+  DT(EnumClassLabel, SString, eclval)                           \
   DT(ArrLikePacked, copy_ptr<DArrLikePacked>, packed)           \
   DT(ArrLikePackedN, copy_ptr<DArrLikePackedN>, packedn)        \
   DT(ArrLikeMap, copy_ptr<DArrLikeMap>, map)                    \
@@ -197,63 +209,145 @@ enum class DataTag : uint8_t {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Information about a class type.  The class is either exact or a
- * subtype of the supplied class.
+ * Information about a class type. The class is either exactly the
+ * supplied class, a subtype of the supplied class, or an intersection
+ * of classes it is a subtype of.
+ *
+ * The intersection case is needed to maintain monotonicity when
+ * performing unions or intersections involving intersections. We want
+ * to maintain the invariant that if a <= A, and b <= B, then
+ * union_of(a, b) <= union_of(A, B) (the same applies for
+ * intersection_of). Another way to state this is that refining a type
+ * anywhere should never result in a worse type anywhere else.
+ *
+ * When unioning/intersecting an interface with anything else, there's
+ * not necessarily a single result class which guarantees
+ * monotonicity. In one of those cases, we instead produce a list of
+ * classes which the result is a subtype of.
+ *
+ * In addition, we want the intersection representation to uniquely
+ * identify a class, so we impose a certain canonical form. No class
+ * in the list can be a subtype of another (if so, the "larger" class
+ * is redundant and should be dropped). Every class "could be" every
+ * other class. If not, the intersection is empty and the type is
+ * actually Bottom. Finally, the list is kept sorted. The ordering is
+ * fixed but arbitrary and we try to ensure that "smaller" classes
+ * come first.
+ *
+ * The intersection always have 2 or more elements (any less should be
+ * Bottom, Exact or Sub instead). The intersection can only ever
+ * contain resolved classes or unresolved classes, never a mix
+ * (unioning a resolved class with an unresolved class results in
+ * TObj/TCls, and intersecting a resolved class with an unresolved
+ * class results in TBottom).
  */
 struct DCls {
-  enum Tag : uint16_t { Exact, Sub };
+  using IsectSet = std::vector<res::Class>;
 
-  DCls(Tag type, res::Class cls)
-    : type(type)
-    , cls(cls)
-  {}
+  DCls() : DCls{TagNone, nullptr} {}
 
-  Tag type;
-  bool isCtx = false;
-  res::Class cls;
+  static DCls MakeExact(res::Class cls, bool nonReg);
+  static DCls MakeSub(res::Class cls, bool nonReg);
+  static DCls MakeIsect(IsectSet isect, bool nonReg);
+  static DCls MakeIsectAndExact(res::Class exact, IsectSet isect, bool nonReg);
+
+  // Need to implement these manually so we do proper ref-counting on
+  // the IsectWrapper (if available).
+  DCls(const DCls&);
+  DCls(DCls&& o) noexcept : val{std::move(o.val)}
+  { o.val.set(TagNone, nullptr); }
+
+  DCls& operator=(const DCls&);
+  DCls& operator=(DCls&& o) { val.swap(o.val); return *this; }
+
+  ~DCls();
+
+  bool isExact() const { return (val.tag() & (TagExact|TagIsect)) == TagExact; }
+  bool isSub() const { return !(val.tag() & (TagExact|TagIsect)); }
+  bool isIsect() const { return tagIsIsect(val.tag()); }
+  bool isIsectAndExact() const { return tagIsIsectAndExact(val.tag()); }
+
+  bool containsNonRegular() const { return !(val.tag() & TagReg); }
+
+  // Obtain the res::Class this DCls represents. Only valid if
+  // !isSect(), as that cannot be completely represented by any single
+  // res::Class.
+  res::Class cls() const;
+
+  // Obtain a res::Class which is a super-type of what this DCls
+  // represents. That is, it may be larger than the "actual"
+  // class. For non-intersections, this is just cls(). For
+  // intersections, it's one of the classes in the intersection (any
+  // of them is valid, as we're a subclass of all of them). We use the
+  // first class in the list, which in canonical order is the
+  // smallest.
+  res::Class smallestCls() const;
+
+  const IsectSet& isect() const;
+  std::pair<res::Class, const IsectSet*> isectAndExact() const;
+
+  bool isCtx() const { return val.tag() & TagCtx; }
+
+  void setCtx(bool ctx) {
+    val.set(ctx ? addCtx(val.tag()) : removeCtx(val.tag()), val.ptr());
+  }
+  void setNonReg(bool nonReg) {
+    val.set(nonReg ? addNonReg(val.tag()) : removeNonReg(val.tag()), val.ptr());
+  }
+
+  void setCls(res::Class cls);
+
+  bool same(const DCls& o, bool checkCtx = true) const;
+
+  void serde(BlobEncoder&) const;
+  void serde(BlobDecoder&);
+
+private:
+  // To keep size down, we encode everything into a single
+  // pointer. The tag encodes whether isCtx() is true, and the type of
+  // pointer. The pointer will either be a res::Class (in opaque
+  // encoding), or to an IsectWrapper.
+  enum Tag : uint8_t {
+    TagNone  = 0,
+    TagExact = (1 << 0),
+    TagIsect = (1 << 1),
+    TagReg   = (1 << 2),
+    TagCtx   = (1 << 3)
+  };
+  CompactTaggedPtr<void, Tag> val;
+
+  DCls(Tag t, void* p) : val{t, p} {}
+
+  static bool tagIsIsect(Tag t) {
+    return (t & Tag(TagExact|TagIsect)) == TagIsect;
+  }
+  static bool tagIsIsectAndExact(Tag t) {
+    return (t & Tag(TagExact|TagIsect)) == Tag(TagExact|TagIsect);
+  }
+
+  static Tag addCtx(Tag t)       { return Tag(t | TagCtx); }
+  static Tag removeCtx(Tag t)    { return Tag(t & ~TagCtx); }
+  static Tag addNonReg(Tag t)    { return Tag(t & ~TagReg); }
+  static Tag removeNonReg(Tag t) { return Tag(t | TagReg); }
+
+  struct IsectWrapper;
+  struct IsectAndExactWrapper;
+
+  IsectWrapper* rawIsect() const;
+  IsectAndExactWrapper* rawIsectAndExact() const;
 };
 
-/*
- * Information about a specific object type.  The class is either
- * exact or a subtype of the supplied class.
- *
- * If the class is known to be a wait handle, DWaitHandle will be used
- * instead.
- */
-struct DObj {
-  enum Tag : uint16_t { Exact, Sub };
+std::string show(const DCls&, bool isObj = false);
 
-  DObj(Tag type, res::Class cls)
-    : type(type)
-    , cls(cls)
-  {}
+//////////////////////////////////////////////////////////////////////
 
-  Tag type;
-  bool isCtx = false;
-  res::Class cls;
-};
-
-/*
- * Information about a wait handle (sub-class of HH\\Awaitable) carry a
- * type that awaiting the wait handle will produce.
- */
-struct DWaitHandle {
-  DWaitHandle(res::Class cls, copy_ptr<Type> inner)
-    : cls{std::move(cls)}
-    , inner{std::move(inner)} {}
-  // Strictly speaking, we know that cls is HH\\Awaitable, but keeping
-  // it around lets us demote to a DObj without having the Index
-  // available.
-  res::Class cls;
-  copy_ptr<Type> inner;
-};
-
+struct DWaitHandle;
 struct DArrLikePacked;
 struct DArrLikePackedN;
 struct DArrLikeMap;
 struct DArrLikeMapN;
-struct ArrKey;
 struct IterTypes;
+struct COWer;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -267,72 +361,6 @@ enum class LegacyMark : uint8_t {
   Marked,   // definitely mark
   Unmarked, // definitely unmarked
   Unknown   // either
-};
-
-// Bag of state for tracking HAM related metadata (array provenance
-// and legacy marking).
-struct HAMSandwich {
-  // No state. Used for types which don't have any HAM relevance
-  // (ints, keysets, etc).
-  static const HAMSandwich None;
-  // Unmarked legacy mark, but no array-provenance. Used for types
-  // which don't care about array-provenance (vec, dict, etc).
-  static const HAMSandwich Unmarked;
-
-  // Create the appropriate HAMSandwich for the given static array.
-  static HAMSandwich FromSArr(SArray);
-
-  // Create the most general HAMSandwich allowed for the given type.
-  static HAMSandwich TopForBits(trep b) {
-    using HPHP::HHBBC::couldBe;
-    return HAMSandwich {
-      couldBe(b, kMarkBits) ? LegacyMark::Unknown : LegacyMark::Bottom
-    };
-  }
-
-  // Return a new HAMSandwich refined based on the given type. For
-  // example, if the given type no longer contains Vec or Dict, we
-  // need to drop any marking information.
-  HAMSandwich project(trep) const;
-
-  // Return the legacy mark information in this HAMSandwich. If the
-  // given type does not require legacy mark information, Unmarked is
-  // always returned.
-  LegacyMark legacyMark(trep) const;
-
-  // Return true if this is the "bottom" HAMSandwich type. That is,
-  // the result of intersecting together incompatible ones.
-  bool isBottom(trep b) const;
-
-  // Check if the intersection between this and another HAMSandwich is
-  // non-empty.
-  bool couldBe(HAMSandwich) const;
-  // Check if this HAMSandwich is completely contained with another.
-  bool subtypeOf(HAMSandwich) const;
-
-  bool operator==(HAMSandwich) const;
-  bool operator!=(HAMSandwich o) const { return !(*this == o); }
-
-  // Union together or intersect two HAMSandwiches.
-  HAMSandwich operator|(HAMSandwich) const;
-  HAMSandwich& operator|=(HAMSandwich o) { return *this = *this | o; }
-
-  HAMSandwich operator&(HAMSandwich) const;
-  HAMSandwich& operator&=(HAMSandwich o) { return *this = *this & o; }
-
-  // Testing:
-
-  void setLegacyMarkForTesting(LegacyMark m) { m_mark = m; }
-
-  bool checkInvariants(trep) const;
-
-private:
-  // Legacy marks are only tracked for Vec and Dict.
-  static constexpr trep kMarkBits = BVec | BDict;
-
-  explicit HAMSandwich(LegacyMark mark) : m_mark{mark} {}
-
-  LegacyMark m_mark;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -355,14 +383,16 @@ enum class Promotion {
 
 struct Type {
   Type() : Type{BBottom} {}
-  explicit Type(trep t) : Type{t, HAMSandwich::TopForBits(t)} {}
-  Type(trep t, HAMSandwich h) : m_bits{t}, m_dataTag{DataTag::None}, m_ham{h} {
+  explicit Type(trep t) : Type{t, topLegacyMarkForBits(t)} {}
+  Type(trep t, LegacyMark m)
+    : m_bits{t}
+    , m_dataTag{DataTag::None}
+    , m_legacyMark{m} {
     assertx(checkInvariants());
   }
 
   Type(const Type& o) noexcept
     : m_raw{o.m_raw}
-    , m_ham{o.m_ham}
   {
     SCOPE_EXIT { assertx(checkInvariants()); };
     if (LIKELY(m_dataTag == DataTag::None)) return;
@@ -371,7 +401,6 @@ struct Type {
 
   Type(Type&& o) noexcept
     : m_raw{o.m_raw}
-    , m_ham{o.m_ham}
   {
     SCOPE_EXIT { assertx(o.checkInvariants()); };
     if (LIKELY(m_dataTag == DataTag::None)) return;
@@ -382,30 +411,63 @@ struct Type {
   Type& operator=(Type&&) noexcept;
 
   ~Type() {
-    assertx(checkInvariants());
     if (LIKELY(m_dataTag == DataTag::None)) return;
     destroyData();
+  }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    ScopedStringDataIndexer _;
+    if constexpr (SerDe::deserializing) {
+      if (UNLIKELY(m_dataTag != DataTag::None)) destroyData();
+      sd(m_raw);
+      switch (m_dataTag) {
+        case DataTag::None: break;
+        #define DT(tag_name,type,name)            \
+          case DataTag::tag_name: {               \
+            type t;                               \
+            sd(t);                                \
+            new (&m_data.name) type{std::move(t)};\
+            break;                                \
+          }
+        DATATAGS
+        #undef DT
+      }
+      assertx(checkInvariants());
+    } else {
+      assertx(checkInvariants());
+      sd(m_raw);
+      switch (m_dataTag) {
+        case DataTag::None: break;
+        #define DT(tag_name,type,name) \
+          case DataTag::tag_name: sd(m_data.name); break;
+        DATATAGS
+        #undef DT
+      }
+    }
   }
 
   /*
    * Exact equality or inequality of types, and hashing.
    */
-  bool operator==(const Type& o) const;
-  bool operator!=(const Type& o) const { return !(*this == o); }
+  bool equal(const Type&) const;
+  bool equalNoContext(const Type&) const;
+
+  // operator== deliberately not implemented. You must be explicit
+  // about whether you need to care about the context or not.
+
   size_t hash() const;
 
-  const Type& operator |= (const Type& other);
-  const Type& operator |= (Type&& other);
-  const Type& operator &= (const Type& other);
-  const Type& operator &= (Type&& other);
+  const Type& operator|=(const Type& other);
+  const Type& operator|=(Type&& other);
+  const Type& operator&=(const Type& other);
+  const Type& operator&=(Type&& other);
 
   /*
-   * Returns true if this type is equivalently refined, more refined or strictly
-   * more refined than `o`.  This is similar to the `==` and subtype operations
-   * defined below, except they take into account if a type is tagged as a
-   * context.
+   * Returns true if this type is more refined or strictly more
+   * refined than `o`.  This is similar to the subtype operations
+   * defined below, except they take into account if a type is tagged
+   * as a context.
    */
-  bool equivalentlyRefined(const Type& o) const;
   bool moreRefined(const Type& o) const;
   bool strictlyMoreRefined(const Type& o) const;
 
@@ -461,11 +523,19 @@ struct Type {
     bool hasValue;
   };
 
+  static LegacyMark topLegacyMarkForBits(trep b) {
+    return HPHP::HHBBC::couldBe(b, kLegacyMarkBits)
+      ? LegacyMark::Unknown : LegacyMark::Bottom;
+  }
+
+  // Legacy marks are only tracked for Vec and Dict.
+  static constexpr trep kLegacyMarkBits = BVec | BDict;
+
 private:
   friend Optional<int64_t> arr_size(const Type& t);
   friend ArrayCat categorize_array(const Type& t);
   friend CompactVector<LSString> get_string_keys(const Type& t);
-  friend Type wait_handle(const Index&, Type);
+  friend Type wait_handle(Type);
   friend bool is_specialized_wait_handle(const Type&);
   friend bool is_specialized_array_like(const Type&);
   friend bool is_specialized_array_like_arrval(const Type&);
@@ -477,6 +547,7 @@ private:
   friend bool is_specialized_obj(const Type&);
   friend bool is_specialized_cls(const Type&);
   friend bool is_specialized_lazycls(const Type&);
+  friend bool is_specialized_ecl(const Type&);
   friend bool is_specialized_string(const Type&);
   friend bool is_specialized_int(const Type&);
   friend bool is_specialized_double(const Type&);
@@ -487,26 +558,28 @@ private:
   friend Type ival(int64_t);
   friend Type dval(double);
   friend Type lazyclsval(SString);
+  friend Type enumclasslabelval(SString);
   friend Type subObj(res::Class);
   friend Type objExact(res::Class);
-  friend Type subCls(res::Class);
-  friend Type clsExact(res::Class);
-  friend Type packed_impl(trep, HAMSandwich, std::vector<Type>);
-  friend Type packedn_impl(trep, HAMSandwich, Type);
-  friend Type map_impl(trep, HAMSandwich, MapElems, Type, Type);
-  friend Type mapn_impl(trep, HAMSandwich, Type, Type);
-  friend DObj dobj_of(const Type&);
+  friend Type subCls(res::Class, bool);
+  friend Type clsExact(res::Class, bool);
+  friend Type packed_impl(trep, LegacyMark, std::vector<Type>);
+  friend Type packedn_impl(trep, LegacyMark, Type);
+  friend Type map_impl(trep, LegacyMark, MapElems, Type, Type);
+  friend Type mapn_impl(trep, LegacyMark, Type, Type);
+  friend const DCls& dobj_of(const Type&);
   friend Type demote_wait_handle(Type);
-  friend DCls dcls_of(Type);
+  friend const DCls& dcls_of(const Type&);
   friend SString sval_of(const Type&);
   friend SString lazyclsval_of(const Type&);
+  friend SString eclval_of(const Type&);
   friend int64_t ival_of(const Type&);
   friend Type union_of(Type, Type);
   friend Type intersection_of(Type, Type);
   friend void widen_type_impl(Type&, uint32_t);
   friend Type widen_type(Type);
   friend Type widening_union(const Type&, const Type&);
-  friend Emptiness emptiness(const Type&);
+  friend std::pair<Emptiness, bool> emptiness(const Type&);
   friend Type opt(Type);
   friend Type unopt(Type);
   template<typename R, bool, bool>
@@ -532,6 +605,8 @@ private:
   friend std::pair<Type, Type> split_string(Type);
   friend std::pair<Type, Type> split_lazycls(Type);
 
+  friend Type promote_classish(Type);
+
   friend std::string show(const Type&);
   friend std::pair<Type,bool> array_like_elem_impl(const Type&, const Type&);
   friend std::pair<Type,bool> array_like_set_impl(Type,
@@ -550,6 +625,9 @@ private:
   friend IterTypes iter_types(const Type&);
   friend Optional<RepoAuthType> make_repo_type_arr(const Type&);
 
+  friend bool array_like_set_can_be_undone(const Type&, const Type&);
+  friend Type undo_array_like_set(Type, const Type&);
+
   friend Type vec_val(SArray);
   friend Type vec_empty();
   friend Type some_vec_empty();
@@ -558,7 +636,6 @@ private:
   friend Type some_dict_empty();
   friend Type keyset_val(SArray);
   friend bool could_contain_objects(const Type&);
-  friend Type loosen_interfaces(Type);
   friend Type loosen_staticness(Type);
   friend Type loosen_string_staticness(Type);
   friend Type loosen_array_staticness(Type);
@@ -576,12 +653,35 @@ private:
   friend Type to_cell(Type t);
   friend bool inner_types_might_raise(const Type& t1, const Type& t2);
   friend std::pair<Type, Promotion> promote_classlike_to_key(Type);
+  friend Type toobj(const Type&);
+  friend Type objcls(const Type&);
+
+  friend bool might_have_dcls(const Type&);
+
+  friend struct WaitHandleCOWer;
+  friend struct ArrLikePackedNCOWer;
+  friend struct ArrLikePackedCOWer;
+  friend struct ArrLikeMapNCOWer;
+  friend struct ArrLikeMapCOWer;
+
+  friend Type unserialize_classes(const IIndex&, Type);
+  friend void unserialize_classes_impl(const IIndex&, const Type&, COWer&);
+
+  friend Type serialize_classes(Type);
+  friend void serialize_classes_impl(const Type&, COWer&);
+
+  // These have to be defined here but are not meant to be used
+  // outside of type-system.cpp
+  friend Type isectObjInternal(DCls::IsectSet);
+  friend Type isectClsInternal(DCls::IsectSet, bool);
+  friend Type isectAndExactObjInternal(res::Class, DCls::IsectSet);
+  friend Type isectAndExactClsInternal(res::Class, DCls::IsectSet, bool);
 
   friend Type set_trep_for_testing(Type, trep);
   friend trep get_trep_for_testing(const Type&);
 
-  friend Type make_obj_for_testing(trep, res::Class, DObj::Tag, bool);
-  friend Type make_cls_for_testing(trep, res::Class, DCls::Tag, bool);
+  friend Type make_obj_for_testing(trep, res::Class, bool, bool, bool);
+  friend Type make_cls_for_testing(trep, res::Class, bool, bool, bool, bool);
   friend Type make_arrval_for_testing(trep, SArray);
   friend Type make_arrpacked_for_testing(trep, std::vector<Type>,
                                          Optional<LegacyMark>);
@@ -634,11 +734,19 @@ private:
     struct {
       uint64_t m_bits : kTRepBitsStored;
       DataTag m_dataTag;
+      LegacyMark m_legacyMark;
     };
     uint64_t m_raw;
   };
-  HAMSandwich m_ham;
   Data m_data;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+struct TypeHasher {
+  size_t operator()(const Type& t) const {
+    return t.hash();
+  }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -651,6 +759,7 @@ struct MapElem {
   Type val;
   TriBool keyStaticness;
 
+  MapElem() = default;
   MapElem(Type val, TriBool keyStaticness)
     : val{std::move(val)}, keyStaticness{keyStaticness} {}
 
@@ -678,23 +787,49 @@ struct MapElem {
   static MapElem CStrKey(Type val) {
     return MapElem{std::move(val), TriBool::No};
   }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(val)(keyStaticness);
+  }
 };
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Information about a wait handle (sub-class of HH\\Awaitable) carry a
+ * type that awaiting the wait handle will produce.
+ */
+struct DWaitHandle {
+  DWaitHandle() = default;
+  // Strictly speaking, we know that cls is HH\\Awaitable, but keeping
+  // it around lets us demote to a DCls without having the Index
+  // available.
+  DWaitHandle(DCls cls, Type inner)
+    : cls{std::move(cls)}
+    , inner{std::move(inner)} {}
+  DCls cls;
+  Type inner;
+
+  template <typename SerDe> void serde(SerDe& sd) { sd(inner)(cls); }
+};
+
 struct DArrLikePacked {
+  DArrLikePacked() = default;
   explicit DArrLikePacked(std::vector<Type> elems)
     : elems(std::move(elems)) {}
-
   std::vector<Type> elems;
+  template <typename SerDe> void serde(SerDe& sd) { sd(elems); }
 };
 
 struct DArrLikePackedN {
+  DArrLikePackedN() = default;
   explicit DArrLikePackedN(Type t) : type(std::move(t)) {}
   Type type;
+  template <typename SerDe> void serde(SerDe& sd) { sd(type); }
 };
 
 struct DArrLikeMap {
+  DArrLikeMap() = default;
   explicit DArrLikeMap(MapElems map, Type optKey, Type optVal)
     : map(std::move(map))
     , optKey(std::move(optKey))
@@ -707,17 +842,22 @@ struct DArrLikeMap {
   // none.
   Type optKey;
   Type optVal;
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(map)(optKey)(optVal);
+  }
 };
 
 // DArrLikePackedN and DArrLikeMapN do not need the LegacyMark because they
 // cannot be converted to a TypedValue
 struct DArrLikeMapN {
+  DArrLikeMapN() = default;
   explicit DArrLikeMapN(Type key, Type val)
     : key(std::move(key))
     , val(std::move(val))
   {}
   Type key;
   Type val;
+  template <typename SerDe> void serde(SerDe& sd) { sd(key)(val); }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -731,12 +871,12 @@ HHBBC_TYPE_PREDEFINED(X)
 /*
  * Return WaitH<T> for a type t.
  */
-Type wait_handle(const Index&, Type t);
+Type wait_handle(Type t);
 
 /*
  * Return T from a WaitH<T>.
  *
- * Pre: is_specialized_handle(t);
+ * Pre: is_specialized_wait_handle(t);
  */
 Type wait_handle_inner(const Type& t);
 
@@ -746,6 +886,7 @@ Type wait_handle_inner(const Type& t);
 Type ival(int64_t);
 Type dval(double);
 Type lazyclsval(SString);
+Type enumclasslabelval(SString);
 Type vec_val(SArray);
 Type dict_val(SArray);
 Type keyset_val(SArray);
@@ -784,8 +925,8 @@ Type some_keyset_empty();
  */
 Type subObj(res::Class);
 Type objExact(res::Class);
-Type subCls(res::Class);
-Type clsExact(res::Class);
+Type subCls(res::Class, bool nonReg);
+Type clsExact(res::Class, bool nonReg);
 
 /*
  * vec types with known size.
@@ -870,8 +1011,8 @@ Type unctx(Type t);
 /*
  * Refinedness equivalence checks.
  */
-inline bool equivalently_refined(const Type& a, const Type& b) {
-  return a.equivalentlyRefined(b);
+inline bool equal(const Type& a, const Type& b) {
+  return a.equal(b);
 }
 
 template<
@@ -880,12 +1021,16 @@ template<
     std::is_same<typename Iterable::value_type, Type>::value
   >
 >
-bool equivalently_refined(const Iterable& a, const Iterable& b) {
+bool equal(const Iterable& a, const Iterable& b) {
   if (a.size() != b.size()) return false;
   for (auto ita = a.begin(), itb = b.begin(); ita != a.end(); ++ita, ++itb) {
-    if (!equivalently_refined(*ita, *itb)) return false;
+    if (!equal(*ita, *itb)) return false;
   }
   return true;
+}
+
+inline bool equal_no_context(const Type& a, const Type& b) {
+  return a.equalNoContext(b);
 }
 
 /*
@@ -906,6 +1051,7 @@ bool is_specialized_cls(const Type&);
  */
 bool is_specialized_string(const Type&);
 bool is_specialized_lazycls(const Type&);
+bool is_specialized_ecl(const Type&);
 bool is_specialized_int(const Type&);
 bool is_specialized_double(const Type&);
 
@@ -969,6 +1115,13 @@ Type remove_keyset(Type);
  * data is removed.
  */
 Type remove_bits(Type, trep);
+
+/*
+ * If the type might contain TCls or TLazyCls, remove it, and add
+ * TSStr instead. Any lazy class/class specialization is preserved and
+ * translated into a string specialization.
+ */
+Type promote_classish(Type);
 
 /*
  * Returns the best known instantiation of a class type.
@@ -1049,21 +1202,21 @@ Optional<IsTypeOp> type_to_istypeop(const Type& t);
  * no matching Type is found.
  *
  */
-Optional<Type> type_of_type_structure(const Index&, Context, SArray ts);
+Optional<Type> type_of_type_structure(const IIndex&, Context, SArray ts);
 
 /*
- * Return the DObj structure for a strict subtype of TObj or TOptObj.
+ * Return the DCls structure for a strict subtype of TObj or TOptObj.
  *
  * Pre: is_specialized_obj(t)
  */
-DObj dobj_of(const Type& t);
+const DCls& dobj_of(const Type& t);
 
 /*
  * Return the DCls structure for a strict subtype of TCls.
  *
  * Pre: is_specialized_cls(t)
  */
-DCls dcls_of(Type t);
+const DCls& dcls_of(const Type& t);
 
 /*
  * Return the SString for a strict subtype of TStr.
@@ -1078,6 +1231,13 @@ SString sval_of(const Type& t);
  * Pre: is_specialized_lazycls(t)
  */
 SString lazyclsval_of(const Type& t);
+
+/*
+ * Return the SString for a strict subtype of TEnumClassLabel.
+ *
+ * Pre: is_specialized_ecl(t)
+ */
+SString eclval_of(const Type& t);
 
 /*
  * Return the specialized integer value for a type.
@@ -1161,16 +1321,10 @@ Type widening_union(const Type& a, const Type& b);
 Type widen_type(Type t);
 
 /*
- * Check if the first type is more refined than the second type for
- * the purposes of use in the Index. This is basically moreRefined()
- * plus some additional rules for interfaces.
+ * Returns what we know about the emptiness of the type and whether
+ * checking is effect-free.
  */
-bool more_refined_for_index(const Type&, const Type&);
-
-/*
- * Returns what we know about the emptiness of the type.
- */
-Emptiness emptiness(const Type&);
+std::pair<Emptiness, bool> emptiness(const Type&);
 
 /*
  * Returns whether a Type could hold an object that has a custom
@@ -1185,21 +1339,6 @@ bool could_have_magic_bool_conversion(const Type&);
  * Pre: `a' is a subtype of TCell.
  */
 Type stack_flav(Type a);
-
-/*
- * The HHBBC type system is not monotonic. However, we want types stored in
- * the index to become monotonically more refined. We call this helper before
- * updating function return types to help maintain that invariant. A function
- * return type should never be an object with some known interface.
- *
- * The monotonicity requirement on our types is that given a, b, A, and B
- * such that A <= a and B <= b, we must have union_of(A, B) <= union_of(a, b)
- * and intersection_of(A, B) <= intersection_of(a, b).
- *
- * The union_of case can fail if a and b are some interface and A and B are
- * concrete, unrelated classes that implement that interface.
- */
-Type loosen_interfaces(Type);
 
 /*
  * Discard any countedness information about the type. Force any type
@@ -1287,8 +1426,7 @@ Type loosen_to_datatype(Type t);
 Type remove_uninit(Type t);
 
 /*
- * If t is not a TCell, returns TInitCell. Otherwise, if t contains
- * TUninit, return union_of(remove_uninit(t), TInitCell).
+ * If t contains TUninit, return union_of(remove_uninit(t), TInitNull).
  */
 Type to_cell(Type t);
 
@@ -1345,7 +1483,9 @@ std::pair<Type,bool> array_like_elem(const Type& arr, const Type& key);
  * the set. The returned type includes the non-TArrLike bits copied
  * into them.
  */
-std::pair<Type,bool> array_like_set(Type arr, const Type& key, const Type& val);
+std::pair<Type,bool> array_like_set(Type arr,
+                                    const Type& key,
+                                    const Type& val);
 
 /*
  * Perform a newelem operation on an array-like type.  Returns an
@@ -1366,6 +1506,26 @@ std::pair<Type,bool> array_like_set(Type arr, const Type& key, const Type& val);
 std::pair<Type,bool> array_like_newelem(Type arr, const Type& val);
 
 /*
+ * Check if an array_like_set on the given array with the given key
+ * and "undo-able". That is, given just the post-set array and the
+ * key, it's possible to reconstruct the array before the
+ * mutation. True will be returned if it definitely can be, false
+ * otherwise.
+ *
+ * Right now this is used to track chains of AddElemC without keeping
+ * a copy of each intermediate state.
+ */
+bool array_like_set_can_be_undone(const Type& arr, const Type& key);
+
+/*
+ * Given an array which is the product of array_like_set with the
+ * given key, produce the array as it was *before* the
+ * array_like_set. This is only if array_like_set returned true on the
+ * pre-set version of the array (with the same key).
+ */
+Type undo_array_like_set(Type arr, const Type& key);
+
+/*
  * Return the best known information for iteration of the supplied type. This is
  * only intended for non-mutable iteration, so the returned types are at worst
  * InitCell.
@@ -1382,11 +1542,11 @@ struct IterTypes {
     Any        // Nothing known
   };
   Count count;
-  // Can a IterInit[K] op throw on this iterator?
+  // Can a IterInit op throw on this iterator?
   bool mayThrowOnInit;
-  // Can a IterNext[K] op throw on this iterator? Can only happen for object
-  // types.
-  bool mayThrowOnNext;
+  // Can a IterGetKey, IterGetValue or IterNext op throw on this iterator?
+  // Can only happen for object types.
+  bool mayThrowOnGetOrNext;
 };
 IterTypes iter_types(const Type&);
 
@@ -1415,15 +1575,35 @@ bool compare_might_raise(const Type& t1, const Type& t2);
 std::pair<Type, Promotion> promote_classlike_to_key(Type);
 
 /*
- * Given a type, adjust the type for the given type-constraint. If there's no
- * type-constraint, or if property type-hints aren't being enforced, then return
- * the type as is. This might return TBottom if the type is not compatible with
- * the type-hint.
+ * Returns true if the Type *might* contain a DCls within it. This is
+ * conservative. If it returns false, the Type definitely does not. If
+ * it returnes true, the Type still might not contain one.
  */
-Type adjust_type_for_prop(const Index& index,
-                          const php::Class& propCls,
-                          const TypeConstraint* tc,
-                          const Type& ty);
+bool might_have_dcls(const Type&);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Calls res::Class::unserialize on any res::Class contained within
+ * the given Type. It also puts the Type into a "canonical" form. A
+ * Type that comes from BlobDecoder may not be in a canonical form
+ * (since the extern-worker job which produced it didn't have complete
+ * class information). This makes the Type canonical according to the
+ * class information known in this job (if not in a job it should be
+ * complete).
+ */
+Type unserialize_classes(const IIndex&, Type);
+
+/*
+ * Calls res::Class::serialize on any res::Class contains within the
+ * given type. This is necessary for any Type which will be sent to
+ * BlobEncoder, as only serialized classes can be encoded.
+ */
+Type serialize_classes(Type);
+
+//////////////////////////////////////////////////////////////////////
+
+}
 
 //////////////////////////////////////////////////////////////////////
 

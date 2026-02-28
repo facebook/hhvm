@@ -1,9 +1,23 @@
-File "this_member.php", line 16, characters 5-20:
+ERROR: File "this_member.php", line 16, characters 13-20:
 Invalid assignment (Typing[4110])
   File "this_member.php", line 13, characters 38-41:
-  Expected `<expr#1> as X`
+  Expected `<expr#4> as X`
   File "this_member.php", line 16, characters 5-9:
-    where `<expr#1>` is a reference to this expression
+    where `<expr#4>` is a reference to this expression
+  File "this_member.php", line 16, characters 13-17:
+  But got `X`
+  File "this_member.php", line 13, characters 38-41:
+    via this generic `this`
+  File "this_member.php", line 15, characters 24-24:
+  Since `X` is not final
+  File "this_member.php", line 12, characters 7-7:
+  this might not be a `X`
+ERROR: File "this_member.php", line 16, characters 13-20:
+Invalid assignment (Typing[4110])
+  File "this_member.php", line 13, characters 38-41:
+  Expected `<expr#4> as X`
+  File "this_member.php", line 16, characters 5-9:
+    where `<expr#4>` is a reference to this expression
   File "this_member.php", line 16, characters 13-17:
   But got `this as X`
   File "this_member.php", line 13, characters 38-41:

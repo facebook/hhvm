@@ -1,0 +1,49 @@
+Code actions available:
+------------------------------------------
+Change to `void` (CodeActionKind: "quickfix")
+await expression (CodeActionKind: "refactor") SELECTED
+Extract into variable (CodeActionKind: "refactor")
+Devmate Quick Fix - Invalid return type (CodeActionKind: "quickfix")
+Devmate Agent Fix - Invalid return type (CodeActionKind: "quickfix")
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"Awaitable<int>",
+          "range":{"end":{"character":9,"line":8},"start":{"character":6,"line":8}}
+        },
+        {
+          "newText":"async ",
+          "range":{"end":{"character":0,"line":7},"start":{"character":0,"line":7}}
+        },
+        {
+          "newText":"$_ = /*range-start*/ await gen_int()/*range-end*/ + 3;",
+          "range":{"end":{"character":52,"line":9},"start":{"character":4,"line":9}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"await expression"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+async function gen_int(): Awaitable<int> {
+  return 1;
+}
+
+function example(): void {
+async   // The refactor should change the lambda to an async that returns `Awaitable<int>`
+  (): Awaitable<int> ==> {
+    $_ = /*range-start*/ await gen_int()/*range-end*/ + 3;
+  };
+}
+

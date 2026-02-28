@@ -2,9 +2,19 @@
 =============================================================
 ===================== compact deserializing ==================
 ==============================================================
+
+Warning: Property 'TestStruct2::p1' declared as type bool, int assigned in %s/test/slow/prop-type-hints/thrift.php on line 26
+
+Warning: Property 'TestStruct2::p2' declared as type int, string assigned in %s/test/slow/prop-type-hints/thrift.php on line 26
+
+Warning: Property 'TestStruct2::p3' declared as type string, bool assigned in %s/test/slow/prop-type-hints/thrift.php on line 26
+
+Warning: Property 'TestStruct2::p6' declared as type ?int, string assigned in %s/test/slow/prop-type-hints/thrift.php on line 26
+
+Warning: Property 'TestStruct2::p5' declared as type DummyStruct, DummyStruct2 assigned in %s/test/slow/prop-type-hints/thrift-defs.inc on line 109
 ===================== binary deserializing ==================
 
-Warning: Property 'TestStruct2::p5' declared as type DummyStruct, DummyStruct2 assigned in %s/thrift-defs.inc on line 106
+Warning: Property 'TestStruct2::p5' declared as type DummyStruct, DummyStruct2 assigned in %s/thrift-defs.inc on line 109
 
 Warning: Property 'TestStruct2::p1' declared as type bool, int assigned in %s/thrift.php on line 8
 
@@ -18,7 +28,7 @@ Warning: Property 'TestStruct2::p6' declared as type ?int, string assigned in %s
 =============================================================
 ===================== compact deserializing ==================
 
-Warning: Property 'TestStruct2::p5' declared as type DummyStruct, DummyStruct2 assigned in %s/thrift-defs.inc on line 106
+Warning: Property 'TestStruct2::p5' declared as type DummyStruct, DummyStruct2 assigned in %s/thrift-defs.inc on line 109
 
 Warning: Property 'TestStruct2::p1' declared as type bool, int assigned in %s/thrift.php on line 16
 
@@ -34,6 +44,8 @@ Warning: Property 'TestStruct2::p6' declared as type ?int, string assigned in %s
 =============================================================
 ===================== compact deserializing ==================
 ==============================================================
+
+Warning: Property 'TestStruct5::_type' declared as type string, int assigned in %s/test/slow/prop-type-hints/thrift-defs.inc on line 199
 ===================== binary deserializing ==================
 
 Warning: Property 'TestStruct5::_type' declared as type string, int assigned in %s/thrift.php on line 8
@@ -56,11 +68,11 @@ Warning: Property 'TestStruct7::p5' declared as type HH\Vector, HH\vec assigned 
 
 Warning: Property 'TestStruct7::p6' declared as type HH\Set, HH\keyset assigned in %s/thrift.php on line 8
 
-Warning: Property 'TestStruct7::p7' declared as type %r(HH\\d)?%rarray, HH\Map assigned in %s/thrift.php on line 8
+Warning: Property 'TestStruct7::p7' declared as type HH\darray, HH\Map assigned in %s/thrift.php on line 8
 
-Warning: Property 'TestStruct7::p8' declared as type %r(HH\\v)?%rarray, HH\Vector assigned in %s/thrift.php on line 8
+Warning: Property 'TestStruct7::p8' declared as type HH\varray, HH\Vector assigned in %s/thrift.php on line 8
 
-Warning: Property 'TestStruct7::p9' declared as type %r(HH\\d)?%rarray, HH\Set assigned in %s/thrift.php on line 8
+Warning: Property 'TestStruct7::p9' declared as type HH\darray, HH\Set assigned in %s/thrift.php on line 8
 =============================================================
 ===================== compact deserializing ==================
 
@@ -72,11 +84,11 @@ Warning: Property 'TestStruct7::p5' declared as type HH\Vector, HH\vec assigned 
 
 Warning: Property 'TestStruct7::p6' declared as type HH\Set, HH\keyset assigned in %s/thrift.php on line 16
 
-Warning: Property 'TestStruct7::p7' declared as type %r(HH\\d)?%rarray, HH\Map assigned in %s/thrift.php on line 16
+Warning: Property 'TestStruct7::p7' declared as type HH\darray, HH\Map assigned in %s/thrift.php on line 16
 
-Warning: Property 'TestStruct7::p8' declared as type %r(HH\\v)?%rarray, HH\Vector assigned in %s/thrift.php on line 16
+Warning: Property 'TestStruct7::p8' declared as type HH\varray, HH\Vector assigned in %s/thrift.php on line 16
 
-Warning: Property 'TestStruct7::p9' declared as type %r(HH\\d)?%rarray, HH\Set assigned in %s/thrift.php on line 16
+Warning: Property 'TestStruct7::p9' declared as type HH\darray, HH\Set assigned in %s/thrift.php on line 16
 ==============================================================
 ===================== binary deserializing ==================
 

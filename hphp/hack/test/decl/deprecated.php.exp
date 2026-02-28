@@ -4,9 +4,9 @@
        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
        sc_module = None; sc_name = ([3:7-22], "\\DeprecatedClass");
-       sc_tparams = []; sc_where_constraints = []; sc_extends = [];
-       sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
+       sc_tparams = []; sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
+       sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
+       sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = [];
@@ -17,18 +17,24 @@
            (Tfun
               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [5:19-22]) };
-                ft_ret =
-                { et_enforced = Typing_defs_core.Unenforced;
-                  et_type = (Rhint ([5:26-30]), (Tprim Tvoid)) };
+                ft_ret = (Rhint ([5:26-30]), (Tprim Tvoid));
                 ft_flags =
-                (make_ft_flags FSync ~return_disposable:false
-                  ~returns_readonly:false ~support_dynamic_type:false
-                  ~readonly_this:false ~is_memoized:false ~variadic:false);
-                ft_ifc_decl = FDPolicied {PUBLIC} }));
+                { Typing_defs_flags.Fun.return_disposable = false;
+                  async = false; generator = false; fun_kind = FSync;
+                  is_function_pointer = false; returns_readonly = false;
+                  readonly_this = false; support_dynamic_type = false;
+                  is_memoized = false; variadic = false };
+                ft_instantiated = true }));
           sm_visibility = Public;
           sm_deprecated =
           (Some "The method foo is deprecated: use bar() instead");
-          sm_flags = (empty); sm_attributes = [] };
+          sm_flags =
+          { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+            override = false; dynamicallycallable = false;
+            php_std_lib = false; support_dynamic_type = false;
+            no_auto_likes = false; needs_concrete = false };
+          sm_attributes = []; sm_sort_text = None;
+          sm_package_requirement = Typing_defs.RPNormal };
          { Shallow_decl_defs.sm_name = ([8:19-22], "bar");
            sm_type =
            (Rwitness_from_decl ([8:19-22]),
@@ -36,16 +42,22 @@
                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability = (CapDefaults [8:19-22]) };
-                 ft_ret =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type = (Rhint ([8:26-30]), (Tprim Tvoid)) };
+                 ft_ret = (Rhint ([8:26-30]), (Tprim Tvoid));
                  ft_flags =
-                 (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~support_dynamic_type:false
-                   ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
-           sm_attributes = [] };
+                 { Typing_defs_flags.Fun.return_disposable = false;
+                   async = false; generator = false; fun_kind = FSync;
+                   is_function_pointer = false; returns_readonly = false;
+                   readonly_this = false; support_dynamic_type = false;
+                   is_memoized = false; variadic = false };
+                 ft_instantiated = true }));
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false; needs_concrete = false };
+           sm_attributes = []; sm_sort_text = None;
+           sm_package_requirement = Typing_defs.RPNormal };
          { Shallow_decl_defs.sm_name = ([11:19-22], "baz");
            sm_type =
            (Rwitness_from_decl ([11:19-22]),
@@ -53,16 +65,22 @@
                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability = (CapDefaults [11:19-22]) };
-                 ft_ret =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type = (Rhint ([11:26-30]), (Tprim Tvoid)) };
+                 ft_ret = (Rhint ([11:26-30]), (Tprim Tvoid));
                  ft_flags =
-                 (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~support_dynamic_type:false
-                   ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
-           sm_attributes = [] };
+                 { Typing_defs_flags.Fun.return_disposable = false;
+                   async = false; generator = false; fun_kind = FSync;
+                   is_function_pointer = false; returns_readonly = false;
+                   readonly_this = false; support_dynamic_type = false;
+                   is_memoized = false; variadic = false };
+                 ft_instantiated = true }));
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false; needs_concrete = false };
+           sm_attributes = []; sm_sort_text = None;
+           sm_package_requirement = Typing_defs.RPNormal };
          { Shallow_decl_defs.sm_name = ([14:19-23], "foo2");
            sm_type =
            (Rwitness_from_decl ([14:19-23]),
@@ -70,98 +88,111 @@
                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability = (CapDefaults [14:19-23]) };
-                 ft_ret =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type = (Rhint ([14:27-31]), (Tprim Tvoid)) };
+                 ft_ret = (Rhint ([14:27-31]), (Tprim Tvoid));
                  ft_flags =
-                 (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~support_dynamic_type:false
-                   ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+                 { Typing_defs_flags.Fun.return_disposable = false;
+                   async = false; generator = false; fun_kind = FSync;
+                   is_function_pointer = false; returns_readonly = false;
+                   readonly_this = false; support_dynamic_type = false;
+                   is_memoized = false; variadic = false };
+                 ft_instantiated = true }));
            sm_visibility = Public;
            sm_deprecated =
            (Some "The method foo2 is deprecated: use bar2() instead");
-           sm_flags = (empty); sm_attributes = [] }
+           sm_flags =
+           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
+             override = false; dynamicallycallable = false;
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false; needs_concrete = false };
+           sm_attributes = []; sm_sort_text = None;
+           sm_package_requirement = Typing_defs.RPNormal }
          ];
-       sc_user_attributes = []; sc_enum_type = None }));
+       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+       sc_package = None }));
   ("\\foo",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
         (Some "The function foo is deprecated: use bar() instead");
-        fe_module = None; fe_internal = false;
+        fe_module = None; fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([18:10-13]),
          (Tfun
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [18:10-13]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([18:17-21]), (Tprim Tvoid)) };
+              ft_ret = (Rhint ([18:17-21]), (Tprim Tvoid));
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC} }));
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
+              ft_instantiated = true }));
         fe_pos = [18:10-13]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }));
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false;
+        fe_package_requirement = Typing_defs.RPNormal }));
   ("\\bar",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_internal = false;
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([21:10-13]),
          (Tfun
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [21:10-13]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([21:17-21]), (Tprim Tvoid)) };
+              ft_ret = (Rhint ([21:17-21]), (Tprim Tvoid));
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC} }));
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
+              ft_instantiated = true }));
         fe_pos = [21:10-13]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }));
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false;
+        fe_package_requirement = Typing_defs.RPNormal }));
   ("\\baz",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_internal = false;
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([24:10-13]),
          (Tfun
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [24:10-13]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([24:17-21]), (Tprim Tvoid)) };
+              ft_ret = (Rhint ([24:17-21]), (Tprim Tvoid));
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC} }));
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
+              ft_instantiated = true }));
         fe_pos = [24:10-13]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }));
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false;
+        fe_package_requirement = Typing_defs.RPNormal }));
   ("\\foo2",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated =
         (Some "The function foo2 is deprecated: use bar2() instead");
-        fe_module = None; fe_internal = false;
+        fe_module = None; fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([27:10-14]),
          (Tfun
             { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [27:10-14]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([27:18-22]), (Tprim Tvoid)) };
+              ft_ret = (Rhint ([27:18-22]), (Tprim Tvoid));
               ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC} }));
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
+              ft_instantiated = true }));
         fe_pos = [27:10-14]; fe_php_std_lib = false;
-        fe_support_dynamic_type = false }))
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false;
+        fe_package_requirement = Typing_defs.RPNormal }))
   ]
-
-They matched!

@@ -1,16 +1,81 @@
 <?hh
 
 class RootClass {
-  public darray<string, mixed> $children = darray[];
+  public darray<string, mixed> $children = dict[];
+  public SomeChildOfMemoize $childWithMemoize;
+  public SomeChildOfMemoize $childWithMemoize2;
+  public static InstaneHeldInStaticProp $myStaticInstance;
+
+  public function __construct() {
+    $this->childWithMemoize = new SomeChildOfMemoize();
+    $this->childWithMemoize2 = new SomeChildOfMemoize();
+  }
+
   <<__Memoize>>
-  public static function getInstance() {
+  public static function getInstance() :mixed{
+    RootClass::$myStaticInstance = new InstaneHeldInStaticProp();
     return new RootClass();
+  }
+}
+
+class InstaneHeldInStaticProp {}
+class InstanceCachedNode1 {}
+class InstanceCachedNode2 {}
+class ParentWithMemoizeAndMemoizeLSB {
+  <<__MemoizeLSB>>
+  public static function doMemoizedLSBWork(): mixed {
+    return json_encode(vec[1,2,3]);
+  }
+  <<__MemoizeLSB>>
+  public static function doMemoizedLSBWorkWithParam(int $a): mixed {
+    return json_encode(vec[$a,2,3]);
+  }
+  <<__Memoize>>
+  public static function doStaticMemoizedWorkWithParam(int $a): mixed {
+    return json_encode(vec[$a,2,3]);
+  }
+  <<__Memoize>>
+  public function doInstanceMemoizedWorkWithParam(int $a): InstanceCachedNode1 {
+    return new InstanceCachedNode1();
+  }
+    <<__Memoize>>
+  public function doInstanceMemoizedWorkWithParam2(int $a): InstanceCachedNode2 {
+    return new InstanceCachedNode2();
+  }
+
+  // ===== Never called section =====
+  <<__Memoize>>
+  public function neverCalledInstanceMemoWithParam(int $a): InstanceCachedNode1 {
+    return new InstanceCachedNode1();
+  }
+  <<__Memoize>>
+  public function neverCalledInstanceMemo(): InstanceCachedNode1 {
+    return new InstanceCachedNode1();
+  }
+   <<__MemoizeLSB>>
+  public static function neverCalledMemoizedLSB(): mixed {
+    return json_encode(vec[1,2,3]);
+  }
+  <<__MemoizeLSB>>
+  public static function neverCalledMemoizedLSBWorkWithParam(int $a): mixed {
+    return json_encode(vec[$a,2,3]);
+  }
+  <<__Memoize>>
+  public static function neverCalledStaticMemoizedWorkWithParam(int $a): mixed {
+    return json_encode(vec[$a,2,3]);
+  }
+}
+
+class SomeChildOfMemoize extends ParentWithMemoizeAndMemoizeLSB {
+  <<__Memoize>>
+  public function doInstanceMemoizedWork(): mixed {
+    return json_encode(vec[1,2,3]);
   }
 }
 
 class ChildWithClosureMember {
   public $closure;
-  public function doWork() {
+  public function doWork() :mixed{
     json_encode($this->closure);
   }
 }
@@ -21,12 +86,12 @@ class ParentWithClosureTarget {
   public $child;
 
   public function __construct() {
-    $this->somestring = json_encode(varray[1,2,3]);
+    $this->somestring = json_encode(vec[1,2,3]);
     $this->child = new ChildWithClosureMember();
     $this->child->closure = $this->createClosure();
   }
 
-  public function createClosure() {
+  public function createClosure() :mixed{
     return function() {
       return $this->someval;
     };
@@ -34,7 +99,7 @@ class ParentWithClosureTarget {
 }
 
 class ClassForSecondCapture { }
-function echo_buffer($str) {
+function echo_buffer($str) :mixed{
 
   // new root names
   $str = str_replace('HPHP::CppStack', 'onsome-stack', $str);
@@ -42,22 +107,21 @@ function echo_buffer($str) {
   $str = str_replace('HPHP::RdsLocal', 'rds-local', $str);
   ObjprofHeapgraphPhp::$echobuf[] = $str;
 }
-function echo_flush() {
+function echo_flush() :mixed{
 
   $echobuf_uniq = array_unique(ObjprofHeapgraphPhp::$echobuf);
   sort(inout $echobuf_uniq);
   foreach ($echobuf_uniq as $str) {
     echo $str;
   }
-  ObjprofHeapgraphPhp::$echobuf = varray[];
+  ObjprofHeapgraphPhp::$echobuf = vec[];
 }
-function showTestClasses($node) {
-
-
-
+function showTestClasses($node) :mixed{
   $classname = idx($node, 'class', 'no class...');
   $kind = $node['kind'];
-  $testclasses = darray[
+  $testclasses = dict[
+    SomeChildOfMemoize::class => 1,
+    ParentWithMemoizeAndMemoizeLSB::class => 1,
     ChildWithClosureMember::class => 1,
     ParentWithClosureTarget::class => 1,
     RootClass::class => 1,
@@ -77,7 +141,7 @@ function showTestClasses($node) {
   }
 }
 
-function edgeName($hg, $edge) {
+function edgeName($hg, $edge) :mixed{
   $from = $edge['from'];
   $n = heapgraph_node($hg, $from);
   $kind = $n['kind'];
@@ -86,9 +150,6 @@ function edgeName($hg, $edge) {
     $ty = $n['type'];
     if ($ty === 'HPHP::CppStack') return 'onsome-stack';
     if ($ty === 'HPHP::PhpStack') return 'onsome-stack';
-    if ($ty === 'HPHP::StaticPropData') {
-      return "StaticProperty:".$n['class']."::".$n['prop'];
-    }
   }
   if (isset($edge['key'])) return "Key:".$edge['key'];
   if (isset($edge['value'])) return "Value:".$edge['value'];
@@ -97,9 +158,8 @@ function edgeName($hg, $edge) {
   return "";
 }
 
-function showTestEdge($edge) {
-
-  $testedges = darray[
+function showTestEdge($edge) :mixed{
+  $testedges = dict[
     'ArrayKey:MemoizedSingleton' => 1,
     'Property:somestring' => 1,
     'Property:child' => 1,
@@ -116,19 +176,51 @@ function showTestEdge($edge) {
   }
 }
 
-function showAllEdges($hg, $edges) {
+function showInstanceMemoizations($edge, $hg) :mixed{
+  $class = idx($edge, 'class');
+  $func = idx($edge, 'func');
+  if ($class === null || $edge === null) {
+    return;
+  }
+  echo_buffer("Instance: $class::$func\n");
+}
+
+
+function showStaticMemoizations($node, $hg) :mixed{
+  if (idx($node, 'kind') != "Root" && idx($node, 'kind') != "Cpp") {
+    return;
+  }
+  $classname = idx($node, 'class');
+  $func = idx($node, 'func');
+  if ($classname === null || $func === null) {
+    return;
+  }
+  $kind = $node['kind'] === "Root" ? "Static: " : "Instance: ";
+  echo_buffer("$kind $classname::$func\n");
+}
+
+function showRootProperties($node): void {
+  if (idx($node, 'type') === 'HPHP::StaticPropData') {
+    if (explode(':', $node['prop'])[0] != 'RootClass') {
+      return;
+    }
+    echo_buffer($node['prop']."\n");
+  }
+}
+
+function showAllEdges($hg, $edges) :mixed{
   foreach ($edges as $edge) {
     echo_buffer(edgeName($hg, $edge)."\n");
   }
 }
 
-function showClassOnly($node) {
+function showClassOnly($node) :mixed{
   if (idx($node, 'class')) {
     echo_buffer($node['class']."\n");
   }
 }
 
-function showClass($node) {
+function showClass($node) :mixed{
   if (idx($node, 'class')) {
     echo_buffer($node['class']."\n");
   } else {
@@ -136,21 +228,29 @@ function showClass($node) {
   }
 }
 
-function printNode($node) {
+function printNode($node, $indent = 0) :mixed{
+  for ($i = 0; $i < $indent; $i++) echo "  ";
   echo "node ".$node['index']." ".$node['kind']." ";
   if (isset($node['class'])) echo $node['class']." ";
   if (isset($node['func'])) echo $node['func']." ";
   if (isset($node['local'])) echo $node['local']." ";
   if (isset($node['prop'])) echo $node['prop']." ";
+  if (isset($node['type'])) echo $node['type']." ";
   echo "\n";
 }
 
-function printEdge($edge) {
-  echo 'edge '.$edge['name'].' ';
+function printEdge($edge, $indent = 0) :mixed{
+  for ($i = 0; $i < $indent; $i++) echo "  ";
+  echo 'edge '.idx($edge, 'name', '(no name)').' ';
   echo $edge['kind'].' '.$edge['from']."->".$edge['to'];
+  if (isset($node['prop'])) echo ' prop='.$node['prop'];
+  if (isset($node['offset'])) echo ' offset='.$node['offset'];
+  if (isset($node['value'])) echo ' value='.$node['value'];
+  if (isset($node['key'])) echo ' key='.$node['key'];
+  if (isset($node['class']) && isset($node['func'])) echo ' func='.($node['class'].'::'.$node['func']);
   echo "\n";
 }
-function dfsPrintNode($hg, $node) {
+function dfsPrintNode($hg, $node) :mixed{
 
   $id = $node['index'];
   ObjprofHeapgraphPhp::$visited[$id] = true;
@@ -179,15 +279,25 @@ function entrypoint_heapgraph(): void {
   $r->children['MemoizedSingleton'] = new ParentWithClosureTarget();
   $r->children['MemoizedSingleton']->child->doWork();
 
+  // Memoize related tests
+  $r->childWithMemoize->doInstanceMemoizedWork();
+  $r->childWithMemoize->doInstanceMemoizedWorkWithParam(42);
+  $r->childWithMemoize->doInstanceMemoizedWorkWithParam(99);
+  $r->childWithMemoize->doInstanceMemoizedWorkWithParam2(123);
+  $r->childWithMemoize2->doInstanceMemoizedWork();
+  SomeChildOfMemoize::doMemoizedLSBWork();
+  SomeChildOfMemoize::doMemoizedLSBWorkWithParam(42);
+  SomeChildOfMemoize::doStaticMemoizedWorkWithParam(42);
+
   // We do some consolidation here because the behavior when testing
   // is really non-deterministic. Both on order of scans and also
   // whether things are in CPP or PHP (based on mode of test)
-  ObjprofHeapgraphPhp::$echobuf = varray[];
+  ObjprofHeapgraphPhp::$echobuf = vec[];
 
   ObjprofHeapgraphPhp::$hg_for_closure = null;
   ObjprofHeapgraphPhp::$id_of_rootclass = null;
 
-  ObjprofHeapgraphPhp::$visited = varray[];
+  ObjprofHeapgraphPhp::$visited = vec[];
 
   ////////////////////////////////////////////////////
   // Test starts here:
@@ -225,6 +335,14 @@ function entrypoint_heapgraph(): void {
   heapgraph_foreach_node($hg, showTestClasses<>);
   echo_flush();
 
+  echo "\nTraversing nodes for static memoizations:\n";
+  heapgraph_foreach_node($hg, ($n) ==> showStaticMemoizations($n, $hg));
+  echo_flush();
+
+  echo "\nTraversing nodes for instance memoizations:\n";
+  heapgraph_foreach_edge($hg, ($n) ==> showInstanceMemoizations($n, $hg));
+  echo_flush();
+
   echo "\nTraversing edges for first capture:\n";
   ObjprofHeapgraphPhp::$hg_for_closure = $hg;
   heapgraph_foreach_edge($hg, showTestEdge<>);
@@ -232,6 +350,10 @@ function entrypoint_heapgraph(): void {
 
   echo "\nTraversing roots for first capture:\n";
   heapgraph_foreach_root($hg, showTestEdge<>);
+  echo_flush();
+
+  echo "\nTraversing root properties:\n";
+  HH\heapgraph_foreach_root_node($hg, showRootProperties<>);
   echo_flush();
 
   // CHILDREN / PARENTS
@@ -247,12 +369,12 @@ function entrypoint_heapgraph(): void {
 
   // DFS NODES
   echo "\nDoing DFS from root class on nodes:\n";
-  heapgraph_dfs_nodes($hg, varray[ObjprofHeapgraphPhp::$id_of_rootclass], varray[], showClassOnly<>);
+  heapgraph_dfs_nodes($hg, vec[ObjprofHeapgraphPhp::$id_of_rootclass], vec[], showClassOnly<>);
   echo_flush();
 
   echo "\nDoing DFS from root class on nodes (skipping root):\n";
   heapgraph_dfs_nodes(
-    $hg, varray[ObjprofHeapgraphPhp::$id_of_rootclass], varray[ObjprofHeapgraphPhp::$id_of_rootclass], showClass<>
+    $hg, vec[ObjprofHeapgraphPhp::$id_of_rootclass], vec[ObjprofHeapgraphPhp::$id_of_rootclass], showClass<>
   );
   echo_flush();
 

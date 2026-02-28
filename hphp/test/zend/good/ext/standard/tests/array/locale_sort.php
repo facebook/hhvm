@@ -2,15 +2,15 @@
 <<__EntryPoint>>
 function main_entry(): void {
   setlocale(LC_ALL, 'fr_FR.ISO8859-1', 'fr_FR');
-  $table = darray["AB" => "Alberta",
+  $table = dict["AB" => "Alberta",
   "BC" => "Colombie-Britannique",
   "MB" => "Manitoba",
   "NB" => "Nouveau-Brunswick",
   "NL" => "Terre-Neuve-et-Labrador",
-  "NS" => "Nouvelle-Écosse",
+  "NS" => "Nouvelle-\xc9cosse",
   "ON" => "Ontario",
-  "PE" => "Île-du-Prince-Édouard",
-  "QC" => "Québec",
+  "PE" => "\xcele-du-Prince-\xc9douard",
+  "QC" => "Qu\xe9bec",
   "SK" => "Saskatchewan",
   "NT" => "Territoires du Nord-Ouest",
   "NU" => "Nunavut",

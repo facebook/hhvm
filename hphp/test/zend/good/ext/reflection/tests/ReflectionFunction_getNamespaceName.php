@@ -1,7 +1,7 @@
 <?hh
 namespace A\B;
 <<__DynamicallyCallable>>
-function foo() {}
+function foo() :mixed{}
 <<__EntryPoint>> function main(): void {
 $function = new \ReflectionFunction('sort');
 \var_dump($function->inNamespace());

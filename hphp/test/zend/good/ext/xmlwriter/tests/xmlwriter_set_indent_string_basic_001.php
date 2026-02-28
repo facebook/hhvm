@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$temp_filename = __SystemLib\hphp_test_tmppath('xmlwriter_set_indent_string.tmp');
+$temp_filename = sys_get_temp_dir().'/'.'xmlwriter_set_indent_string.tmp';
     $fp = fopen($temp_filename, "w");
     fwrite ($fp, "Hi");
     fclose($fp);

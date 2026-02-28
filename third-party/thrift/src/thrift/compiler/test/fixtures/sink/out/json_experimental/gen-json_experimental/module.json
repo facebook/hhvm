@@ -1,0 +1,260 @@
+{
+  "__fbthrift": "@generated",
+  "thrift_module" : "module",
+  "includes": {
+    "cpp": "thrift/annotation/cpp.thrift",
+    "thrift": "thrift/annotation/thrift.thrift"
+  },
+  "namespaces": {
+    "java.swift": "test.fixtures.sink"
+  },
+
+  "structs" :
+  {
+      "InitialResponse" : {
+        "name" : "InitialResponse",
+        "fields" : {
+          "content" : {
+            "name" : "content",
+            "key" : 1,
+            "lineno" : 26,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 25
+      },
+      "FinalResponse" : {
+        "name" : "FinalResponse",
+        "fields" : {
+          "content" : {
+            "name" : "content",
+            "key" : 1,
+            "lineno" : 30,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 29
+      },
+      "SinkPayload" : {
+        "name" : "SinkPayload",
+        "fields" : {
+          "content" : {
+            "name" : "content",
+            "key" : 1,
+            "lineno" : 34,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 33
+      },
+      "CompatibleWithKeywordSink" : {
+        "name" : "CompatibleWithKeywordSink",
+        "fields" : {
+          "sink" : {
+            "name" : "sink",
+            "key" : 1,
+            "lineno" : 39,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 37
+      },
+      "InitialException" : {
+        "name" : "InitialException",
+        "fields" : {
+          "reason" : {
+            "name" : "reason",
+            "key" : 1,
+            "lineno" : 43,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  }
+        },
+        "is_exception" : true,
+        "is_union" : false,
+        "lineno" : 42
+      },
+      "SinkException1" : {
+        "name" : "SinkException1",
+        "fields" : {
+          "reason" : {
+            "name" : "reason",
+            "key" : 1,
+            "lineno" : 47,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  }
+        },
+        "is_exception" : true,
+        "is_union" : false,
+        "lineno" : 46
+      },
+      "SinkException2" : {
+        "name" : "SinkException2",
+        "fields" : {
+          "reason" : {
+            "name" : "reason",
+            "key" : 1,
+            "lineno" : 51,
+            "required" : "opt-in-req-out",
+            "type" : "i64"
+                  }
+        },
+        "is_exception" : true,
+        "is_union" : false,
+        "lineno" : 50
+      }
+  },
+  "services" :
+  {
+      "SinkService" : { 
+        "name" : "SinkService",
+        "lineno" : 54,
+        "functions" : {
+          "method" : {
+            "name" : "method",
+            "returnType" : {
+      "type" : "sink",
+      "inner_type" : {
+      "type" : "struct",
+      "name" : "SinkPayload"
+    },
+      "final_response_type" : {
+      "type" : "struct",
+      "name" : "FinalResponse"
+    }
+    },
+            "lineno" : 55
+          },
+          "methodAndReponse" : {
+            "name" : "methodAndReponse",
+            "returnType" : {
+      "type" : "sink",
+      "inner_type" : {
+      "type" : "struct",
+      "name" : "SinkPayload"
+    },
+      "first_response_type" : {
+      "type" : "struct",
+      "name" : "InitialResponse"
+    },
+      "final_response_type" : {
+      "type" : "struct",
+      "name" : "FinalResponse"
+    }
+    },
+            "lineno" : 56
+          },
+          "methodThrow" : {
+            "name" : "methodThrow",
+            "exceptions" : {
+              "ex" : {
+                "name": "ex",
+                "type" : {
+      "type" : "struct",
+      "name" : "InitialException"
+    },
+                "id" : 1
+              }
+            },
+            "returnType" : {
+      "type" : "sink",
+      "inner_type" : {
+      "type" : "struct",
+      "name" : "SinkPayload"
+    },
+      "final_response_type" : {
+      "type" : "struct",
+      "name" : "FinalResponse"
+    }
+    },
+            "lineno" : 57
+          },
+          "methodSinkThrow" : {
+            "name" : "methodSinkThrow",
+            "returnType" : {
+      "type" : "sink",
+      "inner_type" : {
+      "type" : "struct",
+      "name" : "SinkPayload"
+    },
+      "final_response_type" : {
+      "type" : "struct",
+      "name" : "FinalResponse"
+    }
+    },
+            "lineno" : 60
+          },
+          "methodFinalThrow" : {
+            "name" : "methodFinalThrow",
+            "returnType" : {
+      "type" : "sink",
+      "inner_type" : {
+      "type" : "struct",
+      "name" : "SinkPayload"
+    },
+      "final_response_type" : {
+      "type" : "struct",
+      "name" : "FinalResponse"
+    }
+    },
+            "lineno" : 64
+          },
+          "methodBothThrow" : {
+            "name" : "methodBothThrow",
+            "returnType" : {
+      "type" : "sink",
+      "inner_type" : {
+      "type" : "struct",
+      "name" : "SinkPayload"
+    },
+      "final_response_type" : {
+      "type" : "struct",
+      "name" : "FinalResponse"
+    }
+    },
+            "lineno" : 68
+          },
+          "methodFast" : {
+            "name" : "methodFast",
+            "returnType" : {
+      "type" : "sink",
+      "inner_type" : {
+      "type" : "struct",
+      "name" : "SinkPayload"
+    },
+      "final_response_type" : {
+      "type" : "struct",
+      "name" : "FinalResponse"
+    }
+    },
+            "lineno" : 72,
+            "structured_annotations": {
+              "cpp.ProcessInEbThreadUnsafe" : {
+                "type" : {
+                "type" : "struct",
+                "name" : "ProcessInEbThreadUnsafe",
+                "path" : "thrift/annotation/cpp.thrift"
+              },
+                "value" : {}
+              }
+            }
+          }
+        }
+          }
+  },
+  "source_path" : "thrift/compiler/test/fixtures/sink/src/module",
+  "py_namespace" : ""
+}

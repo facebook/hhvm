@@ -15,7 +15,6 @@
 */
 #include "hphp/hhbbc/representation.h"
 
-#include <sstream>
 #include <boost/algorithm/string.hpp>
 #include <memory>
 #include <vector>
@@ -27,6 +26,7 @@
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>
 
+#include "hphp/hhbbc/analyze.h"
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/context.h"
@@ -48,6 +48,9 @@ namespace HPHP::HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 namespace {
+
+// Truncate stringization of ArrLikeVals above this size.
+constexpr size_t maxArrLikeValSize = 1000;
 
 std::string indent(int level, const std::string& s) {
   // Whee; make as many std::string copies as possible.
@@ -74,7 +77,7 @@ std::string escaped_string(SString str) {
   auto const sl = str->slice();
   folly::toAppend("\"", folly::cEscape<std::string>(sl), "\"", &ret);
   return ret;
-};
+}
 
 std::string array_string(SArray arr) {
   std::string str;
@@ -89,6 +92,7 @@ std::string array_string(SArray arr) {
 namespace php {
 
 std::string local_string(const Func& func, LocalId lid) {
+  if (lid == NoLocalId) return "None";
   if (lid == StackDupId) return "Dup";
   if (lid == StackThisId) return "This";
   assertx(lid <= MaxLocalId);
@@ -96,7 +100,7 @@ std::string local_string(const Func& func, LocalId lid) {
   return loc.name
     ? folly::to<std::string>("$", loc.name->data())
     : folly::to<std::string>("$<unnamed:", lid, ">");
-};
+}
 
 std::string show(const Func& func, const Bytecode& bc) {
   std::string ret;
@@ -190,8 +194,8 @@ std::string show(const Func& func, const Bytecode& bc) {
     : "-";                                                         \
   folly::toAppend(                                                 \
     " ", show(data.fca.base(), data.fca.inoutArgs(),               \
-              data.fca.readonlyArgs(), aeTarget,                   \
-              data.fca.context()), &ret);                          \
+              data.fca.readonlyArgs(), kInvalidId, /* TODO(named_params) actually pass data here */ \
+              aeTarget, data.fca.context()), &ret);                          \
 } while (false);
 
 #define IMM_NA
@@ -353,6 +357,7 @@ std::string show(const Class& cls) {
     folly::toAppend("  implements ", i->data(), "\n", &ret);
   }
   for (auto& m : cls.methods) {
+    if (!m) continue;
     folly::toAppend(
       "  method ",
       m->name->data(), ":\n",
@@ -363,21 +368,23 @@ std::string show(const Class& cls) {
   return ret;
 }
 
-std::string show(const Unit& unit) {
+std::string show(const Unit& unit,
+                 const std::vector<const php::Class*>& classes,
+                 const std::vector<const php::Func*>& funcs) {
   std::string ret;
   folly::toAppend(
     "Unit ", unit.filename->data(), "\n",
     &ret
   );
 
-  for (auto& c : unit.classes) {
+  for (auto const c : classes) {
     folly::toAppend(
       indent(2, show(*c)),
       &ret
     );
   }
 
-  for (auto& f : unit.funcs) {
+  for (auto const f : funcs) {
     folly::toAppend(
       "  function ", f->name->data(), ":\n",
       indent(4, show(*f)),
@@ -389,10 +396,52 @@ std::string show(const Unit& unit) {
   return ret;
 }
 
-std::string show(const Program& p) {
+std::string show(const Unit& unit, const IIndex& index) {
+  std::vector<const php::Class*> classes;
+  std::vector<const php::Func*> funcs;
+  index.for_each_unit_class(
+    unit,
+    [&] (const php::Class& c) { classes.emplace_back(&c); }
+  );
+  index.for_each_unit_func(
+    unit,
+    [&] (const php::Func& f) { funcs.emplace_back(&f); }
+  );
+
+  std::sort(
+    begin(classes), end(classes),
+    [] (const php::Class* a, const php::Class* b) {
+      return string_data_lt_type{}(a->name, b->name);
+    }
+  );
+  std::sort(
+    begin(funcs), end(funcs),
+    [] (const php::Func* a, const php::Func* b) {
+      return string_data_lt{}(a->name, b->name);
+    }
+  );
+
+  return show(unit, classes, funcs);
+}
+
+std::string show(const Unit& unit, const Program& p) {
+  std::vector<const php::Class*> classes;
+  std::vector<const php::Func*> funcs;
+  for (auto const& c : p.classes) {
+    if (c->unit != unit.filename) continue;
+    classes.emplace_back(c.get());
+  }
+  for (auto const& f : p.funcs) {
+    if (f->unit != unit.filename) continue;
+    funcs.emplace_back(f.get());
+  }
+  return show(unit, classes, funcs);
+}
+
+std::string show(const Program& p, const IIndex& index) {
   using namespace folly::gen;
   return from(p.units)
-    | map([] (const std::unique_ptr<php::Unit>& u) { return show(*u); })
+    | map([&] (const std::unique_ptr<php::Unit>& u) { return show(*u, index); })
     | unsplit<std::string>("--------------\n")
     ;
 }
@@ -403,6 +452,60 @@ std::string show(SrcLoc loc) {
                         loc.past.line, loc.past.col);
 }
 
+}
+
+//////////////////////////////////////////////////////////////////////
+
+std::string show(const DCls& dcls, bool isObj) {
+  auto const lt = [&] {
+    assertx(!dcls.isExact());
+    return !isObj && !dcls.containsNonRegular() ? "<-" : "<=";
+  };
+
+  auto const eq = [&] (res::Class cls) {
+    return isObj || dcls.containsNonRegular() || cls.hasCompleteChildren()
+      ? "=" : "=-";
+  };
+
+  std::string ret;
+  if (dcls.isExact()) {
+    folly::toAppend(eq(dcls.cls()), show(dcls.cls()), &ret);
+  } else if (dcls.isSub()) {
+    folly::toAppend(lt(), show(dcls.cls()), &ret);
+  } else if (dcls.isIsect()) {
+    folly::toAppend(
+      lt(),
+      "{",
+      [&] {
+        using namespace folly::gen;
+        return from(dcls.isect())
+          | map([] (res::Class c) { return show(c); })
+          | unsplit<std::string>("&");
+      }(),
+      "}",
+      &ret
+    );
+  } else {
+    auto const [e, i] = dcls.isectAndExact();
+    folly::toAppend(
+      eq(e),
+      "{",
+      show(e),
+      "}&",
+      lt(),
+      "{",
+      [&, i=i] {
+        using namespace folly::gen;
+        return from(*i)
+          | map([] (res::Class c) { return show(c); })
+          | unsplit<std::string>("&");
+      }(),
+          "}",
+      &ret
+    );
+  }
+  if (dcls.isCtx()) folly::toAppend(" this", &ret);
+  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -550,7 +653,7 @@ std::string show(const Type& t) {
   // remaining (non-support) bits. If there's no specialization, just
   // delegate to gather().
   auto const gatherForSpec = [&] (trep bits) {
-    // Gather the supoprt and the non-support bits, then combine them
+    // Gather the support and the non-support bits, then combine them
     // into a string (with the spec in the middle).
     auto const impl = [&] (trep mask, const std::string& spec) {
       auto const [specPart, specMatches] = gather(bits & mask);
@@ -573,40 +676,18 @@ std::string show(const Type& t) {
     };
 
     switch (t.m_dataTag) {
-    case DataTag::Obj: {
-      std::string ret;
-      switch (t.m_data.dobj.type) {
-      case DObj::Exact:
-        folly::toAppend("=", show(t.m_data.dobj.cls), &ret);
-        break;
-      case DObj::Sub:
-        folly::toAppend("<=", show(t.m_data.dobj.cls), &ret);
-        break;
-      }
-      if (t.m_data.dobj.isCtx) folly::toAppend(" this", &ret);
-      return impl(BObj, ret);
-    }
+    case DataTag::Obj:
+      return impl(BObj, show(t.m_data.dobj, true));
     case DataTag::WaitHandle:
       return impl(
         BObj,
-        folly::sformat("=WaitH<{}>", show(*t.m_data.dwh.inner))
+        folly::sformat("=WaitH<{}>", show(t.m_data.dwh->inner))
       );
-    case DataTag::Cls: {
-      std::string ret;
-      switch (t.m_data.dcls.type) {
-      case DCls::Exact:
-        folly::toAppend("=", show(t.m_data.dcls.cls), &ret);
-        break;
-      case DCls::Sub:
-        folly::toAppend("<=", show(t.m_data.dcls.cls), &ret);
-        break;
-      }
-      if (t.m_data.dcls.isCtx) folly::toAppend(" this", &ret);
-      return impl(BCls, ret);
-    }
+    case DataTag::Cls:
+      return impl(BCls, show(t.m_data.dcls, false));
     case DataTag::ArrLikePacked:
       return impl(
-        BArrLikeN,
+        BArrLike,
         folly::sformat(
           "({})",
           [&] {
@@ -619,12 +700,12 @@ std::string show(const Type& t) {
       );
     case DataTag::ArrLikePackedN:
       return impl(
-        BArrLikeN,
+        BArrLike,
         folly::sformat("([{}])", show(t.m_data.packedn->type))
       );
     case DataTag::ArrLikeMap:
       return impl(
-        BArrLikeN,
+        BArrLike,
         folly::sformat(
           "({}{})",
           [&] {
@@ -646,7 +727,7 @@ std::string show(const Type& t) {
       );
     case DataTag::ArrLikeMapN:
       return impl(
-        BArrLikeN,
+        BArrLike,
         folly::sformat(
           "([{}])",
           showElem(t.m_data.mapn->key, t.m_data.mapn->val)
@@ -654,7 +735,18 @@ std::string show(const Type& t) {
       );
     case DataTag::ArrLikeVal:
       return impl(
-        BArrLikeN, folly::sformat("~{}", array_string(t.m_data.aval))
+        BArrLike,
+        folly::sformat(
+          "~{}",
+          [&] {
+            auto s = array_string(t.m_data.aval);
+            if (s.size() > maxArrLikeValSize) {
+              s.resize(maxArrLikeValSize);
+              s += "...(truncated)";
+            }
+            return s;
+          }()
+        )
       );
     case DataTag::Str:
       return impl(BStr, folly::sformat("={}", escaped_string(t.m_data.sval)));
@@ -662,6 +754,9 @@ std::string show(const Type& t) {
       return impl(BLazyCls,
                   folly::sformat("={}",
                   escaped_string(t.m_data.lazyclsval)));
+    case DataTag::EnumClassLabel:
+      return impl(BEnumClassLabel,
+                  folly::sformat("={}", escaped_string(t.m_data.eclval)));
     case DataTag::Int: return impl(BInt, folly::sformat("={}", t.m_data.ival));
     case DataTag::Dbl: return impl(BDbl, folly::sformat("={}", t.m_data.dval));
     case DataTag::None: return gather(bits);
@@ -697,7 +792,10 @@ std::string show(const Type& t) {
 
 std::string show(Context ctx) {
   if (!ctx.func) {
-    if (!ctx.cls) return "-";
+    if (!ctx.cls) {
+      if (!ctx.unit) return "-";
+      return ctx.unit->toCppString();
+    }
     return ctx.cls->name->toCppString();
   }
   auto ret = std::string{};
@@ -714,19 +812,44 @@ std::string show(Context ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::string show(const PropLookupResult<Type>& r) {
+std::string show(const ConstIndex& idx) {
+  return folly::sformat("{}:{}", idx.cls, idx.idx);
+}
+
+std::string show(const MethRef& m) {
+  return folly::sformat("{}:{}", m.cls, m.idx);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+std::string show(FuncClsUnit fc) {
+  if (auto const f = fc.func()) {
+    return folly::sformat("func {}", f->name);
+  } else if (auto const c = fc.cls()) {
+    return folly::sformat("class {}", c->name);
+  } else if (auto const u = fc.unit()) {
+    return folly::sformat("unit {}", u->filename);
+  } else {
+    return "(null)";
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+std::string show(const PropLookupResult& r) {
   return folly::sformat(
-    "{{{},ty:{},found:{},const:{},late:{},init:{}}}",
+    "{{{},ty:{},found:{},const:{},late:{},init:{},internal:{}}}",
     r.name,
     show(r.ty),
     show(r.found),
     show(r.isConst),
     show(r.lateInit),
-    r.classInitMightRaise
+    r.classInitMightRaise,
+    show(r.internal)
   );
 }
 
-std::string show(const PropMergeResult<Type>& r) {
+std::string show(const PropMergeResult& r) {
   return folly::sformat(
     "{{adjusted:{},throws:{}}}",
     show(r.adjusted),
@@ -734,7 +857,7 @@ std::string show(const PropMergeResult<Type>& r) {
   );
 }
 
-std::string show(const ClsConstLookupResult<Type>& r) {
+std::string show(const ClsConstLookupResult& r) {
   return folly::sformat(
     "{{ty:{},found:{},throw:{}}}",
     show(r.ty),
@@ -743,13 +866,30 @@ std::string show(const ClsConstLookupResult<Type>& r) {
   );
 }
 
-std::string show(const ClsTypeConstLookupResult<TypeStructureResolution>& r) {
+std::string show(const ClsTypeConstLookupResult& r) {
   return folly::sformat(
-    "{{ty:{},fail:{},found:{},abstract:{}}}",
+    "{{ty:{},fail:{},sens:{},found:{},abstract:{}}}",
     show(r.resolution.type),
     r.resolution.mightFail,
+    r.resolution.contextSensitive,
     show(r.found),
     show(r.abstract)
+  );
+}
+
+std::string show(const ConstraintType& t) {
+  const char* cts;
+  switch (t.coerceClassToString) {
+    case TriBool::Yes: cts = "yes"; break;
+    case TriBool::No: cts = "no"; break;
+    case TriBool::Maybe: cts = "maybe"; break;
+  }
+  return folly::sformat(
+    "ConstraintType{{lower:{}, upper:{}, coerceClassToString:{}, maybeMixed:{}}}",
+    show(t.lower),
+    show(t.upper),
+    cts,
+    t.maybeMixed ? "true" : "false"
   );
 }
 

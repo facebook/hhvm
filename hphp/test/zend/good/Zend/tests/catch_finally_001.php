@@ -1,5 +1,5 @@
 <?hh
-function foo ($throw = FALSE) {
+function foo ($throw = FALSE) :mixed{
    try {
      echo "try\n";
      if ($throw) {

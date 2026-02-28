@@ -1,7 +1,7 @@
 <?hh
 
 namespace foo {
-  function bar() {
+  function bar() :mixed{
     return __FUNCTION__;
   }
 }

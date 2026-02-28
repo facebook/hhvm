@@ -8,7 +8,7 @@
 // define some classes
 class classWithToString
 {
-    public function __toString() {
+    public function __toString() :mixed{
         return "Class A object";
     }
 }
@@ -18,7 +18,7 @@ class classWithoutToString
 }
 
 // Define error handler
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) :mixed{
     if (error_reporting() != 0) {
         // report non-silenced errors
         echo "Error: $err_no - $err_msg, $filename($linenum)\n";
@@ -36,36 +36,14 @@ hello world
 EOT;
 
 // add arrays
-$index_array = varray [1, 2, 3];
-$assoc_array = darray ['one' => 1, 'two' => 2];
+$index_array = vec[1, 2, 3];
+$assoc_array = dict['one' => 1, 'two' => 2];
 
 // resource
 $res = fopen(__FILE__,'r');
 
 //array of values to iterate over
-$inputs = darray[
-
-      // float data
-      'float 10.5' => 10.5,
-      'float -10.5' => -10.5,
-      'float .5' => .5,
-
-      // array data
-      'empty array' => varray[],
-      'int indexed array' => $index_array,
-      'associative array' => $assoc_array,
-      'nested arrays' => varray['foo', $index_array, $assoc_array],
-
-      // null data
-      'uppercase NULL' => NULL,
-      'lowercase null' => null,
-
-      // boolean data
-      'lowercase true' => true,
-      'lowercase false' =>false,
-      'uppercase TRUE' =>TRUE,
-      'uppercase FALSE' =>FALSE,
-
+$inputs = dict[
       // empty data
       'empty string DQ' => "",
       'empty string SQ' => '',
@@ -75,13 +53,6 @@ $inputs = darray[
       'string SQ' => 'string',
       'mixed case string' => "sTrInG",
       'heredoc' => $heredoc,
-
-      // object data
-      'instance of classWithToString' => new classWithToString(),
-      'instance of classWithoutToString' => new classWithoutToString(),
-
-      // resource
-      'resource' => $res,
 ];
 
 // loop through each element of the array for proper_address

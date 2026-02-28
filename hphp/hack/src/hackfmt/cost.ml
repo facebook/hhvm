@@ -12,7 +12,7 @@ type t =
   | Base
   | Moderate
   | High
-[@@deriving eq]
+[@@deriving eq, show { with_path = false }]
 
 let get_cost t =
   match t with

@@ -4,11 +4,11 @@
 
 class strclass {
   public $str = "bad";
-  static $statstr = "bad";
+  public static $statstr = "bad";
 }
 
 
-function foo() {
+function foo() :mixed{
   \HH\global_set('a', 'good');
   return \HH\global_get('a');
 }
@@ -16,7 +16,7 @@ function foo() {
 
 class c {
   public $val = 10;
-  static $stat = 20;
+  public static $stat = 20;
 }
 <<__EntryPoint>>
 function entrypoint_execution_order(): void {
@@ -127,7 +127,7 @@ function entrypoint_execution_order(): void {
   echo "\r\n";
 
 
-  $a = varray[100,200];
+  $a = vec[100,200];
   $i = 0;
 
   echo "17)";

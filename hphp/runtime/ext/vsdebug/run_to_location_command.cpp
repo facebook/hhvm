@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/debugger-request-info.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 
 namespace HPHP {
@@ -74,8 +75,8 @@ bool RunToLocationCommand::executeImpl(DebuggerSession* session,
 
   // Find a compilation unit to place a temp bp in.
   HPHP::String unitPath(path.c_str());
-  const auto compilationUnit = lookupUnit(unitPath.get(), "", nullptr,
-                                          Native::s_noNativeFuncs, false);
+  const auto compilationUnit = lookupUnit(unitPath.get(), "", nullptr, nullptr,
+                                          false);
   if (compilationUnit == nullptr) {
     throw DebuggerCommandException(
       "Could not find a loaded compilation unit to run to location in!"

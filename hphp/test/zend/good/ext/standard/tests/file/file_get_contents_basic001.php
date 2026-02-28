@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $file_content = "Bienvenue au CodeFest a Montreal";
-$temp_filename = __SystemLib\hphp_test_tmppath('fichier_a_lire.txt');
+$temp_filename = sys_get_temp_dir().'/'.'fichier_a_lire.txt';
 $handle = fopen($temp_filename,"w");
 fwrite($handle,$file_content);
 fclose($handle);

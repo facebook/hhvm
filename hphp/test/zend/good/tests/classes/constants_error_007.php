@@ -1,6 +1,6 @@
 <?hh
 
-function by_ref(inout $ref) {}
+function by_ref(inout $ref) :mixed{}
 
 class aclass {
   const myConst = "hello";

@@ -1,6 +1,6 @@
 <?hh
 
-function xrange($start, $end, $step = 1) {
+function xrange($start, $end, $step = 1) :AsyncGenerator<mixed,mixed,void>{
     for ($i = $start; $i <= $end; $i += $step) {
         yield $i;
     }

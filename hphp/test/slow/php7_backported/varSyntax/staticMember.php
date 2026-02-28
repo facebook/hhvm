@@ -1,12 +1,12 @@
 <?hh
 class A {
     public static $b = 0;
-    public static $c = varray[0, 1];
+    public static $c = vec[0, 1];
     public static $A_str = 'A';
 }
 
 <<__EntryPoint>>
-function main_static_member() {
+function main_static_member() :mixed{
 $A_str = 'A';
 $A_obj = new A;
 $b_str = 'b';

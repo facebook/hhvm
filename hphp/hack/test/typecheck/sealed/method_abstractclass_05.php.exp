@@ -1,0 +1,8 @@
+ERROR: File "method_abstractclass_05.php", line 24, characters 18-18:
+Some members in class `D2` are incompatible with those declared in type `C` (Typing[4341])
+  File "method_abstractclass_05.php", line 17, characters 19-21:
+  The method `foo` is not compatible with the overridden method
+  File "method_abstractclass_05.php", line 17, characters 19-21:
+  You cannot override the method because it is sealed.
+  File "method_abstractclass_05.php", line 7, characters 28-30:
+  Declaration is here

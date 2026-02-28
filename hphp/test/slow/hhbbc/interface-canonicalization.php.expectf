@@ -1,0 +1,1 @@
+Catchable fatal error: Value returned from function foo() must be of type I1, bool given in %s/interface-canonicalization.php on line %d

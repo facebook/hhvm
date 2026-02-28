@@ -16,13 +16,13 @@
 
 #pragma once
 
-#include <folly/dynamic.h>
+#include <folly/json/dynamic.h>
 
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/func.h"
 
-#include "hphp/util/low-ptr.h"
+#include "hphp/util/ptr.h"
 
 namespace HPHP {
 
@@ -36,7 +36,6 @@ struct ProfDataSerializer;
 struct ProfDataDeserializer;
 
 struct MethProfile {
-  using RawType = LowPtr<Class>::storage_type;
 
   enum class Tag : uint8_t {
     UniqueClass = 0,
@@ -51,9 +50,10 @@ struct MethProfile {
   MethProfile() : m_curMeth(nullptr), m_curClass(nullptr) {}
 
   MethProfile(const MethProfile& other)
-    : m_curMeth(other.m_curMeth)
-    , m_curClass(other.m_curClass)
-  {}
+    : m_curClass(other.m_curClass)
+  {
+    m_curMeth.store(other.m_curMeth.load(std::memory_order_acquire), std::memory_order_release);
+  }
 
   std::string toString() const;
   folly::dynamic toDynamic() const;
@@ -81,7 +81,7 @@ struct MethProfile {
    * If `cls' is not provided (when it's not known statically), we peek in `ar'
    * for the class context.
    */
-  void reportMeth(const Class* cls, const Func* meth);
+  void reportMeth(const Class* cls, const Func* meth, const Func* callerFunc);
 
   /*
    * Aggregate two MethProfiles.
@@ -110,21 +110,19 @@ private:
   const Class* rawClass() const { return m_curClass; }
   const Func* rawMeth() const { return fromValue(methValue()); }
   Tag curTag() const { return toTag(methValue()); }
-  const uintptr_t methValue() const { return uintptr_t(m_curMeth.get()); }
+  const uintptr_t methValue() const { return uintptr_t(m_curMeth.load(std::memory_order_acquire)); }
 
   void setMeth(const Func* meth, Tag tag) {
     auto encoded_meth = (Func*)(uintptr_t(meth) | static_cast<uintptr_t>(tag));
-    m_curMeth = encoded_meth;
+    m_curMeth.store(encoded_meth, std::memory_order_release);
   }
 
 private:
-  AtomicLowPtr<const Func,
-               std::memory_order_acquire, std::memory_order_release> m_curMeth;
-  AtomicLowPtr<const Class,
-               std::memory_order_acquire, std::memory_order_release> m_curClass;
+  // We need to store Func* and tags together to handle the race condition in MethProfile::reduce
+  std::atomic<const Func*> m_curMeth;
+  AtomicPackedPtr<const Class> m_curClass;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-

@@ -1,1 +1,2 @@
-No lint errors
+File "expression_tree.php", line 4, characters 40-43:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])

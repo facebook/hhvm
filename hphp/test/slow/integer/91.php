@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_91() {
+function main_91() :mixed{
 $a = -1;
           var_dump($a);
 }

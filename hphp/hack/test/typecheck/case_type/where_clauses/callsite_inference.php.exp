@@ -1,0 +1,30 @@
+ERROR: File "callsite_inference.php", line 27, characters 21-27:
+Invalid argument (Typing[4110])
+  File "callsite_inference.php", line 12, characters 18-22:
+  Expected `CT<_>`
+  File "callsite_inference.php", line 27, characters 21-27:
+  But got `string`
+ERROR: File "callsite_inference.php", line 27, characters 21-27:
+Invalid argument (Typing[4110])
+  File "callsite_inference.php", line 17, characters 23-27:
+  Expected `MyInt`
+  File "callsite_inference.php", line 10, characters 24-31:
+  But got `MyString`
+ERROR: File "callsite_inference.php", line 28, characters 24-24:
+Invalid argument (Typing[4110])
+  File "callsite_inference.php", line 10, characters 3-8:
+  Expected `string`
+  File "callsite_inference.php", line 28, characters 24-24:
+  But got `int`
+ERROR: File "callsite_inference.php", line 28, characters 24-24:
+Invalid argument (Typing[4110])
+  File "callsite_inference.php", line 12, characters 18-22:
+  Expected `CT<_>`
+  File "callsite_inference.php", line 28, characters 24-24:
+  But got `int`
+ERROR: File "callsite_inference.php", line 28, characters 24-24:
+Invalid argument (Typing[4110])
+  File "callsite_inference.php", line 18, characters 26-33:
+  Expected `MyString`
+  File "callsite_inference.php", line 9, characters 21-25:
+  But got `MyInt`

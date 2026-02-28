@@ -6,7 +6,7 @@ class A {
 
 class B extends A {}
 
-<<__EntryPoint>> function test() {
+<<__EntryPoint>> function test() :mixed{
   echo "---- serialize ----\n";
   try {
     var_dump(serialize(new B()));

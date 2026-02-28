@@ -1,0 +1,16 @@
+int(100)
+
+Warning: Method C::foo1 not marked dynamic in %s/prop_order.php on line 31
+int(150)
+int(200)
+
+Warning: Method C::foo2 not marked dynamic in %s/prop_order.php on line 35
+int(250)
+int(300)
+int(350)
+int(400)
+int(450)
+int(500)
+int(550)
+int(600)
+int(650)

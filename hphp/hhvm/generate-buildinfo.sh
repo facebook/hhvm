@@ -1,10 +1,5 @@
 #!/bin/bash
 
-if echo "$1" | grep -q -e 'install_dir='; then
-  # Skip --install_dir
-  shift 1
-fi
-
 DIR="$(pwd -P)"
 SOURCE_ROOT="${SOURCE_ROOT:-$DIR}"
 
@@ -41,10 +36,6 @@ COMPILER_TIMESTAMP=$("${timestamp[@]}")
 
 if [ -z "${COMPILER_ID}" ]; then
   COMPILER_ID=$("${compiler[@]}")
-fi
-
-if [ -z "${USE_LOWPTR}" ]; then
-  USE_LOWPTR="0"
 fi
 
 ################################################################################

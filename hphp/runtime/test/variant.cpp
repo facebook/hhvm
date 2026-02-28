@@ -27,7 +27,7 @@ namespace HPHP {
 
 TEST(Variant, Conversions) {
   Variant v("123");
-  EXPECT_TRUE(v.toInt32() == 123);
+  EXPECT_TRUE((int)v.toInt64() == 123);
 }
 
 TEST(Variant, Refcounts) {

@@ -323,7 +323,7 @@
                       "line_number":3
                     }
                   },
-                  "prefixed_code_expression":{
+                  "prefixed_code_body":{
                     "kind":"binary_expression",
                     "binary_left_operand":{
                       "kind":"binary_expression",

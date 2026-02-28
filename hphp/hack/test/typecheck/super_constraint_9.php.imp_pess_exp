@@ -1,0 +1,78 @@
+ERROR: File "super_constraint_9.php", line 7, characters 10-10:
+Invalid return type (Typing[4336])
+  File "super_constraint_9.php", line 7, characters 59-66:
+  Expected `Foo<Tk2>`
+  File "super_constraint_9.php", line 7, characters 10-10:
+  But got `void` because this function does not always return a value
+ERROR: File "super_constraint_9.php", line 12, characters 16-17:
+Invalid argument (Typing[4110])
+  File "super_constraint_9.php", line 10, characters 32-34:
+  Expected `int`
+  File "super_constraint_9.php", line 10, characters 16-21:
+  But got `string`
+  File "super_constraint_9.php", line 10, characters 16-21:
+  This type argument to `Foo` must match exactly (it is invariant)
+ERROR: File "super_constraint_9.php", line 12, characters 16-17:
+Invalid argument (Typing[4110])
+  File "super_constraint_9.php", line 10, characters 32-34:
+  Expected `int`
+  File "super_constraint_9.php", line 10, characters 46-50:
+  But got `mixed`
+  File "super_constraint_9.php", line 10, characters 46-50:
+  This type argument to `Foo` must match exactly (it is invariant)
+  File "super_constraint_9.php", line 10, characters 46-50:
+  This type argument to `Foo` must match exactly (it is invariant)
+ERROR: File "super_constraint_9.php", line 16, characters 10-12:
+Invalid return type (Typing[4336])
+  File "super_constraint_9.php", line 16, characters 17-24:
+  Expected `Foo<int>`
+  File "super_constraint_9.php", line 16, characters 10-12:
+  But got `void` because this function does not always return a value
+ERROR: File "super_constraint_9.php", line 21, characters 16-20:
+Invalid argument (Typing[4110])
+  File "super_constraint_9.php", line 7, characters 45-52:
+  Expected `~Foo<_>`
+  File "super_constraint_9.php", line 16, characters 17-24:
+  But got `Foo<int>`
+ERROR: File "super_constraint_9.php", line 21, characters 16-20:
+Invalid argument (Typing[4110])
+  File "super_constraint_9.php", line 16, characters 21-23:
+  Expected `int`
+  File "super_constraint_9.php", line 4, characters 7-9:
+  But got `mixed`
+ERROR: File "super_constraint_9.php", line 21, characters 16-20:
+Invalid argument (Typing[4110])
+  File "super_constraint_9.php", line 16, characters 21-23:
+  Expected `int`
+  File "super_constraint_9.php", line 19, characters 16-21:
+  But got `string`
+  File "super_constraint_9.php", line 19, characters 16-21:
+  This type argument to `Foo` must match exactly (it is invariant)
+ERROR: File "super_constraint_9.php", line 21, characters 16-20:
+Invalid argument (Typing[4110])
+  File "super_constraint_9.php", line 16, characters 21-23:
+  Expected `int`
+  File "super_constraint_9.php", line 19, characters 33-37:
+  But got `mixed`
+  File "super_constraint_9.php", line 19, characters 33-37:
+  This type argument to `Foo` must match exactly (it is invariant)
+ERROR: File "super_constraint_9.php", line 21, characters 16-20:
+Invalid argument (Typing[4110])
+  File "super_constraint_9.php", line 16, characters 21-23:
+  Expected `int`
+  File "super_constraint_9.php", line 19, characters 33-37:
+  But got `mixed`
+  File "super_constraint_9.php", line 19, characters 33-37:
+  This type argument to `Foo` must match exactly (it is invariant)
+  File "super_constraint_9.php", line 19, characters 33-37:
+  This type argument to `Foo` must match exactly (it is invariant)
+ERROR: File "super_constraint_9.php", line 21, characters 16-20:
+Invalid argument (Typing[4110])
+  File "super_constraint_9.php", line 16, characters 21-23:
+  Expected `int`
+  File "super_constraint_9.php", line 21, characters 10-10:
+  But got `(~_ & mixed)` because type parameter `Tk2` of `f` could not be determined. Please add explicit type parameters to the invocation of `f`
+  File "super_constraint_9.php", line 7, characters 49-51:
+    via this generic `Tk2`
+  File "super_constraint_9.php", line 21, characters 10-10:
+  This type argument to `Foo` must match exactly (it is invariant)

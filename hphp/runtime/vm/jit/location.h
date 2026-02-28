@@ -48,7 +48,7 @@ struct Location {
   /* implicit */ Location(Stack s) : m_tag{LTag::Stack}, m_stack(s) {}
   /* implicit */ Location(MBase m) : m_tag{LTag::MBase}, m_mbase(m) {}
 
-  LTag tag() const { return m_tag; };
+  LTag tag() const { return m_tag; }
 
   uint32_t localId() const;
   SBInvOffset stackIdx() const;
@@ -82,4 +82,3 @@ std::string show(Location);
 }
 
 #include "hphp/runtime/vm/jit/location-inl.h"
-

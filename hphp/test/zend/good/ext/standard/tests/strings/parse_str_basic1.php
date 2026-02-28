@@ -20,7 +20,7 @@ var_dump(parse_str($s1, inout $res2));
 var_dump($res2);
 
 echo "\nBasic test with an existing array as results array\n";
-$res3_array = varray[1,2,3,4];
+$res3_array = vec[1,2,3,4];
 var_dump(parse_str($s1, inout $res3_array));
 var_dump($res3_array);
 

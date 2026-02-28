@@ -15,21 +15,21 @@
 */
 
 #include "hphp/runtime/vm/native-prop-handler.h"
+#include "hphp/util/hash-map.h"
 
 namespace HPHP::Native {
 //////////////////////////////////////////////////////////////////////////////
-typedef std::unordered_map
-  <const StringData*, NativePropHandler> NativePropHandlerMap;
 
-static NativePropHandlerMap s_nativePropHandlerMap;
+static hphp_fast_map<const StringData*, NativePropHandler>
+  s_nativePropHandlerMap;
 
-void registerNativePropHandler(const String& className,
+void registerNativePropHandler(const StringData* className,
                                NativePropHandler::GetFunc get,
                                NativePropHandler::SetFunc set,
                                NativePropHandler::IssetFunc isset,
                                NativePropHandler::UnsetFunc unset) {
 
-  assertx(s_nativePropHandlerMap.find(className.get()) ==
+  assertx(s_nativePropHandlerMap.find(className) ==
     s_nativePropHandlerMap.end());
 
   NativePropHandler propHandler;
@@ -38,7 +38,7 @@ void registerNativePropHandler(const String& className,
   propHandler.isset = isset;
   propHandler.unset = unset;
 
-  s_nativePropHandlerMap[className.get()] = propHandler;
+  s_nativePropHandlerMap[className] = propHandler;
 }
 
 NativePropHandler* getNativePropHandler(const StringData* className) {
@@ -123,4 +123,10 @@ Variant unsetProp(const Object& obj, const String& name) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+bool cmpNPA::operator()(const PropAccessor* pa1,
+                        const PropAccessor* pa2) const {
+  // Hack property names are case sensitive; use a collision-logging compare.
+  return fstrcmp(pa1->name, pa2->name) == 0;
+}
+
 } // namespace HPHP::Native

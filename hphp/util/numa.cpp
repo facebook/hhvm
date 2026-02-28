@@ -18,6 +18,14 @@
 #ifdef HAVE_NUMA
 #include "hphp/util/portability.h"
 #include <folly/Bits.h>
+#include <folly/system/HardwareConcurrency.h>
+#include <numaif.h>
+#include <algorithm>
+#include <fstream>
+#include <map>
+#include <thread>
+#include <vector>
+
 extern "C" {
 HHVM_ATTRIBUTE_WEAK extern void numa_init();
 }
@@ -30,11 +38,16 @@ namespace HPHP {
 uint32_t numa_num_nodes = 1;
 uint32_t numa_node_set = 1;
 
+bool use_nuca = false;
+
 #ifdef HAVE_NUMA
 
 uint32_t numa_node_mask;
 bool use_numa = false;
 std::vector<bitmask*> node_to_cpu_mask;
+// For NUCA, we pin threads to pairs of nodes with consideration of locality and
+// balancing. When the two nodes are equal, the thread is pinned to a single node.
+std::vector<std::pair<uint8_t, uint8_t>> nuca_node_seq;
 
 void init_numa() {
   if (getenv("HHVM_DISABLE_NUMA")) return;
@@ -79,6 +92,15 @@ void init_numa() {
   numa_node_mask = folly::nextPowTwo(uint32_t(max_node) + 1) - 1;
 }
 
+static int getL3CacheId(int cpuId) {
+  int id = 0;
+  std::ifstream file("/sys/devices/system/cpu/cpu" + std::to_string(cpuId) +
+                     "/cache/index3/id");
+  if (!file.is_open()) return 0;
+  file >> id;
+  return id;
+}
+
 void enable_numa() {
   /*
    * Check if NUMA shouldn't be used, for reasons including: (1) only one NUMA
@@ -86,8 +108,62 @@ void enable_numa() {
    * cases, e.g., allowed nodes non-contiguous, more than 32 nodes; (4) errors
    * calling NUMA API in init_numa().
    */
-  if (numa_num_nodes <= 1 || numa_node_mask == 0) return;
-
+  if (numa_num_nodes <= 1 || numa_node_mask == 0) {
+    // Check for NUCA
+    int cpus = numa_num_configured_cpus();
+    std::map<int, bitmask*> l3toCpus;
+    for (unsigned i = 0; i < cpus; ++i) {
+      if (numa_bitmask_isbitset(numa_all_cpus_ptr, i)) {
+        auto const l3 = getL3CacheId(i);
+        if (!l3toCpus.contains(l3)) {
+          l3toCpus[l3] = numa_allocate_cpumask();
+        }
+        numa_bitmask_setbit(l3toCpus[l3], i);
+      }
+    }
+    if (l3toCpus.size() > 1) {
+      use_nuca = true;
+      node_to_cpu_mask.clear();
+      std::vector<double> inc;
+      std::vector<double> usage;
+      for (auto v : l3toCpus) {
+        node_to_cpu_mask.push_back(v.second);
+        // Note that different nodes can have different number of CPU cores.
+        // Keep track of the increment in node utilization with one more thread,
+        // to perform balancing of utilizations across nodes.
+        auto const increment = 1.0 / numa_bitmask_weight(v.second);
+        inc.push_back(increment);
+        usage.push_back(increment);
+      }
+      for (unsigned i = 0; i < folly::available_concurrency(); ++i) {
+        auto iter = std::min_element(usage.begin(), usage.end());
+        auto const node = iter - usage.begin();
+        *iter += inc[node];
+        nuca_node_seq.push_back({node, node});
+      }
+      // Some threads are pinned to pairs of nodes to allow some flexibility in
+      // scheduling.
+      std::vector<double> pair_inc;
+      std::vector<double> pair_usage;
+      std::vector<std::pair<uint8_t, uint8_t>> pairs;
+      for (uint8_t s = 1; s < l3toCpus.size(); ++s) {
+        for (uint8_t i = 0; i < l3toCpus.size(); ++i) {
+          auto const j = (i + s) % l3toCpus.size();
+          pairs.push_back({i, j});
+          auto const increment = inc[i] * inc[j];
+          pair_inc.push_back(increment);
+          pair_usage.push_back(increment);
+        }
+      }
+      for (unsigned i = 0; i < folly::available_concurrency(); ++i) {
+        auto iter = std::min_element(pair_usage.begin(), pair_usage.end());
+        auto const nodes_index = iter - pair_usage.begin();
+        *iter += pair_inc[nodes_index];
+        nuca_node_seq.push_back(pairs[nodes_index]);
+      }
+    }
+    return;
+  }
   /*
    * libnuma is only partially aware of taskset. If on entry, you have
    * completely disabled a node via taskset, the node will not be available, and
@@ -119,11 +195,39 @@ void enable_numa() {
   use_numa = true;
 }
 
+/*
+ * Bind the current thread to a pair of nodes.
+ */
+inline void sched_on_nodes(unsigned n1, unsigned n2) {
+  if (n1 == n2) {
+    numa_sched_setaffinity(0, node_to_cpu_mask[n1]);
+    return;
+  }
+  auto mask = numa_allocate_cpumask();
+  auto const mask1 = node_to_cpu_mask[n1];
+  auto const mask2 = node_to_cpu_mask[n2];
+  for (unsigned i = 0; i < numa_num_configured_cpus(); ++i) {
+    if (numa_bitmask_isbitset(mask1, i) || numa_bitmask_isbitset(mask2, i)) {
+      numa_bitmask_setbit(mask, i);
+    }
+  }
+  numa_sched_setaffinity(0, mask);
+  numa_bitmask_free(mask);
+}
+
+void nuca_bind_thread() {
+  static std::atomic_uint32_t s_total = 0;
+  auto const index = s_total.fetch_add(1, std::memory_order_acq_rel);
+  if (index >= nuca_node_seq.size()) return;
+  auto const nodes = nuca_node_seq[index];
+  sched_on_nodes(nodes.first, nodes.second);
+}
+
 uint32_t next_numa_node(std::atomic<uint32_t>& curr_node) {
   if (!use_numa) return 0;
   uint32_t node;
   do {
-    node = curr_node.fetch_add(1u, std::memory_order_relaxed);
+    node = curr_node.fetch_add(1u, std::memory_order_acq_rel);
     node &= numa_node_mask;
   } while (!((numa_node_set >> node) & 1));
   return node;
@@ -137,6 +241,17 @@ void numa_interleave(void* start, size_t size) {
 void numa_bind_to(void* start, size_t size, uint32_t node) {
   if (!use_numa) return;
   numa_tonode_memory(start, size, (int)node);
+}
+
+void SavedNumaPolicy::save() {
+  needRestore = !get_mempolicy(&oldPolicy, &oldMask, sizeof(oldMask),
+                               nullptr, 0);
+}
+
+SavedNumaPolicy::~SavedNumaPolicy() {
+  if (needRestore) {
+    set_mempolicy(oldPolicy, &oldMask, sizeof(oldMask));
+  }
 }
 
 #endif

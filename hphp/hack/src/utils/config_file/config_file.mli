@@ -32,11 +32,19 @@ val print_to_stderr : t -> unit
 
 val parse_contents : string -> t
 
-val parse_hhconfig : string -> string * t
+(** [parse_hhconfig file_path] parses the content of [file_path]. *)
+val parse_hhconfig : string -> t
 
 val parse_local_config : string -> t
 
-val apply_overrides : from:string option -> config:t -> overrides:t -> t
+val cat_packages_file : string -> string
+
+val cat_hhconfig_file : string -> string
+
+(** Apply overrides using provided overrides.
+[log_reason] is solely used for logging, so we can write to stderr indicating where
+these overrides came from and what they were. *)
+val apply_overrides : config:t -> overrides:t -> log_reason:string option -> t
 
 val of_list : (string * string) list -> t
 

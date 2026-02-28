@@ -21,13 +21,17 @@
 /**
  * Implements our StringPtr class in terms of HPHP::StringData.
  *
- * By contrast, see std_string_ptr.cpp, which implements this class in
+ * By contrast, see string-data-fake.cpp, which implements this class in
  * terms of std::string so our tests don't need to link against
  * //hphp/runtime/base:runtime_base.
  */
 
 namespace HPHP {
 namespace Facts {
+
+StringPtr::StringPtr(const StringData* impl) noexcept : m_impl{impl} {
+  assertx(m_impl == nullptr || m_impl->isStatic());
+}
 
 std::string_view StringPtr::slice() const noexcept {
   if (m_impl == nullptr) {
@@ -61,14 +65,32 @@ bool StringPtr::same(const StringPtr& s) const noexcept {
   return m_impl->same(s.m_impl);
 }
 
-bool StringPtr::isame(const StringPtr& s) const noexcept {
+bool StringPtr::tsame(const StringPtr& s) const noexcept {
   if (m_impl == s.m_impl) {
     return true;
   }
   if (m_impl == nullptr || s.m_impl == nullptr) {
     return false;
   }
-  return m_impl->isame(s.m_impl);
+  return m_impl->tsame(s.m_impl);
+}
+
+bool StringPtr::fsame(const StringPtr& s) const noexcept {
+  if (m_impl == s.m_impl) {
+    return true;
+  }
+  if (m_impl == nullptr || s.m_impl == nullptr) {
+    return false;
+  }
+  return m_impl->fsame(s.m_impl);
+}
+
+bool StringPtr::tsame_slice(std::string_view a, std::string_view b) noexcept {
+  return tstrcmp_slice(a, b) == 0;
+}
+
+bool StringPtr::fsame_slice(std::string_view a, std::string_view b) noexcept {
+  return fstrcmp_slice(a, b) == 0;
 }
 
 StringPtr makeStringPtr(const StringData& s) {

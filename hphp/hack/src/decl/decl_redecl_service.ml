@@ -7,12 +7,10 @@
  *
  *)
 
-(*****************************************************************************)
-(* On the fly type-declaration are called when the user modified a file
- * we are not at initilalization time anymore. Therefore, we have a bit more
- * work to do. We need calculate what must be re-checked.
- *)
-(*****************************************************************************)
+(** On the fly defs-declaration are called when the user modified a file
+  and we are not at initilalization time anymore. Therefore, we have a bit more
+  work to do. We need to calculate what must be re-checked. *)
+
 open Hh_prelude
 open Reordered_argument_collections
 open Typing_deps
@@ -20,129 +18,63 @@ open Typing_deps
 type get_classes_in_file = Relative_path.t -> SSet.t
 
 type redo_type_decl_result = {
-  errors: Errors.t;
-  changed: DepSet.t;
-  to_redecl: DepSet.t;
-  to_recheck: DepSet.t;
+  fanout: Fanout.t;
   old_decl_missing_count: int;
 }
 
 let lvl = Hh_logger.Level.Debug
 
-let shallow_decl_enabled (ctx : Provider_context.t) =
-  TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
+let compute_deps_neutral = (Fanout.empty, 0)
 
-let force_shallow_decl_fanout_enabled (ctx : Provider_context.t) =
-  TypecheckerOptions.force_shallow_decl_fanout (Provider_context.get_tcopt ctx)
-
-(*****************************************************************************)
-(* The neutral element of declaration (cf procs/multiWorker.mli) *)
-(*****************************************************************************)
-let on_the_fly_neutral = Errors.empty
-
-let compute_deps_neutral () =
-  let empty = DepSet.make () in
-  ((empty, empty, empty), 0)
-
-(*****************************************************************************)
-(* This is the place where we are going to put everything necessary for
- * the redeclaration. We could "pass" the values directly to the workers,
- * but it gives too much work to the master and slows things down,
- * so what we do instead is pass the data through shared memory via
- * OnTheFlyStore.
- * I tried replicating the data to speed things up but it had no effect.
- *)
-(*****************************************************************************)
-
+(** This is the place where we are going to put everything necessary for
+  the redeclaration. We could "pass" the values directly to the workers,
+  but it gives too much work to the master and slows things down,
+  so what we do instead is pass the data through shared memory via
+  OnTheFlyStore.
+  I tried replicating the data to speed things up but it had no effect. *)
 module OnTheFlyStore = GlobalStorage.Make (struct
-  type t = Naming_table.fast
+  type t = Decl_compare.VersionedNames.t Relative_path.Map.t
 end)
 
-(*****************************************************************************)
-(* Re-declaring the types in a file *)
-(*****************************************************************************)
-
-let on_the_fly_decl_file ctx errors fn =
-  let (decl_errors, ()) =
-    Errors.do_with_context fn Errors.Decl (fun () ->
-        Decl.make_env ~sh:SharedMem.Uses ctx fn)
-  in
-  Errors.merge decl_errors errors
-
-(*****************************************************************************)
-(* Given a set of classes, compare the old and the new type and deduce
- * what must be rechecked accordingly.
- *)
-(*****************************************************************************)
-
-let compute_classes_deps ctx old_classes new_classes acc classes =
-  let (changed, to_redecl, to_recheck) = acc in
-  let ((rc, rdd, rdc), old_classes_missing) =
-    Decl_compare.get_classes_deps ~ctx old_classes new_classes classes
-  in
-  let changed = DepSet.union rc changed in
-  let to_redecl = DepSet.union rdd to_redecl in
-  let to_recheck = DepSet.union rdc to_recheck in
-  ((changed, to_redecl, to_recheck), old_classes_missing)
-
-(*****************************************************************************)
-(* Given a set of functions, compare the old and the new type and deduce
- * what must be rechecked accordingly.
- *)
-(*****************************************************************************)
-
-let compute_funs_deps ctx old_funs (changed, to_redecl, to_recheck) funs =
-  let ((rc, rdd, rdc), old_funs_missing) =
+(** Given a set of functions, compare the old and the new decl and deduce
+  what must be rechecked accordingly. *)
+let compare_funs_and_get_fanout
+    ctx old_funs fanout_acc (funs : Decl_compare.VersionedSSet.diff) =
+  let (fanout, old_funs_missing) =
     Decl_compare.get_funs_deps ~ctx old_funs funs
   in
-  let changed = DepSet.union rc changed in
-  let to_redecl = DepSet.union rdd to_redecl in
-  let to_recheck = DepSet.union rdc to_recheck in
-  ((changed, to_redecl, to_recheck), old_funs_missing)
+  let fanout_acc = Fanout.union fanout fanout_acc in
+  (fanout_acc, old_funs_missing)
 
-(*****************************************************************************)
-(* Given a set of typedefs, compare the old and the new type and deduce
- * what must be rechecked accordingly.
- *)
-(*****************************************************************************)
-
-let compute_types_deps ctx old_types (changed, to_redecl, to_recheck) types =
-  let ((rc, rdc), old_types_missing) =
+(** Given a set of typedefs, compare the old and the new decl and deduce
+  what must be rechecked accordingly. *)
+let compare_types_and_get_fanout
+    ctx old_types fanout_acc (types : Decl_compare.VersionedSSet.diff) =
+  let (fanout, old_types_missing) =
     Decl_compare.get_types_deps ~ctx old_types types
   in
-  let changed = DepSet.union rc changed in
-  let to_recheck = DepSet.union rdc to_recheck in
-  ((changed, to_redecl, to_recheck), old_types_missing)
+  let fanout_acc = Fanout.union fanout fanout_acc in
+  (fanout_acc, old_types_missing)
 
-(*****************************************************************************)
-(* Given a set of global constants, compare the old and the new type and
- * deduce what must be rechecked accordingly.
- *)
-(*****************************************************************************)
-
-let compute_gconsts_deps
-    ctx old_gconsts (changed, to_redecl, to_recheck) gconsts =
-  let ((rc, rdd, rdc), old_gconsts_missing) =
+(* Given a set of global constants, compare the old and the new decl and
+   deduce what must be rechecked accordingly. *)
+let compare_gconsts_and_get_fanout
+    ctx old_gconsts fanout_acc (gconsts : Decl_compare.VersionedSSet.diff) =
+  let (fanout, old_gconsts_missing) =
     Decl_compare.get_gconsts_deps ~ctx old_gconsts gconsts
   in
-  let changed = DepSet.union rc changed in
-  let to_redecl = DepSet.union rdd to_redecl in
-  let to_recheck = DepSet.union rdc to_recheck in
-  ((changed, to_redecl, to_recheck), old_gconsts_missing)
+  let fanout_acc = Fanout.union fanout fanout_acc in
+  (fanout_acc, old_gconsts_missing)
 
-(*****************************************************************************)
-(* Whatever we need to do for modules, here *)
-(*****************************************************************************)
-
-let compute_module_deps
-    ctx old_modules new_modules (changed, to_redecl, to_recheck) modules =
-  let ((rc, rdd, rdc), old_modules_missing) =
-    Decl_compare.get_module_deps ~ctx ~old_modules ~new_modules ~modules
+(* Given a set of modules, compare the old and the new decl and
+   deduce what must be rechecked accordingly. *)
+let compare_modules_and_get_fanout
+    ctx old_modules fanout_acc (modules : Decl_compare.VersionedSSet.diff) =
+  let (fanout, old_modules_missing) =
+    Decl_compare.get_modules_deps ~ctx ~old_modules ~modules
   in
-  let changed = DepSet.union rc changed in
-  let to_redecl = DepSet.union rdd to_redecl in
-  let to_recheck = DepSet.union rdc to_recheck in
-  ((changed, to_redecl, to_recheck), old_modules_missing)
+  let fanout_acc = Fanout.union fanout fanout_acc in
+  (fanout_acc, old_modules_missing)
 
 (*****************************************************************************)
 (* Redeclares a list of files
@@ -151,81 +83,95 @@ let compute_module_deps
  *)
 (*****************************************************************************)
 
+(** Compute decls in files. Return errors raised during decling. *)
 let redeclare_files ctx filel =
-  let errors =
-    List.fold_left filel ~f:(on_the_fly_decl_file ctx) ~init:Errors.empty
-  in
-  (List.length filel, errors)
+  List.iter filel ~f:(fun fn -> Decl.make_env ~sh:SharedMem.Uses ctx fn)
 
-let on_the_fly_decl_files filel =
+(** Invalidate local caches and compute decls in files. Return errors raised during decling. *)
+let decl_files ctx filel =
   SharedMem.invalidate_local_caches ();
+  redeclare_files ctx filel
 
-  (* Redeclaring the files *)
-  redeclare_files filel
-
-let compute_deps ctx fast (filel : Relative_path.t list) =
-  let infol = List.map filel ~f:(fun fn -> Relative_path.Map.find fast fn) in
-  let names =
-    List.fold_left infol ~f:FileInfo.merge_names ~init:FileInfo.empty_names
+let compare_decls_and_get_fanout
+    ctx
+    (defs_per_file : Decl_compare.VersionedNames.t Relative_path.Map.t)
+    (filel : Relative_path.t list) : Fanout.t * int =
+  let all_defs =
+    List.fold filel ~init:Decl_compare.VersionedNames.empty ~f:(fun acc fn ->
+        Relative_path.Map.find defs_per_file fn
+        |> Decl_compare.VersionedNames.merge acc)
   in
-  let { FileInfo.n_classes; n_funs; n_types; n_consts; n_modules } = names in
-  let empty = DepSet.make () in
-  let acc = (empty, empty, empty) in
   (* Fetching everything at once is faster *)
-  let old_funs = Decl_heap.Funs.get_old_batch n_funs in
-  let (acc, old_funs_missing) = compute_funs_deps ctx old_funs acc n_funs in
-  let old_types = Decl_heap.Typedefs.get_old_batch n_types in
-  let (acc, old_types_missing) = compute_types_deps ctx old_types acc n_types in
-  let old_consts = Decl_heap.GConsts.get_old_batch n_consts in
+  let (old_funs, old_types, old_consts, old_modules) =
+    let { FileInfo.n_classes = _; n_funs; n_types; n_consts; n_modules } =
+      all_defs.Decl_compare.VersionedNames.old_names
+    in
+    match Provider_backend.get () with
+    | Provider_backend.Rust_provider_backend be ->
+      let non_class_defs =
+        {
+          FileInfo.n_funs;
+          n_classes = SSet.empty;
+          n_types;
+          n_consts;
+          n_modules;
+        }
+      in
+      let (_classes, old_funs, old_types, old_consts, old_modules) =
+        Rust_provider_backend.Decl.get_old_defs be non_class_defs
+      in
+      (old_funs, old_types, old_consts, old_modules)
+    | _ ->
+      ( Decl_heap.Funs.get_old_batch n_funs,
+        Decl_heap.Typedefs.get_old_batch n_types,
+        Decl_heap.GConsts.get_old_batch n_consts,
+        Decl_heap.Modules.get_old_batch n_modules )
+  in
+  let { Decl_compare.VersionedFileInfo.Diff.funs; types; gconsts; modules } =
+    Decl_compare.VersionedFileInfo.diff_names all_defs
+  in
+  let acc = Fanout.empty in
+  let (acc, old_funs_missing) =
+    compare_funs_and_get_fanout ctx old_funs acc funs
+  in
+  let (acc, old_types_missing) =
+    compare_types_and_get_fanout ctx old_types acc types
+  in
   let (acc, old_gconsts_missing) =
-    compute_gconsts_deps ctx old_consts acc n_consts
+    compare_gconsts_and_get_fanout ctx old_consts acc gconsts
   in
-
-  let (acc, old_classes_missing) =
-    if shallow_decl_enabled ctx || force_shallow_decl_fanout_enabled ctx then
-      (acc, 0)
-    else
-      let old_classes = Decl_heap.Classes.get_old_batch n_classes in
-      let new_classes = Decl_heap.Classes.get_batch n_classes in
-      compute_classes_deps ctx old_classes new_classes acc n_classes
-  in
-
   let (acc, old_modules_missing) =
-    let old_modules = Decl_heap.Modules.get_old_batch n_modules in
-    let new_modules = Decl_heap.Modules.get_batch n_modules in
-    compute_module_deps ctx old_modules new_modules acc n_modules
+    compare_modules_and_get_fanout ctx old_modules acc modules
   in
-
   let old_decl_missing_count =
     old_funs_missing
     + old_types_missing
     + old_gconsts_missing
-    + old_classes_missing
     + old_modules_missing
   in
-  let (changed, to_redecl, to_recheck) = acc in
-  ((changed, to_redecl, to_recheck), old_decl_missing_count)
+  (acc, old_decl_missing_count)
 
 (*****************************************************************************)
 (* Load the environment and then redeclare *)
 (*****************************************************************************)
 
-let load_and_on_the_fly_decl_files ctx _ filel =
-  try on_the_fly_decl_files ctx filel with
+(** Invalidate local caches and compute decls in files. Return the file count. *)
+let decl_files_job ctx filel =
+  try (List.length filel, decl_files ctx filel) with
   | exn ->
     let e = Exception.wrap exn in
     Printf.printf "Error: %s\n" (Exception.get_ctor_string e);
     Out_channel.flush stdout;
     Exception.reraise e
 
-let load_and_compute_deps ctx _acc (filel : Relative_path.t list) :
-    (DepSet.t * DepSet.t * DepSet.t * int) * int =
+let load_defs_compare_and_get_fanout ctx _acc (filel : Relative_path.t list) :
+    (Fanout.t * int) * int =
   try
-    let fast = OnTheFlyStore.load () in
-    let ((changed, to_redecl, to_recheck), old_decl_missing_count) =
-      compute_deps ctx fast filel
+    let defs_per_file = OnTheFlyStore.load () in
+    let (fanout, old_decl_missing_count) =
+      compare_decls_and_get_fanout ctx defs_per_file filel
     in
-    ((changed, to_redecl, to_recheck, List.length filel), old_decl_missing_count)
+    ((fanout, List.length filel), old_decl_missing_count)
   with
   | exn ->
     let e = Exception.wrap exn in
@@ -237,86 +183,77 @@ let load_and_compute_deps ctx _acc (filel : Relative_path.t list) :
 (* Merges the results coming back from the different workers *)
 (*****************************************************************************)
 
-let merge_on_the_fly
-    files_initial_count files_declared_count (count, errorl1) errorl2 =
+let merge_on_the_fly files_initial_count files_declared_count (count, ()) () =
   files_declared_count := !files_declared_count + count;
-  ServerProgress.send_percentage_progress
+  Server_progress.write_percentage
     ~operation:"declaring"
     ~done_count:!files_declared_count
     ~total_count:files_initial_count
     ~unit:"files"
     ~extra:None;
-
-  Errors.merge errorl1 errorl2
+  ()
 
 let merge_compute_deps
     files_initial_count
     files_computed_count
-    ( (changed1, to_redecl1, to_recheck1, computed_count),
-      old_decl_missing_count1 )
-    ((changed2, to_redecl2, to_recheck2), old_decl_missing_count2) =
+    ((fanout1, computed_count), old_decl_missing_count1)
+    (fanout2, old_decl_missing_count2) =
   files_computed_count := !files_computed_count + computed_count;
-
-  let (changed, to_redecl, to_recheck) =
-    ( DepSet.union changed1 changed2,
-      DepSet.union to_redecl1 to_redecl2,
-      DepSet.union to_recheck1 to_recheck2 )
-  in
-
-  ServerProgress.send_percentage_progress
+  let fanout = Fanout.union fanout1 fanout2 in
+  Server_progress.write_percentage
     ~operation:"computing dependencies of"
     ~done_count:!files_computed_count
     ~total_count:files_initial_count
     ~unit:"files"
     ~extra:None;
-
-  ( (changed, to_redecl, to_recheck),
-    old_decl_missing_count1 + old_decl_missing_count2 )
+  (fanout, old_decl_missing_count1 + old_decl_missing_count2)
 
 (*****************************************************************************)
 (* The parallel worker *)
 (*****************************************************************************)
-let parallel_on_the_fly_decl
+
+(** Invalidate local decl caches and recompute decls in files in parallel.
+  Compare new and old decls and deduce the fanout.
+  Return errors raised during decling, fanout and missing old decl count. *)
+let parallel_redecl_compare_and_get_fanout
     (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
     (bucket_size : int)
-    (fast : FileInfo.names Relative_path.Map.t)
-    (fnl : Relative_path.t list) :
-    (Errors.t * DepSet.t * DepSet.t * DepSet.t) * int =
+    (defs_per_file : Decl_compare.VersionedNames.t Relative_path.Map.t)
+    (fnl : Relative_path.t list) : Fanout.t * int =
+  Server_progress.with_frame @@ fun () ->
   try
-    OnTheFlyStore.store fast;
+    OnTheFlyStore.store defs_per_file;
     let files_initial_count = List.length fnl in
     let files_declared_count = ref 0 in
     let t = Unix.gettimeofday () in
     Hh_logger.log ~lvl "Declaring on-the-fly %d files" files_initial_count;
-    ServerProgress.send_percentage_progress
+    Server_progress.write_percentage
       ~operation:"declaring"
       ~done_count:!files_declared_count
       ~total_count:files_initial_count
       ~unit:"files"
       ~extra:None;
-    let errors =
-      MultiWorker.call
-        workers
-        ~job:(load_and_on_the_fly_decl_files ctx)
-        ~neutral:on_the_fly_neutral
-        ~merge:(merge_on_the_fly files_initial_count files_declared_count)
-        ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
-    in
+    MultiWorker.call
+      workers
+      ~job:(fun () -> decl_files_job ctx)
+      ~neutral:()
+      ~merge:(merge_on_the_fly files_initial_count files_declared_count)
+      ~next:(MultiWorker.next ~max_size:bucket_size workers fnl);
     let t = Hh_logger.log_duration ~lvl "Finished declaring on-the-fly" t in
     Hh_logger.log ~lvl "Computing dependencies of %d files" files_initial_count;
     let files_computed_count = ref 0 in
-    ServerProgress.send_percentage_progress
+    Server_progress.write_percentage
       ~operation:"computing dependencies of"
       ~done_count:!files_computed_count
       ~total_count:files_initial_count
       ~unit:"files"
       ~extra:None;
-    let ((changed, to_redecl, to_recheck), old_decl_missing_count) =
+    let (fanout, old_decl_missing_count) =
       MultiWorker.call
         workers
-        ~job:(load_and_compute_deps ctx)
-        ~neutral:(compute_deps_neutral ())
+        ~job:(load_defs_compare_and_get_fanout ctx)
+        ~neutral:compute_deps_neutral
         ~merge:(merge_compute_deps files_initial_count files_computed_count)
         ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
     in
@@ -324,7 +261,7 @@ let parallel_on_the_fly_decl
       Hh_logger.log_duration ~lvl "Finished computing dependencies" t
     in
     OnTheFlyStore.clear ();
-    ((errors, changed, to_redecl, to_recheck), old_decl_missing_count)
+    (fanout, old_decl_missing_count)
   with
   | exn ->
     let e = Exception.wrap exn in
@@ -336,60 +273,80 @@ let parallel_on_the_fly_decl
 (*****************************************************************************)
 (* Code invalidating the heap *)
 (*****************************************************************************)
-let oldify_defs
+
+(** Oldify provided defs and elements (a.k.a. members).
+    This is equivalent to moving a the decls for those defs to some heap of old decls,
+    i.e. they will only be retrievable when querying old values.
+    For classes, it oldifies both shallow and folded classes *)
+let[@warning "-21"] oldify_defs (* -21 for dune stubs *)
     (ctx : Provider_context.t)
-    { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }
+    ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } as names)
     (elems : Decl_class_elements.t SMap.t)
     ~(collect_garbage : bool) : unit =
-  Decl_heap.Funs.oldify_batch n_funs;
-  Decl_class_elements.oldify_all elems;
-  Decl_heap.Classes.oldify_batch n_classes;
-  Shallow_classes_provider.oldify_batch ctx n_classes;
-  Decl_heap.Typedefs.oldify_batch n_types;
-  Decl_heap.GConsts.oldify_batch n_consts;
-  Decl_heap.Modules.oldify_batch n_modules;
-  if collect_garbage then SharedMem.GC.collect `gentle;
-  ()
+  match Provider_backend.get () with
+  | Provider_backend.Rust_provider_backend be ->
+    Rust_provider_backend.Decl.oldify_defs be names
+  | _ ->
+    Decl_heap.Funs.oldify_batch n_funs;
+    Decl_class_elements.oldify_all elems;
+    Decl_heap.Classes.oldify_batch n_classes;
+    Old_shallow_classes_provider.oldify_batch ctx n_classes;
+    Decl_heap.Typedefs.oldify_batch n_types;
+    Decl_heap.GConsts.oldify_batch n_consts;
+    Decl_heap.Modules.oldify_batch n_modules;
+    if collect_garbage then SharedMem.GC.collect `gentle;
+    ()
 
-let remove_old_defs
+let[@warning "-21"] remove_old_defs (* -21 for dune stubs *)
     (ctx : Provider_context.t)
-    { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }
+    ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } as names)
     (elems : Decl_class_elements.t SMap.t) : unit =
-  Decl_heap.Funs.remove_old_batch n_funs;
-  Decl_class_elements.remove_old_all elems;
-  Decl_heap.Classes.remove_old_batch n_classes;
-  Shallow_classes_provider.remove_old_batch ctx n_classes;
-  Decl_heap.Typedefs.remove_old_batch n_types;
-  Decl_heap.GConsts.remove_old_batch n_consts;
-  Decl_heap.Modules.remove_old_batch n_modules;
-  SharedMem.GC.collect `gentle;
-  ()
+  match Provider_backend.get () with
+  | Provider_backend.Rust_provider_backend be ->
+    Rust_provider_backend.Decl.remove_old_defs be names
+  | _ ->
+    Decl_heap.Funs.remove_old_batch n_funs;
+    Decl_class_elements.remove_old_all elems;
+    Decl_heap.Classes.remove_old_batch n_classes;
+    Old_shallow_classes_provider.remove_old_batch ctx n_classes;
+    Decl_heap.Typedefs.remove_old_batch n_types;
+    Decl_heap.GConsts.remove_old_batch n_consts;
+    Decl_heap.Modules.remove_old_batch n_modules;
+    SharedMem.GC.collect `gentle;
+    ()
 
-let remove_defs
-    (ctx : Provider_context.t)
-    { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }
-    (elems : Decl_class_elements.t SMap.t)
+(** Remove provided defs and elements from the heap of current decls.
+    For classes, it removes both shallow and folded classes.
+
+    @param elems  elements, a.k.a. members, to remove *)
+let[@warning "-21"] remove_defs (* -21 for dune stubs *)
+    ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } as names)
+    ~(elems : Decl_class_elements.t SMap.t)
     ~(collect_garbage : bool) : unit =
-  Decl_heap.Funs.remove_batch n_funs;
-  Decl_class_elements.remove_all elems;
-  Decl_heap.Classes.remove_batch n_classes;
-  Shallow_classes_provider.remove_batch ctx n_classes;
-  Linearization_provider.remove_batch ctx n_classes;
-  Decl_heap.Typedefs.remove_batch n_types;
-  Decl_heap.GConsts.remove_batch n_consts;
-  Decl_heap.Modules.remove_batch n_modules;
-  if collect_garbage then SharedMem.GC.collect `gentle;
-  ()
+  match Provider_backend.get () with
+  | Provider_backend.Rust_provider_backend be ->
+    Rust_provider_backend.Decl.remove_defs be names
+  | _ ->
+    Decl_heap.Funs.remove_batch n_funs;
+    Decl_class_elements.remove_all elems;
+    Decl_heap.Classes.remove_batch n_classes;
+    Shallow_classes_heap.Classes.remove_batch n_classes;
+    Decl_heap.Typedefs.remove_batch n_types;
+    Decl_heap.GConsts.remove_batch n_consts;
+    Decl_heap.Modules.remove_batch n_modules;
+    if collect_garbage then SharedMem.GC.collect `gentle;
+    ()
 
-let is_dependent_class_of_any ctx classes (c : string) : bool =
+(** [is_descendant_of_any_of classes c] returns whether
+    class [c] is a member of or is a descendant of
+    any of the [classes]. *)
+let is_descendant_of_any_of classes (c : string) : bool =
   if SSet.mem classes c then
-    true
-  else if shallow_decl_enabled ctx then
     true
   else
     match Decl_heap.Classes.get c with
     | None -> false
-    (* it might be a dependent class, but we are only doing this
+    (* it might be a descendant class, but we are only doing this
      * check for the purpose of invalidating things from the heap
      * - if it's already not there, then we don't care. *)
     | Some c ->
@@ -399,72 +356,76 @@ let is_dependent_class_of_any ctx classes (c : string) : bool =
       || intersection_nonempty c.Decl_defs.dc_xhp_attr_deps classes
       || intersection_nonempty c.Decl_defs.dc_req_ancestors_extends classes
 
-let get_maybe_dependent_classes
+(** [add_classes_in_files get_classes files classes_acc]
+    adds to [classes_acc] the classes in [files],
+    obtained with [get_classes file] for [file] in [files] *)
+let add_classes_in_files
     (get_classes : Relative_path.t -> SSet.t)
-    (classes : SSet.t)
-    (files : Relative_path.Set.t) : string list =
-  Relative_path.Set.fold files ~init:classes ~f:(fun x acc ->
-      SSet.union acc @@ get_classes x)
-  |> SSet.elements
+    (files : Relative_path.Set.t)
+    (classes_acc : SSet.t) : SSet.t =
+  Relative_path.Set.fold files ~init:classes_acc ~f:(fun fn acc ->
+      SSet.union acc @@ get_classes fn)
 
-let get_dependent_classes_files (ctx : Provider_context.t) (classes : SSet.t) :
+(** Return the files containing all descendants of provided classes *)
+let get_files_of_descendants (ctx : Provider_context.t) (class_names : SSet.t) :
     Relative_path.Set.t =
-  let mode = Provider_context.get_deps_mode ctx in
-  let visited = VisitedSet.make () in
   SSet.fold
-    classes
+    class_names
     ~init:Typing_deps.(DepSet.make ())
     ~f:(fun c acc ->
-      let source_class = Dep.make (Dep.Type c) in
-      Typing_deps.get_extend_deps ~mode ~visited ~source_class ~acc)
+      Typing_deps.get_extend_deps
+        ~mode:(Provider_context.get_deps_mode ctx)
+        ~visited:(VisitedSet.make ())
+        ~source_class:(Dep.make (Dep.Type c))
+        ~acc)
   |> Naming_provider.get_files ctx
 
-let filter_dependent_classes
-    (ctx : Provider_context.t)
-    (classes : SSet.t)
-    (maybe_dependent_classes : string list) : string list =
-  List.filter maybe_dependent_classes ~f:(is_dependent_class_of_any ctx classes)
+(** [filter_descendant_classes classes ~maybe_descendant_classes]
+    filters [maybe_descendant_classes] to keep only those which are
+    a descendant or a class in [classes], or a member of [classes]. *)
+let filter_descendant_classes
+    (classes : SSet.t) ~(maybe_descendant_classes : string list) : string list =
+  List.filter maybe_descendant_classes ~f:(is_descendant_of_any_of classes)
 
 module ClassSetStore = GlobalStorage.Make (struct
   type t = SSet.t
 end)
 
-let load_and_filter_dependent_classes
-    (ctx : Provider_context.t) (maybe_dependent_classes : string list) :
-    string list * int =
+let load_and_filter_descendant_classes (maybe_descendant_classes : string list)
+    : string list * int =
   let classes = ClassSetStore.load () in
-  ( filter_dependent_classes ctx classes maybe_dependent_classes,
-    List.length maybe_dependent_classes )
+  ( filter_descendant_classes classes ~maybe_descendant_classes,
+    List.length maybe_descendant_classes )
 
-let merge_dependent_classes
+let merge_descendant_classes
     classes_initial_count
     classes_filtered_count
-    (dependent_classes, filtered)
+    (descendant_classes, filtered)
     acc =
   classes_filtered_count := !classes_filtered_count + filtered;
-  ServerProgress.send_percentage_progress
+  Server_progress.write_percentage
     ~operation:"filtering"
     ~done_count:!classes_filtered_count
     ~total_count:classes_initial_count
     ~unit:"classes"
     ~extra:None;
-  dependent_classes @ acc
+  descendant_classes @ acc
 
-let filter_dependent_classes_parallel
-    (ctx : Provider_context.t)
+let filter_descendant_classes_parallel
     (workers : MultiWorker.worker list option)
     ~(bucket_size : int)
     (classes : SSet.t)
-    (maybe_dependent_classes : string list) : string list =
-  if List.length maybe_dependent_classes < 10 then
-    filter_dependent_classes ctx classes maybe_dependent_classes
-  else (
+    (maybe_descendant_classes : string list) : string list =
+  let classes_initial_count = List.length maybe_descendant_classes in
+  if classes_initial_count < 10 then
+    filter_descendant_classes classes ~maybe_descendant_classes
+  else
+    Server_progress.with_frame @@ fun () ->
     ClassSetStore.store classes;
-    let classes_initial_count = List.length maybe_dependent_classes in
     let classes_filtered_count = ref 0 in
     let t = Unix.gettimeofday () in
-    Hh_logger.log ~lvl "Filtering %d dependent classes" classes_initial_count;
-    ServerProgress.send_percentage_progress
+    Hh_logger.log ~lvl "Filtering %d descendant classes" classes_initial_count;
+    Server_progress.write_percentage
       ~operation:"filtering"
       ~done_count:!classes_filtered_count
       ~total_count:classes_initial_count
@@ -473,32 +434,34 @@ let filter_dependent_classes_parallel
     let res =
       MultiWorker.call
         workers
-        ~job:(fun _ c -> load_and_filter_dependent_classes ctx c)
+        ~job:(fun _ c -> load_and_filter_descendant_classes c)
         ~merge:
-          (merge_dependent_classes classes_initial_count classes_filtered_count)
+          (merge_descendant_classes
+             classes_initial_count
+             classes_filtered_count)
         ~neutral:[]
         ~next:
           (MultiWorker.next
              ~max_size:bucket_size
              workers
-             maybe_dependent_classes)
+             maybe_descendant_classes)
     in
     let (_t : float) =
-      Hh_logger.log_duration ~lvl "Finished filtering dependent classes" t
+      Hh_logger.log_duration ~lvl "Finished filtering descendant classes" t
     in
     ClassSetStore.clear ();
     res
-  )
 
-let get_dependent_classes
+let get_descendant_classes
     (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
     ~(bucket_size : int)
     (get_classes : Relative_path.t -> SSet.t)
     (classes : SSet.t) : SSet.t =
-  get_dependent_classes_files ctx classes
-  |> get_maybe_dependent_classes get_classes classes
-  |> filter_dependent_classes_parallel ctx workers ~bucket_size classes
+  let files_of_descendants = get_files_of_descendants ctx classes in
+  add_classes_in_files get_classes files_of_descendants classes
+  |> SSet.elements
+  |> filter_descendant_classes_parallel workers ~bucket_size classes
   |> SSet.of_list
 
 let merge_elements
@@ -506,74 +469,84 @@ let merge_elements
   classes_processed_count := !classes_processed_count + count;
 
   let acc = SMap.union elements acc in
-  ServerProgress.send_percentage_progress
+  Server_progress.write_percentage
     ~operation:"getting members of"
     ~done_count:!classes_processed_count
     ~total_count:classes_initial_count
     ~unit:"classes"
-    ~extra:(Some (Printf.sprintf "%d elements" (SMap.cardinal acc)));
+    ~extra:None;
   acc
 
-(**
- * Get the [Decl_class_elements.t]s corresponding to the classes contained in
- * [defs]. *)
+(** Get the [Decl_class_elements.t]s (a.k.a. members)
+  corresponding to the classes contained in [defs].
+  Get them from the element heaps. *)
 let get_elems
-    (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
     ~(bucket_size : int)
     ~(old : bool)
     (defs : FileInfo.names) : Decl_class_elements.t SMap.t =
-  if shallow_decl_enabled ctx then
-    SMap.empty
-  else
-    let classes = SSet.elements defs.FileInfo.n_classes in
-    (* Getting the members of a class requires fetching the class from the heap.
-     * Doing this for too many classes will cause a large amount of allocations
-     * to be performed on the master process triggering the GC and slowing down
-     * redeclaration. Using the workers prevents this from occurring
-     *)
-    let classes_initial_count = List.length classes in
-    let t = Unix.gettimeofday () in
-    Hh_logger.log ~lvl "Getting elements of %d classes" classes_initial_count;
-    let elements =
-      if classes_initial_count < 10 then
-        Decl_class_elements.get_for_classes ~old classes
-      else
-        let classes_processed_count = ref 0 in
-        ServerProgress.send_percentage_progress
-          ~operation:"getting members of"
-          ~done_count:!classes_processed_count
-          ~total_count:classes_initial_count
-          ~unit:"classes"
-          ~extra:None;
-        MultiWorker.call
-          workers
-          ~job:(fun _ c ->
-            (Decl_class_elements.get_for_classes ~old c, List.length c))
-          ~merge:(merge_elements classes_initial_count classes_processed_count)
-          ~neutral:SMap.empty
-          ~next:(MultiWorker.next ~max_size:bucket_size workers classes)
-    in
-
-    let (_t : float) =
-      Hh_logger.log_duration ~lvl "Finished getting elements" t
-    in
-    elements
-
-let invalidate_folded_classes_for_shallow_fanout
-    ctx workers ~bucket_size ~get_classes_in_file changed_classes =
-  let invalidated =
-    changed_classes
-    |> Typing_deps.add_extend_deps (Provider_context.get_deps_mode ctx)
-    |> Shallow_class_fanout.class_names_from_deps ~ctx ~get_classes_in_file
+  let classes = SSet.elements defs.FileInfo.n_classes in
+  (* Getting the members of a class requires fetching the class from the heap.
+   * Doing this for too many classes will cause a large amount of allocations
+   * to be performed on the master process triggering the GC and slowing down
+   * redeclaration. Using the workers prevents this from occurring
+   *)
+  let classes_initial_count = List.length classes in
+  let t = Unix.gettimeofday () in
+  Hh_logger.log ~lvl "Getting elements of %d classes" classes_initial_count;
+  let elements =
+    if classes_initial_count < 10 then
+      Decl_class_elements.get_for_classes ~old classes
+    else
+      Server_progress.with_frame @@ fun () ->
+      let classes_processed_count = ref 0 in
+      Server_progress.write_percentage
+        ~operation:"getting members of"
+        ~done_count:!classes_processed_count
+        ~total_count:classes_initial_count
+        ~unit:"classes"
+        ~extra:None;
+      MultiWorker.call
+        workers
+        ~job:(fun _ c ->
+          (Decl_class_elements.get_for_classes ~old c, List.length c))
+        ~merge:(merge_elements classes_initial_count classes_processed_count)
+        ~neutral:SMap.empty
+        ~next:(MultiWorker.next ~max_size:bucket_size workers classes)
   in
-  let get_elems n_classes =
-    get_elems ctx workers ~bucket_size FileInfo.{ empty_names with n_classes }
+
+  let (_t : float) =
+    Hh_logger.log_duration ~lvl "Finished getting elements" t
   in
-  Decl_class_elements.remove_old_all (get_elems invalidated ~old:true);
-  Decl_class_elements.remove_all (get_elems invalidated ~old:false);
-  Decl_heap.Classes.remove_old_batch invalidated;
-  Decl_heap.Classes.remove_batch invalidated;
+  elements
+
+let invalidate_folded_classes
+    ctx
+    workers
+    ~bucket_size
+    ~get_classes_in_file
+    (changed_classes : Shallow_class_fanout.changed_class list) : unit =
+  let to_invalidate =
+    List.fold
+      changed_classes
+      ~init:SSet.empty
+      ~f:(fun acc { Shallow_class_fanout.descendant_deps; _ } ->
+        Shallow_class_fanout.class_names_from_deps
+          ~ctx
+          ~get_classes_in_file
+          descendant_deps
+        |> SSet.union acc)
+  in
+  Hh_logger.log "Invalidating %d folded classes" (SSet.cardinal to_invalidate);
+  let (old_members, new_members) =
+    let get_elems n_classes =
+      get_elems workers ~bucket_size FileInfo.{ empty_names with n_classes }
+    in
+    ( lazy (get_elems to_invalidate ~old:true),
+      lazy (get_elems to_invalidate ~old:false) )
+  in
+  Decl_provider.remove_classes ctx to_invalidate ~old_members ~new_members;
+  SharedMem.invalidate_local_caches ();
   SharedMem.GC.collect `gentle;
   ()
 
@@ -581,24 +554,31 @@ let invalidate_folded_classes_for_shallow_fanout
 (* The main entry point *)
 (*****************************************************************************)
 
+(** see .mli **)
 let redo_type_decl
     (ctx : Provider_context.t)
+    ~during_init
     (workers : MultiWorker.worker list option)
     ~(bucket_size : int)
     (get_classes : Relative_path.t -> SSet.t)
     ~(previously_oldified_defs : FileInfo.names)
-    ~(defs : FileInfo.names Relative_path.Map.t) : redo_type_decl_result =
+    ~(defs : Decl_compare.VersionedNames.t Relative_path.Map.t) :
+    redo_type_decl_result =
+  Hh_logger.log "Decl_redecl_service.redo_type_decl: oldifying defs";
   let all_defs =
-    Relative_path.Map.fold defs ~init:FileInfo.empty_names ~f:(fun _ ->
-        FileInfo.merge_names)
+    Relative_path.Map.fold
+      defs
+      ~init:Decl_compare.VersionedNames.empty
+      ~f:(fun _fn names acc -> Decl_compare.VersionedNames.merge names acc)
   in
+  let all_old_defs = all_defs.Decl_compare.VersionedNames.old_names in
   (* Some of the definitions are already in the old heap, left there by a
    * previous lazy check *)
   let (oldified_defs, current_defs) =
-    Decl_utils.split_defs all_defs previously_oldified_defs
+    Decl_utils.split_defs all_old_defs previously_oldified_defs
   in
   (* Oldify the remaining defs along with their elements *)
-  let get_elems = get_elems ctx workers ~bucket_size in
+  let get_elems = get_elems workers ~bucket_size in
   let current_elems = get_elems current_defs ~old:false in
   oldify_defs ctx current_defs current_elems ~collect_garbage:true;
 
@@ -607,107 +587,79 @@ let redo_type_decl
   let all_elems = SMap.union current_elems oldified_elems in
   let fnl = Relative_path.Map.keys defs in
 
-  (* If there aren't enough files, let's do this ourselves ... it's faster! *)
-  let ((errors, changed, to_redecl, to_recheck), old_decl_missing_count) =
+  Hh_logger.log
+    "Decl_redecl_service.redo_type_decl: computing fanout of non-classes";
+  let (fanout_acc, old_decl_missing_count) =
+    (* If there aren't enough files, let's do this ourselves ... it's faster! *)
     if List.length fnl < 10 then
-      let ((_declared : int), errors) = on_the_fly_decl_files ctx fnl in
-      let ((changed, to_redecl, to_recheck), old_decl_missing_count) =
-        compute_deps ctx defs fnl
+      let () = decl_files ctx fnl in
+      let (fanout, old_decl_missing_count) =
+        compare_decls_and_get_fanout ctx defs fnl
       in
-      ((errors, changed, to_redecl, to_recheck), old_decl_missing_count)
+      (fanout, old_decl_missing_count)
     else
-      parallel_on_the_fly_decl ctx workers bucket_size defs fnl
+      parallel_redecl_compare_and_get_fanout ctx workers bucket_size defs fnl
   in
-  let (changed, to_recheck) =
-    if shallow_decl_enabled ctx then (
-      let AffectedDeps.{ changed = changed'; mro_invalidated; needs_recheck } =
-        Shallow_decl_compare.compute_class_fanout
-          ctx
-          ~defs
-          ~fetch_old_decls:(Remote_old_decl_client.fetch_old_decls ~ctx)
-          fnl
-      in
-      let changed = DepSet.union changed changed' in
-      let to_recheck = DepSet.union to_recheck needs_recheck in
-      let mro_invalidated =
-        mro_invalidated
-        |> Naming_provider.get_files ctx
-        |> Relative_path.Set.fold ~init:SSet.empty ~f:(fun path acc ->
-               SSet.union acc (get_classes path))
-      in
-      Linearization_provider.remove_batch ctx mro_invalidated;
-      (changed, to_recheck)
-    ) else if force_shallow_decl_fanout_enabled ctx then (
-      let AffectedDeps.
-            { changed = changed'; mro_invalidated = _; needs_recheck } =
-        Shallow_decl_compare.compute_class_fanout
-          ctx
-          ~defs
-          ~fetch_old_decls:(Remote_old_decl_client.fetch_old_decls ~ctx)
-          fnl
-      in
-
-      invalidate_folded_classes_for_shallow_fanout
+  Hh_logger.log
+    "Decl_redecl_service.redo_type_decl: computing fanout of classes";
+  let fanout =
+    let changes =
+      Shallow_decl_compare.compute_changes
         ctx
-        workers
-        ~bucket_size
-        ~get_classes_in_file:get_classes
-        changed';
-
-      let changed = DepSet.union changed changed' in
-      let to_recheck = DepSet.union to_recheck needs_recheck in
-
-      (changed, to_recheck)
-    ) else
-      (changed, to_recheck)
+        ~during_init
+        ~class_names:
+          (Decl_compare.VersionedSSet.get_classes all_defs
+          |> Decl_compare.VersionedSSet.diff)
+    in
+    invalidate_folded_classes
+      ctx
+      workers
+      ~bucket_size
+      ~get_classes_in_file:get_classes
+      changes;
+    let fanout = Shallow_class_fanout.fanout_of_changes ~ctx changes in
+    Fanout.union fanout fanout_acc
   in
-  remove_old_defs ctx all_defs all_elems;
+  remove_old_defs ctx all_old_defs all_elems;
 
   Hh_logger.log "Finished recomputing type declarations:";
-  Hh_logger.log "  changed: %d" (DepSet.cardinal changed);
-  Hh_logger.log "  to_redecl: %d" (DepSet.cardinal to_redecl);
-  Hh_logger.log "  to_recheck: %d" (DepSet.cardinal to_recheck);
+  Hh_logger.log
+    "  changed defs count: %d"
+    (DepSet.cardinal fanout.Fanout.changed);
+  Hh_logger.log
+    "  defs to recheck count: %d"
+    (DepSet.cardinal fanout.Fanout.to_recheck);
 
-  { errors; changed; to_redecl; to_recheck; old_decl_missing_count }
+  { fanout; old_decl_missing_count }
 
-let oldify_type_decl
+(** see .mli **)
+let oldify_decls_and_remove_descendants
     (ctx : Provider_context.t)
     ?(collect_garbage = true)
     (workers : MultiWorker.worker list option)
     (get_classes : Relative_path.t -> SSet.t)
     ~(bucket_size : int)
-    ~(previously_oldified_defs : FileInfo.names)
     ~(defs : FileInfo.names) : unit =
-  (* Some defs are already oldified, waiting for their recheck *)
-  let (oldified_defs, current_defs) =
-    Decl_utils.split_defs defs previously_oldified_defs
-  in
-  let get_elems = get_elems ctx workers ~bucket_size in
-  (* Oldify things that are not oldified yet *)
-  let current_elems = get_elems current_defs ~old:false in
-  oldify_defs ctx current_defs current_elems ~collect_garbage;
-
-  (* For the rest, just invalidate their current versions *)
-  let oldified_elems = get_elems oldified_defs ~old:false in
-  remove_defs ctx oldified_defs oldified_elems ~collect_garbage;
+  let elems = get_elems workers ~bucket_size defs ~old:false in
+  oldify_defs ctx defs elems ~collect_garbage;
 
   (* Oldifying/removing classes also affects their elements
    * (see Decl_class_elements), which might be shared with other classes. We
    * need to remove all of them too to avoid dangling references *)
   let all_classes = defs.FileInfo.n_classes in
-  let dependent_classes =
-    get_dependent_classes ctx workers get_classes ~bucket_size all_classes
+  let descendant_classes =
+    get_descendant_classes ctx workers get_classes ~bucket_size all_classes
   in
-  let dependent_classes =
+  let descendant_classes =
     FileInfo.
-      { empty_names with n_classes = SSet.diff dependent_classes all_classes }
+      { empty_names with n_classes = SSet.diff descendant_classes all_classes }
   in
-  remove_defs ctx dependent_classes SMap.empty ~collect_garbage
+  remove_defs descendant_classes ~elems:SMap.empty ~collect_garbage
 
 let remove_old_defs
     (ctx : Provider_context.t)
     ~(bucket_size : int)
     (workers : MultiWorker.worker list option)
     (names : FileInfo.names) : unit =
-  let elems = get_elems ctx workers ~bucket_size names ~old:true in
+  let elems = get_elems workers ~bucket_size names ~old:true in
   remove_old_defs ctx names elems

@@ -18,10 +18,8 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/request-info.h"
@@ -31,11 +29,8 @@
 #include "hphp/runtime/ext/stream/ext_stream.h"
 
 #include "hphp/runtime/server/static-content-cache.h"
-#include "hphp/runtime/server/virtual-host.h"
 
 #include "hphp/runtime/base/file-util.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/process.h"
 
 #include <folly/String.h>
 #include <folly/portability/Fcntl.h>
@@ -67,8 +62,6 @@ FileData::~FileData() {
 // statics
 
 StaticString File::s_resource_name("stream");
-
-RDS_LOCAL(int, s_pcloseRet);
 
 const int File::USE_INCLUDE_PATH = 1;
 
@@ -125,10 +118,9 @@ String File::TranslatePathWithFileCache(const String& filename) {
   String translated = TranslatePath(canonicalized);
   if (!translated.empty() && access(translated.data(), F_OK) < 0 &&
       StaticContentCache::TheFileCache) {
-    if (StaticContentCache::TheFileCache->exists(canonicalized.data(),
-                                                 false)) {
+    if (StaticContentCache::TheFileCache->exists(canonicalized.toCppString())) {
       // we use file cache's file name to make stat() work
-      translated = String(RuntimeOption::FileCache);
+      translated = String(Cfg::Server::FileCache);
     }
   }
   return translated;
@@ -142,13 +134,13 @@ String File::TranslateCommand(const String& cmd) {
 bool File::IsVirtualDirectory(const String& filename) {
   return
     StaticContentCache::TheFileCache &&
-    StaticContentCache::TheFileCache->dirExists(filename.data(), false);
+    StaticContentCache::TheFileCache->dirExists(filename.toCppString());
 }
 
 bool File::IsVirtualFile(const String& filename) {
   return
     StaticContentCache::TheFileCache &&
-    StaticContentCache::TheFileCache->fileExists(filename.data(), false);
+    StaticContentCache::TheFileCache->fileExists(filename.toCppString());
 }
 
 req::ptr<File> File::Open(const String& filename, const String& mode,
@@ -189,8 +181,8 @@ File::File(bool nonblocking /* = true */,
 { }
 
 File::~File() {
-  if(m_data.unique()) {
-    closeImpl();
+  if (m_data.use_count() == 1) {
+    File::close();
   }
   m_data.reset();
 }
@@ -201,13 +193,13 @@ void File::sweep() {
   // sweep() is responsible for closing m_fd and any other non-request
   // resources it might have allocated.
   assertx(!valid());
-  File::closeImpl();
+  File::close();
   m_data.reset();
   m_wrapperType = nullptr;
   m_streamType = nullptr;
 }
 
-bool File::closeImpl() {
+bool File::close(int*) {
   return m_data ? m_data->closeImpl() : true;
 }
 
@@ -488,13 +480,13 @@ String File::readLine(int64_t maxlen /* = 0 */) {
       const char *lf;
       cr = (const char *)memchr(readptr, '\r', avail);
       lf = (const char *)memchr(readptr, '\n', avail);
-      if (cr && lf != cr + 1 && !(lf && lf < cr) && cr != &readptr[avail - 1]) {
+      if (cr && lf != cr + 1 && !(lf && lf < cr)) {
         /* mac */
         eol = cr;
       } else if ((cr && lf && cr == lf - 1) || (lf)) {
         /* dos or unix endings */
         eol = lf;
-      } else if (cr != &readptr[avail - 1]) {
+      } else {
         eol = cr;
       }
 
@@ -532,10 +524,29 @@ String File::readLine(int64_t maxlen /* = 0 */) {
         m_data->m_buffer = (char *)malloc(m_data->m_chunkSize);
         m_data->m_bufferSize = m_data->m_chunkSize;
       }
+      if (m_data->m_bufferSize != m_data->m_chunkSize) {
+        m_data->m_buffer = (char *)realloc(m_data->m_buffer, m_data->m_chunkSize);
+        m_data->m_bufferSize = m_data->m_chunkSize;
+      }
       m_data->m_writepos = readImpl(m_data->m_buffer, m_data->m_bufferSize);
       m_data->m_readpos = 0;
+
       if (bufferedLen() == 0) {
         break;
+      }
+
+      // refuse to end chunk on \r when the next character may be \n
+      while (m_data->m_buffer[bufferedLen() - 1] == '\r') {
+        char extrachar[1];
+        int64_t len = readImpl(extrachar, 1);
+        if (len == 1) {
+          m_data->m_buffer = (char *)realloc(m_data->m_buffer, m_data->m_bufferSize + 1);
+          m_data->m_buffer[bufferedLen()] = extrachar[0];
+          m_data->m_writepos = m_data->m_writepos + 1;
+          m_data->m_bufferSize = m_data->m_bufferSize + 1;
+        } else {
+          break;
+        }
       }
     }
   }
@@ -738,7 +749,7 @@ static const char *lookup_trailing_spaces(const char *ptr, int len) {
       if (len > 1 && *(ptr - 2) == '\r') {
         return ptr - 2;
       }
-      /* break is omitted intentionally */
+      [[fallthrough]];
     case '\r':
       return ptr - 1;
     }
@@ -832,7 +843,7 @@ Array File::readCSV(int64_t length /* = 0 */,
             memcpy(tptr, hunk_begin, bptr - hunk_begin);
             tptr += (bptr - hunk_begin);
             hunk_begin = bptr;
-            /* break is omitted intentionally */
+            [[fallthrough]];
           case 0:
             {
               if (hunk_begin != line_end) {

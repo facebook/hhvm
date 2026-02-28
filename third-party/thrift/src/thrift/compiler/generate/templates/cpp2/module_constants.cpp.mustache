@@ -1,0 +1,90 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/const_value" as const_value}}
+{{> Autogen}}
+
+#include "{{program:include_prefix}}{{program:name}}_constants.h"
+
+#include <thrift/lib/cpp2/gen/module_constants_cpp.h>
+
+{{#program:thrift_includes}}
+#include "{{program:include_prefix}}{{program:name}}_constants.h"
+{{/program:thrift_includes}}
+
+namespace {{program:cpp_qualified_namespace}} {
+namespace {{program:name}}_constants {
+
+{{#program:constants}}
+  {{#if constant:outline_init?}}
+{{constant:cpp_type}} const& {{constant:name}}() {
+    {{#if (object.eq? constant:cpp_adapter null)}}
+  static folly::Indestructible<{{constant:self.type.type:cpp_type}}> const instance{ {{!
+    }}{{#partial const_value.iterate_const_values_adapted value=constant:self.value root_const=constant:self}} };
+    {{#else}}
+  static folly::Indestructible<{{constant:cpp_type}}> const instance{
+      folly::factory_constructor, [](){ return {{constant:cpp_adapter}}::fromThrift({{constant:self.type.type:cpp_type}}({{!
+        }}{{#partial const_value.iterate_const_values value=constant:self.value root_const=constant:self}}){{!
+        }}{{#let extra_arg=constant:extra_arg}}{{#if (object.notnull? extra_arg)}},
+                                            {{#partial const_value.iterate_const_values value=extra_arg.value root_const=extra_arg}},
+                                            "{{constant:uri}}"{{/if (object.notnull? extra_arg)}}); }};
+    {{/if (object.eq? constant:cpp_adapter null)}}
+  return *instance;
+}
+  {{#else if (and constant:generated? constant:self.type.binary?)}}
+::std::string_view {{constant:name}}() {
+  constexpr static ::std::string_view {{constant:name}}_{
+    /*@fbthrift_strip_from_fixtures*/"{{constant:self.value.string_value}}",
+    {{constant:self.value.string_length}}/*@fbthrift_strip_from_fixtures*/};
+  return {{constant:name}}_;
+}
+  {{/if constant:outline_init?}}
+
+{{/program:constants}}
+
+{{^program:has_schema?}}
+::std::string_view {{program:schema_name}}() {
+  return "";
+}
+{{/program:has_schema?}}
+::folly::Range<const ::std::string_view*> {{program:schema_name}}_includes() {
+{{#if program:schema_includes_const?}}
+  static const ::std::array<::std::string_view, {{program:num_transitive_thrift_includes}}> includes = {
+    {{#program:transitive_schema_initializers}}
+    {{ . }},
+    {{/program:transitive_schema_initializers}}
+  };
+  return ::folly::range(includes);
+{{#else}}
+  return {};
+{{/if program:schema_includes_const?}}
+}
+::folly::Range<const ::std::string_view*> {{program:schema_name}}_uris() {
+{{#if program:schema_includes_const?}}
+  static const ::std::array<::std::string_view, {{(array.len program:uris)}}> uris = {
+    {{#program:uris}}
+    "{{ . }}",
+    {{/program:uris}}
+  };
+  return ::folly::range(uris);
+{{#else}}
+  return {};
+{{/if program:schema_includes_const?}}
+}
+
+} // namespace {{program:name}}_constants
+} // namespace {{program:cpp_qualified_namespace}}

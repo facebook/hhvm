@@ -1,4 +1,6 @@
-File "nullsafe_member_access_on_nonnull.php", line 4, characters 13-15:
+WARN: File "nullsafe_member_access_on_nonnull.php", line 4, characters 8-15:
+You are using the `?->` operator but this object is of type nonnull which cannot be null. You can use the `->` operator instead. (Warn[12029])
+ERROR: File "nullsafe_member_access_on_nonnull.php", line 4, characters 13-15:
 You are trying to access the method `foo` but this is a nonnull value. Use a **specific** class or interface name. (Typing[4062])
   File "nullsafe_member_access_on_nonnull.php", line 3, characters 12-18:
   Definition is here

@@ -1,6 +1,6 @@
 <?hh
 
-function fn($reqParam, $optParam = null, ...$params) {
+function fn($reqParam, $optParam = null, ...$params) :mixed{
     var_dump($reqParam, $optParam, $params);
 }
 <<__EntryPoint>> function main(): void {

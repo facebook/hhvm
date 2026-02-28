@@ -8,7 +8,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing strrchr() function: with various double quoted strings ***";
 $haystack = "Hello,\t\n\0\n  $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 ";
-$needle = varray[
+$needle = vec[
   //regular strings
   "l",
   "L",

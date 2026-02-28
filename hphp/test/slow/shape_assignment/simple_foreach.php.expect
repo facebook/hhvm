@@ -1,0 +1,24 @@
+string(2) "k1"
+int(1)
+int(2)
+int(3)
+string(2) "k2"
+int(4)
+int(5)
+int(6)
+string(2) "k1"
+int(1)
+int(2)
+int(3)
+string(2) "k2"
+int(4)
+int(5)
+int(6)
+string(2) "k1"
+int(10)
+string(2) "k2"
+int(100)
+int(11)
+int(110)
+int(12)
+int(120)

@@ -23,6 +23,7 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/synchronizable.h"
 #include <proxygen/lib/http/session/HTTPTransaction.h>
+#include <folly/io/async/ssl/OpenSSLTransportCertificate.h>
 #include <folly/IntrusiveList.h>
 #include <folly/IPAddress.h>
 
@@ -59,7 +60,7 @@ struct ResponseMessage {
         // sad panda copy.  TODO (t4362832): change sendImpl to take IOBuf
         m_chunk = folly::IOBuf::copyBuffer(data, size);
       }
-    };
+    }
 
   ResponseMessage(ResponseMessage&& m) noexcept
   : m_transport(std::move(m.m_transport)),
@@ -82,6 +83,10 @@ struct ResponseMessage {
 };
 
 struct PushTxnHandler;
+
+namespace stream_transport {
+struct HttpStreamServerTransport;
+}
 
 const StaticString s_proxygen("proxygen");
 
@@ -108,10 +113,10 @@ struct ProxygenTransport final
 
   const std::string& getServerAddr() override {
     return m_localAddr;
-  };
+  }
   uint16_t getServerPort() override {
     return m_localPort;
-  };
+  }
 
   /**
    * Request URI.
@@ -122,10 +127,17 @@ struct ProxygenTransport final
 
   /**
    * POST request's data.
+   * These APIs return empty data for streaming transports.
    */
   const void *getPostData(size_t &size) override;
   bool hasMorePostData() override;
   const void *getMorePostData(size_t &size) override;
+
+  /**
+   * This callback should be called when the StreamTransport
+   * is ready to receive data.
+   */
+  void onStreamReady() override;
 
   // TODO: is get getFiles required?
 
@@ -147,6 +159,8 @@ struct ProxygenTransport final
 
   /**
    * Get http request size.
+   * For non-buffering requests, this method returns
+   * the size of request data received so far.
    */
   size_t getRequestSize() const override;
 
@@ -158,12 +172,18 @@ struct ProxygenTransport final
 
   const proxygen::HTTPHeaders* getProxygenHeaders() override;
 
+  folly::ssl::X509UniquePtr getPeerCertificate();
+
   /**
    * Get a description of the type of transport.
    */
   String describe() const override {
     return s_proxygen;
   }
+
+  std::shared_ptr<stream_transport::StreamTransport>
+    getStreamTransport() const override;
+  bool isStreamTransport() const override;
 
   /**
    * Add/remove a response header.
@@ -184,6 +204,8 @@ struct ProxygenTransport final
    */
   void sendImpl(const void *data, int size, int code,
                 bool chunked, bool eom) override;
+  void sendStreamResponse(const void* data, int size) override;
+  void sendStreamEOM() override;
 
   /**
    * Override to implement more send end logic.
@@ -233,7 +255,20 @@ struct ProxygenTransport final
     folly::IPAddress ipAddr(localAddr.getIPAddress());
     m_localAddr = ipAddr.toFullyQualified();
     m_localPort = localAddr.getPort();
-  };
+    // Save a reference to the peer's certificate eagerly, while we have
+    // access to the HTTP transaction and its underlying transport. We lose
+    // this access once the transaction is detached, which is why we don't
+    // do this lazily in getPeerCertificate.
+    m_peerCert = folly::OpenSSLTransportCertificate::tryExtractX509(
+        m_clientTxn->getTransport()
+            .getUnderlyingTransport()
+            ->getPeerCertificate());
+  }
+
+  proxygen::HTTPTransaction* getTransaction() noexcept {
+    Lock lock(this);
+    return m_clientTxn;
+  }
 
   void detachTransaction() noexcept override {
     VLOG(5) << "detachTransaction ProxygenTransport=" << (uint64_t) this;
@@ -249,9 +284,9 @@ struct ProxygenTransport final
 
   void onBody(std::unique_ptr<folly::IOBuf> chain) noexcept override;
 
-  void onChunkHeader(size_t /*length*/) noexcept override{};
+  void onChunkHeader(size_t /*length*/) noexcept override{}
 
-  void onChunkComplete() noexcept override {};
+  void onChunkComplete() noexcept override {}
 
   void onTrailers(
     std::unique_ptr<proxygen::HTTPHeaders> /*trailers*/) noexcept override {
@@ -328,11 +363,7 @@ struct ProxygenTransport final
 
   void sendErrorResponse(uint32_t code) noexcept;
 
-  void requestDoneLocking() {
-    Lock lock(this);
-    m_clientComplete = true;
-    notify();
-  }
+  void requestDoneLocking();
 
   bool handlePOST(const proxygen::HTTPHeaders& headers);
 
@@ -347,7 +378,7 @@ struct ProxygenTransport final
   folly::SocketAddress m_clientAddress;
   std::string m_addressStr;
   std::unique_ptr<proxygen::HTTPMessage> m_request;
-  size_t m_requestBodyLength{0};
+  std::atomic<size_t> m_requestBodyLength{0};
   int64_t m_bodyLengthPastLimit{128 * 1024};
 
   // There are two modes of operation for reading POST bodies.  When
@@ -368,7 +399,6 @@ struct ProxygenTransport final
   // the slb due to impending server death
   bool m_reposting{false};
   bool m_shouldRepost{false};
-  bool m_sendStarted{false};
   bool m_egressError{false};
   std::unique_ptr<folly::IOBuf> m_currentBodyBuf;
   proxygen::HTTPMessage m_response;
@@ -382,7 +412,9 @@ struct ProxygenTransport final
   std::map<uint64_t, PushTxnHandler*> m_pushHandlers; // locked
   int64_t m_maxPost{-1};
   const proxygen::HTTPHeaders* m_proxygenHeaders = nullptr;
-
+  std::shared_ptr<stream_transport::HttpStreamServerTransport>
+    m_streamTransport;
+  folly::ssl::X509UniquePtr m_peerCert{nullptr};
  public:
   // List of ProxygenTransport not yet handed to the server will sit
   // in a list, so that we can abort them if they take too long.

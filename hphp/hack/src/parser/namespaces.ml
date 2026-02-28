@@ -70,10 +70,9 @@ let elaborate_raw_id nsenv kind id =
     | ElaborateFun when SN.PseudoFunctions.is_pseudo_function fqid -> fqid
     | ElaborateClass when SN.Typehints.is_reserved_global_name id -> fqid
     | ElaborateClass when SN.Typehints.is_reserved_hh_name id ->
-      if nsenv.ns_is_codegen then
-        elaborate_into_ns (Some "HH") id
-      else
-        fqid
+      (match nsenv.ns_mode with
+      | ForCodegen -> elaborate_into_ns (Some "HH") id
+      | ForTypecheck -> fqid)
     | _ ->
       let (prefix, has_bslash) =
         match String.index id '\\' with

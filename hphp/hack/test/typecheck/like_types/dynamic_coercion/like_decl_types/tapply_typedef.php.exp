@@ -1,6 +1,0 @@
-File "tapply_typedef.php", line 12, characters 10-11:
-Invalid return type (Typing[4110])
-File "tapply_typedef.php", line 11, characters 20-20:
-Expected `int`
-File "tapply_typedef.php", line 11, characters 12-13:
-But got `dynamic`

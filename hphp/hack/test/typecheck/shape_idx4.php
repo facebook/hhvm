@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 /**
  * Argument is not a shape

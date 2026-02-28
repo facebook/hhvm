@@ -5,4 +5,6 @@ bool(false)
 
 Warning:%sNo such file or directory in %s/types/resource/resource_from_fopen.php on line 17
 bool(false)
+
+Warning: No such file or directory in %s/test/slow/spec/tests/types/resource/resource_from_fopen.php on line 20
 bool(false)

@@ -2,12 +2,12 @@
 
 interface Test
 {
-    function show();
+    function show():mixed;
 }
 
 class Tester extends Test
 {
-    function show() {
+    function show() :mixed{
         echo __METHOD__ . "\n";
     }
 }

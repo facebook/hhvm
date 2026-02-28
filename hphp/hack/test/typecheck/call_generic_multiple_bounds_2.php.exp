@@ -1,22 +1,22 @@
-File "call_generic_multiple_bounds_2.php", line 5, characters 10-15:
+ERROR: File "call_generic_multiple_bounds_2.php", line 5, characters 10-15:
 Invalid return type (Typing[4110])
   File "call_generic_multiple_bounds_2.php", line 4, characters 85-90:
   Expected `string`
   File "call_generic_multiple_bounds_2.php", line 4, characters 36-39:
   But got `void`
-File "call_generic_multiple_bounds_2.php", line 5, characters 10-15:
+ERROR: File "call_generic_multiple_bounds_2.php", line 5, characters 10-15:
 Invalid return type (Typing[4110])
   File "call_generic_multiple_bounds_2.php", line 4, characters 85-90:
   Expected `string`
   File "call_generic_multiple_bounds_2.php", line 4, characters 63-66:
   But got `void`
-File "call_generic_multiple_bounds_2.php", line 5, characters 13-14:
+ERROR: File "call_generic_multiple_bounds_2.php", line 5, characters 13-14:
 Invalid argument (Typing[4110])
   File "call_generic_multiple_bounds_2.php", line 4, characters 30-32:
   Expected `int`
   File "call_generic_multiple_bounds_2.php", line 4, characters 70-72:
   But got `num`
-File "call_generic_multiple_bounds_2.php", line 5, characters 13-14:
+ERROR: File "call_generic_multiple_bounds_2.php", line 5, characters 13-14:
 Invalid argument (Typing[4110])
   File "call_generic_multiple_bounds_2.php", line 4, characters 55-59:
   Expected `float`

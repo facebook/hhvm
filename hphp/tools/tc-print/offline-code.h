@@ -28,7 +28,7 @@
 #include "hphp/tools/tc-print/printir-annotation.h"
 
 extern "C" {
-#if defined(HAVE_LIBXED)
+#if defined(__x86_64__)
 #include <xed-interface.h>
 #endif
 }
@@ -98,15 +98,21 @@ struct TCRangeInfo {
 
     auto const offset = [&]() -> folly::dynamic {
       if (!sk) return dynamic();
-      return sk->printableOffset();
+      if (!sk->prologue() && !sk->funcEntry()) return sk->offset();
+      if (sk->valid()) return sk->entryOffset();
+      // Unable to lookup entry offset, assume main entry.
+      return 0;
     }();
+
+    auto const instrStr = sk && sk->valid()
+      ? sk->showInst() : dynamic();
 
     // TODO(T52857125) - maybe also include func and unit info?
     dynamic info = dynamic::object("start", formatTCA(start))
                                   ("end", formatTCA(end))
                                   ("bc", offset)
                                   ("sha1", sha1 ? sha1->toString() : dynamic())
-                                  ("instrStr", instrStr ? *instrStr : dynamic())
+                                  ("instrStr", instrStr)
                                   ("lineNum", lineNum ? *lineNum : dynamic())
                                   ("disasm", disasmObjs);
 
@@ -119,6 +125,10 @@ struct TCRangeInfo {
                        ("blockId", annotation->parentBlockId);
     }
 
+    if (sk && (sk->prologue() || sk->funcEntry())) {
+      info["numEntryArgs"] = sk->numEntryArgs();
+    }
+
     return info;
   }
 
@@ -128,9 +138,9 @@ struct TCRangeInfo {
    */
   std::pair<TCRangeInfo, TCRangeInfo> split(const TCA pos) const {
     always_assert(start <= pos && pos <= end);
-    auto const firstRange = TCRangeInfo{start, pos, sk, sha1, func, instrStr,
+    auto const firstRange = TCRangeInfo{start, pos, sk, sha1, func,
                                         lineNum, unit, annotation};
-    auto const secondRange = TCRangeInfo{pos, end, sk, sha1, func, instrStr,
+    auto const secondRange = TCRangeInfo{pos, end, sk, sha1, func,
                                          lineNum, unit, annotation};
     return std::pair<TCRangeInfo, TCRangeInfo>(firstRange, secondRange);
   }
@@ -142,7 +152,6 @@ struct TCRangeInfo {
   Optional<SHA1> sha1;
 
   Optional<const Func*> func;
-  Optional<std::string> instrStr;
   Optional<int> lineNum;
   Optional<const Unit*> unit;
 
@@ -181,12 +190,14 @@ struct OfflineCode {
   OfflineCode(std::string _dumpDir,
                  TCA _aBase,
                  TCA _coldBase,
-                 TCA _frozenBase)
-      : dumpDir(_dumpDir) {
+                 TCA _frozenBase,
+                 const std::string& _blockMap)
+      : dumpDir(_dumpDir)
+      , blockMap(_blockMap) {
     TCA tcRegionBases[TCRCount] = {
       _aBase, _coldBase, _frozenBase
     };
-#if defined(HAVE_LIBXED)
+#if defined(__x86_64__)
     xedInit();
 #endif
     openFiles(tcRegionBases);
@@ -233,11 +244,12 @@ private:
     {}
   };
 
-  std::string       dumpDir;
-  TCRegionRec       tcRegions[TCRCount];
-#if defined(HAVE_LIBXED)
-  xed_state_t       xed_state;
-  xed_syntax_enum_t xed_syntax;
+  std::string        dumpDir;
+  const std::string& blockMap;
+  TCRegionRec        tcRegions[TCRCount];
+#if defined(__x86_64__)
+  xed_state_t        xed_state;
+  xed_syntax_enum_t  xed_syntax;
 #endif
 
   std::unordered_map<TCA, std::string> addr2SymMap;

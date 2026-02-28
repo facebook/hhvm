@@ -8,7 +8,7 @@
 
 /* declaring a class */
 class sample  {
-  public function __toString() {
+  public function __toString() :mixed{
   return "object";
   }
 }
@@ -20,54 +20,10 @@ $file_handle = fopen(__FILE__, "r");
 
 
 /* array with different values */
-$values =  varray [
-  /* integer values */
-  0,
-  1,
-  12345,
-  -2345,
-
-  /* float values */
-  10.5,
-  -10.5,
-  10.5e10,
-  10.6E-10,
-  .5,
-
-  /* hexadecimal values */
-  0x12,
-  -0x12,
-
-  /* octal values */
-  012,
-  -012,
-  01.2,
-
-  /* array values */
-  varray[],
-  varray[0],
-  varray[1],
-  varray[1, 2],
-  darray['color' => 'red', 'item' => 'pen'],
-
-  /* boolean values */
-  true,
-  false,
-  TRUE,
-  FALSE,
-
-  /* nulls */
-  NULL,
-  null,
-
+$values =  vec[
   /* empty string */
   "",
   '',
-  /* resource */
-  $file_handle,
-
-  /* object */
-  new sample()
 ];
 
 /* loop through each element of the array and check the working of strncasecmp() */

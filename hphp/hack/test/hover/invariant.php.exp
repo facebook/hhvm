@@ -1,0 +1,13 @@
+function invariant<Targs as (mixed...)>(
+  HH\FIXME\MISSING_PARAM_TYPE $condition,
+  HH\TypedFormatString<PlainSprintf, Targs> $f,
+  ...Targs $f_args
+)[]: void
+---
+Call `invariant_violation` if the condition is false.
+
+```
+invariant($x >= 0, "Value cannot be negative: %d", $x);
+```
+
+See http://docs.hhvm.com/hack/reference/function/HH.invariant/

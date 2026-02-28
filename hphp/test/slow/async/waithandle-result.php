@@ -5,7 +5,7 @@ async function blockme(int $n): Awaitable<int> {
   return $n;
 }
 
-function f() {
+function f() :mixed{
 try {
   $handle = blockme(1);
   var_dump(HH\Asio\join($handle));
@@ -22,6 +22,6 @@ try {
 }
 
 <<__EntryPoint>>
-function main_waithandle_result() {
+function main_waithandle_result() :mixed{
 f();
 }

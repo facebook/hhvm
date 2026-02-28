@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_save_xml() {
+function main_save_xml() :mixed{
 $doc = new DOMDocument('1.0');
 
 $root = $doc->createElement('html');

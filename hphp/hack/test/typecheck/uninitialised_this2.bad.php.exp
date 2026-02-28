@@ -1,0 +1,3 @@
+ERROR: File "uninitialised_this2.bad.php", line 12, characters 27-31:
+Until the initialization of `$this` is over, you can only call private methods
+The initialization is not over because `$this->i` can still potentially be null (NastCheck[3004])

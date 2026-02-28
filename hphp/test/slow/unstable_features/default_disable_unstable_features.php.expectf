@@ -1,1 +1,1 @@
-Fatal error: Cannot enable unstable feature: 'class_level_where' is unstable and unstable features are disabled in %s on line 6
+Fatal error: Cannot enable unstable feature: union_intersection_type_hints is unstable and unstable features are disabled in %s on line 6

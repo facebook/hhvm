@@ -21,17 +21,14 @@
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
-#include "hphp/runtime/base/vanilla-vec-defs.h"
+#include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/vm/jit/irgen.h"
-#include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/type.h"
-#include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/util/trace.h"
 
 #include <atomic>
 #include <array>
-#include <folly/lang/Bits.h>
 #include <vector>
 #include <sstream>
 
@@ -47,6 +44,7 @@ auto constexpr kMaxNumLayouts = (1 << 16) - 1;
 
 std::atomic<size_t> s_topoIndex;
 std::array<Layout*, kMaxNumLayouts> s_layoutTable;
+size_t s_numStructLayouts; // For logging.
 std::atomic<bool> s_hierarchyFinal = false;
 std::mutex s_layoutCreationMutex;
 
@@ -79,8 +77,8 @@ Optional<LayoutTest> compute2ByteTest(
   for (auto const live : liveVec) {
     imm &= ~live;
   }
-  auto const and = LayoutTest { imm, LayoutTest::And2Byte };
-  if (checkLayoutTest(liveVec, deadVec, and)) return and;
+  auto const and_ = LayoutTest { imm, LayoutTest::And2Byte };
+  if (checkLayoutTest(liveVec, deadVec, and_)) return and_;
 
   return std::nullopt;
 }
@@ -127,6 +125,8 @@ BespokeArray* Layout::coerce(ArrayData* ad) const {
     return maybeMonoify(ad);
   } else if (layout.is_struct()) {
     return StructDict::MakeFromVanilla(ad, StructLayout::As(this));
+  } else if (layout.is_type_structure()) {
+    return TypeStructure::MakeFromVanilla(ad);
   }
   always_assert(false);
 }
@@ -243,15 +243,18 @@ void Layout::ClearHierarchy() {
   for (size_t i = 0; i < kMaxNumLayouts; i++) {
     if (i != kBespokeTopIndex.raw) s_layoutTable[i] = nullptr;
   }
+  s_numStructLayouts = 0;
 }
 
 void Layout::FinalizeHierarchy() {
   assertx(allowBespokeArrayLikes());
   assertx(!s_hierarchyFinal.load(std::memory_order_acquire));
+  s_numStructLayouts = 0;
   std::vector<Layout*> allLayouts;
   for (size_t i = 0; i < kMaxNumLayouts; i++) {
     auto const layout = s_layoutTable[i];
     if (!layout) continue;
+    if (ArrayLayout(layout).is_struct()) s_numStructLayouts++;
     allLayouts.push_back(layout);
     assertx(layout->checkInvariants());
     for (auto const pIdx : layout->m_parents) {
@@ -489,41 +492,46 @@ struct Layout::Initializer {
     LoggingArray::InitializeLayouts();
     MonotypeVec::InitializeLayouts();
     EmptyMonotypeDict::InitializeLayouts();
+    TypeStructure::InitializeLayouts();
   }
 };
 Layout::Initializer Layout::s_initializer;
 
 //////////////////////////////////////////////////////////////////////////////
 
-ArrayLayout Layout::appendType(Type val) const {
+ArrayLayout Layout::appendType(Type /*val*/) const {
   return ArrayLayout::Top();
 }
 
-ArrayLayout Layout::removeType(Type key) const {
+ArrayLayout Layout::removeType(Type /*key*/) const {
   return ArrayLayout::Top();
 }
 
-ArrayLayout Layout::setType(Type key, Type val) const {
+ArrayLayout Layout::setType(Type /*val*/) const {
   return ArrayLayout::Top();
 }
 
-std::pair<Type, bool> Layout::elemType(Type key) const {
+ArrayLayout Layout::setType(Type /*key*/, Type /*val*/) const {
+  return ArrayLayout::Top();
+}
+
+std::pair<Type, bool> Layout::elemType(Type /*key*/) const {
   return {TInitCell, false};
 }
 
-bool Layout::slotAlwaysPresent(const Type&) const {
+bool Layout::slotAlwaysPresent(const Type& /*slot*/) const {
   return false;
 }
 
-std::pair<Type, bool> Layout::firstLastType(bool isFirst, bool isKey) const {
+std::pair<Type, bool> Layout::firstLastType(bool /*isFirst*/, bool isKey) const {
   return {isKey ? (TInt | TStr) : TInitCell, false};
 }
 
-Type Layout::iterPosType(Type pos, bool isKey) const {
+Type Layout::iterPosType(Type /*pos*/, bool isKey) const {
   return isKey ? (TInt | TStr) : TInitCell;
 }
 
-Type Layout::getTypeBound(Type) const {
+Type Layout::getTypeBound(Type /*slot*/) const {
   return TCell;
 }
 
@@ -585,7 +593,7 @@ ArrayData* maybeBespokifyForTesting(ArrayData* ad,
                                     std::atomic<ArrayData*>& cache,
                                     Bespokify bespokify) {
   if (!profile->data) return ad;
-  auto const bad = cache.load(std::memory_order_relaxed);
+  auto const bad = cache.load(std::memory_order_acquire);
   if (bad) return bad;
 
   auto const result = bespokify(ad, profile);
@@ -598,7 +606,7 @@ ArrayData* maybeBespokifyForTesting(ArrayData* ad,
 
   ArrayData* current = nullptr;
   if (cache.compare_exchange_strong(current, result)) return result;
-  RO::EvalLowStaticArrays ? low_free(result) : uncounted_free(result);
+  ArrayData::FreeStatic(result);
   return current;
 }
 
@@ -683,6 +691,11 @@ void eachLayout(std::function<void(Layout& layout)> fn) {
 Layout** layoutsForJIT() {
   assertx(s_hierarchyFinal.load(std::memory_order_acquire));
   return s_layoutTable.data();
+}
+
+size_t numStructLayouts() {
+  if (!s_hierarchyFinal.load(std::memory_order_acquire)) return 0;
+  return s_numStructLayouts;
 }
 
 //////////////////////////////////////////////////////////////////////////////

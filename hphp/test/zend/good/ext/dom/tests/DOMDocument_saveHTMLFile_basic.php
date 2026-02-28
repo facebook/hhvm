@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$filename = __SystemLib\hphp_test_tmppath('basic.html');
+$filename = sys_get_temp_dir().'/'.'basic.html';
 $doc = new DOMDocument('1.0');
 $root = $doc->createElement('html');
 $root = $doc->appendChild($root);

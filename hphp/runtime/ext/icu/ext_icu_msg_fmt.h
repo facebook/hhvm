@@ -77,8 +77,8 @@ private:
     return true;
   }
 
-  typedef std::map<icu::UnicodeString, icu::Formattable::Type> NamedPartsMap;
-  typedef std::map<int64_t, icu::Formattable::Type> NumericPartsMap;
+  using NamedPartsMap = std::map<icu::UnicodeString, icu::Formattable::Type>;
+  using NumericPartsMap = std::map<int64_t, icu::Formattable::Type>;
 
   UMessageFormat* m_formatter{nullptr};
   NamedPartsMap m_namedParts{};
@@ -89,4 +89,3 @@ private:
 
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP::Intl
-

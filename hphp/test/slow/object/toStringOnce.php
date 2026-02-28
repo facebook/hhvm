@@ -2,12 +2,12 @@
 
 class A {
   private $count = 0;
-  public function __toString() {
+  public function __toString() :mixed{
     return (string) $this->count++;
   }
 }
 
-function main() {
+function main() :mixed{
   $a = new A;
   var_dump((string)$a);
   var_dump((string)$a);
@@ -15,6 +15,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_to_string_once() {
+function main_to_string_once() :mixed{
 main();
 }

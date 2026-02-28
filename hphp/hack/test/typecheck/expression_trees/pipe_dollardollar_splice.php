@@ -2,6 +2,6 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function test(ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $x): void {
+function test(ExampleExpression<ExampleInt> $x): void {
   $x |> ExampleDsl`${ $$ }`;
 }

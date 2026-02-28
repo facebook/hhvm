@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_stream_get_contents_default() {
+function main_stream_get_contents_default() :mixed{
 $temp = tmpfile();
 $s = 'Hi, there';
 fwrite($temp, $s);

@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc::{IterId, Label};
+use hhbc::IterId;
+use hhbc::Label;
 
 #[derive(Clone, Debug, Default, Copy, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct StateId(pub u32);
@@ -29,7 +30,6 @@ pub enum Region {
 pub struct ResolvedTryFinally {
     pub target_label: Label,
     pub finally_label: Label,
-    pub adjusted_level: usize,
     pub iterators_to_release: Vec<IterId>,
 }
 
@@ -50,15 +50,26 @@ impl JumpTargets {
         self.regions.as_slice()
     }
 
-    pub fn get_closest_enclosing_finally_label(&self) -> Option<(Label, Vec<IterId>)> {
-        let mut iters = vec![];
+    /// Checks if the current return is inside a foreach loop or a finally
+    /// block that needs to be run before returning. In case of foreach loops,
+    /// the return statement is placed outside all nested loops to avoid
+    /// double-freeing iterators if there is a return type verification
+    /// failure.
+    pub fn get_enclosing_scope_for_return(&self) -> Option<(Label, Option<IterId>)> {
         for r in self.regions.iter().rev() {
             match r {
                 Region::Using(l) | Region::TryFinally(l) => {
-                    return Some((*l, iters));
+                    return Some((*l, None));
                 }
-                Region::Loop(LoopLabels { iterator, .. }) => {
-                    add_iterator(*iterator, &mut iters);
+                Region::Loop(LoopLabels {
+                    label_break,
+                    iterator,
+                    ..
+                }) => {
+                    // Exclude while/ do-while loops
+                    if iterator.is_some() {
+                        return Some((*label_break, *iterator));
+                    }
                 }
                 _ => {}
             }
@@ -66,8 +77,7 @@ impl JumpTargets {
         None
     }
 
-    /// Return the IterIds of the enclosing iterator loops.
-    /// This corresponds to collect_iterators in OCaml but doesn't allocate/clone.
+    /// Return the IterIds of the enclosing iterator loops without allocating/cloning.
     pub fn iterators(&self) -> impl Iterator<Item = IterId> + '_ {
         self.regions.iter().rev().filter_map(|r| match r {
             Region::Loop(LoopLabels { iterator, .. }) => *iterator,
@@ -75,8 +85,8 @@ impl JumpTargets {
         })
     }
 
-    /// Tries to find a target label given a level and a jump kind (break or continue)
-    pub fn get_target_for_level(&self, is_break: bool, mut level: usize) -> ResolvedJumpTarget {
+    /// Tries to find a target label for the given jump kind (break or continue)
+    pub fn get_target(&self, is_break: bool) -> ResolvedJumpTarget {
         let mut iters = vec![];
         let mut acc = vec![];
         let mut label = None;
@@ -94,59 +104,47 @@ impl JumpTargets {
         //     }
         //  }
         for r in self.regions.iter().rev() {
-            match r {
+            match *r {
                 Region::Function | Region::Finally => return ResolvedJumpTarget::NotFound,
                 Region::Using(finally_label) | Region::TryFinally(finally_label) => {
                     // we need to jump out of try body in try/finally - in order to do this
                     // we should go through the finally block first
                     if skip_try_finally.is_none() {
-                        skip_try_finally = Some((finally_label, level, iters.clone()));
+                        skip_try_finally = Some((finally_label, iters.clone()));
                     }
                 }
                 Region::Switch(end_label) => {
-                    if level == 1 {
-                        label = Some(end_label);
-                        iters.extend_from_slice(&std::mem::take(&mut acc));
-                        break;
-                    } else {
-                        level -= 1;
-                    }
+                    label = Some(end_label);
+                    iters.append(&mut acc);
+                    break;
                 }
                 Region::Loop(LoopLabels {
                     label_break,
                     label_continue,
                     iterator,
                 }) => {
-                    if level == 1 {
-                        if is_break {
-                            add_iterator(iterator.clone(), &mut acc);
-                            label = Some(label_break);
-                            iters.extend_from_slice(&std::mem::take(&mut acc));
-                        } else {
-                            label = Some(label_continue);
-                            iters.extend_from_slice(&std::mem::take(&mut acc));
-                        };
-                        break;
+                    label = Some(if is_break {
+                        add_iterator(iterator, &mut acc);
+                        label_break
                     } else {
-                        add_iterator(iterator.clone(), &mut acc);
-                        level -= 1;
-                    }
+                        label_continue
+                    });
+                    iters.append(&mut acc);
+                    break;
                 }
             }
         }
-        if let Some((finally_label, level, iters)) = skip_try_finally {
-            if let Some(target_label) = label {
-                return ResolvedJumpTarget::ResolvedTryFinally(ResolvedTryFinally {
-                    target_label: target_label.clone(),
-                    finally_label: finally_label.clone(),
-                    adjusted_level: level,
-                    iterators_to_release: iters,
-                });
+        match (skip_try_finally, label) {
+            (Some((finally_label, iterators_to_release)), Some(target_label)) => {
+                ResolvedJumpTarget::ResolvedTryFinally(ResolvedTryFinally {
+                    target_label,
+                    finally_label,
+                    iterators_to_release,
+                })
             }
-        };
-        label.map_or(ResolvedJumpTarget::NotFound, |l| {
-            ResolvedJumpTarget::ResolvedRegular(l.clone(), iters)
-        })
+            (None, Some(l)) => ResolvedJumpTarget::ResolvedRegular(l, iters),
+            (_, None) => ResolvedJumpTarget::NotFound,
+        }
     }
 }
 

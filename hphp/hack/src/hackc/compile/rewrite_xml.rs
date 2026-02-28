@@ -1,34 +1,31 @@
 use env::emitter::Emitter;
-use error::{Error, Result};
+use error::Error;
+use error::Result;
 use naming_special_names_rust::pseudo_consts;
-use oxidized::{
-    aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
-    ast, ast_defs,
-    pos::Pos,
-};
+use oxidized::aast_visitor::AstParams;
+use oxidized::aast_visitor::NodeMut;
+use oxidized::aast_visitor::VisitorMut;
+use oxidized::aast_visitor::visit_mut;
+use oxidized::ast;
+use oxidized::ast_defs;
+use oxidized::pos::Pos;
 
-struct RewriteXmlVisitor<'emitter, 'arena, 'decl> {
-    phantom: std::marker::PhantomData<(&'emitter &'arena (), &'emitter &'decl ())>,
+struct RewriteXmlVisitor<'e> {
+    phantom: std::marker::PhantomData<&'e ()>,
 }
 
-struct Ctx<'emitter, 'arena, 'decl> {
-    emitter: &'emitter mut Emitter<'arena, 'decl>,
+struct Ctx<'e> {
+    emitter: &'e mut Emitter,
 }
 
-impl<'ast, 'arena, 'emitter, 'decl> VisitorMut<'ast>
-    for RewriteXmlVisitor<'emitter, 'arena, 'decl>
-{
-    type Params = AstParams<Ctx<'emitter, 'arena, 'decl>, Error>;
+impl<'ast, 'e> VisitorMut<'ast> for RewriteXmlVisitor<'e> {
+    type Params = AstParams<Ctx<'e>, Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
         self
     }
 
-    fn visit_expr(
-        &mut self,
-        c: &mut Ctx<'emitter, 'arena, 'decl>,
-        e: &'ast mut ast::Expr,
-    ) -> Result<()> {
+    fn visit_expr(&mut self, c: &mut Ctx<'e>, e: &'ast mut ast::Expr) -> Result<()> {
         let ast::Expr(_, pos, expr) = e;
         let emitter = &mut c.emitter;
         if let ast::Expr_::Xml(cs) = expr {
@@ -39,25 +36,26 @@ impl<'ast, 'arena, 'emitter, 'decl> VisitorMut<'ast>
     }
 }
 
-pub fn rewrite_xml<'p, 'arena, 'emitter, 'decl>(
-    emitter: &'emitter mut Emitter<'arena, 'decl>,
-    prog: &'p mut ast::Program,
-) -> Result<()> {
+pub fn rewrite_xml(emitter: &mut Emitter, prog: &mut ast::Program) -> Result<()> {
     let mut xml_visitor = RewriteXmlVisitor {
         phantom: std::marker::PhantomData,
     };
-    let mut c: Ctx<'emitter, 'arena, 'decl> = Ctx { emitter };
-
+    let mut c = Ctx { emitter };
     visit_mut(&mut xml_visitor, &mut c, prog)
 }
 
-fn rewrite_xml_<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
+fn rewrite_xml_(
+    e: &mut Emitter,
     pos: &Pos,
     (id, attributes, children): (ast::Sid, Vec<ast::XhpAttribute>, Vec<ast::Expr>),
 ) -> Result<ast::Expr> {
-    use ast::{ClassId, ClassId_, Expr, Expr_, XhpAttribute};
-    use ast_defs::{Id, ShapeFieldName};
+    use ast::ClassId;
+    use ast::ClassId_;
+    use ast::Expr;
+    use ast::Expr_;
+    use ast::XhpAttribute;
+    use ast_defs::Id;
+    use ast_defs::ShapeFieldName;
 
     let (_, attributes) =
         attributes
@@ -85,7 +83,11 @@ fn rewrite_xml_<'arena, 'decl>(
                 (spread_id, attrs)
             });
     let attribute_map = Expr((), pos.clone(), Expr_::mk_shape(attributes));
-    let children_vec = Expr((), pos.clone(), Expr_::mk_varray(None, children));
+    let children_vec = Expr(
+        (),
+        pos.clone(),
+        Expr_::ValCollection(Box::new(((pos.clone(), ast::VcKind::Vec), None, children))),
+    );
     let filename = Expr(
         (),
         pos.clone(),
@@ -96,11 +98,11 @@ fn rewrite_xml_<'arena, 'decl>(
         pos.clone(),
         Expr_::mk_id(Id(pos.clone(), pseudo_consts::G__LINE__.into())),
     );
-    let renamed_id = hhbc::ClassName::from_ast_name_and_mangle(e.alloc, &id.1);
+    let renamed_id = hhbc::ClassName::from_ast_name_and_mangle(&id.1);
     let cid = ClassId(
         (),
         pos.clone(),
-        ClassId_::CI(Id(id.0.clone(), renamed_id.unsafe_as_str().into())),
+        ClassId_::CI(Id(id.0.clone(), renamed_id.as_str().into())),
     );
 
     e.add_class_ref(renamed_id);
@@ -111,7 +113,12 @@ fn rewrite_xml_<'arena, 'decl>(
         Expr_::New(Box::new((
             cid,
             vec![],
-            vec![attribute_map, children_vec, filename, line],
+            vec![
+                ast::Argument::Anormal(attribute_map),
+                ast::Argument::Anormal(children_vec),
+                ast::Argument::Anormal(filename),
+                ast::Argument::Anormal(line),
+            ],
             None,
             (),
         ))),

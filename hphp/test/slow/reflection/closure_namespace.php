@@ -4,7 +4,7 @@ namespace Foo\Bar {
   const BAZ = 2;
 
   class C {
-    public function func() {
+    public function func() :mixed{
       $x = 40;
       return function ($arg = BAZ) use ($x) { return $x + $arg; };
     }

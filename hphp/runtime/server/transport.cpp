@@ -19,21 +19,23 @@
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/upload.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/stream-transport.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/datetime.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/url.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/compression.h"
+#include "hphp/runtime/server/thread-hint.h"
 #include "hphp/runtime/ext/openssl/ext_openssl.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
-#include "hphp/util/compatibility.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/service-data.h"
@@ -74,7 +76,7 @@ void Transport::onRequestStart(const timespec &queueTime) {
   HardwareCounter::Reset();
   m_instructions = HardwareCounter::GetInstructionCount();
 
-  auto const rate = RuntimeOption::EvalTraceServerRequestRate;
+  auto const rate = Cfg::Eval::TraceServerRequestRate;
   if (rate && folly::Random::rand32(rate) == 0) forceInitRequestTrace();
 }
 
@@ -596,7 +598,7 @@ void Transport::prepareHeaders(bool precompressed, bool chunked,
   if (precompressed) {
     // pre-compressed content is currently always gzip compressed.
     addHeaderImpl("Content-Encoding", "gzip");
-    if (RuntimeOption::ServerAddVaryEncoding) {
+    if (Cfg::Server::AddVaryEncoding) {
       addHeaderImpl("Vary", "Accept-Encoding");
     }
   }
@@ -639,18 +641,18 @@ void Transport::prepareHeaders(bool precompressed, bool chunked,
     addHeaderImpl("Content-Type", contentType.c_str());
   }
 
-  if (RuntimeOption::ExposeHPHP) {
+  if (Cfg::Server::ExposeHPHP) {
     addHeaderImpl("X-Powered-By", (String("HHVM/") + HHVM_VERSION).c_str());
   }
 
-  if ((RuntimeOption::ExposeXFBServer || RuntimeOption::ExposeXFBDebug) &&
-      !RuntimeOption::XFBDebugSSLKey.empty() &&
+  if ((Cfg::Server::ExposeXFBServer || Cfg::Server::ExposeXFBDebug) &&
+      !Cfg::Server::XFBDebugSSLKey.empty() &&
       m_responseHeaders.find("X-FB-Debug") == m_responseHeaders.end()) {
     String ip = this->getServerAddr();
-    String key = RuntimeOption::XFBDebugSSLKey;
+    String key = Cfg::Server::XFBDebugSSLKey;
     String cipher("AES-256-CBC");
     bool crypto_strong = false;
-    auto const iv_len = HHVM_FN(openssl_cipher_iv_length)(cipher).toInt32();
+    auto const iv_len = (int)HHVM_FN(openssl_cipher_iv_length)(cipher).toInt64();
     auto const iv = HHVM_FN(openssl_random_pseudo_bytes)(
       iv_len, crypto_strong
     ).toString();
@@ -668,12 +670,22 @@ void Transport::prepareHeaders(bool precompressed, bool chunked,
   }
 
   // shutting down servers, so need to terminate all Keep-Alive connections
-  if (!RuntimeOption::EnableKeepAlive || isServerStopping()) {
+  if (!Cfg::Server::EnableKeepAlive || isServerStopping()) {
     addHeaderImpl("Connection", "close");
     removeHeaderImpl("Keep-Alive");
 
     // so lower level transports can ignore incoming "Connection: keep-alive"
     removeRequestHeaderImpl("Connection");
+  }
+
+  if (Cfg::Server::ExposeLoadhint) {
+    static auto const counter = ServiceData::createCounter("loadhint.new");
+    auto const loadhint = counter->getValue();
+    if (loadhint >= 0) {
+      // Load balancers only look at lower 32 bits.
+      addHeaderImpl("X-FB-Server-Load",
+                    std::to_string(static_cast<uint32_t>(loadhint)).c_str());
+    }
   }
 }
 
@@ -740,7 +752,13 @@ void Transport::sendRaw(const char *data, int size, int code /* = 200 */,
     return;
   }
 
-  if (!precompressed && RuntimeOption::ForceChunkedEncoding) {
+  // Note: This API is used when `isStreamTransport()` to report request errors
+  // (such as 404) but if we already started sending then ignore this.
+  if (m_sendStarted && isStreamTransport()) {
+    return;
+  }
+
+  if (!precompressed && Cfg::Server::ForceChunkedEncoding) {
     chunked = true;
   }
 
@@ -797,6 +815,7 @@ void Transport::sendRawInternal(const char *data, int size,
   }
 
   // HTTP header handling
+  auto const firstFlush = !m_headerSent;
   if (!m_headerSent) {
     prepareHeaders(precompressed, chunked, response,
                    StringHolder(data, size, FreeType::NoFree));
@@ -808,14 +827,23 @@ void Transport::sendRawInternal(const char *data, int size,
   sendImpl(response.data(), response.size(), m_responseCode, chunked, false);
   ServerStats::SetThreadMode(ServerStats::ThreadMode::Processing);
 
+  if (firstFlush) {
+    ThreadHint::getInstance().updateThreadHint(
+      ThreadHint::Priority::Processing);
+  }
+
   ServerStats::LogBytes(size);
-  if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
+  if (Cfg::Stats::Enable && Cfg::Stats::Web) {
     ServerStats::Log("network.uncompressed", size);
     ServerStats::Log("network.compressed", response.size());
   }
 }
 
 void Transport::onSendEnd() {
+  if (auto stream = getStreamTransport()) {
+    stream->close();
+    return;
+  }
   bool eomSent = false;
   if (m_chunkedEncoding) {
     assertx(m_headerSent);
@@ -838,6 +866,10 @@ void Transport::onSendEnd() {
 
 void Transport::redirect(const char *location, int code /* = 302 */,
                          const char *info /* = nullptr */) {
+  if (auto stream = getStreamTransport()) {
+    stream->close();
+    return;
+  }
   addHeaderImpl("Location", location);
   setResponse(code, info);
   sendString("Moved", code);

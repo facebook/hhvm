@@ -1,0 +1,219 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package thrift
+
+import (
+	"crypto/tls"
+	"io"
+	"maps"
+	"net"
+	"time"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+)
+
+// clientConfig contains a config for the thrift client
+type clientConfig struct {
+	transport         TransportID
+	protocol          types.ProtocolID
+	ioTimeout         time.Duration // Read/Write timeout
+	persistentHeaders map[string]string
+	dialerFn          func() (net.Conn, error)
+	tlsConfig         *tls.Config
+}
+
+// ClientOption is a single configuration setting for the thrift client
+type ClientOption func(*clientConfig)
+
+// NoTimeout is a special value for WithIoTimeout that disables timeouts.
+const NoTimeout = time.Duration(0)
+
+// WithProtocolID sets protocol to given protocolID
+func WithProtocolID(id types.ProtocolID) ClientOption {
+	return func(opts *clientConfig) {
+		opts.protocol = id
+	}
+}
+
+// withHeader sets the transport to Header, protocol Header is implied here.
+// Deprecated: use WithUpgradeToRocket() instead.
+func withHeader() ClientOption {
+	return func(opts *clientConfig) {
+		opts.transport = TransportIDHeader
+	}
+}
+
+// WithUpgradeToRocket sets the protocol UpgradeToRocket is implied here.
+func WithUpgradeToRocket() ClientOption {
+	return func(opts *clientConfig) {
+		opts.transport = TransportIDUpgradeToRocket
+	}
+}
+
+// WithRocket sets the transport to Rocket.
+func WithRocket() ClientOption {
+	return func(opts *clientConfig) {
+		opts.transport = TransportIDRocket
+	}
+}
+
+// WithPersistentHeader adds a persistent header to the client.
+func WithPersistentHeader(name, value string) ClientOption {
+	return func(opts *clientConfig) {
+		opts.persistentHeaders[name] = value
+	}
+}
+
+// WithPersistentHeaders adds persistent headers to the client.
+func WithPersistentHeaders(headers map[string]string) ClientOption {
+	return func(opts *clientConfig) {
+		maps.Copy(opts.persistentHeaders, headers)
+	}
+}
+
+// WithIdentity sets the Header identity field
+func WithIdentity(name string) ClientOption {
+	return func(opts *clientConfig) {
+		opts.persistentHeaders[IdentityHeader] = name
+	}
+}
+
+// WithDialer specifies the remote connection that the thrift
+// client should connect to should be resolved via the given function
+func WithDialer(d func() (net.Conn, error)) ClientOption {
+	return func(opts *clientConfig) {
+		opts.dialerFn = d
+	}
+}
+
+// WithIoTimeout sets deadline duration for I/O operations
+// (see https://golang.org/pkg/net/#Conn). Note that
+// this timeout is not a connection timeout as it is
+// not honored during Dial operation.
+func WithIoTimeout(ioTimeout time.Duration) ClientOption {
+	return func(opts *clientConfig) {
+		opts.ioTimeout = ioTimeout
+	}
+}
+
+// WithTLS is a creates a TLS connection to the given address, including ALPN for thrift.
+func WithTLS(addr string, dialTimeout time.Duration, tlsConfig *tls.Config) ClientOption {
+	clonedTLSConfig := tlsConfig.Clone()
+	return func(opts *clientConfig) {
+		opts.tlsConfig = clonedTLSConfig
+		opts.dialerFn = func() (net.Conn, error) {
+			conn, err := net.DialTimeout("tcp", addr, dialTimeout)
+			if err != nil {
+				return nil, err
+			}
+			return tls.Client(conn, opts.tlsConfig), nil
+		}
+	}
+}
+
+// newClientConfig creates a new client config object and inits it
+func newClientConfig(opts ...ClientOption) *clientConfig {
+	res := &clientConfig{
+		protocol:          types.ProtocolIDCompact,
+		transport:         TransportIDUnknown,
+		ioTimeout:         NoTimeout,
+		persistentHeaders: make(map[string]string),
+	}
+	for _, opt := range opts {
+		opt(res)
+	}
+	return res
+}
+
+// NewClient will return a connected thrift RequestChannel object.
+// Effectively, this is an open thrift connection to a server.
+// A thrift client can use this connection to communicate with a server.
+func NewClient(opts ...ClientOption) (RequestChannel, error) {
+	defaultOpts := []ClientOption{
+		// Default identity headers
+		WithPersistentHeader(IDVersionHeader, IDVersion),
+		WithPersistentHeader(IdentityHeader, ""),
+	}
+	clientOpts := append(defaultOpts, opts...)
+
+	config := newClientConfig(clientOpts...)
+
+	if config.transport == TransportIDUnknown {
+		panic(types.NewTransportException(types.NOT_SUPPORTED, "no transport specified! Please use thrift.WithUpgradeToRocket() in the thrift.NewClient call"))
+	}
+
+	// Important: TLS config must be modified *before* the dialerFn below is called.
+	if config.tlsConfig != nil {
+		// Set ALPN based on transport
+		switch config.transport {
+		case TransportIDRocket:
+			ApplyALPNRocket(config.tlsConfig)
+		case TransportIDUpgradeToRocket:
+			ApplyALPNUpgradeToRocket(config.tlsConfig)
+		default:
+			ApplyALPNHeader(config.tlsConfig)
+		}
+	}
+
+	var conn net.Conn
+	var connErr error
+	if config.dialerFn != nil {
+		conn, connErr = config.dialerFn()
+		if connErr != nil {
+			return nil, connErr
+		}
+	}
+
+	var channel RequestChannel
+	var channelErr error
+	switch config.transport {
+	case TransportIDHeader:
+		channel, channelErr = newHeaderProtocolAsRequestChannel(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
+	case TransportIDRocket:
+		channel, channelErr = newRocketClient(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
+	case TransportIDUpgradeToRocket:
+		channel, channelErr = newUpgradeToRocketClient(conn, config.protocol, config.ioTimeout, config.persistentHeaders)
+	default:
+		panic("framed and unframed transport are not supported")
+	}
+
+	if channelErr != nil {
+		// Protocol creation failed, close the connection (IMPORTANT!).
+		conn.Close()
+		return nil, channelErr
+	}
+
+	return channel, nil
+}
+
+// NewClientV2 creates a new thrift client of type T.
+// Example usage:
+//
+//	client, err := thrift.NewClientV2[myservice.MyServiceClient](thrift.WithUpgradeToRocket(), thrift.WithTLS(...))
+func NewClientV2[T io.Closer](opts ...ClientOption) (T, error) {
+	var zero T
+	channel, err := NewClient(opts...)
+	if err != nil {
+		return zero, err
+	}
+	client, err := InternalConstructClientFromRegistry[T](channel)
+	if err != nil {
+		channel.Close()
+		return zero, err
+	}
+	return client, nil
+}

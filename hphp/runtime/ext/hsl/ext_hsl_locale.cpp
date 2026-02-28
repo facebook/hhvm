@@ -31,11 +31,7 @@ namespace HPHP {
 namespace {
 
 const StaticString
-  s_HSLLocale("HSLLocale"),
-  s_FQHSLLocale("HH\\Lib\\_Private\\_Locale\\Locale"),
   s_InvalidLocaleException("HH\\Lib\\Locale\\InvalidLocaleException");
-
-Class* s_HSLLocaleClass = nullptr;
 
 } // namespace
 
@@ -59,8 +55,7 @@ void HSLLocale::sweep() {
 }
 
 Object HSLLocale::newInstance(std::shared_ptr<Locale> loc) {
-  assertx(s_HSLLocaleClass);
-  Object obj { s_HSLLocaleClass };
+  Object obj { HSLLocale::classof() };
   auto* data = Native::data<HSLLocale>(obj);
   new (data) HSLLocale(loc);
   return obj;
@@ -87,10 +82,11 @@ Array HSLLocale::__debugInfo() const {
 
 HSLLocale* HSLLocale::fromObject(const Object& obj) {
   if (obj.isNull()) {
-    raise_typehint_error("Expected an HSL Locale, got null");
+    raise_typehint_error_without_first_frame(
+      "Expected an HSL Locale, got null");
   }
-  if (!obj->instanceof(s_FQHSLLocale)) {
-    raise_typehint_error(
+  if (!obj->instanceof(HSLLocale::classof())) {
+    raise_typehint_error_without_first_frame(
       folly::sformat(
         "Expected an HSL Locale, got instance of class '{}'",
         obj->getClassName().c_str()
@@ -177,12 +173,12 @@ Object HHVM_FUNCTION(newlocale_all,
 
 struct LocaleExtension final : Extension {
 
-  LocaleExtension() : Extension("hsl_locale", "0.1") {}
+  LocaleExtension() : Extension("hsl_locale", "0.1", NO_ONCALL_YET) {}
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     // Remember to update the HHI :)
 
-    Native::registerNativeDataInfo<HSLLocale>(s_HSLLocale.get());
+    Native::registerNativeDataInfo<HSLLocale>();
     HHVM_NAMED_ME(HH\\Lib\\_Private\\_Locale\\Locale, __debugInfo, HHVM_MN(HSLLocale, __debugInfo));
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_Locale\\get_c_locale, get_c_locale);
@@ -202,9 +198,6 @@ struct LocaleExtension final : Extension {
     LC_(MONETARY);
     LC_(NUMERIC);
     LC_(TIME);
-#if defined(__APPLE__) || defined(__GLIBC__)
-    LC_(MESSAGES);
-#endif
 #ifdef __GLIBC__
     LC_(PAPER);
     LC_(NAME);
@@ -214,10 +207,6 @@ struct LocaleExtension final : Extension {
     LC_(IDENTIFICATION);
 #endif
 #undef LC_
-
-    loadSystemlib();
-    s_HSLLocaleClass = Class::lookup(s_FQHSLLocale.get());
-    assertx(s_HSLLocaleClass);
   }
 } s_locale_extension;
 

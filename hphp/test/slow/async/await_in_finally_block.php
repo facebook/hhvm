@@ -1,11 +1,11 @@
 <?hh
 
-async function f() {
+async function f() :Awaitable<mixed>{
   print "async call...\n";
   return 42;
 }
 
-async function g() {
+async function g() :Awaitable<mixed>{
   try {
     print "try\n";
   } finally {
@@ -18,7 +18,7 @@ async function g() {
 
 
 <<__EntryPoint>>
-function main_await_in_finally_block() {
+function main_await_in_finally_block() :mixed{
 $r = HH\Asio\join(g());
 var_dump($r);
 }

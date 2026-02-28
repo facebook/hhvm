@@ -10,27 +10,30 @@
 open Reordered_argument_collections
 open Aast
 open Typing_defs
+open Hh_prelude
 module SN = Naming_special_names
 
 let unwrap_class_hint = function
   | (_, Happly ((pos, class_name), type_parameters)) ->
-    (pos, class_name, type_parameters)
+    ((pos, class_name, type_parameters), None)
   | (p, Habstr _) ->
-    Errors.add_typing_error
+    let err =
       Typing_error.(
         primary
         @@ Primary.Expected_class
-             { suffix = Some (lazy " or interface but got a generic"); pos = p });
-    (Pos.none, "", [])
+             { suffix = Some (lazy " or interface but got a generic"); pos = p })
+    in
+    ((Pos.none, "", []), Some err)
   | (p, _) ->
-    Errors.add_typing_error
+    let err =
       Typing_error.(
         primary
         @@ Primary.Expected_class
-             { suffix = Some (lazy " or interface"); pos = p });
-    (Pos.none, "", [])
+             { suffix = Some (lazy " or interface"); pos = p })
+    in
+    ((Pos.none, "", []), Some err)
 
-let unwrap_class_type ty =
+let unwrap_class_type ty : _ Reason.t_ * pos_id * decl_ty list =
   match deref ty with
   | (r, Tapply (name, tparaml)) -> (r, name, tparaml)
   | (r, Tgeneric _) ->
@@ -40,12 +43,60 @@ let unwrap_class_type ty =
     let p = Typing_reason.to_pos r in
     (r, (p, ""), [])
 
-(* Given sets A and B return a tuple (AnB, A\B), i.e split A into the part
- * that is common with B, and which is unique to A *)
+let parentish_names
+    {
+      Shallow_decl_defs.sc_mode = _;
+      sc_final = _;
+      sc_abstract = _;
+      sc_is_xhp = _;
+      sc_internal = _;
+      sc_has_xhp_keyword = _;
+      sc_kind = _;
+      sc_module = _;
+      sc_name = _;
+      sc_tparams = _;
+      sc_extends;
+      sc_uses;
+      sc_xhp_attr_uses;
+      sc_xhp_enum_values = _;
+      sc_xhp_marked_empty = _;
+      sc_req_extends;
+      sc_req_implements;
+      sc_req_constraints = _;
+      sc_implements;
+      sc_support_dynamic_type = _;
+      sc_consts = _;
+      sc_typeconsts = _;
+      sc_props = _;
+      sc_sprops = _;
+      sc_constructor = _;
+      sc_static_methods = _;
+      sc_methods = _;
+      sc_user_attributes = _;
+      sc_enum_type = _;
+      sc_docs_url = _;
+      sc_package = _;
+    } =
+  let get_names tys acc =
+    List.fold tys ~init:acc ~f:(fun acc ty ->
+        let (_, (_, name), _) = unwrap_class_type ty in
+        SSet.add acc name)
+  in
+  SSet.empty
+  |> get_names sc_extends
+  |> get_names sc_implements
+  |> get_names sc_uses
+  |> get_names sc_req_extends
+  |> get_names sc_req_implements
+  |> get_names sc_xhp_attr_uses
+
+(** Given sets A and B return a tuple (AnB, A\B), i.e split A into the part
+    that is common with B, and which is unique to A *)
 let split_sets defs split_if_in_defs =
   SSet.partition (SSet.mem split_if_in_defs) defs
 
-(* Map split_sets over all sets in FileInfo *)
+(** Given name sets A and B return a tuple (AnB, A\B), i.e split A into the part
+    that is common with B, and which is unique to A *)
 let split_defs defs split_if_in_defs =
   FileInfo.(
     let (n_funs1, n_funs2) = split_sets defs.n_funs split_if_in_defs.n_funs in
@@ -81,17 +132,17 @@ let split_defs defs split_if_in_defs =
     in
     (r1, r2))
 
-let infer_const expr_ =
+let is_literal_with_trivially_inferable_type (_, _, expr_) =
   match expr_ with
-  | String _ -> Some Tstring
+  | Aast.String _
   | True
-  | False ->
-    Some Tbool
-  | Int _ -> Some Tint
-  | Float _ -> Some Tfloat
-  | Null -> Some Tnull
-  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, _, Int _)) -> Some Tint
-  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, _, Float _)) -> Some Tfloat
+  | False
+  | Int _
+  | Float _
+  | Null
+  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, _, Int _))
+  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, _, Float _)) ->
+    true
   | _ ->
     (* We can't infer the type of everything here. Notably, if you
      * define a const in terms of another const, we need an annotation,
@@ -100,7 +151,7 @@ let infer_const expr_ =
      * Also note that a number of expressions are considered invalid
      * as constant initializers, even if we can infer their type; see
      * Naming.check_constant_expr. *)
-    None
+    false
 
 let coalesce_consistent parent current =
   (* If the parent's constructor is consistent via <<__ConsistentConstruct>>, then

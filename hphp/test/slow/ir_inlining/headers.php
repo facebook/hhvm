@@ -1,6 +1,6 @@
 <?hh
 
-function mapLookup($map, $key, $default) {
+function mapLookup($map, $key, $default) :mixed{
   return $map->containsKey($key) ? $map[$key] : $default;
 }
 
@@ -24,7 +24,7 @@ final class HTTPHeaders {
   }
 }
 
-function main() {
+function main() :mixed{
   $h = new HTTPHeaders();
   $val = $h->getHeader('blah', 'wat');
   echo $val;
@@ -32,6 +32,6 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_headers() {
+function main_headers() :mixed{
 main();
 }

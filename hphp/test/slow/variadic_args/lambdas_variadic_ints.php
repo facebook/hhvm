@@ -6,7 +6,7 @@ function intProvider((function (int...):void) $fn):void {
 
 
 <<__EntryPoint>>
-function main_lambdas_variadic_ints() {
+function main_lambdas_variadic_ints() :mixed{
 print "Int provider ...\$x\n";
 intProvider((...$x) ==> {
   var_dump($x);

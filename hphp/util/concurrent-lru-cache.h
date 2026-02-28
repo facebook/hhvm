@@ -21,6 +21,7 @@
 #include <new>
 #include <thread>
 #include <vector>
+#include <folly/system/HardwareConcurrency.h>
 #include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {
@@ -240,7 +241,7 @@ template <class TKey, class TValue, class THash>
 ConcurrentLRUCache<TKey, TValue, THash>::
 ConcurrentLRUCache(size_t maxSize)
   : m_maxSize(maxSize), m_size(0),
-  m_map(std::thread::hardware_concurrency() * 4) // it will automatically grow
+  m_map(folly::available_concurrency() * 4) // it will automatically grow
 {
   m_head.m_prev = nullptr;
   m_head.m_next = &m_tail;

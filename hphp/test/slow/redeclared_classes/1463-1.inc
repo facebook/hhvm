@@ -2,7 +2,7 @@
 
   class base {
     public $baseVal =  'base';
-    static $baseStatic = 'baseStat';
+    public static $baseStatic = 'baseStat';
     function childProp() {
  return $this->childProp;
  }

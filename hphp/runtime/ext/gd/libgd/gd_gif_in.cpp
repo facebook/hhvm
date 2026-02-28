@@ -1,9 +1,8 @@
 #include <stdio.h>
-#include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include "gd.h"
-#include "gdhelpers.h"
+#include "hphp/runtime/ext/gd/libgd/gd.h"
+#include "hphp/runtime/ext/gd/libgd/gdhelpers.h"
 
 /* Used only when debugging GIF compression code */
 /* #define DEBUGGING_ENVARS */
@@ -73,12 +72,12 @@ static struct {
 
 #define CSD_BUF_SIZE 280
 
-typedef struct {
+struct CODE_STATIC_DATA {
   unsigned char    buf[CSD_BUF_SIZE];
   int              curbit, lastbit, done, last_byte;
-} CODE_STATIC_DATA;
+};
 
-typedef struct {
+struct LZW_STATIC_DATA {
   int fresh;
   int code_size, set_code_size;
   int max_code, max_code_size;
@@ -87,7 +86,7 @@ typedef struct {
   int table[2][(1<< MAX_LWZ_BITS)];
   int stack[STACK_SIZE], *sp;
   CODE_STATIC_DATA scd;
-} LZW_STATIC_DATA;
+};
 
 static int ReadColorMap (gdIOCtx *fd, int number, unsigned char (*buffer)[256]);
 static int DoExtension (gdIOCtx *fd, int label, int *Transparent, int *ZeroDataBlockP);

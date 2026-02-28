@@ -2,7 +2,7 @@
 
 // as a static method
 class C4 {
-  public static function __invoke($a0, $a1) {
+  public static function __invoke($a0, $a1) :mixed{
     var_dump('C4');
     var_dump($a0, $a1);
   }
@@ -13,7 +13,7 @@ class E4 extends D4 {
 
   <<__LSB>>
   private static $__invokeX = 0;
-  public static function __invoke($a0, $a1) {
+  public static function __invoke($a0, $a1) :mixed{
     var_dump('E4');
     var_dump($a0, $a1);
     var_dump(static::$__invokeX ++);
@@ -23,7 +23,7 @@ class C5 {
 
   <<__LSB>>
   private static $__invokeX = 0;
-  public static function __invoke() {
+  public static function __invoke() :mixed{
     var_dump(static::$__invokeX ++);
   }
 }
@@ -31,7 +31,7 @@ class D5 extends C5 {
 }
 
 <<__EntryPoint>>
-function main_767() {
+function main_767() :mixed{
 $c = new C4;
 $d = new D4;
 $c(0, 1);

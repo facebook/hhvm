@@ -1,4 +1,4 @@
 <?hh
 
-<<__PolicyShardedMemoize>>
-function f(mixed $arg)[ctx $arg] {}
+<<__Memoize(#KeyedByIC)>>
+function f(mixed $arg)[ctx $arg] :mixed{}

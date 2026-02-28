@@ -3,18 +3,12 @@
 <<__EntryPoint>> function main(): void {
 require_once(__DIR__ . '/test_base.inc');
 init();
-$requests = varray[
-  varray[
+$requests = vec[
+  vec[
     '-dalways_populate_raw_post_data=1',
-    darray['CONTENT_TYPE' => 'multipart/form-data; boundary=dumy']],
-  varray['-dalways_populate_raw_post_data=1', darray[]],
-  varray['', darray[]],
-  varray['-dvariables_order=NONE -drequest_order=', darray[]],
-  varray['-dvariables_order=E -drequest_order=GPC', darray[]],
-  varray['-dvariables_order=CGP -drequest_order=GP', darray[]],
-  varray['-dvariables_order=GC -drequest_order=CG', darray[]],
-  varray['-dvariables_order=GC -drequest_order=GC', darray[]],
-  varray['-dvariables_order=GC -drequest_order=P', darray[]],
+    dict['CONTENT_TYPE' => 'multipart/form-data; boundary=dumy']],
+  vec['-dalways_populate_raw_post_data=1', dict[]],
+  vec['', dict[]],
 ];
 
 foreach($requests as $request) {
@@ -22,8 +16,8 @@ foreach($requests as $request) {
   runTest(function($port) use($request) {
     list($options, $extra) = $request;
     $path = 'global_variables.php?var=GET&get=1';
-    $post = darray['var' => 'POST', 'post' => 2];
-    $headers = darray['Cookie' => 'var=COOKIE;cookie=3;'];
+    $post = dict['var' => 'POST', 'post' => 2];
+    $headers = dict['Cookie' => 'var=COOKIE;cookie=3;'];
     echo fastcgi_request('localhost', $port, $path, $post, $headers, $extra) . "\n";
   }, $request[0]);
 }

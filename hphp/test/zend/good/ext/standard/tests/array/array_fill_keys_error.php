@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_fill_keys() : error conditions ***\n";
 
-$keys = varray[1, 2];
+$keys = vec[1, 2];
 $val = 1;
 $extra_arg = 10;
 

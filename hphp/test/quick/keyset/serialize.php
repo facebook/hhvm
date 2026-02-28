@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function roundtrip($ks) {
+function roundtrip($ks) :mixed{
   echo "====================================================\n";
   var_dump($ks);
   $str = serialize($ks);
@@ -10,7 +10,7 @@ function roundtrip($ks) {
   var_dump($ks2);
 }
 
-function try_serialize($val) {
+function try_serialize($val) :mixed{
   try {
     echo "====================================================\n";
     var_dump($val);
@@ -20,7 +20,7 @@ function try_serialize($val) {
   }
 }
 
-function try_unserialize($val) {
+function try_unserialize($val) :mixed{
   try {
     echo "====================================================\n";
     var_dump($val);

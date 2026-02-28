@@ -1,8 +1,1 @@
-File "class_meth9.php", line 18, characters 28-31:
-You cannot use this method with `class_meth` (whether you are in the same class hierarchy or not). (Typing[4081])
-File "class_meth9.php", line 13, characters 29-30:
-It is declared as `protected` here
-File "class_meth9.php", line 22, characters 33-36:
-You cannot use this method with `class_meth` (whether you are in the same class hierarchy or not). (Typing[4081])
-File "class_meth9.php", line 13, characters 29-30:
-It is declared as `protected` here
+No errors

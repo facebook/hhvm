@@ -1,0 +1,8 @@
+FunctionCredential
+  INSERT FunctionCredential
+  class
+SORT TEXT: none
+function_exists
+  INSERT function_exists
+  function
+SORT TEXT: none

@@ -1,4 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
+date_default_timezone_set('Europe/Amsterdam');
 $tStamp = mktime (17, 17, 17, 10, 27, 2004);
 echo "tStamp=". date("l Y-m-d H:i:s T", $tStamp). "\n";
 

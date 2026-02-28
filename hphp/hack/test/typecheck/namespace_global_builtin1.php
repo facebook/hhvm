@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 namespace Test;
 
@@ -11,5 +11,5 @@ function g(): void {
 }
 
 function h(): void {
-  fun('\Test\f');
+  \Test\f<>;
 }

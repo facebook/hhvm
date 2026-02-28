@@ -5,7 +5,7 @@ class ctor {
 }
 
 <<__EntryPoint>>
-function main_async_constructor() {
+function main_async_constructor() :mixed{
 new ctor;
 echo "done";
 }

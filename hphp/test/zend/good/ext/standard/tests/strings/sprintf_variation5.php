@@ -14,13 +14,13 @@ $fp_copy = $fp;
 $dfp_copy = $dfp;
   
 // array of resource types
-$resource_types = varray [
+$resource_types = vec[
   $fp_copy,
   $dfp_copy
 ];
 
 // various integer formats
-$int_formats = varray[
+$int_formats = vec[
   "%d", "%Ld", " %d",
   "\t%d", "\n%d", "%4d",
   "%[0-9]", "%*d"

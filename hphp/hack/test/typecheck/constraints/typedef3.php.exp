@@ -1,4 +1,4 @@
-File "typedef3.php", line 5, characters 34-50:
+ERROR: File "typedef3.php", line 5, characters 34-50:
 Some type arguments violate their constraints (Typing[4323])
   File "typedef3.php", line 3, characters 22-22:
   `T` is a constrained type parameter

@@ -14,8 +14,8 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff() : usage variations ***\n";
 
-$array_index = darray [0 => 'a', 1 => 'b', 2 => 'c', 0 => 'd', 3 => 'b'];   //duplicate key (0), duplicate value (b)
-$array_assoc = darray ['2' => 'c',   //same key=>value pair, different order
+$array_index = dict[0 => 'a', 1 => 'b', 2 => 'c', 0 => 'd', 3 => 'b'];   //duplicate key (0), duplicate value (b)
+$array_assoc = dict['2' => 'c',   //same key=>value pair, different order
                       '1' => 'b',
                       '0' => 'a',
                       'b' => '3',   //key and value from array_index swapped

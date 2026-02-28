@@ -1,7 +1,7 @@
 <?hh
 
-class S1 { static $v = 0; }
-function test_1() {
+class S1 { public static $v = 0; }
+function test_1() :mixed{
     $v = ++S1::$v;
     echo "Outer function increments \$v to $v\n";
     $f = function() use($v) {
@@ -10,8 +10,8 @@ function test_1() {
     return $f;
 }
 
-class S2 { static $v = 0; }
-function test_2() {
+class S2 { public static $v = 0; }
+function test_2() :mixed{
     $v = S2::$v;
     $f = function() use($v) {
         echo "Inner function reckons \$v is $v\n";
@@ -21,14 +21,16 @@ function test_2() {
     return $f;
 }
 
-class S3 { static $v = ""; }
-function test_3() {
-    $v = S3::$v .= 'b';
+class S3 { public static $v = ""; }
+function test_3() :mixed{
+    S3::$v .= 'b';
+    $v = S3::$v;
     echo "Outer function catenates 'b' onto \$v to give $v\n";
     $f = function() use($v) {
         echo "Inner function reckons \$v is $v\n";
     };
-    $v = S3::$v .= 'a';
+    S3::$v .= 'a';
+    $v = S3::$v;
     echo "Outer function catenates 'a' onto \$v to give $v\n";
     return $f;
 }

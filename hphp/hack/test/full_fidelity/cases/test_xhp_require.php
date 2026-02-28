@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 trait Foo {
   require extends :bar;
 }

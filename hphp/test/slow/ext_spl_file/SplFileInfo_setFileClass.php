@@ -4,7 +4,7 @@ class MyFileObject extends SplFileObject {}
 
 
 <<__EntryPoint>>
-function main_spl_file_info_set_file_class() {
+function main_spl_file_info_set_file_class() :mixed{
 $info = new SplFileInfo(__FILE__);
 
 $info->setFileClass('MyFileObject');

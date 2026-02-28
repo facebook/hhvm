@@ -14,6 +14,12 @@ val to_string : ?pretty:bool -> t -> string
 
 val to_json : t -> Hh_json.json
 
+val to_yojson : t -> Yojson.Safe.t
+
+val of_json_opt : Hh_json.json -> t option
+
+val of_yojson_opt : Yojson.Safe.t -> t option
+
 (** `diff ~all current ~prev` is for when `current` and `prev` have the same structure.
 It produces a hybrid telemetry object where, element by element, if they're the same
 then we only see the current element, but if they're different then we see both.
@@ -22,7 +28,17 @@ It works with nested telemetry objects. In places where the structure differs,
 only `current` is kept. *)
 val diff : all:bool -> ?suffix_keys:bool -> t -> prev:t -> t
 
+(** [add t1 t2] does a key-by-key numeric add, for instance [add {a->1,b->1} {a->3}] will produce [{a->4,b->1}].
+It retains only numerics (int, float) and hierarchical objects that contain numerics.
+It doesn't retain int lists. *)
 val add : t -> t -> t
+
+(** [merge t1 t2] appends two telemetries, for instance [merge {a->1,b->true} {c->2}]
+will produce [{a->1,b->true,c->2}]. No matching is done: if an item with the same [key]
+appears in both [t1] and [t2] then it will be listed twice in the output, similar
+to if you'd done [t |> int_ ~key ~value |> int_ ~key ~value] twice using the same
+key. (so don't do it!) *)
+val merge : t -> t -> t
 
 val string_ : ?truncate:int -> key:string -> value:string -> t -> t
 
@@ -33,6 +49,14 @@ val string_list :
   ?truncate_each_string:int ->
   key:string ->
   value:string list ->
+  t ->
+  t
+
+val string_list_opt :
+  ?truncate_list:int ->
+  ?truncate_each_string:int ->
+  key:string ->
+  value:string list option ->
   t ->
   t
 
@@ -48,11 +72,25 @@ val int_list : ?truncate_list:int -> key:string -> value:int list -> t -> t
 
 val json_ : key:string -> value:Hh_json.json -> t -> t
 
+val json : key:string -> value:Yojson.Safe.t -> t -> t
+
+val json_opt : key:string -> value:Yojson.Safe.t option -> t -> t
+
 val object_ : key:string -> value:t -> t -> t
 
 val object_opt : key:string -> value:t option -> t -> t
 
-val duration : ?key:string -> start_time:float -> t -> t
+val duration : ?key:string -> start_time:float -> ?end_time:float -> t -> t
+
+(* Similarly to [duration], will add the duration between [start_time] and
+   [end_time] as [key]. However, if there are any pre-existing int values for
+   [key], will remove them and add their sum to the newly added duration. *)
+val add_duration : ?key:string -> start_time:float -> ?end_time:float -> t -> t
+
+(** [with_duration ~description telemetry f] runs [f] and adds
+  in [telemetry] the duration [f] took in milliseconds
+  at key "[description]_duration_ms" *)
+val with_duration : description:string -> t -> (unit -> 'res) -> 'res * t
 
 val float_ : key:string -> value:float -> t -> t
 

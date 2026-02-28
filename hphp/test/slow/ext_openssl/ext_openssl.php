@@ -1,20 +1,20 @@
 <?hh
 
-function VS($x, $y) {
+function VS($x, $y) :mixed{
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
                    var_dump(debug_backtrace()); }
 }
-function VERIFY($x) { VS($x != false, true); }
+function VERIFY($x) :mixed{ VS($x != false, true); }
 
 //////////////////////////////////////////////////////////////////////
 
-function test_openssl_csr_export_to_file() {
+function test_openssl_csr_export_to_file() :mixed{
   $ignore = null;
   $csr = openssl_csr_new(null, inout $ignore);
   VERIFY($csr != null);
 
-  $tmp = tempnam('/tmp', 'vmopenssltest');
+  $tmp = tempnam(sys_get_temp_dir(), 'vmopenssltest');
   unlink($tmp);
   VS(file_get_contents($tmp), false);
   openssl_csr_export_to_file($csr, $tmp);
@@ -22,7 +22,7 @@ function test_openssl_csr_export_to_file() {
   unlink($tmp);
 }
 
-function test_openssl_csr_get_public_key() {
+function test_openssl_csr_get_public_key() :mixed{
   $ignore = null;
   $csr = openssl_csr_new(null, inout $ignore);
   VERIFY($csr != null);
@@ -31,7 +31,7 @@ function test_openssl_csr_get_public_key() {
   VERIFY($publickey != null);
 }
 
-function test_openssl_csr_get_subject() {
+function test_openssl_csr_get_subject() :mixed{
   $ignore = null;
   $csr = openssl_csr_new(null, inout $ignore);
   VERIFY($csr != null);
@@ -41,8 +41,8 @@ function test_openssl_csr_get_subject() {
          $subject['O'] == "Default Company Ltd");
 }
 
-function test_openssl_csr_sign() {
-  $dn = varray[
+function test_openssl_csr_sign() :mixed{
+  $dn = vec[
            "countryName",
            "stateOrProvinceName",
            "localityName",
@@ -72,11 +72,11 @@ function test_openssl_csr_sign() {
   VERIFY(strlen($csrStr) > 500);
 }
 
-function test_openssl_error_string() {
+function test_openssl_error_string() :mixed{
   $ret = openssl_error_string();
 }
 
-function test_openssl_free_key() {
+function test_openssl_free_key() :mixed{
   $ignore = null;
   $csr = openssl_csr_new(null, inout $ignore);
   VERIFY($csr != null);
@@ -86,14 +86,14 @@ function test_openssl_free_key() {
   openssl_free_key($publickey);
 }
 
-function test_openssl_pkcs12_export_to_file() {
+function test_openssl_pkcs12_export_to_file() :mixed{
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
   $csr = openssl_csr_new(null, inout $privkey);
   VERIFY($csr != null);
   $scert = openssl_csr_sign($csr, null, $privkey, 365);
 
-  $tmp = tempnam('/tmp', 'vmopenssltest');
+  $tmp = tempnam(sys_get_temp_dir(), 'vmopenssltest');
   unlink($tmp);
   VS(file_get_contents($tmp), false);
   openssl_pkcs12_export_to_file($scert, $tmp, $privkey, "1234");
@@ -101,7 +101,7 @@ function test_openssl_pkcs12_export_to_file() {
   unlink($tmp);
 }
 
-function test_openssl_pkcs12_read() {
+function test_openssl_pkcs12_read() :mixed{
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
   $csr = openssl_csr_new(null, inout $privkey);
@@ -118,7 +118,7 @@ function test_openssl_pkcs12_read() {
   VERIFY(strlen($certs['pkey']) > 500);
 }
 
-function test_openssl_pkcs7_sign() {
+function test_openssl_pkcs7_sign() :mixed{
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
   $csr = openssl_csr_new(null, inout $privkey);
@@ -128,29 +128,29 @@ function test_openssl_pkcs7_sign() {
   VERIFY($pubkey != null);
 
   $data = "some secret data";
-  $infile = tempnam('/tmp', 'invmtestopenssl');
-  $outfile = tempnam('/tmp', 'outvmtestopenssl');
+  $infile = tempnam(sys_get_temp_dir(), 'invmtestopenssl');
+  $outfile = tempnam(sys_get_temp_dir(), 'outvmtestopenssl');
   unlink($infile);
   unlink($outfile);
   file_put_contents($infile, $data);
 
   VERIFY(openssl_pkcs7_sign
          ($infile, $outfile, $scert, $privkey,
-          darray["To" => "t@facebook.com", "From" => "hzhao@facebook.com"]));
+          dict["To" => "t@facebook.com", "From" => "hzhao@facebook.com"]));
 
-  $tmp = tempnam('/tmp', 'x509vmtestopenssl');
+  $tmp = tempnam(sys_get_temp_dir(), 'x509vmtestopenssl');
   unlink($tmp);
   VS(file_get_contents($tmp), false);
   VERIFY(openssl_x509_export_to_file($scert, $tmp));
 
-  VS(openssl_pkcs7_verify($outfile, 0, $infile, varray[$tmp]), true);
+  VS(openssl_pkcs7_verify($outfile, 0, $infile, vec[$tmp]), true);
   unlink($infile);
   unlink($outfile);
   unlink($tmp);
 }
 
-function test_openssl_pkey_export_to_file() {
-  $tmp = tempnam('/tmp', 'vmopenssltest');
+function test_openssl_pkey_export_to_file() :mixed{
+  $tmp = tempnam(sys_get_temp_dir(), 'vmopenssltest');
   unlink($tmp);
   VS(file_get_contents($tmp), false);
 
@@ -162,7 +162,7 @@ function test_openssl_pkey_export_to_file() {
   unlink($tmp);
 }
 
-function test_openssl_pkey_export() {
+function test_openssl_pkey_export() :mixed{
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
   $out = null;
@@ -170,7 +170,7 @@ function test_openssl_pkey_export() {
   VERIFY(strlen($out) > 500);
 }
 
-function test_openssl_pkey_free() {
+function test_openssl_pkey_free() :mixed{
   $fkey = file_get_contents(__DIR__."/test_public.pem");
   $k = openssl_pkey_get_public($fkey);
   VERIFY($k != false);
@@ -178,7 +178,7 @@ function test_openssl_pkey_free() {
   openssl_pkey_free($k);
 }
 
-function test_openssl_pkey_get_details() {
+function test_openssl_pkey_get_details() :mixed{
   {
     $fkey = file_get_contents(__DIR__."/test_public.pem");
     $k = openssl_pkey_get_public($fkey);
@@ -195,7 +195,7 @@ function test_openssl_pkey_get_details() {
   }
 }
 
-function test_openssl_private_encrypt() {
+function test_openssl_private_encrypt() :mixed{
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
   $csr = openssl_csr_new(null, inout $privkey);
@@ -211,7 +211,7 @@ function test_openssl_private_encrypt() {
   VS($out2, $data);
 }
 
-function test_openssl_public_encrypt() {
+function test_openssl_public_encrypt() :mixed{
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
   $csr = openssl_csr_new(null, inout $privkey);
@@ -227,7 +227,7 @@ function test_openssl_public_encrypt() {
   VS($out2, $data);
 }
 
-function test_openssl_seal() {
+function test_openssl_seal() :mixed{
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
   $csr = openssl_csr_new(null, inout $privkey);
@@ -239,7 +239,7 @@ function test_openssl_seal() {
   $sealed = null;
   $ekeys = null;
   $iv = null;
-  VERIFY(openssl_seal($data, inout $sealed, inout $ekeys, varray[$pubkey],
+  VERIFY(openssl_seal($data, inout $sealed, inout $ekeys, vec[$pubkey],
                       '', inout $iv));
   VERIFY(strlen($sealed) > 0);
   VS(count($ekeys), 1);
@@ -252,7 +252,7 @@ function test_openssl_seal() {
   VERIFY(openssl_open($sealed, inout $open_data, $ekeys[0], $privkey, 'RC4'));
   VS($open_data, $data);
 
-  VERIFY(openssl_seal($data, inout $sealed, inout $ekeys, varray[$pubkey],
+  VERIFY(openssl_seal($data, inout $sealed, inout $ekeys, vec[$pubkey],
                       'AES-256-ECB', inout $iv));
   VERIFY(strlen($sealed) > 0);
   VS(count($ekeys), 1);
@@ -263,7 +263,7 @@ function test_openssl_seal() {
   VS($open_data, $data);
 }
 
-function test_openssl_sign() {
+function test_openssl_sign() :mixed{
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
   $csr = openssl_csr_new(null, inout $privkey);
@@ -278,7 +278,7 @@ function test_openssl_sign() {
 
 }
 
-function test_openssl_x509_check_private_key() {
+function test_openssl_x509_check_private_key() :mixed{
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
   $csr = openssl_csr_new(null, inout $privkey);
@@ -287,18 +287,18 @@ function test_openssl_x509_check_private_key() {
   VERIFY(openssl_x509_check_private_key($scert, $privkey));
 }
 
-function test_openssl_x509_checkpurpose() {
+function test_openssl_x509_checkpurpose() :mixed{
   $fcert = file_get_contents(__DIR__."/test_x509.crt");
   $cert = openssl_x509_read($fcert);
-  VS(openssl_x509_checkpurpose($cert, X509_PURPOSE_SSL_CLIENT, varray[]), 0);
-  VS(openssl_x509_checkpurpose($cert, X509_PURPOSE_SSL_SERVER, varray[]), 0);
+  VS(openssl_x509_checkpurpose($cert, X509_PURPOSE_SSL_CLIENT, vec[]), 0);
+  VS(openssl_x509_checkpurpose($cert, X509_PURPOSE_SSL_SERVER, vec[]), 0);
 }
 
-function test_openssl_x509_export_to_file() {
+function test_openssl_x509_export_to_file() :mixed{
   $fcert = file_get_contents(__DIR__."/test_x509.crt");
   $cert = openssl_x509_read($fcert);
 
-  $tmp = tempnam('/tmp', 'x509vmopenssltest');
+  $tmp = tempnam(sys_get_temp_dir(), 'x509vmopenssltest');
   unlink($tmp);
   VS(file_get_contents($tmp), false);
   VERIFY(openssl_x509_export_to_file($cert, $tmp));
@@ -311,7 +311,7 @@ function test_openssl_x509_export_to_file() {
   unlink($tmp);
 }
 
-function test_openssl_x509_export() {
+function test_openssl_x509_export() :mixed{
   $fcert = file_get_contents(__DIR__."/test_x509.crt");
   $cert = openssl_x509_read($fcert);
   $out = null;
@@ -321,27 +321,27 @@ function test_openssl_x509_export() {
   VS($info['subject']['O'], "RSA Data Security, Inc.");
 }
 
-function test_openssl_x509_free() {
+function test_openssl_x509_free() :mixed{
   $fcert = file_get_contents(__DIR__."/test_x509.crt");
   $cert = openssl_x509_read($fcert);
   VERIFY($cert != null);
   openssl_x509_free($cert);
 }
 
-function test_openssl_x509_parse() {
+function test_openssl_x509_parse() :mixed{
   $fcert = file_get_contents(__DIR__."/test_x509.crt");
   $cert = openssl_x509_read($fcert);
   $info = openssl_x509_parse($cert);
   VS($info['subject']['O'], "RSA Data Security, Inc.");
 }
 
-function test_openssl_x509_read() {
+function test_openssl_x509_read() :mixed{
   $fcert = file_get_contents(__DIR__."/test_x509.crt");
   $cert = openssl_x509_read($fcert);
   VERIFY($cert != null);
 }
 
-function test_openssl_encrypt() {
+function test_openssl_encrypt() :mixed{
   $test = "OpenSSL is good for encrypting things";
   $secret = "supersecretthing";
   $cipher = "AES-256-CBC";
@@ -356,13 +356,13 @@ function test_openssl_encrypt() {
   VS($test, openssl_decrypt($data, $cipher, $secret, OPENSSL_RAW_DATA, $iv));
 }
 
-function test_openssl_digest() {
+function test_openssl_digest() :mixed{
   $test = "OpenSSL is also good for hashing things";
 
   VS(md5($test), openssl_digest($test, "md5"));
 }
 
-function test_openssl_encrypt_long() {
+function test_openssl_encrypt_long() :mixed{
   $pt = 'aa';
   $method = 'aes-128-cbc';
   $iv = str_repeat('x', 16);
@@ -371,7 +371,7 @@ function test_openssl_encrypt_long() {
   var_dump($ct1 === $ct2);
 }
 
-function test_openssl_decrypt_long() {
+function test_openssl_decrypt_long() :mixed{
   $pt = 'aa';
   $method = 'aes-128-cbc';
   $iv = str_repeat('x', 16);
@@ -386,7 +386,7 @@ function test_openssl_decrypt_long() {
 //////////////////////////////////////////////////////////////////////
 
 <<__EntryPoint>>
-function main_ext_openssl() {
+function main_ext_openssl() :mixed{
 test_openssl_csr_export_to_file();
 test_openssl_csr_get_public_key();
 test_openssl_csr_get_subject();

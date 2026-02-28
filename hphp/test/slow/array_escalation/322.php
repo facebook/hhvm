@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_322() {
-$a = darray[0 => varray[0]];
- $a['test'] = varray[0];
+function main_322() :mixed{
+$a = dict[0 => vec[0]];
+ $a['test'] = vec[0];
  var_dump($a);
 }

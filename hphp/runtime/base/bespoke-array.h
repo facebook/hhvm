@@ -25,14 +25,16 @@
 #include "hphp/runtime/base/req-tiny-vector.h"
 #include "hphp/runtime/base/typed-value.h"
 
+#include "hphp/util/configs/eval.h"
+
 namespace HPHP {
 
 inline bool allowBespokeArrayLikes() {
-  return RO::EvalBespokeArrayLikeMode > 0;
+  return Cfg::Eval::BespokeArrayLikeMode > 0;
 }
 
 inline bool shouldTestBespokeArrayLikes() {
-  return RO::EvalBespokeArrayLikeMode == 1;
+  return Cfg::Eval::BespokeArrayLikeMode == 1;
 }
 
 inline bool arrayTypeCouldBeBespoke(DataType t) {
@@ -78,13 +80,15 @@ ArrayData* maybeMakeLoggingArray(ArrayData*, LoggingProfile*);
 ArrayData* makeBespokeForTesting(ArrayData*, LoggingProfile*);
 void profileArrLikeStaticProps(const Class*);
 void profileArrLikeProps(ObjectData*);
+void profileArrLikeClsCns(const Class*, TypedValue*, Slot);
+void profileArrLikeTypeAlias(const TypeAlias*, Array*);
 void setLoggingEnabled(bool);
 void selectBespokeLayouts();
 void waitOnExportProfiles();
 }
 
 /*
- * A bespoke array is an array satisfing the ArrayData interface but backed by
+ * A bespoke array is an array satisfying the ArrayData interface but backed by
  * a variety of possible memory layouts. Eventually, our goal is to generate
  * these layouts at runtime, based on profiling information.
  *
@@ -120,7 +124,7 @@ public:
 
 private:
   template <typename T, typename ... Args>
-  [[noreturn]] static inline T UnsupportedOp(Args ... args) {
+  [[noreturn]] static inline T UnsupportedOp(Args ... /*args*/) {
     always_assert(false);
   }
 
@@ -168,6 +172,7 @@ public:
   static tv_lval ElemStr(tv_lval lvalIn, StringData* key, bool throwOnMissing);
 
   // insertion
+  static ArrayData* SetPosMove(ArrayData* ad, ssize_t pos, TypedValue v);
   static ArrayData* SetIntMove(ArrayData* ad, int64_t key, TypedValue v);
   static ArrayData* SetStrMove(ArrayData* ad, StringData* key, TypedValue v);
 

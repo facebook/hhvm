@@ -1,0 +1,18 @@
+----HANDLER----
+string(3) "foo"
+NULL
+vec(1) {
+  string(4) "Hey!"
+}
+---------------
+In bar!
+Arg is: Hey!
+dict(1) {
+  ["kind"]=>
+  int(1)
+}
+dict(1) {
+  ["kind"]=>
+  int(4)
+}
+int(7)

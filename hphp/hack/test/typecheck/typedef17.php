@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /**
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
@@ -9,7 +9,7 @@
  *
  */
 
-type A<T as string> = vec<T>;
+type A<T> = vec<T>;
 
 function f0<T as string>(A<T> $foo): T {
   return $foo[0];

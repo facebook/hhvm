@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function n(): noreturn {
   throw new Exception('nope');

@@ -1,6 +1,6 @@
 <?hh
 function urls() {
-  return varray[
+  return vec[
 // Parsable URLs:
 '64.246.30.37',
 'http://64.246.30.37',

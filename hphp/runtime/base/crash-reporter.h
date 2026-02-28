@@ -17,6 +17,7 @@
 
 #include <atomic>
 #include <folly/portability/SysTypes.h>
+#include <signal.h>
 
 namespace HPHP {
 
@@ -24,8 +25,8 @@ namespace HPHP {
 
 extern std::atomic<pid_t> CrashingThread;
 void install_crash_reporter();
+void bt_handler(int sigin, siginfo_t* info, void* args);
 
 //////////////////////////////////////////////////////////////////////
 
 }
-

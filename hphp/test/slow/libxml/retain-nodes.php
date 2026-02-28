@@ -1,7 +1,7 @@
 <?hh
 // c.f. http://3v4l.org/sbf0s
 
-function foo() {
+function foo() :mixed{
   $d = new DOMDocument;
   $a = $d->createElement('foo', 'bar');
   $b = $d->createElement('fiz', 'buz');

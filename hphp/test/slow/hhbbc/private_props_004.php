@@ -15,7 +15,7 @@ class MVecFinalOps {
     $this->icell = "asd";
   }
 
-  public function foo() {
+  public function foo() :mixed{
     var_dump(isset($this->s));
     var_dump(!($this->s ?? false));
 
@@ -25,7 +25,7 @@ class MVecFinalOps {
     $this->icell++;
   }
 
-  public function printer() {
+  public function printer() :mixed{
     $s = $this->s;
     $o = $this->o;
     $igen = $this->igen;
@@ -38,7 +38,7 @@ class MVecFinalOps {
 }
 
 <<__EntryPoint>>
-function main_private_props_004() {
+function main_private_props_004() :mixed{
   $x = new MVecFinalOps();
   $x->foo();
   $x->printer();

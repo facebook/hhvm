@@ -23,33 +23,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Array HHVM_FUNCTION(hphp_get_extension_info, const String& name);
-Variant HHVM_FUNCTION(hphp_invoke, const String& name, const Variant& params);
-Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj, const String& cls,
-                                          const String& name, const Variant& params);
-Object HHVM_FUNCTION(hphp_create_object, const String& name, const Variant& params);
-Object HHVM_FUNCTION(hphp_create_object_without_constructor,
-                      const String& name);
-Variant HHVM_FUNCTION(hphp_get_property, const Object& obj, const String& cls,
-                                         const String& prop);
-void HHVM_FUNCTION(hphp_set_property, const Object& obj, const String& cls,
-                                      const String& prop, const Variant& value);
-Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
-                                                const String& prop, bool force);
-void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
-                                             const String& prop, const Variant& value,
-                                             bool force);
-
 struct Reflection {
-  static Class* s_ReflectionExceptionClass;
-  static Class* s_ReflectionExtensionClass;
   [[noreturn]]
   static void ThrowReflectionExceptionObject(const Variant& message);
 };
 
-struct ReflectionFileHandle {
+struct ReflectionFileHandle : SystemLib::ClassLoader<"ReflectionFile"> {
   ReflectionFileHandle(): m_unit(nullptr) {}
-  explicit ReflectionFileHandle(const Unit* unit): m_unit(unit) {};
+  explicit ReflectionFileHandle(const Unit* unit): m_unit(unit) {}
   ReflectionFileHandle(const ReflectionFileHandle&) = delete;
   ReflectionFileHandle& operator=(const ReflectionFileHandle& other) {
     m_unit = other.m_unit;
@@ -72,12 +53,12 @@ struct ReflectionFileHandle {
   }
 
  private:
-  LowPtr<const Unit> m_unit{nullptr};
+  const Unit* m_unit{nullptr};
 };
 
 /* A ReflectionModuleHandle is a NativeData object wrapping a Module*
  * for the purposes of ReflectionModule. */
-struct ReflectionModuleHandle {
+struct ReflectionModuleHandle : SystemLib::ClassLoader<"ReflectionModule"> {
   ReflectionModuleHandle(): m_module(nullptr) {}
   explicit ReflectionModuleHandle(const Module* module): m_module(module) {}
   ReflectionModuleHandle(const ReflectionModuleHandle&) = delete;
@@ -107,9 +88,10 @@ struct ReflectionModuleHandle {
 
 /* A ReflectionFuncHandle is a NativeData object wrapping a Func*
  * for the purposes of ReflectionFunction and ReflectionMethod. */
-struct ReflectionFuncHandle {
+struct ReflectionFuncHandle :
+    SystemLib::ClassLoader<"ReflectionFunctionAbstract"> {
   ReflectionFuncHandle(): m_func(nullptr) {}
-  explicit ReflectionFuncHandle(const Func* func): m_func(func) {};
+  explicit ReflectionFuncHandle(const Func* func): m_func(func) {}
   ReflectionFuncHandle(const ReflectionFuncHandle&) = delete;
   ReflectionFuncHandle& operator=(const ReflectionFuncHandle& other) {
     m_func = other.m_func;
@@ -132,14 +114,14 @@ struct ReflectionFuncHandle {
   }
 
  private:
-  LowPtr<const Func> m_func{nullptr};
+  PackedPtr<const Func> m_func{nullptr};
 };
 
 /* A ReflectionClassHandle is a NativeData object wrapping a Class* for the
  * purposes of ReflectionClass. */
-struct ReflectionClassHandle {
+struct ReflectionClassHandle : SystemLib::ClassLoader<"ReflectionClass"> {
   ReflectionClassHandle(): m_cls(nullptr) {}
-  explicit ReflectionClassHandle(const Class* cls): m_cls(cls) {};
+  explicit ReflectionClassHandle(const Class* cls): m_cls(cls) {}
   ReflectionClassHandle(const ReflectionClassHandle&) = delete;
   ReflectionClassHandle& operator=(const ReflectionClassHandle& that_) {
     m_cls = that_.m_cls;
@@ -168,21 +150,22 @@ struct ReflectionClassHandle {
   }
 
   Variant sleep() const {
-    return String(getClass()->nameStr());
+    return m_cls ? String(m_cls->nameStr()) : empty_string();
   }
 
   void wakeup(const Variant& content, ObjectData* obj);
 
  private:
-  LowPtr<const Class> m_cls{nullptr};
+ PackedPtr<const Class> m_cls{nullptr};
 };
 
 /* A ReflectionConstHandle is a NativeData object wrapping a Const*
  * for the purposes of ReflectionTypeConstant. */
-struct ReflectionConstHandle {
+struct ReflectionConstHandle :
+    SystemLib::ClassLoader<"ReflectionTypeConstant"> {
   ReflectionConstHandle(): m_const(nullptr), m_cls(nullptr) {}
   explicit ReflectionConstHandle(const Class::Const* cns, const Class* cls):
-      m_const(cns), m_cls(cls) {};
+      m_const(cns), m_cls(cls) {}
 
   static ReflectionConstHandle* Get(ObjectData* obj) {
     return Native::data<ReflectionConstHandle>(obj);
@@ -213,14 +196,14 @@ struct ReflectionConstHandle {
 
  private:
   const Class::Const* m_const;
-  LowPtr<const Class> m_cls;
+  PackedPtr<const Class> m_cls;
 };
 
 /**
  * A ReflectionPropHandle is a NativeData object that represents an instance,
  * static, or dynamic property for the purposes of ReflectionProperty.
  */
-struct ReflectionPropHandle {
+struct ReflectionPropHandle : SystemLib::ClassLoader<"ReflectionProperty"> {
   enum Type : uint8_t {
     Invalid  = 0,
     Instance = 1,
@@ -264,9 +247,10 @@ struct ReflectionPropHandle {
 
 /* A ReflectionTypeAliasHandle is a NativeData object wrapping a TypeAlias*
  * for the purposes of static ReflectionTypeAlias. */
-struct ReflectionTypeAliasHandle {
+struct ReflectionTypeAliasHandle :
+    SystemLib::ClassLoader<"ReflectionTypeAlias"> {
   ReflectionTypeAliasHandle(): m_req(nullptr) {}
-  explicit ReflectionTypeAliasHandle(const TypeAlias* req): m_req(req) {};
+  explicit ReflectionTypeAliasHandle(const TypeAlias* req): m_req(req) {}
 
   static ReflectionTypeAliasHandle* Get(ObjectData* obj) {
     return Native::data<ReflectionTypeAliasHandle>(obj);
@@ -299,9 +283,6 @@ Class* get_cls(const Variant& class_or_object);
 const Func* get_method_func(const Class* cls, const String& meth_name);
 Variant default_arg_from_php_code(const Func::ParamInfo& fpi, const Func* func,
                                   unsigned argIdx);
-bool resolveDefaultParameterConstant(const char *value, int64_t valueLen,
-                                     Variant &cns);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

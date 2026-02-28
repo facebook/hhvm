@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * sem_acquire() blocks (if necessary) until the semaphore can be acquired. A

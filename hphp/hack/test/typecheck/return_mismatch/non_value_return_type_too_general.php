@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // special message about annotation here
 function voids1() : mixed {

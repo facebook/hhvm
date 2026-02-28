@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(0 is (int, varray<_>));
   var_dump(tuple(0, vec[]) is (int, varray<_>));
   var_dump(tuple(0, dict[]) is (int, varray<_>));

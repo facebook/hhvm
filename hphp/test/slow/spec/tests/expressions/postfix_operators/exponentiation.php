@@ -1,6 +1,6 @@
 <?hh
 
-function f() { return 3; }
+function f() :mixed{ return 3; }
 
 class C
 {
@@ -44,7 +44,7 @@ function main_entry(): void {
 
   echo "===========\n";
 
-  $a = varray[10, 20];
+  $a = vec[10, 20];
   var_dump($a[0] ** 2);
   var_dump(f() ** 2);
   $c = new C;

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class R_Base {
   public static function bad(): void {

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // keep
 
 abstract class A {}

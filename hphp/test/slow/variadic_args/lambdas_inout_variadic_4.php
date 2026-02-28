@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_lambdas_inout_variadic_4() {
+function main_lambdas_inout_variadic_4() :mixed{
 intProvider((inout ...$x) ==> {});
 }

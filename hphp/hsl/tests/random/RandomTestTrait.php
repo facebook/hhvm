@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /*
  *  Copyright (c) 2004-present, Facebook, Inc.
  *  All rights reserved.
@@ -110,7 +110,7 @@ trait RandomTestTrait {
   }
 
   public static function provideAlphabets(): varray<mixed> {
-    return varray[
+    return vec[
       tuple(_Private\ALPHABET_BASE64),
       tuple(_Private\ALPHABET_BASE64_URL),
       tuple(_Private\ALPHABET_ALPHANUMERIC),

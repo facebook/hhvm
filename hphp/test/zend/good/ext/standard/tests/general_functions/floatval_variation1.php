@@ -13,7 +13,7 @@ $dfp = opendir ( dirname(__FILE__) );
 closedir($dfp);
 
 // other types in an array
-$not_float_types = darray [
+$not_float_types = dict[
            "-2147483648" => -2147483648, // max negative integer value
            "2147483647" => 2147483648,  // max positive integer value
            "file resoruce" => $fp,

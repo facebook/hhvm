@@ -4,11 +4,11 @@
   require_once('test_base.inc');
   init();
   requestAll(
-    varray[
-      varray[
+    vec[
+      vec[
         'test_proxygen_headers.php',
         null,
-        darray[
+        dict[
           'xyzzy' => 42,
           'XyZZy' => 43,
           'XYZZY' => 44,

@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/mutation.h"
 
-#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
@@ -27,7 +26,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 namespace {
 
@@ -59,7 +58,7 @@ bool retypeDst(IRInstruction* inst, int num) {
 //////////////////////////////////////////////////////////////////////
 
 struct RefineTmps {
-  TRACE_SET_MOD(hhir_refineTmps);
+  TRACE_SET_MOD(hhir_refineTmps)
 
   explicit RefineTmps(IRUnit& unit)
     : unit{unit}
@@ -318,7 +317,7 @@ struct RefineTmps {
               auto const phi = it->second.block();
               assertx(phi);
               usedPhis.emplace(Phi{phi, from}, nullptr);
-              phiUses.emplace(PhiUse{&inst, i}, Phi{phi, from});
+              phiUses.insert_or_assign(PhiUse{&inst, i}, Phi{phi, from});
               ITRACE(2, "Would rewrite {} to phi B{} in {}\n",
                      *inst.src(i), phi->id(), inst.toString());
             }
@@ -875,12 +874,12 @@ bool retypeDests(IRInstruction* inst, const IRUnit* /*unit*/) {
  *   target was earlier in RPO we have to schedule another loop to start at or
  *   earlier than that target block.
  */
-void reflowTypes(IRUnit& unit) {
+bool reflowTypes(IRUnit& unit) {
   using RPOId = uint32_t;
   auto const rpoBlocks = rpoSortCfg(unit);
   auto const ids = numberBlocks(unit, rpoBlocks);
+  auto const endRPOId = safe_cast<RPOId>(rpoBlocks.size());
 
-  RPOId firstUnstable = 0;
   for (auto const block : rpoBlocks) {
     auto const inst = &block->front();
     if (inst->is(DefLabel)) {
@@ -890,18 +889,46 @@ void reflowTypes(IRUnit& unit) {
     }
   }
 
-  while (firstUnstable < rpoBlocks.size()) {
-    auto nextFirstUnstable = safe_cast<RPOId>(rpoBlocks.size());
+  RPOId firstUnstable = 0;
+  RPOId firstBottom = endRPOId;
+  while (firstUnstable < endRPOId) {
+    auto nextFirstUnstable = endRPOId;
+    if (firstBottom >= firstUnstable) firstBottom = endRPOId;
     FTRACE(5, "reflowTypes: starting iteration at {}/{})\n",
-           firstUnstable, rpoBlocks.size());
-    for (auto id = firstUnstable; id < rpoBlocks.size(); ++id) {
+           firstUnstable, endRPOId);
+    for (auto id = firstUnstable; id < endRPOId; ++id) {
       auto const block = rpoBlocks[id];
-      FTRACE(5, "reflowTypes: visiting block {} (rpo: {}, firstUnstable: {})\n",
-             block->id(), ids[block], nextFirstUnstable);
+      FTRACE(5, "reflowTypes: visiting block {} "
+                "(rpo: {}, firstUnstable: {}, firstBottom: {})\n",
+             block->id(), ids[block], nextFirstUnstable, firstBottom);
 
       for (auto& inst : *block) {
-        if (inst.is(DefLabel)) continue;
-        retypeDests(&inst, &unit);
+        if (!inst.is(DefLabel)) retypeDests(&inst, &unit);
+
+        for (auto const src : inst.srcs()) {
+          if (src->type() == TBottom) {
+            FTRACE(5, "reflowTypes: found bottom src {} (at rpo: {})\n",
+                   src->toString(), id);
+            firstBottom = std::min(firstBottom, id);
+          }
+        }
+        // If this instruction reachable, but its next block unreachable it is
+        // okay for it to def a Bottom tmp.  It would be better for such
+        // instructions to have a better simplification option to an always
+        // taken variant, but not necessarily all throwing operations have such
+        // an alternate representation.
+        auto const unreachableNext = inst.next() && inst.taken()
+                                     && inst.next()->isUnreachable()
+                                     && !inst.taken()->isUnreachable();
+        if (unreachableNext) continue;
+
+        for (auto const dst : inst.dsts()) {
+          if (dst->type() == TBottom) {
+            FTRACE(5, "reflowTypes: found bottom dst {} (at rpo: {})\n",
+                   dst->toString(), id);
+            firstBottom = std::min(firstBottom, id);
+          }
+        }
       }
 
       auto const jmp = &block->back();
@@ -927,6 +954,7 @@ void reflowTypes(IRUnit& unit) {
     }
     firstUnstable = nextFirstUnstable;
   }
+  return firstBottom != endRPOId;
 }
 
 void insertNegativeAssertTypes(IRUnit& unit, const BlockList& blocks) {
@@ -953,7 +981,7 @@ void insertNegativeAssertTypes(IRUnit& unit, const BlockList& blocks) {
 }
 
 void refineTmps(IRUnit& unit) {
-  TRACE_SET_MOD(hhir_refineTmps);
+  TRACE_SET_MOD(hhir_refineTmps)
   PassTracer tracer{&unit, Trace::hhir_refineTmps, "refineTmps"};
   Timer timer{Timer::optimize_refineTmps, unit.logEntry().get_pointer()};
 

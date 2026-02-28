@@ -11,65 +11,65 @@
 class ZipArchive {
 
   // Constants
-  const int CHECKCONS = 4;
-  const int OVERWRITE = 8;
-  const int FL_NOCASE = 1;
-  const int FL_NODIR = 2;
-  const int FL_COMPRESSED = 4;
-  const int FL_UNCHANGED = 8;
-  const int FL_RECOMPRESS = 16;
-  const int FL_ENCRYPTED = 32;
-  const int ER_MULTIDISK = 1;
-  const int ER_RENAME = 2;
-  const int ER_CLOSE = 3;
-  const int ER_WRITE = 6;
-  const int ER_ZIPCLOSED = 8;
-  const int ER_NOENT = 9;
-  const int ER_EXISTS = 10;
-  const int ER_TMPOPEN = 12;
-  const int ER_MEMORY = 14;
-  const int ER_CHANGED = 15;
-  const int ER_COMPNOTSUPP = 16;
-  const int ER_INVAL = 18;
-  const int ER_NOZIP = 19;
-  const int ER_INTERNAL = 20;
-  const int ER_INCONS = 21;
-  const int ER_REMOVE = 22;
-  const int ER_DELETED = 23;
-  const int ER_ENCRNOTSUPP = 24;
-  const int ER_RDONLY = 25;
-  const int ER_NOPASSWD = 26;
-  const int ER_WRONGPASSWD = 27;
-  const int CM_DEFAULT = -1;
-  const int CM_STORE = 0;
-  const int CM_SHRINK = 1;
-  const int CM_REDUCE_1 = 2;
-  const int CM_REDUCE_2 = 3;
-  const int CM_REDUCE_3 = 4;
-  const int CM_REDUCE_4 = 5;
-  const int CM_IMPLODE = 6;
-  const int CM_DEFLATE = 8;
-  const int CM_DEFLATE64 = 9;
-  const int CM_PKWARE_IMPLODE = 10;
-  const int CM_BZIP2 = 12;
-  const int CM_TERSE = 18;
-  const int CM_WAVPACK = 97;
-  const int CREATE = 1;
-  const int EXCL = 2;
-  const int ER_OK = 0;
-  const int ER_SEEK = 4;
-  const int ER_READ = 5;
-  const int ER_CRC = 7;
-  const int ER_OPEN = 11;
-  const int ER_ZLIB = 13;
-  const int ER_EOF = 17;
-  const int CM_LZMA = 14;
-  const int CM_LZ77 = 19;
-  const int CM_PPMD = 98;
-  const int EM_NONE = 0;
-  const int EM_AES_128 = 257;
-  const int EM_AES_192 = 258;
-  const int EM_AES_256 = 259;
+  const int CHECKCONS;
+  const int OVERWRITE;
+  const int FL_NOCASE;
+  const int FL_NODIR;
+  const int FL_COMPRESSED;
+  const int FL_UNCHANGED;
+  const int FL_RECOMPRESS;
+  const int FL_ENCRYPTED;
+  const int ER_MULTIDISK;
+  const int ER_RENAME;
+  const int ER_CLOSE;
+  const int ER_WRITE;
+  const int ER_ZIPCLOSED;
+  const int ER_NOENT;
+  const int ER_EXISTS;
+  const int ER_TMPOPEN;
+  const int ER_MEMORY;
+  const int ER_CHANGED;
+  const int ER_COMPNOTSUPP;
+  const int ER_INVAL;
+  const int ER_NOZIP;
+  const int ER_INTERNAL;
+  const int ER_INCONS;
+  const int ER_REMOVE;
+  const int ER_DELETED;
+  const int ER_ENCRNOTSUPP;
+  const int ER_RDONLY;
+  const int ER_NOPASSWD;
+  const int ER_WRONGPASSWD;
+  const int CM_DEFAULT;
+  const int CM_STORE;
+  const int CM_SHRINK;
+  const int CM_REDUCE_1;
+  const int CM_REDUCE_2;
+  const int CM_REDUCE_3;
+  const int CM_REDUCE_4;
+  const int CM_IMPLODE;
+  const int CM_DEFLATE;
+  const int CM_DEFLATE64;
+  const int CM_PKWARE_IMPLODE;
+  const int CM_BZIP2;
+  const int CM_TERSE;
+  const int CM_WAVPACK;
+  const int CREATE;
+  const int EXCL;
+  const int ER_OK;
+  const int ER_SEEK;
+  const int ER_READ;
+  const int ER_CRC;
+  const int ER_OPEN;
+  const int ER_ZLIB;
+  const int ER_EOF;
+  const int CM_LZMA;
+  const int CM_LZ77;
+  const int CM_PPMD;
+  const int EM_NONE;
+  const int EM_AES_128;
+  const int EM_AES_192;
+  const int EM_AES_256;
 
   // Properties
   public int $status;
@@ -91,17 +91,20 @@ class ZipArchive {
   public function addGlob(
     string $pattern,
     int $flags = 0,
-    darray $options = darray[],
+    darray<arraykey, mixed> $options = dict[],
   ): bool;
   public function addPattern(
     string $pattern,
     string $path = ".",
-    darray $options = darray[],
+    darray<arraykey, mixed> $options = dict[],
   ): bool;
   public function close(): bool;
   public function deleteIndex(int $index): bool;
   public function deleteName(string $name): bool;
-  public function extractTo(string $destination, $entries = varray[]): bool;
+  public function extractTo(
+    string $destination,
+    HH\FIXME\MISSING_PARAM_TYPE $entries = vec[],
+  ): bool;
   public function getArchiveComment(int $flags = 0): string;
   public function getCommentIndex(int $index, int $flags = 0): string;
   public function getCommentName(string $name, int $flags = 0): string;
@@ -109,7 +112,7 @@ class ZipArchive {
     int $index,
     int $length = 0,
     int $flags = 0,
-  ): string;
+  ): ?string;
   public function getFromName(
     string $name,
     int $length = 0,
@@ -140,8 +143,8 @@ class ZipArchive {
     int $encryption_method,
     string $password,
   ): bool;
-  public function statIndex(int $index, int $flags = 0): darray;
-  public function statName(string $name, int $flags = 0): darray;
+  public function statIndex(int $index, int $flags = 0): darray<arraykey, mixed>;
+  public function statName(string $name, int $flags = 0): darray<arraykey, mixed>;
   public function unchangeAll(): bool;
   public function unchangeArchive(): bool;
   public function unchangeIndex(int $index): bool;
@@ -189,20 +192,13 @@ function zip_entry_name(resource $zip_entry): string;
  * Open a directory entry for reading
  */
 <<__PHPStdLib>>
-function zip_entry_open(
-  resource $zip,
-  resource $zip_entry,
-  string $mode,
-): bool;
+function zip_entry_open(resource $zip, resource $zip_entry, string $mode): bool;
 
 /**
  * Read from an open directory entry
  */
 <<__PHPStdLib>>
-function zip_entry_read(
-  resource $zip_entry,
-  int $length = 1024,
-): string;
+function zip_entry_read(resource $zip_entry): string;
 
 /**
  * Open a ZIP file archive
@@ -214,4 +210,6 @@ function zip_open(string $filename): mixed; // resource or false
  * Read next entry in a ZIP file archive
  */
 <<__PHPStdLib>>
-function zip_read(resource $zip); // resource or false
+function zip_read(
+  resource $zip,
+): HH\FIXME\MISSING_RETURN_TYPE; // resource or false

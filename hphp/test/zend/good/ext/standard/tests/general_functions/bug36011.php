@@ -3,23 +3,23 @@
 class TestClass
 {
     <<__DynamicallyCallable>> static function test()
-    {
+:mixed    {
         echo __METHOD__ . "()\n";
     }
 
     function whee()
-    {
-        array_map(varray['TestClass', 'test'], varray['array_value']);
+:mixed    {
+        array_map(vec['TestClass', 'test'], vec['array_value']);
     }
 
     function whee4()
-    {
-        call_user_func(varray['TestClass', 'test']);
+:mixed    {
+        call_user_func(vec['TestClass', 'test']);
     }
 
     static function whee5()
-    {
-        call_user_func(varray['TestClass', 'test']);
+:mixed    {
+        call_user_func(vec['TestClass', 'test']);
     }
 }
 <<__EntryPoint>> function main(): void {

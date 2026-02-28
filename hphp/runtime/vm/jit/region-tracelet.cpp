@@ -25,14 +25,13 @@
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/analysis.h"
 
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
 #include <folly/MapUtil.h>
 
 #include <algorithm>
-#include <vector>
 
 #include "hphp/runtime/vm/jit/irgen.h"
 
@@ -43,9 +42,9 @@
 
 namespace HPHP { namespace jit {
 
-TRACE_SET_MOD(region);
+TRACE_SET_MOD(region)
 
-typedef hphp_hash_set<SrcKey, SrcKey::Hasher> InterpSet;
+using InterpSet = hphp_hash_set<SrcKey, SrcKey::Hasher>;
 
 namespace {
 
@@ -57,21 +56,24 @@ struct Env {
   Env(const RegionContext& ctx,
       TransKind kind,
       InterpSet& interp,
-      SrcKey& breakAt,
       int32_t maxBCInstrs,
       bool inlining)
     : ctx(ctx)
     , interp(interp)
-    , breakAt(breakAt)
     , sk{ctx.sk}
-    , startSk(sk)
     , region(std::make_shared<RegionDesc>())
     , curBlock(region->addBlock(sk, 0, ctx.spOffset))
     , prevBlocks()
     // TODO(#5703534): this is using a different TransContext than actual
     // translation will use.
-    , unit(TransContext{TransIDSet{}, 0 /* optIndex */, kind, sk, nullptr},
-           std::make_unique<AnnotationData>())
+    , unit(TransContext{
+              TransIDSet{}
+            , 0 /* optIndex */
+            , kind
+            , sk
+            , nullptr
+            , sk.packageInfo()}
+          , std::make_unique<AnnotationData>())
     , irgs(unit, nullptr, 0, nullptr)
     , numJmps(0)
     , numBCInstrs(maxBCInstrs)
@@ -85,9 +87,7 @@ struct Env {
 
   const RegionContext& ctx;
   InterpSet& interp;
-  SrcKey& breakAt;
   SrcKey sk;
-  const SrcKey startSk;
   NormalizedInstruction inst;
   RegionDescPtr region;
   RegionDesc::Block* curBlock;
@@ -122,20 +122,17 @@ SBInvOffset curSpOffset(const Env& env) {
 }
 
 /*
- * Check if the current predicted type for the location in ii is specific
- * enough for what the current opcode wants. If not, return false.
+ * Check if the input has a known datatype or whether we need
+ * to insert a guard.
  */
-bool consumeInput(Env& env, const InputInfo& input) {
-  if (input.dontGuard) return true;
+bool needGuardForInput(Env& env, const InputInfo& input) {
+  if (input.dontGuard) return false;
   auto const type = irgen::provenType(env.irgs, input.loc);
 
-  if (!input.dontBreak && !type.isKnownDataType()) {
-    // Trying to consume a value without a precise enough type.
-    FTRACE(1, "selectTracelet: {} tried to consume {}, type {}\n",
-           env.inst.toString(), show(input.loc), type.toString());
-    return false;
-  }
+  if (type.isKnownDataType()) return false;
 
+  FTRACE(1, "selectTracelet: {} input {}, needs a guard due to unknown type {}\n",
+         env.inst.toString(), show(input.loc), type.toString());
   return true;
 }
 
@@ -169,8 +166,7 @@ bool instructionEndsRegion(const Env& env) {
   return false;
 }
 
-Type getLiveType(const jit::vector<RegionContext::LiveType>& liveTypes,
-                 const Location& loc) {
+Type getLiveType(const LiveTypesVec& liveTypes, const Location& loc) {
   for (auto const& lt : liveTypes) {
     if (lt.location == loc) return lt.type;
   }
@@ -201,13 +197,15 @@ bool prepareInstruction(Env& env) {
   auto const op = env.inst.op();
   auto& fs = env.irgs.irb->fs();
 
+  Block* guardFailBlock = nullptr;
   auto addGuardIfUntracked = [&](Location loc) {
     FTRACE(1, "prepareInstruction: input: {}\n", show(loc));
     if (!fs.tracked(loc) &&
         (loc.tag() != LTag::Local || !fs.localsCleared())) {
       auto const type = getLiveType(env.ctx.liveTypes, loc);
       assert_flog(type <= TCell, "loc = {}: type = {}", show(loc), type);
-      irgen::checkType(env.irgs, loc, type, env.ctx.sk);
+      if (guardFailBlock == nullptr) guardFailBlock = irgen::makeExit(env.irgs);
+      irgen::checkType(env.irgs, loc, type, guardFailBlock);
     }
   };
 
@@ -239,9 +237,8 @@ bool prepareInstruction(Env& env) {
     addGuardIfUntracked(Location::Stack{sbInvOff});
   }
 
-  // Check all the inputs for unknown values.
   for (auto const& input : inputInfos) {
-    if (!consumeInput(env, input)) {
+    if (needGuardForInput(env, input)) {
       FTRACE(2, "Stopping tracelet consuming {} input {}\n",
              opcodeToName(env.inst.op()), show(input.loc));
       return false;
@@ -273,7 +270,7 @@ bool traceThroughJmp(Env& env) {
 
   // We only trace through unconditional jumps and conditional jumps with const
   // inputs while inlining.
-  if (!isUnconditionalJmp(env.inst.op()) &&
+  if (!(isUnconditionalJmp(env.inst.op()) || isInterceptableJmp(env.inst.op())) &&
       !(env.inlining && isConditionalJmp(env.inst.op()) &&
         irgen::publicTopType(env.irgs, BCSPRelOffset{0}).hasConstVal())) {
     return false;
@@ -294,16 +291,16 @@ bool traceThroughJmp(Env& env) {
   }
 
   auto offset = env.inst.imm[0].u_BA;
-  // Only trace through backwards jumps if it's a JmpNS and we're
+  // Only trace through backwards jumps if it's an Enter and we're
   // inlining. This is to get DV funclets.
-  if (offset <= 0 && (env.inst.op() != OpJmpNS || !env.inlining)) {
+  if (offset <= 0 && (env.inst.op() != OpEnter || !env.inlining)) {
     return false;
   }
 
   // Ok we're good. For unconditional jumps, just set env.sk to the dest. For
   // known conditional jumps we have to consume the const value on the top of
   // the stack and figure out which branch to go to.
-  if (isUnconditionalJmp(env.inst.op())) {
+  if (isUnconditionalJmp(env.inst.op()) || isInterceptableJmp(env.inst.op())) {
     env.sk.setOffset(env.sk.offset() + offset);
   } else {
     auto value = irgen::popC(env.irgs);
@@ -441,8 +438,7 @@ void recordDependencies(Env& env) {
 }
 
 void truncateLiterals(Env& env) {
-  if (!env.region || env.region->empty() ||
-      env.region->blocks().back()->empty()) return;
+  assertx(!env.region->blocks().back()->empty());
 
   // Don't finish a region with literal values or values that have a class
   // related to the current context class. They produce valuable information
@@ -456,19 +452,13 @@ void truncateLiterals(Env& env) {
       auto const op = sk.op();
       if (isLiteral(op) || isThisSelfOrParent(op) || isTypeAssert(op)) continue;
     }
-
-    if (i == len - 1) return;
     endSk = sk;
   }
 
   // Don't truncate if we've decided we want to truncate the entire block.
   // That'll mean we'll chop off the trailing N-1 opcodes, then in the next
   // region we'll select N-1 opcodes and chop off N-2 opcodes, and so forth...
-  if (endSk != lastBlock.start()) {
-    FTRACE(1, "selectTracelet truncating block after offset {}:\n{}\n",
-           endSk.offset(), show(lastBlock));
-    lastBlock.truncateAfter(endSk);
-  }
+  if (endSk != lastBlock.start()) lastBlock.truncateAfter(endSk);
 }
 
 RegionDescPtr form_region(Env& env) {
@@ -477,20 +467,20 @@ RegionDescPtr form_region(Env& env) {
                           *env.region, show(env.irgs.irb->unit()));
   };
 
-  env.irgs.irb->setGuardFailBlock(irgen::makeExit(env.irgs));
-  const bool eager =
-    env.ctx.liveTypes.size() <= RuntimeOption::EvalJitTraceletEagerGuardsLimit;
+  auto const eager =
+    env.ctx.liveTypes.size() <= Cfg::Jit::TraceletEagerGuardsLimit;
 
+  Block* guardFailBlock = nullptr;
   for (auto const& lt : env.ctx.liveTypes) {
     // Local and stack slots are lazily guarded when there are too many live
     // locations; but MBase is always eagerly guarded.
     if (eager || lt.location.tag() == LTag::MBase) {
       auto t = lt.type;
       assertx(t <= TCell);
-      irgen::checkType(env.irgs, lt.location, t, env.ctx.sk);
+      if (guardFailBlock == nullptr) guardFailBlock = irgen::makeExit(env.irgs);
+      irgen::checkType(env.irgs, lt.location, t, guardFailBlock);
     }
   }
-  env.irgs.irb->resetGuardFailBlock();
 
   // EndGuards is used to mark the end of the guards, allowing visitGuards to
   // avoid scanning through the entire unit.  We only insert EndGuards if all
@@ -502,12 +492,6 @@ RegionDescPtr form_region(Env& env) {
     assertx(env.numBCInstrs >= 0);
     if (env.numBCInstrs == 0) {
       FTRACE(1, "selectTracelet: breaking region due to size limit\n");
-      break;
-    }
-
-    if (!firstInst && env.sk == env.breakAt) {
-      FTRACE(1, "selectTracelet: breaking region at breakAt: {}\n",
-             show(env.sk));
       break;
     }
 
@@ -528,11 +512,11 @@ RegionDescPtr form_region(Env& env) {
 
     try {
       translateInstr(env.irgs, env.inst);
-    } catch (const FailedIRGen& exn) {
+    } catch (DEBUG_ONLY const FailedIRGen& exn) {
       FTRACE(1, "ir generation for {} failed with {}\n",
              env.inst.toString(), exn.what());
       always_assert_flog(
-        !env.interp.count(env.sk),
+        !env.interp.contains(env.sk),
         "Double PUNT trying to translate {}\n", env.inst
       );
       env.interp.insert(env.sk);
@@ -554,7 +538,8 @@ RegionDescPtr form_region(Env& env) {
 
     if (env.inst.source.funcEntry()) {
       auto const func = curFunc(env);
-      if (func->numRequiredParams() != func->numNonVariadicParams()) {
+      if (env.inst.source.trivialDVFuncEntry() ||
+          func->hasNonTrivialDVFuncEntry()) {
         FTRACE(1, "selectTracelet: tracelet broken after func entry\n");
         break;
       }
@@ -564,7 +549,7 @@ RegionDescPtr form_region(Env& env) {
     if (instructionEndsRegion(env)) {
       FTRACE(1, "selectTracelet: tracelet broken after {}\n", env.inst);
       break;
-    } else if (isIteratorOp(env.sk.op())) {
+    } else if (isIteratorControlFlow(env.sk.op())) {
       FTRACE(1, "selectTracelet: tracelet broken before iterator op\n");
       break;
     }
@@ -575,7 +560,7 @@ RegionDescPtr form_region(Env& env) {
     }
 
     const auto numGuards = env.irgs.irb->numGuards();
-    if (numGuards >= RuntimeOption::EvalJitTraceletGuardsLimit) {
+    if (numGuards >= Cfg::Jit::TraceletGuardsLimit) {
       FTRACE(1, "selectTracelet: tracelet broken due to too many guards ({})\n",
              numGuards);
       break;
@@ -601,7 +586,6 @@ RegionDescPtr form_region(Env& env) {
       // to the last bytecode instruction in the region.  Note that this
       // check has to happen before the call to truncateLiterals()
       // because that updates the region but not the IR unit.
-      if (env.region->blocks().back()->empty()) return true;
       auto lastSk = env.region->lastSrcKey();
       auto const mainExits = findMainExitBlocks(env.irgs.irb->unit(), lastSk);
       /*
@@ -616,9 +600,7 @@ RegionDescPtr form_region(Env& env) {
       return true;
     }();
 
-    if (truncate) {
-      truncateLiterals(env);
-    }
+    if (truncate) truncateLiterals(env);
   }
 
   return std::move(env.region);
@@ -629,9 +611,8 @@ RegionDescPtr form_region(Env& env) {
 
 RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
                              int32_t maxBCInstrs, bool inlining /* = false */) {
-  Timer _t(Timer::selectTracelet);
+  Timer _t(Timer::selectTracelet, nullptr);
   InterpSet interp;
-  SrcKey breakAt;
   RegionDescPtr region;
   uint32_t tries = 0;
 
@@ -648,12 +629,10 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
     }
   };
 
-  if (ctx.liveTypes.size() > RuntimeOption::EvalJitTraceletLiveLocsLimit) {
-    return nullptr;
-  }
+  if (ctx.liveTypes.size() > Cfg::Jit::TraceletLiveLocsLimit) return nullptr;
 
   do {
-    Env env{ctx, kind, interp, breakAt, maxBCInstrs, inlining};
+    Env env{ctx, kind, interp, maxBCInstrs, inlining};
     region = form_region(env);
     ++tries;
   } while (!region);
@@ -664,11 +643,8 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
     return nullptr;
   }
 
-  if (region->blocks().back()->length() == 0) {
-    // If the final block is empty because it would've only contained
-    // instructions producing literal values, kill it.
-    region->deleteBlock(region->blocks().back()->id());
-  }
+  assertx(region->blocks().back()->length() > 0);
+  region->initRpoIds();
 
   tracing::annotateBlock(
     [&] {

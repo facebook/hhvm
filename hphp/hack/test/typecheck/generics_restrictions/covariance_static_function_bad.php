@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 class Base {}
 class Derived extends Base {
   public function __construct(public int $v) {}

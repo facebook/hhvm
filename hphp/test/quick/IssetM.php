@@ -1,16 +1,16 @@
 <?hh
 
-function r($r) {
+function r($r) :mixed{
   print ($r ? " true" : "false")."\n";
 }
 
-function build() {
-  $a = darray["A0" => 0,
+function build() :mixed{
+  $a = dict["A0" => 0,
              "A1" => "a1"];
-  $b = darray["A" => $a,
+  $b = dict["A" => $a,
              "B0" => 0,
              "B1" => "b1"];
-  $c = darray["A" => $a,
+  $c = dict["A" => $a,
              "B" => $b,
              "C0" => 0,
              "C1" => "c1"];
@@ -18,7 +18,7 @@ function build() {
   return $c;
 }
 
-function main() {
+function main() :mixed{
   $arr = build();
 
   r(isset($arr["A"]));

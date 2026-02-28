@@ -10,157 +10,103 @@
 
 module Test = Integration_test_base
 
-let foo_returns_int_name = "foo_returns_int.php"
-
-let foo_returns_string_name = "foo_returns_string_name.php"
-
-let foo_contents =
-  Printf.sprintf "<?hh // strict
-/* HH_FIXME[4336] */
-function foo() : %s {
-
-}
-"
-
-let foo_returns_int_contents = foo_contents "int"
-
-let foo_returns_string_contents = foo_contents "string"
-
-let bar_expects_int_name = "bar_expects_int.php"
-
-let bar_expects_string_name = "bar_expects_string.php"
-
-let bar_contents x =
-  Printf.sprintf
-    "<?hh // strict
-
-function bar_%s(): %s {
-  return foo();
-}
-"
-    x
-    x
-
-let foo_unbound_diagnostics =
-  SMap.of_list
-    [
-      ( "/bar_expects_int.php",
-        SSet.of_list
-          [
-            "File \"/bar_expects_int.php\", line 4, characters 10-12:
-Unbound name: `foo` (a global function) (Naming[2049])";
-            "File \"/bar_expects_int.php\", line 4, characters 10-12:
-Unbound name (typing): `foo` (Typing[4107])";
-          ] );
-      ( "/bar_expects_string.php",
-        SSet.of_list
-          [
-            "File \"/bar_expects_string.php\", line 4, characters 10-12:
-Unbound name: `foo` (a global function) (Naming[2049])";
-            "File \"/bar_expects_string.php\", line 4, characters 10-12:
-Unbound name (typing): `foo` (Typing[4107])";
-          ] );
-    ]
-
-let foo_returns_string_diagnostics =
-  "
-/bar_expects_int.php:
-File \"/bar_expects_int.php\", line 4, characters 10-14:
-Invalid return type (Typing[4110])
-  File \"/bar_expects_int.php\", line 3, characters 21-23:
-  Expected `int`
-  File \"/foo_returns_string_name.php\", line 3, characters 18-23:
-  But got `string`
-
-/bar_expects_string.php:
-"
-
-let foo_duplicate_diagnostics =
-  "
-/foo_returns_int.php:
-File \"/foo_returns_int.php\", line 3, characters 10-12:
-Name already bound: `foo` (Naming[2012])
-  File \"/foo_returns_string_name.php\", line 3, characters 10-12:
-  Previous definition is here
-"
-
-let foo_returns_int_diagnostics =
-  "
-/bar_expects_int.php:
-/bar_expects_string.php:
-File \"/bar_expects_string.php\", line 4, characters 10-14:
-Invalid return type (Typing[4110])
-  File \"/bar_expects_string.php\", line 3, characters 24-29:
-  Expected `string`
-  File \"/foo_returns_int.php\", line 3, characters 18-20:
-  But got `int`
-
-/foo_returns_int.php:
-
-"
-
-let root = "/"
-
-let hhconfig_filename = Filename.concat root ".hhconfig"
-
-let hhconfig_contents =
-  "
-allowed_fixme_codes_strict = 4336
-allowed_decl_fixme_codes = 4336
-"
-
-let load_config hhconfig_filename =
-  let hhconfig_path =
-    Relative_path.create Relative_path.Root hhconfig_filename
-  in
-  let options = ServerArgs.default_options ~root in
-  let (custom_config, _) =
-    ServerConfig.load ~silent:false hhconfig_path options
-  in
-  custom_config
-
 let test () =
-  Relative_path.set_path_prefix Relative_path.Root (Path.make root);
-  TestDisk.set hhconfig_filename hhconfig_contents;
-  let custom_config = load_config hhconfig_filename in
-  let env = Test.setup_server ~custom_config () in
-  let env = Test.connect_persistent_client env in
-
+  Test.Client.with_env ~custom_config:None @@ fun env ->
   (* Two bar files use `foo` which is still unbound. *)
   let env =
-    Test.open_file env bar_expects_int_name ~contents:(bar_contents "int")
-  in
-  let env =
-    Test.open_file env bar_expects_string_name ~contents:(bar_contents "string")
-  in
-  let env = Test.wait env in
-  let (env, loop_outputs) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics loop_outputs foo_unbound_diagnostics;
-
-  (* Now create `foo` in foo_string.php which returns string. *)
-  let env =
-    Test.open_file
+    Test.Client.setup_disk
       env
-      foo_returns_string_name
-      ~contents:foo_returns_string_contents
+      [
+        ( "bar_expects_int.php",
+          "<?hh\nfunction bar_int(): int { return foo(); }\n" );
+        ( "bar_expects_null.php",
+          "<?hh\nfunction bar_null(): null { return foo(); }\n" );
+      ]
   in
-  let env = Test.wait env in
-  let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics_string loop_output foo_returns_string_diagnostics;
+  let (env, diagnostics) = Test.Client.open_file env "bar_expects_int.php" in
+  Test.Client.assert_diagnostics_string
+    diagnostics
+    {|
+/bar_expects_int.php:
+ERROR: File "/bar_expects_int.php", line 2, characters 34-36:
+Unbound name: `foo` (a global function) (Naming[2049])
 
-  (* Create another `foo` in foo_int.php which returns int. *)
+ERROR: File "/bar_expects_int.php", line 2, characters 34-36:
+Unbound name (typing): `foo` (Typing[4107])
+|};
+  let (env, diagnostics) = Test.Client.open_file env "bar_expects_null.php" in
+  Test.Client.assert_diagnostics_string
+    diagnostics
+    {|
+/bar_expects_null.php:
+ERROR: File "/bar_expects_null.php", line 2, characters 36-38:
+Unbound name: `foo` (a global function) (Naming[2049])
+
+ERROR: File "/bar_expects_null.php", line 2, characters 36-38:
+Unbound name (typing): `foo` (Typing[4107])
+|};
+
+  (* Now create `foo` in foo_null.php which returns null. *)
   let env =
-    Test.open_file env foo_returns_int_name ~contents:foo_returns_int_contents
+    Test.Client.setup_disk
+      env
+      [
+        ( "foo_returns_null.php",
+          "<?hh\nfunction foo() : null { return null; }\n" );
+      ]
   in
-  let env = Test.wait env in
-  let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics_in
-    loop_output
-    ~filename:foo_returns_int_name
-    foo_duplicate_diagnostics;
+  let (env, diagnostics) = Test.Client.open_file env "bar_expects_int.php" in
+  let bar_expects_int_but_got_null =
+    {|
+/bar_expects_int.php:
+ERROR: File "/bar_expects_int.php", line 2, characters 34-38:
+Invalid return type (Typing[4110])
+  File "/bar_expects_int.php", line 2, characters 21-23:
+  Expected `int`
+  File "/foo_returns_null.php", line 2, characters 18-21:
+  But got `null`
+|}
+  in
+  Test.Client.assert_diagnostics_string diagnostics bar_expects_int_but_got_null;
+  let (env, diagnostics) = Test.Client.open_file env "bar_expects_null.php" in
+  Test.Client.assert_no_diagnostics diagnostics;
 
-  (* Erase foo_string.php. *)
-  let env = Test.open_file env foo_returns_string_name ~contents:"" in
-  let env = Test.wait env in
-  let (_, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics_string loop_output foo_returns_int_diagnostics
+  (* Create another `foo` in foo_returns_int.php which returns int.
+     For some reason, the foo_returns_null definition is still considered the winner. *)
+  let env =
+    Test.Client.setup_disk
+      env
+      [("foo_returns_int.php", "<?hh\nfunction foo() : int { return 1; }\n")]
+  in
+  let (env, diagnostics) = Test.Client.open_file env "foo_returns_int.php" in
+  Test.Client.assert_diagnostics_string diagnostics "/foo_returns_int.php:\n";
+  let (env, diagnostics) = Test.Client.open_file env "foo_returns_null.php" in
+  Test.Client.assert_diagnostics_string diagnostics "/foo_returns_null.php:\n";
+  let (env, diagnostics) = Test.Client.open_file env "bar_expects_int.php" in
+  Test.Client.assert_diagnostics_string diagnostics bar_expects_int_but_got_null;
+  let (env, diagnostics) = Test.Client.open_file env "bar_expects_null.php" in
+  Test.Client.assert_diagnostics_string diagnostics "/bar_expects_null.php:\n";
+
+  (* Erase foo_returns_null.php. Now everyone agrees that foo_returns_int.php is the winner. *)
+  let env = Test.Client.setup_disk env [("foo_returns_null.php", "")] in
+  let (env, diagnostics) = Test.Client.open_file env "foo_returns_int.php" in
+  Test.Client.assert_diagnostics_string diagnostics "/foo_returns_int.php:\n";
+  let (env, diagnostics) = Test.Client.open_file env "foo_returns_null.php" in
+  Test.Client.assert_diagnostics_string diagnostics "/foo_returns_null.php:\n";
+  let (env, diagnostics) = Test.Client.open_file env "bar_expects_int.php" in
+  Test.Client.assert_diagnostics_string diagnostics "/bar_expects_int.php:\n";
+  let (env, diagnostics) = Test.Client.open_file env "bar_expects_null.php" in
+  Test.Client.assert_diagnostics_string
+    diagnostics
+    {|
+/bar_expects_null.php:
+ERROR: File "/bar_expects_null.php", line 2, characters 36-40:
+Invalid return type (Typing[4110])
+  File "/bar_expects_null.php", line 2, characters 22-25:
+  Expected `null`
+  File "/foo_returns_int.php", line 2, characters 18-20:
+  But got `int`
+|};
+
+  ignore env;
+  ()

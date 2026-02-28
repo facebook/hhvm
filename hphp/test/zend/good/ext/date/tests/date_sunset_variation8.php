@@ -9,7 +9,7 @@ echo "*** Testing date_sunset() : usage variation ***\n";
 
 // GMT is zero for the timezone
 date_default_timezone_set("Africa/Casablanca");
-$time_date = darray [
+$time_date = dict[
 
         //Date at which Sun is up all day at North Pole
         "12 Aug 2008" => mktime(8, 8, 8, 8, 12, 2008),

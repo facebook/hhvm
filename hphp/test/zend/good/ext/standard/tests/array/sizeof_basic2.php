@@ -13,10 +13,10 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing sizeof() : basic functionality ***\n";
 
-$int_array = varray[1, 2, 3, 4];
-$string_array = varray["Saffron", "White", "Green"];
-$indexed_array = darray["Aggression" => "Saffron", "Peace" => "White", "Growth" => "Green"];
-$mixed_array = darray[0 => 1, 1 => 2, "Aggression" => "Saffron", 10 => "Ten", "Ten" => 10];
+$int_array = vec[1, 2, 3, 4];
+$string_array = vec["Saffron", "White", "Green"];
+$indexed_array = dict["Aggression" => "Saffron", "Peace" => "White", "Growth" => "Green"];
+$mixed_array = dict[0 => 1, 1 => 2, "Aggression" => "Saffron", 10 => "Ten", "Ten" => 10];
 
 echo "-- Testing sizeof() with integer array --\n";
 echo "default mode: ";

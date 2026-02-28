@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_no_properties() {
+function main_no_properties() :mixed{
   $func = function() {};
   $func->a;
 }

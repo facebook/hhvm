@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 trait FooTrait {
   // We should report the redundant type parameter here.

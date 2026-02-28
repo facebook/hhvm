@@ -16,7 +16,6 @@
 #include "hphp/runtime/vm/unit-gen-helpers.h"
 
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 
 namespace HPHP {
 
@@ -29,7 +28,7 @@ void checkSize(TypedValue tv, uint64_t& available) {
   };
 
   if (isArrayLikeType(type(tv))) {
-    update(allocSize(val(tv).parr));
+    update(val(tv).parr->heapSize());
 
     IterateKV(val(tv).parr, [&] (TypedValue k, TypedValue v) {
       if (isStringType(type(k))) {
@@ -44,21 +43,30 @@ void checkSize(TypedValue tv, uint64_t& available) {
   }
 }
 
-UpperBoundVec getRelevantUpperBounds(const TypeConstraint& tc,
-                                     const UpperBoundMap& ubs,
-                                     const UpperBoundMap& class_ubs,
-                                     const TParamNameVec& shadowed_tparams) {
-  UpperBoundVec ret;
-  if (!tc.isTypeVar()) return ret;
+std::vector<TypeConstraint> getRelevantUpperBounds(
+  const TypeConstraint& tc,
+  const UpperBoundMap& ubs,
+  const UpperBoundMap& class_ubs,
+  const hphp_fast_set<const StringData*>& shadowed_tparams) {
+  if (!tc.isTypeVar()) return std::vector<TypeConstraint>();
+
+  auto const applyFlags = [&](std::vector<TypeConstraint> ret) {
+    for (auto& ub : ret) {
+      applyFlagsToUB(ub, tc);
+    }
+    return ret;
+  };
+
   auto const typeName = tc.typeName();
   auto it = ubs.find(typeName);
-  if (it != ubs.end()) return it->second;
+  if (it != ubs.end()) return applyFlags(it->second);
   if (std::find(shadowed_tparams.begin(), shadowed_tparams.end(), typeName) ==
                 shadowed_tparams.end()) {
     it = class_ubs.find(typeName);
-    if (it != class_ubs.end()) return it->second;
+    if (it != class_ubs.end()) return applyFlags(it->second);
   }
-  return UpperBoundVec{};
+
+  return std::vector<TypeConstraint>();
 }
 
 }

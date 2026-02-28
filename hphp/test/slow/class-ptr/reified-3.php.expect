@@ -1,0 +1,32 @@
+=== C ===
+>> T::cm
+C::m
+C::m
+C::m
+C::m
+>> T::TS
+string(2) "hi"
+>> T::cm<>
+C::m
+C::m
+C::m
+C::m
+>> T::cr<>
+string(1) "X"
+
+
+=== R<int> ===
+>> T::cm
+R::m
+R::m
+R::m
+R::m
+>> T::TS
+string(2) "hi"
+>> T::cm<>
+R::m
+R::m
+R::m
+R::m
+>> T::cr<>
+string(1) "X"

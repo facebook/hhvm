@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/double-to-int64.h"
@@ -24,7 +23,6 @@
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -35,14 +33,10 @@
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/vanilla-dict.h"
-#include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -133,6 +127,7 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
       case KindOfFunc:
       case KindOfClass:
       case KindOfLazyClass:
+      case KindOfEnumClassLabel:
         b = true;
         continue;
     }
@@ -153,6 +148,7 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
   assertx(tvIsPlausible(*tv));
   double d;
 
+  auto const op = "float conversion";
   do {
     switch (type(tv)) {
       case KindOfUninit:
@@ -162,7 +158,7 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
 
       case KindOfBoolean:
         assertx(val(tv).num == 0LL || val(tv).num == 1LL);
-        // fallthru
+        [[fallthrough]];
       case KindOfInt64:
         d = (double)(val(tv).num);
         continue;
@@ -203,24 +199,27 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
         continue;
 
       case KindOfRFunc:
-        raise_convert_rfunc_to_type("double");
+        throw_convert_rfunc_to_type("float");
 
       case KindOfFunc:
-        invalidFuncConversion("double");
+        invalidFuncConversion("float");
 
       case KindOfClass:
-        d = classToStringHelper(val(tv).pclass)->toDouble();
+        d = classToStringHelper(val(tv).pclass, op)->toDouble();
         continue;
 
       case KindOfLazyClass:
-        d = lazyClassToStringHelper(val(tv).plazyclass)->toDouble();
+        d = lazyClassToStringHelper(val(tv).plazyclass, op)->toDouble();
         continue;
 
       case KindOfClsMeth:
-        throwInvalidClsMethToType("double");
+        throwInvalidClsMethToType("float");
 
       case KindOfRClsMeth:
-        raise_convert_rcls_meth_to_type("double");
+        throw_convert_rcls_meth_to_type("float");
+
+      case KindOfEnumClassLabel:
+        throw_convert_ecl_to_type("float");
     }
     not_reached();
   } while (0);
@@ -235,16 +234,17 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
   assertx(tvIsPlausible(*tv));
   int64_t i;
 
+  auto const op = "int conversion";
   do {
     switch (type(tv)) {
       case KindOfUninit:
       case KindOfNull:
         val(tv).num = 0LL;
-        // fallthru
+        [[fallthrough]];
       case KindOfBoolean:
         assertx(val(tv).num == 0LL || val(tv).num == 1LL);
         type(tv) = KindOfInt64;
-        // fallthru
+        [[fallthrough]];
       case KindOfInt64:
         return;
 
@@ -285,25 +285,28 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
         continue;
 
       case KindOfRFunc:
-        raise_convert_rfunc_to_type("int");
+        throw_convert_rfunc_to_type("int");
 
       case KindOfFunc:
         invalidFuncConversion("int");
         continue;
 
       case KindOfClass:
-        i = classToStringHelper(val(tv).pclass)->toInt64();
+        i = classToStringHelper(val(tv).pclass, op)->toInt64();
         continue;
 
       case KindOfLazyClass:
-        i = lazyClassToStringHelper(val(tv).plazyclass)->toInt64();
+        i = lazyClassToStringHelper(val(tv).plazyclass, op)->toInt64();
         continue;
 
       case KindOfClsMeth:
         throwInvalidClsMethToType("int");
 
       case KindOfRClsMeth:
-        raise_convert_rcls_meth_to_type("int");
+        throw_convert_rcls_meth_to_type("int");
+
+      case KindOfEnumClassLabel:
+        throw_convert_ecl_to_type("int");
     }
     not_reached();
   } while (0);
@@ -319,6 +322,7 @@ int64_t tvCastToInt64(TypedValue tv) {
 
 double tvCastToDouble(TypedValue tv) {
   assertx(tvIsPlausible(tv));
+  auto const op = "float conversion";
   switch (tv.m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -326,7 +330,7 @@ double tvCastToDouble(TypedValue tv) {
 
     case KindOfBoolean:
       assertx(tv.m_data.num == 0LL || tv.m_data.num == 1LL);
-      // fallthru
+      [[fallthrough]];
     case KindOfInt64:
       return (double)(tv.m_data.num);
 
@@ -352,29 +356,33 @@ double tvCastToDouble(TypedValue tv) {
       return tv.m_data.pres->data()->o_toDouble();
 
     case KindOfRFunc:
-      raise_convert_rfunc_to_type("double");
+      throw_convert_rfunc_to_type("float");
 
     case KindOfFunc:
-      invalidFuncConversion("double");
+      invalidFuncConversion("float");
 
     case KindOfClass:
-      return classToStringHelper(tv.m_data.pclass)->toDouble();
+      return classToStringHelper(tv.m_data.pclass, op)->toDouble();
 
     case KindOfLazyClass:
-      return lazyClassToStringHelper(tv.m_data.plazyclass)->toDouble();
+      return lazyClassToStringHelper(tv.m_data.plazyclass, op)->toDouble();
 
     case KindOfClsMeth:
-      throwInvalidClsMethToType("double");
+      throwInvalidClsMethToType("float");
 
     case KindOfRClsMeth:
-      raise_convert_rcls_meth_to_type("double");
+      throw_convert_rcls_meth_to_type("float");
+
+    case KindOfEnumClassLabel:
+      throw_convert_ecl_to_type("float");
   }
   not_reached();
 }
 
 const StaticString
   s_1("1"),
-  s_scalar("scalar");
+  s_scalar("scalar"),
+  s_enumClassLabel("EnumClassLabel");
 
 template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
   T tv, const ConvNoticeLevel notice_level, const StringData* notice_reason) {
@@ -390,6 +398,7 @@ template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
     val(tv).pstr = s;
   };
 
+  auto const op = "string conversion";
   switch (type(tv)) {
     case KindOfUninit:
     case KindOfNull:
@@ -445,19 +454,19 @@ template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
       return;
 
     case KindOfRFunc:
-      raise_convert_rfunc_to_type("string");
+      throw_convert_rfunc_to_type("string");
 
     case KindOfFunc: {
       invalidFuncConversion("string");
     }
 
     case KindOfClass: {
-      auto const s = classToStringHelper(val(tv).pclass);
+      auto const s = classToStringHelper(val(tv).pclass, op);
       return persistentString(const_cast<StringData*>(s));
     }
 
     case KindOfLazyClass: {
-      auto const s = lazyClassToStringHelper(val(tv).plazyclass);
+      auto const s = lazyClassToStringHelper(val(tv).plazyclass, op);
       return persistentString(const_cast<StringData*>(s));
     }
 
@@ -465,7 +474,10 @@ template<typename T> enable_if_lval_t<T, void> tvCastToStringInPlace(
       throwInvalidClsMethToType("string");
 
     case KindOfRClsMeth:
-      raise_convert_rcls_meth_to_type("string");
+      throw_convert_rcls_meth_to_type("string");
+
+    case KindOfEnumClassLabel:
+      return persistentString(s_enumClassLabel.get());
   }
   not_reached();
 }
@@ -493,6 +505,7 @@ StringData* tvCastToStringData(
   const StringData* notice_reason) {
   assertx(tvIsPlausible(tv));
 
+  auto const op = "string conversion";
   switch (tv.m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -547,19 +560,19 @@ StringData* tvCastToStringData(
       return tv.m_data.pres->data()->o_toString().detach();
 
     case KindOfRFunc:
-      raise_convert_rfunc_to_type("string");
+      throw_convert_rfunc_to_type("string");
 
     case KindOfFunc: {
       invalidFuncConversion("string");
     }
 
     case KindOfClass: {
-      auto const s = classToStringHelper(tv.m_data.pclass);
+      auto const s = classToStringHelper(tv.m_data.pclass, op);
       return const_cast<StringData*>(s);
     }
 
     case KindOfLazyClass: {
-      auto const s = lazyClassToStringHelper(tv.m_data.plazyclass);
+      auto const s = lazyClassToStringHelper(tv.m_data.plazyclass, op);
       return const_cast<StringData*>(s);
     }
 
@@ -567,7 +580,10 @@ StringData* tvCastToStringData(
       throwInvalidClsMethToType("string");
 
     case KindOfRClsMeth:
-      raise_convert_rcls_meth_to_type("string");
+      throw_convert_rcls_meth_to_type("string");
+
+    case KindOfEnumClassLabel:
+      return s_enumClassLabel.get();
   }
   not_reached();
 }
@@ -614,7 +630,7 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
       throwInvalidClsMethToType("array");
 
     case KindOfRClsMeth:
-      raise_convert_rcls_meth_to_type("array");
+      throw_convert_rcls_meth_to_type("array");
 
     case KindOfObject: {
       auto ad = tv.m_data.pobj->toArray<IC>();
@@ -624,7 +640,10 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
     }
 
     case KindOfRFunc:
-      raise_convert_rfunc_to_type("array");
+      throw_convert_rfunc_to_type("array");
+
+    case KindOfEnumClassLabel:
+      throw_convert_ecl_to_type("array");
   }
   not_reached();
 }
@@ -704,10 +723,13 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
         throwInvalidClsMethToType("array");
 
       case KindOfRClsMeth:
-        raise_convert_rcls_meth_to_type("array");
+        throw_convert_rcls_meth_to_type("array");
 
       case KindOfRFunc:
-        raise_convert_rfunc_to_type("array");
+        throw_convert_rfunc_to_type("array");
+
+      case KindOfEnumClassLabel:
+        throw_convert_ecl_to_type("array");
     }
     not_reached();
   } while (0);
@@ -778,7 +800,7 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
         continue;
 
       case KindOfRFunc:
-        raise_convert_rfunc_to_type("vec");
+        throw_convert_rfunc_to_type("vec");
 
       case KindOfFunc:
         SystemLib::throwInvalidOperationExceptionObject(
@@ -801,7 +823,10 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
         );
 
       case KindOfRClsMeth:
-        raise_convert_rcls_meth_to_type("vec");
+        throw_convert_rcls_meth_to_type("vec");
+
+      case KindOfEnumClassLabel:
+        throw_convert_ecl_to_type("vec");
     }
     not_reached();
   } while (0);
@@ -872,7 +897,7 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
         continue;
 
       case KindOfRFunc:
-        raise_convert_rfunc_to_type("dict");
+        throw_convert_rfunc_to_type("dict");
 
       case KindOfFunc:
         SystemLib::throwInvalidOperationExceptionObject(
@@ -896,7 +921,10 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
       }
 
       case KindOfRClsMeth:
-        raise_convert_rcls_meth_to_type("dict");
+        throw_convert_rcls_meth_to_type("dict");
+
+      case KindOfEnumClassLabel:
+        throw_convert_ecl_to_type("dict");
     }
     not_reached();
   } while (0);
@@ -967,7 +995,7 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
         continue;
 
       case KindOfRFunc:
-        raise_convert_rfunc_to_type("keyset");
+        throw_convert_rfunc_to_type("keyset");
 
       case KindOfFunc:
         SystemLib::throwInvalidOperationExceptionObject(
@@ -991,7 +1019,10 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
       }
 
       case KindOfRClsMeth:
-        raise_convert_rcls_meth_to_type("keyset");
+        throw_convert_rcls_meth_to_type("keyset");
+
+      case KindOfEnumClassLabel:
+        throw_convert_ecl_to_type("keyset");
     }
     not_reached();
   } while (0);
@@ -1038,10 +1069,13 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
       throwInvalidClsMethToType("object");
 
     case KindOfRClsMeth:
-      raise_convert_rcls_meth_to_type("object");
+      throw_convert_rcls_meth_to_type("object");
 
     case KindOfRFunc:
-      raise_convert_rfunc_to_type("object");
+      throw_convert_rfunc_to_type("object");
+
+    case KindOfEnumClassLabel:
+      throw_convert_ecl_to_type("object");
   }
   not_reached();
 }

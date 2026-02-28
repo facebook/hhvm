@@ -1,6 +1,6 @@
 <?hh
 
-<<__PolicyShardedMemoize>>
-function test()[] {
+<<__Memoize(#KeyedByIC)>>
+function test()[] :mixed{
   echo "ok\n";
 }

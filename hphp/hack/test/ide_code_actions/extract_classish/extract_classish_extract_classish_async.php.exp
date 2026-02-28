@@ -1,0 +1,41 @@
+Code actions available:
+------------------------------------------
+Extract interface (CodeActionKind: "refactor") SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"\n  implements Placeholder_",
+          "range":{"end":{"character":7,"line":2},"start":{"character":7,"line":2}}
+        },
+        {
+          "newText":"interface Placeholder_ {\n  public function foo(): Awaitable<void>;\n}\n\n",
+          "range":{"end":{"character":0,"line":2},"start":{"character":0,"line":2}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract interface"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+interface Placeholder_ {
+  public function foo(): Awaitable<void>;
+}
+
+class A
+  implements Placeholder_ {
+  /*range-start*/
+  public async function foo(): Awaitable<void> {}
+  /*range-end*/
+}
+

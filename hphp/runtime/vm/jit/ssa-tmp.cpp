@@ -20,7 +20,6 @@
 
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/util/low-ptr.h"
 
 namespace HPHP::jit {
 
@@ -107,6 +106,8 @@ Variant SSATmp::variantVal() const {
       return Variant{funcVal()};
     case KindOfClsMeth:
       return Variant{clsmethVal()};
+    case KindOfEnumClassLabel:
+      return Variant{eclVal(), Variant::EnumClassLabelInit{}};
     case KindOfRClsMeth:
     case KindOfString:
     case KindOfVec:

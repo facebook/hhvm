@@ -1,3 +1,0 @@
-# Note that this directory also has a config.runif file that this is overriding
-extension ldap
-function ldap_sasl_bind

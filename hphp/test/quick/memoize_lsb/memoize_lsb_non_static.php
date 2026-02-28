@@ -2,7 +2,7 @@
 
 class A {
   <<__MemoizeLSB>>
-  public function foo() {
+  public function foo() :mixed{
   }
 }
 

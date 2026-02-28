@@ -9,8 +9,13 @@
 let print_tast_internal apply_to_ex_ty print_ex ctx tast =
   let dummy_filename = Relative_path.default in
   let env = Typing_env_types.empty ctx dummy_filename ~droot:None in
+  (* Set a dummy position to satisfy the invariant check in typing_inference_env *)
+  let dummy_file = Relative_path.from_root ~suffix:"tast_print.php" in
+  let dummy_pos = Pos.make dummy_file (Lexing.from_string "") in
+  let (env, _restore) = Typing_env.set_inference_env_pos env (Some dummy_pos) in
   let print_ex ex =
-    apply_to_ex_ty (Typing_print.full_strip_ns env) ex |> print_ex
+    apply_to_ex_ty (Typing_print.full_strip_ns ~hide_internals:false env) ex
+    |> print_ex
   in
   let pp_en fmt _ = Format.pp_print_string fmt "()" in
   let pp_ex fmt ex = Format.pp_print_string fmt (print_ex ex) in

@@ -27,7 +27,7 @@ open Prim_defs
 type mode =
   | Mhhi  (** just declare signatures, don't check anything *)
   | Mstrict  (** check everything! *)
-[@@deriving eq, show, enum]
+[@@deriving eq, hash, show, enum, ord, sexp_of]
 
 let is_strict = function
   | Mstrict -> true
@@ -58,7 +58,43 @@ type name_type =
   | Typedef [@value 1]
   | Const [@value 4]
   | Module [@value 5]
-[@@deriving eq, show, enum, ord]
+[@@deriving eq, show { with_path = false }, enum, ord]
+
+(** And here's a version with more detail and still less structure! This
+one is good for members as well as top-level symbols. It's used to get
+a bit more out of direct-decl-parse, used to populate the search indexer
+(e.g. the icon that apepars in autocomplete suggestions). *)
+type si_kind =
+  | SI_Class
+  | SI_Interface
+  | SI_Enum
+  | SI_Trait
+  | SI_Unknown
+  | SI_Mixed
+  | SI_Function
+  | SI_Typedef
+  | SI_GlobalConstant
+  | SI_XHP
+  | SI_Namespace
+  | SI_ClassMethod
+  | SI_Literal
+  | SI_ClassConstant
+  | SI_Property
+  | SI_LocalVariable
+  | SI_Keyword
+  | SI_Constructor
+[@@deriving eq, show { with_path = false }]
+
+(** Yet more details. The "is_abstract" and "is_final" are used e.g. for autocomplete
+items and to determine whether a type can be suggested e.g. for "$x = new |". *)
+type si_addendum = {
+  sia_name: string;
+      (** This is expected not to contain the leading namespace backslash! See [Utils.strip_ns]. *)
+  sia_kind: si_kind;
+  sia_is_abstract: bool;
+  sia_is_final: bool;
+}
+[@@deriving show]
 
 (** We define two types of positions establishing the location of a given name:
  * a Full position contains the exact position of a name in a file, and a
@@ -73,7 +109,13 @@ type pos =
 (** An id contains a pos, name and a optional decl hash. The decl hash is None
  * only in the case when we didn't compute it for performance reasons
  *)
-type id = pos * string * Int64.t option [@@deriving eq, show]
+type id = {
+  pos: pos;
+  name: string;
+  decl_hash: Int64.t option;
+  sort_text: string option;
+}
+[@@deriving eq, show]
 
 (*****************************************************************************)
 (* The record produced by the parsing phase. *)
@@ -86,37 +128,54 @@ let pp_hash_type fmt hash =
   | None -> Format.fprintf fmt "None"
   | Some hash -> Format.fprintf fmt "Some (%s)" (Int64.to_string hash)
 
-(** The record produced by the parsing phase. *)
-type t = {
-  hash: hash_type;
-  file_mode: mode option;
+(* NB: Type [t] must be manually kept in sync with Rust type [hackrs_provider_backend::FileInfo] *)
+
+type ids = {
   funs: id list;
   classes: id list;
   typedefs: id list;
   consts: id list;
   modules: id list;
+}
+[@@deriving show]
+
+(** The record produced by the parsing phase. *)
+type t = {
+  position_free_decl_hash: hash_type;
+  file_mode: mode option;
+  ids: ids;
   comments: (Pos.t * comment) list option;
       (** None if loaded from saved state *)
 }
 [@@deriving show]
 
+let empty_ids =
+  { funs = []; classes = []; typedefs = []; consts = []; modules = [] }
+
 let empty_t =
   {
-    hash = None;
+    position_free_decl_hash = None;
     file_mode = None;
-    funs = [];
-    classes = [];
-    typedefs = [];
-    consts = [];
-    modules = [];
+    ids = empty_ids;
     comments = Some [];
   }
 
-let pos_full (p, name, hash) = (Full p, name, hash)
+let pos_full (p, name, decl_hash, sort_text) =
+  let pos = Full p in
+  { pos : pos; name; decl_hash; sort_text }
 
 let get_pos_filename = function
   | Full p -> Pos.filename p
   | File (_, fn) -> fn
+
+type pfh_hash = Int64.t
+
+type change = {
+  path: Relative_path.t;
+  old_ids: ids option;
+  new_ids: ids option;
+  new_pfh_hash: pfh_hash option;
+}
 
 (*****************************************************************************)
 (* The simplified record used after parsing. *)
@@ -130,6 +189,7 @@ type names = {
   n_consts: SSet.t;
   n_modules: SSet.t;
 }
+[@@deriving show]
 
 (** The simplified record stored in saved-state.*)
 type saved_names = {
@@ -143,7 +203,7 @@ type saved_names = {
 (** Data structure stored in the saved state *)
 type saved = {
   s_names: saved_names;
-  s_hash: Int64.t option;
+  s_position_free_decl_hash: Int64.t option;
   s_mode: mode option;
 }
 
@@ -161,37 +221,25 @@ let empty_names =
 (*****************************************************************************)
 
 let name_set_of_idl idl =
-  List.fold_left idl ~f:(fun acc (_, x, _) -> SSet.add x acc) ~init:SSet.empty
+  List.fold_left idl ~f:(fun acc id -> SSet.add id.name acc) ~init:SSet.empty
 
-let simplify info =
-  let {
-    funs;
-    classes;
-    typedefs;
-    consts;
-    modules;
-    file_mode = _;
-    comments = _;
-    hash = _;
-  } =
-    info
-  in
-  let n_funs = name_set_of_idl funs in
-  let n_classes = name_set_of_idl classes in
-  let n_types = name_set_of_idl typedefs in
-  let n_consts = name_set_of_idl consts in
-  let n_modules = name_set_of_idl modules in
-  { n_funs; n_classes; n_types; n_consts; n_modules }
+let ids_to_names (ids : ids) : names =
+  let { funs; classes; typedefs; consts; modules } = ids in
+  {
+    n_funs = name_set_of_idl funs;
+    n_classes = name_set_of_idl classes;
+    n_types = name_set_of_idl typedefs;
+    n_consts = name_set_of_idl consts;
+    n_modules = name_set_of_idl modules;
+  }
 
-let to_saved info =
+let simplify info = ids_to_names info.ids
+
+let to_saved info : saved =
   let {
-    funs;
-    classes;
-    typedefs;
-    consts;
-    modules;
-    file_mode = s_mode;
-    hash = s_hash;
+    ids = { funs; classes; typedefs; consts; modules };
+    file_mode;
+    position_free_decl_hash;
     comments = _;
   } =
     info
@@ -202,37 +250,49 @@ let to_saved info =
   let sn_consts = name_set_of_idl consts in
   let sn_modules = name_set_of_idl modules in
   let s_names = { sn_funs; sn_classes; sn_types; sn_consts; sn_modules } in
-  { s_names; s_mode; s_hash }
+  {
+    s_names;
+    s_mode = file_mode;
+    s_position_free_decl_hash = position_free_decl_hash;
+  }
 
 let from_saved fn saved =
-  let { s_names; s_mode; s_hash } = saved in
+  let { s_names; s_mode; s_position_free_decl_hash } = saved in
   let { sn_funs; sn_classes; sn_types; sn_consts; sn_modules } = s_names in
   let funs =
-    List.map (SSet.elements sn_funs) ~f:(fun x -> (File (Fun, fn), x, None))
+    List.map (SSet.elements sn_funs) ~f:(fun x ->
+        { pos = File (Fun, fn); name = x; decl_hash = None; sort_text = None })
   in
   let classes =
     List.map (SSet.elements sn_classes) ~f:(fun x ->
-        (File (Class, fn), x, None))
+        { pos = File (Class, fn); name = x; decl_hash = None; sort_text = None })
   in
   let typedefs =
     List.map (SSet.elements sn_types) ~f:(fun x ->
-        (File (Typedef, fn), x, None))
+        {
+          pos = File (Typedef, fn);
+          name = x;
+          decl_hash = None;
+          sort_text = None;
+        })
   in
   let consts =
-    List.map (SSet.elements sn_consts) ~f:(fun x -> (File (Const, fn), x, None))
+    List.map (SSet.elements sn_consts) ~f:(fun x ->
+        { pos = File (Const, fn); name = x; decl_hash = None; sort_text = None })
   in
   let modules =
     List.map (SSet.elements sn_modules) ~f:(fun m ->
-        (File (Module, fn), m, None))
+        {
+          pos = File (Module, fn);
+          name = m;
+          decl_hash = None;
+          sort_text = None;
+        })
   in
   {
     file_mode = s_mode;
-    hash = s_hash;
-    funs;
-    classes;
-    typedefs;
-    consts;
-    modules;
+    position_free_decl_hash = s_position_free_decl_hash;
+    ids = { funs; classes; typedefs; consts; modules };
     comments = None;
   }
 
@@ -255,12 +315,15 @@ let merge_names t_names1 t_names2 =
     n_modules = SSet.union n_modules t_names2.n_modules;
   }
 
-let to_string fast =
-  let funs = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.funs in
-  let classes = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.classes in
-  let typedefs = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.typedefs in
-  let consts = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.consts in
-  let modules = List.map ~f:(fun (a, b, _) -> (a, b, None)) fast.modules in
+let ids_to_string (ids : ids) : string =
+  let { classes; typedefs; consts; modules; funs } = ids in
+  let funs = List.map ~f:(fun id -> { id with decl_hash = None }) funs in
+  let classes = List.map ~f:(fun id -> { id with decl_hash = None }) classes in
+  let typedefs =
+    List.map ~f:(fun id -> { id with decl_hash = None }) typedefs
+  in
+  let consts = List.map ~f:(fun id -> { id with decl_hash = None }) consts in
+  let modules = List.map ~f:(fun id -> { id with decl_hash = None }) modules in
   [
     ("funs", funs);
     ("classes", classes);
@@ -273,11 +336,15 @@ let to_string fast =
          Printf.sprintf
            "%s: %s %s"
            kind
-           (List.map l ~f:(fun (_, x, _) -> x) |> String.concat ~sep:",")
-           (List.map l ~f:(fun (_, _, hash) ->
-                Int64.to_string (Option.value hash ~default:Int64.zero))
+           (List.map l ~f:(fun id -> id.name) |> String.concat ~sep:",")
+           (List.map l ~f:(fun id ->
+                Int64.to_string (Option.value id.decl_hash ~default:Int64.zero))
            |> String.concat ~sep:","))
   |> String.concat ~sep:";"
+
+let to_string (t : t) : string =
+  let { ids; file_mode = _; position_free_decl_hash = _; comments = _ } = t in
+  ids_to_string ids
 
 type diff = {
   removed_funs: SSet.t;
@@ -294,7 +361,7 @@ type diff = {
 
 let diff f1 f2 =
   let matches_hash =
-    match (f1.hash, f2.hash) with
+    match (f1.position_free_decl_hash, f2.position_free_decl_hash) with
     | (Some h1, Some h2) -> Int64.equal h1 h2
     | _ -> false
   in

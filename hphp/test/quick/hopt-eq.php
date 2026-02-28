@@ -1,34 +1,34 @@
 <?hh
 
-function foo20($x) {
+function foo20($x) :mixed{
   return $x == 0;
 }
 
-function foo30($x) {
+function foo30($x) :mixed{
   return $x === 0;
 }
 
-function foo21($x) {
+function foo21($x) :mixed{
   return $x == 1;
 }
 
-function foo31($x) {
+function foo31($x) :mixed{
   return $x === 1;
 }
 
-function foo2n1($x) {
+function foo2n1($x) :mixed{
   return $x == -1;
 }
 
-function foo3n1($x) {
+function foo3n1($x) :mixed{
   return $x === -1;
 }
 
-function foo2h($x) {
+function foo2h($x) :mixed{
   return $x == 123456;
 }
 
-function foo3h($x) {
+function foo3h($x) :mixed{
   return $x === 123456;
 }
 <<__EntryPoint>> function main(): void {

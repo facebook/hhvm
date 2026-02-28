@@ -19,27 +19,22 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/runtime/vm/jit/smashable-instr.h"
-#include "hphp/runtime/vm/jit/tc-internal.h"
-#include "hphp/runtime/vm/jit/tc.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
-#include "hphp/runtime/base/type-structure.h"
-#include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
-#include "hphp/runtime/vm/interp-helpers.h"
+#include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/method-lookup.h"
-#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit-util.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/text-util.h"
 
-#include <cassert>
 #include <limits>
 #include <mutex>
 #include <string>
@@ -47,7 +42,7 @@
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(targetcache);
+TRACE_SET_MOD(targetcache)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -145,7 +140,30 @@ rds::Handle ClassCache::alloc() {
   return rds::alloc<ClassCache,rds::Mode::Normal,sizeof(Pair)>().handle();
 }
 
-const Class* ClassCache::lookup(rds::Handle handle, StringData* name) {
+void ClassCache::loadFail(const StringData* name, const LdClsFallback fallback) {
+  switch (fallback) {
+    case LdClsFallback::Fatal:
+      raise_error(Strings::UNKNOWN_CLASS, name->data());
+    case LdClsFallback::FatalResolveClass:
+      raise_error(Strings::FAILED_RESOLVE_CLASS, name->data());
+    case LdClsFallback::ThrowClassnameToClassString:
+    case LdClsFallback::ThrowClassnameToClassLazyClass:
+    {
+      std::string msg;
+      auto const k = fallback == LdClsFallback::ThrowClassnameToClassString
+                     ? "string"
+                     : "lazy class";
+      string_printf(msg, Strings::CLASSNAME_TO_CLASS_NOEXIST_EXCEPTION,
+                    k, name->data());
+      SystemLib::throwInvalidArgumentExceptionObject(msg);
+    }
+    case LdClsFallback::Silent:
+      return;
+  }
+}
+
+const Class* ClassCache::lookup(rds::Handle handle, StringData* name,
+                                LdClsFallback fallback) {
   auto const thiz = rds::handleToPtr<ClassCache, rds::Mode::Normal>(handle);
   if (!rds::isHandleInit(handle, rds::NormalTag{})) {
     for (std::size_t i = 0; i < ClassCache::kNumLines; ++i) {
@@ -160,7 +178,8 @@ const Class* ClassCache::lookup(rds::Handle handle, StringData* name) {
     TRACE(1, "ClassCache miss: %s\n", name->data());
     Class* c = Class::load(name);
     if (UNLIKELY(!c)) {
-      raise_error(Strings::UNKNOWN_CLASS, name->data());
+      loadFail(name, fallback);
+      return c;
     }
     if (pair->m_key) decRefStr(pair->m_key);
     pair->m_key = name;
@@ -175,7 +194,7 @@ const Class* ClassCache::lookup(rds::Handle handle, StringData* name) {
 //////////////////////////////////////////////////////////////////////
 // TSClassCache
 
-LowPtr<const Class> TSClassCache::write(rds::Handle handle, ArrayData* ad) {
+const Class* TSClassCache::write(rds::Handle handle, ArrayData* ad) {
   assertx(ad);
   if (!ad->isStatic()) return nullptr;
   auto const thiz = rds::handleToPtr<TSClassCache, rds::Mode::Local>(handle);
@@ -211,10 +230,10 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 NEVER_INLINE
-const Func* lookup(const Class* cls, const StringData* name, const Class* ctx) {
-  // TODO(T115356820): Pass module name to the context
-  auto const callCtx = MethodLookupCallContext(ctx, (const StringData*)nullptr);
-  auto const func = lookupMethodCtx(cls, name, callCtx, CallType::ObjMethod,
+const Func* lookup(const Class* cls, const StringData* name,
+                   const MemberLookupContext& callCtx) {
+  auto const func = lookupMethodCtx(cls, name, callCtx,
+                                    CallType::ObjMethod,
                                     MethodLookupErrorOptions::RaiseOnNotFound);
   assertx(func);
   if (UNLIKELY(func->isStaticInPrologue())) {
@@ -252,7 +271,7 @@ void smashImmediate(TCA movAddr, const Class* cls, const Func* func) {
   auto const clsVal = reinterpret_cast<uintptr_t>(cls);
   auto const funcVal = reinterpret_cast<uintptr_t>(func);
   auto const cacheable =
-    RuntimeOption::RepoAuthoritative &&
+    Cfg::Repo::Authoritative &&
     funcVal &&
     clsVal < std::numeric_limits<uint32_t>::max() &&
     funcVal < std::numeric_limits<uint32_t>::max();
@@ -269,23 +288,32 @@ void smashImmediate(TCA movAddr, const Class* cls, const Func* func) {
 }
 
 EXTERNALLY_VISIBLE const Func*
-handleDynamicCall(const Class* cls, const StringData* name, const Class* ctx) {
+handleDynamicCall(const Class* cls, const StringData* name,
+                  const Class* ctx, const Func* callerFunc) {
+  auto const callCtx = MemberLookupContext(ctx, callerFunc);
   // Perform lookup without any caching.
-  return lookup(cls, name, ctx);
+  return lookup(cls, name, callCtx);
 }
 
 EXTERNALLY_VISIBLE const Func*
-handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
+handleStaticCall(const Class* cls, const StringData* name,
+                 const Class* ctx, const Func* callerFunc,
                  rds::Handle mceHandle, uintptr_t mcePrime) {
   assertx(name->isStatic());
   assertx(cls);
   auto& mce = rds::handleToRef<Entry, rds::Mode::Normal>(mceHandle);
+  auto const callCtx = MemberLookupContext(ctx, callerFunc);
   if (!rds::isHandleInit(mceHandle, rds::NormalTag{})) {
     // If the low bit is set in mcePrime, we have not yet smashed the immediate
     // into the TC, or the value was not cacheable.
     if (UNLIKELY(mcePrime & 0x1)) {
       // First fill the request local cache for this call.
-      auto const func = lookup(cls, name, ctx);
+      auto const func = lookup(cls, name, callCtx);
+      if (Module::warningsEnabled(func) &&
+          will_symbol_raise_module_boundary_violation(func, &callCtx)) {
+        // If we raised a warning, do not cache/smash the func
+        return func;
+      }
       mce = Entry { cls, func };
       rds::initHandle(mceHandle);
       if (mcePrime != 0x1) {
@@ -311,7 +339,12 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
   // Note: if you manually CSE oldFunc->methodSlot() here, gcc 4.8
   // will strangely generate two loads instead of one.
   if (UNLIKELY(cls->numMethods() <= oldFunc->methodSlot())) {
-    auto const func = lookup(cls, name, ctx);
+    auto const func = lookup(cls, name, callCtx);
+    if (Module::warningsEnabled(func) &&
+        will_symbol_raise_module_boundary_violation(func, &callCtx)) {
+      // If we raised a warning, do not cache the func
+      return func;
+    }
     mce = Entry { cls, func };
     return func;
   }
@@ -353,10 +386,8 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
   // If the candidate has the same name, its probably the right
   // function.  Try to prove it.
   //
-  // We can use the invoked name `name' to compare with cand, but note
-  // that function names are case insensitive, so it's not necessarily
-  // true that oldFunc->name() == name bitwise.
-  assertx(oldFunc->name()->isame(name));
+  // We can use the invoked name `name' to compare with cand.
+  assertx(oldFunc->name()->fsame(name));
   if (LIKELY(cand->name() == name)) {
     if (LIKELY((cand->attrs() & AttrPublic) && !cand->hasPrivateAncestor())) {
       // If the candidate function is public, then we also need to check it
@@ -370,6 +401,10 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
       // Bummer.
       if (UNLIKELY(cand->isStaticInPrologue())) {
         throw_has_this_need_static(cand);
+      }
+      if (will_symbol_raise_module_boundary_violation(cand, &callCtx)) {
+        raiseModuleBoundaryViolation(cls, cand, callCtx.moduleName());
+        return cand;
       }
 
       mce = Entry { cls, cand };
@@ -387,12 +422,21 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
     // can't be static, because the last one wasn't.
     if (LIKELY(cand->baseCls() == oldFunc->baseCls())) {
       assertx(!cand->isStaticInPrologue());
+      if (will_symbol_raise_module_boundary_violation(cand, &callCtx)) {
+        raiseModuleBoundaryViolation(cls, cand, callCtx.moduleName());
+        return cand;
+      }
       mce = Entry { cls, cand };
       return cand;
     }
   }
 
-  auto const func = lookup(cls, name, ctx);
+  auto const func = lookup(cls, name, callCtx);
+  if (Module::warningsEnabled(func) &&
+      will_symbol_raise_module_boundary_violation(func, &callCtx)) {
+    // If we raised a warning, do not cache the func
+    return func;
+  }
   mce = Entry { cls, func };
   return func;
 }
@@ -403,40 +447,27 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
 // StaticMethodCache
 //
 
-static const StringData* mangleSmcName(const StringData* cls,
-                                       const StringData* meth,
-                                       const char* ctx) {
-  // Implementation detail of FCallClsMethodD/S: we use "C::M:ctx" as
-  // the key for invoking static method "M" on class "C". This
-  // composes such a key. "::" is semi-arbitrary, though whatever we
-  // choose must delimit possible class and method names, so we might
-  // as well ape the source syntax
-  return
-    makeStaticString(String(cls->data()) + String("::") +
-                     String(meth->data()) + String(":") +
-                     String(ctx));
-}
-
 rds::Handle StaticMethodCache::alloc(const StringData* clsName,
                                      const StringData* methName,
-                                     const char* ctxName) {
+                                     const StringData* ctxName) {
   return rds::bind<StaticMethodCache, rds::Mode::Normal>(
-    rds::StaticMethod { mangleSmcName(clsName, methName, ctxName) }
+    rds::StaticMethod { clsName, methName, ctxName }
   ).handle();
 }
 
 rds::Handle StaticMethodFCache::alloc(const StringData* clsName,
                                       const StringData* methName,
-                                      const char* ctxName) {
+                                      const StringData* ctxName) {
   return rds::bind<StaticMethodFCache, rds::Mode::Normal>(
-    rds::StaticMethodF { mangleSmcName(clsName, methName, ctxName) }
+    rds::StaticMethodF { clsName, methName, ctxName }
   ).handle();
 }
 
 const Func*
-StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
+StaticMethodCache::lookup(rds::Handle handle, const NamedType *ne,
                           const StringData* clsName,
-                          const StringData* methName, const Class* ctx) {
+                          const StringData* methName, const Class* ctx,
+                          const Func* callerFunc) {
   assertx(rds::isNormalHandle(handle));
   auto thiz = rds::handleToPtr<StaticMethodCache, rds::Mode::Normal>(handle);
   Stats::inc(Stats::TgtCache_StaticMethodMiss);
@@ -454,8 +485,7 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
   // Class::load().
   assertx(cls == ne->getCachedClass());
 
-  // TODO(T115356820): Pass module name to the context
-  auto const callCtx = MethodLookupCallContext(ctx, (const StringData*)nullptr);
+  auto const callCtx = MemberLookupContext(ctx, callerFunc);
   LookupResult res = lookupClsMethod(f, cls, methName,
                                      nullptr, // there may be an active
                                               // this, but we can just fall
@@ -482,7 +512,8 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
 
 const Func*
 StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
-                           const StringData* methName, const Class* ctx) {
+                           const StringData* methName, const Class* ctx,
+                           const Func* callerFunc) {
   assertx(cls);
   assertx(rds::isNormalHandle(handle));
   auto thiz = rds::handleToPtr<StaticMethodFCache, rds::Mode::Normal>(handle);
@@ -490,8 +521,7 @@ StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
   Stats::inc(Stats::TgtCache_StaticMethodFHit, -1);
 
   const Func* f;
-  // TODO(T115356820): Pass module name to the context
-  auto const callCtx = MethodLookupCallContext(ctx, (const StringData*)nullptr);
+  auto const callCtx = MemberLookupContext(ctx, callerFunc);
   LookupResult res = lookupClsMethod(f, cls, methName,
                                      nullptr,
                                      callCtx,

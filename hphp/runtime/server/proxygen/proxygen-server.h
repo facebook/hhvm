@@ -18,9 +18,9 @@
 
 #include "hphp/runtime/server/cert-reloader.h"
 #include "hphp/runtime/server/proxygen/proxygen-transport.h"
-#include "hphp/runtime/server/job-queue-vm-stack.h"
 #include "hphp/runtime/server/server-worker.h"
 #include "hphp/runtime/server/server.h"
+#include "hphp/util/job-queue.h"
 #include <proxygen/lib/http/session/HTTPSessionAcceptor.h>
 #include <proxygen/lib/services/WorkerThread.h>
 #include <wangle/ssl/SSLContextConfig.h>
@@ -53,7 +53,7 @@ struct HPHPWorkerThread;
 
 struct HPHPSessionAcceptor : proxygen::HTTPSessionAcceptor {
   explicit HPHPSessionAcceptor(
-    const proxygen::AcceptorConfiguration& config,
+    std::shared_ptr<const proxygen::AcceptorConfiguration> config,
     ProxygenServer *server,
     HPHPWorkerThread *worker);
   ~HPHPSessionAcceptor() override {}
@@ -74,19 +74,18 @@ struct HPHPSessionAcceptor : proxygen::HTTPSessionAcceptor {
 #endif
     proxygen::ProxygenError error) override;
 
-  proxygen::HTTPSessionController* getController() override {
+  std::shared_ptr<proxygen::HTTPSessionController> getController() override {
     return m_controllerPtr;
   }
 
-  void setController(proxygen::HTTPSessionController* controller) {
+  void setController(std::shared_ptr<proxygen::HTTPSessionController> controller) {
     m_controllerPtr = controller;
   }
 
  private:
   ProxygenServer *m_server;
   HPHPWorkerThread *m_worker;
-  proxygen::SimpleController m_simpleController{this};
-  proxygen::HTTPSessionController* m_controllerPtr{&m_simpleController};
+  std::shared_ptr<proxygen::HTTPSessionController> m_controllerPtr;
 };
 
 using ResponseMessageQueue = folly::NotificationQueue<ResponseMessage>;
@@ -128,24 +127,24 @@ struct HPHPWorkerThread : proxygen::WorkerThread,
   std::atomic<uint32_t> m_pendingTransportsCount;
 };
 
-struct ProxygenServer : Server,
-                        folly::AsyncTimeout,
-                        TakeoverAgent::Callback {
+struct ProxygenServer : Server, folly::AsyncTimeout {
   friend HPHPSessionAcceptor;
   friend HPHPWorkerThread;
   explicit ProxygenServer(const ServerOptions& options);
   ~ProxygenServer() override;
 
-  void addTakeoverListener(TakeoverListener* listener) override;
-  void removeTakeoverListener(TakeoverListener* listener) override;
   void saturateWorkers() override {
     m_dispatcher.saturateWorkers();
   }
   void start() override;
+  void start(bool beginAccepting);
   void waitForEnd() override;
   void stop() override;
   size_t getMaxThreadCount() override {
     return m_dispatcher.getMaxThreadCount();
+  }
+  void setMaxThreadCount(size_t count) override {
+    m_dispatcher.setMaxThreadCount(count);
   }
   int getActiveWorker() override {
     return m_dispatcher.getActiveWorker();
@@ -159,8 +158,7 @@ struct ProxygenServer : Server,
   int getLibEventConnectionCount() override;
   uint32_t getPendingTransportsCount();
   bool enableSSL(int port) override;
-  bool enableSSLWithPlainText() override;
-
+  
   void setMaxThreadCount(int max) {
     return m_dispatcher.setMaxThreadCount(max);
   }
@@ -173,12 +171,7 @@ struct ProxygenServer : Server,
 
   void onConnectionsDrained();
 
-  /**
-   * TakeoverAgent::Callback
-   */
-  int onTakeoverRequest(TakeoverAgent::RequestType type) override;
-
-  void takeoverAborted() override;
+  DispatcherStats getDispatcherStats() override;
 
   // Methods invoked by ProxygenTransport, virtual for mocking
   virtual void onRequest(std::shared_ptr<ProxygenTransport> transport);
@@ -199,7 +192,7 @@ struct ProxygenServer : Server,
 
      uint32_t getSampleRate() const override {
        return m_sample_rate_;
-     };
+     }
 
      void loopSample(int64_t busytime /* usec */, int64_t idletime) override;
 
@@ -237,6 +230,8 @@ struct ProxygenServer : Server,
                     : m_drainCount >= m_workers.size());
   }
 
+  void startAccepting();
+
   // These functions can only be called from the m_workers[0] thread
   void stopListening(bool hard = false);
 
@@ -262,7 +257,7 @@ struct ProxygenServer : Server,
   void updateTLSTicketSeeds(wangle::TLSTicketKeySeeds seeds);
 
   virtual std::unique_ptr<HPHPSessionAcceptor> createAcceptor(
-    const proxygen::AcceptorConfiguration& config,
+    std::shared_ptr<const proxygen::AcceptorConfiguration> config,
     HPHPWorkerThread *worker);
 
   // Forbidden copy constructor and assignment operator
@@ -280,14 +275,15 @@ struct ProxygenServer : Server,
   folly::EventBaseManager m_eventBaseManager;
   // The main worker that handles accepting connections is at index 0.
   std::vector<std::unique_ptr<HPHPWorkerThread>> m_workers;
-  proxygen::AcceptorConfiguration m_httpConfig;
-  proxygen::AcceptorConfiguration m_httpsConfig;
+  std::shared_ptr<proxygen::AcceptorConfiguration> m_httpConfig =
+    std::make_shared<proxygen::AcceptorConfiguration>();
+  std::shared_ptr<proxygen::AcceptorConfiguration> m_httpsConfig =
+    std::make_shared<proxygen::AcceptorConfiguration>();
   std::vector<std::unique_ptr<HPHPSessionAcceptor>> m_httpAcceptors;
   std::vector<std::unique_ptr<HPHPSessionAcceptor>> m_httpsAcceptors;
   std::unique_ptr<wangle::FilePoller> m_filePoller;
 
   JobQueueDispatcher<ProxygenWorker> m_dispatcher;
-  std::unique_ptr<TakeoverAgent> m_takeover_agent;
   std::unique_ptr<wangle::TLSCredProcessor> m_credProcessor;
 };
 
@@ -311,4 +307,3 @@ struct ProxygenTransportTraits {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

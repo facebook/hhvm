@@ -2,13 +2,13 @@
 
 interface Bla
 {
-    function bla();
+    function bla():mixed;
 }
 
 class BlaMore implements Bla
 {
     function bla()
-    {
+:mixed    {
         echo "Hello\n";
     }
 }

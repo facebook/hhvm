@@ -3,7 +3,7 @@
 class A<reify Ta, reify Tb> {}
 
 class C<reify Ta> {
-  function f<reify Tb>(A<Ta, Tb> $_) {}
+  function f<reify Tb>(A<Ta, Tb> $_) :mixed{}
 }
 <<__EntryPoint>> function main(): void {
 $c = new C<int>();

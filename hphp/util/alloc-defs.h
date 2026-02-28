@@ -16,9 +16,12 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
+#include <type_traits>
 
 #include <folly/CPortability.h>
-#include "hphp/util/low-ptr-def.h"
+#include "folly/memory/detail/MallocImpl.h"
+#include "hphp/util/ptr.h"
 
 #if FOLLY_SANITIZE
 // ASan is less precise than valgrind so we'll need a superset of those tweaks
@@ -31,16 +34,8 @@
 
 #ifdef USE_JEMALLOC
 #include <jemalloc/jemalloc.h>
-#if (JEMALLOC_VERSION_MAJOR < 5)
-#  error "jemalloc 5 is required"
-#endif
-#if defined(USE_LOWPTR) && defined(__linux__) \
-  && !defined(USE_JEMALLOC_EXTENT_HOOKS)
-#  define USE_JEMALLOC_EXTENT_HOOKS 1
-#endif
-#if USE_JEMALLOC_EXTENT_HOOKS && \
-  (JEMALLOC_VERSION_MAJOR > 5) || (JEMALLOC_VERSION_MINOR >= 1)
-#  define JEMALLOC_METADATA_1G_PAGES 1
+#if JEMALLOC_VERSION_MAJOR < 5 || (JEMALLOC_VERSION_MAJOR == 5 && JEMALLOC_VERSION_MINOR < 3)
+#  error "jemalloc 5.3 is required"
 #endif
 #endif
 
@@ -57,7 +52,7 @@ constexpr bool use_jemalloc =
 // static/uncounted strings/arrays have addresses lower than kUncountedMaxAddr,
 // and all counted HeapObjects have higher addresses.
 constexpr bool addr_encodes_persistency =
-#if USE_JEMALLOC_EXTENT_HOOKS && defined(__x86_64__) && defined(__linux__)
+#if USE_JEMALLOC && defined(__x86_64__) && defined(__linux__)
   true
 #else
   false
@@ -75,5 +70,19 @@ constexpr size_t kStackSizeMinimum =
 
 extern const size_t s_pageSize;
 
+// Rounding a value/pointer down to align.
+template<size_t align, typename T>
+constexpr T rd(T const n) {
+  static_assert(std::is_integral<T>::value || std::is_pointer<T>::value, "");
+  static_assert(sizeof(T) <= sizeof(uintptr_t), "");
+  static_assert((align & (align - 1)) == 0, "");
+  return (T)(((uintptr_t)n) & ~(align - 1));
 }
 
+// Rounding a value/pointer up to align.
+template<size_t align, typename T>
+constexpr T ru(T const n) {
+  return rd<align, T>(T(((uintptr_t)n) + align - 1));
+}
+
+}

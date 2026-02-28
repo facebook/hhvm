@@ -2,9 +2,9 @@
 1/2/3
 1/2/33
 1/22/33
-string(43) "foo() expects at least 1 parameter, 0 given"
+string(54) "foo() expects at least 1 positional parameter, 0 given"
 4/5/6
 4/5/6
 4/5/66
-string(53) "Closure$main() expects at least 2 parameters, 1 given"
-string(53) "Closure$main() expects at least 2 parameters, 0 given"
+string(64) "Closure$main() expects at least 2 positional parameters, 1 given"
+string(64) "Closure$main() expects at least 2 positional parameters, 0 given"

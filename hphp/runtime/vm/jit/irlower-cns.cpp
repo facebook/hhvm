@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/rds-util.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/static-string-table.h"
@@ -27,7 +26,6 @@
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/named-entity.h"
-#include "hphp/runtime/vm/unit.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
@@ -39,7 +37,6 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -50,7 +47,7 @@
 
 namespace HPHP::jit::irlower {
 
-TRACE_SET_MOD(irlower);
+TRACE_SET_MOD(irlower)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -114,6 +111,7 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
       case KindOfLazyClass:
       case KindOfClsMeth:
       case KindOfRClsMeth:
+      case KindOfEnumClassLabel:
         v << copy{v.cns(pcns->m_data.num), dst.reg(0)};
         break;
       case KindOfDouble:
@@ -144,24 +142,18 @@ static TypedValue lookupCnsEHelperNormal(rds::Handle tv_handle,
                                          StringData* nm) {
   assertx(rds::isNormalHandle(tv_handle));
   if (UNLIKELY(rds::isHandleInit(tv_handle))) {
-    auto const tv = rds::handleToPtr<TypedValue, rds::Mode::Normal>(tv_handle);
-    if (tv->m_data.pcnt != nullptr) {
-      auto callback =
-        reinterpret_cast<Native::ConstantCallback>(tv->m_data.pcnt);
-      Variant v = callback(nm);
-      const TypedValue cns = v.detach();
-      assertx(tvIsPlausible(cns));
-      assertx(tvAsCVarRef(&cns).isAllowedAsConstantValue() ==
-              Variant::AllowedAsConstantValue::Allowed);
-      // Resources are allowed as constant but we can't cache them
-      if (type(cns) != KindOfResource) {
-        tvIncRefGen(cns);
-        rds::handleToRef<TypedValue, rds::Mode::Normal>(tv_handle) = cns;
-      }
-      return cns;
-    }
+    UNUSED auto const tv =
+      rds::handleToPtr<TypedValue, rds::Mode::Normal>(tv_handle);
+    assertx(type(tv) == KindOfUninit);
+    Variant v = Constant::get(nm);
+    const TypedValue cns = v.detach();
+    assertx(tvIsPlausible(cns));
+    assertx(tvAsCVarRef(&cns).isAllowedAsConstantValue() ==
+            Variant::AllowedAsConstantValue::Allowed);
+    tvIncRefGen(cns);
+    rds::handleToRef<TypedValue, rds::Mode::Normal>(tv_handle) = cns;
+    return cns;
   }
-  assertx(!rds::isHandleInit(tv_handle));
   return lookupCnsEHelper(nm);
 }
 
@@ -169,20 +161,15 @@ static TypedValue lookupCnsEHelperPersistent(rds::Handle tv_handle,
                                              StringData* nm) {
   assertx(rds::isPersistentHandle(tv_handle));
 
-  auto tv = rds::handleToPtr<TypedValue, rds::Mode::Persistent>(tv_handle);
+  UNUSED auto const tv =
+    rds::handleToPtr<TypedValue, rds::Mode::Persistent>(tv_handle);
   assertx(type(tv) == KindOfUninit);
-
-  // Deferred system constants.
-  if (UNLIKELY(tv->m_data.pcnt != nullptr)) {
-    auto callback = reinterpret_cast<Native::ConstantCallback>(tv->m_data.pcnt);
-    Variant v = callback(nm);
-    const TypedValue cns = v.detach();
-    assertx(tvIsPlausible(cns));
-    assertx(tvAsCVarRef(&cns).isAllowedAsConstantValue() ==
-            Variant::AllowedAsConstantValue::Allowed);
-    return cns;
-  }
-  return lookupCnsEHelper(nm);
+  Variant v = Constant::get(nm);
+  const TypedValue cns = v.detach();
+  assertx(tvIsPlausible(cns));
+  assertx(tvAsCVarRef(&cns).isAllowedAsConstantValue() ==
+          Variant::AllowedAsConstantValue::Allowed);
+  return cns;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -250,26 +237,24 @@ void cgCheckSubClsCns(IRLS& env, const IRInstruction* inst) {
 
   auto const constOffset = slot * sizeof(Class::Const);
 
-  emitCmpLowPtr<StringData>(
+  emitCmpPackedPtr<StringData>(
     v, sf, v.cns(extra->cnsName),
     tmp[constOffset + offsetof(Class::Const, name)]
   );
   fwdJcc(v, env, CC_NE, sf, inst->taken());
 
-  static_assert(sizeof(ConstModifiers::rawData) == 4);
-
   auto const sf2 = v.makeReg();
   auto const kindOffset =
     constOffset +
     offsetof(Class::Const, val) +
-    TypedValueAux::auxOffset +
-    offsetof(AuxUnion, u_constModifiers) +
-    offsetof(ConstModifiers, rawData);
+    offsetof(TypedValueAux, m_auxFlags) +
+    offsetof(AuxFlagsUnion, u_constModifierFlags) +
+    offsetof(ConstModifierFlags, kind);
 
-  static_assert((int)ConstModifiers::Kind::Value == 0);
+  static_assert((int)ConstModifierFlags::Kind::Value == 0);
 
-  v << testlim{
-    safe_cast<int32_t>(ConstModifiers::kKindMask),
+  v << testbim{
+    safe_cast<int8_t>(-1),
     tmp[kindOffset],
     sf2
   };
@@ -310,9 +295,12 @@ void cgProfileSubClsCns(IRLS& env, const IRInstruction* inst) {
 }
 
 static TypedValue initClsCnsHelper(TypedValue* cache,
-                                   const NamedEntity* ne,
+                                   const NamedType* ne,
                                    const StringData* cls,
                                    const StringData* cns) {
+  // We need anchor here since lookupClsCns might raise warning or throw an
+  // exception
+  VMRegAnchor _;
   auto const clsCns = g_context->lookupClsCns(ne, cls, cns);
   tvDup(clsCns, *cache);
   return clsCns;
@@ -327,7 +315,7 @@ void cgInitClsCns(IRLS& env, const IRInstruction* inst) {
   markRDSAccess(v, link.handle());
   auto const args = argGroup(env, inst)
     .addr(rvmtl(), safe_cast<int32_t>(link.handle()))
-    .immPtr(NamedEntity::get(extra->clsName))
+    .immPtr(NamedType::getOrCreate(extra->clsName))
     .immPtr(extra->clsName)
     .immPtr(extra->cnsName);
 
@@ -371,7 +359,7 @@ void ldResolvedTypeHelper(Vout& v, Slot slot, Vreg cls, Vreg cns) {
   };
 }
 
-}
+} // namespace
 
 void cgLdResolvedTypeCns(IRLS& env, const IRInstruction* inst) {
   auto const cls = srcLoc(env, inst, 0).reg();
@@ -402,7 +390,7 @@ void cgLdResolvedTypeCnsNoCheck(IRLS& env, const IRInstruction* inst) {
     v << testqi{0x1, masked, sf};
     unlikelyIfThen(
       v, vcold(env), CC_Z, sf,
-      [&] (Vout& v) { v << trap{TRAP_REASON}; }
+      [&] (Vout& v) { v << trap{TRAP_REASON, Fixup::none()}; }
     );
   }
 
@@ -422,24 +410,24 @@ void cgLdTypeCnsNoThrow(IRLS& env, const IRInstruction* inst) {
 
 void cgLdResolvedTypeCnsClsName(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<LdResolvedTypeCnsClsName>();
+  auto const cls = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
   auto const slot = extra->slot;
-  auto const tmp = v.makeReg();
-  v << load{srcLoc(env, inst, 0).reg()[Class::constantsVecOff()], tmp};
+  auto const cnsVec = v.makeReg();
+  v << load{cls[Class::constantsVecOff()], cnsVec};
 #ifndef USE_LOWPTR
-  auto const offset = tmp[slot * sizeof(Class::Const) +
-                          offsetof(Class::Const, pointedClsName)];
+  auto const offset = cnsVec[slot * sizeof(Class::Const) +
+                             offsetof(Class::Const, pointedClsName)];
   v << load{offset, dst};
 #else
-  auto const rawData = v.makeReg();
-  auto const offset = tmp[slot * sizeof(Class::Const) +
-                          offsetof(Class::Const, val) +
-                          offsetof(TypedValue, m_aux)];
-  v << loadzlq{offset, rawData};
-  v << andqi{static_cast<int32_t>(ConstModifiers::kMask), rawData,
-             dst, v.makeReg()};
+  auto const rawAddr = cnsVec[slot * sizeof(Class::Const) +
+                              offsetof(Class::Const, val) +
+                              offsetof(TypedValue, m_aux) +
+                              offsetof(AuxUnion, u_constModifiers) +
+                              offsetof(ConstModifiers, u_clsName)];
+  emitLdPackedPtr<const StringData>(v, rawAddr, dst);
 #endif
 }
 
@@ -447,6 +435,47 @@ void cgLdTypeCnsClsName(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst).ssa(0).ssa(1);
   cgCallHelper(vmain(env), env, CallSpec::direct(loadClsTypeCnsClsNameHelper),
                callDest(env, inst), SyncOptions::Sync, args);
+}
+
+void cgLdClsCtxCns(IRLS& env, const IRInstruction* inst) {
+  auto const cls = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const slot = inst->extra<LdClsCtxCns>()->slot;
+  auto& v = vmain(env);
+
+  auto const cnsVec = v.makeReg();
+  v << load{cls[Class::constantsVecOff()], cnsVec};
+  auto const rawAddr = cnsVec[slot * sizeof(Class::Const) +
+                              offsetof(Class::Const, val) +
+                              offsetof(TypedValue, m_aux) +
+                              offsetof(AuxUnion, u_constModifiers) +
+                              offsetof(ConstModifiers, u_coeffectsData)];
+  v << loadzlq{rawAddr, dst};
+
+  if (debug) {
+    // Lets assert that the slot we are loading is context constant
+    auto const sf = v.makeReg();
+    auto const kindAddr = cnsVec[slot * sizeof(Class::Const) +
+                                 offsetof(Class::Const, val) +
+                                 offsetof(TypedValue, m_auxFlags) +
+                                 offsetof(AuxFlagsUnion, u_constModifierFlags) +
+                                 offsetof(ConstModifierFlags, kind)];
+    v << cmpbim{static_cast<int8_t>(ConstModifierFlags::Kind::Context), kindAddr, sf};
+    unlikelyIfThen(
+      v, vcold(env), CC_NZ, sf,
+      [&] (Vout& v) { v << trap{TRAP_REASON, Fixup::none()}; }
+    );
+    // Lets assert that the upper bits are zero
+    auto const shifted = v.makeReg();
+    auto const sf2 = v.makeReg();
+    // 16 bits for coeffects
+    v << shrqi{16, dst, shifted, v.makeReg()};
+    v << testq{shifted, shifted, sf2};
+    unlikelyIfThen(
+      v, vcold(env), CC_NZ, sf2,
+      [&] (Vout& v) { v << trap{TRAP_REASON, Fixup::none()}; }
+    );
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

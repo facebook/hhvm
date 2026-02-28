@@ -1,5 +1,9 @@
+(3,8)-(3,10) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.
 (3,14)-(3,14) An expression is expected here.
+(3,20)-(3,22) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.
 (3,26)-(3,26) An expression is expected here.
+(3,32)-(3,34) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.
 (3,38)-(3,38) An expression is expected here.
+(3,44)-(3,46) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.
 (3,50)-(3,50) An expression is expected here.
 (3,50)-(3,53) Encountered unexpected token `$c1`.

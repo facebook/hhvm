@@ -7,7 +7,7 @@ function entrypoint_bug67730(): void {
   imagestring($im, 1, 5, 5,  'A Simple Text String', $text_color);
 
   // Save the image as 'simpletext.jpg'
-  imagejpeg($im, '/tmp/foo' . chr(0) . 'bar');
+  imagejpeg($im, sys_get_temp_dir().'/foo' . chr(0) . 'bar');
 
   // Free up memory
   imagedestroy($im);

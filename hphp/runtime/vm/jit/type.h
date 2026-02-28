@@ -24,7 +24,6 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/type-specialization.h"
 #include "hphp/util/bitset.h"
-#include "hphp/util/low-ptr.h"
 
 #include <cstdint>
 #include <type_traits>
@@ -45,6 +44,7 @@ namespace jit {
 struct GuardConstraint;
 struct ProfDataSerializer;
 struct ProfDataDeserializer;
+struct SBProfType;
 
 /*
  * The PtrLocation enum is a lattice that represents what kind of
@@ -209,10 +209,11 @@ constexpr bool operator>(PtrLocation a, PtrLocation b) {
   IRT(RFunc,           bits_t::bit<22>())                               \
   IRT(RClsMeth,        bits_t::bit<23>())                               \
   IRT(LazyCls,         bits_t::bit<24>())                               \
+  IRT(EnumClassLabel,  bits_t::bit<25>())                               \
 /**/
 
 #define UNCOUNTED_INIT_UNION \
-  kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kLazyCls|kClsMeth
+  kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kLazyCls|kClsMeth|kEnumClassLabel
 
 #define INIT_CELL_UNION \
   kUncountedInit|kStr|kArrLike|kObj|kRes|kRFunc|kRClsMeth
@@ -247,16 +248,17 @@ constexpr bool operator>(PtrLocation a, PtrLocation b) {
  * Adding a new runtime type needs updating numRuntime variable.
  */
 #define IRT_RUNTIME                                                     \
-  IRT(NamedEntity, bits_t::bit<kRuntime>())                             \
-  IRT(RetAddr,     bits_t::bit<kRuntime+1>()) /* Return address */      \
-  IRT(StkPtr,      bits_t::bit<kRuntime+2>()) /* Stack pointer */       \
-  IRT(FramePtr,    bits_t::bit<kRuntime+3>()) /* Frame pointer */       \
-  IRT(TCA,         bits_t::bit<kRuntime+4>())                           \
-  IRT(ABC,         bits_t::bit<kRuntime+5>()) /* AsioBlockableChain */  \
-  IRT(RDSHandle,   bits_t::bit<kRuntime+6>()) /* rds::Handle */         \
-  IRT(Nullptr,     bits_t::bit<kRuntime+7>())                           \
-  IRT(Smashable,   bits_t::bit<kRuntime+8>()) /* Smashable uint64_t */  \
-  IRT(VoidPtr,     bits_t::bit<kRuntime+9>()) /* Arbitrary pointer */   \
+  IRT(NamedType,   bits_t::bit<kRuntime>())                             \
+  IRT(NamedFunc,   bits_t::bit<kRuntime+1>())                           \
+  IRT(RetAddr,     bits_t::bit<kRuntime+2>()) /* Return address */      \
+  IRT(StkPtr,      bits_t::bit<kRuntime+3>()) /* Stack pointer */       \
+  IRT(FramePtr,    bits_t::bit<kRuntime+4>()) /* Frame pointer */       \
+  IRT(TCA,         bits_t::bit<kRuntime+5>())                           \
+  IRT(ABC,         bits_t::bit<kRuntime+6>()) /* AsioBlockableChain */  \
+  IRT(RDSHandle,   bits_t::bit<kRuntime+7>()) /* rds::Handle */         \
+  IRT(Nullptr,     bits_t::bit<kRuntime+8>())                           \
+  IRT(Smashable,   bits_t::bit<kRuntime+9>()) /* Smashable uint64_t */  \
+  IRT(VoidPtr,     bits_t::bit<kRuntime+10>()) /* Arbitrary pointer */  \
   /* bits above this are unused */
 
 /*
@@ -314,9 +316,9 @@ private:
   static constexpr size_t kRuntime = 27;
   static constexpr size_t kNumRuntime = 10;
   static constexpr size_t kNumPtr = 2;
-  using bits_t = BitSet<kRuntime + kNumRuntime + kNumPtr>;
 
 public:
+  using bits_t = BitSet<kRuntime + kNumRuntime + kNumPtr>;
   static constexpr bits_t kBottom{};
   static constexpr bits_t kTop = ~kBottom;
 
@@ -375,6 +377,8 @@ public:
    */
   void serialize(ProfDataSerializer&) const;
   static Type deserialize(ProfDataDeserializer&);
+
+  bits_t rawBits() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // DataType.
@@ -488,7 +492,7 @@ public:
    * reference) in C++.
    */
   bool isSimpleType() const;
-  bool isReferenceType() const;
+  bool isSingularReferenceType() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -589,6 +593,7 @@ public:
   int64_t intVal() const;
   double dblVal() const;
   const StringData* strVal() const;
+  const StringData* eclVal() const;
   const ArrayData* arrVal() const;
   const ArrayData* vecVal() const;
   const ArrayData* dictVal() const;
@@ -670,6 +675,14 @@ public:
    * @requires *this <= TInitCell
    */
   Type modified() const;
+
+  /*
+   * Intersect with refinement.
+   *
+   * For intersections that cannot be performed monotonically (e.g. RATArrays),
+   * select the refinement version of the specialization.
+   */
+  Type refine(Type refinement) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Specialization introspection.                                      [const]
@@ -794,6 +807,8 @@ private:
     ClassSpec m_clsSpec;
     ArraySpec m_arrSpec;
   };
+
+  friend Type typeFromSBProfType(const SBProfType&);
 };
 
 using OptType = Optional<Type>;
@@ -810,10 +825,14 @@ using OptType = Optional<Type>;
  */
 Type typeFromTV(tv_rval tv, const Class* ctx);
 Type typeFromRAT(RepoAuthType ty, const Class* ctx);
-Type typeFromPropTC(const HPHP::TypeConstraint& tc,
+Type typeFromPropTC(const HPHP::TypeIntersectionConstraint& tc,
                     const Class* propCls,
                     const Class* ctx,
                     bool isSProp);
+Type typeFromFuncParam(const Func* func, uint32_t paramId);
+Type typeFromFuncReturn(const Func* func, bool pessimizeForBuiltin = false);
+Type typeFromFuncOut(const Func* func, uint32_t inOutIdx);
+Type typeFromSBProfType(const SBProfType&);
 
 ///////////////////////////////////////////////////////////////////////////////
 

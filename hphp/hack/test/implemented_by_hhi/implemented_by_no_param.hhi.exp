@@ -1,0 +1,2 @@
+ERROR: File "implemented_by_no_param.hhi", line 3, characters 5-19:
+The attribute `__ImplementedBy` expects at least 1 argument (Typing[4153])

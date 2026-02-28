@@ -1,7 +1,7 @@
 <?hh <<__EntryPoint>> function main(): void {
 try
 {
-    $section = new DOMCDataSection();
+    $section = new DOMCdataSection();
 
 }
 catch (Exception $e)

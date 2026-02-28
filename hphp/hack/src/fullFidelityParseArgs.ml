@@ -28,29 +28,22 @@ type t = {
   php5_compat_mode: bool;
   elaborate_namespaces: bool;
   include_line_comments: bool;
-  keep_errors: bool;
   quick_mode: bool;
-  fail_open: bool;
   (* Defining the input *)
   files: string list;
   disable_lval_as_an_expression: bool;
-  enable_class_level_where_clauses: bool;
   disable_legacy_soft_typehints: bool;
-  allow_new_attribute_syntax: bool;
-  disable_legacy_attribute_syntax: bool;
   const_default_func_args: bool;
   const_default_lambda_args: bool;
   const_static_props: bool;
   abstract_static_props: bool;
   disallow_func_ptrs_in_constants: bool;
-  error_php_lambdas: bool;
   disallow_discarded_nullable_awaitables: bool;
   disable_xhp_element_mangling: bool;
   allow_unstable_features: bool;
   enable_xhp_class_modifier: bool;
-  disallow_fun_and_cls_meth_pseudo_funcs: bool;
-  disallow_inst_meth: bool;
   ignore_missing_json: bool;
+  disallow_static_constants_in_default_func_args: bool;
 }
 
 let make
@@ -71,29 +64,22 @@ let make
     php5_compat_mode
     elaborate_namespaces
     include_line_comments
-    keep_errors
     quick_mode
-    fail_open
     show_file_name
     files
     disable_lval_as_an_expression
-    enable_class_level_where_clauses
     disable_legacy_soft_typehints
-    allow_new_attribute_syntax
-    disable_legacy_attribute_syntax
     const_default_func_args
     const_default_lambda_args
     const_static_props
     abstract_static_props
     disallow_func_ptrs_in_constants
-    error_php_lambdas
     disallow_discarded_nullable_awaitables
     disable_xhp_element_mangling
     allow_unstable_features
     enable_xhp_class_modifier
-    disallow_fun_and_cls_meth_pseudo_funcs
-    disallow_inst_meth
-    ignore_missing_json =
+    ignore_missing_json
+    disallow_static_constants_in_default_func_args =
   {
     full_fidelity_json_parse_tree;
     full_fidelity_json;
@@ -112,29 +98,22 @@ let make
     php5_compat_mode;
     elaborate_namespaces;
     include_line_comments;
-    keep_errors;
     quick_mode;
-    fail_open;
     show_file_name;
     files;
     disable_lval_as_an_expression;
-    enable_class_level_where_clauses;
     disable_legacy_soft_typehints;
-    allow_new_attribute_syntax;
-    disable_legacy_attribute_syntax;
     const_default_func_args;
     const_default_lambda_args;
     const_static_props;
     abstract_static_props;
     disallow_func_ptrs_in_constants;
-    error_php_lambdas;
     disallow_discarded_nullable_awaitables;
     disable_xhp_element_mangling;
     allow_unstable_features;
     enable_xhp_class_modifier;
-    disallow_fun_and_cls_meth_pseudo_funcs;
-    disallow_inst_meth;
     ignore_missing_json;
+    disallow_static_constants_in_default_func_args;
   }
 
 let parse_args () =
@@ -171,32 +150,25 @@ let parse_args () =
   let php5_compat_mode = ref false in
   let elaborate_namespaces = ref true in
   let include_line_comments = ref false in
-  let keep_errors = ref true in
   let quick_mode = ref false in
   let enable_hh_syntax = ref false in
-  let fail_open = ref true in
   let show_file_name = ref false in
   let disable_lval_as_an_expression = ref false in
   let set_show_file_name () = show_file_name := true in
   let files = ref [] in
   let push_file file = files := file :: !files in
-  let enable_class_level_where_clauses = ref false in
   let disable_legacy_soft_typehints = ref false in
-  let allow_new_attribute_syntax = ref false in
-  let disable_legacy_attribute_syntax = ref false in
   let const_default_func_args = ref false in
   let const_default_lambda_args = ref false in
   let const_static_props = ref false in
   let abstract_static_props = ref false in
   let disallow_func_ptrs_in_constants = ref false in
-  let error_php_lambdas = ref false in
   let disallow_discarded_nullable_awaitables = ref false in
   let disable_xhp_element_mangling = ref false in
   let allow_unstable_features = ref false in
   let enable_xhp_class_modifier = ref false in
-  let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
-  let disallow_inst_meth = ref false in
   let ignore_missing_json = ref false in
+  let disallow_static_constants_in_default_func_arg = ref false in
   let options =
     [
       (* modes *)
@@ -268,24 +240,14 @@ No errors are filtered out."
       ( "--no-include-line-comments",
         Arg.Clear include_line_comments,
         "Unset the include_line_comments option for the parser." );
-      ( "--keep-errors",
-        Arg.Set keep_errors,
-        "Set the keep_errors option for the parser." );
-      ( "--no-keep-errors",
-        Arg.Clear keep_errors,
-        "Unset the keep_errors option for the parser." );
       ( "--quick-mode",
         Arg.Set quick_mode,
         "Set the quick_mode option for the parser." );
       ( "--no-quick-mode",
         Arg.Clear quick_mode,
         "Unset the quick_mode option for the parser." );
-      ( "--fail-open",
-        Arg.Set fail_open,
-        "Set the fail_open option for the parser." );
-      ( "--no-fail-open",
-        Arg.Clear fail_open,
-        "Unset the fail_open option for the parser." );
+      ("--fail-open", Arg.Unit (fun () -> ()), "Unused.");
+      ("--no-fail-open", Arg.Unit (fun () -> ()), "Unused");
       ("--force-hh-syntax", Arg.Set enable_hh_syntax, "Ignored. Do not use.");
       ( "--show-file-name",
         Arg.Unit set_show_file_name,
@@ -293,19 +255,10 @@ No errors are filtered out."
       ( "--disable-lval-as-an-expression",
         Arg.Set disable_lval_as_an_expression,
         "Disable lval as an expression." );
-      ( "--enable-class-level-where-clauses",
-        Arg.Set enable_class_level_where_clauses,
-        "Enables support for class-level where clauses" );
       ( "--disable-legacy-soft-typehints",
         Arg.Set disable_legacy_soft_typehints,
         "Disables the legacy @ syntax for soft typehints (use __Soft instead)"
       );
-      ( "--allow-new-attribute-syntax",
-        Arg.Set allow_new_attribute_syntax,
-        "Allow the new @ attribute syntax (disables legacy soft typehints)" );
-      ( "--disable-legacy-attribute-syntax",
-        Arg.Set disable_legacy_attribute_syntax,
-        "Disable the legacy <<...>> user attribute syntax" );
       ( "--const-default-func-args",
         Arg.Set const_default_func_args,
         "Statically check default function arguments are constant initializers"
@@ -324,9 +277,6 @@ No errors are filtered out."
         Arg.Set disallow_func_ptrs_in_constants,
         "Disallow use of HH\\fun and HH\\class_meth in constants and constant initializers"
       );
-      ( "--error-php-lambdas",
-        Arg.Set error_php_lambdas,
-        "Report errors on php style anonymous functions" );
       ( "--disallow-discarded-nullable-awaitables",
         Arg.Set disallow_discarded_nullable_awaitables,
         "Error on using discarded nullable awaitables" );
@@ -343,15 +293,12 @@ No errors are filtered out."
       ( "--allow-unstable-features",
         Arg.Set allow_unstable_features,
         "Enables the __EnableUnstableFeatures attribute" );
-      ( "--disallow-fun-and-cls-meth-pseudo-funcs",
-        Arg.Set disallow_fun_and_cls_meth_pseudo_funcs,
-        "Disables parsing of fun() and class_meth()" );
-      ( "--disallow-inst-meth",
-        Arg.Set disallow_inst_meth,
-        "Disabled parsing of inst_meth()" );
       ( "--ignore-missing-json",
         Arg.Set ignore_missing_json,
         "Ignore missing nodes in JSON output" );
+      ( "--disallow-static-constants-in-default-func-args",
+        Arg.Set disallow_static_constants_in_default_func_arg,
+        "Disallow `static::*` in default arguments for functions" );
     ]
   in
   Arg.parse options push_file usage;
@@ -389,111 +336,45 @@ No errors are filtered out."
     !php5_compat_mode
     !elaborate_namespaces
     !include_line_comments
-    !keep_errors
     !quick_mode
-    !fail_open
     !show_file_name
     (List.rev !files)
     !disable_lval_as_an_expression
-    !enable_class_level_where_clauses
     !disable_legacy_soft_typehints
-    !allow_new_attribute_syntax
-    !disable_legacy_attribute_syntax
     !const_default_func_args
     !const_default_lambda_args
     !const_static_props
     !abstract_static_props
     !disallow_func_ptrs_in_constants
-    !error_php_lambdas
     !disallow_discarded_nullable_awaitables
     !disable_xhp_element_mangling
     !allow_unstable_features
     !enable_xhp_class_modifier
-    !disallow_fun_and_cls_meth_pseudo_funcs
-    !disallow_inst_meth
     !ignore_missing_json
+    !disallow_static_constants_in_default_func_arg
 
-let to_parser_options args =
-  let popt = ParserOptions.default in
-  let popt = ParserOptions.with_codegen popt args.codegen in
-  let popt =
-    ParserOptions.with_disable_lval_as_an_expression
-      popt
-      args.disable_lval_as_an_expression
-  in
-  let popt =
-    {
-      popt with
-      GlobalOptions.po_enable_class_level_where_clauses =
-        args.enable_class_level_where_clauses;
-    }
-  in
-  let popt =
-    ParserOptions.with_disable_legacy_soft_typehints
-      popt
-      args.disable_legacy_soft_typehints
-  in
-  let popt =
-    ParserOptions.with_allow_new_attribute_syntax
-      popt
-      args.allow_new_attribute_syntax
-  in
-  let popt =
-    ParserOptions.with_disable_legacy_attribute_syntax
-      popt
-      args.disable_legacy_attribute_syntax
-  in
-  let popt =
-    ParserOptions.with_const_default_func_args popt args.const_default_func_args
-  in
-  let popt =
-    ParserOptions.with_const_default_lambda_args
-      popt
-      args.const_default_lambda_args
-  in
-  let popt =
-    ParserOptions.with_const_static_props popt args.const_static_props
-  in
-  let popt =
-    ParserOptions.with_abstract_static_props popt args.abstract_static_props
-  in
-  let popt =
-    ParserOptions.with_disallow_func_ptrs_in_constants
-      popt
-      args.disallow_func_ptrs_in_constants
-  in
-  let popt =
-    ParserOptions.with_disable_xhp_element_mangling
-      popt
-      args.disable_xhp_element_mangling
-  in
-  let popt =
-    ParserOptions.with_allow_unstable_features popt args.allow_unstable_features
-  in
-  let popt =
-    ParserOptions.with_enable_xhp_class_modifier
-      popt
-      args.enable_xhp_class_modifier
-  in
-  let popt =
-    ParserOptions.with_disallow_fun_and_cls_meth_pseudo_funcs
-      popt
-      args.disallow_fun_and_cls_meth_pseudo_funcs
-  in
-  let popt =
-    ParserOptions.with_disallow_inst_meth popt args.disallow_inst_meth
-  in
-  popt
+let to_parser_options (args : t) : ParserOptions.t =
+  {
+    ParserOptions.default with
+    ParserOptions.codegen = args.codegen;
+    disable_lval_as_an_expression = args.disable_lval_as_an_expression;
+    disable_legacy_soft_typehints = args.disable_legacy_soft_typehints;
+    const_default_func_args = args.const_default_func_args;
+    const_default_lambda_args = args.const_default_lambda_args;
+    const_static_props = args.const_static_props;
+    abstract_static_props = args.abstract_static_props;
+    disallow_func_ptrs_in_constants = args.disallow_func_ptrs_in_constants;
+    disable_xhp_element_mangling = args.disable_xhp_element_mangling;
+    allow_unstable_features = args.allow_unstable_features;
+    enable_xhp_class_modifier = args.enable_xhp_class_modifier;
+    disallow_static_constants_in_default_func_args =
+      args.disallow_static_constants_in_default_func_args;
+  }
 
 let to_parser_env args ~leak_rust_tree ~mode =
   Full_fidelity_parser_env.make
     ~disable_lval_as_an_expression:args.disable_lval_as_an_expression
     ~disable_legacy_soft_typehints:args.disable_legacy_soft_typehints
-    ~allow_new_attribute_syntax:args.allow_new_attribute_syntax
-    ~disable_legacy_attribute_syntax:args.disable_legacy_attribute_syntax
     ~leak_rust_tree
-    ~disallow_fun_and_cls_meth_pseudo_funcs:
-      args.disallow_fun_and_cls_meth_pseudo_funcs
-    ~disallow_inst_meth:args.disallow_inst_meth
     ?mode
     ()

@@ -25,7 +25,6 @@ The format is,
 - id: process ID
 - build: current binary's build ID
 - debug: DEBUG build or not
-- hotprofiler: whether hotprofiler was turned on or not
 - now: current datetime
 - start: when server was started
 - up: server up time so far

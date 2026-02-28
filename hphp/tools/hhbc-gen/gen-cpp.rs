@@ -3,9 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::fmt;
+use std::fmt::Display;
+
 use anyhow::Result;
-use hhbc_gen::{ImmType, Inputs, InstrFlags, OpcodeData, Outputs};
-use std::fmt::{self, Display};
+use hhbc_gen::ImmType;
+use hhbc_gen::Inputs;
+use hhbc_gen::InstrFlags;
+use hhbc_gen::OpcodeData;
+use hhbc_gen::Outputs;
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
@@ -115,6 +121,7 @@ fn fmt_count(n: usize, none: &str, f: impl Fn(usize) -> String) -> String {
     }
 }
 
+#[allow(dead_code)]
 struct FmtCount<'a, T, F>(&'a [T], &'a str, F)
 where
     F: Fn(&mut dyn fmt::Write, &T) -> fmt::Result;

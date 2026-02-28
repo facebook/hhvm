@@ -2,7 +2,7 @@
 
 // Test ImmMap's materialization methods.
 
-function show_iter($iter) {
+function show_iter($iter) :mixed{
   $vs = new Vector($iter);
   usort(inout $vs,  HH\Lib\Legacy_FIXME\cmp<>);
   echo "...\n";
@@ -10,7 +10,7 @@ function show_iter($iter) {
   echo "...\n";
 }
 
-function main() {
+function main() :mixed{
   $fm = new ImmMap(Map {"a" => 10, "b" => 30, 10 => 42});
 
   echo "\ntoDArray...\n";
@@ -68,6 +68,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_materialization() {
+function main_materialization() :mixed{
 main();
 }

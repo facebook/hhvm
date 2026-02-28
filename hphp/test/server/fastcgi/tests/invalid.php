@@ -1,6 +1,6 @@
 <?hh
 
-function invalidTestController($port) {
+function invalidTestController($port) :mixed{
   $host = 'localhost';
 
   $filename = __DIR__.'/request-doesnotexist.dat';

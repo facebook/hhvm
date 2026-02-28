@@ -1,0 +1,22 @@
+1	NNNN	array(array('b' => 1)) != true	
+2	YYYY	array(array('b' => 1)) != false	
+3	YYYY	array(array('b' => 1)) != 1	
+4	YYYY	array(array('b' => 1)) != 0	
+5	YYYY	array(array('b' => 1)) != -1	
+6	YYYY	array(array('b' => 1)) != '1'	
+7	YYYY	array(array('b' => 1)) != '0'	
+8	YYYY	array(array('b' => 1)) != '-1'	
+9	YYYY	array(array('b' => 1)) != null	
+10	YYYY	array(array('b' => 1)) != array()	
+11	YYYY	array(array('b' => 1)) != array(1)	
+12	YYYY	array(array('b' => 1)) != array(2)	
+13	YYYY	array(array('b' => 1)) != array('1')	
+14	YYYY	array(array('b' => 1)) != array('0' => '1')	
+15	YYYY	array(array('b' => 1)) != array('a')	
+16	YYYY	array(array('b' => 1)) != array('a' => 1)	
+17	YYYY	array(array('b' => 1)) != array('b' => 1)	
+18	YYYY	array(array('b' => 1)) != array('a' => 1, 'b' => 2)	
+19	YYYY	array(array('b' => 1)) != array(array('a' => 1))	
+20	NNNN	array(array('b' => 1)) != array(array('b' => 1))	
+21	YYYY	array(array('b' => 1)) != 'php'	
+22	YYYY	array(array('b' => 1)) != ''

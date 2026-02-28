@@ -1,0 +1,33 @@
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread started
+Thread got lock
+Thread releasing lock
+Thread got lock
+Threads finished: 1
+Thread releasing lock
+Thread got lock
+Threads finished: 2
+Thread releasing lock
+Thread got lock
+Threads finished: 3
+Thread releasing lock
+Thread got lock
+Threads finished: 4
+Thread releasing lock
+Thread got lock
+Threads finished: 5
+Thread releasing lock
+Thread got lock
+Threads finished: 6
+Thread releasing lock
+Thread got lock
+Threads finished: 7
+Thread releasing lock
+Threads finished: 8
+Overall time under 15s

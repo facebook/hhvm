@@ -1,0 +1,1 @@
+-vAutoload.Logging=hphp.runtime.ext.facts:=FATAL:default

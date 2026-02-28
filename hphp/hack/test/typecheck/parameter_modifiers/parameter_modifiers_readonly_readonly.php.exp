@@ -1,0 +1,4 @@
+ERROR: File "parameter_modifiers_readonly_readonly.php", line 4, characters 33-40:
+A type specifier is expected here. (Parsing[1002])
+ERROR: File "parameter_modifiers_readonly_readonly.php", line 4, characters 33-40:
+Encountered unexpected text `readonly`, was expecting a type hint. (Parsing[1002])

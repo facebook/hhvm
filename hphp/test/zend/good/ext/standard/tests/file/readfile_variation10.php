@@ -9,16 +9,11 @@ echo "*** Testing readfile() : variation ***\n";
 
 
 /* An array of files */
-$names_arr = varray[
+$names_arr = vec[
   /* Invalid args */
-  -1,
-  TRUE,
-  FALSE,
-  NULL,
   "",
   " ",
   "\0",
-  varray[],
 
   /* prefix with path separator of a non existing directory*/
   "/no/such/file/dir",

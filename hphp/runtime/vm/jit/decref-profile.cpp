@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/decref-profile.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/tv-refcount.h"
 
 namespace {
 bool isTypedValueRefcounted(const HPHP::TypedValue& tv) {
@@ -61,7 +60,8 @@ void DecRefProfile::update(TypedValue tv) {
   auto const countable = tv.val().pcnt;
   if (countable->decWillRelease()) {
     released++;
-    if (isRealType(datatype) && isArrayLikeType(datatype)) {
+    if (isRealType(datatype) && isArrayLikeType(datatype) &&
+        tv.val().parr->isVanilla()) {
       size_t numProfiledElements = 0;
       bool hasRefcountedElement = false;
       IterateKV(tv.val().parr, [&](TypedValue key, TypedValue value){
@@ -127,16 +127,17 @@ const StringData* decRefProfileKey(const IRInstruction* inst) {
   return decRefProfileKey(local);
 }
 
-SharedProfile<DecRefProfile> decRefProfile(
+TargetProfile<DecRefProfile> decRefProfile(
     const TransContext& context, const IRInstruction* inst) {
   auto const profileKey = decRefProfileKey(inst);
-  return SharedProfile<DecRefProfile>(context, inst->marker(), profileKey);
+  return TargetProfile<DecRefProfile>(context, inst->marker(), profileKey);
 }
 
-SharedProfile<DecRefProfile> decRefProfile(
-    const TransContext& context, const BCMarker& marker, int locId) {
+TargetProfile<DecRefProfile> decRefProfile(const TransContext& context,
+                                           const BCMarker& marker,
+                                           int locId) {
   auto const profileKey = decRefProfileKey(locId);
-  return SharedProfile<DecRefProfile>(context, marker, profileKey);
+  return TargetProfile<DecRefProfile>(context, marker, profileKey);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

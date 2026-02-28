@@ -117,6 +117,7 @@ struct TransContext {
   TransKind kind{TransKind::Invalid};
   SrcKey initSrcKey;
   const RegionDesc* region{nullptr};
+  const PackageInfo* packageInfo{nullptr};
   PrologueID pid;
 };
 
@@ -196,10 +197,6 @@ public:
   // Location specifier for the input.
   Location loc;
 
-  // If an input is unknowable, don't break the tracelet just to find its
-  // type---but still generate a guard if that will tell us its type.
-  bool dontBreak{false};
-
   // Never break the tracelet nor generate a guard on account of this input.
   bool dontGuard{false};
 };
@@ -225,6 +222,11 @@ jit::fast_set<uint32_t> getLocalOutputs(const NormalizedInstruction& ni);
  * Return the index of op's local immediate.
  */
 size_t localImmIdx(Op op);
+
+/*
+ * Return the local id referenced by the instruction immediate.
+ */
+uint32_t getLocalOperand(SrcKey sk);
 
 namespace InstrFlags {
 ///////////////////////////////////////////////////////////////////////////////
@@ -268,7 +270,6 @@ enum OutTypeConstraints {
   OutCInputL,           // type is C(type) of local input
 
   OutArith,             // For Add, Sub, Mul
-  OutArithO,            // For AddO, SubO, MulO
   OutBitOp,             // For BitAnd, BitOr, BitXor
   OutSetOp,             // For SetOpL
   OutIncDec,            // For IncDecL
@@ -281,6 +282,8 @@ enum OutTypeConstraints {
   OutClsMeth,           // For ClsMeth pointers
   OutClsMethLike,       // For ResolveRClsMeth* instructions
   OutLazyClass,         // For lazy classes
+
+  OutEnumClassLabel,    // For enum class labels
 
   OutNone,
 };

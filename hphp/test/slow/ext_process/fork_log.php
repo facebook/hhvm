@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_fork_log() {
+function main_fork_log() :mixed{
   try {
     var_dump($g);
   } catch (UndefinedVariableException $e) {

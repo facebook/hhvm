@@ -14,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-// We can't do this on MSVC, it's all debug or all release.
-#ifndef _MSC_VER
 /*
  * Forcibly define USE_TRACE, so we get the debug trace.h interface included
  * here. This allows mixed compilation, where some units were compiled
@@ -24,7 +22,7 @@
 #ifndef USE_TRACE
 #  define USE_TRACE 1
 #endif
-#endif
+
 #include "hphp/util/trace.h"
 
 #include <iostream>
@@ -40,7 +38,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(tprefix);
+TRACE_SET_MOD(tprefix)
 
 namespace Trace {
 
@@ -116,16 +114,16 @@ public:
 
   static void InitFromSpec(folly::StringPiece spec, int* levels) {
     std::vector<folly::StringPiece> pieces;
-    folly::split(",", spec, pieces);
+    folly::split(',', spec, pieces);
     for (auto piece : pieces) {
       folly::StringPiece moduleName;
       int level;
       try {
-        if (!folly::split(":", piece, moduleName, level)) {
+        if (!folly::split(':', piece, moduleName, level)) {
           moduleName = piece;
           level = 1;
         }
-      } catch (const std::exception& re) {
+      } catch (const std::exception& ) {
         std::cerr <<
           folly::format("Ignoring invalid TRACE component: {}\n", piece);
         continue;
@@ -179,9 +177,9 @@ CompactVector<BumpRelease> bumpSpec(folly::StringPiece traceSpec) {
 
   Init::InitFromSpec(traceSpec, modules.data());
   CompactVector<BumpRelease> result;
-  for (int i = 0; i < NumModules; i++) {
-    if (modules[i]) {
-      result.emplace_back(static_cast<Module>(i), -modules[i]);
+  for (int i_2 = 0; i_2 < NumModules; i_2++) {
+    if (modules[i_2]) {
+      result.emplace_back(static_cast<Module>(i_2), -modules[i_2]);
     }
   }
   return result;

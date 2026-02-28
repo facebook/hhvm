@@ -1,0 +1,2 @@
+WARN: File "05-vec-keyset-and-dict-02.hack", line 55, characters 3-18:
+This `is` check is always `true`. The expression on the left has type `vec<string>` which is a subtype of `vec<string>`. (Warn[12009])

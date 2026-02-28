@@ -37,9 +37,9 @@ let diff_decls decls1_str decls2_str =
     Tempfile.with_real_tempdir (fun dir ->
         let temp_dir = Path.to_string dir in
         let control =
-          Caml.Filename.temp_file ~temp_dir "control_decls" ".txt"
+          Stdlib.Filename.temp_file ~temp_dir "control_decls" ".txt"
         in
-        let test = Caml.Filename.temp_file ~temp_dir "test_decls" ".txt" in
+        let test = Stdlib.Filename.temp_file ~temp_dir "test_decls" ".txt" in
         Disk.write_file ~file:control ~contents:decls1_str;
         Disk.write_file ~file:test ~contents:decls2_str;
         Ppxlib_print_diff.print

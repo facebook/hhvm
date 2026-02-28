@@ -20,6 +20,7 @@ type error_mode =
     }
   | Process_aborted
   | Transformer_raised of Exception.t
+  | Poll_exn of Poll.Flags.t list
 
 type process_error = Process_types.invocation_info * error_mode
 
@@ -61,6 +62,8 @@ module ProcessError = struct
         "Transformer_raised(%s %s)"
         info
         (Exception.get_ctor_string e)
+    | Poll_exn flags ->
+      Printf.sprintf "Poll_exn(%s)" (Poll.Flags.to_string flags)
 
   let to_string_verbose ((info, error_mode) : t) : Future.verbose_error =
     let Process_types.{ name; args; env; stack = Utils.Callstack stack } =
@@ -116,6 +119,15 @@ module ProcessError = struct
         environment = None;
         stack = Utils.Callstack stack;
       }
+    | Poll_exn flags ->
+      {
+        message =
+          Printf.sprintf
+            "`poll` system call returned error flags %s"
+            (Poll.Flags.to_string flags);
+        environment = Some env;
+        stack = Utils.Callstack stack;
+      }
 end
 
 let make
@@ -127,18 +139,18 @@ let make
     let info = process.Process_types.info in
     let res =
       match Process.read_and_wait_pid ~timeout process with
-      | Ok { Process_types.stdout; _ } ->
-        begin
-          try Ok (transformer stdout) with
-          | e ->
-            let e = Exception.wrap e in
-            Error (info, Transformer_raised e)
-        end
+      | Ok { Process_types.stdout; _ } -> begin
+        try Ok (transformer stdout) with
+        | e ->
+          let e = Exception.wrap e in
+          Error (info, Transformer_raised e)
+      end
       | Error (Process_types.Abnormal_exit { status; stderr; _ }) ->
         Error (info, Process_failure { status; stderr })
       | Error (Process_types.Timed_out { stdout; stderr }) ->
         Error (info, Timed_out { stdout; stderr })
       | Error Process_types.Overflow_stdin -> Error (info, Process_aborted)
+      | Error (Process_types.Poll_exn err) -> Error (info, Poll_exn err)
     in
     Result.map_error res ~f:(fun (e : process_error) ->
         Future.create_error_instance (module ProcessError) e)

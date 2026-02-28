@@ -1,0 +1,181 @@
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package thrift
+
+import (
+	"context"
+	"errors"
+	"testing"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	dummyif "github.com/facebook/fbthrift/thrift/test/go/if/dummy"
+	"github.com/stretchr/testify/require"
+)
+
+func dummyInterceptor(
+	ctx context.Context,
+	methodName string,
+	pfunc types.ProcessorFunction,
+	args types.ReadableStruct,
+) (types.WritableStruct, error) {
+	if methodName == "Echo" {
+		if echoArg, ok := args.(*dummyif.DummyEchoArgsDeprecated); ok {
+			echoArg.Value = echoArg.Value + "-intercepted"
+		}
+	}
+	return pfunc.RunContext(ctx, args)
+}
+
+func TestInterceptorCreation(t *testing.T) {
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+
+	// Nil case
+	derivedProc := WrapInterceptor(nil, processor)
+	require.NotNil(t, derivedProc)
+	require.Equal(t, processor, derivedProc)
+
+	// Regular case
+	derivedProc = WrapInterceptor(dummyInterceptor, processor)
+	require.NotNil(t, derivedProc)
+	require.NotEqual(t, processor, derivedProc)
+}
+
+func TestInterceptorProcessorFunctionMap(t *testing.T) {
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+	derivedProc := WrapInterceptor(dummyInterceptor, processor)
+	pFunc := derivedProc.ProcessorFunctionMap()["blah"]
+	// Assert that all original functions are present
+	require.Equal(t, len(processor.ProcessorFunctionMap()), len(derivedProc.ProcessorFunctionMap()))
+	for funcName := range processor.ProcessorFunctionMap() {
+		require.Contains(t, derivedProc.ProcessorFunctionMap(), funcName)
+	}
+	require.Nil(t, pFunc)
+}
+
+func TestInterceptorRunContext(t *testing.T) {
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+	derivedProc := WrapInterceptor(dummyInterceptor, processor)
+	pFunc := derivedProc.ProcessorFunctionMap()["Echo"]
+	arg := dummyif.DummyEchoArgsDeprecated{
+		Value: "hello",
+	}
+	resp, err := pFunc.RunContext(context.Background(), &arg)
+	echoResp := resp.(*dummyif.DummyEchoResultDeprecated)
+	require.NoError(t, err)
+	require.Equal(t, "hello-intercepted", *echoResp.Success)
+}
+
+func TestChainInterceptors(t *testing.T) {
+	dummyInterceptor1 := func(
+		ctx context.Context,
+		methodName string,
+		pfunc types.ProcessorFunction,
+		args types.ReadableStruct,
+	) (types.WritableStruct, error) {
+		ws, ae := pfunc.RunContext(ctx, args)
+		if methodName == "Echo" {
+			echoResp := ws.(*dummyif.DummyEchoResultDeprecated)
+			echoResp.Success = Pointerize(*echoResp.Success + "-intercepted1")
+		}
+		return ws, ae
+	}
+	dummyInterceptor2 := func(
+		ctx context.Context,
+		methodName string,
+		pfunc types.ProcessorFunction,
+		args types.ReadableStruct,
+	) (types.WritableStruct, error) {
+		ws, ae := pfunc.RunContext(ctx, args)
+		if methodName == "Echo" {
+			echoResp := ws.(*dummyif.DummyEchoResultDeprecated)
+			echoResp.Success = Pointerize(*echoResp.Success + "-intercepted2")
+		}
+		return ws, ae
+	}
+	dummyInterceptor3 := func(
+		ctx context.Context,
+		methodName string,
+		pfunc types.ProcessorFunction,
+		args types.ReadableStruct,
+	) (types.WritableStruct, error) {
+		ws, ae := pfunc.RunContext(ctx, args)
+		if methodName == "Echo" {
+			echoResp := ws.(*dummyif.DummyEchoResultDeprecated)
+			echoResp.Success = Pointerize(*echoResp.Success + "-intercepted3")
+		}
+		return ws, ae
+	}
+
+	t.Run("three interceptors", func(t *testing.T) {
+		chainedInterceptor := ChainInterceptors(dummyInterceptor1, dummyInterceptor2, dummyInterceptor3)
+		processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+		derivedProc := WrapInterceptor(chainedInterceptor, processor)
+		pFunc := derivedProc.ProcessorFunctionMap()["Echo"]
+		arg := dummyif.DummyEchoArgsDeprecated{
+			Value: "hello",
+		}
+		resp, err := pFunc.RunContext(context.Background(), &arg)
+		echoResp := resp.(*dummyif.DummyEchoResultDeprecated)
+		require.NoError(t, err)
+		require.Equal(t, "hello-intercepted3-intercepted2-intercepted1", *echoResp.Success)
+	})
+	t.Run("one interceptor", func(t *testing.T) {
+		chainedInterceptor := ChainInterceptors(dummyInterceptor1)
+		processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+		derivedProc := WrapInterceptor(chainedInterceptor, processor)
+		pFunc := derivedProc.ProcessorFunctionMap()["Echo"]
+		arg := dummyif.DummyEchoArgsDeprecated{
+			Value: "hello",
+		}
+		resp, err := pFunc.RunContext(context.Background(), &arg)
+		echoResp := resp.(*dummyif.DummyEchoResultDeprecated)
+		require.NoError(t, err)
+		require.Equal(t, "hello-intercepted1", *echoResp.Success)
+	})
+	t.Run("zero interceptors", func(t *testing.T) {
+		chainedInterceptor := ChainInterceptors( /* zero */ )
+		processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+		derivedProc := WrapInterceptor(chainedInterceptor, processor)
+		pFunc := derivedProc.ProcessorFunctionMap()["Echo"]
+		arg := dummyif.DummyEchoArgsDeprecated{
+			Value: "hello",
+		}
+		resp, err := pFunc.RunContext(context.Background(), &arg)
+		echoResp := resp.(*dummyif.DummyEchoResultDeprecated)
+		require.NoError(t, err)
+		require.Equal(t, "hello", *echoResp.Success)
+	})
+}
+
+func TestMaybeWrapApplicationException(t *testing.T) {
+	t.Run("ApplicationException_case", func(t *testing.T) {
+		appException := NewApplicationException(UNKNOWN_APPLICATION_EXCEPTION, "test")
+		err := maybeWrapApplicationException(appException)
+		require.Error(t, err)
+		require.Equal(t, appException, err)
+	})
+
+	t.Run("generic_error_case", func(t *testing.T) {
+		dummyErr := errors.New("dummy error")
+		err := maybeWrapApplicationException(dummyErr)
+		require.Error(t, err)
+		var appErr *ApplicationException
+		require.ErrorAs(t, err, &appErr)
+		require.Equal(t, dummyErr.Error(), appErr.Error())
+	})
+}

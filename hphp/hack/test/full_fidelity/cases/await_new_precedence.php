@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 async function foo(mixed $a, mixed $b, mixed $c, mixed $x) : Awaitable<void> {

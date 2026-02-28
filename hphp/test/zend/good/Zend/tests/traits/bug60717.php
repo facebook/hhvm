@@ -4,27 +4,27 @@ namespace HTML
 {
 	interface Helper
 	{
-		function text($text);
-		function attributes(AnyArray $attributes = null);
-		function textArea(AnyArray $attributes = null, $value);
+		function text($text):mixed;
+		function attributes(AnyArray $attributes = null):mixed;
+		function textArea(AnyArray $attributes = null, $value):mixed;
 	}
 
 	trait TextUTF8
 	{
-		function text($text) {}
+		function text($text) :mixed{}
 	}
 
 	trait TextArea
 	{
-		function textArea(AnyArray $attributes = null, $value) {}
-		abstract function attributes(AnyArray $attributes = null);
-		abstract function text($text);
+		function textArea(AnyArray $attributes = null, $value) :mixed{}
+		abstract function attributes(AnyArray $attributes = null):mixed;
+		abstract function text($text):mixed;
 	}
 
 	trait HTMLAttributes
 	{
-		function attributes(AnyArray $attributes = null) {	}
-		abstract function text($text);
+		function attributes(AnyArray $attributes = null) :mixed{	}
+		abstract function text($text):mixed;
 	}
 
 	class HTMLHelper implements Helper

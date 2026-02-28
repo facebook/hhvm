@@ -6,7 +6,7 @@ class MyArrayIterator extends ArrayIterator
     public $state;
 
     static function fail($state, $method)
-    {
+:mixed    {
         if (self::$fail == $state)
         {
             throw new Exception("State $state: $method()");
@@ -17,49 +17,49 @@ class MyArrayIterator extends ArrayIterator
     {
         $this->state = MyArrayIterator::$fail;
         self::fail(0, __FUNCTION__);
-        parent::__construct(varray[1, 2]);
+        parent::__construct(vec[1, 2]);
         self::fail(1, __FUNCTION__);
     }
 
     function rewind()
-    {
+:mixed    {
         self::fail(2, __FUNCTION__);
         return parent::rewind();
     }
 
     function valid()
-    {
+:mixed    {
         self::fail(3, __FUNCTION__);
         return parent::valid();
     }
 
     function current()
-    {
+:mixed    {
         self::fail(4, __FUNCTION__);
         return parent::current();
     }
 
     function key()
-    {
+:mixed    {
         self::fail(5, __FUNCTION__);
         return parent::key();
     }
 
     function next()
-    {
+:mixed    {
         self::fail(6, __FUNCTION__);
         return parent::next();
     }
 
     static function test($func, $skip = null)
-    {
+:mixed    {
         echo "===$func===\n";
         self::$fail = 0;
         while(self::$fail < 10)
         {
             try
             {
-                var_dump($func(new MyArrayIterator()));
+                var_dump(HH\dynamic_fun($func)(new MyArrayIterator()));
                 break;
             }
             catch (Exception $e)
@@ -78,8 +78,7 @@ class MyArrayIterator extends ArrayIterator
     }
 }
 <<__EntryPoint>> function main(): void {
-MyArrayIterator::test('iterator_to_array');
-MyArrayIterator::test('iterator_count', darray[3 => 6]);
+MyArrayIterator::test('iterator_count', dict[3 => 6]);
 
 echo "===DONE===\n";
 }

@@ -2,7 +2,7 @@
 
 // Test serialization/deserialization of ImmVectors.
 
-function main() {
+function main() :mixed{
   // unserialize() o serialize() == identity function
   $fv = ImmVector {1, 2, 3};
   var_dump(unserialize(serialize($fv)) == $fv);
@@ -26,6 +26,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_serialization() {
+function main_serialization() :mixed{
 main();
 }

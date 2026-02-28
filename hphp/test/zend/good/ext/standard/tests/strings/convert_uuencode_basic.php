@@ -8,7 +8,7 @@
 echo "*** Testing convert_uuencode() : basic functionality ***\n";
 
 // array with different values for $string
-$strings =  varray [
+$strings =  vec[
 
   //double quoted strings
   b"123",

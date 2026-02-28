@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_timelib_offset_tz() {
+function main_timelib_offset_tz() :mixed{
 $dateTime = \DateTime::createFromFormat('U', '1293839999',
   new \DateTimeZone('GMT'));
 $var1 = $dateTime->format('T');

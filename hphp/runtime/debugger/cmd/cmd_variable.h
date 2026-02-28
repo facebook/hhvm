@@ -40,6 +40,8 @@ struct CmdVariable : DebuggerCommand {
   bool onServer(DebuggerProxy&) override;
   void onClient(DebuggerClient&) override;
 
+  std::string name() const override { return "variable"; }
+
 protected:
   void sendImpl(DebuggerThriftBuffer&) override;
   void recvImpl(DebuggerThriftBuffer&) override;

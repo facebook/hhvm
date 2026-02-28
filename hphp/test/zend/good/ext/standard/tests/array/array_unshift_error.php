@@ -12,7 +12,7 @@ try { var_dump( array_unshift() ); } catch (Exception $e) { echo "\n".'Warning: 
 
 // Testing array_unshift with one less than the expected number of arguments
 echo "\n-- Testing array_unshift() function with less than expected no. of arguments --\n";
-$array = varray[1, 2];
+$array = vec[1, 2];
 try { var_dump( array_unshift(inout $array, ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "Done";
 }

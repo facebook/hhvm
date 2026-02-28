@@ -1,15 +1,15 @@
 <?hh
 
-function autoloader($type, $name, $err) {
+function autoloader($type, $name, $err) :mixed{
 }
 
 <<__DynamicallyCallable>>
-function foo() {
+function foo() :mixed{
   echo "foo\n";
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   if (HH\execution_context() === "xbox") {
     return;
   }

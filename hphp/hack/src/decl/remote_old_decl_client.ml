@@ -11,63 +11,86 @@
 (*****************************************************************************)
 open Hh_prelude
 
-let get_hh_version () =
-  let repo = Wwwroot.get None in
-  let hhconfig_path =
-    Path.to_string
-      (Path.concat repo Config_file.file_path_relative_to_repo_root)
-  in
-  let version =
-    if Disk.file_exists hhconfig_path then
-      let (_, config) = Config_file.parse_hhconfig hhconfig_path in
-      Config_file.Getters.string_opt "version" config
-    else
-      None
-  in
-  match version with
-  | None -> Hh_version.version
-  | Some version ->
-    let version = "v" ^ String_utils.lstrip version "^" in
-    version
+module Utils = struct
+  let db_path_of_ctx ~(ctx : Provider_context.t) : Naming_sqlite.db_path option
+      =
+    ctx |> Provider_context.get_backend |> Db_path_provider.get_naming_db_path
 
-let db_path_of_ctx (ctx : Provider_context.t) : Naming_sqlite.db_path option =
-  ctx |> Provider_context.get_backend |> Db_path_provider.get_naming_db_path
+  let name_to_decl_hash_opt ~(name : string) ~(db_path : Naming_sqlite.db_path)
+      =
+    let dep = Typing_deps.(Dep.make (Dep.Type name)) in
+    let decl_hash = Naming_sqlite.get_decl_hash_by_64bit_dep db_path dep in
+    decl_hash
 
-let name_to_decl_hash_opt ~(name : string) ~(db_path : Naming_sqlite.db_path) =
-  let dep = Typing_deps.(Dep.make (Dep.Type name)) in
-  let decl_hash = Naming_sqlite.get_decl_hash_by_64bit_dep db_path dep in
-  if Option.is_some decl_hash then
-    Hh_logger.log
-      "Attempting to fetch old decl with decl hash %s remotely"
-      (Option.value_exn decl_hash);
-  decl_hash
+  let name_to_file_hash_opt ~(name : string) ~(db_path : Naming_sqlite.db_path)
+      =
+    let dep = Typing_deps.(Dep.make (Dep.Type name)) in
+    let file_hash = Naming_sqlite.get_file_hash_by_64bit_dep db_path dep in
+    file_hash
+end
+
+let fetch_old_decls_via_file_hashes
+    ~(ctx : Provider_context.t)
+    ~(db_path : Naming_sqlite.db_path)
+    (names : string list) : Shallow_decl_defs.shallow_class option SMap.t =
+  (* TODO(bobren): names should really be a list of deps *)
+  let file_hashes =
+    List.filter_map
+      ~f:(fun name ->
+        match Utils.name_to_file_hash_opt ~name ~db_path with
+        | Some (path, hash) ->
+          Hh_logger.log
+            "Fetching decl for %s defined in %s from blob %s"
+            name
+            Relative_path.(suffix path)
+            hash;
+          Some (path, hash)
+        | None ->
+          Hh_logger.log "Missing entry for %s" name;
+          None)
+      names
+  in
+  let popt = Provider_context.get_popt ctx in
+  let opts = Decl_parser_options.from_parser_options popt in
+  match Remote_old_decls_ffi.get_decls_via_file_hashes opts file_hashes with
+  | Ok named_old_decls ->
+    (* TODO(bobren) do funs typedefs consts and modules *)
+    let old_decls =
+      List.fold
+        ~init:SMap.empty
+        ~f:(fun acc ndecl ->
+          match ndecl with
+          | Shallow_decl_defs.NClass (name, cls) -> SMap.add name (Some cls) acc
+          | _ -> acc)
+        named_old_decls
+    in
+    old_decls
+  | Error msg ->
+    Hh_logger.log "Error fetching remote decls: %s" msg;
+    SMap.empty
 
 let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
     Shallow_decl_defs.shallow_class option SMap.t =
-  let db_path_opt = db_path_of_ctx ctx in
+  let db_path_opt = Utils.db_path_of_ctx ~ctx in
   match db_path_opt with
   | None -> SMap.empty
   | Some db_path ->
     let decl_hashes =
       List.filter_map
-        ~f:(fun name -> name_to_decl_hash_opt ~name ~db_path)
+        ~f:(fun name -> Utils.name_to_decl_hash_opt ~name ~db_path)
         names
     in
-    let hh_config_version = get_hh_version () in
-    let decl_blobs =
-      Remote_old_decls_ffi.get_decls hh_config_version decl_hashes
+    let start_t = Unix.gettimeofday () in
+    let old_decls = fetch_old_decls_via_file_hashes ~ctx ~db_path names in
+    let to_fetch = List.length decl_hashes in
+    let telemetry =
+      Telemetry.create ()
+      |> Telemetry.int_ ~key:"to_fetch" ~value:to_fetch
+      |> Telemetry.int_ ~key:"fetched" ~value:(SMap.cardinal old_decls)
     in
-    let decls =
-      List.fold
-        ~init:SMap.empty
-        ~f:(fun acc blob ->
-          let contents : Shallow_decl_defs.shallow_class SMap.t =
-            Marshal.from_string blob 0
-          in
-          SMap.fold
-            (fun name cls acc -> SMap.add name (Some cls) acc)
-            contents
-            acc)
-        decl_blobs
-    in
-    decls
+    HackEventLogger.remote_old_decl_end telemetry start_t;
+    Hh_logger.log
+      "Fetched %d/%d decls remotely"
+      (SMap.cardinal old_decls)
+      to_fetch;
+    old_decls

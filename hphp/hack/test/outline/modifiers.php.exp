@@ -4,6 +4,7 @@ fun
   position: line 3, characters 16-18
   span: line 3, character 1 - line 3, character 23
   modifiers: async 
+  detail: function()
   params:
 
 C
@@ -14,11 +15,12 @@ C
   modifiers: abstract 
 
   FOO
-    kind: const
+    kind: class constant
     id: class_const::C::FOO
     position: line 6, characters 18-20
     span: line 6, character 18 - line 6, character 20
     modifiers: abstract 
+    detail: FOO
 
   x1
     kind: property
@@ -26,6 +28,7 @@ C
     position: line 7, characters 17-19
     span: line 7, character 17 - line 7, character 19
     modifiers: public static 
+    detail: $x1
 
   x2
     kind: property
@@ -33,6 +36,7 @@ C
     position: line 8, characters 17-19
     span: line 8, character 17 - line 8, character 19
     modifiers: public static 
+    detail: $x2
 
   bar1
     kind: method
@@ -40,6 +44,7 @@ C
     position: line 10, characters 44-47
     span: line 10, character 3 - line 10, character 50
     modifiers: protected abstract static async 
+    detail: function();
     params:
 
   bar2
@@ -48,6 +53,7 @@ C
     position: line 11, characters 44-47
     span: line 11, character 3 - line 11, character 50
     modifiers: protected abstract static async 
+    detail: function();
     params:
 
   bar3
@@ -56,6 +62,7 @@ C
     position: line 12, characters 44-47
     span: line 12, character 3 - line 12, character 50
     modifiers: protected abstract static async 
+    detail: function();
     params:
 
   bar4
@@ -64,6 +71,7 @@ C
     position: line 13, characters 44-47
     span: line 13, character 3 - line 13, character 50
     modifiers: protected abstract static async 
+    detail: function();
     params:
 
   bar5
@@ -72,6 +80,7 @@ C
     position: line 14, characters 44-47
     span: line 14, character 3 - line 14, character 50
     modifiers: protected abstract static async 
+    detail: function();
     params:
 
   bar6
@@ -80,5 +89,6 @@ C
     position: line 15, characters 44-47
     span: line 15, character 3 - line 15, character 50
     modifiers: protected abstract static async 
+    detail: function();
     params:
 

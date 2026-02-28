@@ -7,42 +7,45 @@ abstract final class GetRandomPortStatics {
 //////////////////////////////////////////////////////////////////////
 
 // so we run on different range of ports every time
-function get_random_port() {
+function get_random_port() :mixed{
   if (GetRandomPortStatics::$base == -1) {
     GetRandomPortStatics::$base = 12345 + (int)((int)(HH\Lib\Legacy_FIXME\cast_for_arithmetic(microtime(false)) * 100) % 30000);
   }
-  return ++GetRandomPortStatics::$base;
+  ++GetRandomPortStatics::$base;
+  return GetRandomPortStatics::$base;
 }
 
-function bind_random_port($socket, $address) {
+function bind_random_port($socket, $address) :mixed{
   for ($i = 0; $i < 100; $i++) {
     $port = get_random_port();
-    if (@socket_bind($socket, $address, $port)) return $port;
+    if (socket_bind($socket, $address, $port)) return $port;
   }
   return 0;
 }
 
-function create_listen_random_port(inout $sock) {
+function create_listen_random_port(inout $sock) :mixed{
   for ($i = 0; $i < 100; $i++) {
     $port = get_random_port();
-    if ($sock = @socket_create_listen($port)) return $port;
+    error_reporting(0);
+    if ($sock = socket_create_listen($port)) return $port;
+    error_reporting(E_ALL);
   }
   return 0;
 }
 
-function pfsockopen_random_port(inout $fsock, $address) {
+function pfsockopen_random_port(inout $fsock, $address) :mixed{
   $fsock = false;
   for ($i = 0; $i < 100; $i++) {
     $port = get_random_port();
     $errno = null;
     $errstr = null;
-    $fsock = @pfsockopen($address, $port, inout $errno, inout $errstr);
+    $fsock = pfsockopen($address, $port, inout $errno, inout $errstr);
     if ($fsock !== false) return $port;
   }
   return 0;
 }
 
-function get_client_server() {
+function get_client_server() :mixed{
   $server = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
   $port = bind_random_port($server, "127.0.0.1");
   var_dump($port != 0);
@@ -52,14 +55,14 @@ function get_client_server() {
   var_dump(socket_connect($client, "127.0.0.1", $port));
 
   $s = socket_accept($server);
-  return varray[$client, $s];
+  return vec[$client, $s];
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 
 <<__EntryPoint>>
-function main_ext_socket() {
+function main_ext_socket() :mixed{
 $s = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 var_dump($s);
 
@@ -82,11 +85,12 @@ var_dump(socket_write($client, "hello world"));
 var_dump(socket_read($s, 100));
 
 list($client, $s) = get_client_server();
-$reads = varray[$s];
-$ignore1 = $ignore2 = null;
+$reads = vec[$s];
+$ignore2 = null;
+$ignore1 = $ignore2;
 var_dump(socket_select(inout $reads, inout $ignore1, inout $ignore2, 1, 0));
 var_dump(socket_write($client, "next select will be 1"));
-$reads = varray[$s];
+$reads = vec[$s];
 var_dump(socket_select(inout $reads, inout $ignore1, inout $ignore2, 1, 0));
 
 list($client, $s) = get_client_server();
@@ -122,7 +126,7 @@ var_dump(socket_listen($s));
 var_dump(socket_close($s));
 
 $s = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-@socket_bind($s, "127.0.0.1", 25);
+socket_bind($s, "127.0.0.1", 25);
 if (socket_last_error($s) == 13) {
   var_dump(socket_strerror(13) == "Permission denied");
   socket_clear_error($s);

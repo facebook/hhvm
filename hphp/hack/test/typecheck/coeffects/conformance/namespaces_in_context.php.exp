@@ -1,8 +1,8 @@
-File "namespaces_in_context.php", line 9, characters 37-51:
+ERROR: File "namespaces_in_context.php", line 9, characters 37-51:
 Unbound name: `MyOuterNs\MyInnerNs\MyOuterNs\Outer` (Naming[2049])
-File "namespaces_in_context.php", line 12, characters 34-50:
+ERROR: File "namespaces_in_context.php", line 12, characters 34-50:
 Illegal context: `\MyOuterNs\MyInnerNs\Inner`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
-File "namespaces_in_context.php", line 16, characters 33-60:
+ERROR: File "namespaces_in_context.php", line 16, characters 33-60:
 Illegal context: `\MyOuterNs\MyInnerNs\Inner`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])

@@ -21,11 +21,11 @@
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/jit-resume-addr-defs.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/mcgen-async.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
-#include "hphp/runtime/vm/jit/prof-data.h"
-#include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
+#include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
@@ -34,16 +34,13 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/workload-stats.h"
 
-#include "hphp/vixl/a64/decoder-a64.h"
-
-#include "hphp/util/arch.h"
+#include "hphp/util/configs/debugger.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/trace.h"
 
-TRACE_SET_MOD(mcg);
+TRACE_SET_MOD(mcg)
 
 namespace HPHP::jit::svcreq {
 
@@ -134,8 +131,13 @@ TranslationResult getTranslation(SrcKey sk) {
     return TranslationResult::failTransiently();
   }
 
-  if (UNLIKELY(!RO::RepoAuthoritative && sk.unit()->isCoverageEnabled())) {
-    assertx(RO::EvalEnablePerFileCoverage);
+  if (UNLIKELY(Cfg::Debugger::EnableVSDebugger && Cfg::Eval::EmitDebuggerIntrCheck)) {
+    assertx(!Cfg::Repo::Authoritative);
+    sk.func()->ensureDebuggerIntrSetLinkBound();
+  }
+
+  if (UNLIKELY(!Cfg::Repo::Authoritative && sk.unit()->isCoverageEnabled())) {
+    assertx(Cfg::Eval::EnablePerFileCoverage);
     SKTRACE(2, sk, "punting because per file code coverage is enabled\n");
     return TranslationResult::failTransiently();
   }
@@ -149,6 +151,14 @@ TranslationResult getTranslation(SrcKey sk) {
     return TranslationResult{s};
   }
 
+  if (mcgen::isAsyncJitEnabled(args.kind)) {
+    assertx(isLive(args.kind) || isProfiling(args.kind));
+    mcgen::enqueueAsyncTranslateRequest(args.kind, args.sk, [&] {
+      return getContext(args.sk, args.kind == TransKind::Profile);
+    }, 0);
+    return TranslationResult::failTransiently();
+  }
+
   LeaseHolder writer(sk.func(), args.kind);
   if (!writer) return TranslationResult::failTransiently();
 
@@ -157,7 +167,10 @@ TranslationResult getTranslation(SrcKey sk) {
     return TranslationResult{s};
   }
 
-  tc::createSrcRec(sk, liveSpOff());
+  if (tc::createSrcRec(sk, liveSpOff()) == nullptr) {
+    // ran out of TC space
+    return TranslationResult::failForProcess();
+  }
 
   if (auto const tca = tc::findSrcRec(sk)->getTopTranslation()) {
     // Handle extremely unlikely race; someone may have just added the first
@@ -166,56 +179,12 @@ TranslationResult getTranslation(SrcKey sk) {
     return TranslationResult{tca};
   }
 
-  return mcgen::retranslate(
-    args,
-    getContext(args.sk, args.kind == TransKind::Profile)
-  );
+  auto const ctx = getContext(args.sk, args.kind == TransKind::Profile);
+  return mcgen::retranslate(args, ctx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}
-
-JitResumeAddr getFuncEntry(const Func* func) {
-  if (auto const addr = func->getFuncEntry()) {
-    return JitResumeAddr::transFuncEntry(addr);
-  }
-
-  LeaseHolder writer(func, TransKind::Profile);
-  if (!writer) {
-    return JitResumeAddr::helper(tc::ustubs().resumeHelperFuncEntryFromInterp);
-  }
-
-  if (auto const addr = func->getFuncEntry()) {
-    return JitResumeAddr::transFuncEntry(addr);
-  }
-
-  if (func->numRequiredParams() != func->numNonVariadicParams()) {
-    const_cast<Func*>(func)
-      ->setFuncEntry(tc::ustubs().resumeHelperFuncEntryFromTC);
-    return JitResumeAddr::helper(tc::ustubs().resumeHelperFuncEntryFromInterp);
-  }
-
-  SrcKey sk{func, 0, SrcKey::FuncEntryTag{}};
-  auto const trans = getTranslation(sk);
-
-  if (auto const addr = trans.addr()) {
-    const_cast<Func*>(func)->setFuncEntry(addr);
-    return JitResumeAddr::transFuncEntry(addr);
-  }
-
-  if (trans.isProcessPersistentFailure()) {
-    const_cast<Func*>(func)
-      ->setFuncEntry(tc::ustubs().interpHelperNoTranslateFuncEntryFromTC);
-    // implies request persistent failure below
-  }
-
-  if (trans.isRequestPersistentFailure()) {
-    return JitResumeAddr::helper(
-      tc::ustubs().interpHelperNoTranslateFuncEntryFromInterp);
-  }
-
-  return JitResumeAddr::helper(tc::ustubs().resumeHelperFuncEntryFromInterp);
 }
 
 namespace {
@@ -257,6 +226,15 @@ void syncRegs(SBInvOffset spOff) noexcept {
 
 }
 
+void uninitDefaultArgs(ActRec* fp, uint32_t numEntryArgs,
+                       uint32_t numNonVariadicParams) noexcept {
+  // JIT may optimize away uninit writes for default arguments. Write them, as
+  // we may inspect them or continue execution in the interpreter.
+  for (auto param = numEntryArgs; param < numNonVariadicParams; ++param) {
+    tvWriteUninit(frame_local(fp, param));
+  }
+}
+
 TCA handleTranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   syncRegs(spOff);
   FTRACE(1, "handleTranslate {}\n", vmfp()->func()->fullName()->data());
@@ -265,13 +243,27 @@ TCA handleTranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   return resume(sk, getTranslation(sk));
 }
 
-TCA handleTranslateFuncEntry(Offset bcOff) noexcept {
+TCA handleTranslateFuncEntry(uint32_t numArgs) noexcept {
   syncRegs(SBInvOffset{0});
+  uninitDefaultArgs(vmfp(), numArgs, liveFunc()->numNonVariadicParams());
   FTRACE(1, "handleTranslateFuncEntry {}\n",
          vmfp()->func()->fullName()->data());
 
-  auto const sk = SrcKey { liveFunc(), bcOff, SrcKey::FuncEntryTag {} };
+  auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };
   return resume(sk, getTranslation(sk));
+}
+
+TCA handleTranslateMainFuncEntry() noexcept {
+    syncRegs(SBInvOffset{0});
+    FTRACE(1, "handleTranslateMainFuncEntry {}\n",
+           vmfp()->func()->fullName()->data());
+    auto const numArgs = liveFunc()->numNonVariadicParams();
+    auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };
+    return resume(sk, getTranslation(sk));
+}
+
+TranslationResult::Scope shouldEnqueueForRetranslate(const SrcKey& sk) {
+  return tc::shouldTranslate(sk, TransKind::Live);
 }
 
 TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
@@ -280,30 +272,75 @@ TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
 
   INC_TPC(retranslate);
   auto const sk = SrcKey { liveFunc(), bcOff, liveResumeMode() };
-  auto const context = getContext(sk, tc::profileFunc(sk.func()));
+  auto const isProfile = tc::profileFunc(sk.func());
+  auto const kind = isProfile ? TransKind::Profile : TransKind::Live;
+  if (mcgen::isAsyncJitEnabled(kind)) {
+    assertx(isLive(kind) || isProfiling(kind));
+    auto const res = shouldEnqueueForRetranslate(sk);
+    if (res != TranslationResult::Scope::Success) {
+      FTRACE_MOD(Trace::async_jit, 2,
+                 "shouldEnqueueForRetranslate failed for sk {}\n", show(sk));
+      return resume(sk, TranslationResult{res});
+    }
+    auto const srcRec = tc::findSrcRec(sk);
+    assertx(srcRec);
+    auto const currNumTrans = srcRec->numTrans();
+    FTRACE_MOD(Trace::async_jit, 2,
+               "Enqueueing sk {} from handleRetranslate\n",
+               show(sk));
+    mcgen::enqueueAsyncTranslateRequest(kind, sk, [&] {
+      return getContext(sk, isProfile);
+    }, currNumTrans);
+    return resume(sk, TranslationResult::failTransiently());
+  }
+  auto const context = getContext(sk, isProfile);
   auto const transResult = mcgen::retranslate(TransArgs{sk}, context);
   SKTRACE(2, sk, "retranslated @%p\n", transResult.addr());
   return resume(sk, transResult);
 }
 
-TCA handleRetranslateFuncEntry(Offset bcOff) noexcept {
+TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept {
   syncRegs(SBInvOffset{0});
+  uninitDefaultArgs(vmfp(), numArgs, liveFunc()->numNonVariadicParams());
   FTRACE(1, "handleRetranslateFuncEntry {}\n",
          vmfp()->func()->fullName()->data());
 
   INC_TPC(retranslate);
-  auto const sk = SrcKey { liveFunc(), bcOff, SrcKey::FuncEntryTag {} };
-  auto const context = getContext(sk, tc::profileFunc(sk.func()));
+  auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };
+  auto const isProfile = tc::profileFunc(sk.func());
+  auto const kind = isProfile ? TransKind::Profile : TransKind::Live;
+  if (mcgen::isAsyncJitEnabled(kind)) {
+    assertx(isLive(kind) || isProfiling(kind));
+    auto const res = shouldEnqueueForRetranslate(sk);
+    if (res != TranslationResult::Scope::Success) {
+      if (!Cfg::Eval::AsyncJitDeferContext) getContext(sk, isProfile);
+      FTRACE_MOD(Trace::async_jit, 2,
+                 "shouldEnqueueForRetranslate failed for sk {}\n", show(sk));
+      return resume(sk, TranslationResult{res});
+    }
+    auto const srcRec = tc::findSrcRec(sk);
+    assertx(srcRec);
+    auto const currNumTrans = srcRec->numTrans();
+    FTRACE_MOD(Trace::async_jit, 2,
+               "Enqueueing sk {} from handleRetranslateFuncEntry\n",
+               show(sk));
+    mcgen::enqueueAsyncTranslateRequest(kind, sk, [&] {
+      return getContext(sk, isProfile);
+    }, currNumTrans);
+    return resume(sk, TranslationResult::failTransiently());
+  }
+  auto const context = getContext(sk, isProfile);
   auto const transResult = mcgen::retranslate(TransArgs{sk}, context);
   SKTRACE(2, sk, "retranslated @%p\n", transResult.addr());
   return resume(sk, transResult);
 }
 
-TCA handleRetranslateOpt(Offset bcOff) noexcept {
+TCA handleRetranslateOpt(uint32_t numArgs) noexcept {
   syncRegs(SBInvOffset{0});
+  uninitDefaultArgs(vmfp(), numArgs, liveFunc()->numNonVariadicParams());
   FTRACE(1, "handleRetranslateOpt {}\n", vmfp()->func()->fullName()->data());
 
-  auto const sk = SrcKey { liveFunc(), bcOff, SrcKey::FuncEntryTag {} };
+  auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };
   auto const translated = mcgen::retranslateOpt(sk.funcID());
   vmpc() = sk.advanced().pc();
   regState() = VMRegState::DIRTY;
@@ -391,6 +428,74 @@ std::string ResumeFlags::show() const {
   return folly::join(", ", flags);
 }
 
+namespace {
+void logResume(SrcKey sk, ResumeFlags flags) {
+  if (!StructuredLog::coinflip(Cfg::Eval::HandleResumeStatsRate)) return;
+
+  StructuredLogEntry ent;
+
+  std::set<folly::StringPiece> flgs;
+  if (flags.m_noTranslate) flgs.emplace("noTranslate");
+  if (flags.m_interpFirst) flgs.emplace("interpFirst");
+  if (flags.m_funcEntry)   flgs.emplace("funcEntry");
+  if (!flgs.empty())       ent.setSet("flags", flgs);
+
+  // Canonicalize path
+  std::filesystem::path fpath = sk.unit()->filepath()->toCppString();
+  auto const dir = RepoOptions::forFile(fpath.c_str()).dir();
+  auto const rel = std::filesystem::proximate(fpath, dir);
+  auto const fn = folly::cEscape<std::string>(sk.func()->fullName()->slice());
+
+  ent.setInt("sample_rate", Cfg::Eval::HandleResumeStatsRate);
+  ent.setStr("file", rel.native());
+  ent.setInt("line", sk.lineNumber());
+  ent.setInt("offset", sk.offset());
+  ent.setStr("func", sk.func()->name()->slice());
+  if (sk.func()->isMethod()) {
+    if (auto c = sk.func()->cls()) ent.setStr("class", c->name()->slice());
+    else ent.setStr("class", sk.func()->preClass()->name()->slice());
+  }
+  ent.setStr("unit_sha1", sk.unit()->sha1().toString());
+  ent.setStr("full_func_name", fn);
+  ent.setInt("prologue", sk.prologue() ? 1 : 0);
+  ent.setInt("funcEntry", sk.funcEntry() ? 1 : 0);
+  ent.setInt("hasThis", sk.hasThis() ? 1 : 0);
+  switch (sk.resumeMode()) {
+  case ResumeMode::None: ent.setStr("resume_mode", "None");       break;
+  case ResumeMode::Async: ent.setStr("resume_mode", "Async");     break;
+  case ResumeMode::GenIter: ent.setStr("resume_mode", "GenIter"); break;
+  }
+  if (sk.prologue() || sk.funcEntry()) {
+    ent.setInt("num_entry_args", sk.numEntryArgs());
+  }
+  ent.setStr("inst", sk.showInst());
+
+  ent.setInt("main_used_bytes", tc::code().mainUsed());
+  ent.setInt("cold_used_bytes", tc::code().coldUsed());
+  ent.setInt("frozen_used_bytes", tc::code().frozenUsed());
+  ent.setInt("data_used_bytes", tc::code().dataUsed());
+
+  if (auto const sr = tc::findSrcRec(sk)) {
+    auto const lock = sr->readlock();
+    ent.setInt("src_rec", 1);
+    ent.setInt("num_trans", sr->translations().size());
+    ent.setInt("tail_jumps", sr->tailFallbackJumps().size());
+    ent.setInt("incoming_branches", sr->incomingBranches().size());
+    ent.setInt("max_trans", Cfg::Jit::MaxTranslations);
+  } else {
+    ent.setInt("src_rec", 0);
+  }
+
+  ent.setInt("can_translate", tc::canTranslate() ? 1 : 0);
+  ent.setInt("profile_count", sk.func()->readJitReqCount());
+  ent.setInt("live_threshold", Cfg::Jit::LiveThreshold);
+  ent.setInt("live_main_usage", tc::getLiveMainUsage());
+  ent.setInt("live_main_limit", Cfg::Jit::MaxLiveMainUsage);
+
+  StructuredLog::log("hhvm_resume_locations", ent);
+}
+}
+
 JitResumeAddr handleResume(ResumeFlags flags) {
   assert_native_stack_aligned();
   FTRACE(1, "handleResume({})\n", flags.show());
@@ -401,12 +506,22 @@ JitResumeAddr handleResume(ResumeFlags flags) {
   auto sk = liveSK();
   if (flags.m_funcEntry) {
     assertx(sk.resumeMode() == ResumeMode::None);
-    sk = SrcKey { sk.func(), sk.offset(), SrcKey::FuncEntryTag {} };
+    auto const func = sk.func();
+    auto numArgs = func->numNonVariadicParams();
+    while (numArgs > 0 && !frame_local(vmfp(), numArgs - 1)->is_init()) {
+      --numArgs;
+    }
+    DEBUG_ONLY auto const entryOffset = sk.offset();
+    sk = SrcKey { sk.func(), numArgs, SrcKey::FuncEntryTag {} };
+    assertx(sk.entryOffset() == entryOffset);
+
     vmsp() = Stack::frameStackBase(vmfp());
   }
   FTRACE(2, "handleResume: sk: {}\n", showShort(sk));
 
-  auto const findOrTranslate = [&] () -> JitResumeAddr {
+  auto const findOrTranslate = [&] (ResumeFlags flags) -> JitResumeAddr {
+    if (!RID().getJit()) return JitResumeAddr::none();
+
     if (!flags.m_noTranslate) {
       auto const trans = getTranslation(sk);
       if (auto const addr = trans.addr()) {
@@ -423,18 +538,16 @@ JitResumeAddr handleResume(ResumeFlags flags) {
 
     if (auto const sr = tc::findSrcRec(sk)) {
       if (auto const tca = sr->getTopTranslation()) {
-        if (LIKELY(RID().getJit())) {
-          SKTRACE(2, sk, "handleResume: found %p\n", tca);
-          if (sk.funcEntry()) return JitResumeAddr::transFuncEntry(tca);
-          return JitResumeAddr::trans(tca);
-        }
+        SKTRACE(2, sk, "handleResume: found %p\n", tca);
+        if (sk.funcEntry()) return JitResumeAddr::transFuncEntry(tca);
+        return JitResumeAddr::trans(tca);
       }
     }
     return JitResumeAddr::none();
   };
 
   auto start = JitResumeAddr::none();
-  if (!flags.m_interpFirst) start = findOrTranslate();
+  if (!flags.m_interpFirst) start = findOrTranslate(flags);
   if (!flags.m_noTranslate && flags.m_interpFirst) INC_TPC(interp_bb_force);
 
   vmJitReturnAddr() = nullptr;
@@ -447,6 +560,9 @@ JitResumeAddr handleResume(ResumeFlags flags) {
   if (!start) {
     WorkloadStats guard(WorkloadStats::InInterp);
     tracing::BlockNoTrace _{"dispatch-bb"};
+
+    // Log the resume event to scuba
+    logResume(sk, flags);
 
     if (sk.funcEntry()) {
       auto const savedRip = vmfp()->m_savedRip;
@@ -467,6 +583,12 @@ JitResumeAddr handleResume(ResumeFlags flags) {
       sk.advance();
     }
 
+    // If background jit is enabled, enqueueing a new translation request
+    // after every basic block may generate too many overlapping translations
+    // because no thread takes a function-level lease.
+    auto const kind = tc::profileFunc(sk.func()) ?
+      TransKind::Profile : TransKind::Live;
+    if (mcgen::isAsyncJitEnabled(kind)) flags = flags.noTranslate();
     do {
       INC_TPC(interp_bb);
       if (auto const retAddr = HPHP::dispatchBB()) {
@@ -474,7 +596,7 @@ JitResumeAddr handleResume(ResumeFlags flags) {
       } else {
         assertx(vmpc());
         sk = liveSK();
-        start = findOrTranslate();
+        start = findOrTranslate(flags);
       }
     } while (!start);
   }

@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /**
  * Setting a non-static key in tuple-like array downgrades it to a vec-like
@@ -6,7 +6,7 @@
  */
 
 function test(int $key): void {
-  $a = varray[4, 'aaa'];
+  $a = vec[4, 'aaa'];
   $a[$key] = 4;
   hh_show($a);
   take_string($a[1]);

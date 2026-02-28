@@ -1,0 +1,2 @@
+ERROR: File "splat_multiple.php", line 7, characters 12-16:
+Too many splat operators `...`. An argument list can have at most one splat operator. (Parsing[1002])

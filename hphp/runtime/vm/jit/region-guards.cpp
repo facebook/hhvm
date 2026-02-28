@@ -21,6 +21,7 @@
 #include <folly/Hash.h>
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/vm/jit/containers.h"
@@ -32,7 +33,7 @@
 
 namespace HPHP { namespace jit {
 
-TRACE_SET_MOD(pgo);
+TRACE_SET_MOD(pgo)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -117,7 +118,7 @@ LocationTypeWeights findLocationTypes(const BlockDataVec& blockData) {
 
 /*
  * We consider relaxation profitable if there's not a single dominating type
- * that accounts for RuntimeOption::EvalJitPGORelaxPercent or more of the time
+ * that accounts for Cfg::Jit::PGORelaxPercent or more of the time
  * during profiling.
  */
 bool relaxIsProfitable(const jit::hash_map<Type,int64_t>& typeWeights,
@@ -126,7 +127,7 @@ bool relaxIsProfitable(const jit::hash_map<Type,int64_t>& typeWeights,
   assertx(guardType <= TCell);
   auto relaxedType = relaxType(guardType, guardCategory);
 
-  int64_t totalWgt   = 0; // sum of all the block weights
+  DEBUG_ONLY int64_t totalWgt   = 0; // sum of all the block weights
   int64_t relaxWgt   = 0; // total weight if we relax guardType w/ guardCategory
   int64_t noRelaxWgt = 0; // total weight if we don't relax guardType at all
   for (auto& typeWgt : typeWeights) {
@@ -144,7 +145,7 @@ bool relaxIsProfitable(const jit::hash_map<Type,int64_t>& typeWeights,
 
   // Consider relaxing to the input guardCategory.
   auto const profitable =
-    (noRelaxWgt * 100 < relaxWgt * RuntimeOption::EvalJitPGORelaxPercent);
+    (noRelaxWgt * 100 < relaxWgt * Cfg::Jit::PGORelaxPercent);
   FTRACE(3,
          "relaxIsProfitable({}, {}): noRelaxWgt={} ; relaxWgt={} ; totalWgt={} "
          "=> {}\n",

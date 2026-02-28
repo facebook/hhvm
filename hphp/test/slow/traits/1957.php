@@ -1,7 +1,7 @@
 <?hh
 
 trait MY_TRAIT  {
-  public function sayHello() {
+  public function sayHello() :mixed{
     echo 'World!';
   }
 }

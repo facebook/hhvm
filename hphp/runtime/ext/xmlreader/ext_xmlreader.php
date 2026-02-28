@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
-<<__NativeData("XMLReader")>>
+<<__NativeData>>
 class XMLReader {
 
   public function __construct(): void {}

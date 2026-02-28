@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1054() {
+function main_1054() :mixed{
 $x = new stdClass();
 try {
   var_dump ($x == 1 && 1 == $x);

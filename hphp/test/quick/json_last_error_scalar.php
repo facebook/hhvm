@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main(): void {
-  $data = varray[
+  $data = vec[
     'null',
     'false',
     'true',

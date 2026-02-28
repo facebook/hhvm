@@ -3,7 +3,7 @@
 abstract final class CallbackStatics {
   public static $callback_invocations = 0;
 }
-function callback($string) {
+function callback($string) :mixed{
     CallbackStatics::$callback_invocations++;
     return "[callback:" . CallbackStatics::$callback_invocations . "]$string\n";
 }

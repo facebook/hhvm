@@ -11,9 +11,9 @@ class type ['a] decl_type_visitor_type =
   object
     method on_tany : 'a -> Typing_reason.decl_t -> 'a
 
-    method on_terr : 'a -> Typing_reason.decl_t -> 'a
-
     method on_tmixed : 'a -> Typing_reason.decl_t -> 'a
+
+    method on_twildcard : 'a -> Typing_reason.decl_t -> 'a
 
     method on_tnonnull : 'a -> Typing_reason.decl_t -> 'a
 
@@ -28,8 +28,7 @@ class type ['a] decl_type_visitor_type =
       Typing_defs.decl_ty ->
       'a
 
-    method on_tgeneric :
-      'a -> Typing_reason.decl_t -> string -> Typing_defs.decl_ty list -> 'a
+    method on_tgeneric : 'a -> Typing_reason.decl_t -> string -> 'a
 
     method on_toption : 'a -> Typing_reason.decl_t -> Typing_defs.decl_ty -> 'a
 
@@ -37,7 +36,7 @@ class type ['a] decl_type_visitor_type =
 
     method on_tprim : 'a -> Typing_reason.decl_t -> Aast.tprim -> 'a
 
-    method on_tvar : 'a -> Typing_reason.decl_t -> Ident.t -> 'a
+    method on_tvar : 'a -> Typing_reason.decl_t -> Tvid.t -> 'a
 
     method on_type : 'a -> Typing_defs.decl_ty -> 'a
 
@@ -51,8 +50,14 @@ class type ['a] decl_type_visitor_type =
       Typing_defs.decl_ty list ->
       'a
 
+    method on_tuple_extra :
+      'a -> Typing_defs.decl_phase Typing_defs.tuple_extra -> 'a
+
     method on_ttuple :
-      'a -> Typing_reason.decl_t -> Typing_defs.decl_ty list -> 'a
+      'a ->
+      Typing_reason.decl_t ->
+      Typing_defs.decl_phase Typing_defs.tuple_type ->
+      'a
 
     method on_tunion :
       'a -> Typing_reason.decl_t -> Typing_defs.decl_ty list -> 'a
@@ -63,9 +68,7 @@ class type ['a] decl_type_visitor_type =
     method on_tshape :
       'a ->
       Typing_reason.decl_t ->
-      Typing_defs.shape_kind ->
-      Typing_defs.decl_phase Typing_defs.shape_field_type
-      Typing_defs.TShapeMap.t ->
+      Typing_defs.decl_phase Typing_defs.shape_type ->
       'a
 
     method on_taccess :
@@ -73,6 +76,16 @@ class type ['a] decl_type_visitor_type =
       Typing_reason.decl_t ->
       Typing_defs.decl_phase Typing_defs.taccess_type ->
       'a
+
+    method on_trefinement :
+      'a ->
+      Typing_reason.decl_t ->
+      Typing_defs.decl_ty ->
+      Typing_defs.decl_class_refinement ->
+      'a
+
+    method on_tclass_ptr :
+      'a -> Typing_reason.decl_t -> Typing_defs.decl_ty -> 'a
   end
 
 class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type
@@ -80,8 +93,6 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type
 class type ['a] locl_type_visitor_type =
   object
     method on_tany : 'a -> Typing_reason.t -> 'a
-
-    method on_terr : 'a -> Typing_reason.t -> 'a
 
     method on_tnonnull : 'a -> Typing_reason.t -> 'a
 
@@ -91,14 +102,13 @@ class type ['a] locl_type_visitor_type =
 
     method on_tprim : 'a -> Typing_reason.t -> Aast.tprim -> 'a
 
-    method on_tvar : 'a -> Typing_reason.t -> Ident.t -> 'a
+    method on_tvar : 'a -> Typing_reason.t -> Tvid.t -> 'a
 
     method on_type : 'a -> Typing_defs.locl_ty -> 'a
 
     method on_tfun : 'a -> Typing_reason.t -> Typing_defs.locl_fun_type -> 'a
 
-    method on_tgeneric :
-      'a -> Typing_reason.t -> string -> Typing_defs.locl_ty list -> 'a
+    method on_tgeneric : 'a -> Typing_reason.t -> string -> 'a
 
     method on_tnewtype :
       'a ->
@@ -115,7 +125,14 @@ class type ['a] locl_type_visitor_type =
       Typing_defs.locl_ty ->
       'a
 
-    method on_ttuple : 'a -> Typing_reason.t -> Typing_defs.locl_ty list -> 'a
+    method on_tuple_extra :
+      'a -> Typing_defs.locl_phase Typing_defs.tuple_extra -> 'a
+
+    method on_ttuple :
+      'a ->
+      Typing_reason.t ->
+      Typing_defs.locl_phase Typing_defs.tuple_type ->
+      'a
 
     method on_tunion : 'a -> Typing_reason.t -> Typing_defs.locl_ty list -> 'a
 
@@ -133,9 +150,7 @@ class type ['a] locl_type_visitor_type =
     method on_tshape :
       'a ->
       Typing_reason.t ->
-      Typing_defs.shape_kind ->
-      Typing_defs.locl_phase Typing_defs.shape_field_type
-      Typing_defs.TShapeMap.t ->
+      Typing_defs.locl_phase Typing_defs.shape_type ->
       'a
 
     method on_tclass :
@@ -145,6 +160,8 @@ class type ['a] locl_type_visitor_type =
       Typing_defs.exact ->
       Typing_defs.locl_ty list ->
       'a
+
+    method on_class_refinement : 'a -> Typing_defs.locl_class_refinement -> 'a
 
     method on_tlist : 'a -> Typing_reason.t -> Typing_defs.locl_ty list -> 'a
 
@@ -156,7 +173,12 @@ class type ['a] locl_type_visitor_type =
       Typing_defs.locl_phase Typing_defs.taccess_type ->
       'a
 
-    method on_neg_type : 'a -> Typing_reason.t -> Typing_defs.neg_type -> 'a
+    method on_neg_type :
+      'a -> Typing_reason.t -> Typing_defs.type_predicate -> 'a
+
+    method on_tlabel : 'a -> Typing_reason.t -> string -> 'a
+
+    method on_tclass_ptr : 'a -> Typing_reason.t -> Typing_defs.locl_ty -> 'a
   end
 
 class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type
@@ -165,9 +187,10 @@ class type ['a] internal_type_visitor_type =
   object
     inherit ['a] locl_type_visitor_type
 
-    method on_internal_type : 'a -> Typing_defs.internal_type -> 'a
+    method on_internal_type : 'a -> Typing_defs_constraints.internal_type -> 'a
 
-    method on_constraint_type : 'a -> Typing_defs.constraint_type -> 'a
+    method on_constraint_type :
+      'a -> Typing_defs_constraints.constraint_type -> 'a
 
     method on_locl_type : 'a -> Typing_defs.locl_ty -> 'a
 
@@ -176,29 +199,65 @@ class type ['a] internal_type_visitor_type =
     method on_locl_type_option : 'a -> Typing_defs.locl_ty option -> 'a
 
     method on_thas_member :
-      'a -> Typing_reason.t -> Typing_defs.has_member -> 'a
+      'a -> Typing_reason.t -> Typing_defs_constraints.has_member -> 'a
 
-    method on_has_member : 'a -> Typing_reason.t -> Typing_defs.has_member -> 'a
+    method on_has_member :
+      'a -> Typing_reason.t -> Typing_defs_constraints.has_member -> 'a
+
+    method on_thas_type_member :
+      'a -> Typing_reason.t -> Typing_defs_constraints.has_type_member -> 'a
+
+    method on_has_type_member :
+      'a -> Typing_reason.t -> Typing_defs_constraints.has_type_member -> 'a
+
+    method on_tcan_index :
+      'a -> Typing_reason.t -> Typing_defs_constraints.can_index -> 'a
+
+    method on_tcan_index_assign :
+      'a -> Typing_reason.t -> Typing_defs_constraints.can_index_assign -> 'a
+
+    method on_tcan_traverse :
+      'a -> Typing_reason.t -> Typing_defs_constraints.can_traverse -> 'a
+
+    method on_can_index :
+      'a -> Typing_reason.t -> Typing_defs_constraints.can_index -> 'a
+
+    method on_can_index_assign :
+      'a -> Typing_reason.t -> Typing_defs_constraints.can_index_assign -> 'a
+
+    method on_can_traverse :
+      'a -> Typing_reason.t -> Typing_defs_constraints.can_traverse -> 'a
 
     method on_tdestructure :
-      'a -> Typing_reason.t -> Typing_defs.destructure -> 'a
+      'a -> Typing_reason.t -> Typing_defs_constraints.destructure -> 'a
 
     method on_destructure :
-      'a -> Typing_reason.t -> Typing_defs.destructure -> 'a
+      'a -> Typing_reason.t -> Typing_defs_constraints.destructure -> 'a
 
     method on_tcunion :
       'a ->
       Typing_reason.t ->
       Typing_defs.locl_ty ->
-      Typing_defs.constraint_type ->
+      Typing_defs_constraints.constraint_type ->
       'a
 
     method on_tcintersection :
       'a ->
       Typing_reason.t ->
       Typing_defs.locl_ty ->
-      Typing_defs.constraint_type ->
+      Typing_defs_constraints.constraint_type ->
       'a
+
+    method on_ttype_switch :
+      'a ->
+      Typing_reason.t ->
+      Typing_defs.type_predicate ->
+      Typing_defs.locl_ty ->
+      Typing_defs.locl_ty ->
+      'a
+
+    method on_thas_const :
+      'a -> Typing_reason.t -> string -> Typing_defs.locl_ty -> 'a
   end
 
 class ['a] internal_type_visitor : ['a] internal_type_visitor_type

@@ -38,7 +38,7 @@ namespace Verifier {
 struct Block {
   explicit Block(PC start) :
       start(start), last(0), end(0) , id(-1), rpo_id(-1), next_linear(0),
-      next_rpo(0), succs(0), exn(0) {
+      next_rpo(0), succs(0), exn(0), succ_count(0) {
   }
 
   // Never copy Blocks.
@@ -55,8 +55,9 @@ struct Block {
   int rpo_id;         // reverse postorder number. 0 = entry.
   Block* next_linear; // next block in linear order
   Block* next_rpo;    // next block in reverse postorder
-  Block** succs;      // array of succesors (can have nulls)
+  Block** succs;      // array of successors (can have nulls)
   Block* exn;         // exception edge (can be null)
+  int succ_count;     // the number of successors
 };
 
 /**
@@ -86,7 +87,13 @@ inline bool isTF(PC pc) {
 }
 
 inline bool isCF(PC pc) {
-  return instrIsNonCallControlFlow(peek_op(pc));
+  auto const op = decode_op(pc);
+  if (instrIsNonCallControlFlow(op)) return true;
+  if (isFCall(op)) {
+    return decodeFCallArgs(op, pc, nullptr).asyncEagerOffset != kInvalidOffset;
+  }
+
+  return false;
 }
 
 inline bool isRet(PC pc) {
@@ -99,11 +106,8 @@ inline bool isRet(PC pc) {
 inline bool isIter(PC pc) {
   switch (peek_op(pc)) {
   case Op::IterInit:
-  case Op::LIterInit:
   case Op::IterNext:
-  case Op::LIterNext:
   case Op::IterFree:
-  case Op::LIterFree:
     return true;
   default:
     break;
@@ -115,15 +119,11 @@ inline int getIterId(PC pc) {
   assertx(isIter(pc));
   auto const op = peek_op(pc);
   auto const im = getImm(pc, 0);
-  return op == Op::IterFree || op == Op::LIterFree ? im.u_IA : im.u_ITA.iterId;
+  return op == Op::IterFree ? im.u_IA : im.u_ITA.iterId;
 }
 
 inline int getImmIva(PC pc) {
   return getImm(pc, 0).u_IVA;
-}
-
-inline int numSuccBlocks(const Block* b) {
-  return numSuccs(b->last);
 }
 
 #define APPLY(d, l, r)                         \
@@ -170,7 +170,7 @@ private:
  */
 struct GraphBuilder {
 private:
-  typedef hphp_hash_map<PC, Block*> BlockMap;
+  using BlockMap = hphp_hash_map<PC, Block*>;
   enum EdgeKind { FallThrough, Taken };
  public:
   template<class F>
@@ -190,7 +190,7 @@ private:
   Offset offset(PC addr) const {
     return m_func.offsetOf(addr);
   }
-  Block** succs(Block* b);
+  Block** createSuccs(Block* b);
  private:
   BlockMap m_blocks;
   Arena& m_arena;
@@ -278,7 +278,7 @@ inline InstrRange blockInstrs(const Block* b) {
 }
 
 inline BlockPtrRange succBlocks(const Block* b) {
-  return BlockPtrRange(b->succs, numSuccBlocks(b));
+  return BlockPtrRange(b->succs, b->succ_count);
 }
 
 inline BlockPtrRange entryBlocks(const Graph* g) {

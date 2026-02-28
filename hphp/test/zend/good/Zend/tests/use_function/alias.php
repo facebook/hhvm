@@ -1,13 +1,13 @@
 <?hh
 
 namespace foo {
-    function baz() {
+    function baz() :mixed{
         return 'foo.baz';
     }
 }
 
 namespace bar {
-    function baz() {
+    function baz() :mixed{
         return 'bar.baz';
     }
 }

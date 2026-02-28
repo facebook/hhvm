@@ -1,7 +1,7 @@
 <?hh
 
-function test($a) {
-  $x = darray[
+function test($a) :mixed{
+  $x = dict[
     $a.'1' => $a.'1',
     $a.'2' => $a.'2',
     $a.'3' => $a.'3',
@@ -1507,6 +1507,6 @@ function test($a) {
 }
 
 <<__EntryPoint>>
-function main_big_array() {
+function main_big_array() :mixed{
 test('hi');
 }

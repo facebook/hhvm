@@ -6,14 +6,14 @@ function main(): void {
   b(__hhvm_intrinsics\launder_value(true));
   d(__hhvm_intrinsics\launder_value(1.234));
   n(__hhvm_intrinsics\launder_value(null));
-  r(__hhvm_intrinsics\launder_value(STDIN));
+  r(__hhvm_intrinsics\launder_value(HH\stdin()));
   m(__hhvm_intrinsics\launder_value(1.234));
 
   i(42);
   b(true);
   d(1.234);
   n(null);
-  r(STDIN);
+  r(HH\stdin());
   m(1.234);
 }
 

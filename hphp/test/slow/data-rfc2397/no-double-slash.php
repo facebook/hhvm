@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_no_double_slash() {
-$streams = varray[
+function main_no_double_slash() :mixed{
+$streams = vec[
   'data:,A%20brief%20note',
   'data:application/vnd-xxx-query,select_vcount,fcol_from_fieldtable/local',
   'data:;base64,Zm9vYmFyIGZvb2Jhcg==',
@@ -17,6 +17,6 @@ $streams = varray[
 
 foreach ($streams as $stream)
 {
-  var_dump(@file_get_contents($stream));
+  var_dump(file_get_contents($stream));
 }
 }

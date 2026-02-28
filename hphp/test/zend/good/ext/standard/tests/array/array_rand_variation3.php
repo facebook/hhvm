@@ -12,27 +12,27 @@
 echo "*** Testing array_rand() : with multi-dimensional array ***\n";
 
 // initialise the multi-dimensional array
-$input = varray[
+$input = vec[
        // array with int values
-/*1*/  varray[1, 2, 0, -0, -1, -2],
+/*1*/  vec[1, 2, 0, -0, -1, -2],
 
        // array with float values
-       varray[1.23, -1.23, 0.34, -0.34, 0e2, 2e-3, -2e2, -40e-2],
+       vec[1.23, -1.23, 0.34, -0.34, 0e2, 2e-3, -2e2, -40e-2],
 
        // array with single quoted strings
-/*3*/  varray['one', '123numbers', 'hello\tworld', 'hello world\0', '12.34floatnum'],
+/*3*/  vec['one', '123numbers', 'hello\tworld', 'hello world\0', '12.34floatnum'],
 
        // array with double quoted strings
-       varray["one","123numbers", "hello\tworld", "hello world\0", "12.34floatnum"],
+       vec["one","123numbers", "hello\tworld", "hello world\0", "12.34floatnum"],
 
        // array with bool values
-/*5*/  varray[true, TRUE, FALSE, false, TrUe, FaLsE],
+/*5*/  vec[true, TRUE, FALSE, false, TrUe, FaLsE],
 
        // array with hexa values
-       varray[0x123, -0x123, 0xabc, 0xABC, 0xab],
+       vec[0x123, -0x123, 0xabc, 0xABC, 0xab],
 
        // array with null values
-/*7*/  varray[null, NULL, "\0", Null, NuLl]
+/*7*/  vec[null, NULL, "\0", Null, NuLl]
 
 ];
 

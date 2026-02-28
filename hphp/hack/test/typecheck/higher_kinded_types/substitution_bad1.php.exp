@@ -1,6 +1,0 @@
-File "substitution_bad1.php--file2.php", line 5, characters 10-11:
-Invalid return type (Typing[4110])
-File "substitution_bad1.php--file2.php", line 4, characters 36-38:
-Expected `int`
-File "substitution_bad1.php--file2.php", line 4, characters 16-28:
-But got `mixed` arising from an implicit `as ?nonnull` constraint on this type

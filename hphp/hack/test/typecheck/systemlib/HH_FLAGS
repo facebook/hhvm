@@ -1,1 +1,1 @@
---enable-systemlib-annotations
+--config is_systemlib=true

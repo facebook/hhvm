@@ -1,0 +1,8 @@
+WARN: File "91-coalesce-01.hack", line 7, characters 5-16:
+This null coalesce will always evaluate to its right-hand side. (Warn[12023])
+  File "91-coalesce-01.hack", line 4, characters 12-15:
+  The expression on the left has type `null` which is always `null`.
+WARN: File "91-coalesce-01.hack", line 8, characters 5-18:
+This null coalesce will always evaluate to its left-hand side. (Warn[12023])
+  File "91-coalesce-01.hack", line 5, characters 14-23:
+  The expression on the left has type `string` which can never be `null`.

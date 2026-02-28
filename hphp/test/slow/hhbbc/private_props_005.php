@@ -8,12 +8,12 @@ class UnknownUnsetThis {
     unset($this->{$l});
   }
 
-  public function printer() {
+  public function printer() :mixed{
     var_dump(isset($this->s), isset($this->i));
   }
 }
 
-function main() {
+function main() :mixed{
   $x = new UnknownUnsetThis('s');
   $x->printer();
   $x = new UnknownUnsetThis('i');
@@ -22,6 +22,6 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_private_props_005() {
+function main_private_props_005() :mixed{
 main();
 }

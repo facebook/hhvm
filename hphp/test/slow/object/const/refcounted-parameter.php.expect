@@ -1,0 +1,21 @@
+object(C) (1) {
+  ["a"]=>
+  object(A) (1) {
+    ["i"]=>
+    int(1)
+  }
+}
+object(C) (1) {
+  ["a"]=>
+  object(A) (1) {
+    ["i"]=>
+    int(2)
+  }
+}
+object(C) (1) {
+  ["a"]=>
+  object(A) (1) {
+    ["i"]=>
+    int(3)
+  }
+}

@@ -20,9 +20,7 @@ let check_types env (_, p, te) =
       let rec iter ty1 =
         let (_, ety1) = Env.expand_type env ty1 in
         match get_node ety1 with
-        | Tany _
-        | Terr ->
-          true
+        | Tany _ -> true
         | Tvec_or_dict _
         | Ttuple _
         | Tshape _
@@ -34,6 +32,7 @@ let check_types env (_, p, te) =
                || String.equal cn SN.Collections.cVec ->
           true
         | Tunion tyl -> List.for_all ~f:iter tyl
+        | Tintersection tyl -> List.exists ~f:iter tyl
         | Tgeneric _
         | Tnewtype _
         | Tdependent _ ->
@@ -51,7 +50,9 @@ let check_types env (_, p, te) =
           Lazy.map ty_str ~f:(fun ty_str ->
               Reason.to_string ("This is " ^ ty_str) (get_reason ty1))
         in
-        Errors.add_typing_error
+        let Equal = Tast_env.eq_typing_env in
+        Typing_error_utils.add_typing_error
+          ~env
           Typing_error.(
             primary @@ Primary.Inout_argument_bad_type { pos = p; reasons })
     (* Other invalid expressions are caught in Nast_check. *)
@@ -65,11 +66,12 @@ let handler =
 
     method! at_expr env =
       function
-      | (_, _, Call (_, _, te, _)) ->
+      | (_, _, Call { args; _ }) ->
         List.iter
           ~f:(function
-            | (Ast_defs.Pnormal, _) -> ()
-            | (Ast_defs.Pinout _, e) -> check_types env e)
-          te
+            | Aast_defs.Anormal _ -> ()
+            | Aast_defs.Anamed _ -> ()
+            | Aast_defs.Ainout (_, e) -> check_types env e)
+          args
       | _ -> ()
   end

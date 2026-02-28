@@ -23,14 +23,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const StaticString
-  s_SimpleXMLElement,
-  s_SimpleXMLElementIterator,
-  s_SimpleXMLIterator;
-
-const Class* SimpleXMLElement_classof();
-const Class* SimpleXMLElementIterator_classof();
-const Class* SimpleXMLIterator_classof();
+struct SimpleXMLElementLoader : SystemLib::ClassLoader<"SimpleXMLElement"> {};
+struct SimpleXMLElementIteratorLoader :
+  SystemLib::ClassLoader<"SimpleXMLElementIterator"> {};
+struct SimpleXMLIteratorLoader : SystemLib::ClassLoader<"SimpleXMLIterator"> {};
 
 Array SimpleXMLElement_darrayCast(const ObjectData* obj);
 Variant SimpleXMLElement_objectCast(const ObjectData* obj, DataType type);

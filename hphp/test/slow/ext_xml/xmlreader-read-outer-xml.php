@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_xmlreader_read_outer_xml() {
+function main_xmlreader_read_outer_xml() :mixed{
 $xml = <<<EOF
 <a>
 <b>0</b>

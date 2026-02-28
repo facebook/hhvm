@@ -1,0 +1,82 @@
+File   : README
+Author : Richard A. O'Keefe.
+Updated: 30 April 1984
+Purpose: Explain the new strings package.
+
+    The UNIX string libraries (described in the string(3) manual page)
+differ from UNIX to UNIX (e.g. strtok is not in V7 or 4.1bsd).  Worse,
+the sources are not in the public domain, so that if there is a string
+routine which is nearly what you want but not quite you can't  take  a
+copy  and  modify it.  And of course C programmers on non-UNIX systems
+are at the mercy of their supplier.
+
+    This package was designed to let me do reasonable things with  C's
+strings  whatever UNIX (V7, PaNiX, UX63, 4.1bsd) I happen to be using.
+Everything in the System III manual is here and does just what the  S3
+manual  says  it does.  There are also lots of new goodies.  I'm sorry
+about the names, but the routines do have to work  on  asphyxiated-at-
+birth  systems  which  truncate identifiers.  The convention is that a
+routine is called
+ str [n] [c] <operation>
+If there is an "n", it means that the function takes an (int) "length"
+argument, which bounds the number of characters to be moved or  looked
+at.  If the function has a "set" argument, a "c" in the name indicates
+that  the complement of the set is used.  Functions or variables whose
+names start with _ are support routines which aren't really meant  for
+general  use.  I don't know what the "p" is doing in "strpbrk", but it
+is there in the S3 manual so it's here too.  "istrtok" does not follow
+this rule, but with 7 letters what can you do?
+
+    I have included new versions of atoi(3) and atol(3) as well.  They
+use a new primitive str2int, which takes a pair of bounds and a radix,
+and does much more thorough checking than the normal atoi and atol do.
+The result returned by atoi & atol is valid if and only if errno == 0.
+There is also an output conversion routine int2str, with itoa and ltoa
+as interface macros.  Only after writing int2str did I notice that the
+str2int routine has no provision for unsigned numbers.  On reflection,
+I don't greatly care.   I'm afraid that int2str may depend on your "C"
+compiler in unexpected ways.  Do check the code with -S.
+
+    Several of these routines have "asm" inclusions conditional on the
+VaxAsm option.  These insertions can make the routines which have them
+quite a bit faster, but there is a snag.  The VAX architects, for some
+reason best known to themselves and their therapists, decided that all
+"strings" were shorter than 2^16 bytes.  Even when the length operands
+are in 32-bit registers, only 16 bits count.  So the "asm" versions do
+not work for long strings.  If you can guarantee that all your strings
+will be short, define VaxAsm in the makefile, but in general, and when
+using other machines, do not define it.
+
+    To use this library, you need the "strings.a" library file and the
+"strings.h" and "ctypes.h" header files.  The other header  files  are
+for compiling the library itself, though if you are hacking extensions
+you  may  find  them useful.  General users really shouldn't see them.
+I've defined a few macros I find useful in "strings.h"; if you have no
+need for "index", "rindex", "streql", and "beql", just edit them  out.
+On the 4.1bsd system I am using declaring all these functions 'extern'
+does not mean that they will all be loaded; but only the ones you use.
+When using lesser systems you may find it necessary to break strings.h
+up, or you could get by with just adding "extern" declarations for the
+functions you want as you need them.  Many of these functions have the
+same names as functions in the "standard C library", by design as this
+is a replacement/reimplementation of part of that library.  So you may
+have to talk the loader into loading this library first.   Again, I've
+found no problems on 4.1bsd.
+
+    You may wonder at my failure to provide manual pages for this code.
+For the things in V7, 4.?, or SIII, you should be able to use whichever
+manual page came with that system,  and anything I might write would be
+so like it as to raise suspicions of violating AT&T copyrights.  In the
+sources you will find comments which provide far more documentation for
+these routines than AT&T ever provided for their strings stuff,  I just
+don't happen to have put it in nroff -man form.   Had I done so, the .3
+files would have outbulked the .c files!
+
+    These files are in the public domain.  This includes getopt.c, which
+is the work of Henry Spencer, University of Toronto Zoology, who says of
+it "None of this software is derived from Bell software. I had no access
+to the source for Bell's versions at the time I wrote it.  This software
+is hereby explicitly placed in the public domain.  It may  be  used  for
+any purpose on any machine by anyone." I would greatly prefer it if *my*
+material received no military use.
+

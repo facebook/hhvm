@@ -21,12 +21,11 @@
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include <libxml/tree.h>
-#include <libxml/uri.h>
 #include <libxml/xmlwriter.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-const StaticString s_XMLWriterData("XMLWriterData");
+const StaticString s_XMLWriter("XMLWriter");
 
 struct XMLWriterData {
   XMLWriterData(): m_ptr(nullptr), m_output(nullptr) {}
@@ -653,7 +652,7 @@ void XMLWriterResource::sweep() {
 
 #define XMLWRITER_FUNCTION(return_type, function_name, method_name, ...)       \
   static return_type HHVM_FUNCTION(function_name,                              \
-                            const Resource& wr, CREATE_PARAMS(__VA_ARGS__)) {  \
+                         const OptResource& wr, CREATE_PARAMS(__VA_ARGS__)) {  \
     VMRegGuard _;                                                             \
     CHECK_RESOURCE(resource);                                                  \
     return resource->m_writer.method_name(EXTRACT_ARGS(__VA_ARGS__));          \
@@ -672,7 +671,7 @@ void XMLWriterResource::sweep() {
   }                                                                            \
 
 #define XMLWRITER_FUNCTION_NO_ARGS(return_type, function_name, method_name)    \
-  static return_type HHVM_FUNCTION(function_name, const Resource& wr) {        \
+  static return_type HHVM_FUNCTION(function_name, const OptResource& wr) {     \
     VMRegGuard _;                                                             \
     CHECK_RESOURCE(resource);                                                  \
     return resource->m_writer.method_name();                                   \
@@ -713,7 +712,7 @@ XMLWRITER_METHOD(bool, setIndentString,
                  const String&, indentString)
 
 static Variant HHVM_FUNCTION(xmlwriter_set_indent_string,
-                             const Resource& wr, const Variant& indentString) {
+                         const OptResource& wr, const Variant& indentString) {
   VMRegGuard _;
   CHECK_RESOURCE(resource);
 
@@ -870,9 +869,9 @@ XMLWRITER_METHOD_AND_FUNCTION(String, xmlwriter_output_memory, outputMemory,
 ///////////////////////////////////////////////////////////////////////////////
 // extension
 struct XMLWriterExtension final : Extension {
-    XMLWriterExtension() : Extension("xmlwriter", "0.1") {};
+    XMLWriterExtension() : Extension("xmlwriter", "0.1", NO_ONCALL_YET) {}
 
-    void moduleInit() override {
+    void moduleRegisterNative() override {
       HHVM_ME(XMLWriter, openMemory);
       HHVM_ME(XMLWriter, openURI);
       HHVM_ME(XMLWriter, setIndentString);
@@ -959,9 +958,7 @@ struct XMLWriterExtension final : Extension {
       HHVM_FE(xmlwriter_flush);
       HHVM_FE(xmlwriter_output_memory);
 
-      Native::registerNativeDataInfo<XMLWriterData>(s_XMLWriterData.get());
-
-      loadSystemlib();
+      Native::registerNativeDataInfo<XMLWriterData>(s_XMLWriter.get());
     }
 } s_xmlwriter_extension;
 

@@ -1,0 +1,4 @@
+ERROR: File "enums.php", line 8, characters 7-14:
+Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
+ERROR: File "enums.php", line 9, characters 7-14:
+Using `D::class` in this position will trigger an implicit runtime conversion to string, please use `nameof D` (Typing[4482])

@@ -1,20 +1,20 @@
 <?hh
 class BlaIterator implements Iterator
 {
-    public function rewind() { }
+    public function rewind() :mixed{ }
 
-    public function next() { }
+    public function next() :mixed{ }
 
-    public function valid() {
+    public function valid() :mixed{
         return true;
     }
 
     public function current()
-    {
+:mixed    {
       throw new Exception('boo');
     }
 
-    public function key() { }
+    public function key() :mixed{ }
 }
 <<__EntryPoint>> function main(): void {
 $it = new BlaIterator();

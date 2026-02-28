@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 namespace {
@@ -23,16 +22,17 @@ namespace {
 
   struct HslSystemlibExtension final : Extension {
 
-    HslSystemlibExtension() : Extension("hsl_systemlib", "1.0") {}
+    HslSystemlibExtension() : Extension("hsl_systemlib", "1.0", NO_ONCALL_YET) {}
 
     void moduleLoad(const IniSetting::Map& ini, const Hdf hdf) override {
       Config::Bind(s_enabled, ini, hdf, "Eval.HSLSystemlibEnabled", true);
     }
 
-    void moduleInit() override {
+    std::vector<std::string> hackFiles() const override {
       if (s_enabled) {
-        loadSystemlib();
+        return {"hsl_systemlib.hack"};
       }
+      return {};
     }
 
     const DependencySet getDeps() const override {

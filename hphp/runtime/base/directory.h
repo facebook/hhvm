@@ -50,7 +50,7 @@ struct Directory : SweepableResourceData {
 };
 
 struct PlainDirectory : Directory {
-  DECLARE_RESOURCE_ALLOCATION(PlainDirectory);
+  DECLARE_RESOURCE_ALLOCATION(PlainDirectory)
 
   explicit PlainDirectory(const String& path);
   explicit PlainDirectory(int fd);
@@ -66,7 +66,7 @@ private:
 };
 
 struct ArrayDirectory : Directory {
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(ArrayDirectory);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(ArrayDirectory)
 
   explicit ArrayDirectory(const Array& a) : m_it(a) {}
 
@@ -88,7 +88,7 @@ private:
 };
 
 struct CachedDirectory : Directory {
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(CachedDirectory);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(CachedDirectory)
 
   explicit CachedDirectory(const String& path);
 
@@ -107,4 +107,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

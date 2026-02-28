@@ -9,7 +9,7 @@ $method = $params[0]->getDeclaringFunction ();
 unset ($params);
 echo $method->getName ()."\n";
 
-$parameter = new ReflectionParameter (varray [$closure, '__invoke'], 'b');
+$parameter = new ReflectionParameter (vec[$closure, '__invoke'], 'b');
 $method = $parameter->getDeclaringFunction ();
 unset ($parameter);
 echo $method->getName ()."\n";

@@ -5,16 +5,16 @@ class C {
   const type T = int;
   const type Ta = A;
 
-  function f() {
+  function f() :mixed{
     return type_structure(static::class, 'Ta')['classname'];
   }
-  static function g() {
+  static function g() :mixed{
     return type_structure(static::class, 'Ta')['classname'];
   }
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $int = type_structure(C::class, 'T');
   $a = type_structure(C::class, 'Ta')['classname'];
   $a2 = C::g();

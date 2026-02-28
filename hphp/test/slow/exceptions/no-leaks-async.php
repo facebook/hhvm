@@ -9,13 +9,13 @@ class FooException extends Exception {
   }
 }
 
-async function f() {
+async function f() :Awaitable<mixed>{
   await RescheduleWaitHandle::create(0, 0); // simulate blocking I/O
   throw new FooException();
 }
 
 <<__NEVER_INLINE>>
-async function run() {
+async function run() :Awaitable<mixed>{
   $delta = 0;
   for ($i = 0; $i < 10; $i++) {
     $start = memory_get_usage(true);
@@ -27,7 +27,7 @@ async function run() {
 
 
 <<__EntryPoint>>
-async function main() {
+async function main() :Awaitable<mixed>{
   await run(); await run(); await run(); // ignore
   $delta1 = abs(await run());
   $delta2 = abs(await run());

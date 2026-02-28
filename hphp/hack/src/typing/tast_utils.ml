@@ -13,7 +13,7 @@ open Aast_defs
 open Typing_defs
 module Env = Tast_env
 module MakeType = Typing_make_type
-module Cls = Decl_provider.Class
+module Cls = Folded_class
 module SN = Naming_special_names
 
 (** Return true if ty definitely does not contain null.  I.e., the
@@ -23,19 +23,18 @@ module SN = Naming_special_names
 let rec type_non_nullable env ty =
   let (_, ty) = Env.expand_type env ty in
   match get_node ty with
-  | Tprim
-      ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
-      | Tnoreturn )
+  | Tprim (Tint | Tbool | Tfloat | Tresource | Tnum | Tarraykey | Tnoreturn)
   | Tnonnull
   | Tfun _
   | Ttuple _
   | Tshape _
   | Tclass _ ->
     true
-  | Tnewtype (_, _, ty)
-  | Tdependent (_, ty)
-    when type_non_nullable env ty ->
-    true
+  | Tdependent (_, ty) when type_non_nullable env ty -> true
+  | Tnewtype (name, tyl, _) ->
+    let Equal = Tast_env.eq_typing_env in
+    let (_, ty) = Typing_utils.get_newtype_super env (get_reason ty) name tyl in
+    type_non_nullable env ty
   | Tunion tyl when not (List.is_empty tyl) ->
     List.for_all tyl ~f:(type_non_nullable env)
   | _ -> false
@@ -80,7 +79,7 @@ let intersect_truthiness tr1 tr2 =
   | (Possibly_falsy, Possibly_falsy) -> Possibly_falsy
 
 let (tclass_is_falsy_when_empty, is_traversable) =
-  let r = Typing_reason.Rnone in
+  let r = Typing_reason.none in
   let mixed = MakeType.mixed r in
   let simple_xml_el = MakeType.class_type r "\\SimpleXMLElement" [] in
   let container_type = MakeType.container r mixed in
@@ -103,7 +102,6 @@ let rec truthiness env ty =
   let (env, ty) = Env.expand_type env ty in
   match get_node ty with
   | Tany _
-  | Terr
   | Tdynamic
   | Tvar _ ->
     Unknown
@@ -113,7 +111,9 @@ let rec truthiness env ty =
     Possibly_falsy
   | Tnewtype (id, _, _) when Env.is_enum env id -> Possibly_falsy
   | Tclass ((_, cid), _, _) ->
-    if String.equal cid SN.Classes.cStringish then
+    if String.equal cid SN.Classes.cString then
+      Possibly_falsy
+    else if String.equal cid SN.Classes.cStringish then
       Possibly_falsy
     else if String.equal cid SN.Classes.cXHPChild then
       Possibly_falsy
@@ -125,9 +125,11 @@ let rec truthiness env ty =
       (* Classes which implement Traversable but not Container will always be
          truthy when empty. If this Tclass is instead an interface type like
          KeyedTraversable, the value may or may not be truthy when empty. *)
-      match Decl_provider.get_class (Env.get_ctx env) cid with
-      | None -> Unknown
-      | Some cls ->
+      match Tast_env.get_class env cid with
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        Unknown
+      | Decl_entry.Found cls ->
         (match Cls.kind cls with
         | Cclass _ -> Always_truthy
         | Cinterface
@@ -136,17 +138,17 @@ let rec truthiness env ty =
           Possibly_falsy
         | Ctrait -> Unknown)
     )
+  | Tlabel _ -> Always_truthy
   | Tprim Tresource -> Always_truthy
   | Tprim Tnull -> Always_falsy
   | Tprim Tvoid -> Always_falsy
   | Tprim Tnoreturn -> Unknown
-  | Tprim (Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey) -> Possibly_falsy
-  | Tunion tyl ->
-    begin
-      match List.map tyl ~f:(truthiness env) with
-      | [] -> Unknown
-      | hd :: tl -> List.fold tl ~init:hd ~f:fold_truthiness
-    end
+  | Tprim (Tint | Tbool | Tfloat | Tnum | Tarraykey) -> Possibly_falsy
+  | Tunion tyl -> begin
+    match List.map tyl ~f:(truthiness env) with
+    | [] -> Unknown
+    | hd :: tl -> List.fold tl ~init:hd ~f:fold_truthiness
+  end
   | Tintersection tyl ->
     List.map tyl ~f:(truthiness env)
     |> List.fold ~init:Possibly_falsy ~f:intersect_truthiness
@@ -159,32 +161,31 @@ let rec truthiness env ty =
       | [] -> Unknown
       | hd :: tl -> List.fold tl ~init:hd ~f:fold_truthiness
     end
-  | Tshape (Closed_shape, fields) when Int.equal 0 (TShapeMap.cardinal fields)
-    ->
-    Always_falsy
-  | Tshape (_, fields) ->
-    let has_non_optional_fields =
-      TShapeMap.fold
-        (fun _ { sft_optional = opt; _ } -> ( || ) (not opt))
-        fields
-        false
-    in
-    if has_non_optional_fields then
-      Always_truthy
+  | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fields } ->
+    if is_nothing shape_kind && TShapeMap.is_empty fields then
+      Always_falsy
     else
-      Possibly_falsy
-  | Ttuple [] -> Always_falsy
-  | Ttuple (_ :: _) ->
+      let has_non_optional_fields =
+        TShapeMap.fold
+          (fun _ { sft_optional = opt; _ } -> ( || ) (not opt))
+          fields
+          false
+      in
+      if has_non_optional_fields then
+        Always_truthy
+      else
+        Possibly_falsy
+  | Ttuple { t_required = []; t_optional = []; t_extra = Tvariadic t_variadic }
+    when is_nothing t_variadic ->
+    Always_falsy
+  | Ttuple { t_required = _ :: _; _ } ->
     (* A tuple is a vec at runtime, and non-empty vecs are truthy. *)
     Always_truthy
-  | Tfun _
-  | Taccess _ ->
-    (* TODO(T36532263) check if that's ok *) Unknown
-  | Tvec_or_dict _ ->
-    (* TODO(T69768816) determine which variant is correct for vec_or_dict *)
-    Unknown
-  | Tunapplied_alias _ ->
-    Typing_defs.error_Tunapplied_alias_in_illegal_context ()
+  | Ttuple _ -> Possibly_falsy
+  | Tfun _ -> Always_truthy
+  | Taccess _ -> Unknown
+  | Tvec_or_dict _ -> Possibly_falsy
+  | Tclass_ptr _ -> Always_truthy
 
 (** When a type represented by one of these variants is used in a truthiness
     test, it indicates a potential logic error, since the truthiness of some
@@ -205,10 +206,11 @@ let rec find_sketchy_types env acc ty =
   let (env, ety) = Env.expand_type env ty in
   match get_node ety with
   | Toption ty -> find_sketchy_types env acc ty
-  | Tprim Tstring -> String :: acc
   | Tprim Tarraykey -> Arraykey :: acc
   | Tclass ((_, cid), _, _) ->
-    if String.equal cid SN.Classes.cStringish then
+    if String.equal cid SN.Classes.cString then
+      String :: acc
+    else if String.equal cid SN.Classes.cStringish then
       Stringish :: acc
     else if String.equal cid SN.Classes.cXHPChild then
       XHPChild :: acc
@@ -216,9 +218,11 @@ let rec find_sketchy_types env acc ty =
     then
       acc
     else (
-      match Decl_provider.get_class (Env.get_ctx env) cid with
-      | None -> acc
-      | Some cls ->
+      match Tast_env.get_class env cid with
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        acc
+      | Decl_entry.Found cls ->
         (match Cls.kind cls with
         | Cinterface -> Traversable_interface (Env.print_ty env ty) :: acc
         | Cclass _
@@ -246,16 +250,18 @@ let rec find_sketchy_types env acc ty =
   | Tany _
   | Tnonnull
   | Tdynamic
-  | Terr
   | Tprim _
   | Tfun _
   | Ttuple _
   | Tshape _
   | Tvar _
   | Tvec_or_dict _
-  | Tunapplied_alias _
   | Taccess _
+  | Tlabel _
   | Tneg _ ->
+    acc
+  | Tclass_ptr _ ->
+    (* TODO(T199610905) Extend the sketchy null check to support class pointers *)
     acc
 
 let find_sketchy_types env ty = find_sketchy_types env [] ty

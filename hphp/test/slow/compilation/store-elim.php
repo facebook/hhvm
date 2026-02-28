@@ -1,6 +1,6 @@
 <?hh
 
-function main($a, $b, $c) {
+function main($a, $b, $c) :mixed{
   $i = 0;
   if ($c) {
     $t = 0;
@@ -25,7 +25,7 @@ function main($a, $b, $c) {
 
 
 <<__EntryPoint>>
-function main_store_elim() {
+function main_store_elim() :mixed{
 for ($i = 0; $i < 2; $i++) {
   main(1, 42, 0);
   main(2, 42, 0);

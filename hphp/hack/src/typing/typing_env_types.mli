@@ -16,16 +16,42 @@ type local_env = {
       (** Local variables that were assigned in a `using` clause *)
 }
 
+(** Contains contextual information useful when type checking an
+    expression tree. *)
+type expr_tree_env = {
+  dsl: Aast.class_name;
+      (** The DSL the expression tree is representing. For instance in:
+
+          SomeDSL`1 + 1`
+
+          This hint would reference `SomeDsl` *)
+  outer_locals: Typing_local_types.t;
+      (** The set of locals defined outside the expression tree. Ex:
+        $x = 10;
+        SomeDSL`1 + 1`;
+
+        `$x` would be in this set *)
+}
+
 type env = {
+  expression_id_provider: Expression_id.provider;
+  tvar_id_provider: Tvid.provider;
   fresh_typarams: SSet.t;
   lenv: local_env;
   genv: genv;
   decl_env: Decl_env.env;
   in_loop: bool;
   in_try: bool;
-  in_expr_tree: bool;
-  inside_constructor: bool;
-  in_support_dynamic_type_method_check: bool;
+  in_lambda: bool;
+  in_expr_tree: expr_tree_env option;
+      (** If set to Some(_), then we are performing type checking within a
+          expression tree. *)
+  in_macro_splice: Typing_local_types.t option;
+      (**  If set to Some(local_env) then we are type checking within a splice that
+           contains nested expression trees with free variables. local_env contains
+           the bindings for those free variables
+      *)
+  checked: Tast.check_status;
       (** Set to true when checking if a <<__SoundDynamicallyCallable>> method body
           is well-typed under dyn..dyn->dyn assumptions, that is if it can be safely called
           in a dynamic environment. *)
@@ -37,26 +63,29 @@ type env = {
       (** A set of constraints that are global to a given method *)
   log_levels: int SMap.t;
   inference_env: Typing_inference_env.t;
+  rank: int;
+      (** The rank at which fresh type variables and type parameters should be generated *)
+  check_rank: bool;
+      (** Heuristic to determine when we need to check ranks during subtyping  *)
   allow_wildcards: bool;
   big_envs: (Pos.t * env) list ref;
   fun_tast_info: Tast.fun_tast_info option;
       (** This is only filled in after type-checking the function in question *)
+  emit_string_coercion_error: bool;
+      (** Gates which expressions emit class pointer to string coercion errors *)
 }
 
 and genv = {
   tcopt: TypecheckerOptions.t;
-  callable_pos: Pos.t;  (** position of the function/method being checked *)
+  callable_pos: Pos.t;
+      (** position of the function/method name being checked *)
+  function_pos: Pos.t;
+      (** position of the full function/method being checked *)
   readonly: bool;
   (* Whether readonly analysis is needed on this function *)
   return: Typing_env_return_info.t;
-      (** For each function/method parameter, its type, position, calling convention. *)
-  params: (locl_ty * Pos.t * param_mode) Local_id.Map.t;
-      (** For each function/method parameter, its type, position, calling convention. *)
-  condition_types: decl_ty SMap.t;
-      (** condition types associated with parameters.
-          For every mayberx parameter that has condition type we create
-          fresh type parameter (see: make_local_param_ty) and store mapping
-          fresh type name -> condition type in env so it can be retrieved later *)
+  params: (locl_ty * Pos.t * locl_ty option) Local_id.Map.t;
+      (** For each function/method parameter, its type, position, and inout "return" type. *)
   parent: (string * decl_ty) option;
       (** Identifier and type of the parent class if it exists *)
   self: (string * locl_ty) option;
@@ -68,12 +97,20 @@ and genv = {
   fun_is_ctor: bool;  (** Is the method a constructor? *)
   file: Relative_path.t;
       (** The file containing the top-level definition that we are checking *)
-  this_module: Ast_defs.id option;
+  current_module: Ast_defs.id option;
       (** The module of the top-level definition that we are checking *)
+  current_package: Aast_defs.package_membership option;
+      (** The package membership of a top-level definition that we're checking *)
+  soft_package_requirement: Ast_defs.id option;
+      (** The __SoftRequirePackage annotation on the current function/method if present *)
   this_internal: bool;
-      (** Is the definition that we are checking marked <<__Internal>>? *)
+      (** Is the definition that we are checking marked internal? *)
   this_support_dynamic_type: bool;
       (** Is the definition that we are checking marked <<__SupportDynamicType>>? *)
+  no_auto_likes: bool;
+      (** Is the definition that we are checking marked <<__NoAutoLikes>>? *)
+  needs_concrete: bool;
+      (** Is the definition that we are checking marked <<__NeedsConcrete>>? *)
 }
 
 val empty :
@@ -93,13 +130,18 @@ val get_tpenv : env -> Type_parameter_env.t
 val get_pos_and_kind_of_generic :
   env -> string -> (Pos_or_decl.t * Typing_kinding_defs.kind) option
 
-val get_lower_bounds :
-  env -> string -> locl_ty list -> Type_parameter_env.tparam_bounds
+val get_lower_bounds : env -> string -> Type_parameter_env.tparam_bounds
 
-val get_upper_bounds :
-  env -> string -> locl_ty list -> Type_parameter_env.tparam_bounds
+val get_upper_bounds : env -> string -> Type_parameter_env.tparam_bounds
 
-val get_equal_bounds :
-  env -> string -> locl_ty list -> Type_parameter_env.tparam_bounds
+val get_equal_bounds : env -> string -> Type_parameter_env.tparam_bounds
 
 val get_tparams_in_ty_and_acc : env -> SSet.t -> locl_ty -> SSet.t
+
+val get_rank : env -> int
+
+val increment_rank : env -> env
+
+val decrement_rank : env -> env
+
+val should_check_rank : env -> bool

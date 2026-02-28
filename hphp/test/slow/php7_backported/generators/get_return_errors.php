@@ -1,25 +1,25 @@
 <?hh
 
-function gen1() {
+function gen1() :AsyncGenerator<mixed,mixed,void>{
     yield 1;
     yield 2;
     return 3;
 }
 
-function gen2() {
+function gen2() :AsyncGenerator<mixed,mixed,void>{
     throw new Exception("gen2() throw");
     yield 1;
     return 2;
 }
 
-function gen3() {
+function gen3() :AsyncGenerator<mixed,mixed,void>{
     yield;
     return 1;
 }
 
 
 <<__EntryPoint>>
-function main_get_return_errors() {
+function main_get_return_errors() :mixed{
   $gen = gen1();
   $gen->next();
   try {

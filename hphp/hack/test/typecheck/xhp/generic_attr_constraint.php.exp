@@ -1,4 +1,4 @@
-File "generic_attr_constraint.php", line 8, characters 15-17:
+ERROR: File "generic_attr_constraint.php", line 8, characters 15-17:
 Invalid xhp value for attribute `:foo` in `:my-xhp` (Typing[4323])
   File "generic_attr_constraint.php", line 3, characters 15-15:
   `T` is a constrained type parameter

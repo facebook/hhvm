@@ -17,13 +17,9 @@
 #include "hphp/runtime/base/url-file.h"
 #include <vector>
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/url/ext_url.h"
-#include "hphp/runtime/base/php-globals.h"
-#include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
 
@@ -99,9 +95,9 @@ bool UrlFile::open(const String& input_url, const String& mode) {
     }
   }
 
-  Variant user = f_parse_url(url, k_PHP_URL_USER);
+  Variant user = HHVM_FN(parse_url)(url, k_PHP_URL_USER);
   if (user.isString()) {
-    Variant pass = f_parse_url(url, k_PHP_URL_PASS);
+    Variant pass = HHVM_FN(parse_url)(url, k_PHP_URL_PASS);
     http.auth(user.toString().c_str(), pass.toString().c_str());
     url = HHVM_FN(preg_replace)(
       s_remove_user_pass_pattern,

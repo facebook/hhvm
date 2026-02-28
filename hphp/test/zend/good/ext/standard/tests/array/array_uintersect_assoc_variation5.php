@@ -4,20 +4,20 @@
  * Source code: ext/standard/array.c
  * Alias to functions:
  */
-function incorrect_return_value ($val1, $val2) {
-  return varray[1];
+function incorrect_return_value ($val1, $val2) :mixed{
+  return vec[1];
 }
-function too_many_parameters ($val1, $val2, $val3) {
+function too_many_parameters ($val1, $val2, $val3) :mixed{
   return 1;
 }
-function too_few_parameters ($val1) {
+function too_few_parameters ($val1) :mixed{
   return 1;
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_uintersect_assoc() : usage variation - differing comparison functions***\n";
 
-$arr1 = varray[1];
-$arr2 = varray[1,2];
+$arr1 = vec[1];
+$arr2 = vec[1,2];
 
 echo "\n-- comparison function with an incorrect return value --\n";
 var_dump(array_uintersect_assoc($arr1, $arr2, incorrect_return_value<>));

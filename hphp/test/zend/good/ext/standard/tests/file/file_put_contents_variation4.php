@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 
-function runtest() {
+function runtest() :mixed{
 
    //correct php53 behaviour is to ingnore the FILE_USE_INCLUDE_PATH unless the file alread exists
    // in the include path. In this case it doesn't so the file should be written in the current dir.
@@ -20,7 +20,7 @@ abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation4 {
 }
 <<__EntryPoint>> function main(): void {
 require_once('fopen_include_path.inc');
-$thisTestDir = __SystemLib\hphp_test_tmppath('dir');
+$thisTestDir = sys_get_temp_dir().'/'.'dir';
 
 mkdir($thisTestDir);
 $oldDirPath = getcwd();

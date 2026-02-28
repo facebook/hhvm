@@ -1,29 +1,31 @@
 <?hh
 class EnglishMealIterator implements Iterator {
     private $pos=0;
-    private $myContent=varray["breakfast", "dinner", "tea"];
+    private $myContent=vec["breakfast", "dinner", "tea"];
 
-    public function valid() {
+    public function valid() :mixed{
         echo "--> " . __METHOD__ . " ($this->pos)\n";
         return $this->pos<3;
     }
 
-    public function next() {
+    public function next() :mixed{
         echo "--> " . __METHOD__ . " ($this->pos)\n";
-        return $this->myContent[$this->pos++];
+        $__lval_tmp_0 = $this->pos;
+        $this->pos++;
+        return $this->myContent[$__lval_tmp_0];
     }
 
-    public function rewind() {
+    public function rewind() :mixed{
         echo "--> " . __METHOD__ . " ($this->pos)\n";
         $this->pos=0;
     }
 
-    public function current() {
+    public function current() :mixed{
         echo "--> " . __METHOD__ . " ($this->pos)\n";
         return $this->myContent[$this->pos];
     }
 
-    public function key() {
+    public function key() :mixed{
         echo "--> " . __METHOD__ . " ($this->pos)\n";
         return "meal " . $this->pos;
     }
@@ -31,19 +33,19 @@ class EnglishMealIterator implements Iterator {
 }
 
 class A1 implements IteratorAggregate {
-    function getIterator() {
+    function getIterator() :mixed{
         return new EnglishMealIterator;
     }
 }
 
 class A2 implements IteratorAggregate {
-    function getIterator() {
+    function getIterator() :mixed{
         return new A1;
     }
 }
 
 class A3 implements IteratorAggregate {
-    function getIterator() {
+    function getIterator() :mixed{
         return new A2;
     }
 }

@@ -2,8 +2,8 @@
 
 class X {
 }
-function test() {
-  $a = varray[new X, 0];
+function test() :mixed{
+  $a = vec[new X, 0];
   foreach ($a as $v) {
     var_dump($v);
   }
@@ -12,7 +12,7 @@ function test() {
 }
 
 <<__EntryPoint>>
-function main_500() {
+function main_500() :mixed{
 test();
 var_dump('exit');
 }

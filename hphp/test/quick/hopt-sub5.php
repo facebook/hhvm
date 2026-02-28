@@ -1,5 +1,5 @@
 <?hh
-function foo($a, $b) {
+function foo($a, $b) :mixed{
   // const - const
   $a = 5;
   $b = 7;

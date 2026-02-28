@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1234() {
+function main_1234() :mixed{
 $nullherequote= <<<fail
 fail;
 echo "--$nullherequote--\n";

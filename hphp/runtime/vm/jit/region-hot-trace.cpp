@@ -19,13 +19,12 @@
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include <limits>
 
 namespace HPHP { namespace jit {
 
-TRACE_SET_MOD(pgo);
+TRACE_SET_MOD(pgo)
 
 /**
  * Remove from pConds the elements that correspond to stack positions
@@ -75,7 +74,7 @@ RegionDescPtr selectHotTrace(HotTransContext& ctx) {
   auto numBCInstrs = ctx.maxBCInstrs;
   FTRACE(1, "selectHotTrace: starting with maxBCInstrs = {}\n", numBCInstrs);
 
-  while (!selectedSet.count(tid)) {
+  while (!selectedSet.contains(tid)) {
     auto rec = ctx.profData->transRec(tid);
     auto blockRegion = rec->region();
     if (blockRegion == nullptr) break;

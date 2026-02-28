@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // These examples should not cause the missing_override_attribute lint error to
 // be emitted.

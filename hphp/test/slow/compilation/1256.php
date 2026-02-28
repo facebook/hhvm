@@ -1,6 +1,6 @@
 <?hh
 
-function test($a = 0) {
+function test($a = 0) :mixed{
  $b = $a;
  $c = $b[$a];
 }

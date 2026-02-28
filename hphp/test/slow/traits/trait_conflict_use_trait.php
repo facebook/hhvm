@@ -27,7 +27,7 @@ class D {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(D::FOO);
   var_dump(C::FOO);
   var_dump(T3::FOO);

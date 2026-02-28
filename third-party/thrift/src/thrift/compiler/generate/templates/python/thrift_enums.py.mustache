@@ -1,0 +1,140 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+Generated Python enums for Thrift types
+}}
+{{#import "common/common" as m_common}}
+{{#partial m_common.auto_generated_py}}
+import builtins
+{{#if (not (has_compiler_option? "no_metadata"))}}
+{{#if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
+import importlib
+from types import ModuleType
+
+{{#else}}
+
+import apache.thrift.metadata.thrift_types as _fbthrift_metadata
+{{/if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
+{{/if (not (has_compiler_option? "no_metadata"))}}
+import {{program.base_library_package}}.types as _fbthrift_python_types
+{{#each program.include_namespaces as |include|}}
+  {{#if include.has_types?}}
+import {{include.included_module_path}}.thrift_enums as {{include.included_module_mangle}}__thrift_types
+  {{/if include.has_types?}}
+{{/each}}
+{{#each program.enums as |enum|}}
+import typing as _std_python_typing
+
+{{!
+    This is necessary because thrift_abstract_types.py imports this.
+}}
+{{#if (not (has_compiler_option? "no_metadata"))}}
+{{#if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
+
+def _fbthrift__import_ThriftMetadata() -> ModuleType:
+    return importlib.import_module("apache.thrift.metadata.thrift_types")
+{{/if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
+{{/if (not (has_compiler_option? "no_metadata"))}}
+
+
+class {{enum.py_name}}(_fbthrift_python_types.{{#if enum.flags?}}Flag{{#else}}Enum, int{{/if}}):
+    {{#each enum.values as |enum_value|}}
+    {{enum_value.py_name}} = {{enum_value.value}}
+    {{/each}}
+    @staticmethod
+    def __get_thrift_name__() -> builtins.str:
+        return "{{program.name}}.{{enum.name}}"
+
+    @staticmethod
+    def __get_thrift_uri__() -> _std_python_typing.Optional[builtins.str]:
+        return {{#if (string.empty? enum.uri)}}None{{#else}}"{{enum.uri}}"{{/if}}
+
+{{#if (not (has_compiler_option? "no_metadata"))}}
+    @staticmethod
+    def __get_metadata__() -> {{> metadata/metadata_return_type}}
+        return gen_metadata_enum_{{enum.py_name}}()
+
+{{/if (not (has_compiler_option? "no_metadata"))}}
+    def _to_python(self) -> _std_python_typing.Self:
+        return self
+
+    def _to_py3(self) -> _std_python_typing.Self:
+    {{! NB: thrift-py3 now uses thrift-python enums}}
+        return self
+
+    {{!
+        To prevent the need to import the `thrift-py-deprecated` type,
+        ignore the static type check error due to the lack of the import for the type.
+    }}
+    # pyre-ignore[11]: Annotation `{{program.py_deprecated_module_path}}.ttypes.{{enum.name}}` is not defined as a type.
+    def _to_py_deprecated(self) -> "{{program.py_deprecated_module_path}}.ttypes.{{enum.name}}":
+        {{!
+            At run-time, `thrift-py-deprecated` enum values are just integers.
+            Return the integer value.
+        }}
+        return self.value
+{{/each}}
+
+{{#if (not (has_compiler_option? "no_metadata"))}}
+{{#each program.enums as |enum|}}
+def _fbthrift_gen_metadata_enum_{{enum.py_name}}({{!
+}}metadata_struct: {{> metadata/metadata_thrift_type}}) -> {{> metadata/metadata_return_type}}
+    {{#if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
+    _fbthrift_metadata = _fbthrift__import_ThriftMetadata()
+
+    {{/if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
+    qualified_name = "{{program.name}}.{{enum.name}}"
+
+    if qualified_name in metadata_struct.enums:
+        return metadata_struct
+    elements = {
+        {{#each enum.values as |enum_value|}}
+        {{enum_value.value}}: "{{enum_value.name}}",
+        {{/each}}
+    }
+    structured_annotations = [
+        {{#each enum.structured_annotations as |annotation|}}
+          {{#if annotation.type.structured?}}
+        {{#annotation.value}}{{> metadata/const_struct }}{{/annotation.value}},
+          {{/if annotation.type.structured?}}
+        {{/each}}
+    ]
+    enum_dict = dict(metadata_struct.enums)
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
+    new_struct = metadata_struct(enums=enum_dict)
+
+    return new_struct
+
+def gen_metadata_enum_{{enum.py_name}}() -> {{> metadata/metadata_return_type}}
+    {{#if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
+    _fbthrift_metadata = _fbthrift__import_ThriftMetadata()
+    {{/if (has_compiler_option? "avoid_enum_metadata_circular_reference")}}
+    return _fbthrift_gen_metadata_enum_{{enum.py_name}}(
+        _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
+    )
+
+{{/each}}
+{{/if (not (has_compiler_option? "no_metadata"))}}
+{{#each (array.enumerate program.typedefs with_first=true) as |i typedef first?|}}
+  {{#if first?}}
+{{! Enum typedefs }}
+  {{/if first?}}
+  {{#if typedef.enum?}}
+    {{#let enum = typedef.true_type}}
+{{typedef.py_name}} = {{#if enum.need_module_path?}}{{enum.module_mangle}}.{{/if}}{{enum.py_name}}
+  {{/if typedef.enum?}}
+{{/each}}

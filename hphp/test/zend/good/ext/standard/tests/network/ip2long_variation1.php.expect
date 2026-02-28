@@ -1,0 +1,8 @@
+*** Testing ip2long() : usage variation ***
+
+--empty string DQ--
+bool(false)
+
+--empty string SQ--
+bool(false)
+===DONE===

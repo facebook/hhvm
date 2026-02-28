@@ -11,7 +11,7 @@
 // get a class
 class classA
 {
-  public function __toString() {
+  public function __toString() :mixed{
     return "Class A object";
   }
 }
@@ -25,7 +25,7 @@ hello world
 EOT;
 
 // unexpected values to be passed to $stream_id argument
-$inputs = varray[
+$inputs = vec[
 
        // int data
 /*1*/  0,
@@ -53,7 +53,7 @@ $inputs = varray[
        // empty data
 /*16*/ "",
        '',
-       varray[],
+       vec[],
 
        // string data
 /*19*/ "string",

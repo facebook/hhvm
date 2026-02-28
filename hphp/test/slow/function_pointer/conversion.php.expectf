@@ -1,1 +1,3 @@
-Fatal error: Cannot convert reified function to int in %s on line %d
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Cannot convert reified function to int' %s
+Stack trace:
+#0 {main}

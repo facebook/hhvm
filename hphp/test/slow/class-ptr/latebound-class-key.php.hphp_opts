@@ -1,2 +1,0 @@
--vRuntime.Eval.EmitClassPointers=2
--vRuntime.Eval.FoldLazyClassKeys=true

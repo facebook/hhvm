@@ -84,6 +84,12 @@ ALWAYS_INLINE UnalignedTypedValue* VanillaVec::entries(ArrayData* arr) {
   return reinterpret_cast<UnalignedTypedValue*>(arr + 1);
 }
 
+ALWAYS_INLINE
+const UnalignedTypedValue* VanillaVec::entries(const ArrayData* arr) {
+  assertx(stores_unaligned_typed_values);
+  return reinterpret_cast<const UnalignedTypedValue*>(arr + 1);
+}
+
 ALWAYS_INLINE ptrdiff_t VanillaVec::entriesOffset() {
   return sizeof(ArrayData);
 }
@@ -110,6 +116,15 @@ size_t VanillaVec::capacityToSizeIndex(size_t capacity) {
   const auto index = MemoryManager::size2Index(capacityToSizeBytes(capacity));
   assertx(index <= VanillaVec::MaxSizeIndex);
   return index;
+}
+
+ALWAYS_INLINE
+bool VanillaVec::checkCapacity(size_t capacity) {
+  if (capacity <= VanillaVec::SmallSize) {
+    return true;
+  }
+  const auto index = MemoryManager::size2Index(capacityToSizeBytes(capacity));
+  return index <= VanillaVec::MaxSizeIndex;
 }
 
 ALWAYS_INLINE
@@ -151,4 +166,3 @@ void VanillaVec::IterateKV(const ArrayData* arr, F fn) {
 //////////////////////////////////////////////////////////////////////
 
 }
-

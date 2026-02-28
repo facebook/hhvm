@@ -4,10 +4,10 @@ class YieldedException extends Exception {
 }
 class ReflectedException extends Exception {
 }
-function throwYieldedException() {
+function throwYieldedException() :mixed{
   throw new YieldedException();
 }
-function gen() {
+function gen() :AsyncGenerator<mixed,mixed,void>{
   try {
     $a = yield throwYieldedException();
     echo 'Gen got '.$a;
@@ -22,7 +22,7 @@ function gen() {
 }
 
 <<__EntryPoint>>
-function main_2176() {
+function main_2176() :mixed{
 try {
   $g = gen();
   $g->next();

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * ( excerpt from
@@ -7,7 +7,7 @@
  * A parent class to ReflectionFunction and ParentMethod. Read their
  * descriptions for details.
  */
-<<__NativeData('ReflectionFuncHandle')>>
+<<__NativeData>>
 abstract class ReflectionFunctionAbstract implements Reflector {
 
   const IS_STATIC    = 1;
@@ -117,6 +117,12 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function isAsync()[]: bool;
 
   /**
+   * @return     bool   TRUE if the function is internal, otherwise FALSE.
+   */
+  <<__Native>>
+  public function isInternalToModule()[]: bool;
+
+  /**
    * Indicates whether the function has ...$varargs as its last parameter
    * to capture variadic arguments.
    *
@@ -145,6 +151,10 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * Gets the file name from a user-defined function. Warning: This function
    * is currently not documented; only its argument list is available.
+   *
+   * Warning: if this is a method defined in a trait, getFileName() might return
+   * a filename of the class using the trait instead of a filename of the trait,
+   * if the trait was flattened (e.g. in repo mode by hhbbc).
    *
    * @return     mixed   The file name.
    */
@@ -175,6 +185,26 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
     return new ReflectionFile((string)$fileName);
   }
+
+  /**
+   * Extract type var names used in a function's parameter type hints.
+   *
+   * NB: Please use getTypeVarNames() instead, as it returns all the
+   * type vars that are defined on the function irrespective of how
+   * they are used (params, return type, within the body etc.).
+   *
+   * @return keyset containing type var names as strings
+   */
+  <<__Native>>
+  public function getParamTypeVarNames()[]: keyset<string>;
+
+  /**
+   * Get names of type vars defined on this function or method.
+   *
+   * @return vec containing type var names as strings
+   */
+  <<__Native>>
+  public function getTypeVarNames()[]: vec<string>;
 
   /**
    * ( excerpt from
@@ -267,7 +297,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
       $retTypeInfo = $this->getRetTypeInfo();
       return new ReflectionType(
         $this,
-        darray[
+        dict[
           'name' => $retTypeInfo['type_hint'],
           'nullable' => $retTypeInfo['type_hint_nullable'],
           'builtin' => $retTypeInfo['type_hint_builtin'],
@@ -311,7 +341,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getParameters()[]: varray<ReflectionParameter> {
     // FIXME: ReflectionParameter sh/could have native data pointing to the
     // relevant Func::ParamInfo data structure
-    $ret = varray[];
+    $ret = vec[];
     foreach ($this->getParamInfo() as $idx => $info) {
       $param = new ReflectionParameter(null, null, $info);
       $ret[] = $param;
@@ -385,11 +415,12 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   // Implementation of __toString
   final protected function __toStringHelper(
     $type,
-    varray<string> $preAttrs = varray[],
-    varray<string> $funcAttrs = varray[],
+    varray<string> $preAttrs = vec[],
+    varray<string> $funcAttrs = vec[],
   )[]: string {
     $ret = '';
-    if ($doc = $this->getDocComment()) {
+    $doc = $this->getDocComment();
+    if ($doc) {
       $ret .= $doc . "\n";
     }
     $ret .= "$type [ <";
@@ -398,7 +429,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
       if ($this->isDeprecated()) {
         $ret .= ', deprecated';
       }
-      if ($extensionName = $this->getExtensionName()) {
+      $extensionName = $this->getExtensionName();
+      if ($extensionName) {
         $ret .= ':' . $extensionName;
       }
     } else {
@@ -444,6 +476,9 @@ abstract class ReflectionFunctionAbstract implements Reflector {
  * ( excerpt from http://php.net/manual/en/class.reflectionfunction.php )
  *
  * The ReflectionFunction class reports information about a function.
+ *
+ * The purpose of reflection is to enable tooling for introspection of the
+ * codebase, not to drive execution of the business logic.
  */
 class ReflectionFunction extends ReflectionFunctionAbstract {
 
@@ -480,7 +515,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   }
 
   <<__Native>>
-  private function __initClosure(object $closure)[write_this_props]: bool;
+  private function __initClosure(\HH\object $closure)[write_this_props]: bool;
 
   <<__Native>>
   private function __initName(string $name)[write_this_props]: bool;
@@ -514,8 +549,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
       function(...$args) { return $this->invokeArgs($args); };
   }
 
-  <<__Pure, __MaybeMutable>>
-  public function isClosure(): bool {
+  public function isClosure()[]: bool {
     return (bool) $this->closure;
   }
 
@@ -563,7 +597,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
       return hphp_invoke_method($this->closure, get_class($this->closure),
                                 '__invoke', $args);
     }
-    return hphp_invoke($this->getName(), $args);
+    throw new ReflectionException(__FUNCTION__."() on top-level functions is no longer supported");
   }
 
   /**
@@ -582,7 +616,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
       return hphp_invoke_method($this->closure, get_class($this->closure),
                                 '__invoke', array_values($args));
     }
-    return hphp_invoke($this->getName(), array_values($args));
+    throw new ReflectionException(__FUNCTION__."() on top-level functions is no longer supported");
   }
 
   /**
@@ -599,19 +633,20 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
   }
 
   <<__Native>>
-  private function getClosureScopeClassname(object $closure)[]: ?string;
+  private function getClosureScopeClassname(\HH\object $closure)[]: ?string;
 
-  <<__Pure, __MaybeMutable>>
   public function getClosureScopeClass(): ?ReflectionClass {
-    if ($this->closure &&
-        ($cls = $this->getClosureScopeClassname($this->closure))) {
-      return new ReflectionClass($cls);
+    if ($this->closure) {
+      $cls = $this->getClosureScopeClassname($this->closure);
+      if ($cls) {
+        return new ReflectionClass($cls);
+      }
     }
     return null;
   }
 
   <<__Native>>
-  private function getClosureThisObject(object $closure): ?object;
+  private function getClosureThisObject(\HH\object $closure): ?\HH\object;
 
   /**
    * Returns this pointer bound to closure.
@@ -633,6 +668,9 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
  * ( excerpt from http://php.net/manual/en/class.reflectionmethod.php )
  *
  * The ReflectionMethod class reports information about a method.
+ *
+ * The purpose of reflection is to enable tooling for introspection of the
+ * codebase, not to drive execution of the business logic.
  */
 class ReflectionMethod extends ReflectionFunctionAbstract {
 
@@ -699,22 +737,25 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    * @return     string  A string representation of this ReflectionMethod.
    */
   public function __toString()[]: string {
-    $preAttrs = varray[];
+    $preAttrs = vec[];
 
     $decl_class = $this->getDeclaringClassname();
     if ($this->originalClass !== $decl_class) {
       $preAttrs[] = "inherits $decl_class";
-    } else if ($proto_cls = $this->getPrototypeClassname()) {
-      $preAttrs[] = interface_exists($proto_cls, false)
-        ? 'implements '.$proto_cls
-        : 'overrides '.$proto_cls;
+    } else {
+      $proto_cls = $this->getPrototypeClassname();
+      if ($proto_cls) {
+        $preAttrs[] = interface_exists($proto_cls, false)
+          ? 'implements '.$proto_cls
+          : 'overrides '.$proto_cls;
+      }
     }
 
     if ($this->isConstructor()) {
       $preAttrs[] = 'ctor';
     }
 
-    $funcAttrs = varray[];
+    $funcAttrs = vec[];
     if ($this->isAbstract()) {
       $funcAttrs[] = 'abstract';
     }
@@ -727,7 +768,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
 
     if ($this->isPrivate()) {
       $funcAttrs[] = 'private';
-    } elseif ($this->isProtected()) {
+    } else if ($this->isProtected()) {
       $funcAttrs[] = 'protected';
     } else {
       $funcAttrs[] = 'public';
@@ -736,9 +777,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     return $this->__toStringHelper('Method', $preAttrs, $funcAttrs);
   }
 
-  <<__Pure, __MaybeMutable>>
   public function __debugInfo() {
-    return darray['name' => $this->name, 'class' => $this->class];
+    return dict['name' => $this->name, 'class' => $this->class];
   }
 
   /**
@@ -770,7 +810,6 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     print $str;
   }
 
-  <<__Pure, __MaybeMutable>>
   private function isAccessible(): bool {
     return $this->forcedAccessible || $this->isPublic();
   }
@@ -1015,13 +1054,41 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    * @return ReflectionClass   A ReflectionClass object of the class that the
    *                           reflected method is part of.
    */
-  public function getDeclaringClass()[] {
+  public function getDeclaringClass()[]: ReflectionClass {
     return new ReflectionClass($this->getDeclaringClassname());
   }
 
   public function getOriginalClassname()[]: string {
     return (string)$this->originalClass;
   }
+
+  /**
+   * Gets the "canonical" version of the method, where canonical means that
+   * the method is *actually* defined and implemented on the class that is
+   * within the returned value's ->getDeclaringClass()->getName().
+   * This is particularly relevant when the method is inherited from a trait
+   *
+   * NOTE: This wouldn't work "correctly" in repo-mode, where traits are
+   * flattened. As such, in repo-mode this throws an exception instead.
+   */
+  public function getCanonicalMethod()[]: ReflectionMethod {
+    $canonical_clsname = $this->getCanonicalClassname();
+    if ($canonical_clsname === $this->class) {
+      return $this;
+    }
+    return new ReflectionMethod($canonical_clsname, $this->name);
+  }
+
+  /**
+   * Gets the name of the "canonical" class, where canonical means that
+   * the method is *actually* defined and implemented on that class.
+   * This is particularly relevant when the method is inherited from a trait
+   *
+   * NOTE: This wouldn't work "correctly" in repo-mode, where traits are
+   * flattened. As such, in repo-mode this throws an exception instead.
+   */
+  <<__Native>>
+  public function getCanonicalClassname()[]: string;
 
   <<__Native>>
   private function getDeclaringClassname()[]: string;
@@ -1036,8 +1103,11 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
  * ( excerpt from http://php.net/manual/en/class.reflectionclass.php )
  *
  * The ReflectionClass class reports information about a class.
+ *
+ * The purpose of reflection is to enable tooling for introspection of the
+ * codebase, not to drive execution of the business logic.
  */
-<<__NativeData('ReflectionClassHandle')>>
+<<__NativeData>>
 class ReflectionClass implements Reflector {
   const int IS_IMPLICIT_ABSTRACT = 16;
   const int IS_EXPLICIT_ABSTRACT = 32;
@@ -1062,6 +1132,9 @@ class ReflectionClass implements Reflector {
     } else {
       $classname = $name_or_obj;
     }
+    if (HH\is_class($classname)) {
+      $classname = HH\class_to_classname($classname);
+    }
     $name = $this->__init($classname);
     if (!$name) {
       throw new ReflectionException("Class $classname does not exist");
@@ -1069,7 +1142,7 @@ class ReflectionClass implements Reflector {
     $this->name = $name;
   }
 
-  <<__Native>>
+  <<__Native("NoRecording")>>
   private function __init(string $name)[]: string;
 
   /**
@@ -1079,23 +1152,25 @@ class ReflectionClass implements Reflector {
    */
   public function __toString()[]: string {
     $ret = '';
-    if ($docComment = $this->getDocComment()) {
+    $docComment = $this->getDocComment();
+    if ($docComment) {
       $ret .= $docComment . "\n";
     }
     if ($this is ReflectionObject) {
       $ret .= 'Object of class [ ';
-    } elseif ($this->isInterface()) {
+    } else if ($this->isInterface()) {
       $ret .= 'Interface [ ';
-    } elseif ($this->isTrait()) {
+    } else if ($this->isTrait()) {
       $ret .= 'Trait [ ';
-    } elseif ($this->isEnum()) {
+    } else if ($this->isEnum()) {
       $ret .= 'Enum [ ';
     } else {
       $ret .= 'Class [ ';
     }
     if ($this->isInternal()) {
       $ret .= '<internal:';
-      if ($extensionName = $this->getExtensionName()) {
+      $extensionName = $this->getExtensionName();
+      if ($extensionName) {
         $ret .= ':' . $extensionName;
       }
       $ret .= '> ';
@@ -1107,9 +1182,9 @@ class ReflectionClass implements Reflector {
     }
     if ($this->isInterface()) {
       $ret .= 'interface ';
-    } elseif ($this->isTrait()) {
+    } else if ($this->isTrait()) {
       $ret .= 'trait ';
-    } elseif ($this->isEnum()) {
+    } else if ($this->isEnum()) {
       $ret .= 'enum ';
     } else {
       if ($this->isAbstract()) {
@@ -1121,10 +1196,12 @@ class ReflectionClass implements Reflector {
       $ret .= 'class ';
     }
     $ret .= $this->getName();
-    if ($parent = $this->getParentName()) {
+    $parent = $this->getParentName();
+    if ($parent) {
       $ret .= " extends $parent";
     }
-    if ($ifaces = $this->getInterfaceNames()) {
+    $ifaces = $this->getInterfaceNames();
+    if ($ifaces) {
       if ($this->isInterface()) {
         $ret .= ' extends ';
       } else {
@@ -1158,7 +1235,7 @@ class ReflectionClass implements Reflector {
     foreach ($props as $prop) {
       if ($prop->isStatic()) {
         ++$numStaticProps;
-      } elseif (!$prop->isDefault()) {
+      } else if (!$prop->isDefault()) {
         ++$numDynamicProps;
       }
     }
@@ -1399,7 +1476,7 @@ class ReflectionClass implements Reflector {
    *                     method.
    */
   public function getMethods(?int $filter = null)[]: varray<ReflectionMethod> {
-    $ret = varray[];
+    $ret = vec[];
     $clsname = $this->getName();
     foreach ($this->getMethodOrderWithCaching($filter) as $name) {
       $ret[] = new ReflectionMethod($clsname, $name);
@@ -1496,7 +1573,7 @@ class ReflectionClass implements Reflector {
   }
 
   public function getTypeConstants()[]: varray<ReflectionTypeConstant> {
-    $ret = varray[];
+    $ret = vec[];
     $class = $this->getName();
     foreach ($this->getTypeConstantNamesWithCaching() as $name) {
       $ret[] = new ReflectionTypeConstant($class, $name);
@@ -1564,6 +1641,24 @@ class ReflectionClass implements Reflector {
   }
 
   /**
+   * Gets the name of the required class for a trait.
+   *
+   * @return  Null if there are no require class requirement or the
+   *          string name of the class required by the require class statement
+   */
+  <<__Native>>
+  public function getRequiredClass()[]: ?string;
+
+  /**
+   * Gets the name of the required this as class for a trait.
+   *
+   * @return  Null if there are no require this as requirement or the
+   *          string name of the class required by the require class statement
+   */
+  <<__Native>>
+  public function getRequiredThisAsClass()[]: ?string;
+
+  /**
    * ( excerpt from
    * http://php.net/manual/en/reflectionclass.gettraitnames.php )
    *
@@ -1575,20 +1670,6 @@ class ReflectionClass implements Reflector {
    */
   <<__Native>>
   public function getTraitNames()[]: varray<string>;
-
-  /**
-   * ( excerpt from
-   * http://php.net/manual/en/reflectionclass.gettraitaliases.php )
-   *
-   * Warning: This function is currently not documented; only its argument
-   * list is available.
-   *
-   * @return     mixed   Returns an array with new method names in keys and
-   *                     original names (in the format "TraitName::original")
-   *                     in values. Returns NULL in case of an error.
-   */
-  <<__Native>>
-  public function getTraitAliases()[]: darray<string, string>;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.gettraits.php )
@@ -1610,7 +1691,7 @@ class ReflectionClass implements Reflector {
   private function getReflectionClassesFromNames(
     varray<string> $names
   )[]: darray<string, ReflectionClass> {
-    $ret = darray[];
+    $ret = dict[];
     foreach ($names as $name) {
       $ret[$name] = new ReflectionClass($name);
     }
@@ -1647,6 +1728,22 @@ class ReflectionClass implements Reflector {
    */
   <<__Native>>
   public function isFinal()[]: bool;
+
+  /**
+   * Checks if a class is internal.
+   *
+   * @return     bool   Returns TRUE on success or FALSE on failure.
+   */
+  <<__Native>>
+  public function isInternalToModule()[]: bool;
+
+  /*
+   * Returns the module associated with the given function.
+   *
+   * @return     ?string  Returns the module name if the class is part of a module, null otherwise.
+   */
+  <<__Native>>
+  public function getModule()[]: ?string;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.istrait.php )
@@ -1748,7 +1845,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   Returns a new instance of the class.
    */
-  public function newInstanceArgs(Traversable<mixed> $args = varray[])[defaults] {
+  public function newInstanceArgs(Traversable<mixed> $args = vec[])[defaults] {
     if ($args && !$this->getConstructorName()) {
       // consistent with reference, but perhaps not particularly useful
       throw new ReflectionException(
@@ -1773,34 +1870,30 @@ class ReflectionClass implements Reflector {
   // This calculations requires walking the preclasses in the hierarchy and
   // should not be getting performed repeatedly.
   <<__Native>>
-  // returns dict:
-  //   'properties'               => darray<string, prop_info_array>
-  //   'private_properties'       => darray<string, prop_info_array>
-  //   'properties_index'         => darray<string, int>
-  //   'private_properties_index' => darray<string, int>
-  private static function getClassPropertyInfo(string $clsname)[]: dict;
+  // returns keyset of instance and then static properties
+  private static function getNonDynamicPropNames(string $clsname)[]: keyset<string>;
 
   <<__Native>>
-  private function getDynamicPropertyInfos(object $obj)[]: dict<string, mixed>;
+  private function getDynamicPropertyInfos(
+    \HH\object $obj,
+  )[]: dict<string, mixed>;
 
-  private function getOrderedPropertyInfos()[]: ConstMap<string, mixed> {
-    $props_map = self::getPropsMapCache($this->getName());
-    if (!$this->obj) { return $props_map; }
+  private function getOrderedPropertyNames()[]: keyset<string> {
+    $prop_names = self::getNonDynamicPropNamesMemoized($this->getName());
+    if (!$this->obj) { return $prop_names; }
 
     // caching cannot be well applied to an object's dynamic properties,
     // since they can be added and removed at any time between calls to
     // property methods.
     $dynamic_props = $this->getDynamicPropertyInfos($this->obj);
-    return (!$dynamic_props)
-      ? $props_map
-      : new Map(HH\Lib\Dict\merge($props_map, $dynamic_props));
+    return HH\Lib\Keyset\union($prop_names, HH\Lib\Keyset\keys($dynamic_props));
   }
 
   <<__Memoize>>
-  private static function getPropsMapCache(
+  private static function getNonDynamicPropNamesMemoized(
     string $clsname
-  )[]: ImmMap<string, mixed> {
-    return new ImmMap(self::getClassPropertyInfo($clsname));
+  )[]: keyset<string> {
+    return self::getNonDynamicPropNames($clsname);
   }
 
   /**
@@ -1836,7 +1929,7 @@ class ReflectionClass implements Reflector {
    * @return     bool   TRUE if it has the property, otherwise FALSE
    */
   public function hasProperty($name)[]: bool {
-    return $this->getOrderedPropertyInfos()->containsKey($name);
+    return HH\Lib\C\contains($this->getOrderedPropertyNames(), $name);
   }
 
   /**
@@ -1851,8 +1944,8 @@ class ReflectionClass implements Reflector {
    * @return     mixed   An array of ReflectionProperty objects.
    */
   public function getProperties($filter = 0xFFFF)[]: varray<ReflectionProperty> {
-    $ret = varray[];
-    foreach ($this->getOrderedPropertyInfos() as $name => $prop_info) {
+    $ret = vec[];
+    foreach ($this->getOrderedPropertyNames() as $name) {
       if ($this->obj) {
         $p = new ReflectionProperty($this->obj, $name);
       } else {
@@ -1878,7 +1971,7 @@ class ReflectionClass implements Reflector {
    * @return     mixed   The static properties, as an array.
    */
   public function getStaticProperties(): darray<string, mixed> {
-    $ret = darray[];
+    $ret = dict[];
     foreach ($this->getProperties(ReflectionProperty::IS_STATIC) as $prop) {
       $val = hphp_get_static_property($this->getName(), $prop->name, true);
       $ret[$prop->name] = $val;
@@ -1950,7 +2043,7 @@ class ReflectionClass implements Reflector {
    *                     into account.
    */
   public function getDefaultProperties()[]: darray<string, mixed> {
-    $ret = darray[];
+    $ret = dict[];
     foreach ($this->getProperties() as $prop) {
       if ($prop->isDefault()) {
         $ret[$prop->name] = $prop->getDefaultValue();
@@ -1958,6 +2051,14 @@ class ReflectionClass implements Reflector {
     }
     return $ret;
   }
+
+  /**
+   * Get names of type vars defined on this class.
+   *
+   * @return vec containing type var names as strings
+   */
+  <<__Native>>
+  public function getTypeVarNames()[]: vec<string>;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.getextension.php
@@ -2160,6 +2261,8 @@ class ReflectionClass implements Reflector {
  *
  * The ReflectionObject class reports information about an object.
  *
+ * The purpose of reflection is to enable tooling for introspection of the
+ * codebase, not to drive execution of the business logic.
  */
 class ReflectionObject extends ReflectionClass {
 
@@ -2169,7 +2272,6 @@ class ReflectionObject extends ReflectionClass {
    *
    *  Constructs a ReflectionObject.
    */
-  <<__Pure>>
   public function __construct($argument) {
     if (!is_object($argument)) {
       throw new ReflectionException(
@@ -2211,8 +2313,10 @@ class ReflectionObject extends ReflectionClass {
 /**
  * The ReflectionTypeConstant class reports information about an object.
  *
+ * The purpose of reflection is to enable tooling for introspection of the
+ * codebase, not to drive execution of the business logic.
  */
-<<__NativeData('ReflectionConstHandle')>>
+<<__NativeData>>
 class ReflectionTypeConstant implements Reflector {
 
   /**
@@ -2273,8 +2377,19 @@ class ReflectionTypeConstant implements Reflector {
    *                           reflected type constant is part of.
    */
   public function getClass()[] {
-    return new ReflectionClass($this->getClassname());
+    return new ReflectionClass($this->getClassPtr());
   }
+
+    /**
+   * Gets the name of the "canonical" class, where canonical means that
+   * the type constant is *actually* declared and defined on that class.
+   * This is particularly relevant when the const is inherited from a trait
+   *
+   * NOTE: This wouldn't work "correctly" in repo-mode, where traits are
+   * flattened. As such, in repo-mode this throws an exception instead.
+   */
+  <<__Native>>
+  public function getCanonicalClassname()[]: string;
 
   public function __toString()[] {
     $abstract = $this->isAbstract() ? 'abstract ' : '';
@@ -2311,14 +2426,14 @@ class ReflectionTypeConstant implements Reflector {
   private function getDeclaringClassname()[]: string;
 
   <<__Native>>
-  private function getClassname()[]: string;
+  private function getClassPtr()[]: class<mixed>;
 
   /* returns the shape containing the full type information for this
    * type constant. The structure of this shape is specified in
    * reflection.hhi. */
   public function getTypeStructure()[] {
     return HH\type_structure(
-      $this->getClassname(),
+      $this->getClassPtr(),
       $this->getName()
     );
   }
@@ -2328,10 +2443,14 @@ class ReflectionTypeConstant implements Reflector {
 ///////////////////////////////////////////////////////////////////////////////
 // type aliases
 
-/** The ReflectionTypeAlias class reports information about a type
+/**
+ * The ReflectionTypeAlias class reports information about a type
  * alias.
+ *
+ * The purpose of reflection is to enable tooling for introspection of the
+ * codebase, not to drive execution of the business logic.
  */
-<<__NativeData('ReflectionTypeAliasHandle')>>
+<<__NativeData>>
 class ReflectionTypeAlias implements Reflector {
 
   private string $name = '';
@@ -2438,7 +2557,7 @@ class ReflectionTypeAlias implements Reflector {
 
 /** The ReflectionFile class reports information about a file.
  */
-<<__NativeData('ReflectionFileHandle')>>
+<<__NativeData>>
 final class ReflectionFile implements Reflector {
 
   private string $name = '';
@@ -2494,6 +2613,15 @@ final class ReflectionFile implements Reflector {
     return "File [ {$this->name} ]\n";
   }
 
+  /*
+   * Get the module of the file.
+   *
+   * @return     ?string  Returns the module name if the file has a module
+   *                      membership statement, null otherwise.
+   */
+  <<__Native>>
+  public function getModule()[]: ?string;
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2501,7 +2629,7 @@ final class ReflectionFile implements Reflector {
 
 /** The ReflectionModule class reports information about a module.
  */
-<<__NativeData('ReflectionModuleHandle')>>
+<<__NativeData>>
 final class ReflectionModule implements Reflector {
 
   private string $name = '';
@@ -2512,17 +2640,13 @@ final class ReflectionModule implements Reflector {
    * @name      string  Name of the module.
    */
   final public function __construct(string $name)[] {
-    $n = $this->__init($name);
-    if (!$n) {
-      throw new ReflectionException(
-        "module {$name} does not exist");
-    }
-    $this->name = $n;
+    $this->__init($name); // throws an exception if module doesn't exist
+    $this->name = $name;
   }
 
   // helper for ctor
   <<__Native>>
-  private function __init(string $name)[]: string;
+  private function __init(string $name)[]: void;
 
   /**
    * Gets all attributes
@@ -2536,6 +2660,9 @@ final class ReflectionModule implements Reflector {
   use ReflectionLegacyAttribute;
 
   use ReflectionTypedAttribute;
+
+  <<__Native>>
+  public function getDocComment()[]: mixed;
 
   /**
    * Get the name of the file.

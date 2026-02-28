@@ -10,7 +10,7 @@
  */
 
 
-#include "gdfontmb.h"
+#include "hphp/runtime/ext/gd/libgd/gdfontmb.h"
 
 static const char gdFontMediumBoldData[] =
 {

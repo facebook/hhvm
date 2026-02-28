@@ -1,0 +1,54 @@
+/*
+ *  Copyright (c) 2018-present, Facebook, Inc.
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
+
+#pragma once
+
+#include <folly/portability/GMock.h>
+#include <folly/portability/GTest.h>
+
+#include <fizz/record/Types.h>
+#include <folly/String.h>
+
+namespace fizz {
+namespace test {
+
+class ExtensionsTest : public testing::Test {
+ protected:
+  Buf getBuf(folly::StringPiece hex) {
+    auto data = unhexlify(hex);
+    return folly::IOBuf::copyBuffer(data.data(), data.size());
+  }
+
+  std::vector<Extension> getExtensions(folly::StringPiece hex) {
+    auto buf = ExtensionsTest::getBuf(hex);
+    folly::io::Cursor cursor(buf.get());
+    Extension ext;
+    size_t len;
+    Error err;
+    EXPECT_EQ(detail::read(len, err, ext, cursor), Status::Success);
+    EXPECT_EQ(len, buf->computeChainDataLength());
+    EXPECT_TRUE(cursor.isAtEnd());
+    std::vector<Extension> exts;
+    exts.push_back(std::move(ext));
+    return exts;
+  }
+
+  template <class T>
+  void checkEncode(T&& ext, folly::StringPiece expectedHex) {
+    Extension encoded;
+    Error err;
+    EXPECT_EQ(
+        encodeExtension(encoded, err, std::forward<T>(ext)), Status::Success);
+    auto buf = folly::IOBuf::create(0);
+    folly::io::Appender appender(buf.get(), 10);
+    EXPECT_EQ(detail::write(err, encoded, appender), Status::Success);
+    EXPECT_TRUE(folly::IOBufEqualTo()(buf, getBuf(expectedHex)));
+  }
+};
+} // namespace test
+} // namespace fizz

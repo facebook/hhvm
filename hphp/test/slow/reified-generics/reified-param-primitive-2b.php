@@ -3,7 +3,7 @@
 class C<<<__Warn>> reify T> {}
 class D<reify T> {}
 
-function f<reify T>(T $x) {}
+function f<reify T>(T $x) :mixed{}
 
 <<__EntryPoint>>
 function main(): void {

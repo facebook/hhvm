@@ -113,13 +113,24 @@ PhysReg r_svcreq_arg(size_t i);
  *
  * - r_func_prologue_flags: see struct PrologueFlags
  * - r_func_prologue_callee: the func being called
- * - r_func_prologue_num_args: the number of arguments being passed
  * - r_func_prologue_ctx: the $this/static:class context (TCtx)
+ * - r_func_prologue_num_args: the number of arguments being passed
  */
 inline PhysReg r_func_prologue_flags() { return rarg(0); }
 inline PhysReg r_func_prologue_callee() { return rarg(1); }
-inline PhysReg r_func_prologue_num_args() { return rarg(2); }
-inline PhysReg r_func_prologue_ctx() { return rarg(3); }
+inline PhysReg r_func_prologue_ctx() { return rarg(2); }
+inline PhysReg r_func_prologue_num_args() { return rarg(3); }
+
+/*
+ * Func entry input registers.
+ *
+ * - r_func_entry_ar_flags: the callee's ActRec::m_callOffAndFlags
+ * - r_func_entry_callee_id: the id of the func being called
+ * - r_func_entry_ctx: the $this/static::class context (TCtx)
+ */
+inline PhysReg r_func_entry_ar_flags() { return rarg(0); }
+inline PhysReg r_func_entry_callee_id() { return rarg(1); }
+inline PhysReg r_func_entry_ctx() { return rarg(2); }
 
 ///////////////////////////////////////////////////////////////////////////////
 // JIT and TC boundary ABI registers.
@@ -148,12 +159,6 @@ inline RegSet cross_trace_regs()          { return vm_regs_no_sp(); }
 inline RegSet cross_trace_regs_resumed()  { return vm_regs_with_sp(); }
 
 /*
- * Registers that are live when we reenter the JIT from the TC (e.g., via
- * service requests).
- */
-inline RegSet leave_trace_regs() { return vm_regs_no_sp(); }
-
-/*
  * Registers that are live when calling a prologue of a VM function.
  */
 inline RegSet func_prologue_regs(bool withCtx) {
@@ -169,8 +174,13 @@ inline RegSet func_prologue_regs(bool withCtx) {
 /*
  * Registers that are live when calling a func entry of a VM function.
  */
-inline RegSet func_entry_regs() {
-  return vm_regs_with_sp();
+inline RegSet func_entry_regs(bool withCtx) {
+  auto regs =
+    vm_regs_with_sp() |
+    r_func_entry_ar_flags() |
+    r_func_entry_callee_id();
+  if (withCtx) regs |= r_func_entry_ctx();
+  return regs;
 }
 
 /*

@@ -1,0 +1,36 @@
+error: Typing[4472] Cannot access function pkg4_call defined in package pkg4 which may not be available [1]
+-> pkg4_call is defined in cross_package_with_package_syntax_if_nested.php--pkg4.php [2]
+-> pkg4_call belongs to package pkg4 by this package override [3]
+-> package pkg3 is available because the current file belongs to it by this package override [4]
+-> package pkg1 is assumed to be deployed here [5]
+-> pkg3 includes pkg2 via its definition [6]
+-> pkg3 includes pkg2_soft via its definition [7]
+-> pkg3 includes pkg1 via its definition [8]
+
+cross_package_with_package_syntax_if_nested.php--pkg3.php:12:5
+         1 | <?hh
+[4]      2 | <<file: __PackageOverride('pkg3')>>
+         3 | function test(): void {
+[5]      4 |   if (package pkg1) {
+         5 |     if (package pkg4) {
+         6 |       // both pkg1 and pkg4 are accessible here
+           :
+        10 |     // only pkg1 is accessible here
+        11 |     pkg1_call(); // ok
+[1]     12 |     pkg4_call(); // error
+        13 |   }
+        14 | }
+
+cross_package_with_package_syntax_if_nested.php--pkg4.php:3:10
+         1 | <?hh
+[3]      2 | <<file: __PackageOverride('pkg4')>>
+[2]      3 | function pkg4_call(): void {}
+
+PACKAGES.toml:18:13
+        16 | 
+        17 | [packages.pkg3]
+[6,7,8] 18 | includes = ["pkg2", "pkg2_soft", "pkg1"]
+        19 | 
+        20 | [packages.pkg4]
+
+1 error found

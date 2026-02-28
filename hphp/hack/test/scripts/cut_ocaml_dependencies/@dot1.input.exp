@@ -1,0 +1,35 @@
+
+LEGEND:
+    a -> b indicates module a depends on module b
+    //foo:bar ---> //foo:baz indicates target //foo:bar depends on target //foo:baz
+
+digraph G {
+compound=True
+subgraph "cluster_//hphp/hack/test/scripts/cut_ocaml_dependencies/fixtures/b:b" {
+    label = < <b>//hphp/hack/test/scripts/cut_ocaml_dependencies/fixtures/b:b</b> >
+    style = filled;
+    color = lightgray;
+    node [style=filled,color=white];
+    b1;
+}
+subgraph "cluster_//hphp/hack/test/scripts/cut_ocaml_dependencies/fixtures:a" {
+    label = < <b>//hphp/hack/test/scripts/cut_ocaml_dependencies/fixtures:a</b> >
+    style = filled;
+    color = lightgray;
+    node [style=filled,color=white];
+    a1;
+}
+subgraph "cluster_//hphp/hack/test/scripts/cut_ocaml_dependencies/fixtures:c" {
+    label = < <b>//hphp/hack/test/scripts/cut_ocaml_dependencies/fixtures:c</b> >
+    style = filled;
+    color = lightgray;
+    node [style=filled,color=white];
+    c1;
+}
+// Edges between modules:
+"a1" -> "b1"
+"b1" -> "c1"
+// Edges between buck targets. Ignore the node names: only the heads and tails matter:
+"a1" -> "b1" [lhead="cluster_//hphp/hack/test/scripts/cut_ocaml_dependencies/fixtures/b:b" ltail="cluster_//hphp/hack/test/scripts/cut_ocaml_dependencies/fixtures:a" style=dotted]
+"b1" -> "c1" [lhead="cluster_//hphp/hack/test/scripts/cut_ocaml_dependencies/fixtures:c" ltail="cluster_//hphp/hack/test/scripts/cut_ocaml_dependencies/fixtures/b:b" style=dotted]
+}

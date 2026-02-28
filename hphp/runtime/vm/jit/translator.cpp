@@ -16,59 +16,39 @@
 
 #include "hphp/runtime/vm/jit/translator.h"
 
-#include <cinttypes>
-#include <assert.h>
 #include <stdint.h>
 
-#include <algorithm>
-#include <memory>
 #include <string>
-#include <utility>
-#include <vector>
 
 #include <folly/Conv.h>
-#include <folly/MapUtil.h>
 
-#include "hphp/util/arch.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/ringbuffer.h"
-#include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/bc-pattern.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/method-lookup.h"
-#include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/treadmill.h"
-#include "hphp/runtime/vm/type-profile.h"
 
-#include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/irgen-basic.h"
 #include "hphp/runtime/vm/jit/irgen-bespoke.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
-#include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
-#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
-#include "hphp/runtime/vm/jit/punt.h"
-#include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/vm/jit/translate-region.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 
-TRACE_SET_MOD(trans);
+TRACE_SET_MOD(trans)
 
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
@@ -107,6 +87,7 @@ static const struct {
   { OpDouble,      {None,             Stack1,       OutDouble       }},
   { OpString,      {None,             Stack1,       OutStringImm    }},
   { OpLazyClass,   {None,             Stack1,       OutLazyClass    }},
+  { OpEnumClassLabel, {None,          Stack1,       OutEnumClassLabel }},
   { OpDict,        {None,             Stack1,       OutDictImm      }},
   { OpKeyset,      {None,             Stack1,       OutKeysetImm    }},
   { OpVec,         {None,             Stack1,       OutVecImm       }},
@@ -120,14 +101,15 @@ static const struct {
   { OpNewPair,     {StackTop2,        Stack1,       OutObject       }},
   { OpColFromArray,   {Stack1,        Stack1,       OutObject       }},
   { OpCnsE,        {None,             Stack1,       OutCns          }},
-  { OpClsCns,      {Stack1,           Stack1,       OutUnknown      }},
+  { OpClsCns,      {Stack1|DontGuardAny,
+                                      Stack1,       OutUnknown      }},
   { OpClsCnsD,     {None,             Stack1,       OutUnknown      }},
   { OpClsCnsL,     {Stack1|Local,     Stack1,       OutUnknown      }},
   { OpFile,        {None,             Stack1,       OutString       }},
   { OpDir,         {None,             Stack1,       OutString       }},
   { OpMethod,      {None,             Stack1,       OutString       }},
   { OpClassName,   {Stack1,           Stack1,       OutString       }},
-  { OpLazyClassFromClass, {Stack1,    Stack1,       OutLazyClass    }},
+  { OpEnumClassLabelName, {Stack1,    Stack1,       OutString       }},
   { OpFuncCred,    {None,             Stack1,       OutObject       }},
 
   /*** 3. Operator instructions ***/
@@ -139,10 +121,6 @@ static const struct {
   { OpAdd,         {StackTop2,        Stack1,       OutArith        }},
   { OpSub,         {StackTop2,        Stack1,       OutArith        }},
   { OpMul,         {StackTop2,        Stack1,       OutArith        }},
-  /* Arithmetic ops that overflow ints to floats */
-  { OpAddO,        {StackTop2,        Stack1,       OutArithO       }},
-  { OpSubO,        {StackTop2,        Stack1,       OutArithO       }},
-  { OpMulO,        {StackTop2,        Stack1,       OutArithO       }},
   /* Div and mod might return boolean false. Sigh. */
   { OpDiv,         {StackTop2,        Stack1,       OutUnknown      }},
   { OpMod,         {StackTop2,        Stack1,       OutUnknown      }},
@@ -185,13 +163,17 @@ static const struct {
   { OpSelect,      {StackTop3,        Stack1,       OutUnknown      }},
   { OpPrint,       {Stack1,           Stack1,       OutInt64        }},
   { OpClone,       {Stack1,           Stack1,       OutObject       }},
-  { OpExit,        {Stack1,           Stack1,       OutNull         }},
-  { OpFatal,       {Stack1,           None,         OutNone         }},
+  { OpExit,        {Stack1|DontGuardAny,
+                                      Stack1,       OutNull         }},
+  { OpFatal,       {Stack1|DontGuardAny,
+                                      None,         OutNone         }},
+  { OpStaticAnalysisError,
+                   {None,             None,         OutNone         }},
 
   /*** 4. Control flow instructions ***/
 
+  { OpEnter,       {None,             None,         OutNone         }},
   { OpJmp,         {None,             None,         OutNone         }},
-  { OpJmpNS,       {None,             None,         OutNone         }},
   { OpJmpZ,        {Stack1,           None,         OutNone         }},
   { OpJmpNZ,       {Stack1,           None,         OutNone         }},
   { OpSwitch,      {Stack1,           None,         OutNone         }},
@@ -224,7 +206,9 @@ static const struct {
   { OpCGetG,       {Stack1,           Stack1,       OutUnknown      }},
   { OpCGetS,       {StackTop2,        Stack1,       OutUnknown      }},
   { OpClassGetC,   {Stack1,           Stack1,       OutClass        }},
-  { OpClassGetTS,  {Stack1,           StackTop2,    OutUnknown      }},
+  { OpClassGetTS,  {Stack1,           Stack1,       OutClass       }},
+  { OpClassGetTSWithGenerics,
+                   {Stack1,           StackTop2,    OutUnknown      }},
 
   /*** 6. Isset, Empty, and type querying instructions ***/
 
@@ -239,24 +223,23 @@ static const struct {
 
   /*** 7. Mutator instructions ***/
 
+  { OpPopG,        {StackTop2,        None,         OutNone          }},
   { OpSetL,        {Stack1|Local,     Stack1|Local, OutSameAsInput1  }},
-  { OpSetG,        {StackTop2,        Stack1,       OutSameAsInput1  }},
   { OpSetS,        {StackTop3,        Stack1,       OutSameAsInput1  }},
   { OpSetOpL,      {Stack1|Local,     Stack1|Local, OutSetOp        }},
-  { OpSetOpG,      {StackTop2,        Stack1,       OutUnknown      }},
-  { OpSetOpS,      {StackTop3,        Stack1,       OutUnknown      }},
+  { OpSetOpS,      {StackTop3|DontGuardAny,
+                                      Stack1,       OutUnknown      }},
   { OpIncDecL,     {Local,            Stack1|Local, OutIncDec       }},
-  { OpIncDecG,     {Stack1,           Stack1,       OutUnknown      }},
-  { OpIncDecS,     {StackTop2,        Stack1,       OutUnknown      }},
+  { OpIncDecS,     {StackTop2|DontGuardAny,
+                                      Stack1,       OutUnknown      }},
   { OpUnsetL,      {Local,            Local,        OutNone         }},
-  { OpUnsetG,      {Stack1,           None,         OutNone         }},
+  { OpUnsetG,      {Stack1|DontGuardAny,
+                                      None,         OutNone         }},
 
   /*** 8. Call instructions ***/
 
   { OpNewObj,      {Stack1,           Stack1,       OutObject       }},
-  { OpNewObjR,     {StackTop2,        Stack1,       OutObject       }},
   { OpNewObjD,     {None,             Stack1,       OutObject       }},
-  { OpNewObjRD,    {Stack1,           Stack1,       OutObject       }},
   { OpNewObjS,     {None,             Stack1,       OutObject       }},
   { OpLockObj,     {Stack1,           Stack1,       OutSameAsInput1 }},
 
@@ -266,6 +249,8 @@ static const struct {
    */
   { OpFCallClsMethod,
                    {StackTop2,        StackN,       OutUnknown      }},
+  { OpFCallClsMethodM,
+                   {Stack1,           StackN,       OutUnknown      }},
   { OpFCallClsMethodD,
                    {None,             StackN,       OutUnknown      }},
   { OpFCallClsMethodS,
@@ -276,44 +261,51 @@ static const struct {
   { OpFCallFunc,   {Stack1,           StackN,       OutUnknown      }},
   { OpFCallFuncD,  {None,             StackN,       OutUnknown      }},
   { OpFCallObjMethod,
-                   {Stack1,           StackN,       OutUnknown      }},
+                   {Stack1|DontGuardAny,
+                                      StackN,       OutUnknown      }},
   { OpFCallObjMethodD,
                    {None,             StackN,       OutUnknown      }},
 
   /*** 11. Iterator instructions ***/
 
-  { OpIterInit,    {Stack1,           Local,        OutUnknown      }},
-  { OpLIterInit,   {Local,            Local,        OutUnknown      }},
-  { OpIterNext,    {None,             Local,        OutUnknown      }},
-  { OpLIterNext,   {Local,            Local,        OutUnknown      }},
+  { OpIterBase,    {Stack1,           Stack1,       OutUnknown      }},
+  { OpIterGetKey,  {Local,            Stack1,       OutUnknown      }},
+  { OpIterGetValue,{Local,            Stack1,       OutUnknown      }},
+  { OpIterSetValue,{Local|Stack1,     Local,        OutNone         }},
+  { OpIterInit,    {Local,            None,         OutUnknown      }},
+  { OpIterNext,    {Local,            None,         OutUnknown      }},
   { OpIterFree,    {None,             None,         OutNone         }},
-  { OpLIterFree,   {Local,            None,         OutNone         }},
 
   /*** 12. Include, eval, and define instructions ***/
 
-  { OpIncl,        {Stack1,           Stack1,       OutUnknown      }},
-  { OpInclOnce,    {Stack1,           Stack1,       OutUnknown      }},
-  { OpReq,         {Stack1,           Stack1,       OutUnknown      }},
-  { OpReqOnce,     {Stack1,           Stack1,       OutUnknown      }},
-  { OpReqDoc,      {Stack1,           Stack1,       OutUnknown      }},
-  { OpEval,        {Stack1,           Stack1,       OutUnknown      }},
+  { OpIncl,        {Stack1|DontGuardAny,
+                                     Stack1,       OutUnknown      }},
+  { OpInclOnce,    {Stack1|DontGuardAny,
+                                     Stack1,       OutUnknown      }},
+  { OpReq,         {Stack1|DontGuardAny,
+                                     Stack1,       OutUnknown      }},
+  { OpReqOnce,     {Stack1|DontGuardAny,
+                                     Stack1,       OutUnknown      }},
+  { OpReqDoc,      {Stack1|DontGuardAny,
+                                     Stack1,       OutUnknown      }},
+  { OpEval,        {Stack1|DontGuardAny,
+                                     Stack1,       OutUnknown      }},
 
   /*** 13. Miscellaneous instructions ***/
 
   { OpThis,        {None,             Stack1,       OutThisObject   }},
   { OpBareThis,    {None,             Stack1,       OutUnknown      }},
   { OpCheckThis,   {This,             None,         OutNone         }},
-  { OpChainFaults, {StackTop2,        Stack1,       OutObject       }},
+  { OpChainFaults, {StackTop2|DontGuardAny,
+                                      Stack1,       OutObject       }},
   { OpVerifyParamType,
-                   {Local,            Local,        OutUnknown      }},
-  { OpVerifyParamTypeTS,
-                   {Local|Stack1,     Local,        OutUnknown      }},
-  { OpVerifyRetTypeC,
                    {Stack1,           Stack1,       OutUnknown      }},
+  { OpVerifyParamTypeTS,
+                   {Local|Stack1,     None,         OutNone         }},
   { OpVerifyRetTypeTS,
                    {StackTop2,        Stack1,       OutUnknown      }},
-  { OpVerifyRetNonNullC,
-                   {Stack1,           Stack1,       OutSameAsInput1  }},
+  { OpVerifyTypeTS,
+                   {StackTop2,        Stack1,       OutSameAsInput2 }},
   { OpVerifyOutType,
                    {Stack1,           Stack1,       OutUnknown      }},
   { OpOODeclExists,
@@ -323,7 +315,15 @@ static const struct {
   { OpLateBoundCls,{None,             Stack1,       OutClass        }},
   { OpRecordReifiedGeneric,
                    {Stack1,           Stack1,       OutVec          }},
-  { OpCheckReifiedGenericMismatch,
+  { OpCheckClsReifiedGenericMismatch,
+                   {Stack1,           None,         OutNone         }},
+  { OpClassHasReifiedGenerics,
+                   {Stack1,           Stack1,       OutBoolean      }},
+  { OpGetClsRGProp,
+                   {Stack1,           Stack1,       OutVec          }},
+  { OpHasReifiedParent,
+                   {Stack1,           Stack1,       OutBoolean      }},
+  { OpCheckClsRGSoft,
                    {Stack1,           None,         OutNone         }},
   { OpNativeImpl,  {None,             None,         OutNone         }},
   { OpCreateCl,    {BStackN,          Stack1,       OutObject       }},
@@ -333,15 +333,12 @@ static const struct {
   { OpArrayUnmarkLegacy, {StackTop2,  Stack1,       OutUnknown      }},
   { OpCheckProp,   {None,             Stack1,       OutBoolean      }},
   { OpInitProp,    {Stack1,           None,         OutNone         }},
-  { OpSilence,     {Local|DontGuardAny,
-                                      Local,        OutNone         }},
   { OpThrowNonExhaustiveSwitch,
                    {None,             None,         OutNone         }},
-  { OpRaiseClassStringConversionWarning,
+  { OpRaiseClassStringConversionNotice,
                    {None,             None,         OutNone         }},
   { OpAssertRATL,  {None,             None,         OutNone         }},
   { OpAssertRATStk,{None,             None,         OutNone         }},
-  { OpBreakTraceHint,{None,           None,         OutNone         }},
   { OpGetMemoKeyL, {Local,            Stack1,       OutUnknown      }},
   { OpResolveRFunc,{Stack1,           Stack1,       OutFuncLike     }},
   { OpResolveFunc, {None,             Stack1,       OutFunc         }},
@@ -359,11 +356,12 @@ static const struct {
                    {Stack1,           Stack1,       OutClsMethLike  }},
   { OpResolveRClsMethodS,
                    {Stack1,           Stack1,       OutClsMethLike  }},
-
-  // TODO (T61651936): ResolveClass may return a classptr or a string
-  { OpResolveClass,{None,             Stack1,       OutUnknown      }},
+  { OpResolveClass,{None,             Stack1,       OutClass        }},
   { OpSetImplicitContextByValue,
                    {Stack1,           Stack1,       OutUnknown      }},
+  { OpGetMemoAgnosticImplicitContext,
+                   {None,             Stack1,       OutUnknown      }},
+  { OpReifiedInit, {Local|StackTop2,  None,         OutNone         }},
 
   /*** 14. Generator instructions ***/
 
@@ -384,11 +382,10 @@ static const struct {
   { OpWHResult,    {Stack1,           Stack1,       OutUnknown      }},
   { OpAwait,       {Stack1,           Stack1,       OutUnknown      }},
   { OpAwaitAll,    {LocalRange,       Stack1,       OutNull         }},
+  { OpAwaitLowPri, {None,             Stack1,       OutNull         }},
 
   /*** 16. Member instructions ***/
 
-  { OpBaseGC,      {StackI,           MBase,        OutNone         }},
-  { OpBaseGL,      {Local,            MBase,        OutNone         }},
   { OpBaseSC,      {StackI|StackI2,   MBase,        OutNone         }},
   { OpBaseL,       {Local,            MBase,        OutNone         }},
   { OpBaseC,       {StackI,           MBase,        OutNone         }},
@@ -396,7 +393,7 @@ static const struct {
   { OpDim,         {MBase|MKey,       MBase,        OutNone         }},
   { OpQueryM,      {BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
-  { OpSetM,        {Stack1|BStackN|MBase|MKey,
+  { OpSetM,        {Stack1|DontGuardStack1|BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
   { OpSetRangeM,   {StackTop3|BStackN|MBase,
                                       None,         OutNone         }},
@@ -412,6 +409,10 @@ static const struct {
                                       Stack1,       OutSameAsInput1 }},
   { OpMemoSetEager, {Stack1|LocalRange,
                                       Stack1,       OutSameAsInput1 }},
+  { OpNop,         {None|DontGuardAny,
+                                      None,         OutNone         }},
+  { OpCGetCUNop,   {Stack1|DontGuardAny,
+                                      Stack1,       OutCInput       }},
 };
 
 namespace {
@@ -437,8 +438,7 @@ const InstrInfo& getInstrInfo(Op op) {
 namespace {
 int64_t countOperands(uint64_t mask) {
   const uint64_t ignore = Local | Iter | DontGuardStack1 |
-    DontGuardAny | This | MBase | StackI | StackI2 | MKey | LocalRange |
-    DontGuardBase;
+    DontGuardAny | This | MBase | StackI | StackI2 | MKey | LocalRange;
   mask &= ~ignore;
 
   static const uint64_t counts[][2] = {
@@ -464,6 +464,7 @@ int64_t getStackPopped(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
     case Op::FCallClsMethod:
+    case Op::FCallClsMethodM:
     case Op::FCallClsMethodD:
     case Op::FCallClsMethodS:
     case Op::FCallClsMethodSD:
@@ -513,6 +514,7 @@ int64_t getStackPushed(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
     case Op::FCallClsMethod:
+    case Op::FCallClsMethodM:
     case Op::FCallClsMethodD:
     case Op::FCallClsMethodS:
     case Op::FCallClsMethodSD:
@@ -538,8 +540,6 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
   switch (ni.op()) {
   case Op::Nop:
   case Op::CGetCUNop:
-  case Op::UGetCUNop:
-  case Op::EntryNop:
     return true;
   default:
     return false;
@@ -577,15 +577,6 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
 #define O(name, imm, ...) case Op::name: imm break;
 
 size_t localImmIdx(Op op) {
-  switch (op) {
-    case Op::LIterInit:
-    case Op::LIterNext:
-    case Op::LIterFree:
-      return 1;
-    default:
-      break;
-  }
-
   size_t idx = 0xff;
   switch (op) {
     OPCODES
@@ -650,7 +641,7 @@ unsigned localRangeImmIdx(Op op) {
     case Op::MemoGetEager:
       return 2;
     default:
-      always_assert_flog("op {} doesn't have LocalRange!\n", opcodeToName(op));
+      always_assert_flog(false, "op {} doesn't have LocalRange!\n", opcodeToName(op));
       return -1;
   }
 }
@@ -671,6 +662,21 @@ uint32_t getLocalOperand(const NormalizedInstruction& ni) {
   not_reached();
 }
 
+uint32_t getLocalOperand(SrcKey sk) {
+  auto const idx = localImmIdx(sk.op());
+  auto const argu = getImm(sk.pc(), idx);
+  switch (immType(sk.op(), idx)) {
+    case ArgType::LA:
+      return argu.u_LA;
+    case ArgType::NLA:
+      return argu.u_NLA.id;
+    case ArgType::ILA:
+      return argu.u_ILA;
+    default:
+      always_assert(false);
+  }
+}
+
 /*
  * Get location metadata for the inputs of `ni'.
  */
@@ -679,7 +685,7 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, SBInvOffset bcSPOff) {
   if (isAlwaysNop(ni)) return inputs;
 
   always_assert_flog(
-    instrInfo.count(ni.op()),
+    instrInfo.contains(ni.op()),
     "Invalid opcode in getInputsImpl: {}\n",
     opcodeToName(ni.op())
   );
@@ -736,7 +742,6 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, SBInvOffset bcSPOff) {
     for (int i = 0; i < numArgs; i++) {
       inputs.emplace_back(Location::Stack { stackOff-- });
       inputs.back().dontGuard = true;
-      inputs.back().dontBreak = true;
     }
   }
   if (flags & BStackN) {
@@ -745,6 +750,7 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, SBInvOffset bcSPOff) {
     SKTRACE(1, sk, "getInputs: BStackN %d %d\n", stackOff.offset, numArgs);
     for (int i = 0; i < numArgs; i++) {
       inputs.emplace_back(Location::Stack { stackOff-- });
+      inputs.back().dontGuard = true;
     }
   }
   if (isFCall(ni.op())) {
@@ -758,6 +764,11 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, SBInvOffset bcSPOff) {
 
     switch (ni.op()) {
       case Op::FCallCtor:
+        inputs.emplace_back(Location::Stack { stackOff-- });
+        if (fca.lockWhileUnwinding()) {
+          inputs.emplace_back(Location::Stack { stackOff-- });
+        }
+        break;
       case Op::FCallObjMethod:
       case Op::FCallObjMethodD:
         inputs.emplace_back(Location::Stack { stackOff-- });
@@ -806,21 +817,20 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, SBInvOffset bcSPOff) {
         break;
     }
   }
-  if (flags & MBase) {
-    inputs.emplace_back(Location::MBase{});
-    if (flags & DontGuardBase) {
-      inputs.back().dontGuard = true;
-      inputs.back().dontBreak = true;
-    }
-  }
+
+  if (flags & MBase) inputs.emplace_back(Location::MBase{});
 
   SKTRACE(1, sk, "stack args: virtual sfo now %d\n", stackOff.offset);
   TRACE(1, "%s\n", Trace::prettyNode("Inputs", inputs).c_str());
 
-  if ((flags & DontGuardAny) || dontGuardAnyInputs(ni)) {
+  if ((flags & DontGuardAny)) {
     for (auto& info : inputs) info.dontGuard = true;
   }
   return inputs;
+}
+
+bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
+  return getInstrInfo(ni.op()).in & DontGuardAny;
 }
 
 /*
@@ -829,264 +839,25 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, SBInvOffset bcSPOff) {
 jit::fast_set<uint32_t> getLocalOutputs(const NormalizedInstruction& ni) {
   fast_set<uint32_t> locals;
   auto const op = ni.op();
-
-  if (isIteratorOp(op)) {
-    auto const ita = ni.imm[0].u_ITA;
-    locals.insert(ita.valId);
-    if (ita.hasKey()) locals.insert(ita.keyId);
-  } else {
-    auto const info = getInstrInfo(op);
-    if (info.out & Local) {
-      auto const id = getLocalOperand(ni);
-      locals.insert(id);
+  auto const info = getInstrInfo(op);
+  if (info.out & Local) {
+    auto const id = getLocalOperand(ni);
+    locals.insert(id);
+  }
+  if (info.out & LocalRange) {
+    auto const& range = ni.imm[localRangeImmIdx(op)].u_LAR;
+    for (unsigned i = 0; i < range.count; ++i) {
+      locals.insert(range.first + i);
     }
-    if (info.out & LocalRange) {
-      auto const& range = ni.imm[localRangeImmIdx(op)].u_LAR;
-      for (unsigned i = 0; i < range.count; ++i) {
-        locals.insert(range.first + i);
-      }
-    }
-    if (info.out & MKey) {
-      auto const mk = ni.imm[memberKeyImmIdx(op)].u_KA;
-      if (mk.mcode == MEL || mk.mcode == MPL) {
-        locals.insert(mk.local.id);
-      }
+  }
+  if (info.out & MKey) {
+    auto const mk = ni.imm[memberKeyImmIdx(op)].u_KA;
+    if (mk.mcode == MEL || mk.mcode == MPL) {
+      locals.insert(mk.local.id);
     }
   }
 
   return locals;
-}
-
-bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
-  switch (ni.op()) {
-  case Op::IterNext:
-  case Op::LIterNext:
-  case Op::IterInit:
-  case Op::LIterInit:
-  case Op::JmpZ:
-  case Op::JmpNZ:
-  case Op::Jmp:
-  case Op::JmpNS:
-  case Op::ClsCnsD:
-  case Op::NewStructDict:
-  case Op::Switch:
-  case Op::SSwitch:
-  case Op::Lt:
-  case Op::Lte:
-  case Op::Gt:
-  case Op::Gte:
-  case Op::Cmp:
-  case Op::SetOpL:
-  case Op::InitProp:
-  case Op::BreakTraceHint:
-  case Op::IsTypeL:
-  case Op::IsTypeC:
-  case Op::IncDecL:
-  case Op::Eq:
-  case Op::Neq:
-  case Op::AssertRATL:
-  case Op::AssertRATStk:
-  case Op::SetL:
-  case Op::CastBool:
-  case Op::Same:
-  case Op::NSame:
-  case Op::Yield:
-  case Op::YieldK:
-  case Op::ContEnter:
-  case Op::ContRaise:
-  case Op::CreateCont:
-  case Op::Await:
-  case Op::AwaitAll:
-  case Op::BitAnd:
-  case Op::BitOr:
-  case Op::BitXor:
-  case Op::Sub:
-  case Op::Mul:
-  case Op::SubO:
-  case Op::MulO:
-  case Op::Add:
-  case Op::AddO:
-  case Op::ClassGetC:
-  case Op::ClassGetTS:
-  case Op::AKExists:
-  case Op::AddElemC:
-  case Op::AddNewElemC:
-  case Op::Dict:
-  case Op::Keyset:
-  case Op::Vec:
-  case Op::ArrayIdx:
-  case Op::ArrayMarkLegacy:
-  case Op::ArrayUnmarkLegacy:
-  case Op::BareThis:
-  case Op::BitNot:
-  case Op::CGetG:
-  case Op::CGetL:
-  case Op::CGetQuietL:
-  case Op::CGetL2:
-  case Op::CGetS:
-  case Op::CUGetL:
-  case Op::CastDouble:
-  case Op::CastInt:
-  case Op::CastString:
-  case Op::CastDict:
-  case Op::CastKeyset:
-  case Op::CastVec:
-  case Op::DblAsBits:
-  case Op::CheckProp:
-  case Op::CheckThis:
-  case Op::Clone:
-  case Op::CnsE:
-  case Op::ColFromArray:
-  case Op::CombineAndResolveTypeStruct:
-  case Op::RecordReifiedGeneric:
-  case Op::CheckReifiedGenericMismatch:
-  case Op::ConcatN:
-  case Op::Concat:
-  case Op::ContCheck:
-  case Op::ContCurrent:
-  case Op::ContKey:
-  case Op::ContValid:
-  case Op::ContGetReturn:
-  case Op::CreateCl:
-  case Op::Dir:
-  case Op::Div:
-  case Op::Double:
-  case Op::Dup:
-  case Op::FCallClsMethod:
-  case Op::FCallClsMethodD:
-  case Op::FCallClsMethodS:
-  case Op::FCallClsMethodSD:
-  case Op::FCallCtor:
-  case Op::FCallFunc:
-  case Op::FCallFuncD:
-  case Op::FCallObjMethodD:
-  case Op::ResolveRFunc:
-  case Op::ResolveFunc:
-  case Op::ResolveMethCaller:
-  case Op::ResolveClsMethod:
-  case Op::ResolveClsMethodD:
-  case Op::ResolveClsMethodS:
-  case Op::ResolveRClsMethod:
-  case Op::ResolveRClsMethodD:
-  case Op::ResolveRClsMethodS:
-  case Op::ResolveClass:
-  case Op::LazyClass:
-  case Op::False:
-  case Op::File:
-  case Op::FuncCred:
-  case Op::GetMemoKeyL:
-  case Op::Idx:
-  case Op::InstanceOf:
-  case Op::InstanceOfD:
-  case Op::IsLateBoundCls:
-  case Op::IsTypeStructC:
-  case Op::Int:
-  case Op::IssetG:
-  case Op::IssetL:
-  case Op::IssetS:
-  case Op::IsUnsetL:
-  case Op::IterFree:
-  case Op::LIterFree:
-  case Op::LateBoundCls:
-  case Op::Method:
-  case Op::Mod:
-  case Op::Pow:
-  case Op::ClassName:
-  case Op::LazyClassFromClass:
-  case Op::NativeImpl:
-  case Op::NewCol:
-  case Op::NewPair:
-  case Op::NewDictArray:
-  case Op::NewVec:
-  case Op::NewKeysetArray:
-  case Op::NewObj:
-  case Op::NewObjR:
-  case Op::NewObjD:
-  case Op::NewObjRD:
-  case Op::NewObjS:
-  case Op::Not:
-  case Op::Null:
-  case Op::NullUninit:
-  case Op::OODeclExists:
-  case Op::ParentCls:
-  case Op::PopC:
-  case Op::PopU:
-  case Op::PopU2:
-  case Op::PopL:
-  case Op::Print:
-  case Op::PushL:
-  case Op::RetC:
-  case Op::RetCSuspended:
-  case Op::SelfCls:
-  case Op::SetG:
-  case Op::SetS:
-  case Op::Shl:
-  case Op::Shr:
-  case Op::Silence:
-  case Op::String:
-  case Op::This:
-  case Op::Throw:
-  case Op::ThrowAsTypeStructException:
-  case Op::ThrowNonExhaustiveSwitch:
-  case Op::RaiseClassStringConversionWarning:
-  case Op::True:
-  case Op::UnsetL:
-  case Op::VerifyParamType:
-  case Op::VerifyParamTypeTS:
-  case Op::VerifyRetTypeC:
-  case Op::VerifyRetTypeTS:
-  case Op::VerifyRetNonNullC:
-  case Op::VerifyOutType:
-  case Op::WHResult:
-  case Op::BaseGC:
-  case Op::BaseGL:
-  case Op::BaseSC:
-  case Op::BaseL:
-  case Op::BaseC:
-  case Op::BaseH:
-  case Op::Dim:
-  case Op::QueryM:
-  case Op::SetM:
-  case Op::IncDecM:
-  case Op::SetOpM:
-  case Op::UnsetM:
-  case Op::SetRangeM:
-  case Op::MemoGet:
-  case Op::MemoGetEager:
-  case Op::MemoSet:
-  case Op::MemoSetEager:
-  case Op::RetM:
-  case Op::Select:
-  case Op::LockObj:
-  case Op::ClsCnsL:
-  case Op::SetImplicitContextByValue:
-    return false;
-
-  // These are instructions that are always interp-one'd, or are always no-ops.
-  case Op::Nop:
-  case Op::EntryNop:
-  case Op::CGetCUNop:
-  case Op::UGetCUNop:
-  case Op::ClsCns:
-  case Op::Exit:
-  case Op::Fatal:
-  case Op::SetOpG:
-  case Op::SetOpS:
-  case Op::IncDecG:
-  case Op::IncDecS:
-  case Op::UnsetG:
-  case Op::FCallObjMethod:
-  case Op::Incl:
-  case Op::InclOnce:
-  case Op::Req:
-  case Op::ReqOnce:
-  case Op::ReqDoc:
-  case Op::Eval:
-  case Op::ChainFaults:
-    return true;
-  }
-
-  always_assert_flog(0, "invalid opcode {}\n", static_cast<uint32_t>(ni.op()));
 }
 
 bool instrBreaksProfileBB(const NormalizedInstruction& inst) {
@@ -1094,12 +865,11 @@ bool instrBreaksProfileBB(const NormalizedInstruction& inst) {
   if (isFCall(op)) return true;
 
   if (instrIsNonCallControlFlow(op) ||
-      op == OpAwait || // may branch to scheduler and suspend execution
-      op == OpAwaitAll || // similar to Await
+      isAwait(op) || // may branch to scheduler and suspend execution
       op == OpClsCnsD || // side exits if misses in the RDS
       op == OpThrowNonExhaustiveSwitch || // control flow breaks bb
-      op == OpVerifyParamTypeTS || // avoids combinatorial explosion
-      op == OpVerifyParamType) {   // with nullable types
+      op == OpVerifyParamTypeTS) { // avoids combinatorial explosion
+                                   // with nullable types
     return true;
   }
   // In profiling mode, don't trace through a control flow merge point,
@@ -1227,7 +997,7 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni) {
 
   if (isAlwaysNop(ni)) return;
 
-  if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {
+  if (ni.interp || Cfg::Jit::AlwaysInterpOne) {
     irgen::interpOne(irgs);
     return;
   }
@@ -1259,8 +1029,7 @@ void invalidatePath(const std::string& path) {
      * going to be some new file, not the old file that needs invalidation.
      */
     String spath(path);
-    lookupUnit(spath.get(), "", nullptr /* initial_opt */,
-               Native::s_noNativeFuncs, false);
+    lookupUnit(spath.get(), "", nullptr /* initial_opt */, nullptr, false);
   });
 }
 

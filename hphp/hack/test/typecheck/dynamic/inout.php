@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function testObjGet(dynamic $x): void {
   $z = 5;

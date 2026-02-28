@@ -8,7 +8,7 @@
 
 
 echo "*** Test tempnam() function: by passing an existing filename as prefix ***\n";
-$dir_name = __SystemLib\hphp_test_tmppath('tempnam_variation5');
+$dir_name = sys_get_temp_dir().'/'.'tempnam_variation5';
 mkdir($dir_name);
 $h = fopen($dir_name."/tempnam_variation5.tmp", "w");
 

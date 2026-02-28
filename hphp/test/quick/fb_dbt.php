@@ -2,12 +2,12 @@
 
 
 
-function h() {
+function h() :mixed{
     var_dump(fb_debug_backtrace());
 }
 
 class C {
-  static function f() {
+  static function f() :mixed{
     h();
   }
 }
@@ -26,10 +26,10 @@ abstract final class FbDebugBacktraceStatics {
  *
  * @author epriestley
  */
-function fb_debug_backtrace($skip_top_libcore=true, $bt=null) {
+function fb_debug_backtrace($skip_top_libcore=true, $bt=null) :mixed{
 
   if (FbDebugBacktraceStatics::$real === null) {
-    FbDebugBacktraceStatics::$real = strlen(realpath($_SERVER['PHP_ROOT']).'/');
+    FbDebugBacktraceStatics::$real = strlen(rtrim(realpath(\HH\global_get('_SERVER')['PHP_ROOT']), '/').'/');
   }
 
   if (!$bt) {  // fb_handle_error defaults to array() in PHP5
@@ -81,11 +81,16 @@ function fb_debug_backtrace($skip_top_libcore=true, $bt=null) {
   return array_values($bt);
 }
 
-function g() {
+function g() :mixed{
   C::f();
 }
 
 <<__EntryPoint>> function main(): void {
-$_SERVER['PHP_ROOT'] = dirname(__FILE__)."../../..";
+\HH\global_set('_SERVER', dict_update(\HH\global_get('_SERVER'), 'PHP_ROOT', dirname(__FILE__)."/../.."));
 g();
+}
+
+function dict_update(dict<arraykey, mixed> $d, arraykey $k, mixed $v): dict<arraykey, mixed> {
+  $d[$k] = $v;
+  return $d;
 }

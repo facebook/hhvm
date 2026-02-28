@@ -14,10 +14,10 @@ echo "*** Testing array_chunk() : usage variations ***\n";
 $size = 2;
 
 // input array
-$input_array = darray [
-  "array1" => varray[],
-  "array2" => varray[1, 2, 3],
-  "array3" =>  varray[1]
+$input_array = dict[
+  "array1" => vec[],
+  "array2" => vec[1, 2, 3],
+  "array3" =>  vec[1]
 ];
 
 echo "\n-- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' as defualt --\n";

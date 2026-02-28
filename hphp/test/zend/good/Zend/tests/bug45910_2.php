@@ -6,13 +6,13 @@ class foo {
     const CCC = 'a';
     const DDD = self::AAA;
 
-    private static $foo = darray[
+    private static $foo = dict[
         self::BBB    => 'a',
         self::CCC    => 'b',
         self::DDD    =>  11
     ];
 
-    public static function test() {
+    public static function test() :mixed{
         self::$foo;
     }
 }

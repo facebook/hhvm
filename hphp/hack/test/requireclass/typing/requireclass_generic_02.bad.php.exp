@@ -1,6 +1,0 @@
-File "requireclass_generic_02.bad.php", line 10, characters 7-7:
-This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
-  File "requireclass_generic_02.bad.php", line 11, characters 7-13:
-  This requires to be exactly C
-  File "requireclass_generic_02.bad.php", line 7, characters 17-17:
-  Required here

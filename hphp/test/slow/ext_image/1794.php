@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1794() {
+function main_1794() :mixed{
 
 $exif = exif_read_data(__DIR__.'/images/246x247.png');
 print_r($exif);

@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+function foo() :mixed{
   $x = 3;
   if (2 + $x) { return $x; }
   else { return 2; }

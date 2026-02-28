@@ -99,19 +99,13 @@ Values
 
 HHBC instructions may push and pop values on the current frame's evaluation
 stack and they may read and write values to the current frame's local
-variables. Values come in two flavors: cells and refs.
-
-A "cell" is a structure that contains a type identifier and either data (for
-non-refcounted types) or a pointer to data (for refcounted types). When a cell
-containing a pointer is duplicated, the new cell will point to the same data as
-the original cell. When a cell containing a pointer is duplicated or discarded,
-the execution engine is responsible for honoring the data's refcount logic.
-
-A "ref" is a structure that contains a pointer to a cell container. When a ref
-is duplicated, the new ref will point to the same container as the original
-ref. When a ref is duplicated or destroyed, the execution engine is responsible
-for honoring the container's refcount logic. When the container is destroyed,
-the cell it contains is also destroyed.
+variables. A value (or "cell") is a structure that contains a type identifier
+and either data (for non-refcounted types) or a pointer to data (for refcounted
+types). When a cell containing a pointer is duplicated, the new cell will point
+to the same data as the original cell. When a cell containing a pointer is
+duplicated or discarded, the execution engine is responsible for honoring the
+data's refcount logic. Throughout this document, we use "cell" and "value"
+interchangeably.
 
 Functions
 ---------
@@ -149,8 +143,8 @@ default values are called "optional parameters".
 
 The metadata of each function specifies a set of non-overlapping ranges of
 bytecode that compose the function body, and it specifies the main entry point
-and 0 or more DV entry points (entry points are discussed in more detail in
-the "Entry points" section).
+and 0 or more default value ("DV") entry points (entry points are discussed in
+more detail in the "Entry points" section).
 
 The total size of the bytecode for the function body must not exceed 2^31 - 1
 bytes. The bytecode for a function must be one contiguous range of bytecode.
@@ -182,8 +176,8 @@ documented much here. See class.h.
 Closures
 --------
 
-Closures are implemented in hhbc as subclasses of Closure, in conjunction with
-the CreateCl opcode. It is legal hhbc to create other subclasses of Closure (to
+Closures are implemented in HHBC as subclasses of Closure, in conjunction with
+the CreateCl opcode. It is legal HHBC to create other subclasses of Closure (to
 represent user code that attempts to do the same), but attempting to
 instantiate one will result in a fatal error. The documentation of the CreateCl
 opcode below lists the requirements for a closure subclass to be usable with
@@ -242,8 +236,8 @@ change significantly, so this spec is staying light on details for now.
 Entry points
 ------------
 
-Entry points come in four varieties: the main entry point, DV entry points, and
-catch entry points.
+Entry points come in three varieties: the main entry point, default value ("DV")
+entry points, and catch entry points.
 
 Every function has exactly one main entry point. When a function is called, the
 dispatcher will set the PC of the new frame to point to the main entry point if
@@ -302,12 +296,8 @@ multiple rows that are marked as being unconditionally declared in the
 outermost scope with the same function name. Each function id must be between 0
 and 2^31 - 2 inclusive.
 
-Each row in the class table contains a unique class id, a class name specified
-by a litstr id, a flag that indicates if the class declaration is hoisted to
-the prelude of pseudo-main, and the class metadata. Note that there may be
-multiple rows in the class table with same class name. However, there may not
-be multiple rows that are marked as being hoisted with the same class name.
-Each class id must be between 0 and 2^31 - 2 inclusive.
+Each row in the class table contains a class name specified by a litstr id and
+the class metadata.
 
 
 Calling convention
@@ -569,8 +559,7 @@ for each of the instruction's inputs.
 
 Here is a description of each flavor descriptor:
 
-  C - cell; specifies that the value must be a cell at run time
-  V - ref; specifies that the value must be a ref at run time
+  C - cell; specifies that the value must be a typed value at run time
   U - uninit; specifies that the value must be an uninitialized null at run
       time; this is only used for FCallBuiltin, CreateCl, and CUGetL.
 
@@ -629,15 +618,15 @@ without fallthrough or a terminal instruction.
 8) The initialization state of each iterator variable must be known at every
 point in the code and must be the same for all control paths. There are two
 possible states: (1) uninitialized, and (2) "iter-initialized" (initialized
-via IterInit*). Every range of bytecode for which an iterator variable i is
+via IterInit). Every range of bytecode for which an iterator variable i is
 initialized must be protected by an EH entry with a catch handler that unsets
 i by calling IterFree.
 
-9) The iterator variable referenced by IterInit* must be in the uninitialized
+9) The iterator variable referenced by IterInit must be in the uninitialized
 state when the instruction executes. An iterator variable referenced by
-IterNext* and IterFree must be in the "iter-initialized" state. Note that
-IterInit* conditionally initialize the iterator variable, and IterNext*
-conditionally free the iterator variable.
+IterGetKey, IterGetValue, IterSetValue, IterNext and IterFree instructions must
+be in the "iter-initialized" state. Note that IterInit conditionally initialize
+the iterator variable, and IterNext conditionally free the iterator variable.
 
 10) Each EH table must follow all of the rules specified in the "Exception
 handler (EH) table" section.
@@ -681,6 +670,7 @@ descriptions:
   ArrLike - denotes array, vec, dict, or keyset
   Class - denotes class pointer type
   LazyClass - denotes lazy class type
+  EnumClassLabel - denotes enum class label type
 
 Multiple type annotations may be combined together using the "|" symbol. For
 example, the type annotation "Int|Dbl" means that a value is either integer or
@@ -699,7 +689,8 @@ $1 is used to refer to the value at the top of the evaluation stack, $2 is used
 to refer to the value directly below $1 on the evaluation stack, $3 is used to
 refer to the value directly below $2, and so forth. Also, %1 is used to refer
 to the first immediate argument, and %2 is used to refer to the second
-immediate argument.
+immediate argument. Thus, the indices used to refer to values on both
+the evaluation stack and in the immediate arguments list are 1-indexed.
 
 Note that the relative offset immediate used by a Jmp*, Iter*, Switch,
 or SSwitch instruction is relative to the beginning of the instruction.
@@ -723,7 +714,7 @@ location descriptors is given below:
 
 There are several groups of similarly named instructions where the name of each
 instruction ends with a different location descriptor (for example, Set*). Each
-instruction in the group perform similar actions but take different kinds of
+instruction in the group performs similar actions but takes different kinds of
 inputs to specify the location to access.
 
 There are numerous instructions which incorporate a readonly immediate.
@@ -780,12 +771,6 @@ Nop    []  ->  []
 
   No operation. This instruction does nothing.
 
-EntryNop []  ->  []
-
-  No operation. This instruction is occasionally inserted by the emitter to
-  avoid having jumps to the entry of a function. Contrary to a Nop, EntryNop
-  is guaranteed to not be optimized away.
-
 PopC                  [C]  ->  []
 PopU                  [U]  ->  []
 
@@ -811,11 +796,6 @@ CGetCUNop   [C|U:<T>]  ->  [C:<T>]
   Convert a cell or uninit value to a cell, no op. This is a flavor-safety only
   opcode and should only be used when $1 is statically known to be a cell.
 
-UGetCUNop   [C|U:<T>]  ->  [U:<T>]
-
- Convert a cell or uninit value to an uninit, no op. This is a flavor-safety
- only opcode and should only be used when $1 is statically known to be an
- uninit.
 
 2. Literal and constant instructions
 ------------------------------------
@@ -838,6 +818,7 @@ Vec <scalar vec id>                  []  ->  [C:Vec]
 Dict <scalar dict id>                []  ->  [C:Dict]
 Keyset <scalar keyset id>            []  ->  [C:Keyset]
 LazyClass <litstr id>                []  ->  [C:LazyClass]
+EnumClassLabel <litstr id>           []  ->  [C:EnumClassLabel]
 
   Push immediate. Pushes %1 onto the stack.
 
@@ -906,7 +887,7 @@ ColFromArray <coll type>    [C:Arr]  ->  [C:Obj]
   in packed mode if %1 is Vector or ImmVector, and must be in mixed mode
   otherwise.
 
-  Note that integer-like string keys are converted to integers in array, but
+  Note that integer-like string keys are converted to integers in arrays, but
   not in collections; thus not all collections can be created using this
   instruction.
 
@@ -956,9 +937,9 @@ ClassName    [C:Class] ->  [C:Static Str]
 
   Push the name of the class in $1 as a string.
 
-LazyClassFromClass    [C:Class] ->  [C:LazyClass]
+EnumClassLabelName [C:EnumClassLabel] -> [C:Static Str]
 
-  Push the lazy class corresponding to the class in $1.
+  Push the name of the enum class label in $1 as a string.
 
 3. Operator instructions
 ------------------------
@@ -989,44 +970,23 @@ Mul    [C:<T2> C:<T1>]  ->  [C:Dbl]    (where T1 == Dbl || T2 == Dbl)
   Multiplication (*). Pushes ($2 * $1) onto the stack. This instruction throws a
   fatal error if either $1 or $2 is not numeric.
 
-AddO   [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
-       [C:<T2> C:<T1>]  ->  [C:Int|dbl] (where T1 != Dbl && T2 != Dbl)
-
-  Same behavior as Add, except for when both inputs have type Int and the
-  result would not fit in a 64-bit integer. Then this instruction will push
-  (double)$1 + (double)$2.
-
-SubO   [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
-       [C:<T2> C:<T1>]  ->  [C:Int|Dbl] (where T1 != Dbl && T2 != Dbl)
-
-  Same behavior as Sub, except for when both inputs have type Int and the
-  result would not fit in a 64-bit integer. Then this instruction will push
-  (double)$2 - (double)$1.
-
-MulO   [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
-       [C:<T2> C:<T1>]  ->  [C:Int|Dbl] (where T1 != Dbl && T2 != Dbl)
-
-  Same behavior as Mul, except for when both inputs have type Int and the
-  result would not fit in a 64-bit integer. Then this instruction will push
-  (double)$1 * (double)$2.
-
 Div    [C C]  ->  [C:Bool|Int|Dbl]
        [C:Dbl C:Int]  ->  [C:Bool|Dbl]
        [C:Int C:Dbl]  ->  [C:Bool|Dbl]
        [C:Dbl C:Dbl]  ->  [C:Bool|Dbl]
 
   Division (/). Pushes ($2 / $1) onto the stack. This instruction throws a
-  fatal error if either $1 or $2 is not numeric.
+  fatal error if either $1 or $2 is not numeric, or if $1 is zero.
 
 Mod    [C C]  ->  [C:Bool|Int]
 
   Modulus (%). Pushes ((int)$2 % (int)$1) onto the stack. This instruction throws a
-  fatal error if either $1 or $2 is not numeric.
+  fatal error if either $1 or $2 is not numeric, or if $1 is zero.
 
 Pow    [C C]  ->  [C:Int|Dbl]
 
-  Power. Pushes $2 raised to the power of $1 onto the stack. This instruction
-  never throws a fatal error.
+  Power. Pushes $2 raised to the power of $1 onto the stack. This instruction throws a
+  fatal error if either $1 or $2 is not numeric.
 
 Not    [C]  ->  [C:Bool]
 
@@ -1173,11 +1133,12 @@ IsTypeStructC <type struct resolve op>  [C C]  ->  [C:Bool]
   If the type struct resolve op is DontResolve and the given type structure is
   unresolved, then this instruction raises an error.
 
-ThrowAsTypeStructException [C C]  ->  []
+ThrowAsTypeStructException <as exception kind> [C C]  ->  []
 
   Throws a user catchable type assertion exception that indicates what the
   given type of $2 is, what the expected type is (given on $1) and which key
-  it failed at, if applicable.
+  it failed at, if applicable. If the exception kind is Error, then throw
+  a recoverable error. If it is Typehint raise a TypehintViolationException.
 
 CombineAndResolveTypeStruct <num type structures> [C..C] -> [C]
 
@@ -1221,21 +1182,23 @@ Fatal <fatal subop>  [C]  ->  []
   will throw a parse fatal error with a full backtrace. Setting %1 to 2 will
   throw a runtime fatal error with the backtrace omitting the top frame.
 
+StaticAnalysisError [] -> []
+
+  Produces either a request level Fatal or a process level assertion indicating
+  that code believed to be unreachable during static analysis has been executed.
+
 
 4. Control flow instructions
 ----------------------------
 
+Enter <rel offset>   []  ->  []
+
+  Enter the function body. This instruction is used at the end of default value
+  initializers to transfer control to the function body.
+
 Jmp <rel offset>    []  ->  []
 
   Jump. Transfers control to the location specified by %1.
-
-JmpNS <rel offset>   []  ->  []
-
-  Jump, with no surprise flag checks (NS means "no surprise"). This behaves
-  identically to the Jmp instruction, except that internal VM checks for things
-  like OOM and timeouts do not need to be performed even if the offset is
-  negative.  This instruction cannot have a zero offset (i.e. it cannot jump to
-  itself).
 
 JmpZ <rel offset>    [C]  ->  []
 
@@ -1275,9 +1238,11 @@ SSwitch <litstr id/offset vector>    [C]  ->  []
   found, control is transferred to the location specified by the final element
   in the vector, which must have a litstr id of -1.
 
-RetC    [C]  ->  []
+RetC <verification kind> [C]  ->  []
 
-  Return a cell. Returns $1 to the caller.
+  Returns $1 to the caller after performing return type checks based on the
+  specified verification kind immediate. Verification kind can be specified to
+  do all or no type checks, or check for non-nullability.
 
   If this instruction is used inside an async function executed in an "eager
   execution" mode, the $1 is wrapped into a StaticResultWaitHandle prior to
@@ -1295,7 +1260,7 @@ RetCSuspended   [C]  ->  []
   meant to be used within memoized async functions where the memoized value to
   be returned is already wrapped in a wait-handle.
 
-RetM <num returns> [C..C] -> []
+RetM <num returns> <verification kind> [C..C] -> []
 
   RetM is a variant of RetC that allows multiple cells to be returned. The RetM
   bytecode must be the only form of return used in a single function, and all
@@ -1327,12 +1292,12 @@ CGetQuietL <local variable id>    []  ->  [C]
 
 CGetL2 <local variable id>    [<C>:<T>]  ->  [C <C>:<T>]
 
-  Get local as cell. If the local variable given by %1 is defined, this
-  instruction gets the value of the local variable, pushes it onto the stack as
-  a cell, and then pushes $1 onto the stack.
+  Get local as cell. First, $1 is popped off the stack. If the local variable
+  given by %1 is defined, this instruction then gets the value of the local variable,
+  pushes it onto the stack as a cell, and then pushes $1 back onto the stack.
 
   If the local variable is not defined, this instruction raises a warning,
-  pushes null onto the stack, and then pushes $1 onto the stack.
+  pushes null onto the stack, and then pushes $1 back onto the stack.
 
 CUGetL <local variable id>    []  ->  [C|U]
 
@@ -1363,9 +1328,12 @@ CGetS <readonly op>    [C C:Class]  ->  [C]
   instruction throws a fatal error. Otherwise, this instruction pushes the
   static property onto the stack as a cell.
 
-ClassGetC                          [C]  ->  [C:Class]
+ClassGetC <mode>                   [C]  ->  [C:Class]
 
-  Fetch class. This instruction checks if $1 is a string, object, or class. If
+  Fetch class. This instruction has different modes selected by the %1 enum.
+
+  Normal mode:
+  This instruction checks if $1 is a string, object, or class. If
   a class, it pushes the input unchanged. If a string, it checks if $1 is the
   name of a defined class. If so, the class is pushed. If not, this instruction
   will invoke the autoload facility passing in $1, and then it will again check
@@ -1374,15 +1342,34 @@ ClassGetC                          [C]  ->  [C:Class]
   class of the object. If $1 is not any of the above cases, this instruction
   throws a fatal error.
 
-ClassGetTS                         [C:Dict]  ->  [C:Class, C:StaticVec|Null]
+  ExplicitConversion mode:
+  This is an explicit str-to-class conversion through HH\classname_to_class().
+  Checks if $1 is a string, class, or lazy class; objects are not admitted and
+  classes pointers are pushed unchanged. When $1 is a string, we check whether
+  the target class has the <<__DynamicallyReferenced>> attribute and raise a
+  sampled notice otherwise. If the target class fails to load, we throw a
+  catchable InvalidArgumentException.
+
+  UnsafeBackdoor mode:
+  Same as the last mode but skips the <<__DynamicallyReferenced>> check. Not
+  valid in repo mode and asserts in HHBBC.
+
+ClassGetTS                         [C:Dict]  ->  [C:Class]
 
   Fetch class from type-structure. This instruction checks if $1 is a valid
-  type-structure (darray or dict). If not, this instruction throws a fatal
-  error. Otherwise, $1['classname'] is loaded, and mangled as dictated by the
+  type-structure (dict). If not, this instruction throws a fatal error.
+  Otherwise, $1['classname'] is loaded as with ClassGetC in Normal mode
+  and the resulting class is pushed.
+
+ClassGetTSWithGenerics             [C:Dict]  ->  [C:Class, C:StaticVec]
+
+  Fetch class from type-structure. This instruction checks if $1 is a valid
+  type-structure (dict). If not, this instruction throws a fatal error.
+  Otherwise, $1['classname'] is loaded, and mangled as dictated by the
   type-structure's generics information (if present). The possibly mangled
   classname is then processed like ClassGetC and the resulting class is
   pushed. If present, the type-structure's generics information is processed as
-  in RecordReifiedGeneric and pushed. If not present, null is pushed.
+  in RecordReifiedGeneric and pushed. If not present, an empty vec is pushed.
 
 
 6. Isset and type querying instructions
@@ -1435,6 +1422,7 @@ IsTypeC  <op>                     [C]  ->  [C:Bool]
       ArrLike  | Vec or Dict or Keyset
       Scalar   | Int or Dbl or Str or Bool
       Res      | Res
+      Class    | Class or LazyClass
 
   If t is Obj, this instruction checks if the operand in an object.
     Instances of a special class __PHP_Incomplete_Class are not considered
@@ -1461,6 +1449,7 @@ IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
       ArrLike  | Vec or Dict or Keyset
       Scalar   | Int or Dbl or Str or Bool
       Res      | Res
+      Class    | Class or LazyClass
 
   If the local variable given by %1 is defined, the logic is the same as for
     IsTypeC (see above).
@@ -1474,17 +1463,16 @@ IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
 7. Mutator instructions
 -----------------------
 
+PopG    [C C]  ->  []
+
+  Set global. This instruction marks the global variable named (string)$2 as
+  defined, assigns the value $1 to the global variable.
+
 SetL <local variable id>    [C]  ->  [C]
 
   Set local. This instruction marks the local variable given by %1 as defined,
   stores the value $1 into the local variable, and then pushes $1 onto the
   stack.
-
-SetG    [C C]  ->  [C]
-
-  Set global. This instruction marks the global variable named (string)$2 as
-  defined, assigns the value $1 to the global variable, and then pushes $1 onto
-  the stack.
 
 SetS <readonly op>   [C C:Class C]  ->  [C]
 
@@ -1501,20 +1489,8 @@ SetOpL <local variable id> <op>    [C]  ->  [C]
   Next, this instruction reads the local variable into x, then executes y = x
   <op> $1, assigns y into local variable %1, and then pushes y onto the stack.
   The immediate value must be one of the following opcodes:
-    Add, AddO, Sub, SubO, Mul, MulO, Div, Mod, Shl, Shr, Concat, BitAnd,
+    Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd,
     BitOr, BitXor.
-
-SetOpG <op>    [C C]  ->  [C]
-
-  Set op global. This instruction first computes x = (string)$2. If the global
-  variable named n is not defined, this instruction marks it as defined, sets
-  it to null, and raises a warning.
-
-  Next, this instruction reads the global variable named x into y, executes z =
-  y <op> $1, assigns z into the global variable named x, and then pushes z onto
-  the stack as a cell. The immediate value must be one of the following
-  opcodes:
-    Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor.
 
 SetOpS <op>    [C C:Class C]  ->  [C]
 
@@ -1544,27 +1520,6 @@ IncDecL <local variable id> <op>    []  ->  [C]
 
   If op is PostDec, this instruction pushes x onto the stack and then it
   executes --x.
-
-IncDecG <op>    [C]  ->  [C]
-
-  Increment/decrement. This instruction first computes x = (string)$1. Next, if
-  the global variable named x is not defined, this instruction first defines it,
-  sets it to null, and raises a warning.
-
-  Where v is the local variable or global variable named x, this instruction
-  performs the following:
-
-  If op is PreInc, this instruction executes ++v and then pushes v onto the
-  stack as a cell.
-
-  If op is PostInc, this instruction pushes v onto the stack and then it
-  executes ++v.
-
-  If op is PreDec, this instruction executes --v and then pushes v onto the
-  stack.
-
-  If op is PostDec, this instruction pushes v onto the stack and then it
-  executes --v.
 
 IncDecS <op>    [C C:Class]  ->  [C]
 
@@ -1619,9 +1574,7 @@ InitProp <propName> <op> [C] -> []
 --------------------
 
 NewObj                                      [C:Class]              ->  [C:Obj]
-NewObjR                                     [C:Class, C:Vec|Null]  ->  [C:Obj]
 NewObjD   <litstr id>                       []                     ->  [C:Obj]
-NewObjRD  <litstr id>                       [C:Vec|Null]           ->  [C:Obj]
 NewObjS   <mode>                            []                     ->  [C:Obj]
 
   New object. First, these instructions load a class into x as given
@@ -1630,12 +1583,10 @@ NewObjS   <mode>                            []                     ->  [C:Obj]
     instruction   x
     ------------+----
       NewObj    | $1
-      NewObjR   | $2
       NewObjD   | %1
-      NewObjRD  | %1
       NewObjS   | %1
 
-  When loading %1 into x, NewObjD and NewObjRD will perform the work performed
+  When loading %1 into x, NewObjD will perform the work performed
   by the ClassGetC instruction to convert the name given by %1 into a class.
   NewObjS will perform the same work as LateBoundCls/SelfCls/ParentCls depending
   on the specified mode.
@@ -1643,9 +1594,6 @@ NewObjS   <mode>                            []                     ->  [C:Obj]
   This instruction pushes a default-initialized object onto the stack. The
   initialization will complete by running a constructor with FCallCtor, and
   clearing the IsBeingConstructed flag using LockObj.
-
-  NewObjR's and NewObjRD's $1 contains a list of reified generics, or null if
-  none present.
 
 LockObj                                    [C:Obj] -> [C:Obj]
 
@@ -1659,15 +1607,22 @@ FCall* opcodes
   specified by the FCA (FCall arguments) immediate consisting of the following
   data:
 
-  <flags> <num args> <num returns> <inout bool vector> <async eager offset>
+  <flags> <num args> <num returns> <inout bool vector>
+  <litstr vec id> <async eager offset>
   [C|V..C|V]  ->  [C..C]
 
   FCall* first looks up the callee function according to the specific opcode.
 
   The vector %4 must be either empty or it must contain exactly %2 booleans.
-  If it is non-empty, FCall* checks whether inout-ness of parameters 0..(%2-1)
+  If it is non-empty, FCall* checks whether inout-ness of parameters 1..%2
   of the callee matches the corresponding inout-ness values specified by the
   vector %4. Throws an exception if there is a mismatch.
+
+  The vector referred to by id %5 contains the list of named arguments in
+  lexicographical order. The named arguments are interpreted as living in
+  the bottom num named params positions of the stack. If no named arguments
+  are present in the call, %5 will instead contain the special sigil $,
+  interpreted as an empty vector.
 
   Finally, FCall* transfers the top %2 values from the stack to the callee as
   parameters and invokes the callee. When the callee returns, it will transfer
@@ -1675,12 +1630,12 @@ FCall* opcodes
   callee must return the matching number of values using either RetC opcode
   (if %3 was one) or RetM opcode (otherwise).
 
-  If the optional offset %5 was specified, the callee supports async eager
+  If the optional offset %6 was specified, the callee supports async eager
   return and it would return a finished Awaitable, it may instead return the
   unpacked result of the Awaitable and continue execution of the caller at
   offset %5.
 
-  If %5 was specified and the callee raised an exception, the exception will
+  If %6 was specified and the callee raised an exception, the exception will
   continue to propagate thru the caller instead of being wrapped into Awaitable.
   Note that for the purposes of exception handling inside the caller, the PC
   will point after the FCall* rather than %5 so it is not advised to have
@@ -1760,7 +1715,9 @@ FCallObjMethodD <fca> <class hint> <nullsafe> <litstr id>
 
 FCallClsMethod <fca> <class hint> <op>
   [U U C|V..C|V C C:Class]  ->  [C..C]
-FCallClsMethodD <fca> <class hint> <litstr id> <litstr id>
+FCallClsMethodM <fca> <class hint> <op> <litstr id>
+  [U U C|V..C|V C]    ->  [C..C]
+FCallClsMethodD <fca> <litstr id> <litstr id>
   [U U C|V..C|V]    ->  [C..C]
 FCallClsMethodS <fca> <class hint> <mode>
   [U U C|V..C|V C]  ->  [C..C]
@@ -1773,13 +1730,14 @@ FCallClsMethodSD <fca> <class hint> <mode> <litstr id>
     instruction            x    y
     --------------------+----+-----
       FCallClsMethod    | $1 | $2
-      FCallClsMethodD   | %3 | %4
+      FCallClsMethodM   | $1 | %4
+      FCallClsMethodD   | %2 | %3
       FCallClsMethodS   | %3 | $1
       FCallClsMethodSD  | %3 | %4
 
-  When loading litstr id %3 into x, FCallClsMethodD will perform the work
-  performed by the ClassGetC instruction to convert the name given by %3 into
-  a class.
+  When loading litstr id %2 into x, FCallClsMethodD will perform the work
+  performed by the ClassGetC instruction to convert the name given by %2 into
+  a class. Similarly, FCallClsMethodM will convert $1 into a class.
 
   When loading mode %3 into x, FCallClsMethodS and FCallClsMethodSD will
   perform the work performed by LateBoundCls/SelfCls/ParentCls depending
@@ -1862,28 +1820,6 @@ BaseLD <local variable id>    []  ->  [B]
 
   Get base from local. This operation outputs a base that points to the local
   given by %1, whether or not it is defined.
-
-BaseGC                        [C]  ->  [B]
-BaseGL <local variable id>    []  ->  [B]
-
-  Get base from global name. This operation outputs a base that points to the
-  global variable whose name is given by (string)%1 or (string)$1. If the
-  global is not defined, this operation produces a base that points to null.
-
-BaseGCW                        [C]  ->  [B]
-BaseGLW <local variable id>    []  ->  [B]
-
-  Get base from global name. This operation outputs a base that points to the
-  global variable whose name is given by (string)%1 or (string)$1. If the
-  global is not defined, this operation raises a warning and outputs a base
-  that points to null.
-
-BaseGCD                        [C]  ->  [B]
-BaseGLD <local variable id>    []  ->  [B]
-
-  Get base from global name. This operation outputs a base that points to the
-  global variable whose name is given by (string)%1 or (string)$1, defining it
-  first if necessary.
 
 BaseSC                         [C C:Class]  ->  [B]
 
@@ -2108,7 +2044,7 @@ PropLD <local variable id>    [B]  ->  [B]
          y->x has been unset previously
     -------+--------------------------------------------------------------------
     00XXXX | null
-    01XXXX | y = new stdclass; create property y->x; y->x
+    01XXXX | y = new stdClass; create property y->x; y->x
     1X0X0X | create property y->x; y->x
     1X0X1X | y->__get(x)
     1X100X | throw fatal error
@@ -2465,7 +2401,7 @@ SetPropL <local variable id>    [C B]  ->  [C]
          y->k has been unset previously
     -------+--------------------------------------------------------------------
     00XXXX | raise warning; push null
-    01XXXX | y = new stdclass; y->k = x; push x
+    01XXXX | y = new stdClass; y->k = x; push x
     1X0X0X | create property y->k; y->k = x; push x
     1X0X1X | y->__set(k, x); push x
     1X100X | throw fatal error
@@ -2498,7 +2434,7 @@ SetOpPropL <op> <local variable id>    [C B]  ->  [C]
           y->k has been unset previously
     --------+-------------------------------------------------------------------
     00XXXXX | raise warning; push null
-    01XXXXX | y = new stdclass; z = null <op> x; y->k = z; push z
+    01XXXXX | y = new stdClass; z = null <op> x; y->k = z; push z
     100X0XX | z = null <op> x; y->k = z; push z
     100X10X | w = y->__get(k); z = w <op> x; y->k = z; push z
     100X11X | w = y->__get(k); z = w <op> x; y->__set(k, z), push z
@@ -2534,7 +2470,7 @@ IncDecPropL <op> <local variable id>    [B]  ->  [C]
           y->x has been unset previously
     --------+-------------------------------------------------------------------
     00XXXXX | raise warning; push null
-    01XXXXX | y = new stdclass; b = null; a = b; <op>a; y->x = a;
+    01XXXXX | y = new stdClass; b = null; a = b; <op>a; y->x = a;
             |   push a (Pre*) or b (Post*)
     100X0XX | b = null; a = b; <op>a; y->x = a; push a (Pre*) or b (Post*)
     100X10X | b = y->__get(x); a = b; <op>a; y->x = a;
@@ -2604,11 +2540,6 @@ described in the "Instruction set" introduction section.
 
 10.1 Base Operations
 ---------------------
-
-BaseGC <stack index> <member op mode>    []  ->  []
-BaseGL <local id>    <member op mode>    []  ->  []
-
-  BaseG{C,L}{,W,D} member operation.
 
 BaseSC <stack index> <stack index> <member op mode> <readonly op>    []  ->  []
 
@@ -2708,117 +2639,113 @@ UnsetM <stack count> <member key>    [...]  ->  []
 -------------------------
 
 Several iterator instructions take an IterArgs struct. This struct contains an
-iterator ID, an value output local ID, and optionally a key output local ID.
-Below, when we refer to "the iterator ID in %1", "the value local given in %1",
-etc., we're referring to these IDs.
+iterator ID and flags.
 
-IterInit  <IterArgs> <rel offset>    [C]  ->  []
+Flags must be set consistently across all instructions referring to the same
+iterator. They carry information that could be used by the runtime to optimize
+iteration:
 
-  Initialize an iterator. This instruction takes a "base" in $1. It creates an
-  iterator with ID given in %1 pointing to the beginning of $1 and, if $1 has
-  base-internal iteration state (see below), rewinds $1. It then checks if the
-  base is empty. If so, it frees the iterator (with an implicit IterFree) and
-  transfers control to the target %2.
+  BaseConst: The base local is unmodified in the loop.
+  WithKeys: Indicates whether IterGetKeys might be used during iteration.
 
-  If the base is non-empty, this instruction writes the value of the base's
-  first element to the value local given in %1. If the iterator is a key-value
-  iterator, then this instruction also writes the key of the base's first
-  element to the key local given in %1.
+IterBase    [C]  ->  [C:Arr|Obj]
 
-  This instruction stores to its key and value output locals with the same
-  semantics as SetL (non-binding assignment).
+  Extract iterator base from $1.
 
-  The precise semantics of "rewind", "is empty", "get key", and "get value"
-  depend on the type of the base:
+    - If $1 is array-like, pushes $1 onto the stack.
 
-    - If $1 is array-like, we will create a new array iterator. "rewind" does
-      nothing in this case - array iterators don't have base-internal state.
-      The "is empty" check is a check on the length of $1, and "get key" and
-      "get value" load $1's first element.
+    - If $1 is a collection object, pushes the underlying vec or dict onto
+      the stack.
 
-    - If $1 is a collection object, then we'll unpack or create the underlying
-      vec or dict and then create a new array iterator, as above.
-
-    - If $1 is an object that implements Iterator, or if it is an instance of
-      an extension class that implements Traversable, then we create a new
-      object iterator. We call $1->rewind() to reset the base's internal state,
-      then call $1->valid() to check if $1 is non-empty. If $1 is valid, then we
-      call $1->current() (and $1->key()) to get the $1's first value (and key).
+    - If $1 is an object that implements Iterator, pushes $1 onto the stack.
 
     - If $1 is an object that implements the IteratorAggregate interface, then
       we repeatedly execute "x = x->getIterator()" until x is no longer an
       object that implements the IteratorAggregate interface. If x is now an
-      object that implements the Iterator interface, we create a new object
-      iterator as above. Otherwise, we throw an object of type Exception.
+      object that implements the Iterator interface, pushes x onto the stack.
+      Otherwise, we throw an object of type Exception.
 
     - If $1 is an object that does not match any of the cases above, then we
-      create a new default class iterator (with no base-internal state) that
-      iterates over accessible properties of the base's class, in the order
-      that they were defined. "get key" returns the name of the first property,
-      and "get value" returns the $1's value for that property.
+      create a dict that contains all accessible properties of the base's class,
+      in the order that they were defined, then push that dict onto the stack.
+      Keys and values of the dict correspond to the property names and values.
 
-    - If $1 is not an array-like or object, this method raises a warning
-      and transfers control to the target %2.
+    - If $1 is not an array-like or object, an exception is thrown.
 
-LIterInit  <IterArgs> <local id> <rel offset>    []   ->  []
+IterInit  <IterArgs> <local id> <rel offset>    []   ->  []
 
-  Initialize iterator with local. If the local specified by %2 is array-like,
-  this instruction creates an array iterator pointing to the beginning of %2,
-  but leaves %2 in its local rather than copying it into the iterator and
-  inc-ref-ing it. Otherwise, it behaves as IterInit, except that the base comes
-  from the local %2 rather than from the stack.
+  Initialize an iterator. This instruction takes a "base" in %2, which must be
+  an array-like or an object implementing the Iterator interface. It creates
+  an iterator with ID given in %1 pointing to the beginning of %2 and, if %2 is
+  an Iterator object, rewinds %2. It then checks if the base is empty. If so,
+  it frees the iterator (with an implicit IterFree) and transfers control to
+  the target %3.
 
-  If the base is non-empty, this instruction sets the output value (and, for
-  key-value iterators, the output key) to the first element of the base.
-  Otherwise, it frees the iterator and transfers control to the target %3.
+  The precise semantics of "rewind" and "is empty" depend on the type of
+  the base:
 
-  Since we don't store array-like bases in the iterator, all other operations
-  on this iterator must use the LIter variants (LIterNext, LIterFree) and must
-  provide the same local (containing the same array-like) as immediates.
+    - If %2 is array-like, we will create a new array iterator. "rewind" does
+      nothing in this case - array iterators don't have base-internal state.
+      The "is empty" check is a check on the length of %2.
 
-IterNext  <IterArgs> <rel offset>    []   ->  []
+    - If %2 is an object that implements Iterator, then we create a new object
+      iterator. We call %2->rewind() to reset the base's internal state, then
+      call %2->valid() to check if %2 is non-empty.
+
+  All other operations on this iterator must provide the same local (containing
+  the same iterator base) as immediates.
+
+IterNext  <IterArgs> <local id> <rel offset>    []   ->  []
 
   Iterator next. This instruction first advances the iterator with the ID given
-  in %1. If the iterator has more elements, then it writes the next element's
-  value (and, for key-value iters, its key) to the output locals given in %1,
-  Otherwise, the base frees the iterator (with an implicit IterFree) and
-  transfers control to the location specified by %2.
+  in %1 using a base in %2. If the iterator has more elements, it transfers
+  control to the location specified by %3. Otherwise, it frees the iterator
+  (with an implicit IterFree).
 
   As with IterInit, the precise semantics of "advance" and "has more elements"
-  depend on the iterator type. (We could also say it depends on the type of
-  the base, but we use some iterator types (e.g. array iterator) for multiple
-  base types (e.g. array-likes and collection objects).)
+  depends on the type of the base:
 
-    - For array iterators: "advance" increments the iterator's position, and
+    - If %2 is array-like, "advance" increments the iterator's position, and
       the base "has more elements" if this position is not the final position
-      for the stored array. If the array has more elements, we take its key
-      and value at the new position.
+      for the stored array.
 
-    - For object iterators: we call $base->next() to update the base's internal
-      state, then call $base->valid() to check whether it has more elements. If
-      so, we use $base->key() and $base->current() to get the new key and value.
+    - If %2 is an object that implements Iterator, we call %2->next() to update
+      the base's internal state, then call %2->valid() to check whether it has
+      more elements.
 
-    - For default class iterators, we advance to the base's class's next
-      accessible property (if there are more) and we use its name and value as
-      the new key and value.
+IterGetKey  <IterArgs> <local id>    []  ->  [C]
 
-LIterNext  <IterArgs> <local id> <rel offset>    []   ->  []
+  Get the key at the current position of iterator with the ID given in %1 using
+  a base in %2. Then push it to the evaluation stack.
 
-  Iterator next with local. The iterator with ID given in %1 must have been
-  initialized with LIterInit. This instructions behaves similarily to IterNext,
-  except that if %2 is an array-like, it will use this local as the iterator's
-  base rather than the one stored in the iterator.
+  If %2 is an object that implements Iterator, the current key is obtained by
+  calling %2->key().
+
+  This instruction requires "WithKeys" flag to be set in %1 for this iterator.
+
+IterGetValue  <IterArgs> <local id>    []  ->  [C]
+
+  Get the value at the current position of iterator with the ID given in %1
+  using a base in %2. Then push it to the evaluation stack.
+
+  If %2 is an object that implements Iterator, the current value is obtained by
+  calling %2->current().
+
+IterSetValue  <IterArgs> <local id>    [C]  ->  []
+
+  Move the value on the evaluation stack to the current position of iterator
+  with the ID given in %1 using a base in %2.
+
+  The base %2 must be a vec or dict.
+
+  This instruction requires "BaseConst" flag to not be set in %1.
 
 IterFree <iterator id>    []  ->  []
 
-  Iterator free. This instruction frees the iterator with ID %1. An iterator is
-  typically freed by IterInit or IterNext when its base has no more elements,
-  so IterFree is only needed for guarding against exceptions.
-
-LIterFree <iterator id> <local id>   []  ->  []
-
-  Iterator free with local. This instruction frees the iterator with ID %1,
-  which must have been initialized by LIterInit with base %2.
+  Iterator free. This instruction frees the iterator with ID %1, which must have
+  been initialized by IterInit. Since the iterator does not contain the base,
+  this does not actually free anything. This instruction is just used to inform
+  the VM that the iterator slot is no longer used.
 
 
 12. Include, eval, and define instructions
@@ -2914,27 +2841,20 @@ OODeclExists <Class|Interface|Trait> [C C]  ->  [C:Bool]
   the autoloader if needed and if $1 is true. The result of the existence check
   will be pushed on the stack.
 
-VerifyParamType <parameter id>    []  ->  []
+VerifyOutType <parameter id>    [C]  ->  [C]
+
+  Verify out param type. Check that $1 is a value compatible with the declared
+  parameter type specified by the given parameter. In case of a mismatch
+  a warning or recoverable error is raised.
+
+VerifyParamType <parameter id>    [C]  ->  [C]
 
   Verify parameter type. Functions and methods can optionally specify the types
   of arguments they will accept.
 
-  VerifyParamType checks the specified parameter against the enclosing
-  function's corresponding parameter constraints. In case of a mismatch, a
-  recoverable error is raised.
-
-VerifyRetTypeC    [C] -> [C]
-
-  Verify return type. This instruction pops $1 off of the stack, checks if $1
-  is compatible with the current function's return type annotation and raises
-  a warning if there is a mismatch, and then it pushes $1 back onto the stack.
-
-VerifyRetNonNullC [C] -> [C]
-
-  This is intended to provide the same behavior as VerifyRetTypeC, except in
-  only checks that $1 is non null. This should only be emitted by HHBBC if it
-  can statically verify that return value will pass the function's type
-  annotation if it is non null.
+  VerifyParamType checks the type of the parameter in $1 against the enclosing
+  function's corresponding parameter constraints for `parameter id`. In case
+  of a mismatch, a recoverable error is raised.
 
 VerifyParamTypeTS <parameter id>    [C]  ->  []
 
@@ -2951,6 +2871,15 @@ VerifyRetTypeTS [C C]  ->  [C]
   recoverable error is raised. If the popped cell is not a type structure,
   an error is raised. This instruction also verifies the reified generic type
   parameters of $2.
+
+VerifyTypeTS [C C]  ->  [C]
+
+  VerifyTypeTS pops a type structure from the stack and checks whether
+  $2 is compatible with this type structure, checking tuples and shape elements,
+  and enum values, in contrast to other Verify instructions that only do
+  shallow checking. In case of a mismatch, a warning is issued. If the popped cell
+  is not a type structure, an error is raised. This instruction also verifies
+  the reified generic type parameters of $2.
 
 SelfCls                  []  ->  [C:Class]
 
@@ -2978,17 +2907,50 @@ RecordReifiedGeneric [C:Vec] -> [C:Vec]
   representation of these type structures to the global reified generics table.
   Pushes the resulting static list of type structures.
 
-CheckReifiedGenericMismatch [C:Vec] -> []
+CheckClsReifiedGenericMismatch [C:Vec] -> []
 
   Throws a fatal error unless whether each generic in $1 is reified or erased
   matches exactly to the expectations of the current class. If there is
   no class in the current context, throws a fatal error as well.
+
+ClassHasReifiedGenerics [C:Class|LazyClass] -> [C:Bool]
+
+  Checks if the class in $1 has reified generics and pushes the
+  resulting boolean onto the stack. Throws a fatal error if $1 is not a class
+  or lazy class.
+
+GetClsRGProp [C:Class|LazyClass] -> [C:Vec|Null]
+
+  Gets the reified generics property for current instance, using the index of this
+  property as stored in class $1. Raises a fatal error if the current instance
+  is null or $1 is not a class or lazy class. Returns null if the current
+  instance or $1 doesn't have reified generics.
+
+HasReifiedParent [C:Class|LazyClass] -> [C:Bool]
+
+  Checks if the parent of the class in $1 has reified generics and pushes the
+  resulting boolean onto the stack. Throws a fatal error if $1 is not a class.
+  or lazy class.
+
+CheckClsRGSoft [C:Class|LazyClass] -> []
+
+  Raises a warning if every reified generic in class $1 is soft.
+  Otherwise, raises a fatal error. This bytecode should only be emitted
+  when a class which expects reified generics is being instantiated without
+  any reified generics given (thus guarded by a ClassHasReifiedGenerics bytecode).
+  Throws a fatal error if $1 is not a class or lazy class.
 
 NativeImpl    []  ->  []
 
   Native implementation. This instruction invokes the native implementation
   associated with current function and returns the return value to the caller
   of the current function.
+
+ReifiedInit <local variable id> [C:Class|LazyClass C:Obj] -> []
+
+  Checks if the class in $1 or its parent has reified generics. If yes, assigns vec %1
+  to the reified generics of object $2. Throws a fatal error if $1 is not a class
+  or lazy class.
 
 AKExists    [C C] -> [C:Bool]
 
@@ -2997,9 +2959,9 @@ AKExists    [C C] -> [C:Bool]
   key. Throws a fatal error if $1 is not an array or object, and raises a
   warning if $2 is not a string, integer, or null.
 
-CreateCl <num args> <class id>  [C|U..C|U]  ->  [C]
+CreateCl <num args> <class name>  [C|U..C|U]  ->  [C]
 
-  Creates an instance of the class specified by <class id> and pushes it on the
+  Creates an instance of the class specified by <class name> and pushes it on the
   stack.
 
   The specified class must be a subclass of "Closure", must have a single
@@ -3058,32 +3020,6 @@ AssertRATStk  <stack offset> <repo auth type>    []  ->  []
   one restriction: "specialized" array type information may not be asserted,
   because the global array type table may only be present in RepoAuthoritative
   mode.
-
-BreakTraceHint   []  ->  []
-
-  This opcode has no effects, but is a hint that code immediately following it
-  is probably not worth including in the same compilation unit as the code in
-  front of it. In HHVM, this is used to tell the JIT to break a Tracelet when
-  it sees this opcode.
-
-Silence  <local id> <Start|End>   []  ->  []
-
-  With %2 = Start, sets the error reporting level to 0 and stores the previous
-  one in the local variable %1. The local variable will be overwritten without
-  reference counting.
-
-  With %2 = End, if the error reporting level is 0, restores the error
-  reporting level to the previous value (stored in local variable %1); if the
-  error reporting level is not 0, does nothing.
-
-  The verifier requires that all code paths to an End on local variable %1
-  contain a Start on %1, and that all code paths with a Start lead to an End on
-  the same variable.  It additionally requires that none of these paths store
-  any value in %1 between the Start and End operations. Lastly, the set of
-  variables storing the error reporting state must be consistent across block
-  boundaries.
-
-  In either case, the local variable %1 must be an unnamed local.
 
 GetMemoKeyL  <local id>  [] ->  [C:<Int/String>]
 
@@ -3205,19 +3141,22 @@ ThrowNonExhaustiveSwitch [] -> []
   emitted correctly.
 
 ResolveClass <litstr id>   []  ->  [C:Class] (where %1 is a class name)
-                           []  ->  [C:Str]
 
   If %1 is a valid class name, resolve it to a class pointer value, then push
-  the pointer onto the top of stack. When resolution fails, push the class name.
+  the pointer onto the top of stack. When resolution fails, raise an error.
 
-RaiseClassStringConversionWarning [] -> []
+RaiseClassStringConversionNotice [] -> []
 
-  Raises a warning indicating an implicit class to string conversion.
-  This warning can be downgraded to a noop through a runtime option.
+  Raises a notice indicating an implicit class to string conversion.
+  This notice is emitted at a sampled rate through a runtime option.
 
-SetImplicitContextByValue [C:?Obj] -> [C:?Obj]
+SetImplicitContextByValue [C:Obj] -> [C:Obj]
 
   Sets the implicit context to %1 and returns the previous implicit context.
+
+GetMemoAgnosticImplicitContext [] -> [C:Obj]
+
+  Returns the memo agnostic branch of the current IC.
 
 14. Generator creation and execution
 ---------------------------------------
@@ -3345,6 +3284,15 @@ AwaitAll<local-range>    []  ->  [C:Null]
   already be complete a null will be pushed to the stack without suspending
   the current function.
 
+AwaitLowPri []  ->  [C:Null]
+
+  This instruction may only appear in bodies of async functions, and there
+  cannot be another await instruction before this one. This instruction suspends
+  execution into a new low priority AsyncFunctionWaitHandle. Moves all local
+  variables from the current frame into the object, sets resume offset at the
+  next opcode and suspends execution by transferring control flow back to the
+  caller.
+
 Basic statement transformations
 -------------------------------
 
@@ -3405,12 +3353,7 @@ The functionality of the ternary operator is implemented using Jmp*
 instructions. All Jmp* instructions used to implement the ternary operator will
 be forward jumps.
 
-7) Silence operator (@)
-The silence operator is implemented by using various instructions (including
-the Jmp* instructions), unnamed local variables, and an EH catch entry. All Jmp*
-instructions used to implement the silence operator will be forward jumps.
-
-8) The $this expression
+7) The $this expression
 The $this expression has different effects depending on whether or not $this is
 the direct base of a property expression (such as "$this->x") or a method call
 expression (such as "$this->foo()"). When the $this expression is the direct

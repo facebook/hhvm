@@ -20,19 +20,24 @@ let tast_holes_result_to_tuple
       } =
   (actual_ty_string, actual_ty_json, expected_ty_string, expected_ty_json, pos)
 
-let print_json result =
-  Nuclide_rpc_message_printer.(
-    print_json
-    @@ tast_holes_response_to_json
-    @@ List.map ~f:tast_holes_result_to_tuple result)
+let print_json ~print_file result =
+  Nuclide_rpc_message_printer.print_json
+  @@ Nuclide_rpc_message_printer.tast_holes_response_to_json ~print_file
+  @@ List.map ~f:tast_holes_result_to_tuple result
 
-let print_string result =
+let print_string ~print_file result =
+  let printer pos =
+    if print_file then
+      Pos.to_absolute pos |> Pos.string
+    else
+      Pos.string_no_file pos
+  in
   let print_elem
       TastHolesService.{ pos; actual_ty_string; expected_ty_string; _ } =
     print_endline
     @@ Format.sprintf
          {|%s actual type: %s, expected type: %s|}
-         Pos.(string_no_file pos)
+         (printer pos)
          actual_ty_string
          expected_ty_string
   in
@@ -40,8 +45,8 @@ let print_string result =
   | [] -> print_endline "No TAST Holes"
   | _ -> List.iter ~f:print_elem result
 
-let go result output_json =
+let go result ~print_file output_json =
   if output_json then
-    print_json result
+    print_json ~print_file result
   else
-    print_string result
+    print_string ~print_file result

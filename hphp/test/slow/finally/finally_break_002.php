@@ -1,7 +1,7 @@
 <?hh
 
-function blah() {
-  $xs = varray[1, 2, 3, 4, 5];
+function blah() :mixed{
+  $xs = vec[1, 2, 3, 4, 5];
 
   foreach ($xs as $x) {
     try {
@@ -18,6 +18,6 @@ function blah() {
 
 
 <<__EntryPoint>>
-function main_finally_break_002() {
+function main_finally_break_002() :mixed{
 blah();
 }

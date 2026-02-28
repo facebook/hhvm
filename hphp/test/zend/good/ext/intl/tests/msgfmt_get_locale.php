@@ -5,8 +5,8 @@
  */
 
 function ut_main()
-{
-    $locales = varray[
+:mixed{
+    $locales = vec[
         'en_UK',
         'en_US@California',
         'uk',

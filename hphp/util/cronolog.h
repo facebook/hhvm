@@ -41,8 +41,8 @@ struct Cronolog {
   FILE* getOutputFile();
   static void changeOwner(const std::string& username,
                           const std::string& symlink);
-  PERIODICITY m_periodicity{UNKNOWN};
-  PERIODICITY m_periodDelayUnits{UNKNOWN};
+  Periodicity m_periodicity{Periodicity::Unknown};
+  Periodicity m_periodDelayUnits{Periodicity::Unknown};
   int m_periodMultiple{1};
   int m_periodDelay{0};
   int m_useAmericanDateFormats{0};
@@ -61,4 +61,3 @@ struct Cronolog {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

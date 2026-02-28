@@ -1,0 +1,1463 @@
+{
+  "sanity": {
+    "macros": {
+      "s": {
+        "type": "macroDef",
+        "result": "string"
+      },
+      "sParam": {
+        "type": "macroDef",
+        "params": [ "a" ],
+        "result": "%a%"
+      }
+    },
+    "cases": {
+      "simple": {
+        "orig": "@s",
+        "expand": "string"
+      },
+      "emptyParam": {
+        "orig": "@sParam(  )",
+        "expand": ""
+      },
+      "normalParam": {
+        "orig": "@sParam(a\\ )",
+        "expand": "a "
+      },
+      "escapedParam": {
+        "orig": "@sParam(  \\)  )",
+        "expand": ")"
+      },
+      "keys": {
+        "orig": {
+          "type": "keys",
+          "dictionary": { "a": 1 }
+        },
+        "expand": [ "a" ]
+      },
+      "values": {
+        "orig": {
+          "type": "values",
+          "dictionary": { "a": 1 }
+        },
+        "expand": [ 1 ]
+      },
+      "range": {
+        "orig": "@range( @int(-1), @int(5) )",
+        "expand": [ -1, 0, 1, 2, 3, 4, 5 ]
+      },
+      "booleans": {
+        "orig": "@and(@not(@or(@bool(false),@bool(1))), @not(@bool(false)))",
+        "expand": false
+      },
+      "lazyAnd": {
+        "orig": "@and(@bool(false), @fail(Will not fire))",
+        "expand": false
+      },
+      "lazyOr": {
+        "orig": "@or(@bool(true), @fail(Will not fire))",
+        "expand": true
+      },
+      "sortInts": {
+        "orig": {
+          "type": "sort",
+          "dictionary": [ 2, 1, 5, 3, 10 ]
+        },
+        "expand": [ 1, 2, 3, 5, 10 ]
+      },
+      "sortStrings": {
+        "orig": {
+          "type": "sort",
+          "dictionary": [ "a", "c", "b" ]
+        },
+        "expand": [ "a", "b", "c" ]
+      },
+      "sortMix": {
+        "orig": {
+          "type": "sort",
+          "dictionary": [ "2", "99", 10, 99 ]
+        },
+        "expand": [ 10, 99, "2", "99" ]
+      },
+      "hashString": {
+        "orig": "@hash(abcd)",
+        "expand": 6660178300034425268
+      },
+      "hashInt": {
+        "orig": "@hash(@int(2313))",
+        "expand": -4996987850411076878
+      },
+      "ifElse": {
+        "orig": "@if(@bool(true), abc, @fail(oops))",
+        "expand": "abc"
+      },
+      "ifElseLong": {
+        "orig": {
+          "type": "if",
+          "condition": false,
+          "is_true": "@fail(oops)",
+          "is_false": "abc"
+        },
+        "expand": "abc"
+      },
+      "isLocalIp": {
+        "orig": "@isLocalIp(::1)",
+        "expand": true
+      },
+      "isLocalIp2": {
+        "orig": "@isLocalIp(::0001)",
+        "expand": true
+      },
+      "isLocalIp3": {
+        "orig": "@isLocalIp(not an ip)",
+        "expand": false
+      },
+      "isLocalIp4": {
+        "orig": "@isLocalIp(127.0.0.1)",
+        "expand": true
+      }
+    }
+  },
+  "casts": {
+    "macros": {},
+    "cases": {
+      "trueToBool": {
+        "orig": "@bool(true)",
+        "expand": true
+      },
+      "falseToBool": {
+        "orig": "@bool(false)",
+        "expand": false
+      },
+      "0toBool": {
+        "orig": "@bool(@int(0) )",
+        "expand": false
+      },
+      "1toBool": {
+        "orig": "@bool( @int(1))",
+        "expand": true
+      },
+      "strToInt": {
+        "orig": "@int( -1 )",
+        "expand": -1
+      },
+      "intToStr": {
+        "orig": "@str(@int(5))",
+        "expand": "5"
+      },
+      "strToDouble": {
+        "orig": "@double(5.5)",
+        "expand": 5.5
+      },
+      "doubleToStr": {
+        "orig": "@str(@double(5.5))",
+        "expand": "5.5"
+      }
+    }
+  },
+  "inner": {
+    "macros": {
+      "s": {
+        "type": "macroDef",
+        "result": "string"
+      },
+      "subst": {
+        "type": "macroDef",
+        "params": [
+          "inner"
+        ],
+        "result": "@%inner%"
+      },
+      "concat": {
+        "type": "macroDef",
+        "params": [
+          "p1",
+          {
+            "name": "p2",
+            "default": "321"
+          }
+        ],
+        "result": "%p1%%p2%"
+      },
+      "multiple_concat": {
+        "type": "macroDef",
+        "params": [ "a", "b" ],
+        "result": "%a%2%b%"
+      }
+    },
+    "cases": {
+      "inner": {
+        "orig": "@subst(s)",
+        "expand": "string"
+      },
+      "concat": {
+        "orig": "@concat(@s,123)",
+        "expand" : "string123"
+      },
+      "concat_default": {
+        "orig": "@concat(@s)",
+        "expand": "string321"
+      },
+      "concat_multiple": {
+        "orig": "@multiple_concat(1,3)",
+        "expand": "123"
+      },
+      "multiline_call": {
+        "orig": "@concat(hello, world)",
+        "expand": "helloworld"
+      }
+    }
+  },
+  "default_args": {
+    "macros": {
+      "def": {
+        "type": "macroDef",
+        "params": [ { "name": "a", "default": 15 } ],
+        "result": "%a%"
+      },
+      "opt": {
+        "type": "macroDef",
+        "params": [ { "name": "a" }, { "name": "b", "optional": true } ],
+        "result": "@if(%a%, hello, %b%)"
+      },
+      "mix": {
+        "type": "macroDef",
+        "params": [
+          {
+            "name": "a",
+            "default": true
+          },
+          {
+            "name": "b",
+            "optional": true
+          },
+          {
+            "name": "c",
+            "default": true
+          },
+          {
+            "name": "d",
+            "optional": true
+          }
+        ],
+        "result": "@if(%a%, @if(%c%, bla, %d%), %b%)"
+      }
+    },
+    "cases": {
+      "default_param": {
+        "orig": "@def",
+        "expand": 15
+      },
+      "default_param_pass": {
+        "orig": "@def(abc)",
+        "expand": "abc"
+      },
+      "optional_param": {
+        "orig": "@opt(@bool(true))",
+        "expand": "hello"
+      },
+      "optional_param_pass": {
+        "orig": "@opt(@bool(false), world)",
+        "expand": "world"
+      },
+      "mix": {
+        "orig": "@mix",
+        "expand": "bla"
+      },
+      "mix2": {
+        "orig": "@mix(@bool(false), blah)",
+        "expand": "blah"
+      },
+      "mix3": {
+        "orig": "@mix(@bool(true))",
+        "expand": "bla"
+      },
+      "mix4": {
+        "orig": "@mix(@bool(true), 123, @bool(false), blabla)",
+        "expand": "blabla"
+      }
+    }
+  },
+  "import": {
+    "macros": {
+      "type": "merge",
+      "params": [
+        {
+          "imported": "@import(%templGlobal%)"
+        }
+      ]
+    },
+    "cases": {
+      "simple": {
+        "orig": "@import(test)",
+        "expand": "mock_test"
+      },
+      "templ": {
+        "orig": "@import(%testGlobal%)",
+        "expand": "mock_test"
+      },
+      "imported_templ": {
+        "orig": "@imported",
+        "expand": "imported_macro"
+      },
+      "import_fail": {
+        "orig": "@import(do_not_exist, Oops\\, something went wrong)",
+        "expand": "Oops, something went wrong"
+      },
+      "import_no_fail": {
+        "orig": "@import(test, @fail(Import failed))",
+        "expand": "mock_test"
+      }
+    }
+  },
+  "select": {
+    "macros": {
+      "my-dict": {
+        "type": "constDef",
+        "result": { "a": "b" }
+      }
+    },
+    "cases": {
+      "dict": {
+        "orig": {
+          "type": "select",
+          "dictionary": { "a": 1, "b": 2 },
+          "key": "a"
+        },
+        "expand": 1
+      },
+      "array": {
+        "orig": {
+          "type": "select",
+          "dictionary": [ "a", "b", "c" ],
+          "key": 1
+        },
+        "expand": "b"
+      },
+      "arrayNegativeId": {
+        "orig": {
+          "type": "select",
+          "dictionary": [ "a", "b", "c" ],
+          "key": -1
+        },
+        "expand": "c"
+      },
+      "selectDefault1": {
+        "orig": {
+          "type": "select",
+          "dictionary": { "a": 1, "b": 2 },
+          "key": "c",
+          "default": 3
+        },
+        "expand": 3
+      },
+      "selectDefault2": {
+        "orig": {
+          "type": "select",
+          "dictionary": { "a": 1, "b": 2 },
+          "key": "a",
+          "default": "@fail(No key)"
+        },
+        "expand": 1
+      },
+      "selectDefault3": {
+        "orig": {
+          "type": "select",
+          "dictionary": ["a", "b"],
+          "key": 2,
+          "default": 3
+        },
+        "expand": 3
+      },
+      "selectDefault4": {
+        "orig": {
+          "type": "select",
+          "dictionary": ["a", "b"],
+          "key": 1,
+          "default": "@fail(No key)"
+        },
+        "expand": "b"
+      },
+      "selectDefaultStr": {
+        "orig": "@select(%my-dict%, b, c)",
+        "expand": "c"
+      },
+      "selectFailDefaultStr": {
+        "orig": "@select(%my-dict%, a, @fail(oops))",
+        "expand": "b"
+      },
+      "selectNoDefaultStr": {
+        "orig": "@select(%my-dict%, a)",
+        "expand": "b"
+      }
+    }
+  },
+  "weightedHash": {
+    "macros": {},
+    "cases": {
+      "one_item": {
+        "orig": {
+          "type": "weightedHash",
+          "dictionary": { "a": 0.5 },
+          "key": 2015
+        },
+        "expand": "a"
+      },
+      "zero_weight": {
+        "orig": {
+          "type": "weightedHash",
+          "dictionary": {
+            "a": 0,
+            "b": 1
+          },
+          "key": "hello world"
+        },
+        "expand": "b"
+      },
+      "str": {
+        "orig": {
+          "type": "define",
+          "vars": {
+            "weights": {
+              "a": 0,
+              "b": 1,
+              "c": 0.5
+            }
+          },
+          "result": "@weightedHash(%weights%, @int(12345))"
+        },
+        "expand": "b"
+      }
+    }
+  },
+  "split": {
+    "macros": {},
+    "cases": {
+      "simple": {
+        "orig": {
+          "type": "split",
+          "dictionary": "a.b.c.",
+          "delim": "."
+        },
+        "expand": [ "a", "b", "c", "" ]
+      },
+      "empty": {
+        "orig": "@split(,)",
+        "expand": [ "" ]
+      },
+      "emptyDelim": {
+        "orig": "@split(abacaba,)",
+        "expand": [ "abacaba" ]
+      },
+      "emplyPieces": {
+        "orig": "@split(abbabbabb, b)",
+        "expand": [ "a", "", "a", "", "a", "", "" ]
+      },
+      "multiCharDelim": {
+        "orig": "@split(abbabbabb, bb)",
+        "expand": [ "a", "a", "a", "" ]
+      }
+    }
+  },
+  "shuffle": {
+    "macros": {
+    },
+    "cases": {
+      "empty": {
+        "orig": {
+          "type": "shuffle",
+          "dictionary": [ ]
+        },
+        "expand": [ ]
+      },
+      "one": {
+        "orig": {
+          "type": "shuffle",
+          "dictionary": [ 1 ]
+        },
+        "expand": [ 1 ]
+      },
+      "withSeed1": {
+        "orig": {
+          "type": "shuffle",
+          "dictionary": [ 1, 3 ],
+          "seed": 11111111
+        },
+        "expand": [ 1, 3 ]
+      },
+      "withSeed2": {
+        "orig": {
+          "type": "shuffle",
+          "dictionary": [ 1, 3 ],
+          "seed": 123
+        },
+        "expand": [ 3, 1 ]
+      },
+      "withSeed1again": {
+        "orig": {
+          "type": "shuffle",
+          "dictionary": [ 1, 3 ],
+          "seed": 11111111
+        },
+        "expand": [ 1, 3 ]
+      },
+      "withSeed2again": {
+        "orig": {
+          "type": "shuffle",
+          "dictionary": [ 1, 3 ],
+          "seed": 123
+        },
+        "expand": [ 3, 1 ]
+      }
+    }
+  },
+  "slice": {
+    "macros": {
+    },
+    "cases": {
+      "sanity": {
+        "orig": {
+          "type": "slice",
+          "from": "@int(1)",
+          "to": 2,
+          "dictionary": [ "a", "b", "c", "d" ]
+        },
+        "expand": [ "b", "c" ]
+      },
+      "string": {
+        "orig": "@slice(abcd,@int(2),@int(3))",
+        "expand": "cd"
+      },
+      "out_of_range": {
+        "orig": "@slice(abcd, @int(0), @int(-1))",
+        "expand": ""
+      },
+      "out_of_range2": {
+        "orig": "@slice(abcd, @int(-10), @int(10000))",
+        "expand": "abcd"
+      }
+    }
+  },
+  "set": {
+    "macros": {},
+    "cases": {
+      "map_replace": {
+        "orig": {
+          "type": "set",
+          "dictionary": { "a": 1, "b": 2 },
+          "key": "b",
+          "value": 5
+        },
+        "expand": { "a": 1, "b": 5 }
+      },
+      "map_add": {
+        "orig": {
+          "type": "set",
+          "dictionary": { "a": 1 },
+          "key": "c",
+          "value": 10
+        },
+        "expand": { "a": 1, "c": 10 }
+      },
+      "array": {
+        "orig": {
+          "type": "set",
+          "dictionary": [ "a", 1, "b" ],
+          "key": 1,
+          "value": "c"
+        },
+        "expand": [ "a", "c", "b" ]
+      }
+    }
+  },
+  "transform": {
+    "macros": {
+      "concat": {
+        "type": "macroDef",
+        "params": [ "a", "b" ],
+        "result": "%a%%b%"
+      }
+    },
+    "cases": {
+      "list": {
+        "orig": {
+          "type": "transform",
+          "dictionary": [ "a", "b", "c" ],
+          "itemTransform": "@concat(%item%,1)"
+        },
+        "expand": [ "a1", "b1", "c1" ]
+      },
+      "map": {
+        "orig": {
+          "type": "transform",
+          "dictionary": { "a": "1", "b": "2", "c": "3" },
+          "keyTransform": "%key%1",
+          "itemTransform": "@concat(%item%,%key%)"
+        },
+        "expand": { "a1": "1a", "b1": "2b", "c1": "3c" }
+      },
+      "inner": {
+        "orig": {
+          "type": "transform",
+          "itemName": "list",
+          "keyName": "listKey",
+          "itemTransform": {
+            "type": "transform",
+            "dictionary": "%list%",
+            "itemTransform": "@concat(%listKey%,@str(%item%))"
+          },
+          "dictionary": {
+            "a": [1, 2, 3],
+            "b": [4, 5, 6]
+          }
+        },
+        "expand": {
+          "a": ["a1", "a2", "a3"],
+          "b": ["b4", "b5", "b6"]
+        }
+      },
+      "multiKey": {
+        "orig": {
+          "type": "transform",
+          "keyTransform": "%item%",
+          "itemTransform": "%key%",
+          "dictionary": {
+            "a": ["1", "2", "3"],
+            "b": ["4", "5", "6"]
+          }
+        },
+        "expand": {
+          "1": "a", "2": "a", "3": "a",
+          "4": "b", "5": "b", "6": "b"
+        }
+      }
+    }
+  },
+  "escape": {
+    "macros": {
+      "amp": {
+        "type": "constDef",
+        "result": "\\@"
+      },
+      "\\@": {
+        "type": "macroDef",
+        "result": "\\@\\(\\\\\\)"
+      },
+      "a": {
+        "type": "macroDef",
+        "result": "@\\@"
+      },
+      "b": {
+        "type": "macroDef",
+        "params": [ "a", "b" ],
+        "result": {
+          "\\@a": "@%a%",
+          "\\@b": "@%a%%b%",
+          "@a": "\\%a\\%%amp%"
+        }
+      },
+      "c": {
+        "type": "macroDef",
+        "params": [ "a" ],
+        "result": "%a%"
+      }
+    },
+    "cases": {
+      "simple": {
+        "orig": "\\%\\\\",
+        "expand": "%\\"
+      },
+      "macro": {
+        "orig": "@a",
+        "expand": "@(\\)"
+      },
+      "macro2": {
+        "orig": "@\\a",
+        "expand": "@(\\)"
+      },
+      "inner": {
+        "orig": "@b(\\a,)",
+        "expand": {
+          "@a": "@(\\)",
+          "@b": "@(\\)",
+          "@(\\)": "%a%@"
+        }
+      },
+      "merge": {
+        "orig": {
+          "type": "merge",
+          "params": [ [ "\\\\" ], [ "\\@" ], [ "@\\@" ] ]
+        },
+        "expand": [ "\\", "@", "@(\\)" ]
+      },
+      "transform_dict": {
+        "orig": {
+          "type": "transform",
+          "itemTransform": "\\%%item1%",
+          "keyTransform": "%key1%\\@",
+          "keyName": "key1",
+          "itemName": "item1",
+          "dictionary": {
+            "\\@": "\\\\"
+          }
+        },
+        "expand": {
+          "@@": "%\\"
+        }
+      },
+      "transform_list": {
+        "orig": {
+          "type": "transform",
+          "itemTransform": "\\%%item1%",
+          "itemName": "item1",
+          "dictionary": [ "\\@", "\\\\" ]
+        },
+        "expand": [ "%@", "%\\" ]
+      },
+      "trim": {
+        "orig": "@c(  \\   \\\\ \\   )",
+        "expand": "   \\  "
+      },
+      "trim2": {
+        "orig": "@c(\\\\\\ )",
+        "expand": "\\ "
+      },
+      "trim3": {
+        "orig": "@c( )",
+        "expand": ""
+      }
+    }
+  },
+  "consts_in_consts": {
+    "macros": [
+      {
+        "a": {
+          "type": "constDef",
+          "result": "A"
+        }
+      },
+      [
+        {
+          "type": "merge",
+          "params": [
+            {
+              "A": {
+                "type": "macroDef",
+                "params": [ "param" ],
+                "result": "%c%%param%"
+              },
+              "b": {
+                "type": "constDef",
+                "result": "%a%b"
+              }
+            },
+            {
+              "c": {
+                "type": "constDef",
+                "result": "%b%c"
+              }
+            }
+          ]
+        },
+        {
+          "d": {
+            "type": "constDef",
+            "result": "@A(d)"
+          }
+        }
+      ]
+    ],
+    "cases": {
+      "a": {
+        "orig": "%a%",
+        "expand": "A"
+      },
+      "b": {
+        "orig": "%b%",
+        "expand": "Ab"
+      },
+      "c": {
+        "orig": "%c%",
+        "expand": "Abc"
+      },
+      "d": {
+        "orig": "%d%",
+        "expand": "Abcd"
+      },
+      "macroA": {
+        "orig": "@%a%(%c%)",
+        "expand": "AbcAbc"
+      }
+    }
+  },
+  "process": {
+    "macros": {
+      "indexof": {
+        "type": "macroDef",
+        "params": [ "list", "x" ],
+        "result": {
+          "type": "process",
+          "initialValue": "@int(-1)",
+          "dictionary": "%list%",
+          "transform": {
+            "type": "if",
+            "condition": "@and(@equals(%value%,@int(-1)),@equals(%item%,%x%))",
+            "is_true": "%key%",
+            "is_false": "%value%"
+          }
+        }
+      },
+      "objectToString": {
+        "type": "macroDef",
+        "params": [ "dictionary" ],
+        "result": {
+          "type": "merge",
+          "params": [
+            "{",
+            {
+              "type": "process",
+              "initialValue": "",
+              "dictionary": "%dictionary%",
+              "transform": {
+                "type": "merge",
+                "params": [
+                  "@if(@empty(%value%), %key%:, %value%\\,%key%:)",
+                  "@if(@isObject(%item%), @objectToString(%item%), %item%)"
+                ]
+              }
+            },
+            "}"
+          ]
+        }
+      },
+      "minEl": {
+        "type": "macroDef",
+        "params": [ "list" ],
+        "result": {
+          "type": "process",
+          "initialValue": "@select(%list%,@int(0))",
+          "dictionary": "@slice(%list%,@int(1),@size(%list%))",
+          "transform": {
+            "type": "if",
+            "condition": "@less(%item%,%value%)",
+            "is_true": "%item%",
+            "is_false": "%value%"
+          }
+        }
+      }
+    },
+    "cases": {
+      "indexof": {
+        "orig": {
+          "type": "indexof",
+          "list": [ "a", "b", "c", "d", "e" ],
+          "x": "a"
+        },
+        "expand": 0
+      },
+      "indexof2": {
+        "orig": {
+          "type": "indexof",
+          "list": [ "a", "b", "c", "d", "e" ],
+          "x": "d"
+        },
+        "expand": 3
+      },
+      "objectToString": {
+        "orig": {
+          "type": "objectToString",
+          "dictionary": { "a": "b" }
+        },
+        "expand": "{a:b}"
+      },
+      "objectToString2": {
+        "orig": {
+          "type": "objectToString",
+          "dictionary": { "a": { "b": "c"} }
+        },
+        "expand": "{a:{b:c}}"
+      },
+      "minEl": {
+        "orig": {
+          "type": "minEl",
+          "list": [ "fd", "b", "d", "bab" ]
+        },
+        "expand": "b"
+      },
+      "minEl2": {
+        "orig": {
+          "type": "minEl",
+          "list": [ 1, 3, 0, 4 ]
+        },
+        "expand": 0
+      }
+    }
+  },
+  "bitwise": {
+    "macros": {
+      "set-msb": {
+        "type": "constDef",
+        "result": -9223372036854775808
+      },
+      "allones": {
+        "type": "constDef",
+        "result": -1
+      },
+      "allones-but-msb": {
+        "type": "constDef",
+        "result": 9223372036854775807
+      },
+      "allones-but-lsb": {
+        "type": "constDef",
+        "result": -2
+      }
+    },
+    "cases": {
+      "0&0": {
+        "orig": "@bitwiseAnd(@int(0), @int(0))",
+        "expand": 0
+      },
+      "0&1": {
+        "orig": "@bitwiseAnd(@int(0), @int(1))",
+        "expand": 0
+      },
+      "1&1": {
+        "orig": "@bitwiseAnd(@int(1), @int(1))",
+        "expand": 1
+      },
+      "1&15": {
+        "orig": "@bitwiseAnd(@int(1), @int(15))",
+        "expand": 1
+      },
+      "lsb&all": {
+        "orig": "@bitwiseAnd(@int(1), %allones%)",
+        "expand": 1
+      },
+      "msb&all": {
+        "orig": "@equals(@bitwiseAnd(%set-msb%, %allones%), @int(%set-msb%))",
+        "expand": true
+      },
+      "0|0": {
+        "orig": "@bitwiseOr(@int(0), @int(0))",
+        "expand": 0
+      },
+      "0|1": {
+        "orig": "@bitwiseOr(@int(0), @int(1))",
+        "expand": 1
+      },
+      "1|1": {
+        "orig": "@bitwiseOr(@int(1), @int(1))",
+        "expand": 1
+      },
+      "1|2": {
+        "orig": "@bitwiseOr(@int(1), @int(2))",
+        "expand": 3
+      },
+      "lsb|all": {
+        "orig": "@bitwiseOr(@int(1), %allones%)",
+        "expand": -1
+      },
+      "msb|all": {
+        "orig": "@bitwiseOr(%set-msb%, %allones%)",
+        "expand": -1
+      },
+      "0^0": {
+        "orig": "@bitwiseXor(@int(0), @int(0))",
+        "expand": 0
+      },
+      "0^1": {
+        "orig": "@bitwiseXor(@int(0), @int(1))",
+        "expand": 1
+      },
+      "1^1": {
+        "orig": "@bitwiseXor(@int(1), @int(1))",
+        "expand": 0
+      },
+      "1^2": {
+        "orig": "@bitwiseXor(@int(1), @int(2))",
+        "expand": 3
+      },
+      "lsb^all": {
+        "orig": "@equals(@bitwiseXor(@int(1), %allones%), @int(%allones-but-lsb%))",
+        "expand": true
+      },
+      "msb^all": {
+        "orig": "@equals(@bitwiseXor(%set-msb%, %allones%), @int(%allones-but-msb%))",
+        "expand": true
+      },
+      "~allones": {
+        "orig": "@bitwiseNot(%allones%)",
+        "expand": 0
+      },
+      "~allones-but-lsb": {
+        "orig": "@bitwiseNot(%allones-but-lsb%)",
+        "expand": 1
+      },
+      "~allones-but-msb": {
+        "orig": "@equals(@bitwiseNot(%allones-but-msb%), @int(%set-msb%))",
+        "expand": true
+      },
+      "1<<4": {
+        "orig": "@bitwiseLeftShift(@int(1), @int(4))",
+        "expand": 16
+      },
+      "16>>4": {
+        "orig": "@bitwiseRightShift(@int(16), @int(4))",
+        "expand": 1
+      },
+      "1<<63": {
+        "orig": "@equals(@bitwiseLeftShift(@int(1), @int(63)), %set-msb%)",
+        "expand": true
+      },
+      "msb>>63": {
+        "orig": "@bitwiseRightShift(%set-msb%, @int(63))",
+        "expand": 1
+      },
+      "msb<<1": {
+        "orig": "@bitwiseLeftShift(%set-msb%, @int(1))",
+        "expand": 0
+      },
+      "1>>1": {
+        "orig": "@bitwiseRightShift(@int(1), @int(1))",
+        "expand": 0
+      },
+      "allones-but-lsb>>1": {
+        "orig": "@equals(@bitwiseRightShift(%allones-but-lsb%, @int(1)), %allones-but-msb%)",
+        "expand": true
+      },
+      "allones-but-msb<<1": {
+        "orig": "@equals(@bitwiseLeftShift(%allones-but-msb%, @int(1)), %allones-but-lsb%)",
+        "expand": true
+      }
+    }
+  },
+  "math": {
+    "macros": {
+      "factorial": {
+        "type": "macroDef",
+        "params": [ "x" ],
+        "result": {
+          "type": "if",
+          "condition": "@less(@int(1),%x%)",
+          "is_true": "@mul(%x%,@factorial(@sub(%x%,@int(1))))",
+          "is_false": "@int(1)"
+        }
+      }
+    },
+    "cases": {
+      "fact5": {
+        "orig": "@factorial(@int(5))",
+        "expand": 120
+      },
+      "fact0": {
+        "orig": "@factorial(@int(0))",
+        "expand": 1
+      },
+      "mod": {
+        "orig": "@mod(@int(5),@int(3))",
+        "expand": 2
+      },
+      "div": {
+        "orig": "@div(@int(7),@int(3))",
+        "expand": 2
+      },
+      "div2": {
+        "orig": "@div(@int(0),@int(3))",
+        "expand": 0
+      }
+    }
+  },
+  "contains": {
+    "macros": {},
+    "cases": {
+      "containsList": {
+        "orig": {
+          "type": "contains",
+          "dictionary": [ 100, 1, 2, 3 ],
+          "key": 100
+        },
+        "expand": true
+      },
+      "containsStr": {
+        "orig": {
+          "type": "contains",
+          "dictionary": "abacaba",
+          "key": "aca"
+        },
+        "expand": true
+      },
+      "containsObj": {
+        "orig": {
+          "type": "contains",
+          "dictionary": { "a": 1, "b": 2},
+          "key": "a"
+        },
+        "expand": true
+      },
+      "notContainsList": {
+        "orig": {
+          "type": "contains",
+          "dictionary": [ 0, 1, 2, 3 ],
+          "key": 5
+        },
+        "expand": false
+      },
+      "notContainsStr": {
+        "orig": {
+          "type": "contains",
+          "dictionary": "abacaba",
+          "key": "ada"
+        },
+        "expand": false
+      },
+      "notContainsObj": {
+        "orig": {
+          "type": "contains",
+          "dictionary": { "a": 1, "b": 2 },
+          "key": "c"
+        },
+        "expand": false
+      }
+    }
+  },
+  "foreach": {
+    "macros": {},
+    "cases": {
+      "simple": {
+        "orig": [
+          {
+            "type": "foreach",
+            "from": [ "a", "b" ],
+            "use": [ "%item%1" ]
+          },
+          {
+            "type": "foreach",
+            "from": [ "a", "b" ],
+            "top": 1
+          },
+          {
+            "type": "foreach",
+            "from": { },
+            "top": 1
+          },
+          {
+            "type": "foreach",
+            "from": [ "a" ]
+          },
+          {
+            "type": "foreach",
+            "from": [ 1, 2 ],
+            "where": "@less(@int(1), %item%)",
+            "use": { "@str(%key%)": "%item%" }
+          },
+          {
+            "type": "foreach",
+            "from": [ 1, 2, 3, 4, 5, 6 ],
+            "where": "@equals(@mod(%item%, @int(2)), @int(0))",
+            "top": 2,
+            "use": {
+              "type": "define",
+              "vars": {
+                "item2": "@mul(%item%, @int(2))"
+              },
+              "result": {
+                "@str(%item%)": "%item%",
+                "@str(%item2%)": "%item2%"
+              }
+            }
+          },
+          {
+            "type": "foreach",
+            "from": { "\\@": "b" },
+            "use": [ "%key%%item%", "%item%%key%" ]
+          },
+          {
+            "type": "foreach",
+            "key": "k",
+            "item": "v",
+            "from": { "a": "b", "d": "c", "z": "\\@a" },
+            "where": "@less(%v%, %k%)"
+          },
+          {
+            "type": "foreach",
+            "from": {},
+            "use": [],
+            "noMatchResult": {}
+          },
+          {
+            "type": "foreach",
+            "from": { "a": "b" },
+            "use": [],
+            "noMatchResult": {}
+          },
+          {
+            "type": "foreach",
+            "from": [ 1, 2, 3 ],
+            "top": "@add(@int(1), @int(1))"
+          },
+          {
+            "type": "foreach",
+            "from": [],
+            "use": {}
+          }
+        ],
+        "expand": [
+          [ "a1", "b1" ],
+          [ "a" ],
+          {},
+          [ "a" ],
+          { "1": 2 },
+          {
+            "2": 2,
+            "4": 4,
+            "8": 8
+          },
+          [ "@b", "b@" ],
+          { "d": "c", "z": "@a" },
+          {},
+          [],
+          [ 1, 2 ],
+          []
+        ]
+      }
+    }
+  },
+
+  "vars": {
+    "macros": {
+      "shadow_var": {
+        "type": "macroDef",
+        "params": [ "param" ],
+        "result": {
+          "vars": {
+            "param": 1
+          },
+          "ret": "%param%"
+        }
+      }
+    },
+    "cases": {
+      "simple": {
+        "orig": {
+          "vars": {
+            "a": "%b%",
+            "b": "abacaba"
+          },
+
+          "my_key": "%a%"
+        },
+        "expand": {
+          "my_key": "abacaba"
+        }
+      },
+      "vars_foreach": {
+        "orig": {
+          "vars": {
+            "a": "123"
+          },
+
+          "type": "foreach",
+          "from": [ "a", "b" ],
+          "use": [ "%item%%a%" ]
+        },
+        "expand": [ "a123", "b123" ]
+      },
+      "vars_foreach_inner": {
+        "orig": {
+          "type": "foreach",
+          "from": { "a": "b", "c": "d" },
+          "use": {
+            "vars": {
+              "concat": "%key%%item%"
+            },
+
+            "%key%": "%concat%"
+          }
+        },
+        "expand": {
+          "a": "ab",
+          "c": "cd"
+        }
+      },
+
+      "nested": {
+        "orig": {
+          "vars": {
+            "fst": "a"
+          },
+
+          "my_key1": {
+            "vars": {
+              "scnd": "b",
+              "thrd": "%fst%%scnd%"
+            },
+
+            "my_key2": "%fst%%scnd%%thrd%"
+          }
+        },
+        "expand": {
+          "my_key1": {
+            "my_key2": "abab"
+          }
+        }
+      },
+
+      "simbling_scope": {
+        "orig": {
+          "a": {
+            "vars": { "a": 5 },
+            "result": "%a%"
+          },
+          "b": {
+            "vars": { "a": 10 },
+            "result": "%a%"
+          },
+          "c": {
+            "vars": { "a": 15 },
+            "result": "%a%"
+          }
+        },
+        "expand": {
+          "a": {
+            "result": 5
+          },
+          "b": {
+            "result": 10
+          },
+          "c": {
+            "result": 15
+          }
+        }
+      },
+
+      "shadowing": {
+        "orig": "@shadow_var(2)",
+        "expand": { "ret": 1 }
+      },
+
+      "shadowing2": {
+        "orig": {
+          "vars": {
+            "item": 15
+          },
+
+          "type": "transform",
+          "dictionary": { "a": 1, "b": 2 },
+          "itemTransform": "@add(%item%, @int(1))"
+        },
+        "expand": { "a": 2, "b": 3 }
+      },
+
+      "shadowing3": {
+        "orig": {
+          "type": "transform",
+          "dictionary": { "a": 1, "b": 2 },
+          "itemTransform": {
+            "vars": {
+              "my_key": "%key%"
+            },
+            "type": "transform",
+            "dictionary": "@range(@int(0), %item%)",
+            "itemTransform": {
+              "type": "merge",
+              "params": [ "%my_key%", "@str(%item%)" ]
+            }
+          }
+        },
+        "expand": {
+          "a": [ "a0", "a1" ],
+          "b": [ "b0", "b1", "b2" ]
+        }
+      }
+    }
+  },
+  "defined": {
+    "macros": {
+      "myMacro": {
+        "type": "macroDef",
+        "params": [ "a", "b" ],
+        "result": {
+          "a": "@defined(a)",
+          "b": "@defined(b)",
+          "c": "@defined(c)",
+          "params": "@defined(params)",
+          "local": "@defined(local)",
+          "myMacro": "@defined(myMacro)",
+          "arg": "%a%"
+        }
+      }
+    },
+    "cases": {
+      "definedConst": {
+        "orig": "@defined(testGlobal)",
+        "expand": true
+      },
+      "definedLocal": {
+        "orig": {
+          "type": "transform",
+          "keyName": "my_key",
+          "dictionary": [ 1, 2, 3 ],
+          "itemTransform": "@and(@defined(my_key), @defined(item))"
+        },
+        "expand": [ true, true, true ]
+      },
+      "undefined": {
+        "orig": "@defined(name)",
+        "expand": false
+      },
+      "shortMacro": {
+        "orig": {
+          "vars": {
+            "local": true
+          },
+          "in_macro": "@myMacro(@defined(local),2)",
+          "outside_macro": {
+            "a": "@defined(a)",
+            "local": "@defined(local)",
+            "myMacro": "@defined(myMacro)"
+          }
+        },
+        "expand": {
+          "in_macro": {
+            "arg": true,
+            "a": true,
+            "b": true,
+            "c": false,
+            "local": false,
+            "myMacro": false,
+            "params": false
+          },
+          "outside_macro": {
+            "a": false,
+            "local": true,
+            "myMacro": false
+          }
+        }
+      },
+      "longMacro": {
+        "orig": {
+          "vars": {
+            "local": true
+          },
+
+          "type": "foreach",
+          "from": {
+            "type": "myMacro",
+            "a": "@defined(local)",
+            "b": 2
+          },
+          "use": { "%key%" : "%item%" }
+        },
+        "expand": {
+          "arg": true,
+          "a": true,
+          "b": true,
+          "c": false,
+          "params": false,
+          "local": false,
+          "myMacro": false
+        }
+      }
+    }
+  }
+}

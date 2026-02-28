@@ -1,4 +1,4 @@
-File "test_consts15.php", line 8, characters 22-22:
+ERROR: File "test_consts15.php", line 8, characters 22-22:
 Cannot re-declare this constant as abstract (Typing[4142])
-File "test_consts15.php", line 4, characters 9-9:
-Previously defined here
+  File "test_consts15.php", line 4, characters 9-9:
+  Previously defined here

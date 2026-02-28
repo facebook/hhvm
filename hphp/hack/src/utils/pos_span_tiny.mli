@@ -8,7 +8,7 @@
 
 (** A compressed representation of a position span, i.e. a start and an end position. *)
 
-type t [@@deriving eq, show, ord]
+type t [@@deriving eq, hash, show, ord]
 
 val dummy : t
 

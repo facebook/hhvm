@@ -5,24 +5,24 @@ class Props {
   public static string $b;
 }
 
-function wrap($fun) {
+function wrap($fun) :mixed{
   try {
     $fun();
   } catch (Exception $e) { echo "caught: ".$e->getMessage()."\n"; }
 }
 
-class foo {}
-class bar {}
-class baz {}
-class buz {}
+<<__DynamicallyReferenced>> class foo {}
+<<__DynamicallyReferenced>> class bar {}
+<<__DynamicallyReferenced>> class baz {}
+<<__DynamicallyReferenced>> class buz {}
 
-function foo(string $s) {
+function foo(string $s) :mixed{
   var_dump($s);
   var_dump(is_string($s));
   var_dump(strlen($s));
 }
 
-function bar($f) {
+function bar($f) :mixed{
   var_dump($f);
   var_dump((string)$f);
   var_dump(is_string($f));
@@ -34,25 +34,25 @@ function bar($f) {
 }
 
 function baz(): string {
-  return __hhvm_intrinsics\create_class_pointer('baz');
+  return HH\classname_to_class('baz');
 }
 
-function buz() {
-  return __hhvm_intrinsics\create_class_pointer('buz');
+function buz() :mixed{
+  return HH\classname_to_class('buz');
 }
 
 function io(inout string $a, inout $b): string {
   var_dump($a, $b);
-  list($a, $b) = varray[$b, $a];
+  list($a, $b) = vec[$b, $a];
   return $a;
 }
 
-function main() {
+function main() :mixed{
   foo("hello");
-  foo(__hhvm_intrinsics\create_class_pointer('foo'));
+  foo(HH\classname_to_class('foo'));
 
   bar("hello");
-  bar(__hhvm_intrinsics\create_class_pointer('bar'));
+  bar(HH\classname_to_class('bar'));
 
   var_dump(baz(), is_string(baz()), baz() is string, baz() as string);
   var_dump(buz(), is_string(buz()), buz() is string, buz() as string);
@@ -60,10 +60,10 @@ function main() {
   wrap(() ==> (new Props)->a = buz());
   wrap(() ==> Props::$b = buz());
 
-  $x = __hhvm_intrinsics\create_class_pointer('foo');             var_dump(io(inout $x, inout $x));
+  $x = HH\classname_to_class('foo');             var_dump(io(inout $x, inout $x));
   $y = 'foo';                     var_dump(io(inout $y, inout $y));
-  $x = __hhvm_intrinsics\create_class_pointer('foo'); $y = 'foo'; var_dump(io(inout $x, inout $y));
-  $x = __hhvm_intrinsics\create_class_pointer('foo'); $y = 'foo'; var_dump(io(inout $y, inout $x));
+  $x = HH\classname_to_class('foo'); $y = 'foo'; var_dump(io(inout $x, inout $y));
+  $x = HH\classname_to_class('foo'); $y = 'foo'; var_dump(io(inout $y, inout $x));
   var_dump($x, $y);
 }
 <<__EntryPoint>>

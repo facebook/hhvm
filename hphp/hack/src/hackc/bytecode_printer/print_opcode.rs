@@ -3,33 +3,73 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::print;
-use ffi::Str;
+use std::io::Error;
+use std::io::ErrorKind;
+use std::io::Result;
+use std::io::Write;
+
 use hash::HashSet;
-use hhbc::{
-    AdataId, BareThisOp, ClassName, ClassNum, CollectionType, ConstName, ContCheckOp, FCallArgs,
-    FatalOp, FunctionName, IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterArgs, IterId,
-    Label, Local, LocalRange, MOpMode, MemberKey, MethodName, NumParams, OODeclExistsOp,
-    ObjMethodOp, Opcode, ParamName, PropName, QueryMOp, ReadonlyOp, SetOpOp, SetRangeOp, SilenceOp,
-    SpecialClsRef, StackIndex, SwitchKind, TypeStructResolveOp,
-};
+use hhbc::AdataState;
+use hhbc::AsTypeStructExceptionKind;
+use hhbc::BareThisOp;
+use hhbc::BytesId;
+use hhbc::ClassGetCMode;
+use hhbc::ClassName;
+use hhbc::CollectionType;
+use hhbc::ConstName;
+use hhbc::ContCheckOp;
+use hhbc::FCallArgs;
+use hhbc::FatalOp;
+use hhbc::FloatBits;
+use hhbc::FunctionName;
+use hhbc::IncDecOp;
+use hhbc::InitPropOp;
+use hhbc::IsLogAsDynamicCallOp;
+use hhbc::IsTypeOp;
+use hhbc::IterArgs;
+use hhbc::IterId;
+use hhbc::Label;
+use hhbc::Local;
+use hhbc::LocalRange;
+use hhbc::MOpMode;
+use hhbc::MemberKey;
+use hhbc::MethodName;
+use hhbc::NumParams;
+use hhbc::OODeclExistsOp;
+use hhbc::ObjMethodOp;
+use hhbc::Opcode;
+use hhbc::PropName;
+use hhbc::QueryMOp;
+use hhbc::ReadonlyOp;
+use hhbc::SetOpOp;
+use hhbc::SetRangeOp;
+use hhbc::SpecialClsRef;
+use hhbc::StackIndex;
+use hhbc::StringId;
+use hhbc::SwitchKind;
+use hhbc::TypeStructEnforceKind;
+use hhbc::TypeStructResolveOp;
+use hhbc::VerifyRetKind;
 use hhbc_string_utils::float;
-use print_opcode::{PrintOpcode, PrintOpcodeTypes};
-use std::io::{Error, ErrorKind, Result, Write};
+use print_opcode::PrintOpcode;
+use print_opcode::PrintOpcodeTypes;
+
+use crate::print;
+use crate::write::angle;
 
 #[derive(PrintOpcode)]
 #[print_opcode(override = "SSwitch")]
-pub(crate) struct PrintOpcode<'a, 'b> {
-    pub(crate) opcode: &'b Opcode<'a>,
+pub struct PrintOpcode<'b> {
+    pub(crate) opcode: &'b Opcode,
     pub(crate) dv_labels: &'b HashSet<Label>,
-    pub(crate) local_names: &'b [Str<'a>],
+    pub(crate) local_names: &'b [StringId],
 }
 
-impl<'a, 'b> PrintOpcode<'a, 'b> {
-    pub(crate) fn new(
-        opcode: &'b Opcode<'a>,
+impl<'b> PrintOpcode<'b> {
+    pub fn new(
+        opcode: &'b Opcode,
         dv_labels: &'b HashSet<Label>,
-        local_names: &'b [Str<'a>],
+        local_names: &'b [StringId],
     ) -> Self {
         Self {
             opcode,
@@ -38,7 +78,7 @@ impl<'a, 'b> PrintOpcode<'a, 'b> {
         }
     }
 
-    fn get_opcode(&self) -> &'b Opcode<'a> {
+    fn get_opcode(&self) -> &'b Opcode {
         self.opcode
     }
 
@@ -53,8 +93,13 @@ impl<'a, 'b> PrintOpcode<'a, 'b> {
         w.write_all(b">")
     }
 
-    fn print_fcall_args(&self, w: &mut dyn Write, args: &FCallArgs<'_>) -> Result<()> {
-        print::print_fcall_args(w, args, self.dv_labels)
+    fn print_fcall_args(
+        &self,
+        w: &mut dyn Write,
+        args: &FCallArgs,
+        adata: &AdataState,
+    ) -> Result<()> {
+        print::print_fcall_args(w, args, self.dv_labels, adata)
     }
 
     fn print_label(&self, w: &mut dyn Write, label: &Label) -> Result<()> {
@@ -72,17 +117,17 @@ impl<'a, 'b> PrintOpcode<'a, 'b> {
     }
 
     fn print_iter_args(&self, w: &mut dyn Write, iter_args: &IterArgs) -> Result<()> {
-        print_iter_args(w, iter_args, self.local_names)
+        print_iter_args(w, iter_args)
     }
 
-    fn print_member_key(&self, w: &mut dyn Write, member_key: &MemberKey<'_>) -> Result<()> {
+    fn print_member_key(&self, w: &mut dyn Write, member_key: &MemberKey) -> Result<()> {
         print_member_key(w, member_key, self.local_names)
     }
 
     fn print_s_switch(
         &self,
         w: &mut dyn Write,
-        cases: &[Str<'_>],
+        cases: &[BytesId],
         targets: &[Label],
     ) -> Result<()> {
         if cases.len() != targets.len() {
@@ -105,7 +150,7 @@ impl<'a, 'b> PrintOpcode<'a, 'b> {
 
         w.write_all(b"SSwitch <")?;
         for (case, target) in iter {
-            print_quoted_str(w, case)?;
+            print_quoted_bytes(w, case.as_bytes())?;
             w.write_all(b":")?;
             self.print_label(w, target)?;
             w.write_all(b" ")?;
@@ -125,7 +170,6 @@ macro_rules! print_with_display {
     };
 }
 
-print_with_display!(print_class_num, ClassNum);
 print_with_display!(print_num_params, NumParams);
 print_with_display!(print_stack_index, StackIndex);
 
@@ -138,6 +182,7 @@ macro_rules! print_with_debug {
 }
 
 print_with_debug!(print_bare_this_op, BareThisOp);
+print_with_debug!(print_class_get_c_mode, ClassGetCMode);
 print_with_debug!(print_collection_type, CollectionType);
 print_with_debug!(print_cont_check_op, ContCheckOp);
 print_with_debug!(print_fatal_op, FatalOp);
@@ -152,52 +197,49 @@ print_with_debug!(print_query_m_op, QueryMOp);
 print_with_debug!(print_readonly_op, ReadonlyOp);
 print_with_debug!(print_set_op_op, SetOpOp);
 print_with_debug!(print_set_range_op, SetRangeOp);
-print_with_debug!(print_silence_op, SilenceOp);
 print_with_debug!(print_special_cls_ref, SpecialClsRef);
 print_with_debug!(print_switch_kind, SwitchKind);
 print_with_debug!(print_type_struct_resolve_op, TypeStructResolveOp);
+print_with_debug!(print_verify_ret_kind, VerifyRetKind);
+print_with_debug!(print_type_struct_enforce_kind, TypeStructEnforceKind);
+print_with_debug!(
+    print_as_type_struct_exception_kind,
+    AsTypeStructExceptionKind
+);
 
-fn print_adata_id(w: &mut dyn Write, id: &AdataId<'_>) -> Result<()> {
-    w.write_all(b"@")?;
-    print_str(w, id)
+fn print_class_name(w: &mut dyn Write, id: &ClassName) -> Result<()> {
+    print_quoted_str(w, id.as_str())
 }
 
-fn print_class_name(w: &mut dyn Write, id: &ClassName<'_>) -> Result<()> {
-    print_quoted_str(w, &id.as_ffi_str())
+fn print_const_name(w: &mut dyn Write, id: &ConstName) -> Result<()> {
+    print_quoted_str(w, id.as_str())
 }
 
-fn print_const_name(w: &mut dyn Write, id: &ConstName<'_>) -> Result<()> {
-    print_quoted_str(w, &id.as_ffi_str())
+fn print_float(w: &mut dyn Write, d: FloatBits) -> Result<()> {
+    write!(w, "{}", float::to_string(d.to_f64()))
 }
 
-fn print_double(w: &mut dyn Write, d: f64) -> Result<()> {
-    write!(w, "{}", float::to_string(d))
+fn print_function_name(w: &mut dyn Write, id: &FunctionName) -> Result<()> {
+    print_quoted_str(w, id.as_str())
 }
 
-fn print_function_name(w: &mut dyn Write, id: &FunctionName<'_>) -> Result<()> {
-    print_quoted_str(w, &id.as_ffi_str())
-}
-
-fn print_iter_args(w: &mut dyn Write, iter_args: &IterArgs, local_names: &[Str<'_>]) -> Result<()> {
-    print_iterator_id(w, &iter_args.iter_id)?;
-    if iter_args.key_id.is_valid() {
-        w.write_all(b" K:")?;
-        print_local(w, &iter_args.key_id, local_names)?;
-    } else {
-        w.write_all(b" NK")?;
-    }
-    w.write_all(b" V:")?;
-    print_local(w, &iter_args.val_id, local_names)
+fn print_iter_args(w: &mut dyn Write, iter_args: &IterArgs) -> Result<()> {
+    angle(w, |w| {
+        let flags = hhvm_hhbc_defs_ffi::ffi::iter_args_flags_to_string_ffi(iter_args.flags);
+        write!(w, "{}", flags)
+    })?;
+    w.write_all(b" ")?;
+    print_iterator_id(w, &iter_args.iter_id)
 }
 
 fn print_iterator_id(w: &mut dyn Write, i: &IterId) -> Result<()> {
     write!(w, "{}", i)
 }
 
-fn print_local(w: &mut dyn Write, local: &Local, local_names: &[Str<'_>]) -> Result<()> {
-    match local_names.get(local.idx as usize) {
-        Some(name) => write!(w, "{}", name.unsafe_as_str()),
-        None => write!(w, "_{}", local.idx),
+fn print_local(w: &mut dyn Write, local: &Local, local_names: &[StringId]) -> Result<()> {
+    match local_names.get(local.index()) {
+        Some(name) => write!(w, "{}", name.as_str()),
+        None => write!(w, "_{}", local),
     }
 }
 
@@ -205,7 +247,7 @@ fn print_local_range(w: &mut dyn Write, locrange: &LocalRange) -> Result<()> {
     write!(w, "L:{}+{}", locrange.start, locrange.len)
 }
 
-fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>, local_names: &[Str<'_>]) -> Result<()> {
+fn print_member_key(w: &mut dyn Write, mk: &MemberKey, local_names: &[StringId]) -> Result<()> {
     use MemberKey as M;
     match mk {
         M::EC(si, op) => {
@@ -222,7 +264,7 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>, local_names: &[Str<'_
         }
         M::ET(s, op) => {
             w.write_all(b"ET:")?;
-            print_quoted_str(w, s)?;
+            print_quoted_bytes(w, s.as_bytes())?;
             w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
@@ -258,44 +300,47 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>, local_names: &[Str<'_
     }
 }
 
-fn print_method_name(w: &mut dyn Write, id: &MethodName<'_>) -> Result<()> {
-    print_quoted_str(w, &id.as_ffi_str())
+fn print_method_name(w: &mut dyn Write, id: &MethodName) -> Result<()> {
+    print_quoted_bytes(w, id.as_bytes())
 }
 
-fn print_param_name(w: &mut dyn Write, param_name: &ParamName<'_>) -> Result<()> {
-    match param_name {
-        ParamName::ParamUnnamed(i) => w.write_all(i.to_string().as_bytes()),
-        ParamName::ParamNamed(s) => w.write_all(s),
-    }
+pub(crate) fn print_prop_name(w: &mut dyn Write, id: &PropName) -> Result<()> {
+    print_quoted_str(w, id.as_str())
 }
 
-pub(crate) fn print_prop_name(w: &mut dyn Write, id: &PropName<'_>) -> Result<()> {
-    print_quoted_str(w, &id.as_ffi_str())
+fn print_quoted_bytes_id(w: &mut dyn Write, s: &BytesId) -> Result<()> {
+    print_quoted_bytes(w, s.as_bytes())
 }
 
-fn print_quoted_str(w: &mut dyn Write, s: &ffi::Str<'_>) -> Result<()> {
+fn print_quoted_str(w: &mut dyn Write, s: &str) -> Result<()> {
+    w.write_all(b"\"")?;
+    w.write_all(escaper::escape(s).as_bytes())?;
+    w.write_all(b"\"")
+}
+
+fn print_quoted_bytes(w: &mut dyn Write, s: &[u8]) -> Result<()> {
+    use bstr::ByteSlice as BS;
     w.write_all(b"\"")?;
     w.write_all(&escaper::escape_bstr(s.as_bstr()))?;
     w.write_all(b"\"")
 }
 
-fn print_shape_fields(w: &mut dyn Write, keys: &[ffi::Str<'_>]) -> Result<()> {
+fn print_shape_fields(w: &mut dyn Write, keys: &[BytesId]) -> Result<()> {
     w.write_all(b"<")?;
     for (i, key) in keys.iter().enumerate() {
         if i != 0 {
             w.write_all(b" ")?;
         }
-        print_quoted_str(w, key)?;
+        print_quoted_bytes(w, key.as_bytes())?;
     }
     w.write_all(b">")
 }
 
-fn print_str(w: &mut dyn Write, s: &ffi::Str<'_>) -> Result<()> {
-    use bstr::ByteSlice;
-    w.write_all(s.as_bytes())
+fn print_string_id(w: &mut dyn Write, s: &StringId) -> Result<()> {
+    w.write_all(s.as_str().as_bytes())
 }
 
-impl<'a, 'b> PrintOpcodeTypes for PrintOpcode<'a, 'b> {
+impl<'b> PrintOpcodeTypes for PrintOpcode<'b> {
     type Write = dyn Write + 'b;
     type Error = Error;
 }

@@ -51,17 +51,47 @@ let magic_method_name input =
 
 let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
     env * (locl_fun_params * locl_ty option) option =
-  match get_node (Typing_utils.strip_dynamic env class_) with
+  let (env, ty) = Typing_dynamic_utils.strip_dynamic env class_ in
+  match get_node ty with
   | Tclass ((_, className), _, []) ->
     let ( >>= ) = Option.( >>= ) in
     let ce_type =
-      (Env.get_class env className >>= fun c -> Env.get_member true env c fname)
+      let lookup_def c =
+        Option.first_some
+          (Env.get_method env c fname)
+          (Env.get_method env c "format_wild")
+      in
+      Env.get_class env className |> Decl_entry.to_option >>= lookup_def
       >>= fun { ce_type = (lazy ty); ce_pos = (lazy pos); _ } ->
       match deref ty with
       | (_, Tfun fty) ->
+        (* Ugly hack to remove like-type from return syntactically so that in dynamic mode
+         * we don't simplify it to dynamic.
+         *)
+        let fty =
+          {
+            fty with
+            ft_ret =
+              (match get_node fty.ft_ret with
+              | Tlike ty -> ty
+              | _ -> fty.ft_ret);
+          }
+        in
         let ety_env = empty_expand_env in
+        (* Generate fresh type variables (and assert constraints, if any) for generic parameters on the format method *)
+        let ((env, _ty_err_opt1), explicit_targs) =
+          Typing_phase.localize_targs
+            ~check_type_integrity:true
+            ~is_method:true
+            ~def_pos:pos
+            ~use_pos
+            ~use_name:fname
+            env
+            fty.ft_tparams
+            []
+        in
         let instantiation =
-          Typing_phase.{ use_pos; use_name = fname; explicit_targs = [] }
+          Typing_phase.{ use_pos; use_name = fname; explicit_targs }
         in
         Some
           (Typing_phase.localize_ft
@@ -74,14 +104,14 @@ let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
     in
     begin
       match ce_type with
-      | Some
-          ( (env, ty_err_opt),
-            { ft_params = pars; ft_ret = { et_type = ty; _ }; _ } ) ->
-        Option.iter ty_err_opt ~f:Errors.add_typing_error;
+      | Some ((env, ty_err_opt), { ft_params = pars; ft_ret = ty; _ }) ->
+        Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
         let (env, ty) = Env.expand_type env ty in
         let ty_opt =
-          match get_node (Typing_utils.strip_dynamic env ty) with
-          | Tprim Tstring -> None
+          match get_node ty with
+          | Tclass ((_, id), _, _) when String.equal id SN.Classes.cString ->
+            None
+          | Tdynamic -> None
           | _ -> Some ty
         in
         (env, Some (pars, ty_opt))
@@ -108,11 +138,11 @@ let parse_printf_string env s pos (class_ : locl_ty) : env * locl_fun_params =
     in
     let add_reason =
       List.map ~f:(fun p ->
-          let et_type =
-            p.fp_type.et_type
-            |> map_reason ~f:(fun r -> Reason.Rformat (pos, snippet, r))
+          let fp_type =
+            p.fp_type
+            |> map_reason ~f:(fun r -> Reason.format (pos, snippet, r))
           in
-          { p with fp_type = { p.fp_type with et_type } })
+          { p with fp_type })
     in
     match lookup_magic_type env pos class_ fname with
     | (env, Some (good_args, None)) ->
@@ -122,7 +152,8 @@ let parse_printf_string env s pos (class_ : locl_ty) : env * locl_fun_params =
       let (env, xs) = read_modifier env (i + 1) next i0 in
       (env, add_reason good_args @ xs)
     | (env, None) ->
-      Errors.add_typing_error
+      Typing_error_utils.add_typing_error
+        ~env
         Typing_error.(
           primary
           @@ Primary.Format_string
@@ -132,7 +163,8 @@ let parse_printf_string env s pos (class_ : locl_ty) : env * locl_fun_params =
                  fmt_string = s;
                  class_pos = get_pos class_;
                  fn_name = fname;
-                 class_suggest = Print.full_strip_ns env class_;
+                 class_suggest =
+                   Print.full_strip_ns ~hide_internals:true env class_;
                });
       let (env, xs) = read_text env (i + 1) in
       (env, add_reason xs)
@@ -171,9 +203,9 @@ let rec const_string_of (env : env) (e : Nast.expr) :
   | (_, p, String2 xs) ->
     let (env, xs) = mapM const_string_of env (List.rev xs) in
     (env, List.fold_right ~f:glue xs ~init:(Left p))
-  | (_, _, Binop (Ast_defs.Dot, a, b)) ->
-    let (env, stra) = const_string_of env a in
-    let (env, strb) = const_string_of env b in
+  | (_, _, Binop Aast.{ bop = Ast_defs.Dot; lhs; rhs }) ->
+    let (env, stra) = const_string_of env lhs in
+    let (env, strb) = const_string_of env rhs in
     (env, glue stra strb)
   | (_, p, _) -> (env, Left p)
 
@@ -190,42 +222,35 @@ let rec get_possibly_like_format_string_type_arg t =
   | _ -> get_format_string_type_arg t
 
 (* Specialize a function type using whatever we can tell about the args *)
-let retype_magic_func
-    (env : env)
-    (ft : locl_fun_type)
-    (el : (Ast_defs.param_kind * Nast.expr) list) : env * locl_fun_type =
-  let rec f env param_types (args : (Ast_defs.param_kind * Nast.expr) list) :
+let retype_magic_func (env : env) (ft : locl_fun_type) (el : Nast.argument list)
+    : env * locl_fun_type =
+  let rec f env param_types (args : Nast.expr list) :
       env * locl_fun_params option =
     match (param_types, args) with
-    | ([{ fp_type = { et_type; _ }; _ }], [(_, (_, _, Null))])
-      when is_some (get_possibly_like_format_string_type_arg et_type) ->
+    | ([{ fp_type; _ }], [(_, _, Null)])
+      when is_some (get_possibly_like_format_string_type_arg fp_type) ->
       (env, None)
-    | ([({ fp_type = { et_type; _ }; _ } as fp)], (_, arg) :: _) ->
-      begin
-        match get_possibly_like_format_string_type_arg et_type with
-        | Some type_arg ->
-          (match const_string_of env arg with
-          | (env, Right str) ->
-            let (_, pos, _) = arg in
-            let (env, argl) = parse_printf_string env str pos type_arg in
-            ( env,
-              Some
-                ({
-                   fp with
-                   fp_type =
-                     {
-                       et_type = mk (get_reason et_type, Tprim Tstring);
-                       et_enforced = Unenforced;
-                     };
-                 }
-                 :: argl) )
-          | (env, Left pos) ->
-            Errors.add_typing_error
-              Typing_error.(
-                primary @@ Primary.Expected_literal_format_string pos);
-            (env, None))
-        | None -> (env, None)
-      end
+    | ([({ fp_type; _ } as fp)], arg :: _) -> begin
+      match get_possibly_like_format_string_type_arg fp_type with
+      | Some type_arg ->
+        (match const_string_of env arg with
+        | (env, Right str) ->
+          let (_, pos, _) = arg in
+          let (env, argl) = parse_printf_string env str pos type_arg in
+          ( env,
+            Some
+              ({
+                 fp with
+                 fp_type = Typing_make_type.string (get_reason fp_type);
+               }
+              :: argl) )
+        | (env, Left pos) ->
+          Typing_error_utils.add_typing_error
+            ~env
+            Typing_error.(primary @@ Primary.Expected_literal_format_string pos);
+          (env, None))
+      | None -> (env, None)
+    end
     | (param :: params, _ :: args) ->
       (match f env params args with
       | (env, None) -> (env, None)
@@ -238,13 +263,14 @@ let retype_magic_func
     else
       ft.ft_params
   in
-  match f env non_variadic_param_types el with
+  match
+    f env non_variadic_param_types (List.map ~f:Aast_utils.arg_to_expr el)
+  with
   | (env, None) -> (env, ft)
   | (env, Some xs) ->
     ( env,
       {
         ft with
         ft_params = xs;
-        ft_flags =
-          Typing_defs_flags.(set_bit ft_flags_variadic false ft.ft_flags);
+        ft_flags = Typing_defs_flags.Fun.set_variadic false ft.ft_flags;
       } )

@@ -15,7 +15,7 @@ echo "*** Testing mb_ereg() : error conditions ***\n";
 echo "\n-- Testing mb_ereg() function with more than expected no. of arguments --\n";
 $pattern = b'string_val';
 $string = b'string_val';
-$registers = varray[1, 2];
+$registers = vec[1, 2];
 $extra_arg = 10;
 try { var_dump( mb_ereg($pattern, $string, inout $registers, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 

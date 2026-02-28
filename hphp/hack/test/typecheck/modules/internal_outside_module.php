@@ -1,13 +1,10 @@
 <?hh
 
-<<__Internal>>
-function f(): void {}
+internal function f(): void {}
 
-<<__Internal>>
-class A {
-  <<__Internal>>
-  public function g(): void {}
+internal class A {
+  internal function g(): void {}
+  protected internal function h(): void {}
 }
 
-<<__Internal>>
-type Foobar = int;
+internal type Foobar = int;

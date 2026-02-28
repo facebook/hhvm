@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/configs/configs.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/variable-unserializer.h"
@@ -43,14 +44,12 @@ hphp_fast_string_set Option::PackageExcludeStaticPatterns;
 
 bool Option::CachePHPFile = false;
 
-hphp_fast_string_imap<std::string> Option::AutoloadClassMap;
-hphp_fast_string_imap<std::string> Option::AutoloadFuncMap;
-hphp_fast_string_map<std::string> Option::AutoloadConstMap;
-std::string Option::AutoloadRoot;
+bool Option::ConstFoldFileBC = false;
 
 bool Option::GenerateTextHHBC = false;
 bool Option::GenerateHhasHHBC = false;
 bool Option::GenerateBinaryHHBC = false;
+bool Option::NoOutputHHBC = false;
 
 int Option::ParserThreadCount = 0;
 
@@ -61,13 +60,32 @@ const int Option::kDefaultParserDirGroupSizeLimit = 50000;
 int Option::ParserGroupSize = kDefaultParserGroupSize;
 int Option::ParserDirGroupSizeLimit = kDefaultParserDirGroupSizeLimit;
 bool Option::ParserAsyncCleanup = true;
+bool Option::ParserOptimisticStore = true;
+
+bool Option::ForceEnableSymbolRefs = false;
+bool Option::UseExternWorkerForFullAnalysis = false;
 
 std::string Option::ExternWorkerUseCase;
-bool Option::ExternWorkerForceSubprocess = false;
+std::string Option::ExternWorkerPlatform;
+std::string Option::ExternWorkerFeaturesFile;
+std::string Option::ExternWorkerPath;
 int Option::ExternWorkerTimeoutSecs = 0;
 bool Option::ExternWorkerUseExecCache = true;
 bool Option::ExternWorkerCleanup = true;
+bool Option::ExternWorkerUseRichClient = true;
+bool Option::ExternWorkerUseP2P = false;
+int Option::ExternWorkerCasConnectionCount = 16;
+int Option::ExternWorkerEngineConnectionCount = 6;
+int Option::ExternWorkerExecutionConcurrencyLimit = 6000;
+int Option::ExternWorkerAcConnectionCount = 16;
+bool Option::ExternWorkerVerboseLogging = false;
 std::string Option::ExternWorkerWorkingDir;
+
+int Option::ExternWorkerThrottleRetries = -1;
+int Option::ExternWorkerThrottleBaseWaitMSecs = -1;
+bool Option::ExternWorkerUseSubprocessScheduler = true;
+size_t Option::ExternWorkerMaxSubprocessMemory = 0;
+std::string Option::ExternWorkerZstdDictionaryPath;
 
 ///////////////////////////////////////////////////////////////////////////////
 // load from HDF file
@@ -86,7 +104,9 @@ void Option::LoadRootHdf(const IniSetting::Map& ini,
 
 void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   LoadRootHdf(ini, config, "IncludeRoots", RuntimeOption::IncludeRoots);
-  LoadRootHdf(ini, config, "AutoloadRoots", RuntimeOption::AutoloadRoots);
+
+  // Add this here too to avoid lint errors about unvisited node when RuntimeOption::Load() only loads config["Runtime"].
+  Config::Bind(RuntimeOption::GetMetadata(), ini, config, "Metadata");
 
   Config::Bind(PackageExcludeDirs, ini, config, "PackageExcludeDirs");
   Config::Bind(PackageExcludeFiles, ini, config, "PackageExcludeFiles");
@@ -114,89 +134,25 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
         v.setEvalScalar();
         RuntimeOption::ConstantFunctions[func] = *v.asTypedValue();
         continue;
-      } catch (const Exception& e) {
+      } catch (const Exception&) {
         // fall through and log
       }
     }
     Logger::FError("Invalid ConstantFunction: '{}'\n", str);
   }
 
-  {
-    // Repo
-    Config::Bind(RuntimeOption::RepoDebugInfo,
-                 ini, config, "Repo.DebugInfo",
-                 RuntimeOption::RepoDebugInfo);
-  }
-
-  {
-    // AutoloadMap
-    // not using Bind here because those maps are enormous and cause performance
-    // problems when showing up later
-    AutoloadClassMap = Config::GetIFastMap(ini, config, "AutoloadMap.class");
-    AutoloadFuncMap = Config::GetIFastMap(ini, config, "AutoloadMap.function");
-    AutoloadConstMap = Config::GetFastMap(ini, config, "AutoloadMap.constant");
-    AutoloadRoot = Config::GetString(ini, config, "AutoloadMap.root");
-  }
-
- Config::Bind(RuntimeOption::EvalCheckPropTypeHints, ini, config,
-               "CheckPropTypeHints", RuntimeOption::EvalCheckPropTypeHints);
-
-  Config::Bind(RuntimeOption::EnableHipHopSyntax,
-               ini, config, "EnableHipHopSyntax",
-               RuntimeOption::EnableHipHopSyntax);
-  Config::Bind(RuntimeOption::EvalJitEnableRenameFunction,
-               ini, config, "JitEnableRenameFunction",
-               RuntimeOption::EvalJitEnableRenameFunction);
-  Config::Bind(RuntimeOption::EvalHackArrCompatSerializeNotices,
-               ini, config, "HackArrCompatSerializeNotices",
-               RuntimeOption::EvalHackArrCompatSerializeNotices);
-  Config::Bind(RuntimeOption::EvalForbidDynamicCallsToFunc,
-               ini, config, "ForbidDynamicCallsToFunc",
-               RuntimeOption::EvalForbidDynamicCallsToFunc);
-  Config::Bind(RuntimeOption::EvalForbidDynamicCallsToClsMeth,
-               ini, config, "ForbidDynamicCallsToClsMeth",
-               RuntimeOption::EvalForbidDynamicCallsToClsMeth);
-  Config::Bind(RuntimeOption::EvalForbidDynamicCallsToInstMeth,
-               ini, config, "ForbidDynamicCallsToInstMeth",
-               RuntimeOption::EvalForbidDynamicCallsToInstMeth);
-  Config::Bind(RuntimeOption::EvalForbidDynamicConstructs,
-               ini, config, "ForbidDynamicConstructs",
-               RuntimeOption::EvalForbidDynamicConstructs);
-  Config::Bind(RuntimeOption::EvalForbidDynamicCallsWithAttr,
-               ini, config, "ForbidDynamicCallsWithAttr",
-               RuntimeOption::EvalForbidDynamicCallsWithAttr);
-  Config::Bind(RuntimeOption::EvalLogKnownMethodsAsDynamicCalls,
-               ini, config, "LogKnownMethodsAsDynamicCalls",
-               RuntimeOption::EvalLogKnownMethodsAsDynamicCalls);
-  Config::Bind(RuntimeOption::EvalNoticeOnBuiltinDynamicCalls,
-               ini, config, "NoticeOnBuiltinDynamicCalls",
-               RuntimeOption::EvalNoticeOnBuiltinDynamicCalls);
-  Config::Bind(RuntimeOption::EvalAbortBuildOnVerifyError,
-               ini, config, "AbortBuildOnVerifyError",
-               RuntimeOption::EvalAbortBuildOnVerifyError);
-
-  {
-    // Hack
-    Config::Bind(RuntimeOption::CheckIntOverflow, ini, config,
-                 "Hack.Lang.CheckIntOverflow",
-                 RuntimeOption::CheckIntOverflow);
-    Config::Bind(RuntimeOption::StrictArrayFillKeys, ini, config,
-                 "Hack.Lang.StrictArrayFillKeys",
-                 RuntimeOption::StrictArrayFillKeys);
-  }
-
-  Config::Bind(RuntimeOption::EnableXHP, ini, config, "EnableXHP",
-               RuntimeOption::EnableXHP);
+  Cfg::LoadForCompiler(ini, config);
 
   Config::Bind(ParserThreadCount, ini, config, "ParserThreadCount", 0);
   if (ParserThreadCount <= 0) {
     ParserThreadCount = Process::GetCPUCount();
   }
 
-  Config::Bind(RuntimeOption::EvalGenerateDocComments, ini, config,
-               "GenerateDocComments", RuntimeOption::EvalGenerateDocComments);
-  Config::Bind(RuntimeOption::EvalUseHHBBC, ini, config, "UseHHBBC",
-               RuntimeOption::EvalUseHHBBC);
+  Config::Bind(ForceEnableSymbolRefs, ini, config,
+               "ForceEnableSymbolRefs", false);
+
+  Config::Bind(UseExternWorkerForFullAnalysis, ini, config,
+               "UseExternWorkerForFullAnalysis", false);
 
   Config::Bind(ParserGroupSize, ini, config,
                "ParserGroupSize", kDefaultParserGroupSize);
@@ -207,15 +163,25 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     ParserDirGroupSizeLimit = kDefaultParserDirGroupSizeLimit;
   }
 
+  Config::Bind(ConstFoldFileBC, ini, config,
+               "ConstFoldFileBC", ConstFoldFileBC);
+
   Config::Bind(ParserAsyncCleanup, ini, config,
                "ParserAsyncCleanup", ParserAsyncCleanup);
+  Config::Bind(ParserOptimisticStore, ini, config,
+               "ParserOptimisticStore", ParserOptimisticStore);
 
+  // Use case id for remote extern worker implementation.
+  // If empty, use the builtin Subprocess impl.
   Config::Bind(ExternWorkerUseCase, ini, config, "ExternWorker.UseCase",
                ExternWorkerUseCase);
-  // Kill switch for extern-worker. Disable all implementations except
-  // the builtin one.
-  Config::Bind(ExternWorkerForceSubprocess, ini, config,
-               "ExternWorker.ForceSubprocess", ExternWorkerForceSubprocess);
+  Config::Bind(ExternWorkerPlatform, ini, config, "ExternWorker.Platform",
+               ExternWorkerPlatform);
+  Config::Bind(ExternWorkerFeaturesFile, ini, config,
+               "ExternWorker.FeaturesFile", ExternWorkerFeaturesFile);
+  // If not set or empty, default to current_executable_path()
+  Config::Bind(ExternWorkerPath, ini, config, "ExternWorker.Path",
+               ExternWorkerPath);
   Config::Bind(ExternWorkerTimeoutSecs, ini, config, "ExternWorker.TimeoutSecs",
                ExternWorkerTimeoutSecs);
   Config::Bind(ExternWorkerUseExecCache, ini, config,
@@ -224,6 +190,40 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                ExternWorkerCleanup);
   Config::Bind(ExternWorkerWorkingDir, ini, config, "ExternWorker.WorkingDir",
                ExternWorkerWorkingDir);
+  Config::Bind(ExternWorkerUseRichClient, ini, config,
+               "ExternWorker.UseRichClient", ExternWorkerUseRichClient);
+  Config::Bind(ExternWorkerUseP2P, ini, config, "ExternWorker.UseP2P",
+               ExternWorkerUseP2P);
+  Config::Bind(ExternWorkerCasConnectionCount, ini, config,
+               "ExternWorker.CasConnectionCount",
+               ExternWorkerCasConnectionCount);
+  Config::Bind(ExternWorkerEngineConnectionCount, ini, config,
+               "ExternWorker.EngineConnectionCount",
+               ExternWorkerEngineConnectionCount);
+  Config::Bind(ExternWorkerExecutionConcurrencyLimit, ini, config,
+               "ExternWorker.ExecutionConcurrencyLimit",
+               ExternWorkerExecutionConcurrencyLimit);
+  Config::Bind(ExternWorkerAcConnectionCount, ini, config,
+               "ExternWorker.AcConnectionCount",
+               ExternWorkerAcConnectionCount);
+  Config::Bind(ExternWorkerVerboseLogging, ini, config,
+               "ExternWorker.VerboseLogging",
+               ExternWorkerVerboseLogging);
+  Config::Bind(ExternWorkerThrottleRetries, ini, config,
+               "ExternWorker.ThrottleRetries",
+               ExternWorkerThrottleRetries);
+  Config::Bind(ExternWorkerThrottleBaseWaitMSecs, ini, config,
+               "ExternWorker.ThrottleBaseWaitMSecs",
+               ExternWorkerThrottleBaseWaitMSecs);
+  Config::Bind(ExternWorkerMaxSubprocessMemory, ini, config,
+               "ExternWorker.MaxSubprocessMemory",
+               ExternWorkerMaxSubprocessMemory);
+  Config::Bind(ExternWorkerUseSubprocessScheduler, ini, config,
+               "ExternWorker.UseSubprocessScheduler",
+               ExternWorkerUseSubprocessScheduler);
+  Config::Bind(ExternWorkerZstdDictionaryPath, ini, config,
+               "ExternWorker.ZstdDictionaryPath",
+               ExternWorkerZstdDictionaryPath);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

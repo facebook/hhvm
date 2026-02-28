@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function just_return_it<T>((function(T):void) $f):(function(T):void) { return $f; }

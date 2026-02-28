@@ -25,11 +25,12 @@
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/file-util.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
 
 DummySandbox::DummySandbox(DebuggerProxy *proxy,
                            const std::string &defaultPath,
@@ -58,13 +59,13 @@ struct CLISession {
   CLISession() {
     TRACE(2, "CLISession::CLISession\n");
     char *argv[] = {"", nullptr};
-    execute_command_line_begin(1, argv, 0);
+    execute_command_line_begin(1, argv);
   }
   ~CLISession() {
     TRACE(2, "CLISession::~CLISession\n");
     Debugger::UnregisterSandbox(g_context->getSandboxId());
     DebuggerHook::detach();
-    execute_command_line_end(0, false, nullptr);
+    execute_command_line_end(false, nullptr);
   }
 
   CLISession(const CLISession&) = delete;
@@ -85,11 +86,11 @@ void DummySandbox::run() {
       DSandboxInfo sandbox = m_proxy->getSandbox();
       std::string msg;
       if (sandbox.valid()) {
-        SourceRootInfo sri(sandbox.m_user, sandbox.m_name);
+        SourceRootInfo::WithRoot sri(sandbox.m_user, sandbox.m_name);
         if (sandbox.m_path.empty()) {
-          sandbox.m_path = sri.path();
+          sandbox.m_path = SourceRootInfo::GetCurrentSourceRoot();
         }
-        if (!sri.sandboxOn()) {
+        if (!SourceRootInfo::SandboxOn()) {
           msg = "Invalid sandbox was specified. "
             "PHP files may not be loaded properly.\n";
         } else {
@@ -97,7 +98,8 @@ void DummySandbox::run() {
           forceToDict(server);
           Array arr = server.asArrRef();
           server.unset();
-          php_global_set(s__SERVER, sri.setServerVariables(std::move(arr)));
+          php_global_set(s__SERVER,
+                         SourceRootInfo::SetServerVariables(std::move(arr)));
         }
         Debugger::RegisterSandbox(sandbox);
         g_context->setSandboxId(sandbox.id());
@@ -111,7 +113,7 @@ void DummySandbox::run() {
           bool error; std::string errorMsg;
           bool ret = hphp_invoke(g_context.getNoCheck(), doc, false, null_array,
                                  nullptr, "", "", error, errorMsg, true,
-                                 false, true, RuntimeOption::EvalPreludePath);
+                                 false, true, Cfg::Eval::PreludePath);
           if (!ret || error) {
             msg += "Unable to pre-load " + doc;
             if (!errorMsg.empty()) {
@@ -152,10 +154,10 @@ void DummySandbox::run() {
         }
         m_signum = CmdSignal::SignalNone;
       }
-    } catch (const DebuggerClientExitException& e) {
+    } catch (const DebuggerClientExitException& ) {
       // stopped by the dummy sandbox thread itself
       break;
-    } catch (const DebuggerException& e) {
+    } catch (const DebuggerException& ) {
     }
   }
 }

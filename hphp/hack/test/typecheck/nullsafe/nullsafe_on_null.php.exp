@@ -1,0 +1,2 @@
+WARN: File "nullsafe_on_null.php", line 10, characters 5-14:
+You are using the `?->` operator but this value is always null. It's likely you did not intend this value to be always null. (Warn[12030])

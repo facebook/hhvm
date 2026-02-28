@@ -1,10 +1,10 @@
 <?hh
 
-function reschedule() {
+function reschedule() :mixed{
   return RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
 }
 
-function pretty_backtrace() {
+function pretty_backtrace() :mixed{
   $stack = debug_backtrace();
   array_shift(inout $stack);
   echo "backtrace:\n";
@@ -17,18 +17,18 @@ function pretty_backtrace() {
   }
 }
 
-async function suspends() {
+async function suspends() :Awaitable<mixed>{
   await reschedule();
   pretty_backtrace();
   return 1;
 }
 
-async function eager() {
+async function eager() :Awaitable<mixed>{
   pretty_backtrace();
   return 2;
 }
 
-<<__EntryPoint>> async function main() {
+<<__EntryPoint>> async function main() :Awaitable<mixed>{
 
   /* put each token on its own line and add comments */
   concurrent

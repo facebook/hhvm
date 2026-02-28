@@ -4,12 +4,12 @@
 */
 class temp
 {
-   function __toString() {
+   function __toString() :mixed{
      return "Object";
    }
 }
 
-function check_dirname( $paths ) {
+function check_dirname( $paths ) :mixed{
    $loop_counter = 0;
    $noOfPaths = count($paths);
    for( ; $loop_counter < $noOfPaths; $loop_counter++ ) {
@@ -20,7 +20,7 @@ function check_dirname( $paths ) {
    }
 }
 <<__EntryPoint>> function main(): void {
-$file_path_variations = varray [
+$file_path_variations = vec[
   /* home dir shortcut char */
   "~/home/user/bar",
   "~/home/user/bar/",
@@ -44,9 +44,6 @@ $file_path_variations = varray [
   '0',
   "0",
 
-  /* object */
-  new temp,
-
   /* path as spaces */
   " ",
   ' ',
@@ -54,8 +51,6 @@ $file_path_variations = varray [
   /* empty path */
   "",
   '',
-  NULL,
-  null
 ];
 
 echo "*** Testing possible variations in path ***\n";

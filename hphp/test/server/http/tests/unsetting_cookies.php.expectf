@@ -1,0 +1,21 @@
+Requesting 'test_unsetting_cookies.php'
+string(%d) "bool(true)
+dict(2) {
+  ["Key1"]=>
+  string(6) "Value1"
+  ["Key2"]=>
+  string(6) "Value2"
+}
+dict(2) {
+  ["Key1"]=>
+  string(6) "Value1"
+  ["Key2"]=>
+  string(6) "Value2"
+}
+string(23) "Key1=Value1;Key2=Value2""
+Requesting 'test_unsetting_cookies.php'
+string(%d) "bool(false)
+NULL
+dict(0) {
+}
+string(23) "Key1=Value1;Key2=Value2""

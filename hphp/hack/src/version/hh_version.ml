@@ -20,12 +20,11 @@ let version : string =
   | Some banner -> banner
   | None -> Build_id.build_revision ^ " " ^ Build_id.build_commit_time_string
 
-let version_json =
-  Hh_json.(
-    JSON_Object
-      [
-        ("commit", JSON_String Build_id.build_revision);
-        ("commit_time", int_ Build_id.build_commit_time);
-        ("build_mode", JSON_String Build_id.build_mode);
-        ("api_version", int_ api_version);
-      ])
+let version_json : Yojson.Safe.t =
+  `Assoc
+    [
+      ("commit", `String Build_id.build_revision);
+      ("commit_time", `Int Build_id.build_commit_time);
+      ("build_mode", `String Build_id.build_mode);
+      ("api_version", `Int api_version);
+    ]

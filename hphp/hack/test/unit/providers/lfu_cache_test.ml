@@ -6,6 +6,7 @@
  *
  *)
 
+open Hh_prelude
 open Asserter
 open OUnit2
 
@@ -20,11 +21,21 @@ module Cache_entry = struct
 
   type 'a value = 'a
 
-  let get_size : type a. key:a key -> value:a value -> Lfu_cache.size =
-   fun ~key ~value ->
-    match key with
-    | Int_key _ -> 1
-    | String_key _ -> String.length value
+  let compare (type ta tb) (a : ta key) (b : tb key) : int =
+    match (a, b) with
+    | (Int_key a, Int_key b) -> Int.compare a b
+    | (Int_key _, String_key _) -> -1
+    | (String_key _, Int_key _) -> 1
+    | (String_key a, String_key b) -> String.compare a b
+
+  let hash (type ta) (key : ta key) : int =
+    let hsv = Hash.create () in
+    let hsv =
+      match key with
+      | Int_key i -> Hash.fold_int (Hash.fold_int hsv 1) i
+      | String_key s -> Hash.fold_string (Hash.fold_int hsv 2) s
+    in
+    Hash.get_hash_value hsv
 
   let key_to_log_string : type a. a key -> string =
    fun key ->
@@ -51,7 +62,19 @@ let test_insert _test_ctxt =
   Int_asserter.assert_option_equals
     (Some 2)
     (Cache.find_or_add cache ~key:(Int_key 1) ~default:(fun () -> None))
-    "Key should have been overwritten with value 2"
+    "Key should have been overwritten with value 2";
+  Cache.add cache ~key:(String_key "a") ~value:"aa";
+  let contents =
+    Cache.fold cache ~init:[] ~f:(fun (Cache.Element (key, value)) acc ->
+        match (key, value) with
+        | (Int_key k, v) -> Printf.sprintf "%d->%d" k v :: acc
+        | (String_key k, v) -> Printf.sprintf "%s->%s" k v :: acc)
+  in
+  String_asserter.assert_list_equals
+    ["1->2"; "a->aa"]
+    (List.sort contents ~compare:String.compare)
+    "Key should have these two values";
+  ()
 
 let test_insert_many _test_ctxt =
   let insert_random_entry i cache =
@@ -104,7 +127,7 @@ let test_eviction _test_ctxt =
   ()
 
 let () =
-  "lru_cache_test"
+  "lfu_cache_test"
   >::: [
          "test_insert" >:: test_insert;
          "test_insert_many" >:: test_insert_many;

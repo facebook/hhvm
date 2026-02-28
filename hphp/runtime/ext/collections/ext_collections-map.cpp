@@ -5,8 +5,6 @@
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
@@ -14,10 +12,6 @@
 #include "hphp/runtime/vm/coeffects.h"
 
 namespace HPHP {
-/////////////////////////////////////////////////////////////////////////////
-
-Class* c_Map::s_cls;
-Class* c_ImmMap::s_cls;
 
 /////////////////////////////////////////////////////////////////////////////
 // BaseMap
@@ -357,12 +351,6 @@ c_ImmMap* c_ImmMap::Clone(ObjectData* obj) {
 }
 
 namespace collections {
-/////////////////////////////////////////////////////////////////////////////
-
-const StaticString
-  s_HH_Map("HH\\Map"),
-  s_HH_ImmMap("HH\\ImmMap"),
-  s_MapIterator("MapIterator");
 
 /////////////////////////////////////////////////////////////////////////////
 // MapIterator
@@ -389,17 +377,14 @@ static void HHVM_METHOD(MapIterator, rewind) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-void CollectionsExtension::initMap() {
+void CollectionsExtension::registerNativeMap() {
   HHVM_ME(MapIterator, current);
   HHVM_ME(MapIterator, key);
   HHVM_ME(MapIterator, valid);
   HHVM_ME(MapIterator, next);
   HHVM_ME(MapIterator, rewind);
 
-  Native::registerNativeDataInfo<MapIterator>(
-    s_MapIterator.get(),
-    Native::NDIFlags::NO_SWEEP
-  );
+  Native::registerNativeDataInfo<MapIterator>(Native::NDIFlags::NO_SWEEP);
 
   // BaseMap common
 
@@ -432,27 +417,20 @@ void CollectionsExtension::initMap() {
   HHVM_NAMED_ME(HH\\ImmMap, toMap,       materialize<c_Map>);
 
   // c_Map specific
-  HHVM_NAMED_ME(HH\\Map, add,           &c_Map::php_add);
-  HHVM_NAMED_ME(HH\\Map, addAll,        &c_Map::php_addAll);
-  HHVM_NAMED_ME(HH\\Map, set,           &c_Map::php_set);
-  HHVM_NAMED_ME(HH\\Map, removeKey,     &c_Map::php_removeKey);
-  HHVM_NAMED_ME(HH\\Map, clear,         &c_Map::php_clear);
-  HHVM_NAMED_ME(HH\\Map, reserve,       &c_Map::php_reserve);
+  HHVM_NAMED_ME(HH\\Map, clearNative,     &c_Map::clear);
+  HHVM_NAMED_ME(HH\\Map, setNative,       &c_Map::php_set);
+  HHVM_NAMED_ME(HH\\Map, addNative,       &c_Map::php_add);
+  HHVM_NAMED_ME(HH\\Map, addAllNative,    &c_Map::php_addAll);
+  HHVM_NAMED_ME(HH\\Map, removeKeyNative, &c_Map::php_removeKey);
+  HHVM_NAMED_ME(HH\\Map, reserve,         &c_Map::php_reserve);
 
   HHVM_NAMED_ME(HH\\Map, toImmMap,      &c_Map::getImmutableCopy);
 
-  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_Map);
-  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_ImmMap);
+  Native::registerNativePropHandler<CollectionPropHandler>(c_Map::className());
+  Native::registerNativePropHandler<CollectionPropHandler>(c_ImmMap::className());
 
-  loadSystemlib("collections-map");
-
-  c_Map::s_cls = Class::lookup(s_HH_Map.get());
-  assertx(c_Map::s_cls);
-  finishClass<c_Map>();
-
-  c_ImmMap::s_cls = Class::lookup(s_HH_ImmMap.get());
-  assertx(c_ImmMap::s_cls);
-  finishClass<c_ImmMap>();
+  Native::registerClassExtraDataHandler(c_Map::className(), finish_class<c_Map>);
+  Native::registerClassExtraDataHandler(c_ImmMap::className(), finish_class<c_ImmMap>);
 }
 
 /////////////////////////////////////////////////////////////////////////////

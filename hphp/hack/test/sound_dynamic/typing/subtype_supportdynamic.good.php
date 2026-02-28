@@ -2,7 +2,7 @@
 
 function expectNonNull(nonnull $nn):void { }
 
-function e(supportdynamic $sd): void {
+function e(supportdyn<nonnull> $sd): void {
   expectNonNull($sd);
 }
 
@@ -102,5 +102,5 @@ function foo(int $x):bool {
 }
 function test_function((function(~int):bool) $f): void {
   e($f);
-  e(fun('foo'));
+  e(foo<>);
 }

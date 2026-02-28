@@ -1,0 +1,32 @@
+WARN: File "set_array_get.php", line 4, characters 10-18:
+Array access on type `Set<string>` returns the key (if present) or throws an exception. Consider using the `contains` method to check for membership instead. (Warn[12034])
+WARN: File "set_array_get.php", line 8, characters 10-18:
+Array access on type `ImmSet<string>` returns the key (if present) or throws an exception. Consider using the `contains` method to check for membership instead. (Warn[12034])
+WARN: File "set_array_get.php", line 12, characters 10-18:
+Array access on type `ConstSet<string>` returns the key (if present) or throws an exception. Consider using the `contains` method to check for membership instead. (Warn[12034])
+WARN: File "set_array_get.php", line 16, characters 10-18:
+Array access on type `MutableSet<string>` returns the key (if present) or throws an exception. Consider using the `contains` method to check for membership instead. (Warn[12034])
+ERROR: File "set_array_get.php", line 4, characters 10-18:
+Typing error (Typing[4110])
+  File "set_array_get.php", line 4, characters 10-18:
+  Expected an array that can be indexed
+  File "set_array_get.php", line 3, characters 19-29:
+  But got `Set<string>`
+ERROR: File "set_array_get.php", line 8, characters 10-18:
+Typing error (Typing[4110])
+  File "set_array_get.php", line 8, characters 10-18:
+  Expected an array that can be indexed
+  File "set_array_get.php", line 7, characters 22-35:
+  But got `ImmSet<string>`
+ERROR: File "set_array_get.php", line 12, characters 10-18:
+Typing error (Typing[4110])
+  File "set_array_get.php", line 12, characters 10-18:
+  Expected an array that can be indexed
+  File "set_array_get.php", line 11, characters 24-39:
+  But got `ConstSet<string>`
+ERROR: File "set_array_get.php", line 16, characters 10-18:
+Typing error (Typing[4110])
+  File "set_array_get.php", line 16, characters 10-18:
+  Expected an array that can be indexed
+  File "set_array_get.php", line 15, characters 26-43:
+  But got `MutableSet<string>`

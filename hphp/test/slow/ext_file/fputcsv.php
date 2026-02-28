@@ -2,10 +2,10 @@
 
 
 <<__EntryPoint>>
-function main_fputcsv() {
-$tempfile = tempnam('/tmp', 'vmextfiletest');
+function main_fputcsv() :mixed{
+$tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
-$fields = varray['apple', "\"banana\""];
+$fields = vec['apple', "\"banana\""];
 $f = fopen($tempfile, 'w');
 // #2511892: have to specify all fields due to a bug
 fputcsv($f, $fields, ',', '"');

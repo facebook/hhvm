@@ -4,6 +4,7 @@ foo
   position: line 3, characters 10-12
   span: line 3, character 1 - line 3, character 17
   modifiers: 
+  detail: function()
   params:
 
 bar
@@ -12,6 +13,7 @@ bar
   position: line 5, characters 10-12
   span: line 5, character 1 - line 5, character 17
   modifiers: 
+  detail: function()
   params:
 
 C
@@ -27,6 +29,7 @@ C
     position: line 8, characters 19-21
     span: line 8, character 3 - line 8, character 26
     modifiers: public 
+    detail: function()
     params:
 
   bar
@@ -35,5 +38,6 @@ C
     position: line 10, characters 26-28
     span: line 10, character 3 - line 10, character 33
     modifiers: public static 
+    detail: function()
     params:
 

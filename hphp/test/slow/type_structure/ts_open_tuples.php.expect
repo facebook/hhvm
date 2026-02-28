@@ -1,0 +1,7 @@
+type_structure:
+{"kind":10,"elem_types":[{"kind":1}],"optional_elem_types":[{"kind":4},{"kind":2}]}
+{"kind":10,"elem_types":[{"kind":1}],"variadic_type":{"kind":23}}
+
+Reflection: TypeConstants:
+TV: (HH\int, optional HH\string, optional HH\bool) =>  {"kind":10,"elem_types":[{"kind":1}],"optional_elem_types":[{"kind":4},{"kind":2}]}
+TW: (HH\int, HH\nonnull...) =>  {"kind":10,"elem_types":[{"kind":1}],"variadic_type":{"kind":23}}

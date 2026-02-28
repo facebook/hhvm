@@ -1,0 +1,30 @@
+run
+break test()
+@test(1)
+step
+next
+next
+next
+next
+next
+next
+next
+next
+next
+next
+next
+next
+next
+next
+next
+break clear all
+run
+break flow2.php:10
+break flow2.php:12
+@test(2)
+out
+run
+out
+break clear all
+run
+quit

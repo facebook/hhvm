@@ -61,14 +61,14 @@ Server received: 'world!'
 Initial server address:
 object(HH\Lib\_Private\_OS\sockaddr_un_pathname) (2) {
   ["sun_path"]=>
-  string(%d) "%s/ext_os_sockets.php.tmpdir/sock"
+  string(%d) "%s/sock"
   ["sa_family"]=>
   int(1)
 }
 Server address from getsockname():
 object(HH\Lib\_Private\_OS\sockaddr_un_pathname) (2) {
   ["sun_path"]=>
-  string(%d) "%s/ext_os_sockets.php.tmpdir/sock"
+  string(%d) "%s/sock"
   ["sa_family"]=>
   int(1)
 }
@@ -90,7 +90,7 @@ object(HH\Lib\_Private\_OS\sockaddr_un_unnamed) (1) {
 Server address from getpeername():
 object(HH\Lib\_Private\_OS\sockaddr_un_pathname) (2) {
   ["sun_path"]=>
-  string(%d) "%s/ext_os_sockets.php.tmpdir/sock"
+  string(%d) "%s/sock"
   ["sa_family"]=>
   int(1)
 }

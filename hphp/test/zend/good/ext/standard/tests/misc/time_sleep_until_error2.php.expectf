@@ -1,2 +1,0 @@
-
-Warning: time_sleep_until() expects parameter 1 to be double, string given in %s/time_sleep_until_error2.php on line 2

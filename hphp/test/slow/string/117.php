@@ -2,6 +2,6 @@
 
 
 <<__EntryPoint>>
-function main_117() {
+function main_117() :mixed{
 print '\'\\"';
 }

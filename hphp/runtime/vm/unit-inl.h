@@ -14,15 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_UNIT_INL_H_
-#error "unit-inl.h should only be included by unit.h"
-#endif
+#pragma once
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/unit-util.h"
+
+#include "hphp/util/configs/eval.h"
 
 namespace HPHP {
 
@@ -68,6 +67,11 @@ inline bool Unit::isICE() const {
   return m_ICE;
 }
 
+inline bool Unit::isSoftDeployedRepoOnly() const {
+  assertx(Cfg::Repo::Authoritative);
+  return m_softDeployedRepoOnly;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // File paths.
 
@@ -80,8 +84,8 @@ inline const StringData* Unit::perRequestFilepath() const {
   if (!m_extended) return nullptr;
   auto const u = getExtended();
   if (!u->m_perRequestFilepath.bound()) return nullptr;
-  assertx(!RuntimeOption::RepoAuthoritative);
-  assertx(RuntimeOption::EvalReuseUnitsByHash);
+  assertx(!Cfg::Repo::Authoritative);
+  assertx(Cfg::Eval::ReuseUnitsByHash);
   if (!u->m_perRequestFilepath.isInit()) return nullptr;
   return *u->m_perRequestFilepath;
 }
@@ -103,8 +107,8 @@ inline bool Unit::hasPerRequestFilepath() const {
 inline void Unit::bindPerRequestFilepath(const StringData* p) {
   assertx(p);
   assertx(p->isStatic());
-  assertx(!RuntimeOption::RepoAuthoritative);
-  assertx(RuntimeOption::EvalReuseUnitsByHash);
+  assertx(!Cfg::Repo::Authoritative);
+  assertx(Cfg::Eval::ReuseUnitsByHash);
   assertx(m_extended);
   auto u = getExtended();
   assertx(u->m_perRequestFilepath.bound());
@@ -113,53 +117,72 @@ inline void Unit::bindPerRequestFilepath(const StringData* p) {
 }
 
 inline void Unit::makeFilepathPerRequest() {
-  assertx(!RuntimeOption::RepoAuthoritative);
-  assertx(RuntimeOption::EvalReuseUnitsByHash);
+  assertx(!Cfg::Repo::Authoritative);
+  assertx(Cfg::Eval::ReuseUnitsByHash);
   assertx(m_extended);
   auto u = getExtended();
   assertx(!u->m_perRequestFilepath.bound());
-  u->m_perRequestFilepath = rds::alloc<LowStringPtr>();
+  u->m_perRequestFilepath = rds::alloc<PackedStringPtr>();
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // Unit cache ref-counting
 
 inline void Unit::acquireCacheRefCount() {
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(m_extended);
   ++getExtended()->m_cacheRefCount;
 }
 
 inline bool Unit::releaseCacheRefCount() {
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(m_extended);
   assertx(getExtended()->m_cacheRefCount > 0);
   return !(--getExtended()->m_cacheRefCount);
 }
 
 inline bool Unit::hasCacheRef() const {
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(m_extended);
   return getExtended()->m_cacheRefCount > 0;
+}
+
+inline Unit* Unit::nextCachedByHash() const {
+  assertx(!Cfg::Repo::Authoritative);
+  assertx(m_extended);
+  return getExtended()->m_nextCachedByHash.load(std::memory_order_acquire);
+}
+
+inline void Unit::setNextCachedByHash(Unit* u) {
+  assertx(!Cfg::Repo::Authoritative);
+  assertx(m_extended);
+  assertx(!u || u->sha1() == sha1());
+  return getExtended()->m_nextCachedByHash.store(u, std::memory_order_release);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Idle unit reaping
 
-inline void Unit::setLastTouchRequest(int64_t request) {
-  assertx(!RuntimeOption::RepoAuthoritative);
-  assertx(RuntimeOption::EvalIdleUnitTimeoutSecs > 0);
+inline void
+Unit::setLastTouchRequest(Treadmill::Clock::time_point requestStartTime) {
+  assertx(!Cfg::Repo::Authoritative);
+  assertx(Cfg::Eval::IdleUnitTimeoutSecs > 0);
+  assertx(requestStartTime != Treadmill::kNoStartTime);
   assertx(m_extended);
   auto u = getExtended();
-  auto old = u->m_lastTouchRequest.load();
-  while (old < request) {
-    if (u->m_lastTouchRequest.compare_exchange_weak(old, request)) return;
+  auto old = u->m_lastTouchRequestStartTime.load();
+  while (old < requestStartTime) {
+    if (u->m_lastTouchRequestStartTime
+      .compare_exchange_weak(old, requestStartTime)
+    ) {
+      return;
+    }
   }
 }
 
 inline void Unit::setLastTouchTime(TouchClock::time_point now) {
-  assertx(!RuntimeOption::RepoAuthoritative);
-  assertx(RuntimeOption::EvalIdleUnitTimeoutSecs > 0);
+  assertx(!Cfg::Repo::Authoritative);
+  assertx(Cfg::Eval::IdleUnitTimeoutSecs > 0);
   assertx(m_extended);
   auto u = getExtended();
   auto old = u->m_lastTouchTime.load();
@@ -168,34 +191,41 @@ inline void Unit::setLastTouchTime(TouchClock::time_point now) {
   }
 }
 
-inline std::pair<int64_t, Unit::TouchClock::time_point>
+inline std::pair<Treadmill::Clock::time_point, Unit::TouchClock::time_point>
 Unit::getLastTouch() const {
-  assertx(!RuntimeOption::RepoAuthoritative);
-  assertx(RuntimeOption::EvalIdleUnitTimeoutSecs > 0);
+  assertx(!Cfg::Repo::Authoritative);
+  assertx(Cfg::Eval::IdleUnitTimeoutSecs > 0);
   assertx(m_extended);
   auto const u = getExtended();
   return std::make_pair(
-    u->m_lastTouchRequest.load(),
+    u->m_lastTouchRequestStartTime.load(),
     u->m_lastTouchTime.load()
   );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Litstrs and NamedEntitys.
+// Litstrs, NamedTypes, and NamedFuncs.
 
 inline size_t Unit::numLitstrs() const {
   return m_litstrs.size();
 }
 
-inline const NamedEntity* Unit::lookupNamedEntityId(Id id) const {
-  return lookupNamedEntityPairId(id).second;
+inline const NamedType* Unit::lookupNamedTypeId(Id id) const {
+  return lookupNamedTypePairId(id).second;
 }
 
-inline NamedEntityPair Unit::lookupNamedEntityPairId(Id id) const {
+inline NamedTypePair Unit::lookupNamedTypePairId(Id id) const {
   auto const name = lookupLitstrId(id);
   assertx(name);
   assertx(name->data()[0] != '\\');
-  return { name, NamedEntity::get(name) };
+  return { name, NamedType::getOrCreate(name) };
+}
+
+inline NamedFuncPair Unit::lookupNamedFuncPairId(Id id) const {
+  auto const name = lookupLitstrId(id);
+  assertx(name);
+  assertx(name->data()[0] != '\\');
+  return { name, NamedFunc::getOrCreate(name) };
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -208,10 +238,21 @@ inline size_t Unit::numArrays() const {
 ///////////////////////////////////////////////////////////////////////////////
 // PreClasses
 
-inline PreClass* Unit::lookupPreClassId(Id id) const {
-  assertx(id < Id(m_preClasses.size()));
-  return m_preClasses[id].get();
+inline PreClass* Unit::lookupPreClass(const StringData* name) const {
+  auto const it = m_nameToPreClass.find(name);
+  return it == m_nameToPreClass.end() ? nullptr : it->second.get();
 }
+
+inline folly::Range<PreClassPtr*> Unit::preclasses() {
+  return { m_preClasses.data(), m_preClasses.size() };
+}
+
+inline folly::Range<const PreClassPtr*> Unit::preclasses() const {
+  return { m_preClasses.data(), m_preClasses.size() };
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Metadata
 
 inline const Constant* Unit::lookupConstantId(Id id) const {
   assertx(id < Id(m_constants.size()));
@@ -226,14 +267,6 @@ inline const Module* Unit::lookupModuleId(Id id) const {
 inline const PreTypeAlias* Unit::lookupTypeAliasId(Id id) const {
   assertx(id < Id(m_typeAliases.size()));
   return &m_typeAliases[id];
-}
-
-inline folly::Range<PreClassPtr*> Unit::preclasses() {
-  return { m_preClasses.data(), m_preClasses.size() };
-}
-
-inline folly::Range<const PreClassPtr*> Unit::preclasses() const {
-  return { m_preClasses.data(), m_preClasses.size() };
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -318,7 +351,7 @@ inline const StringData* Unit::moduleName() const {
 // Merge.
 
 inline bool Unit::isEmpty() const {
-  return m_mergeState.load(std::memory_order_relaxed) == MergeState::Merged;
+  return m_mergeState.load(std::memory_order_acquire) == MergeState::Merged;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

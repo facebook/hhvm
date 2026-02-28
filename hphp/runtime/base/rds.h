@@ -16,7 +16,6 @@
 #pragma once
 
 #include "hphp/runtime/base/rds-symbol.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/util/alloc.h"
@@ -38,7 +37,7 @@
 #ifndef incl_HPHP_UTIL_ALLOC_H_
 #error "please include alloc.h before determining RDS implementation!"
 #endif
-#if USE_JEMALLOC_EXTENT_HOOKS
+#ifdef USE_LOWPTR
 #define RDS_FIXED_PERSISTENT_BASE 1
 #endif
 #endif
@@ -68,7 +67,7 @@ namespace HPHP::rds {
  * within [1G, 4G) offset from the persistent
  * base (0 if RDS_FIXED_PERSISTENT_BASE is       +-------------+ <-- tl_base
  * defined as 1, which is safe if address from   |  Header     |
- * lower_malloc() is below 4G).                  +-------------+
+ * low_malloc() is below 4G).                    +-------------+
  *                                               |             |
  * The normal region is perhaps analogous to     |  Normal     |
  * .bss, while the persistent region is          |    region   |
@@ -160,7 +159,7 @@ template <typename F> void forEachLocalAlloc(F);
 extern __thread void* tl_base;
 
 /*
- * An async singal safe way to determine if the current thread has a fully
+ * An async signal safe way to determine if the current thread has a fully
  * initialized RDS (including the initialization of rds::local).
  */
 bool isFullyInitialized();
@@ -372,7 +371,7 @@ private:
 
   void checkSanity();
 
-  Handle raw() const { return m_handle.load(std::memory_order_relaxed); }
+  Handle raw() const { return m_handle.load(std::memory_order_acquire); }
   std::atomic<Handle> m_handle;
 };
 
@@ -431,6 +430,13 @@ bool testAndSetBit(size_t bit);
  * Table mapping handles to their symbols.  This excludes Profiling symbols.
  */
 Optional<Symbol> reverseLink(Handle handle);
+
+/*
+ * Table mapping handles to their symbols.
+ * Only returns a symbol if the handle is exact, unlike reverseLink(),
+ * which returns true if the handle is within range of a symbol.
+ */
+Optional<Symbol> reverseLinkExact(Handle handle);
 
 //////////////////////////////////////////////////////////////////////
 

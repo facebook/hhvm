@@ -9,11 +9,11 @@ function main(): void {
 
   $clsmeth = Bar::foo<>;
 
-  $arr1 = varray[];
-  $arr2 = varray[99];
-  $arr3 = varray['foo'];
-  $arr4 = varray['foo', 'bar'];
-  $arr5 = varray['foo', 42];
+  $arr1 = vec[];
+  $arr2 = vec[99];
+  $arr3 = vec['foo'];
+  $arr4 = vec['foo', 'bar'];
+  $arr5 = vec['foo', 42];
 
   echo $clsmeth == $arr1 ? "clsmeth == arry1\n" : "clsmeth != arry1\n";
   echo $clsmeth == $arr2 ? "clsmeth == arry2\n" : "clsmeth != arry2\n";
@@ -22,10 +22,10 @@ function main(): void {
   echo $clsmeth == $arr5 ? "clsmeth == arry5\n" : "clsmeth != arry5\n";
   echo "\n";
 
-  $arr2 = varray[99, 'foo'];
-  $arr3 = varray['Bar'];
-  $arr4 = varray['Bar', 'foo'];
-  $arr5 = varray['Bar', 0];
+  $arr2 = vec[99, 'foo'];
+  $arr3 = vec['Bar'];
+  $arr4 = vec['Bar', 'foo'];
+  $arr5 = vec['Bar', 0];
 
   $try = ($a, $b, $num) ==> {
     try {

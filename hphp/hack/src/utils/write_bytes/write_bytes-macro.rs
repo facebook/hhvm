@@ -1,14 +1,20 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-use proc_macro2::{Literal, Span, TokenStream};
+use std::borrow::Cow;
+use std::collections::HashMap;
+use std::collections::HashSet;
+
+use proc_macro2::Literal;
+use proc_macro2::Span;
+use proc_macro2::TokenStream;
 use quote::quote;
-use std::{
-    borrow::Cow,
-    collections::{HashMap, HashSet},
-};
-use syn::{
-    parse::Parser, punctuated::Punctuated, spanned::Spanned, Error, Expr, LitByteStr, Token,
-};
+use syn::Error;
+use syn::Expr;
+use syn::LitByteStr;
+use syn::Token;
+use syn::parse::Parser;
+use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
 
 type Result<T> = std::result::Result<T, Error>;
 
@@ -243,6 +249,7 @@ struct FmtSpec {
     name: FmtSpecName,
 }
 
+#[allow(clippy::todo)]
 fn read_fmt_spec<I: Iterator<Item = u8>>(
     it: &mut std::iter::Peekable<I>,
     span: Span,
@@ -293,7 +300,8 @@ fn read_fmt_spec<I: Iterator<Item = u8>>(
 
 #[cfg(test)]
 mod test_helpers {
-    use proc_macro2::{TokenStream, TokenTree};
+    use proc_macro2::TokenStream;
+    use proc_macro2::TokenTree;
     use syn::Error;
 
     pub(crate) fn mismatch(
@@ -369,9 +377,11 @@ mod test_helpers {
 // #[rustfmt::skip] // skip rustfmt because it tends to add unwanted tokens to our quotes.
 #[allow(dead_code)]
 mod test {
-    use super::*;
-    use crate::test_helpers::{assert_error, assert_pat_eq};
     use quote::quote;
+
+    use super::*;
+    use crate::test_helpers::assert_error;
+    use crate::test_helpers::assert_pat_eq;
 
     #[test]
     fn test_basic() {

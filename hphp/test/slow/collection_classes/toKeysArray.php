@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_to_keys_array() {
+function main_to_keys_array() :mixed{
 $x = Vector {'a'};
 var_dump($x->toKeysArray());
 var_dump($x->lazy()->toKeysArray());

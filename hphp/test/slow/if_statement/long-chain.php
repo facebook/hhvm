@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_long_chain() {
+function main_long_chain() :mixed{
 $i = 42;
 if( $i == 0 ){ echo $i; }
 else if( $i == 1 ){ echo $i; }

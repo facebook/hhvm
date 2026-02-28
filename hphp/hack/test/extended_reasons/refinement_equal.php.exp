@@ -1,0 +1,150 @@
+error: Typing[4110] Invalid return type
+
+File refinement_equal.php, line 12, character 10 - line 12, character 11:
+
+ 10 |     $z = $c;
+ 11 |   }
+ 12 |   return »$z«;
+ 13 | }
+
+Expected ~C
+
+File refinement_equal.php, line 6, character 36 - line 6, character 36:
+
+ 4 | class C extends A {}
+ 5 | 
+ 6 | function inter_equal(?A $a, C $c): »C« {
+ 7 |   if($a == null) {
+ 8 |     $z = $a;
+ 9 |   } else {
+10 |     $z = $c;
+11 |   }
+
+But got ?C
+
+File refinement_equal.php, line 6, character 22 - line 6, character 23:
+
+ 4 | class C extends A {}
+ 5 | 
+ 6 | function inter_equal(»?A« $a, C $c): C {
+ 7 |   if($a == null) {
+ 8 |     $z = $a;
+ 9 |   } else {
+10 |     $z = $c;
+11 |   }
+
+Here's why:
+
+
+  Step 1 of 1                                 (here is where the error occurred) 
+
+I started by checking this subtype relationship.
+
+The subtype comes from this hint
+
+File refinement_equal.php, line 6, character 22 - line 6, character 23:
+
+ 4 | class C extends A {}
+ 5 | 
+ 6 | function inter_equal(»?A« $a, C $c): C {
+ 7 |   if($a == null) {
+ 8 |     $z = $a;
+ 9 |   } else {
+10 |     $z = $c;
+11 |   }
+
+and flows into this expression
+
+File refinement_equal.php, line 6, character 25 - line 6, character 26:
+
+ 4 | class C extends A {}
+ 5 | 
+ 6 | function inter_equal(?A »$a«, C $c): C {
+ 7 |   if($a == null) {
+ 8 |     $z = $a;
+ 9 |   } else {
+10 |     $z = $c;
+11 |   }
+
+as the parameter hint
+
+which itself flows into this expression
+
+File refinement_equal.php, line 7, character 6 - line 7, character 7:
+
+ 4 | class C extends A {}
+ 5 | 
+ 6 | function inter_equal(?A $a, C $c): C {
+ 7 |   if(»$a« == null) {
+ 8 |     $z = $a;
+ 9 |   } else {
+10 |     $z = $c;
+11 |   }
+
+as the type of the local variable
+
+which itself flows into this expression
+
+File refinement_equal.php, line 8, character 10 - line 8, character 11:
+
+ 4 | class C extends A {}
+ 5 | 
+ 6 | function inter_equal(?A $a, C $c): C {
+ 7 |   if($a == null) {
+ 8 |     $z = »$a«;
+ 9 |   } else {
+10 |     $z = $c;
+11 |   }
+
+as the type of the local variable
+
+which itself flows into this expression
+
+File refinement_equal.php, line 8, character 5 - line 8, character 6:
+
+ 4 | class C extends A {}
+ 5 | 
+ 6 | function inter_equal(?A $a, C $c): C {
+ 7 |   if($a == null) {
+ 8 |     »$z« = $a;
+ 9 |   } else {
+10 |     $z = $c;
+11 |   }
+
+via an assignment
+
+which itself flows into this expression
+
+File refinement_equal.php, line 12, character 10 - line 12, character 11:
+
+ 10 |     $z = $c;
+ 11 |   }
+ 12 |   return »$z«;
+ 13 | }
+
+as the type of the local variable
+
+which itself flows into this expression
+
+File refinement_equal.php, line 12, character 3 - line 12, character 12:
+
+ 10 |     $z = $c;
+ 11 |   }
+ 12 |   »return $z;«
+ 13 | }
+
+because it is used in a return position
+
+The supertype comes from this declaration
+
+File refinement_equal.php, line 6, character 36 - line 6, character 36:
+
+ 4 | class C extends A {}
+ 5 | 
+ 6 | function inter_equal(?A $a, C $c): »C« {
+ 7 |   if($a == null) {
+ 8 |     $z = $a;
+ 9 |   } else {
+10 |     $z = $c;
+11 |   }
+

@@ -1,0 +1,31 @@
+=== ReflectionClass::getTypeConstant('T') ===
+string(38) "TypeConstant [ const type T = HH\int]
+"
+=== ReflectionClass::getTypeConstant('X') ===
+string(38) "TypeConstant [ abstract const type X]
+"
+=== ReflectionClass::hasTypeConstant('TypeAbsI') ===
+bool(true)
+=== ReflectionClass::hasTypeConstant('TYPE') ===
+bool(false)
+
+=== <C::TypeI>::getDeclaringClass() ===
+string(1) "I"
+=== <C::TypeI>::getName() ===
+string(5) "TypeI"
+=== <C::TypeI>::getAssignedTypeText() ===
+string(4) "C::T"
+=== <C::TypeI>::isAbstract() ===
+bool(false)
+
+=== <C::X>::getDeclaringClass() ===
+string(1) "C"
+=== <C::X>::getName() ===
+string(1) "X"
+=== <C::X>::getAssignedTypeText() ===
+NULL
+=== <C::X>::isAbstract() ===
+bool(true)
+
+=== ReflectionTypeConstant(C, x) ===
+string(33) "Type Constant C::x does not exist"

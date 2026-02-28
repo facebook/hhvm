@@ -18,7 +18,6 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/perf-warning.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tracing.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -37,18 +36,17 @@
 
 #include "hphp/util/arch.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/hhir.h"
 #include "hphp/util/trace.h"
 
 #include <folly/Format.h>
 #include <folly/Range.h>
 
-#include <sstream>
-
 namespace HPHP::jit::irlower {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 namespace {
 
@@ -84,7 +82,7 @@ void cgInst(IRLS& env, const IRInstruction* inst){
     if (auto const next = inst->next()) {
       v << jmp{label(env, next)};
     } else {
-      v << trap{TRAP_REASON}; // or end?
+      v << trap{TRAP_REASON, Fixup::none()}; // or end?
     }
   }
 }
@@ -218,7 +216,7 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit,
 
 Vcost computeIRUnitCost(const IRUnit& unit) {
   auto vunit = lowerUnit(unit, CodeKind::Trace, false /* regAlloc */);
-  if (RuntimeOption::EvalHHIRInliningUseLayoutBlocks) {
+  if (Cfg::HHIR::InliningUseLayoutBlocks) {
     layoutBlocks(*vunit);
   }
   return computeVunitCost(*vunit);

@@ -72,7 +72,7 @@ struct ArrayUtil final {
   // modifying input, although names of these functions sound like mutating.
 
   /**
-   * Retuns an array with all string keys lowercased [or uppercased].
+   * Returns an array with all string keys lowercased [or uppercased].
    */
   static Variant ChangeKeyCase(const Array& input, bool lower);
 

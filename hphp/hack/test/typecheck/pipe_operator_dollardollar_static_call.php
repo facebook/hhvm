@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Foo {
   public static function fooMeth(): void {}

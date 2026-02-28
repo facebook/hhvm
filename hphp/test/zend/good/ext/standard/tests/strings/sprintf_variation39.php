@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : hexa formats with boolean values ***\n";
 
 // array of boolean values 
-$boolean_values = varray[
+$boolean_values = vec[
   true,
   false,
   TRUE,
@@ -15,7 +15,7 @@ $boolean_values = varray[
 ];
 
 // array of hexa formats
-$hexa_formats = varray[  
+$hexa_formats = vec[  
   "%x", "%xx", "%lx", 
   "%Lx", " %x", "%x ",
   "\t%x", "\n%x", "%4x",

@@ -1,0 +1,25 @@
+Packed free function credential
+  Format valid: yes
+Unpacked free function:
+  Class: (null)
+  Function: free_function
+
+Packed static method credential
+  Format valid: yes
+Unpacked static method:
+  Class: TestClass
+  Function: static_method
+
+Packed instance method credential
+  Format valid: yes
+Unpacked instance method:
+  Class: TestClass
+  Function: instance_method
+
+Verification:
+  Free function class matches: yes
+  Free function name matches: yes
+  Static method class matches: yes
+  Static method name matches: yes
+  Instance method class matches: yes
+  Instance method name matches: yes

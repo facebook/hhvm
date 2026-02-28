@@ -1,7 +1,7 @@
 <?hh
 
 function matches_results($original, $compare)
-{
+:mixed{
     // get rid of $original keys that aren't in result
     $order = array_intersect_key($original, $compare);
 
@@ -16,7 +16,7 @@ function main_entry(): void {
   $m = new Memcached();
   $m->addServer('localhost', '11211');
 
-  $data = darray[
+  $data = dict[
       'foo' => 'foo-data',
       'bar' => 'bar-data',
       '2' => '2-data',

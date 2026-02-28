@@ -1,13 +1,13 @@
 <?hh
 
-function show_params($params) {
+function show_params($params) :mixed{
   echo 'parameters => array(' . count($params) . ") {\n";
   foreach ($params as $p) {
     echo "  name => {$p->getName()}\n";
   }
   echo "}\n";
 }
-function show($rf) {
+function show($rf) :mixed{
   var_dump($rf->getName());
   var_dump($rf->isUserDefined());
   var_dump($rf->getStartLine());
@@ -43,11 +43,11 @@ function entrypoint_1352(): void {
 
   echo "\ninvoking g\n";
   $rg->invoke('hello');
-  $rg->invokeArgs(varray['goodbye']);
+  $rg->invokeArgs(vec['goodbye']);
 
   echo "\ninvoking add\n";
   $radd->invoke(1, 2);
-  $radd->invokeArgs(varray[5000000000, 5000000000]);
+  $radd->invokeArgs(vec[5000000000, 5000000000]);
 
   echo "\nshowing f\n";
   show($rf);

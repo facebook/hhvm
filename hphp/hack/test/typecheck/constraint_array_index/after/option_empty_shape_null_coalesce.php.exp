@@ -1,0 +1,4 @@
+ERROR: File "option_empty_shape_null_coalesce.php", line 3, characters 10-21:
+You are accessing a field known to not exist (Typing[4321])
+  File "option_empty_shape_null_coalesce.php", line 2, characters 13-19:
+  The field `a` is not defined in this shape

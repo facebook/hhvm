@@ -26,13 +26,20 @@ type inherited = {
   ih_sprops: (element * decl_ty option) SMap.t;
   ih_methods: (element * fun_elt option) SMap.t;
   ih_smethods: (element * fun_elt option) SMap.t;
+  ih_support_dynamic_type: bool;
 }
 
 (** Builds the [inherited] type by fetching any ancestor from the heap.
     The [cache] parameter is a map of heap entries we might already have at hand
     which acts as a cache for the shared heap. *)
 val make :
-  Decl_env.env ->
   Shallow_decl_defs.shallow_class ->
   cache:Decl_store.class_entries SMap.t ->
   inherited
+
+(** [find_overridden_method cls ~get_method] finds in the parents and
+  used traits of [cls] a method overridden by [cls]. *)
+val find_overridden_method :
+  Shallow_decl_defs.shallow_class ->
+  get_method:(decl_ty -> class_elt option) ->
+  class_elt option

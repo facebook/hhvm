@@ -1,0 +1,17 @@
+*** Testing is_infinite() : usage variations ***
+
+-- Iteration 1 --
+bool(false)
+
+-- Iteration 2 --
+bool(false)
+
+-- Iteration 3 --
+bool(false)
+
+-- Iteration 4 --
+bool(false)
+
+-- Iteration 5 --
+bool(false)
+===Done===

@@ -1,0 +1,8 @@
+P::TFoo: int(2)
+P::TBar: int(2)
+P::TFoo: int(2)
+P::TBar: int(2)
+C::TFoo: int(2)
+C::TBar: int(1)
+C::TFoo: int(2)
+C::TBar: int(1)

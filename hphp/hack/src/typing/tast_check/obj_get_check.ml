@@ -18,12 +18,16 @@ let handler =
     method! at_expr env =
       function
       | (_, _, Obj_get (_, (_, p, This), _, _)) ->
-        Errors.add_typing_error
+        let Equal = Tast_env.eq_typing_env in
+        Typing_error_utils.add_typing_error
+          ~env
           Typing_error.(
             primary
             @@ Primary.Nonsense_member_selection { pos = p; kind = "$this" })
       | (_, _, Obj_get (_, (_, p, Lplaceholder _), _, _)) ->
-        Errors.add_typing_error
+        let Equal = Tast_env.eq_typing_env in
+        Typing_error_utils.add_typing_error
+          ~env
           Typing_error.(
             primary
             @@ Primary.Nonsense_member_selection { pos = p; kind = "$_" })
@@ -31,15 +35,18 @@ let handler =
         when Tast_env.is_sub_type_for_union
                env
                ty
-               (MakeType.dynamic Reason.none)
-             || Tast_env.is_sub_type_for_union
-                  env
-                  ty
-                  (mk (Reason.none, Typing_defs.make_tany ()))
-             || Tast_env.is_sub_type_for_union env ty (MakeType.err Reason.none)
-        ->
+               (MakeType.dynamic Reason.none) ->
+        (* TODO akenn: do we need to detect error tyvar too? *)
         ()
-      | (_, _, Obj_get (_, (_, p, Lvar _), _, _)) ->
-        Errors.add_naming_error @@ Naming_error.Lvar_in_obj_get p
+      | (_, _, Obj_get (_, (_, pos, Lvar (lvar_pos, lvar_lid)), _, _)) ->
+        let lvar_name = Local_id.get_name lvar_lid in
+        let custom_err_config =
+          let tcopt = Tast_env.get_tcopt env in
+          TypecheckerOptions.custom_error_config tcopt
+        in
+        Diagnostics.add_diagnostic
+          (Naming_error_utils.to_user_diagnostic
+             (Naming_error.Lvar_in_obj_get { pos; lvar_pos; lvar_name })
+             custom_err_config)
       | _ -> ()
   end

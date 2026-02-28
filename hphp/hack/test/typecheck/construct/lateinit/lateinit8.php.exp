@@ -1,4 +1,4 @@
-File "lateinit8.php--file3.php", line 3, characters 23-23:
+ERROR: File "lateinit8.php--file3.php", line 3, characters 23-23:
 Some members in class `D` are incompatible with those declared in type `C` (Typing[4282])
   File "lateinit8.php--file1.php", line 4, characters 10-12:
   Redeclared properties must be consistently declared `__LateInit`

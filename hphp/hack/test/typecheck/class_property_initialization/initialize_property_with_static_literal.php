@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 class Bar {
   const string THE_CONST = "bar const";

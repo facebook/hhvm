@@ -18,7 +18,7 @@ vec(3) {
     ["class"]=>
     string(1) "X"
     ["type"]=>
-    string(2) "::"
+    string(2) "->"
   }
   dict(1) {
     ["function"]=>

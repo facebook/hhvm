@@ -1,0 +1,29 @@
+{
+  "pools": {
+    "A": { "servers": [ "localhost:12345" ] },
+    "B": { "servers": [ "localhost:12346" ] }
+  },
+  "named_handles": [
+    {
+      "type": "PoolRoute",
+      "name": "route:A",
+      "pool": "A"
+    },
+    {
+      "type": "PoolRoute",
+      "name": "route:B",
+      "pool": "B"
+    },
+    {
+      "type": "AllSyncRoute",
+      "name": "route:C",
+      "children": "NullRoute"
+    },
+    {
+      "type": "AllSyncRoute",
+      "name": "route:all",
+      "children": [ "route:A", "route:B", "route:C" ]
+    }
+  ],
+  "route": "route:all"
+}

@@ -1,0 +1,6 @@
+*** Testing strip_tags() : usage variations ***
+-- Iteration 1 --
+string(0) ""
+-- Iteration 2 --
+string(0) ""
+===DONE===

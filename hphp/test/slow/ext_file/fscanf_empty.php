@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_fscanf_empty() {
+function main_fscanf_empty() :mixed{
 $tempfile = tempnam(sys_get_temp_dir(), 'vmextfiletest');
 
 touch($tempfile);

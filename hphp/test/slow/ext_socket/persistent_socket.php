@@ -1,7 +1,7 @@
 <?hh
 
 
-function read_all_data( $conn, $bytes ) {
+function read_all_data( $conn, $bytes ) :mixed{
   $all_data = '';
   $data = '';
 
@@ -15,7 +15,7 @@ function read_all_data( $conn, $bytes ) {
   return $bytes == 0 ? $all_data : false;
 }
 
-function test_server($server) {
+function test_server($server) :mixed{
   // The server only accepts once, but the client will call
   // stream_socket_client multiple times with the persistent flag.
   $peername = null;
@@ -38,7 +38,7 @@ function test_server($server) {
   fclose($server);
 }
 
-function test_client($scheme, $port) {
+function test_client($scheme, $port) :mixed{
   $clientcontext = null;
   if ($scheme != "tcp") {
     $clientcontext = stream_context_create();
@@ -51,7 +51,7 @@ function test_client($scheme, $port) {
   do_request($scheme, $port, $clientcontext);
 }
 
-function do_request($scheme, $port, $context) {
+function do_request($scheme, $port, $context) :mixed{
   $errno = null;
   $errstr = null;
   $client = stream_socket_client(
@@ -84,10 +84,10 @@ function do_request($scheme, $port, $context) {
 
 
 <<__EntryPoint>>
-function main_persistent_socket() {
-$pemfile = tempnam('/tmp', 'sslservertest');
+function main_persistent_socket() :mixed{
+$pemfile = tempnam(sys_get_temp_dir(), 'sslservertest');
 
-$certdata = darray['countryName' => 'US',
+$certdata = dict['countryName' => 'US',
                   'stateOrProvinceName' => 'California',
                   'localityName' => 'Menlo Park',
                   'organizationName' => 'Test Corp',
@@ -118,10 +118,10 @@ stream_context_set_option($context, 'ssl', 'passphrase', $pem_passphrase);
 stream_context_set_option($context, 'ssl', 'allow_self_signed', true);
 stream_context_set_option($context, 'ssl', 'verify_peer', false);
 
-$schemes = varray["tcp", "tls", "ssl"];
-$contexts = varray[null, $context, $context];
-$servers = varray[];
-$ports = varray[];
+$schemes = vec["tcp", "tls", "ssl"];
+$contexts = vec[null, $context, $context];
+$servers = vec[];
+$ports = vec[];
 foreach ($schemes as $i => $scheme) {
   $server = null;
   $port = 0;
@@ -129,7 +129,7 @@ foreach ($schemes as $i => $scheme) {
     $port = rand(50000, 65535);
     $errno = null;
     $errstr = null;
-    $server = @stream_socket_server(
+    $server = stream_socket_server(
       "$scheme://127.0.0.1:$port",
       inout $errno,
       inout $errstr,

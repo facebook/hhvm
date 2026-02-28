@@ -1,11 +1,11 @@
 <?hh
 
-function foo () {}
-async function async_foo() {}
+function foo () :mixed{}
+async function async_foo() :Awaitable<mixed>{}
 
 class Bar {
-  public function foo () {}
-  public async function asyncFoo() {}
+  public function foo () :mixed{}
+  public async function asyncFoo() :Awaitable<mixed>{}
 }
 <<__EntryPoint>> function main(): void {
 var_dump((new ReflectionFunction('foo'))->isAsync());

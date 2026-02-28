@@ -1,5 +1,5 @@
-<?hh // strict
+<?hh
 
 function test(): void {
-  fun('unbound_func');
+  unbound_func<>;
 }

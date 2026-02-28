@@ -1,26 +1,50 @@
 =============== positive tests =====================
 
-Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 133
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/inst_meth/forbid-notice.php on line 133
 
-Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s on line 135
+Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/inst_meth/forbid-notice.php on line 135
 
-Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 152
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/inst_meth/forbid-notice.php on line 143
 
-Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s on line 154
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/inst_meth/forbid-notice.php on line 145
 
-Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 163
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/inst_meth/forbid-notice.php on line 57
 
-Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 174
+Warning: Method A::static_func not marked dynamic in %s/dynamic-calls/inst_meth/forbid-notice.php on line 58
 
-Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 184
+Warning: Method B::static_func not marked dynamic in %s/dynamic-calls/inst_meth/forbid-notice.php on line 59
 
-Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 192
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/inst_meth/forbid-notice.php on line 67
 
-Notice: 'A::cmp' called dynamically but is not __DynamicallyCallable in %s on line 202
+Warning: Method A::static_async_func not marked dynamic in %s/dynamic-calls/inst_meth/forbid-notice.php on line 68
+
+Warning: Method B::static_async_func not marked dynamic in %s/dynamic-calls/inst_meth/forbid-notice.php on line 69
+
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/inst_meth/forbid-notice.php on line 152
+
+Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/inst_meth/forbid-notice.php on line 154
+
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/inst_meth/forbid-notice.php on line 163
+
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/inst_meth/forbid-notice.php on line 174
+
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/inst_meth/forbid-notice.php on line 184
+
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/inst_meth/forbid-notice.php on line 192
+
+Notice: 'A::cmp' called dynamically but is not __DynamicallyCallable in %s/dynamic-calls/inst_meth/forbid-notice.php on line 202
 =============== negative tests =====================
 =============== positive tests (exceptions) ========
 Exception: 'A::func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::async_func' called dynamically but is not __DynamicallyCallable
+Exception: Method A::static_func not marked dynamic
+Exception: Method A::static_async_func not marked dynamic
+Exception: Method A::static_func not marked dynamic
+Exception: Method A::static_func not marked dynamic
+Exception: Method B::static_func not marked dynamic
+Exception: Method A::static_async_func not marked dynamic
+Exception: Method A::static_async_func not marked dynamic
+Exception: Method B::static_async_func not marked dynamic
 Exception: 'A::func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::async_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A::func' called dynamically but is not __DynamicallyCallable

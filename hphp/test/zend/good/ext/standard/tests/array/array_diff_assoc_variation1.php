@@ -12,14 +12,14 @@
 // get a class
 class classA
 {
-  public function __toString() {
+  public function __toString() :mixed{
     return "Class A object";
   }
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_assoc() : usage variations ***\n";
 
-$array = varray[1, 2, 3];
+$array = vec[1, 2, 3];
 
 
 // heredoc string
@@ -31,7 +31,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 //array of unexpected values to be passed to $arr1 argument
-$inputs = varray[
+$inputs = vec[
 
        // int data
 /*1*/  0,

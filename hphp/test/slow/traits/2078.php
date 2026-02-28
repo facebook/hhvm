@@ -1,7 +1,7 @@
 <?hh
 
 trait T {
-  public static function m() {
+  public static function m() :mixed{
     echo "original\n";
   }
 }
@@ -15,7 +15,7 @@ class B {
 }
 
 <<__EntryPoint>>
-function main_2078() {
+function main_2078() :mixed{
   A::m();
   fb_intercept2("A::m", function($_1, $_2, inout $_3) {
     echo "new\n";

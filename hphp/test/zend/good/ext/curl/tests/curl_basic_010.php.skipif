@@ -1,8 +1,8 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-if (!extension_loaded("curl")) die("skip");
+if (!extension_loaded("curl")) exit("skip");
 $addr = "www.".uniqid().".".uniqid();
 if (gethostbyname($addr) != $addr) {
-    die("skip catch all dns");
+    exit("skip catch all dns");
 }
 }

@@ -3,7 +3,7 @@
 class MyObject
 {
     function fail()
-    {
+:mixed    {
         throw new Exception();
     }
 

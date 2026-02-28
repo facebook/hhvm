@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_1464() {
+function main_1464() :mixed{
 $i = 1;
 if ($i == 1) {
   include '1464-1.inc';

@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  public static function dyn_test(inout $a) {
+  public static function dyn_test(inout $a) :mixed{
     $s = "gs";
     $a = $s;
     return $s;
@@ -11,7 +11,7 @@ class A {
 <<__EntryPoint>> function main(): void {
 $f = 'dyn_test';
 $d = null;
-$e = A::$f(inout $d);
+$e = HH\dynamic_class_meth(A::class,$f)(inout $d);
 var_dump($d);
 var_dump($e);
 }

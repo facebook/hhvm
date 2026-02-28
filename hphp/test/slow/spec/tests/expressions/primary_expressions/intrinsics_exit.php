@@ -1,12 +1,12 @@
 <?hh
 
 function cleanup1()
-{
+:mixed{
     echo "Inside " . __METHOD__ . "\n";
 }
 
 function cleanup2()
-{
+:mixed{
     echo "Inside " . __METHOD__ . "\n";
 }
 <<__EntryPoint>>

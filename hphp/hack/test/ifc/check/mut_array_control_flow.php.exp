@@ -1,9 +1,0 @@
-=== IFC analysis results for mut_array_control_flow.php
-File "mut_array_control_flow.php", line 33, characters 3-12:
-Data with policy `I` appears in context `J`. (Typing[4379])
-  File "mut_array_control_flow.php", line 7, characters 16-17:
-  This may be the data source with policy `I`
-  File "mut_array_control_flow.php", line 9, characters 16-17:
-  This may be the data sink with policy `J`
-  File "mut_array_control_flow.php", line 29, characters 3-21:
-  Another program point contributing to the illegal flow

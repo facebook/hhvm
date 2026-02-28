@@ -1,6 +1,0 @@
-File "tfun.php", line 5, characters 10-11:
-Invalid return type (Typing[4110])
-File "tfun.php", line 4, characters 40-60:
-Expected `(function(): string)`
-File "tfun.php", line 4, characters 12-33:
-But got `dynamic`

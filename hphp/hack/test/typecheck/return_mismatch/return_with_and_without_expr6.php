@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function test(int $x0): mixed {
   return  (int $i) ==> {

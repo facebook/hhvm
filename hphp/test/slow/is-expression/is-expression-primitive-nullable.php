@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function is_bool_(mixed $x): void {
   if ($x is ?bool) {
@@ -50,7 +50,7 @@ function is_keyset_(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_primitive_nullable() {
+function main_is_expression_primitive_nullable() :mixed{
 is_bool_(null);
 is_bool_(true);
 

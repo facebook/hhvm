@@ -1,6 +1,6 @@
 <?hh
 
-function preg_replace_callback_main() {
+function preg_replace_callback_main() :mixed{
   $count = -1;
   var_dump(preg_replace_callback(
     '/(a)/',
@@ -15,6 +15,6 @@ function preg_replace_callback_main() {
 
 
 <<__EntryPoint>>
-function main_preg_replace_callback() {
+function main_preg_replace_callback() :mixed{
 preg_replace_callback_main();
 }

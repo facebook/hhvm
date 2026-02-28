@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Cov<+Tc> {}
 class A {}

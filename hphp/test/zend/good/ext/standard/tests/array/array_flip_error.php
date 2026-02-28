@@ -12,7 +12,7 @@ try { var_dump( array_flip() ); } catch (Exception $e) { echo "\n".'Warning: '.$
 
 //one more than the expected number of arguments
 echo "-- Testing array_flip() function with more than expected no. of arguments --\n";
-$input = darray[1 => 'one', 2 => 'two'];
+$input = dict[1 => 'one', 2 => 'two'];
 $extra_arg = 10;
 try { var_dump( array_flip($input, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 

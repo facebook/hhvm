@@ -16,10 +16,13 @@
 
 #pragma once
 
+#include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 
+#include "hphp/runtime/ext/facts/path-and-hash.h"
 #include "hphp/util/sha1.h"
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -34,6 +37,8 @@ struct Unit;
 struct String;
 struct StringData;
 struct RepoOptions;
+struct RepoUnitInfo;
+struct AutoloadMap;
 
 namespace Native {
 struct FuncTable;
@@ -44,7 +49,7 @@ struct FuncTable;
 /*
  * Try to get a Unit* for a php file, given a path and directory.  The actual
  * path to try to find the file at is located using these arguments,
- * resolveVmInclude, and possibly StatCache::realpath calls.
+ * resolveVmInclude, and possibly realpath calls.
  *
  * In RepoAuthoritative mode, this will only find Units that were compiled into
  * the repo ahead of time.  Otherwise, this function may invoke the compiler to
@@ -66,63 +71,38 @@ struct FuncTable;
  * May return nullptr if the Unit can't be loaded, and may throw exceptions or
  * fatal errors.
  */
-Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
-                 const Native::FuncTable&, bool alreadyRealpath,
-                 bool forPrefetch = false);
+Unit* lookupUnit(const StringData* path, const char* currentDir,
+                 bool* initial_opt, const Extension* extension,
+                 bool alreadyRealpath, bool forPrefetch = false,
+                 bool forAutoload = false);
+
+Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
+                 const char* currentDir, bool* initial_opt,
+                 const Extension* extension, bool alreadyRealpath,
+                 bool forPrefetch = false, bool forAutoload = false);
 
 /*
  * As above, but for system units. Only appropriate in
  * RepoAuthoritative mode, as we do not cache system units otherwise.
  */
-Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
+Unit* lookupSyslibUnit(StringData* path);
 
 /*
  * Mangle a file's sha1sum with runtime options that affect the Unit output.
  * The parser and this module need to agree on how this is done.
  */
 
-#define UNITCACHEFLAGS()                        \
-  R(EnableClassLevelWhereClauses)               \
-  R(EvalGenerateDocComments)                    \
-  R(EnableXHP)                                  \
-  R(EvalEnableCallBuiltin)                      \
-  R(EvalHackArrCompatSerializeNotices)          \
-  R(EvalHackCompilerVerboseErrors)              \
-  R(EvalJitEnableRenameFunction)                \
-  R(EvalLoadFilepathFromUnitCache)              \
-  R(EvalForbidDynamicCallsToFunc)               \
-  R(EvalForbidDynamicCallsToClsMeth)            \
-  R(EvalForbidDynamicCallsToInstMeth)           \
-  R(EvalForbidDynamicConstructs)                \
-  R(EvalForbidDynamicCallsWithAttr)             \
-  R(EvalLogKnownMethodsAsDynamicCalls)          \
-  R(EvalNoticeOnBuiltinDynamicCalls)            \
-  R(EvalAssemblerFoldDefaultValues)             \
-  R(RepoDebugInfo)                              \
-  R(CheckIntOverflow)                           \
-  R(EvalEnableImplicitContext)                  \
-  R(EvalEmitClsMethPointers)                    \
-  R(EvalIsVecNotices)                           \
-  R(EvalAllowHhas)                              \
-  R(EvalEnforceGenericsUB)                      \
-  R(EvalEmitMethCallerFuncPointers)             \
-  R(EvalAssemblerMaxScalarSize)                 \
-  R(EvalEmitClassPointers)                      \
-  R(EvalFoldLazyClassKeys)                      \
-  R(EvalEnableAbstractContextConstants)         \
-  R(EvalTraitConstantInterfaceBehavior)         \
-  R(EvalUnitCacheBreaker)                       \
-  R(EvalDiamondTraitMethods)                    \
-  R(EvalClassPassesClassname)                   \
-  R(PHP7_NoHexNumerics)                         \
-  R(PHP7_Builtins)                              \
-  R(PHP7_Substr)                                \
-  R(EvalEnableDecl)                             \
-  /**/
-
-std::string mangleUnitSha1(const std::string& fileSha1,
+std::string mangleUnitSha1(const folly::StringPiece fileSha1,
                            const folly::StringPiece fileName,
                            const RepoOptionsFlags&);
+
+Optional<SHA1> getHashForFile(const std::string& path,
+                              const std::filesystem::path& root);
+
+Optional<std::string> getHashFromEden(const char* path,
+                                      Stream::Wrapper* wrapper);
+
+Optional<std::string> getDigestFromEden(const char* path, Stream::Wrapper* wrapper);
 
 /*
  * Return the number of php files that are currently loaded in this process.
@@ -139,13 +119,6 @@ size_t numLoadedUnits();
 std::vector<Unit*> loadedUnitsRepoAuth();
 
 /*
- * Return the current entires in the non-repo Unit cache or the
- * per-hash Unit cache. Used for debugging.
- */
-std::vector<std::pair<const StringData*, Unit*>> nonRepoUnitCacheUnits();
-std::vector<std::pair<SHA1, Unit*>> nonRepoUnitHashCacheUnits();
-
-/*
  * Resolve an include path, for the supplied path and directory, using the same
  * rules as PHP's fopen() or include.  May return a null String if the path
  * would not be includable.  File stat information is returned in `s'.
@@ -159,7 +132,6 @@ std::vector<std::pair<SHA1, Unit*>> nonRepoUnitHashCacheUnits();
 String resolveVmInclude(const StringData* path,
                         const char* currentDir,
                         struct stat* s,  // out
-                        const Native::FuncTable&,
                         bool allow_dir = false);
 
 /*
@@ -220,6 +192,25 @@ void prefetchUnit(StringData* path,
                   const Unit* loadingUnit);
 
 /*
+ * As an optimization requests may specify a list of changed files via
+ * unitCacheSyncRepo() to be marked as dirty. When this is done these files
+ * will be reloaded in requests that set unitCacheSetSync().
+ *
+ * Requests should use unitCacheSetSync() to indicate that files loaded via
+ * the autoloader can be trusted without resolving their paths or checking for
+ * modifications via stat so long as their dirty bits are not set.
+ *
+ * The unitCacheClearSync() must be called to clear the thread local trust bit
+ * set in the unit cache.
+ */
+void unitCacheSetSync();
+void unitCacheClearSync();
+void unitCacheSyncRepo(AutoloadMap* map,
+                       std::filesystem::path& root,
+                       std::vector<Facts::PathAndOptionalHash>& changed,
+                       std::vector<std::filesystem::path>& deleted);
+
+/*
  * Block until all outstanding Unit prefetch attempts finish. Note
  * that if a new attempt is queued while we are blocked here, we will
  * wait for that to finish as well. This means this can block
@@ -253,6 +244,7 @@ struct LazyUnitContentsLoader {
   LazyUnitContentsLoader(const char* path,
                          Stream::Wrapper* wrapper,
                          const RepoOptionsFlags& options,
+                         std::filesystem::path repoRoot,
                          size_t fileLength,
                          bool forceEager);
 
@@ -261,7 +253,8 @@ struct LazyUnitContentsLoader {
   // for the lifetime of the loader.
   LazyUnitContentsLoader(SHA1 sha,
                          folly::StringPiece contents,
-                         const RepoOptionsFlags& options);
+                         const RepoOptionsFlags& options,
+                         std::filesystem::path repoRoot);
 
   LazyUnitContentsLoader(const LazyUnitContentsLoader&) = delete;
   LazyUnitContentsLoader(LazyUnitContentsLoader&&) = delete;
@@ -271,6 +264,8 @@ struct LazyUnitContentsLoader {
   const SHA1& sha1() const { return m_hash; }
   const RepoOptionsFlags& options() const { return m_options; }
   size_t fileLength() const { return m_file_length; }
+
+  const std::filesystem::path& repoRoot() const { return m_repo; }
 
   // Did we actually perform the load?
   bool didLoad() const { return m_loaded; }
@@ -297,8 +292,6 @@ struct LazyUnitContentsLoader {
 private:
   void load();
 
-  Optional<std::string> getHashFromEden() const;
-
   const char* m_path;
   Stream::Wrapper* m_wrapper;
   const RepoOptionsFlags& m_options;
@@ -306,6 +299,8 @@ private:
   SHA1 m_hash;
   SHA1 m_file_hash;
   size_t m_file_length;
+
+  std::filesystem::path m_repo;
 
   // Points to either m_contents (if loaded from file), or some
   // external string (if provided in ctor).

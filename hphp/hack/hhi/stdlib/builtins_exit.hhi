@@ -1,4 +1,4 @@
-<?hh   /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -8,8 +8,6 @@
  *
  */
 
-// exit and die terminate the request
+// exit terminates the request
 <<__PHPStdLib>>
-function exit($exit_code_or_message = 0): noreturn;
-<<__PHPStdLib>>
-function die($exit_code_or_message = 0): noreturn;
+function exit(HH\FIXME\MISSING_PARAM_TYPE $exit_code_or_message = 0): noreturn;

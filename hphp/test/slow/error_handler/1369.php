@@ -1,6 +1,6 @@
 <?hh
 
-function user_exception_handler($e) {
+function user_exception_handler($e) :mixed{
   ob_end_clean();
   var_dump(error_get_last());
   echo 'Goodbye';

@@ -28,12 +28,8 @@
 #include <utility>
 #include <vector>
 
-#ifndef _MSC_VER
 #include <dwarf.h>
 #include <libdwarf.h>
-#else
-#include "hphp/util/eh-frame-msvc.h"
-#endif
 
 namespace HPHP {
 

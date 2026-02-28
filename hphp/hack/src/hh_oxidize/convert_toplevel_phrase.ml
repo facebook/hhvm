@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Core
 open Asttypes
 open Parsetree
 open Utils
@@ -44,15 +44,23 @@ let module_blacklist =
     "aast";
     "aast_defs_visitors_ancestors";
     "ast_defs_visitors_ancestors";
+    "base::export";
+    "core";
     "core_kernel";
     "common";
     "hh_core";
+    "hh_json";
+    "hh_json_helpers::adhoc_json_helpers";
     "hh_prelude";
     "naming_special_names";
     "pp_type";
+    "ppx_yojson_conv_lib::yojson_conv::primitives";
     "reordered_argument_collections";
+    "sexplib::std";
     "string_utils";
     "utils";
+    "pos::set";
+    "truthiness_collector::internal";
   ]
 
 (* HACK: These submodules are defined inline in another module. We don't convert
@@ -75,9 +83,9 @@ let enum_modules =
     ("error_codes", "NastCheck");
     ("error_codes", "Typing");
     ("error_codes", "Init");
-    (* An optional error set that runs only for arg --enable-global-write-check
-       or --enable-global-write-check-function. *)
-    ("error_codes", "GlobalWriteCheck");
+    ("error_codes", "Warning");
+    (* An optional error set that runs only for arg --enable-global-access-check. *)
+    ("error_codes", "GlobalAccessCheck");
   ]
 
 let is_manually_converted_nested_module mod_name =
@@ -109,14 +117,19 @@ let string_of_module_desc = function
   | Pmod_unpack _ -> "Pmod_unpack"
   | Pmod_extension _ -> "Pmod_extension"
   | Pmod_ident _ -> "Pmod_ident"
+  | Pmod_apply_unit _ -> "Pmod_apply_unit"
 
 let structure_item (env : Env.t) (si : structure_item) : Env.t =
   match si.pstr_desc with
-  (* A type declaration. The list type_decls will contain multiple items in the
-     event of `type ... and`. *)
-  | Pstr_type (_, type_decls) ->
-    List.iter type_decls ~f:Convert_type_decl.type_declaration;
+  (* A type declaration. The [type_decls] list will contain items in the case of
+     mutual recursion, i.e., `type ... and`. *)
+  | Pstr_type (_, type_decl :: type_decls) ->
+    Convert_type_decl.type_declaration type_decl;
+    List.iter
+      type_decls
+      ~f:(Convert_type_decl.type_declaration ~mutual_rec:true);
     env
+  | Pstr_type (_, []) -> failwith "unexpected parse tree: empty Pstr_type"
   (* Convert `open Foo` to `use crate::foo::*;` *)
   | Pstr_open { popen_expr; _ } ->
     let id =

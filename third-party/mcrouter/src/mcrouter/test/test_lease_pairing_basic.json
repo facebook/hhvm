@@ -1,0 +1,16 @@
+{
+  "pools": {
+    "A": {
+      "servers": [
+        "localhost:11130",
+        "localhost:11131"
+      ]
+    }
+  },
+  "route": {
+    "type": "FailoverRoute",
+    "name": "01",
+    "enable_lease_pairing": true,
+    "children": "Pool|A"
+  }
+}

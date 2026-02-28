@@ -1,0 +1,11 @@
+f [fromPackages] abstract.php
+f [fromPackages] basic-soft.php
+f [fromPackages] basic.php
+f [fromPackages] interface.php
+f [fromPackages] noactivedeployement.php
+f [fromPackages] soft.php
+f [fromPackages] soft_sampled.php
+f [fromPackages] soft_unsampled.php
+string(9) "in A::bar"
+string(4) "in b"
+string(7) "in bMem"

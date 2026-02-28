@@ -1,0 +1,24 @@
+ERROR: File "polymorphic_function_hint_tconst.php", line 6, characters 33-33:
+A type constant cannot use type parameters (NastCheck[3027])
+  File "polymorphic_function_hint_tconst.php", line 6, characters 30-30:
+  `T` was declared as a type parameter here
+ERROR: File "polymorphic_function_hint_tconst.php", line 6, characters 37-37:
+A type constant cannot use type parameters (NastCheck[3027])
+  File "polymorphic_function_hint_tconst.php", line 6, characters 30-30:
+  `T` was declared as a type parameter here
+ERROR: File "polymorphic_function_hint_tconst.php", line 7, characters 43-43:
+A type constant cannot use type parameters (NastCheck[3027])
+  File "polymorphic_function_hint_tconst.php", line 7, characters 40-40:
+  `T` was declared as a type parameter here
+ERROR: File "polymorphic_function_hint_tconst.php", line 7, characters 47-47:
+A type constant cannot use type parameters (NastCheck[3027])
+  File "polymorphic_function_hint_tconst.php", line 7, characters 40-40:
+  `T` was declared as a type parameter here
+ERROR: File "polymorphic_function_hint_tconst.php", line 8, characters 46-46:
+A type constant cannot use type parameters (NastCheck[3027])
+  File "polymorphic_function_hint_tconst.php", line 8, characters 43-43:
+  `T` was declared as a type parameter here
+ERROR: File "polymorphic_function_hint_tconst.php", line 8, characters 50-50:
+A type constant cannot use type parameters (NastCheck[3027])
+  File "polymorphic_function_hint_tconst.php", line 8, characters 43-43:
+  `T` was declared as a type parameter here

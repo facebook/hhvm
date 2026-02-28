@@ -23,7 +23,7 @@ namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -117,6 +117,13 @@ ArgGroup& ArgGroup::ssa(int i, bool allowFP) {
       push_arg(ArgDesc{s, loc}, s->type());
     }
   }
+  return *this;
+}
+
+ArgGroup& ArgGroup::fp(int i) {
+  auto const s = m_inst->src(i);
+  auto const loc = m_locs[s];
+  push_SIMDarg(ArgDesc{s, loc}, s->type());
   return *this;
 }
 

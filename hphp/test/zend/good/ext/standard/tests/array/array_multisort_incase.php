@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_multisort() : case-insensitive\n";
 
-$a = varray[
+$a = vec[
     'Second',
     'First.1',
     'First.2',
@@ -17,7 +17,7 @@ $a = varray[
     'Third',
 ];
 
-$b = varray[
+$b = vec[
     '2 a',
     '1 bb 1',
     '1 bB 2',

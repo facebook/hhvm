@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function serde($x) {
+function rpc_serde($x) :mixed{
   $p = new DummyProtocol();
   thrift_protocol_write_binary($p, 'blah', 1, $x, 20, true);
   echo "===================== binary deserializing ==================\n";
@@ -10,7 +10,7 @@ function serde($x) {
 
   if (!($x is TestStruct3)) {
     $p = new DummyProtocol();
-    thrift_protocol_write_compact($p, 'blah', 1, $x, 20, true);
+    thrift_protocol_write_compact2($p, 'blah', 1, $x, 20, true);
     $p->getTransport()->buff[1] = pack('C', 0x42);
     echo "===================== compact deserializing ==================\n";
     thrift_protocol_read_compact($p, get_class($x));
@@ -19,14 +19,14 @@ function serde($x) {
 }
 
 <<__EntryPoint>>
-function test() {
+function test() :mixed{
   require 'thrift-defs.inc';
 
-  serde(@new TestStruct1());
-  serde(@new TestStruct2());
-  serde(@new TestStruct4());
-  serde(@new TestStruct5());
-  serde(@new TestStruct6());
-  serde(@new TestStruct7());
-  serde(@new TestStruct3());
+  rpc_serde(new TestStruct1());
+  rpc_serde(new TestStruct2());
+  rpc_serde(new TestStruct4());
+  rpc_serde(new TestStruct5());
+  rpc_serde(new TestStruct6());
+  rpc_serde(new TestStruct7());
+  rpc_serde(new TestStruct3());
 }

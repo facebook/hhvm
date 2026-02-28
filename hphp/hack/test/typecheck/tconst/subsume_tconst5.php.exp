@@ -1,4 +1,4 @@
-File "subsume_tconst5.php", line 9, characters 23-24:
+ERROR: File "subsume_tconst5.php", line 9, characters 23-24:
 Cannot re-declare this type constant as abstract (Typing[4142])
-File "subsume_tconst5.php", line 5, characters 14-15:
-Previously defined here
+  File "subsume_tconst5.php", line 5, characters 14-15:
+  Previously defined here

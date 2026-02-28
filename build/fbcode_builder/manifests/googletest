@@ -1,0 +1,30 @@
+[manifest]
+name = googletest
+
+[download]
+url = https://github.com/google/googletest/archive/refs/tags/v1.17.0.tar.gz
+sha256 = 65fab701d9829d38cb77c14acdc431d2108bfdbf8979e40eb8ae567edf10b27c
+
+[build]
+builder = cmake
+subdir = googletest-1.17.0
+
+[cmake.defines]
+# Everything else defaults to the shared runtime, so tell gtest that
+# it should not use its choice of the static runtime
+gtest_force_shared_crt=ON
+
+[cmake.defines.os=windows]
+BUILD_SHARED_LIBS=ON
+
+[homebrew]
+googletest
+
+# packaged googletest is too old
+[debs.not(all(distro=ubuntu,any(distro_vers="18.04",distro_vers="20.04",distro_vers="22.04")))]
+libgtest-dev
+libgmock-dev
+
+[rpms.distro=fedora]
+gmock-devel
+gtest-devel

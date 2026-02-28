@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 interface A {}
 class B {

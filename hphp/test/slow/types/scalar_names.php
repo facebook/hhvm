@@ -21,28 +21,28 @@ class myarraykey {
 class mynum {
 }
 
-function test_hh_string(<<__Soft>> HH\string $foo) { var_dump($foo); }
-function test_hh_int(<<__Soft>> HH\int $foo) { var_dump($foo); }
-function test_hh_float(<<__Soft>> HH\float $foo) { var_dump($foo); }
-function test_hh_bool(<<__Soft>> HH\bool $foo) { var_dump($foo); }
-function test_hh_resource(<<__Soft>> HH\resource $foo) { var_dump($foo); }
-function test_hh_arraykey(<<__Soft>> HH\arraykey $foo) { var_dump($foo); }
-function test_hh_num(<<__Soft>> HH\num $foo) { var_dump($foo); }
+function test_hh_string(<<__Soft>> HH\string $foo) :mixed{ var_dump($foo); }
+function test_hh_int(<<__Soft>> HH\int $foo) :mixed{ var_dump($foo); }
+function test_hh_float(<<__Soft>> HH\float $foo) :mixed{ var_dump($foo); }
+function test_hh_bool(<<__Soft>> HH\bool $foo) :mixed{ var_dump($foo); }
+function test_hh_resource(<<__Soft>> HH\resource $foo) :mixed{ var_dump($foo); }
+function test_hh_arraykey(<<__Soft>> HH\arraykey $foo) :mixed{ var_dump($foo); }
+function test_hh_num(<<__Soft>> HH\num $foo) :mixed{ var_dump($foo); }
 
-function test_string(<<__Soft>> string $foo) { var_dump($foo); }
-function test_int(<<__Soft>> int $foo) { var_dump($foo); }
-function test_float(<<__Soft>> float $foo) { var_dump($foo); }
-function test_bool(<<__Soft>> bool $foo) { var_dump($foo); }
-function test_resource(<<__Soft>> resource $foo) { var_dump($foo); }
-function test_arraykey(<<__Soft>> arraykey $foo) { var_dump($foo); }
-function test_num(<<__Soft>> num $foo) { var_dump($foo); }
+function test_string(<<__Soft>> string $foo) :mixed{ var_dump($foo); }
+function test_int(<<__Soft>> int $foo) :mixed{ var_dump($foo); }
+function test_float(<<__Soft>> float $foo) :mixed{ var_dump($foo); }
+function test_bool(<<__Soft>> bool $foo) :mixed{ var_dump($foo); }
+function test_resource(<<__Soft>> resource $foo) :mixed{ var_dump($foo); }
+function test_arraykey(<<__Soft>> arraykey $foo) :mixed{ var_dump($foo); }
+function test_num(<<__Soft>> num $foo) :mixed{ var_dump($foo); }
 
 
 // It's important that we're in a "<?hh" file and that HH syntax
 // is not enabled, otherwise this test would fatal at parse time
 
 <<__EntryPoint>>
-function main_scalar_names() {
+function main_scalar_names() :mixed{
 set_error_handler(
   function(
     HH\int $errno,

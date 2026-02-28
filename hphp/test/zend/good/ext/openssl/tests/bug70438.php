@@ -8,10 +8,10 @@ $ekeys = null;
 $iv = null;
 $decrypted = null;
 
-openssl_seal($data, inout $sealed, inout $ekeys, varray[$pub_key, $pub_key], $cipher, inout $iv);
-openssl_seal($data, inout $sealed, inout $ekeys, varray[$pub_key, $pub_key],
+openssl_seal($data, inout $sealed, inout $ekeys, vec[$pub_key, $pub_key], $cipher, inout $iv);
+openssl_seal($data, inout $sealed, inout $ekeys, vec[$pub_key, $pub_key],
              'sparkles', inout $iv);
-openssl_seal($data, inout $sealed, inout $ekeys, varray[$pub_key, $pub_key],
+openssl_seal($data, inout $sealed, inout $ekeys, vec[$pub_key, $pub_key],
              $cipher, inout $iv);
 openssl_open($sealed, inout $decrypted, $ekeys[0], $priv_key, $cipher, $iv);
 echo $decrypted;

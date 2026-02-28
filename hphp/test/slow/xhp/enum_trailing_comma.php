@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class :foo {
   attribute
@@ -11,6 +11,6 @@ class :foo {
 
 
 <<__EntryPoint>>
-function main_enum_trailing_comma() {
+function main_enum_trailing_comma() :mixed{
 echo 'Done';
 }

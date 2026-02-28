@@ -6,7 +6,7 @@ class base2 {
 }
 
 <<__EntryPoint>>
-function main_1462() {
+function main_1462() :mixed{
   if (__hhvm_intrinsics\launder_value(true)) {
     include '1462-1.inc';
   } else {
@@ -15,8 +15,8 @@ function main_1462() {
   $foo = "foo";
   $y = new a;
   var_dump(a::foo());
-  var_dump(a::$foo());
-  var_dump(call_user_func(varray['a','foo']));
+  var_dump(HH\dynamic_class_meth(a::class, $foo)());
+  var_dump(call_user_func(vec['a','foo']));
   var_dump(a::$astat);
   var_dump(a::$a1stat);
   var_dump(a::aconst);

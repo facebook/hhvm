@@ -7,28 +7,28 @@ final class c {}
 class x
 {
     function __construct() {}
-    private function a() {}
-    private static function b() {}
-    protected function c() {}
-    protected static function d() {}
-    public function e() {}
-    public static function f() {}
-    final function g() {}
-    function h() {}
+    private function a() :mixed{}
+    private static function b() :mixed{}
+    protected function c() :mixed{}
+    protected static function d() :mixed{}
+    public function e() :mixed{}
+    public static function f() :mixed{}
+    final function g() :mixed{}
+    function h() :mixed{}
 }
 
 abstract class y
 {
-    abstract function a();
-    abstract protected function b();
+    abstract function a():mixed;
+    abstract protected function b():mixed;
 }
 
-function dump_modifierNames($class) {
+function dump_modifierNames($class) :mixed{
     $obj = new ReflectionClass($class);
     var_dump($obj->getName(), Reflection::getModifierNames($obj->getModifiers()));
 }
 
-function dump_methodModifierNames($class) {
+function dump_methodModifierNames($class) :mixed{
     $obj = new ReflectionClass($class);
     foreach($obj->getMethods() as $method) {
         var_dump($obj->getName() . "::" . $method->getName(), Reflection::getModifierNames($method->getModifiers()));

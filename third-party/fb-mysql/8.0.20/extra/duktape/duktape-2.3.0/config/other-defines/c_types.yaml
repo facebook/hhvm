@@ -1,0 +1,175 @@
+# These should map to C99 types directly if available.
+- typedef: duk_uint8_t
+- typedef: duk_int8_t
+- typedef: duk_uint16_t
+- typedef: duk_int16_t
+- typedef: duk_uint32_t
+- typedef: duk_int32_t
+- typedef: duk_uint64_t
+- typedef: duk_int64_t
+- typedef: duk_uint_least8_t
+- typedef: duk_int_least8_t
+- typedef: duk_uint_least16_t
+- typedef: duk_int_least16_t
+- typedef: duk_uint_least32_t
+- typedef: duk_int_least32_t
+- typedef: duk_uint_least64_t
+- typedef: duk_int_least64_t
+- typedef: duk_uint_fast8_t
+- typedef: duk_int_fast8_t
+- typedef: duk_uint_fast16_t
+- typedef: duk_int_fast16_t
+- typedef: duk_uint_fast32_t
+- typedef: duk_int_fast32_t
+- typedef: duk_uint_fast64_t
+- typedef: duk_int_fast64_t
+- typedef: duk_uintptr_t
+- typedef: duk_intptr_t
+- typedef: duk_uintmax_t
+- typedef: duk_intmax_t
+- typedef: duk_size_t
+- typedef: duk_ptrdiff_t
+- typedef: duk_float_t
+- typedef: duk_double_t
+
+# Limits for above types
+- define: DUK_UINT8_MIN
+- define: DUK_UINT8_MAX
+- define: DUK_INT8_MIN
+- define: DUK_INT8_MAX
+- define: DUK_UINT_LEAST8_MIN
+- define: DUK_UINT_LEAST8_MAX
+- define: DUK_INT_LEAST8_MIN
+- define: DUK_INT_LEAST8_MAX
+- define: DUK_UINT_FAST8_MIN
+- define: DUK_UINT_FAST8_MAX
+- define: DUK_INT_FAST8_MIN
+- define: DUK_INT_FAST8_MAX
+- define: DUK_UINT16_MIN
+- define: DUK_UINT16_MAX
+- define: DUK_INT16_MIN
+- define: DUK_INT16_MAX
+- define: DUK_UINT_LEAST16_MIN
+- define: DUK_UINT_LEAST16_MAX
+- define: DUK_INT_LEAST16_MIN
+- define: DUK_INT_LEAST16_MAX
+- define: DUK_UINT_FAST16_MIN
+- define: DUK_UINT_FAST16_MAX
+- define: DUK_INT_FAST16_MIN
+- define: DUK_INT_FAST16_MAX
+- define: DUK_UINT32_MIN
+- define: DUK_UINT32_MAX
+- define: DUK_INT32_MIN
+- define: DUK_INT32_MAX
+- define: DUK_UINT_LEAST32_MIN
+- define: DUK_UINT_LEAST32_MAX
+- define: DUK_INT_LEAST32_MIN
+- define: DUK_INT_LEAST32_MAX
+- define: DUK_UINT_FAST32_MIN
+- define: DUK_UINT_FAST32_MAX
+- define: DUK_INT_FAST32_MIN
+- define: DUK_INT_FAST32_MAX
+- define: DUK_UINT64_MIN
+- define: DUK_UINT64_MAX
+- define: DUK_INT64_MIN
+- define: DUK_INT64_MAX
+- define: DUK_UINT_LEAST64_MIN
+- define: DUK_UINT_LEAST64_MAX
+- define: DUK_INT_LEAST64_MIN
+- define: DUK_INT_LEAST64_MAX
+- define: DUK_UINT_FAST64_MIN
+- define: DUK_UINT_FAST64_MAX
+- define: DUK_INT_FAST64_MIN
+- define: DUK_INT_FAST64_MAX
+- define: DUK_UINTPTR_MIN
+- define: DUK_UINTPTR_MAX
+- define: DUK_INTPTR_MIN
+- define: DUK_INTPTR_MAX
+- define: DUK_UINTMAX_MIN
+- define: DUK_UINTMAX_MAX
+- define: DUK_INTMAX_MIN
+- define: DUK_INTMAX_MAX
+- define: DUK_SIZE_MIN
+- define: DUK_SIZE_MAX
+# FIXME: ptrdiff limits
+
+# Indicate if some limits are computed and can only be used runtime
+- define: DUK_UINT64_MIN_COMPUTED
+- define: DUK_UINT64_MAX_COMPUTED
+- define: DUK_INT64_MIN_COMPUTED
+- define: DUK_INT64_MAX_COMPUTED
+- define: DUK_UINT_LEAST64_MIN_COMPUTED
+- define: DUK_UINT_LEAST64_MAX_COMPUTED
+- define: DUK_INT_LEAST64_MIN_COMPUTED
+- define: DUK_INT_LEAST64_MAX_COMPUTED
+- define: DUK_UINT_FAST64_MIN_COMPUTED
+- define: DUK_UINT_FAST64_MAX_COMPUTED
+- define: DUK_INT_FAST64_MIN_COMPUTED
+- define: DUK_INT_FAST64_MAX_COMPUTED
+- define: DUK_UINTMAX_MIN_COMPUTED
+- define: DUK_UINTMAX_MAX_COMPUTED
+- define: DUK_INTMAX_MIN_COMPUTED
+- define: DUK_INTMAX_MAX_COMPUTED
+- define: DUK_UINTPTR_MIN_COMPUTED
+- define: DUK_UINTPTR_MAX_COMPUTED
+- define: DUK_INTPTR_MIN_COMPUTED
+- define: DUK_INTPTR_MAX_COMPUTED
+- define: DUK_SIZE_MAX_COMPUTED
+
+# Derived types which typically have a fixed mapping to above types.
+# FIXME: add current mapping
+- typedef: duk_int_t
+- typedef: duk_uint_t
+- typedef: duk_int_fast_t
+- typedef: duk_uint_fast_t
+- typedef: duk_small_int_t
+- typedef: duk_small_uint_t
+- typedef: duk_small_int_fast_t
+- typedef: duk_small_uint_fast_t
+- typedef: duk_bool_t
+- typedef: duk_idx_t
+- typedef: duk_uidx_t
+- typedef: duk_uarridx_t
+- typedef: duk_ret_t
+- typedef: duk_errcode_t
+- typedef: duk_codepoint_t
+- typedef: duk_ucodepoint_t
+
+# Limits for derived types
+- define: DUK_INT_MIN
+- define: DUK_INT_MAX
+- define: DUK_UINT_MIN
+- define: DUK_UINT_MAX
+- define: DUK_INT_FAST_MIN
+- define: DUK_INT_FAST_MAX
+- define: DUK_UINT_FAST_MIN
+- define: DUK_UINT_FAST_MAX
+- define: DUK_SMALL_INT_MIN
+- define: DUK_SMALL_INT_MAX
+- define: DUK_SMALL_UINT_MIN
+- define: DUK_SMALL_UINT_MAX
+- define: DUK_SMALL_INT_FAST_MIN
+- define: DUK_SMALL_INT_FAST_MAX
+- define: DUK_SMALL_UINT_FAST_MIN
+- define: DUK_SMALL_UINT_FAST_MAX
+- define: DUK_BOOL_MIN
+- define: DUK_BOOL_MAX
+- define: DUK_IDX_MIN
+- define: DUK_IDX_MAX
+- define: DUK_UARRIDX_MIN
+- define: DUK_UARRIDX_MAX
+- define: DUK_RET_MIN
+- define: DUK_RET_MAX
+- define: DUK_ERRCODE_MIN
+- define: DUK_ERRCODE_MAX
+- define: DUK_CODEPOINT_MIN
+- define: DUK_CODEPOINT_MAX
+- define: DUK_UCODEPOINT_MIN
+- define: DUK_UCODEPOINT_MAX
+
+# Typedef for public API calls
+- typedef: duk_context
+
+# Double constants
+- define: DUK_DOUBLE_NAN  # FIXME: document DUK_USE_COMPUTED_NAN
+- define: DUK_DOUBLE_INFINITY  # FIXME: document DUK_USE_COMPUTED_INFINITY

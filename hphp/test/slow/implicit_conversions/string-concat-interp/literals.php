@@ -15,7 +15,7 @@ function main(): void {
   echo '' . false;
   echo '' . null;
   echo '' . PHP_INT_MAX;
-  echo '' . STDIN;
+  echo '' . HH\stdin();
   echo '' . "string\n";
 
   echo "--- . with empty RHS ---\n";
@@ -31,7 +31,7 @@ function main(): void {
   echo false . '';
   echo null . '';
   echo PHP_INT_MAX . '';
-  echo STDIN . '';
+  echo HH\stdin() . '';
   echo "string\n" . '';
 
   echo "--- . with non-empty LHS ---\n";
@@ -47,7 +47,7 @@ function main(): void {
   echo '<' . false;
   echo '<' . null;
   echo '<' . PHP_INT_MAX;
-  echo '<' . STDIN;
+  echo '<' . HH\stdin();
   echo '<' . "string\n";
 
   echo "--- concatN middle ---\n";
@@ -63,7 +63,7 @@ function main(): void {
   echo '<' . false . '>';
   echo '<' . null . '>';
   echo '<' . PHP_INT_MAX . '>';
-  echo '<' . STDIN . '>';
+  echo '<' . HH\stdin() . '>';
   echo '<' . "string\n" . '>';
 
   echo "--- concatN left ---\n";
@@ -79,7 +79,7 @@ function main(): void {
   echo false . ' string' . "\n";
   echo null . ' string' . "\n";
   echo PHP_INT_MAX . ' string' . "\n";
-  echo STDIN . ' string' . "\n";
+  echo HH\stdin() . ' string' . "\n";
   echo "string" . ' string' . "\n";
 
   echo "--- concatN emptystring left ---\n";
@@ -95,7 +95,7 @@ function main(): void {
   echo '' . false . "\n";
   echo '' . null . "\n";
   echo '' . PHP_INT_MAX . "\n";
-  echo '' . STDIN . "\n";
+  echo '' . HH\stdin() . "\n";
   echo '' . "string" . "\n";
 
   echo "--- concatN emptystring right ---\n";
@@ -111,7 +111,7 @@ function main(): void {
   echo 'value:' . false . '';
   echo 'value:' . null . '';
   echo 'value:' . PHP_INT_MAX . '';
-  echo 'value:' . STDIN . '';
+  echo 'value:' . HH\stdin() . '';
   echo 'value:' . "string" . '';
 
   echo "--- .= ---\n";
@@ -128,7 +128,7 @@ function main(): void {
   $a .= false;
   $a .= null;
   $a .= PHP_INT_MAX;
-  $a .= STDIN;
+  $a .= HH\stdin();
   $a .= "string";
   echo "$a\n";
 
@@ -144,6 +144,6 @@ function main(): void {
   $a = false;       $a .= 'foo'; echo "$a\n";
   $a = null;        $a .= 'foo'; echo "$a\n";
   $a = PHP_INT_MAX; $a .= 'foo'; echo "$a\n";
-  $a = STDIN;       $a .= 'foo'; echo "$a\n";
+  $a = HH\stdin();  $a .= 'foo'; echo "$a\n";
   $a = "string";    $a .= 'foo'; echo "$a\n";
 }

@@ -2,8 +2,8 @@
 
 
 <<__EntryPoint>>
-function main_fseek_args() {
-$fname = tempnam('/tmp', 'foobar');
+function main_fseek_args() :mixed{
+$fname = tempnam(sys_get_temp_dir(), 'foobar');
 file_put_contents($fname, 'herpderp');
 $spl = new SplFileObject($fname, 'r');
 $spl->fseek($spl->getSize() - 4);

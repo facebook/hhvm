@@ -1,10 +1,10 @@
 <?hh
 
-function test1(... $args) {
+function test1(... $args) :mixed{
     var_dump($args);
 }
 
-function test2($arg1, $arg2, ...$args) {
+function test2($arg1, $arg2, ...$args) :mixed{
     var_dump($arg1, $arg2, $args);
 }
 

@@ -1,16 +1,16 @@
 <?hh
 
-function baz(inout $x) {
+function baz(inout $x) :mixed{
   var_dump($x);
 }
 
 class A {
   private $x;
 
-  function foo() {
+  function foo() :mixed{
     $this->x = $this;
   }
-  function bar() {
+  function bar() :mixed{
     try {
       $y = $this->x->x;
       baz(inout $y);
@@ -19,7 +19,7 @@ class A {
     }
   }
 
-  public function what() {
+  public function what() :mixed{
     $this->foo();
     $this->bar();
     unset($this->x->x);

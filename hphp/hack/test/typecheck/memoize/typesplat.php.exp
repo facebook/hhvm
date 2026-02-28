@@ -1,0 +1,4 @@
+ERROR: File "typesplat.php", line 6, characters 35-36:
+Memoized functions cannot be variadic or use the type-splat operator. (NastCheck[3086])
+ERROR: File "typesplat.php", line 10, characters 46-47:
+Memoized functions cannot be variadic or use the type-splat operator. (NastCheck[3086])

@@ -1,8 +1,0 @@
-File "retain_position_info.php", line 9, characters 13-18:
-Invalid `is` expression hint (Typing[4195])
-File "retain_position_info.php", line 9, characters 13-18:
-The `is` operator cannot be used with an erased generic type parameter
-File "retain_position_info.php", line 9, characters 13-18:
-Wrong number of type arguments (expected 0, got 1) (Typing[4101])
-File "retain_position_info.php", line 7, characters 15-15:
-Definition is here

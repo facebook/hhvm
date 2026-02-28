@@ -6,28 +6,28 @@
 
 /* Creating soft and hard links to a file and applying fileowner() on links */
 <<__EntryPoint>> function main(): void {
-fclose( fopen(__SystemLib\hphp_test_tmppath('fileowner_variation1.tmp'), "w") );
+fclose( fopen(sys_get_temp_dir().'/'.'fileowner_variation1.tmp', "w")) ;
 
 echo "*** Testing fileowner() with links ***\n";
 /* With symlink */
 symlink(
-  __SystemLib\hphp_test_tmppath('fileowner_variation1.tmp'),
-  __SystemLib\hphp_test_tmppath('fileowner_variation1_symlink.tmp')
+  sys_get_temp_dir().'/'.'fileowner_variation1.tmp',
+  sys_get_temp_dir().'/'.'fileowner_variation1_symlink.tmp'
 );
-var_dump( fileowner(__SystemLib\hphp_test_tmppath('fileowner_variation1_symlink.tmp')) ); //expected true
+var_dump( fileowner(sys_get_temp_dir().'/'.'fileowner_variation1_symlink.tmp')) ; //expected true
 clearstatcache();
 
 /* With hardlink */
 link(
-  __SystemLib\hphp_test_tmppath('fileowner_variation1.tmp'),
-  __SystemLib\hphp_test_tmppath('fileowner_variation1_link.tmp')
+  sys_get_temp_dir().'/'.'fileowner_variation1.tmp',
+  sys_get_temp_dir().'/'.'fileowner_variation1_link.tmp'
 );
-var_dump( fileowner(__SystemLib\hphp_test_tmppath('fileowner_variation1_link.tmp')) );  // expected: true
+var_dump( fileowner(sys_get_temp_dir().'/'.'fileowner_variation1_link.tmp')) ;  // expected: true
 clearstatcache();
 
 echo "\n*** Done ***";
 
-unlink(__SystemLib\hphp_test_tmppath('fileowner_variation1_symlink.tmp'));
-unlink(__SystemLib\hphp_test_tmppath('fileowner_variation1_link.tmp'));
-unlink(__SystemLib\hphp_test_tmppath('fileowner_variation1.tmp'));
+unlink(sys_get_temp_dir().'/'.'fileowner_variation1_symlink.tmp');
+unlink(sys_get_temp_dir().'/'.'fileowner_variation1_link.tmp');
+unlink(sys_get_temp_dir().'/'.'fileowner_variation1.tmp');
 }

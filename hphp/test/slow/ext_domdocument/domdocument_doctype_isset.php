@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_domdocument_doctype_isset() {
+function main_domdocument_doctype_isset() :mixed{
 $dom = new DOMDocument();
 var_dump(isset($dom->doctype));
 var_dump($dom->doctype);

@@ -9,5 +9,5 @@ function test(): void {
 }
 
 abstract class MyState {
-  public (function(ExampleInt): ExampleInt) $my_prop;
+  public ExampleFunction<(function(ExampleInt): ExampleInt)> $my_prop;
 }

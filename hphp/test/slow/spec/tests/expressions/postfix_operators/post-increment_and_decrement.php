@@ -6,7 +6,7 @@
    +-------------------------------------------------------------+
 */
 
-function error_boundary(inout $x, $fn) {
+function error_boundary(inout $x, $fn) :mixed{
   try {
     return $fn(inout $x);
   } catch (Exception $e) {
@@ -16,7 +16,7 @@ function error_boundary(inout $x, $fn) {
 }
 
 function incdec($a)
-{
+:mixed{
     echo "--------------------------------------- start incdec ---\n";
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
 
@@ -32,7 +32,7 @@ function incdec($a)
 }
 
 function incdecrev($a)
-{
+:mixed{
     echo "--------------------------------------- start incdecrev ---\n";
     echo '$a = '.(string)($a)." <---> "; var_dump($a);
 

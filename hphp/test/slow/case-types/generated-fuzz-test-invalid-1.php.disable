@@ -1,0 +1,1477 @@
+<?hh
+  /**
+   * THIS FILE IS @generated; DO NOT EDIT IT
+   * To regenerate this file, run
+   *
+   *   buck run //hphp/hack/test:gen_case_type_tests
+   **/
+
+  <<file: __EnableUnstableFeatures('case_types')>>
+
+  
+    class StringishObj {
+      public function __toString(): string { return ''; }
+    }
+    
+
+  enum MyEnum : string {
+    A = 'A';
+    B = 'B';
+  }
+
+  enum class EC : nonnull {
+    float A = 3.141;
+    (float, float) B = tuple(0.0, 0.0);
+  }
+
+  interface I {}
+
+  class InstanceOfI implements I {}
+  
+
+  trait MyTrait {}
+
+  class UsesMyTrait {
+    use MyTrait;
+  }
+abstract final class AbsFinal {}
+class :my-xhp implements XHPChild {}
+class AClass {}
+class ReifiedClass<reify T> {}
+function my_func(): void {}
+
+  abstract class BaseCheck {
+    abstract const type T;
+    abstract const string NAME;
+    abstract protected static function values(): vec<this::T>;
+    abstract protected static function funcParam(this::T $c): void;
+    abstract protected static function funcReturn(mixed $c): this::T;
+    abstract protected static function funcGenericParam<Tx as this::T>(Tx $c): void;
+    abstract protected static function funcGenericReturn<Tx as this::T>(mixed $c): Tx;
+    abstract protected static function propertyCheck(this::T $val): void;
+
+    public static function run(): void {
+      foreach(static::values() as $val) {
+        // Param Checks
+        static::funcParam($val);
+        static::funcGenericParam($val);
+
+        // Return Checks
+        static::funcReturn($val);
+        static::funcGenericReturn($val);
+
+        // Property Checks
+        static::propertyCheck($val);
+      }
+      echo (static::NAME .' Ok' . PHP_EOL);
+    }
+  }
+
+  case type CT0 = NonExistent|(function(): void);
+              type AliasCT0 = CT0;
+
+  
+class CheckAliasCT0<T as AliasCT0> extends BaseCheck {
+  const type T = AliasCT0;
+  const string NAME = 'AliasCT0';
+
+  <<__LateInit>>
+  private AliasCT0 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT0 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT0 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT0>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT0>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT0 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT0> {
+    return vec[() ==> {},my_func<>,vec['my_func']];
+  }
+}
+case type CT1 = NonExistent|(mixed, mixed);
+              type AliasCT1 = CT1;
+
+  
+class CheckAliasCT1<T as AliasCT1> extends BaseCheck {
+  const type T = AliasCT1;
+  const string NAME = 'AliasCT1';
+
+  <<__LateInit>>
+  private AliasCT1 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT1 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT1 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT1>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT1>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT1 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT1> {
+    return vec[tuple(0, 0),tuple(1, 2, 3)];
+  }
+}
+case type CT2 = NonExistent|?bool;
+              type AliasCT2 = CT2;
+
+  
+class CheckAliasCT2<T as AliasCT2> extends BaseCheck {
+  const type T = AliasCT2;
+  const string NAME = 'AliasCT2';
+
+  <<__LateInit>>
+  private AliasCT2 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT2 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT2 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT2>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT2>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT2 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT2> {
+    return vec[false,null,true];
+  }
+}
+case type CT3 = NonExistent|AClass;
+              type AliasCT3 = CT3;
+
+  
+class CheckAliasCT3<T as AliasCT3> extends BaseCheck {
+  const type T = AliasCT3;
+  const string NAME = 'AliasCT3';
+
+  <<__LateInit>>
+  private AliasCT3 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT3 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT3 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT3>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT3>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT3 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT3> {
+    return vec[new AClass()];
+  }
+}
+case type CT4 = NonExistent|AbsFinal;
+              type AliasCT4 = CT4;
+
+  
+class CheckAliasCT4<T as AliasCT4> extends BaseCheck {
+  const type T = AliasCT4;
+  const string NAME = 'AliasCT4';
+
+  <<__LateInit>>
+  private AliasCT4 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT4 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT4 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT4>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT4>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT4 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT4> {
+    return vec[];
+  }
+}
+case type CT5 = NonExistent|Awaitable<num>;
+              type AliasCT5 = CT5;
+
+  
+class CheckAliasCT5<T as AliasCT5> extends BaseCheck {
+  const type T = AliasCT5;
+  const string NAME = 'AliasCT5';
+
+  <<__LateInit>>
+  private AliasCT5 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT5 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT5 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT5>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT5>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT5 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT5> {
+    return vec[async { return 0.0; },async { return 0; },async { return 1; },async { return 3.14; }];
+  }
+}
+case type CT6 = NonExistent|Container<mixed>;
+              type AliasCT6 = CT6;
+
+  
+class CheckAliasCT6<T as AliasCT6> extends BaseCheck {
+  const type T = AliasCT6;
+  const string NAME = 'AliasCT6';
+
+  <<__LateInit>>
+  private AliasCT6 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT6 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT6 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT6>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT6>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT6 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT6> {
+    return vec[keyset[],vec[]];
+  }
+}
+case type CT7 = NonExistent|HH\AnyArray<arraykey, mixed>;
+              type AliasCT7 = CT7;
+
+  
+class CheckAliasCT7<T as AliasCT7> extends BaseCheck {
+  const type T = AliasCT7;
+  const string NAME = 'AliasCT7';
+
+  <<__LateInit>>
+  private AliasCT7 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT7 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT7 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT7>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT7>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT7 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT7> {
+    return vec[dict[],keyset[],vec[]];
+  }
+}
+case type CT8 = NonExistent|HH\EnumClass\Label<EC, float>;
+              type AliasCT8 = CT8;
+
+  
+class CheckAliasCT8<T as AliasCT8> extends BaseCheck {
+  const type T = AliasCT8;
+  const string NAME = 'AliasCT8';
+
+  <<__LateInit>>
+  private AliasCT8 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT8 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT8 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT8>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT8>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT8 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT8> {
+    return vec[#A,EC#B];
+  }
+}
+case type CT9 = NonExistent|HH\FunctionRef<(function(): void)>;
+              type AliasCT9 = CT9;
+
+  
+class CheckAliasCT9<T as AliasCT9> extends BaseCheck {
+  const type T = AliasCT9;
+  const string NAME = 'AliasCT9';
+
+  <<__LateInit>>
+  private AliasCT9 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT9 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT9 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT9>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT9>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT9 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT9> {
+    return vec[my_func<>];
+  }
+}
+case type CT10 = NonExistent|HH\MemberOf<EC, float>;
+              type AliasCT10 = CT10;
+
+  
+class CheckAliasCT10<T as AliasCT10> extends BaseCheck {
+  const type T = AliasCT10;
+  const string NAME = 'AliasCT10';
+
+  <<__LateInit>>
+  private AliasCT10 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT10 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT10 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT10>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT10>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT10 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT10> {
+    return vec[EC::A,EC::B];
+  }
+}
+case type CT11 = NonExistent|I;
+              type AliasCT11 = CT11;
+
+  
+class CheckAliasCT11<T as AliasCT11> extends BaseCheck {
+  const type T = AliasCT11;
+  const string NAME = 'AliasCT11';
+
+  <<__LateInit>>
+  private AliasCT11 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT11 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT11 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT11>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT11>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT11 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT11> {
+    return vec[new InstanceOfI()];
+  }
+}
+case type CT12 = NonExistent|KeyedContainer<arraykey, mixed>;
+              type AliasCT12 = CT12;
+
+  
+class CheckAliasCT12<T as AliasCT12> extends BaseCheck {
+  const type T = AliasCT12;
+  const string NAME = 'AliasCT12';
+
+  <<__LateInit>>
+  private AliasCT12 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT12 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT12 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT12>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT12>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT12 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT12> {
+    return vec[dict[],vec[]];
+  }
+}
+case type CT13 = NonExistent|KeyedTraversable<arraykey, mixed>;
+              type AliasCT13 = CT13;
+
+  
+class CheckAliasCT13<T as AliasCT13> extends BaseCheck {
+  const type T = AliasCT13;
+  const string NAME = 'AliasCT13';
+
+  <<__LateInit>>
+  private AliasCT13 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT13 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT13 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT13>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT13>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT13 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT13> {
+    return vec[dict[],keyset[],vec[]];
+  }
+}
+case type CT14 = NonExistent|MyEnum;
+              type AliasCT14 = CT14;
+
+  
+class CheckAliasCT14<T as AliasCT14> extends BaseCheck {
+  const type T = AliasCT14;
+  const string NAME = 'AliasCT14';
+
+  <<__LateInit>>
+  private AliasCT14 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT14 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT14 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT14>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT14>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT14 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT14> {
+    return vec['B',MyEnum::A];
+  }
+}
+case type CT15 = NonExistent|MyTrait;
+              type AliasCT15 = CT15;
+
+  
+class CheckAliasCT15<T as AliasCT15> extends BaseCheck {
+  const type T = AliasCT15;
+  const string NAME = 'AliasCT15';
+
+  <<__LateInit>>
+  private AliasCT15 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT15 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT15 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT15>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT15>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT15 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT15> {
+    return vec[];
+  }
+}
+case type CT16 = NonExistent|ReifiedClass<null>;
+              type AliasCT16 = CT16;
+
+  
+class CheckAliasCT16<T as AliasCT16> extends BaseCheck {
+  const type T = AliasCT16;
+  const string NAME = 'AliasCT16';
+
+  <<__LateInit>>
+  private AliasCT16 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT16 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT16 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT16>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT16>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT16 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT16> {
+    return vec[new ReifiedClass<null>()];
+  }
+}
+case type CT17 = NonExistent|Stringish;
+              type AliasCT17 = CT17;
+
+  
+class CheckAliasCT17<T as AliasCT17> extends BaseCheck {
+  const type T = AliasCT17;
+  const string NAME = 'AliasCT17';
+
+  <<__LateInit>>
+  private AliasCT17 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT17 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT17 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT17>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT17>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT17 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT17> {
+    return vec['','hello world',new StringishObj()];
+  }
+}
+case type CT18 = NonExistent|Traversable<mixed>;
+              type AliasCT18 = CT18;
+
+  
+class CheckAliasCT18<T as AliasCT18> extends BaseCheck {
+  const type T = AliasCT18;
+  const string NAME = 'AliasCT18';
+
+  <<__LateInit>>
+  private AliasCT18 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT18 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT18 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT18>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT18>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT18 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT18> {
+    return vec[dict[],keyset[],vec[]];
+  }
+}
+case type CT19 = NonExistent|XHPChild;
+              type AliasCT19 = CT19;
+
+  
+class CheckAliasCT19<T as AliasCT19> extends BaseCheck {
+  const type T = AliasCT19;
+  const string NAME = 'AliasCT19';
+
+  <<__LateInit>>
+  private AliasCT19 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT19 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT19 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT19>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT19>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT19 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT19> {
+    return vec['','hello world',0,1,<my-xhp/>];
+  }
+}
+case type CT20 = NonExistent|arraykey;
+              type AliasCT20 = CT20;
+
+  
+class CheckAliasCT20<T as AliasCT20> extends BaseCheck {
+  const type T = AliasCT20;
+  const string NAME = 'AliasCT20';
+
+  <<__LateInit>>
+  private AliasCT20 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT20 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT20 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT20>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT20>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT20 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT20> {
+    return vec['','hello world',0,1];
+  }
+}
+case type CT21 = NonExistent|bool;
+              type AliasCT21 = CT21;
+
+  
+class CheckAliasCT21<T as AliasCT21> extends BaseCheck {
+  const type T = AliasCT21;
+  const string NAME = 'AliasCT21';
+
+  <<__LateInit>>
+  private AliasCT21 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT21 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT21 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT21>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT21>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT21 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT21> {
+    return vec[false,true];
+  }
+}
+case type CT22 = NonExistent|dict<arraykey, mixed>;
+              type AliasCT22 = CT22;
+
+  
+class CheckAliasCT22<T as AliasCT22> extends BaseCheck {
+  const type T = AliasCT22;
+  const string NAME = 'AliasCT22';
+
+  <<__LateInit>>
+  private AliasCT22 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT22 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT22 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT22>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT22>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT22 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT22> {
+    return vec[dict[]];
+  }
+}
+case type CT23 = NonExistent|dynamic;
+              type AliasCT23 = CT23;
+
+  
+class CheckAliasCT23<T as AliasCT23> extends BaseCheck {
+  const type T = AliasCT23;
+  const string NAME = 'AliasCT23';
+
+  <<__LateInit>>
+  private AliasCT23 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT23 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT23 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT23>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT23>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT23 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT23> {
+    return vec[false,null,shape('x' => 10),shape(),true];
+  }
+}
+case type CT24 = NonExistent|float;
+              type AliasCT24 = CT24;
+
+  
+class CheckAliasCT24<T as AliasCT24> extends BaseCheck {
+  const type T = AliasCT24;
+  const string NAME = 'AliasCT24';
+
+  <<__LateInit>>
+  private AliasCT24 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT24 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT24 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT24>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT24>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT24 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT24> {
+    return vec[0.0,3.14];
+  }
+}
+case type CT25 = NonExistent|int;
+              type AliasCT25 = CT25;
+
+  
+class CheckAliasCT25<T as AliasCT25> extends BaseCheck {
+  const type T = AliasCT25;
+  const string NAME = 'AliasCT25';
+
+  <<__LateInit>>
+  private AliasCT25 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT25 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT25 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT25>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT25>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT25 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT25> {
+    return vec[0,1];
+  }
+}
+case type CT26 = NonExistent|keyset<arraykey>;
+              type AliasCT26 = CT26;
+
+  
+class CheckAliasCT26<T as AliasCT26> extends BaseCheck {
+  const type T = AliasCT26;
+  const string NAME = 'AliasCT26';
+
+  <<__LateInit>>
+  private AliasCT26 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT26 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT26 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT26>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT26>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT26 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT26> {
+    return vec[keyset[]];
+  }
+}
+case type CT27 = NonExistent|mixed;
+              type AliasCT27 = CT27;
+
+  
+class CheckAliasCT27<T as AliasCT27> extends BaseCheck {
+  const type T = AliasCT27;
+  const string NAME = 'AliasCT27';
+
+  <<__LateInit>>
+  private AliasCT27 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT27 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT27 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT27>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT27>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT27 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT27> {
+    return vec['','hello world',0,1,false,null,true];
+  }
+}
+case type CT28 = NonExistent|nonnull;
+              type AliasCT28 = CT28;
+
+  
+class CheckAliasCT28<T as AliasCT28> extends BaseCheck {
+  const type T = AliasCT28;
+  const string NAME = 'AliasCT28';
+
+  <<__LateInit>>
+  private AliasCT28 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT28 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT28 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT28>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT28>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT28 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT28> {
+    return vec['','hello world',0,1,false,true];
+  }
+}
+case type CT29 = NonExistent|noreturn;
+              type AliasCT29 = CT29;
+
+  
+class CheckAliasCT29<T as AliasCT29> extends BaseCheck {
+  const type T = AliasCT29;
+  const string NAME = 'AliasCT29';
+
+  <<__LateInit>>
+  private AliasCT29 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT29 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT29 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT29>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT29>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT29 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT29> {
+    return vec[];
+  }
+}
+case type CT30 = NonExistent|nothing;
+              type AliasCT30 = CT30;
+
+  
+class CheckAliasCT30<T as AliasCT30> extends BaseCheck {
+  const type T = AliasCT30;
+  const string NAME = 'AliasCT30';
+
+  <<__LateInit>>
+  private AliasCT30 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT30 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT30 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT30>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT30>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT30 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT30> {
+    return vec[];
+  }
+}
+case type CT31 = NonExistent|null;
+              type AliasCT31 = CT31;
+
+  
+class CheckAliasCT31<T as AliasCT31> extends BaseCheck {
+  const type T = AliasCT31;
+  const string NAME = 'AliasCT31';
+
+  <<__LateInit>>
+  private AliasCT31 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT31 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT31 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT31>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT31>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT31 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT31> {
+    return vec[null];
+  }
+}
+case type CT32 = NonExistent|num;
+              type AliasCT32 = CT32;
+
+  
+class CheckAliasCT32<T as AliasCT32> extends BaseCheck {
+  const type T = AliasCT32;
+  const string NAME = 'AliasCT32';
+
+  <<__LateInit>>
+  private AliasCT32 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT32 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT32 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT32>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT32>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT32 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT32> {
+    return vec[0,0.0,1,3.14];
+  }
+}
+case type CT33 = NonExistent|resource;
+              type AliasCT33 = CT33;
+
+  
+class CheckAliasCT33<T as AliasCT33> extends BaseCheck {
+  const type T = AliasCT33;
+  const string NAME = 'AliasCT33';
+
+  <<__LateInit>>
+  private AliasCT33 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT33 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT33 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT33>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT33>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT33 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT33> {
+    return vec[imagecreate(10, 10)];
+  }
+}
+case type CT34 = NonExistent|shape(...);
+              type AliasCT34 = CT34;
+
+  
+class CheckAliasCT34<T as AliasCT34> extends BaseCheck {
+  const type T = AliasCT34;
+  const string NAME = 'AliasCT34';
+
+  <<__LateInit>>
+  private AliasCT34 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT34 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT34 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT34>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT34>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT34 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT34> {
+    return vec[shape('x' => 10),shape()];
+  }
+}
+case type CT35 = NonExistent|string;
+              type AliasCT35 = CT35;
+
+  
+class CheckAliasCT35<T as AliasCT35> extends BaseCheck {
+  const type T = AliasCT35;
+  const string NAME = 'AliasCT35';
+
+  <<__LateInit>>
+  private AliasCT35 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT35 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT35 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT35>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT35>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT35 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT35> {
+    return vec['','hello world'];
+  }
+}
+case type CT36 = NonExistent|vec<mixed>;
+              type AliasCT36 = CT36;
+
+  
+class CheckAliasCT36<T as AliasCT36> extends BaseCheck {
+  const type T = AliasCT36;
+  const string NAME = 'AliasCT36';
+
+  <<__LateInit>>
+  private AliasCT36 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT36 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT36 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT36>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT36>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT36 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT36> {
+    return vec[vec[]];
+  }
+}
+case type CT37 = NonExistent|vec_or_dict<string>;
+              type AliasCT37 = CT37;
+
+  
+class CheckAliasCT37<T as AliasCT37> extends BaseCheck {
+  const type T = AliasCT37;
+  const string NAME = 'AliasCT37';
+
+  <<__LateInit>>
+  private AliasCT37 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT37 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT37 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT37>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT37>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT37 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT37> {
+    return vec[dict[],vec[]];
+  }
+}
+case type CT38 = NonExistent|void;
+              type AliasCT38 = CT38;
+
+  
+class CheckAliasCT38<T as AliasCT38> extends BaseCheck {
+  const type T = AliasCT38;
+  const string NAME = 'AliasCT38';
+
+  <<__LateInit>>
+  private AliasCT38 $field;
+  <<__LateInit>>
+  private T $generic_field;
+
+  protected static function funcParam(AliasCT38 $c): void {}
+
+  protected static function funcReturn(mixed $c): AliasCT38 {
+    return $c;
+  }
+
+  protected static function funcGenericParam<Tx as AliasCT38>(Tx $c): void {}
+
+  protected static function funcGenericReturn<Tx as AliasCT38>(mixed $c): Tx {
+    return $c;
+  }
+
+  protected static function propertyCheck(AliasCT38 $val): void {
+    $instance = new self();
+    $instance->field = $val;
+    $instance->generic_field = $val;
+  }
+
+  protected static function values(): vec<AliasCT38> {
+    return vec[null];
+  }
+}
+
+  <<__EntryPoint>>
+  function main(): void {
+    CheckAliasCT0::run();
+CheckAliasCT1::run();
+CheckAliasCT2::run();
+CheckAliasCT3::run();
+CheckAliasCT4::run();
+CheckAliasCT5::run();
+CheckAliasCT6::run();
+CheckAliasCT7::run();
+CheckAliasCT8::run();
+CheckAliasCT9::run();
+CheckAliasCT10::run();
+CheckAliasCT11::run();
+CheckAliasCT12::run();
+CheckAliasCT13::run();
+CheckAliasCT14::run();
+CheckAliasCT15::run();
+CheckAliasCT16::run();
+CheckAliasCT17::run();
+CheckAliasCT18::run();
+CheckAliasCT19::run();
+CheckAliasCT20::run();
+CheckAliasCT21::run();
+CheckAliasCT22::run();
+CheckAliasCT23::run();
+CheckAliasCT24::run();
+CheckAliasCT25::run();
+CheckAliasCT26::run();
+CheckAliasCT27::run();
+CheckAliasCT28::run();
+CheckAliasCT29::run();
+CheckAliasCT30::run();
+CheckAliasCT31::run();
+CheckAliasCT32::run();
+CheckAliasCT33::run();
+CheckAliasCT34::run();
+CheckAliasCT35::run();
+CheckAliasCT36::run();
+CheckAliasCT37::run();
+CheckAliasCT38::run();
+  }

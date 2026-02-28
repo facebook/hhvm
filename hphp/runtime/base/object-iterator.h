@@ -48,6 +48,7 @@ namespace HPHP {
 template <typename DeclFn, typename DynFn>
 void IteratePropMemOrder(const ObjectData* obj, DeclFn declFn, DynFn dynFn) {
   assertx(!obj->isCollection());
+  const_cast<ObjectData*>(obj)->deserializeAllLazyProps();
 
   auto cls = obj->getVMClass();
   auto const declProps = cls->declProperties();
@@ -73,6 +74,7 @@ void IteratePropMemOrder(const ObjectData* obj, DeclFn declFn, DynFn dynFn) {
 template <typename DeclFn, typename DynFn>
 void IteratePropToArrayOrder(const ObjectData* obj, DeclFn declFn, DynFn dynFn) {
   assertx(!obj->isCollection());
+  const_cast<ObjectData*>(obj)->deserializeAllLazyProps();
 
   // The iteration order is going most-to-least-derived in the inheritance
   // hierarchy, visiting properties in declaration order (with the wrinkle

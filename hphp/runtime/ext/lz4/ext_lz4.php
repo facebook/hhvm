@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * This function compresses the given string using the lz4lib data format, which

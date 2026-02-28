@@ -17,6 +17,6 @@ echo "\n";
 $infile = fopen("NoSuchFile.txt", 'r');
 var_dump($infile);
 
-$infile = @fopen("NoSuchFile.txt", 'r');
+$infile = fopen("NoSuchFile.txt", 'r');
 var_dump($infile);
 }

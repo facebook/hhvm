@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) :mixed{
     echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
 <<__EntryPoint>> function main(): void {
@@ -16,7 +16,7 @@ echo "*** Testing getimagesize() : usage variations ***\n";
 $imagefile = dirname(__FILE__)."/test1pix.jpg";
 
 //array of values to iterate over
-$values = darray[
+$values = dict[
 
       // int data
       "0" => 0,
@@ -32,11 +32,11 @@ $values = darray[
       0 => .5,
 
       // array data
-      "array()" => varray[],
-      "array(0)" => varray[0],
-      "array(1)" => varray[1],
-      "array(1, 2)" => varray[1, 2],
-      "array('color' => 'red', 'item' => 'pen')" => darray['color' => 'red', 'item' => 'pen'],
+      "array()" => vec[],
+      "array(0)" => vec[0],
+      "array(1)" => vec[1],
+      "array(1, 2)" => vec[1, 2],
+      "array('color' => 'red', 'item' => 'pen')" => dict['color' => 'red', 'item' => 'pen'],
 
       // null data
       "NULL" => NULL,

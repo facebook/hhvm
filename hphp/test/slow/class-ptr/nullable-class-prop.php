@@ -4,7 +4,7 @@ class A {}
 
 abstract class Bar {
   protected ?string $name = null;
-  public function getClassName() {
+  public function getClassName() :mixed{
       return $this->name;
   }
 }
@@ -14,7 +14,7 @@ final class Foo extends Bar {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   $o = new Foo;
   var_dump($o->getClassName());
 }

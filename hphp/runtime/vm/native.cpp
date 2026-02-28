@@ -16,20 +16,17 @@
 
 #include "hphp/runtime/vm/native.h"
 
+#include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/base/req-ptr.h"
-#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/native-func-table.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP::Native {
 
 //////////////////////////////////////////////////////////////////////////////
 
-FuncTable s_systemNativeFuncs;
-const FuncTable s_noNativeFuncs; // always empty
 ConstantMap s_constant_map;
 ClassConstantMapMap s_class_constant_map;
 
@@ -76,17 +73,8 @@ void pushInt(Registers& regs, const int64_t value) {
   }
 }
 
-void pushRval(Registers& regs, tv_rval tv, bool isFCallBuiltin) {
-  if (isFCallBuiltin) {
-    // tv_rval either points at the stack, or we don't have wide
-    // tv_vals. In either case, its actually pointing at a TypedValue
-    // already.
-    static_assert(TVOFF(m_data) == 0, "");
-    assertx((const char*)&val(tv) + TVOFF(m_type) == (const char*)&type(tv));
-    return pushInt(regs, (int64_t)&val(tv));
-  }
-  // Otherwise we need to materialize the TypedValue and push a
-  // pointer to it.
+void pushRval(Registers& regs, tv_rval tv) {
+  // We need to materialize the TypedValue and push a pointer to it.
   assertx(regs.spilled_rval_count < kMaxBuiltinArgs);
   regs.spilled_rvals[regs.spilled_rval_count++] = *tv;
   pushInt(regs, (int64_t)&regs.spilled_rvals[regs.spilled_rval_count - 1]);
@@ -112,12 +100,6 @@ void pushTypedValue(Registers& regs, TypedValue tv) {
     regs.GP_regs[regs.GP_count++] = val(tv).num;
     regs.GP_regs[regs.GP_count++] = dataType;
   } else {
-#if defined(__powerpc64__)
-    // We don't have room to spill two 64-bit values in PowerPC. If it becomes
-    // an issue, we can always up kMaxBuiltinArgs later. (We have room to pass
-    // 15 TypedValue arguments on PowerPC already, which should be plenty.)
-    always_assert(false);
-#else
     assertx(regs.spilled_count + 1 < kMaxBuiltinArgs - kNumGPRegs);
     regs.spilled_args[regs.spilled_count++] = val(tv).num;
     regs.spilled_args[regs.spilled_count++] = dataType;
@@ -126,74 +108,58 @@ void pushTypedValue(Registers& regs, TypedValue tv) {
     #ifdef __aarch64__
       regs.GP_count = kNumGPRegs;
     #endif
-#endif
   }
-}
-
-// Push a native argument (e.g an ArrayData / TypedValue, not Array / Variant).
-void pushNativeArg(Registers& regs, const Func* const func, const int i,
-                   MaybeDataType builtinType, TypedValue arg) {
-  // If the param type is known, just pass the value.
-  if (builtinType) return pushInt(regs, val(arg).num);
-
-  // Pass both the type and value for TypedValue parameters.
-  pushTypedValue(regs, arg);
 }
 
 // Push each argument, spilling ones we don't have registers for to the stack.
 void populateArgs(Registers& regs,
                   const ActRec* fp,
                   const Func* const func,
-                  TypedValue* stk,
-                  const int numArgs,
-                  bool isFCallBuiltin) {
+                  const int numArgs) {
   // Regular FCalls will have their out parameter locations below the ActRec on
   // the stack, while FCallBuiltin has no ActRec to skip over.
-  auto io = isFCallBuiltin
-    ? stk + 1
-    : reinterpret_cast<TypedValue*>(const_cast<ActRec*>(fp) + 1);
-
-  auto const get = [&] (int idx) {
-    return isFCallBuiltin
-      ? tv_lval{&stk[-idx]}
-      : frame_local(fp, idx);
-  };
+  auto io = reinterpret_cast<TypedValue*>(const_cast<ActRec*>(fp) + 1);
 
   for (auto i = 0; i < numArgs; ++i) {
-    auto const arg = get(i);
+    auto const arg = frame_local(fp, i);
     auto const& pi = func->params()[i];
-    auto const type = pi.builtinType;
-    if (func->isInOut(i)) {
-      if (auto const iv = builtinInValue(func, i)) {
-        *io = *iv;
-        tvDecRefGen(arg);
-      } else {
-        *io = *arg;
-      }
+    switch (pi.builtinAbi) {
+      case Func::ParamInfo::BuiltinAbi::Value:
+        pushInt(regs, val(arg).num);
+        break;
+      case Func::ParamInfo::BuiltinAbi::FPValue:
+        pushDouble(regs, val(arg));
+        break;
+      case Func::ParamInfo::BuiltinAbi::ValueByRef:
+        pushInt(regs, (int64_t)&val(arg));
+        break;
+      case Func::ParamInfo::BuiltinAbi::TypedValue:
+        pushTypedValue(regs, *arg);
+        break;
+      case Func::ParamInfo::BuiltinAbi::TypedValueByRef:
+        pushRval(regs, arg);
+        break;
+      case Func::ParamInfo::BuiltinAbi::InOutByRef:
+        assertx(func->isInOut(i));
+        if (auto const iv = builtinInValue(func, i)) {
+          *io = *iv;
+          tvDecRefGen(arg);
+        } else {
+          *io = *arg;
+        }
 
-      // Any persistent values may become counted...
-      if (isArrayLikeType(io->m_type)) {
-        io->m_type = io->m_data.parr->toDataType();
-      } else if (isStringType(io->m_type)) {
-        io->m_type = KindOfString;
-      }
+        // Any persistent values may become counted...
+        if (isArrayLikeType(io->m_type)) {
+          io->m_type = io->m_data.parr->toDataType();
+        } else if (isStringType(io->m_type)) {
+          io->m_type = KindOfString;
+        }
 
-      // Set the input value to null to avoid double freeing it
-      arg.type() = KindOfNull;
+        // Set the input value to null to avoid double freeing it
+        tvWriteNull(arg);
 
-      pushInt(regs, (int64_t)io++);
-    } else if (pi.isTakenAsTypedValue()) {
-      pushTypedValue(regs, *arg);
-    } else if (pi.isNativeArg()) {
-      pushNativeArg(regs, func, i, type, *arg);
-    } else if (pi.isTakenAsVariant() || !type) {
-      pushRval(regs, arg, isFCallBuiltin);
-    } else if (type == KindOfDouble) {
-      pushDouble(regs, val(arg));
-    } else if (isBuiltinByRef(type)) {
-      pushInt(regs, (int64_t)&val(arg));
-    } else {
-      pushInt(regs, val(arg).num);
+        pushInt(regs, (int64_t)io++);
+        break;
     }
   }
 }
@@ -207,19 +173,17 @@ void populateArgs(Registers& regs,
  * If <ctx> is not nullptr, it is prepended to <args> when
  * calling.
  */
-void callFunc(const Func* const func,
-              const ActRec* fp,
-              const void* const ctx,
-              TypedValue* args,
-              TypedValue& ret,
-              bool isFCallBuiltin) {
+void callFuncImpl(const Func* const func,
+                  const ActRec* fp,
+                  const void* const ctx,
+                  TypedValue& ret) {
   auto const f = func->nativeFuncPtr();
   auto const numArgs = func->numParams();
-  auto retType = func->hniReturnType();
+  auto retType = func->returnTypeConstraints().asSystemlibType();
   auto regs = Registers{};
 
   if (ctx) pushInt(regs, (int64_t)ctx);
-  populateArgs(regs, fp, func, args, numArgs, isFCallBuiltin);
+  populateArgs(regs, fp, func, numArgs);
 
   // Decide how many int and double arguments we need to call func. Note that
   // spilled arguments come after the GP registers, in line with them. We can
@@ -245,10 +209,8 @@ void callFunc(const Func* const func,
     } else {
       new (&ret) Variant(callFuncIndirectImpl<Variant>(f, GP_args, GP_count,
                                                        SIMD_args, SIMD_count));
-      if (ret.m_type == KindOfUninit) {
-        ret.m_type = KindOfNull;
-      }
     }
+    assertx(ret.m_type != KindOfUninit);
     return;
   }
 
@@ -284,8 +246,8 @@ void callFunc(const Func* const func,
     case KindOfKeyset:
     case KindOfClsMeth:
     case KindOfObject:
+    case KindOfEnumClassLabel:
     case KindOfResource: {
-      assertx(isBuiltinByRef(ret.m_type));
       if (func->isReturnByValue()) {
         auto val = callFuncInt64Impl(f, GP_args, GP_count, SIMD_args,
                                      SIMD_count);
@@ -310,89 +272,19 @@ void callFunc(const Func* const func,
   not_reached();
 }
 
+TypedValue callFunc(const Func* const func,
+                    const ActRec* fp,
+                    const void* const ctx) {
+  TypedValue rv;
+  rv.m_type = KindOfUninit;
+  callFuncImpl(func, fp, ctx, rv);
+  assertx(tvIsPlausible(rv));
+  assertx(rv.m_type != KindOfUninit);
+  return rv;
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
-
-namespace {
-
-template <typename F>
-void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
-  assertx(func->isBuiltin() && "func is not a builtin");
-  assertx(numArgs == func->numParams());
-
-  for (int32_t i = 0; i < numArgs; i++) {
-    const Func::ParamInfo& pi = func->params()[i];
-
-    auto const tv = args(i);
-
-    auto tc = pi.typeConstraint;
-    auto targetType = pi.builtinType;
-    if (tc.isNullable()) {
-      if (tvIsNull(tv)) {
-        // No need to coerce when passed a null for a nullable type
-        continue;
-      }
-      // Arg isn't null, so treat it like the underlying type for coersion
-      // purposes.  The ABI-passed type will still be mixed/Variant.
-      targetType = std::nullopt;
-    }
-    if (!targetType) {
-      // FIXME(T116301380): native builtins don't resolve properly
-      targetType = tc.isUnresolved() ? KindOfObject : tc.underlyingDataType();
-    }
-
-    auto const raise_type_error = [&]{
-      auto const expected_type = [&]{
-        if (tc.isVecOrDict()) return "vec_or_dict";
-        return getDataTypeString(*targetType).data();
-      }();
-      auto const msg = param_type_error_message(
-        func->name()->data(), i+1, expected_type, *tv);
-      if (RuntimeOption::PHP7_EngineExceptions) {
-        SystemLib::throwTypeErrorObject(msg);
-      }
-      SystemLib::throwRuntimeExceptionObject(msg);
-    };
-
-    // Check the varray_or_darray and vec_or_dict union types.
-    // Precondition: the DataType of the TypedValue is correct.
-    auto const check_dvarray = [&]{
-      assertx(IMPLIES(targetType, equivDataTypes(type(tv), *targetType)));
-      if (tc.isVecOrDict() && !tvIsVec(tv) && !tvIsDict(tv)) {
-        raise_type_error();
-      }
-    };
-
-    // Check if we have the right type, or if its a Variant.
-    if (!targetType || equivDataTypes(type(tv), *targetType)) {
-      check_dvarray();
-      continue;
-    }
-
-    if ((tvIsClass(tv) || tvIsLazyClass(tv)) && isStringType(*targetType)) {
-      val(tv).pstr = tvIsClass(tv) ?
-        const_cast<StringData*>(val(tv).pclass->name()) :
-        const_cast<StringData*>(val(tv).plazyclass.name());
-      type(tv) = KindOfPersistentString;
-      if (RuntimeOption::EvalClassStringHintNotices) {
-        raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
-      }
-      continue;
-    }
-
-    raise_type_error();
-  }
-}
-
-}
-
-void coerceFCallArgsFromLocals(const ActRec* fp,
-                               int32_t numArgs,
-                               const Func* func) {
-  coerceFCallArgsImpl(
-    numArgs, func,
-    [&] (int32_t idx) { return frame_local(fp, idx); }
-  );
-}
 
 #undef CASE
 #undef COERCE_OR_CAST
@@ -400,16 +292,9 @@ void coerceFCallArgsFromLocals(const ActRec* fp,
 TypedValue* functionWrapper(ActRec* ar) {
   assertx(ar);
   auto func = ar->func();
-  auto numArgs = func->numParams();
-  TypedValue* args = ((TypedValue*)ar) - 1;
 
-  coerceFCallArgsFromLocals(ar, numArgs, func);
+  TypedValue rv = callFunc(func, ar, nullptr);
 
-  TypedValue rv;
-  rv.m_type = KindOfUninit;
-  callFunc(func, ar, nullptr, args, rv, false);
-
-  assertx(rv.m_type != KindOfUninit);
   frame_free_locals_no_this_inl(
     ar,
     func->numLocals(),
@@ -424,11 +309,7 @@ TypedValue* functionWrapper(ActRec* ar) {
 TypedValue* methodWrapper(ActRec* ar) {
   assertx(ar);
   auto func = ar->func();
-  auto numArgs = func->numParams();
   bool isStatic = func->isStatic();
-  TypedValue* args = ((TypedValue*)ar) - 1;
-
-  coerceFCallArgsFromLocals(ar, numArgs, func);
 
   // Prepend a context arg for methods
   // Class when it's being called statically Foo::bar()
@@ -446,11 +327,8 @@ TypedValue* methodWrapper(ActRec* ar) {
     ctx = ar->getClass();
   }
 
-  TypedValue rv;
-  rv.m_type = KindOfUninit;
-  callFunc(func, ar, ctx, args, rv, false);
+  TypedValue rv = callFunc(func, ar, ctx);
 
-  assertx(rv.m_type != KindOfUninit);
   if (isStatic) {
     frame_free_locals_no_this_inl(
       ar,
@@ -471,25 +349,10 @@ TypedValue* methodWrapper(ActRec* ar) {
   return ar->retSlot();
 }
 
-[[noreturn]] TypedValue* unimplementedWrapper(ActRec* ar) {
-  auto func = ar->func();
-  auto cls = func->cls();
-  if (cls) {
-    raise_error("Call to unimplemented native method %s::%s()",
-                cls->name()->data(), func->name()->data());
-  }
-  raise_error("Call to unimplemented native function %s()",
-              func->name()->data());
-}
-
 void getFunctionPointers(const NativeFunctionInfo& info, int nativeAttrs,
                          ArFunction& bif, NativeFunction& nif) {
   nif = info.ptr;
-  if (!nif) {
-    bif = unimplementedWrapper;
-    return;
-  }
-
+  if (!nif) return;
   auto const isMethod = info.sig.args.size() &&
       ((info.sig.args[0] == NativeSig::Type::This) ||
        (info.sig.args[0] == NativeSig::Type::Class));
@@ -498,75 +361,37 @@ void getFunctionPointers(const NativeFunctionInfo& info, int nativeAttrs,
 
 //////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_outOnly("__OutOnly");
-
-static MaybeDataType typeForOutParam(TypedValue attr) {
-
-  if (!isArrayLikeType(attr.m_type) || attr.m_data.parr->size() < 1) {
-    return {};
-  }
-
-  auto const& type = attr.m_data.parr->nvGetVal(attr.m_data.parr->iter_begin());
-  if (!isStringType(type.m_type)) return {};
-
-  auto const str = type.m_data.pstr->data();
-  if (strcmp(str, "varray") == 0) return KindOfVec;
-  if (strcmp(str, "darray") == 0) return KindOfDict;
-
-#define DT(name, ...) if (strcmp(str, "KindOf" #name) == 0) return KindOf##name;
-  DATATYPES
-#undef DT
-
-  return {};
-}
-
-MaybeDataType builtinOutType(
-  const TypeConstraint& tc,
-  const UserAttributeMap& map
-) {
-  // FIXME(T116301380): native builtins don't resolve properly
-  auto const tcDT = tc.isUnresolved() ? KindOfObject : tc.underlyingDataType();
-
-  auto const it = map.find(s_outOnly.get());
-  if (it == map.end()) return tcDT;
-
-  auto const dt = typeForOutParam(it->second);
-  return dt ? dt : tcDT;
-}
-
 static Optional<TypedValue> builtinInValue(
   const Func::ParamInfo& pinfo
 ) {
-  auto& map = pinfo.userAttributes;
+  if (!pinfo.isOutOnly()) return {};
 
-  auto const it = map.find(s_outOnly.get());
-  if (it == map.end()) return {};
-
-  auto const dt = typeForOutParam(it->second);
+  auto const dt = pinfo.typeConstraints.underlyingDataType();
   if (!dt) return make_tv<KindOfNull>();
 
   switch (*dt) {
-  case KindOfNull:    return make_tv<KindOfNull>();
-  case KindOfBoolean: return make_tv<KindOfBoolean>(false);
-  case KindOfInt64:   return make_tv<KindOfInt64>(0);
-  case KindOfDouble:  return make_tv<KindOfDouble>(0.0);
-  case KindOfPersistentString:
-  case KindOfString:  return make_tv<KindOfString>(staticEmptyString());
-  case KindOfPersistentVec:
-  case KindOfVec:     return make_tv<KindOfVec>(ArrayData::CreateVec());
-  case KindOfPersistentDict:
-  case KindOfDict:    return make_tv<KindOfDict>(ArrayData::CreateDict());
-  case KindOfPersistentKeyset:
-  case KindOfKeyset:  return make_tv<KindOfNull>();
-  case KindOfUninit:
-  case KindOfObject:
-  case KindOfResource:
-  case KindOfRFunc:
-  case KindOfFunc:
-  case KindOfClass:
-  case KindOfLazyClass:
-  case KindOfClsMeth:
-  case KindOfRClsMeth: return make_tv<KindOfNull>();
+    case KindOfNull:    return make_tv<KindOfNull>();
+    case KindOfBoolean: return make_tv<KindOfBoolean>(false);
+    case KindOfInt64:   return make_tv<KindOfInt64>(0);
+    case KindOfDouble:  return make_tv<KindOfDouble>(0.0);
+    case KindOfPersistentString:
+    case KindOfString:  return make_tv<KindOfString>(staticEmptyString());
+    case KindOfPersistentVec:
+    case KindOfVec:     return make_tv<KindOfVec>(ArrayData::CreateVec());
+    case KindOfPersistentDict:
+    case KindOfDict:    return make_tv<KindOfDict>(ArrayData::CreateDict());
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:  return make_tv<KindOfKeyset>(ArrayData::CreateKeyset());
+    case KindOfUninit:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfEnumClassLabel:
+    case KindOfRFunc:
+    case KindOfFunc:
+    case KindOfClass:
+    case KindOfLazyClass:
+    case KindOfClsMeth:
+    case KindOfRClsMeth: return make_tv<KindOfNull>();
   }
 
   not_reached();
@@ -581,9 +406,18 @@ Optional<TypedValue> builtinInValue(const Func* builtin, uint32_t i) {
 static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
   using T = NativeSig::Type;
 
+  if (tc.typeName() && interface_supports_arrlike(tc.typeName())) {
+    // TODO(T116301380): If native builtins resolved properly, we could probably
+    // do something smarter here. As it stands we match on whether the type here
+    // is _exactly_ one of the magic interfaces that supports array like things,
+    // including Hack Collections.
+    return ty == T::Mixed || ty == T::MixedTV;
+  }
+
   if (!tc.hasConstraint() || tc.isNullable() || tc.isCallable() ||
       tc.isArrayKey() || tc.isNumber() || tc.isVecOrDict() ||
-      tc.isArrayLike() || tc.isClassname()) {
+      tc.isArrayLike() || tc.isClassname() || tc.isClass() ||
+      tc.isClassOrClassname() || tc.isTypeVar() || tc.isUnion()) {
     return ty == T::Mixed || ty == T::MixedTV;
   }
 
@@ -591,7 +425,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
 
   if (tc.isUnresolved()) {
     // FIXME(T116301380): native builtins don't resolve properly
-    return ty == T::Object || ty == T::ObjectArg;
+    return ty == T::Object || ty == T::ObjectNN;
   }
 
   if (!tc.underlyingDataType()) {
@@ -601,15 +435,15 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
   switch (*tc.underlyingDataType()) {
     case KindOfDouble:       return ty == T::Double;
     case KindOfBoolean:      return ty == T::Bool;
-    case KindOfObject:       return ty == T::Object   || ty == T::ObjectArg;
+    case KindOfObject:       return ty == T::Object   || ty == T::ObjectNN;
     case KindOfPersistentString:
-    case KindOfString:       return ty == T::String   || ty == T::StringArg;
+    case KindOfString:       return ty == T::String   || ty == T::StringNN;
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
-    case KindOfKeyset:       return ty == T::Array    || ty == T::ArrayArg;
+    case KindOfKeyset:       return ty == T::Array    || ty == T::ArrayNN;
     case KindOfResource:     return ty == T::Resource || ty == T::ResourceArg;
     case KindOfUninit:
     case KindOfNull:         return ty == T::Void;
@@ -620,6 +454,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfClsMeth:      return ty == T::ClsMeth;
     case KindOfRClsMeth:     // TODO(T67037453)
     case KindOfLazyClass:    return false; // TODO (T68823958)
+    case KindOfEnumClassLabel: return false;
   }
   not_reached();
 }
@@ -652,6 +487,7 @@ static bool tcCheckNativeIO(
       case KindOfClsMeth:      return ty == T::ClsMethIO;
       case KindOfRClsMeth:     // TODO (T67037453)
       case KindOfLazyClass:    return false; // TODO (T68823958)
+      case KindOfEnumClassLabel: return false;
     }
     not_reached();
   };
@@ -662,21 +498,29 @@ static bool tcCheckNativeIO(
     return checkDT(tv->m_type);
   }
 
-  auto const& tc = pinfo.typeConstraint;
-  if (!tc.hasConstraint() || tc.isNullable() || tc.isCallable() ||
-      tc.isArrayKey() || tc.isNumber() || tc.isVecOrDict() ||
-      tc.isArrayLike() || tc.isClassname()) {
-    return ty == T::MixedIO;
-  }
+  auto const checkOne = [&](auto const& tc) {
+    if (!tc.hasConstraint() || tc.isNullable() || tc.isCallable() ||
+        tc.isArrayKey() || tc.isNumber() || tc.isVecOrDict() ||
+        tc.isArrayLike() || tc.isClassname() || tc.isClass() ||
+        tc.isClassOrClassname() || tc.isTypeVar()) {
+      return ty == T::MixedIO;
+    }
 
-  // FIXME(T116301380): native builtins don't resolve properly
-  if (tc.isUnresolved()) return ty == T::ObjectIO;
+    // FIXME(T116301380): native builtins don't resolve properly
+    if (tc.isUnresolved()) return ty == T::ObjectIO;
 
-  if (!tc.underlyingDataType()) {
-    return false;
-  }
+    if (!tc.underlyingDataType()) {
+      return false;
+    }
 
-  return checkDT(*tc.underlyingDataType());
+    return checkDT(*tc.underlyingDataType());
+  };
+
+  return std::any_of(
+    pinfo.typeConstraints.range().begin(),
+    pinfo.typeConstraints.range().end(),
+    [&](auto const& tc) { return checkOne(tc); }
+  );
 }
 
 const char* kInvalidReturnTypeMessage = "Invalid return type detected";
@@ -694,11 +538,20 @@ static const StaticString
   s_actrec("ActRec");
 
 const char* checkTypeFunc(const NativeSig& sig,
-                          const TypeConstraint& retType,
                           const FuncEmitter* func) {
   using T = NativeSig::Type;
 
-  if (!tcCheckNative(retType, sig.ret)) return kInvalidReturnTypeMessage;
+  auto const check = [](auto const& tcs, const T type) {
+    return std::any_of(
+      tcs.range().begin(),
+      tcs.range().end(),
+      [&](auto const& tc) { return tcCheckNative(tc, type); }
+    );
+  };
+
+  if (!check(func->retTypeConstraints, sig.ret)) {
+    return kInvalidReturnTypeMessage;
+  }
 
   auto argIt = sig.args.begin();
   auto endIt = sig.args.end();
@@ -729,7 +582,7 @@ const char* checkTypeFunc(const NativeSig& sig,
       continue;
     }
 
-    if (!tcCheckNative(pInfo.typeConstraint, argTy)) {
+    if (!check(pInfo.typeConstraints, argTy)) {
       return kInvalidArgTypeMessage;
     }
   }
@@ -803,9 +656,9 @@ static std::string nativeTypeString(NativeSig::Type ty) {
   case T::String:     return "string";
   case T::Array:      return "array";
   case T::Resource:   return "resource";
-  case T::ObjectArg:  return "object";
-  case T::StringArg:  return "string";
-  case T::ArrayArg:   return "array";
+  case T::ObjectNN:   return "object";
+  case T::StringNN:   return "string";
+  case T::ArrayNN:    return "array";
   case T::ResourceArg:return "resource";
   case T::Mixed:      return "mixed";
   case T::MixedTV:    return "mixed";
@@ -860,19 +713,25 @@ std::string NativeSig::toString(const char* classname,
   return str;
 }
 
-/////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
-bool registerConstant(const StringData* cnsName,
-                      ConstantCallback callback) {
-  TypedValueAux tv;
-  tv.m_type = KindOfUninit;
-  tv.m_data.pcnt = reinterpret_cast<MaybeCountable*>(callback);
-  tv.dynamic() = true;
-  if (!Constant::defNativeConstantCallback(cnsName, tv)) {
-    return false;
+using ClassExtraDataHandlerMap = std::unordered_map
+  <const StringData*, FinishFunc>;
+
+static ClassExtraDataHandlerMap s_classExtraDataHandlerMap;
+
+void registerClassExtraDataHandler(const String& clsName, FinishFunc fn) {
+  assertx(s_classExtraDataHandlerMap.find(clsName.get()) ==
+    s_classExtraDataHandlerMap.end());
+  s_classExtraDataHandlerMap[clsName.get()] = fn;
+}
+
+FinishFunc getClassExtraDataHandler(const StringData* clsName) {
+  auto it = s_classExtraDataHandlerMap.find(clsName);
+  if (it == s_classExtraDataHandlerMap.end()) {
+    return nullptr;
   }
-  s_constant_map[cnsName] = tv;
-  return true;
+  return it->second;
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -9,20 +9,20 @@
 <<__EntryPoint>> function main(): void {
 
 echo "*** Testing fileperms(), chmod() with files and dirs ***\n";
-fopen(__SystemLib\hphp_test_tmppath('perm.tmp'), "w");
-var_dump( chmod(__SystemLib\hphp_test_tmppath('perm.tmp'), 0755 ) );
-printf("%o", fileperms(__SystemLib\hphp_test_tmppath('perm.tmp')) );
+fopen(sys_get_temp_dir().'/'.'perm.tmp', "w");
+var_dump( chmod(sys_get_temp_dir().'/'.'perm.tmp', 0755) ) ;
+printf("%o", fileperms(sys_get_temp_dir().'/'.'perm.tmp')) ;
 echo "\n";
 clearstatcache();
 
-mkdir(__SystemLib\hphp_test_tmppath('perm'));
-var_dump( chmod(__SystemLib\hphp_test_tmppath('perm'), 0777 ) );
-printf("%o", fileperms(__SystemLib\hphp_test_tmppath('perm')) );
+mkdir(sys_get_temp_dir().'/'.'perm');
+var_dump( chmod(sys_get_temp_dir().'/'.'perm', 0777) ) ;
+printf("%o", fileperms(sys_get_temp_dir().'/'.'perm')) ;
 echo "\n";
 clearstatcache();
 
 echo "Done\n";
 
-unlink(__SystemLib\hphp_test_tmppath('perm.tmp'));
-rmdir(__SystemLib\hphp_test_tmppath('perm'));
+unlink(sys_get_temp_dir().'/'.'perm.tmp');
+rmdir(sys_get_temp_dir().'/'.'perm');
 }

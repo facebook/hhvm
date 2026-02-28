@@ -1,12 +1,12 @@
 <?hh
 
-function f($b) {
-  $a = $b ? 0 : darray['x' => $b];
+function f($b) :mixed{
+  $a = $b ? 0 : dict['x' => $b];
   $a[] = $a;
   var_dump($a);
 }
 
 <<__EntryPoint>>
-function main_261() {
+function main_261() :mixed{
 f(false);
 }

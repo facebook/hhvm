@@ -25,10 +25,10 @@ type client_config = {
 }
 
 type typecheck_result = {
-  errors: Errors.t;
-      (** The errors in the codebase at this point in time. This field is
+  diagnostics: Diagnostics.t;
+      (** The diagnostics in the codebase at this point in time. This field is
       cumulative, so previous cursors need not be consulted. TODO: is that
-      true, or should this be a `Relative_path.Map.t Errors.t`? *)
+      true, or should this be a `Relative_path.Map.t Diagnostics.t`? *)
 }
 
 type cursor_state =
@@ -59,9 +59,10 @@ lexicographically-orderable by the time ordering. For that reason, it's
 important that the first field in the cursor ID is the
 monotonically-increasing ID.
 
-The choice of `,` as a delimiter is important. Watchman uses `:`, which is
-inappropriate for this goal, because the ASCII value of `,` is less than that
-of all the numerals, while `:` is greater than that of all the numerals.
+The choice of `,` as a delimiter is important. Watchman and Edenfs_watcher use
+`:`, which is inappropriate for this goal, because the ASCII value of `,` is
+less than that of all the numerals, while `:` is greater than that of all the
+numerals.
 
 Using this delimiter ensures that a string like `cursor,1,foo` is less than a
 string like `cursor,10,foo` by the ASCII lexicographical ordering, which is
@@ -93,27 +94,27 @@ let make_cursor_id (id : int) (client_config : client_config) : cursor_id =
 
 let typecheck_and_get_deps_and_errors_job
     (ctx : Provider_context.t) _acc (paths : Relative_path.t list) :
-    Errors.t * dep_graph_delta =
+    Diagnostics.t * dep_graph_delta =
   List.fold
     paths
-    ~init:(Errors.empty, HashSet.create ())
+    ~init:(Diagnostics.empty, HashSet.create ())
     ~f:(fun acc path ->
       let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
       match Provider_context.read_file_contents entry with
       | Some _ ->
         let deps = HashSet.create () in
         Typing_deps.add_dependency_callback
-          "typecheck_and_get_deps_and_errors_job"
+          ~name:"typecheck_and_get_deps_and_errors_job"
           (fun dependent dependency ->
             let dependent = Typing_deps.Dep.make dependent in
             let dependency = Typing_deps.Dep.make dependency in
             HashSet.add deps (dependent, dependency));
-        let { Tast_provider.Compute_tast_and_errors.errors; _ } =
+        let { Tast_provider.Compute_tast_and_errors.diagnostics; _ } =
           Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
         in
 
         let (acc_errors, acc_deps) = acc in
-        let acc_errors = Errors.merge errors acc_errors in
+        let acc_errors = Diagnostics.merge diagnostics acc_errors in
         HashSet.union acc_deps ~other:deps;
         (acc_errors, acc_deps)
       | None -> acc)
@@ -215,20 +216,17 @@ class cursor ~client_id ~cursor_state =
              been processed. Stop recursion here. *)
           acc
         | Saved_state { dep_table_errors_saved_state_path; _ } ->
-          let errors : SaveStateServiceTypes.saved_state_errors =
-            if
-              Sys.file_exists (Path.to_string dep_table_errors_saved_state_path)
-            then
+          if Sys.file_exists (Path.to_string dep_table_errors_saved_state_path)
+          then
+            let errors : SaveStateServiceTypes.saved_state_errors =
               In_channel.with_file
                 ~binary:true
                 (Path.to_string dep_table_errors_saved_state_path)
                 ~f:(fun ic -> Marshal.from_channel ic)
-            else
-              []
-          in
-          errors
-          |> List.map ~f:(fun (_phase, path) -> path)
-          |> List.fold ~init:acc ~f:Relative_path.Set.union
+            in
+            errors
+          else
+            Relative_path.Set.empty
         | Saved_state_delta { previous; fanout_result; _ } ->
           let acc =
             Relative_path.Set.union
@@ -261,7 +259,7 @@ class cursor ~client_id ~cursor_state =
             | None ->
               Relative_path.Map.add acc ~key:path ~data:Naming_sqlite.Deleted
             | Some _ ->
-              let file_info =
+              let ids =
                 Ast_provider.compute_file_info
                   ~popt:(Provider_context.get_popt ctx)
                   ~entry
@@ -269,7 +267,8 @@ class cursor ~client_id ~cursor_state =
               Relative_path.Map.add
                 acc
                 ~key:path
-                ~data:(Naming_sqlite.Modified file_info))
+                ~data:
+                  (Naming_sqlite.Modified { FileInfo.empty_t with FileInfo.ids }))
       in
 
       let old_naming_table = self#load_naming_table ctx in
@@ -294,10 +293,10 @@ class cursor ~client_id ~cursor_state =
 
     method calculate_errors
         (ctx : Provider_context.t) (workers : MultiWorker.worker list)
-        : Errors.t * cursor option =
+        : Diagnostics.t * cursor option =
       match cursor_state with
-      | Typecheck_result { typecheck_result = { errors; _ }; _ } ->
-        (errors, None)
+      | Typecheck_result { typecheck_result = { diagnostics; _ }; _ } ->
+        (diagnostics, None)
       | (Saved_state _ | Saved_state_delta _) as current_cursor ->
         (* The global reverse naming table is updated by calling this
            function. We can discard the forward naming table returned to us. *)
@@ -309,9 +308,9 @@ class cursor ~client_id ~cursor_state =
           MultiWorker.call
             (Some workers)
             ~job:(typecheck_and_get_deps_and_errors_job ctx)
-            ~neutral:(Errors.empty, HashSet.create ())
+            ~neutral:(Diagnostics.empty, HashSet.create ())
             ~merge:(fun (errors, deps) (acc_errors, acc_deps) ->
-              let acc_errors = Errors.merge acc_errors errors in
+              let acc_errors = Diagnostics.merge acc_errors errors in
               HashSet.union acc_deps ~other:deps;
               (acc_errors, acc_deps))
             ~next:
@@ -323,14 +322,14 @@ class cursor ~client_id ~cursor_state =
           "Got %d new dependency edges as a result of typechecking %d files"
           (HashSet.length fanout_files_deps)
           (Relative_path.Set.cardinal files_to_typecheck);
-        let typecheck_result = { errors } in
+        let typecheck_result = { diagnostics } in
         let cursor =
           new cursor
             ~client_id
             ~cursor_state:
               (Typecheck_result { previous = current_cursor; typecheck_result })
         in
-        (errors, Some cursor)
+        (diagnostics, Some cursor)
   end
 
 type persistent_state = {

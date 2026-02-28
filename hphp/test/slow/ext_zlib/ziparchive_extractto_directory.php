@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main_ziparchive_extractto_directory() {
+function main_ziparchive_extractto_directory() :mixed{
 $dir = tempnam(sys_get_temp_dir(), __FILE__);
 unlink($dir);
 mkdir($dir);

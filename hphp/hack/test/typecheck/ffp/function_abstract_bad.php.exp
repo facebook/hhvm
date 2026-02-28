@@ -1,8 +1,8 @@
-File "function_abstract_bad.php", line 4, characters 7-14:
+ERROR: File "function_abstract_bad.php", line 4, characters 7-14:
 Top-level functions cannot be declared `abstract` (Parsing[1002])
-File "function_abstract_bad.php", line 4, characters 32-35:
+ERROR: File "function_abstract_bad.php", line 4, characters 32-35:
 `async` functions must have an `Awaitable` return type. (Parsing[1002])
-File "function_abstract_bad.php", line 4, characters 25-27:
+ERROR: File "function_abstract_bad.php", line 4, characters 25-27:
 Invalid return type (Typing[4336])
   File "function_abstract_bad.php", line 4, characters 32-35:
   Expected `void`

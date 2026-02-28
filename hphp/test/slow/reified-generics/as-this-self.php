@@ -10,7 +10,7 @@ class C {
 
 class D {
   const type T1 = string;
-  public function f(mixed $x) {
+  public function f(mixed $x) :mixed{
     $e = new E();
     $e->f<C::T2>($x);
   }
@@ -18,7 +18,7 @@ class D {
 
 class E {
   const type T1 = bool;
-  public function f<reify T>(mixed $x) {
+  public function f<reify T>(mixed $x) :mixed{
     try {
       $x as T;
       var_dump("yes");

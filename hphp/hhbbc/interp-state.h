@@ -19,7 +19,7 @@
 #include <string>
 #include <map>
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/interp.h"
@@ -33,6 +33,8 @@ namespace HPHP::HHBBC {
 
 struct ClassAnalysis;
 struct FuncAnalysis;
+
+struct ClsConstantWork;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -74,10 +76,8 @@ struct LiveIter {
   BlockId initBlock       = NoBlockId;
   // Set whenever we see any mutation, even "safe" ones that don't affect keys.
   bool baseUpdated        = false;
-  // Set whenever the base of the iterator cannot be an iterator
-  bool baseCannotBeObject = false;
 };
-using Iter = boost::variant<DeadIter, LiveIter>;
+using Iter = std::variant<DeadIter, LiveIter>;
 
 /*
  * Tag indicating what sort of thing contains the current member base.
@@ -124,7 +124,6 @@ enum class BaseLoc {
   Local,
   This,
   Stack,
-  Global,
 };
 
 /*
@@ -353,7 +352,7 @@ private:
 struct StateBase {
   StateBase() {
     initialized = unreachable = false;
-  };
+  }
   StateBase(const StateBase&) = default;
   StateBase(StateBase&&) = default;
   StateBase& operator=(const StateBase&) = default;
@@ -416,13 +415,14 @@ struct State : StateBase {
   }
 
   InterpStack stack;
+  IterId topStkIterKeyEquiv = NoIterId;
 };
 
 /*
  * Return a copy of a State without copying the evaluation stack, pushing
  * Throwable on the stack.
  */
-State with_throwable_only(const Index& env, const State&);
+State with_throwable_only(const IIndex& env, const State&);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -449,17 +449,54 @@ struct StateMutationUndo {
   // Stack modification (undone by changing the stack slot to the
   // recorded type).
   struct Stack { size_t idx; Type t; };
-  using Events = boost::variant<Push, Pop, Local, Stack, Mark>;
+  // Top of stack is an array which just had the given key inserted
+  // into it, and the set is reversable. (Used to avoid COW for large
+  // specialized arrays).
+  struct UndoableArraySet {
+    Type key;
+    // Store information about *post* set array so DCE can avoid
+    // needing to materialize the post set array.
+    Optional<int64_t> size;
+    Type::ArrayCat cat;
+    bool isStrictSubtypeOfDict;
+  };
+  using Events = std::variant<Push, Pop, Local, Stack, Mark, UndoableArraySet>;
 
   std::vector<Events> events;
+  bool suppressed{false};
 
-  void onPush() { events.emplace_back(Push{}); }
-  void onPop(Type old) { events.emplace_back(Pop{ std::move(old) }); }
+  void suppress() {
+    assertx(!suppressed);
+    suppressed = true;
+  }
+  void unsuppress() { suppressed = false; }
+
+  void onPush() {
+    if (suppressed) return;
+    events.emplace_back(Push{});
+  }
+  void onPop(Type old) {
+    if (suppressed) return;
+    events.emplace_back(Pop{ std::move(old) });
+  }
   void onStackWrite(size_t idx, Type old) {
+    if (suppressed) return;
     events.emplace_back(Stack{ idx, std::move(old) });
   }
   void onLocalWrite(LocalId l, Type old) {
+    if (suppressed) return;
     events.emplace_back(Local{ l, std::move(old) });
+  }
+  void onUndoableArraySet(const Type& arr, Type key) {
+    if (suppressed) return;
+    events.emplace_back(
+      UndoableArraySet{
+        std::move(key),
+        arr_size(arr),
+        categorize_array(arr),
+        arr.strictSubtypeOf(BDictN)
+      }
+    );
   }
 };
 
@@ -477,15 +514,15 @@ struct StateMutationUndo {
  * populated.
  */
 struct PropertiesInfo {
-  PropertiesInfo(const Index&, Context, ClassAnalysis*);
+  PropertiesInfo(const IIndex&, Context, ClassAnalysis*);
 
-  const PropStateElem<>* readPrivateProp(SString name) const;
-  const PropStateElem<>* readPrivateStatic(SString name) const;
+  const PropStateElem* readPrivateProp(SString name) const;
+  const PropStateElem* readPrivateStatic(SString name) const;
 
-  void mergeInPrivateProp(const Index& index,
+  void mergeInPrivateProp(const IIndex& index,
                           SString name,
                           const Type& t);
-  void mergeInPrivateStatic(const Index& index,
+  void mergeInPrivateStatic(const IIndex& index,
                             SString name,
                             const Type& t,
                             bool ignoreConst,
@@ -493,12 +530,17 @@ struct PropertiesInfo {
 
   void mergeInPrivateStaticPreAdjusted(SString name, const Type& t);
 
-  void mergeInAllPrivateProps(const Index&, const Type&);
-  void mergeInAllPrivateStatics(const Index&, const Type&,
+  void mergeInAllPrivateProps(const IIndex&, const Type&);
+  void mergeInAllPrivateStatics(const IIndex&, const Type&,
                                 bool ignoreConst,
                                 bool mustBeReadOnly);
 
-  void setBadPropInitialValues();
+  void setInitialValue(const php::Prop&, TypedValue, bool, bool);
+
+  bool hasInitialValues() const { return !m_inits.empty(); }
+  const PropInitInfo* getInitialValue(const php::Prop&) const;
+
+  bool privatePropertySatisfiesTC(SString name) const;
 
   const PropState& privatePropertiesRaw() const;
   const PropState& privateStaticsRaw() const;
@@ -507,6 +549,7 @@ private:
   ClassAnalysis* const m_cls;
   PropState m_privateProperties;
   PropState m_privateStatics;
+  hphp_fast_map<const php::Prop*, PropInitInfo> m_inits;
   const php::Func* m_func;
 };
 
@@ -523,7 +566,7 @@ struct MethodsInfo {
   // Look up the best known return type for the current class's
   // method, return std::nullopt if not known, or if the Func is not a
   // method of the current class.
-  Optional<Type> lookupReturnType(const php::Func&);
+  Optional<Index::ReturnType> lookupReturnType(const php::Func&);
 
 private:
   ClassAnalysis* m_cls;
@@ -537,17 +580,24 @@ private:
  * Shows up in a few different interpreter structures.
  */
 using ClosureUseVarMap = hphp_fast_map<
-  php::Class*,
+  const php::Class*,
   CompactVector<Type>
 >;
 
-/*
- * Merge the types in the vector as possible use vars for the closure
- * `clo' into the destination map.
- */
-void merge_closure_use_vars_into(ClosureUseVarMap& dst,
-                                 php::Class* clo,
-                                 CompactVector<Type>);
+struct ClosureUseVarInfo {
+  ClosureUseVarInfo(const IIndex*, Context, ClassAnalysis*);
+
+  CompactVector<Type> initial(const php::Func&);
+  void merge(const php::Class&, CompactVector<Type>);
+
+  ClosureUseVarMap merged() { return std::move(m_merged); }
+
+private:
+  const IIndex* m_index;
+  ClassAnalysis* m_cls;
+  const php::Func* m_func;
+  ClosureUseVarMap m_merged;
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -578,28 +628,40 @@ inline CollectionOpts operator-(CollectionOpts o1, CollectionOpts o2) {
 
 inline bool any(CollectionOpts o) { return static_cast<int>(o); }
 
+//////////////////////////////////////////////////////////////////////
+
+// Information about all the memoization setters seen so far.
+struct MemoSets {
+  // To avoid ambiguity, we separate the types for the eager and
+  // suspend case.
+  Type retTy;
+  Type waitHandleRetTy;
+  bool effectFree{true};
+};
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Area used for writing down any information that is collected across
  * a series of step operations (possibly cross block).
  */
 struct CollectedInfo {
-  explicit CollectedInfo(const Index& index,
-                         Context ctx,
-                         ClassAnalysis* cls,
-                         CollectionOpts opts,
-                         const FuncAnalysis* fa = nullptr);
+  CollectedInfo(const IIndex& index,
+                Context ctx,
+                ClassAnalysis* cls,
+                CollectionOpts opts,
+                ClsConstantWork* clsCns = nullptr,
+                const FuncAnalysis* fa = nullptr);
 
-  ClosureUseVarMap closureUseTypes;
+  ClosureUseVarInfo closureUseVars;
   PropertiesInfo props;
   MethodsInfo methods;
+  ClsConstantWork* clsCns;
   hphp_fast_set<CallContext, CallContextHasher> unfoldableFuncs;
   bool effectFree{true};
+  bool reanalyzeOnUpdate{false};
   bool hasInvariantIterBase{false};
   CollectionOpts opts{};
-  /*
-   * See FuncAnalysisResult for details.
-   */
-  std::bitset<64> usedParams;
 
   PublicSPropMutations publicSPropMutations;
 
@@ -610,6 +672,10 @@ struct CollectedInfo {
      */
     Base base{};
 
+    /*
+     * Used to track whether a member op sequence is effect free. We use
+     * this information to replace member op sequences with constants.
+     */
     bool effectFree{false};
     bool extraPop{false};
 
@@ -631,8 +697,23 @@ struct CollectedInfo {
       base.loc = BaseLoc::None;
       arrayChain.clear();
     }
+
+    bool empty() const {
+      return base.loc == BaseLoc::None && arrayChain.empty();
+    }
   };
   MInstrState mInstrState;
+
+  /*
+   * All blocks encountered (so far) which contain a MemoGet
+   * instruction.
+   */
+  folly::sorted_vector_set<BlockId> allMemoGets;
+  /*
+   * The union of all types used as inputs to a MemoSet instruction,
+   * and whether those types come from an effect-free function.
+   */
+  MemoSets allMemoSets;
 };
 
 //////////////////////////////////////////////////////////////////////

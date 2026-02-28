@@ -22,7 +22,7 @@ let error_if_abstract_type_constant_with_default env typeconst =
     match typeconst.c_tconst_kind with
     | Aast.TCAbstract { c_atc_default = Some _; _ } ->
       let (pos, _) = typeconst.c_tconst_name in
-      Errors.experimental_feature pos "abstract type constant with default"
+      Diagnostics.experimental_feature pos "abstract type constant with default"
     | _ -> ()
 
 let handler =

@@ -1,0 +1,2 @@
+ERROR: File "lambda_called_on_pair_negative.php", line 3, characters 19-20:
+Tuple elements can only be accessed with an integer literal (Typing[4116])

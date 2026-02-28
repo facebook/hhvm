@@ -53,7 +53,7 @@ void print_int(int64_t i);
 void print_boolean(bool val);
 
 void raiseWarning(const StringData* sd);
-void raiseNotice(const StringData* sd);
+void raiseNotice(uint32_t sampleRate, const StringData* sd);
 [[noreturn]] void throwArrayIndexException(const ArrayData *ad, int64_t index);
 [[noreturn]] void throwArrayKeyException(const ArrayData *ad, const StringData* key);
 std::string formatParamInOutMismatch(const char* fname, uint32_t index,
@@ -65,7 +65,9 @@ void checkReadonlyMismatch(const Func* func, uint32_t numArgs,
 [[noreturn]] void throwParamInOutMismatch(const Func* func, uint32_t index);
 [[noreturn]] void throwReadonlyMismatch(const Func* func, int32_t index);
 [[noreturn]] void throwInvalidUnpackArgs();
-[[noreturn]] void throwMissingArgument(const Func* func, int got);
+[[noreturn]] void throwMissingPositionalArgument(const Func* func, int got);
+[[noreturn]] void throwMissingNamedArgument(const Func* func, int got);
+[[noreturn]] void throwNamedArgumentNameMismatch(const Func* func, const StringData* argName);
 [[noreturn]] void throwOrWarnLocalMustBeValueTypeException(const StringData* locName);
 [[noreturn]] void throwMustBeEnclosedInReadonlyException(const Class* cls,
                                                          const StringData* propName);
@@ -84,6 +86,27 @@ void raiseCoeffectsCallViolation(const Func* callee,
 
 void raiseCoeffectsFunParamTypeViolation(TypedValue, int32_t);
 void raiseCoeffectsFunParamCoeffectRulesViolation(const Func*);
+
+void raiseModuleBoundaryViolation(const Class* ctx,
+                                  const Func* callee,
+                                  const StringData* callerModule);
+void raiseModuleBoundaryViolation(const Class* cls,
+                                  const StringData* callerModule);
+
+void raiseModulePropertyViolation(const Class* cls,
+                                  const StringData* prop,
+                                  const StringData* callerModule,
+                                  bool is_static);
+
+/**
+ * We enter this function if a class is loaded from a string and missing
+ * AttrDynamicallyReferenced. This attr is set by hackc if the
+ * <<__DynamicallyReferenced>> attribute is present and has no arguments.
+ * If we pass an int argument to the attribute, we treat it as "soft" missing
+ * and go down the slow path; then we look up the user attributes on the
+ * resolved Class* at runtime to determine the sample rate for the notice.
+ */
+void raiseMissingDynamicallyReferenced(const Class* cls);
 
 inline Iter*
 frame_iter(const ActRec* fp, int i) {
@@ -174,8 +197,5 @@ void ALWAYS_INLINE
 frame_free_args(TypedValue* args, int count) {
   for (auto i = count; i--; ) tvDecRefGen(*(args - i));
 }
-
-int64_t zero_error_level();
-void restore_error_level(int64_t oldLevel);
 
 }

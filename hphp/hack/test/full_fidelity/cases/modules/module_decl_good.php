@@ -1,13 +1,11 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('modules')>>
-
-module Foobar {
+new module Foobar {
 
 }
 
-module BiNgBaZ {}
+new module BiNgBaZ {}
 
 
 <<Attributes('?'), YesAttributes('.')>>
-module Lol_Attributes {}
+new module Lol_Attributes {}

@@ -6,7 +6,7 @@
    +-------------------------------------------------------------+
 */
 
-function e() {
+function e() :mixed{
   try {
     var_dump($p);
     var_dump(isset($p));
@@ -17,7 +17,7 @@ function e() {
   }
 }
 
-function f($p) {
+function f($p) :mixed{
   var_dump($p);
   var_dump(isset($p));
   unset($p);
@@ -27,13 +27,13 @@ function f($p) {
 class X1 {
 }
 
-function g2() {
+function g2() :mixed{
   var_dump(\HH\global_isset('gl'));
   \HH\global_unset('gl'); // unsets global "version"
   var_dump(\HH\global_isset('gl'));
 }
 
-function g3($p1, inout $p2) {
+function g3($p1, inout $p2) :mixed{
   try {
     var_dump(isset($p1, $p2));
     unset($p1, $p2); // unsets local "version" in current scope
@@ -44,9 +44,9 @@ function g3($p1, inout $p2) {
 }
 
 class State {
-  static $count = 0;
+  public static $count = 0;
 }
-function g4() {
+function g4() :mixed{
   ++State::$count;
   echo "count = ".State::$count."\n";
 
@@ -149,7 +149,7 @@ function entrypoint_intrinsics_unset(): void {
 
   echo "---------- unsetting array elements ------------\n";
 
-  $a = darray[0 => 10, 1 => 20, "xx" => 30];
+  $a = dict[0 => 10, 1 => 20, "xx" => 30];
   print_r($a);
   unset($a[1]);
   print_r($a);

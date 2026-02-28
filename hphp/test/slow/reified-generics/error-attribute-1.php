@@ -1,5 +1,5 @@
 <?hh
 
-<<__Reified(varray[1,2])>>
+<<__Reified(vec[1,2])>>
 class D {}
 

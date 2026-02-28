@@ -1,1 +1,1 @@
-Fatal error: Class 'X' required to extend class 'NonExistent' by trait '%s' in %s/test/slow/traits/require_constraint_nonexistent_class.php on line 7
+Fatal error: Class 'X' required to be a strict subclass of class 'NonExistent' by trait '%s' in %s/test/slow/traits/require_constraint_nonexistent_class.php on line 7

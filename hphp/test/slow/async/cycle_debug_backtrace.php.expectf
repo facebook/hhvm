@@ -1,24 +1,13 @@
-dict(4) {
-  [0]=>
+vec(3) {
   string(28) "Closure$testCycleBackTrace#3"
-  [1]=>
   string(12) "HH\Asio\join"
-  [2]=>
-  string(18) "testCycleBackTrace"
-  [3]=>
-  string(32) "entrypoint_cycle_debug_backtrace"
+  string(35) "__SystemLib\enter_async_entry_point"
 }
-dict(5) {
-  [0]=>
+vec(4) {
   string(28) "Closure$testCycleBackTrace#5"
-  [1]=>
   string(28) "Closure$testCycleBackTrace#3"
-  [2]=>
   string(12) "HH\Asio\join"
-  [3]=>
-  string(18) "testCycleBackTrace"
-  [4]=>
-  string(32) "entrypoint_cycle_debug_backtrace"
+  string(35) "__SystemLib\enter_async_entry_point"
 }
 string(%d) "Encountered dependency cycle.
 Existing stack:
@@ -27,6 +16,26 @@ Existing stack:
 Trying to introduce dependency on:
   {closure} (%x) (dupe)
 "
+vec(4) {
+  dict(2) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(22)
+  }
+  dict(1) {
+    ["function"]=>
+    string(28) "Closure$testCycleBackTrace#3"
+  }
+  dict(1) {
+    ["function"]=>
+    string(12) "HH\Asio\join"
+  }
+  dict(1) {
+    ["function"]=>
+    string(35) "__SystemLib\enter_async_entry_point"
+  }
+}
 string(178) "Encountered dependency cycle.
 Existing stack:
   {closure} (%x) (dupe)
@@ -34,3 +43,23 @@ Existing stack:
 Trying to introduce dependency on:
   {closure} (%x) (dupe)
 "
+vec(4) {
+  dict(2) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(22)
+  }
+  dict(1) {
+    ["function"]=>
+    string(28) "Closure$testCycleBackTrace#3"
+  }
+  dict(1) {
+    ["function"]=>
+    string(12) "HH\Asio\join"
+  }
+  dict(1) {
+    ["function"]=>
+    string(35) "__SystemLib\enter_async_entry_point"
+  }
+}

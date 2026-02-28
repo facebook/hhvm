@@ -9,7 +9,7 @@
 
 open Hh_prelude
 open Reordered_argument_collections
-include Sys
+include Stdlib.Sys
 
 module S = struct
   type t = string [@@deriving show]
@@ -60,6 +60,9 @@ let make_unsafe path = path
 
 let to_string path = path
 
+(** [concat p1 p2] returns a path equivalent to [p1 ^ "/" ^ p2].
+  In the resulting path [p1] (resp. [p2]) has all its trailing (resp. leading) "." and "/" removed.
+  eg: concat "a/." ".//b" => "a/b" concat "." "b" => "./b" concat "a" "." => "a/." concat "a" "/b" => "a/b" *)
 let concat path more = make (Filename.concat path more)
 
 let parent path =
@@ -114,4 +117,4 @@ let path_of_slash_escaped_string str =
   consume 0;
   make (Buffer.contents buf)
 
-module Set = Reordered_argument_set (Caml.Set.Make (S))
+module Set = Reordered_argument_set (Stdlib.Set.Make (S))

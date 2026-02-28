@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 interface IFoo {
   public static function test(): string;
 }

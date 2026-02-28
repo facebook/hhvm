@@ -32,29 +32,22 @@
 #include <string>
 #include <vector>
 
-#ifdef __APPLE__
-# include <dispatch/dispatch.h>
-#elif defined(_MSC_VER)
-# include <agents.h>
-# include <ppltasks.h>
-#endif
-
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
 struct RequestInjectionData;
 
+namespace VSDEBUG {
+struct DebuggerRequestInfo;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 struct RequestTimer {
   friend struct RequestInjectionData;
 
-#if defined(__APPLE__) || defined(_MSC_VER)
-  RequestTimer(RequestInjectionData*);
-#else
   RequestTimer(RequestInjectionData*, clockid_t);
-#endif
 
   ~RequestTimer();
 
@@ -66,13 +59,6 @@ private:
   RequestInjectionData* m_reqInjectionData;
   int m_timeoutSeconds{0};
 
-#if defined(__APPLE__)
-  void cancelTimerSource();
-  dispatch_source_t m_timerSource{nullptr};
-  dispatch_group_t m_timerGroup;
-#elif defined(_MSC_VER)
-  concurrency::task_completion_event<void>* m_tce{nullptr};
-#else
   clockid_t m_clockType;
   timer_t m_timerId;
   TYPE_SCAN_IGNORE_FIELD(m_timerId); // timer_t is void*
@@ -81,8 +67,7 @@ private:
   bool m_hasTimer{false};
 
   /* Set true when we activate a timer, cleared when the signal handler runs. */
-  std::atomic<bool> m_timerActive{false};
-#endif
+  std::atomic_bool m_timerActive{false};
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -117,15 +102,9 @@ struct RequestInjectionData {
   };
 
   RequestInjectionData()
-#if defined(__APPLE__) || defined(_MSC_VER)
-    : m_timer(this)
-    , m_cpuTimer(this)
-    , m_userTimeoutTimer(this)
-#else
     : m_timer(this, CLOCK_REALTIME)
     , m_cpuTimer(this, CLOCK_THREAD_CPUTIME_ID)
     , m_userTimeoutTimer(this, CLOCK_REALTIME)
-#endif
     {}
 
   ~RequestInjectionData() = default;
@@ -193,7 +172,7 @@ struct RequestInjectionData {
   }
   void clearHostOOMFlag() {
     clearFlag(MemExceededFlag);
-    m_hostOutOfMemory.store(false, std::memory_order_relaxed);
+    m_hostOutOfMemory.store(false, std::memory_order_release);
   }
   bool hostOOMFlag() const {
     return m_hostOutOfMemory.load(std::memory_order_acquire);
@@ -238,8 +217,8 @@ struct RequestInjectionData {
   /*
    * Whether to suppress the emission of Class to String conversion warnings.
    */
-  bool getSuppressClassConversionWarnings() const;
-  void setSuppressClassConversionWarnings(bool);
+  bool getSuppressClassConversionNotices() const;
+  void setSuppressClassConversionNotices(bool);
 
   /*
    * Whether coverage is being collected.
@@ -254,7 +233,8 @@ struct RequestInjectionData {
   bool getDebuggerAttached();
   void setDebuggerAttached(bool);
 
-  void setDebuggerAttachedAtInit(bool);
+  void setVSDebugDisablesJit(bool);
+  bool getVSDebugDisablesJit() const { return m_vsdebugDisablesJit; }
 
   /*
    * Returns true if the debugger should force interrupts due to any of the
@@ -262,6 +242,17 @@ struct RequestInjectionData {
    */
   bool getDebuggerForceIntr() const;
   void setDebuggerIntr(bool);
+
+  /*
+   * Returns true whether the request was interrupted by the debugger.
+   */
+  bool wasInterruptedByDebugger() const;
+  void setWasInterruptedByDebugger();
+
+  /*
+   * Whether the debugger is running any step command.
+   */
+  bool getDebuggerStepIntr() const;
 
   /*
    * Whether the debugger is running a "step in" command.
@@ -281,6 +272,13 @@ struct RequestInjectionData {
    */
   StepOutState getDebuggerStepOut() const;
   void setDebuggerStepOut(StepOutState);
+
+  VSDEBUG::DebuggerRequestInfo* getDebuggerRequestInfo() const {
+    return m_debuggerRI.load(std::memory_order_acquire);
+  }
+  void setDebuggerRequestInfo(VSDEBUG::DebuggerRequestInfo* debuggerRI) {
+    m_debuggerRI.store(debuggerRI, std::memory_order_release);
+  }
 
   /*
    * The stack depth registered by the debugger's most recent flow command.
@@ -310,6 +308,11 @@ struct RequestInjectionData {
    */
   size_t getDebuggerStackDepth() const;
 
+  /*
+   * Clear all breakpoint and flow filters.
+   */
+  void clearPCFilters();
+
   /* Getters and setters for user settable INI settings. */
 
   const std::string& getDefaultMimeType() const;
@@ -323,12 +326,6 @@ struct RequestInjectionData {
   int64_t getMemoryLimitNumeric() const;
   void setMemoryLimit(folly::StringPiece);
 
-  const std::string& getVariablesOrder() const;
-  void setVariablesOrder(const std::string&);
-
-  const std::string& getRequestOrder() const;
-  void setRequestOrder(const std::string&);
-
   int64_t getSocketDefaultTimeout() const;
 
   const std::string& getUserAgent() const;
@@ -340,6 +337,28 @@ struct RequestInjectionData {
   bool setAllowedDirectories(const std::string& value);
 
   const std::vector<std::string>& getAllowedDirectoriesProcessed() const;
+
+  const std::string& getBrotliEnabled() const { return m_brotliEnabled; }
+
+  const std::string& getBrotliChunkedEnabled() const { return m_brotliChunkedEnabled; }
+
+  uint32_t getBrotliLgWindowSize() const { return m_brotliLgWindowSize; }
+
+  uint32_t getBrotliQuality() const { return m_brotliQuality; }
+
+  const std::string& getZstdEnabled() const { return m_zstdEnabled; }
+
+  int64_t getZstdLevel() const { return m_zstdLevel; }
+
+  int64_t getZstdChecksumRate() const { return m_zstdChecksumRate; }
+
+  int64_t getZstdWindowLog() const { return m_zstdWindowLog; }
+
+  int64_t getZstdTargetBlockSize() const { return m_zstdTargetBlockSize; }
+
+  const std::string& getGzipCompressionEnabled() const { return m_gzipCompressionEnabled; }
+
+  int64_t getGzipCompressionLevel() const { return m_gzipCompressionLevel; }
 
   // When safe file access is enabled only whitelisted by setAllowedDirectories
   // may be modified
@@ -358,18 +377,22 @@ private:
   RequestTimer m_userTimeoutTimer;
 
   bool m_debuggerAttached{false};
-  bool m_hasDebuggerAttachedAtInit{false};
+  bool m_vsdebugDisablesJit{false};
   bool m_coverage{false};
   bool m_jit{false};
   bool m_jittingDisabled{false};
   bool m_jitFolding{false};
+
   bool m_debuggerIntr{false};
+  bool m_wasInterruptedByDebugger{false};
 
   bool m_suppressClassConversionWarnings{false};
 
   bool m_debuggerStepIn{false};
   bool m_debuggerNext{false};
   StepOutState m_debuggerStepOut{StepOutState::None};
+
+  std::atomic<VSDEBUG::DebuggerRequestInfo*> m_debuggerRI{nullptr};
 
 public:
   PCFilter m_breakPointFilter;
@@ -397,8 +420,7 @@ private:
    * `m_hostOutOfMemory` is a flag used together with MemExceededFlag, to
    * indicate whether the host is running low on memory.  Note that the presence
    * of this flag doesn't necessarily lead to the request being aborted.  A
-   * request is only affected when it satisfies some other criteria, e.g., when
-   * it uses more memory than RequestMemoryOOMKillBytes.  If we do decide to
+   * request is only affected when it satisfies some other criteria.  If we do decide to
    * abort the request, `m_OOMAbort` is set.
    */
   std::atomic<bool> m_hostOutOfMemory{false};
@@ -408,24 +430,15 @@ private:
   bool m_requestOOM{false};
 
   /* Pointer to surprise flags stored in RDS. */
-  std::atomic<size_t>* m_sflagsAndStkPtr{nullptr};
+  StackLimitAndSurpriseFlags* m_stackLimitAndSurprise{nullptr};
 
   std::stack<int> m_activeLineBreaks;
 
   /* Things corresponding to user settable INI settings. */
 
   std::string m_maxMemory;
-  std::string m_argSeparatorOutput;
-  std::string m_argSeparatorInput;
-  std::string m_variablesOrder;
-  std::string m_requestOrder;
   std::string m_defaultCharset;
   std::string m_defaultMimeType;
-  std::string m_brotliEnabled;
-  std::string m_brotliChunkedEnabled;
-  std::string m_zstdEnabled;
-  std::string m_gzipCompressionLevel = "-1";
-  std::string m_gzipCompression;
   std::string m_errorLog;
   std::string m_userAgent;
   std::string m_timezone;
@@ -441,11 +454,23 @@ private:
   int64_t m_errorReportingLevel;
   int64_t m_socketDefaultTimeout;
   int64_t m_maxMemoryNumeric;
-  int64_t m_brotliLgWindowSize;
-  int64_t m_brotliQuality;
+
+  /* Brotli */
+  std::string m_brotliEnabled;
+  std::string m_brotliChunkedEnabled;
+  uint32_t m_brotliLgWindowSize;
+  uint32_t m_brotliQuality;
+
+  /* Zstd */
+  std::string m_zstdEnabled;
   int64_t m_zstdLevel;
   int64_t m_zstdChecksumRate;
   int64_t m_zstdWindowLog;
+  int64_t m_zstdTargetBlockSize;
+
+  /* Gzip */
+  std::string m_gzipCompressionEnabled;
+  int64_t m_gzipCompressionLevel = -1;
 
   /*
    * Instead of using several surprise flags, we can track the timeout info

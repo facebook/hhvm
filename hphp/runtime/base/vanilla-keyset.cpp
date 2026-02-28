@@ -20,11 +20,8 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/tv-uncounted.h"
-#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/vanilla-dict-defs.h"
 
 #include "hphp/util/alloc.h"
@@ -35,7 +32,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(runtime);
+TRACE_SET_MOD(runtime)
 
 std::aligned_storage<kEmptyKeysetSize, 16>::type s_theEmptyKeyset;
 
@@ -116,6 +113,8 @@ ArrayData* VanillaKeyset::MakeSet(uint32_t size, const TypedValue* values) {
     }
   }
   auto ad = asSet(MakeReserveSet(size));
+
+  auto const op = "keyset insertion";
   for (uint32_t i = 0; i < size; ++i) {
     auto& tv = values[size - i - 1];
     /*
@@ -129,12 +128,12 @@ ArrayData* VanillaKeyset::MakeSet(uint32_t size, const TypedValue* values) {
       decRefStr(tv.m_data.pstr); // FIXME
     } else if (isClassType(tv.m_type)) {
       auto const keyStr =
-        const_cast<StringData*>(classToStringHelper(tv.m_data.pclass));
+        const_cast<StringData*>(classToStringHelper(tv.m_data.pclass, op));
       ad->insert<false>(keyStr);
     } else {
       assertx(isLazyClassType(tv.m_type));
       auto const keyStr =
-        const_cast<StringData*>(lazyClassToStringHelper(tv.m_data.plazyclass));
+        const_cast<StringData*>(lazyClassToStringHelper(tv.m_data.plazyclass, op));
       ad->insert<false>(keyStr);
     }
   }
@@ -221,7 +220,7 @@ ArrayData* VanillaKeyset::MakeSetFromAPC(const APCArray* apc) {
   auto const apcSize = apc->size();
   KeysetInit init{apcSize};
   for (uint32_t i = 0; i < apcSize; ++i) {
-    init.add(apc->getPackedVal(i)->toLocal());
+    init.add(apc->getPackedVal(i)->toLocal(true /* pure irrelevant for arraykeys */));
   }
   return init.create();
 }
@@ -435,7 +434,7 @@ void VanillaKeyset::compact() {
  */
 bool VanillaKeyset::checkInvariants() const {
   static_assert(sizeof(VanillaKeyset) % 16 == 0, "Some memcpy16 can fail.");
-  static_assert(sizeof(Elm) <= 16, "Don't loose the precious memory gainz!");
+  static_assert(sizeof(Elm) <= 16, "Don't lose the precious memory gainz!");
 
   // All arrays:
   assertx(checkCount());
@@ -542,6 +541,10 @@ arr_lval VanillaKeyset::LvalInt(ArrayData*, int64_t) {
 }
 
 arr_lval VanillaKeyset::LvalStr(ArrayData*, StringData*) {
+  throwInvalidKeysetOperation();
+}
+
+ArrayData* VanillaKeyset::SetPosMove(ArrayData*, ssize_t, TypedValue) {
   throwInvalidKeysetOperation();
 }
 

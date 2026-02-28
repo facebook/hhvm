@@ -44,7 +44,7 @@ final class sockaddr_in extends sockaddr {
   }
 
   final public function __debugInfo(): darray<string, mixed> {
-    return darray[
+    return dict[
       'port (host byte order)' => $this->port,
       'address (uint32)' => $this->address,
       'address (presentation format)' =>

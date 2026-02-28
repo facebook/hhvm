@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$array = varray['cat', 'hat', 'sat'];
+$array = vec['cat', 'hat', 'sat'];
 $iterator = new ArrayIterator($array);
 
 // Simple regex

@@ -9,177 +9,74 @@
 open Hh_prelude
 open Aast
 
-(** Information about type parameters that are and were in scope. The first boolean flag
-  indicates if the variable is still in scope or if it was only in scope earlier
-  (true means still in scope).
-  The second boolean flag indicates whether the type parameter is higher-kinded *)
-type tparam_info = (pos * bool * bool) SMap.t
+(** Positions of type parameters that are in scope. *)
+type tparam_info = pos SMap.t
 
-let error_if_is_this (pos, name) =
+let error_if_is_this (pos, name) custom_err_config =
   if String.equal (String.lowercase name) "this" then
-    Errors.add_naming_error @@ Naming_error.This_reserved pos
+    Diagnostics.add_diagnostic
+      (Naming_error_utils.to_user_diagnostic
+         (Naming_error.This_reserved pos)
+         custom_err_config)
 
-let error_if_invalid_tparam_name ~nested ~is_hk (pos, name) =
-  match
-    ( String.equal name Naming_special_names.Typehints.wildcard,
-      nested && not is_hk )
-  with
-  | (true, false) ->
-    Errors.add_naming_error @@ Naming_error.Wildcard_tparam_disallowed pos
-  | (true, true) -> ()
-  | _ ->
-    if String.is_empty name || not (Char.equal name.[0] 'T') then
-      Errors.add_naming_error @@ Naming_error.Start_with_T pos
-
-let error_if_reified ~because_nested (pos, name) = function
-  | Erased -> ()
-  | SoftReified
-  | Reified ->
-    Errors.add_naming_error
-    @@ Naming_error.HKT_unsupported_feature
-         { pos; because_nested; var_name = name; feature = `reification }
-
-let error_if_user_attributes ~because_nested (pos, name) attrs =
-  if not (List.is_empty attrs) then
-    Errors.add_naming_error
-    @@ Naming_error.HKT_unsupported_feature
-         { pos; because_nested; var_name = name; feature = `user_attrs }
-
-let error_if_not_invariant ~because_nested (pos, name) =
-  let open Ast_defs in
-  function
-  | Invariant -> ()
-  | Covariant
-  | Contravariant ->
-    Errors.add_naming_error
-    @@ Naming_error.HKT_unsupported_feature
-         { pos; because_nested; var_name = name; feature = `variance }
-
-let error_if_constraints_present ~because_nested (pos, name) constraints =
-  if not (List.is_empty constraints) then
-    Errors.add_naming_error
-    @@ Naming_error.HKT_unsupported_feature
-         { pos; because_nested; var_name = name; feature = `constraints }
-
-let rec check_tparam ~nested (seen : tparam_info) tparam =
-  let name = tparam.tp_name in
-  let is_higher_kinded = not (List.is_empty tparam.tp_parameters) in
-  error_if_is_this name;
-  error_if_invalid_tparam_name ~nested ~is_hk:is_higher_kinded name;
-
-  if nested then begin
-    error_if_constraints_present ~because_nested:true name tparam.tp_constraints;
-    error_if_reified ~because_nested:true name tparam.tp_reified;
-    error_if_user_attributes ~because_nested:true name tparam.tp_user_attributes;
-    error_if_not_invariant ~because_nested:true name tparam.tp_variance
-  end;
-
-  if is_higher_kinded then begin
-    error_if_constraints_present
-      ~because_nested:false
-      name
-      tparam.tp_constraints;
-    error_if_reified ~because_nested:false name tparam.tp_reified;
-    error_if_user_attributes
-      ~because_nested:false
-      name
-      tparam.tp_user_attributes;
-    error_if_not_invariant ~because_nested:false name tparam.tp_variance
-  end;
-
-  check_tparams ~nested:true seen tparam.tp_parameters
+let error_if_invalid_tparam_name (pos, name) custom_err_config =
+  if String.is_empty name || not (Char.equal name.[0] 'T') then
+    Diagnostics.add_diagnostic
+      (Naming_error_utils.to_user_diagnostic
+         (Naming_error.Start_with_T pos)
+         custom_err_config)
 
 (* See not on Naming.type_param about scoping of type parameters *)
-and check_tparams ~nested (seen : tparam_info) tparams =
-  let bring_into_scope (seen : tparam_info) tparam =
-    let is_hk = not (List.is_empty tparam.tp_parameters) in
+let check_tparams (seen : tparam_info) tparams custom_err_config =
+  let check_bind (seen : tparam_info) tparam =
+    error_if_is_this tparam.tp_name custom_err_config;
+    error_if_invalid_tparam_name tparam.tp_name custom_err_config;
     let (pos, name) = tparam.tp_name in
-    if String.equal name Naming_special_names.Typehints.wildcard then
+    if String.equal name Naming_special_names.Typehints.wildcard then (
+      Diagnostics.add_diagnostic
+        (Naming_error_utils.to_user_diagnostic
+           (Naming_error.Wildcard_tparam_disallowed pos)
+           custom_err_config);
       seen
-    else begin
+    ) else begin
       (match SMap.find_opt name seen with
-      | Some (prev_pos, true, _) ->
-        Errors.add_naming_error
-        @@ Naming_error.Shadowed_tparam { pos; prev_pos; tparam_name = name }
-      | Some (_, false, _) ->
-        Errors.add_typing_error
-          Typing_error.(
-            primary
-            @@ Primary.Tparam_non_shadowing_reuse { pos; tparam_name = name })
+      | Some prev_pos ->
+        Diagnostics.add_diagnostic
+          (Naming_error_utils.to_user_diagnostic
+             (Naming_error.Shadowed_tparam { pos; prev_pos; tparam_name = name })
+             custom_err_config)
       | None -> ());
-      SMap.add name (pos, true, is_hk) seen
+      SMap.add name pos seen
     end
   in
-  let remove_from_scope (seen : tparam_info) tparam =
-    let (pos, name) = tparam.tp_name in
-    if String.equal name Naming_special_names.Typehints.wildcard then
-      seen
-    else
-      (* Using a dummy value for the higher-kindedness, we don't care once
-         it's out of scope *)
-      SMap.add name (pos, false, false) seen
-  in
 
-  let seen = List.fold_left tparams ~f:bring_into_scope ~init:seen in
-  let seen = List.fold_left tparams ~f:(check_tparam ~nested) ~init:seen in
-  if nested then
-    List.fold_left tparams ~f:remove_from_scope ~init:seen
-  else
-    seen
+  List.fold_left tparams ~f:check_bind ~init:seen
 
-let check_where_constraints (seen : tparam_info) cstrs =
-  let visitor =
-    object (this)
-      inherit [_] Aast.iter as super
-
-      method! on_hint env (pos, h) =
-        match h with
-        | Aast.Habstr (t, args) ->
-          (match SMap.find_opt t seen with
-          | Some (_, true, true) ->
-            Errors.add_naming_error
-            @@ Naming_error.HKT_unsupported_feature
-                 {
-                   pos;
-                   because_nested = false;
-                   var_name = t;
-                   feature = `where_constraints;
-                 }
-          | Some _
-          | None ->
-            ());
-          List.iter args ~f:(this#on_hint env)
-        | _ -> super#on_hint env (pos, h)
-    end
-  in
-  List.iter cstrs ~f:(fun (h1, _, h2) ->
-      visitor#on_hint () h1;
-      visitor#on_hint () h2)
-
-let check_class class_ =
+let check_class class_ custom_err_config =
   let seen_class_tparams =
-    check_tparams ~nested:false SMap.empty class_.c_tparams
+    check_tparams SMap.empty class_.c_tparams custom_err_config
   in
 
-  (* Due to ~nested:false above, the class tparams are still marked as in scope *)
-  let check_method method_tparams method_where_cstrs =
-    let seen = check_tparams ~nested:false seen_class_tparams method_tparams in
-    check_where_constraints seen method_where_cstrs
+  (* Note that the class tparams are still marked as in scope *)
+  let check_method method_tparams =
+    ignore (check_tparams seen_class_tparams method_tparams custom_err_config)
   in
-  List.iter class_.c_methods ~f:(fun m ->
-      check_method m.m_tparams m.m_where_constraints)
+
+  List.iter class_.c_methods ~f:(fun m -> check_method m.m_tparams)
 
 let handler =
   object
     inherit Nast_visitor.handler_base
 
-    method! at_fun_ _ fun_ =
-      let seen = check_tparams ~nested:false SMap.empty fun_.f_tparams in
-      (* Due to ~nested:false above, the function tparams are still marked as in scope *)
-      check_where_constraints seen fun_.f_where_constraints
+    method! at_fun_def env fd =
+      let custom_err_config = Nast_check_env.get_custom_error_config env in
+      ignore (check_tparams SMap.empty fd.fd_tparams custom_err_config)
 
-    method! at_class_ _ = check_class
+    method! at_class_ env cls =
+      let custom_err_config = Nast_check_env.get_custom_error_config env in
+      check_class cls custom_err_config
 
-    method! at_typedef _ typedef =
-      check_tparams ~nested:false SMap.empty typedef.t_tparams |> ignore
+    method! at_typedef env typedef =
+      let custom_err_config = Nast_check_env.get_custom_error_config env in
+      ignore (check_tparams SMap.empty typedef.t_tparams custom_err_config)
   end

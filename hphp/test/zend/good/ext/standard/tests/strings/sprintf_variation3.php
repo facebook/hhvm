@@ -7,7 +7,7 @@
 echo "*** Testing sprintf() : integer formats with integer values ***\n";
 
 // different valid  integer vlaues
-$valid_ints = varray[
+$valid_ints = vec[
   0,
   1,
   -1,
@@ -28,7 +28,7 @@ $valid_ints = varray[
   017777777777  // max positive integer as octal
 ];
 // various integer formats
-$int_formats = varray[
+$int_formats = vec[
   "%d", "%hd", "%ld",
   "%Ld", " %d", "%d ",
   "\t%d", "\n%d", "%4d",

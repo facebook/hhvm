@@ -1,0 +1,2 @@
+ERROR: File "polymorphic_lambda_wildcard_in_body.php", line 13, characters 34-34:
+Wildcard typehints are not allowed in this position (Naming[2084])

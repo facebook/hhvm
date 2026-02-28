@@ -1,0 +1,4 @@
+ERROR: File "collection_unexpected_arrow_legacy.php", line 5, characters 8-32:
+Cannot use key value initializer for `Vector`. It does not allow keys. (Parsing[1002])
+ERROR: File "collection_unexpected_arrow_legacy.php", line 5, characters 16-20:
+Keys may not be specified for \HH\Vector initialization (Naming[2051])

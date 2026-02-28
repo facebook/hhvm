@@ -21,4 +21,8 @@ rust::String fcall_flags_to_string_ffi(FCallArgsFlags flags) {
   return fcall_flags_to_string(flags);
 }
 
+rust::String iter_args_flags_to_string_ffi(IterArgsFlags flags) {
+  return iter_args_flags_to_string(flags);
 }
+
+} // namespace HPHP

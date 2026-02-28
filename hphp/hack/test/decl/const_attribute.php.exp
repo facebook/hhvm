@@ -4,17 +4,30 @@
        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
        sc_module = None; sc_name = ([4:7-8], "\\A"); sc_tparams = [];
-       sc_where_constraints = []; sc_extends = []; sc_uses = [];
-       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-       sc_req_implements = []; sc_req_class = []; sc_implements = [];
-       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+       sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
+       sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
+       sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
+       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+       sc_typeconsts = [];
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([5:14-16], "x"); sp_xhp_attr = None;
-          sp_type = (Some (Rhint ([5:10-13]), (Tprim Tint)));
-          sp_visibility = Public; sp_flags = const | needs_init };
+          sp_type = (Rhint ([5:10-13]), (Tprim Tint));
+          sp_visibility = Public;
+          sp_flags =
+          { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+            lateinit = false; lsb = false; needs_init = true;
+            php_std_lib = false; readonly = false;
+            safe_global_variable = false; no_auto_likes = false }
+          };
          { Shallow_decl_defs.sp_name = ([8:14-16], "y"); sp_xhp_attr = None;
-           sp_type = (Some (Rhint ([8:10-13]), (Tprim Tint)));
-           sp_visibility = Public; sp_flags = const | needs_init }
+           sp_type = (Rhint ([8:10-13]), (Tprim Tint));
+           sp_visibility = Public;
+           sp_flags =
+           { Shallow_decl_defs.PropFlags.abstract = false; const = true;
+             lateinit = false; lsb = false; needs_init = true;
+             php_std_lib = false; readonly = false;
+             safe_global_variable = false; no_auto_likes = false }
+           }
          ];
        sc_sprops = [];
        sc_constructor =
@@ -27,37 +40,50 @@
                      ft_implicit_params =
                      { capability = (CapDefaults [10:19-30]) };
                      ft_ret =
-                     { et_enforced = Typing_defs_core.Unenforced;
-                       et_type =
-                       (Rwitness_from_decl ([10:19-30]), (Tprim Tvoid)) };
+                     (Rwitness_from_decl ([10:19-30]), (Tprim Tvoid));
                      ft_flags =
-                     (make_ft_flags FSync ~return_disposable:false
-                       ~returns_readonly:false ~support_dynamic_type:false
-                       ~readonly_this:false ~is_memoized:false
-                       ~variadic:false);
-                     ft_ifc_decl = FDPolicied {PUBLIC} }));
+                     { Typing_defs_flags.Fun.return_disposable = false;
+                       async = false; generator = false; fun_kind = FSync;
+                       is_function_pointer = false; returns_readonly = false;
+                       readonly_this = false; support_dynamic_type = false;
+                       is_memoized = false; variadic = false };
+                     ft_instantiated = true }));
                sm_visibility = Public; sm_deprecated = None;
-               sm_flags = (empty); sm_attributes = [] });
+               sm_flags =
+               { Shallow_decl_defs.MethodFlags.abstract = false;
+                 final = false; override = false;
+                 dynamicallycallable = false; php_std_lib = false;
+                 support_dynamic_type = false; no_auto_likes = false;
+                 needs_concrete = false };
+               sm_attributes = []; sm_sort_text = None;
+               sm_package_requirement = Typing_defs.RPNormal });
        sc_static_methods = []; sc_methods = [];
        sc_user_attributes =
-       [{ Typing_defs_core.ua_name = ([3:3-10], "__Const");
-          ua_classname_params = [] }
+       [{ Typing_defs_core.ua_name = ([3:3-10], "__Const"); ua_params = [];
+          ua_raw_val = None }
          ];
-       sc_enum_type = None }));
+       sc_enum_type = None; sc_docs_url = None; sc_package = None }));
   ("\\B",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
         sc_module = None; sc_name = ([16:7-8], "\\B"); sc_tparams = [];
-        sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
+        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
+        sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
+        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+        sc_typeconsts = [];
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([18:14-16], "x"); sp_xhp_attr = None;
-           sp_type = (Some (Rhint ([18:10-13]), (Tprim Tint)));
-           sp_visibility = Public; sp_flags = const | needs_init }
+           sp_type = (Rhint ([18:10-13]), (Tprim Tint));
+           sp_visibility = Public;
+           sp_flags =
+           { Shallow_decl_defs.PropFlags.abstract = false; const = true;
+             lateinit = false; lsb = false; needs_init = true;
+             php_std_lib = false; readonly = false;
+             safe_global_variable = false; no_auto_likes = false }
+           }
           ];
         sc_sprops = [];
         sc_constructor =
@@ -70,33 +96,47 @@
                       ft_implicit_params =
                       { capability = (CapDefaults [20:19-30]) };
                       ft_ret =
-                      { et_enforced = Typing_defs_core.Unenforced;
-                        et_type =
-                        (Rwitness_from_decl ([20:19-30]), (Tprim Tvoid)) };
+                      (Rwitness_from_decl ([20:19-30]), (Tprim Tvoid));
                       ft_flags =
-                      (make_ft_flags FSync ~return_disposable:false
-                        ~returns_readonly:false ~support_dynamic_type:false
-                        ~readonly_this:false ~is_memoized:false
-                        ~variadic:false);
-                      ft_ifc_decl = FDPolicied {PUBLIC} }));
+                      { Typing_defs_flags.Fun.return_disposable = false;
+                        async = false; generator = false; fun_kind = FSync;
+                        is_function_pointer = false;
+                        returns_readonly = false; readonly_this = false;
+                        support_dynamic_type = false; is_memoized = false;
+                        variadic = false };
+                      ft_instantiated = true }));
                 sm_visibility = Public; sm_deprecated = None;
-                sm_flags = (empty); sm_attributes = [] });
+                sm_flags =
+                { Shallow_decl_defs.MethodFlags.abstract = false;
+                  final = false; override = false;
+                  dynamicallycallable = false; php_std_lib = false;
+                  support_dynamic_type = false; no_auto_likes = false;
+                  needs_concrete = false };
+                sm_attributes = []; sm_sort_text = None;
+                sm_package_requirement = Typing_defs.RPNormal });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None }));
+        sc_enum_type = None; sc_docs_url = None; sc_package = None }));
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
         sc_module = None; sc_name = ([25:7-8], "\\C"); sc_tparams = [];
-        sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
+        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
+        sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
+        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+        sc_typeconsts = [];
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([26:55-57], "x"); sp_xhp_attr = None;
-           sp_type = (Some (Rhint ([26:51-54]), (Tprim Tint)));
-           sp_visibility = Private; sp_flags = const | needs_init }
+           sp_type = (Rhint ([26:51-54]), (Tprim Tint));
+           sp_visibility = Private;
+           sp_flags =
+           { Shallow_decl_defs.PropFlags.abstract = false; const = true;
+             lateinit = false; lsb = false; needs_init = true;
+             php_std_lib = false; readonly = false;
+             safe_global_variable = false; no_auto_likes = false }
+           }
           ];
         sc_sprops = [];
         sc_constructor =
@@ -107,32 +147,35 @@
                     { ft_tparams = []; ft_where_constraints = [];
                       ft_params =
                       [{ fp_pos = [26:55-57]; fp_name = (Some "$x");
-                         fp_type =
-                         { et_enforced = Typing_defs_core.Unenforced;
-                           et_type = (Rhint ([26:51-54]), (Tprim Tint)) };
+                         fp_type = (Rhint ([26:51-54]), (Tprim Tint));
                          fp_flags =
-                         (make_fp_flags ~accept_disposable:false
-                           ~has_default:false ~mode:Typing_defs_core.FPnormal
-                           ~ifc_external:false ~ifc_can_call:false
-                           ~readonly:false);
-                          }
+                         { Typing_defs_flags.FunParam.accept_disposable =
+                           false; inout = false; is_optional = false;
+                           readonly = false; ignore_readonly_error = false;
+                           splat = false; named = false };
+                         fp_def_value = None }
                         ];
                       ft_implicit_params =
                       { capability = (CapDefaults [26:19-30]) };
                       ft_ret =
-                      { et_enforced = Typing_defs_core.Unenforced;
-                        et_type =
-                        (Rwitness_from_decl ([26:19-30]), (Tprim Tvoid)) };
+                      (Rwitness_from_decl ([26:19-30]), (Tprim Tvoid));
                       ft_flags =
-                      (make_ft_flags FSync ~return_disposable:false
-                        ~returns_readonly:false ~support_dynamic_type:false
-                        ~readonly_this:false ~is_memoized:false
-                        ~variadic:false);
-                      ft_ifc_decl = FDPolicied {PUBLIC} }));
+                      { Typing_defs_flags.Fun.return_disposable = false;
+                        async = false; generator = false; fun_kind = FSync;
+                        is_function_pointer = false;
+                        returns_readonly = false; readonly_this = false;
+                        support_dynamic_type = false; is_memoized = false;
+                        variadic = false };
+                      ft_instantiated = true }));
                 sm_visibility = Public; sm_deprecated = None;
-                sm_flags = (empty); sm_attributes = [] });
+                sm_flags =
+                { Shallow_decl_defs.MethodFlags.abstract = false;
+                  final = false; override = false;
+                  dynamicallycallable = false; php_std_lib = false;
+                  support_dynamic_type = false; no_auto_likes = false;
+                  needs_concrete = false };
+                sm_attributes = []; sm_sort_text = None;
+                sm_package_requirement = Typing_defs.RPNormal });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None }))
+        sc_enum_type = None; sc_docs_url = None; sc_package = None }))
   ]
-
-They matched!

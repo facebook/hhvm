@@ -1,4 +1,10 @@
-File "tconst_on_generics5.php", line 39, characters 14-17:
+ERROR: File "tconst_on_generics5.php", line 22, characters 74-75:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "tconst_on_generics5.php", line 25, characters 77-78:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "tconst_on_generics5.php", line 28, characters 77-78:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "tconst_on_generics5.php", line 39, characters 14-17:
 Some type arguments violate their constraints (Typing[4323])
   File "tconst_on_generics5.php", line 25, characters 31-32:
   `T1` is a constrained type parameter

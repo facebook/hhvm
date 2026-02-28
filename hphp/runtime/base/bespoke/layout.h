@@ -61,6 +61,7 @@ constexpr uint8_t kIntMonotypeDictLayoutByte       = 0b10011010;
 constexpr uint8_t kStrMonotypeDictLayoutByte       = 0b10010110;
 constexpr uint8_t kStaticStrMonotypeDictLayoutByte = 0b10000110;
 constexpr uint8_t kEmptyMonotypeDictLayoutByte     = 0b10000010;
+constexpr uint8_t kTypeStructureLayoutByte         = 0b10011110;
 constexpr uint8_t kBespokeVtableMask               = 0b00011111;
 
 // Log that we're calling the given function for the given array.
@@ -93,6 +94,7 @@ BespokeArray* maybeStructify(ArrayData* ad, const LoggingProfile* profile);
   X(arr_lval, LvalStr, T* ad, StringData* k) \
   X(tv_lval, ElemInt, tv_lval lval, int64_t k, bool) \
   X(tv_lval, ElemStr, tv_lval lval, StringData* k, bool) \
+  X(ArrayData*, SetPosMove, T*, ssize_t pos, TypedValue v) \
   X(ArrayData*, SetIntMove, T*, int64_t k, TypedValue v) \
   X(ArrayData*, SetStrMove, T*, StringData* k, TypedValue v)\
   X(ArrayData*, RemoveIntMove, T*, int64_t) \
@@ -199,6 +201,10 @@ struct LayoutFunctionDispatcher {
   static tv_lval ElemStr(tv_lval lval, StringData* k, bool throwOnMissing) {
     Cast(lval.val().parr, __func__);
     return Array::ElemStr(lval, k, throwOnMissing);
+  }
+  static ArrayData* SetPosMove(ArrayData* ad, ssize_t pos, TypedValue v) {
+    assertx(type(v) != KindOfUninit);
+    return Array::SetPosMove(Cast(ad, __func__), pos, v);
   }
   static ArrayData* SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
     assertx(type(v) != KindOfUninit);
@@ -379,6 +385,7 @@ struct Layout {
    * Returns the most specific layout known for the result of setting a key
    * of type `key` to a val of type `val` for an array with this layout.
    */
+  virtual ArrayLayout setType(Type val) const;
   virtual ArrayLayout setType(Type key, Type val) const;
 
   /*
@@ -490,5 +497,8 @@ void eachLayout(std::function<void(Layout& layout)> fn);
 
 // Array of all layout pointers. Useful for accessing from the TC.
 Layout** layoutsForJIT();
+
+// For logging.
+size_t numStructLayouts();
 
 }

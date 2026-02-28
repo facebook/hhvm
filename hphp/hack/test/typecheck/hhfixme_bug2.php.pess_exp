@@ -1,6 +1,0 @@
-File "hhfixme_bug2.php.pess", line 12, characters 39-44:
-Invalid argument (Typing[4110])
-  File "hhfixme_bug2.php.pess", line 8, characters 55-56:
-  Expected `~[unresolved]`
-  File "hhfixme_bug2.php.pess", line 10, characters 37-40:
-  But got `null`

@@ -3,7 +3,7 @@
 class DateTimeExt extends DateTime
 {
 	public function format($format = "F j, Y, g:i:s a")
-	{
+:mixed	{
 		return parent::format($format);
 	}
 }

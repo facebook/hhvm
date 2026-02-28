@@ -1,0 +1,1 @@
+Catchable fatal error: Typed local assignment: Expected int, got null in %s/hphp/test/slow/typed_locals/shape_lval.php on line %d

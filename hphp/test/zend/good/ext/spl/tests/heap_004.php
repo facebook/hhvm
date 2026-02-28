@@ -1,6 +1,6 @@
 <?hh
 class myHeap extends SplHeap {
-    public function compare($a, $b) {
+    public function compare($a, $b) :mixed{
         throw new Exception("foo");
     }
 }

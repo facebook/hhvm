@@ -1,0 +1,25 @@
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+vec(2) {
+  int(100)
+  string(5) "value"
+}
+dict(2) {
+  ["a"]=>
+  int(100)
+  ["b"]=>
+  int(200)
+}
+dict(2) {
+  [100]=>
+  int(300)
+  [500]=>
+  int(800)
+}
+bool(true)
+bool(true)
+bool(true)
+bool(true)

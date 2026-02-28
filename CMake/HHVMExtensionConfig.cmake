@@ -442,15 +442,7 @@ function (HHVM_EXTENSION_INTERNAL_SORT_OUT_SOURCES rootDir)
     elseif (${fileExtension} STREQUAL ".h" OR ${fileExtension} STREQUAL ".hpp")
       list(APPEND HEADER_SOURCES "${rootDir}/${fileName}")
     elseif (${fileExtension} STREQUAL ".s")
-      # AT&T syntax, MSVC doesn't like.
-      if (NOT MSVC)
-        list(APPEND ASM_SOURCES "${rootDir}/${fileName}")
-      endif()
-    elseif (${fileExtension} STREQUAL ".asm")
-      # MASM syntax. MSVC only.
-      if (MSVC)
-        list(APPEND ASM_SOURCES "${rootDir}/${fileName}")
-      endif()
+      list(APPEND ASM_SOURCES "${rootDir}/${fileName}")
     elseif (${fileExtension} STREQUAL ".php")
       list(APPEND PHP_SOURCES "${rootDir}/${fileName}")
     elseif (${fileExtension} STREQUAL ".hack")
@@ -530,10 +522,6 @@ function(HHVM_EXTENSION_INTERNAL_RESOLVE_DEPENDENCIES_OF_EXTENSION resolvedDestV
         if (${listIDX} EQUAL 0)
           # OS Dependency
           if (${currentDependency} STREQUAL "osPosix")
-            if (MSVC)
-              HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${currentDependency} ON)
-              break()
-            endif()
           else()
             message(FATAL_ERROR "The only OS restriction that is currently valid is 'osPosix', got '${currentDependency}'!")
           endif()
@@ -712,19 +700,6 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      set(CMAKE_REQUIRED_LIBRARIES "${CURL_LIBRARIES}")
-      set(CMAKE_REQUIRED_INCLUDES "${CURL_INCLUDE_DIR}")
-      CHECK_FUNCTION_EXISTS("curl_multi_select" HAVE_CURL_MULTI_SELECT)
-      CHECK_FUNCTION_EXISTS("curl_multi_wait" HAVE_CURL_MULTI_WAIT)
-      if (HAVE_CURL_MULTI_SELECT)
-        HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_CURL_MULTI_SELECT")
-      endif()
-      if (HAVE_CURL_MULTI_WAIT)
-        HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_CURL_MULTI_WAIT")
-      endif()
-      set(CMAKE_REQUIRED_LIBRARIES)
-      set(CMAKE_REQUIRED_INCLUDES)
-
       HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${CURL_INCLUDE_DIR})
       HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${CURL_LIBRARIES})
       HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBCURL")
@@ -792,6 +767,17 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${GMP_INCLUDE_DIR})
       HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${GMP_LIBRARY})
       HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBGMP")
+    endif()
+  elseif (${libraryName} STREQUAL "heif")
+    find_package(Libheif ${requiredVersion} REQUIRED)
+    if (NOT LIBHEIF_INCLUDE_DIR OR NOT LIBHEIF_LIBRARY)
+      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+      return()
+    endif()
+
+    if (${addPaths})
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBHEIF_INCLUDE_DIR})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBHEIF_LIBRARY})
     endif()
   elseif (${libraryName} STREQUAL "iconv")
     find_package(Libiconv ${requiredVersion})
@@ -864,18 +850,6 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBJPEG")
       HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_GD_JPG")
     endif()
-  elseif (${libraryName} STREQUAL "jsonc")
-    find_package(Libjsonc ${requiredVersion})
-    if (NOT LIBJSONC_INCLUDE_DIR OR NOT LIBJSONC_LIBRARY)
-      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
-      return()
-    endif()
-
-    if (${addPaths})
-      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBJSONC_INCLUDE_DIR})
-      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBJSONC_LIBRARY})
-      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBJSONC")
-    endif()
   elseif (${libraryName} STREQUAL "ldap")
     find_package(Ldap ${requiredVersion})
     if (NOT LDAP_INCLUDE_DIR OR NOT LDAP_LIBRARIES)
@@ -887,6 +861,17 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LDAP_INCLUDE_DIR})
       HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LDAP_LIBRARIES})
       HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBLDAP")
+    endif()
+  elseif (${libraryName} STREQUAL "lmdb")
+    find_package(Lmdb ${requiredVersion} REQUIRED)
+    if (NOT LMDB_INCLUDE_DIR OR NOT LMDB_LIBRARY)
+      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+      return()
+    endif()
+
+    if (${addPaths})
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LMDB_INCLUDE_DIR})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LMDB_LIBRARY})
     endif()
   elseif (${libraryName} STREQUAL "magickwand")
     find_package(LibMagickWand ${requiredVersion})
@@ -941,31 +926,6 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(fbmysqlclient)
     MYSQL_SOCKET_SEARCH()
     HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DPHP_MYSQL_UNIX_SOCK_ADDR=\"${MYSQL_UNIX_SOCK_ADDR}\"")
-  elseif (${libraryName} STREQUAL "pgsql")
-    FIND_PATH(PGSQL_INCLUDE_DIR NAMES libpq-fe.h
-      PATHS
-        /usr/include
-        /usr/include/postgresql
-        /usr/include/pgsql
-        /usr/local/include
-        /usr/local/include/postgresql
-        /usr/local/include/pgsql
-      )
-    FIND_LIBRARY(PGSQL_LIBRARY NAMES pq
-      PATHS
-        /lib
-        /usr/lib
-        /usr/local/lib
-    )
-    IF (NOT PGSQL_INCLUDE_DIR OR NOT PGSQL_LIBRARY)
-      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
-      return()
-    endif()
-
-    if(${addPaths})
-      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${PGSQL_INCLUDE_DIR})
-      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${PGSQL_LIBRARY})
-    endif()
   elseif (${libraryName} STREQUAL "png")
     find_package(LibPng ${requiredVersion})
     if (NOT LIBPNG_INCLUDE_DIRS OR NOT LIBPNG_LIBRARIES)

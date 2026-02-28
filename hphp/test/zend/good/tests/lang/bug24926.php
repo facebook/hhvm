@@ -2,7 +2,7 @@
 
 class foo {
 
-    public $functions = darray[];
+    public $functions = dict[];
 
     function __construct()
     {

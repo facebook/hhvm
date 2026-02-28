@@ -5,14 +5,14 @@
  * Alias to functions:
  */
 // Note: basic use cases in Zend/tests/is_a.phpt
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function is_a_variation_001(): void {
 echo "*** Testing is_a() : usage variations ***\n";
 // Initialise function arguments not being substituted (if any)
 $class_name = 'stdClass';
 
 
 //array of values to iterate over
-$values = varray[
+$values = vec[
 
       // int data
       0,
@@ -51,7 +51,7 @@ $values = varray[
 // loop through each element of the array for object
 
 foreach($values as $value) {
-      echo @"\nArg value $value \n";
+      echo "\nArg value $value \n";
       var_dump( is_a($value, $class_name) );
 };
 

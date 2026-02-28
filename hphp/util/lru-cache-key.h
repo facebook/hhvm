@@ -82,15 +82,15 @@ private:
     mutable std::atomic<size_t> m_hash;
 
     size_t hash() const {
-      size_t h = m_hash.load(std::memory_order_relaxed);
+      size_t h = m_hash.load(std::memory_order_acquire);
       if (h == 0) {
         uint64_t h128[2];
-        MurmurHash3::hash128<false>(m_data, m_size, 0, h128);
+        MurmurHash3::hash128<true>(m_data, m_size, 0, h128);
         h = (size_t)h128[0];
         if (h == 0) {
           h = 1;
         }
-        m_hash.store(h, std::memory_order_relaxed);
+        m_hash.store(h, std::memory_order_release);
       }
       return h;
     }
@@ -100,4 +100,3 @@ private:
 };
 
 } // namespace HPHP
-

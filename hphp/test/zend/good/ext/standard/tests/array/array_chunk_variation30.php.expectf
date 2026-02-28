@@ -4,8 +4,14 @@ vec(3) {
   int(3)
 }
 [0]
+
+Warning: Invalid argument: size: 0 in %s/test/zend/good/ext/standard/tests/array/array_chunk_variation30.php on line 6
 NULL
+
+Warning: Invalid argument: size: 0 in %s/test/zend/good/ext/standard/tests/array/array_chunk_variation30.php on line 7
 NULL
+
+Warning: Invalid argument: size: 0 in %s/test/zend/good/ext/standard/tests/array/array_chunk_variation30.php on line 8
 NULL
 
 [1]

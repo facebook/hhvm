@@ -25,6 +25,9 @@
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/text-util.h"
+
 namespace HPHP::jit::irgen {
 
 bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
@@ -36,9 +39,6 @@ bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
   case Op::Mul:
   case Op::Div:
   case Op::Mod:
-  case Op::AddO:
-  case Op::SubO:
-  case Op::MulO:
     return is_numeric(t1) && is_numeric(t2);
   case Op::BitAnd:
   case Op::BitOr:
@@ -54,9 +54,6 @@ Opcode intArithOp(Op op) {
   case Op::Add:  return AddInt;
   case Op::Sub:  return SubInt;
   case Op::Mul:  return MulInt;
-  case Op::AddO: return AddIntO;
-  case Op::SubO: return SubIntO;
-  case Op::MulO: return MulIntO;
   default:
     break;
   }
@@ -68,9 +65,6 @@ Opcode dblArithOp(Op op) {
   case Op::Add:  return AddDbl;
   case Op::Sub:  return SubDbl;
   case Op::Mul:  return MulDbl;
-  case Op::AddO: return AddDbl;
-  case Op::SubO: return SubDbl;
-  case Op::MulO: return MulDbl;
   default:
     break;
   }
@@ -138,17 +132,11 @@ void binaryArith(IRGS& env, Op op) {
     return;
   }
 
-  auto const exitSlow = makeExitSlow(env);
   auto src2 = popC(env);
   auto src1 = popC(env);
   auto const opc = promoteBinaryDoubles(env, op, src1, src2);
 
-  if (opc == AddIntO || opc == SubIntO || opc == MulIntO) {
-    assertx(src1->isA(TInt) && src2->isA(TInt));
-    push(env, gen(env, opc, exitSlow, src1, src2));
-  } else {
-    push(env, gen(env, opc, src1, src2));
-  }
+  push(env, gen(env, opc, src1, src2));
 }
 
 // Helpers for comparison generation:
@@ -303,12 +291,16 @@ SSATmp* implFunCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   PUNT(Func-cmp);
 }
 
-const StaticString s_clsToStringWarning(Strings::CLASS_TO_STRING);
-
 SSATmp* convToStr(IRGS& env, SSATmp* in, bool should_warn) {
-  if (should_warn && RuntimeOption::EvalRaiseClassConversionWarning &&
+  if (should_warn &&
+      Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0 &&
       in->type().subtypeOfAny(TCls, TLazyCls)) {
-    gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
+    std::string msg;
+    string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT, "comparison");
+    gen(env,
+        RaiseNotice,
+        SampleRateData { Cfg::Eval::RaiseClassConversionNoticeSampleRate },
+        cns(env, makeStaticString(msg)));
   }
   if (in->isA(TCls))     return gen(env, LdClsName, in);
   if (in->isA(TLazyCls)) return gen(env, LdLazyClsName, in);
@@ -345,6 +337,30 @@ SSATmp* implLazyClsCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 }
 SSATmp* implClsCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   return implClsishCmp(env, op, left, right, false);
+}
+
+SSATmp* implEnumClassLabelCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  assertx(left->isA(TEnumClassLabel));
+  assertx(right->isA(TEnumClassLabel));
+
+  switch (op) {
+    case Op::Gt:
+    case Op::Gte:
+    case Op::Lt:
+    case Op::Lte:
+    case Op::Cmp:
+      PUNT(EnumClassLabel-relationalcmp);
+    case Op::Eq:
+    case Op::Same:
+    case Op::Neq:
+    case Op::NSame: {
+      auto const l = gen(env, LdEnumClassLabelName, left);
+      auto const r = gen(env, LdEnumClassLabelName, right);
+      return gen(env, toStrCmpOpcode(op), l, r);
+    }
+    default: always_assert(false);
+  }
+  not_reached();
 }
 
 SSATmp* implClsMethCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
@@ -452,6 +468,7 @@ void implCmp(IRGS& env, Op op) {
         if (leftTy <= TKeyset)  return implKeysetCmp;
         if (leftTy <= TLazyCls) return implLazyClsCmp;
         if (leftTy <= TClsMeth) return implClsMethCmp;
+        if (leftTy <= TEnumClassLabel) return implEnumClassLabelCmp;
         always_assert(false);
       }();
       push(env, (*impl)(env, op, left, right));
@@ -473,7 +490,7 @@ template<class PreDecRef> void implConcat(
     [&] (SSATmp* s, DecRefProfileId locId) {
       if (s->isA(TStr)) return s;
       const ConvNoticeLevel notice_level =
-        flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForStrConcat);
+        flagToConvNoticeLevel(Cfg::Eval::NoticeOnCoerceForStrConcat);
       auto const ret = gen(
         env,
         ConvTVToStr,
@@ -546,7 +563,7 @@ void emitConcatN(IRGS& env, uint32_t n) {
   auto const t4 = n == 4 ? popC(env) : nullptr;
 
   const ConvNoticeLevel level =
-    flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForStrConcat);
+    flagToConvNoticeLevel(Cfg::Eval::NoticeOnCoerceForStrConcat);
   const auto convData = ConvNoticeData{level, s_ConvNoticeReasonConcat.get()};
   auto const s4 = !t4 || t4->isA(TStr) ? t4 : gen(env, ConvTVToStr, convData, t4);
   auto const s3 = t3->isA(TStr) ? t3 : gen(env, ConvTVToStr, convData, t3);
@@ -576,9 +593,6 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
     case SetOpOp::PlusEqual:   return Op::Add;
     case SetOpOp::MinusEqual:  return Op::Sub;
     case SetOpOp::MulEqual:    return Op::Mul;
-    case SetOpOp::PlusEqualO:  return Op::AddO;
-    case SetOpOp::MinusEqualO: return Op::SubO;
-    case SetOpOp::MulEqualO:   return Op::MulO;
     case SetOpOp::DivEqual:    return std::nullopt;
     case SetOpOp::ConcatEqual: return Op::Concat;
     case SetOpOp::ModEqual:    return std::nullopt;
@@ -612,16 +626,13 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
     PUNT(SetOpL);
   }
 
-  auto const exitSlow = makeExitSlow(env);
   auto val = popC(env);
   env.irb->constrainValue(loc, DataTypeSpecific);
   auto opc = isBitOp(*subOpc)
     ? bitOp(*subOpc)
     : promoteBinaryDoubles(env, *subOpc, loc, val);
 
-  auto const result = opc == AddIntO || opc == SubIntO || opc == MulIntO
-    ? gen(env, opc, exitSlow, loc, val)
-    : gen(env, opc, loc, val);
+  auto const result = gen(env, opc, loc, val);
   pushStLoc(env, id, result);
 }
 
@@ -668,58 +679,99 @@ void emitShr(IRGS& env) {
 }
 
 void emitPow(IRGS& env) {
-  // Special-case exponent of 2 or 3, i.e.
+  // Special-case exponent of 0, 1, 2 or 3, i.e.
+  // $x ** 0 == 1
+  // $x ** 1 == $x
   // $x**2 becomes $x*$x,
   // $x**3 becomes ($x*$x)*$x
+  // For other constant integer exponents, use binary exponentiation
   auto exponent = topC(env);
   auto base = topC(env, BCSPRelOffset{1});
-  if ((exponent->hasConstVal(2) || exponent->hasConstVal(3)) &&
-      (base->isA(TDbl) || base->isA(TInt))) {
+  if ((base->isA(TInt) || base->isA(TDbl)) &&
+    exponent->hasConstVal(TInt)) {
     auto const intVal = exponent->intVal();
-    auto const isCube = intVal == 3;
-
-    auto makeExitPow = [&] (SSATmp* src, bool computeSquare) {
-      auto const exit = defBlock(env, Block::Hint::Unlikely);
-      BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
-      assertx(src->isA(TInt));
-      src = gen(env, ConvIntToDbl, src);
-      SSATmp* genPowResult;
-      if (computeSquare) {
-        genPowResult = gen(env, MulDbl, src, src);
-        if (isCube) {
-          genPowResult = gen(env, MulDbl, genPowResult, src);
-        }
-      } else {
-        assertx(base->isA(TInt));
-        auto const src1 = gen(env, ConvIntToDbl, base);
-        genPowResult = gen(env, MulDbl, src, src1);
-      }
+    if (intVal == 0) {
       discard(env, 2);
-      push(env, genPowResult);
-      gen(env, Jmp, makeExit(env, nextSrcKey(env)));
-      return exit;
-    };
-
-    SSATmp* genPowResult;
+      push(env, base->isA(TInt) ? cns(env, 1) : cns(env, 1.0));
+      return;
+    }
+    if (intVal == 1) {
+      // discard exponent, leave base on stack
+      discard(env);
+      return;
+    }
+    
+    auto const isNegExp = intVal < 0;
+    if (isNegExp) return interpOne(env, TUncountedInit, 2); // TODO
     if (base->isA(TInt)) {
-      auto const exitPow = makeExitPow(base, true);
-      genPowResult = gen(env, MulIntO, exitPow, base, base);
-    } else {
-      genPowResult = gen(env, MulDbl, base, base);
-    }
-    if (isCube) {
-      if (genPowResult->isA(TInt)) {
-        auto const exitPow = makeExitPow(genPowResult, false);
-        genPowResult = gen(env, MulIntO, exitPow, genPowResult, base);
-      } else {
-        genPowResult = gen(env, MulDbl, genPowResult, base);
+      // Create exit block for potential integer overflow
+      auto makeExitPow = [&] () {
+        auto const exit = defBlock(env, Block::Hint::Unlikely);
+        BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
+
+        // Convert base to double and compute power
+        auto baseVal = base->isA(TInt) ? gen(env, ConvIntToDbl, base) : base;
+        auto result = cns(env, 1.0);
+
+        auto exp = intVal;
+        while (exp > 0) {
+          if (exp & 1) {
+            result = gen(env, MulDbl, result, baseVal);
+          }
+          if (exp > 1) {
+            baseVal = gen(env, MulDbl, baseVal, baseVal);
+          }
+          exp >>= 1;
+        }
+
+        discard(env, 2);
+        push(env, result);
+        gen(env, Jmp, makeExit(env, nextSrcKey(env)));
+        return exit;
+      };
+
+      auto exitPow = makeExitPow();
+      auto result = cns(env, 1);
+      auto baseVal = base;
+
+      auto exp = intVal;
+      while (exp > 0) {
+        if (exp & 1) {
+          result = gen(env, MulIntO, exitPow, result, baseVal);
+        }
+        if (exp > 1) {
+          baseVal = gen(env, MulIntO, exitPow, baseVal, baseVal);
+        }
+        exp >>= 1;
       }
+
+      discard(env, 2);
+      push(env, result);
+      return;
+    } else {
+      assert(base->isA(TDbl));
+      auto result = cns(env, 1.0);
+      auto exp = intVal;
+      auto baseVal = base;
+
+      while (exp > 0) {
+        if (exp & 1) {
+          result = gen(env, MulDbl, result, baseVal);
+        }
+        if (exp > 1) {
+          baseVal = gen(env, MulDbl, baseVal, baseVal);
+        }
+        exp >>= 1;
+      }
+
+      discard(env, 2);
+      push(env, result);
+      gen(env, Jmp, makeExit(env, nextSrcKey(env)));
+      return;
+
     }
-    discard(env, 2);
-    push(env, genPowResult);
-    return;
   }
-  interpOne(env, TUncountedInit, 2);
+  return interpOne(env, TUncountedInit, 2);
 }
 
 void emitBitNot(IRGS& env) {
@@ -745,7 +797,7 @@ void emitBitNot(IRGS& env) {
 void emitNot(IRGS& env) {
   auto const src = popC(env);
   push(env, negate(env, gen(env, ConvTVToBool, src)));
-  decRef(env, src, DecRefProfileId::Default);
+  decRef(env, src);
 }
 
 const StaticString s_DIVISION_BY_ZERO(Strings::DIVISION_BY_ZERO);
@@ -879,8 +931,6 @@ void emitBitXor(IRGS& env) { binaryBitOp(env, Op::BitXor); }
 
 void emitSub(IRGS& env)    { binaryArith(env, Op::Sub); }
 void emitMul(IRGS& env)    { binaryArith(env, Op::Mul); }
-void emitSubO(IRGS& env)   { binaryArith(env, Op::SubO); }
-void emitMulO(IRGS& env)   { binaryArith(env, Op::MulO); }
 
 void emitGt(IRGS& env)     { implCmp(env, Op::Gt);    }
 void emitGte(IRGS& env)    { implCmp(env, Op::Gte);   }
@@ -893,7 +943,6 @@ void emitNSame(IRGS& env)  { implCmp(env, Op::NSame); }
 void emitCmp(IRGS& env)    { implCmp(env, Op::Cmp); }
 
 void emitAdd(IRGS& env)    { implAdd(env, Op::Add); }
-void emitAddO(IRGS& env)   { implAdd(env, Op::AddO); }
 
 //////////////////////////////////////////////////////////////////////
 

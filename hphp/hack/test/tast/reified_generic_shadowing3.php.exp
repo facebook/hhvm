@@ -6,18 +6,22 @@ Errors:
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mstrict;
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-11], "\\f");
       fd_fun =
       { f_span = [4:1-7:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([4:18-22], (Hprim Tvoid)))); 
-        f_name = ([4:10-11], "\\f"); f_tparams = [{ tp_variance = Invariant; tp_name = ([4:12-13], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-        f_where_constraints = []; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([4:18-22], (Hprim Tvoid)))); 
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([5:3-11], (Expr ((T), [5:3-10], (New (((T), [5:7-8], (CI ([5:7-8], "T"))), [], [], None, (_))))));
-            ([6:3-11], (Expr ((_), [6:3-10], (New (((_), [6:7-8], (CI ([6:7-8], "\\U"))), [], [], None, (_))))))]
+          [([5:3-11], (Expr ((T), [5:3-10], (New (((T), [5:7-8], (CI ([5:7-8], "T"))), [], [], None, (nothing))))));
+            ([6:3-11], (Expr ((nothing), [6:3-10], (New (((nothing), [6:7-8], (CI ([6:7-8], "\\U"))), [], [], None, (nothing))))))]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-        f_doc_comment = None };
-      fd_internal = false })
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-11], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None;
+      fd_tparams =
+      [{ tp_variance = Invariant; tp_name = ([4:12-13], "T"); tp_constraints = [(Constraint_as, ([4:12-13], (Happly (([4:12-13], "\\HH\\supportdyn"), [([4:12-13], Hmixed)]))))]; 
+         tp_reified = Erased; tp_user_attributes = [] }
+        ];
+      fd_where_constraints = []; fd_package = None })

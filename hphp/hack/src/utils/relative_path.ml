@@ -7,17 +7,20 @@
  *
  *)
 
+(* silence "unused open! Ppx_yojson_conv_lib.Yojson_conv.Primitives" *)
+[@@@warning "-66"]
+
 open Hh_prelude
 open Reordered_argument_collections
 open Utils
-open String_utils
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 type prefix =
   | Root
   | Hhi
   | Dummy
   | Tmp
-[@@deriving eq, show, enum, ord]
+[@@deriving eq, hash, show, enum, ord, sexp_of, yojson]
 
 let is_hhi = function
   | Hhi -> true
@@ -60,22 +63,21 @@ let path_of_prefix prefix =
     in
     raise (Invalid_argument message)
 
+let enforce_trailing_slash v =
+  if String.is_suffix v ~suffix:Filename.dir_sep then
+    v
+  else
+    v ^ Filename.dir_sep
+
 let set_path_prefix prefix v =
   let v = Path.to_string v in
   assert (String.length v > 0);
 
-  (* Ensure that there is a trailing slash *)
-  let v =
-    if string_ends_with v Filename.dir_sep then
-      v
-    else
-      v ^ Filename.dir_sep
-  in
   match prefix with
   | Dummy -> raise (Failure "Dummy is always represented by an empty string")
-  | _ -> path_ref_of_prefix prefix := Some v
+  | _ -> path_ref_of_prefix prefix := Some (enforce_trailing_slash v)
 
-type t = prefix * string [@@deriving eq, show, ord]
+type t = prefix * string [@@deriving eq, hash, show, ord, sexp_of, yojson]
 
 type relative_path = t
 
@@ -84,8 +86,6 @@ let prefix (p : t) = fst p
 let suffix (p : t) = snd p
 
 let default = (Dummy, "")
-
-let is_partial p = String.is_suffix (suffix p) ~suffix:".hackpartial"
 
 (* We could have simply used Marshal.to_string here, but this does slightly
  * better on space usage. *)
@@ -115,19 +115,31 @@ let storage_of_string str =
 module S = struct
   type t = relative_path
 
-  let compare : t -> t -> int = compare
+  let compare = compare
+
+  let equal = equal
+
+  let hash = hash
 
   let to_string = storage_to_string
 end
 
 let to_absolute (p, rest) = path_of_prefix p ^ rest
 
+let to_absolute_with_prefix ~www ~hhi (p, rest) =
+  let path_concat p rest = enforce_trailing_slash (Path.to_string p) ^ rest in
+  match p with
+  | Root -> path_concat www rest
+  | Hhi -> path_concat hhi rest
+  | Dummy -> rest
+  | _ -> failwith "invalid prefix"
+
 let to_tmp (_, rest) = (Tmp, rest)
 
 let to_root (_, rest) = (Root, rest)
 
 module Set = struct
-  include Reordered_argument_set (Caml.Set.Make (S))
+  include Reordered_argument_set (Stdlib.Set.Make (S))
 
   let pp_limit ?(max_items = None) fmt x =
     Format.fprintf fmt "@[<2>{";
@@ -160,6 +172,10 @@ module Set = struct
 
   let show_large ?(max_items = 5) sset =
     Format.asprintf "%a" (pp_large ~max_items) sset
+
+  let yojson_of_t x = make_yojson_of_t yojson_of_t x
+
+  let t_of_yojson x = make_t_of_yojson t_of_yojson x
 end
 
 module Map = struct
@@ -168,12 +184,16 @@ module Map = struct
   let pp pp_data = make_pp pp pp_data
 
   let show pp_data x = Format.asprintf "%a" (pp pp_data) x
+
+  let yojson_of_t x = make_yojson_of_t suffix x
+
+  let hash_fold_t s t = make_hash_fold_t hash_fold_t s t
 end
 
 let create prefix s =
   let prefix_s = path_of_prefix prefix in
   let prefix_len = String.length prefix_s in
-  if not (string_starts_with s prefix_s) then (
+  if not (String.is_prefix s ~prefix:prefix_s) then (
     Printf.eprintf "%s is not a prefix of %s" prefix_s s;
     assert_false_log_backtrace None
   );
@@ -183,7 +203,7 @@ let create_detect_prefix s =
   let file_prefix =
     [Root; Hhi; Tmp]
     |> List.find ~f:(fun prefix ->
-           String_utils.string_starts_with s (path_of_prefix prefix))
+           String.is_prefix s ~prefix:(path_of_prefix prefix))
     |> fun x ->
     match x with
     | Some prefix -> prefix
@@ -192,11 +212,11 @@ let create_detect_prefix s =
   create file_prefix s
 
 (* Strips the root and relativizes the file if possible, otherwise returns
-  original string *)
+   original string *)
 let strip_root_if_possible s =
   let prefix_s = path_of_prefix Root in
   let prefix_len = String.length prefix_s in
-  if not (string_starts_with s prefix_s) then
+  if not (String.is_prefix s ~prefix:prefix_s) then
     None
   else
     Some (String.sub s ~pos:prefix_len ~len:(String.length s - prefix_len))

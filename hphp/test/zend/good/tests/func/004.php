@@ -1,7 +1,7 @@
 <?hh
 
 function print_something_multiple_times($something,$times)
-{
+:mixed{
   echo "----\nIn function, printing the string \"$something\" $times times\n";
   for ($i=0; $i<$times; $i++) {
     echo "$i) $something\n";
@@ -10,7 +10,7 @@ function print_something_multiple_times($something,$times)
 }
 
 function some_other_function()
-{
+:mixed{
   echo "This is some other function, to ensure more than just one function works fine...\n";
 }
 

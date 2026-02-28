@@ -1,7 +1,7 @@
 <?hh
 
 function main(/* TAny */ $untyped, /* TAny */ $arr) {
-  $x = darray[];
+  $x = dict[];
   $x['foo'] = 0;
   $x[null] = 0;
   $x[4.2] = 0;

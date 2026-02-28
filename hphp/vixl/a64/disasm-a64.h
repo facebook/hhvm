@@ -23,9 +23,7 @@
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-#ifndef VIXL_A64_DISASM_A64_H
-#define VIXL_A64_DISASM_A64_H
+#pragma once
 
 #include "hphp/vixl/globals.h"
 #include "hphp/vixl/utils.h"
@@ -135,5 +133,3 @@ class PrintDisassembler: public Disassembler {
   const char* color_;
 };
 }  // namespace vixl
-
-#endif  // VIXL_A64_DISASM_A64_H

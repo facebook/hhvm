@@ -3,7 +3,7 @@
 class D {
 }
 
-function main() {
+function main() :mixed{
   $i1 = new D;
   $i2 = new D;
   $i3 = new D;
@@ -73,7 +73,7 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_power_assign_decref() {
+function main_power_assign_decref() :mixed{
 error_reporting(E_NOTICE);
 
 main();

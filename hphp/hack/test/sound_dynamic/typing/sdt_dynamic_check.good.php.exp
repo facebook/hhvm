@@ -1,0 +1,41 @@
+File "sdt_dynamic_check.good.php", line 12, characters 3-13:
+  int
+File "sdt_dynamic_check.good.php", line 19, characters 3-13:
+  vec<C>
+File "sdt_dynamic_check.good.php", line 19, characters 3-13:[2]
+  dynamic
+File "sdt_dynamic_check.good.php", line 26, characters 3-13:
+  int
+File "sdt_dynamic_check.good.php", line 33, characters 3-13:
+  vec<C>
+File "sdt_dynamic_check.good.php", line 33, characters 3-13:[2]
+  dynamic
+File "sdt_dynamic_check.good.php", line 64, characters 24-34:
+  int
+File "sdt_dynamic_check.good.php", line 66, characters 27-37:
+  vec<C>
+File "sdt_dynamic_check.good.php", line 66, characters 27-37:[2]
+  dynamic
+File "sdt_dynamic_check.good.php", line 68, characters 30-40:
+  int
+File "sdt_dynamic_check.good.php", line 70, characters 33-43:
+  vec<C>
+File "sdt_dynamic_check.good.php", line 70, characters 33-43:[2]
+  dynamic
+File "sdt_dynamic_check.good.php", line 72, characters 26-36:
+  int
+File "sdt_dynamic_check.good.php", line 74, characters 43-53:
+  int
+File "sdt_dynamic_check.good.php", line 41, characters 5-15:
+  int
+File "sdt_dynamic_check.good.php", line 46, characters 5-15:
+  vec<C>
+File "sdt_dynamic_check.good.php", line 46, characters 5-15:[2]
+  dynamic
+File "sdt_dynamic_check.good.php", line 51, characters 5-15:
+  int
+File "sdt_dynamic_check.good.php", line 56, characters 5-15:
+  vec<C>
+File "sdt_dynamic_check.good.php", line 56, characters 5-15:[2]
+  dynamic
+No errors

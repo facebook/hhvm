@@ -1,0 +1,91 @@
+<?hh
+<<file: __EnableUnstableFeatures('expression_trees')>>
+
+function f(): void {
+  $x = ExampleDsl::makeTree(
+    darray[
+      "path" => __FILE__,
+      "start_line" => 5,
+      "end_line" => 5,
+      "start_column" => 18,
+      "end_column" => 19,
+    ],
+    darray[
+      "splices" => dict[],
+      "functions" => vec[],
+      "static_methods" => vec[],
+      "variables" => vec[],
+      "lexically_enclosing_tree" => NULL,
+    ],
+    (
+      (ExampleDsl $v) ==> {
+        return $v->visitInt(
+          darray[
+            "path" => __FILE__,
+            "start_line" => 5,
+            "end_line" => 5,
+            "start_column" => 18,
+            "end_column" => 19,
+          ],
+          1,
+        );
+      }
+    ),
+  );
+  (
+    () ==> {
+      $splice0 = ${ExampleDsl::lift($x)};
+      return ExampleDsl::makeTree(
+        darray[
+          "path" => __FILE__,
+          "start_line" => 6,
+          "end_line" => 6,
+          "start_column" => 13,
+          "end_column" => 22,
+        ],
+        darray[
+          "splices" => dict["$0splice0" => $splice0],
+          "functions" => vec[],
+          "static_methods" => vec[],
+          "variables" => vec[],
+          "lexically_enclosing_tree" => NULL,
+        ],
+        (
+          (ExampleDsl $v) ==> {
+            return $v->visitBinop(
+              darray[
+                "path" => __FILE__,
+                "start_line" => 6,
+                "end_line" => 6,
+                "start_column" => 13,
+                "end_column" => 22,
+              ],
+              $v->splice(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 6,
+                  "end_line" => 6,
+                  "start_column" => 13,
+                  "end_column" => 18,
+                ],
+                "$0splice0",
+                $splice0,
+              ),
+              "__plus",
+              $v->visitInt(
+                darray[
+                  "path" => __FILE__,
+                  "start_line" => 6,
+                  "end_line" => 6,
+                  "start_column" => 21,
+                  "end_column" => 22,
+                ],
+                1,
+              ),
+            );
+          }
+        ),
+      );
+    }
+  )();
+}

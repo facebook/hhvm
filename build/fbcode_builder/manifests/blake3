@@ -1,0 +1,10 @@
+[manifest]
+name = blake3
+
+[download]
+url = https://github.com/BLAKE3-team/BLAKE3/archive/refs/tags/1.5.1.tar.gz
+sha256 = 822cd37f70152e5985433d2c50c8f6b2ec83aaf11aa31be9fe71486a91744f37
+
+[build]
+builder = cmake
+subdir = BLAKE3-1.5.1/c

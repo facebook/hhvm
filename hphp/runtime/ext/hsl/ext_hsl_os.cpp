@@ -25,14 +25,13 @@
 #include "hphp/runtime/server/cli-server-ext.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/light-process.h"
+#include "hphp/util/configs/server.h"
 
 #include <folly/functional/Invoke.h>
 #include <type_traits>
 
-#include <arpa/inet.h>
 #include <fcntl.h>
 #include <netinet/in.h>
-#include <netinet/tcp.h>
 #include <stdio.h>
 #include <sys/file.h>
 #include <sys/socket.h>
@@ -42,12 +41,10 @@ namespace HPHP {
 namespace {
 
 const StaticString
-  s_HSLFileDescriptor("HSLFileDescriptor"),
   s_fd("fd"),
   s_resource("resource"),
   s_type("type"),
   s_ErrnoException("HH\\Lib\\_Private\\_OS\\ErrnoException"),
-  s_FQHSLFileDescriptor("HH\\Lib\\OS\\FileDescriptor"),
   s_HSL_sockaddr("HH\\Lib\\_Private\\_OS\\sockaddr"),
   s_HSL_sockaddr_in("HH\\Lib\\_Private\\_OS\\sockaddr_in"),
   s_HSL_sockaddr_in6("HH\\Lib\\_Private\\_OS\\sockaddr_in6"),
@@ -64,8 +61,6 @@ const Slot
   s_sin6_addr_idx { 3 },
   s_sin6_scope_id_idx { 4 },
   s_sun_path_idx { 1 };
-
-Class* s_FileDescriptorClass = nullptr;
 
 IMPLEMENT_REQUEST_LOCAL(std::set<int>, s_fds_to_close);
 
@@ -115,15 +110,8 @@ Object hsl_sockaddr_from_native(const sockaddr_storage& addr, socklen_t len) {
           "sockaddr_un must fit in allocated space"
         );
         const sockaddr_un* const detail = reinterpret_cast<const sockaddr_un*>(&addr);
-#ifdef __linux__
         // Documented way to check for "unnamed" sockets: 0-byte-length sun_path
         const bool is_unnamed = len == sizeof(sa_family_t);
-#else
-        // This works on __APPLE__, generally makes sense, but means an 'abstract' socket
-        // on Linux
-        const bool is_unnamed = len <= offsetof(struct sockaddr_un, sun_path)
-          || detail->sun_path[0] == 0;
-#endif
         if (is_unnamed) {
           return create_object(s_HSL_sockaddr_un_unnamed, Array::CreateVec());
         }
@@ -192,11 +180,6 @@ void native_sockaddr_from_hsl(const Object& object, sockaddr_storage& native, so
   }
   bzero(&native, sizeof(native));
   address_len = offsetof(struct sockaddr_storage, ss_family) + sizeof(native.ss_family);
-#ifdef __APPLE__
-  SCOPE_EXIT {
-    native.ss_len = address_len;
-  };
-#endif
   native.ss_family = object->propRvalAtOffset(s_sa_family_idx).val().num;
 #define CHECK_SOCKADDR_TYPE(sa, af) \
   static_assert( \
@@ -222,16 +205,8 @@ void native_sockaddr_from_hsl(const Object& object, sockaddr_storage& native, so
         auto detail = reinterpret_cast<sockaddr_un*>(&native);
         const auto offset = offsetof(struct sockaddr_un, sun_path);
         if (object.instanceof(s_HSL_sockaddr_un_unnamed)) {
-#if defined(__linux__)
           address_len = sizeof(sa_family_t);
           return;
-#elif defined(__APPLE__)
-          // Match what MacOS gives us for socketpair()- 16 nulls
-          address_len = 16;
-          return;
-#else
-          static_assert(false, "Unsupported platform");
-#endif
         }
         assertx(object.instanceof(s_HSL_sockaddr_un_pathname));
 
@@ -288,7 +263,8 @@ void native_sockaddr_from_hsl(const Object& object, sockaddr_storage& native, so
 
 } // namespace
 
-struct HSLFileDescriptor {
+struct HSLFileDescriptor :
+    SystemLib::ClassLoader<"HH\\Lib\\OS\\FileDescriptor"> {
   enum class Type {
     FD,
     RESOURCE
@@ -344,8 +320,7 @@ struct HSLFileDescriptor {
 
   template<class ...Args>
   static Object newInstance(Args&&... args) {
-    assertx(s_FileDescriptorClass);
-    Object obj { s_FileDescriptorClass };
+    Object obj { HSLFileDescriptor::classof() };
 
     auto* data = Native::data<HSLFileDescriptor>(obj);
     new (data) HSLFileDescriptor(args...);
@@ -354,10 +329,11 @@ struct HSLFileDescriptor {
 
   static HSLFileDescriptor* get(const Object& obj) {
     if (obj.isNull()) {
-      raise_typehint_error("Expected an HSL FileDescriptor, got null");
+      raise_typehint_error_without_first_frame(
+        "Expected an HSL FileDescriptor, got null");
     }
-    if (!obj->instanceof(s_FQHSLFileDescriptor)) {
-      raise_typehint_error(
+    if (!obj->instanceof(HSLFileDescriptor::classof())) {
+      raise_typehint_error_without_first_frame(
         folly::sformat(
           "Expected an HSL FileDescriptor, got instance of class '{}'",
           obj->getClassName().c_str()
@@ -369,7 +345,7 @@ struct HSLFileDescriptor {
 
   static HSLFileDescriptor* get(const Variant& var) {
     if (!var.isObject()) {
-      raise_typehint_error(
+      raise_typehint_error_without_first_frame(
         folly::sformat(
           "Expected an HSL FileDescriptor, got {}",
           getDataTypeString(var.getType()).c_str()
@@ -389,6 +365,8 @@ struct HSLFileDescriptor {
     if (fd < 0) throw_errno_exception(EBADF);
     return fd;
   }
+
+  void sweep() {}
 
   void close() {
     switch (m_type) {
@@ -657,22 +635,11 @@ Object HHVM_FUNCTION(HSL_os_socket, int64_t domain, int64_t type, int64_t protoc
   return HSLFileDescriptor::newInstance(fd);
 }
 
-#ifdef __APPLE__
-#define EINVAL_ON_BAD_SOCKADDR_LEN(ss, sslen) { \
-  if (sslen > sizeof(sockaddr_storage) || sslen < 0) { \
-    return { CLIError {}, EINVAL }; \
-  } \
-  if (sslen != ss.ss_len) { \
-    return { CLIError {}, EINVAL }; \
-  } \
-}
-#else // ifdef __APPLE__
 #define EINVAL_ON_BAD_SOCKADDR_LEN(ss, sslen) { \
   if (sslen > sizeof(sockaddr_storage) || sslen < 0) { \
     return { CLIError {}, EINVAL }; \
   } \
 }
-#endif // ifdef __APPLE__
 
 #define IMPL(fun) \
 CLISrvResult<int, int> CLI_CLIENT_HANDLER(HSL_os_## fun, \
@@ -699,8 +666,8 @@ void HHVM_FUNCTION(HSL_os_ ## fun, const Object& fd, const Object& hsl_sockaddr)
   ); \
 }
 
-IMPL(connect);
-IMPL(bind);
+IMPL(connect)
+IMPL(bind)
 
 #undef IMPL
 #undef EINVAL_ON_BAD_SOCKADDR_LEN
@@ -874,7 +841,7 @@ void HHVM_FUNCTION(HSL_os_ftruncate, const Object& obj, int64_t length) {
 }
 
 Object HHVM_FUNCTION(HSL_os_request_stdio_fd, int64_t client_fd) {
-  if (RuntimeOption::ServerExecutionMode() && !is_cli_server_mode()) {
+  if (!is_any_cli_mode()) {
     throw_errno_exception(
       EBADF,
       "Request STDIO file descriptors are only available in CLI mode"
@@ -980,7 +947,12 @@ int64_t HHVM_FUNCTION(HSL_os_fork_and_execve,
                       const Array& envp,
                       const Array& fds,
                       const Array& options) {
-  std::string cwd("");
+  if (!Cfg::Server::AllowExec) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Process execution is disabled by the Server.AllowExec configuration"
+    );
+  }
+  std::string cwd;
   int flags = Process::FORK_AND_EXECVE_FLAG_NONE;
   int pgid = 0;
 
@@ -1054,7 +1026,7 @@ int64_t HHVM_FUNCTION(HSL_os_fork_and_execve,
       pgid
     );
   } else {
-    if (RuntimeOption::ServerExecutionMode()) {
+    if (Cfg::Server::Mode) {
       throw_errno_exception(
         ENOSYS,
         "Fork and execve requires lightprocesses in server mode"
@@ -1088,7 +1060,7 @@ int64_t HHVM_FUNCTION(HSL_os_fork_and_execve,
 
 struct OSExtension final : Extension {
 
-  OSExtension() : Extension("hsl_os", "0.1") {}
+  OSExtension() : Extension("hsl_os", "0.1", NO_ONCALL_YET) {}
 
   void cliClientInit() override {
     CLI_REGISTER_HANDLER(HSL_os_open);
@@ -1101,10 +1073,10 @@ struct OSExtension final : Extension {
     CLI_REGISTER_HANDLER(HSL_os_fcntl_intarg);
   }
 
-  void moduleInit() override {
+  void moduleRegisterNative() override {
     // Remember to update the HHI :)
 
-    Native::registerNativeDataInfo<HSLFileDescriptor>(s_HSLFileDescriptor.get());
+    Native::registerNativeDataInfo<HSLFileDescriptor>();
     HHVM_NAMED_ME(HH\\Lib\\OS\\FileDescriptor, __debugInfo, HHVM_MN(HSLFileDescriptor, __debugInfo));
 
     // The preprocessor doesn't like "\" immediately before a ##
@@ -1334,10 +1306,6 @@ struct OSExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\setsockopt_int, HSL_os_setsockopt_int);
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\fork_and_execve, HSL_os_fork_and_execve);
-
-    loadSystemlib();
-    s_FileDescriptorClass = Class::lookup(s_FQHSLFileDescriptor.get());
-    assertx(s_FileDescriptorClass);
   }
 
   void requestShutdown() override {

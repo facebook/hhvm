@@ -1,0 +1,6 @@
+No errors
+/a.php
+read_file.php--b.php
+  [10:3-31] file: a.php
+  content: // Content of file a.php
+

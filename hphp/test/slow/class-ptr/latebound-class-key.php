@@ -19,6 +19,6 @@ final class C extends Bar {
 }
 
 <<__EntryPoint>>
-function main() {
+function main() :mixed{
   var_dump(C::getClass());
 }

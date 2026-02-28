@@ -9,6 +9,6 @@ function blah(): void {
 }
 
 <<__EntryPoint>>
-function main_typedef_class_fail1() {
+function main_typedef_class_fail1() :mixed{
 blah();
 }

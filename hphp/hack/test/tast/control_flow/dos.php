@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 /* test that there are no interference between the Do continuations of multiple
  * do loops */

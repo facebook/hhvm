@@ -6,26 +6,26 @@ class MyClass {
     $this->prop2 = 'somethingElse';
     $this->prop3 = 'somethingElseThen';
 
-    var_dump(set_error_handler(varray[$this, 'errorHandler']));
+    var_dump(set_error_handler(vec[$this, 'errorHandler']));
   }
 
   public function errorHandler($severity, $message, $file = NULL,
-                               $line = NULL) {
+                               $line = NULL) :mixed{
     return false;
   }
 
-  public function fail() {
+  public function fail() :mixed{
     user_error('Try to cause an error', E_USER_ERROR);
   }
 }
 
-function main() {
+function main() :mixed{
   $x = new MyClass();
   $x->fail();
 }
 
 
 <<__EntryPoint>>
-function main_object_handler() {
+function main_object_handler() :mixed{
 main();
 }

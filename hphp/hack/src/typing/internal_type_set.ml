@@ -13,6 +13,7 @@
  *)
 open Hh_prelude
 open Typing_defs
+open Typing_defs_constraints
 
 module Ty_ = struct
   type t = internal_type [@@deriving show]
@@ -25,7 +26,7 @@ module Ty_ = struct
     | (ConstraintType _, LoclType _) -> -1
 end
 
-include Caml.Set.Make (Ty_)
+include Stdlib.Set.Make (Ty_)
 
 let fold_map set ~init:acc ~f =
   fold
@@ -49,3 +50,5 @@ let pp fmt t =
   Format.fprintf fmt "@,}@]"
 
 let show = Format.asprintf "%a" pp
+
+let force_lazy_values t = map Type_force_lazy_values.internal_type t

@@ -1,2 +1,4 @@
-File "superglobals.php", line 4, characters 8-15:
+ERROR: File "superglobals.php", line 4, characters 8-15:
+`$_SERVER` is no longer accessible as a magic global variable. Use the HH\global_* functions instead. (Parsing[1002])
+ERROR: File "superglobals.php", line 4, characters 8-15:
 Variable `$_SERVER` is undefined, or not always defined. (Naming[2050])

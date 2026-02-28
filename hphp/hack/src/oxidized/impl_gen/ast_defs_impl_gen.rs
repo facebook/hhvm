@@ -1,33 +1,34 @@
-// Copyright (c) Facebook, Inc. and its affiliates.
+// Copyright (c) Meta Platforms, Inc. and affiliates.
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<018bd9417c398597381715d2bc93df71>>
+// @generated SignedSource<<b6c37feb04c1c31d8773c0b93c6afd9d>>
 //
 // To regenerate this file, run:
-//   hphp/hack/src/oxidized_regen.sh
+//   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
 
+#![allow(clippy::all)]
 use crate::ast_defs::*;
 impl ShapeFieldName {
-    pub fn mk_sflit_int(p0: Pstring) -> Self {
-        ShapeFieldName::SFlitInt(p0)
-    }
     pub fn mk_sflit_str(p0: PositionedByteString) -> Self {
         ShapeFieldName::SFlitStr(p0)
+    }
+    pub fn mk_sfclassname(p0: Id) -> Self {
+        ShapeFieldName::SFclassname(p0)
     }
     pub fn mk_sfclass_const(p0: Id, p1: Pstring) -> Self {
         ShapeFieldName::SFclassConst(p0, p1)
     }
-    pub fn is_sflit_int(&self) -> bool {
-        match self {
-            ShapeFieldName::SFlitInt(..) => true,
-            _ => false,
-        }
-    }
     pub fn is_sflit_str(&self) -> bool {
         match self {
             ShapeFieldName::SFlitStr(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_sfclassname(&self) -> bool {
+        match self {
+            ShapeFieldName::SFclassname(..) => true,
             _ => false,
         }
     }
@@ -37,15 +38,15 @@ impl ShapeFieldName {
             _ => false,
         }
     }
-    pub fn as_sflit_int(&self) -> Option<&Pstring> {
-        match self {
-            ShapeFieldName::SFlitInt(p0) => Some(p0),
-            _ => None,
-        }
-    }
     pub fn as_sflit_str(&self) -> Option<&PositionedByteString> {
         match self {
             ShapeFieldName::SFlitStr(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_sfclassname(&self) -> Option<&Id> {
+        match self {
+            ShapeFieldName::SFclassname(p0) => Some(p0),
             _ => None,
         }
     }
@@ -55,15 +56,15 @@ impl ShapeFieldName {
             _ => None,
         }
     }
-    pub fn as_sflit_int_mut(&mut self) -> Option<&mut Pstring> {
-        match self {
-            ShapeFieldName::SFlitInt(p0) => Some(p0),
-            _ => None,
-        }
-    }
     pub fn as_sflit_str_mut(&mut self) -> Option<&mut PositionedByteString> {
         match self {
             ShapeFieldName::SFlitStr(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_sfclassname_mut(&mut self) -> Option<&mut Id> {
+        match self {
+            ShapeFieldName::SFclassname(p0) => Some(p0),
             _ => None,
         }
     }
@@ -73,15 +74,15 @@ impl ShapeFieldName {
             _ => None,
         }
     }
-    pub fn as_sflit_int_into(self) -> Option<Pstring> {
-        match self {
-            ShapeFieldName::SFlitInt(p0) => Some(p0),
-            _ => None,
-        }
-    }
     pub fn as_sflit_str_into(self) -> Option<PositionedByteString> {
         match self {
             ShapeFieldName::SFlitStr(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_sfclassname_into(self) -> Option<Id> {
+        match self {
+            ShapeFieldName::SFclassname(p0) => Some(p0),
             _ => None,
         }
     }
@@ -299,22 +300,46 @@ impl ReadonlyKind {
         true
     }
 }
-impl OgNullFlavor {
-    pub fn mk_ognullthrows() -> Self {
-        OgNullFlavor::OGNullthrows
+impl ParamNamed {
+    pub fn mk_param_named() -> Self {
+        ParamNamed::ParamNamed
     }
-    pub fn mk_ognullsafe() -> Self {
-        OgNullFlavor::OGNullsafe
+    pub fn is_param_named(&self) -> bool {
+        true
     }
-    pub fn is_ognullthrows(&self) -> bool {
+}
+impl OptionalKind {
+    pub fn mk_optional() -> Self {
+        OptionalKind::Optional
+    }
+    pub fn is_optional(&self) -> bool {
+        true
+    }
+}
+impl SplatKind {
+    pub fn mk_splat() -> Self {
+        SplatKind::Splat
+    }
+    pub fn is_splat(&self) -> bool {
+        true
+    }
+}
+impl OperatorNullFlavor {
+    pub fn mk_regular() -> Self {
+        OperatorNullFlavor::Regular
+    }
+    pub fn mk_nullsafe() -> Self {
+        OperatorNullFlavor::Nullsafe
+    }
+    pub fn is_regular(&self) -> bool {
         match self {
-            OgNullFlavor::OGNullthrows => true,
+            OperatorNullFlavor::Regular => true,
             _ => false,
         }
     }
-    pub fn is_ognullsafe(&self) -> bool {
+    pub fn is_nullsafe(&self) -> bool {
         match self {
-            OgNullFlavor::OGNullsafe => true,
+            OperatorNullFlavor::Nullsafe => true,
             _ => false,
         }
     }
@@ -449,9 +474,6 @@ impl Bop {
     }
     pub fn mk_question_question() -> Self {
         Bop::QuestionQuestion
-    }
-    pub fn mk_eq(p0: Option<Box<Bop>>) -> Self {
-        Bop::Eq(p0)
     }
     pub fn is_plus(&self) -> bool {
         match self {
@@ -597,30 +619,6 @@ impl Bop {
             _ => false,
         }
     }
-    pub fn is_eq(&self) -> bool {
-        match self {
-            Bop::Eq(..) => true,
-            _ => false,
-        }
-    }
-    pub fn as_eq(&self) -> Option<&Option<Box<Bop>>> {
-        match self {
-            Bop::Eq(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_eq_mut(&mut self) -> Option<&mut Option<Box<Bop>>> {
-        match self {
-            Bop::Eq(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_eq_into(self) -> Option<Option<Box<Bop>>> {
-        match self {
-            Bop::Eq(p0) => Some(p0),
-            _ => None,
-        }
-    }
 }
 impl Uop {
     pub fn mk_utild() -> Self {
@@ -718,6 +716,9 @@ impl Visibility {
     pub fn mk_internal() -> Self {
         Visibility::Internal
     }
+    pub fn mk_protected_internal() -> Self {
+        Visibility::ProtectedInternal
+    }
     pub fn is_private(&self) -> bool {
         match self {
             Visibility::Private => true,
@@ -739,6 +740,12 @@ impl Visibility {
     pub fn is_internal(&self) -> bool {
         match self {
             Visibility::Internal => true,
+            _ => false,
+        }
+    }
+    pub fn is_protected_internal(&self) -> bool {
+        match self {
+            Visibility::ProtectedInternal => true,
             _ => false,
         }
     }
@@ -796,6 +803,147 @@ impl XhpEnumValue {
         match self {
             XhpEnumValue::XEVString(p0) => Some(p0),
             _ => None,
+        }
+    }
+}
+impl Tprim {
+    pub fn mk_tnull() -> Self {
+        Tprim::Tnull
+    }
+    pub fn mk_tvoid() -> Self {
+        Tprim::Tvoid
+    }
+    pub fn mk_tint() -> Self {
+        Tprim::Tint
+    }
+    pub fn mk_tbool() -> Self {
+        Tprim::Tbool
+    }
+    pub fn mk_tfloat() -> Self {
+        Tprim::Tfloat
+    }
+    pub fn mk_tresource() -> Self {
+        Tprim::Tresource
+    }
+    pub fn mk_tnum() -> Self {
+        Tprim::Tnum
+    }
+    pub fn mk_tarraykey() -> Self {
+        Tprim::Tarraykey
+    }
+    pub fn mk_tnoreturn() -> Self {
+        Tprim::Tnoreturn
+    }
+    pub fn is_tnull(&self) -> bool {
+        match self {
+            Tprim::Tnull => true,
+            _ => false,
+        }
+    }
+    pub fn is_tvoid(&self) -> bool {
+        match self {
+            Tprim::Tvoid => true,
+            _ => false,
+        }
+    }
+    pub fn is_tint(&self) -> bool {
+        match self {
+            Tprim::Tint => true,
+            _ => false,
+        }
+    }
+    pub fn is_tbool(&self) -> bool {
+        match self {
+            Tprim::Tbool => true,
+            _ => false,
+        }
+    }
+    pub fn is_tfloat(&self) -> bool {
+        match self {
+            Tprim::Tfloat => true,
+            _ => false,
+        }
+    }
+    pub fn is_tresource(&self) -> bool {
+        match self {
+            Tprim::Tresource => true,
+            _ => false,
+        }
+    }
+    pub fn is_tnum(&self) -> bool {
+        match self {
+            Tprim::Tnum => true,
+            _ => false,
+        }
+    }
+    pub fn is_tarraykey(&self) -> bool {
+        match self {
+            Tprim::Tarraykey => true,
+            _ => false,
+        }
+    }
+    pub fn is_tnoreturn(&self) -> bool {
+        match self {
+            Tprim::Tnoreturn => true,
+            _ => false,
+        }
+    }
+}
+impl TypedefVisibility {
+    pub fn mk_transparent() -> Self {
+        TypedefVisibility::Transparent
+    }
+    pub fn mk_opaque() -> Self {
+        TypedefVisibility::Opaque
+    }
+    pub fn mk_opaque_module() -> Self {
+        TypedefVisibility::OpaqueModule
+    }
+    pub fn is_transparent(&self) -> bool {
+        match self {
+            TypedefVisibility::Transparent => true,
+            _ => false,
+        }
+    }
+    pub fn is_opaque(&self) -> bool {
+        match self {
+            TypedefVisibility::Opaque => true,
+            _ => false,
+        }
+    }
+    pub fn is_opaque_module(&self) -> bool {
+        match self {
+            TypedefVisibility::OpaqueModule => true,
+            _ => false,
+        }
+    }
+}
+impl ReifyKind {
+    pub fn mk_erased() -> Self {
+        ReifyKind::Erased
+    }
+    pub fn mk_soft_reified() -> Self {
+        ReifyKind::SoftReified
+    }
+    pub fn mk_reified() -> Self {
+        ReifyKind::Reified
+    }
+    pub fn is_erased(&self) -> bool {
+        match self {
+            ReifyKind::Erased => true,
+            _ => false,
+        }
+    }
+    pub fn is_soft_reified(&self) -> bool {
+        match self {
+            ReifyKind::SoftReified => true,
+            _ => false,
+        }
+    }
+    pub fn is_reified(&self) -> bool {
+        match self {
+            ReifyKind::Reified => true,
+            _ => false,
         }
     }
 }

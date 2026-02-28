@@ -1,0 +1,2 @@
+ERROR: File "lambda_arith_called_on_tuple.php", line 3, characters 19-21:
+Tuple elements can only be accessed with an integer literal (Typing[4116])

@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2022-04-06-0002",
+  "version" : "2025-08-11-0002",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -12,6 +12,8 @@
       "trivia_type_name" : "single_line_comment" },
     { "trivia_kind_name" : "FixMe",
       "trivia_type_name" : "fix_me" },
+    { "trivia_kind_name" : "Ignore",
+      "trivia_type_name" : "ignore" },
     { "trivia_kind_name" : "IgnoreError",
       "trivia_type_name" : "ignore_error" },
     { "trivia_kind_name" : "FallThrough",
@@ -55,6 +57,8 @@
       "token_text" : "classname" },
     { "token_kind" : "Clone",
       "token_text" : "clone" },
+    { "token_kind" : "Concurrent",
+      "token_text" : "concurrent" },
     { "token_kind" : "Const",
       "token_text" : "const" },
     { "token_kind" : "Construct",
@@ -67,8 +71,6 @@
       "token_text" : "darray" },
     { "token_kind" : "Default",
       "token_text" : "default" },
-    { "token_kind" : "Define",
-      "token_text" : "define" },
     { "token_kind" : "Dict",
       "token_text" : "dict" },
     { "token_kind" : "Do",
@@ -79,20 +81,10 @@
       "token_text" : "echo" },
     { "token_kind" : "Else",
       "token_text" : "else" },
-    { "token_kind" : "Elseif",
-      "token_text" : "elseif" },
     { "token_kind" : "Empty",
       "token_text" : "empty" },
-    { "token_kind" : "Endfor",
-      "token_text" : "endfor" },
-    { "token_kind" : "Endforeach",
-      "token_text" : "endforeach" },
     { "token_kind" : "Endif",
       "token_text" : "endif" },
-    { "token_kind" : "Endswitch",
-      "token_text" : "endswitch" },
-    { "token_kind" : "Endwhile",
-      "token_text" : "endwhile" },
     { "token_kind" : "Enum",
       "token_text" : "enum" },
     { "token_kind" : "Eval",
@@ -113,14 +105,10 @@
       "token_text" : "for" },
     { "token_kind" : "Foreach",
       "token_text" : "foreach" },
-    { "token_kind" : "From",
-      "token_text" : "from" },
     { "token_kind" : "Function",
       "token_text" : "function" },
     { "token_kind" : "Global",
       "token_text" : "global" },
-    { "token_kind" : "Concurrent",
-      "token_text" : "concurrent" },
     { "token_kind" : "If",
       "token_text" : "if" },
     { "token_kind" : "Implements",
@@ -147,12 +135,20 @@
       "token_text" : "isset" },
     { "token_kind" : "Keyset",
       "token_text" : "keyset" },
+    { "token_kind" : "Lateinit",
+      "token_text" : "lateinit" },
     { "token_kind" : "List",
       "token_text" : "list" },
+    { "token_kind" : "Match",
+      "token_text" : "match" },
     { "token_kind" : "Mixed",
       "token_text" : "mixed" },
     { "token_kind" : "Module",
       "token_text" : "module" },
+    { "token_kind" : "Named",
+      "token_text" : "named" },
+    { "token_kind" : "Nameof",
+      "token_text" : "nameof" },
     { "token_kind" : "Namespace",
       "token_text" : "namespace" },
     { "token_kind" : "New",
@@ -165,8 +161,6 @@
       "token_text" : "noreturn" },
     { "token_kind" : "Num",
       "token_text" : "num" },
-    { "token_kind" : "Object",
-      "token_text" : "object" },
     { "token_kind" : "Parent",
       "token_text" : "parent" },
     { "token_kind" : "Print",
@@ -187,8 +181,6 @@
       "token_text" : "require_once" },
     { "token_kind" : "Required",
       "token_text" : "required" },
-    { "token_kind" : "Lateinit",
-      "token_text" : "lateinit" },
     { "token_kind" : "Resource",
       "token_text" : "resource" },
     { "token_kind" : "Return",
@@ -233,6 +225,8 @@
       "token_text" : "vec" },
     { "token_kind" : "Void",
       "token_text" : "void" },
+    { "token_kind" : "With",
+      "token_text" : "with" },
     { "token_kind" : "Where",
       "token_text" : "where" },
     { "token_kind" : "While",
@@ -369,6 +363,8 @@
       "token_text" : "$$" },
     { "token_kind" : "BarGreaterThan",
       "token_text" : "|>" },
+    { "token_kind" : "BarQuestionGreaterThan",
+      "token_text" : "|?>" },
     { "token_kind" : "SlashGreaterThan",
       "token_text" : "/>" },
     { "token_kind" : "LessThanSlash",
@@ -385,6 +381,12 @@
       "token_text" : "readonly" },
     { "token_kind" : "Internal",
       "token_text" : "internal" },
+    { "token_kind" : "Package",
+      "token_text" : "package" },
+    { "token_kind" : "Let",
+      "token_text" : "let" },
+    { "token_kind" : "Optional",
+      "token_text" : "optional" },
 
     { "token_kind" : "ErrorToken",
       "token_text" : null },
@@ -461,6 +463,13 @@
       "fields" : [
         { "field_name" : "parts" }
       ] },
+    { "kind_name" : "ModuleName",
+      "type_name" : "module_name",
+      "description" : "module_name",
+      "prefix" : "module_name",
+      "fields" : [
+        { "field_name" : "parts" }
+      ] },
     { "kind_name" : "SimpleTypeSpecifier",
       "type_name" : "simple_type_specifier",
       "description" : "simple_type_specifier",
@@ -490,7 +499,7 @@
       "fields" : [
         { "field_name" : "prefix" },
         { "field_name" : "left_backtick" },
-        { "field_name" : "expression" },
+        { "field_name" : "body" },
         { "field_name" : "right_backtick" }
       ] },
     { "kind_name" : "VariableExpression",
@@ -524,6 +533,7 @@
       "prefix" : "enum",
       "fields" : [
         { "field_name" : "attribute_spec" },
+        { "field_name" : "modifiers" },
         { "field_name" : "keyword" },
         { "field_name" : "name" },
         { "field_name" : "colon" },
@@ -588,6 +598,8 @@
       "prefix" : "alias",
       "fields" : [
         { "field_name" : "attribute_spec" },
+        { "field_name" : "modifiers" },
+        { "field_name" : "module_kw_opt" },
         { "field_name" : "keyword" },
         { "field_name" : "name" },
         { "field_name" : "generic_parameter" },
@@ -609,6 +621,32 @@
         { "field_name" : "equal" },
         { "field_name" : "context" },
         { "field_name" : "semicolon" }
+      ] },
+    { "kind_name" : "CaseTypeDeclaration",
+      "type_name" : "case_type_declaration",
+      "description" : "case_type_declaration",
+      "prefix" : "case_type",
+      "fields" : [
+        { "field_name" : "attribute_spec" },
+        { "field_name" : "modifiers" },
+        { "field_name" : "case_keyword" },
+        { "field_name" : "type_keyword" },
+        { "field_name" : "name" },
+        { "field_name" : "generic_parameter" },
+        { "field_name" : "as" },
+        { "field_name" : "bounds" },
+        { "field_name" : "equal" },
+        { "field_name" : "variants" },
+        { "field_name" : "semicolon" }
+      ] },
+    { "kind_name" : "CaseTypeVariant",
+      "type_name" : "case_type_variant",
+      "description" : "case_type_variant",
+      "prefix" : "case_type_variant",
+      "fields" : [
+        { "field_name" : "bar" },
+        { "field_name" : "type" },
+        { "field_name" : "where_clause" }
       ] },
     { "kind_name" : "PropertyDeclaration",
       "type_name" : "property_declaration",
@@ -783,7 +821,6 @@
         { "field_name" : "extends_list" },
         { "field_name" : "implements_keyword" },
         { "field_name" : "implements_list" },
-        { "field_name" : "where_clause" },
         { "field_name" : "body" }
       ] },
     { "kind_name" : "ClassishBody",
@@ -793,36 +830,6 @@
       "fields" : [
         { "field_name" : "left_brace" },
         { "field_name" : "elements" },
-        { "field_name" : "right_brace" }
-      ] },
-    { "kind_name" : "TraitUsePrecedenceItem",
-      "type_name" : "trait_use_precedence_item",
-      "description" : "trait_use_precedence_item",
-      "prefix" : "trait_use_precedence_item",
-      "fields" : [
-        { "field_name" : "name" },
-        { "field_name" : "keyword" },
-        { "field_name" : "removed_names" }
-      ] },
-    { "kind_name" : "TraitUseAliasItem",
-      "type_name" : "trait_use_alias_item",
-      "description" : "trait_use_alias_item",
-      "prefix" : "trait_use_alias_item",
-      "fields" : [
-        { "field_name" : "aliasing_name" },
-        { "field_name" : "keyword" },
-        { "field_name" : "modifiers" },
-        { "field_name" : "aliased_name" }
-      ] },
-    { "kind_name" : "TraitUseConflictResolution",
-      "type_name" : "trait_use_conflict_resolution",
-      "description" : "trait_use_conflict_resolution",
-      "prefix" : "trait_use_conflict_resolution",
-      "fields" : [
-        { "field_name" : "keyword" },
-        { "field_name" : "names" },
-        { "field_name" : "left_brace" },
-        { "field_name" : "clauses" },
         { "field_name" : "right_brace" }
       ] },
     { "kind_name" : "TraitUse",
@@ -841,6 +848,17 @@
       "fields" : [
         { "field_name" : "keyword" },
         { "field_name" : "kind" },
+        { "field_name" : "name" },
+        { "field_name" : "semicolon" }
+      ] },
+    { "kind_name" : "RequireClauseConstraint",
+      "type_name" : "require_clause_constraint",
+      "description" : "require_clause_constraint",
+      "prefix" : "require_constraint",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "this" },
+        { "field_name" : "operator" },
         { "field_name" : "name" },
         { "field_name" : "semicolon" }
       ] },
@@ -903,6 +921,15 @@
         { "field_name" : "decorator" },
         { "field_name" : "expression" }
       ] },
+    { "kind_name" : "NamedArgument",
+      "type_name" : "named_argument",
+      "description" : "named_argument",
+      "prefix" : "named_argument",
+      "fields" : [
+        { "field_name" : "name" },
+        { "field_name" : "equal" },
+        { "field_name" : "expression" }
+      ] },
     { "kind_name" : "ParameterDeclaration",
       "type_name" : "parameter_declaration",
       "description" : "parameter_declaration",
@@ -910,20 +937,16 @@
       "fields" : [
         { "field_name" : "attribute" },
         { "field_name" : "visibility" },
+        { "field_name" : "optional" },
         { "field_name" : "call_convention" },
+        { "field_name" : "named" },
         { "field_name" : "readonly" },
+        { "field_name" : "pre_ellipsis" },
         { "field_name" : "type" },
+        { "field_name" : "ellipsis" },
         { "field_name" : "name" },
-        { "field_name" : "default_value" }
-      ] },
-    { "kind_name" : "VariadicParameter",
-      "type_name" : "variadic_parameter",
-      "description" : "variadic_parameter",
-      "prefix" : "variadic_parameter",
-      "fields" : [
-        { "field_name" : "call_convention" },
-        { "field_name" : "type" },
-        { "field_name" : "ellipsis" }
+        { "field_name" : "default_value" },
+        { "field_name" : "parameter_end" }
       ] },
     { "kind_name" : "OldAttributeSpecification",
       "type_name" : "old_attribute_specification",
@@ -933,21 +956,6 @@
         { "field_name" : "left_double_angle" },
         { "field_name" : "attributes" },
         { "field_name" : "right_double_angle" }
-      ] },
-    { "kind_name" : "AttributeSpecification",
-      "type_name" : "attribute_specification",
-      "description" : "attribute_specification",
-      "prefix" : "attribute_specification",
-      "fields" : [
-        { "field_name" : "attributes" }
-      ] },
-    { "kind_name" : "Attribute",
-      "type_name" : "attribute",
-      "description" : "attribute",
-      "prefix" : "attribute",
-      "fields" : [
-        { "field_name" : "at" },
-        { "field_name" : "attribute_name" }
       ] },
     { "kind_name" : "InclusionExpression",
       "type_name" : "inclusion_expression",
@@ -1009,6 +1017,18 @@
         { "field_name" : "right_paren" },
         { "field_name" : "semicolon" }
       ] },
+    { "kind_name" : "DeclareLocalStatement",
+      "type_name" : "declare_local_statement",
+      "description" : "declare_local_statement",
+      "prefix" : "declare_local",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "variable" },
+        { "field_name" : "colon" },
+        { "field_name" : "type" },
+        { "field_name" : "initializer" },
+        { "field_name" : "semicolon" }
+      ] },
     { "kind_name" : "UsingStatementBlockScoped",
       "type_name" : "using_statement_block_scoped",
       "description" : "using_statement_block_scoped",
@@ -1052,19 +1072,7 @@
         { "field_name" : "condition" },
         { "field_name" : "right_paren" },
         { "field_name" : "statement" },
-        { "field_name" : "elseif_clauses" },
         { "field_name" : "else_clause" }
-      ] },
-    { "kind_name" : "ElseifClause",
-      "type_name" : "elseif_clause",
-      "description" : "elseif_clause",
-      "prefix" : "elseif",
-      "fields" : [
-        { "field_name" : "keyword" },
-        { "field_name" : "left_paren" },
-        { "field_name" : "condition" },
-        { "field_name" : "right_paren" },
-        { "field_name" : "statement" }
       ] },
     { "kind_name" : "ElseClause",
       "type_name" : "else_clause",
@@ -1195,6 +1203,28 @@
         { "field_name" : "keyword" },
         { "field_name" : "colon" }
       ] },
+    { "kind_name" : "MatchStatement",
+      "type_name" : "match_statement",
+      "description" : "match_statement",
+      "prefix" : "match_statement",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "left_paren" },
+        { "field_name" : "expression" },
+        { "field_name" : "right_paren" },
+        { "field_name" : "left_brace" },
+        { "field_name" : "arms" },
+        { "field_name" : "right_brace" }
+      ] },
+    { "kind_name" : "MatchStatementArm",
+      "type_name" : "match_statement_arm",
+      "description" : "match_statement_arm",
+      "prefix" : "match_statement_arm",
+      "fields" : [
+        { "field_name" : "pattern" },
+        { "field_name" : "arrow" },
+        { "field_name" : "body" }
+      ] },
     { "kind_name" : "ReturnStatement",
       "type_name" : "return_statement",
       "description" : "return_statement",
@@ -1286,6 +1316,7 @@
         { "field_name" : "attribute_spec" },
         { "field_name" : "async_keyword" },
         { "field_name" : "function_keyword" },
+        { "field_name" : "type_parameters" },
         { "field_name" : "left_paren" },
         { "field_name" : "parameters" },
         { "field_name" : "right_paren" },
@@ -1306,6 +1337,32 @@
         { "field_name" : "variables" },
         { "field_name" : "right_paren" }
       ] },
+    { "kind_name" : "VariablePattern",
+      "type_name" : "variable_pattern",
+      "description" : "variable_pattern",
+      "prefix" : "variable_pattern",
+      "fields" : [
+        { "field_name" : "variable" }
+      ] },
+    { "kind_name" : "ConstructorPattern",
+      "type_name" : "constructor_pattern",
+      "description" : "constructor_pattern",
+      "prefix" : "constructor_pattern",
+      "fields" : [
+        { "field_name" : "constructor" },
+        { "field_name" : "left_paren" },
+        { "field_name" : "members" },
+        { "field_name" : "right_paren" }
+      ] },
+    { "kind_name" : "RefinementPattern",
+      "type_name" : "refinement_pattern",
+      "description" : "refinement_pattern",
+      "prefix" : "refinement_pattern",
+      "fields" : [
+        { "field_name" : "variable" },
+        { "field_name" : "colon" },
+        { "field_name" : "specifier" }
+      ] },
     { "kind_name" : "LambdaExpression",
       "type_name" : "lambda_expression",
       "description" : "lambda_expression",
@@ -1322,6 +1379,8 @@
       "description" : "lambda_signature",
       "prefix" : "lambda",
       "fields" : [
+        { "field_name" : "function_keyword" },
+        { "field_name" : "type_parameters" },
         { "field_name" : "left_paren" },
         { "field_name" : "parameters" },
         { "field_name" : "right_paren" },
@@ -1475,6 +1534,14 @@
         { "field_name" : "left_paren" },
         { "field_name" : "argument_list" },
         { "field_name" : "right_paren" }
+      ] },
+    { "kind_name" : "NameofExpression",
+      "type_name" : "nameof_expression",
+      "description" : "nameof_expression",
+      "prefix" : "nameof",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "target" }
       ] },
     { "kind_name" : "FunctionCallExpression",
       "type_name" : "function_call_expression",
@@ -1859,7 +1926,6 @@
         { "field_name" : "reified" },
         { "field_name" : "variance" },
         { "field_name" : "name" },
-        { "field_name" : "param_params" },
         { "field_name" : "constraints" }
       ] },
     { "kind_name" : "TypeConstraint",
@@ -1909,6 +1975,7 @@
         { "field_name" : "outer_left_paren" },
         { "field_name" : "readonly_keyword" },
         { "field_name" : "function_keyword" },
+        { "field_name" : "type_parameters" },
         { "field_name" : "inner_left_paren" },
         { "field_name" : "parameter_list" },
         { "field_name" : "inner_right_paren" },
@@ -1923,14 +1990,75 @@
       "description" : "closure_parameter_type_specifier",
       "prefix" : "closure_parameter",
       "fields" : [
+        { "field_name" : "optional" },
         { "field_name" : "call_convention" },
+        { "field_name" : "named" },
         { "field_name" : "readonly" },
+        { "field_name" : "pre_ellipsis" },
+        { "field_name" : "type" },
+        { "field_name" : "name" },
+        { "field_name" : "ellipsis" }
+      ] },
+    { "kind_name" : "TupleOrUnionOrIntersectionElementTypeSpecifier",
+      "type_name" : "tuple_or_union_or_intersection_element_type_specifier",
+      "description" : "tuple_or_union_or_intersection_element_type_specifier",
+      "prefix" : "tuple_or_union_or_intersection_element",
+      "fields" : [
+        { "field_name" : "optional" },
+        { "field_name" : "pre_ellipsis" },
+        { "field_name" : "type" },
+        { "field_name" : "ellipsis" }
+      ] },
+    { "kind_name" : "TypeRefinement",
+      "type_name" : "type_refinement",
+      "description" : "type_refinement",
+      "prefix" : "type_refinement",
+      "fields" : [
+        { "field_name" : "type" },
+        { "field_name" : "keyword" },
+        { "field_name" : "left_brace" },
+        { "field_name" : "members" },
+        { "field_name" : "right_brace" }
+      ] },
+    { "kind_name" : "TypeInRefinement",
+      "type_name" : "type_in_refinement",
+      "description" : "type_in_refinement",
+      "prefix" : "type_in_refinement",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "name" },
+        { "field_name" : "type_parameters" },
+        { "field_name" : "constraints" },
+        { "field_name" : "equal" },
         { "field_name" : "type" }
+      ] },
+    { "kind_name" : "CtxInRefinement",
+      "type_name" : "ctx_in_refinement",
+      "description" : "ctx_in_refinement",
+      "prefix" : "ctx_in_refinement",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "name" },
+        { "field_name" : "type_parameters" },
+        { "field_name" : "constraints" },
+        { "field_name" : "equal" },
+        { "field_name" : "ctx_list" }
       ] },
     { "kind_name" : "ClassnameTypeSpecifier",
       "type_name" : "classname_type_specifier",
       "description" : "classname_type_specifier",
       "prefix" : "classname",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "left_angle" },
+        { "field_name" : "type" },
+        { "field_name" : "trailing_comma" },
+        { "field_name" : "right_angle" }
+      ] },
+    { "kind_name" : "ClassPtrTypeSpecifier",
+      "type_name" : "class_ptr_type_specifier",
+      "description" : "class_ptr_type_specifier",
+      "prefix" : "class_ptr",
       "fields" : [
         { "field_name" : "keyword" },
         { "field_name" : "left_angle" },
@@ -2111,10 +2239,28 @@
       "prefix" : "module_declaration",
       "fields" : [
         { "field_name" : "attribute_spec" },
-        { "field_name" : "keyword" },
+        { "field_name" : "new_keyword" },
+        { "field_name" : "module_keyword" },
         { "field_name" : "name" },
         { "field_name" : "left_brace" },
         { "field_name" : "right_brace" }
+      ] },
+    { "kind_name" : "ModuleMembershipDeclaration",
+      "type_name" : "module_membership_declaration",
+      "description" : "module_membership_declaration",
+      "prefix" : "module_membership_declaration",
+      "fields" : [
+        { "field_name" : "module_keyword" },
+        { "field_name" : "name" },
+        { "field_name" : "semicolon" }
+      ] },
+    { "kind_name" : "PackageExpression",
+      "type_name" : "package_expression",
+      "description" : "package_expression",
+      "prefix" : "package_expression",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "name" }
       ] },
 
     { "kind_name" : "Token",

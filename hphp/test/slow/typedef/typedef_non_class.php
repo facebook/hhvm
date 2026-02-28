@@ -27,15 +27,15 @@ function fooString(MyString $x): void {
   var_dump($x);
 }
 
-function main() {
+function main() :mixed{
   fooInt(12);
   fooBool(false);
   fooDouble(1.2);
-  fooArray(varray[1,2,3]);
+  fooArray(vec[1,2,3]);
   fooString("asdasd");
 }
 
 <<__EntryPoint>>
-function main_typedef_non_class() {
+function main_typedef_non_class() :mixed{
 main();
 }

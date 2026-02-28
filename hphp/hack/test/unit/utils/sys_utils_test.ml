@@ -107,165 +107,64 @@ let test_redirect_stdout_and_stderr_to_file_success () =
       ());
   true
 
-let test_ncores () =
-  (* Several positive examples taken from https://doc.callmematthi.eu/static/webArticles/Understanding%20Linux%20_proc_cpuinfo.pdf *)
-  let cpuinfo_1socket_1core_hyper =
-    {|processor : 0
-model name : Intel(R) Pentium(R) 4 CPU 2.80GHz
-cache size : 1024 KB
-physical id : 0
-siblings : 2
-core id : 0
-cpu cores : 1
+let test_non_intr () =
+  Tempfile.with_real_tempdir (fun dir ->
+      let path = Path.concat dir "a.txt" |> Path.to_string in
+      let buf1a = Bytes.make 100000 'h' in
+      let buf1b = Bytes.make 200000 'w' in
+      let fd = Unix.openfile path [Unix.O_WRONLY; Unix.O_CREAT] 0o666 in
+      Sys_utils.write_non_intr fd buf1a 0 0;
+      Sys_utils.write_non_intr fd buf1a 0 (Bytes.length buf1a);
+      Sys_utils.write_non_intr fd buf1b 0 (Bytes.length buf1b);
+      Unix.close fd;
+      (* can we read it okay? *)
+      let fd = Unix.openfile path [Unix.O_RDONLY] 0o666 in
+      let buf2x = Sys_utils.read_non_intr fd 0 in
+      let buf2a = Sys_utils.read_non_intr fd (Bytes.length buf1a) in
+      let buf2b = Sys_utils.read_non_intr fd (Bytes.length buf1b) in
+      let buf2y = Sys_utils.read_non_intr fd 0 in
+      let buf2z = Sys_utils.read_non_intr fd 1 in
+      Unix.close fd;
+      assert (buf2x |> Option.value_exn |> Bytes.length = 0);
+      assert (Bytes.equal buf1a (Option.value_exn buf2a));
+      assert (Bytes.equal buf1b (Option.value_exn buf2b));
+      assert (buf2y |> Option.value_exn |> Bytes.length = 0);
+      assert (Option.is_none buf2z);
+      ());
+  true
 
-processor : 1
-model name : Intel(R) Pentium(R) 4 CPU 2.80GHz
-cache size : 1024 KB
-physical id : 0
-siblings : 2
-core id : 0
-cpu cores : 1|}
-  in
-  Asserter.Int_asserter.assert_equals
-    1
-    (Sys_utils.ncores_linux_only cpuinfo_1socket_1core_hyper)
-    "cpuinfo_1socket_1core_hyper should have this many cores";
+let test_atomically_create () =
+  Tempfile.with_real_tempdir (fun dir ->
+      let buf = Bytes.of_string "hello" in
+      let len = Bytes.length buf in
 
-  let cpuinfo_1socket_4core_nothyper =
-    "processor : 0
-model name : Intel(R) Xeon(R) CPU E5410 @ 2.33GHz
-cache size : 6144 KB
-physical id : 0
-siblings : 4
-core id : 0
-cpu cores : 4
+      (* Does it create ok in the success path? *)
+      let path = Path.concat dir "test.txt" |> Path.to_string in
+      let fd =
+        Sys_utils.atomically_create_and_init_file
+          path
+          ~rd:true
+          ~wr:true
+          0o666
+          ~init:(fun fd -> Sys_utils.write_non_intr fd buf 0 len)
+      in
+      Unix.close (Option.value_exn fd);
+      let fd = Unix.openfile path [Unix.O_RDONLY] 0o666 in
+      let buf2 = Sys_utils.read_non_intr fd len in
+      assert (Bytes.equal buf (Option.value_exn buf2));
+      Unix.close fd;
 
-processor : 1
-model name : Intel(R) Xeon(R) CPU E5410 @ 2.33GHz
-cache size : 6144 KB
-physical id : 0
-siblings : 4
-core id : 1
-cpu cores : 4
-
-processor : 2
-model name : Intel(R) Xeon(R) CPU E5410 @ 2.33GHz
-cache size : 6144 KB
-physical id : 0
-siblings : 4
-core id : 2
-cpu cores : 4
-
-processor : 3
-model name : Intel(R) Xeon(R) CPU E5410 @ 2.33GHz
-cache size : 6144 KB
-physical id : 0
-siblings : 4
-core id : 3
-cpu cores : 4"
-  in
-  Asserter.Int_asserter.assert_equals
-    4
-    (Sys_utils.ncores_linux_only cpuinfo_1socket_4core_nothyper)
-    "cpuinfo_1socket_4core_nothyper should have this many cores";
-
-  let cpuinfo_1socket_2core_nothyper =
-    "processor : 0
-model name : Intel(R) Pentium(R) D CPU 3.00GHz
-cache size : 2048 KB
-physical id : 0
-siblings : 2
-core id : 0
-cpu cores : 2
-
-processor : 1
-model name : Intel(R) Pentium(R) D CPU 3.00GHz
-cache size : 2048 KB
-physical id : 0
-siblings : 2
-core id : 1
-cpu cores : 2"
-  in
-  Asserter.Int_asserter.assert_equals
-    2
-    (Sys_utils.ncores_linux_only cpuinfo_1socket_2core_nothyper)
-    "cpuinfo_1socket_2core_nothyper should have this many cores";
-
-  let cpuinfo_2socket_1core_hyper =
-    "processor : 0
-model name : Intel(R) Xeon(TM) CPU 3.60GHz
-cache size : 1024 KB
-physical id : 0
-siblings : 2
-core id : 0
-cpu cores : 1
-
-processor : 1
-model name : Intel(R) Xeon(TM) CPU 3.60GHz
-cache size : 1024 KB
-physical id : 3
-siblings : 2
-core id : 0
-cpu cores : 1
-
-processor : 2
-model name : Intel(R) Xeon(TM) CPU 3.60GHz
-cache size : 1024 KB
-physical id : 0
-siblings : 2
-core id : 0
-cpu cores : 1
-
-processor : 3
-model name : Intel(R) Xeon(TM) CPU 3.60GHz
-cache size : 1024 KB
-physical id : 3
-siblings : 2
-core id : 0
-cpu cores : 1"
-  in
-  Asserter.Int_asserter.assert_equals
-    2
-    (Sys_utils.ncores_linux_only cpuinfo_2socket_1core_hyper)
-    "cpuinfo_2socket_1core_hyper should have this many cores";
-
-  let cpuinfo_2socket_2core_nothyper =
-    "processor : 0
-model name : Intel(R) Xeon(R) CPU 5160 @ 3.00GHz
-cache size : 4096 KB
-physical id : 0
-siblings : 2
-core id : 0
-cpu cores : 2
-
-processor : 1
-model name : Intel(R) Xeon(R) CPU 5160 @ 3.00GHz
-cache size : 4096 KB
-physical id : 0
-siblings : 2
-core id : 1
-cpu cores : 2
-
-processor : 2
-model name : Intel(R) Xeon(R) CPU 5160 @ 3.00GHz
-cache size : 4096 KB
-physical id : 3
-siblings : 2
-core id : 0
-cpu cores : 2
-
-processor : 3
-model name : Intel(R) Xeon(R) CPU 5160 @ 3.00GHz
-cache size : 4096 KB
-physical id : 3
-siblings : 2
-core id : 1
-cpu cores : 2"
-  in
-  Asserter.Int_asserter.assert_equals
-    4
-    (Sys_utils.ncores_linux_only cpuinfo_2socket_2core_nothyper)
-    "cpuinfo_2socket_2core_nothyper should have this many cores";
+      (* Does it fail to create if a file pre-exists? *)
+      let fd =
+        Sys_utils.atomically_create_and_init_file
+          path
+          ~rd:true
+          ~wr:true
+          0o666
+          ~init:(fun _fd -> ())
+      in
+      assert (Option.is_none fd);
+      ());
   true
 
 let tests =
@@ -277,7 +176,8 @@ let tests =
       test_redirect_stdout_and_stderr_to_file_failure );
     ( "test_redirect_stdout_and_stderr_to_file_success",
       test_redirect_stdout_and_stderr_to_file_success );
-    ("test_ncores", test_ncores);
+    ("test_non_intr", test_non_intr);
+    ("test_atomically_create", test_atomically_create);
   ]
 
 let () = Unit_test.run_all tests

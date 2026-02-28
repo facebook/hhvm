@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 newtype MyInt = int;
 

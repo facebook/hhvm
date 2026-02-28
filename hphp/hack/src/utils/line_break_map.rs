@@ -30,10 +30,14 @@ impl LineBreakMap {
         // Start with (len / 80) + 1, assuming 80 is average char count in a line.
         let mut result = Vec::with_capacity((len / 80) + 1);
         result.push(0);
-        for i in 1..(len + 1) {
-            let prev = text[i - 1];
-            if prev == b'\r' && text[i] != b'\n' || prev == b'\n' {
-                result.push(i);
+
+        let iter = text
+            .iter()
+            .zip(text.iter().skip(1).map(Some).chain(std::iter::once(None)));
+
+        for (i, (byte, next)) in iter.enumerate() {
+            if *byte == b'\n' || *byte == b'\r' && next != Some(&b'\n') {
+                result.push(i + 1);
             }
         }
         if result.len() > 1 {
@@ -132,5 +136,19 @@ impl LineBreakMap {
 
     pub fn offset_to_line_lengths(&self) -> Vec<isize> {
         panic!("Not implemented")
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use test_case::test_case;
+
+    use super::*;
+    #[test_case("<?hh \r\nFoo Bar!", vec![0, 7, 15])]
+    #[test_case("<?hh \nFoo Bar!", vec![0, 6, 14])]
+    #[test_case("<?hh \r", vec![0, 6])]
+    fn test_line_break_map(test: &str, expected_lines: Vec<usize>) {
+        let line_break_map = LineBreakMap::new(test.as_bytes());
+        assert_eq!(line_break_map.lines, expected_lines.into());
     }
 }

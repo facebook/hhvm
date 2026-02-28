@@ -17,16 +17,11 @@
 
 #include <algorithm>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-
 #include <folly/Conv.h>
 #include <folly/portability/Fcntl.h>
 
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/base/zend-functions.h"
 
-#include "hphp/util/alloc.h"
 #include "hphp/util/conv-10.h"
 
 namespace HPHP {
@@ -197,6 +192,7 @@ void StringBuffer::append(const Variant& v) {
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
+    case KindOfEnumClassLabel:
       append(v.toString());
   }
 }

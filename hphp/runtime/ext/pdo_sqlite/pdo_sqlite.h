@@ -91,7 +91,7 @@ struct PDOSqliteResource : PDOResource {
                       const Variant& callback,
                       int argcount);
 
-  DECLARE_RESOURCE_ALLOCATION(PDOSqliteResource);
+  DECLARE_RESOURCE_ALLOCATION(PDOSqliteResource)
 
 private:
 

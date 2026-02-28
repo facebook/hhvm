@@ -2,10 +2,10 @@
 
 class A implements Serializable {
   public $_foo = 42;
-  public function serialize() {
-    return serialize(darray['a' => 'apple', 'b' => 'banana']);
+  public function serialize() :mixed{
+    return serialize(dict['a' => 'apple', 'b' => 'banana']);
   }
-  public function unserialize($_) {}
+  public function unserialize($_) :mixed{}
 }
 
 class B {
@@ -14,8 +14,8 @@ class B {
 
 class C implements JsonSerializable {
   public $_foo = 42;
-  public function jsonSerialize() {
-    return serialize(darray['a' => 'apple', 'b' => 'banana']);
+  public function jsonSerialize() :mixed{
+    return serialize(dict['a' => 'apple', 'b' => 'banana']);
   }
 }
 
@@ -29,7 +29,7 @@ function attempt(mixed $in): void {
 }
 
  <<__EntryPoint>>
-function main() {
+function main() :mixed{
   attempt(new A());
   attempt(new B());
   attempt(new C());

@@ -6,7 +6,7 @@ trait MY_TRAIT {
 class MY_CLASS{
   use MY_TRAIT;
   public $x;
-  public function printX() {
+  public function printX() :mixed{
     var_dump($this->x);
     $this->x = 10;
     var_dump($this->x);

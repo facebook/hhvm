@@ -1,0 +1,108 @@
+File "branches_returning_same_value.php", line 12, characters 12-14:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 14, characters 12-14:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 20, characters 12-18:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 22, characters 12-18:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 29, characters 12-14:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 31, characters 12-14:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 38, characters 12-15:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 41, characters 12-15:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 47, characters 12-23:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 49, characters 12-23:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 55, characters 12-24:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 57, characters 12-24:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 63, characters 12-38:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])
+File "branches_returning_same_value.php", line 65, characters 12-38:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])
+File "branches_returning_same_value.php", line 95, characters 12-14:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 97, characters 10-12:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 102, characters 12-18:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 104, characters 12-18:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 106, characters 12-18:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 125, characters 12-18:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 130, characters 10-16:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 136, characters 12-18:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 141, characters 10-16:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 147, characters 14-20:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 149, characters 12-18:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 151, characters 12-18:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 153, characters 12-18:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 175, characters 14-16:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 177, characters 14-16:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 183, characters 14-20:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 185, characters 14-20:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 192, characters 14-16:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 194, characters 14-16:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 201, characters 14-17:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 204, characters 14-17:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 210, characters 14-25:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 212, characters 14-25:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 218, characters 14-26:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 220, characters 14-26:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 226, characters 14-17:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])
+File "branches_returning_same_value.php", line 228, characters 14-17:
+This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using an `HH_FIXME` comment. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5806])
+File "branches_returning_same_value.php", line 258, characters 14-20:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 260, characters 14-20:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 262, characters 14-20:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 281, characters 14-20:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 286, characters 12-18:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 292, characters 14-20:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 297, characters 12-18:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 302, characters 14-16:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 304, characters 12-14:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 309, characters 16-22:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 311, characters 14-20:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 313, characters 14-20:
+There are multiple return statements, but they all return the same value. (Lint[5646])
+File "branches_returning_same_value.php", line 315, characters 14-20:
+There are multiple return statements, but they all return the same value. (Lint[5646])

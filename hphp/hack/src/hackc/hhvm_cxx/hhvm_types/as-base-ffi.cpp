@@ -25,4 +25,4 @@ rust::String type_flags_to_string_ffi(TypeConstraintFlags flags) {
   return type_flags_to_string(flags);
 }
 
-}
+} // namespace HPHP

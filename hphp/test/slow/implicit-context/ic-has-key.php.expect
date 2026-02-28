@@ -1,0 +1,8 @@
+in zoned...
+ClassContext::exists: True
+in keyedbyIC memo
+ClassContext::exists: True
+in backdoored_fn
+ClassContext::exists: False
+in default memo
+ClassContext::exists: False

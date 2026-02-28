@@ -1,6 +1,0 @@
-File "yield.php", line 6, characters 3-10:
-Invalid `yield` (Typing[4110])
-File "yield.php", line 5, characters 40-42:
-Expected `int`
-File "yield.php", line 5, characters 12-18:
-But got `dynamic`

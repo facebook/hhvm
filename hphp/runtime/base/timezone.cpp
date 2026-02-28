@@ -21,11 +21,9 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/datetime.h"
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-error.h"
 
 #include "hphp/util/functional.h"
-#include "hphp/util/logger.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/text-util.h"
 
@@ -49,13 +47,10 @@ struct GuessedTimeZone {
     struct tm tmbuf;
     struct tm *ta = localtime_r(&the_time, &tmbuf);
     const char *tzid = nullptr;
-#ifndef _MSC_VER
-    // TODO: Fixme under MSVC!
     if (ta) {
       tzid = timelib_timezone_id_from_abbr(ta->tm_zone, ta->tm_gmtoff,
                                            ta->tm_isdst);
     }
-#endif
     if (!tzid) {
       tzid = "UTC";
     }

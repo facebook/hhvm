@@ -1,4 +1,4 @@
-File "typedef17.php", line 23, characters 6-7:
+ERROR: File "typedef17.php", line 23, characters 6-7:
 Invalid argument (Typing[4323])
   File "typedef17.php", line 14, characters 13-13:
   `T` is a constrained type parameter

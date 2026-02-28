@@ -1,0 +1,49 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/constants" as constants}}
+{{#import "common/type" as types}}
+{{> common/auto_generated_go}}
+
+package {{root_program.go_pkg_name}}
+
+import (
+    {{#each root_program.thrift_imports as |program|}}
+    {{program.go_package_alias}} "{{program.go_import_path}}"
+    {{/each}}
+    thrift "{{constants.thrift_lib_import}}"
+)
+
+// (needed to ensure safety because of naive import list construction)
+{{> common/unused_imports_protection}}
+var _ = thrift.VOID
+
+var GoUnusedProtection__ int
+
+{{#each root_program.consts as |const|}}
+{{#if const.docs?}}{{!
+}}{{const.docs}}{{!
+}}{{/if const.docs?}}{{!
+}}{{#if const.var?}}var{{#else}}const{{/if const.var?}} {{!}}{{!
+}}{{const.go_name}} {{!
+    }}{{#if const.type.structured?}}*{{/if const.type.structured?}}{{#partial types.go_type type=const.type}} = {{!
+      }}{{#partial constants.const_value value=const.value root_const=const}}
+{{#if const.docs?}}
+{{! new line after documented constant}}
+
+{{/if const.docs?}}{{!
+}}{{/each}}

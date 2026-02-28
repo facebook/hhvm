@@ -22,13 +22,12 @@
 #include "hphp/util/match.h"
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/alias-class.h"
 
 namespace HPHP::jit {
 
-TRACE_SET_MOD(hhir_alias);
+TRACE_SET_MOD(hhir_alias)
 
 namespace {
 
@@ -45,27 +44,38 @@ void visit_locations(const BlockList& blocks, Visit visit) {
     for (auto& inst : *blk) {
       auto const effects = canonicalize(memory_effects(inst));
       FTRACE(1, "  {: <30} -- {}\n", show(effects), inst.toString());
-      match<void>(
+      match(
         effects,
-        [&] (IrrelevantEffects)   {},
-        [&] (UnknownEffects)      {},
-        [&] (ReturnEffects x)     { visit(x.kills); },
-        [&] (CallEffects x)       { visit(x.kills);
-                                    visit(x.inputs);
-                                    visit(x.actrec);
-                                    visit(x.outputs);
-                                    visit(x.locals); },
-        [&] (GeneralEffects x)    { visit(x.loads);
-                                    visit(x.stores);
-                                    visit(x.inout);
-                                    visit(x.moves);
-                                    visit(x.kills);
-                                    visit(x.backtrace); },
-        [&] (PureLoad x)          { visit(x.src); },
-        [&] (PureStore x)         { visit(x.dst); },
-        [&] (ExitEffects x)       { visit(x.live); visit(x.kills); },
-        [&] (PureInlineCall x)    { visit(x.base);
-                                    visit(x.actrec); }
+        [&] (const IrrelevantEffects&)   {},
+        [&] (const UnknownEffects&)      {},
+        [&] (const ReturnEffects& x)     { visit(x.kills); },
+        [&] (const CallEffects& x) {
+          visit(x.kills);
+          visit(x.uninits);
+          visit(x.inputs);
+          visit(x.actrec);
+          visit(x.outputs);
+          for (auto const& frame : x.backtrace) {
+            visit(frame);
+          }
+        },
+        [&] (const GeneralEffects& x) {
+          visit(x.loads);
+          visit(x.stores);
+          visit(x.inout);
+          visit(x.moves);
+          visit(x.kills);
+          for (auto const& frame : x.backtrace) {
+            visit(frame);
+          }
+        },
+        [&] (const PureLoad& x)          { visit(x.src); },
+        [&] (const PureStore& x)         { visit(x.dst); },
+        [&] (const ExitEffects& x)       { visit(x.live);
+                                           visit(x.kills);
+                                           visit(x.uninits); },
+        [&] (const PureInlineCall& x)    { visit(x.base);
+                                           visit(x.actrec); }
       );
     }
   }
@@ -85,7 +95,7 @@ Optional<uint32_t> add_class(AliasAnalysis& ret, AliasClass acls) {
   meta.index = ret.locations.size() - 1;
   always_assert(meta.index < kMaxTrackedALocs);
   return meta.index;
-};
+}
 
 // Expand a location into a set of locations that may alias it. This
 // is for locals where the location may contain a discrete set of
@@ -239,6 +249,7 @@ Optional<ALocMeta> AliasAnalysis::find(AliasClass acls) const {
 /**/
 
 #define ALIAS_CLASSES(X)      \
+  X(ClosureArg, closureArg, all_closureArg) \
   X(Prop, prop, all_props)    \
   X(ElemI, elemI, all_elemIs) \
   X(ElemS, elemS, all_elemSs) \
@@ -384,12 +395,22 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
    * object property offsets, and for arrays based only on index.  Everything
    * colliding in that regard is assumed to possibly alias.
    */
+  
+  auto conflict_closure_arg_offset = jit::fast_map<uint32_t,ALocBits>{};
   auto conflict_prop_offset = jit::fast_map<uint32_t,ALocBits>{};
   auto conflict_array_index = jit::fast_map<int64_t,ALocBits>{};
   auto conflict_array_key = jit::fast_map<const StringData*,ALocBits>{};
   auto prop_array_map = jit::fast_map<int64_t,AliasClass>{};
 
   visit_locations(blocks, [&] (AliasClass acls) {
+    if (auto const closure_arg = acls.is_closureArg()) {
+      if (auto const index = add_class(ret, acls)) {
+        conflict_closure_arg_offset[closure_arg->offset].set(*index);
+        prop_array_map.emplace(*index, acls);
+      }
+      return;
+    }
+
     if (auto const prop = acls.is_prop()) {
       if (auto const index = add_class(ret, acls)) {
         conflict_prop_offset[prop->offset].set(*index);
@@ -489,6 +510,11 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
     };
 
   auto make_conflict_set = [&] (AliasClass acls, ALocMeta& meta) {
+    if (auto const closure_arg = acls.is_closureArg()) {
+      maybe_set_conflicts(conflict_closure_arg_offset[closure_arg->offset], meta, acls);
+      ret.all_closureArg.set(meta.index);
+      return;
+    }
     if (auto const prop = acls.is_prop()) {
       maybe_set_conflicts(conflict_prop_offset[prop->offset], meta, acls);
       ret.all_props.set(meta.index);

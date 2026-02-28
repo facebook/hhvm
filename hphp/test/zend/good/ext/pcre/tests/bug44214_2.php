@@ -1,6 +1,6 @@
 <?hh
 
-function myCallBack( $match ) {
+function myCallBack( $match ) :mixed{
 
     ZendGoodExtPcreTestsBug442142::$array[] = $match[0];
     return 'xxx';
@@ -10,7 +10,7 @@ abstract final class ZendGoodExtPcreTestsBug442142 {
   public static $array;
 }
 <<__EntryPoint>> function main(): void {
-ZendGoodExtPcreTestsBug442142::$array = varray[];
+ZendGoodExtPcreTestsBug442142::$array = vec[];
 
 $string = 'aaa bbb ccc ddd eee ccc aaa bbb';
 

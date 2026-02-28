@@ -16,20 +16,17 @@
 
 #include "hphp/runtime/vm/jit/enter-tc.h"
 
-#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/jit-resume-addr.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/write-lease.h"
 
-#include "hphp/runtime/vm/runtime.h"
-
+#include "hphp/util/configs/debugger.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/trace.h"
 
-TRACE_SET_MOD(mcg);
+TRACE_SET_MOD(mcg)
 
 namespace HPHP::jit {
 
@@ -48,13 +45,23 @@ ALWAYS_INLINE void preEnter(JitResumeAddr start) {
     Trace::ringbufferEntry(Trace::RBTypeEnterTC, skData, (uint64_t)addr);
   }
 
+  // If stepping in the debugger, the next debugger interrpt check in JIT
+  // must bring the execution back to interpreter.
+  if (UNLIKELY(Cfg::Debugger::EnableVSDebugger &&
+               !RID().getVSDebugDisablesJit() &&
+               !g_context->m_dbgNoBreak &&
+               RID().getDebuggerStepIntr())) {
+    markFunctionWithDebuggerIntr(vmfp()->func());
+  }
+
   regState() = VMRegState::DIRTY;
 }
 
 ALWAYS_INLINE void postExit() {
   regState() = VMRegState::CLEAN;
-  assertx(isValidVMStackAddress(vmsp()));
-
+  assert_flog(isValidVMStackAddress(vmsp()),
+              "vmsp() = {} ; getStackLowAddress() = {} ; getStackHighAddress() = {}\n",
+              vmsp(), vmStack().getStackLowAddress(), vmStack().getStackHighAddress());
   vmfp() = nullptr;
   vmpc() = nullptr;
 }

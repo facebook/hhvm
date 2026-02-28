@@ -1,0 +1,2 @@
+{"path":"passed-by-file-name.php","line":1,"char":1,"code":"HACKFORMAT","severity":"warning","original":"<?hh\n    function f():  void {\n}\n","replacement":"<?hh\nfunction f(): void {\n}\n","name":"format","description":"This file is not formatted. Use `arc f` to keep it formatted."}
+{"path":"needs-formatting.php","line":1,"char":1,"code":"HACKFORMAT","severity":"warning","original":"<?hh\n    function f():  void {\n}\n","replacement":"<?hh\nfunction f(): void {\n}\n","name":"format","description":"This file is not formatted. Use `arc f` to keep it formatted."}

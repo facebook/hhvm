@@ -1,6 +1,0 @@
-string(4) "dict"
-string(4) "dict"
-string(4) "dict"
-
-Warning: getrusage() expects parameter 1 to be integer, vec given in %s/test/zend/good/ext/standard/tests/general_functions/getrusage.php on line 6
-Done

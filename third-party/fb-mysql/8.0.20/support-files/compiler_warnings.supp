@@ -1,0 +1,93 @@
+# Copyright (c) 2007, 2013, Oracle and/or its affiliates. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2.0,
+# as published by the Free Software Foundation.
+#
+# This program is also distributed with certain software (including
+# but not limited to OpenSSL) that is licensed under separate terms,
+# as designated in a particular file or component or in included license
+# documentation.  The authors of MySQL hereby grant you an additional
+# permission to link the program and your derivative works with the
+# separately licensed software that they have included with MySQL.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License, version 2.0, for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301  USA
+
+#
+# This file contains compiler warnings that can
+# be ignored for various reasons.
+#
+
+integer.cpp: .*control reaches end of non-void function.*: 1288-1427
+sql_yacc.cc : .*label 'yyerrlab1' defined but not used.*
+sql_yacc.cc : .*switch statement contains 'default' but no 'case' labels.*
+
+#
+# Things that can be ignored in InnoDB
+#
+pars0grm.tab.c: .*'yyerrorlab' : unreferenced label.*
+_flex_tmp.c: .*not enough actual parameters for macro 'yywrap'.*
+pars0lex.l: .*conversion from 'ulint' to 'int', possible loss of data.*
+
+#
+# bdb is not critical to keep up to date
+#
+.*/bdb/.* : .*discards qualifiers from pointer target type.*
+.*/bdb/.* : .*unused parameter.*
+.*/bdb/.* : .*may be used uninitialized.*
+.*/bdb/.* : .*empty body in an if-statement.*
+db_vrfy.c : .*comparison is always false due to limited range of data type.*
+
+#
+# readline is not maintained by us
+#
+.*/cmd-line-utils/libedit/.* : .*
+
+#
+# Ignore all conversion warnings on windows 64
+# (Is safe as we are not yet supporting strings >= 2G)
+#
+.* : conversion from '__int64' to .*int'.*
+.* : conversion from '__int64' to 'uint8'.*
+.* : conversion from '__int64' to 'uint32'.*
+.* : conversion from '__int64' to 'u.*long'.*
+.* : conversion from '__int64' to 'long'.*
+.* : conversion from '__int64' to 'off_t'.*
+.* : conversion from '.*size_t' to .*int'.*
+.* : conversion from '.*size_t' to 'TaoCrypt::word32'.*
+.* : conversion from '.*size_t' to 'u.*long'.*
+.* : conversion from '.*size_t' to 'uint32'.*
+.* : conversion from '.*size_t' to 'off_t'.*
+.* : conversion from '.*size_t' to 'size_s'.*
+.* : conversion from '.*size_t' to 'DWORD'.*
+.* : conversion from '.*size_t' to 'uLongf'.*
+.* : conversion from '.*size_t' to 'UINT'.*
+.* : conversion from '.*size_t' to 'uInt'.*
+.* : conversion from '.*size_t' to 'uint16'.*
+
+#
+# The following should be fixed by the ndb team
+#
+.*/ndb/.* : .*used uninitialized in this function.*
+
+#
+# Unexplanable (?) stuff
+#
+listener.cc : .*conversion from 'SOCKET' to 'int'.*
+net_serv.cc : .*conversion from 'SOCKET' to 'int'.*
+
+# allow a little moving space for the warning below
+mi_packrec.c : .*result of 32-bit shift implicitly converted to 64 bits.* : 560-600
+
+#
+# Wrong compiler warnings
+#
+.* : .*no matching operator delete found; memory will not be freed if initialization throws an exception.*
+ctype-simple.c : .*unary minus operator applied to unsigned type, result still unsigned.*

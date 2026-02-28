@@ -1,6 +1,6 @@
 <?hh
 function cons<X,Y>(X $x, Y $y) : (X,Y) {
-  return varray[$x, $y];
+  return vec[$x, $y];
 }
 function car<X,Y>((X,Y) $x): X {
   return $x[0];

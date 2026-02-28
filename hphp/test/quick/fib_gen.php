@@ -1,7 +1,7 @@
 <?hh
 
 // Lazy infinite list!
-function fibonacci($first, $second) {
+function fibonacci($first, $second) :AsyncGenerator<mixed,mixed,void>{
   $a = $first; $b = $second;
   while (true) {
     yield $b;

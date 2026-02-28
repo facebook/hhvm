@@ -1,5 +1,5 @@
 Testing openssl_pkey_new
-resource(4) of type (OpenSSL key)
+resource(%d) of type (OpenSSL key)
 
 Warning: Unknown elliptic curve (short) name invalid_cuve_name in %s on line %d
 bool(false)
@@ -9,15 +9,15 @@ string(9) "secp384r1"
 bool(true)
 Testing openssl_csr_new with key generation
 NULL
-resource(5) of type (OpenSSL key)
+resource(%d) of type (OpenSSL key)
 Testing openssl_csr_new with existing ecc key
-resource(7) of type (OpenSSL X.509 CSR)
+resource(%d) of type (OpenSSL X.509 CSR)
 bool(false)
 dict(1) {
   ["d"]=>
   string(%d) "%a"
 }
-resource(8) of type (OpenSSL X.509)
+resource(%d) of type (OpenSSL X.509)
 Testing openssl_x509_check_private_key
 bool(true)
 bool(false)

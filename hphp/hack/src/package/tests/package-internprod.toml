@@ -1,0 +1,48 @@
+# Configuration for intern/prod enforcement via Packages V2
+
+# #########################################################
+# This file has only a testing purpose and it is not relied
+# upon for the build of the intern or prod repo
+# #########################################################
+
+[packages]
+
+# prod packages ###########################################
+
+[packages.prod_strict]
+soft_includes=["prod_pulled_from_intern"]
+
+[packages.prod_pulled_from_intern]
+includes=["prod_strict"]
+
+# intern packages #########################################
+
+# okay:
+[packages.intern1]
+includes=["prod_strict"]
+soft_includes=["prod_pulled_from_intern"]
+
+# okay:
+[packages.intern2]
+includes=["prod_strict", "prod_pulled_from_intern"]
+
+# error: needs to at least soft-include "prod_pulled_from_intern"
+[packages.intern3]
+includes=["prod_strict"]
+
+# #########################################################
+
+[deployments]
+
+# okay:
+[deployments.prod1]
+packages=["prod_strict"]
+soft_packages = ["prod_pulled_from_intern"]
+
+# okay:
+[deployments.prod2]
+packages=["prod_strict", "prod_pulled_from_intern"]
+
+# error: needs to at least soft-deploy "prod_pulled_from_intern"
+[deployments.prod3]
+packages=["prod_strict"]

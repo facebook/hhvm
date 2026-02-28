@@ -1,4 +1,0 @@
-File "tparam_method_vs_class1.php", line 7, characters 27-28:
-You cannot re-bind the type parameter `TA` (Naming[2041])
-File "tparam_method_vs_class1.php", line 4, characters 12-13:
-`TA` is already bound here

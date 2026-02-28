@@ -21,7 +21,7 @@ namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-struct Index;
+struct IIndex;
 struct FuncAnalysis;
 struct Bytecode;
 struct BlockUpdateInfo;
@@ -39,14 +39,16 @@ using BlockUpdates = CompactVector<std::pair<BlockId, CompressedBlockUpdate>>;
  * php::Func, and may renumber the php::Func's locals, but won't update
  * any of the func's other metadata.
  */
-void optimize_func(const Index&, FuncAnalysis&&, php::WideFunc&);
+void optimize_func(const IIndex&, FuncAnalysis&&, php::WideFunc&);
 
-void update_bytecode(php::WideFunc&, BlockUpdates&&, FuncAnalysis* = nullptr);
-
-/*
- * Optimize property type hints for a particular class.
- */
-void optimize_class_prop_type_hints(const Index& index, Context ctx);
+enum class UpdateBCResult {
+  None, // No changes
+  Changed, // Changes
+  ChangedAnalyze // Changes, and should analyze this function again
+};
+UpdateBCResult update_bytecode(php::WideFunc&,
+                               BlockUpdates,
+                               FuncAnalysis* = nullptr);
 
 /*
  * Return a bytecode to generate the value in cell
@@ -56,4 +58,3 @@ Bytecode gen_constant(const TypedValue& cell);
 //////////////////////////////////////////////////////////////////////
 
 }
-

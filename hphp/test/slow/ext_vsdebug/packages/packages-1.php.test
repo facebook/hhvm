@@ -1,0 +1,5 @@
+<?hh
+
+<<__EntryPoint>> function main_test() {
+  hphp_debug_break();
+}

@@ -1,0 +1,9 @@
+int(0)
+int(1)
+string(56) "test2() expects at least 1 positional parameter, 0 given"
+int(2)
+int(0)
+string(57) "test3() expects at least 2 positional parameters, 1 given"
+int(2)
+int(1)
+Done

@@ -1,0 +1,10 @@
+*** Testing str_split() : unexpected values for 'str' ***
+-- Iteration 1 --
+vec(1) {
+  string(0) ""
+}
+-- Iteration 2 --
+vec(1) {
+  string(0) ""
+}
+Done

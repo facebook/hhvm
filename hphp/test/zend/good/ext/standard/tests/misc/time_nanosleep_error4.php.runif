@@ -1,2 +1,2 @@
 os not WIN
-function time_nanosleep
+extension standard

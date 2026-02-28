@@ -1,0 +1,14 @@
+*** Testing count() : usage variations ***
+
+-- Iteration 1 --
+int(3)
+
+-- Iteration 2 --
+int(5)
+
+-- Iteration 3 --
+int(3)
+
+-- Iteration 4 --
+int(3)
+Done

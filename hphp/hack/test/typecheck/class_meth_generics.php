@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class C<T as arraykey> {
@@ -15,7 +15,7 @@ function testdirect(string $s, int $i, bool $b): (string, (int, bool)) {
 }
 
 function testindirect(string $s, int $i, bool $b): (string, (int, bool)) {
-  $f = class_meth(C::class, 'nongeneric');
-  $g = class_meth(C::class, 'generic');
+  $f = C::nongeneric<>;
+  $g = C::generic<>;
   return tuple($f($s), $g($i, $b));
 }

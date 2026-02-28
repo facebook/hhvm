@@ -1,0 +1,9 @@
+string(57) "is_null() expects exactly 1 positional parameter, 0 given"
+bool(true)
+string(57) "is_null() expects exactly 1 positional parameter, 2 given"
+string(57) "is_null() expects exactly 1 positional parameter, 3 given"
+string(58) "strpos() expects at least 2 positional parameters, 0 given"
+string(58) "strpos() expects at least 2 positional parameters, 1 given"
+string(71) "Argument 1 passed to strpos() must be an instance of string, null given"
+string(71) "Argument 1 passed to strpos() must be an instance of string, null given"
+string(57) "strpos() expects at most 3 positional parameters, 4 given"

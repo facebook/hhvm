@@ -1,0 +1,17 @@
+[
+  ["type","f"],
+  [
+    "anyof",
+    ["suffix","php"],
+    ["suffix","phpt"],
+    ["suffix","hack"],
+    ["suffix","hackpartial"],
+    ["suffix","hck"],
+    ["suffix","hh"],
+    ["suffix","hhi"],
+    ["suffix","xhp"],
+    ["name",".hhconfig"],
+    ["name","PACKAGES.toml"]
+  ],
+  ["not",["anyof",["dirname",".hg"],["dirname",".git"],["dirname",".svn"]]]
+]

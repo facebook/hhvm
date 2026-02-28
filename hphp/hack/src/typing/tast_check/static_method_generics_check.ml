@@ -9,32 +9,33 @@
 open Hh_prelude
 open Aast
 
-let static_method_check reified_params m =
+let static_method_check env reified_params m =
   let visitor =
-    object (this)
+    object
       inherit [_] Aast.iter as super
 
       method! on_hint env (pos, h) =
         match h with
-        | Aast.Habstr (t, args) ->
+        | Aast.Habstr t ->
           if SSet.mem t reified_params then
-            Errors.add_typing_error
+            let Equal = Tast_env.eq_typing_env in
+            Typing_error_utils.add_typing_error
+              ~env
               Typing_error.(
                 primary
                 @@ Primary.Static_meth_with_class_reified_generic
-                     { pos = m.m_span; generic_pos = pos });
-          List.iter args ~f:(this#on_hint env)
+                     { pos = m.m_span; generic_pos = pos })
         | _ -> super#on_hint env (pos, h)
     end
   in
-  List.iter m.m_params ~f:(visitor#on_fun_param ());
-  visitor#on_type_hint () m.m_ret
+  List.iter m.m_params ~f:(visitor#on_fun_param env);
+  visitor#on_type_hint env m.m_ret
 
 let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_class_ _env c =
+    method! at_class_ env c =
       let (_, static_methods, _) = split_methods c.c_methods in
       if
         not
@@ -48,5 +49,6 @@ let handler =
                 None)
           |> SSet.of_list
         in
-        List.iter static_methods ~f:(static_method_check reified_params)
+        let Equal = Tast_env.eq_typing_env in
+        List.iter static_methods ~f:(static_method_check env reified_params)
   end

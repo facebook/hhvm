@@ -1,3 +1,5 @@
 <?hh
 
-interface ITest {}
+interface ITest {
+  public function foo(): void;
+}

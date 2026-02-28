@@ -1,0 +1,12 @@
+() ==> {
+$y = 1;
+return ${1 __plus $y};}()
+() ==> {
+$y = 1;
+return ${1 __plus ${2 __plus $y}};}()
+() ==> {
+$y = 1;
+return ${1 __plus $y};}()
+() ==> {
+$y = 1;
+return ${1 __plus ${2 __plus $y}};}()

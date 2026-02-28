@@ -15,10 +15,7 @@
 */
 
 #include "hphp/util/hfsort.h"
-#include "hphp/util/hash.h"
 #include "hphp/util/trace.h"
-
-#include <folly/Format.h>
 
 #include <set>
 

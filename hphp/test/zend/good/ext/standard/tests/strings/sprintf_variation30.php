@@ -11,13 +11,13 @@ $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
 // array of resource types
-$resource_values = varray [
+$resource_values = vec[
   $fp,
   $dfp
 ];
 
 // array of octal formats
-$octal_formats = varray[ 
+$octal_formats = vec[ 
   "%o", "%ho", "%lo", 
   "%Lo", " %o", "%o ",                        
   "\t%o", "\n%o", "%4o",

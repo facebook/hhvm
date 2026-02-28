@@ -1,4 +1,8 @@
-File "class_meth_reified_trait.php", line 8, characters 3-31:
-Invalid function reference. This function requires reified generics. Prefer using a lambda instead. (Typing[4381])
-File "class_meth_reified_trait.php", line 10, characters 3-26:
-Invalid function reference. This function requires reified generics. Prefer using a lambda instead. (Typing[4381])
+WARN: File "class_meth_reified_trait.php", line 8, characters 8-10:
+Static method call on a trait: `Foo::bar` (Warn[12020])
+  File "class_meth_reified_trait.php", line 3, characters 7-9:
+  `Foo` is defined here
+WARN: File "class_meth_reified_trait.php", line 10, characters 8-10:
+Static method call on a trait: `Foo::bar` (Warn[12020])
+  File "class_meth_reified_trait.php", line 3, characters 7-9:
+  `Foo` is defined here

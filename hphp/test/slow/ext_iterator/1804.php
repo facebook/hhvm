@@ -1,8 +1,8 @@
 <?hh
 
-function getFiles($rdi,$depth=0) {
+function getFiles($rdi,$depth=0) :mixed{
   if (!is_object($rdi)) return;
-  $files = varray[];
+  $files = vec[];
   // order changes per machine
   for ($rdi->rewind(); $rdi->valid(); $rdi->next()) {
     if ($rdi->isDot()) continue;
@@ -21,7 +21,7 @@ function getFiles($rdi,$depth=0) {
 }
 
 <<__EntryPoint>>
-function main_1804() {
+function main_1804() :mixed{
   $rdi = new RecursiveDirectoryIterator(__DIR__.'/../../sample_dir');
   getFiles($rdi);
 }

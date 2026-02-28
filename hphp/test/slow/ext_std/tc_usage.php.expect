@@ -1,0 +1,34 @@
+keyset(8) {
+  string(3) "RDS"
+  string(8) "RDSLocal"
+  string(13) "code.bytecode"
+  string(9) "code.cold"
+  string(11) "code.frozen"
+  string(9) "code.main"
+  string(4) "data"
+  string(13) "persistentRDS"
+}
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)

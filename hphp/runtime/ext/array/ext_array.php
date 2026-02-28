@@ -1,7 +1,10 @@
-<?hh // partial
+<?hh
 <<file:__EnableUnstableFeatures('readonly')>>
 
 namespace {
+
+const int ARRAY_FILTER_USE_BOTH = 1;
+const int ARRAY_FILTER_USE_KEY = 2;
 
 /**
  * Returns an array with all keys from input lowercased or uppercased.
@@ -80,14 +83,14 @@ function array_combine(
  * array_count_values() returns an array using the values of the input array
  *   as keys and their frequency in input as values.
  *
- * @param AnyArray $input - The array of values to count
+ * @param Container $input - The array of values to count
  *
  * @return mixed - Returns an associative array of values from input as keys
  *   and their count as value.
  *
  */
 <<__Native, __IsFoldable>>
-function array_count_values(AnyArray $input)[]: mixed;
+function array_count_values(mixed $input)[]: mixed;
 
 /**
  * Fills an array with the value of the value parameter, using the values of
@@ -104,7 +107,7 @@ function array_count_values(AnyArray $input)[]: mixed;
 function array_fill_keys(
   mixed $keys,
   mixed $value,
-)[]: darray;
+)[]: darray<arraykey, mixed>;
 
 /**
  * Fills an array with num entries of the value of the value parameter, keys
@@ -209,7 +212,7 @@ function array_keys(
  *
  */
 <<__Native, __IsFoldable>>
-function array_merge_recursive(mixed $array1, ...$arrays)[]: mixed;
+function array_merge_recursive(mixed $array1, mixed... $arrays)[]: mixed;
 
 /**
  * Merges the elements of one or more arrays together so that the values of
@@ -226,8 +229,72 @@ function array_merge_recursive(mixed $array1, ...$arrays)[]: mixed;
  * @return mixed - Returns the resulting array.
  *
  */
-<<__Native, __IsFoldable>>
-function array_merge(mixed $array1, ...$arrays)[]: mixed;
+function array_merge(mixed $array1, mixed... $arrays)[]: mixed {
+  // This is basically tvCastToArrayInPlace<..., IntishCast::Cast> with special
+  // errors for inputs that are not Container<_>
+  $arr1 = dict[];
+  if ($array1 is keyset<_>) {
+    foreach ($array1 as $k) {
+      if ($k is string) {
+        $intish = (int)$k;
+        if ((string)$intish === $k) {
+          $arr1[$intish] = $intish;
+          continue;
+        }
+      }
+      $arr1[$k] = $k;
+    }
+  } else if ($array1 is KeyedContainer<_, _>) {
+    foreach ($array1 as $k => $v) {
+      if ($k is string) {
+        $intish = (int)$k;
+        if ((string)$intish === $k) {
+          $arr1[$intish] = $v;
+          continue;
+        }
+      }
+      $arr1[$k] = $v;
+    }
+  } else if (\HH\is_class_meth($array1)) {
+    throw new InvalidOperationException("Cannot convert class method to array");
+  } else {
+    trigger_error(
+      "Invalid operand type was used: array_merge expects array(s) or collection(s)",
+      E_WARNING,
+    );
+    return null;
+  }
+
+  $ret = dict[];
+  $nextKI = 0;
+  foreach ($arr1 as $k => $v) {
+    if ($k is int) {
+      $ret[$nextKI] = $v;
+      $nextKI++;
+    } else {
+      $ret[$k] = $v;
+    }
+  }
+  foreach ($arrays as $arr) {
+    if (!($arr is vec<_> || $arr is dict<_, _> || $arr is keyset<_>)) {
+      trigger_error(
+        "Invalid operand type was used: array_merge expects array(s)",
+        E_WARNING,
+      );
+      return null;
+    }
+    foreach ($arr as $k => $v) {
+      if ($k is int) {
+        $ret[$nextKI] = $v;
+        $nextKI++;
+      } else {
+        $ret[$k] = $v;
+      }
+    }
+  }
+
+  return $ret;
+}
 
 /**
  * array_replace_recursive() replaces the values of the first array with the
@@ -253,7 +320,7 @@ function array_merge(mixed $array1, ...$arrays)[]: mixed;
 function array_replace_recursive(
   mixed $array1,
   mixed $array2 = null,
-  ...$argv
+  mixed... $argv
 )[]: mixed;
 
 /**
@@ -274,7 +341,7 @@ function array_replace_recursive(
  *
  */
 <<__Native, __IsFoldable>>
-function array_replace(mixed $array1, mixed $array2 = null, ...$argv)[]: mixed;
+function array_replace(mixed $array1, mixed $array2 = null, mixed... $argv)[]: mixed;
 
 /**
  * array_pad() returns a copy of the input padded to size specified by
@@ -316,7 +383,7 @@ function array_pad(
 <<__Native>>
 function array_pop(
   inout mixed $array
-)[]: mixed;
+)[write_props]: mixed;
 
 /**
  * array_product() returns the product of values in an array.
@@ -351,7 +418,7 @@ function array_product(
 function array_push(
   inout mixed $array,
   mixed $var,
-  ...$args
+  mixed... $args
 )[]: mixed;
 
 /**
@@ -396,14 +463,14 @@ function array_rand(mixed $input, int $num_req = 1)[leak_safe]: mixed;
  * @param mixed $array - The input array.
  * @param bool $preserve_keys - If set to TRUE keys are preserved.
  *
- * @return mixed - Returns the reversed array.
+ * @return ?array - Returns the reversed array.
  *
  */
 <<__Native, __IsFoldable>>
 function array_reverse(
   mixed $array,
   bool $preserve_keys = false,
-)[]: mixed;
+)[]: ?darray<arraykey, mixed>;
 
 /**
  * Searches haystack for needle.
@@ -573,7 +640,7 @@ function array_unique(
 function array_unshift(
   inout mixed $array,
   mixed $var,
-  ...$argv
+  mixed... $argv
 )[]: mixed;
 
 /**
@@ -689,7 +756,7 @@ function range(mixed $low, mixed $high, mixed $step = 1)[]: mixed;
  *
  */
 <<__Native, __IsFoldable>>
-function array_diff(mixed $container1, mixed $container2, ...$argv)[]: mixed;
+function array_diff(mixed $container1, mixed $container2, mixed... $argv)[]: mixed;
 
 /**
  * Computes the difference of arrays by using a callback function for data
@@ -713,7 +780,7 @@ function array_udiff(
   mixed $array1,
   mixed $array2,
   (function()[_]: void) $data_compare_func,
-  ...$argv
+  mixed... $argv
 )[ctx $data_compare_func]: mixed;
 
 /**
@@ -728,7 +795,7 @@ function array_udiff(
  *
  */
 <<__Native, __IsFoldable>>
-function array_diff_assoc(mixed $array1, mixed $array2, ...$argv)[]: mixed;
+function array_diff_assoc(mixed $array1, mixed $array2, mixed... $argv)[]: mixed;
 
 /**
  * Compares array1 against array2 and returns the difference. Unlike
@@ -749,7 +816,7 @@ function array_diff_uassoc(
   mixed $array1,
   mixed $array2,
   (function()[_]: void) $key_compare_func,
-  ...$argv
+  mixed... $argv
 )[ctx $key_compare_func]: mixed;
 
 /**
@@ -781,7 +848,7 @@ function array_udiff_assoc(
   mixed $array1,
   mixed $array2,
   (function()[_]: void) $data_compare_func,
-  ...$argv
+  mixed... $argv
 )[ctx $data_compare_func]: mixed;
 
 /**
@@ -814,7 +881,7 @@ function array_udiff_uassoc(
   mixed $array2,
   (function()[_]: void) $data_compare_func,
   (function()[_]: void) $key_compare_func,
-  ...$argv
+  mixed... $argv
 )[ctx $data_compare_func, ctx $key_compare_func]: mixed;
 
 /**
@@ -830,7 +897,7 @@ function array_udiff_uassoc(
  *
  */
 <<__Native, __IsFoldable>>
-function array_diff_key(mixed $container1, mixed $container2, ...$argv)[]: mixed;
+function array_diff_key(mixed $container1, mixed $container2, mixed... $argv)[]: mixed;
 
 /**
  * Compares the keys from array1 against the keys from array2 and returns the
@@ -852,7 +919,7 @@ function array_diff_ukey(
   mixed $array1,
   mixed $array2,
   (function()[_]: void) $key_compare_func,
-  ...$argv
+  mixed... $argv
 )[ctx $key_compare_func]: mixed;
 
 /**
@@ -867,7 +934,7 @@ function array_diff_ukey(
  *
  */
 <<__Native, __IsFoldable>>
-function array_intersect(mixed $container1, mixed $container2, ...$argv)[]: mixed;
+function array_intersect(mixed $container1, mixed $container2, mixed... $argv)[]: mixed;
 
 /**
  * Computes the intersection of arrays, compares data by a callback function.
@@ -889,7 +956,7 @@ function array_uintersect(
   mixed $array1,
   mixed $array2,
   (function()[_]: void) $data_compare_func,
-  ...$argv
+  mixed... $argv
 )[ctx $data_compare_func]: mixed;
 
 /**
@@ -901,7 +968,7 @@ function array_uintersect(
  *
  */
 <<__Native, __IsFoldable>>
-function array_intersect_assoc(mixed $array1, mixed $array2, ...$argv)[]: mixed;
+function array_intersect_assoc(mixed $array1, mixed $array2, mixed... $argv)[]: mixed;
 
 /**
  * array_intersect_uassoc() returns an array containing all the values of
@@ -925,7 +992,7 @@ function array_intersect_uassoc(
   mixed $array1,
   mixed $array2,
   (function()[_]: void) $key_compare_func,
-  ...$argv
+  mixed... $argv
 )[ctx $key_compare_func]: mixed;
 
 /**
@@ -950,7 +1017,7 @@ function array_uintersect_assoc(
   mixed $array1,
   mixed $array2,
   (function()[_]: void) $data_compare_func,
-  ...$argv
+  mixed... $argv
 )[ctx $data_compare_func]: mixed;
 
 /**
@@ -977,7 +1044,7 @@ function array_uintersect_uassoc(
   mixed $array2,
   (function()[_]: void) $data_compare_func,
   (function()[_]: void) $key_compare_func,
-  ...$argv
+  mixed...$argv
 )[ctx $data_compare_func, ctx $key_compare_func]: mixed;
 
 /**
@@ -995,7 +1062,7 @@ function array_uintersect_uassoc(
 function array_intersect_key(
   mixed $container1,
   mixed $container2,
-  ...$argv
+  mixed... $argv
 )[]: mixed;
 
 /**
@@ -1020,7 +1087,7 @@ function array_intersect_ukey(
   mixed $array1,
   mixed $array2,
   (function()[_]: void) $key_compare_func,
-  ...$argv
+  mixed... $argv
 )[ctx $key_compare_func]: mixed;
 
 /**
@@ -1154,7 +1221,7 @@ function krsort(
 <<__Native>>
 function usort(
   inout mixed $array,
-  mixed $cmp_function,
+  (function(arraykey, arraykey)[_]: int) $cmp_function,
 )[ctx $cmp_function]: bool;
 
 /**
@@ -1173,7 +1240,7 @@ function usort(
 <<__Native>>
 function uasort(
   inout mixed $array,
-  mixed $cmp_function,
+  (function(arraykey, arraykey)[_]: int) $cmp_function,
 )[ctx $cmp_function]: bool;
 
 /**
@@ -1194,7 +1261,7 @@ function uasort(
 <<__Native>>
 function uksort(
   inout mixed $array,
-  mixed $cmp_function,
+  (function(arraykey, arraykey)[_]: int) $cmp_function,
 )[ctx $cmp_function]: bool;
 
 /**
@@ -1371,47 +1438,42 @@ namespace __SystemLib {
    * If array_map() is called by other means, it dispatches to this version
    * which allows variadic array counts and deals with bad types.
    */
-  <<__Native>>
-  function array_map(mixed $callback, mixed $arr1, ...$argv): mixed;
+  <<__Native("NoRecording")>>
+  function array_map(mixed $callback, mixed $arr1, mixed ...$argv): mixed;
 
   <<__Native, __IsFoldable>>
   function merge_xhp_attr_declarations(
-    darray $arr1,
-    darray $arr2,
-    ...$rest
-  )[]: darray;
+    darray<arraykey, mixed> $arr1,
+    darray<arraykey, mixed> $arr2,
+    darray<arraykey, mixed>... $rest
+  )[]: darray<arraykey, mixed>;
 }
 
 namespace HH {
   <<__Native, __IsFoldable>>
-  function dict(
-    mixed
-      $arr,
-  )[]: dict;
+  function dict<Tk as arraykey, Tv>(
+    KeyedTraversable<Tk, Tv> $arr,
+  )[]: dict<Tk, Tv>;
 
   <<__Native, __IsFoldable>>
-  function vec(
-    mixed
-      $arr,
-  )[]: vec;
+  function vec<T>(
+    Traversable<T> $arr,
+  )[]: vec<T>;
 
   <<__Native, __IsFoldable>>
-  function keyset(
-    mixed
-      $arr,
-  )[]: keyset;
+  function keyset<T as arraykey>(
+    Traversable<T> $arr,
+  )[]: keyset<T>;
 
   <<__Native, __IsFoldable>>
-  function varray(
-    mixed
-      $arr,
-  )[]: varray;
+  function varray<T>(
+    Traversable<T> $arr,
+  )[]: varray<T>;
 
   <<__Native, __IsFoldable>>
-  function darray(
-    mixed
-      $arr,
-  )[]: darray;
+  function darray<Tk as arraykey, Tv>(
+    KeyedTraversable<Tk, Tv> $arr,
+  )[]: darray<Tk, Tv>;
 
   /**
    * array_key_cast() can be used to convert a given value to the equivalent

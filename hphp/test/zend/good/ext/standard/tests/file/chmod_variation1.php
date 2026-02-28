@@ -2,7 +2,7 @@
 
 const PERMISSIONS_MASK = 0777;
 <<__EntryPoint>> function main(): void {
-$dirname = __SystemLib\hphp_test_tmppath('testdir');
+$dirname = sys_get_temp_dir().'/'.'testdir';
 mkdir($dirname);
 
 for ($perms_to_set = 0777; $perms_to_set >= 0; $perms_to_set--) {

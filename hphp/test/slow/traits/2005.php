@@ -8,7 +8,7 @@ interface I1 {
 }
 
 <<__EntryPoint>>
-function main_2005() {
+function main_2005() :mixed{
 var_dump(class_implements('C1'));
 var_dump(class_parents('C1'));
 var_dump(class_uses('C1'));

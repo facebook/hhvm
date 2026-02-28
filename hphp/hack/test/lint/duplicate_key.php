@@ -1,15 +1,15 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function f1(): array<string, int> {
-  return darray[
+  return dict[
     'a' => 1,
     'b' => 2,
   ];
 }
 
 function f2(): array<string, int> {
-  return darray[
+  return dict[
     'a' => 1,
     'a' => 2,
   ];

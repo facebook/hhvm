@@ -3,10 +3,10 @@
 
 class A {
   private static Traversable $x;
-  public static function set() {
+  public static function set() :mixed{
     self::$x = __hhvm_intrinsics\launder_value(vec[]);
   }
-  public static function get() {
+  public static function get() :mixed{
     $x = self::$x;
     $x[] = 456;
     return $x;

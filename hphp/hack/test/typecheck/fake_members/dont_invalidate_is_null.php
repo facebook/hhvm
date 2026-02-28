@@ -1,11 +1,11 @@
-<?hh // strict
+<?hh
 
 class A {
   public ?int $y;
 }
 
 function f(A $x, ?A $y): void {
-  if (!is_null($x->y) && !is_null($y)) {
+  if (!($x->y is null) && !($y is null)) {
     expect_nonnull($x->y);
   }
 }

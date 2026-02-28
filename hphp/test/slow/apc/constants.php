@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_constants() {
+function main_constants() :mixed{
 var_dump(APC_ITER_TYPE);
 var_dump(APC_ITER_KEY);
 var_dump(APC_ITER_FILENAME);

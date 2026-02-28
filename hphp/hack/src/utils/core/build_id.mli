@@ -17,4 +17,7 @@ val build_mode : string
 
 val is_build_optimized : bool
 
+(**
+  Returns `true` iff the binary was not made by fbpkg
+*)
 val is_dev_build : bool

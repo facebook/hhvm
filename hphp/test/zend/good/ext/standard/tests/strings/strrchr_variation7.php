@@ -13,7 +13,7 @@ $blank_line = <<<EOD
 
 EOD;
 
-$needles = varray[
+$needles = vec[
   "\n",
   '\n',
   "\r",

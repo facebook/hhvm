@@ -2,11 +2,11 @@
 // Source php weakref extension
 class Foo {
   private $ptr = null;
-  public function set($p) {
+  public function set($p) :mixed{
     $this->ptr = $p;
   }
 }
-function foo() {
+function foo() :mixed{
   $a = new Foo();
   $b = new Foo();
   $a->set($b);
@@ -15,11 +15,11 @@ function foo() {
 }
 class Leaker {
   private $ptr = null;
-  public function set($p) {
+  public function set($p) :mixed{
     $this->ptr = $p;
   }
 };
-function leaker($acquire) {
+function leaker($acquire) :mixed{
   $a = new Leaker();
   $b = new Leaker();
   $a->set($b);
@@ -30,7 +30,7 @@ function leaker($acquire) {
   }
   return $wr;
 }
-function factorial($n) {
+function factorial($n) :mixed{
   if ($n <= 1) return 1;
   return $n * factorial($n-1);
 }

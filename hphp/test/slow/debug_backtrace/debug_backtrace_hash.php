@@ -1,27 +1,27 @@
 <?hh
 
 class SomeClass {
-  public static function pathA() {
+  public static function pathA() :mixed{
     return (new SomeClass())->getStackHash();
   }
 
-  public static function pathB() {
+  public static function pathB() :mixed{
     return (new SomeClass())->getStackHash();
   }
 
-  public static function pathC(string $metadata, int $options) {
+  public static function pathC(string $metadata, int $options) :mixed{
     HH\set_frame_metadata($metadata);
     return (new SomeClass())->getStackHash($options);
   }
 
-  private function getStackHash(int $options = 0) {
+  private function getStackHash(int $options = 0) :mixed{
     return hphp_debug_backtrace_hash($options);
   }
 }
 
 
 <<__EntryPoint>>
-function main_debug_backtrace_hash() {
+function main_debug_backtrace_hash() :mixed{
 $hash_a = SomeClass::pathA();
 $hash_a2 = SomeClass::pathA();
 if ($hash_a === $hash_a2) {

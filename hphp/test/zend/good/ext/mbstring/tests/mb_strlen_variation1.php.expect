@@ -1,0 +1,17 @@
+*** Testing mb_strlen() : usage variations ***
+
+-- Iteration 1 --
+int(0)
+
+-- Iteration 2 --
+int(0)
+
+-- Iteration 3 --
+int(6)
+
+-- Iteration 4 --
+int(6)
+
+-- Iteration 5 --
+int(11)
+Done

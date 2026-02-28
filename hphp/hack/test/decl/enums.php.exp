@@ -4,32 +4,34 @@
        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
        sc_has_xhp_keyword = false; sc_kind = Cenum; sc_module = None;
        sc_name = ([3:6-9], "\\Foo"); sc_tparams = [];
-       sc_where_constraints = [];
        sc_extends =
        [(Rhint ([3:6-9]),
          (Tapply (([3:6-9], "\\HH\\BuiltinEnum"),
             [(Rhint ([3:6-9]), (Tapply (([3:6-9], "\\Foo"), [])))])))
          ];
        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_implements = []; sc_support_dynamic_type = false;
+       sc_xhp_marked_empty = false; sc_req_extends = [];
+       sc_req_implements = []; sc_req_constraints = []; sc_implements = [];
+       sc_support_dynamic_type = false;
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([4:3-6], "FOO");
           scc_type = (Rwitness_from_decl ([4:9-10]), (Tprim Tint));
-          scc_refs = [] };
+          scc_refs = []; scc_value = None };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([5:3-6], "BAR");
            scc_type = (Rwitness_from_decl ([5:9-11]), (Tprim Tint));
-           scc_refs = [] };
+           scc_refs = []; scc_value = None };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([6:3-6], "BAZ");
            scc_type = (Rwitness_from_decl ([6:3-6]), Tany);
-           scc_refs = [((Typing_defs.From "\\Foo"), "FOO")] };
+           scc_refs = [((Typing_defs.From "\\Foo"), "FOO")]; scc_value = None
+           };
          { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([7:3-6], "QUX");
            scc_type = (Rwitness_from_decl ([7:3-6]), Tany);
-           scc_refs = [((Typing_defs.From "\\Foo"), "BAR")] }
+           scc_refs = [((Typing_defs.From "\\Foo"), "BAR")]; scc_value = None
+           }
          ];
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -37,8 +39,6 @@
        sc_enum_type =
        (Some { Typing_defs.te_base = (Rhint ([3:11-14]), (Tprim Tint));
                te_constraint = (Some (Rhint ([3:18-21]), (Tprim Tint)));
-               te_includes = [] })
-       }))
+               te_includes = [] });
+       sc_docs_url = None; sc_package = None }))
   ]
-
-They matched!

@@ -15,18 +15,18 @@ Warning: fileperms(): No such file or directory in %s/006_error.php on line 26
 bool(false)
 
 
-Warning: chmod() expects exactly 2 parameters, 1 given in %s/006_error.php on line 32
+Warning: chmod() expects exactly 2 positional parameters, 1 given in %s/006_error.php on line 32
 
-Warning: chmod() expects exactly 2 parameters, 1 given in %s/006_error.php on line 33
+Warning: chmod() expects exactly 2 positional parameters, 1 given in %s/006_error.php on line 33
 
-Warning: chmod() expects exactly 2 parameters, 0 given in %s/006_error.php on line 34
+Warning: chmod() expects exactly 2 positional parameters, 0 given in %s/006_error.php on line 34
 
-Warning: fileperms() expects exactly 1 parameter, 0 given in %s/006_error.php on line 35
+Warning: fileperms() expects exactly 1 positional parameter, 0 given in %s/006_error.php on line 35
 
-Warning: chmod() expects exactly 2 parameters, 3 given in %s/006_error.php on line 38
+Warning: chmod() expects exactly 2 positional parameters, 3 given in %s/006_error.php on line 38
 
-Warning: fileperms() expects exactly 1 parameter, 2 given in %s/006_error.php on line 39
+Warning: fileperms() expects exactly 1 positional parameter, 2 given in %s/006_error.php on line 39
 
-Warning: fileperms() expects exactly 1 parameter, 2 given in %s/006_error.php on line 40
+Warning: fileperms() expects exactly 1 positional parameter, 2 given in %s/006_error.php on line 40
 
 *** Done ***

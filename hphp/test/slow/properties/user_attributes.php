@@ -14,7 +14,7 @@ class C {
 
 
 <<__EntryPoint>>
-function main_user_attributes() {
+function main_user_attributes() :mixed{
 foreach ((new ReflectionClass(C::class))->getProperties() as $prop) {
   var_dump($prop->getAttributes());
 }

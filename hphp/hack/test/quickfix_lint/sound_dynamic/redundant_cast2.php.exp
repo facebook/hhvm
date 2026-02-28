@@ -1,0 +1,19 @@
+//// redundant_cast2.php
+<?hh
+
+<<__SupportDynamicType>>
+function map<T>(T $_, (function(T): void) $_): void {}
+
+<<__SupportDynamicType>>
+function main1(): void {
+  map(42.0, $f ==> { (float) $f; });
+}
+
+<<__SupportDynamicType>>
+function main2(): void {
+  map(42.0, (float $f) ==> { $f; });
+}
+
+
+There were input 1 patches for 1 files.
+Dropped patch count: 0 (0 overlapping, 0 original not found)

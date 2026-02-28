@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class Foo {
   const bar = 'I am a constant';
@@ -6,10 +6,10 @@ class Foo {
 
 function f(): void {
   try {
-    $arr = darray[
-      4 => darray[
-        2 => darray[],
-        (string)$z => darray[],
+    $arr = dict[
+      4 => dict[
+        2 => dict[],
+        (string)$z => dict[],
       ],
     ];
     $arreq = $arr;
@@ -36,6 +36,6 @@ function f(): void {
 
 
 <<__EntryPoint>>
-function main_bad_intermediate() {
+function main_bad_intermediate() :mixed{
   f();
 }

@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 // Bad because writing to $x on RHS
 function test(varray<varray<int>> $a): int {

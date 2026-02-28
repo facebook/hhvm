@@ -18,9 +18,6 @@
 
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/tc.h"
-#include "hphp/runtime/vm/jit/translator.h"
-
-#include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/util/timer.h"
 
@@ -44,7 +41,7 @@ const TransRec* getTransRec(TCA tca) {
   if (!enabled()) return nullptr;
   TransRec* ret = nullptr;
   {
-    folly::SharedMutex::ReadHolder guard(s_lock);
+    std::shared_lock guard(s_lock);
     auto it = s_transDB.upper_bound(tca);
     if (it == s_transDB.begin()) {
       return nullptr;
@@ -86,7 +83,7 @@ void addTranslation(const TransRec& transRec) {
   tc::assertOwnsCodeLock();
 
   auto transRecPtr = std::make_unique<TransRec>(transRec);
-  folly::SharedMutex::WriteHolder guard(s_lock);
+  std::unique_lock guard(s_lock);
   if (transRecPtr->id == kInvalidTransID) {
     transRecPtr->id = s_translations.size();
   } else {

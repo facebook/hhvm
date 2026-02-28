@@ -4,6 +4,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_error::SyntaxQuickfix;
+use parser_core_types::syntax_error::{self as Errors};
+use parser_core_types::token_kind::TokenKind;
+
 use crate::declaration_parser::DeclarationParser;
 use crate::expression_parser::ExpressionParser;
 use crate::lexer::Lexer;
@@ -11,20 +17,19 @@ use crate::parser_env::ParserEnv;
 use crate::parser_trait::Context;
 use crate::parser_trait::ParserTrait;
 use crate::parser_trait::SeparatedListKind;
-use crate::smart_constructors::{NodeType, SmartConstructors, Token};
-use parser_core_types::lexable_token::LexableToken;
-use parser_core_types::syntax_error::{self as Errors, SyntaxError};
-use parser_core_types::token_kind::TokenKind;
+use crate::smart_constructors::NodeType;
+use crate::smart_constructors::SmartConstructors;
+use crate::smart_constructors::Token;
 
 #[derive(Clone)]
 pub struct TypeParser<'a, S>
 where
     S: SmartConstructors,
-    S::R: NodeType,
+    S::Output: NodeType,
 {
-    lexer: Lexer<'a, S::TF>,
+    lexer: Lexer<'a, S::Factory>,
     env: ParserEnv,
-    context: Context<'a, Token<S>>,
+    context: Context<Token<S>>,
     errors: Vec<SyntaxError>,
     sc: S,
 }
@@ -32,12 +37,12 @@ where
 impl<'a, S> ParserTrait<'a, S> for TypeParser<'a, S>
 where
     S: SmartConstructors,
-    S::R: NodeType,
+    S::Output: NodeType,
 {
     fn make(
-        mut lexer: Lexer<'a, S::TF>,
+        mut lexer: Lexer<'a, S::Factory>,
         env: ParserEnv,
-        context: Context<'a, Token<S>>,
+        context: Context<Token<S>>,
         errors: Vec<SyntaxError>,
         sc: S,
     ) -> Self {
@@ -51,16 +56,23 @@ where
         }
     }
 
-    fn into_parts(mut self) -> (Lexer<'a, S::TF>, Context<'a, Token<S>>, Vec<SyntaxError>, S) {
+    fn into_parts(
+        mut self,
+    ) -> (
+        Lexer<'a, S::Factory>,
+        Context<Token<S>>,
+        Vec<SyntaxError>,
+        S,
+    ) {
         self.lexer.set_in_type(false);
         (self.lexer, self.context, self.errors, self.sc)
     }
 
-    fn lexer(&self) -> &Lexer<'a, S::TF> {
+    fn lexer(&self) -> &Lexer<'a, S::Factory> {
         &self.lexer
     }
 
-    fn lexer_mut(&mut self) -> &mut Lexer<'a, S::TF> {
+    fn lexer_mut(&mut self) -> &mut Lexer<'a, S::Factory> {
         &mut self.lexer
     }
 
@@ -93,11 +105,11 @@ where
         &self.context.skipped_tokens
     }
 
-    fn context_mut(&mut self) -> &mut Context<'a, Token<S>> {
+    fn context_mut(&mut self) -> &mut Context<Token<S>> {
         &mut self.context
     }
 
-    fn context(&self) -> &Context<'a, Token<S>> {
+    fn context(&self) -> &Context<Token<S>> {
         &self.context
     }
 }
@@ -105,7 +117,7 @@ where
 impl<'a, S> TypeParser<'a, S>
 where
     S: SmartConstructors,
-    S::R: NodeType,
+    S::Output: NodeType,
 {
     fn with_expression_parser<F, U>(&mut self, f: F) -> U
     where
@@ -125,7 +137,7 @@ where
         res
     }
 
-    fn parse_expression(&mut self) -> S::R {
+    fn parse_expression(&mut self) -> S::Output {
         self.with_expression_parser(|p: &mut ExpressionParser<'a, S>| p.parse_expression())
     }
 
@@ -149,17 +161,16 @@ where
     }
 
     // parse type specifier but return missing if you fail to parse
-    pub fn parse_type_specifier_opt(&mut self, allow_var: bool, allow_attr: bool) -> S::R {
+    pub fn parse_type_specifier_opt(&mut self, allow_var: bool, allow_attr: bool) -> S::Output {
         // Strictly speaking, "mixed" is a nullable type specifier. We parse it as
         // a simple type specifier here.
         let mut parser1 = self.clone();
         let token = parser1.next_xhp_class_name_or_other_token();
-        let new_attr_syntax = self.env.allow_new_attribute_syntax;
-        match token.kind() {
+        let type_spec = match token.kind() {
             | TokenKind::Var if allow_var => {
                 self.continue_from(parser1);
-                let token = S!(make_token, self, token);
-                S!(make_simple_type_specifier, self, token)
+                let token = self.sc_mut().make_token(token);
+                self.sc_mut().make_simple_type_specifier(token)
             }
             | TokenKind::This => self.parse_simple_type_or_type_constant(),
             | TokenKind::SelfToken => self.parse_type_constant(),
@@ -179,7 +190,6 @@ where
             | TokenKind::Void
             | TokenKind::Noreturn
             | TokenKind::Resource
-            | TokenKind::Object
             | TokenKind::Mixed
             | TokenKind::NullLiteral
             | TokenKind::Name => self.parse_simple_type_or_type_constant_or_generic(),
@@ -189,8 +199,8 @@ where
             }
             | TokenKind::Backslash => {
                 self.continue_from(parser1);
-                let missing = S!(make_missing, self, self.pos());
-                let token = S!(make_token, self, token);
+                let pos = self.pos(); let missing = self.sc_mut().make_missing(pos);
+                let token = self.sc_mut().make_token(token);
                 let name = self.scan_qualified_name(missing, token);
                 self.parse_remaining_simple_type_or_type_constant_or_generic(name)
             }
@@ -207,27 +217,84 @@ where
             | TokenKind::Shape => self.parse_shape_specifier(),
             | TokenKind::Question => self.parse_nullable_type_specifier(),
             | TokenKind::Tilde => self.parse_like_type_specifier(),
-            | TokenKind::At if !new_attr_syntax => self.parse_soft_type_specifier(),
-            | TokenKind::At if new_attr_syntax => self.parse_attributized_specifier(),
+            | TokenKind::At => self.parse_soft_type_specifier(),
             | TokenKind::LessThanLessThan if allow_attr => self.parse_attributized_specifier(),
+            | TokenKind::Enum
+            | TokenKind::Class => self.parse_class_ptr_type_specifier(),
             | TokenKind::Classname => self.parse_classname_type_specifier(),
             | _ => {
-                S!(make_missing, self, self.pos())
+                let pos = self.pos(); self.sc_mut().make_missing(pos)
             }
+        };
+        match self.peek_token_kind() {
+            TokenKind::With if self.peek_token_kind_with_lookahead(1) == TokenKind::LeftBrace => {
+                self.parse_type_refinement(type_spec)
+            }
+            _ => type_spec,
         }
     }
 
     // TODO: What about something like for::for? Is that a legal type constant?
-    pub fn parse_type_specifier(&mut self, allow_var: bool, allow_attr: bool) -> S::R {
+    pub fn parse_type_specifier(&mut self, allow_var: bool, allow_attr: bool) -> S::Output {
         let result = self.parse_type_specifier_opt(allow_var, allow_attr);
         if result.is_missing() {
-            self.with_error_on_whole_token(Errors::error1007);
+            self.with_error_on_whole_token(Errors::error1007, Vec::new());
             let token = self.next_xhp_class_name_or_other_token();
-            let token = S!(make_token, self, token);
-            S!(make_error, self, token)
+            let token = self.sc_mut().make_token(token);
+            self.sc_mut().make_error(token)
         } else {
             result
         }
+    }
+
+    fn parse_type_refinement(&mut self, type_spec: S::Output) -> S::Output {
+        // SPEC
+        // type-refinement:
+        //   type-specifier  with  {  type-refinement-members_opt  ;opt  }
+        //
+        // type-refinement-members:
+        //   type-refinement-member  ;  type-refinement-members
+        let keyword = self.assert_token(TokenKind::With);
+        let left_brace = self.require_left_brace();
+        let members =
+            self.with_decl_parser(
+                |x: &mut DeclarationParser<'a, S>| match x.peek_token_kind() {
+                    TokenKind::Type | TokenKind::Ctx => {
+                        // Note: blindly calling this without matching on expected token first
+                        // would result in confusing error "expected `}`" in error cases such as
+                        // `... with { const ... }`
+                        x.parse_separated_list(
+                            TokenKind::Semicolon,
+                            SeparatedListKind::TrailingAllowed,
+                            TokenKind::RightBrace,
+                            Errors::expected_refinement_member,
+                            |x| x.parse_refinement_member(),
+                        )
+                        .0
+                    }
+                    tk => {
+                        if tk != TokenKind::RightBrace {
+                            x.with_error(Errors::expected_refinement_member, Vec::new());
+                        }
+                        let pos = x.pos();
+                        x.sc_mut().make_missing(pos)
+                    }
+                },
+            );
+        let right_brace = self.require_right_brace();
+        let refinement = self.sc_mut().make_type_refinement(
+            type_spec,
+            keyword,
+            left_brace,
+            members,
+            right_brace,
+        );
+        if self.peek_token_kind() == TokenKind::With {
+            self.with_error(Errors::cannot_chain_type_refinements, Vec::new());
+            // ERROR RECOVERY: nest chained refinement
+            return self.parse_type_refinement(refinement);
+        }
+        refinement
     }
 
     // SPEC
@@ -237,12 +304,12 @@ where
     //   this  ::  name
     //   parent  ::  name
     //   type-constant-type-name  ::  name
-    fn parse_remaining_type_constant(&mut self, left: S::R) -> S::R {
+    fn parse_remaining_type_constant(&mut self, left: S::Output) -> S::Output {
         let separator = self.fetch_token();
         let right = self.next_token_as_name();
         if right.kind() == TokenKind::Name {
-            let right = S!(make_token, self, right);
-            let syntax = S!(make_type_constant, self, left, separator, right);
+            let right = self.sc_mut().make_token(right);
+            let syntax = self.sc_mut().make_type_constant(left, separator, right);
             let token = self.peek_token();
             if token.kind() == TokenKind::ColonColon {
                 self.parse_remaining_type_constant(syntax)
@@ -253,67 +320,71 @@ where
             // ERROR RECOVERY: Assume that the thing following the ::
             // that is not a name belongs to the next thing to be
             // parsed; treat the name as missing.
-            self.with_error(Errors::error1004);
-            let missing = S!(make_missing, self, self.pos());
-            S!(make_type_constant, self, left, separator, missing)
+            self.with_error(Errors::error1004, Vec::new());
+            let pos = self.pos();
+            let missing = self.sc_mut().make_missing(pos);
+            self.sc_mut().make_type_constant(left, separator, missing)
         }
     }
 
-    fn parse_remaining_generic(&mut self, name: S::R) -> S::R {
+    fn parse_remaining_generic(&mut self, name: S::Output) -> S::Output {
         let (arguments, _) = self.parse_generic_type_argument_list();
-        S!(make_generic_type_specifier, self, name, arguments)
+        self.sc_mut().make_generic_type_specifier(name, arguments)
     }
 
-    pub fn parse_simple_type_or_type_constant(&mut self) -> S::R {
+    pub fn parse_simple_type_or_type_constant(&mut self) -> S::Output {
         let name = self.next_xhp_class_name_or_other();
         self.parse_remaining_simple_type_or_type_constant(name)
     }
 
-    pub fn parse_simple_type_or_generic(&mut self) -> S::R {
+    pub fn parse_simple_type_or_generic(&mut self) -> S::Output {
         let name = self.next_xhp_class_name_or_other();
         self.parse_remaining_simple_type_or_generic(name)
     }
 
-    fn parse_type_constant(&mut self) -> S::R {
+    fn parse_type_constant(&mut self) -> S::Output {
         let name = self.next_xhp_class_name_or_other();
         let token = self.peek_token();
         match token.kind() {
             TokenKind::ColonColon => self.parse_remaining_type_constant(name),
             _ => {
-                self.with_error(Errors::error1047);
-                S!(make_error, self, name)
+                self.with_error(Errors::error1047, Vec::new());
+                self.sc_mut().make_error(name)
             }
         }
     }
 
-    fn parse_remaining_simple_type_or_type_constant(&mut self, name: S::R) -> S::R {
+    fn parse_remaining_simple_type_or_type_constant(&mut self, name: S::Output) -> S::Output {
         let token = self.peek_token();
         match token.kind() {
             TokenKind::ColonColon => self.parse_remaining_type_constant(name),
-            _ => S!(make_simple_type_specifier, self, name),
+            _ => self.sc_mut().make_simple_type_specifier(name),
         }
     }
 
-    fn parse_simple_type_or_type_constant_or_generic(&mut self) -> S::R {
+    fn parse_simple_type_or_type_constant_or_generic(&mut self) -> S::Output {
         let name = self.next_xhp_class_name_or_other();
         self.parse_remaining_simple_type_or_type_constant_or_generic(name)
     }
 
-    pub fn parse_remaining_type_specifier(&mut self, name: S::R) -> S::R {
+    pub fn parse_remaining_type_specifier(&mut self, name: S::Output) -> S::Output {
         self.parse_remaining_simple_type_or_type_constant_or_generic(name)
     }
 
-    fn parse_remaining_simple_type_or_type_constant_or_generic(&mut self, name: S::R) -> S::R {
+    fn parse_remaining_simple_type_or_type_constant_or_generic(
+        &mut self,
+        name: S::Output,
+    ) -> S::Output {
         match self.peek_token_kind_with_possible_attributized_type_list() {
             TokenKind::LessThan => self.parse_remaining_generic(name),
             _ => self.parse_remaining_simple_type_or_type_constant(name),
         }
     }
 
-    fn parse_remaining_simple_type_or_generic(&mut self, name: S::R) -> S::R {
+    fn parse_remaining_simple_type_or_generic(&mut self, name: S::Output) -> S::Output {
         match self.peek_token_kind_with_possible_attributized_type_list() {
             TokenKind::LessThan => self.parse_remaining_generic(name),
-            _ => S!(make_simple_type_specifier, self, name),
+            _ => self.sc_mut().make_simple_type_specifier(name),
         }
     }
 
@@ -330,33 +401,37 @@ where
     // https://github.com/hhvm/hack-langspec/issues/83
     //
     // TODO: Do we also need to allow "= type-specifier" here?
-    fn parse_generic_type_constraint_opt(&mut self) -> Option<S::R> {
+    fn parse_generic_type_constraint_opt(&mut self) -> Option<S::Output> {
         let mut parser1 = self.clone();
         let token = parser1.next_token();
         match token.kind() {
             TokenKind::As | TokenKind::Super => {
                 self.continue_from(parser1);
-                let constraint_token = S!(make_token, self, token);
+                let constraint_token = self.sc_mut().make_token(token);
                 let matched_type = self.parse_type_specifier(false, true);
-                let type_constraint =
-                    S!(make_type_constraint, self, constraint_token, matched_type);
+                let type_constraint = self
+                    .sc_mut()
+                    .make_type_constraint(constraint_token, matched_type);
                 Some(type_constraint)
             }
             _ => None,
         }
     }
 
-    fn parse_variance_opt(&mut self) -> S::R {
+    fn parse_variance_opt(&mut self) -> S::Output {
         match self.peek_token_kind() {
             TokenKind::Plus | TokenKind::Minus => self.fetch_token(),
-            _ => S!(make_missing, self, self.pos()),
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
         }
     }
 
     // SPEC
     // generic-type-parameter:
     //   generic-type-parameter-reified-opt  generic-type-parameter-variance-opt
-    //     name type-parameter-list? generic-type-constraint-list-opt
+    //     name generic-type-constraint-list-opt
     //
     // generic-type-parameter-variance:
     //   +
@@ -366,32 +441,26 @@ where
     // or one as indicated in the spec.
     // https://github.com/hhvm/hack-langspec/issues/83
     // TODO: Update the spec with reified
-    pub fn parse_type_parameter(&mut self) -> S::R {
+    pub fn parse_type_parameter(&mut self) -> S::Output {
         let attributes = self.with_decl_parser(|x: &mut DeclarationParser<'a, S>| {
             x.parse_attribute_specification_opt()
         });
         let reified = self.optional_token(TokenKind::Reify);
         let variance = self.parse_variance_opt();
         let type_name = self.require_name_allow_all_keywords();
-        let param_params = self.parse_generic_type_parameter_list_opt();
         let constraints =
             self.parse_list_until_none(|x: &mut Self| x.parse_generic_type_constraint_opt());
-        S!(
-            make_type_parameter,
-            self,
-            attributes,
-            reified,
-            variance,
-            type_name,
-            param_params,
-            constraints
-        )
+        self.sc_mut()
+            .make_type_parameter(attributes, reified, variance, type_name, constraints)
     }
 
-    pub fn parse_generic_type_parameter_list_opt(&mut self) -> S::R {
+    pub fn parse_generic_type_parameter_list_opt(&mut self) -> S::Output {
         match self.peek_token_kind_with_possible_attributized_type_list() {
             TokenKind::LessThan => self.parse_generic_type_parameter_list(),
-            _ => S!(make_missing, self, self.pos()),
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
         }
     }
 
@@ -404,7 +473,7 @@ where
     //   generic-type-parameter  ,  generic-type-parameter
     //
 
-    pub fn parse_generic_type_parameter_list(&mut self) -> S::R {
+    pub fn parse_generic_type_parameter_list(&mut self) -> S::Output {
         let left = self.assert_left_angle_in_type_list_with_possible_attribute();
         let (params, _) = self.parse_comma_list_allow_trailing(
             TokenKind::GreaterThan,
@@ -413,10 +482,10 @@ where
         );
 
         let right = self.require_right_angle();
-        S!(make_type_parameters, self, left, params, right)
+        self.sc_mut().make_type_parameters(left, params, right)
     }
 
-    fn parse_type_list(&mut self, close_kind: TokenKind) -> S::R {
+    fn parse_type_list(&mut self, close_kind: TokenKind) -> S::Output {
         // SPEC:
         // type-specifier-list:
         //   type-specifiers  ,opt
@@ -439,13 +508,16 @@ where
     // call-convention:
     //   inout
 
-    fn parse_call_convention_opt(&mut self) -> S::R {
+    fn parse_call_convention_opt(&mut self) -> S::Output {
         match self.peek_token_kind() {
             TokenKind::Inout => {
                 let token = self.next_token();
-                S!(make_token, self, token)
+                self.sc_mut().make_token(token)
             }
-            _ => S!(make_missing, self, self.pos()),
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
         }
     }
 
@@ -457,13 +529,55 @@ where
     // readonly:
     //   readonly
 
-    fn parse_readonly_opt(&mut self) -> S::R {
+    fn parse_readonly_opt(&mut self) -> S::Output {
         match self.peek_token_kind() {
             TokenKind::Readonly => {
                 let token = self.next_token();
-                S!(make_token, self, token)
+                self.sc_mut().make_token(token)
             }
-            _ => S!(make_missing, self, self.pos()),
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
+        }
+    }
+
+    fn parse_ellipsis_opt(&mut self) -> S::Output {
+        match self.peek_token_kind() {
+            TokenKind::DotDotDot => {
+                let token = self.next_token();
+                self.sc_mut().make_token(token)
+            }
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
+        }
+    }
+
+    fn parse_optional_opt(&mut self) -> S::Output {
+        match self.peek_token_kind() {
+            TokenKind::Optional => {
+                let token = self.next_token();
+                self.sc_mut().make_token(token)
+            }
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
+        }
+    }
+
+    fn parse_named_opt(&mut self) -> S::Output {
+        match self.peek_token_kind() {
+            TokenKind::Named => {
+                let token = self.next_token();
+                self.sc_mut().make_token(token)
+            }
+            _ => {
+                let pos = self.pos();
+                self.sc_mut().make_missing(pos)
+            }
         }
     }
 
@@ -479,7 +593,7 @@ where
     //   closure-param-type-specifier
     //   closure-param-type-specifiers  ,  closure-param-type-specifier
 
-    fn parse_closure_param_list(&mut self, close_kind: TokenKind) -> S::R {
+    fn parse_closure_param_list(&mut self, close_kind: TokenKind) -> S::Output {
         let (items, _) =
             self.parse_comma_list_allow_trailing(close_kind, Errors::error1007, |x: &mut Self| {
                 x.parse_closure_param_type_or_ellipsis()
@@ -500,49 +614,107 @@ where
     //   type-specifier  ...
     //   ...
 
-    fn parse_closure_param_type_or_ellipsis(&mut self) -> S::R {
-        match self.peek_token_kind() {
-            TokenKind::DotDotDot => {
-                let missing1 = S!(make_missing, self, self.pos());
-                let missing2 = S!(make_missing, self, self.pos());
-                let token = self.next_token();
-                let token = S!(make_token, self, token);
-                S!(make_variadic_parameter, self, missing1, missing2, token)
+    fn parse_closure_param_type_or_ellipsis(&mut self) -> S::Output {
+        let optional = self.parse_optional_opt();
+        let callconv = self.parse_call_convention_opt();
+        let named = self.parse_named_opt();
+        let readonly = self.parse_readonly_opt();
+
+        let ellipsis1 = self.parse_ellipsis_opt();
+        let ts =
+            self.parse_type_specifier_opt(/* allow_var = */ false, /* allow_attr */ true);
+
+        let param_name = if self.peek_token_kind() == TokenKind::Variable {
+            let token_node = self.next_token();
+
+            if named.is_missing() {
+                let (start_offset, end_offset) = match token_node.leading_start_offset() {
+                    Some(start_offset) => (start_offset, start_offset + token_node.full_width()),
+                    None => self.error_offsets(true), // This fallback is probably unreachable
+                };
+                let quickfixes = vec![
+                    SyntaxQuickfix {
+                        title: "Add `named` keyword".into(),
+                        edits: vec![(start_offset, start_offset, "named ".into())],
+                    },
+                    SyntaxQuickfix {
+                        title: "Remove parameter name".into(),
+                        edits: vec![(start_offset - /*whitespace*/1, end_offset, "".into())],
+                    },
+                ];
+                let error = {
+                    SyntaxError::make(
+                        start_offset,
+                        end_offset,
+                        Errors::named_param_without_named_keyword,
+                        quickfixes,
+                    )
+                };
+
+                self.add_error(error);
             }
-            _ => {
-                let callconv = self.parse_call_convention_opt();
-                let readonly = self.parse_readonly_opt();
-                let ts = self.parse_type_specifier(false, true);
-                match self.peek_token_kind() {
-                    TokenKind::DotDotDot => {
-                        let token = self.next_token();
-                        let token = S!(make_token, self, token);
-                        S!(make_variadic_parameter, self, callconv, ts, token)
-                    }
-                    _ => S!(
-                        make_closure_parameter_type_specifier,
-                        self,
-                        callconv,
-                        readonly,
-                        ts
-                    ),
-                }
-            }
-        }
+
+            self.sc_mut().make_token(token_node)
+        } else {
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
+        };
+
+        let (pre_ellipsis, ellipsis) = if ts.is_missing() {
+            let pos = self.pos();
+            (self.sc_mut().make_missing(pos), ellipsis1)
+        } else {
+            let ellipsis = self.parse_ellipsis_opt();
+            (ellipsis1, ellipsis)
+        };
+
+        let sc_mut = &mut self.sc_mut();
+        sc_mut.make_closure_parameter_type_specifier(
+            optional,
+            callconv,
+            named,
+            readonly,
+            pre_ellipsis,
+            ts,
+            param_name,
+            ellipsis,
+        )
     }
 
-    fn parse_optionally_reified_type(&mut self) -> S::R {
+    fn parse_tuple_or_union_or_intersection_element_type(&mut self) -> S::Output {
+        let optional = self.parse_optional_opt();
+        let ellipsis1 = self.parse_ellipsis_opt();
+        let ts =
+            self.parse_type_specifier(/* allow_var = */ false, /* allow_attr */ true);
+        let (pre_ellipsis, ellipsis) = if ts.is_missing() {
+            let pos = self.pos();
+            (self.sc_mut().make_missing(pos), ellipsis1)
+        } else {
+            let ellipsis = self.parse_ellipsis_opt();
+            (ellipsis1, ellipsis)
+        };
+        self.sc_mut()
+            .make_tuple_or_union_or_intersection_element_type_specifier(
+                optional,
+                pre_ellipsis,
+                ts,
+                ellipsis,
+            )
+    }
+
+    fn parse_optionally_reified_type(&mut self) -> S::Output {
         if self.peek_token_kind() == TokenKind::Reify {
             let token = self.next_token();
-            let reified_kw = S!(make_token, self, token);
+            let reified_kw = self.sc_mut().make_token(token);
             let type_argument = self.parse_type_specifier(false, true);
-            S!(make_reified_type_argument, self, reified_kw, type_argument)
+            self.sc_mut()
+                .make_reified_type_argument(reified_kw, type_argument)
         } else {
             self.parse_type_specifier(false, true)
         }
     }
 
-    pub fn parse_generic_type_argument_list(&mut self) -> (S::R, bool) {
+    pub fn parse_generic_type_argument_list(&mut self) -> (S::Output, bool) {
         // SPEC:
         // generic-type-argument-list:
         //   <  generic-type-arguments  ,opt  >
@@ -570,26 +742,29 @@ where
         match self.peek_token_kind() {
             TokenKind::GreaterThan => {
                 let close_angle = self.assert_token(TokenKind::GreaterThan);
-                let result = S!(make_type_arguments, self, open_angle, args, close_angle);
+                let result = self
+                    .sc_mut()
+                    .make_type_arguments(open_angle, args, close_angle);
                 (result, no_arg_is_missing)
             }
             _ => {
                 // ERROR RECOVERY: Don't eat the token that is in the place of the
                 // missing > or ,.  TokenKind::Assume that it is the > that is missing and
                 // try to parse whatever is coming after the type.
-                self.with_error(Errors::error1014);
-                let missing = S!(make_missing, self, self.pos());
-                let result = S!(make_type_arguments, self, open_angle, args, missing);
+                self.with_error(Errors::error1014, Vec::new());
+                let pos = self.pos();
+                let missing = self.sc_mut().make_missing(pos);
+                let result = self.sc_mut().make_type_arguments(open_angle, args, missing);
                 (result, no_arg_is_missing)
             }
         }
     }
 
-    fn parse_darray_type_specifier(&mut self) -> S::R {
+    fn parse_darray_type_specifier(&mut self) -> S::Output {
         // darray<type, type>
         let array_token = self.assert_token(TokenKind::Darray);
         if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
-            S!(make_simple_type_specifier, self, array_token)
+            self.sc_mut().make_simple_type_specifier(array_token)
         } else {
             let left_angle = self.assert_left_angle_in_type_list_with_possible_attribute();
             let key_type = self.parse_type_specifier(false, true);
@@ -597,9 +772,7 @@ where
             let value_type = self.parse_type_specifier(false, true);
             let optional_comma = self.optional_token(TokenKind::Comma);
             let right_angle = self.require_right_angle();
-            S!(
-                make_darray_type_specifier,
-                self,
+            self.sc_mut().make_darray_type_specifier(
                 array_token,
                 left_angle,
                 key_type,
@@ -611,19 +784,17 @@ where
         }
     }
 
-    fn parse_varray_type_specifier(&mut self) -> S::R {
+    fn parse_varray_type_specifier(&mut self) -> S::Output {
         // varray<type>
         let array_token = self.assert_token(TokenKind::Varray);
         if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
-            S!(make_simple_type_specifier, self, array_token)
+            self.sc_mut().make_simple_type_specifier(array_token)
         } else {
             let left_angle = self.assert_left_angle_in_type_list_with_possible_attribute();
             let value_type = self.parse_type_specifier(false, true);
             let optional_comma = self.optional_token(TokenKind::Comma);
             let right_angle = self.require_right_angle();
-            S!(
-                make_varray_type_specifier,
-                self,
+            self.sc_mut().make_varray_type_specifier(
                 array_token,
                 left_angle,
                 value_type,
@@ -633,7 +804,7 @@ where
         }
     }
 
-    fn parse_vec_type_specifier(&mut self) -> S::R {
+    fn parse_vec_type_specifier(&mut self) -> S::Output {
         // vec < type-specifier >
         // TODO: Should we allow a trailing comma?
         // TODO: Add this to the specification
@@ -642,25 +813,18 @@ where
         // about at type checking time?
         let keyword = self.assert_token(TokenKind::Vec);
         if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
-            S!(make_simple_type_specifier, self, keyword)
+            self.sc_mut().make_simple_type_specifier(keyword)
         } else {
             let left = self.assert_left_angle_in_type_list_with_possible_attribute();
             let t = self.parse_type_specifier(false, true);
             let optional_comma = self.optional_token(TokenKind::Comma);
             let right = self.require_right_angle();
-            S!(
-                make_vector_type_specifier,
-                self,
-                keyword,
-                left,
-                t,
-                optional_comma,
-                right
-            )
+            self.sc_mut()
+                .make_vector_type_specifier(keyword, left, t, optional_comma, right)
         }
     }
 
-    fn parse_keyset_type_specifier(&mut self) -> S::R {
+    fn parse_keyset_type_specifier(&mut self) -> S::Output {
         // keyset < type-specifier >
         // TODO: Should we allow a trailing comma?
         // TODO: Add this to the specification
@@ -669,25 +833,18 @@ where
         // about at type checking time?
         let keyword = self.assert_token(TokenKind::Keyset);
         if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
-            S!(make_simple_type_specifier, self, keyword)
+            self.sc_mut().make_simple_type_specifier(keyword)
         } else {
             let left = self.assert_left_angle_in_type_list_with_possible_attribute();
             let t = self.parse_type_specifier(false, true);
             let comma = self.optional_token(TokenKind::Comma);
             let right = self.require_right_angle();
-            S!(
-                make_keyset_type_specifier,
-                self,
-                keyword,
-                left,
-                t,
-                comma,
-                right
-            )
+            self.sc_mut()
+                .make_keyset_type_specifier(keyword, left, t, comma, right)
         }
     }
 
-    fn parse_tuple_type_explicit_specifier(&mut self) -> S::R {
+    fn parse_tuple_type_explicit_specifier(&mut self) -> S::Output {
         // tuple < type-specifier-list >
         // TODO: Add this to the specification
         let keyword = self.assert_token(TokenKind::Tuple);
@@ -701,33 +858,22 @@ where
         let right_angle = parser1.next_token();
         if right_angle.kind() == TokenKind::GreaterThan {
             self.continue_from(parser1);
-            let token = S!(make_token, self, right_angle);
-            S!(
-                make_tuple_type_explicit_specifier,
-                self,
-                keyword,
-                left_angle,
-                args,
-                token
-            )
+            let token = self.sc_mut().make_token(right_angle);
+            self.sc_mut()
+                .make_tuple_type_explicit_specifier(keyword, left_angle, args, token)
         } else {
             // ERROR RECOVERY: Don't eat the token that is in the place of the
             // missing > or ,.  TokenKind::Assume that it is the > that is missing and
             // try to parse whatever is coming after the type.
-            self.with_error(Errors::error1022);
-            let right_angle = S!(make_missing, self, self.pos());
-            S!(
-                make_tuple_type_explicit_specifier,
-                self,
-                keyword,
-                left_angle,
-                args,
-                right_angle
-            )
+            self.with_error(Errors::error1022, Vec::new());
+            let pos = self.pos();
+            let right_angle = self.sc_mut().make_missing(pos);
+            self.sc_mut()
+                .make_tuple_type_explicit_specifier(keyword, left_angle, args, right_angle)
         }
     }
 
-    fn parse_dictionary_type_specifier(&mut self) -> S::R {
+    fn parse_dictionary_type_specifier(&mut self) -> S::Output {
         // dict < type-specifier , type-specifier >
         //
         // TODO: Add this to the specification
@@ -742,7 +888,7 @@ where
         // about at type checking time?
         let keyword = self.assert_token(TokenKind::Dict);
         if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
-            S!(make_simple_type_specifier, self, keyword)
+            self.sc_mut().make_simple_type_specifier(keyword)
         } else {
             // TODO: This allows "noreturn" as a type argument. Should we
             // disallow that at parse time?
@@ -753,18 +899,12 @@ where
                 |x: &mut Self| x.parse_return_type(),
             );
             let right = self.require_right_angle();
-            S!(
-                make_dictionary_type_specifier,
-                self,
-                keyword,
-                left,
-                arguments,
-                right
-            )
+            self.sc_mut()
+                .make_dictionary_type_specifier(keyword, left, arguments, right)
         }
     }
 
-    fn parse_tuple_or_closure_type_specifier(&mut self) -> S::R {
+    fn parse_tuple_or_closure_type_specifier(&mut self) -> S::Output {
         let mut parser1 = self.clone();
         let _ = parser1.assert_token(TokenKind::LeftParen);
         let token = parser1.peek_token();
@@ -774,7 +914,7 @@ where
         }
     }
 
-    pub fn parse_contexts(&mut self) -> S::R {
+    pub fn parse_contexts(&mut self) -> S::Output {
         if self.peek_token_kind() == TokenKind::LeftBracket {
             let (left_bracket, types, right_bracket) = self
                 .parse_bracketted_comma_list_opt_allow_trailing(|x: &mut Self| {
@@ -785,25 +925,27 @@ where
                                 x.with_expression_parser(|p: &mut ExpressionParser<'a, S>| {
                                     p.parse_simple_variable()
                                 });
-                            S!(make_function_ctx_type_specifier, x, ctx, var)
+                            x.sc_mut().make_function_ctx_type_specifier(ctx, var)
                         }
                         TokenKind::Variable => {
                             /* Keeping this isolated from the type constant parsing code for now */
                             let var = x.assert_token(TokenKind::Variable);
                             let colcol = x.require_coloncolon();
                             let name = x.require_name();
-                            S!(make_type_constant, x, var, colcol, name)
+                            x.sc_mut().make_type_constant(var, colcol, name)
                         }
                         _ => x.parse_type_specifier(false, false),
                     }
                 });
-            S!(make_contexts, self, left_bracket, types, right_bracket)
+            self.sc_mut()
+                .make_contexts(left_bracket, types, right_bracket)
         } else {
-            S!(make_missing, self, self.pos())
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
         }
     }
 
-    fn parse_closure_type_specifier(&mut self) -> S::R {
+    fn parse_closure_type_specifier(&mut self) -> S::Output {
         // SPEC
         //
         // TODO: Update the specification with closure-param-type-specifier-list-opt.
@@ -824,11 +966,13 @@ where
         let olp = self.fetch_token();
         let ro = self.parse_readonly_opt();
         let fnc = self.fetch_token();
+        let typarams = self.parse_generic_type_parameter_list_opt();
         let ilp = self.require_left_paren();
         let (pts, irp) = if self.peek_token_kind() == TokenKind::RightParen {
-            let missing = S!(make_missing, self, self.pos());
+            let pos = self.pos();
+            let missing = self.sc_mut().make_missing(pos);
             let token = self.next_token();
-            let token = S!(make_token, self, token);
+            let token = self.sc_mut().make_token(token);
             (missing, token)
         } else {
             // TODO add second pass checking to ensure ellipsis is the last arg
@@ -841,24 +985,12 @@ where
         let readonly = self.parse_readonly_opt();
         let ret = self.parse_type_specifier(false, true);
         let orp = self.require_right_paren();
-        S!(
-            make_closure_type_specifier,
-            self,
-            olp,
-            ro,
-            fnc,
-            ilp,
-            pts,
-            irp,
-            ctxs,
-            col,
-            readonly,
-            ret,
-            orp
+        self.sc_mut().make_closure_type_specifier(
+            olp, ro, fnc, typarams, ilp, pts, irp, ctxs, col, readonly, ret, orp,
         )
     }
 
-    fn parse_tuple_or_union_or_intersection_type_specifier(&mut self) -> S::R {
+    fn parse_tuple_or_union_or_intersection_type_specifier(&mut self) -> S::Output {
         // SPEC
         // tuple-union-intersection-type-specifier:
         //   ( type-specifier  ,  type-specifier-list  )
@@ -882,39 +1014,49 @@ where
 
         let left_paren = self.assert_token(TokenKind::LeftParen);
 
-        let (args, _, separator_kind) = self.parse_separated_list_predicate(
-            |x| x == TokenKind::Bar || x == TokenKind::Ampersand || x == TokenKind::Comma,
-            SeparatedListKind::TrailingAllowed,
-            |x| x == TokenKind::RightParen,
-            Errors::error1007,
-            |x: &mut Self| x.parse_type_specifier(false, true),
-        );
+        let (args, _, separator_kind) = match self.peek_token_kind() {
+            // Special case for empty tuple ()
+            TokenKind::RightParen => {
+                let pos = self.pos();
+                let item_list = self.sc_mut().make_list(vec![], pos);
+                (item_list, false, TokenKind::Comma)
+            }
+            _ => self.parse_separated_list_predicate(
+                |x| x == TokenKind::Bar || x == TokenKind::Ampersand || x == TokenKind::Comma,
+                SeparatedListKind::TrailingAllowed,
+                |x| x == TokenKind::RightParen,
+                Errors::error1007,
+                |x| x.parse_tuple_or_union_or_intersection_element_type(),
+            ),
+        };
 
         if self.peek_token_kind() == TokenKind::RightParen {
             let right_paren = self.next_token();
-            let token = S!(make_token, self, right_paren);
+            let token = self.sc_mut().make_token(right_paren);
             match separator_kind {
-                TokenKind::Bar => S!(make_union_type_specifier, self, left_paren, args, token),
-                TokenKind::Ampersand => S!(
-                    make_intersection_type_specifier,
-                    self,
-                    left_paren,
-                    args,
-                    token
-                ),
-                _ => S!(make_tuple_type_specifier, self, left_paren, args, token),
+                TokenKind::Bar => self
+                    .sc_mut()
+                    .make_union_type_specifier(left_paren, args, token),
+                TokenKind::Ampersand => self
+                    .sc_mut()
+                    .make_intersection_type_specifier(left_paren, args, token),
+                _ => self
+                    .sc_mut()
+                    .make_tuple_type_specifier(left_paren, args, token),
             }
         } else {
             // ERROR RECOVERY: Don't eat the token that is in the place of the
             // missing ) or ,.  Assume that it is the ) that is missing and
             // try to parse whatever is coming after the type.
-            self.with_error(Errors::error1022);
-            let missing = S!(make_missing, self, self.pos());
-            S!(make_tuple_type_specifier, self, left_paren, args, missing)
+            self.with_error(Errors::error1022, Vec::new());
+            let pos = self.pos();
+            let missing = self.sc_mut().make_missing(pos);
+            self.sc_mut()
+                .make_tuple_type_specifier(left_paren, args, missing)
         }
     }
 
-    fn parse_nullable_type_specifier(&mut self) -> S::R {
+    fn parse_nullable_type_specifier(&mut self) -> S::Output {
         // SPEC:
         // nullable-type-specifier:
         //   ? type-specifier
@@ -926,10 +1068,11 @@ where
         // underlying type.
         let question = self.assert_token(TokenKind::Question);
         let nullable_type = self.parse_type_specifier(false, true);
-        S!(make_nullable_type_specifier, self, question, nullable_type)
+        self.sc_mut()
+            .make_nullable_type_specifier(question, nullable_type)
     }
 
-    fn parse_like_type_specifier(&mut self) -> S::R {
+    fn parse_like_type_specifier(&mut self) -> S::Output {
         // SPEC:
         // like-type-specifier:
         //   ~ type-specifier
@@ -938,10 +1081,10 @@ where
         // underlying type.
         let tilde = self.assert_token(TokenKind::Tilde);
         let like_type = self.parse_type_specifier(false, true);
-        S!(make_like_type_specifier, self, tilde, like_type)
+        self.sc_mut().make_like_type_specifier(tilde, like_type)
     }
 
-    fn parse_soft_type_specifier(&mut self) -> S::R {
+    fn parse_soft_type_specifier(&mut self) -> S::Output {
         // SPEC (Draft)
         // soft-type-specifier:
         //   @ type-specifier
@@ -953,10 +1096,10 @@ where
         // Note that it is legal for trivia to come between the @ and the type.
         let soft_at = self.assert_token(TokenKind::At);
         let soft_type = self.parse_type_specifier(false, true);
-        S!(make_soft_type_specifier, self, soft_at, soft_type)
+        self.sc_mut().make_soft_type_specifier(soft_at, soft_type)
     }
 
-    fn parse_attributized_specifier(&mut self) -> S::R {
+    fn parse_attributized_specifier(&mut self) -> S::Output {
         // SPEC
         // attributized-specifier:
         // attribute-specification-opt type-specifier
@@ -964,15 +1107,29 @@ where
             x.parse_attribute_specification_opt()
         });
         let attributized_type = self.parse_type_specifier(false, true);
-        S!(
-            make_attributized_specifier,
-            self,
-            attribute_spec_opt,
-            attributized_type
+        self.sc_mut()
+            .make_attributized_specifier(attribute_spec_opt, attributized_type)
+    }
+
+    fn parse_class_ptr_type_specifier(&mut self) -> S::Output {
+        // SPEC
+        // class-ptr-type-specifier:
+        //   class  <  qualified-name generic-type-argument-list-opt >
+        let class = self.fetch_token();
+        let left_angle = self.require_left_angle();
+        let class_type = self.parse_type_specifier(false, true);
+        let optional_comma = self.optional_token(TokenKind::Comma);
+        let right_angle = self.require_right_angle();
+        self.sc_mut().make_class_ptr_type_specifier(
+            class,
+            left_angle,
+            class_type,
+            optional_comma,
+            right_angle,
         )
     }
 
-    fn parse_classname_type_specifier(&mut self) -> S::R {
+    fn parse_classname_type_specifier(&mut self) -> S::Output {
         // SPEC
         // classname-type-specifier:
         //   classname
@@ -993,9 +1150,7 @@ where
                 let classname_type = self.parse_type_specifier(false, true);
                 let optional_comma = self.optional_token(TokenKind::Comma);
                 let right_angle = self.require_right_angle();
-                S!(
-                    make_classname_type_specifier,
-                    self,
+                self.sc_mut().make_classname_type_specifier(
                     classname,
                     left_angle,
                     classname_type,
@@ -1004,24 +1159,22 @@ where
                 )
             }
             _ => {
-                let missing1 = S!(make_missing, self, self.pos());
-                let missing2 = S!(make_missing, self, self.pos());
-                let missing3 = S!(make_missing, self, self.pos());
-                let missing4 = S!(make_missing, self, self.pos());
-                S!(
-                    make_classname_type_specifier,
-                    self,
-                    classname,
-                    missing1,
-                    missing2,
-                    missing3,
-                    missing4
+                let pos = self.pos();
+                let missing1 = self.sc_mut().make_missing(pos);
+                let pos = self.pos();
+                let missing2 = self.sc_mut().make_missing(pos);
+                let pos = self.pos();
+                let missing3 = self.sc_mut().make_missing(pos);
+                let pos = self.pos();
+                let missing4 = self.sc_mut().make_missing(pos);
+                self.sc_mut().make_classname_type_specifier(
+                    classname, missing1, missing2, missing3, missing4,
                 )
             }
         }
     }
 
-    fn parse_field_specifier(&mut self) -> S::R {
+    fn parse_field_specifier(&mut self) -> S::Output {
         // SPEC
         // field-specifier:
         //   ?-opt present-field-specifier
@@ -1039,22 +1192,17 @@ where
         let question = if self.peek_token_kind() == TokenKind::Question {
             self.assert_token(TokenKind::Question)
         } else {
-            S!(make_missing, self, self.pos())
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
         };
         let name = self.parse_expression();
         let arrow = self.require_arrow();
         let field_type = self.parse_type_specifier(false, true);
-        S!(
-            make_field_specifier,
-            self,
-            question,
-            name,
-            arrow,
-            field_type
-        )
+        self.sc_mut()
+            .make_field_specifier(question, name, arrow, field_type)
     }
 
-    fn parse_shape_specifier(&mut self) -> S::R {
+    fn parse_shape_specifier(&mut self) -> S::Output {
         // SPEC
         // shape-specifier:
         //   shape ( field-specifier-list-opt )
@@ -1071,49 +1219,42 @@ where
         let is_closing_token =
             |x: TokenKind| x == TokenKind::RightParen || x == TokenKind::DotDotDot;
         let fields = self.parse_comma_list_opt_allow_trailing_predicate(
-            &is_closing_token,
+            is_closing_token,
             Errors::error1025,
             |x: &mut Self| x.parse_field_specifier(),
         );
         let ellipsis = if self.peek_token_kind() == TokenKind::DotDotDot {
             self.assert_token(TokenKind::DotDotDot)
         } else {
-            S!(make_missing, self, self.pos())
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
         };
         let rparen = self.require_right_paren();
-        S!(
-            make_shape_type_specifier,
-            self,
-            shape,
-            lparen,
-            fields,
-            ellipsis,
-            rparen
-        )
+        self.sc_mut()
+            .make_shape_type_specifier(shape, lparen, fields, ellipsis, rparen)
     }
 
-    pub(crate) fn parse_type_constraint_opt(&mut self) -> Option<S::R> {
+    pub(crate) fn parse_type_constraint_opt(&mut self, allow_super: bool) -> Option<S::Output> {
         // SPEC
         // type-constraint:
         //   as  type-specifier
-        // TODO: Is this correct? Or do we need to allow "super" as well?
+        //   super  type-specifier
         // TODO: What about = ?
-        if self.peek_token_kind() == TokenKind::As {
-            let constraint_as = self.next_token();
-            let constraint_as = S!(make_token, self, constraint_as);
-            let constraint_type = self.parse_type_specifier(false, true);
-            Some(S!(
-                make_type_constraint,
-                self,
-                constraint_as,
-                constraint_type
-            ))
-        } else {
-            None
+        let make = |x: &mut Self| {
+            let constraint = x.next_token();
+            let constraint = x.sc_mut().make_token(constraint);
+            let constraint_type = x.parse_type_specifier(false, true);
+            Some(x.sc_mut().make_type_constraint(constraint, constraint_type))
+        };
+        let token = self.peek_token_kind();
+        match token {
+            TokenKind::As => make(self),
+            TokenKind::Super if allow_super => make(self),
+            _ => None,
         }
     }
 
-    pub fn parse_context_constraint_opt(&mut self) -> Option<S::R> {
+    pub fn parse_context_constraint_opt(&mut self) -> Option<S::Output> {
         // SPEC
         // context-constraint:
         //   as  context-list
@@ -1121,33 +1262,31 @@ where
         match self.peek_token_kind() {
             TokenKind::As | TokenKind::Super => {
                 let constraint_token = self.next_token();
-                let constraint_token = S!(make_token, self, constraint_token);
+                let constraint_token = self.sc_mut().make_token(constraint_token);
                 let constraint_ctx = self.parse_contexts();
-                Some(S!(
-                    make_context_constraint,
-                    self,
-                    constraint_token,
-                    constraint_ctx
-                ))
+                Some(
+                    self.sc_mut()
+                        .make_context_constraint(constraint_token, constraint_ctx),
+                )
             }
             _ => None,
         }
     }
 
-    pub fn parse_return_type(&mut self) -> S::R {
+    pub fn parse_return_type(&mut self) -> S::Output {
         if self.peek_token_kind() == TokenKind::Noreturn {
             let token = self.next_token();
-            S!(make_token, self, token)
+            self.sc_mut().make_token(token)
         } else {
             self.parse_type_specifier(false, true)
         }
     }
 
     // Same as parse_return_type but can return missing
-    pub fn parse_return_type_opt(&mut self) -> S::R {
+    pub fn parse_return_type_opt(&mut self) -> S::Output {
         if self.peek_token_kind() == TokenKind::Noreturn {
             let token = self.next_token();
-            S!(make_token, self, token)
+            self.sc_mut().make_token(token)
         } else {
             self.parse_type_specifier_opt(false, true)
         }

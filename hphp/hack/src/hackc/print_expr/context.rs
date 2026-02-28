@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::special_class_resolver::SpecialClassResolver;
-use env::emitter::Emitter;
 
 #[derive(Clone)]
 pub struct Context<'a> {
@@ -13,9 +12,9 @@ pub struct Context<'a> {
 }
 
 impl<'a> Context<'a> {
-    pub fn new<'arena, 'decl>(emitter: &'a Emitter<'arena, 'decl>) -> Self {
+    pub fn new(special_class_resolver: &'a dyn SpecialClassResolver) -> Self {
         Self {
-            special_class_resolver: emitter,
+            special_class_resolver,
             dump_lambdas: false,
         }
     }

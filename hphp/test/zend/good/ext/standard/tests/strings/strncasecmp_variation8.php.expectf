@@ -1,0 +1,22 @@
+*** Test strncasecmp() function: with single quoted strings ***
+-- Iteration 1 --
+int(0)
+int(0)
+int(0)
+int(-%d)
+-- Iteration 2 --
+int(0)
+int(0)
+int(0)
+int(-%d)
+-- Iteration 3 --
+int(0)
+int(0)
+int(0)
+int(-%d)
+-- Iteration 4 --
+int(%d)
+int(%d)
+int(%d)
+int(0)
+*** Done ***

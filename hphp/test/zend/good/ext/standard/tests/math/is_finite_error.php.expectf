@@ -1,4 +1,4 @@
 
-Warning: is_finite() expects exactly 1 parameter, 0 given in %s/is_finite_error.php on line 2
+Warning: is_finite() expects exactly 1 positional parameter, 0 given in %s/is_finite_error.php on line 2
 
-Warning: is_finite() expects exactly 1 parameter, 3 given in %s/is_finite_error.php on line 3
+Warning: is_finite() expects exactly 1 positional parameter, 3 given in %s/is_finite_error.php on line 3

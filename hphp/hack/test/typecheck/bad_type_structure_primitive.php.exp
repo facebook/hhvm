@@ -1,96 +1,96 @@
 File "bad_type_structure_primitive.php", line 4, characters 3-22:
   TypeStructureKind
 File "bad_type_structure_primitive.php", line 5, characters 3-23:
-  ?string
+  string
 File "bad_type_structure_primitive.php", line 6, characters 3-22:
-  ?string
+  string
 File "bad_type_structure_primitive.php", line 9, characters 3-27:
-  err
+  nothing
 File "bad_type_structure_primitive.php", line 10, characters 3-26:
-  err
+  nothing
 File "bad_type_structure_primitive.php", line 11, characters 3-28:
-  err
+  nothing
 File "bad_type_structure_primitive.php", line 12, characters 3-24:
-  err
+  nothing
 File "bad_type_structure_primitive.php", line 13, characters 3-29:
-  err
+  nothing
 File "bad_type_structure_primitive.php", line 14, characters 3-29:
-  err
+  nothing
 File "bad_type_structure_primitive.php", line 15, characters 3-31:
-  err
+  nothing
 File "bad_type_structure_primitive.php", line 18, characters 3-22:
   TypeStructureKind
 File "bad_type_structure_primitive.php", line 22, characters 3-22:
   TypeStructureKind
 File "bad_type_structure_primitive.php", line 23, characters 3-23:
-  ?string
+  string
 File "bad_type_structure_primitive.php", line 24, characters 3-22:
-  ?string
+  string
 File "bad_type_structure_primitive.php", line 27, characters 3-27:
-  err
+  nothing
 File "bad_type_structure_primitive.php", line 28, characters 3-26:
-  err
+  nothing
 File "bad_type_structure_primitive.php", line 29, characters 3-28:
-  err
+  nothing
 File "bad_type_structure_primitive.php", line 30, characters 3-24:
-  err
+  nothing
 File "bad_type_structure_primitive.php", line 31, characters 3-29:
-  err
+  nothing
 File "bad_type_structure_primitive.php", line 32, characters 3-29:
-  err
+  nothing
 File "bad_type_structure_primitive.php", line 33, characters 3-31:
-  ?vec<_>
+  vec<mixed>
 File "bad_type_structure_primitive.php", line 36, characters 3-22:
   TypeStructureKind
-File "bad_type_structure_primitive.php", line 9, characters 15-25:
-The field `classname` is undefined (Typing[4108])
-  File "typestructure.hhi", line 55, characters 29-698:
-  Definition is here
-File "bad_type_structure_primitive.php", line 10, characters 15-24:
-The field `nullable` is undefined (Typing[4108])
-  File "typestructure.hhi", line 55, characters 29-698:
-  Definition is here
-File "bad_type_structure_primitive.php", line 11, characters 15-26:
-The field `elem_types` is undefined (Typing[4108])
-  File "typestructure.hhi", line 55, characters 29-698:
-  Definition is here
-File "bad_type_structure_primitive.php", line 12, characters 15-22:
-The field `fields` is undefined (Typing[4108])
-  File "typestructure.hhi", line 55, characters 29-698:
-  Definition is here
-File "bad_type_structure_primitive.php", line 13, characters 15-27:
-The field `param_types` is undefined (Typing[4108])
-  File "typestructure.hhi", line 55, characters 29-698:
-  Definition is here
-File "bad_type_structure_primitive.php", line 14, characters 15-27:
-The field `return_type` is undefined (Typing[4108])
-  File "typestructure.hhi", line 55, characters 29-698:
-  Definition is here
-File "bad_type_structure_primitive.php", line 15, characters 15-29:
-The field `generic_types` is undefined (Typing[4108])
-  File "typestructure.hhi", line 55, characters 29-698:
-  Definition is here
-File "bad_type_structure_primitive.php", line 27, characters 15-25:
-The field `classname` is undefined (Typing[4108])
-  File "typestructure.hhi", line 55, characters 29-698:
-  Definition is here
-File "bad_type_structure_primitive.php", line 28, characters 15-24:
-The field `nullable` is undefined (Typing[4108])
-  File "typestructure.hhi", line 55, characters 29-698:
-  Definition is here
-File "bad_type_structure_primitive.php", line 29, characters 15-26:
-The field `elem_types` is undefined (Typing[4108])
-  File "typestructure.hhi", line 55, characters 29-698:
-  Definition is here
-File "bad_type_structure_primitive.php", line 30, characters 15-22:
-The field `fields` is undefined (Typing[4108])
-  File "typestructure.hhi", line 55, characters 29-698:
-  Definition is here
-File "bad_type_structure_primitive.php", line 31, characters 15-27:
-The field `param_types` is undefined (Typing[4108])
-  File "typestructure.hhi", line 55, characters 29-698:
-  Definition is here
-File "bad_type_structure_primitive.php", line 32, characters 15-27:
-The field `return_type` is undefined (Typing[4108])
-  File "typestructure.hhi", line 55, characters 29-698:
-  Definition is here
+ERROR: File "bad_type_structure_primitive.php", line 9, characters 15-25:
+This shape doesn't have a field `classname` (Typing[4108])
+  File "typestructure.hhi", line 59, characters 31-699:
+  The shape is defined here
+ERROR: File "bad_type_structure_primitive.php", line 10, characters 15-24:
+The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 60, characters 6-15:
+  This is where the field was declared as optional.
+ERROR: File "bad_type_structure_primitive.php", line 11, characters 15-26:
+The field `elem_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 64, characters 6-17:
+  This is where the field was declared as optional.
+ERROR: File "bad_type_structure_primitive.php", line 12, characters 15-22:
+This shape doesn't have a field `fields` (Typing[4108])
+  File "typestructure.hhi", line 59, characters 31-699:
+  The shape is defined here
+ERROR: File "bad_type_structure_primitive.php", line 13, characters 15-27:
+The field `param_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 68, characters 6-18:
+  This is where the field was declared as optional.
+ERROR: File "bad_type_structure_primitive.php", line 14, characters 15-27:
+The field `return_type` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 67, characters 6-18:
+  This is where the field was declared as optional.
+ERROR: File "bad_type_structure_primitive.php", line 15, characters 15-29:
+The field `generic_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 69, characters 6-20:
+  This is where the field was declared as optional.
+ERROR: File "bad_type_structure_primitive.php", line 27, characters 15-25:
+This shape doesn't have a field `classname` (Typing[4108])
+  File "typestructure.hhi", line 59, characters 31-699:
+  The shape is defined here
+ERROR: File "bad_type_structure_primitive.php", line 28, characters 15-24:
+The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 60, characters 6-15:
+  This is where the field was declared as optional.
+ERROR: File "bad_type_structure_primitive.php", line 29, characters 15-26:
+The field `elem_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 64, characters 6-17:
+  This is where the field was declared as optional.
+ERROR: File "bad_type_structure_primitive.php", line 30, characters 15-22:
+This shape doesn't have a field `fields` (Typing[4108])
+  File "typestructure.hhi", line 59, characters 31-699:
+  The shape is defined here
+ERROR: File "bad_type_structure_primitive.php", line 31, characters 15-27:
+The field `param_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 68, characters 6-18:
+  This is where the field was declared as optional.
+ERROR: File "bad_type_structure_primitive.php", line 32, characters 15-27:
+The field `return_type` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "typestructure.hhi", line 67, characters 6-18:
+  This is where the field was declared as optional.

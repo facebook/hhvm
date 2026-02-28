@@ -2,7 +2,7 @@
 
 
 <<__EntryPoint>>
-function main_stream_file_offset() {
+function main_stream_file_offset() :mixed{
 $fd = fopen(__DIR__.'/stream_file_offset.php.sample', 'rb');
 
 // fgets moves the read position.

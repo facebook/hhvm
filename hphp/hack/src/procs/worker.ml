@@ -137,10 +137,8 @@ let read_and_process_job ic oc : job_outcome =
             ^^ "If you are sending closures, double-check to ensure that "
             ^^ "they have not captured large values in their environment.")
             len;
-          HackEventLogger.invariant_violation_bug
+          HackEventLogger.worker_large_data_send
             ~path:Relative_path.default
-            ~pos:""
-            ~desc:"WORKER_LARGE_DATA_SEND"
             (Telemetry.create () |> Telemetry.int_ ~key:"len" ~value:len)
         );
 
@@ -175,7 +173,7 @@ let read_and_process_job ic oc : job_outcome =
     start_major_collections := gc.Gc.major_collections;
     start_wall_time := Unix.gettimeofday ();
     start_proc_fs_status :=
-      ProcFS.status_for_pid (Unix.getpid ()) |> Core_kernel.Result.ok;
+      ProcFS.status_for_pid (Unix.getpid ()) |> Core.Result.ok;
     HackEventLogger.deserialize_globals log_globals;
     Mem_profile.start ();
     do_process { send = send_result };
@@ -216,6 +214,19 @@ let read_and_process_job ic oc : job_outcome =
        leave them all to the catch-all handler below. *)
     Hh_logger.log "Worker got EPIPE due to server shutdown";
     `Controller_has_died
+  | Poll.Poll_exception flags as e ->
+    (* TODO @catg. This occasionally happen. I'm temporarily logging more info
+       about the flags to be able to debug. *)
+    let msg =
+      Printf.sprintf
+        "Poll_exception (%s). Stack: \n%s"
+        (Poll.Flags.to_string flags)
+        (Exception.wrap e |> Exception.to_string |> Exception.clean_stack)
+    in
+    Hh_logger.log "%s" msg;
+    EventLogger.log_if_initialized (fun () ->
+        HackEventLogger.invariant_violation_bug msg);
+    `Error Exit_status.Type_error
   | exn ->
     let e = Exception.wrap exn in
     Hh_logger.log
@@ -246,13 +257,6 @@ let process_job_and_exit ic oc =
     on_clone_cancelled (Daemon.descr_of_out_channel oc);
     exit 0
   | `Controller_has_died -> `Controller_has_died
-
-let win32_worker_main restore (state, _controller_fd) (ic, oc) =
-  (* On Windows, there is no clone process, the worker does the job
-     directly and exits when it is done. *)
-  restore state;
-  match process_job_and_exit ic oc with
-  | `Controller_has_died -> exit 0
 
 let maybe_send_status_to_controller fd status =
   match fd with
@@ -340,10 +344,12 @@ let unix_worker_main restore (state, controller_fd) (ic, oc) =
       | Unix.WSIGNALED x ->
         let sig_str = PrintSignal.string_of_signal x in
         Printf.printf "Worker interrupted with signal: %s\n" sig_str;
-        exit 2
+        Stdlib.flush stdout;
+        Stdlib.exit 2
       | Unix.WSTOPPED x ->
         Printf.printf "Worker stopped with signal: %d\n" x;
-        exit 3)
+        Stdlib.flush stdout;
+        Stdlib.exit 3)
   done;
   assert false
 

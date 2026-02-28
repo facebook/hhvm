@@ -36,8 +36,8 @@ function slice_l(
 }
 
 /**
- * Returns the string with the given prefix removed, or the string itself if
- * it doesn't start with the prefix.
+ * Returns the string with one instance of the given prefix removed, or the
+ * string itself if it doesn't start with the prefix.
  *
  * Strings will be normalized for comparison in encodings that support multiple
  * representations, such as UTF-8.

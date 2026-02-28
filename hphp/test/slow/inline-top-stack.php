@@ -1,6 +1,6 @@
 <?hh
 final class InlineTopStack { public static $storage = Map { 'exns' => Map {} }; /* no COW */ }
-function dump() {
+function dump() :mixed{
   foreach (InlineTopStack::$storage['exns'] as $f => $exn) {
     $trace = implode(
       ', ',
@@ -11,23 +11,23 @@ function dump() {
 }
 
 <<__ALWAYS_INLINE>>
-function red($a) {
+function red($a) :mixed{
   $a['exns'][__FUNCTION__] = new Exception;
 }
 
 <<__ALWAYS_INLINE>>
-function green($a) {
+function green($a) :mixed{
   $a['exns'][__FUNCTION__] = new Exception;
   red($a);
 }
 
 <<__ALWAYS_INLINE>>
-function blue($a) {
+function blue($a) :mixed{
   $a['exns'] = Map {__FUNCTION__ => new Exception };
   green($a);
 }
 <<__EntryPoint>>
-function main_top_stack() {
+function main_top_stack() :mixed{
   for ($i = 0; $i < 10; $i++) blue(InlineTopStack::$storage);
   dump();
 }

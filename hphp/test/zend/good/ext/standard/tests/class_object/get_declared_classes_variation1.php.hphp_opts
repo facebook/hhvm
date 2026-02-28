@@ -1,2 +1,1 @@
---ffile=test/zend/good/ext/standard/tests/class_object/AutoLoaded.inc
---ffile=hphp/test/zend/good/ext/standard/tests/class_object/AutoLoaded.inc
+--inputs=__DIR__/AutoLoaded.inc

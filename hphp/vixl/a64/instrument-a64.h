@@ -23,9 +23,7 @@
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-#ifndef VIXL_A64_INSTRUMENT_A64_H_
-#define VIXL_A64_INSTRUMENT_A64_H_
+#pragma once
 
 #include "hphp/vixl/globals.h"
 #include "hphp/vixl/utils.h"
@@ -103,5 +101,3 @@ class Instrument: public DecoderVisitor {
 };
 
 }  // namespace vixl
-
-#endif  // VIXL_A64_INSTRUMENT_A64_H_

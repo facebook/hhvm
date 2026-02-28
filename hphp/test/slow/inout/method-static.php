@@ -1,23 +1,25 @@
 <?hh
 
 class Foo {
-  function alpha(inout $a, inout $b) {
+  function alpha(inout $a, inout $b) :mixed{
     $a = 'bravo';
     $b = 'charlie';
     return 'delta';
   }
-  static function beta(inout $x) {
-    return $x++;
+  static function beta(inout $x) :mixed{
+    $__lval_tmp_0 = $x;
+    $x++;
+    return $__lval_tmp_0;
   }
-  function one(inout $t) {
+  function one(inout $t) :mixed{
     $t = debug_backtrace()[0]['function'];
   }
-  static function two(inout $t) {
+  static function two(inout $t) :mixed{
     $t = debug_backtrace()[0]['function'];
   }
 }
 
-function main($obj) {
+function main($obj) :mixed{
   $a = 'beta';
   $b = 'gamma';
   $x = 41;
@@ -35,6 +37,6 @@ function main($obj) {
 
 
 <<__EntryPoint>>
-function main_method_static() {
+function main_method_static() :mixed{
 main(new Foo);
 }

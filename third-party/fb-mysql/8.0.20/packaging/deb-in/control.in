@@ -1,0 +1,288 @@
+Source: mysql-@DEB_PRODUCTNAME@
+Maintainer: MySQL Release Engineering <mysql-build@oss.oracle.com>
+Section: database
+Priority: optional
+Standards-Version: 3.9.8
+Homepage: http://www.mysql.com/
+Build-Depends: debhelper (>= 9.0.0),
+ libaio-dev[linux-any],
+ libncurses5-dev (>= 5.0-6),
+ libjson-perl, libldap2-dev,
+ libsasl2-dev,
+ perl,
+ zlib1g-dev (>= 1:1.1.3-5),
+ po-debconf,
+ psmisc,
+ bison,
+ lsb-release,
+ cmake,
+ fakeroot,
+ libnuma-dev,
+ libmecab-dev,
+ dh-systemd
+ @DEB_CONTROL_BDEPS@ @DEB_CONTROL_BDEPS_COMMERCIAL@ @DEB_CONTROL_BDEPS_SSL@
+
+
+Package: mysql-server
+Architecture: any
+Depends: mysql-@DEB_PRODUCTNAME@-server (= ${binary:Version}), ${misc:Depends}
+Description: MySQL Server meta package depending on latest version
+ The MySQL(TM) software delivers a very fast, multi-threaded, multi-user,
+ and robust SQL (Structured Query Language) database server. MySQL Server
+ is intended for mission-critical, heavy-load production systems as well
+ as for embedding into mass-deployed software. MySQL is a trademark of
+ Oracle. This is a meta package that depends on the latest mysql server
+ package available in the repository.
+
+Package: mysql-@DEB_PRODUCTNAME@-server
+Architecture: any
+Pre-depends: debconf (>= 0.2.17), adduser
+Depends: mysql-common (>= ${binary:Version}),
+ mysql-client (= ${binary:Version}),
+ mysql-@DEB_PRODUCTNAME@-server-core (= ${binary:Version}),
+ perl,
+ psmisc,
+ ${shlibs:Depends}, ${misc:Depends}
+Breaks: mysql-common (<< 5.7.14), mysql-@DEB_PRODUCTNAME@-client (<< 5.7)
+Conflicts: mysql,
+ mysql-server-5.0, mysql-server-core-5.0,
+ mysql-server-5.1, mysql-server-core-5.1,
+ mysql-server-5.5, mysql-server-core-5.5,
+ mysql-server-5.6, mysql-server-core-5.6,
+ mysql-server-5.7, mysql-server-core-5.7,
+ mysql-@DEB_NOTPRODUCTNAME@-server,
+ @DEB_CONTROL_SERVER_CONFLICT_NDB@,
+ mariadb-server-5.5, mariadb-server-core-5.5,
+ mariadb-server-10.0, mariadb-server-core-10.0,
+ mariadb-server-10.1, mariadb-server-core-10.1,
+ mariadb-server-10.2, mariadb-server-core-10.2,
+ mysql-client-5.0, mysql-client-core-5.0,
+ mysql-client-5.1, mysql-client-core-5.1,
+ mysql-client-5.5, mysql-client-core-5.5,
+ mysql-client-5.6, mysql-client-core-5.6,
+ mysql-client-5.7, mysql-client-core-5.7,
+ mariadb-client-5.5, mariadb-client-core-5.5,
+ mariadb-client-10.0, mariadb-client-core-10.0,
+ mariadb-client-10.1, mariadb-client-core-10.1,
+ mariadb-client-10.2, mariadb-client-core-10.2
+Replaces: mysql,
+ mysql-server-5.0, mysql-server-core-5.0,
+ mysql-server-5.1, mysql-server-core-5.1,
+ mysql-server-5.5, mysql-server-core-5.5,
+ mysql-server-5.6, mysql-server-core-5.6,
+ mysql-server-5.7, mysql-server-core-5.7,
+ mysql-@DEB_PRODUCTNAME@-client (<< 5.7),
+ mysql-@DEB_NOTPRODUCTNAME@-server,
+ @DEB_CONTROL_SERVER_CONFLICT_NDB@,
+ mysql-common (<< 5.7.14)
+Provides: virtual-mysql-server
+Description: MySQL Server
+ The MySQL(TM) software delivers a very fast, multi-threaded, multi-user,
+ and robust SQL (Structured Query Language) database server. MySQL Server
+ is intended for mission-critical, heavy-load production systems as well
+ as for embedding into mass-deployed software. MySQL is a trademark of
+ Oracle. This package includes the MySQL server binary as well as related
+ utilities to run and administer a MySQL server.
+
+Package: mysql-@DEB_PRODUCTNAME@-server-core
+Architecture: any
+Recommends: mecab-ipadic-utf8
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Breaks: mysql-@DEB_PRODUCTNAME@-server (<< 8.0.1),
+ mysql-@DEB_NOTPRODUCTNAME@-server (<< 8.0.1),
+Conflicts: mysql,
+ mysql-server-core-5.7,
+ mysql-server-core-8.0,
+ mysql-@DEB_NOTPRODUCTNAME@-server-core,
+ mariadb-server-core-10.1,
+ mariadb-server-core-10.2,
+ mariadb-server-core-10.3
+Replaces: mysql-@DEB_PRODUCTNAME@-server (<< 8.0.1),
+ mysql-@DEB_NOTPRODUCTNAME@-server (<< 8.0.1),
+ mysql-@DEB_NOTPRODUCTNAME@-server-core,
+ mysql-server-core-5.7,
+ mysql-server-core-8.0
+Provides: virtual-mysql-server-core
+Description: MySQL Server Core Binaires
+ The MySQL(TM) software delivers a very fast, multi-threaded, multi-user,
+ and robust SQL (Structured Query Language) database server. MySQL Server
+ is intended for mission-critical, heavy-load production systems as well
+ as for embedding into mass-deployed software. MySQL is a trademark of
+ Oracle. This package includes the core MySQL server binaries, but no
+ configuration or service scripts.
+
+Package: mysql-client
+Architecture: any
+Depends: mysql-@DEB_PRODUCTNAME@-client (= ${binary:Version}), ${misc:Depends}
+Description: MySQL Client meta package depending on latest version
+ The MySQL(TM) software delivers a very fast, multi-threaded, multi-user,
+ and robust SQL (Structured Query Language) database server. MySQL Server
+ is intended for mission-critical, heavy-load production systems as well
+ as for embedding into mass-deployed software. MySQL is a trademark of
+ Oracle. This is a meta package that depends on the latest mysql client
+ package available in the repository.
+
+Package: mysql-@DEB_PRODUCTNAME@-client
+Architecture: any
+Depends: mysql-common (>= ${binary:Version}),
+ ${shlibs:Depends}, ${misc:Depends},
+ mysql-@DEB_PRODUCTNAME@-client-core (= ${binary:Version})
+Breaks: mysql-common (<< 8.0.1),
+ libmysqlclient-dev (<< 5.7.14),
+Conflicts: mysql,
+ mysql-client-5.7, mysql-client-core-5.7,
+ mysql-client-8.0, mysql-client-core-8.0,
+ mysql-@DEB_NOTPRODUCTNAME@-client,
+ @DEB_CONTROL_CLIENT_CONFLICT_NDB@,
+ mariadb-client-10.1, mariadb-client-core-10.1,
+ mariadb-client-10.2, mariadb-client-core-10.2,
+ mariadb-client-10.3, mariadb-client-core-10.3,
+ mysql-server-5.7, mysql-server-core-5.7,
+ mysql-server-8.0, mysql-server-core-8.0,
+ mariadb-server-10.1, mariadb-server-core-10.1,
+ mariadb-server-10.2, mariadb-server-core-10.2,
+ mariadb-server-10.3, mariadb-server-core-10.3,
+Replaces: mysql,
+ mysql-client-5.7, mysql-client-core-5.7,
+ mysql-client-8.0, mysql-client-core-8.0,
+ mysql-@DEB_NOTPRODUCTNAME@-client,
+ @DEB_CONTROL_CLIENT_CONFLICT_NDB@,
+ mysql-common (<< 8.0.1),
+ libmysqlclient-dev (<< 5.7.14)
+Provides: virtual-mysql-client,
+Description: MySQL Client
+ The MySQL(TM) software delivers a very fast, multi-threaded, multi-user,
+ and robust SQL (Structured Query Language) database server. MySQL Server
+ is intended for mission-critical, heavy-load production systems as well
+ as for embedding into mass-deployed software. MySQL is a trademark of
+ Oracle. This package contains the standard MySQL clients and
+ administration tools.
+
+Package: mysql-@DEB_PRODUCTNAME@-client-core
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Breaks: libmysqlclient-dev (<< 5.7.14),
+ mysql-@DEB_PRODUCTNAME@-client (<< 8.0.1),
+ mysql-@DEB_NOTPRODUCTNAME@-client (<< 8.0.1),
+Conflicts: mysql,
+ mysql-client-core-5.7,
+ mysql-client-core-8.0,
+ mysql-@DEB_NOTPRODUCTNAME@-client-core,
+ mariadb-client-core-10.1,
+ mariadb-client-core-10.2,
+ mariadb-client-core-10.3
+Replaces: mysql,
+ mysql-client-core-5.7,
+ mysql-client-core-8.0,
+ mysql-@DEB_NOTPRODUCTNAME@-client,
+ mysql-common (<< 5.7.17),
+ mysql-@DEB_PRODUCTNAME@-client (<< 8.0.1),
+ mysql-@DEB_NOTPRODUCTNAME@-client (<< 8.0.1),
+ mysql-@DEB_NOTPRODUCTNAME@-client-core,
+ libmysqlclient-dev (<< 5.7.14)
+Provides: virtual-mysql-client-core
+Description: MySQL Client Core Binaries
+ The MySQL(TM) software delivers a very fast, multi-threaded, multi-user,
+ and robust SQL (Structured Query Language) database server. MySQL Server
+ is intended for mission-critical, heavy-load production systems as well
+ as for embedding into mass-deployed software. MySQL is a trademark of
+ Oracle. This package contains the MySQL client binaries.
+
+Package: libmysqlclient21
+Architecture: any
+Section: libs
+Pre-Depends: ${misc:Pre-Depends}
+Multi-Arch: same
+Depends: mysql-common (>= ${binary:Version}),
+ ${shlibs:Depends}, ${misc:Depends}
+Description: MySQL shared client libraries
+ The MySQL(TM) software delivers a very fast, multi-threaded, multi-user,
+ and robust SQL (Structured Query Language) database server. MySQL Server
+ is intended for mission-critical, heavy-load production systems as well
+ as for embedding into mass-deployed software. MySQL is a trademark of
+ Oracle. This package contains the shared libraries for MySQL client
+ applications.
+
+Package: mysql-common
+Architecture: any
+Pre-depends: debconf (>= 0.2.17), ${misc:Pre-Depends}
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: mysql,
+ mysql-server-5.7, mysql-server-core-5.7,
+ mysql-client-5.7, mysql-client-core-5.7,
+ mysql-server-8.0, mysql-server-core-8.0,
+ mysql-client-8.0, mysql-client-core-8.0,
+ mariadb-server-5.5, percona-xtradb-cluster-common-5.5,
+ mysql-common (<< 5.7.14)
+Replaces: mysql, libmysqlclient-dev,
+ mysql-server-5.7, mysql-server-core-5.7,
+ mysql-server-8.0, mysql-server-core-8.0,
+ mariadb-server-5.5, percona-xtradb-cluster-common-5.5,
+ mysql-common (<< 5.7.14)
+Provides: mysql-common
+Description: Common files shared between packages
+ The MySQL(TM) software delivers a very fast, multi-threaded, multi-user,
+ and robust SQL (Structured Query Language) database server. MySQL Server
+ is intended for mission-critical, heavy-load production systems as well
+ as for embedding into mass-deployed software. MySQL is a trademark of
+ Oracle. This package contains common files needed by MySQL client
+ library and MySQL database server.
+
+Package: libmysqlclient-dev
+Architecture: any
+Section: libdevel
+Depends: libmysqlclient21 (= ${binary:Version}),
+ ${shlibs:Depends}, ${misc:Depends}
+Breaks: libmysqld-dev
+Replaces: mysql-client-5.6, mysql-client-core-5.6,
+ mysql-client-5.7, mysql-client-core-5.7,
+ mysql-client-8.0, mysql-client-core-8.0,
+ libmysqld-dev
+Description: MySQL development headers
+ The MySQL(TM) software delivers a very fast, multi-threaded, multi-user,
+ and robust SQL (Structured Query Language) database server. MySQL Server
+ is intended for mission-critical, heavy-load production systems as well
+ as for embedding into mass-deployed software. MySQL is a trademark of
+ Oracle. This package contains the development header files necessary
+ to develop MySQL client applications.
+
+Package: mysql-testsuite
+Architecture: any
+Depends: mysql-@DEB_PRODUCTNAME@-test (= ${binary:Version}), ${misc:Depends}
+Description: MySQL Testsuite meta package depending on latest version
+ The MySQL(TM) software delivers a very fast, multi-threaded, multi-user,
+ and robust SQL (Structured Query Language) database server. MySQL Server
+ is intended for mission-critical, heavy-load production systems as well
+ as for embedding into mass-deployed software. MySQL is a trademark of
+ Oracle. This is a meta package that depends on the latest mysql test
+ package available in the repository.
+
+Package: mysql-@DEB_PRODUCTNAME@-test
+Architecture: any
+Depends: mysql-@DEB_PRODUCTNAME@-server (= ${binary:Version}),
+ mysql-@DEB_PRODUCTNAME@-client (= ${binary:Version}), python,
+ libmysqlclient-dev, libjson-perl, mecab-ipadic-utf8,
+ ${shlibs:Depends}, ${misc:Depends}, @DEB_NDB_CONTROL_TEST_DEPS@
+Breaks: mysql-@DEB_PRODUCTNAME@-server (<< 8.0),
+ mysql-community-server-core ( << 8.0.20 ),
+ mysql-@DEB_PRODUCTNAME@-client (<< 5.7.14)
+Replaces: mysql-@DEB_PRODUCTNAME@-server ( << 8.0),
+ mysql-community-server-core ( << 8.0.20 )
+Conflicts: mysql,
+ mysql-testsuite-8.0, mysql-testsuite-5.7, mysql-@DEB_NOTPRODUCTNAME@-test,
+ mariadb-test, mariadb-test-data
+Description: MySQL Test Run MTR - The MySQL testsuite
+ The MySQL(TM) software delivers a very fast, multi-threaded, multi-user,
+ and robust SQL (Structured Query Language) database server. MySQL Server
+ is intended for mission-critical, heavy-load production systems as well
+ as for embedding into mass-deployed software. MySQL is a trademark of
+ Oracle. This package contains the MySQL regression test suite for MySQL
+ database server.
+
+@DEB_CONTROL_DEBUG@
+@DEB_CONTROL_DBGSYM@
+@DEB_CONTROL_ROUTER@
+@DEB_NDB_CONTROL_DBGSYM@
+@DEB_NDB_CONTROL_EXTRAS@
+@DEB_COMMERCIAL_CONTROL_EXTRAS@

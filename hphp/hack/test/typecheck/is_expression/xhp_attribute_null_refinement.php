@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 interface I {
@@ -17,7 +17,7 @@ class B implements I {
 
 function f(): void {}
 
-class C implements XHPChild {
+class C extends XHPTest implements XHPChild {
   attribute ?I x = null;
 
   public function test(): void {

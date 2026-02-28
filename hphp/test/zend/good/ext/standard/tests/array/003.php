@@ -1,6 +1,6 @@
 <?hh
 
-function cmp($a, $b) {
+function cmp($a, $b) :mixed{
     is_array ($a)
         && ($a = array_sum ($a));
     is_array ($b)

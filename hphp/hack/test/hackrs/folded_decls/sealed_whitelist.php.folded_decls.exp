@@ -1,0 +1,19 @@
+FoldedClass {
+    name: "\\A",
+    kind: Cclass(
+        Concrete,
+    ),
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: class<this>,
+            origin: "\\A",
+            refs: [],
+        },
+    },
+    sealed_whitelist: {
+        "\\A",
+    },
+}

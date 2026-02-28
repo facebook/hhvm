@@ -1,30 +1,30 @@
 <?hh
 
-async function answer() {
+async function answer() :Awaitable<mixed>{
   await reschedule();
   echo "In answer\n";
-  return IntContext::getContext();
+  return IntContext::getContext()->getPayload();
 }
 
-function reschedule() {
+function reschedule() :mixed{
   return RescheduleWaitHandle::create(
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
   );
 }
 
-async function change() {
+async function change() :Awaitable<mixed>{
   echo "In change\n";
-  return await IntContext::genStart(2, async () ==> {
-    return IntContext::getContext();
+  return await IntContext::genStart(new Base(2), async () ==> {
+    return IntContext::getContext()->getPayload();
   });
 }
 
 <<__EntryPoint>>
-async function main() {
+async function main() :Awaitable<mixed>{
   include 'async-implicit.inc';
 
-  $result = await IntContext::genStart(1, async () ==> {
+  $result = await IntContext::genStart(new Base(1), async () ==> {
     concurrent {
       $x = await answer();
       $y = await change();

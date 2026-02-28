@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Gets current thread's ID.

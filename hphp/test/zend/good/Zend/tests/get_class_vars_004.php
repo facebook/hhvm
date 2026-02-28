@@ -14,7 +14,7 @@ class A {
         var_dump(get_class_vars('A'));
     }
 
-    static public function test() {
+    static public function test() :mixed{
         var_dump(get_class_vars('A'));
     }
 }

@@ -1,0 +1,49 @@
+Code actions available:
+------------------------------------------
+await expression (CodeActionKind: "quickfix") SELECTED
+Devmate Quick Fix - Casting Awaitable<int> to int: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (CodeActionKind: "quickfix")
+Devmate Agent Fix - Casting Awaitable<int> to int: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (CodeActionKind: "quickfix")
+Devmate Quick Fix - This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (CodeActionKind: "quickfix")
+Devmate Agent Fix - This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (CodeActionKind: "quickfix")
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"Awaitable<mixed>",
+          "range":{"end":{"character":32,"line":7},"start":{"character":27,"line":7}}
+        },
+        {
+          "newText":"async ",
+          "range":{"end":{"character":9,"line":7},"start":{"character":9,"line":7}}
+        },
+        {
+          "newText":"return (int)await gen_int() + 3;",
+          "range":{"end":{"character":30,"line":8},"start":{"character":4,"line":8}}
+        }
+      ]
+    }
+  },
+  "kind":"quickfix",
+  "title":"await expression"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+async function gen_int(): Awaitable<int> {
+  return 1;
+}
+
+class A {
+  public async function repro(): Awaitable<mixed> {
+    return (int)await gen_int() + 3;
+            //  ^ at-caret should be a quickfix (not a refactoring)
+  }
+}
+

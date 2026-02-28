@@ -1,0 +1,9 @@
+{
+    "comment": "Metadata for Duktape distributable", 
+    "duk_version_string": "2.3.0", 
+    "type": "duk_dist_meta", 
+    "duk_version": 20300, 
+    "git_branch": "master", 
+    "git_commit": "d7fdb67f18561a50e06bafd196c6b423af9ad6fe", 
+    "git_describe": "v2.3.0"
+}

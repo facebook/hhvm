@@ -32,7 +32,7 @@ function string_add_val(string $a = STRING_ADD_VAL): string {
     return $a;
 }
 
-function int_val_default_null(int $a = NULL_VAL) {
+function int_val_default_null(int $a = NULL_VAL) :mixed{
     return $a;
 }
 <<__EntryPoint>> function main(): void {

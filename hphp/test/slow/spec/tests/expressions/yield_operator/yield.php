@@ -3,7 +3,7 @@
 // define a simple generator that returns a series of consecutive values
 
 function series($start, $end)
-{
+:AsyncGenerator<mixed,mixed,void>{
     for ($i = $start; $i <= $end; ++$i)
     {
         yield $i;
@@ -15,7 +15,7 @@ function series($start, $end)
 // define a generator that returns sucessive lines from a file of text
 
 function getTextFileLines($filename)
-{
+:AsyncGenerator<mixed,mixed,void>{
     $infile = fopen($filename, 'r');
     if ($infile == FALSE)
     {
@@ -44,7 +44,7 @@ function getTextFileLines($filename)
 // also yield on its own + yield in an expression
 
 function f()
-{
+:AsyncGenerator<mixed,mixed,void>{
 //  if (0)      // even if the yield is never executed, can't have return with value
     for ($i = 1; $i <= 3; ++$i)
     {
@@ -71,7 +71,7 @@ function f()
 // define a simple generator that returns key/value pairs
 
 function series2($start, $end, $keyPrefix = "")
-{
+:AsyncGenerator<mixed,mixed,void>{
     for ($i = $start; $i <= $end; ++$i)
     {
 //      yield;                          // default key is int 0,1,2... and value NULL

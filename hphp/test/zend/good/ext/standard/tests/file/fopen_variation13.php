@@ -5,8 +5,8 @@
  * Alias to functions:
  */
 
-function runtest() {
-    $tempDir = __SystemLib\hphp_test_tmppath('fopen_variation13.dir.tmp');
+function runtest() :mixed{
+    $tempDir = sys_get_temp_dir().'/'.'fopen_variation13.dir.tmp';
     $tmpfile = 'fopen_variation13.tmp';
     $absFile = $tempDir.'/'.$tmpfile;
 

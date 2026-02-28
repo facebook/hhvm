@@ -1,29 +1,29 @@
 ////foo.php
-<?hh // strict
+<?hh
 class Foo {
   public function f(int $x): void {}
 }
 
 ////treq_ext_foo.php
-<?hh // strict
+<?hh
 trait TReqExtFoo {
   require extends Foo;
 }
 
 ////child.php
-<?hh // strict
+<?hh
 class Child extends Foo {
   public function f(string $x): void {}
 }
 
 ////treq_ext_child.php
-<?hh // strict
+<?hh
 trait TReqExtChild {
   require extends Child;
 }
 
 ////tboth_traits.php
-<?hh // strict
+<?hh
 trait TBothTraits {
   use TReqExtChild;
   use TReqExtFoo;

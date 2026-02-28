@@ -1,5 +1,5 @@
 //// newtype.php
-<?hh // strict
+<?hh
 
 newtype bar = bool;
 class C1 {
@@ -7,7 +7,7 @@ class C1 {
 }
 
 //// def.php
-<?hh // strict
+<?hh
 
 newtype foo = bar;
 class C2 {
@@ -15,7 +15,7 @@ class C2 {
 }
 
 //// use.php
-<?hh // strict
+<?hh
 
 // Should fail because C2::FOO is really a bool
 type myshape = shape(C2::FOO => int);

@@ -1,0 +1,14 @@
+=== All files in directory ===
+vec(7) {
+  string(15) ".hhvmconfig.hdf"
+  string(11) "readdir.php"
+  string(18) "readdir.php.expect"
+  string(21) "readdir.php.no_remote"
+  string(18) "readdir.php.norepo"
+  string(28) "nested_files/placeholder.txt"
+  string(46) "nested_files/nested_two/second_placeholder.txt"
+}
+=== List a nonexistent directory ===
+Got a Failed To Readlink error: true
+=== Try to establish client in non-Eden mount ===
+Got an exception: Failed to readlink /tmp/.eden/root

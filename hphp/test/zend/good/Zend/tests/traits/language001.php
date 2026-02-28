@@ -1,7 +1,7 @@
 <?hh
 
 trait THello {
-  public function hello() {
+  public function hello() :mixed{
     echo 'Hello';
   }
 }

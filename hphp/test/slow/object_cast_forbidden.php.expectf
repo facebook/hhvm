@@ -1,1 +1,1 @@
-Fatal error: Invalid cast type: object in %s on line %d
+Fatal error: Encountered unexpected token `$value`. in %s/object_cast_forbidden.php on line 6

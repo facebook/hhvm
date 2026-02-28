@@ -1,6 +1,0 @@
-File "array_heterogeneous.php", line 20, characters 3-14:
-This is not an object of type `KeyedContainer`, this is an int (Typing[4370])
-  File "array_heterogeneous.php", line 18, characters 16-16:
-  Definition is here
-File "array_heterogeneous.php", line 23, characters 10-24:
-Was expecting a return type hint (Typing[4030])

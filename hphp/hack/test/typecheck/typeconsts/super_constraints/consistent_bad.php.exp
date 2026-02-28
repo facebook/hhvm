@@ -1,0 +1,6 @@
+ERROR: File "consistent_bad.php", line 11, characters 23-24:
+The constraint on this type constant is inconsistent with its parent (Typing[4110])
+  File "consistent_bad.php", line 11, characters 39-41:
+  Expected `Two`
+  File "consistent_bad.php", line 15, characters 39-41:
+  But got `One`

@@ -1,7 +1,7 @@
 <?hh
 
 class LocalSoapClient extends SoapClient {
-  static $input = null;
+  public static $input = null;
 
   function __construct($wsdl) {
     parent::__construct($wsdl);
@@ -18,7 +18,7 @@ class LocalSoapClient extends SoapClient {
   }
 }
 
-function test($input) {
+<<__DynamicallyCallable>> function test($input) {
   LocalSoapClient::$input = $input;
 }
 
@@ -66,7 +66,7 @@ $wsdl  = <<<EOF
 </definitions>
 EOF;
 
-  $filename = __SystemLib\hphp_test_tmppath('wsdl');
+  $filename = sys_get_temp_dir().'/'.'wsdl';
   $f = fopen($filename, 'w');
   fwrite($f, $wsdl);
   fclose($f);
@@ -74,6 +74,6 @@ EOF;
   $client = new LocalSoapClient($filename);
   unlink($filename);
 
-  $client->__soapcall('test', varray[$param]);
+  $client->__soapcall('test', vec[$param]);
   var_dump(LocalSoapClient::$input);
 }

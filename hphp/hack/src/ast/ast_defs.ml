@@ -7,13 +7,17 @@
  *
  *)
 
-include Ast_defs_visitors_ancestors
+(* We could open Hh_prelude here, but then we get errors about using ==,
+   which some visitor below uses. *)
+open Base.Export
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 (*****************************************************************************)
 (* The Abstract Syntax Tree *)
 (*****************************************************************************)
 
-type pos = (Pos.t[@visitors.opaque])
+type pos = (Pos.t[@visitors.opaque] [@yojson.opaque] [@sexp.opaque])
+[@@transform.opaque]
 
 and id_ = string
 
@@ -26,25 +30,27 @@ and byte_string = string
 and positioned_byte_string = pos * byte_string
 
 and shape_field_name =
-  | SFlit_int of pstring
   | SFlit_str of positioned_byte_string
-  | SFclass_const of id * pstring
+  | SFclassname of id (* nameof C *)
+  | SFclass_const of id * pstring (* C::X *)
+[@@transform.opaque]
 
 and variance =
   | Covariant
   | Contravariant
   | Invariant
+[@@transform.opaque]
 
 and constraint_kind =
   | Constraint_as
   | Constraint_eq
   | Constraint_super
-
-and reified = bool
+[@@transform.opaque]
 
 and abstraction =
   | Concrete
   | Abstract
+[@@transform.opaque]
 
 and classish_kind =
   | Cclass of abstraction  (** Kind for `class` and `abstract class` *)
@@ -55,6 +61,7 @@ and classish_kind =
       (** Kind for `enum class` and `abstract enum class`.
       See https://docs.hhvm.com/hack/built-in-types/enum-class
   *)
+[@@transform.opaque]
 
 and param_kind =
   | Pinout of pos
@@ -65,101 +72,154 @@ and param_kind =
        *       ^^^^^^^^^^
        *)
   | Pnormal
+[@@transform.opaque]
 
-and readonly_kind = Readonly
+and readonly_kind = Readonly [@@transform.opaque]
 
-and og_null_flavor =
-  | OG_nullthrows
-  | OG_nullsafe
+and param_named = Param_named [@@transform.opaque]
+
+and optional_kind = Optional [@@transform.opaque]
+
+and splat_kind = Splat [@@transform.opaque]
+
+and operator_null_flavor =
+  | Regular
+  | Nullsafe
+[@@transform.opaque]
 
 and prop_or_method =
   | Is_prop
   | Is_method
+[@@transform.opaque]
 
 and fun_kind =
   | FSync
   | FAsync
   | FGenerator
   | FAsyncGenerator
+[@@transform.opaque]
 
 and bop =
-  | Plus
-  | Minus
-  | Star
-  | Slash
-  | Eqeq
-  | Eqeqeq
-  | Starstar
-  | Diff
-  | Diff2
-  | Ampamp
-  | Barbar
-  | Lt
-  | Lte
-  | Gt
-  | Gte
-  | Dot
-  | Amp
-  | Bar
-  | Ltlt
-  | Gtgt
-  | Percent
-  | Xor
-  | Cmp
-  | QuestionQuestion
-  | Eq of bop option
+  | Plus  (** Addition: x + y *)
+  | Minus  (** Subtraction: x - y  *)
+  | Star  (** Multiplication: x * y *)
+  | Slash  (** Division: x / y *)
+  | Eqeq  (** Value/coercing equality: x == y *)
+  | Eqeqeq  (** Same-type-and-value equality: x === y *)
+  | Starstar  (** Exponent: x ** y *)
+  | Diff  (** Value inquality: x != y *)
+  | Diff2  (** Not-same-type-and-value-equality: x !== y *)
+  | Ampamp  (** Logical AND: x && y *)
+  | Barbar  (** Logical OR: x || y *)
+  | Lt  (** Less than: x < y *)
+  | Lte  (** Less than or equal to: x <= y *)
+  | Gt  (** Greater than: x > y *)
+  | Gte  (** Greater than or equal to: x >= y *)
+  | Dot  (** String concatenation: x . y *)
+  | Amp  (** Bitwise AND: x & y *)
+  | Bar  (** Bitwise OR: x | y *)
+  | Ltlt  (** Bitwise left shift: x << y *)
+  | Gtgt  (** Bitwise right shift: x >> y *)
+  | Percent  (** Modulo: x % y *)
+  | Xor  (** Bitwise XOR: x ^ y *)
+  | Cmp  (** Spaceship operator: x <=> y *)
+  | QuestionQuestion  (** Coalesce: x ?? y *)
+[@@transform.opaque]
 
 and uop =
-  | Utild
-  | Unot
-  | Uplus
-  | Uminus
-  | Uincr
-  | Udecr
-  | Upincr
-  | Updecr
-  | Usilence
+  | Utild  (** Bitwise negation: ~x *)
+  | Unot  (** Logical not: !b *)
+  | Uplus  (** Unary plus: +x *)
+  | Uminus  (** Unary minus: -x *)
+  | Uincr  (** Unary increment: ++i  *)
+  | Udecr  (** Unary decrement: --i *)
+  | Upincr  (** Unary postfix increment: i++ *)
+  | Updecr  (** Unary postfix decrement: i-- *)
+  | Usilence  (** Error control/Silence (ignore) expections: @e *)
+[@@transform.opaque]
 
 and visibility =
   | Private [@visitors.name "visibility_Private"]
   | Public [@visitors.name "visibility_Public"]
   | Protected [@visitors.name "visibility_Protected"]
   | Internal [@visitors.name "visibility_Internal"]
+  | ProtectedInternal [@visitors.name "visibility_ProtectedInternal"]
+[@@transform.opaque]
+
+(** Literal values that can occur in XHP enum properties.
+ *
+ * class :my-xhp-class {
+ *   attribute enum {'big', 'small'} my-prop;
+ * }
+ *)
+and xhp_enum_value =
+  | XEV_Int of int
+  | XEV_String of string
+[@@transform.opaque]
+
+(** Hack's primitive types (as the typechecker understands them).
+ *
+ * Used in the AST of typehints (Aast_defs.Hprim) and in the representation of
+ * types (Typing_defs.Tprim).
+ *)
+and tprim =
+  | Tnull
+  | Tvoid
+  | Tint
+  | Tbool
+  | Tfloat
+  | Tresource
+  | Tnum
+  | Tarraykey
+  | Tnoreturn
+[@@transform.opaque]
+
+and typedef_visibility =
+  | Transparent
+  | Opaque
+  | OpaqueModule
+[@@transform.opaque]
+
+and reify_kind =
+  | Erased
+  | SoftReified
+  | Reified
+[@@transform.opaque]
 [@@deriving
   show { with_path = false },
     eq,
+    hash,
     ord,
+    sexp,
+    transform ~restart:(`Disallow `Encode_as_result),
+    yojson_of,
     visitors
       {
-        name = "iter_defs";
         variety = "iter";
         nude = true;
         visit_prefix = "on_";
-        ancestors = ["iter_defs_base"];
+        ancestors = ["Visitors_runtime.iter_base"];
       },
     visitors
       {
-        name = "endo_defs";
         variety = "endo";
         nude = true;
         visit_prefix = "on_";
-        ancestors = ["endo_defs_base"];
+        ancestors = ["Visitors_runtime.endo_base"];
       },
     visitors
       {
-        name = "reduce_defs";
         variety = "reduce";
         nude = true;
         visit_prefix = "on_";
-        ancestors = ["reduce_defs_base"];
+        ancestors = ["Visitors_runtime.reduce_base"];
       },
     visitors
       {
-        name = "map_defs";
         variety = "map";
         nude = true;
         visit_prefix = "on_";
-        ancestors = ["map_defs_base"];
+        ancestors = ["Visitors_runtime.map_base"];
       }]
 
 (*****************************************************************************)
@@ -289,20 +349,31 @@ module ShapeField = struct
    * we have to write our own compare. *)
   let compare x y =
     match (x, y) with
-    | (SFlit_int (_, s1), SFlit_int (_, s2)) -> String.compare s1 s2
     | (SFlit_str (_, s1), SFlit_str (_, s2)) -> String.compare s1 s2
+    | (SFclassname (_, s1), SFclassname (_, s2)) -> String.compare s1 s2
     | (SFclass_const ((_, s1), (_, s1')), SFclass_const ((_, s2), (_, s2'))) ->
-      Core_kernel.Tuple.T2.compare
+      Core.Tuple.T2.compare
         ~cmp1:String.compare
         ~cmp2:String.compare
         (s1, s1')
         (s2, s2')
-    | (SFlit_int _, _) -> -1
-    | (SFlit_str _, SFlit_int _) -> 1
-    | (SFlit_str _, _) -> -1
-    | (SFclass_const _, _) -> 1
+    (* Cross-variant order: SFlit_str, SFclassname, SFclass_const
+     *
+     * This can be derived provided that we validate a deriver in Rust that is
+     * synced to this. Rust also does not have facilities like [@compare.ignore]
+     * so we need a special Pos that always compares to 0. *)
+    | (SFlit_str _, SFclassname _)
+    | (SFlit_str _, SFclass_const _) ->
+      -1
+    (* spacing *)
+    | (SFclassname _, SFlit_str _) -> 1
+    | (SFclassname _, SFclass_const _) -> -1
+    (* spacing *)
+    | (SFclass_const _, SFlit_str _)
+    | (SFclass_const _, SFclassname _) ->
+      1
 
-  let equal x y = Core_kernel.Int.equal 0 (compare x y)
+  let equal x y = Core.Int.equal 0 (compare x y)
 end
 
 module ShapeMap = struct
@@ -318,15 +389,4 @@ module ShapeMap = struct
     make_pp pp_shape_field_name pp_val fmt map
 end
 
-module ShapeSet = Set.Make (ShapeField)
-
-(** Literal values that can occur in XHP enum properties.
- *
- * class :my-xhp-class {
- *   attribute enum {'big', 'small'} my-prop;
- * }
- *)
-type xhp_enum_value =
-  | XEV_Int of int
-  | XEV_String of string
-[@@deriving eq, show]
+module ShapeSet = Stdlib.Set.Make (ShapeField)

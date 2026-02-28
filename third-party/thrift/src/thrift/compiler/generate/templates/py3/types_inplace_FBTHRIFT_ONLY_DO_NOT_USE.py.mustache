@@ -1,0 +1,343 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+This file holds pure python implementations of thrift types that
+are re-exported via types.pyx
+
+}}
+{{#import "common/constants" as constants}}
+{{#import "common/types" as types}}
+{{> common/auto_generated_py}}
+{{#program:inplace_migrate?}}
+
+from __future__ import annotations
+
+from collections.abc import Mapping, Sequence, Set
+import enum
+import importlib
+from builtins import property as _python__property
+
+import typing as _typing
+import folly.iobuf as _fbthrift_iobuf
+import thrift.py3.types
+from thrift.py3.types import (
+    _fbthrift__is_float32,
+    _fbthrift__filter_kwargs,
+)
+import thrift.py3.exceptions
+import thrift.python.exceptions
+import thrift.python.types
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as _fbthrift_python_types
+{{! must import thrift_types before thrift_enums due to enum dependence on metadata.thrift_types}}
+import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_enums as _fbthrift_python_enums
+
+
+{{#program:includeNamespaces}}
+  {{#if hasTypes?}}
+import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+    {{#if (not (array.empty? program:self.consts))}}
+import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types
+    {{/if (not (array.empty? program:self.consts))}}
+  {{/if hasTypes?}}
+{{/program:includeNamespaces}}
+
+def get_types_reflection():
+    return importlib.import_module(
+        "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
+    )
+
+def _get_py_deprecated_module():
+    import thrift.util.converter # needed by _to_py_deprecated() call
+    return importlib.import_module("{{program:py_deprecated_module_path}}.ttypes")
+
+_fbthrift__module_name__ = "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types"
+
+__all__ = []
+
+### Enums ###
+{{#program:enums}}
+
+{{enum:name}} = _fbthrift_python_enums.{{enum:name}}
+
+{{#program:inplace_migrate?}}
+__all__.append("{{enum:name}}")
+
+{{/program:inplace_migrate?}}
+{{/program:enums}}
+
+### Union Enums ###
+{{#program:filtered_structs}}
+{{#struct:union?}}
+
+{{> inplace/union_enum_py }}
+
+
+{{! this is a dumb hack due to dunder class mangling rules}}
+_fbthrift__{{struct:name}}Type = __{{struct:name}}Type
+
+{{#program:inplace_migrate?}}
+__all__.append("__{{struct:name}}Type")
+
+{{/program:inplace_migrate?}}
+{{/struct:union?}}
+{{/program:filtered_structs}}
+
+### Containers ###
+{{#program:containerTypes}}
+{{> inplace/container }}
+
+{{#program:inplace_migrate?}}
+__all__.append("{{type:flat_name}}")
+
+{{/program:inplace_migrate?}}
+{{/program:containerTypes}}
+
+### Structured Types ###
+{{#program:filtered_structs}}
+class {{struct:name}}({{> types/python_struct_class }}):
+    __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+    {{#struct:py3_fields}}{{#field:type}}{{#type:needs_convert?}}
+        "_fbthrift_inner__{{field:py_name}}",
+    {{/type:needs_convert?}}{{/field:type}}{{/struct:py3_fields}}{{#struct:union?}}
+        "_fbthrift_inner__type",
+        "_fbthrift_inner__value",
+    {{/struct:union?}}
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.{{struct:name}}
+    _FBTHRIFT__FIELD_NAMES = (
+        {{#struct:py3_fields}}
+        "{{field:py_name}}",
+        {{/struct:py3_fields}}
+    )
+    {{#struct:allow_inheritance?}}
+    _fbthrift_allow_inheritance_DO_NOT_USE = True
+    {{/struct:allow_inheritance?}}
+    {{#struct:union?}}
+    Type = _fbthrift__{{struct:name}}Type
+    {{/struct:union?}}
+    _fbthrift__inner : _fbthrift_python_types.{{struct:name}}
+    {{#struct:py3_fields}}
+    {{#field:type}}{{#type:needs_convert?}}
+    _fbthrift_inner__{{field:py_name}} : {{> inplace/field_type}} | None
+    {{/type:needs_convert?}}{{/field:type}}
+    {{/struct:py3_fields}}
+    {{#struct:union?}}
+    _fbthrift_inner__type: Type
+    _fbthrift_inner__value: {{> inplace/union_value_type }}
+    {{/struct:union?}}
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        {{#struct:fields}}
+        {{#field:type}}{{#type:string?}}
+        {{! This fixes formatting change affecting MyEnum(str, enum.Enum)}}
+        _fbthrift__maybe_str_enum = kwargs.get("{{field:py_name}}", None)
+        if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
+            kwargs["{{field:py_name}}"] = _fbthrift__maybe_str_enum.value
+        {{/type:string?}}{{/field:type}}
+        {{/struct:fields}}
+        try:
+            self._fbthrift__inner = _fbthrift_python_types.{{struct:name}}(*args, **kwargs)
+        except TypeError:
+        {{! TODO(T222259754): thrift-py3 skips validation of None fields; thrift-python does not}}
+            kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
+            self._fbthrift__inner = _fbthrift_python_types.{{struct:name}}(*args, **kwargs)
+
+        {{! we deliberately omit __init__ of Struct/GeneratedError, which tries to init cpp2 object}}
+        {{#struct:exception?}}
+        super(thrift.python.exceptions.Error, self).__init__(*(val for _, val in self))
+        {{/struct:exception?}}
+        {{! There's an optimization opportunity here if convertible objects are already correct type}}
+
+    def __new__(_fbthrift__cls, *args, **kwargs) -> {{struct:name}}:
+        instance = super().__new__(_fbthrift__cls)
+        {{#struct:py3_fields}}
+        {{#field:type}}{{#type:needs_convert?}}
+        instance._fbthrift_inner__{{field:py_name}} = None
+        {{/type:needs_convert?}}{{/field:type}}
+        {{/struct:py3_fields}}
+        {{#struct:union?}}
+        instance._fbthrift_inner__type = None
+        instance._fbthrift_inner__value = None
+        {{/struct:union?}}
+        return instance
+
+    {{^struct:exception?}}{{^struct:union?}}{{^struct:cpp_noncopyable?}}
+    def __call__(self, **kwargs) -> {{struct:name}}:
+        return {{struct:name}}.from_python(self._fbthrift__inner(**kwargs))
+
+    {{/struct:cpp_noncopyable?}}{{/struct:union?}}{{/struct:exception?}}
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.{{struct:name}}) -> {{struct:name}}:
+        inst = {{struct:name}}.__new__({{struct:name}})
+        inst._fbthrift__inner = thrift_python_inner
+        {{#struct:exception?}}
+        super(thrift.python.exceptions.Error, inst).__init__(*(val for _, val in inst))
+        {{/struct:exception?}}
+        return inst
+
+    def _to_py3(self) -> {{struct:name}}:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.{{struct:name}}:
+        return self._fbthrift__inner
+
+    def _to_py_deprecated(self):
+        py_deprecated_types = _get_py_deprecated_module()
+        return thrift.util.converter.to_py_struct(py_deprecated_types.{{struct:name}}, self)
+
+    def _fbthrift__isset(self) -> dict[str, bool]:
+        return thrift.python.types.isset(self._fbthrift__inner)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__{{struct:name}}()
+
+    @staticmethod
+    def __get_metadata__():
+        return {{struct:name}}._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "{{program:name}}.{{struct:name}}"
+
+    {{#struct:py3_fields}}
+    @_python__property
+    def {{field:py_name}}(self) -> {{> inplace/field_type}}:
+{{#field:type}}{{#type:needs_convert?}}
+        if self._fbthrift_inner__{{field:py_name}} is None:
+            __python_val = self._fbthrift__inner.{{field:py_name}}
+            {{#field:optional?}}
+            if __python_val is None:
+            {{^field:optional_default?}}
+                return None
+            {{/field:optional_default?}}
+            {{#field:optional_default?}}
+                __python_val = {{#partial constants.inplace_const_value value=field:self.default_value }}
+            {{/field:optional_default?}}
+            {{/field:optional?}}{{^field:optional?}}{{#struct:union?}}
+            if __python_val is None:
+                return None
+            {{/struct:union?}}{{/field:optional?}}
+            self._fbthrift_inner__{{field:py_name}} = {{!
+                }}{{#partial types.python_type type=field:self.type}}.from_python(__python_val)
+
+        return self._fbthrift_inner__{{field:py_name}}
+{{/type:needs_convert?}}{{^type:needs_convert?}}{{^field:optional_default?}}
+        return self._fbthrift__inner.{{field:py_name}}
+{{/field:optional_default?}}{{#field:optional_default?}}
+        __python_val = self._fbthrift__inner.{{field:py_name}}
+        if __python_val is None:
+            return {{#partial constants.inplace_const_value value=field:self.default_value }}
+        return __python_val
+{{/field:optional_default?}}{{/type:needs_convert?}}{{/field:type}}
+
+    {{/struct:py3_fields}}
+    {{#struct:union?}}
+    @_python__property
+    def type(self) -> _fbthrift_python_types.{{struct:name}}.Type:
+        if self._fbthrift_inner__type is None:
+            self._fbthrift_inner__type = self.Type(self._fbthrift__inner.type.value)
+        return self._fbthrift_inner__type
+
+    @_python__property
+    def value(self) -> {{> inplace/union_value_type }}:
+        match self._fbthrift__inner.type:
+{{#struct:py3_fields}}{{#field:type}}{{#type:needs_convert?}}
+            case _fbthrift_python_types.{{struct:name}}.Type.{{field:py_name}}:
+                return self.{{field:py_name}}
+{{/type:needs_convert?}}{{/field:type}}{{/struct:py3_fields}}
+            case _:
+                return self._fbthrift__inner.value
+
+
+    {{> inplace/union_from_value}}
+
+    {{/struct:union?}}
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return {{(array.len struct:py3_fields)}}
+
+    def __eq__(self, other):
+    {{! when in-place migration complete, we can start ignoring cpp.noncomparable attribute }}
+        if type(self) == type(other):
+            return self._fbthrift__inner == other._fbthrift__inner
+
+        {{! thrift-py3 vs thrift-python comparison}}
+        if type(other) is self._FBTHRIFT__PYTHON_CLASS:
+            return self._fbthrift__inner == other
+
+        {{#struct:allow_inheritance?}}
+        if isinstance(other, {{struct:name}}):
+            return self._fbthrift__inner == other._fbthrift__inner
+
+        {{/struct:allow_inheritance?}}
+        return False
+
+
+    {{#struct:is_struct_orderable?}}
+    def __lt__(self, other):
+        if not isinstance(other, {{struct:name}}):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, {{struct:name}}):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+    {{/struct:is_struct_orderable?}}
+
+    {{#if struct:exception?}}
+    def __str__(self):
+      {{#if (object.notnull? exception:message_field)}}
+        field = self.{{exception:message_field.py_name}}
+        if field is None:
+            {{! optional field, stringify }}
+            return str(field)
+        return field
+      {{#else}}
+        return super().__str__()
+      {{/if (object.notnull? exception:message_field)}}
+
+    {{/if struct:exception?}}
+    def __hash__(self):
+        return super().__hash__()
+
+    def __copy__(self):
+        return self{{! thrift-py3 / thrift-python is immutable}}
+
+
+{{#program:inplace_migrate?}}
+__all__.append("{{struct:name}}")
+
+{{/program:inplace_migrate?}}
+{{/program:filtered_structs}}
+
+### Constants
+{{#program:constants}}
+{{constant:name}} = {{#partial constants.inplace_const_value value=constant:self.value }}
+{{/program:constants}}
+{{/program:inplace_migrate?}}

@@ -8,52 +8,13 @@ date_default_timezone_set("UTC");
 
 echo "*** Testing date_sun_info() : usage variations ***\n";
 
-
-// heredoc string
-$heredoc = <<<EOT
-abc
-xyz
-EOT;
-
-// get a resource variable
-$fp = fopen(__FILE__, "r");
-
-$inputs = varray[
-       // int data
-/*1*/  0,
-       1,
-       12345,
-       -2345,
-
+$inputs = vec[
        // float data
 /*5*/  10.5,
        -10.5,
        12.3456789000e10,
        12.3456789000E-10,
        .5,
-
-       // null data
-/*10*/ NULL,
-       null,
-
-       // boolean data
-/*12*/ true,
-       false,
-       TRUE,
-       FALSE,
-
-       // empty data
-/*16*/ "",
-       '',
-       varray[],
-
-       // string data
-/*19*/ "abcxyz",
-       'abcxyz',
-       $heredoc,
-
-       // resource variable
-/*22*/ $fp
 ];
 
 // loop through each element of $inputs to check the behaviour of date_sun_info()

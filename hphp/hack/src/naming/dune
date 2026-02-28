@@ -6,9 +6,39 @@
   (pps ppx_deriving.std)))
 
 (library
+ (name name_context)
+ (wrapped false)
+ (modules name_context)
+ (preprocess
+  (pps ppx_compare ppx_deriving.std))
+)
+
+(library
+ (name naming_error_utils)
+ (wrapped false)
+ (modules naming_error_utils)
+ (libraries naming_error custom_error_eval)
+ (preprocess
+  (pps ppx_compare ppx_deriving.std))
+)
+
+
+(library
+ (name naming_error)
+ (wrapped false)
+ (modules naming_error )
+ (libraries
+   ast
+   pos
+   pos_or_decl
+   error_codes
+   name_context
+   user_error))
+
+(library
  (name nast)
  (modules nast)
- (libraries annotated_ast naming_special_names errors)
+ (libraries annotated_ast naming_special_names user_error errors)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -102,34 +132,79 @@
   relative_path
   temp_file)
  (preprocess
-  (pps ppx_deriving.std)))
+  (pps
+   ppx_deriving.std)))
 
 (library
  (name naming_global)
  (modules naming_global)
- (libraries file_info naming_provider naming_table)
+ (libraries file_info naming_error naming_provider naming_table)
  (preprocess
   (pps ppx_deriving.std)))
 
 (library
  (name naming_captures)
  (modules naming_captures)
- (libraries nast)
+ (libraries nast naming_error naming_error_utils)
  (preprocess
   (pps ppx_deriving.std)))
 
 (library
  (name naming_elaborate_namespaces_endo)
  (modules naming_elaborate_namespaces_endo)
- (libraries annotated_ast parser)
+ (libraries annotated_ast nast parser)
  (preprocess
   (pps ppx_deriving.std)))
 
+
 (library
  (name naming)
- (modules naming)
+ (modules
+  naming
+  naming_elab_as_expr
+  naming_elab_block
+  naming_elab_call
+  naming_elab_class_id
+  naming_elab_class_members
+  naming_elab_collection
+  naming_elab_const_expr
+  naming_elab_defs
+  naming_elab_dynamic_class_name
+  naming_elab_enum_class
+  naming_elab_everything_sdt
+  naming_elab_func_body
+  naming_elab_haccess_hint
+  naming_elab_happly_hint
+  naming_elab_import
+  naming_elab_invariant
+  naming_elab_lvar
+  naming_elab_retonly_hint
+  naming_elab_shape_field_name
+  naming_elab_soft
+  naming_elab_this_hint
+  naming_elab_user_attributes
+  naming_elab_wildcard_hint
+  naming_guard_invalid
+  naming_phase_env
+  naming_phase_error
+  naming_phase_pass
+  naming_typed_locals
+  naming_validate_await
+  naming_validate_cast_expr
+  naming_validate_class_req
+  naming_validate_clone_return_hint
+  naming_validate_consistent_construct
+  naming_validate_dynamic_hint
+  naming_validate_fun_params
+  naming_validate_function_hint_optional_parameters
+  naming_validate_polymorphic_lambda_expr
+  naming_validate_module
+  naming_validate_supportdyn
+  naming_validate_xhp_name
+ )
  (libraries
   ast
+  annotated_ast_utils
   ast_provider
   common
   file_provider
@@ -138,12 +213,16 @@
   naming_attributes
   naming_captures
   naming_elaborate_namespaces_endo
+  naming_error
+  naming_error_utils
+  nast_check_error
   naming_table
   naming_global
   naming_provider
   nast
   provider_backend
   typing_deps
-  typechecker_options)
+  typechecker_options
+  user_error)
  (preprocess
   (pps ppx_deriving.std)))

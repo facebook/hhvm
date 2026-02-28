@@ -1,8 +1,8 @@
 <?hh
 
-function err($x) { throw new Exception(); }
-function foo() {
-  $x = varray[darray['asd' => true]];
+function err($x) :mixed{ throw new Exception(); }
+function foo() :mixed{
+  $x = vec[dict['asd' => true]];
   try {
     $x[0]['asd'][] = 2;
   } catch (Exception $e) {
@@ -12,7 +12,7 @@ function foo() {
 }
 
 <<__EntryPoint>>
-function main_minstr_throw_004() {
+function main_minstr_throw_004() :mixed{
 set_error_handler(err<>);
 foo();
 }

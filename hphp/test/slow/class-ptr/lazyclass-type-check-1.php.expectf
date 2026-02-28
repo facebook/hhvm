@@ -1,0 +1,12 @@
+in foo
+
+Notice: Implicit Class to string conversion for argument 1 passed to foo() in %s/lazyclass-type-check-1.php on line 18
+in foo
+in foo2
+
+Notice: Implicit Class to string conversion for argument 1 passed to foo2() in %s/lazyclass-type-check-1.php on line 21
+in foo2
+bool(true)
+bool(true)
+bool(true)
+bool(true)

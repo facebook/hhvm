@@ -1,0 +1,22 @@
+ERROR: File "shape_at_wrong.php", line 9, characters 10-98:
+Invalid return type (Typing[4110])
+  File "shape_at_wrong.php", line 8, characters 33-42:
+  Expected `int`
+  File "expr_tree.php", line 147, characters 40-45:
+  But got `string`
+ERROR: File "shape_at_wrong.php", line 18, characters 5-41:
+Too many positional arguments (expected 2 but got 3) (Typing[4105])
+  File "Shapes.hhi", line 83, characters 28-29:
+  Definition is here
+ERROR: File "shape_at_wrong.php", line 21, characters 33-38:
+Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
+ERROR: File "shape_at_wrong.php", line 24, characters 5-31:
+Too few positional arguments (required 2 but got 1) (Typing[4104])
+  File "Shapes.hhi", line 83, characters 28-29:
+  Definition is here
+ERROR: File "shape_at_wrong.php", line 27, characters 33-35:
+You are calling `Shapes::at()` on a field known to not exist (Typing[4251])
+  File "shape_at_wrong.php", line 5, characters 36-62:
+  The field `x` is not defined in this shape
+ERROR: File "shape_at_wrong.php", line 30, characters 5-33:
+`HH\string` does not support this operator (it has no instance method named `__unwrap`) (Typing[4053])

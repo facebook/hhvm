@@ -1,7 +1,7 @@
 <?hh
 
 class foo {
-  public function bar() {
+  public function bar() :mixed{
     $z = function() {};
     $zz = function() {};
     $zzz = function() {};

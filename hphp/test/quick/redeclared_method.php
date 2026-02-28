@@ -1,8 +1,8 @@
 <?hh
 
 class C {
-  function f() {}
-  function f() {}
+  function f() :mixed{}
+  function f() :mixed{}
 }
 <<__EntryPoint>>
 function main_entry(): void {

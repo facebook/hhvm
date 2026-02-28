@@ -1,0 +1,12 @@
+f [fromIncludedDir] abstract.php
+f [fromIncludedDir] basic-soft.php
+f [fromIncludedDir] basic.php
+f [fromIncludedDir] interface.php
+f [fromIncludedDir] noactivedeployement.php
+f [fromIncludedDir] parse_errors/parse_errors.php
+f [fromIncludedDir] soft.php
+f [fromIncludedDir] soft_sampled.php
+f [fromIncludedDir] soft_unsampled.php
+string(10) "in A1::bar"
+string(5) "in a1"
+string(5) "in b1"

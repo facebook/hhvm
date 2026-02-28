@@ -18,7 +18,7 @@ $value2 = 33;
 $value3 = 555;
 
 
-$unsorted_numerics =  varray[ $value1 , $value2, $value3];
+$unsorted_numerics =  vec[ $value1 , $value2, $value3];
 
 echo "\n-- 'flag' value is defualt --\n";
 $temp_array = $unsorted_numerics;

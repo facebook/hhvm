@@ -19,7 +19,7 @@ function main_entry(): void {
   $fp = fopen(__FILE__, "r");
 
   //array of values to iterate over
-  $values = varray[
+  $values = vec[
 
         // int data
         0,
@@ -68,7 +68,7 @@ function main_entry(): void {
   // loop through each element of the array for value
 
   foreach($values as $value) {
-        echo @"\nArg value<$value>\n";
+        echo "\nArg value<$value>\n";
         var_dump( xml_parser_set_option($parser, $option, $value) );
   };
 

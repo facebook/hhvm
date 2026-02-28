@@ -1,10 +1,10 @@
 <?hh <<__EntryPoint>> function main(): void {
-$timezones = varray [
+$timezones = vec[
     "America/Chicago", "Europe/Amsterdam", "Asia/Jerusalem",
     "Asia/Singapore", "America/Sao_Paulo"
 ];
 
-$timestrings = varray [
+$timestrings = vec[
     "2004-04-07 00:00:00 -2 months +7 days +23 hours +59 minutes +59 seconds",
     "2004-04-07 00:00:00 -2 months +7 days +23 hours +59 minutes +60 seconds",
     "2004-04-07 00:00:00 -2 months +7 days +23 hours +59 minutes +61 seconds",

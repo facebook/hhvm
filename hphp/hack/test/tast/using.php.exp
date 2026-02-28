@@ -2,9 +2,9 @@
     { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-13], "\\Handle"); c_tparams = []; c_extends = []; 
-      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-      c_xhp_category = None; c_reqs = []; c_implements = [([3:25-36], (Happly (([3:25-36], "\\IDisposable"), [])))]; 
-      c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = [];
+      c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+      c_implements = [([3:25-36], (Happly (([3:25-36], "\\IDisposable"), [])))]; 
+      c_consts = []; c_typeconsts = []; c_vars = [];
       c_methods =
       [{ m_span = [4:3-39]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
@@ -12,25 +12,25 @@
          m_params = []; m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([4:32-36], (Hprim Tvoid)))); m_external = false; 
-         m_doc_comment = None }
+         m_hidden = false; m_doc_comment = None }
         ];
-      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
-      c_doc_comment = None; c_emit_id = None; c_internal = false });
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = [{ ua_name = ([3:7-13], "__SupportDynamicType"); ua_params = [] }]; 
+      c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
+      c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
-         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mstrict;
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-14], "\\test");
        fd_fun =
        { f_span = [7:1-11:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([7:18-22], (Hprim Tvoid)))); 
-         f_name = ([7:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((void), (Some ([7:18-22], (Hprim Tvoid)))); 
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
@@ -39,10 +39,12 @@
                 { us_is_block_scoped = false; us_has_await = false;
                   us_exprs =
                   ([8:10-46],
-                   [((Handle), [8:10-27],
-                     (Binop ((Eq None), ((Handle), [8:10-12], (Lvar ([8:10-12], $x))), ((Handle), [8:15-27], (New (((Handle), [8:19-25], (CI ([8:19-25], "\\Handle"))), [], [], None, (_)))))));
-                     ((Handle), [8:29-46],
-                      (Binop ((Eq None), ((Handle), [8:29-31], (Lvar ([8:29-31], $y))), ((Handle), [8:34-46], (New (((Handle), [8:38-44], (CI ([8:38-44], "\\Handle"))), [], [], None, (_)))))))
+                   [((exact Handle), [8:10-27],
+                     (Assign (((exact Handle), [8:10-12], (Lvar ([8:10-12], $x))), None,
+                        ((exact Handle), [8:15-27], (New (((exact Handle), [8:19-25], (CI ([8:19-25], "\\Handle"))), [], [], None, ((function(): void))))))));
+                     ((exact Handle), [8:29-46],
+                      (Assign (((exact Handle), [8:29-31], (Lvar ([8:29-31], $y))), None,
+                         ((exact Handle), [8:34-46], (New (((exact Handle), [8:38-44], (CI ([8:38-44], "\\Handle"))), [], [], None, ((function(): void))))))))
                      ]);
                   us_block =
                   [([9:5-33],
@@ -50,13 +52,16 @@
                        { us_is_block_scoped = false; us_has_await = false;
                          us_exprs =
                          ([9:12-29],
-                          [((Handle), [9:12-29],
-                            (Binop ((Eq None), ((Handle), [9:12-14], (Lvar ([9:12-14], $z))), ((Handle), [9:17-29], (New (((Handle), [9:21-27], (CI ([9:21-27], "\\Handle"))), [], [], None, (_)))))))]);
+                          [((exact Handle), [9:12-29],
+                            (Assign (((exact Handle), [9:12-14], (Lvar ([9:12-14], $z))), None,
+                               ((exact Handle), [9:17-29], (New (((exact Handle), [9:21-27], (CI ([9:21-27], "\\Handle"))), [], [], None, ((function(): void))))))))
+                            ]);
                          us_block = [([Pos.none], Noop)] }))
                     ]
                   }))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
-         f_doc_comment = None };
-       fd_internal = false })
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-14], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None })

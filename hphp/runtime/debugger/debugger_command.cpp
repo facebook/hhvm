@@ -19,12 +19,23 @@
 #include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/debugger/debugger.h"
+#include "hphp/util/sandbox-events.h"
 #include "hphp/runtime/debugger/cmd/all.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
-TRACE_SET_MOD(debugger);
+TRACE_SET_MOD(debugger)
+namespace {
+
+void logEvent(std::string_view event, std::string_view key, uint64_t duration_us) {
+  rareSboxEvent("debugger", event, key, duration_us);
+  auto msg = folly::sformat("DebuggerCommand - {}::{} took {}us\n",
+                            event, key, duration_us);
+  TRACE(2, msg);
+}
+} // namespace
+
 
 // Resets the buffer, serializes this command into the buffer and then
 // flushes the buffer.
@@ -74,7 +85,9 @@ void DebuggerCommand::recvImpl(DebuggerThriftBuffer& thrift) {
 // Returns false on timeout, true when data has been read even if that data
 // didn't form a usable command. Is there is no usable command, cmd is null.
 bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
-                              DebuggerCommandPtr& cmd, const char* caller) {
+                              DebuggerCommandPtr& cmd, const char* caller,
+                              bool should_flush,
+                              bool should_timeout) {
   TRACE(5, "DebuggerCommand::Receive\n");
   cmd.reset();
 
@@ -85,9 +98,11 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
   auto const ret = poll(fds, 1, POLLING_SECONDS * 1000);
 
   // Timeout.
-  if (ret == 0) return false;
+  if (ret == 0 && should_timeout) {
+    return false;
+  }
 
-  if (ret == -1) {
+  if (ret == -1 && should_timeout) {
     auto const errorNumber = errno; // Just in case TRACE_RB changes errno
     TRACE_RB(1, "DebuggerCommand::Receive: error %d\n", errorNumber);
     return errorNumber != EINTR; // Treat signals as timeouts
@@ -96,7 +111,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
   // If we don't have any data to read (POLLIN) then we're done. If we
   // do have data we'll attempt to read and decode it below, even if
   // there are other error bits set.
-  if (!(fds[0].revents & POLLIN)) {
+  if (!(fds[0].revents & POLLIN) && should_timeout) {
     TRACE_RB(1, "DebuggerCommand::Receive: revents %d\n", fds[0].revents);
     return true;
   }
@@ -104,7 +119,9 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
   int32_t type;
   std::string clsname;
   try {
-    thrift.reset(true);
+    if (should_flush) {
+      thrift.reset(true);
+    }
     thrift.read(type);
     thrift.read(clsname);
   } catch (...) {
@@ -116,34 +133,28 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
   }
 
   TRACE(1, "DebuggerCommand::Receive: got cmd of type %d\n", type);
+  auto startTime = std::chrono::steady_clock::now();
 
   // Not all commands are here, as not all commands need to be sent over wire.
   switch (type) {
-    case KindOfBreak    : cmd = std::make_shared<CmdBreak>(); break;
-    case KindOfContinue : cmd = std::make_shared<CmdContinue>(); break;
-    case KindOfDown     : cmd = std::make_shared<CmdDown>(); break;
-    case KindOfException: cmd = std::make_shared<CmdException>(); break;
-    case KindOfFrame    : cmd = std::make_shared<CmdFrame>(); break;
-    case KindOfGlobal   : cmd = std::make_shared<CmdGlobal>(); break;
-    case KindOfInfo     : cmd = std::make_shared<CmdInfo>(); break;
-    case KindOfConstant : cmd = std::make_shared<CmdConstant>(); break;
-    case KindOfList     : cmd = std::make_shared<CmdList>(); break;
-    case KindOfMachine  : cmd = std::make_shared<CmdMachine>(); break;
-    case KindOfNext     : cmd = std::make_shared<CmdNext>(); break;
-    case KindOfOut      : cmd = std::make_shared<CmdOut>(); break;
-    case KindOfPrint    : cmd = std::make_shared<CmdPrint>(); break;
-    case KindOfQuit     : cmd = std::make_shared<CmdQuit>(); break;
-    case KindOfRun      : cmd = std::make_shared<CmdRun>(); break;
-    case KindOfStep     : cmd = std::make_shared<CmdStep>(); break;
-    case KindOfThread   : cmd = std::make_shared<CmdThread>(); break;
-    case KindOfUp       : cmd = std::make_shared<CmdUp>(); break;
-    case KindOfVariable : cmd = std::make_shared<CmdVariable>(); break;
-    case KindOfWhere    : cmd = std::make_shared<CmdWhere>(); break;
-    case KindOfEval     : cmd = std::make_shared<CmdEval>(); break;
-    case KindOfInterrupt: cmd = std::make_shared<CmdInterrupt>(); break;
-    case KindOfSignal   : cmd = std::make_shared<CmdSignal>(); break;
-    case KindOfAuth     : cmd = std::make_shared<CmdAuth>(); break;
-    case KindOfShell    : cmd = std::make_shared<CmdShell>(); break;
+    case KindOfBreak      : cmd = std::make_shared<CmdBreak>(); break;
+    case KindOfConstant   : cmd = std::make_shared<CmdConstant>(); break;
+    case KindOfGlobal     : cmd = std::make_shared<CmdGlobal>(); break;
+    case KindOfInfo       : cmd = std::make_shared<CmdInfo>(); break;
+    case KindOfList       : cmd = std::make_shared<CmdList>(); break;
+    case KindOfMachine    : cmd = std::make_shared<CmdMachine>(); break;
+    case KindOfPrint      : cmd = std::make_shared<CmdPrint>(); break;
+    case KindOfQuit       : cmd = std::make_shared<CmdQuit>(); break;
+    case KindOfRun        : cmd = std::make_shared<CmdRun>(); break;
+    case KindOfThread     : cmd = std::make_shared<CmdThread>(); break;
+    case KindOfVariable   : cmd = std::make_shared<CmdVariable>(); break;
+    case KindOfWhere      : cmd = std::make_shared<CmdWhere>(); break;
+    case KindOfEval       : cmd = std::make_shared<CmdEval>(); break;
+    case KindOfEvalStream : cmd = std::make_shared<CmdEvalStream>(); break;
+    case KindOfInterrupt  : cmd = std::make_shared<CmdInterrupt>(); break;
+    case KindOfSignal     : cmd = std::make_shared<CmdSignal>(); break;
+    case KindOfAuth       : cmd = std::make_shared<CmdAuth>(); break;
+    case KindOfShell      : cmd = std::make_shared<CmdShell>(); break;
     case KindOfInternalTesting :
       cmd = std::make_shared<CmdInternalTesting>();
       break;
@@ -160,6 +171,11 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
       cmd.reset();
       return true;
   }
+  assertx(cmd);
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                          std::chrono::steady_clock::now() - startTime);
+  logEvent("debugger_command", cmd->name(), static_cast<uint64_t>(duration.count()));
+
   if (!cmd->recv(thrift)) {
     // Note: this error case is easily tested, and we have a test for it. But
     // the error case noted above is quite difficult to test. Keep these two

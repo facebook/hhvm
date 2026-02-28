@@ -5,15 +5,15 @@ interface I2 { const K = 2; }
 trait T implements I2 {}
 class X implements I1 {
   use T;
-  function f() { var_dump(X::K); }
+  function f() :mixed{ var_dump(X::K); }
 }
 
-function main() {
+function main() :mixed{
   (new X)->f();
 }
 
 
 <<__EntryPoint>>
-function main_const_conflict() {
+function main_const_conflict() :mixed{
 main();
 }

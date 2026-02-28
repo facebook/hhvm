@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 function f(KeyedTraversable<int, string> $t): void {
   foreach ($t as $k -> $v) {

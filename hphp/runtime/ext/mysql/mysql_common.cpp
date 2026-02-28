@@ -19,12 +19,9 @@
 
 #include <algorithm>
 #include <cassert>
-#include <unordered_set>
 #include <vector>
 
 #include <folly/Conv.h>
-#include <folly/ScopeGuard.h>
-#include <folly/String.h>
 #include <folly/portability/Sockets.h>
 
 #include "hphp/util/network.h"
@@ -41,13 +38,11 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/socket.h"
-#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/native-data.h"
 
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
-#include "hphp/runtime/ext/pcre/ext_pcre.h"
 #include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/server/server-stats.h"
 
@@ -72,13 +67,6 @@ static MySQLStaticInitializer s_mysql_initializer;
 int MySQLUtil::set_mysql_timeout(MYSQL *mysql,
                                  MySQLUtil::TimeoutType type,
                                  int ms) {
-#ifdef __APPLE__
-  // Work around a bug in webscalesql where setting a read or write timeout
-  // causes most mysql connections to fail (depending on the exact timing of
-  // packets). See https://github.com/webscalesql/webscalesql-5.6/issues/23
-  return 0;
-#endif
-
   mysql_option opt = MYSQL_OPT_CONNECT_TIMEOUT;
 #ifdef MYSQL_MILLISECOND_TIMEOUT
   switch (type) {
@@ -138,8 +126,8 @@ MYSQL* MySQL::GetConn(const Variant& link_identifier,
     raise_warning("supplied argument is not a valid MySQL-Link resource");
   }
   // Don't return a connection where mysql_real_connect() failed to most
-  // f_mysql_* APIs (the ones that deal with errno where we do want to do this
-  // anyway use MySQL::Get instead) as mysqlclient doesn't support passing
+  // native mysql_* APIs (the ones that deal with errno where we do want to do
+  // this anyway use MySQL::Get instead) as mysqlclient doesn't support passing
   // connections in that state and it can crash.
   if (mySQL && mySQL->m_last_error_set) {
     ret = nullptr;
@@ -170,7 +158,7 @@ int MySQL::GetDefaultPort() {
     } else {
       Variant ret = HHVM_FN(getservbyname)("mysql", "tcp");
       if (!same(ret, false)) {
-        s_default_port = ret.toInt16();
+        s_default_port = (short)ret.toInt64();
       }
     }
   }
@@ -324,7 +312,7 @@ bool MySQL::connect(const String& host, int port, const String& socket,
     MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ConnectTimeout,
                                  connect_timeout);
   }
-  if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
+  if (Cfg::Stats::Enable && Cfg::Stats::SQL) {
     ServerStats::Log("sql.conn", 1);
   }
   IOStatusHelper io("mysql::connect", host.data(), port);
@@ -364,7 +352,7 @@ bool MySQL::reconnect(const String& host, int port, const String& socket,
       MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ConnectTimeout,
                                    connect_timeout);
     }
-    if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
+    if (Cfg::Stats::Enable && Cfg::Stats::SQL) {
       ServerStats::Log("sql.reconn_new", 1);
     }
     IOStatusHelper io("mysql::connect", host.data(), port);
@@ -373,7 +361,7 @@ bool MySQL::reconnect(const String& host, int port, const String& socket,
                              (database.empty() ? nullptr : database.data()),
                              port, socket.data(), client_flags);
   } else if (m_state == MySQLState::CONNECTED && !mysql_ping(m_conn)) {
-    if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
+    if (Cfg::Stats::Enable && Cfg::Stats::SQL) {
       ServerStats::Log("sql.reconn_ok", 1);
     }
     if (!database.empty()) {
@@ -385,7 +373,7 @@ bool MySQL::reconnect(const String& host, int port, const String& socket,
       MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ConnectTimeout,
                                    connect_timeout);
     }
-    if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
+    if (Cfg::Stats::Enable && Cfg::Stats::SQL) {
       ServerStats::Log("sql.reconn_old", 1);
     }
     IOStatusHelper io("mysql::connect", host.data(), port);
@@ -422,7 +410,7 @@ req::ptr<MySQLResult> php_mysql_extract_result_helper(const T& result) {
 
 }
 
-req::ptr<MySQLResult> php_mysql_extract_result(const Resource& result) {
+req::ptr<MySQLResult> php_mysql_extract_result(const OptResource& result) {
   return php_mysql_extract_result_helper(result);
 }
 
@@ -476,7 +464,7 @@ const char *php_mysql_get_field_name(int field_type) {
   return "unknown";
 }
 
-Variant php_mysql_field_info(const Resource& result, int field,
+Variant php_mysql_field_info(const OptResource& result, int field,
                              int entry_type) {
   auto res = php_mysql_extract_result(result);
   if (!res) return false;
@@ -612,11 +600,11 @@ Variant php_mysql_do_connect_with_ssl(
 
   if (!sslContextProvider.isNull()) {
     auto ctx = sslContextProvider.toObject();
-    if (!ctx.instanceof(MySSLContextProvider::s_className)) {
+    if (!ctx.instanceof(MySSLContextProvider::className())) {
        SystemLib::throwInvalidArgumentExceptionObject(
          folly::sformat(
            "Invalid argument. Expected {}, received {}",
-           MySSLContextProvider::s_className,
+           MySSLContextProvider::className(),
            ctx->getClassName().c_str()
          )
        );
@@ -1134,11 +1122,11 @@ Variant MySQLStmt::result_metadata() {
   Array args;
   args.append(Variant(req::make<MySQLResult>(mysql_result)));
 
-  auto cls = Class::lookup(s_mysqli_result.get());
+  auto cls = Class::load(s_mysqli_result.get());
   Object obj{cls};
 
   tvDecRefGen(
-    g_context->invokeFunc(cls->getCtor(), args, obj.get())
+    g_context->invokeFunc(cls->getCtor(), args, nullptr, obj.get())
   );
   return obj;
 }
@@ -1210,7 +1198,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id)
   MYSQL* conn = MySQL::GetConn(link_id, &rconn);
   if (!conn || !rconn) return MySQLQueryReturn::FAIL;
 
-  if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
+  if (Cfg::Stats::Enable && Cfg::Stats::SQL) {
     ServerStats::Log("sql.query", 1);
 
     // removing comments, which can be wrong actually if some string field's
@@ -1238,7 +1226,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id)
         table = table.substr(1, table.length() - 2);
       }
       ServerStats::Log(std::string("sql.query.") + table + "." + verb, 1);
-      if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {
+      if (Cfg::Stats::Enable && Cfg::Stats::SQLTable) {
         MySqlStats::Record(verb, rconn->m_xaction_count, table);
         if (verb == "update") {
           preg_match("/([^\\s,]+)\\s*=\\s*([^\\s,]+)[\\+\\-]/",
@@ -1265,7 +1253,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id)
         rconn->m_xaction_count = ((verb == "begin" ||
                                    verb == "start transaction") ? 1 : 0);
         ServerStats::Log(std::string("sql.query.") + verb, 1);
-        if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {
+        if (Cfg::Stats::Enable && Cfg::Stats::SQLTable) {
           MySqlStats::Record(verb);
         }
       } else {
@@ -1360,7 +1348,7 @@ Variant php_mysql_do_query_and_get_result(const String& query, const Variant& li
 ///////////////////////////////////////////////////////////////////////////////
 // row operations
 
-Variant php_mysql_fetch_hash(const Resource& result, int result_type) {
+Variant php_mysql_fetch_hash(const OptResource& result, int result_type) {
   if ((result_type & PHP_MYSQL_BOTH) == 0) {
     raise_invalid_argument_warning("result_type: %d", result_type);
     return false;

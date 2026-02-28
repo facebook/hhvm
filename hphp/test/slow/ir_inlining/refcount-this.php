@@ -1,14 +1,14 @@
 <?hh
 
 
-function ident($a) { return $a; }
+function ident($a) :mixed{ return $a; }
 
 class BMTR {
-  public function init() {
+  public function init() :mixed{
     $this->registerToolkit(ident($this));
   }
 
-  private function registerToolkit($derp) {
+  private function registerToolkit($derp) :mixed{
     // Do some crap, to block inlining
     var_dump($derp);
     var_dump('a' . 'b');
@@ -17,6 +17,6 @@ class BMTR {
 
 
 <<__EntryPoint>>
-function main_refcount_this() {
+function main_refcount_this() :mixed{
 (new BMTR)->init();
 }

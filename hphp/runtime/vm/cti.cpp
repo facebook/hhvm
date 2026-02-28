@@ -15,12 +15,17 @@
 */
 
 #include "hphp/runtime/vm/cti.h"
-#include "hphp/util/asm-x64.h"
+
+#ifdef CTI_SUPPORTED
+
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
 
+#include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/codecache.h"
+
 namespace HPHP {
-TRACE_SET_MOD(cti);
+TRACE_SET_MOD(cti)
 using jit::X64Assembler;
 using jit::TCA;
 using Verifier::funcInstrs;
@@ -74,7 +79,7 @@ struct PatchTable {
   }
 private:
   bool checkPc(PC pc) const {
-    return m_ctimap.count(pc - m_unitpc) != 0;
+    return m_ctimap.contains(pc - m_unitpc);
   }
 private:
   boost::container::flat_map<Offset,uint32_t> m_ctimap;
@@ -111,26 +116,28 @@ size_t compute_size(const Func* func) {
 }
 
 inline bool isNop(Op opcode) {
-  if (!RuntimeOption::RepoAuthoritative) return false;
+  if (!Cfg::Repo::Authoritative) return false;
   return opcode == OpNop ||
-         opcode == OpEntryNop ||
          opcode == OpCGetCUNop ||
-         opcode == OpUGetCUNop ||
-         (!debug && isTypeAssert(opcode)) ||
-         opcode == OpBreakTraceHint;
+         (!debug && isTypeAssert(opcode));
 }
 
 auto const pc_arg   = rdx;  // passed & returned by all opcodes
 auto const next_ip  = rax;  // returned by opcodes with unpredictable targets
 auto const next_reg = rbx;  // for conditional branches
 auto const nextpc_arg = rdi; // for predicted calls
-auto const tl_reg = r12;
+auto const modes_arg = edi; // for updateCoverageModeThreaded
 auto const modes_reg = r13d;
 auto const ra_reg = r14;
+auto const next_ip_saved = r15;  // used when next_ip needs to be moved to a
+                                 // callee-saved register
 
 }
 
 Offset compile_cti(Func* func, PC unitpc) {
+  auto const needsCoverageCheck =
+    !Cfg::Repo::Authoritative &&
+    Cfg::Eval::EnableCodeCoverage > 0;
   std::lock_guard<std::mutex> lock(g_mutex);
   auto cti_entry = func->ctiEntry();
   if (cti_entry) return cti_entry; // we lost the compile race
@@ -142,7 +149,7 @@ Offset compile_cti(Func* func, PC unitpc) {
     inner_block.emplace();
     inner_block->init(mem, cti_size, "");
   }
-  auto cti_table = RuntimeOption::RepoAuthoritative ? cti_ops : ctid_ops;
+  auto cti_table = Cfg::Repo::Authoritative ? cti_ops : ctid_ops;
   X64Assembler a{mem ? *inner_block : cti_code()};
   auto cti_base = a.frontier();
   PatchTable patches(func, unitpc, cti_base);
@@ -189,9 +196,19 @@ Offset compile_cti(Func* func, PC unitpc) {
         ((int32_t*)a.frontier())[-1] = instrLen(pc);
       }
       a.  call  (cti);
-      DEBUG_ONLY auto after = a.frontier();
-      a.  jmp   (next_ip);
-      assert(a.frontier() - after == kCtiIndirectJmpSize);
+      // Coverage mode can be turned on/off by native function calls.
+      // TODO: make it work with per-file coverage mode.
+      if (needsCoverageCheck && op == OpNativeImpl) {
+        a.movq(next_ip, next_ip_saved);
+        a.movl(modes_reg, modes_arg);
+        a.call(updateCoverageFunc);
+        a.movl(eax, modes_reg);
+        a.jmp(next_ip_saved);
+      } else {
+        DEBUG_ONLY auto after = a.frontier();
+        a.  jmp   (next_ip);
+        assert(a.frontier() - after == kCtiIndirectJmpSize);
+      }
     }
     auto size = a.frontier() - ip;
     if (!g_cti_sizes[(int)op]) {
@@ -221,7 +238,8 @@ Offset compile_cti(Func* func, PC unitpc) {
 TCA lookup_cti(const Func* func, Offset cti_entry, PC unitpc, PC pc) {
   assert(pc && unitpc);
   if (tl_cti_cache.empty()) {
-    tl_cti_cache.resize(jit::CodeCache::ABytecodeSize >> 10);
+    // tl_cti_size must be a power of two because probes use (hash & (size - 1))
+    tl_cti_cache.resize(folly::nextPowTwo(Cfg::CodeCache::ABytecodeSize >> 10));
     always_assert(tl_cti_cache.size() > 0 &&
                   (tl_cti_cache.size() & (tl_cti_cache.size()-1)) == 0);
   }
@@ -243,12 +261,11 @@ void compile_cti_stubs() {
   X64Assembler a{bc_section};
 
   // pc is passed/returned in rdx, but we don't access it here
-  // g_enterCti(modes, {ip, pc}, rds::Header*)
-  //            edi    rsi  rdx  rcx           r8, r9 unused
+  // g_enterCti(modes, {ip, pc})
+  //            edi    rsi  rdx            rcx, r8, r9 unused
   g_enterCti = (EntryStub) a.frontier();
   a.push  (rbp);
   a.movq  (rsp, rbp);
-  a.movq  (rcx, tl_reg);
   a.movl  (edi, modes_reg);
   a.lea   (rbp[-8], ra_reg);
   a.jmp   (rsi);
@@ -264,3 +281,11 @@ void compile_cti_stubs() {
 }
 
 }
+#else
+namespace HPHP {
+
+void free_cti(Offset, uint32_t) {
+}
+
+}
+#endif

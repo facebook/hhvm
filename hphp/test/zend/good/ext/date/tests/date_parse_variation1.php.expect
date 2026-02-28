@@ -1,0 +1,38 @@
+*** Testing date_parse() : usage variation -  unexpected values to first argument $date***
+
+-- empty string DQ --
+dict(1) {
+  [0]=>
+  string(12) "Empty string"
+}
+
+-- empty string SQ --
+dict(1) {
+  [0]=>
+  string(12) "Empty string"
+}
+
+-- string DQ --
+dict(1) {
+  [0]=>
+  string(47) "The timezone could not be found in the database"
+}
+
+-- string SQ --
+dict(1) {
+  [0]=>
+  string(47) "The timezone could not be found in the database"
+}
+
+-- mixed case string --
+dict(1) {
+  [0]=>
+  string(47) "The timezone could not be found in the database"
+}
+
+-- heredoc --
+dict(1) {
+  [0]=>
+  string(47) "The timezone could not be found in the database"
+}
+===DONE===

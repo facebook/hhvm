@@ -7,24 +7,24 @@
 echo "*** Testing sprintf() : octal formats with array values ***\n";
 
 // different arrays used to test the function 
-$array_values = varray[
-  varray[],
-  varray[0],
-  varray[1],
-  varray[NULL],
-  varray[null],
-  varray["string"],
-  varray[true],
-  varray[TRUE],
-  varray[false],
-  varray[FALSE],
-  varray[1,2,3,4],
-  varray[0123],
-  darray[1 => "One", "two" => 2]
+$array_values = vec[
+  vec[],
+  vec[0],
+  vec[1],
+  vec[NULL],
+  vec[null],
+  vec["string"],
+  vec[true],
+  vec[TRUE],
+  vec[false],
+  vec[FALSE],
+  vec[1,2,3,4],
+  vec[0123],
+  dict[1 => "One", "two" => 2]
 ];
 
 // array of octal formats
-$octal_formats = varray[ 
+$octal_formats = vec[ 
   "%o", "%ho", "%lo", 
   "%Lo", " %o", "%o ",                        
   "\t%o", "\n%o", "%4o",
